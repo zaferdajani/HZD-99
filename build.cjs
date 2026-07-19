@@ -26,7 +26,7 @@ for (const k in EMBED) {
   const ext = f.split('.').pop().toLowerCase();
   media[k] = 'data:' + MIME[ext] + ';base64,' + fs.readFileSync(f).toString('base64');
 }
-const files = ['i18n', 'media', 'audio', 'engine', 'lang', 'riddles', 'world', 'entities', 'trials', 'game', 'touch']
+const files = ['i18n', 'media', 'audio', 'engine', 'lang', 'riddles', 'world', 'entities', 'trials', 'comics', 'game', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 const html = fs.readFileSync('index.html', 'utf8');
 const out = html.replace(/<script src="js\/i18n\.js"><\/script>[\s\S]*<\/body>/,

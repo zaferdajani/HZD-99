@@ -170,7 +170,10 @@ function startGame(save) {
   player = new Player(save.bench.x, save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
   updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
-  if (save.time < 1) { G.state = 'INTRO'; G.introT = 0; G.introSlam = false; }
+  if (save.time < 1) {
+    // the colorful backstory comic, then the cinematic title beat
+    CX_START('intro', () => { G.state = 'INTRO'; G.introT = 0; G.introSlam = false; });
+  }
   else G.state = 'PLAY';
 }
 function respawn() {
@@ -359,6 +362,7 @@ function update(dt) {
   else if (G.state === 'SKILLS') updateSkills();
   else if (G.state === 'RELICS') updateRelics();
   else if (G.state === 'PAUSE') updatePause();
+  else if (G.state === 'COMIC') updateComic(dt);
   else if (G.state === 'TRIALS') updateTrials(dt);
   else if (G.state === 'DEV') updateDev();
   else if (G.state === 'MENU') updateMenu();
@@ -1460,6 +1464,7 @@ function draw(tms) {
     if (st === 'CTRL' && G.ctrlBack === 'MENU') drawCtrl();
     return;
   }
+  if (st === 'COMIC') { drawComic(); return; }
   if (st === 'INTRO') {
     const T = G.introT;
     c.fillStyle = '#020409'; c.fillRect(0, 0, 960, 540);

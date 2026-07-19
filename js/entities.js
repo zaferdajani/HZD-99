@@ -994,6 +994,12 @@ class Boss {
     if (this.dead) return;
     if (this.st === 'dorm') {
       if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
+        // manga-style reveal the first time this guardian is met
+        if (typeof CX_START === 'function' && COMIC_BOOK[this.kind] && !G.save.flags['cx_' + this.kind]) {
+          G.save.flags['cx_' + this.kind] = 1; persist();
+          CX_START(this.kind);
+          return;
+        }
         this.st = 'intro'; this.t = 1.4; sfx('roar');
         setMusic(this.kind === 'mother' ? 'mother' : 'boss');
       }

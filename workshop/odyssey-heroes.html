@@ -273,16 +273,55 @@ function drawHuman(g,P,view,cfg){
     const ex0=front?-4.4:6.4,ex1=front?4.4:0;
     function eye(x){
       if(cfg.blindfold)return;
-      if(P.eyes==='closed'){g.strokeStyle=INK;g.lineWidth=1.8;
-        g.beginPath();g.moveTo(x-2.6,-11);g.quadraticCurveTo(x,-9.4,x+2.6,-11);g.stroke();}
-      else if(P.eyes==='dizzy'){g.strokeStyle=INK;g.lineWidth=1.4;
-        g.beginPath();for(let a=0;a<TAU*1.6;a+=0.4)g.lineTo(x+Math.cos(a)*a*0.62,-11+Math.sin(a)*a*0.62);g.stroke();}
-      else{
-        g.fillStyle='#fff';g.beginPath();g.ellipse(x,-11,2.8,P.eyes==='angry'?2:2.8,0,0,TAU);g.fill();
-        g.fillStyle=cfg.eyeC||'#3a2a16';g.beginPath();g.arc(x+0.7,-11,1.4,0,TAU);g.fill();
-        if(P.eyes==='angry'){g.strokeStyle=INK;g.lineWidth=1.8;
-          g.beginPath();g.moveTo(x-3,-14.4);g.lineTo(x+2.6,-12.8);g.stroke();}
+      const angry=P.eyes==='angry';
+      // brow — always present, angled by emotion (this is where the meaning lives)
+      g.strokeStyle=cfg.hair||INK;g.lineWidth=1.9;g.lineCap='round';
+      if(angry){g.beginPath();g.moveTo(x-3.4,-15.6);g.lineTo(x+3,-13.4);g.stroke();}
+      else if(P.eyes==='closed'){g.beginPath();g.moveTo(x-3,-13.8);g.quadraticCurveTo(x,-15,x+3,-13.8);g.stroke();}
+      else{g.beginPath();g.moveTo(x-3.2,-14.6);g.quadraticCurveTo(x,-15.6,x+3.2,-14.4);g.stroke();}
+      if(P.eyes==='closed'){
+        // heavy lash line with a soft lower echo
+        g.strokeStyle=INK;g.lineWidth=1.9;
+        g.beginPath();g.moveTo(x-2.8,-11);g.quadraticCurveTo(x,-9.2,x+2.8,-11);g.stroke();
+        g.strokeStyle='rgba(34,21,7,0.35)';g.lineWidth=1;
+        g.beginPath();g.moveTo(x-2,-9.6);g.quadraticCurveTo(x,-8.6,x+2,-9.6);g.stroke();
+        return;
       }
+      if(P.eyes==='dizzy'){g.strokeStyle=INK;g.lineWidth=1.4;
+        g.beginPath();for(let a=0;a<TAU*1.6;a+=0.4)g.lineTo(x+Math.cos(a)*a*0.62,-11+Math.sin(a)*a*0.62);g.stroke();return;}
+      const eh=angry?2.4:3.1;
+      // almond outline (lash-dark), thicker on the upper lid
+      g.fillStyle=INK;
+      g.beginPath();g.moveTo(x-3.4,-11);
+      g.quadraticCurveTo(x-1,-11-eh-1.1,x+3.2,-11.2);
+      g.quadraticCurveTo(x+3.8,-11,x+3.2,-10.6);
+      g.quadraticCurveTo(x,-11+eh,x-3.4,-11);g.closePath();g.fill();
+      // sclera with corner shading (not flat white)
+      const sg3=g.createLinearGradient(x-3,-13,x+3,-9);
+      sg3.addColorStop(0,'#cfc4b0');sg3.addColorStop(0.35,'#f8f4ea');sg3.addColorStop(1,'#e8e0d0');
+      g.fillStyle=sg3;
+      g.beginPath();g.moveTo(x-2.9,-11);
+      g.quadraticCurveTo(x-1,-11-eh-0.4,x+2.8,-11.1);
+      g.quadraticCurveTo(x,-11+eh-0.4,x-2.9,-11);g.closePath();g.fill();
+      // iris: radial gradient with dark limbal ring, slightly toward the viewer
+      const ix=x+0.7,iy=-11.1,ir=angry?1.7:2.05;
+      const ig=g.createRadialGradient(ix-0.4,iy-0.5,0.2,ix,iy,ir);
+      const eyeC=cfg.eyeC||'#3a2a16';
+      ig.addColorStop(0,'#e8dcc8');ig.addColorStop(0.25,eyeC);ig.addColorStop(0.85,eyeC);ig.addColorStop(1,'#120c06');
+      g.fillStyle=ig;g.beginPath();g.arc(ix,iy,ir,0,TAU);g.fill();
+      // pupil
+      g.fillStyle='#0c0804';g.beginPath();g.arc(ix,iy,ir*0.42,0,TAU);g.fill();
+      // upper-lid shadow across the iris (depth)
+      g.fillStyle='rgba(34,21,7,0.3)';
+      g.beginPath();g.ellipse(x,-11-eh*0.55,3,eh*0.5,0,0,Math.PI,true);g.fill();
+      // twin light catches — the life of the eye
+      g.fillStyle='rgba(255,255,255,0.95)';
+      g.beginPath();g.arc(ix-0.7,iy-0.7,0.5,0,TAU);g.fill();
+      g.fillStyle='rgba(255,255,255,0.45)';
+      g.beginPath();g.arc(ix+0.6,iy+0.5,0.3,0,TAU);g.fill();
+      // lower lash hint
+      g.strokeStyle='rgba(34,21,7,0.45)';g.lineWidth=0.8;
+      g.beginPath();g.moveTo(x+1.4,-11+eh-0.6);g.lineTo(x+2.6,-11+eh-0.2);g.stroke();
     }
     eye(ex0); if(front||view==='threeq')eye(front?ex1:1.2);
     // nose + mouth
