@@ -39,10 +39,22 @@ function loadMedia() {
   if (mediaAudioLoaded || typeof AC === 'undefined' || !AC) return;
   mediaAudioLoaded = true;
   for (const k in MEDIA_SRC.audio) {
-    fetch(MEDIA_SRC.audio[k])
-      .then(r => r.arrayBuffer())
-      .then(b => AC.decodeAudioData(b))
-      .then(buf => { MBUF[k] = buf; })
-      .catch(() => {});
+    const src = MEDIA_SRC.audio[k];
+    if (src.startsWith('data:')) {
+      // decode inline (strict CSPs may refuse fetch() on data: URIs)
+      try {
+        const bin = atob(src.slice(src.indexOf(',') + 1));
+        const buf = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+        Promise.resolve(AC.decodeAudioData(buf.buffer))
+          .then(b => { MBUF[k] = b; }).catch(() => {});
+      } catch (e) {}
+    } else {
+      fetch(src)
+        .then(r => r.arrayBuffer())
+        .then(b => AC.decodeAudioData(b))
+        .then(buf => { MBUF[k] = buf; })
+        .catch(() => {});
+    }
   }
 }
