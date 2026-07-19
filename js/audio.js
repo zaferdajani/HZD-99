@@ -1,0 +1,530 @@
+// CLAWBYTE — synthesized audio: SFX + original cinematic OST (no assets, all code)
+let AC = null, MUTED = false, MUSIC_ON = true, AUD_UNLOCKED = false;
+function audioOn() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (!AC) return;
+  if (AC.state === 'suspended') { try { AC.resume(); } catch (e) {} }
+  if (!AUD_UNLOCKED) {
+    // iOS/Safari unlock: play a 1-sample silent buffer inside the user gesture
+    try {
+      const b = AC.createBuffer(1, 1, 22050);
+      const s = AC.createBufferSource();
+      s.buffer = b; s.connect(AC.destination); s.start(0);
+      AUD_UNLOCKED = true;
+    } catch (e) {}
+  }
+  if (typeof loadMedia === 'function') loadMedia();
+}
+// ---------- recorded-sample playback (CC0 assets, synth fallback) ----------
+let RECNODE = null;
+function stopRecorded() {
+  if (RECNODE) { try { RECNODE.src.stop(); RECNODE.g.disconnect(); } catch (e) {} }
+  RECNODE = null;
+}
+function playRecorded(key, gain) {
+  stopRecorded();
+  if (!AC || !MBUF[key]) return false;
+  const src = AC.createBufferSource(), g = AC.createGain();
+  src.buffer = MBUF[key]; src.loop = true;
+  g.gain.value = gain;
+  src.connect(g); g.connect(musicGain());
+  src.start();
+  RECNODE = { src, g, key };
+  return true;
+}
+function playBuf(key, vol, rate) {
+  if (!AC || MUTED || !MBUF[key]) return false;
+  const s = AC.createBufferSource(), g = AC.createGain();
+  s.buffer = MBUF[key];
+  if (rate) s.playbackRate.value = rate;
+  g.gain.value = vol;
+  s.connect(g); g.connect(AC.destination);
+  s.start();
+  return true;
+}
+// unlock on ANY first interaction, not just canvas/keyboard
+['pointerdown', 'touchstart', 'touchend', 'mousedown', 'keydown', 'click'].forEach(ev =>
+  addEventListener(ev, audioOn, { passive: true }));
+function mf(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+
+// ---------- low-level voices ----------
+function tone(freq, dur, type, vol, slideTo, delay) {
+  if (!AC || MUTED) return;
+  const t0 = AC.currentTime + (delay || 0);
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type || 'square';
+  o.frequency.setValueAtTime(freq, t0);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(28, slideTo), t0 + dur);
+  g.gain.setValueAtTime(vol || 0.07, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g).connect(AC.destination);
+  o.start(t0); o.stop(t0 + dur + 0.03);
+}
+function noiseBuf(dur) {
+  const n = Math.floor(AC.sampleRate * dur);
+  const buf = AC.createBuffer(1, n, AC.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  return buf;
+}
+function hiss(dur, vol, delay) {
+  if (!AC || MUTED) return;
+  const t0 = AC.currentTime + (delay || 0);
+  const src = AC.createBufferSource(), g = AC.createGain();
+  src.buffer = noiseBuf(dur);
+  g.gain.setValueAtTime(vol || 0.1, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(g).connect(AC.destination);
+  src.start(t0);
+}
+function whoosh(dur, f0, f1, vol, delay) {
+  if (!AC || MUTED) return;
+  const t0 = AC.currentTime + (delay || 0);
+  const src = AC.createBufferSource(), g = AC.createGain(), f = AC.createBiquadFilter();
+  src.buffer = noiseBuf(dur);
+  f.type = 'bandpass'; f.Q.value = 1.2;
+  f.frequency.setValueAtTime(f0, t0);
+  f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+  g.gain.setValueAtTime(vol, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(f).connect(g).connect(AC.destination);
+  src.start(t0);
+}
+
+// ---------- sound effects ----------
+function sfx(n) {
+  if (!AC || MUTED) return;
+  // recorded samples first (loaded from the CC0 library), synth fallback below
+  if (n === 'hit' && playBuf(Math.random() < 0.5 ? 'hit1' : 'hit2', 0.45, 0.9 + Math.random() * 0.2)) return;
+  if (n === 'bosshit' && playBuf('metal', 0.5, 0.85 + Math.random() * 0.15)) return;
+  if (n === 'boom' && playBuf('explosion', 0.55)) return;
+  if (n === 'edie' && playBuf('glass', 0.45, 0.9 + Math.random() * 0.25)) return;
+  if (n === 'shoot' && playBuf('laser', 0.28)) return;
+  if (n === 'cast' && playBuf('zap', 0.4)) return;
+  if (n === 'chest' && playBuf('powerup', 0.4)) return;
+  if (n === 'hurt' && playBuf('low', 0.5)) return;
+  switch (n) {
+    case 'jump': tone(230, 0.13, 'square', 0.065, 470); whoosh(0.08, 300, 900, 0.03); break;
+    case 'djump': tone(340, 0.13, 'square', 0.05, 700); break;
+    case 'dash': whoosh(0.16, 500, 2600, 0.09); tone(620, 0.13, 'sawtooth', 0.035, 190); break;
+    case 'swing': case 'atk': whoosh(0.11, 800, 2600, 0.09); tone(520, 0.06, 'sawtooth', 0.03, 260); break;
+    case 'chargeReady': tone(880, 0.14, 'sine', 0.07, 1760); tone(1320, 0.2, 'sine', 0.05, null, 0.06); break;
+    case 'chargedHit':
+      hiss(0.5, 0.18); tone(70, 0.45, 'sawtooth', 0.14, 30);
+      whoosh(0.3, 400, 3600, 0.12);
+      [880, 1175, 1760].forEach((f, i) => tone(f, 0.3, 'triangle', 0.06, null, i * 0.05));
+      break;
+    case 'wave': whoosh(0.16, 1200, 3400, 0.06); tone(900, 0.14, 'sine', 0.045, 1800); break;
+    case 'hit': hiss(0.06, 0.09); tone(170, 0.08, 'square', 0.06, 90); break;
+    case 'bosshit': hiss(0.09, 0.11); tone(92, 0.13, 'square', 0.1, 44); break;
+    case 'hurt': tone(120, 0.28, 'sawtooth', 0.12, 50); hiss(0.2, 0.08); break;
+    case 'pick': tone(880, 0.07, 'sine', 0.05, 1370); break;
+    case 'heal': tone(520, 0.3, 'sine', 0.05, 1040); break;
+    case 'shoot': tone(980, 0.1, 'square', 0.04, 340); break;
+    case 'phit': tone(300, 0.08, 'square', 0.05, 120); break;
+    case 'boom': hiss(0.45, 0.16); tone(90, 0.4, 'sawtooth', 0.12, 34); break;
+    case 'edie': hiss(0.22, 0.11); tone(150, 0.2, 'sawtooth', 0.08, 42); tone(500, 0.12, 'square', 0.04, 120); break;
+    case 'break': hiss(0.2, 0.12); tone(200, 0.15, 'square', 0.07, 70); break;
+    case 'bench': [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, 'sine', 0.05, null, i * 0.1)); break;
+    case 'boss': case 'roar': tone(55, 0.9, 'sawtooth', 0.14, 30); tone(110, 0.7, 'square', 0.055, 45); hiss(0.6, 0.06); break;
+    case 'phase': tone(82, 0.5, 'sawtooth', 0.12, 48); hiss(0.32, 0.08); break;
+    case 'win': [523, 659, 784, 988, 1319].forEach((f, i) => tone(f, 0.4, 'triangle', 0.06, null, i * 0.16)); break;
+    case 'ui': tone(540, 0.05, 'square', 0.035); break;
+    case 'ok': tone(660, 0.09, 'square', 0.045, 990); break;
+    case 'no': tone(130, 0.12, 'square', 0.06, 80); break;
+    case 'pogo': tone(420, 0.09, 'square', 0.05, 840); break;
+    case 'cast': tone(200, 0.2, 'sawtooth', 0.07, 900); hiss(0.1, 0.05); break;
+    case 'step': hiss(0.025, 0.016); tone(170, 0.03, 'sine', 0.02, 120); break;
+    case 'land': tone(130, 0.09, 'sine', 0.06, 62); hiss(0.05, 0.03); break;
+    case 'chest': [660, 830, 1050, 1320].forEach((f, i) => tone(f, 0.14, 'sine', 0.05, null, i * 0.06)); break;
+    case 'buy': tone(1180, 0.06, 'square', 0.045); tone(1570, 0.09, 'square', 0.045, null, 0.07); break;
+    case 'dieSting':
+      [57, 53, 50, 45].forEach((m, i) => tone(mf(m), 0.4, 'sawtooth', 0.08, null, i * 0.26));
+      hiss(0.5, 0.05, 0.9);
+      break;
+  }
+}
+// rising charge whine while holding the attack button
+function sfxChargeTick(k) {
+  if (!AC || MUTED) return;
+  tone(280 + k * 520, 0.09, 'sawtooth', 0.03 + k * 0.02);
+}
+// soft rising hum while repairing
+function sfxHealTick(k) {
+  if (!AC || MUTED) return;
+  tone(360 + k * 430, 0.13, 'sine', 0.032);
+}
+// per-character voice chirps for dialogue
+const NPC_VOICE = {
+  servo: [170, 'sawtooth'], ratchet: [330, 'square'], mono: [240, 'sine'],
+  sage: [140, 'sine'], patch: [430, 'square'], lumen: [540, 'sine'],
+};
+function sfxVoice(id) {
+  if (!AC || MUTED) return;
+  const v = NPC_VOICE[id] || [300, 'square'];
+  for (let i = 0; i < 3; i++)
+    tone(v[0] * (0.9 + Math.random() * 0.25), 0.07, v[1], 0.04, null, i * 0.07);
+}
+
+// ==================================================================
+// ORIGINAL CINEMATIC OST — 16th-note sequencer through a hall-reverb
+// + compressor bus. Every piece composed for this game.
+// ==================================================================
+let MG = null, MCOMP = null, MVERB = null;
+function musicGain() {
+  if (!MG && AC) {
+    MCOMP = AC.createDynamicsCompressor();
+    MCOMP.threshold.value = -20; MCOMP.knee.value = 14; MCOMP.ratio.value = 7;
+    MCOMP.attack.value = 0.004; MCOMP.release.value = 0.2;
+    MCOMP.connect(AC.destination);
+    MG = AC.createGain(); MG.gain.value = 0.55; MG.connect(MCOMP);
+    // generated concert-hall impulse response
+    MVERB = AC.createConvolver();
+    const len = Math.floor(AC.sampleRate * 2.4);
+    const ir = AC.createBuffer(2, len, AC.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = ir.getChannelData(ch);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.7);
+    }
+    MVERB.buffer = ir;
+    const vg = AC.createGain(); vg.gain.value = 0.7;
+    MVERB.connect(vg); vg.connect(MCOMP);
+  }
+  return MG;
+}
+function vSend(node, amt) {
+  const g = AC.createGain(); g.gain.value = amt;
+  node.connect(g); g.connect(MVERB);
+}
+function vEnv(g, t, a, peak, dur) {
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(peak, t + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(dur, a + 0.05));
+}
+// deep sub-bass: sine an octave down + soft saw body
+function iSub(m, t, d) {
+  const g = AC.createGain(), f = AC.createBiquadFilter();
+  f.type = 'lowpass'; f.frequency.value = 240;
+  g.connect(f); f.connect(musicGain());
+  vEnv(g, t, 0.02, 0.2, d);
+  const o1 = AC.createOscillator(); o1.type = 'sine'; o1.frequency.value = mf(m - 12);
+  const o2 = AC.createOscillator(); o2.type = 'sawtooth'; o2.frequency.value = mf(m);
+  o1.connect(g); o2.connect(g);
+  o1.start(t); o1.stop(t + d + 0.1); o2.start(t); o2.stop(t + d + 0.1);
+}
+// heroic brass: detuned saw stack + octave-down body, filter blip
+function iBrass(m, t, d) {
+  const g = AC.createGain(), f = AC.createBiquadFilter();
+  f.type = 'lowpass';
+  f.frequency.setValueAtTime(500, t);
+  f.frequency.linearRampToValueAtTime(2300, t + 0.07);
+  f.frequency.linearRampToValueAtTime(950, t + Math.max(0.2, d));
+  g.connect(f); f.connect(musicGain()); vSend(f, 0.35);
+  vEnv(g, t, 0.03, 0.055, d);
+  for (const det of [-12, 0, 11]) {
+    const o = AC.createOscillator(); o.type = 'sawtooth';
+    o.frequency.value = mf(m); o.detune.value = det;
+    o.connect(g); o.start(t); o.stop(t + d + 0.1);
+  }
+  const ob = AC.createOscillator(); ob.type = 'sawtooth'; ob.frequency.value = mf(m - 12);
+  const gb = AC.createGain(); vEnv(gb, t, 0.03, 0.03, d);
+  ob.connect(gb); gb.connect(f); ob.start(t); ob.stop(t + d + 0.1);
+}
+// soaring super-saw lead with vibrato + echo
+function iLeadX(m, t, d) {
+  const mk = (tt, peak) => {
+    const g = AC.createGain(), f = AC.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 2600;
+    g.connect(f); f.connect(musicGain()); vSend(f, 0.4);
+    vEnv(g, tt, 0.03, peak, d);
+    const lfo = AC.createOscillator(), lg = AC.createGain();
+    lfo.frequency.value = 5.2; lg.gain.value = 6;
+    lfo.connect(lg);
+    for (const det of [-14, 0, 14]) {
+      const o = AC.createOscillator(); o.type = 'sawtooth';
+      o.frequency.value = mf(m); o.detune.value = det;
+      lg.connect(o.frequency);
+      o.connect(g); o.start(tt); o.stop(tt + d + 0.1);
+    }
+    lfo.start(tt); lfo.stop(tt + d + 0.1);
+  };
+  mk(t, 0.036);
+  mk(t + 0.21, 0.014);
+}
+// choir "ahh": soft sine/triangle stack, slow bloom, drowned in reverb
+function iChoir(notes, t, d) {
+  const f = AC.createBiquadFilter();
+  f.type = 'bandpass'; f.frequency.value = 800; f.Q.value = 0.4;
+  f.connect(musicGain()); vSend(f, 0.9);
+  for (const m of notes) {
+    const g = AC.createGain(); g.connect(f);
+    vEnv(g, t, Math.min(0.7, d * 0.4), 0.05, d);
+    const lfo = AC.createOscillator(), lg = AC.createGain();
+    lfo.frequency.value = 4.6; lg.gain.value = 3.5; lfo.connect(lg);
+    for (const spec of [['sine', m, 1], ['triangle', m, 0.5], ['sine', m + 12, 0.22]]) {
+      const o = AC.createOscillator(); o.type = spec[0];
+      o.frequency.value = mf(spec[1]); o.detune.value = rnd(-8, 8);
+      lg.connect(o.frequency);
+      const og = AC.createGain(); og.gain.value = spec[2];
+      o.connect(og); og.connect(g);
+      o.start(t); o.stop(t + d + 0.2);
+    }
+    lfo.start(t); lfo.stop(t + d + 0.2);
+  }
+}
+// staccato string ostinato note
+function iOst(m, t) {
+  const g = AC.createGain(), f = AC.createBiquadFilter();
+  f.type = 'lowpass'; f.frequency.value = 1700;
+  g.connect(f); f.connect(musicGain()); vSend(f, 0.25);
+  vEnv(g, t, 0.012, 0.045, 0.13);
+  for (const det of [-8, 8]) {
+    const o = AC.createOscillator(); o.type = 'sawtooth';
+    o.frequency.value = mf(m); o.detune.value = det;
+    o.connect(g); o.start(t); o.stop(t + 0.2);
+  }
+}
+function iPluck(m, t, d) {
+  const g = AC.createGain(); g.connect(musicGain()); vSend(g, 0.5);
+  vEnv(g, t, 0.006, 0.055, Math.min(d, 0.45));
+  const o = AC.createOscillator(); o.type = 'sine'; o.frequency.value = mf(m);
+  o.connect(g); o.start(t); o.stop(t + d + 0.05);
+}
+function iBell(m, t) {
+  const g = AC.createGain(); g.connect(musicGain()); vSend(g, 0.7);
+  vEnv(g, t, 0.005, 0.045, 1.3);
+  const o = AC.createOscillator(); o.type = 'sine'; o.frequency.value = mf(m);
+  o.connect(g); o.start(t); o.stop(t + 1.4);
+  const g2 = AC.createGain(); g2.connect(musicGain());
+  vEnv(g2, t, 0.005, 0.014, 0.8);
+  const o2 = AC.createOscillator(); o2.type = 'sine'; o2.frequency.value = mf(m) * 2.76;
+  o2.connect(g2); o2.start(t); o2.stop(t + 0.9);
+}
+function iBass(m, t, d) { iSub(m + 12, t, d); }
+// timpani hit
+function dTimp(m, t) {
+  const g = AC.createGain(); g.connect(musicGain()); vSend(g, 0.45);
+  vEnv(g, t, 0.004, 0.34, 0.5);
+  const o = AC.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(mf(m), t);
+  o.frequency.exponentialRampToValueAtTime(mf(m) * 0.55, t + 0.3);
+  o.connect(g); o.start(t); o.stop(t + 0.55);
+  const src = AC.createBufferSource(), ng = AC.createGain(), nf = AC.createBiquadFilter();
+  src.buffer = noiseBuf(0.1); nf.type = 'lowpass'; nf.frequency.value = 320;
+  vEnv(ng, t, 0.002, 0.14, 0.09);
+  src.connect(nf); nf.connect(ng); ng.connect(musicGain());
+  src.start(t);
+}
+function dCrash(t) {
+  const src = AC.createBufferSource(), g = AC.createGain(), f = AC.createBiquadFilter();
+  src.buffer = noiseBuf(1.5);
+  f.type = 'highpass'; f.frequency.value = 4200;
+  g.gain.setValueAtTime(0.11, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+  src.connect(f); f.connect(g); g.connect(musicGain()); vSend(g, 0.8);
+  src.start(t);
+}
+function dKick(t) {
+  const g = AC.createGain(); g.connect(musicGain());
+  vEnv(g, t, 0.003, 0.42, 0.14);
+  const o = AC.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(150, t);
+  o.frequency.exponentialRampToValueAtTime(44, t + 0.12);
+  o.connect(g); o.start(t); o.stop(t + 0.2);
+}
+function dHat(t) {
+  const src = AC.createBufferSource(), g = AC.createGain(), f = AC.createBiquadFilter();
+  src.buffer = noiseBuf(0.05);
+  f.type = 'highpass'; f.frequency.value = 6500;
+  vEnv(g, t, 0.002, 0.028, 0.05);
+  src.connect(f); f.connect(g); g.connect(musicGain());
+  src.start(t);
+}
+function dSnare(t) {
+  const src = AC.createBufferSource(), g = AC.createGain(), f = AC.createBiquadFilter();
+  src.buffer = noiseBuf(0.14);
+  f.type = 'bandpass'; f.frequency.value = 1900; f.Q.value = 0.8;
+  vEnv(g, t, 0.002, 0.1, 0.13);
+  src.connect(f); f.connect(g); g.connect(musicGain()); vSend(g, 0.3);
+  src.start(t);
+  const g2 = AC.createGain(); g2.connect(musicGain());
+  vEnv(g2, t, 0.002, 0.05, 0.08);
+  const o = AC.createOscillator(); o.type = 'triangle'; o.frequency.value = 190;
+  o.connect(g2); o.start(t); o.stop(t + 0.1);
+}
+
+// ---- composition helpers (build repeated figures) ----
+function reps(bars, per, fn) { const a = []; for (let b = 0; b < bars; b++) fn(a, b * per, b); return a; }
+
+// ---- the OST ----
+// fields: bpm, steps, once, lead[[s,m,len]], brass[[s,m,len]], choir[[s,[m..],len]],
+// sub[[s,m,len]], ost[[start,root,len,[offsets]]], bells[[s,m]], timp[[s,m]],
+// crash[steps], bassPulse[[s,m,len]], arp[[s,[m..],len]]+arpRate, drums{k,h,s}
+const TRACKS = {
+  // "Whiskers in the Dark" — title: slow choir dirge that blooms into a theme
+  title: {
+    bpm: 76, steps: 128,
+    choir: [[0, [57, 60, 64], 32], [32, [53, 57, 60], 32], [64, [48, 52, 55, 60], 32], [96, [55, 59, 62], 32]],
+    sub: [[0, 33, 30], [32, 29, 30], [64, 36, 30], [96, 31, 30]],
+    timp: reps(4, 32, (a, o) => { a.push([o, 45], [o + 6, 45], [o + 16, 45], [o + 22, 45]); }),
+    lead: [[64, 69, 6], [72, 72, 6], [80, 76, 12], [92, 74, 4], [96, 77, 12], [110, 76, 6], [116, 71, 12]],
+    bells: [[12, 81], [44, 84], [76, 88], [108, 83]],
+    crash: [64],
+  },
+  // "Rust & Dandelions" — Scrap Meadows: heroic ostinato adventure
+  A: {
+    bpm: 100, steps: 128,
+    ost: reps(8, 16, (a, o, b) => { a.push([o, [60, 58, 53, 60, 60, 58, 53, 55][b], 16, [0, 12, 7, 12, 4, 12, 7, 12]]); }),
+    brass: [[0, 67, 8], [12, 64, 4], [16, 65, 6], [24, 62, 4], [32, 60, 12], [48, 67, 6], [56, 70, 6], [64, 72, 12], [80, 70, 4], [84, 67, 6], [96, 65, 8], [108, 62, 4], [112, 67, 14]],
+    sub: reps(8, 16, (a, o, b) => { a.push([o, [36, 34, 29, 36, 36, 34, 29, 31][b], 14]); }),
+    choir: [[64, [60, 64, 67], 32], [96, [58, 62, 65], 16], [112, [55, 59, 62, 67], 16]],
+    timp: reps(8, 16, (a, o, b) => { if (b % 2 === 0) a.push([o, 36]); }),
+    drums: { k: [0, 8], h: [0, 2, 4, 6, 8, 10, 12, 14], s: [4, 12] },
+    crash: [0, 64],
+  },
+  // "Packet Storm" — Data Conduits: driving synthwave pulse
+  B: {
+    bpm: 112, steps: 64,
+    ost: [[0, 64, 16, [0, 12, 7, 15]], [16, 60, 16, [0, 12, 7, 16]], [32, 67, 16, [0, 12, 7, 16]], [48, 62, 16, [0, 12, 7, 15]]],
+    lead: [[0, 76, 4], [8, 79, 3], [16, 74, 6], [28, 71, 3], [32, 79, 6], [44, 83, 3], [48, 78, 4], [56, 74, 6]],
+    choir: [[0, [52, 59, 64], 32], [32, [48, 55, 62], 32]],
+    bassPulse: [[0, 40, 16], [16, 36, 16], [32, 43, 16], [48, 38, 16]],
+    drums: { k: [0, 4, 8, 12], h: [0, 2, 4, 6, 8, 10, 12, 14], s: [4, 12] },
+    crash: [0],
+  },
+  // "Hammerfall Protocol" — Foundry: war drums + low brass
+  C: {
+    bpm: 96, steps: 128,
+    brass: [[0, 50, 3], [4, 50, 3], [8, 53, 3], [12, 49, 4], [32, 50, 3], [36, 50, 3], [40, 56, 3], [44, 55, 4], [64, 50, 3], [68, 50, 3], [72, 53, 3], [76, 57, 4], [96, 58, 6], [104, 56, 6], [112, 53, 8], [120, 49, 8]],
+    sub: reps(8, 16, (a, o, b) => { a.push([o, [38, 38, 36, 38, 38, 38, 41, 37][b], 14]); }),
+    choir: [[32, [50, 53, 56], 32], [96, [49, 53, 58], 32]],
+    timp: reps(8, 16, (a, o) => { a.push([o, 38], [o + 3, 38], [o + 8, 38], [o + 11, 45], [o + 14, 44]); }),
+    drums: { k: [0, 6, 8], h: [2, 10, 14], s: [4, 12] },
+    crash: [0, 64],
+  },
+  // "Music Box for a Frozen Library" — Archives: choir + bells, vast and cold
+  D: {
+    bpm: 80, steps: 64,
+    bells: [[0, 74], [4, 78], [8, 81], [12, 78], [16, 73], [20, 76], [24, 81], [28, 76], [32, 74], [36, 78], [40, 83], [44, 81], [48, 78], [56, 73]],
+    choir: [[0, [59, 62, 66, 71], 32], [32, [55, 59, 62, 67], 32]],
+    sub: [[0, 35, 30], [32, 31, 30]],
+    timp: [[0, 35], [32, 31]],
+  },
+  // "Something Grows in the Wires" — Virus Nest: tritone dread
+  E: {
+    bpm: 100, steps: 64,
+    ost: [[0, 65, 32, [0, 0, 6, 0, 0, 0, 6, 7]], [32, 68, 16, [0, 0, 6, 0, 0, 0, 6, 5]], [48, 70, 16, [0, 0, 5, 0, 0, 0, 6, 0]]],
+    choir: [[0, [53, 59, 62], 32], [32, [56, 62, 65], 32]],
+    lead: [[8, 72, 4], [24, 71, 6], [40, 74, 4], [52, 68, 8]],
+    sub: [[0, 41, 30], [32, 44, 14], [48, 47, 8], [56, 46, 8]],
+    timp: reps(4, 16, (a, o) => { a.push([o, 41], [o + 3, 41]); }),
+    crash: [32],
+  },
+  // "Prism Waltz" — Crystal Cache: harp shimmer + lydian choir
+  X: {
+    bpm: 108, steps: 64,
+    arp: [[0, [55, 62, 66, 73], 16], [16, [57, 64, 69, 76], 16], [32, [59, 66, 71, 78], 16], [48, [55, 64, 71, 74], 16]], arpRate: 1,
+    choir: [[0, [55, 62, 66, 71], 32], [32, [57, 64, 69, 74], 32]],
+    bells: [[0, 86], [16, 88], [32, 90], [48, 85]],
+    sub: [[0, 31, 14], [16, 33, 14], [32, 35, 14], [48, 31, 14]],
+  },
+  // "Claws Out" — boss battle: racing strings, brass war-calls, B-section lift
+  boss: {
+    bpm: 150, steps: 128,
+    ost: reps(8, 16, (a, o, b) => { a.push([o, [57, 57, 53, 55, 53, 55, 57, 57][b], 16, [0, 12, 0, 12, 7, 12, 0, 12]]); }),
+    brass: [[0, 45, 3], [8, 45, 3], [16, 41, 4], [24, 43, 4], [32, 45, 3], [40, 47, 3], [48, 48, 6], [56, 50, 6], [64, 53, 8], [80, 55, 8], [96, 57, 12], [112, 55, 6], [120, 52, 6]],
+    lead: [[64, 77, 6], [72, 76, 4], [80, 79, 8], [96, 81, 12], [112, 79, 6], [120, 74, 6]],
+    sub: reps(8, 16, (a, o, b) => { a.push([o, [33, 33, 29, 31, 29, 31, 33, 33][b], 15]); }),
+    timp: reps(8, 16, (a, o) => { a.push([o, 33], [o + 10, 33]); }),
+    drums: { k: [0, 4, 8, 12], h: [0, 2, 4, 6, 8, 10, 12, 14], s: [4, 12] },
+    crash: [0, 64],
+  },
+  // "NULL / VOID" — MOTHER-V: half-step menace, relentless war machine
+  mother: {
+    bpm: 156, steps: 128,
+    ost: reps(8, 16, (a, o, b) => { a.push([o, [59, 59, 58, 59, 59, 60, 58, 56][b], 16, [0, 12, 1, 12, 0, 12, 1, 12]]); }),
+    brass: [[0, 47, 6], [16, 46, 6], [32, 47, 6], [48, 52, 6], [64, 47, 8], [80, 53, 8], [96, 54, 10], [112, 50, 12]],
+    choir: [[0, [59, 62, 65], 64], [64, [58, 61, 64, 67], 64]],
+    sub: reps(8, 16, (a, o, b) => { a.push([o, [35, 34, 35, 40, 35, 41, 42, 38][b], 15]); }),
+    timp: reps(8, 16, (a, o) => { a.push([o, 35], [o + 6, 35], [o + 12, 35]); }),
+    drums: { k: [0, 4, 8, 10, 12], h: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], s: [4, 12] },
+    crash: [0, 32, 64, 96],
+  },
+  // "Sunlight on Rusted Fur" — victory fanfare
+  winTheme: {
+    bpm: 110, steps: 64, once: true,
+    brass: [[0, 60, 4], [6, 64, 4], [12, 67, 6], [20, 72, 12], [32, 71, 6], [40, 72, 20]],
+    choir: [[0, [60, 64, 67], 32], [32, [60, 65, 69], 16], [48, [60, 64, 67, 72], 16]],
+    bells: [[12, 88], [24, 91], [40, 96], [52, 84]],
+    timp: [[0, 36], [32, 41], [48, 36]],
+    crash: [0, 32],
+  },
+};
+
+const MUS = { cur: null, name: null, step: 0, nextT: 0 };
+// tracks where a recorded CC0 piece takes over from the synth score
+const RECORDED_TRACKS = { boss: ['boss', 0.5], mother: ['boss', 0.58], title: ['ambient', 0.5] };
+function setMusic(name) {
+  if (MUS.name === name) return;
+  stopRecorded();
+  MUS.name = name;
+  const rec = RECORDED_TRACKS[name];
+  if (rec && MUSIC_ON && !MUTED && playRecorded(rec[0], rec[1])) { MUS.cur = null; return; }
+  MUS.cur = TRACKS[name] || null;
+  MUS.step = 0; MUS.nextT = 0;
+}
+function stopMusic() { stopRecorded(); MUS.name = null; MUS.cur = null; }
+function schedStep(tr, s, t, spb) {
+  if (tr.lead) for (const ev of tr.lead) if (ev[0] === s) iLeadX(ev[1], t, ev[2] * spb);
+  if (tr.brass) for (const ev of tr.brass) if (ev[0] === s) iBrass(ev[1], t, ev[2] * spb);
+  if (tr.choir) for (const ev of tr.choir) if (ev[0] === s) iChoir(ev[1], t, ev[2] * spb);
+  if (tr.sub) for (const ev of tr.sub) if (ev[0] === s) iSub(ev[1], t, ev[2] * spb);
+  if (tr.bass) for (const ev of tr.bass) if (ev[0] === s) iBass(ev[1], t, ev[2] * spb);
+  if (tr.bells) for (const ev of tr.bells) if (ev[0] === s) iBell(ev[1], t);
+  if (tr.timp) for (const ev of tr.timp) if (ev[0] === s) dTimp(ev[1], t);
+  if (tr.crash && tr.crash.indexOf(s) >= 0) dCrash(t);
+  if (tr.ost) for (const seg of tr.ost) {
+    if (s >= seg[0] && s < seg[0] + seg[2]) {
+      const off = seg[3][(s - seg[0]) % seg[3].length];
+      if (off != null) iOst(seg[1] + off, t);
+    }
+  }
+  if (tr.arp) {
+    const rate = tr.arpRate || 2;
+    for (const seg of tr.arp) {
+      if (s >= seg[0] && s < seg[0] + seg[2] && (s - seg[0]) % rate === 0)
+        iPluck(seg[1][((s - seg[0]) / rate) % seg[1].length], t, spb * rate * 1.6);
+    }
+  }
+  if (tr.bassPulse) {
+    for (const seg of tr.bassPulse) {
+      if (s >= seg[0] && s < seg[0] + seg[2] && (s - seg[0]) % 2 === 0)
+        iSub(seg[1], t, spb * 1.7);
+    }
+  }
+  if (tr.drums) {
+    const b = s % 16;
+    if (tr.drums.k && tr.drums.k.indexOf(b) >= 0) dKick(t);
+    if (tr.drums.h && tr.drums.h.indexOf(b) >= 0) dHat(t);
+    if (tr.drums.s && tr.drums.s.indexOf(b) >= 0) dSnare(t);
+  }
+}
+setInterval(() => {
+  if (AC && AC.state === 'suspended' && AUD_UNLOCKED) { try { AC.resume(); } catch (e) {} }
+  if (!AC || AC.state !== 'running' || !MUS.cur || MUTED || !MUSIC_ON) return;
+  musicGain();
+  const tr = MUS.cur, spb = 60 / tr.bpm / 4;
+  if (MUS.nextT < AC.currentTime) MUS.nextT = AC.currentTime + 0.06;
+  while (MUS.nextT < AC.currentTime + 0.18) {
+    schedStep(tr, MUS.step, MUS.nextT, spb);
+    MUS.step++;
+    if (MUS.step >= tr.steps) {
+      if (tr.once) { stopMusic(); break; }
+      MUS.step = 0;
+    }
+    MUS.nextT += spb;
+  }
+}, 30);
+// legacy shims (old drone API)
+function setDrone(z) { setMusic(z); }
+function stopDrone() { stopMusic(); }
