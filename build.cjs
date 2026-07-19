@@ -1,28 +1,32 @@
-// CLAWBYTE build: emits play.html (single file) with curated CC0 assets
-// embedded as data: URIs. Run: node build.cjs
+// NOSTOS build: emits play.html (single file) with the CC0/CC-BY assets
+// embedded as data: URIs (credits: assets/CREDITS.md). Run: node build.cjs
 const fs = require('fs');
 const EMBED = {
-  bgFar: 'assets/backgrounds/sci_fi_bg1.jpg',
-  boss: 'assets/music/epic_combat.ogg',
-  ambient: 'assets/music/ambient_observing_the_star.ogg',
-  hit1: 'assets/sfx/hit_01.ogg',
-  hit2: 'assets/sfx/hit_02.ogg',
-  metal: 'assets/sfx/metal_05.ogg',
-  explosion: 'assets/sfx/explosion.ogg',
-  glass: 'assets/sfx/glass_01.ogg',
-  laser: 'assets/sfx/laser2.mp3',
-  zap: 'assets/sfx/zapTwoTone.mp3',
-  powerup: 'assets/sfx/powerUp1.mp3',
-  low: 'assets/sfx/lowDown.mp3',
+  bgFar: 'assets/backgrounds/sunset_temple_bg.png',
+  bgMid: 'assets/backgrounds/santorini_mid_bg.png',
+  boss: 'assets/music/battle_theme_a.mp3',
+  ambient: 'assets/music/mediterranean_breeze.ogg',
+  hit1: 'assets/sfx/sword_hit_01.ogg',
+  hit2: 'assets/sfx/sword_hit_02.ogg',
+  metal: 'assets/sfx/metal_clang.ogg',
+  explosion: 'assets/sfx/stone_crash.ogg',
+  glass: 'assets/sfx/amphora_break.ogg',
+  laser: 'assets/sfx/arrow_whoosh.wav',
+  zap: 'assets/sfx/zap_shimmer.flac',
+  powerup: 'assets/sfx/powerup_complete.mp3',
+  low: 'assets/sfx/low_thud.ogg',
+  bell: 'assets/sfx/divine_bell.ogg',
+  gong: 'assets/sfx/gong.ogg',
 };
-const MIME = { jpg: 'image/jpeg', png: 'image/png', ogg: 'audio/ogg', mp3: 'audio/mpeg', wav: 'audio/wav' };
+const MIME = { jpg: 'image/jpeg', png: 'image/png', ogg: 'audio/ogg', mp3: 'audio/mpeg', wav: 'audio/wav', flac: 'audio/flac' };
 const media = {};
 for (const k in EMBED) {
   const f = EMBED[k];
+  if (!fs.existsSync(f)) { console.warn('skip missing asset:', f); continue; }
   const ext = f.split('.').pop().toLowerCase();
   media[k] = 'data:' + MIME[ext] + ';base64,' + fs.readFileSync(f).toString('base64');
 }
-const files = ['i18n', 'media', 'audio', 'engine', 'lang', 'riddles', 'world', 'entities', 'game', 'touch']
+const files = ['i18n', 'media', 'audio', 'engine', 'lang', 'riddles', 'world', 'entities', 'trials', 'game', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 const html = fs.readFileSync('index.html', 'utf8');
 const out = html.replace(/<script src="js\/i18n\.js"><\/script>[\s\S]*<\/body>/,

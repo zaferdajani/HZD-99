@@ -1,4 +1,4 @@
-// CLAWBYTE — input, camera, particles, helpers
+// NOSTOS — input, camera, particles, helpers
 const KEYB = {
   LEFT: ['ArrowLeft', 'KeyA', 'VL'], RIGHT: ['ArrowRight', 'KeyD', 'VR'],
   UP: ['ArrowUp', 'KeyW', 'VU'], DOWN: ['ArrowDown', 'KeyS', 'VD'],

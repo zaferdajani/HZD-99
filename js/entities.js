@@ -1,4 +1,4 @@
-// CLAWBYTE — player, enemies, bosses, projectiles, pickups
+// NOSTOS — Odysseus, foes, guardians, projectiles, pickups
 const DIFFS = [
   { cores: 7, edmg: 1, ehp: 0.75, pdmg: 1.25, espd: 1, lives: 0 },
   { cores: 5, edmg: 1, ehp: 1, pdmg: 1, espd: 1, lives: 0 },
@@ -14,7 +14,7 @@ function relicHas(id) { return G.save.relics && G.save.relics.indexOf(id) >= 0; 
 function tileAt(tx, ty) {
   const g = G.grid;
   if (ty < 0 || ty >= g.length || tx < 0 || tx >= g[0].length) return '.';
-  if (G.roomId === 'D3' && !G.save.flags.bossZero && ty >= 15 && tx >= 15 && tx <= 17) return '#';
+  if (G.roomId === 'D3' && !G.save.flags.bossBrood && ty >= 15 && tx >= 15 && tx <= 17) return '#';
   const c = g[ty][tx];
   if (c === 'B' && G.save.broken[G.roomId + ':' + tx + ',' + ty]) return '.';
   return c;
@@ -382,10 +382,9 @@ class Player {
       c.save(); c.globalAlpha = tr.t * 1.5;
       c.translate(tr.x + this.w / 2, tr.y + this.h / 2);
       c.scale(tr.face, 1); c.fillStyle = P.glow;
-      rr(c, -13, -6, 26, 18, 7); c.fill();
-      c.beginPath(); c.arc(8, -12, 8, 0, 7); c.fill();
-      c.beginPath(); c.moveTo(2, -16); c.lineTo(5, -25); c.lineTo(10, -17); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(11, -17); c.lineTo(15, -24); c.lineTo(17, -15); c.closePath(); c.fill();
+      rr(c, -11, -6, 22, 20, 7); c.fill();               // torso ghost
+      c.beginPath(); c.arc(4, -13, 8, 0, 7); c.fill();   // helmed head
+      c.beginPath(); c.moveTo(-2, -19); c.quadraticCurveTo(4, -30, 12, -19); c.closePath(); c.fill(); // crest
       c.restore();
     }
     c.save();
@@ -410,14 +409,11 @@ class Player {
       c.quadraticCurveTo(-9 - len * 0.5, -27 + fl * 0.5 + i * 2 + bob, -13 - len, -22 + fl + i * 3 + bob);
       c.stroke();
     }
-    // tail — energy conduit
-    c.strokeStyle = '#cfd8e6'; c.lineWidth = 3.5; c.lineCap = 'round';
-    c.beginPath(); c.moveTo(-11, -10);
-    const tw = Math.sin(this.anim * 6) * 6;
-    c.quadraticCurveTo(-24, -18 + tw, -21, -30 + tw * 1.4); c.stroke();
-    c.strokeStyle = P.glow; c.lineWidth = 1.2;
-    c.beginPath(); c.moveTo(-12.5, -12.5); c.quadraticCurveTo(-22, -19 + tw, -20.5, -28 + tw * 1.3); c.stroke();
-    c.fillStyle = P.glow; c.beginPath(); c.arc(-21, -30 + tw * 1.4, 2.6, 0, 7); c.fill();
+    // lower cloak hem drifting behind the hero
+    const tw = Math.sin(this.anim * 6) * 4;
+    c.strokeStyle = '#8f2f38'; c.lineWidth = 4; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(-10, -12);
+    c.quadraticCurveTo(-19, -6 + tw * 0.4, -17, 0 + tw * 0.6); c.stroke();
     // segmented digitigrade legs with glowing joints
     const leg = (hipX, phase, front) => {
       const hipY = -9 + bob * 0.3;
@@ -426,79 +422,82 @@ class Player {
       else if (!this.on) { fx = hipX + 2.5; fy = -4; }
       else { fx = hipX + 1; fy = 0; }
       const kx = (hipX + fx) / 2 - 3.5 - lift * 0.3, ky = (hipY + fy) / 2 - 1;
-      c.strokeStyle = front ? '#aab6c6' : '#7f8b9c'; c.lineWidth = 3.4; c.lineJoin = 'round';
+      c.strokeStyle = front ? '#e0a877' : '#b0805a'; c.lineWidth = 3.4; c.lineJoin = 'round';
       c.beginPath(); c.moveTo(hipX, hipY); c.lineTo(kx, ky); c.lineTo(fx, fy - 1); c.stroke();
-      c.fillStyle = front ? '#cfd8e6' : '#93a0b2';
+      c.strokeStyle = front ? '#d8b25a' : '#a8853f'; c.lineWidth = 2;      // bronze greave
+      c.beginPath(); c.moveTo(kx, ky + 1); c.lineTo(fx, fy - 2); c.stroke();
+      c.fillStyle = front ? '#8a5a30' : '#6b4525';                          // sandal
       c.fillRect(fx - 2.5, fy - 2, 6, 2.6);
-      c.fillStyle = P.glow;
-      c.beginPath(); c.arc(hipX, hipY, 1.9, 0, 7); c.arc(kx, ky, 1.5, 0, 7); c.fill();
     };
     leg(-7, ph + Math.PI, false); leg(6, ph, true);
     // volt-blade sheathed on the back (hidden mid-swing — it's in the paw)
     if (!this.swingVis) {
       c.save(); c.translate(-9, -22 + bob * 0.4); c.rotate(-0.85);
-      c.fillStyle = '#8892a2'; c.fillRect(-2, 0, 4, 8);
-      c.fillStyle = '#5c6678'; c.fillRect(-4.5, -1, 9, 3);
+      c.fillStyle = '#6b4a2a'; c.fillRect(-2, 0, 4, 8);          // leather grip
+      c.fillStyle = '#c8963c'; c.fillRect(-4.5, -1, 9, 3);       // bronze cross-guard
       const bg = c.createLinearGradient(0, -26, 0, 0);
-      bg.addColorStop(0, '#ffffff'); bg.addColorStop(1, P.glow);
-      c.fillStyle = bg; c.shadowColor = P.glow; c.shadowBlur = 9;
-      c.beginPath(); c.moveTo(-1.8, -2); c.lineTo(-1.8, -22); c.lineTo(0, -27); c.lineTo(1.8, -22); c.lineTo(1.8, -2); c.closePath(); c.fill();
+      bg.addColorStop(0, '#fff2c8'); bg.addColorStop(1, '#d8b25a');
+      c.fillStyle = bg; c.shadowColor = '#ffd76a'; c.shadowBlur = 9;
+      c.beginPath(); c.moveTo(-1.8, -2); c.lineTo(-2.6, -14); c.lineTo(0, -26); c.lineTo(2.6, -14); c.lineTo(1.8, -2); c.closePath(); c.fill();
       c.shadowBlur = 0; c.restore();
     }
-    // body
+    // body — white chiton with a leather baldric
     const grad = c.createLinearGradient(0, -26, 0, 0);
-    grad.addColorStop(0, '#e8eef6'); grad.addColorStop(1, '#b9c4d4');
+    grad.addColorStop(0, '#f6f1e4'); grad.addColorStop(1, '#cfc4a8');
     c.fillStyle = grad;
     rr(c, -13, -24 + bob * 0.4, 26, 20, 7); c.fill();
-    c.strokeStyle = '#7d8a9c'; c.lineWidth = 1; rr(c, -13, -24 + bob * 0.4, 26, 20, 7); c.stroke();
-    // chest light
-    c.fillStyle = P.glow; c.shadowColor = P.glow; c.shadowBlur = 8;
+    c.strokeStyle = '#8a7a5c'; c.lineWidth = 1; rr(c, -13, -24 + bob * 0.4, 26, 20, 7); c.stroke();
+    c.strokeStyle = '#6b4a2a'; c.lineWidth = 3;                            // baldric strap
+    c.beginPath(); c.moveTo(-9, -23 + bob * 0.4); c.lineTo(9, -8 + bob * 0.4); c.stroke();
+    // golden brooch of Ithaca
+    c.fillStyle = '#ffd76a'; c.shadowColor = '#ffd76a'; c.shadowBlur = 8;
     c.beginPath(); c.arc(6, -15 + bob * 0.4, 2.6, 0, 7); c.fill(); c.shadowBlur = 0;
-    // head
+    // head — tanned face, dark beard, bronze Corinthian helmet, red plume
     const hy = -30 + bob;
-    c.fillStyle = '#eef3fa';
-    rr(c, -4, hy - 10, 20, 17, 6); c.fill();
-    c.strokeStyle = '#7d8a9c'; rr(c, -4, hy - 10, 20, 17, 6); c.stroke();
-    // ears
-    c.fillStyle = '#dfe6f0';
-    c.beginPath(); c.moveTo(-2, hy - 8); c.lineTo(1, hy - 18); c.lineTo(6, hy - 9); c.closePath(); c.fill();
-    c.beginPath(); c.moveTo(8, hy - 9); c.lineTo(12, hy - 18); c.lineTo(15, hy - 7); c.closePath(); c.fill();
-    c.fillStyle = P.glow;
-    c.beginPath(); c.moveTo(0, hy - 9.5); c.lineTo(1.5, hy - 15); c.lineTo(4.5, hy - 10); c.closePath(); c.fill();
-    // visor eyes
-    c.fillStyle = '#0a1420'; rr(c, 1, hy - 6, 15, 7, 3); c.fill();
-    c.fillStyle = this.healT > 0 ? '#aef7d8' : P.glow;
-    c.shadowColor = c.fillStyle; c.shadowBlur = 7;
-    c.fillRect(4, hy - 4.5, 4, 4); c.fillRect(10.5, hy - 4.5, 4, 4);
-    c.shadowBlur = 0;
-    // whisker antennae
-    c.strokeStyle = 'rgba(200,220,240,0.7)'; c.lineWidth = 1;
-    c.beginPath(); c.moveTo(16, hy - 2); c.lineTo(21, hy - 4); c.moveTo(16, hy); c.lineTo(21, hy + 1); c.stroke();
-    // visor scan sweep
-    const scn = this.anim % 2.6;
-    if (scn < 0.45) {
-      c.fillStyle = 'rgba(255,255,255,0.75)';
-      c.fillRect(2 + (scn / 0.45) * 11, hy - 5.5, 2.4, 5.6);
-    }
-    // panel seam + vents on torso
-    c.strokeStyle = 'rgba(70,85,105,0.55)'; c.lineWidth = 1;
-    c.beginPath(); c.moveTo(-9, -16 + bob * 0.4); c.lineTo(7, -16 + bob * 0.4); c.stroke();
-    c.fillStyle = (this.dashT > 0 || this.healT > 0) ? P.glow : 'rgba(70,85,105,0.6)';
-    for (let k = 0; k < 3; k++) c.fillRect(-10 + k * 3, -12 + bob * 0.4, 1.6, 4);
-    // front arm (two-segment)
+    c.fillStyle = '#e0a877';
+    rr(c, -2, hy - 8, 17, 15, 5); c.fill();                                 // face
+    c.fillStyle = '#3a2a1c';
+    rr(c, 3, hy + 1, 12, 6, 3); c.fill();                                   // beard
+    const hg = c.createLinearGradient(0, hy - 14, 0, hy - 2);
+    hg.addColorStop(0, '#e8c26a'); hg.addColorStop(1, '#b08a3a');
+    c.fillStyle = hg;                                                       // helmet dome + cheek guards
+    c.beginPath(); c.moveTo(-4, hy - 2); c.quadraticCurveTo(-4, hy - 13, 7, hy - 13);
+    c.quadraticCurveTo(17, hy - 13, 17, hy - 3); c.lineTo(17, hy + 2); c.lineTo(14, hy + 2);
+    c.lineTo(14, hy - 2); c.lineTo(11, hy - 3); c.lineTo(2, hy - 3); c.lineTo(-1, hy + 2);
+    c.lineTo(-4, hy + 2); c.closePath(); c.fill();
+    c.strokeStyle = '#8a6a28'; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(-4, hy - 2); c.quadraticCurveTo(-4, hy - 13, 7, hy - 13);
+    c.quadraticCurveTo(17, hy - 13, 17, hy - 3); c.stroke();
+    // eyes in the helmet's shadow
+    c.fillStyle = '#241a10';
+    c.fillRect(4, hy - 2.5, 3.4, 2.6); c.fillRect(10.5, hy - 2.5, 3.4, 2.6);
+    // horsehair plume, streaming with speed
+    const plF = Math.sin(this.anim * 8) * 2 + Math.min(6, Math.abs(this.vx) / 60);
+    c.fillStyle = '#c0303a';
+    c.beginPath();
+    c.moveTo(-1, hy - 11);
+    c.quadraticCurveTo(6, hy - 22, 15, hy - 12);
+    c.quadraticCurveTo(8, hy - 17 - plF * 0.3, -6 - plF, hy - 6 + plF * 0.4);
+    c.closePath(); c.fill();
+    // leather belt on torso
+    c.strokeStyle = 'rgba(107,74,42,0.9)'; c.lineWidth = 2.5;
+    c.beginPath(); c.moveTo(-11, -7 + bob * 0.4); c.lineTo(11, -7 + bob * 0.4); c.stroke();
+    // front arm (two-segment, tanned)
     const armSw = run ? Math.sin(ph + Math.PI) * 4 : 0;
-    c.strokeStyle = '#9aa7b8'; c.lineWidth = 3; c.lineCap = 'round';
+    c.strokeStyle = '#e0a877'; c.lineWidth = 3; c.lineCap = 'round';
     c.beginPath(); c.moveTo(6, -20 + bob * 0.4); c.lineTo(9 + armSw * 0.4, -14 + bob * 0.4); c.lineTo(11 + armSw, -8); c.stroke();
-    c.fillStyle = P.glow; c.beginPath(); c.arc(6, -20 + bob * 0.4, 1.7, 0, 7); c.fill();
-    // thruster jets
+    c.fillStyle = '#c8963c'; c.beginPath(); c.arc(6, -20 + bob * 0.4, 1.9, 0, 7); c.fill(); // shoulder clasp
+    // winged sandals of Hermes — white wing-beats when leaping in air
     if (this.jetT > 0 || (!this.on && this.vy < -140 && this.dashT <= 0)) {
       c.save(); c.globalCompositeOperation = 'lighter';
-      for (const px of (this.flipT > 0 ? [-7, 6] : [-8])) {
-        const L = rnd(8, 15) + (this.jetT > 0 ? 5 : 0);
-        const jg = c.createLinearGradient(px, -6, px - 5, -6 + L + 8);
-        jg.addColorStop(0, '#ffffff'); jg.addColorStop(0.4, '#8ff6ff'); jg.addColorStop(1, 'rgba(60,180,255,0)');
-        c.fillStyle = jg;
-        c.beginPath(); c.moveTo(px - 2.4, -6); c.lineTo(px + 2.4, -6); c.lineTo(px - 4, -6 + L + 8); c.closePath(); c.fill();
+      const wb = Math.sin(this.anim * 30) * 4;
+      for (const wpx of [-8, 7]) {
+        c.fillStyle = 'rgba(255,252,240,0.85)';
+        c.beginPath();
+        c.moveTo(wpx, -3);
+        c.quadraticCurveTo(wpx - 9, -9 - wb, wpx - 14, -2 - wb);
+        c.quadraticCurveTo(wpx - 8, -1, wpx, 0);
+        c.closePath(); c.fill();
       }
       c.restore();
     }
@@ -1002,20 +1001,25 @@ class Boss {
     }
     if (this.st === 'intro') { this.t -= dt; if (this.t <= 0) { this.st = 'idle'; this.t = 0.8; } return; }
     if (this.hp <= 0) { this.die(); return; }
-    if (this.phase === 1 && this.hp < this.hpMax / 2) {
-      this.phase = 2; this.t = 1;
+    const phN = this.kind === 'mother' ? 3 : 2;
+    const want = 1 + Math.min(phN - 1, Math.floor((1 - this.hp / this.hpMax) * phN));
+    if (want > this.phase) {
+      this.phase = want; this.t = 1;
       burst(this.cx(), this.cy(), 30, '#ffffff', 320, 0.7, 200, 4, true);
       cam.shake = 12; sfx('phase');
     }
     const px = player.x + player.w / 2, py = player.y + player.h / 2;
     const spd = DF().espd;
     switch (this.kind) {
-      // ---- GLITCH.EXE: charging corrupted hound ----
+      // ---- Charybdis: the surging maelstrom ----
       case 'glitch': {
         this.vy += 2100 * dt;
         if (this.st === 'idle') {
           this.vx = 0; this.t -= dt;
           this.face = Math.sign(px - this.cx()) || 1;
+          // phase 2: the whirlpool drags the hero toward her maw
+          if (this.phase === 2 && !player.dead && player.on)
+            player.vx -= Math.sign(px - this.cx()) * 150 * dt * 60 * 0.016;
           if (this.t <= 0) { this.st = this.cycle++ % 3 === 2 ? 'leap' : 'charge'; this.t = 3; if (this.st === 'leap') { this.vy = -680; this.vx = this.face * 280 * spd; } }
         } else if (this.st === 'charge') {
           this.vx = this.face * (this.phase === 2 ? 560 : 420) * spd;
@@ -1030,7 +1034,7 @@ class Boss {
         }
         break;
       }
-      // ---- Broodmother: hangs above, spawns and slams ----
+      // ---- Scylla: hangs from her cave, snatches and spawns ----
       case 'brood': {
         if (this.st === 'idle') {
           this.y = this.homeY + Math.sin(this.anim * 1.6) * 12;
@@ -1045,7 +1049,8 @@ class Boss {
               burst(this.cx(), this.y + this.h, 10, PAL.B.glow, 180, 0.4, 300, 3, true);
             } else if (which === 3) { this.st = 'slamwarn'; this.t = 0.6; this.tx = px; }
             else {
-              for (let i = -1; i <= 1; i++) this.shoot(i * 110, 240, 7, 200);
+              const nspit = this.phase === 2 ? 2 : 1;
+              for (let i = -nspit; i <= nspit; i++) this.shoot(i * 110, 240, 7, 200);
               sfx('shoot');
             }
           }
@@ -1065,7 +1070,7 @@ class Boss {
         }
         break;
       }
-      // ---- ATLAS-7: slow walker, slams and lobs ----
+      // ---- Polyphemus: slow giant, slams and hurls boulders ----
       case 'atlas': {
         this.vy += 2100 * dt;
         this.face = Math.sign(px - this.cx()) || 1;
@@ -1076,7 +1081,9 @@ class Boss {
           else if (this.t <= 0) {
             this.t = this.phase === 2 ? 2.2 : 3.2;
             const d = px - this.cx();
-            this.shoot(clamp(d * 1.1, -300, 300), -460, 8, 900); sfx('shoot');
+            this.shoot(clamp(d * 1.1, -300, 300), -460, 8, 900);
+            if (this.phase === 2) this.shoot(clamp(d * 1.35, -360, 360), -560, 10, 900);
+            sfx('shoot');
           }
         } else if (this.st === 'slamwarn') {
           this.vx = 0; this.t -= dt;
@@ -1095,7 +1102,7 @@ class Boss {
         moveEnt(this, dt);
         break;
       }
-      // ---- Archivist Zero: teleporting caster ----
+      // ---- Circe: blinking enchantress ----
       case 'zero': {
         this.y += Math.sin(this.anim * 2) * 14 * dt;
         if (this.st === 'idle') {
@@ -1113,6 +1120,11 @@ class Boss {
               this.marks = [];
               for (let k = -1; k <= (this.phase === 2 ? 2 : 1); k++) this.marks.push({ x: px + k * 80, t: 0.7 });
             }
+            if (this.phase === 2) {
+              const aa = Math.atan2(py - this.cy(), px - this.cx());
+              this.shoot(Math.cos(aa - 0.18) * 210, Math.sin(aa - 0.18) * 210, 9);
+              this.shoot(Math.cos(aa + 0.18) * 210, Math.sin(aa + 0.18) * 210, 9);
+            }
             this.st = 'idle'; this.t = this.phase === 2 ? 1.7 : 2.4;
           }
         }
@@ -1125,7 +1137,7 @@ class Boss {
         }
         break;
       }
-      // ---- Prism Prowler: rival robo-cat ----
+      // ---- The Siren Queen: swooping duelist of the strait ----
       case 'prism': {
         this.vy += 2100 * dt;
         if (this.st === 'idle') {
@@ -1150,7 +1162,10 @@ class Boss {
           if (this.trailT <= 0) { this.trailT = 0.03; addPart(this.cx(), this.cy(), 0, 0, 0.3, PAL.X.glow, 5, 0, true); }
           if (this.t <= 0) { this.st = 'rest'; this.t = this.phase === 2 ? 0.5 : 0.85; this.vx = 0; }
         } else if (this.st === 'pounce') {
-          if (this.vy > 0 && this.y + this.h > 14 * TILE) { this.st = 'rest'; this.t = 0.7; this.vx = 0; cam.shake = 6; }
+          if (this.vy > 0 && this.y + this.h > 14 * TILE) {
+            this.st = 'rest'; this.t = 0.7; this.vx = 0; cam.shake = 6;
+            if (this.phase === 2) this.ring(8, 200 * spd, this.anim);
+          }
         } else if (this.st === 'rest') {
           this.vx = 0; this.t -= dt;
           if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.3, 0.7); }
@@ -1159,7 +1174,7 @@ class Boss {
         if (this.st === 'dashslash' && (col.l || col.r)) { this.st = 'rest'; this.t = 0.8; }
         break;
       }
-      // ---- MOTHER-V: the Null Core ----
+      // ---- Antinous: champion of the suitors (3 phases) ----
       case 'mother': {
         this.y = 110 + Math.sin(this.anim * 1.1) * 16;
         this.t -= dt;
@@ -1171,13 +1186,24 @@ class Boss {
             if (this.beam.t <= 0) this.beam = null;
           }
         }
+        if (this.beam2) {
+          this.beam2.t -= dt;
+          if (this.beam2.warn && this.beam2.t <= 0) { this.beam2.warn = false; this.beam2.t = 0.5; sfx('boom'); cam.shake = 8; }
+          else if (!this.beam2.warn) {
+            if (!player.dead && aabb(this.beam2, player)) player.hurt(DF().edmg, this.beam2.x + this.beam2.w / 2);
+            if (this.beam2.t <= 0) this.beam2 = null;
+          }
+        }
         if (this.t <= 0) {
-          const p2 = this.phase === 2;
-          this.t = p2 ? 1.7 : 2.4;
+          const p2 = this.phase >= 2, p3 = this.phase >= 3;
+          this.t = p3 ? 1.3 : p2 ? 1.7 : 2.4;
           const which = this.cycle++ % (p2 ? 3 : 4);
-          if (which === 0) this.ring(p2 ? 14 : 10, 230 * spd, this.anim);
-          else if (which === 1 && G.enemies.filter(e => !e.dead).length < 2) {
-            const b = new Enemy('blob', this.cx() - 17, this.y + this.h);
+          if (which === 0) {
+            this.ring(p3 ? 16 : p2 ? 14 : 10, 230 * spd, this.anim);
+            if (p3) this.ring(10, 160 * spd, this.anim + 0.3);
+          }
+          else if (which === 1 && G.enemies.filter(e => !e.dead).length < (p3 ? 3 : 2)) {
+            const b = new Enemy(p3 ? 'hopper' : 'blob', this.cx() - 17, this.y + this.h);
             G.enemies.push(b);
             burst(this.cx(), this.y + this.h, 12, PAL.E.glow, 200, 0.5, 300, 3, true);
           } else {
@@ -1185,6 +1211,9 @@ class Boss {
             this.beam = horiz
               ? { x: 0, y: py - 34, w: G.roomDef.w * TILE, h: 68, t: 0.8, warn: true }
               : { x: px - 34, y: 0, w: 68, h: G.roomDef.h * TILE, t: 0.8, warn: true };
+            if (p3) this.beam2 = horiz
+              ? { x: px - 34, y: 0, w: 68, h: G.roomDef.h * TILE, t: 1.1, warn: true }
+              : { x: 0, y: py - 34, w: G.roomDef.w * TILE, h: 68, t: 1.1, warn: true };
             sfx('cast');
           }
         }
@@ -1218,95 +1247,181 @@ class Boss {
       c.fillRect(m.x - 10, 12 * TILE, 20, 3 * TILE);
     }
     if (this.kind === 'mother' && this.beam) {
-      c.fillStyle = this.beam.warn ? 'rgba(255,90,220,0.22)' : 'rgba(255,120,240,0.6)';
+      c.fillStyle = this.beam.warn ? 'rgba(255,190,90,0.22)' : 'rgba(255,210,120,0.6)';
       c.fillRect(this.beam.x, this.beam.y, this.beam.w, this.beam.h);
+    }
+    if (this.kind === 'mother' && this.beam2) {
+      c.fillStyle = this.beam2.warn ? 'rgba(255,190,90,0.22)' : 'rgba(255,210,120,0.6)';
+      c.fillRect(this.beam2.x, this.beam2.y, this.beam2.w, this.beam2.h);
     }
     c.translate(cx, cy);
     switch (this.kind) {
-      case 'glitch': {
+      case 'glitch': {   // CHARYBDIS — the living whirlpool
         c.scale(this.face || 1, 1);
         const gj = this.st === 'charge' ? rnd(-2, 2) : 0;
         c.translate(gj, gj * 0.5);
-        c.fillStyle = '#39424f'; rr(c, -30, -14, 54, 26, 8); c.fill();     // torso
-        c.fillStyle = '#2b323d'; rr(c, 12, -26, 22, 18, 6); c.fill();      // head
-        c.fillStyle = '#ff4f6d'; c.shadowColor = '#ff4f6d'; c.shadowBlur = 10;
-        c.fillRect(18, -21, 12, 5); c.shadowBlur = 0;                       // eye strip
-        c.fillStyle = '#2b323d';
-        const lg = Math.sin(this.anim * 14) * 4;
-        c.fillRect(-26, 10, 7, 11 + lg); c.fillRect(-8, 10, 7, 11 - lg); c.fillRect(14, 10, 7, 11 + lg);
-        c.fillStyle = P.glow; // corruption
-        c.beginPath(); c.arc(-18, -16, 5, 0, 7); c.arc(-6, -19, 4, 0, 7); c.arc(4, -16, 3, 0, 7); c.fill();
-        if (chance(0.15)) { c.fillStyle = 'rgba(255,255,255,0.25)'; c.fillRect(rnd(-30, 20), rnd(-24, 16), rnd(6, 18), 3); } // glitch bars
+        // churning water body: layered rotating swirl arcs
+        for (let ring2 = 3; ring2 >= 0; ring2--) {
+          const rr2 = 10 + ring2 * 7;
+          c.strokeStyle = ring2 % 2 ? '#2e7d8a' : '#4dd0c0';
+          c.globalAlpha = a * (0.5 + ring2 * 0.12);
+          c.lineWidth = 5 - ring2;
+          c.beginPath();
+          c.arc(0, 0, rr2, this.anim * (2 + ring2 * 0.7), this.anim * (2 + ring2 * 0.7) + 4.6);
+          c.stroke();
+        }
+        c.globalAlpha = a;
+        // gaping maw
+        c.fillStyle = '#06222a'; c.beginPath(); c.ellipse(6, 2, 15, 11, 0, 0, 7); c.fill();
+        c.fillStyle = '#eefcff';                                            // triple tooth rows
+        for (let k = 0; k < 5; k++) {
+          c.beginPath(); c.moveTo(-6 + k * 5, -8); c.lineTo(-4 + k * 5, -2); c.lineTo(-2 + k * 5, -8); c.closePath(); c.fill();
+          c.beginPath(); c.moveTo(-5 + k * 5, 12); c.lineTo(-3 + k * 5, 6); c.lineTo(-1 + k * 5, 12); c.closePath(); c.fill();
+        }
+        // the hungry eye deep in the throat
+        c.fillStyle = '#ff9c4a'; c.shadowColor = '#ff9c4a'; c.shadowBlur = 12;
+        c.beginPath(); c.arc(10, 1, 4, 0, 7); c.fill(); c.shadowBlur = 0;
+        // spray foam
+        if (chance(0.5)) addPart(this.cx() + rnd(-26, 26), this.y + rnd(-6, 10), rnd(-60, 60), rnd(-160, -60), 0.4, '#d8f4f8', 2.5, 500);
         break;
       }
-      case 'brood': {
-        c.strokeStyle = '#2b323d'; c.lineWidth = 6;
-        c.beginPath(); c.moveTo(0, -this.h / 2); c.lineTo(0, -cy); c.stroke(); // hanging cable
+      case 'brood': {   // SCYLLA — six necks writhing from her cave
+        c.strokeStyle = '#24343f'; c.lineWidth = 12;
+        c.beginPath(); c.moveTo(0, -this.h / 2); c.lineTo(0, -cy); c.stroke(); // rock stalk to the roof
         const puls = 1 + Math.sin(this.anim * 3) * 0.05;
         c.scale(puls, puls);
-        c.fillStyle = '#39424f'; c.beginPath(); c.ellipse(0, 0, 33, 29, 0, 0, 7); c.fill();
-        c.fillStyle = P.glow; c.globalAlpha = 0.85 * a;
-        c.beginPath(); c.ellipse(0, 6, 24, 18, 0, 0, 7); c.fill();
+        // central mass — scaled hide
+        c.fillStyle = '#3a4a52'; c.beginPath(); c.ellipse(0, 0, 33, 27, 0, 0, 7); c.fill();
+        c.fillStyle = '#54707d'; c.globalAlpha = 0.8 * a;
+        c.beginPath(); c.ellipse(0, 5, 24, 16, 0, 0, 7); c.fill();
         c.globalAlpha = a;
-        c.fillStyle = '#0a1420';
-        for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(-12 + i * 12, 4, 4.5, 0, 7); c.fill(); } // brood sacs
-        c.fillStyle = '#ff4f6d'; c.shadowColor = '#ff4f6d'; c.shadowBlur = 12;
-        c.beginPath(); c.arc(0, -12, 6, 0, 7); c.fill(); c.shadowBlur = 0;
-        c.strokeStyle = P.glow; c.lineWidth = 3;
-        for (let i = 0; i < 4; i++) {
-          const wob = Math.sin(this.anim * 4 + i) * 8;
-          c.beginPath(); c.moveTo(-24 + i * 16, 24); c.quadraticCurveTo(-24 + i * 16 + wob, 40, -24 + i * 16 - wob, 52); c.stroke();
+        // six serpent necks ending in fanged heads
+        for (let i = 0; i < 6; i++) {
+          const wob = Math.sin(this.anim * 4 + i * 1.7) * 9;
+          const nx = -25 + i * 10;
+          const hx = nx - wob, hyy = 52 + Math.sin(this.anim * 3 + i) * 6;
+          c.strokeStyle = '#46606b'; c.lineWidth = 5;
+          c.beginPath(); c.moveTo(nx, 20); c.quadraticCurveTo(nx + wob, 38, hx, hyy); c.stroke();
+          // head
+          c.fillStyle = '#33454e';
+          c.beginPath(); c.ellipse(hx, hyy + 3, 6, 4.5, wob * 0.02, 0, 7); c.fill();
+          c.fillStyle = '#ff6a5a'; c.shadowColor = '#ff6a5a'; c.shadowBlur = 6;
+          c.beginPath(); c.arc(hx + 2, hyy + 2, 1.6, 0, 7); c.fill(); c.shadowBlur = 0;
+          c.fillStyle = '#eefcff';
+          c.beginPath(); c.moveTo(hx - 3, hyy + 6); c.lineTo(hx - 1.5, hyy + 9); c.lineTo(hx, hyy + 6); c.closePath(); c.fill();
         }
+        // her cold central eyes
+        c.fillStyle = '#c8e8e8'; c.shadowColor = '#7deac8'; c.shadowBlur = 12;
+        c.beginPath(); c.arc(-7, -10, 4, 0, 7); c.arc(7, -10, 4, 0, 7); c.fill(); c.shadowBlur = 0;
         break;
       }
-      case 'atlas': {
+      case 'atlas': {   // POLYPHEMUS — the one-eyed shepherd giant
         c.scale(this.face || 1, 1);
         const warn = this.st === 'slamwarn';
-        c.fillStyle = warn ? '#8a4a12' : '#5c3a12'; rr(c, -28, -34, 56, 52, 9); c.fill(); // torso
-        c.fillStyle = '#3f2a0e'; rr(c, -18, -46, 36, 18, 6); c.fill();                    // head
-        c.fillStyle = warn ? '#fff2a8' : '#ff9430'; c.shadowColor = '#ff9430'; c.shadowBlur = 12;
-        c.fillRect(-10, -41, 20, 6); c.shadowBlur = 0;
-        c.fillStyle = '#3f2a0e';
-        rr(c, -40, -26, 13, 40, 5); c.fill(); rr(c, 27, -26, 13, 40, 5); c.fill();        // arms
-        c.fillRect(-22, 18, 14, 18); c.fillRect(8, 18, 14, 18);                            // legs
-        c.fillStyle = '#ff9430'; c.globalAlpha = 0.9 * a;
-        c.beginPath(); c.arc(0, -6, 9 + Math.sin(this.anim * 5) * 2, 0, 7); c.fill();      // furnace core
-        c.globalAlpha = a;
+        // hulking tanned torso
+        const tg = c.createLinearGradient(0, -34, 0, 18);
+        tg.addColorStop(0, '#c08a58'); tg.addColorStop(1, '#8a5f3a');
+        c.fillStyle = tg; rr(c, -28, -34, 56, 52, 12); c.fill();
+        // ragged goat-hide loincloth
+        c.fillStyle = '#5c4326';
+        c.beginPath(); c.moveTo(-26, 8); c.lineTo(26, 8); c.lineTo(20, 24); c.lineTo(12, 16);
+        c.lineTo(2, 26); c.lineTo(-8, 16); c.lineTo(-18, 25); c.closePath(); c.fill();
+        // heavy arms; the near one drags a club
+        c.fillStyle = '#a8744a';
+        rr(c, -40, -26, 13, 44, 6); c.fill(); rr(c, 27, -26, 13, 44, 6); c.fill();
+        c.fillStyle = '#6b4a2a';
+        c.save(); c.translate(36, 16); c.rotate(0.5);
+        rr(c, -4, 0, 9, 26, 4); c.fill(); c.restore();                      // olive-wood club
+        // legs
+        c.fillStyle = '#8a5f3a'; c.fillRect(-22, 18, 14, 18); c.fillRect(8, 18, 14, 18);
+        // head with matted hair and heavy brow
+        c.fillStyle = '#b07c4e'; rr(c, -16, -50, 34, 22, 8); c.fill();
+        c.fillStyle = '#4a3018';
+        c.beginPath(); c.moveTo(-16, -48); c.quadraticCurveTo(0, -58, 18, -48);
+        c.lineTo(18, -42); c.quadraticCurveTo(0, -50, -16, -42); c.closePath(); c.fill();
+        // THE eye — huge, tracking, whitens before the slam
+        c.fillStyle = warn ? '#fff2a8' : '#ffe9c8'; c.shadowColor = '#ff9c4a'; c.shadowBlur = 14;
+        c.beginPath(); c.arc(1, -39, 8, 0, 7); c.fill(); c.shadowBlur = 0;
+        c.fillStyle = '#3a2210';
+        const lk = player.dead ? 0 : clamp((player.x + 12 - cx) * (this.face || 1) * 0.01, -3, 3);
+        c.beginPath(); c.arc(1 + lk, -39, 3.4, 0, 7); c.fill();
+        // beard
+        c.fillStyle = '#4a3018'; rr(c, -8, -32, 20, 8, 4); c.fill();
         break;
       }
-      case 'zero': {
+      case 'zero': {   // CIRCE — enchantress of Aiaia
         const fl = Math.sin(this.anim * 2.4) * 4;
         c.translate(0, fl);
-        c.fillStyle = 'rgba(58,113,156,0.5)';
-        c.beginPath(); c.moveTo(-22, -28); c.lineTo(22, -28); c.lineTo(14, 30); c.lineTo(-14, 30); c.closePath(); c.fill(); // robe
-        c.fillStyle = '#28506f'; rr(c, -14, -30, 28, 22, 8); c.fill();  // hood
-        c.fillStyle = '#eefcff'; c.shadowColor = '#9fe8ff'; c.shadowBlur = 14;
-        c.fillRect(-8, -22, 6, 5); c.fillRect(3, -22, 6, 5); c.shadowBlur = 0;
-        c.strokeStyle = '#9fe8ff'; c.lineWidth = 2; c.globalAlpha = 0.6 * a;
+        // flowing violet gown
+        const rg = c.createLinearGradient(0, -28, 0, 30);
+        rg.addColorStop(0, 'rgba(120,74,160,0.9)'); rg.addColorStop(1, 'rgba(70,42,110,0.55)');
+        c.fillStyle = rg;
+        c.beginPath(); c.moveTo(-16, -24); c.lineTo(16, -24);
+        c.quadraticCurveTo(22, 6, 16 + Math.sin(this.anim * 2) * 4, 30);
+        c.lineTo(-16 - Math.sin(this.anim * 2) * 4, 30);
+        c.quadraticCurveTo(-22, 6, -16, -24); c.closePath(); c.fill();
+        // face and long dark hair
+        c.fillStyle = '#e8b890'; c.beginPath(); c.arc(0, -30, 9, 0, 7); c.fill();
+        c.fillStyle = '#2a1a30';
+        c.beginPath(); c.moveTo(-9, -36); c.quadraticCurveTo(0, -44, 9, -36);
+        c.quadraticCurveTo(13, -20, 10, -6); c.lineTo(6, -8); c.quadraticCurveTo(9, -24, 5, -34);
+        c.lineTo(-5, -34); c.quadraticCurveTo(-9, -24, -6, -8); c.lineTo(-10, -6);
+        c.quadraticCurveTo(-13, -20, -9, -36); c.closePath(); c.fill();
+        // golden diadem + glowing eyes
+        c.strokeStyle = '#ffd76a'; c.lineWidth = 2;
+        c.beginPath(); c.arc(0, -31, 8.4, -2.6, -0.5); c.stroke();
+        c.fillStyle = '#b46aff'; c.shadowColor = '#b46aff'; c.shadowBlur = 10;
+        c.fillRect(-5, -31, 3.4, 2.6); c.fillRect(2, -31, 3.4, 2.6); c.shadowBlur = 0;
+        // the wand, raised — its tip burns
+        c.strokeStyle = '#8a6a28'; c.lineWidth = 2.4;
+        c.beginPath(); c.moveTo(12, -18); c.lineTo(26, -34); c.stroke();
+        c.fillStyle = '#6aff9e'; c.shadowColor = '#6aff9e'; c.shadowBlur = 12 + Math.sin(this.anim * 6) * 5;
+        c.beginPath(); c.arc(27, -35, 3.4, 0, 7); c.fill(); c.shadowBlur = 0;
+        // enchantment circles
+        c.strokeStyle = '#b46aff'; c.lineWidth = 2; c.globalAlpha = 0.5 * a;
         for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(0, 0, 34 + i * 8 + Math.sin(this.anim * 3 + i) * 3, 0, 7); c.stroke(); }
         c.globalAlpha = a;
         break;
       }
-      case 'prism': {
+      case 'prism': {   // THE SIREN QUEEN — the voice of the strait
         c.scale(this.face || 1, 1);
-        c.fillStyle = '#2e2333'; rr(c, -24, -12, 46, 22, 8); c.fill();  // sleek body
-        c.fillStyle = '#241a28'; rr(c, 10, -24, 18, 16, 6); c.fill();   // head
-        c.beginPath(); c.moveTo(12, -22); c.lineTo(15, -32); c.lineTo(19, -23); c.closePath(); c.fill();
-        c.beginPath(); c.moveTo(21, -23); c.lineTo(25, -31); c.lineTo(27, -21); c.closePath(); c.fill();
-        c.fillStyle = P.glow; c.shadowColor = P.glow; c.shadowBlur = 12;
-        c.fillRect(15, -19, 4, 4); c.fillRect(21.5, -19, 4, 4); c.shadowBlur = 0;
-        c.strokeStyle = P.glow; c.lineWidth = 3; c.lineCap = 'round';
-        const tw2 = Math.sin(this.anim * 7) * 7;
-        c.beginPath(); c.moveTo(-22, -6); c.quadraticCurveTo(-36, -14 + tw2, -34, -28 + tw2); c.stroke();
-        // crystal shards on back
-        c.fillStyle = 'rgba(255,122,209,0.8)';
-        c.beginPath(); c.moveTo(-14, -12); c.lineTo(-10, -26); c.lineTo(-5, -12); c.closePath(); c.fill();
-        c.beginPath(); c.moveTo(-4, -12); c.lineTo(1, -22); c.lineTo(5, -12); c.closePath(); c.fill();
+        // great wings, beating
+        const wb2 = Math.sin(this.anim * 9) * 10;
+        for (const wdir of [-1, 1]) {
+          c.fillStyle = wdir < 0 ? 'rgba(168,228,255,0.55)' : 'rgba(200,240,255,0.7)';
+          c.beginPath();
+          c.moveTo(-6, -8);
+          c.quadraticCurveTo(-24 * wdir - 6, -30 - wb2 * wdir, -40 * wdir - 4, -12 - wb2);
+          c.quadraticCurveTo(-26 * wdir - 4, -4, -6, 0);
+          c.closePath(); c.fill();
+        }
+        // feathered body
+        c.fillStyle = '#2e4a5c'; rr(c, -20, -12, 40, 22, 10); c.fill();
+        c.fillStyle = '#3c617a';
+        for (let k = 0; k < 4; k++) {
+          c.beginPath(); c.moveTo(-16 + k * 9, 10); c.lineTo(-12 + k * 9, 18); c.lineTo(-8 + k * 9, 10); c.closePath(); c.fill();
+        }
+        // pale face with golden hair, mouth open in song
+        c.fillStyle = '#f0dcc8'; c.beginPath(); c.arc(12, -18, 8, 0, 7); c.fill();
+        c.fillStyle = '#ffd76a';
+        c.beginPath(); c.moveTo(4, -22); c.quadraticCurveTo(12, -30, 20, -22);
+        c.quadraticCurveTo(22, -12, 18, -6); c.lineTo(15, -10); c.quadraticCurveTo(18, -18, 12, -24);
+        c.quadraticCurveTo(6, -18, 8, -10); c.lineTo(5, -8); c.quadraticCurveTo(2, -14, 4, -22);
+        c.closePath(); c.fill();
+        c.fillStyle = '#7ad4ff'; c.shadowColor = '#7ad4ff'; c.shadowBlur = 10;
+        c.fillRect(8.5, -20, 3, 2.6); c.fillRect(14, -20, 3, 2.6); c.shadowBlur = 0;
+        c.fillStyle = '#3a2a30'; c.beginPath(); c.ellipse(12, -13.5, 2, 3, 0, 0, 7); c.fill(); // the song
+        // song-notes rising while she sings
+        if (chance(0.2)) addPart(this.cx() + rnd(-6, 18) * (this.face || 1), this.y - 20, rnd(-15, 15), rnd(-60, -30), 0.8, '#ffd76a', 2.4, -40, true);
+        // talons
+        c.strokeStyle = '#c8a25a'; c.lineWidth = 2.6; c.lineCap = 'round';
+        c.beginPath(); c.moveTo(-6, 10); c.lineTo(-8, 18); c.moveTo(2, 10); c.lineTo(2, 18); c.stroke();
         break;
       }
-      case 'mother': {
-        const p2 = this.phase === 2;
-        c.strokeStyle = 'rgba(107,37,150,0.8)'; c.lineWidth = 10;
+      case 'mother': {   // ANTINOUS — armored champion, borne up by arrogance
+        const p2 = this.phase >= 2, p3 = this.phase >= 3;
+        // six wine-red banners of the occupied hall stream around him
+        c.strokeStyle = p3 ? 'rgba(224,90,74,0.85)' : 'rgba(140,44,36,0.8)'; c.lineWidth = 9;
         for (let i = 0; i < 6; i++) {
           const aa = i / 6 * Math.PI * 2 + this.anim * 0.3;
           const wob = Math.sin(this.anim * 2 + i * 2) * 20;
@@ -1314,18 +1429,36 @@ class Boss {
           c.quadraticCurveTo(Math.cos(aa) * 90, Math.sin(aa) * 90 + wob, Math.cos(aa) * 150, Math.sin(aa) * 150 - wob);
           c.stroke();
         }
-        const puls = 1 + Math.sin(this.anim * (p2 ? 6 : 3)) * 0.06;
+        const puls = 1 + Math.sin(this.anim * (p2 ? 6 : 3)) * 0.04;
         c.scale(puls, puls);
-        c.fillStyle = '#39424f'; c.beginPath(); c.arc(0, 0, 58, 0, 7); c.fill();
-        c.fillStyle = P.glow; c.globalAlpha = 0.8 * a;
-        c.beginPath(); c.arc(0, 0, 46, 0, 7); c.fill(); c.globalAlpha = a;
-        c.fillStyle = '#0a0512'; c.beginPath(); c.arc(0, 0, 30, 0, 7); c.fill();
-        // the eye
-        c.fillStyle = p2 ? '#ff4f6d' : '#e05aff'; c.shadowColor = c.fillStyle; c.shadowBlur = 24;
         const look = Math.atan2(player.y - cy, player.x - cx);
-        c.beginPath(); c.arc(Math.cos(look) * 10, Math.sin(look) * 10, 13, 0, 7); c.fill();
+        // the great round shield (aspis) with a meander rim — his guard
+        c.fillStyle = '#8a5530'; c.beginPath(); c.arc(0, 6, 52, 0, 7); c.fill();
+        c.fillStyle = '#c8963c'; c.beginPath(); c.arc(0, 6, 44, 0, 7); c.fill();
+        c.strokeStyle = '#6b4520'; c.lineWidth = 3;
+        c.beginPath(); c.arc(0, 6, 48, 0, 7); c.stroke();
+        c.fillStyle = '#8a5530'; c.beginPath(); c.arc(0, 6, 14, 0, 7); c.fill(); // shield boss
+        // torso + crested helm rising over the shield rim
+        c.fillStyle = '#b0805a'; rr(c, -14, -52, 28, 26, 8); c.fill();          // shoulders
+        const hg2 = c.createLinearGradient(0, -74, 0, -46);
+        hg2.addColorStop(0, '#e8c26a'); hg2.addColorStop(1, '#a8853f');
+        c.fillStyle = hg2;
+        c.beginPath(); c.moveTo(-12, -46); c.quadraticCurveTo(-12, -70, 0, -70);
+        c.quadraticCurveTo(12, -70, 12, -46); c.closePath(); c.fill();          // helm
+        c.fillStyle = p3 ? '#ff5a4a' : '#c0303a';
+        c.beginPath(); c.moveTo(-14, -66); c.quadraticCurveTo(0, -84 - Math.sin(this.anim * 4) * 4, 16, -64);
+        c.quadraticCurveTo(4, -72, -14, -60); c.closePath(); c.fill();          // tall crest
+        // eye-slit glare tracks the hero
+        c.fillStyle = p2 ? '#ff5a4a' : '#ffd76a'; c.shadowColor = c.fillStyle; c.shadowBlur = 16;
+        c.fillRect(-7 + clamp(Math.cos(look) * 3, -3, 3), -58, 14, 3.4);
         c.shadowBlur = 0;
-        c.fillStyle = '#0a0512'; c.beginPath(); c.arc(Math.cos(look) * 12, Math.sin(look) * 12, 5, 0, 7); c.fill();
+        // his long spear, levelled at the hero
+        c.save(); c.rotate(look);
+        c.strokeStyle = '#6b4a2a'; c.lineWidth = 4;
+        c.beginPath(); c.moveTo(20, 0); c.lineTo(86, 0); c.stroke();
+        c.fillStyle = '#e8e2d0';
+        c.beginPath(); c.moveTo(86, -5); c.lineTo(102, 0); c.lineTo(86, 5); c.closePath(); c.fill();
+        c.restore();
         break;
       }
     }

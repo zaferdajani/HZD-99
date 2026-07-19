@@ -1,4 +1,4 @@
-// CLAWBYTE — mobile touch controls in side gutters OUTSIDE the game frame
+// NOSTOS — mobile touch controls in side gutters OUTSIDE the game frame
 // (auto-detected; the game canvas shrinks and controls live in the letterbox)
 const TOUCH = {
   enabled: ('ontouchstart' in window) || (navigator.maxTouchPoints > 0),
