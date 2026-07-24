@@ -1638,6 +1638,20 @@ function roomMini(id) {
   return mc;
 }
 const MAP_BOSSROOM = { A4: 'Glitch', B4: 'Atlas', C3: 'Zero', D3: 'Brood', X1: 'Prism', E3: 'Mother' };
+// how many collectibles (secret relics, unopened chests, uncollected abilities)
+// still remain in a room — powers the backtracking ★ marker on the chart.
+function roomSecretsLeft(id) {
+  const def = ROOMS[id]; if (!def) return 0;
+  let n = 0;
+  def.ents.forEach((e, i) => {
+    const [kind, , , extra, cond] = e;
+    if (cond && !G.save.flags[cond]) return;
+    if (kind === 'secret') { if (!G.save.flags['sr_' + extra]) n++; }
+    else if (kind === 'chest') { if (!G.save.flags['ch_' + id + '_' + i]) n++; }
+    else if (kind === 'mod') { if (!G.save.abil[extra]) n++; }
+  });
+  return n;
+}
 function drawMap() {
   c.fillStyle = 'rgba(4,7,12,0.9)'; c.fillRect(0, 0, 960, 540);
   ftxt(t('map_title'), 480, 40, 26, '#eef3fa', 'center', '#ffcf6a');
@@ -1678,6 +1692,11 @@ function drawMap() {
       const done = G.save.flags['boss' + MAP_BOSSROOM[id]];
       ftxt(done ? '✓' : '☠', rc.x + rc.w - 11, rc.y + 11, 12, done ? '#7de8a0' : '#ff6a7a');
     }
+    // ★ = this explored room still hides something — come back with new gifts
+    if (roomSecretsLeft(id) > 0) {
+      const tw = 0.6 + Math.sin(performance.now() / 300 + rc.x) * 0.4;
+      ftxt('★', rc.x + rc.w - 11, rc.y + rc.h - 11, 12, 'rgba(255,215,106,' + tw + ')', 'center', '#ffd76a');
+    }
     if (id === G.roomId && player) {
       const relx = mx + (player.x / (ROOMS[id].w * TILE)) * mw;
       const rely = my + (player.y / (ROOMS[id].h * TILE)) * mh;
@@ -1688,7 +1707,8 @@ function drawMap() {
       rr(c, rc.x - 2, rc.y - 2, rc.w + 4, rc.h + 4, 6); c.stroke();
     }
   }
-  ftxt('● ' + t('map_here') + '   ◆ ' + t('rest').replace('E — ', '') + '   ☠ ' + t('map_boss') + '   ◎ ' + t('map_shop'), 480, 516, 13, '#7d93a8');
+  ftxt('● ' + t('map_here') + '   ◆ ' + t('rest').replace('E — ', '') + '   ☠ ' + t('map_boss') + '   ◎ ' + t('map_shop') + '   ★ ' + t('map_secret'), 480, 508, 13, '#7d93a8');
+  ftxt(t('map_backtrack'), 480, 528, 12, '#6a8298');
 }
 function drawCrest() {
   c.fillStyle = 'rgba(4,7,12,0.85)'; c.fillRect(0, 0, 960, 540);
