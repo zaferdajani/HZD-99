@@ -124,31 +124,31 @@ function trNumOptions(correct) {
   for (let i = arr.length - 1; i > 0; i--) { const j = irnd(0, i); [arr[i], arr[j]] = [arr[j], arr[i]]; }
   return arr.map(v => ({ v, correct: v === correct }));
 }
-const TR_ITEMS = [
-  { kind: 'amphora', min: 2, max: 9 },
-  { kind: 'helmet', min: 3, max: 12 },
-  { kind: 'wreath', min: 1, max: 6 },
-];
+// Each item KIND has ONE fixed weight, shown to the player as a key. The pans
+// hold whole counts of these items, so "which is heavier" is a solvable sum:
+// heavier pan = larger (count × weight) total. Weights match visual size:
+// a light wreath = 1, a jar = 2, a bronze helmet = 3.
+const TR_WEIGHT = { wreath: 1, amphora: 2, helmet: 3 };
+const TR_KINDS = ['wreath', 'amphora', 'helmet'];
 function trqScales() {
   const d = TR.diff;
-  const nL = 1 + Math.min(3, Math.floor(d / 2) + irnd(0, 1));
-  const nR = 1 + Math.min(3, Math.floor(d / 2) + irnd(0, 1));
-  const mk = n => {
-    const a = [];
-    for (let i = 0; i < n; i++) {
-      const it = TR_ITEMS[irnd(0, 2)];
-      a.push({ kind: it.kind, w: irnd(it.min, it.max), drop: i * 0.22 + rnd(0, 0.1), fall: 1 });
-    }
-    return a;
+  const nKinds = d < 2 ? 1 : d < 4 ? 2 : 3;            // easy = one kind (pure count)
+  const pool = TR_KINDS.slice(0, nKinds);
+  const maxPer = 2 + Math.min(3, Math.floor(d / 2));   // items per kind cap
+  const buildKinds = () => {
+    const arr = [];
+    for (const k of pool) { const n = irnd(0, maxPer); for (let i = 0; i < n; i++) arr.push(k); }
+    if (!arr.length) arr.push(pool[irnd(0, pool.length - 1)]);   // never an empty pan
+    return arr;
   };
-  let L = mk(nL), R = mk(nR);
-  // sometimes force balance (harder to spot)
-  if (chance(0.22)) {
-    R = L.map((it, i) => ({ kind: TR_ITEMS[irnd(0, 2)].kind, w: it.w, drop: i * 0.22 + rnd(0, 0.1), fall: 1 }));
-  }
-  const sumL = L.reduce((s2, i) => s2 + i.w, 0), sumR = R.reduce((s2, i) => s2 + i.w, 0);
+  const toItems = ks => ks.map((k, i) => ({ kind: k, w: TR_WEIGHT[k], drop: i * 0.14 + rnd(0, 0.08), fall: 1 }));
+  let Lk = buildKinds(), Rk = buildKinds();
+  if (chance(0.2)) Rk = Lk.slice();                    // sometimes a true balance
+  const L = toItems(Lk), R = toItems(Rk);
+  const weigh = arr => arr.reduce((s2, it) => s2 + it.w, 0);
+  const sumL = weigh(L), sumR = weigh(R);
   const correct = sumL > sumR ? 0 : sumR > sumL ? 1 : 2;
-  TR.q = { L, R, sumL, sumR, correct, t: 0, tilt: 0, tiltV: 0, reveal: false };
+  TR.q = { L, R, sumL, sumR, correct, pool, t: 0, tilt: 0, tiltV: 0, reveal: false };
 }
 function trqNumbers() {
   const d = TR.diff;
@@ -559,7 +559,15 @@ function trDrawStones(q) {
   trOptButtons(q.opts, 470, o => greekNum(o.v) + '  ·  ' + o.v);
 }
 function trDrawScales(q) {
-  ftxt(t('tr_h_scales'), 480, 130, 19, '#eef3fa');
+  ftxt(t('tr_h_scales'), 480, 116, 19, '#eef3fa');
+  // the weight KEY — every item kind's fixed weight, so the puzzle is solvable
+  ftxt(t('tr_scales_key'), 480, 146, 13, '#c8b88a');
+  const kx0 = 480 - (q.pool.length - 1) * 74 / 2;
+  q.pool.forEach((k, i) => {
+    const x = kx0 + i * 74;
+    trItem(k, x - 14, 174, 1.0);
+    ftxt('= ' + TR_WEIGHT[k], x + 6, 174, 17, '#ffd76a', 'left');
+  });
   // Themis herself frames the scene, huge, holding the living beam
   trThemis(480, 520, 1.35, q.tilt, 150);
   // items resting on the pans (world coords of pans depend on tilt)
@@ -571,14 +579,20 @@ function trDrawScales(q) {
       if (it.fall <= 0) return;
       const ease = 1 - Math.pow(1 - it.fall, 3);
       const dy = (1 - ease) * -260;
-      const px2 = bx + (i - (items.length - 1) / 2) * 30;
-      trItem(it.kind, px2, by + dy - 12, 1.25);
-      c.fillStyle = '#fff2d0';
-      ftxt(String(it.w), px2, by + dy + 12, 15, '#fff2d0', 'center', 'rgba(0,0,0,0.8)');
+      const px2 = bx + (i - (items.length - 1) / 2) * 22;
+      trItem(it.kind, px2, by + dy - 12, 1.0);
+    });
+    // exact per-kind tally under the pan, so counting is never a guess
+    const tally = {};
+    items.forEach(it => { tally[it.kind] = (tally[it.kind] || 0) + 1; });
+    q.pool.filter(k => tally[k]).forEach((k, i) => {
+      const ty = by + 34 + i * 20, tx = bx - 20;
+      trItem(k, tx, ty, 0.72);
+      ftxt('×' + tally[k], tx + 13, ty, 14, '#eef3fa', 'left');
     });
   }
   if (q.reveal) {
-    ftxt(q.sumL + '   ·   ' + q.sumR, 480, 180, 22, '#ffd76a');
+    ftxt(q.sumL + '   ·   ' + q.sumR, 480, 198, 22, '#ffd76a');
   }
   trOptButtons([{ k: 'tr_left' }, { k: 'tr_right' }, { k: 'tr_equal' }], 480, o => t(o.k));
 }
