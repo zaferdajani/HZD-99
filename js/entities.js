@@ -409,6 +409,16 @@ class Player {
       c.quadraticCurveTo(-9 - len * 0.5, -27 + fl * 0.5 + i * 2 + bob, -13 - len, -22 + fl + i * 3 + bob);
       c.stroke();
     }
+    // the round shield (aspis) strapped across the back
+    c.save(); c.translate(-11, -18 + bob * 0.3); c.rotate(-0.12);
+    c.fillStyle = '#6b4520'; c.beginPath(); c.arc(0, 0, 9.6, 0, 7); c.fill();
+    const shg = c.createRadialGradient(-2, -2, 1.5, 0, 0, 8.6);
+    shg.addColorStop(0, '#e8c26a'); shg.addColorStop(1, '#c8963c');
+    c.fillStyle = shg; c.beginPath(); c.arc(0, 0, 8.6, 0, 7); c.fill();
+    c.strokeStyle = '#8a6428'; c.lineWidth = 1.2;
+    c.beginPath(); c.arc(0, 0, 6, 0, 7); c.stroke();
+    c.fillStyle = '#8a6428'; c.beginPath(); c.arc(0, 0, 2.2, 0, 7); c.fill();
+    c.restore();
     // lower cloak hem drifting behind the hero
     const tw = Math.sin(this.anim * 6) * 4;
     c.strokeStyle = '#8f2f38'; c.lineWidth = 4; c.lineCap = 'round';
@@ -468,9 +478,14 @@ class Player {
     c.strokeStyle = '#8a6a28'; c.lineWidth = 1;
     c.beginPath(); c.moveTo(-4, hy - 2); c.quadraticCurveTo(-4, hy - 13, 7, hy - 13);
     c.quadraticCurveTo(17, hy - 13, 17, hy - 3); c.stroke();
-    // eyes in the helmet's shadow
+    // eyes in the helmet's shadow — dark, with a living glint
     c.fillStyle = '#241a10';
     c.fillRect(4, hy - 2.5, 3.4, 2.6); c.fillRect(10.5, hy - 2.5, 3.4, 2.6);
+    c.fillStyle = 'rgba(255,246,220,0.9)';
+    c.fillRect(4.7, hy - 2.2, 1, 1); c.fillRect(11.2, hy - 2.2, 1, 1);
+    // bronze cuirass definition across the chiton
+    c.strokeStyle = 'rgba(138,100,40,0.6)'; c.lineWidth = 1.2;
+    c.beginPath(); c.moveTo(-7, -19 + bob * 0.4); c.quadraticCurveTo(0, -16 + bob * 0.4, 7, -19 + bob * 0.4); c.stroke();
     // horsehair plume, streaming with speed
     const plF = Math.sin(this.anim * 8) * 2 + Math.min(6, Math.abs(this.vx) / 60);
     c.fillStyle = '#c0303a';
