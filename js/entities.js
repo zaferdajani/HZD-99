@@ -1241,6 +1241,17 @@ class Boss {
         break;
       }
     }
+    // hard containment: a guardian can never leave its arena (leap/charge
+    // through a door opening previously let Charybdis fall out of the world)
+    const AW = G.roomDef.w * TILE, AH = G.roomDef.h * TILE;
+    if (this.x < 4) { this.x = 4; this.vx = Math.abs(this.vx); }
+    if (this.x > AW - this.w - 4) { this.x = AW - this.w - 4; this.vx = -Math.abs(this.vx); }
+    if (this.y + this.h > AH - TILE * 2 + 4 && this.kind !== 'mother') {
+      this.y = AH - TILE * 2 - this.h + 4;
+      if (this.vy > 0) this.vy = 0;
+      if (this.st === 'leap') { this.st = 'idle'; this.t = rnd(0.5, 0.8); }
+    }
+    if (this.y < -40) { this.y = -40; if (this.vy < 0) this.vy = 0; }
     if (!player.dead && aabb(this, player) && this.st !== 'intro') player.hurt(DF().edmg, this.cx());
   }
   die() {

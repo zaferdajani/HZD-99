@@ -3,6 +3,7 @@
 // reveal comic the first time it is approached. All panels are drawn in
 // code (bold flat colors, halftone screentones, speed lines, splash
 // onomatopoeia); captions are original writing, en + ar.
+const TAU = Math.PI * 2;
 const CX = { on: false, id: null, panels: [], i: 0, t: 0, onEnd: null };
 
 function CX_START(id, onEnd) {
