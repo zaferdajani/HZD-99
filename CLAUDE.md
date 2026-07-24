@@ -6,7 +6,15 @@
 ## RULE #1 — ALWAYS SEND THE TEST LINK (owner-mandated 2026-07-19)
 After EVERY edit that changes something playable or viewable, END the reply
 with the link the owner should open to test it. Never finish a change without
-it. The standing links:
+it.
+
+**PLACEMENT RULE (owner-mandated 2026-07-24, do NOT forget):** ANY instruction
+that tells the owner to open a link OR copy a prompt must be the LAST thing in
+the message — the link/prompt goes at the very end with NOTHING after it (no
+trailing sentence, no sign-off). One link at a time when he asks for "one
+link." This applies to every message, not just edit results.
+
+The standing links:
 
 - **Game (permanent, auto-updating) — the official link**:
   **https://zaferdajani.github.io/odyssey/**
