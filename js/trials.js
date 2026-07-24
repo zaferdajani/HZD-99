@@ -75,7 +75,7 @@ function trEndLabor() {
     const old = tr.best[TR.game] || 0;
     TR.reward = TR.score > old ? Math.round((TR.score - old) / 40) : 0;
     if (TR.score > old) tr.best[TR.game] = TR.score;
-    if (TR.reward > 0) { G.save.iq += TR.reward; sfx('win'); }
+    if (TR.reward > 0) { G.save.iq += TR.reward; G.firstSeen('metis', 'fu_metis'); sfx('win'); }
     persist();
     TR.mode = 'result'; TR.anim = 0;
     return;

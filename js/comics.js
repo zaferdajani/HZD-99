@@ -4,12 +4,12 @@
 // code (bold flat colors, halftone screentones, speed lines, splash
 // onomatopoeia); captions are original writing, en + ar.
 const TAU = Math.PI * 2;
-const CX = { on: false, id: null, panels: [], i: 0, t: 0, onEnd: null };
+const CX = { on: false, id: null, panels: [], i: 0, t: 0, onEnd: null, forceText: false };
 
 function CX_START(id, onEnd) {
   const def = COMIC_BOOK[id];
   if (!def) { if (onEnd) onEnd(); return; }
-  CX.on = true; CX.id = id; CX.panels = def; CX.i = 0; CX.t = 0;
+  CX.on = true; CX.id = id; CX.panels = def; CX.i = 0; CX.t = 0; CX.forceText = false;
   CX.onEnd = onEnd || null;
   CX.prevState = G.state;
   G.state = 'COMIC';
@@ -21,11 +21,22 @@ function cxEnd() {
   const cb = CX.onEnd; CX.onEnd = null;
   if (cb) cb();
 }
+// true once the whole caption has typed out (or a press forced it complete)
+function cxCaptionDone() {
+  const p = CX.panels[CX.i];
+  if (!p) return true;
+  if (CX.forceText) return true;
+  const cap = p.cap[LANG] || p.cap.en;
+  return (CX.t - 0.15) * 60 >= cap.length;
+}
+// Reader-paced: NO auto-advance timer. First press completes the typing text
+// instantly; the next press turns the page. Panels wait for the reader.
 function updateComic(dt) {
   CX.t += dt;
   if (inP('BACK')) { cxEnd(); return; }
-  if (inP('OK') || inP('ATK') || inP('INT') || CX.t > 5.2) {
-    CX.i++; CX.t = 0;
+  if (inP('OK') || inP('ATK') || inP('INT')) {
+    if (!cxCaptionDone()) { CX.forceText = true; sfx('ui'); return; }
+    CX.i++; CX.t = 0; CX.forceText = false;
     if (CX.i >= CX.panels.length) { cxEnd(); return; }
     sfx('ui');
   }
@@ -130,7 +141,7 @@ const COMIC_BOOK = {
   intro: [
     { cap: { en: 'Ten years of war. For a wooden horse and a burning city, they will sing forever.',
              ar: 'عشر سنين من الحرب. حصانٌ خشبي ومدينةٌ تحترق — وسيغنّون بذلك إلى الأبد.' },
-      sfx: { t: 'TROY FALLS', x: 480, y: 120, c: '#ffb84a', size: 52 },
+      sfx: { t: { en: 'TROY FALLS', ar: 'سقطت طروادة' }, x: 480, y: 120, c: '#ffb84a', size: 52 },
       bg(t) {
         const sky = c.createLinearGradient(0, 0, 0, 540);
         sky.addColorStop(0, '#2a0a0a'); sky.addColorStop(0.6, '#8a2c14'); sky.addColorStop(1, '#e8742c');
@@ -163,14 +174,14 @@ const COMIC_BOOK = {
       } },
     { cap: { en: 'But one god watched the victors sail. Poseidon does not forgive — and the sea is very large.',
              ar: 'لكن إلهًا واحدًا راقب المنتصرين وهم يبحرون. بوسيدون لا يغفر — والبحر واسعٌ جدًا.' },
-      sfx: { t: 'KRA-KOOM!', x: 700, y: 100, c: '#7ad4ff', size: 56 },
+      sfx: { t: { en: 'KRA-KOOM!', ar: 'قصْف!' }, x: 700, y: 100, c: '#7ad4ff', size: 56 },
       bg(t) {
         const sky = c.createLinearGradient(0, 0, 0, 540);
         sky.addColorStop(0, '#060a18'); sky.addColorStop(0.5, '#10244a'); sky.addColorStop(1, '#0a3a44');
         c.fillStyle = sky; c.fillRect(0, 0, 960, 540);
         // lightning
         if (Math.sin(t * 9) > 0.55) {
-          c.fillStyle = 'rgba(210,235,255,0.25)'; c.fillRect(0, 0, 960, 540);
+          c.fillStyle = 'rgba(210,235,255,' + (0.25 * flashScale()) + ')'; c.fillRect(0, 0, 960, 540);
           c.strokeStyle = '#eaf6ff'; c.lineWidth = 5; c.lineCap = 'round';
           c.beginPath(); c.moveTo(250, 0); c.lineTo(300, 130); c.lineTo(260, 150); c.lineTo(330, 300); c.stroke();
         }
@@ -587,8 +598,9 @@ function drawComic() {
   // onomatopoeia splash pops in
   if (p.sfx && t > 0.35) {
     const sk2 = Math.min(1, (t - 0.35) / 0.18);
+    const stxt = typeof p.sfx.t === 'object' ? (p.sfx.t[LANG] || p.sfx.t.en) : p.sfx.t;
     c.save(); c.translate(p.sfx.x, p.sfx.y); c.scale(0.5 + sk2 * 0.5 + Math.sin(t * 10) * 0.015, 0.5 + sk2 * 0.5);
-    cxSplash(0, 0, p.sfx.t, p.sfx.c, p.sfx.size);
+    cxSplash(0, 0, stxt, p.sfx.c, p.sfx.size);
     c.restore();
   }
   c.restore();
@@ -602,8 +614,9 @@ function drawComic() {
   c.moveTo(bx, by + 4); c.lineTo(bx + bw, by); c.lineTo(bx + bw - 6, by + bh); c.lineTo(bx + 4, by + bh - 2);
   c.closePath(); c.fill(); c.stroke();
   c.fillStyle = '#181008';
-  const shown = cap.slice(0, Math.floor((t - 0.15) * 60));
+  const shown = CX.forceText ? cap : cap.slice(0, Math.floor((t - 0.15) * 60));
   c.font = '600 17px Georgia, "Times New Roman", serif';
+  c.direction = LANG === 'ar' ? 'rtl' : 'ltr';
   c.textAlign = 'center'; c.textBaseline = 'middle';
   wrapText(shown, bw - 60, 17).slice(0, 2).forEach((ln, i2) =>
     c.fillText(ln, 480, by + 22 + i2 * 22));

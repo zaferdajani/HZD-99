@@ -85,7 +85,7 @@ class Player {
   dmg() { return Math.round(12 * (hasCrest('claws') ? 1.25 : 1) * (1 + (relicHas('fang') ? 0.08 : 0) + (relicHas('whisker') ? 0.06 : 0)) * DF().pdmg); }
   voltMax() { return relicHas('collar') ? 110 : 99; }
   healCost() { return relicHas('coolant') ? 28 : 33; }
-  gainVolts(n) { this.volts = clamp(this.volts + Math.round(n * (hasCrest('siphon') ? 1.5 : 1)) + (relicHas('silk') ? 2 : 0), 0, this.voltMax()); }
+  gainVolts(n) { if (n > 0) G.firstSeen('ichor', 'fu_ichor'); this.volts = clamp(this.volts + Math.round(n * (hasCrest('siphon') ? 1.5 : 1)) + (relicHas('silk') ? 2 : 0), 0, this.voltMax()); }
   update(dt) {
     if (this.dead) return;
     if (this.rechargeT > 0) {
@@ -702,6 +702,7 @@ class Scrap {
     if (col.l || col.r) this.vx = 0;
     if (!player.dead && aabb(this, player)) {
       this.dead = true; G.save.scrap += this.val; sfx('pick');
+      G.firstSeen('obol', 'fu_obol');
       addPart(this.x, this.y, 0, -60, 0.4, '#ffd76a', 3, 0, true);
     }
   }

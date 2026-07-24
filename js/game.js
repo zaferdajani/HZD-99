@@ -3,6 +3,11 @@ const cv = document.getElementById('cv');
 let c = cv.getContext('2d');
 const mainCtx = c;
 const SAVE_KEY = 'nostos_save', META_KEY = 'nostos_meta';
+// accessibility / audience settings (persisted in meta)
+let REDUCED_FLASH = false;   // dampens full-screen flashes for photosensitivity
+let KIDS = false;            // gentler text, no obol loss on death, dev menu hidden, glossary on
+// scales the alpha of any full-screen flash; 0.28 keeps effects readable without strobing
+function flashScale() { return REDUCED_FLASH ? 0.28 : 1; }
 
 const CRESTS = { claws: 2, over: 2, plate: 2, magnet: 1, siphon: 1, phantom: 2, sprint: 1, nine: 3 };
 const SHOP = [
@@ -23,6 +28,12 @@ const G = {
   recharge: null, coreFlash: null, coresFullT: 0, healToasted: false,
   addRing(x, y, r0) { this.rings.push({ x, y, r: r0 || 12, a: 0.85 }); },
   toast(text) { this.toasts.push({ text, t: 3 }); },
+  // one-time contextual explainer the first time a resource/term is earned
+  firstSeen(flagKey, tKey) {
+    if (!this.save || !this.save.flags || this.save.flags['fu_' + flagKey]) return;
+    this.save.flags['fu_' + flagKey] = 1;
+    this.toast(t(tKey));
+  },
   breakTile(tx, ty) {
     this.save.broken[this.roomId + ':' + tx + ',' + ty] = 1;
     tileDirty = true;
@@ -37,7 +48,8 @@ const G = {
   onPlayerDeath() {
     this.save.deaths++;
     if (this.save.diff === 2) this.save.lives++;
-    if (this.save.scrap > 0) {
+    // Kids mode: keep your obols on death (no Souls-style dropped pouch to recover)
+    if (!KIDS && this.save.scrap > 0) {
       this.save.pouch = { room: this.roomId, x: clamp(player.x, 40, this.roomDef.w * TILE - 60), y: Math.min(player.y, 13 * TILE), amount: this.save.scrap };
       this.save.scrap = 0;
     }
@@ -82,11 +94,11 @@ let player = null;
 // ---------- persistence ----------
 function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(G.save)); } catch (e) {} }
 function loadStored() { try { return JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { return null; } }
-function saveMeta() { try { localStorage.setItem(META_KEY, JSON.stringify({ lang: LANG, muted: MUTED, music: MUSIC_ON })); } catch (e) {} }
+function saveMeta() { try { localStorage.setItem(META_KEY, JSON.stringify({ lang: LANG, muted: MUTED, music: MUSIC_ON, flash: REDUCED_FLASH, kids: KIDS })); } catch (e) {} }
 function loadMeta() {
   try {
     const m = JSON.parse(localStorage.getItem(META_KEY));
-    if (m) { LANG = m.lang || 'en'; MUTED = !!m.muted; MUSIC_ON = m.music !== false; }
+    if (m) { LANG = m.lang || 'en'; MUTED = !!m.muted; MUSIC_ON = m.music !== false; REDUCED_FLASH = !!m.flash; KIDS = !!m.kids; }
   } catch (e) {}
 }
 function newSave(diff) {
@@ -362,6 +374,7 @@ function update(dt) {
   else if (G.state === 'SKILLS') updateSkills();
   else if (G.state === 'RELICS') updateRelics();
   else if (G.state === 'PAUSE') updatePause();
+  else if (G.state === 'GLOSS') updateGloss();
   else if (G.state === 'COMIC') updateComic(dt);
   else if (G.state === 'TRIALS') updateTrials(dt);
   else if (G.state === 'DEV') updateDev();
@@ -380,7 +393,8 @@ function update(dt) {
 function menuOptions() {
   const opts = [];
   if (loadStored()) opts.push('continue');
-  opts.push('new', 'controls', 'lang', 'sound', 'music', 'dev');
+  opts.push('new', 'controls', 'lang', 'sound', 'music', 'flash', 'kids');
+  if (!KIDS) opts.push('dev'); // dev jump menu hidden while Kids mode is on
   return opts;
 }
 function updateMenu() {
@@ -400,6 +414,8 @@ function updateMenu() {
       if (!MUSIC_ON) stopRecorded();
       else if (nm) { MUS.name = null; setMusic(nm); }
     }
+    else if (o === 'flash') { REDUCED_FLASH = !REDUCED_FLASH; saveMeta(); }
+    else if (o === 'kids') { KIDS = !KIDS; saveMeta(); if (G.menuIdx >= menuOptions().length) G.menuIdx = 0; }
     else if (o === 'dev') { G.state = 'DEV'; G.devIdx = 0; }
   }
 }
@@ -475,7 +491,7 @@ function updateDiff() {
   if (inP('OK')) { sfx('ok'); startGame(newSave(G.diffIdx)); }
 }
 function updatePause() {
-  const n = 7;
+  const n = 8;
   if (inP('DOWN')) { G.pauseIdx = (G.pauseIdx + 1) % n; sfx('ui'); }
   if (inP('UP')) { G.pauseIdx = (G.pauseIdx + n - 1) % n; sfx('ui'); }
   if (inP('PAUSE')) { G.state = 'PLAY'; return; }
@@ -487,8 +503,24 @@ function updatePause() {
     else if (G.pauseIdx === 3) { G.state = 'SKILLS'; G.skillIdx = 0; }
     else if (G.pauseIdx === 4) G.state = 'RELICS';
     else if (G.pauseIdx === 5) { G.ctrlBack = 'PAUSE'; G.state = 'CTRL'; }
+    else if (G.pauseIdx === 6) { G.state = 'GLOSS'; }
     else { persist(); setMusic('title'); G.state = 'MENU'; G.menuIdx = 0; }
   }
+}
+function updateGloss() { if (inP('OK') || inP('BACK') || inP('PAUSE')) { G.state = 'PAUSE'; sfx('ui'); } }
+const GLOSS_TERMS = ['heart', 'ichor', 'metis', 'obol', 'blessing'];
+function drawGloss() {
+  c.fillStyle = 'rgba(4,7,12,0.9)'; c.fillRect(0, 0, 960, 540);
+  ftxt(t('gloss_title'), 480, 54, 28, '#eef3fa', 'center', '#ffd76a');
+  const rtl = LANG === 'ar';
+  GLOSS_TERMS.forEach((id, i) => {
+    const y = 116 + i * 78;
+    dimPanel(150, y - 26, 660, 66);
+    ftxt(t('g_' + id), rtl ? 786 : 174, y - 6, 18, '#ffd76a', rtl ? 'right' : 'left');
+    wrapText(t('g_' + id + '_d'), 620, 13).slice(0, 2).forEach((ln, j) =>
+      ftxt(ln, rtl ? 786 : 174, y + 14 + j * 17, 13, '#c6d4e2', rtl ? 'right' : 'left', null, '600'));
+  });
+  ftxt(t('gloss_hint'), 480, 512, 13, '#7d93a8');
 }
 function updateRelics() {
   if (inP('OK') || inP('BACK')) { G.state = 'PLAY'; sfx('ui'); }
@@ -558,7 +590,7 @@ function updateRiddle() {
       G.save.flags['rd_' + r.def.id] = 1;
       G.save.iq += r.def.iq;
       r.st.opened = true;
-      sfx('win'); G.toast(t('rd_reward') + '  +' + r.def.iq + ' ' + t('sk_iq'));
+      sfx('win'); G.firstSeen('metis', 'fu_metis'); G.toast(t('rd_reward') + '  +' + r.def.iq + ' ' + t('sk_iq'));
       burst(r.st.x + 13, r.st.y + 12, 24, '#b48cff', 260, 0.8, 100, 4, true);
       persist();
     } else {
@@ -639,6 +671,9 @@ function scanOverlay() {
 }
 function ftxt(str, x, y, size, color, align, glow, weight) {
   c.font = (weight || '700') + ' ' + size + 'px "Segoe UI", Tahoma, sans-serif';
+  // bidi: Arabic strings (incl. embedded numbers/latin like "Μ 0 ميتيس") resolve
+  // correctly only with an rtl base direction; reset to ltr otherwise.
+  c.direction = LANG === 'ar' ? 'rtl' : 'ltr';
   c.textAlign = align || 'center'; c.textBaseline = 'middle';
   if (glow) { c.shadowColor = glow; c.shadowBlur = 14; }
   c.fillStyle = color; c.fillText(str, x, y); c.shadowBlur = 0;
@@ -1338,7 +1373,7 @@ function drawWorldFrame() {
   if (G.impact && G.impact.t > 0) {
     const k = G.impact.t / G.impact.t0;
     const sx = G.impact.x - cam.x, sy = G.impact.y - cam.y;
-    c.fillStyle = 'rgba(255,255,255,' + (0.82 * k) + ')';
+    c.fillStyle = 'rgba(255,255,255,' + (0.82 * k * flashScale()) + ')';
     c.fillRect(0, 0, 960, 540);
     c.save();
     c.strokeStyle = 'rgba(10,16,26,' + (0.9 * k) + ')';
@@ -1369,7 +1404,7 @@ function drawWorldFrame() {
     c.restore();
   }
   if (G.flash > 0) {
-    c.fillStyle = 'rgba(255,255,255,' + (G.flash * 0.32) + ')';
+    c.fillStyle = 'rgba(255,255,255,' + (G.flash * 0.32 * flashScale()) + ')';
     c.fillRect(0, 0, 960, 540);
   }
   scanOverlay();
@@ -1438,6 +1473,8 @@ function draw(tms) {
         continue: t('menu_continue'), new: t('menu_new'), controls: t('menu_controls'),
         lang: t('menu_lang'), sound: MUTED ? t('menu_sound_off') : t('menu_sound_on'),
         music: MUSIC_ON ? t('menu_music_on') : t('menu_music_off'),
+        flash: REDUCED_FLASH ? t('menu_flash_on') : t('menu_flash_off'),
+        kids: KIDS ? t('menu_kids_on') : t('menu_kids_off'),
         dev: t('menu_dev'),
       };
       opts.forEach((o, i) => {
@@ -1498,7 +1535,7 @@ function draw(tms) {
       ftxt(t('title'), 0, 0, 72, '#eef3fa', 'center', '#ffcf6a');
       c.restore();
       ftxt(t('intro4'), 480, 335, 30, '#ff5f6d', 'center', '#ff5f6d');
-      if (T < 10.2) { c.fillStyle = 'rgba(255,255,255,' + Math.max(0, 1 - (T - 9.6) / 0.6) + ')'; c.fillRect(0, 0, 960, 540); }
+      if (T < 10.2) { c.fillStyle = 'rgba(255,255,255,' + Math.max(0, 1 - (T - 9.6) / 0.6) * flashScale() + ')'; c.fillRect(0, 0, 960, 540); }
     }
     ftxt(t('intro_skip'), 480, 512, 13, '#546b7d');
     return;
@@ -1536,11 +1573,11 @@ function draw(tms) {
   if (st === 'DEAD') {
     c.fillStyle = 'rgba(8,4,8,' + clamp((1.8 - G.deadT) * 1.2, 0, 0.85) + ')';
     c.fillRect(0, 0, 960, 540);
-    ftxt(t('death'), 480, 250, 46, '#ff5f6d', 'center', '#ff5f6d');
+    ftxt(t(KIDS ? 'death_kids' : 'death'), 480, 250, KIDS ? 40 : 46, KIDS ? '#7ad4ff' : '#ff5f6d', 'center', KIDS ? '#7ad4ff' : '#ff5f6d');
   } else if (st === 'PAUSE') {
     c.fillStyle = 'rgba(4,7,12,0.75)'; c.fillRect(0, 0, 960, 540);
     ftxt(t('paused'), 480, 120, 38, '#eef3fa', 'center', '#ffcf6a');
-    [t('resume'), t('pm_map'), t('pm_crests'), t('pm_skills'), t('pm_relics'), t('ctl_title'), t('to_menu')].forEach((s, i) => {
+    [t('resume'), t('pm_map'), t('pm_crests'), t('pm_skills'), t('pm_relics'), t('ctl_title'), t('pm_gloss'), t('to_menu')].forEach((s, i) => {
       const sel = i === G.pauseIdx;
       ftxt((sel ? '▸ ' : '') + s, 480, 190 + i * 40, 21, sel ? '#eef3fa' : '#7d93a8');
     });
@@ -1569,6 +1606,8 @@ function draw(tms) {
     drawSkills();
   } else if (st === 'RELICS') {
     drawRelics();
+  } else if (st === 'GLOSS') {
+    drawGloss();
   } else if (st === 'TRIALS') {
     drawTrials();
   }
