@@ -1274,19 +1274,32 @@ class Boss {
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
-    // telegraphs
+    // telegraphs — high-contrast so the danger zone reads even on dark ground
     if (this.kind === 'zero') for (const m of this.marks) {
-      c.fillStyle = 'rgba(238,252,255,0.35)';
+      const pu = 0.4 + Math.sin(performance.now() / 90) * 0.16;
+      c.fillStyle = 'rgba(255,120,60,' + pu + ')';
       c.fillRect(m.x - 10, 12 * TILE, 20, 3 * TILE);
+      c.strokeStyle = 'rgba(255,235,150,0.9)'; c.lineWidth = 2;
+      c.strokeRect(m.x - 9, 12 * TILE + 1, 18, 3 * TILE - 2);
     }
-    if (this.kind === 'mother' && this.beam) {
-      c.fillStyle = this.beam.warn ? 'rgba(255,190,90,0.22)' : 'rgba(255,210,120,0.6)';
-      c.fillRect(this.beam.x, this.beam.y, this.beam.w, this.beam.h);
-    }
-    if (this.kind === 'mother' && this.beam2) {
-      c.fillStyle = this.beam2.warn ? 'rgba(255,190,90,0.22)' : 'rgba(255,210,120,0.6)';
-      c.fillRect(this.beam2.x, this.beam2.y, this.beam2.w, this.beam2.h);
-    }
+    const beamTele = (bm) => {
+      if (!bm) return;
+      if (bm.warn) {
+        const pu = 0.42 + Math.sin(performance.now() / 85) * 0.15;   // fast pulse = incoming
+        c.fillStyle = 'rgba(255,120,60,' + pu + ')';
+        c.fillRect(bm.x, bm.y, bm.w, bm.h);
+        c.save(); c.beginPath(); c.rect(bm.x, bm.y, bm.w, bm.h); c.clip();
+        c.strokeStyle = 'rgba(255,235,150,0.45)'; c.lineWidth = 2;
+        for (let s = -bm.h; s < bm.w; s += 18) { c.beginPath(); c.moveTo(bm.x + s, bm.y); c.lineTo(bm.x + s + bm.h, bm.y + bm.h); c.stroke(); }
+        c.restore();
+        c.strokeStyle = 'rgba(255,235,150,0.95)'; c.lineWidth = 3;
+        c.strokeRect(bm.x + 1.5, bm.y + 1.5, bm.w - 3, bm.h - 3);
+      } else {
+        c.fillStyle = 'rgba(255,210,120,0.62)';
+        c.fillRect(bm.x, bm.y, bm.w, bm.h);
+      }
+    };
+    if (this.kind === 'mother') { beamTele(this.beam); beamTele(this.beam2); }
     c.translate(cx, cy);
     switch (this.kind) {
       case 'glitch': {   // CHARYBDIS — the living whirlpool

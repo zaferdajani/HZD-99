@@ -39,18 +39,20 @@ function tLayout() {
   return {
     r, W, H, rgx, lgx,
     btns: [
-      { code: 'VJUMP', x: rgx, y: H - 64, r: Math.min(46, TOUCH.gut / 2 - 8), icon: '⤒', show: () => true },
-      { code: 'VATK', x: rgx, y: H - 152, r: 34, icon: '⟡', show: () => true },
-      { code: 'VDASH', x: rgx - half, y: H - 224, r: 24, icon: '≫', show: () => G.save && G.save.abil.dash },
-      { code: 'VCAST', x: rgx + half, y: H - 224, r: 24, icon: '◎', show: () => G.save && G.save.abil.emp },
-      { code: 'VHEAL', x: rgx, y: H - 292, r: 28, icon: '✚', show: () => true },
-      { code: 'VINT', x: lgx, y: H - 226, r: 27, icon: 'E', show: () => !!G.near },
+      // right gutter — the attack hand
+      { code: 'VJUMP', x: rgx, y: H - 70, r: Math.min(48, TOUCH.gut / 2 - 6), icon: '▲', label: 'tb_jump', show: () => true },
+      { code: 'VATK', x: rgx, y: H - 162, r: 36, icon: '🗡', label: 'tb_hit', show: () => true },
+      { code: 'VDASH', x: rgx - half, y: H - 234, r: 25, icon: '»', label: 'tb_dash', show: () => G.save && G.save.abil.dash },
+      { code: 'VCAST', x: rgx + half, y: H - 234, r: 25, icon: '◉', label: 'tb_pulse', show: () => G.save && G.save.abil.emp },
+      // left gutter — the movement hand (heal + use kept clear of the right cluster)
+      { code: 'VHEAL', x: lgx, y: H - 298, r: 28, icon: '✚', label: 'tb_heal', show: () => true },
+      { code: 'VINT', x: lgx, y: H - 198, r: 29, icon: 'E', label: 'tb_use', show: () => !!G.near },
     ],
-    corners: [
-      { code: 'VPAUSE', x: rgx, y: 28, r: 17, icon: '▐▌' },
-      { code: 'VMAP', x: rgx, y: 70, r: 17, icon: '▦' },
-      { code: 'VCREST', x: rgx, y: 112, r: 17, icon: '◇' },
-      { code: 'VSKILL', x: rgx, y: 154, r: 17, icon: '◈' },
+    corners: [   // compact 2×2 system cluster, top of the right gutter
+      { code: 'VPAUSE', x: rgx - half, y: 34, r: 17, icon: '❚❚', label: 'tb_pause' },
+      { code: 'VMAP', x: rgx + half, y: 34, r: 17, icon: '▦', label: 'tb_map' },
+      { code: 'VCREST', x: rgx - half, y: 82, r: 17, icon: '◇', label: 'tb_gear' },
+      { code: 'VSKILL', x: rgx + half, y: 82, r: 17, icon: '◈', label: 'tb_gifts' },
     ],
   };
 }
@@ -82,7 +84,7 @@ function tapMenu(x, y) {
     if (i >= 0 && i < 3 && y >= 150 && y <= 150 + 3 * 105) { G.diffIdx = i; tPress('VOK'); }
   } else if (st === 'PAUSE') {
     const i = Math.round((y - 190) / 40);
-    if (i >= 0 && i < 7 && Math.abs(y - (190 + i * 40)) <= 20) { G.pauseIdx = i; tPress('VOK'); }
+    if (i >= 0 && i < 8 && Math.abs(y - (190 + i * 40)) <= 20) { G.pauseIdx = i; tPress('VOK'); }
   } else if (st === 'CREST') {
     const i = Math.round((y - 170) / 40);
     if (G.save.crests.length && i >= 0 && i < G.save.crests.length && Math.abs(y - (170 + i * 40)) <= 20) { G.crestIdx = i; tPress('VOK'); }
@@ -162,6 +164,14 @@ function tCircle(x, y, r, pressed, icon, iconSize) {
     tcx.fillText(icon, x, y + 1);
   }
 }
+function tLabel(x, y, r, key, pressed) {
+  tcx.font = '700 10px "Segoe UI", Tahoma, sans-serif';
+  tcx.textAlign = 'center'; tcx.textBaseline = 'middle';
+  tcx.direction = (typeof LANG !== 'undefined' && LANG === 'ar') ? 'rtl' : 'ltr';
+  tcx.fillStyle = pressed ? 'rgba(180,245,255,0.98)' : 'rgba(190,220,240,0.72)';
+  tcx.fillText(t(key), x, y + r + 9);
+  tcx.direction = 'ltr';
+}
 function drawTouchUI() {
   if (!TOUCH.enabled || !tcx) return;
   const W = innerWidth, H = innerHeight;
@@ -184,15 +194,17 @@ function drawTouchUI() {
   tcx.beginPath(); tcx.moveTo(L.r.left, 0); tcx.lineTo(L.r.left, H);
   tcx.moveTo(L.r.right, 0); tcx.lineTo(L.r.right, H); tcx.stroke();
   if (kind === 'play') {
-    for (const b of L.corners) tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, 12);
+    for (const b of L.corners) { tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, 12); if (b.label) tLabel(b.x, b.y, b.r, b.label, !!keys[b.code]); }
     // joystick — left gutter
     if (TOUCH.joy) {
       tCircle(TOUCH.joy.ox, TOUCH.joy.oy, 46, false, null);
       tCircle(TOUCH.joy.ox + TOUCH.joy.dx, TOUCH.joy.oy + TOUCH.joy.dy, 24, true, null);
     } else {
       tcx.globalAlpha = 0.5;
-      tCircle(L.lgx, H - 110, Math.min(42, TOUCH.gut / 2 - 10), false, '✥');
+      const jr = Math.min(42, TOUCH.gut / 2 - 10);
+      tCircle(L.lgx, H - 116, jr, false, '✥');
       tcx.globalAlpha = 1;
+      tLabel(L.lgx, H - 116, jr, 'tb_move', false);
     }
     for (const b of L.btns) if (b.show()) {
       if (b.code === 'VHEAL' && typeof player !== 'undefined' && player && player.volts >= 33 && player.cores < player.maxCores()) {
@@ -204,6 +216,7 @@ function drawTouchUI() {
         tcx.beginPath(); tcx.arc(b.x, b.y, b.r + 10, 0, 7); tcx.fill();
       }
       tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon);
+      if (b.label) tLabel(b.x, b.y, b.r, b.label, !!keys[b.code]);
     }
   } else if (kind === 'menu') {
     tCircle(L.rgx, 28, 17, false, '✕', 14);

@@ -152,6 +152,9 @@ en: {
   hint_secret: 'This wall sounds hollow…',
   cx_next: 'Enter / tap — next', cx_skip: 'Esc — skip the tale',
   cx_more: 'tap to reveal',
+  // ---- touch button labels ----
+  tb_jump: 'JUMP', tb_hit: 'HIT', tb_dash: 'DASH', tb_pulse: 'PULSE', tb_heal: 'HEAL',
+  tb_use: 'USE', tb_move: 'MOVE', tb_pause: 'PAUSE', tb_map: 'MAP', tb_gear: 'GEAR', tb_gifts: 'GIFTS',
   // ---- glossary + first-use term hints ----
   pm_gloss: 'Words of the Voyage',
   gloss_title: 'Words of the Voyage', gloss_hint: 'Esc — close',
@@ -346,6 +349,9 @@ ar: {
   hint_secret: 'هذا الجدار يبدو أجوف…',
   cx_next: 'Enter / نقر — التالي', cx_skip: 'Esc — تخطّي الحكاية',
   cx_more: 'انقر لإظهار البقية',
+  // ---- تسميات أزرار اللمس ----
+  tb_jump: 'قفز', tb_hit: 'ضرب', tb_dash: 'اندفاع', tb_pulse: 'نبضة', tb_heal: 'تضميد',
+  tb_use: 'تفاعل', tb_move: 'حركة', tb_pause: 'إيقاف', tb_map: 'خريطة', tb_gear: 'عتاد', tb_gifts: 'مواهب',
   // ---- كلمات الرحلة + تلميحات أول استخدام ----
   pm_gloss: 'كلمات الرحلة',
   gloss_title: 'كلمات الرحلة', gloss_hint: 'Esc — إغلاق',

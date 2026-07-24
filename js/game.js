@@ -404,7 +404,7 @@ function updateMenu() {
   if (inP('OK')) {
     const o = opts[G.menuIdx]; sfx('ok');
     if (o === 'continue') startGame(loadStored());
-    else if (o === 'new') { G.state = 'DIFF'; G.diffIdx = 1; }
+    else if (o === 'new') { G.state = 'DIFF'; G.diffIdx = 0; } // default cursor on the gentle Lotus-Eater
     else if (o === 'controls') { G.ctrlBack = 'MENU'; G.state = 'CTRL'; }
     else if (o === 'lang') { LANG = LANG === 'en' ? 'ar' : 'en'; saveMeta(); }
     else if (o === 'sound') { MUTED = !MUTED; saveMeta(); }
@@ -1251,9 +1251,10 @@ function drawHUD() {
     ftxt(TOUCH && TOUCH.enabled ? '✚' : '✚ F', vx + 28, vy, 15, 'rgba(174,247,216,' + hpu + ')', 'left');
     if (!G.healToasted) { G.healToasted = true; G.toast(t('heal_hint')); }
   }
-  // scrap + knowledge
-  ftxt('◎ ' + G.save.scrap, 76, 66, 17, '#ffd76a', 'left', null, '700');
-  ftxt('Μ ' + (G.save.iq || 0) + ' ' + t('sk_iq'), 76, 88, 13, '#c8a2ff', 'left');
+  // scrap + knowledge (a touch larger on phones, where the canvas is letterboxed small)
+  const big = (TOUCH && TOUCH.enabled) ? 1 : 0;
+  ftxt('◎ ' + G.save.scrap, 76, 66, 17 + big * 4, '#ffd76a', 'left', null, '700');
+  ftxt('Μ ' + (G.save.iq || 0) + ' ' + t('sk_iq'), 76, 90 + big * 2, 13 + big * 4, '#c8a2ff', 'left', null, '700');
   // nine-lives counter
   if (G.save.diff === 2) ftxt('♥ ' + (9 - G.save.lives) + ' — ' + t('lives_left'), 934, 26, 15, '#ff8f9d', 'right');
   // audio blocked indicator (browser hasn't allowed sound yet)
@@ -1298,6 +1299,8 @@ function drawLights(P) {
     else if (s.type === 'chest' && !s.opened) lightAt(s.x + s.w / 2, s.y + 10, 55, '#ffd76a', 0.28);
   }
   if (G.boss && !G.boss.dead) lightAt(G.boss.cx(), G.boss.cy(), 180, P.glow, 0.16);
+  // faint rim behind each enemy so silhouettes never vanish into dark ground
+  for (const e of G.enemies) if (!e.dead) lightAt(e.x + e.w / 2, e.y + e.h / 2, 40, e.kind === 'turret' ? '#ff8f6a' : '#fff2d0', 0.16);
   for (const p of G.pickups) if (p instanceof Scrap) lightAt(p.x + 5, p.y + 5, 26, '#ffd76a', 0.3);
   c.restore(); c.globalAlpha = 1;
 }
@@ -1331,8 +1334,8 @@ function drawWorldFrame() {
     c.fillRect(15 * TILE, 15 * TILE, 3 * TILE, 2 * TILE);
     ftxt('⚷', 16.5 * TILE, 15.8 * TILE, 22, '#7deac8', 'center', '#7deac8');
   }
-  // ambient darkness — dynamic lights lift what matters
-  c.fillStyle = 'rgba(3,6,14,0.16)';
+  // ambient darkness — dynamic lights lift what matters (eased for readability)
+  c.fillStyle = 'rgba(3,6,14,0.11)';
   c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
   drawStatics(P);
   for (const p of G.pickups) p.draw(c);

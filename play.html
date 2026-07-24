@@ -183,6 +183,9 @@ en: {
   hint_secret: 'This wall sounds hollow…',
   cx_next: 'Enter / tap — next', cx_skip: 'Esc — skip the tale',
   cx_more: 'tap to reveal',
+  // ---- touch button labels ----
+  tb_jump: 'JUMP', tb_hit: 'HIT', tb_dash: 'DASH', tb_pulse: 'PULSE', tb_heal: 'HEAL',
+  tb_use: 'USE', tb_move: 'MOVE', tb_pause: 'PAUSE', tb_map: 'MAP', tb_gear: 'GEAR', tb_gifts: 'GIFTS',
   // ---- glossary + first-use term hints ----
   pm_gloss: 'Words of the Voyage',
   gloss_title: 'Words of the Voyage', gloss_hint: 'Esc — close',
@@ -377,6 +380,9 @@ ar: {
   hint_secret: 'هذا الجدار يبدو أجوف…',
   cx_next: 'Enter / نقر — التالي', cx_skip: 'Esc — تخطّي الحكاية',
   cx_more: 'انقر لإظهار البقية',
+  // ---- تسميات أزرار اللمس ----
+  tb_jump: 'قفز', tb_hit: 'ضرب', tb_dash: 'اندفاع', tb_pulse: 'نبضة', tb_heal: 'تضميد',
+  tb_use: 'تفاعل', tb_move: 'حركة', tb_pause: 'إيقاف', tb_map: 'خريطة', tb_gear: 'عتاد', tb_gifts: 'مواهب',
   // ---- كلمات الرحلة + تلميحات أول استخدام ----
   pm_gloss: 'كلمات الرحلة',
   gloss_title: 'كلمات الرحلة', gloss_hint: 'Esc — إغلاق',
@@ -2710,19 +2716,32 @@ class Boss {
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
-    // telegraphs
+    // telegraphs — high-contrast so the danger zone reads even on dark ground
     if (this.kind === 'zero') for (const m of this.marks) {
-      c.fillStyle = 'rgba(238,252,255,0.35)';
+      const pu = 0.4 + Math.sin(performance.now() / 90) * 0.16;
+      c.fillStyle = 'rgba(255,120,60,' + pu + ')';
       c.fillRect(m.x - 10, 12 * TILE, 20, 3 * TILE);
+      c.strokeStyle = 'rgba(255,235,150,0.9)'; c.lineWidth = 2;
+      c.strokeRect(m.x - 9, 12 * TILE + 1, 18, 3 * TILE - 2);
     }
-    if (this.kind === 'mother' && this.beam) {
-      c.fillStyle = this.beam.warn ? 'rgba(255,190,90,0.22)' : 'rgba(255,210,120,0.6)';
-      c.fillRect(this.beam.x, this.beam.y, this.beam.w, this.beam.h);
-    }
-    if (this.kind === 'mother' && this.beam2) {
-      c.fillStyle = this.beam2.warn ? 'rgba(255,190,90,0.22)' : 'rgba(255,210,120,0.6)';
-      c.fillRect(this.beam2.x, this.beam2.y, this.beam2.w, this.beam2.h);
-    }
+    const beamTele = (bm) => {
+      if (!bm) return;
+      if (bm.warn) {
+        const pu = 0.42 + Math.sin(performance.now() / 85) * 0.15;   // fast pulse = incoming
+        c.fillStyle = 'rgba(255,120,60,' + pu + ')';
+        c.fillRect(bm.x, bm.y, bm.w, bm.h);
+        c.save(); c.beginPath(); c.rect(bm.x, bm.y, bm.w, bm.h); c.clip();
+        c.strokeStyle = 'rgba(255,235,150,0.45)'; c.lineWidth = 2;
+        for (let s = -bm.h; s < bm.w; s += 18) { c.beginPath(); c.moveTo(bm.x + s, bm.y); c.lineTo(bm.x + s + bm.h, bm.y + bm.h); c.stroke(); }
+        c.restore();
+        c.strokeStyle = 'rgba(255,235,150,0.95)'; c.lineWidth = 3;
+        c.strokeRect(bm.x + 1.5, bm.y + 1.5, bm.w - 3, bm.h - 3);
+      } else {
+        c.fillStyle = 'rgba(255,210,120,0.62)';
+        c.fillRect(bm.x, bm.y, bm.w, bm.h);
+      }
+    };
+    if (this.kind === 'mother') { beamTele(this.beam); beamTele(this.beam2); }
     c.translate(cx, cy);
     switch (this.kind) {
       case 'glitch': {   // CHARYBDIS — the living whirlpool
@@ -4689,7 +4708,7 @@ function updateMenu() {
   if (inP('OK')) {
     const o = opts[G.menuIdx]; sfx('ok');
     if (o === 'continue') startGame(loadStored());
-    else if (o === 'new') { G.state = 'DIFF'; G.diffIdx = 1; }
+    else if (o === 'new') { G.state = 'DIFF'; G.diffIdx = 0; } // default cursor on the gentle Lotus-Eater
     else if (o === 'controls') { G.ctrlBack = 'MENU'; G.state = 'CTRL'; }
     else if (o === 'lang') { LANG = LANG === 'en' ? 'ar' : 'en'; saveMeta(); }
     else if (o === 'sound') { MUTED = !MUTED; saveMeta(); }
@@ -5536,9 +5555,10 @@ function drawHUD() {
     ftxt(TOUCH && TOUCH.enabled ? '✚' : '✚ F', vx + 28, vy, 15, 'rgba(174,247,216,' + hpu + ')', 'left');
     if (!G.healToasted) { G.healToasted = true; G.toast(t('heal_hint')); }
   }
-  // scrap + knowledge
-  ftxt('◎ ' + G.save.scrap, 76, 66, 17, '#ffd76a', 'left', null, '700');
-  ftxt('Μ ' + (G.save.iq || 0) + ' ' + t('sk_iq'), 76, 88, 13, '#c8a2ff', 'left');
+  // scrap + knowledge (a touch larger on phones, where the canvas is letterboxed small)
+  const big = (TOUCH && TOUCH.enabled) ? 1 : 0;
+  ftxt('◎ ' + G.save.scrap, 76, 66, 17 + big * 4, '#ffd76a', 'left', null, '700');
+  ftxt('Μ ' + (G.save.iq || 0) + ' ' + t('sk_iq'), 76, 90 + big * 2, 13 + big * 4, '#c8a2ff', 'left', null, '700');
   // nine-lives counter
   if (G.save.diff === 2) ftxt('♥ ' + (9 - G.save.lives) + ' — ' + t('lives_left'), 934, 26, 15, '#ff8f9d', 'right');
   // audio blocked indicator (browser hasn't allowed sound yet)
@@ -5583,6 +5603,8 @@ function drawLights(P) {
     else if (s.type === 'chest' && !s.opened) lightAt(s.x + s.w / 2, s.y + 10, 55, '#ffd76a', 0.28);
   }
   if (G.boss && !G.boss.dead) lightAt(G.boss.cx(), G.boss.cy(), 180, P.glow, 0.16);
+  // faint rim behind each enemy so silhouettes never vanish into dark ground
+  for (const e of G.enemies) if (!e.dead) lightAt(e.x + e.w / 2, e.y + e.h / 2, 40, e.kind === 'turret' ? '#ff8f6a' : '#fff2d0', 0.16);
   for (const p of G.pickups) if (p instanceof Scrap) lightAt(p.x + 5, p.y + 5, 26, '#ffd76a', 0.3);
   c.restore(); c.globalAlpha = 1;
 }
@@ -5616,8 +5638,8 @@ function drawWorldFrame() {
     c.fillRect(15 * TILE, 15 * TILE, 3 * TILE, 2 * TILE);
     ftxt('⚷', 16.5 * TILE, 15.8 * TILE, 22, '#7deac8', 'center', '#7deac8');
   }
-  // ambient darkness — dynamic lights lift what matters
-  c.fillStyle = 'rgba(3,6,14,0.16)';
+  // ambient darkness — dynamic lights lift what matters (eased for readability)
+  c.fillStyle = 'rgba(3,6,14,0.11)';
   c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
   drawStatics(P);
   for (const p of G.pickups) p.draw(c);
@@ -6097,18 +6119,20 @@ function tLayout() {
   return {
     r, W, H, rgx, lgx,
     btns: [
-      { code: 'VJUMP', x: rgx, y: H - 64, r: Math.min(46, TOUCH.gut / 2 - 8), icon: '⤒', show: () => true },
-      { code: 'VATK', x: rgx, y: H - 152, r: 34, icon: '⟡', show: () => true },
-      { code: 'VDASH', x: rgx - half, y: H - 224, r: 24, icon: '≫', show: () => G.save && G.save.abil.dash },
-      { code: 'VCAST', x: rgx + half, y: H - 224, r: 24, icon: '◎', show: () => G.save && G.save.abil.emp },
-      { code: 'VHEAL', x: rgx, y: H - 292, r: 28, icon: '✚', show: () => true },
-      { code: 'VINT', x: lgx, y: H - 226, r: 27, icon: 'E', show: () => !!G.near },
+      // right gutter — the attack hand
+      { code: 'VJUMP', x: rgx, y: H - 70, r: Math.min(48, TOUCH.gut / 2 - 6), icon: '▲', label: 'tb_jump', show: () => true },
+      { code: 'VATK', x: rgx, y: H - 162, r: 36, icon: '🗡', label: 'tb_hit', show: () => true },
+      { code: 'VDASH', x: rgx - half, y: H - 234, r: 25, icon: '»', label: 'tb_dash', show: () => G.save && G.save.abil.dash },
+      { code: 'VCAST', x: rgx + half, y: H - 234, r: 25, icon: '◉', label: 'tb_pulse', show: () => G.save && G.save.abil.emp },
+      // left gutter — the movement hand (heal + use kept clear of the right cluster)
+      { code: 'VHEAL', x: lgx, y: H - 298, r: 28, icon: '✚', label: 'tb_heal', show: () => true },
+      { code: 'VINT', x: lgx, y: H - 198, r: 29, icon: 'E', label: 'tb_use', show: () => !!G.near },
     ],
-    corners: [
-      { code: 'VPAUSE', x: rgx, y: 28, r: 17, icon: '▐▌' },
-      { code: 'VMAP', x: rgx, y: 70, r: 17, icon: '▦' },
-      { code: 'VCREST', x: rgx, y: 112, r: 17, icon: '◇' },
-      { code: 'VSKILL', x: rgx, y: 154, r: 17, icon: '◈' },
+    corners: [   // compact 2×2 system cluster, top of the right gutter
+      { code: 'VPAUSE', x: rgx - half, y: 34, r: 17, icon: '❚❚', label: 'tb_pause' },
+      { code: 'VMAP', x: rgx + half, y: 34, r: 17, icon: '▦', label: 'tb_map' },
+      { code: 'VCREST', x: rgx - half, y: 82, r: 17, icon: '◇', label: 'tb_gear' },
+      { code: 'VSKILL', x: rgx + half, y: 82, r: 17, icon: '◈', label: 'tb_gifts' },
     ],
   };
 }
@@ -6140,7 +6164,7 @@ function tapMenu(x, y) {
     if (i >= 0 && i < 3 && y >= 150 && y <= 150 + 3 * 105) { G.diffIdx = i; tPress('VOK'); }
   } else if (st === 'PAUSE') {
     const i = Math.round((y - 190) / 40);
-    if (i >= 0 && i < 7 && Math.abs(y - (190 + i * 40)) <= 20) { G.pauseIdx = i; tPress('VOK'); }
+    if (i >= 0 && i < 8 && Math.abs(y - (190 + i * 40)) <= 20) { G.pauseIdx = i; tPress('VOK'); }
   } else if (st === 'CREST') {
     const i = Math.round((y - 170) / 40);
     if (G.save.crests.length && i >= 0 && i < G.save.crests.length && Math.abs(y - (170 + i * 40)) <= 20) { G.crestIdx = i; tPress('VOK'); }
@@ -6220,6 +6244,14 @@ function tCircle(x, y, r, pressed, icon, iconSize) {
     tcx.fillText(icon, x, y + 1);
   }
 }
+function tLabel(x, y, r, key, pressed) {
+  tcx.font = '700 10px "Segoe UI", Tahoma, sans-serif';
+  tcx.textAlign = 'center'; tcx.textBaseline = 'middle';
+  tcx.direction = (typeof LANG !== 'undefined' && LANG === 'ar') ? 'rtl' : 'ltr';
+  tcx.fillStyle = pressed ? 'rgba(180,245,255,0.98)' : 'rgba(190,220,240,0.72)';
+  tcx.fillText(t(key), x, y + r + 9);
+  tcx.direction = 'ltr';
+}
 function drawTouchUI() {
   if (!TOUCH.enabled || !tcx) return;
   const W = innerWidth, H = innerHeight;
@@ -6242,15 +6274,17 @@ function drawTouchUI() {
   tcx.beginPath(); tcx.moveTo(L.r.left, 0); tcx.lineTo(L.r.left, H);
   tcx.moveTo(L.r.right, 0); tcx.lineTo(L.r.right, H); tcx.stroke();
   if (kind === 'play') {
-    for (const b of L.corners) tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, 12);
+    for (const b of L.corners) { tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, 12); if (b.label) tLabel(b.x, b.y, b.r, b.label, !!keys[b.code]); }
     // joystick — left gutter
     if (TOUCH.joy) {
       tCircle(TOUCH.joy.ox, TOUCH.joy.oy, 46, false, null);
       tCircle(TOUCH.joy.ox + TOUCH.joy.dx, TOUCH.joy.oy + TOUCH.joy.dy, 24, true, null);
     } else {
       tcx.globalAlpha = 0.5;
-      tCircle(L.lgx, H - 110, Math.min(42, TOUCH.gut / 2 - 10), false, '✥');
+      const jr = Math.min(42, TOUCH.gut / 2 - 10);
+      tCircle(L.lgx, H - 116, jr, false, '✥');
       tcx.globalAlpha = 1;
+      tLabel(L.lgx, H - 116, jr, 'tb_move', false);
     }
     for (const b of L.btns) if (b.show()) {
       if (b.code === 'VHEAL' && typeof player !== 'undefined' && player && player.volts >= 33 && player.cores < player.maxCores()) {
@@ -6262,6 +6296,7 @@ function drawTouchUI() {
         tcx.beginPath(); tcx.arc(b.x, b.y, b.r + 10, 0, 7); tcx.fill();
       }
       tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon);
+      if (b.label) tLabel(b.x, b.y, b.r, b.label, !!keys[b.code]);
     }
   } else if (kind === 'menu') {
     tCircle(L.rgx, 28, 17, false, '✕', 14);
