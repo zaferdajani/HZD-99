@@ -1,0 +1,47 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['index.html', 'js/**', 'assets/**', 'native/**']
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Build the single-file game
+        run: node build.cjs
+
+      - name: Prepare the Capacitor app
+        working-directory: native
+        run: |
+          mkdir -p www
+          cp ../index.html www/index.html
+          npm install --no-audit --no-fund
+          npx cap add android || true
+          npx cap sync android
+
+      - name: Assemble debug APK
+        working-directory: native/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clawbyte-android-debug
+          path: native/android/app/build/outputs/apk/debug/*.apk

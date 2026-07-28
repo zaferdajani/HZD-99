@@ -1,36 +1,65 @@
-# NOSTOS (Odyssey) — Third-Party Asset Credits & Licenses
+# CLAWBYTE — Third-Party Asset Credits & Licenses
 
-Every asset in this folder was verified on its source page at the time of
-download (2026-07-19) to be published under CC0 1.0 or CC-BY. CC0 text:
-https://creativecommons.org/publicdomain/zero/1.0/ · CC-BY 4.0 text:
-https://creativecommons.org/licenses/by/4.0/
+Every asset in this folder was downloaded from OpenGameArt.org and is published
+under **CC0 1.0 (public domain dedication)** — verified on each source page at
+the time of download (2026-07-19). CC0 permits commercial use, modification and
+redistribution with no attribution required; we credit the authors anyway out
+of respect. License text: https://creativecommons.org/publicdomain/zero/1.0/
 
 ## backgrounds/
-| File | Author | License | Source |
-|---|---|---|---|
-| sunset_temple_bg.png | Pyromantic | CC0 1.0 (page dual-licenses CC-BY 3.0 / CC0; CC0 chosen) | https://opengameart.org/content/sunset-temple-tiles |
-| santorini_mid_bg.png | Tio Aimar | CC0 1.0 (License.txt in pack confirms CC0 1.0 Universal) | https://opengameart.org/content/2d-platformer-santorini-pack |
-| santorini_mid_layer1.png | Tio Aimar | CC0 1.0 | https://opengameart.org/content/2d-platformer-santorini-pack |
-| santorini_mid_layer2.png | Tio Aimar | CC0 1.0 | https://opengameart.org/content/2d-platformer-santorini-pack |
+
+| File | Author | Source |
+|---|---|---|
+| sci_fi_bg1.jpg | hassekf | https://opengameart.org/content/sci-fi-background |
+| ind_far.png / ind_mid.png / ind_fg.png | Luis Zuno (ansimuz) | https://opengameart.org/content/industrial-parallax-background (CC0, verified 2026-07-24) — 3 parallax layers from the Industrial Parallax pack; colourised per zone in-engine |
+| scifi_platform_BG1.jpg | Eris | https://opengameart.org/content/sci-fi-platform-tiles |
+| scifi_platformTiles_32x32.png | Eris | https://opengameart.org/content/sci-fi-platform-tiles |
+
+## characters/
+
+| Files | Author | Source |
+|---|---|---|
+| gothic-hero-{idle,run,jump,attack}.png | Luis Zuno (ansimuz) | https://opengameart.org/content/gothicvania-patreons-collection — pack's own `public-license.txt` states **public domain, free for personal or commercial use, credit appreciated** (verified 2026-07-26). Hand-animated hero used for the Odyssey world's player character (idle 4 / run 12 / jump 5 / attack 6 frames). |
+| hell-hound-{run,idle}.png, ghost-idle.png, fire-skull.png | Luis Zuno (ansimuz) | same pack/licence. Odyssey-world enemies: hound → crawler (run 5 / idle 6), ghost → flier (7), fire-skull → hopper (12). |
+| hell-beast-idle.png, demon-idle.png | Luis Zuno (ansimuz) | same pack/licence. Odyssey-world bosses: beast → the Bronze Boar (6), demon → Talos the Forge-Giant (6); the ghost sheet doubles as the Judge of the Dead. |
+
+The robo-cat world deliberately keeps its ORIGINAL code-drawn robots — the two
+worlds are meant to look like different games.
+
+**Rejected during sourcing (recorded so we don't revisit):** rgsdev's "Animated
+Knight Character Pack v2.0" — **CC-BY-SA 4.0**, a share-alike licence that would
+force the whole game to become share-alike. Never use SA-licensed art here.
 
 ## music/
-| File | Author | License | Source |
-|---|---|---|---|
-| mediterranean_breeze.ogg | Eric Matyas (www.soundimage.org) | CC-BY 3.0 — attribution required: "MEDITERRANEAN BREEZE" by Eric Matyas, www.soundimage.org | https://opengameart.org/content/mediterranean-breezelooping |
-| battle_theme_a.mp3 | cynicmusic (cynicmusic.com / pixelsphere.org) | CC0 1.0 | https://opengameart.org/content/battle-theme-a |
+
+| File | Author | Source |
+|---|---|---|
+| epic_combat.ogg | Chester01 | https://opengameart.org/content/epic-combat |
+| battleThemeA.mp3 | cynicmusic (pixelsphere.org) | https://opengameart.org/content/battle-theme-a |
+| boss_encounter.wav | cynicmusic (pixelsphere.org) | https://opengameart.org/content/dramatic-boss-encounter |
+| ambient_observing_the_star.ogg | yd | https://opengameart.org/content/another-space-background-track |
+
+Larger CC0 tracks reviewed but not stored in the repo (download if wanted):
+- "Determined Pursuit" epic orchestra loop by Emma_MA (18 MB WAV) —
+  https://opengameart.org/content/determined-pursuit-epic-orchestra-loop
+- "Epic Endgame Cinematic" by cynicmusic (31 MB WAV) —
+  https://opengameart.org/content/epic-endgame-cinematic
 
 ## sfx/
-| File | Author | License | Source |
-|---|---|---|---|
-| sword_hit_01.ogg (pack file hit_01.ogg) | rubberduck | CC0 1.0 | https://opengameart.org/content/100-cc0-sfx |
-| sword_hit_02.ogg (pack file hit_02.ogg) | rubberduck | CC0 1.0 | https://opengameart.org/content/100-cc0-sfx |
-| metal_clang.ogg (pack file metal_04.ogg) | rubberduck | CC0 1.0 | https://opengameart.org/content/100-cc0-sfx |
-| stone_crash.ogg (pack file explosion.ogg) | rubberduck | CC0 1.0 | https://opengameart.org/content/100-cc0-sfx |
-| amphora_break.ogg (pack file glass_01.ogg) | rubberduck | CC0 1.0 | https://opengameart.org/content/100-cc0-sfx |
-| low_thud.ogg (pack file slam_01.ogg) | rubberduck | CC0 1.0 | https://opengameart.org/content/100-cc0-sfx |
-| divine_bell.ogg (pack file bell_01.ogg) | rubberduck | CC0 1.0 | https://opengameart.org/content/100-cc0-sfx |
-| gong.ogg (pack file gong_01.ogg) | rubberduck | CC0 1.0 | https://opengameart.org/content/100-cc0-sfx |
-| arrow_whoosh.wav (pack file swishes/swish-2.wav) | artisticdude | CC0 1.0 | https://opengameart.org/content/swishes-sound-pack |
-| heavy_whoosh.wav (pack file swishes/swish-7.wav) | artisticdude | CC0 1.0 | https://opengameart.org/content/swishes-sound-pack |
-| powerup_complete.mp3 (source file completetask_0.mp3) | Brandon Morris | CC0 1.0 (page dual-licenses OGA-BY 3.0 / CC0; CC0 chosen) | https://opengameart.org/content/completion-sound |
-| zap_shimmer.flac (source file shimmer_1.flac) | The Berklee College of Music (submitted by qubodup) | CC-BY 3.0 — attribution required: sound by The Berklee College of Music | https://opengameart.org/content/shimmer-glitter-magic |
+
+| Files | Author | Source |
+|---|---|---|
+| hit_*.ogg, shot_*.ogg, metal_*.ogg, glass_*.ogg, explosion.ogg | rubberduck | https://opengameart.org/content/100-cc0-sfx |
+| laser*.mp3, powerUp*.mp3, zapTwoTone.mp3, phaserUp3.mp3, lowDown.mp3 | Kenney (kenney.nl) | https://opengameart.org/content/63-digital-sound-effects-lasers-phasers-space-etc |
+
+## Integration notes
+
+- The playable single-file build (`play.html`) still uses the procedural
+  art/audio so it stays a small self-contained artifact.
+- The multi-file build (`index.html` + `js/`) is where these assets get wired
+  in: backgrounds as parallax image layers, music via an `<audio>`/WebAudio
+  buffer path replacing or layering over the synth OST, SFX buffers replacing
+  the synth effects one by one.
+- Rule for any future additions to this folder: only CC0 or CC-BY (with the
+  credit recorded here BEFORE committing); never "free for personal use",
+  never ripped game assets.

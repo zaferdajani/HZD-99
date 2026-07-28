@@ -1,68 +1,74 @@
-# NOSTOS — an Odyssey metroidvania
+# CLAWBYTE
 
-An original browser game in the classic metroidvania genre, built on **Homer's
-Odyssey** (the ancient, public-domain epic — see `ODYSSEY_SOURCE.md` for the
-research base and full story mapping). You are **Odysseus**, king of Ithaca,
-cast alone onto a strange shore by Poseidon's wrath, fighting the long way
-home. All names of original constructs, dialogue, riddles, art and Arabic
-translations were written for this project; nothing is copied from any modern
-adaptation.
+A dual-world metroidvania. At "Who are you?" you choose your game:
 
-## Play
+- **A robo-cat ninja** — NYA-9, a maintenance unit who slept through the fall of
+  the Machine Depths, hunting the virus that repurposed every machine it touched.
+- **A hero of the Odyssey** — the long way home to Ithaca, through the Halls of
+  the Dead and the Forge of the Cyclopes.
 
-Open `play.html` in any browser (single self-contained file, no server
-needed), or serve the folder and open `index.html` (modular source).
-Keyboard or touch (mobile auto-detected).
+Same levels and mechanics, two completely different worlds: art, music, names,
+enemies, bosses, gear and signature powers.
 
-## The voyage
+Playable in a browser, installable to a phone home screen, and packaged for
+Android with Capacitor.
 
-- **6 zones, 20 interconnected rooms**: the Storm-Wrecked Shores, the
-  Cyclops' Island, Circe's Isle, the Underworld, Ithaca — and the hidden
-  Sirens' Strait, found only by those who follow the song.
-- **6 guardians with phased special moves** (the final duel has three
-  phases): Charybdis, Polyphemus, Circe's Trial, Scylla, the Siren Queen,
-  and Antinous, Champion of the Suitors. Every guardian yields a reward:
-  a god-gift ability and a trophy treasure.
-- **Abilities**: Wind of Aeolus (dash) · Winged Sandals of Hermes (double
-  jump) · Grip of the Fig Tree (wall-cling) · Aegis Pulse · Key of
-  Persephone.
-- **Blessings of the Gods**: 8 equippable blessings on a socket budget.
-- **Treasures of the Voyage**: 13 relics — the Ram's Fleece, a Sprig of
-  Moly, Scylla's Sinew, the Great Bow…
-- **Riddles of the Oracle** (8, original) grant **Metis** to unlock the
-  Gifts of Cunning skill tree.
-- **The Trials of Wisdom** — four fully animated mini-games at stations
-  along the road (falling marble in *Stones of the Mason*, a tilting golden
-  beam held by Themis in *Scales of Themis*, chisel-carved *Numbers of the
-  Oracle*, and the playable four-string lyre of *Song of the Sirens*), plus
-  a Full Trial at the temple: 45-second rounds, ramping difficulty, streak
-  bonuses, and a laurel-crowned marble bust for your result. Metis is earned
-  by surpassing your finest measure.
-- **World systems**: hearths of Hestia (rest + save + respawn), Hermes'
-  trading post, 7 NPCs (Athena, Hermes, Eurylochus, Elpenor, the shade of
-  Tiresias, Eumaeus, Penelope), obols dropped Souls-style on death, auto-map
-  (Tab), Greek-lettered friezes and carved votive tablets, zone-tinted
-  parallax of temples, aqueducts and wine-dark sea.
-- **3 difficulties**: Lotus-Eater, Wayfarer, and **Wrath of Poseidon**
-  (double damage, faster foes, exactly nine threads of life — then the
-  save is unwoven).
-- **Bilingual**: full English + Arabic UI and dialogue (toggle in menu),
-  with ambient ancient-Greek lettering (ΝΟΣΤΟΣ · ΙΘΑΚΗ · α β γ δ).
-- **Original OST** (10 synthesized tracks) layered with CC0/CC-BY recorded
-  music and SFX — every third-party asset license-verified and credited in
-  `assets/CREDITS.md`.
-- **Workshop of Daedalus**: a developer door on the title menu that jumps
-  straight to any guardian, trial, or riddle for playtesting.
+## Play it
+
+Open `index.html` — that is the whole game in a single self-contained file
+(all art and audio embedded, no server or install needed). If GitHub Pages is
+enabled on this repo, it is also live at the Pages URL.
+
+**On a phone:** open the page in the browser, then *Share → Add to Home Screen*.
+Launched from the icon it runs full-screen with on-screen controls.
 
 ## Controls
 
-Move: arrows / A-D · Jump: Z / Space · Attack: X / J (+Up/Down to aim) ·
-Dash: C / Shift · Aegis Pulse: V / K · Bind wounds: hold F / H ·
-Interact: E · Map: Tab / M · Blessings: I · Pause: Esc
+| Action | Keyboard | Gamepad |
+|---|---|---|
+| Move | Arrows / A D | Stick or D-pad |
+| Jump | Z / Space | Cross |
+| Attack | X / J | Square |
+| Dash (FireDash) | C / Shift | R1 / R2 |
+| EMP / Zeus's Spark | V / K | L1 / L2 |
+| Heal | hold F / H | Triangle |
+| **Signature power** | **Q / R** | **L3 / R3** |
+| Interact | E or Up | Circle |
+| Map / Pause | Tab / M / Esc | Select / Start |
 
-## Tech
+**Signature powers.** The cat's **Feral Claws** turn her blade into purple energy
+talons with a halo of light; her combo finisher becomes a pouncing paw punch.
+The hero's **Wrath of Olympus** wreathes him in divine gold; his strikes land as
+thunderbolts and his finisher calls a bolt down from the sky.
 
-Vanilla JS + Canvas 2D, zero dependencies. `play.html` is `index.html`
-with the eleven `js/` files inlined and the media embedded as data: URIs
-(`node build.cjs` rebuilds it). Engine lineage: ported from the CLAWBYTE
-engine (same repo owner) and fully re-themed at every layer.
+**Hidden rooms** below the floor only open to a **down-attack** — jump, hold
+down, and hit.
+
+## Repo layout
+
+```
+index.html   the built game - one self-contained file (this is what you play)
+dev.html     multi-file entry for development (loads js/ and assets/)
+js/          source: engine, entities, world, themes, audio, touch, trials
+assets/      CC0 art and audio  -  see assets/CREDITS.md
+build.cjs    rebuilds index.html from js/ + assets/   (node build.cjs)
+native/      Capacitor config for the Android build
+STORY.md     the Machine Depths backstory the art is built from
+RUSTSONG.md  the constructed language used on the lore terminals
+```
+
+### Working on it
+
+Edit files in `js/`, open `dev.html` to test, then run `node build.cjs` to
+regenerate `index.html`. Bump `GAME_VERSION` in `js/game.js` when you ship —
+the game checks its own source and prompts players to update.
+
+## Licensing
+
+The code, characters, world, story and music composition are original.
+
+Third-party art and audio are **CC0 / public domain**, with every author and
+source recorded in **`assets/CREDITS.md`** before use. Share-alike (CC-BY-SA)
+assets are deliberately **not** used anywhere, because that licence would force
+the whole project to become share-alike — the rejected pack is documented in
+CREDITS.md so nobody adds it later.

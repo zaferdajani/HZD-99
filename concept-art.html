@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CLAWBYTE — Character Concept Sheet</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{--bg:#05090f;--panel:#0b1220;--edge:#1d3347;--txt:#dbe7f2;--dim:#7d93a8;--glow:#37ffd0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 "Segoe UI",Tahoma,sans-serif;padding:34px 20px 60px}
+  h1{text-align:center;font-size:34px;margin:0 0 4px;letter-spacing:2px;color:#fff;text-shadow:0 0 24px var(--glow)}
+  .sub{text-align:center;color:var(--dim);margin:0 0 34px}
+  .zone-h{max-width:1180px;margin:38px auto 12px;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--edge);padding-bottom:6px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:16px;max-width:1180px;margin:0 auto}
+  .card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+  .card canvas{width:100%;border-radius:8px;display:block}
+  .nm{font-weight:700;font-size:16px}
+  .ar{color:var(--glow);font-size:13px;margin-inline-start:6px}
+  .role{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+  .note{font-size:12.5px;color:#a9bccc}
+</style>
+</head>
+<body>
+<h1>CLAWBYTE</h1>
+<p class="sub">Character concept sheet — every design is original to this project · هيكل شخصيات اللعبة</p>
+<div id="root"></div>
+<script>
+const TAU = Math.PI * 2;
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+const CARDS = [];
+function section(title){CARDS.push({section:title});}
+function card(nm,ar,role,note,bg,glow,draw){CARDS.push({nm,ar,role,note,bg,glow,draw});}
+
+// ============ THE HERO ============
+section('The Hero');
+card('NYA-9 — idle','نيا-9','Playable hero','White cat-frame with a crimson ninja scarf, volt-blade sheathed on the back, visor eyes, thruster ports, energy-conduit tail.', ['#07161a','#0b2b28'],'#37ffd0',(c,g)=>{
+  c.translate(0,52); c.scale(2.6,2.6);
+  // scarf
+  c.strokeStyle='#e0484f';c.lineWidth=4;c.lineCap='round';
+  c.beginPath();c.moveTo(1,-24);c.quadraticCurveTo(-17,-28,-27,-20);c.stroke();
+  c.strokeStyle='#a63740';c.lineWidth=2.6;
+  c.beginPath();c.moveTo(1,-24);c.quadraticCurveTo(-16,-25,-25,-15);c.stroke();
+  // tail
+  c.strokeStyle='#cfd8e6';c.lineWidth=3.5;
+  c.beginPath();c.moveTo(-11,-10);c.quadraticCurveTo(-24,-16,-21,-30);c.stroke();
+  c.strokeStyle=g;c.lineWidth=1.2;
+  c.beginPath();c.moveTo(-12.5,-12.5);c.quadraticCurveTo(-22,-17,-20.5,-28);c.stroke();
+  c.fillStyle=g;c.beginPath();c.arc(-21,-30,2.6,0,TAU);c.fill();
+  // legs (segmented)
+  const leg=(hx,f)=>{const kx=hx-2.5,ky=-5;c.strokeStyle=f?'#aab6c6':'#7f8b9c';c.lineWidth=3.4;c.lineJoin='round';
+    c.beginPath();c.moveTo(hx,-9);c.lineTo(kx,ky);c.lineTo(hx+1,-1);c.stroke();
+    c.fillStyle=f?'#cfd8e6':'#93a0b2';c.fillRect(hx-1.5,-2,6,2.6);
+    c.fillStyle=g;c.beginPath();c.arc(hx,-9,1.9,0,TAU);c.arc(kx,ky,1.5,0,TAU);c.fill();};
+  leg(-7,false);
+  // blade on back
+  c.save();c.translate(-9,-22);c.rotate(-0.85);
+  c.fillStyle='#8892a2';c.fillRect(-2,0,4,8);
+  c.fillStyle='#5c6678';c.fillRect(-4.5,-1,9,3);
+  const bg2=c.createLinearGradient(0,-26,0,0);bg2.addColorStop(0,'#fff');bg2.addColorStop(1,g);
+  c.fillStyle=bg2;c.shadowColor=g;c.shadowBlur=9;
+  c.beginPath();c.moveTo(-1.8,-2);c.lineTo(-1.8,-22);c.lineTo(0,-27);c.lineTo(1.8,-22);c.lineTo(1.8,-2);c.closePath();c.fill();
+  c.shadowBlur=0;c.restore();
+  // body
+  const grad=c.createLinearGradient(0,-26,0,0);grad.addColorStop(0,'#e8eef6');grad.addColorStop(1,'#b9c4d4');
+  c.fillStyle=grad;rr(c,-13,-24,26,20,7);c.fill();
+  c.strokeStyle='#7d8a9c';c.lineWidth=1;rr(c,-13,-24,26,20,7);c.stroke();
+  c.strokeStyle='rgba(70,85,105,0.55)';c.beginPath();c.moveTo(-9,-16);c.lineTo(7,-16);c.stroke();
+  c.fillStyle='rgba(70,85,105,0.6)';for(let k=0;k<3;k++)c.fillRect(-10+k*3,-12,1.6,4);
+  c.fillStyle=g;c.shadowColor=g;c.shadowBlur=8;c.beginPath();c.arc(6,-15,2.6,0,TAU);c.fill();c.shadowBlur=0;
+  leg(6,true);
+  // arm
+  c.strokeStyle='#9aa7b8';c.lineWidth=3;c.beginPath();c.moveTo(6,-20);c.lineTo(9,-14);c.lineTo(11,-8);c.stroke();
+  c.fillStyle=g;c.beginPath();c.arc(6,-20,1.7,0,TAU);c.fill();
+  // head
+  const hy=-30;
+  c.fillStyle='#eef3fa';rr(c,-4,hy-10,20,17,6);c.fill();
+  c.strokeStyle='#7d8a9c';rr(c,-4,hy-10,20,17,6);c.stroke();
+  c.fillStyle='#dfe6f0';
+  c.beginPath();c.moveTo(-2,hy-8);c.lineTo(1,hy-18);c.lineTo(6,hy-9);c.closePath();c.fill();
+  c.beginPath();c.moveTo(8,hy-9);c.lineTo(12,hy-18);c.lineTo(15,hy-7);c.closePath();c.fill();
+  c.fillStyle=g;c.beginPath();c.moveTo(0,hy-9.5);c.lineTo(1.5,hy-15);c.lineTo(4.5,hy-10);c.closePath();c.fill();
+  c.fillStyle='#0a1420';rr(c,1,hy-6,15,7,3);c.fill();
+  c.fillStyle=g;c.shadowColor=g;c.shadowBlur=7;
+  c.fillRect(4,hy-4.5,4,4);c.fillRect(10.5,hy-4.5,4,4);c.shadowBlur=0;
+  c.strokeStyle='rgba(200,220,240,0.7)';c.lineWidth=1;
+  c.beginPath();c.moveTo(16,hy-2);c.lineTo(21,hy-4);c.moveTo(16,hy);c.lineTo(21,hy+1);c.stroke();
+});
+card('NYA-9 — golden cross-slash','نيا-9 — الضربة الذهبية','Combo finisher','Third combo hit: twin crossing crescents in gold, forward lunge, +35% damage. The blade leaves white streak-arcs.', ['#07161a','#0b2b28'],'#ffd76a',(c,g)=>{
+  c.translate(-14,40); c.scale(2.1,2.1);
+  // slashing pose (leaning forward)
+  c.rotate(0.18);
+  c.strokeStyle='#e0484f';c.lineWidth=4;c.lineCap='round';
+  c.beginPath();c.moveTo(0,-24);c.quadraticCurveTo(-20,-22,-30,-12);c.stroke();
+  const grad=c.createLinearGradient(0,-26,0,0);grad.addColorStop(0,'#e8eef6');grad.addColorStop(1,'#b9c4d4');
+  c.fillStyle=grad;rr(c,-13,-24,26,20,7);c.fill();
+  const hy=-30;
+  c.fillStyle='#eef3fa';rr(c,-4,hy-10,20,17,6);c.fill();
+  c.fillStyle='#dfe6f0';
+  c.beginPath();c.moveTo(-2,hy-8);c.lineTo(1,hy-18);c.lineTo(6,hy-9);c.closePath();c.fill();
+  c.beginPath();c.moveTo(8,hy-9);c.lineTo(12,hy-18);c.lineTo(15,hy-7);c.closePath();c.fill();
+  c.fillStyle='#0a1420';rr(c,1,hy-6,15,7,3);c.fill();
+  c.fillStyle='#ffd76a';c.shadowColor='#ffd76a';c.shadowBlur=7;
+  c.fillRect(4,hy-4.5,4,4);c.fillRect(10.5,hy-4.5,4,4);c.shadowBlur=0;
+  // twin golden crescents
+  c.save();c.translate(26,-18);c.globalCompositeOperation='lighter';
+  const cres=(rot,alpha)=>{c.save();c.rotate(rot);c.globalAlpha=alpha;
+    const gr=c.createRadialGradient(0,0,10,0,0,26);
+    gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(0.55,g);gr.addColorStop(1,'rgba(255,255,255,0.95)');
+    c.beginPath();c.arc(0,0,26,-1.1,0.9);c.arc(0,0,10,0.9,-1.1,true);c.closePath();
+    c.shadowColor=g;c.shadowBlur=14;c.fillStyle=gr;c.fill();
+    c.lineWidth=2;c.strokeStyle='#fff';
+    c.beginPath();c.arc(0,0,18,0.55,0.92);c.stroke();c.restore();};
+  cres(0,1);cres(Math.PI*0.55,0.7);
+  c.restore();
+});
+
+// ============ NPCS ============
+section('Friends of the Depths');
+card('Old Servo','سيرفو العجوز','Tutorial guide','A rust-brown maintenance sphere from the first fabricator era. Antenna lamp, warm amber eyes. He remembers when machines dreamed.', ['#07161a','#0b2b28'],'#ffd76a',(c,g)=>{
+  c.translate(0,52);c.scale(2.7,2.7);
+  c.fillStyle='#5c5346';c.beginPath();c.arc(0,-14,15,0,TAU);c.fill();
+  c.strokeStyle='#463f35';c.lineWidth=1.4;
+  c.beginPath();c.arc(0,-14,15,0.3,1.4);c.stroke();c.beginPath();c.arc(0,-14,11,2,3);c.stroke();
+  c.fillStyle='#463f35';c.beginPath();c.arc(0,-26,10,0,TAU);c.fill();
+  c.fillStyle=g;c.shadowColor=g;c.shadowBlur=8;
+  c.fillRect(-5,-29,4,4);c.fillRect(2,-29,4,4);c.shadowBlur=0;
+  c.strokeStyle='#5c5346';c.lineWidth=2;c.beginPath();c.moveTo(0,-36);c.lineTo(0,-42);c.stroke();
+  c.fillStyle='#ff9430';c.shadowColor='#ff9430';c.shadowBlur=8;c.beginPath();c.arc(0,-43,2.5,0,TAU);c.fill();c.shadowBlur=0;
+  c.fillStyle='#3a352d';c.fillRect(-9,-3,6,3);c.fillRect(3,-3,6,3);
+});
+card('Ratchet','راتشيت','Merchant','A rat-frame scavenger with a salvage pack. Everything he sells he pulled from units that stopped needing things. Scrap talks.', ['#07161a','#0b2b28'],'#ffd76a',(c,g)=>{
+  c.translate(0,52);c.scale(2.7,2.7);
+  c.fillStyle='#6e5a3a';rr(c,-13,-22,26,22,6);c.fill();
+  c.fillStyle='#8a7248';c.beginPath();c.moveTo(4,-26);c.lineTo(22,-20);c.lineTo(6,-14);c.closePath();c.fill();
+  c.fillStyle='#0a1420';c.beginPath();c.arc(8,-22,2.5,0,TAU);c.fill();
+  c.fillStyle='#e8b54c';c.beginPath();c.arc(8.6,-22.6,0.8,0,TAU);c.fill();
+  c.fillStyle='#4a3b22';rr(c,-18,-14,10,14,3);c.fill();
+  c.strokeStyle='#2d2415';c.lineWidth=1;
+  c.beginPath();c.moveTo(-16,-10);c.lineTo(-10,-10);c.moveTo(-16,-6);c.lineTo(-10,-6);c.stroke();
+  c.strokeStyle='#8a7248';c.lineWidth=2;
+  c.beginPath();c.moveTo(-11,-22);c.quadraticCurveTo(-20,-30,-16,-36);c.stroke();
+  c.fillStyle=g;c.shadowColor=g;c.shadowBlur=6;c.beginPath();c.arc(-13,-11,1.6,0,TAU);c.fill();c.shadowBlur=0;
+});
+card('Mono','مونو','Archivist drone','A tall, quiet index-unit who archived the whole network — and now archives its ruins. Cyan data-band eyes, record grooves down the chassis.', ['#050a1e','#0a1440'],'#57a8ff',(c,g)=>{
+  c.translate(0,52);c.scale(2.5,2.5);
+  c.fillStyle='#2b3a52';rr(c,-8,-38,16,38,6);c.fill();
+  c.fillStyle=g;c.shadowColor=g;c.shadowBlur=10;c.fillRect(-5,-33,10,4);c.shadowBlur=0;
+  c.strokeStyle='#3b4d6b';c.lineWidth=2;
+  for(let k=0;k<3;k++){c.beginPath();c.moveTo(-8,-24+k*7);c.lineTo(8,-24+k*7);c.stroke();}
+  c.fillStyle='#22304a';c.fillRect(-8,-6,16,6);
+});
+card('The Nine-Lives Sage','حكيم الأرواح التسع','Lorekeeper','An elder cat-frame on its ninth life, meditating in the ice. Nine spectral tail-wisps drift behind it. It knows where the Key sleeps.', ['#0a1218','#14283a'],'#9fe8ff',(c,g)=>{
+  c.translate(0,52);c.scale(2.6,2.6);
+  c.strokeStyle='rgba(159,232,255,0.5)';c.lineWidth=2;
+  for(let k=0;k<5;k++){const a=-0.9+k*0.45;
+    c.beginPath();c.moveTo(0,-4);c.quadraticCurveTo(Math.sin(a)*20,-2,Math.sin(a)*26,4);c.stroke();}
+  c.fillStyle='#3d4a5c';c.beginPath();c.arc(0,-12,14,0,TAU);c.fill();
+  c.fillStyle='#4d5c70';c.beginPath();c.arc(0,-28,9,0,TAU);c.fill();
+  c.beginPath();c.moveTo(-7,-33);c.lineTo(-5,-41);c.lineTo(-1,-34);c.closePath();c.fill();
+  c.beginPath();c.moveTo(1,-34);c.lineTo(5,-41);c.lineTo(7,-33);c.closePath();c.fill();
+  c.fillStyle=g;c.shadowColor=g;c.shadowBlur=8;
+  c.fillRect(-5,-30,3.5,3.5);c.fillRect(1.5,-30,3.5,3.5);c.shadowBlur=0;
+});
+
+// ============ BOSSES ============
+section('The Six Guardians');
+card('GLITCH.EXE','GLITCH.EXE','Boss — Scrap Meadows','A corrupted guard-hound whose renderer is failing: glitch bars flicker across its chassis. Charges, leaps, and spits sparks in phase two.', ['#07161a','#0b2b28'],'#37ffd0',(c,g)=>{
+  c.translate(0,50);c.scale(1.8,1.8);
+  c.fillStyle='#39424f';rr(c,-30,-14,54,26,8);c.fill();
+  c.fillStyle='#2b323d';rr(c,12,-26,22,18,6);c.fill();
+  c.fillStyle='#ff4f6d';c.shadowColor='#ff4f6d';c.shadowBlur=10;c.fillRect(18,-21,12,5);c.shadowBlur=0;
+  c.fillStyle='#2b323d';
+  c.fillRect(-26,10,7,11);c.fillRect(-8,10,7,13);c.fillRect(14,10,7,11);
+  c.fillStyle=g;
+  c.beginPath();c.arc(-18,-16,5,0,TAU);c.arc(-6,-19,4,0,TAU);c.arc(4,-16,3,0,TAU);c.fill();
+  c.fillStyle='rgba(255,255,255,0.25)';c.fillRect(-24,-8,16,3);c.fillRect(2,4,18,3);
+});
+card('Broodmother Node','عقدة الحاضنة','Boss — Data Conduits','A pulsing hatchery pod hanging from a cable, birthing corrupted fliers. Tendrils sway beneath; the red eye never blinks.', ['#050a1e','#0a1440'],'#4db8ff',(c,g)=>{
+  c.translate(0,30);c.scale(1.7,1.7);
+  c.strokeStyle='#2b323d';c.lineWidth=6;c.beginPath();c.moveTo(0,-29);c.lineTo(0,-60);c.stroke();
+  c.fillStyle='#39424f';c.beginPath();c.ellipse(0,0,33,29,0,0,TAU);c.fill();
+  c.fillStyle=g;c.globalAlpha=0.85;c.beginPath();c.ellipse(0,6,24,18,0,0,TAU);c.fill();c.globalAlpha=1;
+  c.fillStyle='#0a1420';for(let i=0;i<3;i++){c.beginPath();c.arc(-12+i*12,4,4.5,0,TAU);c.fill();}
+  c.fillStyle='#ff4f6d';c.shadowColor='#ff4f6d';c.shadowBlur=12;c.beginPath();c.arc(0,-12,6,0,TAU);c.fill();c.shadowBlur=0;
+  c.strokeStyle=g;c.lineWidth=3;
+  for(let i=0;i<4;i++){c.beginPath();c.moveTo(-24+i*16,24);c.quadraticCurveTo(-20+i*16,40,-28+i*16,52);c.stroke();}
+});
+card('Forge Warden ATLAS-7','حارس المسبك أطلس-7','Boss — The Foundry','A furnace golem with a molten core. Slow, patient, devastating: ground-shock slams, molten lobs, and ember rain when enraged.', ['#160a05','#331508'],'#ff9430',(c,g)=>{
+  c.translate(0,46);c.scale(1.5,1.5);
+  c.fillStyle='#5c3a12';rr(c,-28,-34,56,52,9);c.fill();
+  c.fillStyle='#3f2a0e';rr(c,-18,-46,36,18,6);c.fill();
+  c.fillStyle=g;c.shadowColor=g;c.shadowBlur=12;c.fillRect(-10,-41,20,6);c.shadowBlur=0;
+  c.fillStyle='#3f2a0e';
+  rr(c,-40,-26,13,40,5);c.fill();rr(c,27,-26,13,40,5);c.fill();
+  c.fillRect(-22,18,14,18);c.fillRect(8,18,14,18);
+  c.fillStyle=g;c.globalAlpha=0.9;c.beginPath();c.arc(0,-6,10,0,TAU);c.fill();c.globalAlpha=1;
+  c.strokeStyle='#7c4414';c.lineWidth=1.4;
+  c.beginPath();c.moveTo(-28,-18);c.lineTo(28,-18);c.moveTo(-28,2);c.lineTo(28,2);c.stroke();
+});
+card('Archivist Zero','أمين الأرشيف زيرو','Boss — Frozen Archives','A hooded librarian-AI wrapped in frost rings. Teleports between shelves, fires knowledge in eight directions, raises ice from the floor.', ['#0a1218','#14283a'],'#9fe8ff',(c,g)=>{
+  c.translate(0,44);c.scale(1.9,1.9);
+  c.strokeStyle=g;c.lineWidth=2;c.globalAlpha=0.6;
+  for(let i=0;i<3;i++){c.beginPath();c.arc(0,-8,34+i*8,0,TAU);c.stroke();}
+  c.globalAlpha=1;
+  c.fillStyle='rgba(58,113,156,0.5)';
+  c.beginPath();c.moveTo(-22,-36);c.lineTo(22,-36);c.lineTo(14,22);c.lineTo(-14,22);c.closePath();c.fill();
+  c.fillStyle='#28506f';rr(c,-14,-38,28,22,8);c.fill();
+  c.fillStyle='#eefcff';c.shadowColor=g;c.shadowBlur=14;
+  c.fillRect(-8,-30,6,5);c.fillRect(3,-30,6,5);c.shadowBlur=0;
+});
+card('The Prism Prowler','قطّ الموشور الجوّال','Secret boss — Crystal Cache','Your rival: a sleek black cat-frame grown over with pink crystal shards. Fast as you, meaner than you, and it stole the ninth crest.', ['#180512','#38102e'],'#ff5ec8',(c,g)=>{
+  c.translate(0,48);c.scale(2.1,2.1);
+  c.fillStyle='#2e2333';rr(c,-24,-12,46,22,8);c.fill();
+  c.fillStyle='#241a28';rr(c,10,-24,18,16,6);c.fill();
+  c.beginPath();c.moveTo(12,-22);c.lineTo(15,-32);c.lineTo(19,-23);c.closePath();c.fill();
+  c.beginPath();c.moveTo(21,-23);c.lineTo(25,-31);c.lineTo(27,-21);c.closePath();c.fill();
+  c.fillStyle=g;c.shadowColor=g;c.shadowBlur=12;
+  c.fillRect(15,-19,4,4);c.fillRect(21.5,-19,4,4);c.shadowBlur=0;
+  c.strokeStyle=g;c.lineWidth=3;c.lineCap='round';
+  c.beginPath();c.moveTo(-22,-6);c.quadraticCurveTo(-36,-14,-34,-28);c.stroke();
+  c.fillStyle='rgba(255,122,209,0.8)';
+  c.beginPath();c.moveTo(-14,-12);c.lineTo(-10,-26);c.lineTo(-5,-12);c.closePath();c.fill();
+  c.beginPath();c.moveTo(-4,-12);c.lineTo(1,-22);c.lineTo(5,-12);c.closePath();c.fill();
+});
+card('MOTHER-V, the Null Core','MOTHER-V نواة العدم','Final boss — The Virus Nest','The virus itself: a vast eye-core suspended in six writhing tendrils. It does not destroy machines. It repurposes them. That is worse.', ['#120518','#2a0a3a'],'#d94aff',(c,g)=>{
+  c.translate(0,10);c.scale(0.85,0.85);
+  c.strokeStyle='rgba(107,37,150,0.8)';c.lineWidth=10;
+  for(let i=0;i<6;i++){const a=i/6*TAU;
+    c.beginPath();c.moveTo(0,0);
+    c.quadraticCurveTo(Math.cos(a)*90,Math.sin(a)*90+14,Math.cos(a)*140,Math.sin(a)*140-14);c.stroke();}
+  c.fillStyle='#39424f';c.beginPath();c.arc(0,0,58,0,TAU);c.fill();
+  c.fillStyle=g;c.globalAlpha=0.8;c.beginPath();c.arc(0,0,46,0,TAU);c.fill();c.globalAlpha=1;
+  c.fillStyle='#0a0512';c.beginPath();c.arc(0,0,30,0,TAU);c.fill();
+  c.fillStyle='#e05aff';c.shadowColor='#e05aff';c.shadowBlur=24;
+  c.beginPath();c.arc(6,6,13,0,TAU);c.fill();c.shadowBlur=0;
+  c.fillStyle='#0a0512';c.beginPath();c.arc(8,8,5,0,TAU);c.fill();
+});
+
+// ============ ENEMIES ============
+section('The Infected');
+card('Crawler','الزاحف','Common enemy','A floor-patrol bot overtaken by virus growths. Its red sensor strip sweeps the ground it once cleaned.', ['#07161a','#0b2b28'],'#37ffd0',(c,g)=>{
+  c.translate(0,42);c.scale(2.6,2.6);
+  c.fillStyle='#3a4250';rr(c,-14,-8,28,16,5);c.fill();
+  c.fillStyle='#2a303c';c.fillRect(-11,6,4,5);c.fillRect(-3,6,4,5);c.fillRect(6,6,4,5);
+  c.fillStyle='#ff4f6d';c.shadowColor='#ff4f6d';c.shadowBlur=8;c.fillRect(4,-5,6,4);c.shadowBlur=0;
+  c.fillStyle=g;c.beginPath();c.arc(-8,-9,3,0,TAU);c.arc(-2,-10,2.4,0,TAU);c.fill();
+});
+card('Flier','الطائر','Common enemy','A courier drone with translucent rotor-wings, its cargo replaced by hunger. Chases anything with a heartbeat — or a power core.', ['#050a1e','#0a1440'],'#4db8ff',(c,g)=>{
+  c.translate(0,30);c.scale(2.6,2.6);
+  c.fillStyle='rgba(160,200,255,0.35)';
+  c.beginPath();c.ellipse(-4,-12,11,4,-0.4,0,TAU);c.fill();
+  c.beginPath();c.ellipse(-4,-4,11,4,0.4,0,TAU);c.fill();
+  c.fillStyle='#3a4250';c.beginPath();c.ellipse(0,0,12,9,0,0,TAU);c.fill();
+  c.fillStyle='#ff4f6d';c.shadowColor='#ff4f6d';c.shadowBlur=8;c.beginPath();c.arc(6,-1,3.4,0,TAU);c.fill();c.shadowBlur=0;
+  c.fillStyle=g;c.beginPath();c.arc(-7,5,2.6,0,TAU);c.fill();
+});
+card('Turret','البرج','Stationary threat','Bolted-down defense hardware, reprogrammed to defend nothing and shoot everything. Too heavy to knock back.', ['#160a05','#331508'],'#ff9430',(c,g)=>{
+  c.translate(0,40);c.scale(2.5,2.5);
+  c.fillStyle='#2a303c';rr(c,-14,2,28,13,3);c.fill();
+  c.fillStyle='#3a4250';rr(c,-9,-14,18,18,5);c.fill();
+  c.fillStyle='#556075';c.fillRect(2,-9,17,7);
+  c.fillStyle='#ff4f6d';c.shadowColor='#ff4f6d';c.shadowBlur=8;c.beginPath();c.arc(0,-6,3.4,0,TAU);c.fill();c.shadowBlur=0;
+  c.fillStyle=g;c.beginPath();c.arc(-10,-2,2.6,0,TAU);c.fill();
+});
+card('Hopper','الوثّاب','Common enemy','A jumping actuator-frame that pounces with rusty piston legs the moment you cross its sightline.', ['#160a05','#331508'],'#ff9430',(c,g)=>{
+  c.translate(0,40);c.scale(2.5,2.5);
+  c.fillStyle='#3a4250';rr(c,-12,-9,24,17,6);c.fill();
+  c.strokeStyle='#2a303c';c.lineWidth=3;
+  c.beginPath();c.moveTo(-8,7);c.lineTo(-12,13);c.moveTo(8,7);c.lineTo(12,13);c.stroke();
+  c.fillStyle='#ff4f6d';c.shadowColor='#ff4f6d';c.shadowBlur=8;c.fillRect(2,-5,7,3.4);c.shadowBlur=0;
+  c.fillStyle=g;c.beginPath();c.arc(-6,-11,3,0,TAU);c.fill();
+});
+card('Blob','الكتلة','Common enemy','Raw virus mass slowly digesting a machine part. What it consumes, it becomes. Slow — but it never stops coming.', ['#120518','#2a0a3a'],'#d94aff',(c,g)=>{
+  c.translate(0,38);c.scale(2.6,2.6);
+  c.fillStyle=g;c.globalAlpha=0.85;
+  c.beginPath();c.ellipse(0,3,17,11,0,0,TAU);c.fill();c.globalAlpha=1;
+  c.fillStyle='#2a303c';c.beginPath();c.arc(-4,0,5,0,TAU);c.fill();
+  c.fillStyle='#ff4f6d';c.shadowColor='#ff4f6d';c.shadowBlur=8;
+  c.beginPath();c.arc(5,-2,3,0,TAU);c.arc(-1,-7,2.2,0,TAU);c.fill();c.shadowBlur=0;
+});
+
+// ============ render ============
+const root=document.getElementById('root');
+let grid=null;
+for(const it of CARDS){
+  if(it.section){
+    const h=document.createElement('div');h.className='zone-h';h.textContent=it.section;root.appendChild(h);
+    grid=document.createElement('div');grid.className='grid';root.appendChild(grid);
+    continue;
+  }
+  const el=document.createElement('div');el.className='card';
+  const cv2=document.createElement('canvas');
+  const S=260,dpr=Math.min(2,devicePixelRatio||1);
+  cv2.width=S*dpr;cv2.height=S*0.72*dpr;
+  const c=cv2.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
+  const bgg=c.createLinearGradient(0,0,0,S*0.72);
+  bgg.addColorStop(0,it.bg[0]);bgg.addColorStop(1,it.bg[1]);
+  c.fillStyle=bgg;c.fillRect(0,0,S,S*0.72);
+  // ground line + glow pool
+  c.fillStyle='rgba(255,255,255,0.06)';c.fillRect(0,S*0.72-14,S,14);
+  const pool=c.createRadialGradient(S/2,S*0.72-10,4,S/2,S*0.72-10,80);
+  pool.addColorStop(0,it.glow);pool.addColorStop(1,'rgba(0,0,0,0)');
+  c.globalAlpha=0.18;c.fillStyle=pool;c.fillRect(0,S*0.72-70,S,70);c.globalAlpha=1;
+  c.save();c.translate(S/2,S*0.36);
+  it.draw(c,it.glow);
+  c.restore();
+  el.appendChild(cv2);
+  el.insertAdjacentHTML('beforeend',
+    '<div><span class="nm">'+it.nm+'</span><span class="ar">'+it.ar+'</span></div>'+
+    '<div class="role">'+it.role+'</div><div class="note">'+it.note+'</div>');
+  grid.appendChild(el);
+}
+</script>
+</body>
+</html>

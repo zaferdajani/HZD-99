@@ -1,0 +1,15 @@
+{
+  "name": "clawbyte-native",
+  "private": true,
+  "version": "1.0.0",
+  "description": "CLAWBYTE native app shell (Capacitor)",
+  "scripts": {
+    "prepare:www": "node ../build.cjs && node -e \"require('fs').mkdirSync('www',{recursive:true});require('fs').copyFileSync('../play.html','www/index.html')\"",
+    "sync": "npm run prepare:www && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0"
+  }
+}

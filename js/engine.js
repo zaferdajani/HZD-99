@@ -1,15 +1,48 @@
-// NOSTOS — input, camera, particles, helpers
+// CLAWBYTE — input, camera, particles, helpers
 const KEYB = {
-  LEFT: ['ArrowLeft', 'KeyA', 'VL'], RIGHT: ['ArrowRight', 'KeyD', 'VR'],
-  UP: ['ArrowUp', 'KeyW', 'VU'], DOWN: ['ArrowDown', 'KeyS', 'VD'],
-  JUMP: ['KeyZ', 'Space', 'VJUMP'], ATK: ['KeyX', 'KeyJ', 'VATK'],
-  DASH: ['KeyC', 'ShiftLeft', 'ShiftRight', 'VDASH'], CAST: ['KeyV', 'KeyK', 'VCAST'],
-  HEAL: ['KeyF', 'KeyH', 'VHEAL'], INT: ['KeyE', 'VINT'],
-  MAP: ['Tab', 'KeyM', 'VMAP'], CREST: ['KeyI', 'VCREST'], SKILL: ['KeyT', 'VSKILL'],
-  PAUSE: ['Escape', 'KeyP', 'VPAUSE'],
-  OK: ['Enter', 'KeyZ', 'Space', 'VOK'], BACK: ['Escape', 'VBACK'],
+  LEFT: ['ArrowLeft', 'KeyA', 'VL', 'GP_L'], RIGHT: ['ArrowRight', 'KeyD', 'VR', 'GP_R'],
+  UP: ['ArrowUp', 'KeyW', 'VU', 'GP_U'], DOWN: ['ArrowDown', 'KeyS', 'VD', 'GP_D'],
+  JUMP: ['KeyZ', 'Space', 'VJUMP', 'GP_JUMP'], ATK: ['KeyX', 'KeyJ', 'VATK', 'GP_ATK'],
+  DASH: ['KeyC', 'ShiftLeft', 'ShiftRight', 'VDASH', 'GP_DASH'], CAST: ['KeyV', 'KeyK', 'VCAST', 'GP_CAST'],
+  HEAL: ['KeyF', 'KeyH', 'VHEAL', 'GP_HEAL'], INT: ['KeyE', 'VINT', 'GP_INT'],
+  CLAW: ['KeyQ', 'KeyR', 'VCLAW', 'GP_CLAW'],
+  MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], CREST: ['KeyI', 'VCREST'], SKILL: ['KeyT', 'VSKILL'],
+  PAUSE: ['Escape', 'KeyP', 'VPAUSE', 'GP_PAUSE'],
+  OK: ['Enter', 'KeyZ', 'Space', 'VOK', 'GP_OK'], BACK: ['Escape', 'VBACK', 'GP_BACK'],
 };
 const keys = {}, keysP = {};
+// ---- gamepad (PS4/PS5/Xbox via the standard mapping) ----
+const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW'];
+const GP_PREV = {};
+addEventListener('gamepadconnected', () => { try { audioOn(); } catch (e) {} });
+function pollGamepad() {
+  if (!navigator.getGamepads) return;
+  let gp = null;
+  for (const pd of navigator.getGamepads()) if (pd && pd.connected) { gp = pd; break; }
+  const st = {};
+  if (gp) {
+    const b = gp.buttons, ax = gp.axes || [];
+    const P = i => b[i] && (b[i].pressed || b[i].value > 0.4);
+    const A0 = ax[0] || 0, A1 = ax[1] || 0;
+    st.GP_L = P(14) || A0 < -0.4; st.GP_R = P(15) || A0 > 0.4;
+    st.GP_U = P(12) || A1 < -0.4; st.GP_D = P(13) || A1 > 0.4;
+    st.GP_JUMP = st.GP_OK = P(0);          // cross / A
+    st.GP_ATK = P(2);                       // square / X
+    st.GP_DASH = P(5) || P(7);              // R1 / R2
+    st.GP_CAST = P(4) || P(6);              // L1 / L2
+    st.GP_HEAL = P(3);                      // triangle / Y
+    st.GP_INT = st.GP_BACK = P(1);          // circle / B
+    st.GP_PAUSE = P(9);                     // options / start
+    st.GP_MAP = P(8);                       // share / select
+    st.GP_CLAW = P(10) || P(11);            // L3 / R3 — Feral Claws
+  }
+  for (const code of GP_CODES) {
+    const on = !!st[code];
+    if (on) { keys[code] = 1; if (!GP_PREV[code]) keysP[code] = 1; }
+    else keys[code] = 0;
+    GP_PREV[code] = on;
+  }
+}
 addEventListener('keydown', e => {
   if (['Tab', 'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (!e.repeat) { keys[e.code] = 1; keysP[e.code] = 1; }

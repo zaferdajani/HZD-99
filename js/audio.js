@@ -1,5 +1,4 @@
-// NOSTOS — synthesized audio: SFX + original cinematic OST, layered with
-// CC0/CC-BY recorded samples (assets/CREDITS.md) when available.
+// CLAWBYTE — synthesized audio: SFX + original cinematic OST (no assets, all code)
 let AC = null, MUTED = false, MUSIC_ON = true, AUD_UNLOCKED = false;
 function audioOn() {
   if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
@@ -145,21 +144,6 @@ function sfx(n) {
       break;
   }
 }
-// plucked lyre string (Trials of Wisdom); m = midi note
-function sfxPluck(m, vol) {
-  if (!AC || MUTED) return;
-  const t0 = AC.currentTime;
-  const g = AC.createGain();
-  g.gain.setValueAtTime(vol || 0.14, t0);
-  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.9);
-  g.connect(AC.destination);
-  for (const spec of [['triangle', 0, 1], ['sine', 12, 0.35], ['sine', 19, 0.12]]) {
-    const o = AC.createOscillator(), og = AC.createGain();
-    o.type = spec[0]; o.frequency.value = mf(m + spec[1]); og.gain.value = spec[2];
-    o.connect(og); og.connect(g);
-    o.start(t0); o.stop(t0 + 1);
-  }
-}
 // rising charge whine while holding the attack button
 function sfxChargeTick(k) {
   if (!AC || MUTED) return;
@@ -172,9 +156,8 @@ function sfxHealTick(k) {
 }
 // per-character voice chirps for dialogue
 const NPC_VOICE = {
-  athena: [300, 'sine'], hermes: [390, 'square'], eurylochus: [220, 'sawtooth'],
-  tiresias: [140, 'sine'], elpenor: [430, 'square'], eumaeus: [190, 'sawtooth'],
-  penelope: [340, 'sine'],
+  servo: [170, 'sawtooth'], ratchet: [330, 'square'], mono: [240, 'sine'],
+  sage: [140, 'sine'], patch: [430, 'square'], lumen: [540, 'sine'],
 };
 function sfxVoice(id) {
   if (!AC || MUTED) return;
@@ -197,7 +180,10 @@ function musicGain() {
     MG = AC.createGain(); MG.gain.value = 0.55; MG.connect(MCOMP);
     // generated concert-hall impulse response
     MVERB = AC.createConvolver();
-    const len = Math.floor(AC.sampleRate * 2.4);
+    // shorter IR on touch devices — 2.4s stereo convolution is a mobile CPU hog
+    // and starves the audio thread (the "glitching"); 1.3s keeps the hall feel
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const len = Math.floor(AC.sampleRate * (isTouch ? 1.3 : 2.4));
     const ir = AC.createBuffer(2, len, AC.sampleRate);
     for (let ch = 0; ch < 2; ch++) {
       const d = ir.getChannelData(ch);
@@ -378,7 +364,7 @@ function reps(bars, per, fn) { const a = []; for (let b = 0; b < bars; b++) fn(a
 // sub[[s,m,len]], ost[[start,root,len,[offsets]]], bells[[s,m]], timp[[s,m]],
 // crash[steps], bassPulse[[s,m,len]], arp[[s,[m..],len]]+arpRate, drums{k,h,s}
 const TRACKS = {
-  // "The Wine-Dark Sea" — title: slow choir dirge that blooms into a theme
+  // "Whiskers in the Dark" — title: slow choir dirge that blooms into a theme
   title: {
     bpm: 76, steps: 128,
     choir: [[0, [57, 60, 64], 32], [32, [53, 57, 60], 32], [64, [48, 52, 55, 60], 32], [96, [55, 59, 62], 32]],
@@ -388,7 +374,7 @@ const TRACKS = {
     bells: [[12, 81], [44, 84], [76, 88], [108, 83]],
     crash: [64],
   },
-  // "Salt and Sunlight" — Storm-Wrecked Shores: heroic ostinato adventure
+  // "Rust & Dandelions" — Scrap Meadows: heroic ostinato adventure
   A: {
     bpm: 100, steps: 128,
     ost: reps(8, 16, (a, o, b) => { a.push([o, [60, 58, 53, 60, 60, 58, 53, 55][b], 16, [0, 12, 7, 12, 4, 12, 7, 12]]); }),
@@ -399,7 +385,7 @@ const TRACKS = {
     drums: { k: [0, 8], h: [0, 2, 4, 6, 8, 10, 12, 14], s: [4, 12] },
     crash: [0, 64],
   },
-  // "The Giant's Pastures" — Cyclops' Island: driving pulse
+  // "Packet Storm" — Data Conduits: driving synthwave pulse
   B: {
     bpm: 112, steps: 64,
     ost: [[0, 64, 16, [0, 12, 7, 15]], [16, 60, 16, [0, 12, 7, 16]], [32, 67, 16, [0, 12, 7, 16]], [48, 62, 16, [0, 12, 7, 15]]],
@@ -409,7 +395,7 @@ const TRACKS = {
     drums: { k: [0, 4, 8, 12], h: [0, 2, 4, 6, 8, 10, 12, 14], s: [4, 12] },
     crash: [0],
   },
-  // "Aiaia" — Circe's Isle: war drums + low brass enchantment
+  // "Hammerfall Protocol" — Foundry: war drums + low brass
   C: {
     bpm: 96, steps: 128,
     brass: [[0, 50, 3], [4, 50, 3], [8, 53, 3], [12, 49, 4], [32, 50, 3], [36, 50, 3], [40, 56, 3], [44, 55, 4], [64, 50, 3], [68, 50, 3], [72, 53, 3], [76, 57, 4], [96, 58, 6], [104, 56, 6], [112, 53, 8], [120, 49, 8]],
@@ -419,7 +405,7 @@ const TRACKS = {
     drums: { k: [0, 6, 8], h: [2, 10, 14], s: [4, 12] },
     crash: [0, 64],
   },
-  // "Fields of Asphodel" — the Underworld: choir + bells, vast and pale
+  // "Music Box for a Frozen Library" — Archives: choir + bells, vast and cold
   D: {
     bpm: 80, steps: 64,
     bells: [[0, 74], [4, 78], [8, 81], [12, 78], [16, 73], [20, 76], [24, 81], [28, 76], [32, 74], [36, 78], [40, 83], [44, 81], [48, 78], [56, 73]],
@@ -427,7 +413,7 @@ const TRACKS = {
     sub: [[0, 35, 30], [32, 31, 30]],
     timp: [[0, 35], [32, 31]],
   },
-  // "The Occupied House" — Ithaca under the suitors: tritone dread
+  // "Something Grows in the Wires" — Virus Nest: tritone dread
   E: {
     bpm: 100, steps: 64,
     ost: [[0, 65, 32, [0, 0, 6, 0, 0, 0, 6, 7]], [32, 68, 16, [0, 0, 6, 0, 0, 0, 6, 5]], [48, 70, 16, [0, 0, 5, 0, 0, 0, 6, 0]]],
@@ -437,7 +423,7 @@ const TRACKS = {
     timp: reps(4, 16, (a, o) => { a.push([o, 41], [o + 3, 41]); }),
     crash: [32],
   },
-  // "The Song" — Sirens' Strait: lyre shimmer + lydian choir
+  // "Prism Waltz" — Crystal Cache: harp shimmer + lydian choir
   X: {
     bpm: 108, steps: 64,
     arp: [[0, [55, 62, 66, 73], 16], [16, [57, 64, 69, 76], 16], [32, [59, 66, 71, 78], 16], [48, [55, 64, 71, 74], 16]], arpRate: 1,
@@ -445,7 +431,7 @@ const TRACKS = {
     bells: [[0, 86], [16, 88], [32, 90], [48, 85]],
     sub: [[0, 31, 14], [16, 33, 14], [32, 35, 14], [48, 31, 14]],
   },
-  // "Bronze and Blood" — guardian battle: racing strings, brass war-calls
+  // "Claws Out" — boss battle: racing strings, brass war-calls, B-section lift
   boss: {
     bpm: 150, steps: 128,
     ost: reps(8, 16, (a, o, b) => { a.push([o, [57, 57, 53, 55, 53, 55, 57, 57][b], 16, [0, 12, 0, 12, 7, 12, 0, 12]]); }),
@@ -456,7 +442,7 @@ const TRACKS = {
     drums: { k: [0, 4, 8, 12], h: [0, 2, 4, 6, 8, 10, 12, 14], s: [4, 12] },
     crash: [0, 64],
   },
-  // "The Hall Runs Red" — Antinous: half-step menace, relentless
+  // "NULL / VOID" — MOTHER-V: half-step menace, relentless war machine
   mother: {
     bpm: 156, steps: 128,
     ost: reps(8, 16, (a, o, b) => { a.push([o, [59, 59, 58, 59, 59, 60, 58, 56][b], 16, [0, 12, 1, 12, 0, 12, 1, 12]]); }),
@@ -467,7 +453,7 @@ const TRACKS = {
     drums: { k: [0, 4, 8, 10, 12], h: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], s: [4, 12] },
     crash: [0, 32, 64, 96],
   },
-  // "Ithaca at Last" — victory fanfare
+  // "Sunlight on Rusted Fur" — victory fanfare
   winTheme: {
     bpm: 110, steps: 64, once: true,
     brass: [[0, 60, 4], [6, 64, 4], [12, 67, 6], [20, 72, 12], [32, 71, 6], [40, 72, 20]],
@@ -531,8 +517,11 @@ setInterval(() => {
   if (!AC || AC.state !== 'running' || !MUS.cur || MUTED || !MUSIC_ON) return;
   musicGain();
   const tr = MUS.cur, spb = 60 / tr.bpm / 4;
-  if (MUS.nextT < AC.currentTime) MUS.nextT = AC.currentTime + 0.06;
-  while (MUS.nextT < AC.currentTime + 0.18) {
+  // if the main thread stalled (mobile), resync without scheduling a huge burst
+  if (MUS.nextT < AC.currentTime) MUS.nextT = AC.currentTime + 0.08;
+  // wider lookahead (0.35s) so audio survives render hitches without glitching
+  let guard = 0;
+  while (MUS.nextT < AC.currentTime + 0.35 && guard++ < 40) {
     schedStep(tr, MUS.step, MUS.nextT, spb);
     MUS.step++;
     if (MUS.step >= tr.steps) {
@@ -541,7 +530,7 @@ setInterval(() => {
     }
     MUS.nextT += spb;
   }
-}, 30);
+}, 40);
 // legacy shims (old drone API)
 function setDrone(z) { setMusic(z); }
 function stopDrone() { stopMusic(); }

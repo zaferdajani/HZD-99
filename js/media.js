@@ -1,25 +1,36 @@
-// NOSTOS — media manager: CC0/CC-BY image & audio assets (see assets/CREDITS.md)
+// CLAWBYTE — media manager: CC0 image/audio assets (see assets/CREDITS.md)
 // Multi-file mode loads from assets/…; the single-file build injects
 // window.EMBEDDED_MEDIA with data: URIs and these paths are overridden.
 const MEDIA_SRC = {
   images: {
-    bgFar: 'assets/backgrounds/sunset_temple_bg.png',
-    bgMid: 'assets/backgrounds/santorini_mid_bg.png',
+    bgFar: 'assets/backgrounds/sci_fi_bg1.jpg',
+    bgMid: 'assets/backgrounds/scifi_platform_BG1.jpg',
+    indFar: 'assets/backgrounds/ind_far.png',
+    indMid: 'assets/backgrounds/ind_mid.png',
+    indFg: 'assets/backgrounds/ind_fg.png',
+    heroIdle: 'assets/characters/gothic-hero-idle.png',
+    heroRun: 'assets/characters/gothic-hero-run.png',
+    heroJump: 'assets/characters/gothic-hero-jump.png',
+    heroAtk: 'assets/characters/gothic-hero-attack.png',
+    houndRun: 'assets/characters/hell-hound-run.png',
+    houndIdle: 'assets/characters/hell-hound-idle.png',
+    ghost: 'assets/characters/ghost-idle.png',
+    skull: 'assets/characters/fire-skull.png',
+    beast: 'assets/characters/hell-beast-idle.png',
+    demon: 'assets/characters/demon-idle.png',
   },
   audio: {
-    boss: 'assets/music/battle_theme_a.mp3',
-    ambient: 'assets/music/mediterranean_breeze.ogg',
-    hit1: 'assets/sfx/sword_hit_01.ogg',
-    hit2: 'assets/sfx/sword_hit_02.ogg',
-    metal: 'assets/sfx/metal_clang.ogg',
-    explosion: 'assets/sfx/stone_crash.ogg',
-    glass: 'assets/sfx/amphora_break.ogg',
-    laser: 'assets/sfx/arrow_whoosh.wav',
-    zap: 'assets/sfx/zap_shimmer.flac',
-    powerup: 'assets/sfx/powerup_complete.mp3',
-    low: 'assets/sfx/low_thud.ogg',
-    bell: 'assets/sfx/divine_bell.ogg',
-    gong: 'assets/sfx/gong.ogg',
+    boss: 'assets/music/epic_combat.ogg',
+    ambient: 'assets/music/ambient_observing_the_star.ogg',
+    hit1: 'assets/sfx/hit_01.ogg',
+    hit2: 'assets/sfx/hit_02.ogg',
+    metal: 'assets/sfx/metal_05.ogg',
+    explosion: 'assets/sfx/explosion.ogg',
+    glass: 'assets/sfx/glass_01.ogg',
+    laser: 'assets/sfx/laser2.mp3',
+    zap: 'assets/sfx/zapTwoTone.mp3',
+    powerup: 'assets/sfx/powerUp1.mp3',
+    low: 'assets/sfx/lowDown.mp3',
   },
 };
 if (typeof window !== 'undefined' && window.EMBEDDED_MEDIA) {
@@ -39,22 +50,10 @@ function loadMedia() {
   if (mediaAudioLoaded || typeof AC === 'undefined' || !AC) return;
   mediaAudioLoaded = true;
   for (const k in MEDIA_SRC.audio) {
-    const src = MEDIA_SRC.audio[k];
-    if (src.startsWith('data:')) {
-      // decode inline (strict CSPs may refuse fetch() on data: URIs)
-      try {
-        const bin = atob(src.slice(src.indexOf(',') + 1));
-        const buf = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-        Promise.resolve(AC.decodeAudioData(buf.buffer))
-          .then(b => { MBUF[k] = b; }).catch(() => {});
-      } catch (e) {}
-    } else {
-      fetch(src)
-        .then(r => r.arrayBuffer())
-        .then(b => AC.decodeAudioData(b))
-        .then(buf => { MBUF[k] = buf; })
-        .catch(() => {});
-    }
+    fetch(MEDIA_SRC.audio[k])
+      .then(r => r.arrayBuffer())
+      .then(b => AC.decodeAudioData(b))
+      .then(buf => { MBUF[k] = buf; })
+      .catch(() => {});
   }
 }

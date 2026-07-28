@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CLAWBYTE — a robo-cat metroidvania</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+  html,body{margin:0;padding:0;background:#04060a;height:100%;overflow:hidden;overscroll-behavior:none}
+  body{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas#cv{max-width:100vw;max-height:100vh;max-height:100dvh;aspect-ratio:16/9;outline:none;touch-action:none;
+    box-shadow:0 0 80px rgba(60,220,255,.12);border-radius:6px}
+</style>
+</head>
+<body>
+<canvas id="cv" width="960" height="540"></canvas>
+<canvas id="tc" style="position:fixed;inset:0;z-index:5;display:none;pointer-events:none"></canvas>
+<script src="js/theme.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/media.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/lang.js"></script>
+<script src="js/riddles.js"></script>
+<script src="js/trials.js"></script>
+<script src="js/world.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/game.js"></script>
+<script src="js/touch.js"></script>
+</body>
+</html>
