@@ -2164,8 +2164,10 @@ function dimPanel(x, y, w, h) {
 // glows red — NYA-9 reads teal, the hero reads gold, and the crimson crest is
 // pigment rather than emission. Nothing here is new, so both carry wear.
 // ---------------------------------------------------------------------------
-const NYA_P  = { core:'#0b1a2b', shade:'#1d3a55', mid:'#37647c', lit:'#7cb4ae', glow:'#37ffd0' };
-const WRAP_P = { core:'#121a1e', shade:'#1f2b30', mid:'#334449' };
+// Corrected to the reference sheet: NYA-9 is WHITE CERAMIC over brushed steel
+// with oxidized bronze fittings and cyan light — not the dark blue-teal she was.
+const NYA_P  = { core:'#3a3730', shade:'#6b665d', mid:'#c2bcae', lit:'#f2eee6', glow:'#3fd8ee' };
+const WRAP_P = { core:'#20262b', shade:'#333c44', mid:'#4e5a64' };
 const BRZ_P  = { core:'#2b1f12', shade:'#5f4520', mid:'#9a7534', lit:'#d9b56a', glow:'#ffd98a' };
 const CRE_P  = { core:'#5e1a22', shade:'#a8323c', mid:'#e0484f', lit:'#f2887f' };
 
@@ -2204,6 +2206,20 @@ function drawNyaP(x, detail) {
   x.beginPath(); x.moveTo(-40,44); x.lineTo(40,44); x.lineTo(52,120); x.lineTo(-52,120); x.closePath(); x.fill();
   x.beginPath(); x.moveTo(-126,196); x.quadraticCurveTo(-98,116,-46,106);
   x.lineTo(46,106); x.quadraticCurveTo(98,116,126,196); x.closePath(); x.fill();
+  // segmented tail, from the reference sheet — ceramic beads on a steel cable
+  x.strokeStyle = MAT.steel.dark; x.lineWidth = 5;
+  x.beginPath(); x.moveTo(96,150); x.quadraticCurveTo(158,124, 150,58); x.stroke();
+  for (let i = 0; i < 6; i++) {
+    const k = i / 5, tx = 96 + (1-k)*(1-k)*0 + (2*(1-k)*k*158 + k*k*150) - (1-k)*(1-k)*0;
+    const bx = (1-k)*(1-k)*96 + 2*(1-k)*k*158 + k*k*150;
+    const by = (1-k)*(1-k)*150 + 2*(1-k)*k*124 + k*k*58;
+    x.fillStyle = ramp(x, MAT.ceramic, bx-8, by-8, bx+7, by+8, 0.9 - k*0.15);
+    x.beginPath(); x.ellipse(bx, by, 9 - i*0.7, 8 - i*0.6, 0.3, 0, 7); x.fill();
+  }
+  // bronze neck collar
+  x.fillStyle = ramp(x, MAT.bronze, -44, 36, 40, 62);
+  x.beginPath(); x.moveTo(-44,40); x.lineTo(44,40); x.lineTo(40,60); x.lineTo(-40,60); x.closePath(); x.fill();
+  occl(x, 0, 44, 52, 12, 0.5);
 
   x.fillStyle = WRAP_P.shade;
   x.beginPath(); x.moveTo(-64,10); x.quadraticCurveTo(-136,-16,-186,16);
@@ -2212,10 +2228,9 @@ function drawNyaP(x, detail) {
   x.beginPath(); x.moveTo(-62,40); x.quadraticCurveTo(-116,58,-150,92);
   x.quadraticCurveTo(-112,76,-58,72); x.closePath(); x.fill();
 
-  const eg = x.createLinearGradient(-60,-180, 60,-60);
-  eg.addColorStop(0, NYA_P.mid); eg.addColorStop(1, NYA_P.core);
-  x.fillStyle = eg; nyaEarP(x,-1); x.fill(); nyaEarP(x,1); x.fill();
-  x.fillStyle = NYA_P.core;
+  x.fillStyle = ramp(x, MAT.ceramic, -60,-180, 60,-60, 0.85);
+  nyaEarP(x,-1); x.fill(); nyaEarP(x,1); x.fill();
+  x.fillStyle = ramp(x, MAT.bronze, -20,-160, 20,-70, 0.8);
   for (const d of [-1, 1]) {
     x.save(); x.scale(d,1);
     x.beginPath(); x.moveTo(50,-80); x.quadraticCurveTo(64,-126,76,-160);
@@ -2228,11 +2243,13 @@ function drawNyaP(x, detail) {
     for (let i = 0; i < 3; i++) { x.beginPath(); x.arc(62+i*13,-115+i*5, 2, 0, 7); x.fill(); }
   }
 
-  const g = x.createLinearGradient(-96,-114, 88, 76);
-  g.addColorStop(0, NYA_P.lit); g.addColorStop(0.30, NYA_P.mid);
-  g.addColorStop(0.58, NYA_P.shade); g.addColorStop(1, NYA_P.core);
   x.save(); nyaSkullP(x); x.clip();
-  x.fillStyle = g; x.fillRect(-150,-210, 300, 330);
+  x.fillStyle = ramp(x, MAT.ceramic, -96,-114, 88, 76);
+  x.fillRect(-150,-210, 300, 330);
+  // the ears and the brow sit above the face, so they cast onto it
+  occl(x, -62,-70, 46, 34, 0.45); occl(x, 62,-70, 46, 34, 0.45);
+  occl(x, 0,-26, 96, 22, 0.35);
+  wear(x, [[-84,-14,7],[70,26,6],[-30,64,5],[52,-52,5]]);
   if (detail) {
     x.fillStyle = 'rgba(150,205,200,0.16)';
     x.beginPath(); x.moveTo(46,-22); x.lineTo(102,-12); x.lineTo(96,44); x.lineTo(42,32); x.closePath(); x.fill();
@@ -2256,10 +2273,10 @@ function drawNyaP(x, detail) {
   x.restore();
 
   x.save(); nyaSkullP(x); x.clip();
-  x.fillStyle = NYA_P.core;
+  x.fillStyle = ramp(x, MAT.steel, -92,-52, 92,-24);
   x.beginPath(); x.moveTo(-92,-50); x.quadraticCurveTo(0,-36, 92,-50);
   x.lineTo(92,-28); x.quadraticCurveTo(0,-15, -92,-28); x.closePath(); x.fill();
-  x.strokeStyle = 'rgba(214,243,231,0.34)'; x.lineWidth = 2.2;
+  x.strokeStyle = 'rgba(220,178,104,0.55)'; x.lineWidth = 2.2;   // bronze trim
   x.beginPath(); x.moveTo(-90,-49); x.quadraticCurveTo(0,-35, 90,-49); x.stroke();
   x.restore();
 
@@ -2282,20 +2299,24 @@ function drawNyaP(x, detail) {
   x.fillStyle = 'rgba(190,210,200,0.18)';
   x.beginPath(); x.ellipse(-78, 40, 8, 5, -0.35, 0, 7); x.fill();
 
+  // her eyes run the same sensor as everything else in the Depths — but cyan,
+  // because she slept through the broadcast and it never reached her
   for (const [d, cx, s, rot] of [[-1,-50,1.0,0.10],[1,51,0.9,-0.10]]) {
     x.save(); x.translate(cx,-8); x.rotate(rot); x.scale(d*s, s);
-    x.fillStyle = NYA_P.core; x.save(); x.scale(1.16,1.3); nyaEyeP(x); x.fill(); x.restore();
-    x.shadowColor = NYA_P.glow; x.shadowBlur = 24; x.fillStyle = NYA_P.glow; nyaEyeP(x); x.fill(); x.shadowBlur = 0;
-    x.fillStyle = '#eafff9'; x.beginPath(); x.ellipse(6,-5, 9, 3.2, -0.2, 0, 7); x.fill();
+    x.fillStyle = MAT.steel.deep; x.save(); x.scale(1.2,1.34); nyaEyeP(x); x.fill(); x.restore();
+    occl(x, 0, 0, 34, 20, 0.5);
+    x.shadowColor = MAT.cyan.mid; x.shadowBlur = 22; x.fillStyle = MAT.cyan.mid;
+    nyaEyeP(x); x.fill(); x.shadowBlur = 0;
+    x.fillStyle = MAT.cyan.lit; x.beginPath(); x.ellipse(6,-5, 9, 3.2, -0.2, 0, 7); x.fill();
     x.restore();
   }
 
-  x.fillStyle = NYA_P.glow; x.shadowColor = NYA_P.glow; x.shadowBlur = 14;
+  x.fillStyle = MAT.cyan.mid; x.shadowColor = MAT.cyan.mid; x.shadowBlur = 14;
   x.beginPath(); x.moveTo(0,-84); x.lineTo(8,-74); x.lineTo(0,-64); x.lineTo(-8,-74); x.closePath(); x.fill();
   x.shadowBlur = 0;
-  x.strokeStyle = NYA_P.mid; x.lineWidth = 3.5;
+  x.strokeStyle = MAT.bronze.mid; x.lineWidth = 3.5;
   x.beginPath(); x.moveTo(-78,-162); x.quadraticCurveTo(-106,-200,-82,-218); x.stroke();
-  x.fillStyle = NYA_P.glow; x.shadowColor = NYA_P.glow; x.shadowBlur = 16;
+  x.fillStyle = MAT.cyan.lit; x.shadowColor = MAT.cyan.mid; x.shadowBlur = 16;
   x.beginPath(); x.arc(-81,-221, 5.5, 0, 7); x.fill(); x.shadowBlur = 0;
   x.restore();
 }
