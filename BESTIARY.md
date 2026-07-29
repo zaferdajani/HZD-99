@@ -71,13 +71,18 @@ brittle when cold.
 Each is listed with its Machine Depths name and its Odyssey-world counterpart,
 because one engine serves both worlds.
 
-### GLITCH — *The Sorter* · Zone A, Scrap Meadows
+### GLITCH — *NULL-SEEKER DRILLER* · Zone A, Scrap Meadows
 *(Odyssey: The Bronze Boar)*
 **Element SKARN · weak to GLAZZ**
-A yard-crane that spent a century deciding which bodies were worth stripping. It
-still sorts. It has simply stopped distinguishing between scrap and you. Fights
-by hurling magnetised junk it drags off the yard floor — it never runs out,
-because the arena *is* its ammunition.
+An excavation unit: subterranean drilling and tunnel maintenance, a century of
+it. The broadcast gave it one new instruction — *drill toward the signal* — and it
+has been obeying ever since.
+**Signature: the Borehole.** It rears and drives its bore-head into the floor,
+leaving a corrupted hole that keeps erupting for the rest of the fight. The arena
+you finish in is worse than the one you started in, because it has been working
+the whole time. Kill it before the floor runs out.
+Zone A's mimics are built from its parts, and the crawler carries a scaled-down
+version of the same fluted bore-head.
 **Drops: the SCRAPPLATE suit — arm `Shard Volley`.** A cone of ferrous shrapnel.
 Short range, wide spread, and it grounds anything arcing.
 
@@ -90,22 +95,30 @@ which live long — which does not trouble it, because it can always make more.
 **Drops: the COOLANT suit — arm `Pressure Jet`.** A continuous stream that shoves
 light enemies backward and quenches burning ground.
 
-### ATLAS — *The Pour* · Zone C, The Foundry
+### ATLAS — *FURNACE CHOIR* · Zone C, The Foundry
 *(Odyssey: Talos, the Forge-Giant)*
 **Element HOTT · weak to VANN**
-The Foundry's assembly frame, still pouring bodies for an army that will never be
-counted. Its chest is an open crucible; it fights by throwing what it is
-currently casting, half-finished and screaming.
+A smelting and alloy-casting array: a ring of resonant bells around an open
+furnace core. It sings to the foundry. Heat rises when it sings, and metal obeys.
+**Signature: the Hymn.** The bells wind up and then ring, sending expanding rings
+of heat across the arena — two of them, three once it overheats.
+**And it can be silenced.** Play the Song while a hymn is expanding and the two
+collide: dissonance kills the ring and staggers the Choir for a second. This is
+the only boss that fights with NYA-9's own weapon, so it is the only one she can
+argue with. Bring the Song to this fight.
 **Drops: the FORGE suit — arm `Slag Burst`.** A lobbed glob of molten metal that
 pools and burns where it lands. The only arm that leaves damage behind it.
 
-### ZERO — *The Registrar* · Zone D, Frozen Archives
+### ZERO — *THE ARCHIVIST* · Zone D, Frozen Archives
 *(Odyssey: The Judge of the Dead)*
 **Element GLAZZ · weak to HOTT**
-The archive's index. It does not attack so much as *file* you: it marks positions
-in the room, and a moment later those positions flash-freeze. It is the only boss
-that never touches you directly. It is also the most dangerous, because it is
-thinking one step ahead of where you are.
+A high-capacity data librarian, and the only thing down here that still keeps
+records. It hoards. It does not attack so much as *acquire*: it marks positions
+and freezes them, and it never touches you directly.
+**Signature: the Information Prison.** A cage of frozen data closes around where
+you stand and begins extracting — not your health, your **scrap**, three at a
+time, filing it away where you cannot follow. Hit the bars and they break early.
+It is the only boss that can cost you something you cannot heal back.
 **Drops: the HALT suit — arm `Frost Lattice`.** Freezes a target solid for two
 seconds. **This is the arm that beats the final boss.**
 

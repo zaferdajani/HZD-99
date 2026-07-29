@@ -1941,6 +1941,8 @@ class Boss {
     this.hurtT = 0; this.dead = false; this.anim = 0; this.face = -1;
     this.cycle = 0; this.marks = []; this.beam = null;
     this.hypnoT = 0; this.stagT = 0;
+    this.bores = []; this.hymn = null; this.prison = null;
+    this.windT = 0; this.overdriveT = 0;
     if (kind === 'brood') { this.y = 60; this.homeY = 60; }
     if (kind === 'zero') this.y -= 90;
     if (kind === 'mother') { this.y = 110; this.x = G.roomDef.w * TILE / 2 - s.w / 2; }
@@ -1980,6 +1982,8 @@ class Boss {
     }
     const px = player.x + player.w / 2, py = player.y + player.h / 2;
     const spd = DF().espd;
+    this.windT -= dt; this.overdriveT -= dt;
+    this.tickAbilities(dt, px, py);
     switch (this.kind) {
       // ---- GLITCH.EXE: charging corrupted hound ----
       case 'glitch': {
@@ -1987,7 +1991,21 @@ class Boss {
         if (this.st === 'idle') {
           this.vx = 0; this.t -= dt;
           this.face = Math.sign(px - this.cx()) || 1;
-          if (this.t <= 0) { this.st = this.cycle++ % 3 === 2 ? 'leap' : 'charge'; this.t = 3; if (this.st === 'leap') { this.vy = -680; this.vx = this.face * 280 * spd; } }
+          if (this.t <= 0) {
+            const k = this.cycle++ % 4;
+            this.st = k === 2 ? 'leap' : k === 3 ? 'bore' : 'charge';
+            this.t = this.st === 'bore' ? 1.1 : 3;
+            if (this.st === 'leap') { this.vy = -680; this.vx = this.face * 280 * spd; }
+          }
+        } else if (this.st === 'bore') {
+          // rears up, then drives the bore-head into the floor
+          this.vx = 0; this.t -= dt; this.windT = 0.35;
+          if (this.t <= 0.6 && !this.bored) {
+            this.bored = true;
+            this.plantBore(clamp(px, 40, G.roomDef.w * TILE - 40));
+            cam.shake = 10; sfx('phit');
+          }
+          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.6, 1.0); this.bored = false; }
         } else if (this.st === 'charge') {
           this.vx = this.face * (this.phase === 2 ? 560 : 420) * spd;
           if (chance(0.4)) addPart(this.cx() - this.face * 24, this.y + this.h, -this.face * 60, rnd(-60, 0), 0.3, PAL.A.glow, 3, 300, true);
@@ -2049,9 +2067,20 @@ class Boss {
           this.t -= dt;
           if (Math.abs(px - this.cx()) < 100 && this.t < 2) { this.st = 'slamwarn'; this.t = 0.55; this.vx = 0; }
           else if (this.t <= 0) {
-            this.t = this.phase === 2 ? 2.2 : 3.2;
-            const d = px - this.cx();
-            this.shoot(clamp(d * 1.1, -300, 300), -460, 8, 900); sfx('shoot');
+            if (this.cycle++ % 3 === 2) { this.st = 'hymn'; this.t = 1.0; }
+            else {
+              this.t = this.phase === 2 ? 2.2 : 3.2;
+              const d = px - this.cx();
+              this.shoot(clamp(d * 1.1, -300, 300), -460, 8, 900); sfx('shoot');
+            }
+          }
+        } else if (this.st === 'hymn') {
+          // the bells wind up, then ring: expanding rings of heat
+          this.vx = 0; this.t -= dt; this.windT = 0.4;
+          if (this.t <= 0) {
+            this.hymn = { r: 10, t: 0, n: this.phase === 2 ? 3 : 2 };
+            sfx('roar'); cam.shake = 7;
+            this.st = 'idle'; this.t = this.phase === 2 ? 2.0 : 3.0;
           }
         } else if (this.st === 'slamwarn') {
           this.vx = 0; this.t -= dt;
@@ -2082,11 +2111,15 @@ class Boss {
             burst(this.cx(), this.cy(), 14, PAL.D.glow, 220, 0.4, 0, 3, true);
             this.x = this.tx - this.w / 2; this.y = this.ty - this.h / 2;
             burst(this.cx(), this.cy(), 14, PAL.D.glow, 220, 0.4, 0, 3, true);
-            const alt = this.cycle++ % 2 === 0;
-            if (alt) this.ring(this.phase === 2 ? 10 : 8, 240 * spd, this.anim);
-            else {
+            const alt = this.cycle++ % 3;
+            if (alt === 0) this.ring(this.phase === 2 ? 10 : 8, 240 * spd, this.anim);
+            else if (alt === 1) {
               this.marks = [];
               for (let k = -1; k <= (this.phase === 2 ? 2 : 1); k++) this.marks.push({ x: px + k * 80, t: 0.7 });
+            } else {
+              // an information prison: a cage of frozen data around where you stand
+              this.prison = { x: px, y: py, t: 0, life: this.phase === 2 ? 3.4 : 2.6, held: 0 };
+              sfx('cast'); this.windT = 0.5;
             }
             this.st = 'idle'; this.t = this.phase === 2 ? 1.7 : 2.4;
           }
@@ -2180,6 +2213,105 @@ class Boss {
     }
     if (!player.dead && aabb(this, player) && this.st !== 'intro') player.hurt(DF().edmg, this.cx());
   }
+  // ---- the three signature systems -----------------------------------------
+  plantBore(x) {
+    this.bores.push({ x, t: 0, next: 1.6 });
+    if (this.bores.length > 4) this.bores.shift();
+  }
+  tickAbilities(dt, px, py) {
+    // boreholes: the Driller's legacy. They keep erupting after it plants them,
+    // so the floor you fight on is worse in the second half than the first.
+    for (const b of this.bores) {
+      b.t += dt; b.next -= dt;
+      if (b.next <= 0) {
+        b.next = 1.9;
+        const gy = G.roomDef.h * TILE;
+        for (let i = -1; i <= 1; i++) {
+          const pr = new Proj(b.x + i * 9, gy - 8, i * 60, -520, false, 1, 6, MAT.crimson.mid, 900, 1.6);
+          G.projs.push(pr);
+        }
+        burst(b.x, gy - 10, 10, MAT.crimson.mid, 220, 0.5, -200, 3, true);
+        sfx('shoot');
+      }
+    }
+    // the hymn: expanding rings. The Song cancels it — dissonance. That is the
+    // whole reason this boss has bells.
+    if (this.hymn) {
+      const h = this.hymn;
+      h.t += dt; h.r += 260 * dt;
+      if (player.songT > 0) {                        // she sings over it
+        this.hymn = null;
+        this.stagT = Math.max(this.stagT, 1.1);
+        G.elemPop = { t: 0.6, x: this.cx(), y: this.y - 12, el: 'murr' };
+        burst(this.cx(), this.cy(), 30, ELEM.murr.glow, 380, 0.8, 0, 4, true);
+        cam.shake = 9; sfx('powerUp');
+      } else {
+        const d = Math.hypot(px - this.cx(), py - this.cy());
+        if (Math.abs(d - h.r) < 16 && !player.dead) player.hurt(DF().edmg, this.cx());
+        if (h.r > 520) { h.n--; if (h.n > 0) { h.r = 10; } else this.hymn = null; }
+      }
+    }
+    // the prison: it holds you and takes what you are carrying, rather than
+    // wounding you. Break out by attacking it.
+    if (this.prison) {
+      const q = this.prison;
+      q.t += dt;
+      const inside = Math.abs(px - q.x) < 62 && Math.abs(py - q.y) < 62;
+      if (inside && !player.dead) {
+        player.vx *= 0.25;
+        q.held += dt;
+        if (q.held > 0.7) {
+          q.held = 0;
+          if (G.save.scrap > 0) { G.save.scrap = Math.max(0, G.save.scrap - 3); G.toast(t('arch_take')); }
+          else player.hurt(1, q.x);
+        }
+      }
+      if (player.swing && inside) q.life -= dt * 3;   // hitting the bars breaks them
+      q.life -= dt;
+      if (q.life <= 0) { this.prison = null; }
+    }
+  }
+  drawAbilities(c) {
+    for (const b of this.bores) {                     // a scar in the floor
+      const gy = G.roomDef.h * TILE;
+      c.save();
+      c.fillStyle = MAT.crimson.deep;
+      c.beginPath(); c.ellipse(b.x, gy - 4, 13, 5, 0, 0, 7); c.fill();
+      const glow = 0.4 + Math.sin(b.t * 4) * 0.3;
+      c.globalAlpha = glow;
+      c.fillStyle = MAT.crimson.mid;
+      c.beginPath(); c.ellipse(b.x, gy - 5, 8, 3, 0, 0, 7); c.fill();
+      c.restore(); c.globalAlpha = 1;
+      c.save(); c.translate(b.x, gy - 8); tendrils(c, 3, 16, b.t, b.x, 0.35 * glow); c.restore();
+    }
+    if (this.hymn) {                                  // the ring of the bells
+      const h = this.hymn;
+      c.save(); c.globalAlpha = clamp(1 - h.r / 560, 0, 1);
+      c.strokeStyle = MAT.molten.mid; c.lineWidth = 7;
+      c.shadowColor = MAT.molten.mid; c.shadowBlur = 14;
+      c.beginPath(); c.arc(this.cx(), this.cy(), h.r, 0, 7); c.stroke();
+      c.strokeStyle = MAT.molten.lit; c.lineWidth = 2;
+      c.beginPath(); c.arc(this.cx(), this.cy(), h.r - 5, 0, 7); c.stroke();
+      c.shadowBlur = 0; c.restore(); c.globalAlpha = 1;
+    }
+    if (this.prison) {                                // bars of frozen data
+      const q = this.prison, k = clamp(q.life, 0, 1);
+      c.save(); c.globalAlpha = 0.35 + Math.min(1, q.t * 3) * 0.4 * k;
+      c.strokeStyle = MAT.frost.mid; c.lineWidth = 3;
+      c.strokeRect(q.x - 62, q.y - 62, 124, 124);
+      c.lineWidth = 1.6; c.strokeStyle = MAT.frost.lit;
+      for (let i = 1; i < 6; i++) {
+        const bx = q.x - 62 + i * 20.6;
+        c.beginPath(); c.moveTo(bx, q.y - 62); c.lineTo(bx, q.y + 62); c.stroke();
+      }
+      c.globalAlpha = 0.5; c.fillStyle = MAT.frost.lit;
+      for (let i = 0; i < 5; i++) {                   // extracted memories, rising
+        const yy = q.y + 56 - ((q.t * 40 + i * 26) % 120);
+        ftxt('◈', q.x - 40 + i * 20, yy, 11, MAT.frost.lit);
+      }
+      c.restore(); c.globalAlpha = 1;
+    }
+  }
   die() {
     if (this.dead) return;
     this.dead = true;
@@ -2200,6 +2332,7 @@ class Boss {
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
     // telegraphs
+    this.drawAbilities(c);
     if (this.kind === 'zero') for (const m of this.marks) {
       c.fillStyle = 'rgba(238,252,255,0.35)';
       c.fillRect(m.x - 10, 12 * TILE, 20, 3 * TILE);
