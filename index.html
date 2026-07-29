@@ -4389,10 +4389,12 @@ class Boss {
     this.hurtT = 0; this.dead = false; this.anim = 0; this.face = -1;
     this.cycle = 0; this.marks = []; this.beam = null;
     this.hypnoT = 0; this.stagT = 0;
-    this.spawnX = this.x; this.spawnY = this.y;
     if (kind === 'brood') { this.y = 60; this.homeY = 60; }
     if (kind === 'zero') this.y -= 90;
     if (kind === 'mother') { this.y = 110; this.x = G.roomDef.w * TILE / 2 - s.w / 2; }
+    // recorded AFTER the per-kind placement, or the flyers get sent back to a
+    // position they never actually occupied
+    this.spawnX = this.x; this.spawnY = this.y;
   }
   cx() { return this.x + this.w / 2; }
   cy() { return this.y + this.h / 2; }
