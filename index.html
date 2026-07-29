@@ -6384,6 +6384,252 @@ function dimPanel(x, y, w, h) {
   c.fillStyle = 'rgba(6,10,16,0.88)'; rr(c, x, y, w, h, 12); c.fill();
   c.strokeStyle = 'rgba(120,200,255,0.35)'; c.lineWidth = 1.5; rr(c, x, y, w, h, 12); c.stroke();
 }
+// ---------------------------------------------------------------------------
+// Character portraits. Both are drawn in one normalised space (roughly ±110 wide,
+// -220..+196 tall, origin between the eyes) so the same code serves the big title
+// mascot and the small character-select portrait; pass detail=false to drop the
+// fine work that turns to mush at portrait size.
+//
+// Both follow STORY.md's art rules: red light means infected, so nothing friendly
+// glows red — NYA-9 reads teal, the hero reads gold, and the crimson crest is
+// pigment rather than emission. Nothing here is new, so both carry wear.
+// ---------------------------------------------------------------------------
+const NYA_P  = { core:'#0b1a2b', shade:'#1d3a55', mid:'#37647c', lit:'#7cb4ae', glow:'#37ffd0' };
+const WRAP_P = { core:'#121a1e', shade:'#1f2b30', mid:'#334449' };
+const BRZ_P  = { core:'#2b1f12', shade:'#5f4520', mid:'#9a7534', lit:'#d9b56a', glow:'#ffd98a' };
+const CRE_P  = { core:'#5e1a22', shade:'#a8323c', mid:'#e0484f', lit:'#f2887f' };
+
+function nyaSkullP(x) {
+  x.beginPath();
+  x.moveTo(-48,-92);
+  x.bezierCurveTo(-20,-110, 20,-110, 48,-92);
+  x.bezierCurveTo(86,-70, 104,-36, 104, 0);
+  x.lineTo(112, 16); x.lineTo(98, 24);
+  x.bezierCurveTo(94, 52, 74, 74, 44, 84);
+  x.bezierCurveTo(24, 92, -24, 92, -44, 84);
+  x.bezierCurveTo(-74, 74, -94, 52, -98, 24);
+  x.lineTo(-112, 16); x.lineTo(-104, 0);
+  x.bezierCurveTo(-104,-36, -86,-70, -48,-92);
+  x.closePath();
+}
+function nyaEarP(x, dir) {
+  x.save(); x.scale(dir, 1);
+  x.beginPath();
+  x.moveTo(36,-76); x.quadraticCurveTo(56,-130, 74,-176); x.quadraticCurveTo(104,-114, 92,-60);
+  x.closePath(); x.restore();
+}
+function nyaEyeP(x) {
+  x.beginPath();
+  x.moveTo(-25, 1); x.quadraticCurveTo(-20,-12, 2,-13); x.quadraticCurveTo(23,-13, 28,-4);
+  x.quadraticCurveTo(23, 10, 2, 11); x.quadraticCurveTo(-20, 10, -25, 1);
+  x.closePath();
+}
+// NYA-9: a maintenance unit, not a soldier — round-dominant skull, level brow and
+// alert (not narrowed) eyes. The asymmetry is a repair patch she riveted on herself.
+function drawNyaP(x, detail) {
+  x.save(); x.rotate(-0.03);
+  const sg = x.createLinearGradient(-90, 60, 90, 190);
+  sg.addColorStop(0, NYA_P.shade); sg.addColorStop(1, NYA_P.core);
+  x.fillStyle = sg;
+  x.beginPath(); x.moveTo(-40,44); x.lineTo(40,44); x.lineTo(52,120); x.lineTo(-52,120); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(-126,196); x.quadraticCurveTo(-98,116,-46,106);
+  x.lineTo(46,106); x.quadraticCurveTo(98,116,126,196); x.closePath(); x.fill();
+
+  x.fillStyle = WRAP_P.shade;
+  x.beginPath(); x.moveTo(-64,10); x.quadraticCurveTo(-136,-16,-186,16);
+  x.quadraticCurveTo(-140,22,-118,40); x.quadraticCurveTo(-96,30,-60,36); x.closePath(); x.fill();
+  x.fillStyle = WRAP_P.core;
+  x.beginPath(); x.moveTo(-62,40); x.quadraticCurveTo(-116,58,-150,92);
+  x.quadraticCurveTo(-112,76,-58,72); x.closePath(); x.fill();
+
+  const eg = x.createLinearGradient(-60,-180, 60,-60);
+  eg.addColorStop(0, NYA_P.mid); eg.addColorStop(1, NYA_P.core);
+  x.fillStyle = eg; nyaEarP(x,-1); x.fill(); nyaEarP(x,1); x.fill();
+  x.fillStyle = NYA_P.core;
+  for (const d of [-1, 1]) {
+    x.save(); x.scale(d,1);
+    x.beginPath(); x.moveTo(50,-80); x.quadraticCurveTo(64,-126,76,-160);
+    x.quadraticCurveTo(90,-120,84,-70); x.closePath(); x.fill(); x.restore();
+  }
+  if (detail) {
+    x.strokeStyle = 'rgba(190,235,230,0.30)'; x.lineWidth = 3;
+    x.beginPath(); x.moveTo(58,-118); x.lineTo(92,-104); x.stroke();
+    x.fillStyle = 'rgba(214,243,231,0.5)';
+    for (let i = 0; i < 3; i++) { x.beginPath(); x.arc(62+i*13,-115+i*5, 2, 0, 7); x.fill(); }
+  }
+
+  const g = x.createLinearGradient(-96,-114, 88, 76);
+  g.addColorStop(0, NYA_P.lit); g.addColorStop(0.30, NYA_P.mid);
+  g.addColorStop(0.58, NYA_P.shade); g.addColorStop(1, NYA_P.core);
+  x.save(); nyaSkullP(x); x.clip();
+  x.fillStyle = g; x.fillRect(-150,-210, 300, 330);
+  if (detail) {
+    x.fillStyle = 'rgba(150,205,200,0.16)';
+    x.beginPath(); x.moveTo(46,-22); x.lineTo(102,-12); x.lineTo(96,44); x.lineTo(42,32); x.closePath(); x.fill();
+    x.strokeStyle = 'rgba(214,243,231,0.34)'; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(46,-22); x.lineTo(102,-12); x.stroke();
+    x.fillStyle = 'rgba(214,243,231,0.55)';
+    for (let i = 0; i < 4; i++) { x.beginPath(); x.arc(52+i*16,-16+i*3.4, 2.2, 0, 7); x.fill(); }
+    x.strokeStyle = 'rgba(190,235,230,0.16)'; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(-70,-70); x.quadraticCurveTo(0,-90, 72,-68); x.stroke();
+  }
+  x.restore();
+
+  x.save(); nyaSkullP(x); x.clip();
+  const rg = x.createLinearGradient(-106,-116, 40, 46);
+  rg.addColorStop(0,'rgba(214,243,231,0)'); rg.addColorStop(0.18,'rgba(214,243,231,0.92)');
+  rg.addColorStop(0.52,'rgba(214,243,231,0)');
+  x.strokeStyle = rg; x.lineWidth = 8; nyaSkullP(x); x.stroke();
+  const bg2 = x.createLinearGradient(80, 86, 0, 6);
+  bg2.addColorStop(0,'rgba(55,255,208,0.40)'); bg2.addColorStop(1,'rgba(55,255,208,0)');
+  x.strokeStyle = bg2; x.lineWidth = 5; nyaSkullP(x); x.stroke();
+  x.restore();
+
+  x.save(); nyaSkullP(x); x.clip();
+  x.fillStyle = NYA_P.core;
+  x.beginPath(); x.moveTo(-92,-50); x.quadraticCurveTo(0,-36, 92,-50);
+  x.lineTo(92,-28); x.quadraticCurveTo(0,-15, -92,-28); x.closePath(); x.fill();
+  x.strokeStyle = 'rgba(214,243,231,0.34)'; x.lineWidth = 2.2;
+  x.beginPath(); x.moveTo(-90,-49); x.quadraticCurveTo(0,-35, 90,-49); x.stroke();
+  x.restore();
+
+  x.save(); nyaSkullP(x); x.clip();
+  const wg = x.createLinearGradient(-60, 24, 70, 84);
+  wg.addColorStop(0, WRAP_P.mid); wg.addColorStop(1, WRAP_P.core);
+  x.fillStyle = wg;
+  x.beginPath(); x.moveTo(-102,30); x.quadraticCurveTo(0,16, 102,30);
+  x.lineTo(102,58); x.quadraticCurveTo(0,96, -102,58); x.closePath(); x.fill();
+  x.strokeStyle = 'rgba(190,210,200,0.26)'; x.lineWidth = 2;
+  x.beginPath(); x.moveTo(-98,32); x.quadraticCurveTo(0,18, 98,32); x.stroke();
+  if (detail) {
+    x.strokeStyle = 'rgba(190,210,200,0.14)'; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(-66,40); x.quadraticCurveTo(-30,58,-6,74); x.stroke();
+    x.beginPath(); x.moveTo(-40,34); x.quadraticCurveTo(-18,54, 4,70); x.stroke();
+  }
+  x.restore();
+  x.fillStyle = WRAP_P.mid;
+  x.beginPath(); x.ellipse(-74, 44, 15, 11, -0.35, 0, 7); x.fill();
+  x.fillStyle = 'rgba(190,210,200,0.18)';
+  x.beginPath(); x.ellipse(-78, 40, 8, 5, -0.35, 0, 7); x.fill();
+
+  for (const [d, cx, s, rot] of [[-1,-50,1.0,0.10],[1,51,0.9,-0.10]]) {
+    x.save(); x.translate(cx,-8); x.rotate(rot); x.scale(d*s, s);
+    x.fillStyle = NYA_P.core; x.save(); x.scale(1.16,1.3); nyaEyeP(x); x.fill(); x.restore();
+    x.shadowColor = NYA_P.glow; x.shadowBlur = 24; x.fillStyle = NYA_P.glow; nyaEyeP(x); x.fill(); x.shadowBlur = 0;
+    x.fillStyle = '#eafff9'; x.beginPath(); x.ellipse(6,-5, 9, 3.2, -0.2, 0, 7); x.fill();
+    x.restore();
+  }
+
+  x.fillStyle = NYA_P.glow; x.shadowColor = NYA_P.glow; x.shadowBlur = 14;
+  x.beginPath(); x.moveTo(0,-84); x.lineTo(8,-74); x.lineTo(0,-64); x.lineTo(-8,-74); x.closePath(); x.fill();
+  x.shadowBlur = 0;
+  x.strokeStyle = NYA_P.mid; x.lineWidth = 3.5;
+  x.beginPath(); x.moveTo(-78,-162); x.quadraticCurveTo(-106,-200,-82,-218); x.stroke();
+  x.fillStyle = NYA_P.glow; x.shadowColor = NYA_P.glow; x.shadowBlur = 16;
+  x.beginPath(); x.arc(-81,-221, 5.5, 0, 7); x.fill(); x.shadowBlur = 0;
+  x.restore();
+}
+
+function helmPathP(x) {
+  x.beginPath();
+  x.moveTo(-72,-34);
+  x.bezierCurveTo(-72,-108, -38,-130, 0,-130);
+  x.bezierCurveTo(38,-130, 72,-108, 72,-34);
+  x.bezierCurveTo(76, 18, 72, 60, 56, 96);
+  x.lineTo(30, 92); x.quadraticCurveTo(20, 52, 15, 30);
+  x.lineTo(-15, 30); x.quadraticCurveTo(-20, 52, -30, 92);
+  x.lineTo(-56, 96);
+  x.bezierCurveTo(-72, 60, -76, 18, -72,-34);
+  x.closePath();
+}
+function helmEyeP(x) {
+  x.beginPath();
+  x.moveTo(-30, 6); x.quadraticCurveTo(-14,-12, 12,-14);
+  x.quadraticCurveTo(30,-13, 33,-2); x.quadraticCurveTo(16, 12, -8, 13);
+  x.closePath();
+}
+// The wanderer of the Odyssey: square-dominant Corinthian helm (endurance), with
+// the crest supplying the only dynamic shape. Salt-worn — verdigris in the crevices.
+function drawHeroP(x, detail) {
+  x.save(); x.rotate(0.03);
+  const sg = x.createLinearGradient(-90, 60, 90, 190);
+  sg.addColorStop(0, BRZ_P.shade); sg.addColorStop(1, BRZ_P.core);
+  x.fillStyle = sg;
+  x.beginPath(); x.moveTo(-126,196); x.quadraticCurveTo(-96,112,-44,100);
+  x.lineTo(44,100); x.quadraticCurveTo(96,112,126,196); x.closePath(); x.fill();
+
+  const cg = x.createLinearGradient(-70,-200, 60,-60);
+  cg.addColorStop(0, CRE_P.lit); cg.addColorStop(0.42, CRE_P.mid); cg.addColorStop(1, CRE_P.core);
+  x.fillStyle = cg;
+  x.beginPath();
+  x.moveTo(-88,-16);
+  x.bezierCurveTo(-106,-124, -50,-204, 0,-204);
+  x.bezierCurveTo(50,-204, 106,-124, 88,-16);
+  x.lineTo(70,-30);
+  x.bezierCurveTo(74,-104, 38,-128, 0,-128);
+  x.bezierCurveTo(-38,-128, -74,-104, -70,-30);
+  x.closePath(); x.fill();
+  if (detail) {
+    x.strokeStyle = 'rgba(255,190,180,0.20)'; x.lineWidth = 2.4;
+    for (let i = -4; i <= 4; i++) {
+      const a = i * 0.20 - Math.PI / 2;
+      x.beginPath();
+      x.moveTo(Math.cos(a) * 62, Math.sin(a) * 74 - 54);
+      x.lineTo(Math.cos(a) * 96, Math.sin(a) * 118 - 46);
+      x.stroke();
+    }
+  }
+  const combg = x.createLinearGradient(-40,-140, 40,-118);
+  combg.addColorStop(0, BRZ_P.lit); combg.addColorStop(1, BRZ_P.shade);
+  x.fillStyle = combg;
+  x.beginPath();
+  x.moveTo(-72,-32); x.bezierCurveTo(-76,-106, -38,-132, 0,-132);
+  x.bezierCurveTo(38,-132, 76,-106, 72,-32);
+  x.lineTo(60,-34); x.bezierCurveTo(62,-98, 32,-120, 0,-120);
+  x.bezierCurveTo(-32,-120, -62,-98, -60,-34);
+  x.closePath(); x.fill();
+
+  const g = x.createLinearGradient(-92,-124, 84, 78);
+  g.addColorStop(0, BRZ_P.lit); g.addColorStop(0.28, BRZ_P.mid);
+  g.addColorStop(0.60, BRZ_P.shade); g.addColorStop(1, BRZ_P.core);
+  x.save(); helmPathP(x); x.clip();
+  x.fillStyle = g; x.fillRect(-150,-210, 300, 330);
+  if (detail) {
+    x.fillStyle = 'rgba(78,122,99,0.30)';
+    x.beginPath(); x.ellipse(-58, 44, 20, 13, 0.4, 0, 7); x.fill();
+    x.beginPath(); x.ellipse(44, 66, 15, 9, -0.3, 0, 7); x.fill();
+    x.fillStyle = 'rgba(43,31,18,0.42)';
+    x.beginPath(); x.ellipse(48,-64, 14, 8, 0.6, 0, 7); x.fill();
+    x.strokeStyle = 'rgba(255,233,184,0.20)'; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(34,-72); x.quadraticCurveTo(50,-66, 60,-56); x.stroke();
+  }
+  x.strokeStyle = 'rgba(255,233,184,0.34)'; x.lineWidth = 3;
+  x.beginPath(); x.moveTo(-70,-30); x.quadraticCurveTo(0,-46, 70,-30); x.stroke();
+  x.restore();
+
+  x.save(); helmPathP(x); x.clip();
+  const rg = x.createLinearGradient(-104,-124, 34, 40);
+  rg.addColorStop(0,'rgba(255,233,184,0)'); rg.addColorStop(0.18,'rgba(255,233,184,0.95)');
+  rg.addColorStop(0.54,'rgba(255,233,184,0)');
+  x.strokeStyle = rg; x.lineWidth = 8; helmPathP(x); x.stroke();
+  x.restore();
+
+  for (const [d, cx] of [[-1,-38],[1,39]]) {
+    x.save(); x.translate(cx,-6); x.scale(d,1);
+    x.fillStyle = '#160f08'; x.save(); x.scale(1.14,1.28); helmEyeP(x); x.fill(); x.restore();
+    x.shadowColor = BRZ_P.glow; x.shadowBlur = 20; x.fillStyle = BRZ_P.glow;
+    x.save(); x.scale(0.52,0.46); x.translate(6,-2); helmEyeP(x); x.fill(); x.restore();
+    x.shadowBlur = 0; x.restore();
+  }
+  const ng = x.createLinearGradient(-9,-30, 11, 30);
+  ng.addColorStop(0, BRZ_P.lit); ng.addColorStop(1, BRZ_P.shade);
+  x.fillStyle = ng;
+  x.beginPath(); x.moveTo(-9,-34); x.lineTo(9,-34); x.lineTo(7, 40); x.lineTo(0, 48); x.lineTo(-7, 40); x.closePath(); x.fill();
+  x.strokeStyle = 'rgba(255,233,184,0.45)'; x.lineWidth = 1.6;
+  x.beginPath(); x.moveTo(-8,-32); x.lineTo(-6, 38); x.stroke();
+  x.restore();
+}
+
 function drawMenuBG(tsec) {
   const sky = c.createLinearGradient(0, 0, 0, 540);
   sky.addColorStop(0, '#050a14'); sky.addColorStop(1, '#0b1b30');
@@ -6393,16 +6639,14 @@ function drawMenuBG(tsec) {
     c.fillStyle = 'rgba(120,220,255,' + (0.1 + hash2(i, 14) * 0.3) + ')';
     c.fillRect(xx, yy, 2.4, 2.4);
   }
-  // big cat silhouette
-  c.save(); c.translate(760, 350); c.globalAlpha = 0.6;
-  c.fillStyle = '#0e2438';
-  c.beginPath(); c.arc(0, 0, 120, 0, 7); c.fill();
-  c.beginPath(); c.moveTo(-95, -70); c.lineTo(-65, -160); c.lineTo(-25, -85); c.closePath(); c.fill();
-  c.beginPath(); c.moveTo(25, -85); c.lineTo(70, -158); c.lineTo(95, -68); c.closePath(); c.fill();
-  c.fillStyle = '#37ffd0'; c.shadowColor = '#37ffd0'; c.shadowBlur = 30;
-  c.globalAlpha = 0.55 + Math.sin(tsec * 2) * 0.15;
-  c.fillRect(-58, -22, 38, 14); c.fillRect(22, -22, 38, 14);
-  c.restore(); c.shadowBlur = 0; c.globalAlpha = 1;
+  // NYA-9 keeping watch behind the menu. Suppressed on the chooser, where she would
+  // otherwise show through the hero's card and lend him her antenna.
+  if (G.state !== 'WHO') {
+    c.save(); c.translate(772, 334); c.scale(1.02, 1.02);
+    c.globalAlpha = 0.58 + Math.sin(tsec * 2) * 0.07;
+    drawNyaP(c, true);
+    c.restore(); c.shadowBlur = 0; c.globalAlpha = 1;
+  }
 }
 function draw(tms) {
   const tsec = tms / 1000;
@@ -6429,28 +6673,9 @@ function draw(tms) {
           c.strokeStyle = i ? '#ffd98a' : '#37ffd0'; c.lineWidth = 2.5;
           rr(c, x - 170, 150, 340, 300, 12); c.stroke();
         }
-        c.save(); c.translate(x, 250); c.scale(2.2, 2.2);
-        if (i === 0) {
-          // robo-cat portrait
-          c.fillStyle = '#eef3fa'; rr(c, -14, -12, 28, 24, 8); c.fill();
-          c.fillStyle = '#dfe6f0';
-          c.beginPath(); c.moveTo(-11, -10); c.lineTo(-7, -22); c.lineTo(-1, -11); c.closePath(); c.fill();
-          c.beginPath(); c.moveTo(2, -11); c.lineTo(8, -22); c.lineTo(12, -9); c.closePath(); c.fill();
-          c.fillStyle = '#0a1420'; rr(c, -9, -4, 19, 9, 4); c.fill();
-          c.fillStyle = '#37ffd0'; c.shadowColor = '#37ffd0'; c.shadowBlur = 8;
-          c.fillRect(-5, -2, 5, 5); c.fillRect(3, -2, 5, 5); c.shadowBlur = 0;
-        } else {
-          // hero portrait: bronze helmet with crimson crest
-          c.fillStyle = '#d9b56a'; rr(c, -13, -12, 26, 24, 9); c.fill();
-          c.fillStyle = '#b8934c';
-          c.beginPath(); c.arc(0, -10, 13, Math.PI, 0); c.fill();
-          c.strokeStyle = '#e0484f'; c.lineWidth = 5; c.lineCap = 'round';
-          c.beginPath(); c.arc(0, -12, 15, Math.PI * 1.15, Math.PI * 1.85); c.stroke();
-          c.fillStyle = '#2a1e10'; rr(c, -8, -4, 16, 8, 3); c.fill();
-          c.fillStyle = '#ffd98a'; c.shadowColor = '#ffd98a'; c.shadowBlur = 8;
-          c.fillRect(-5, -2, 4, 4); c.fillRect(2, -2, 4, 4); c.shadowBlur = 0;
-        }
-        c.restore();
+        c.save(); c.translate(x, 252); c.scale(0.42, 0.42);
+        if (i === 0) drawNyaP(c, false); else drawHeroP(c, false);
+        c.restore(); c.shadowBlur = 0;
         ftxt(t(i ? 'who_hero' : 'who_robo'), x, 360, 20, sel ? '#eef3fa' : '#8aa2b5');
         ftxt(t(i ? 'who_herod' : 'who_robod'), x, 392, 13, '#7d93a8');
         // show whether this character has a voyage in progress
