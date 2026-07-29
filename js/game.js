@@ -61,8 +61,9 @@ const G = {
   onPlayerDeath() {
     this.save.deaths++;
     if (this.save.diff === 2) this.save.lives++;
-    if (this.save.scrap > 0) {
+    if (this.save.scrap > 0 || player.volts > 8) {
       this.save.pouch = { room: this.roomId, x: clamp(player.x, 40, this.roomDef.w * TILE - 60), y: Math.min(player.y, 13 * TILE), amount: this.save.scrap };
+      this.save.pouchVolts = Math.round(player.volts);   // the charge stays with it too
       this.save.scrap = 0;
     }
     persist();
@@ -249,16 +250,34 @@ function respawn() {
   player = new Player(G.save.bench.x, G.save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
   updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
-  if (G.save.pouch) G.toast(t('pouch'));
+  if (G.save.pouch) G.toast(t('pouch') + '  (' + t('z_' + ROOMS[G.save.pouch.room].zone) + ')');
   G.state = 'PLAY';
 }
 function bossActive() { return G.boss && !G.boss.dead && G.boss.st !== 'dorm'; }
 
 // ---------- transitions ----------
 function checkTransitions() {
-  if (G.trans || bossActive()) return;
+  if (G.trans) return;
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
   const ex = G.roomDef.exits || {};
+  // The out-of-bounds rescue has to run even mid-boss. It used to sit behind an
+  // early `if (bossActive()) return`, so falling into an arena pit during a boss
+  // fight dropped you out of the world with nothing to catch you — no floor, no
+  // reset, no death. That is the softlock.
+  const inBoss = bossActive();
+  if (player.y > H + 40 && (inBoss || !ex.B)) {
+    player.hurt(1, player.x);
+    player.x = player.lastSafe.x; player.y = player.lastSafe.y;
+    player.vx = 0; player.vy = 0;
+    return;
+  }
+  if (inBoss) {
+    // and keep you inside the arena while it lives, or you can walk off the edge
+    // into the same void sideways
+    player.x = clamp(player.x, 2, W - player.w - 2);
+    if (player.y + player.h < -200) { player.y = 0; player.vy = 0; }
+    return;
+  }
   let side = null;
   if (player.x + player.w < -2 && ex.L) side = 'L';
   else if (player.x > W + 2 && ex.R) side = 'R';

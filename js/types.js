@@ -135,7 +135,10 @@ function playSong() {
   G.songWave = { t: 0.7, x: px, y: py };
   sfx('powerUp');
   let charmed = 0;
-  const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+  // the Husk listens too — calming it is how you get your charge back
+  const targets = G.enemies
+    .concat(G.pickups.filter(o => o && o.kind === 'husk'))
+    .concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
   for (const e of targets) {
     if (e.dead) continue;
     if (Math.hypot(e.x + e.w / 2 - px, e.y + e.h / 2 - py) > SONG_RANGE) continue;

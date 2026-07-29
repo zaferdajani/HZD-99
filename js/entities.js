@@ -1318,6 +1318,18 @@ class Scrap {
   }
   update(dt) {
     this.t += dt;
+    if (this.rest === undefined) this.rest = 0;
+    // A shard that lands in spikes, or on a ledge you cannot stand on, used to be
+    // gone for good. After a moment at rest it drifts to you instead.
+    const settled = this.rest > 1.2;
+    if (settled && !player.dead && dist2(this.x, this.y, player.x, player.y) < 320 * 320) {
+      const dx = player.x + 12 - this.x, dy = player.y + 18 - this.y, d = Math.hypot(dx, dy) || 1;
+      this.x += dx / d * 300 * dt; this.y += dy / d * 300 * dt;
+      this.vx = 0; this.vy = 0;
+      if (chance(dt * 8)) addPart(this.x, this.y, 0, -30, 0.4, '#ffd76a', 1.6, 0, true);
+      if (aabb(this, player)) { this.dead = true; G.save.scrap += this.val; sfx('pick'); }
+      return;
+    }
     if (hasCrest('magnet') && !player.dead && dist2(this.x, this.y, player.x, player.y) < 210 * 210) {
       const dx = player.x + 12 - this.x, dy = player.y + 18 - this.y, d = Math.hypot(dx, dy) || 1;
       this.vx += dx / d * 1900 * dt; this.vy += dy / d * 1900 * dt;
@@ -1326,6 +1338,7 @@ class Scrap {
     const col = moveEnt(this, dt);
     if (col.d) { this.vy = pv < -50 ? 0 : -pv * 0.35; this.vx *= 0.82; }
     if (col.l || col.r) this.vx = 0;
+    this.rest = (col.d && Math.abs(this.vy) < 30 && Math.abs(this.vx) < 20) ? this.rest + dt : 0;
     if (!player.dead && aabb(this, player)) {
       this.dead = true; G.save.scrap += this.val; sfx('pick');
       addPart(this.x, this.y, 0, -60, 0.4, '#ffd76a', 3, 0, true);
@@ -1339,20 +1352,86 @@ class Scrap {
     c.restore(); c.shadowBlur = 0;
   }
 }
+// THE HUSK — what is left standing where NYA-9 fell.
+// Hollow Knight leaves a shade you must fight. A repair unit leaves something
+// worse and more personal: her own previous chassis, still upright, still running
+// the last orders she gave it, with the broadcast already behind its eyes. It
+// holds the scrap and the charge she was carrying.
+// Two ways to take it back, and they are not equal — walk into it and it gives up
+// the scrap, or play the Song first and it remembers itself, releasing the charge
+// as well. The recovery uses the one power that is hers.
 class Pouch {
-  constructor(x, y, amount) { this.x = x; this.y = y; this.w = 18; this.h = 18; this.amount = amount; this.vy = 0; this.vx = 0; this.dead = false; this.t = 0; }
+  constructor(x, y, amount) {
+    this.x = x; this.y = y; this.w = 22; this.h = 30; this.amount = amount;
+    this.vy = 0; this.vx = 0; this.dead = false; this.t = 0;
+    this.calmed = false;                 // has the Song reached it
+    this.volts = (G.save.pouchVolts || 0);
+    this.drift = chance(0.5) ? 1 : -1;
+    this.hypnoT = 0; this.stagT = 0; this.kind = 'husk';
+  }
   update(dt) {
-    this.t += dt; this.vy += 900 * dt; moveEnt(this, dt);
+    this.t += dt;
+    // the Song calms it — the same call that charms mimics
+    if (!this.calmed && this.hypnoT > 0) {
+      this.calmed = true;
+      burst(this.x + 11, this.y + 12, 22, ELEM.murr.glow, 240, 0.8, -40, 3, true);
+      sfx('powerUp'); G.toast(t('husk_calm'));
+    }
+    // it paces where it fell until it is calmed, then waits for her
+    if (!this.calmed) {
+      this.vx = this.drift * 22 * (0.6 + Math.sin(this.t * 1.6) * 0.4);
+      if (!groundAhead(this, this.drift)) this.drift *= -1;
+    } else this.vx = 0;
+    this.vy += 900 * dt;
+    const col = moveEnt(this, dt);
+    if (col.l || col.r) this.drift *= -1;
     if (!player.dead && aabb(this, player)) {
-      this.dead = true; G.save.scrap += this.amount; G.save.pouch = null;
-      sfx('bench'); G.toast(t('pouch_back') + '  +' + this.amount);
+      this.dead = true;
+      G.save.scrap += this.amount;
+      let msg = t('pouch_back') + '  +' + this.amount;
+      if (this.calmed && this.volts > 0) {
+        player.gainVolts(this.volts);
+        msg += '  ·  +' + this.volts + '⚡';
+      }
+      G.save.pouch = null; G.save.pouchVolts = 0;
+      sfx('bench'); G.toast(msg);
+      burst(this.x + 11, this.y + 14, 26, this.calmed ? ELEM.murr.glow : '#ffd76a', 300, 0.7, 60, 4, true);
     }
   }
   draw(c) {
-    c.shadowColor = '#ffd76a'; c.shadowBlur = 14 + Math.sin(this.t * 5) * 6;
-    c.fillStyle = '#c9992e'; rr(c, this.x, this.y + 4, 18, 14, 5); c.fill();
-    c.fillStyle = '#ffd76a'; c.fillRect(this.x + 6, this.y, 6, 6);
+    const cx = this.x + 11, sway = Math.sin(this.t * (this.calmed ? 1.4 : 3.4)) * (this.calmed ? 1 : 2.2);
+    contactShadow(c, cx, this.y + this.h, 11, 0.4);
+    c.save(); c.translate(cx + sway * 0.3, this.y + this.h);
+    // hollow chassis: her outline, emptied out
+    const g = c.createLinearGradient(-9, -28, 8, 2);
+    g.addColorStop(0, this.calmed ? '#6f8f96' : '#4a5560');
+    g.addColorStop(1, '#151c24');
+    c.fillStyle = g;
+    c.beginPath();
+    c.moveTo(-8, 0); c.lineTo(-9, -16);
+    c.quadraticCurveTo(-9, -26, 0, -26);
+    c.quadraticCurveTo(9, -26, 9, -16); c.lineTo(8, 0);
+    c.closePath(); c.fill();
+    // ears, so it is unmistakably her shape
+    c.beginPath(); c.moveTo(-7, -22); c.lineTo(-9, -31); c.lineTo(-2, -24); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(7, -22); c.lineTo(9, -31); c.lineTo(2, -24); c.closePath(); c.fill();
+    // the eyes are the whole point: red while the broadcast still has it,
+    // her own teal once the Song has reached it
+    const col = this.calmed ? ELEM.murr.col : '#ff2f4f';
+    c.fillStyle = col; c.shadowColor = col;
+    c.shadowBlur = 10 + Math.sin(this.t * 5) * 5;
+    c.fillRect(-6, -20, 4.2, 2.6); c.fillRect(1.8, -20, 4.2, 2.6);
     c.shadowBlur = 0;
+    // the scrap it is holding, visible in the chest cavity
+    c.fillStyle = '#ffd76a'; c.shadowColor = '#ffd76a'; c.shadowBlur = 8;
+    c.fillRect(-2.4, -13, 4.8, 4.8);
+    c.shadowBlur = 0;
+    c.restore();
+    if (this.calmed) {   // it hums back
+      c.save(); c.globalAlpha = 0.5 + Math.sin(this.t * 4) * 0.3;
+      ftxt('♪', cx + 12, this.y - 4, 12, ELEM.murr.glow);
+      c.restore(); c.globalAlpha = 1;
+    }
   }
 }
 
@@ -1853,6 +1932,7 @@ class Boss {
     this.hurtT = 0; this.dead = false; this.anim = 0; this.face = -1;
     this.cycle = 0; this.marks = []; this.beam = null;
     this.hypnoT = 0; this.stagT = 0;
+    this.spawnX = this.x; this.spawnY = this.y;
     if (kind === 'brood') { this.y = 60; this.homeY = 60; }
     if (kind === 'zero') this.y -= 90;
     if (kind === 'mother') { this.y = 110; this.x = G.roomDef.w * TILE / 2 - s.w / 2; }
@@ -2081,7 +2161,12 @@ class Boss {
     if (this.x < 0) { this.x = 0; if (this.vx < 0) this.vx = 0; this.atEdge = 1; }
     else if (this.x > maxX) { this.x = maxX; if (this.vx > 0) this.vx = 0; this.atEdge = 1; }
     else this.atEdge = 0;
-    if (this.y > G.roomDef.h * TILE + 20) { this.y = G.roomDef.h * TILE - this.h - 2; this.vy = 0; }
+    // falling out used to park the boss on the room's bottom edge, which is often
+    // inside solid tile — hence a boss stuck in the floor. Send it home instead.
+    if (this.y > G.roomDef.h * TILE + 20) {
+      this.x = this.spawnX; this.y = this.spawnY; this.vx = 0; this.vy = 0;
+      burst(this.cx(), this.cy(), 14, '#ffffff', 200, 0.5, 0, 3, true);
+    }
     if (!player.dead && aabb(this, player) && this.st !== 'intro') player.hurt(DF().edmg, this.cx());
   }
   die() {
