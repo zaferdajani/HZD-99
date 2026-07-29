@@ -5,8 +5,9 @@ const KEYB = {
   JUMP: ['KeyZ', 'Space', 'VJUMP', 'GP_JUMP'], ATK: ['KeyX', 'KeyJ', 'VATK', 'GP_ATK'],
   DASH: ['KeyC', 'ShiftLeft', 'ShiftRight', 'VDASH', 'GP_DASH'], CAST: ['KeyV', 'KeyK', 'VCAST', 'GP_CAST'],
   HEAL: ['KeyF', 'KeyH', 'VHEAL', 'GP_HEAL'], INT: ['KeyE', 'VINT', 'GP_INT'],
-  CLAW: ['KeyQ', 'KeyR', 'VCLAW', 'GP_CLAW'],
+  CLAW: ['KeyQ', 'VCLAW', 'GP_CLAW'],
   ARM: ['KeyG', 'Digit1', 'VARM', 'GP_ARM'], SONG: ['KeyB', 'KeyN', 'VSONG', 'GP_SONG'],
+  STAR: ['KeyR', 'Digit2', 'VSTAR', 'GP_STAR'],
   MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], CREST: ['KeyI', 'VCREST', 'GP_CREST'], SKILL: ['KeyT', 'VSKILL', 'GP_SKILL'],
   PAUSE: ['Escape', 'KeyP', 'VPAUSE', 'GP_PAUSE'],
   OK: ['Enter', 'KeyZ', 'Space', 'VOK', 'GP_OK'], BACK: ['Escape', 'VBACK', 'GP_BACK'],
@@ -17,7 +18,7 @@ const keys = {}, keysP = {};
 // touch gutters disappear, the picture grows to fill the screen, and every
 // action moves onto a real button. Detection is automatic on first input.
 // ---------------------------------------------------------------------------
-const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST'];
+const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST', 'GP_STAR'];
 const GP_PREV = {};
 
 // Standard-mapping button indices, which every DualShock 4 / DualSense reports.
@@ -34,17 +35,18 @@ const PAD_BTN_XB = {
 };
 // every action that lives on a face/shoulder button, in the order the config
 // screen lists them. Movement stays on the stick + d-pad and is not remappable.
-const PAD_ACTIONS = ['JUMP', 'ATK', 'DASH', 'CAST', 'ARM', 'SONG', 'CLAW', 'HEAL', 'INT', 'MAP', 'SKILL', 'CREST', 'PAUSE'];
+const PAD_ACTIONS = ['JUMP', 'ATK', 'STAR', 'DASH', 'CAST', 'ARM', 'SONG', 'CLAW', 'HEAL', 'INT', 'MAP', 'SKILL', 'CREST', 'PAUSE'];
 const PAD_DEFAULT = {
   JUMP: 0, ATK: 2, INT: 1, HEAL: 3,
   DASH: 5,        // R1
   CAST: 7,        // R2 — fire the suit
   ARM: 4,         // L1 — change suit
   SONG: 6,        // L2 — the Song
+  STAR: 11,       // R3 — throw a shuriken
   CLAW: 10,       // L3
-  MAP: 11,        // R3
-  SKILL: 8,       // Share
-  CREST: 16,      // PS
+  MAP: 8,         // Share
+  SKILL: 16,      // PS
+  CREST: -1,      // unbound by default; remap it if you want it on the pad
   PAUSE: 9,       // Options
 };
 const PAD = {

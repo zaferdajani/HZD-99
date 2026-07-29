@@ -222,3 +222,142 @@ function drawKeytar(c, face, t) {
   }
   c.restore();
 }
+
+
+// ---------------------------------------------------------------------------
+// SHURIKEN — zizt-charged throwing stars. A ninja without stars is not a ninja.
+//
+// The restock loop is a repair unit's, not a soldier's: she does not find ammo,
+// she gets her own back. A thrown star sticks where it lands and can be picked up
+// again, so the stars are a resource you manage in space rather than a magazine
+// you refill. Killing something with one returns it instantly — a clean kill
+// costs nothing. Benches re-forge the full set.
+// ---------------------------------------------------------------------------
+const STAR_MAX_BASE = 6, STAR_CD = 0.17, STAR_SPD = 720;
+
+function starMax() { return STAR_MAX_BASE + (((G.save && G.save.arms) || []).length >= 3 ? 2 : 0); }
+function starCount() { return G.save ? (G.save.stars == null ? starMax() : G.save.stars) : 0; }
+function starSet(n) { if (G.save) G.save.stars = clamp(n, 0, starMax()); }
+function starRestock() { starSet(starMax()); }
+
+function throwStar(p) {
+  if (starCount() <= 0) { sfx('lowDown'); G.toast(t('star_none')); return false; }
+  starSet(starCount() - 1);
+  const up = inD('UP'), dn = inD('DOWN') && !p.on;
+  const vy = up ? -STAR_SPD : dn ? STAR_SPD : 0;
+  const vx = (up || dn) ? p.face * 90 : p.face * STAR_SPD;
+  G.projs.push(new Star(p.x + p.w / 2 + p.face * 12, p.y + p.h / 2 - 4, vx, vy));
+  p.starCD = STAR_CD; sfx('shoot');
+  return true;
+}
+
+class Star {
+  constructor(x, y, vx, vy) {
+    this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+    this.r = 7; this.w = 14; this.h = 14;
+    this.spin = 0; this.life = 4; this.dead = false;
+    this.stuck = false; this.stuckT = 0; this.hits = 0;
+    this.el = 'zizt'; this.dmg = Math.round(15 * DF().pdmg);
+    this.friendly = true;
+    this.color = ELEM.zizt.col;   // drawLights() reads .color off every projectile
+  }
+  box() { return { x: this.x - 7, y: this.y - 7, w: 14, h: 14 }; }
+  update(dt) {
+    this.spin += dt * (this.stuck ? 1.2 : 26);
+    if (this.stuck) {
+      // sitting in a wall, waiting to be collected
+      this.stuckT += dt;
+      if (!player.dead && aabb(this.box(), player)) {
+        this.dead = true; starSet(starCount() + 1);
+        sfx('pick'); burst(this.x, this.y, 8, MAT.cyan.lit, 160, 0.35, 0, 3, true);
+      }
+      if (this.stuckT > 26) { this.dead = true; }   // eventually it corrodes
+      return;
+    }
+    this.life -= dt;
+    if (this.life <= 0) { this.dropAsPickup(); return; }
+    this.vy += 320 * dt;                            // a little drop, so it arcs
+    this.x += this.vx * dt; this.y += this.vy * dt;
+    if (solidAt(Math.floor(this.x / TILE), Math.floor(this.y / TILE))) {
+      this.stuck = true; this.vx = this.vy = 0;
+      sfx('metal'); burst(this.x, this.y, 5, MAT.cyan.mid, 120, 0.25, 0, 2, true);
+      return;
+    }
+    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+    for (const e of targets) {
+      if (e.dead || (this.seen && this.seen.has(e))) continue;
+      if (!aabb(this.box(), e)) continue;
+      if (!this.seen) this.seen = new Set();
+      this.seen.add(e);
+      dealDmg(e, this.dmg, 'zizt', this.x, this.y);
+      burst(this.x, this.y, 9, ELEM.zizt.glow, 220, 0.3, 0, 3, true);
+      if (e.hp <= 0) {
+        e.die(Math.sign(this.vx) || 1, -0.3);
+        // a clean kill hands the star straight back
+        this.dead = true; starSet(starCount() + 1);
+        sfx('pick');
+        return;
+      }
+      this.hits++;
+      if (this.hits >= 2) { this.dropAsPickup(); return; }   // pierces two, then falls
+      this.vx *= 0.75;
+    }
+  }
+  dropAsPickup() {
+    this.dead = true;
+    G.pickups.push(new StarPickup(this.x, this.y));
+  }
+  draw(c) {
+    c.save(); c.translate(this.x, this.y); c.rotate(this.spin);
+    if (!this.stuck) {                               // charge trail
+      c.strokeStyle = 'rgba(63,216,238,0.35)'; c.lineWidth = 3;
+      c.beginPath(); c.arc(0, 0, 10, 0, 7); c.stroke();
+    }
+    c.shadowColor = ELEM.zizt.col; c.shadowBlur = this.stuck ? 6 : 12;
+    c.fillStyle = ramp(c, MAT.steel, -7, -7, 7, 7);
+    c.beginPath();
+    for (let i = 0; i < 4; i++) {                    // four-point star, notched
+      const a = i / 4 * Math.PI * 2;
+      c.lineTo(Math.cos(a) * 7.5, Math.sin(a) * 7.5);
+      c.lineTo(Math.cos(a + 0.39) * 2.6, Math.sin(a + 0.39) * 2.6);
+    }
+    c.closePath(); c.fill();
+    c.fillStyle = ELEM.zizt.glow;
+    c.beginPath(); c.arc(0, 0, 1.9, 0, 7); c.fill();
+    c.shadowBlur = 0; c.restore();
+  }
+}
+
+// a star lying on the ground, waiting to be walked over
+class StarPickup {
+  constructor(x, y) {
+    this.x = x - 7; this.y = y - 7; this.w = 14; this.h = 14;
+    this.vx = rnd(-40, 40); this.vy = -90; this.t = 0; this.dead = false;
+  }
+  update(dt) {
+    this.t += dt; this.vy += 900 * dt;
+    const col = moveEnt(this, dt);
+    if (col.d) { this.vy = 0; this.vx *= 0.8; }
+    if (this.t > 1.0 && !player.dead && dist2(this.x, this.y, player.x, player.y) < 300 * 300) {
+      const dx = player.x + 12 - this.x, dy = player.y + 18 - this.y, d = Math.hypot(dx, dy) || 1;
+      this.x += dx / d * 280 * dt; this.y += dy / d * 280 * dt;   // never unreachable
+    }
+    if (!player.dead && aabb(this, player)) {
+      this.dead = true; starSet(starCount() + 1);
+      sfx('pick'); burst(this.x + 7, this.y + 7, 8, MAT.cyan.lit, 160, 0.35, 0, 3, true);
+    }
+  }
+  draw(c) {
+    c.save(); c.translate(this.x + 7, this.y + 7); c.rotate(this.t * 1.6);
+    c.shadowColor = ELEM.zizt.col; c.shadowBlur = 8 + Math.sin(this.t * 5) * 4;
+    c.fillStyle = MAT.steel.mid;
+    c.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const a = i / 4 * Math.PI * 2;
+      c.lineTo(Math.cos(a) * 7, Math.sin(a) * 7);
+      c.lineTo(Math.cos(a + 0.39) * 2.4, Math.sin(a + 0.39) * 2.4);
+    }
+    c.closePath(); c.fill();
+    c.shadowBlur = 0; c.restore();
+  }
+}

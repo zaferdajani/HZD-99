@@ -109,7 +109,7 @@ class Player {
     this.combo = 0; this.comboT = 0; this.dashVX = 0; this.dashVY = 0; this.rechargeT = 0;
     this.chargeT = 0; this.chargeTick = 0; this.healTick = 0;
     this.clawT = 0; this.clawCD = 0; this.pounceT = 0;   // FERAL CLAWS (robo-cat)
-    this.armCD = 0; this.songT = 0; this.songCD = 0;
+    this.armCD = 0; this.songT = 0; this.songCD = 0; this.starCD = 0;
     this.downBuf = 0; this.pogoT = 0;
   }
   maxCores() { return G.save.coresMax + (hasCrest('plate') ? 1 : 0) + (relicHas('silent') ? 1 : 0); }
@@ -315,7 +315,9 @@ class Player {
         sfx('heal'); burst(this.x + this.w / 2, this.y + this.h / 2, 16, '#aef7d8', 180, 0.5, 100, 3, true);
       }
     } else this.healT = 0;
-    this.armCD -= dt; this.songT -= dt; this.songCD -= dt;
+    this.armCD -= dt; this.songT -= dt; this.songCD -= dt; this.starCD -= dt;
+    // shuriken — hers from the start, aimed with UP or DOWN
+    if (inP('STAR') && this.starCD <= 0) throwStar(this);
     // cycle the suit wheel (slot 0 is the plain bolt, so EMP is never lost)
     if (inP('ARM') && cycleArm(1)) {
       const a = activeArm();

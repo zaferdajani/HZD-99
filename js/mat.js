@@ -15,19 +15,20 @@ const MAT = {
   // oxidized bronze: warm, dirty gold. Joints, collars, fittings.
   bronze:  { lit: '#dcb268', mid: '#9a7638', dark: '#5c4520', deep: '#332711' },
   // cyan light: uncorrupted power. Never on an infected sensor.
-  cyan:    { lit: '#c9fbff', mid: '#3fd8ee', dark: '#1b7d92' },
+  cyan:    { lit: '#c9fbff', mid: '#3fd8ee', dark: '#1b7d92', deep: '#0a3540' },
   // crimson corruption: the broadcast. Only ever this.
-  crimson: { lit: '#ff8a90', mid: '#ff2f43', dark: '#7e1018' },
+  crimson: { lit: '#ff8a90', mid: '#ff2f43', dark: '#7e1018', deep: '#3a060c' },
   // molten metal: the Foundry only.
-  molten:  { lit: '#ffe0a8', mid: '#ff7a22', dark: '#8a2c08' },
+  molten:  { lit: '#ffe0a8', mid: '#ff7a22', dark: '#8a2c08', deep: '#3d1203' },
   // frosted glass: the Archives only.
-  frost:   { lit: '#f0fbff', mid: '#c2dee8', dark: '#6d8b98' },
+  frost:   { lit: '#f0fbff', mid: '#c2dee8', dark: '#6d8b98', deep: '#33454e' },
 };
 
 // A ramp whose axis you choose, so a surface facing away from the light can be
 // shaded differently from one facing into it. Pass the light direction per part.
 function ramp(c, m, x0, y0, x1, y1, k) {
   const g = c.createLinearGradient(x0, y0, x1, y1);
+  m = { lit: m.lit, mid: m.mid, dark: m.dark || m.mid, deep: m.deep || m.dark || m.mid };
   const s = k == null ? 1 : k;               // k<1 dims the whole part (facing away)
   const mix = (a, b, t) => {
     const p = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];

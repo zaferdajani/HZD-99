@@ -96,7 +96,7 @@ const G = {
       if (!this.save.arms.includes(arm)) {
         this.save.arms.push(arm);
         this.save.armIdx = this.save.arms.length;   // wear it immediately
-        showItem(t('arm_' + arm), t('arm_' + arm + 'd'));
+        showItem(t('arm_' + arm), t('arm_' + arm + 'd') + '  —  ' + t('arm_how'));
       }
     }
     const tr = RELIC_TROPHY[kind];
@@ -139,7 +139,7 @@ function loadMeta() {
 }
 function newSave(diff) {
   return {
-    v: 1, diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [], arms: [], armIdx: 0,
+    v: 1, diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [], arms: [], armIdx: 0, stars: 6,
     slots: 3, iq: 0, skills: [], relics: [], flags: {}, broken: {}, visited: {}, shop: {},
     bench: { room: 'A1', x: 80, y: 412 }, deaths: 0, lives: 0, time: 0,
     pouch: null, usedNine: false, won: false, evo: 0,
@@ -337,7 +337,7 @@ function doInteract(s) {
   } else if (s.type === 'bench') {
     G.save.bench = { room: G.roomId, x: s.x, y: s.y + s.h - 38 };
     G.save.usedNine = false; G.save.usedAegis = false;
-    persist(); sfx('bench');
+    starRestock(); persist(); sfx('bench');
     const dur = Math.max(1.4, (player.maxCores() - player.cores) * 0.2 + 1.4);
     const dock = 0.55;
     // dock phase: walk to the centre, then charge (robot: cables+surge / hero: drink)
@@ -1862,6 +1862,22 @@ function drawHUD() {
   const songReady = player.volts >= SONG_COST;
   ftxt('♪', 934, 118, 20, songReady ? ELEM.murr.glow : 'rgba(125,147,168,0.5)', 'right');
   if (!(TOUCH && TOUCH.enabled)) ftxt('B', 934, 138, 11, songReady ? '#8fd8c8' : '#546b7d', 'right');
+  // shuriken: pips, so you can read the count without arithmetic
+  const sc = starCount(), sm = starMax();
+  for (let i = 0; i < sm; i++) {
+    const bx = 906 - i * 15, on = i < sc;
+    c.save(); c.translate(bx, 164); c.rotate(0.5);
+    c.fillStyle = on ? ELEM.zizt.glow : 'rgba(120,140,160,0.28)';
+    if (on) { c.shadowColor = ELEM.zizt.col; c.shadowBlur = 6; }
+    c.beginPath();
+    for (let k = 0; k < 4; k++) {
+      const a = k / 4 * Math.PI * 2;
+      c.lineTo(Math.cos(a) * 5.4, Math.sin(a) * 5.4);
+      c.lineTo(Math.cos(a + 0.39) * 1.9, Math.sin(a + 0.39) * 1.9);
+    }
+    c.closePath(); c.fill(); c.shadowBlur = 0; c.restore();
+  }
+  if (!(TOUCH && TOUCH.enabled)) ftxt('R', 934, 186, 11, sc ? '#8fd8c8' : '#546b7d', 'right');
 
   // scrap + knowledge
   ftxt('⚙ ' + G.save.scrap, 76, 66, 17, '#ffd76a', 'left', null, '700');
@@ -1892,6 +1908,7 @@ function drawHUD() {
   }
 }
 function lightAt(x, y, r, color, a) {
+  if (!color) return;
   const g = c.createRadialGradient(x, y, 0, x, y, r);
   g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)');
   c.globalAlpha = a; c.fillStyle = g;
