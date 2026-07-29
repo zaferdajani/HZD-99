@@ -9,7 +9,7 @@
 
 const MAT = {
   // white ceramic: warm off-white, chipped and stained. The armour material.
-  ceramic: { lit: '#fdfbf6', mid: '#e2dcd0', dark: '#9a9488', deep: '#4a463e' },
+  ceramic: { lit: '#f8f4ec', mid: '#b6b0a3', dark: '#5f5a51', deep: '#302d28' },
   // brushed steel: cool, mid-value, low specular. Frames and pistons.
   steel:   { lit: '#a8b2bc', mid: '#5f6a75', dark: '#333b43', deep: '#1b2127' },
   // oxidized bronze: warm, dirty gold. Joints, collars, fittings.
