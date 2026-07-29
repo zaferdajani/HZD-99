@@ -109,6 +109,7 @@ class Player {
     this.combo = 0; this.comboT = 0; this.dashVX = 0; this.dashVY = 0; this.rechargeT = 0;
     this.chargeT = 0; this.chargeTick = 0; this.healTick = 0;
     this.clawT = 0; this.clawCD = 0; this.pounceT = 0;   // FERAL CLAWS (robo-cat)
+    this.armCD = 0; this.songT = 0; this.songCD = 0;
   }
   maxCores() { return G.save.coresMax + (hasCrest('plate') ? 1 : 0) + (relicHas('silent') ? 1 : 0); }
   speed() { return 340 * (hasCrest('sprint') ? 1.15 : 1) * (relicHas('shard') ? 1.04 : 1); }
@@ -306,11 +307,27 @@ class Player {
         sfx('heal'); burst(this.x + this.w / 2, this.y + this.h / 2, 16, '#aef7d8', 180, 0.5, 100, 3, true);
       }
     } else this.healT = 0;
-    // EMP cast
+    this.armCD -= dt; this.songT -= dt; this.songCD -= dt;
+    // cycle the suit wheel (slot 0 is the plain bolt, so EMP is never lost)
+    if (inP('ARM') && cycleArm(1)) {
+      const a = activeArm();
+      sfx('ui'); G.toast(a ? t('arm_' + a.id) : t('arm_none'));
+    }
+    // CAST fires whichever suit is worn; with none worn it is the old EMP bolt
+    const arm = (typeof activeArm === 'function') ? activeArm() : null;
     const empCost = hasSkill('router') ? 18 : 26;
-    if (inP('CAST') && hasMod('emp') && this.castCD <= 0 && this.volts >= empCost) {
+    if (inP('CAST') && arm && this.armCD <= 0 && this.volts >= arm.cost) {
+      this.volts -= arm.cost; this.armCD = arm.cd;
+      fireArm(this, arm);
+    } else if (inP('CAST') && !arm && hasMod('emp') && this.castCD <= 0 && this.volts >= empCost) {
       this.volts -= empCost; this.castCD = 0.5; sfx('cast');
       G.projs.push(new Proj(this.x + this.w / 2 + this.face * 16, this.y + this.h / 2 - 4, this.face * 540, 0, true, Math.round(22 * DF().pdmg), 11, '#7df3ff'));
+    }
+    // the Song — quiets the orders without touching the body
+    if (inP('SONG') && this.songCD <= 0 && this.volts >= SONG_COST) {
+      this.songCD = 1.1;
+      const n = playSong();
+      if (n) G.toast(t('song_hit').replace('%s', n));
     }
     // resolve movement
     const wasFalling = this.vy;
@@ -355,7 +372,7 @@ class Player {
             dm *= 2;
             burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 10, '#ffffff', 340, 0.4, 100, 4, true);
           }
-          e.hp -= dm; e.hurtT = 0.15;
+          dm = dealDmg(e, dm, armEl(), hb.x + hb.w / 2, hb.y + hb.h / 2, true);
           if (!(e instanceof Boss) && e.kind !== 'turret') {
             e.kbT = 0.26;
             e.vx += kx * 310;
@@ -1204,7 +1221,7 @@ class Proj {
   constructor(x, y, vx, vy, friendly, dmg, r, color, grav, life) {
     this.x = x; this.y = y; this.vx = vx; this.vy = vy;
     this.friendly = friendly; this.dmg = dmg; this.r = r; this.color = color;
-    this.grav = grav || 0; this.life = life || 3; this.dead = false;
+    this.grav = grav || 0; this.life = life || 3; this.dead = false; this.el = null;
   }
   box() { return { x: this.x - this.r, y: this.y - this.r, w: this.r * 2, h: this.r * 2 }; }
   update(dt) {
@@ -1219,7 +1236,33 @@ class Proj {
       for (const e of targets) {
         if (e.dead) continue;
         if (aabb(this.box(), e)) {
-          e.hp -= this.dmg; e.hurtT = 0.15; this.dead = true;
+          dealDmg(e, this.dmg, this.el || armEl(), this.x, this.y); this.dead = true;
+          if (this.freeze) {                       // HALT: holds a target still
+            e.stagT = Math.max(e.stagT || 0, 2.0);
+            burst(this.x, this.y, 14, ELEM.glazz.glow, 200, 0.6, 40, 3, true);
+          }
+          if (this.pool) {                         // FORGE: splash where it lands
+            for (const o of targets) {
+              if (o === e || o.dead) continue;
+              if (Math.hypot(o.x + o.w / 2 - this.x, o.y + o.h / 2 - this.y) < 78)
+                dealDmg(o, Math.round(this.dmg * 0.6), 'hott', o.x + o.w / 2, o.y);
+            }
+            burst(this.x, this.y, 18, ELEM.hott.glow, 260, 0.7, 260, 4, true);
+          }
+          if (this.chain > 0) {                    // ARCLIGHT: jumps onward
+            let best = null, bd = 190;
+            for (const o of targets) {
+              if (o === e || o.dead) continue;
+              const d = Math.hypot(o.x + o.w / 2 - this.x, o.y + o.h / 2 - this.y);
+              if (d < bd) { bd = d; best = o; }
+            }
+            if (best) {
+              const nx = best.x + best.w / 2, ny = best.y + best.h / 2;
+              const j = new Proj(this.x, this.y, (nx - this.x) * 4, (ny - this.y) * 4, true,
+                                 Math.round(this.dmg * 0.75), this.r, this.color, 0, 0.3);
+              j.el = this.el; j.chain = this.chain - 1; G.projs.push(j);
+            }
+          }
           if (!(e instanceof Boss) && e.kind !== 'turret') {
             e.kbT = 0.22; e.vx += Math.sign(this.vx) * 260; e.vy -= 120;
           }
@@ -1330,6 +1373,7 @@ class Enemy {
   constructor(kind, x, y) {
     const k = EKIND[kind];
     this.kind = kind; this.x = x; this.y = y; this.w = k.w; this.h = k.h;
+    this.hypnoT = 0; this.stagT = 0;
     this.hp = Math.round(k.hp * DF().ehp); this.spd = k.spd * DF().espd;
     this.vx = 0; this.vy = 0; this.dir = chance(0.5) ? 1 : -1;
     this.t = rnd(0.5, 2); this.sx = x; this.sy = y; this.hurtT = 0; this.dead = false; this.anim = rnd(0, 9);
@@ -1337,6 +1381,15 @@ class Enemy {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    // charmed by the Song: it keeps the body and quiets the orders
+    if (this.hypnoT > 0) {
+      this.hypnoT -= dt; this.stagT = 0;
+      this.vx = 0; this.vy += 900 * dt;
+      moveEnt(this, dt);
+      if (Math.random() < dt * 6) burst(this.x + this.w / 2, this.y - 4, 1, ELEM.murr.glow, 40, 0.6, -30, 2, true);
+      return;
+    }
+    if (this.stagT > 0) { this.stagT -= dt; this.vx = 0; return; }
     // light trail — infected machines smear glowing red light as they move
     const mx = this.x + this.w / 2, my = this.y + this.h / 2;
     if (!this.tr.length || Math.hypot(mx - this.tr[0].x, my - this.tr[0].y) > 3) {
@@ -1663,6 +1716,7 @@ class Boss {
     this.vx = 0; this.vy = 0; this.st = 'dorm'; this.t = 1.4; this.phase = 1;
     this.hurtT = 0; this.dead = false; this.anim = 0; this.face = -1;
     this.cycle = 0; this.marks = []; this.beam = null;
+    this.hypnoT = 0; this.stagT = 0;
     if (kind === 'brood') { this.y = 60; this.homeY = 60; }
     if (kind === 'zero') this.y -= 90;
     if (kind === 'mother') { this.y = 110; this.x = G.roomDef.w * TILE / 2 - s.w / 2; }
@@ -1682,6 +1736,7 @@ class Boss {
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
     if (this.dead) return;
+    if (this.stagT > 0) { this.stagT -= dt; return; }   // Song / weakness stagger
     if (this.st === 'dorm') {
       if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
         this.st = 'intro'; this.t = 1.4; sfx('roar');

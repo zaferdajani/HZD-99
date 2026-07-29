@@ -35,7 +35,7 @@ for (const k in EMBED) {
   const ext = f.split('.').pop().toLowerCase();
   media[k] = 'data:' + MIME[ext] + ';base64,' + fs.readFileSync(f).toString('base64');
 }
-const files = ['theme', 'i18n', 'media', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'game', 'touch']
+const files = ['theme', 'types', 'i18n', 'media', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'game', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 const html = fs.readFileSync('dev.html', 'utf8');
 const out = html.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/,

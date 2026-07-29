@@ -87,6 +87,17 @@ const G = {
     this.save.flags['boss' + cap] = 1;
     const grants = { glitch: 'dash', brood: 'djump', atlas: 'emp', zero: 'key' };
     if (grants[kind]) grantMod(grants[kind]);
+    // …and the suit it was wearing. This is the Mega Man X loop: the thing that
+    // beat you becomes the thing that beats the next one.
+    const arm = ARM_BY_BOSS[kind];
+    if (arm) {
+      if (!this.save.arms) this.save.arms = [];
+      if (!this.save.arms.includes(arm)) {
+        this.save.arms.push(arm);
+        this.save.armIdx = this.save.arms.length;   // wear it immediately
+        showItem(t('arm_' + arm), t('arm_' + arm + 'd'));
+      }
+    }
     const tr = RELIC_TROPHY[kind];
     if (tr && !(this.save.relics || []).includes(tr)) {
       if (!this.save.relics) this.save.relics = [];
@@ -127,7 +138,7 @@ function loadMeta() {
 }
 function newSave(diff) {
   return {
-    v: 1, diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [],
+    v: 1, diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [], arms: [], armIdx: 0,
     slots: 3, iq: 0, skills: [], relics: [], flags: {}, broken: {}, visited: {}, shop: {},
     bench: { room: 'A1', x: 80, y: 412 }, deaths: 0, lives: 0, time: 0,
     pouch: null, usedNine: false, won: false, evo: 0,
@@ -1718,6 +1729,43 @@ function drawSeals(P) {
   if (ex.B) c.fillRect(0, H - 10, W, 10);
   c.globalAlpha = 1;
 }
+// Element feedback and the Song's wave. Drawn in screen space, so world points
+// are converted through the camera.
+function drawFX() {
+  const dt = 1 / 60;
+  if (G.songWave) {
+    const w = G.songWave; w.t -= dt;
+    if (w.t <= 0) G.songWave = null;
+    else {
+      const k = 1 - w.t / 0.7, sx = w.x - cam.x, sy = w.y - cam.y;
+      c.save(); c.globalAlpha = (1 - k) * 0.85;
+      c.strokeStyle = ELEM.murr.glow; c.lineWidth = 3;
+      c.beginPath(); c.arc(sx, sy, SONG_RANGE * k, 0, 7); c.stroke();
+      c.lineWidth = 1.5; c.globalAlpha = (1 - k) * 0.4;
+      c.beginPath(); c.arc(sx, sy, SONG_RANGE * k * 0.72, 0, 7); c.stroke();
+      // notes riding the wave outward
+      c.globalAlpha = 1 - k;
+      c.fillStyle = ELEM.murr.glow;
+      for (let i = 0; i < 7; i++) {
+        const a = i / 7 * Math.PI * 2 + k * 1.6, rr2 = SONG_RANGE * k * 0.86;
+        ftxt('♪', sx + Math.cos(a) * rr2, sy + Math.sin(a) * rr2 - 4, 15 + (1 - k) * 6, ELEM.murr.glow);
+      }
+      c.restore(); c.globalAlpha = 1;
+    }
+  }
+  if (G.elemPop) {
+    const p = G.elemPop; p.t -= dt;
+    if (p.t <= 0) G.elemPop = null;
+    else {
+      const k = 1 - p.t / 0.5;
+      c.save(); c.globalAlpha = Math.min(1, p.t * 3);
+      const lbl = p.el === 'murr' ? t('fx_stagger') : p.el ? t('fx_weak') : t('fx_resist');
+      const col = p.el ? ELEM[p.el].glow : '#8aa2b5';
+      ftxt(lbl, p.x - cam.x, p.y - cam.y - 22 - k * 20, p.el ? 19 : 14, col, 'center', p.el ? col : null, '800');
+      c.restore(); c.globalAlpha = 1;
+    }
+  }
+}
 function drawHUD() {
   const P = PAL[G.roomDef.zone];
   // full-health celebration glow behind the row
@@ -1776,6 +1824,26 @@ function drawHUD() {
     ftxt(TOUCH && TOUCH.enabled ? '✚' : '✚ F', vx + 28, vy, 15, 'rgba(174,247,216,' + hpu + ')', 'left');
     if (!G.healToasted) { G.healToasted = true; G.toast(t('heal_hint')); }
   }
+  // ---- suit wheel: what you are wearing, and what else you could wear
+  const slots = armSlots();
+  if (slots.length > 1) {
+    const cur = (G.save.armIdx || 0) % slots.length;
+    for (let i = 1; i < slots.length; i++) {
+      const bx = 44 + (i - 1) * 42, by = 118, on = i === cur;
+      c.save(); c.translate(bx, by);
+      c.globalAlpha = on ? 1 : 0.42;
+      drawArmBadge(c, slots[i].id, on ? 17 : 14, on);
+      c.restore(); c.globalAlpha = 1;
+    }
+    const a = slots[cur];
+    ftxt(a ? t('arm_' + a.id) : t('arm_none'), 44, 146, 12, a ? ELEM[a.el].glow : '#7d93a8', 'left');
+    if (!(TOUCH && TOUCH.enabled)) ftxt('G', 26, 118, 11, '#546b7d');
+  }
+  // the Song is always available — it is hers, not a boss's
+  const songReady = player.volts >= SONG_COST;
+  ftxt('♪', 934, 118, 20, songReady ? ELEM.murr.glow : 'rgba(125,147,168,0.5)', 'right');
+  if (!(TOUCH && TOUCH.enabled)) ftxt('B', 934, 138, 11, songReady ? '#8fd8c8' : '#546b7d', 'right');
+
   // scrap + knowledge
   ftxt('⚙ ' + G.save.scrap, 76, 66, 17, '#ffd76a', 'left', null, '700');
   ftxt('◈ ' + (G.save.iq || 0) + ' ' + t('sk_iq'), 76, 88, 13, '#b48cff', 'left');
@@ -2474,6 +2542,7 @@ function draw(tms) {
   }
   // in-world states render the world behind
   drawWorldFrame();
+  drawFX();
   drawHUD();
   if (G.trans) {
     const k = G.trans.half ? 1 - (0.14 - G.trans.t) / 0.14 : (0.28 - G.trans.t) / 0.14;
