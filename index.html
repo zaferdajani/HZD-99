@@ -502,8 +502,10 @@ en: {
     'Move — Arrow keys / A D',
     'Jump — Z or Space  (again in air with Twin Thrusters)',
     'Attack — X or J  (aim any direction incl. diagonals · 3-hit combo)',
+    'Rebound — in the air, hold ↓ and Attack  (bounce off what you hit; hold Jump for height)',
     'Dash — C or Shift  (dashes at the angle you hold)',
-    'EMP Pulse — V or K  (needs module · costs volts)',
+    'Suit / Arm — V or K to fire  ·  G to change suit',
+    'The Song — B or N  (charms mimics · staggers bosses · costs volts)',
     'Repair — hold F or H  (costs 33 volts, must stand still)',
     'Interact — E',
     'Map — Tab / M   ·   Crests — I   ·   Pause — Esc',
@@ -680,8 +682,10 @@ ar: {
     'الحركة — الأسهم / A D',
     'القفز — Z أو المسافة (وقفزة ثانية في الهواء مع الدافعين التوأم)',
     'الهجوم — X أو J (صوّب بأي اتجاه حتى القطري · سلسلة من ثلاث ضربات)',
+    'الارتداد — في الهواء، اضغط ↓ مع الهجوم (ترتدّ عمّا تضربه · اضغط القفز لارتفاع أعلى)',
     'الاندفاع — C أو Shift (يندفع بالزاوية التي تضغطها)',
-    'نبضة كهرومغناطيسية — V أو K (تتطلب وحدة وتستهلك فولتات)',
+    'البدلة — V أو K للإطلاق · G لتبديل البدلة',
+    'اللحن — B أو N (ينوّم المقلّدين · يُربك الزعماء ويستهلك فولتات)',
     'الإصلاح — استمر بالضغط على F أو H (يكلف 33 فولتًا مع الوقوف ثابتًا)',
     'التفاعل — E',
     'الخريطة — Tab / M   ·   الأوسمة — I   ·   إيقاف مؤقت — Esc',
@@ -2440,6 +2444,7 @@ class Player {
     this.chargeT = 0; this.chargeTick = 0; this.healTick = 0;
     this.clawT = 0; this.clawCD = 0; this.pounceT = 0;   // FERAL CLAWS (robo-cat)
     this.armCD = 0; this.songT = 0; this.songCD = 0;
+    this.downBuf = 0; this.pogoT = 0;
   }
   maxCores() { return G.save.coresMax + (hasCrest('plate') ? 1 : 0) + (relicHas('silent') ? 1 : 0); }
   speed() { return 340 * (hasCrest('sprint') ? 1.15 : 1) * (relicHas('shard') ? 1.04 : 1); }
@@ -2559,11 +2564,18 @@ class Player {
     if (this.clawT > 0 && chance(0.5))
       addPart(this.x + rnd(-6, this.w + 6), this.y + rnd(0, this.h), rnd(-18, 18), rnd(-42, -12), 0.5,
         heroP ? (chance(0.5) ? '#ffd76a' : '#fff6c0') : (chance(0.5) ? '#b06aff' : '#e0a0ff'), 2.2, -40, true);
+    // Down is buffered: players press DOWN and ATK together, and whichever lands
+    // first used to decide the swing. Holding the intent for a beat fixes that.
+    if (inD('DOWN')) this.downBuf = 0.16; else this.downBuf -= dt;
+    this.pogoT -= dt;
     // attack — aim in 8 directions, 3-hit ninja combo
     if (inP('ATK') && this.atkCD <= 0) {
       this.atkCD = 0.36 * (hasCrest('over') ? 0.7 : 1);
       let ax = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
-      let ay = (inD('UP') ? -1 : 0) + (inD('DOWN') && !this.on ? 1 : 0);
+      let ay = (inD('UP') ? -1 : 0) + (this.downBuf > 0 && !this.on ? 1 : 0);
+      // a down-attack goes straight down. Diagonal aim used to push the hitbox
+      // forward of whatever you were standing over, which is why it kept missing.
+      if (ay > 0) ax = 0;
       if (!ax && !ay) ax = this.face;
       if (ax) this.face = ax;
       this.combo = this.comboT > 0 ? (this.combo + 1) % 3 : 0;
@@ -2686,6 +2698,11 @@ class Player {
     }
     // swing hits
     if (this.swing && this.swing.t > 0) {
+      // …and the other order too: ATK first, DOWN a frame later. Within the first
+      // 60ms the swing is still re-aimable.
+      if (this.swing.t > 0.06 && this.swing.ay <= 0 && !this.on && inD('DOWN')) {
+        this.swing.ax = 0; this.swing.ay = 1; this.swing.ang = Math.PI / 2;
+      }
       this.swing.t -= dt;
       const hb = this.hitbox();
       let pogo = false;
@@ -2736,9 +2753,17 @@ class Player {
         } else if (c === '^' && this.swing.ay > 0) pogo = true;
       }
       if (pogo && this.swing.ay > 0) {
-        this.vy = -640;
+        // A short, crisp rebound rather than a free jump — hold JUMP to get the
+        // taller one. Either way you leave the enemy instead of falling into it.
+        this.vy = inD('JUMP') ? -620 : -470;
+        if (this.dashT > 0 && this.dashVY > 0) { this.dashT = 0; this.dashVY = 0; }
+        this.iT = Math.max(this.iT, 0.18);   // no contact damage from what you just hit
+        this.pogoT = 0.18;
         this.airJumps = hasMod('djump') ? (hasSkill('triple') ? 2 : 1) : 0;
         this.dashCD = Math.min(this.dashCD, 0); this.swing.t = 0; sfx('pogo');
+        cam.shake = Math.max(cam.shake, 4);
+        G.hitStop = Math.max(G.hitStop, 0.05);
+        burst(this.x + this.w / 2, this.y + this.h + 4, 10, '#cfe8ff', 220, 0.3, 260, 3, true);
       }
     }
     for (let i = this.trail.length - 1; i >= 0; i--) { this.trail[i].t -= dt; if (this.trail[i].t <= 0) this.trail.splice(i, 1); }
@@ -2786,8 +2811,11 @@ class Player {
   hitbox() {
     const s = this.swing;
     const n = Math.hypot(s.ax, s.ay) || 1;
-    const R = s.combo === 2 ? 50 : 44;
-    const half = s.combo === 2 ? 35 : 30;
+    const down = s.ay > 0 && !s.ax;
+    // the down box starts at the feet and is wider than it is deep, so landing on
+    // something slightly to one side still rebounds
+    const R = down ? 46 : (s.combo === 2 ? 50 : 44);
+    const half = down ? 32 : (s.combo === 2 ? 35 : 30);
     const cx = this.x + this.w / 2 + s.ax / n * R;
     const cy = this.y + this.h / 2 + s.ay / n * R;
     return { x: cx - half, y: cy - half, w: half * 2, h: half * 2 };
