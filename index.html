@@ -4004,119 +4004,231 @@ class Enemy {
     // shaded metal body gradient (top-lit → dark belly) for dimensionality
     const eg = c.createLinearGradient(0, -12, 0, 14);
     eg.addColorStop(0, '#616e82'); eg.addColorStop(0.55, '#454f60'); eg.addColorStop(1, '#28303c');
+    // ---- one faction, five species ------------------------------------------
+    // These are 26-34px tall in play, so they are designed AT that size: the
+    // silhouette carries the recognition and detail is spent only where it
+    // separates one machine from another. Each still reads as the job it used to
+    // do (STORY.md: a mimic keeps its work, it only stops caring what the work
+    // does to you), and each owns a distinct base geometry so no two share an
+    // outline: crawler = long low wedge, hopper = teardrop on springs,
+    // blob = sagging dome, flier = pure circle, turret = rooted trapezoid.
+    const EL = (typeof ELEM !== 'undefined' && typeof MIMIC_EL !== 'undefined' && ELEM[MIMIC_EL[this.kind]]) || { col: '#8aa2b5', glow: '#cfe3ef' };
+    const steel = (y0, y1) => {
+      const g = c.createLinearGradient(-6, y0, 6, y1);
+      g.addColorStop(0, '#8496ad');    // lit plate, cool
+      g.addColorStop(0.45, '#4d5a6b');
+      g.addColorStop(1, '#1d242e');    // deep shadow, bluer still
+      return g;
+    };
+    const plate = (path, y0, y1) => { c.fillStyle = steel(y0, y1); path(); c.fill(); };
+    const seam = (x0, y0, x1, y1, a) => {   // additive panel line, never black
+      c.strokeStyle = 'rgba(190,214,235,' + (a || 0.22) + ')'; c.lineWidth = 0.7;
+      c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
+    };
+    const accent = (fn, glow) => {          // element tell: material, not eyes
+      c.fillStyle = EL.col;
+      if (glow) { c.shadowColor = EL.col; c.shadowBlur = 5; }
+      fn(); c.shadowBlur = 0;
+    };
     switch (this.kind) {
       case 'crawler': {
-        // infected quadruped hound: 4 articulated two-segment legs + head on a neck
-        const phE = this.anim * 12;
-        const legE = (hx, phase, front) => {
-          const step = Math.sin(phase) * 4, lift = Math.max(0, -Math.cos(phase)) * 3;
-          const fx = hx + step, fy = 9 - lift;
-          const kx = (hx + fx) / 2 - 2, ky = (2 + fy) / 2 + 1;
-          c.strokeStyle = front ? '#59667a' : '#3d4756'; c.lineWidth = 2.6; c.lineJoin = 'round';
-          c.beginPath(); c.moveTo(hx, 2); c.lineTo(kx, ky); c.lineTo(fx, fy); c.stroke();
-          c.fillStyle = front ? '#7d8a9c' : '#59667a'; c.fillRect(fx - 2, fy - 1, 4.5, 2.5);
+        // DRAKK — a yard hauler that read the word "hound". Long low wedge with
+        // a cargo hopper on its back: the back attachment is what makes it
+        // unmistakable in silhouette, from the front and the side alike.
+        const ph = this.anim * 12;
+        const leg = (hx, phase, len, thick) => {
+          const step = Math.sin(phase) * 3.2, lift = Math.max(0, -Math.cos(phase)) * 2.2;
+          c.strokeStyle = '#39434f'; c.lineWidth = thick; c.lineCap = 'round';
+          c.beginPath(); c.moveTo(hx, 1);
+          c.lineTo(hx + step * 0.5, 5 - lift);
+          c.lineTo(hx + step, 9 - lift * 0.4);          // visible knee, not a peg
+          c.stroke();
+          c.fillStyle = '#2b333d';                       // a foot, so it stands
+          c.fillRect(hx + step - 1.6, 8.4 - lift * 0.4, 3.4, 1.8);
         };
-        legE(-9, phE, false); legE(5, phE + Math.PI, false);
-        c.fillStyle = eg; rr(c, -13, -6, 24, 12, 4); c.fill();
-        c.strokeStyle = '#2c333f'; c.lineWidth = 1; rr(c, -13, -6, 24, 12, 4); c.stroke();
-        legE(-7, phE + Math.PI, true); legE(7, phE, true);
-        c.fillStyle = '#59667a'; c.fillRect(8, -6, 4, 3);
-        c.fillStyle = '#4d5768'; rr(c, 9, -13, 11, 9, 3); c.fill();
-        eyes(11.5, -11, 2.4);
-        c.strokeStyle = '#7d8a9c'; c.lineWidth = 1.2;
-        c.beginPath(); c.moveTo(12, -13); c.lineTo(10, -18); c.lineTo(13, -19); c.stroke();
-        c.fillStyle = P.glow; c.shadowColor = P.glow; c.shadowBlur = 6;
-        c.beginPath(); c.arc(-8, -8, 2.8, 0, 7); c.arc(-2, -9, 2.2, 0, 7); c.fill(); c.shadowBlur = 0;
-        break;
-      }
-      case 'flier': {
-        // infected drone: rotor mast, torso pod, head, dangling arms and legs
-        const wing = Math.sin(this.anim * 26) * 6;
-        c.fillStyle = 'rgba(170,205,255,0.3)';
-        c.beginPath(); c.ellipse(-2, -10 - wing * 0.4, 12, 3, -0.15, 0, 7); c.fill();
-        c.beginPath(); c.ellipse(-2, -10 + wing * 0.4, 12, 3, 0.15, 0, 7); c.fill();
-        c.fillStyle = '#59667a'; c.fillRect(-3.5, -11, 3, 4);
-        c.fillStyle = eg; rr(c, -9, -8, 18, 13, 5); c.fill();
-        c.strokeStyle = '#2c333f'; c.lineWidth = 1; rr(c, -9, -8, 18, 13, 5); c.stroke();
-        c.fillStyle = '#4d5768'; rr(c, 2, -8, 9, 8, 3); c.fill();
-        eyes(4, -6, 2.2);
-        const sway = Math.sin(this.anim * 7) * 2.5;
-        c.strokeStyle = '#59667a'; c.lineWidth = 2; c.lineCap = 'round';
-        c.beginPath(); c.moveTo(-6, 4); c.lineTo(-7 + sway, 10); c.moveTo(3, 5); c.lineTo(4 - sway, 11); c.stroke();
-        c.fillStyle = '#7d8a9c'; c.fillRect(-9 + sway, 9, 3.5, 2.5); c.fillRect(2.5 - sway, 10, 3.5, 2.5);
-        c.fillStyle = P.glow; c.shadowColor = P.glow; c.shadowBlur = 6;
-        c.beginPath(); c.arc(-7, -4, 2.4, 0, 7); c.fill(); c.shadowBlur = 0;
-        break;
-      }
-      case 'turret': {
-        // rooted sentry robot: base, waist, torso, idle arm, tracking cannon arm + head
-        c.fillStyle = '#2c333f'; rr(c, -14, 8, 28, 8, 3); c.fill();
-        c.fillStyle = '#3d4756'; c.fillRect(-4, 2, 8, 7);
-        c.fillStyle = eg; rr(c, -10, -8, 20, 12, 4); c.fill();
-        c.strokeStyle = '#2c333f'; c.lineWidth = 1; rr(c, -10, -8, 20, 12, 4); c.stroke();
-        c.strokeStyle = '#59667a'; c.lineWidth = 2.4; c.lineCap = 'round';
-        c.beginPath(); c.moveTo(-9, -4); c.lineTo(-13, 0); c.lineTo(-11, 4); c.stroke();
-        const a = player.dead ? 0 : Math.atan2(player.y + 18 - cy, (player.x - cx) * flip);
-        const rec = clamp((this.t - 1.6) * 5, 0, 4); // recoil right after a shot
-        c.save(); c.translate(4, -3); c.rotate(clamp(a, -1, 1));
-        c.fillStyle = '#59667a'; c.fillRect(-rec, -3, 14, 6);
-        c.fillStyle = '#7d8a9c'; c.fillRect(12 - rec, -4, 4, 8);
-        c.restore();
-        c.save(); c.translate(0, -12); c.rotate(clamp(a * 0.4, -0.4, 0.4));
-        c.fillStyle = '#4d5768'; rr(c, -6, -5, 12, 9, 3); c.fill();
-        eyes(-3.5, -3, 2.4);
-        c.restore();
-        c.fillStyle = P.glow; c.shadowColor = P.glow; c.shadowBlur = 6;
-        c.beginPath(); c.arc(-11, 10, 2.6, 0, 7); c.fill(); c.shadowBlur = 0;
+        leg(-7, ph, 9, 2.6); leg(-3.5, ph + 2.4, 9, 2.2);
+        leg(4, ph + 1.1, 9, 3);  leg(8, ph + 3.6, 9, 2.4);
+        // cargo hopper (back attachment)
+        plate(() => {
+          c.beginPath(); c.moveTo(-1, -6); c.lineTo(11, -8); c.lineTo(12, -1); c.lineTo(0, -1);
+          c.closePath();
+        }, -9, -1);
+        accent(() => {                                   // rust bleeding from the bin
+          c.globalAlpha = 0.55;
+          c.fillRect(2, -2.4, 8, 1.4); c.globalAlpha = 1;
+        });
+        c.fillStyle = '#59677a';                        // rim of the open bin
+        c.beginPath(); c.moveTo(-1.4, -6.2); c.lineTo(11.4, -8.4); c.lineTo(11.6, -7); c.lineTo(-1.2, -4.8);
+        c.closePath(); c.fill();
+        seam(1, -4.2, 10.4, -6, 0.24);
+        // chassis: a long wedge, nose lower than tail
+        plate(() => {
+          c.beginPath(); c.moveTo(-13, -1.5); c.lineTo(-9, -4.5); c.lineTo(9, -4.5);
+          c.lineTo(12.5, -0.5); c.lineTo(10, 2.5); c.lineTo(-11, 2.5); c.closePath();
+        }, -5, 3);
+        seam(-9, -1.2, 8, -1.2, 0.2);
+        // head: a blunt tow-coupling thrust forward on a stub neck
+        plate(() => {
+          c.beginPath(); c.moveTo(-18, -1); c.lineTo(-13, -5); c.lineTo(-10, -5);
+          c.lineTo(-10, 1.5); c.lineTo(-16, 2); c.closePath();
+        }, -5, 2);
+        // the coupling: an open jaw with a tooth, so the front end reads as a head
+        c.fillStyle = '#2b333d';
+        c.beginPath(); c.moveTo(-19.5, -1.4); c.lineTo(-14.5, -0.6);
+        c.lineTo(-14.5, 2.4); c.lineTo(-19, 1.6); c.closePath(); c.fill();
+        c.fillStyle = '#59677a';
+        c.beginPath(); c.moveTo(-18.6, -0.8); c.lineTo(-16.2, -0.4); c.lineTo(-17.4, 1.2); c.closePath(); c.fill();
+        seam(-13.4, -4.2, -10.6, -4.2, 0.3);
+        eyes(-16.8, -3.6, 1.9);
         break;
       }
       case 'hopper': {
-        // humanoid mini-bot on spring legs; arms fly up mid-leap
-        const crouch = this.vy === 0 ? Math.max(0, Math.sin(this.anim * 6)) * 2 : -2;
-        const armUp = this.vy < -40 ? -5 : (this.vy === 0 ? 0 : -2);
-        c.strokeStyle = '#59667a'; c.lineWidth = 2.2; c.lineJoin = 'round';
-        for (const lx of [-6, 6]) {
-          c.beginPath(); c.moveTo(lx, 4 + crouch);
-          c.lineTo(lx - 3, 7 + crouch * 0.6); c.lineTo(lx + 3, 9 + crouch * 0.3); c.lineTo(lx - 1, 12);
+        // NIKK — a leak-seeker that copied NYA-9's own frame. It is the only
+        // mimic with ears, and it has them because it was imitating her.
+        const ph = this.anim * 9;
+        const squash = 1 + Math.sin(ph) * 0.06;
+        // coiled spring legs — the species signature, visible at 1x
+        c.strokeStyle = '#39434f'; c.lineWidth = 1.5; c.lineCap = 'round';
+        for (const sx of [-4.5, 4.5]) {
+          c.beginPath();
+          for (let i = 0; i <= 8; i++) {
+            const yy = 4 + i * 0.9, xx = sx + (i % 2 ? 1.7 : -1.7) * (1 - i / 14);
+            i ? c.lineTo(xx, yy) : c.moveTo(sx, yy);
+          }
           c.stroke();
-          c.fillStyle = '#7d8a9c'; c.fillRect(lx - 3.5, 11, 6, 2.6);
+          c.fillStyle = '#2b333d'; c.fillRect(sx - 2.6, 11, 5.2, 1.8);
         }
-        c.fillStyle = eg; rr(c, -9, -7 + crouch, 18, 13, 4); c.fill();
-        c.strokeStyle = '#2c333f'; c.lineWidth = 1; rr(c, -9, -7 + crouch, 18, 13, 4); c.stroke();
-        c.strokeStyle = '#59667a'; c.lineWidth = 2.2; c.lineCap = 'round';
-        c.beginPath(); c.moveTo(-8, -3 + crouch); c.lineTo(-12, 1 + crouch + armUp);
-        c.moveTo(8, -3 + crouch); c.lineTo(12, 1 + crouch + armUp); c.stroke();
-        c.fillStyle = '#7d8a9c'; c.fillRect(-14, crouch + armUp, 3.5, 3); c.fillRect(10.5, crouch + armUp, 3.5, 3);
-        c.fillStyle = '#4d5768'; rr(c, -5, -15 + crouch, 11, 9, 3); c.fill();
-        eyes(-2.5, -13 + crouch, 2.4);
-        c.strokeStyle = '#7d8a9c'; c.lineWidth = 1.2;
-        c.beginPath(); c.moveTo(0, -15 + crouch); c.lineTo(-1, -19 + crouch); c.stroke();
-        c.fillStyle = P.glow; c.shadowColor = P.glow; c.shadowBlur = 6;
-        c.beginPath(); c.arc(7, -10 + crouch, 2.4, 0, 7); c.fill(); c.shadowBlur = 0;
+        // coolant tank on the back
+        plate(() => { c.beginPath(); c.ellipse(6, -2, 3.4, 4.6, 0.25, 0, 7); c.closePath(); }, -7, 3);
+        accent(() => { c.beginPath(); c.ellipse(6.6, -2.6, 1.1, 2.1, 0.25, 0, 7); c.fill(); }, true);
+        // teardrop body
+        plate(() => {
+          c.beginPath(); c.moveTo(0, -11);
+          c.bezierCurveTo(7, -10, 9, -3, 8, 2);
+          c.bezierCurveTo(6, 6, -6, 6, -8, 2);
+          c.bezierCurveTo(-9, -3, -7, -10, 0, -11);
+          c.closePath();
+        }, -12 * squash, 6);
+        seam(-6.5, -3, 6.5, -3, 0.22);
+        // ears — the head-area element that makes it recognisable
+        c.fillStyle = '#4d5a6b';
+        for (const [ex, tx] of [[-5.4, -7.6], [4.4, 6.8]]) {
+          c.beginPath(); c.moveTo(ex, -8.6); c.quadraticCurveTo(tx, -14.5, ex + (tx - ex) * 0.55, -8);
+          c.closePath(); c.fill();
+        }
+        // probe snout with a hanging drip
+        c.fillStyle = '#39434f';
+        c.beginPath(); c.moveTo(-8, -1); c.lineTo(-12.5, 0.6); c.lineTo(-8, 2.2); c.closePath(); c.fill();
+        accent(() => { c.beginPath(); c.arc(-12.4, 2.4 + Math.sin(ph * 0.7) * 0.6, 0.9, 0, 7); c.fill(); }, true);
+        eyes(-5.2, -6.4, 2);
         break;
       }
       case 'blob': {
-        // the consumed one: a robot half-swallowed by virus mass, arm grasping out
-        const sq = Math.sin(this.anim * 5) * 3;
-        c.fillStyle = P.glow; c.globalAlpha = 0.8;
-        c.beginPath(); c.ellipse(0, 4 - sq / 2, 17, 9 + sq, 0, 0, 7); c.fill();
-        c.globalAlpha = 1;
-        c.save(); c.rotate(-0.25 + Math.sin(this.anim * 2.5) * 0.06);
-        c.fillStyle = eg; rr(c, -6, -8, 13, 11, 3); c.fill();
-        c.fillStyle = '#4d5768'; rr(c, 1, -13, 10, 8, 3); c.fill();
-        eyes(3, -11, 2.2);
+        // BRUT — foundry spillage that cooled into something with legs. The only
+        // asymmetric mimic: it sags, and it has three stubby legs, not four.
+        const ph = this.anim * 5;
+        const pulse = 0.55 + Math.sin(ph) * 0.45;
+        c.strokeStyle = '#2b333d'; c.lineWidth = 2.4; c.lineCap = 'round';
+        for (const [lx, lp] of [[-8, 0], [-1, 2.1], [7.5, 4.2]]) {
+          const lift = Math.max(0, Math.sin(ph * 1.6 + lp)) * 1.4;
+          c.beginPath(); c.moveTo(lx, 6); c.lineTo(lx + 0.6, 11 - lift); c.stroke();
+        }
+        // the mass: wide, low, and deliberately lopsided
+        plate(() => {
+          c.beginPath(); c.moveTo(-16, 6);
+          c.bezierCurveTo(-17, -4, -9, -11, 1, -11);
+          c.bezierCurveTo(10, -11, 16, -6, 15, 1);
+          c.bezierCurveTo(14.4, 5, 12, 7, 8, 7);
+          c.bezierCurveTo(4, 9, -12, 9, -16, 6);
+          c.closePath();
+        }, -12, 8);
+        // molten underglow first — the heat is INSIDE, the crust sits over it
+        c.save(); c.globalAlpha = 0.5 + pulse * 0.3;
+        const ug = c.createRadialGradient(-1, 3, 1, -1, 3, 15);
+        ug.addColorStop(0, EL.col); ug.addColorStop(1, 'rgba(255,122,52,0)');
+        c.fillStyle = ug; c.beginPath(); c.ellipse(-1, 3, 14, 6, 0, 0, 7); c.fill();
         c.restore();
-        const grasp = Math.sin(this.anim * 4) * 2;
-        c.strokeStyle = '#59667a'; c.lineWidth = 2.4; c.lineCap = 'round';
-        c.beginPath(); c.moveTo(-8, 2); c.lineTo(-13, -5 + grasp); c.lineTo(-12, -9 + grasp); c.stroke();
-        c.lineWidth = 1.3;
-        c.beginPath();
-        c.moveTo(-12, -9 + grasp); c.lineTo(-14.5, -12 + grasp);
-        c.moveTo(-12, -9 + grasp); c.lineTo(-11.5, -13 + grasp);
-        c.moveTo(-12, -9 + grasp); c.lineTo(-9.5, -12 + grasp);
-        c.stroke();
-        c.fillStyle = P.glow; c.shadowColor = P.glow; c.shadowBlur = 6;
-        c.beginPath(); c.arc(6, -2, 2.6, 0, 7); c.arc(-3, 6, 2, 0, 7); c.fill(); c.shadowBlur = 0;
+        // cooled crust: several DARK irregular plates, so the gaps between them
+        // are what glows. Plates lighter than the body read as planks taped on.
+        c.fillStyle = '#242c36';
+        const crust = [
+          [[-14, 3], [-11, -5], [-4, -8], [-3, -1], [-8, 4]],
+          [[-1.5, -9], [5, -9.5], [7, -3.5], [0.5, -2.5]],
+          [[8.5, -6], [14, -2], [13, 3], [8, 2]],
+          [[-2, 0], [6, -1], [7.5, 5], [-1, 6]],
+        ];
+        for (const poly of crust) {
+          c.beginPath(); poly.forEach((pt, i) => i ? c.lineTo(pt[0], pt[1]) : c.moveTo(pt[0], pt[1]));
+          c.closePath(); c.fill();
+        }
+        // a few short hot flecks where the crust has not closed
+        c.save(); c.globalAlpha = pulse;
+        c.fillStyle = '#ffd9a0'; c.shadowColor = EL.col; c.shadowBlur = 4;
+        c.fillRect(-3.4, -6, 0.9, 2.2); c.fillRect(7.4, -2.6, 0.8, 2.6);
+        c.fillRect(-1.2, 5.4, 2.4, 0.8);
+        c.shadowBlur = 0; c.restore();
+        eyes(-3, -6, 2.2);
+        break;
+      }
+      case 'flier': {
+        // OKK — a survey lens that never landed. The lens IS the big shape, and
+        // it is the only mimic with a single eye, so it never reads as the others.
+        const ph = this.anim * 6, bob = Math.sin(ph) * 0.8;
+        c.save(); c.translate(0, bob);
+        // housing ring behind the lens
+        c.strokeStyle = '#4d5a6b'; c.lineWidth = 2.4;
+        c.beginPath(); c.arc(0, 0, 10.5, 0, 7); c.stroke();
+        c.strokeStyle = '#39434f'; c.lineWidth = 1;
+        for (let i = 0; i < 3; i++) {                    // mounting struts
+          const a = ph * 0.6 + i / 3 * Math.PI * 2;
+          c.beginPath(); c.moveTo(Math.cos(a) * 6.5, Math.sin(a) * 6.5);
+          c.lineTo(Math.cos(a) * 10.5, Math.sin(a) * 10.5); c.stroke();
+        }
+        // the lens body
+        plate(() => { c.beginPath(); c.arc(0, 0, 7, 0, 7); c.closePath(); }, -8, 7);
+        // single red iris — infection marker, one not two
+        c.fillStyle = '#ff2f4f'; c.shadowColor = '#ff2f4f'; c.shadowBlur = 9;
+        c.beginPath(); c.arc(-1.2, 0, 3.1, 0, 7); c.fill();
+        c.shadowBlur = 0;
+        c.fillStyle = '#20272f'; c.beginPath(); c.arc(-1.2, 0, 1.3, 0, 7); c.fill();
+        c.fillStyle = 'rgba(255,255,255,0.55)';
+        c.beginPath(); c.arc(-2.8, -1.6, 0.9, 0, 7); c.fill();
+        // arc emitters underneath
+        accent(() => {
+          for (const ex of [-5, 5]) { c.beginPath(); c.arc(ex, 8.4, 1.3, 0, 7); c.fill(); }
+        }, true);
+        c.strokeStyle = '#4d5a6b'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(0, -10.5); c.lineTo(0.6, -14); c.stroke();
+        c.restore();
+        break;
+      }
+      default: {
+        // VAKT — bolted down, still guarding a door that leads nowhere. Rooted
+        // trapezoid: the only mimic with no legs and a horizontal base.
+        const ph = this.anim * 3;
+        const aim = Math.sin(ph * 0.5) * 0.22;
+        // base, wider at the floor, with visible anchor bolts
+        plate(() => {
+          c.beginPath(); c.moveTo(-13, 15); c.lineTo(-8, 2); c.lineTo(8, 2); c.lineTo(13, 15); c.closePath();
+        }, 0, 15);
+        c.fillStyle = '#2b333d';
+        for (const bx of [-9.5, 9.5]) { c.beginPath(); c.arc(bx, 12.4, 1.5, 0, 7); c.fill(); }
+        seam(-8.6, 6, 8.6, 6, 0.2);
+        // shoulder collar — head-area mass, where recognition lives
+        plate(() => {
+          c.beginPath(); c.moveTo(-9, 2); c.lineTo(-7.5, -3); c.lineTo(7.5, -3); c.lineTo(9, 2); c.closePath();
+        }, -4, 3);
+        c.save(); c.rotate(aim);
+        // turret head + barrel
+        plate(() => {
+          c.beginPath(); c.moveTo(-6.5, -3); c.lineTo(-5, -10); c.lineTo(5, -10); c.lineTo(6.5, -3); c.closePath();
+        }, -11, -2);
+        c.fillStyle = '#39434f'; c.fillRect(-13, -8.4, 8, 3.4);      // barrel
+        accent(() => {                                                // arc coils
+          for (let i = 0; i < 3; i++) c.fillRect(-12 + i * 2.4, -8.8, 1, 4.2);
+        }, true);
+        eyes(-3.4, -8, 2);
+        c.restore();
         break;
       }
     }
