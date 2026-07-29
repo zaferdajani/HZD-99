@@ -59,9 +59,12 @@ function tcResize() {
   tc.style.left = OX + 'px'; tc.style.top = OY + 'px';
   tc.style.width = W + 'px'; tc.style.height = H + 'px';
   tcx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  TOUCH.gut = Math.max(96, Math.min(190, W * 0.15));
+  // a connected pad means nothing needs finger room: drop the gutters entirely
+  // and let the frame take the whole viewport
+  const padOn = (typeof PAD !== 'undefined') && PAD.on;
+  TOUCH.gut = padOn ? 0 : Math.max(96, Math.min(190, W * 0.15));
   // the game frame always fits fully inside the visible area, no scrolling
-  const availW = Math.max(300, W - TOUCH.gut * 2 - 8);
+  const availW = Math.max(300, W - TOUCH.gut * 2 - (padOn ? 0 : 8));
   const cw = Math.min(availW, H * 16 / 9), ch = cw * 9 / 16;
   cv.style.maxWidth = 'none'; cv.style.maxHeight = 'none';
   cv.style.position = 'fixed';
@@ -248,6 +251,7 @@ function tCircle(x, y, r, pressed, icon, iconSize) {
 }
 function drawTouchUI() {
   if (!TOUCH.enabled || !tcx) return;
+  if (typeof PAD !== 'undefined' && PAD.on) { tcx.clearRect(0, 0, TOUCH.vw || innerWidth, TOUCH.vh || innerHeight); return; }
   const vv = window.visualViewport;
   const cw = Math.round(vv ? vv.width : innerWidth), ch = Math.round(vv ? vv.height : innerHeight);
   if (cw !== TOUCH.rawW || ch !== TOUCH.rawH) tcResize();

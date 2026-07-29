@@ -477,7 +477,7 @@ function update(dt) {
   else if (G.state === 'LANGSEL') updateLangSel();
   else if (G.state === 'DIFF') updateDiff();
   else if (G.state === 'WHO') updateWho();
-  else if (G.state === 'CTRL') { if (inP('BACK') || inP('OK')) { G.state = G.ctrlBack || 'MENU'; sfx('ui'); } }
+  else if (G.state === 'CTRL') updateCtrl();
   else if (G.state === 'INTRO') {
     G.introT += dt;
     if (inP('OK') || inP('ATK') || inP('BACK') || G.introT > 12.4) { G.state = 'PLAY'; sfx('ok'); }
@@ -2381,6 +2381,30 @@ function drawHeroP(x, detail) {
   x.restore();
 }
 
+function updateCtrl() {
+  if (!PAD.on) {
+    if (inP('BACK') || inP('OK')) { G.state = G.ctrlBack || 'MENU'; sfx('ui'); }
+    return;
+  }
+  if (G.padIdx == null) G.padIdx = 0;
+  if (PAD.listen) {                       // waiting for a button to bind
+    if (keysP.Escape) { PAD.listen = null; sfx('ui'); return; }
+    if (PAD.lastPress >= 0) {
+      padBind(PAD.listen, PAD.lastPress);
+      G.toast(t('pa_' + PAD.listen) + ' → ' + padLabel(PAD.lastPress));
+      PAD.listen = null; sfx('ok');
+    }
+    return;
+  }
+  const n = PAD_ACTIONS.length, colH = Math.ceil(n / 2);
+  if (inP('DOWN') || keysP.ArrowDown) { G.padIdx = (G.padIdx + 1) % n; sfx('ui'); }
+  if (inP('UP') || keysP.ArrowUp) { G.padIdx = (G.padIdx + n - 1) % n; sfx('ui'); }
+  if (inP('LEFT') || keysP.ArrowLeft) { G.padIdx = (G.padIdx + n - colH) % n; sfx('ui'); }
+  if (inP('RIGHT') || keysP.ArrowRight) { G.padIdx = (G.padIdx + colH) % n; sfx('ui'); }
+  if (keysP.Enter || keysP.KeyX) { PAD.listen = PAD_ACTIONS[G.padIdx]; PAD.lastPress = -1; sfx('ui'); }
+  if (keysP.KeyR) { padReset(); G.toast(t('pad_wasreset')); sfx('ok'); }
+  if (keysP.Escape) { G.state = G.ctrlBack || 'MENU'; sfx('ui'); }
+}
 function drawMenuBG(tsec) {
   const sky = c.createLinearGradient(0, 0, 0, 540);
   sky.addColorStop(0, '#050a14'); sky.addColorStop(1, '#0b1b30');
@@ -2593,10 +2617,44 @@ function draw(tms) {
   }
 }
 function drawCtrl() {
+  // With a pad attached this screen becomes the controller map: every action,
+  // the button it sits on, and a live highlight of whatever you are pressing.
+  if (PAD.on) { drawPadCfg(); return; }
   dimPanel(200, 80, 560, 390);
   ftxt(t('ctl_title'), 480, 120, 30, '#eef3fa', 'center', '#37ffd0');
   t('ctl').forEach((ln, i) => ftxt(ln, 480, 170 + i * 33, 15, '#cfe3ef', 'center', null, '600'));
-  ftxt(t('back') + ' — Esc / Enter', 480, 445, 13, '#7d93a8');
+  ftxt(t('ctl_nopad'), 480, 424, 12, '#66788a');
+  ftxt(t('back') + ' — Esc / Enter', 480, 448, 13, '#7d93a8');
+}
+function drawPadCfg() {
+  dimPanel(96, 42, 768, 464);
+  ftxt(t('pad_title'), 480, 78, 26, '#eef3fa', 'center', '#37ffd0');
+  const nm = PAD.id ? (PAD.id.length > 52 ? PAD.id.slice(0, 52) + '…' : PAD.id) : t('pad_generic');
+  ftxt('● ' + nm, 480, 104, 12, '#8fd8c8');
+  const n = PAD_ACTIONS.length, colH = Math.ceil(n / 2);
+  for (let i = 0; i < n; i++) {
+    const a = PAD_ACTIONS[i];
+    const col = i < colH ? 0 : 1, row = i % colH;
+    const x = 140 + col * 372, y = 142 + row * 40;
+    const sel = i === G.padIdx;
+    const btn = PAD.map[a];
+    const live = btn >= 0 && PAD.down[btn];
+    if (sel) {
+      c.fillStyle = 'rgba(55,255,208,0.10)'; rr(c, x - 16, y - 17, 344, 34, 8); c.fill();
+      c.strokeStyle = '#37ffd0'; c.lineWidth = 1.6; rr(c, x - 16, y - 17, 344, 34, 8); c.stroke();
+    }
+    ftxt(t('pa_' + a), x, y, 15, sel ? '#eef3fa' : '#9fb8c8', 'left');
+    const bx = x + 246, listening = PAD.listen === a;
+    c.fillStyle = listening ? 'rgba(255,215,106,0.22)' : live ? 'rgba(55,255,208,0.30)' : 'rgba(20,32,44,0.9)';
+    rr(c, bx, y - 14, 88, 28, 7); c.fill();
+    c.strokeStyle = listening ? '#ffd76a' : live ? '#37ffd0' : 'rgba(120,150,170,0.5)';
+    c.lineWidth = live || listening ? 2 : 1.2; rr(c, bx, y - 14, 88, 28, 7); c.stroke();
+    ftxt(listening ? t('pad_press') : padLabel(btn), bx + 44, y, listening ? 12 : 14,
+         listening ? '#ffd76a' : live ? '#eafff9' : '#cfe3ef');
+  }
+  ftxt(t('pad_move'), 480, 424, 12, '#8aa2b5');
+  ftxt(t('pad_hint'), 480, 452, 13, '#cfe3ef');
+  ftxt(t('pad_reset'), 480, 476, 12, '#7d93a8');
 }
 const miniCache = {};
 function roomMini(id) {

@@ -7,35 +7,133 @@ const KEYB = {
   HEAL: ['KeyF', 'KeyH', 'VHEAL', 'GP_HEAL'], INT: ['KeyE', 'VINT', 'GP_INT'],
   CLAW: ['KeyQ', 'KeyR', 'VCLAW', 'GP_CLAW'],
   ARM: ['KeyG', 'Digit1', 'VARM', 'GP_ARM'], SONG: ['KeyB', 'KeyN', 'VSONG', 'GP_SONG'],
-  MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], CREST: ['KeyI', 'VCREST'], SKILL: ['KeyT', 'VSKILL'],
+  MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], CREST: ['KeyI', 'VCREST', 'GP_CREST'], SKILL: ['KeyT', 'VSKILL', 'GP_SKILL'],
   PAUSE: ['Escape', 'KeyP', 'VPAUSE', 'GP_PAUSE'],
   OK: ['Enter', 'KeyZ', 'Space', 'VOK', 'GP_OK'], BACK: ['Escape', 'VBACK', 'GP_BACK'],
 };
 const keys = {}, keysP = {};
-// ---- gamepad (PS4/PS5/Xbox via the standard mapping) ----
-const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG'];
+// ---------------------------------------------------------------------------
+// Gamepad. A Bluetooth pad on a phone should turn the game into a console: the
+// touch gutters disappear, the picture grows to fill the screen, and every
+// action moves onto a real button. Detection is automatic on first input.
+// ---------------------------------------------------------------------------
+const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST'];
 const GP_PREV = {};
-addEventListener('gamepadconnected', () => { try { audioOn(); } catch (e) {} });
+
+// Standard-mapping button indices, which every DualShock 4 / DualSense reports.
+const PAD_BTN = {
+  0: 'Cross', 1: 'Circle', 2: 'Square', 3: 'Triangle',
+  4: 'L1', 5: 'R1', 6: 'L2', 7: 'R2',
+  8: 'Share', 9: 'Options', 10: 'L3', 11: 'R3',
+  12: 'D-Up', 13: 'D-Down', 14: 'D-Left', 15: 'D-Right', 16: 'PS',
+};
+const PAD_BTN_XB = {
+  0: 'A', 1: 'B', 2: 'X', 3: 'Y', 4: 'LB', 5: 'RB', 6: 'LT', 7: 'RT',
+  8: 'View', 9: 'Menu', 10: 'LS', 11: 'RS',
+  12: 'D-Up', 13: 'D-Down', 14: 'D-Left', 15: 'D-Right', 16: 'Guide',
+};
+// every action that lives on a face/shoulder button, in the order the config
+// screen lists them. Movement stays on the stick + d-pad and is not remappable.
+const PAD_ACTIONS = ['JUMP', 'ATK', 'DASH', 'CAST', 'ARM', 'SONG', 'CLAW', 'HEAL', 'INT', 'MAP', 'SKILL', 'CREST', 'PAUSE'];
+const PAD_DEFAULT = {
+  JUMP: 0, ATK: 2, INT: 1, HEAL: 3,
+  DASH: 5,        // R1
+  CAST: 7,        // R2 — fire the suit
+  ARM: 4,         // L1 — change suit
+  SONG: 6,        // L2 — the Song
+  CLAW: 10,       // L3
+  MAP: 11,        // R3
+  SKILL: 8,       // Share
+  CREST: 16,      // PS
+  PAUSE: 9,       // Options
+};
+const PAD = {
+  on: false, id: '', kind: 'generic', idx: -1,
+  map: Object.assign({}, PAD_DEFAULT),
+  down: {},          // live button state, for the config screen
+  lastPress: -1,     // most recent button index, for "press to bind"
+  listen: null,      // action currently awaiting a button
+  seen: false,
+};
+function padLabel(i) {
+  if (i == null || i < 0) return '—';
+  return (PAD.kind === 'xbox' ? PAD_BTN_XB[i] : PAD_BTN[i]) || ('B' + i);
+}
+function padKindOf(id) {
+  const s = (id || '').toLowerCase();
+  if (/dualshock|dualsense|playstation|054c|wireless controller/.test(s)) return 'ps';
+  if (/xbox|xinput|045e/.test(s)) return 'xbox';
+  return 'generic';
+}
+function padSave() {
+  try { localStorage.setItem('cb_padmap', JSON.stringify(PAD.map)); } catch (e) {}
+}
+function padLoad() {
+  try {
+    const v = JSON.parse(localStorage.getItem('cb_padmap') || 'null');
+    if (v && typeof v === 'object') PAD.map = Object.assign({}, PAD_DEFAULT, v);
+  } catch (e) {}
+}
+padLoad();
+function padReset() { PAD.map = Object.assign({}, PAD_DEFAULT); padSave(); }
+// bind an action, clearing whatever else held that button so two moves can
+// never share one key by accident
+function padBind(action, btn) {
+  for (const a of PAD_ACTIONS) if (a !== action && PAD.map[a] === btn) PAD.map[a] = -1;
+  PAD.map[action] = btn; padSave();
+}
+
+function padConnected(on, gp) {
+  if (on === PAD.on) return;
+  PAD.on = on;
+  if (on) { PAD.id = (gp && gp.id) || ''; PAD.kind = padKindOf(PAD.id); }
+  // the whole point: with a pad attached the touch gutters go away and the
+  // picture takes the space they were using
+  if (typeof TOUCH !== 'undefined') {
+    if (typeof tcResize === 'function') tcResize();
+    if (typeof tc !== 'undefined' && tc) {
+      tc.style.display = on ? 'none' : 'block';
+      tc.style.pointerEvents = on ? 'none' : 'auto';
+    }
+  }
+  if (typeof G !== 'undefined' && G.toast && typeof t === 'function')
+    G.toast(on ? t('pad_on') : t('pad_off'));
+}
+addEventListener('gamepadconnected', e => {
+  try { audioOn(); } catch (er) {}
+  padConnected(true, e.gamepad);
+});
+addEventListener('gamepaddisconnected', () => padConnected(false, null));
+
 function pollGamepad() {
   if (!navigator.getGamepads) return;
   let gp = null;
   for (const pd of navigator.getGamepads()) if (pd && pd.connected) { gp = pd; break; }
+  if (gp && !PAD.on) padConnected(true, gp);
+  else if (!gp && PAD.on) padConnected(false, null);
+  // the connect event does not always carry the pad (and some browsers fire a
+  // bare event), so learn the identity from the poll the moment it is available
+  if (gp && gp.id && PAD.id !== gp.id) { PAD.id = gp.id; PAD.kind = padKindOf(gp.id); }
   const st = {};
   if (gp) {
     const b = gp.buttons, ax = gp.axes || [];
-    const P = i => b[i] && (b[i].pressed || b[i].value > 0.4);
+    const P = i => i >= 0 && b[i] && (b[i].pressed || b[i].value > 0.4);
     const A0 = ax[0] || 0, A1 = ax[1] || 0;
+    // movement: left stick and d-pad both, always
     st.GP_L = P(14) || A0 < -0.4; st.GP_R = P(15) || A0 > 0.4;
     st.GP_U = P(12) || A1 < -0.4; st.GP_D = P(13) || A1 > 0.4;
-    st.GP_JUMP = st.GP_OK = P(0);          // cross / A
-    st.GP_ATK = P(2);                       // square / X
-    st.GP_DASH = P(5) || P(7);              // R1 / R2
-    st.GP_CAST = P(4) || P(6);              // L1 / L2
-    st.GP_HEAL = P(3);                      // triangle / Y
-    st.GP_INT = st.GP_BACK = P(1);          // circle / B
-    st.GP_PAUSE = P(9);                     // options / start
-    st.GP_MAP = P(8);                       // share / select
-    st.GP_CLAW = P(10) || P(11);            // L3 / R3 — Feral Claws
+    // live state + edge capture, so the config screen can show presses and bind
+    PAD.lastPress = -1;
+    for (let i = 0; i < b.length; i++) {
+      const on = P(i);
+      if (on && !PAD.down[i]) PAD.lastPress = i;
+      PAD.down[i] = on;
+    }
+    // everything else comes from the (remappable) table
+    for (const a of PAD_ACTIONS) st['GP_' + a] = P(PAD.map[a]);
+    st.GP_OK = st.GP_JUMP; st.GP_BACK = st.GP_INT;
+    // while rebinding, swallow the actions so a bind press does not also fire
+    if (PAD.listen) for (const c of GP_CODES) st[c] = false;
   }
   for (const code of GP_CODES) {
     const on = !!st[code];
