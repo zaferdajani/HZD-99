@@ -5116,148 +5116,56 @@ class Boss {
     c.translate(cx, cy);
     switch (this.kind) {
       case 'glitch': {
-        // GLITCH.EXE — an armoured, virus-corrupted war-hound
-        const charging = this.st === 'charge';
-        const p2 = this.phase === 2;
-        const tt = this.anim;
-        const neon = P.glow;
-        const cor = charging ? '#ff2f4f' : (p2 ? '#ff5a6d' : '#ff4f6d');
-        // ---------- orbiting energy halo + corruption drones (accessory) ----------
-        c.save(); c.globalCompositeOperation = 'lighter';
-        const haloR = 58 + Math.sin(tt * 3) * 3;
-        c.globalAlpha = charging ? 0.4 : 0.22;
-        c.strokeStyle = cor; c.lineWidth = 2.4;
-        c.beginPath(); c.ellipse(0, -6, haloR, haloR * 0.4, 0, 0, 7); c.stroke();
-        c.globalAlpha = 0.14; c.strokeStyle = neon; c.lineWidth = 1.4;
-        c.beginPath(); c.ellipse(0, -6, haloR - 6, haloR * 0.36, 0, 0, 7); c.stroke();
-        c.globalAlpha = 1;
-        for (let i = 0; i < 3; i++) {
-          const aa = tt * 2.1 + i / 3 * Math.PI * 2;
-          const ox = Math.cos(aa) * haloR, oy = Math.sin(aa) * haloR * 0.4 - 6;
-          const dep = (Math.sin(aa) + 1) / 2, sz = 3 + dep * 3.5;
-          c.save(); c.translate(ox, oy); c.rotate(aa * 2);
-          const dg = c.createRadialGradient(0, 0, 0, 0, 0, sz * 2.4);
-          dg.addColorStop(0, '#ffffff'); dg.addColorStop(0.4, i === 1 ? neon : cor); dg.addColorStop(1, 'rgba(0,0,0,0)');
-          c.fillStyle = dg; c.beginPath(); c.arc(0, 0, sz * 2.4, 0, 7); c.fill();
-          c.fillStyle = '#1a2028'; c.fillRect(-sz * 0.6, -sz * 0.6, sz * 1.2, sz * 1.2);
-          c.fillStyle = i === 1 ? neon : cor; c.fillRect(-sz * 0.3, -sz * 0.3, sz * 0.6, sz * 0.6);
-          c.restore();
-        }
-        c.restore();
-        // ---------- charge windup aura ----------
-        if (charging) {
-          c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.3 + Math.sin(tt * 30) * 0.1;
-          const ag = c.createRadialGradient(0, 0, 8, 0, 0, 60);
-          ag.addColorStop(0, cor); ag.addColorStop(1, 'rgba(0,0,0,0)');
-          c.fillStyle = ag; c.beginPath(); c.arc(0, 0, 60, 0, 7); c.fill();
-          c.restore(); c.globalAlpha = 1;
-        }
+        // NULL-SEEKER DRILLER — an excavation unit. Quadruped, ceramic-drummed,
+        // with a fluted bronze bore-head thrown forward. Built to the design
+        // sheet: ceramic armour, steel frame, bronze joints, and a sensor that
+        // walks cyan to crimson as it escalates.
+        const tt = this.anim, p2 = this.phase === 2;
+        const st8 = sensorState(this);
         c.scale(this.face || 1, 1);
-        const gj = charging ? rnd(-1.6, 1.6) : 0;
-        c.translate(gj, gj * 0.5);
-        // ---------- motion smear when charging ----------
-        if (charging) {
-          for (let k = 1; k <= 3; k++) {
-            c.globalAlpha = 0.12 * (4 - k);
-            c.fillStyle = '#20303e';
-            rr(c, -36 - k * 9, -14, 60, 30, 11); c.fill();
-          }
-          c.globalAlpha = 1;
+        for (const [lx, ph] of [[-24, 0], [-11, 2.2], [12, 1.1], [25, 3.4]]) {
+          const sw = Math.sin(tt * (this.st === 'charge' ? 14 : 5) + ph);
+          const kx = lx + sw * 5, ky = 4 + Math.abs(sw) * 2;
+          c.strokeStyle = MAT.steel.dark; c.lineWidth = 5; c.lineCap = 'round';
+          c.beginPath(); c.moveTo(lx * 0.7, -4); c.lineTo(kx, ky); c.lineTo(kx + sw * 3, 24); c.stroke();
+          c.strokeStyle = MAT.steel.mid; c.lineWidth = 2.4;
+          c.beginPath(); c.moveTo(lx * 0.7, -4); c.lineTo(kx, ky); c.stroke();
+          c.fillStyle = ramp(c, MAT.bronze, kx - 3, ky - 3, kx + 3, ky + 3);
+          c.beginPath(); c.arc(kx, ky, 3.2, 0, 7); c.fill();
+          c.fillStyle = MAT.ceramic.dark; c.fillRect(kx + sw * 3 - 4, 23, 8, 3.5);
+          occl(c, kx + sw * 3, 26, 7, 3, 0.5);
         }
-        // ---------- 4 articulated legs (behind body) ----------
-        const legPhase = tt * (charging ? 22 : 13);
-        const drawLeg = (hx, phase, back) => {
-          const step = Math.sin(phase) * 6, lift = Math.max(0, -Math.cos(phase)) * 5;
-          const fx = hx + step, fy = 26 - lift;
-          const kx = (hx + fx) / 2 + 3, ky = (6 + fy) / 2;
-          c.strokeStyle = back ? '#2a333f' : '#46596e'; c.lineWidth = back ? 5 : 6; c.lineJoin = 'round'; c.lineCap = 'round';
-          c.beginPath(); c.moveTo(hx, 6); c.lineTo(kx, ky); c.lineTo(fx, fy); c.stroke();
-          c.fillStyle = back ? '#1c242e' : '#5a6d84'; c.fillRect(fx - 3, fy - 2, 7, 4);
-          c.fillStyle = neon; c.shadowColor = neon; c.shadowBlur = 5;
-          c.beginPath(); c.arc(kx, ky, 1.8, 0, 7); c.fill(); c.shadowBlur = 0;
-        };
-        drawLeg(-24, legPhase + Math.PI, true); drawLeg(8, legPhase, true);
-        // ---------- main torso: cylindrical metal gradient ----------
-        const bg = c.createLinearGradient(0, -22, 0, 28);
-        bg.addColorStop(0, '#7d8ea6'); bg.addColorStop(0.35, '#46536a'); bg.addColorStop(0.7, '#2a323f'); bg.addColorStop(1, '#12171f');
-        c.fillStyle = bg; rr(c, -36, -14, 62, 30, 12); c.fill();
-        // belly ambient occlusion
-        const ao = c.createLinearGradient(0, 4, 0, 16);
-        ao.addColorStop(0, 'rgba(0,0,0,0)'); ao.addColorStop(1, 'rgba(0,0,0,0.55)');
-        c.fillStyle = ao; rr(c, -36, -14, 62, 30, 12); c.fill();
-        // ---------- hunched shoulder / neck ----------
-        const sg = c.createLinearGradient(0, -30, 0, -2);
-        sg.addColorStop(0, '#8fa0b8'); sg.addColorStop(0.5, '#4b5a70'); sg.addColorStop(1, '#232c38');
-        c.fillStyle = sg; c.beginPath();
-        c.moveTo(-6, -8); c.quadraticCurveTo(2, -30, 22, -24); c.quadraticCurveTo(30, -20, 28, -4);
-        c.lineTo(-6, -8); c.closePath(); c.fill();
-        // ---------- back armour plates w/ neon edges + rim light ----------
-        const plate = (px, py, w, h, sk) => {
-          c.save(); c.translate(px, py); c.rotate(sk);
-          const pg = c.createLinearGradient(0, -h / 2, 0, h / 2);
-          pg.addColorStop(0, '#5f7188'); pg.addColorStop(0.55, '#394456'); pg.addColorStop(1, '#1b222c');
-          c.fillStyle = pg; rr(c, -w / 2, -h / 2, w, h, 3); c.fill();
-          c.strokeStyle = 'rgba(255,255,255,0.5)'; c.lineWidth = 1.4;
-          c.beginPath(); c.moveTo(-w / 2 + 2, -h / 2 + 1); c.lineTo(w / 2 - 2, -h / 2 + 1); c.stroke(); // rim light
-          c.strokeStyle = neon; c.shadowColor = neon; c.shadowBlur = 6; c.lineWidth = 1.2;
-          c.strokeRect(-w / 2, -h / 2, w, h); c.shadowBlur = 0;
-          c.restore();
-        };
-        plate(-22, -12, 16, 12, -0.15); plate(-6, -15, 16, 12, -0.05); plate(9, -14, 15, 12, 0.05);
-        // ---------- spiky back blades (weapon shine) ----------
-        const blade = (bx, by, len, lean) => {
-          c.save(); c.translate(bx, by); c.rotate(lean);
-          const blg = c.createLinearGradient(0, 0, 0, -len);
-          blg.addColorStop(0, '#3a4656'); blg.addColorStop(0.6, '#8ea3bd'); blg.addColorStop(1, '#eaf3ff');
-          c.fillStyle = blg;
-          c.beginPath(); c.moveTo(-4, 0); c.lineTo(0, -len); c.lineTo(4, 0); c.closePath(); c.fill();
-          c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 1;
-          c.beginPath(); c.moveTo(-1, -2); c.lineTo(0, -len); c.stroke(); // specular edge
-          c.restore();
-        };
-        blade(-20, -14, 16, -0.25); blade(-8, -18, 20, -0.12); blade(6, -17, 17, 0.05);
-        // ---------- corruption veins (neon, flicker) ----------
-        c.save(); c.globalCompositeOperation = 'lighter';
-        c.globalAlpha = 0.6 + Math.sin(tt * 12) * 0.25;
-        c.strokeStyle = cor; c.shadowColor = cor; c.shadowBlur = 8; c.lineWidth = 1.6; c.lineCap = 'round';
-        c.beginPath(); c.moveTo(-30, 2); c.lineTo(-20, -4); c.lineTo(-12, 4); c.lineTo(-2, -2); c.stroke();
-        c.beginPath(); c.moveTo(-16, 8); c.lineTo(-8, 2); c.lineTo(2, 8); c.stroke();
-        c.restore(); c.globalAlpha = 1; c.shadowBlur = 0;
-        // ---------- head ----------
-        c.save(); c.translate(26, -12);
-        const hg = c.createLinearGradient(0, -14, 0, 12);
-        hg.addColorStop(0, '#6b7d95'); hg.addColorStop(0.5, '#3a4557'); hg.addColorStop(1, '#171d26');
-        c.fillStyle = hg;
-        c.beginPath(); c.moveTo(-8, -12); c.lineTo(16, -8); c.lineTo(22, 2); c.lineTo(14, 12); c.lineTo(-8, 10); c.quadraticCurveTo(-14, -1, -8, -12); c.closePath(); c.fill();
-        // horns
-        c.fillStyle = '#c9d4e2';
-        c.beginPath(); c.moveTo(-4, -10); c.lineTo(-14, -26); c.lineTo(2, -12); c.closePath(); c.fill();
-        c.beginPath(); c.moveTo(6, -9); c.lineTo(2, -24); c.lineTo(12, -10); c.closePath(); c.fill();
-        // jaw
-        c.fillStyle = '#2a323d'; c.beginPath(); c.moveTo(2, 8); c.lineTo(20, 4); c.lineTo(18, 12); c.lineTo(4, 13); c.closePath(); c.fill();
-        c.fillStyle = '#e8eef6';
-        for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(6 + i * 3.5, 8); c.lineTo(7.5 + i * 3.5, 12); c.lineTo(9 + i * 3.5, 8); c.closePath(); c.fill(); }
-        // neon visor eye w/ bloom
-        const ev = charging ? 1 : 0.6 + Math.sin(tt * 6) * 0.3;
-        c.save(); c.globalCompositeOperation = 'lighter';
-        const eg = c.createRadialGradient(6, -2, 1, 6, -2, 16);
-        eg.addColorStop(0, '#ffffff'); eg.addColorStop(0.4, cor); eg.addColorStop(1, 'rgba(0,0,0,0)');
-        c.globalAlpha = ev; c.fillStyle = eg; c.beginPath(); c.arc(6, -2, 16, 0, 7); c.fill();
-        c.restore(); c.globalAlpha = 1;
-        c.fillStyle = charging ? '#ffffff' : cor; c.shadowColor = cor; c.shadowBlur = 12;
-        c.beginPath(); c.moveTo(-2, -4); c.lineTo(14, -1); c.lineTo(12, 3); c.lineTo(-2, 1); c.closePath(); c.fill();
-        c.shadowBlur = 0;
-        c.fillStyle = '#ffffff'; c.fillRect(8, -2, 3, 2);
+        c.fillStyle = ramp(c, MAT.ceramic, -20, -22, 24, 12);
+        rr(c, -26, -20, 52, 30, 9); c.fill();
+        occl(c, 0, 10, 26, 7, 0.45);
+        c.fillStyle = ramp(c, MAT.bronze, -26, -6, 26, 2);
+        c.fillRect(-26, -6, 52, 5);
+        c.fillStyle = ramp(c, MAT.ceramic, -14, -30, 16, -14, 0.95);
+        rr(c, -16, -30, 32, 14, 5); c.fill();
+        occl(c, 0, -16, 18, 4, 0.4);
+        wear(c, [[-22, -14, 4], [17, 2, 3], [-6, -26, 3]]);
+        c.strokeStyle = 'rgba(40,44,50,0.45)'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(-20, -12); c.lineTo(20, -12); c.stroke();
+        for (const ex of [8, 15]) {
+          c.fillStyle = ramp(c, MAT.steel, ex - 2, -34, ex + 2, -26);
+          c.fillRect(ex, -34, 4, 8);
+          if (p2) { c.fillStyle = MAT.crimson.mid; c.fillRect(ex, -36, 4, 2.5); }
+        }
+        const drill = tt * (this.st === 'charge' || this.st === 'bore' ? 46 : 12);
+        c.save(); c.translate(-30, 2); c.rotate(this.st === 'bore' ? 0.5 : -0.06);
+        c.fillStyle = ramp(c, MAT.bronze, -6, -9, 6, 9);
+        c.beginPath(); c.moveTo(-22, 0); c.lineTo(4, -9); c.lineTo(4, 9); c.closePath(); c.fill();
+        c.strokeStyle = 'rgba(28,20,10,0.6)'; c.lineWidth = 1.2;
+        for (let i = 0; i < 4; i++) {
+          const o = ((drill + i * 5.5) % 22) - 22;
+          c.beginPath(); c.moveTo(o, -7.5); c.lineTo(o + 8, 7.5); c.stroke();
+        }
+        c.fillStyle = ramp(c, MAT.steel, 2, -10, 10, 10);
+        rr(c, 2, -10, 9, 20, 3); c.fill();
         c.restore();
-        // ---------- glitch scanline artifacts ----------
-        if (chance(0.18)) {
-          c.save(); c.globalCompositeOperation = 'lighter';
-          c.fillStyle = chance(0.5) ? cor : neon; c.globalAlpha = 0.4;
-          c.fillRect(rnd(-36, 24), rnd(-22, 14), rnd(8, 22), 2);
-          c.restore(); c.globalAlpha = 1;
-        }
-        // front legs (over body)
-        drawLeg(-14, legPhase, false); drawLeg(18, legPhase + Math.PI, false);
+        occl(c, -24, 4, 9, 5, 0.5);
+        drawSensor(c, -13, -12, 5, st8, tt);
+        if (p2 || this.overdriveT > 0) { c.save(); c.translate(14, -26); tendrils(c, 5, 26, tt, 1.2, 0.75); c.restore(); }
         break;
       }
       case 'brood': {
@@ -5285,55 +5193,118 @@ class Boss {
         break;
       }
       case 'atlas': {
-        c.scale(this.face || 1, 1);
-        const warn = this.st === 'slamwarn';
-        // molten forge-iron torso with a hot vertical gradient + cracked-lava seams
-        const atg = c.createLinearGradient(0, -34, 0, 18);
-        atg.addColorStop(0, warn ? '#c47020' : '#7a5220'); atg.addColorStop(0.5, warn ? '#7a3c10' : '#4a2e0d');
-        atg.addColorStop(1, '#221306');
-        c.fillStyle = atg; rr(c, -28, -34, 56, 52, 9); c.fill();
-        c.strokeStyle = warn ? 'rgba(255,180,90,0.9)' : 'rgba(255,148,48,0.5)'; c.lineWidth = 1.4;
-        c.beginPath(); c.moveTo(-16, -20); c.lineTo(-6, -8); c.lineTo(-12, 6);
-        c.moveTo(12, -24); c.lineTo(6, -6); c.lineTo(14, 8); c.stroke();
-        c.strokeStyle = 'rgba(255,225,170,0.4)'; c.lineWidth = 1.6;
-        c.beginPath(); c.moveTo(-24, -30); c.lineTo(24, -30); c.stroke(); // rim light
-        const ahg = c.createLinearGradient(0, -46, 0, -28);
-        ahg.addColorStop(0, '#5a3c14'); ahg.addColorStop(1, '#2c1c08');
-        c.fillStyle = ahg; rr(c, -18, -46, 36, 18, 6); c.fill();          // head
-        c.fillStyle = warn ? '#fff2a8' : '#ff9430'; c.shadowColor = '#ff9430'; c.shadowBlur = 12;
-        c.fillRect(-10, -41, 20, 6); c.shadowBlur = 0;
-        const armg = c.createLinearGradient(-40, 0, -27, 0);
-        armg.addColorStop(0, '#4a3210'); armg.addColorStop(1, '#2c1c08');
-        c.fillStyle = armg; rr(c, -40, -26, 13, 40, 5); c.fill();
-        c.fillStyle = '#3a2810'; rr(c, 27, -26, 13, 40, 5); c.fill();     // arms
-        c.fillStyle = '#241706'; c.fillRect(-22, 18, 14, 18); c.fillRect(8, 18, 14, 18); // legs
-        c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.9 * a;
-        const fcg = c.createRadialGradient(0, -6, 1, 0, -6, 12 + Math.sin(this.anim * 5) * 2);
-        fcg.addColorStop(0, '#fff2c0'); fcg.addColorStop(0.5, '#ff9430'); fcg.addColorStop(1, 'rgba(255,80,20,0)');
-        c.fillStyle = fcg; c.beginPath(); c.arc(0, -6, 12 + Math.sin(this.anim * 5) * 2, 0, 7); c.fill(); // furnace core
-        c.restore(); c.globalAlpha = a;
+        // FURNACE CHOIR — a smelting array that sings. A bronze ring frame of
+        // ceramic bells around an open furnace core, molten metal in the slot.
+        const tt = this.anim;
+        const singing = this.st === 'hymn' || !!this.hymn;
+        const heat = singing ? 1 : (this.phase === 2 ? 0.7 : 0.45);
+        const st8 = sensorState(this);
+        c.fillStyle = ramp(c, MAT.steel, -26, 24, 26, 37);
+        c.beginPath(); c.moveTo(-26, 37); c.lineTo(-18, 22); c.lineTo(18, 22); c.lineTo(26, 37); c.closePath(); c.fill();
+        occl(c, 0, 36, 26, 5, 0.55);
+        for (const px2 of [-13, 13]) {
+          c.fillStyle = ramp(c, MAT.bronze, px2 - 3, 4, px2 + 3, 24);
+          c.fillRect(px2 - 3, 4, 6, 20);
+        }
+        c.fillStyle = ramp(c, MAT.ceramic, -9, -30, 9, 22);
+        rr(c, -10, -30, 20, 54, 4); c.fill();
+        c.save();
+        c.fillStyle = MAT.molten.deep; c.fillRect(-5, -26, 10, 46);
+        const mg = c.createLinearGradient(0, -26, 0, 20);
+        mg.addColorStop(0, MAT.molten.lit); mg.addColorStop(0.5, MAT.molten.mid); mg.addColorStop(1, MAT.molten.dark);
+        c.globalAlpha = 0.55 + heat * 0.4 + Math.sin(tt * 6) * 0.05;
+        c.shadowColor = MAT.molten.mid; c.shadowBlur = 10 + heat * 16;
+        c.fillStyle = mg; c.fillRect(-4, -25, 8, 44);
+        c.restore(); c.shadowBlur = 0;
+        wear(c, [[-9, -6, 4], [6, 10, 3]]);
+        c.strokeStyle = ramp(c, MAT.bronze, -30, -34, 30, -26); c.lineWidth = 4;
+        c.beginPath(); c.ellipse(0, -30, 29, 7, 0, 0, 7); c.stroke();
+        c.strokeStyle = MAT.bronze.lit; c.lineWidth = 1.2;
+        c.beginPath(); c.ellipse(0, -31, 29, 7, 0, Math.PI, Math.PI * 2); c.stroke();
+        for (const [bx, bp] of [[-24, 0], [-13, 1.1], [0, 2.2], [13, 3.3], [24, 4.4]]) {
+          const swing = Math.sin(tt * (singing ? 7 : 1.7) + bp) * (singing ? 0.30 : 0.10);
+          c.save(); c.translate(bx, -30 + Math.abs(bx) * 0.12); c.rotate(swing);
+          c.strokeStyle = MAT.bronze.dark; c.lineWidth = 1.4;
+          c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 9); c.stroke();
+          for (let k = 2; k < 9; k += 3) { c.fillStyle = MAT.bronze.mid; c.fillRect(-1.2, k, 2.4, 1.6); }
+          c.fillStyle = ramp(c, MAT.ceramic, -6, 8, 6, 24, 0.95);
+          c.beginPath();
+          c.moveTo(-3.5, 9); c.lineTo(3.5, 9);
+          c.bezierCurveTo(6.5, 15, 7, 20, 7, 22);
+          c.lineTo(-7, 22); c.bezierCurveTo(-7, 20, -6.5, 15, -3.5, 9);
+          c.closePath(); c.fill();
+          c.fillStyle = ramp(c, MAT.bronze, -7, 21, 7, 25);
+          c.fillRect(-7.2, 21.5, 14.4, 2.6);
+          c.save(); c.globalAlpha = 0.4 + heat * 0.55;
+          c.shadowColor = MAT.molten.mid; c.shadowBlur = 8 + heat * 12;
+          c.fillStyle = MAT.molten.mid;
+          c.beginPath(); c.ellipse(0, 22.5, 5.4, 1.8, 0, 0, 7); c.fill();
+          c.restore(); c.shadowBlur = 0;
+          occl(c, 0, 9.5, 5, 2, 0.5);
+          c.restore();
+        }
+        drawSensor(c, 0, -36, 5.5, st8, tt);
+        if (this.phase === 2 || this.overdriveT > 0) {
+          c.save(); c.translate(-22, -22); tendrils(c, 4, 24, tt, 0.4, 0.7); c.restore();
+          c.save(); c.translate(22, -22); tendrils(c, 4, 24, tt, 2.9, 0.7); c.restore();
+        }
         break;
       }
       case 'zero': {
-        const fl = Math.sin(this.anim * 2.4) * 4;
+        // THE ARCHIVIST — a data librarian: a tapering cloak of ceramic panels
+        // and frosted glass, a bronze halo, and jointed arms holding book-racks.
+        const tt = this.anim, fl = Math.sin(tt * 2.2) * 3;
+        const st8 = sensorState(this);
         c.translate(0, fl);
-        // spectral robe with a cold vertical gradient fading to nothing at the hem
-        const zrg = c.createLinearGradient(0, -28, 0, 30);
-        zrg.addColorStop(0, 'rgba(120,180,220,0.6)'); zrg.addColorStop(0.6, 'rgba(58,113,156,0.5)');
-        zrg.addColorStop(1, 'rgba(40,80,111,0.05)');
-        c.fillStyle = zrg;
-        c.beginPath(); c.moveTo(-22, -28); c.lineTo(22, -28); c.lineTo(14, 30);
-        c.quadraticCurveTo(0, 34 + Math.sin(this.anim * 3) * 3, -14, 30); c.closePath(); c.fill();
-        const zhg = c.createLinearGradient(0, -30, 0, -8);
-        zhg.addColorStop(0, '#3d6b8f'); zhg.addColorStop(1, '#1c3a52');
-        c.fillStyle = zhg; rr(c, -14, -30, 28, 22, 8); c.fill();  // hood
-        c.strokeStyle = 'rgba(200,240,255,0.4)'; c.lineWidth = 1.2;
-        c.beginPath(); c.moveTo(-13, -26); c.quadraticCurveTo(0, -33, 13, -26); c.stroke(); // rim
-        c.fillStyle = '#eefcff'; c.shadowColor = '#9fe8ff'; c.shadowBlur = 14;
-        c.fillRect(-8, -22, 6, 5); c.fillRect(3, -22, 6, 5); c.shadowBlur = 0;
-        c.strokeStyle = '#9fe8ff'; c.lineWidth = 2; c.globalAlpha = 0.6 * a;
-        for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(0, 0, 34 + i * 8 + Math.sin(this.anim * 3 + i) * 3, 0, 7); c.stroke(); }
-        c.globalAlpha = a;
+        for (const [ox, k] of [[-1, 0.82], [1, 0.9], [0, 1]]) {
+          c.fillStyle = ramp(c, MAT.ceramic, ox * 8 - 10, -16, ox * 8 + 12, 28, k);
+          c.beginPath();
+          c.moveTo(ox * 3 - 8, -14);
+          c.bezierCurveTo(ox * 4 - 13, 4, ox * 6 - 20, 20, ox * 7 - 23, 29);
+          c.lineTo(ox * 7 + 23, 29);
+          c.bezierCurveTo(ox * 6 + 20, 20, ox * 4 + 13, 4, ox * 3 + 8, -14);
+          c.closePath(); c.fill();
+        }
+        occl(c, 0, 28, 22, 4, 0.5);
+        c.save(); c.globalAlpha = 0.42;
+        c.fillStyle = ramp(c, MAT.frost, -5, -10, 5, 26);
+        c.beginPath(); c.moveTo(-4, -12); c.lineTo(4, -12); c.lineTo(8, 27); c.lineTo(-8, 27); c.closePath(); c.fill();
+        c.restore();
+        c.strokeStyle = 'rgba(60,74,84,0.4)'; c.lineWidth = 0.9;
+        for (const sx of [-12, 12]) { c.beginPath(); c.moveTo(sx * 0.5, -8); c.lineTo(sx * 1.5, 26); c.stroke(); }
+        for (const [side, ay, ph] of [[-1, -8, 0], [1, -8, 1.6], [-1, 2, 3.1], [1, 2, 4.7]]) {
+          const sw = Math.sin(tt * 1.5 + ph) * 2.4;
+          const ex = side * 24, ey = ay + sw;
+          c.strokeStyle = MAT.steel.dark; c.lineWidth = 3.2; c.lineCap = 'round';
+          c.beginPath(); c.moveTo(side * 7, ay - 2); c.lineTo(side * 16, ay + 2 + sw * 0.5); c.lineTo(ex, ey); c.stroke();
+          c.fillStyle = ramp(c, MAT.bronze, side * 15, ay - 2, side * 17, ay + 4);
+          c.beginPath(); c.arc(side * 16, ay + 2 + sw * 0.5, 2.2, 0, 7); c.fill();
+          c.save(); c.translate(ex, ey); c.rotate(side * 0.2 + sw * 0.04);
+          c.fillStyle = ramp(c, MAT.ceramic, -4, -6, 4, 6, 0.9);
+          rr(c, -4.5, -6, 9, 12, 1.5); c.fill();
+          c.fillStyle = MAT.bronze.mid; c.fillRect(-4.5, -1, 9, 1.6);
+          if (st8 === 'locked' || st8 === 'overdrive') {
+            c.fillStyle = MAT.crimson.mid; c.shadowColor = MAT.crimson.mid; c.shadowBlur = 7;
+            c.fillRect(-3, -4.5, 6, 1.6); c.shadowBlur = 0;
+          }
+          c.restore();
+          occl(c, ex, ey + 7, 5, 2, 0.4);
+        }
+        c.fillStyle = ramp(c, MAT.steel, -4, -20, 4, -12);
+        c.fillRect(-3.5, -20, 7, 9);
+        c.fillStyle = ramp(c, MAT.ceramic, -8, -30, 8, -18);
+        rr(c, -8, -30, 16, 14, 5); c.fill();
+        occl(c, 0, -17, 8, 3, 0.45);
+        drawSensor(c, 0, -23, 4.6, st8, tt);
+        c.save(); c.translate(0, -34);
+        c.strokeStyle = ramp(c, MAT.bronze, -16, -4, 16, 4); c.lineWidth = 2.6;
+        c.beginPath(); c.ellipse(0, 0, 16, 4.5, Math.sin(tt * 0.5) * 0.16, 0, 7); c.stroke();
+        c.strokeStyle = MAT.bronze.lit; c.lineWidth = 1;
+        c.beginPath(); c.ellipse(0, -0.8, 16, 4.5, Math.sin(tt * 0.5) * 0.16, Math.PI, Math.PI * 2); c.stroke();
+        c.restore();
+        if (this.phase === 2 || this.overdriveT > 0) {
+          c.save(); c.translate(0, -34); tendrils(c, 6, 22, tt, 1.7, 0.8); c.restore();
+        }
         break;
       }
       case 'prism': {
