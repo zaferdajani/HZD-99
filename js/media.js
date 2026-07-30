@@ -22,6 +22,7 @@ const MEDIA_SRC = {
     roster: 'assets/characters/roster_8yaw.png',
     // 3D-rendered zone vistas: 2 cols x 3 rows, A B / C D / E X
     zones: 'assets/backgrounds/zones_far.jpg',
+    driller: 'assets/characters/driller_12x6.png',
   },
   audio: {
     boss: 'assets/music/epic_combat.ogg',

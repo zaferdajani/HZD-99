@@ -10,15 +10,31 @@ const GAME_VERSION = 'CLAWBYTE v4.3';
 function checkForUpdate() {
   if (G.updateReady) return;
   try {
-    fetch(location.href, { cache: 'reload' })
+    fetch(location.href.split('?')[0], { cache: 'reload' })
       .then(r => r.ok ? r.text() : null)
       .then(txt => {
         if (!txt) return;
-        const m = txt.match(/GAME_VERSION\s*=\s*'([^']+)'/);
-        if (m && m[1] && m[1] !== GAME_VERSION) G.updateReady = m[1];
+        // the build id is injected by build.cjs on every build; dev.html has
+        // none, so the dev page never self-refreshes
+        const m = txt.match(/BUILD_ID\s*=\s*'([^']+)'/);
+        const mine = (typeof window !== 'undefined' && window.BUILD_ID) || null;
+        if (m && mine && m[1] !== mine) {
+          G.updateReady = (txt.match(/GAME_VERSION\s*=\s*'([^']+)'/) || [0, 'update'])[1];
+          G.updateStamp = Date.now();
+        }
       })
       .catch(() => {});
   } catch (e) {}
+}
+// The home-screen copy updates itself: re-check when the app is resumed from the
+// home screen and every ten minutes while open; when an update exists and you
+// are on the title screen — nothing to lose — it applies on its own.
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) checkForUpdate();
+  });
+  setInterval(checkForUpdate, 10 * 60 * 1000);
+  setTimeout(checkForUpdate, 4000);
 }
 function applyUpdate() {
   try {
@@ -514,6 +530,11 @@ function updateMenu() {
   const opts = menuOptions();
   // U (or the on-screen banner) takes the newer build
   if (G.updateReady && inP('CLAW')) { sfx('ok'); applyUpdate(); return; }
+  if (G.updateReady) {
+    // on the title screen there is nothing to lose: count down and refresh
+    G.autoUpdT = (G.autoUpdT == null ? 3.5 : G.autoUpdT - 1 / 60);
+    if (G.autoUpdT <= 0) { applyUpdate(); return; }
+  }
   if (inP('DOWN')) { G.menuIdx = (G.menuIdx + 1) % opts.length; sfx('ui'); }
   if (inP('UP')) { G.menuIdx = (G.menuIdx + opts.length - 1) % opts.length; sfx('ui'); }
   if (inP('OK')) {
@@ -1076,6 +1097,12 @@ function drawZoneVista(P, zone, px, py) {
   hz.addColorStop(0, 'rgba(5,9,14,0)'); hz.addColorStop(1, 'rgba(5,9,14,0.62)');
   c.fillStyle = hz; c.fillRect(0, 0, 960, 540);
   c.fillStyle = 'rgba(5,9,14,0.14)'; c.fillRect(0, 0, 960, 540);
+  // rooms narrower than the screen: the painting must stop at the walls
+  if (roomW < 958) {
+    const edge = roomW - px;
+    if (edge < 960) { c.fillStyle = 'rgba(4,7,11,0.9)'; c.fillRect(edge, 0, 960 - edge, 540); }
+    if (-px > 0) { c.fillStyle = 'rgba(4,7,11,0.9)'; c.fillRect(0, 0, -px, 540); }
+  }
   return true;
 }
 function drawMachineBG(P, px, py, horizon) {

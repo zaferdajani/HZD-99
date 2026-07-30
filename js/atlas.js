@@ -105,3 +105,74 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   c.restore();
   return true;
 }
+
+
+// ---------------------------------------------------------------------------
+// The Driller's own sheet: 12 cols x 6 rows of ANIMATION, not just a turnaround.
+//   row 0  turnaround (12 yaws — we use 5 authored buckets, left to right)
+//   row 1  walk cycle, authored facing LEFT
+//   row 2  rear-up (the bore wind-up telegraph)
+//   row 3  drive the bore-head into the floor, dust and all
+//   row 4  damaged idle — smoke and burning; phase two lives here
+//   row 5  destroyed — collapse into wreckage
+// This sheet's light is a soft top key, near-symmetric, so mirroring the
+// animation rows for right-facing is visually safe — unlike the roster sheet,
+// whose hard upper-left key made mirroring a lie. Row 0 is never mirrored; it
+// has real authored angles.
+const DRILLER = { key: 'driller', cols: 12, rows: 6, k: 2.55, yOff: 0.10 };
+// faceVis buckets -> row-0 columns (left profile ... right profile)
+const DRILLER_YAW = [[-0.75, 0], [-0.3, 2], [0.3, 3], [0.75, 8], [9, 10]];
+
+function drawDriller(c, b) {
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[DRILLER.key];
+  if (!im) return false;
+  const CW = im.naturalWidth / DRILLER.cols, CH = im.naturalHeight / DRILLER.rows;
+  const t = b.anim, fv = b.faceVis == null ? -1 : b.faceVis;
+  let row, col, mirror = false;
+
+  const facingRight = fv > 0;
+  if (b.dead || b.deathAnimT > 0) {
+    row = 5;
+    const k = 1 - clamp((b.deathAnimT || 0) / 1.6, 0, 1);
+    col = Math.min(11, Math.floor(k * 12));
+    mirror = facingRight;
+  } else if (b.st === 'bore') {
+    if (!b.bored) { row = 2; col = Math.min(11, Math.floor((1.1 - b.t) / 1.1 * 12)); }
+    else { row = 3; col = 3 + Math.floor(t * 14) % 9; }
+    // the rear-up and bore rows are authored mostly front-on: no mirror needed
+  } else if (b.st === 'charge' || Math.abs(b.vx) > 40) {
+    row = 1; col = Math.floor(t * (b.st === 'charge' ? 18 : 11)) % 12;
+    mirror = facingRight;
+  } else if (b.hurtT > 0 || b.phase >= 2) {
+    row = 4; col = Math.floor(t * 9) % 12;
+    mirror = facingRight;
+  } else {
+    // idle: real authored yaw, driven by the eased facing — the turn passes
+    // through the front view because the front view actually exists
+    row = 0; col = 9;
+    for (const [th, cc] of DRILLER_YAW) { if (fv <= th) { col = cc; break; } }
+  }
+
+  const cx = b.x + b.w / 2, footY = b.y + b.h;
+  const dh = b.h * DRILLER.k, dw = dh * (CW / CH);
+  const dy = footY - dh + b.h * DRILLER.yOff;
+  // reactive shadow (rows 3-5 carry baked dust, so soften it there)
+  const dusty = row >= 3;
+  const lean = clamp((b.vx || 0) / 420, -1, 1);
+  const sw = dw * 0.30 * (1 + Math.abs(lean) * 0.35);
+  const g = c.createRadialGradient(cx, footY, 0, cx, footY, Math.max(1, sw));
+  g.addColorStop(0, 'rgba(4,8,12,' + (dusty ? 0.3 : 0.55) + ')');
+  g.addColorStop(1, 'rgba(4,8,12,0)');
+  c.fillStyle = g;
+  c.beginPath(); c.ellipse(cx + lean * dw * 0.1, footY, sw, Math.max(2, dh * 0.05), 0, 0, 7); c.fill();
+
+  c.save();
+  c.translate(cx, 0);
+  if (mirror) c.scale(-1, 1);
+  if (b.hurtT > 0 && row !== 4) c.globalAlpha = 0.72;
+  // each cell carries a drawn frame near its edges; crop past it
+  const inx = CW * 0.09, iny = CH * 0.05;
+  c.drawImage(im, col * CW + inx, row * CH + iny, CW - inx * 2, CH - iny * 2 - CH * 0.02, -dw / 2, dy, dw, dh);
+  c.restore();
+  return true;
+}

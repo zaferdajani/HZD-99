@@ -8,6 +8,7 @@ const EMBED = {
   indFg: 'assets/backgrounds/ind_fg.png',
   roster: 'assets/characters/roster_8yaw.png',
   zones: 'assets/backgrounds/zones_far.jpg',
+  driller: 'assets/characters/driller_12x6.png',
   heroIdle: 'assets/characters/gothic-hero-idle.png',
   heroRun: 'assets/characters/gothic-hero-run.png',
   heroJump: 'assets/characters/gothic-hero-jump.png',
@@ -40,7 +41,9 @@ for (const k in EMBED) {
 const files = ['theme', 'mat', 'types', 'i18n', 'media', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'game', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 const html = fs.readFileSync('dev.html', 'utf8');
+const buildId = Date.now().toString(36);
 const out = html.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/,
+  '<script>window.BUILD_ID=' + JSON.stringify(buildId) + '</script>\n' +
   '<script>window.EMBEDDED_MEDIA=' + JSON.stringify(media) + '</script>\n' +
   '<script>\n' + files.join('\n') + '\n</script>\n</body>');
 fs.writeFileSync('index.html', out);

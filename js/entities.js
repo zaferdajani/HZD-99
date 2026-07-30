@@ -517,7 +517,8 @@ class Player {
   }
   die() {
     if (this.dead) return;
-    this.dead = true; sfx('boom');
+    this.dead = true;
+    this.deathAnimT = 1.6;   // the destroyed row plays out while the wreck settles sfx('boom');
     burst(this.x + this.w / 2, this.y + this.h / 2, 40, '#8ff6ff', 340, 0.9, 300, 4, true);
     G.onPlayerDeath();
   }
@@ -2019,6 +2020,7 @@ class Boss {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    if (this.deathAnimT > 0) this.deathAnimT -= dt;   // the collapse plays out
     if (this.dead) return;
     if (this.stagT > 0) { this.stagT -= dt; return; }   // Song / weakness stagger
     if (this.st === 'dorm') {
@@ -2386,11 +2388,12 @@ class Boss {
     G.onBossDead(this.kind);
   }
   draw(c) {
-    if (this.dead) return;
+    if (this.dead && !(this.kind === 'glitch' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.driller)) return;
     const P = PAL[G.roomDef.zone];
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
+    if (this.dead) { drawDriller(c, this); c.restore(); return; }
     // telegraphs
     this.drawAbilities(c);
     if (this.kind === 'zero') for (const m of this.marks) {
@@ -2431,6 +2434,7 @@ class Boss {
         return;
       }
     }
+    if (this.kind === 'glitch' && drawDriller(c, this)) { c.restore(); return; }
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
           flash: this.hurtT > 0 ? 1 : 0,
           grounded: this.kind !== 'brood' && this.kind !== 'zero' && this.kind !== 'prism',
