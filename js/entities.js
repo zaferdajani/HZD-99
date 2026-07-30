@@ -1486,6 +1486,9 @@ class Enemy {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    // turn toward where we are going, in time rather than in frames drawn
+    const wantF = (this.kind === 'flier' ? Math.sign(this.vx) || 1 : this.dir) || 1;
+    this.faceVis += clamp(wantF - this.faceVis, -dt * 5.5, dt * 5.5);
     // charmed by the Song: it keeps the body and quiets the orders
     if (this.hypnoT > 0) {
       this.hypnoT -= dt; this.stagT = 0;
@@ -1591,10 +1594,13 @@ class Enemy {
     }
     // authored nose-left like the bosses, and eased so a mimic turns rather than
     // snapping. flier faces its travel vector; the rest face their walk direction.
-    const want = (this.kind === 'flier' ? Math.sign(this.vx) || 1 : this.dir) || 1;
-    this.faceVis += clamp(want - this.faceVis, -0.11, 0.11);
-    const fvE = -this.faceVis;
-    const flipS = Math.abs(fvE) < 0.1 ? (fvE < 0 ? -0.1 : 0.1) : fvE;
+    const TP = turnPose(this.faceVis);
+    // Only the crawler is authored in profile. The rest are drawn head-on, so
+    // they must never be scaled toward zero — they just lean.
+    const profile = this.kind === 'crawler';
+    const flipS = profile
+      ? -TP.dir * (TP.pose === 'q' ? 0.5 + TP.t * 0.5 : 1)
+      : -TP.dir;
     // grounded creatures cast a contact shadow (lighting pass)
     if (this.kind !== 'flier') contactShadow(c, cx, this.y + this.h, this.w * 0.55, 0.38);
     // ---- hero world: real hand-animated creatures ----
@@ -1670,6 +1676,38 @@ class Enemy {
     };
     switch (this.kind) {
       case 'crawler': {
+        if (TP.pose === 'front') {
+          // head-on: the bore-head end-on, four legs, body much narrower.
+          // Undo the outer flip — a front view is the same from either side, and
+          // mirroring it makes the machine appear to jump as it crosses centre.
+          c.save(); c.scale(1 / flipS, 1);
+          const ph0 = this.anim * 12;
+          for (const [lx, phs, dep] of [[-7, 1.1, 0.7], [7, 3.6, 0.7], [-5, 0, 1], [5, 2.4, 1]]) {
+            const sw = Math.sin(ph0 + phs);
+            c.save(); c.globalAlpha = dep < 1 ? 0.8 : 1;
+            c.strokeStyle = dep < 1 ? MAT.steel.deep : MAT.steel.dark;
+            c.lineWidth = 2.6 * dep; c.lineCap = 'round';
+            c.beginPath(); c.moveTo(lx, 1); c.lineTo(lx + sw, 9); c.stroke();
+            c.fillStyle = MAT.steel.deep; c.fillRect(lx + sw - 1.6 * dep, 8.4, 3.4 * dep, 1.8);
+            c.restore();
+          }
+          plate(() => { c.beginPath(); rr(c, -9, -5, 18, 8, 3); }, -6, 4);
+          c.fillStyle = ramp(c, MAT.bronze, -9, -1, 9, 1); c.fillRect(-9, -1, 18, 2);
+          c.save(); c.translate(0, 1);
+          c.fillStyle = ramp(c, MAT.bronze, -5, -5, 5, 5);
+          c.beginPath(); c.arc(0, 0, 4.6, 0, 7); c.fill();
+          c.strokeStyle = 'rgba(28,20,10,0.6)'; c.lineWidth = 0.7;
+          for (let i = 0; i < 5; i++) {
+            const a = this.anim * 4 + i / 5 * Math.PI * 2;
+            c.beginPath(); c.moveTo(Math.cos(a) * 1.6, Math.sin(a) * 1.6);
+            c.lineTo(Math.cos(a) * 4.4, Math.sin(a) * 4.4); c.stroke();
+          }
+          c.restore();
+          occl(c, 0, 6, 6, 2, 0.5);
+          eyes(-2, -7, 2);
+          c.restore();
+          break;
+        }
         // DRAKK — a yard hauler that read the word "hound". Long low wedge with
         // a cargo hopper on its back: the back attachment is what makes it
         // unmistakable in silhouette, from the front and the side alike.
@@ -2393,71 +2431,108 @@ class Boss {
     const faceScale = Math.abs(fv) < 0.09 ? (fv < 0 ? -0.09 : 0.09) : fv;
     switch (this.kind) {
       case 'glitch': {
-        // NULL-SEEKER DRILLER — an excavation unit. Quadruped, ceramic-drummed,
-        // with a fluted bronze bore-head thrown forward. Built to the design
-        // sheet: ceramic armour, steel frame, bronze joints, and a sensor that
-        // walks cyan to crimson as it escalates.
+        // NULL-SEEKER DRILLER. Authored in three poses off the sheet — SIDE, 3/4
+        // and FRONT — so a turn walks through the front view instead of squashing
+        // the profile to a sliver.
         const tt = this.anim, p2 = this.phase === 2;
         const st8 = sensorState(this);
-        c.scale(faceScale, 1);
-        for (const [lx, ph] of [[-24, 0], [-11, 2.2], [12, 1.1], [25, 3.4]]) {
-          const sw = Math.sin(tt * (this.st === 'charge' ? 14 : 5) + ph);
-          const kx = lx + sw * 5, ky = 4 + Math.abs(sw) * 2;
-          // lower leg
-          c.strokeStyle = MAT.steel.dark; c.lineWidth = 5; c.lineCap = 'round';
-          c.beginPath(); c.moveTo(kx, ky); c.lineTo(kx + sw * 3, 24); c.stroke();
-          // upper leg as a hydraulic piston: a bronze sleeve with a bright rod
-          // sliding out of it as the leg extends. This is what tells you the thing
-          // is powered rather than a bent stick.
-          const ang = Math.atan2(ky + 4, kx - lx * 0.7);
-          const seg = Math.hypot(kx - lx * 0.7, ky + 4);
-          c.save(); c.translate(lx * 0.7, -4); c.rotate(ang);
-          c.fillStyle = ramp(c, MAT.steel, 0, -3.4, seg * 0.6, 3.4);
-          rr(c, 0, -3.4, seg * 0.62, 6.8, 2.4); c.fill();          // sleeve
-          c.fillStyle = ramp(c, MAT.ceramic, seg * 0.5, -2, seg, 2, 0.9);
-          c.fillRect(seg * 0.55, -1.9, seg * 0.45, 3.8);           // polished rod
-          c.fillStyle = ramp(c, MAT.bronze, 0, -4, 6, 4);
-          rr(c, -1, -4.2, 6, 8.4, 2); c.fill();                    // hip gland
-          c.strokeStyle = 'rgba(30,36,42,0.5)'; c.lineWidth = 0.8;
-          c.beginPath(); c.moveTo(seg * 0.62, -3); c.lineTo(seg * 0.62, 3); c.stroke();
-          c.restore();
-          occl(c, lx * 0.7, -2, 6, 3, 0.45);
-          c.fillStyle = ramp(c, MAT.bronze, kx - 3, ky - 3, kx + 3, ky + 3);
-          c.beginPath(); c.arc(kx, ky, 3.2, 0, 7); c.fill();
-          c.fillStyle = MAT.ceramic.dark; c.fillRect(kx + sw * 3 - 4, 23, 8, 3.5);
-          occl(c, kx + sw * 3, 26, 7, 3, 0.5);
-        }
-        c.fillStyle = ramp(c, MAT.ceramic, -20, -22, 24, 12);
-        rr(c, -26, -20, 52, 30, 9); c.fill();
-        occl(c, 0, 10, 26, 7, 0.45);
-        c.fillStyle = ramp(c, MAT.bronze, -26, -6, 26, 2);
-        c.fillRect(-26, -6, 52, 5);
-        c.fillStyle = ramp(c, MAT.ceramic, -14, -30, 16, -14, 0.95);
-        rr(c, -16, -30, 32, 14, 5); c.fill();
-        occl(c, 0, -16, 18, 4, 0.4);
-        wear(c, [[-22, -14, 4], [17, 2, 3], [-6, -26, 3]]);
-        c.strokeStyle = 'rgba(40,44,50,0.45)'; c.lineWidth = 1;
-        c.beginPath(); c.moveTo(-20, -12); c.lineTo(20, -12); c.stroke();
-        for (const ex of [8, 15]) {
-          c.fillStyle = ramp(c, MAT.steel, ex - 2, -34, ex + 2, -26);
-          c.fillRect(ex, -34, 4, 8);
-          if (p2) { c.fillStyle = MAT.crimson.mid; c.fillRect(ex, -36, 4, 2.5); }
-        }
+        const T = turnPose(this.faceVis);
         const drill = tt * (this.st === 'charge' || this.st === 'bore' ? 46 : 12);
-        c.save(); c.translate(-30, 2); c.rotate(this.st === 'bore' ? 0.5 : -0.06);
-        c.fillStyle = ramp(c, MAT.bronze, -6, -9, 6, 9);
-        c.beginPath(); c.moveTo(-22, 0); c.lineTo(4, -9); c.lineTo(4, 9); c.closePath(); c.fill();
-        c.strokeStyle = 'rgba(28,20,10,0.6)'; c.lineWidth = 1.2;
-        for (let i = 0; i < 4; i++) {
-          const o = ((drill + i * 5.5) % 22) - 22;
-          c.beginPath(); c.moveTo(o, -7.5); c.lineTo(o + 8, 7.5); c.stroke();
+
+        const legPair = (lx, ph, depth) => {          // depth 1 = near, <1 = far side
+          const sw = Math.sin(tt * (this.st === 'charge' ? 14 : 5) + ph);
+          const kx = lx + sw * 5 * depth, ky = 4 + Math.abs(sw) * 2;
+          c.save(); c.globalAlpha = depth < 1 ? 0.8 : 1;
+          c.strokeStyle = depth < 1 ? MAT.steel.deep : MAT.steel.dark;
+          c.lineWidth = 5 * depth; c.lineCap = 'round';
+          c.beginPath(); c.moveTo(kx, ky); c.lineTo(kx + sw * 3, 24); c.stroke();
+          const ang = Math.atan2(ky + 4, kx - lx * 0.7), seg = Math.hypot(kx - lx * 0.7, ky + 4);
+          c.save(); c.translate(lx * 0.7, -4); c.rotate(ang);
+          c.fillStyle = ramp(c, MAT.steel, 0, -3.4, seg * 0.6, 3.4, depth);
+          rr(c, 0, -3.4 * depth, seg * 0.62, 6.8 * depth, 2.4); c.fill();
+          c.fillStyle = ramp(c, MAT.ceramic, seg * 0.5, -2, seg, 2, 0.9 * depth);
+          c.fillRect(seg * 0.55, -1.9 * depth, seg * 0.45, 3.8 * depth);
+          c.fillStyle = ramp(c, MAT.bronze, 0, -4, 6, 4, depth);
+          rr(c, -1, -4.2 * depth, 6, 8.4 * depth, 2); c.fill();
+          c.restore();
+          c.fillStyle = MAT.ceramic.dark; c.fillRect(kx + sw * 3 - 4 * depth, 23, 8 * depth, 3.5);
+          occl(c, kx + sw * 3, 26, 7 * depth, 3, 0.5 * depth);
+          c.restore();
+        };
+        const stacks = (sep) => {
+          for (const ex of [sep, sep + 7]) {
+            c.fillStyle = ramp(c, MAT.steel, ex - 2, -34, ex + 2, -26);
+            c.fillRect(ex, -34, 4, 8);
+            if (p2) { c.fillStyle = MAT.crimson.mid; c.fillRect(ex, -36, 4, 2.5); }
+          }
+        };
+
+        if (T.pose === 'front') {
+          // ---- FRONT: the drum head-on, the bore-head pointing straight at you,
+          // four legs splayed with the far pair dimmed behind the near pair.
+          c.save(); c.scale(1 + T.t * 0.10, 1);
+          legPair(-19, 1.1, 0.68); legPair(19, 3.4, 0.68);
+          legPair(-13, 0, 1);      legPair(13, 2.2, 1);
+          stacks(-4);
+          c.fillStyle = ramp(c, MAT.ceramic, -14, -22, 16, 12);
+          rr(c, -19, -20, 38, 30, 9); c.fill();            // narrower seen head-on
+          occl(c, 0, 10, 19, 6, 0.45);
+          c.fillStyle = ramp(c, MAT.bronze, -19, -6, 19, 2);
+          c.fillRect(-19, -6, 38, 5);
+          c.fillStyle = ramp(c, MAT.ceramic, -10, -30, 12, -14, 0.95);
+          rr(c, -12, -30, 24, 14, 5); c.fill();
+          occl(c, 0, -16, 13, 4, 0.4);
+          wear(c, [[-15, -12, 4], [11, 2, 3]]);
+          c.save(); c.translate(0, 4);                      // bore-head, end-on
+          c.fillStyle = ramp(c, MAT.bronze, -11, -11, 11, 11);
+          c.beginPath(); c.arc(0, 0, 11, 0, 7); c.fill();
+          c.strokeStyle = 'rgba(28,20,10,0.6)'; c.lineWidth = 1.4;
+          for (let i = 0; i < 6; i++) {
+            const a = drill * 0.16 + i / 6 * Math.PI * 2;
+            c.beginPath(); c.moveTo(Math.cos(a) * 3.5, Math.sin(a) * 3.5);
+            c.lineTo(Math.cos(a) * 10.5, Math.sin(a) * 10.5); c.stroke();
+          }
+          c.fillStyle = ramp(c, MAT.steel, -4, -4, 4, 4);
+          c.beginPath(); c.arc(0, 0, 4, 0, 7); c.fill();
+          c.restore();
+          occl(c, 0, 14, 11, 4, 0.5);
+          drawSensor(c, 0, -12, 5, st8, tt);
+          if (p2 || this.overdriveT > 0) { c.save(); c.translate(0, -28); tendrils(c, 5, 26, tt, 1.2, 0.75); c.restore(); }
+          c.restore();
+        } else {
+          // ---- SIDE and 3/4. The 3/4 narrows the profile and brings the far legs
+          // into view, which is what sells the angle rather than a squash.
+          const narrow = T.pose === 'q' ? 0.46 + T.t * 0.54 : 1;
+          c.scale(-T.dir * narrow, 1);
+          if (T.pose === 'q') { legPair(-20, 1.1, 0.66); legPair(18, 3.4, 0.66); }
+          legPair(-24, 0, 1); legPair(-11, 2.2, 1); legPair(12, 1.1, 1); legPair(25, 3.4, 1);
+          c.fillStyle = ramp(c, MAT.ceramic, -20, -22, 24, 12);
+          rr(c, -26, -20, 52, 30, 9); c.fill();
+          occl(c, 0, 10, 26, 7, 0.45);
+          c.fillStyle = ramp(c, MAT.bronze, -26, -6, 26, 2);
+          c.fillRect(-26, -6, 52, 5);
+          c.fillStyle = ramp(c, MAT.ceramic, -14, -30, 16, -14, 0.95);
+          rr(c, -16, -30, 32, 14, 5); c.fill();
+          occl(c, 0, -16, 18, 4, 0.4);
+          wear(c, [[-22, -14, 4], [17, 2, 3], [-6, -26, 3]]);
+          c.strokeStyle = 'rgba(40,44,50,0.45)'; c.lineWidth = 1;
+          c.beginPath(); c.moveTo(-20, -12); c.lineTo(20, -12); c.stroke();
+          stacks(8);
+          c.save(); c.translate(-30, 2); c.rotate(this.st === 'bore' ? 0.5 : -0.06);
+          c.fillStyle = ramp(c, MAT.bronze, -6, -9, 6, 9);
+          c.beginPath(); c.moveTo(-22, 0); c.lineTo(4, -9); c.lineTo(4, 9); c.closePath(); c.fill();
+          c.strokeStyle = 'rgba(28,20,10,0.6)'; c.lineWidth = 1.2;
+          for (let i = 0; i < 4; i++) {
+            const o = ((drill + i * 5.5) % 22) - 22;
+            c.beginPath(); c.moveTo(o, -7.5); c.lineTo(o + 8, 7.5); c.stroke();
+          }
+          c.fillStyle = ramp(c, MAT.steel, 2, -10, 10, 10);
+          rr(c, 2, -10, 9, 20, 3); c.fill();
+          c.restore();
+          occl(c, -24, 4, 9, 5, 0.5);
+          drawSensor(c, -13, -12, 5, st8, tt);
+          if (p2 || this.overdriveT > 0) { c.save(); c.translate(14, -26); tendrils(c, 5, 26, tt, 1.2, 0.75); c.restore(); }
         }
-        c.fillStyle = ramp(c, MAT.steel, 2, -10, 10, 10);
-        rr(c, 2, -10, 9, 20, 3); c.fill();
-        c.restore();
-        occl(c, -24, 4, 9, 5, 0.5);
-        drawSensor(c, -13, -12, 5, st8, tt);
-        if (p2 || this.overdriveT > 0) { c.save(); c.translate(14, -26); tendrils(c, 5, 26, tt, 1.2, 0.75); c.restore(); }
         break;
       }
       case 'brood': {
@@ -2690,7 +2765,8 @@ class Boss {
         // still exactly what it was, and that is the point of it.
         const tt = this.anim;
         const hot = this.st === 'beam' || this.st === 'aim';
-        c.scale(faceScale, 1);
+        // authored head-on: it turns by swinging its gimbal, never by squashing
+        c.rotate(this.faceVis * 0.08);
         // bronze gimbal ring, turning on two axes
         c.strokeStyle = ramp(c, MAT.bronze, -22, -14, 22, 14); c.lineWidth = 2.8;
         c.beginPath(); c.ellipse(0, 0, 21, 13, Math.sin(tt * 0.6) * 0.2, 0, 7); c.stroke();

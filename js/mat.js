@@ -145,3 +145,25 @@ function wear(c, pts, seed) {
   }
   c.restore();
 }
+
+
+// ---------------------------------------------------------------------------
+// Turning in 2D.
+//
+// A machine authored in profile cannot turn by scaling its width to zero: that
+// squashes it to a sliver and pops out the mirror image. It is a flip, not a
+// turn. The design sheets give FRONT, SIDE and 3/4 for exactly this reason, so a
+// turn should pass THROUGH the front view:
+//
+//     side-left  ->  3/4-left  ->  FRONT  ->  3/4-right  ->  side-right
+//
+// turnPose maps the eased facing to which authored pose to draw, plus how far
+// into it we are, so the 3/4 can be built by narrowing the profile and revealing
+// the front-facing parts underneath.
+// ---------------------------------------------------------------------------
+function turnPose(u) {
+  const a = Math.abs(u), dir = u < 0 ? -1 : 1;
+  if (a >= 0.66) return { pose: 'side',  dir, t: 1 };
+  if (a >= 0.20) return { pose: 'q',     dir, t: (a - 0.20) / 0.46 };   // 0..1 toward side
+  return          { pose: 'front', dir, t: a / 0.20 };                   // 0..1 toward 3/4
+}
