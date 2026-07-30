@@ -7,6 +7,7 @@ const EMBED = {
   indMid: 'assets/backgrounds/ind_mid.png',
   indFg: 'assets/backgrounds/ind_fg.png',
   roster: 'assets/characters/roster_8yaw.png',
+  zones: 'assets/backgrounds/zones_far.jpg',
   heroIdle: 'assets/characters/gothic-hero-idle.png',
   heroRun: 'assets/characters/gothic-hero-run.png',
   heroJump: 'assets/characters/gothic-hero-jump.png',
