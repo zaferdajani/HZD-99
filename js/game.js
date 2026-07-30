@@ -16,7 +16,7 @@ function checkForUpdate() {
         if (!txt) return;
         // the build id is injected by build.cjs on every build; dev.html has
         // none, so the dev page never self-refreshes
-        const m = txt.match(/BUILD_ID\s*=\s*'([^']+)'/);
+        const m = txt.match(/BUILD_ID\s*=\s*["']([^"']+)["']/);
         const mine = (typeof window !== 'undefined' && window.BUILD_ID) || null;
         if (m && mine && m[1] !== mine) {
           G.updateReady = (txt.match(/GAME_VERSION\s*=\s*'([^']+)'/) || [0, 'update'])[1];
