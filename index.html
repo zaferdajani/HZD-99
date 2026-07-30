@@ -4231,7 +4231,7 @@ class Enemy {
   constructor(kind, x, y) {
     const k = EKIND[kind];
     this.kind = kind; this.x = x; this.y = y; this.w = k.w; this.h = k.h;
-    this.hypnoT = 0; this.stagT = 0;
+    this.hypnoT = 0; this.stagT = 0; this.faceVis = 1;
     this.hp = Math.round(k.hp * DF().ehp); this.spd = k.spd * DF().espd;
     this.vx = 0; this.vy = 0; this.dir = chance(0.5) ? 1 : -1;
     this.t = rnd(0.5, 2); this.sx = x; this.sy = y; this.hurtT = 0; this.dead = false; this.anim = rnd(0, 9);
@@ -4342,7 +4342,12 @@ class Enemy {
       }
       c.restore();
     }
-    const flipS = (this.kind === 'flier' ? Math.sign(this.vx) || 1 : this.dir);
+    // authored nose-left like the bosses, and eased so a mimic turns rather than
+    // snapping. flier faces its travel vector; the rest face their walk direction.
+    const want = (this.kind === 'flier' ? Math.sign(this.vx) || 1 : this.dir) || 1;
+    this.faceVis += clamp(want - this.faceVis, -0.11, 0.11);
+    const fvE = -this.faceVis;
+    const flipS = Math.abs(fvE) < 0.1 ? (fvE < 0 ? -0.1 : 0.1) : fvE;
     // grounded creatures cast a contact shadow (lighting pass)
     if (this.kind !== 'flier') contactShadow(c, cx, this.y + this.h, this.w * 0.55, 0.38);
     // ---- hero world: real hand-animated creatures ----
@@ -4694,6 +4699,10 @@ class Boss {
     this.hurtT = 0; this.dead = false; this.anim = 0; this.face = -1;
     this.cycle = 0; this.marks = []; this.beam = null;
     this.hypnoT = 0; this.stagT = 0;
+    // faceVis trails face, so a machine visibly TURNS instead of teleporting its
+    // nose to the other side. Passing through zero squashes the body, which reads
+    // as it swinging round.
+    this.faceVis = this.face;
     this.bores = []; this.hymn = null; this.prison = null;
     this.windT = 0; this.overdriveT = 0;
     if (kind === 'brood') { this.y = 60; this.homeY = 60; }
@@ -4736,6 +4745,11 @@ class Boss {
     const px = player.x + player.w / 2, py = player.y + player.h / 2;
     const spd = DF().espd;
     this.windT -= dt; this.overdriveT -= dt;
+    // every boss looks where it is going, even the ones that do not walk
+    if (this.kind === 'zero' || this.kind === 'brood' || this.kind === 'prism' || this.kind === 'mother')
+      this.face = Math.sign(px - this.cx()) || this.face || 1;
+    const turn = dt * 5.5;
+    this.faceVis += clamp((this.face || 1) - this.faceVis, -turn, turn);
     this.tickAbilities(dt, px, py);
     switch (this.kind) {
       // ---- GLITCH.EXE: charging corrupted hound ----
@@ -5125,6 +5139,11 @@ class Boss {
       }
     }
     c.translate(cx, cy);
+    // The bodies are authored nose-LEFT, but face = +1 means "the player is to my
+    // right", so scaling by face directly made every boss charge backwards. Scale
+    // by the negated eased facing instead, and never let it hit exactly zero.
+    const fv = -(this.faceVis || (this.face || 1));
+    const faceScale = Math.abs(fv) < 0.09 ? (fv < 0 ? -0.09 : 0.09) : fv;
     switch (this.kind) {
       case 'glitch': {
         // NULL-SEEKER DRILLER — an excavation unit. Quadruped, ceramic-drummed,
@@ -5133,7 +5152,7 @@ class Boss {
         // walks cyan to crimson as it escalates.
         const tt = this.anim, p2 = this.phase === 2;
         const st8 = sensorState(this);
-        c.scale(this.face || 1, 1);
+        c.scale(faceScale, 1);
         for (const [lx, ph] of [[-24, 0], [-11, 2.2], [12, 1.1], [25, 3.4]]) {
           const sw = Math.sin(tt * (this.st === 'charge' ? 14 : 5) + ph);
           const kx = lx + sw * 5, ky = 4 + Math.abs(sw) * 2;
@@ -5206,7 +5225,9 @@ class Boss {
         c.beginPath(); c.moveTo(0, -this.h / 2); c.lineTo(0, -cy); c.stroke();
         c.strokeStyle = MAT.bronze.dark; c.lineWidth = 2.2;
         c.beginPath(); c.moveTo(-2, -this.h / 2); c.lineTo(-2, -cy); c.stroke();
-        c.save(); c.scale(puls, puls);
+        c.save();
+        c.rotate(this.faceVis * -0.07);           // swings on its cable toward you
+        c.scale(puls, puls);
         // bronze manifold collar at the top, with outlet stubs
         c.fillStyle = ramp(c, MAT.bronze, -22, -30, 22, -20);
         rr(c, -22, -30, 44, 11, 3); c.fill();
@@ -5280,6 +5301,7 @@ class Boss {
         const singing = this.st === 'hymn' || !!this.hymn;
         const heat = singing ? 1 : (this.phase === 2 ? 0.7 : 0.45);
         const st8 = sensorState(this);
+        c.rotate(this.faceVis * -0.05);           // leans toward its target
         c.fillStyle = ramp(c, MAT.steel, -26, 24, 26, 37);
         c.beginPath(); c.moveTo(-26, 37); c.lineTo(-18, 22); c.lineTo(18, 22); c.lineTo(26, 37); c.closePath(); c.fill();
         occl(c, 0, 36, 26, 5, 0.55);
@@ -5346,6 +5368,7 @@ class Boss {
         // and frosted glass, a bronze halo, and jointed arms holding book-racks.
         const tt = this.anim, fl = Math.sin(tt * 2.2) * 3;
         const st8 = sensorState(this);
+        const look = -this.faceVis;               // it does not walk; it turns to look
         c.translate(0, fl);
         // the cloak is built from vertical fold panels, each with its own light
         // value, so the form turns instead of reading as one flat cone
@@ -5377,7 +5400,8 @@ class Boss {
         for (const sx of [-12, 12]) { c.beginPath(); c.moveTo(sx * 0.5, -8); c.lineTo(sx * 1.5, 26); c.stroke(); }
         for (const [side, ay, ph] of [[-1, -8, 0], [1, -8, 1.6], [-1, 2, 3.1], [1, 2, 4.7]]) {
           const sw = Math.sin(tt * 1.5 + ph) * 2.4;
-          const ex = side * 24, ey = ay + sw;
+          const reach = 24 + (side === Math.sign(look) ? 5 : -3);   // reaches toward you
+          const ex = side * reach, ey = ay + sw;
           c.strokeStyle = MAT.steel.dark; c.lineWidth = 3.2; c.lineCap = 'round';
           c.beginPath(); c.moveTo(side * 7, ay - 2); c.lineTo(side * 16, ay + 2 + sw * 0.5); c.lineTo(ex, ey); c.stroke();
           c.fillStyle = ramp(c, MAT.bronze, side * 15, ay - 2, side * 17, ay + 4);
@@ -5395,11 +5419,13 @@ class Boss {
         }
         c.fillStyle = ramp(c, MAT.steel, -4, -20, 4, -12);
         c.fillRect(-3.5, -20, 7, 9);
+        c.save(); c.translate(look * 2.2, 0); c.rotate(look * 0.09);   // head turn
         c.fillStyle = ramp(c, MAT.ceramic, -8, -30, 8, -18);
         rr(c, -8, -30, 16, 14, 5); c.fill();
         occl(c, 0, -17, 8, 3, 0.45);
         drawSensor(c, 0, -23, 4.6, st8, tt);
-        c.save(); c.translate(0, -34);
+        c.restore();
+        c.save(); c.translate(look * 1.6, -34);
         c.strokeStyle = ramp(c, MAT.bronze, -16, -4, 16, 4); c.lineWidth = 2.6;
         c.beginPath(); c.ellipse(0, 0, 16, 4.5, Math.sin(tt * 0.5) * 0.16, 0, 7); c.stroke();
         c.strokeStyle = MAT.bronze.lit; c.lineWidth = 1;
@@ -5417,7 +5443,7 @@ class Boss {
         // still exactly what it was, and that is the point of it.
         const tt = this.anim;
         const hot = this.st === 'beam' || this.st === 'aim';
-        c.scale(this.face || 1, 1);
+        c.scale(faceScale, 1);
         // bronze gimbal ring, turning on two axes
         c.strokeStyle = ramp(c, MAT.bronze, -22, -14, 22, 14); c.lineWidth = 2.8;
         c.beginPath(); c.ellipse(0, 0, 21, 13, Math.sin(tt * 0.6) * 0.2, 0, 7); c.stroke();
