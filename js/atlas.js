@@ -93,17 +93,34 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   const sy = S.row * ch + ch * IN.top;
   const sw2 = cw * (1 - IN.side * 2);
   const sh2 = ch * (1 - IN.top - IN.bottom);
-  c.drawImage(im, sx, sy, sw2, sh2, cx - dw / 2, dy, dw, dh);
-
-  // damage flash and the Song's charm are tinted ON TOP, so the rendered
-  // lighting underneath is never destroyed by a flat colour fill
   if (o.flash > 0 || o.charm > 0) {
-    c.globalCompositeOperation = 'source-atop';
-    c.fillStyle = o.charm > 0 ? 'rgba(63,216,238,0.42)' : 'rgba(255,235,235,0.55)';
-    c.fillRect(cx - dw / 2, dy, dw, dh);
+    // Tint in an offscreen pass. source-atop against the main canvas clips to
+    // the opaque BACKGROUND, not the sprite — which painted a glowing rectangle
+    // around anything hit. The scratch canvas is transparent, so the tint there
+    // clips to the sprite alone.
+    const col = o.charm > 0 ? 'rgba(63,216,238,0.42)' : 'rgba(255,235,235,0.55)';
+    tintedSprite(im, sx, sy, sw2, sh2, dw, dh, col, c, cx - dw / 2, dy);
+  } else {
+    c.drawImage(im, sx, sy, sw2, sh2, cx - dw / 2, dy, dw, dh);
   }
   c.restore();
   return true;
+}
+
+// shared scratch canvas for tinted sprite draws
+let _tintCv = null;
+function tintedSprite(im, sx, sy, sw2, sh2, dw, dh, col, c, dx, dy) {
+  const W = Math.ceil(dw), H = Math.ceil(dh);
+  if (!_tintCv) _tintCv = document.createElement('canvas');
+  if (_tintCv.width < W) _tintCv.width = W;
+  if (_tintCv.height < H) _tintCv.height = H;
+  const tx = _tintCv.getContext('2d');
+  tx.clearRect(0, 0, W, H);
+  tx.drawImage(im, sx, sy, sw2, sh2, 0, 0, dw, dh);
+  tx.globalCompositeOperation = 'source-atop';
+  tx.fillStyle = col; tx.fillRect(0, 0, W, H);
+  tx.globalCompositeOperation = 'source-over';
+  c.drawImage(_tintCv, 0, 0, W, H, dx, dy, W, H);
 }
 
 
