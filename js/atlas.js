@@ -45,6 +45,11 @@ function yawCol(faceVis) {
   const f = faceVis == null ? 1 : faceVis;
   return Math.round(clamp((1 - f) / 2, 0, 1) * 4);
 }
+// fractional yaw for cross-faded rotation: the same mapping, unrounded
+function yawColF(faceVis) {
+  const f = faceVis == null ? 1 : faceVis;
+  return clamp((1 - f) / 2, 0, 1) * 4;
+}
 
 // Draws the subject grounded at (cx, footY), scaled from its hitbox height.
 // Returns false if the sheet has not loaded, so callers fall back to the
@@ -89,19 +94,91 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   if (o.alpha != null) c.globalAlpha = o.alpha;
   // rows whose neighbours crowd them harder get their own crop
   const IN = Object.assign({}, ATLAS_INSET, S.ins || {});
-  const sx = yawCol(faceVis) * cw + cw * IN.side;
   const sy = S.row * ch + ch * IN.top;
   const sw2 = cw * (1 - IN.side * 2);
   const sh2 = ch * (1 - IN.top - IN.bottom);
+  const sxOf = (cc) => cc * cw + cw * IN.side;
+  // ---- procedural puppetry -----------------------------------------------
+  // One authored pose per angle is a statue; motion has to be synthesised.
+  // Everything is anchored at the FOOT so squash keeps the feet planted, and
+  // scale pairs are volume-preserving (sx = 1/sy) so mass reads as constant.
+  const t = o.t || 0, vx = o.vx || 0, vy = o.vy || 0;
+  // ---- real rotation in 3D ----------------------------------------------
+  // The eight authored angles are a turntable; motion between them is what
+  // makes the body read as a volume. Facing gives a fractional yaw and the
+  // renderer CROSS-FADES the two nearest authored angles, so a turn sweeps
+  // through perspectives instead of popping. Some machines rotate on their
+  // own: yawSpin turns the full turntable (prism), yawScan sweeps like a
+  // sentry looking along its arc (turret, archivist).
+  let fy;
+  if (o.yawSpin) fy = ((t * o.yawSpin) % 8 + 8) % 8;
+  else if (o.yawScan) fy = o.yawScan.c + Math.sin(t * o.yawScan.r) * o.yawScan.a;
+  else fy = yawColF(faceVis);
+  fy = ((fy % 8) + 8) % 8;
+  const col0 = Math.floor(fy) % ATLAS.cols, col1 = (col0 + 1) % ATLAS.cols;
+  const colF = fy - Math.floor(fy);
+  let bob = 0, rot = 0, kx = 1, ky = 1, pivTop = false;
+  switch (o.mode) {
+    case 'walk': {                 // gait: quick bob, lean into the run
+      const g = t * (6 + Math.abs(vx) / 30);
+      bob = Math.abs(Math.sin(g)) * dh * 0.05;
+      rot = clamp(vx / 420, -1, 1) * 0.075 + Math.sin(g * 2) * 0.022;
+      ky = 1 + Math.sin(g * 2) * 0.02; kx = 1 / ky;
+      break;
+    }
+    case 'spring': {               // hopper: stretch in flight, squash on landing
+      const airK = clamp(Math.abs(vy) / 700, 0, 1);
+      ky = 1 + (vy < 0 ? 0.16 : 0.10) * airK;
+      if (airK < 0.05) ky = 1 - Math.abs(Math.sin(t * 8)) * 0.05;
+      kx = 1 / ky;
+      rot = clamp(vx / 380, -1, 1) * 0.06;
+      break;
+    }
+    case 'pulse': {                // molten things breathe slowly
+      ky = 1 + Math.sin(t * 3) * 0.035; kx = 1 / ky;
+      break;
+    }
+    case 'hover': {                // fliers ride a slow wave
+      bob = Math.sin(t * 2.4) * dh * 0.035;
+      rot = Math.sin(t * 1.7) * 0.05 + clamp(vx / 300, -1, 1) * 0.08;
+      break;
+    }
+    case 'sway': {                 // hung from above: pendulum about the TOP
+      rot = Math.sin(t * 1.1) * 0.045 + clamp(vx / 300, -1, 1) * 0.05;
+      pivTop = true;
+      break;
+    }
+    case 'gimbal': {               // prism: the ring turns, the core pulses
+      rot = Math.sin(t * 1.3) * 0.09;
+      ky = 1 + Math.sin(t * 2.6) * 0.02; kx = 1 / ky;
+      break;
+    }
+    case 'breathe': default: {     // idle machines still run: faint respiration
+      ky = 1 + Math.sin(t * 1.8) * 0.018; kx = 1 / ky;
+      rot = Math.sin(t * 0.7) * 0.02;
+      break;
+    }
+  }
+  c.translate(cx, footY);
+  const topY = dy - footY;                     // sprite top, relative to the foot
+  if (pivTop) { c.translate(0, topY); c.rotate(rot); c.translate(0, -topY); }
+  else c.rotate(rot);
+  c.scale(kx, ky);
+  const ddx = -dw / 2, ddy = topY - bob;
   if (o.flash > 0 || o.charm > 0) {
     // Tint in an offscreen pass. source-atop against the main canvas clips to
     // the opaque BACKGROUND, not the sprite — which painted a glowing rectangle
     // around anything hit. The scratch canvas is transparent, so the tint there
     // clips to the sprite alone.
     const col = o.charm > 0 ? 'rgba(63,216,238,0.42)' : 'rgba(255,235,235,0.55)';
-    tintedSprite(im, sx, sy, sw2, sh2, dw, dh, col, c, cx - dw / 2, dy);
+    tintedSprite(im, sxOf(colF > 0.5 ? col1 : col0), sy, sw2, sh2, dw, dh, col, c, ddx, ddy);
   } else {
-    c.drawImage(im, sx, sy, sw2, sh2, cx - dw / 2, dy, dw, dh);
+    c.drawImage(im, sxOf(col0), sy, sw2, sh2, ddx, ddy, dw, dh);
+    if (colF > 0.03) {                       // the next angle fades in over it
+      c.save(); c.globalAlpha *= colF;
+      c.drawImage(im, sxOf(col1), sy, sw2, sh2, ddx, ddy, dw, dh);
+      c.restore();
+    }
   }
   c.restore();
   return true;

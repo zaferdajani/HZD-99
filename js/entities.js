@@ -1635,7 +1635,10 @@ class Enemy {
           flash: this.hurtT > 0 ? 1 : 0,
           charm: this.hypnoT > 0 ? 1 : 0,
           grounded: this.kind !== 'flier',
-          vx: this.vx, air: this.kind === 'hopper' ? clamp(-this.vy / 400, 0, 1) : 0,
+          t: this.anim, vx: this.vx, vy: this.vy,
+          air: this.kind === 'hopper' ? clamp(Math.abs(this.vy) / 400, 0, 1) : 0,
+          mode: { crawler: 'walk', hopper: 'spring', blob: 'pulse', flier: 'hover', turret: 'breathe' }[this.kind] || 'breathe',
+          yawScan: this.kind === 'turret' ? { c: 2, r: 0.55, a: 1.6 } : null,
         })) return;
     c.save();
     if (this.hurtT > 0) { c.globalAlpha = 0.6; }
@@ -2438,7 +2441,10 @@ class Boss {
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
           flash: this.hurtT > 0 ? 1 : 0,
           grounded: this.kind !== 'brood' && this.kind !== 'zero' && this.kind !== 'prism',
-          vx: this.vx, air: clamp(-this.vy / 500, 0, 1),
+          t: this.anim, vx: this.vx, vy: this.vy, air: clamp(-this.vy / 500, 0, 1),
+          mode: { brood: 'sway', atlas: 'breathe', zero: 'hover', prism: 'gimbal', mother: 'pulse' }[this.kind] || 'breathe',
+          yawSpin: this.kind === 'prism' ? 0.9 : 0,
+          yawScan: this.kind === 'zero' ? { c: yawColF(this.faceVis), r: 0.4, a: 0.7 } : null,
         })) { c.restore(); return; }
     c.translate(cx, cy);
     // The bodies are authored nose-LEFT, but face = +1 means "the player is to my
