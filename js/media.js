@@ -18,6 +18,8 @@ const MEDIA_SRC = {
     skull: 'assets/characters/fire-skull.png',
     beast: 'assets/characters/hell-beast-idle.png',
     demon: 'assets/characters/demon-idle.png',
+    // pre-rendered 3D turnaround atlas: 11 subjects x 8 yaw angles
+    roster: 'assets/characters/roster_8yaw.png',
   },
   audio: {
     boss: 'assets/music/epic_combat.ogg',

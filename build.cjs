@@ -6,6 +6,7 @@ const EMBED = {
   indFar: 'assets/backgrounds/ind_far.png',
   indMid: 'assets/backgrounds/ind_mid.png',
   indFg: 'assets/backgrounds/ind_fg.png',
+  roster: 'assets/characters/roster_8yaw.png',
   heroIdle: 'assets/characters/gothic-hero-idle.png',
   heroRun: 'assets/characters/gothic-hero-run.png',
   heroJump: 'assets/characters/gothic-hero-jump.png',
@@ -35,7 +36,7 @@ for (const k in EMBED) {
   const ext = f.split('.').pop().toLowerCase();
   media[k] = 'data:' + MIME[ext] + ';base64,' + fs.readFileSync(f).toString('base64');
 }
-const files = ['theme', 'mat', 'types', 'i18n', 'media', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'game', 'touch']
+const files = ['theme', 'mat', 'types', 'i18n', 'media', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'game', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 const html = fs.readFileSync('dev.html', 'utf8');
 const out = html.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/,

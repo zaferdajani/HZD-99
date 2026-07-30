@@ -1628,6 +1628,14 @@ class Enemy {
         return;
       }
     }
+    // Pre-rendered 3D turnaround. Selected by angle, never mirrored, so the baked
+    // key light stays on the correct side as the machine turns.
+    if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
+          flash: this.hurtT > 0 ? 1 : 0,
+          charm: this.hypnoT > 0 ? 1 : 0,
+          grounded: this.kind !== 'flier',
+          vx: this.vx, air: this.kind === 'hopper' ? clamp(-this.vy / 400, 0, 1) : 0,
+        })) return;
     c.save();
     if (this.hurtT > 0) { c.globalAlpha = 0.6; }
     c.translate(cx, cy);
@@ -2423,6 +2431,11 @@ class Boss {
         return;
       }
     }
+    if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
+          flash: this.hurtT > 0 ? 1 : 0,
+          grounded: this.kind !== 'brood' && this.kind !== 'zero' && this.kind !== 'prism',
+          vx: this.vx, air: clamp(-this.vy / 500, 0, 1),
+        })) { c.restore(); return; }
     c.translate(cx, cy);
     // The bodies are authored nose-LEFT, but face = +1 means "the player is to my
     // right", so scaling by face directly made every boss charge backwards. Scale
