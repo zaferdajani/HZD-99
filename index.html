@@ -286,11 +286,16 @@ function occl(c, x, y, w, h, a) {
 // broadcast is driving. The state IS the telegraph, so a player can read what a
 // boss is about to do from its eye alone.
 // ---------------------------------------------------------------------------
+// Escalation is carried by brightness, ring count and spin — NOT by hue. Hue
+// carries infection: crimson if the broadcast has it, cyan if it does not. Running
+// the ladder cyan-to-red would have meant infected bosses idling in friendly
+// colours, which contradicts STORY.md's one hard rule and costs the player the
+// read that red means danger.
 const SENSOR = {
-  idle:      { m: MAT.cyan,    blur: 6,  rings: 1, spin: 0.4, pulse: 0.10 },
-  alert:     { m: MAT.cyan,    blur: 11, rings: 2, spin: 1.6, pulse: 0.30 },
-  locked:    { m: MAT.crimson, blur: 14, rings: 2, spin: 3.0, pulse: 0.45 },
-  overdrive: { m: MAT.crimson, blur: 22, rings: 3, spin: 6.0, pulse: 0.75 },
+  idle:      { blur: 5,  rings: 1, spin: 0.4, pulse: 0.10, k: 0.55 },
+  alert:     { blur: 10, rings: 2, spin: 1.6, pulse: 0.30, k: 0.78 },
+  locked:    { blur: 15, rings: 2, spin: 3.0, pulse: 0.45, k: 1 },
+  overdrive: { blur: 23, rings: 3, spin: 6.0, pulse: 0.75, k: 1 },
 };
 function sensorState(e) {
   if (!e) return 'idle';
@@ -300,8 +305,10 @@ function sensorState(e) {
   return 'idle';
 }
 // one eye, drawn the same way everywhere, so the whole faction speaks one language
-function drawSensor(c, x, y, r, state, t) {
-  const S = SENSOR[state] || SENSOR.idle, m = S.m;
+// clean === true means the machine was never corrected, so it keeps its own light
+function drawSensor(c, x, y, r, state, t, clean) {
+  const S = SENSOR[state] || SENSOR.idle;
+  const m = clean ? MAT.cyan : MAT.crimson;
   const p = 1 + Math.sin(t * (2 + S.spin)) * S.pulse;
   c.save(); c.translate(x, y);
   // recessed housing, so the lens sits IN the plate rather than on it
@@ -311,13 +318,17 @@ function drawSensor(c, x, y, r, state, t) {
   c.fillStyle = m.dark;
   c.beginPath(); c.arc(0, 0, r * 1.15, 0, 7); c.fill();
   // the light
+  c.save();
+  c.globalAlpha = 0.45 + S.k * 0.55;
   c.shadowColor = m.mid; c.shadowBlur = S.blur * p;
-  c.fillStyle = m.mid;
+  c.fillStyle = S.k >= 1 ? m.mid : m.dark;
   c.beginPath(); c.arc(0, 0, r * p, 0, 7); c.fill();
-  c.fillStyle = m.lit;
+  c.fillStyle = S.k >= 1 ? m.lit : m.mid;
   c.beginPath(); c.arc(0, 0, r * 0.44 * p, 0, 7); c.fill();
+  c.restore();
   c.shadowBlur = 0;
   // targeting rings — they multiply and spin as it escalates
+  c.globalAlpha = 0.4 + S.k * 0.6;
   c.strokeStyle = m.mid; c.lineWidth = Math.max(0.6, r * 0.13);
   for (let i = 0; i < S.rings; i++) {
     const rr2 = r * (1.5 + i * 0.55), a0 = t * S.spin + i * 1.1;
@@ -5126,10 +5137,25 @@ class Boss {
         for (const [lx, ph] of [[-24, 0], [-11, 2.2], [12, 1.1], [25, 3.4]]) {
           const sw = Math.sin(tt * (this.st === 'charge' ? 14 : 5) + ph);
           const kx = lx + sw * 5, ky = 4 + Math.abs(sw) * 2;
+          // lower leg
           c.strokeStyle = MAT.steel.dark; c.lineWidth = 5; c.lineCap = 'round';
-          c.beginPath(); c.moveTo(lx * 0.7, -4); c.lineTo(kx, ky); c.lineTo(kx + sw * 3, 24); c.stroke();
-          c.strokeStyle = MAT.steel.mid; c.lineWidth = 2.4;
-          c.beginPath(); c.moveTo(lx * 0.7, -4); c.lineTo(kx, ky); c.stroke();
+          c.beginPath(); c.moveTo(kx, ky); c.lineTo(kx + sw * 3, 24); c.stroke();
+          // upper leg as a hydraulic piston: a bronze sleeve with a bright rod
+          // sliding out of it as the leg extends. This is what tells you the thing
+          // is powered rather than a bent stick.
+          const ang = Math.atan2(ky + 4, kx - lx * 0.7);
+          const seg = Math.hypot(kx - lx * 0.7, ky + 4);
+          c.save(); c.translate(lx * 0.7, -4); c.rotate(ang);
+          c.fillStyle = ramp(c, MAT.steel, 0, -3.4, seg * 0.6, 3.4);
+          rr(c, 0, -3.4, seg * 0.62, 6.8, 2.4); c.fill();          // sleeve
+          c.fillStyle = ramp(c, MAT.ceramic, seg * 0.5, -2, seg, 2, 0.9);
+          c.fillRect(seg * 0.55, -1.9, seg * 0.45, 3.8);           // polished rod
+          c.fillStyle = ramp(c, MAT.bronze, 0, -4, 6, 4);
+          rr(c, -1, -4.2, 6, 8.4, 2); c.fill();                    // hip gland
+          c.strokeStyle = 'rgba(30,36,42,0.5)'; c.lineWidth = 0.8;
+          c.beginPath(); c.moveTo(seg * 0.62, -3); c.lineTo(seg * 0.62, 3); c.stroke();
+          c.restore();
+          occl(c, lx * 0.7, -2, 6, 3, 0.45);
           c.fillStyle = ramp(c, MAT.bronze, kx - 3, ky - 3, kx + 3, ky + 3);
           c.beginPath(); c.arc(kx, ky, 3.2, 0, 7); c.fill();
           c.fillStyle = MAT.ceramic.dark; c.fillRect(kx + sw * 3 - 4, 23, 8, 3.5);
@@ -5169,26 +5195,81 @@ class Boss {
         break;
       }
       case 'brood': {
-        c.strokeStyle = '#2b323d'; c.lineWidth = 6;
-        c.beginPath(); c.moveTo(0, -this.h / 2); c.lineTo(0, -cy); c.stroke(); // hanging cable
-        const puls = 1 + Math.sin(this.anim * 3) * 0.05;
-        c.scale(puls, puls);
-        const brg = c.createRadialGradient(-8, -12, 4, 0, 0, 36);
-        brg.addColorStop(0, '#6b7789'); brg.addColorStop(0.55, '#39424f'); brg.addColorStop(1, '#1a212b');
-        c.fillStyle = brg; c.beginPath(); c.ellipse(0, 0, 33, 29, 0, 0, 7); c.fill();
-        c.strokeStyle = 'rgba(180,200,225,0.35)'; c.lineWidth = 1.5;
-        c.beginPath(); c.ellipse(-3, -6, 26, 20, 0, Math.PI * 1.15, Math.PI * 1.9); c.stroke(); // rim light
-        c.fillStyle = P.glow; c.globalAlpha = 0.85 * a;
-        c.beginPath(); c.ellipse(0, 6, 24, 18, 0, 0, 7); c.fill();
-        c.globalAlpha = a;
-        c.fillStyle = '#0a1420';
-        for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(-12 + i * 12, 4, 4.5, 0, 7); c.fill(); } // brood sacs
-        c.fillStyle = '#ff4f6d'; c.shadowColor = '#ff4f6d'; c.shadowBlur = 12;
-        c.beginPath(); c.arc(0, -12, 6, 0, 7); c.fill(); c.shadowBlur = 0;
-        c.strokeStyle = P.glow; c.lineWidth = 3;
-        for (let i = 0; i < 4; i++) {
-          const wob = Math.sin(this.anim * 4 + i) * 8;
-          c.beginPath(); c.moveTo(-24 + i * 16, 24); c.quadraticCurveTo(-24 + i * 16 + wob, 40, -24 + i * 16 - wob, 52); c.stroke();
+        // BROODMOTHER NODE — a coolant regulator for the network's arteries that
+        // started incubating instead. Ceramic pressure vessel, bronze manifolds,
+        // cyan coolant behind glass, and half-formed mimics in pods beneath it.
+        const tt = this.anim, p2 = this.phase === 2;
+        const st8 = sensorState(this);
+        const puls = 1 + Math.sin(tt * 3) * 0.04;
+        // the feed cable it still hangs from
+        c.strokeStyle = MAT.steel.dark; c.lineWidth = 6;
+        c.beginPath(); c.moveTo(0, -this.h / 2); c.lineTo(0, -cy); c.stroke();
+        c.strokeStyle = MAT.bronze.dark; c.lineWidth = 2.2;
+        c.beginPath(); c.moveTo(-2, -this.h / 2); c.lineTo(-2, -cy); c.stroke();
+        c.save(); c.scale(puls, puls);
+        // bronze manifold collar at the top, with outlet stubs
+        c.fillStyle = ramp(c, MAT.bronze, -22, -30, 22, -20);
+        rr(c, -22, -30, 44, 11, 3); c.fill();
+        for (const mx of [-26, -18, 18, 26]) {
+          c.fillStyle = ramp(c, MAT.bronze, mx - 3, -28, mx + 3, -20);
+          c.fillRect(mx - 3, -28, 6, 9);
+        }
+        occl(c, 0, -19, 22, 4, 0.5);
+        // the ceramic vessel
+        c.fillStyle = ramp(c, MAT.ceramic, -20, -22, 22, 16);
+        c.beginPath();
+        c.moveTo(-24, -20); c.lineTo(24, -20);
+        c.bezierCurveTo(30, 0, 24, 16, 14, 20);
+        c.lineTo(-14, 20);
+        c.bezierCurveTo(-24, 16, -30, 0, -24, -20);
+        c.closePath(); c.fill();
+        wear(c, [[-20, -8, 5], [17, 4, 4], [-6, 14, 3]]);
+        // coolant window: cyan fluid with a moving level line
+        c.save();
+        c.fillStyle = MAT.cyan.deep;
+        rr(c, -13, -13, 26, 24, 4); c.fill();
+        const lvl = -6 + Math.sin(tt * 1.6) * 2.4;
+        const cg2 = c.createLinearGradient(0, lvl, 0, 11);
+        cg2.addColorStop(0, MAT.cyan.lit); cg2.addColorStop(1, MAT.cyan.dark);
+        c.globalAlpha = 0.85; c.shadowColor = MAT.cyan.mid; c.shadowBlur = 10;
+        c.fillStyle = cg2; rr(c, -12, lvl, 24, 11 - lvl, 3); c.fill();
+        c.shadowBlur = 0; c.globalAlpha = 1;
+        c.strokeStyle = 'rgba(240,251,255,0.5)'; c.lineWidth = 1;
+        rr(c, -13, -13, 26, 24, 4); c.stroke();
+        c.restore();
+        occl(c, 0, -13, 13, 3, 0.4);
+        // incubation pods hanging underneath, each with a half-formed mimic
+        for (const [bx, bp] of [[-16, 0], [0, 1.7], [16, 3.4]]) {
+          const sw = Math.sin(tt * 1.3 + bp) * 0.10;
+          c.save(); c.translate(bx, 19); c.rotate(sw);
+          c.strokeStyle = MAT.steel.mid; c.lineWidth = 1.4;
+          c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 5); c.stroke();
+          c.save(); c.globalAlpha = 0.6;
+          c.fillStyle = ramp(c, MAT.frost, -7, 5, 7, 22);
+          c.beginPath(); c.ellipse(0, 13, 7, 9, 0, 0, 7); c.fill();
+          c.restore();
+          // the thing inside, not finished
+          c.fillStyle = p2 ? MAT.crimson.dark : MAT.steel.dark;
+          c.beginPath(); c.ellipse(0, 14, 3.4, 4.4, sw, 0, 7); c.fill();
+          c.fillStyle = p2 ? MAT.crimson.mid : MAT.cyan.dark;
+          c.beginPath(); c.arc(-1.1, 12.6, 1.1, 0, 7); c.fill();
+          c.strokeStyle = 'rgba(240,251,255,0.45)'; c.lineWidth = 0.8;
+          c.beginPath(); c.ellipse(0, 13, 7, 9, 0, 0, 7); c.stroke();
+          c.restore();
+        }
+        // coolant dripping from the hem
+        for (let i = 0; i < 3; i++) {
+          const dy = ((tt * 34 + i * 17) % 26);
+          c.globalAlpha = 1 - dy / 26;
+          c.fillStyle = MAT.cyan.mid;
+          c.beginPath(); c.ellipse(-9 + i * 9, 20 + dy, 1.2, 2.2, 0, 0, 7); c.fill();
+        }
+        c.globalAlpha = 1;
+        drawSensor(c, 0, -24, 5, st8, tt);
+        c.restore();
+        if (p2 || this.overdriveT > 0) {
+          c.save(); c.translate(-20, 6); tendrils(c, 4, 22, tt, 0.9, 0.7); c.restore();
+          c.save(); c.translate(20, 6); tendrils(c, 4, 22, tt, 3.4, 0.7); c.restore();
         }
         break;
       }
@@ -5206,16 +5287,26 @@ class Boss {
           c.fillStyle = ramp(c, MAT.bronze, px2 - 3, 4, px2 + 3, 24);
           c.fillRect(px2 - 3, 4, 6, 20);
         }
-        c.fillStyle = ramp(c, MAT.ceramic, -9, -30, 9, 22);
+        // the column is ceramic and stays ceramic: heat lives in the slot only, so
+        // the piece keeps a light-mid-dark structure instead of glowing all over
+        c.fillStyle = ramp(c, MAT.ceramic, -11, -30, 9, 22, 0.8);
         rr(c, -10, -30, 20, 54, 4); c.fill();
+        c.fillStyle = 'rgba(28,26,22,0.5)';                 // shadowed right flank
+        rr(c, 3, -29, 7, 52, 3); c.fill();
         c.save();
-        c.fillStyle = MAT.molten.deep; c.fillRect(-5, -26, 10, 46);
+        c.fillStyle = '#150a04'; c.fillRect(-5.5, -26, 11, 46);   // cold cavity
         const mg = c.createLinearGradient(0, -26, 0, 20);
-        mg.addColorStop(0, MAT.molten.lit); mg.addColorStop(0.5, MAT.molten.mid); mg.addColorStop(1, MAT.molten.dark);
-        c.globalAlpha = 0.55 + heat * 0.4 + Math.sin(tt * 6) * 0.05;
-        c.shadowColor = MAT.molten.mid; c.shadowBlur = 10 + heat * 16;
-        c.fillStyle = mg; c.fillRect(-4, -25, 8, 44);
+        mg.addColorStop(0, MAT.molten.mid); mg.addColorStop(0.45, MAT.molten.lit);
+        mg.addColorStop(1, MAT.molten.dark);
+        c.globalAlpha = 0.5 + heat * 0.35 + Math.sin(tt * 6) * 0.05;
+        c.shadowColor = MAT.molten.mid; c.shadowBlur = 8 + heat * 14;
+        c.fillStyle = mg; c.fillRect(-3.4, -24, 6.8, 42);
         c.restore(); c.shadowBlur = 0;
+        c.strokeStyle = 'rgba(20,14,8,0.7)'; c.lineWidth = 1.4;   // slot lip
+        c.strokeRect(-5.5, -26, 11, 46);
+        c.fillStyle = ramp(c, MAT.bronze, -11, -4, 11, 3);        // waist band
+        c.fillRect(-11, -4, 22, 5);
+        occl(c, 0, 1, 11, 3, 0.45);
         wear(c, [[-9, -6, 4], [6, 10, 3]]);
         c.strokeStyle = ramp(c, MAT.bronze, -30, -34, 30, -26); c.lineWidth = 4;
         c.beginPath(); c.ellipse(0, -30, 29, 7, 0, 0, 7); c.stroke();
@@ -5256,16 +5347,28 @@ class Boss {
         const tt = this.anim, fl = Math.sin(tt * 2.2) * 3;
         const st8 = sensorState(this);
         c.translate(0, fl);
-        for (const [ox, k] of [[-1, 0.82], [1, 0.9], [0, 1]]) {
-          c.fillStyle = ramp(c, MAT.ceramic, ox * 8 - 10, -16, ox * 8 + 12, 28, k);
+        // the cloak is built from vertical fold panels, each with its own light
+        // value, so the form turns instead of reading as one flat cone
+        const folds = [-3, -2, -1, 0, 1, 2, 3];
+        for (const f of folds) {
+          const top = f * 2.6, botL = f * 6.6 - 3.4, botR = f * 6.6 + 3.4;
+          // panels facing the light are brighter; the far ones fall away
+          const k = clamp(0.95 - Math.abs(f + 0.9) * 0.13, 0.42, 0.95);
+          c.fillStyle = ramp(c, MAT.ceramic, top - 4, -14, botR, 29, k);
           c.beginPath();
-          c.moveTo(ox * 3 - 8, -14);
-          c.bezierCurveTo(ox * 4 - 13, 4, ox * 6 - 20, 20, ox * 7 - 23, 29);
-          c.lineTo(ox * 7 + 23, 29);
-          c.bezierCurveTo(ox * 6 + 20, 20, ox * 4 + 13, 4, ox * 3 + 8, -14);
+          c.moveTo(top - 1.6, -14);
+          c.bezierCurveTo(top - 2.4, 4, botL + 1.2, 18, botL, 29);
+          c.lineTo(botR, 29);
+          c.bezierCurveTo(botR - 1.2, 18, top + 2.4, 4, top + 1.6, -14);
           c.closePath(); c.fill();
+          // the crease line down each fold
+          c.strokeStyle = 'rgba(38,36,32,0.45)'; c.lineWidth = 0.8;
+          c.beginPath(); c.moveTo(top + 1.6, -13); c.lineTo(botR, 28); c.stroke();
         }
-        occl(c, 0, 28, 22, 4, 0.5);
+        // hem: a heavier bronze-weighted edge, and the shadow it throws
+        c.fillStyle = ramp(c, MAT.bronze, -22, 25, 22, 30, 0.85);
+        c.beginPath(); c.moveTo(-23, 25); c.lineTo(23, 25); c.lineTo(21, 30); c.lineTo(-21, 30); c.closePath(); c.fill();
+        occl(c, 0, 29, 22, 4, 0.55);
         c.save(); c.globalAlpha = 0.42;
         c.fillStyle = ramp(c, MAT.frost, -5, -10, 5, 26);
         c.beginPath(); c.moveTo(-4, -12); c.lineTo(4, -12); c.lineTo(8, 27); c.lineTo(-8, 27); c.closePath(); c.fill();
@@ -5308,57 +5411,117 @@ class Boss {
         break;
       }
       case 'prism': {
+        // PRISM PROWLER — the one machine the network never indexed, so the
+        // broadcast never found it. It is NOT infected: it is the only boss whose
+        // sensor stays cyan, and the only one with no wear and no tendrils. It is
+        // still exactly what it was, and that is the point of it.
+        const tt = this.anim;
+        const hot = this.st === 'beam' || this.st === 'aim';
         c.scale(this.face || 1, 1);
-        const prg = c.createLinearGradient(0, -12, 0, 10);
-        prg.addColorStop(0, '#4a3a55'); prg.addColorStop(0.5, '#2e2333'); prg.addColorStop(1, '#160f1c');
-        c.fillStyle = prg; rr(c, -24, -12, 46, 22, 8); c.fill();  // sleek body
-        c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.3 + Math.sin(this.anim * 4) * 0.15;
-        c.strokeStyle = P.glow; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-20, -9); c.lineTo(16, -9); c.stroke(); // iridescent sheen
-        c.restore(); c.globalAlpha = a;
-        const phg = c.createLinearGradient(0, -24, 0, -8);
-        phg.addColorStop(0, '#3a2a42'); phg.addColorStop(1, '#1a1220');
-        c.fillStyle = phg; rr(c, 10, -24, 18, 16, 6); c.fill();   // head
-        c.beginPath(); c.moveTo(12, -22); c.lineTo(15, -32); c.lineTo(19, -23); c.closePath(); c.fill();
-        c.beginPath(); c.moveTo(21, -23); c.lineTo(25, -31); c.lineTo(27, -21); c.closePath(); c.fill();
-        c.fillStyle = P.glow; c.shadowColor = P.glow; c.shadowBlur = 12;
-        c.fillRect(15, -19, 4, 4); c.fillRect(21.5, -19, 4, 4); c.shadowBlur = 0;
-        c.strokeStyle = P.glow; c.lineWidth = 3; c.lineCap = 'round';
-        const tw2 = Math.sin(this.anim * 7) * 7;
-        c.beginPath(); c.moveTo(-22, -6); c.quadraticCurveTo(-36, -14 + tw2, -34, -28 + tw2); c.stroke();
-        // crystal shards on back
-        c.fillStyle = 'rgba(255,122,209,0.8)';
-        c.beginPath(); c.moveTo(-14, -12); c.lineTo(-10, -26); c.lineTo(-5, -12); c.closePath(); c.fill();
-        c.beginPath(); c.moveTo(-4, -12); c.lineTo(1, -22); c.lineTo(5, -12); c.closePath(); c.fill();
+        // bronze gimbal ring, turning on two axes
+        c.strokeStyle = ramp(c, MAT.bronze, -22, -14, 22, 14); c.lineWidth = 2.8;
+        c.beginPath(); c.ellipse(0, 0, 21, 13, Math.sin(tt * 0.6) * 0.2, 0, 7); c.stroke();
+        c.strokeStyle = MAT.bronze.lit; c.lineWidth = 1;
+        c.beginPath(); c.ellipse(0, -1, 21, 13, Math.sin(tt * 0.6) * 0.2, Math.PI, Math.PI * 2); c.stroke();
+        c.strokeStyle = ramp(c, MAT.bronze, -6, -16, 6, 16); c.lineWidth = 2.2;
+        c.beginPath(); c.ellipse(0, 0, 8, 15, Math.cos(tt * 0.45) * 0.25, 0, 7); c.stroke();
+        // ceramic housing shells, clean — no chipping on this one
+        for (const sx of [-1, 1]) {
+          c.fillStyle = ramp(c, MAT.ceramic, sx * 12 - 6, -11, sx * 12 + 6, 9, 0.95);
+          c.beginPath();
+          c.moveTo(sx * 9, -10); c.lineTo(sx * 22, -6);
+          c.lineTo(sx * 22, 6); c.lineTo(sx * 9, 10);
+          c.closePath(); c.fill();
+          occl(c, sx * 10, 0, 4, 8, 0.4);
+        }
+        // the faceted crystal core
+        const facets = 7, spin = tt * 0.8;
+        c.save();
+        for (let i = 0; i < facets; i++) {
+          const a0 = spin + i / facets * Math.PI * 2, a1 = spin + (i + 1) / facets * Math.PI * 2;
+          const k = 0.45 + 0.55 * Math.abs(Math.cos(a0 + 0.6));
+          c.fillStyle = ramp(c, MAT.frost, 0, -10, Math.cos(a0) * 10, 10, k);
+          c.beginPath(); c.moveTo(0, 0);
+          c.lineTo(Math.cos(a0) * 11, Math.sin(a0) * 9);
+          c.lineTo(Math.cos(a1) * 11, Math.sin(a1) * 9);
+          c.closePath(); c.fill();
+        }
+        c.restore();
+        // refracted light — a fan of thin cyan rays, brighter while it aims
+        c.save(); c.globalCompositeOperation = 'lighter';
+        c.globalAlpha = hot ? 0.55 : 0.24;
+        for (let i = 0; i < 5; i++) {
+          const a = spin * 1.6 + i / 5 * Math.PI * 2;
+          c.strokeStyle = MAT.cyan.lit; c.lineWidth = 1.1;
+          c.beginPath(); c.moveTo(0, 0);
+          c.lineTo(Math.cos(a) * (hot ? 34 : 20), Math.sin(a) * (hot ? 26 : 15));
+          c.stroke();
+        }
+        c.restore(); c.globalAlpha = 1;
+        // the eye. Cyan, always — it was never corrected.
+        drawSensor(c, 0, 0, 4.6, hot ? 'locked' : 'alert', tt, true);   // clean: never catalogued, never corrected
         break;
       }
       case 'mother': {
-        const p2 = this.phase === 2;
-        c.strokeStyle = 'rgba(107,37,150,0.8)'; c.lineWidth = 10;
-        for (let i = 0; i < 6; i++) {
-          const aa = i / 6 * Math.PI * 2 + this.anim * 0.3;
-          const wob = Math.sin(this.anim * 2 + i * 2) * 20;
-          c.beginPath(); c.moveTo(0, 0);
-          c.quadraticCurveTo(Math.cos(aa) * 90, Math.sin(aa) * 90 + wob, Math.cos(aa) * 150, Math.sin(aa) * 150 - wob);
-          c.stroke();
+        // MOTHER-V — not a machine. The broadcast grew a body out of cable and
+        // coolant because it finally wanted hands. So it is the inverse of every
+        // other boss: crimson tissue first, with fragments of the ceramic machines
+        // it absorbed still stuck in it, half-digested.
+        const tt = this.anim, p2 = this.phase === 2;
+        // outer cable-flesh: overlapping lobes that breathe
+        for (let ring = 3; ring >= 1; ring--) {
+          const rr3 = 22 + ring * 12 + Math.sin(tt * 1.2 + ring) * 2.5;
+          const g2 = c.createRadialGradient(-rr3 * 0.25, -rr3 * 0.3, 2, 0, 0, rr3);
+          g2.addColorStop(0, MAT.crimson.dark);
+          g2.addColorStop(0.6, 'rgba(60,10,18,0.92)');
+          g2.addColorStop(1, 'rgba(28,6,12,0.5)');
+          c.fillStyle = g2;
+          c.beginPath();
+          for (let i = 0; i <= 16; i++) {
+            const a = i / 16 * Math.PI * 2;
+            const w2 = rr3 * (1 + Math.sin(a * 3 + tt * 0.8 + ring) * 0.10);
+            i ? c.lineTo(Math.cos(a) * w2, Math.sin(a) * w2 * 0.92)
+              : c.moveTo(Math.cos(a) * w2, Math.sin(a) * w2 * 0.92);
+          }
+          c.closePath(); c.fill();
         }
-        const puls = 1 + Math.sin(this.anim * (p2 ? 6 : 3)) * 0.06;
-        c.scale(puls, puls);
-        const mrg = c.createRadialGradient(-16, -18, 6, 0, 0, 62);
-        mrg.addColorStop(0, '#6b7789'); mrg.addColorStop(0.5, '#39424f'); mrg.addColorStop(1, '#141922');
-        c.fillStyle = mrg; c.beginPath(); c.arc(0, 0, 58, 0, 7); c.fill();
-        c.strokeStyle = 'rgba(190,150,230,0.4)'; c.lineWidth = 2;
-        c.beginPath(); c.arc(0, 0, 56, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); // rim light
-        c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.8 * a;
-        const mcg = c.createRadialGradient(0, 0, 8, 0, 0, 46);
-        mcg.addColorStop(0, p2 ? '#ff8a9c' : '#e0a0ff'); mcg.addColorStop(1, 'rgba(60,20,90,0)');
-        c.fillStyle = mcg; c.beginPath(); c.arc(0, 0, 46, 0, 7); c.fill(); c.restore(); c.globalAlpha = a;
-        c.fillStyle = '#0a0512'; c.beginPath(); c.arc(0, 0, 30, 0, 7); c.fill();
-        // the eye
-        c.fillStyle = p2 ? '#ff4f6d' : '#e05aff'; c.shadowColor = c.fillStyle; c.shadowBlur = 24;
-        const look = Math.atan2(player.y - cy, player.x - cx);
-        c.beginPath(); c.arc(Math.cos(look) * 10, Math.sin(look) * 10, 13, 0, 7); c.fill();
+        // absorbed machine parts: ceramic plates and a bronze fitting, embedded
+        for (const [ax, ay, ar, aw, ah] of [[-34, -16, -0.5, 15, 9], [30, 10, 0.35, 13, 8], [-14, 34, 0.9, 12, 7], [24, -30, -0.2, 11, 6]]) {
+          c.save(); c.translate(ax, ay); c.rotate(ar);
+          c.fillStyle = ramp(c, MAT.ceramic, -aw, -ah, aw, ah, 0.62);
+          rr(c, -aw, -ah, aw * 2, ah * 2, 2); c.fill();
+          c.fillStyle = 'rgba(60,10,18,0.55)';               // tissue creeping over
+          rr(c, -aw, ah * 0.2, aw * 2, ah * 0.9, 2); c.fill();
+          c.strokeStyle = MAT.bronze.dark; c.lineWidth = 1.2;
+          c.beginPath(); c.moveTo(-aw, -ah * 0.3); c.lineTo(aw, -ah * 0.3); c.stroke();
+          c.restore();
+          occl(c, ax, ay + ah, aw, ah * 0.6, 0.45);
+        }
+        // cable bundles reaching outward — the hands it wanted
+        for (let i = 0; i < 8; i++) {
+          const a = i / 8 * Math.PI * 2 + tt * 0.22;
+          c.save(); c.rotate(a); c.translate(30, 0);
+          tendrils(c, 3, 30 + (p2 ? 14 : 0), tt, i * 1.3, 0.8);
+          c.restore();
+        }
+        // the core: a crimson heart with a ring of extracted sensors round it
+        const beat = 1 + Math.sin(tt * 4) * (p2 ? 0.14 : 0.07);
+        c.save(); c.scale(beat, beat);
+        const cg3 = c.createRadialGradient(-4, -5, 1, 0, 0, 22);
+        cg3.addColorStop(0, '#fff0f0'); cg3.addColorStop(0.35, MAT.crimson.mid);
+        cg3.addColorStop(1, MAT.crimson.deep);
+        c.shadowColor = MAT.crimson.mid; c.shadowBlur = 26;
+        c.fillStyle = cg3;
+        c.beginPath(); c.arc(0, 0, 20, 0, 7); c.fill();
         c.shadowBlur = 0;
-        c.fillStyle = '#0a0512'; c.beginPath(); c.arc(Math.cos(look) * 12, Math.sin(look) * 12, 5, 0, 7); c.fill();
+        c.restore();
+        // the eyes of the machines it has taken, orbiting it
+        for (let i = 0; i < 6; i++) {
+          const a = tt * 0.7 + i / 6 * Math.PI * 2;
+          const ox = Math.cos(a) * 30, oy = Math.sin(a) * 24;
+          drawSensor(c, ox, oy, 2.8, 'locked', tt + i);
+        }
+        drawSensor(c, 0, 0, 7, 'overdrive', tt);
         break;
       }
     }

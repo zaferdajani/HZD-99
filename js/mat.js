@@ -58,11 +58,16 @@ function occl(c, x, y, w, h, a) {
 // broadcast is driving. The state IS the telegraph, so a player can read what a
 // boss is about to do from its eye alone.
 // ---------------------------------------------------------------------------
+// Escalation is carried by brightness, ring count and spin — NOT by hue. Hue
+// carries infection: crimson if the broadcast has it, cyan if it does not. Running
+// the ladder cyan-to-red would have meant infected bosses idling in friendly
+// colours, which contradicts STORY.md's one hard rule and costs the player the
+// read that red means danger.
 const SENSOR = {
-  idle:      { m: MAT.cyan,    blur: 6,  rings: 1, spin: 0.4, pulse: 0.10 },
-  alert:     { m: MAT.cyan,    blur: 11, rings: 2, spin: 1.6, pulse: 0.30 },
-  locked:    { m: MAT.crimson, blur: 14, rings: 2, spin: 3.0, pulse: 0.45 },
-  overdrive: { m: MAT.crimson, blur: 22, rings: 3, spin: 6.0, pulse: 0.75 },
+  idle:      { blur: 5,  rings: 1, spin: 0.4, pulse: 0.10, k: 0.55 },
+  alert:     { blur: 10, rings: 2, spin: 1.6, pulse: 0.30, k: 0.78 },
+  locked:    { blur: 15, rings: 2, spin: 3.0, pulse: 0.45, k: 1 },
+  overdrive: { blur: 23, rings: 3, spin: 6.0, pulse: 0.75, k: 1 },
 };
 function sensorState(e) {
   if (!e) return 'idle';
@@ -72,8 +77,10 @@ function sensorState(e) {
   return 'idle';
 }
 // one eye, drawn the same way everywhere, so the whole faction speaks one language
-function drawSensor(c, x, y, r, state, t) {
-  const S = SENSOR[state] || SENSOR.idle, m = S.m;
+// clean === true means the machine was never corrected, so it keeps its own light
+function drawSensor(c, x, y, r, state, t, clean) {
+  const S = SENSOR[state] || SENSOR.idle;
+  const m = clean ? MAT.cyan : MAT.crimson;
   const p = 1 + Math.sin(t * (2 + S.spin)) * S.pulse;
   c.save(); c.translate(x, y);
   // recessed housing, so the lens sits IN the plate rather than on it
@@ -83,13 +90,17 @@ function drawSensor(c, x, y, r, state, t) {
   c.fillStyle = m.dark;
   c.beginPath(); c.arc(0, 0, r * 1.15, 0, 7); c.fill();
   // the light
+  c.save();
+  c.globalAlpha = 0.45 + S.k * 0.55;
   c.shadowColor = m.mid; c.shadowBlur = S.blur * p;
-  c.fillStyle = m.mid;
+  c.fillStyle = S.k >= 1 ? m.mid : m.dark;
   c.beginPath(); c.arc(0, 0, r * p, 0, 7); c.fill();
-  c.fillStyle = m.lit;
+  c.fillStyle = S.k >= 1 ? m.lit : m.mid;
   c.beginPath(); c.arc(0, 0, r * 0.44 * p, 0, 7); c.fill();
+  c.restore();
   c.shadowBlur = 0;
   // targeting rings — they multiply and spin as it escalates
+  c.globalAlpha = 0.4 + S.k * 0.6;
   c.strokeStyle = m.mid; c.lineWidth = Math.max(0.6, r * 0.13);
   for (let i = 0; i < S.rings; i++) {
     const rr2 = r * (1.5 + i * 0.55), a0 = t * S.spin + i * 1.1;

@@ -86,7 +86,7 @@ version of the same fluted bore-head.
 **Drops: the SCRAPPLATE suit — arm `Shard Volley`.** A cone of ferrous shrapnel.
 Short range, wide spread, and it grounds anything arcing.
 
-### BROOD — *The Nursery* · Zone B, Data Conduits
+### BROOD — *BROODMOTHER NODE* · Zone B, Data Conduits
 *(Odyssey: The Siren Mother)*
 **Element VANN · weak to ZIZT**
 It was a coolant regulator for the network's arteries. Now it incubates. It fills
@@ -122,22 +122,28 @@ It is the only boss that can cost you something you cannot heal back.
 **Drops: the HALT suit — arm `Frost Lattice`.** Freezes a target solid for two
 seconds. **This is the arm that beats the final boss.**
 
-### PRISM — *The Index* · Zone X, Crystal Cache
+### PRISM — *PRISM PROWLER* · Zone X, Crystal Cache
 *(Odyssey: The Marble Lynx)*
 **Element ZIZT · weak to SKARN**
 The one machine the network never catalogued, in the one vault it never indexed —
 so the broadcast never found it. Prism is *not infected*. It is simply territorial,
 and it has been alone with the last clean light in the world for a very long time.
 It fights with refracted beams and does not pursue you if you leave.
+**It is the only boss with a cyan eye.** Every other machine down here looks back
+at you in crimson. You can tell what Prism is from across the room, before it does
+anything, because its light is still its own.
 **Drops: the ARCLIGHT suit — arm `Arc Lash`.** A chaining bolt that jumps between
 nearby targets. Optional boss, and the reward reflects it.
 
-### MOTHER — *The Correction* · Zone E, The Virus Nest
+### MOTHER — *MOTHER-V* · Zone E, The Virus Nest
 *(Odyssey: Charybdis, the Devourer)*
 **Element VIZRR · weak to GLAZZ**
 Not a machine. The Null Core's broadcast, grown a body out of cable and coolant
 because it finally wanted hands. It does not try to kill you — it tries to
 *repurpose* you, and its attacks rewrite rather than wound.
+It is built the opposite way round from everything else in the Depths: tissue
+first, with the ceramic parts of the machines it has absorbed still stuck in it
+half-digested, and their sensors orbiting its core — still lit, still looking.
 **Drops nothing.** There is no suit made of the thing you came to end.
 
 ### The ring, at a glance
@@ -162,6 +168,19 @@ what they were *trying* to be, in Rustsong.
 
 **The rule that makes them frightening:** a mimic keeps the *job* it had. It is
 still doing its work. It simply no longer cares what its work does to you.
+
+## 4b. How to read a machine
+
+Two rules, and between them you can read any machine in the Depths at a glance.
+
+**Hue is infection.** Crimson means the broadcast is driving. Cyan means it is
+not. This never varies, which is why Prism's cyan eye is worth noticing and why
+the Husk turning from crimson to cyan means you have got something back.
+
+**Brightness is escalation.** The same sensor dims and brightens, and grows extra
+targeting rings that spin faster, as a machine climbs from idle through alert and
+locked to overdrive. A boss in overdrive also grows crimson tendrils. So the eye
+tells you *what* it is and *how close* it is to acting, without a health bar.
 
 ## 5. The Song — the player's own element
 
