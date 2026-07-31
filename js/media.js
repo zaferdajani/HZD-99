@@ -26,6 +26,8 @@ const MEDIA_SRC = {
     vistaCity: 'assets/backgrounds/vista_city.jpg',
     vistaCrystal: 'assets/backgrounds/vista_crystal.jpg',
     driller: 'assets/characters/driller_12x6.png',
+    // the first boss: virus-infected robot beast, parts atlas for the cutout rig
+    beastParts: 'assets/characters/beast_parts.png',
   },
   audio: {
     boss: 'assets/music/epic_combat.ogg',

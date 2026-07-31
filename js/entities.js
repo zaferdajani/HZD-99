@@ -1660,6 +1660,10 @@ class Enemy {
         return;
       }
     }
+    // Zone A ground minions are the boss's WHELPS — smaller versions of the
+    // virus beast itself, assembled from the same parts rig.
+    if (G.roomDef && G.roomDef.zone === 'A' && (this.kind === 'crawler' || this.kind === 'hopper')
+        && typeof drawBeastMini === 'function' && drawBeastMini(c, this)) return;
     // Pre-rendered 3D turnaround. Selected by angle, never mirrored, so the baked
     // key light stays on the correct side as the machine turns.
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
@@ -2010,7 +2014,7 @@ class Wreck {
 
 // ================= BOSSES =================
 const BSTAT = {
-  glitch: { w: 76, h: 52, hp: 220 },
+  glitch: { w: 104, h: 70, hp: 220 },
   brood: { w: 66, h: 58, hp: 320 },
   atlas: { w: 62, h: 74, hp: 460 },
   zero: { w: 44, h: 56, hp: 500 },
@@ -2428,12 +2432,16 @@ class Boss {
     G.onBossDead(this.kind);
   }
   draw(c) {
-    if (this.dead && !(this.kind === 'glitch' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.driller)) return;
+    if (this.dead && !(this.kind === 'glitch' && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beast || MEDIA_IMG.driller))) return;
     const P = PAL[G.roomDef.zone];
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
-    if (this.dead) { if (!(typeof drawDriller3D === 'function' && this.deathAnimT <= 0 && false)) drawDriller(c, this); c.restore(); return; }
+    if (this.dead) {
+      // the beast folds onto the ground and its virus-light goes out
+      if (!(typeof drawBeast === 'function' && drawBeast(c, this))) drawDriller(c, this);
+      c.restore(); return;
+    }
     // telegraphs
     this.drawAbilities(c);
     if (this.kind === 'zero') for (const m of this.marks) {
@@ -2474,6 +2482,7 @@ class Boss {
         return;
       }
     }
+    if (this.kind === 'glitch' && typeof drawBeast === 'function' && drawBeast(c, this)) { c.restore(); return; }
     if (this.kind === 'glitch' && typeof drawDriller3D === 'function' && drawDriller3D(c, this)) { c.restore(); return; }
     if (this.kind === 'glitch' && drawDriller(c, this)) { c.restore(); return; }
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
