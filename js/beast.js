@@ -205,7 +205,11 @@ function drawBeast(c, b) {
     c.save();
     c.translate(cx, footY);
     const sgn = fv < 0 ? 1 : -1;                     // authored facing LEFT
-    c.scale(sgn * Math.max(Math.abs(fv), 0.22) * S, S);
+    // NO paper-thin edge at the turn: the body flexes to 85% at most and the
+    // pivot crouches into its feet — the flip reads as weight, never as a line
+    const ta = Math.abs(fv);
+    c.translate(0, (1 - ta) * 7);
+    c.scale(sgn * (0.85 + 0.15 * ta) * S, (1 - (1 - ta) * 0.06) * S);
     if (b.hurtT > 0) c.globalAlpha = 0.72;
     // ground shadow lives with every representation
     c.save(); c.globalAlpha *= 0.34; c.fillStyle = '#04070b';
@@ -244,7 +248,9 @@ function drawBeastMini(c, e) {
     c.save();
     c.translate(e.x + e.w / 2, e.y + e.h);
     const sgn = fv < 0 ? 1 : -1;
-    c.scale(sgn * Math.max(Math.abs(fv), 0.25) * S, S);
+    const ta = Math.abs(fv);
+    c.translate(0, (1 - ta) * 4);
+    c.scale(sgn * (0.85 + 0.15 * ta) * S, (1 - (1 - ta) * 0.06) * S);
     if (e.hurtT > 0) c.globalAlpha = 0.72;
     if (e.hypnoT > 0) c.globalAlpha = 0.85;
     c.save(); c.globalAlpha *= 0.3; c.fillStyle = '#04070b';

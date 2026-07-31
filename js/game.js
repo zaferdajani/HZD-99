@@ -2945,6 +2945,10 @@ G.updateStamp = 1;
 setTimeout(checkForUpdate, 2500);
 setInterval(checkForUpdate, 240000);
 addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate(); });
+// instant repeat loads + offline: cache-first assets, network-first code
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  try { navigator.serviceWorker.register('sw.js'); } catch (e) {}
+}
 let lastT = 0;
 function mainLoop(tms) {
   const dt = Math.min((tms - lastT) / 1000, 1 / 30);

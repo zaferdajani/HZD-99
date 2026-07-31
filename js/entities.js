@@ -2088,7 +2088,16 @@ class Boss {
     if (this.kind === 'zero' || this.kind === 'brood' || this.kind === 'prism' || this.kind === 'mother')
       this.face = Math.sign(px - this.cx()) || this.face || 1;
     const turn = dt * 5.5;
+    const pvSign = Math.sign(this.faceVis) || 1;
     this.faceVis += clamp((this.face || 1) - this.faceVis, -turn, turn);
+    // the pivot kicks up dust the instant the body whips through centre, so a
+    // turning machine reads as planting and spinning, never as a flat sliver
+    if (this.kind === 'glitch' && (Math.sign(this.faceVis) || 1) !== pvSign) {
+      for (let i = 0; i < 8; i++)
+        addPart(this.cx() + rnd(-this.w * 0.4, this.w * 0.4), this.y + this.h - rnd(0, 8),
+          rnd(-120, 120), rnd(-140, -30), 0.35, '#b9a888', 3, 260, true);
+      sfx('step');
+    }
     this.tickAbilities(dt, px, py);
     switch (this.kind) {
       // ---- GLITCH.EXE: charging corrupted hound ----

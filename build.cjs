@@ -48,10 +48,13 @@ const html = fs.readFileSync('dev.html', 'utf8');
 const buildId = Date.now().toString(36);
 // the loading screen paints while the megabytes below it still stream in
 const loader = fs.readFileSync('loader.html', 'utf8');
+// SLIM build: media is NOT embedded — the deployed repo serves assets/ as
+// separate files that stream in after boot (media.js already loads lazily and
+// every draw path has a fallback until its art arrives). This cuts the
+// blocking download from ~12MB to ~1MB.
 const out = html.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/, () =>
   loader + '\n' +
   '<script>window.BUILD_ID=' + JSON.stringify(buildId) + '</script>\n' +
-  '<script>window.EMBEDDED_MEDIA=' + JSON.stringify(media) + '</script>\n' +
   '<script>\n' + files.join('\n') + '\n</script>\n</body>');
 fs.writeFileSync('index.html', out);
 console.log('index.html built:', (fs.statSync('index.html').size / 1048576).toFixed(2) + 'MB');
