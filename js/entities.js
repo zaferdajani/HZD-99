@@ -2062,6 +2062,7 @@ class Boss {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    if (this.shieldT > 0) this.shieldT -= dt;          // shorted plating recovers
     if (this.deathAnimT > 0) this.deathAnimT -= dt;   // the collapse plays out
     if (this.dead) return;
     if (this.stagT > 0) { this.stagT -= dt; return; }   // Song / weakness stagger
@@ -2080,7 +2081,8 @@ class Boss {
       cam.shake = 12; sfx('phase');
     }
     const px = player.x + player.w / 2, py = player.y + player.h / 2;
-    const spd = DF().espd;
+    // each boss up the chain is natively faster and more relentless
+    const spd = DF().espd * (BOSS_AGGRO[this.kind] || 1);
     this.windT -= dt; this.overdriveT -= dt;
     // every boss looks where it is going, even the ones that do not walk
     if (this.kind === 'zero' || this.kind === 'brood' || this.kind === 'prism' || this.kind === 'mother')
@@ -2498,6 +2500,25 @@ class Boss {
     }
     // telegraphs
     this.drawAbilities(c);
+    // plating chain feedback: a shorted shield crackles in the key element's
+    // color for the length of the window; closed plating pings grey on hit
+    if (BOSS_GATE[this.kind]) {
+      const R = Math.max(this.w, this.h) * 0.78;
+      if ((this.shieldT || 0) > 0) {
+        const key = armDef(BOSS_GATE[this.kind]);
+        const col = key ? ELEM[key.el].glow : '#ffffff';
+        c.save(); c.globalAlpha = 0.32 + Math.sin(this.anim * 18) * 0.14;
+        c.strokeStyle = col; c.lineWidth = 2.5; c.setLineDash([10, 7]);
+        c.beginPath(); c.arc(cx, cy, R + Math.sin(this.anim * 9) * 3, 0, 7); c.stroke();
+        c.setLineDash([]); c.restore();
+      } else if (!bossGateOpen(this) && this.hurtT > 0) {
+        c.save(); c.globalAlpha = 0.55;
+        c.strokeStyle = '#c8d2dc'; c.lineWidth = 3;
+        c.beginPath(); c.arc(cx, cy, R, -0.6, 0.6); c.stroke();
+        c.beginPath(); c.arc(cx, cy, R, Math.PI - 0.6, Math.PI + 0.6); c.stroke();
+        c.restore();
+      }
+    }
     if (this.kind === 'zero') for (const m of this.marks) {
       c.fillStyle = 'rgba(238,252,255,0.35)';
       c.fillRect(m.x - 10, 12 * TILE, 20, 3 * TILE);

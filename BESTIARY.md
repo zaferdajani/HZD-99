@@ -71,6 +71,19 @@ brittle when cold.
 Each is listed with its Machine Depths name and its Odyssey-world counterpart,
 because one engine serves both worlds.
 
+### The plating chain
+
+Every boss past the first wears PLATING: ordinary hits do a fraction of their
+damage. Each boss's plating shorts only to the arm taken from the boss before
+it — beat one, wear its arm into the next fight, and land that element (fire
+the arm, or strike with it equipped) to SHORT the armor for six seconds of
+real damage. The chain: NULLFANG's SCRAPPLATE shorts TALONHOST → TALONHOST's
+COOLANT shorts the FURNACE CHOIR → FORGE shorts THE ARCHIVIST → HALT shorts
+the next — all the way up. Two universal outs exist: the Song's stagger opens
+any machine briefly, and TALONHOST is bare while it rests low. Each boss is
+also natively faster than the one before, so the chain demands sharper
+movement as much as the right arm.
+
 ### GLITCH — *NULL-SEEKER DRILLER* · Zone A, Scrap Meadows
 *(Odyssey: The Bronze Boar)*
 **Element SKARN · weak to GLAZZ**

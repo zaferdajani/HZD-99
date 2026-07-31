@@ -1968,6 +1968,15 @@ function drawHUD() {
     c.fillRect(480 - w / 2 + 4, 498, (w - 8) * clamp(b.hp / b.hpMax, 0, 1), 8);
     c.globalAlpha = 1;
     ftxt(t('b_' + b.kind), 480, 481, 14, '#eef3fa', 'center', P.glow);
+    // plating chain status: what shorts this boss's armor, and the open window
+    if (BOSS_GATE[b.kind]) {
+      const key = armDef(BOSS_GATE[b.kind]);
+      const kn = t('arm_' + key.id).split(' — ')[0];
+      if ((b.shieldT || 0) > 0)
+        ftxt('⛨ ' + t('gate_open') + ' ' + Math.ceil(b.shieldT), 480, 534, 12, ELEM[key.el].glow, 'center');
+      else if (!bossGateOpen(b))
+        ftxt('⛨ ' + t('gate_plated').replace('{a}', kn), 480, 534, 12, '#93a3b4', 'center');
+    }
   }
   // toasts
   G.toasts.forEach((tt, i) => {

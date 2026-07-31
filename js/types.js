@@ -41,6 +41,24 @@ const ARMS = [
 const ARM_BY_BOSS = {}; for (const a of ARMS) ARM_BY_BOSS[a.from] = a.id;
 function armDef(id) { return ARMS.find(a => a.id === id); }
 
+// ---------------------------------------------------------------------------
+// THE PLATING CHAIN. Every boss past the first is armored, and its plating
+// shorts only to the arm taken from the boss before it — beat NULLFANG, wear
+// its arm against TALONHOST, and so on up the chain. While plated, hits do a
+// fraction; short the plating (or catch a vulnerable window: the Song's
+// stagger, TALONHOST's rest) and it takes damage for real. Each boss is also
+// natively faster and more relentless than the one before.
+// ---------------------------------------------------------------------------
+const BOSS_GATE = { brood: 'shard', atlas: 'jet', zero: 'slag', prism: 'frost', mother: 'arc' };
+const BOSS_AGGRO = { glitch: 1, brood: 1.12, atlas: 1.22, zero: 1.32, prism: 1.42, mother: 1.55 };
+function bossGateOpen(b) {
+  if (!BOSS_GATE[b.kind]) return true;
+  if ((b.shieldT || 0) > 0) return true;
+  if ((b.stagT || 0) > 0) return true;                       // the Song opens all
+  if (b.kind === 'brood' && (b.st === 'restlow' || b.st === 'rest')) return true;
+  return false;
+}
+
 function ownedArms() { return ARMS.filter(a => ((G.save && G.save.arms) || []).includes(a.id)); }
 // slot 0 is deliberately empty: the plain bolt stays on the wheel, so acquiring a
 // suit never takes an option away from you.
@@ -100,6 +118,19 @@ function elemMul(atk, def) {
 // One damage funnel so melee, arms and the Song all obey the chart and all
 // produce the same read on screen.
 function dealDmg(e, dm, atkEl, x, y, noPenalty) {
+  // plating chain: the key element SHORTS the shield; anything else clinks
+  if (BOSS_GATE[e.kind] && e.hpMax) {
+    const key = armDef(BOSS_GATE[e.kind]);
+    if (atkEl && key && atkEl === key.el && (e.shieldT || 0) <= 0) {
+      e.shieldT = 6;
+      burst(x, y, 26, ELEM[atkEl].glow, 380, 0.6, 120, 4, true);
+      cam.shake = Math.max(cam.shake, 8); G.hitStop = Math.max(G.hitStop, 0.1);
+      sfx('phase');
+    } else if (!bossGateOpen(e)) {
+      dm = Math.max(1, Math.round(dm * 0.15));
+      G.elemPop = { t: 0.4, x, y, el: null };
+    }
+  }
   const def = elOf(e);
   let mul = elemMul(atkEl, def);
   if (noPenalty && mul < 1) mul = 1;   // the blade never gets worse for the suit worn
