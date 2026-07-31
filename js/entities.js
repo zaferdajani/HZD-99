@@ -952,20 +952,29 @@ class Player {
     c.beginPath(); c.moveTo(-9, -16 + bob * 0.4); c.lineTo(7, -16 + bob * 0.4); c.stroke();
     c.fillStyle = (this.dashT > 0 || this.healT > 0) ? P.glow : 'rgba(70,85,105,0.6)';
     for (let k = 0; k < 3; k++) c.fillRect(-10 + k * 3, -12 + bob * 0.4, 1.6, 4);
-    // --- front arm that actually GRIPS the volt-blade and swings it ---
+    // --- front arm: a cat scratches — the paw rakes, nothing is held.
+    // (the hero form still carries the volt-blade through the old arcs) ---
     {
       const shX = 6, shY = -20 + bob * 0.4;
       let ang, reach = 12;
       if (this.swingVis) {
-        // the paw carries the blade through the whole arc of each combo
         const sv = this.swingVis, pr = clamp(1 - sv.t / sv.t0, 0, 1);
         const aim = sv.ang * (this.face < 0 ? -1 : 1);   // local space (already flipped)
-        if (sv.combo === 2) ang = aim - 1.5 + pr * 2.8;  // overhead cross-slash
-        else if (sv.combo === 1) ang = aim + 1.15 - pr * 2.2; // rising counter-cut
-        else ang = aim - 1.0 + pr * 2.1;                 // descending cut
-        reach = 13 + Math.sin(pr * Math.PI) * 4;         // extends through the strike
+        if (hero) {
+          // sword arcs: long, shoulder-led
+          if (sv.combo === 2) ang = aim - 1.5 + pr * 2.8;
+          else if (sv.combo === 1) ang = aim + 1.15 - pr * 2.2;
+          else ang = aim - 1.0 + pr * 2.1;
+          reach = 13 + Math.sin(pr * Math.PI) * 4;
+        } else {
+          // scratch arcs: short, fast, in front — the paw snaps out and rakes
+          if (sv.combo === 2) ang = aim - 1.1 + pr * 2.0;   // crossing double-rake
+          else if (sv.combo === 1) ang = aim + 0.8 - pr * 1.55; // upward flick
+          else ang = aim - 0.65 + pr * 1.4;                 // forward-down swipe
+          reach = 13 + Math.sin(pr * Math.PI) * 7;          // paw punches forward
+        }
       } else if (run && sprintK > 0.25) {
-        // NINJA SPRINT: blade arm sweeps back behind the body, trailing the run
+        // NINJA SPRINT: the arm sweeps back behind the body, trailing the run
         ang = 1.15 + sprintK * 1.55 + Math.sin(ph) * 0.12;
         reach = 12 + sprintK * 3;
       } else {
@@ -996,8 +1005,26 @@ class Player {
         }
         c.restore();
       }
-      // the blade, held IN the paw — travels and rotates with the swing
-      if (this.swingVis && this.clawT <= 0) {
+      // the cat's own claws bare from the paw for the strike: three hooked
+      // talons splayed along the swipe, steel-white with glowing tips
+      if (this.swingVis && this.clawT <= 0 && !hero) {
+        c.save(); c.translate(hx, hy); c.rotate(ang);
+        for (let k = -1; k <= 1; k++) {
+          const len = 11 - Math.abs(k) * 2, spread = k * 0.38;
+          c.save(); c.rotate(spread);
+          const cg2 = c.createLinearGradient(0, 0, len, 0);
+          cg2.addColorStop(0, '#ffffff'); cg2.addColorStop(0.6, '#dff2ff'); cg2.addColorStop(1, P.glow);
+          c.fillStyle = cg2; c.shadowColor = P.glow; c.shadowBlur = 8;
+          // hooked like a real claw: curves down toward the tip
+          c.beginPath(); c.moveTo(0, -1.6);
+          c.quadraticCurveTo(len * 0.55, -2.2, len, 1.2);
+          c.quadraticCurveTo(len * 0.5, 1.8, 0, 1.6); c.closePath(); c.fill();
+          c.shadowBlur = 0; c.restore();
+        }
+        c.restore();
+      }
+      // the blade, held IN the paw — hero form only
+      if (this.swingVis && this.clawT <= 0 && hero) {
         c.save(); c.translate(hx, hy); c.rotate(ang + Math.PI / 2);
         c.fillStyle = '#5c6678'; c.fillRect(-1.8, 0, 3.6, 7);        // grip
         c.fillStyle = '#8892a2'; c.fillRect(-4.5, -1.5, 9, 3);       // guard
