@@ -389,7 +389,7 @@ class Player {
       const kx = this.swing.ax / n0 || this.face, ky = this.swing.ay / n0;
       for (const e of targets) {
         if (e.dead || this.swing.set.has(e)) continue;
-        if (aabb(hb, e)) {
+        if (aabb(hb, hurtBoxOf(e))) {
           this.swing.set.add(e);
           let dm = Math.round(this.dmg() * (this.swing.combo === 2 ? (hasSkill('calc') ? 1.55 : 1.35) : 1)
                               * (this.clawT > 0 ? 1.45 : 1));   // claws rake deeper
@@ -1306,7 +1306,7 @@ class Proj {
       const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
       for (const e of targets) {
         if (e.dead) continue;
-        if (aabb(this.box(), e)) {
+        if (aabb(this.box(), hurtBoxOf(e))) {
           dealDmg(e, this.dmg, this.el || armEl(), this.x, this.y); this.dead = true;
           if (this.freeze) {                       // HALT: holds a target still
             e.stagT = Math.max(e.stagT || 0, 2.0);

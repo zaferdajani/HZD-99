@@ -117,6 +117,34 @@ function elemMul(atk, def) {
 
 // One damage funnel so melee, arms and the Song all obey the chart and all
 // produce the same read on screen.
+// ---------------------------------------------------------------------------
+// THE BODY YOU SEE IS THE BODY YOU CAN HIT. The new boss art draws far beyond
+// the old movement boxes, so player attacks test against a visual-sized
+// hurtbox. Movement and contact damage keep the tight box — the fight gets
+// fairer for the player, never harsher.
+// ---------------------------------------------------------------------------
+function hurtBoxOf(e) {
+  const cx2 = e.x + e.w / 2;
+  if (e.kind === 'glitch') {            // NULLFANG: long low body, bottom-anchored
+    const w = e.w * 2.2, h = e.h * 2.0;
+    return { x: cx2 - w / 2, y: e.y + e.h - h, w, h };
+  }
+  if (e.kind === 'brood') {             // TALONHOST: wings and tail, centred
+    const w = e.w * 2.4, h = e.h * 2.2;
+    return { x: cx2 - w / 2, y: e.y + e.h / 2 - h / 2, w, h };
+  }
+  if (e.kind === 'flier') {             // mini TALONHOST wingspan
+    const w = e.w * 2.0, h = e.h * 1.7;
+    return { x: cx2 - w / 2, y: e.y + e.h / 2 - h / 2, w, h };
+  }
+  if (typeof G !== 'undefined' && G.roomDef && G.roomDef.zone === 'A'
+      && (e.kind === 'crawler' || e.kind === 'hopper')) {
+    const w = e.w * 1.8, h = e.h * 1.45; // whelps drawn bigger than their box
+    return { x: cx2 - w / 2, y: e.y + e.h - h, w, h };
+  }
+  return e;
+}
+
 function dealDmg(e, dm, atkEl, x, y, noPenalty) {
   // plating chain: the key element SHORTS the shield; anything else clinks
   if (BOSS_GATE[e.kind] && e.hpMax) {
@@ -319,7 +347,7 @@ class Star {
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     for (const e of targets) {
       if (e.dead || (this.seen && this.seen.has(e))) continue;
-      if (!aabb(this.box(), e)) continue;
+      if (!aabb(this.box(), hurtBoxOf(e))) continue;
       if (!this.seen) this.seen = new Set();
       this.seen.add(e);
       dealDmg(e, this.dmg, 'zizt', this.x, this.y);
