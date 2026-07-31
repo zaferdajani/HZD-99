@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="ms9ep2cr"</script>
+<script>window.BUILD_ID="ms9fj2oo"</script>
 <script>
 /**
  * @license
@@ -617,6 +617,66 @@ const BEAST_CACHE = { dark: null };
 const BEAST_TUNE = { headX: -82, headY: -188, bodyX: 118, bodyY: 229, shX: -100, hpX: 62 };
 
 function beastImg() { return typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.beastParts; }
+
+// ---------------------------------------------------------------------------
+// THE FRONT VIEW, built from the authored art itself. The sheet has no
+// straight-on figure, but the 3/4 head mirrored about its face axis gives a
+// true two-eyed front face (every pixel is the artist's), the body sprite's
+// chest disc is the torso seen end-on, and the leg sprites stand under it.
+// The turn passes THROUGH this — side, front, side — never a flat sliver.
+// ---------------------------------------------------------------------------
+function beastFront() {
+  if (BEAST_CACHE.front) return BEAST_CACHE.front;
+  const im = beastImg(); if (!im || !im.naturalWidth) return null;
+  const cv = document.createElement('canvas'); cv.width = 240; cv.height = 280;
+  const q = cv.getContext('2d');
+  const P = BEAST_P, CXc = 120, GY = 274;
+  const part = (key, dx, dy, sc, mirror, dark) => {
+    const s = P[key];
+    q.save();
+    q.translate(dx, dy);
+    if (mirror) q.scale(-1, 1);
+    if (sc) q.scale(sc, sc);
+    if (dark) q.globalAlpha = 0.68;
+    q.drawImage(im, s[0], s[1], s[2], s[3], -s[2] / 2, -s[3] / 2, s[2], s[3]);
+    q.restore();
+  };
+  // hind legs peeking outside, darker (they are further away)
+  part('bleg1', CXc - 58, GY - 60, 1, false, true);
+  part('bleg1', CXc + 58, GY - 60, 1, true, true);
+  // front legs, planted
+  part('fleg1', CXc - 34, GY - 58, 1, false);
+  part('fleg1', CXc + 34, GY - 58, 1, true);
+  part('fleg0', CXc - 36, GY - 118, 1, false);
+  part('fleg0', CXc + 36, GY - 118, 1, true);
+  // chest: the body sprite's disc end, seen straight on
+  {
+    const s = P.body;
+    const w = 96;                                   // the disc portion only
+    q.drawImage(im, s[0], s[1], w, s[3], CXc - w * 0.62, GY - 196, w * 1.24, s[3] * 1.1);
+  }
+  // the face: mirror-composited about the face axis (x=34 in the head sprite)
+  {
+    const s = P.head, AX = 34;
+    const hw = s[2] - AX;                           // mane side width
+    const hy = GY - 258;
+    // right half: the original's mane side
+    q.save();
+    q.beginPath(); q.rect(CXc, hy, hw, s[3]); q.clip();
+    q.drawImage(im, s[0] + AX, s[1], hw, s[3], CXc, hy, hw, s[3]);
+    q.restore();
+    // left half: the same pixels mirrored
+    q.save();
+    q.translate(CXc, 0); q.scale(-1, 1);
+    q.beginPath(); q.rect(0, hy, hw, s[3]); q.clip();
+    q.drawImage(im, s[0] + AX, s[1], hw, s[3], 0, hy, hw, s[3]);
+    q.restore();
+    // the muzzle strip, centred over the seam
+    q.drawImage(im, s[0], s[1] + 40, AX, s[3] - 40, CXc - AX / 2, hy + 46, AX, s[3] - 40);
+  }
+  BEAST_CACHE.front = cv;
+  return cv;
+}
 // far-side limbs use a darkened copy of the atlas so depth reads
 function beastDark() {
   if (BEAST_CACHE.dark) return BEAST_CACHE.dark;
@@ -796,9 +856,23 @@ function drawBeast(c, b) {
     c.save();
     c.translate(cx, footY);
     const sgn = fv < 0 ? 1 : -1;                     // authored facing LEFT
-    // NO paper-thin edge at the turn: the body flexes to 85% at most and the
-    // pivot crouches into its feet — the flip reads as weight, never as a line
     const ta = Math.abs(fv);
+    // through-the-front turn: inside the window the constructed FRONT view
+    // (the artist's pixels, mirror-composited) looks at the camera
+    const turnFront = ta < 0.3 && !b.dead && b.stagT <= 0 && b.st !== 'leap' && b.st !== 'bore'
+      ? beastFront() : null;
+    if (turnFront) {
+      const k = 1 - ta / 0.3;
+      const fs = S * (270 / 274);
+      c.translate(0, (1 - ta) * 4);
+      c.scale((0.74 + 0.26 * k) * fs, fs);
+      c.save(); c.globalAlpha *= 0.34; c.fillStyle = '#04070b';
+      c.beginPath(); c.ellipse(0, 2, 132, 15, 0, 0, 7); c.fill(); c.restore();
+      if (b.hurtT > 0) c.globalAlpha = 0.72;
+      c.drawImage(turnFront, -120, -274);
+      c.restore();
+      return true;
+    }
     c.translate(0, (1 - ta) * 7);
     c.scale(sgn * (0.85 + 0.15 * ta) * S, (1 - (1 - ta) * 0.06) * S);
     if (b.hurtT > 0) c.globalAlpha = 0.72;
@@ -840,10 +914,19 @@ function drawBeastMini(c, e) {
     c.translate(e.x + e.w / 2, e.y + e.h);
     const sgn = fv < 0 ? 1 : -1;
     const ta = Math.abs(fv);
-    c.translate(0, (1 - ta) * 4);
-    c.scale(sgn * (0.85 + 0.15 * ta) * S, (1 - (1 - ta) * 0.06) * S);
     if (e.hurtT > 0) c.globalAlpha = 0.72;
     if (e.hypnoT > 0) c.globalAlpha = 0.85;
+    const fr = ta < 0.3 ? beastFront() : null;
+    if (fr) {
+      const k = 1 - ta / 0.3;
+      const fs = S * (270 / 274);
+      c.scale((0.74 + 0.26 * k) * fs, fs);
+      c.drawImage(fr, -120, -274);
+      c.restore();
+      return true;
+    }
+    c.translate(0, (1 - ta) * 4);
+    c.scale(sgn * (0.85 + 0.15 * ta) * S, (1 - (1 - ta) * 0.06) * S);
     c.save(); c.globalAlpha *= 0.3; c.fillStyle = '#04070b';
     c.beginPath(); c.ellipse(0, 3, 195, 16, 0, 0, 7); c.fill(); c.restore();
     const fake = {
