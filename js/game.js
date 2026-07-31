@@ -518,6 +518,7 @@ function update(dt) {
   else if (G.state === 'RELICS') updateRelics();
   else if (G.state === 'TRIAL') updateTrial(dt);
   else if (G.state === 'PAUSE') updatePause();
+  else if (G.state === 'TCFG') updateTouchCfg();
   else if (G.state === 'MENU') updateMenu();
   else if (G.state === 'LANGSEL') updateLangSel();
   else if (G.state === 'DIFF') updateDiff();
@@ -594,20 +595,29 @@ function updateWho() {
     else { G.diffIdx = 1; G.state = 'DIFF'; }  // fresh voyage → pick difficulty
   }
 }
+function pauseHasTouch() { return typeof TOUCH !== 'undefined' && TOUCH.enabled; }
 function updatePause() {
-  const n = 7;
+  const n = pauseHasTouch() ? 8 : 7;
   if (inP('DOWN')) { G.pauseIdx = (G.pauseIdx + 1) % n; sfx('ui'); }
   if (inP('UP')) { G.pauseIdx = (G.pauseIdx + n - 1) % n; sfx('ui'); }
   if (inP('PAUSE')) { G.state = 'PLAY'; return; }
   if (inP('OK')) {
     sfx('ok');
+    const quitIdx = n - 1;
     if (G.pauseIdx === 0) G.state = 'PLAY';
     else if (G.pauseIdx === 1) G.state = 'MAP';
     else if (G.pauseIdx === 2) { G.state = 'CREST'; G.crestIdx = 0; }
     else if (G.pauseIdx === 3) { G.state = 'SKILLS'; G.skillIdx = 0; }
     else if (G.pauseIdx === 4) G.state = 'RELICS';
     else if (G.pauseIdx === 5) { G.ctrlBack = 'PAUSE'; G.state = 'CTRL'; }
-    else { persist(); setMusic('title'); G.state = 'MENU'; G.menuIdx = 0; }
+    else if (pauseHasTouch() && G.pauseIdx === 6) G.state = 'TCFG';
+    else if (G.pauseIdx === quitIdx) { persist(); setMusic('title'); G.state = 'MENU'; G.menuIdx = 0; }
+  }
+}
+function updateTouchCfg() {
+  if (inP('BACK') || inP('PAUSE') || inP('OK')) {
+    if (typeof tLayoutSave === 'function') tLayoutSave();
+    G.state = 'PAUSE'; sfx('ui');
   }
 }
 function updateRelics() {
@@ -2719,14 +2729,23 @@ function draw(tms) {
   } else if (st === 'PAUSE') {
     c.fillStyle = 'rgba(4,7,12,0.75)'; c.fillRect(0, 0, 960, 540);
     ftxt(t('paused'), 480, 120, 38, '#eef3fa', 'center', '#37ffd0');
-    [t('resume'), t('pm_map'), t('pm_crests'), t('pm_skills'), t('pm_relics'), t('ctl_title'), t('to_menu')].forEach((s, i) => {
-      const sel = i === G.pauseIdx, last = i === 6, y = 190 + i * 40;
+    const pmItems = [t('resume'), t('pm_map'), t('pm_crests'), t('pm_skills'), t('pm_relics'), t('ctl_title')];
+    if (pauseHasTouch()) pmItems.push(t('tl_title'));
+    pmItems.push(t('to_menu'));
+    pmItems.forEach((s, i) => {
+      const sel = i === G.pauseIdx, last = i === pmItems.length - 1, y = 190 + i * 40;
       // the way OUT is highlighted so it can never be missed
       if (last) { c.fillStyle = 'rgba(255,120,110,0.10)'; rr(c, 300, y - 20, 360, 34, 8); c.fill(); }
       ftxt((sel ? '▸ ' : '') + (last ? '⏻  ' : '') + s, 480, y, 21,
            sel ? '#eef3fa' : (last ? '#e88b86' : '#7d93a8'));
     });
     ftxt(GAME_VERSION, 930, 522, 12, '#44586b', 'right');
+  } else if (st === 'TCFG') {
+    c.fillStyle = 'rgba(4,7,12,0.82)'; c.fillRect(0, 0, 960, 540);
+    ftxt(t('tl_title'), 480, 150, 32, '#eef3fa', 'center', '#37ffd0');
+    ftxt(t('tl_hint1'), 480, 230, 18, '#9fb8cc');
+    ftxt(t('tl_hint2'), 480, 262, 18, '#9fb8cc');
+    ftxt(t('tl_hint3'), 480, 294, 18, '#9fb8cc');
   } else if (st === 'CTRL') {
     drawCtrl();
   } else if (st === 'DIALOG' && G.dialog) {

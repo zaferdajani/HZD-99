@@ -4,7 +4,13 @@ const TOUCH = {
   enabled: ('ontouchstart' in window) || (navigator.maxTouchPoints > 0),
   joy: null, held: {}, portrait: false, fsTried: false, gut: 130,
   ox: 0, oy: 0, rawW: 0, rawH: 0, vis: null,
+  // custom layout: per-button {fx, fy, k} as fractions of the viewport,
+  // persisted so the controller is YOURS (PUBG-style edit screen)
+  layout: {}, editSel: null, editDrag: null,
 };
+try { TOUCH.layout = JSON.parse(localStorage.getItem('cb_touch_layout') || '{}') || {}; } catch (e) { TOUCH.layout = {}; }
+function tLayoutSave() { try { localStorage.setItem('cb_touch_layout', JSON.stringify(TOUCH.layout)); } catch (e) {} }
+function tBuzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 10); } catch (e) {} }
 let tc = null, tcx = null;
 function tcSetup() {
   tc = document.getElementById('tc');
@@ -86,7 +92,7 @@ function tLayout() {
   // compress spacing on short screens so buttons can never overlap
   const u = clamp(H / 460, 0.6, 1);
   const half = TOUCH.gut / 4 + 2;
-  return {
+  const L0 = {
     r, W, H, rgx, lgx, u,
     btns: [
       { code: 'VJUMP', x: rgx, y: H - 60 * u, r: Math.min(44 * u, TOUCH.gut / 2 - 8), icon: '⤒', show: () => true },
@@ -115,8 +121,17 @@ function tLayout() {
       { code: 'VSKILL', x: lgx, y: 152 * u + 4, r: 16 * u + 2, icon: '◈' },
     ],
   };
+  // the player's own arrangement wins over every default
+  for (const b of L0.btns.concat(L0.corners)) {
+    const o = TOUCH.layout[b.code];
+    if (o) {
+      if (o.fx != null) { b.x = o.fx * W; b.y = o.fy * H; }
+      if (o.k) b.r *= o.k;
+    }
+  }
+  return L0;
 }
-function tPress(code) { keys[code] = 1; keysP[code] = 1; }
+function tPress(code) { keys[code] = 1; keysP[code] = 1; tBuzz(10); }
 function tSetK(code, on) {
   if (on && !keys[code]) { keys[code] = 1; keysP[code] = 1; }
   else if (!on) keys[code] = 0;
@@ -124,14 +139,24 @@ function tSetK(code, on) {
 function tStateKind() {
   const s = G.state;
   if (s === 'PLAY') return 'play';
+  if (s === 'TCFG') return 'tcfg';
   if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'RIDDLE' || s === 'SKILLS' || s === 'TRIAL') return 'menu';
   return 'tap';
+}
+// layout-editor chrome: fixed controls that are not part of the layout
+function tEditChrome(L) {
+  return [
+    { code: 'EDONE', x: L.W - 150, y: 44, r: 26, icon: '✓' },
+    { code: 'ERESET', x: L.W - 214, y: 44, r: 22, icon: '⟲' },
+    { code: 'EPLUS', x: 150, y: 44, r: 22, icon: '＋' },
+    { code: 'EMINUS', x: 214, y: 44, r: 22, icon: '－' },
+  ];
 }
 function tApplyJoy() {
   const j = TOUCH.joy;
   const dx = j ? j.dx : 0, dy = j ? j.dy : 0;
-  tSetK('VL', dx < -14); tSetK('VR', dx > 14);
-  tSetK('VU', dy < -30); tSetK('VD', dy > 30);
+  tSetK('VL', dx < -10); tSetK('VR', dx > 10);
+  tSetK('VU', dy < -26); tSetK('VD', dy > 26);
 }
 function tapMenu(x, y) {
   const st = G.state;
@@ -158,7 +183,8 @@ function tapMenu(x, y) {
     if (i >= 0 && i < 3 && y >= 150 && y <= 150 + 3 * 105) { G.diffIdx = i; tPress('VOK'); }
   } else if (st === 'PAUSE') {
     const i = Math.round((y - 190) / 40);
-    if (i >= 0 && i < 7 && Math.abs(y - (190 + i * 40)) <= 20) { G.pauseIdx = i; tPress('VOK'); }
+    const np = (typeof pauseHasTouch === 'function' && pauseHasTouch()) ? 8 : 7;
+    if (i >= 0 && i < np && Math.abs(y - (190 + i * 40)) <= 20) { G.pauseIdx = i; tPress('VOK'); }
   } else if (st === 'CREST') {
     const i = Math.round((y - 170) / 40);
     if (G.save.crests.length && i >= 0 && i < G.save.crests.length && Math.abs(y - (170 + i * 40)) <= 20) { G.crestIdx = i; tPress('VOK'); }
@@ -212,8 +238,33 @@ function tStart(e) {
       for (const b of L.corners) if (Math.hypot(x - b.x, y - b.y) < b.r + 9) { hit = b; break; }
       if (!hit) for (const b of L.btns) if (b.show() && Math.hypot(x - b.x, y - b.y) < b.r + 9) { hit = b; break; }
       if (hit) { TOUCH.held[t.identifier] = hit.code; tPress(hit.code); }
-      else if (x < L.r.left + 20 && y > 150 && !TOUCH.joy) {
-        TOUCH.joy = { id: t.identifier, ox: Math.min(x, L.r.left - 26), oy: y, dx: 0, dy: 0 };
+      else if (x < L.W * 0.46 && y > 130 && !TOUCH.joy) {
+        // COD/PUBG-style floating stick: it appears UNDER the thumb, wherever
+        // the thumb lands on the left half, and follows on long drags
+        TOUCH.joy = { id: t.identifier, ox: x, oy: y, dx: 0, dy: 0 };
+        tBuzz(8);
+      }
+    } else if (kind === 'tcfg') {
+      // layout editor: chrome first, then grab any button to drag it
+      let hit = null;
+      for (const b of tEditChrome(L)) if (Math.hypot(x - b.x, y - b.y) < b.r + 10) { hit = b; break; }
+      if (hit) {
+        sfx('ui');
+        if (hit.code === 'EDONE') { tLayoutSave(); G.state = 'PAUSE'; }
+        else if (hit.code === 'ERESET') { TOUCH.layout = {}; tLayoutSave(); }
+        else if ((hit.code === 'EPLUS' || hit.code === 'EMINUS') && TOUCH.editSel) {
+          const o = TOUCH.layout[TOUCH.editSel] = TOUCH.layout[TOUCH.editSel] || {};
+          o.k = clamp((o.k || 1) + (hit.code === 'EPLUS' ? 0.12 : -0.12), 0.6, 1.8);
+        }
+        continue;
+      }
+      for (const b of L.corners.concat(L.btns)) {
+        if (Math.hypot(x - b.x, y - b.y) < Math.max(26, b.r + 12)) {
+          TOUCH.editSel = b.code;
+          TOUCH.editDrag = { id: t.identifier, code: b.code };
+          tBuzz(12);
+          break;
+        }
       }
     } else if (kind === 'menu') {
       if (Math.hypot(x - L.lgx, y - 28) < 28) { tPress('VBACK'); continue; }
@@ -229,9 +280,24 @@ function tMove(e) {
   e.preventDefault();
   for (const t of e.changedTouches) {
     if (TOUCH.joy && t.identifier === TOUCH.joy.id) {
-      TOUCH.joy.dx = clamp(t.clientX - TOUCH.ox - TOUCH.joy.ox, -52, 52);
-      TOUCH.joy.dy = clamp(t.clientY - TOUCH.oy - TOUCH.joy.oy, -52, 52);
+      const j = TOUCH.joy;
+      let dx = t.clientX - TOUCH.ox - j.ox, dy = t.clientY - TOUCH.oy - j.oy;
+      const len = Math.hypot(dx, dy);
+      // long drags pull the base along (nipplejs 'follow'): re-centering the
+      // stick under the thumb is what makes big direction flips feel instant
+      if (len > 56) {
+        const k = (len - 56) / len;
+        j.ox += dx * k; j.oy += dy * k;
+        dx *= 56 / len; dy *= 56 / len;
+      }
+      j.dx = dx; j.dy = dy;
       tApplyJoy();
+    }
+    if (TOUCH.editDrag && t.identifier === TOUCH.editDrag.id) {
+      const W = TOUCH.vw || innerWidth, H = TOUCH.vh || innerHeight;
+      const x = clamp(t.clientX - TOUCH.ox, 20, W - 20), y = clamp(t.clientY - TOUCH.oy, 20, H - 20);
+      const o = TOUCH.layout[TOUCH.editDrag.code] = TOUCH.layout[TOUCH.editDrag.code] || {};
+      o.fx = x / W; o.fy = y / H;
     }
   }
 }
@@ -239,6 +305,7 @@ function tEnd(e) {
   e.preventDefault();
   for (const t of e.changedTouches) {
     if (TOUCH.joy && t.identifier === TOUCH.joy.id) { TOUCH.joy = null; tApplyJoy(); }
+    if (TOUCH.editDrag && t.identifier === TOUCH.editDrag.id) TOUCH.editDrag = null;
     const code = TOUCH.held[t.identifier];
     if (code) { keys[code] = 0; delete TOUCH.held[t.identifier]; }
   }
@@ -281,12 +348,30 @@ function drawTouchUI() {
   tcx.strokeStyle = 'rgba(80,160,200,0.25)'; tcx.lineWidth = 1;
   tcx.beginPath(); tcx.moveTo(L.r.left, 0); tcx.lineTo(L.r.left, H);
   tcx.moveTo(L.r.right, 0); tcx.lineTo(L.r.right, H); tcx.stroke();
+  if (kind === 'tcfg') {
+    // LAYOUT EDITOR: every button shown, drag to move, +/- resizes selection
+    for (const b of L.corners.concat(L.btns)) {
+      if (b.code === TOUCH.editSel) {
+        tcx.save(); tcx.globalAlpha = 0.5;
+        tcx.strokeStyle = '#37ffd0'; tcx.lineWidth = 3; tcx.setLineDash([7, 6]);
+        tcx.beginPath(); tcx.arc(b.x, b.y, b.r + 10, 0, 7); tcx.stroke();
+        tcx.setLineDash([]); tcx.restore();
+      }
+      tCircle(b.x, b.y, b.r, b.code === TOUCH.editSel, b.icon);
+    }
+    for (const b of tEditChrome(L)) tCircle(b.x, b.y, b.r, false, b.icon, 18);
+    return;
+  }
   if (kind === 'play') {
     for (const b of L.corners) tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, 12);
-    // joystick — left gutter
+    // floating stick, alive under the thumb
     if (TOUCH.joy) {
-      tCircle(TOUCH.joy.ox, TOUCH.joy.oy, 46, false, null);
-      tCircle(TOUCH.joy.ox + TOUCH.joy.dx, TOUCH.joy.oy + TOUCH.joy.dy, 24, true, null);
+      tCircle(TOUCH.joy.ox, TOUCH.joy.oy, 50, false, null);
+      tcx.save(); tcx.globalAlpha = 0.35;
+      tcx.beginPath(); tcx.arc(TOUCH.joy.ox, TOUCH.joy.oy, 56, 0, 7);
+      tcx.strokeStyle = 'rgba(120,220,255,0.8)'; tcx.lineWidth = 1.5; tcx.stroke();
+      tcx.restore();
+      tCircle(TOUCH.joy.ox + TOUCH.joy.dx, TOUCH.joy.oy + TOUCH.joy.dy, 27, true, null);
     } else {
       tcx.globalAlpha = 0.5;
       tCircle(L.lgx, H - 110, Math.min(42, TOUCH.gut / 2 - 10), false, '✥');
