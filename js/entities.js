@@ -98,7 +98,7 @@ function touchingWall(e, dir) {
 class Player {
   constructor(x, y) {
     this.x = x; this.y = y; this.w = 24; this.h = 36;
-    this.vx = 0; this.vy = 0; this.face = 1; this.on = false;
+    this.vx = 0; this.vy = 0; this.face = 1; this.faceVis = 1; this.on = false;
     this.cores = 5; this.volts = 33;
     this.coyote = 0; this.jbuf = 0; this.airJumps = 0;
     this.dashT = 0; this.dashCD = 0; this.iT = 0; this.atkCD = 0;
@@ -120,6 +120,16 @@ class Player {
   gainVolts(n) { this.volts = clamp(this.volts + Math.round(n * (hasCrest('siphon') ? 1.5 : 1)) + (relicHas('silk') ? 2 : 0), 0, this.voltMax()); }
   update(dt) {
     if (this.dead) return;
+    // she TURNS, fast but with weight: the body flexes through the flip in
+    // ~100ms and kicks a little dust — same law as every creature in the game
+    {
+      const pvs = Math.sign(this.faceVis || 1);
+      this.faceVis += clamp(this.face - this.faceVis, -dt * 18, dt * 18);
+      if ((Math.sign(this.faceVis) || 1) !== pvs && this.on)
+        for (let i = 0; i < 3; i++)
+          addPart(this.x + this.w / 2 + rnd(-6, 6), this.y + this.h - 2,
+            rnd(-60, 60), rnd(-70, -20), 0.25, '#8fa3b5', 2, 400);
+    }
     if (this.rechargeT > 0) {
       this.rechargeT -= dt; this.anim += dt;
       this.vx = 0; this.vy = Math.min(this.vy + 2300 * dt, 980);
@@ -679,7 +689,10 @@ class Player {
     }
     c.save();
     c.translate(this.x + this.w / 2, this.y + this.h);
-    c.scale(this.face, 1);
+    {
+      const tfv = this.faceVis == null ? this.face : this.faceVis;
+      c.scale((Math.sign(tfv) || this.face) * (0.86 + 0.14 * Math.abs(tfv)), 1);
+    }
     const run = this.on && Math.abs(this.vx) > 40 && this.dashT <= 0;
     const sprintK = clamp((Math.abs(this.vx) - 120) / 240, 0, 1);   // 0→1 into a full sprint
     // ninja stride: the faster she moves, the quicker and longer the cycle
@@ -1633,7 +1646,7 @@ class Enemy {
     // they must never be scaled toward zero — they just lean.
     const profile = this.kind === 'crawler';
     const flipS = profile
-      ? -TP.dir * (TP.pose === 'q' ? 0.5 + TP.t * 0.5 : 1)
+      ? -TP.dir * (TP.pose === 'q' ? 0.82 + TP.t * 0.18 : 1)
       : -TP.dir;
     // grounded creatures cast a contact shadow (lighting pass)
     if (this.kind !== 'flier') contactShadow(c, cx, this.y + this.h, this.w * 0.55, 0.38);
