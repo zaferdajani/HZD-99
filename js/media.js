@@ -28,6 +28,8 @@ const MEDIA_SRC = {
     driller: 'assets/characters/driller_12x6.png',
     // the first boss: virus-infected robot beast, parts atlas for the cutout rig
     beastParts: 'assets/characters/beast_parts.png',
+    // boss 01: virus-infected robot eagle, parts atlas for the cutout rig
+    eagleParts: 'assets/characters/eagle_parts.png',
   },
   audio: {
     boss: 'assets/music/epic_combat.ogg',

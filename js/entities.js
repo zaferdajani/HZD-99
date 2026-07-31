@@ -1335,6 +1335,8 @@ class Proj {
     }
   }
   draw(c) {
+    // TALONHOST's metallic feathers wear the sheet's own art
+    if (this.feather && typeof drawFeather === 'function' && drawFeather(c, this)) return;
     c.shadowColor = this.color; c.shadowBlur = 12; c.fillStyle = this.color;
     c.beginPath(); c.arc(this.x, this.y, this.r, 0, 7); c.fill();
     c.shadowBlur = 0;
@@ -1664,6 +1666,8 @@ class Enemy {
     // virus beast itself, assembled from the same parts rig.
     if (G.roomDef && G.roomDef.zone === 'A' && (this.kind === 'crawler' || this.kind === 'hopper')
         && typeof drawBeastMini === 'function' && drawBeastMini(c, this)) return;
+    // every flying minion is a small TALONHOST — talons only, no feathers
+    if (this.kind === 'flier' && typeof drawEagleMini === 'function' && drawEagleMini(c, this)) return;
     // Pre-rendered 3D turnaround. Selected by angle, never mirrored, so the baked
     // key light stays on the correct side as the machine turns.
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
@@ -2015,7 +2019,7 @@ class Wreck {
 // ================= BOSSES =================
 const BSTAT = {
   glitch: { w: 104, h: 70, hp: 220 },
-  brood: { w: 66, h: 58, hp: 320 },
+  brood: { w: 96, h: 64, hp: 320 },
   atlas: { w: 62, h: 74, hp: 460 },
   zero: { w: 44, h: 56, hp: 500 },
   prism: { w: 50, h: 34, hp: 520 },
@@ -2131,36 +2135,84 @@ class Boss {
       }
       // ---- Broodmother: hangs above, spawns and slams ----
       case 'brood': {
+        // ---- TALONHOST: hangs from the ceiling mount, rains metallic
+        // feathers in fans, swoops through the arena with a wind wake, and
+        // must come down low to rest its wings — that's your window ----
         if (this.st === 'idle') {
-          this.y = this.homeY + Math.sin(this.anim * 1.6) * 12;
-          this.x += Math.sin(this.anim * 0.9) * 30 * dt;
+          this.x = lerp(this.x, this.spawnX, dt * 2);
+          this.y = this.homeY + Math.sin(this.anim * 1.6) * 8;
           this.t -= dt;
           if (this.t <= 0) {
-            this.t = this.phase === 2 ? 1.8 : 2.6;
-            const which = this.cycle++ % (this.phase === 2 ? 3 : 4);
-            if (which === 0 && G.enemies.filter(e => !e.dead && e.kind === 'flier').length < 3) {
-              const f = new Enemy('flier', this.cx() - 13, this.y + this.h);
-              G.enemies.push(f); sfx('shoot');
-              burst(this.cx(), this.y + this.h, 10, PAL.B.glow, 180, 0.4, 300, 3, true);
-            } else if (which === 3) { this.st = 'slamwarn'; this.t = 0.6; this.tx = px; }
+            const which = this.cycle++ % 4;   // volley, swoop, volley, rest
+            if (which === 3) { this.st = 'rest'; this.t = 1.0; }
+            else if (which === 1) { this.st = 'swoopwarn'; this.t = 0.55; this.tx = px; this.ty = py; }
             else {
-              for (let i = -1; i <= 1; i++) this.shoot(i * 110, 240, 7, 200);
-              sfx('shoot');
+              this.st = 'volley'; this.t = this.phase === 2 ? 1.6 : 1.9; this.fired = 0;
+              if (G.enemies.filter(e => !e.dead && e.kind === 'flier').length < (this.phase === 2 ? 2 : 1)) {
+                const f = new Enemy('flier', this.cx() - 13, this.y + this.h);
+                G.enemies.push(f); sfx('shoot');
+                burst(this.cx(), this.y + this.h, 10, PAL.B.glow, 180, 0.4, 300, 3, true);
+              }
             }
           }
-        } else if (this.st === 'slamwarn') {
-          this.t -= dt; this.x = lerp(this.x, this.tx - this.w / 2, 0.1);
-          if (this.t <= 0) { this.st = 'slam'; this.vy = 700; }
-        } else if (this.st === 'slam') {
-          this.y += this.vy * dt;
-          if (this.y + this.h >= 15 * TILE) {
-            this.y = 15 * TILE - this.h; this.st = 'rise'; this.t = 0.9;
-            cam.shake = 10; sfx('boom');
-            this.shoot(-260, -140, 6); this.shoot(260, -140, 6);
+        } else if (this.st === 'volley') {
+          // centre-top, then the authored charge -> fire -> recover, raining
+          // a fan of metallic feathers you must take cover from
+          this.x = lerp(this.x, G.roomDef.w * TILE / 2 - this.w / 2, dt * 3);
+          this.y = lerp(this.y, this.homeY, dt * 3);
+          this.t -= dt; this.windT = 0.3;
+          const volleys = this.phase === 2 ? 2 : 1;
+          if (this.fired < volleys && this.t <= (this.fired ? 0.45 : (this.phase === 2 ? 1.05 : 0.9))) {
+            this.fired++;
+            const n = this.phase === 2 ? 7 : 5;
+            for (let i = 0; i < n; i++) {
+              const a = Math.PI / 2 + (i - (n - 1) / 2) * 0.28 + rnd(-0.04, 0.04);
+              const f = new Proj(this.cx() + (i - (n - 1) / 2) * 16, this.y + this.h - 6,
+                Math.cos(a) * 330, Math.sin(a) * 330, false, 1, 7, '#ff4c5c', 180, 4);
+              f.feather = true; G.projs.push(f);
+            }
+            sfx('shoot'); cam.shake = 4;
           }
+          if (this.t <= 0) { this.st = 'idle'; this.t = this.phase === 2 ? 1.2 : 1.8; }
+        } else if (this.st === 'swoopwarn') {
+          // locks on, talons splayed — then the dive
+          this.t -= dt; this.windT = 0.3;
+          if (this.t <= 0) {
+            this.st = 'swoop'; this.t = 0;
+            this.sx = this.x; this.sy = this.y;
+            const W = G.roomDef.w * TILE;
+            this.mx = clamp(this.tx, 70, W - 70);
+            this.my = clamp(this.ty + 4, 60, 14.4 * TILE);
+            this.ex = clamp(this.mx + (this.cx() < this.mx ? 300 : -300), 90, W - 90) - this.w / 2;
+            sfx('dash');
+          }
+        } else if (this.st === 'swoop') {
+          // one diagonal dive straight through where you stood, wind trailing
+          this.t += dt / 1.05;
+          const u = Math.min(1, this.t), iu = 1 - u;
+          const nx = iu * iu * this.sx + 2 * iu * u * (this.mx - this.w / 2) + u * u * this.ex;
+          const ny = iu * iu * this.sy + 2 * iu * u * (this.my - this.h / 2) + u * u * this.homeY;
+          this.vx = (nx - this.x) / Math.max(dt, 0.001);
+          this.vy = (ny - this.y) / Math.max(dt, 0.001);
+          this.x = nx; this.y = ny;
+          // the wake: wind streaks curling off the dive path
+          if (chance(0.95)) addPart(this.cx() - this.vx * 0.05 + rnd(-10, 10), this.cy() - this.vy * 0.05 + rnd(-14, 14),
+            -this.vx * 0.22 + rnd(-50, 50), -this.vy * 0.22 + rnd(-30, 30), 0.38, '#bfe6f2', 3, 0, true);
+          if (chance(0.4)) addPart(this.cx(), this.cy(), rnd(-60, 60), rnd(-60, 60), 0.25, '#ff4c5c', 2, 0, true);
+          if (u >= 1) { this.st = 'idle'; this.t = this.phase === 2 ? 1.1 : 1.6; this.vx = 0; this.vy = 0; }
+        } else if (this.st === 'rest') {
+          // wings burn out: it descends into claw range
+          this.y = lerp(this.y, 12.4 * TILE, dt * 2.8);
+          this.x += Math.sin(this.anim * 2.2) * 22 * dt;
+          this.t -= dt;
+          if (this.t <= 0 && this.y > 11.6 * TILE) { this.st = 'restlow'; this.t = this.phase === 2 ? 2.0 : 2.9; }
+        } else if (this.st === 'restlow') {
+          this.y += Math.sin(this.anim * 3) * 8 * dt;
+          this.t -= dt;
+          if (this.t <= 0) { this.st = 'rise'; this.t = 1.2; }
         } else if (this.st === 'rise') {
           this.t -= dt; this.y = lerp(this.y, this.homeY, 0.06);
-          if (this.t <= 0) this.st = 'idle';
+          if (this.t <= 0) { this.st = 'idle'; this.t = 1.3; }
         }
         break;
       }
@@ -2432,14 +2484,16 @@ class Boss {
     G.onBossDead(this.kind);
   }
   draw(c) {
-    if (this.dead && !(this.kind === 'glitch' && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beast || MEDIA_IMG.driller))) return;
+    if (this.dead && !((this.kind === 'glitch' || this.kind === 'brood') && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beastParts || MEDIA_IMG.eagleParts || MEDIA_IMG.driller))) return;
     const P = PAL[G.roomDef.zone];
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
     if (this.dead) {
-      // the beast folds onto the ground and its virus-light goes out
-      if (!(typeof drawBeast === 'function' && drawBeast(c, this))) drawDriller(c, this);
+      // each machine dies as itself: the beast folds, the eagle drops
+      if (this.kind === 'brood') {
+        if (typeof drawEagle === 'function') drawEagle(c, this);
+      } else if (!(typeof drawBeast === 'function' && drawBeast(c, this))) drawDriller(c, this);
       c.restore(); return;
     }
     // telegraphs
@@ -2483,6 +2537,7 @@ class Boss {
       }
     }
     if (this.kind === 'glitch' && typeof drawBeast === 'function' && drawBeast(c, this)) { c.restore(); return; }
+    if (this.kind === 'brood' && typeof drawEagle === 'function' && drawEagle(c, this)) { c.restore(); return; }
     if (this.kind === 'glitch' && typeof drawDriller3D === 'function' && drawDriller3D(c, this)) { c.restore(); return; }
     if (this.kind === 'glitch' && drawDriller(c, this)) { c.restore(); return; }
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {

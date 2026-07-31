@@ -12,6 +12,7 @@ const EMBED = {
   vistaCrystal: 'assets/backgrounds/vista_crystal.jpg',
   driller: 'assets/characters/driller_12x6.png',
   beastParts: 'assets/characters/beast_parts.png',
+  eagleParts: 'assets/characters/eagle_parts.png',
   heroIdle: 'assets/characters/gothic-hero-idle.png',
   heroRun: 'assets/characters/gothic-hero-run.png',
   heroJump: 'assets/characters/gothic-hero-jump.png',
@@ -41,7 +42,7 @@ for (const k in EMBED) {
   const ext = f.split('.').pop().toLowerCase();
   media[k] = 'data:' + MIME[ext] + ';base64,' + fs.readFileSync(f).toString('base64');
 }
-const files = ['vendor-three', 'model3d', 'beast', 'theme', 'mat', 'types', 'i18n', 'media', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'game', 'touch']
+const files = ['vendor-three', 'model3d', 'beast', 'eagle', 'theme', 'mat', 'types', 'i18n', 'media', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'game', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 const html = fs.readFileSync('dev.html', 'utf8');
 const buildId = Date.now().toString(36);
