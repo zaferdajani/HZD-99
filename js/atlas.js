@@ -36,6 +36,106 @@ const ATLAS = {
   },
 };
 
+// ---------------------------------------------------------------------------
+// Load-time cell cleanup. The generated sheets carry three defects that no
+// crop can fully hide: thin frame lines drawn inside cells, chunks of
+// neighbouring subjects poking across cell borders, and white blend fringe
+// left by keying. Per cell we keep only the LARGEST connected alpha component
+// — the subject itself — which structurally removes lines and intruders, then
+// erode boundary pixels that are still near-white. Runs once per sheet.
+const ATLAS_PROC = {};
+function processSheet(key, cols, rows) {
+  if (ATLAS_PROC[key] !== undefined) return ATLAS_PROC[key];
+  const im = MEDIA_IMG[key];
+  if (!im) return null;
+  const W = im.naturalWidth, H = im.naturalHeight;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
+  const img = x.getImageData(0, 0, W, H), d = img.data;
+  const lbl = new Int32Array(W * H);
+  const qx = new Int32Array(W * H), qy = new Int32Array(W * H);
+  for (let r = 0; r < rows; r++) for (let ci = 0; ci < cols; ci++) {
+    const x0 = Math.floor(ci * W / cols), x1 = Math.floor((ci + 1) * W / cols);
+    const y0 = Math.floor(r * H / rows), y1 = Math.floor((r + 1) * H / rows);
+    // label components (4-connected) inside this cell
+    let next = 0; const sizes = [];
+    for (let yy = y0; yy < y1; yy++) for (let xx = x0; xx < x1; xx++) {
+      const n = yy * W + xx;
+      if (lbl[n] !== 0 || d[n * 4 + 3] < 16) continue;
+      next++; let head = 0, tail = 0, size = 0;
+      qx[tail] = xx; qy[tail] = yy; tail++; lbl[n] = next;
+      while (head < tail) {
+        const px2 = qx[head], py2 = qy[head]; head++; size++;
+        for (const [ax, ay] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+          const nx2 = px2 + ax, ny2 = py2 + ay;
+          if (nx2 < x0 || ny2 < y0 || nx2 >= x1 || ny2 >= y1) continue;
+          const nn = ny2 * W + nx2;
+          if (lbl[nn] === 0 && d[nn * 4 + 3] >= 16) { lbl[nn] = next; qx[tail] = nx2; qy[tail] = ny2; tail++; }
+        }
+      }
+      sizes.push(size);
+    }
+    if (!next) continue;
+    let best = 1;
+    for (let i = 1; i < sizes.length; i++) if (sizes[i] > sizes[best - 1]) best = i + 1;
+    const base = next - sizes.length;   // labels used before this cell
+    for (let yy = y0; yy < y1; yy++) for (let xx = x0; xx < x1; xx++) {
+      const n = yy * W + xx;
+      if (lbl[n] !== 0 && lbl[n] !== base + best) { d[n * 4 + 3] = 0; }
+    }
+    // two erosion passes on white fringe at the silhouette boundary
+    for (let pass = 0; pass < 2; pass++) {
+      const kill = [];
+      for (let yy = Math.max(1, y0); yy < Math.min(H - 1, y1); yy++)
+        for (let xx = Math.max(1, x0); xx < Math.min(W - 1, x1); xx++) {
+          const n = yy * W + xx, i = n * 4;
+          if (d[i + 3] < 16) continue;
+          if (d[(n-1)*4+3] >= 16 && d[(n+1)*4+3] >= 16 && d[(n-W)*4+3] >= 16 && d[(n+W)*4+3] >= 16) continue;
+          const rr2 = d[i], gg = d[i+1], bb = d[i+2];
+          if (rr2 >= 202 && gg >= 202 && bb >= 202 && Math.max(rr2, gg, bb) - Math.min(rr2, gg, bb) <= 18) kill.push(i);
+        }
+      for (const i of kill) d[i + 3] = 0;
+    }
+  }
+  // frame lines drawn near cell boundaries survive when dust bridges them to
+  // the subject. They are neutral mid-grey; the machines are warm ceramic or
+  // cool steel, both of which carry more channel spread. Kill neutral grey in
+  // narrow bands around every internal cell boundary.
+  // The generator draws cell frames at ARBITRARY positions — probing found a
+  // full-height grey line 66% into one cell — so position-based bands lose.
+  // Detect instead: any column or row of a cell whose pixels are MOSTLY flat
+  // neutral grey is a drawn frame line, wherever it sits. Only the grey pixels
+  // die, so art crossing the line keeps everything that has colour.
+  const isLineGrey = (i) => {
+    const rr2 = d[i], gg = d[i+1], bb = d[i+2];
+    return rr2 >= 130 && rr2 <= 233 && Math.max(rr2, gg, bb) - Math.min(rr2, gg, bb) <= 14;
+  };
+  for (let r = 0; r < rows; r++) for (let ci = 0; ci < cols; ci++) {
+    const x0 = Math.floor(ci * W / cols), x1 = Math.floor((ci + 1) * W / cols);
+    const y0 = Math.floor(r * H / rows), y1 = Math.floor((r + 1) * H / rows);
+    for (let xx = x0; xx < x1; xx++) {          // vertical frame lines
+      let n = 0;
+      for (let yy = y0; yy < y1; yy++) { const i = (yy * W + xx) * 4; if (d[i+3] >= 16 && isLineGrey(i)) n++; }
+      if (n > (y1 - y0) * 0.30) for (let yy = y0; yy < y1; yy++) {
+        const i = (yy * W + xx) * 4; if (d[i+3] >= 16 && isLineGrey(i)) d[i+3] = 0;
+      }
+    }
+    for (let yy = y0; yy < y1; yy++) {          // horizontal frame lines
+      let n = 0;
+      for (let xx = x0; xx < x1; xx++) { const i = (yy * W + xx) * 4; if (d[i+3] >= 16 && isLineGrey(i)) n++; }
+      if (n > (x1 - x0) * 0.30) for (let xx = x0; xx < x1; xx++) {
+        const i = (yy * W + xx) * 4; if (d[i+3] >= 16 && isLineGrey(i)) d[i+3] = 0;
+      }
+    }
+  }
+  x.putImageData(img, 0, 0);
+  ATLAS_PROC[key] = cv;
+  return cv;
+}
+function sheetOf(key, cols, rows) {
+  const p = processSheet(key, cols, rows);
+  return p || MEDIA_IMG[key];
+}
 function atlasReady() {
   return typeof MEDIA_IMG !== 'undefined' && !!MEDIA_IMG[ATLAS.key];
 }
@@ -63,8 +163,8 @@ const ATLAS_INSET = { top: 0.115, bottom: 0.055, side: 0.035 };
 function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   const S = ATLAS.sub[subject];
   if (!S || !atlasReady()) return false;
-  const im = MEDIA_IMG[ATLAS.key];
-  const cw = im.naturalWidth / ATLAS.cols, ch = im.naturalHeight / ATLAS.rows;
+  const im = sheetOf(ATLAS.key, ATLAS.cols, ATLAS.rows);
+  const cw = im.width / ATLAS.cols, ch = im.height / ATLAS.rows;
   const o = opts || {};
   const dh = hitH * S.k, dw = dh * (cw / ch);
   const dy = footY - dh + hitH * S.yOff;
@@ -172,6 +272,30 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
     // clips to the sprite alone.
     const col = o.charm > 0 ? 'rgba(63,216,238,0.42)' : 'rgba(255,235,235,0.55)';
     tintedSprite(im, sxOf(colF > 0.5 ? col1 : col0), sy, sw2, sh2, dw, dh, col, c, ddx, ddy);
+  } else if (o.mode === 'walk' || o.mode === 'spring') {
+    // ---- cutout rig: the image is taken apart and mounted on pivots ----------
+    // The lower band of the sprite is cut into two leg groups (rear half and
+    // front half), each hinged at its own hip and swinging in counterphase; the
+    // body is a third part that rides above them and bobs. Three parts of the
+    // SAME rendered art, articulated — not one picture sliding.
+    const hipF = 0.64;                                  // hips at 64% of the cell
+    const g2 = t * (6 + Math.abs(vx) / 30);
+    const swing = (o.mode === 'walk' ? 0.20 : 0.08) * clamp(Math.abs(vx) / 120 + 0.35, 0.35, 1);
+    const legSy = sy + sh2 * hipF, legH = sh2 * (1 - hipF);
+    const legDy = topY + dh * hipF;                     // legs stay planted (no bob)
+    const legDh = dh * (1 - hipF);
+    for (const [half, ph] of [[0, 1], [1, -1]]) {       // rear group, front group
+      c.save();
+      c.translate(ddx + dw * (half ? 0.5 : 0), legDy);
+      // shear about the hip line: the top edge never leaves the body, so the
+      // stride can never tear a gap open the way rotation did
+      c.transform(1, 0, Math.sin(g2) * swing * ph, 1, 0, 0);
+      c.drawImage(im, sxOf(col0) + half * sw2 / 2, legSy, sw2 / 2, legH,
+                  half ? -dw * 0.015 : 0, -legDh * 0.04, dw / 2 + dw * 0.015, legDh * 1.04);
+      c.restore();
+    }
+    // the body overlaps the hip line so the seam never shows
+    c.drawImage(im, sxOf(col0), sy, sw2, sh2 * (hipF + 0.05), ddx, ddy, dw, dh * (hipF + 0.05));
   } else {
     c.drawImage(im, sxOf(col0), sy, sw2, sh2, ddx, ddy, dw, dh);
     if (colF > 0.03) {                       // the next angle fades in over it
@@ -218,15 +342,15 @@ const DRILLER = { key: 'driller', cols: 12, rows: 6, k: 2.55, yOff: 0.10 };
 const DRILLER_YAW = [[-0.75, 0], [-0.3, 2], [0.3, 3], [0.75, 8], [9, 10]];
 
 function drawDriller(c, b) {
-  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[DRILLER.key];
-  if (!im) return false;
-  const CW = im.naturalWidth / DRILLER.cols, CH = im.naturalHeight / DRILLER.rows;
+  if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG[DRILLER.key]) return false;
+  const im = sheetOf(DRILLER.key, DRILLER.cols, DRILLER.rows);
+  const CW = im.width / DRILLER.cols, CH = im.height / DRILLER.rows;
   const t = b.anim, fv = b.faceVis == null ? -1 : b.faceVis;
-  let row, col, mirror = false;
+  let row, col, mirror = false, extraDy = 0;
 
   const facingRight = fv > 0;
   if (b.dead || b.deathAnimT > 0) {
-    row = 5;
+    row = 5; extraDy = b.h * 0.10;   // seat the wreck on its shadow
     const k = 1 - clamp((b.deathAnimT || 0) / 1.6, 0, 1);
     col = Math.min(11, Math.floor(k * 12));
     mirror = facingRight;
@@ -249,7 +373,7 @@ function drawDriller(c, b) {
 
   const cx = b.x + b.w / 2, footY = b.y + b.h;
   const dh = b.h * DRILLER.k, dw = dh * (CW / CH);
-  const dy = footY - dh + b.h * DRILLER.yOff;
+  const dy = footY - dh + b.h * DRILLER.yOff + (typeof extraDy === 'number' ? extraDy : 0);
   // reactive shadow (rows 3-5 carry baked dust, so soften it there)
   const dusty = row >= 3;
   const lean = clamp((b.vx || 0) / 420, -1, 1);
