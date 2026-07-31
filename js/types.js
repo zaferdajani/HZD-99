@@ -234,6 +234,8 @@ function drawKeytar(c, face, t) {
 // costs nothing. Benches re-forge the full set.
 // ---------------------------------------------------------------------------
 const STAR_MAX_BASE = 6, STAR_CD = 0.17, STAR_SPD = 720;
+// the suit condenses ambient static back into a star while you fight on
+const STAR_REGEN_T = 8;
 
 function starMax() { return STAR_MAX_BASE + (((G.save && G.save.arms) || []).length >= 3 ? 2 : 0); }
 function starCount() { return G.save ? (G.save.stars == null ? starMax() : G.save.stars) : 0; }

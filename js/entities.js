@@ -1058,6 +1058,31 @@ class Player {
         }
         c.shadowBlur = 0; c.restore(); c.globalAlpha = 1;
       };
+      // the cat's cut is a CLAW RAKE: three curved talon crescents, sharp at
+      // both ends, full in the belly — the wake of a paw, not a sword edge
+      const talonRake = (len, wid, alpha, body, edge) => {
+        body = body || col; edge = edge || '#ffffff';
+        const hl = len / 2;
+        c.save();
+        for (let k = -1; k <= 1; k++) {
+          const off = k * wid * 0.42, L = hl * (1 - Math.abs(k) * 0.14), W = wid * (1 - Math.abs(k) * 0.1);
+          c.globalAlpha = alpha * (1 - Math.abs(k) * 0.2);
+          c.shadowColor = body; c.shadowBlur = 14;
+          c.fillStyle = body;
+          c.beginPath();
+          c.moveTo(-L, 6 + off);
+          c.quadraticCurveTo(0, -W + off, L, 1 + off);
+          c.quadraticCurveTo(0, -W * 0.55 + off, -L, 6 + off);
+          c.closePath(); c.fill();
+          c.shadowBlur = 0;
+          // razor edge along the leading curve
+          c.strokeStyle = edge; c.globalAlpha = alpha * (0.9 - Math.abs(k) * 0.25);
+          c.lineWidth = 1.6; c.lineCap = 'round';
+          c.beginPath(); c.moveTo(-L * 0.94, 5 + off);
+          c.quadraticCurveTo(0, -W * 0.96 + off, L * 0.94, 0.5 + off); c.stroke();
+        }
+        c.restore(); c.globalAlpha = 1;
+      };
       // in claw mode a strike is a RAKE: three parallel talon streaks
       const cut = divineHit ? boltCut : clawed ? (len, wid, alpha) => {
         const hl = len / 2;
@@ -1085,85 +1110,64 @@ class Player {
           c.stroke();
         }
         c.restore(); c.globalAlpha = 1;
-      } : (len, wid, alpha) => {
-        const hl = len / 2;
-        c.globalAlpha = alpha;
-        // glow pass
-        c.shadowColor = col; c.shadowBlur = 20;
-        const gr = c.createLinearGradient(-hl, 0, hl, 0);
-        gr.addColorStop(0, 'rgba(255,255,255,0)');
-        gr.addColorStop(0.5, col);
-        gr.addColorStop(1, 'rgba(255,255,255,0)');
-        c.fillStyle = gr;
-        c.beginPath();
-        c.moveTo(-hl, 6);
-        c.quadraticCurveTo(0, -wid, hl, 2);
-        c.quadraticCurveTo(0, -wid * 0.3, -hl, 6);
-        c.closePath(); c.fill();
-        c.shadowBlur = 0;
-        // razor-white core edge
-        c.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
-        c.lineWidth = 2.2; c.lineCap = 'round';
-        c.beginPath();
-        c.moveTo(-hl * 0.92, 4);
-        c.quadraticCurveTo(0, -wid * 0.72, hl * 0.94, 1);
-        c.stroke();
-        // faint echo streak trailing the cut
-        c.globalAlpha = alpha * 0.4;
-        c.lineWidth = 1.2;
-        c.beginPath();
-        c.moveTo(-hl * 0.7, 12);
-        c.quadraticCurveTo(0, -wid * 0.35 + 10, hl * 0.75, 8);
-        c.stroke();
-        c.globalAlpha = 1;
-      };
+      } : (len, wid, alpha) => talonRake(len, wid, alpha, col);
       if (sv.combo === 3) {
-        // charged volt-burst: expanding ring blade with four radial cuts
-        const cbx = this.x + this.w / 2, cby = this.y + this.h / 2;
-        const R2 = 34 + ease * 104;
+        // SUPERCHARGED: two claw sweeps closing in an X in front of the cat —
+        // gold over zone-glow, a shock ring, and a four-point spark at the cross
+        const cbx = this.x + this.w / 2 + (this.face || 1) * 34, cby = this.y + this.h / 2;
+        const a3 = Math.min(1, (1 - p) * 1.7);
+        const drift3 = (1 - ease) * 0.3;
         c.save();
         c.translate(cbx, cby);
         c.globalCompositeOperation = 'lighter';
-        c.globalAlpha = Math.min(1, (1 - p) * 1.7);
-        c.strokeStyle = '#ffffff'; c.shadowColor = PAL[G.roomDef.zone].glow; c.shadowBlur = 26;
-        c.lineWidth = 7 * (1 - p * 0.6);
-        c.beginPath(); c.arc(0, 0, R2, 0, 7); c.stroke();
-        c.lineWidth = 2.4;
-        c.strokeStyle = PAL[G.roomDef.zone].glow;
-        c.beginPath(); c.arc(0, 0, R2 * 0.72, 0, 7); c.stroke();
-        c.rotate(ease * 1.2);
-        c.lineWidth = 3; c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineCap = 'round';
+        // slim shock ring racing outward from the cross
+        c.globalAlpha = a3 * 0.8;
+        c.strokeStyle = '#ffffff'; c.shadowColor = gcol; c.shadowBlur = 22;
+        c.lineWidth = 3.5 * (1 - p * 0.6);
+        c.beginPath(); c.arc(0, 0, 34 + ease * 104, 0, 7); c.stroke();
+        c.shadowBlur = 0;
+        // the two rakes: they close toward each other as the strike settles
+        const gr3 = 0.7 + ease * 0.55;
+        c.save(); c.rotate(-0.62 + drift3); c.scale(gr3, gr3);
+        talonRake(158, 44, a3, '#ffd76a'); c.restore();
+        c.save(); c.rotate(0.62 - drift3); c.scale(gr3, -gr3);
+        talonRake(158, 44, a3 * 0.92, gcol); c.restore();
+        // spark cross where the claws meet
+        c.globalAlpha = a3;
+        c.strokeStyle = '#ffffff'; c.shadowColor = '#ffd76a'; c.shadowBlur = 16;
+        c.lineWidth = 2.2; c.lineCap = 'round';
+        c.rotate(ease * 0.6);
         for (let k = 0; k < 4; k++) {
           c.rotate(Math.PI / 2);
-          c.beginPath(); c.moveTo(R2 * 0.4, 0); c.lineTo(R2 + 14, 0); c.stroke();
+          c.beginPath(); c.moveTo(4, 0); c.lineTo(20 + ease * 14, 0); c.stroke();
         }
         c.restore();
         c.globalAlpha = 1;
       } else {
       c.save();
-      // the cut lives IN FRONT of the cat, along the aim direction
-      const n2 = Math.hypot(Math.cos(sv.ang), Math.sin(sv.ang)) || 1;
+      // the rake hangs in midair CLEAR of the cat — pushed out along the aim
+      // so the claws never cover the body
       c.translate(
-        this.x + this.w / 2 + Math.cos(sv.ang) * 38,
-        this.y + this.h / 2 - 2 + Math.sin(sv.ang) * 38
+        this.x + this.w / 2 + Math.cos(sv.ang) * 56,
+        this.y + this.h / 2 + Math.sin(sv.ang) * 56
       );
       c.globalCompositeOperation = 'lighter';
       const grow = 0.55 + ease * 0.65;         // the cut extends as it lands
       const drift = (1 - ease) * 0.22;         // slight rotation as it settles
       if (sv.combo === 0) {
-        c.rotate(sv.ang - 0.38 + drift);       // descending diagonal cut
+        c.rotate(sv.ang + 0.5 + drift);        // paw swipe: forward and downward
         c.scale(grow, 1);
-        cut(118, 34, Math.min(1, (1 - p) * 1.7));
+        cut(94, 26, Math.min(1, (1 - p) * 1.7));
       } else if (sv.combo === 1) {
-        c.rotate(sv.ang + 0.38 - drift);       // rising counter-cut
+        c.rotate(sv.ang + 0.3 - drift);        // second swipe, bowed the other way
         c.scale(grow, -1);
-        cut(118, 34, Math.min(1, (1 - p) * 1.7));
+        cut(94, 26, Math.min(1, (1 - p) * 1.7));
       } else {
-        // finisher: golden X — two crossing cuts
+        // finisher: golden X — two crossing claw rakes
         c.rotate(sv.ang - 0.5 + drift); c.scale(grow, 1);
-        cut(142, 40, Math.min(1, (1 - p) * 1.7));
+        cut(116, 32, Math.min(1, (1 - p) * 1.7));
         c.rotate(1.0); c.scale(1, -1);
-        cut(142, 40, Math.min(1, (1 - p) * 1.4));
+        cut(116, 32, Math.min(1, (1 - p) * 1.4));
       }
       c.restore();
       c.globalAlpha = 1;
@@ -2065,6 +2069,12 @@ class Boss {
         } else if (this.st === 'bore') {
           // rears up, then drives the bore-head into the floor
           this.vx = 0; this.t -= dt; this.windT = 0.35;
+          // grind dust and sparks at the drill tip while the head is in the floor
+          if (this.t <= 0.64 && this.t > 0.15) {
+            const nx = this.cx() + (this.faceVis || this.face || 1) * this.w * 0.55;
+            if (chance(0.85)) addPart(nx + rnd(-10, 10), this.y + this.h - rnd(0, 6), rnd(-100, 100), rnd(-170, -40), 0.45, '#b9a888', 3, 260, true);
+            if (chance(0.3)) addPart(nx + rnd(-6, 6), this.y + this.h - 4, rnd(-140, 140), rnd(-220, -80), 0.25, '#ffd76a', 2, 300, true);
+          }
           if (this.t <= 0.6 && !this.bored) {
             this.bored = true;
             this.plantBore(clamp(px, 40, G.roomDef.w * TILE - 40));

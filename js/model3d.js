@@ -313,10 +313,20 @@ function m3dRenderDriller(b) {
     const ph = (i === 0 || i === 3) ? 0 : Math.PI;
     leg.rotation.z = moving ? Math.sin(gph + ph) * 0.42 : Math.sin(t * 1.6 + i) * 0.05;
   });
-  // bore: rear up and drive the head down
+  // bore is a choreography, not a pose: rear back, slam the head into the
+  // floor, grind while the borehole is planted, then come back up level
   if (b.st === 'bore') {
-    const k = clamp(1 - (b.t || 0) / 1.1, 0, 1);
-    rig.root.rotation.z = Math.sin(Math.min(k * 1.6, 1) * Math.PI) * -0.55;
+    const u = clamp(1 - (b.t || 0) / 1.1, 0, 1);      // 0 windup -> 1 done
+    // sign convention (verified on screen): positive z pitches the nose DOWN
+    let pitch;
+    if (u < 0.42) pitch = -0.5 * Math.sin(u / 0.42 * Math.PI / 2);  // rear up
+    else {
+      const v = (u - 0.42) / 0.58;
+      pitch = v < 0.22 ? -0.5 + (v / 0.22) * 1.05                   // slam down
+        : v < 0.75 ? 0.55 + Math.sin(t * 40) * 0.025                // grind in the floor
+          : 0.55 * (1 - (v - 0.75) / 0.25);                         // recover
+    }
+    rig.root.rotation.z = pitch;
   } else rig.root.rotation.z = 0;
   // idle breath
   rig.root.position.y = Math.sin(t * 2.2) * 0.35;

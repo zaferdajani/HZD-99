@@ -423,6 +423,16 @@ function update(dt) {
     } else {
       player.update(dt);
       checkEvo();
+      // shuriken regen: the suit condenses static into a fresh star over time,
+      // so running dry is a lull, never a dead end
+      if (starCount() < starMax()) {
+        G.starRegenT = (G.starRegenT || 0) + dt;
+        if (G.starRegenT >= STAR_REGEN_T) {
+          G.starRegenT = 0; starSet(starCount() + 1);
+          sfx('pick');
+          burst(player.x + player.w / 2, player.y + 10, 8, ELEM.zizt.glow, 160, 0.35, 60, 2, true);
+        }
+      } else G.starRegenT = 0;
       if (bossActive()) player.x = clamp(player.x, 4, G.roomDef.w * TILE - player.w - 4);
       for (const e of G.enemies) if (!e.dead) e.update(dt);
       G.enemies = G.enemies.filter(e => !e.dead);
@@ -1078,14 +1088,21 @@ function mchHull(x, base, s, body, dark, eye) {
 }
 // zone -> cell in the rendered vista atlas (2 cols x 3 rows)
 const ZONE_CELL = { A: [0, 0], B: [1, 0], C: [0, 1], D: [1, 1], E: [0, 2], X: [1, 2] };
+// zones with a dedicated full-frame vista use it; the gloomy atlas cells stay
+// wired underneath for the later stages
+const ZONE_VISTA = { A: 'vistaCity', B: 'vistaCrystal' };
 function drawZoneVista(P, zone, px, py) {
-  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.zones;
-  const cell = ZONE_CELL[zone];
+  const solo = ZONE_VISTA[zone] && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[ZONE_VISTA[zone]];
+  const im = solo || (typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.zones);
+  const cell = solo ? [0, 0] : ZONE_CELL[zone];
   if (!im || !cell) return false;
-  const CW = im.naturalWidth / 2, CH = im.naturalHeight / 3;
-  // scale the cell past the screen and pan across the excess as the camera
-  // crosses the room — a single painting, so it pans rather than tiles
-  const sc = (540 / CH) * 1.12, dw = CW * sc, dh = CH * sc;
+  const CW = solo ? im.naturalWidth : im.naturalWidth / 2;
+  const CH = solo ? im.naturalHeight : im.naturalHeight / 3;
+  // scale the painting past the screen and pan across the excess as the camera
+  // crosses the room — a single painting, so it pans rather than tiles. Wide
+  // solo paintings are width-bound so there is always horizontal travel.
+  const sc = Math.max((540 / CH) * 1.12, (960 / CW) * 1.16);
+  const dw = CW * sc, dh = CH * sc;
   const roomW = G.roomDef.w * TILE;
   const fx = roomW > 980 ? clamp(px / (roomW - 960), 0, 1) : 0.5;
   const ox = -(dw - 960) * fx;
@@ -1917,9 +1934,15 @@ function drawHUD() {
   const sc = starCount(), sm = starMax();
   for (let i = 0; i < sm; i++) {
     const bx = 906 - i * 15, on = i < sc;
-    c.save(); c.translate(bx, 164); c.rotate(0.5);
-    c.fillStyle = on ? ELEM.zizt.glow : 'rgba(120,140,160,0.28)';
+    // the next pip charges up visibly as the suit condenses a new star
+    const charging = !on && i === sc && G.starRegenT > 0;
+    const chg = charging ? Math.min(1, G.starRegenT / STAR_REGEN_T) : 0;
+    c.save(); c.translate(bx, 164); c.rotate(0.5 + (charging ? chg * 6.28 : 0));
+    c.fillStyle = on ? ELEM.zizt.glow
+      : charging ? 'rgba(190,240,255,' + (0.28 + chg * 0.6).toFixed(2) + ')'
+        : 'rgba(120,140,160,0.28)';
     if (on) { c.shadowColor = ELEM.zizt.col; c.shadowBlur = 6; }
+    if (charging && chg > 0.7) { c.shadowColor = ELEM.zizt.col; c.shadowBlur = 5 * chg; }
     c.beginPath();
     for (let k = 0; k < 4; k++) {
       const a = k / 4 * Math.PI * 2;

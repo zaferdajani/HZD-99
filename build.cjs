@@ -8,6 +8,8 @@ const EMBED = {
   indFg: 'assets/backgrounds/ind_fg.png',
   roster: 'assets/characters/roster_8yaw.png',
   zones: 'assets/backgrounds/zones_far.jpg',
+  vistaCity: 'assets/backgrounds/vista_city.jpg',
+  vistaCrystal: 'assets/backgrounds/vista_crystal.jpg',
   driller: 'assets/characters/driller_12x6.png',
   heroIdle: 'assets/characters/gothic-hero-idle.png',
   heroRun: 'assets/characters/gothic-hero-run.png',
