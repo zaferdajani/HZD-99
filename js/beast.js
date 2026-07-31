@@ -159,11 +159,26 @@ function beastPose(b) {
     P.bob = 0; P.tailA = 0.05; P.tailUp = -1;
     P.glow = Math.max(0, 0.6 - k * 0.6) * (0.5 + Math.sin(t * 30) * 0.5);
     P.legs = P.legs.map(() => ({ a1: 0.9 * k, a2: -1.5 * k }));
-  } else if (st === 'charge') {
-    gallop(11, 0.26);
-    P.neckA = -0.08; P.headA = -0.06;               // head level, locked on prey
-    P.tailA = Math.sin(t * 6) * 0.3; P.tailUp = -0.55; P.glow = 1;
-  } else if (st === 'leap') {
+  } else if (st === 'stalk') {
+    // the prowl: slow gait, head carried LOW, eyes locked on prey
+    gallop(7, 0.2);
+    P.neckA = 0.14; P.headA = 0.2;
+    P.tailA = Math.sin(t * 4) * 0.22; P.tailUp = -0.7; P.glow = 1;
+  } else if (st === 'swipewarn') {
+    // weight back, near paw rising
+    P.crouch = 6; P.pitch = -0.05;
+    P.legs[0] = { a1: -0.95, a2: 0.55 };
+    P.glow = 1.2; P.tailA = Math.sin(t * 10) * 0.3;
+  } else if (st === 'swipe') {
+    // the paw rakes through
+    P.crouch = 6; P.pitch = 0.04;
+    P.legs[0] = { a1: 0.55, a2: -0.35 };
+    P.glow = 1.4;
+  } else if (st === 'recover') {
+    // landed, gathering itself — the opening
+    P.crouch = 16; P.glow = 0.45;
+    P.legs = P.legs.map(() => ({ a1: 0.3, a2: -0.5 }));
+  } else if (st === 'pounce') {
     // pounce: forelegs reach, hindlegs drive, nose follows the arc
     const dive = Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400));
     P.pitch = dive; P.bob = 0;
@@ -171,27 +186,6 @@ function beastPose(b) {
     P.legs[1] = P.legs[3] = { a1: 0.7, a2: -0.5 };
     P.neckA = -0.12; P.headA = dive * 0.6; P.glow = 1;
     P.tailA = 0.4; P.tailUp = 0.9;
-  } else if (st === 'bore') {
-    // THE ROAR: crouch onto the haunches, throw the head back and howl the
-    // virus into the floor, then slam back down as the eruptions plant
-    const u = Math.max(0, Math.min(1, 1 - (b.t || 0) / 1.1));
-    if (u < 0.45) {
-      const k = Math.sin(u / 0.45 * Math.PI / 2);
-      P.crouch = 10 * k; P.pitch = -0.16 * k;
-      P.neckA = -0.5 * k; P.headA = -0.6 * k;       // head thrown back
-      P.legs[1].a1 = P.legs[3].a1 = 0.3 * k;        // haunches folded
-      P.glow = 0.6 + k * 0.8;
-      P.tailA = Math.sin(t * 9) * 0.35 * k; P.tailUp = 0.5 + k * 0.5;
-    } else {
-      const v = (u - 0.45) / 0.55;
-      const slam = v < 0.3 ? v / 0.3 : 1;
-      P.crouch = 10 - 16 * slam + (v > 0.3 ? Math.sin(t * 44) * 1.6 : 0);
-      P.pitch = -0.16 + 0.3 * slam;
-      P.neckA = -0.5 + 0.72 * slam; P.headA = -0.6 + 0.95 * slam;  // bite the floor
-      P.legs[0].a1 = P.legs[2].a1 = -0.24 * slam;
-      P.glow = 1.4;
-      P.tailA = Math.sin(t * 12) * 0.3; P.tailUp = 1;
-    }
   } else if (Math.abs(b.vx || 0) > 40) gallop(8, 0.22);
   return P;
 }
@@ -268,7 +262,8 @@ function drawBeast(c, b) {
     const ta = Math.abs(fv);
     // through-the-front turn: inside the window the constructed FRONT view
     // (the artist's pixels, mirror-composited) looks at the camera
-    const turnFront = ta < 0.3 && !b.dead && b.stagT <= 0 && b.st !== 'leap' && b.st !== 'bore'
+    const turnFront = ta < 0.3 && !b.dead && b.stagT <= 0
+      && b.st !== 'pounce' && b.st !== 'crouch' && b.st !== 'roar'
       ? beastFront() : null;
     if (turnFront) {
       const k = 1 - ta / 0.3;
@@ -288,17 +283,19 @@ function drawBeast(c, b) {
     // ground shadow lives with every representation
     c.save(); c.globalAlpha *= 0.34; c.fillStyle = '#04070b';
     c.beginPath(); c.ellipse(0, 4, 205, 17, 0, 0, 7); c.fill(); c.restore();
-    const u = b.st === 'bore' ? Math.max(0, Math.min(1, 1 - (b.t || 0) / 1.1)) : 0;
     if (b.stagT > 0 && !b.dead) {
       // staggered by the Song: cowering low, trembling
       bFig(c, 'aAtk', 0, 2.2);
-    } else if (b.st === 'leap' && !b.dead) {
+    } else if (b.st === 'pounce' && !b.dead) {
       // the authored pounce: crouched attack figure riding the arc
       const dive = Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400));
       bFig(c, 'aAtk', dive, 0);
-    } else if (b.st === 'bore' && u > 0.18 && u < 0.45 && !b.dead) {
+    } else if (b.st === 'crouch' && !b.dead) {
+      // flat in the grass, trembling with intent — the sheet's own crouch
+      bFig(c, 'aAtk', 0, 1.6);
+    } else if (b.st === 'roar' && (b.t || 0) > 0.25 && !b.dead) {
       // THE ROAR — the sheet's own open-jaw howl, shaking harder as it peaks
-      bFig(c, 'aRoar', 0, 1 + (u - 0.18) * 14);
+      bFig(c, 'aRoar', 0, 1 + Math.max(0, 1.25 - (b.t || 0)) * 6);
       // virus light pouring from the throat
       c.save(); c.globalCompositeOperation = 'lighter';
       const mg = c.createRadialGradient(-150, -215, 2, -150, -215, 60);

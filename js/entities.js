@@ -433,7 +433,7 @@ class Player {
       if (pogo && this.swing.ay > 0) {
         // A short, crisp rebound rather than a free jump — hold JUMP to get the
         // taller one. Either way you leave the enemy instead of falling into it.
-        this.vy = inD('JUMP') ? -620 : -470;
+        this.vy = inD('JUMP') ? -880 : -660;
         if (this.dashT > 0 && this.dashVY > 0) { this.dashT = 0; this.dashVY = 0; }
         this.iT = Math.max(this.iT, 0.18);   // no contact damage from what you just hit
         this.pogoT = 0.18;
@@ -2031,7 +2031,7 @@ class Wreck {
 
 // ================= BOSSES =================
 const BSTAT = {
-  glitch: { w: 104, h: 70, hp: 220 },
+  glitch: { w: 84, h: 56, hp: 220 },
   brood: { w: 96, h: 64, hp: 320 },
   atlas: { w: 62, h: 74, hp: 460 },
   zero: { w: 44, h: 56, hp: 500 },
@@ -2115,46 +2115,95 @@ class Boss {
     switch (this.kind) {
       // ---- GLITCH.EXE: charging corrupted hound ----
       case 'glitch': {
+        // ---- NULLFANG moves like a LION, traced from the sheet's four
+        // poses: it STALKS low (walk figure), SWIPES a paw at arm's reach,
+        // flattens into a CROUCH (attack figure) before the POUNCE, and
+        // ROARS (roar figure) to shove you back and call the pack. The old
+        // boss's drill is gone — nothing here is inherited. ----
         this.vy += 2100 * dt;
+        const dist = px - this.cx(), adist = Math.abs(dist);
         if (this.st === 'idle') {
           this.vx = 0; this.t -= dt;
-          this.face = Math.sign(px - this.cx()) || 1;
+          this.face = Math.sign(dist) || 1;
+          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(2.0, 3.2); this.roarCD = this.roarCD || rnd(4.5, 6.5); }
+        } else if (this.st === 'stalk') {
+          // low prowl toward you, patient, gathering pounce distance
+          this.face = Math.sign(dist) || 1;
+          this.vx = this.face * (this.phase === 2 ? 150 : 110) * spd;
+          this.t -= dt; this.roarCD -= dt;
+          if (adist < 130) { this.st = 'swipewarn'; this.t = 0.32; this.vx = 0; }
+          else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(6.5, 8.5); }
+          else if (this.t <= 0 && adist > 170 && adist < 470) { this.st = 'crouch'; this.t = 0.55; this.vx = 0; }
+          else if (this.t <= 0) this.t = rnd(1.1, 1.9);
+        } else if (this.st === 'swipewarn') {
+          // the paw rises — that is your tell
+          this.vx = 0; this.t -= dt; this.windT = 0.3;
+          if (this.t <= 0) { this.st = 'swipe'; this.t = 0.24; this.swiped = false; }
+        } else if (this.st === 'swipe') {
+          this.vx = 0; this.t -= dt;
+          if (!this.swiped && this.t <= 0.18) {
+            this.swiped = true;
+            const f = this.face || 1;
+            const box = { x: this.cx() + (f > 0 ? 6 : -114), y: this.y - 24, w: 108, h: this.h + 28 };
+            burst(this.cx() + f * 66, this.cy(), 10, '#b06aff', 260, 0.35, 150, 3, true);
+            sfx('atk');
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
+          }
           if (this.t <= 0) {
-            const k = this.cycle++ % 4;
-            this.st = k === 2 ? 'leap' : k === 3 ? 'bore' : 'charge';
-            this.t = this.st === 'bore' ? 1.1 : 3;
-            if (this.st === 'leap') { this.vy = -680; this.vx = this.face * 280 * spd; }
+            // a lion swipes twice when it is angry
+            if (this.phase === 2 && chance(0.5)) { this.st = 'swipewarn'; this.t = 0.22; }
+            else { this.st = 'idle'; this.t = rnd(0.5, 0.9); }
           }
-        } else if (this.st === 'bore') {
-          // rears up, then drives the bore-head into the floor
-          this.vx = 0; this.t -= dt; this.windT = 0.35;
-          // grind dust and sparks at the drill tip while the head is in the floor
-          if (this.t <= 0.64 && this.t > 0.15) {
-            const nx = this.cx() + (this.faceVis || this.face || 1) * this.w * 0.55;
-            if (chance(0.85)) addPart(nx + rnd(-10, 10), this.y + this.h - rnd(0, 6), rnd(-100, 100), rnd(-170, -40), 0.45, '#b9a888', 3, 260, true);
-            if (chance(0.3)) addPart(nx + rnd(-6, 6), this.y + this.h - 4, rnd(-140, 140), rnd(-220, -80), 0.25, '#ffd76a', 2, 300, true);
+        } else if (this.st === 'crouch') {
+          // flat to the ground, trembling with intent — then the pounce
+          this.vx = 0; this.t -= dt; this.windT = 0.3;
+          if (this.t <= 0) {
+            this.st = 'pounce';
+            this.face = Math.sign(dist) || 1;
+            this.vx = clamp(dist * 1.5, -560, 560) * (this.phase === 2 ? 1.15 : 1) * spd;
+            this.vy = -(420 + Math.min(260, adist * 0.5));
+            sfx('dash');
           }
-          if (this.t <= 0.6 && !this.bored) {
-            this.bored = true;
-            this.plantBore(clamp(px, 40, G.roomDef.w * TILE - 40));
-            cam.shake = 10; sfx('phit');
+        } else if (this.st === 'pounce') {
+          // airborne, claws first, virus streaming off the coat
+          if (chance(0.5)) addPart(this.cx() - this.face * 30, this.cy() + rnd(-14, 14),
+            -this.face * rnd(60, 140), rnd(-40, 40), 0.3, '#b06aff', 2.5, 0, true);
+        } else if (this.st === 'roar') {
+          this.vx = 0; this.t -= dt;
+          if (!this.roared && this.t <= 0.75) {
+            this.roared = true;
+            cam.shake = 11; sfx('roar'); G.flash = Math.max(G.flash, 0.18);
+            if (typeof G.addRing === 'function') G.addRing(this.cx(), this.cy() - 20);
+            // the roar itself shoves you off your feet
+            if (adist < 250 && !player.dead) {
+              player.vx = (Math.sign(dist) || 1) * 520;
+              player.vy = Math.min(player.vy, -170);
+            }
+            // and the pack answers
+            if (G.enemies.filter(e => !e.dead && (e.kind === 'crawler' || e.kind === 'hopper')).length < (this.phase === 2 ? 2 : 1)) {
+              const wx = clamp(this.cx() - this.face * 150, 60, G.roomDef.w * TILE - 60);
+              const wl = new Enemy('crawler', wx, this.y + this.h - 26);
+              G.enemies.push(wl);
+              burst(wx, this.y + this.h - 10, 12, '#b06aff', 220, 0.5, 260, 3, true);
+            }
           }
-          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.6, 1.0); this.bored = false; }
-        } else if (this.st === 'charge') {
-          this.vx = this.face * (this.phase === 2 ? 560 : 420) * spd;
-          if (chance(0.4)) addPart(this.cx() - this.face * 24, this.y + this.h, -this.face * 60, rnd(-60, 0), 0.3, PAL.A.glow, 3, 300, true);
-          this.t -= dt;
+          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(1.6, 2.6); }
+        } else if (this.st === 'recover') {
+          // a beat of stillness after the landing — your window
+          this.vx *= 0.8; this.t -= dt;
+          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.4, 0.7); }
         }
         const col = moveEnt(this, dt);
-        const hitEdge = this.x <= 0 || this.x >= G.roomDef.w * TILE - this.w;
-        if (this.st === 'charge' && (col.l || col.r || hitEdge || this.t <= 0)) {
-          this.st = 'idle'; this.t = rnd(0.5, 0.9); cam.shake = 6; sfx('phit');
-          burst(this.cx() + this.face * this.w / 2, this.y + this.h * 0.6, 14, PAL[G.roomDef.zone].glow, 240, 0.5, 200, 3, true);
+        if (this.st === 'pounce' && col.d) {
+          this.st = 'recover'; this.t = 0.5;
+          cam.shake = 8; sfx('land');
+          for (let i = 0; i < 10; i++)
+            addPart(this.cx() + rnd(-this.w * 0.5, this.w * 0.5), this.y + this.h - 4,
+              rnd(-160, 160), rnd(-180, -40), 0.4, '#b9a888', 3, 300, true);
+          const box = { x: this.cx() - 80, y: this.y, w: 160, h: this.h + 8 };
+          if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
         }
-        if (this.st === 'leap' && col.d) {
-          this.st = 'idle'; this.t = rnd(0.5, 0.8); cam.shake = 7;
-          if (this.phase === 2) { this.shoot(-220, -320, 6, 900); this.shoot(220, -320, 6, 900); sfx('shoot'); }
-        }
+        if (this.st === 'stalk' && (col.l || col.r)) this.face *= -1;
         break;
       }
       // ---- Broodmother: hangs above, spawns and slams ----

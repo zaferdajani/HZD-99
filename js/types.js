@@ -126,7 +126,7 @@ function elemMul(atk, def) {
 function hurtBoxOf(e) {
   const cx2 = e.x + e.w / 2;
   if (e.kind === 'glitch') {            // NULLFANG: long low body, bottom-anchored
-    const w = e.w * 2.2, h = e.h * 2.0;
+    const w = e.w * 2.6, h = e.h * 2.1;
     return { x: cx2 - w / 2, y: e.y + e.h - h, w, h };
   }
   if (e.kind === 'brood') {             // TALONHOST: wings and tail, centred

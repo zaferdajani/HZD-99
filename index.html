@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="ms9g6xdv"</script>
+<script>window.BUILD_ID="ms9gqlm9"</script>
 <script>
 /**
  * @license
@@ -750,11 +750,26 @@ function beastPose(b) {
     P.bob = 0; P.tailA = 0.05; P.tailUp = -1;
     P.glow = Math.max(0, 0.6 - k * 0.6) * (0.5 + Math.sin(t * 30) * 0.5);
     P.legs = P.legs.map(() => ({ a1: 0.9 * k, a2: -1.5 * k }));
-  } else if (st === 'charge') {
-    gallop(11, 0.26);
-    P.neckA = -0.08; P.headA = -0.06;               // head level, locked on prey
-    P.tailA = Math.sin(t * 6) * 0.3; P.tailUp = -0.55; P.glow = 1;
-  } else if (st === 'leap') {
+  } else if (st === 'stalk') {
+    // the prowl: slow gait, head carried LOW, eyes locked on prey
+    gallop(7, 0.2);
+    P.neckA = 0.14; P.headA = 0.2;
+    P.tailA = Math.sin(t * 4) * 0.22; P.tailUp = -0.7; P.glow = 1;
+  } else if (st === 'swipewarn') {
+    // weight back, near paw rising
+    P.crouch = 6; P.pitch = -0.05;
+    P.legs[0] = { a1: -0.95, a2: 0.55 };
+    P.glow = 1.2; P.tailA = Math.sin(t * 10) * 0.3;
+  } else if (st === 'swipe') {
+    // the paw rakes through
+    P.crouch = 6; P.pitch = 0.04;
+    P.legs[0] = { a1: 0.55, a2: -0.35 };
+    P.glow = 1.4;
+  } else if (st === 'recover') {
+    // landed, gathering itself — the opening
+    P.crouch = 16; P.glow = 0.45;
+    P.legs = P.legs.map(() => ({ a1: 0.3, a2: -0.5 }));
+  } else if (st === 'pounce') {
     // pounce: forelegs reach, hindlegs drive, nose follows the arc
     const dive = Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400));
     P.pitch = dive; P.bob = 0;
@@ -762,27 +777,6 @@ function beastPose(b) {
     P.legs[1] = P.legs[3] = { a1: 0.7, a2: -0.5 };
     P.neckA = -0.12; P.headA = dive * 0.6; P.glow = 1;
     P.tailA = 0.4; P.tailUp = 0.9;
-  } else if (st === 'bore') {
-    // THE ROAR: crouch onto the haunches, throw the head back and howl the
-    // virus into the floor, then slam back down as the eruptions plant
-    const u = Math.max(0, Math.min(1, 1 - (b.t || 0) / 1.1));
-    if (u < 0.45) {
-      const k = Math.sin(u / 0.45 * Math.PI / 2);
-      P.crouch = 10 * k; P.pitch = -0.16 * k;
-      P.neckA = -0.5 * k; P.headA = -0.6 * k;       // head thrown back
-      P.legs[1].a1 = P.legs[3].a1 = 0.3 * k;        // haunches folded
-      P.glow = 0.6 + k * 0.8;
-      P.tailA = Math.sin(t * 9) * 0.35 * k; P.tailUp = 0.5 + k * 0.5;
-    } else {
-      const v = (u - 0.45) / 0.55;
-      const slam = v < 0.3 ? v / 0.3 : 1;
-      P.crouch = 10 - 16 * slam + (v > 0.3 ? Math.sin(t * 44) * 1.6 : 0);
-      P.pitch = -0.16 + 0.3 * slam;
-      P.neckA = -0.5 + 0.72 * slam; P.headA = -0.6 + 0.95 * slam;  // bite the floor
-      P.legs[0].a1 = P.legs[2].a1 = -0.24 * slam;
-      P.glow = 1.4;
-      P.tailA = Math.sin(t * 12) * 0.3; P.tailUp = 1;
-    }
   } else if (Math.abs(b.vx || 0) > 40) gallop(8, 0.22);
   return P;
 }
@@ -859,7 +853,8 @@ function drawBeast(c, b) {
     const ta = Math.abs(fv);
     // through-the-front turn: inside the window the constructed FRONT view
     // (the artist's pixels, mirror-composited) looks at the camera
-    const turnFront = ta < 0.3 && !b.dead && b.stagT <= 0 && b.st !== 'leap' && b.st !== 'bore'
+    const turnFront = ta < 0.3 && !b.dead && b.stagT <= 0
+      && b.st !== 'pounce' && b.st !== 'crouch' && b.st !== 'roar'
       ? beastFront() : null;
     if (turnFront) {
       const k = 1 - ta / 0.3;
@@ -879,17 +874,19 @@ function drawBeast(c, b) {
     // ground shadow lives with every representation
     c.save(); c.globalAlpha *= 0.34; c.fillStyle = '#04070b';
     c.beginPath(); c.ellipse(0, 4, 205, 17, 0, 0, 7); c.fill(); c.restore();
-    const u = b.st === 'bore' ? Math.max(0, Math.min(1, 1 - (b.t || 0) / 1.1)) : 0;
     if (b.stagT > 0 && !b.dead) {
       // staggered by the Song: cowering low, trembling
       bFig(c, 'aAtk', 0, 2.2);
-    } else if (b.st === 'leap' && !b.dead) {
+    } else if (b.st === 'pounce' && !b.dead) {
       // the authored pounce: crouched attack figure riding the arc
       const dive = Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400));
       bFig(c, 'aAtk', dive, 0);
-    } else if (b.st === 'bore' && u > 0.18 && u < 0.45 && !b.dead) {
+    } else if (b.st === 'crouch' && !b.dead) {
+      // flat in the grass, trembling with intent — the sheet's own crouch
+      bFig(c, 'aAtk', 0, 1.6);
+    } else if (b.st === 'roar' && (b.t || 0) > 0.25 && !b.dead) {
       // THE ROAR — the sheet's own open-jaw howl, shaking harder as it peaks
-      bFig(c, 'aRoar', 0, 1 + (u - 0.18) * 14);
+      bFig(c, 'aRoar', 0, 1 + Math.max(0, 1.25 - (b.t || 0)) * 6);
       // virus light pouring from the throat
       c.save(); c.globalCompositeOperation = 'lighter';
       const mg = c.createRadialGradient(-150, -215, 2, -150, -215, 60);
@@ -1630,7 +1627,7 @@ function elemMul(atk, def) {
 function hurtBoxOf(e) {
   const cx2 = e.x + e.w / 2;
   if (e.kind === 'glitch') {            // NULLFANG: long low body, bottom-anchored
-    const w = e.w * 2.2, h = e.h * 2.0;
+    const w = e.w * 2.6, h = e.h * 2.1;
     return { x: cx2 - w / 2, y: e.y + e.h - h, w, h };
   }
   if (e.kind === 'brood') {             // TALONHOST: wings and tail, centred
@@ -4796,7 +4793,7 @@ class Player {
       if (pogo && this.swing.ay > 0) {
         // A short, crisp rebound rather than a free jump — hold JUMP to get the
         // taller one. Either way you leave the enemy instead of falling into it.
-        this.vy = inD('JUMP') ? -620 : -470;
+        this.vy = inD('JUMP') ? -880 : -660;
         if (this.dashT > 0 && this.dashVY > 0) { this.dashT = 0; this.dashVY = 0; }
         this.iT = Math.max(this.iT, 0.18);   // no contact damage from what you just hit
         this.pogoT = 0.18;
@@ -6394,7 +6391,7 @@ class Wreck {
 
 // ================= BOSSES =================
 const BSTAT = {
-  glitch: { w: 104, h: 70, hp: 220 },
+  glitch: { w: 84, h: 56, hp: 220 },
   brood: { w: 96, h: 64, hp: 320 },
   atlas: { w: 62, h: 74, hp: 460 },
   zero: { w: 44, h: 56, hp: 500 },
@@ -6478,46 +6475,95 @@ class Boss {
     switch (this.kind) {
       // ---- GLITCH.EXE: charging corrupted hound ----
       case 'glitch': {
+        // ---- NULLFANG moves like a LION, traced from the sheet's four
+        // poses: it STALKS low (walk figure), SWIPES a paw at arm's reach,
+        // flattens into a CROUCH (attack figure) before the POUNCE, and
+        // ROARS (roar figure) to shove you back and call the pack. The old
+        // boss's drill is gone — nothing here is inherited. ----
         this.vy += 2100 * dt;
+        const dist = px - this.cx(), adist = Math.abs(dist);
         if (this.st === 'idle') {
           this.vx = 0; this.t -= dt;
-          this.face = Math.sign(px - this.cx()) || 1;
+          this.face = Math.sign(dist) || 1;
+          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(2.0, 3.2); this.roarCD = this.roarCD || rnd(4.5, 6.5); }
+        } else if (this.st === 'stalk') {
+          // low prowl toward you, patient, gathering pounce distance
+          this.face = Math.sign(dist) || 1;
+          this.vx = this.face * (this.phase === 2 ? 150 : 110) * spd;
+          this.t -= dt; this.roarCD -= dt;
+          if (adist < 130) { this.st = 'swipewarn'; this.t = 0.32; this.vx = 0; }
+          else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(6.5, 8.5); }
+          else if (this.t <= 0 && adist > 170 && adist < 470) { this.st = 'crouch'; this.t = 0.55; this.vx = 0; }
+          else if (this.t <= 0) this.t = rnd(1.1, 1.9);
+        } else if (this.st === 'swipewarn') {
+          // the paw rises — that is your tell
+          this.vx = 0; this.t -= dt; this.windT = 0.3;
+          if (this.t <= 0) { this.st = 'swipe'; this.t = 0.24; this.swiped = false; }
+        } else if (this.st === 'swipe') {
+          this.vx = 0; this.t -= dt;
+          if (!this.swiped && this.t <= 0.18) {
+            this.swiped = true;
+            const f = this.face || 1;
+            const box = { x: this.cx() + (f > 0 ? 6 : -114), y: this.y - 24, w: 108, h: this.h + 28 };
+            burst(this.cx() + f * 66, this.cy(), 10, '#b06aff', 260, 0.35, 150, 3, true);
+            sfx('atk');
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
+          }
           if (this.t <= 0) {
-            const k = this.cycle++ % 4;
-            this.st = k === 2 ? 'leap' : k === 3 ? 'bore' : 'charge';
-            this.t = this.st === 'bore' ? 1.1 : 3;
-            if (this.st === 'leap') { this.vy = -680; this.vx = this.face * 280 * spd; }
+            // a lion swipes twice when it is angry
+            if (this.phase === 2 && chance(0.5)) { this.st = 'swipewarn'; this.t = 0.22; }
+            else { this.st = 'idle'; this.t = rnd(0.5, 0.9); }
           }
-        } else if (this.st === 'bore') {
-          // rears up, then drives the bore-head into the floor
-          this.vx = 0; this.t -= dt; this.windT = 0.35;
-          // grind dust and sparks at the drill tip while the head is in the floor
-          if (this.t <= 0.64 && this.t > 0.15) {
-            const nx = this.cx() + (this.faceVis || this.face || 1) * this.w * 0.55;
-            if (chance(0.85)) addPart(nx + rnd(-10, 10), this.y + this.h - rnd(0, 6), rnd(-100, 100), rnd(-170, -40), 0.45, '#b9a888', 3, 260, true);
-            if (chance(0.3)) addPart(nx + rnd(-6, 6), this.y + this.h - 4, rnd(-140, 140), rnd(-220, -80), 0.25, '#ffd76a', 2, 300, true);
+        } else if (this.st === 'crouch') {
+          // flat to the ground, trembling with intent — then the pounce
+          this.vx = 0; this.t -= dt; this.windT = 0.3;
+          if (this.t <= 0) {
+            this.st = 'pounce';
+            this.face = Math.sign(dist) || 1;
+            this.vx = clamp(dist * 1.5, -560, 560) * (this.phase === 2 ? 1.15 : 1) * spd;
+            this.vy = -(420 + Math.min(260, adist * 0.5));
+            sfx('dash');
           }
-          if (this.t <= 0.6 && !this.bored) {
-            this.bored = true;
-            this.plantBore(clamp(px, 40, G.roomDef.w * TILE - 40));
-            cam.shake = 10; sfx('phit');
+        } else if (this.st === 'pounce') {
+          // airborne, claws first, virus streaming off the coat
+          if (chance(0.5)) addPart(this.cx() - this.face * 30, this.cy() + rnd(-14, 14),
+            -this.face * rnd(60, 140), rnd(-40, 40), 0.3, '#b06aff', 2.5, 0, true);
+        } else if (this.st === 'roar') {
+          this.vx = 0; this.t -= dt;
+          if (!this.roared && this.t <= 0.75) {
+            this.roared = true;
+            cam.shake = 11; sfx('roar'); G.flash = Math.max(G.flash, 0.18);
+            if (typeof G.addRing === 'function') G.addRing(this.cx(), this.cy() - 20);
+            // the roar itself shoves you off your feet
+            if (adist < 250 && !player.dead) {
+              player.vx = (Math.sign(dist) || 1) * 520;
+              player.vy = Math.min(player.vy, -170);
+            }
+            // and the pack answers
+            if (G.enemies.filter(e => !e.dead && (e.kind === 'crawler' || e.kind === 'hopper')).length < (this.phase === 2 ? 2 : 1)) {
+              const wx = clamp(this.cx() - this.face * 150, 60, G.roomDef.w * TILE - 60);
+              const wl = new Enemy('crawler', wx, this.y + this.h - 26);
+              G.enemies.push(wl);
+              burst(wx, this.y + this.h - 10, 12, '#b06aff', 220, 0.5, 260, 3, true);
+            }
           }
-          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.6, 1.0); this.bored = false; }
-        } else if (this.st === 'charge') {
-          this.vx = this.face * (this.phase === 2 ? 560 : 420) * spd;
-          if (chance(0.4)) addPart(this.cx() - this.face * 24, this.y + this.h, -this.face * 60, rnd(-60, 0), 0.3, PAL.A.glow, 3, 300, true);
-          this.t -= dt;
+          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(1.6, 2.6); }
+        } else if (this.st === 'recover') {
+          // a beat of stillness after the landing — your window
+          this.vx *= 0.8; this.t -= dt;
+          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.4, 0.7); }
         }
         const col = moveEnt(this, dt);
-        const hitEdge = this.x <= 0 || this.x >= G.roomDef.w * TILE - this.w;
-        if (this.st === 'charge' && (col.l || col.r || hitEdge || this.t <= 0)) {
-          this.st = 'idle'; this.t = rnd(0.5, 0.9); cam.shake = 6; sfx('phit');
-          burst(this.cx() + this.face * this.w / 2, this.y + this.h * 0.6, 14, PAL[G.roomDef.zone].glow, 240, 0.5, 200, 3, true);
+        if (this.st === 'pounce' && col.d) {
+          this.st = 'recover'; this.t = 0.5;
+          cam.shake = 8; sfx('land');
+          for (let i = 0; i < 10; i++)
+            addPart(this.cx() + rnd(-this.w * 0.5, this.w * 0.5), this.y + this.h - 4,
+              rnd(-160, 160), rnd(-180, -40), 0.4, '#b9a888', 3, 300, true);
+          const box = { x: this.cx() - 80, y: this.y, w: 160, h: this.h + 8 };
+          if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
         }
-        if (this.st === 'leap' && col.d) {
-          this.st = 'idle'; this.t = rnd(0.5, 0.8); cam.shake = 7;
-          if (this.phase === 2) { this.shoot(-220, -320, 6, 900); this.shoot(220, -320, 6, 900); sfx('shoot'); }
-        }
+        if (this.st === 'stalk' && (col.l || col.r)) this.face *= -1;
         break;
       }
       // ---- Broodmother: hangs above, spawns and slams ----
