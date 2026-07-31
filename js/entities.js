@@ -2396,7 +2396,7 @@ class Boss {
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
-    if (this.dead) { drawDriller(c, this); c.restore(); return; }
+    if (this.dead) { if (!(typeof drawDriller3D === 'function' && this.deathAnimT <= 0 && false)) drawDriller(c, this); c.restore(); return; }
     // telegraphs
     this.drawAbilities(c);
     if (this.kind === 'zero') for (const m of this.marks) {
@@ -2437,6 +2437,7 @@ class Boss {
         return;
       }
     }
+    if (this.kind === 'glitch' && typeof drawDriller3D === 'function' && drawDriller3D(c, this)) { c.restore(); return; }
     if (this.kind === 'glitch' && drawDriller(c, this)) { c.restore(); return; }
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
           flash: this.hurtT > 0 ? 1 : 0,
