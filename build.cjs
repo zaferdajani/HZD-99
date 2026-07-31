@@ -46,7 +46,10 @@ const files = ['vendor-three', 'model3d', 'beast', 'eagle', 'theme', 'mat', 'typ
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 const html = fs.readFileSync('dev.html', 'utf8');
 const buildId = Date.now().toString(36);
-const out = html.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/,
+// the loading screen paints while the megabytes below it still stream in
+const loader = fs.readFileSync('loader.html', 'utf8');
+const out = html.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/, () =>
+  loader + '\n' +
   '<script>window.BUILD_ID=' + JSON.stringify(buildId) + '</script>\n' +
   '<script>window.EMBEDDED_MEDIA=' + JSON.stringify(media) + '</script>\n' +
   '<script>\n' + files.join('\n') + '\n</script>\n</body>');

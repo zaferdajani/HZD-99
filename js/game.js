@@ -2954,6 +2954,11 @@ function mainLoop(tms) {
   draw(tms);
   drawTouchUI();
   clearP();
+  if (!mainLoop.ldGone) {
+    mainLoop.ldGone = true;
+    const ld = document.getElementById('cbload');
+    if (ld) { ld.style.opacity = '0'; setTimeout(() => { try { ld.remove(); } catch (e) {} }, 500); }
+  }
   requestAnimationFrame(mainLoop);
 }
 requestAnimationFrame(mainLoop);
