@@ -174,6 +174,17 @@ function beastPose(b) {
     P.crouch = 6; P.pitch = 0.04;
     P.legs[0] = { a1: 0.55, a2: -0.35 };
     P.glow = 1.4;
+  } else if (st === 'spring' || st === 'dive') {
+    // airborne leap: forelegs reaching, hindlegs driving
+    P.pitch = st === 'dive' ? 0.3 : -0.22; P.bob = 0;
+    P.legs[0] = P.legs[2] = { a1: -0.7, a2: 0.5 };
+    P.legs[1] = P.legs[3] = { a1: 0.65, a2: -0.45 };
+    P.glow = 1.3; P.tailUp = 0.8; P.tailA = 0.3;
+  } else if (st === 'perch') {
+    // poised on the ledge, weight gathered, tail cutting the air
+    P.crouch = 8; P.neckA = 0.1; P.headA = 0.16;
+    P.tailA = Math.sin(t * 9) * 0.35; P.tailUp = -0.4;
+    P.glow = 1.1;
   } else if (st === 'recover') {
     // landed, gathering itself — the opening
     P.crouch = 16; P.glow = 0.45;
@@ -264,6 +275,7 @@ function drawBeast(c, b) {
     // (the artist's pixels, mirror-composited) looks at the camera
     const turnFront = ta < 0.3 && !b.dead && b.stagT <= 0
       && b.st !== 'pounce' && b.st !== 'crouch' && b.st !== 'roar'
+      && b.st !== 'springwarn' && b.st !== 'spring' && b.st !== 'dive'
       ? beastFront() : null;
     if (turnFront) {
       const k = 1 - ta / 0.3;
@@ -290,6 +302,9 @@ function drawBeast(c, b) {
       // the authored pounce: crouched attack figure riding the arc
       const dive = Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400));
       bFig(c, 'aAtk', dive, 0);
+    } else if ((b.st === 'springwarn' || (b.st === 'perch' && (b.t || 0) <= 0.45)) && !b.dead) {
+      // the flattened crouch figure IS the tell, on the ground or the ledge
+      bFig(c, 'aAtk', 0, 1.8);
     } else if (b.st === 'crouch' && !b.dead) {
       // flat in the grass, trembling with intent — the sheet's own crouch
       bFig(c, 'aAtk', 0, 1.6);

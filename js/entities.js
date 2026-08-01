@@ -2125,15 +2125,33 @@ class Boss {
         if (this.st === 'idle') {
           this.vx = 0; this.t -= dt;
           this.face = Math.sign(dist) || 1;
-          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(2.0, 3.2); this.roarCD = this.roarCD || rnd(4.5, 6.5); }
+          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(1.4, 2.4); this.roarCD = this.roarCD || rnd(4, 5.5); if (this.ambushCD == null) this.ambushCD = rnd(5, 8); }
         } else if (this.st === 'stalk') {
           // low prowl toward you, patient, gathering pounce distance
           this.face = Math.sign(dist) || 1;
-          this.vx = this.face * (this.phase === 2 ? 150 : 110) * spd;
-          this.t -= dt; this.roarCD -= dt;
-          if (adist < 130) { this.st = 'swipewarn'; this.t = 0.32; this.vx = 0; }
-          else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(6.5, 8.5); }
-          else if (this.t <= 0 && adist > 170 && adist < 470) { this.st = 'crouch'; this.t = 0.55; this.vx = 0; }
+          this.vx = this.face * (this.phase === 2 ? 210 : 165) * spd;
+          this.t -= dt; this.roarCD -= dt; this.ambushCD -= dt;
+          if (this.ambushCD <= 0) {
+            // scan the room for perches ('=' platform runs)
+            const per = [];
+            for (let ty2 = 3; ty2 < G.roomDef.h - 2; ty2++) {
+              let run = 0;
+              for (let tx2 = 1; tx2 < G.roomDef.w; tx2++) {
+                const ch2 = G.grid && G.grid[ty2] && G.grid[ty2][tx2];
+                if (ch2 === '=') run++;
+                else { if (run >= 3) per.push([(tx2 - run / 2) * TILE, ty2 * TILE]); run = 0; }
+              }
+              if (run >= 3) per.push([(G.roomDef.w - run / 2) * TILE, ty2 * TILE]);
+            }
+            if (per.length) {
+              per.sort((a2, b2) => Math.abs(a2[0] - this.cx()) - Math.abs(b2[0] - this.cx()));
+              this.perch = per[0];
+              this.st = 'springwarn'; this.t = 0.42; this.vx = 0;
+            }
+            this.ambushCD = rnd(this.phase === 2 ? 6 : 9, this.phase === 2 ? 9 : 12);
+          } else if (adist < 130) { this.st = 'swipewarn'; this.t = 0.32; this.vx = 0; }
+          else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(5.5, 7); }
+          else if (this.t <= 0 && adist > 170 && adist < 470) { this.st = 'crouch'; this.t = 0.45; this.vx = 0; }
           else if (this.t <= 0) this.t = rnd(1.1, 1.9);
         } else if (this.st === 'swipewarn') {
           // the paw rises — that is your tell
@@ -2160,7 +2178,7 @@ class Boss {
           if (this.t <= 0) {
             this.st = 'pounce';
             this.face = Math.sign(dist) || 1;
-            this.vx = clamp(dist * 1.5, -560, 560) * (this.phase === 2 ? 1.15 : 1) * spd;
+            this.vx = clamp(dist * 1.6, -640, 640) * (this.phase === 2 ? 1.15 : 1) * spd;
             this.vy = -(420 + Math.min(260, adist * 0.5));
             sfx('dash');
           }
@@ -2188,14 +2206,70 @@ class Boss {
             }
           }
           if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(1.6, 2.6); }
+        } else if (this.st === 'springwarn') {
+          // crouched, eyes up at the perch — dust already rising off its back
+          this.vx = 0; this.vy = 0; this.t -= dt; this.windT = 0.3;
+          if (chance(0.4)) addPart(this.cx() + rnd(-20, 20), this.y + rnd(0, 10), rnd(-30, 30), rnd(-120, -60), 0.3, '#b9a888', 2, 0, true);
+          if (this.t <= 0) {
+            this.st = 'spring'; this.u = 0;
+            this.sx = this.x; this.sy = this.y;
+            this.tx = clamp(this.perch[0] - this.w / 2, 40, G.roomDef.w * TILE - this.w - 40);
+            this.ty = this.perch[1] - this.h;
+            this.face = Math.sign(this.tx - this.x) || 1;
+            sfx('dash');
+          }
+        } else if (this.st === 'spring') {
+          // one clean leap onto the platform
+          this.u += dt / 0.55;
+          const u2 = Math.min(1, this.u);
+          this.x = lerp(this.sx, this.tx, u2);
+          this.y = lerp(this.sy, this.ty, u2) - Math.sin(u2 * Math.PI) * 120;
+          this.vx = (this.tx - this.sx) / 0.55; this.vy = 0;
+          if (u2 >= 1) {
+            this.x = this.tx; this.y = this.ty; this.vx = 0;
+            this.st = 'perch'; this.t = this.phase === 2 ? 1.0 : 1.4;
+            cam.shake = 5; sfx('land');
+          }
+        } else if (this.st === 'perch') {
+          // up on the ledge, tracking you; it flattens and the eye flares
+          // in the last half second — that is the dive coming
+          this.vx = 0; this.vy = 0; this.t -= dt;
+          this.face = Math.sign(dist) || 1;
+          if (this.t <= 0.45) this.windT = 0.3;
+          if (this.t <= 0) {
+            this.st = 'dive'; this.u = 0;
+            this.sx = this.x; this.sy = this.y;
+            this.tx = clamp(px - this.w / 2, 20, G.roomDef.w * TILE - this.w - 20);
+            this.ty = player.y + player.h - this.h;
+            this.face = Math.sign(this.tx - this.x) || 1;
+            sfx('dash');
+          }
+        } else if (this.st === 'dive') {
+          // claws-first drop onto the prey
+          this.u += dt / 0.42;
+          const u2 = Math.min(1, this.u);
+          this.x = lerp(this.sx, this.tx, u2);
+          this.y = lerp(this.sy, this.ty, u2 * u2);   // accelerating fall
+          this.vx = (this.tx - this.sx) / 0.42; this.vy = 600;
+          if (chance(0.6)) addPart(this.cx() - this.face * 26, this.cy() + rnd(-16, 16), -this.face * rnd(60, 130), rnd(-60, 30), 0.3, '#b06aff', 2.5, 0, true);
+          if (u2 >= 1) {
+            this.st = 'recover'; this.t = this.phase === 2 ? 0.34 : 0.45;
+            cam.shake = 10; sfx('boom');
+            for (let i = 0; i < 12; i++)
+              addPart(this.cx() + rnd(-this.w * 0.6, this.w * 0.6), this.y + this.h - 4,
+                rnd(-180, 180), rnd(-200, -50), 0.45, '#b9a888', 3, 300, true);
+            const box = { x: this.cx() - 92, y: this.y - 8, w: 184, h: this.h + 22 };
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
+            if (this.phase === 2 && typeof G.addRing === 'function') G.addRing(this.cx(), this.y + this.h - 8);
+          }
         } else if (this.st === 'recover') {
           // a beat of stillness after the landing — your window
           this.vx *= 0.8; this.t -= dt;
           if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.4, 0.7); }
         }
-        const col = moveEnt(this, dt);
+        const col = (this.st === 'spring' || this.st === 'dive') ? {} : moveEnt(this, dt);
         if (this.st === 'pounce' && col.d) {
-          this.st = 'recover'; this.t = 0.5;
+          this.st = 'recover'; this.t = this.phase === 2 ? 0.32 : 0.42;
           cam.shake = 8; sfx('land');
           for (let i = 0; i < 10; i++)
             addPart(this.cx() + rnd(-this.w * 0.5, this.w * 0.5), this.y + this.h - 4,
