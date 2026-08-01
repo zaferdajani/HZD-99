@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msa3seti"</script>
+<script>window.BUILD_ID="msa46ewq"</script>
 <script>
 /**
  * @license
@@ -5979,15 +5979,21 @@ class Enemy {
         const col = moveEnt(this, dt);
         if (col.d) {
           this.vx = 0; this.t -= dt;
+          // it faces its prey while gathering — so the leap goes nose-first
+          this.dir = Math.sign(px - cx) || this.dir || 1;
           if (this.t <= 0 && !player.dead && Math.abs(px - cx) < 380) {
             this.t = rnd(1.1, 1.9);
-            this.vy = -560; this.vx = Math.sign(px - cx) * this.spd;
+            this.dir = Math.sign(px - cx) || 1;
+            this.vy = -560; this.vx = this.dir * this.spd;
             sfx('jump');
           }
         }
         break;
       }
     }
+    // spikes are spikes for everyone: a machine that lands in the pit dies
+    // in it — no creature camps where the player cannot stand
+    if (onSpike(this)) { this.die(0, -0.4); return; }
     // touch damage
     if (!player.dead && aabb(this, player)) player.hurt(DF().edmg, cx);
   }
@@ -10622,11 +10628,11 @@ function tLayout() {
       // the shuriken, the Song and the suit wheel all need a thumb on mobile
       { code: 'VSTAR', x: rgx - half * 2.1, y: H - 226 * u, r: 24 * u, icon: '✦',
         show: () => typeof starCount === 'function' && starCount() > 0 },
-      { code: 'VSONG', x: lgx, y: H * 0.60, r: 25 * u, icon: '♪',
+      { code: 'VSONG', x: lgx, y: H * 0.42, r: 25 * u, icon: '♪',
         show: () => player && player.volts >= (typeof SONG_COST === 'number' ? SONG_COST : 26) },
-      { code: 'VARM', x: lgx, y: H * 0.76, r: 22 * u, icon: '◈',
+      { code: 'VARM', x: lgx, y: H * 0.56, r: 22 * u, icon: '◈',
         show: () => typeof armSlots === 'function' && armSlots().length > 1 },
-      { code: 'VINT', x: lgx, y: H * 0.42, r: 26 * u, icon: 'E', show: () => !!G.near },
+      { code: 'VINT', x: lgx, y: H * 0.28, r: 26 * u, icon: 'E', show: () => !!G.near },
     ],
     // menu buttons live in the LEFT column, actions in the right — no clutter
     corners: [

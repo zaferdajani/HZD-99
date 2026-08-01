@@ -1604,15 +1604,21 @@ class Enemy {
         const col = moveEnt(this, dt);
         if (col.d) {
           this.vx = 0; this.t -= dt;
+          // it faces its prey while gathering — so the leap goes nose-first
+          this.dir = Math.sign(px - cx) || this.dir || 1;
           if (this.t <= 0 && !player.dead && Math.abs(px - cx) < 380) {
             this.t = rnd(1.1, 1.9);
-            this.vy = -560; this.vx = Math.sign(px - cx) * this.spd;
+            this.dir = Math.sign(px - cx) || 1;
+            this.vy = -560; this.vx = this.dir * this.spd;
             sfx('jump');
           }
         }
         break;
       }
     }
+    // spikes are spikes for everyone: a machine that lands in the pit dies
+    // in it — no creature camps where the player cannot stand
+    if (onSpike(this)) { this.die(0, -0.4); return; }
     // touch damage
     if (!player.dead && aabb(this, player)) player.hurt(DF().edmg, cx);
   }

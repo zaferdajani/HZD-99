@@ -107,11 +107,11 @@ function tLayout() {
       // the shuriken, the Song and the suit wheel all need a thumb on mobile
       { code: 'VSTAR', x: rgx - half * 2.1, y: H - 226 * u, r: 24 * u, icon: '✦',
         show: () => typeof starCount === 'function' && starCount() > 0 },
-      { code: 'VSONG', x: lgx, y: H * 0.60, r: 25 * u, icon: '♪',
+      { code: 'VSONG', x: lgx, y: H * 0.42, r: 25 * u, icon: '♪',
         show: () => player && player.volts >= (typeof SONG_COST === 'number' ? SONG_COST : 26) },
-      { code: 'VARM', x: lgx, y: H * 0.76, r: 22 * u, icon: '◈',
+      { code: 'VARM', x: lgx, y: H * 0.56, r: 22 * u, icon: '◈',
         show: () => typeof armSlots === 'function' && armSlots().length > 1 },
-      { code: 'VINT', x: lgx, y: H * 0.42, r: 26 * u, icon: 'E', show: () => !!G.near },
+      { code: 'VINT', x: lgx, y: H * 0.28, r: 26 * u, icon: 'E', show: () => !!G.near },
     ],
     // menu buttons live in the LEFT column, actions in the right — no clutter
     corners: [
