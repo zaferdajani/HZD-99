@@ -198,6 +198,7 @@ function spawnStatic(type, tx, ty, extra, flagKey) {
   G.statics.push({ type, x: tx * TILE + (TILE - w) / 2, y: ty * TILE - h, w, h, extra, flagKey, opened: !!(flagKey && G.save.flags[flagKey]), t: rnd(0, 9) });
 }
 function loadRoom(id) {
+  if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
   G.wrecks = []; G.recharge = null;
@@ -418,7 +419,22 @@ function fxDecay(dt) {
   if (G.impact) { G.impact.t -= dt; if (G.impact.t <= 0) G.impact = null; }
   if (G.bolt) { G.bolt.t -= dt; if (G.bolt.t <= 0) G.bolt = null; }
 }
+function tickNPCVox() {
+  // proximity mixing: each NPC's voice swells as she draws near, and blooms
+  // while it is actually speaking with her
+  if (typeof npcVoxTick !== 'function' || !G.statics) return;
+  for (const s of G.statics) {
+    if (s.type !== 'npc') continue;
+    const d = Math.hypot(player.x + player.w / 2 - (s.x + s.w / 2),
+                         player.y + player.h / 2 - (s.y + s.h / 2));
+    const talking = G.state === 'DIALOG' && G.dialog && G.dialog.npc === s.extra;
+    const k = clamp(1 - d / 320, 0, 1);
+    npcVoxTick(s.extra, (talking ? 0.85 : k * k) * 0.6);
+  }
+}
 function update(dt) {
+  if (G.state === 'PLAY' || G.state === 'DIALOG') tickNPCVox();
+  else if (typeof npcVoxQuietAll === 'function') npcVoxQuietAll();
   if (G.state === 'PLAY') {
     G.save.time += dt;
     fxDecay(dt);
@@ -1756,64 +1772,8 @@ function drawStatics(P) {
       if (typeof isHero === 'function' && isHero() && drawHeroNPC(c, id, s)) {
         // the Odyssey has its own people — robed, human, Greek. The machine
         // folk below belong to the Depths and stay there.
-      } else if (id === 'servo') {
-        c.fillStyle = '#5c5346'; c.beginPath(); c.arc(0, -14, 15, 0, 7); c.fill();
-        c.fillStyle = '#463f35'; c.beginPath(); c.arc(0, -26, 10, 0, 7); c.fill();
-        c.fillStyle = '#ffd76a'; c.shadowColor = '#ffd76a'; c.shadowBlur = 8;
-        c.fillRect(-5, -29, 4, 4); c.fillRect(2, -29, 4, 4); c.shadowBlur = 0;
-        c.strokeStyle = '#5c5346'; c.lineWidth = 2;
-        c.beginPath(); c.moveTo(0, -36); c.lineTo(0, -42); c.stroke();
-        c.fillStyle = '#ff9430'; c.beginPath(); c.arc(0, -43, 2.5, 0, 7); c.fill();
-      } else if (id === 'ratchet') {
-        c.fillStyle = '#6e5a3a'; rr(c, -13, -22, 26, 22, 6); c.fill();
-        c.fillStyle = '#8a7248'; c.beginPath(); c.moveTo(4, -26); c.lineTo(22, -20); c.lineTo(6, -14); c.closePath(); c.fill();
-        c.fillStyle = '#0a1420'; c.beginPath(); c.arc(8, -22, 2.5, 0, 7); c.fill();
-        c.fillStyle = '#4a3b22'; rr(c, -18, -14, 10, 14, 3); c.fill();
-        c.strokeStyle = '#8a7248'; c.lineWidth = 2;
-        c.beginPath(); c.moveTo(-11, -22); c.quadraticCurveTo(-20, -30, -16, -36); c.stroke();
-      } else if (id === 'mono') {
-        c.fillStyle = '#2b3a52'; rr(c, -8, -38, 16, 38, 6); c.fill();
-        c.fillStyle = '#57a8ff'; c.shadowColor = '#57a8ff'; c.shadowBlur = 10;
-        c.fillRect(-5, -33, 10, 4); c.shadowBlur = 0;
-        c.strokeStyle = '#3b4d6b'; c.lineWidth = 2;
-        for (let k = 0; k < 3; k++) { c.beginPath(); c.moveTo(-8, -24 + k * 7); c.lineTo(8, -24 + k * 7); c.stroke(); }
-      } else if (id === 'patch') {
-        const sc = Math.sin(performance.now() / 130 + s.t) * 1.6;
-        c.strokeStyle = '#4a3b22'; c.lineWidth = 2.4; c.lineCap = 'round';
-        for (let k = 0; k < 4; k++) {
-          const lx = -12 + k * 8, lift = (k % 2 ? sc : -sc);
-          c.beginPath(); c.moveTo(lx * 0.5, -12); c.lineTo(lx, -4 + lift); c.lineTo(lx + 3, 0 + lift * 0.5); c.stroke();
-        }
-        c.fillStyle = '#6e5a3a'; c.beginPath(); c.arc(0, -16, 11, 0, 7); c.fill();
-        c.fillStyle = '#4a3b22'; c.beginPath(); c.arc(0, -20, 6, 0, 7); c.fill();
-        c.fillStyle = '#ffd08a'; c.shadowColor = '#ffd08a'; c.shadowBlur = 8;
-        c.fillRect(-4, -22, 3, 3); c.fillRect(1, -22, 3, 3); c.shadowBlur = 0;
-        c.strokeStyle = '#8a7248'; c.lineWidth = 1.6;
-        c.beginPath(); c.moveTo(8, -20); c.lineTo(14, -26); c.stroke();
-        c.fillStyle = '#ff9430'; c.beginPath(); c.arc(14.5, -26.5, 1.8, 0, 7); c.fill();
-      } else if (id === 'lumen') {
-        const fl = Math.sin(performance.now() / 90 + s.t) * 4;
-        const gp = 0.5 + Math.sin(performance.now() / 400 + s.t) * 0.4;
-        c.fillStyle = 'rgba(125,255,154,0.28)';
-        c.beginPath(); c.ellipse(-8, -18 - fl, 9, 3.5, -0.5, 0, 7); c.fill();
-        c.beginPath(); c.ellipse(8, -18 - fl, 9, 3.5, 0.5, 0, 7); c.fill();
-        c.fillStyle = '#2f4a38';
-        c.beginPath(); c.moveTo(0, -26); c.quadraticCurveTo(9, -18, 0, -4); c.quadraticCurveTo(-9, -18, 0, -26); c.fill();
-        c.fillStyle = '#7dff9a'; c.shadowColor = '#7dff9a'; c.shadowBlur = 10 + gp * 10;
-        c.beginPath(); c.arc(0, -13, 4.5, 0, 7); c.fill(); c.shadowBlur = 0;
-        c.fillStyle = '#0a1420'; c.fillRect(-3, -23, 2.4, 2.4); c.fillRect(1, -23, 2.4, 2.4);
-      } else if (id === 'sage') {
-        c.fillStyle = '#3d4a5c'; c.beginPath(); c.arc(0, -12, 14, 0, 7); c.fill();
-        c.fillStyle = '#4d5c70'; c.beginPath(); c.arc(0, -28, 9, 0, 7); c.fill();
-        c.beginPath(); c.moveTo(-7, -33); c.lineTo(-5, -41); c.lineTo(-1, -34); c.closePath(); c.fill();
-        c.beginPath(); c.moveTo(1, -34); c.lineTo(5, -41); c.lineTo(7, -33); c.closePath(); c.fill();
-        c.fillStyle = '#9fe8ff'; c.shadowColor = '#9fe8ff'; c.shadowBlur = 8;
-        c.fillRect(-5, -30, 3.5, 3.5); c.fillRect(1.5, -30, 3.5, 3.5); c.shadowBlur = 0;
-        c.strokeStyle = 'rgba(159,232,255,0.5)'; c.lineWidth = 2;
-        for (let k = 0; k < 5; k++) {
-          const aa = -0.9 + k * 0.45 + Math.sin(performance.now() / 700 + k) * 0.1;
-          c.beginPath(); c.moveTo(0, -4); c.quadraticCurveTo(Math.sin(aa) * 20, -2, Math.sin(aa) * 26, 4); c.stroke();
-        }
+      } else {
+        drawNPCBody(c, id, performance.now() / 1000 + (s.t || 0) * 1.7, talking);
       }
       c.restore();
     }
@@ -3416,6 +3376,348 @@ function drawCine() {
     } else {
       c.fillStyle = 'rgba(255,255,255,' + clamp(gk / 0.3, 0, 1) + ')';
       c.fillRect(0, 0, 960, 540);
+    }
+  }
+}
+// ---- the machine world's people ------------------------------------------
+// Rebuilt as VOLUMES, not stickers: every form is a path clipped to a
+// diagonal light ramp (upper-left key light, cool shadows, warm lights),
+// with a segmented rim, asymmetric wear, and exactly one emissive accent.
+// Local space: origin at the feet, facing +x; the caller flips and bobs.
+function drawNPCBody(c, id, tn, talking) {
+  const lin = (x0, y0, x1, y1, st) => {
+    const g = c.createLinearGradient(x0, y0, x1, y1);
+    for (const s2 of st) g.addColorStop(s2[0], s2[1]);
+    return g;
+  };
+  const ao = (x, r, a) => {
+    c.save(); c.globalAlpha = a == null ? 0.3 : a; c.fillStyle = '#04070b';
+    c.beginPath(); c.ellipse(x, -1, r, r * 0.22, 0, 0, 7); c.fill(); c.restore();
+  };
+  const blink = (tn % 4.3) < 0.1, blink2 = ((tn + 1.7) % 3.7) < 0.1;
+  if (talking) c.rotate(-0.03 + Math.sin(tn * 8) * 0.015);
+  switch (id) {
+    case 'servo': {   // the Old Unit — a worn sphere on treads, still warm
+      const br = Math.sin(tn * 1.9) * 0.8;
+      ao(0, 17);
+      // tread base: square = stable; it doesn't travel much anymore
+      c.fillStyle = '#26241f'; rr(c, -13, -7, 26, 7, 3); c.fill();
+      c.fillStyle = lin(-13, -8, 8, 0, [[0, '#5c584c'], [1, '#302d27']]);
+      rr(c, -13, -7, 26, 3.4, 2); c.fill();
+      c.fillStyle = '#171613';
+      for (let k = -1; k <= 1; k++) { c.beginPath(); c.arc(k * 8, -3.4, 2.2, 0, 7); c.fill(); }
+      // the body: one dome, DENTED on the right — a concave bite in the
+      // silhouette that thirty years of service put there
+      const body = () => {
+        c.beginPath();
+        c.moveTo(-13, -8);
+        c.bezierCurveTo(-16, -20 - br, -9, -30.5 - br, 0, -31 - br);
+        c.bezierCurveTo(7, -31 - br, 12, -26 - br, 13, -19 - br);
+        c.quadraticCurveTo(13.6, -15, 11.6, -12.4);
+        c.quadraticCurveTo(10.2, -10.4, 12.4, -8.4);
+        c.closePath();
+      };
+      c.save(); body(); c.clip();
+      c.fillStyle = lin(-14, -34, 12, -6, [[0, '#efe6d2'], [0.35, '#c9bda2'], [0.7, '#8d8371'], [1, '#565349']]);
+      c.fillRect(-18, -36, 36, 32);
+      c.fillStyle = 'rgba(150,86,58,0.5)';                 // rust bloom, one side only
+      c.beginPath(); c.ellipse(9, -13 - br, 5, 7, 0.5, 0, 7); c.fill();
+      c.fillStyle = 'rgba(122,66,44,0.45)';
+      c.beginPath(); c.ellipse(11, -10 - br, 3, 4, 0.5, 0, 7); c.fill();
+      c.strokeStyle = 'rgba(40,38,34,0.5)'; c.lineWidth = 1; // hatch seam
+      c.beginPath(); c.arc(0, -14 - br, 8, 0.4, 2.7); c.stroke();
+      // segmented rim: bright over a short arc, lost at both ends
+      c.strokeStyle = lin(-13, -31, 4, -18, [[0, 'rgba(255,250,235,0)'], [0.45, 'rgba(255,250,235,0.9)'], [1, 'rgba(255,250,235,0)']]);
+      c.lineWidth = 2.2; body(); c.stroke();
+      c.restore();
+      // brow ridge PLATE with a lit top edge; the eyes are housed under it
+      c.fillStyle = lin(-9, -28 - br, 8, -22 - br, [[0, '#b6a88c'], [1, '#5f584a']]);
+      rr(c, -9, -26.5 - br, 17.5, 4, 2); c.fill();
+      c.strokeStyle = 'rgba(255,250,235,0.55)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(-8, -26.6 - br); c.lineTo(6.5, -26.8 - br); c.stroke();
+      c.fillStyle = '#171512'; rr(c, -8, -23 - br, 15.5, 6.4, 3); c.fill();
+      const ep = blink ? 0.12 : 1;
+      c.fillStyle = 'rgba(255,201,100,' + ep + ')'; c.shadowColor = '#ffc964'; c.shadowBlur = 7;
+      rr(c, -6.2, -22 - br, 4.6, 4.4, 1.6); c.fill();
+      rr(c, 1.2, -22 - br, 4, 4, 1.6); c.fill();           // right eye a touch smaller
+      c.shadowBlur = 0;
+      c.fillStyle = 'rgba(40,36,30,0.7)';                  // speaker grille
+      for (let k = 0; k < 3; k++) c.fillRect(-3 + k * 2.4, -13.8 - br, 1.2, 2.6);
+      // one antenna, bent by the years, lamp still burning — his emissive
+      const asw = Math.sin(tn * 1.5) * 1.2;
+      c.strokeStyle = '#57503f'; c.lineWidth = 1.8; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(-4, -29.5 - br); c.quadraticCurveTo(-7, -37 - br, -1 + asw, -40 - br); c.stroke();
+      c.fillStyle = '#ff9430'; c.shadowColor = '#ff9430'; c.shadowBlur = 7;
+      c.beginPath(); c.arc(-0.6 + asw, -40.4 - br, 2, 0, 7); c.fill(); c.shadowBlur = 0;
+      // little folded arms
+      c.strokeStyle = '#494438'; c.lineWidth = 3; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(-11.5, -16 - br); c.quadraticCurveTo(-13.5, -12, -10.5, -10); c.stroke();
+      c.beginPath(); c.moveTo(11, -15 - br); c.quadraticCurveTo(13, -12, 10.5, -10.5); c.stroke();
+      break;
+    }
+    case 'ratchet': { // Hermes of the scrap heaps — his silhouette IS the shop
+      const br = Math.sin(tn * 1.6) * 0.9;
+      const sway = Math.sin(tn * 1.1) * 2.2;
+      ao(2, 20);
+      // BEHIND: the salvage pack towering over him
+      const pack = () => {
+        c.beginPath();
+        c.moveTo(-19, -4);
+        c.bezierCurveTo(-24, -18, -22, -34, -14, -40);
+        c.quadraticCurveTo(-6, -44, 0, -40);
+        c.quadraticCurveTo(2, -30, 1, -18);
+        c.quadraticCurveTo(0, -8, -2, -4);
+        c.closePath();
+      };
+      c.save(); pack(); c.clip();
+      c.fillStyle = lin(-24, -44, 2, -6, [[0, '#9a8560'], [0.4, '#77654a'], [0.75, '#544838'], [1, '#3a3330']]);
+      c.fillRect(-26, -46, 30, 44);
+      c.fillStyle = 'rgba(140,110,70,0.7)'; rr(c, -20, -30, 9, 8, 2); c.fill();   // stitched patches,
+      c.fillStyle = 'rgba(94,120,128,0.65)'; rr(c, -12, -38, 8, 7, 2); c.fill();  // mismatched on purpose
+      c.strokeStyle = 'rgba(35,30,26,0.6)'; c.lineWidth = 1.2;                    // cargo straps
+      c.beginPath(); c.moveTo(-22, -22); c.quadraticCurveTo(-10, -26, 1, -22); c.stroke();
+      c.beginPath(); c.moveTo(-21, -12); c.quadraticCurveTo(-10, -16, 0, -12); c.stroke();
+      c.restore();
+      // dangling wares off the pack — the whole shop sways when he breathes
+      for (let k = 0; k < 2; k++) {
+        const tx2 = -21 + k * 5, tsw = Math.sin(tn * 1.4 + k * 2.1) * 1.4;
+        c.strokeStyle = 'rgba(40,34,28,0.8)'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(tx2, -20 + k * 9); c.lineTo(tx2 + tsw, -14 + k * 9); c.stroke();
+        c.fillStyle = k ? '#8fa8b0' : '#c9a05e';
+        if (k) { c.beginPath(); c.arc(tx2 + tsw, -12.5 + k * 9, 2, 0, 7); c.fill(); }
+        else rr(c, tx2 + tsw - 1.6, -14, 3.2, 4, 1), c.fill();
+      }
+      // rolled tarp on top, and the lamp pole reaching forward
+      c.fillStyle = lin(-16, -46, -4, -38, [[0, '#b8a67e'], [1, '#6e5f46']]);
+      rr(c, -17, -45, 15, 6, 3); c.fill();
+      c.strokeStyle = '#4a4238'; c.lineWidth = 2; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(-6, -44); c.quadraticCurveTo(4, -50, 10, -46); c.stroke();
+      // the lantern — HIS light, swinging gently, selling warmth
+      c.strokeStyle = '#3a342c'; c.lineWidth = 1.2;
+      c.beginPath(); c.moveTo(10, -46); c.lineTo(10 + sway, -40); c.stroke();
+      c.save(); c.translate(10 + sway, -37.5);
+      c.fillStyle = '#3a342c'; rr(c, -3, -3, 6, 7, 2); c.fill();
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const lg2 = c.createRadialGradient(0, 0.5, 0.5, 0, 0.5, 11);
+      lg2.addColorStop(0, 'rgba(255,224,150,1)'); lg2.addColorStop(0.35, 'rgba(255,190,90,0.6)'); lg2.addColorStop(1, 'rgba(255,170,60,0)');
+      c.fillStyle = lg2; c.beginPath(); c.arc(0, 0.5, 11, 0, 7); c.fill();
+      c.restore();
+      c.fillStyle = '#fff2cc'; c.shadowColor = '#ffcd62'; c.shadowBlur = 8;
+      c.fillRect(-1.4, -1.6, 2.8, 4); c.shadowBlur = 0;
+      c.restore();
+      // the body: hunched over the counter — concave back, weight in the belly
+      const bod = () => {
+        c.beginPath();
+        c.moveTo(-8, 0);
+        c.bezierCurveTo(-12, -10 - br * 0.4, -10, -20 - br, -3, -26 - br);
+        c.quadraticCurveTo(5, -30 - br, 10, -24 - br);
+        c.bezierCurveTo(14, -18, 13, -8, 10, 0);
+        c.closePath();
+      };
+      c.save(); bod(); c.clip();
+      c.fillStyle = lin(-10, -30, 12, -2, [[0, '#d8bc8a'], [0.4, '#a9885c'], [0.75, '#77573c'], [1, '#4c3a30']]);
+      c.fillRect(-14, -32, 30, 34);
+      c.strokeStyle = 'rgba(52,40,32,0.7)'; c.lineWidth = 2.4;   // apron strap
+      c.beginPath(); c.moveTo(-6, -24 - br); c.lineTo(9, -12); c.stroke();
+      c.strokeStyle = 'rgba(255,236,200,0.35)'; c.lineWidth = 1; // its lit edge
+      c.beginPath(); c.moveTo(-5.4, -25 - br); c.lineTo(9.6, -13); c.stroke();
+      c.restore();
+      // the head, thrust forward over the goods, hooded in a steel cap
+      c.save(); c.translate(8, -27 - br); c.rotate(0.08 + (talking ? Math.sin(tn * 9) * 0.03 : 0));
+      const hd = () => {
+        c.beginPath(); c.moveTo(-7, 3);
+        c.bezierCurveTo(-8, -4, -3, -8, 2, -8);
+        c.bezierCurveTo(8, -8, 11, -4, 10.5, 1);
+        c.quadraticCurveTo(10, 4.5, 6, 5);
+        c.quadraticCurveTo(-2, 6, -7, 3); c.closePath();
+      };
+      c.save(); hd(); c.clip();
+      c.fillStyle = lin(-8, -9, 10, 5, [[0, '#e6d2a4'], [0.45, '#b49468'], [1, '#6a5140']]);
+      c.fillRect(-9, -10, 21, 17);
+      c.restore();
+      c.fillStyle = lin(-8, -10, 6, -2, [[0, '#8a9298'], [1, '#4c5258']]);
+      c.beginPath(); c.moveTo(-8, -1); c.quadraticCurveTo(-6, -9.5, 2, -9.5);
+      c.quadraticCurveTo(9, -9.5, 11, -4);
+      c.quadraticCurveTo(9, -6.5, 2, -6.8); c.quadraticCurveTo(-4, -6.6, -8, -1);
+      c.closePath(); c.fill();
+      c.strokeStyle = 'rgba(240,248,255,0.6)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(-7, -3); c.quadraticCurveTo(-4, -8.6, 2, -8.8); c.stroke();
+      // gold optics under the cap — the appraising look
+      c.fillStyle = '#141210'; rr(c, -1, -5.5, 10.6, 5.4, 2.4); c.fill();
+      const ep2 = blink2 ? 0.15 : 1;
+      c.fillStyle = 'rgba(255,205,98,' + ep2 + ')'; c.shadowColor = '#ffcd62'; c.shadowBlur = 7;
+      rr(c, 0.2, -5, 4.6, 4.2, 1.4); c.fill(); rr(c, 5.6, -4.8, 3.8, 3.8, 1.4); c.fill();
+      c.shadowBlur = 0;
+      c.restore();
+      // the counter crate and the arm resting on it, in FRONT of everything
+      c.fillStyle = lin(12, -14, 24, 0, [[0, '#7c6a4c'], [1, '#453a2c']]);
+      rr(c, 12, -12, 13, 12, 2); c.fill();
+      c.fillStyle = 'rgba(230,210,170,0.35)'; c.fillRect(12, -12, 13, 2.2);
+      c.strokeStyle = 'rgba(40,34,26,0.7)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(18.5, -10); c.lineTo(18.5, 0); c.stroke();
+      c.strokeStyle = '#8a6f4c'; c.lineWidth = 3.6; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(6, -20 - br); c.quadraticCurveTo(13, -18, 16, -12.6); c.stroke();
+      c.fillStyle = '#c9a878'; c.beginPath(); c.arc(16.5, -12.4, 2.4, 0, 7); c.fill();
+      break;
+    }
+    case 'mono': {    // the Oracle — a CRT face on a shroud of dead cables
+      const br = Math.sin(tn * 1.4) * 0.7;
+      ao(0, 15);
+      const shroud = () => {
+        c.beginPath(); c.moveTo(-4, -36);
+        c.bezierCurveTo(-13, -28, -14, -12, -12, 0);
+        c.lineTo(12, 0);
+        c.bezierCurveTo(14, -12, 13, -28, 4, -36); c.closePath();
+      };
+      c.save(); shroud(); c.clip();
+      c.fillStyle = lin(-12, -36, 12, 0, [[0, '#4c5670'], [0.45, '#333c54'], [1, '#1e2334']]);
+      c.fillRect(-16, -38, 32, 40);
+      c.lineWidth = 1.6; c.lineCap = 'round';
+      for (let k = 0; k < 6; k++) {                        // the hanging cables
+        const lx = -10 + k * 4 + (k % 2) * 1.2;
+        c.strokeStyle = k === 2 ? 'rgba(120,190,255,0.5)' : 'rgba(20,24,36,0.65)';
+        c.beginPath(); c.moveTo(lx, -32);
+        c.bezierCurveTo(lx - 2, -20, lx + 2 * Math.sin(tn * 0.9 + k), -10, lx, 0); c.stroke();
+      }
+      c.restore();
+      c.fillStyle = '#232838'; rr(c, -6, -38 - br, 12, 4, 2); c.fill();
+      // the CRT head, tilted a few degrees — never square to the room
+      c.save(); c.translate(0, -46 - br); c.rotate(-0.05);
+      c.fillStyle = lin(-13, -9, 12, 9, [[0, '#8a94a8'], [0.4, '#5b6478'], [1, '#343a4c']]);
+      rr(c, -13, -8, 26, 17, 5); c.fill();
+      c.strokeStyle = 'rgba(230,240,255,0.5)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(-11, -7.2); c.lineTo(6, -7.5); c.stroke();
+      c.fillStyle = '#081020'; rr(c, -10.5, -5.5, 21, 12, 3); c.fill();
+      c.save(); rr(c, -10.5, -5.5, 21, 12, 3); c.clip();
+      // the face is a waveform: it talks, it quickens
+      c.strokeStyle = '#57c8ff'; c.shadowColor = '#57c8ff'; c.shadowBlur = 6; c.lineWidth = 1.6;
+      c.beginPath();
+      for (let x2 = -10; x2 <= 10; x2 += 1) {
+        const y2 = 0.5 - Math.sin(x2 * 0.55 + tn * (talking ? 9 : 3)) * (talking ? 3.6 : 2.2) * Math.exp(-Math.abs(x2) * 0.06);
+        x2 === -10 ? c.moveTo(x2, y2) : c.lineTo(x2, y2);
+      }
+      c.stroke(); c.shadowBlur = 0;
+      c.globalAlpha = 0.16; c.fillStyle = '#9fd8ff';
+      for (let k = -5; k < 6; k += 2) c.fillRect(-10.5, k, 21, 0.8);
+      c.globalAlpha = 1;
+      c.restore();
+      c.restore();
+      // the screen light SPILLS down the shroud — the light lives in the room
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const sp = c.createRadialGradient(0, -40 - br, 3, 0, -26, 26);
+      sp.addColorStop(0, 'rgba(87,200,255,0.2)'); sp.addColorStop(1, 'rgba(87,200,255,0)');
+      c.fillStyle = sp; c.beginPath(); c.arc(0, -30, 26, 0, 7); c.fill();
+      c.restore();
+      break;
+    }
+    case 'patch': {   // the Tinker — copper dome, unequal goggles, torch arm
+      const sc = Math.sin(tn * 7.7) * 1.6;
+      ao(0, 15);
+      for (let k = 0; k < 4; k++) {                        // shaded spider legs
+        const lx = -12 + k * 8, lift = (k % 2 ? sc : -sc);
+        c.strokeStyle = '#2e2820'; c.lineWidth = 3; c.lineCap = 'round';
+        c.beginPath(); c.moveTo(lx * 0.4, -11); c.lineTo(lx, -4 + lift); c.lineTo(lx + 3, 0 + lift * 0.5); c.stroke();
+        c.strokeStyle = '#6e5f46'; c.lineWidth = 1.2;
+        c.beginPath(); c.moveTo(lx * 0.4 - 0.5, -11.7); c.lineTo(lx - 0.5, -4.8 + lift); c.stroke();
+      }
+      const dome = () => {
+        c.beginPath(); c.moveTo(-11, -9);
+        c.bezierCurveTo(-12, -20, -5, -26, 1, -26);
+        c.bezierCurveTo(8, -26, 12, -20, 11, -11);
+        c.quadraticCurveTo(6, -7, 0, -7);
+        c.quadraticCurveTo(-6, -7, -11, -9); c.closePath();
+      };
+      c.save(); dome(); c.clip();
+      c.fillStyle = lin(-11, -27, 11, -6, [[0, '#e2b184'], [0.4, '#a87850'], [0.8, '#6c4a36'], [1, '#48342c']]);
+      c.fillRect(-13, -28, 26, 24);
+      c.strokeStyle = 'rgba(30,24,20,0.5)'; c.lineWidth = 1;
+      c.beginPath(); c.arc(0, -14, 9, 3.5, 5.9); c.stroke();
+      c.restore();
+      // goggles: UNEQUAL lenses, glass glint on the big one
+      c.fillStyle = '#33302a';
+      c.beginPath(); c.arc(-2, -21, 4.4, 0, 7); c.fill();
+      c.beginPath(); c.arc(5.4, -20.4, 3.2, 0, 7); c.fill();
+      c.fillStyle = '#ffd08a'; c.shadowColor = '#ffd08a'; c.shadowBlur = 6;
+      c.beginPath(); c.arc(-2, -21, 2.6, 0, 7); c.fill();
+      c.beginPath(); c.arc(5.4, -20.4, 1.8, 0, 7); c.fill(); c.shadowBlur = 0;
+      c.strokeStyle = 'rgba(255,255,255,0.75)'; c.lineWidth = 1;
+      c.beginPath(); c.arc(-3, -22.2, 2.6, 3.6, 4.8); c.stroke();
+      // the torch arm, tip sputtering — his emissive
+      c.strokeStyle = '#5c4c38'; c.lineWidth = 2.4; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(8, -16); c.quadraticCurveTo(14, -22, 15, -27 - sc * 0.6); c.stroke();
+      const wp = Math.sin(tn * 23) > 0.2 ? 1 : 0.3;
+      c.fillStyle = 'rgba(255,148,48,' + wp + ')'; c.shadowColor = '#ff9430'; c.shadowBlur = 9 * wp;
+      c.beginPath(); c.arc(15.3, -28 - sc * 0.6, 1.8, 0, 7); c.fill(); c.shadowBlur = 0;
+      break;
+    }
+    case 'sage': {    // the Archivist — a porcelain orb inside turning rings
+      const hov = Math.sin(tn * 1.3) * 2.4;
+      ao(0, 11, 0.2);
+      c.save(); c.translate(0, -26 + hov);
+      const ringTilt = Math.sin(tn * 0.7) * 0.3;
+      c.strokeStyle = 'rgba(159,232,255,0.35)'; c.lineWidth = 2;   // back half
+      c.beginPath(); c.ellipse(0, 0, 15, 5.4, ringTilt, Math.PI, Math.PI * 2); c.stroke();
+      const orb = () => { c.beginPath(); c.arc(0, 0, 9, 0, 7); };
+      c.save(); orb(); c.clip();
+      c.fillStyle = lin(-8, -9, 8, 8, [[0, '#f2f6fa'], [0.45, '#b9c8d8'], [0.8, '#77879c'], [1, '#4c5870']]);
+      c.fillRect(-10, -10, 20, 20);
+      c.fillStyle = 'rgba(20,26,40,0.9)';
+      rr(c, -5.5, -2.2, 11, 4.4, 2.2); c.fill();
+      c.restore();
+      const gp = 0.65 + Math.sin(tn * 2.1) * 0.25;
+      c.fillStyle = 'rgba(159,232,255,' + gp + ')'; c.shadowColor = '#9fe8ff'; c.shadowBlur = 8;
+      rr(c, -3.6, -1.4, 7.2, 2.8, 1.4); c.fill(); c.shadowBlur = 0;
+      c.strokeStyle = 'rgba(159,232,255,0.5)'; c.lineWidth = 2;    // front half
+      c.beginPath(); c.ellipse(0, 0, 15, 5.4, ringTilt, 0, Math.PI); c.stroke();
+      const ba = (tn * 1.6) % Math.PI;                             // one bright segment
+      c.strokeStyle = '#e8fbff'; c.lineWidth = 2.2;
+      c.beginPath(); c.ellipse(0, 0, 15, 5.4, ringTilt, ba, ba + 0.7); c.stroke();
+      c.restore();
+      c.strokeStyle = 'rgba(159,232,255,0.4)'; c.lineWidth = 1.6;  // drifting glyph threads
+      for (let k = 0; k < 4; k++) {
+        const aa = -0.7 + k * 0.46 + Math.sin(tn * 1.4 + k) * 0.1;
+        c.beginPath(); c.moveTo(0, -16 + hov); c.quadraticCurveTo(Math.sin(aa) * 16, -8, Math.sin(aa) * 22, 2); c.stroke();
+      }
+      break;
+    }
+    case 'lumen': {   // the Lost Nymph — a leaf-wrapped light
+      const fl = Math.sin(tn * 11) * 4;
+      const gp = 0.5 + Math.sin(tn * 2.4) * 0.35;
+      ao(0, 8, 0.16);
+      c.save(); c.translate(0, -16 - Math.sin(tn * 1.2) * 3);
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const au = c.createRadialGradient(0, 2, 1, 0, 2, 20);
+      au.addColorStop(0, 'rgba(125,255,154,' + (0.22 + gp * 0.14) + ')');
+      au.addColorStop(1, 'rgba(125,255,154,0)');
+      c.fillStyle = au; c.beginPath(); c.arc(0, 2, 20, 0, 7); c.fill();
+      for (const sd of [-1, 1]) {                          // veined additive wings
+        c.save(); c.translate(sd * 4, -4); c.rotate(sd * (0.45 + fl * 0.04));
+        const wg = c.createLinearGradient(0, 0, sd * 13, -6);
+        wg.addColorStop(0, 'rgba(190,255,210,0.5)'); wg.addColorStop(1, 'rgba(125,255,154,0.06)');
+        c.fillStyle = wg;
+        c.beginPath(); c.ellipse(sd * 7, -2, 8.5, 3.4, sd * -0.4, 0, 7); c.fill();
+        c.strokeStyle = 'rgba(220,255,230,0.5)'; c.lineWidth = 0.8;
+        c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(sd * 8, -4.5, sd * 14, -4); c.stroke();
+        c.restore();
+      }
+      c.restore();
+      const bod = () => {
+        c.beginPath(); c.moveTo(0, -11);
+        c.bezierCurveTo(6.5, -7, 6, 3, 0, 9);
+        c.bezierCurveTo(-6, 3, -6.5, -7, 0, -11); c.closePath();
+      };
+      c.save(); bod(); c.clip();
+      c.fillStyle = lin(-6, -11, 6, 9, [[0, '#69a878'], [0.45, '#3f7052'], [1, '#22402e']]);
+      c.fillRect(-8, -12, 16, 22);
+      c.restore();
+      c.strokeStyle = 'rgba(210,255,225,0.7)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(-2.6, -9); c.quadraticCurveTo(-5, -3, -3.4, 4); c.stroke();
+      c.fillStyle = 'rgba(220,255,230,' + (0.75 + gp * 0.25) + ')';
+      c.shadowColor = '#7dff9a'; c.shadowBlur = 9 + gp * 8;
+      c.beginPath(); c.arc(0, -1, 3.4, 0, 7); c.fill(); c.shadowBlur = 0;
+      c.fillStyle = '#10241a'; c.fillRect(-2.6, -7.4, 1.8, 1.8); c.fillRect(1, -7.4, 1.8, 1.8);
+      c.restore();
+      break;
     }
   }
 }

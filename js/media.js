@@ -43,6 +43,15 @@ const MEDIA_SRC = {
     zap: 'assets/sfx/zapTwoTone.mp3',
     powerup: 'assets/sfx/powerUp1.mp3',
     low: 'assets/sfx/lowDown.mp3',
+    // NPC proximity voices: drop a loopable file at any of these paths and
+    // it replaces that character's synthesized hum automatically (a missing
+    // file 404s silently and the synth voice keeps singing instead)
+    hum_servo: 'assets/sfx/hum_servo.ogg',
+    hum_ratchet: 'assets/sfx/hum_ratchet.ogg',
+    hum_mono: 'assets/sfx/hum_mono.ogg',
+    hum_sage: 'assets/sfx/hum_sage.ogg',
+    hum_patch: 'assets/sfx/hum_patch.ogg',
+    hum_lumen: 'assets/sfx/hum_lumen.ogg',
   },
 };
 if (typeof window !== 'undefined' && window.EMBEDDED_MEDIA) {

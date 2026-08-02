@@ -91,6 +91,72 @@ function whoosh(dur, f0, f1, vol, delay) {
   src.start(t0);
 }
 
+// ---------- NPC proximity voices ------------------------------------------
+// Every NPC sings its presence into the room: a looping voice whose volume
+// swells as you draw near and blooms while it speaks with you. A recorded
+// loop in MBUF ('hum_<id>') takes over automatically; otherwise each
+// character gets a signature synth voice.
+const NPCVOX = {};
+function npcVoxBuild(id) {
+  if (!AC) return null;
+  const g = AC.createGain(); g.gain.value = 0; g.connect(AC.destination);
+  const nodes = [];
+  if (MBUF['hum_' + id]) {
+    const s = AC.createBufferSource();
+    s.buffer = MBUF['hum_' + id]; s.loop = true;
+    s.connect(g); s.start(); nodes.push(s);
+    return { g, nodes };
+  }
+  const osc = (f, type, vol, wobF, wobA) => {
+    const o = AC.createOscillator(), og = AC.createGain();
+    o.type = type; o.frequency.value = f; og.gain.value = vol;
+    if (wobF) {
+      const l = AC.createOscillator(), lg = AC.createGain();
+      l.frequency.value = wobF; lg.gain.value = wobA || 2;
+      l.connect(lg).connect(o.frequency); l.start(); nodes.push(l);
+    }
+    o.connect(og).connect(g); o.start(); nodes.push(o);
+  };
+  const nz = (vol, f0, q) => {
+    const s = AC.createBufferSource();
+    const n = Math.floor(AC.sampleRate * 1.2);
+    const buf = AC.createBuffer(1, n, AC.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    s.buffer = buf; s.loop = true;
+    const f = AC.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = f0; f.Q.value = q || 1;
+    const ng = AC.createGain(); ng.gain.value = vol;
+    s.connect(f).connect(ng).connect(g); s.start(); nodes.push(s);
+  };
+  switch (id) {
+    case 'servo':   osc(84, 'sine', 0.5, 0.4, 3); osc(168, 'sine', 0.12); break;            // an old warm motor
+    case 'ratchet': osc(62, 'sawtooth', 0.06); nz(0.1, 900, 2); osc(124, 'sine', 0.2, 5, 4); break; // shop generator + lamp fizz
+    case 'mono':    osc(120, 'sine', 0.35, 0.25, 8); osc(2093, 'sine', 0.018); break;       // CRT hum + a thin whine
+    case 'sage':    osc(440, 'sine', 0.12); osc(554.4, 'sine', 0.1); osc(659.3, 'sine', 0.08, 0.3, 2); break; // a held chord, almost song
+    case 'patch':   nz(0.22, 2400, 0.8); osc(96, 'square', 0.05, 7, 5); break;              // tools and tiny arcs
+    case 'lumen':   osc(880, 'sine', 0.1, 1.7, 12); osc(1318.5, 'sine', 0.05, 2.3, 9); break; // wandering shimmer
+    default:        osc(110, 'sine', 0.3);
+  }
+  return { g, nodes };
+}
+function npcVoxTick(id, target) {
+  if (!AC || MUTED || !AUD_UNLOCKED) return;
+  let v = NPCVOX[id];
+  if (!v) { v = npcVoxBuild(id); if (!v) return; NPCVOX[id] = v; }
+  v.g.gain.setTargetAtTime(target, AC.currentTime, 0.18);
+}
+function npcVoxQuietAll() {
+  if (!AC) return;
+  for (const id in NPCVOX) NPCVOX[id].g.gain.setTargetAtTime(0, AC.currentTime, 0.12);
+}
+function npcVoxStopAll() {
+  for (const id in NPCVOX) {
+    const v = NPCVOX[id];
+    try { v.g.gain.setTargetAtTime(0, AC.currentTime, 0.08); } catch (e) {}
+    setTimeout(() => { try { v.nodes.forEach(n => n.stop()); v.g.disconnect(); } catch (e) {} }, 400);
+    delete NPCVOX[id];
+  }
+}
 // ---------- ODYSSEY audio skin (per ODYSSEY_AUDIO_DESIGN) -----------------
 // The hero theme trades the machine's ceramic/pneumatic/digital voice for
 // steel, leather, chainmail, breath and bronze bells — and every big sound
