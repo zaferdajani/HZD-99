@@ -398,6 +398,8 @@ class Player {
     if (col.d) {
       if (!this.on && wasFalling > 420) {
         this.landT = wasFalling > 700 ? 0.22 : 0.12; sfx('land');
+        if (typeof padRumble === 'function')
+          padRumble(wasFalling > 700 ? 0.5 : 0.2, wasFalling > 700 ? 0.35 : 0.3, wasFalling > 700 ? 140 : 80);
         burst(this.x + this.w / 2, this.y + this.h, wasFalling > 700 ? 14 : 6, '#9fb8c8', wasFalling > 700 ? 150 : 90, 0.35, 500, 2);
       }
       this.on = true; this.coyote = 0.1;
@@ -452,6 +454,7 @@ class Player {
           this.gainVolts(11);
           sfx(e instanceof Boss ? 'bosshit' : 'hit'); cam.shake = Math.max(cam.shake, 2.5);
           G.hitStop = Math.max(G.hitStop, 0.045);
+          if (typeof padRumble === 'function') padRumble(0.15, 0.4, 60);
           burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 14, '#fff2a8', 280, 0.35, 300, 3, true);
           burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 6, '#ffffff', 160, 0.2, 100, 2, true);
           if (this.swing.combo === 2) G.impact = { t: 0.12, t0: 0.12, x: hb.x + hb.w / 2, y: hb.y + hb.h / 2 };
@@ -485,6 +488,7 @@ class Player {
         this.pogoT = 0.18;
         this.airJumps = hasMod('djump') ? (hasSkill('triple') ? 2 : 1) : 0;
         this.dashCD = Math.min(this.dashCD, 0); this.swing.t = 0; sfx('pogo');
+        if (typeof padRumble === 'function') padRumble(0.3, 0.55, 90);
         cam.shake = Math.max(cam.shake, 4);
         G.hitStop = Math.max(G.hitStop, 0.05);
         burst(this.x + this.w / 2, this.y + this.h + 4, 10, '#cfe8ff', 220, 0.3, 260, 3, true);
@@ -558,6 +562,7 @@ class Player {
     }
     this.cores -= d; this.iT = hasSkill('reflex') ? 1.65 : 1.3; this.healT = 0;
     cam.shake = 9; sfx('hurt');
+    if (typeof padRumble === 'function') padRumble(0.85, 0.5, 240);
     G.flash = Math.max(G.flash, 0.4); G.addRing(this.x + this.w / 2, this.y + this.h / 2);
     G.impact = { t: 0.09, t0: 0.09, x: this.x + this.w / 2, y: this.y + this.h / 2 };
     burst(this.x + this.w / 2, this.y + this.h / 2, 14, '#ff5f6d', 260, 0.5, 500, 3, true);

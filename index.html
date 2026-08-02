@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msc52ydn"</script>
+<script>window.BUILD_ID="msc6mi1o"</script>
 <script>
 /**
  * @license
@@ -2008,7 +2008,7 @@ en: {
   pad_on: '🎮 Controller connected — touch controls hidden',
   pad_off: 'Controller disconnected — touch controls restored',
   pad_press: 'press…', pad_move: 'Move — left stick or D-pad (always)',
-  pad_hint: 'Select with the stick  ·  Enter / X to rebind  ·  Esc to go back',
+  pad_hint: 'Select with the stick  ·  Confirm (A) to rebind  ·  B / Start or Esc to go back',
   pad_reset: 'R — restore defaults', pad_wasreset: 'Controller defaults restored',
   ctl_nopad: 'Connect a controller (Bluetooth or USB) and this becomes the controller map.',
   pa_STAR: 'Shuriken', pa_JUMP: 'Jump', pa_ATK: 'Attack', pa_DASH: 'Dash', pa_CAST: 'Fire suit',
@@ -2215,7 +2215,7 @@ ar: {
   pad_on: '🎮 تم توصيل وحدة التحكم — أُخفيت أزرار اللمس',
   pad_off: 'فُصلت وحدة التحكم — عادت أزرار اللمس',
   pad_press: 'اضغط زرًا…', pad_move: 'الحركة — العصا اليسرى أو الأسهم (دائمًا)',
-  pad_hint: 'اختر بالعصا · Enter أو X لإعادة التعيين · Esc للرجوع',
+  pad_hint: 'اختر بالعصا · التأكيد (A) لإعادة التعيين · B أو Start أو Esc للرجوع',
   pad_reset: 'R — استعادة الافتراضي', pad_wasreset: 'أُعيدت الإعدادات الافتراضية',
   ctl_nopad: 'وصّل وحدة تحكم (بلوتوث أو USB) لتتحول هذه الشاشة إلى خريطة الأزرار.',
   pa_STAR: 'نجوم النينجا', pa_JUMP: 'القفز', pa_ATK: 'الهجوم', pa_DASH: 'الاندفاع', pa_CAST: 'إطلاق البدلة',
@@ -3897,6 +3897,7 @@ function pollGamepad() {
   // the connect event does not always carry the pad (and some browsers fire a
   // bare event), so learn the identity from the poll the moment it is available
   if (gp && gp.id && PAD.id !== gp.id) { PAD.id = gp.id; PAD.kind = padKindOf(gp.id); }
+  PAD.gp = gp;                       // live handle for rumble
   const st = {};
   if (gp) {
     const b = gp.buttons, ax = gp.axes || [];
@@ -3936,7 +3937,25 @@ function inD(n) { return KEYB[n].some(c => keys[c]); }
 function inP(n) { return KEYB[n].some(c => keysP[c]); }
 function clearP() { for (const k in keysP) keysP[k] = 0; }
 
+// ---------- gamepad rumble -------------------------------------------------
+// Dual-rumble haptics (Chrome/Edge vibrationActuator; hapticActuators pulse
+// as the fallback). Newer effects simply replace older ones.
+function padRumble(strong, weak, ms) {
+  if (!PAD.on || !PAD.gp) return;
+  try {
+    const act = PAD.gp.vibrationActuator || (PAD.gp.hapticActuators && PAD.gp.hapticActuators[0]);
+    if (!act) return;
+    if (act.playEffect) {
+      act.playEffect('dual-rumble', {
+        duration: Math.min(1000, ms || 100),
+        strongMagnitude: clamp(strong, 0, 1),
+        weakMagnitude: clamp(weak, 0, 1),
+      });
+    } else if (act.pulse) act.pulse(clamp(Math.max(strong, weak), 0, 1), Math.min(1000, ms || 100));
+  } catch (e) {}
+}
 const cam = { x: 0, y: 0, shake: 0 };
+let prevShake = 0;
 function updateCam(px, py, rw, rh, dt) {
   // look-ahead in the facing direction; snappier horizontally than vertically
   const lead = (typeof player !== 'undefined' && player && !player.dead) ? player.face * 65 : 0;
@@ -3944,6 +3963,12 @@ function updateCam(px, py, rw, rh, dt) {
   const ty = clamp(py - 300, 0, Math.max(0, rh - 540));
   cam.x = lerp(cam.x, tx, 1 - Math.pow(0.0002, dt));
   cam.y = lerp(cam.y, ty, 1 - Math.pow(0.0035, dt));
+  // every screen shake is also felt in the hands: boss slams, roars,
+  // explosions and heavy landings all raise cam.shake, so one hook here
+  // turns the whole game's impact language into haptics
+  if (cam.shake > prevShake + 2.5)
+    padRumble(clamp(cam.shake / 13, 0.15, 1), clamp(cam.shake / 9, 0.2, 1), 60 + cam.shake * 16);
+  prevShake = cam.shake;
   cam.shake = Math.max(0, cam.shake - dt * 22);
 }
 function camSX() { return cam.x + (cam.shake > 0 ? rnd(-cam.shake, cam.shake) : 0); }
@@ -5028,6 +5053,8 @@ class Player {
     if (col.d) {
       if (!this.on && wasFalling > 420) {
         this.landT = wasFalling > 700 ? 0.22 : 0.12; sfx('land');
+        if (typeof padRumble === 'function')
+          padRumble(wasFalling > 700 ? 0.5 : 0.2, wasFalling > 700 ? 0.35 : 0.3, wasFalling > 700 ? 140 : 80);
         burst(this.x + this.w / 2, this.y + this.h, wasFalling > 700 ? 14 : 6, '#9fb8c8', wasFalling > 700 ? 150 : 90, 0.35, 500, 2);
       }
       this.on = true; this.coyote = 0.1;
@@ -5082,6 +5109,7 @@ class Player {
           this.gainVolts(11);
           sfx(e instanceof Boss ? 'bosshit' : 'hit'); cam.shake = Math.max(cam.shake, 2.5);
           G.hitStop = Math.max(G.hitStop, 0.045);
+          if (typeof padRumble === 'function') padRumble(0.15, 0.4, 60);
           burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 14, '#fff2a8', 280, 0.35, 300, 3, true);
           burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 6, '#ffffff', 160, 0.2, 100, 2, true);
           if (this.swing.combo === 2) G.impact = { t: 0.12, t0: 0.12, x: hb.x + hb.w / 2, y: hb.y + hb.h / 2 };
@@ -5115,6 +5143,7 @@ class Player {
         this.pogoT = 0.18;
         this.airJumps = hasMod('djump') ? (hasSkill('triple') ? 2 : 1) : 0;
         this.dashCD = Math.min(this.dashCD, 0); this.swing.t = 0; sfx('pogo');
+        if (typeof padRumble === 'function') padRumble(0.3, 0.55, 90);
         cam.shake = Math.max(cam.shake, 4);
         G.hitStop = Math.max(G.hitStop, 0.05);
         burst(this.x + this.w / 2, this.y + this.h + 4, 10, '#cfe8ff', 220, 0.3, 260, 3, true);
@@ -5188,6 +5217,7 @@ class Player {
     }
     this.cores -= d; this.iT = hasSkill('reflex') ? 1.65 : 1.3; this.healT = 0;
     cam.shake = 9; sfx('hurt');
+    if (typeof padRumble === 'function') padRumble(0.85, 0.5, 240);
     G.flash = Math.max(G.flash, 0.4); G.addRing(this.x + this.w / 2, this.y + this.h / 2);
     G.impact = { t: 0.09, t0: 0.09, x: this.x + this.w / 2, y: this.y + this.h / 2 };
     burst(this.x + this.w / 2, this.y + this.h / 2, 14, '#ff5f6d', 260, 0.5, 500, 3, true);
@@ -11137,6 +11167,10 @@ function updateCtrl() {
       padBind(PAD.listen, PAD.lastPress);
       G.toast(t('pa_' + PAD.listen) + ' → ' + padLabel(PAD.lastPress));
       PAD.listen = null; sfx('ok');
+      // the binding press is still physically held; when code suppression
+      // lifts it would fire a phantom fresh edge and instantly re-arm a new
+      // bind (and eat the exit button). Mark every code as already-down.
+      if (typeof GP_CODES !== 'undefined') for (const c2 of GP_CODES) GP_PREV[c2] = true;
     }
     return;
   }
@@ -11145,9 +11179,12 @@ function updateCtrl() {
   if (inP('UP') || keysP.ArrowUp) { G.padIdx = (G.padIdx + n - 1) % n; sfx('ui'); }
   if (inP('LEFT') || keysP.ArrowLeft) { G.padIdx = (G.padIdx + n - colH) % n; sfx('ui'); }
   if (inP('RIGHT') || keysP.ArrowRight) { G.padIdx = (G.padIdx + colH) % n; sfx('ui'); }
-  if (keysP.Enter || keysP.KeyX) { PAD.listen = PAD_ACTIONS[G.padIdx]; PAD.lastPress = -1; sfx('ui'); }
+  // the pad must be able to drive its OWN config screen: confirm starts a
+  // bind, and BACK / PAUSE on the pad leave the screen — before this, the
+  // only way out was a keyboard Escape, a trap for controller players
+  if (keysP.Enter || keysP.KeyX || inP('OK')) { PAD.listen = PAD_ACTIONS[G.padIdx]; PAD.lastPress = -1; sfx('ui'); return; }
   if (keysP.KeyR) { padReset(); G.toast(t('pad_wasreset')); sfx('ok'); }
-  if (keysP.Escape) { G.state = G.ctrlBack || 'MENU'; sfx('ui'); }
+  if (keysP.Escape || inP('BACK') || inP('PAUSE')) { G.state = G.ctrlBack || 'MENU'; sfx('ui'); }
 }
 function drawMenuBG(tsec) {
   const sky = c.createLinearGradient(0, 0, 0, 540);
@@ -12700,6 +12737,9 @@ function tcSetup() {
   tc.addEventListener('touchcancel', tEnd, { passive: false });
 }
 function tcResize() {
+  // no touch layer (desktop): nothing to lay out — without this guard a
+  // CONNECTED GAMEPAD crashed every frame on non-touch devices
+  if (!tc) return;
   // size everything from the ACTUAL visible viewport (browser bars change it)
   const vv = window.visualViewport;
   const rawW = Math.round(vv ? vv.width : innerWidth);

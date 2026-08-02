@@ -2586,6 +2586,10 @@ function updateCtrl() {
       padBind(PAD.listen, PAD.lastPress);
       G.toast(t('pa_' + PAD.listen) + ' → ' + padLabel(PAD.lastPress));
       PAD.listen = null; sfx('ok');
+      // the binding press is still physically held; when code suppression
+      // lifts it would fire a phantom fresh edge and instantly re-arm a new
+      // bind (and eat the exit button). Mark every code as already-down.
+      if (typeof GP_CODES !== 'undefined') for (const c2 of GP_CODES) GP_PREV[c2] = true;
     }
     return;
   }
@@ -2594,9 +2598,12 @@ function updateCtrl() {
   if (inP('UP') || keysP.ArrowUp) { G.padIdx = (G.padIdx + n - 1) % n; sfx('ui'); }
   if (inP('LEFT') || keysP.ArrowLeft) { G.padIdx = (G.padIdx + n - colH) % n; sfx('ui'); }
   if (inP('RIGHT') || keysP.ArrowRight) { G.padIdx = (G.padIdx + colH) % n; sfx('ui'); }
-  if (keysP.Enter || keysP.KeyX) { PAD.listen = PAD_ACTIONS[G.padIdx]; PAD.lastPress = -1; sfx('ui'); }
+  // the pad must be able to drive its OWN config screen: confirm starts a
+  // bind, and BACK / PAUSE on the pad leave the screen — before this, the
+  // only way out was a keyboard Escape, a trap for controller players
+  if (keysP.Enter || keysP.KeyX || inP('OK')) { PAD.listen = PAD_ACTIONS[G.padIdx]; PAD.lastPress = -1; sfx('ui'); return; }
   if (keysP.KeyR) { padReset(); G.toast(t('pad_wasreset')); sfx('ok'); }
-  if (keysP.Escape) { G.state = G.ctrlBack || 'MENU'; sfx('ui'); }
+  if (keysP.Escape || inP('BACK') || inP('PAUSE')) { G.state = G.ctrlBack || 'MENU'; sfx('ui'); }
 }
 function drawMenuBG(tsec) {
   const sky = c.createLinearGradient(0, 0, 0, 540);

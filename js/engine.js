@@ -116,6 +116,7 @@ function pollGamepad() {
   // the connect event does not always carry the pad (and some browsers fire a
   // bare event), so learn the identity from the poll the moment it is available
   if (gp && gp.id && PAD.id !== gp.id) { PAD.id = gp.id; PAD.kind = padKindOf(gp.id); }
+  PAD.gp = gp;                       // live handle for rumble
   const st = {};
   if (gp) {
     const b = gp.buttons, ax = gp.axes || [];
@@ -155,7 +156,25 @@ function inD(n) { return KEYB[n].some(c => keys[c]); }
 function inP(n) { return KEYB[n].some(c => keysP[c]); }
 function clearP() { for (const k in keysP) keysP[k] = 0; }
 
+// ---------- gamepad rumble -------------------------------------------------
+// Dual-rumble haptics (Chrome/Edge vibrationActuator; hapticActuators pulse
+// as the fallback). Newer effects simply replace older ones.
+function padRumble(strong, weak, ms) {
+  if (!PAD.on || !PAD.gp) return;
+  try {
+    const act = PAD.gp.vibrationActuator || (PAD.gp.hapticActuators && PAD.gp.hapticActuators[0]);
+    if (!act) return;
+    if (act.playEffect) {
+      act.playEffect('dual-rumble', {
+        duration: Math.min(1000, ms || 100),
+        strongMagnitude: clamp(strong, 0, 1),
+        weakMagnitude: clamp(weak, 0, 1),
+      });
+    } else if (act.pulse) act.pulse(clamp(Math.max(strong, weak), 0, 1), Math.min(1000, ms || 100));
+  } catch (e) {}
+}
 const cam = { x: 0, y: 0, shake: 0 };
+let prevShake = 0;
 function updateCam(px, py, rw, rh, dt) {
   // look-ahead in the facing direction; snappier horizontally than vertically
   const lead = (typeof player !== 'undefined' && player && !player.dead) ? player.face * 65 : 0;
@@ -163,6 +182,12 @@ function updateCam(px, py, rw, rh, dt) {
   const ty = clamp(py - 300, 0, Math.max(0, rh - 540));
   cam.x = lerp(cam.x, tx, 1 - Math.pow(0.0002, dt));
   cam.y = lerp(cam.y, ty, 1 - Math.pow(0.0035, dt));
+  // every screen shake is also felt in the hands: boss slams, roars,
+  // explosions and heavy landings all raise cam.shake, so one hook here
+  // turns the whole game's impact language into haptics
+  if (cam.shake > prevShake + 2.5)
+    padRumble(clamp(cam.shake / 13, 0.15, 1), clamp(cam.shake / 9, 0.2, 1), 60 + cam.shake * 16);
+  prevShake = cam.shake;
   cam.shake = Math.max(0, cam.shake - dt * 22);
 }
 function camSX() { return cam.x + (cam.shake > 0 ? rnd(-cam.shake, cam.shake) : 0); }

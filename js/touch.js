@@ -45,6 +45,9 @@ function tcSetup() {
   tc.addEventListener('touchcancel', tEnd, { passive: false });
 }
 function tcResize() {
+  // no touch layer (desktop): nothing to lay out — without this guard a
+  // CONNECTED GAMEPAD crashed every frame on non-touch devices
+  if (!tc) return;
   // size everything from the ACTUAL visible viewport (browser bars change it)
   const vv = window.visualViewport;
   const rawW = Math.round(vv ? vv.width : innerWidth);
