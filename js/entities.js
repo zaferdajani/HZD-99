@@ -797,11 +797,11 @@ class Player {
       }
       c.lineCap = 'round'; c.lineJoin = 'round';
       // dark fold under, bright cloth over — reads as a folded ribbon
-      c.strokeStyle = '#a63740';
+      c.strokeStyle = '#b91c1c';
       c.beginPath(); c.moveTo(seg[0][0], seg[0][1] + 2.2);
       for (let i = 1; i <= 4; i++) c.lineTo(seg[i][0], seg[i][1] + 2.2 - i * 0.3);
       c.lineWidth = 4.6; c.stroke();
-      c.strokeStyle = '#e0484f';
+      c.strokeStyle = '#e63946';
       c.beginPath(); c.moveTo(seg[0][0], seg[0][1]);
       for (let i = 1; i <= 4; i++) c.lineTo(seg[i][0], seg[i][1]);
       c.lineWidth = 3.6; c.stroke();
@@ -938,8 +938,8 @@ class Player {
     // wider at the hips than the chest. A pear, not a box.
     const by0 = -24 + bob * 0.4;
     const grad = c.createLinearGradient(0, by0 - 2, 0, by0 + 20);
-    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.35, '#f5f5f0');
-    grad.addColorStop(0.75, '#ccd2da'); grad.addColorStop(1, '#98a1b0');
+    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.32, '#f2f1e8');
+    grad.addColorStop(0.7, '#bcc5d2'); grad.addColorStop(1, '#77839c');
     c.fillStyle = grad;
     const belly = () => {
       c.beginPath();
@@ -959,7 +959,7 @@ class Player {
     // specular rim along the top-left of the shell
     c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 1.4;
     c.beginPath(); c.moveTo(-8, by0 + 1.5); c.quadraticCurveTo(-14, by0 + 4, -14.5, by0 + 11); c.stroke();
-    c.strokeStyle = '#7d8a9c'; c.lineWidth = 1; belly(); c.stroke();
+    c.strokeStyle = 'rgba(74,86,106,0.9)'; c.lineWidth = 1.2; belly(); c.stroke();
     // evolution gear on the torso
     if (!hero && evo >= 1) {
       // shoulder pauldron riding the back of the shell
@@ -994,10 +994,10 @@ class Player {
     // what makes the silhouette read CAT at 36px
     const hy = -30 + bob;
     const hgd = c.createLinearGradient(0, hy - 12, 0, hy + 8);
-    hgd.addColorStop(0, '#ffffff'); hgd.addColorStop(0.5, '#f5f5f0'); hgd.addColorStop(1, '#b2bac6');
+    hgd.addColorStop(0, '#ffffff'); hgd.addColorStop(0.48, '#f0efe6'); hgd.addColorStop(1, '#96a2b6');
     c.fillStyle = hgd;
     rr(c, -12, hy - 12, 27, 21, 10); c.fill();
-    c.strokeStyle = '#7d8a9c'; c.lineWidth = 1; rr(c, -12, hy - 12, 27, 21, 10); c.stroke();
+    c.strokeStyle = 'rgba(74,86,106,0.9)'; c.lineWidth = 1.2; rr(c, -12, hy - 12, 27, 21, 10); c.stroke();
     // cheek/jaw shadow + top specular
     c.fillStyle = 'rgba(70,88,110,0.26)';
     rr(c, -12, hy + 3, 27, 6, 5); c.fill();
@@ -1008,7 +1008,7 @@ class Player {
       c.fillStyle = evo >= 3 ? '#e6c56f' : '#b8934c';
       c.beginPath(); c.arc(6, hy - 6, 11, Math.PI, 0); c.fill();
       c.fillRect(-5, hy - 7, 22, 3);
-      c.strokeStyle = '#e0484f'; c.lineWidth = 4; c.lineCap = 'round';
+      c.strokeStyle = '#e63946'; c.lineWidth = 4; c.lineCap = 'round';
       c.beginPath(); c.arc(4, hy - 8, 13, Math.PI * 1.15, Math.PI * 1.8); c.stroke();
       if (evo >= 3) {
         // divine laurel glow

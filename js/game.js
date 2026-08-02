@@ -2052,7 +2052,11 @@ function drawWorldFrame() {
   for (const w of G.wrecks) w.draw(c);
   if (G.boss) G.boss.draw(c);
   for (const p of G.projs) p.draw(c);
-  if (player) player.draw(c);
+  // the player is drawn AFTER the cinematic grade (bloom + zone wash) so she
+  // stays solid and rich instead of being swallowed by the atmosphere — the
+  // one exception is the recharge pod, whose cables and canopy must close
+  // over her, so she stays in-world for that scene
+  if (player && G.recharge) player.draw(c);
   // recharge at a pod: cables hook onto the robot, surge arcs, glass canopy closes
   if (G.recharge && player) {
     const rc = G.recharge;
@@ -2210,6 +2214,14 @@ function drawWorldFrame() {
     vig.addColorStop(0.65, 'rgba(0,0,0,0.18)');
     vig.addColorStop(1, 'rgba(0,0,0,0.55)');
     c.fillStyle = vig; c.fillRect(0, 0, 960, 540);
+    c.restore();
+  }
+  // the character herself, post-grade: full pigment, no bloom wash. Her own
+  // emissive accents (visor, jets, claws) still glow via their shadowBlur.
+  if (player && !G.recharge) {
+    c.save();
+    c.translate(-Math.round(camSX()), -Math.round(camSY()));
+    player.draw(c);
     c.restore();
   }
   // manga impact frame: white panel + radial action lines
