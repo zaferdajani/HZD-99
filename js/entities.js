@@ -1819,11 +1819,14 @@ class Enemy {
       }
     }
     // Zone A ground minions are the boss's WHELPS — smaller versions of the
-    // virus beast itself, assembled from the same parts rig.
-    if (G.roomDef && G.roomDef.zone === 'A' && (this.kind === 'crawler' || this.kind === 'hopper')
+    // virus beast itself, assembled from the same parts rig. CLAWBYTE only:
+    // the Odyssey's creatures never fall back onto the machine art, not even
+    // for a frame while their own sheets load.
+    const heroEn = typeof isHero === 'function' && isHero();
+    if (!heroEn && G.roomDef && G.roomDef.zone === 'A' && (this.kind === 'crawler' || this.kind === 'hopper')
         && typeof drawBeastMini === 'function' && drawBeastMini(c, this)) return;
     // every flying minion is a small TALONHOST — talons only, no feathers
-    if (this.kind === 'flier' && typeof drawEagleMini === 'function' && drawEagleMini(c, this)) return;
+    if (!heroEn && this.kind === 'flier' && typeof drawEagleMini === 'function' && drawEagleMini(c, this)) return;
     // Pre-rendered 3D turnaround. Selected by angle, never mirrored, so the baked
     // key light stays on the correct side as the machine turns.
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
@@ -3344,12 +3347,38 @@ class Boss {
     G.onBossDead(this.kind);
   }
   draw(c) {
-    if (this.dead && !((this.kind === 'glitch' || this.kind === 'brood') && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beastParts || MEDIA_IMG.eagleParts || MEDIA_IMG.driller))) return;
+    // ONE ENGINE, TWO WORLDS — and they must never bleed into each other.
+    // Every routing decision below checks the theme FIRST: the Odyssey's
+    // bosses are never allowed to borrow the machine art, dead or alive.
+    const heroWorld = typeof isHero === 'function' && isHero();
+    if (this.dead && !heroWorld
+      && !((this.kind === 'glitch' || this.kind === 'brood') && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beastParts || MEDIA_IMG.eagleParts || MEDIA_IMG.driller))) return;
     const P = PAL[G.roomDef.zone];
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
     if (this.dead) {
+      if (heroWorld) {
+        // the Odyssey's creatures die as THEMSELVES: the same sheet they
+        // fought with, keeling over and fading — never the lion
+        const k = 1 - clamp((this.deathAnimT || 0) / 1.6, 0, 1);
+        const BSPR = {
+          glitch: ['beast', 6, 55, 67, 1.25], brood: ['ghost', 7, 64, 80, 1.6],
+          atlas: ['demon', 6, 160, 144, 1.7], zero: ['ghost', 7, 64, 80, 1.4],
+        };
+        const s = BSPR[this.kind];
+        if (s && typeof sheetReady === 'function' && sheetReady(s[0])) {
+          const [key, n, cw, ch, mult] = s;
+          c.save();
+          c.globalAlpha *= Math.max(0, 1 - k * 0.9);
+          c.translate(cx, this.y + this.h + k * 10);
+          c.scale(this.face || 1, 1);
+          c.rotate(k * 0.45); c.scale(1, 1 - k * 0.4);
+          drawSheet(c, key, n, cw, ch, 0, (this.h * 1.55 * mult) / ch, 4);
+          c.restore();
+        }
+        c.restore(); return;
+      }
       // each machine dies as itself: the beast folds, the eagle drops
       if (this.kind === 'brood') {
         if (typeof drawEagle === 'function') drawEagle(c, this);
@@ -3398,6 +3427,7 @@ class Boss {
     if (typeof isHero === 'function' && isHero()) {
       const BSPR = {
         glitch: ['beast', 6, 55, 67, 12, 1.25],   // the Bronze Boar
+        brood: ['ghost', 7, 64, 80, 8, 1.6],      // the Siren Mother — a spirit, not the iron eagle
         atlas: ['demon', 6, 160, 144, 7, 1.7],    // Talos, the Forge-Giant
         zero: ['ghost', 7, 64, 80, 8, 1.4],       // the Judge of the Dead
       };
@@ -3421,10 +3451,11 @@ class Boss {
         return;
       }
     }
-    if (this.kind === 'glitch' && typeof drawBeast === 'function' && drawBeast(c, this)) { c.restore(); return; }
-    if (this.kind === 'brood' && typeof drawEagle === 'function' && drawEagle(c, this)) { c.restore(); return; }
-    if (this.kind === 'glitch' && typeof drawDriller3D === 'function' && drawDriller3D(c, this)) { c.restore(); return; }
-    if (this.kind === 'glitch' && drawDriller(c, this)) { c.restore(); return; }
+    // the machine's authored art is CLAWBYTE-only — hard theme gate
+    if (!heroWorld && this.kind === 'glitch' && typeof drawBeast === 'function' && drawBeast(c, this)) { c.restore(); return; }
+    if (!heroWorld && this.kind === 'brood' && typeof drawEagle === 'function' && drawEagle(c, this)) { c.restore(); return; }
+    if (!heroWorld && this.kind === 'glitch' && typeof drawDriller3D === 'function' && drawDriller3D(c, this)) { c.restore(); return; }
+    if (!heroWorld && this.kind === 'glitch' && drawDriller(c, this)) { c.restore(); return; }
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
           flash: this.hurtT > 0 ? 1 : 0,
           grounded: this.kind !== 'brood' && this.kind !== 'zero' && this.kind !== 'prism',

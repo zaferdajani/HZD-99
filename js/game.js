@@ -1753,7 +1753,10 @@ function drawStatics(P) {
       if (id === 'sage' && chance(0.03)) addPart(s.x + s.w / 2 + rnd(-16, 16), s.y + rnd(0, 20), rnd(-8, 8), rnd(-14, -4), 0.9, '#9fe8ff', 1.6, 0, true);
       if (id === 'patch' && chance(0.05)) addPart(s.x + s.w / 2 + rnd(-6, 10), s.y + s.h - 8, rnd(-40, 40), rnd(-70, -20), 0.3, '#ffd08a', 2, 500, true);
       if (id === 'lumen' && chance(0.06)) addPart(s.x + s.w / 2, s.y + 12, rnd(-14, 14), rnd(-20, -6), 0.7, '#7dff9a', 1.8, -18, true);
-      if (id === 'servo') {
+      if (typeof isHero === 'function' && isHero() && drawHeroNPC(c, id, s)) {
+        // the Odyssey has its own people — robed, human, Greek. The machine
+        // folk below belong to the Depths and stay there.
+      } else if (id === 'servo') {
         c.fillStyle = '#5c5346'; c.beginPath(); c.arc(0, -14, 15, 0, 7); c.fill();
         c.fillStyle = '#463f35'; c.beginPath(); c.arc(0, -26, 10, 0, 7); c.fill();
         c.fillStyle = '#ffd76a'; c.shadowColor = '#ffd76a'; c.shadowBlur = 8;
@@ -3415,6 +3418,103 @@ function drawCine() {
       c.fillRect(0, 0, 960, 540);
     }
   }
+}
+// ---- the Odyssey's people ------------------------------------------------
+// Robed, human, Greek — drawn in the same local space as the machine NPCs
+// (origin at the feet, already flipped to face the player). Breathing and
+// small gestures live on performance.now() like their machine counterparts.
+function drawHeroNPC(c, id, s) {
+  const tn = performance.now() / 1000 + (s.t || 0);
+  const br = Math.sin(tn * 1.7) * 0.8;                 // breath
+  const robe = (x, w, h, col, hem) => {
+    c.fillStyle = col;
+    c.beginPath();
+    c.moveTo(x - w * 0.32, -h);
+    c.quadraticCurveTo(x - w * 0.62, -h * 0.4, x - w * 0.5, 0);
+    c.lineTo(x + w * 0.5, 0);
+    c.quadraticCurveTo(x + w * 0.62, -h * 0.4, x + w * 0.32, -h);
+    c.closePath(); c.fill();
+    if (hem) { c.fillStyle = hem; c.fillRect(x - w * 0.5, -3, w, 3); }
+  };
+  const head = (x, y, r, skin) => {
+    c.fillStyle = skin || '#d8b896';
+    c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
+  };
+  switch (id) {
+    case 'servo': {   // Old Mentor — bearded elder leaning on a knotted staff
+      c.strokeStyle = '#6e5a3a'; c.lineWidth = 2.6; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(13, 0); c.lineTo(10, -34 - br); c.stroke();
+      c.fillStyle = '#8a7248'; c.beginPath(); c.arc(10, -35 - br, 2.6, 0, 7); c.fill();
+      robe(0, 24, 26 + br, '#8a8298', '#6b657a');
+      head(0, -30 - br, 7.5);
+      c.fillStyle = '#e8e4da';                          // beard + brow
+      c.beginPath(); c.moveTo(-5, -28 - br); c.quadraticCurveTo(0, -16 - br, 5, -28 - br); c.closePath(); c.fill();
+      c.fillStyle = '#f2efe8'; c.beginPath(); c.arc(0, -36 - br, 5.5, Math.PI, 0); c.fill();
+      c.fillStyle = '#2a2a30'; c.fillRect(1, -32 - br, 2, 2); c.fillRect(5, -32 - br, 2, 2);
+      return true;
+    }
+    case 'ratchet': { // Hermion the Trader — chiton, amphora, a coin in hand
+      c.fillStyle = '#b06a42';                           // the amphora
+      c.beginPath(); c.ellipse(-15, -9, 6, 9, 0, 0, 7); c.fill();
+      c.fillStyle = '#8a4f30'; c.fillRect(-18, -20, 6, 4);
+      robe(0, 22, 24 + br, '#e8e0cc', '#c8a84a');
+      head(0, -28 - br, 7);
+      c.fillStyle = '#4a3b28';                           // curls
+      c.beginPath(); c.arc(0, -32 - br, 5.5, Math.PI * 0.95, Math.PI * 0.05); c.fill();
+      c.fillStyle = '#2a2a30'; c.fillRect(2, -29 - br, 2, 2); c.fillRect(5.5, -29 - br, 2, 2);
+      const cp = 0.5 + Math.sin(tn * 4) * 0.5;           // the coin turning
+      c.fillStyle = '#ffd76a'; c.shadowColor = '#ffd76a'; c.shadowBlur = 6 * cp;
+      c.beginPath(); c.ellipse(12, -18 - br, 2.8 * (0.4 + cp * 0.6), 2.8, 0, 0, 7); c.fill();
+      c.shadowBlur = 0;
+      return true;
+    }
+    case 'mono': {    // the Oracle — veiled, gold circlet, eyes like embers
+      robe(0, 24, 34 + br, '#3a4668', '#2a3450');
+      c.fillStyle = '#3a4668';                           // the veil over the head
+      c.beginPath(); c.arc(0, -36 - br, 9, Math.PI * 0.9, Math.PI * 0.1); c.fill();
+      c.fillRect(-9, -36 - br, 18, 8);
+      c.fillStyle = '#141a2a'; c.beginPath(); c.arc(0, -33 - br, 6, 0, 7); c.fill();
+      const gp = 0.6 + Math.sin(tn * 2.2) * 0.3;
+      c.fillStyle = 'rgba(159,208,255,' + gp + ')';
+      c.shadowColor = '#9fd0ff'; c.shadowBlur = 8;
+      c.fillRect(-3.5, -34 - br, 2.6, 2.6); c.fillRect(1, -34 - br, 2.6, 2.6);
+      c.shadowBlur = 0;
+      c.strokeStyle = '#ffd76a'; c.lineWidth = 1.6;      // circlet
+      c.beginPath(); c.arc(0, -37 - br, 8.4, Math.PI * 1.05, Math.PI * 1.95); c.stroke();
+      return true;
+    }
+    case 'sage': {    // the Sibyl — hooded, an unrolled scroll in her hands
+      robe(0, 25, 30 + br, '#4d5c70', '#3d4a5c');
+      c.fillStyle = '#4d5c70';
+      c.beginPath(); c.arc(0, -32 - br, 8.5, Math.PI * 0.85, Math.PI * 0.15); c.fill();
+      c.fillStyle = '#1a2230'; c.beginPath(); c.arc(0, -30 - br, 5.5, 0, 7); c.fill();
+      c.fillStyle = '#9fe8ff'; c.shadowColor = '#9fe8ff'; c.shadowBlur = 7;
+      c.fillRect(-3, -31 - br, 2.2, 2.2); c.fillRect(1, -31 - br, 2.2, 2.2); c.shadowBlur = 0;
+      c.fillStyle = '#e8e0c8';                            // the scroll
+      c.fillRect(-9, -18 - br * 0.5, 18, 6);
+      c.fillStyle = '#c8b890'; c.fillRect(-11, -19 - br * 0.5, 3, 8); c.fillRect(8, -19 - br * 0.5, 3, 8);
+      return true;
+    }
+    case 'patch': {   // the Tinker of Daedalus — leather apron, bronze wing
+      const sc = Math.sin(tn * 7) * 1.4;                 // hammer taps
+      c.fillStyle = '#8a7248';                            // the half-built wing
+      for (let k = 0; k < 3; k++) {
+        c.beginPath(); c.ellipse(-14 - k * 3, -10 - k * 5, 7 - k, 2.6, -0.5, 0, 7); c.fill();
+      }
+      robe(0, 21, 22 + br, '#a08862', null);
+      c.fillStyle = '#6e5a3a'; c.fillRect(-8, -20 - br, 16, 14);   // apron
+      head(0, -26 - br, 6.5);
+      c.fillStyle = '#4a3b28'; c.beginPath(); c.arc(0, -29 - br, 5, Math.PI, 0); c.fill();
+      c.fillStyle = '#2a2a30'; c.fillRect(1.5, -27 - br, 2, 2); c.fillRect(4.5, -27 - br, 2, 2);
+      c.strokeStyle = '#5c5346'; c.lineWidth = 2.2; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(9, -16); c.lineTo(15, -22 - sc); c.stroke();
+      c.fillStyle = '#8a8ea0'; c.fillRect(13, -26 - sc, 6, 4);     // hammer head
+      return true;
+    }
+    // 'lumen' (the Lost Nymph) keeps the shared leaf-sprite — she already
+    // reads as a wood spirit in both worlds.
+  }
+  return false;
 }
 // ---- portrait system: a 64×64 dialogue bust with real face acting --------
 // Expressions ride on the three things that read at this size: the visor's
