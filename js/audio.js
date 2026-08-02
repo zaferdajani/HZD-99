@@ -91,9 +91,127 @@ function whoosh(dur, f0, f1, vol, delay) {
   src.start(t0);
 }
 
+// ---------- ODYSSEY audio skin (per ODYSSEY_AUDIO_DESIGN) -----------------
+// The hero theme trades the machine's ceramic/pneumatic/digital voice for
+// steel, leather, chainmail, breath and bronze bells — and every big sound
+// carries a stone-hall echo, because kingdoms reverberate and corridors don't.
+function bellToll(f, vol, delay) {
+  // a bronze bell is a fundamental plus stretched inharmonic partials
+  tone(f, 1.3, 'sine', vol, null, delay);
+  tone(f * 2.76, 0.7, 'sine', vol * 0.35, null, delay);
+  tone(f * 5.4, 0.28, 'sine', vol * 0.14, null, delay);
+  hiss(0.05, vol * 0.3, delay);
+}
+function chink(vol, delay) {
+  // one chainmail link against another
+  const f = 1200 + Math.random() * 600;
+  tone(f, 0.035, 'square', vol || 0.028, f * 0.7, delay);
+  hiss(0.025, (vol || 0.028) * 0.8, delay);
+}
+function heroEcho(fn) {
+  // cathedral tail: the same gesture again, twice, quieter and farther away
+  fn(1, 0);
+  fn(0.38, 0.22);
+  fn(0.16, 0.44);
+}
+function heroSfx(n) {
+  switch (n) {
+    case 'step': {
+      // chainmail chink + leather creak, pitch wandering ±5%
+      const p = 0.95 + Math.random() * 0.1;
+      chink(0.022);
+      tone(430 * p, 0.04, 'triangle', 0.02, 300 * p);
+      return true;
+    }
+    case 'stepice':   // boots on ice: a glassy crunch under the chainmail
+      hiss(0.05, 0.03); chink(0.018, 0.01);
+      tone(2100 + Math.random() * 400, 0.05, 'triangle', 0.02, 1200);
+      return true;
+    case 'jump':      // leather creak + chainmail shift + "hup" of breath
+      tone(180, 0.1, 'sawtooth', 0.04, 260); chink(0.03, 0.02);
+      hiss(0.09, 0.035); tone(90, 0.08, 'sine', 0.04, 140);
+      return true;
+    case 'djump':     // the harder push-off
+      tone(200, 0.12, 'sawtooth', 0.05, 320); chink(0.035, 0.02); hiss(0.11, 0.045);
+      return true;
+    case 'land':      // plate CLANK + dust
+      heroEcho((k, d) => {
+        tone(310, 0.12, 'square', 0.07 * k, 150, d);
+        tone(920, 0.07, 'triangle', 0.03 * k, 460, d);
+      });
+      hiss(0.06, 0.04); chink(0.03, 0.03);
+      return true;
+    case 'dash':      // dodge roll: chainmail shhh-shhh
+      whoosh(0.2, 500, 1500, 0.07); chink(0.03, 0.03); chink(0.026, 0.1);
+      return true;
+    case 'swing': case 'atk': // steel SHWING + air cut
+      whoosh(0.12, 900, 2700, 0.09);
+      tone(1750, 0.13, 'triangle', 0.035, 2600);
+      return true;
+    case 'hit':       // impact + steel ring
+      hiss(0.06, 0.09); tone(1150, 0.18, 'triangle', 0.05, 850);
+      tone(170, 0.07, 'square', 0.05, 90);
+      return true;
+    case 'bosshit':   // full CLANG off heavy plate
+      heroEcho((k, d) => tone(680, 0.22, 'square', 0.08 * k, 300, d));
+      tone(1360, 0.18, 'triangle', 0.04); hiss(0.08, 0.1);
+      return true;
+    case 'hurt':      // chainmail chink + plate dent + grunt
+      tone(115, 0.22, 'sawtooth', 0.09, 55);
+      tone(520, 0.11, 'square', 0.05, 240); chink(0.035, 0.03);
+      return true;
+    case 'ui':        // parchment rustle + quill scratch
+      hiss(0.055, 0.03); tone(2300, 0.03, 'triangle', 0.014, 1600);
+      return true;
+    case 'ok':        // wax-seal stamp
+      tone(175, 0.09, 'sine', 0.075, 85); hiss(0.04, 0.02);
+      return true;
+    case 'pick':      // item "shhhink" + chime
+      tone(1150, 0.07, 'triangle', 0.045, 1900);
+      tone(2300, 0.12, 'sine', 0.02, null, 0.04);
+      return true;
+    case 'chest':     // wood creak + hinge + treasure shimmer
+      tone(150, 0.28, 'sawtooth', 0.03, 85);
+      [1350, 1700, 2150].forEach((f, i) => tone(f, 0.14, 'sine', 0.035, null, 0.12 + i * 0.07));
+      return true;
+    case 'bench':     // the bonfire: crackle, settle, sheathed steel
+      for (let i = 0; i < 6; i++) hiss(0.03, 0.025, Math.random() * 0.7);
+      tone(140, 0.5, 'sine', 0.03, 110);
+      tone(700, 0.1, 'triangle', 0.025, 350, 0.3); chink(0.024, 0.45);
+      return true;
+    case 'heal':      // potion: glass clink, gulp, magic fizz
+      tone(1800, 0.05, 'triangle', 0.04);
+      tone(300, 0.09, 'sine', 0.05, 170, 0.12);
+      hiss(0.18, 0.02, 0.2);
+      return true;
+    case 'cast':      // ancient words + magic circle hum
+      hiss(0.2, 0.03);
+      tone(150, 0.45, 'sine', 0.05, 300);
+      tone(452, 0.3, 'sine', 0.022, 604, 0.12);
+      return true;
+    case 'boss':      // the boss bar: bell tolls, echoing down the nave
+      bellToll(98, 0.09, 0); bellToll(98, 0.06, 0.55); bellToll(98, 0.04, 1.1);
+      return true;
+    case 'dieSting':  // death: one great toll + wind + a whispering hall
+      bellToll(73.4, 0.11, 0);
+      whoosh(1.2, 300, 90, 0.05, 0.3);
+      bellToll(73.4, 0.05, 0.9);
+      return true;
+    case 'win':       // solo trumpet, triumphant but sad
+      [523, 659, 784, 659, 880].forEach((f, i) =>
+        tone(f, i === 4 ? 0.6 : 0.22, 'sawtooth', 0.045, null, i * 0.18));
+      hiss(0.04, 0.02);
+      return true;
+    case 'pogo':      // the downward strike rings like a struck shield
+      tone(1500, 0.12, 'triangle', 0.05, 750); chink(0.02, 0.02);
+      return true;
+  }
+  return false;   // everything else keeps the shared voice
+}
 // ---------- sound effects ----------
 function sfx(n) {
   if (!AC || MUTED) return;
+  if (typeof isHero === 'function' && isHero() && heroSfx(n)) return;
   // recorded samples first (loaded from the CC0 library), synth fallback below
   if (n === 'hit' && playBuf(Math.random() < 0.5 ? 'hit1' : 'hit2', 0.45, 0.9 + Math.random() * 0.2)) return;
   if (n === 'bosshit' && playBuf('metal', 0.5, 0.85 + Math.random() * 0.15)) return;
@@ -135,6 +253,7 @@ function sfx(n) {
     case 'pogo': tone(420, 0.09, 'square', 0.05, 840); break;
     case 'cast': tone(200, 0.2, 'sawtooth', 0.07, 900); hiss(0.1, 0.05); break;
     case 'step': hiss(0.025, 0.016); tone(170, 0.03, 'sine', 0.02, 120); break;
+    case 'stepice': hiss(0.04, 0.02); tone(1900 + Math.random() * 400, 0.04, 'triangle', 0.018, 1100); break;
     case 'land': tone(130, 0.09, 'sine', 0.06, 62); hiss(0.05, 0.03); break;
     case 'chest': [660, 830, 1050, 1320].forEach((f, i) => tone(f, 0.14, 'sine', 0.05, null, i * 0.06)); break;
     case 'buy': tone(1180, 0.06, 'square', 0.045); tone(1570, 0.09, 'square', 0.045, null, 0.07); break;

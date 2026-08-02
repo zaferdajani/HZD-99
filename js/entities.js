@@ -405,7 +405,10 @@ class Player {
     } else { this.on = false; this.coyote -= dt; }
     if (this.on && Math.abs(this.vx) > 150 && this.dashT <= 0) {
       this.stepT = (this.stepT || 0) - dt;
-      if (this.stepT <= 0) { this.stepT = 0.27; sfx('step'); }
+      if (this.stepT <= 0) {
+        this.stepT = 0.27;
+        sfx((G.roomDef.ice || (G.iceT || 0) > 0) ? 'stepice' : 'step');
+      }
     } else this.stepT = 0.1;
     // hazard tiles
     if (onSpike(this)) {
