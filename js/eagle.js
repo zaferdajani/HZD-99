@@ -130,6 +130,27 @@ function drawEagle(c, b) {
       c.translate((Math.random() - 0.5) * 2.4, 0);
       egFlap(c, t, 11, 0);
       egChestGlow(c, 1.3 + Math.sin(t * 16) * 0.3);
+    } else if (b.st === 'broodcall') {
+      // BROOD CALL: the screech — thrown back on the cable, chest strobing
+      c.strokeStyle = '#3a4048'; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(0, -300); c.lineTo(0, -100); c.stroke();
+      c.rotate(-0.16 + Math.sin(t * 22) * 0.02);
+      egFigA(c, 'kCharge', 1, 0);
+      egChestGlow(c, 1.5 + Math.sin(t * 25) * 0.5);
+    } else if (b.st === 'cfcrash') {
+      // COOLANT FREEZE: an uncontrolled tumble, not a stoop
+      egFigA(c, 'pDown', 1, Math.sin(t * 7) * 0.5);
+      egChestGlow(c, 0.9 + Math.sin(t * 30) * 0.4);
+    } else if (b.st === 'cffloor') {
+      // downed, chest cracked, coolant bleeding out — the repair window
+      c.scale(1, 1 + Math.sin(t * 8) * 0.03);
+      egFigA(c, 'pRest', 1, 0.12);
+      egChestGlow(c, 0.25 + Math.sin(t * 18) * 0.15);
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const cg = c.createRadialGradient(0, -20, 4, 0, -20, 70);
+      cg.addColorStop(0, 'rgba(160,230,255,0.5)'); cg.addColorStop(1, 'rgba(120,200,255,0)');
+      c.fillStyle = cg; c.beginPath(); c.arc(0, -20, 70, 0, 7); c.fill();
+      c.restore();
     } else if (b.st === 'restlow') {
       // wings spent: down in claw range, breathing hard (the sheet keeps the
       // mount on the creature in every frame, so it stays)

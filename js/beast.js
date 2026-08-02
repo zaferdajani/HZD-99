@@ -276,6 +276,7 @@ function drawBeast(c, b) {
     const turnFront = ta < 0.3 && !b.dead && b.stagT <= 0
       && b.st !== 'pounce' && b.st !== 'crouch' && b.st !== 'roar'
       && b.st !== 'springwarn' && b.st !== 'spring' && b.st !== 'dive'
+      && b.st !== 'nullhop' && b.st !== 'nullend'
       ? beastFront() : null;
     if (turnFront) {
       const k = 1 - ta / 0.3;
@@ -308,14 +309,35 @@ function drawBeast(c, b) {
     } else if (b.st === 'crouch' && !b.dead) {
       // flat in the grass, trembling with intent — the sheet's own crouch
       bFig(c, 'aAtk', 0, 1.6);
+    } else if (b.st === 'nullhop' && !b.dead) {
+      // NULL GRAVITY coil: the same authored crouch, wound tighter
+      bFig(c, 'aAtk', 0, 2.6);
+    } else if (b.st === 'nullend' && !b.dead) {
+      // the field's collapse dropped it flat — sprawled and spent
+      bFig(c, 'aAtk', 0.12, 0.6);
+    } else if (b.st === 'nullcharge' && !b.dead) {
+      // stands dead still while gravity is unplugged; virus light climbs the coat
+      beastDraw(c, b, beastPose(b));
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const ng = c.createRadialGradient(0, -120, 10, 0, -120, 190);
+      ng.addColorStop(0, 'rgba(176,106,255,' + (0.24 + Math.sin(b.anim * 9) * 0.12) + ')');
+      ng.addColorStop(1, 'rgba(176,106,255,0)');
+      c.fillStyle = ng; c.beginPath(); c.arc(0, -120, 190, 0, 7); c.fill();
+      c.restore();
     } else if (b.st === 'roar' && (b.t || 0) > 0.25 && !b.dead) {
       // THE ROAR — the sheet's own open-jaw howl, shaking harder as it peaks
       bFig(c, 'aRoar', 0, 1 + Math.max(0, 1.25 - (b.t || 0)) * 6);
-      // virus light pouring from the throat
+      // the virus orb GATHERS in the throat through the inhale (the tell),
+      // pulsing brighter each beat, then floods out as the roar breaks
+      const inh = Math.max(0, Math.min(1, (1.25 - (b.t || 0)) / 0.5));
+      const orbR = 22 + inh * 44;
+      const pulse = 0.5 + Math.sin(b.anim * 13) * 0.22 * (0.4 + inh);
       c.save(); c.globalCompositeOperation = 'lighter';
-      const mg = c.createRadialGradient(-150, -215, 2, -150, -215, 60);
-      mg.addColorStop(0, 'rgba(220,150,255,0.65)'); mg.addColorStop(1, 'rgba(140,60,220,0)');
-      c.fillStyle = mg; c.beginPath(); c.arc(-150, -215, 60, 0, 7); c.fill();
+      const mg = c.createRadialGradient(-150, -215, 2, -150, -215, orbR);
+      mg.addColorStop(0, 'rgba(240,200,255,' + Math.min(0.95, 0.45 + pulse * 0.5) + ')');
+      mg.addColorStop(0.4, 'rgba(220,150,255,' + (0.35 + inh * 0.3) + ')');
+      mg.addColorStop(1, 'rgba(140,60,220,0)');
+      c.fillStyle = mg; c.beginPath(); c.arc(-150, -215, orbR, 0, 7); c.fill();
       c.restore();
     } else {
       beastDraw(c, b, beastPose(b));

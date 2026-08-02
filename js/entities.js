@@ -110,7 +110,10 @@ class Player {
     this.chargeT = 0; this.chargeTick = 0; this.healTick = 0;
     this.clawT = 0; this.clawCD = 0; this.pounceT = 0;   // FERAL CLAWS (robo-cat)
     this.armCD = 0; this.songT = 0; this.songCD = 0; this.starCD = 0;
-    this.downBuf = 0; this.pogoT = 0;
+    this.downBuf = 0; this.pogoT = 0; this.slowT = 0;   // frost-slow from the Archivist
+    // scarf (4 segments) + tail (3 segments) spring chains — angles + velocities
+    this.scarfA = [-0.4, -0.55, -0.7, -0.85]; this.scarfV = [0, 0, 0, 0];
+    this.tailA = [0.9, 0.75, 0.6]; this.tailV = [0, 0, 0];
   }
   maxCores() { return G.save.coresMax + (hasCrest('plate') ? 1 : 0) + (relicHas('silent') ? 1 : 0); }
   speed() { return 340 * (hasCrest('sprint') ? 1.15 : 1) * (relicHas('shard') ? 1.04 : 1); }
@@ -130,6 +133,29 @@ class Player {
           addPart(this.x + this.w / 2 + rnd(-6, 6), this.y + this.h - 2,
             rnd(-60, 60), rnd(-70, -20), 0.25, '#8fa3b5', 2, 400);
     }
+    // scarf + tail follow-through: spring-damper chains (k=0.3, damping 0.8
+    // per 60fps frame). Each segment chases the one before it, so the cloth
+    // whips and settles instead of ticking like a metronome.
+    {
+      const f60 = clamp(dt * 60, 0, 3);
+      const wind = clamp(this.vx * this.face, 0, 420) / 420;   // forward speed streams it back
+      const fall = clamp(this.vy / 900, -1, 1);                // + falling lifts, − rising drops
+      for (let i = 0; i < 4; i++) {
+        const rest = -0.34 - i * 0.14 + wind * (0.44 + i * 0.1) + fall * (0.5 + i * 0.14)
+          + Math.sin(this.anim * (9 + i * 1.3) + i * 1.9) * (0.05 + wind * 0.16 + Math.abs(fall) * 0.08);
+        const drive = i ? this.scarfA[i - 1] * 0.6 + rest * 0.4 : rest;
+        this.scarfV[i] = (this.scarfV[i] + (drive - this.scarfA[i]) * 0.3 * f60) * Math.pow(0.8, f60);
+        this.scarfA[i] = clamp(this.scarfA[i] + this.scarfV[i] * f60 * 0.6, -1.5, 1.4);
+      }
+      const runK = clamp(Math.abs(this.vx) / this.speed(), 0, 1);
+      for (let i = 0; i < 3; i++) {
+        const rest = 0.95 - i * 0.16 - wind * 0.5 + fall * 0.4
+          + Math.sin(this.anim * 6 - i * 0.9) * (0.12 + runK * 0.1);
+        const drive = i ? this.tailA[i - 1] * 0.55 + rest * 0.45 : rest;
+        this.tailV[i] = (this.tailV[i] + (drive - this.tailA[i]) * 0.3 * f60) * Math.pow(0.8, f60);
+        this.tailA[i] = clamp(this.tailA[i] + this.tailV[i] * f60 * 0.6, -0.4, 2.2);
+      }
+    }
     if (this.rechargeT > 0) {
       this.rechargeT -= dt; this.anim += dt;
       this.vx = 0; this.vy = Math.min(this.vy + 2300 * dt, 980);
@@ -139,8 +165,16 @@ class Player {
     this.anim += dt;
     this.dashCD -= dt; this.atkCD -= dt; this.iT -= dt; this.castCD -= dt;
     this.jbuf -= dt; this.landT -= dt; this.comboT -= dt;
-    const ice = !!G.roomDef.ice;
-    const dir = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
+    if (this.slowT > 0) {
+      this.slowT -= dt;
+      if (chance(0.3)) addPart(this.x + rnd(0, this.w), this.y + rnd(0, this.h),
+        rnd(-15, 15), rnd(-25, 5), 0.4, '#bfe8ff', 2, 100);
+    }
+    // COOLANT FREEZE coats any floor in ice; NULL GRAVITY makes jumps go light
+    const ice = !!G.roomDef.ice || (G.iceT || 0) > 0;
+    // MOTHER'S SONG mirrors your inputs for its few seconds — fight it
+    const dirRaw = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
+    const dir = (G.revT || 0) > 0 ? -dirRaw : dirRaw;
     const healing = this.healT > 0;
 
     if (this.dashT > 0) {
@@ -153,7 +187,9 @@ class Player {
       const acc = (ice ? 1000 : 3000), fric = ice ? 260 : 2900;
       if (dir !== 0 && !healing) {
         this.vx += dir * acc * dt;
-        this.vx = clamp(this.vx, -this.speed(), this.speed());
+        // frozen joints: the Archivist's beams halve her top speed for a spell
+        const cap = this.speed() * (this.slowT > 0 ? 0.5 : 1);
+        this.vx = clamp(this.vx, -cap, cap);
         this.face = dir;
       } else {
         const s = Math.sign(this.vx);
@@ -163,6 +199,7 @@ class Player {
       // asymmetric gravity: quick rise, floaty apex hang, heavier fall
       let grav = this.vy < 0 ? 2150 : 3050;
       if (!this.on && Math.abs(this.vy) < 90) grav *= 0.55;
+      if ((G.lowGravT || 0) > 0) grav *= 0.32;   // NULL GRAVITY field
       this.vy = Math.min(this.vy + grav * dt, 1020);
       this.wallSlide = 0;
       if (hasMod('wall') && !this.on && this.vy > 0 && dir !== 0 && touchingWall(this, dir)) {
@@ -345,9 +382,15 @@ class Player {
     }
     // the Song — quiets the orders without touching the body
     if (inP('SONG') && this.songCD <= 0 && this.volts >= SONG_COST) {
-      this.songCD = 1.1;
-      const n = playSong();
-      if (n) G.toast(t('song_hit').replace('%s', n));
+      if ((G.songLockT || 0) > 0) {
+        // MOTHER'S SONG is jamming the channel — the keytar chokes
+        this.songCD = 0.5; sfx('no');
+      } else {
+        this.songCD = 1.1;
+        const n = playSong();
+        if (n) G.toast(t('song_hit').replace('%s', n));
+        if ((G.darkT || 0) > 0) G.revealT = 3;   // the Song lights her up
+      }
     }
     // resolve movement
     const wasFalling = this.vy;
@@ -739,24 +782,50 @@ class Player {
         c.fillStyle = '#8a6f38'; c.beginPath(); c.arc(-10, -18 + bob * 0.4, 2.5, 0, 7); c.fill();
       }
     }
-    for (let i = 0; i < 2; i++) {
-      const fl = Math.sin(this.anim * 9 + i * 1.9) * (2.5 + spdK * 5);
-      const len = 14 + spdK * 16 + (this.on ? 0 : 6);
-      c.strokeStyle = i ? '#a63740' : '#e0484f';
-      c.lineWidth = 4 - i * 1.4; c.lineCap = 'round';
-      c.beginPath(); c.moveTo(1, -24 + bob);
-      c.quadraticCurveTo(-9 - len * 0.5, -27 + fl * 0.5 + i * 2 + bob, -13 - len, -22 + fl + i * 3 + bob);
-      c.stroke();
+    {
+      // scarf — the 4-segment spring chain, rendered as a tapering ribbon.
+      // The angles live in update(); here we just walk the chain backward.
+      let sx0 = 1, sy0 = -24 + bob;
+      const seg = [[sx0, sy0]];
+      for (let i = 0; i < 4; i++) {
+        const L = 7 + spdK * 3.5 + (this.on ? 0 : 1.5);
+        sx0 -= Math.cos(this.scarfA[i]) * L; sy0 -= Math.sin(this.scarfA[i]) * L;
+        seg.push([sx0, sy0]);
+      }
+      c.lineCap = 'round'; c.lineJoin = 'round';
+      // dark fold under, bright cloth over — reads as a folded ribbon
+      c.strokeStyle = '#a63740';
+      c.beginPath(); c.moveTo(seg[0][0], seg[0][1] + 2.2);
+      for (let i = 1; i <= 4; i++) c.lineTo(seg[i][0], seg[i][1] + 2.2 - i * 0.3);
+      c.lineWidth = 4.6; c.stroke();
+      c.strokeStyle = '#e0484f';
+      c.beginPath(); c.moveTo(seg[0][0], seg[0][1]);
+      for (let i = 1; i <= 4; i++) c.lineTo(seg[i][0], seg[i][1]);
+      c.lineWidth = 3.6; c.stroke();
+      // split tip — the scarf ends in two tails that flutter apart
+      c.lineWidth = 2.2;
+      c.beginPath(); c.moveTo(seg[3][0], seg[3][1]);
+      c.lineTo(seg[4][0] - 1, seg[4][1] + 4 + Math.sin(this.anim * 11) * 2); c.stroke();
     }
     if (!hero) {
-      // tail — energy conduit
-      c.strokeStyle = '#cfd8e6'; c.lineWidth = 3.5; c.lineCap = 'round';
-      c.beginPath(); c.moveTo(-11, -10);
-      const tw = Math.sin(this.anim * 6) * 6;
-      c.quadraticCurveTo(-24, -18 + tw, -21, -30 + tw * 1.4); c.stroke();
+      // tail — energy conduit on the 3-segment spring chain: it lags a turn,
+      // streams back at a sprint and flags upward in a fall
+      let tx0 = -11, ty0 = -10;
+      const tp = [[tx0, ty0]];
+      for (let i = 0; i < 3; i++) {
+        const L = 8.5 - i * 0.5;
+        tx0 -= Math.cos(this.tailA[i]) * L; ty0 -= Math.sin(this.tailA[i]) * L;
+        tp.push([tx0, ty0]);
+      }
+      c.strokeStyle = '#cfd8e6'; c.lineWidth = 3.5; c.lineCap = 'round'; c.lineJoin = 'round';
+      c.beginPath(); c.moveTo(tp[0][0], tp[0][1]);
+      for (let i = 1; i <= 3; i++) c.lineTo(tp[i][0], tp[i][1]);
+      c.stroke();
       c.strokeStyle = P.glow; c.lineWidth = 1.2;
-      c.beginPath(); c.moveTo(-12.5, -12.5); c.quadraticCurveTo(-22, -19 + tw, -20.5, -28 + tw * 1.3); c.stroke();
-      c.fillStyle = P.glow; c.beginPath(); c.arc(-21, -30 + tw * 1.4, 2.6, 0, 7); c.fill();
+      c.beginPath(); c.moveTo(tp[0][0] - 1.5, tp[0][1] - 2.5);
+      for (let i = 1; i <= 3; i++) c.lineTo(tp[i][0] + 0.5, tp[i][1] + 1);
+      c.stroke();
+      c.fillStyle = P.glow; c.beginPath(); c.arc(tp[3][0], tp[3][1], 2.6, 0, 7); c.fill();
     }
     // segmented digitigrade legs with glowing joints
     const leg = (hipX, phase, front) => {
@@ -1067,6 +1136,19 @@ class Player {
     }
     }
     c.restore();
+    // combo pips — 1/2/3 tiny lights above the head while the chain is alive;
+    // the newest pip burns white so you can read where you are mid-combo
+    if (this.comboT > 0) {
+      const n = this.combo + 1, a = clamp(this.comboT / 0.3, 0, 1);
+      c.save(); c.globalAlpha = 0.85 * a;
+      for (let i = 0; i < n; i++) {
+        const px2 = this.x + this.w / 2 + (i - (n - 1) / 2) * 9;
+        c.fillStyle = i === n - 1 ? '#ffffff' : PAL[G.roomDef.zone].glow;
+        c.shadowColor = PAL[G.roomDef.zone].glow; c.shadowBlur = 6;
+        c.beginPath(); c.arc(px2, this.y - 12, i === n - 1 ? 2.6 : 2, 0, 7); c.fill();
+      }
+      c.shadowBlur = 0; c.restore(); c.globalAlpha = 1;
+    }
     // volt-blade slashes — sharp tapered anime CUTS through space, not rings
     if (this.swingVis) {
       const sv = this.swingVis;
@@ -1345,6 +1427,10 @@ class Proj {
     } else if (!player.dead && aabb(this.box(), player)) {
       this.dead = true;
       player.hurt(DF().edmg, this.x);
+      if (this.frost) {                          // Archivist beam: frozen joints
+        player.slowT = Math.max(player.slowT, 2);
+        burst(this.x, this.y, 12, '#bfe8ff', 180, 0.5, 100, 2.5, true);
+      }
     }
   }
   draw(c) {
@@ -1533,6 +1619,11 @@ class Enemy {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    // summoned brood expires: called minions burn out after their tour
+    if (this.expireT != null && !this.dead) {
+      this.expireT -= dt;
+      if (this.expireT <= 0) { this.die(0, -0.5); return; }
+    }
     // turn toward where we are going, in time rather than in frames drawn
     const wantF = (this.kind === 'flier' ? Math.sign(this.vx) || 1 : this.dir) || 1;
     this.faceVis += clamp(wantF - this.faceVis, -dt * 5.5, dt * 5.5);
@@ -1590,12 +1681,18 @@ class Enemy {
         break;
       }
       case 'turret': {
+        // sweep → LOCK (the red light is the tell) → fire
         this.t -= dt;
-        if (this.t <= 0 && !player.dead && dist2(cx, cy, px, py) < 440 * 440) {
-          this.t = 2.2 / DF().espd;
-          const d = Math.hypot(px - cx, py - cy) || 1;
-          G.projs.push(new Proj(cx, cy - 6, (px - cx) / d * 270, (py - cy) / d * 270, false, 1, 6, PAL[G.roomDef.zone].glow));
-          sfx('shoot');
+        if ((this.lockT || 0) > 0) {
+          this.lockT -= dt;
+          if (this.lockT <= 0) {
+            this.t = 2.0 / DF().espd; this.lockT = 0;
+            const d = Math.hypot(px - cx, py - cy) || 1;
+            G.projs.push(new Proj(cx, cy - 6, (px - cx) / d * 340, (py - cy) / d * 340, false, 1, 6, '#ff5c6c'));
+            sfx('shoot');
+          }
+        } else if (this.t <= 0 && !player.dead && dist2(cx, cy, px, py) < 440 * 440) {
+          this.lockT = 0.55; sfx('ui');
         }
         break;
       }
@@ -1629,6 +1726,15 @@ class Enemy {
     sfx('edie');
     player.gainVolts(8);
     burst(cx, cy, 10, PAL[G.roomDef.zone].glow, 200, 0.4, 400, 3, true);
+    // a slag blob does not die clean: it bursts into two small blobs
+    if (this.kind === 'blob' && !this.mini && !onSpike(this)) {
+      for (const s of [-1, 1]) {
+        const b2 = new Enemy('blob', cx - 10 + s * 10, this.y + this.h - 16);
+        b2.w = 20; b2.h = 15; b2.hp = 12; b2.mini = true;
+        b2.dir = s; b2.vx = s * 130; b2.vy = -240; b2.kbT = 0.35;
+        G.enemies.push(b2);
+      }
+    }
     G.wrecks.push(new Wreck(this, kx || 0, ky || 0));
   }
   draw(c) {
@@ -1978,6 +2084,13 @@ class Enemy {
         }, true);
         eyes(-3.4, -8, 2);
         c.restore();
+        // LOCKED: the red targeting light — your half-second to move
+        if ((this.lockT || 0) > 0) {
+          c.save(); c.globalAlpha = 0.6 + Math.sin(this.anim * 30) * 0.35;
+          c.fillStyle = '#ff3c50'; c.shadowColor = '#ff3c50'; c.shadowBlur = 12;
+          c.beginPath(); c.arc(0, -14, 3.2, 0, 7); c.fill();
+          c.shadowBlur = 0; c.restore();
+        }
         break;
       }
     }
@@ -2137,7 +2250,12 @@ class Boss {
           this.face = Math.sign(dist) || 1;
           this.vx = this.face * (this.phase === 2 ? 210 : 165) * spd;
           this.t -= dt; this.roarCD -= dt; this.ambushCD -= dt;
-          if (this.ambushCD <= 0) {
+          if (!this.nullUsed && this.hp <= this.hpMax * 0.5) {
+            // NULL GRAVITY: once per fight, below half health, the virus
+            // overrides the room's gravity — the charge-up is the tell
+            this.nullUsed = true;
+            this.st = 'nullcharge'; this.t = 1.1; this.vx = 0; sfx('cast');
+          } else if (this.ambushCD <= 0) {
             // scan the room for perches ('=' platform runs)
             const per = [];
             for (let ty2 = 3; ty2 < G.roomDef.h - 2; ty2++) {
@@ -2194,6 +2312,17 @@ class Boss {
             -this.face * rnd(60, 140), rnd(-40, 40), 0.3, '#b06aff', 2.5, 0, true);
         } else if (this.st === 'roar') {
           this.vx = 0; this.t -= dt;
+          if (!this.roared) {
+            // the inhale: a virus orb gathers in the throat and loose ground
+            // debris drifts upward — both scream "get clear NOW"
+            if (chance(0.7)) addPart(this.cx() + rnd(-90, 90), this.y + this.h - 4,
+              rnd(-15, 15), rnd(-80, -30), 0.5, '#8a8a96', 2, -60);
+            if (chance(0.8)) {
+              const oa = rnd(0, 6.28), or2 = rnd(26, 48);
+              addPart(this.cx() + this.face * 30 + Math.cos(oa) * or2, this.cy() - 6 + Math.sin(oa) * or2,
+                -Math.cos(oa) * 95, -Math.sin(oa) * 95, 0.3, '#b06aff', 2.5, 0, true);
+            }
+          }
           if (!this.roared && this.t <= 0.75) {
             this.roared = true;
             cam.shake = 11; sfx('roar'); G.flash = Math.max(G.flash, 0.18);
@@ -2272,16 +2401,63 @@ class Boss {
           // a beat of stillness after the landing — your window
           this.vx *= 0.8; this.t -= dt;
           if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.4, 0.7); }
+        } else if (this.st === 'nullcharge') {
+          // dead still while virus light crawls up off the floor and your
+          // own jumps start to feel wrong — gravity is being unplugged
+          this.vx = 0; this.t -= dt; this.windT = 0.3;
+          G.lowGravT = Math.max(G.lowGravT || 0, 0.5);
+          if (chance(0.9)) addPart(rnd(40, G.roomDef.w * TILE - 40), G.roomDef.h * TILE - 10,
+            rnd(-10, 10), rnd(-70, -25), 0.6, '#b06aff', 2.5, -140, true);
+          if (this.t <= 0) {
+            this.nullSeq = 3;
+            this.st = 'nullhop'; this.t = 0.12;
+            G.flash = Math.max(G.flash, 0.25); cam.shake = 6; sfx('roar');
+          }
+        } else if (this.st === 'nullhop') {
+          // between the field pounces: an instant coil, then launch — the
+          // field itself is the wind-up, the pounces have none
+          this.vx = 0; this.t -= dt;
+          G.lowGravT = Math.max(G.lowGravT || 0, 1.2);
+          if (chance(0.5)) addPart(rnd(40, G.roomDef.w * TILE - 40), rnd(60, G.roomDef.h * TILE - 50),
+            rnd(-20, 20), rnd(-30, 10), 0.5, '#b06aff', 2, 0, true);
+          if (this.t <= 0) {
+            const d2 = px - this.cx();
+            this.face = Math.sign(d2) || 1;
+            this.vx = clamp(d2 * 1.9, -720, 720) * spd;
+            this.vy = -(380 + Math.min(240, Math.abs(d2) * 0.45));
+            this.st = 'pounce'; sfx('dash');
+          }
+        } else if (this.st === 'nullend') {
+          // the field collapses: everything slams back down and NULLFANG
+          // lands hard, stunned — the longest window in the fight
+          this.vx = 0; this.t -= dt;
+          if (!this.nullCrash) {
+            this.nullCrash = true;
+            G.lowGravT = 0;
+            for (let i = 0; i < 16; i++)
+              addPart(rnd(40, G.roomDef.w * TILE - 40), rnd(80, G.roomDef.h * TILE - 80),
+                0, rnd(300, 520), 0.5, '#8a8a96', 3, 600);
+            cam.shake = 9; sfx('boom');
+          }
+          this.stagT = Math.max(this.stagT, 0.3);
+          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.6, 1.0); this.nullCrash = false; }
         }
+        if (this.st === 'pounce' && this.nullSeq > 0) G.lowGravT = Math.max(G.lowGravT || 0, 1.2);
         const col = (this.st === 'spring' || this.st === 'dive') ? {} : moveEnt(this, dt);
         if (this.st === 'pounce' && col.d) {
-          this.st = 'recover'; this.t = this.phase === 2 ? 0.32 : 0.42;
           cam.shake = 8; sfx('land');
           for (let i = 0; i < 10; i++)
             addPart(this.cx() + rnd(-this.w * 0.5, this.w * 0.5), this.y + this.h - 4,
               rnd(-160, 160), rnd(-180, -40), 0.4, '#b9a888', 3, 300, true);
           const box = { x: this.cx() - 80, y: this.y, w: 160, h: this.h + 8 };
           if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
+          if (this.nullSeq > 0) {
+            this.nullSeq--;
+            if (this.nullSeq > 0) { this.st = 'nullhop'; this.t = 0.16; }
+            else { this.st = 'nullend'; this.t = 1.15; }
+          } else {
+            this.st = 'recover'; this.t = this.phase === 2 ? 0.32 : 0.42;
+          }
         }
         if (this.st === 'stalk' && (col.l || col.r)) this.face *= -1;
         break;
@@ -2291,11 +2467,22 @@ class Boss {
         // ---- TALONHOST: hangs from the ceiling mount, rains metallic
         // feathers in fans, swoops through the arena with a wind wake, and
         // must come down low to rest its wings — that's your window ----
+        this.bcCD = this.bcCD == null ? 9 : this.bcCD - dt;
         if (this.st === 'idle') {
           this.x = lerp(this.x, this.spawnX, dt * 2);
           this.y = this.homeY + Math.sin(this.anim * 1.6) * 8;
           this.t -= dt;
-          if (this.t <= 0) {
+          if (!this.frozeUsed && this.hp <= this.hpMax * 0.4) {
+            // COOLANT FREEZE: once per fight the ruptured coolant system
+            // drops it out of the sky — an uncontrolled fall, not a swoop
+            this.frozeUsed = true;
+            this.st = 'cfcrash'; this.vy = 60; sfx('hurt');
+          } else if (this.t <= 0 && this.bcCD <= 0) {
+            // BROOD CALL: the territorial screech that summons its brood
+            this.st = 'broodcall'; this.t = 1.6;
+            this.bcCD = rnd(12, 16); this.bcN = this.phase === 2 ? 4 : 3;
+            this.bcT = 0.5; this.bcCried = false;
+          } else if (this.t <= 0) {
             const which = this.cycle++ % 4;   // volley, swoop, volley, rest
             if (which === 3) { this.st = 'rest'; this.t = 1.0; }
             else if (which === 1) { this.st = 'swoopwarn'; this.t = 0.55; this.tx = px; this.ty = py; }
@@ -2366,6 +2553,55 @@ class Boss {
         } else if (this.st === 'rise') {
           this.t -= dt; this.y = lerp(this.y, this.homeY, 0.06);
           if (this.t <= 0) { this.st = 'idle'; this.t = 1.3; }
+        } else if (this.st === 'broodcall') {
+          // head thrown back, core strobing — then the brood answers from
+          // the arena's edges, one staggered swoop at a time
+          this.x = lerp(this.x, G.roomDef.w * TILE / 2 - this.w / 2, dt * 2);
+          this.y = lerp(this.y, this.homeY, dt * 2);
+          this.t -= dt; this.windT = 0.3;
+          if (!this.bcCried && this.t <= 1.1) {
+            this.bcCried = true; sfx('roar'); cam.shake = 7;
+            if (typeof G.addRing === 'function') G.addRing(this.cx(), this.cy());
+          }
+          if (chance(0.4)) addPart(this.cx() + rnd(-20, 20), this.y + this.h - 8,
+            rnd(-40, 40), rnd(-30, 60), 0.3, '#ff4c5c', 2.5, 0, true);
+          if (this.bcCried && this.bcN > 0) {
+            this.bcT -= dt;
+            if (this.bcT <= 0) {
+              this.bcT = 0.5; this.bcN--;
+              const left = this.bcN % 2 === 0;
+              const f = new Enemy('flier', left ? 16 : G.roomDef.w * TILE - 42, rnd(70, 150));
+              f.hp = 1; f.expireT = 10; f.dir = left ? 1 : -1;
+              G.enemies.push(f); sfx('shoot');
+              burst(f.x + f.w / 2, f.y + f.h / 2, 8, '#ff4c5c', 160, 0.35, 0, 2.5, true);
+            }
+          }
+          if (this.t <= 0 && this.bcN <= 0) {
+            this.st = 'idle'; this.t = 1.5;
+            this.stagT = Math.max(this.stagT, 0.9);   // wings drooped — window
+          }
+        } else if (this.st === 'cfcrash') {
+          // falling with no lift at all; sparks and coolant trailing
+          this.vy += 2600 * dt; this.y += this.vy * dt;
+          this.x += Math.sin(this.anim * 9) * 30 * dt;
+          if (chance(0.7)) addPart(this.cx() + rnd(-16, 16), this.y + rnd(0, this.h),
+            rnd(-60, 60), rnd(-80, 20), 0.4, chance(0.5) ? '#8fd8ff' : '#ffb060', 2.5, 200, true);
+          if (this.y >= 12.9 * TILE) {
+            this.y = 12.9 * TILE; this.vy = 0;
+            this.st = 'cffloor'; this.t = 1.7; this.coreCracked = true;
+            G.iceT = 7.5; cam.shake = 10; sfx('boom');
+            for (let i = 0; i < 22; i++)
+              addPart(this.cx() + rnd(-24, 24), this.cy() + rnd(-10, 10),
+                rnd(-280, 280), rnd(-320, -40), 0.7, i % 3 ? '#8fd8ff' : '#e8fbff', 3, 500, true);
+            G.toast(t('cf_warn'));
+          }
+        } else if (this.st === 'cffloor') {
+          // grounded with the chest cracked open — hit it while it repairs
+          this.t -= dt;
+          this.stagT = Math.max(this.stagT, 0.4);
+          if (chance(0.5)) addPart(this.cx() + rnd(-14, 14), this.cy(),
+            rnd(-60, 60), rnd(-130, -30), 0.5, '#8fd8ff', 2.5, 200, true);
+          if (this.t <= 0) { this.st = 'rise'; this.t = 1.4; this.coreCracked = false; }
         }
         break;
       }
@@ -2373,10 +2609,20 @@ class Boss {
       case 'atlas': {
         this.vy += 2100 * dt;
         this.face = Math.sign(px - this.cx()) || 1;
+        this.fbCD = this.fbCD == null ? 8 : this.fbCD - dt;
         if (this.st === 'idle') {
-          this.vx = this.face * 62 * spd;
+          this.vx = this.face * 62 * spd * (this.slag ? 0.55 : 1);
           this.t -= dt;
-          if (Math.abs(px - this.cx()) < 100 && this.t < 2) { this.st = 'slamwarn'; this.t = 0.55; this.vx = 0; }
+          if (!this.meltUsed && this.hp <= this.hpMax * 0.35) {
+            // MELTDOWN: below a third the furnace stops holding itself back —
+            // the bell runs white-hot and the floor starts to pour
+            this.meltUsed = true;
+            this.st = 'meltwarn'; this.t = 1.2; this.vx = 0; sfx('cast');
+          } else if (this.fbCD <= 0 && this.t <= 0.6) {
+            // FORGE BELL: three rapid clapper strikes, three falling weapons
+            this.st = 'forgebell'; this.t = 1.35; this.vx = 0;
+            this.fbCD = rnd(11, 15); this.fbStruck = 0;
+          } else if (Math.abs(px - this.cx()) < 100 && this.t < 2) { this.st = 'slamwarn'; this.t = 0.55; this.vx = 0; }
           else if (this.t <= 0) {
             if (this.cycle++ % 3 === 2) { this.st = 'hymn'; this.t = 1.0; }
             else {
@@ -2384,6 +2630,31 @@ class Boss {
               const d = px - this.cx();
               this.shoot(clamp(d * 1.1, -300, 300), -460, 8, 900); sfx('shoot');
             }
+          }
+        } else if (this.st === 'forgebell') {
+          // each strike rings out a spark shower, then the sky answers with
+          // embedded white-hot weapons — break them before they burst
+          this.vx = 0; this.t -= dt; this.windT = 0.3;
+          const due = Math.floor((1.35 - this.t) / 0.3);
+          while (this.fbStruck < Math.min(3, due)) {
+            this.fbStruck++;
+            cam.shake = 6; sfx('bosshit');
+            burst(this.cx(), this.cy() - 10, 12, MAT.molten.mid, 260, 0.45, 200, 3, true);
+            const wx = clamp(px + rnd(-110, 110), 60, G.roomDef.w * TILE - 60);
+            this.forge = this.forge || [];
+            this.forge.push({ x: wx, y: -30, vy: 0, landed: false, t: 3, kind: this.fbStruck % 3 });
+          }
+          if (this.t <= 0) { this.st = 'idle'; this.t = this.phase === 2 ? 1.6 : 2.4; }
+        } else if (this.st === 'meltwarn') {
+          // the tell: the bell whitens, steam screams from every joint
+          this.vx = 0; this.t -= dt; this.windT = 0.4;
+          this.whiteHot = Math.min(1, (this.whiteHot || 0) + dt * 1.2);
+          if (chance(0.9)) addPart(this.cx() + rnd(-40, 40), this.y + rnd(0, this.h),
+            rnd(-30, 30), rnd(-140, -60), 0.5, '#fff2dd', 2.5, 0, true);
+          if (this.t <= 0) {
+            this.st = 'idle'; this.t = 2.0;
+            this.slag = { t: 0, life: 6.5, h: 0 };
+            cam.shake = 9; sfx('roar');
           }
         } else if (this.st === 'hymn') {
           // the bells wind up, then ring: expanding rings of heat
@@ -2413,9 +2684,54 @@ class Boss {
       // ---- Archivist Zero: teleporting caster ----
       case 'zero': {
         this.y += Math.sin(this.anim * 2) * 14 * dt;
+        this.azCD = this.azCD == null ? 10 : this.azCD - dt;
         if (this.st === 'idle') {
+          // DATA CORRUPTION makes the whole unit run hotter while your HUD lies
+          this.t -= dt * ((G.hudGlitchT || 0) > 0 ? 1.45 : 1);
+          if (!this.dcUsed && this.hp <= this.hpMax * 0.4) {
+            // DATA CORRUPTION: once, below 40% — the archive uploads itself
+            // into your visor and scrambles everything you trust
+            this.dcUsed = true;
+            this.st = 'dccast'; this.t = 0.9; sfx('cast'); this.windT = 0.5;
+          } else if (this.azCD <= 0 && this.t <= 0.4) {
+            // ABSOLUTE ZERO: the librarian's hush — the expanding frost aura
+            // is the tell; be outside it when the silence lands
+            this.st = 'azhush'; this.t = 1.1; this.azCD = rnd(13, 17); this.windT = 0.5;
+            sfx('cast');
+          } else if (this.t <= 0) { this.st = 'blink'; this.t = 0.45; this.tx = clamp(px + rnd(-160, 160), 60, G.roomDef.w * TILE - 100); this.ty = clamp(py - rnd(70, 150), 60, 380); }
+        } else if (this.st === 'azhush') {
           this.t -= dt;
-          if (this.t <= 0) { this.st = 'blink'; this.t = 0.45; this.tx = clamp(px + rnd(-160, 160), 60, G.roomDef.w * TILE - 100); this.ty = clamp(py - rnd(70, 150), 60, 380); }
+          this.azR = 40 + (1.1 - this.t) * 190;      // the aura swelling outward
+          if (chance(0.8)) {
+            const aa = rnd(0, 6.28);
+            addPart(this.cx() + Math.cos(aa) * this.azR, this.cy() + Math.sin(aa) * this.azR,
+              -Math.cos(aa) * 60, -Math.sin(aa) * 60, 0.35, '#bfe8ff', 2, 0, true);
+          }
+          if (this.t <= 0) {
+            const d2 = Math.hypot(px - this.cx(), py - this.cy());
+            burst(this.cx(), this.cy(), 30, '#e0f7fa', 420, 0.7, 0, 3.5, true);
+            cam.shake = 8; sfx('break'); G.flash = Math.max(G.flash, 0.2);
+            if (d2 < this.azR && !player.dead) {
+              player.slowT = Math.max(player.slowT, 2.4);
+              player.hurt(1, this.cx());
+            }
+            // two follow-up beams while you are slowed — dodge on half speed
+            this.marks.push({ x: px, t: 0.55 }, { x: px + (Math.sign(player.vx) || 1) * 70, t: 0.85 });
+            this.azR = 0;
+            this.st = 'idle'; this.t = 2.0;
+          }
+        } else if (this.st === 'dccast') {
+          this.t -= dt;
+          // a stream of cyan digits pouring from the tablet into your visor
+          if (chance(0.9)) {
+            const k = rnd(0, 1);
+            addPart(lerp(this.cx(), px, k), lerp(this.cy(), py, k) + rnd(-8, 8),
+              (px - this.cx()) * 0.4, (py - this.cy()) * 0.4, 0.25, '#8ff6ff', 2, 0, true);
+          }
+          if (this.t <= 0) {
+            G.hudGlitchT = 8; G.toast(t('dc_warn')); sfx('phase');
+            this.st = 'idle'; this.t = 1.8;
+          }
         } else if (this.st === 'blink') {
           this.t -= dt;
           if (this.t <= 0) {
@@ -2438,7 +2754,9 @@ class Boss {
         for (let i = this.marks.length - 1; i >= 0; i--) {
           const m = this.marks[i]; m.t -= dt;
           if (m.t <= 0) {
-            G.projs.push(new Proj(m.x, 15 * TILE - 6, 0, -520, false, 1, 8, '#eefcff', 0, 0.9));
+            const pr = new Proj(m.x, 15 * TILE - 6, 0, -520, false, 1, 8, '#eefcff', 0, 0.9);
+            pr.frost = true;                       // contact freezes the joints
+            G.projs.push(pr);
             sfx('shoot'); this.marks.splice(i, 1);
           }
         }
@@ -2447,10 +2765,28 @@ class Boss {
       // ---- Prism Prowler: rival robo-cat ----
       case 'prism': {
         this.vy += 2100 * dt;
+        this.lsCD = this.lsCD == null ? 8 : this.lsCD - dt;
         if (this.st === 'idle') {
           this.vx = 0; this.t -= dt;
           this.face = Math.sign(px - this.cx()) || 1;
-          if (this.t <= 0) {
+          if (!this.arcUsed && this.hp <= this.hpMax * 0.35) {
+            // ARC OVERLOAD: once, low health — the turntable overcharges and
+            // it vanishes into its own lightning storm
+            this.arcUsed = true;
+            this.st = 'arcspin'; this.t = 1.2; this.vx = 0; sfx('cast');
+          } else if (this.lsCD <= 0 && this.t <= 0) {
+            // LIGHT SPLIT: a cat's pounce, taken through light — three spots
+            // glow; only one holds the real body
+            this.st = 'lsvanish'; this.t = 0.95; this.lsCD = rnd(10, 14);
+            const W2 = G.roomDef.w * TILE;
+            this.lsSpots = [0, 1, 2].map(i => ({
+              x: clamp(W2 * (0.2 + i * 0.3) + rnd(-60, 60), 70, W2 - 70),
+              y: 13.4 * TILE,
+            }));
+            this.lsReal = Math.floor(rnd(0, 3)) % 3;
+            burst(this.cx(), this.cy(), 20, PAL.X.glow, 260, 0.5, 0, 3, true);
+            sfx('wave');
+          } else if (this.t <= 0) {
             const pick = this.cycle++ % 3;
             if (pick === 0) { this.st = 'dashslash'; this.t = 0.42; this.vx = this.face * 720 * spd; }
             else if (pick === 1) { this.st = 'pounce'; this.vy = -600; this.vx = this.face * 380 * spd; }
@@ -2473,14 +2809,96 @@ class Boss {
         } else if (this.st === 'rest') {
           this.vx = 0; this.t -= dt;
           if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.3, 0.7); }
+        } else if (this.st === 'lsvanish') {
+          // gone — only the three glowing afterimages remain (the tell)
+          this.vx = 0; this.vy = 0; this.t -= dt;
+          if (this.t <= 0) {
+            const spot = this.lsSpots[this.lsReal];
+            this.x = spot.x - this.w / 2; this.y = spot.y - this.h;
+            burst(spot.x, spot.y - this.h / 2, 18, PAL.X.glow, 300, 0.5, 60, 3, true);
+            sfx('dash');
+            // the fakes fire; the real one pounces
+            this.lsSpots.forEach((s2, i) => {
+              if (i === this.lsReal) return;
+              const a = Math.atan2(py - (s2.y - 20), px - s2.x);
+              this.shoot(Math.cos(a) * 340, Math.sin(a) * 340, 5, 0);
+              burst(s2.x, s2.y - 20, 10, '#e0e0ff', 200, 0.4, 0, 2.5, true);
+            });
+            this.lsSpots = null;
+            this.face = Math.sign(px - this.cx()) || 1;
+            this.st = 'pounce'; this.vy = -420; this.vx = this.face * 460 * spd;
+          }
+        } else if (this.st === 'arcspin') {
+          // the turntable screams up to full speed — sparks climbing the coils
+          this.vx = 0; this.t -= dt; this.windT = 0.3;
+          if (chance(0.9)) addPart(this.cx() + rnd(-30, 30), this.y + this.h - 6,
+            rnd(-40, 40), rnd(-160, -60), 0.4, '#8ff6ff', 2.5, 0, true);
+          if (this.t <= 0) {
+            this.st = 'arcstorm'; this.t = 5.2; this.stormT = 5.2;
+            this.strikes = []; this.strikeT = 0.2;
+            G.flash = Math.max(G.flash, 0.3); cam.shake = 8; sfx('roar');
+          }
+        } else if (this.st === 'arcstorm') {
+          // hiding inside the storm: untouchable, but every strike is told
+          // by its floor-glow a full second early
+          this.vx = 0; this.t -= dt; this.stormT = this.t;
+          this.strikeT -= dt;
+          if (this.strikeT <= 0 && this.t > 1.0) {
+            this.strikeT = 0.6;
+            this.strikes.push({ x: clamp(px + rnd(-40, 40), 40, G.roomDef.w * TILE - 40), t: 1.0 });
+          }
+          if (chance(0.8)) addPart(this.cx() + rnd(-36, 36), this.y + rnd(-10, this.h),
+            rnd(-60, 60), rnd(-40, 40), 0.2, '#8ff6ff', 2, 0, true);
+          if (this.t <= 0) {
+            this.stormT = 0;
+            this.st = 'rest'; this.t = 1.9;
+            this.stagT = Math.max(this.stagT, 1.5);   // fell off the disc
+            cam.shake = 7; sfx('boom');
+          }
         }
-        const col = moveEnt(this, dt);
+        // the storm's lightning: warn on the floor, then the bolt
+        if (this.strikes && this.strikes.length) {
+          for (let i = this.strikes.length - 1; i >= 0; i--) {
+            const s2 = this.strikes[i]; s2.t -= dt;
+            if (s2.t <= 0) {
+              const gy = 15 * TILE;
+              for (let k = 0; k < 8; k++)
+                addPart(s2.x + rnd(-10, 10), gy - k * 55 - rnd(0, 40), rnd(-40, 40), rnd(-20, 20), 0.16, '#dffcff', 3, 0, true);
+              burst(s2.x, gy - 8, 14, '#8ff6ff', 260, 0.4, 200, 3, true);
+              cam.shake = Math.max(cam.shake, 6); sfx('cast');
+              if (!player.dead && Math.abs(px - s2.x) < 42 && py > gy - 90) player.hurt(DF().edmg, s2.x);
+              this.strikes.splice(i, 1);
+            }
+          }
+        }
+        const col = (this.st === 'lsvanish' || this.st === 'arcstorm') ? {} : moveEnt(this, dt);
         if (this.st === 'dashslash' && (col.l || col.r)) { this.st = 'rest'; this.t = 0.8; }
         break;
       }
       // ---- MOTHER-V: the Null Core ----
       case 'mother': {
         this.y = 110 + Math.sin(this.anim * 1.1) * 16;
+        // PHASE SHIFT: crossing 75/50/25% shatters two more shell plates.
+        // The core burns brighter to compensate and each break unlocks a
+        // crueller trick: double Null Wave, then the tendril grab, then
+        // the exposed core spitting wider rings.
+        const phFrac = this.hp / this.hpMax;
+        const wantPh = phFrac <= 0.25 ? 3 : phFrac <= 0.5 ? 2 : phFrac <= 0.75 ? 1 : 0;
+        if ((this.mPhase || 0) < wantPh) {
+          this.mPhase = wantPh;
+          burst(this.cx(), this.cy(), 30, '#b48cff', 420, 0.8, 100, 4, true);
+          burst(this.cx(), this.cy(), 14, '#ffd76a', 300, 0.6, 0, 3, true);
+          cam.shake = 10; sfx('phase'); G.flash = Math.max(G.flash, 0.25);
+          this.stagT = Math.max(this.stagT, 0.5);   // reforming — brief window
+        }
+        this.msCD = this.msCD == null ? 12 : this.msCD - dt;
+        // TOTAL NULL: once, below 20% — every light in the arena dies
+        if (!this.tnUsed && phFrac <= 0.2 && this.st !== 'msong' && this.st !== 'nwcharge') {
+          this.tnUsed = true;
+          this.st = 'tnull'; this.nwT = 1.4; this.beam = null;
+          G.darkT = 8.4; G.toast(t('tn_warn'));
+          sfx('roar'); G.flash = Math.max(G.flash, 0.4); cam.shake = 9;
+        }
         this.t -= dt;
         if (this.beam) {
           this.beam.t -= dt;
@@ -2490,21 +2908,98 @@ class Boss {
             if (this.beam.t <= 0) this.beam = null;
           }
         }
-        if (this.t <= 0) {
+        // NULL WAVE in flight: black ring, red edge — jump it or eat the shove
+        if (this.nwave) {
+          const nw = this.nwave;
+          nw.r += 240 * dt;
+          const d2 = Math.hypot(px - this.cx(), py - this.cy());
+          if (Math.abs(d2 - nw.r) < 18 && !player.dead && player.iT <= 0) {
+            player.hurt(DF().edmg, this.cx());
+            player.vx = (Math.sign(px - this.cx()) || 1) * 640;
+            player.slowT = Math.max(player.slowT, 1.2);
+          }
+          if (nw.r > 620) {
+            nw.n--;
+            if (nw.n > 0) nw.r = 10;
+            else { this.nwave = null; this.stagT = Math.max(this.stagT, 1.0); }
+          }
+        }
+        if (this.st === 'nwcharge') {
+          // the tell is SILENCE: the halo freezes and the core runs black
+          this.nwT -= dt;
+          if (this.nwT <= 0) {
+            this.st = 'idle';
+            this.nwave = { r: 10, n: (this.mPhase || 0) >= 1 ? 2 : 1 };
+            cam.shake = 9; sfx('boom'); G.flash = Math.max(G.flash, 0.3);
+          }
+        } else if (this.st === 'msong') {
+          // MOTHER'S SONG: the original broadcast — red where hers is cyan
+          this.nwT -= dt;
+          if (chance(0.8)) {
+            const oa = rnd(0, 6.28);
+            addPart(this.cx() + Math.cos(oa) * 40, this.cy() + Math.sin(oa) * 40,
+              Math.cos(oa) * 160, Math.sin(oa) * 160, 0.4, chance(0.5) ? '#e63946' : '#b48cff', 2.5, 0, true);
+          }
+          if (this.nwT <= 0) {
+            this.st = 'idle';
+            G.songLockT = 10; G.revT = 5; G.toast(t('ms_warn'));
+            sfx('phase'); cam.shake = 7;
+            this.stagT = Math.max(this.stagT, 0.8);
+          }
+        } else if (this.st === 'tnull') {
+          // attacks come out of the dark with sound for a tell; the Song
+          // buys three seconds of sight
+          this.nwT -= dt;
+          if (this.nwT <= 0) { this.nwT = 1.4; sfx('cast'); this.lash = { x: px, y: py, t: 0.5 }; }
+          if (this.lash) {
+            this.lash.t -= dt;
+            if (this.lash.t <= 0) {
+              burst(this.lash.x, this.lash.y, 12, '#b48cff', 240, 0.4, 100, 3, true);
+              if (!player.dead && Math.hypot(px - this.lash.x, py - this.lash.y) < 46)
+                player.hurt(DF().edmg, this.lash.x);
+              this.lash = null;
+            }
+          }
+          if ((G.darkT || 0) <= 0) {
+            // lights return: she hangs exposed, every plate open — FINISH IT
+            this.st = 'idle'; this.t = 2.2; this.lash = null;
+            this.stagT = Math.max(this.stagT, 2.0);
+            G.flash = Math.max(G.flash, 0.3); sfx('phase');
+          }
+        } else if (this.st === 'grabwarn') {
+          // a tendril arcs out and hovers on you — break line-of-pull by moving
+          this.nwT -= dt;
+          if (this.nwT <= 0) { this.st = 'grab'; this.nwT = 0.9; sfx('dash'); }
+        } else if (this.st === 'grab') {
+          this.nwT -= dt;
+          if (!player.dead) {
+            player.vx += (Math.sign(this.cx() - px) || 1) * 1150 * dt;
+            if (chance(0.6)) addPart(lerp(this.cx(), px, rnd(0.2, 0.9)), lerp(this.cy(), py, rnd(0.2, 0.9)),
+              rnd(-30, 30), rnd(-30, 30), 0.2, '#b48cff', 2, 0, true);
+          }
+          if (this.nwT <= 0) this.st = 'idle';
+        } else if (this.t <= 0) {
           const p2 = this.phase === 2;
-          this.t = p2 ? 1.7 : 2.4;
-          const which = this.cycle++ % (p2 ? 3 : 4);
-          if (which === 0) this.ring(p2 ? 14 : 10, 230 * spd, this.anim);
-          else if (which === 1 && G.enemies.filter(e => !e.dead).length < 2) {
-            const b = new Enemy('blob', this.cx() - 17, this.y + this.h);
-            G.enemies.push(b);
-            burst(this.cx(), this.y + this.h, 12, PAL.E.glow, 200, 0.5, 300, 3, true);
+          this.t = (p2 ? 1.7 : 2.4) * (1 - (this.mPhase || 0) * 0.08);
+          if (this.msCD <= 0 && (this.mPhase || 0) >= 1) {
+            this.msCD = rnd(18, 24);
+            this.st = 'msong'; this.nwT = 1.6; sfx('cast');
           } else {
-            const horiz = p2 ? chance(0.5) : true;
-            this.beam = horiz
-              ? { x: 0, y: py - 34, w: G.roomDef.w * TILE, h: 68, t: 0.8, warn: true }
-              : { x: px - 34, y: 0, w: 68, h: G.roomDef.h * TILE, t: 0.8, warn: true };
-            sfx('cast');
+            const which = this.cycle++ % 4;
+            if (which === 0 && !this.nwave) { this.st = 'nwcharge'; this.nwT = 1.1; sfx('no'); }
+            else if (which === 1) this.ring((p2 ? 14 : 10) + (this.mPhase || 0) * 2, 230 * spd, this.anim);
+            else if (which === 2 && (this.mPhase || 0) >= 2) { this.st = 'grabwarn'; this.nwT = 0.5; sfx('cast'); }
+            else if (which === 2 && G.enemies.filter(e => !e.dead).length < 2) {
+              const b = new Enemy('blob', this.cx() - 17, this.y + this.h);
+              G.enemies.push(b);
+              burst(this.cx(), this.y + this.h, 12, PAL.E.glow, 200, 0.5, 300, 3, true);
+            } else {
+              const horiz = p2 ? chance(0.5) : true;
+              this.beam = horiz
+                ? { x: 0, y: py - 34, w: G.roomDef.w * TILE, h: 68, t: 0.8, warn: true }
+                : { x: px - 34, y: 0, w: 68, h: G.roomDef.h * TILE, t: 0.8, warn: true };
+              sfx('cast');
+            }
           }
         }
         break;
@@ -2522,7 +3017,8 @@ class Boss {
       this.x = this.spawnX; this.y = this.spawnY; this.vx = 0; this.vy = 0;
       burst(this.cx(), this.cy(), 14, '#ffffff', 200, 0.5, 0, 3, true);
     }
-    if (!player.dead && aabb(this, player) && this.st !== 'intro') player.hurt(DF().edmg, this.cx());
+    if (!player.dead && aabb(this, player) && this.st !== 'intro'
+      && this.st !== 'lsvanish' && this.st !== 'arcstorm') player.hurt(DF().edmg, this.cx());
   }
   // ---- the three signature systems -----------------------------------------
   plantBore(x) {
@@ -2560,6 +3056,52 @@ class Boss {
         const d = Math.hypot(px - this.cx(), py - this.cy());
         if (Math.abs(d - h.r) < 16 && !player.dead) player.hurt(DF().edmg, this.cx());
         if (h.r > 520) { h.n--; if (h.n > 0) { h.r = 10; } else this.hymn = null; }
+      }
+    }
+    // FORGE BELL: the fallen weapons — embedded, white-hot, on a fuse.
+    // Break them early (one hit each) or be elsewhere when they burst.
+    if (this.forge && this.forge.length) {
+      for (let i = this.forge.length - 1; i >= 0; i--) {
+        const w = this.forge[i];
+        if (!w.landed) {
+          w.vy += 1700 * dt; w.y += w.vy * dt;
+          if (chance(0.5)) addPart(w.x + rnd(-4, 4), w.y, rnd(-20, 20), rnd(-60, -10), 0.3, MAT.molten.mid, 2, 0, true);
+          if (w.y >= 15 * TILE - 26) {
+            w.y = 15 * TILE - 26; w.landed = true;
+            cam.shake = Math.max(cam.shake, 3); sfx('land');
+            burst(w.x, w.y + 20, 8, MAT.molten.mid, 180, 0.4, 300, 2.5, true);
+          }
+        } else {
+          w.t -= dt;
+          if (player.swing && Math.abs(px - w.x) < 44 && Math.abs(py - (w.y + 10)) < 50) {
+            burst(w.x, w.y + 10, 12, MAT.molten.mid, 220, 0.45, 200, 3, true);
+            sfx('break'); this.forge.splice(i, 1); continue;
+          }
+          if (w.t <= 0) {
+            burst(w.x, w.y + 8, 18, MAT.molten.lit, 320, 0.55, 200, 3.5, true);
+            cam.shake = Math.max(cam.shake, 6); sfx('boom');
+            if (!player.dead && Math.hypot(px - w.x, py - (w.y + 8)) < 54) player.hurt(DF().edmg, w.x);
+            this.forge.splice(i, 1);
+          }
+        }
+      }
+    }
+    // MELTDOWN: the slag tide — an orange line climbing the floor. Platforms
+    // are the answer; standing in the pour is not.
+    if (this.slag) {
+      const s = this.slag;
+      s.t += dt; s.life -= dt;
+      s.h = 30 * Math.min(1, s.t / 1.2) * clamp(s.life / 0.8, 0, 1);
+      const top = 15 * TILE - s.h;
+      if (s.h > 8 && !player.dead && player.y + player.h > top + 4) {
+        s.tick = (s.tick || 0) - dt;
+        if (s.tick <= 0) { s.tick = 0.7; player.hurt(1, player.x - 40); }
+      }
+      if (chance(0.7)) addPart(rnd(30, G.roomDef.w * TILE - 30), top, rnd(-20, 20), rnd(-70, -20), 0.4, MAT.molten.mid, 2.5, 0, true);
+      if (s.life <= 0) {
+        this.slag = null; this.whiteHot = 0;
+        this.stagT = Math.max(this.stagT, 1.0);   // cooling vents open — window
+        sfx('phase');
       }
     }
     // the prison: it holds you and takes what you are carrying, rather than
@@ -2604,6 +3146,140 @@ class Boss {
       c.strokeStyle = MAT.molten.lit; c.lineWidth = 2;
       c.beginPath(); c.arc(this.cx(), this.cy(), h.r - 5, 0, 7); c.stroke();
       c.shadowBlur = 0; c.restore(); c.globalAlpha = 1;
+    }
+    // FORGE BELL weapons: sword, axe and spear silhouettes, embedded, glowing
+    if (this.forge) {
+      for (const w of this.forge) {
+        c.save(); c.translate(w.x, w.y);
+        const hot = w.landed ? 0.6 + Math.sin(w.t * (w.t < 1 ? 22 : 9)) * 0.35 : 0.8;
+        c.shadowColor = MAT.molten.mid; c.shadowBlur = 12 * hot;
+        c.fillStyle = '#e8d8c8'; c.strokeStyle = MAT.molten.mid; c.lineWidth = 1.4;
+        if (w.kind === 0) {          // sword: blade down, crossguard
+          c.fillRect(-2.4, -22, 4.8, 44); c.fillRect(-9, -14, 18, 4);
+        } else if (w.kind === 1) {   // axe: haft + head
+          c.fillRect(-2, -24, 4, 48);
+          c.beginPath(); c.moveTo(2, -20); c.quadraticCurveTo(18, -14, 2, -2); c.closePath(); c.fill();
+        } else {                     // spear: long shaft + leaf point
+          c.fillRect(-1.6, -28, 3.2, 52);
+          c.beginPath(); c.moveTo(0, -38); c.lineTo(5, -26); c.lineTo(-5, -26); c.closePath(); c.fill();
+        }
+        c.globalAlpha = hot; c.strokeStyle = MAT.molten.lit;
+        c.strokeRect(-2.4, -22, 4.8, 44);
+        c.restore(); c.globalAlpha = 1;
+      }
+    }
+    // MELTDOWN slag tide
+    if (this.slag && this.slag.h > 1) {
+      const gy = 15 * TILE, top = gy - this.slag.h;
+      const W2 = G.roomDef.w * TILE;
+      const sg = c.createLinearGradient(0, top, 0, gy);
+      sg.addColorStop(0, MAT.molten.lit); sg.addColorStop(0.35, MAT.molten.mid); sg.addColorStop(1, '#7a2c08');
+      c.fillStyle = sg; c.fillRect(0, top, W2, this.slag.h + 6);
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5 + Math.sin(this.anim * 7) * 0.2;
+      c.fillStyle = MAT.molten.lit; c.fillRect(0, top - 2, W2, 3);
+      c.restore(); c.globalAlpha = 1;
+    }
+    // MELTDOWN: the bell running white-hot — heat aura swallowing the body
+    if ((this.whiteHot || 0) > 0 || this.slag) {
+      const wk = this.slag ? 1 : this.whiteHot;
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const wg = c.createRadialGradient(this.cx(), this.cy(), 8, this.cx(), this.cy(), this.w * 1.1);
+      wg.addColorStop(0, 'rgba(255,245,224,' + (0.5 * wk) + ')');
+      wg.addColorStop(0.5, 'rgba(255,170,80,' + (0.3 * wk) + ')');
+      wg.addColorStop(1, 'rgba(255,120,58,0)');
+      c.fillStyle = wg; c.beginPath(); c.arc(this.cx(), this.cy(), this.w * 1.1, 0, 7); c.fill();
+      c.restore();
+    }
+    // ABSOLUTE ZERO hush aura — the swelling frost ring is the whole tell
+    if (this.st === 'azhush' && this.azR > 0) {
+      c.save(); c.globalAlpha = 0.55;
+      c.strokeStyle = '#bfe8ff'; c.lineWidth = 3;
+      c.shadowColor = '#bfe8ff'; c.shadowBlur = 14;
+      c.beginPath(); c.arc(this.cx(), this.cy(), this.azR, 0, 7); c.stroke();
+      c.lineWidth = 1.2; c.strokeStyle = '#eefcff';
+      c.beginPath(); c.arc(this.cx(), this.cy(), this.azR * 0.86, 0, 7); c.stroke();
+      c.shadowBlur = 0; c.restore();
+    }
+    // LIGHT SPLIT: three refraction ghosts — one holds the cat
+    if (this.st === 'lsvanish' && this.lsSpots) {
+      const k = clamp(1 - this.t / 0.95, 0, 1);
+      for (const s2 of this.lsSpots) {
+        c.save(); c.globalAlpha = 0.25 + k * 0.4 + Math.sin(this.anim * 10 + s2.x) * 0.1;
+        c.strokeStyle = PAL.X.glow; c.lineWidth = 2;
+        c.shadowColor = PAL.X.glow; c.shadowBlur = 12;
+        // a crouched-cat outline, faint, shimmering
+        c.beginPath(); c.ellipse(s2.x, s2.y - 22, 30, 16, 0, 0, 7); c.stroke();
+        c.beginPath(); c.arc(s2.x + 22, s2.y - 34, 10, 0, 7); c.stroke();
+        c.beginPath(); c.moveTo(s2.x + 18, s2.y - 42); c.lineTo(s2.x + 22, s2.y - 50); c.lineTo(s2.x + 27, s2.y - 42);
+        c.moveTo(s2.x + 26, s2.y - 42); c.lineTo(s2.x + 31, s2.y - 49); c.lineTo(s2.x + 34, s2.y - 41); c.stroke();
+        c.shadowBlur = 0; c.restore();
+      }
+      c.globalAlpha = 1;
+    }
+    // ARC OVERLOAD: floor glows a second ahead of every bolt
+    if (this.strikes) {
+      const gy = 15 * TILE;
+      for (const s2 of this.strikes) {
+        const warn = clamp(1 - s2.t, 0, 1);
+        c.save(); c.globalAlpha = 0.3 + warn * 0.5;
+        c.fillStyle = '#8ff6ff'; c.shadowColor = '#8ff6ff'; c.shadowBlur = 10;
+        c.beginPath(); c.ellipse(s2.x, gy - 4, 30 + warn * 10, 6, 0, 0, 7); c.fill();
+        c.shadowBlur = 0; c.restore();
+      }
+      c.globalAlpha = 1;
+    }
+    // NULL WAVE ring: black body, red rim — the void moving outward
+    if (this.nwave) {
+      const nw = this.nwave;
+      c.save(); c.globalAlpha = clamp(1 - nw.r / 660, 0, 1);
+      c.strokeStyle = '#0d0d12'; c.lineWidth = 10;
+      c.beginPath(); c.arc(this.cx(), this.cy(), nw.r, 0, 7); c.stroke();
+      c.strokeStyle = '#e63946'; c.lineWidth = 3;
+      c.shadowColor = '#e63946'; c.shadowBlur = 12;
+      c.beginPath(); c.arc(this.cx(), this.cy(), nw.r + 5, 0, 7); c.stroke();
+      c.shadowBlur = 0; c.restore();
+    }
+    if (this.st === 'nwcharge') {
+      // the silent charge: the core swallowed by black
+      c.save();
+      const k = 1 - clamp(this.nwT / 1.1, 0, 1);
+      const dg = c.createRadialGradient(this.cx(), this.cy(), 2, this.cx(), this.cy(), 60);
+      dg.addColorStop(0, 'rgba(13,13,18,' + (0.75 * k) + ')');
+      dg.addColorStop(1, 'rgba(13,13,18,0)');
+      c.fillStyle = dg; c.beginPath(); c.arc(this.cx(), this.cy(), 60, 0, 7); c.fill();
+      c.restore();
+    }
+    if (this.st === 'msong') {
+      // inverted song rings — red and violet where hers run cyan
+      for (let i = 0; i < 3; i++) {
+        const r2 = ((1.6 - this.nwT) * 90 + i * 34) % 150;
+        c.save(); c.globalAlpha = clamp(1 - r2 / 150, 0, 1) * 0.7;
+        c.strokeStyle = i % 2 ? '#e63946' : '#b48cff'; c.lineWidth = 2.5;
+        c.beginPath(); c.arc(this.cx(), this.cy(), 30 + r2, 0, 7); c.stroke();
+        c.restore();
+      }
+      c.globalAlpha = 1;
+    }
+    if ((this.st === 'grabwarn' || this.st === 'grab') && !player.dead) {
+      // the tendril: a waving virus-purple whip reaching for you
+      c.save(); c.globalAlpha = this.st === 'grab' ? 0.9 : 0.45;
+      c.strokeStyle = '#b48cff'; c.lineWidth = this.st === 'grab' ? 4 : 2.5;
+      c.shadowColor = '#b48cff'; c.shadowBlur = 10; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(this.cx(), this.cy() + 20);
+      const tx2 = player.x + player.w / 2, ty2 = player.y + player.h / 2;
+      for (let k = 1; k <= 5; k++) {
+        const u = k / 5;
+        c.lineTo(lerp(this.cx(), tx2, u) + Math.sin(this.anim * 11 + k * 1.7) * 16 * (1 - u),
+                 lerp(this.cy() + 20, ty2, u) + Math.cos(this.anim * 9 + k * 1.3) * 12 * (1 - u));
+      }
+      c.stroke(); c.shadowBlur = 0; c.restore();
+    }
+    if (this.lash) {
+      // in the dark: the strike point glows for half a second — MOVE
+      c.save(); c.globalAlpha = 0.5 + Math.sin(this.anim * 22) * 0.3;
+      c.strokeStyle = '#b48cff'; c.lineWidth = 2;
+      c.beginPath(); c.arc(this.lash.x, this.lash.y, 30 + this.lash.t * 40, 0, 7); c.stroke();
+      c.restore();
     }
     if (this.prison) {                                // bars of frozen data
       const q = this.prison, k = clamp(q.life, 0, 1);
@@ -2651,6 +3327,12 @@ class Boss {
     }
     // telegraphs
     this.drawAbilities(c);
+    // LIGHT SPLIT: the body is elsewhere — only the ghosts (drawn above) show
+    if (this.st === 'lsvanish') { c.restore(); return; }
+    // ARC OVERLOAD: a strobing silhouette inside its own lightning
+    if (this.st === 'arcstorm') {
+      c.globalAlpha *= 0.35 + Math.sin(this.anim * 26) * 0.25;
+    }
     // plating chain feedback: a shorted shield crackles in the key element's
     // color for the length of the window; closed plating pings grey on hit
     if (BOSS_GATE[this.kind]) {

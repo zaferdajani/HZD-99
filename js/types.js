@@ -146,6 +146,12 @@ function hurtBoxOf(e) {
 }
 
 function dealDmg(e, dm, atkEl, x, y, noPenalty) {
+  // ARC OVERLOAD: hiding inside the lightning — nothing lands until it ends
+  if ((e.stormT || 0) > 0) {
+    burst(x, y, 6, '#8ff6ff', 200, 0.3, 0, 2.5, true);
+    G.elemPop = { t: 0.4, x, y, el: null };
+    return 0;
+  }
   // plating chain: the key element SHORTS the shield; anything else clinks
   if (BOSS_GATE[e.kind] && e.hpMax) {
     const key = armDef(BOSS_GATE[e.kind]);
