@@ -717,10 +717,10 @@ class Player {
       c.save(); c.globalAlpha = tr.t * 1.5;
       c.translate(tr.x + this.w / 2, tr.y + this.h / 2);
       c.scale(tr.face, 1); c.fillStyle = P.glow;
-      rr(c, -13, -6, 26, 18, 7); c.fill();
-      c.beginPath(); c.arc(8, -12, 8, 0, 7); c.fill();
-      c.beginPath(); c.moveTo(2, -16); c.lineTo(5, -25); c.lineTo(10, -17); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(11, -17); c.lineTo(15, -24); c.lineTo(17, -15); c.closePath(); c.fill();
+      rr(c, -14, -7, 28, 19, 9); c.fill();
+      c.beginPath(); c.arc(2, -15, 11, 0, 7); c.fill();
+      c.beginPath(); c.moveTo(-8, -21); c.lineTo(-4, -32); c.lineTo(1, -22); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(4, -22); c.lineTo(9, -32); c.lineTo(13, -21); c.closePath(); c.fill();
       c.restore();
     }
     // contact shadow — tightens and darkens as the hero nears the ground
@@ -785,7 +785,7 @@ class Player {
     {
       // scarf — the 4-segment spring chain, rendered as a tapering ribbon.
       // The angles live in update(); here we just walk the chain backward.
-      let sx0 = 1, sy0 = -24 + bob;
+      let sx0 = 0, sy0 = -22.5 + bob;   // knotted at the neck, under the big head
       const seg = [[sx0, sy0]];
       for (let i = 0; i < 4; i++) {
         const L = 7 + spdK * 3.5 + (this.on ? 0 : 1.5);
@@ -841,12 +841,13 @@ class Player {
       } else if (!this.on) { fx = hipX + 2.5; fy = -4; }
       else { fx = hipX + 1; fy = 0; }
       const kx = (hipX + fx) / 2 - 3.5 - lift * 0.3 + knee, ky = (hipY + fy) / 2 - 1 - knee * 0.5;
-      c.strokeStyle = front ? '#aab6c6' : '#7f8b9c'; c.lineWidth = 3.4; c.lineJoin = 'round';
+      // short, stubby limbs — spec §1.1: chubby means the legs stay little
+      c.strokeStyle = front ? '#aab6c6' : '#7f8b9c'; c.lineWidth = 4.2; c.lineJoin = 'round';
       c.beginPath(); c.moveTo(hipX, hipY); c.lineTo(kx, ky); c.lineTo(fx, fy - 1); c.stroke();
       c.fillStyle = front ? '#cfd8e6' : '#93a0b2';
       // the foot points on push-off instead of staying flat
       c.save(); c.translate(fx, fy - 1); c.rotate(run ? Math.cos(phase) * 0.5 * sprintK : 0);
-      c.fillRect(-2.5, -1, 6, 2.6); c.restore();
+      c.fillRect(-3, -1.2, 7, 3.2); c.restore();
       c.fillStyle = P.glow;
       c.beginPath(); c.arc(hipX, hipY, 1.9, 0, 7); c.arc(kx, ky, 1.5, 0, 7); c.fill();
       // dust kicks off the back foot at full tilt
@@ -893,9 +894,9 @@ class Player {
       // orbiting halo ring — a crown of light / a laurel of divine favour
       c.globalAlpha = (0.45 + pulse * 0.35) * fade;
       c.strokeStyle = divine ? '#ffd76a' : '#e0a0ff'; c.lineWidth = 2.2;
-      c.beginPath(); c.ellipse(0, -34, 17, 5.5, Math.sin(this.anim * 1.6) * 0.25, 0, 7); c.stroke();
+      c.beginPath(); c.ellipse(0, -42, 16, 5, Math.sin(this.anim * 1.6) * 0.25, 0, 7); c.stroke();
       c.strokeStyle = '#ffffff'; c.lineWidth = 1;
-      c.beginPath(); c.ellipse(0, -34, 17, 5.5, Math.sin(this.anim * 1.6) * 0.25, 0.6, 3.1); c.stroke();
+      c.beginPath(); c.ellipse(0, -42, 16, 5, Math.sin(this.anim * 1.6) * 0.25, 0.6, 3.1); c.stroke();
       if (divine) {
         // static arcs crawling over the champion — the storm clings to him
         c.globalAlpha = fade * (0.5 + Math.sin(this.anim * 19) * 0.4);
@@ -912,7 +913,7 @@ class Player {
     }
     // volt-blade sheathed on the back (hidden mid-swing — it's in the paw)
     if (!this.swingVis && this.clawT <= 0) {
-      c.save(); c.translate(-9, -22 + bob * 0.4); c.rotate(-0.85);
+      c.save(); c.translate(-11, -19 + bob * 0.4); c.rotate(-1.0);
       c.fillStyle = '#8892a2'; c.fillRect(-2, 0, 4, 8);
       c.fillStyle = '#5c6678'; c.fillRect(-4.5, -1, 9, 3);
       const bg = c.createLinearGradient(0, -26, 0, 0);
@@ -922,7 +923,7 @@ class Player {
       c.shadowBlur = 0; c.restore();
       if (!hero && evo >= 2) {
         // second volt-blade — crossed sheaths, war-ready
-        c.save(); c.translate(-3, -21 + bob * 0.4); c.rotate(-1.3);
+        c.save(); c.translate(-5, -18 + bob * 0.4); c.rotate(-1.35);
         c.fillStyle = '#8892a2'; c.fillRect(-1.6, 0, 3.2, 6);
         c.fillStyle = '#5c6678'; c.fillRect(-3.5, -1, 7, 2.6);
         c.fillStyle = evo >= 3 ? '#ffd76a' : P.glow; c.shadowColor = c.fillStyle; c.shadowBlur = 7;
@@ -930,35 +931,46 @@ class Player {
         c.shadowBlur = 0; c.restore();
       }
     }
-    // body — rounded chassis with top light, shadowed underside and a rim edge
+    // body — the CHUBBY ceramic shell (spec §1.1): rounded, bottom-heavy,
+    // wider at the hips than the chest. A pear, not a box.
     const by0 = -24 + bob * 0.4;
-    const grad = c.createLinearGradient(0, by0 - 4, 0, by0 + 20);
-    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.3, '#e8eef6');
-    grad.addColorStop(0.72, '#b9c4d4'); grad.addColorStop(1, '#8b98ab');
+    const grad = c.createLinearGradient(0, by0 - 2, 0, by0 + 20);
+    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.35, '#f5f5f0');
+    grad.addColorStop(0.75, '#ccd2da'); grad.addColorStop(1, '#98a1b0');
     c.fillStyle = grad;
-    rr(c, -13, by0, 26, 20, 7); c.fill();
-    // ambient occlusion under the chest
-    const ao2 = c.createLinearGradient(0, by0 + 9, 0, by0 + 20);
+    const belly = () => {
+      c.beginPath();
+      c.moveTo(-10, by0 + 1);
+      c.quadraticCurveTo(-17, by0 + 9, -14.5, by0 + 16);
+      c.quadraticCurveTo(-8, by0 + 20.5, 0, by0 + 20.5);
+      c.quadraticCurveTo(8, by0 + 20.5, 14.5, by0 + 16);
+      c.quadraticCurveTo(17, by0 + 9, 10, by0 + 1);
+      c.quadraticCurveTo(0, by0 - 2.5, -10, by0 + 1);
+      c.closePath();
+    };
+    belly(); c.fill();
+    // ambient occlusion pooling under the round belly
+    const ao2 = c.createLinearGradient(0, by0 + 10, 0, by0 + 21);
     ao2.addColorStop(0, 'rgba(60,75,95,0)'); ao2.addColorStop(1, 'rgba(45,58,75,0.5)');
-    c.fillStyle = ao2; rr(c, -13, by0, 26, 20, 7); c.fill();
+    c.fillStyle = ao2; belly(); c.fill();
     // specular rim along the top-left of the shell
     c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 1.4;
-    c.beginPath(); c.moveTo(-9, by0 + 2.5); c.quadraticCurveTo(-12.5, by0 + 3, -12.5, by0 + 8); c.stroke();
-    c.strokeStyle = '#7d8a9c'; c.lineWidth = 1; rr(c, -13, by0, 26, 20, 7); c.stroke();
+    c.beginPath(); c.moveTo(-8, by0 + 1.5); c.quadraticCurveTo(-14, by0 + 4, -14.5, by0 + 11); c.stroke();
+    c.strokeStyle = '#7d8a9c'; c.lineWidth = 1; belly(); c.stroke();
     // evolution gear on the torso
     if (!hero && evo >= 1) {
-      // shoulder pauldron
+      // shoulder pauldron riding the back of the shell
       c.fillStyle = evo >= 3 ? '#4a5668' : '#68758a';
-      rr(c, 0, -28 + bob * 0.4, 13, 7, 3); c.fill();
+      rr(c, -16, -25 + bob * 0.4, 11, 6, 3); c.fill();
       c.strokeStyle = evo >= 3 ? '#ffd76a' : '#93a0b2'; c.lineWidth = 1;
-      rr(c, 0, -28 + bob * 0.4, 13, 7, 3); c.stroke();
+      rr(c, -16, -25 + bob * 0.4, 11, 6, 3); c.stroke();
     }
     if (!hero && evo >= 2) {
-      // armored chest plate
+      // armored belly plate
       c.fillStyle = 'rgba(90,104,124,0.85)';
-      rr(c, -12, -23 + bob * 0.4, 15, 9, 4); c.fill();
+      rr(c, -10, -20 + bob * 0.4, 14, 8, 4); c.fill();
       c.strokeStyle = evo >= 3 ? '#ffd76a' : 'rgba(150,165,185,0.8)'; c.lineWidth = 1;
-      rr(c, -12, -23 + bob * 0.4, 15, 9, 4); c.stroke();
+      rr(c, -10, -20 + bob * 0.4, 14, 8, 4); c.stroke();
     }
     if (hero && evo >= 1) {
       // hammered bronze breastplate (gold at apex)
@@ -968,21 +980,26 @@ class Player {
       rr(c, -11, -23 + bob * 0.4, 21, 12, 5); c.stroke();
       c.beginPath(); c.moveTo(-1, -21 + bob * 0.4); c.lineTo(-1, -13 + bob * 0.4); c.stroke();
     }
-    // chest light
+    // chest light + gold power socket (spec: upgrade sockets are gold)
     c.fillStyle = P.glow; c.shadowColor = P.glow; c.shadowBlur = 8;
-    c.beginPath(); c.arc(6, -15 + bob * 0.4, 2.6, 0, 7); c.fill(); c.shadowBlur = 0;
-    // head — domed helm shading so it reads as a rounded 3D form
+    c.beginPath(); c.arc(7, -15 + bob * 0.4, 2.6, 0, 7); c.fill(); c.shadowBlur = 0;
+    c.fillStyle = '#ffd76a'; c.shadowColor = '#ffd76a'; c.shadowBlur = 5;
+    c.beginPath(); c.arc(-11.5, -18 + bob * 0.4, 1.8, 0, 7); c.fill(); c.shadowBlur = 0;
+    c.strokeStyle = '#8a6f38'; c.lineWidth = 0.8;
+    c.beginPath(); c.arc(-11.5, -18 + bob * 0.4, 2.6, 0, 7); c.stroke();
+    // head — the OVERSIZED dome (spec §1.1: head is 40% of her): this is
+    // what makes the silhouette read CAT at 36px
     const hy = -30 + bob;
-    const hgd = c.createLinearGradient(0, hy - 10, 0, hy + 7);
-    hgd.addColorStop(0, '#ffffff'); hgd.addColorStop(0.45, '#eef3fa'); hgd.addColorStop(1, '#a9b6c8');
+    const hgd = c.createLinearGradient(0, hy - 12, 0, hy + 8);
+    hgd.addColorStop(0, '#ffffff'); hgd.addColorStop(0.5, '#f5f5f0'); hgd.addColorStop(1, '#b2bac6');
     c.fillStyle = hgd;
-    rr(c, -4, hy - 10, 20, 17, 6); c.fill();
-    c.strokeStyle = '#7d8a9c'; rr(c, -4, hy - 10, 20, 17, 6); c.stroke();
+    rr(c, -12, hy - 12, 27, 21, 10); c.fill();
+    c.strokeStyle = '#7d8a9c'; c.lineWidth = 1; rr(c, -12, hy - 12, 27, 21, 10); c.stroke();
     // cheek/jaw shadow + top specular
-    c.fillStyle = 'rgba(70,88,110,0.28)';
-    rr(c, -4, hy + 1, 20, 6, 4); c.fill();
-    c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 1.2;
-    c.beginPath(); c.moveTo(0, hy - 8.5); c.lineTo(9, hy - 9); c.stroke();
+    c.fillStyle = 'rgba(70,88,110,0.26)';
+    rr(c, -12, hy + 3, 27, 6, 5); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 1.3;
+    c.beginPath(); c.moveTo(-6, hy - 10.4); c.quadraticCurveTo(4, hy - 11.6, 11, hy - 10); c.stroke();
     if (hero) {
       // bronze helmet with crimson crest (gold at apex)
       c.fillStyle = evo >= 3 ? '#e6c56f' : '#b8934c';
@@ -997,37 +1014,46 @@ class Player {
         c.shadowBlur = 0;
       }
     } else {
-      // ears
-      c.fillStyle = '#dfe6f0';
-      c.beginPath(); c.moveTo(-2, hy - 8); c.lineTo(1, hy - 18); c.lineTo(6, hy - 9); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(8, hy - 9); c.lineTo(12, hy - 18); c.lineTo(15, hy - 7); c.closePath(); c.fill();
-      c.fillStyle = P.glow;
-      c.beginPath(); c.moveTo(0, hy - 9.5); c.lineTo(1.5, hy - 15); c.lineTo(4.5, hy - 10); c.closePath(); c.fill();
+      // antenna ears — one of the three features that must read at 36px:
+      // tall, set on top of the dome, cyan sensor inners
+      c.fillStyle = '#e8e8ea';
+      c.beginPath(); c.moveTo(-11, hy - 8); c.lineTo(-6, hy - 22); c.lineTo(0, hy - 10); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(4, hy - 10); c.lineTo(10, hy - 22); c.lineTo(15, hy - 8); c.closePath(); c.fill();
+      c.strokeStyle = '#98a1b0'; c.lineWidth = 0.8;
+      c.beginPath(); c.moveTo(-11, hy - 8); c.lineTo(-6, hy - 22); c.lineTo(0, hy - 10);
+      c.moveTo(4, hy - 10); c.lineTo(10, hy - 22); c.lineTo(15, hy - 8); c.stroke();
+      c.fillStyle = P.glow; c.globalAlpha = 0.75;
+      c.beginPath(); c.moveTo(-9, hy - 9.5); c.lineTo(-6.4, hy - 17); c.lineTo(-3, hy - 10.5); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(6.4, hy - 10.5); c.lineTo(9.6, hy - 17); c.lineTo(12.6, hy - 9.5); c.closePath(); c.fill();
+      c.globalAlpha = 1;
       if (evo >= 3) {
         // apex antennae with glowing tips
         c.strokeStyle = '#ffd76a'; c.lineWidth = 1.6; c.lineCap = 'round';
-        c.beginPath(); c.moveTo(-1, hy - 12); c.lineTo(-4, hy - 21); c.moveTo(13, hy - 12); c.lineTo(16, hy - 21); c.stroke();
+        c.beginPath(); c.moveTo(-6, hy - 20); c.lineTo(-9, hy - 27); c.moveTo(10, hy - 20); c.lineTo(13, hy - 27); c.stroke();
         c.fillStyle = '#ffd76a'; c.shadowColor = '#ffd76a'; c.shadowBlur = 6;
-        c.beginPath(); c.arc(-4, hy - 21, 1.6, 0, 7); c.arc(16, hy - 21, 1.6, 0, 7); c.fill();
+        c.beginPath(); c.arc(-9, hy - 27, 1.6, 0, 7); c.arc(13, hy - 27, 1.6, 0, 7); c.fill();
         c.shadowBlur = 0;
       }
     }
-    // visor eyes
-    c.fillStyle = hero ? '#2a1e10' : '#0a1420'; rr(c, 1, hy - 6, 15, 7, 3); c.fill();
+    // the visor — a full LED band across the dome, not two pinprick eyes
+    c.fillStyle = hero ? '#2a1e10' : '#0a1420'; rr(c, -8, hy - 7, 22, 10, 5); c.fill();
+    c.strokeStyle = 'rgba(58,58,74,0.9)'; c.lineWidth = 1; rr(c, -8, hy - 7, 22, 10, 5); c.stroke();
     c.fillStyle = this.healT > 0 ? '#aef7d8' : P.glow;
-    c.shadowColor = c.fillStyle; c.shadowBlur = 7;
-    c.fillRect(4, hy - 4.5, 4, 4); c.fillRect(10.5, hy - 4.5, 4, 4);
+    c.shadowColor = c.fillStyle; c.shadowBlur = 8;
+    c.fillRect(-5, hy - 4.8, 6.5, 5.6); c.fillRect(5, hy - 4.8, 6.5, 5.6);
     c.shadowBlur = 0;
+    c.fillStyle = 'rgba(160,255,240,0.55)';                // inner highlight line
+    c.fillRect(-5, hy - 4.8, 6.5, 1.4); c.fillRect(5, hy - 4.8, 6.5, 1.4);
     if (!hero) {
       // whisker antennae
       c.strokeStyle = 'rgba(200,220,240,0.7)'; c.lineWidth = 1;
-      c.beginPath(); c.moveTo(16, hy - 2); c.lineTo(21, hy - 4); c.moveTo(16, hy); c.lineTo(21, hy + 1); c.stroke();
+      c.beginPath(); c.moveTo(15, hy - 1); c.lineTo(21, hy - 3); c.moveTo(15, hy + 2); c.lineTo(21, hy + 3); c.stroke();
     }
-    // visor scan sweep
+    // visor scan sweep — the cyan bar crossing the whole band
     const scn = this.anim % 2.6;
     if (scn < 0.45) {
-      c.fillStyle = 'rgba(255,255,255,0.75)';
-      c.fillRect(2 + (scn / 0.45) * 11, hy - 5.5, 2.4, 5.6);
+      c.fillStyle = 'rgba(255,255,255,0.8)';
+      c.fillRect(-7 + (scn / 0.45) * 19, hy - 6, 2.6, 8);
     }
     // panel seam + vents on torso
     c.strokeStyle = 'rgba(70,85,105,0.55)'; c.lineWidth = 1;
@@ -1065,10 +1091,10 @@ class Player {
       }
       const hx = shX + Math.cos(ang) * reach, hy = shY + Math.sin(ang) * reach;
       const ex = shX + Math.cos(ang - 0.5) * reach * 0.55, ey = shY + Math.sin(ang - 0.5) * reach * 0.55;
-      // upper + fore arm
-      c.strokeStyle = '#9aa7b8'; c.lineWidth = 3.4; c.lineCap = 'round'; c.lineJoin = 'round';
+      // upper + fore arm — chubby means round little arms too
+      c.strokeStyle = '#9aa7b8'; c.lineWidth = 4; c.lineCap = 'round'; c.lineJoin = 'round';
       c.beginPath(); c.moveTo(shX, shY); c.lineTo(ex, ey); c.lineTo(hx, hy); c.stroke();
-      c.fillStyle = '#cfd8e6'; c.beginPath(); c.arc(hx, hy, 2.4, 0, 7); c.fill();  // paw/grip
+      c.fillStyle = '#cfd8e6'; c.beginPath(); c.arc(hx, hy, 2.9, 0, 7); c.fill();  // paw/grip
       c.fillStyle = P.glow; c.beginPath(); c.arc(shX, shY, 1.7, 0, 7); c.arc(ex, ey, 1.3, 0, 7); c.fill();
       // FERAL CLAWS: three purple energy talons splay from the paw
       if (this.clawT > 0) {
@@ -1094,8 +1120,9 @@ class Player {
         for (let k = -1; k <= 1; k++) {
           const len = 11 - Math.abs(k) * 2, spread = k * 0.38;
           c.save(); c.rotate(spread);
+          // claw steel per the locked palette: #C0C0D0 body, #E8E8FF edge
           const cg2 = c.createLinearGradient(0, 0, len, 0);
-          cg2.addColorStop(0, '#ffffff'); cg2.addColorStop(0.6, '#dff2ff'); cg2.addColorStop(1, P.glow);
+          cg2.addColorStop(0, '#e8e8ff'); cg2.addColorStop(0.55, '#c0c0d0'); cg2.addColorStop(1, P.glow);
           c.fillStyle = cg2; c.shadowColor = P.glow; c.shadowBlur = 8;
           // hooked like a real claw: curves down toward the tip
           c.beginPath(); c.moveTo(0, -1.6);
@@ -1127,8 +1154,9 @@ class Player {
       c.save(); c.globalCompositeOperation = 'lighter';
       for (const px of (this.flipT > 0 ? [-7, 6] : [-8])) {
         const L = rnd(8, 15) + (this.jetT > 0 ? 5 : 0);
+        // spec §2.3: jet-orange core fading to cyan at the edge
         const jg = c.createLinearGradient(px, -6, px - 5, -6 + L + 8);
-        jg.addColorStop(0, '#ffffff'); jg.addColorStop(0.4, '#8ff6ff'); jg.addColorStop(1, 'rgba(60,180,255,0)');
+        jg.addColorStop(0, '#fff1d8'); jg.addColorStop(0.4, '#ff8c42'); jg.addColorStop(1, 'rgba(55,255,208,0)');
         c.fillStyle = jg;
         c.beginPath(); c.moveTo(px - 2.4, -6); c.lineTo(px + 2.4, -6); c.lineTo(px - 4, -6 + L + 8); c.closePath(); c.fill();
       }
