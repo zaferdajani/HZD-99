@@ -137,6 +137,10 @@ function hurtBoxOf(e) {
     const w = e.w * 2.0, h = e.h * 1.7;
     return { x: cx2 - w / 2, y: e.y + e.h / 2 - h / 2, w, h };
   }
+  if (e.kind === 'zero') {              // GLACIERE: the drawn unicorn, horn to tail
+    const w = e.w * 1.5, h = e.h * 1.9;
+    return { x: cx2 - w / 2, y: e.y + e.h - h, w, h };
+  }
   if (typeof G !== 'undefined' && G.roomDef && G.roomDef.zone === 'A'
       && (e.kind === 'crawler' || e.kind === 'hopper')) {
     const w = e.w * 1.8, h = e.h * 1.45; // whelps drawn bigger than their box

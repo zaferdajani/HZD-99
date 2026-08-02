@@ -1472,6 +1472,8 @@ class Proj {
   draw(c) {
     // TALONHOST's metallic feathers wear the sheet's own art
     if (this.feather && typeof drawFeather === 'function' && drawFeather(c, this)) return;
+    // GLACIERE's void lance and ice shards wear hers
+    if (this.glcFx && typeof drawGlcProj === 'function' && drawGlcProj(c, this)) return;
     c.shadowColor = this.color; c.shadowBlur = 12; c.fillStyle = this.color;
     c.beginPath(); c.arc(this.x, this.y, this.r, 0, 7); c.fill();
     c.shadowBlur = 0;
@@ -2192,7 +2194,7 @@ const BSTAT = {
   glitch: { w: 84, h: 56, hp: 220 },
   brood: { w: 96, h: 64, hp: 320 },
   atlas: { w: 62, h: 74, hp: 460 },
-  zero: { w: 44, h: 56, hp: 500 },
+  zero: { w: 112, h: 62, hp: 500 },   // GLACIERE: a long floating quadruped
   prism: { w: 50, h: 34, hp: 520 },
   mother: { w: 120, h: 120, hp: 750 },
 };
@@ -2263,10 +2265,12 @@ class Boss {
     this.faceVis += clamp((this.face || 1) - this.faceVis, -turn, turn);
     // the pivot kicks up dust the instant the body whips through centre, so a
     // turning machine reads as planting and spinning, never as a flat sliver
-    if (this.kind === 'glitch' && (Math.sign(this.faceVis) || 1) !== pvSign) {
+    if ((this.kind === 'glitch' || this.kind === 'zero') && (Math.sign(this.faceVis) || 1) !== pvSign) {
+      // THE TURN LAW's dust: the crossing frame is masked by a kicked cloud
+      const dustCol = this.kind === 'zero' ? '#cfe8f4' : '#b9a888';
       for (let i = 0; i < 8; i++)
         addPart(this.cx() + rnd(-this.w * 0.4, this.w * 0.4), this.y + this.h - rnd(0, 8),
-          rnd(-120, 120), rnd(-140, -30), 0.35, '#b9a888', 3, 260, true);
+          rnd(-120, 120), rnd(-140, -30), 0.35, dustCol, 3, 260, true);
       sfx('step');
     }
     this.tickAbilities(dt, px, py);
@@ -2722,22 +2726,127 @@ class Boss {
       }
       // ---- Archivist Zero: teleporting caster ----
       case 'zero': {
-        this.y += Math.sin(this.anim * 2) * 14 * dt;
+        // ---- GLACIERE, THE FROZEN PURIFIER: she FLOATS, gliding to flank
+        // you, and answers with the sheet's five powers — VOID LANCE, ICE
+        // SHARDS, FROST NOVA, DASH CHARGE, VOID ORBS — every one told.
+        // ABSOLUTE ZERO, DATA CORRUPTION and the prison remain her rites. ----
         this.azCD = this.azCD == null ? 10 : this.azCD - dt;
+        this.novaCD = Math.max(0, (this.novaCD || 0) - dt);
+        const gW = G.roomDef.w * TILE;
+        const hovY = clamp(py - 130, 80, 330);
+        if (this.st !== 'dash' && this.st !== 'dashwarn')
+          this.face = Math.sign(px - this.cx()) || this.face || 1;
         if (this.st === 'idle') {
+          // the float: glide toward a point flanking the prey
+          const tx2 = clamp(px + (this.cx() < px ? -190 : 190), 70, gW - 70);
+          this.x = lerp(this.x, tx2 - this.w / 2, dt * 1.1);
+          this.y = lerp(this.y, hovY, dt * 1.4);
           // DATA CORRUPTION makes the whole unit run hotter while your HUD lies
           this.t -= dt * ((G.hudGlitchT || 0) > 0 ? 1.45 : 1);
+          const adist = Math.abs(px - this.cx());
           if (!this.dcUsed && this.hp <= this.hpMax * 0.4) {
-            // DATA CORRUPTION: once, below 40% — the archive uploads itself
+            // DATA CORRUPTION: once, below 40% — the void uploads itself
             // into your visor and scrambles everything you trust
             this.dcUsed = true;
             this.st = 'dccast'; this.t = 0.9; sfx('cast'); this.windT = 0.5;
           } else if (this.azCD <= 0 && this.t <= 0.4) {
-            // ABSOLUTE ZERO: the librarian's hush — the expanding frost aura
+            // ABSOLUTE ZERO: the purifier's hush — the expanding frost aura
             // is the tell; be outside it when the silence lands
             this.st = 'azhush'; this.t = 1.1; this.azCD = rnd(13, 17); this.windT = 0.5;
             sfx('cast');
-          } else if (this.t <= 0) { this.st = 'blink'; this.t = 0.45; this.tx = clamp(px + rnd(-160, 160), 60, G.roomDef.w * TILE - 100); this.ty = clamp(py - rnd(70, 150), 60, 380); }
+          } else if (adist < 140 && Math.abs(py - this.cy()) < 120 && this.novaCD <= 0) {
+            // FROST NOVA is reactive: crowd her and the cold answers — she
+            // drops onto the standing frame and gathers, that is the tell
+            this.st = 'novawarn'; this.t = 0.6; this.novaCD = 7; sfx('cast'); this.windT = 0.5;
+          } else if (this.t <= 0) {
+            const alt = this.cycle++ % 5;
+            if (alt === 0 || alt === 2) { this.st = 'lancewarn'; this.t = 0.7; this.windT = 0.5; sfx('cast'); }
+            else if (alt === 1) { this.st = 'shardwarn'; this.t = 0.5; this.windT = 0.4; sfx('cast'); }
+            else if (alt === 3) { this.st = 'dashwarn'; this.t = 0.55; this.windT = 0.5; sfx('dash'); }
+            else if (!this.orbs || !this.orbs.length) { this.st = 'orbs'; this.t = 1.0; this.windT = 0.5; sfx('cast'); }
+            else {
+              // an information prison: a cage of frozen void around you
+              this.prison = { x: px, y: py, t: 0, life: this.phase === 2 ? 3.4 : 2.6, held: 0 };
+              sfx('cast'); this.windT = 0.5; this.t = 2.2;
+            }
+          }
+        } else if (this.st === 'lancewarn') {
+          // the horn drinks void light — hold, watch, then move OFF the line
+          this.t -= dt; this.vx = 0; this.vy = 0;
+          if (this.t <= 0) {
+            const n2 = this.phase === 2 ? 2 : 1;
+            for (let k = 0; k < n2; k++) {
+              const a = Math.atan2(py + (k ? -70 : 0) - this.cy(), px - this.cx());
+              const pr = new Proj(this.cx() + this.face * this.w * 0.55, this.y + this.h * 0.18,
+                Math.cos(a) * 185, Math.sin(a) * 185, false, 1, 13, '#d24bff', 0, 4.2);
+              pr.glcFx = 'lance'; G.projs.push(pr);
+            }
+            sfx('cast'); cam.shake = 4;
+            this.st = 'idle'; this.t = this.phase === 2 ? 1.5 : 2.1;
+          }
+        } else if (this.st === 'shardwarn') {
+          // ice condenses along the spine crystals, then the fan flies
+          this.t -= dt;
+          if (this.t <= 0) {
+            const n2 = this.phase === 2 ? 7 : 5;
+            const base = Math.atan2(py - this.cy(), px - this.cx());
+            for (let k = 0; k < n2; k++) {
+              const a = base + (k - (n2 - 1) / 2) * 0.19;
+              const pr = new Proj(this.cx(), this.cy(), Math.cos(a) * 350, Math.sin(a) * 350, false, 1, 8, '#a5d8ff', 0, 2.2);
+              pr.glcFx = 'shard'; pr.frost = true; G.projs.push(pr);
+            }
+            sfx('shoot'); this.st = 'idle'; this.t = this.phase === 2 ? 1.4 : 2.0;
+          }
+        } else if (this.st === 'dashwarn') {
+          // she squares up and coils; the charge line is drawn in the air
+          this.t -= dt; this.vx = 0; this.vy = 0;
+          this.dashAng = Math.atan2(py - this.cy(), px - this.cx());
+          this.face = Math.abs(Math.cos(this.dashAng)) > 0.05 ? (Math.cos(this.dashAng) > 0 ? 1 : -1) : this.face;
+          if (this.t <= 0) {
+            this.st = 'dash'; this.t = 0.62;
+            this.vx = Math.cos(this.dashAng) * 640 * spd;
+            this.vy = Math.sin(this.dashAng) * 640 * spd;
+            sfx('dash'); cam.shake = 5;
+          }
+        } else if (this.st === 'dash') {
+          // DASH CHARGE: through where you stood, authored crystals hanging
+          // in her wake — the trail itself bites
+          this.t -= dt;
+          this.x += this.vx * dt; this.y += this.vy * dt;
+          this.y = clamp(this.y, 50, 14 * TILE - this.h);
+          this.trailT = (this.trailT || 0) - dt;
+          if (this.trailT <= 0) {
+            this.trailT = 0.07;
+            this.iceTrail = this.iceTrail || [];
+            this.iceTrail.push({ x: this.cx() - this.vx * 0.06, y: this.cy() + rnd(-8, 8), t: 2.4 });
+          }
+          if (chance(0.8)) addPart(this.cx() - this.vx * 0.04, this.cy() + rnd(-16, 16),
+            -this.vx * 0.2 + rnd(-40, 40), rnd(-40, 40), 0.3, '#bfe8ff', 2.5, 0, true);
+          if (this.t <= 0) { this.vx = 0; this.vy = 0; this.st = 'recover'; this.t = 0.7; }
+        } else if (this.st === 'recover') {
+          // spent from the charge — your window
+          this.t -= dt; this.y = lerp(this.y, hovY, dt * 1.2);
+          if (this.t <= 0) { this.st = 'idle'; this.t = 0.9; }
+        } else if (this.st === 'novawarn') {
+          this.t -= dt; this.vx = 0; this.vy = 0;
+          if (this.t <= 0) {
+            this.nova = { r: 24 };
+            burst(this.cx(), this.cy(), 26, '#e0f7fa', 380, 0.6, 0, 3.5, true);
+            cam.shake = 7; sfx('break'); G.flash = Math.max(G.flash, 0.18);
+            this.st = 'idle'; this.t = 1.6;
+            this.stagT = Math.max(this.stagT, 0.55);   // spent for a breath
+          }
+        } else if (this.st === 'orbs') {
+          // VOID ORBS: she stands and calls them out of the dark
+          this.t -= dt; this.vx = 0; this.vy = 0;
+          if (this.t <= 0) {
+            this.orbs = [];
+            const n2 = this.phase === 2 ? 4 : 3;
+            for (let k = 0; k < n2; k++)
+              this.orbs.push({ a: k / n2 * Math.PI * 2, cd: 1.4 + k * 0.5, t: 9, x: this.cx(), y: this.cy() });
+            sfx('phase');
+            this.st = 'idle'; this.t = 2.0;
+          }
         } else if (this.st === 'azhush') {
           this.t -= dt;
           this.azR = 40 + (1.1 - this.t) * 190;      // the aura swelling outward
@@ -2771,24 +2880,6 @@ class Boss {
             G.hudGlitchT = 8; G.toast(t('dc_warn')); sfx('phase');
             this.st = 'idle'; this.t = 1.8;
           }
-        } else if (this.st === 'blink') {
-          this.t -= dt;
-          if (this.t <= 0) {
-            burst(this.cx(), this.cy(), 14, PAL.D.glow, 220, 0.4, 0, 3, true);
-            this.x = this.tx - this.w / 2; this.y = this.ty - this.h / 2;
-            burst(this.cx(), this.cy(), 14, PAL.D.glow, 220, 0.4, 0, 3, true);
-            const alt = this.cycle++ % 3;
-            if (alt === 0) this.ring(this.phase === 2 ? 10 : 8, 240 * spd, this.anim);
-            else if (alt === 1) {
-              this.marks = [];
-              for (let k = -1; k <= (this.phase === 2 ? 2 : 1); k++) this.marks.push({ x: px + k * 80, t: 0.7 });
-            } else {
-              // an information prison: a cage of frozen data around where you stand
-              this.prison = { x: px, y: py, t: 0, life: this.phase === 2 ? 3.4 : 2.6, held: 0 };
-              sfx('cast'); this.windT = 0.5;
-            }
-            this.st = 'idle'; this.t = this.phase === 2 ? 1.7 : 2.4;
-          }
         }
         for (let i = this.marks.length - 1; i >= 0; i--) {
           const m = this.marks[i]; m.t -= dt;
@@ -2797,6 +2888,46 @@ class Boss {
             pr.frost = true;                       // contact freezes the joints
             G.projs.push(pr);
             sfx('shoot'); this.marks.splice(i, 1);
+          }
+        }
+        // FROST NOVA in flight: a ring of biting cold, jump it or wear it
+        if (this.nova) {
+          const nv = this.nova; nv.r += 300 * dt;
+          const d2 = Math.hypot(px - this.cx(), py - this.cy());
+          if (Math.abs(d2 - nv.r) < 17 && !player.dead && player.iT <= 0) {
+            player.hurt(DF().edmg, this.cx());
+            player.slowT = Math.max(player.slowT, 1.6);
+          }
+          if (nv.r > 250) this.nova = null;
+        }
+        // VOID ORBS: they orbit her and take their shots; they burn out
+        if (this.orbs && this.orbs.length) {
+          for (let i = this.orbs.length - 1; i >= 0; i--) {
+            const ob = this.orbs[i];
+            ob.a += dt * 1.7; ob.t -= dt; ob.cd -= dt;
+            ob.x = this.cx() + Math.cos(ob.a) * 80;
+            ob.y = this.cy() + Math.sin(ob.a) * 54;
+            if (ob.cd <= 0) {
+              ob.cd = this.phase === 2 ? 1.5 : 2.1;
+              const a = Math.atan2(py - ob.y, px - ob.x);
+              G.projs.push(new Proj(ob.x, ob.y, Math.cos(a) * 300, Math.sin(a) * 300, false, 1, 6, '#d24bff', 0, 2));
+              sfx('shoot');
+            }
+            if (ob.t <= 0) {
+              burst(ob.x, ob.y, 8, '#d24bff', 160, 0.4, 0, 2.5, true);
+              this.orbs.splice(i, 1);
+            }
+          }
+        }
+        // the DASH CHARGE's hanging ice: authored crystals that bite and fade
+        if (this.iceTrail && this.iceTrail.length) {
+          for (let i = this.iceTrail.length - 1; i >= 0; i--) {
+            const tr = this.iceTrail[i]; tr.t -= dt;
+            if (tr.t <= 0) { this.iceTrail.splice(i, 1); continue; }
+            if (!player.dead && player.iT <= 0 && Math.abs(px - tr.x) < 20 && Math.abs(py - tr.y) < 26) {
+              player.hurt(1, tr.x);
+              player.slowT = Math.max(player.slowT, 1.2);
+            }
           }
         }
         break;
@@ -3229,6 +3360,29 @@ class Boss {
       c.fillStyle = wg; c.beginPath(); c.arc(this.cx(), this.cy(), this.w * 1.1, 0, 7); c.fill();
       c.restore();
     }
+    // GLACIERE's telegraphs and standing hazards -------------------------
+    if (this.nova) {
+      c.save(); c.globalAlpha = clamp(1 - this.nova.r / 260, 0, 1);
+      c.strokeStyle = '#e0f7fa'; c.lineWidth = 4;
+      c.shadowColor = '#a5d8ff'; c.shadowBlur = 14;
+      c.beginPath(); c.arc(this.cx(), this.cy(), this.nova.r, 0, 7); c.stroke();
+      c.strokeStyle = '#d24bff'; c.lineWidth = 1.6;
+      c.beginPath(); c.arc(this.cx(), this.cy(), this.nova.r * 0.9, 0, 7); c.stroke();
+      c.shadowBlur = 0; c.restore();
+    }
+    if (this.iceTrail && typeof drawGlcCrystal === 'function')
+      for (const tr of this.iceTrail)
+        drawGlcCrystal(c, tr.x, tr.y + 16, 0.34, clamp(tr.t * 0.9, 0, 1));
+    if (this.orbs && typeof drawGlcOrb === 'function')
+      for (const ob of this.orbs) if (ob.x != null) drawGlcOrb(c, ob.x, ob.y, this.anim + ob.a);
+    if (this.st === 'dashwarn' && this.dashAng != null) {
+      // the charge line, sketched in frost before she takes it
+      c.save(); c.globalAlpha = 0.3 + Math.sin(this.anim * 14) * 0.15;
+      c.strokeStyle = '#a5d8ff'; c.lineWidth = 2; c.setLineDash([12, 9]);
+      c.beginPath(); c.moveTo(this.cx(), this.cy());
+      c.lineTo(this.cx() + Math.cos(this.dashAng) * 460, this.cy() + Math.sin(this.dashAng) * 460);
+      c.stroke(); c.setLineDash([]); c.restore();
+    }
     // ABSOLUTE ZERO hush aura — the swelling frost ring is the whole tell
     if (this.st === 'azhush' && this.azR > 0) {
       c.save(); c.globalAlpha = 0.55;
@@ -3357,7 +3511,8 @@ class Boss {
     // bosses are never allowed to borrow the machine art, dead or alive.
     const heroWorld = typeof isHero === 'function' && isHero();
     if (this.dead && !heroWorld
-      && !((this.kind === 'glitch' || this.kind === 'brood') && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beastParts || MEDIA_IMG.eagleParts || MEDIA_IMG.driller))) return;
+      && !((this.kind === 'glitch' || this.kind === 'brood') && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beastParts || MEDIA_IMG.eagleParts || MEDIA_IMG.driller))
+      && !(this.kind === 'zero' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.glaciereParts)) return;
     const P = PAL[G.roomDef.zone];
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
@@ -3384,8 +3539,11 @@ class Boss {
         }
         c.restore(); return;
       }
-      // each machine dies as itself: the beast folds, the eagle drops
-      if (this.kind === 'brood') {
+      // each machine dies as itself: the beast folds, the eagle drops,
+      // and GLACIERE breaks into the sheet's own parts
+      if (this.kind === 'zero') {
+        if (typeof drawGlaciere === 'function') drawGlaciere(c, this);
+      } else if (this.kind === 'brood') {
         if (typeof drawEagle === 'function') drawEagle(c, this);
       } else if (!(typeof drawBeast === 'function' && drawBeast(c, this))) drawDriller(c, this);
       c.restore(); return;
@@ -3457,6 +3615,7 @@ class Boss {
       }
     }
     // the machine's authored art is CLAWBYTE-only — hard theme gate
+    if (!heroWorld && this.kind === 'zero' && typeof drawGlaciere === 'function' && drawGlaciere(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'glitch' && typeof drawBeast === 'function' && drawBeast(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'brood' && typeof drawEagle === 'function' && drawEagle(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'glitch' && typeof drawDriller3D === 'function' && drawDriller3D(c, this)) { c.restore(); return; }

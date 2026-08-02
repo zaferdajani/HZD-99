@@ -30,6 +30,8 @@ const MEDIA_SRC = {
     beastParts: 'assets/characters/beast_parts.png',
     // boss 01: virus-infected robot eagle, parts atlas for the cutout rig
     eagleParts: 'assets/characters/eagle_parts.png',
+    // the frost boss: GLACIERE, corrupted unicorn — figures, parts and fx
+    glaciereParts: 'assets/characters/glaciere_parts.png',
   },
   audio: {
     boss: 'assets/music/epic_combat.ogg',
