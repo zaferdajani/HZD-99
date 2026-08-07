@@ -3512,7 +3512,8 @@ class Boss {
     const heroWorld = typeof isHero === 'function' && isHero();
     if (this.dead && !heroWorld
       && !((this.kind === 'glitch' || this.kind === 'brood') && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beastParts || MEDIA_IMG.eagleParts || MEDIA_IMG.driller))
-      && !(this.kind === 'zero' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.glaciereParts)) return;
+      && !(this.kind === 'zero' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.glaciereParts)
+      && !(this.kind === 'prism' && typeof drawPrism === 'function')) return;
     const P = PAL[G.roomDef.zone];
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
@@ -3540,7 +3541,12 @@ class Boss {
         c.restore(); return;
       }
       // each machine dies as itself: the beast folds, the eagle drops,
-      // and GLACIERE breaks into the sheet's own parts
+      // GLACIERE breaks into the sheet's own parts, and the PRISM PROWLER
+      // shatters into rainbow shards while its turntable spins down
+      if (this.kind === 'prism') {
+        if (typeof drawPrism === 'function') drawPrism(c, this);
+        c.restore(); return;
+      }
       if (this.kind === 'zero') {
         if (typeof drawGlaciere === 'function') drawGlaciere(c, this);
       } else if (this.kind === 'brood') {
@@ -3618,6 +3624,7 @@ class Boss {
     if (!heroWorld && this.kind === 'zero' && typeof drawGlaciere === 'function' && drawGlaciere(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'glitch' && typeof drawBeast === 'function' && drawBeast(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'brood' && typeof drawEagle === 'function' && drawEagle(c, this)) { c.restore(); return; }
+    if (!heroWorld && this.kind === 'prism' && typeof drawPrism === 'function' && drawPrism(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'glitch' && typeof drawDriller3D === 'function' && drawDriller3D(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'glitch' && drawDriller(c, this)) { c.restore(); return; }
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
