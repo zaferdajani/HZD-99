@@ -53,6 +53,103 @@ function glcGhost(c, r, dx, dy, alpha) {
   c.restore();
 }
 
+// ---------------------------------------------------------------------------
+// THE AIR-GALLOP RIG — her legs are no longer frozen in the baked gallop.
+// The hero figure keeps its head, mane, body, spine crystals and tail, but
+// the baked legs are lifted out and the sheet's own two leg pieces (front
+// and hind, each a full hip-ball/knee-ball/hoof limb) are hung back on
+// nested pivots — near and far pairs — cycling on NULLFANG's rotary-gallop
+// clock. Idle she paddles slowly on the hover; the dash is a full gallop.
+// ---------------------------------------------------------------------------
+const GLC_CACHE = {};
+// per-piece skeleton, measured off the sheet: hip and knee ball centres
+const GLC_LEG = {
+  legF: { hip: [26, 24], knee: [52, 57] },
+  legH: { hip: [33, 20], knee: [55, 55] },
+};
+// hip anchors in hero-local space (origin bottom-centre, art faces LEFT):
+// [f near, h near, f far, h far], each [x, y, part, scale]
+const GLC_HIPS = [
+  [-145, -135, 'legF', 1.12], [40, -113, 'legH', 0.9],
+  [-127, -138, 'legF', 1.05], [56, -116, 'legH', 0.84],
+];
+// cool-shadowed atlas for the far pair, so depth reads
+function glcDark() {
+  if (GLC_CACHE.dark) return GLC_CACHE.dark;
+  const im = glcImg(); if (!im || !im.naturalWidth) return null;
+  const cv = document.createElement('canvas');
+  cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+  const x = cv.getContext('2d');
+  x.drawImage(im, 0, 0);
+  x.globalCompositeOperation = 'source-atop';
+  x.fillStyle = 'rgba(9,11,26,0.45)'; x.fillRect(0, 0, cv.width, cv.height);
+  GLC_CACHE.dark = cv;
+  return cv;
+}
+// the hero figure with its baked legs erased — mane, belly lightning and the
+// whole tail chain survive untouched; rig legs hang over the cut
+function glcHeroCut() {
+  if (GLC_CACHE.heroCut) return GLC_CACHE.heroCut;
+  const im = glcImg(); if (!im || !im.naturalWidth) return null;
+  const s = GLC_P.hero;
+  const cv = document.createElement('canvas');
+  cv.width = s[2]; cv.height = s[3];
+  const x = cv.getContext('2d');
+  x.drawImage(im, s[0], s[1], s[2], s[3], 0, 0, s[2], s[3]);
+  x.globalCompositeOperation = 'destination-out';
+  x.fillRect(122, 285, 128, 128);               // the front legs and both hoofs
+  x.fillRect(326, 296, 106, 117);               // the hind leg under the tail
+  GLC_CACHE.heroCut = cv;
+  return cv;
+}
+// one authored leg split at its knee ball — upper drives from the hip, the
+// shank folds about the knee, overlapped 14 rows through the ball
+function glcLegDraw(c, key, ax, ay, a1, a2, sc, dark) {
+  const im = dark ? glcDark() : glcImg(); if (!im) return;
+  const s = GLC_P[key], L = GLC_LEG[key];
+  const cutUp = Math.min(s[3], L.knee[1] + 7), cutLo = Math.max(0, L.knee[1] - 7);
+  c.save();
+  c.translate(ax, ay); c.rotate(a1);
+  c.drawImage(im, s[0], s[1], s[2], cutUp,
+    -L.hip[0] * sc, -L.hip[1] * sc, s[2] * sc, cutUp * sc);
+  c.translate((L.knee[0] - L.hip[0]) * sc, (L.knee[1] - L.hip[1]) * sc);
+  c.rotate(a2);
+  c.drawImage(im, s[0], s[1] + cutLo, s[2], s[3] - cutLo,
+    -L.knee[0] * sc, (cutLo - L.knee[1]) * sc, s[2] * sc, (s[3] - cutLo) * sc);
+  c.restore();
+}
+// the assembled hero with living legs. gait is the accumulated clock phase,
+// k 0..1 scales paddle → full gallop, tuck 0..1 folds the legs up (the
+// coiled dash tell). Falls back to the whole authored figure untouched.
+function glcHeroRig(c, rot, shake, gait, k, tuck) {
+  const cut = glcHeroCut();
+  if (!cut) { glcFig(c, 'hero', rot, shake); return; }
+  const s = GLC_P.hero;
+  c.save();
+  if (shake) c.translate(rnd(-shake, shake), rnd(-shake, shake));
+  if (rot) c.rotate(rot);
+  // NULLFANG's rotary-gallop timing: hind pair near-together, front pair
+  // staggered off-beat — the off-beat is what reads as a living stride
+  const PH = [0, 1.18 * Math.PI, 0.42 * Math.PI, 1.46 * Math.PI];
+  const legs = PH.map(p => {
+    const w = gait + p;
+    let a1 = (Math.sin(w) + 0.22 * Math.sin(w * 2 + 0.6)) * (0.10 + 0.30 * k);
+    let a2 = (Math.sin(w + 1.25) * 0.55 + Math.max(0, Math.sin(w + 2.1)) * 0.5) * (0.2 + 0.45 * k);
+    if (tuck > 0) {                             // gathered: hoofs drawn up
+      a1 += (-0.30 - a1) * tuck;
+      a2 += (0.85 - a2) * tuck;
+    }
+    return { a1, a2 };
+  });
+  const far = [GLC_HIPS[2], GLC_HIPS[3]], near = [GLC_HIPS[0], GLC_HIPS[1]];
+  glcLegDraw(c, far[0][2], far[0][0], far[0][1], legs[2].a1, legs[2].a2, far[0][3], true);
+  glcLegDraw(c, far[1][2], far[1][0], far[1][1], legs[3].a1, legs[3].a2, far[1][3], true);
+  c.drawImage(cut, -s[2] / 2, -s[3]);
+  glcLegDraw(c, near[1][2], near[1][0], near[1][1], legs[1].a1, legs[1].a2, near[1][3], false);
+  glcLegDraw(c, near[0][2], near[0][0], near[0][1], legs[0].a1, legs[0].a2, near[0][3], false);
+  c.restore();
+}
+
 function drawGlaciere(c, b) {
   const im = glcImg(); if (!im || !im.naturalWidth) return false;
   c.save();
@@ -157,6 +254,12 @@ function drawGlaciere(c, b) {
     // mane-frequency shimmer, and a bank rolled into her glide direction
     const bob = Math.sin(b.anim * 1.7) * 7 + Math.sin(b.anim * 4.6) * 2;
     const roll = clamp(vxV / 2600, -0.085, 0.085) * sgn;
+    // the gait clock: her legs cycle faster the faster she actually moves —
+    // a slow hover-paddle at rest, a full airborne gallop on the charge
+    const spdG = Math.hypot(vxV, vyV);
+    const gaitK = b.st === 'dash' ? 1 : clamp(spdG / 620, 0, 1);
+    b.glcGait = (b.glcGait || 0) + dtA * (2.6 + gaitK * 7.2);
+    const gait = b.glcGait;
     const pitch = clamp((b.vy || 0) / -1400, -0.16, 0.16) + Math.sin(b.anim * 1.1) * 0.022;
     c.translate(0, -14 + bob);                 // she rides above the ground line
     const swell = Math.sin(b.anim * 0.9);      // the slow body swell, breathing
@@ -183,15 +286,17 @@ function drawGlaciere(c, b) {
         c.restore();
       }
       c.scale(1.07, 0.96);
-      glcFig(c, 'hero', clamp((b.vy || 0) / 2200, -0.3, 0.3), 0);
+      glcHeroRig(c, clamp((b.vy || 0) / 2200, -0.3, 0.3), 0, gait, 1, 0);
       // the tail crystals drag a wake of themselves through the line
       for (let i = 1; i <= 3; i++)
         glcGhost(c, GLC_P.tailW, i * 15 + Math.sin(b.anim * 9 - i * 1.1) * 5,
           Math.sin(b.anim * 7 - i * 1.4) * 6, 0.22 - i * 0.055);
     } else if (b.st === 'dashwarn') {
-      glcFig(c, 'hero', -0.06, 1.6);           // coiling, aimed — the tell
+      // coiling, aimed — the tell: the legs GATHER UP under her as she loads
+      const tk = clamp(1 - (b.t || 0) / 0.6, 0, 1);
+      glcHeroRig(c, -0.06, 1.6, gait, 0, 0.4 + tk * 0.6);
     } else if (b.st === 'lancewarn' || b.st === 'shardwarn') {
-      glcFig(c, 'hero', -0.03, 1.2);
+      glcHeroRig(c, -0.03, 1.2, gait, 0.1, 0.35);
     } else {
       // LANCE RECOIL: the body is punched back a few px along the shot line
       // the instant the lance leaves, nose kicked up, settling as it decays
@@ -204,7 +309,7 @@ function drawGlaciere(c, b) {
         c.translate(w * -14, 0);
         c.scale(1 + w * 0.09, 1 - w * 0.07);
       }
-      glcFig(c, 'hero', pitch + roll + rq * 0.07, 0);
+      glcHeroRig(c, pitch + roll + rq * 0.07, 0, gait, gaitK, 0);
     }
     // VOID MANE FLOW: 2-3 additive ghost echoes of the authored tendrils,
     // offset on a phase wave — the baked mane appears to stream and coil

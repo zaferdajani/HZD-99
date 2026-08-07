@@ -59,6 +59,113 @@ function drgFig(c, key, wk, shake, rot) {
   c.restore();
 }
 
+// ---------------------------------------------------------------------------
+// THE STEPPING RIG — no more sliding stride pose. The walk figure keeps his
+// body, wings, head and tail, but the baked legs are lifted out and the
+// sheet's own four leg pieces are hung back on nested hip/knee pivots, so
+// the walk is REAL steps: reach, plant, drive, fold. The gait clock is
+// NULLFANG's rotary gallop — hind pair drives, front pair catches off-beat.
+// ---------------------------------------------------------------------------
+// per-piece skeleton, measured off the sheet: hip ball and knee ball centres
+// in part-local px. Each piece is split at its knee so the shank folds.
+const DRG_LEG = {
+  flegR: { hip: [46, 20], knee: [70, 42] },
+  flegL: { hip: [30, 20], knee: [56, 46] },
+  hlegR: { hip: [20, 20], knee: [60, 44] },
+  hlegL: { hip: [17, 18], knee: [46, 44] },
+};
+// hip anchors in walk-pose local space (origin feet-centre, art faces RIGHT):
+// [f near, h near, f far, h far] — far pair sits deeper and darker
+const DRG_HIPS = [[60, -70, 'flegR'], [-26, -68, 'hlegR'], [44, -72, 'flegL'], [-8, -70, 'hlegL']];
+const DRG_LEGSC = 0.64;                          // leg pieces vs walk-pose art
+// warm-shadowed atlas copy for the far pair, so depth reads
+function drgDark() {
+  if (DRG_CACHE.dark) return DRG_CACHE.dark;
+  const im = drgImg(); if (!im || !im.naturalWidth) return null;
+  const cv = document.createElement('canvas');
+  cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+  const x = cv.getContext('2d');
+  x.drawImage(im, 0, 0);
+  x.globalCompositeOperation = 'source-atop';
+  x.fillStyle = 'rgba(24,7,4,0.45)'; x.fillRect(0, 0, cv.width, cv.height);
+  DRG_CACHE.dark = cv;
+  return cv;
+}
+// the walk figure with its baked legs erased — the tail band survives whole.
+// The rig legs hang over the cut, their hip balls tucked up into the belly.
+function drgWalkCut(hot) {
+  const slot = hot ? 'walkCutHot' : 'walkCut';
+  if (DRG_CACHE[slot]) return DRG_CACHE[slot];
+  const im = hot ? drgHot() : drgImg();
+  if (!im || (im.naturalWidth === 0 && !im.getContext)) return null;
+  const s = DRG_P.walk;
+  const cv = document.createElement('canvas');
+  cv.width = s[2]; cv.height = s[3];
+  const x = cv.getContext('2d');
+  x.drawImage(im, s[0], s[1], s[2], s[3], 0, 0, s[2], s[3]);
+  x.globalCompositeOperation = 'destination-out';
+  x.fillRect(80, 96, 116, 72);                  // the leg block right of the tail
+  x.fillRect(35, 148, 45, 20);                  // the feet strip under the tail
+  DRG_CACHE[slot] = cv;
+  return cv;
+}
+// one authored leg split at its knee ball: the upper drives from the hip,
+// the shank folds about the knee — both halves are the sheet's own pixels,
+// overlapped 14 rows through the ball so the seam never shows mid-flex
+function drgLegDraw(c, key, ax, ay, a1, a2, dark) {
+  const im = dark ? drgDark() : drgImg(); if (!im) return;
+  const s = DRG_P[key], L = DRG_LEG[key], sc = DRG_LEGSC;
+  const cutUp = Math.min(s[3], L.knee[1] + 7), cutLo = Math.max(0, L.knee[1] - 7);
+  c.save();
+  c.translate(ax, ay); c.rotate(a1);
+  c.drawImage(im, s[0], s[1], s[2], cutUp,
+    -L.hip[0] * sc, -L.hip[1] * sc, s[2] * sc, cutUp * sc);
+  c.translate((L.knee[0] - L.hip[0]) * sc, (L.knee[1] - L.hip[1]) * sc);
+  c.rotate(a2);
+  c.drawImage(im, s[0], s[1] + cutLo, s[2], s[3] - cutLo,
+    -L.knee[0] * sc, (cutLo - L.knee[1]) * sc, s[2] * sc, (s[3] - cutLo) * sc);
+  c.restore();
+}
+// the assembled stepping walk: far pair, cut body, near pair — one gait beat
+function drgWalkRig(c, ph, wk, shake, rot) {
+  const cut = drgWalkCut(false);
+  if (!cut) { drgFig(c, 'walk', wk, shake, rot); return; }
+  const s = DRG_P.walk;
+  c.save();
+  if (shake) c.translate(rnd(-shake, shake), rnd(-shake, shake) * 0.5);
+  if (rot) { c.translate(0, -s[3] * 0.45); c.rotate(rot); c.translate(0, s[3] * 0.45); }
+  // ROTARY GALLOP timing, straight off NULLFANG: hind pair near-together,
+  // front pair staggered, front vs hind NOT a clean half-cycle — the
+  // off-beat is what reads as an animal instead of a wind-up toy
+  const PH = [0, 1.18 * Math.PI, 0.42 * Math.PI, 1.46 * Math.PI];
+  const legs = PH.map((p, i) => {
+    const w = ph + p;
+    // the hind pair carries the mass — it steps shallower and never folds
+    // both feet off the ground at once; the front pair does the reaching
+    const hind = i === 1 || i === 3 ? 0.72 : 1;
+    return {
+      // second harmonic: the reach snaps forward, drags back slower
+      a1: (Math.sin(w) + 0.22 * Math.sin(w * 2 + 0.6)) * 0.26 * hind,
+      // the knee folds hard on the swing-through, stays long in stance
+      a2: (Math.sin(w + 1.25) * 0.55 + Math.max(0, Math.sin(w + 2.1)) * 0.5) * 0.42 * hind,
+    };
+  });
+  drgLegDraw(c, DRG_HIPS[2][2], DRG_HIPS[2][0], DRG_HIPS[2][1], legs[2].a1, legs[2].a2, true);
+  drgLegDraw(c, DRG_HIPS[3][2], DRG_HIPS[3][0], DRG_HIPS[3][1], legs[3].a1, legs[3].a2, true);
+  c.drawImage(cut, -s[2] / 2, -s[3]);
+  if (wk > 0) {
+    const hcut = drgWalkCut(true);
+    if (hcut) {
+      c.save(); c.globalAlpha *= Math.min(1, wk) * 0.5;
+      c.drawImage(hcut, -s[2] / 2, -s[3]);
+      c.restore();
+    }
+  }
+  drgLegDraw(c, DRG_HIPS[1][2], DRG_HIPS[1][0], DRG_HIPS[1][1], legs[1].a1, legs[1].a2, false);
+  drgLegDraw(c, DRG_HIPS[0][2], DRG_HIPS[0][0], DRG_HIPS[0][1], legs[0].a1, legs[0].a2, false);
+  c.restore();
+}
+
 // one death piece, centre-anchored
 function drgPiece(c, key, sc) {
   const im = drgImg(); const s = DRG_P[key];
@@ -292,7 +399,7 @@ function drawFurnace(c, b) {
               rnd(-40, 40), rnd(-70, -20), 0.3, '#c8925c', 2.5, 300, true);
       }
       c.translate(0, -Math.abs(Math.sin(ph)) * 3 + 1);
-      drgFig(c, 'walk', wk, shk, Math.sin(ph) * 0.035);
+      drgWalkRig(c, ph, wk, shk, Math.sin(ph) * 0.035);
     } else {
       // stand: breathing, the core light swelling and settling
       c.translate(0, Math.sin(b.anim * 1.8) * 1.5);
