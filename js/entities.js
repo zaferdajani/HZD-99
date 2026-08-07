@@ -2520,6 +2520,7 @@ class Boss {
             // drops it out of the sky — an uncontrolled fall, not a swoop
             this.frozeUsed = true;
             this.st = 'cfcrash'; this.vy = 60; sfx('hurt');
+            this.cabV = (this.cabV || 0) + 2.0;   // torn free — the cable whips
           } else if (this.t <= 0 && this.bcCD <= 0) {
             // BROOD CALL: the territorial screech that summons its brood
             this.st = 'broodcall'; this.t = 1.6;
@@ -2548,13 +2549,25 @@ class Boss {
           if (this.fired < volleys && this.t <= (this.fired ? 0.45 : (this.phase === 2 ? 1.05 : 0.9))) {
             this.fired++;
             const n = this.phase === 2 ? 7 : 5;
-            for (let i = 0; i < n; i++) {
-              const a = Math.PI / 2 + (i - (n - 1) / 2) * 0.28 + rnd(-0.04, 0.04);
-              const f = new Proj(this.cx() + (i - (n - 1) / 2) * 16, this.y + this.h - 6,
+            // the fan leaves the wings centre-out in a two-frame ripple, and
+            // the recoil kicks her back up the cable
+            this.feaQ = this.feaQ || [];
+            for (let i = 0; i < n; i++)
+              this.feaQ.push({ d: Math.abs(i - (n - 1) / 2) * 0.033, i, n });
+            this.cabV = (this.cabV || 0) + (this.fired === 1 ? 1.3 : -1.3);
+            this.fireKick = 1;
+            sfx('shoot'); cam.shake = 4;
+          }
+          if (this.feaQ && this.feaQ.length) {
+            for (const q of this.feaQ) {
+              q.d -= dt;
+              if (q.d > 0) continue;
+              const a = Math.PI / 2 + (q.i - (q.n - 1) / 2) * 0.28 + rnd(-0.04, 0.04);
+              const f = new Proj(this.cx() + (q.i - (q.n - 1) / 2) * 16, this.y + this.h - 6,
                 Math.cos(a) * 330, Math.sin(a) * 330, false, 1, 7, '#ff4c5c', 180, 4);
               f.feather = true; G.projs.push(f);
             }
-            sfx('shoot'); cam.shake = 4;
+            this.feaQ = this.feaQ.filter(q => q.d > 0);
           }
           if (this.t <= 0) { this.st = 'idle'; this.t = this.phase === 2 ? 1.2 : 1.8; }
         } else if (this.st === 'swoopwarn') {
@@ -2568,6 +2581,8 @@ class Boss {
             this.my = clamp(this.ty + 4, 60, 14.4 * TILE);
             this.ex = clamp(this.mx + (this.cx() < this.mx ? 300 : -300), 90, W - 90) - this.w / 2;
             sfx('dash');
+            // her departure leaves the empty cable swinging over the perch
+            this.cabV = (this.cabV || 0) + (this.cx() < this.mx ? -2.2 : 2.2);
           }
         } else if (this.st === 'swoop') {
           // one diagonal dive straight through where you stood, wind trailing
@@ -2578,11 +2593,24 @@ class Boss {
           this.vx = (nx - this.x) / Math.max(dt, 0.001);
           this.vy = (ny - this.y) / Math.max(dt, 0.001);
           this.x = nx; this.y = ny;
-          // the wake: wind streaks curling off the dive path
-          if (chance(0.95)) addPart(this.cx() - this.vx * 0.05 + rnd(-10, 10), this.cy() - this.vy * 0.05 + rnd(-14, 14),
-            -this.vx * 0.22 + rnd(-50, 50), -this.vy * 0.22 + rnd(-30, 30), 0.38, '#bfe6f2', 3, 0, true);
-          if (chance(0.4)) addPart(this.cx(), this.cy(), rnd(-60, 60), rnd(-60, 60), 0.25, '#ff4c5c', 2, 0, true);
-          if (u >= 1) { this.st = 'idle'; this.t = this.phase === 2 ? 1.1 : 1.6; this.vx = 0; this.vy = 0; }
+          // the wake: twin ribbons of wind peeling off the wingtips, each
+          // curling outward so the trail arcs instead of scattering
+          const wsp = Math.hypot(this.vx, this.vy) || 1;
+          const wnx = -this.vy / wsp, wny = this.vx / wsp;
+          for (const sgn of [-1, 1]) {
+            if (!chance(0.9)) continue;
+            const off = sgn * (15 + Math.sin(this.anim * 12 + sgn) * 5);
+            addPart(this.cx() + wnx * off - this.vx * 0.03, this.cy() + wny * off - this.vy * 0.03,
+              -this.vx * 0.16 + wnx * sgn * 55, -this.vy * 0.16 + wny * sgn * 55,
+              0.55, '#d6f2fb', 3.4, 0, true);
+          }
+          if (chance(0.3)) addPart(this.cx(), this.cy(), rnd(-40, 40), rnd(-40, 40), 0.22, '#ff4c5c', 2, 0, true);
+          if (u >= 1) {
+            // the catch: she snaps back onto station and the cable takes the
+            // leftover momentum as a settling swing
+            this.cabV = (this.cabV || 0) + clamp(this.vx * 0.0035, -2.4, 2.4);
+            this.st = 'idle'; this.t = this.phase === 2 ? 1.1 : 1.6; this.vx = 0; this.vy = 0;
+          }
         } else if (this.st === 'rest') {
           // wings burn out: it descends into claw range
           this.y = lerp(this.y, 12.4 * TILE, dt * 2.8);
@@ -2595,7 +2623,10 @@ class Boss {
           if (this.t <= 0) { this.st = 'rise'; this.t = 1.2; }
         } else if (this.st === 'rise') {
           this.t -= dt; this.y = lerp(this.y, this.homeY, 0.06);
-          if (this.t <= 0) { this.st = 'idle'; this.t = 1.3; }
+          if (this.t <= 0) {
+            this.st = 'idle'; this.t = 1.3;
+            this.cabV = (this.cabV || 0) + 0.9;   // catching the cable rocks it
+          }
         } else if (this.st === 'broodcall') {
           // head thrown back, core strobing — then the brood answers from
           // the arena's edges, one staggered swoop at a time
@@ -2604,6 +2635,7 @@ class Boss {
           this.t -= dt; this.windT = 0.3;
           if (!this.bcCried && this.t <= 1.1) {
             this.bcCried = true; sfx('roar'); cam.shake = 7;
+            this.cabV = (this.cabV || 0) - 1.1;   // the screech throws her back
             if (typeof G.addRing === 'function') G.addRing(this.cx(), this.cy());
           }
           if (chance(0.4)) addPart(this.cx() + rnd(-20, 20), this.y + this.h - 8,
