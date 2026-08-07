@@ -3512,7 +3512,8 @@ class Boss {
     const heroWorld = typeof isHero === 'function' && isHero();
     if (this.dead && !heroWorld
       && !((this.kind === 'glitch' || this.kind === 'brood') && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beastParts || MEDIA_IMG.eagleParts || MEDIA_IMG.driller))
-      && !(this.kind === 'zero' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.glaciereParts)) return;
+      && !(this.kind === 'zero' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.glaciereParts)
+      && !(this.kind === 'mother' && typeof drawMother === 'function')) return;
     const P = PAL[G.roomDef.zone];
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
@@ -3541,7 +3542,11 @@ class Boss {
       }
       // each machine dies as itself: the beast folds, the eagle drops,
       // and GLACIERE breaks into the sheet's own parts
-      if (this.kind === 'zero') {
+      if (this.kind === 'mother') {
+        // MOTHER-V's finale: plates shatter one by one, the tendrils go limp,
+        // the halo falls and rings on the floor, the core flickers out LAST
+        if (typeof drawMother === 'function') drawMother(c, this);
+      } else if (this.kind === 'zero') {
         if (typeof drawGlaciere === 'function') drawGlaciere(c, this);
       } else if (this.kind === 'brood') {
         if (typeof drawEagle === 'function') drawEagle(c, this);
@@ -3619,6 +3624,7 @@ class Boss {
     if (!heroWorld && this.kind === 'glitch' && typeof drawBeast === 'function' && drawBeast(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'brood' && typeof drawEagle === 'function' && drawEagle(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'glitch' && typeof drawDriller3D === 'function' && drawDriller3D(c, this)) { c.restore(); return; }
+    if (!heroWorld && this.kind === 'mother' && typeof drawMother === 'function' && drawMother(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'glitch' && drawDriller(c, this)) { c.restore(); return; }
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
           flash: this.hurtT > 0 ? 1 : 0,
