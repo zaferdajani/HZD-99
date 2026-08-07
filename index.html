@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msjfr0nj"</script>
+<script>window.BUILD_ID="msjfso5x"</script>
 <script>
 /**
  * @license
@@ -612,9 +612,76 @@ const BEAST_P = {
 };
 const BEAST_H = 270;              // the full figure's standing height in atlas px
 const BEAST_F = 270 / 149;        // example-pose panel scale -> rig scale
-const BEAST_CACHE = { dark: null };
+const BEAST_CACHE = { dark: null, glow: {} };
 // assembly anchors, exposed so the auditor can calibrate them against the art
 const BEAST_TUNE = { headX: -82, headY: -188, bodyX: 118, bodyY: 229, shX: -100, hpX: 62 };
+// live-render state the glow overlays read: set per-draw, never persisted
+const BEAST_LIVE = { t: 0, glow: 1 };
+
+// ---------------------------------------------------------------------------
+// THE VIRUS VEINS. The artist already painted every emissive mark — eye,
+// core discs, joint lights, the tail spade. Scan each sprite ONCE for its
+// purple pixels, cluster them, and breathe additive pulses at exactly those
+// authored positions. Nothing is repainted; the light just lives.
+// ---------------------------------------------------------------------------
+function beastGlowSpots(key) {
+  const cache = BEAST_CACHE.glow;
+  if (cache[key] !== undefined) return cache[key];
+  const im = beastImg(); if (!im || !im.naturalWidth) return null;
+  const s = BEAST_P[key];
+  const cv = document.createElement('canvas'); cv.width = s[2]; cv.height = s[3];
+  const q = cv.getContext('2d', { willReadFrequently: true });
+  q.drawImage(im, s[0], s[1], s[2], s[3], 0, 0, s[2], s[3]);
+  let d;
+  try { d = q.getImageData(0, 0, s[2], s[3]).data; } catch (e) { return (cache[key] = null); }
+  const cl = [];
+  for (let y = 0; y < s[3]; y += 2) for (let x = 0; x < s[2]; x += 2) {
+    const i = (y * s[2] + x) * 4;
+    const r = d[i], g = d[i + 1], b = d[i + 2];
+    // the authored virus purple: blue-heavy, red-warm, green-starved
+    if (d[i + 3] > 120 && b > 140 && r > 70 && b - g > 60 && r - g > 8) {
+      let hit = null;
+      for (const c2 of cl)
+        if (Math.abs(x - c2.sx / c2.n) < 13 && Math.abs(y - c2.sy / c2.n) < 13) { hit = c2; break; }
+      if (hit) { hit.sx += x; hit.sy += y; hit.n++; }
+      else cl.push({ sx: x, sy: y, n: 1 });
+    }
+  }
+  const out = cl.filter(c2 => c2.n >= 2)
+    .sort((a2, b2) => b2.n - a2.n).slice(0, 14)
+    .map(c2 => ({
+      x: c2.sx / c2.n, y: c2.sy / c2.n,
+      r: 4.5 + Math.min(15, Math.sqrt(c2.n) * 2.4),
+    }));
+  cache[key] = out;
+  return out;
+}
+
+// breathe the pulses over a just-drawn sprite. (px,py) is the same pivot
+// offset the sprite was drawn with; dim knocks far-side veins back.
+function bGlowOver(c, key, px, py, dim, sc) {
+  const k = BEAST_LIVE.glow * (dim || 1);
+  if (k <= 0.05) return;
+  const spots = beastGlowSpots(key);
+  if (!spots || !spots.length) return;
+  const F = sc || 1;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  for (const sp of spots) {
+    // the wave travels ALONG the body: phase keyed to the vein's x position
+    const ph = BEAST_LIVE.t * 2.7 + sp.x * 0.05 + sp.y * 0.02;
+    const a = Math.max(0, k * (0.16 + 0.15 * Math.sin(ph)));
+    if (a <= 0.02) continue;
+    const gx = (sp.x - px) * F, gy = (sp.y - py) * F;
+    const gr = sp.r * F * (1.15 + 0.3 * Math.sin(ph * 0.5 + 1));
+    const gg = c.createRadialGradient(gx, gy, 0.5, gx, gy, gr);
+    gg.addColorStop(0, 'rgba(226,168,255,' + Math.min(0.8, a * 1.6) + ')');
+    gg.addColorStop(0.5, 'rgba(176,106,255,' + a + ')');
+    gg.addColorStop(1, 'rgba(120,50,210,0)');
+    c.fillStyle = gg;
+    c.beginPath(); c.arc(gx, gy, gr, 0, 7); c.fill();
+  }
+  c.restore();
+}
 
 function beastImg() { return typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.beastParts; }
 
@@ -690,17 +757,36 @@ function beastDark() {
   BEAST_CACHE.dark = cv;
   return cv;
 }
+// smear copies use a violet-flooded atlas — the virus afterimage, not a xerox
+function beastViolet() {
+  if (BEAST_CACHE.viol) return BEAST_CACHE.viol;
+  const im = beastImg(); if (!im) return null;
+  const cv = document.createElement('canvas');
+  cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+  const x = cv.getContext('2d');
+  x.drawImage(im, 0, 0);
+  x.globalCompositeOperation = 'source-atop';
+  x.fillStyle = 'rgba(150,80,255,0.7)'; x.fillRect(0, 0, cv.width, cv.height);
+  BEAST_CACHE.viol = cv;
+  return cv;
+}
 
 // draw one AUTHORED whole-figure pose, bottom-aligned on the ground line.
 // These are the sheet's own key poses — the open-jaw roar and the crouched
 // attack exist only as whole figures, so the rig hands over to them.
-function bFig(c, key, rot, shake) {
+function bFig(c, key, rot, shake, sqx, sqy) {
   const s = BEAST_P[key];
   const w = s[2] * BEAST_F, h = s[3] * BEAST_F;
   c.save();
   if (shake) c.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake * 0.5);
+  // squash & stretch about the ground contact — anticipation compresses,
+  // launch stretches past 1.0, the art itself is never resampled oddly
+  if (sqx || sqy) c.scale(sqx || 1, sqy || 1);
   if (rot) { c.translate(0, -h * 0.4); c.rotate(rot); c.translate(0, h * 0.4); }
   c.drawImage(beastImg(), s[0], s[1], s[2], s[3], -w / 2, -h, w, h);
+  // the figure's own authored veins breathe too
+  c.translate(-w / 2, -h);
+  bGlowOver(c, key, 0, 0, 1, BEAST_F);
   c.restore();
 }
 
@@ -709,6 +795,7 @@ function bPart(c, key, px, py, dark) {
   const s = BEAST_P[key];
   const im = dark ? beastDark() : beastImg();
   c.drawImage(im, s[0], s[1], s[2], s[3], -px, -py, s[2], s[3]);
+  bGlowOver(c, key, px, py, dark ? 0.4 : 1);
 }
 
 // a two-segment leg: rotate a1 at the anchor, draw upper, step to the knee,
@@ -729,42 +816,93 @@ function beastPose(b) {
   const P = {
     bob: Math.sin(t * 2.1) * 3, pitch: 0, crouch: 0,
     neckA: 0, headA: 0, tailA: Math.sin(t * 1.4) * 0.18, tailUp: -1,
-    glow: 0.55 + Math.sin(t * 3) * 0.2, slump: 0,
+    glow: 0.55 + Math.sin(t * 3) * 0.2, slump: 0, swell: 0,
     legs: [0, 1, 2, 3].map(i => ({ a1: Math.sin(t * 1.6 + i * 1.7) * 0.04, a2: 0.02 })),
   };
   const gallop = (freq, amp) => {
     const g = t * freq;
+    // ROTARY GALLOP timing, like a real lion: the hind pair drives almost
+    // together, the front pair catches staggered, and front vs hind are NOT
+    // a clean half-cycle apart. The off-beat is what reads as flesh instead
+    // of a wind-up toy. legs: [f near, b near, f far, b far]
+    const PH = [0, 1.18 * Math.PI, 0.42 * Math.PI, 1.46 * Math.PI];
+    const k = amp / 0.22;
     P.legs = [0, 1, 2, 3].map(i => {
-      const ph = (i % 2) * Math.PI * 0.75 + (i > 1 ? Math.PI : 0);
-      return { a1: Math.sin(g + ph) * amp, a2: Math.sin(g + ph + 1.2) * amp * 0.6 };
+      const w = g + PH[i], s1 = Math.sin(w);
+      return {
+        // a touch of second harmonic: reach snaps forward, drags back slower
+        a1: (s1 + 0.22 * Math.sin(w * 2 + 0.6)) * amp,
+        // the knee folds hard on the swing-through, stays long in stance
+        a2: (Math.sin(w + 1.25) * 0.55 + Math.max(0, Math.sin(w + 2.1)) * 0.5) * amp,
+      };
     });
-    P.bob = Math.sin(g * 2) * 4;
-    P.pitch = Math.sin(g) * 0.05;
+    // double-beat bob, the hind-drive beat landing heavier than the catch
+    P.bob = (Math.sin(g * 2) * 0.62 + Math.sin(g + 0.7) * 0.38) * 6.5 * k;
+    P.pitch = (Math.sin(g + 0.4) * 0.05 + Math.sin(g * 2 + 1.1) * 0.018) * k;
+    // the tail counter-swings against the body's rock, half a beat late
+    P.tailA = -Math.sin(g - 0.7) * 0.24 * k - P.pitch * 1.5;
+    P.tailUp = -0.85 + Math.sin(g * 0.5) * 0.12;
   };
   if (b.dead) {
-    // powered down: folded legs, dropped body, head on the ground, light out
-    const k = 1 - Math.max(0, Math.min(1, (b.deathAnimT || 0) / 1.6));
-    P.slump = k;
-    P.crouch = 44 * k; P.pitch = 0.1 * k;
-    P.neckA = 0.34 * k; P.headA = 0.5 * k;
-    P.bob = 0; P.tailA = 0.05; P.tailUp = -1;
-    P.glow = Math.max(0, 0.6 - k * 0.6) * (0.5 + Math.sin(t * 30) * 0.5);
-    P.legs = P.legs.map(() => ({ a1: 0.9 * k, a2: -1.5 * k }));
+    // STAGGERED COLLAPSE: the machine dies joint by joint — near fore-knee
+    // buckles first, the far one follows, the hips give, the body drops onto
+    // them, and the head is the last light down, with one small rebound.
+    const T = 1.6 - Math.max(0, Math.min(1.6, b.deathAnimT || 0));
+    const jt = (d0, dur) => {
+      const u = Math.max(0, Math.min(1, (T - d0) / dur));
+      return u * u * (3 - 2 * u);
+    };
+    const fN = jt(0, 0.32), fF = jt(0.12, 0.34);
+    const hN = jt(0.3, 0.4), hF = jt(0.42, 0.4);
+    const bodyK = jt(0.1, 0.85), headK = jt(0.62, 0.55);
+    const tailK = jt(0.85, 0.5);
+    const bounce = -0.07 * Math.sin(Math.max(0, Math.min(1, (T - 1.2) / 0.35)) * Math.PI);
+    P.slump = bodyK;
+    P.crouch = 44 * bodyK; P.pitch = 0.01 + 0.14 * fN - 0.05 * hN;
+    P.neckA = 0.34 * headK; P.headA = 0.5 * headK + bounce;
+    P.bob = 0;
+    P.tailA = 0.05 + (1 - tailK) * Math.sin(t * 3) * 0.08;
+    // the tail flops its last and comes to REST ON the ground: the body has
+    // sunk 44px, so the tip eases up in local space to lie flat, not clip
+    P.tailUp = -1 + 0.35 * tailK;
+    P.glow = Math.max(0, 0.6 * (1 - T / 1.6)) * (0.5 + Math.sin(t * 30) * 0.5);
+    P.legs = [fN, hN, fF, hF].map(k2 => ({ a1: 0.9 * k2, a2: -1.5 * k2 }));
   } else if (st === 'stalk') {
-    // the prowl: slow gait, head carried LOW, eyes locked on prey
+    // the prowl: slow gait, head carried LOW, eyes locked on prey. The head
+    // bobs half a beat behind the shoulders and the whole stride softens
+    // and gathers on a slow settle wave — patience, not a metronome.
     gallop(7, 0.2);
-    P.neckA = 0.14; P.headA = 0.2;
-    P.tailA = Math.sin(t * 4) * 0.22; P.tailUp = -0.7; P.glow = 1;
+    const g2 = t * 7, settle = 0.78 + 0.22 * Math.sin(t * 0.9 + 1);
+    P.bob *= settle;
+    P.legs.forEach(l => { l.a1 *= settle; l.a2 *= settle; });
+    P.neckA = 0.14 + Math.sin(g2 * 2 - 1.3) * 0.022;
+    P.headA = 0.2 + Math.sin(g2 - 2.0) * 0.045 + Math.sin(t * 0.9) * 0.03;
+    P.tailUp = -0.7; P.glow = 1;
   } else if (st === 'swipewarn') {
-    // weight back, near paw rising
-    P.crouch = 6; P.pitch = -0.05;
-    P.legs[0] = { a1: -0.95, a2: 0.55 };
-    P.glow = 1.2; P.tailA = Math.sin(t * 10) * 0.3;
+    // two beats of anticipation: the SHOULDER pulls back and the weight
+    // settles first — only then does the paw rise into the cock
+    const wq = 1 - Math.max(0, Math.min(1, (b.t || 0) / 0.3));
+    const pull = Math.min(1, wq / 0.4);
+    const rise = Math.max(0, (wq - 0.4) / 0.6);
+    const re = rise * rise * (3 - 2 * rise);
+    P.crouch = 4 + pull * 4; P.pitch = -0.02 - pull * 0.035;
+    P.legs[0] = {
+      a1: 0.28 * pull * (1 - re) - 0.95 * re,
+      a2: -0.14 * pull * (1 - re) + 0.55 * re,
+    };
+    P.legs[1].a1 += 0.1 * pull;                    // hind gathers underneath
+    P.neckA = 0.05 * pull; P.headA = 0.08 * pull;
+    P.glow = 1 + wq * 0.3; P.tailA = Math.sin(t * 10) * 0.3;
   } else if (st === 'swipe') {
-    // the paw rakes through
-    P.crouch = 6; P.pitch = 0.04;
-    P.legs[0] = { a1: 0.55, a2: -0.35 };
-    P.glow = 1.4;
+    // the paw whips through, OVERSHOOTS the strike line, then settles back
+    const sq = 1 - Math.max(0, Math.min(1, (b.t || 0) / 0.24));
+    const e = 1 - Math.pow(1 - sq, 3);
+    const over = 0.3 * Math.max(0, Math.sin((sq - 0.4) / 0.6 * Math.PI));
+    P.crouch = 6; P.pitch = 0.015 + 0.03 * e;
+    P.legs[0] = { a1: -0.95 + 1.5 * e + over, a2: 0.55 - 0.9 * e - over * 0.5 };
+    P.legs[1].a1 = -0.1 * e;                       // hind braces the followthrough
+    P.neckA = 0.04 * e; P.headA = 0.1 * e;
+    P.glow = 1.4; P.tailA = -0.25 * e;
   } else if (st === 'spring' || st === 'dive') {
     // airborne leap: forelegs reaching, hindlegs driving
     P.pitch = st === 'dive' ? 0.3 : -0.22; P.bob = 0;
@@ -772,14 +910,38 @@ function beastPose(b) {
     P.legs[1] = P.legs[3] = { a1: 0.65, a2: -0.45 };
     P.glow = 1.3; P.tailUp = 0.8; P.tailA = 0.3;
   } else if (st === 'perch') {
-    // poised on the ledge, weight gathered, tail cutting the air
-    P.crouch = 8; P.neckA = 0.1; P.headA = 0.16;
-    P.tailA = Math.sin(t * 9) * 0.35; P.tailUp = -0.4;
-    P.glow = 1.1;
+    // poised on the ledge — and the TAIL-LASH: a slow flat-topped draw one
+    // way, a fast whip back, the cat deciding to kill
+    const lw = t * 4.5, sw = Math.sin(lw);
+    P.crouch = 8; P.neckA = 0.1;
+    P.headA = 0.16 + Math.sin(t * 3.1) * 0.02;
+    P.tailA = (sw > 0 ? Math.pow(sw, 0.55) : -Math.pow(-sw, 2.2)) * 0.5;
+    P.tailUp = -0.25 - Math.cos(lw) * 0.25;
+    P.glow = 1.1 + Math.max(0, sw) * 0.15;
   } else if (st === 'recover') {
-    // landed, gathering itself — the opening
-    P.crouch = 16; P.glow = 0.45;
-    P.legs = P.legs.map(() => ({ a1: 0.3, a2: -0.5 }));
+    // the landing settle: hit the deck HARD past the rest pose, then ease
+    // back up through it — overshoot down, recover — your opening
+    const rq = 1 - Math.max(0, Math.min(1, (b.t || 0) / 0.42));
+    const drop = Math.sin(Math.min(1, rq * 2.2) * Math.PI * 0.5);
+    const rise = Math.max(0, (rq - 0.45) / 0.55);
+    const k2 = drop * (1 - rise * rise * 0.8);
+    P.crouch = 4 + 20 * k2; P.pitch = 0.05 * k2;
+    P.neckA = 0.12 * k2; P.headA = 0.18 * k2;
+    P.glow = 0.45;
+    P.legs = P.legs.map(() => ({ a1: 0.32 * k2, a2: -0.55 * k2 }));
+    P.tailUp = -0.9 + 0.3 * k2; P.tailA = Math.sin(t * 6) * 0.15;
+  } else if (st === 'roar') {
+    // rig-side roar frames: the chest SWELLS through the first breath
+    // (before the authored open-jaw figure takes over) and eases back down
+    // after the roar breaks
+    let rq = Math.max(0, Math.min(1, (1.25 - (b.t || 0)) / 0.18));
+    if ((b.t || 0) < 0.25) rq *= Math.max(0, (b.t || 0) / 0.25);
+    P.swell = rq;
+    P.crouch = -3 * rq; P.pitch = -0.05 * rq;
+    P.neckA = -0.18 * rq; P.headA = -0.1 * rq;
+    P.glow = 1 + rq * 0.5;
+    P.legs.forEach(l => { l.a1 -= 0.06 * rq; });
+    P.tailA = 0.12 + rq * 0.1; P.tailUp = -0.6;
   } else if (st === 'pounce') {
     // pounce: forelegs reach, hindlegs drive, nose follows the arc
     const dive = Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400));
@@ -796,9 +958,17 @@ function beastPose(b) {
 // y=0, x=0 under the body's centre. Caller has already scaled and mirrored.
 function beastDraw(c, b, P) {
   const g = P.crouch;
+  BEAST_LIVE.t = b.anim || 0; BEAST_LIVE.glow = P.glow;
   c.save();
   c.translate(0, P.bob + g);
   c.rotate(P.pitch);
+  // the chest swell (roar anticipation) inflates the whole cage about a
+  // point mid-torso, so the mane and shoulders ride up together
+  if (P.swell) {
+    c.translate(0, -140);
+    c.scale(1 + 0.045 * P.swell, 1 + 0.075 * P.swell);
+    c.translate(0, 140);
+  }
   // anchors measured off the authored FULL figure (ground y=0, origin under
   // the body centre, facing left): head low and forward, long level body,
   // legs under the shoulders/hips, tail rooted at the rump top
@@ -858,6 +1028,40 @@ function drawBeast(c, b) {
     const fv = b.faceVis == null ? -1 : b.faceVis;
     const S = (b.h * 2.35) / BEAST_H;
     const cx = b.x + b.w / 2, footY = b.y + b.h;
+    BEAST_LIVE.t = b.anim || 0; BEAST_LIVE.glow = 1;
+    // SMEAR TRAIL: while it leaps (pounce / spring / dive), 2-3 violet
+    // afterimage copies of the authored crouch figure hang along the arc
+    // and burn off — the virus can't keep up with the body
+    const leaping = !b.dead && (b.st === 'pounce' || b.st === 'spring' || b.st === 'dive');
+    if (b.dead) b._smear = null;
+    if (leaping) {
+      const tr = b._smear || (b._smear = []);
+      const last = tr[tr.length - 1];
+      const rot = b.st === 'pounce'
+        ? Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400))
+        : (b.st === 'dive' ? 0.3 : -0.22);
+      if (!last || Math.hypot(cx - last.x, footY - last.y) > 30) {
+        tr.push({ x: cx, y: footY, t: b.anim, sgn: fv < 0 ? 1 : -1, rot });
+        if (tr.length > 3) tr.shift();
+      }
+    }
+    if (b._smear && b._smear.length) {
+      const vim = beastViolet();
+      const sA = BEAST_P.aAtk, gw = sA[2] * BEAST_F, gh = sA[3] * BEAST_F;
+      for (let i = b._smear.length - 1; i >= 0; i--) {
+        const sm = b._smear[i], age = (b.anim || 0) - sm.t;
+        if (age > 0.26) { b._smear.splice(i, 1); continue; }
+        if (!vim || age < 0.03) continue;
+        c.save();
+        c.globalCompositeOperation = 'lighter';
+        c.globalAlpha *= 0.32 * (1 - age / 0.26);
+        c.translate(sm.x, sm.y);
+        c.scale(sm.sgn * S, S);
+        if (sm.rot) { c.translate(0, -gh * 0.4); c.rotate(sm.rot); c.translate(0, gh * 0.4); }
+        c.drawImage(vim, sA[0], sA[1], sA[2], sA[3], -gw / 2, -gh, gw, gh);
+        c.restore();
+      }
+    }
     c.save();
     c.translate(cx, footY);
     const sgn = fv < 0 ? 1 : -1;                     // authored facing LEFT
@@ -873,7 +1077,9 @@ function drawBeast(c, b) {
       const k = 1 - ta / 0.3;
       const fs = S * (270 / 274);
       c.translate(0, (1 - ta) * 4);
-      c.scale((0.74 + 0.26 * k) * fs, fs);
+      // the front composite never compresses below 0.82 of its true width —
+      // the crossing frame is a dimensional body, never a sliver
+      c.scale((0.82 + 0.18 * k) * fs, fs);
       c.save(); c.globalAlpha *= 0.34; c.fillStyle = '#04070b';
       c.beginPath(); c.ellipse(0, 2, 132, 15, 0, 0, 7); c.fill(); c.restore();
       if (b.hurtT > 0) c.globalAlpha = 0.72;
@@ -889,23 +1095,36 @@ function drawBeast(c, b) {
     c.beginPath(); c.ellipse(0, 4, 205, 17, 0, 0, 7); c.fill(); c.restore();
     if (b.stagT > 0 && !b.dead) {
       // staggered by the Song: cowering low, trembling
+      BEAST_LIVE.glow = 0.35;
       bFig(c, 'aAtk', 0, 2.2);
     } else if (b.st === 'pounce' && !b.dead) {
-      // the authored pounce: crouched attack figure riding the arc
+      // the authored pounce riding the arc — STRETCHED past 1.0 on the
+      // launch drive, relaxing and spreading again as it tops out and drops
       const dive = Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400));
-      bFig(c, 'aAtk', dive, 0);
+      const up = Math.max(0, Math.min(0.55, -(b.vy || 0) / 1000));
+      const dn = Math.max(0, Math.min(0.5, (b.vy || 0) / 1000));
+      BEAST_LIVE.glow = 1.25;
+      bFig(c, 'aAtk', dive, 0, 1 - up * 0.16 + dn * 0.08, 1 + up * 0.26 - dn * 0.06);
     } else if ((b.st === 'springwarn' || (b.st === 'perch' && (b.t || 0) <= 0.45)) && !b.dead) {
       // the flattened crouch figure IS the tell, on the ground or the ledge
-      bFig(c, 'aAtk', 0, 1.8);
+      BEAST_LIVE.glow = 1.15;
+      bFig(c, 'aAtk', 0, 1.8, 1.04, 0.95);
     } else if (b.st === 'crouch' && !b.dead) {
-      // flat in the grass, trembling with intent — the sheet's own crouch
-      bFig(c, 'aAtk', 0, 1.6);
+      // the pounce anticipation: the sheet's own crouch, COMPRESSING in two
+      // beats — a slow settle, then one extra hard coil right before launch
+      const ck = 1 - Math.max(0, Math.min(1, (b.t || 0) / 0.45));
+      const beat2 = Math.max(0, Math.min(1, (ck - 0.72) / 0.28));
+      const cmp = ck * ck * 0.5 + beat2 * beat2 * (3 - 2 * beat2) * 0.5;
+      BEAST_LIVE.glow = 1.1 + cmp * 0.4;
+      bFig(c, 'aAtk', 0, 1.6, 1 + 0.09 * cmp, 1 - 0.14 * cmp);
     } else if (b.st === 'nullhop' && !b.dead) {
       // NULL GRAVITY coil: the same authored crouch, wound tighter
-      bFig(c, 'aAtk', 0, 2.6);
+      BEAST_LIVE.glow = 1.5;
+      bFig(c, 'aAtk', 0, 2.6, 1.1, 0.87);
     } else if (b.st === 'nullend' && !b.dead) {
       // the field's collapse dropped it flat — sprawled and spent
-      bFig(c, 'aAtk', 0.12, 0.6);
+      BEAST_LIVE.glow = 0.5;
+      bFig(c, 'aAtk', 0.12, 0.6, 1.06, 0.96);
     } else if (b.st === 'nullcharge' && !b.dead) {
       // stands dead still while gravity is unplugged; virus light climbs the coat
       beastDraw(c, b, beastPose(b));
@@ -915,8 +1134,11 @@ function drawBeast(c, b) {
       ng.addColorStop(1, 'rgba(176,106,255,0)');
       c.fillStyle = ng; c.beginPath(); c.arc(0, -120, 190, 0, 7); c.fill();
       c.restore();
-    } else if (b.st === 'roar' && (b.t || 0) > 0.25 && !b.dead) {
-      // THE ROAR — the sheet's own open-jaw howl, shaking harder as it peaks
+    } else if (b.st === 'roar' && (b.t || 0) > 0.25 && (b.t || 0) <= 1.07 && !b.dead) {
+      // THE ROAR — the sheet's own open-jaw howl, shaking harder as it
+      // peaks. (The first ~0.18s stays on the rig: the chest swells up into
+      // this figure instead of snapping to it.)
+      BEAST_LIVE.glow = 1.5;
       bFig(c, 'aRoar', 0, 1 + Math.max(0, 1.25 - (b.t || 0)) * 6);
       // the virus orb GATHERS in the throat through the inhale (the tell),
       // pulsing brighter each beat, then floods out as the roar breaks
@@ -954,7 +1176,7 @@ function drawBeastMini(c, e) {
     if (fr) {
       const k = 1 - ta / 0.3;
       const fs = S * (270 / 274);
-      c.scale((0.74 + 0.26 * k) * fs, fs);
+      c.scale((0.82 + 0.18 * k) * fs, fs);
       c.drawImage(fr, -120, -274);
       c.restore();
       return true;
@@ -8232,6 +8454,10 @@ class Boss {
             this.vx = clamp(dist * 1.6, -640, 640) * (this.phase === 2 ? 1.15 : 1) * spd;
             this.vy = -(420 + Math.min(260, adist * 0.5));
             sfx('dash');
+            // launch kickback: the hind paws throw dirt out behind the leap
+            for (let i = 0; i < 7; i++)
+              addPart(this.cx() - this.face * rnd(10, 40), this.y + this.h - rnd(0, 6),
+                -this.face * rnd(80, 220), rnd(-140, -30), rnd(0.3, 0.5), '#b9a888', rnd(2.5, 4), 240, true);
           }
         } else if (this.st === 'pounce') {
           // airborne, claws first, virus streaming off the coat
@@ -8291,6 +8517,10 @@ class Boss {
             this.x = this.tx; this.y = this.ty; this.vx = 0;
             this.st = 'perch'; this.t = this.phase === 2 ? 1.0 : 1.4;
             cam.shake = 5; sfx('land');
+            // grit puffs off the ledge where the paws bite down
+            for (let i = 0; i < 6; i++)
+              addPart(this.cx() + rnd(-34, 34), this.y + this.h - 2,
+                rnd(-90, 90), rnd(-70, -12), rnd(0.25, 0.4), '#b9a888', rnd(2, 3), 140, true);
           }
         } else if (this.st === 'perch') {
           // up on the ledge, tracking you; it flattens and the eye flares
@@ -8320,6 +8550,19 @@ class Boss {
             for (let i = 0; i < 12; i++)
               addPart(this.cx() + rnd(-this.w * 0.6, this.w * 0.6), this.y + this.h - 4,
                 rnd(-180, 180), rnd(-200, -50), 0.45, '#b9a888', 3, 300, true);
+            // the heavy landing language: low dust rolls outward along the
+            // ground, slow pale plumes hang, and a few dark chips fly
+            for (let i = 0; i < 8; i++) {
+              const dr = i % 2 ? 1 : -1;
+              addPart(this.cx() + dr * rnd(12, this.w * 0.8), this.y + this.h - 3,
+                dr * rnd(130, 300), rnd(-36, -6), rnd(0.5, 0.85), '#cdbd9c', rnd(3.5, 5.5), 70);
+            }
+            for (let i = 0; i < 4; i++)
+              addPart(this.cx() + rnd(-30, 30), this.y + this.h - rnd(4, 14),
+                rnd(-40, 40), rnd(-90, -40), rnd(0.6, 0.9), '#8f846f', rnd(4, 6), 30);
+            for (let i = 0; i < 3; i++)
+              addPart(this.cx() + rnd(-20, 20), this.y + this.h - 6,
+                rnd(-240, 240), rnd(-260, -140), 0.5, '#8a8a96', 2.5, 700, true);
             const box = { x: this.cx() - 92, y: this.y - 8, w: 184, h: this.h + 22 };
             if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
             if (this.phase === 2 && typeof G.addRing === 'function') G.addRing(this.cx(), this.y + this.h - 8);
@@ -8376,6 +8619,15 @@ class Boss {
           for (let i = 0; i < 10; i++)
             addPart(this.cx() + rnd(-this.w * 0.5, this.w * 0.5), this.y + this.h - 4,
               rnd(-160, 160), rnd(-180, -40), 0.4, '#b9a888', 3, 300, true);
+          // heavier landing: dust rolls low and wide off the forepaws
+          for (let i = 0; i < 6; i++) {
+            const dr = i % 2 ? 1 : -1;
+            addPart(this.cx() + this.face * 20 + dr * rnd(8, this.w * 0.6), this.y + this.h - 3,
+              dr * rnd(110, 250), rnd(-30, -6), rnd(0.45, 0.7), '#cdbd9c', rnd(3, 5), 70);
+          }
+          for (let i = 0; i < 3; i++)
+            addPart(this.cx() + rnd(-24, 24), this.y + this.h - rnd(4, 12),
+              rnd(-30, 30), rnd(-80, -35), rnd(0.55, 0.8), '#8f846f', rnd(3.5, 5.5), 30);
           const box = { x: this.cx() - 80, y: this.y, w: 160, h: this.h + 8 };
           if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
           if (this.nullSeq > 0) {
