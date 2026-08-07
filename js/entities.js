@@ -114,6 +114,14 @@ class Player {
     // scarf (4 segments) + tail (3 segments) spring chains — angles + velocities
     this.scarfA = [-0.4, -0.55, -0.7, -0.85]; this.scarfV = [0, 0, 0, 0];
     this.tailA = [0.9, 0.75, 0.6]; this.tailV = [0, 0, 0];
+    // motion-depth state: anticipation / overshoot / settle + idle micro-life
+    this.takeoffT = 0; this.takeoff0 = 0.16; this.takeoffCoil = 0; // jump coil + launch stretch
+    this.land0 = 0.12;                                   // duration of the current landing bounce
+    this.hurtPoseT = 0;                                  // limbs flail for a beat on knockback
+    this.earL = 0; this.earV = 0;                        // ear-tip inertia (spring, px of trail)
+    this.earTwitchT = 0; this.earTwitchSide = 1;         // idle ear twitch
+    this.idleT = 0; this.lookX = 0; this.lookTgt = 0;    // look-around visor shift + weight shift
+    this.dashTrailT = 0;                                 // afterimage spawn metronome
   }
   maxCores() { return G.save.coresMax + (hasCrest('plate') ? 1 : 0) + (relicHas('silent') ? 1 : 0); }
   speed() { return 340 * (hasCrest('sprint') ? 1.15 : 1) * (relicHas('shard') ? 1.04 : 1); }
@@ -155,6 +163,43 @@ class Player {
         this.tailV[i] = (this.tailV[i] + (drive - this.tailA[i]) * 0.3 * f60) * Math.pow(0.8, f60);
         this.tailA[i] = clamp(this.tailA[i] + this.tailV[i] * f60 * 0.6, -0.4, 2.2);
       }
+      // ear-tip inertia: the tall antenna ears trail the head — swept back at a
+      // run, thrown forward when she brakes, lifted in a fall (same spring feel
+      // as the scarf, one scalar: px of horizontal tip-lag in local space)
+      const eTgt = -clamp(this.vx * this.face / this.speed(), -1, 1) * 3.4 - fall * 1.6;
+      this.earV = (this.earV + (eTgt - this.earL) * 0.32 * f60) * Math.pow(0.76, f60);
+      this.earL = clamp(this.earL + this.earV * f60 * 0.7, -5, 5);
+      // idle micro-life: randomized ear twitches, tail flicks, look-arounds and
+      // slow weight shifts — she never stands like a statue
+      const idle = this.on && Math.abs(this.vx) < 30 && !this.swingVis && this.dashT <= 0
+        && this.healT <= 0 && this.landT <= 0;
+      if (idle) {
+        this.idleT += dt;
+        this.earTwitchIn = (this.earTwitchIn == null ? rnd(1.0, 2.6) : this.earTwitchIn) - dt;
+        if (this.earTwitchIn <= 0) {
+          this.earTwitchIn = rnd(1.6, 4.4); this.earTwitchT = 0.34;
+          this.earTwitchSide = chance(0.5) ? -1 : 1;
+        }
+        this.lookIn = (this.lookIn == null ? rnd(1.6, 3.4) : this.lookIn) - dt;
+        if (this.lookIn <= 0) {
+          this.lookIn = rnd(2.4, 5.5);
+          this.lookTgt = chance(0.6) ? (chance(0.5) ? -2.6 : 2.6) : 0;
+          this.lookHold = rnd(0.5, 1.2);
+        }
+        this.tailFlickIn = (this.tailFlickIn == null ? rnd(1.8, 4.5) : this.tailFlickIn) - dt;
+        if (this.tailFlickIn <= 0) {
+          this.tailFlickIn = rnd(2.4, 6);
+          this.tailV[0] += 0.55; this.tailV[1] += 0.35; this.tailV[2] += 0.2;
+        }
+      } else { this.idleT = 0; this.lookTgt = 0; this.lookHold = null; }
+      if (this.lookHold != null) {
+        this.lookHold -= dt;
+        if (this.lookHold <= 0) { this.lookTgt = 0; this.lookHold = null; }
+      }
+      this.earTwitchT = Math.max(0, this.earTwitchT - dt);
+      this.lookX = lerp(this.lookX, this.lookTgt, 1 - Math.pow(0.001, dt));
+      this.takeoffT = Math.max(0, this.takeoffT - dt);
+      this.hurtPoseT = Math.max(0, this.hurtPoseT - dt);
     }
     if (this.rechargeT > 0) {
       this.rechargeT -= dt; this.anim += dt;
@@ -181,7 +226,13 @@ class Player {
       this.dashT -= dt;
       this.vx = this.dashVX; this.vy = this.dashVY;
       if (this.dashT <= 0) { if (this.dashVY < 0) this.vy = -240; else this.vy = Math.min(this.vy, 320); }
-      this.trail.push({ x: this.x, y: this.y, face: this.face, t: 0.25 });
+      // afterimages: 2-3 DISCRETE echoes along the dash line (not a per-frame
+      // smear) — each one a readable copy that fades where she was
+      this.dashTrailT -= dt;
+      if (this.dashTrailT <= 0) {
+        this.dashTrailT = 0.055;
+        this.trail.push({ x: this.x, y: this.y, face: this.face, t: 0.24, t0: 0.24 });
+      }
     } else {
       // horizontal — crisp starts and stops
       const acc = (ice ? 1000 : 3000), fric = ice ? 260 : 2900;
@@ -205,6 +256,9 @@ class Player {
       if (hasMod('wall') && !this.on && this.vy > 0 && dir !== 0 && touchingWall(this, dir)) {
         this.vy = Math.min(this.vy, 150); this.wallSlide = dir;
         if (chance(0.3)) addPart(dir > 0 ? this.x + this.w : this.x, this.y + this.h * 0.7, -dir * 40, rnd(-20, 60), 0.3, PAL[G.roomDef.zone].glow, 2, 300, true);
+        // hot friction flecks off the paw pressed to the wall
+        if (chance(0.22)) addPart(dir > 0 ? this.x + this.w : this.x, this.y + this.h * 0.35,
+          -dir * rnd(30, 90), rnd(-90, -30), 0.24, '#ffd76a', 1.6, 700, true);
       }
       // jumping
       if (inP('JUMP')) this.jbuf = 0.12;
@@ -212,13 +266,16 @@ class Player {
         if (this.on || this.coyote > 0) {
           this.vy = -770 * (relicHas('spring') ? 1.045 : 1);
           this.on = false; this.coyote = 0; this.jbuf = 0; this.jetT = 0.2; sfx('jump');
+          this.takeoffT = this.takeoff0 = 0.17; this.takeoffCoil = 1;   // coil 1-2 frames, then stretch
         } else if (this.wallSlide !== 0) {
           this.vy = -700; this.vx = -this.wallSlide * 430; this.face = -this.wallSlide; this.jbuf = 0;
           this.jetT = 0.22; this.flipT = 0.5; sfx('jump');
+          this.takeoffT = this.takeoff0 = 0.12; this.takeoffCoil = 0;   // launch stretch only
           burst(this.wallSlide > 0 ? this.x + this.w : this.x, this.y + this.h / 2, 6, PAL[G.roomDef.zone].glow, 140, 0.3, 400, 3, true);
         } else if (this.airJumps > 0) {
           this.vy = -680; this.airJumps--; this.jbuf = 0;
           this.jetT = 0.3; this.flipT = 0.5; sfx('djump');
+          this.takeoffT = this.takeoff0 = 0.12; this.takeoffCoil = 0;
           burst(this.x + this.w / 2, this.y + this.h, 10, '#8ff6ff', 160, 0.35, 500, 3, true);
         }
       }
@@ -234,6 +291,7 @@ class Player {
         this.dashVY = ddy / dn * 880;
         this.dashT = 0.16 * (hasCrest('sprint') ? 1.2 : 1);
         this.dashCD = 0.45; this.vx = this.dashVX; this.vy = this.dashVY;
+        this.dashTrailT = 0.03;   // first afterimage drops just behind her
         this.healT = 0; sfx('dash');
       }
     }
@@ -397,7 +455,7 @@ class Player {
     const col = moveEnt(this, dt);
     if (col.d) {
       if (!this.on && wasFalling > 420) {
-        this.landT = wasFalling > 700 ? 0.22 : 0.12; sfx('land');
+        this.landT = wasFalling > 700 ? 0.22 : 0.12; this.land0 = this.landT; sfx('land');
         if (typeof padRumble === 'function')
           padRumble(wasFalling > 700 ? 0.5 : 0.2, wasFalling > 700 ? 0.35 : 0.3, wasFalling > 700 ? 140 : 80);
         burst(this.x + this.w / 2, this.y + this.h, wasFalling > 700 ? 14 : 6, '#9fb8c8', wasFalling > 700 ? 150 : 90, 0.35, 500, 2);
@@ -561,6 +619,7 @@ class Player {
       return;
     }
     this.cores -= d; this.iT = hasSkill('reflex') ? 1.65 : 1.3; this.healT = 0;
+    this.hurtPoseT = 0.3;   // limbs flail for a beat while the knockback carries her
     cam.shake = 9; sfx('hurt');
     if (typeof padRumble === 'function') padRumble(0.85, 0.5, 240);
     G.flash = Math.max(G.flash, 0.4); G.addRing(this.x + this.w / 2, this.y + this.h / 2);
@@ -722,14 +781,23 @@ class Player {
     if (this.iT > 0 && Math.floor(this.iT * 18) % 2 === 0) return;
     const P = PAL[G.roomDef.zone];
     for (const tr of this.trail) {
-      c.save(); c.globalAlpha = tr.t * 1.5;
+      // dash echoes: each one a whole readable copy of her silhouette that
+      // cools from white-hot (freshest) to zone-glow and shrinks as it dies
+      const k = tr.t / (tr.t0 || 0.25);
+      c.save(); c.globalCompositeOperation = 'lighter';
+      c.globalAlpha = 0.24 + k * 0.36;
       c.translate(tr.x + this.w / 2, tr.y + this.h / 2);
-      c.scale(tr.face, 1); c.fillStyle = P.glow;
+      c.scale(tr.face * (0.86 + k * 0.14), 0.86 + k * 0.14);
+      c.fillStyle = P.glow;
       rr(c, -14, -7, 28, 19, 9); c.fill();
       c.beginPath(); c.arc(2, -15, 11, 0, 7); c.fill();
       c.beginPath(); c.moveTo(-8, -21); c.lineTo(-4, -32); c.lineTo(1, -22); c.closePath(); c.fill();
       c.beginPath(); c.moveTo(4, -22); c.lineTo(9, -32); c.lineTo(13, -21); c.closePath(); c.fill();
-      c.restore();
+      // white-hot core on the freshest echo — the visor band still burning
+      c.globalAlpha = k * k * 0.7;
+      c.fillStyle = '#ffffff';
+      rr(c, -5, -19, 15, 6, 3); c.fill();
+      c.restore(); c.globalAlpha = 1;
     }
     // contact shadow — tightens and darkens as the hero nears the ground
     {
@@ -749,13 +817,40 @@ class Player {
     // ninja stride: the faster she moves, the quicker and longer the cycle
     const ph = this.anim * (13 + sprintK * 7);
     const bob = run ? Math.sin(ph * 2) * (1.4 - sprintK * 0.9) : Math.sin(this.anim * 2.4) * 0.9;
-    const heavy = this.landT > 0.14;
-    const cr = this.landT > 0 ? (heavy ? 0.3 : 0.15) : (this.skidT > 0 ? 0.2 : (this.wallSlide !== 0 ? 0.1 : 0))
+    // --- squash & stretch: one signed, volume-conserving deformation ---
+    let sy = 1, sx = 1;
+    if (this.landT > 0) {
+      // landing: deep squash -> overshoot stretch -> settle (damped bounce,
+      // pinned at the feet so the dome dips and rebounds)
+      const l0 = this.land0 || 0.12, lk = 1 - this.landT / l0;
+      const A = l0 > 0.15 ? 0.3 : 0.17;
+      // cos crosses zero exactly at lk=1, so the settle never pops
+      const w = A * Math.cos(lk * Math.PI * 1.5) * (1 - lk * 0.5);
+      sy -= w; sx += w * 0.72;
+    }
+    if (this.pogoT > 0) {
+      // pogo rebound: she stretches tall off the bounce, then settles
+      const pk = this.pogoT / 0.18;
+      sy += 0.22 * pk * pk; sx -= 0.13 * pk * pk;
+    }
+    if (this.takeoffT > 0 && this.landT <= 0) {
+      // jump: 1-2 frames of anticipation coil, then a launch stretch
+      const el = this.takeoff0 - this.takeoffT;
+      if (this.takeoffCoil && el < 0.05) { sy -= 0.16; sx += 0.12; }
+      else {
+        const q = this.takeoffT / Math.max(0.01, this.takeoff0 - (this.takeoffCoil ? 0.05 : 0));
+        sy += 0.18 * q; sx -= 0.1 * q;
+      }
+    }
+    const cr = (this.skidT > 0 ? 0.2 : (this.wallSlide !== 0 ? 0.1 : 0))
              + (run ? sprintK * 0.12 : 0);                          // low, coiled sprint carriage
+    if (this.wallSlide !== 0) c.translate(2.5, 0);                  // body pressed INTO the wall
     c.rotate(this.lean + (this.skidT > 0 ? -0.14 : 0) + (this.wallSlide !== 0 ? 0.1 : 0)
-             + (run ? sprintK * 0.3 : 0));                          // pitched forward, chasing the ground
+             + (run ? sprintK * 0.3 : 0)                            // pitched forward, chasing the ground
+             + (this.hurtPoseT > 0 ? -0.3 * (this.hurtPoseT / 0.3) : 0)  // thrown back, off balance
+             + (this.idleT > 0.9 ? Math.sin(this.idleT * 0.9) * 0.022 : 0)); // idle weight shift
     if (this.flipT > 0) c.rotate(-(1 - this.flipT / 0.5) * Math.PI * 2);
-    c.scale(1, 1 - cr);
+    c.scale(sx, sy * (1 - cr));
     // evolution: the frame grows with each power milestone (visual only — hitbox unchanged)
     const evo = typeof evoTier === 'function' ? evoTier() : 0;
     c.scale(1 + evo * 0.07, 1 + evo * 0.07);
@@ -839,7 +934,11 @@ class Player {
     const leg = (hipX, phase, front) => {
       const hipY = -9 + bob * 0.3;
       let fx, fy, lift = 0, knee = 0;
-      if (run) {
+      if (this.hurtPoseT > 0) {
+        // knockback flail: both legs thrown forward, kicking at nothing
+        fx = hipX + (front ? 7 : 4.5) + Math.sin(this.anim * 34 + (front ? 0 : 2.1)) * 2.5;
+        fy = -6 - Math.max(0, Math.sin(this.anim * 30 + (front ? 1.2 : 3))) * 3;
+      } else if (run) {
         // stride reaches further and the knee drives higher the faster she goes
         const reach = 7.5 + sprintK * 7;
         fx = hipX + Math.sin(phase) * reach;
@@ -996,8 +1095,9 @@ class Player {
     c.strokeStyle = '#8a6f38'; c.lineWidth = 0.8;
     c.beginPath(); c.arc(-11.5, -18 + bob * 0.4, 2.6, 0, 7); c.stroke();
     // head — the OVERSIZED dome (spec §1.1: head is 40% of her): this is
-    // what makes the silhouette read CAT at 36px
-    const hy = -30 + bob;
+    // what makes the silhouette read CAT at 36px. In the stride it bobs in
+    // COUNTER-PHASE to the body — the dome stays level-ish while the hips pump
+    const hy = -30 + (run ? -bob * 0.6 : bob);
     const hgd = c.createLinearGradient(0, hy - 12, 0, hy + 8);
     hgd.addColorStop(0, '#ffffff'); hgd.addColorStop(0.48, '#f0efe6'); hgd.addColorStop(1, '#96a2b6');
     c.fillStyle = hgd;
@@ -1023,16 +1123,22 @@ class Player {
       }
     } else {
       // antenna ears — one of the three features that must read at 36px:
-      // tall, set on top of the dome, cyan sensor inners
+      // tall, set on top of the dome, cyan sensor inners. The TIPS carry
+      // inertia: swept back at a run, thrown up in a fall — plus the idle
+      // twitch, one ear at a time on its randomized timer
+      const eT = this.earTwitchT > 0 ? Math.sin(this.earTwitchT * 34) * this.earTwitchT * 8.5 : 0;
+      const eLx = this.earL || 0, eLy = clamp(-this.vy * 0.004, -3, 3);
+      const lTx = eLx + (this.earTwitchSide < 0 ? eT : 0);
+      const rTx = eLx + (this.earTwitchSide > 0 ? eT : 0);
       c.fillStyle = '#e8e8ea';
-      c.beginPath(); c.moveTo(-11, hy - 8); c.lineTo(-6, hy - 22); c.lineTo(0, hy - 10); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(4, hy - 10); c.lineTo(10, hy - 22); c.lineTo(15, hy - 8); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(-11, hy - 8); c.lineTo(-6 + lTx, hy - 22 + eLy); c.lineTo(0, hy - 10); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(4, hy - 10); c.lineTo(10 + rTx, hy - 22 + eLy); c.lineTo(15, hy - 8); c.closePath(); c.fill();
       c.strokeStyle = '#98a1b0'; c.lineWidth = 0.8;
-      c.beginPath(); c.moveTo(-11, hy - 8); c.lineTo(-6, hy - 22); c.lineTo(0, hy - 10);
-      c.moveTo(4, hy - 10); c.lineTo(10, hy - 22); c.lineTo(15, hy - 8); c.stroke();
+      c.beginPath(); c.moveTo(-11, hy - 8); c.lineTo(-6 + lTx, hy - 22 + eLy); c.lineTo(0, hy - 10);
+      c.moveTo(4, hy - 10); c.lineTo(10 + rTx, hy - 22 + eLy); c.lineTo(15, hy - 8); c.stroke();
       c.fillStyle = P.glow; c.globalAlpha = 0.75;
-      c.beginPath(); c.moveTo(-9, hy - 9.5); c.lineTo(-6.4, hy - 17); c.lineTo(-3, hy - 10.5); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(6.4, hy - 10.5); c.lineTo(9.6, hy - 17); c.lineTo(12.6, hy - 9.5); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(-9, hy - 9.5); c.lineTo(-6.4 + lTx * 0.72, hy - 17 + eLy * 0.72); c.lineTo(-3, hy - 10.5); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(6.4, hy - 10.5); c.lineTo(9.6 + rTx * 0.72, hy - 17 + eLy * 0.72); c.lineTo(12.6, hy - 9.5); c.closePath(); c.fill();
       c.globalAlpha = 1;
       if (evo >= 3) {
         // apex antennae with glowing tips
@@ -1046,12 +1152,14 @@ class Player {
     // the visor — a full LED band across the dome, not two pinprick eyes
     c.fillStyle = hero ? '#2a1e10' : '#0a1420'; rr(c, -8, hy - 7, 22, 10, 5); c.fill();
     c.strokeStyle = 'rgba(58,58,74,0.9)'; c.lineWidth = 1; rr(c, -8, hy - 7, 22, 10, 5); c.stroke();
+    // eye blocks slide inside the band when she glances around while idle
+    const lk = clamp(this.lookX || 0, -2.4, 2.4);
     c.fillStyle = this.healT > 0 ? '#aef7d8' : P.glow;
     c.shadowColor = c.fillStyle; c.shadowBlur = 8;
-    c.fillRect(-5, hy - 4.8, 6.5, 5.6); c.fillRect(5, hy - 4.8, 6.5, 5.6);
+    c.fillRect(-5 + lk, hy - 4.8, 6.5, 5.6); c.fillRect(5 + lk, hy - 4.8, 6.5, 5.6);
     c.shadowBlur = 0;
     c.fillStyle = 'rgba(160,255,240,0.55)';                // inner highlight line
-    c.fillRect(-5, hy - 4.8, 6.5, 1.4); c.fillRect(5, hy - 4.8, 6.5, 1.4);
+    c.fillRect(-5 + lk, hy - 4.8, 6.5, 1.4); c.fillRect(5 + lk, hy - 4.8, 6.5, 1.4);
     if (!hero) {
       // whisker antennae
       c.strokeStyle = 'rgba(200,220,240,0.7)'; c.lineWidth = 1;
@@ -1073,22 +1181,33 @@ class Player {
     {
       const shX = 6, shY = -20 + bob * 0.4;
       let ang, reach = 12;
-      if (this.swingVis) {
-        const sv = this.swingVis, pr = clamp(1 - sv.t / sv.t0, 0, 1);
+      if (this.hurtPoseT > 0) {
+        // knockback flail: the arm windmills for a beat
+        ang = -1.9 + Math.sin(this.anim * 36) * 0.75; reach = 13;
+      } else if (this.swingVis) {
+        const sv = this.swingVis, prRaw = clamp(1 - sv.t / sv.t0, 0, 1);
+        // ANTICIPATION: for the first beat the paw pulls BACK past the start of
+        // the arc (pr dips negative), then whips through the full swing
+        const pr = prRaw < 0.18 ? -(prRaw / 0.18) * 0.34 : (prRaw - 0.18) / 0.82;
+        const prc = Math.max(0, pr);
         const aim = sv.ang * (this.face < 0 ? -1 : 1);   // local space (already flipped)
         if (hero) {
           // sword arcs: long, shoulder-led
           if (sv.combo === 2) ang = aim - 1.5 + pr * 2.8;
           else if (sv.combo === 1) ang = aim + 1.15 - pr * 2.2;
           else ang = aim - 1.0 + pr * 2.1;
-          reach = 13 + Math.sin(pr * Math.PI) * 4;
+          reach = 13 + Math.sin(prc * Math.PI) * 4;
         } else {
           // scratch arcs: short, fast, in front — the paw snaps out and rakes
           if (sv.combo === 2) ang = aim - 1.1 + pr * 2.0;   // crossing double-rake
           else if (sv.combo === 1) ang = aim + 0.8 - pr * 1.55; // upward flick
           else ang = aim - 0.65 + pr * 1.4;                 // forward-down swipe
-          reach = 13 + Math.sin(pr * Math.PI) * 7;          // paw punches forward
+          // tucked close in the wind-up, punched forward through the rake
+          reach = (pr < 0 ? 10.5 : 13) + Math.sin(prc * Math.PI) * 7;
         }
+      } else if (this.wallSlide !== 0) {
+        // wall-slide: palm planted on the wall above the shoulder
+        ang = -0.9 + Math.sin(this.anim * 3) * 0.05; reach = 13.5;
       } else if (run && sprintK > 0.25) {
         // NINJA SPRINT: the arm sweeps back behind the body, trailing the run
         ang = 1.15 + sprintK * 1.55 + Math.sin(ph) * 0.12;
@@ -1312,20 +1431,22 @@ class Player {
       c.globalCompositeOperation = 'lighter';
       const grow = 0.55 + ease * 0.65;         // the cut extends as it lands
       const drift = (1 - ease) * 0.22;         // slight rotation as it settles
+      // the rake materializes a frame AFTER the arm's wind-up — anticipation
+      const gate = clamp((p - 0.07) / 0.07, 0, 1);
       if (sv.combo === 0) {
         c.rotate(sv.ang + 0.5 + drift);        // paw swipe: forward and downward
         c.scale(grow, 1);
-        cut(94, 26, Math.min(1, (1 - p) * 1.7));
+        cut(94, 26, Math.min(1, (1 - p) * 1.7) * gate);
       } else if (sv.combo === 1) {
         c.rotate(sv.ang + 0.3 - drift);        // second swipe, bowed the other way
         c.scale(grow, -1);
-        cut(94, 26, Math.min(1, (1 - p) * 1.7));
+        cut(94, 26, Math.min(1, (1 - p) * 1.7) * gate);
       } else {
         // finisher: golden X — two crossing claw rakes
         c.rotate(sv.ang - 0.5 + drift); c.scale(grow, 1);
-        cut(116, 32, Math.min(1, (1 - p) * 1.7));
+        cut(116, 32, Math.min(1, (1 - p) * 1.7) * gate);
         c.rotate(1.0); c.scale(1, -1);
-        cut(116, 32, Math.min(1, (1 - p) * 1.4));
+        cut(116, 32, Math.min(1, (1 - p) * 1.4) * gate);
       }
       c.restore();
       c.globalAlpha = 1;
