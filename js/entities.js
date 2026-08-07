@@ -2265,9 +2265,9 @@ class Boss {
     this.faceVis += clamp((this.face || 1) - this.faceVis, -turn, turn);
     // the pivot kicks up dust the instant the body whips through centre, so a
     // turning machine reads as planting and spinning, never as a flat sliver
-    if ((this.kind === 'glitch' || this.kind === 'zero') && (Math.sign(this.faceVis) || 1) !== pvSign) {
+    if ((this.kind === 'glitch' || this.kind === 'zero' || this.kind === 'atlas') && (Math.sign(this.faceVis) || 1) !== pvSign) {
       // THE TURN LAW's dust: the crossing frame is masked by a kicked cloud
-      const dustCol = this.kind === 'zero' ? '#cfe8f4' : '#b9a888';
+      const dustCol = this.kind === 'zero' ? '#cfe8f4' : this.kind === 'atlas' ? '#c8925c' : '#b9a888';
       for (let i = 0; i < 8; i++)
         addPart(this.cx() + rnd(-this.w * 0.4, this.w * 0.4), this.y + this.h - rnd(0, 8),
           rnd(-120, 120), rnd(-140, -30), 0.35, dustCol, 3, 260, true);
@@ -3320,6 +3320,9 @@ class Boss {
     // FORGE BELL weapons: sword, axe and spear silhouettes, embedded, glowing
     if (this.forge) {
       for (const w of this.forge) {
+        // the summoned molten orbs: the sheet's authored GLOW CORE, when the
+        // dragon atlas is in — same positions, timers and hitchecks either way
+        if (typeof drawFurnaceOrb === 'function' && drawFurnaceOrb(c, w, this.anim)) continue;
         c.save(); c.translate(w.x, w.y);
         const hot = w.landed ? 0.6 + Math.sin(w.t * (w.t < 1 ? 22 : 9)) * 0.35 : 0.8;
         c.shadowColor = MAT.molten.mid; c.shadowBlur = 12 * hot;
@@ -3512,7 +3515,8 @@ class Boss {
     const heroWorld = typeof isHero === 'function' && isHero();
     if (this.dead && !heroWorld
       && !((this.kind === 'glitch' || this.kind === 'brood') && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beastParts || MEDIA_IMG.eagleParts || MEDIA_IMG.driller))
-      && !(this.kind === 'zero' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.glaciereParts)) return;
+      && !(this.kind === 'zero' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.glaciereParts)
+      && !(this.kind === 'atlas' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.dragonParts)) return;
     const P = PAL[G.roomDef.zone];
     const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
@@ -3543,6 +3547,10 @@ class Boss {
       // and GLACIERE breaks into the sheet's own parts
       if (this.kind === 'zero') {
         if (typeof drawGlaciere === 'function') drawGlaciere(c, this);
+      } else if (this.kind === 'atlas') {
+        // FURNACE CHOIR dies as himself: the dragon breaks into the sheet's
+        // own parts — wings first, then the head, then the body drops
+        if (typeof drawFurnace === 'function') drawFurnace(c, this);
       } else if (this.kind === 'brood') {
         if (typeof drawEagle === 'function') drawEagle(c, this);
       } else if (!(typeof drawBeast === 'function' && drawBeast(c, this))) drawDriller(c, this);
@@ -3616,6 +3624,7 @@ class Boss {
     }
     // the machine's authored art is CLAWBYTE-only — hard theme gate
     if (!heroWorld && this.kind === 'zero' && typeof drawGlaciere === 'function' && drawGlaciere(c, this)) { c.restore(); return; }
+    if (!heroWorld && this.kind === 'atlas' && typeof drawFurnace === 'function' && drawFurnace(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'glitch' && typeof drawBeast === 'function' && drawBeast(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'brood' && typeof drawEagle === 'function' && drawEagle(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'glitch' && typeof drawDriller3D === 'function' && drawDriller3D(c, this)) { c.restore(); return; }
