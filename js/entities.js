@@ -2469,6 +2469,10 @@ class Boss {
             this.vx = clamp(dist * 1.6, -640, 640) * (this.phase === 2 ? 1.15 : 1) * spd;
             this.vy = -(420 + Math.min(260, adist * 0.5));
             sfx('dash');
+            // launch kickback: the hind paws throw dirt out behind the leap
+            for (let i = 0; i < 7; i++)
+              addPart(this.cx() - this.face * rnd(10, 40), this.y + this.h - rnd(0, 6),
+                -this.face * rnd(80, 220), rnd(-140, -30), rnd(0.3, 0.5), '#b9a888', rnd(2.5, 4), 240, true);
           }
         } else if (this.st === 'pounce') {
           // airborne, claws first, virus streaming off the coat
@@ -2528,6 +2532,10 @@ class Boss {
             this.x = this.tx; this.y = this.ty; this.vx = 0;
             this.st = 'perch'; this.t = this.phase === 2 ? 1.0 : 1.4;
             cam.shake = 5; sfx('land');
+            // grit puffs off the ledge where the paws bite down
+            for (let i = 0; i < 6; i++)
+              addPart(this.cx() + rnd(-34, 34), this.y + this.h - 2,
+                rnd(-90, 90), rnd(-70, -12), rnd(0.25, 0.4), '#b9a888', rnd(2, 3), 140, true);
           }
         } else if (this.st === 'perch') {
           // up on the ledge, tracking you; it flattens and the eye flares
@@ -2557,6 +2565,19 @@ class Boss {
             for (let i = 0; i < 12; i++)
               addPart(this.cx() + rnd(-this.w * 0.6, this.w * 0.6), this.y + this.h - 4,
                 rnd(-180, 180), rnd(-200, -50), 0.45, '#b9a888', 3, 300, true);
+            // the heavy landing language: low dust rolls outward along the
+            // ground, slow pale plumes hang, and a few dark chips fly
+            for (let i = 0; i < 8; i++) {
+              const dr = i % 2 ? 1 : -1;
+              addPart(this.cx() + dr * rnd(12, this.w * 0.8), this.y + this.h - 3,
+                dr * rnd(130, 300), rnd(-36, -6), rnd(0.5, 0.85), '#cdbd9c', rnd(3.5, 5.5), 70);
+            }
+            for (let i = 0; i < 4; i++)
+              addPart(this.cx() + rnd(-30, 30), this.y + this.h - rnd(4, 14),
+                rnd(-40, 40), rnd(-90, -40), rnd(0.6, 0.9), '#8f846f', rnd(4, 6), 30);
+            for (let i = 0; i < 3; i++)
+              addPart(this.cx() + rnd(-20, 20), this.y + this.h - 6,
+                rnd(-240, 240), rnd(-260, -140), 0.5, '#8a8a96', 2.5, 700, true);
             const box = { x: this.cx() - 92, y: this.y - 8, w: 184, h: this.h + 22 };
             if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
             if (this.phase === 2 && typeof G.addRing === 'function') G.addRing(this.cx(), this.y + this.h - 8);
@@ -2613,6 +2634,15 @@ class Boss {
           for (let i = 0; i < 10; i++)
             addPart(this.cx() + rnd(-this.w * 0.5, this.w * 0.5), this.y + this.h - 4,
               rnd(-160, 160), rnd(-180, -40), 0.4, '#b9a888', 3, 300, true);
+          // heavier landing: dust rolls low and wide off the forepaws
+          for (let i = 0; i < 6; i++) {
+            const dr = i % 2 ? 1 : -1;
+            addPart(this.cx() + this.face * 20 + dr * rnd(8, this.w * 0.6), this.y + this.h - 3,
+              dr * rnd(110, 250), rnd(-30, -6), rnd(0.45, 0.7), '#cdbd9c', rnd(3, 5), 70);
+          }
+          for (let i = 0; i < 3; i++)
+            addPart(this.cx() + rnd(-24, 24), this.y + this.h - rnd(4, 12),
+              rnd(-30, 30), rnd(-80, -35), rnd(0.55, 0.8), '#8f846f', rnd(3.5, 5.5), 30);
           const box = { x: this.cx() - 80, y: this.y, w: 160, h: this.h + 8 };
           if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
           if (this.nullSeq > 0) {
