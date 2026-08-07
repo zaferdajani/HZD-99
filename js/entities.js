@@ -2732,6 +2732,18 @@ class Boss {
         // ABSOLUTE ZERO, DATA CORRUPTION and the prison remain her rites. ----
         this.azCD = this.azCD == null ? 10 : this.azCD - dt;
         this.novaCD = Math.max(0, (this.novaCD || 0) - dt);
+        // the shard fan's second rank: queued arrows leave a couple frames
+        // after the first — the ripple launch (angles/speeds unchanged)
+        if (this.glcShardQ && this.glcShardQ.length) {
+          for (let i = this.glcShardQ.length - 1; i >= 0; i--) {
+            const q = this.glcShardQ[i]; q.d -= dt;
+            if (q.d <= 0) {
+              const pr = new Proj(this.cx(), this.cy(), Math.cos(q.a) * 350, Math.sin(q.a) * 350, false, 1, 8, '#a5d8ff', 0, 2.2);
+              pr.glcFx = 'shard'; pr.frost = true; G.projs.push(pr);
+              this.glcShardQ.splice(i, 1);
+            }
+          }
+        }
         const gW = G.roomDef.w * TILE;
         const hovY = clamp(py - 130, 80, 330);
         if (this.st !== 'dash' && this.st !== 'dashwarn')
@@ -2790,10 +2802,15 @@ class Boss {
           if (this.t <= 0) {
             const n2 = this.phase === 2 ? 7 : 5;
             const base = Math.atan2(py - this.cy(), px - this.cx());
+            // the fan leaves in a RIPPLE, not a wall: even ranks fire now,
+            // odd ranks a couple frames later — same angles, same speeds
+            this.glcShardQ = this.glcShardQ || [];
             for (let k = 0; k < n2; k++) {
               const a = base + (k - (n2 - 1) / 2) * 0.19;
-              const pr = new Proj(this.cx(), this.cy(), Math.cos(a) * 350, Math.sin(a) * 350, false, 1, 8, '#a5d8ff', 0, 2.2);
-              pr.glcFx = 'shard'; pr.frost = true; G.projs.push(pr);
+              if (k % 2 === 0) {
+                const pr = new Proj(this.cx(), this.cy(), Math.cos(a) * 350, Math.sin(a) * 350, false, 1, 8, '#a5d8ff', 0, 2.2);
+                pr.glcFx = 'shard'; pr.frost = true; G.projs.push(pr);
+              } else this.glcShardQ.push({ a, d: 0.07 });
             }
             sfx('shoot'); this.st = 'idle'; this.t = this.phase === 2 ? 1.4 : 2.0;
           }
@@ -3374,7 +3391,7 @@ class Boss {
       for (const tr of this.iceTrail)
         drawGlcCrystal(c, tr.x, tr.y + 16, 0.34, clamp(tr.t * 0.9, 0, 1));
     if (this.orbs && typeof drawGlcOrb === 'function')
-      for (const ob of this.orbs) if (ob.x != null) drawGlcOrb(c, ob.x, ob.y, this.anim + ob.a);
+      for (const ob of this.orbs) if (ob.x != null) drawGlcOrb(c, ob.x, ob.y, this.anim + ob.a, 9 - ob.t);
     if (this.st === 'dashwarn' && this.dashAng != null) {
       // the charge line, sketched in frost before she takes it
       c.save(); c.globalAlpha = 0.3 + Math.sin(this.anim * 14) * 0.15;
