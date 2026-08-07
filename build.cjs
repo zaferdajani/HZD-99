@@ -42,7 +42,7 @@ for (const k in EMBED) {
   const ext = f.split('.').pop().toLowerCase();
   media[k] = 'data:' + MIME[ext] + ';base64,' + fs.readFileSync(f).toString('base64');
 }
-const files = ['vendor-three', 'model3d', 'beast', 'eagle', 'glaciere', 'mother', 'theme', 'mat', 'prism', 'types', 'i18n', 'media', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'game', 'touch']
+const files = ['vendor-three', 'model3d', 'beast', 'eagle', 'glaciere', 'furnace', 'mother', 'theme', 'mat', 'prism', 'types', 'i18n', 'media', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'game', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 const html = fs.readFileSync('dev.html', 'utf8');
 const buildId = Date.now().toString(36);

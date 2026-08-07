@@ -32,6 +32,9 @@ const MEDIA_SRC = {
     eagleParts: 'assets/characters/eagle_parts.png',
     // the frost boss: GLACIERE, corrupted unicorn — figures, parts and fx
     glaciereParts: 'assets/characters/glaciere_parts.png',
+    // the forge boss: FURNACE CHOIR, corrupted mecha dragon — poses, parts,
+    // the glow core and the lava ring
+    dragonParts: 'assets/characters/dragon_parts.png',
   },
   audio: {
     boss: 'assets/music/epic_combat.ogg',

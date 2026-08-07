@@ -150,9 +150,15 @@ shipped code and assets, not from intention.*
   shorts it).
 
 **FURNACE CHOIR** (`atlas`) — Zone C · Element HOTT · drops FORGE
-- Visual (interim): pre-rendered 8-yaw bronze bell-carrier walker.
-- Moves: slow advance, lobbed slag, slam, THE HYMN (expanding heat rings —
-  silenced by the player's Song). Plated (COOLANT shorts it). 460 HP, aggro 1.22.
+- Visual: the owner's CORRUPTED MECHA DRAGON sheet (`dragon_parts.png`) —
+  authored IDLE/WALK/FLY poses, the large flying figure for the roar/summon/
+  meltdown, the parts column as his death (he breaks into the artist's own
+  pieces), the glow core as the summoned orbs, the lava ring under his feet.
+- Moves: slow advance, lobbed fireball, TAIL SLAM (authored tail coils
+  overhead, then plants), THE HYMN → the Forge Roar (he rears; expanding heat
+  rings — silenced by the player's Song), forgebell → summoned molten orbs,
+  meltdown (white-hot + slag tide). Plated (COOLANT shorts it). 460 HP,
+  aggro 1.22.
 
 **THE ARCHIVIST** (`zero`) — Zone D · Element GLAZZ · drops HALT
 - Visual (interim): pre-rendered 8-yaw frost archival unit.
