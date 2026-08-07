@@ -5,3 +5,6 @@ ios/
 *.apk
 *.aab
 .DS_Store
+
+# agent worktrees + local Claude session data — never commit
+.claude/
