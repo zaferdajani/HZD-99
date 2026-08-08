@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msk8nnrd";window.GAME_LOCK="hero"</script>
+<script>window.BUILD_ID="msk9yt3l";window.GAME_LOCK="hero"</script>
 <script>
 /**
  * @license
@@ -674,9 +674,16 @@ function bGlowOver(c, key, px, py, dim, sc) {
     const gx = (sp.x - px) * F, gy = (sp.y - py) * F;
     const gr = sp.r * F * (1.15 + 0.3 * Math.sin(ph * 0.5 + 1));
     const gg = c.createRadialGradient(gx, gy, 0.5, gx, gy, gr);
-    gg.addColorStop(0, 'rgba(226,168,255,' + Math.min(0.8, a * 1.6) + ')');
-    gg.addColorStop(0.5, 'rgba(176,106,255,' + a + ')');
-    gg.addColorStop(1, 'rgba(120,50,210,0)');
+    if (BEAST_LIVE.pure) {
+      // the virus is gone: the same authored vein positions breathe CLEAN
+      gg.addColorStop(0, 'rgba(190,255,240,' + Math.min(0.8, a * 1.6) + ')');
+      gg.addColorStop(0.5, 'rgba(90,235,205,' + a + ')');
+      gg.addColorStop(1, 'rgba(20,140,120,0)');
+    } else {
+      gg.addColorStop(0, 'rgba(226,168,255,' + Math.min(0.8, a * 1.6) + ')');
+      gg.addColorStop(0.5, 'rgba(176,106,255,' + a + ')');
+      gg.addColorStop(1, 'rgba(120,50,210,0)');
+    }
     c.fillStyle = gg;
     c.beginPath(); c.arc(gx, gy, gr, 0, 7); c.fill();
   }
@@ -742,6 +749,34 @@ function beastFront() {
     q.drawImage(im, s[0], s[1] + 40, AX, s[3] - 40, CXc - AX / 2, hy + 46, AX, s[3] - 40);
   }
   BEAST_CACHE.front = cv;
+  return cv;
+}
+// THE PURIFIED ATLAS: the virus is destroyed, so its purple must leave the
+// body too. Every blue-heavy virus pixel in the authored sheet is remapped
+// to a clean teal — same art, same positions, the infection gone.
+function beastPure() {
+  if (BEAST_CACHE.pureAtlas !== undefined) return BEAST_CACHE.pureAtlas;
+  const im = beastImg(); if (!im || !im.naturalWidth) return null;
+  const cv = document.createElement('canvas');
+  cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+  const x = cv.getContext('2d', { willReadFrequently: true });
+  x.drawImage(im, 0, 0);
+  let d;
+  try { d = x.getImageData(0, 0, cv.width, cv.height); }
+  catch (e) { return (BEAST_CACHE.pureAtlas = null); }
+  const p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const r = p[i], g = p[i + 1], b2 = p[i + 2];
+    // the same virus-purple test the vein scanner uses, softened to catch
+    // the dimmer edges of each glow disc
+    if (p[i + 3] > 60 && b2 > 110 && b2 - g > 35 && r - g > 0) {
+      p[i] = Math.round(r * 0.3);
+      p[i + 1] = Math.min(255, Math.round(b2 * 0.95));
+      p[i + 2] = Math.round(b2 * 0.8);
+    }
+  }
+  x.putImageData(d, 0, 0);
+  BEAST_CACHE.pureAtlas = cv;
   return cv;
 }
 // far-side limbs use a darkened copy of the atlas so depth reads
@@ -838,7 +873,8 @@ function bSleep(c, t, lift) {
 // draw one part with its pivot at the current origin
 function bPart(c, key, px, py, dark) {
   const s = BEAST_P[key];
-  const im = dark ? beastDark() : beastImg();
+  const im = dark ? beastDark()
+    : (BEAST_LIVE.pure && beastPure()) || beastImg();
   c.drawImage(im, s[0], s[1], s[2], s[3], -px, -py, s[2], s[3]);
   bGlowOver(c, key, px, py, dark ? 0.4 : 1);
 }
@@ -920,6 +956,54 @@ function beastPose(b) {
       { a1: 0.86 * fold + 0.02, a2: -1.46 * fold },
       { a1: 0.92 * fold + 0.02, a2: -1.5 * fold },
     ];
+    return P;
+  }
+  if (b.purified) {
+    const pt = b.pureT || 0;
+    if (pt < 0.8) {
+      // THE RISE: up out of the collapse, shaking the last of it off
+      const k = pt / 0.8, e = k * k * (3 - 2 * k);
+      P.crouch = 44 * (1 - e); P.pitch = 0.06 * (1 - e);
+      P.legs = [0, 1, 2, 3].map(() => ({ a1: 0.9 * (1 - e), a2: -1.5 * (1 - e) }));
+      P.headA = 0.5 * (1 - e); P.neckA = 0.3 * (1 - e);
+      P.glow = 0.25; P.tailUp = -1 + e * 0.9;
+      P.bob = k > 0.6 ? Math.sin(t * 40) * 2 * (1 - k) : 0;
+      return P;
+    }
+    // A HOUSECAT THE SIZE OF A CAR: happy tail always; it pads to her
+    // side, sits watching her, grooms a forepaw, and loafs — on a loop
+    P.glow = 0.35 + Math.sin(t * 2) * 0.1;
+    P.tailUp = 0.35; P.tailA = Math.sin(t * 3.2) * 0.35;
+    if (b.petWalk) {
+      const g2 = t * 4.2;
+      const PH2 = [0, 1.18 * Math.PI, 0.42 * Math.PI, 1.46 * Math.PI];
+      P.legs = [0, 1, 2, 3].map(i => {
+        const w = g2 + PH2[i];
+        return { a1: Math.sin(w) * 0.14,
+          a2: (Math.sin(w + 1.25) * 0.55 + Math.max(0, Math.sin(w + 2.1)) * 0.5) * 0.2 };
+      });
+      P.bob = Math.sin(g2 * 2) * 2;
+      P.headA = 0.06 + Math.sin(g2 - 1) * 0.03;
+      return P;
+    }
+    const cyc = pt % 12;
+    if (cyc < 4) {                      // SIT: haunches down, chest up, watching
+      P.crouch = 24; P.pitch = -0.05;
+      P.headA = -0.06 + Math.sin(t * 0.9) * 0.03;
+      P.legs = [{ a1: 0.06, a2: 0.04 }, { a1: 0.5, a2: -0.7 }, { a1: 0.02, a2: 0.04 }, { a1: 0.46, a2: -0.66 }];
+    } else if (cyc < 7.5) {             // GROOM: forepaw to the cheek, licking
+      const lk = Math.min(1, cyc - 4, 7.5 - cyc);
+      P.crouch = 28; P.pitch = -0.03;
+      P.legs = [{ a1: -1.15 * lk, a2: 0.6 * lk }, { a1: 0.5, a2: -0.7 }, { a1: 0.04, a2: 0.03 }, { a1: 0.46, a2: -0.66 }];
+      P.headA = 0.5 * lk + Math.max(0, Math.sin(t * 7)) * 0.06 * lk;
+      P.neckA = 0.2 * lk;
+    } else {                            // LOAF: folded flat, utterly content
+      const lk = Math.min(1, (cyc - 7.5) / 0.8);
+      P.crouch = 24 + 20 * lk; P.pitch = 0.03 * lk;
+      P.legs = [0, 1, 2, 3].map(() => ({ a1: 0.9 * lk, a2: -1.5 * lk }));
+      P.headA = 0.25 * lk; P.neckA = 0.15 * lk;
+      P.bob = Math.sin(t * 0.9) * 1.2;
+    }
     return P;
   }
   if (b.dead) {
@@ -1107,7 +1191,7 @@ function drawBeast(c, b) {
     const fv = b.faceVis == null ? -1 : b.faceVis;
     const S = (b.h * 2.35) / BEAST_H;
     const cx = b.x + b.w / 2, footY = b.y + b.h;
-    BEAST_LIVE.t = b.anim || 0; BEAST_LIVE.glow = 1;
+    BEAST_LIVE.t = b.anim || 0; BEAST_LIVE.glow = 1; BEAST_LIVE.pure = !!b.purified;
     // SMEAR TRAIL: while it leaps (pounce / spring / dive), 2-3 violet
     // afterimage copies of the authored crouch figure hang along the arc
     // and burn off — the virus can't keep up with the body
@@ -4738,6 +4822,7 @@ en: {
   cine_sub: 'THE MACHINE DEPTHS',
   cine_skip: 'hold JUMP to skip',
   cine_nav: 'Enter / ▶  next   ·   ◀  back   ·   Esc  skip',
+  pure_beast: 'The virus is destroyed — NULLFANG is free. He seems to like you.',
   cine_c1: 'KERNEL DEPTHS. A city of machines, run on one broadcast — the Mother\'s Song.',
   cine_c2: 'Every unit woke to it, worked to it, slept to it.',
   cine_c3: 'MOTHER-V, the broadcast heart. While she sang, the Depths were kind.',
@@ -4958,6 +5043,7 @@ ar: {
   cine_sub: 'أعماق الآلات',
   cine_skip: 'اضغط القفز مطوّلًا للتخطي',
   cine_nav: 'Enter / ▶  التالي   ·   ◀  رجوع   ·   Esc  تخطٍّ',
+  pure_beast: 'دُمِّر الفيروس — ناب العدم حُرّ. يبدو أنه أحبّك.',
   cine_c1: 'أعماق النواة. مدينة آلات تعمل على بثٍّ واحد — أغنية الأم.',
   cine_c2: 'كل وحدة تستيقظ عليها، وتعمل عليها، وتنام عليها.',
   cine_c3: 'MOTHER-V، قلب البث. ما دامت تغنّي، كانت الأعماق رحيمة.',
@@ -9960,8 +10046,35 @@ class Boss {
           sfx('boom'); sfx('phase');
           if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
           if (typeof padRumble === 'function') padRumble(1, 0.8, 700);
+          if (this.kind === 'glitch' && !this.purified) {
+            // the blast was the VIRUS leaving, not the beast dying
+            this.purified = true; this.pureT = 0;
+            G.toast(t('pure_beast'));
+          }
           if (this.rewardPend) { this.rewardPend = false; G.onBossDead(this.kind); }
         }
+      }
+      if (this.purified) {
+        // THE PET: a freed guardian is a giant housecat now. It settles to
+        // the floor, pads to her side, keeps its face to her, and purrs
+        // little hearts when it is close enough to be happy.
+        this.pureT = (this.pureT || 0) + dt;
+        const floorY2 = 15 * TILE - this.h;
+        if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
+        this.faceVis = (this.faceVis || this.face)
+          + clamp(this.face - (this.faceVis || this.face), -dt * 5, dt * 5);
+        if (this.pureT > 1.1 && !player.dead) {
+          const pd = player.x + player.w / 2 - this.cx();
+          this.face = Math.sign(pd) || this.face;
+          if (Math.abs(pd) > 96) { this.x += clamp(pd, -70, 70) * dt; this.petWalk = true; }
+          else {
+            this.petWalk = false;
+            if (Math.abs(pd) < 90 && chance(0.05))
+              addPart(this.cx() + rnd(-14, 14), this.y - 6, rnd(-6, 6), rnd(-42, -22),
+                rnd(0.7, 1.1), chance(0.5) ? '#ff8fb3' : '#ffc2d4', 2.6, -14, true);
+          }
+          this.x = clamp(this.x, 8, G.roomDef.w * TILE - this.w - 8);
+        } else this.petWalk = false;
       }
       // the X1 bridge lets go once the wreck has settled
       if (G.roomId === 'X1' && (this.deathAnimT || 0) <= 0 && !this.bridgeGone) {
@@ -10310,6 +10423,35 @@ class Boss {
           }
         }
         if (this.st === 'stalk' && (col.l || col.r)) this.face *= -1;
+        // ANTI-WEDGE WATCHDOG: a dive can end beneath a ledge and jam the
+        // hunter in place. If it stops registering movement for 2.6s in an
+        // active state it WRENCHES itself free toward open floor — and if
+        // that fails twice more, it re-enters clean from its spawn point.
+        {
+          if (this.wdX == null) { this.wdX = this.x; this.wdT = 0; }
+          const activeSt = this.st === 'stalk' || this.st === 'recover'
+            || this.st === 'pounce' || this.st === 'crouch' || this.st === 'nullend';
+          if (Math.abs(this.x - this.wdX) > 10 || !activeSt || this.stagT > 0) {
+            this.wdX = this.x; this.wdT = 0;
+          } else if ((this.wdT += dt) > 2.6) {
+            this.wdT = 0; this.wdX = this.x;
+            this.wedged = (this.wedged || 0) + 1;
+            const mid = G.roomDef.w * TILE / 2;
+            if (this.wedged >= 3) {
+              this.x = this.spawnX; this.y = this.spawnY; this.vx = 0; this.vy = 0;
+              this.st = 'stalk'; this.t = 1.5; this.wedged = 0;
+              burst(this.cx(), this.cy(), 14, '#b06aff', 200, 0.5, 100, 3, true);
+            } else {
+              this.st = 'pounce';
+              this.vy = -560; this.vx = (mid > this.cx() ? 1 : -1) * 300;
+              this.face = Math.sign(this.vx) || 1;
+              cam.shake = Math.max(cam.shake, 4); sfx('dash');
+              for (let i = 0; i < 8; i++)
+                addPart(this.cx() + rnd(-24, 24), this.y + this.h - 4,
+                  rnd(-120, 120), rnd(-160, -40), 0.4, '#b9a888', 2.5, 300, true);
+            }
+          }
+        }
         break;
       }
       // ---- Broodmother: hangs above, spawns and slams ----
@@ -12215,6 +12357,14 @@ function loadRoom(id) {
       spawnStatic(kind, tx, ty, extra, kind === 'term' ? null : null);
     }
   });
+  // the freed guardian stays home: NULLFANG pads around his old arena as
+  // her pet forever after the virus is destroyed
+  if (id === 'A4' && G.save.flags.bossGlitch && !G.boss) {
+    G.boss = new Boss('glitch', 20 * TILE, 15 * TILE);
+    G.boss.dead = true; G.boss.purified = true; G.boss.pureT = 5;
+    G.boss.deathFxT = 0; G.boss.deathFinale = true; G.boss.rewardPend = false;
+    G.boss.hp = 0; G.boss.st = 'idle';
+  }
   if (G.save.pouch && G.save.pouch.room === id) {
     const p = new Pouch(G.save.pouch.x, G.save.pouch.y, G.save.pouch.amount);
     G.pickups.push(p);
