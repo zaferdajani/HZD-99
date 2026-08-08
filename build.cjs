@@ -52,9 +52,20 @@ const loader = fs.readFileSync('loader.html', 'utf8');
 // separate files that stream in after boot (media.js already loads lazily and
 // every draw path has a fallback until its art arrives). This cuts the
 // blocking download from ~12MB to ~1MB.
-const out = html.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/, () =>
-  loader + '\n' +
-  '<script>window.BUILD_ID=' + JSON.stringify(buildId) + '</script>\n' +
-  '<script>\n' + files.join('\n') + '\n</script>\n</body>');
-fs.writeFileSync('index.html', out);
-console.log('index.html built:', (fs.statSync('index.html').size / 1048576).toFixed(2) + 'MB');
+// TWO LIBRARIES, one engine: the cat's game and the hero's game ship as
+// separate pages, each hard-locked to its own world — no chooser, no bleed.
+const emit = (fname, lock) => {
+  let shell = html;
+  if (lock === 'hero')
+    shell = shell.replace(/<title>[^<]*<\/title>/,
+      '<title>NOSTOS — an Odyssey metroidvania</title>');
+  const out = shell.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/, () =>
+    loader + '\n' +
+    '<script>window.BUILD_ID=' + JSON.stringify(buildId) +
+    ';window.GAME_LOCK=' + JSON.stringify(lock) + '</script>\n' +
+    '<script>\n' + files.join('\n') + '\n</script>\n</body>');
+  fs.writeFileSync(fname, out);
+  console.log(fname + ' built (' + lock + '):', (fs.statSync(fname).size / 1048576).toFixed(2) + 'MB');
+};
+emit('index.html', 'robo');    // CLAWBYTE — the machine depths
+emit('odyssey.html', 'hero');  // NOSTOS — the long way home

@@ -186,6 +186,13 @@ function drawEagle(c, b) {
     c.translate(cx, cy);
     c.scale(S, S);
     if (b.hurtT > 0) c.globalAlpha = 0.72;
+    if (b.st === 'dorm') c.globalAlpha *= 0.85;      // asleep on the line, dimmed
+    if (b.st === 'intro') {
+      // the waking shiver: it runs down the cable into her frame, hardest
+      // just before the screech breaks
+      const wk2 = Math.max(0, Math.min(1, 1 - (b.t || 0) / 2));
+      c.translate((Math.random() - 0.5) * wk2 * 6, (Math.random() - 0.5) * wk2 * 3);
+    }
     const t = b.anim;
     // while hung, the body tilts with the pendulum, plus a lean toward the
     // anchor when an attack has pulled her off plumb

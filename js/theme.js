@@ -196,13 +196,16 @@ const THEMES = {
   },
 };
 function themeId() {
+  // a build can be LOCKED to one game (two separate libraries: the cat's
+  // CLAWBYTE page and the hero's NOSTOS page each ship with their own lock)
+  const lock = (typeof window !== 'undefined' && window.GAME_LOCK) || null;
   if (typeof G !== 'undefined' && G.state) {
     const s = G.state;
-    // the shell (title menu / chooser / language) is always the neutral world…
-    if (s === 'MENU' || s === 'WHO' || s === 'LANGSEL') return 'robo';
+    // the shell (title menu / chooser / language) wears the locked world…
+    if (s === 'MENU' || s === 'WHO' || s === 'LANGSEL') return lock || 'robo';
     // …and once a character is chosen, the difficulty screen previews THAT world
-    if (s === 'DIFF') return G.pendTheme || 'robo';
+    if (s === 'DIFF') return G.pendTheme || lock || 'robo';
   }
-  return (typeof G !== 'undefined' && G.save && G.save.theme) || 'robo';
+  return (typeof G !== 'undefined' && G.save && G.save.theme) || lock || 'robo';
 }
 function isHero() { return themeId() === 'hero'; }

@@ -134,8 +134,12 @@ const ROOMS = {
       rect(g, 18, 15, 20, 16, 'B');         // breakable floor → D1
     } },
   C3: { zone: 'C', w: 30, h: 17, exits: { L: 'C2', R: 'C4' },
-    ents: [['boss', 20, 15, 'atlas']],
-    build(g) { frame(g); openL(g); hline(g, 5, 8, 11, '='); hline(g, 21, 24, 11, '='); rect(g, 28, 11, 29, 14, 'B'); } },
+    ents: [['boss', 22, 6, 'atlas'], ['plat', 7, 9, [9, 0, 4.2]]],
+    build(g) {
+      frame(g); openL(g);
+      hline(g, 5, 8, 11, '='); hline(g, 21, 24, 11, '='); rect(g, 28, 11, 29, 14, 'B');
+      hline(g, 19, 25, 6, '#');           // the dragon's roost ledge, high right
+    } },
   C4: { zone: 'C', w: 20, h: 17, exits: { L: 'C3' },
     ents: [['chest', 10, 15, 'slot'], ['scrap', 14, 15, 40], ['riddle', 6, 15, 4]],
     build(g) { frame(g); openL(g); } },

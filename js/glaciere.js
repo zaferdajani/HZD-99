@@ -203,9 +203,16 @@ function drawGlaciere(c, b) {
     const sclX = sgn * (0.85 + 0.15 * ta) * S, sclY = (1 - (1 - ta) * 0.05) * S;
     c.scale(sclX, sclY);
     if (b.hurtT > 0) c.globalAlpha = 0.72;
-    // hover shadow, faint — she floats
+    // dormant/wake clock: she KNEELS on the arena floor before the fight —
+    // the standing assembly, dark and still — and RISES to hover height as
+    // she wakes, the ignition timed to the roar
+    const wakeK = b.st === 'intro' ? clamp(1 - (b.t || 0) / 2, 0, 1) : (b.st === 'dorm' ? 0 : 1);
+    const rE = clamp((wakeK - 0.4) / 0.5, 0, 1);
+    const riseK = b.st === 'dorm' ? 0 : (b.st === 'intro' ? rE * rE * (3 - 2 * rE) : 1);
+    const groundOff = 90 * (1 - riseK);
+    // hover shadow, faint — tight underfoot while she is grounded
     c.save(); c.globalAlpha *= 0.22; c.fillStyle = '#04070b';
-    c.beginPath(); c.ellipse(0, 2, 200, 16, 0, 0, 7); c.fill(); c.restore();
+    c.beginPath(); c.ellipse(0, 2 + groundOff, 200 * (0.55 + 0.45 * riseK), 16, 0, 0, 7); c.fill(); c.restore();
     if (b.dead) {
       // DEATH: she breaks into the sheet's own parts row — and the pieces
       // FALL: gravity takes them, each bounces once on the floor line, and
@@ -261,12 +268,57 @@ function drawGlaciere(c, b) {
     b.glcGait = (b.glcGait || 0) + dtA * (2.6 + gaitK * 7.2);
     const gait = b.glcGait;
     const pitch = clamp((b.vy || 0) / -1400, -0.16, 0.16) + Math.sin(b.anim * 1.1) * 0.022;
-    c.translate(0, -14 + bob);                 // she rides above the ground line
+    c.translate(0, (-14 + bob) * riseK + groundOff);   // grounded → riding the air
     const swell = Math.sin(b.anim * 0.9);      // the slow body swell, breathing
     c.scale(1 + swell * 0.008, 1 - swell * 0.009);
     const heroFig = !(b.st === 'novawarn' || b.st === 'orbs' || b.st === 'azhush'
+      || b.st === 'dorm' || (b.st === 'intro' && wakeK < 0.5)
       || ((b.glcStamp || 0) > 0 && b.st === 'idle'));
-    if (b.st === 'novawarn' || b.st === 'orbs' || b.st === 'azhush') {
+    if (b.st === 'dorm') {
+      // ASLEEP ON HER HOOVES: head bowed, one ember alive in the horn.
+      // Drawn a third over fight scale so the sleeping shape OWNS the room,
+      // over a pool of ground frost that marks her cold
+      const br2 = Math.sin(b.anim * 0.9) * 0.006;
+      c.scale(1.32 * (1 + br2), 1.32 * (1 - br2));
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha *= 0.16 + Math.sin(b.anim * 0.7) * 0.05;
+      const fg = c.createRadialGradient(0, 0, 8, 0, 0, 190);
+      fg.addColorStop(0, 'rgba(165,216,255,0.8)'); fg.addColorStop(1, 'rgba(165,216,255,0)');
+      c.fillStyle = fg; c.beginPath(); c.ellipse(0, 0, 190, 26, 0, 0, 7); c.fill();
+      c.restore();
+      glcFig(c, 'asm', 0.025, 0, 0.92);
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const hg = c.createRadialGradient(-150, -240, 1, -150, -240, 16);
+      hg.addColorStop(0, 'rgba(240,160,255,' + (0.16 + Math.max(0, Math.sin(b.anim * 0.9)) * 0.12) + ')');
+      hg.addColorStop(1, 'rgba(120,30,200,0)');
+      c.fillStyle = hg; c.beginPath(); c.arc(-150, -240, 16, 0, 7); c.fill();
+      c.restore();
+    } else if (b.st === 'intro') {
+      if (wakeK < 0.5) {
+        // the stir: the sleeping figure trembles harder as the cold gathers,
+        // easing back down from the dormant scale as she braces to lift
+        const sc2 = 1.32 - (wakeK / 0.5) * 0.32;
+        c.scale(sc2, sc2);
+        glcFig(c, 'asm', 0.025 - wakeK * 0.05, wakeK * 4.5);
+        if (typeof addPart === 'function' && chance(wakeK * 0.7))
+          addPart(cx + rnd(-b.w, b.w), footY + groundOff * sclY - rnd(0, 20),
+            rnd(-20, 20), rnd(-60, -20), 0.5, '#bfe8ff', 2, 0, true);
+      } else {
+        // IGNITION: she is airborne in the hero figure, the horn flaring
+        // with the shriek, frost blown off the lift
+        glcFig(c, 'hero', -0.05, (1 - wakeK) * 3);
+        const hp2 = glcHornLocal();
+        const fl = Math.max(0, 1 - Math.abs(wakeK - 0.62) / 0.3);
+        if (fl > 0.01) {
+          c.save(); c.globalCompositeOperation = 'lighter';
+          const g = c.createRadialGradient(hp2.x, hp2.y, 2, hp2.x, hp2.y, 30 + fl * 70);
+          g.addColorStop(0, 'rgba(240,190,255,' + 0.85 * fl + ')');
+          g.addColorStop(0.5, 'rgba(190,80,240,' + 0.5 * fl + ')');
+          g.addColorStop(1, 'rgba(120,30,200,0)');
+          c.fillStyle = g; c.beginPath(); c.arc(hp2.x, hp2.y, 30 + fl * 70, 0, 7); c.fill();
+          c.restore();
+        }
+      }
+    } else if (b.st === 'novawarn' || b.st === 'orbs' || b.st === 'azhush') {
       // gathered: the standing assembly, trembling as power collects
       glcFig(c, 'asm', 0, b.st === 'novawarn' ? 2 : 0.8);
     } else if ((b.glcStamp || 0) > 0 && b.st === 'idle') {

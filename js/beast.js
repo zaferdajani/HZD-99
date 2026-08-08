@@ -252,6 +252,39 @@ function beastPose(b) {
     P.tailA = -Math.sin(g - 0.7) * 0.24 * k - P.pitch * 1.5;
     P.tailUp = -0.85 + Math.sin(g * 0.5) * 0.12;
   };
+  if (st === 'dorm' && !b.dead) {
+    // ASLEEP: a mound of machine — deep crouch, head sunk between the
+    // forelegs, tail wrapped close, the virus veins barely breathing
+    // sphinx-lying: the legs FOLD under the body (the collapse pose held
+    // peacefully), belly on the floor, chin nearly on the forepaws
+    P.crouch = 72 + Math.sin(t * 0.8) * 1.2; P.bob = 0; P.pitch = 0.08;
+    P.neckA = 0.48; P.headA = 0.95;
+    P.tailUp = -1.35; P.tailA = 0.05;
+    P.glow = 0.05 + Math.max(0, Math.sin(t * 0.8)) * 0.06;
+    P.legs = [{ a1: 0.72, a2: -1.42 }, { a1: 0.78, a2: -1.5 }, { a1: 0.66, a2: -1.36 }, { a1: 0.75, a2: -1.46 }];
+    return P;
+  }
+  if (st === 'intro' && !b.dead) {
+    // THE WAKING: the eye finds her first — the head snaps up while the
+    // mass is still down — then the body follows it upright, and the draw
+    // side hands the last beat to the authored roar figure
+    const k = Math.max(0, Math.min(1, 1 - (b.t || 0) / 2));
+    const head = Math.min(1, k / 0.35);
+    const rise = Math.max(0, Math.min(1, (k - 0.32) / 0.38));
+    P.crouch = 72 * (1 - rise * rise); P.bob = 0; P.pitch = 0.08 * (1 - rise);
+    P.neckA = 0.48 * (1 - head); P.headA = 0.95 - head * 1.05;
+    P.tailUp = -1.35 + rise * 0.55; P.tailA = Math.sin(t * (1 + k * 6)) * 0.1 * k;
+    P.glow = 0.05 + head * 0.7 + (k > 0.5 ? Math.max(0, Math.sin(t * 24)) * 0.25 : 0);
+    // the folded legs push the ground away as the mass comes up
+    const fold = 1 - rise;
+    P.legs = [
+      { a1: 0.72 * fold + 0.02, a2: -1.42 * fold },
+      { a1: 0.78 * fold + 0.02, a2: -1.5 * fold },
+      { a1: 0.66 * fold + 0.02, a2: -1.36 * fold },
+      { a1: 0.75 * fold + 0.02, a2: -1.46 * fold },
+    ];
+    return P;
+  }
   if (b.dead) {
     // STAGGERED COLLAPSE: the machine dies joint by joint — near fore-knee
     // buckles first, the far one follows, the hips give, the body drops onto
@@ -543,6 +576,11 @@ function drawBeast(c, b) {
       ng.addColorStop(1, 'rgba(176,106,255,0)');
       c.fillStyle = ng; c.beginPath(); c.arc(0, -120, 190, 0, 7); c.fill();
       c.restore();
+    } else if (b.st === 'intro' && (b.t || 0) <= 0.85 && !b.dead) {
+      // the wake's climax: fully risen, it takes the authored open-jaw
+      // howl and holds it while the roar plays out
+      BEAST_LIVE.glow = 1.4;
+      bFig(c, 'aRoar', 0, 2 + Math.max(0, (b.t || 0) - 0.35) * 5);
     } else if (b.st === 'roar' && (b.t || 0) > 0.25 && (b.t || 0) <= 1.07 && !b.dead) {
       // THE ROAR — the sheet's own open-jaw howl, shaking harder as it
       // peaks. (The first ~0.18s stays on the rig: the chest swells up into

@@ -2434,6 +2434,7 @@ class Boss {
     this.bores = []; this.hymn = null; this.prison = null;
     this.windT = 0; this.overdriveT = 0;
     if (kind === 'brood') { this.y = 60; this.homeY = 60; }
+    if (kind === 'atlas') { this.nestX = this.x + s.w / 2; this.nestFootY = y; }
     if (kind === 'zero') this.y -= 90;
     if (kind === 'mother') { this.y = 110; this.x = G.roomDef.w * TILE / 2 - s.w / 2; }
     // recorded AFTER the per-kind placement, or the flyers get sent back to a
@@ -2460,12 +2461,46 @@ class Boss {
     if (this.stagT > 0) { this.stagT -= dt; return; }   // Song / weakness stagger
     if (this.st === 'dorm') {
       if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
-        this.st = 'intro'; this.t = 1.4; sfx('roar');
+        // THE STIR: it hears her. The wake itself is quiet — servos, a
+        // breath — the ROAR belongs to the moment it reaches full height.
+        this.st = 'intro'; this.t = 2.0; this.roared = false;
+        sfx('ui'); cam.shake = Math.max(cam.shake, 3);
         setMusic(this.kind === 'mother' ? 'mother' : 'boss');
       }
       return;
     }
-    if (this.st === 'intro') { this.t -= dt; if (this.t <= 0) { this.st = 'idle'; this.t = 0.8; } return; }
+    if (this.st === 'intro') {
+      this.t -= dt;
+      if (!this.roared && this.t <= 0.85) {
+        // THE ROAR — each guardian announces itself in its own voice, and
+        // the room answers: shake, rumble, a burst off the body
+        this.roared = true;
+        sfx({ glitch: 'roar_beast', brood: 'roar_eagle', zero: 'roar_glc',
+              atlas: 'roar_drg', prism: 'roar_prism' }[this.kind] || 'roar');
+        cam.shake = Math.max(cam.shake, 11);
+        if (typeof padRumble === 'function') padRumble(0.8, 0.6, 550);
+        burst(this.cx(), this.cy() - this.h * 0.3, 16, '#ffffff', 260, 0.5, 160, 3, true);
+      }
+      if (this.kind === 'atlas' && this.nestFootY != null && this.t <= 0.6 && !this.nestLanded) {
+        // DOWN FROM THE ROOST: he leaves the nest on the wing and glides to
+        // the arena floor, landing with the whole room's weight
+        const floorFoot = 15 * TILE;
+        const k2 = clamp((0.6 - this.t) / 0.5, 0, 1);
+        const e2 = k2 * k2 * (3 - 2 * k2);
+        this.y = this.nestFootY + (floorFoot - this.nestFootY) * e2 - this.h;
+        this.x += (G.roomDef.w * TILE * 0.5 - this.w / 2 - this.x) * Math.min(1, dt * 3);
+        this.vy = 320;
+        this.face = this.faceVis = player.x + player.w / 2 < this.cx() ? -1 : 1;
+        if (k2 >= 1) {
+          this.nestLanded = true; this.vy = 0;
+          cam.shake = Math.max(cam.shake, 9); sfx('boom');
+          if (typeof padRumble === 'function') padRumble(0.7, 0.5, 300);
+          burst(this.cx(), this.y + this.h, 18, '#c8925c', 220, 0.5, 400, 3);
+        }
+      }
+      if (this.t <= 0) { this.st = 'idle'; this.t = 0.8; this.vy = 0; }
+      return;
+    }
     if (this.hp <= 0) { this.die(); return; }
     if (this.phase === 1 && this.hp < this.hpMax / 2) {
       this.phase = 2; this.t = 1;

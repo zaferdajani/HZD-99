@@ -186,10 +186,51 @@ function drgGlow(c, x, y, r, a, lit) {
 // mouth position per grounded pose, in art-local units (origin feet-centre)
 const DRG_MOUTH = { idle: [62, -112], walk: [72, -116], fly: [92, -128] };
 
+// his roost: a nest of slag and bent girders packed onto the high ledge.
+// World-space and anchored — it stays where he built it after he leaves.
+function drgNest(c, x, y, t) {
+  c.save();
+  c.translate(x, y);
+  // heat shimmer banked in the bowl
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const eg = c.createRadialGradient(0, -8, 2, 0, -8, 46);
+  const ea = 0.14 + Math.max(0, Math.sin(t * 0.9)) * 0.08;
+  eg.addColorStop(0, 'rgba(255,160,80,' + ea + ')'); eg.addColorStop(1, 'rgba(255,120,50,0)');
+  c.fillStyle = eg; c.beginPath(); c.ellipse(0, -8, 70, 26, 0, 0, 7); c.fill();
+  c.restore();
+  // the bowl: three packed arcs of scrap, darkest deepest
+  c.lineCap = 'round';
+  for (let i = 0; i < 3; i++) {
+    c.strokeStyle = ['#241a12', '#3a2a20', '#4a382a'][i];
+    c.lineWidth = 13 - i * 3;
+    c.beginPath();
+    c.ellipse(0, -4 - i * 5, 74 - i * 10, 20 - i * 4, 0, 0.15 + i * 0.06, Math.PI - 0.15 - i * 0.06);
+    c.stroke();
+  }
+  // bent girder ends poking from the weave
+  c.strokeStyle = '#57453a'; c.lineWidth = 4;
+  for (let i = 0; i < 6; i++) {
+    const a = 0.4 + i * 0.45, r0 = 58 - (i % 2) * 12;
+    c.beginPath();
+    c.moveTo(Math.cos(a) * r0 * (i % 2 ? -1 : 1), -8 - Math.sin(a) * 12);
+    c.lineTo(Math.cos(a) * (r0 + 16) * (i % 2 ? -1 : 1), -16 - Math.sin(a) * 20);
+    c.stroke();
+  }
+  // a few live embers in the weave
+  for (let i = 0; i < 4; i++) {
+    const px = Math.sin(i * 2.7) * 40, ph = t * 1.4 + i * 1.9;
+    c.fillStyle = 'rgba(255,' + (150 + i * 20) + ',80,' + (0.3 + Math.max(0, Math.sin(ph)) * 0.4) + ')';
+    c.fillRect(px, -10 - (i % 2) * 6, 3, 3);
+  }
+  c.restore();
+}
+
 function drawFurnace(c, b) {
   const im = drgImg(); if (!im || !im.naturalWidth) return false;
   c.save();
   try {
+    // the roost is part of the room, not of him — drawn at its own anchor
+    if (b.nestX != null && !b.dead) drgNest(c, b.nestX, b.nestFootY, b.anim);
     // ---- visual-state memory: draw-side timers driven off b.anim ----------
     const fc = b.fc || (b.fc = {
       pSt: b.st, pAnim: b.anim, slamT: 0, roarT: 0, pulseT: 0,
@@ -297,11 +338,14 @@ function drawFurnace(c, b) {
     }
 
     // ---- ground presence: the authored lava ring, breathing under him ----
+    // banked while he sleeps; it catches as the wake reaches ignition
+    const wakeK2 = b.st === 'intro' ? clamp(1 - (b.t || 0) / 2, 0, 1) : (b.st === 'dorm' ? 0 : 1);
+    const ringGate = b.st === 'dorm' ? 0 : b.st === 'intro' ? (b.nestLanded ? 1 : 0) : 1;
     const grounded = Math.abs(b.vy || 0) < 120;
-    if (grounded) {
+    if (grounded && ringGate > 0.01) {
       const rg = DRG_P.ring;
       const hotStat = b.st === 'hymn' || b.st === 'forgebell' || b.st === 'meltwarn';
-      const ra = (0.2 + Math.sin(b.anim * 2.6) * 0.07 + (hotStat ? 0.22 : 0) + wk * 0.25);
+      const ra = (0.2 + Math.sin(b.anim * 2.6) * 0.07 + (hotStat ? 0.22 : 0) + wk * 0.25) * ringGate;
       const rw2 = 95, rh2 = 15;
       c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha *= ra;
       c.drawImage(im, rg[0], rg[1], rg[2], rg[3], -rw2, -rh2 * 0.62, rw2 * 2, rh2 * 2);
@@ -311,7 +355,53 @@ function drawFurnace(c, b) {
     const shk = b.hurtT > 0 ? 1.2 : 0;
     const heroPose = b.st === 'hymn' || b.st === 'forgebell' || b.st === 'meltwarn' || fc.roarT > 0;
 
-    if (b.stagT > 0) {
+    if (b.st === 'dorm') {
+      // ASLEEP IN THE NEST: hunkered into the slag bowl, wings drawn in,
+      // head sunk over the forepaws — every glow banked but one ember
+      c.translate(0, 9 + Math.sin(b.anim * 0.7) * 1.4);
+      const br3 = Math.sin(b.anim * 0.7) * 0.012;
+      c.scale(1 + br3, 1 - br3);
+      drgFig(c, 'idle', 0, 0, 0.11);
+      drgGlow(c, 12, -78, 8, 0.06 + Math.max(0, Math.sin(b.anim * 0.7)) * 0.06, false);
+    } else if (b.st === 'intro') {
+      const t2 = b.t || 0;
+      if (wakeK2 < 0.45) {
+        // the stir: the hunched shape lifts out of the bowl, the chest
+        // light climbing through the seams, the whole machine knocking
+        const u = wakeK2 / 0.45;
+        c.translate(0, 9 * (1 - u));
+        drgFig(c, 'idle', 0, u * 3, 0.11 * (1 - u));
+        drgGlow(c, 12, -78, 8 + u * 18, 0.06 + u * 0.4, false);
+      } else if (t2 <= 0.6 && !b.nestLanded) {
+        // ON THE WING: down from the roost, nose tipped into the glide
+        drgFig(c, 'fly', wk, 0.6, clamp((b.vy || 0) / 2400, -0.22, 0.28));
+        if (typeof addPart === 'function' && chance(0.5))
+          addPart(cx + rnd(-30, 30), footY - b.h * 1.2, rnd(-40, 40), rnd(-90, -30),
+            0.4, '#ff7b3a', 2, 0, true);
+      } else if (b.nestLanded) {
+        // TOUCHDOWN: the landing squash settling out as the fight begins
+        const ls = clamp(t2 / 0.1, 0, 1);
+        c.translate(0, 4 * ls);
+        c.scale(1 + 0.07 * ls, 1 - 0.09 * ls);
+        drgFig(c, 'idle', wk, ls * 2, 0);
+        drgGlow(c, 12, -78, 16, 0.3, false);
+      } else {
+        // IGNITION: he rears into the authored flying figure as the horn
+        // of the foundry sounds — mouth and core flooding, ring catching
+        const u = (wakeK2 - 0.45) / 0.55;
+        const fl = Math.max(0, 1 - Math.abs(wakeK2 - 0.62) / 0.3);
+        c.save();
+        c.translate(0, -(4 + u * 9));
+        c.scale(HR, HR);
+        drgFig(c, 'hero', 0, (1 - u) * 2.5 + fl * 2, -0.04 - u * 0.05);
+        drgGlow(c, 266, -292, 20 + fl * 40, 0.3 + fl * 0.6, fl > 0.4);
+        drgGlow(c, 40, -230, 26 + fl * 22, 0.22 + fl * 0.4, false);
+        c.restore();
+        if (fl > 0.3 && typeof addPart === 'function' && chance(0.7))
+          addPart(cx + rnd(-40, 40), footY - b.h * 1.5, rnd(-80, 80), rnd(-160, -40),
+            0.5, chance(0.5) ? '#ffd76a' : '#ff7b3a', 2.5, 0, true);
+      }
+    } else if (b.stagT > 0) {
       // SILENCED: her song killed his — grounded, slumped, the light dimmed
       c.translate(0, 4);
       drgFig(c, 'idle', wk, 1.6, 0.06);
@@ -407,7 +497,7 @@ function drawFurnace(c, b) {
     }
 
     // grounded overlays -----------------------------------------------------
-    if (!heroPose && b.stagT <= 0) {
+    if (!heroPose && b.stagT <= 0 && b.st !== 'dorm' && b.st !== 'intro') {
       const mk2 = DRG_MOUTH[!grounded ? 'fly' : (Math.abs(b.vx || 0) > 20 ? 'walk' : 'idle')];
       // FIREBALL tell: heat climbs into the mouth as the lob comes due
       if (b.st === 'idle' && (b.t || 0) < 0.6 && !b.hymn && !b.slag)

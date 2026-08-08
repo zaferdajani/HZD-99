@@ -562,9 +562,19 @@ function update(dt) {
   }
 }
 function menuOptions() {
-  // "Play" always leads to the Who-are-you chooser (per-character saves)
+  // "Play" always leads to the Who-are-you chooser (per-character saves) —
+  // unless this build is LOCKED to one game, where the menu speaks plainly:
+  // Continue (if that game has a save) and New Game (story from the top)
+  const lk = gameLock();
+  if (lk) {
+    const opts = [];
+    if (loadStored(lk)) opts.push('continue');
+    opts.push('newgame');
+    return opts.concat(['controls', 'lang', 'sound', 'music']);
+  }
   return ['play', 'controls', 'lang', 'sound', 'music'];
 }
+function gameLock() { return (typeof window !== 'undefined' && window.GAME_LOCK) || null; }
 function updateMenu() {
   const opts = menuOptions();
   // U (or the on-screen banner) takes the newer build
@@ -579,6 +589,19 @@ function updateMenu() {
   if (inP('OK')) {
     const o = opts[G.menuIdx]; sfx('ok');
     if (o === 'play') { G.whoIdx = 0; G.state = 'WHO'; }
+    else if (o === 'continue') {
+      const s2 = loadStored(gameLock());
+      if (s2) { G.pendTheme = gameLock(); startGame(s2); }
+    } else if (o === 'newgame') {
+      // a truly new game: the old save goes, the story plays again, and
+      // only then does the difficulty screen hand over the controls
+      const lk2 = gameLock();
+      G.pendTheme = lk2; wipeSave(lk2); G.diffIdx = 1;
+      if (lk2 !== 'hero') {
+        try { localStorage.removeItem('cb_intro_seen'); } catch (e) {}
+        G.afterCine = 'DIFF'; startCine();
+      } else G.state = 'DIFF';
+    }
     else if (o === 'controls') { G.ctrlBack = 'MENU'; G.state = 'CTRL'; }
     else if (o === 'lang') { openLangSel('MENU'); }
     else if (o === 'sound') { MUTED = !MUTED; saveMeta(); }
@@ -604,7 +627,7 @@ function updateLangSel() {
 function updateDiff() {
   if (inP('DOWN')) { G.diffIdx = (G.diffIdx + 1) % 3; sfx('ui'); }
   if (inP('UP')) { G.diffIdx = (G.diffIdx + 2) % 3; sfx('ui'); }
-  if (inP('BACK')) { G.state = 'WHO'; sfx('ui'); return; }
+  if (inP('BACK')) { G.state = gameLock() ? 'MENU' : 'WHO'; sfx('ui'); return; }
   if (inP('OK')) {
     sfx('ok');
     const s = newSave(G.diffIdx);
@@ -2673,7 +2696,8 @@ function draw(tms) {
       drawGlyphText(c, RS_TITLE, 340, 200, 13, 'rgba(55,255,208,0.55)', 'rgba(55,255,208,0.4)');
       const opts = menuOptions();
       const labels = {
-        play: t('menu_play'), controls: t('menu_controls'),
+        play: t('menu_play'), continue: t('menu_continue'), newgame: t('menu_newgame'),
+        controls: t('menu_controls'),
         lang: t('menu_language') + ': ' + langName(LANG), sound: MUTED ? t('menu_sound_off') : t('menu_sound_on'),
         music: MUSIC_ON ? t('menu_music_on') : t('menu_music_off'),
       };
@@ -2853,7 +2877,11 @@ function startCine() {
 function cineEnd() {
   try { localStorage.setItem('cb_intro_seen', '1'); } catch (e) {}
   G.cine = null;
-  G.state = 'MENU'; G.menuIdx = 0;
+  if (G.afterCine === 'DIFF') {
+    G.afterCine = null; G.diffIdx = 1;
+    G.pendTheme = G.pendTheme || gameLock() || 'robo';
+    G.state = 'DIFF';
+  } else { G.state = 'MENU'; G.menuIdx = 0; }
 }
 function updateCine(dt) {
   const ci = G.cine;
@@ -4038,7 +4066,7 @@ loadMeta();
 setMusic('title');
 // first boot only: "The Broadcast Falls" — the manga opening plays once,
 // then never again unless the save flag is cleared
-try { if (!localStorage.getItem('cb_intro_seen')) startCine(); } catch (e) {}
+try { if (!localStorage.getItem('cb_intro_seen') && gameLock() !== 'hero') startCine(); } catch (e) {}
 // look for a newer build at boot, and again every few minutes while idling
 G.updateStamp = 1;
 setTimeout(checkForUpdate, 2500);

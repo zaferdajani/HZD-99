@@ -311,6 +311,23 @@ function sfx(n) {
     case 'break': hiss(0.2, 0.12); tone(200, 0.15, 'square', 0.07, 70); break;
     case 'bench': [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, 'sine', 0.05, null, i * 0.1)); break;
     case 'boss': case 'roar': tone(55, 0.9, 'sawtooth', 0.14, 30); tone(110, 0.7, 'square', 0.055, 45); hiss(0.6, 0.06); break;
+    // each guardian wakes with its OWN voice — pitched to the machine it is
+    case 'roar_beast':   // NULLFANG: a ripping sub-growl that ends in teeth
+      tone(46, 1.2, 'sawtooth', 0.17, 26); tone(92, 0.9, 'square', 0.07, 38);
+      tone(23, 1.2, 'sine', 0.1, 20); hiss(0.9, 0.09); break;
+    case 'roar_eagle':   // TALONHOST: a metal screech climbing off the cable
+      tone(950, 0.55, 'square', 0.07, 2300); tone(1900, 0.45, 'sawtooth', 0.05, 700, 0.1);
+      tone(140, 0.5, 'square', 0.05, 90, 0.05); hiss(0.5, 0.07); break;
+    case 'roar_glc':     // GLACIERE: a crystalline shriek over a cold sub
+      tone(660, 0.8, 'triangle', 0.07, 1056); tone(990, 0.8, 'triangle', 0.05, 1584, 0.06);
+      tone(1485, 0.7, 'triangle', 0.04, 2376, 0.12);
+      whoosh(0.9, 2400, 700, 0.05); tone(84, 0.9, 'sine', 0.08, 60); break;
+    case 'roar_drg':     // FURNACE CHOIR: a foundry horn, all mass
+      tone(62, 1.4, 'square', 0.15, 56); tone(124, 1.1, 'sawtooth', 0.09, 100);
+      tone(31, 1.4, 'sine', 0.1, 28); whoosh(0.8, 300, 900, 0.05); break;
+    case 'roar_prism':   // PRISM PROWLER: an electric yowl, up then spat out
+      tone(520, 0.75, 'sawtooth', 0.08, 1100); tone(780, 0.6, 'square', 0.045, 390, 0.12);
+      hiss(0.3, 0.05); break;
     case 'phase': tone(82, 0.5, 'sawtooth', 0.12, 48); hiss(0.32, 0.08); break;
     case 'win': [523, 659, 784, 988, 1319].forEach((f, i) => tone(f, 0.4, 'triangle', 0.06, null, i * 0.16)); break;
     case 'ui': tone(540, 0.05, 'square', 0.035); break;
