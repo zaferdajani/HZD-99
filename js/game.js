@@ -201,7 +201,7 @@ function loadRoom(id) {
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
-  G.wrecks = []; G.recharge = null;
+  G.wrecks = []; G.recharge = null; G.plats = [];
   parts.length = 0;
   const def = ROOMS[id];
   def.ents.forEach((d, i) => {
@@ -217,6 +217,8 @@ function loadRoom(id) {
         s.vx = 0; s.vy = 0; s.flagKey = fk;
         G.pickups.push(s);
       }
+    } else if (kind === 'plat') {
+      G.plats.push(new MovingPlat(tx, ty, extra));
     } else if (kind === 'boss') {
       if (!G.save.flags['boss' + extra.charAt(0).toUpperCase() + extra.slice(1)])
         G.boss = new Boss(extra, tx * TILE, ty * TILE);
@@ -444,7 +446,9 @@ function update(dt) {
       if (!G.trans.half && G.trans.t < 0.14) { G.trans.half = true; applyTransition(); }
       if (G.trans.t <= 0) G.trans = null;
     } else {
+      if (G.plats) for (const pl of G.plats) pl.update(dt);
       player.update(dt);
+      if (typeof platRide === 'function') platRide(player);
       checkEvo();
       // shuriken regen: the suit condenses static into a fresh star over time,
       // so running dry is a lull, never a dead end
@@ -2048,6 +2052,7 @@ function drawWorldFrame() {
   c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
   drawStatics(P);
   for (const p of G.pickups) p.draw(c);
+  if (G.plats) for (const pl of G.plats) pl.draw(c);
   for (const e of G.enemies) e.draw(c);
   for (const w of G.wrecks) w.draw(c);
   if (G.boss) G.boss.draw(c);
@@ -2860,7 +2865,7 @@ function updateCine(dt) {
   }
   ci.t += dt;
   ci.promptT = Math.max(0, ci.promptT - dt);
-  const inTitle = ci.t >= 70;
+  const inTitle = ci.t >= 58;
   const pressed = inP('OK') || inP('JUMP') || inP('ATK');
   const held = inD('OK') || inD('JUMP') || inD('ATK');
   if (inTitle) {
@@ -2870,22 +2875,20 @@ function updateCine(dt) {
   if (pressed) ci.promptT = 2;
   if (held && ci.promptT > 0) {
     ci.hold += dt;
-    if (ci.hold >= 1) { ci.t = 70; ci.hold = 0; ci.promptT = 0; sfx('ui'); }
+    if (ci.hold >= 1) { ci.t = 58; ci.hold = 0; ci.promptT = 0; sfx('ui'); }
   } else ci.hold = 0;
 }
 function drawCine() {
   const ci = G.cine; if (!ci) return;
   const T = ci.t;
-  c.fillStyle = '#0d0d12'; c.fillRect(0, 0, 960, 540);
-  // panel-edge fade: each panel breathes in and out of black
-  const seg = (a, b) => T >= a && T < b;
-  const segA = (a, b) => clamp((T - a) / 0.5, 0, 1) * clamp((b - T) / 0.5, 0, 1);
-  const border = () => {
-    c.strokeStyle = '#000'; c.lineWidth = 6; c.strokeRect(3, 3, 954, 534);
-    c.strokeStyle = 'rgba(140,140,150,0.5)'; c.lineWidth = 1; c.strokeRect(8, 8, 944, 524);
-  };
+  // =========================================================================
+  // THE BROADCAST FALLS — a real comic. Paper gutters, ink borders, halftone
+  // shade — and the actual cast on every page: MOTHER-V, the machine folk,
+  // the four guardians from their authored sheets, and NYA-9 herself.
+  // Selective color law: cyan is hers, red is the infection, gold is power.
+  // =========================================================================
+  const seg = (a, b2) => T >= a && T < b2;
   const citySil = (yBase, k, dark) => {
-    // layered skyline in flat blacks — the machine city asleep
     for (let i = 0; i < 26; i++) {
       const bw = 40 + hash2(i, k) * 80, bh = 90 + hash2(i, k + 1) * 260;
       const bx = (i * 76 + hash2(i, k + 2) * 40) % 1040 - 40;
@@ -2893,460 +2896,412 @@ function drawCine() {
       c.fillRect(bx, yBase - bh, bw, bh + 200);
     }
   };
-  const neon = (n, k, alpha) => {
-    c.save(); c.globalAlpha = alpha;
-    c.strokeStyle = '#37ffd0'; c.lineWidth = 2; c.shadowColor = '#37ffd0'; c.shadowBlur = 8;
-    for (let i = 0; i < n; i++) {
-      const bx = (i * 137 + hash2(i, k) * 60) % 960, by = 140 + hash2(i, k + 3) * 300;
-      c.beginPath(); c.moveTo(bx, by); c.lineTo(bx + 30 + hash2(i, k + 1) * 60, by); c.stroke();
-    }
-    c.shadowBlur = 0; c.restore();
-  };
   const motes = (n, k) => {
     c.fillStyle = 'rgba(200,200,210,0.35)';
     for (let i = 0; i < n; i++)
       c.fillRect((i * 211 + hash2(i, k) * 900) % 960, (hash2(i, k + 1) * 540 + T * 5) % 540, 1.6, 1.6);
   };
-  const nyaMini = (x, y, s, pose) => {
-    // the smallest readable NYA-9: white shell, cyan visor, red scarf
-    c.save(); c.translate(x, y); c.scale(s, s);
-    c.fillStyle = '#e8e8ea';
-    if (pose === 'curl') {
-      c.beginPath(); c.arc(0, 0, 15, 0, 7); c.fill();
-      c.fillStyle = '#c8c8cc'; c.beginPath(); c.arc(5, -3, 8, 0, 7); c.fill();
-      c.strokeStyle = '#e63946'; c.lineWidth = 4; c.lineCap = 'round';
-      c.beginPath(); c.arc(0, 2, 11, 0.4, 2.6); c.stroke();
-      c.fillStyle = '#d8d8dc';   // drooped ears
-      c.beginPath(); c.moveTo(2, -12); c.lineTo(8, -15); c.lineTo(9, -9); c.closePath(); c.fill();
-    } else {
-      c.beginPath(); c.arc(0, 4, 9, 0, 7); c.fill();          // body
-      c.beginPath(); c.arc(0, -8, 8, 0, 7); c.fill();         // head
-      c.fillStyle = '#d8d8dc';                                 // ears
-      c.beginPath(); c.moveTo(-7, -13); c.lineTo(-5, -21); c.lineTo(-1, -13); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(1, -13); c.lineTo(5, -21); c.lineTo(7, -13); c.closePath(); c.fill();
-      c.fillStyle = '#0a1420'; c.fillRect(-6, -11, 12, 5);
-      const von = pose !== 'dark';
-      if (von) {
-        c.fillStyle = '#37ffd0'; c.shadowColor = '#37ffd0'; c.shadowBlur = 6;
-        c.fillRect(-5, -10, 10, 3); c.shadowBlur = 0;
-      }
-      c.strokeStyle = '#e63946'; c.lineWidth = 3; c.lineCap = 'round';
-      c.beginPath(); c.moveTo(-4, -2); c.quadraticCurveTo(-12, 0, -15, 6); c.stroke();
+  // halftone dot screen, cached as a pattern — the comic's shading
+  if (!drawCine._tone) {
+    const tc = document.createElement('canvas'); tc.width = tc.height = 7;
+    const tx = tc.getContext('2d'); tx.fillStyle = '#000';
+    tx.beginPath(); tx.arc(3.5, 3.5, 1.5, 0, 7); tx.fill();
+    drawCine._tone = c.createPattern(tc, 'repeat');
+  }
+  const tone = (x, y, w, h, a) => {
+    c.save(); c.globalAlpha = a; c.fillStyle = drawCine._tone;
+    c.fillRect(x, y, w, h); c.restore();
+  };
+  // one comic panel: pops in with an ease + white flash, clips its art
+  const panel = (x, y, w, h, at, fn) => {
+    const k = clamp((T - at) / 0.32, 0, 1);
+    c.save();
+    if (k <= 0) {
+      c.fillStyle = '#cfc9b8'; c.fillRect(x, y, w, h);
+      c.strokeStyle = 'rgba(30,30,34,0.35)'; c.lineWidth = 2; c.strokeRect(x, y, w, h);
+      c.restore(); return;
+    }
+    const e = 1 - Math.pow(1 - k, 3);
+    c.beginPath(); c.rect(x, y, w, h); c.clip();
+    c.save();
+    c.translate(x + w / 2, y + h / 2);
+    c.scale(0.94 + 0.06 * e, 0.94 + 0.06 * e);
+    c.translate(-(x + w / 2), -(y + h / 2));
+    c.fillStyle = '#101016'; c.fillRect(x - 20, y - 20, w + 40, h + 40);
+    try { fn(x, y, w, h, T - at); } catch (e2) {}
+    c.restore();
+    if (k < 1) { c.fillStyle = 'rgba(255,255,255,' + (1 - k) * 0.9 + ')'; c.fillRect(x, y, w, h); }
+    c.restore();
+    c.strokeStyle = '#14141a'; c.lineWidth = 5; c.strokeRect(x, y, w, h);
+  };
+  // caption box: cream card, ink border, typewriter reveal
+  const cap = (x, y, w, txt, local) => {
+    const lines = wrapText(txt, w - 26, 14);
+    const h = 14 + lines.length * 18;
+    const shown = clamp(local * 40, 0, txt.length);
+    c.save(); c.translate(x, y); c.rotate(-0.006);
+    c.fillStyle = '#f3efe1'; c.fillRect(0, 0, w, h);
+    c.strokeStyle = '#14141a'; c.lineWidth = 3; c.strokeRect(0, 0, w, h);
+    let used = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const take = clamp(shown - used, 0, lines[i].length);
+      if (take > 0) ftxt(lines[i].slice(0, take), w / 2, 12 + i * 18, 14, '#17171d', 'center');
+      used += lines[i].length + 1;
     }
     c.restore();
   };
-  const lionSil = (x, y, s, crouched) => {
-    // NULLFANG as the manga draws him: a black mass, purple mane, one red eye
-    c.save(); c.translate(x, y); c.scale(s, s);
-    c.save(); c.globalCompositeOperation = 'lighter';
-    const mg = c.createRadialGradient(-18, -26, 4, -18, -26, 42);
-    mg.addColorStop(0, 'rgba(180,140,255,0.5)'); mg.addColorStop(1, 'rgba(180,140,255,0)');
-    c.fillStyle = mg; c.beginPath(); c.arc(-18, -26, 42, 0, 7); c.fill();
+  // onomatopoeia: double-stroked display type, rocked on its own angle
+  const sfxWord = (txt, x, y, size, ang, col) => {
+    c.save(); c.translate(x, y); c.rotate(ang);
+    c.font = '900 ' + size + 'px Impact, "Arial Black", sans-serif';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.lineJoin = 'round';
+    c.strokeStyle = '#0d0d12'; c.lineWidth = size * 0.24; c.strokeText(txt, 0, 0);
+    c.strokeStyle = '#f3efe1'; c.lineWidth = size * 0.1; c.strokeText(txt, 0, 0);
+    c.fillStyle = col; c.fillText(txt, 0, 0);
     c.restore();
-    c.fillStyle = '#0a0a0e';
-    c.beginPath(); c.ellipse(6, -8 + (crouched ? 6 : 0), 40, crouched ? 12 : 17, 0, 0, 7); c.fill();
-    c.beginPath(); c.arc(-22, -24 + (crouched ? 8 : 0), 17, 0, 7); c.fill();   // head in mane
-    for (let i = 0; i < 8; i++) {                                              // jagged mane ring
-      const a = i / 8 * Math.PI * 2;
+  };
+  const nameTag = (x, y, key) => {
+    const nm = String(t(key)).split(/[,،]/)[0].trim();
+    c.save();
+    c.font = '800 13px "Segoe UI", Tahoma, sans-serif';
+    const w = c.measureText(nm).width + 18;
+    c.fillStyle = '#14141a'; c.fillRect(x, y, w, 22);
+    c.fillStyle = '#f3efe1'; c.textAlign = 'left'; c.textBaseline = 'middle';
+    c.fillText(nm, x + 9, y + 12);
+    c.restore();
+  };
+  const radialLight = (x, y, r, col, a) => {
+    const g = c.createRadialGradient(x, y, r * 0.1, x, y, r);
+    g.addColorStop(0, col.replace('$', a)); g.addColorStop(1, col.replace('$', 0));
+    c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2);
+  };
+  const speedBurst = (x, y, r0, r1, n, col, ph) => {
+    c.save(); c.strokeStyle = col; c.lineWidth = 2;
+    for (let i = 0; i < n; i++) {
+      const a = i / n * Math.PI * 2 + (ph || 0);
+      c.beginPath(); c.moveTo(x + Math.cos(a) * r0, y + Math.sin(a) * r0);
+      c.lineTo(x + Math.cos(a) * r1, y + Math.sin(a) * r1); c.stroke();
+    }
+    c.restore();
+  };
+  const vista = (x, y, w, h, tint, ta) => {
+    const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.vistaCity;
+    if (im) {
+      const s = Math.max(w / im.width, h / im.height);
+      c.drawImage(im, x + w / 2 - im.width * s / 2, y + h / 2 - im.height * s / 2,
+        im.width * s, im.height * s);
+      c.fillStyle = 'rgba(10,12,16,0.35)'; c.fillRect(x, y, w, h);
+    } else { c.fillStyle = '#131318'; c.fillRect(x, y, w, h); }
+    if (tint) { c.fillStyle = tint.replace('$', ta == null ? 0.22 : ta); c.fillRect(x, y, w, h); }
+  };
+  // the REAL cat: a Player instance posed for the page (world stubs guarded)
+  const nyaReal = (x, y, sc, opts) => {
+    if (typeof Player === 'undefined') return;
+    if (!G.grid) G.grid = [['#']];
+    if (!G.roomDef) G.roomDef = { zone: 'A' };
+    if (!G.roomId) G.roomId = 'X0';
+    const p = ci.nya || (ci.nya = new Player(0, 0));
+    p.x = -12; p.y = -36; p.face = p.faceVis = (opts && opts.face) || 1;
+    p.anim = T; p.idleT = (opts && opts.idle) || 0; p.iT = 0; p.on = true;
+    c.save(); c.translate(x, y); c.scale(sc, sc);
+    try { p.draw(c); } catch (e2) {}
+    c.restore();
+  };
+  const TITLE_AT = 58;
+
+  // paper page under everything (the title page goes dark again)
+  if (T < TITLE_AT) {
+    c.fillStyle = '#ddd7c6'; c.fillRect(0, 0, 960, 540);
+    c.save(); c.globalAlpha = 0.05;
+    for (let i = 0; i < 40; i++)
+      c.fillRect(hash2(i, 400) * 960, hash2(i, 401) * 540, 1.5 + hash2(i, 402) * 2, 1);
+    c.restore();
+  }
+
+  // ---------------- PAGE 1: THE SONG (0-13) ----------------
+  if (seg(0, 13)) {
+    panel(14, 14, 932, 240, 0.2, (x, y, w, h, lo) => {
+      // the machine city, whole — and the Song moving through its sky
+      vista(x, y, w, h, 'rgba(40,120,120,$)', 0.16);
+      c.save(); c.globalCompositeOperation = 'lighter';
+      c.strokeStyle = 'rgba(55,255,208,0.55)'; c.lineWidth = 2.4;
+      c.shadowColor = '#37ffd0'; c.shadowBlur = 10;
       c.beginPath();
-      c.moveTo(-22 + Math.cos(a) * 14, -24 + (crouched ? 8 : 0) + Math.sin(a) * 14);
-      c.lineTo(-22 + Math.cos(a + 0.2) * 25, -24 + (crouched ? 8 : 0) + Math.sin(a + 0.2) * 25);
-      c.lineTo(-22 + Math.cos(a + 0.45) * 14, -24 + (crouched ? 8 : 0) + Math.sin(a + 0.45) * 14);
-      c.closePath(); c.fillStyle = '#141018'; c.fill();
-    }
-    c.fillStyle = '#e63946'; c.shadowColor = '#e63946'; c.shadowBlur = 10;
-    c.beginPath(); c.arc(-27, -26 + (crouched ? 8 : 0), 2.6, 0, 7); c.fill();
-    c.shadowBlur = 0;
-    c.strokeStyle = '#0a0a0e'; c.lineWidth = 5; c.lineCap = 'round';           // spade tail
-    c.beginPath(); c.moveTo(42, -12); c.quadraticCurveTo(58, -26, 54, -40); c.stroke();
-    c.restore();
-  };
-  // ---------------- SCENE 1: THE DEPTHS (0-12) ----------------
-  if (seg(0, 4)) {
-    c.save(); c.globalAlpha = segA(0, 4.4);
-    c.translate(0, -80 + Math.min(1, T / 4) * 80);         // the slow pan down
-    c.fillStyle = '#1a1a20'; c.fillRect(0, 0, 960, 640);
-    citySil(560, 5, false); citySil(600, 9, true);
-    neon(14, 3, 0.5 + Math.sin(T * 2) * 0.1);
-    motes(20, 7);
-    c.restore(); border();
-  } else if (seg(4, 8)) {
-    c.save(); c.globalAlpha = segA(4, 8.4);
-    const z = 1 + (T - 4) * 0.04;                          // the slow zoom
-    c.translate(480, 280); c.scale(z, z); c.translate(-480, -280);
-    for (let i = 0; i < 8; i++) {                          // bokeh city lights
-      c.fillStyle = 'rgba(120,120,130,0.12)';
-      c.beginPath(); c.arc(hash2(i, 21) * 960, hash2(i, 22) * 400, 24 + hash2(i, 23) * 30, 0, 7); c.fill();
-    }
-    const trem = (T % 2) < 0.12 ? 1 : 0;                   // the servo still trying
-    c.save(); c.translate(480 + trem, 300);
-    c.strokeStyle = '#2c2c34'; c.lineWidth = 26; c.lineCap = 'round';
-    c.beginPath(); c.moveTo(-160, 160); c.lineTo(-60, 20); c.lineTo(40, -30); c.stroke();
-    c.strokeStyle = '#3c3c46'; c.lineWidth = 18;
-    c.beginPath(); c.moveTo(-60, 20); c.lineTo(40, -30); c.stroke();
-    c.fillStyle = '#26262e';                               // the gear never placed
-    c.beginPath(); c.arc(80, -44, 34, 0, 7); c.fill();
-    for (let i = 0; i < 8; i++) {
-      const a = i / 8 * Math.PI * 2 + 0.3;
-      c.fillRect(80 + Math.cos(a) * 34 - 5, -44 + Math.sin(a) * 34 - 5, 10, 10);
-    }
-    c.fillStyle = '#101014'; c.beginPath(); c.arc(80, -44, 12, 0, 7); c.fill();
-    c.fillStyle = 'rgba(150,90,60,0.5)';                   // rust on the joints
-    c.beginPath(); c.arc(-60, 20, 9, 0, 7); c.fill();
-    c.restore();
-    motes(16, 8);
-    c.restore(); border();
-  } else if (seg(8, 12)) {
-    c.save(); c.globalAlpha = segA(8, 12.4);
-    const k = clamp((T - 8.5) / 3, 0, 1);                  // dark → red
-    c.fillStyle = '#131318'; c.fillRect(0, 0, 960, 540);
-    c.save(); c.translate(480, 270);
-    const open = 0.35 + k * 0.5;                           // the eye opens wider
-    c.fillStyle = '#1c1c22';
-    c.beginPath(); c.ellipse(0, 0, 190, 120 * open + 8, 0, 0, 7); c.fill();
-    // six-blade mechanical aperture
-    const ec = k < 0.33 ? '#0d0d12' : k < 0.66 ? '#4a0a0a' : '#e63946';
-    c.fillStyle = ec;
-    if (k >= 0.66) { c.shadowColor = '#e63946'; c.shadowBlur = 30; }
-    c.beginPath(); c.arc(0, 0, 62 * open + 14, 0, 7); c.fill(); c.shadowBlur = 0;
-    c.strokeStyle = '#26262e'; c.lineWidth = 5;
-    for (let i = 0; i < 6; i++) {
-      const a = i / 6 * Math.PI * 2 + k * 0.5;
-      c.beginPath(); c.moveTo(Math.cos(a) * 30, Math.sin(a) * 30);
-      c.lineTo(Math.cos(a + 0.5) * (62 * open + 14), Math.sin(a + 0.5) * (62 * open + 14)); c.stroke();
-    }
-    // the city reflected in it, tinted by what it has become
-    c.save(); c.globalAlpha = 0.35; c.beginPath(); c.arc(0, 0, 60 * open + 12, 0, 7); c.clip();
-    c.translate(-40, 20); c.scale(0.18, 0.18);
-    citySil(300, 5, false);
-    if (k >= 0.66) { c.fillStyle = 'rgba(230,57,70,0.35)'; c.fillRect(-500, -400, 1500, 900); }
-    c.restore();
-    c.restore();
-    c.restore(); border();
-  }
-  // ---------------- SCENE 2: THE BROADCAST (12-28) ----------------
-  else if (seg(12, 16)) {
-    c.save(); c.globalAlpha = segA(12, 16.4);
-    // TV snow
-    for (let i = 0; i < 260; i++) {
-      const sx2 = (hash2(i, Math.floor(T * 20)) * 960) | 0, sy2 = (hash2(i + 300, Math.floor(T * 20)) * 540) | 0;
-      c.fillStyle = hash2(i, 40) > 0.5 ? 'rgba(220,220,225,0.25)' : 'rgba(10,10,14,0.6)';
-      c.fillRect(sx2, sy2, 3, 3);
-    }
-    const zk = 1.6 - clamp((T - 12) / 4, 0, 1) * 0.6;      // zoom out
-    c.save(); c.translate(480, 270); c.scale(zk, zk);
-    for (let i = 0; i < 5; i++) {                          // the signal, discoloring
-      const r2 = ((T - 12) * 60 + i * 46) % 260;
-      const col = i < 2 ? '#37ffd0' : i < 4 ? '#b48cff' : '#e63946';
-      c.save(); c.globalAlpha = clamp(1 - r2 / 260, 0, 1) * 0.8;
-      c.strokeStyle = col; c.lineWidth = 3; c.shadowColor = col; c.shadowBlur = 10;
-      c.beginPath(); c.arc(0, 0, 18 + r2, 0, 7); c.stroke();
-      c.shadowBlur = 0; c.restore();
-    }
-    c.strokeStyle = 'rgba(220,220,230,0.25)'; c.lineWidth = 1.6;   // speed lines
-    for (let i = 0; i < 12; i++) {
-      const a = i / 12 * Math.PI * 2 + T * 0.2;
-      c.beginPath(); c.moveTo(Math.cos(a) * 90, Math.sin(a) * 90);
-      c.lineTo(Math.cos(a) * 420, Math.sin(a) * 420); c.stroke();
-    }
-    c.restore();
-    c.restore(); border();
-  } else if (seg(16, 22)) {
-    c.save(); c.globalAlpha = segA(16, 22.4);
-    const panels = [[0, 0], [482, 0], [0, 272], [482, 272]];
-    const local = T - 16;
-    panels.forEach((p2, i) => {
-      // the four corners of the city failing at once, then going dark in turn
-      const fade = clamp(1 - (local - (3.5 + i * 0.5)) / 0.5, 0, 1);
-      c.save(); c.beginPath(); c.rect(p2[0], p2[1], 478, 268); c.clip();
-      c.globalAlpha = fade;
-      c.translate(p2[0], p2[1]);
-      c.fillStyle = '#16161c'; c.fillRect(0, 0, 478, 268);
-      if (i === 0) {           // eye turns red, fast cycle
-        const kk = (local % 1);
-        c.fillStyle = kk < 0.4 ? '#26262e' : kk < 0.7 ? '#4a0a0a' : '#e63946';
-        if (kk >= 0.7) { c.shadowColor = '#e63946'; c.shadowBlur = 20; }
-        c.beginPath(); c.arc(239, 134, 42, 0, 7); c.fill(); c.shadowBlur = 0;
-        c.strokeStyle = '#101014'; c.lineWidth = 4;
-        c.beginPath(); c.arc(239, 134, 58, 0, 7); c.stroke();
-      } else if (i === 1) {    // the conveyor stutters
-        const jerk = local % 1.4 < 0.9 ? local * 60 : Math.floor(local * 3) * 20;
-        c.fillStyle = '#26262e'; c.fillRect(0, 150, 478, 24);
-        for (let b2 = 0; b2 < 7; b2++) {
-          c.fillStyle = '#3a3a44';
-          c.fillRect(((b2 * 90 + jerk) % 560) - 40, 128, 34, 22);
-        }
-        c.strokeStyle = '#101014'; c.lineWidth = 3;
-        for (let g2 = 0; g2 < 3; g2++) {
-          c.beginPath(); c.arc(80 + g2 * 150, 200, 22, 0, 7); c.stroke();
-        }
-      } else if (i === 2) {    // wires spark purple, settle red
-        c.strokeStyle = '#2c2c34'; c.lineWidth = 5;
-        c.beginPath(); c.moveTo(0, 80); c.quadraticCurveTo(200, 140, 478, 100); c.stroke();
-        c.beginPath(); c.moveTo(0, 190); c.quadraticCurveTo(260, 150, 478, 210); c.stroke();
-        if ((local * 2) % 1 < 0.3) {
-          const sc = local < 3 ? '#b48cff' : '#e63946';
-          c.fillStyle = sc; c.shadowColor = sc; c.shadowBlur = 14;
-          const sx3 = 100 + hash2(Math.floor(local * 4), 60) * 280;
-          c.beginPath(); c.arc(sx3, 120 + hash2(Math.floor(local * 4), 61) * 60, 4, 0, 7); c.fill();
-          c.shadowBlur = 0;
-        }
-      } else {                 // the door slams; warning light strobes
-        const slam = clamp(local / 0.25, 0, 1);
-        c.fillStyle = '#101014'; c.fillRect(120, 40, 240, 220);
-        c.fillStyle = '#2c2c34'; c.fillRect(120, 40, 240 * slam, 220);
-        if (slam >= 1 && (local * 3) % 1 < 0.5) {
-          c.fillStyle = '#e63946'; c.shadowColor = '#e63946'; c.shadowBlur = 16;
-          c.beginPath(); c.arc(239, 28, 8, 0, 7); c.fill(); c.shadowBlur = 0;
-        }
+      for (let px = 0; px <= w; px += 5) {
+        const yy = y + 52 + Math.sin(px * 0.02 - lo * 2.2) * 12 * Math.sin(px / w * Math.PI);
+        px === 0 ? c.moveTo(x + px, yy) : c.lineTo(x + px, yy);
+      }
+      c.stroke();
+      for (let i = 0; i < 4; i++) {
+        const nx = x + ((i * 233 + lo * 46) % w), ny = y + 40 + Math.sin(lo * 2 + i * 2) * 14;
+        ftxt('♪', nx, ny, 15 + (i % 2) * 5, 'rgba(55,255,208,0.8)');
       }
       c.restore();
+      tone(x, y + h - 60, w, 60, 0.1);
+      cap(x + 14, y + 12, 400, t('cine_c1'), lo);
     });
-    c.strokeStyle = '#000'; c.lineWidth = 4;               // the 2×2 gutters
-    c.beginPath(); c.moveTo(480, 0); c.lineTo(480, 540);
-    c.moveTo(0, 270); c.lineTo(960, 270); c.stroke();
-    c.restore(); border();
-  } else if (seg(22, 28)) {
-    c.save(); c.globalAlpha = segA(22, 28.4);
-    const local = T - 22;
-    const pull = 1 + local * 0.02;
-    c.save(); c.translate(480, 270); c.scale(1 / pull, 1 / pull); c.translate(-480, -270);
-    c.fillStyle = '#0a0a0f'; c.fillRect(-100, -100, 1160, 740);
-    citySil(560, 31, true);
-    // the choir: fifty red eyes opening in a slow constellation
-    for (let i = 0; i < 52; i++) {
-      const ex = hash2(i, 44) * 940 + 10, ey = 120 + hash2(i, 45) * 360;
-      const openAt = hash2(i, 46) * 4;
-      const kk = clamp((local - openAt) / 0.4, 0, 1);
-      if (kk <= 0) continue;
-      const sz = (2 + hash2(i, 47) * 4) * kk;
-      c.fillStyle = '#e63946'; c.shadowColor = '#e63946'; c.shadowBlur = 6;
-      c.beginPath(); c.arc(ex, ey, sz, 0, 7); c.fill();
-    }
-    c.shadowBlur = 0;
-    // and one cyan point that refuses — her
-    const cp = 0.5 + Math.sin(local * 1.6) * 0.5;
-    c.fillStyle = '#37ffd0'; c.shadowColor = '#37ffd0'; c.shadowBlur = 10 + cp * 8;
-    c.beginPath(); c.arc(720, 180, 4 + cp * 1.5, 0, 7); c.fill(); c.shadowBlur = 0;
-    c.restore();
-    c.restore(); border();
+    panel(14, 268, 452, 258, 2.2, (x, y, w, h, lo) => {
+      // the machine folk at their shift — the real NPCs
+      c.fillStyle = '#191922'; c.fillRect(x, y, w, h);
+      radialLight(x + w / 2, y + 30, 240, 'rgba(255,205,120,$)', 0.16);
+      c.fillStyle = '#101016'; c.fillRect(x, y + h - 44, w, 44);
+      c.strokeStyle = 'rgba(220,220,230,0.14)'; c.lineWidth = 1;
+      for (let i = 0; i < 5; i++) { c.beginPath(); c.moveTo(x + i * w / 4, y); c.lineTo(x + i * w / 4, y + h - 44); c.stroke(); }
+      const floor = y + h - 44;
+      if (typeof drawNPCBody === 'function')
+        [['servo', -130, 2.9], ['ratchet', 0, 3.1], ['mono', 128, 2.9]].forEach(nn => {
+          c.save(); c.translate(x + w / 2 + nn[1], floor); c.scale(nn[2], nn[2]);
+          try { drawNPCBody(c, nn[0], T + nn[1], false); } catch (e2) {}
+          c.restore();
+        });
+      tone(x, floor - 30, w, 74, 0.12);
+      cap(x + 12, y + 12, 300, t('cine_c2'), lo - 0.4);
+    });
+    panel(480, 268, 466, 258, 4.4, (x, y, w, h, lo) => {
+      // MOTHER-V serene — the broadcast heart, singing
+      c.fillStyle = '#12121c'; c.fillRect(x, y, w, h);
+      radialLight(x + w / 2, y + h * 0.46, 230, 'rgba(55,255,208,$)', 0.14);
+      if (typeof drawMother === 'function') {
+        const bx = x + w / 2, by = y + h * 0.52;
+        const mb = ci.mb1 || (ci.mb1 = {
+          w: 120, h: 120, st: 'dorm', mPhase: 0, hp: 1, hpMax: 1, hurtT: 0,
+          cx() { return 0; }, cy() { return 0; },
+        });
+        mb.anim = T;
+        c.save(); c.translate(bx, by); c.scale(0.78, 0.78);
+        try { drawMother(c, mb); } catch (e2) {}
+        c.restore();
+      }
+      for (let i = 0; i < 3; i++) {
+        const k = ((lo * 0.5 + i * 0.33) % 1);
+        ftxt('♪', x + w / 2 + 90 + i * 26 - k * 30, y + h * 0.4 - k * 90, 14 + i * 3,
+          'rgba(55,255,208,' + (0.8 - k * 0.7) + ')');
+      }
+      tone(x, y, w, 40, 0.1);
+      cap(x + 12, y + h - 62, 320, t('cine_c3'), lo - 0.5);
+    });
   }
-  // ---------------- SCENE 3: THE CRADLE (28-48) ----------------
-  else if (seg(28, 33)) {
-    c.save(); c.globalAlpha = segA(28, 33.4);
-    const local = T - 28;
-    // the duct: perspective lines converging, pipes with cyan strips
-    c.fillStyle = '#131318'; c.fillRect(0, 0, 960, 540);
-    c.strokeStyle = '#26262e'; c.lineWidth = 3;
-    for (let i = 0; i < 10; i++) {
-      const off = ((i * 90 - local * 60) % 900 + 900) % 900;
-      const kk = off / 900, w2 = 960 * (1 - kk * 0.75), h2 = 540 * (1 - kk * 0.75);
-      c.strokeRect(480 - w2 / 2, 270 - h2 / 2, w2, h2);
-    }
-    c.strokeStyle = 'rgba(55,255,208,0.4)'; c.lineWidth = 2;
-    c.beginPath(); c.moveTo(0, 60); c.lineTo(480 - 120, 270 - 34); c.stroke();
-    c.beginPath(); c.moveTo(960, 60); c.lineTo(480 + 120, 270 - 34); c.stroke();
-    // condensation falls, one drop at a time
-    const dk = (local % 2) / 2;
-    c.fillStyle = 'rgba(180,220,230,0.5)';
-    c.beginPath(); c.arc(330, 80 + dk * dk * 380, 2.5, 0, 7); c.fill();
-    // the small white shape at the end of the crawl
-    const br = 0.9 + Math.sin(local * 1.8) * 0.1;
-    c.save(); c.globalAlpha = 0.8; c.shadowColor = '#e8e8ea'; c.shadowBlur = 18 * br;
-    c.fillStyle = '#e8e8ea'; c.beginPath(); c.arc(480, 268, 7 * br, 0, 7); c.fill();
-    c.restore();
-    motes(14, 71);
-    c.restore(); border();
-  } else if (seg(33, 39)) {
-    c.save(); c.globalAlpha = segA(33, 39.4);
-    const local = T - 33;
-    c.fillStyle = '#101014'; c.fillRect(0, 0, 960, 540);
-    // one cyan work-light from above
-    const lg = c.createRadialGradient(480, 40, 10, 480, 300, 420);
-    lg.addColorStop(0, 'rgba(55,255,208,0.16)'); lg.addColorStop(1, 'rgba(55,255,208,0)');
-    c.fillStyle = lg; c.fillRect(0, 0, 960, 540);
-    const drift = Math.sin(local * 0.52) * 60;             // the slow circling
-    c.save(); c.translate(480 + drift, 330);
-    c.strokeStyle = '#2c2c34'; c.lineWidth = 5;            // the cradle basket
-    c.beginPath(); c.moveTo(-70, 30); c.quadraticCurveTo(0, 74, 70, 30); c.stroke();
-    c.strokeStyle = '#3a3a44'; c.lineWidth = 2.4;
-    for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(i * 28, 34 + Math.abs(i) * -3 + 8); c.lineTo(i * 22, 8); c.stroke(); }
-    nyaMini(0, 6, 2.6, 'curl');                            // asleep, visor dark
-    // diagnostic tools and the little keytar beside her
-    c.fillStyle = '#26262e'; c.fillRect(96, 30, 40, 12);
-    c.fillStyle = '#37ffd0'; c.fillRect(100, 33, 4, 3); c.fillRect(108, 33, 4, 3);
-    c.fillStyle = '#2c2c34'; c.fillRect(-140, 26, 34, 16);
-    c.strokeStyle = 'rgba(55,255,208,0.6)'; c.lineWidth = 1.4;
-    for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(-136 + i * 7, 28); c.lineTo(-136 + i * 7, 40); c.stroke(); }
-    c.restore();
-    motes(12, 81);
-    c.restore(); border();
-  } else if (seg(39, 45)) {
-    c.save(); c.globalAlpha = segA(39, 45.4);
-    const local = T - 39;
-    c.fillStyle = '#0a0a0e'; c.fillRect(0, 0, 960, 540);
-    // extreme close-up: the visor waking pixel by pixel
-    c.fillStyle = '#16161c'; rr(c, 200, 140, 560, 260, 60); c.fill();
-    c.fillStyle = '#0a1420'; rr(c, 260, 210, 440, 120, 26); c.fill();
-    const spread = clamp(local / 2.2, 0, 1) * 220;
-    if (local > 0.6) {
-      c.fillStyle = '#37ffd0'; c.shadowColor = '#37ffd0'; c.shadowBlur = 24;
-      c.fillRect(480 - spread, 250, spread * 2, 40);
+  // ---------------- PAGE 2: THE FALL (13-25) ----------------
+  else if (seg(13, 25)) {
+    panel(14, 14, 452, 512, 13.2, (x, y, w, h, lo) => {
+      // the corruption reaches her: the same heart, torn by the null signal
+      c.fillStyle = '#140e14'; c.fillRect(x, y, w, h);
+      radialLight(x + w / 2, y + h * 0.42, 260, 'rgba(230,57,70,$)', 0.15);
+      const bx = x + w / 2, by = y + h * 0.5;
+      // expanding null rings, red
+      for (let i = 0; i < 4; i++) {
+        const r = ((lo * 90 + i * 70) % 300);
+        c.save(); c.globalAlpha = clamp(1 - r / 300, 0, 1) * 0.6;
+        c.strokeStyle = i % 2 ? '#e63946' : '#b48cff'; c.lineWidth = 2.6;
+        c.beginPath(); c.arc(bx, by, 30 + r, 0, 7); c.stroke(); c.restore();
+      }
+      if (typeof drawMother === 'function') {
+        const mb = ci.mb2 || (ci.mb2 = {
+          w: 120, h: 120, st: 'nwcharge', mPhase: 1, hp: 0.55, hpMax: 1, hurtT: 0,
+          cx() { return 0; }, cy() { return 0; },
+        });
+        mb.anim = T;
+        const jx = (T * 9 % 1) < 0.2 ? rnd(-4, 4) : 0;
+        c.save(); c.translate(bx + jx, by); c.scale(0.92, 0.92);
+        try { drawMother(c, mb); } catch (e2) {}
+        c.restore();
+      }
+      // glitch bars tearing the panel
+      for (let i = 0; i < 5; i++) {
+        if (hash2(i, Math.floor(T * 7)) < 0.55) continue;
+        const gy2 = y + hash2(i, Math.floor(T * 5)) * h;
+        c.fillStyle = i % 2 ? 'rgba(230,57,70,0.28)' : 'rgba(180,140,255,0.22)';
+        c.fillRect(x, gy2, w, 3 + hash2(i, 9) * 5);
+      }
+      sfxWord('KRRZZT', bx, y + 74, 42, -0.08, '#e63946');
+      tone(x, y + h - 90, w, 90, 0.14);
+      cap(x + 12, y + h - 64, 320, t('cine_c4'), lo - 0.3);
+    });
+    panel(480, 14, 466, 248, 15.4, (x, y, w, h, lo) => {
+      // the signal itself, discoloring ring by ring
+      c.fillStyle = '#0f0f14'; c.fillRect(x, y, w, h);
+      for (let i = 0; i < 130; i++) {
+        const sx2 = x + (hash2(i, Math.floor(T * 20)) * w) | 0, sy2 = y + (hash2(i + 300, Math.floor(T * 20)) * h) | 0;
+        c.fillStyle = hash2(i, 40) > 0.5 ? 'rgba(220,220,225,0.22)' : 'rgba(10,10,14,0.6)';
+        c.fillRect(sx2, sy2, 3, 3);
+      }
+      const bx = x + w / 2, by = y + h / 2;
+      for (let i = 0; i < 5; i++) {
+        const r2 = (lo * 60 + i * 40) % 200;
+        const col = i < 2 ? '#37ffd0' : i < 4 ? '#b48cff' : '#e63946';
+        c.save(); c.globalAlpha = clamp(1 - r2 / 200, 0, 1) * 0.8;
+        c.strokeStyle = col; c.lineWidth = 3; c.shadowColor = col; c.shadowBlur = 10;
+        c.beginPath(); c.arc(bx, by, 14 + r2, 0, 7); c.stroke(); c.restore();
+      }
+      speedBurst(bx, by, 70, 240, 12, 'rgba(220,220,230,0.22)', T * 0.2);
+      cap(x + 12, y + 12, 280, t('cine_c5'), lo - 0.3);
+    });
+    panel(480, 276, 466, 250, 17.6, (x, y, w, h, lo) => {
+      // the city under the command — every window an obeying red eye
+      vista(x, y, w, h, 'rgba(160,30,40,$)', 0.34);
+      for (let i = 0; i < 30; i++) {
+        const kk = clamp((lo - hash2(i, 46) * 3) / 0.4, 0, 1);
+        if (kk <= 0) continue;
+        c.fillStyle = '#e63946'; c.shadowColor = '#e63946'; c.shadowBlur = 6;
+        c.beginPath();
+        c.arc(x + hash2(i, 44) * w, y + 30 + hash2(i, 45) * (h - 70), (1.6 + hash2(i, 47) * 3) * kk, 0, 7);
+        c.fill();
+      }
       c.shadowBlur = 0;
-      c.fillStyle = 'rgba(160,255,240,0.8)';
-      c.fillRect(480 - spread, 258, spread * 2, 8);
-    }
-    // the glow finds the scarf below
-    if (spread > 100) {
-      c.save(); c.globalAlpha = (spread - 100) / 120 * 0.5;
-      c.fillStyle = '#e63946'; rr(c, 300, 430, 360, 60, 24); c.fill();
-      c.fillStyle = 'rgba(55,255,208,0.25)'; rr(c, 300, 430, 360, 24, 12); c.fill();
-      c.restore();
-    }
-    c.restore(); border();
-  } else if (seg(45, 48)) {
-    c.save(); c.globalAlpha = segA(45, 48.4);
-    const local = T - 45;
-    c.fillStyle = '#101014'; c.fillRect(0, 0, 960, 540);
-    // red light seeps from the grate she is about to open
-    const rl = 0.5 + Math.sin(local * 7) * 0.15;
-    const rg = c.createRadialGradient(870, 270, 6, 870, 270, 260);
-    rg.addColorStop(0, 'rgba(230,57,70,' + 0.24 * rl + ')'); rg.addColorStop(1, 'rgba(230,57,70,0)');
-    c.fillStyle = rg; c.fillRect(0, 0, 960, 540);
-    c.fillStyle = '#26262e'; c.fillRect(830, 180, 90, 180);
-    c.fillStyle = '#0a0a0e';
-    for (let i = 0; i < 5; i++) c.fillRect(838 + i * 17, 188, 8, 164);
-    // she sits up: ears from drooped to alert, visor scanning
-    const up = clamp(local / 1.2, 0, 1);
-    nyaMini(430, 340 - up * 16, 5, up < 0.5 ? 'curl' : 'idle');
-    if (up >= 0.5) {
-      const scan = (local * 1.2) % 1;
-      c.fillStyle = 'rgba(255,255,255,0.85)';
-      c.fillRect(430 - 24 + scan * 44, 340 - up * 16 - 52, 5, 14);
-    }
-    motes(10, 91);
-    c.restore(); border();
+      tone(x, y, w, h, 0.12);
+      cap(x + 12, y + h - 62, 300, t('cine_c6'), lo - 0.4);
+    });
   }
-  // ---------------- SCENE 4: FIRST ENCOUNTER (48-70) ----------------
-  else if (seg(48, 52)) {
-    c.save(); c.globalAlpha = segA(48, 52.4);
-    c.fillStyle = '#0d0d12'; c.fillRect(0, 0, 960, 540);
-    // through the grate: the city alive with red eyes (soft focus)
-    c.save(); c.globalAlpha = 0.75;
-    citySil(500, 101, true);
-    for (let i = 0; i < 24; i++) {
-      c.fillStyle = 'rgba(230,57,70,0.8)';
-      c.beginPath(); c.arc(hash2(i, 104) * 960, 160 + hash2(i, 105) * 280, 2 + hash2(i, 106) * 3, 0, 7); c.fill();
-    }
-    c.restore();
-    // the grate, razor sharp in front
-    c.fillStyle = '#1c1c22';
-    for (let i = 0; i < 16; i++) c.fillRect(i * 62, 0, 10, 540);
-    for (let i = 0; i < 7; i++) c.fillRect(0, i * 84, 960, 8);
-    // her, back to us, one paw on the metal — trembling just slightly
-    const shake2 = (T * 8 % 1) < 0.5 ? 0.6 : -0.6;
-    nyaMini(300 + shake2 * 0.4, 430, 7, 'idle');
-    c.restore(); border();
-  } else if (seg(52, 58)) {
-    c.save(); c.globalAlpha = segA(52, 58.4);
-    const local = T - 52;
-    const zm = 1 + clamp(local / 4, 0, 1) * 0.25;          // creep onto his face
-    c.fillStyle = '#0d0d12'; c.fillRect(0, 0, 960, 540);
-    c.save(); c.translate(480, 300); c.scale(zm, zm);
-    c.fillStyle = '#16161c'; c.fillRect(-480, 40, 960, 200);   // his platform
-    lionSil(0, 30, 4.4, false);
-    // he looks up: speed lines burst off the eye
-    if (local > 3) {
-      c.strokeStyle = 'rgba(230,57,70,0.4)'; c.lineWidth = 2;
-      for (let i = 0; i < 8; i++) {
-        const a = i / 8 * Math.PI * 2;
-        c.beginPath(); c.moveTo(-118 + Math.cos(a) * 24, -76 + Math.sin(a) * 24);
-        c.lineTo(-118 + Math.cos(a) * 90, -76 + Math.sin(a) * 90); c.stroke();
+  // ---------------- PAGE 3: THE GUARDIANS (25-41) ----------------
+  else if (seg(25, 41)) {
+    // four panels, four real guardians from their own sheets
+    panel(14, 14, 452, 240, 25.3, (x, y, w, h, lo) => {
+      c.fillStyle = '#120e18'; c.fillRect(x, y, w, h);
+      radialLight(x + w / 2, y + h - 30, 250, 'rgba(150,80,255,$)', 0.2);
+      c.fillStyle = '#0c0a10'; c.fillRect(x, y + h - 26, w, 26);
+      if (typeof bFig === 'function') {
+        c.save(); c.translate(x + w / 2 + 10, y + h - 28); c.scale(0.62, 0.62);
+        try { bFig(c, 'aRoar', 0, 2.2); } catch (e2) {}
+        c.restore();
       }
-      // the tiny cyan reflection in his eye: her visor
-      c.fillStyle = '#37ffd0'; c.shadowColor = '#37ffd0'; c.shadowBlur = 6;
-      c.beginPath(); c.arc(-117, -78, 1.6, 0, 7); c.fill(); c.shadowBlur = 0;
-    }
-    c.restore();
-    c.restore(); border();
-  } else if (seg(58, 64)) {
-    c.save(); c.globalAlpha = segA(58, 64.4);
-    const local = T - 58;
-    // the split: her order against his ruin, the Song caught between
-    c.save(); c.beginPath(); c.rect(0, 0, 478, 540); c.clip();
-    c.fillStyle = '#14161a'; c.fillRect(0, 0, 478, 540);
-    const clg = c.createRadialGradient(239, 200, 10, 239, 200, 300);
-    clg.addColorStop(0, 'rgba(55,255,208,0.14)'); clg.addColorStop(1, 'rgba(55,255,208,0)');
-    c.fillStyle = clg; c.fillRect(0, 0, 478, 540);
-    nyaMini(239, 330, 6, 'idle');
-    motes(8, 121);
-    c.restore();
-    c.save(); c.beginPath(); c.rect(482, 0, 478, 540); c.clip();
-    c.fillStyle = '#100c0e'; c.fillRect(482, 0, 478, 540);
-    lionSil(720, 340, 3.4, true);
-    for (let i = 0; i < 6; i++) {                          // chaotic embers
-      c.fillStyle = 'rgba(230,57,70,0.6)';
-      c.fillRect(500 + hash2(i, Math.floor(T * 6)) * 430, (hash2(i + 9, Math.floor(T * 4)) * 540), 2.5, 2.5);
-    }
-    c.restore();
-    // the Song wave crossing the gutter, breaking against the red
-    c.strokeStyle = '#37ffd0'; c.lineWidth = 3; c.shadowColor = '#37ffd0'; c.shadowBlur = 8;
-    c.beginPath();
-    for (let x2 = 60; x2 <= 620; x2 += 6) {
-      const damp = x2 > 480 ? Math.max(0, 1 - (x2 - 480) / 140) : 1;
-      const y2 = 270 + Math.sin(x2 * 0.045 - local * 6) * 20 * damp;
-      x2 === 60 ? c.moveTo(x2, y2) : c.lineTo(x2, y2);
-    }
-    c.stroke(); c.shadowBlur = 0;
-    c.strokeStyle = '#000'; c.lineWidth = 4;
-    c.beginPath(); c.moveTo(480, 0); c.lineTo(480, 540); c.stroke();
-    c.restore(); border();
-  } else if (seg(64, 70)) {
-    c.save(); c.globalAlpha = segA(64, 70.4);
-    const local = T - 64;
-    c.fillStyle = '#0f0f14'; c.fillRect(0, 0, 960, 540);
-    citySil(540, 131, true);
-    neon(10, 133, 0.4);
-    for (let i = 0; i < 12; i++) {
-      c.fillStyle = 'rgba(230,57,70,0.7)';
-      c.beginPath(); c.arc(hash2(i, 135) * 960, 120 + hash2(i, 136) * 200, 2.4, 0, 7); c.fill();
-    }
-    // out of her depth, doing the job: the drop, the landing, the claws
-    const drop = clamp(local / 0.9, 0, 1);
-    const ny = 120 + drop * drop * 280;
-    const crouchK = local > 0.9 && local < 1.5 ? 1 : 0;
-    nyaMini(480, ny, 6, 'idle');
-    if (crouchK && local < 1.2) {                          // landing dust
-      c.fillStyle = 'rgba(160,160,170,0.5)';
-      for (let i = 0; i < 6; i++) {
-        c.beginPath(); c.arc(480 + (i - 2.5) * 16, 428, Math.max(0.8, 4 - Math.abs(i - 2.5)), 0, 7); c.fill();
+      speedBurst(x + w / 2 - 60, y + 70, 46, 130, 9, 'rgba(230,57,70,0.35)');
+      sfxWord('RRAAGH', x + 128, y + 52, 34, -0.1, '#b48cff');
+      nameTag(x + 8, y + h - 30, 'b_glitch');
+      tone(x, y, w, 44, 0.12);
+    });
+    panel(480, 14, 466, 240, 27.3, (x, y, w, h, lo) => {
+      c.fillStyle = '#100f15'; c.fillRect(x, y, w, h);
+      radialLight(x + w / 2, y + 60, 220, 'rgba(230,57,70,$)', 0.13);
+      if (typeof drawEagle === 'function') {
+        const S = (120 * 3.0) / 532;
+        const eb = ci.eb1 || (ci.eb1 = {
+          w: 120, h: 100, st: 'dorm', hurtT: 0, dead: false, t: 0.5,
+        });
+        eb.x = x + w / 2 - 60; eb.y = y + 120; eb.anim = T;
+        eb.spawnX = eb.x; eb.homeY = y + 120 - 100 / 2 + 300 * S - 26;
+        c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip();
+        try { drawEagle(c, eb); } catch (e2) {}
+        c.restore();
       }
-    }
-    if (local > 1.6) {                                     // the talons gleam
-      const fl = local < 1.8 ? 1 : 0.5 + Math.sin(T * 6) * 0.2;
-      c.strokeStyle = 'rgba(232,232,255,' + fl + ')'; c.lineWidth = 2.4; c.lineCap = 'round';
-      for (let k = -1; k <= 1; k++) {
-        c.beginPath(); c.moveTo(510, 396 + k * 5);
-        c.quadraticCurveTo(524, 398 + k * 6, 530, 404 + k * 6); c.stroke();
+      sfxWord('SKREEE', x + w - 120, y + 46, 32, 0.09, '#e63946');
+      nameTag(x + 8, y + h - 30, 'b_brood');
+      tone(x, y + h - 50, w, 50, 0.12);
+    });
+    panel(14, 268, 452, 240, 29.3, (x, y, w, h, lo) => {
+      c.fillStyle = '#0e1218'; c.fillRect(x, y, w, h);
+      radialLight(x + w / 2, y + h * 0.45, 240, 'rgba(120,190,255,$)', 0.16);
+      if (typeof glcHeroRig === 'function') {
+        c.save(); c.translate(x + w / 2, y + h - 34); c.scale(0.5, 0.5);
+        c.translate(0, Math.sin(T * 1.7) * 8);
+        try { glcHeroRig(c, 0, 0, T * 3, 0.35, 0); } catch (e2) {}
+        c.restore();
       }
-    }
-    c.fillStyle = '#16161c'; c.fillRect(0, 434, 960, 106);
-    c.restore(); border();
+      // frost breathing off her line of flight
+      for (let i = 0; i < 8; i++)
+        c.fillRect(x + ((i * 63 + T * 30) % w), y + 40 + hash2(i, 61) * (h - 90),
+          1.8, 1.8);
+      sfxWord('FSSSHH', x + 120, y + 50, 32, -0.07, '#a5d8ff');
+      nameTag(x + 8, y + h - 30, 'b_zero');
+      tone(x, y, w, 40, 0.1);
+    });
+    panel(480, 268, 466, 240, 31.3, (x, y, w, h, lo) => {
+      c.fillStyle = '#170f0c'; c.fillRect(x, y, w, h);
+      radialLight(x + w / 2, y + h - 20, 260, 'rgba(255,123,58,$)', 0.22);
+      if (typeof drgFig === 'function') {
+        c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip();
+        c.translate(x + w / 2, y + h - 12); c.scale(-0.4, 0.4);
+        try {
+          drgFig(c, 'hero', 0, 1.2, -0.03);
+          if (typeof drgGlow === 'function') drgGlow(c, 266, -292, 26, 0.6, false);
+        } catch (e2) {}
+        c.restore();
+      }
+      sfxWord('VWOOOM', x + w - 130, y + 52, 32, 0.08, '#ffd76a');
+      nameTag(x + 8, y + h - 30, 'b_atlas');
+      tone(x, y, w, 46, 0.12);
+    });
+    if (T > 33.5) cap(250, 512, 460, t('cine_c7'), T - 33.5);
   }
-  // ---------------- SCENE 5: TITLE CARD (70+) ----------------
+  // ---------------- PAGE 4: THE ONE THAT SLEPT (41-58) ----------------
+  else if (seg(41, 58)) {
+    panel(14, 14, 452, 512, 41.3, (x, y, w, h, lo) => {
+      // the maintenance bay below the broadcast floor — and her, on standby
+      c.fillStyle = '#0e0e13'; c.fillRect(x, y, w, h);
+      // hanging cables
+      c.strokeStyle = '#23232c'; c.lineWidth = 5;
+      for (let i = 0; i < 4; i++) {
+        c.beginPath(); c.moveTo(x + 40 + i * 110, y);
+        c.quadraticCurveTo(x + 70 + i * 110, y + 120 + i * 18, x + 30 + i * 110, y + 200 + i * 26);
+        c.stroke();
+      }
+      // one cyan worklight cone onto the cradle
+      const lg = c.createLinearGradient(0, y, 0, y + h);
+      lg.addColorStop(0, 'rgba(55,255,208,0.16)'); lg.addColorStop(0.8, 'rgba(55,255,208,0)');
+      c.save(); c.beginPath();
+      c.moveTo(x + w / 2 - 26, y); c.lineTo(x + w / 2 + 26, y);
+      c.lineTo(x + w / 2 + 128, y + h); c.lineTo(x + w / 2 - 128, y + h); c.closePath();
+      c.fillStyle = lg; c.fill(); c.restore();
+      c.fillStyle = '#101016'; c.fillRect(x, y + h - 60, w, 60);
+      // the cradle ring and the REAL cat inside it, dimmed to standby
+      c.strokeStyle = '#2c2c34'; c.lineWidth = 6;
+      c.beginPath(); c.arc(x + w / 2, y + h - 64, 74, Math.PI * 0.1, Math.PI * 0.9); c.stroke();
+      nyaReal(x + w / 2, y + h - 66, 3.1, { face: 1 });
+      c.fillStyle = 'rgba(14,14,19,0.55)'; c.fillRect(x, y, w, h);   // standby dim
+      // her visor still finds the light
+      radialLight(x + w / 2 - 4, y + h - 156, 60, 'rgba(55,255,208,$)', 0.2);
+      tone(x, y + h - 130, w, 130, 0.14);
+      cap(x + 12, y + 14, 340, t('cine_c8'), lo - 0.3);
+    });
+    panel(480, 14, 466, 248, 44.5, (x, y, w, h, lo) => {
+      // extreme close-up: the boot. The real portrait, four times life
+      c.fillStyle = '#0c1016'; c.fillRect(x, y, w, h);
+      const on = lo > 1.1;
+      if (typeof drawPortrait === 'function') {
+        c.save(); c.translate(x + w / 2, y + h / 2 + 10); c.scale(3.4, 3.4);
+        try { drawPortrait(c, -32, -40, on ? 'curious' : 'sad', true); } catch (e2) {}
+        c.restore();
+      }
+      if (!on) {
+        c.fillStyle = 'rgba(10,14,20,0.5)'; c.fillRect(x, y, w, h);
+        c.font = '600 12px monospace'; c.textAlign = 'left'; c.fillStyle = '#37ffd0';
+        const rows = ['> frame NYA-9 : maintenance', '> song-link : NOT FOUND', '> boot?'];
+        for (let i = 0; i < rows.length; i++)
+          if (lo > 0.25 + i * 0.28) c.fillText(rows[i], x + 16, y + 24 + i * 16);
+      } else {
+        speedBurst(x + w / 2, y + h / 2, 90, 220, 14, 'rgba(55,255,208,0.25)');
+        sfxWord('PING', x + w - 90, y + 40, 30, 0.08, '#37ffd0');
+      }
+      cap(x + 12, y + h - 62, 300, t('cine_c9'), lo - 1.4);
+    });
+    panel(480, 276, 466, 250, 48.5, (x, y, w, h, lo) => {
+      // she stands. Red city behind the grate; her light in front of it
+      c.fillStyle = '#12090b'; c.fillRect(x, y, w, h);
+      radialLight(x + w - 80, y + h / 2, 220, 'rgba(230,57,70,$)', 0.2);
+      c.fillStyle = '#1c1c22';
+      for (let i = 0; i < 9; i++) c.fillRect(x + w - 190 + i * 20, y, 8, h);
+      c.fillStyle = '#101016'; c.fillRect(x, y + h - 40, w, 40);
+      nyaReal(x + 150, y + h - 40, 3.4, { face: 1, idle: 2 });
+      speedBurst(x + 150, y + h - 106, 66, 120, 10, 'rgba(55,255,208,0.12)');
+      tone(x, y, w, 50, 0.1);
+      cap(x + 12, y + 12, 300, t('cine_c10'), lo - 0.4);
+    });
+  }
+  // ---------------- TITLE CARD (58+) ----------------
   else {
-    const local = T - 70;
+    const local = T - TITLE_AT;
     c.fillStyle = '#050508'; c.fillRect(0, 0, 960, 540);
     c.save(); c.globalAlpha = 0.1;
     c.translate(-((local * 2) % 200), 0);
     citySil(560, 141, false); citySil(760, 143, false);
     c.restore();
-    // starfield drifting down
     for (let i = 0; i < 50; i++) {
       const sy2 = (hash2(i, 151) * 540 + local * 3) % 540;
       c.fillStyle = 'rgba(200,220,235,' + (0.2 + hash2(i, 152) * 0.5) + ')';
       c.fillRect(hash2(i, 150) * 960, sy2, 1.8, 1.8);
     }
+    // she walks the skyline under the title — the real figure, small
+    nyaReal(480 + Math.sin(local * 0.4) * 6, 512, 1.7, { face: 1, idle: 1 });
     const title = t('title');
     const shown = Math.min(title.length, Math.floor(local / 0.3) + 1);
     const glitch = (local % 2) < 0.07;
@@ -3363,15 +3318,14 @@ function drawCine() {
       ftxt(t('cine_sub'), 480, 278, 18, '#8a8a9a', 'center');
       c.globalAlpha = 1;
       const blink = (local % 1) < 0.65;
-      if (blink) ftxt(t('press'), 480, 400, 18, '#cfe3ef', 'center');
-      // her visor as a small waiting icon
+      if (blink) ftxt(t('press'), 480, 360, 18, '#cfe3ef', 'center');
       const vp = 0.5 + Math.sin(local * 2) * 0.3;
       c.fillStyle = 'rgba(55,255,208,' + vp + ')'; c.shadowColor = '#37ffd0'; c.shadowBlur = 8;
       c.fillRect(896, 496, 26, 9); c.shadowBlur = 0;
     }
   }
   // skip affordance + the ending glitch-out
-  if (ci.promptT > 0 && T < 70) {
+  if (ci.promptT > 0 && T < 58) {
     c.save(); c.globalAlpha = Math.min(1, ci.promptT);
     ftxt(t('cine_skip'), 480, 508, 14, '#9fb8c8', 'center');
     if (ci.hold > 0) {
@@ -3840,7 +3794,8 @@ function drawHeroNPC(c, id, s) {
 // ---- portrait system: a 64×64 dialogue bust with real face acting --------
 // Expressions ride on the three things that read at this size: the visor's
 // light, the set of the ears, and the tilt of the head.
-function drawPortrait(c, x, y, expr) {
+function drawPortrait(c, x, y, expr, bare) {
+  // bare: no dialog frame or clip — the comic intro uses the bust raw
   const tn = performance.now() / 1000;
   const hero = typeof isHero === 'function' && isHero();
   const blink = (tn % 3.4) < 0.09;                     // random-feeling blink
@@ -3853,10 +3808,12 @@ function drawPortrait(c, x, y, expr) {
     angry:      { earL: -0.9, earR: 0.9, glow: 0.6 + (Math.sin(tn * 22) > 0 ? 0.4 : 0), tilt: -0.06 },
   }[expr] || { earL: -0.18, earR: 0.18, glow: 0.85, tilt: 0 };
   c.save();
-  // frame
-  c.fillStyle = 'rgba(10,18,28,0.92)'; c.strokeStyle = 'rgba(55,255,208,0.45)'; c.lineWidth = 1.5;
-  rr(c, x, y, 64, 64, 8); c.fill(); rr(c, x, y, 64, 64, 8); c.stroke();
-  c.beginPath(); rr(c, x + 1, y + 1, 62, 62, 7); c.clip();
+  if (!bare) {
+    // frame
+    c.fillStyle = 'rgba(10,18,28,0.92)'; c.strokeStyle = 'rgba(55,255,208,0.45)'; c.lineWidth = 1.5;
+    rr(c, x, y, 64, 64, 8); c.fill(); rr(c, x, y, 64, 64, 8); c.stroke();
+    c.beginPath(); rr(c, x + 1, y + 1, 62, 62, 7); c.clip();
+  }
   c.translate(x + 32, y + 40); c.rotate(E.tilt);
   if (hero) {
     // bronze-helm bust for the Odyssey theme

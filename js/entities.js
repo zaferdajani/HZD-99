@@ -849,7 +849,19 @@ class Player {
              + (run ? sprintK * 0.3 : 0)                            // pitched forward, chasing the ground
              + (this.hurtPoseT > 0 ? -0.3 * (this.hurtPoseT / 0.3) : 0)  // thrown back, off balance
              + (this.idleT > 0.9 ? Math.sin(this.idleT * 0.9) * 0.022 : 0)); // idle weight shift
-    if (this.flipT > 0) c.rotate(-(1 - this.flipT / 0.5) * Math.PI * 2);
+    if (this.flipT > 0) {
+      // THE SPIRAL: the double jump is a ninja pirouette about her own
+      // VERTICAL axis — head to toe through the middle of the body — not a
+      // cartwheel. Two eased twists; the silhouette slims through each
+      // profile pass and mirrors on the far side, so the spin reads as a
+      // body turning in place, with a whisker of axis wobble for style.
+      const k = 1 - this.flipT / 0.5;
+      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const th = e * Math.PI * 4;                  // two full twists
+      const fx = Math.cos(th);
+      c.scale((fx < 0 ? -1 : 1) * Math.max(0.22, Math.abs(fx)), 1);
+      c.rotate(Math.sin(th) * 0.05);
+    }
     c.scale(sx, sy * (1 - cr));
     // evolution: the frame grows with each power milestone (visual only — hitbox unchanged)
     const evo = typeof evoTier === 'function' ? evoTier() : 0;
@@ -1600,6 +1612,92 @@ class Proj {
     c.shadowBlur = 0;
     c.fillStyle = 'rgba(255,255,255,0.8)';
     c.beginPath(); c.arc(this.x, this.y, this.r * 0.4, 0, 7); c.fill();
+  }
+}
+
+// ================= MOVING PLATFORMS =================
+// Powered rail slabs for the later zones: each one ping-pongs between two
+// anchors on a smooth cosine, carries whoever rides it, and is ONE-WAY —
+// she jumps up through it freely and only lands from above.
+class MovingPlat {
+  constructor(tx, ty, spec) {
+    // spec: [dxTiles, dyTiles, periodSec, widthTiles?]
+    const wT = (spec && spec[3]) || 3;
+    this.w = wT * TILE; this.h = 12;
+    this.x0 = tx * TILE; this.y0 = ty * TILE - this.h;
+    this.x1 = this.x0 + ((spec && spec[0]) || 0) * TILE;
+    this.y1 = this.y0 + ((spec && spec[1]) || 0) * TILE;
+    this.per = Math.max(1.4, (spec && spec[2]) || 3.4);
+    this.ph = 0; this.x = this.x0; this.y = this.y0;
+    this.fdx = 0; this.fdy = 0;
+  }
+  update(dt) {
+    this.ph += dt;
+    const k = (1 - Math.cos(this.ph / this.per * Math.PI * 2)) / 2;   // 0→1→0
+    const nx = this.x0 + (this.x1 - this.x0) * k;
+    const ny = this.y0 + (this.y1 - this.y0) * k;
+    this.fdx = nx - this.x; this.fdy = ny - this.y;
+    this.x = nx; this.y = ny;
+  }
+  draw(c) {
+    const P = PAL[G.roomDef.zone];
+    const moving = Math.abs(this.fdx) + Math.abs(this.fdy) > 0.01;
+    c.save();
+    // rail ghost: the travel line, faint, so the timing is readable
+    c.strokeStyle = 'rgba(150,170,190,0.14)'; c.lineWidth = 2;
+    c.setLineDash([4, 7]);
+    c.beginPath();
+    c.moveTo(this.x0 + this.w / 2, this.y0 + this.h / 2);
+    c.lineTo(this.x1 + this.w / 2, this.y1 + this.h / 2);
+    c.stroke(); c.setLineDash([]);
+    // slab body: dark metal, chamfered, with the zone's light on its lip
+    const g = c.createLinearGradient(0, this.y, 0, this.y + this.h);
+    g.addColorStop(0, '#4a5462'); g.addColorStop(0.35, '#2c323c'); g.addColorStop(1, '#171b22');
+    c.fillStyle = g; rr(c, this.x, this.y, this.w, this.h, 4); c.fill();
+    c.strokeStyle = '#0c0f14'; c.lineWidth = 2; rr(c, this.x, this.y, this.w, this.h, 4); c.stroke();
+    // emissive top strip — her landing surface, always readable
+    c.fillStyle = P.glow; c.globalAlpha = 0.85;
+    rr(c, this.x + 3, this.y + 1.5, this.w - 6, 3, 2); c.fill();
+    c.globalAlpha = 1;
+    // side thruster wash when it moves
+    if (moving) {
+      const dir = Math.atan2(this.fdy, this.fdx) + Math.PI;
+      const jx = this.x + this.w / 2 + Math.cos(dir) * this.w * 0.5;
+      const jy = this.y + this.h / 2 + Math.sin(dir) * 8;
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
+      const jg = c.createRadialGradient(jx, jy, 1, jx, jy, 14);
+      jg.addColorStop(0, P.glow); jg.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = jg; c.beginPath(); c.arc(jx, jy, 14, 0, 7); c.fill();
+      c.restore();
+    }
+    // underside vents
+    c.fillStyle = 'rgba(8,10,14,0.8)';
+    for (let i = 0; i < Math.floor(this.w / 22); i++)
+      c.fillRect(this.x + 8 + i * 22, this.y + this.h - 3, 10, 2);
+    c.restore();
+  }
+}
+// ride resolve, run every frame after her physics: standing on a slab means
+// the slab's motion is hers too. One-way from above; never a head bonk.
+function platRide(p) {
+  if (!G.plats || !G.plats.length || p.dead) return;
+  for (const pl of G.plats) {
+    if (p.x + p.w <= pl.x + 2 || p.x >= pl.x + pl.w - 2) continue;
+    const feet = p.y + p.h;
+    const catchBand = 12 + Math.abs(pl.fdy) * 2;
+    if (p.vy >= -1 && feet >= pl.y - 5 && feet <= pl.y + catchBand) {
+      if (!p.on && p.vy > 420) {                 // real landing: squash + dust
+        p.landT = p.vy > 700 ? 0.22 : 0.12; p.land0 = p.landT;
+        sfx('land');
+        burst(p.x + p.w / 2, pl.y, 6, '#9fb8c8', 90, 0.35, 500, 2);
+      }
+      p.x += pl.fdx;
+      p.y = pl.y - p.h;
+      p.vy = Math.min(p.vy, Math.max(0, pl.fdy * 60));
+      p.on = true; p.coyote = 0.1;
+      p.airJumps = hasMod('djump') ? (hasSkill('triple') ? 2 : 1) : 0;
+      return;
+    }
   }
 }
 

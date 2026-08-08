@@ -113,7 +113,7 @@ const ROOMS = {
     } },
   // ============ ZONE C — The Foundry ============
   C1: { zone: 'C', w: 30, h: 34, exits: { T: 'B3', B: 'C2' },
-    ents: [['mod', 26, 18, 'wall'], ['flier', 15, 15], ['flier', 10, 25], ['turret', 20, 27], ['scrap', 3, 23, 15], ['riddle', 6, 23, 3], ['secret', 8, 23, 'sigil3']],
+    ents: [['plat', 12, 22, [0, -8, 4.6, 2]], ['mod', 26, 18, 'wall'], ['flier', 15, 15], ['flier', 10, 25], ['turret', 20, 27], ['scrap', 3, 23, 15], ['riddle', 6, 23, 3], ['secret', 8, 23, 'sigil3']],
     build(g) {
       hline(g, 0, 29, 0, '#'); rect(g, 0, 32, 29, 33, '#');
       vline(g, 0, 0, 33, '#'); vline(g, 29, 0, 33, '#');
@@ -125,12 +125,12 @@ const ROOMS = {
       rect(g, 22, 32, 25, 33, '.');         // bottom opening to C2
     } },
   C2: { zone: 'C', w: 60, h: 17, exits: { T: 'C1', R: 'C3', B: 'D1' },
-    ents: [['hopper', 16, 15], ['hopper', 42, 15], ['turret', 28, 15], ['blob', 55, 15], ['scrap', 5, 15, 12], ['npc', 25, 15, 'patch']],
+    ents: [['plat', 33, 12, [5, 0, 3.6]], ['hopper', 16, 15], ['hopper', 42, 15], ['turret', 28, 15], ['blob', 55, 15], ['scrap', 5, 15, 12], ['npc', 25, 15, 'patch']],
     build(g) {
       frame(g); openR(g);
       rect(g, 22, 0, 25, 0, '.');           // ceiling opening from C1
       hline(g, 8, 13, 15, '^'); hline(g, 33, 38, 15, '^'); hline(g, 48, 52, 15, '^');
-      hline(g, 9, 12, 11, '='); hline(g, 34, 37, 11, '='); hline(g, 47, 52, 11, '=');
+      hline(g, 9, 12, 11, '='); hline(g, 47, 52, 11, '=');
       rect(g, 18, 15, 20, 16, 'B');         // breakable floor → D1
     } },
   C3: { zone: 'C', w: 30, h: 17, exits: { L: 'C2', R: 'C4' },
@@ -144,11 +144,11 @@ const ROOMS = {
     ents: [['bench', 6, 15], ['npc', 12, 15, 'sage'], ['term', 24, 15, 3]],
     build(g) { frame(g); openR(g); rect(g, 18, 0, 20, 0, '.'); hline(g, 15, 18, 11, '='); } },
   D2: { zone: 'D', w: 60, h: 17, exits: { L: 'D1', R: 'D3' }, ice: true,
-    ents: [['flier', 20, 6], ['flier', 40, 7], ['turret', 25, 15], ['turret', 44, 15], ['blob', 55, 15], ['scrap', 33, 9, 15], ['riddle', 21, 8, 5], ['secret', 41, 12, 'coin']],
+    ents: [['flier', 20, 6], ['flier', 40, 7], ['turret', 25, 15], ['turret', 44, 15], ['blob', 55, 15], ['plat', 30, 10, [6, 0, 3.4]], ['scrap', 41, 11, 15], ['riddle', 21, 8, 5], ['secret', 41, 12, 'coin']],
     build(g) {
       frame(g); openL(g); openR(g);
       hline(g, 10, 16, 15, '^'); hline(g, 30, 37, 15, '^'); hline(g, 46, 51, 15, '^');
-      hline(g, 11, 15, 11, '='); hline(g, 31, 36, 10, '='); hline(g, 46, 50, 11, '=');
+      hline(g, 11, 15, 11, '='); hline(g, 46, 50, 11, '=');
       hline(g, 20, 23, 8, '='); hline(g, 40, 43, 12, '=');
     } },
   D3: { zone: 'D', w: 30, h: 17, exits: { L: 'D2', B: { to: 'E1', flag: 'bossZero' } }, ice: true,
@@ -159,11 +159,11 @@ const ROOMS = {
     ents: [['blob', 10, 15], ['blob', 20, 15], ['hopper', 25, 15], ['riddle', 5, 15, 6], ['npc', 13, 15, 'lumen']],
     build(g) { frame(g); openR(g); rect(g, 15, 0, 17, 0, '.'); hline(g, 6, 9, 11, '='); } },
   E2: { zone: 'E', w: 60, h: 17, exits: { L: 'E1', R: 'E3' },
-    ents: [['turret', 31, 15], ['flier', 18, 6], ['flier', 34, 6], ['blob', 45, 15], ['bench', 52, 15], ['scrap', 25, 9, 20], ['secret', 17, 8, 'star']],
+    ents: [['plat', 22, 10, [5, 0, 2.8]], ['plat', 37, 12, [0, -4, 3.0]], ['turret', 31, 15], ['flier', 18, 6], ['flier', 34, 6], ['blob', 45, 15], ['bench', 52, 15], ['scrap', 11, 11, 20], ['secret', 17, 8, 'star']],
     build(g) {
       frame(g); openL(g); openR(g);
       hline(g, 8, 14, 15, '^'); hline(g, 22, 27, 15, '^'); hline(g, 36, 41, 15, '^');
-      hline(g, 9, 13, 12, '='); hline(g, 23, 26, 10, '='); hline(g, 37, 40, 12, '=');
+      hline(g, 9, 13, 12, '=');
       hline(g, 16, 19, 8, '=');
     } },
   E3: { zone: 'E', w: 34, h: 17, exits: { L: 'E2' },
