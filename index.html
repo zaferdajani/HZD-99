@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msk0qo6c"</script>
+<script>window.BUILD_ID="msk1m90t";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -843,6 +843,39 @@ function beastPose(b) {
     P.tailA = -Math.sin(g - 0.7) * 0.24 * k - P.pitch * 1.5;
     P.tailUp = -0.85 + Math.sin(g * 0.5) * 0.12;
   };
+  if (st === 'dorm' && !b.dead) {
+    // ASLEEP: a mound of machine — deep crouch, head sunk between the
+    // forelegs, tail wrapped close, the virus veins barely breathing
+    // sphinx-lying: the legs FOLD under the body (the collapse pose held
+    // peacefully), belly on the floor, chin nearly on the forepaws
+    P.crouch = 72 + Math.sin(t * 0.8) * 1.2; P.bob = 0; P.pitch = 0.08;
+    P.neckA = 0.48; P.headA = 0.95;
+    P.tailUp = -1.35; P.tailA = 0.05;
+    P.glow = 0.05 + Math.max(0, Math.sin(t * 0.8)) * 0.06;
+    P.legs = [{ a1: 0.72, a2: -1.42 }, { a1: 0.78, a2: -1.5 }, { a1: 0.66, a2: -1.36 }, { a1: 0.75, a2: -1.46 }];
+    return P;
+  }
+  if (st === 'intro' && !b.dead) {
+    // THE WAKING: the eye finds her first — the head snaps up while the
+    // mass is still down — then the body follows it upright, and the draw
+    // side hands the last beat to the authored roar figure
+    const k = Math.max(0, Math.min(1, 1 - (b.t || 0) / 2));
+    const head = Math.min(1, k / 0.35);
+    const rise = Math.max(0, Math.min(1, (k - 0.32) / 0.38));
+    P.crouch = 72 * (1 - rise * rise); P.bob = 0; P.pitch = 0.08 * (1 - rise);
+    P.neckA = 0.48 * (1 - head); P.headA = 0.95 - head * 1.05;
+    P.tailUp = -1.35 + rise * 0.55; P.tailA = Math.sin(t * (1 + k * 6)) * 0.1 * k;
+    P.glow = 0.05 + head * 0.7 + (k > 0.5 ? Math.max(0, Math.sin(t * 24)) * 0.25 : 0);
+    // the folded legs push the ground away as the mass comes up
+    const fold = 1 - rise;
+    P.legs = [
+      { a1: 0.72 * fold + 0.02, a2: -1.42 * fold },
+      { a1: 0.78 * fold + 0.02, a2: -1.5 * fold },
+      { a1: 0.66 * fold + 0.02, a2: -1.36 * fold },
+      { a1: 0.75 * fold + 0.02, a2: -1.46 * fold },
+    ];
+    return P;
+  }
   if (b.dead) {
     // STAGGERED COLLAPSE: the machine dies joint by joint — near fore-knee
     // buckles first, the far one follows, the hips give, the body drops onto
@@ -1134,6 +1167,11 @@ function drawBeast(c, b) {
       ng.addColorStop(1, 'rgba(176,106,255,0)');
       c.fillStyle = ng; c.beginPath(); c.arc(0, -120, 190, 0, 7); c.fill();
       c.restore();
+    } else if (b.st === 'intro' && (b.t || 0) <= 0.85 && !b.dead) {
+      // the wake's climax: fully risen, it takes the authored open-jaw
+      // howl and holds it while the roar plays out
+      BEAST_LIVE.glow = 1.4;
+      bFig(c, 'aRoar', 0, 2 + Math.max(0, (b.t || 0) - 0.35) * 5);
     } else if (b.st === 'roar' && (b.t || 0) > 0.25 && (b.t || 0) <= 1.07 && !b.dead) {
       // THE ROAR — the sheet's own open-jaw howl, shaking harder as it
       // peaks. (The first ~0.18s stays on the rig: the chest swells up into
@@ -1384,6 +1422,13 @@ function drawEagle(c, b) {
     c.translate(cx, cy);
     c.scale(S, S);
     if (b.hurtT > 0) c.globalAlpha = 0.72;
+    if (b.st === 'dorm') c.globalAlpha *= 0.85;      // asleep on the line, dimmed
+    if (b.st === 'intro') {
+      // the waking shiver: it runs down the cable into her frame, hardest
+      // just before the screech breaks
+      const wk2 = Math.max(0, Math.min(1, 1 - (b.t || 0) / 2));
+      c.translate((Math.random() - 0.5) * wk2 * 6, (Math.random() - 0.5) * wk2 * 3);
+    }
     const t = b.anim;
     // while hung, the body tilts with the pendulum, plus a lean toward the
     // anchor when an attack has pulled her off plumb
@@ -1742,9 +1787,16 @@ function drawGlaciere(c, b) {
     const sclX = sgn * (0.85 + 0.15 * ta) * S, sclY = (1 - (1 - ta) * 0.05) * S;
     c.scale(sclX, sclY);
     if (b.hurtT > 0) c.globalAlpha = 0.72;
-    // hover shadow, faint — she floats
+    // dormant/wake clock: she KNEELS on the arena floor before the fight —
+    // the standing assembly, dark and still — and RISES to hover height as
+    // she wakes, the ignition timed to the roar
+    const wakeK = b.st === 'intro' ? clamp(1 - (b.t || 0) / 2, 0, 1) : (b.st === 'dorm' ? 0 : 1);
+    const rE = clamp((wakeK - 0.4) / 0.5, 0, 1);
+    const riseK = b.st === 'dorm' ? 0 : (b.st === 'intro' ? rE * rE * (3 - 2 * rE) : 1);
+    const groundOff = 90 * (1 - riseK);
+    // hover shadow, faint — tight underfoot while she is grounded
     c.save(); c.globalAlpha *= 0.22; c.fillStyle = '#04070b';
-    c.beginPath(); c.ellipse(0, 2, 200, 16, 0, 0, 7); c.fill(); c.restore();
+    c.beginPath(); c.ellipse(0, 2 + groundOff, 200 * (0.55 + 0.45 * riseK), 16, 0, 0, 7); c.fill(); c.restore();
     if (b.dead) {
       // DEATH: she breaks into the sheet's own parts row — and the pieces
       // FALL: gravity takes them, each bounces once on the floor line, and
@@ -1800,12 +1852,57 @@ function drawGlaciere(c, b) {
     b.glcGait = (b.glcGait || 0) + dtA * (2.6 + gaitK * 7.2);
     const gait = b.glcGait;
     const pitch = clamp((b.vy || 0) / -1400, -0.16, 0.16) + Math.sin(b.anim * 1.1) * 0.022;
-    c.translate(0, -14 + bob);                 // she rides above the ground line
+    c.translate(0, (-14 + bob) * riseK + groundOff);   // grounded → riding the air
     const swell = Math.sin(b.anim * 0.9);      // the slow body swell, breathing
     c.scale(1 + swell * 0.008, 1 - swell * 0.009);
     const heroFig = !(b.st === 'novawarn' || b.st === 'orbs' || b.st === 'azhush'
+      || b.st === 'dorm' || (b.st === 'intro' && wakeK < 0.5)
       || ((b.glcStamp || 0) > 0 && b.st === 'idle'));
-    if (b.st === 'novawarn' || b.st === 'orbs' || b.st === 'azhush') {
+    if (b.st === 'dorm') {
+      // ASLEEP ON HER HOOVES: head bowed, one ember alive in the horn.
+      // Drawn a third over fight scale so the sleeping shape OWNS the room,
+      // over a pool of ground frost that marks her cold
+      const br2 = Math.sin(b.anim * 0.9) * 0.006;
+      c.scale(1.32 * (1 + br2), 1.32 * (1 - br2));
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha *= 0.16 + Math.sin(b.anim * 0.7) * 0.05;
+      const fg = c.createRadialGradient(0, 0, 8, 0, 0, 190);
+      fg.addColorStop(0, 'rgba(165,216,255,0.8)'); fg.addColorStop(1, 'rgba(165,216,255,0)');
+      c.fillStyle = fg; c.beginPath(); c.ellipse(0, 0, 190, 26, 0, 0, 7); c.fill();
+      c.restore();
+      glcFig(c, 'asm', 0.025, 0, 0.92);
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const hg = c.createRadialGradient(-150, -240, 1, -150, -240, 16);
+      hg.addColorStop(0, 'rgba(240,160,255,' + (0.16 + Math.max(0, Math.sin(b.anim * 0.9)) * 0.12) + ')');
+      hg.addColorStop(1, 'rgba(120,30,200,0)');
+      c.fillStyle = hg; c.beginPath(); c.arc(-150, -240, 16, 0, 7); c.fill();
+      c.restore();
+    } else if (b.st === 'intro') {
+      if (wakeK < 0.5) {
+        // the stir: the sleeping figure trembles harder as the cold gathers,
+        // easing back down from the dormant scale as she braces to lift
+        const sc2 = 1.32 - (wakeK / 0.5) * 0.32;
+        c.scale(sc2, sc2);
+        glcFig(c, 'asm', 0.025 - wakeK * 0.05, wakeK * 4.5);
+        if (typeof addPart === 'function' && chance(wakeK * 0.7))
+          addPart(cx + rnd(-b.w, b.w), footY + groundOff * sclY - rnd(0, 20),
+            rnd(-20, 20), rnd(-60, -20), 0.5, '#bfe8ff', 2, 0, true);
+      } else {
+        // IGNITION: she is airborne in the hero figure, the horn flaring
+        // with the shriek, frost blown off the lift
+        glcFig(c, 'hero', -0.05, (1 - wakeK) * 3);
+        const hp2 = glcHornLocal();
+        const fl = Math.max(0, 1 - Math.abs(wakeK - 0.62) / 0.3);
+        if (fl > 0.01) {
+          c.save(); c.globalCompositeOperation = 'lighter';
+          const g = c.createRadialGradient(hp2.x, hp2.y, 2, hp2.x, hp2.y, 30 + fl * 70);
+          g.addColorStop(0, 'rgba(240,190,255,' + 0.85 * fl + ')');
+          g.addColorStop(0.5, 'rgba(190,80,240,' + 0.5 * fl + ')');
+          g.addColorStop(1, 'rgba(120,30,200,0)');
+          c.fillStyle = g; c.beginPath(); c.arc(hp2.x, hp2.y, 30 + fl * 70, 0, 7); c.fill();
+          c.restore();
+        }
+      }
+    } else if (b.st === 'novawarn' || b.st === 'orbs' || b.st === 'azhush') {
       // gathered: the standing assembly, trembling as power collects
       glcFig(c, 'asm', 0, b.st === 'novawarn' ? 2 : 0.8);
     } else if ((b.glcStamp || 0) > 0 && b.st === 'idle') {
@@ -2124,10 +2221,51 @@ function drgGlow(c, x, y, r, a, lit) {
 // mouth position per grounded pose, in art-local units (origin feet-centre)
 const DRG_MOUTH = { idle: [62, -112], walk: [72, -116], fly: [92, -128] };
 
+// his roost: a nest of slag and bent girders packed onto the high ledge.
+// World-space and anchored — it stays where he built it after he leaves.
+function drgNest(c, x, y, t) {
+  c.save();
+  c.translate(x, y);
+  // heat shimmer banked in the bowl
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const eg = c.createRadialGradient(0, -8, 2, 0, -8, 46);
+  const ea = 0.14 + Math.max(0, Math.sin(t * 0.9)) * 0.08;
+  eg.addColorStop(0, 'rgba(255,160,80,' + ea + ')'); eg.addColorStop(1, 'rgba(255,120,50,0)');
+  c.fillStyle = eg; c.beginPath(); c.ellipse(0, -8, 70, 26, 0, 0, 7); c.fill();
+  c.restore();
+  // the bowl: three packed arcs of scrap, darkest deepest
+  c.lineCap = 'round';
+  for (let i = 0; i < 3; i++) {
+    c.strokeStyle = ['#241a12', '#3a2a20', '#4a382a'][i];
+    c.lineWidth = 13 - i * 3;
+    c.beginPath();
+    c.ellipse(0, -4 - i * 5, 74 - i * 10, 20 - i * 4, 0, 0.15 + i * 0.06, Math.PI - 0.15 - i * 0.06);
+    c.stroke();
+  }
+  // bent girder ends poking from the weave
+  c.strokeStyle = '#57453a'; c.lineWidth = 4;
+  for (let i = 0; i < 6; i++) {
+    const a = 0.4 + i * 0.45, r0 = 58 - (i % 2) * 12;
+    c.beginPath();
+    c.moveTo(Math.cos(a) * r0 * (i % 2 ? -1 : 1), -8 - Math.sin(a) * 12);
+    c.lineTo(Math.cos(a) * (r0 + 16) * (i % 2 ? -1 : 1), -16 - Math.sin(a) * 20);
+    c.stroke();
+  }
+  // a few live embers in the weave
+  for (let i = 0; i < 4; i++) {
+    const px = Math.sin(i * 2.7) * 40, ph = t * 1.4 + i * 1.9;
+    c.fillStyle = 'rgba(255,' + (150 + i * 20) + ',80,' + (0.3 + Math.max(0, Math.sin(ph)) * 0.4) + ')';
+    c.fillRect(px, -10 - (i % 2) * 6, 3, 3);
+  }
+  c.restore();
+}
+
 function drawFurnace(c, b) {
   const im = drgImg(); if (!im || !im.naturalWidth) return false;
   c.save();
   try {
+    // the roost is part of the room, not of him — drawn at its own anchor
+    if (b.nestX != null && !b.dead) drgNest(c, b.nestX, b.nestFootY, b.anim);
     // ---- visual-state memory: draw-side timers driven off b.anim ----------
     const fc = b.fc || (b.fc = {
       pSt: b.st, pAnim: b.anim, slamT: 0, roarT: 0, pulseT: 0,
@@ -2235,11 +2373,14 @@ function drawFurnace(c, b) {
     }
 
     // ---- ground presence: the authored lava ring, breathing under him ----
+    // banked while he sleeps; it catches as the wake reaches ignition
+    const wakeK2 = b.st === 'intro' ? clamp(1 - (b.t || 0) / 2, 0, 1) : (b.st === 'dorm' ? 0 : 1);
+    const ringGate = b.st === 'dorm' ? 0 : b.st === 'intro' ? (b.nestLanded ? 1 : 0) : 1;
     const grounded = Math.abs(b.vy || 0) < 120;
-    if (grounded) {
+    if (grounded && ringGate > 0.01) {
       const rg = DRG_P.ring;
       const hotStat = b.st === 'hymn' || b.st === 'forgebell' || b.st === 'meltwarn';
-      const ra = (0.2 + Math.sin(b.anim * 2.6) * 0.07 + (hotStat ? 0.22 : 0) + wk * 0.25);
+      const ra = (0.2 + Math.sin(b.anim * 2.6) * 0.07 + (hotStat ? 0.22 : 0) + wk * 0.25) * ringGate;
       const rw2 = 95, rh2 = 15;
       c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha *= ra;
       c.drawImage(im, rg[0], rg[1], rg[2], rg[3], -rw2, -rh2 * 0.62, rw2 * 2, rh2 * 2);
@@ -2249,7 +2390,53 @@ function drawFurnace(c, b) {
     const shk = b.hurtT > 0 ? 1.2 : 0;
     const heroPose = b.st === 'hymn' || b.st === 'forgebell' || b.st === 'meltwarn' || fc.roarT > 0;
 
-    if (b.stagT > 0) {
+    if (b.st === 'dorm') {
+      // ASLEEP IN THE NEST: hunkered into the slag bowl, wings drawn in,
+      // head sunk over the forepaws — every glow banked but one ember
+      c.translate(0, 9 + Math.sin(b.anim * 0.7) * 1.4);
+      const br3 = Math.sin(b.anim * 0.7) * 0.012;
+      c.scale(1 + br3, 1 - br3);
+      drgFig(c, 'idle', 0, 0, 0.11);
+      drgGlow(c, 12, -78, 8, 0.06 + Math.max(0, Math.sin(b.anim * 0.7)) * 0.06, false);
+    } else if (b.st === 'intro') {
+      const t2 = b.t || 0;
+      if (wakeK2 < 0.45) {
+        // the stir: the hunched shape lifts out of the bowl, the chest
+        // light climbing through the seams, the whole machine knocking
+        const u = wakeK2 / 0.45;
+        c.translate(0, 9 * (1 - u));
+        drgFig(c, 'idle', 0, u * 3, 0.11 * (1 - u));
+        drgGlow(c, 12, -78, 8 + u * 18, 0.06 + u * 0.4, false);
+      } else if (t2 <= 0.6 && !b.nestLanded) {
+        // ON THE WING: down from the roost, nose tipped into the glide
+        drgFig(c, 'fly', wk, 0.6, clamp((b.vy || 0) / 2400, -0.22, 0.28));
+        if (typeof addPart === 'function' && chance(0.5))
+          addPart(cx + rnd(-30, 30), footY - b.h * 1.2, rnd(-40, 40), rnd(-90, -30),
+            0.4, '#ff7b3a', 2, 0, true);
+      } else if (b.nestLanded) {
+        // TOUCHDOWN: the landing squash settling out as the fight begins
+        const ls = clamp(t2 / 0.1, 0, 1);
+        c.translate(0, 4 * ls);
+        c.scale(1 + 0.07 * ls, 1 - 0.09 * ls);
+        drgFig(c, 'idle', wk, ls * 2, 0);
+        drgGlow(c, 12, -78, 16, 0.3, false);
+      } else {
+        // IGNITION: he rears into the authored flying figure as the horn
+        // of the foundry sounds — mouth and core flooding, ring catching
+        const u = (wakeK2 - 0.45) / 0.55;
+        const fl = Math.max(0, 1 - Math.abs(wakeK2 - 0.62) / 0.3);
+        c.save();
+        c.translate(0, -(4 + u * 9));
+        c.scale(HR, HR);
+        drgFig(c, 'hero', 0, (1 - u) * 2.5 + fl * 2, -0.04 - u * 0.05);
+        drgGlow(c, 266, -292, 20 + fl * 40, 0.3 + fl * 0.6, fl > 0.4);
+        drgGlow(c, 40, -230, 26 + fl * 22, 0.22 + fl * 0.4, false);
+        c.restore();
+        if (fl > 0.3 && typeof addPart === 'function' && chance(0.7))
+          addPart(cx + rnd(-40, 40), footY - b.h * 1.5, rnd(-80, 80), rnd(-160, -40),
+            0.5, chance(0.5) ? '#ffd76a' : '#ff7b3a', 2.5, 0, true);
+      }
+    } else if (b.stagT > 0) {
       // SILENCED: her song killed his — grounded, slumped, the light dimmed
       c.translate(0, 4);
       drgFig(c, 'idle', wk, 1.6, 0.06);
@@ -2345,7 +2532,7 @@ function drawFurnace(c, b) {
     }
 
     // grounded overlays -----------------------------------------------------
-    if (!heroPose && b.stagT <= 0) {
+    if (!heroPose && b.stagT <= 0 && b.st !== 'dorm' && b.st !== 'intro') {
       const mk2 = DRG_MOUTH[!grounded ? 'fly' : (Math.abs(b.vx || 0) > 20 ? 'walk' : 'idle')];
       // FIREBALL tell: heat climbs into the mouth as the lob comes due
       if (b.st === 'idle' && (b.t || 0) < 0.6 && !b.hymn && !b.slag)
@@ -3128,14 +3315,17 @@ const THEMES = {
   },
 };
 function themeId() {
+  // a build can be LOCKED to one game (two separate libraries: the cat's
+  // CLAWBYTE page and the hero's NOSTOS page each ship with their own lock)
+  const lock = (typeof window !== 'undefined' && window.GAME_LOCK) || null;
   if (typeof G !== 'undefined' && G.state) {
     const s = G.state;
-    // the shell (title menu / chooser / language) is always the neutral world…
-    if (s === 'MENU' || s === 'WHO' || s === 'LANGSEL') return 'robo';
+    // the shell (title menu / chooser / language) wears the locked world…
+    if (s === 'MENU' || s === 'WHO' || s === 'LANGSEL') return lock || 'robo';
     // …and once a character is chosen, the difficulty screen previews THAT world
-    if (s === 'DIFF') return G.pendTheme || 'robo';
+    if (s === 'DIFF') return G.pendTheme || lock || 'robo';
   }
-  return (typeof G !== 'undefined' && G.save && G.save.theme) || 'robo';
+  return (typeof G !== 'undefined' && G.save && G.save.theme) || lock || 'robo';
 }
 function isHero() { return themeId() === 'hero'; }
 
@@ -4479,6 +4669,8 @@ en: {
   subtitle: 'A robo-cat metroidvania in the Machine Depths',
   press: 'Press Enter',
   menu_play: 'Play',
+  menu_continue: 'Continue',
+  menu_newgame: 'New Game',
   who_new: 'New voyage', who_cont: 'Continue voyage',
   menu_controls: 'Controls',
   menu_language: 'Language', lang_title: 'Choose Language', lang_hint: 'Enter — select  ·  Esc — back',
@@ -4696,6 +4888,8 @@ ar: {
   subtitle: 'مغامرة قطّ آليّ في أعماق الآلات',
   press: 'اضغط Enter',
   menu_play: 'العب',
+  menu_continue: 'متابعة',
+  menu_newgame: 'لعبة جديدة',
   who_new: 'رحلة جديدة', who_cont: 'متابعة الرحلة',
   menu_controls: 'أزرار التحكم',
   menu_language: 'اللغة', lang_title: 'اختر اللغة', lang_hint: 'Enter — اختيار  ·  Esc — رجوع',
@@ -5822,6 +6016,23 @@ function sfx(n) {
     case 'break': hiss(0.2, 0.12); tone(200, 0.15, 'square', 0.07, 70); break;
     case 'bench': [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, 'sine', 0.05, null, i * 0.1)); break;
     case 'boss': case 'roar': tone(55, 0.9, 'sawtooth', 0.14, 30); tone(110, 0.7, 'square', 0.055, 45); hiss(0.6, 0.06); break;
+    // each guardian wakes with its OWN voice — pitched to the machine it is
+    case 'roar_beast':   // NULLFANG: a ripping sub-growl that ends in teeth
+      tone(46, 1.2, 'sawtooth', 0.17, 26); tone(92, 0.9, 'square', 0.07, 38);
+      tone(23, 1.2, 'sine', 0.1, 20); hiss(0.9, 0.09); break;
+    case 'roar_eagle':   // TALONHOST: a metal screech climbing off the cable
+      tone(950, 0.55, 'square', 0.07, 2300); tone(1900, 0.45, 'sawtooth', 0.05, 700, 0.1);
+      tone(140, 0.5, 'square', 0.05, 90, 0.05); hiss(0.5, 0.07); break;
+    case 'roar_glc':     // GLACIERE: a crystalline shriek over a cold sub
+      tone(660, 0.8, 'triangle', 0.07, 1056); tone(990, 0.8, 'triangle', 0.05, 1584, 0.06);
+      tone(1485, 0.7, 'triangle', 0.04, 2376, 0.12);
+      whoosh(0.9, 2400, 700, 0.05); tone(84, 0.9, 'sine', 0.08, 60); break;
+    case 'roar_drg':     // FURNACE CHOIR: a foundry horn, all mass
+      tone(62, 1.4, 'square', 0.15, 56); tone(124, 1.1, 'sawtooth', 0.09, 100);
+      tone(31, 1.4, 'sine', 0.1, 28); whoosh(0.8, 300, 900, 0.05); break;
+    case 'roar_prism':   // PRISM PROWLER: an electric yowl, up then spat out
+      tone(520, 0.75, 'sawtooth', 0.08, 1100); tone(780, 0.6, 'square', 0.045, 390, 0.12);
+      hiss(0.3, 0.05); break;
     case 'phase': tone(82, 0.5, 'sawtooth', 0.12, 48); hiss(0.32, 0.08); break;
     case 'win': [523, 659, 784, 988, 1319].forEach((f, i) => tone(f, 0.4, 'triangle', 0.06, null, i * 0.16)); break;
     case 'ui': tone(540, 0.05, 'square', 0.035); break;
@@ -7048,8 +7259,12 @@ const ROOMS = {
       rect(g, 18, 15, 20, 16, 'B');         // breakable floor → D1
     } },
   C3: { zone: 'C', w: 30, h: 17, exits: { L: 'C2', R: 'C4' },
-    ents: [['boss', 20, 15, 'atlas']],
-    build(g) { frame(g); openL(g); hline(g, 5, 8, 11, '='); hline(g, 21, 24, 11, '='); rect(g, 28, 11, 29, 14, 'B'); } },
+    ents: [['boss', 22, 6, 'atlas'], ['plat', 7, 9, [9, 0, 4.2]]],
+    build(g) {
+      frame(g); openL(g);
+      hline(g, 5, 8, 11, '='); hline(g, 21, 24, 11, '='); rect(g, 28, 11, 29, 14, 'B');
+      hline(g, 19, 25, 6, '#');           // the dragon's roost ledge, high right
+    } },
   C4: { zone: 'C', w: 20, h: 17, exits: { L: 'C3' },
     ents: [['chest', 10, 15, 'slot'], ['scrap', 14, 15, 40], ['riddle', 6, 15, 4]],
     build(g) { frame(g); openL(g); } },
@@ -9541,6 +9756,7 @@ class Boss {
     this.bores = []; this.hymn = null; this.prison = null;
     this.windT = 0; this.overdriveT = 0;
     if (kind === 'brood') { this.y = 60; this.homeY = 60; }
+    if (kind === 'atlas') { this.nestX = this.x + s.w / 2; this.nestFootY = y; }
     if (kind === 'zero') this.y -= 90;
     if (kind === 'mother') { this.y = 110; this.x = G.roomDef.w * TILE / 2 - s.w / 2; }
     // recorded AFTER the per-kind placement, or the flyers get sent back to a
@@ -9567,12 +9783,46 @@ class Boss {
     if (this.stagT > 0) { this.stagT -= dt; return; }   // Song / weakness stagger
     if (this.st === 'dorm') {
       if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
-        this.st = 'intro'; this.t = 1.4; sfx('roar');
+        // THE STIR: it hears her. The wake itself is quiet — servos, a
+        // breath — the ROAR belongs to the moment it reaches full height.
+        this.st = 'intro'; this.t = 2.0; this.roared = false;
+        sfx('ui'); cam.shake = Math.max(cam.shake, 3);
         setMusic(this.kind === 'mother' ? 'mother' : 'boss');
       }
       return;
     }
-    if (this.st === 'intro') { this.t -= dt; if (this.t <= 0) { this.st = 'idle'; this.t = 0.8; } return; }
+    if (this.st === 'intro') {
+      this.t -= dt;
+      if (!this.roared && this.t <= 0.85) {
+        // THE ROAR — each guardian announces itself in its own voice, and
+        // the room answers: shake, rumble, a burst off the body
+        this.roared = true;
+        sfx({ glitch: 'roar_beast', brood: 'roar_eagle', zero: 'roar_glc',
+              atlas: 'roar_drg', prism: 'roar_prism' }[this.kind] || 'roar');
+        cam.shake = Math.max(cam.shake, 11);
+        if (typeof padRumble === 'function') padRumble(0.8, 0.6, 550);
+        burst(this.cx(), this.cy() - this.h * 0.3, 16, '#ffffff', 260, 0.5, 160, 3, true);
+      }
+      if (this.kind === 'atlas' && this.nestFootY != null && this.t <= 0.6 && !this.nestLanded) {
+        // DOWN FROM THE ROOST: he leaves the nest on the wing and glides to
+        // the arena floor, landing with the whole room's weight
+        const floorFoot = 15 * TILE;
+        const k2 = clamp((0.6 - this.t) / 0.5, 0, 1);
+        const e2 = k2 * k2 * (3 - 2 * k2);
+        this.y = this.nestFootY + (floorFoot - this.nestFootY) * e2 - this.h;
+        this.x += (G.roomDef.w * TILE * 0.5 - this.w / 2 - this.x) * Math.min(1, dt * 3);
+        this.vy = 320;
+        this.face = this.faceVis = player.x + player.w / 2 < this.cx() ? -1 : 1;
+        if (k2 >= 1) {
+          this.nestLanded = true; this.vy = 0;
+          cam.shake = Math.max(cam.shake, 9); sfx('boom');
+          if (typeof padRumble === 'function') padRumble(0.7, 0.5, 300);
+          burst(this.cx(), this.y + this.h, 18, '#c8925c', 220, 0.5, 400, 3);
+        }
+      }
+      if (this.t <= 0) { this.st = 'idle'; this.t = 0.8; this.vy = 0; }
+      return;
+    }
     if (this.hp <= 0) { this.die(); return; }
     if (this.phase === 1 && this.hp < this.hpMax / 2) {
       this.phase = 2; this.t = 1;
@@ -12076,9 +12326,19 @@ function update(dt) {
   }
 }
 function menuOptions() {
-  // "Play" always leads to the Who-are-you chooser (per-character saves)
+  // "Play" always leads to the Who-are-you chooser (per-character saves) —
+  // unless this build is LOCKED to one game, where the menu speaks plainly:
+  // Continue (if that game has a save) and New Game (story from the top)
+  const lk = gameLock();
+  if (lk) {
+    const opts = [];
+    if (loadStored(lk)) opts.push('continue');
+    opts.push('newgame');
+    return opts.concat(['controls', 'lang', 'sound', 'music']);
+  }
   return ['play', 'controls', 'lang', 'sound', 'music'];
 }
+function gameLock() { return (typeof window !== 'undefined' && window.GAME_LOCK) || null; }
 function updateMenu() {
   const opts = menuOptions();
   // U (or the on-screen banner) takes the newer build
@@ -12093,6 +12353,19 @@ function updateMenu() {
   if (inP('OK')) {
     const o = opts[G.menuIdx]; sfx('ok');
     if (o === 'play') { G.whoIdx = 0; G.state = 'WHO'; }
+    else if (o === 'continue') {
+      const s2 = loadStored(gameLock());
+      if (s2) { G.pendTheme = gameLock(); startGame(s2); }
+    } else if (o === 'newgame') {
+      // a truly new game: the old save goes, the story plays again, and
+      // only then does the difficulty screen hand over the controls
+      const lk2 = gameLock();
+      G.pendTheme = lk2; wipeSave(lk2); G.diffIdx = 1;
+      if (lk2 !== 'hero') {
+        try { localStorage.removeItem('cb_intro_seen'); } catch (e) {}
+        G.afterCine = 'DIFF'; startCine();
+      } else G.state = 'DIFF';
+    }
     else if (o === 'controls') { G.ctrlBack = 'MENU'; G.state = 'CTRL'; }
     else if (o === 'lang') { openLangSel('MENU'); }
     else if (o === 'sound') { MUTED = !MUTED; saveMeta(); }
@@ -12118,7 +12391,7 @@ function updateLangSel() {
 function updateDiff() {
   if (inP('DOWN')) { G.diffIdx = (G.diffIdx + 1) % 3; sfx('ui'); }
   if (inP('UP')) { G.diffIdx = (G.diffIdx + 2) % 3; sfx('ui'); }
-  if (inP('BACK')) { G.state = 'WHO'; sfx('ui'); return; }
+  if (inP('BACK')) { G.state = gameLock() ? 'MENU' : 'WHO'; sfx('ui'); return; }
   if (inP('OK')) {
     sfx('ok');
     const s = newSave(G.diffIdx);
@@ -14187,7 +14460,8 @@ function draw(tms) {
       drawGlyphText(c, RS_TITLE, 340, 200, 13, 'rgba(55,255,208,0.55)', 'rgba(55,255,208,0.4)');
       const opts = menuOptions();
       const labels = {
-        play: t('menu_play'), controls: t('menu_controls'),
+        play: t('menu_play'), continue: t('menu_continue'), newgame: t('menu_newgame'),
+        controls: t('menu_controls'),
         lang: t('menu_language') + ': ' + langName(LANG), sound: MUTED ? t('menu_sound_off') : t('menu_sound_on'),
         music: MUSIC_ON ? t('menu_music_on') : t('menu_music_off'),
       };
@@ -14367,7 +14641,11 @@ function startCine() {
 function cineEnd() {
   try { localStorage.setItem('cb_intro_seen', '1'); } catch (e) {}
   G.cine = null;
-  G.state = 'MENU'; G.menuIdx = 0;
+  if (G.afterCine === 'DIFF') {
+    G.afterCine = null; G.diffIdx = 1;
+    G.pendTheme = G.pendTheme || gameLock() || 'robo';
+    G.state = 'DIFF';
+  } else { G.state = 'MENU'; G.menuIdx = 0; }
 }
 function updateCine(dt) {
   const ci = G.cine;
@@ -15552,7 +15830,7 @@ loadMeta();
 setMusic('title');
 // first boot only: "The Broadcast Falls" — the manga opening plays once,
 // then never again unless the save flag is cleared
-try { if (!localStorage.getItem('cb_intro_seen')) startCine(); } catch (e) {}
+try { if (!localStorage.getItem('cb_intro_seen') && gameLock() !== 'hero') startCine(); } catch (e) {}
 // look for a newer build at boot, and again every few minutes while idling
 G.updateStamp = 1;
 setTimeout(checkForUpdate, 2500);
