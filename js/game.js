@@ -198,6 +198,9 @@ function spawnStatic(type, tx, ty, extra, flagKey) {
   G.statics.push({ type, x: tx * TILE + (TILE - w) / 2, y: ty * TILE - h, w, h, extra, flagKey, opened: !!(flagKey && G.save.flags[flagKey]), t: rnd(0, 9) });
 }
 function loadRoom(id) {
+  if (G.boss && G.boss.dead && G.boss.rewardPend) {
+    G.boss.rewardPend = false; G.onBossDead(G.boss.kind);
+  }
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
@@ -2064,6 +2067,28 @@ function drawWorldFrame() {
   c.translate(-Math.round(camSX()), -Math.round(camSY()));
   if (tileDirty) renderTileLayer(P);
   c.drawImage(tileCv, 0, 0);
+  // X1 hardlight bridge: alive while the Prowler stands, red and flickering
+  // through the collapse, gone when the wreck settles
+  if (G.roomId === 'X1' && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)) {
+    const dying = G.boss.dead;
+    const tn2 = performance.now();
+    const fl = dying ? 0.45 + Math.sin(tn2 / 38) * 0.3 : 0.7 + Math.sin(tn2 / 300) * 0.15;
+    const col = dying ? '#ff5f6d' : '#37ffd0';
+    const bx0 = 6 * TILE, bw2 = 3 * TILE, by0 = 15 * TILE;
+    c.save();
+    // emitter posts at both ends
+    c.fillStyle = '#2a3038';
+    c.fillRect(bx0 - 6, by0 - 4, 8, 12); c.fillRect(bx0 + bw2 - 2, by0 - 4, 8, 12);
+    // hardlight slats
+    c.globalAlpha = fl;
+    c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 12;
+    for (let i = 0; i < 6; i++)
+      c.fillRect(bx0 + 3 + i * (bw2 - 6) / 6, by0, (bw2 - 6) / 6 - 3, 5);
+    c.shadowBlur = 0;
+    c.globalAlpha = fl * 0.4;
+    c.fillRect(bx0, by0 + 5, bw2, 2);
+    c.restore();
+  }
   // D3 kernel seal (dynamic, drawn over the cached tiles)
   if (G.roomId === 'D3' && !G.save.flags.bossZero) {
     const spu = 0.5 + Math.sin(performance.now() / 300) * 0.2;

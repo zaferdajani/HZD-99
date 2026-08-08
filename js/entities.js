@@ -22,6 +22,11 @@ function tileAt(tx, ty) {
   const g = G.grid;
   if (ty < 0 || ty >= g.length || tx < 0 || tx >= g[0].length) return '.';
   if (G.roomId === 'D3' && !G.save.flags.bossZero && ty >= 15 && tx >= 15 && tx <= 17) return '#';
+  // X1: a hardlight bridge seals the floor entrance for the length of the
+  // Prowler fight — neither she nor the boss can fall through the way in.
+  // It holds through the death collapse, then shatters open again.
+  if (G.roomId === 'X1' && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)
+      && ty >= 15 && tx >= 6 && tx <= 8) return '#';
   const c = g[ty][tx];
   if (c === 'B' && G.save.broken[G.roomId + ':' + tx + ',' + ty]) return '.';
   return c;
@@ -2466,7 +2471,43 @@ class Boss {
     }
     if (this.shieldT > 0) this.shieldT -= dt;          // shorted plating recovers
     if (this.deathAnimT > 0) this.deathAnimT -= dt;   // the collapse plays out
-    if (this.dead) return;
+    if (this.dead) {
+      // THE DEATH SCENE: the wreck does not go quietly — secondary
+      // detonations ripple across the body while it comes apart, each one
+      // kicking the room and the pad, closing on one last whiteout
+      if (this.deathFxT == null) { this.deathFxT = 2.1; this.deathFxNext = 0.12; }
+      if (this.deathFxT > 0) {
+        this.deathFxT -= dt; this.deathFxNext -= dt;
+        if (this.deathFxNext <= 0 && this.deathFxT > 0.5) {
+          this.deathFxNext = rnd(0.12, 0.28);
+          const bx = this.cx() + rnd(-this.w * 0.7, this.w * 0.7);
+          const by = this.y + rnd(0, this.h);
+          burst(bx, by, 10, chance(0.5) ? '#ffffff' : PAL[G.roomDef.zone].glow, 230, 0.5, 150, 3, true);
+          cam.shake = Math.max(cam.shake, 5); sfx('hit');
+          if (typeof padRumble === 'function') padRumble(0.3, 0.42, 120);
+        }
+        if (this.deathFxT <= 0.5 && !this.deathFinale) {
+          this.deathFinale = true;
+          burst(this.cx(), this.cy(), 70, '#ffffff', 480, 1.2, 150, 5, true);
+          burst(this.cx(), this.cy(), 30, PAL[G.roomDef.zone].glow, 320, 1.0, 80, 4, true);
+          G.flash = Math.max(G.flash, 0.85); cam.shake = Math.max(cam.shake, 18);
+          G.hitStop = Math.max(G.hitStop, 0.18);
+          sfx('boom'); sfx('phase');
+          if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
+          if (typeof padRumble === 'function') padRumble(1, 0.8, 700);
+          if (this.rewardPend) { this.rewardPend = false; G.onBossDead(this.kind); }
+        }
+      }
+      // the X1 bridge lets go once the wreck has settled
+      if (G.roomId === 'X1' && (this.deathAnimT || 0) <= 0 && !this.bridgeGone) {
+        this.bridgeGone = true;
+        for (let i = 0; i < 12; i++)
+          addPart(6 * TILE + rnd(0, 3 * TILE), 15 * TILE + rnd(-4, 4),
+            rnd(-60, 60), rnd(-40, 120), 0.6, '#37ffd0', 2.5, 500, true);
+        sfx('glass'); cam.shake = Math.max(cam.shake, 4);
+      }
+      return;
+    }
     if (this.stagT > 0) { this.stagT -= dt; return; }   // Song / weakness stagger
     if (this.st === 'dorm') {
       if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
@@ -3854,15 +3895,22 @@ class Boss {
   die() {
     if (this.dead) return;
     this.dead = true;
+    this.deathAnimT = Math.max(this.deathAnimT || 0, 1.6);
     burst(this.cx(), this.cy(), 60, '#ffffff', 420, 1.1, 200, 5, true);
     burst(this.cx(), this.cy(), 40, PAL[G.roomDef.zone].glow, 300, 1.4, 100, 4, true);
     cam.shake = 16; sfx('boom'); sfx('win');
-    G.hitStop = Math.max(G.hitStop, 0.14); G.flash = Math.max(G.flash, 0.7);
+    if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
+    if (typeof padRumble === 'function') padRumble(1, 0.85, 800);
+    G.hitStop = Math.max(G.hitStop, 0.22); G.flash = Math.max(G.flash, 0.7);
     G.addRing(this.cx(), this.cy()); G.addRing(this.cx(), this.cy(), 60);
     G.impact = { t: 0.24, t0: 0.24, x: this.cx(), y: this.cy() };
     if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
     G.dropScrap(this.cx(), this.cy(), 30);
-    G.onBossDead(this.kind);
+    // the reward dialog used to open HERE — freezing the collapse mid-fall
+    // so the wreck stood still. Now the death scene plays to its finale
+    // first; the spoils wait their turn (update fires them, loadRoom is
+    // the safety net if the room is left early).
+    this.rewardPend = true;
   }
   draw(c) {
     // ONE ENGINE, TWO WORLDS — and they must never bleed into each other.
