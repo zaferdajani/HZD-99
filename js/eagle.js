@@ -23,13 +23,45 @@ const EAGLE_P = {
 const EAGLE_F = 2.11;             // panel figure scale -> in-world master scale
 const EAGLE_CACHE = { anchors: null };
 
-function eagleImg() { return typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.eagleParts; }
+let EG_PURE = false;              // drawEagle sets this from b.purified
+let EG_PURE_CV = undefined;
+// the purified sheet: every hot virus-red pixel remapped to clean teal
+function egPureAtlas(im) {
+  if (EG_PURE_CV !== undefined) return EG_PURE_CV;
+  // never cache before the sheet has decoded — a 0-size canvas is forever
+  if (!im || !im.naturalWidth) return null;
+  const cv = document.createElement('canvas');
+  cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+  const x = cv.getContext('2d', { willReadFrequently: true });
+  x.drawImage(im, 0, 0);
+  let d;
+  try { d = x.getImageData(0, 0, cv.width, cv.height); }
+  catch (e) { return (EG_PURE_CV = null); }
+  const p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const r = p[i], g = p[i + 1], b2 = p[i + 2];
+    if (p[i + 3] > 60 && r > 130 && r - g > 55 && r - b2 > 45) {
+      p[i] = Math.round(r * 0.25);
+      p[i + 1] = Math.min(255, Math.round(r * 0.9 + 40));
+      p[i + 2] = Math.round(r * 0.72);
+    }
+  }
+  x.putImageData(d, 0, 0);
+  return (EG_PURE_CV = cv);
+}
+function eagleImg() {
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.eagleParts;
+  if (im && EG_PURE) { const pv = egPureAtlas(im); if (pv) return pv; }
+  return im;
+}
 
 // each figure is registered on its glowing chest core, found by scanning the
 // art itself — so alternating frames stay locked to one another
 function eagleAnchors() {
   if (EAGLE_CACHE.anchors) return EAGLE_CACHE.anchors;
-  const im = eagleImg(); if (!im || !im.naturalWidth) return null;
+  // always scan the RAW sheet: the purified remap moves the red the scan needs
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.eagleParts;
+  if (!im || !im.naturalWidth) return null;
   const cv = document.createElement('canvas');
   cv.width = im.naturalWidth; cv.height = im.naturalHeight;
   const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
@@ -148,7 +180,8 @@ function egCableStroke(c, x0, y0, x1, y1, bow) {
 }
 
 function drawEagle(c, b) {
-  const im = eagleImg(); if (!im || !im.naturalWidth) return false;
+  EG_PURE = !!b.purified;
+  const im = eagleImg(); if (!im || (!im.naturalWidth && !im.getContext)) return false;
   c.save();
   try {
     const S = (b.w * 3.0) / 532;
@@ -205,7 +238,7 @@ function drawEagle(c, b) {
       const lx = (hangX - cx) / S, ly = (ancY - cy) / S;
       egCableStroke(c, lx, ly, ax, ay, -(b.cabV || 0) * 14 + (lx - ax) * 0.1);
     }
-    if (b.dead) {
+    if (b.dead && !b.purified) {
       // powered down on the ground, light out, listing to one side
       const k = 1 - Math.max(0, Math.min(1, (b.deathAnimT || 0) / 1.6));
       egFigA(c, 'pRest', 1, 0.35 * k);
@@ -330,6 +363,7 @@ function drawFeather(c, pr) {
 // the flock: every flying minion is a small TALONHOST — the same authored
 // flip-book frames at a smaller scale; talons only, no feathers
 function drawEagleMini(c, e) {
+  EG_PURE = false;
   const im = eagleImg(); if (!im || !im.naturalWidth) return false;
   c.save();
   try {

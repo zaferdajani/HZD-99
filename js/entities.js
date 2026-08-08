@@ -2495,35 +2495,54 @@ class Boss {
           sfx('boom'); sfx('phase');
           if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
           if (typeof padRumble === 'function') padRumble(1, 0.8, 700);
-          if (this.kind === 'glitch' && !this.purified) {
-            // the blast was the VIRUS leaving, not the beast dying
+          if (this.kind !== 'mother' && !this.purified) {
+            // the blast was the VIRUS leaving, not the guardian dying
             this.purified = true; this.pureT = 0;
-            G.toast(t('pure_beast'));
+            G.toast(t({ glitch: 'pure_beast', brood: 'pure_brood', atlas: 'pure_atlas',
+                        zero: 'pure_zero', prism: 'pure_prism' }[this.kind]));
           }
           if (this.rewardPend) { this.rewardPend = false; G.onBossDead(this.kind); }
         }
       }
       if (this.purified) {
-        // THE PET: a freed guardian is a giant housecat now. It settles to
-        // the floor, pads to her side, keeps its face to her, and purrs
-        // little hearts when it is close enough to be happy.
+        // THE PETS: a freed guardian keeps its nature. The lion and the
+        // dragon pad to her side; GLACIERE glides at her shoulder; the
+        // eagle perches watching over her; the Prowler is just a cat
+        // again. All of them purr hearts when she is close.
         this.pureT = (this.pureT || 0) + dt;
-        const floorY2 = 15 * TILE - this.h;
-        if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
         this.faceVis = (this.faceVis || this.face)
           + clamp(this.face - (this.faceVis || this.face), -dt * 5, dt * 5);
-        if (this.pureT > 1.1 && !player.dead) {
-          const pd = player.x + player.w / 2 - this.cx();
-          this.face = Math.sign(pd) || this.face;
-          if (Math.abs(pd) > 96) { this.x += clamp(pd, -70, 70) * dt; this.petWalk = true; }
-          else {
-            this.petWalk = false;
-            if (Math.abs(pd) < 90 && chance(0.05))
-              addPart(this.cx() + rnd(-14, 14), this.y - 6, rnd(-6, 6), rnd(-42, -22),
-                rnd(0.7, 1.1), chance(0.5) ? '#ff8fb3' : '#ffc2d4', 2.6, -14, true);
+        const px2 = player.x + player.w / 2, pd = px2 - this.cx();
+        const settled = this.pureT > 1.1 && !player.dead;
+        if (settled) this.face = Math.sign(pd) || this.face;
+        if (settled && Math.abs(pd) < (this.kind === 'zero' ? 180 : 110) && chance(0.05))
+          addPart(this.cx() + rnd(-14, 14), this.y - 6, rnd(-6, 6), rnd(-42, -22),
+            rnd(0.7, 1.1), chance(0.5) ? '#ff8fb3' : '#ffc2d4', 2.6, -14, true);
+        const floorY2 = 15 * TILE - this.h;
+        if (this.kind === 'glitch' || this.kind === 'atlas') {
+          if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
+          let mv = 0;
+          if (settled && Math.abs(pd) > 96) { mv = clamp(pd, -70, 70); this.x += mv * dt; }
+          this.petWalk = mv !== 0;
+          this.vx = this.kind === 'atlas' ? mv : 0;   // drives the dragon's step rig
+          if (this.kind === 'atlas') { this.st = 'idle'; this.t = 5; this.vy = 0; }
+        } else if (this.kind === 'zero') {
+          this.st = 'idle';
+          if (settled) {
+            // at her shoulder: a half-length behind, riding the air
+            const tx2 = px2 - (Math.sign(pd) || 1) * 120 - this.w / 2;
+            const ty2 = floorY2 - 130;
+            this.x += (tx2 - this.x) * Math.min(1, dt * 1.6);
+            this.y += (ty2 - this.y) * Math.min(1, dt * 1.1);
           }
-          this.x = clamp(this.x, 8, G.roomDef.w * TILE - this.w - 8);
-        } else this.petWalk = false;
+        } else if (this.kind === 'brood') {
+          this.st = 'restlow'; this.t = 5;
+          this.y = floorY2 + 4; this.vy = 0; this.cabV = this.cabV || 0;
+        } else if (this.kind === 'prism') {
+          this.st = 'dorm';
+          if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
+        }
+        this.x = clamp(this.x, 8, G.roomDef.w * TILE - this.w - 8);
       }
       // the X1 bridge lets go once the wreck has settled
       if (G.roomId === 'X1' && (this.deathAnimT || 0) <= 0 && !this.bridgeGone) {
@@ -3980,7 +3999,8 @@ class Boss {
       && !(this.kind === 'mother' && typeof drawMother === 'function')
       && !(this.kind === 'atlas' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.dragonParts)) return;
     const P = PAL[G.roomDef.zone];
-    const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
+    let a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
+    if (this.purified && (this.pureT || 0) < 0.7) a *= clamp((this.pureT || 0) / 0.7 + 0.15, 0.15, 1);
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
     if (this.dead) {

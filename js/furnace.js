@@ -113,7 +113,8 @@ function drgWalkCut(hot) {
 // the shank folds about the knee — both halves are the sheet's own pixels,
 // overlapped 14 rows through the ball so the seam never shows mid-flex
 function drgLegDraw(c, key, ax, ay, a1, a2, dark) {
-  const im = dark ? drgDark() : drgImg(); if (!im) return;
+  const im = dark ? drgDark() : drgImg();
+  if (!im || !(im.naturalWidth || im.width)) return;
   const s = DRG_P[key], L = DRG_LEG[key], sc = DRG_LEGSC;
   const cutUp = Math.min(s[3], L.knee[1] + 7), cutLo = Math.max(0, L.knee[1] - 7);
   c.save();
@@ -315,7 +316,7 @@ function drawFurnace(c, b) {
 
     // ---- DEATH: he breaks into the sheet's own parts, staggered — wings
     // tear free first, the head drops next, the legs buckle, the body falls
-    if (b.dead) {
+    if (b.dead && !b.purified) {
       fc.deadT += dt;
       if (!fc.shatter) {
         const mk = (k, x, y, delay, vx, vy, vr, gy) =>

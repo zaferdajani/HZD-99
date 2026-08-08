@@ -20,7 +20,37 @@ const GLC_P = {
   mane: [100, 10, 168, 162],
   tailW: [430, 230, 186, 155],
 };
-function glcImg() { return typeof MEDIA_IMG !== 'undefined' ? MEDIA_IMG.glaciereParts : null; }
+let GLC_PURE = false;             // drawGlaciere sets this from b.purified
+let GLC_PURE_CV = undefined;
+// purified sheet: the void purple leaves her — remapped to living ice
+function glcPureAtlas(im) {
+  if (GLC_PURE_CV !== undefined) return GLC_PURE_CV;
+  // never cache before the sheet has decoded — a 0-size canvas is forever
+  if (!im || !im.naturalWidth) return null;
+  const cv = document.createElement('canvas');
+  cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+  const x = cv.getContext('2d', { willReadFrequently: true });
+  x.drawImage(im, 0, 0);
+  let d;
+  try { d = x.getImageData(0, 0, cv.width, cv.height); }
+  catch (e) { return (GLC_PURE_CV = null); }
+  const p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const r = p[i], g = p[i + 1], b2 = p[i + 2];
+    if (p[i + 3] > 60 && b2 > 120 && b2 - g > 40 && r - g > 5) {
+      p[i] = Math.round(r * 0.45);
+      p[i + 1] = Math.min(255, Math.round(b2 * 0.92));
+      p[i + 2] = b2;
+    }
+  }
+  x.putImageData(d, 0, 0);
+  return (GLC_PURE_CV = cv);
+}
+function glcImg() {
+  const im = typeof MEDIA_IMG !== 'undefined' ? MEDIA_IMG.glaciereParts : null;
+  if (im && GLC_PURE) { const pv = glcPureAtlas(im); if (pv) return pv; }
+  return im;
+}
 
 // draw one authored figure bottom-anchored in local space (art faces LEFT)
 function glcFig(c, key, rot, shake, alpha) {
@@ -75,22 +105,24 @@ const GLC_HIPS = [
 ];
 // cool-shadowed atlas for the far pair, so depth reads
 function glcDark() {
-  if (GLC_CACHE.dark) return GLC_CACHE.dark;
-  const im = glcImg(); if (!im || !im.naturalWidth) return null;
+  const slot = GLC_PURE ? 'darkPure' : 'dark';
+  if (GLC_CACHE[slot]) return GLC_CACHE[slot];
+  const im = glcImg(); if (!im || (!im.naturalWidth && !im.getContext)) return null;
   const cv = document.createElement('canvas');
   cv.width = im.naturalWidth; cv.height = im.naturalHeight;
   const x = cv.getContext('2d');
   x.drawImage(im, 0, 0);
   x.globalCompositeOperation = 'source-atop';
   x.fillStyle = 'rgba(9,11,26,0.45)'; x.fillRect(0, 0, cv.width, cv.height);
-  GLC_CACHE.dark = cv;
+  GLC_CACHE[slot] = cv;
   return cv;
 }
 // the hero figure with its baked legs erased — mane, belly lightning and the
 // whole tail chain survive untouched; rig legs hang over the cut
 function glcHeroCut() {
-  if (GLC_CACHE.heroCut) return GLC_CACHE.heroCut;
-  const im = glcImg(); if (!im || !im.naturalWidth) return null;
+  const slot = GLC_PURE ? 'heroCutPure' : 'heroCut';
+  if (GLC_CACHE[slot]) return GLC_CACHE[slot];
+  const im = glcImg(); if (!im || (!im.naturalWidth && !im.getContext)) return null;
   const s = GLC_P.hero;
   const cv = document.createElement('canvas');
   cv.width = s[2]; cv.height = s[3];
@@ -99,13 +131,14 @@ function glcHeroCut() {
   x.globalCompositeOperation = 'destination-out';
   x.fillRect(122, 285, 128, 128);               // the front legs and both hoofs
   x.fillRect(326, 296, 106, 117);               // the hind leg under the tail
-  GLC_CACHE.heroCut = cv;
+  GLC_CACHE[slot] = cv;
   return cv;
 }
 // one authored leg split at its knee ball — upper drives from the hip, the
 // shank folds about the knee, overlapped 14 rows through the ball
 function glcLegDraw(c, key, ax, ay, a1, a2, sc, dark) {
-  const im = dark ? glcDark() : glcImg(); if (!im) return;
+  const im = dark ? glcDark() : glcImg();
+  if (!im || !(im.naturalWidth || im.width)) return;
   const s = GLC_P[key], L = GLC_LEG[key];
   const cutUp = Math.min(s[3], L.knee[1] + 7), cutLo = Math.max(0, L.knee[1] - 7);
   c.save();
@@ -151,7 +184,8 @@ function glcHeroRig(c, rot, shake, gait, k, tuck) {
 }
 
 function drawGlaciere(c, b) {
-  const im = glcImg(); if (!im || !im.naturalWidth) return false;
+  GLC_PURE = !!b.purified;
+  const im = glcImg(); if (!im || (!im.naturalWidth && !im.getContext)) return false;
   c.save();
   try {
     const H = b.h * 1.9;                       // drawn height over the hitbox
@@ -213,7 +247,7 @@ function drawGlaciere(c, b) {
     // hover shadow, faint — tight underfoot while she is grounded
     c.save(); c.globalAlpha *= 0.22; c.fillStyle = '#04070b';
     c.beginPath(); c.ellipse(0, 2 + groundOff, 200 * (0.55 + 0.45 * riseK), 16, 0, 0, 7); c.fill(); c.restore();
-    if (b.dead) {
+    if (b.dead && !b.purified) {
       // DEATH: she breaks into the sheet's own parts row — and the pieces
       // FALL: gravity takes them, each bounces once on the floor line, and
       // they settle where they lie with dying spin. Nothing drifts forever.

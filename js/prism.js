@@ -604,9 +604,9 @@ function drawPrism(c, b) {
 
     // disc rotation: a real turntable — it idles slowly, whips with facing
     // changes, and screams during the arc states
-    const P = b.dead ? null : przPose(b);
+    const P = (b.dead && !b.purified) ? null : przPose(b);
     const dA = b.anim - (b.przAt == null ? b.anim : b.przAt); b.przAt = b.anim;
-    if (!b.dead) {
+    if (!b.dead || b.purified) {
       const dFv = fv - (b.przFv == null ? fv : b.przFv);
       b.przRot = (b.przRot || 0) + dA * P.discSpin + dFv * -2.2;
       // the crossing frame: the disc kicks sparks as the cat swings through
@@ -622,7 +622,7 @@ function drawPrism(c, b) {
     c.translate(cx, footY);
     c.scale(S, S);
 
-    if (b.dead) { przDeath(c, b, S); c.restore(); return true; }
+    if (b.dead && !b.purified) { przDeath(c, b, S); c.restore(); return true; }
 
     // the turntable does not mirror — it is a disc; only its lines rotate
     przDisc(c, b, P, b.przRot || 0);

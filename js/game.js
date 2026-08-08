@@ -237,13 +237,17 @@ function loadRoom(id) {
       spawnStatic(kind, tx, ty, extra, kind === 'term' ? null : null);
     }
   });
-  // the freed guardian stays home: NULLFANG pads around his old arena as
-  // her pet forever after the virus is destroyed
-  if (id === 'A4' && G.save.flags.bossGlitch && !G.boss) {
-    G.boss = new Boss('glitch', 20 * TILE, 15 * TILE);
-    G.boss.dead = true; G.boss.purified = true; G.boss.pureT = 5;
-    G.boss.deathFxT = 0; G.boss.deathFinale = true; G.boss.rewardPend = false;
-    G.boss.hp = 0; G.boss.st = 'idle';
+  // the freed guardians stay home: every purified boss lives on in its
+  // old arena as her pet, forever
+  const PET_HOMES = { A4: ['glitch', 20], B4: ['brood', 15], C3: ['atlas', 15], D3: ['zero', 15], X1: ['prism', 20] };
+  const ph2 = PET_HOMES[id];
+  if (ph2 && G.save.flags['boss' + ph2[0].charAt(0).toUpperCase() + ph2[0].slice(1)] && !G.boss) {
+    const pb = new Boss(ph2[0], ph2[1] * TILE, 15 * TILE);
+    pb.dead = true; pb.purified = true; pb.pureT = 5;
+    pb.deathFxT = 0; pb.deathFinale = true; pb.rewardPend = false; pb.hp = 0;
+    pb.st = ph2[0] === 'brood' ? 'restlow' : ph2[0] === 'prism' ? 'dorm' : 'idle';
+    if (ph2[0] === 'brood') pb.y = 15 * TILE - pb.h + 4;
+    G.boss = pb;
   }
   if (G.save.pouch && G.save.pouch.room === id) {
     const p = new Pouch(G.save.pouch.x, G.save.pouch.y, G.save.pouch.amount);
