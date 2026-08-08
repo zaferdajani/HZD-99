@@ -237,6 +237,14 @@ function loadRoom(id) {
       spawnStatic(kind, tx, ty, extra, kind === 'term' ? null : null);
     }
   });
+  // the freed guardian stays home: NULLFANG pads around his old arena as
+  // her pet forever after the virus is destroyed
+  if (id === 'A4' && G.save.flags.bossGlitch && !G.boss) {
+    G.boss = new Boss('glitch', 20 * TILE, 15 * TILE);
+    G.boss.dead = true; G.boss.purified = true; G.boss.pureT = 5;
+    G.boss.deathFxT = 0; G.boss.deathFinale = true; G.boss.rewardPend = false;
+    G.boss.hp = 0; G.boss.st = 'idle';
+  }
   if (G.save.pouch && G.save.pouch.room === id) {
     const p = new Pouch(G.save.pouch.x, G.save.pouch.y, G.save.pouch.amount);
     G.pickups.push(p);

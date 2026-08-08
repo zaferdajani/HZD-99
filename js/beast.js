@@ -83,9 +83,16 @@ function bGlowOver(c, key, px, py, dim, sc) {
     const gx = (sp.x - px) * F, gy = (sp.y - py) * F;
     const gr = sp.r * F * (1.15 + 0.3 * Math.sin(ph * 0.5 + 1));
     const gg = c.createRadialGradient(gx, gy, 0.5, gx, gy, gr);
-    gg.addColorStop(0, 'rgba(226,168,255,' + Math.min(0.8, a * 1.6) + ')');
-    gg.addColorStop(0.5, 'rgba(176,106,255,' + a + ')');
-    gg.addColorStop(1, 'rgba(120,50,210,0)');
+    if (BEAST_LIVE.pure) {
+      // the virus is gone: the same authored vein positions breathe CLEAN
+      gg.addColorStop(0, 'rgba(190,255,240,' + Math.min(0.8, a * 1.6) + ')');
+      gg.addColorStop(0.5, 'rgba(90,235,205,' + a + ')');
+      gg.addColorStop(1, 'rgba(20,140,120,0)');
+    } else {
+      gg.addColorStop(0, 'rgba(226,168,255,' + Math.min(0.8, a * 1.6) + ')');
+      gg.addColorStop(0.5, 'rgba(176,106,255,' + a + ')');
+      gg.addColorStop(1, 'rgba(120,50,210,0)');
+    }
     c.fillStyle = gg;
     c.beginPath(); c.arc(gx, gy, gr, 0, 7); c.fill();
   }
@@ -151,6 +158,34 @@ function beastFront() {
     q.drawImage(im, s[0], s[1] + 40, AX, s[3] - 40, CXc - AX / 2, hy + 46, AX, s[3] - 40);
   }
   BEAST_CACHE.front = cv;
+  return cv;
+}
+// THE PURIFIED ATLAS: the virus is destroyed, so its purple must leave the
+// body too. Every blue-heavy virus pixel in the authored sheet is remapped
+// to a clean teal — same art, same positions, the infection gone.
+function beastPure() {
+  if (BEAST_CACHE.pureAtlas !== undefined) return BEAST_CACHE.pureAtlas;
+  const im = beastImg(); if (!im || !im.naturalWidth) return null;
+  const cv = document.createElement('canvas');
+  cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+  const x = cv.getContext('2d', { willReadFrequently: true });
+  x.drawImage(im, 0, 0);
+  let d;
+  try { d = x.getImageData(0, 0, cv.width, cv.height); }
+  catch (e) { return (BEAST_CACHE.pureAtlas = null); }
+  const p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const r = p[i], g = p[i + 1], b2 = p[i + 2];
+    // the same virus-purple test the vein scanner uses, softened to catch
+    // the dimmer edges of each glow disc
+    if (p[i + 3] > 60 && b2 > 110 && b2 - g > 35 && r - g > 0) {
+      p[i] = Math.round(r * 0.3);
+      p[i + 1] = Math.min(255, Math.round(b2 * 0.95));
+      p[i + 2] = Math.round(b2 * 0.8);
+    }
+  }
+  x.putImageData(d, 0, 0);
+  BEAST_CACHE.pureAtlas = cv;
   return cv;
 }
 // far-side limbs use a darkened copy of the atlas so depth reads
@@ -247,7 +282,8 @@ function bSleep(c, t, lift) {
 // draw one part with its pivot at the current origin
 function bPart(c, key, px, py, dark) {
   const s = BEAST_P[key];
-  const im = dark ? beastDark() : beastImg();
+  const im = dark ? beastDark()
+    : (BEAST_LIVE.pure && beastPure()) || beastImg();
   c.drawImage(im, s[0], s[1], s[2], s[3], -px, -py, s[2], s[3]);
   bGlowOver(c, key, px, py, dark ? 0.4 : 1);
 }
@@ -329,6 +365,54 @@ function beastPose(b) {
       { a1: 0.86 * fold + 0.02, a2: -1.46 * fold },
       { a1: 0.92 * fold + 0.02, a2: -1.5 * fold },
     ];
+    return P;
+  }
+  if (b.purified) {
+    const pt = b.pureT || 0;
+    if (pt < 0.8) {
+      // THE RISE: up out of the collapse, shaking the last of it off
+      const k = pt / 0.8, e = k * k * (3 - 2 * k);
+      P.crouch = 44 * (1 - e); P.pitch = 0.06 * (1 - e);
+      P.legs = [0, 1, 2, 3].map(() => ({ a1: 0.9 * (1 - e), a2: -1.5 * (1 - e) }));
+      P.headA = 0.5 * (1 - e); P.neckA = 0.3 * (1 - e);
+      P.glow = 0.25; P.tailUp = -1 + e * 0.9;
+      P.bob = k > 0.6 ? Math.sin(t * 40) * 2 * (1 - k) : 0;
+      return P;
+    }
+    // A HOUSECAT THE SIZE OF A CAR: happy tail always; it pads to her
+    // side, sits watching her, grooms a forepaw, and loafs — on a loop
+    P.glow = 0.35 + Math.sin(t * 2) * 0.1;
+    P.tailUp = 0.35; P.tailA = Math.sin(t * 3.2) * 0.35;
+    if (b.petWalk) {
+      const g2 = t * 4.2;
+      const PH2 = [0, 1.18 * Math.PI, 0.42 * Math.PI, 1.46 * Math.PI];
+      P.legs = [0, 1, 2, 3].map(i => {
+        const w = g2 + PH2[i];
+        return { a1: Math.sin(w) * 0.14,
+          a2: (Math.sin(w + 1.25) * 0.55 + Math.max(0, Math.sin(w + 2.1)) * 0.5) * 0.2 };
+      });
+      P.bob = Math.sin(g2 * 2) * 2;
+      P.headA = 0.06 + Math.sin(g2 - 1) * 0.03;
+      return P;
+    }
+    const cyc = pt % 12;
+    if (cyc < 4) {                      // SIT: haunches down, chest up, watching
+      P.crouch = 24; P.pitch = -0.05;
+      P.headA = -0.06 + Math.sin(t * 0.9) * 0.03;
+      P.legs = [{ a1: 0.06, a2: 0.04 }, { a1: 0.5, a2: -0.7 }, { a1: 0.02, a2: 0.04 }, { a1: 0.46, a2: -0.66 }];
+    } else if (cyc < 7.5) {             // GROOM: forepaw to the cheek, licking
+      const lk = Math.min(1, cyc - 4, 7.5 - cyc);
+      P.crouch = 28; P.pitch = -0.03;
+      P.legs = [{ a1: -1.15 * lk, a2: 0.6 * lk }, { a1: 0.5, a2: -0.7 }, { a1: 0.04, a2: 0.03 }, { a1: 0.46, a2: -0.66 }];
+      P.headA = 0.5 * lk + Math.max(0, Math.sin(t * 7)) * 0.06 * lk;
+      P.neckA = 0.2 * lk;
+    } else {                            // LOAF: folded flat, utterly content
+      const lk = Math.min(1, (cyc - 7.5) / 0.8);
+      P.crouch = 24 + 20 * lk; P.pitch = 0.03 * lk;
+      P.legs = [0, 1, 2, 3].map(() => ({ a1: 0.9 * lk, a2: -1.5 * lk }));
+      P.headA = 0.25 * lk; P.neckA = 0.15 * lk;
+      P.bob = Math.sin(t * 0.9) * 1.2;
+    }
     return P;
   }
   if (b.dead) {
@@ -516,7 +600,7 @@ function drawBeast(c, b) {
     const fv = b.faceVis == null ? -1 : b.faceVis;
     const S = (b.h * 2.35) / BEAST_H;
     const cx = b.x + b.w / 2, footY = b.y + b.h;
-    BEAST_LIVE.t = b.anim || 0; BEAST_LIVE.glow = 1;
+    BEAST_LIVE.t = b.anim || 0; BEAST_LIVE.glow = 1; BEAST_LIVE.pure = !!b.purified;
     // SMEAR TRAIL: while it leaps (pounce / spring / dive), 2-3 violet
     // afterimage copies of the authored crouch figure hang along the arc
     // and burn off — the virus can't keep up with the body

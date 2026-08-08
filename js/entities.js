@@ -2495,8 +2495,35 @@ class Boss {
           sfx('boom'); sfx('phase');
           if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
           if (typeof padRumble === 'function') padRumble(1, 0.8, 700);
+          if (this.kind === 'glitch' && !this.purified) {
+            // the blast was the VIRUS leaving, not the beast dying
+            this.purified = true; this.pureT = 0;
+            G.toast(t('pure_beast'));
+          }
           if (this.rewardPend) { this.rewardPend = false; G.onBossDead(this.kind); }
         }
+      }
+      if (this.purified) {
+        // THE PET: a freed guardian is a giant housecat now. It settles to
+        // the floor, pads to her side, keeps its face to her, and purrs
+        // little hearts when it is close enough to be happy.
+        this.pureT = (this.pureT || 0) + dt;
+        const floorY2 = 15 * TILE - this.h;
+        if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
+        this.faceVis = (this.faceVis || this.face)
+          + clamp(this.face - (this.faceVis || this.face), -dt * 5, dt * 5);
+        if (this.pureT > 1.1 && !player.dead) {
+          const pd = player.x + player.w / 2 - this.cx();
+          this.face = Math.sign(pd) || this.face;
+          if (Math.abs(pd) > 96) { this.x += clamp(pd, -70, 70) * dt; this.petWalk = true; }
+          else {
+            this.petWalk = false;
+            if (Math.abs(pd) < 90 && chance(0.05))
+              addPart(this.cx() + rnd(-14, 14), this.y - 6, rnd(-6, 6), rnd(-42, -22),
+                rnd(0.7, 1.1), chance(0.5) ? '#ff8fb3' : '#ffc2d4', 2.6, -14, true);
+          }
+          this.x = clamp(this.x, 8, G.roomDef.w * TILE - this.w - 8);
+        } else this.petWalk = false;
       }
       // the X1 bridge lets go once the wreck has settled
       if (G.roomId === 'X1' && (this.deathAnimT || 0) <= 0 && !this.bridgeGone) {
@@ -2845,6 +2872,35 @@ class Boss {
           }
         }
         if (this.st === 'stalk' && (col.l || col.r)) this.face *= -1;
+        // ANTI-WEDGE WATCHDOG: a dive can end beneath a ledge and jam the
+        // hunter in place. If it stops registering movement for 2.6s in an
+        // active state it WRENCHES itself free toward open floor — and if
+        // that fails twice more, it re-enters clean from its spawn point.
+        {
+          if (this.wdX == null) { this.wdX = this.x; this.wdT = 0; }
+          const activeSt = this.st === 'stalk' || this.st === 'recover'
+            || this.st === 'pounce' || this.st === 'crouch' || this.st === 'nullend';
+          if (Math.abs(this.x - this.wdX) > 10 || !activeSt || this.stagT > 0) {
+            this.wdX = this.x; this.wdT = 0;
+          } else if ((this.wdT += dt) > 2.6) {
+            this.wdT = 0; this.wdX = this.x;
+            this.wedged = (this.wedged || 0) + 1;
+            const mid = G.roomDef.w * TILE / 2;
+            if (this.wedged >= 3) {
+              this.x = this.spawnX; this.y = this.spawnY; this.vx = 0; this.vy = 0;
+              this.st = 'stalk'; this.t = 1.5; this.wedged = 0;
+              burst(this.cx(), this.cy(), 14, '#b06aff', 200, 0.5, 100, 3, true);
+            } else {
+              this.st = 'pounce';
+              this.vy = -560; this.vx = (mid > this.cx() ? 1 : -1) * 300;
+              this.face = Math.sign(this.vx) || 1;
+              cam.shake = Math.max(cam.shake, 4); sfx('dash');
+              for (let i = 0; i < 8; i++)
+                addPart(this.cx() + rnd(-24, 24), this.y + this.h - 4,
+                  rnd(-120, 120), rnd(-160, -40), 0.4, '#b9a888', 2.5, 300, true);
+            }
+          }
+        }
         break;
       }
       // ---- Broodmother: hangs above, spawns and slams ----
