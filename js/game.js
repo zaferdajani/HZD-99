@@ -1194,6 +1194,193 @@ const ZONE_CELL = { A: [0, 0], B: [1, 0], C: [0, 1], D: [1, 1], E: [0, 2], X: [1
 // zones with a dedicated full-frame vista use it; the gloomy atlas cells stay
 // wired underneath for the later stages
 const ZONE_VISTA = { A: 'vistaCity', B: 'vistaCrystal' };
+
+// ===========================================================================
+// THE POUR — the Foundry's molten iron, running continuously behind the play.
+// Not a looping video and not a neon stripe: three ladles tip somewhere up in
+// the dark and the metal FALLS. Each stream necks and swells the way a real
+// pour does, its skin scrolls downward, drips tear loose at the lip and
+// stretch as they accelerate, and the whole thing lands in a churning pool
+// that throws light back up the walls. Every phase is a modulo of the clock,
+// so it never restarts and never repeats visibly.
+// ===========================================================================
+const POURS = [
+  { x: 160, w: 9, top: -30, len: 296, rate: 0.62, hue: 0 },
+  { x: 620, w: 13, top: -30, len: 344, rate: 0.44, hue: 1 },
+  { x: 1080, w: 7, top: -30, len: 268, rate: 0.78, hue: 0 },
+  { x: 1520, w: 11, top: -30, len: 318, rate: 0.53, hue: 1 },
+];
+// layered sines: smooth, endlessly varying, and perfectly periodic
+function pourWob(a) {
+  return Math.sin(a) * 0.55 + Math.sin(a * 2.27 + 1.7) * 0.28 + Math.sin(a * 4.13 + 0.4) * 0.17;
+}
+function drawLavaFalls(px, py) {
+  const t = performance.now() / 1000;
+  const PARA = 0.24;                                  // sits deep, behind everything
+  c.save();
+  // it is FAR AWAY: the pour lights the hall, it does not compete with the
+  // fight happening in front of it
+  c.globalAlpha = 0.5;
+  for (const p of POURS) {
+    const sx = p.x - px * PARA;
+    if (sx < -140 || sx > 1100) continue;
+    const y0 = p.top - py * 0.04, y1 = y0 + p.len;
+    // ---- the ladle lip it pours from: a dark spout against the dark ----
+    c.fillStyle = 'rgba(14,9,7,0.85)';
+    rr(c, sx - p.w * 1.9, y0 - 16, p.w * 3.8, 20, 5); c.fill();
+    c.fillStyle = 'rgba(60,32,20,0.7)';
+    rr(c, sx - p.w * 1.9, y0 - 16, p.w * 3.8, 5, 3); c.fill();
+
+    // ---- the falling column ----
+    // width follows the fall: metal NECKS as it speeds up, then the stream
+    // swells again where a fresh surge catches up with it
+    const N = 26;
+    const L = [], R = [];
+    for (let i = 0; i <= N; i++) {
+      const q = i / N, yy = y0 + p.len * q;
+      const surge = 1 + 0.34 * pourWob(t * 1.15 * p.rate * 6 - q * 5.2 + p.hue * 2.1);
+      const neck = 1 / (1 + q * 1.55);                // gravity thins the ribbon
+      const w = p.w * neck * surge;
+      const cx2 = sx + pourWob(t * 0.5 + q * 2.4 + p.hue) * (5 + q * 13);
+      L.push([cx2 - w, yy]); R.push([cx2 + w, yy]);
+    }
+    const ribbon = () => {
+      c.beginPath();
+      c.moveTo(L[0][0], L[0][1]);
+      for (let i = 1; i <= N; i++) c.lineTo(L[i][0], L[i][1]);
+      for (let i = N; i >= 0; i--) c.lineTo(R[i][0], R[i][1]);
+      c.closePath();
+    };
+    // dark crust first — the skin that cools on the outside of the stream
+    c.globalCompositeOperation = 'source-over';
+    ribbon();
+    const cg = c.createLinearGradient(0, y0, 0, y1);
+    cg.addColorStop(0, 'rgba(120,44,14,0.95)');
+    cg.addColorStop(0.5, 'rgba(96,30,10,0.9)');
+    cg.addColorStop(1, 'rgba(70,20,8,0.85)');
+    c.fillStyle = cg; c.fill();
+    // the glowing body, inset so the crust survives at the edges
+    c.globalCompositeOperation = 'lighter';
+    c.save();
+    ribbon(); c.clip();
+    const bg2 = c.createLinearGradient(0, y0, 0, y1);
+    bg2.addColorStop(0, 'rgba(255,238,190,0.95)');
+    bg2.addColorStop(0.28, 'rgba(255,168,60,0.85)');
+    bg2.addColorStop(0.72, 'rgba(255,104,26,0.7)');
+    bg2.addColorStop(1, 'rgba(206,54,14,0.55)');
+    c.fillStyle = bg2;
+    c.fillRect(sx - 90, y0, 180, p.len);
+    // the skin SCROLLS: bright striations running down the column forever
+    c.globalAlpha = 0.5;
+    for (let s = 0; s < 9; s++) {
+      const ph = ((t * (150 + s * 11) * p.rate + s * 97) % (p.len + 90)) - 45;
+      const q = clamp(ph / p.len, 0, 1);
+      const w2 = p.w * (1 / (1 + q * 1.55)) * 1.5;
+      c.fillStyle = 'rgba(255,246,214,' + (0.16 + 0.2 * (1 - q)) + ')';
+      const cx2 = sx + pourWob(t * 0.5 + q * 2.4 + p.hue) * (5 + q * 13);
+      rr(c, cx2 - w2 * 0.42, y0 + ph, w2 * 0.84, 12 + q * 26, 6); c.fill();
+    }
+    c.globalAlpha = 0.5;
+    c.restore();
+
+    // ---- drips: they tear off the lip, stretch as they accelerate, and
+    // hit the pool. Three staggered so there is always one in the air.
+    for (let k = 0; k < 3; k++) {
+      const ph = ((t * p.rate * 0.85 + k * 0.37 + p.hue * 0.19) % 1);
+      const q = ph * ph;                              // acceleration
+      const dy = y0 + 26 + q * (p.len - 26);
+      const dx = sx + pourWob(t * 0.5 + q * 2.4 + p.hue) * (5 + q * 13);
+      const stretch = 1 + q * 3.6, rad = p.w * 0.42 * (1 - q * 0.35);
+      c.globalCompositeOperation = 'lighter';
+      c.fillStyle = 'rgba(255,190,90,0.7)';
+      c.beginPath(); c.ellipse(dx, dy, rad, rad * stretch, 0, 0, 7); c.fill();
+      c.fillStyle = 'rgba(255,246,214,0.75)';
+      c.beginPath(); c.ellipse(dx, dy - rad * stretch * 0.25, rad * 0.45, rad * stretch * 0.5, 0, 0, 7); c.fill();
+    }
+
+    // ---- the pool it lands in, and the light it throws back ----
+    const pw = p.w * 4.2;
+    c.globalCompositeOperation = 'lighter';
+    const pg2 = c.createRadialGradient(sx, y1, 3, sx, y1, pw);
+    pg2.addColorStop(0, 'rgba(255,244,206,0.5)');
+    pg2.addColorStop(0.35, 'rgba(255,140,40,0.24)');
+    pg2.addColorStop(1, 'rgba(180,40,10,0)');
+    c.fillStyle = pg2;
+    c.beginPath(); c.ellipse(sx, y1, pw, pw * 0.4, 0, 0, 7); c.fill();
+    // ripples rolling out of the impact, endlessly
+    for (let r2 = 0; r2 < 3; r2++) {
+      const rp = ((t * 0.75 * p.rate + r2 / 3) % 1);
+      c.globalAlpha = (1 - rp) * 0.26;
+      c.strokeStyle = 'rgba(255,196,110,0.9)'; c.lineWidth = 2;
+      c.beginPath(); c.ellipse(sx, y1 + 3, 10 + rp * pw, (10 + rp * pw) * 0.32, 0, 0, 7); c.stroke();
+    }
+    c.globalAlpha = 0.5;
+    // spatter: a few embers kicked up on every impact beat
+    for (let s = 0; s < 5; s++) {
+      const sp = ((t * 1.5 * p.rate + s * 0.21) % 1);
+      const a = -Math.PI / 2 + (s - 2) * 0.42;
+      const dist = sp * pw * 0.85;
+      c.globalAlpha = (1 - sp) * 0.5;
+      c.fillStyle = 'rgba(255,214,140,1)';
+      c.fillRect(sx + Math.cos(a) * dist, y1 + Math.sin(a) * dist * 0.7 + sp * sp * 26, 2.5, 2.5);
+    }
+    c.globalAlpha = 0.5;
+    // heat haze standing over the pool — the air itself bending
+    c.globalCompositeOperation = 'lighter';
+    for (let h = 0; h < 4; h++) {
+      const hp = ((t * 0.42 + h * 0.25) % 1);
+      c.globalAlpha = (1 - hp) * 0.07;
+      const hx = sx + pourWob(t * 1.3 + h * 2) * 22;
+      c.fillStyle = 'rgba(255,170,90,1)';
+      c.beginPath();
+      c.ellipse(hx, y1 - hp * 120, pw * 0.4 * (1 - hp * 0.4), 26 + hp * 40, 0, 0, 7);
+      c.fill();
+    }
+    c.globalAlpha = 0.5;
+  }
+  c.restore();
+  c.globalCompositeOperation = 'source-over';
+}
+// ---------------------------------------------------------------------------
+// THE STRATA BAND — the owner's painted scene strips, hung as a mid-depth
+// layer between the vista and the playfield so the kingdoms read as built
+// places with real material behind them instead of a flat wash.
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// GROUND STRATA. The kingdoms' floors and walls were flat palette fills — one
+// colour, one line, all the way across. They are now cut from the owner's
+// painted scenes: forge rubble and cooling slag underfoot in the Foundry,
+// rimed ice and frozen racks in the Archives. The texture is baked into a
+// tile-aligned sheet once, then sampled by WORLD position, so seams never
+// show and the same wall never repeats where the eye can catch it.
+// ---------------------------------------------------------------------------
+const STRATA = { C: 'strataLava', D: 'strataIceB', E: 'strataRubble' };
+const STRATA_TW = 512, STRATA_TH = 160;         // both multiples of TILE
+const strataCache = {};
+function strataTex(zone) {
+  const key = STRATA[zone];
+  if (!key) return null;
+  if (strataCache[zone] !== undefined) return strataCache[zone];
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[key];
+  if (!im || !im.naturalWidth) return null;       // retry next frame
+  const cv = document.createElement('canvas');
+  cv.width = STRATA_TW; cv.height = STRATA_TH;
+  const x = cv.getContext('2d');
+  x.drawImage(im, 0, 0, im.naturalWidth, im.naturalHeight, 0, 0, STRATA_TW, STRATA_TH);
+  // mirror-blend the right edge into the left so the horizontal wrap is seamless
+  x.save();
+  const g2 = x.createLinearGradient(STRATA_TW - 96, 0, STRATA_TW, 0);
+  g2.addColorStop(0, 'rgba(0,0,0,0)'); g2.addColorStop(1, 'rgba(0,0,0,1)');
+  x.globalCompositeOperation = 'destination-out';
+  x.fillStyle = g2; x.fillRect(STRATA_TW - 96, 0, 96, STRATA_TH);
+  x.globalCompositeOperation = 'destination-over';
+  x.translate(STRATA_TW, 0); x.scale(-1, 1);
+  x.drawImage(im, 0, 0, im.naturalWidth, im.naturalHeight, 0, 0, STRATA_TW, STRATA_TH);
+  x.restore();
+  strataCache[zone] = cv;
+  return cv;
+}
+
 function drawZoneVista(P, zone, px, py) {
   const solo = ZONE_VISTA[zone] && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[ZONE_VISTA[zone]];
   const im = solo || (typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.zones);
@@ -1217,6 +1404,7 @@ function drawZoneVista(P, zone, px, py) {
   hz.addColorStop(0, 'rgba(5,9,14,0)'); hz.addColorStop(1, 'rgba(5,9,14,0.62)');
   c.fillStyle = hz; c.fillRect(0, 0, 960, 540);
   c.fillStyle = 'rgba(5,9,14,0.14)'; c.fillRect(0, 0, 960, 540);
+  if (zone === 'C') drawLavaFalls(px, py);
   // rooms narrower than the screen: the painting must stop at the walls
   if (roomW < 958) {
     const edge = roomW - px;
@@ -1573,11 +1761,22 @@ function drawTiles(P) {
     if (ch === '#') {
       const up = tileAt(tx, ty - 1);
       const exposed = up !== '#' && up !== 'B';
+      const tex = strataTex(G.roomDef.zone);
+      if (tex && !(typeof isHero === 'function' && isHero())) {
+        // the painted rock itself, sampled where this tile sits in the world
+        c.drawImage(tex, X % STRATA_TW, Y % STRATA_TH, TILE, TILE, X, Y, TILE, TILE);
+        // seat it into the zone light so it belongs to this kingdom
+        c.globalAlpha = 0.34; c.fillStyle = P.solid; c.fillRect(X, Y, TILE, TILE);
+        c.globalAlpha = 0.22 + hash2(tx * 3, ty * 7) * 0.16;
+        c.fillStyle = P.dark; c.fillRect(X, Y, TILE, TILE);
+        c.globalAlpha = 1;
+      } else {
       // body with per-tile tonal variation
       c.fillStyle = P.solid; c.fillRect(X, Y, TILE, TILE);
       c.globalAlpha = 0.1 + hash2(tx * 3, ty * 7) * 0.22;
       c.fillStyle = P.dark; c.fillRect(X, Y, TILE, TILE);
       c.globalAlpha = 1;
+      }
       if (!exposed) {
         // interior: plate seams, rivets, polychrome mottling
         if (hash2(tx, ty) > 0.72) { c.fillStyle = P.dark; c.fillRect(X + 8, Y + 10, 5, 5); c.fillRect(X + 20, Y + 20, 4, 4); }
@@ -1639,9 +1838,13 @@ function drawTiles(P) {
         }
       }
     } else if (ch === '=') {
-      c.fillStyle = P.dark; c.fillRect(X, Y + 2, TILE, 7);
-      c.fillStyle = P.edge; c.fillRect(X, Y, TILE, 3);
-      c.globalAlpha = 0.5; c.fillRect(X + 4, Y + 9, 2.5, 4); c.fillRect(X + 25, Y + 9, 2.5, 4); c.globalAlpha = 1;
+      // the authored deck is drawn per RUN after this loop; this flat bar is
+      // only the fallback for before the sheet lands (or if it never does)
+      if (!platReady()) {
+        c.fillStyle = P.dark; c.fillRect(X, Y + 2, TILE, 7);
+        c.fillStyle = P.edge; c.fillRect(X, Y, TILE, 3);
+        c.globalAlpha = 0.5; c.fillRect(X + 4, Y + 9, 2.5, 4); c.fillRect(X + 25, Y + 9, 2.5, 4); c.globalAlpha = 1;
+      }
     } else if (ch === '^') {
       c.fillStyle = P.spike; c.shadowColor = P.glow; c.shadowBlur = 6;
       for (let k = 0; k < 2; k++) {
@@ -1657,6 +1860,94 @@ function drawTiles(P) {
       c.beginPath(); c.moveTo(X + 6, Y + 4); c.lineTo(X + 14, Y + 16); c.lineTo(X + 8, Y + 28);
       c.moveTo(X + 22, Y + 6); c.lineTo(X + 18, Y + 18); c.lineTo(X + 26, Y + 27); c.stroke();
       c.fillStyle = P.glow; c.globalAlpha = pulse; c.fillRect(X + 13, Y + 14, 6, 5); c.globalAlpha = 1;
+    }
+  }
+  drawPlatformRuns();
+}
+// ---------------------------------------------------------------------------
+// AUTHORED STRATA DECKS. The one-way platforms used to be flat two-tone bars —
+// a straight line across every kingdom. They are now the owner's painted decks,
+// three-sliced so any run length keeps its sculpted end caps and only the
+// middle band repeats: forge iron in the Foundry, rimed ice in the Archives,
+// virus-grown plate in the Nest, clean steel everywhere else.
+// ---------------------------------------------------------------------------
+const PLAT_SLOT = {
+  clean: { x: 73, y: 0, w: 366, h: 104 },
+  virus: { x: 77, y: 104, w: 358, h: 104 },
+  fire: { x: 61, y: 208, w: 390, h: 104 },
+  ice: { x: 61, y: 312, w: 390, h: 104 },
+};
+function platReady() {
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.platforms;
+  return !!(im && im.naturalWidth);
+}
+function platVariant() {
+  if (typeof isHero === 'function' && isHero()) return 'clean';
+  return { C: 'fire', D: 'ice', E: 'virus' }[G.roomDef.zone] || 'clean';
+}
+// one deck, three-sliced into an arbitrary span
+function drawDeck(cx2, X, Y, RW, DH, variant) {
+  if (!platReady()) return false;
+  const im = MEDIA_IMG.platforms, S = PLAT_SLOT[variant] || PLAT_SLOT.clean;
+  const capS = Math.round(S.w * 0.27), midS = S.w - capS * 2;
+  const capD = Math.round(DH * (capS / S.h) * 1.35);
+  const cw = Math.min(capD, Math.floor(RW / 2));
+  cx2.save();
+  cx2.drawImage(im, S.x, S.y, capS, S.h, X, Y, cw, DH);
+  const midW = RW - cw * 2;
+  if (midW > 0) {
+    const step = Math.max(24, Math.round(capD * 1.4));
+    let dx = X + cw;
+    while (dx < X + cw + midW) {
+      const w2 = Math.min(step, X + cw + midW - dx);
+      cx2.drawImage(im, S.x + capS, S.y, Math.round(midS * (w2 / step)), S.h, dx, Y, w2, DH);
+      dx += w2;
+    }
+  }
+  cx2.save(); cx2.translate(X + RW, 0); cx2.scale(-1, 1);
+  cx2.drawImage(im, S.x, S.y, capS, S.h, 0, Y, cw, DH);
+  cx2.restore();
+  cx2.restore();
+  return true;
+}
+function drawPlatformRuns() {
+  if (!platReady()) return;
+  const im = MEDIA_IMG.platforms, S = PLAT_SLOT[platVariant()];
+  const g = G.grid, W = g[0].length, H = g.length;
+  // the deck stands taller than its collision line so it reads as built
+  // MASS, not a stripe — the walking surface stays exactly on the tile top
+  const DH = 30, LIFT = 5;
+  const capS = Math.round(S.w * 0.27);            // sculpted end, in sheet px
+  const midS = S.w - capS * 2;
+  const capD = Math.round(DH * (capS / S.h) * 1.35);
+  for (let ty = 0; ty < H; ty++) {
+    let tx = 0;
+    while (tx < W) {
+      if (tileAt(tx, ty) !== '=') { tx++; continue; }
+      let e = tx;
+      while (e + 1 < W && tileAt(e + 1, ty) === '=') e++;
+      const X = tx * TILE, RW = (e - tx + 1) * TILE, Y = ty * TILE - LIFT;
+      const cw = Math.min(capD, Math.floor(RW / 2));
+      c.save();
+      // a short run gets the caps squeezed rather than a stretched middle
+      c.drawImage(im, S.x, S.y, capS, S.h, X, Y, cw, DH);
+      const midW = RW - cw * 2;
+      if (midW > 0) {
+        // repeat the middle band instead of smearing it — the pipes and the
+        // light strip keep their real proportions at any length
+        const step = Math.max(24, Math.round(capD * 1.4));
+        let dx = X + cw;
+        while (dx < X + cw + midW) {
+          const w2 = Math.min(step, X + cw + midW - dx);
+          c.drawImage(im, S.x + capS, S.y, Math.round(midS * (w2 / step)), S.h, dx, Y, w2, DH);
+          dx += w2;
+        }
+      }
+      c.save(); c.translate(X + RW, 0); c.scale(-1, 1);
+      c.drawImage(im, S.x, S.y, capS, S.h, 0, Y, cw, DH);
+      c.restore();
+      c.restore();
+      tx = e + 1;
     }
   }
 }

@@ -35,6 +35,13 @@ const MEDIA_SRC = {
     // the forge boss: FURNACE CHOIR, corrupted mecha dragon — poses, parts,
     // the glow core and the lava ring
     dragonParts: 'assets/characters/dragon_parts.png',
+    // authored STRATA: four platform decks (clean / virus-grown / forge /
+    // frozen) cut from the owner's sheet, and the four scene bands behind them
+    platforms: 'assets/tiles/platforms.png',
+    strataRubble: 'assets/backgrounds/strata_rubble.jpg',
+    strataIceA: 'assets/backgrounds/strata_iceA.jpg',
+    strataLava: 'assets/backgrounds/strata_lava.jpg',
+    strataIceB: 'assets/backgrounds/strata_iceB.jpg',
   },
   audio: {
     boss: 'assets/music/epic_combat.ogg',
@@ -68,7 +75,12 @@ if (typeof window !== 'undefined' && window.EMBEDDED_MEDIA) {
 const MEDIA_IMG = {}, MBUF = {};
 for (const k in MEDIA_SRC.images) {
   const im = new Image();
-  im.onload = () => { MEDIA_IMG[k] = im; };
+  im.onload = () => {
+    MEDIA_IMG[k] = im;
+    // the tile layer is cached once per room — a sheet that lands after that
+    // first render would never appear, so force a repaint when art arrives
+    if (k === 'platforms') { try { tileDirty = true; } catch (e) {} }
+  };
   im.src = MEDIA_SRC.images[k];
 }
 let mediaAudioLoaded = false;

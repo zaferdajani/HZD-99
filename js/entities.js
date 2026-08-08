@@ -1649,6 +1649,30 @@ class MovingPlat {
     const P = PAL[G.roomDef.zone];
     const moving = Math.abs(this.fdx) + Math.abs(this.fdy) > 0.01;
     c.save();
+    // the rail slab wears the same authored deck the built world does, so a
+    // moving platform never reads as a different material to stand on
+    if (typeof drawDeck === 'function' && typeof platVariant === 'function'
+        && drawDeck(c, this.x, this.y - 5, this.w, 30, platVariant())) {
+      // its own rail line and thruster wash still tell you it TRAVELS
+      c.strokeStyle = 'rgba(150,170,190,0.14)'; c.lineWidth = 2;
+      c.setLineDash([4, 7]);
+      c.beginPath();
+      c.moveTo(this.x0 + this.w / 2, this.y0 + this.h / 2);
+      c.lineTo(this.x1 + this.w / 2, this.y1 + this.h / 2);
+      c.stroke(); c.setLineDash([]);
+      if (moving) {
+        const dir = Math.atan2(this.fdy, this.fdx) + Math.PI;
+        const jx = this.x + this.w / 2 + Math.cos(dir) * this.w * 0.5;
+        const jy = this.y + this.h / 2 + Math.sin(dir) * 8;
+        c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
+        const jg = c.createRadialGradient(jx, jy, 1, jx, jy, 14);
+        jg.addColorStop(0, P.glow); jg.addColorStop(1, 'rgba(0,0,0,0)');
+        c.fillStyle = jg; c.beginPath(); c.arc(jx, jy, 14, 0, 7); c.fill();
+        c.restore();
+      }
+      c.restore();
+      return;
+    }
     // rail ghost: the travel line, faint, so the timing is readable
     c.strokeStyle = 'rgba(150,170,190,0.14)'; c.lineWidth = 2;
     c.setLineDash([4, 7]);
