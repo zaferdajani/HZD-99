@@ -99,7 +99,8 @@ function tLayout() {
     r, W, H, rgx, lgx, u,
     btns: [
       { code: 'VJUMP', x: rgx, y: H - 60 * u, r: Math.min(44 * u, TOUCH.gut / 2 - 8), icon: '⤒', show: () => true },
-      { code: 'VATK', x: rgx, y: H - 148 * u, r: 33 * u, icon: '⟡', show: () => true },
+      { code: 'VATK', x: rgx, y: H - 148 * u, r: 33 * u, sym: 'claw',
+        tint: { fill: 'rgba(255,150,150,0.95)', ring: 'rgba(255,110,110,0.7)' }, show: () => true },
       { code: 'VHEAL', x: rgx, y: H - 230 * u, r: 27 * u, icon: '✚', show: () => true },
       { code: 'VDASH', x: rgx - half, y: H - 304 * u, r: 23 * u, icon: '≫', show: () => G.save && G.save.abil.dash },
       { code: 'VCAST', x: rgx + half, y: H - 304 * u, r: 23 * u, icon: '◎', show: () => G.save && G.save.abil.emp },
@@ -108,7 +109,8 @@ function tLayout() {
         icon: (G.save && G.save.theme === 'hero') ? '⚡' : '⁂',
         show: () => player && player.clawCD <= 0 && player.clawT <= 0 },
       // the shuriken, the Song and the suit wheel all need a thumb on mobile
-      { code: 'VSTAR', x: rgx - half * 2.1, y: H - 226 * u, r: 24 * u, icon: '✦',
+      { code: 'VSTAR', x: rgx - half * 2.1, y: H - 226 * u, r: 26 * u, sym: 'shuriken',
+        tint: { fill: 'rgba(190,238,255,0.96)', ring: 'rgba(90,215,255,0.75)' },
         show: () => typeof starCount === 'function' && starCount() > 0 },
       { code: 'VSONG', x: lgx, y: H * 0.42, r: 25 * u, icon: '♪',
         show: () => player && player.volts >= (typeof SONG_COST === 'number' ? SONG_COST : 26) },
@@ -313,16 +315,71 @@ function tEnd(e) {
     if (code) { keys[code] = 0; delete TOUCH.held[t.identifier]; }
   }
 }
-function tCircle(x, y, r, pressed, icon, iconSize) {
+// ---------------------------------------------------------------------------
+// REAL BUTTON GLYPHS. The two attacks used to be a diamond and a four-pointed
+// star — near-identical at thumb size. They are now DRAWN: the melee is her
+// claw (three curved talons raking), the shuriken is an actual four-bladed
+// ninja star with a centre hole. Each carries its own tint so the eye tells
+// them apart before it reads the shape at all.
+// ---------------------------------------------------------------------------
+const TSYM = {
+  // three tapered talons, curving as they rake — a cat's strike
+  claw(x, y, s) {
+    tcx.save(); tcx.translate(x, y); tcx.rotate(-0.32);
+    for (let i = -1; i <= 1; i++) {
+      const off = i * s * 0.34;
+      tcx.beginPath();
+      // outer edge down, inner edge back up: a crescent that tapers to a point
+      tcx.moveTo(off - s * 0.1, -s * 0.72);
+      tcx.quadraticCurveTo(off + s * 0.34, -s * 0.02, off + s * 0.02, s * 0.76);
+      tcx.quadraticCurveTo(off + s * 0.12, -s * 0.02, off - s * 0.24, -s * 0.64);
+      tcx.closePath();
+      tcx.fill();
+    }
+    tcx.restore();
+  },
+  // a four-bladed shuriken: concave edges between the points, hollow centre
+  shuriken(x, y, s) {
+    tcx.save(); tcx.translate(x, y); tcx.rotate(0.3);
+    tcx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const a = i * Math.PI / 2;
+      const px = Math.cos(a), py = Math.sin(a);
+      const nx = Math.cos(a + Math.PI / 2), ny = Math.sin(a + Math.PI / 2);
+      if (i === 0) tcx.moveTo(px * s, py * s); else tcx.lineTo(px * s, py * s);
+      // the blade's trailing edge scoops back toward the hub before the
+      // next point — that concave sweep is what makes it read as a star
+      tcx.quadraticCurveTo((px + nx) * s * 0.16, (py + ny) * s * 0.16, nx * s, ny * s);
+    }
+    tcx.closePath();
+    tcx.fill('evenodd');
+    // the centre hole, punched clean
+    tcx.globalCompositeOperation = 'destination-out';
+    tcx.beginPath(); tcx.arc(0, 0, s * 0.2, 0, 7); tcx.fill();
+    tcx.restore();
+  },
+};
+function tCircle(x, y, r, pressed, icon, iconSize, sym, tint) {
   tcx.beginPath(); tcx.arc(x, y, r, 0, 7);
   tcx.fillStyle = pressed ? 'rgba(120,230,255,0.45)' : 'rgba(18,36,52,0.75)';
   tcx.fill();
-  tcx.lineWidth = 1.8; tcx.strokeStyle = pressed ? 'rgba(160,240,255,0.95)' : 'rgba(120,200,240,0.55)';
+  tcx.lineWidth = 1.8;
+  tcx.strokeStyle = pressed ? 'rgba(160,240,255,0.95)'
+    : (tint ? tint.ring : 'rgba(120,200,240,0.55)');
   tcx.stroke();
+  if (sym && TSYM[sym]) {
+    tcx.save();
+    tcx.fillStyle = tint ? tint.fill : 'rgba(230,245,255,0.92)';
+    tcx.shadowColor = tint ? tint.ring : 'rgba(160,240,255,0.8)';
+    tcx.shadowBlur = pressed ? 10 : 5;
+    TSYM[sym](x, y + 0.5, r * 0.52);
+    tcx.restore();
+    return;
+  }
   if (icon) {
     tcx.font = '700 ' + (iconSize || Math.round(r * 0.85)) + 'px "Segoe UI", sans-serif';
     tcx.textAlign = 'center'; tcx.textBaseline = 'middle';
-    tcx.fillStyle = 'rgba(230,245,255,0.92)';
+    tcx.fillStyle = tint ? tint.fill : 'rgba(230,245,255,0.92)';
     tcx.fillText(icon, x, y + 1);
   }
 }
@@ -360,7 +417,7 @@ function drawTouchUI() {
         tcx.beginPath(); tcx.arc(b.x, b.y, b.r + 10, 0, 7); tcx.stroke();
         tcx.setLineDash([]); tcx.restore();
       }
-      tCircle(b.x, b.y, b.r, b.code === TOUCH.editSel, b.icon);
+      tCircle(b.x, b.y, b.r, b.code === TOUCH.editSel, b.icon, null, b.sym, b.tint);
     }
     for (const b of tEditChrome(L)) tCircle(b.x, b.y, b.r, false, b.icon, 18);
     return;
@@ -389,7 +446,7 @@ function drawTouchUI() {
         tcx.fillStyle = g;
         tcx.beginPath(); tcx.arc(b.x, b.y, b.r + 10, 0, 7); tcx.fill();
       }
-      tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon);
+      tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, null, b.sym, b.tint);
     }
   } else if (kind === 'menu') {
     tCircle(L.lgx, 28, 18, false, '✕', 14);

@@ -23,9 +23,10 @@ function tileAt(tx, ty) {
   if (ty < 0 || ty >= g.length || tx < 0 || tx >= g[0].length) return '.';
   if (G.roomId === 'D3' && !G.save.flags.bossZero && ty >= 15 && tx >= 15 && tx <= 17) return '#';
   // X1: a hardlight bridge seals the floor entrance for the length of the
-  // Prowler fight — neither she nor the boss can fall through the way in.
-  // It holds through the death collapse, then shatters open again.
-  if (G.roomId === 'X1' && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)
+  // Prowler fight — but ONLY once she is inside and standing clear of it.
+  // Until then the way in stays open. It holds through the death collapse,
+  // then shatters open again.
+  if (G.roomId === 'X1' && G.x1Bridge && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)
       && ty >= 15 && tx >= 6 && tx <= 8) return '#';
   const c = g[ty][tx];
   if (c === 'B' && G.save.broken[G.roomId + ':' + tx + ',' + ty]) return '.';

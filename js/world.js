@@ -74,7 +74,7 @@ const ROOMS = {
       hline(g, 25, 28, 12, '=');
       rect(g, 29, 8, 29, 11, '.');          // exit R (upper level)
     } },
-  B2: { zone: 'B', w: 60, h: 17, exits: { L: 'B1', R: 'B3', T: 'X1' },
+  B2: { zone: 'B', w: 60, h: 17, exits: { L: 'B1', R: 'B3' },
     ents: [['turret', 20, 15], ['turret', 38, 15], ['flier', 33, 7], ['hopper', 45, 15], ['crawler', 50, 15], ['scrap', 14, 15, 10], ['riddle', 55, 15, 1], ['secret', 51, 10, 'collar']],
     build(g) {
       frame(g); openR(g);
@@ -82,8 +82,6 @@ const ROOMS = {
       rect(g, 1, 12, 8, 14, '#');           // left ledge
       hline(g, 28, 31, 15, '^');            // spike strip
       hline(g, 27, 32, 11, '=');
-      // secret shaft to X1 (breakable ceiling)
-      rect(g, 6, 0, 8, 0, '.'); rect(g, 6, 1, 8, 1, 'B');
       hline(g, 2, 4, 4, '='); hline(g, 5, 7, 7, '='); hline(g, 2, 4, 10, '=');
       hline(g, 42, 45, 12, '='); hline(g, 50, 53, 10, '=');
     } },
@@ -97,18 +95,24 @@ const ROOMS = {
       hline(g, 5, 8, 11, '='); hline(g, 21, 24, 11, '=');
       rect(g, 28, 11, 29, 14, 'B');         // secret wall → B5
     } },
-  B5: { zone: 'B', w: 24, h: 17, exits: { L: 'B4' },
+  B5: { zone: 'B', w: 24, h: 17, exits: { L: 'B4', T: 'X1' },
     ents: [['chest', 12, 15, 'phantom'], ['scrap', 16, 15, 25], ['riddle', 19, 15, 2], ['vault', 21, 15]],
-    build(g) { frame(g); openL(g); hline(g, 8, 15, 12, '='); } },
+    build(g) {
+      frame(g); openL(g); hline(g, 8, 15, 12, '=');
+      // the secret shaft up to the Crystal Cache — the kingdom's true end,
+      // beyond TALONHOST, behind a breakable ceiling
+      rect(g, 6, 0, 8, 0, '.'); rect(g, 6, 1, 8, 1, 'B');
+      hline(g, 3, 6, 11, '='); hline(g, 5, 8, 7, '='); hline(g, 4, 7, 4, '=');
+    } },
   V1: { zone: 'X', w: 24, h: 17, exits: { L: 'B5' },
     ents: [['chest', 12, 15, 'rl:aegis'], ['scrap', 5, 15, 60], ['scrap', 8, 15, 60], ['scrap', 16, 15, 60], ['scrap', 19, 15, 40], ['term', 9, 15, 4]],
     build(g) { frame(g); openL(g); hline(g, 8, 15, 11, '='); } },
   // ============ ZONE X — Crystal Cache (secret) ============
-  X1: { zone: 'X', w: 30, h: 17, exits: { B: 'B2' },
+  X1: { zone: 'X', w: 30, h: 17, exits: { B: 'B5' },
     ents: [['boss', 20, 15, 'prism'], ['chest', 24, 15, 'nine', 'bossPrism'], ['scrap', 4, 15, 20], ['riddle', 3, 15, 7]],
     build(g) {
       frame(g);
-      rect(g, 6, 15, 8, 16, '.');           // floor opening back down to B2
+      rect(g, 6, 15, 8, 16, '.');           // floor opening back down to B5
       hline(g, 12, 17, 11, '='); hline(g, 20, 24, 8, '=');
     } },
   // ============ ZONE C — The Foundry ============
@@ -179,7 +183,7 @@ const ROOMS = {
 const MAPPOS = {
   A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A3: [3, 3, 1, 1], A4: [4, 3, 1, 1], A5: [1, 4, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1],
-  X1: [4, 1, 1, 1],
+  X1: [8, 1, 1, 1],
   C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1],
   D1: [5, 6, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1],
   E1: [8, 7, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1],

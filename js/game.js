@@ -204,7 +204,7 @@ function loadRoom(id) {
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
-  G.wrecks = []; G.recharge = null; G.plats = [];
+  G.wrecks = []; G.recharge = null; G.plats = []; G.x1Bridge = false; G.x1T = 0;
   parts.length = 0;
   const def = ROOMS[id];
   def.ents.forEach((d, i) => {
@@ -338,6 +338,18 @@ function applyTransition() {
   else if (tr.side === 'T') { player.x = clamp(from.x, 40, W - 60); player.y = H - player.h - 6; player.vy = Math.min(from.vy, -620); }
   else { player.x = clamp(from.x, 40, W - 60); player.y = 4; player.vy = Math.max(from.vy, 80); }
   player.vx = from.vx; player.lastSafe = { x: player.x, y: player.y };
+  // THE CACHE MOUTH: she climbs up through the opening, and the hardlight
+  // bridge closes beneath her the instant she is through — so the way in is
+  // never a pit that spits her straight back down the shaft she came up.
+  if (G.roomId === 'X1' && tr.side === 'T' && G.boss && !G.boss.dead) {
+    G.x1Bridge = true;
+    player.y = 15 * TILE - player.h; player.vy = 0;
+    player.lastSafe = { x: player.x, y: player.y };
+    sfx('cast'); cam.shake = Math.max(cam.shake, 3);
+    for (let i = 0; i < 12; i++)
+      addPart(6 * TILE + rnd(0, 3 * TILE), 15 * TILE + rnd(-3, 3),
+        rnd(-50, 50), rnd(-60, 20), 0.5, '#37ffd0', 2.4, 200, true);
+  }
   updateCam(player.x, player.y, W, H, 1);
 }
 
@@ -462,6 +474,20 @@ function update(dt) {
       if (G.trans.t <= 0) G.trans = null;
     } else {
       if (typeof updateRoarFX === 'function') updateRoarFX(dt);
+      // THE CACHE GATE: the floor entrance stays open until she is truly
+      // inside — on her feet, clear of the hole — and only then does the
+      // hardlight bridge snap across behind her and seal the arena
+      if (G.roomId === 'X1' && !G.x1Bridge && G.boss && !G.boss.dead) {
+        const hx0 = 6 * TILE;
+        // backstop: any other way in seals the moment she clears the floor
+        if (!player.dead && player.y + player.h <= 15 * TILE - 2) {
+          G.x1Bridge = true;
+          sfx('cast'); cam.shake = Math.max(cam.shake, 3);
+          for (let i = 0; i < 10; i++)
+            addPart(hx0 + rnd(0, 3 * TILE), 15 * TILE + rnd(-3, 3),
+              rnd(-40, 40), rnd(-50, 20), 0.5, '#37ffd0', 2.4, 200, true);
+        }
+      }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
       player.update(dt);
       if (typeof platRide === 'function') platRide(player);
@@ -2081,7 +2107,7 @@ function drawWorldFrame() {
   c.drawImage(tileCv, 0, 0);
   // X1 hardlight bridge: alive while the Prowler stands, red and flickering
   // through the collapse, gone when the wreck settles
-  if (G.roomId === 'X1' && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)) {
+  if (G.roomId === 'X1' && G.x1Bridge && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)) {
     const dying = G.boss.dead;
     const tn2 = performance.now();
     const fl = dying ? 0.45 + Math.sin(tn2 / 38) * 0.3 : 0.7 + Math.sin(tn2 / 300) * 0.15;
