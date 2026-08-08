@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="mskasxnw";window.GAME_LOCK="robo"</script>
+<script>window.BUILD_ID="msknv1h9";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -7505,7 +7505,7 @@ const ROOMS = {
       hline(g, 25, 28, 12, '=');
       rect(g, 29, 8, 29, 11, '.');          // exit R (upper level)
     } },
-  B2: { zone: 'B', w: 60, h: 17, exits: { L: 'B1', R: 'B3', T: 'X1' },
+  B2: { zone: 'B', w: 60, h: 17, exits: { L: 'B1', R: 'B3' },
     ents: [['turret', 20, 15], ['turret', 38, 15], ['flier', 33, 7], ['hopper', 45, 15], ['crawler', 50, 15], ['scrap', 14, 15, 10], ['riddle', 55, 15, 1], ['secret', 51, 10, 'collar']],
     build(g) {
       frame(g); openR(g);
@@ -7513,8 +7513,6 @@ const ROOMS = {
       rect(g, 1, 12, 8, 14, '#');           // left ledge
       hline(g, 28, 31, 15, '^');            // spike strip
       hline(g, 27, 32, 11, '=');
-      // secret shaft to X1 (breakable ceiling)
-      rect(g, 6, 0, 8, 0, '.'); rect(g, 6, 1, 8, 1, 'B');
       hline(g, 2, 4, 4, '='); hline(g, 5, 7, 7, '='); hline(g, 2, 4, 10, '=');
       hline(g, 42, 45, 12, '='); hline(g, 50, 53, 10, '=');
     } },
@@ -7528,18 +7526,24 @@ const ROOMS = {
       hline(g, 5, 8, 11, '='); hline(g, 21, 24, 11, '=');
       rect(g, 28, 11, 29, 14, 'B');         // secret wall → B5
     } },
-  B5: { zone: 'B', w: 24, h: 17, exits: { L: 'B4' },
+  B5: { zone: 'B', w: 24, h: 17, exits: { L: 'B4', T: 'X1' },
     ents: [['chest', 12, 15, 'phantom'], ['scrap', 16, 15, 25], ['riddle', 19, 15, 2], ['vault', 21, 15]],
-    build(g) { frame(g); openL(g); hline(g, 8, 15, 12, '='); } },
+    build(g) {
+      frame(g); openL(g); hline(g, 8, 15, 12, '=');
+      // the secret shaft up to the Crystal Cache — the kingdom's true end,
+      // beyond TALONHOST, behind a breakable ceiling
+      rect(g, 6, 0, 8, 0, '.'); rect(g, 6, 1, 8, 1, 'B');
+      hline(g, 3, 6, 11, '='); hline(g, 5, 8, 7, '='); hline(g, 4, 7, 4, '=');
+    } },
   V1: { zone: 'X', w: 24, h: 17, exits: { L: 'B5' },
     ents: [['chest', 12, 15, 'rl:aegis'], ['scrap', 5, 15, 60], ['scrap', 8, 15, 60], ['scrap', 16, 15, 60], ['scrap', 19, 15, 40], ['term', 9, 15, 4]],
     build(g) { frame(g); openL(g); hline(g, 8, 15, 11, '='); } },
   // ============ ZONE X — Crystal Cache (secret) ============
-  X1: { zone: 'X', w: 30, h: 17, exits: { B: 'B2' },
+  X1: { zone: 'X', w: 30, h: 17, exits: { B: 'B5' },
     ents: [['boss', 20, 15, 'prism'], ['chest', 24, 15, 'nine', 'bossPrism'], ['scrap', 4, 15, 20], ['riddle', 3, 15, 7]],
     build(g) {
       frame(g);
-      rect(g, 6, 15, 8, 16, '.');           // floor opening back down to B2
+      rect(g, 6, 15, 8, 16, '.');           // floor opening back down to B5
       hline(g, 12, 17, 11, '='); hline(g, 20, 24, 8, '=');
     } },
   // ============ ZONE C — The Foundry ============
@@ -7610,7 +7614,7 @@ const ROOMS = {
 const MAPPOS = {
   A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A3: [3, 3, 1, 1], A4: [4, 3, 1, 1], A5: [1, 4, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1],
-  X1: [4, 1, 1, 1],
+  X1: [8, 1, 1, 1],
   C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1],
   D1: [5, 6, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1],
   E1: [8, 7, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1],
@@ -7651,9 +7655,10 @@ function tileAt(tx, ty) {
   if (ty < 0 || ty >= g.length || tx < 0 || tx >= g[0].length) return '.';
   if (G.roomId === 'D3' && !G.save.flags.bossZero && ty >= 15 && tx >= 15 && tx <= 17) return '#';
   // X1: a hardlight bridge seals the floor entrance for the length of the
-  // Prowler fight — neither she nor the boss can fall through the way in.
-  // It holds through the death collapse, then shatters open again.
-  if (G.roomId === 'X1' && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)
+  // Prowler fight — but ONLY once she is inside and standing clear of it.
+  // Until then the way in stays open. It holds through the death collapse,
+  // then shatters open again.
+  if (G.roomId === 'X1' && G.x1Bridge && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)
       && ty >= 15 && tx >= 6 && tx <= 8) return '#';
   const c = g[ty][tx];
   if (c === 'B' && G.save.broken[G.roomId + ':' + tx + ',' + ty]) return '.';
@@ -12421,7 +12426,7 @@ function loadRoom(id) {
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
-  G.wrecks = []; G.recharge = null; G.plats = [];
+  G.wrecks = []; G.recharge = null; G.plats = []; G.x1Bridge = false; G.x1T = 0;
   parts.length = 0;
   const def = ROOMS[id];
   def.ents.forEach((d, i) => {
@@ -12555,6 +12560,18 @@ function applyTransition() {
   else if (tr.side === 'T') { player.x = clamp(from.x, 40, W - 60); player.y = H - player.h - 6; player.vy = Math.min(from.vy, -620); }
   else { player.x = clamp(from.x, 40, W - 60); player.y = 4; player.vy = Math.max(from.vy, 80); }
   player.vx = from.vx; player.lastSafe = { x: player.x, y: player.y };
+  // THE CACHE MOUTH: she climbs up through the opening, and the hardlight
+  // bridge closes beneath her the instant she is through — so the way in is
+  // never a pit that spits her straight back down the shaft she came up.
+  if (G.roomId === 'X1' && tr.side === 'T' && G.boss && !G.boss.dead) {
+    G.x1Bridge = true;
+    player.y = 15 * TILE - player.h; player.vy = 0;
+    player.lastSafe = { x: player.x, y: player.y };
+    sfx('cast'); cam.shake = Math.max(cam.shake, 3);
+    for (let i = 0; i < 12; i++)
+      addPart(6 * TILE + rnd(0, 3 * TILE), 15 * TILE + rnd(-3, 3),
+        rnd(-50, 50), rnd(-60, 20), 0.5, '#37ffd0', 2.4, 200, true);
+  }
   updateCam(player.x, player.y, W, H, 1);
 }
 
@@ -12679,6 +12696,20 @@ function update(dt) {
       if (G.trans.t <= 0) G.trans = null;
     } else {
       if (typeof updateRoarFX === 'function') updateRoarFX(dt);
+      // THE CACHE GATE: the floor entrance stays open until she is truly
+      // inside — on her feet, clear of the hole — and only then does the
+      // hardlight bridge snap across behind her and seal the arena
+      if (G.roomId === 'X1' && !G.x1Bridge && G.boss && !G.boss.dead) {
+        const hx0 = 6 * TILE;
+        // backstop: any other way in seals the moment she clears the floor
+        if (!player.dead && player.y + player.h <= 15 * TILE - 2) {
+          G.x1Bridge = true;
+          sfx('cast'); cam.shake = Math.max(cam.shake, 3);
+          for (let i = 0; i < 10; i++)
+            addPart(hx0 + rnd(0, 3 * TILE), 15 * TILE + rnd(-3, 3),
+              rnd(-40, 40), rnd(-50, 20), 0.5, '#37ffd0', 2.4, 200, true);
+        }
+      }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
       player.update(dt);
       if (typeof platRide === 'function') platRide(player);
@@ -14298,7 +14329,7 @@ function drawWorldFrame() {
   c.drawImage(tileCv, 0, 0);
   // X1 hardlight bridge: alive while the Prowler stands, red and flickering
   // through the collapse, gone when the wreck settles
-  if (G.roomId === 'X1' && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)) {
+  if (G.roomId === 'X1' && G.x1Bridge && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)) {
     const dying = G.boss.dead;
     const tn2 = performance.now();
     const fl = dying ? 0.45 + Math.sin(tn2 / 38) * 0.3 : 0.7 + Math.sin(tn2 / 300) * 0.15;
@@ -16459,7 +16490,8 @@ function tLayout() {
     r, W, H, rgx, lgx, u,
     btns: [
       { code: 'VJUMP', x: rgx, y: H - 60 * u, r: Math.min(44 * u, TOUCH.gut / 2 - 8), icon: '⤒', show: () => true },
-      { code: 'VATK', x: rgx, y: H - 148 * u, r: 33 * u, icon: '⟡', show: () => true },
+      { code: 'VATK', x: rgx, y: H - 148 * u, r: 33 * u, sym: 'claw',
+        tint: { fill: 'rgba(255,150,150,0.95)', ring: 'rgba(255,110,110,0.7)' }, show: () => true },
       { code: 'VHEAL', x: rgx, y: H - 230 * u, r: 27 * u, icon: '✚', show: () => true },
       { code: 'VDASH', x: rgx - half, y: H - 304 * u, r: 23 * u, icon: '≫', show: () => G.save && G.save.abil.dash },
       { code: 'VCAST', x: rgx + half, y: H - 304 * u, r: 23 * u, icon: '◎', show: () => G.save && G.save.abil.emp },
@@ -16468,7 +16500,8 @@ function tLayout() {
         icon: (G.save && G.save.theme === 'hero') ? '⚡' : '⁂',
         show: () => player && player.clawCD <= 0 && player.clawT <= 0 },
       // the shuriken, the Song and the suit wheel all need a thumb on mobile
-      { code: 'VSTAR', x: rgx - half * 2.1, y: H - 226 * u, r: 24 * u, icon: '✦',
+      { code: 'VSTAR', x: rgx - half * 2.1, y: H - 226 * u, r: 26 * u, sym: 'shuriken',
+        tint: { fill: 'rgba(190,238,255,0.96)', ring: 'rgba(90,215,255,0.75)' },
         show: () => typeof starCount === 'function' && starCount() > 0 },
       { code: 'VSONG', x: lgx, y: H * 0.42, r: 25 * u, icon: '♪',
         show: () => player && player.volts >= (typeof SONG_COST === 'number' ? SONG_COST : 26) },
@@ -16673,16 +16706,71 @@ function tEnd(e) {
     if (code) { keys[code] = 0; delete TOUCH.held[t.identifier]; }
   }
 }
-function tCircle(x, y, r, pressed, icon, iconSize) {
+// ---------------------------------------------------------------------------
+// REAL BUTTON GLYPHS. The two attacks used to be a diamond and a four-pointed
+// star — near-identical at thumb size. They are now DRAWN: the melee is her
+// claw (three curved talons raking), the shuriken is an actual four-bladed
+// ninja star with a centre hole. Each carries its own tint so the eye tells
+// them apart before it reads the shape at all.
+// ---------------------------------------------------------------------------
+const TSYM = {
+  // three tapered talons, curving as they rake — a cat's strike
+  claw(x, y, s) {
+    tcx.save(); tcx.translate(x, y); tcx.rotate(-0.32);
+    for (let i = -1; i <= 1; i++) {
+      const off = i * s * 0.34;
+      tcx.beginPath();
+      // outer edge down, inner edge back up: a crescent that tapers to a point
+      tcx.moveTo(off - s * 0.1, -s * 0.72);
+      tcx.quadraticCurveTo(off + s * 0.34, -s * 0.02, off + s * 0.02, s * 0.76);
+      tcx.quadraticCurveTo(off + s * 0.12, -s * 0.02, off - s * 0.24, -s * 0.64);
+      tcx.closePath();
+      tcx.fill();
+    }
+    tcx.restore();
+  },
+  // a four-bladed shuriken: concave edges between the points, hollow centre
+  shuriken(x, y, s) {
+    tcx.save(); tcx.translate(x, y); tcx.rotate(0.3);
+    tcx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const a = i * Math.PI / 2;
+      const px = Math.cos(a), py = Math.sin(a);
+      const nx = Math.cos(a + Math.PI / 2), ny = Math.sin(a + Math.PI / 2);
+      if (i === 0) tcx.moveTo(px * s, py * s); else tcx.lineTo(px * s, py * s);
+      // the blade's trailing edge scoops back toward the hub before the
+      // next point — that concave sweep is what makes it read as a star
+      tcx.quadraticCurveTo((px + nx) * s * 0.16, (py + ny) * s * 0.16, nx * s, ny * s);
+    }
+    tcx.closePath();
+    tcx.fill('evenodd');
+    // the centre hole, punched clean
+    tcx.globalCompositeOperation = 'destination-out';
+    tcx.beginPath(); tcx.arc(0, 0, s * 0.2, 0, 7); tcx.fill();
+    tcx.restore();
+  },
+};
+function tCircle(x, y, r, pressed, icon, iconSize, sym, tint) {
   tcx.beginPath(); tcx.arc(x, y, r, 0, 7);
   tcx.fillStyle = pressed ? 'rgba(120,230,255,0.45)' : 'rgba(18,36,52,0.75)';
   tcx.fill();
-  tcx.lineWidth = 1.8; tcx.strokeStyle = pressed ? 'rgba(160,240,255,0.95)' : 'rgba(120,200,240,0.55)';
+  tcx.lineWidth = 1.8;
+  tcx.strokeStyle = pressed ? 'rgba(160,240,255,0.95)'
+    : (tint ? tint.ring : 'rgba(120,200,240,0.55)');
   tcx.stroke();
+  if (sym && TSYM[sym]) {
+    tcx.save();
+    tcx.fillStyle = tint ? tint.fill : 'rgba(230,245,255,0.92)';
+    tcx.shadowColor = tint ? tint.ring : 'rgba(160,240,255,0.8)';
+    tcx.shadowBlur = pressed ? 10 : 5;
+    TSYM[sym](x, y + 0.5, r * 0.52);
+    tcx.restore();
+    return;
+  }
   if (icon) {
     tcx.font = '700 ' + (iconSize || Math.round(r * 0.85)) + 'px "Segoe UI", sans-serif';
     tcx.textAlign = 'center'; tcx.textBaseline = 'middle';
-    tcx.fillStyle = 'rgba(230,245,255,0.92)';
+    tcx.fillStyle = tint ? tint.fill : 'rgba(230,245,255,0.92)';
     tcx.fillText(icon, x, y + 1);
   }
 }
@@ -16720,7 +16808,7 @@ function drawTouchUI() {
         tcx.beginPath(); tcx.arc(b.x, b.y, b.r + 10, 0, 7); tcx.stroke();
         tcx.setLineDash([]); tcx.restore();
       }
-      tCircle(b.x, b.y, b.r, b.code === TOUCH.editSel, b.icon);
+      tCircle(b.x, b.y, b.r, b.code === TOUCH.editSel, b.icon, null, b.sym, b.tint);
     }
     for (const b of tEditChrome(L)) tCircle(b.x, b.y, b.r, false, b.icon, 18);
     return;
@@ -16749,7 +16837,7 @@ function drawTouchUI() {
         tcx.fillStyle = g;
         tcx.beginPath(); tcx.arc(b.x, b.y, b.r + 10, 0, 7); tcx.fill();
       }
-      tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon);
+      tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, null, b.sym, b.tint);
     }
   } else if (kind === 'menu') {
     tCircle(L.lgx, 28, 18, false, '✕', 14);
