@@ -209,21 +209,29 @@ function bSleep(c, t, lift) {
   BEAST_LIVE.t = t; BEAST_LIVE.glow = 0.08 + Math.max(0, br) * 0.06 + lift * 0.8;
   c.save();
   c.translate(0, br * 1.6 * (1 - lift) - lift * 26);
-  // hind shank lying flat under the rump, and its dark far twin
-  c.save(); c.translate(112, -20); c.rotate(1.3); bPart(c, 'bleg1', 36, 57, true); c.restore();
-  c.save(); c.translate(96, -16); c.rotate(1.38); bPart(c, 'bleg1', 36, 57); c.restore();
   // the body, belly on the ground (bottom of the torso at the floor line)
   c.save(); c.translate(0, 85 - lift * 30); c.rotate(-0.02 + lift * 0.05);
   bPart(c, 'body', BEAST_TUNE.bodyX, BEAST_TUNE.bodyY); c.restore();
-  // tail lying along the ground behind, only the spade tip breathing
-  c.save(); c.translate(150, -12);
-  for (let i = 0; i < 4; i++) {
-    const key = 'tail' + i;
-    c.translate(BEAST_P[key][2] * 0.62, (i === 3 ? Math.max(0, br) * -2 : 0));
-    c.rotate(0.04);
-    bPart(c, key, BEAST_P[key][2] / 2, BEAST_P[key][3] / 2);
+  // the haunch: ONE round hip mass settled against the rump — a sleeping
+  // lion's hind legs disappear under the body, so no shank ever shows
+  c.save(); c.translate(58, -42 + lift * 8); c.rotate(-0.35);
+  bPart(c, 'bleg0', BEAST_P.bleg0[2] / 2, BEAST_P.bleg0[3] / 2); c.restore();
+  // the tail: one CONNECTED curve hugging the near flank, the spade tip
+  // resting by the forepaws — segments overlapped along the arc so it
+  // reads as a single limb, never scattered pieces
+  {
+    const PTS = [[86, -30], [52, -14], [12, -9], [-30, -9], [-68, -12]];
+    for (let i = 0; i < 4; i++) {
+      const key = 'tail' + i;
+      const mx = (PTS[i][0] + PTS[i + 1][0]) / 2, my = (PTS[i][1] + PTS[i + 1][1]) / 2;
+      const a = Math.atan2(PTS[i + 1][1] - PTS[i][1], PTS[i + 1][0] - PTS[i][0]);
+      c.save();
+      c.translate(mx, my - (i === 3 ? Math.max(0, br) * 2 : 0));
+      c.rotate(a + Math.PI);                     // pieces are authored tip-back
+      bPart(c, key, BEAST_P[key][2] / 2, BEAST_P[key][3] / 2);
+      c.restore();
+    }
   }
-  c.restore();
   // forelegs stretched FLAT in front — far one first, darkened
   c.save(); c.translate(-136, -15 - lift * 8); c.rotate(1.42); bPart(c, 'fleg1', 35, 54, true); c.restore();
   c.save(); c.translate(-152, -13 - lift * 10); c.rotate(1.5); bPart(c, 'fleg1', 35, 54); c.restore();
