@@ -446,6 +446,7 @@ function update(dt) {
       if (!G.trans.half && G.trans.t < 0.14) { G.trans.half = true; applyTransition(); }
       if (G.trans.t <= 0) G.trans = null;
     } else {
+      if (typeof updateRoarFX === 'function') updateRoarFX(dt);
       if (G.plats) for (const pl of G.plats) pl.update(dt);
       player.update(dt);
       if (typeof platRide === 'function') platRide(player);
@@ -2080,6 +2081,7 @@ function drawWorldFrame() {
   for (const w of G.wrecks) w.draw(c);
   if (G.boss) G.boss.draw(c);
   for (const p of G.projs) p.draw(c);
+  if (typeof drawRoarFX === 'function') drawRoarFX(c);
   // the player is drawn AFTER the cinematic grade (bloom + zone wash) so she
   // stays solid and rich instead of being swallowed by the atmosphere — the
   // one exception is the recharge pod, whose cables and canopy must close

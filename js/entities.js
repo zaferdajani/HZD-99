@@ -2455,6 +2455,15 @@ class Boss {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    if (this.roarBuzzT > 0) {
+      // the roar VIBRATES: a held tremble on the camera and, through the
+      // rumble motors, on the controller — re-armed in short pulses
+      const pb = Math.floor(this.roarBuzzT * 5.5);
+      this.roarBuzzT -= dt;
+      cam.shake = Math.max(cam.shake, 2.6);
+      if (Math.floor(this.roarBuzzT * 5.5) !== pb && typeof padRumble === 'function')
+        padRumble(0.4, 0.55, 200);
+    }
     if (this.shieldT > 0) this.shieldT -= dt;          // shorted plating recovers
     if (this.deathAnimT > 0) this.deathAnimT -= dt;   // the collapse plays out
     if (this.dead) return;
@@ -2478,7 +2487,12 @@ class Boss {
         sfx({ glitch: 'roar_beast', brood: 'roar_eagle', zero: 'roar_glc',
               atlas: 'roar_drg', prism: 'roar_prism' }[this.kind] || 'roar');
         cam.shake = Math.max(cam.shake, 11);
-        if (typeof padRumble === 'function') padRumble(0.8, 0.6, 550);
+        this.roarBuzzT = 0.8;
+        if (typeof padRumble === 'function') padRumble(0.9, 0.7, 650);
+        if (typeof roarWave === 'function')
+          roarWave(this.cx(), this.cy() - this.h * 0.35,
+            { glitch: '#b48cff', brood: '#ff5f6d', zero: '#a5d8ff',
+              atlas: '#ffd76a', prism: '#37ffd0' }[this.kind] || '#e05aff');
         burst(this.cx(), this.cy() - this.h * 0.3, 16, '#ffffff', 260, 0.5, 160, 3, true);
       }
       if (this.kind === 'atlas' && this.nestFootY != null && this.t <= 0.6 && !this.nestLanded) {
@@ -2626,7 +2640,10 @@ class Boss {
           }
           if (!this.roared && this.t <= 0.75) {
             this.roared = true;
-            cam.shake = 11; sfx('roar'); G.flash = Math.max(G.flash, 0.18);
+            cam.shake = 11; sfx('roar_beast'); G.flash = Math.max(G.flash, 0.18);
+            this.roarBuzzT = 0.6;
+            if (typeof padRumble === 'function') padRumble(0.85, 0.65, 500);
+            if (typeof roarWave === 'function') roarWave(this.cx() + this.face * 30, this.cy() - 10, '#b48cff');
             if (typeof G.addRing === 'function') G.addRing(this.cx(), this.cy() - 20);
             // the roar itself shoves you off your feet
             if (adist < 250 && !player.dead) {
@@ -2983,7 +3000,13 @@ class Boss {
             this.fbCD = rnd(11, 15); this.fbStruck = 0;
           } else if (Math.abs(px - this.cx()) < 100 && this.t < 2) { this.st = 'slamwarn'; this.t = 0.55; this.vx = 0; }
           else if (this.t <= 0) {
-            if (this.cycle++ % 3 === 2) { this.st = 'hymn'; this.t = 1.0; }
+            if (this.cycle++ % 3 === 2) {
+              this.st = 'hymn'; this.t = 1.0;
+              this.roarBuzzT = 0.7;
+              if (typeof padRumble === 'function') padRumble(0.7, 0.6, 550);
+              if (typeof roarWave === 'function')
+                roarWave(this.cx() + this.face * 34, this.y - this.h * 0.6, '#ffd76a');
+            }
             else {
               this.t = this.phase === 2 ? 2.2 : 3.2;
               const d = px - this.cx();

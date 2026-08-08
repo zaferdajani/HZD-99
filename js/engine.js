@@ -159,6 +159,56 @@ function clearP() { for (const k in keysP) keysP[k] = 0; }
 // ---------- gamepad rumble -------------------------------------------------
 // Dual-rumble haptics (Chrome/Edge vibrationActuator; hapticActuators pulse
 // as the fallback). Newer effects simply replace older ones.
+// ---------------------------------------------------------------------------
+// ROAR SHOCKWAVES: the sound of a roar made visible — expanding rings of
+// pressure with sound-ticks riding them and a core flash at the throat.
+// The caller sustains the tremble (cam.shake + rumble) while these fly.
+// ---------------------------------------------------------------------------
+const ROARFX = [];
+function roarWave(x, y, col) {
+  for (let i = 0; i < 3; i++) ROARFX.push({ x, y, t: -i * 0.12, col });
+  ROARFX.push({ x, y, t: 0, col, flash: true });
+}
+function updateRoarFX(dt) {
+  for (let i = ROARFX.length - 1; i >= 0; i--) {
+    ROARFX[i].t += dt;
+    if (ROARFX[i].t > (ROARFX[i].flash ? 0.24 : 0.9)) ROARFX.splice(i, 1);
+  }
+}
+function drawRoarFX(c) {
+  for (const r of ROARFX) {
+    if (r.t < 0) continue;
+    c.save(); c.globalCompositeOperation = 'lighter';
+    if (r.flash) {
+      // the throat flash: one hard pulse of the roar's own color
+      const k = r.t / 0.24;
+      c.globalAlpha = (1 - k) * 0.5;
+      const g = c.createRadialGradient(r.x, r.y, 2, r.x, r.y, 26 + k * 110);
+      g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, r.col);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = g;
+      c.beginPath(); c.arc(r.x, r.y, 26 + k * 110, 0, 7); c.fill();
+    } else {
+      // a pressure ring: grounded ellipse, thick when young, with short
+      // sound-ticks riding its rim
+      const k = r.t / 0.9, rad = 26 + k * 640;
+      c.globalAlpha = (1 - k) * 0.65;
+      c.strokeStyle = r.col; c.lineWidth = 2 + (1 - k) * 8;
+      c.beginPath(); c.ellipse(r.x, r.y, rad, rad * 0.8, 0, 0, 7); c.stroke();
+      c.lineWidth = 2;
+      for (let i = 0; i < 12; i++) {
+        const a = i / 12 * Math.PI * 2 + k * 1.6;
+        const cx2 = r.x + Math.cos(a) * rad, cy2 = r.y + Math.sin(a) * rad * 0.8;
+        c.beginPath();
+        c.moveTo(cx2, cy2);
+        c.lineTo(cx2 + Math.cos(a) * 11, cy2 + Math.sin(a) * 9);
+        c.stroke();
+      }
+    }
+    c.restore();
+  }
+}
+
 function padRumble(strong, weak, ms) {
   if (!PAD.on || !PAD.gp) return;
   try {
