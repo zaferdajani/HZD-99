@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msk2mitm";window.GAME_LOCK="robo"</script>
+<script>window.BUILD_ID="msk2vlnw";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -6694,6 +6694,56 @@ function clearP() { for (const k in keysP) keysP[k] = 0; }
 // ---------- gamepad rumble -------------------------------------------------
 // Dual-rumble haptics (Chrome/Edge vibrationActuator; hapticActuators pulse
 // as the fallback). Newer effects simply replace older ones.
+// ---------------------------------------------------------------------------
+// ROAR SHOCKWAVES: the sound of a roar made visible — expanding rings of
+// pressure with sound-ticks riding them and a core flash at the throat.
+// The caller sustains the tremble (cam.shake + rumble) while these fly.
+// ---------------------------------------------------------------------------
+const ROARFX = [];
+function roarWave(x, y, col) {
+  for (let i = 0; i < 3; i++) ROARFX.push({ x, y, t: -i * 0.12, col });
+  ROARFX.push({ x, y, t: 0, col, flash: true });
+}
+function updateRoarFX(dt) {
+  for (let i = ROARFX.length - 1; i >= 0; i--) {
+    ROARFX[i].t += dt;
+    if (ROARFX[i].t > (ROARFX[i].flash ? 0.24 : 0.9)) ROARFX.splice(i, 1);
+  }
+}
+function drawRoarFX(c) {
+  for (const r of ROARFX) {
+    if (r.t < 0) continue;
+    c.save(); c.globalCompositeOperation = 'lighter';
+    if (r.flash) {
+      // the throat flash: one hard pulse of the roar's own color
+      const k = r.t / 0.24;
+      c.globalAlpha = (1 - k) * 0.5;
+      const g = c.createRadialGradient(r.x, r.y, 2, r.x, r.y, 26 + k * 110);
+      g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, r.col);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = g;
+      c.beginPath(); c.arc(r.x, r.y, 26 + k * 110, 0, 7); c.fill();
+    } else {
+      // a pressure ring: grounded ellipse, thick when young, with short
+      // sound-ticks riding its rim
+      const k = r.t / 0.9, rad = 26 + k * 640;
+      c.globalAlpha = (1 - k) * 0.65;
+      c.strokeStyle = r.col; c.lineWidth = 2 + (1 - k) * 8;
+      c.beginPath(); c.ellipse(r.x, r.y, rad, rad * 0.8, 0, 0, 7); c.stroke();
+      c.lineWidth = 2;
+      for (let i = 0; i < 12; i++) {
+        const a = i / 12 * Math.PI * 2 + k * 1.6;
+        const cx2 = r.x + Math.cos(a) * rad, cy2 = r.y + Math.sin(a) * rad * 0.8;
+        c.beginPath();
+        c.moveTo(cx2, cy2);
+        c.lineTo(cx2 + Math.cos(a) * 11, cy2 + Math.sin(a) * 9);
+        c.stroke();
+      }
+    }
+    c.restore();
+  }
+}
+
 function padRumble(strong, weak, ms) {
   if (!PAD.on || !PAD.gp) return;
   try {
@@ -9868,6 +9918,15 @@ class Boss {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    if (this.roarBuzzT > 0) {
+      // the roar VIBRATES: a held tremble on the camera and, through the
+      // rumble motors, on the controller — re-armed in short pulses
+      const pb = Math.floor(this.roarBuzzT * 5.5);
+      this.roarBuzzT -= dt;
+      cam.shake = Math.max(cam.shake, 2.6);
+      if (Math.floor(this.roarBuzzT * 5.5) !== pb && typeof padRumble === 'function')
+        padRumble(0.4, 0.55, 200);
+    }
     if (this.shieldT > 0) this.shieldT -= dt;          // shorted plating recovers
     if (this.deathAnimT > 0) this.deathAnimT -= dt;   // the collapse plays out
     if (this.dead) return;
@@ -9891,7 +9950,12 @@ class Boss {
         sfx({ glitch: 'roar_beast', brood: 'roar_eagle', zero: 'roar_glc',
               atlas: 'roar_drg', prism: 'roar_prism' }[this.kind] || 'roar');
         cam.shake = Math.max(cam.shake, 11);
-        if (typeof padRumble === 'function') padRumble(0.8, 0.6, 550);
+        this.roarBuzzT = 0.8;
+        if (typeof padRumble === 'function') padRumble(0.9, 0.7, 650);
+        if (typeof roarWave === 'function')
+          roarWave(this.cx(), this.cy() - this.h * 0.35,
+            { glitch: '#b48cff', brood: '#ff5f6d', zero: '#a5d8ff',
+              atlas: '#ffd76a', prism: '#37ffd0' }[this.kind] || '#e05aff');
         burst(this.cx(), this.cy() - this.h * 0.3, 16, '#ffffff', 260, 0.5, 160, 3, true);
       }
       if (this.kind === 'atlas' && this.nestFootY != null && this.t <= 0.6 && !this.nestLanded) {
@@ -10039,7 +10103,10 @@ class Boss {
           }
           if (!this.roared && this.t <= 0.75) {
             this.roared = true;
-            cam.shake = 11; sfx('roar'); G.flash = Math.max(G.flash, 0.18);
+            cam.shake = 11; sfx('roar_beast'); G.flash = Math.max(G.flash, 0.18);
+            this.roarBuzzT = 0.6;
+            if (typeof padRumble === 'function') padRumble(0.85, 0.65, 500);
+            if (typeof roarWave === 'function') roarWave(this.cx() + this.face * 30, this.cy() - 10, '#b48cff');
             if (typeof G.addRing === 'function') G.addRing(this.cx(), this.cy() - 20);
             // the roar itself shoves you off your feet
             if (adist < 250 && !player.dead) {
@@ -10396,7 +10463,13 @@ class Boss {
             this.fbCD = rnd(11, 15); this.fbStruck = 0;
           } else if (Math.abs(px - this.cx()) < 100 && this.t < 2) { this.st = 'slamwarn'; this.t = 0.55; this.vx = 0; }
           else if (this.t <= 0) {
-            if (this.cycle++ % 3 === 2) { this.st = 'hymn'; this.t = 1.0; }
+            if (this.cycle++ % 3 === 2) {
+              this.st = 'hymn'; this.t = 1.0;
+              this.roarBuzzT = 0.7;
+              if (typeof padRumble === 'function') padRumble(0.7, 0.6, 550);
+              if (typeof roarWave === 'function')
+                roarWave(this.cx() + this.face * 34, this.y - this.h * 0.6, '#ffd76a');
+            }
             else {
               this.t = this.phase === 2 ? 2.2 : 3.2;
               const d = px - this.cx();
@@ -12301,6 +12374,7 @@ function update(dt) {
       if (!G.trans.half && G.trans.t < 0.14) { G.trans.half = true; applyTransition(); }
       if (G.trans.t <= 0) G.trans = null;
     } else {
+      if (typeof updateRoarFX === 'function') updateRoarFX(dt);
       if (G.plats) for (const pl of G.plats) pl.update(dt);
       player.update(dt);
       if (typeof platRide === 'function') platRide(player);
@@ -13935,6 +14009,7 @@ function drawWorldFrame() {
   for (const w of G.wrecks) w.draw(c);
   if (G.boss) G.boss.draw(c);
   for (const p of G.projs) p.draw(c);
+  if (typeof drawRoarFX === 'function') drawRoarFX(c);
   // the player is drawn AFTER the cinematic grade (bloom + zone wash) so she
   // stays solid and rich instead of being swallowed by the atmosphere — the
   // one exception is the recharge pod, whose cables and canopy must close
