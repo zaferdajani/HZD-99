@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msk9yt3l";window.GAME_LOCK="robo"</script>
+<script>window.BUILD_ID="mskasxnw";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -1399,13 +1399,45 @@ const EAGLE_P = {
 const EAGLE_F = 2.11;             // panel figure scale -> in-world master scale
 const EAGLE_CACHE = { anchors: null };
 
-function eagleImg() { return typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.eagleParts; }
+let EG_PURE = false;              // drawEagle sets this from b.purified
+let EG_PURE_CV = undefined;
+// the purified sheet: every hot virus-red pixel remapped to clean teal
+function egPureAtlas(im) {
+  if (EG_PURE_CV !== undefined) return EG_PURE_CV;
+  // never cache before the sheet has decoded — a 0-size canvas is forever
+  if (!im || !im.naturalWidth) return null;
+  const cv = document.createElement('canvas');
+  cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+  const x = cv.getContext('2d', { willReadFrequently: true });
+  x.drawImage(im, 0, 0);
+  let d;
+  try { d = x.getImageData(0, 0, cv.width, cv.height); }
+  catch (e) { return (EG_PURE_CV = null); }
+  const p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const r = p[i], g = p[i + 1], b2 = p[i + 2];
+    if (p[i + 3] > 60 && r > 130 && r - g > 55 && r - b2 > 45) {
+      p[i] = Math.round(r * 0.25);
+      p[i + 1] = Math.min(255, Math.round(r * 0.9 + 40));
+      p[i + 2] = Math.round(r * 0.72);
+    }
+  }
+  x.putImageData(d, 0, 0);
+  return (EG_PURE_CV = cv);
+}
+function eagleImg() {
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.eagleParts;
+  if (im && EG_PURE) { const pv = egPureAtlas(im); if (pv) return pv; }
+  return im;
+}
 
 // each figure is registered on its glowing chest core, found by scanning the
 // art itself — so alternating frames stay locked to one another
 function eagleAnchors() {
   if (EAGLE_CACHE.anchors) return EAGLE_CACHE.anchors;
-  const im = eagleImg(); if (!im || !im.naturalWidth) return null;
+  // always scan the RAW sheet: the purified remap moves the red the scan needs
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.eagleParts;
+  if (!im || !im.naturalWidth) return null;
   const cv = document.createElement('canvas');
   cv.width = im.naturalWidth; cv.height = im.naturalHeight;
   const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
@@ -1524,7 +1556,8 @@ function egCableStroke(c, x0, y0, x1, y1, bow) {
 }
 
 function drawEagle(c, b) {
-  const im = eagleImg(); if (!im || !im.naturalWidth) return false;
+  EG_PURE = !!b.purified;
+  const im = eagleImg(); if (!im || (!im.naturalWidth && !im.getContext)) return false;
   c.save();
   try {
     const S = (b.w * 3.0) / 532;
@@ -1581,7 +1614,7 @@ function drawEagle(c, b) {
       const lx = (hangX - cx) / S, ly = (ancY - cy) / S;
       egCableStroke(c, lx, ly, ax, ay, -(b.cabV || 0) * 14 + (lx - ax) * 0.1);
     }
-    if (b.dead) {
+    if (b.dead && !b.purified) {
       // powered down on the ground, light out, listing to one side
       const k = 1 - Math.max(0, Math.min(1, (b.deathAnimT || 0) / 1.6));
       egFigA(c, 'pRest', 1, 0.35 * k);
@@ -1706,6 +1739,7 @@ function drawFeather(c, pr) {
 // the flock: every flying minion is a small TALONHOST — the same authored
 // flip-book frames at a smaller scale; talons only, no feathers
 function drawEagleMini(c, e) {
+  EG_PURE = false;
   const im = eagleImg(); if (!im || !im.naturalWidth) return false;
   c.save();
   try {
@@ -1744,7 +1778,37 @@ const GLC_P = {
   mane: [100, 10, 168, 162],
   tailW: [430, 230, 186, 155],
 };
-function glcImg() { return typeof MEDIA_IMG !== 'undefined' ? MEDIA_IMG.glaciereParts : null; }
+let GLC_PURE = false;             // drawGlaciere sets this from b.purified
+let GLC_PURE_CV = undefined;
+// purified sheet: the void purple leaves her — remapped to living ice
+function glcPureAtlas(im) {
+  if (GLC_PURE_CV !== undefined) return GLC_PURE_CV;
+  // never cache before the sheet has decoded — a 0-size canvas is forever
+  if (!im || !im.naturalWidth) return null;
+  const cv = document.createElement('canvas');
+  cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+  const x = cv.getContext('2d', { willReadFrequently: true });
+  x.drawImage(im, 0, 0);
+  let d;
+  try { d = x.getImageData(0, 0, cv.width, cv.height); }
+  catch (e) { return (GLC_PURE_CV = null); }
+  const p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const r = p[i], g = p[i + 1], b2 = p[i + 2];
+    if (p[i + 3] > 60 && b2 > 120 && b2 - g > 40 && r - g > 5) {
+      p[i] = Math.round(r * 0.45);
+      p[i + 1] = Math.min(255, Math.round(b2 * 0.92));
+      p[i + 2] = b2;
+    }
+  }
+  x.putImageData(d, 0, 0);
+  return (GLC_PURE_CV = cv);
+}
+function glcImg() {
+  const im = typeof MEDIA_IMG !== 'undefined' ? MEDIA_IMG.glaciereParts : null;
+  if (im && GLC_PURE) { const pv = glcPureAtlas(im); if (pv) return pv; }
+  return im;
+}
 
 // draw one authored figure bottom-anchored in local space (art faces LEFT)
 function glcFig(c, key, rot, shake, alpha) {
@@ -1799,22 +1863,24 @@ const GLC_HIPS = [
 ];
 // cool-shadowed atlas for the far pair, so depth reads
 function glcDark() {
-  if (GLC_CACHE.dark) return GLC_CACHE.dark;
-  const im = glcImg(); if (!im || !im.naturalWidth) return null;
+  const slot = GLC_PURE ? 'darkPure' : 'dark';
+  if (GLC_CACHE[slot]) return GLC_CACHE[slot];
+  const im = glcImg(); if (!im || (!im.naturalWidth && !im.getContext)) return null;
   const cv = document.createElement('canvas');
   cv.width = im.naturalWidth; cv.height = im.naturalHeight;
   const x = cv.getContext('2d');
   x.drawImage(im, 0, 0);
   x.globalCompositeOperation = 'source-atop';
   x.fillStyle = 'rgba(9,11,26,0.45)'; x.fillRect(0, 0, cv.width, cv.height);
-  GLC_CACHE.dark = cv;
+  GLC_CACHE[slot] = cv;
   return cv;
 }
 // the hero figure with its baked legs erased — mane, belly lightning and the
 // whole tail chain survive untouched; rig legs hang over the cut
 function glcHeroCut() {
-  if (GLC_CACHE.heroCut) return GLC_CACHE.heroCut;
-  const im = glcImg(); if (!im || !im.naturalWidth) return null;
+  const slot = GLC_PURE ? 'heroCutPure' : 'heroCut';
+  if (GLC_CACHE[slot]) return GLC_CACHE[slot];
+  const im = glcImg(); if (!im || (!im.naturalWidth && !im.getContext)) return null;
   const s = GLC_P.hero;
   const cv = document.createElement('canvas');
   cv.width = s[2]; cv.height = s[3];
@@ -1823,13 +1889,14 @@ function glcHeroCut() {
   x.globalCompositeOperation = 'destination-out';
   x.fillRect(122, 285, 128, 128);               // the front legs and both hoofs
   x.fillRect(326, 296, 106, 117);               // the hind leg under the tail
-  GLC_CACHE.heroCut = cv;
+  GLC_CACHE[slot] = cv;
   return cv;
 }
 // one authored leg split at its knee ball — upper drives from the hip, the
 // shank folds about the knee, overlapped 14 rows through the ball
 function glcLegDraw(c, key, ax, ay, a1, a2, sc, dark) {
-  const im = dark ? glcDark() : glcImg(); if (!im) return;
+  const im = dark ? glcDark() : glcImg();
+  if (!im || !(im.naturalWidth || im.width)) return;
   const s = GLC_P[key], L = GLC_LEG[key];
   const cutUp = Math.min(s[3], L.knee[1] + 7), cutLo = Math.max(0, L.knee[1] - 7);
   c.save();
@@ -1875,7 +1942,8 @@ function glcHeroRig(c, rot, shake, gait, k, tuck) {
 }
 
 function drawGlaciere(c, b) {
-  const im = glcImg(); if (!im || !im.naturalWidth) return false;
+  GLC_PURE = !!b.purified;
+  const im = glcImg(); if (!im || (!im.naturalWidth && !im.getContext)) return false;
   c.save();
   try {
     const H = b.h * 1.9;                       // drawn height over the hitbox
@@ -1937,7 +2005,7 @@ function drawGlaciere(c, b) {
     // hover shadow, faint — tight underfoot while she is grounded
     c.save(); c.globalAlpha *= 0.22; c.fillStyle = '#04070b';
     c.beginPath(); c.ellipse(0, 2 + groundOff, 200 * (0.55 + 0.45 * riseK), 16, 0, 0, 7); c.fill(); c.restore();
-    if (b.dead) {
+    if (b.dead && !b.purified) {
       // DEATH: she breaks into the sheet's own parts row — and the pieces
       // FALL: gravity takes them, each bounces once on the floor line, and
       // they settle where they lie with dying spin. Nothing drifts forever.
@@ -2288,7 +2356,8 @@ function drgWalkCut(hot) {
 // the shank folds about the knee — both halves are the sheet's own pixels,
 // overlapped 14 rows through the ball so the seam never shows mid-flex
 function drgLegDraw(c, key, ax, ay, a1, a2, dark) {
-  const im = dark ? drgDark() : drgImg(); if (!im) return;
+  const im = dark ? drgDark() : drgImg();
+  if (!im || !(im.naturalWidth || im.width)) return;
   const s = DRG_P[key], L = DRG_LEG[key], sc = DRG_LEGSC;
   const cutUp = Math.min(s[3], L.knee[1] + 7), cutLo = Math.max(0, L.knee[1] - 7);
   c.save();
@@ -2490,7 +2559,7 @@ function drawFurnace(c, b) {
 
     // ---- DEATH: he breaks into the sheet's own parts, staggered — wings
     // tear free first, the head drops next, the legs buckle, the body falls
-    if (b.dead) {
+    if (b.dead && !b.purified) {
       fc.deadT += dt;
       if (!fc.shatter) {
         const mk = (k, x, y, delay, vx, vy, vr, gy) =>
@@ -4280,9 +4349,9 @@ function drawPrism(c, b) {
 
     // disc rotation: a real turntable — it idles slowly, whips with facing
     // changes, and screams during the arc states
-    const P = b.dead ? null : przPose(b);
+    const P = (b.dead && !b.purified) ? null : przPose(b);
     const dA = b.anim - (b.przAt == null ? b.anim : b.przAt); b.przAt = b.anim;
-    if (!b.dead) {
+    if (!b.dead || b.purified) {
       const dFv = fv - (b.przFv == null ? fv : b.przFv);
       b.przRot = (b.przRot || 0) + dA * P.discSpin + dFv * -2.2;
       // the crossing frame: the disc kicks sparks as the cat swings through
@@ -4298,7 +4367,7 @@ function drawPrism(c, b) {
     c.translate(cx, footY);
     c.scale(S, S);
 
-    if (b.dead) { przDeath(c, b, S); c.restore(); return true; }
+    if (b.dead && !b.purified) { przDeath(c, b, S); c.restore(); return true; }
 
     // the turntable does not mirror — it is a disc; only its lines rotate
     przDisc(c, b, P, b.przRot || 0);
@@ -4823,6 +4892,10 @@ en: {
   cine_skip: 'hold JUMP to skip',
   cine_nav: 'Enter / ▶  next   ·   ◀  back   ·   Esc  skip',
   pure_beast: 'The virus is destroyed — NULLFANG is free. He seems to like you.',
+  pure_brood: 'The virus is destroyed — TALONHOST is free. She perches, watching over you.',
+  pure_atlas: 'The virus is destroyed — FURNACE CHOIR is free. The furnace burns warm now.',
+  pure_zero: 'The virus is destroyed — GLACIERE is free. She glides at your side.',
+  pure_prism: 'The virus is destroyed — the Prowler is free. Just a cat again.',
   cine_c1: 'KERNEL DEPTHS. A city of machines, run on one broadcast — the Mother\'s Song.',
   cine_c2: 'Every unit woke to it, worked to it, slept to it.',
   cine_c3: 'MOTHER-V, the broadcast heart. While she sang, the Depths were kind.',
@@ -5044,6 +5117,10 @@ ar: {
   cine_skip: 'اضغط القفز مطوّلًا للتخطي',
   cine_nav: 'Enter / ▶  التالي   ·   ◀  رجوع   ·   Esc  تخطٍّ',
   pure_beast: 'دُمِّر الفيروس — ناب العدم حُرّ. يبدو أنه أحبّك.',
+  pure_brood: 'دُمِّر الفيروس — مضيف المخالب حُرّة. تجثم وتسهر عليك.',
+  pure_atlas: 'دُمِّر الفيروس — جوقة الأتون حُرّ. صار الأتون دافئًا الآن.',
+  pure_zero: 'دُمِّر الفيروس — غلاسيير حُرّة. تنساب إلى جانبك.',
+  pure_prism: 'دُمِّر الفيروس — قطّ الموشور حُرّ. عاد قطًّا وحسب.',
   cine_c1: 'أعماق النواة. مدينة آلات تعمل على بثٍّ واحد — أغنية الأم.',
   cine_c2: 'كل وحدة تستيقظ عليها، وتعمل عليها، وتنام عليها.',
   cine_c3: 'MOTHER-V، قلب البث. ما دامت تغنّي، كانت الأعماق رحيمة.',
@@ -10046,35 +10123,54 @@ class Boss {
           sfx('boom'); sfx('phase');
           if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
           if (typeof padRumble === 'function') padRumble(1, 0.8, 700);
-          if (this.kind === 'glitch' && !this.purified) {
-            // the blast was the VIRUS leaving, not the beast dying
+          if (this.kind !== 'mother' && !this.purified) {
+            // the blast was the VIRUS leaving, not the guardian dying
             this.purified = true; this.pureT = 0;
-            G.toast(t('pure_beast'));
+            G.toast(t({ glitch: 'pure_beast', brood: 'pure_brood', atlas: 'pure_atlas',
+                        zero: 'pure_zero', prism: 'pure_prism' }[this.kind]));
           }
           if (this.rewardPend) { this.rewardPend = false; G.onBossDead(this.kind); }
         }
       }
       if (this.purified) {
-        // THE PET: a freed guardian is a giant housecat now. It settles to
-        // the floor, pads to her side, keeps its face to her, and purrs
-        // little hearts when it is close enough to be happy.
+        // THE PETS: a freed guardian keeps its nature. The lion and the
+        // dragon pad to her side; GLACIERE glides at her shoulder; the
+        // eagle perches watching over her; the Prowler is just a cat
+        // again. All of them purr hearts when she is close.
         this.pureT = (this.pureT || 0) + dt;
-        const floorY2 = 15 * TILE - this.h;
-        if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
         this.faceVis = (this.faceVis || this.face)
           + clamp(this.face - (this.faceVis || this.face), -dt * 5, dt * 5);
-        if (this.pureT > 1.1 && !player.dead) {
-          const pd = player.x + player.w / 2 - this.cx();
-          this.face = Math.sign(pd) || this.face;
-          if (Math.abs(pd) > 96) { this.x += clamp(pd, -70, 70) * dt; this.petWalk = true; }
-          else {
-            this.petWalk = false;
-            if (Math.abs(pd) < 90 && chance(0.05))
-              addPart(this.cx() + rnd(-14, 14), this.y - 6, rnd(-6, 6), rnd(-42, -22),
-                rnd(0.7, 1.1), chance(0.5) ? '#ff8fb3' : '#ffc2d4', 2.6, -14, true);
+        const px2 = player.x + player.w / 2, pd = px2 - this.cx();
+        const settled = this.pureT > 1.1 && !player.dead;
+        if (settled) this.face = Math.sign(pd) || this.face;
+        if (settled && Math.abs(pd) < (this.kind === 'zero' ? 180 : 110) && chance(0.05))
+          addPart(this.cx() + rnd(-14, 14), this.y - 6, rnd(-6, 6), rnd(-42, -22),
+            rnd(0.7, 1.1), chance(0.5) ? '#ff8fb3' : '#ffc2d4', 2.6, -14, true);
+        const floorY2 = 15 * TILE - this.h;
+        if (this.kind === 'glitch' || this.kind === 'atlas') {
+          if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
+          let mv = 0;
+          if (settled && Math.abs(pd) > 96) { mv = clamp(pd, -70, 70); this.x += mv * dt; }
+          this.petWalk = mv !== 0;
+          this.vx = this.kind === 'atlas' ? mv : 0;   // drives the dragon's step rig
+          if (this.kind === 'atlas') { this.st = 'idle'; this.t = 5; this.vy = 0; }
+        } else if (this.kind === 'zero') {
+          this.st = 'idle';
+          if (settled) {
+            // at her shoulder: a half-length behind, riding the air
+            const tx2 = px2 - (Math.sign(pd) || 1) * 120 - this.w / 2;
+            const ty2 = floorY2 - 130;
+            this.x += (tx2 - this.x) * Math.min(1, dt * 1.6);
+            this.y += (ty2 - this.y) * Math.min(1, dt * 1.1);
           }
-          this.x = clamp(this.x, 8, G.roomDef.w * TILE - this.w - 8);
-        } else this.petWalk = false;
+        } else if (this.kind === 'brood') {
+          this.st = 'restlow'; this.t = 5;
+          this.y = floorY2 + 4; this.vy = 0; this.cabV = this.cabV || 0;
+        } else if (this.kind === 'prism') {
+          this.st = 'dorm';
+          if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
+        }
+        this.x = clamp(this.x, 8, G.roomDef.w * TILE - this.w - 8);
       }
       // the X1 bridge lets go once the wreck has settled
       if (G.roomId === 'X1' && (this.deathAnimT || 0) <= 0 && !this.bridgeGone) {
@@ -11531,7 +11627,8 @@ class Boss {
       && !(this.kind === 'mother' && typeof drawMother === 'function')
       && !(this.kind === 'atlas' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.dragonParts)) return;
     const P = PAL[G.roomDef.zone];
-    const a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
+    let a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
+    if (this.purified && (this.pureT || 0) < 0.7) a *= clamp((this.pureT || 0) / 0.7 + 0.15, 0.15, 1);
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
     if (this.dead) {
@@ -12357,13 +12454,17 @@ function loadRoom(id) {
       spawnStatic(kind, tx, ty, extra, kind === 'term' ? null : null);
     }
   });
-  // the freed guardian stays home: NULLFANG pads around his old arena as
-  // her pet forever after the virus is destroyed
-  if (id === 'A4' && G.save.flags.bossGlitch && !G.boss) {
-    G.boss = new Boss('glitch', 20 * TILE, 15 * TILE);
-    G.boss.dead = true; G.boss.purified = true; G.boss.pureT = 5;
-    G.boss.deathFxT = 0; G.boss.deathFinale = true; G.boss.rewardPend = false;
-    G.boss.hp = 0; G.boss.st = 'idle';
+  // the freed guardians stay home: every purified boss lives on in its
+  // old arena as her pet, forever
+  const PET_HOMES = { A4: ['glitch', 20], B4: ['brood', 15], C3: ['atlas', 15], D3: ['zero', 15], X1: ['prism', 20] };
+  const ph2 = PET_HOMES[id];
+  if (ph2 && G.save.flags['boss' + ph2[0].charAt(0).toUpperCase() + ph2[0].slice(1)] && !G.boss) {
+    const pb = new Boss(ph2[0], ph2[1] * TILE, 15 * TILE);
+    pb.dead = true; pb.purified = true; pb.pureT = 5;
+    pb.deathFxT = 0; pb.deathFinale = true; pb.rewardPend = false; pb.hp = 0;
+    pb.st = ph2[0] === 'brood' ? 'restlow' : ph2[0] === 'prism' ? 'dorm' : 'idle';
+    if (ph2[0] === 'brood') pb.y = 15 * TILE - pb.h + 4;
+    G.boss = pb;
   }
   if (G.save.pouch && G.save.pouch.room === id) {
     const p = new Pouch(G.save.pouch.x, G.save.pouch.y, G.save.pouch.amount);
