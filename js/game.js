@@ -2873,9 +2873,14 @@ function draw(tms) {
 // Hold JUMP/OK one second to skip; the watched flag lives in localStorage.
 // ===========================================================================
 function startCine() {
-  G.cine = { t: 0, hold: 0, promptT: 0, glitchT: 0, ending: false };
+  G.cine = { page: 0, pt: 0, glitchT: 0, ending: false };
   G.state = 'CINE';
 }
+// page start times in the original score, and how long each page takes to
+// finish appearing (panels popped, captions typed) — pressing next before
+// that reveals the whole page instantly; pressing again turns it
+const CINE_PAGE_T = [0, 13, 25, 41, 58];
+const CINE_REVEAL = [8, 8, 10.5, 10.5];
 function cineEnd() {
   try { localStorage.setItem('cb_intro_seen', '1'); } catch (e) {}
   G.cine = null;
@@ -2888,29 +2893,36 @@ function cineEnd() {
 function updateCine(dt) {
   const ci = G.cine;
   if (!ci) { cineEnd(); return; }
+  if (ci.page == null) { ci.page = 0; ci.pt = ci.t || 0; }
   if (ci.ending) {
     ci.glitchT -= dt;
     if (ci.glitchT <= 0) cineEnd();
     return;
   }
-  ci.t += dt;
-  ci.promptT = Math.max(0, ci.promptT - dt);
-  const inTitle = ci.t >= 58;
-  const pressed = inP('OK') || inP('JUMP') || inP('ATK');
-  const held = inD('OK') || inD('JUMP') || inD('ATK');
-  if (inTitle) {
-    if (pressed) { ci.ending = true; ci.glitchT = 0.8; sfx('phase'); sfx('ok'); }
+  ci.pt += dt;
+  // THE READER'S CONTROLS: the story never runs away on its own —
+  // next turns the page (or completes it), back re-reads, skip jumps out
+  const next = inP('OK') || inP('JUMP') || inP('ATK') || inP('RIGHT');
+  const prev = inP('LEFT');
+  const skip = inP('PAUSE') || inP('BACK');
+  if (ci.page >= 4) {                              // the title card
+    if (next || skip) { ci.ending = true; ci.glitchT = 0.8; sfx('phase'); sfx('ok'); }
+    else if (prev) { ci.page = 3; ci.pt = CINE_REVEAL[3]; sfx('ui'); }
     return;
   }
-  if (pressed) ci.promptT = 2;
-  if (held && ci.promptT > 0) {
-    ci.hold += dt;
-    if (ci.hold >= 1) { ci.t = 58; ci.hold = 0; ci.promptT = 0; sfx('ui'); }
-  } else ci.hold = 0;
+  if (skip) { ci.page = 4; ci.pt = 0; sfx('ui'); return; }
+  if (next) {
+    sfx('ui');
+    if (ci.pt < CINE_REVEAL[ci.page]) ci.pt = CINE_REVEAL[ci.page];
+    else { ci.page++; ci.pt = 0; }
+    return;
+  }
+  if (prev && ci.page > 0) { ci.page--; ci.pt = CINE_REVEAL[ci.page]; sfx('ui'); }
 }
 function drawCine() {
   const ci = G.cine; if (!ci) return;
-  const T = ci.t;
+  if (ci.page == null) { ci.page = 0; ci.pt = 0; }
+  const T = CINE_PAGE_T[Math.min(ci.page, 4)] + ci.pt;
   // =========================================================================
   // THE BROADCAST FALLS — a real comic. Paper gutters, ink borders, halftone
   // shade — and the actual cast on every page: MOTHER-V, the machine folk,
@@ -3041,7 +3053,7 @@ function drawCine() {
   const TITLE_AT = 58;
 
   // paper page under everything (the title page goes dark again)
-  if (T < TITLE_AT) {
+  if (ci.page < 4) {
     c.fillStyle = '#ddd7c6'; c.fillRect(0, 0, 960, 540);
     c.save(); c.globalAlpha = 0.05;
     for (let i = 0; i < 40; i++)
@@ -3049,8 +3061,8 @@ function drawCine() {
     c.restore();
   }
 
-  // ---------------- PAGE 1: THE SONG (0-13) ----------------
-  if (seg(0, 13)) {
+  // ---------------- PAGE 1: THE SONG ----------------
+  if (ci.page === 0) {
     panel(14, 14, 932, 240, 0.2, (x, y, w, h, lo) => {
       // the machine city, whole — and the Song moving through its sky
       vista(x, y, w, h, 'rgba(40,120,120,$)', 0.16);
@@ -3112,8 +3124,8 @@ function drawCine() {
       cap(x + 12, y + h - 62, 320, t('cine_c3'), lo - 0.5);
     });
   }
-  // ---------------- PAGE 2: THE FALL (13-25) ----------------
-  else if (seg(13, 25)) {
+  // ---------------- PAGE 2: THE FALL ----------------
+  else if (ci.page === 1) {
     panel(14, 14, 452, 512, 13.2, (x, y, w, h, lo) => {
       // the corruption reaches her: the same heart, torn by the null signal
       c.fillStyle = '#140e14'; c.fillRect(x, y, w, h);
@@ -3183,8 +3195,8 @@ function drawCine() {
       cap(x + 12, y + h - 62, 300, t('cine_c6'), lo - 0.4);
     });
   }
-  // ---------------- PAGE 3: THE GUARDIANS (25-41) ----------------
-  else if (seg(25, 41)) {
+  // ---------------- PAGE 3: THE GUARDIANS ----------------
+  else if (ci.page === 2) {
     // four panels, four real guardians from their own sheets
     panel(14, 14, 452, 240, 25.3, (x, y, w, h, lo) => {
       c.fillStyle = '#120e18'; c.fillRect(x, y, w, h);
@@ -3253,8 +3265,8 @@ function drawCine() {
     });
     if (T > 33.5) cap(250, 512, 460, t('cine_c7'), T - 33.5);
   }
-  // ---------------- PAGE 4: THE ONE THAT SLEPT (41-58) ----------------
-  else if (seg(41, 58)) {
+  // ---------------- PAGE 4: THE ONE THAT SLEPT ----------------
+  else if (ci.page === 3) {
     panel(14, 14, 452, 512, 41.3, (x, y, w, h, lo) => {
       // the maintenance bay below the broadcast floor — and her, on standby
       c.fillStyle = '#0e0e13'; c.fillRect(x, y, w, h);
@@ -3354,16 +3366,12 @@ function drawCine() {
       c.fillRect(896, 496, 26, 9); c.shadowBlur = 0;
     }
   }
-  // skip affordance + the ending glitch-out
-  if (ci.promptT > 0 && T < 58) {
-    c.save(); c.globalAlpha = Math.min(1, ci.promptT);
-    ftxt(t('cine_skip'), 480, 508, 14, '#9fb8c8', 'center');
-    if (ci.hold > 0) {
-      c.strokeStyle = '#37ffd0'; c.lineWidth = 3;
-      c.strokeRect(400, 520, 160, 8);
-      c.fillStyle = '#37ffd0'; c.fillRect(402, 522, 156 * Math.min(1, ci.hold), 4);
-    }
-    c.restore();
+  // the reader's controls, always visible under the page
+  if (ci.page < 4) {
+    const pu = 0.6 + Math.sin(performance.now() / 400) * 0.15;
+    c.fillStyle = 'rgba(18,18,24,0.8)'; rr(c, 240, 510, 480, 26, 9); c.fill();
+    ftxt(t('cine_nav') + '  ·  ' + (ci.page + 1) + '/5', 480, 523, 13,
+      'rgba(232,236,242,' + pu + ')');
   }
   if (ci.ending) {
     const gk = ci.glitchT;
