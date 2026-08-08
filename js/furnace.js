@@ -225,6 +225,44 @@ function drgNest(c, x, y, t) {
   c.restore();
 }
 
+// THE SLEEPING DRAGON — composed from his own authored parts the way a
+// dragon actually sleeps: body flat on the ground, tail wrapped around the
+// front, wings folded over the back like a tent, head down on a tucked
+// forepaw. lift 0..1 is the stir: head and chest come off the ground first.
+// Local space: ground at y=0, art faces RIGHT, caller has scaled/mirrored.
+function drgSleep(c, t, lift) {
+  const im = drgImg(); if (!im || (im.naturalWidth === 0 && !im.getContext)) return;
+  const dk = drgDark();
+  const pc = (key, x, y, rot, sc, sqx, sqy, dark) => {
+    const s = DRG_P[key];
+    c.save(); c.translate(x, y); if (rot) c.rotate(rot);
+    c.scale(sqx || 1, sqy || 1);
+    c.drawImage(dark && dk ? dk : im, s[0], s[1], s[2], s[3],
+      -s[2] * sc / 2, -s[3] * sc / 2, s[2] * sc, s[3] * sc);
+    c.restore();
+  };
+  const P2 = 0.42;
+  const br = Math.sin(t * 0.75);                   // the slow sleeping breath
+  c.save();
+  c.translate(0, br * 1.3 * (1 - lift));
+  // far wing: folded flat along the back, darkened for depth
+  pc('wingL', -14, -58, 0.9, 0.2, 1, 0.55, true);
+  // tail wrapped around the front of the body, lying on the ground
+  pc('tail', -26, -13, 0.1, P2);
+  // the body, belly on the ground
+  pc('body', 0, -27, -0.02, P2, 1, 1 - br * 0.012);
+  // near wing folded over it — the tent
+  pc('wingR', 2, -54 - lift * 6, 1.0 - lift * 0.15, 0.24, 1, 0.5);
+  // tucked forepaw, lying flat — the pillow
+  pc('flegR', 46, -11, 1.35, P2 * 0.85);
+  // neck and head: resting on the paw; the stir lifts them first
+  pc('neck', 34, -30 - lift * 30, 0.55 - lift * 0.75, P2);
+  pc('head', 58 - lift * 8, -15 - lift * 52, 0.6 - lift * 0.85, P2);
+  // the banked chest ember, breathing under the plating
+  drgGlow(c, 2, -26, 7 + lift * 16, 0.06 + Math.max(0, br) * 0.06 + lift * 0.35, false);
+  c.restore();
+}
+
 function drawFurnace(c, b) {
   const im = drgImg(); if (!im || !im.naturalWidth) return false;
   c.save();
@@ -356,22 +394,19 @@ function drawFurnace(c, b) {
     const heroPose = b.st === 'hymn' || b.st === 'forgebell' || b.st === 'meltwarn' || fc.roarT > 0;
 
     if (b.st === 'dorm') {
-      // ASLEEP IN THE NEST: hunkered into the slag bowl, wings drawn in,
-      // head sunk over the forepaws — every glow banked but one ember
-      c.translate(0, 9 + Math.sin(b.anim * 0.7) * 1.4);
-      const br3 = Math.sin(b.anim * 0.7) * 0.012;
-      c.scale(1 + br3, 1 - br3);
-      drgFig(c, 'idle', 0, 0, 0.11);
-      drgGlow(c, 12, -78, 8, 0.06 + Math.max(0, Math.sin(b.anim * 0.7)) * 0.06, false);
+      // ASLEEP IN THE NEST: the composed sleeping pose — body flat, tail
+      // wrapped, wings folded over the back, head down on a tucked forepaw
+      drgSleep(c, b.anim, 0);
     } else if (b.st === 'intro') {
       const t2 = b.t || 0;
       if (wakeK2 < 0.45) {
-        // the stir: the hunched shape lifts out of the bowl, the chest
+        // the stir: head and chest come off the ground first, the chest
         // light climbing through the seams, the whole machine knocking
         const u = wakeK2 / 0.45;
-        c.translate(0, 9 * (1 - u));
-        drgFig(c, 'idle', 0, u * 3, 0.11 * (1 - u));
-        drgGlow(c, 12, -78, 8 + u * 18, 0.06 + u * 0.4, false);
+        c.save();
+        if (u > 0.3) c.translate(rnd(-1, 1) * u * 2.5, rnd(-1, 1) * u);
+        drgSleep(c, b.anim, u);
+        c.restore();
       } else if (t2 <= 0.6 && !b.nestLanded) {
         // ON THE WING: down from the roost, nose tipped into the glide
         drgFig(c, 'fly', wk, 0.6, clamp((b.vy || 0) / 2400, -0.22, 0.28));

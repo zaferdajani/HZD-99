@@ -199,6 +199,43 @@ function bFig(c, key, rot, shake, sqx, sqy) {
   c.restore();
 }
 
+// THE SLEEPING LION — composed flat from his own parts, the way lions
+// actually sleep: belly on the ground, forelegs stretched flat in front,
+// the head resting down ON them inside the mane, tail lying still along
+// the ground. lift 0..1 is the stir: the head rises first, then the chest.
+// Local space: authored (faces LEFT), ground y=0, caller scaled/mirrored.
+function bSleep(c, t, lift) {
+  const br = Math.sin(t * 0.75);
+  BEAST_LIVE.t = t; BEAST_LIVE.glow = 0.08 + Math.max(0, br) * 0.06 + lift * 0.8;
+  c.save();
+  c.translate(0, br * 1.6 * (1 - lift) - lift * 26);
+  // hind shank lying flat under the rump, and its dark far twin
+  c.save(); c.translate(112, -20); c.rotate(1.3); bPart(c, 'bleg1', 36, 57, true); c.restore();
+  c.save(); c.translate(96, -16); c.rotate(1.38); bPart(c, 'bleg1', 36, 57); c.restore();
+  // the body, belly on the ground (bottom of the torso at the floor line)
+  c.save(); c.translate(0, 85 - lift * 30); c.rotate(-0.02 + lift * 0.05);
+  bPart(c, 'body', BEAST_TUNE.bodyX, BEAST_TUNE.bodyY); c.restore();
+  // tail lying along the ground behind, only the spade tip breathing
+  c.save(); c.translate(150, -12);
+  for (let i = 0; i < 4; i++) {
+    const key = 'tail' + i;
+    c.translate(BEAST_P[key][2] * 0.62, (i === 3 ? Math.max(0, br) * -2 : 0));
+    c.rotate(0.04);
+    bPart(c, key, BEAST_P[key][2] / 2, BEAST_P[key][3] / 2);
+  }
+  c.restore();
+  // forelegs stretched FLAT in front — far one first, darkened
+  c.save(); c.translate(-136, -15 - lift * 8); c.rotate(1.42); bPart(c, 'fleg1', 35, 54, true); c.restore();
+  c.save(); c.translate(-152, -13 - lift * 10); c.rotate(1.5); bPart(c, 'fleg1', 35, 54); c.restore();
+  // the head, resting on the stretched paws — the stir raises it first
+  c.save();
+  c.translate(-128 + lift * 20, -58 - lift * 96);
+  c.rotate(0.42 - lift * 0.55);
+  bPart(c, 'head', 118, 92);
+  c.restore();
+  c.restore();
+}
+
 // draw one part with its pivot at the current origin
 function bPart(c, key, px, py, dark) {
   const s = BEAST_P[key];
@@ -255,13 +292,14 @@ function beastPose(b) {
   if (st === 'dorm' && !b.dead) {
     // ASLEEP: a mound of machine — deep crouch, head sunk between the
     // forelegs, tail wrapped close, the virus veins barely breathing
-    // sphinx-lying: the legs FOLD under the body (the collapse pose held
-    // peacefully), belly on the floor, chin nearly on the forepaws
-    P.crouch = 72 + Math.sin(t * 0.8) * 1.2; P.bob = 0; P.pitch = 0.08;
-    P.neckA = 0.48; P.headA = 0.95;
-    P.tailUp = -1.35; P.tailA = 0.05;
+    // a real lion's sleep: the collapse rest held peacefully — belly on
+    // the floor, legs folded flat along the ground, head down on the paws,
+    // tail lying still. Only the breath moves.
+    P.crouch = 44 + Math.sin(t * 0.8) * 1.4; P.bob = 0; P.pitch = 0.03;
+    P.neckA = 0.5; P.headA = 1.05;
+    P.tailUp = -1.5; P.tailA = 0.02;
     P.glow = 0.05 + Math.max(0, Math.sin(t * 0.8)) * 0.06;
-    P.legs = [{ a1: 0.72, a2: -1.42 }, { a1: 0.78, a2: -1.5 }, { a1: 0.66, a2: -1.36 }, { a1: 0.75, a2: -1.46 }];
+    P.legs = [{ a1: 0.9, a2: -1.5 }, { a1: 0.94, a2: -1.54 }, { a1: 0.86, a2: -1.46 }, { a1: 0.92, a2: -1.5 }];
     return P;
   }
   if (st === 'intro' && !b.dead) {
@@ -271,17 +309,17 @@ function beastPose(b) {
     const k = Math.max(0, Math.min(1, 1 - (b.t || 0) / 2));
     const head = Math.min(1, k / 0.35);
     const rise = Math.max(0, Math.min(1, (k - 0.32) / 0.38));
-    P.crouch = 72 * (1 - rise * rise); P.bob = 0; P.pitch = 0.08 * (1 - rise);
-    P.neckA = 0.48 * (1 - head); P.headA = 0.95 - head * 1.05;
+    P.crouch = 44 * (1 - rise * rise); P.bob = 0; P.pitch = 0.03 * (1 - rise);
+    P.neckA = 0.5 * (1 - head); P.headA = 1.05 - head * 1.15;
     P.tailUp = -1.35 + rise * 0.55; P.tailA = Math.sin(t * (1 + k * 6)) * 0.1 * k;
     P.glow = 0.05 + head * 0.7 + (k > 0.5 ? Math.max(0, Math.sin(t * 24)) * 0.25 : 0);
     // the folded legs push the ground away as the mass comes up
     const fold = 1 - rise;
     P.legs = [
-      { a1: 0.72 * fold + 0.02, a2: -1.42 * fold },
-      { a1: 0.78 * fold + 0.02, a2: -1.5 * fold },
-      { a1: 0.66 * fold + 0.02, a2: -1.36 * fold },
-      { a1: 0.75 * fold + 0.02, a2: -1.46 * fold },
+      { a1: 0.9 * fold + 0.02, a2: -1.5 * fold },
+      { a1: 0.94 * fold + 0.02, a2: -1.54 * fold },
+      { a1: 0.86 * fold + 0.02, a2: -1.46 * fold },
+      { a1: 0.92 * fold + 0.02, a2: -1.5 * fold },
     ];
     return P;
   }
@@ -576,9 +614,19 @@ function drawBeast(c, b) {
       ng.addColorStop(1, 'rgba(176,106,255,0)');
       c.fillStyle = ng; c.beginPath(); c.arc(0, -120, 190, 0, 7); c.fill();
       c.restore();
-    } else if (b.st === 'intro' && (b.t || 0) <= 0.85 && !b.dead) {
-      // the wake's climax: fully risen, it takes the authored open-jaw
-      // howl and holds it while the roar plays out
+    } else if (b.st === 'dorm' && !b.dead) {
+      // asleep, composed flat from his own parts — only the breath moves
+      bSleep(c, b.anim, 0);
+    } else if (b.st === 'intro' && (b.t || 0) > 1.0 && !b.dead) {
+      // the stir: head off the paws first, chest following — still down
+      const k = clamp(1 - (b.t || 0) / 2, 0, 1);
+      c.save();
+      if (k > 0.2) c.translate(rnd(-1, 1) * k * 3, rnd(-1, 1) * k);
+      bSleep(c, b.anim, clamp(k / 0.5, 0, 1));
+      c.restore();
+    } else if (b.st === 'intro' && !b.dead) {
+      // the wake's climax: up onto his feet and straight into the authored
+      // open-jaw howl, holding it while the roar plays out
       BEAST_LIVE.glow = 1.4;
       bFig(c, 'aRoar', 0, 2 + Math.max(0, (b.t || 0) - 0.35) * 5);
     } else if (b.st === 'roar' && (b.t || 0) > 0.25 && (b.t || 0) <= 1.07 && !b.dead) {
