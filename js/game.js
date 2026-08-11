@@ -208,6 +208,9 @@ function loadRoom(id) {
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
   G.wrecks = []; G.recharge = null; G.plats = []; G.x1Bridge = false; G.x1T = 0;
+  // a scripted finishing blow belongs to the room it was swung in; carrying one
+  // across a door would leave her driven by a boss that no longer exists
+  G.finish = null; G.offer = null; G.forkBoss = null;
   parts.length = 0;
   const def = ROOMS[id];
   def.ents.forEach((d, i) => {
@@ -430,9 +433,9 @@ function doInteract(s) {
     G.save.bench = { room: G.roomId, x: s.x, y: s.y + s.h - 38 };
     G.save.usedNine = false; G.save.usedAegis = false;
     starRestock(); persist(); sfx('bench');
-    // a rest is the deep divergence — this one asks properly, and waits
-    if (typeof brOffer === 'function' && !(typeof isHero === 'function' && isHero()))
-      setTimeout(() => { if (G.state === 'PLAY') brOffer('bench'); }, 500);
+    // A rest used to raise the fork too. It is a checkpoint — the place you go
+    // to stop thinking for a moment — and putting the game's heaviest question
+    // there, every single time, is what turned it into furniture.
     const dur = Math.max(1.4, (player.maxCores() - player.cores) * 0.2 + 1.4);
     const dock = 0.55;
     // dock phase: walk to the centre, then charge (robot: cables+surge / hero: drink)
@@ -538,7 +541,10 @@ function update(dt) {
         }
       }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
-      player.update(dt);
+      // during a finishing blow she is driven, not steered — the choice was the
+      // input, and nothing the player does now can fumble it
+      if (G.finish && typeof updateFinisher === 'function') updateFinisher(dt);
+      else player.update(dt);
       if (typeof platRide === 'function') platRide(player);
       checkEvo();
       // shuriken regen: the suit condenses static into a fresh star over time,
@@ -556,6 +562,7 @@ function update(dt) {
       if (G.saws) for (const sw of G.saws) sw.update(dt);
       if (typeof updatePets === 'function') updatePets(dt);
       if (typeof updateBrDelta === 'function') updateBrDelta(dt);
+      if (typeof updateSpoilQ === 'function') updateSpoilQ(dt);
       G.enemies = G.enemies.filter(e => !e.dead);
       if (G.boss) G.boss.update(dt);
       for (const p of G.projs) if (!p.dead) p.update(dt);
@@ -3926,7 +3933,6 @@ function draw(tms) {
   // in-world states render the world behind
   drawWorldFrame();
   drawFX();
-  if (typeof drawOffer === 'function' && G.offer && G.offer.kind === 'kill') drawOffer();
   if (typeof drawBrDelta === 'function') drawBrDelta();
   drawHUD();
   drawMapButton();

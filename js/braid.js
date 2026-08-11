@@ -58,7 +58,8 @@ function braid() {
   if (!G.save) return null;
   if (!G.save.braid) {
     G.save.braid = {
-      led: '',                       // the whole multiverse, as a string
+      led: '',                       // the CHOICES — only what you were asked
+      trail: '',                     // where you fought, one letter per machine
       tally: { L: 0, R: 0, X: 0 },
       nodes: [],                     // divergences worth drawing on the chart
       seen: {},                      // universe ids this player has stood in
@@ -69,6 +70,7 @@ function braid() {
   if (!b.tally) b.tally = { L: 0, R: 0, X: 0 };
   if (!b.nodes) b.nodes = [];
   if (!b.seen) b.seen = {};
+  if (b.trail == null) b.trail = '';
   return b;
 }
 
@@ -105,8 +107,14 @@ function brId(seed) {
 let brCache = { key: null, u: null };
 function universe() {
   const b = braid(); if (!b) return brDefaultUniverse();
-  if (brCache.key === b.led) return brCache.u;
-  const seed = brHash('clawbyte/' + b.led);
+  // TWO INPUTS, TWO JOBS. The ledger is only what you were ASKED — a handful of
+  // guardian forks — and it alone sets the world's DIRECTION, so one act of
+  // mercy is never drowned out by forty machines you cleared on the way. The
+  // trail is everywhere you fought, and it only perturbs the HASH: it decides
+  // which world you got, not which way it leans.
+  const key = b.led + '#' + b.trail;
+  if (brCache.key === key) return brCache.u;
+  const seed = brHash('clawbyte/' + key);
   const R = brRng(seed);
   const total = Math.max(1, b.tally.L + b.tally.R + b.tally.X);
   const mercy = b.tally.L / total, sever = b.tally.R / total, red = b.tally.X / total;
@@ -197,7 +205,7 @@ function universe() {
     callK: has('choir') ? 1 : 0,
     calmK: has('clement') ? 0.3 : 0,      // extra chance a machine wakes peaceful
   };
-  brCache = { key: b.led, u };
+  brCache = { key, u };
   return u;
 }
 function brDefaultUniverse() {
@@ -224,13 +232,9 @@ function brRecord(pick, kind, room) {
   const before = universe();
   b.led += pick;
   b.tally[pick] = (b.tally[pick] || 0) + 1;
-  if (kind === 'kill') b.kills++;
-  // only real divergences go on the chart — a chart of every kill is a wall
-  if (kind !== 'kill') {
-    b.forks++;
-    b.nodes.push({ p: pick, k: kind, r: room || G.roomId, d: b.led.length });
-    if (b.nodes.length > 220) b.nodes.shift();
-  }
+  b.forks++;
+  b.nodes.push({ p: pick, k: kind, r: room || G.roomId, d: b.led.length });
+  if (b.nodes.length > 220) b.nodes.shift();
   brCache.key = null;                       // the world has changed underneath us
   const after = universe();
   b.seen[after.id] = 1;
@@ -254,6 +258,22 @@ function brRecord(pick, kind, room) {
   // No toast: the readout above already names the world and says what changed,
   // and two banners fighting for the same moment is how a good beat gets lost.
   return after;
+}
+// A MACHINE DIES AND IS NOT DISCUSSED.
+//
+// Every kill used to raise a three-way ribbon. Forty of those in a run is not a
+// moral system, it is a nag — and asking the same question over a spike-crawler
+// that you asked over a guardian is what made the guardian's question cheap. So
+// an ordinary kill is now recorded and never mentioned: it leaves a mark on the
+// trail, which perturbs the world you are in without pretending you deliberated
+// over it. The question is reserved for the only creatures big enough to ask it.
+function brKill(room) {
+  const b = braid(); if (!b) return;
+  b.kills++;
+  const z = (G.roomDef && G.roomDef.zone) || (room || 'A')[0] || 'A';
+  b.trail += z;
+  if (b.trail.length > 160) b.trail = b.trail.slice(-160);
+  brCache.key = null;
 }
 // the readout itself, top-centre, in screen space
 function drawBrDelta() {
@@ -282,121 +302,184 @@ function drawBrDelta() {
 }
 
 // ---------------------------------------------------------------------------
-// THE OFFER. Three ways to answer, every kill and every rest.
+// THE OFFER. One question, asked only by the creatures worth asking.
 //
-// It never blocks. A prompt that stops a platformer dead on every kill would
-// wreck the game's pace, so this is a ribbon with a clock on it: answer, or
-// keep playing and let it lapse. Lapsing is itself a choice and is recorded as
-// severance, because doing nothing to a dying machine IS severing it.
+// It used to fire on every kill and every campfire, and that was the mistake:
+// a question repeated forty times a run stops being a question. Now the blow
+// that would kill a guardian brings it to its knees instead, and the fight
+// stops on exactly one fork — spare it, or end it. Nothing else in the game
+// interrupts you to ask anything.
 // ---------------------------------------------------------------------------
-const BR_OFFER_T = 2.6;
 function brOffer(kind, x, y) {
   if (!G.save || (typeof isHero === 'function' && isHero())) return;
-  // rests and bosses always ask; kills ask on a ribbon that can lapse
-  G.offer = { kind, t: kind === 'kill' ? BR_OFFER_T : 9e9, t0: BR_OFFER_T, x: x || 0, y: y || 0, done: false };
-  if (kind !== 'kill') G.state = 'OFFER';
+  G.offer = { kind, t: 9e9, t0: 9e9, x: x || 0, y: y || 0, done: false };
+  G.state = 'OFFER';
 }
+
+// NOBODY KNOWS WHICH IS BETTER, AND THAT IS THE POINT.
+//
+// If mercy always paid, mercy would not be a choice — it would be the correct
+// answer with a delay on it. So what a guardian leaves behind is drawn from the
+// world itself: the same ledger that made this universe decides whether sparing
+// this one enriches you or whether ending it does. It is fixed for a given world
+// (the same code always plays the same), and unknowable before you commit. Some
+// runs will teach you that mercy pays. Those runs are lying to you.
+const BR_SPOIL = ['core', 'scrap', 'iq', 'slot'];
+function bossSpoil(kind, pick) {
+  if (!G.save) return null;
+  const R = brRng(brHash('spoil/' + braid().led + '/' + kind + '/' + pick));
+  R(); R();                                  // warm the stream off the raw seed
+  const g = BR_SPOIL[Math.floor(R() * BR_SPOIL.length) % BR_SPOIL.length];
+  // mercy leaves a living creature that keeps giving; severance leaves salvage.
+  // The KIND of gift tilts, the SIZE does not — neither answer is the rich one.
+  const big = R() < 0.5;
+  if (g === 'core') {
+    G.save.coresMax = (G.save.coresMax || 4) + 1;
+    if (player) player.cores = player.maxCores();
+  } else if (g === 'scrap') {
+    G.save.scrap = (G.save.scrap || 0) + (big ? 220 : 140);
+  } else if (g === 'iq') {
+    G.save.iq = (G.save.iq || 0) + (big ? 6 : 4);
+  } else {
+    G.save.slots = Math.min(6, (G.save.slots || 3) + 1);
+  }
+  return { name: t('sp_' + g), desc: t('sp_' + g + '_d') };
+}
+// Announcements wait for the world to be ready for them. A guardian's answer
+// runs a film, or a scripted finishing blow, or a collapse — opening a dialog
+// on top of any of those eats the moment. This queue holds the card until the
+// game is actually back in the player's hands.
+function spoilLater(sp) {
+  if (sp) G.spoilQ = { name: sp.name, desc: sp.desc, t: 0.7 };
+}
+function updateSpoilQ(dt) {
+  const q = G.spoilQ; if (!q) return;
+  if (G.state !== 'PLAY' || G.finish || G.dialog) return;
+  q.t -= dt;
+  if (q.t <= 0) { G.spoilQ = null; if (typeof showItem === 'function') showItem(q.name, q.desc); }
+}
+
 function brAnswer(pick) {
   const o = G.offer; if (!o || o.done) return;
   o.done = true;
   const u = brRecord(pick, o.kind, G.roomId);
-  if (typeof sfx === 'function') sfx(pick === 'X' ? 'phase' : pick === 'L' ? 'powerUp' : 'ui');
-  // the Signal's gift is real, and so is its price
-  if (pick === 'X') {
-    if (player) { player.volts = Math.min(player.maxVolts ? player.maxVolts() : 99, player.volts + 30); }
-    if (typeof G.hudGlitchT === 'number') G.hudGlitchT = Math.max(G.hudGlitchT, 3);
-    if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 6);
-  } else if (pick === 'L' && player) {
-    player.cores = Math.min(player.maxCores(), player.cores + (o.kind === 'kill' ? 0 : 1));
-  } else if (pick === 'R') {
-    if (typeof G.dropScrap === 'function' && o.kind === 'kill') G.dropScrap(o.x, o.y, 4);
-  }
-  // THE FIRST CHOICE resolves here, and it is the only offer that hands over a
-  // power. Both branches give the DASH, because the way out of the Meadows can
-  // never depend on the answer. What differs is the second gift, and it differs
-  // in KIND rather than in size — a permanent edge, or a debt the lion repays.
-  if (o.kind === 'firstboss' && G.forkBoss) {
+  if (typeof sfx === 'function') sfx(pick === 'L' ? 'powerUp' : 'ui');
+  // THE GUARDIAN'S FORK. The first one hands over authored gifts, because it is
+  // the moment the game teaches the rule; every one after it pays out of the
+  // world. Either way the answer is the last input of the fight — choosing to
+  // end it does not mean swinging again, it means the game swings for you.
+  if (G.forkBoss) {
     const b2 = G.forkBoss; G.forkBoss = null;
+    const first = o.kind === 'firstboss';
     if (pick === 'L') {
-      G.save.flags.oath = 1;
-      b2.hp = 0;
-      b2.tamed = true;
-      b2.die();                                  // the purification path: it lives
-      if (typeof showItem === 'function') showItem(t('oath_name'), t('oath_desc'));
+      b2.hp = 0; b2.tamed = true;
+      b2.die();                                  // the purification film: it lives
+      if (first) { G.save.flags.oath = 1; spoilLater({ name: t('oath_name'), desc: t('oath_desc') }); }
+      else spoilLater(bossSpoil(b2.kind, 'L'));
     } else {
-      G.save.flags.resolve = 1;
-      b2.hp = 0;
-      b2.forceKill = true;
+      b2.hp = 0; b2.forceKill = true;
       // remembered, so the room never re-spawns it as a pet on the way back
       G.save.flags.killed = G.save.flags.killed || {};
       G.save.flags.killed[b2.kind] = 1;
-      b2.die();
-      if (typeof showItem === 'function') showItem(t('resolve_name'), t('resolve_desc'));
+      if (first) G.save.flags.resolve = 1;
+      const sp = first ? { name: t('resolve_name'), desc: t('resolve_desc') } : bossSpoil(b2.kind, 'R');
+      startFinisher(b2, sp);                     // she closes the distance herself
     }
   }
   if (G.state === 'OFFER') G.state = 'PLAY';
   G.offer = null;
   return u;
 }
+
+// ---------------------------------------------------------------------------
+// THE LAST BLOW IS NOT YOURS TO SWING.
+//
+// Choosing to end a guardian used to leave it standing there at zero, waiting
+// for you to walk over and press attack one more time — which turns a decision
+// into a chore and, worse, lets a fumbled input undercut the most deliberate
+// moment in the game. The choice IS the input. The game closes the distance and
+// lands the blow, and it lands cleanly every time.
+// ---------------------------------------------------------------------------
+const FIN_STEP = 0.36, FIN_HOLD = 0.9;
+function startFinisher(b, spoil) {
+  if (!b || typeof player === 'undefined' || !player) { if (b) b.die(); spoilLater(spoil); return; }
+  const side = (player.x + player.w / 2) < b.cx() ? -1 : 1;
+  G.finish = {
+    b, spoil, t: 0, hit: false, x0: player.x, y0: player.y,
+    tx: b.cx() + side * (b.w / 2 + 22) - player.w / 2,
+    ty: b.y + b.h - player.h, face: -side,
+  };
+  player.vx = 0; player.vy = 0; player.swing = null; player.atkBuf = 0;
+  if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 3);
+}
+function updateFinisher(dt) {
+  const f = G.finish; if (!f) return;
+  f.t += dt;
+  const b = f.b;
+  if (f.t < FIN_STEP) {
+    // the step in — eased, so it reads as a decision rather than a teleport
+    const k = f.t / FIN_STEP, e = k * k * (3 - 2 * k);
+    player.x = f.x0 + (f.tx - f.x0) * e;
+    player.y = f.y0 + (f.ty - f.y0) * e;
+    player.face = f.face;
+    if (chance(0.6)) addPart(player.x + player.w / 2, player.y + player.h - 2,
+      -f.face * rnd(40, 110), rnd(-40, -6), 0.3, '#8fa3b5', 2, 500);
+    return;
+  }
+  if (!f.hit) {
+    f.hit = true;
+    // the heavy end of the combo, swung by the game
+    player.face = f.face;
+    player.combo = 2; player.comboT = 0.9;
+    player.swingVis = { t: 0.3, t0: 0.3, ang: f.face > 0 ? 0 : Math.PI, combo: 2 };
+    if (typeof sfx === 'function') { sfx('swing'); sfx('boom'); }
+    G.hitStop = Math.max(G.hitStop || 0, 0.26);
+    G.flash = Math.max(G.flash || 0, 0.8);
+    if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 14);
+    if (typeof padRumble === 'function') padRumble(1, 0.9, 700);
+    if (typeof burst === 'function') burst(b.cx(), b.cy(), 34, '#ffffff', 380, 0.9, 160, 4, true);
+    if (!b.dead) b.die();
+    return;
+  }
+  if (f.t > FIN_STEP + FIN_HOLD) { G.finish = null; spoilLater(f.spoil); }
+}
 // the readout runs on the real clock, not on how fast the machine happens to draw
 function updateBrDelta(dt) {
   const d = G.brDelta; if (!d) return;
   d.t -= dt; if (d.t <= 0) G.brDelta = null;
 }
+// NO STRAY KEY DECIDES THIS. There is nothing left in the game that interrupts
+// you to ask a question, so the one that does gets to insist on a real answer:
+// every fork now decides whether a creature lives, and letting Esc resolve it
+// would end one by accident. Two doors, both reachable by key and by thumb —
+// refusing to auto-answer costs nothing and cannot strand anyone.
 function updateOffer(dt) {
-  const o = G.offer; if (!o) return;
+  if (!G.offer) return;
   if (inP('LEFT')) return brAnswer('L');
   if (inP('RIGHT')) return brAnswer('R');
-  if (o.kind !== 'firstboss' && (inP('UP') || inP('CAST') || inP('CLAW'))) return brAnswer('X');
-  // THE WAY OUT. A rest fork has no timer, so before this there was no input at
-  // all that could close it — on a phone that was a dead end you could read but
-  // never answer. Backing out is now always possible and is recorded as
-  // severance, which is the same rule the kill ribbon already used: declining to
-  // decide IS a decision, and it is never a trap.
-  //
-  // The one exception is the lion. That fork decides whether a creature lives,
-  // and it is the choice the whole run is weighed against — letting a stray Esc
-  // resolve it as FINISH would kill him by accident. It has two doors, both
-  // reachable by key and by thumb, so refusing to auto-answer costs nothing.
-  if (o.kind !== 'firstboss' && (inP('BACK') || inP('PAUSE') || inP('OK') || inP('JUMP'))) {
-    return brAnswer('R');
-  }
-  if (o.kind === 'kill') {
-    o.t -= dt;
-    if (o.t <= 0) { brAnswer('R'); }      // walking away is a choice
-  }
 }
 // ---------------------------------------------------------------------------
 // ONE geometry, shared by the drawing and the hit-test. They were separate, and
 // the result was an offer that could be READ on a phone but never ANSWERED:
 // the touch layer had no case for this state, so a tap sent OK, which nothing
-// here was listening for — and a rest fork has no timeout, so the player was
-// simply stuck looking at it. Anything drawn as a button has to be pressable by
+// here was listening for — and a fork has no timeout, so the player was simply
+// stuck looking at it. Anything drawn as a button has to be pressable by
 // whatever the player actually has in their hands.
+//
+// Two doors, the same two every time. A guardian is spared or it is ended;
+// there is no third thing to do with something that has knelt in front of you.
 // ---------------------------------------------------------------------------
-function offerOpts(o) {
-  const two = o.kind === 'firstboss';
-  return two ? [
+function offerOpts() {
+  return [
     { p: 'L', key: '\u25c0', col: '#7de8a0', lab: t('fb_tame'), d: 'fb_tame_d' },
     { p: 'R', key: '\u25b6', col: '#ffd76a', lab: t('fb_beat'), d: 'fb_beat_d' },
-  ] : [
-    { p: 'L', key: '\u25c0', col: '#7de8a0', lab: t('br_mercy'), d: 'br_L_d' },
-    { p: 'X', key: '\u25b2', col: '#ff5a6a', lab: t('br_red'), d: 'br_X_d' },
-    { p: 'R', key: '\u25b6', col: '#ffd76a', lab: t('br_sever'), d: 'br_R_d' },
   ];
 }
 function offerBoxes() {
-  const o = G.offer; if (!o) return [];
-  const full = o.kind !== 'kill';
-  const opts = offerOpts(o);
-  const two = o.kind === 'firstboss';
-  const w = full ? (two ? 250 : 210) : 128, h = full ? 66 : 34, gap = full ? 18 : 8;
-  // the ribbon follows the corpse, but the whole ROW has to stay on screen —
-  // clamping the centre alone pushed the left option off the left edge, where it
-  // could be neither read nor tapped
-  const half = (opts.length - 1) / 2 * (w + gap) + w / 2 + 12;
-  const bx = full ? 480 : clamp(o.x - cam.x, half, 960 - half);
-  const by = full ? 348 : clamp(o.y - cam.y, h / 2 + 100, 540 - h / 2 - 96);
+  if (!G.offer) return [];
+  const opts = offerOpts();
+  const w = 250, h = 66, gap = 18;
+  const bx = 480, by = 348;
   return opts.map((op, i) => ({
     op, w, h,
     x: bx + (i - (opts.length - 1) / 2) * (w + gap), y: by,
@@ -414,23 +497,19 @@ function offerTap(sx, sy) {
   }
   return false;
 }
-// the ribbon, drawn in world space over the thing that just died
+// the fork, over the frozen room, with the kneeling guardian still visible
 function drawOffer() {
   const o = G.offer; if (!o) return;
-  const full = o.kind !== 'kill';
-  const k = full ? 1 : clamp(o.t / o.t0, 0, 1);
   c.save();
-  if (full) {
-    c.fillStyle = 'rgba(4,7,12,0.82)'; c.fillRect(0, 0, 960, 540);
-    ftxt(t(o.kind === 'firstboss' ? 'fb_title' : o.kind === 'bench' ? 'br_rest' : 'br_boss'), 480, 116, 22, '#eef3fa', 'center', '#37ffd0');
-    ftxt(universe().id + '  ·  ' + t('br_depth').replace('%s', universe().depth), 480, 146, 13, '#7d93a8', 'center');
-  }
+  c.fillStyle = 'rgba(4,7,12,0.82)'; c.fillRect(0, 0, 960, 540);
+  ftxt(t(o.kind === 'firstboss' ? 'fb_title' : 'br_boss'), 480, 116, 22, '#eef3fa', 'center', '#37ffd0');
+  ftxt(universe().id + '  ·  ' + t('br_depth').replace('%s', universe().depth), 480, 146, 13, '#7d93a8', 'center');
   // THE PREMISE, SAID ONCE, IN THE GAME. The very first time she is asked, the
   // game states the rule outright rather than hoping the player infers it: the
   // story is fixed, the world is not, and what you do first echoes loudest.
   // Every readout after this is evidence for that sentence.
   if (braid().led.length === 0) {
-    const bw = 660, bh = 90, bx0 = 480 - bw / 2, by0 = full ? 176 : 58;
+    const bw = 660, bh = 90, bx0 = 480 - bw / 2, by0 = 176;
     c.fillStyle = 'rgba(6,11,18,0.9)'; rr(c, bx0, by0, bw, bh, 10); c.fill();
     c.strokeStyle = 'rgba(120,220,255,0.45)'; c.lineWidth = 1.5;
     rr(c, bx0, by0, bw, bh, 10); c.stroke();
@@ -438,38 +517,19 @@ function drawOffer() {
     ftxt(t('br_prime2'), 480, by0 + 47, 12.5, '#9fd8e8', 'center');
     ftxt(t('br_prime3'), 480, by0 + 68, 12.5, '#ffd76a', 'center');
   }
-  const gap = full ? 18 : 8;
-  const boxes = offerBoxes();
-  const w = boxes.length ? boxes[0].w : 210, h = boxes.length ? boxes[0].h : 66;
-  // one source of truth: the row is centred on the middle box the hit-test uses
-  const bx = boxes.length ? boxes[(boxes.length - 1) / 2 | 0].x + (boxes.length % 2 ? 0 : (w + gap) / 2) : 480;
-  const by = boxes.length ? boxes[0].y : 348;
-  boxes.forEach((bxo) => {
-    const op = bxo.op, ox = bxo.x, oy = bxo.y;
-    c.globalAlpha = full ? 1 : 0.35 + k * 0.6;
+  for (const b of offerBoxes()) {
+    const op = b.op, ox = b.x, oy = b.y, w = b.w, h = b.h;
     c.fillStyle = 'rgba(8,14,22,0.9)';
     rr(c, ox - w / 2, oy - h / 2, w, h, 8); c.fill();
-    c.strokeStyle = op.col; c.lineWidth = full ? 2 : 1.4;
+    c.strokeStyle = op.col; c.lineWidth = 2;
     rr(c, ox - w / 2, oy - h / 2, w, h, 8); c.stroke();
-    ftxt(op.key + '  ' + op.lab, ox, oy - (full ? 8 : 0), full ? 17 : 12, op.col, 'center');
-    if (full) ftxt(t(op.d), ox, oy + 16, 11, '#8aa2b5', 'center');
-    c.globalAlpha = 1;
-  });
-  // SAY HOW TO ANSWER. A full-screen fork has no timer and stops the world, so
-  // if the way in is not obvious it reads as a trap rather than a choice. The
-  // line is phrased for whatever is actually in the player's hands.
-  if (full) {
-    const touchy = typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled;
-    const key = o.kind === 'firstboss'
-      ? (touchy ? 'br_pick_ft' : 'br_pick_fk')
-      : (touchy ? 'br_pick_t' : 'br_pick_k');
-    ftxt(t(key), 480, 424, 12.5, '#7d93a8', 'center');
+    ftxt(op.key + '  ' + op.lab, ox, oy - 8, 17, op.col, 'center');
+    ftxt(t(op.d), ox, oy + 16, 11, '#8aa2b5', 'center');
   }
-  // the clock on a kill ribbon, so lapsing never feels like a bug
-  if (!full) {
-    c.fillStyle = 'rgba(255,255,255,0.5)';
-    c.fillRect(bx - (w * 1.5 + gap), by + h / 2 + 5, (w * 3 + gap * 2) * k, 2);
-  }
+  // SAY HOW TO ANSWER. The fork has no timer and stops the world, so if the way
+  // in is not obvious it reads as a trap rather than a choice.
+  const touchy = typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled;
+  ftxt(t(touchy ? 'br_pick_ft' : 'br_pick_fk'), 480, 424, 12.5, '#7d93a8', 'center');
   c.restore();
 }
 
@@ -538,7 +598,7 @@ function drawBraidView() {
   ftxt(t('br_depth').replace('%s', u.depth) + '  ·  ' + t('br_worlds').replace('%s', Object.keys(b.seen).length),
     149, 104, 11, '#7d93a8', 'center');
   const bars = [
-    [t('br_mercy'), u.mercy, '#7de8a0'], [t('br_sever'), u.sever, '#ffd76a'], [t('br_red'), u.red, '#ff5a6a'],
+    [t('br_mercy'), u.mercy, '#7de8a0'], [t('br_sever'), u.sever, '#ffd76a'],
   ];
   bars.forEach((bb, i) => {
     const y = 126 + i * 20;

@@ -2263,9 +2263,9 @@ class Enemy {
       }
     }
     G.wrecks.push(new Wreck(this, kx || 0, ky || 0));
-    // THE BRAID: every machine that dies asks what you are. The ribbon does not
-    // stop play — ignore it and severance is recorded for you.
-    if (typeof brOffer === 'function' && !this.mini) brOffer('kill', cx, cy - 26);
+    // THE BRAID: every machine that dies leaves a mark on the world, and none of
+    // them stop the game to discuss it. Only guardians are asked about.
+    if (typeof brKill === 'function' && !this.mini) brKill(G.roomId);
     // CHOIR: in a world where they hear each other die, the dead call the living
     if (typeof brHas === 'function' && brHas('choir') && chance(0.35)) {
       const e2 = new Enemy(chance(0.5) ? 'crawler' : 'flier', cx + rnd(-80, 80), this.y - 40);
@@ -2862,24 +2862,6 @@ class Boss {
       }
       return;
     }
-    // ---- THE FIRST CHOICE -------------------------------------------------
-    // NULLFANG is the first guardian and the first fork. Brought low, the fight
-    // stops and asks the only question the whole game is built on: do you finish
-    // this, or do you free it? Both hand over the DASH — the route out of the
-    // Meadows must never depend on the answer — but the SECOND gift differs in
-    // kind, so neither answer is the correct one.
-    //
-    // It is also, by the Braid's own arithmetic, the single most consequential
-    // press in a run: as the FIRST entry on the ledger it carries roughly nine
-    // times the weight of the choice you will make an hour from now.
-    if (this.kind === 'glitch' && !this.dead && !this.forkAsked
-        && this.hp <= this.hpMax * 0.22 && this.st !== 'dorm' && this.st !== 'intro'
-        && !(typeof isHero === 'function' && isHero())) {
-      this.forkAsked = true;
-      this.vx = 0; this.stagT = 1.2;
-      if (typeof brOffer === 'function') { brOffer('firstboss'); G.forkBoss = this; }
-      return;
-    }
     if (this.stagT > 0) { this.stagT -= dt; return; }   // Song / weakness stagger
     if (this.st === 'dorm') {
       if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
@@ -2928,6 +2910,29 @@ class Boss {
       if (this.t <= 0) { this.st = 'idle'; this.t = 0.8; this.vy = 0; }
       return;
     }
+    // ---- THE FORK ---------------------------------------------------------
+    // Every guardian asks, and it asks on the killing blow. The strike that
+    // would end it instead puts it on its knees, and the fight stops on the
+    // only question the game is built on: do you finish this, or do you free
+    // it? Nothing smaller than a guardian is ever allowed to ask — a question
+    // repeated over every crawler is what made this one cheap.
+    //
+    // For NULLFANG it is also, by the Braid's own arithmetic, the single most
+    // consequential press in a run: as the FIRST entry on the ledger it carries
+    // roughly nine times the weight of the choice you will make an hour later.
+    if (this.hp <= 0 && !this.forkAsked && this.kind !== 'mother'
+        && typeof brOffer === 'function' && player && !player.dead
+        && !(typeof isHero === 'function' && isHero())) {
+      this.forkAsked = true;
+      this.hp = 0; this.vx = 0; this.vy = 0;
+      brOffer(this.kind === 'glitch' ? 'firstboss' : 'boss');
+      G.forkBoss = this;
+      return;
+    }
+    // A guardian at zero does not fall on its own any more. It is either kneeling
+    // with the question still open, or waiting for the blow the game is about to
+    // swing on the player's behalf — and dying early would eat both moments.
+    if (this.hp <= 0 && (G.forkBoss === this || (G.finish && G.finish.b === this))) return;
     if (this.hp <= 0) { this.die(); return; }
     if (this.phase === 1 && this.hp < this.hpMax / 2) {
       this.phase = 2; this.t = 1;
