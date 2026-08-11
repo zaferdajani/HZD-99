@@ -237,6 +237,9 @@ en: {
   t3: ['COLD STORAGE NOTE: the Prowler stole the ninth prototype crest and fled toward the crystal seams.'],
   door_locked: 'Sealed. A greater power holds it shut.',
   hint_secret: 'This wall sounds hollow…',
+  // the one-time lesson: taught on the first loose rock, never shown again
+  break_down: 'Loose rock — jump, hold DOWN, and strike',
+  break_hit: 'Loose rock — strike it',
 },
 ar: {
   title: 'CLAWBYTE',
@@ -462,6 +465,8 @@ ar: {
   t3: ['ملاحظة التخزين البارد: سرق الجوّالُ الوسامَ التجريبي التاسع وفرّ نحو عروق البلّور.'],
   door_locked: 'مختوم. قوة عظمى تُبقيه مغلقًا.',
   hint_secret: 'هذا الجدار يبدو أجوف…',
+  break_down: 'صخرة مُتخلخلة — اقفز واضغط للأسفل ثم اضرب',
+  break_hit: 'صخرة مُتخلخلة — اضربها',
 },
 tr: {
   title: 'CLAWBYTE', subtitle: 'Makine Derinliklerinde bir robot-kedi metroidvania', press: 'Enter’a bas',

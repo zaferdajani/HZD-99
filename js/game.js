@@ -65,6 +65,9 @@ const G = {
   toast(text) { this.toasts.push({ text, t: 3 }); },
   breakTile(tx, ty) {
     this.save.broken[this.roomId + ':' + tx + ',' + ty] = 1;
+    // the lesson is learned the first time it works. From here the seam stops
+    // being announced and every remaining one is on the player to spot.
+    if (!this.save.flags.taughtBreak) { this.save.flags.taughtBreak = 1; persist(); }
     tileDirty = true;
     sfx('break'); cam.shake = Math.max(cam.shake, 4);
     burst(tx * TILE + 16, ty * TILE + 16, 14, PAL[this.roomDef.zone].solid, 220, 0.6, 600, 4);
@@ -1356,6 +1359,136 @@ function drawLavaFalls(px, py) {
 // tile-aligned sheet once, then sampled by WORLD position, so seams never
 // show and the same wall never repeats where the eye can catch it.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// THE ROCK. Every solid tile in the game — floor, wall, ceiling — is cut from
+// one baked slab per kingdom. Before this, only three zones had any surface at
+// all: the other three (including the two you start in) fell through to a flat
+// colour with a little noise on it, which is why the ground read as a painted
+// rectangle you happened to be standing on.
+//
+// It is built the way stone actually looks: broken into masses that catch the
+// light on their upper faces and fall into shadow underneath, with aggregate,
+// fissures and pitting over the top. Baked once per zone, tiled on both axes.
+//
+// It also gives the hidden blocks somewhere to hide. A secret has to be made of
+// the same material as the wall around it or it is not a secret — so the
+// breakables below are cut from this same slab, and carry only a hairline tell.
+// ---------------------------------------------------------------------------
+const ROCK_TW = 256, ROCK_TH = 128;     // both multiples of TILE
+const rockCache = {};
+const rkHx = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+function rkMix(a, b, t2) {
+  const A = rkHx(a), B = rkHx(b);
+  const p = (i) => Math.round(A[i] + (B[i] - A[i]) * t2).toString(16).padStart(2, '0');
+  return '#' + p(0) + p(1) + p(2);
+}
+function rockTex(zone) {
+  if (rockCache[zone]) return rockCache[zone];
+  const P = PAL[zone]; if (!P) return null;
+  const cv = document.createElement('canvas');
+  cv.width = ROCK_TW; cv.height = ROCK_TH;
+  const x = cv.getContext('2d');
+  let s = zone.charCodeAt(0) * 7919 + 13;
+  const R = () => ((s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  // wrap on BOTH axes: walls repeat vertically, and a mass clipped at the top
+  // edge has to come back round at the bottom or the repeat shows up as a hard
+  // line across every wall in the game
+  const wrap = (fn) => {
+    for (const oy of [-ROCK_TH, 0, ROCK_TH]) for (const ox of [-ROCK_TW, 0, ROCK_TW]) {
+      x.save(); x.translate(ox, oy); fn(); x.restore();
+    }
+  };
+  const deep = rkMix(P.dark, '#000000', 0.55);      // the shadow it sits in
+  const lit = rkMix(P.solid, P.edge, 0.22);         // a face turned to the light
+  x.fillStyle = deep; x.fillRect(0, 0, ROCK_TW, ROCK_TH);
+
+  // hewn masses, from a jittered grid so the joints never line up into brick
+  const COLS = 6, ROWS = 4, CWx = ROCK_TW / COLS, CHy = ROCK_TH / ROWS;
+  const blocks = [];
+  for (let r = 0; r < ROWS; r++) for (let ci = 0; ci < COLS; ci++) {
+    const bx = (ci + 0.5) * CWx + (R() - 0.5) * CWx * 0.5;
+    const by = (r + 0.5) * CHy + (R() - 0.5) * CHy * 0.45;
+    const n = 6 + Math.floor(R() * 3), pts = [];
+    for (let a = 0; a < n; a++) {
+      const ang = (a / n) * Math.PI * 2 + R() * 0.35, rad = 0.56 + R() * 0.5;
+      pts.push([bx + Math.cos(ang) * CWx * rad * 1.15, by + Math.sin(ang) * CHy * rad * 1.2]);
+    }
+    blocks.push({ pts, cy: by, tone: R() });
+  }
+  for (const b of blocks) {
+    const top = Math.min(...b.pts.map(p => p[1])), bot = Math.max(...b.pts.map(p => p[1]));
+    wrap(() => {
+      x.beginPath();
+      b.pts.forEach((p, j) => j ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]));
+      x.closePath();
+      const g = x.createLinearGradient(0, top, 0, bot);
+      const base = b.tone > 0.66 ? P.solid : b.tone > 0.33 ? P.mid : P.dark;
+      g.addColorStop(0, rkMix(base, lit, 0.5));
+      g.addColorStop(0.45, base);
+      g.addColorStop(1, rkMix(base, deep, 0.72));
+      x.fillStyle = g; x.fill();
+      x.strokeStyle = deep; x.globalAlpha = 0.6; x.lineWidth = 1.3; x.stroke();
+      x.globalAlpha = 1;
+    });
+  }
+  for (const b of blocks) wrap(() => {          // the lit lip along each upper face
+    x.strokeStyle = rkMix(P.edge, '#ffffff', 0.15); x.globalAlpha = 0.16; x.lineWidth = 1.1;
+    x.beginPath();
+    b.pts.filter(p => p[1] < b.cy).forEach((p, j) => j ? x.lineTo(p[0], p[1] + 1) : x.moveTo(p[0], p[1] + 1));
+    x.stroke(); x.globalAlpha = 1;
+  });
+  for (let i = 0; i < 520; i++) {               // aggregate
+    const gx = R() * ROCK_TW, gy = R() * ROCK_TH, gr = 0.9 + R() * 3.1, k = R();
+    x.fillStyle = k > 0.86 ? rkMix(P.edge, '#ffffff', 0.3) : k > 0.58 ? rkMix(P.mid, lit, 0.4) : deep;
+    x.globalAlpha = k > 0.86 ? 0.16 + R() * 0.2 : 0.2 + R() * 0.38;
+    wrap(() => {
+      x.beginPath();
+      const n = 3 + (i % 3);
+      for (let a = 0; a < n; a++) {
+        const ang = (a / n) * Math.PI * 2 + i, rad = gr * (0.55 + ((i * 7 + a * 13) % 10) / 13);
+        const px = gx + Math.cos(ang) * rad, py = gy + Math.sin(ang) * rad * 0.8;
+        a ? x.lineTo(px, py) : x.moveTo(px, py);
+      }
+      x.closePath(); x.fill();
+    });
+  }
+  x.globalAlpha = 1;
+  for (let i = 0; i < 7; i++) {                 // fissures
+    const pts = [[R() * ROCK_TW, R() * ROCK_TH]];
+    let ang = (R() - 0.5) + (R() > 0.5 ? 0 : Math.PI);
+    for (let k = 0; k < 5 + R() * 4; k++) {
+      ang += (R() - 0.5) * 1.25;
+      const L = 6 + R() * 17, p0 = pts[pts.length - 1];
+      pts.push([p0[0] + Math.cos(ang) * L, p0[1] + Math.sin(ang) * L * 0.6]);
+    }
+    wrap(() => {
+      x.strokeStyle = deep; x.globalAlpha = 0.8; x.lineWidth = 1.1 + R() * 1.7;
+      x.beginPath(); pts.forEach((p, j) => j ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1])); x.stroke();
+      x.strokeStyle = rkMix(P.mid, lit, 0.5); x.globalAlpha = 0.24; x.lineWidth = 0.9;
+      x.beginPath(); pts.forEach((p, j) => j ? x.lineTo(p[0] + 1, p[1] - 1.3) : x.moveTo(p[0] + 1, p[1] - 1.3)); x.stroke();
+    });
+  }
+  x.globalAlpha = 1;
+  for (let i = 0; i < 110; i++) {               // pitting
+    const px = R() * ROCK_TW, py = R() * ROCK_TH, pr = 1.5 + R() * 4.6;
+    wrap(() => {
+      x.fillStyle = deep; x.globalAlpha = 0.26 + R() * 0.26;
+      x.beginPath(); x.ellipse(px, py, pr, pr * 0.74, R() * 3, 0, 7); x.fill();
+      x.fillStyle = rkMix(P.mid, lit, 0.55); x.globalAlpha = 0.2;
+      x.beginPath(); x.ellipse(px, py - pr * 0.55, pr * 0.72, pr * 0.32, 0, 0, 7); x.fill();
+    });
+  }
+  // Ground should sit UNDER the cast, not compete with it. The kingdom palettes
+  // are saturated by design — the Cache is hot magenta, the Foundry is orange —
+  // and at full strength the floor read as a bright band rather than as stone.
+  // One quiet pass down, so the colour still says which kingdom you are in
+  // while the value says "this is rock, the character is what matters".
+  x.globalAlpha = 0.14; x.fillStyle = '#000'; x.fillRect(0, 0, ROCK_TW, ROCK_TH);
+  x.globalAlpha = 1;
+  rockCache[zone] = cv;
+  return cv;
+}
+
 const STRATA = { C: 'strataLava', D: 'strataIceB', E: 'strataRubble' };
 const STRATA_TW = 512, STRATA_TH = 160;         // both multiples of TILE
 const strataCache = {};
@@ -1958,15 +2091,25 @@ function drawTiles(P) {
     if (ch === '#') {
       const up = tileAt(tx, ty - 1);
       const exposed = up !== '#' && up !== 'B';
+      const rock = (typeof isHero === 'function' && isHero()) ? null : rockTex(G.roomDef.zone);
       const tex = strataTex(G.roomDef.zone);
-      if (tex && !(typeof isHero === 'function' && isHero())) {
-        // the painted rock itself, sampled where this tile sits in the world
-        c.drawImage(tex, X % STRATA_TW, Y % STRATA_TH, TILE, TILE, X, Y, TILE, TILE);
-        // seat it into the zone light so it belongs to this kingdom
-        c.globalAlpha = 0.34; c.fillStyle = P.solid; c.fillRect(X, Y, TILE, TILE);
-        c.globalAlpha = 0.22 + hash2(tx * 3, ty * 7) * 0.16;
-        c.fillStyle = P.dark; c.fillRect(X, Y, TILE, TILE);
-        c.globalAlpha = 1;
+      if (rock) {
+        // the material itself, sampled where this tile sits in the world so
+        // neighbouring tiles are continuous rock rather than repeated stamps
+        c.drawImage(rock, X % ROCK_TW, Y % ROCK_TH, TILE, TILE, X, Y, TILE, TILE);
+        // the painted kingdom plate, where one exists, laid over the rock as
+        // colour and grime rather than as the surface itself
+        if (tex) {
+          c.globalAlpha = 0.3;
+          c.drawImage(tex, X % STRATA_TW, Y % STRATA_TH, TILE, TILE, X, Y, TILE, TILE);
+          c.globalAlpha = 1;
+        }
+        // depth: tiles buried under other tiles sit further from the light
+        if (!exposed) {
+          c.globalAlpha = 0.1 + hash2(tx * 3, ty * 7) * 0.13;
+          c.fillStyle = P.dark; c.fillRect(X, Y, TILE, TILE);
+          c.globalAlpha = 1;
+        }
       } else {
       // body with per-tile tonal variation
       c.fillStyle = P.solid; c.fillRect(X, Y, TILE, TILE);
@@ -1975,20 +2118,54 @@ function drawTiles(P) {
       c.globalAlpha = 1;
       }
       if (!exposed) {
-        // interior: plate seams, rivets, polychrome mottling
-        if (hash2(tx, ty) > 0.72) { c.fillStyle = P.dark; c.fillRect(X + 8, Y + 10, 5, 5); c.fillRect(X + 20, Y + 20, 4, 4); }
-        if (hash2(tx * 7, ty) > 0.6) { c.fillStyle = 'rgba(0,0,0,0.14)'; c.fillRect(X, Y + 15, TILE, 2); }
-        for (let k = 0; k < 2; k++) {
-          const mv = hash2(tx * 11 + k * 5, ty * 13);
-          if (mv > 0.45) {
-            c.fillStyle = k ? P.acc2 : P.mid;
-            c.globalAlpha = 0.05 + mv * 0.08;
-            rr(c, X + mv * 14, Y + hash2(ty, k) * 18, 13, 9, 4); c.fill();
+        // interior: plate seams, rivets, polychrome mottling. The rock already
+        // carries its own surface, so this only dresses the flat fallback.
+        if (!rock) {
+          if (hash2(tx, ty) > 0.72) { c.fillStyle = P.dark; c.fillRect(X + 8, Y + 10, 5, 5); c.fillRect(X + 20, Y + 20, 4, 4); }
+          if (hash2(tx * 7, ty) > 0.6) { c.fillStyle = 'rgba(0,0,0,0.14)'; c.fillRect(X, Y + 15, TILE, 2); }
+          for (let k = 0; k < 2; k++) {
+            const mv = hash2(tx * 11 + k * 5, ty * 13);
+            if (mv > 0.45) {
+              c.fillStyle = k ? P.acc2 : P.mid;
+              c.globalAlpha = 0.05 + mv * 0.08;
+              rr(c, X + mv * 14, Y + hash2(ty, k) * 18, 13, 9, 4); c.fill();
+              c.globalAlpha = 1;
+            }
+          }
+        }
+      } else if (rock) {
+        // THE WALKING SURFACE. A floor drawn as a straight bright bar across
+        // the top of every tile is what makes a level read as a ruled line.
+        // This cuts a broken skyline instead: each tile gets its own chipped
+        // profile, keyed off its position so it is identical every visit, and
+        // the ground under it is bitten away to match. The deviation stays
+        // inside a few pixels — the collision is still a square, and the art
+        // is never allowed to lie about where the floor is.
+        const px = [];
+        for (let k = 0; k <= 4; k++) {
+          const hh = hash2(tx * 5 + k * 17, ty * 3);
+          px.push([X + (TILE / 4) * k, Y + 1 + hh * 4.5 - (k === 2 ? 1.5 : 0)]);
+        }
+        c.beginPath();
+        c.moveTo(X, Y + 12);
+        px.forEach(p => c.lineTo(p[0], p[1]));
+        c.lineTo(X + TILE, Y + 12); c.closePath();
+        c.save(); c.clip();
+        c.fillStyle = P.edge; c.globalAlpha = 0.85; c.fillRect(X, Y, TILE, 4);
+        c.globalAlpha = 0.3; c.fillRect(X, Y + 3, TILE, 4);
+        c.globalAlpha = 0.12; c.fillRect(X, Y + 6, TILE, 6);
+        c.globalAlpha = 1; c.restore();
+        // loose chips sitting on the lip, so the edge has thickness
+        for (let k = 0; k < 3; k++) {
+          const cb = hash2(tx * 13 + k * 7, ty + k);
+          if (cb > 0.52) {
+            c.fillStyle = P.edge; c.globalAlpha = 0.5 + cb * 0.3;
+            rr(c, X + 1 + cb * 22, Y - 1 + hash2(tx, k) * 2, 3 + cb * 5, 3, 1.5); c.fill();
             c.globalAlpha = 1;
           }
         }
       } else {
-        // natural walking surface: irregular lit lip, nubs, zone flora
+        // natural walking surface: irregular lit lip, nubs
         c.fillStyle = P.edge; c.globalAlpha = 0.9; c.fillRect(X, Y, TILE, 3);
         c.globalAlpha = 0.35; c.fillRect(X, Y + 3, TILE, 3);
         c.globalAlpha = 0.14; c.fillRect(X, Y + 6, TILE, 5);
@@ -2003,6 +2180,10 @@ function drawTiles(P) {
             c.globalAlpha = 1;
           }
         }
+      }
+      // what grows on the walking surface belongs to the kingdom, not to the
+      // renderer that drew the lip — it runs for the rock and the fallback both
+      if (exposed) {
         if (G.roomDef.zone === 'D') {
           // snow cap
           c.fillStyle = '#eefcff'; c.globalAlpha = 0.85;
@@ -2051,12 +2232,92 @@ function drawTiles(P) {
       }
       c.shadowBlur = 0;
     } else if (ch === 'B') {
-      c.fillStyle = P.solid; c.fillRect(X, Y, TILE, TILE);
-      const pulse = 0.25 + Math.sin(performance.now() / 400 + tx) * 0.1;
-      c.strokeStyle = P.dark; c.lineWidth = 2;
-      c.beginPath(); c.moveTo(X + 6, Y + 4); c.lineTo(X + 14, Y + 16); c.lineTo(X + 8, Y + 28);
-      c.moveTo(X + 22, Y + 6); c.lineTo(X + 18, Y + 18); c.lineTo(X + 26, Y + 27); c.stroke();
-      c.fillStyle = P.glow; c.globalAlpha = pulse; c.fillRect(X + 13, Y + 14, 6, 5); c.globalAlpha = 1;
+      // ---------------------------------------------------------------------
+      // THE LOOSE ROCK. A secret has to be made of the same stuff as the wall
+      // around it, or it is not a secret — it is a button. So this is cut from
+      // the same slab as the wall, and betrays itself only twice: its grain does
+      // not line up with the rock around it, and a hairline FRACTURE runs the
+      // perimeter of the mass, broken the way a real seam is, with a little
+      // spill of grit where it has been quietly settling.
+      //
+      // That tell is the same everywhere in the game. Learn it once on the rock
+      // that opens the floor in Zone A, and from then on you read every wall in
+      // the factory differently — which is the whole point of teaching it.
+      // ---------------------------------------------------------------------
+      const rockB = (typeof isHero === 'function' && isHero()) ? null : rockTex(G.roomDef.zone);
+      if (rockB) {
+        // Same slab, deliberately sampled at a different offset. The joints in
+        // the surrounding wall run continuously; the joints inside a loose mass
+        // do not line up with them. That mismatch is the real tell — it is a
+        // property of the stone rather than a mark drawn on it, it survives
+        // every palette in the game, and once you have caught it once you
+        // cannot stop seeing it. The fracture below just confirms what the
+        // grain already said.
+        const OX = 101, OY = 53;
+        c.drawImage(rockB, (X + OX) % ROCK_TW, (Y + OY) % ROCK_TH, TILE, TILE, X, Y, TILE, TILE);
+        const texB = strataTex(G.roomDef.zone);
+        if (texB) {
+          c.globalAlpha = 0.3;
+          c.drawImage(texB, X % STRATA_TW, Y % STRATA_TH, TILE, TILE, X, Y, TILE, TILE);
+          c.globalAlpha = 1;
+        }
+      } else {
+        c.fillStyle = P.solid; c.fillRect(X, Y, TILE, TILE);
+        c.globalAlpha = 0.16; c.fillStyle = P.dark; c.fillRect(X, Y, TILE, TILE); c.globalAlpha = 1;
+      }
+      // until you have broken your first one, the tell is drawn plainly enough
+      // to notice. After that it drops back to a whisper and stays there.
+      const taught = !!(G.save && G.save.flags && G.save.flags.taughtBreak);
+      const dk = taught ? 0.72 : 0.95, lk = taught ? 0.2 : 0.34;
+      const IN = 3;
+      // The fracture traces the PERIMETER of the whole loose mass, never the
+      // individual tiles — a boulder has one crack around it, not a grid of
+      // boxes. Any edge facing another breakable is skipped, and edges that
+      // meet one run out to the full tile bound so the line stays unbroken
+      // across the cluster.
+      const nbB = (dx, dy) => tileAt(tx + dx, ty + dy) === 'B';
+      const l = nbB(-1, 0), r = nbB(1, 0), u = nbB(0, -1), d = nbB(0, 1);
+      const x0 = l ? X : X + IN, x1 = r ? X + TILE : X + TILE - IN;
+      const y0 = u ? Y : Y + IN, y1 = d ? Y + TILE : Y + TILE - IN;
+      const edges = [];
+      if (!u) edges.push([x0, Y + IN, x1, Y + IN, 0]);
+      if (!d) edges.push([x0, Y + TILE - IN, x1, Y + TILE - IN, 1]);
+      if (!l) edges.push([X + IN, y0, X + IN, y1, 2]);
+      if (!r) edges.push([X + TILE - IN, y0, X + TILE - IN, y1, 3]);
+      for (const [ax, ay, bx, by, si] of edges) {
+        const dx2 = bx - ax, dy2 = by - ay, len = Math.hypot(dx2, dy2) || 1;
+        const nx = -dy2 / len, ny = dx2 / len;      // edge normal, for the wander
+        const N = 5;
+        // one segment of the run is missing: stone never parts cleanly all round
+        const skip = 1 + Math.floor(hash2(tx * 3 + si, ty * 5) * (N - 2));
+        for (let k = 0; k < N; k++) {
+          if (k === skip) continue;
+          const t0 = k / N, t1b = (k + 1) / N;
+          // the wander has to be worth several pixels or a crack spanning three
+          // tiles comes out as a ruled rectangle
+          const j0 = (hash2(tx * 7 + si * 13 + k, ty * 11) - 0.5) * 5;
+          const j1 = (hash2(tx * 7 + si * 13 + k + 1, ty * 11) - 0.5) * 5;
+          const px0 = ax + dx2 * t0 + nx * j0, py0 = ay + dy2 * t0 + ny * j0;
+          const px1 = ax + dx2 * t1b + nx * j1, py1 = ay + dy2 * t1b + ny * j1;
+          // the gap itself — dark, because you are seeing past the stone
+          c.strokeStyle = '#000'; c.globalAlpha = dk; c.lineWidth = taught ? 1.4 : 2;
+          c.beginPath(); c.moveTo(px0, py0); c.lineTo(px1, py1); c.stroke();
+          // and the lip the light catches on the near side of it, which is what
+          // actually makes a crack read as a crack rather than a drawn line
+          c.strokeStyle = P.edge; c.globalAlpha = lk; c.lineWidth = taught ? 0.8 : 1.2;
+          c.beginPath(); c.moveTo(px0 + 0.9, py0 - 1.1); c.lineTo(px1 + 0.9, py1 - 1.1); c.stroke();
+        }
+      }
+      c.globalAlpha = 1;
+      // grit trickled out of the seam — only along the bottom of the mass, and
+      // only where there is open air under it to have fallen through
+      if (!d) for (let k = 0; k < 4; k++) {
+        const gv = hash2(tx * 17 + k, ty * 5);
+        if (gv < 0.35) continue;
+        c.fillStyle = P.edge; c.globalAlpha = (taught ? 0.13 : 0.24) * (0.5 + gv * 0.5);
+        c.fillRect(X + 5 + gv * 21, Y + TILE - IN + 1.5 + hash2(k, tx) * 2, 1.3 + gv, 1.1);
+      }
+      c.globalAlpha = 1;
     }
   }
   drawPlatformRuns();
@@ -2342,6 +2603,44 @@ function drawStatics(P) {
     ftxt(label, s.x + s.w / 2, s.y - 18, 13, '#eef3fa', 'center', 'rgba(120,220,255,0.8)');
   }
 }
+// ---------------------------------------------------------------------------
+// TEACHING THE TELL — once, and then never again. The first loose rock a player
+// stands next to says out loud what to do about it. The moment one is broken,
+// anywhere, this stops firing for the rest of the save: from then on the seam
+// itself is the only thing that tells you, which is what makes the rest of the
+// factory worth looking at.
+// ---------------------------------------------------------------------------
+function drawBreakHint() {
+  if (!player || player.dead || !G.grid) return;
+  if (G.save && G.save.flags && G.save.flags.taughtBreak) return;
+  const pcx = player.x + player.w / 2, pcy = player.y + player.h / 2;
+  const t0 = Math.floor(pcx / TILE), t1 = Math.floor(pcy / TILE);
+  let best = null, bd = 1e9;
+  for (let ty = t1 - 3; ty <= t1 + 3; ty++) for (let tx = t0 - 4; tx <= t0 + 4; tx++) {
+    if (tileAt(tx, ty) !== 'B') continue;
+    const d = Math.hypot(tx * TILE + 16 - pcx, ty * TILE + 16 - pcy);
+    if (d < bd) { bd = d; best = { tx, ty }; }
+  }
+  if (!best || bd > 132) return;
+  // find the top of this block so the prompt sits above the whole cluster
+  let top = best.ty;
+  while (tileAt(best.tx, top - 1) === 'B') top--;
+  // a block at or below her feet has to be hit from above; anything beside or
+  // over her head takes an ordinary swing
+  const below = top * TILE >= player.y + player.h - 6;
+  const msg = t(below ? 'break_down' : 'break_hit');
+  // a floor block sits at her feet, so the line has to clear her head
+  const bx = best.tx * TILE + 16, by = top * TILE - (below ? 46 : 16);
+  const pu = 0.55 + Math.sin(performance.now() / 260) * 0.45;
+  // a soft ring on the stone itself, so the eye goes to the rock, not the text
+  c.save();
+  c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.1 + pu * 0.13;
+  const gr = c.createRadialGradient(bx, top * TILE + 16, 2, bx, top * TILE + 16, 34);
+  gr.addColorStop(0, PAL[G.roomDef.zone].edge); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = gr; c.beginPath(); c.arc(bx, top * TILE + 16, 34, 0, 7); c.fill();
+  c.restore();
+  ftxt(msg, bx, by, 12, '#eef3fa', 'center', 'rgba(120,220,255,0.85)');
+}
 function drawSeals(P) {
   if (!bossActive()) return;
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
@@ -2626,6 +2925,7 @@ function drawWorldFrame() {
   c.fillStyle = 'rgba(3,6,14,0.16)';
   c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
   drawStatics(P);
+  drawBreakHint();
   for (const p of G.pickups) p.draw(c);
   if (G.plats) for (const pl of G.plats) pl.draw(c);
   for (const e of G.enemies) e.draw(c);
