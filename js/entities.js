@@ -2737,6 +2737,7 @@ const BOSS_ART = {
   zero: 'glaciereParts',     // GLACIERE      — the unicorn
   atlas: 'dragonParts',      // FURNACE CHOIR — the dragon
   prism: 'prismParts',       // PRISM PROWLER — the cat
+  mother: 'motherParts',     // MOTHER-V      — the Null Core
 };
 // It is there; its body just has not come over the wire yet. A dark mass with a
 // live rim and two eyes reads as "something enormous, in the dark, watching" —

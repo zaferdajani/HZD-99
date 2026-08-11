@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msoxjrj5";window.GAME_LOCK="hero";window.MUS_FILES={"ambient_observing_the_star":"assets/music/ambient_observing_the_star.ogg","battleThemeA":"assets/music/battleThemeA.mp3","boss_encounter":"assets/music/boss_encounter.wav","epic_combat":"assets/music/epic_combat.ogg"}</script>
+<script>window.BUILD_ID="msoz8t1c";window.GAME_LOCK="hero";window.MUS_FILES={"ambient_observing_the_star":"assets/music/ambient_observing_the_star.ogg","battleThemeA":"assets/music/battleThemeA.mp3","boss_encounter":"assets/music/boss_encounter.wav","epic_combat":"assets/music/epic_combat.ogg"}</script>
 <script>
 /**
  * @license
@@ -2879,6 +2879,203 @@ function mvPlatePath(c, r0, r1, w0, w1, spike) {
   c.closePath();
 }
 
+// ===========================================================================
+// THE AUTHORED SHEET. Twenty painted parts, cut out of one plate and rigged
+// against the motion this file already computes.
+//
+// She is RADIAL, which is what makes a sheet work here at all: one plate,
+// drawn eight times around a circle, IS the shell — and drawing the same
+// plate eight times is what keeps the ring symmetrical in a way eight
+// separately painted plates never would be. The art on the sheet is oriented
+// pointing LEFT-ish with its spikes up, so every draw rotates it into its
+// sector and the whole body is built from a handful of rects.
+// ===========================================================================
+const MVA = {
+  plate: [427, 2, 175, 238], plateB: [604, 2, 175, 228],
+  crack: [326, 360, 177, 216], crack2: [505, 360, 181, 216],
+  collar: [2, 360, 322, 220],
+  haloCR: [2, 582, 526, 196], haloR: [2, 780, 522, 184],
+  coreS: [2, 966, 125, 118], coreB: [688, 360, 238, 215], coreD: [526, 780, 145, 148],
+  tend1: [2, 2, 133, 356], tend2: [287, 2, 138, 340], tend3: [137, 2, 148, 356],
+  stub: [129, 966, 155, 108],
+  shard1: [673, 780, 108, 143], shard2: [783, 780, 100, 136], shard3: [491, 966, 101, 75],
+  shard4: [885, 780, 116, 120], shard5: [286, 966, 115, 96], shard6: [403, 966, 86, 88],
+};
+const MV_SHARDS = ['shard1', 'shard2', 'shard3', 'shard4', 'shard5', 'shard6'];
+const MV_TENDS = ['tend1', 'tend2', 'tend3'];
+function mvArt() {
+  const im = (typeof MEDIA_IMG !== 'undefined') ? MEDIA_IMG.motherParts : null;
+  return (im && im.naturalWidth) ? im : null;
+}
+// one part, centred on the current origin, at a given angle and pixel height
+function mvBlit(c, key, ang, h, alpha, flip) {
+  const im = mvArt(); if (!im) return;
+  const r = MVA[key]; if (!r) return;
+  const k = h / r[3], w = r[2] * k;
+  c.save();
+  c.rotate(ang);
+  if (flip) c.scale(1, -1);
+  c.globalAlpha *= (alpha == null ? 1 : alpha);
+  c.drawImage(im, r[0], r[1], r[2], r[3], -w / 2, -h / 2, w, h);
+  c.restore();
+}
+// a part hung out along a radius, so a plate sits in its sector rather than
+// on top of the core
+function mvBlitAt(c, key, ang, rad, h, alpha, spin) {
+  const im = mvArt(); if (!im) return;
+  const r = MVA[key]; if (!r) return;
+  const k = h / r[3], w = r[2] * k;
+  c.save();
+  c.rotate(ang);
+  c.translate(rad, 0);
+  c.rotate(spin || 0);
+  c.globalAlpha *= (alpha == null ? 1 : alpha);
+  c.drawImage(im, r[0], r[1], r[2], r[3], -w / 2, -h / 2, w, h);
+  c.restore();
+}
+function mvArtBody(c, b, P) {
+  const { tt, dd, beat, hpFrac, ph, dorm, charging, dark, song, stag, grabbing, hurt, targA, cy } = P;
+  // ---- void aura: unchanged in spirit, she is still a hole in the world ----
+  if (!dark) {
+    const deathFade = b.dead ? mvClamp(1 - dd / 1.8, 0, 1) : 1;
+    const ag = c.createRadialGradient(0, 0, 20, 0, 0, 132);
+    ag.addColorStop(0, 'rgba(26,10,26,' + 0.5 * deathFade + ')');
+    ag.addColorStop(0.65, 'rgba(20,8,22,' + 0.26 * deathFade + ')');
+    ag.addColorStop(1, 'rgba(13,13,18,0)');
+    c.fillStyle = ag; c.beginPath(); c.arc(0, 0, 132, 0, MV_TAU); c.fill();
+  }
+  // ---- tendrils, behind the shell, reaching the way they always did --------
+  const limpK = b.dead ? mvClamp(dd / 1.0, 0, 1) : 0;
+  const dissK = b.dead ? mvClamp((dd - 0.5) / 1.0, 0, 1) : 0;
+  const reach = dorm ? 0 : grabbing ? -0.5 : stag ? 0.15 : 0.75;
+  if (dissK < 1 && !dark) {
+    const tLen = 96 + ph * 22;
+    for (let i = 0; i < 8; i++) {
+      const Ti = (i + 0.5) / 8 * MV_TAU + Math.sin(tt * 0.17 + i * 2.4) * 0.05;
+      let wgt = Math.pow(Math.max(0, Math.cos(Ti - targA)), 2) * reach;
+      if (grabbing && Math.cos(Ti - targA) > 0.86) wgt = -0.4;
+      // it leans toward her target, sways on the beat, and hangs on death
+      let ang = mvAngLerp(Ti, targA, Math.max(0, wgt) * 0.34)
+        + Math.sin(tt * 2.3 + i * 1.7) * (0.05 + 0.11 * Math.max(0, wgt)) * (1 - limpK);
+      ang = mvAngLerp(ang, Math.PI / 2, limpK * 0.75);
+      const grow = (1 + 0.28 * Math.max(0, wgt)) * (1 - limpK * 0.18) * (dorm ? 0.72 : 1);
+      const key = MV_TENDS[i % MV_TENDS.length];
+      const h = tLen * grow;
+      // the art points along its own length: rotate so the tip leads outward
+      mvBlitAt(c, key, ang, 34 + h * 0.5, h, (1 - dissK) * (dorm ? 0.7 : 1), Math.PI / 2);
+    }
+  }
+  // ---- collar under the plates --------------------------------------------
+  if (!dark && dissK < 1) {
+    const cw = 104 * (1 + 0.03 * beat);
+    mvBlit(c, 'collar', tt * 0.06, cw, (b.dead ? 1 - dissK : 1) * (dorm ? 0.85 : 1));
+  }
+  // ---- the shell: ONE plate, eight sectors --------------------------------
+  const shellA = tt * 0.1;
+  const breathe = 3.5 * beat + (stag ? 14 : 0) + (song ? 5 : 0) + (charging ? -2.5 : 0);
+  const shellAl = dark ? 0.08 : dorm ? 0.85 : 1;
+  for (let i = 0; i < 8; i++) {
+    const gone = mvGone(i, ph);
+    const h1 = mvHash(i * 3 + 1);
+    const A = i / 8 * MV_TAU + shellA + Math.sin(tt * (0.21 + h1 * 0.12) + h1 * 6) * 0.05;
+    let fly = 0, flyAl = 1;
+    if (b.dead) {
+      const t0 = (gone ? 0.02 + i * 0.03 : 0.12 + i * 0.14);
+      const e = dd - t0;
+      if (e > 0) { fly = e * (240 + 260 * e); flyAl = mvClamp(1 - e / 0.5, 0, 1); }
+      if (flyAl <= 0) continue;
+    } else if (gone) {
+      continue;                       // this one is already lost to a phase shift
+    }
+    // one plate is worn, and two of them crack as she loses phases
+    const key = (i === 3) ? 'plateB' : (ph >= 1 && i === 5) ? 'crack' : (ph >= 2 && i === 1) ? 'crack2' : 'plate';
+    // eight plates on a ring wide enough that they read as an iris with gaps,
+    // and whose inner tips stop short of the core instead of burying it
+    const rad = 67 + breathe + fly;
+    // the sheet paints the plate with its crest spikes up; turning it a quarter
+    // the other way puts the spikes on the OUTSIDE of the ring, which is the
+    // whole point of a silhouette breaker
+    mvBlitAt(c, key, A, rad, 66 * (1 + 0.02 * beat), shellAl * flyAl, -Math.PI / 2);
+  }
+  // ---- shards, only once she is coming apart ------------------------------
+  if (b.dead && dd > 0.25) {
+    for (let i = 0; i < 10; i++) {
+      const h1 = mvHash(i * 7 + 3), h2 = mvHash(i * 11 + 5);
+      const e = dd - (0.25 + h1 * 0.5); if (e <= 0) continue;
+      const al = mvClamp(1 - e / 1.1, 0, 1); if (al <= 0) continue;
+      const A = h1 * MV_TAU, rad = e * (150 + 220 * e);
+      mvBlitAt(c, MV_SHARDS[i % MV_SHARDS.length], A, rad, 26 + h2 * 22, al, e * (2 + h2 * 4));
+    }
+  }
+  // ---- the core: the only warm thing in the game --------------------------
+  {
+    const scl = 1 + 0.08 * beat + (stag ? 0.04 : 0) + ph * 0.02;
+    let bright = (dorm ? 0.55 : 0.9) + ph * 0.16 + (stag ? 0.25 : 0) + (dark ? 0.35 : 0)
+      + (song ? 0.12 : 0) + (hurt ? 0.35 : 0);
+    let deadCore = 0, flick = 1;
+    if (b.dead) {
+      deadCore = mvClamp((dd - 1.55) / 0.9, 0, 1);
+      const gate = mvHash(Math.floor(dd * 22));
+      flick = dd < 1.55 ? 1 + 0.3 * Math.sin(dd * 30) * mvClamp(dd - 0.8, 0, 1)
+        : (gate > deadCore * 0.85 ? 1 - deadCore * 0.35 : 0.06);
+      bright = 1.25 * flick * (1 - deadCore * 0.55);
+    }
+    const big = ph >= 1 || stag || charging;
+    const size = 54 * scl * (1 - deadCore * 0.45) * (big ? 1.12 : 1);
+    // the light it throws into the room, which is what welds the figure together
+    if (!charging && deadCore < 1) {
+      const gg = c.createRadialGradient(0, 0, 4, 0, 0, size * 2.1);
+      gg.addColorStop(0, 'rgba(255,215,106,' + 0.5 * bright * (1 - deadCore) + ')');
+      gg.addColorStop(0.5, 'rgba(217,166,62,' + 0.16 * bright * (1 - deadCore) + ')');
+      gg.addColorStop(1, 'rgba(138,90,22,0)');
+      c.fillStyle = gg; c.beginPath(); c.arc(0, 0, size * 2.1, 0, MV_TAU); c.fill();
+    }
+    // charging goes BLACK — with the frozen halo, that silence is the tell
+    const key = (charging || deadCore > 0.8) ? 'coreD' : big ? 'coreB' : 'coreS';
+    c.save();
+    c.globalAlpha *= mvClamp(charging ? 1 : bright * 0.75 + 0.35, 0, 1);
+    mvBlit(c, key, tt * (charging ? 0 : 0.25), size);
+    c.restore();
+  }
+  // ---- the halo: a crown she does not wear ---------------------------------
+  {
+    let hy = -(b.h / 2) - 38, haloAl = dark ? 0.25 : 1, rock = 0;
+    if (b.dead) {
+      // it falls, hits the floor, bounces and rings like a dropped coin
+      const t = dd - 0.35;
+      if (t > 0) {
+        const grav = 1500;
+        const gy = (typeof G !== 'undefined' && G.roomDef ? G.roomDef.h - 2 : 15) * (typeof TILE !== 'undefined' ? TILE : 32);
+        const F = Math.max(40, gy - (cy + hy) - 6);
+        const t1 = Math.sqrt(2 * F / grav);
+        if (t < t1) { hy += 0.5 * grav * t * t; rock = t * 2.2; }
+        else {
+          const v1 = grav * t1 * 0.26, t2 = t - t1, tAir = 2 * v1 / grav;
+          const tc = Math.min(t2, tAir);
+          hy += F - (v1 * tc - 0.5 * grav * tc * tc);
+          rock = Math.sin(t2 * 22) * Math.max(0, 0.5 - t2 * 0.4);
+          haloAl = mvClamp(1 - (t2 - tAir) / 1.6, 0, 1);
+        }
+      }
+    } else {
+      hy += Math.sin(tt * 0.9) * 3 - beat * 2;
+    }
+    if (haloAl > 0.01) {
+      c.save();
+      c.translate(0, hy);
+      // the halo IS the health bar: split cyan-and-red at full, pure red at the end
+      const key = (hpFrac > 0.45 && !b.dead) ? 'haloCR' : 'haloR';
+      const w = 150 + beat * 5 + ph * 6;
+      const r = MVA[key], k = w / r[2];
+      c.rotate(rock * 0.25);
+      c.globalAlpha *= haloAl * (charging ? 0.5 : 1);
+      c.drawImage(mvArt(), r[0], r[1], r[2], r[3], -w / 2, -r[3] * k / 2, w, r[3] * k);
+      c.restore();
+    }
+  }
+  return true;
+}
+
 function drawMother(c, b) {
   // ---- shared rhythm bookkeeping (visual only — never touches AI state) ----
   const S = b._mv || (b._mv = { last: b.anim, haloA: 0.6, beatPh: 0, deathT: 0 });
@@ -2912,6 +3109,17 @@ function drawMother(c, b) {
 
   c.save();
   c.translate(cx, cy);
+
+  // ---- 0. THE AUTHORED BODY -------------------------------------------------
+  // She was the last guardian drawn entirely in maths, which is why she read
+  // cleaner and flatter than the cast she is the climax of. With her sheet in
+  // memory the painted parts take over — but nothing above this line changes:
+  // the heartbeat, the halo's fall, the plate-loss order, the reach of the
+  // tendrils and the collapse of the core are all still the numbers this file
+  // already worked out. Only what gets painted is different.
+  if (mvArt() && mvArtBody(c, b, {
+    tt, dd, beat, hpFrac, ph, dorm, charging, dark, song, stag, grabbing, hurt, targA, cy,
+  })) { c.restore(); return; }
 
   // ---- 1. void aura: she is a hole in the world -----------------------------
   if (!dark) {
@@ -5731,6 +5939,7 @@ const MEDIA_SRC = {
     // guardians this sheet carries BOTH halves of the character — the virus-lit
     // red cat it became, and the clear blue cat underneath it
     prismParts: 'assets/characters/prism_parts.png',
+    motherParts: 'assets/characters/mother_parts.png',
     // authored STRATA: four platform decks (clean / virus-grown / forge /
     // frozen) cut from the owner's sheet, and the four scene bands behind them
     platforms: 'assets/tiles/platforms.png',
@@ -10730,6 +10939,7 @@ const BOSS_ART = {
   zero: 'glaciereParts',     // GLACIERE      — the unicorn
   atlas: 'dragonParts',      // FURNACE CHOIR — the dragon
   prism: 'prismParts',       // PRISM PROWLER — the cat
+  mother: 'motherParts',     // MOTHER-V      — the Null Core
 };
 // It is there; its body just has not come over the wire yet. A dark mass with a
 // live rim and two eyes reads as "something enormous, in the dark, watching" —
