@@ -146,6 +146,7 @@ function tStateKind() {
   if (s === 'PLAY') return 'play';
   if (s === 'TCFG') return 'tcfg';
   if (s === 'MAP') return 'map';
+  if (s === 'OFFER') return 'offer';
   if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'RIDDLE' || s === 'SKILLS' || s === 'TRIAL') return 'menu';
   return 'tap';
 }
@@ -272,6 +273,15 @@ function tStart(e) {
           tBuzz(12);
           break;
         }
+      }
+    } else if (kind === 'offer') {
+      // The three doors are the only thing on screen; a tap has to be able to
+      // open one. Falling through to the generic any-tap-is-OK branch is what
+      // left a phone player looking at a choice they could not make.
+      if (x >= L.r.left && x <= L.r.right && y >= L.r.top && y <= L.r.bottom
+          && typeof offerTap === 'function') {
+        const gx = (x - L.r.left) * 960 / L.r.width, gy = (y - L.r.top) * 540 / L.r.height;
+        if (offerTap(gx, gy)) { tBuzz(12); continue; }
       }
     } else if (kind === 'map') {
       // the chart is driven directly: tap a control, drag the paper, pinch to

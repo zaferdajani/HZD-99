@@ -348,10 +348,71 @@ function updateOffer(dt) {
   if (inP('LEFT')) return brAnswer('L');
   if (inP('RIGHT')) return brAnswer('R');
   if (o.kind !== 'firstboss' && (inP('UP') || inP('CAST') || inP('CLAW'))) return brAnswer('X');
+  // THE WAY OUT. A rest fork has no timer, so before this there was no input at
+  // all that could close it — on a phone that was a dead end you could read but
+  // never answer. Backing out is now always possible and is recorded as
+  // severance, which is the same rule the kill ribbon already used: declining to
+  // decide IS a decision, and it is never a trap.
+  //
+  // The one exception is the lion. That fork decides whether a creature lives,
+  // and it is the choice the whole run is weighed against — letting a stray Esc
+  // resolve it as FINISH would kill him by accident. It has two doors, both
+  // reachable by key and by thumb, so refusing to auto-answer costs nothing.
+  if (o.kind !== 'firstboss' && (inP('BACK') || inP('PAUSE') || inP('OK') || inP('JUMP'))) {
+    return brAnswer('R');
+  }
   if (o.kind === 'kill') {
     o.t -= dt;
     if (o.t <= 0) { brAnswer('R'); }      // walking away is a choice
   }
+}
+// ---------------------------------------------------------------------------
+// ONE geometry, shared by the drawing and the hit-test. They were separate, and
+// the result was an offer that could be READ on a phone but never ANSWERED:
+// the touch layer had no case for this state, so a tap sent OK, which nothing
+// here was listening for — and a rest fork has no timeout, so the player was
+// simply stuck looking at it. Anything drawn as a button has to be pressable by
+// whatever the player actually has in their hands.
+// ---------------------------------------------------------------------------
+function offerOpts(o) {
+  const two = o.kind === 'firstboss';
+  return two ? [
+    { p: 'L', key: '\u25c0', col: '#7de8a0', lab: t('fb_tame'), d: 'fb_tame_d' },
+    { p: 'R', key: '\u25b6', col: '#ffd76a', lab: t('fb_beat'), d: 'fb_beat_d' },
+  ] : [
+    { p: 'L', key: '\u25c0', col: '#7de8a0', lab: t('br_mercy'), d: 'br_L_d' },
+    { p: 'X', key: '\u25b2', col: '#ff5a6a', lab: t('br_red'), d: 'br_X_d' },
+    { p: 'R', key: '\u25b6', col: '#ffd76a', lab: t('br_sever'), d: 'br_R_d' },
+  ];
+}
+function offerBoxes() {
+  const o = G.offer; if (!o) return [];
+  const full = o.kind !== 'kill';
+  const opts = offerOpts(o);
+  const two = o.kind === 'firstboss';
+  const w = full ? (two ? 250 : 210) : 128, h = full ? 66 : 34, gap = full ? 18 : 8;
+  // the ribbon follows the corpse, but the whole ROW has to stay on screen —
+  // clamping the centre alone pushed the left option off the left edge, where it
+  // could be neither read nor tapped
+  const half = (opts.length - 1) / 2 * (w + gap) + w / 2 + 12;
+  const bx = full ? 480 : clamp(o.x - cam.x, half, 960 - half);
+  const by = full ? 348 : clamp(o.y - cam.y, h / 2 + 100, 540 - h / 2 - 96);
+  return opts.map((op, i) => ({
+    op, w, h,
+    x: bx + (i - (opts.length - 1) / 2) * (w + gap), y: by,
+  }));
+}
+// a tap or a click, in 960x540 screen space
+function offerTap(sx, sy) {
+  const o = G.offer; if (!o || o.done) return false;
+  for (const b of offerBoxes()) {
+    // generous on a phone: the pad extends the target without moving the art
+    if (Math.abs(sx - b.x) <= b.w / 2 + 10 && Math.abs(sy - b.y) <= b.h / 2 + 12) {
+      brAnswer(b.op.p);
+      return true;
+    }
+  }
+  return false;
 }
 // the ribbon, drawn in world space over the thing that just died
 function drawOffer() {
@@ -377,22 +438,14 @@ function drawOffer() {
     ftxt(t('br_prime2'), 480, by0 + 47, 12.5, '#9fd8e8', 'center');
     ftxt(t('br_prime3'), 480, by0 + 68, 12.5, '#ffd76a', 'center');
   }
-  const bx = full ? 480 : clamp(o.x - cam.x, 130, 830);
-  const by = full ? 348 : clamp(o.y - cam.y, 118, 430);
-  // the first boss is a clean binary — tame or finish. Everywhere else keeps the
-  // Signal's third door open.
-  const two = o.kind === 'firstboss';
-  const opts = two ? [
-    { p: 'L', key: '◀', col: '#7de8a0', lab: t('fb_tame'), d: 'fb_tame_d' },
-    { p: 'R', key: '▶', col: '#ffd76a', lab: t('fb_beat'), d: 'fb_beat_d' },
-  ] : [
-    { p: 'L', key: '◀', col: '#7de8a0', lab: t('br_mercy'), d: 'br_L_d' },
-    { p: 'X', key: '▲', col: '#ff5a6a', lab: t('br_red'), d: 'br_X_d' },
-    { p: 'R', key: '▶', col: '#ffd76a', lab: t('br_sever'), d: 'br_R_d' },
-  ];
-  const w = full ? (two ? 250 : 210) : 128, h = full ? 66 : 34, gap = full ? 18 : 8;
-  opts.forEach((op, i) => {
-    const ox = bx + (i - (opts.length - 1) / 2) * (w + gap), oy = by;
+  const gap = full ? 18 : 8;
+  const boxes = offerBoxes();
+  const w = boxes.length ? boxes[0].w : 210, h = boxes.length ? boxes[0].h : 66;
+  // one source of truth: the row is centred on the middle box the hit-test uses
+  const bx = boxes.length ? boxes[(boxes.length - 1) / 2 | 0].x + (boxes.length % 2 ? 0 : (w + gap) / 2) : 480;
+  const by = boxes.length ? boxes[0].y : 348;
+  boxes.forEach((bxo) => {
+    const op = bxo.op, ox = bxo.x, oy = bxo.y;
     c.globalAlpha = full ? 1 : 0.35 + k * 0.6;
     c.fillStyle = 'rgba(8,14,22,0.9)';
     rr(c, ox - w / 2, oy - h / 2, w, h, 8); c.fill();
@@ -402,6 +455,16 @@ function drawOffer() {
     if (full) ftxt(t(op.d), ox, oy + 16, 11, '#8aa2b5', 'center');
     c.globalAlpha = 1;
   });
+  // SAY HOW TO ANSWER. A full-screen fork has no timer and stops the world, so
+  // if the way in is not obvious it reads as a trap rather than a choice. The
+  // line is phrased for whatever is actually in the player's hands.
+  if (full) {
+    const touchy = typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled;
+    const key = o.kind === 'firstboss'
+      ? (touchy ? 'br_pick_ft' : 'br_pick_fk')
+      : (touchy ? 'br_pick_t' : 'br_pick_k');
+    ftxt(t(key), 480, 424, 12.5, '#7d93a8', 'center');
+  }
   // the clock on a kill ribbon, so lapsing never feels like a bug
   if (!full) {
     c.fillStyle = 'rgba(255,255,255,0.5)';

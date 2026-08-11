@@ -2926,6 +2926,14 @@ function drawMapButton() {
   c.restore();
 }
 addEventListener('mousedown', (e) => {
+  // an offer is answered by clicking the option, on any device
+  if (typeof G !== 'undefined' && G.offer && !G.offer.done && typeof offerTap === 'function') {
+    const r0 = cv && cv.getBoundingClientRect ? cv.getBoundingClientRect() : null;
+    if (r0) {
+      const ox = (e.clientX - r0.left) * (960 / r0.width), oy = (e.clientY - r0.top) * (540 / r0.height);
+      if (offerTap(ox, oy)) return;
+    }
+  }
   if (typeof G === 'undefined' || G.state !== 'PLAY') return;
   if (!mapUnlocked() || (TOUCH && TOUCH.enabled)) return;
   const b = cv && cv.getBoundingClientRect ? cv.getBoundingClientRect() : null; if (!b) return;
