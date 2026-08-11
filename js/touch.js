@@ -227,6 +227,7 @@ function tapMenu(x, y) {
 function tStart(e) {
   e.preventDefault();
   audioOn();
+  try { purifyGesture(); } catch (e) {}
   if (!TOUCH.fsTried) {
     TOUCH.fsTried = true;
     try {

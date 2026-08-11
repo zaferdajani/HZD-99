@@ -103,6 +103,7 @@ function padConnected(on, gp) {
 }
 addEventListener('gamepadconnected', e => {
   try { audioOn(); } catch (er) {}
+  try { purifyGesture(); } catch (er) {}
   padConnected(true, e.gamepad);
 });
 addEventListener('gamepaddisconnected', () => padConnected(false, null));
@@ -149,6 +150,7 @@ addEventListener('keydown', e => {
   if (['Tab', 'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (!e.repeat) { keys[e.code] = 1; keysP[e.code] = 1; }
   audioOn();
+  try { purifyGesture(); } catch (er) {}
 });
 addEventListener('keyup', e => { keys[e.code] = 0; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = 0; });

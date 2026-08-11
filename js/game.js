@@ -253,7 +253,7 @@ function loadRoom(id) {
     const p = new Pouch(G.save.pouch.x, G.save.pouch.y, G.save.pouch.amount);
     G.pickups.push(p);
   }
-  if (G.boss && !G.boss.dead && typeof purifyPreload === 'function') purifyPreload(G.boss.kind);
+  if (typeof purifyPreloadNear === 'function') purifyPreloadNear(id);
   G.save.visited[id] = 1;
   tileDirty = true;
   setMusic(def.zone);
@@ -1393,17 +1393,61 @@ function strataTex(zone) {
 // ===========================================================================
 const PURIFY_VID = { glitch: 'assets/video/purify_glitch.mp4' };
 const purifyPre = {};
-// start pulling the film down as soon as its arena loads, so the final hit
-// does not sit waiting on the network
+// Start pulling the film down long before it is needed, and — critically —
+// PRIME it inside a real user gesture: browsers will not hand you a decoded
+// first frame until the element has been allowed to play once. Priming is
+// play-then-pause-then-rewind, which unlocks the element and decodes frame 0,
+// so the final blow starts it instantly instead of stuttering.
 function purifyPreload(kind) {
   const s = PURIFY_VID[kind];
   if (!s || purifyPre[kind]) return;
   const v = document.createElement('video');
-  v.preload = 'auto'; v.muted = true; v.playsInline = true;
+  v.preload = 'auto'; v.muted = true; v.defaultMuted = true; v.playsInline = true;
   v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
+  v.setAttribute('webkit-playsinline', '');
+  v.crossOrigin = 'anonymous';
   v.src = s;
   try { v.load(); } catch (e) {}
   purifyPre[kind] = v;
+  if (VID_GESTURE) purifyPrime(v);
+}
+function purifyPrime(v) {
+  if (!v || v._primed) return;
+  v._primed = true;
+  const pr = v.play();
+  const settle = () => { try { v.pause(); v.currentTime = 0; } catch (e) {} };
+  if (pr && pr.then) pr.then(settle, () => { v._primed = false; });
+  else settle();
+}
+// ready enough that play() will not stall: the browser says it can run to
+// the end, or at least has future frames buffered
+function purifyReady(kind) {
+  const v = purifyPre[kind];
+  return !!(v && (v.readyState >= 4 || (v.readyState >= 3 && v._primed)));
+}
+// every film in the game gets unlocked by the first real input
+let VID_GESTURE = false;
+function purifyGesture() {
+  if (VID_GESTURE) return;
+  VID_GESTURE = true;
+  for (const k in purifyPre) purifyPrime(purifyPre[k]);
+}
+// preload the whole neighbourhood: any boss room one door away is fetched
+// now, so a fight is never the first time the file is touched
+function purifyPreloadNear(id) {
+  const seen = {};
+  const scan = (rid) => {
+    const r = ROOMS[rid];
+    if (!r || seen[rid]) return; seen[rid] = 1;
+    for (const e of r.ents || [])
+      if (e[0] === 'boss' && PURIFY_VID[e[3]]) purifyPreload(e[3]);
+  };
+  scan(id);
+  const ex = (ROOMS[id] && ROOMS[id].exits) || {};
+  for (const k in ex) {
+    const d = ex[k];
+    scan(typeof d === 'object' ? d.to : d);
+  }
 }
 function startPurifyCut(kind) {
   if (!PURIFY_VID[kind]) return false;
@@ -1417,10 +1461,8 @@ function startPurifyCut(kind) {
     snap.width = cv.width; snap.height = cv.height;
     snap.getContext('2d').drawImage(cv, 0, 0);
   } catch (e) { snap = null; }
-  G.cut = { kind, v, snap, t: 0, ph: 'in', hint: 0, failed: false };
+  G.cut = { kind, v, snap, t: 0, ph: 'in', hint: 0, failed: false, held: 0 };
   try { v.currentTime = 0; } catch (e) {}
-  const pr = v.play();
-  if (pr && pr.catch) pr.catch(() => { G.cut && (G.cut.failed = true); });
   G.state = 'CUT';
   return true;
 }
@@ -1445,7 +1487,18 @@ function updateCut(dt) {
   const skip = inP('OK') || inP('JUMP') || inP('ATK') || inP('PAUSE') || inP('BACK');
   if (skip && ct.ph !== 'out') { ct.ph = 'out'; ct.t = 0; return; }
   if (ct.ph === 'in') {
-    if (ct.t >= 0.34) { ct.ph = 'play'; ct.t = 0; }
+    if (ct.t >= 0.34) { ct.ph = 'hold'; ct.t = 0; }
+    return;
+  }
+  if (ct.ph === 'hold') {
+    // black. If the film still is not ready, we simply wait here — the dark
+    // reads as the moment before a memory surfaces, never as a stall.
+    ct.held += dt;
+    if (purifyReady(ct.kind) || ct.held > 4) {
+      const pr = v.play();
+      if (pr && pr.catch) pr.catch(() => { if (G.cut) G.cut.failed = true; });
+      ct.ph = 'play'; ct.t = 0;
+    }
     return;
   }
   if (ct.ph === 'play') {
@@ -1471,14 +1524,40 @@ function drawCut() {
     }
     return;
   }
-  const a = ct.ph === 'out' ? 1 - clamp(ct.t / 0.65, 0, 1) : clamp(ct.t / 0.3, 0, 1);
+  if (ct.ph === 'hold') {
+    // the dark before a memory: one slow breath of light in the middle of
+    // the frame, so the wait never reads as the game having stopped
+    const pu = 0.5 + Math.sin(ct.held * 2.4) * 0.5;
+    c.save(); c.globalCompositeOperation = 'lighter';
+    const g = c.createRadialGradient(480, 270, 4, 480, 270, 240);
+    g.addColorStop(0, 'rgba(55,255,208,' + (0.05 + pu * 0.05) + ')');
+    g.addColorStop(1, 'rgba(55,255,208,0)');
+    c.fillStyle = g; c.fillRect(0, 0, 960, 540);
+    c.restore();
+    return;
+  }
+  const a = ct.ph === 'out' ? 1 - clamp(ct.t / 0.65, 0, 1) : clamp(ct.t / 0.45, 0, 1);
   const v = ct.v;
   if (v && v.videoWidth) {
     // letterbox the film inside the frame — never crop the authored art
     const k = Math.min(960 / v.videoWidth, 540 / v.videoHeight);
     const w = v.videoWidth * k, h = v.videoHeight * k;
+    const x0 = (960 - w) / 2, y0 = (540 - h) / 2;
     c.save(); c.globalAlpha = a;
-    try { c.drawImage(v, (960 - w) / 2, (540 - h) / 2, w, h); } catch (e) {}
+    try { c.drawImage(v, x0, y0, w, h); } catch (e) {}
+    c.restore();
+    // THE MEMORY REVEAL: it does not cut in, it surfaces — a bloom of its own
+    // light over the first half second, then a soft vignette holds it there
+    if (ct.ph === 'play' && ct.t < 0.5) {
+      const b = 1 - ct.t / 0.5;
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = b * 0.5;
+      try { c.drawImage(v, x0 - w * 0.012 * b, y0 - h * 0.012 * b, w * (1 + 0.024 * b), h * (1 + 0.024 * b)); } catch (e) {}
+      c.restore();
+    }
+    c.save();
+    const vg = c.createRadialGradient(480, 270, 200, 480, 270, 560);
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.55)');
+    c.fillStyle = vg; c.fillRect(0, 0, 960, 540);
     c.restore();
   }
   if (ct.ph === 'play' && ct.hint > 1.6) {
