@@ -62,9 +62,13 @@ function przClip(b) {
   const spd = Math.abs(b.vx || 0);
 
   if (b.purified) {
-    // the moment itself: one frame where the body has already cleared but the
-    // tail crystal is still burning red, the last of it leaving
-    if ((b.pureT || 0) < 0.9) return R.p_turn[0];
+    // THE HANDOFF. Her film ends with the freed cat rolled onto its back,
+    // paws in the air, batting at its own tail crystal — so the game comes out
+    // of the cutscene in exactly that pose and holds it before drifting into
+    // the normal idle. A cut is invisible when both sides of it agree.
+    const pt = b.pureT || 0;
+    if (pt < 0.5) return R.p_turn[0];        // body cleared, tail still red
+    if (pt < 3.2) return seq(R.p_play, 3.4); // belly-up, exactly where the film left off
     if (spd > 240) return seq(R.p_run, 11);
     if (spd > 34) return seq(R.p_walk, 9);
     // left alone it behaves like a cat with nothing left to guard: it rolls on

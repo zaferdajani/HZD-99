@@ -1587,6 +1587,7 @@ const PURIFY_VID = {
   brood: 'assets/video/purify_brood.mp4',   // TALONHOST     - the eagle
   zero: 'assets/video/purify_zero.mp4',     // GLACIERE      - the unicorn
   atlas: 'assets/video/purify_atlas.mp4',   // FURNACE CHOIR - the dragon
+  prism: 'assets/video/purify_prism.mp4',   // PRISM PROWLER - the cat
 };
 const purifyPre = {};
 // Start pulling the film down long before it is needed, and — critically —
