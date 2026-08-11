@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msord555";window.GAME_LOCK="robo"</script>
+<script>window.BUILD_ID="msorrirg";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -5722,9 +5722,14 @@ const MEDIA_SRC = {
     strataLava: 'assets/backgrounds/strata_lava.jpg',
     strataIceB: 'assets/backgrounds/strata_iceB.jpg',
   },
-  audio: {
+  // Music is STREAMED, never decoded. decodeAudioData turns a 2 MB ogg into
+  // ~60 MB of raw float PCM and holds it in RAM for the whole session — on a
+  // phone that is the single most expensive thing this game did.
+  stream: {
     boss: 'assets/music/epic_combat.ogg',
     ambient: 'assets/music/ambient_observing_the_star.ogg',
+  },
+  audio: {
     hit1: 'assets/sfx/hit_01.ogg',
     hit2: 'assets/sfx/hit_02.ogg',
     metal: 'assets/sfx/metal_05.ogg',
@@ -5751,17 +5756,48 @@ if (typeof window !== 'undefined' && window.EMBEDDED_MEDIA) {
     else MEDIA_SRC.audio[k] = window.EMBEDDED_MEDIA[k];
   }
 }
-const MEDIA_IMG = {}, MBUF = {};
-for (const k in MEDIA_SRC.images) {
+// ---------------------------------------------------------------------------
+// ART ON DEMAND. Every sheet in the manifest used to start downloading the
+// instant this file parsed — the Foundry dragon, the Archive unicorn, all of it,
+// before the player had touched anything, whether or not they would ever get
+// there. That is how a cloud game ends up behaving like a bundled one.
+//
+// The store is now a lazy map: asking for a sheet is what starts fetching it,
+// and until it lands the answer is undefined. Every renderer in the codebase
+// already guards on that (`if (!im || !im.naturalWidth) return`) because sheets
+// have always been able to arrive late, so nothing else had to change.
+// ---------------------------------------------------------------------------
+const MEDIA_RAW = {}, MEDIA_PEND = {}, MBUF = {};
+function mediaFetch(k) {
+  if (MEDIA_RAW[k] || MEDIA_PEND[k] || !MEDIA_SRC.images[k]) return;
+  MEDIA_PEND[k] = 1;
   const im = new Image();
   im.onload = () => {
-    MEDIA_IMG[k] = im;
-    // the tile layer is cached once per room — a sheet that lands after that
+    MEDIA_RAW[k] = im;
+    // the tile layer is baked once per room — a sheet that lands after that
     // first render would never appear, so force a repaint when art arrives
-    if (k === 'platforms') { try { tileDirty = true; } catch (e) {} }
+    if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {
+      try { tileDirty = true; } catch (e) {}
+    }
   };
   im.src = MEDIA_SRC.images[k];
 }
+const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
+  get(t, k) {
+    if (typeof k !== 'string') return t[k];
+    if (t[k]) return t[k];
+    mediaFetch(k);
+    return undefined;
+  },
+}) : MEDIA_RAW;
+// the handful that must never pop in late: the shared turnaround atlas, the
+// player's own sheets and the decks she is standing on
+['roster', 'platforms', 'driller'].forEach(mediaFetch);
+// Asking "is this sheet here yet?" must NOT be what fetches it. Several guards
+// test four boss atlases in one condition to decide which renderer to use, and
+// through the lazy map that innocent-looking check pulled 2.7 MB of art for
+// guardians that were not even in the room.
+function mediaHas(k) { return !!MEDIA_RAW[k]; }
 let mediaAudioLoaded = false;
 function loadMedia() {
   if (mediaAudioLoaded || typeof AC === 'undefined' || !AC) return;
@@ -6190,21 +6226,38 @@ function audioOn() {
   if (typeof loadMedia === 'function') loadMedia();
 }
 // ---------- recorded-sample playback (CC0 assets, synth fallback) ----------
+// ---------------------------------------------------------------------------
+// MUSIC STREAMS. It used to be pulled down whole, decoded with decodeAudioData
+// and held as raw float PCM for the entire session — two tracks came to about
+// SIXTY MEGABYTES resident, which on a phone is the most expensive thing the
+// game did by a wide margin, and it happened whether or not you ever heard them.
+//
+// An <audio> element streams: the browser buffers a few seconds, plays, and
+// throws the rest away. Memory goes from tens of megabytes to roughly nothing,
+// playback starts sooner because it does not wait for the whole file, and it
+// costs nothing anywhere else because music never needed sample-accurate
+// scheduling — only the little SFX do, and those still decode.
+// ---------------------------------------------------------------------------
 let RECNODE = null;
 function stopRecorded() {
-  if (RECNODE) { try { RECNODE.src.stop(); RECNODE.g.disconnect(); } catch (e) {} }
+  if (RECNODE) {
+    try { RECNODE.el.pause(); RECNODE.el.src = ''; RECNODE.el.load(); } catch (e) {}
+  }
   RECNODE = null;
 }
 function playRecorded(key, gain) {
   stopRecorded();
-  if (!AC || !MBUF[key]) return false;
-  const src = AC.createBufferSource(), g = AC.createGain();
-  src.buffer = MBUF[key]; src.loop = true;
-  g.gain.value = gain;
-  src.connect(g); g.connect(musicGain());
-  src.start();
-  RECNODE = { src, g, key };
-  return true;
+  const src = MEDIA_SRC.stream && MEDIA_SRC.stream[key];
+  if (!src) return false;
+  try {
+    const el = new Audio();
+    el.src = src; el.loop = true; el.preload = 'auto';
+    el.volume = Math.max(0, Math.min(1, gain));
+    const pr = el.play();
+    if (pr && pr.catch) pr.catch(() => {});
+    RECNODE = { el, key };
+    return true;
+  } catch (e) { return false; }
 }
 function playBuf(key, vol, rate) {
   if (!AC || MUTED || !MBUF[key]) return false;
@@ -12057,11 +12110,11 @@ class Boss {
     // bosses are never allowed to borrow the machine art, dead or alive.
     const heroWorld = typeof isHero === 'function' && isHero();
     if (this.dead && !heroWorld
-      && !((this.kind === 'glitch' || this.kind === 'brood') && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beastParts || MEDIA_IMG.eagleParts || MEDIA_IMG.driller))
-      && !(this.kind === 'zero' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.glaciereParts)
+      && !((this.kind === 'glitch' || this.kind === 'brood') && typeof mediaHas === 'function' && (mediaHas('beastParts') || mediaHas('eagleParts') || mediaHas('driller')))
+      && !(this.kind === 'zero' && typeof mediaHas === 'function' && mediaHas('glaciereParts'))
       && !(this.kind === 'prism' && typeof drawPrism === 'function')
       && !(this.kind === 'mother' && typeof drawMother === 'function')
-      && !(this.kind === 'atlas' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.dragonParts)) return;
+      && !(this.kind === 'atlas' && typeof mediaHas === 'function' && mediaHas('dragonParts'))) return;
     const P = PAL[G.roomDef.zone];
     // The intro used to fade the boss up from nothing, which made sense when it
     // arrived out of empty air. Now every guardian is already lying there in a

@@ -4193,11 +4193,11 @@ class Boss {
     // bosses are never allowed to borrow the machine art, dead or alive.
     const heroWorld = typeof isHero === 'function' && isHero();
     if (this.dead && !heroWorld
-      && !((this.kind === 'glitch' || this.kind === 'brood') && typeof MEDIA_IMG !== 'undefined' && (MEDIA_IMG.beastParts || MEDIA_IMG.eagleParts || MEDIA_IMG.driller))
-      && !(this.kind === 'zero' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.glaciereParts)
+      && !((this.kind === 'glitch' || this.kind === 'brood') && typeof mediaHas === 'function' && (mediaHas('beastParts') || mediaHas('eagleParts') || mediaHas('driller')))
+      && !(this.kind === 'zero' && typeof mediaHas === 'function' && mediaHas('glaciereParts'))
       && !(this.kind === 'prism' && typeof drawPrism === 'function')
       && !(this.kind === 'mother' && typeof drawMother === 'function')
-      && !(this.kind === 'atlas' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.dragonParts)) return;
+      && !(this.kind === 'atlas' && typeof mediaHas === 'function' && mediaHas('dragonParts'))) return;
     const P = PAL[G.roomDef.zone];
     // The intro used to fade the boss up from nothing, which made sense when it
     // arrived out of empty air. Now every guardian is already lying there in a

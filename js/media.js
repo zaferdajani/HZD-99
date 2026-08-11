@@ -47,9 +47,14 @@ const MEDIA_SRC = {
     strataLava: 'assets/backgrounds/strata_lava.jpg',
     strataIceB: 'assets/backgrounds/strata_iceB.jpg',
   },
-  audio: {
+  // Music is STREAMED, never decoded. decodeAudioData turns a 2 MB ogg into
+  // ~60 MB of raw float PCM and holds it in RAM for the whole session — on a
+  // phone that is the single most expensive thing this game did.
+  stream: {
     boss: 'assets/music/epic_combat.ogg',
     ambient: 'assets/music/ambient_observing_the_star.ogg',
+  },
+  audio: {
     hit1: 'assets/sfx/hit_01.ogg',
     hit2: 'assets/sfx/hit_02.ogg',
     metal: 'assets/sfx/metal_05.ogg',
@@ -76,17 +81,48 @@ if (typeof window !== 'undefined' && window.EMBEDDED_MEDIA) {
     else MEDIA_SRC.audio[k] = window.EMBEDDED_MEDIA[k];
   }
 }
-const MEDIA_IMG = {}, MBUF = {};
-for (const k in MEDIA_SRC.images) {
+// ---------------------------------------------------------------------------
+// ART ON DEMAND. Every sheet in the manifest used to start downloading the
+// instant this file parsed — the Foundry dragon, the Archive unicorn, all of it,
+// before the player had touched anything, whether or not they would ever get
+// there. That is how a cloud game ends up behaving like a bundled one.
+//
+// The store is now a lazy map: asking for a sheet is what starts fetching it,
+// and until it lands the answer is undefined. Every renderer in the codebase
+// already guards on that (`if (!im || !im.naturalWidth) return`) because sheets
+// have always been able to arrive late, so nothing else had to change.
+// ---------------------------------------------------------------------------
+const MEDIA_RAW = {}, MEDIA_PEND = {}, MBUF = {};
+function mediaFetch(k) {
+  if (MEDIA_RAW[k] || MEDIA_PEND[k] || !MEDIA_SRC.images[k]) return;
+  MEDIA_PEND[k] = 1;
   const im = new Image();
   im.onload = () => {
-    MEDIA_IMG[k] = im;
-    // the tile layer is cached once per room — a sheet that lands after that
+    MEDIA_RAW[k] = im;
+    // the tile layer is baked once per room — a sheet that lands after that
     // first render would never appear, so force a repaint when art arrives
-    if (k === 'platforms') { try { tileDirty = true; } catch (e) {} }
+    if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {
+      try { tileDirty = true; } catch (e) {}
+    }
   };
   im.src = MEDIA_SRC.images[k];
 }
+const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
+  get(t, k) {
+    if (typeof k !== 'string') return t[k];
+    if (t[k]) return t[k];
+    mediaFetch(k);
+    return undefined;
+  },
+}) : MEDIA_RAW;
+// the handful that must never pop in late: the shared turnaround atlas, the
+// player's own sheets and the decks she is standing on
+['roster', 'platforms', 'driller'].forEach(mediaFetch);
+// Asking "is this sheet here yet?" must NOT be what fetches it. Several guards
+// test four boss atlases in one condition to decide which renderer to use, and
+// through the lazy map that innocent-looking check pulled 2.7 MB of art for
+// guardians that were not even in the room.
+function mediaHas(k) { return !!MEDIA_RAW[k]; }
 let mediaAudioLoaded = false;
 function loadMedia() {
   if (mediaAudioLoaded || typeof AC === 'undefined' || !AC) return;

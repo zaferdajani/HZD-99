@@ -16,21 +16,38 @@ function audioOn() {
   if (typeof loadMedia === 'function') loadMedia();
 }
 // ---------- recorded-sample playback (CC0 assets, synth fallback) ----------
+// ---------------------------------------------------------------------------
+// MUSIC STREAMS. It used to be pulled down whole, decoded with decodeAudioData
+// and held as raw float PCM for the entire session — two tracks came to about
+// SIXTY MEGABYTES resident, which on a phone is the most expensive thing the
+// game did by a wide margin, and it happened whether or not you ever heard them.
+//
+// An <audio> element streams: the browser buffers a few seconds, plays, and
+// throws the rest away. Memory goes from tens of megabytes to roughly nothing,
+// playback starts sooner because it does not wait for the whole file, and it
+// costs nothing anywhere else because music never needed sample-accurate
+// scheduling — only the little SFX do, and those still decode.
+// ---------------------------------------------------------------------------
 let RECNODE = null;
 function stopRecorded() {
-  if (RECNODE) { try { RECNODE.src.stop(); RECNODE.g.disconnect(); } catch (e) {} }
+  if (RECNODE) {
+    try { RECNODE.el.pause(); RECNODE.el.src = ''; RECNODE.el.load(); } catch (e) {}
+  }
   RECNODE = null;
 }
 function playRecorded(key, gain) {
   stopRecorded();
-  if (!AC || !MBUF[key]) return false;
-  const src = AC.createBufferSource(), g = AC.createGain();
-  src.buffer = MBUF[key]; src.loop = true;
-  g.gain.value = gain;
-  src.connect(g); g.connect(musicGain());
-  src.start();
-  RECNODE = { src, g, key };
-  return true;
+  const src = MEDIA_SRC.stream && MEDIA_SRC.stream[key];
+  if (!src) return false;
+  try {
+    const el = new Audio();
+    el.src = src; el.loop = true; el.preload = 'auto';
+    el.volume = Math.max(0, Math.min(1, gain));
+    const pr = el.play();
+    if (pr && pr.catch) pr.catch(() => {});
+    RECNODE = { el, key };
+    return true;
+  } catch (e) { return false; }
 }
 function playBuf(key, vol, rate) {
   if (!AC || MUTED || !MBUF[key]) return false;
