@@ -40,6 +40,9 @@ const MEDIA_SRC = {
     // red cat it became, and the clear blue cat underneath it
     prismParts: 'assets/characters/prism_parts.png',
     motherParts: 'assets/characters/mother_parts.png',
+    // NYA-9's claw arc, painted as glowing light on pure black so it can be
+    // composited additively with no alpha channel to cut
+    slashFx: 'assets/fx/slash.png',
     // authored STRATA: four platform decks (clean / virus-grown / forge /
     // frozen) cut from the owner's sheet, and the four scene bands behind them
     platforms: 'assets/tiles/platforms.png',
@@ -141,7 +144,7 @@ const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
 }) : MEDIA_RAW;
 // the handful that must never pop in late: the shared turnaround atlas, the
 // player's own sheets and the decks she is standing on
-['roster', 'platforms', 'driller'].forEach(mediaFetch);
+['roster', 'platforms', 'driller', 'slashFx'].forEach(mediaFetch);
 // Asking "is this sheet here yet?" must NOT be what fetches it. Several guards
 // test four boss atlases in one condition to decide which renderer to use, and
 // through the lazy map that innocent-looking check pulled 2.7 MB of art for

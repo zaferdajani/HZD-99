@@ -1360,6 +1360,13 @@ class Player {
         }
         c.restore();
       }
+      // THE RAKE ITSELF. The claws were always drawn; what was missing was the
+      // cut they leave in the air, and that absence is why the attack never
+      // read as a hit. It is an authored light effect, composited additively —
+      // the sheet is painted on black, so brightness IS the alpha and no
+      // cutting is needed. Each beat of the combo escalates the shape, and the
+      // finisher is a crossing double-rake.
+      if (this.swingVis && !hero) drawRake(c, this, hx, hy, ang, P);
       // the cat's own claws bare from the paw for the strike: three hooked
       // talons splayed along the swipe, steel-white with glowing tips
       if (this.swingVis && this.clawT <= 0 && !hero) {
@@ -2727,6 +2734,58 @@ const BSTAT = {
   prism: { w: 62, h: 46, hp: 520 },
   mother: { w: 120, h: 120, hp: 750 },
 };
+// ===========================================================================
+// THE RAKE — NYA-9's claw arc, from an authored light sheet.
+//
+// The sheet is painted on pure black, which is the whole trick: drawn with
+// 'lighter' the black contributes nothing and the glow composites correctly
+// over any background, so there is no alpha channel to cut and no matte to
+// get wrong. Brightness is the alpha.
+//
+// The art arcs from upper-left down to lower-right, so each draw rotates it
+// onto the swing direction and mirrors it for the way she is facing.
+// ===========================================================================
+const RAKE = {
+  rake1: [39, 33, 156, 178], rake2: [229, 34, 195, 177], heavy: [457, 30, 252, 214],
+  burstL: [807, 68, 168, 164], xrake: [37, 249, 304, 291], burstM: [542, 278, 159, 151],
+  burstS: [407, 313, 83, 81], ring: [761, 329, 231, 60], streak: [372, 472, 374, 49],
+};
+function drawRake(c, pl, hx, hy, ang, P) {
+  const im = (typeof MEDIA_IMG !== 'undefined') ? MEDIA_IMG.slashFx : null;
+  if (!im || !im.naturalWidth) return;
+  const sv = pl.swingVis, p = clamp(1 - sv.t / sv.t0, 0, 1);
+  if (p < 0.06) return;                       // nothing during the wind-up
+  // snaps in, holds a moment, thins away — a cut does not fade evenly
+  const a = p < 0.22 ? p / 0.22 : Math.pow(1 - (p - 0.22) / 0.78, 1.5);
+  if (a <= 0.02) return;
+  const claw = pl.clawT > 0;
+  const key = sv.combo === 2 ? (claw ? 'xrake' : 'heavy') : sv.combo === 1 ? 'rake2' : 'rake1';
+  const r = RAKE[key];
+  // it grows through the swing, so the arc opens rather than sitting still
+  // sized against HER, not against the screen: she is 36px tall, so a rake that
+  // reads as a heavy blow is about her own height and not three times it
+  const h = (sv.combo === 2 ? 40 : sv.combo === 1 ? 32 : 28) * (claw ? 1.3 : 1)
+    * (0.84 + p * 0.26);
+  const w = r[2] / r[3] * h;
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  c.translate(hx + Math.cos(ang) * h * 0.22, hy + Math.sin(ang) * h * 0.22);
+  c.rotate(ang + (sv.combo === 1 ? -0.5 : 0.35));
+  // The finisher already has its own authored identity — the golden crossing X
+  // drawn below. This sweep sits UNDER it at half strength so the third beat
+  // reads as one heavier blow rather than two effects arguing.
+  c.globalAlpha = a * (claw ? 0.95 : 0.8) * (sv.combo === 2 ? 0.5 : 1);
+  c.drawImage(im, r[0], r[1], r[2], r[3], -w * 0.42, -h / 2, w, h);
+  // the strike flash: one bright burst on the frame the hitbox is live
+  if (p > 0.18 && p < 0.42 && sv.combo !== 2) {
+    const b = RAKE.burstS;
+    const bh = (sv.combo === 2 ? 22 : 15) * (claw ? 1.3 : 1);
+    const bw = b[2] / b[3] * bh;
+    c.globalAlpha = (1 - Math.abs(p - 0.3) / 0.12) * 0.85;
+    c.drawImage(im, b[0], b[1], b[2], b[3], w * 0.18 - bw / 2, -bh / 2, bw, bh);
+  }
+  c.restore();
+}
 // EVERY GUARDIAN'S REAL BODY, AND THE SHEET IT ARRIVES IN. One table, checked
 // per kind. If a kind is in here it has authored art and must never be drawn as
 // anything else — not as the driller it was prototyped from, not as another
