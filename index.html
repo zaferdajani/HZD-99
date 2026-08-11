@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msp4rz11";window.GAME_LOCK="robo";window.MUS_FILES={"ambient_observing_the_star":"assets/music/ambient_observing_the_star.ogg","epic_combat":"assets/music/epic_combat.ogg","mus_archives":"assets/music/mus_archives.m4a","mus_cache":"assets/music/mus_cache.m4a","mus_conduits":"assets/music/mus_conduits.m4a","mus_ending":"assets/music/mus_ending.m4a","mus_foundry":"assets/music/mus_foundry.m4a","mus_furnace":"assets/music/mus_furnace.m4a","mus_glaciere":"assets/music/mus_glaciere.m4a","mus_intro":"assets/music/mus_intro.m4a","mus_meadows":"assets/music/mus_meadows.m4a","mus_mother":"assets/music/mus_mother.m4a","mus_nest":"assets/music/mus_nest.m4a","mus_nullfang":"assets/music/mus_nullfang.m4a","mus_prism":"assets/music/mus_prism.m4a","mus_talonhost":"assets/music/mus_talonhost.m4a","mus_title":"assets/music/mus_title.m4a"};window.VID_FILES={"end_atlas":"assets/video/end_atlas.mp4","end_brood":"assets/video/end_brood.mp4","end_close":"assets/video/end_close.mp4","end_folk":"assets/video/end_folk.mp4","end_glitch":"assets/video/end_glitch.mp4","end_mother":"assets/video/end_mother.mp4","end_open":"assets/video/end_open.mp4","end_prism":"assets/video/end_prism.mp4","end_zero":"assets/video/end_zero.mp4","purify_atlas":"assets/video/purify_atlas.mp4","purify_brood":"assets/video/purify_brood.mp4","purify_glitch":"assets/video/purify_glitch.mp4","purify_prism":"assets/video/purify_prism.mp4","purify_zero":"assets/video/purify_zero.mp4"}</script>
+<script>window.BUILD_ID="msp55i8p";window.GAME_LOCK="robo";window.MUS_FILES={"ambient_observing_the_star":"assets/music/ambient_observing_the_star.ogg","epic_combat":"assets/music/epic_combat.ogg","mus_archives":"assets/music/mus_archives.m4a","mus_cache":"assets/music/mus_cache.m4a","mus_conduits":"assets/music/mus_conduits.m4a","mus_ending":"assets/music/mus_ending.m4a","mus_foundry":"assets/music/mus_foundry.m4a","mus_furnace":"assets/music/mus_furnace.m4a","mus_glaciere":"assets/music/mus_glaciere.m4a","mus_intro":"assets/music/mus_intro.m4a","mus_meadows":"assets/music/mus_meadows.m4a","mus_mother":"assets/music/mus_mother.m4a","mus_nest":"assets/music/mus_nest.m4a","mus_nullfang":"assets/music/mus_nullfang.m4a","mus_prism":"assets/music/mus_prism.m4a","mus_talonhost":"assets/music/mus_talonhost.m4a","mus_title":"assets/music/mus_title.m4a"};window.VID_FILES={"end_atlas":"assets/video/end_atlas.mp4","end_brood":"assets/video/end_brood.mp4","end_close":"assets/video/end_close.mp4","end_folk":"assets/video/end_folk.mp4","end_glitch":"assets/video/end_glitch.mp4","end_mother":"assets/video/end_mother.mp4","end_open":"assets/video/end_open.mp4","end_prism":"assets/video/end_prism.mp4","end_zero":"assets/video/end_zero.mp4","purify_atlas":"assets/video/purify_atlas.mp4","purify_brood":"assets/video/purify_brood.mp4","purify_glitch":"assets/video/purify_glitch.mp4","purify_prism":"assets/video/purify_prism.mp4","purify_zero":"assets/video/purify_zero.mp4"}</script>
 <script>
 /**
  * @license
@@ -16207,6 +16207,63 @@ function drawCut() {
   }
 }
 
+// One reused offscreen layer for the near depth plate, and one gradient built
+// once. Both are allocated on first use and never again — a depth pass that
+// allocated per frame would cost more than the depth is worth.
+const VNEAR_Y = 196, VNEAR_H = 344;      // the band the near depth lives in
+const VNEAR_K = 0.5;                     // and the resolution it is drawn at
+let _vsc = null, _vmask = null;
+function vistaScratch() {
+  if (_vsc === null) {
+    try {
+      const cv4 = document.createElement('canvas');
+      // Only as tall as the band it feeds — a full-frame scratch spent a third
+      // of its fill rate on rows the mask throws away — and only half as wide
+      // and tall again. The near depth is the layer the eye is NOT focused on;
+      // rendering it soft costs a quarter of the pixels and reads as the
+      // shallow focus a real camera would have there anyway.
+      cv4.width = 960 * VNEAR_K; cv4.height = VNEAR_H * VNEAR_K;
+      _vsc = cv4.getContext('2d');
+      _vsc.setTransform(VNEAR_K, 0, 0, VNEAR_K, 0, 0);   // author in full-frame units
+    } catch (e) { _vsc = false; }
+  }
+  return _vsc || null;
+}
+function vistaMask(x2) {
+  if (!_vmask) {
+    _vmask = x2.createLinearGradient(0, 0, 0, VNEAR_H * 0.68);
+    _vmask.addColorStop(0, 'rgba(0,0,0,0)');
+    _vmask.addColorStop(0.55, 'rgba(0,0,0,0.72)');
+    _vmask.addColorStop(1, 'rgba(0,0,0,1)');
+  }
+  return _vmask;
+}
+// Airborne particulate at two depths. Nothing in a still painting tells you
+// the air between you and it has volume; a little of it drifting at two
+// different rates does, for almost nothing.
+const MOTES = [];
+for (let i = 0; i < 26; i++) {
+  MOTES.push({
+    x: hash2(i, 71) * 1400, y: hash2(i, 72) * 460 + 40,
+    d: 0.3 + hash2(i, 73) * 0.8,               // depth: drift rate and size
+    r: 0.5 + hash2(i, 74) * 1.5,
+    ph: hash2(i, 75) * 7,
+  });
+}
+function drawMotes(px, py, t3) {
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  for (const m of MOTES) {
+    const sx = ((m.x - px * m.d * 0.5 + Math.sin(t3 * 0.23 + m.ph) * 16) % 1400 + 1400) % 1400 - 220;
+    if (sx < -20 || sx > 980) continue;
+    const sy = m.y - py * m.d * 0.08 + Math.sin(t3 * 0.4 + m.ph * 2) * 9;
+    c.globalAlpha = 0.05 + m.d * 0.07;
+    c.fillStyle = '#cfe6f5';
+    c.beginPath(); c.arc(sx, sy, m.r * (0.6 + m.d), 0, 7); c.fill();
+  }
+  c.restore();
+  c.globalAlpha = 1;
+}
 function drawZoneVista(P, zone, px, py) {
   const solo = ZONE_VISTA[zone] && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[ZONE_VISTA[zone]];
   const im = solo || (typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.zones);
@@ -16221,15 +16278,56 @@ function drawZoneVista(P, zone, px, py) {
   const dw = CW * sc, dh = CH * sc;
   const roomW = G.roomDef.w * TILE;
   const fx = roomW > 980 ? clamp(px / (roomW - 960), 0, 1) : 0.5;
-  const ox = -(dw - 960) * fx;
-  const oy = -(dh - 540) * 0.6 - py * 0.05;
-  c.drawImage(im, cell[0] * CW, cell[1] * CH, CW, CH, ox, oy, dw, dh);
+  // ---- DEPTH. One painting, drawn twice, at two different distances. ----
+  // A single plate panned as one plane is a backdrop: everything in it, the
+  // far skyline and the wreck ten metres away, slides at exactly one rate,
+  // which is the giveaway that there is no space behind the player. The plate
+  // is now drawn again, larger and travelling faster, feathered in over the
+  // lower half where the near ground actually is. Both copies are the same
+  // art — nothing is redrawn, nothing is restyled, the scene is identical —
+  // but the bottom of the frame now moves past faster than the top, which is
+  // the whole of what the eye uses to judge distance.
+  const t3 = performance.now() / 1000;
+  const breathe = 1 + Math.sin(t3 * 0.21) * 0.011;         // a live camera, never still
+  const plate = (x2, mul, travel, vert, sway, yOff) => {
+    const s2 = sc * mul * breathe;
+    const w2 = CW * s2, h2 = CH * s2;
+    const cx2 = -(w2 - 960) * (0.5 + (fx - 0.5) * travel) + Math.sin(t3 * 0.17 + sway) * 3.5 * travel;
+    const cy2 = -(h2 - 540) * 0.6 - py * vert - (yOff || 0);
+    x2.drawImage(im, cell[0] * CW, cell[1] * CH, CW, CH, cx2, cy2, w2, h2);
+  };
+  // when the far plate is the only one, it carries the full travel — the
+  // depth pass must not cost the scene its pan
+  // ...and only when the frame budget can carry it (see mainLoop)
+  const wide = roomW > 980 && richBG;
+  plate(c, 1, wide ? 0.62 : 1, 0.035, 0);                   // far: the horizon barely moves
+  // The near copy, masked into the lower frame. A room exactly one screen wide
+  // cannot pan at all, so there is no parallax to separate and the second plate
+  // would be pure cost — most rooms in the game are that size.
+  const near = wide && vistaScratch();
+  if (near) {
+    // no clear: the plate is opaque and covers the band edge to edge, so the
+    // previous frame is fully overwritten by the draw that follows
+    plate(near, 1.13, 1, 0.115, 2.1, VNEAR_Y);
+    near.globalCompositeOperation = 'destination-in';
+    near.fillStyle = vistaMask(near);
+    near.fillRect(0, 0, 960, VNEAR_H);
+    near.globalCompositeOperation = 'source-over';
+    c.drawImage(near.canvas, 0, 0, 960 * VNEAR_K, VNEAR_H * VNEAR_K, 0, VNEAR_Y, 960, VNEAR_H);
+  }
+  // aerial perspective: haze sits BETWEEN the two depths conceptually and is
+  // painted over the far one, so the near ground reads as being in front of air
+  const air = c.createLinearGradient(0, 120, 0, 430);
+  air.addColorStop(0, 'rgba(120,150,175,0.10)');
+  air.addColorStop(1, 'rgba(120,150,175,0)');
+  c.fillStyle = air; c.fillRect(0, 0, 960, 540);
   // seat the playfield: darken the lower third and cool the whole frame slightly
   // toward the zone palette so gameplay reads against the painting
   const hz = c.createLinearGradient(0, 250, 0, 540);
   hz.addColorStop(0, 'rgba(5,9,14,0)'); hz.addColorStop(1, 'rgba(5,9,14,0.62)');
   c.fillStyle = hz; c.fillRect(0, 0, 960, 540);
   c.fillStyle = 'rgba(5,9,14,0.14)'; c.fillRect(0, 0, 960, 540);
+  drawMotes(px, py, t3);
   if (zone === 'C') drawLavaFalls(px, py);
   // rooms narrower than the screen: the painting must stop at the walls
   if (roomW < 958) {
@@ -19792,8 +19890,23 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   try { navigator.serviceWorker.register('sw.js'); } catch (e) {}
 }
 let lastT = 0;
+// ---------------------------------------------------------------------------
+// THE FRAME BUDGET. The background's near depth plate is the one piece of
+// scenery in the game that a weak device cannot afford: it is a second
+// full-width composite, every frame, purely for looks. So it is not
+// unconditional. The loop keeps a slow average of real frame time and gives
+// the plate up when the game is not holding a comfortable rate, taking it back
+// when it recovers. Nobody is ever shown a prettier background at the price of
+// a worse-feeling game.
+// ---------------------------------------------------------------------------
+let frameMs = 16.7, richBG = true;
 function mainLoop(tms) {
   const dt = Math.min((tms - lastT) / 1000, 1 / 30);
+  if (lastT) {
+    frameMs += (Math.min(tms - lastT, 100) - frameMs) * 0.03;
+    if (richBG && frameMs > 26) richBG = false;              // ~38fps: give it up
+    else if (!richBG && frameMs < 19) richBG = true;         // ~53fps: take it back
+  }
   lastT = tms;
   if (typeof pollGamepad === 'function') pollGamepad();
   update(dt);
