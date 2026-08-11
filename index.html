@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msorrirg";window.GAME_LOCK="robo"</script>
+<script>window.BUILD_ID="msosma1j";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -13085,12 +13085,19 @@ function universe() {
     else feed += w * 0.14;
   }
   const cureF = wsum ? cure / wsum : 0, feedF = wsum ? feed / wsum : 0;
+  // cureF and feedF are FRACTIONS of the weighted ledger, so on the very first
+  // choice one of them is necessarily 1.0 — and a simulated playthrough caught
+  // exactly what that meant: a single act of mercy cured all six kingdoms and
+  // turned every machine in the game peaceful, at which point there was no game
+  // left. The fractions still say WHICH WAY the world is going; REACH says how
+  // far it has been able to travel yet. A world has to be worked on.
+  const reach = n / (n + 45);
   for (let i = 0; i < BR_ZONES.length; i++) {
     const z = BR_ZONES[i];
     // each kingdom answers at its own rate, so curing the world is never one
     // uniform slider and the map never reads as a single number repeated six times
     const bias = 0.72 + R() * 0.62;
-    inf[z] = clamp(1 - cureF * bias * 1.9 + feedF * 0.75, 0, 1);
+    inf[z] = clamp(1 - cureF * bias * 1.6 * reach + feedF * 0.85 * reach, 0, 1);
   }
 
   // Boss disposition. A guardian you never met in this world may already be
