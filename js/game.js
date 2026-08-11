@@ -534,6 +534,7 @@ function update(dt) {
       if (bossActive()) player.x = clamp(player.x, 4, G.roomDef.w * TILE - player.w - 4);
       for (const e of G.enemies) if (!e.dead) e.update(dt);
       if (typeof updatePets === 'function') updatePets(dt);
+      if (typeof updateBrDelta === 'function') updateBrDelta(dt);
       G.enemies = G.enemies.filter(e => !e.dead);
       if (G.boss) G.boss.update(dt);
       for (const p of G.projs) if (!p.dead) p.update(dt);
@@ -3762,6 +3763,7 @@ function draw(tms) {
   drawWorldFrame();
   drawFX();
   if (typeof drawOffer === 'function' && G.offer && G.offer.kind === 'kill') drawOffer();
+  if (typeof drawBrDelta === 'function') drawBrDelta();
   drawHUD();
   drawMapButton();
   if (G.trans) {

@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msoq205x";window.GAME_LOCK="robo"</script>
+<script>window.BUILD_ID="msoqu6hm";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -5230,6 +5230,13 @@ en: {
   br_ctl: '✥ pan  ·  Z / X zoom  ·  E recentre  ·  Y close',
   br_btn: 'BRAID',
   pet_bond: '%s trusts you (%d)',
+  br_prime1: 'The story of the virus is already written. This world is not.',
+  br_prime2: 'Every kill, every rest: three ways to answer. All of them are recorded.',
+  br_prime3: 'What you do FIRST echoes loudest — the opening choice weighs ~9× your last.',
+  br_d_inf: 'infection %s',
+  br_d_law: 'new law · %s',
+  br_d_gone: 'law lost · %s',
+  br_d_none: 'the world holds — for now',
   map_new: 'Map online — open it any time (M / Tab)',
   map_ctl: 'Drag or ✥ to pan   ·   wheel / pinch / Z · X to zoom   ·   E fit   ·   Q recentre   ·   M close',
 },
@@ -5474,6 +5481,13 @@ ar: {
   br_ctl: '✥ تحريك · Z / X تقريب · E توسيط · Y إغلاق',
   br_btn: 'الجديلة',
   pet_bond: '%s صار يثق بك (%d)',
+  br_prime1: 'قصة الفيروس مكتوبة سلفًا. أمّا هذا العالم فلا.',
+  br_prime2: 'مع كل قتل وكل استراحة: ثلاثة ردود، وكلها تُسجَّل.',
+  br_prime3: 'ما تفعله أولًا هو الأعلى صدى — الاختيار الأول يزن ٩ أضعاف الأخير.',
+  br_d_inf: 'العدوى %s',
+  br_d_law: 'قانون جديد · %s',
+  br_d_gone: 'زال قانون · %s',
+  br_d_none: 'العالم صامد — الآن',
   map_new: 'الخريطة جاهزة — افتحها في أي وقت (M / Tab)',
   map_ctl: 'اسحب للتحريك · عجلة أو تقريب بالإصبعين · E ملء الشاشة · Q توسيط · M إغلاق',
 },
@@ -12798,6 +12812,10 @@ function drawPetBond(c2) {
 // LEFT = mercy, RIGHT = severance, RED = the Signal's own offer
 const BR_PICKS = ['L', 'R', 'X'];
 const BR_ZONES = ['A', 'B', 'C', 'D', 'E', 'X'];
+// How much louder each step echoes than the one after it. This single number IS
+// the butterfly effect: at 1.10 over a 24-choice run, the first decision carries
+// about nine times the weight of the most recent one.
+const BR_ECHO = 1.10;
 
 // Every anomaly must DO something. A world modifier that is only a word on a
 // screen is set dressing; these each change how the room plays.
@@ -12870,18 +12888,45 @@ function universe() {
   const total = Math.max(1, b.tally.L + b.tally.R + b.tally.X);
   const mercy = b.tally.L / total, sever = b.tally.R / total, red = b.tally.X / total;
 
-  // EVERYONE IS INFECTED. That is the starting condition of the whole story, so
-  // infection opens at 1 and is only ever bought down by mercy — and the Signal
-  // buys it straight back up.
+  // EVERYONE IS INFECTED. That is the starting condition of the whole story: the
+  // ledger opens at 1.0 in every kingdom.
+  //
+  // THE BUTTERFLY. This used to be a tally — count the mercies, divide by the
+  // total. Measured, that turned out NOT to be a butterfly effect at all: an
+  // early choice moved the world exactly as much as the most recent one, because
+  // normalising by the total means an old choice's share only ever shrinks. That
+  // is chaos with no memory, and advertising it as a butterfly effect would have
+  // been a lie.
+  //
+  // A first attempt simulated this step-by-step with a logistic spread term. It
+  // measured WORSE: the attractor and the 0..1 clamp pull two diverged histories
+  // back together, so the model was contractive — late choices ended up mattering
+  // more than early ones, the exact opposite of the claim.
+  //
+  // What compounding actually means here is that a cure applied before the rot
+  // has spread saves everything downstream of it, and one applied at the end
+  // saves nothing. So each choice is weighted by how much history it got to act
+  // on: BR_ECHO^(steps that came after it). The first decision of a run carries
+  // roughly nine times the weight of the most recent one — which is a real,
+  // measurable sensitive dependence on initial conditions rather than an assertion.
   const inf = {};
+  const n = b.led.length;
+  let wsum = 0, cure = 0, feed = 0;
+  for (let k = 0; k < n; k++) {
+    const w = Math.pow(BR_ECHO, n - 1 - k);
+    wsum += w;
+    const ch = b.led[k];
+    if (ch === 'L') cure += w;
+    else if (ch === 'X') feed += w * 1.2;
+    else feed += w * 0.14;
+  }
+  const cureF = wsum ? cure / wsum : 0, feedF = wsum ? feed / wsum : 0;
   for (let i = 0; i < BR_ZONES.length; i++) {
     const z = BR_ZONES[i];
-    // each kingdom answers to mercy at its own rate, so curing the world is
-    // never one uniform slider
-    const bias = 0.7 + R() * 0.6;
-    const cured = mercy * bias * 1.45;
-    const fed = red * 0.85 + sever * 0.12;
-    inf[z] = clamp(1 - cured + fed, 0, 1);
+    // each kingdom answers at its own rate, so curing the world is never one
+    // uniform slider and the map never reads as a single number repeated six times
+    const bias = 0.72 + R() * 0.62;
+    inf[z] = clamp(1 - cureF * bias * 1.9 + feedF * 0.75, 0, 1);
   }
 
   // Boss disposition. A guardian you never met in this world may already be
@@ -12960,11 +13005,50 @@ function brRecord(pick, kind, room) {
   const after = universe();
   b.seen[after.id] = 1;
   if (typeof persist === 'function') persist();
-  // crossing into a genuinely new world is the moment worth announcing
-  if (after.id !== before.id && kind !== 'kill' && typeof G.toast === 'function') {
-    G.toast(t('br_shift').replace('%s', after.id));
-  }
+
+  // PROVE IT, EVERY TIME. A game can claim that choices matter, or it can show
+  // the reader the diff. This is the diff: what that single press actually did
+  // to the world, in the numbers the world is actually built from. It is also
+  // the honesty check on the whole feature — if this readout were ever empty,
+  // the claim would be false, and the player would see that immediately.
+  const dInf = (avg(after.inf) - avg(before.inf));
+  const gained = after.anom.filter(a => before.anom.indexOf(a) < 0);
+  const lost = before.anom.filter(a => after.anom.indexOf(a) < 0);
+  G.brDelta = {
+    t: 4.2, t0: 4.2, id: after.id, dInf,
+    gained, lost,
+    echo: Math.pow(BR_ECHO, Math.max(0, 24 - b.led.length)),
+    first: b.led.length === 1,
+  };
+  function avg(o) { let s = 0, n2 = 0; for (const k in o) { s += o[k]; n2++; } return n2 ? s / n2 : 0; }
+  // No toast: the readout above already names the world and says what changed,
+  // and two banners fighting for the same moment is how a good beat gets lost.
   return after;
+}
+// the readout itself, top-centre, in screen space
+function drawBrDelta() {
+  const d = G.brDelta; if (!d || d.t <= 0) return;
+  const k = clamp(d.t / 0.6, 0, 1) * clamp((d.t0 - d.t) / 0.25, 0, 1);
+  c.save();
+  c.globalAlpha = k;
+  const lines = [];
+  if (Math.abs(d.dInf) >= 0.002) {
+    const up = d.dInf > 0;
+    lines.push({ s: t('br_d_inf').replace('%s', (up ? '+' : '−') + Math.round(Math.abs(d.dInf) * 100) + '%'),
+                 col: up ? '#ff8fa0' : '#7de8a0' });
+  }
+  for (const a of d.gained) lines.push({ s: t('br_d_law').replace('%s', BR_ANOM[a].n), col: '#aef7d8' });
+  for (const a of d.lost) lines.push({ s: t('br_d_gone').replace('%s', BR_ANOM[a].n), col: '#7d93a8' });
+  if (!lines.length) lines.push({ s: t('br_d_none'), col: '#7d93a8' });
+  const w = 330, h = 26 + lines.length * 17;
+  // low and centre: the room name owns the top of the screen, and this has to be
+  // readable at a glance without ever fighting it
+  const x = 480 - w / 2, y = 372;
+  c.fillStyle = 'rgba(5,9,15,0.95)'; rr(c, x, y, w, h, 8); c.fill();
+  c.strokeStyle = 'rgba(120,200,230,0.35)'; c.lineWidth = 1.2; rr(c, x, y, w, h, 8); c.stroke();
+  ftxt(d.id, 480, y + 14, 12, '#cfe8ff', 'center');
+  lines.forEach((ln, i) => ftxt(ln.s, 480, y + 32 + i * 17, 12, ln.col, 'center'));
+  c.restore();
 }
 
 // ---------------------------------------------------------------------------
@@ -13001,6 +13085,11 @@ function brAnswer(pick) {
   G.offer = null;
   return u;
 }
+// the readout runs on the real clock, not on how fast the machine happens to draw
+function updateBrDelta(dt) {
+  const d = G.brDelta; if (!d) return;
+  d.t -= dt; if (d.t <= 0) G.brDelta = null;
+}
 function updateOffer(dt) {
   const o = G.offer; if (!o) return;
   if (inP('LEFT')) return brAnswer('L');
@@ -13019,11 +13108,24 @@ function drawOffer() {
   c.save();
   if (full) {
     c.fillStyle = 'rgba(4,7,12,0.82)'; c.fillRect(0, 0, 960, 540);
-    ftxt(t(o.kind === 'bench' ? 'br_rest' : 'br_boss'), 480, 168, 22, '#eef3fa', 'center', '#37ffd0');
-    ftxt(universe().id + '  ·  ' + t('br_depth').replace('%s', universe().depth), 480, 202, 13, '#7d93a8', 'center');
+    ftxt(t(o.kind === 'bench' ? 'br_rest' : 'br_boss'), 480, 116, 22, '#eef3fa', 'center', '#37ffd0');
+    ftxt(universe().id + '  ·  ' + t('br_depth').replace('%s', universe().depth), 480, 146, 13, '#7d93a8', 'center');
+  }
+  // THE PREMISE, SAID ONCE, IN THE GAME. The very first time she is asked, the
+  // game states the rule outright rather than hoping the player infers it: the
+  // story is fixed, the world is not, and what you do first echoes loudest.
+  // Every readout after this is evidence for that sentence.
+  if (braid().led.length === 0) {
+    const bw = 660, bh = 90, bx0 = 480 - bw / 2, by0 = full ? 176 : 58;
+    c.fillStyle = 'rgba(6,11,18,0.9)'; rr(c, bx0, by0, bw, bh, 10); c.fill();
+    c.strokeStyle = 'rgba(120,220,255,0.45)'; c.lineWidth = 1.5;
+    rr(c, bx0, by0, bw, bh, 10); c.stroke();
+    ftxt(t('br_prime1'), 480, by0 + 24, 15, '#eef3fa', 'center');
+    ftxt(t('br_prime2'), 480, by0 + 47, 12.5, '#9fd8e8', 'center');
+    ftxt(t('br_prime3'), 480, by0 + 68, 12.5, '#ffd76a', 'center');
   }
   const bx = full ? 480 : clamp(o.x - cam.x, 130, 830);
-  const by = full ? 300 : clamp(o.y - cam.y, 90, 430);
+  const by = full ? 348 : clamp(o.y - cam.y, 118, 430);
   const opts = [
     { p: 'L', key: '◀', col: '#7de8a0', lab: t('br_mercy') },
     { p: 'X', key: '▲', col: '#ff5a6a', lab: t('br_red') },
@@ -13680,6 +13782,7 @@ function update(dt) {
       if (bossActive()) player.x = clamp(player.x, 4, G.roomDef.w * TILE - player.w - 4);
       for (const e of G.enemies) if (!e.dead) e.update(dt);
       if (typeof updatePets === 'function') updatePets(dt);
+      if (typeof updateBrDelta === 'function') updateBrDelta(dt);
       G.enemies = G.enemies.filter(e => !e.dead);
       if (G.boss) G.boss.update(dt);
       for (const p of G.projs) if (!p.dead) p.update(dt);
@@ -16908,6 +17011,7 @@ function draw(tms) {
   drawWorldFrame();
   drawFX();
   if (typeof drawOffer === 'function' && G.offer && G.offer.kind === 'kill') drawOffer();
+  if (typeof drawBrDelta === 'function') drawBrDelta();
   drawHUD();
   drawMapButton();
   if (G.trans) {
