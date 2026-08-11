@@ -35,6 +35,10 @@ const MEDIA_SRC = {
     // the forge boss: FURNACE CHOIR, corrupted mecha dragon — poses, parts,
     // the glow core and the lava ring
     dragonParts: 'assets/characters/dragon_parts.png',
+    // the crystal boss: PRISM PROWLER, authored pose atlas. Unlike the other
+    // guardians this sheet carries BOTH halves of the character — the virus-lit
+    // red cat it became, and the clear blue cat underneath it
+    prismParts: 'assets/characters/prism_parts.png',
     // authored STRATA: four platform decks (clean / virus-grown / forge /
     // frozen) cut from the owner's sheet, and the four scene bands behind them
     platforms: 'assets/tiles/platforms.png',

@@ -15,6 +15,127 @@
 // drew, so Boss.draw can keep its fallback chain.
 // ===========================================================================
 
+// ---------------------------------------------------------------------------
+// AUTHORED ATLAS. The owner's PRISM sheet carries both halves of the character:
+// the virus-lit red cat it fights as, and the clear blue cat underneath. That
+// means the purification needs no hue remap here — it simply changes which half
+// of the sheet we read from, which is why this boss looks right where a tinted
+// copy of the infected art never would.
+//
+// Rects are [sx, sy, sw, sh] into assets/characters/prism_parts.png, with an
+// optional 5th flag for the handful the artist drew facing left. Everything
+// else is nose-RIGHT and gets mirrored on facing.
+// ---------------------------------------------------------------------------
+const PRZ_FR = {
+  i_dorm: [[702, 739, 186, 81], [543, 739, 157, 82]],
+  i_idle: [[592, 165, 106, 118], [425, 295, 146, 113]],
+  i_walk: [[849, 295, 135, 110], [573, 295, 118, 113], [317, 295, 106, 114], [834, 165, 95, 117], [700, 165, 132, 118], [124, 526, 154, 105]],
+  i_run: [[166, 295, 149, 115], [693, 295, 154, 113], [356, 414, 159, 109], [583, 635, 174, 96]],
+  i_roar: [[210, 2, 118, 145], [506, 2, 187, 133], [695, 2, 160, 129]],
+  i_slash: [[2, 2, 206, 161]],
+  i_burst: [[177, 165, 217, 123]],
+  i_beam: [[330, 2, 174, 142, 1]],
+  i_spin: [[2, 165, 173, 128]],
+  i_hurt: [[396, 165, 194, 120]],
+  i_death: [[2, 835, 208, 79]],
+  p_idle: [[442, 526, 112, 104], [187, 635, 120, 101]],
+  p_walk: [[641, 414, 147, 107], [2, 414, 114, 110], [118, 414, 105, 110], [225, 414, 129, 110], [790, 414, 140, 107], [517, 414, 122, 108]],
+  p_run: [[704, 526, 122, 103], [2, 526, 120, 107], [828, 526, 141, 102], [173, 739, 189, 91]],
+  p_play: [[280, 526, 160, 105], [556, 526, 146, 104], [2, 635, 183, 102], [309, 635, 152, 100], [463, 635, 118, 98], [364, 739, 177, 88]],
+  p_stretch: [[2, 739, 169, 94], [759, 635, 153, 95]],
+  p_loaf: [[212, 835, 128, 75]],
+  p_turn: [[2, 295, 162, 117]],
+};
+// the standing reference the artist drew at: every frame shares one world
+// scale off this, so a lying cat stays smaller than a rearing one
+const PRZ_REF_H = 118;
+
+function przImg() {
+  const im = (typeof MEDIA_IMG !== 'undefined') ? MEDIA_IMG.prismParts : null;
+  return (im && im.naturalWidth) ? im : null;
+}
+
+// which drawing the cat is in right now
+function przClip(b) {
+  const t = b.anim || 0, st = b.st, R = PRZ_FR;
+  const seq = (a, hz) => a[Math.floor(Math.abs(t) * hz) % a.length];
+  const spd = Math.abs(b.vx || 0);
+
+  if (b.purified) {
+    // the moment itself: one frame where the body has already cleared but the
+    // tail crystal is still burning red, the last of it leaving
+    if ((b.pureT || 0) < 0.9) return R.p_turn[0];
+    if (spd > 240) return seq(R.p_run, 11);
+    if (spd > 34) return seq(R.p_walk, 9);
+    // left alone it behaves like a cat with nothing left to guard: it rolls on
+    // its back batting at its own tail crystal, stretches, then loafs
+    const cyc = (t * 1) % 17;
+    if (cyc < 4.6) return seq(R.p_play, 3.6);
+    if (cyc < 6.4) return seq(R.p_stretch, 2.4);
+    if (cyc < 10) return R.p_loaf[0];
+    return seq(R.p_idle, 1.3);
+  }
+  if (b.dead) return R.i_death[0];
+  if ((b.stagT || 0) > 0) return R.i_hurt[0];
+  if (st === 'dorm') return seq(R.i_dorm, 0.42);
+  if (st === 'intro') return seq(R.i_roar, 5.5);
+  if (st === 'arcspin') return R.i_spin[0];
+  if (st === 'dashslash') return R.i_slash[0];
+  if (st === 'lsvanish' || st === 'lsarrive') return R.i_burst[0];
+  if (st === 'beam' || st === 'aim') return R.i_beam[0];
+  if (st === 'pounce') return seq(R.i_run, 12);
+  if (spd > 240) return seq(R.i_run, 12);
+  if (spd > 34) return seq(R.i_walk, 9);
+  return seq(R.i_idle, 1.5);
+}
+
+// Authored-art path. Returns false when the sheet has not decoded yet, so the
+// procedural cat below keeps the boss on screen from the very first frame.
+function drawPrismSheet(c, b) {
+  const im = przImg(); if (!im) return false;
+  const f = przClip(b); if (!f) return false;
+  const [sx, sy, sw, sh, art] = f;
+
+  const cx = b.x + b.w / 2, footY = b.y + b.h;
+  const fv = b.faceVis == null ? (b.face || 1) : b.faceVis;
+  const ta = Math.max(0.001, Math.abs(fv));
+  const dir = (fv < 0 ? -1 : 1) * (art ? -1 : 1);   // sheet is nose-RIGHT
+  // PRISM's hitbox is the smallest of any boss — it is a fast rival cat, not a
+  // siege engine — so the art is drawn well proud of it. The tail crystal sits
+  // in the upper part of every frame, which is why the reference height buys
+  // less body than the number suggests.
+  const S = (b.h * 1.95) / PRZ_REF_H;
+  const dw = sw * S, dh = sh * S;
+
+  // breath and the settle after a landing, in world pixels
+  const bob = (b.st === 'dorm' || b.dead) ? 0 : Math.sin((b.anim || 0) * 2.2) * 1.2;
+
+  c.save();
+  // contact shadow, so a painted sprite still sits on the floor
+  c.save();
+  c.globalAlpha = 0.32; c.fillStyle = '#000';
+  c.beginPath(); c.ellipse(cx, footY - 1, dw * 0.30, dh * 0.055, 0, 0, 7); c.fill();
+  c.restore();
+
+  c.translate(cx, footY + bob);
+  // the turn is a real squash through the vertical, matching the turntable
+  c.scale(dir * (0.88 + 0.12 * ta), 1);
+  c.drawImage(im, sx, sy, sw, sh, -dw / 2, -dh, dw, dh);
+
+  // the hit frame: the crystal takes the light straight through, so the whole
+  // cat lifts towards white for an instant, punched through its own alpha
+  const hurt = b.hurtT || 0;
+  if (hurt > 0) {
+    c.save();
+    c.globalCompositeOperation = 'lighter';
+    c.globalAlpha = Math.min(0.7, hurt * 3.5);
+    c.drawImage(im, sx, sy, sw, sh, -dw / 2, -dh, dw, dh);
+    c.restore();
+  }
+  c.restore();
+  return true;
+}
+
 const PRZ = {
   // crystal body: cool indigo ramp, hue-shifted (never black-mixed)
   body:  { lit: '#a8aee2', mid: '#565b96', dark: '#2a2a4a', deep: '#131328' },
@@ -596,6 +717,9 @@ function przDeath(c, b, S) {
 // ===========================================================================
 function drawPrism(c, b) {
   try {
+    // authored art first; the procedural cat stays as the fallback so the boss
+    // is never missing while the sheet is still coming down the wire
+    if (drawPrismSheet(c, b)) return true;
     const S = (b.h * 1.15) / 34;
     const cx = b.x + b.w / 2, footY = b.y + b.h;
     const fv = b.faceVis == null ? (b.face || 1) : b.faceVis;

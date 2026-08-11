@@ -4036,7 +4036,11 @@ class Boss {
       && !(this.kind === 'mother' && typeof drawMother === 'function')
       && !(this.kind === 'atlas' && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.dragonParts)) return;
     const P = PAL[G.roomDef.zone];
-    let a = this.st === 'intro' ? clamp(1 - this.t / 1.4, 0, 1) : 1;
+    // The intro used to fade the boss up from nothing, which made sense when it
+    // arrived out of empty air. Now every guardian is already lying there in a
+    // dormant pose, so a fade from zero blinked it out of existence on the exact
+    // frame it woke. It stays solid; the rise and the roar carry the moment.
+    let a = 1;
     if (this.purified && (this.pureT || 0) < 0.7) a *= clamp((this.pureT || 0) / 0.7 + 0.15, 0.15, 1);
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
     const cx = this.cx(), cy = this.cy();
