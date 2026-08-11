@@ -74,13 +74,21 @@ const ROOMS = {
       hline(g, 25, 28, 12, '=');
       rect(g, 29, 8, 29, 11, '.');          // exit R (upper level)
     } },
-  B2: { zone: 'B', w: 60, h: 17, exits: { L: 'B1', R: 'B3' },
+  B2: { zone: 'B', w: 60, h: 17, exits: { L: 'B1', R: 'B3', B: 'V2' },
     ents: [['turret', 20, 15], ['turret', 38, 15], ['flier', 33, 7], ['hopper', 45, 15], ['crawler', 50, 15], ['scrap', 14, 15, 10], ['riddle', 55, 15, 1], ['secret', 51, 10, 'collar']],
     build(g) {
       frame(g); openR(g);
       rect(g, 0, 8, 0, 11, '.');            // entry from B1 (upper left)
       rect(g, 1, 12, 8, 14, '#');           // left ledge
       hline(g, 28, 31, 15, '^');            // spike strip
+      // THE BRITTLE RAIL. Stand on it and cut down. Without the Grounding
+      // Crest that is simply death, which is exactly why nobody finds this
+      // before they have it.
+      // Row 15 is the live rail; row 16 stays a solid floor slab that has to be
+      // broken separately. Making BOTH rows hazard would have handed the vault
+      // to anyone with the crest for free — hazard tiles are not solid, so she
+      // would simply have fallen through without ever cutting anything.
+      hline(g, 43, 46, 15, 'v'); hline(g, 43, 46, 16, 'B');
       hline(g, 27, 32, 11, '=');
       hline(g, 2, 4, 4, '='); hline(g, 5, 7, 7, '='); hline(g, 2, 4, 10, '=');
       hline(g, 42, 45, 12, '='); hline(g, 50, 53, 10, '=');
@@ -107,6 +115,19 @@ const ROOMS = {
   V1: { zone: 'X', w: 24, h: 17, exits: { L: 'B5' },
     ents: [['chest', 12, 15, 'rl:aegis'], ['scrap', 5, 15, 60], ['scrap', 8, 15, 60], ['scrap', 16, 15, 60], ['scrap', 19, 15, 40], ['term', 9, 15, 4]],
     build(g) { frame(g); openL(g); hline(g, 8, 15, 11, '='); } },
+  // THE GROUNDED VAULT. There is no door and no key. The only way in is to
+  // stand ON a live hazard rail — which is fatal without the Grounding Crest —
+  // and cut through the brittle section of it. Until somebody does that, this
+  // room does not exist on the map, because the map only ever draws rooms that
+  // have actually been stood in.
+  V2: { zone: 'X', w: 22, h: 17, exits: { T: 'B2' },
+    ents: [['chest', 11, 15, 'nine'], ['scrap', 4, 15, 80], ['scrap', 17, 15, 80],
+           ['scrap', 8, 11, 60], ['bench', 14, 15], ['term', 6, 15, 4]],
+    build(g) {
+      frame(g);
+      rect(g, 9, 0, 12, 0, '.');            // the hole she cut, overhead
+      hline(g, 6, 10, 11, '='); hline(g, 13, 17, 8, '=');
+    } },
   // ============ ZONE X — Crystal Cache (secret) ============
   X1: { zone: 'X', w: 30, h: 17, exits: { B: 'B5' },
     ents: [['boss', 20, 15, 'prism'], ['chest', 24, 15, 'nine', 'bossPrism'], ['scrap', 4, 15, 20], ['riddle', 3, 15, 7]],
@@ -182,7 +203,7 @@ const ROOMS = {
 // map screen layout: [gridX, gridY, wCells, hCells]
 const MAPPOS = {
   A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A3: [3, 3, 1, 1], A4: [4, 3, 1, 1], A5: [1, 4, 1, 1],
-  B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1],
+  B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
   X1: [8, 1, 1, 1],
   C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1],
   D1: [5, 6, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1],

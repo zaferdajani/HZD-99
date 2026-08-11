@@ -196,6 +196,7 @@ en: {
   c_magnet: 'Magnet Core', c_magnetd: 'Scrap flies to you from afar.',
   c_siphon: 'Volt Siphon', c_siphond: 'Gain 50% more volts per hit.',
   c_phantom: 'Phantom Coil', c_phantomd: 'Dashing makes you briefly untouchable.',
+  c_ground: 'Grounding Crest', c_groundd: 'Live rails cannot hurt you — and a brittle one can be cut through.',
   c_sprint: 'Sprinter Protocol', c_sprintd: 'Run 15% faster and dash further.',
   c_nine: 'Ninth Life', c_nined: 'Cheat death once per rest: revive with 3 cores.',
   s_slot: 'Crest Socket', s_slotd: 'Permanently gain +1 crest socket.',

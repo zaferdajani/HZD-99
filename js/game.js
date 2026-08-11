@@ -43,7 +43,7 @@ function applyUpdate() {
   } catch (e) { location.reload(); }
 }
 
-const CRESTS = { claws: 2, over: 2, plate: 2, magnet: 1, siphon: 1, phantom: 2, sprint: 1, nine: 3 };
+const CRESTS = { claws: 2, over: 2, plate: 2, magnet: 1, siphon: 1, phantom: 2, sprint: 1, ground: 2, nine: 3 };
 const SHOP = [
   { id: 'claws', type: 'crest', cost: 220 }, { id: 'over', type: 'crest', cost: 240 },
   { id: 'plate', type: 'crest', cost: 300 }, { id: 'siphon', type: 'crest', cost: 200 },
@@ -278,6 +278,24 @@ function loadRoom(id) {
   if (G.save.pouch && G.save.pouch.room === id) {
     const p = new Pouch(G.save.pouch.x, G.save.pouch.y, G.save.pouch.amount);
     G.pickups.push(p);
+  }
+  // THE GRINDERS. Every horizontal run of hazard rail long enough to patrol
+  // gets a wheel. The Foundry is the exception: down there the hazard is not a
+  // machine at all, it is the melt, and nothing rolls on it.
+  G.saws = [];
+  if (typeof SawWheel === 'function' && def.zone !== 'C' && !(typeof isHero === 'function' && isHero())) {
+    const gg = G.grid;
+    for (let ty = 0; ty < gg.length; ty++) {
+      let run = -1;
+      for (let tx = 0; tx <= gg[0].length; tx++) {
+        const isH = tx < gg[0].length && tileAt(tx, ty) === '^';
+        if (isH && run < 0) run = tx;
+        else if (!isH && run >= 0) {
+          if (tx - run >= 3) G.saws.push(new SawWheel(run * TILE, tx * TILE, ty));
+          run = -1;
+        }
+      }
+    }
   }
   if (typeof purifyPreloadNear === 'function') purifyPreloadNear(id);
   if (player) player.oathUsed = false;      // the lion owes her once per room
@@ -535,6 +553,7 @@ function update(dt) {
       } else G.starRegenT = 0;
       if (bossActive()) player.x = clamp(player.x, 4, G.roomDef.w * TILE - player.w - 4);
       for (const e of G.enemies) if (!e.dead) e.update(dt);
+      if (G.saws) for (const sw of G.saws) sw.update(dt);
       if (typeof updatePets === 'function') updatePets(dt);
       if (typeof updateBrDelta === 'function') updateBrDelta(dt);
       G.enemies = G.enemies.filter(e => !e.dead);
@@ -2262,89 +2281,113 @@ function drawTiles(P) {
         c.fillStyle = P.edge; c.fillRect(X, Y, TILE, 3);
         c.globalAlpha = 0.5; c.fillRect(X + 4, Y + 9, 2.5, 4); c.fillRect(X + 25, Y + 9, 2.5, 4); c.globalAlpha = 1;
       }
-    } else if (ch === '^') {
+    } else if (ch === '^' || ch === 'v') {
       // -----------------------------------------------------------------
-      // THE TEETH. These were two flat identical triangles filled with
-      // P.spike — which is the LIGHTEST colour in every kingdom's palette.
-      // A pale pastel shape in the softest tone available reads as scenery,
-      // not as the thing that kills you, and no amount of glow fixes that.
+      // THE HAZARD RAIL. Cones were the wrong idea twice over: a triangle
+      // sitting still reads as a warning sign rather than a threat, and you
+      // route around it once and never think about it again.
       //
-      // Hazards need three things the old ones had none of. A material of
-      // their OWN, so they are visibly not made of the floor: dark iron
-      // driven into a socket. VOLUME, from a lit facet and a shadow facet
-      // either side of a ridge — sharpness reads as a thin hard specular,
-      // never as a fat glow. And a HISTORY: irregular heights, chipped tips
-      // and dried stain at the root, because a hazard that has obviously
-      // been used is the one players actually respect.
+      // Outside the Foundry this is now a MACHINED TRENCH — a recessed
+      // channel with a live rail down it and hazard chevrons on the lip —
+      // and a bolted saw wheel patrols every run of it long enough to walk.
+      // The trench is the track; the wheel is the danger, and it has to be
+      // read and timed instead of merely avoided.
+      //
+      // In the Foundry there is no machine at all. The floor is simply open
+      // to the melt, and the melt takes whatever falls in it — hers or
+      // theirs, it does not distinguish.
       // -----------------------------------------------------------------
-      // Steel that is LIGHTER than the ground it stands in. The first attempt
-      // made these near-black and they vanished against a dark floor — a hazard
-      // you cannot see the silhouette of is not intimidating, it is unfair. The
-      // body is deliberately zone-independent so it reads on green rock, orange
-      // rock and blue ice alike; only a rim of the kingdom's own light is
-      // borrowed, so it still belongs here.
       c.save();
-      const steelD = '#141a22', steelM = rkMix('#57646f', P.edge, 0.12), steelL = rkMix('#aebbc7', P.edge, 0.18);
-      const ironDim = rkMix(P.dark, '#000000', 0.72);
-      // the socket they are driven into
-      c.fillStyle = ironDim; c.fillRect(X, Y + TILE - 7, TILE, 7);
-      c.fillStyle = steelD; c.fillRect(X, Y + TILE - 7, TILE, 2);
-      // TWO broad teeth, not a comb of needles. A wedge that is nearly as wide
-      // at the root as it is tall reads as something that would go THROUGH you;
-      // a thin pin reads as a fence. Width is most of the menace.
-      for (let k = 0; k < 2; k++) {
-        const h2 = hash2(tx * 7 + k * 31, ty * 13);
-        const bx = X + 8 + k * 16 + (h2 - 0.5) * 2.6;
-        const hgt = 13 + h2 * 8;
-        const lean = (hash2(tx + k, ty * 3) - 0.5) * 2.6;
-        const halfW = 7.4 - h2 * 1.4;
-        const tipX = bx + lean, tipY = Y + TILE - 6 - hgt;
-        // the whole tooth, then the lit facet over its left half. A hard dark
-        // outline around the silhouette is what separates it from the floor at
-        // gameplay distance — without it the shape dissolves into the rock.
-        c.fillStyle = steelM;
-        c.beginPath();
-        c.moveTo(bx - halfW, Y + TILE - 5); c.lineTo(tipX, tipY);
-        c.lineTo(bx + halfW, Y + TILE - 5); c.closePath(); c.fill();
-        c.fillStyle = steelL;
-        c.beginPath();
-        c.moveTo(bx - halfW, Y + TILE - 5); c.lineTo(tipX, tipY);
-        c.lineTo(tipX - halfW * 0.34, Y + TILE - 5); c.closePath(); c.fill();
-        // NB: do not touch lineJoin here. An earlier version set it to 'miter'
-        // and leaked that to everything drawn afterwards — the Foundry's lava
-        // strokes have sharp corners, and miter joins turned them into enormous
-        // black spears across the whole screen.
-        c.strokeStyle = steelD; c.lineWidth = 1.3;
-        c.beginPath();
-        c.moveTo(bx - halfW, Y + TILE - 5); c.lineTo(tipX, tipY);
-        c.lineTo(bx + halfW, Y + TILE - 5); c.stroke();
-        // the honed edge — thin, and only on the top half, because that is
-        // where a blade actually catches the light
-        c.strokeStyle = '#ffffff';
-        c.globalAlpha = 0.6; c.lineWidth = 1;
-        c.beginPath();
-        c.moveTo(tipX, tipY + 1);
-        c.lineTo(bx - halfW * 0.5, Y + TILE - 5 - hgt * 0.34);
-        c.stroke();
-        // the point itself — not every tooth catches the light equally, or the
-        // row turns into a dotted line
-        c.globalAlpha = 0.55 + h2 * 0.42; c.fillStyle = '#ffffff';
-        c.fillRect(tipX - 0.8, tipY, 1.6, 1.6);
+      if (G.roomDef.zone === 'C' && !(typeof isHero === 'function' && isHero())) {
+        // ---- THE MELT ----
+        const cr = rkMix(P.dark, '#000000', 0.55);
+        c.fillStyle = cr; c.fillRect(X, Y, TILE, TILE);
+        // molten body, hottest at the surface
+        const lg = c.createLinearGradient(0, Y + 2, 0, Y + TILE);
+        lg.addColorStop(0, '#fff1b8'); lg.addColorStop(0.22, '#ffae2e');
+        lg.addColorStop(0.6, '#e8460f'); lg.addColorStop(1, '#6b1204');
+        c.fillStyle = lg; c.fillRect(X, Y + 2, TILE, TILE - 2);
+        // crust: cooled plates floating on it, which is what sells DEPTH —
+        // without them a lava tile is just an orange rectangle
+        for (let k = 0; k < 3; k++) {
+          const h2 = hash2(tx * 11 + k * 17, ty * 5);
+          if (h2 < 0.42) continue;
+          c.fillStyle = 'rgba(38,12,8,0.82)';
+          rr(c, X + 2 + h2 * 18, Y + 5 + hash2(k, tx) * 16, 6 + h2 * 9, 3.5 + h2 * 2.5, 2); c.fill();
+          c.fillStyle = 'rgba(255,150,60,0.35)';
+          c.fillRect(X + 2 + h2 * 18, Y + 4.4 + hash2(k, tx) * 16, 6 + h2 * 9, 1);
+        }
+        // the meniscus where it laps the rock
+        c.fillStyle = 'rgba(255,236,180,0.85)'; c.fillRect(X, Y + 1.5, TILE, 1.6);
+        c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
+        const hg = c.createLinearGradient(0, Y - 10, 0, Y + 8);
+        hg.addColorStop(0, 'rgba(255,120,30,0)'); hg.addColorStop(1, 'rgba(255,150,50,0.7)');
+        c.fillStyle = hg; c.fillRect(X, Y - 10, TILE, 18);
+      } else {
+        // ---- THE TRENCH ----
+        const steelD = '#141a22';
+        const steelM = rkMix('#4d5a66', P.edge, 0.1);
+        const steelL = rkMix('#9fadba', P.edge, 0.16);
+        // recess: the floor is cut away, and you can see it is cut away
+        c.fillStyle = rkMix(P.dark, '#000000', 0.78); c.fillRect(X, Y, TILE, TILE);
+        c.fillStyle = steelD; c.fillRect(X, Y + 2, TILE, TILE - 2);
+        // the lip on either side, machined and bolted
+        c.fillStyle = steelM; c.fillRect(X, Y, TILE, 4);
+        c.fillStyle = steelL; c.fillRect(X, Y, TILE, 1.4);
+        for (let k = 0; k < 2; k++) {
+          c.fillStyle = steelD;
+          c.beginPath(); c.arc(X + 8 + k * 16, Y + 2.2, 1.3, 0, 7); c.fill();
+        }
+        // hazard chevrons, the universal "machinery runs here"
+        c.globalAlpha = 0.55;
+        for (let k = -1; k < 3; k++) {
+          c.fillStyle = k % 2 ? '#c8ce18' : '#1a1d24';
+          c.beginPath();
+          const cx0 = X + k * 11 + 4;
+          c.moveTo(cx0, Y + 4); c.lineTo(cx0 + 6, Y + 4);
+          c.lineTo(cx0 + 12, Y + 10); c.lineTo(cx0 + 6, Y + 10);
+          c.closePath(); c.fill();
+        }
         c.globalAlpha = 1;
-        // dried stain where it enters the socket
-        c.fillStyle = 'rgba(120,10,24,0.5)';
-        c.beginPath();
-        c.ellipse(bx, Y + TILE - 5.5, halfW * 1.5, 2.4, 0, 0, 7); c.fill();
+        // the live rail the wheels run on, sunk at the bottom
+        c.fillStyle = steelM; c.fillRect(X, Y + TILE - 8, TILE, 8);
+        c.fillStyle = steelD; c.fillRect(X, Y + TILE - 8, TILE, 1.6);
+        c.save();
+        c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.45;
+        const rg = c.createLinearGradient(0, Y + TILE - 8, 0, Y + TILE - 1);
+        if (ch === 'v') { rg.addColorStop(0, 'rgba(90,220,255,0)'); rg.addColorStop(1, 'rgba(120,232,255,0.95)'); }
+        else { rg.addColorStop(0, 'rgba(255,40,70,0)'); rg.addColorStop(1, 'rgba(255,46,74,0.9)'); }
+        c.fillStyle = rg; c.fillRect(X, Y + TILE - 8, TILE, 7);
+        c.restore();
+        // THE BRITTLE STRETCH. Same rail, same teeth — but the housing is
+        // cracked and its current runs cyan instead of crimson, because this
+        // length of it is not earthed. Nothing announces what that means; a
+        // player only learns it by standing on it, which they cannot survive
+        // until they are carrying the Grounding Crest.
+        if (ch === 'v') {
+          c.strokeStyle = '#9fe8ff'; c.globalAlpha = 0.5; c.lineWidth = 1.2;
+          for (let k = 0; k < 3; k++) {
+            const h3 = hash2(tx * 3 + k, ty * 9);
+            c.beginPath();
+            c.moveTo(X + 3 + k * 10, Y + 5);
+            c.lineTo(X + 6 + k * 10 + (h3 - 0.5) * 5, Y + 12 + h3 * 5);
+            c.lineTo(X + 3 + k * 10 + (h3 - 0.5) * 7, Y + TILE - 9);
+            c.stroke();
+          }
+          c.globalAlpha = 1;
+        }
+        // and a low bed of hardened teeth, so the trench itself still bites
+        c.fillStyle = steelL;
+        for (let k = 0; k < 4; k++) {
+          const h2 = hash2(tx * 5 + k * 23, ty * 7);
+          const bx = X + 4 + k * 8;
+          c.beginPath();
+          c.moveTo(bx - 3, Y + TILE - 7);
+          c.lineTo(bx, Y + TILE - 13 - h2 * 3);
+          c.lineTo(bx + 3, Y + TILE - 7);
+          c.closePath(); c.fill();
+        }
       }
-      // the virus still running in the rail underneath — this is what makes a
-      // row of teeth read as ARMED rather than as an old fence
-      c.save();
-      c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.4;
-      c.globalAlpha = 0.22;
-      const sg = c.createLinearGradient(0, Y + TILE - 8, 0, Y + TILE - 1);
-      sg.addColorStop(0, 'rgba(255,40,70,0)'); sg.addColorStop(1, 'rgba(255,46,74,0.75)');
-      c.fillStyle = sg; c.fillRect(X, Y + TILE - 8, TILE, 7);
-      c.restore();
       c.restore();
     } else if (ch === 'B') {
       // ---------------------------------------------------------------------
@@ -2750,16 +2793,10 @@ function drawSpikeMenace() {
     const g = c.createLinearGradient(0, Y + TILE, 0, Y - 12);
     g.addColorStop(0, 'rgba(255,50,80,0.9)'); g.addColorStop(1, 'rgba(255,50,80,0)');
     c.fillStyle = g; c.fillRect(X - 2, Y - 12, TILE + 4, TILE + 12);
-    // and the points catch it
-    c.globalAlpha = k * (0.3 + pu * 0.45);
-    c.fillStyle = '#fff2f4';
-    for (let m = 0; m < 2; m++) {
-      const h2 = hash2(tx * 7 + m * 31, ty * 13);
-      const bx = X + 8 + m * 16 + (h2 - 0.5) * 2.6;
-      const hgt = 13 + h2 * 8;
-      const lean = (hash2(tx + m, ty * 3) - 0.5) * 2.6;
-      c.beginPath(); c.arc(bx + lean, Y + TILE - 6 - hgt, 1.6 + pu * 1.3, 0, 7); c.fill();
-    }
+    // the melt breathes light upward; the trench glows along its rail
+    c.globalAlpha = k * (0.2 + pu * 0.3);
+    c.fillStyle = G.roomDef.zone === 'C' ? '#ffd08a' : '#ffd0d6';
+    c.fillRect(X + 2, Y + TILE - 10, TILE - 4, 2);
   }
   c.restore();
 }
@@ -3155,6 +3192,7 @@ function drawWorldFrame() {
   drawBreakHint();
   for (const p of G.pickups) p.draw(c);
   if (G.plats) for (const pl of G.plats) pl.draw(c);
+  if (G.saws) for (const sw of G.saws) sw.draw(c);
   for (const e of G.enemies) e.draw(c);
   for (const w of G.wrecks) w.draw(c);
   if (G.boss) G.boss.draw(c);

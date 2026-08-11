@@ -29,7 +29,7 @@ function tileAt(tx, ty) {
   if (G.roomId === 'X1' && G.x1Bridge && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)
       && ty >= 15 && tx >= 6 && tx <= 8) return '#';
   const c = g[ty][tx];
-  if (c === 'B' && G.save.broken[G.roomId + ':' + tx + ',' + ty]) return '.';
+  if ((c === 'B' || c === 'v') && G.save.broken[G.roomId + ':' + tx + ',' + ty]) return '.';
   return c;
 }
 function solidAt(tx, ty) { const c = tileAt(tx, ty); return c === '#' || c === 'B'; }
@@ -95,7 +95,7 @@ function moveEnt(e, dt) {
 function onSpike(e) {
   const x0 = Math.floor((e.x + 5) / TILE), x1 = Math.floor((e.x + e.w - 5) / TILE);
   const y0 = Math.floor((e.y + 6) / TILE), y1 = Math.floor((e.y + e.h - 2) / TILE);
-  for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) if (tileAt(tx, ty) === '^') return true;
+  for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) { const c2 = tileAt(tx, ty); if (c2 === '^' || c2 === 'v') return true; }
   return false;
 }
 function groundAhead(e, dir) {
@@ -509,8 +509,14 @@ class Player {
         sfx((G.roomDef.ice || (G.iceT || 0) > 0) ? 'stepice' : 'step');
       }
     } else this.stepT = 0.1;
-    // hazard tiles
-    if (onSpike(this)) {
+    // hazard tiles. The GROUNDING CREST is the one piece of kit that lets her
+    // stand on a live rail — and standing on one is the only way to reach what
+    // is under the brittle stretch of it.
+    if (onSpike(this) && hasCrest('ground')) {
+      if (chance(0.5)) addPart(this.x + rnd(0, this.w), this.y + this.h - 2,
+        rnd(-40, 40), rnd(-70, -20), 0.3, chance(0.5) ? '#9fe8ff' : '#ffffff', 2, 90, true);
+      this.groundedOn = true;
+    } else if (onSpike(this)) {
       this.hurt(1, this.x - this.vx);
       if (!this.dead) { this.x = this.lastSafe.x; this.y = this.lastSafe.y; this.vx = 0; this.vy = 0; }
     } else if (this.on && this.vy === 0) {
@@ -589,7 +595,19 @@ class Player {
       const x0 = Math.floor(hb.x / TILE), x1 = Math.floor((hb.x + hb.w) / TILE);
       const y0 = Math.floor(hb.y / TILE), y1 = Math.floor((hb.y + hb.h) / TILE);
       for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
-        const c = (tileAt(tx, ty) === '#' && brLoose(tx, ty)) ? 'B' : tileAt(tx, ty);
+        const raw = tileAt(tx, ty);
+        // only a grounded cat can cut a live rail; anyone else is just being hit
+        if (raw === 'v') {
+          if (hasCrest('ground') && this.swing.ay > 0) {
+            G.breakTile(tx, ty); pogo = true;
+            sfx('glass'); cam.shake = Math.max(cam.shake, 7);
+            for (let i = 0; i < 14; i++)
+              addPart(tx * TILE + 16, ty * TILE + 16, rnd(-220, 220), rnd(-260, 60),
+                rnd(0.4, 0.8), chance(0.5) ? '#9fe8ff' : '#fff2a8', rnd(2, 3.4), 500, true);
+          }
+          continue;
+        }
+        const c = (raw === '#' && brLoose(tx, ty)) ? 'B' : raw;
         if (c === 'B') {
           // floor blocks (at/below the feet) only break with a DOWN-attack
           // (jump, hold down, hit); side/ceiling secret walls break normally
@@ -1709,6 +1727,129 @@ class Proj {
 // Powered rail slabs for the later zones: each one ping-pongs between two
 // anchors on a smooth cosine, carries whoever rides it, and is ONE-WAY —
 // she jumps up through it freely and only lands from above.
+// ===========================================================================
+// THE GRINDER. A cone sitting still on the floor is a warning sign, not a
+// threat — you route around it once and never think about it again. A wheel
+// that PATROLS the rail is a different thing entirely: it has to be read, timed
+// and beaten, and it turns a static wall into a piece of play.
+//
+// It is built like a machine that would actually exist in this factory: a
+// bolted hub, spokes under tension, and a hardened tooth ring that bites the
+// rail it runs on and throws sparks off it. Rotation is derived from distance
+// travelled, never from a timer, because a wheel that slides instead of rolling
+// is the one thing the eye catches instantly.
+// ===========================================================================
+class SawWheel {
+  constructor(x0, x1, ty) {
+    this.r = 19;
+    this.railY = ty * TILE;                 // top of the hazard rail
+    this.x0 = x0 + this.r; this.x1 = x1 - this.r;
+    if (this.x1 < this.x0) { const m = (x0 + x1) / 2; this.x0 = this.x1 = m; }
+    this.x = this.x0; this.y = this.railY + TILE - this.r * 0.62;
+    this.spd = 74 + ((x0 * 7919) % 40);     // each rail runs at its own pace
+    this.dir = ((x0 / TILE) | 0) % 2 ? 1 : -1;
+    this.rot = 0; this.sparkT = 0; this.arcSeed = 0; this.arcT = 0;
+  }
+  update(dt) {
+    const span = this.x1 - this.x0;
+    if (span <= 1) { this.rot += dt * 5; return; }
+    const nx = this.x + this.dir * this.spd * dt;
+    if (nx > this.x1) { this.x = this.x1; this.dir = -1; }
+    else if (nx < this.x0) { this.x = this.x0; this.dir = 1; }
+    else this.x = nx;
+    // rolling, not sliding: the tooth ring turns exactly as far as it travelled
+    this.rot += (this.dir * this.spd * dt) / this.r;
+    // the arc re-strikes on its own clock, so it flickers instead of spinning
+    this.arcT -= dt;
+    if (this.arcT <= 0) { this.arcT = 0.055; this.arcSeed = (this.arcSeed + 5) % 12; }
+    // it grinds where it touches
+    this.sparkT -= dt;
+    if (this.sparkT <= 0 && typeof addPart === 'function') {
+      this.sparkT = 0.035;
+      for (let i = 0; i < 2; i++)
+        addPart(this.x - this.dir * this.r * 0.55, this.y + this.r * 0.86,
+          -this.dir * rnd(90, 260), rnd(-140, -20), rnd(0.18, 0.38),
+          chance(0.5) ? '#fff0c0' : '#ffa23c', rnd(1.6, 2.6), 620, true);
+    }
+    // and it hurts, above the rail, which is the entire point of it moving
+    if (player && !player.dead && player.iT <= 0) {
+      const dx = (player.x + player.w / 2) - this.x, dy = (player.y + player.h / 2) - this.y;
+      if (Math.hypot(dx, dy) < this.r + 12) player.hurt(1, this.x);
+    }
+  }
+  draw(c2) {
+    const P = PAL[G.roomDef.zone];
+    c2.save();
+    c2.translate(this.x, this.y);
+    // the shadow it casts into its own trench
+    c2.globalAlpha = 0.4; c2.fillStyle = '#000';
+    c2.beginPath(); c2.ellipse(0, this.r * 0.9, this.r * 0.95, 4, 0, 0, 7); c2.fill();
+    c2.globalAlpha = 1;
+    c2.rotate(this.rot);
+    const R = this.r;
+    // hardened tooth ring — swept, so the leading edge of each tooth is the
+    // one that would catch
+    c2.fillStyle = rkMix('#8f9daa', P.edge, 0.12);
+    c2.beginPath();
+    const N = 12;
+    for (let i = 0; i < N; i++) {
+      const a0 = (i / N) * Math.PI * 2, a1 = ((i + 0.42) / N) * Math.PI * 2, a2 = ((i + 1) / N) * Math.PI * 2;
+      c2.lineTo(Math.cos(a0) * R * 0.82, Math.sin(a0) * R * 0.82);
+      c2.lineTo(Math.cos(a1) * R * 1.16, Math.sin(a1) * R * 1.16);
+      c2.lineTo(Math.cos(a2) * R * 0.82, Math.sin(a2) * R * 0.82);
+    }
+    c2.closePath(); c2.fill();
+    c2.strokeStyle = '#141a22'; c2.lineWidth = 1.4; c2.stroke();
+    // the honed inner edge of the ring
+    c2.strokeStyle = '#eaf4ff'; c2.globalAlpha = 0.5; c2.lineWidth = 1.4;
+    c2.beginPath(); c2.arc(0, 0, R * 0.8, 0, 7); c2.stroke();
+    c2.globalAlpha = 1;
+    // disc, spokes, bolted hub
+    const g = c2.createRadialGradient(-R * 0.3, -R * 0.35, 2, 0, 0, R * 0.8);
+    g.addColorStop(0, '#7c8996'); g.addColorStop(1, '#2b333d');
+    c2.fillStyle = g;
+    c2.beginPath(); c2.arc(0, 0, R * 0.78, 0, 7); c2.fill();
+    c2.strokeStyle = '#0e131a'; c2.lineWidth = 1.2;
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      c2.beginPath(); c2.moveTo(Math.cos(a) * R * 0.2, Math.sin(a) * R * 0.2);
+      c2.lineTo(Math.cos(a) * R * 0.72, Math.sin(a) * R * 0.72); c2.stroke();
+    }
+    c2.fillStyle = '#5d6975';
+    c2.beginPath(); c2.arc(0, 0, R * 0.26, 0, 7); c2.fill();
+    c2.strokeStyle = '#0e131a'; c2.lineWidth = 1.1; c2.stroke();
+    c2.fillStyle = '#0e131a';
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 + 0.4;
+      c2.beginPath(); c2.arc(Math.cos(a) * R * 0.16, Math.sin(a) * R * 0.16, 1.5, 0, 7); c2.fill();
+    }
+    // ---- IT IS ELECTRIC ----------------------------------------------
+    // The blade is not merely sharp, it is LIVE: the tooth ring carries a
+    // charge that lights its own edge and jumps to whatever is nearest. An
+    // arc is the cheapest possible way to say "do not touch this", and it
+    // is the thing that stops a wheel reading as a cog.
+    c2.globalCompositeOperation = 'lighter';
+    c2.globalAlpha = 0.55 + Math.sin(this.rot * 3) * 0.2;
+    c2.strokeStyle = '#bdf0ff'; c2.lineWidth = 2.2;
+    c2.beginPath(); c2.arc(0, 0, R * 1.02, 0, 7); c2.stroke();
+    c2.globalAlpha = 0.9; c2.strokeStyle = '#ffffff'; c2.lineWidth = 1;
+    // arcs jumping tooth to tooth
+    const AN = 12;
+    for (let i = 0; i < 3; i++) {
+      const j = ((this.arcSeed || 0) + i * 5) % AN;
+      const a0 = (j / AN) * Math.PI * 2, a1 = ((j + 1) / AN) * Math.PI * 2;
+      const mid = (a0 + a1) / 2, bulge = R * (1.1 + ((j * 7) % 5) / 16);
+      c2.beginPath();
+      c2.moveTo(Math.cos(a0) * R * 1.14, Math.sin(a0) * R * 1.14);
+      c2.quadraticCurveTo(Math.cos(mid) * bulge * 1.32, Math.sin(mid) * bulge * 1.32,
+                          Math.cos(a1) * R * 1.14, Math.sin(a1) * R * 1.14);
+      c2.stroke();
+    }
+    c2.globalAlpha = 0.6; c2.fillStyle = '#9fe8ff';
+    c2.beginPath(); c2.arc(0, 0, R * 0.14, 0, 7); c2.fill();
+    c2.restore();
+  }
+}
 class MovingPlat {
   constructor(tx, ty, spec) {
     // spec: [dxTiles, dyTiles, periodSec, widthTiles?]
