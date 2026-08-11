@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msoibgh6";window.GAME_LOCK="hero"</script>
+<script>window.BUILD_ID="msokdi7j";window.GAME_LOCK="hero"</script>
 <script>
 /**
  * @license
@@ -13665,7 +13665,12 @@ function strataTex(zone) {
 // around as your pet. No smoke, no wreckage: the film IS the death.
 // A hard timeout and an error path guarantee this can never trap the player.
 // ===========================================================================
-const PURIFY_VID = { glitch: 'assets/video/purify_glitch.mp4' };
+const PURIFY_VID = {
+  glitch: 'assets/video/purify_glitch.mp4', // NULLFANG      - the lion
+  brood: 'assets/video/purify_brood.mp4',   // TALONHOST     - the eagle
+  zero: 'assets/video/purify_zero.mp4',     // GLACIERE      - the unicorn
+  atlas: 'assets/video/purify_atlas.mp4',   // FURNACE CHOIR - the dragon
+};
 const purifyPre = {};
 // Start pulling the film down long before it is needed, and — critically —
 // PRIME it inside a real user gesture: browsers will not hand you a decoded
@@ -13776,12 +13781,17 @@ function updateCut(dt) {
     return;
   }
   if (ct.ph === 'play') {
+    // stall watch: if the frame clock has not moved after a beat and a half,
+    // this browser cannot decode the film. Bail immediately rather than make
+    // her stand in the dark — the fight resumes as if the memory never came.
+    if (v.currentTime > (ct.lastCT || 0) + 0.01) { ct.lastCT = v.currentTime; ct.stall = 0; }
+    else ct.stall = (ct.stall || 0) + dt;
     const dead = ct.failed || (v.error != null)
       || (v.ended === true)
       || (v.duration && v.currentTime >= v.duration - 0.05);
     // hard ceiling: a film that never loads or never ends still hands back
     const cap = (v.duration && isFinite(v.duration)) ? v.duration + 2.5 : 12;
-    if (dead || ct.t > cap) { ct.ph = 'out'; ct.t = 0; }
+    if (dead || ct.stall > 1.5 || ct.t > cap) { ct.ph = 'out'; ct.t = 0; }
     return;
   }
   if (ct.t >= 0.65) endPurifyCut();
