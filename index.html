@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msox4s7y";window.GAME_LOCK="robo"</script>
+<script>window.BUILD_ID="msoxcgfz";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -10682,6 +10682,37 @@ const BSTAT = {
   prism: { w: 62, h: 46, hp: 520 },
   mother: { w: 120, h: 120, hp: 750 },
 };
+// EVERY GUARDIAN'S REAL BODY, AND THE SHEET IT ARRIVES IN. One table, checked
+// per kind. If a kind is in here it has authored art and must never be drawn as
+// anything else — not as the driller it was prototyped from, not as another
+// guardian whose sheet happens to be in memory.
+const BOSS_ART = {
+  glitch: 'beastParts',      // NULLFANG      — the lion
+  brood: 'eagleParts',       // TALONHOST     — the eagle
+  zero: 'glaciereParts',     // GLACIERE      — the unicorn
+  atlas: 'dragonParts',      // FURNACE CHOIR — the dragon
+  prism: 'prismParts',       // PRISM PROWLER — the cat
+};
+// It is there; its body just has not come over the wire yet. A dark mass with a
+// live rim and two eyes reads as "something enormous, in the dark, watching" —
+// which is the right thing to be looking at for the half second this lasts, and
+// is honest in a way that showing the wrong creature never was.
+function drawBossHold(c, b) {
+  const P = PAL[G.roomDef.zone];
+  const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+  const pu = 0.5 + Math.sin((b.anim || 0) * 3) * 0.5;
+  c.save();
+  c.fillStyle = 'rgba(7,10,16,0.94)';
+  c.beginPath(); c.ellipse(cx, cy, b.w * 0.56, b.h * 0.56, 0, 0, 6.2832); c.fill();
+  c.globalAlpha = 0.22 + pu * 0.28; c.strokeStyle = P.glow; c.lineWidth = 2.5; c.stroke();
+  c.globalAlpha = 0.45 + pu * 0.55; c.fillStyle = P.glow;
+  for (const s of [-1, 1]) {
+    c.beginPath();
+    c.ellipse(cx + s * b.w * 0.15, cy - b.h * 0.16, 3.6, 2.3, 0, 0, 6.2832);
+    c.fill();
+  }
+  c.restore();
+}
 class Boss {
   constructor(kind, x, y) {
     const s = BSTAT[kind];
@@ -12293,12 +12324,10 @@ class Boss {
     // Every routing decision below checks the theme FIRST: the Odyssey's
     // bosses are never allowed to borrow the machine art, dead or alive.
     const heroWorld = typeof isHero === 'function' && isHero();
-    if (this.dead && !heroWorld
-      && !((this.kind === 'glitch' || this.kind === 'brood') && typeof mediaHas === 'function' && (mediaHas('beastParts') || mediaHas('eagleParts') || mediaHas('driller')))
-      && !(this.kind === 'zero' && typeof mediaHas === 'function' && mediaHas('glaciereParts'))
-      && !(this.kind === 'prism' && typeof drawPrism === 'function')
-      && !(this.kind === 'mother' && typeof drawMother === 'function')
-      && !(this.kind === 'atlas' && typeof mediaHas === 'function' && mediaHas('dragonParts'))) return;
+    // The old test ORed the art keys across bosses, so NULLFANG counted as
+    // "has a body" whenever the EAGLE's sheet happened to be loaded. Per-kind,
+    // from one table, is the only version of this that cannot be wrong.
+    if (this.dead && !heroWorld && !BOSS_ART[this.kind] && this.kind !== 'mother') return;
     const P = PAL[G.roomDef.zone];
     // The intro used to fade the boss up from nothing, which made sense when it
     // arrived out of empty air. Now every guardian is already lying there in a
@@ -12437,9 +12466,18 @@ class Boss {
     if (!heroWorld && this.kind === 'glitch' && typeof drawBeast === 'function' && drawBeast(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'brood' && typeof drawEagle === 'function' && drawEagle(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'prism' && typeof drawPrism === 'function' && drawPrism(c, this)) { c.restore(); return; }
-    if (!heroWorld && this.kind === 'glitch' && typeof drawDriller3D === 'function' && drawDriller3D(c, this)) { c.restore(); return; }
     if (!heroWorld && this.kind === 'mother' && typeof drawMother === 'function' && drawMother(c, this)) { c.restore(); return; }
-    if (!heroWorld && this.kind === 'glitch' && drawDriller(c, this)) { c.restore(); return; }
+    // NEVER THE WRONG BODY. Every guardian's authored art streams in on demand,
+    // and until it lands its draw function returns false — which used to drop
+    // through to the legacy procedural boss underneath. That is exactly why
+    // walking into NULLFANG's room could show you the DRILLER for a moment: not
+    // a leftover asset, a fallback firing while the real sheet was still in
+    // flight. A guardian that HAS a body now waits behind its own silhouette
+    // rather than borrowing somebody else's.
+    if (!heroWorld && BOSS_ART[this.kind]) {
+      if (typeof mediaFetch === 'function') mediaFetch(BOSS_ART[this.kind]);
+      drawBossHold(c, this); c.restore(); return;
+    }
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
           flash: this.hurtT > 0 ? 1 : 0,
           grounded: this.kind !== 'brood' && this.kind !== 'zero' && this.kind !== 'prism',
@@ -13453,6 +13491,7 @@ const BR_SPOIL = ['core', 'scrap', 'iq', 'slot'];
 function bossSpoil(kind, pick) {
   if (!G.save) return null;
   const R = brRng(brHash('spoil/' + braid().led + '/' + kind + '/' + pick));
+  R(); R();                                  // warm the stream off the raw seed
   const g = BR_SPOIL[Math.floor(R() * BR_SPOIL.length) % BR_SPOIL.length];
   // mercy leaves a living creature that keeps giving; severance leaves salvage.
   // The KIND of gift tilts, the SIZE does not — neither answer is the rich one.
@@ -13965,6 +14004,12 @@ function loadRoom(id) {
   // a scripted finishing blow belongs to the room it was swung in; carrying one
   // across a door would leave her driven by a boss that no longer exists
   G.finish = null; G.offer = null; G.forkBoss = null;
+  // stream the room's guardian the moment the room exists, so its body is ready
+  // long before it stirs — the silhouette is a safety net, not a plan
+  setTimeout(() => {
+    if (G.boss && typeof BOSS_ART !== 'undefined' && BOSS_ART[G.boss.kind]
+        && typeof mediaFetch === 'function') mediaFetch(BOSS_ART[G.boss.kind]);
+  }, 0);
   parts.length = 0;
   const def = ROOMS[id];
   def.ents.forEach((d, i) => {

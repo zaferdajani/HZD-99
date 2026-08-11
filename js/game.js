@@ -211,6 +211,12 @@ function loadRoom(id) {
   // a scripted finishing blow belongs to the room it was swung in; carrying one
   // across a door would leave her driven by a boss that no longer exists
   G.finish = null; G.offer = null; G.forkBoss = null;
+  // stream the room's guardian the moment the room exists, so its body is ready
+  // long before it stirs — the silhouette is a safety net, not a plan
+  setTimeout(() => {
+    if (G.boss && typeof BOSS_ART !== 'undefined' && BOSS_ART[G.boss.kind]
+        && typeof mediaFetch === 'function') mediaFetch(BOSS_ART[G.boss.kind]);
+  }, 0);
   parts.length = 0;
   const def = ROOMS[id];
   def.ents.forEach((d, i) => {
