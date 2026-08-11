@@ -240,6 +240,9 @@ en: {
   // the one-time lesson: taught on the first loose rock, never shown again
   break_down: 'Loose rock — jump, hold DOWN, and strike',
   break_hit: 'Loose rock — strike it',
+  map_btn: 'MAP',
+  map_new: 'Map online — open it any time (M / Tab)',
+  map_ctl: 'Drag or ✥ to pan   ·   wheel / pinch / Z · X to zoom   ·   E fit   ·   Q recentre   ·   M close',
 },
 ar: {
   title: 'CLAWBYTE',
@@ -467,6 +470,9 @@ ar: {
   hint_secret: 'هذا الجدار يبدو أجوف…',
   break_down: 'صخرة مُتخلخلة — اقفز واضغط للأسفل ثم اضرب',
   break_hit: 'صخرة مُتخلخلة — اضربها',
+  map_btn: 'الخريطة',
+  map_new: 'الخريطة جاهزة — افتحها في أي وقت (M / Tab)',
+  map_ctl: 'اسحب للتحريك · عجلة أو تقريب بالإصبعين · E ملء الشاشة · Q توسيط · M إغلاق',
 },
 tr: {
   title: 'CLAWBYTE', subtitle: 'Makine Derinliklerinde bir robot-kedi metroidvania', press: 'Enter’a bas',

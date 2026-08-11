@@ -145,6 +145,7 @@ function tStateKind() {
   const s = G.state;
   if (s === 'PLAY') return 'play';
   if (s === 'TCFG') return 'tcfg';
+  if (s === 'MAP') return 'map';
   if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'RIDDLE' || s === 'SKILLS' || s === 'TRIAL') return 'menu';
   return 'tap';
 }
@@ -272,6 +273,20 @@ function tStart(e) {
           break;
         }
       }
+    } else if (kind === 'map') {
+      // the chart is driven directly: tap a control, drag the paper, pinch to
+      // zoom. Nothing here presses a game button, so a stray tap can never
+      // close the map by accident.
+      const inR = x >= L.r.left && x <= L.r.right && y >= L.r.top && y <= L.r.bottom;
+      const gx = (x - L.r.left) * 960 / L.r.width, gy = (y - L.r.top) * 540 / L.r.height;
+      if (inR && typeof mapTap === 'function' && mapTap(gx, gy)) { tBuzz(8); continue; }
+      TOUCH.mapT = TOUCH.mapT || {};
+      TOUCH.mapT[t.identifier] = { x, y };
+      const ids = Object.keys(TOUCH.mapT);
+      if (ids.length === 2) {
+        const a = TOUCH.mapT[ids[0]], b = TOUCH.mapT[ids[1]];
+        TOUCH.mapPinch = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+      }
     } else if (kind === 'menu') {
       if (Math.hypot(x - L.lgx, y - 28) < 28) { tPress('VBACK'); continue; }
       if (x >= L.r.left && x <= L.r.right && y >= L.r.top && y <= L.r.bottom) {
@@ -284,6 +299,29 @@ function tStart(e) {
 }
 function tMove(e) {
   e.preventDefault();
+  if (tStateKind() === 'map' && TOUCH.mapT) {
+    const L = tLayout();
+    const k = 960 / L.r.width;
+    for (const t of e.changedTouches) {
+      const rec = TOUCH.mapT[t.identifier]; if (!rec) continue;
+      const nx = t.clientX - TOUCH.ox, ny = t.clientY - TOUCH.oy;
+      const ids = Object.keys(TOUCH.mapT);
+      if (ids.length === 1 && typeof mapView !== 'undefined') {
+        mapView.x += (nx - rec.x) * k; mapView.y += (ny - rec.y) * k;
+      }
+      rec.x = nx; rec.y = ny;
+      if (ids.length === 2 && typeof mapZoomAt === 'function') {
+        const a = TOUCH.mapT[ids[0]], b = TOUCH.mapT[ids[1]];
+        const d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+        const prev = TOUCH.mapPinch || d;
+        const mx = ((a.x + b.x) / 2 - L.r.left) * k;
+        const my = ((a.y + b.y) / 2 - L.r.top) * (540 / L.r.height);
+        mapZoomAt(mx, my, d / prev);
+        TOUCH.mapPinch = d;
+      }
+    }
+    return;
+  }
   for (const t of e.changedTouches) {
     if (TOUCH.joy && t.identifier === TOUCH.joy.id) {
       const j = TOUCH.joy;
@@ -308,6 +346,10 @@ function tMove(e) {
   }
 }
 function tEnd(e) {
+  if (TOUCH.mapT) {
+    for (const t of e.changedTouches) delete TOUCH.mapT[t.identifier];
+    if (!Object.keys(TOUCH.mapT).length) { TOUCH.mapT = null; TOUCH.mapPinch = 0; }
+  }
   e.preventDefault();
   for (const t of e.changedTouches) {
     if (TOUCH.joy && t.identifier === TOUCH.joy.id) { TOUCH.joy = null; tApplyJoy(); }
@@ -425,6 +467,25 @@ function drawTouchUI() {
   }
   if (kind === 'play') {
     for (const b of L.corners) tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, 12);
+    // the map is the one corner control worth naming: an unlabelled glyph in a
+    // column of glyphs is not a button anybody finds
+    const mb = L.corners.find(b => b.code === 'VMAP');
+    if (mb && typeof mapUnlocked === 'function' && mapUnlocked()) {
+      const nw = (G.mapBtnNew || 0) > 0;
+      if (nw) {
+        tcx.save();
+        tcx.strokeStyle = 'rgba(120,240,255,' + (0.4 + Math.abs(Math.sin(performance.now() / 200)) * 0.6) + ')';
+        tcx.lineWidth = 2.5;
+        tcx.beginPath(); tcx.arc(mb.x, mb.y, mb.r + 7, 0, 7); tcx.stroke();
+        tcx.restore();
+      }
+      tcx.save();
+      tcx.font = '700 10px "Segoe UI", sans-serif';
+      tcx.textAlign = 'center'; tcx.textBaseline = 'middle';
+      tcx.fillStyle = nw ? '#eaffff' : 'rgba(190,220,235,0.85)';
+      tcx.fillText(t('map_btn'), mb.x, mb.y + mb.r + 9);
+      tcx.restore();
+    }
     // floating stick, alive under the thumb
     if (TOUCH.joy) {
       tCircle(TOUCH.joy.ox, TOUCH.joy.oy, 50, false, null);

@@ -583,7 +583,11 @@ function update(dt) {
       else sfx('ui');
     }
   }
-  else if (G.state === 'MAP') { if (inP('MAP') || inP('BACK') || inP('OK')) { G.state = 'PLAY'; sfx('ui'); } }
+  else if (G.state === 'MAP') {
+    if (G.mapBtnNew > 0) G.mapBtnNew = 0;
+    if (inP('MAP') || inP('BACK') || inP('PAUSE')) { G.state = 'PLAY'; mapView.ready = false; sfx('ui'); }
+    else updateMap(dt);
+  }
   else if (G.state === 'CREST') updateCrest();
   else if (G.state === 'SHOP') updateShop();
   else if (G.state === 'RIDDLE') updateRiddle();
@@ -2690,6 +2694,47 @@ function drawFX() {
     }
   }
 }
+// ---------------------------------------------------------------------------
+// THE MAP BUTTON. A map bound to a key nobody presses may as well not exist, so
+// there is a labelled control on the HUD that opens it — clickable with a mouse,
+// tappable on a phone. It stays out of the way until it means something: the
+// moment she has been in a second room, it fades in and says so once.
+// ---------------------------------------------------------------------------
+function mapUnlocked() {
+  let n = 0;
+  for (const k in (G.save && G.save.visited) || {}) { if (++n >= 2) return true; }
+  return false;
+}
+function mapBtnRect() { return { x: 846, y: 22, w: 92, h: 28 }; }
+function drawMapButton() {
+  if (!mapUnlocked() || (TOUCH && TOUCH.enabled)) return;
+  // announce it once, the first time it is worth having
+  if (!G.save.flags.mapSeen) {
+    G.save.flags.mapSeen = 1; G.mapBtnNew = 6; persist();
+    if (typeof G.toast === 'function') G.toast(t('map_new'));
+  }
+  const r = mapBtnRect();
+  const nw = (G.mapBtnNew || 0) > 0;
+  const pu = nw ? 0.5 + Math.sin(performance.now() / 180) * 0.5 : 0;
+  c.save();
+  c.fillStyle = 'rgba(8,16,24,' + (0.6 + pu * 0.25) + ')';
+  rr(c, r.x, r.y, r.w, r.h, 7); c.fill();
+  c.strokeStyle = nw ? 'rgba(120,240,255,' + (0.5 + pu * 0.5) + ')' : 'rgba(120,200,230,0.45)';
+  c.lineWidth = nw ? 2 : 1.3;
+  rr(c, r.x, r.y, r.w, r.h, 7); c.stroke();
+  ftxt('▦ ' + t('map_btn'), r.x + r.w / 2, r.y + r.h / 2, 13, nw ? '#eaffff' : '#bcd6e6', 'center');
+  c.restore();
+}
+addEventListener('mousedown', (e) => {
+  if (typeof G === 'undefined' || G.state !== 'PLAY') return;
+  if (!mapUnlocked() || (TOUCH && TOUCH.enabled)) return;
+  const b = cv && cv.getBoundingClientRect ? cv.getBoundingClientRect() : null; if (!b) return;
+  const sx = (e.clientX - b.left) * (960 / b.width), sy = (e.clientY - b.top) * (540 / b.height);
+  const r = mapBtnRect();
+  if (sx >= r.x && sx <= r.x + r.w && sy >= r.y && sy <= r.y + r.h) {
+    G.state = 'MAP'; G.mapBtnNew = 0; mapView.ready = false; sfx('ui');
+  }
+});
 function drawHUD() {
   const P = PAL[G.roomDef.zone];
   // DATA CORRUPTION: the whole HUD jitters, tears and lies for its 8 seconds
@@ -3652,6 +3697,7 @@ function draw(tms) {
   drawWorldFrame();
   drawFX();
   drawHUD();
+  drawMapButton();
   if (G.trans) {
     const k = G.trans.half ? 1 - (0.14 - G.trans.t) / 0.14 : (0.28 - G.trans.t) / 0.14;
     c.fillStyle = 'rgba(3,5,9,' + clamp(k, 0, 1) + ')'; c.fillRect(0, 0, 960, 540);
@@ -4821,10 +4867,107 @@ function roomMini(id) {
   return mc;
 }
 const MAP_BOSSROOM = { A4: 'Glitch', B4: 'Brood', C3: 'Atlas', D3: 'Zero', X1: 'Prism', E3: 'Mother' };
+// ---------------------------------------------------------------------------
+// THE MAP. A fixed grid squeezed into one screen tells you where the rooms are
+// but never lets you look at one. This is a real chart you can drive: it opens
+// framed on the room you are standing in, and from there you can push in far
+// enough to read a room's actual terrain, or pull back to see the whole factory
+// at once. Wheel or pinch to zoom, drag or steer to pan, and one key puts the
+// whole thing back on screen.
+// ---------------------------------------------------------------------------
+const MAP_ZMIN = 0.55, MAP_ZMAX = 4.2;
+const mapView = { z: 1, x: 0, y: 0, ready: false, drag: null, pinch: 0 };
+function mapContentBox() {
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const id in MAPPOS) {
+    const [gx, gy, w, h] = MAPPOS[id];
+    if (gx < x0) x0 = gx; if (gy < y0) y0 = gy;
+    if (gx + w > x1) x1 = gx + w; if (gy + h > y1) y1 = gy + h;
+  }
+  return { x0, y0, x1, y1 };
+}
+// frame everything, so "where am I in all this" is always one press away
+function mapFit() {
+  const b = mapContentBox(), cell = 62;
+  const w = (b.x1 - b.x0) * cell, h = (b.y1 - b.y0) * cell;
+  mapView.z = clamp(Math.min(860 / Math.max(1, w), 400 / Math.max(1, h)), MAP_ZMIN, MAP_ZMAX);
+  mapView.x = 480 - (b.x0 * cell + w / 2) * mapView.z;
+  mapView.y = 292 - (b.y0 * cell + h / 2) * mapView.z;
+}
+// open centred on where she is actually standing
+function mapCenterOnRoom(id) {
+  const pos = MAPPOS[id]; if (!pos) return mapFit();
+  const cell = 62;
+  mapView.x = 480 - (pos[0] + pos[2] / 2) * cell * mapView.z;
+  mapView.y = 292 - (pos[1] + pos[3] / 2) * cell * mapView.z;
+}
+function mapZoomAt(sx, sy, f) {
+  const nz = clamp(mapView.z * f, MAP_ZMIN, MAP_ZMAX);
+  const k = nz / mapView.z;
+  // keep whatever is under the cursor or the pinch centre pinned in place
+  mapView.x = sx - (sx - mapView.x) * k;
+  mapView.y = sy - (sy - mapView.y) * k;
+  mapView.z = nz;
+}
+function mapOpen() {
+  mapView.z = 1.35; mapView.ready = true; mapView.drag = null;
+  mapCenterOnRoom(G.roomId);
+}
+function updateMap(dt) {
+  if (!mapView.ready) mapOpen();
+  // steering: stick, arrows or WASD push the chart around
+  const sp = 620 * dt;
+  if (inD('LEFT')) mapView.x += sp;
+  if (inD('RIGHT')) mapView.x -= sp;
+  if (inD('UP')) mapView.y += sp;
+  if (inD('DOWN')) mapView.y -= sp;
+  if (inD('JUMP') || inD('DASH')) mapZoomAt(480, 292, 1 + 1.9 * dt);
+  if (inD('ATK') || inD('CAST')) mapZoomAt(480, 292, 1 - 1.6 * dt);
+  if (inP('INT')) mapFit();
+  if (inP('CLAW')) { mapView.z = 1.35; mapCenterOnRoom(G.roomId); }
+  // never let the chart be driven off into empty space
+  const b = mapContentBox(), cell = 62, m = 420;
+  mapView.x = clamp(mapView.x, 960 - m - b.x1 * cell * mapView.z, m - b.x0 * cell * mapView.z);
+  mapView.y = clamp(mapView.y, 540 - m - b.y1 * cell * mapView.z, m - b.y0 * cell * mapView.z);
+}
+// wheel on desktop; the touch layer feeds drag and pinch through mapPointer()
+addEventListener('wheel', (e) => {
+  if (typeof G === 'undefined' || G.state !== 'MAP') return;
+  e.preventDefault();
+  const r = (typeof cv !== 'undefined' && cv && cv.getBoundingClientRect) ? cv.getBoundingClientRect() : null;
+  const sx = r ? (e.clientX - r.left) * (960 / r.width) : 480;
+  const sy = r ? (e.clientY - r.top) * (540 / r.height) : 292;
+  mapZoomAt(sx, sy, e.deltaY < 0 ? 1.14 : 1 / 1.14);
+}, { passive: false });
+// mouse drag to pan, so the chart works the way every other map does
+addEventListener('mousedown', (e) => {
+  if (typeof G === 'undefined' || G.state !== 'MAP') return;
+  const r = cv && cv.getBoundingClientRect ? cv.getBoundingClientRect() : null;
+  if (r) {
+    const sx = (e.clientX - r.left) * (960 / r.width), sy = (e.clientY - r.top) * (540 / r.height);
+    if (mapTap(sx, sy)) return;              // a control, not the chart
+  }
+  mapView.drag = { x: e.clientX, y: e.clientY };
+});
+addEventListener('mousemove', (e) => {
+  if (typeof G === 'undefined' || G.state !== 'MAP' || !mapView.drag) return;
+  const r = (typeof cv !== 'undefined' && cv && cv.getBoundingClientRect) ? cv.getBoundingClientRect() : null;
+  const k = r ? 960 / r.width : 1;
+  mapView.x += (e.clientX - mapView.drag.x) * k;
+  mapView.y += (e.clientY - mapView.drag.y) * k;
+  mapView.drag = { x: e.clientX, y: e.clientY };
+});
+addEventListener('mouseup', () => { mapView.drag = null; });
+
 function drawMap() {
   c.fillStyle = 'rgba(4,7,12,0.9)'; c.fillRect(0, 0, 960, 540);
+  if (!mapView.ready) mapOpen();
   ftxt(t('map_title'), 480, 40, 26, '#eef3fa', 'center', '#37ffd0');
-  const cell = 62, ox = 70, oy = 56;
+  c.save();
+  // everything below is drawn in chart space; the view transform does the rest
+  c.beginPath(); c.rect(0, 58, 960, 440); c.clip();
+  c.translate(mapView.x, mapView.y); c.scale(mapView.z, mapView.z);
+  const cell = 62, ox = 0, oy = 0;
   const rectFor = id => {
     const [gx, gy, w, h] = MAPPOS[id];
     return { x: ox + gx * cell + 3, y: oy + gy * cell + 3, w: w * cell - 6, h: h * cell - 6 };
@@ -4871,7 +5014,45 @@ function drawMap() {
       rr(c, rc.x - 2, rc.y - 2, rc.w + 4, rc.h + 4, 6); c.stroke();
     }
   }
-  ftxt('● ' + t('map_here') + '   ◆ ' + t('rest').replace('E — ', '') + '   ☠ ' + t('map_boss') + '   ⚙ ' + t('map_shop'), 480, 516, 13, '#7d93a8');
+  c.restore();
+  // zoom readout and the controls, in screen space above the chart
+  const btns = mapButtons();
+  for (const b of btns) {
+    c.fillStyle = 'rgba(10,18,26,0.85)';
+    rr(c, b.x - b.r, b.y - b.r, b.r * 2, b.r * 2, 8); c.fill();
+    c.strokeStyle = 'rgba(120,220,255,0.5)'; c.lineWidth = 1.5;
+    rr(c, b.x - b.r, b.y - b.r, b.r * 2, b.r * 2, 8); c.stroke();
+    ftxt(b.icon, b.x, b.y, b.icon.length > 1 ? 12 : 19, '#cfe8ff', 'center');
+  }
+  ftxt(Math.round(mapView.z * 100) + '%', 900, 96, 12, '#7d93a8', 'center');
+  ftxt('● ' + t('map_here') + '   ◆ ' + t('rest').replace('E — ', '') + '   ☠ ' + t('map_boss') + '   ⚙ ' + t('map_shop'), 480, 502, 13, '#7d93a8');
+  ftxt(t('map_ctl'), 480, 522, 12, '#5f7488');
+}
+// the three on-screen controls, shared by the mouse and the touch layer
+function mapButtons() {
+  return [
+    { code: 'ZIN', x: 900, y: 130, r: 19, icon: '＋' },
+    { code: 'ZOUT', x: 900, y: 176, r: 19, icon: '－' },
+    { code: 'ZFIT', x: 900, y: 222, r: 19, icon: '⤢' },
+    { code: 'ZME', x: 900, y: 268, r: 19, icon: '◉' },
+    // always reachable by thumb: a chart you cannot close is a trap
+    { code: 'ZBACK', x: 44, y: 38, r: 19, icon: '✕' },
+  ];
+}
+// a tap or click on one of them, in 960x540 screen coordinates
+function mapTap(sx, sy) {
+  for (const b of mapButtons()) {
+    if (Math.abs(sx - b.x) <= b.r + 8 && Math.abs(sy - b.y) <= b.r + 8) {
+      if (b.code === 'ZIN') mapZoomAt(480, 292, 1.3);
+      else if (b.code === 'ZOUT') mapZoomAt(480, 292, 1 / 1.3);
+      else if (b.code === 'ZFIT') mapFit();
+      else if (b.code === 'ZME') { mapView.z = 1.6; mapCenterOnRoom(G.roomId); }
+      else { G.state = 'PLAY'; mapView.ready = false; }
+      if (typeof sfx === 'function') sfx('ui');
+      return true;
+    }
+  }
+  return false;
 }
 function drawCrest() {
   c.fillStyle = 'rgba(4,7,12,0.85)'; c.fillRect(0, 0, 960, 540);
