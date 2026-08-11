@@ -507,6 +507,14 @@ class Player {
       this.swing.t -= dt;
       const hb = this.hitbox();
       let pogo = false;
+      // A freed guardian is never a target. Swinging at the beast you saved is
+      // not an attack, it is a poke — so it is intercepted here, before any of
+      // the damage machinery, and answered instead.
+      if (typeof isPet === 'function' && isPet(G.boss) && !this.swing.set.has(G.boss)
+          && aabb(hb, hurtBoxOf(G.boss))) {
+        this.swing.set.add(G.boss);
+        petPoke(G.boss, hb.x + hb.w / 2, hb.y + hb.h / 2);
+      }
       const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
       const n0 = Math.hypot(this.swing.ax, this.swing.ay) || 1;
       const kx = this.swing.ax / n0 || this.face, ky = this.swing.ay / n0;
@@ -4109,6 +4117,17 @@ class Boss {
     let a = 1;
     if (this.purified && (this.pureT || 0) < 0.7) a *= clamp((this.pureT || 0) / 0.7 + 0.15, 0.15, 1);
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
+    // A REACTION HAS TO HAPPEN IN THE CREATURE. Particles thrown around a
+    // motionless body read as an effect played AT it; the bend is what turns a
+    // poke into an answer. Rides inside the save above, so every early return
+    // in this method unwinds it correctly.
+    const _pp = (typeof petPose === 'function') ? petPose(this) : null;
+    if (_pp) {
+      const _px = this.cx(), _py = this.y + this.h;
+      c.translate(_px + _pp.dx, _py + _pp.dy);
+      c.rotate(_pp.rot); c.scale(_pp.sx, _pp.sy);
+      c.translate(-_px, -_py);
+    }
     const cx = this.cx(), cy = this.cy();
     if (this.dead) {
       if (heroWorld) {

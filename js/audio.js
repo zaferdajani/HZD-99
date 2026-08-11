@@ -331,6 +331,19 @@ function sfx(n) {
     case 'phase': tone(82, 0.5, 'sawtooth', 0.12, 48); hiss(0.32, 0.08); break;
     case 'win': [523, 659, 784, 988, 1319].forEach((f, i) => tone(f, 0.4, 'triangle', 0.06, null, i * 0.16)); break;
     case 'ui': tone(540, 0.05, 'square', 0.035); break;
+    // THE PURR. A low triangle wobbling under a soft warm third — the point is
+    // that it is the only sound in the game with no attack transient at all.
+    // Everything else in a factory this loud starts with a hit; affection does
+    // not, and the ear notices that before the player does.
+    case 'purr':
+      tone(66, 0.5, 'triangle', 0.05, 58);
+      tone(99, 0.42, 'triangle', 0.028, 88, 0.03);
+      tone(330, 0.18, 'sine', 0.02, 396, 0.06);
+      break;
+    case 'chirp':     // the eagle, pleased with itself
+      tone(880, 0.07, 'sine', 0.035, 1320);
+      tone(1320, 0.09, 'sine', 0.025, 1046, 0.07);
+      break;
     case 'ok': tone(660, 0.09, 'square', 0.045, 990); break;
     case 'no': tone(130, 0.12, 'square', 0.06, 80); break;
     case 'pogo': tone(420, 0.09, 'square', 0.05, 840); break;

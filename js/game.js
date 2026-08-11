@@ -533,6 +533,7 @@ function update(dt) {
       } else G.starRegenT = 0;
       if (bossActive()) player.x = clamp(player.x, 4, G.roomDef.w * TILE - player.w - 4);
       for (const e of G.enemies) if (!e.dead) e.update(dt);
+      if (typeof updatePets === 'function') updatePets(dt);
       G.enemies = G.enemies.filter(e => !e.dead);
       if (G.boss) G.boss.update(dt);
       for (const p of G.projs) if (!p.dead) p.update(dt);
@@ -3039,6 +3040,7 @@ function drawWorldFrame() {
   for (const e of G.enemies) e.draw(c);
   for (const w of G.wrecks) w.draw(c);
   if (G.boss) G.boss.draw(c);
+  if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
   for (const p of G.projs) p.draw(c);
   if (typeof drawRoarFX === 'function') drawRoarFX(c);
   // the player is drawn AFTER the cinematic grade (bloom + zone wash) so she
