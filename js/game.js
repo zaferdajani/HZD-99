@@ -615,7 +615,13 @@ function update(dt) {
       G.near = findNear();
       if (G.near && (inP('INT') || (inP('UP') && player.on))) doInteract(G.near);
       checkTransitions();
-      if (G.winT > 0) { G.winT -= dt; if (G.winT <= 0) { G.state = 'WIN'; setMusic('winTheme'); } }
+      if (G.winT > 0) {
+        G.winT -= dt;
+        // the reel plays in the gap the win screen was already waiting through
+        if (G.winT <= 0 && !(typeof startEndingReel === 'function' && startEndingReel())) {
+          G.state = 'WIN'; setMusic('winTheme');
+        }
+      }
       if (G.state === 'PLAY') {
         if (inP('MAP')) { G.state = 'MAP'; sfx('ui'); }
         if (inP('BRAID')) { G.state = 'BRAID'; braidView.ready = false; sfx('ui'); }
@@ -1602,6 +1608,49 @@ const PURIFY_VID = {
   atlas: 'assets/video/purify_atlas.mp4',   // FURNACE CHOIR - the dragon
   prism: 'assets/video/purify_prism.mp4',   // PRISM PROWLER - the cat
 };
+// ---------------------------------------------------------------------------
+// THE TRUE ENDING, CUT TO WHAT THE PLAYER ACTUALLY DID.
+//
+// One wide shot of everybody happy is a lie in a game where you were asked,
+// five times, whether a creature gets to live. So the ending is not a film —
+// it is a REEL. An opener and a closer that always play, and one short solo
+// vignette per guardian that plays only if that guardian is still alive.
+//
+// Every vignette is the same meadow at the same hour, shot as a slow left-to-
+// right dolly at the same height and speed, with no other guardian and no NYA-9
+// in frame. That is what makes them cuttable: any subset, in order, joins into
+// one continuous travelling move. A player who spared nobody gets the same
+// sunrise and the same last frame over an emptier field — which is the honest
+// version of what they chose, not a punishment.
+// ---------------------------------------------------------------------------
+// The order they cut in. Only the clips actually present in assets/video/ get
+// registered — the build scans the directory and hands the list over — so a
+// reel can never name a file that is not there and park the ending on black
+// while a watchdog counts down.
+const END_ORDER = ['end_open', 'end_folk', 'end_glitch', 'end_brood', 'end_zero',
+  'end_atlas', 'end_prism', 'end_close'];
+const ENDING_VID = {};
+{
+  const have = (typeof window !== 'undefined' && window.VID_FILES) || null;
+  for (const k of END_ORDER) {
+    const src = have ? have[k] : 'assets/video/' + k + '.mp4';
+    if (src) ENDING_VID[k] = src;
+  }
+}
+Object.assign(PURIFY_VID, ENDING_VID);
+function endingReel() {
+  const killed = (G.save && G.save.flags && G.save.flags.killed) || {};
+  const out = [];
+  for (const k of END_ORDER) {
+    if (!PURIFY_VID[k]) continue;                 // no such clip in this build
+    const guardian = k.slice(4);
+    // open, folk and close are unconditional; a guardian shows up iff it lives
+    if (guardian !== 'open' && guardian !== 'folk' && guardian !== 'close'
+      && killed[guardian]) continue;
+    out.push(k);
+  }
+  return out;
+}
 const purifyPre = {};
 // Start pulling the film down long before it is needed, and — critically —
 // PRIME it inside a real user gesture: browsers will not hand you a decoded
@@ -1676,11 +1725,40 @@ function startPurifyCut(kind) {
   G.state = 'CUT';
   return true;
 }
+// Start the ending reel. Returns false when there is nothing to play — no
+// clips shipped yet, or none of them decodable — so the caller can fall
+// straight through to the win screen instead of staring at black.
+function startEndingReel() {
+  const reel = endingReel();
+  while (reel.length) {
+    const k = reel.shift();
+    purifyPreload(k);
+    if (startPurifyCut(k)) { G.reel = reel; return true; }
+  }
+  G.reel = null;
+  return false;
+}
 function endPurifyCut() {
   const ct = G.cut;
   if (!ct) { G.state = 'PLAY'; return; }
   try { ct.v.pause(); } catch (e) {}
   G.cut = null;
+  // MID-REEL: hand straight to the next clip rather than back to the game, so
+  // the vignettes read as one move instead of eight separate cutscenes.
+  if (G.reel) {
+    // One skip skips the ending. And if a clip never ran a single frame, this
+    // browser cannot decode the reel at all — trying the other seven would be
+    // fifty seconds of black, so the first failure ends it.
+    if (ct.skipped || !ct.ran) G.reel = [];
+    while (G.reel.length) {
+      const k = G.reel.shift();
+      if (startPurifyCut(k)) return;
+    }
+    G.reel = null;
+    G.state = 'WIN';
+    if (typeof setMusic === 'function') setMusic('winTheme');
+    return;
+  }
   G.state = 'PLAY';
   const b = G.boss;
   if (b && b.purified) {
@@ -1695,7 +1773,7 @@ function updateCut(dt) {
   ct.t += dt; ct.hint += dt;
   const v = ct.v;
   const skip = inP('OK') || inP('JUMP') || inP('ATK') || inP('PAUSE') || inP('BACK');
-  if (skip && ct.ph !== 'out') { ct.ph = 'out'; ct.t = 0; return; }
+  if (skip && ct.ph !== 'out') { ct.ph = 'out'; ct.t = 0; ct.skipped = true; return; }
   if (ct.ph === 'in') {
     if (ct.t >= 0.34) { ct.ph = 'hold'; ct.t = 0; }
     return;
@@ -1715,7 +1793,7 @@ function updateCut(dt) {
     // stall watch: if the frame clock has not moved after a beat and a half,
     // this browser cannot decode the film. Bail immediately rather than make
     // her stand in the dark — the fight resumes as if the memory never came.
-    if (v.currentTime > (ct.lastCT || 0) + 0.01) { ct.lastCT = v.currentTime; ct.stall = 0; }
+    if (v.currentTime > (ct.lastCT || 0) + 0.01) { ct.lastCT = v.currentTime; ct.stall = 0; ct.ran = true; }
     else ct.stall = (ct.stall || 0) + dt;
     const dead = ct.failed || (v.error != null)
       || (v.ended === true)

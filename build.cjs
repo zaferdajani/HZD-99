@@ -55,6 +55,17 @@ try {
     if (MUS_EXT.test(f)) musFiles[f.replace(MUS_EXT, '')] = 'assets/music/' + f;
   }
 } catch (e) { /* no music directory yet */ }
+// THE FILM MANIFEST, for the same reason as the music one. The ending is a
+// reel of eight clips that plays only the ones the player earned, and naming a
+// clip that is not on disk would park the ending on black while a watchdog
+// counted down — once per missing file.
+const VID_EXT = /\.(mp4|webm|mov)$/i;
+const vidFiles = {};
+try {
+  for (const f of fs.readdirSync('assets/video')) {
+    if (VID_EXT.test(f)) vidFiles[f.replace(VID_EXT, '')] = 'assets/video/' + f;
+  }
+} catch (e) { /* no video directory yet */ }
 const html = fs.readFileSync('dev.html', 'utf8');
 const buildId = Date.now().toString(36);
 // the loading screen paints while the megabytes below it still stream in
@@ -74,7 +85,8 @@ const emit = (fname, lock) => {
     loader + '\n' +
     '<script>window.BUILD_ID=' + JSON.stringify(buildId) +
     ';window.GAME_LOCK=' + JSON.stringify(lock) +
-    ';window.MUS_FILES=' + JSON.stringify(musFiles) + '</script>\n' +
+    ';window.MUS_FILES=' + JSON.stringify(musFiles) +
+    ';window.VID_FILES=' + JSON.stringify(vidFiles) + '</script>\n' +
     '<script>\n' + files.join('\n') + '\n</script>\n</body>');
   fs.writeFileSync(fname, out);
   console.log(fname + ' built (' + lock + '):', (fs.statSync(fname).size / 1048576).toFixed(2) + 'MB');
