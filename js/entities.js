@@ -142,7 +142,7 @@ class Player {
   }
   maxCores() { return G.save.coresMax + (hasCrest('plate') ? 1 : 0) + (relicHas('silent') ? 1 : 0); }
   speed() { return 340 * (hasCrest('sprint') ? 1.15 : 1) * (relicHas('shard') ? 1.04 : 1); }
-  dmg() { return Math.round(12 * (hasCrest('claws') ? 1.25 : 1) * (1 + (relicHas('fang') ? 0.08 : 0) + (relicHas('whisker') ? 0.06 : 0)) * DF().pdmg); }
+  dmg() { return Math.round(12 * (hasCrest('claws') ? 1.25 : 1) * (G.save.flags && G.save.flags.resolve ? 1.18 : 1) * (1 + (relicHas('fang') ? 0.08 : 0) + (relicHas('whisker') ? 0.06 : 0)) * DF().pdmg); }
   voltMax() { return relicHas('collar') ? 110 : 99; }
   healCost() { return relicHas('coolant') ? 28 : 33; }
   gainVolts(n) { this.volts = clamp(this.volts + Math.round(n * (hasCrest('siphon') ? 1.5 : 1)) + (relicHas('silk') ? 2 : 0), 0, this.voltMax()); }
@@ -356,9 +356,25 @@ class Player {
     // first used to decide the swing. Holding the intent for a beat fixes that.
     if (inD('DOWN')) this.downBuf = 0.16; else this.downBuf -= dt;
     this.pogoT -= dt;
-    // attack — aim in 8 directions, 3-hit ninja combo
-    if (inP('ATK') && this.atkCD <= 0) {
-      this.atkCD = 0.36 * (hasCrest('over') ? 0.7 : 1);
+    // ---- THE SLASH -------------------------------------------------------
+    // The single worst thing about the old melee was invisible: pressing ATK
+    // during recovery DROPPED the press. A player attacking on rhythm — which is
+    // what anyone does once they know the timing — was throwing away every other
+    // input and feeling like the character was ignoring them. Nothing else about
+    // an attack matters as much as the game agreeing that you pressed the button.
+    //
+    // So the press is now held for a beat and spent the instant the swing is
+    // free. This is the difference between "sluggish" and "tight", and it is
+    // almost entirely this one buffer.
+    if (inP('ATK')) this.atkBuf = 0.2;
+    else this.atkBuf = (this.atkBuf || 0) - dt;
+    if (this.atkBuf > 0 && this.atkCD <= 0) {
+      this.atkBuf = 0;
+      // The combo ACCELERATES. Three identical beats read as one slow beat
+      // repeated; opening fast and landing heavy on the finisher is what makes
+      // a three-hit string feel like a sentence instead of a metronome.
+      const nextC = this.comboT > 0 ? (this.combo + 1) % 3 : 0;
+      this.atkCD = (nextC === 0 ? 0.26 : nextC === 1 ? 0.23 : 0.33) * (hasCrest('over') ? 0.7 : 1);
       let ax = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
       let ay = (inD('UP') ? -1 : 0) + (this.downBuf > 0 && !this.on ? 1 : 0);
       // a down-attack goes straight down. Diagonal aim used to push the hitbox
@@ -369,14 +385,20 @@ class Player {
       this.combo = this.comboT > 0 ? (this.combo + 1) % 3 : 0;
       this.comboT = 0.9;
       const ang = Math.atan2(ay, ax);
-      this.swing = { t: 0.12, ax, ay, ang, combo: this.combo, set: new Set() };
+      // active a touch longer, so a swing that looks like it should connect does
+      this.swing = { t: 0.15, ax, ay, ang, combo: this.combo, set: new Set() };
       this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo };
       if (hasSkill('wave')) {
         const wn = Math.hypot(ax, ay) || 1;
         G.projs.push(new Proj(this.x + this.w / 2 + ax / wn * 22, this.y + this.h / 2 - 2 + ay / wn * 22,
           ax / wn * 430, ay / wn * 430, true, Math.round(8 * DF().pdmg), 7, PAL[G.roomDef.zone].glow, 0, 0.34));
       }
-      if (this.combo === 2 && this.on && !ay) this.vx += ax * 210;
+      // EVERY grounded swing steps into the strike. Only the finisher used to
+      // move her, so the first two hits felt like swiping at air from a standstill.
+      if (this.on && !ay) this.vx += ax * (this.combo === 2 ? 230 : 96);
+      // and in the air a level swing arrests the fall for a moment: it reads as
+      // committing weight to the blow rather than flailing while dropping
+      if (!this.on && !ay && this.vy > -60) this.vy = Math.min(this.vy, 40);
       // PAW PUNCH — in claw mode the finisher becomes a pouncing strike:
       // she launches at the target like a cat, claws first
       if (this.clawT > 0 && this.combo === 2) {
@@ -535,15 +557,31 @@ class Player {
             e.vy = Math.min(e.vy, 0) + ky * 220 - 120;
           }
           this.gainVolts(11);
-          sfx(e instanceof Boss ? 'bosshit' : 'hit'); cam.shake = Math.max(cam.shake, 2.5);
-          G.hitStop = Math.max(G.hitStop, 0.045);
-          if (typeof padRumble === 'function') padRumble(0.15, 0.4, 60);
+          // IMPACT, WEIGHTED. One flat freeze for every hit makes a finisher land
+          // like a jab. Hit-stop, shake and rumble now all scale with what the
+          // blow actually was, so the third hit of a combo reads as the third hit.
+          const heavy = this.swing.combo === 2, big = e instanceof Boss;
+          sfx(big ? 'bosshit' : 'hit');
+          cam.shake = Math.max(cam.shake, heavy ? 5 : big ? 3.4 : 2.5);
+          G.hitStop = Math.max(G.hitStop, heavy ? 0.085 : big ? 0.06 : 0.05);
+          // RECOIL. Contact has to push back on HER too, or the enemy is made of
+          // paper — a few pixels against the swing is all it takes to sell mass.
+          this.vx -= kx * (heavy ? 130 : 62);
+          if (typeof padRumble === 'function') padRumble(heavy ? 0.42 : 0.2, heavy ? 0.6 : 0.42, heavy ? 110 : 60);
+          this.hitConfirmT = 0.14;
           burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 14, '#fff2a8', 280, 0.35, 300, 3, true);
           burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 6, '#ffffff', 160, 0.2, 100, 2, true);
           if (this.swing.combo === 2) G.impact = { t: 0.12, t0: 0.12, x: hb.x + hb.w / 2, y: hb.y + hb.h / 2 };
           if (this.swing.ay > 0) pogo = true;
           if (e.hp <= 0) e.die(kx, ky);
         }
+      }
+      // WHIFF. A miss used to be silent, which made a missed swing feel like a
+      // dropped input rather than a mistake. The blade now cuts air on the frame
+      // the window closes, and only if nothing was struck.
+      if (this.swing.t <= 0 && !this.swing.set.size && !this.swing.whiffed) {
+        this.swing.whiffed = true;
+        sfx('whiff');
       }
       // hostile projectiles can be swatted
       for (const p of G.projs) if (!p.friendly && !p.dead && aabb(hb, p.box())) { p.dead = true; burst(p.x, p.y, 6, p.color, 150, 0.25, 300, 2, true); }
@@ -641,6 +679,33 @@ class Player {
       G.addRing(this.x + this.w / 2, this.y + this.h / 2);
       G.toast(t('rl_aegis'));
       burst(this.x + this.w / 2, this.y + this.h / 2, 16, '#ffd76a', 240, 0.5, 200, 3, true);
+      return;
+    }
+    // THE OATH — what the lion owes her for not finishing it. Once per room,
+    // the blow that would leave her on her last core is answered instead: it
+    // comes out of the dark, roars everything off her, and is gone. Deliberately
+    // a SAVE and not a stat, so the tame reward is a different KIND of power
+    // from the +18% the kill hands out rather than a bigger or smaller number.
+    if (G.save.flags && G.save.flags.oath && !this.oathUsed && this.cores - d <= 1 && this.cores > 1) {
+      this.oathUsed = true;
+      this.iT = 1.6; this.healT = 0;
+      const cx0 = this.x + this.w / 2, cy0 = this.y + this.h / 2;
+      if (typeof roarWave === 'function') roarWave(cx0, cy0, '#ffb347');
+      sfx('roar_beast'); cam.shake = Math.max(cam.shake, 9);
+      G.hitStop = Math.max(G.hitStop, 0.12);
+      if (typeof padRumble === 'function') padRumble(0.7, 0.9, 320);
+      for (const e of G.enemies) {
+        if (e.dead) continue;
+        const dx0 = e.x + e.w / 2 - cx0, dy0 = e.y + e.h / 2 - cy0;
+        const dd = Math.hypot(dx0, dy0);
+        if (dd > 250) continue;
+        e.kbT = 0.45; e.stagT = Math.max(e.stagT || 0, 0.8);
+        e.vx += (dx0 / (dd || 1)) * 520; e.vy = -260;
+      }
+      for (let i = 0; i < 26; i++)
+        addPart(cx0 + rnd(-30, 30), cy0 + rnd(-20, 20), rnd(-160, 160), rnd(-180, 60),
+          rnd(0.5, 1), chance(0.5) ? '#ffb347' : '#ffe0a8', rnd(2.4, 4), 120, true);
+      G.toast(t('oath_fire'));
       return;
     }
     this.cores -= d; this.iT = hasSkill('reflex') ? 1.65 : 1.3; this.healT = 0;
@@ -2594,8 +2659,11 @@ class Boss {
           sfx('boom'); sfx('phase');
           if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
           if (typeof padRumble === 'function') padRumble(1, 0.8, 700);
-          if (this.kind !== 'mother' && !this.purified) {
-            // the blast was the VIRUS leaving, not the guardian dying
+          // Normally the blast is the VIRUS leaving, not the guardian dying —
+          // that is the whole point of the purification arc. But forceKill means
+          // the player was ASKED and chose to end it, and a choice the game
+          // quietly reverses two seconds later is not a choice.
+          if (this.kind !== 'mother' && !this.purified && !this.forceKill) {
             this.purified = true; this.pureT = 0;
             G.toast(t({ glitch: 'pure_beast', brood: 'pure_brood', atlas: 'pure_atlas',
                         zero: 'pure_zero', prism: 'pure_prism' }[this.kind]));
@@ -2651,6 +2719,24 @@ class Boss {
             rnd(-60, 60), rnd(-40, 120), 0.6, '#37ffd0', 2.5, 500, true);
         sfx('glass'); cam.shake = Math.max(cam.shake, 4);
       }
+      return;
+    }
+    // ---- THE FIRST CHOICE -------------------------------------------------
+    // NULLFANG is the first guardian and the first fork. Brought low, the fight
+    // stops and asks the only question the whole game is built on: do you finish
+    // this, or do you free it? Both hand over the DASH — the route out of the
+    // Meadows must never depend on the answer — but the SECOND gift differs in
+    // kind, so neither answer is the correct one.
+    //
+    // It is also, by the Braid's own arithmetic, the single most consequential
+    // press in a run: as the FIRST entry on the ledger it carries roughly nine
+    // times the weight of the choice you will make an hour from now.
+    if (this.kind === 'glitch' && !this.dead && !this.forkAsked
+        && this.hp <= this.hpMax * 0.22 && this.st !== 'dorm' && this.st !== 'intro'
+        && !(typeof isHero === 'function' && isHero())) {
+      this.forkAsked = true;
+      this.vx = 0; this.stagT = 1.2;
+      if (typeof brOffer === 'function') { brOffer('firstboss'); G.forkBoss = this; }
       return;
     }
     if (this.stagT > 0) { this.stagT -= dt; return; }   // Song / weakness stagger
@@ -4072,7 +4158,10 @@ class Boss {
     // A guardian with an authored purification film does not detonate. The
     // film shows the last blow and the virus leaving; we skip straight past
     // the wreck so nothing of him is ever seen destroyed.
-    if (typeof startPurifyCut === 'function' && startPurifyCut(this.kind)) {
+    // forceKill is the FINISH branch of the first fork. Without it the film runs
+    // either way and both answers end with the lion alive, which would make the
+    // choice a costume change. Choosing to end it has to actually end it.
+    if (!this.forceKill && typeof startPurifyCut === 'function' && startPurifyCut(this.kind)) {
       this.deathAnimT = 0; this.deathFxT = 0; this.deathFinale = true;
       this.purified = true; this.pureT = 0; this.rewardPend = true;
       this.vx = 0; this.vy = 0;

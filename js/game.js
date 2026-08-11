@@ -266,7 +266,8 @@ function loadRoom(id) {
   // old arena as her pet, forever
   const PET_HOMES = { A4: ['glitch', 20], B4: ['brood', 15], C3: ['atlas', 15], D3: ['zero', 15], X1: ['prism', 20] };
   const ph2 = PET_HOMES[id];
-  if (ph2 && G.save.flags['boss' + ph2[0].charAt(0).toUpperCase() + ph2[0].slice(1)] && !G.boss) {
+  if (ph2 && G.save.flags['boss' + ph2[0].charAt(0).toUpperCase() + ph2[0].slice(1)] && !G.boss
+      && !(G.save.flags.killed && G.save.flags.killed[ph2[0]])) {
     const pb = new Boss(ph2[0], ph2[1] * TILE, 15 * TILE);
     pb.dead = true; pb.purified = true; pb.pureT = 5;
     pb.deathFxT = 0; pb.deathFinale = true; pb.rewardPend = false; pb.hp = 0;
@@ -279,6 +280,7 @@ function loadRoom(id) {
     G.pickups.push(p);
   }
   if (typeof purifyPreloadNear === 'function') purifyPreloadNear(id);
+  if (player) player.oathUsed = false;      // the lion owes her once per room
   G.save.visited[id] = 1;
   tileDirty = true;
   setMusic(def.zone);

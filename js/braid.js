@@ -304,6 +304,29 @@ function brAnswer(pick) {
   } else if (pick === 'R') {
     if (typeof G.dropScrap === 'function' && o.kind === 'kill') G.dropScrap(o.x, o.y, 4);
   }
+  // THE FIRST CHOICE resolves here, and it is the only offer that hands over a
+  // power. Both branches give the DASH, because the way out of the Meadows can
+  // never depend on the answer. What differs is the second gift, and it differs
+  // in KIND rather than in size — a permanent edge, or a debt the lion repays.
+  if (o.kind === 'firstboss' && G.forkBoss) {
+    const b2 = G.forkBoss; G.forkBoss = null;
+    if (pick === 'L') {
+      G.save.flags.oath = 1;
+      b2.hp = 0;
+      b2.tamed = true;
+      b2.die();                                  // the purification path: it lives
+      if (typeof showItem === 'function') showItem(t('oath_name'), t('oath_desc'));
+    } else {
+      G.save.flags.resolve = 1;
+      b2.hp = 0;
+      b2.forceKill = true;
+      // remembered, so the room never re-spawns it as a pet on the way back
+      G.save.flags.killed = G.save.flags.killed || {};
+      G.save.flags.killed[b2.kind] = 1;
+      b2.die();
+      if (typeof showItem === 'function') showItem(t('resolve_name'), t('resolve_desc'));
+    }
+  }
   if (G.state === 'OFFER') G.state = 'PLAY';
   G.offer = null;
   return u;
@@ -317,7 +340,7 @@ function updateOffer(dt) {
   const o = G.offer; if (!o) return;
   if (inP('LEFT')) return brAnswer('L');
   if (inP('RIGHT')) return brAnswer('R');
-  if (inP('UP') || inP('CAST') || inP('CLAW')) return brAnswer('X');
+  if (o.kind !== 'firstboss' && (inP('UP') || inP('CAST') || inP('CLAW'))) return brAnswer('X');
   if (o.kind === 'kill') {
     o.t -= dt;
     if (o.t <= 0) { brAnswer('R'); }      // walking away is a choice
@@ -331,7 +354,7 @@ function drawOffer() {
   c.save();
   if (full) {
     c.fillStyle = 'rgba(4,7,12,0.82)'; c.fillRect(0, 0, 960, 540);
-    ftxt(t(o.kind === 'bench' ? 'br_rest' : 'br_boss'), 480, 116, 22, '#eef3fa', 'center', '#37ffd0');
+    ftxt(t(o.kind === 'firstboss' ? 'fb_title' : o.kind === 'bench' ? 'br_rest' : 'br_boss'), 480, 116, 22, '#eef3fa', 'center', '#37ffd0');
     ftxt(universe().id + '  ·  ' + t('br_depth').replace('%s', universe().depth), 480, 146, 13, '#7d93a8', 'center');
   }
   // THE PREMISE, SAID ONCE, IN THE GAME. The very first time she is asked, the
@@ -349,21 +372,27 @@ function drawOffer() {
   }
   const bx = full ? 480 : clamp(o.x - cam.x, 130, 830);
   const by = full ? 348 : clamp(o.y - cam.y, 118, 430);
-  const opts = [
-    { p: 'L', key: '◀', col: '#7de8a0', lab: t('br_mercy') },
-    { p: 'X', key: '▲', col: '#ff5a6a', lab: t('br_red') },
-    { p: 'R', key: '▶', col: '#ffd76a', lab: t('br_sever') },
+  // the first boss is a clean binary — tame or finish. Everywhere else keeps the
+  // Signal's third door open.
+  const two = o.kind === 'firstboss';
+  const opts = two ? [
+    { p: 'L', key: '◀', col: '#7de8a0', lab: t('fb_tame'), d: 'fb_tame_d' },
+    { p: 'R', key: '▶', col: '#ffd76a', lab: t('fb_beat'), d: 'fb_beat_d' },
+  ] : [
+    { p: 'L', key: '◀', col: '#7de8a0', lab: t('br_mercy'), d: 'br_L_d' },
+    { p: 'X', key: '▲', col: '#ff5a6a', lab: t('br_red'), d: 'br_X_d' },
+    { p: 'R', key: '▶', col: '#ffd76a', lab: t('br_sever'), d: 'br_R_d' },
   ];
-  const w = full ? 210 : 128, h = full ? 66 : 34, gap = full ? 18 : 8;
+  const w = full ? (two ? 250 : 210) : 128, h = full ? 66 : 34, gap = full ? 18 : 8;
   opts.forEach((op, i) => {
-    const ox = bx + (i - 1) * (w + gap), oy = by;
+    const ox = bx + (i - (opts.length - 1) / 2) * (w + gap), oy = by;
     c.globalAlpha = full ? 1 : 0.35 + k * 0.6;
     c.fillStyle = 'rgba(8,14,22,0.9)';
     rr(c, ox - w / 2, oy - h / 2, w, h, 8); c.fill();
     c.strokeStyle = op.col; c.lineWidth = full ? 2 : 1.4;
     rr(c, ox - w / 2, oy - h / 2, w, h, 8); c.stroke();
     ftxt(op.key + '  ' + op.lab, ox, oy - (full ? 8 : 0), full ? 17 : 12, op.col, 'center');
-    if (full) ftxt(t('br_' + op.p + '_d'), ox, oy + 16, 11, '#8aa2b5', 'center');
+    if (full) ftxt(t(op.d), ox, oy + 16, 11, '#8aa2b5', 'center');
     c.globalAlpha = 1;
   });
   // the clock on a kill ribbon, so lapsing never feels like a bug

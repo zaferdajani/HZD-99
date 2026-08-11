@@ -340,6 +340,10 @@ function sfx(n) {
       tone(99, 0.42, 'triangle', 0.028, 88, 0.03);
       tone(330, 0.18, 'sine', 0.02, 396, 0.06);
       break;
+    case 'whiff':     // the blade cutting air — breathy, no metal, no pitch centre
+      hiss(0.075, 0.02);
+      tone(300, 0.07, 'sine', 0.012, 120);
+      break;
     case 'chirp':     // the eagle, pleased with itself
       tone(880, 0.07, 'sine', 0.035, 1320);
       tone(1320, 0.09, 'sine', 0.025, 1046, 0.07);
