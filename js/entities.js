@@ -33,6 +33,17 @@ function tileAt(tx, ty) {
   return c;
 }
 function solidAt(tx, ty) { const c = tileAt(tx, ty); return c === '#' || c === 'B'; }
+// FRACTURE worlds: a deterministic scatter of ordinary wall is secretly loose.
+// Same tiles every visit, and only ever wall that already has open air behind
+// it, so it can never seal a route or open one that leads nowhere.
+function brLoose(tx, ty) {
+  if (typeof brHas !== 'function' || !brHas('fracture')) return false;
+  if (tileAt(tx, ty) !== '#') return false;
+  const h = ((tx * 73856093) ^ (ty * 19349663) ^ (universe().seed | 0)) >>> 0;
+  if ((h % 1000) / 1000 > 0.06) return false;
+  const open = (x, y) => { const c2 = tileAt(x, y); return c2 !== '#' && c2 !== 'B'; };
+  return open(tx, ty - 1) || open(tx, ty + 1) || open(tx - 1, ty) || open(tx + 1, ty);
+}
 // ---- sprite-sheet helpers (real hand-animated art; see assets/CREDITS.md) ----
 function sheetReady(key) { return typeof MEDIA_IMG !== 'undefined' && !!MEDIA_IMG[key]; }
 // draw one frame of a uniform sheet, standing on the local origin (feet at 0,0)
@@ -532,7 +543,7 @@ class Player {
       const x0 = Math.floor(hb.x / TILE), x1 = Math.floor((hb.x + hb.w) / TILE);
       const y0 = Math.floor(hb.y / TILE), y1 = Math.floor((hb.y + hb.h) / TILE);
       for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
-        const c = tileAt(tx, ty);
+        const c = (tileAt(tx, ty) === '#' && brLoose(tx, ty)) ? 'B' : tileAt(tx, ty);
         if (c === 'B') {
           // floor blocks (at/below the feet) only break with a DOWN-attack
           // (jump, hold down, hit); side/ceiling secret walls break normally
@@ -1914,6 +1925,21 @@ class Enemy {
     // turn toward where we are going, in time rather than in frames drawn
     const wantF = (this.kind === 'flier' ? Math.sign(this.vx) || 1 : this.dir) || 1;
     this.faceVis += clamp(wantF - this.faceVis, -dt * 5.5, dt * 5.5);
+    // CURED. On ground the player's mercy has bought back, machines wake up as
+    // what they were built to be. They potter about, they will not touch her,
+    // and their sensor burns cyan instead of red. This is the whole reward for
+    // choosing LEFT, and it has to be visible from across the room.
+    if (this.calm) {
+      this.stagT = 0; this.hypnoT = 1e9;
+      this.t -= dt;
+      if (this.t <= 0) { this.dir = -this.dir || 1; this.t = rnd(1.6, 4.2); }
+      this.vx = this.dir * this.spd * 0.26;
+      this.vy += 900 * dt;
+      const col = moveEnt(this, dt);
+      if (col.l || col.r) this.dir = -this.dir;
+      if (chance(dt * 2.2)) addPart(this.x + this.w / 2 + rnd(-5, 5), this.y - 2, rnd(-10, 10), -22, 0.7, '#37ffd0', 2, -20, true);
+      return;
+    }
     // charmed by the Song: it keeps the body and quiets the orders
     if (this.hypnoT > 0) {
       this.hypnoT -= dt; this.stagT = 0;
@@ -2023,6 +2049,14 @@ class Enemy {
       }
     }
     G.wrecks.push(new Wreck(this, kx || 0, ky || 0));
+    // THE BRAID: every machine that dies asks what you are. The ribbon does not
+    // stop play — ignore it and severance is recorded for you.
+    if (typeof brOffer === 'function' && !this.mini) brOffer('kill', cx, cy - 26);
+    // CHOIR: in a world where they hear each other die, the dead call the living
+    if (typeof brHas === 'function' && brHas('choir') && chance(0.35)) {
+      const e2 = new Enemy(chance(0.5) ? 'crawler' : 'flier', cx + rnd(-80, 80), this.y - 40);
+      e2.expireT = 14; G.enemies.push(e2);
+    }
   }
   draw(c) {
     const P = PAL[G.roomDef.zone];

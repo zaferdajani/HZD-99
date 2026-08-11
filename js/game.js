@@ -215,11 +215,33 @@ function loadRoom(id) {
     if (cond && !G.save.flags[cond]) return;
     if (EKIND[kind]) {
       const k = EKIND[kind];
-      G.enemies.push(new Enemy(kind, tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h));
+      // THE BRAID decides who is even here. A kingdom you have cured wakes fewer
+      // machines and wakes some of them calm; a HOLLOW world barely wakes at all.
+      const U = typeof universe === 'function' ? universe() : null;
+      if (U) {
+        const zi = U.inf[def.zone] != null ? U.inf[def.zone] : 1;
+        // Infection feeds the population, but only somewhat — a cured kingdom
+        // should read as PEACEFUL, not as empty. Most of what survives mercy is
+        // still there; it has simply stopped wanting to kill her.
+        const keep = clamp((0.66 + zi * 0.34) * U.foeK, 0.2, 1.6);
+        if (keep < 1 && ((i * 2654435761) % 1000) / 1000 > keep) return;
+      }
+      const en = new Enemy(kind, tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h);
+      if (U) {
+        const zi = U.inf[def.zone] != null ? U.inf[def.zone] : 1;
+        en.spd *= U.spdK * (0.82 + zi * 0.32);
+        // CURED GROUND. Below a quarter infection the machines start coming back
+        // to themselves: they wake calm, wander, and will not hurt her. This is
+        // the reward for mercy that the player can actually see.
+        const calmC = clamp((0.28 - zi) * 2.4 + U.calmK, 0, 0.9);
+        if (calmC > 0 && ((i * 40503 + 17) % 1000) / 1000 < calmC) { en.calm = true; en.hypnoT = 1e9; }
+      }
+      G.enemies.push(en);
     } else if (kind === 'scrap') {
       const fk = 'sc_' + id + '_' + i;
       if (!G.save.flags[fk]) {
-        const s = new Scrap(tx * TILE + 10, ty * TILE - 20, extra || 10);
+        const uL = typeof universe === 'function' ? universe().lootK : 1;
+        const s = new Scrap(tx * TILE + 10, ty * TILE - 20, Math.round((extra || 10) * uL));
         s.vx = 0; s.vy = 0; s.flagKey = fk;
         G.pickups.push(s);
       }
@@ -388,6 +410,9 @@ function doInteract(s) {
     G.save.bench = { room: G.roomId, x: s.x, y: s.y + s.h - 38 };
     G.save.usedNine = false; G.save.usedAegis = false;
     starRestock(); persist(); sfx('bench');
+    // a rest is the deep divergence — this one asks properly, and waits
+    if (typeof brOffer === 'function' && !(typeof isHero === 'function' && isHero()))
+      setTimeout(() => { if (G.state === 'PLAY') brOffer('bench'); }, 500);
     const dur = Math.max(1.4, (player.maxCores() - player.cores) * 0.2 + 1.4);
     const dock = 0.55;
     // dock phase: walk to the centre, then charge (robot: cables+surge / hero: drink)
@@ -557,6 +582,7 @@ function update(dt) {
       if (G.winT > 0) { G.winT -= dt; if (G.winT <= 0) { G.state = 'WIN'; setMusic('winTheme'); } }
       if (G.state === 'PLAY') {
         if (inP('MAP')) { G.state = 'MAP'; sfx('ui'); }
+        if (inP('BRAID')) { G.state = 'BRAID'; braidView.ready = false; sfx('ui'); }
         else if (inP('CREST')) { G.state = 'CREST'; G.crestIdx = 0; sfx('ui'); }
         else if (inP('SKILL')) { G.state = 'SKILLS'; G.skillIdx = 0; sfx('ui'); }
         else if (inP('PAUSE')) { G.state = 'PAUSE'; G.pauseIdx = 0; sfx('ui'); }
@@ -582,6 +608,11 @@ function update(dt) {
       } else if (G.dialog.npc) sfxVoice(G.dialog.npc);
       else sfx('ui');
     }
+  }
+  else if (G.state === 'OFFER') updateOffer(dt);
+  else if (G.state === 'BRAID') {
+    if (inP('BRAID') || inP('BACK') || inP('PAUSE')) { G.state = 'PLAY'; braidView.ready = false; sfx('ui'); }
+    else updateBraidView(dt);
   }
   else if (G.state === 'MAP') {
     if (G.mapBtnNew > 0) G.mapBtnNew = 0;
@@ -2706,6 +2737,7 @@ function mapUnlocked() {
   return false;
 }
 function mapBtnRect() { return { x: 846, y: 22, w: 92, h: 28 }; }
+function braidBtnRect() { return { x: 846, y: 56, w: 92, h: 28 }; }
 function drawMapButton() {
   if (!mapUnlocked() || (TOUCH && TOUCH.enabled)) return;
   // announce it once, the first time it is worth having
@@ -2723,6 +2755,18 @@ function drawMapButton() {
   c.lineWidth = nw ? 2 : 1.3;
   rr(c, r.x, r.y, r.w, r.h, 7); c.stroke();
   ftxt('▦ ' + t('map_btn'), r.x + r.w / 2, r.y + r.h / 2, 13, nw ? '#eaffff' : '#bcd6e6', 'center');
+  // and the multiverse itself, once she has actually forked one
+  const b2 = braid();
+  if (b2 && b2.led.length) {
+    const q = braidBtnRect();
+    const u = universe();
+    const hot = u.red > 0.34;
+    c.fillStyle = 'rgba(8,16,24,0.6)';
+    rr(c, q.x, q.y, q.w, q.h, 7); c.fill();
+    c.strokeStyle = hot ? 'rgba(255,90,106,0.55)' : 'rgba(125,232,160,0.45)';
+    c.lineWidth = 1.3; rr(c, q.x, q.y, q.w, q.h, 7); c.stroke();
+    ftxt('⋔ ' + u.id, q.x + q.w / 2, q.y + q.h / 2, 11.5, hot ? '#ffbcc4' : '#bcd6e6', 'center');
+  }
   c.restore();
 }
 addEventListener('mousedown', (e) => {
@@ -2733,6 +2777,11 @@ addEventListener('mousedown', (e) => {
   const r = mapBtnRect();
   if (sx >= r.x && sx <= r.x + r.w && sy >= r.y && sy <= r.y + r.h) {
     G.state = 'MAP'; G.mapBtnNew = 0; mapView.ready = false; sfx('ui');
+    return;
+  }
+  const q = braidBtnRect(); const b3 = braid();
+  if (b3 && b3.led.length && sx >= q.x && sx <= q.x + q.w && sy >= q.y && sy <= q.y + q.h) {
+    G.state = 'BRAID'; braidView.ready = false; sfx('ui');
   }
 });
 function drawHUD() {
@@ -2969,6 +3018,20 @@ function drawWorldFrame() {
   // ambient darkness — dynamic lights lift what matters
   c.fillStyle = 'rgba(3,6,14,0.16)';
   c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
+  // THE BRAID writes itself onto the air of the room. A kingdom still deep in
+  // the rot runs violet; one she has bought back runs clean. STARLESS worlds
+  // lose the ceiling lights entirely.
+  if (typeof universe === 'function') {
+    const U = universe(), zi = U.inf[G.roomDef.zone] != null ? U.inf[G.roomDef.zone] : 1;
+    if (zi > 0.4) {
+      c.fillStyle = 'rgba(120,20,90,' + ((zi - 0.4) * 0.13).toFixed(3) + ')';
+      c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
+    } else if (zi < 0.25) {
+      c.fillStyle = 'rgba(60,220,190,' + ((0.25 - zi) * 0.1).toFixed(3) + ')';
+      c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
+    }
+    if (U.darkK) { c.fillStyle = 'rgba(2,4,10,0.4)'; c.fillRect(cam.x - 12, cam.y - 12, 984, 564); }
+  }
   drawStatics(P);
   drawBreakHint();
   for (const p of G.pickups) p.draw(c);
@@ -3696,6 +3759,7 @@ function draw(tms) {
   // in-world states render the world behind
   drawWorldFrame();
   drawFX();
+  if (typeof drawOffer === 'function' && G.offer && G.offer.kind === 'kill') drawOffer();
   drawHUD();
   drawMapButton();
   if (G.trans) {
@@ -3747,6 +3811,10 @@ function draw(tms) {
       wrapText(d.lines[d.i], 620, 16).forEach((ln, i) => ftxt(ln, 480, 442 + i * 22, 16, '#e6eef6', 'center', null, '600'));
     }
     ftxt('▼', 480, 494, 13, '#7d93a8');
+  } else if (st === 'OFFER') {
+    drawOffer();
+  } else if (st === 'BRAID') {
+    drawBraidView();
   } else if (st === 'MAP') {
     drawMap();
   } else if (st === 'CREST') {

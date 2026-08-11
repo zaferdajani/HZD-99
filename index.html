@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msop5nq1";window.GAME_LOCK="robo"</script>
+<script>window.BUILD_ID="msops1dj";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -5216,6 +5216,19 @@ en: {
   break_down: 'Loose rock — jump, hold DOWN, and strike',
   break_hit: 'Loose rock — strike it',
   map_btn: 'MAP',
+  br_title: 'THE BRAID',
+  br_mercy: 'MERCY', br_sever: 'SEVER', br_red: 'THE SIGNAL',
+  br_L_d: 'Cure it. The ground remembers.',
+  br_R_d: 'End it. Take what is left.',
+  br_X_d: 'Take its gift. Something is owed.',
+  br_rest: 'The fire asks what you are becoming',
+  br_boss: 'A guardian falls. What follows it?',
+  br_shift: 'The world forks — %s',
+  br_depth: 'depth %s', br_worlds: '%s worlds',
+  br_inf: 'INFECTION', br_laws: 'LAWS OF THIS WORLD',
+  br_seed: 'ledger …%s',
+  br_ctl: '✥ pan  ·  Z / X zoom  ·  E recentre  ·  Y close',
+  br_btn: 'BRAID',
   map_new: 'Map online — open it any time (M / Tab)',
   map_ctl: 'Drag or ✥ to pan   ·   wheel / pinch / Z · X to zoom   ·   E fit   ·   Q recentre   ·   M close',
 },
@@ -5446,6 +5459,19 @@ ar: {
   break_down: 'صخرة مُتخلخلة — اقفز واضغط للأسفل ثم اضرب',
   break_hit: 'صخرة مُتخلخلة — اضربها',
   map_btn: 'الخريطة',
+  br_title: 'الجديلة',
+  br_mercy: 'رحمة', br_sever: 'قطع', br_red: 'الإشارة',
+  br_L_d: 'اشفِه. الأرض تتذكّر.',
+  br_R_d: 'أنهِه. خذ ما تبقّى.',
+  br_X_d: 'اقبل هديتها. هناك ثمن.',
+  br_rest: 'النار تسألك ما الذي تصيرين إليه',
+  br_boss: 'سقط حارس. فماذا بعده؟',
+  br_shift: 'العالم يتشعّب — %s',
+  br_depth: 'العمق %s', br_worlds: '%s عوالم',
+  br_inf: 'العدوى', br_laws: 'قوانين هذا العالم',
+  br_seed: 'السجل …%s',
+  br_ctl: '✥ تحريك · Z / X تقريب · E توسيط · Y إغلاق',
+  br_btn: 'الجديلة',
   map_new: 'الخريطة جاهزة — افتحها في أي وقت (M / Tab)',
   map_ctl: 'اسحب للتحريك · عجلة أو تقريب بالإصبعين · E ملء الشاشة · Q توسيط · M إغلاق',
 },
@@ -6861,7 +6887,7 @@ const KEYB = {
   CLAW: ['KeyQ', 'VCLAW', 'GP_CLAW'],
   ARM: ['KeyG', 'Digit1', 'VARM', 'GP_ARM'], SONG: ['KeyB', 'KeyN', 'VSONG', 'GP_SONG'],
   STAR: ['KeyR', 'Digit2', 'VSTAR', 'GP_STAR'],
-  MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], CREST: ['KeyI', 'VCREST', 'GP_CREST'], SKILL: ['KeyT', 'VSKILL', 'GP_SKILL'],
+  MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], BRAID: ['KeyY', 'VBRAID', 'GP_BRAID'], CREST: ['KeyI', 'VCREST', 'GP_CREST'], SKILL: ['KeyT', 'VSKILL', 'GP_SKILL'],
   PAUSE: ['Escape', 'KeyP', 'VPAUSE', 'GP_PAUSE'],
   OK: ['Enter', 'KeyZ', 'Space', 'VOK', 'GP_OK'], BACK: ['Escape', 'VBACK', 'GP_BACK'],
 };
@@ -7820,6 +7846,17 @@ function tileAt(tx, ty) {
   return c;
 }
 function solidAt(tx, ty) { const c = tileAt(tx, ty); return c === '#' || c === 'B'; }
+// FRACTURE worlds: a deterministic scatter of ordinary wall is secretly loose.
+// Same tiles every visit, and only ever wall that already has open air behind
+// it, so it can never seal a route or open one that leads nowhere.
+function brLoose(tx, ty) {
+  if (typeof brHas !== 'function' || !brHas('fracture')) return false;
+  if (tileAt(tx, ty) !== '#') return false;
+  const h = ((tx * 73856093) ^ (ty * 19349663) ^ (universe().seed | 0)) >>> 0;
+  if ((h % 1000) / 1000 > 0.06) return false;
+  const open = (x, y) => { const c2 = tileAt(x, y); return c2 !== '#' && c2 !== 'B'; };
+  return open(tx, ty - 1) || open(tx, ty + 1) || open(tx - 1, ty) || open(tx + 1, ty);
+}
 // ---- sprite-sheet helpers (real hand-animated art; see assets/CREDITS.md) ----
 function sheetReady(key) { return typeof MEDIA_IMG !== 'undefined' && !!MEDIA_IMG[key]; }
 // draw one frame of a uniform sheet, standing on the local origin (feet at 0,0)
@@ -8319,7 +8356,7 @@ class Player {
       const x0 = Math.floor(hb.x / TILE), x1 = Math.floor((hb.x + hb.w) / TILE);
       const y0 = Math.floor(hb.y / TILE), y1 = Math.floor((hb.y + hb.h) / TILE);
       for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
-        const c = tileAt(tx, ty);
+        const c = (tileAt(tx, ty) === '#' && brLoose(tx, ty)) ? 'B' : tileAt(tx, ty);
         if (c === 'B') {
           // floor blocks (at/below the feet) only break with a DOWN-attack
           // (jump, hold down, hit); side/ceiling secret walls break normally
@@ -9701,6 +9738,21 @@ class Enemy {
     // turn toward where we are going, in time rather than in frames drawn
     const wantF = (this.kind === 'flier' ? Math.sign(this.vx) || 1 : this.dir) || 1;
     this.faceVis += clamp(wantF - this.faceVis, -dt * 5.5, dt * 5.5);
+    // CURED. On ground the player's mercy has bought back, machines wake up as
+    // what they were built to be. They potter about, they will not touch her,
+    // and their sensor burns cyan instead of red. This is the whole reward for
+    // choosing LEFT, and it has to be visible from across the room.
+    if (this.calm) {
+      this.stagT = 0; this.hypnoT = 1e9;
+      this.t -= dt;
+      if (this.t <= 0) { this.dir = -this.dir || 1; this.t = rnd(1.6, 4.2); }
+      this.vx = this.dir * this.spd * 0.26;
+      this.vy += 900 * dt;
+      const col = moveEnt(this, dt);
+      if (col.l || col.r) this.dir = -this.dir;
+      if (chance(dt * 2.2)) addPart(this.x + this.w / 2 + rnd(-5, 5), this.y - 2, rnd(-10, 10), -22, 0.7, '#37ffd0', 2, -20, true);
+      return;
+    }
     // charmed by the Song: it keeps the body and quiets the orders
     if (this.hypnoT > 0) {
       this.hypnoT -= dt; this.stagT = 0;
@@ -9810,6 +9862,14 @@ class Enemy {
       }
     }
     G.wrecks.push(new Wreck(this, kx || 0, ky || 0));
+    // THE BRAID: every machine that dies asks what you are. The ribbon does not
+    // stop play — ignore it and severance is recorded for you.
+    if (typeof brOffer === 'function' && !this.mini) brOffer('kill', cx, cy - 26);
+    // CHOIR: in a world where they hear each other die, the dead call the living
+    if (typeof brHas === 'function' && brHas('choir') && chance(0.35)) {
+      const e2 = new Enemy(chance(0.5) ? 'crawler' : 'flier', cx + rnd(-80, 80), this.y - 40);
+      e2.expireT = 14; G.enemies.push(e2);
+    }
   }
   draw(c) {
     const P = PAL[G.roomDef.zone];
@@ -12447,6 +12507,389 @@ class Boss {
   }
 }
 
+// ===========================================================================
+// THE BRAID — CLAWBYTE's multiverse.
+//
+// THE PROBLEM. "Every choice creates a new pathway" sounds like it means
+// storing a tree of worlds. It cannot: three options at every kill and every
+// rest means the number of reachable worlds passes a billion inside twenty
+// minutes of play. No save file holds that, and no author writes it.
+//
+// THE ANSWER. You do not store a multiverse. You DERIVE one.
+//
+// Everything the player does appends one character to a LEDGER — a short
+// string. That ledger is the only thing on disk. A universe is a pure function
+// of it, computed fresh whenever it is needed:
+//
+//        ledger  ──hash──▶  seed  ──generator──▶  the world you are standing in
+//
+// Storage is constant. The number of universes is not bounded at all. The same
+// ledger always rebuilds the same universe, on any device, forever — so a world
+// can be written down as a six-character code and handed to somebody else.
+//
+// Two channels of consequence run out of the same ledger, and the game needs
+// both to feel fair:
+//
+//   TALLY  — how many times you chose mercy, severance or the Signal. Smooth,
+//            directional, legible. This drives infection, tone, aggression.
+//            It is how the player learns that their choices point somewhere.
+//   HASH   — the exact ORDER of those choices, avalanched into 32 bits. Sharp,
+//            discrete, unrepeatable. This drives the ANOMALIES: the named
+//            physical laws that make one world not another.
+//
+// Tally alone would make every world a slider. Hash alone would make choices
+// feel arbitrary. Together: the direction is yours, the destination is unique.
+// ===========================================================================
+
+// LEFT = mercy, RIGHT = severance, RED = the Signal's own offer
+const BR_PICKS = ['L', 'R', 'X'];
+const BR_ZONES = ['A', 'B', 'C', 'D', 'E', 'X'];
+
+// Every anomaly must DO something. A world modifier that is only a word on a
+// screen is set dressing; these each change how the room plays.
+const BR_ANOM = {
+  bloom:    { n: 'BLOOM',    d: 'The rot flowers. Faster machines, richer scrap.' },
+  hollow:   { n: 'HOLLOW',   d: 'Half the factory never woke. Fewer foes, sharper minds.' },
+  starless: { n: 'STARLESS', d: 'The ceiling lights failed. You carry the only glow.' },
+  frost:    { n: 'FROST',    d: 'Coolant flooded everything. Slow, heavy, brittle.' },
+  fracture: { n: 'FRACTURE', d: 'The rock never set. More of it is loose than looks it.' },
+  dense:    { n: 'DENSE',    d: 'Gravity runs high. You fall harder and hit harder.' },
+  choir:    { n: 'CHOIR',    d: 'They hear each other die. The dead call the living.' },
+  clement:  { n: 'CLEMENT',  d: 'Something here remembers being built to help.' },
+};
+const BR_ANOM_KEYS = Object.keys(BR_ANOM);
+
+function braid() {
+  if (!G.save) return null;
+  if (!G.save.braid) {
+    G.save.braid = {
+      led: '',                       // the whole multiverse, as a string
+      tally: { L: 0, R: 0, X: 0 },
+      nodes: [],                     // divergences worth drawing on the chart
+      seen: {},                      // universe ids this player has stood in
+      kills: 0, forks: 0,
+    };
+  }
+  const b = G.save.braid;
+  if (!b.tally) b.tally = { L: 0, R: 0, X: 0 };
+  if (!b.nodes) b.nodes = [];
+  if (!b.seen) b.seen = {};
+  return b;
+}
+
+// FNV-1a, then an avalanche. Cheap, and one different character anywhere in the
+// ledger has to move every output bit or neighbouring worlds come out samey.
+function brHash(s) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+  }
+  h ^= h >>> 16; h = Math.imul(h, 0x7feb352d) >>> 0;
+  h ^= h >>> 15; h = Math.imul(h, 0x846ca68b) >>> 0;
+  h ^= h >>> 16;
+  return h >>> 0;
+}
+// a small deterministic stream off one seed, so every derived value is stable
+function brRng(seed) {
+  let s = (seed || 1) >>> 0;
+  return () => {
+    s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0;
+    return s / 4294967296;
+  };
+}
+function brId(seed) {
+  return 'U-' + seed.toString(36).toUpperCase().padStart(6, '0').slice(-6);
+}
+
+// ---------------------------------------------------------------------------
+// THE GENERATOR. Pure: ledger in, world out. No randomness that is not seeded,
+// no reads of live game state — which is what makes a universe reproducible
+// from its code alone.
+// ---------------------------------------------------------------------------
+let brCache = { key: null, u: null };
+function universe() {
+  const b = braid(); if (!b) return brDefaultUniverse();
+  if (brCache.key === b.led) return brCache.u;
+  const seed = brHash('clawbyte/' + b.led);
+  const R = brRng(seed);
+  const total = Math.max(1, b.tally.L + b.tally.R + b.tally.X);
+  const mercy = b.tally.L / total, sever = b.tally.R / total, red = b.tally.X / total;
+
+  // EVERYONE IS INFECTED. That is the starting condition of the whole story, so
+  // infection opens at 1 and is only ever bought down by mercy — and the Signal
+  // buys it straight back up.
+  const inf = {};
+  for (let i = 0; i < BR_ZONES.length; i++) {
+    const z = BR_ZONES[i];
+    // each kingdom answers to mercy at its own rate, so curing the world is
+    // never one uniform slider
+    const bias = 0.7 + R() * 0.6;
+    const cured = mercy * bias * 1.45;
+    const fed = red * 0.85 + sever * 0.12;
+    inf[z] = clamp(1 - cured + fed, 0, 1);
+  }
+
+  // Boss disposition. A guardian you never met in this world may already be
+  // free in it, or may have been taken further under.
+  const boss = {};
+  const KINDS = ['glitch', 'brood', 'zero', 'atlas', 'prism'];
+  for (const k of KINDS) {
+    const r = R();
+    boss[k] = red > 0.45 && r < red * 0.7 ? 'ascended'
+      : mercy > 0.4 && r < mercy * 0.5 ? 'freed'
+      : 'infected';
+  }
+
+  // Anomalies come off the HASH, not the tally: this is the part of a world
+  // that is yours alone rather than a consequence of your morals.
+  const anom = [];
+  const nA = 1 + (seed % 3);
+  const pool = BR_ANOM_KEYS.slice();
+  for (let i = 0; i < nA && pool.length; i++) {
+    const j = Math.floor(R() * pool.length);
+    anom.push(pool.splice(j, 1)[0]);
+  }
+  // the ledger's own drift can force a law on top of the roll
+  if (red > 0.55 && anom.indexOf('bloom') < 0) anom.push('bloom');
+  if (mercy > 0.6 && anom.indexOf('clement') < 0) anom.push('clement');
+
+  const has = (a) => anom.indexOf(a) >= 0;
+  const u = {
+    id: brId(seed), seed, led: b.led, depth: b.led.length,
+    mercy, sever, red, inf, boss, anom,
+    // world laws, all read live by the systems that care
+    foeK: (has('hollow') ? 0.55 : 1) * (has('bloom') ? 1.25 : 1),
+    spdK: (has('frost') ? 0.78 : 1) * (has('bloom') ? 1.16 : 1),
+    lootK: (has('bloom') ? 1.5 : 1) * (has('hollow') ? 1.25 : 1) * (1 + sever * 0.4),
+    gravK: has('dense') ? 1.16 : 1,
+    darkK: has('starless') ? 1 : 0,
+    secretK: has('fracture') ? 1 : 0,
+    callK: has('choir') ? 1 : 0,
+    calmK: has('clement') ? 0.3 : 0,      // extra chance a machine wakes peaceful
+  };
+  brCache = { key: b.led, u };
+  return u;
+}
+function brDefaultUniverse() {
+  const inf = {}; for (const z of BR_ZONES) inf[z] = 1;
+  return {
+    id: 'U-000000', seed: 0, led: '', depth: 0, mercy: 0, sever: 0, red: 0,
+    inf, boss: {}, anom: [], foeK: 1, spdK: 1, lootK: 1, gravK: 1,
+    darkK: 0, secretK: 0, callK: 0, calmK: 0,
+  };
+}
+
+// how infected the room she is standing in is, 0..1
+function brInf() {
+  const u = universe();
+  return (u.inf && G.roomDef && u.inf[G.roomDef.zone] != null) ? u.inf[G.roomDef.zone] : 1;
+}
+function brHas(a) { return universe().anom.indexOf(a) >= 0; }
+
+// ---------------------------------------------------------------------------
+// RECORDING A CHOICE. One character on the ledger. Everything else follows.
+// ---------------------------------------------------------------------------
+function brRecord(pick, kind, room) {
+  const b = braid(); if (!b) return;
+  const before = universe();
+  b.led += pick;
+  b.tally[pick] = (b.tally[pick] || 0) + 1;
+  if (kind === 'kill') b.kills++;
+  // only real divergences go on the chart — a chart of every kill is a wall
+  if (kind !== 'kill') {
+    b.forks++;
+    b.nodes.push({ p: pick, k: kind, r: room || G.roomId, d: b.led.length });
+    if (b.nodes.length > 220) b.nodes.shift();
+  }
+  brCache.key = null;                       // the world has changed underneath us
+  const after = universe();
+  b.seen[after.id] = 1;
+  if (typeof persist === 'function') persist();
+  // crossing into a genuinely new world is the moment worth announcing
+  if (after.id !== before.id && kind !== 'kill' && typeof G.toast === 'function') {
+    G.toast(t('br_shift').replace('%s', after.id));
+  }
+  return after;
+}
+
+// ---------------------------------------------------------------------------
+// THE OFFER. Three ways to answer, every kill and every rest.
+//
+// It never blocks. A prompt that stops a platformer dead on every kill would
+// wreck the game's pace, so this is a ribbon with a clock on it: answer, or
+// keep playing and let it lapse. Lapsing is itself a choice and is recorded as
+// severance, because doing nothing to a dying machine IS severing it.
+// ---------------------------------------------------------------------------
+const BR_OFFER_T = 2.6;
+function brOffer(kind, x, y) {
+  if (!G.save || (typeof isHero === 'function' && isHero())) return;
+  // rests and bosses always ask; kills ask on a ribbon that can lapse
+  G.offer = { kind, t: kind === 'kill' ? BR_OFFER_T : 9e9, t0: BR_OFFER_T, x: x || 0, y: y || 0, done: false };
+  if (kind !== 'kill') G.state = 'OFFER';
+}
+function brAnswer(pick) {
+  const o = G.offer; if (!o || o.done) return;
+  o.done = true;
+  const u = brRecord(pick, o.kind, G.roomId);
+  if (typeof sfx === 'function') sfx(pick === 'X' ? 'phase' : pick === 'L' ? 'powerUp' : 'ui');
+  // the Signal's gift is real, and so is its price
+  if (pick === 'X') {
+    if (player) { player.volts = Math.min(player.maxVolts ? player.maxVolts() : 99, player.volts + 30); }
+    if (typeof G.hudGlitchT === 'number') G.hudGlitchT = Math.max(G.hudGlitchT, 3);
+    if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 6);
+  } else if (pick === 'L' && player) {
+    player.cores = Math.min(player.maxCores(), player.cores + (o.kind === 'kill' ? 0 : 1));
+  } else if (pick === 'R') {
+    if (typeof G.dropScrap === 'function' && o.kind === 'kill') G.dropScrap(o.x, o.y, 4);
+  }
+  if (G.state === 'OFFER') G.state = 'PLAY';
+  G.offer = null;
+  return u;
+}
+function updateOffer(dt) {
+  const o = G.offer; if (!o) return;
+  if (inP('LEFT')) return brAnswer('L');
+  if (inP('RIGHT')) return brAnswer('R');
+  if (inP('UP') || inP('CAST') || inP('CLAW')) return brAnswer('X');
+  if (o.kind === 'kill') {
+    o.t -= dt;
+    if (o.t <= 0) { brAnswer('R'); }      // walking away is a choice
+  }
+}
+// the ribbon, drawn in world space over the thing that just died
+function drawOffer() {
+  const o = G.offer; if (!o) return;
+  const full = o.kind !== 'kill';
+  const k = full ? 1 : clamp(o.t / o.t0, 0, 1);
+  c.save();
+  if (full) {
+    c.fillStyle = 'rgba(4,7,12,0.82)'; c.fillRect(0, 0, 960, 540);
+    ftxt(t(o.kind === 'bench' ? 'br_rest' : 'br_boss'), 480, 168, 22, '#eef3fa', 'center', '#37ffd0');
+    ftxt(universe().id + '  ·  ' + t('br_depth').replace('%s', universe().depth), 480, 202, 13, '#7d93a8', 'center');
+  }
+  const bx = full ? 480 : clamp(o.x - cam.x, 130, 830);
+  const by = full ? 300 : clamp(o.y - cam.y, 90, 430);
+  const opts = [
+    { p: 'L', key: '◀', col: '#7de8a0', lab: t('br_mercy') },
+    { p: 'X', key: '▲', col: '#ff5a6a', lab: t('br_red') },
+    { p: 'R', key: '▶', col: '#ffd76a', lab: t('br_sever') },
+  ];
+  const w = full ? 210 : 128, h = full ? 66 : 34, gap = full ? 18 : 8;
+  opts.forEach((op, i) => {
+    const ox = bx + (i - 1) * (w + gap), oy = by;
+    c.globalAlpha = full ? 1 : 0.35 + k * 0.6;
+    c.fillStyle = 'rgba(8,14,22,0.9)';
+    rr(c, ox - w / 2, oy - h / 2, w, h, 8); c.fill();
+    c.strokeStyle = op.col; c.lineWidth = full ? 2 : 1.4;
+    rr(c, ox - w / 2, oy - h / 2, w, h, 8); c.stroke();
+    ftxt(op.key + '  ' + op.lab, ox, oy - (full ? 8 : 0), full ? 17 : 12, op.col, 'center');
+    if (full) ftxt(t('br_' + op.p + '_d'), ox, oy + 16, 11, '#8aa2b5', 'center');
+    c.globalAlpha = 1;
+  });
+  // the clock on a kill ribbon, so lapsing never feels like a bug
+  if (!full) {
+    c.fillStyle = 'rgba(255,255,255,0.5)';
+    c.fillRect(bx - (w * 1.5 + gap), by + h / 2 + 5, (w * 3 + gap * 2) * k, 2);
+  }
+  c.restore();
+}
+
+// ---------------------------------------------------------------------------
+// THE CHART. Your own tree of worlds, drawn as a braid: mercy bends one way,
+// severance the other, the Signal drops straight down.
+// ---------------------------------------------------------------------------
+const braidView = { z: 1, x: 0, y: 0, ready: false, drag: null };
+function brLayout() {
+  const b = braid(); if (!b) return [];
+  const pts = [{ x: 0, y: 0, p: null, k: 'root', r: '', d: 0 }];
+  let x = 0, y = 0;
+  for (const n of b.nodes) {
+    x += n.p === 'L' ? -46 : n.p === 'R' ? 46 : 0;
+    y += n.p === 'X' ? 66 : 52;
+    pts.push({ x, y, p: n.p, k: n.k, r: n.r, d: n.d });
+  }
+  return pts;
+}
+function brOpen() {
+  braidView.z = 1; braidView.ready = true; braidView.drag = null;
+  const pts = brLayout(), last = pts[pts.length - 1];
+  braidView.x = 480 - last.x; braidView.y = 300 - last.y;
+}
+function updateBraidView(dt) {
+  if (!braidView.ready) brOpen();
+  const sp = 560 * dt;
+  if (inD('LEFT')) braidView.x += sp;
+  if (inD('RIGHT')) braidView.x -= sp;
+  if (inD('UP')) braidView.y += sp;
+  if (inD('DOWN')) braidView.y -= sp;
+  if (inD('JUMP')) braidView.z = clamp(braidView.z * (1 + 1.8 * dt), 0.35, 3);
+  if (inD('ATK')) braidView.z = clamp(braidView.z * (1 - 1.6 * dt), 0.35, 3);
+  if (inP('INT')) brOpen();
+}
+function drawBraidView() {
+  if (!braidView.ready) brOpen();
+  const u = universe(), b = braid();
+  c.fillStyle = 'rgba(4,7,12,0.94)'; c.fillRect(0, 0, 960, 540);
+  ftxt(t('br_title'), 480, 36, 24, '#eef3fa', 'center', '#37ffd0');
+  c.save();
+  c.beginPath(); c.rect(0, 52, 960, 400); c.clip();
+  c.translate(braidView.x, braidView.y); c.scale(braidView.z, braidView.z);
+  const pts = brLayout();
+  c.lineWidth = 2.4;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], p = pts[i];
+    c.strokeStyle = p.p === 'L' ? 'rgba(125,232,160,0.75)' : p.p === 'X' ? 'rgba(255,90,106,0.8)' : 'rgba(255,215,106,0.7)';
+    c.beginPath(); c.moveTo(a.x, a.y);
+    c.bezierCurveTo(a.x, a.y + 24, p.x, p.y - 24, p.x, p.y); c.stroke();
+  }
+  pts.forEach((p, i) => {
+    const cur = i === pts.length - 1;
+    c.fillStyle = p.p === 'L' ? '#7de8a0' : p.p === 'X' ? '#ff5a6a' : p.p === 'R' ? '#ffd76a' : '#cfe8ff';
+    c.beginPath(); c.arc(p.x, p.y, cur ? 8 : 4.5, 0, 7); c.fill();
+    if (cur) {
+      c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 2;
+      c.beginPath(); c.arc(p.x, p.y, 13, 0, 7); c.stroke();
+    }
+    if (p.k === 'boss') { c.fillStyle = '#ffffff'; c.fillRect(p.x - 2, p.y - 14, 4, 4); }
+  });
+  c.restore();
+  // the world this path built
+  dimPanel(24, 60, 250, 168);
+  ftxt(u.id, 149, 82, 19, '#eef3fa', 'center');
+  ftxt(t('br_depth').replace('%s', u.depth) + '  ·  ' + t('br_worlds').replace('%s', Object.keys(b.seen).length),
+    149, 104, 11, '#7d93a8', 'center');
+  const bars = [
+    [t('br_mercy'), u.mercy, '#7de8a0'], [t('br_sever'), u.sever, '#ffd76a'], [t('br_red'), u.red, '#ff5a6a'],
+  ];
+  bars.forEach((bb, i) => {
+    const y = 126 + i * 20;
+    ftxt(bb[0], 40, y, 11, bb[2], 'left');
+    c.fillStyle = 'rgba(255,255,255,0.1)'; c.fillRect(120, y - 4, 130, 8);
+    c.fillStyle = bb[2]; c.fillRect(120, y - 4, 130 * clamp(bb[1], 0, 1), 8);
+  });
+  let iy = 196;
+  ftxt(t('br_inf'), 40, iy, 11, '#8aa2b5', 'left');
+  BR_ZONES.forEach((z, i) => {
+    const x = 118 + i * 22;
+    const v = u.inf[z];
+    c.fillStyle = 'rgba(255,255,255,0.12)'; c.fillRect(x, iy - 8, 16, 16);
+    c.fillStyle = 'rgba(224,90,255,' + (0.25 + v * 0.75) + ')'; c.fillRect(x, iy - 8 + 16 * (1 - v), 16, 16 * v);
+    ftxt(z, x + 8, iy + 16, 9, '#6d8496', 'center');
+  });
+  // the laws of this world
+  dimPanel(686, 60, 250, 168);
+  ftxt(t('br_laws'), 811, 82, 13, '#eef3fa', 'center');
+  if (!u.anom.length) ftxt('—', 811, 120, 13, '#7d93a8', 'center');
+  u.anom.slice(0, 4).forEach((a, i) => {
+    const y = 108 + i * 30;
+    ftxt(BR_ANOM[a].n, 700, y, 13, '#aef7d8', 'left');
+    ftxt(BR_ANOM[a].d, 700, y + 13, 9.5, '#7d93a8', 'left');
+  });
+  ftxt(t('br_ctl'), 480, 500, 12, '#5f7488', 'center');
+  ftxt(t('br_seed').replace('%s', b.led.slice(-40) || '—'), 480, 520, 10, '#46586a', 'center');
+}
+
 // CLAWBYTE — main loop, states, HUD, menus, save
 const cv = document.getElementById('cv');
 let c = cv.getContext('2d');
@@ -12664,11 +13107,33 @@ function loadRoom(id) {
     if (cond && !G.save.flags[cond]) return;
     if (EKIND[kind]) {
       const k = EKIND[kind];
-      G.enemies.push(new Enemy(kind, tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h));
+      // THE BRAID decides who is even here. A kingdom you have cured wakes fewer
+      // machines and wakes some of them calm; a HOLLOW world barely wakes at all.
+      const U = typeof universe === 'function' ? universe() : null;
+      if (U) {
+        const zi = U.inf[def.zone] != null ? U.inf[def.zone] : 1;
+        // Infection feeds the population, but only somewhat — a cured kingdom
+        // should read as PEACEFUL, not as empty. Most of what survives mercy is
+        // still there; it has simply stopped wanting to kill her.
+        const keep = clamp((0.66 + zi * 0.34) * U.foeK, 0.2, 1.6);
+        if (keep < 1 && ((i * 2654435761) % 1000) / 1000 > keep) return;
+      }
+      const en = new Enemy(kind, tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h);
+      if (U) {
+        const zi = U.inf[def.zone] != null ? U.inf[def.zone] : 1;
+        en.spd *= U.spdK * (0.82 + zi * 0.32);
+        // CURED GROUND. Below a quarter infection the machines start coming back
+        // to themselves: they wake calm, wander, and will not hurt her. This is
+        // the reward for mercy that the player can actually see.
+        const calmC = clamp((0.28 - zi) * 2.4 + U.calmK, 0, 0.9);
+        if (calmC > 0 && ((i * 40503 + 17) % 1000) / 1000 < calmC) { en.calm = true; en.hypnoT = 1e9; }
+      }
+      G.enemies.push(en);
     } else if (kind === 'scrap') {
       const fk = 'sc_' + id + '_' + i;
       if (!G.save.flags[fk]) {
-        const s = new Scrap(tx * TILE + 10, ty * TILE - 20, extra || 10);
+        const uL = typeof universe === 'function' ? universe().lootK : 1;
+        const s = new Scrap(tx * TILE + 10, ty * TILE - 20, Math.round((extra || 10) * uL));
         s.vx = 0; s.vy = 0; s.flagKey = fk;
         G.pickups.push(s);
       }
@@ -12837,6 +13302,9 @@ function doInteract(s) {
     G.save.bench = { room: G.roomId, x: s.x, y: s.y + s.h - 38 };
     G.save.usedNine = false; G.save.usedAegis = false;
     starRestock(); persist(); sfx('bench');
+    // a rest is the deep divergence — this one asks properly, and waits
+    if (typeof brOffer === 'function' && !(typeof isHero === 'function' && isHero()))
+      setTimeout(() => { if (G.state === 'PLAY') brOffer('bench'); }, 500);
     const dur = Math.max(1.4, (player.maxCores() - player.cores) * 0.2 + 1.4);
     const dock = 0.55;
     // dock phase: walk to the centre, then charge (robot: cables+surge / hero: drink)
@@ -13006,6 +13474,7 @@ function update(dt) {
       if (G.winT > 0) { G.winT -= dt; if (G.winT <= 0) { G.state = 'WIN'; setMusic('winTheme'); } }
       if (G.state === 'PLAY') {
         if (inP('MAP')) { G.state = 'MAP'; sfx('ui'); }
+        if (inP('BRAID')) { G.state = 'BRAID'; braidView.ready = false; sfx('ui'); }
         else if (inP('CREST')) { G.state = 'CREST'; G.crestIdx = 0; sfx('ui'); }
         else if (inP('SKILL')) { G.state = 'SKILLS'; G.skillIdx = 0; sfx('ui'); }
         else if (inP('PAUSE')) { G.state = 'PAUSE'; G.pauseIdx = 0; sfx('ui'); }
@@ -13031,6 +13500,11 @@ function update(dt) {
       } else if (G.dialog.npc) sfxVoice(G.dialog.npc);
       else sfx('ui');
     }
+  }
+  else if (G.state === 'OFFER') updateOffer(dt);
+  else if (G.state === 'BRAID') {
+    if (inP('BRAID') || inP('BACK') || inP('PAUSE')) { G.state = 'PLAY'; braidView.ready = false; sfx('ui'); }
+    else updateBraidView(dt);
   }
   else if (G.state === 'MAP') {
     if (G.mapBtnNew > 0) G.mapBtnNew = 0;
@@ -15155,6 +15629,7 @@ function mapUnlocked() {
   return false;
 }
 function mapBtnRect() { return { x: 846, y: 22, w: 92, h: 28 }; }
+function braidBtnRect() { return { x: 846, y: 56, w: 92, h: 28 }; }
 function drawMapButton() {
   if (!mapUnlocked() || (TOUCH && TOUCH.enabled)) return;
   // announce it once, the first time it is worth having
@@ -15172,6 +15647,18 @@ function drawMapButton() {
   c.lineWidth = nw ? 2 : 1.3;
   rr(c, r.x, r.y, r.w, r.h, 7); c.stroke();
   ftxt('▦ ' + t('map_btn'), r.x + r.w / 2, r.y + r.h / 2, 13, nw ? '#eaffff' : '#bcd6e6', 'center');
+  // and the multiverse itself, once she has actually forked one
+  const b2 = braid();
+  if (b2 && b2.led.length) {
+    const q = braidBtnRect();
+    const u = universe();
+    const hot = u.red > 0.34;
+    c.fillStyle = 'rgba(8,16,24,0.6)';
+    rr(c, q.x, q.y, q.w, q.h, 7); c.fill();
+    c.strokeStyle = hot ? 'rgba(255,90,106,0.55)' : 'rgba(125,232,160,0.45)';
+    c.lineWidth = 1.3; rr(c, q.x, q.y, q.w, q.h, 7); c.stroke();
+    ftxt('⋔ ' + u.id, q.x + q.w / 2, q.y + q.h / 2, 11.5, hot ? '#ffbcc4' : '#bcd6e6', 'center');
+  }
   c.restore();
 }
 addEventListener('mousedown', (e) => {
@@ -15182,6 +15669,11 @@ addEventListener('mousedown', (e) => {
   const r = mapBtnRect();
   if (sx >= r.x && sx <= r.x + r.w && sy >= r.y && sy <= r.y + r.h) {
     G.state = 'MAP'; G.mapBtnNew = 0; mapView.ready = false; sfx('ui');
+    return;
+  }
+  const q = braidBtnRect(); const b3 = braid();
+  if (b3 && b3.led.length && sx >= q.x && sx <= q.x + q.w && sy >= q.y && sy <= q.y + q.h) {
+    G.state = 'BRAID'; braidView.ready = false; sfx('ui');
   }
 });
 function drawHUD() {
@@ -15418,6 +15910,20 @@ function drawWorldFrame() {
   // ambient darkness — dynamic lights lift what matters
   c.fillStyle = 'rgba(3,6,14,0.16)';
   c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
+  // THE BRAID writes itself onto the air of the room. A kingdom still deep in
+  // the rot runs violet; one she has bought back runs clean. STARLESS worlds
+  // lose the ceiling lights entirely.
+  if (typeof universe === 'function') {
+    const U = universe(), zi = U.inf[G.roomDef.zone] != null ? U.inf[G.roomDef.zone] : 1;
+    if (zi > 0.4) {
+      c.fillStyle = 'rgba(120,20,90,' + ((zi - 0.4) * 0.13).toFixed(3) + ')';
+      c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
+    } else if (zi < 0.25) {
+      c.fillStyle = 'rgba(60,220,190,' + ((0.25 - zi) * 0.1).toFixed(3) + ')';
+      c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
+    }
+    if (U.darkK) { c.fillStyle = 'rgba(2,4,10,0.4)'; c.fillRect(cam.x - 12, cam.y - 12, 984, 564); }
+  }
   drawStatics(P);
   drawBreakHint();
   for (const p of G.pickups) p.draw(c);
@@ -16145,6 +16651,7 @@ function draw(tms) {
   // in-world states render the world behind
   drawWorldFrame();
   drawFX();
+  if (typeof drawOffer === 'function' && G.offer && G.offer.kind === 'kill') drawOffer();
   drawHUD();
   drawMapButton();
   if (G.trans) {
@@ -16196,6 +16703,10 @@ function draw(tms) {
       wrapText(d.lines[d.i], 620, 16).forEach((ln, i) => ftxt(ln, 480, 442 + i * 22, 16, '#e6eef6', 'center', null, '600'));
     }
     ftxt('▼', 480, 494, 13, '#7d93a8');
+  } else if (st === 'OFFER') {
+    drawOffer();
+  } else if (st === 'BRAID') {
+    drawBraidView();
   } else if (st === 'MAP') {
     drawMap();
   } else if (st === 'CREST') {

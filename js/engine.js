@@ -8,7 +8,7 @@ const KEYB = {
   CLAW: ['KeyQ', 'VCLAW', 'GP_CLAW'],
   ARM: ['KeyG', 'Digit1', 'VARM', 'GP_ARM'], SONG: ['KeyB', 'KeyN', 'VSONG', 'GP_SONG'],
   STAR: ['KeyR', 'Digit2', 'VSTAR', 'GP_STAR'],
-  MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], CREST: ['KeyI', 'VCREST', 'GP_CREST'], SKILL: ['KeyT', 'VSKILL', 'GP_SKILL'],
+  MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], BRAID: ['KeyY', 'VBRAID', 'GP_BRAID'], CREST: ['KeyI', 'VCREST', 'GP_CREST'], SKILL: ['KeyT', 'VSKILL', 'GP_SKILL'],
   PAUSE: ['Escape', 'KeyP', 'VPAUSE', 'GP_PAUSE'],
   OK: ['Enter', 'KeyZ', 'Space', 'VOK', 'GP_OK'], BACK: ['Escape', 'VBACK', 'GP_BACK'],
 };
