@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msol6hj2";window.GAME_LOCK="robo"</script>
+<script>window.BUILD_ID="msonw6h3";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -10164,6 +10164,36 @@ class Enemy {
   }
 }
 
+// ---------------------------------------------------------------------------
+// THE SCALE LAW (sprite spec, section C: WORLD SCALE / CHARACTER SCALE).
+// NYA-9 is the canonical reference. Ordinary minions must read SMALLER than her;
+// every boss must read LARGER. Two minions had drifted out of that order: the
+// flier and the blob were drawn at boss-like multiples of their own hitbox
+// (~2.5x and ~2.7x, against ~1.45x for everything else), which pushed both above
+// the hero — and pushed the blob above an actual boss.
+//
+// This trims the DRAWING only. Collision boxes, damage and fight tuning are
+// untouched, and the scale is taken about each creature's ground-contact point
+// so feet stay planted on the same floor line (section M: GROUNDING).
+// ---------------------------------------------------------------------------
+// The blob is oversized in BOTH games — it has no hand-drawn Odyssey sheet, so
+// the Odyssey draws it from the same atlas and inherits the same problem. The
+// flier only overshoots in CLAWBYTE; the Odyssey's ghost has its own sheet and
+// already sits correctly under that hero, so trimming it there would shrink it
+// to nothing.
+const EDRAW = { blob: 0.56 };
+const EDRAW_ROBO = { flier: 0.64 };
+const _enemyDrawRaw = Enemy.prototype.draw;
+Enemy.prototype.draw = function (c) {
+  const hero = typeof isHero === 'function' && isHero();
+  const k = EDRAW[this.kind] || (hero ? 0 : EDRAW_ROBO[this.kind]);
+  if (!k) return _enemyDrawRaw.call(this, c);
+  const px = this.x + this.w / 2, py = this.y + this.h;
+  c.save();
+  c.translate(px, py); c.scale(k, k); c.translate(-px, -py);
+  try { _enemyDrawRaw.call(this, c); } finally { c.restore(); }
+};
+
 // tumbling burning wreck — the dramatic enemy death
 class Wreck {
   constructor(e, kx, ky) {
@@ -10220,7 +10250,9 @@ const BSTAT = {
   brood: { w: 96, h: 64, hp: 320 },
   atlas: { w: 62, h: 74, hp: 460 },
   zero: { w: 112, h: 62, hp: 500 },   // GLACIERE: a long floating quadruped
-  prism: { w: 50, h: 34, hp: 520 },
+  // PRISM is the nimble rival, so it stays the smallest guardian — but a boss
+  // still has to stand over NYA-9 (36), and at 34 it stood under her.
+  prism: { w: 62, h: 46, hp: 520 },
   mother: { w: 120, h: 120, hp: 750 },
 };
 class Boss {
