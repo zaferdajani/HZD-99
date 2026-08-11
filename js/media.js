@@ -79,6 +79,24 @@ const MEDIA_SRC = {
     hum_sage: 'assets/sfx/hum_sage.ogg',
     hum_patch: 'assets/sfx/hum_patch.ogg',
     hum_lumen: 'assets/sfx/hum_lumen.ogg',
+    // NYA-9's voice and the guardians' roars. Short, mono, decoded once — about
+    // 2.5 MB of PCM for the whole cast, against the 62 MB the music used to cost
+    // before it was moved to streaming.
+    vox_atk1: 'assets/sfx/vox/atk1.ogg',
+    vox_atk2: 'assets/sfx/vox/atk2.ogg',
+    vox_atk3: 'assets/sfx/vox/atk3.ogg',
+    vox_land: 'assets/sfx/vox/land.ogg',
+    vox_dash: 'assets/sfx/vox/dash.ogg',
+    vox_win: 'assets/sfx/vox/win.ogg',
+    vox_hurt: 'assets/sfx/vox/hurt.ogg',
+    vox_djump: 'assets/sfx/vox/djump.ogg',
+    vox_purr: 'assets/sfx/vox/purr.ogg',
+    vox_roar_beast: 'assets/sfx/vox/roar_beast.ogg',
+    vox_roar_eagle: 'assets/sfx/vox/roar_eagle.ogg',
+    vox_roar_glc: 'assets/sfx/vox/roar_glc.ogg',
+    vox_roar_drg: 'assets/sfx/vox/roar_drg.ogg',
+    vox_roar_prism: 'assets/sfx/vox/roar_prism.ogg',
+    vox_roar_mother: 'assets/sfx/vox/roar_mother.ogg',
   },
 };
 if (typeof window !== 'undefined' && window.EMBEDDED_MEDIA) {

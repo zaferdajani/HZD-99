@@ -292,9 +292,37 @@ function heroSfx(n) {
   return false;   // everything else keeps the shared voice
 }
 // ---------- sound effects ----------
+// ---------------------------------------------------------------------------
+// THE VOICE LAYER. NYA-9 and the guardians now have recorded voices, and they
+// take precedence over the synth for the events they cover. Everything not in
+// this table still plays the synthesised cue, which is deliberate: several of
+// her small chirps could not be generated convincingly and the synth versions
+// are better than a bad sample. Nothing here is required — a missing file
+// leaves playBuf falsy and the switch below answers instead.
+//
+// Hero-world sounds never reach this: heroSfx returns above.
+// ---------------------------------------------------------------------------
+const VOX = {
+  land: ['vox_land', 0.42], dash: ['vox_dash', 0.4],
+  hurt: ['vox_hurt', 0.6], djump: ['vox_djump', 0.42],
+  purr: ['vox_purr', 0.5], win: ['vox_win', 0.5],
+  roar_beast: ['vox_roar_beast', 0.75], roar_eagle: ['vox_roar_eagle', 0.75],
+  roar_glc: ['vox_roar_glc', 0.75], roar_drg: ['vox_roar_drg', 0.8],
+  roar_prism: ['vox_roar_prism', 0.75],
+};
 function sfx(n) {
   if (!AC || MUTED) return;
   if (typeof isHero === 'function' && isHero() && heroSfx(n)) return;
+  // HER KIAI, ON THE RIGHT BEAT. The three-hit string escalates, so the shout
+  // does too: the combo index the player is actually on picks the take, and the
+  // heavy third one is the one with the metal in its tail.
+  if (n === 'atk' || n === 'swing') {
+    const c = (typeof player !== 'undefined' && player && player.combo) | 0;
+    if (playBuf('vox_atk' + (c === 2 ? 3 : c === 1 ? 2 : 1), c === 2 ? 0.5 : 0.42,
+      0.97 + Math.random() * 0.06)) return;
+  }
+  const v = VOX[n];
+  if (v && playBuf(v[0], v[1], 0.97 + Math.random() * 0.06)) return;
   // recorded samples first (loaded from the CC0 library), synth fallback below
   if (n === 'hit' && playBuf(Math.random() < 0.5 ? 'hit1' : 'hit2', 0.45, 0.9 + Math.random() * 0.2)) return;
   if (n === 'bosshit' && playBuf('metal', 0.5, 0.85 + Math.random() * 0.15)) return;
