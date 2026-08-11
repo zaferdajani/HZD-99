@@ -2724,6 +2724,8 @@ class Wreck {
 }
 
 // ================= BOSSES =================
+// the states that own their stagger rather than being interrupted by one
+const BOSS_SELF_STAG = { nullend: 1, cffloor: 1 };
 const BSTAT = {
   glitch: { w: 84, h: 56, hp: 220 },
   brood: { w: 96, h: 64, hp: 320 },
@@ -2953,7 +2955,18 @@ class Boss {
       }
       return;
     }
-    if (this.stagT > 0) { this.stagT -= dt; return; }   // Song / weakness stagger
+    // TWO STATES ARE THEIR OWN STAGGER. nullend (NULLFANG landing after Null
+    // Gravity) and cffloor (TALONHOST grounded with its chest cracked open)
+    // re-apply stagT every frame so the boss stays open to attack for the whole
+    // window. Returning early on that starved the very timer the handler was
+    // counting down: it only ticked on the one frame in eighteen where the
+    // stagger had just expired. NULLFANG's 1.15s recovery took 22 seconds and
+    // TALONHOST's 1.7s repair took 42 — the boss visibly stopped and stayed
+    // stopped, which is exactly how it looked from the outside.
+    if (this.stagT > 0) {
+      this.stagT -= dt;
+      if (!BOSS_SELF_STAG[this.st]) return;             // Song / weakness stagger
+    }
     if (this.st === 'dorm') {
       if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
         // THE STIR: it hears her. The wake itself is quiet — servos, a

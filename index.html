@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msp3blua";window.GAME_LOCK="robo";window.MUS_FILES={"ambient_observing_the_star":"assets/music/ambient_observing_the_star.ogg","epic_combat":"assets/music/epic_combat.ogg","mus_archives":"assets/music/mus_archives.m4a","mus_cache":"assets/music/mus_cache.m4a","mus_conduits":"assets/music/mus_conduits.m4a","mus_ending":"assets/music/mus_ending.m4a","mus_foundry":"assets/music/mus_foundry.m4a","mus_furnace":"assets/music/mus_furnace.m4a","mus_glaciere":"assets/music/mus_glaciere.m4a","mus_intro":"assets/music/mus_intro.m4a","mus_meadows":"assets/music/mus_meadows.m4a","mus_mother":"assets/music/mus_mother.m4a","mus_nest":"assets/music/mus_nest.m4a","mus_nullfang":"assets/music/mus_nullfang.m4a","mus_prism":"assets/music/mus_prism.m4a","mus_talonhost":"assets/music/mus_talonhost.m4a","mus_title":"assets/music/mus_title.m4a"};window.VID_FILES={"end_mother":"assets/video/end_mother.mp4","purify_atlas":"assets/video/purify_atlas.mp4","purify_brood":"assets/video/purify_brood.mp4","purify_glitch":"assets/video/purify_glitch.mp4","purify_prism":"assets/video/purify_prism.mp4","purify_zero":"assets/video/purify_zero.mp4"}</script>
+<script>window.BUILD_ID="msp3kzb1";window.GAME_LOCK="robo";window.MUS_FILES={"ambient_observing_the_star":"assets/music/ambient_observing_the_star.ogg","epic_combat":"assets/music/epic_combat.ogg","mus_archives":"assets/music/mus_archives.m4a","mus_cache":"assets/music/mus_cache.m4a","mus_conduits":"assets/music/mus_conduits.m4a","mus_ending":"assets/music/mus_ending.m4a","mus_foundry":"assets/music/mus_foundry.m4a","mus_furnace":"assets/music/mus_furnace.m4a","mus_glaciere":"assets/music/mus_glaciere.m4a","mus_intro":"assets/music/mus_intro.m4a","mus_meadows":"assets/music/mus_meadows.m4a","mus_mother":"assets/music/mus_mother.m4a","mus_nest":"assets/music/mus_nest.m4a","mus_nullfang":"assets/music/mus_nullfang.m4a","mus_prism":"assets/music/mus_prism.m4a","mus_talonhost":"assets/music/mus_talonhost.m4a","mus_title":"assets/music/mus_title.m4a"};window.VID_FILES={"end_mother":"assets/video/end_mother.mp4","purify_atlas":"assets/video/purify_atlas.mp4","purify_brood":"assets/video/purify_brood.mp4","purify_glitch":"assets/video/purify_glitch.mp4","purify_prism":"assets/video/purify_prism.mp4","purify_zero":"assets/video/purify_zero.mp4"}</script>
 <script>
 /**
  * @license
@@ -10977,6 +10977,8 @@ class Wreck {
 }
 
 // ================= BOSSES =================
+// the states that own their stagger rather than being interrupted by one
+const BOSS_SELF_STAG = { nullend: 1, cffloor: 1 };
 const BSTAT = {
   glitch: { w: 84, h: 56, hp: 220 },
   brood: { w: 96, h: 64, hp: 320 },
@@ -11206,7 +11208,18 @@ class Boss {
       }
       return;
     }
-    if (this.stagT > 0) { this.stagT -= dt; return; }   // Song / weakness stagger
+    // TWO STATES ARE THEIR OWN STAGGER. nullend (NULLFANG landing after Null
+    // Gravity) and cffloor (TALONHOST grounded with its chest cracked open)
+    // re-apply stagT every frame so the boss stays open to attack for the whole
+    // window. Returning early on that starved the very timer the handler was
+    // counting down: it only ticked on the one frame in eighteen where the
+    // stagger had just expired. NULLFANG's 1.15s recovery took 22 seconds and
+    // TALONHOST's 1.7s repair took 42 — the boss visibly stopped and stayed
+    // stopped, which is exactly how it looked from the outside.
+    if (this.stagT > 0) {
+      this.stagT -= dt;
+      if (!BOSS_SELF_STAG[this.st]) return;             // Song / weakness stagger
+    }
     if (this.st === 'dorm') {
       if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
         // THE STIR: it hears her. The wake itself is quiet — servos, a
