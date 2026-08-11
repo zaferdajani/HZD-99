@@ -3995,6 +3995,18 @@ class Boss {
   die() {
     if (this.dead) return;
     this.dead = true;
+    // A guardian with an authored purification film does not detonate. The
+    // film shows the last blow and the virus leaving; we skip straight past
+    // the wreck so nothing of him is ever seen destroyed.
+    if (typeof startPurifyCut === 'function' && startPurifyCut(this.kind)) {
+      this.deathAnimT = 0; this.deathFxT = 0; this.deathFinale = true;
+      this.purified = true; this.pureT = 0; this.rewardPend = true;
+      this.vx = 0; this.vy = 0;
+      if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
+      G.dropScrap(this.cx(), this.cy(), 30);
+      sfx('win');
+      return;
+    }
     this.deathAnimT = Math.max(this.deathAnimT || 0, 1.6);
     burst(this.cx(), this.cy(), 60, '#ffffff', 420, 1.1, 200, 5, true);
     burst(this.cx(), this.cy(), 40, PAL[G.roomDef.zone].glow, 300, 1.4, 100, 4, true);

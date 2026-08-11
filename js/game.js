@@ -253,6 +253,7 @@ function loadRoom(id) {
     const p = new Pouch(G.save.pouch.x, G.save.pouch.y, G.save.pouch.amount);
     G.pickups.push(p);
   }
+  if (G.boss && !G.boss.dead && typeof purifyPreload === 'function') purifyPreload(G.boss.kind);
   G.save.visited[id] = 1;
   tileDirty = true;
   setMusic(def.zone);
@@ -589,6 +590,7 @@ function update(dt) {
   else if (G.state === 'PAUSE') updatePause();
   else if (G.state === 'TCFG') updateTouchCfg();
   else if (G.state === 'CINE') updateCine(dt);
+  else if (G.state === 'CUT') updateCut(dt);
   else if (G.state === 'MENU') updateMenu();
   else if (G.state === 'LANGSEL') updateLangSel();
   else if (G.state === 'DIFF') updateDiff();
@@ -1379,6 +1381,112 @@ function strataTex(zone) {
   x.restore();
   strataCache[zone] = cv;
   return cv;
+}
+
+
+// ===========================================================================
+// PURIFICATION CUTSCENES. Some guardians do not blow apart when they lose —
+// they get an authored film instead. The final blow freezes the room, the
+// clip plays, and when it fades the creature is standing there freed, moving
+// around as your pet. No smoke, no wreckage: the film IS the death.
+// A hard timeout and an error path guarantee this can never trap the player.
+// ===========================================================================
+const PURIFY_VID = { glitch: 'assets/video/purify_glitch.mp4' };
+const purifyPre = {};
+// start pulling the film down as soon as its arena loads, so the final hit
+// does not sit waiting on the network
+function purifyPreload(kind) {
+  const s = PURIFY_VID[kind];
+  if (!s || purifyPre[kind]) return;
+  const v = document.createElement('video');
+  v.preload = 'auto'; v.muted = true; v.playsInline = true;
+  v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
+  v.src = s;
+  try { v.load(); } catch (e) {}
+  purifyPre[kind] = v;
+}
+function startPurifyCut(kind) {
+  if (!PURIFY_VID[kind]) return false;
+  let v = purifyPre[kind];
+  if (!v) { purifyPreload(kind); v = purifyPre[kind]; }
+  if (!v) return false;
+  // freeze the last live frame so the room can dim away under the film
+  let snap = null;
+  try {
+    snap = document.createElement('canvas');
+    snap.width = cv.width; snap.height = cv.height;
+    snap.getContext('2d').drawImage(cv, 0, 0);
+  } catch (e) { snap = null; }
+  G.cut = { kind, v, snap, t: 0, ph: 'in', hint: 0, failed: false };
+  try { v.currentTime = 0; } catch (e) {}
+  const pr = v.play();
+  if (pr && pr.catch) pr.catch(() => { G.cut && (G.cut.failed = true); });
+  G.state = 'CUT';
+  return true;
+}
+function endPurifyCut() {
+  const ct = G.cut;
+  if (!ct) { G.state = 'PLAY'; return; }
+  try { ct.v.pause(); } catch (e) {}
+  G.cut = null;
+  G.state = 'PLAY';
+  const b = G.boss;
+  if (b && b.purified) {
+    // the film already showed the rise, so he is simply awake and friendly
+    b.pureT = Math.max(b.pureT || 0, 1.2);
+    if (b.rewardPend) { b.rewardPend = false; G.onBossDead(b.kind); }
+  }
+}
+function updateCut(dt) {
+  const ct = G.cut;
+  if (!ct) { G.state = 'PLAY'; return; }
+  ct.t += dt; ct.hint += dt;
+  const v = ct.v;
+  const skip = inP('OK') || inP('JUMP') || inP('ATK') || inP('PAUSE') || inP('BACK');
+  if (skip && ct.ph !== 'out') { ct.ph = 'out'; ct.t = 0; return; }
+  if (ct.ph === 'in') {
+    if (ct.t >= 0.34) { ct.ph = 'play'; ct.t = 0; }
+    return;
+  }
+  if (ct.ph === 'play') {
+    const dead = ct.failed || (v.error != null)
+      || (v.ended === true)
+      || (v.duration && v.currentTime >= v.duration - 0.05);
+    // hard ceiling: a film that never loads or never ends still hands back
+    const cap = (v.duration && isFinite(v.duration)) ? v.duration + 2.5 : 12;
+    if (dead || ct.t > cap) { ct.ph = 'out'; ct.t = 0; }
+    return;
+  }
+  if (ct.t >= 0.65) endPurifyCut();
+}
+function drawCut() {
+  const ct = G.cut;
+  if (!ct) return;
+  c.fillStyle = '#000'; c.fillRect(0, 0, 960, 540);
+  if (ct.ph === 'in') {
+    if (ct.snap) {
+      c.save(); c.globalAlpha = 1 - clamp(ct.t / 0.34, 0, 1);
+      c.drawImage(ct.snap, 0, 0, 960, 540);
+      c.restore();
+    }
+    return;
+  }
+  const a = ct.ph === 'out' ? 1 - clamp(ct.t / 0.65, 0, 1) : clamp(ct.t / 0.3, 0, 1);
+  const v = ct.v;
+  if (v && v.videoWidth) {
+    // letterbox the film inside the frame — never crop the authored art
+    const k = Math.min(960 / v.videoWidth, 540 / v.videoHeight);
+    const w = v.videoWidth * k, h = v.videoHeight * k;
+    c.save(); c.globalAlpha = a;
+    try { c.drawImage(v, (960 - w) / 2, (540 - h) / 2, w, h); } catch (e) {}
+    c.restore();
+  }
+  if (ct.ph === 'play' && ct.hint > 1.6) {
+    c.save();
+    c.globalAlpha = 0.35 + Math.sin(performance.now() / 420) * 0.12;
+    ftxt(t('cut_skip'), 480, 516, 13, '#9fb8c8', 'center');
+    c.restore();
+  }
 }
 
 function drawZoneVista(P, zone, px, py) {
@@ -3012,6 +3120,7 @@ function draw(tms) {
   c.clearRect(0, 0, 960, 540);
   const st = G.state;
   if (st === 'CINE') { drawCine(); return; }
+  if (st === 'CUT') { drawCut(); return; }
   if (st === 'MENU' || st === 'LANGSEL' || st === 'DIFF' || st === 'WHO' || (st === 'CTRL' && G.ctrlBack === 'MENU') || st === 'GAMEOVER') {
     drawMenuBG(tsec);
     if (st === 'LANGSEL') {
