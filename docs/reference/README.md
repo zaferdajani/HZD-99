@@ -10,7 +10,8 @@ separates cleanly.
 | File | Character | Used in |
 |---|---|---|
 | `nya9.png` | NYA-9 — the hero | Shots 09, 10, 11 (every shot she appears in) |
-| `motherv.png` | MOTHER-V — the broadcast heart | Shots 03 and 05 — same plate for both, so she matches herself |
+| `motherv.png` | MOTHER-V — the Null Core, closed | Shots 03 and 05 — same plate for both, so she matches herself |
+| `motherv_phase2.png` | MOTHER-V — shell open, tendrils out, halo red | Her ending film: this is the state she is in when the last blow lands |
 | `nullfang.png` | NULLFANG — the virus beast | Shot 07 |
 | `furnace.png` | FURNACE CHOIR — the mecha dragon | Shot 08 |
 | `talonhost.png` | TALONHOST — the iron eagle | Beat III alternate |
