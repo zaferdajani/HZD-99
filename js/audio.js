@@ -29,11 +29,48 @@ function audioOn() {
 // scheduling — only the little SFX do, and those still decode.
 // ---------------------------------------------------------------------------
 let RECNODE = null;
+// Where each track was when something took it off. Crossing a zone border used
+// to restart the score from bar one, so walking back and forth across a border
+// — which is most of how this game is played — meant hearing the same opening
+// eight bars over and over and never the rest of the piece. A kingdom's theme
+// now picks up where it left off. Fights and fanfares are excluded: those are
+// meant to start at the top every time.
+const MUS_POS = {};
+const MUS_RESTART = /^(boss|mus_null|mus_talon|mus_furnace|mus_glaciere|mus_prism|mus_mother|mus_title|mus_intro|mus_ending|ambient$)/;
 function stopRecorded() {
-  if (RECNODE) {
-    try { RECNODE.el.pause(); RECNODE.el.src = ''; RECNODE.el.load(); } catch (e) {}
-  }
+  const n = RECNODE;
   RECNODE = null;
+  if (!n) return;
+  try { if (!MUS_RESTART.test(n.key)) MUS_POS[n.key] = n.el.currentTime || 0; } catch (e) {}
+  // fade the outgoing stream rather than cutting it dead mid-note
+  let v = 0;
+  try { v = n.el.volume; } catch (e) {}
+  const iv = setInterval(() => {
+    v -= 0.14;
+    try {
+      if (v <= 0.01) { n.el.pause(); n.el.src = ''; n.el.load(); clearInterval(iv); }
+      else n.el.volume = Math.max(0, Math.min(1, v));
+    } catch (e) { clearInterval(iv); }
+  }, 40);
+}
+// A streamed track stops for reasons that have nothing to do with the game: the
+// network stalls, the phone pauses audio when the app goes to the background or
+// a call arrives, or the loop simply fails to come round. None of it raises an
+// error anybody was listening for — the music just ends, mid-level, and stays
+// ended. Anything that leaves the current track paused gets it started again.
+function musKick() {
+  const n = RECNODE;
+  if (!n || MUTED || !MUSIC_ON) return;
+  try {
+    if (n.el.paused && n.el.src) {
+      const pr = n.el.play();
+      if (pr && pr.catch) pr.catch(() => {});
+    }
+  } catch (e) {}
+}
+if (typeof addEventListener === 'function') {
+  addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(musKick, 200); });
+  setInterval(musKick, 2500);
 }
 function playRecorded(key, gain) {
   stopRecorded();
@@ -42,10 +79,27 @@ function playRecorded(key, gain) {
   try {
     const el = new Audio();
     el.src = src; el.loop = true; el.preload = 'auto';
-    el.volume = Math.max(0, Math.min(1, gain));
+    const target = Math.max(0, Math.min(1, gain));
+    const node = { el, key, target };
+    el.volume = 0;                                   // faded in below
+    const pos = MUS_POS[key] || 0;
+    if (pos > 0) {
+      const seek = () => { try { el.currentTime = pos; } catch (e) {} };
+      seek();
+      el.addEventListener('loadedmetadata', seek, { once: true });
+    }
+    ['pause', 'stalled', 'suspend', 'waiting', 'ended'].forEach(ev =>
+      el.addEventListener(ev, () => setTimeout(musKick, 150)));
+    RECNODE = node;
+    let v = 0;
+    const iv = setInterval(() => {
+      if (RECNODE !== node) { clearInterval(iv); return; }
+      v += 0.14;
+      try { el.volume = Math.max(0, Math.min(1, Math.min(target, v))); } catch (e) {}
+      if (v >= target) clearInterval(iv);
+    }, 40);
     const pr = el.play();
     if (pr && pr.catch) pr.catch(() => {});
-    RECNODE = { el, key };
     return true;
   } catch (e) { return false; }
 }

@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msp6hv0r";window.GAME_LOCK="robo";window.MUS_FILES={"ambient_observing_the_star":"assets/music/ambient_observing_the_star.ogg","epic_combat":"assets/music/epic_combat.ogg","mus_archives":"assets/music/mus_archives.m4a","mus_cache":"assets/music/mus_cache.m4a","mus_conduits":"assets/music/mus_conduits.m4a","mus_ending":"assets/music/mus_ending.m4a","mus_foundry":"assets/music/mus_foundry.m4a","mus_furnace":"assets/music/mus_furnace.m4a","mus_glaciere":"assets/music/mus_glaciere.m4a","mus_intro":"assets/music/mus_intro.m4a","mus_meadows":"assets/music/mus_meadows.m4a","mus_mother":"assets/music/mus_mother.m4a","mus_nest":"assets/music/mus_nest.m4a","mus_nullfang":"assets/music/mus_nullfang.m4a","mus_prism":"assets/music/mus_prism.m4a","mus_talonhost":"assets/music/mus_talonhost.m4a","mus_title":"assets/music/mus_title.m4a"};window.VID_FILES={"end_atlas":"assets/video/end_atlas.mp4","end_brood":"assets/video/end_brood.mp4","end_close":"assets/video/end_close.mp4","end_folk":"assets/video/end_folk.mp4","end_glitch":"assets/video/end_glitch.mp4","end_mother":"assets/video/end_mother.mp4","end_open":"assets/video/end_open.mp4","end_prism":"assets/video/end_prism.mp4","end_zero":"assets/video/end_zero.mp4","purify_atlas":"assets/video/purify_atlas.mp4","purify_brood":"assets/video/purify_brood.mp4","purify_glitch":"assets/video/purify_glitch.mp4","purify_prism":"assets/video/purify_prism.mp4","purify_zero":"assets/video/purify_zero.mp4"}</script>
+<script>window.BUILD_ID="msp6rfow";window.GAME_LOCK="robo";window.MUS_FILES={"ambient_observing_the_star":"assets/music/ambient_observing_the_star.ogg","epic_combat":"assets/music/epic_combat.ogg","mus_archives":"assets/music/mus_archives.m4a","mus_cache":"assets/music/mus_cache.m4a","mus_conduits":"assets/music/mus_conduits.m4a","mus_ending":"assets/music/mus_ending.m4a","mus_foundry":"assets/music/mus_foundry.m4a","mus_furnace":"assets/music/mus_furnace.m4a","mus_glaciere":"assets/music/mus_glaciere.m4a","mus_intro":"assets/music/mus_intro.m4a","mus_meadows":"assets/music/mus_meadows.m4a","mus_mother":"assets/music/mus_mother.m4a","mus_nest":"assets/music/mus_nest.m4a","mus_nullfang":"assets/music/mus_nullfang.m4a","mus_prism":"assets/music/mus_prism.m4a","mus_talonhost":"assets/music/mus_talonhost.m4a","mus_title":"assets/music/mus_title.m4a"};window.VID_FILES={"end_atlas":"assets/video/end_atlas.mp4","end_brood":"assets/video/end_brood.mp4","end_close":"assets/video/end_close.mp4","end_folk":"assets/video/end_folk.mp4","end_glitch":"assets/video/end_glitch.mp4","end_mother":"assets/video/end_mother.mp4","end_open":"assets/video/end_open.mp4","end_prism":"assets/video/end_prism.mp4","end_zero":"assets/video/end_zero.mp4","purify_atlas":"assets/video/purify_atlas.mp4","purify_brood":"assets/video/purify_brood.mp4","purify_glitch":"assets/video/purify_glitch.mp4","purify_prism":"assets/video/purify_prism.mp4","purify_zero":"assets/video/purify_zero.mp4"}</script>
 <script>
 /**
  * @license
@@ -6500,11 +6500,48 @@ function audioOn() {
 // scheduling — only the little SFX do, and those still decode.
 // ---------------------------------------------------------------------------
 let RECNODE = null;
+// Where each track was when something took it off. Crossing a zone border used
+// to restart the score from bar one, so walking back and forth across a border
+// — which is most of how this game is played — meant hearing the same opening
+// eight bars over and over and never the rest of the piece. A kingdom's theme
+// now picks up where it left off. Fights and fanfares are excluded: those are
+// meant to start at the top every time.
+const MUS_POS = {};
+const MUS_RESTART = /^(boss|mus_null|mus_talon|mus_furnace|mus_glaciere|mus_prism|mus_mother|mus_title|mus_intro|mus_ending|ambient$)/;
 function stopRecorded() {
-  if (RECNODE) {
-    try { RECNODE.el.pause(); RECNODE.el.src = ''; RECNODE.el.load(); } catch (e) {}
-  }
+  const n = RECNODE;
   RECNODE = null;
+  if (!n) return;
+  try { if (!MUS_RESTART.test(n.key)) MUS_POS[n.key] = n.el.currentTime || 0; } catch (e) {}
+  // fade the outgoing stream rather than cutting it dead mid-note
+  let v = 0;
+  try { v = n.el.volume; } catch (e) {}
+  const iv = setInterval(() => {
+    v -= 0.14;
+    try {
+      if (v <= 0.01) { n.el.pause(); n.el.src = ''; n.el.load(); clearInterval(iv); }
+      else n.el.volume = Math.max(0, Math.min(1, v));
+    } catch (e) { clearInterval(iv); }
+  }, 40);
+}
+// A streamed track stops for reasons that have nothing to do with the game: the
+// network stalls, the phone pauses audio when the app goes to the background or
+// a call arrives, or the loop simply fails to come round. None of it raises an
+// error anybody was listening for — the music just ends, mid-level, and stays
+// ended. Anything that leaves the current track paused gets it started again.
+function musKick() {
+  const n = RECNODE;
+  if (!n || MUTED || !MUSIC_ON) return;
+  try {
+    if (n.el.paused && n.el.src) {
+      const pr = n.el.play();
+      if (pr && pr.catch) pr.catch(() => {});
+    }
+  } catch (e) {}
+}
+if (typeof addEventListener === 'function') {
+  addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(musKick, 200); });
+  setInterval(musKick, 2500);
 }
 function playRecorded(key, gain) {
   stopRecorded();
@@ -6513,10 +6550,27 @@ function playRecorded(key, gain) {
   try {
     const el = new Audio();
     el.src = src; el.loop = true; el.preload = 'auto';
-    el.volume = Math.max(0, Math.min(1, gain));
+    const target = Math.max(0, Math.min(1, gain));
+    const node = { el, key, target };
+    el.volume = 0;                                   // faded in below
+    const pos = MUS_POS[key] || 0;
+    if (pos > 0) {
+      const seek = () => { try { el.currentTime = pos; } catch (e) {} };
+      seek();
+      el.addEventListener('loadedmetadata', seek, { once: true });
+    }
+    ['pause', 'stalled', 'suspend', 'waiting', 'ended'].forEach(ev =>
+      el.addEventListener(ev, () => setTimeout(musKick, 150)));
+    RECNODE = node;
+    let v = 0;
+    const iv = setInterval(() => {
+      if (RECNODE !== node) { clearInterval(iv); return; }
+      v += 0.14;
+      try { el.volume = Math.max(0, Math.min(1, Math.min(target, v))); } catch (e) {}
+      if (v >= target) clearInterval(iv);
+    }, 40);
     const pr = el.play();
     if (pr && pr.catch) pr.catch(() => {});
-    RECNODE = { el, key };
     return true;
   } catch (e) { return false; }
 }
@@ -8373,6 +8427,8 @@ function touchingWall(e, dir) {
   return false;
 }
 
+const FLIP_DUR = 0.62;   // the double-jump pirouette, start to finish
+
 // ===========================================================================
 // THE JOINT LAYER — why her limbs used to snap.
 //
@@ -8610,12 +8666,12 @@ class Player {
           this.takeoffT = this.takeoff0 = 0.17; this.takeoffCoil = 1;   // coil 1-2 frames, then stretch
         } else if (this.wallSlide !== 0) {
           this.vy = -700; this.vx = -this.wallSlide * 430; this.face = -this.wallSlide; this.jbuf = 0;
-          this.jetT = 0.22; this.flipT = 0.5; sfx('jump');
+          this.jetT = 0.22; this.flipT = FLIP_DUR; sfx('jump');
           this.takeoffT = this.takeoff0 = 0.12; this.takeoffCoil = 0;   // launch stretch only
           burst(this.wallSlide > 0 ? this.x + this.w : this.x, this.y + this.h / 2, 6, PAL[G.roomDef.zone].glow, 140, 0.3, 400, 3, true);
         } else if (this.airJumps > 0) {
           this.vy = -680; this.airJumps--; this.jbuf = 0;
-          this.jetT = 0.3; this.flipT = 0.5; sfx('djump');
+          this.jetT = 0.3; this.flipT = FLIP_DUR; sfx('djump');
           this.takeoffT = this.takeoff0 = 0.12; this.takeoffCoil = 0;
           burst(this.x + this.w / 2, this.y + this.h, 10, '#8ff6ff', 160, 0.35, 500, 3, true);
         }
@@ -9294,11 +9350,39 @@ class Player {
       // cartwheel. Two eased twists; the silhouette slims through each
       // profile pass and mirrors on the far side, so the spin reads as a
       // body turning in place, with a whisker of axis wobble for style.
-      const k = 1 - this.flipT / 0.5;
+      // IT USED TO SPIN TOO FAST TO SEE. Two full twists inside half a second
+      // is eight profile passes, one every four frames, each squeezed to 22%
+      // of her width — the eye gets a strobe, not a pirouette, and no amount of
+      // extra artwork would have fixed a rotation running faster than the
+      // display can show it. One turn now, never narrower than a third of her
+      // width, and the smear below fills in the frames the screen cannot.
+      const k = 1 - this.flipT / FLIP_DUR;
       const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-      const th = e * Math.PI * 4;                  // two full twists
+      const th = e * Math.PI * 2;                  // one full twist
+      // MOTION BLUR, which is what "more frames" actually means here: the
+      // silhouette is stamped at the phases she passed through between this
+      // frame and the last, so the turn reads continuous instead of stepped.
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      for (let g = 1; g <= 3; g++) {
+        const kb = Math.max(0, k - g * 0.055);
+        const eb = kb < 0.5 ? 2 * kb * kb : 1 - Math.pow(-2 * kb + 2, 2) / 2;
+        const tb = eb * Math.PI * 2, fb = Math.cos(tb);
+        c.save();
+        c.scale((fb < 0 ? -1 : 1) * Math.max(0.33, Math.abs(fb)), 1);
+        c.rotate(Math.sin(tb) * 0.05);
+        c.globalAlpha = 0.22 - g * 0.05;
+        c.fillStyle = P.glow;
+        rr(c, -13, -25, 26, 19, 9); c.fill();                    // body
+        c.beginPath(); c.arc(2, -33, 10.5, 0, 7); c.fill();      // head
+        c.beginPath(); c.moveTo(-7, -39); c.lineTo(-3, -49); c.lineTo(2, -40); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(5, -40); c.lineTo(9, -49); c.lineTo(13, -39); c.closePath(); c.fill();
+        c.restore();
+      }
+      c.restore();
+      c.globalAlpha = 1;
       const fx = Math.cos(th);
-      c.scale((fx < 0 ? -1 : 1) * Math.max(0.22, Math.abs(fx)), 1);
+      c.scale((fx < 0 ? -1 : 1) * Math.max(0.33, Math.abs(fx)), 1);
       c.rotate(Math.sin(th) * 0.05);
     }
     c.scale(sx, sy * (1 - cr));

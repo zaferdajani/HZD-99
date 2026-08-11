@@ -111,6 +111,8 @@ function touchingWall(e, dir) {
   return false;
 }
 
+const FLIP_DUR = 0.62;   // the double-jump pirouette, start to finish
+
 // ===========================================================================
 // THE JOINT LAYER — why her limbs used to snap.
 //
@@ -348,12 +350,12 @@ class Player {
           this.takeoffT = this.takeoff0 = 0.17; this.takeoffCoil = 1;   // coil 1-2 frames, then stretch
         } else if (this.wallSlide !== 0) {
           this.vy = -700; this.vx = -this.wallSlide * 430; this.face = -this.wallSlide; this.jbuf = 0;
-          this.jetT = 0.22; this.flipT = 0.5; sfx('jump');
+          this.jetT = 0.22; this.flipT = FLIP_DUR; sfx('jump');
           this.takeoffT = this.takeoff0 = 0.12; this.takeoffCoil = 0;   // launch stretch only
           burst(this.wallSlide > 0 ? this.x + this.w : this.x, this.y + this.h / 2, 6, PAL[G.roomDef.zone].glow, 140, 0.3, 400, 3, true);
         } else if (this.airJumps > 0) {
           this.vy = -680; this.airJumps--; this.jbuf = 0;
-          this.jetT = 0.3; this.flipT = 0.5; sfx('djump');
+          this.jetT = 0.3; this.flipT = FLIP_DUR; sfx('djump');
           this.takeoffT = this.takeoff0 = 0.12; this.takeoffCoil = 0;
           burst(this.x + this.w / 2, this.y + this.h, 10, '#8ff6ff', 160, 0.35, 500, 3, true);
         }
@@ -1032,11 +1034,39 @@ class Player {
       // cartwheel. Two eased twists; the silhouette slims through each
       // profile pass and mirrors on the far side, so the spin reads as a
       // body turning in place, with a whisker of axis wobble for style.
-      const k = 1 - this.flipT / 0.5;
+      // IT USED TO SPIN TOO FAST TO SEE. Two full twists inside half a second
+      // is eight profile passes, one every four frames, each squeezed to 22%
+      // of her width — the eye gets a strobe, not a pirouette, and no amount of
+      // extra artwork would have fixed a rotation running faster than the
+      // display can show it. One turn now, never narrower than a third of her
+      // width, and the smear below fills in the frames the screen cannot.
+      const k = 1 - this.flipT / FLIP_DUR;
       const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-      const th = e * Math.PI * 4;                  // two full twists
+      const th = e * Math.PI * 2;                  // one full twist
+      // MOTION BLUR, which is what "more frames" actually means here: the
+      // silhouette is stamped at the phases she passed through between this
+      // frame and the last, so the turn reads continuous instead of stepped.
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      for (let g = 1; g <= 3; g++) {
+        const kb = Math.max(0, k - g * 0.055);
+        const eb = kb < 0.5 ? 2 * kb * kb : 1 - Math.pow(-2 * kb + 2, 2) / 2;
+        const tb = eb * Math.PI * 2, fb = Math.cos(tb);
+        c.save();
+        c.scale((fb < 0 ? -1 : 1) * Math.max(0.33, Math.abs(fb)), 1);
+        c.rotate(Math.sin(tb) * 0.05);
+        c.globalAlpha = 0.22 - g * 0.05;
+        c.fillStyle = P.glow;
+        rr(c, -13, -25, 26, 19, 9); c.fill();                    // body
+        c.beginPath(); c.arc(2, -33, 10.5, 0, 7); c.fill();      // head
+        c.beginPath(); c.moveTo(-7, -39); c.lineTo(-3, -49); c.lineTo(2, -40); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(5, -40); c.lineTo(9, -49); c.lineTo(13, -39); c.closePath(); c.fill();
+        c.restore();
+      }
+      c.restore();
+      c.globalAlpha = 1;
       const fx = Math.cos(th);
-      c.scale((fx < 0 ? -1 : 1) * Math.max(0.22, Math.abs(fx)), 1);
+      c.scale((fx < 0 ? -1 : 1) * Math.max(0.33, Math.abs(fx)), 1);
       c.rotate(Math.sin(th) * 0.05);
     }
     c.scale(sx, sy * (1 - cr));
