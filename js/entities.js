@@ -2903,6 +2903,34 @@ function enemyYaw(e) {
 }
 // the states that own their stagger rather than being interrupted by one
 const BOSS_SELF_STAG = { nullend: 1, cffloor: 1 };
+
+// ---------------------------------------------------------------------------
+// ONE GUARDIAN, ONE QUESTION — and it has to be asked no matter what lands the
+// last blow.
+//
+// Four separate places in the combat code destroy an entity the instant its
+// health reaches zero: the claw's hitbox, the shuriken, the Song, and the
+// pounce. Every one of them called die() on the spot. So a guardian killed by
+// an actual attack — which is every guardian a player has ever killed — was
+// already dead and already playing its death by the time Boss.update looked at
+// its health and offered the choice. The fork only ever fired in tests that
+// subtracted health directly without swinging anything, which is precisely why
+// it passed its own test suite while never once appearing in the game.
+//
+// The question therefore lives HERE, and die() asks it before doing anything
+// else. Whatever kills a guardian, it kneels first.
+// ---------------------------------------------------------------------------
+function bossFork(b) {
+  if (!b || b.forkAsked || b.dead || b.kind === 'mother') return false;
+  if (typeof brOffer !== 'function' || typeof G === 'undefined') return false;
+  if (typeof player === 'undefined' || !player || player.dead) return false;
+  if (typeof isHero === 'function' && isHero()) return false;
+  b.forkAsked = true;
+  b.hp = 0; b.vx = 0; b.vy = 0; b.stagT = 0;
+  brOffer(b.kind === 'glitch' ? 'firstboss' : 'boss');
+  G.forkBoss = b;
+  return true;
+}
 const BSTAT = {
   glitch: { w: 84, h: 56, hp: 220 },
   brood: { w: 96, h: 64, hp: 320 },
@@ -3132,6 +3160,30 @@ class Boss {
       }
       return;
     }
+    // ---- THE FORK ---------------------------------------------------------
+    // Every guardian asks, and it asks on the killing blow. The strike that
+    // would end it instead puts it on its knees, and the fight stops on the
+    // only question the game is built on: do you finish this, or do you free
+    // it? Nothing smaller than a guardian is ever allowed to ask — a question
+    // repeated over every crawler is what made this one cheap.
+    //
+    // For NULLFANG it is also, by the Braid's own arithmetic, the single most
+    // consequential press in a run: as the FIRST entry on the ledger it carries
+    // roughly nine times the weight of the choice you will make an hour later.
+    //
+    // THIS RUNS BEFORE THE STATE MACHINE, and that placement is the whole point.
+    // It used to sit below every state handler, so any state that returned early
+    // swallowed the question entirely: PRISM PROWLER killed mid-dash never asked
+    // and never died — it sat at zero health, still fighting. A guardian's death
+    // cannot be contingent on which move it happened to be in when it died.
+    // (The blow itself is caught in die(); this is the backstop for anything
+    // that drains a guardian to zero without ever calling it.)
+    if (this.hp <= 0 && bossFork(this)) return;
+    // A guardian at zero does not fall on its own any more. It is either kneeling
+    // with the question still open, or waiting for the blow the game is about to
+    // swing on the player's behalf — and dying early would eat both moments.
+    if (this.hp <= 0 && (G.forkBoss === this || (G.finish && G.finish.b === this))) return;
+    if (this.hp <= 0) { this.die(); return; }
     // TWO STATES ARE THEIR OWN STAGGER. nullend (NULLFANG landing after Null
     // Gravity) and cffloor (TALONHOST grounded with its chest cracked open)
     // re-apply stagT every frame so the boss stays open to attack for the whole
@@ -3203,20 +3255,6 @@ class Boss {
     // For NULLFANG it is also, by the Braid's own arithmetic, the single most
     // consequential press in a run: as the FIRST entry on the ledger it carries
     // roughly nine times the weight of the choice you will make an hour later.
-    if (this.hp <= 0 && !this.forkAsked && this.kind !== 'mother'
-        && typeof brOffer === 'function' && player && !player.dead
-        && !(typeof isHero === 'function' && isHero())) {
-      this.forkAsked = true;
-      this.hp = 0; this.vx = 0; this.vy = 0;
-      brOffer(this.kind === 'glitch' ? 'firstboss' : 'boss');
-      G.forkBoss = this;
-      return;
-    }
-    // A guardian at zero does not fall on its own any more. It is either kneeling
-    // with the question still open, or waiting for the blow the game is about to
-    // swing on the player's behalf — and dying early would eat both moments.
-    if (this.hp <= 0 && (G.forkBoss === this || (G.finish && G.finish.b === this))) return;
-    if (this.hp <= 0) { this.die(); return; }
     if (this.phase === 1 && this.hp < this.hpMax / 2) {
       this.phase = 2; this.t = 1;
       burst(this.cx(), this.cy(), 30, '#ffffff', 320, 0.7, 200, 4, true);
@@ -4583,6 +4621,11 @@ class Boss {
   }
   die() {
     if (this.dead) return;
+    // THE BLOW THAT WOULD END IT asks the question instead. This is the path
+    // every real kill actually takes — the claw, the shuriken, the Song and the
+    // pounce all call die() the moment health hits zero — so the guardian has
+    // to kneel here, or it never kneels at all.
+    if (!this.forceKill && bossFork(this)) return;
     this.dead = true;
     // A guardian with an authored purification film does not detonate. The
     // film shows the last blow and the virus leaving; we skip straight past

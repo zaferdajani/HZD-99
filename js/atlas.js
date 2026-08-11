@@ -284,18 +284,27 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
     const legSy = sy + sh2 * hipF, legH = sh2 * (1 - hipF);
     const legDy = topY + dh * hipF;                     // legs stay planted (no bob)
     const legDh = dh * (1 - hipF);
-    for (const [half, ph] of [[0, 1], [1, -1]]) {       // rear group, front group
-      c.save();
-      c.translate(ddx + dw * (half ? 0.5 : 0), legDy);
-      // shear about the hip line: the top edge never leaves the body, so the
-      // stride can never tear a gap open the way rotation did
-      c.transform(1, 0, Math.sin(g2) * swing * ph, 1, 0, 0);
-      c.drawImage(im, sxOf(col0) + half * sw2 / 2, legSy, sw2 / 2, legH,
-                  half ? -dw * 0.015 : 0, -legDh * 0.04, dw / 2 + dw * 0.015, legDh * 1.04);
-      c.restore();
-    }
-    // the body overlaps the hip line so the seam never shows
-    c.drawImage(im, sxOf(col0), sy, sw2, sh2 * (hipF + 0.05), ddx, ddy, dw, dh * (hipF + 0.05));
+    // One authored angle, rigged. Run it twice and the second angle fades in
+    // over the first: this branch used to draw col0 only, so the walkers — the
+    // crawler and the hopper, the two machines the player meets most — STEPPED
+    // between authored angles while everything else on the turntable swept
+    // through them. They turn like the rest of the roster now.
+    const limbPass = (cc) => {
+      for (const [half, ph] of [[0, 1], [1, -1]]) {     // rear group, front group
+        c.save();
+        c.translate(ddx + dw * (half ? 0.5 : 0), legDy);
+        // shear about the hip line: the top edge never leaves the body, so the
+        // stride can never tear a gap open the way rotation did
+        c.transform(1, 0, Math.sin(g2) * swing * ph, 1, 0, 0);
+        c.drawImage(im, sxOf(cc) + half * sw2 / 2, legSy, sw2 / 2, legH,
+                    half ? -dw * 0.015 : 0, -legDh * 0.04, dw / 2 + dw * 0.015, legDh * 1.04);
+        c.restore();
+      }
+      // the body overlaps the hip line so the seam never shows
+      c.drawImage(im, sxOf(cc), sy, sw2, sh2 * (hipF + 0.05), ddx, ddy, dw, dh * (hipF + 0.05));
+    };
+    limbPass(col0);
+    if (colF > 0.03) { c.save(); c.globalAlpha *= colF; limbPass(col1); c.restore(); }
   } else {
     c.drawImage(im, sxOf(col0), sy, sw2, sh2, ddx, ddy, dw, dh);
     if (colF > 0.03) {                       // the next angle fades in over it
