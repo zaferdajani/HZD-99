@@ -1641,6 +1641,13 @@ const ENDING_VID = {};
   }
 }
 Object.assign(PURIFY_VID, ENDING_VID);
+// The opening film's shots go in the same table — it is what every film in the
+// game is played through, so a clip the build found on disk but never
+// registered here is a clip that silently does not exist.
+{
+  const have = (typeof window !== 'undefined' && window.VID_FILES) || null;
+  if (have) for (const k in have) if (k.indexOf('intro') === 0) PURIFY_VID[k] = have[k];
+}
 function endingReel() {
   const killed = (G.save && G.save.flags && G.save.flags.killed) || {};
   const out = [];
@@ -1752,12 +1759,25 @@ function endPurifyCut() {
     // One skip skips the ending. And if a clip never ran a single frame, this
     // browser cannot decode the reel at all — trying the other seven would be
     // fifty seconds of black, so the first failure ends it.
-    if (ct.skipped || !ct.ran) G.reel = [];
+    if (ct.skipped || !ct.ran) { G.reel = []; G.reelCap = null; }
     while (G.reel.length) {
       const k = G.reel.shift();
-      if (startPurifyCut(k)) return;
+      const cap = G.reelCap ? G.reelCap.shift() : null;
+      if (startPurifyCut(k)) { if (cap) G.cut.cap = cap; return; }
     }
-    G.reel = null;
+    G.reel = null; G.reelCap = null;
+    // the opening film hands over to the comic's own ending — the title card
+    // and whatever was waiting behind it — rather than to the win screen
+    if (G.reelEnd === 'CINE') {
+      G.reelEnd = null;
+      // Only a film that COULD NOT PLAY falls back to the comic. Someone who
+      // skipped it is telling us they do not want the opening at all — handing
+      // them the comic version to skip a second time is not a fallback, it is
+      // a second obstacle.
+      if (!ct.ran && !ct.skipped) { G.state = 'CINE'; return; }
+      cineEnd();
+      return;
+    }
     G.state = 'WIN';
     if (typeof setMusic === 'function') setMusic('winTheme');
     return;
@@ -1855,6 +1875,27 @@ function drawCut() {
     vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.55)');
     c.fillStyle = vg; c.fillRect(0, 0, 960, 540);
     c.restore();
+  }
+  // THE CAPTION. The opening film carries the same lines the comic's panels
+  // carried, one per shot — without them the footage is atmosphere and the
+  // story is gone. Fades in over the first beat and sits on a soft plate so it
+  // stays readable over whatever the shot happens to be doing underneath.
+  if (ct.cap && ct.ph === 'play') {
+    const a = clamp(ct.t / 0.6, 0, 1) * clamp((ct.dur ? ct.dur - ct.t : 9) / 0.5, 0, 1);
+    if (a > 0.01) {
+      c.save();
+      c.globalAlpha = a;
+      const txt = t(ct.cap);
+      c.font = '600 17px "Segoe UI", Tahoma, sans-serif';
+      const w2 = Math.min(880, c.measureText(txt).width + 40);
+      const g2 = c.createLinearGradient(0, 432, 0, 500);
+      g2.addColorStop(0, 'rgba(4,8,12,0)'); g2.addColorStop(0.5, 'rgba(4,8,12,0.72)');
+      g2.addColorStop(1, 'rgba(4,8,12,0)');
+      c.fillStyle = g2; c.fillRect(480 - w2 / 2 - 30, 432, w2 + 60, 68);
+      ftxt(txt, 480, 468, 17, '#eaf4ff', 'center', 'rgba(0,0,0,0.85)', '600');
+      c.restore();
+      c.globalAlpha = 1;
+    }
   }
   if (ct.ph === 'play' && ct.hint > 1.6) {
     c.save();
@@ -4197,8 +4238,43 @@ function draw(tms) {
 // speed lines; ~70 seconds of story, then the title card.
 // Hold JUMP/OK one second to skip; the watched flag lives in localStorage.
 // ===========================================================================
+// THE OPENING, SHOT AS FILM. The same story the comic tells, in the same
+// order, as live footage — each shot carrying the caption that panel carried.
+// The comic is not gone: it is the fallback, and it runs whenever the film
+// cannot (files not shipped, or a browser that will not decode them), so the
+// game always opens with its story rather than with black.
+const INTRO_FILM = [
+  ['intro1', 'cine_c1'],   // the Kernel Depths, working as one
+  ['intro2', 'cine_c3'],   // MOTHER-V, the broadcast heart
+  ['intro3', 'cine_c4'],   // something outside answers her Song
+  ['intro4', 'cine_c5'],   // frequency by frequency, the signal turns
+  ['intro6', 'cine_c7'],   // the great guardians kneel first
+  ['intro7', 'cine_c8'],   // one frame was never wired to the Song
+  ['intro8', 'cine_c10'],  // she wakes to a silent city, and goes
+];
+function introFilmReel() {
+  const have = (typeof window !== 'undefined' && window.VID_FILES) || {};
+  return INTRO_FILM.filter(s => have[s[0]]);
+}
+function startIntroFilm() {
+  const reel = introFilmReel();
+  while (reel.length) {
+    const [k, cap] = reel.shift();
+    purifyPreload(k);
+    if (startPurifyCut(k)) {
+      G.cut.cap = cap;
+      G.reel = reel.map(s => s[0]);
+      G.reelCap = reel.map(s => s[1]);
+      G.reelEnd = 'CINE';
+      return true;
+    }
+  }
+  G.reel = null; G.reelCap = null; G.reelEnd = null;
+  return false;
+}
 function startCine() {
   G.cine = { page: 0, pt: 0, glitchT: 0, ending: false };
+  if (startIntroFilm()) return;
   G.state = 'CINE';
 }
 // page start times in the original score, and how long each page takes to
