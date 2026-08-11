@@ -1627,8 +1627,11 @@ const PURIFY_VID = {
 // registered — the build scans the directory and hands the list over — so a
 // reel can never name a file that is not there and park the ending on black
 // while a watchdog counts down.
-const END_ORDER = ['end_open', 'end_folk', 'end_glitch', 'end_brood', 'end_zero',
-  'end_atlas', 'end_prism', 'end_close'];
+// end_mother opens the reel: she is the last thing the player fights, and her
+// switching off is what turns the lights back on across the whole world — so
+// the ending starts on her and travels outward from there.
+const END_ORDER = ['end_mother', 'end_open', 'end_folk', 'end_glitch', 'end_brood',
+  'end_zero', 'end_atlas', 'end_prism', 'end_close'];
 const ENDING_VID = {};
 {
   const have = (typeof window !== 'undefined' && window.VID_FILES) || null;
@@ -1646,7 +1649,7 @@ function endingReel() {
     const guardian = k.slice(4);
     // open, folk and close are unconditional; a guardian shows up iff it lives
     if (guardian !== 'open' && guardian !== 'folk' && guardian !== 'close'
-      && killed[guardian]) continue;
+      && guardian !== 'mother' && killed[guardian]) continue;
     out.push(k);
   }
   return out;

@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msp2s4ig";window.GAME_LOCK="robo";window.MUS_FILES={"ambient_observing_the_star":"assets/music/ambient_observing_the_star.ogg","epic_combat":"assets/music/epic_combat.ogg","mus_archives":"assets/music/mus_archives.m4a","mus_cache":"assets/music/mus_cache.m4a","mus_conduits":"assets/music/mus_conduits.m4a","mus_ending":"assets/music/mus_ending.m4a","mus_foundry":"assets/music/mus_foundry.m4a","mus_furnace":"assets/music/mus_furnace.m4a","mus_glaciere":"assets/music/mus_glaciere.m4a","mus_intro":"assets/music/mus_intro.m4a","mus_meadows":"assets/music/mus_meadows.m4a","mus_mother":"assets/music/mus_mother.m4a","mus_nest":"assets/music/mus_nest.m4a","mus_nullfang":"assets/music/mus_nullfang.m4a","mus_prism":"assets/music/mus_prism.m4a","mus_talonhost":"assets/music/mus_talonhost.m4a","mus_title":"assets/music/mus_title.m4a"};window.VID_FILES={"purify_atlas":"assets/video/purify_atlas.mp4","purify_brood":"assets/video/purify_brood.mp4","purify_glitch":"assets/video/purify_glitch.mp4","purify_prism":"assets/video/purify_prism.mp4","purify_zero":"assets/video/purify_zero.mp4"}</script>
+<script>window.BUILD_ID="msp2y3kp";window.GAME_LOCK="robo";window.MUS_FILES={"ambient_observing_the_star":"assets/music/ambient_observing_the_star.ogg","epic_combat":"assets/music/epic_combat.ogg","mus_archives":"assets/music/mus_archives.m4a","mus_cache":"assets/music/mus_cache.m4a","mus_conduits":"assets/music/mus_conduits.m4a","mus_ending":"assets/music/mus_ending.m4a","mus_foundry":"assets/music/mus_foundry.m4a","mus_furnace":"assets/music/mus_furnace.m4a","mus_glaciere":"assets/music/mus_glaciere.m4a","mus_intro":"assets/music/mus_intro.m4a","mus_meadows":"assets/music/mus_meadows.m4a","mus_mother":"assets/music/mus_mother.m4a","mus_nest":"assets/music/mus_nest.m4a","mus_nullfang":"assets/music/mus_nullfang.m4a","mus_prism":"assets/music/mus_prism.m4a","mus_talonhost":"assets/music/mus_talonhost.m4a","mus_title":"assets/music/mus_title.m4a"};window.VID_FILES={"end_mother":"assets/video/end_mother.mp4","purify_atlas":"assets/video/purify_atlas.mp4","purify_brood":"assets/video/purify_brood.mp4","purify_glitch":"assets/video/purify_glitch.mp4","purify_prism":"assets/video/purify_prism.mp4","purify_zero":"assets/video/purify_zero.mp4"}</script>
 <script>
 /**
  * @license
@@ -15718,8 +15718,11 @@ const PURIFY_VID = {
 // registered — the build scans the directory and hands the list over — so a
 // reel can never name a file that is not there and park the ending on black
 // while a watchdog counts down.
-const END_ORDER = ['end_open', 'end_folk', 'end_glitch', 'end_brood', 'end_zero',
-  'end_atlas', 'end_prism', 'end_close'];
+// end_mother opens the reel: she is the last thing the player fights, and her
+// switching off is what turns the lights back on across the whole world — so
+// the ending starts on her and travels outward from there.
+const END_ORDER = ['end_mother', 'end_open', 'end_folk', 'end_glitch', 'end_brood',
+  'end_zero', 'end_atlas', 'end_prism', 'end_close'];
 const ENDING_VID = {};
 {
   const have = (typeof window !== 'undefined' && window.VID_FILES) || null;
@@ -15737,7 +15740,7 @@ function endingReel() {
     const guardian = k.slice(4);
     // open, folk and close are unconditional; a guardian shows up iff it lives
     if (guardian !== 'open' && guardian !== 'folk' && guardian !== 'close'
-      && killed[guardian]) continue;
+      && guardian !== 'mother' && killed[guardian]) continue;
     out.push(k);
   }
   return out;
