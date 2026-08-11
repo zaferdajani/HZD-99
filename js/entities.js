@@ -111,6 +111,68 @@ function touchingWall(e, dir) {
   return false;
 }
 
+// ===========================================================================
+// THE JOINT LAYER — why her limbs used to snap.
+//
+// Every pose in this rig was evaluated fresh each frame and drawn exactly
+// where the formula said. That is fine while one formula is running, but the
+// moment the state changed — run to swing, swing to idle, ground to air, hurt
+// to anything — the arm was simply somewhere else on the next frame. No amount
+// of polish inside a single pose fixes that; the eye reads the seam between
+// poses, not the poses.
+//
+// So the joints now have MEMORY. Each one carries a value and a velocity and
+// is driven toward its target by a critically-damped spring: it arrives
+// instead of appearing, carries a little of its old motion into the new pose,
+// and settles. That single change smooths every transition in the game at
+// once, in every direction she can face and every motion she can be in,
+// including ones nobody thought to hand-tune.
+// ===========================================================================
+const RIG_MAXDT = 1 / 30;      // a dropped frame must never fling a limb
+function rigStep(s, key, target, stiff, dt) {
+  const p = '_' + key, v = '_' + key + 'v';
+  if (s[p] === undefined) { s[p] = target; s[v] = 0; return target; }
+  // Sub-step, and take the step size FROM the stiffness. A fixed sub-step is
+  // the classic way to blow one of these up: a stiff spring integrated at a
+  // step near its own period does not settle, it diverges — and a limb that
+  // diverges leaves the screen. The step is bounded by the damping term, so
+  // the stiffest joint here stays as stable as the loosest.
+  const damp = 2 * Math.sqrt(stiff);
+  const hMax = Math.min(RIG_MAXDT, 1.4 / damp);
+  let left = Math.min(dt, 0.1);
+  while (left > 1e-6) {
+    const h = Math.min(left, hMax);
+    s[v] += (stiff * (target - s[p]) - damp * s[v]) * h;
+    s[p] += s[v] * h;
+    left -= h;
+  }
+  return s[p];
+}
+// the same spring, but on a circle: always take the short way round, so an
+// angle crossing ±π drags through the near side instead of unwinding
+function rigAng(s, key, target, stiff, dt) {
+  const p = '_' + key;
+  if (s[p] !== undefined) {
+    let d = target - s[p];
+    while (d > Math.PI) { s[p] += Math.PI * 2; d -= Math.PI * 2; }
+    while (d < -Math.PI) { s[p] -= Math.PI * 2; d += Math.PI * 2; }
+  }
+  return rigStep(s, key, target, stiff, dt);
+}
+// Two-bone IK. The elbow used to be pinned at a fixed angular offset from the
+// shoulder→hand line, so it bent by the same amount whether the arm was tucked
+// or fully extended — the giveaway that nothing underneath was jointed. Now the
+// upper arm and forearm have LENGTHS, and the elbow lands wherever those two
+// lengths can actually meet the hand.
+function rigIK(sx, sy, hx, hy, l1, l2, bend) {
+  const dx = hx - sx, dy = hy - sy;
+  const d = clamp(Math.hypot(dx, dy), Math.abs(l1 - l2) + 0.01, (l1 + l2) * 0.998);
+  const base = Math.atan2(dy, dx);
+  const cosA = clamp((d * d + l1 * l1 - l2 * l2) / (2 * d * l1), -1, 1);
+  const a = base + Math.acos(cosA) * bend;
+  return { x: sx + Math.cos(a) * l1, y: sy + Math.sin(a) * l1, base };
+}
+
 // ================= PLAYER =================
 class Player {
   constructor(x, y) {
@@ -922,6 +984,13 @@ class Player {
     }
     const run = this.on && Math.abs(this.vx) > 40 && this.dashT <= 0;
     const sprintK = clamp((Math.abs(this.vx) - 120) / 240, 0, 1);   // 0→1 into a full sprint
+    // the joint springs run on render time, not sim time: they smooth what the
+    // eye actually receives, so they stay smooth at any frame rate
+    {
+      const nw = performance.now();
+      this.rigDt = this._rigT ? Math.min((nw - this._rigT) / 1000, 0.1) : 1 / 60;
+      this._rigT = nw;
+    }
     // ninja stride: the faster she moves, the quicker and longer the cycle
     const ph = this.anim * (13 + sprintK * 7);
     const bob = run ? Math.sin(ph * 2) * (1.4 - sprintK * 0.9) : Math.sin(this.anim * 2.4) * 0.9;
@@ -1067,6 +1136,12 @@ class Player {
         knee = Math.max(0, -Math.cos(phase)) * sprintK * 5;   // tucked knee on recovery
       } else if (!this.on) { fx = hipX + 2.5; fy = -4; }
       else { fx = hipX + 1; fy = 0; }
+      // the foot is springed too, so leaving the ground, landing, and dropping
+      // out of a run all BEND the leg through the change instead of cutting to
+      // the new pose. Stiff enough that a running stride still lands on beat.
+      const lk = front ? 'legF' : 'legB';
+      fx = rigStep(this, lk + 'x', fx, run ? 2600 : 520, this.rigDt);
+      fy = rigStep(this, lk + 'y', fy, run ? 2600 : 520, this.rigDt);
       const kx = (hipX + fx) / 2 - 3.5 - lift * 0.3 + knee, ky = (hipY + fy) / 2 - 1 - knee * 0.5;
       // short, stubby limbs — spec §1.1: chubby means the legs stay little
       c.strokeStyle = front ? '#aab6c6' : '#7f8b9c'; c.lineWidth = 4.2; c.lineJoin = 'round';
@@ -1082,14 +1157,29 @@ class Player {
         addPart(this.x + this.w / 2 - this.face * 8, this.y + this.h - 1,
                 -this.face * rnd(50, 130), rnd(-60, -14), 0.32, '#9fb8c8', 2.4, 500);
     };
-    // rear arm streams back too — both arms trailing is the ninja-run silhouette
-    if (run && sprintK > 0.25) {
-      const bAng = 1.3 + sprintK * 1.6 - Math.sin(ph) * 0.12;
-      const bx2 = -4, by2 = -19 + bob * 0.4;
-      c.strokeStyle = '#7f8b9c'; c.lineWidth = 3; c.lineCap = 'round';
-      c.beginPath(); c.moveTo(bx2, by2);
-      c.lineTo(bx2 + Math.cos(bAng) * 11, by2 + Math.sin(bAng) * 11);
-      c.stroke();
+    // Rear arm. It used to appear the instant she crossed into a sprint and
+    // vanish the instant she dropped out of one — a whole limb popping in and
+    // out of the silhouette. It is always there now, and it SWINGS between
+    // tucked and trailing, so the ninja-run builds instead of switching on.
+    {
+      const trail = clamp((sprintK - 0.1) / 0.6, 0, 1);
+      const bTgt = (run ? 1.25 : 1.5) + trail * 1.6 - Math.sin(ph) * (0.1 + trail * 0.16);
+      const bAng = rigAng(this, 'armB', bTgt, 200, this.rigDt);
+      // it has to reach PAST the back of the torso to be seen at all — a
+      // trailing arm that stops inside the silhouette is a trailing arm nobody
+      // ever saw. At rest it stays short and the body hides it, which is right
+      // for a side view; the sprint is what swings it out.
+      const bLen = rigStep(this, 'armBL', 10 + trail * 6, 180, this.rigDt);
+      const bx2 = -9, by2 = -19 + bob * 0.4;
+      const bhx = bx2 + Math.cos(bAng) * bLen, bhy = by2 + Math.sin(bAng) * bLen;
+      const bEl = rigIK(bx2, by2, bhx, bhy, Math.max(5.6, bLen * 0.58), Math.max(5.6, bLen * 0.58), -1);
+      c.lineCap = 'round'; c.lineJoin = 'round';
+      c.strokeStyle = 'rgba(32,41,54,0.85)'; c.lineWidth = 4.6;
+      c.beginPath(); c.moveTo(bx2, by2); c.lineTo(bEl.x, bEl.y); c.lineTo(bhx, bhy); c.stroke();
+      c.strokeStyle = '#6d7a8c'; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(bx2, by2); c.lineTo(bEl.x, bEl.y); c.lineTo(bhx, bhy); c.stroke();
+      c.fillStyle = 'rgba(32,41,54,0.85)'; c.beginPath(); c.ellipse(bhx, bhy, 3.1, 2.7, 0, 0, 7); c.fill();
+      c.fillStyle = '#8d9aac'; c.beginPath(); c.ellipse(bhx, bhy, 2.3, 1.9, 0, 0, 7); c.fill();
     }
     // speed smear behind her at full sprint
     if (run && sprintK > 0.5) {
@@ -1299,8 +1389,13 @@ class Player {
     // --- front arm: a cat scratches — the paw rakes, nothing is held.
     // (the hero form still carries the volt-blade through the old arcs) ---
     {
-      const shX = 6, shY = -20 + bob * 0.4;
-      let ang, reach = 12;
+      // The shoulder used to sit at x=6 — six pixels inside a torso that is
+      // seventeen wide. Every resting and running pose therefore put the whole
+      // arm INSIDE her own silhouette, in the same metal as the belly: drawn
+      // every frame, visible in none of them. It rides on the front edge now,
+      // and every pose below is aimed to keep the paw clear of the body.
+      const shX = 10, shY = -20 + bob * 0.4;
+      let ang, reach = 14;
       if (this.hurtPoseT > 0) {
         // knockback flail: the arm windmills for a beat
         ang = -1.9 + Math.sin(this.anim * 36) * 0.75; reach = 13;
@@ -1329,19 +1424,60 @@ class Player {
         // wall-slide: palm planted on the wall above the shoulder
         ang = -0.9 + Math.sin(this.anim * 3) * 0.05; reach = 13.5;
       } else if (run && sprintK > 0.25) {
-        // NINJA SPRINT: the arm sweeps back behind the body, trailing the run
-        ang = 1.15 + sprintK * 1.55 + Math.sin(ph) * 0.12;
-        reach = 12 + sprintK * 3;
+        // NINJA SPRINT: the arm sweeps back — but LOW, past the hip, so the paw
+        // clears the belly instead of disappearing into it
+        ang = 1.35 + sprintK * 0.5 + Math.sin(ph) * 0.12;
+        reach = 15 + sprintK * 4;
       } else {
-        const armSw = run ? Math.sin(ph + Math.PI) * 4 : 0;
-        ang = 1.15 + armSw * 0.05 + Math.sin(this.anim * 2) * 0.05; // relaxed guard
+        // relaxed guard, held at the front edge of the chest where it can be
+        // seen: the paw pumps a little with the walk and breathes at a stand
+        const armSw = run ? Math.sin(ph + Math.PI) : 0;
+        ang = 0.72 + armSw * 0.26 + Math.sin(this.anim * 2) * 0.06;
+        reach = 14 + armSw * 1.2;
       }
+      // Everything above only says where the arm WANTS to be. The spring says
+      // where it is — stiff through a strike so the rake keeps its snap, loose
+      // the rest of the time so travel, landing and idle flow into each other.
+      const stiff = this.swingVis ? 900 : this.hurtPoseT > 0 ? 700 : 230;
+      ang = rigAng(this, 'armA', ang, stiff, this.rigDt);
+      reach = rigStep(this, 'armR', reach, stiff * 0.75, this.rigDt);
       const hx = shX + Math.cos(ang) * reach, hy = shY + Math.sin(ang) * reach;
-      const ex = shX + Math.cos(ang - 0.5) * reach * 0.55, ey = shY + Math.sin(ang - 0.5) * reach * 0.55;
-      // upper + fore arm — chubby means round little arms too
-      c.strokeStyle = '#9aa7b8'; c.lineWidth = 4; c.lineCap = 'round'; c.lineJoin = 'round';
+      // the elbow is SOLVED now. The bones grow with the reach, so a tucked arm
+      // folds hard and an extended one straightens out — the fold itself
+      // animates, which is most of what sells a limb as jointed
+      const bone = Math.max(7.6, reach * 0.56);
+      const el = rigIK(shX, shY, hx, hy, bone, bone, -1);
+      const ex = el.x, ey = el.y;
+      // upper + fore arm — chubby means round little arms too. Drawn twice: a
+      // dark contour underneath, then the metal inside it. Without the contour
+      // the arm is the same value as the belly it crosses and vanishes into it,
+      // which is exactly what it used to do.
+      c.lineCap = 'round'; c.lineJoin = 'round';
+      c.strokeStyle = 'rgba(38,48,62,0.9)'; c.lineWidth = 5.8;
       c.beginPath(); c.moveTo(shX, shY); c.lineTo(ex, ey); c.lineTo(hx, hy); c.stroke();
-      c.fillStyle = '#cfd8e6'; c.beginPath(); c.arc(hx, hy, 2.9, 0, 7); c.fill();  // paw/grip
+      c.strokeStyle = '#8593a6'; c.lineWidth = 4;
+      c.beginPath(); c.moveTo(shX, shY); c.lineTo(ex, ey); c.lineTo(hx, hy); c.stroke();
+      c.strokeStyle = 'rgba(226,236,250,0.55)'; c.lineWidth = 1.4;   // top-lit edge
+      c.beginPath(); c.moveTo(shX, shY - 1); c.lineTo(ex, ey - 1); c.stroke();
+      // THE PAW. It was a circle, which meant it pointed nowhere and could not
+      // lead or trail the arm. It is now a pad with three toes, and its wrist
+      // rides a softer spring than the arm does — so it drags behind the swing
+      // and whips through at the end, the way a real paw follows a foreleg.
+      const wr = rigAng(this, 'armW', ang, this.swingVis ? 520 : 160, this.rigDt);
+      c.save(); c.translate(hx, hy); c.rotate(wr);
+      const spread = this.swingVis ? 1 + Math.sin(clamp(1 - this.swingVis.t / this.swingVis.t0, 0, 1) * Math.PI) * 0.5 : 1;
+      c.fillStyle = 'rgba(38,48,62,0.9)';                                      // contour
+      c.beginPath(); c.ellipse(0.3, 0, 4.1, 3.5, 0, 0, 7); c.fill();
+      for (let k = -1; k <= 1; k++) {
+        c.beginPath(); c.arc(2.5, k * 1.65 * spread, 1.9, 0, 7); c.fill();
+      }
+      c.fillStyle = '#dbe3ef';
+      c.beginPath(); c.ellipse(0.3, 0, 3.2, 2.6, 0, 0, 7); c.fill();          // the pad
+      c.fillStyle = '#f2f6fd';
+      for (let k = -1; k <= 1; k++) {                                          // three toes
+        c.beginPath(); c.arc(2.5, k * 1.65 * spread, 1.1, 0, 7); c.fill();
+      }
+      c.restore();
       c.fillStyle = P.glow; c.beginPath(); c.arc(shX, shY, 1.7, 0, 7); c.arc(ex, ey, 1.3, 0, 7); c.fill();
       // FERAL CLAWS: three purple energy talons splay from the paw
       if (this.clawT > 0) {
