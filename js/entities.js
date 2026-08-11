@@ -2347,7 +2347,7 @@ class Enemy {
           t: this.anim, vx: this.vx, vy: this.vy,
           air: this.kind === 'hopper' ? clamp(Math.abs(this.vy) / 400, 0, 1) : 0,
           mode: { crawler: 'walk', hopper: 'spring', blob: 'pulse', flier: 'hover', turret: 'breathe' }[this.kind] || 'breathe',
-          yawScan: this.kind === 'turret' ? { c: 2, r: 0.55, a: 1.6 } : null,
+          yawScan: enemyYaw(this),
         })) return;
     c.save();
     if (this.hurtT > 0) { c.globalAlpha = 0.6; }
@@ -2724,6 +2724,47 @@ class Wreck {
 }
 
 // ================= BOSSES =================
+// ---------------------------------------------------------------------------
+// USING THE WHOLE TURNTABLE.
+//
+// Every machine is a pre-rendered 3D turnaround, eight authored angles that the
+// renderer cross-fades between — but the only thing that ever moved the yaw was
+// which way it was facing. That makes a turn read as a volume and everything
+// else read as a cutout, which is why the cast looked flatter than the art
+// actually is.
+//
+// So the yaw now answers to what the machine is DOING as well as where it is
+// looking. Nothing here changes a silhouette or a palette: it is the same
+// authored frames, sampled at angles they were rendered for and never reached.
+// ---------------------------------------------------------------------------
+function enemyYaw(e) {
+  const base = yawColF(e.faceVis);
+  // The turntable wraps, and angles 5-7 are the BACK of the model. A
+  // side-scroller must never show those, so every offset is clamped to keep the
+  // whole sweep inside the front hemisphere 0..4 — measured, because the first
+  // version of this happily rotated a crawler around to face away from camera.
+  const S = (c, a) => ({ c: clamp(c, a, 4 - a), r: 0, a });
+  switch (e.kind) {
+    case 'turret':
+      // a sentry sweeping its arc — it does not walk, so the sweep IS its motion
+      return Object.assign(S(2, 1.6), { r: 0.55 });
+    case 'flier':
+      // BANKS into its own movement, the way anything that flies has to, and
+      // drifts a little while hovering so it is never perfectly still
+      return Object.assign(S(base + clamp(e.vx / 150, -1, 1) * 1.15, 0.30), { r: 0.9 });
+    case 'crawler':
+      // a slow head-scan while it walks: it is looking for her
+      return Object.assign(S(base, Math.abs(e.vx) > 12 ? 0.22 : 0.45), { r: 0.7 });
+    case 'blob':
+      // a mass that has no front rolls where it is going
+      return Object.assign(S(base + clamp(e.vx / 120, -1, 1) * 0.8, 0.35), { r: 0.5 });
+    case 'hopper':
+      // twists in the air and squares up as it lands
+      return Object.assign(S(base + clamp(-e.vy / 500, -1, 1) * 0.9, e.on ? 0.12 : 0.3), { r: 1.4 });
+    default:
+      return Object.assign(S(base, 0.25), { r: 0.6 });
+  }
+}
 // the states that own their stagger rather than being interrupted by one
 const BOSS_SELF_STAG = { nullend: 1, cffloor: 1 };
 const BSTAT = {
