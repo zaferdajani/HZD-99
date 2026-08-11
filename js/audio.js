@@ -701,15 +701,48 @@ const TRACKS = {
 };
 
 const MUS = { cur: null, name: null, step: 0, nextT: 0 };
-// tracks where a recorded CC0 piece takes over from the synth score
-const RECORDED_TRACKS = { boss: ['boss', 0.5], mother: ['boss', 0.58], title: ['ambient', 0.5] };
+// THE SCORE, SLOT BY SLOT. Each entry names a file in assets/music/ and the
+// level to play it at. A slot whose file is not on disk simply loses, and the
+// synth score for that slot plays instead — so the game is never silent while
+// the album is being written, and every finished track turns itself on.
+//
+// Boss slots are per guardian and fall back to the shared 'boss' slot, which is
+// why every fight already has music even though only one recording exists.
+// Each slot lists its candidates best-first, so a new score displaces the
+// placeholder it replaces and nothing loses the music it already had.
+const RECORDED_TRACKS = {
+  title: [['mus_title', 0.5], ['ambient', 0.5]],
+  intro: [['mus_intro', 0.55], ['ambient', 0.5]],
+  A: [['mus_meadows', 0.4]], B: [['mus_conduits', 0.4]], C: [['mus_foundry', 0.42]],
+  D: [['mus_archives', 0.4]], E: [['mus_nest', 0.44]], X: [['mus_cache', 0.4]],
+  boss_glitch: [['mus_nullfang', 0.52], ['boss', 0.5]],
+  boss_brood: [['mus_talonhost', 0.52], ['boss', 0.5]],
+  boss_atlas: [['mus_furnace', 0.54], ['boss', 0.5]],
+  boss_zero: [['mus_glaciere', 0.5], ['boss', 0.5]],
+  boss_prism: [['mus_prism', 0.52], ['boss', 0.5]],
+  boss_mother: [['mus_mother', 0.56], ['boss', 0.58]],
+  boss: [['boss', 0.5]], mother: [['boss', 0.58]],
+};
+function pickRecorded(name) {
+  const cand = RECORDED_TRACKS[name]; if (!cand) return false;
+  for (const c of cand) if (playRecorded(c[0], c[1])) return true;
+  return false;
+}
+// when a per-guardian slot has neither a recording nor a synth track of its own
+const MUS_FALL = {
+  boss_glitch: 'boss', boss_brood: 'boss', boss_atlas: 'boss',
+  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother',
+  intro: 'title',
+};
 function setMusic(name) {
   if (MUS.name === name) return;
   stopRecorded();
   MUS.name = name;
-  const rec = RECORDED_TRACKS[name];
-  if (rec && MUSIC_ON && !MUTED && playRecorded(rec[0], rec[1])) { MUS.cur = null; return; }
-  MUS.cur = TRACKS[name] || null;
+  const back = MUS_FALL[name];
+  if (MUSIC_ON && !MUTED && (pickRecorded(name) || (back && pickRecorded(back)))) {
+    MUS.cur = null; return;
+  }
+  MUS.cur = TRACKS[name] || (back && TRACKS[back]) || null;
   MUS.step = 0; MUS.nextT = 0;
 }
 function stopMusic() { stopRecorded(); MUS.name = null; MUS.cur = null; }

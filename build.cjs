@@ -44,6 +44,17 @@ for (const k in EMBED) {
 }
 const files = ['vendor-three', 'model3d', 'beast', 'eagle', 'glaciere', 'furnace', 'mother', 'theme', 'mat', 'prism', 'types', 'i18n', 'media', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'pets', 'braid', 'game', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
+// THE MUSIC MANIFEST. Scored tracks are dropped into assets/music/ and turned
+// on by rebuilding — no code edit per track, and no reference to a file that is
+// not there (a missing stream would start an <audio> element that silently
+// never plays instead of falling back to the synth score).
+const MUS_EXT = /\.(ogg|mp3|m4a|wav)$/i;
+const musFiles = {};
+try {
+  for (const f of fs.readdirSync('assets/music')) {
+    if (MUS_EXT.test(f)) musFiles[f.replace(MUS_EXT, '')] = 'assets/music/' + f;
+  }
+} catch (e) { /* no music directory yet */ }
 const html = fs.readFileSync('dev.html', 'utf8');
 const buildId = Date.now().toString(36);
 // the loading screen paints while the megabytes below it still stream in
@@ -62,7 +73,8 @@ const emit = (fname, lock) => {
   const out = shell.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/, () =>
     loader + '\n' +
     '<script>window.BUILD_ID=' + JSON.stringify(buildId) +
-    ';window.GAME_LOCK=' + JSON.stringify(lock) + '</script>\n' +
+    ';window.GAME_LOCK=' + JSON.stringify(lock) +
+    ';window.MUS_FILES=' + JSON.stringify(musFiles) + '</script>\n' +
     '<script>\n' + files.join('\n') + '\n</script>\n</body>');
   fs.writeFileSync(fname, out);
   console.log(fname + ' built (' + lock + '):', (fs.statSync(fname).size / 1048576).toFixed(2) + 'MB');

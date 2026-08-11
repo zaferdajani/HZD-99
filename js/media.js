@@ -50,10 +50,15 @@ const MEDIA_SRC = {
   // Music is STREAMED, never decoded. decodeAudioData turns a 2 MB ogg into
   // ~60 MB of raw float PCM and holds it in RAM for the whole session — on a
   // phone that is the single most expensive thing this game did.
-  stream: {
+  // Anything in assets/music/ is available under its own basename: the build
+  // scans the directory and hands the list over, so a new score is turned on by
+  // dropping the file in and rebuilding. Nothing here ever names a file that is
+  // not on disk — a missing stream would start an <audio> that silently never
+  // plays instead of falling back to the synth score.
+  stream: Object.assign({
     boss: 'assets/music/epic_combat.ogg',
     ambient: 'assets/music/ambient_observing_the_star.ogg',
-  },
+  }, (typeof window !== 'undefined' && window.MUS_FILES) || {}),
   audio: {
     hit1: 'assets/sfx/hit_01.ogg',
     hit2: 'assets/sfx/hit_02.ogg',

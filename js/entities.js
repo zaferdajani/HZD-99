@@ -2900,7 +2900,9 @@ class Boss {
         // breath — the ROAR belongs to the moment it reaches full height.
         this.st = 'intro'; this.t = 2.0; this.roared = false;
         sfx('ui'); cam.shake = Math.max(cam.shake, 3);
-        setMusic(this.kind === 'mother' ? 'mother' : 'boss');
+        // each guardian gets its own theme when one has been scored, and the
+        // shared boss score until then
+        setMusic('boss_' + this.kind);
       }
       return;
     }
