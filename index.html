@@ -225,7 +225,7 @@
 })();
 </script>
 
-<script>window.BUILD_ID="msosma1j";window.GAME_LOCK="robo"</script>
+<script>window.BUILD_ID="msot9foy";window.GAME_LOCK="robo"</script>
 <script>
 /**
  * @license
@@ -15711,13 +15711,89 @@ function drawTiles(P) {
         c.globalAlpha = 0.5; c.fillRect(X + 4, Y + 9, 2.5, 4); c.fillRect(X + 25, Y + 9, 2.5, 4); c.globalAlpha = 1;
       }
     } else if (ch === '^') {
-      c.fillStyle = P.spike; c.shadowColor = P.glow; c.shadowBlur = 6;
+      // -----------------------------------------------------------------
+      // THE TEETH. These were two flat identical triangles filled with
+      // P.spike — which is the LIGHTEST colour in every kingdom's palette.
+      // A pale pastel shape in the softest tone available reads as scenery,
+      // not as the thing that kills you, and no amount of glow fixes that.
+      //
+      // Hazards need three things the old ones had none of. A material of
+      // their OWN, so they are visibly not made of the floor: dark iron
+      // driven into a socket. VOLUME, from a lit facet and a shadow facet
+      // either side of a ridge — sharpness reads as a thin hard specular,
+      // never as a fat glow. And a HISTORY: irregular heights, chipped tips
+      // and dried stain at the root, because a hazard that has obviously
+      // been used is the one players actually respect.
+      // -----------------------------------------------------------------
+      // Steel that is LIGHTER than the ground it stands in. The first attempt
+      // made these near-black and they vanished against a dark floor — a hazard
+      // you cannot see the silhouette of is not intimidating, it is unfair. The
+      // body is deliberately zone-independent so it reads on green rock, orange
+      // rock and blue ice alike; only a rim of the kingdom's own light is
+      // borrowed, so it still belongs here.
+      c.save();
+      const steelD = '#141a22', steelM = rkMix('#57646f', P.edge, 0.12), steelL = rkMix('#aebbc7', P.edge, 0.18);
+      const ironDim = rkMix(P.dark, '#000000', 0.72);
+      // the socket they are driven into
+      c.fillStyle = ironDim; c.fillRect(X, Y + TILE - 7, TILE, 7);
+      c.fillStyle = steelD; c.fillRect(X, Y + TILE - 7, TILE, 2);
+      // TWO broad teeth, not a comb of needles. A wedge that is nearly as wide
+      // at the root as it is tall reads as something that would go THROUGH you;
+      // a thin pin reads as a fence. Width is most of the menace.
       for (let k = 0; k < 2; k++) {
+        const h2 = hash2(tx * 7 + k * 31, ty * 13);
+        const bx = X + 8 + k * 16 + (h2 - 0.5) * 2.6;
+        const hgt = 13 + h2 * 8;
+        const lean = (hash2(tx + k, ty * 3) - 0.5) * 2.6;
+        const halfW = 7.4 - h2 * 1.4;
+        const tipX = bx + lean, tipY = Y + TILE - 6 - hgt;
+        // the whole tooth, then the lit facet over its left half. A hard dark
+        // outline around the silhouette is what separates it from the floor at
+        // gameplay distance — without it the shape dissolves into the rock.
+        c.fillStyle = steelM;
         c.beginPath();
-        c.moveTo(X + k * 16, Y + TILE); c.lineTo(X + k * 16 + 8, Y + 6); c.lineTo(X + k * 16 + 16, Y + TILE);
-        c.closePath(); c.fill();
+        c.moveTo(bx - halfW, Y + TILE - 5); c.lineTo(tipX, tipY);
+        c.lineTo(bx + halfW, Y + TILE - 5); c.closePath(); c.fill();
+        c.fillStyle = steelL;
+        c.beginPath();
+        c.moveTo(bx - halfW, Y + TILE - 5); c.lineTo(tipX, tipY);
+        c.lineTo(tipX - halfW * 0.34, Y + TILE - 5); c.closePath(); c.fill();
+        // NB: do not touch lineJoin here. An earlier version set it to 'miter'
+        // and leaked that to everything drawn afterwards — the Foundry's lava
+        // strokes have sharp corners, and miter joins turned them into enormous
+        // black spears across the whole screen.
+        c.strokeStyle = steelD; c.lineWidth = 1.3;
+        c.beginPath();
+        c.moveTo(bx - halfW, Y + TILE - 5); c.lineTo(tipX, tipY);
+        c.lineTo(bx + halfW, Y + TILE - 5); c.stroke();
+        // the honed edge — thin, and only on the top half, because that is
+        // where a blade actually catches the light
+        c.strokeStyle = '#ffffff';
+        c.globalAlpha = 0.6; c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(tipX, tipY + 1);
+        c.lineTo(bx - halfW * 0.5, Y + TILE - 5 - hgt * 0.34);
+        c.stroke();
+        // the point itself — not every tooth catches the light equally, or the
+        // row turns into a dotted line
+        c.globalAlpha = 0.55 + h2 * 0.42; c.fillStyle = '#ffffff';
+        c.fillRect(tipX - 0.8, tipY, 1.6, 1.6);
+        c.globalAlpha = 1;
+        // dried stain where it enters the socket
+        c.fillStyle = 'rgba(120,10,24,0.5)';
+        c.beginPath();
+        c.ellipse(bx, Y + TILE - 5.5, halfW * 1.5, 2.4, 0, 0, 7); c.fill();
       }
-      c.shadowBlur = 0;
+      // the virus still running in the rail underneath — this is what makes a
+      // row of teeth read as ARMED rather than as an old fence
+      c.save();
+      c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.4;
+      c.globalAlpha = 0.22;
+      const sg = c.createLinearGradient(0, Y + TILE - 8, 0, Y + TILE - 1);
+      sg.addColorStop(0, 'rgba(255,40,70,0)'); sg.addColorStop(1, 'rgba(255,46,74,0.75)');
+      c.fillStyle = sg; c.fillRect(X, Y + TILE - 8, TILE, 7);
+      c.restore();
+      c.restore();
     } else if (ch === 'B') {
       // ---------------------------------------------------------------------
       // THE LOOSE ROCK. A secret has to be made of the same stuff as the wall
@@ -16097,6 +16173,44 @@ function drawStatics(P) {
 // itself is the only thing that tells you, which is what makes the rest of the
 // factory worth looking at.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// THE WARNING. The teeth themselves are baked into the tile layer, so the part
+// that has to MOVE lives here: as she comes near, heat rises off the rail and
+// the points catch the light. A hazard that reacts to you being close reads as
+// aware of you, and that is most of what makes one intimidating.
+// ---------------------------------------------------------------------------
+function drawSpikeMenace() {
+  if (!player || player.dead || !G.grid) return;
+  const pcx = player.x + player.w / 2, pcy = player.y + player.h / 2;
+  const t0 = Math.floor(pcx / TILE), t1 = Math.floor(pcy / TILE);
+  const now = performance.now();
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  for (let ty = t1 - 3; ty <= t1 + 4; ty++) for (let tx = t0 - 5; tx <= t0 + 5; tx++) {
+    if (tileAt(tx, ty) !== '^') continue;
+    const X = tx * TILE, Y = ty * TILE;
+    const d = Math.hypot(X + 16 - pcx, Y + 16 - pcy);
+    const k = clamp(1 - d / 170, 0, 1);
+    if (k <= 0.01) continue;
+    // heat off the rail, breathing
+    const pu = 0.55 + Math.sin(now / 260 + tx * 0.7) * 0.45;
+    c.globalAlpha = k * k * (0.16 + pu * 0.16);
+    const g = c.createLinearGradient(0, Y + TILE, 0, Y - 12);
+    g.addColorStop(0, 'rgba(255,50,80,0.9)'); g.addColorStop(1, 'rgba(255,50,80,0)');
+    c.fillStyle = g; c.fillRect(X - 2, Y - 12, TILE + 4, TILE + 12);
+    // and the points catch it
+    c.globalAlpha = k * (0.3 + pu * 0.45);
+    c.fillStyle = '#fff2f4';
+    for (let m = 0; m < 2; m++) {
+      const h2 = hash2(tx * 7 + m * 31, ty * 13);
+      const bx = X + 8 + m * 16 + (h2 - 0.5) * 2.6;
+      const hgt = 13 + h2 * 8;
+      const lean = (hash2(tx + m, ty * 3) - 0.5) * 2.6;
+      c.beginPath(); c.arc(bx + lean, Y + TILE - 6 - hgt, 1.6 + pu * 1.3, 0, 7); c.fill();
+    }
+  }
+  c.restore();
+}
 function drawBreakHint() {
   if (!player || player.dead || !G.grid) return;
   if (G.save && G.save.flags && G.save.flags.taughtBreak) return;
@@ -16485,6 +16599,7 @@ function drawWorldFrame() {
     if (U.darkK) { c.fillStyle = 'rgba(2,4,10,0.4)'; c.fillRect(cam.x - 12, cam.y - 12, 984, 564); }
   }
   drawStatics(P);
+  drawSpikeMenace();
   drawBreakHint();
   for (const p of G.pickups) p.draw(c);
   if (G.plats) for (const pl of G.plats) pl.draw(c);
