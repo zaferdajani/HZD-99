@@ -722,6 +722,8 @@ const RECORDED_TRACKS = {
   boss_prism: [['mus_prism', 0.52], ['boss', 0.5]],
   boss_mother: [['mus_mother', 0.56], ['boss', 0.58]],
   boss: [['boss', 0.5]], mother: [['boss', 0.58]],
+  // the one that plays over the ending, after the last blow has been swung
+  winTheme: [['mus_ending', 0.5], ['ambient', 0.45]],
 };
 function pickRecorded(name) {
   const cand = RECORDED_TRACKS[name]; if (!cand) return false;
