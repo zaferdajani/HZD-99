@@ -207,7 +207,7 @@ function loadRoom(id) {
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
-  G.wrecks = []; G.recharge = null; G.plats = []; G.x1Bridge = false; G.x1T = 0;
+  G.wrecks = []; G.recharge = null; G.plats = []; G.saws = []; G.x1Bridge = false; G.x1T = 0;
   // a scripted finishing blow belongs to the room it was swung in; carrying one
   // across a door would leave her driven by a boss that no longer exists
   G.finish = null; G.offer = null; G.forkBoss = null;
@@ -256,6 +256,10 @@ function loadRoom(id) {
       }
     } else if (kind === 'plat') {
       G.plats.push(new MovingPlat(tx, ty, extra));
+    } else if (kind === 'saw') {
+      // the same call the rail grinders make: the hero's world runs on stone
+      // and rope, and a powered blade on a rail does not belong in it
+      if (!(typeof isHero === 'function' && isHero())) G.saws.push(new SawRig(tx, ty, extra));
     } else if (kind === 'boss') {
       if (!G.save.flags['boss' + extra.charAt(0).toUpperCase() + extra.slice(1)])
         G.boss = new Boss(extra, tx * TILE, ty * TILE);
@@ -291,7 +295,8 @@ function loadRoom(id) {
   // THE GRINDERS. Every horizontal run of hazard rail long enough to patrol
   // gets a wheel. The Foundry is the exception: down there the hazard is not a
   // machine at all, it is the melt, and nothing rolls on it.
-  G.saws = [];
+  // NOT cleared here: the list already holds any rig this room placed by hand,
+  // and clearing it after the entity pass is what silently deleted them.
   if (typeof SawWheel === 'function' && def.zone !== 'C' && !(typeof isHero === 'function' && isHero())) {
     const gg = G.grid;
     for (let ty = 0; ty < gg.length; ty++) {
@@ -592,6 +597,7 @@ function update(dt) {
         }
       }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
+      sawHum(dt);
       // during a finishing blow she is driven, not steered — the choice was the
       // input, and nothing the player does now can fumble it
       if (G.finish && typeof updateFinisher === 'function') updateFinisher(dt);

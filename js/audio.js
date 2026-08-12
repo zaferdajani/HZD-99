@@ -269,6 +269,55 @@ function clawSlash(beat) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// THE MOTOR. A chainsaw is a sound before it is a shape — you hear it in the
+// next room and you know what is in this one. One node for the whole room, not
+// one per saw, with its gain following the NEAREST blade and its pitch
+// following how hard that blade is working. It exists only while a room has a
+// saw in it, so nothing hums in a room that has none.
+// ---------------------------------------------------------------------------
+let SAWN = null;
+function sawHum(dt) {
+  const list = (typeof G !== 'undefined' && G.saws) || null;
+  const on = list && list.length && AC && AC.state === 'running' && !MUTED;
+  if (!on) {
+    if (SAWN) { try { SAWN.g.gain.value = 0; SAWN.osc.stop(); SAWN.n.stop(); } catch (e) {} SAWN = null; }
+    return;
+  }
+  if (!SAWN) {
+    try {
+      const g = AC.createGain(); g.gain.value = 0; g.connect(AC.destination);
+      const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600;
+      lp.connect(g);
+      const osc = AC.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = 88;
+      const og = AC.createGain(); og.gain.value = 0.5; osc.connect(og); og.connect(lp);
+      // the ragged edge of the chain, not a clean tone
+      const nb = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+      const d = nb.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.6;
+      const n = AC.createBufferSource(); n.buffer = nb; n.loop = true;
+      const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1500; bp.Q.value = 1.1;
+      const ng = AC.createGain(); ng.gain.value = 0.5;
+      n.connect(bp); bp.connect(ng); ng.connect(lp);
+      osc.start(); n.start();
+      SAWN = { g, osc, n, lp };
+    } catch (e) { SAWN = null; return; }
+  }
+  let near = 1e9, work = 0;
+  for (const sw of list) {
+    const dx = sw.x - (player ? player.x : 0), dy = sw.y - (player ? player.y : 0);
+    const d2 = Math.hypot(dx, dy);
+    if (d2 < near) { near = d2; work = sw.sp; }
+  }
+  const k = clamp(1 - (near - 60) / 460, 0, 1);
+  const want = k * k * 0.055;
+  try {
+    const g = SAWN.g.gain;
+    g.value += (want - g.value) * Math.min(1, dt * 6);
+    SAWN.osc.frequency.value = 84 + clamp(work / 300, 0, 1) * 34;
+    SAWN.lp.frequency.value = 1500 + clamp(work / 300, 0, 1) * 2600;
+  } catch (e) {}
+}
 // ---------- NPC proximity voices ------------------------------------------
 // Every NPC sings its presence into the room: a looping voice whose volume
 // swells as you draw near and blooms while it speaks with you. A recorded
@@ -618,6 +667,14 @@ function sfx(n) {
     case 'boom': hiss(0.45, 0.16); tone(90, 0.4, 'sawtooth', 0.12, 34); break;
     case 'edie': hiss(0.22, 0.11); tone(150, 0.2, 'sawtooth', 0.08, 42); tone(500, 0.12, 'square', 0.04, 120); break;
     case 'break': hiss(0.2, 0.12); tone(200, 0.15, 'square', 0.07, 70); break;
+    // steel meeting steel and not liking it: a bright scrape that falls away,
+    // a bite of low thud under it, and one ringing partial off the housing
+    case 'grind':
+      whoosh(0.16, 5200, 1400, 0.075);
+      hiss(0.07, 0.06);
+      tone(2050 * (0.94 + Math.random() * 0.12), 0.14, 'sawtooth', 0.035, 900);
+      tone(150, 0.1, 'square', 0.05, 72);
+      break;
     case 'bench': [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, 'sine', 0.05, null, i * 0.1)); break;
     case 'boss': case 'roar': tone(55, 0.9, 'sawtooth', 0.14, 30); tone(110, 0.7, 'square', 0.055, 45); hiss(0.6, 0.06); break;
     // each guardian wakes with its OWN voice — pitched to the machine it is

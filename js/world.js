@@ -150,7 +150,8 @@ const ROOMS = {
       rect(g, 22, 32, 25, 33, '.');         // bottom opening to C2
     } },
   C2: { zone: 'C', w: 60, h: 17, exits: { T: 'C1', R: 'C3', B: 'D1' },
-    ents: [['plat', 33, 12, [5, 0, 3.6]], ['hopper', 16, 15], ['hopper', 42, 15], ['turret', 28, 15], ['blob', 55, 15], ['scrap', 5, 15, 12], ['npc', 25, 15, 'patch']],
+    ents: [['plat', 33, 12, [5, 0, 3.6]], ['hopper', 16, 15], ['hopper', 42, 15], ['turret', 28, 15], ['blob', 55, 15], ['scrap', 5, 15, 12], ['npc', 25, 15, 'patch'],
+           ['saw', 40, 15, [6, 0, 3.0]]],
     build(g) {
       frame(g); openR(g);
       rect(g, 22, 0, 25, 0, '.');           // ceiling opening from C1
@@ -173,7 +174,8 @@ const ROOMS = {
     ents: [['bench', 6, 15], ['npc', 12, 15, 'sage'], ['term', 24, 15, 3]],
     build(g) { frame(g); openR(g); rect(g, 18, 0, 20, 0, '.'); hline(g, 15, 18, 11, '='); } },
   D2: { zone: 'D', w: 60, h: 17, exits: { L: 'D1', R: 'D3' }, ice: true,
-    ents: [['flier', 20, 6], ['flier', 40, 7], ['turret', 25, 15], ['turret', 44, 15], ['blob', 55, 15], ['plat', 30, 10, [6, 0, 3.4]], ['scrap', 41, 11, 15], ['riddle', 21, 8, 5], ['secret', 41, 12, 'coin']],
+    ents: [['flier', 20, 6], ['flier', 40, 7], ['turret', 25, 15], ['turret', 44, 15], ['blob', 55, 15], ['plat', 30, 10, [6, 0, 3.4]], ['scrap', 41, 11, 15], ['riddle', 21, 8, 5], ['secret', 41, 12, 'coin'],
+           ['saw', 19, 15, [7, 0, 3.4]]],
     build(g) {
       frame(g); openL(g); openR(g);
       hline(g, 10, 16, 15, '^'); hline(g, 30, 37, 15, '^'); hline(g, 46, 51, 15, '^');
@@ -188,7 +190,8 @@ const ROOMS = {
     ents: [['blob', 10, 15], ['blob', 20, 15], ['hopper', 25, 15], ['riddle', 5, 15, 6], ['npc', 13, 15, 'lumen']],
     build(g) { frame(g); openR(g); rect(g, 15, 0, 17, 0, '.'); hline(g, 6, 9, 11, '='); } },
   E2: { zone: 'E', w: 60, h: 17, exits: { L: 'E1', R: 'E3' },
-    ents: [['plat', 22, 10, [5, 0, 2.8]], ['plat', 37, 12, [0, -4, 3.0]], ['turret', 31, 15], ['flier', 18, 6], ['flier', 34, 6], ['blob', 45, 15], ['bench', 52, 15], ['scrap', 11, 11, 20], ['secret', 17, 8, 'star']],
+    ents: [['plat', 22, 10, [5, 0, 2.8]], ['plat', 37, 12, [0, -4, 3.0]], ['turret', 31, 15], ['flier', 18, 6], ['flier', 34, 6], ['blob', 45, 15], ['bench', 52, 15], ['scrap', 11, 11, 20], ['secret', 17, 8, 'star'],
+           ['saw', 43, 15, [6, 0, 2.6]], ['saw', 29, 9, [0, 4, 3.2]]],
     build(g) {
       frame(g); openL(g); openR(g);
       hline(g, 8, 14, 15, '^'); hline(g, 22, 27, 15, '^'); hline(g, 36, 41, 15, '^');

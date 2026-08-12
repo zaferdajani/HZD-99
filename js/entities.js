@@ -2177,6 +2177,190 @@ class SawWheel {
     c2.restore();
   }
 }
+// ===========================================================================
+// THE CHAINSAW RIG. A blade on a rail, running back and forth inside its own
+// housing — and the thing that makes it read as dangerous is not the blade, it
+// is the SPARKS. A saw that slides silently along a bar is a moving rectangle.
+// One that throws a rooster-tail of sparks off the rail while it travels, and
+// slams into its housing at each end hard enough to shower the floor, is a
+// machine that is working, and working is what makes it frightening.
+//
+// So there are two spark sources, and they are different on purpose:
+//   TRAVEL   a thin continuous spray off the shoe where the carriage grinds
+//            the rail, thrown BACKWARD from the direction of travel, scaled by
+//            how fast it is going — so it thins out at the ends of the stroke
+//            where the saw slows, and fans at the middle where it is quickest.
+//   IMPACT   a hard burst at each end when it hits the box, plus a screech and
+//            a kick of the camera. It fires once per arrival, latched, because
+//            an impact that repeats every frame while the saw sits at the end
+//            is not an impact, it is a fountain.
+//
+// It travels on the same eased path the moving platforms use, so it is always
+// slowest at the ends: there is always a window to cross, and the window is
+// visible from across the room because the sparks stop.
+// ===========================================================================
+class SawRig {
+  constructor(tx, ty, spec) {
+    this.r = 15;                                   // blade radius
+    this.x0 = tx * TILE + TILE / 2;
+    this.y0 = ty * TILE - 2;                       // the blade rides on the deck
+    this.x1 = this.x0 + ((spec && spec[0]) || 0) * TILE;
+    this.y1 = this.y0 + ((spec && spec[1]) || 0) * TILE;
+    this.per = Math.max(1.6, (spec && spec[2]) || 3.2);
+    this.ph = Math.random() * this.per;
+    const u0 = (1 - Math.cos(this.ph / this.per * Math.PI * 2)) / 2;
+    this.x = this.x0 + (this.x1 - this.x0) * u0;
+    this.y = this.y0 + (this.y1 - this.y0) * u0;
+    this.spin = 0; this.sp = 0; this.end = 0; this.hitT = 0;
+  }
+  update(dt) {
+    const px = this.x, py = this.y;
+    this.ph += dt;
+    const u = (1 - Math.cos(this.ph / this.per * Math.PI * 2)) / 2;
+    this.x = this.x0 + (this.x1 - this.x0) * u;
+    this.y = this.y0 + (this.y1 - this.y0) * u;
+    const dx = this.x - px, dy = this.y - py;
+    this.sp = Math.hypot(dx, dy) / Math.max(dt, 1e-4);
+    this.spin += dt * (26 + this.sp * 0.06);       // the blade never stops
+    if (this.hitT > 0) this.hitT -= dt;
+    // THE ENDS OF THE STROKE. Latched, so the shower fires on arrival and not
+    // once per frame for as long as it rests there.
+    const at = u < 0.02 ? -1 : u > 0.98 ? 1 : 0;
+    if (at && at !== this.end) {
+      this.end = at;
+      this.hitT = 0.22;
+      const dirx = this.x1 - this.x0, diry = this.y1 - this.y0;
+      const n = Math.hypot(dirx, diry) || 1;
+      const sx = this.x + dirx / n * this.r * at, sy = this.y + diry / n * this.r * at;
+      for (let i = 0; i < 16; i++) {
+        const a = Math.atan2(-diry, -dirx) * at + rnd(-1.1, 1.1);
+        const v = rnd(90, 320);
+        addPart(sx, sy, Math.cos(a) * v, Math.sin(a) * v - rnd(0, 60),
+          rnd(0.22, 0.6), i % 3 ? '#ffb347' : '#fff3d0', rnd(1.5, 3), 780, true);
+      }
+      // only when the player can actually see it hit — a saw grinding in a
+      // room she has walked away from should not shake her camera
+      if (Math.abs(this.x - cam.x - 480) < 620 && Math.abs(this.y - cam.y - 270) < 400) {
+        sfx('grind'); cam.shake = Math.max(cam.shake, 3.5);
+      }
+    } else if (!at) this.end = 0;
+    // THE TRAVELLING SPRAY, off the shoe, thrown back down the rail
+    if (this.sp > 22 && parts.length < 420) {
+      const k = clamp(this.sp / 260, 0, 1);
+      const n = Math.random() < k ? 2 : 1;
+      for (let i = 0; i < n; i++) {
+        const back = Math.atan2(-dy, -dx) + rnd(-0.5, 0.5);
+        const v = rnd(40, 150) * (0.4 + k);
+        addPart(this.x - dx / Math.max(1, Math.hypot(dx, dy)) * this.r * 0.8,
+          this.y + this.r * 0.55,
+          Math.cos(back) * v, Math.sin(back) * v - rnd(10, 70),
+          rnd(0.14, 0.4), Math.random() < 0.3 ? '#fff3d0' : '#ffa235', rnd(1, 2.2), 900, true);
+      }
+    }
+    if (!player.dead && player.iT <= 0
+        && Math.abs(player.x + player.w / 2 - this.x) < this.r + player.w * 0.4
+        && Math.abs(player.y + player.h / 2 - this.y) < this.r + player.h * 0.4) {
+      player.hurt(DF().edmg, this.x);
+      burst(this.x, this.y, 10, '#ff8a4a', 240, 0.5, 700, 3, true);
+    }
+  }
+  draw(c) {
+    const P = PAL[G.roomDef.zone];
+    // the rail it runs on, and the housing box at each end
+    c.save();
+    c.strokeStyle = 'rgba(120,132,148,0.55)'; c.lineWidth = 5;
+    c.beginPath(); c.moveTo(this.x0, this.y0); c.lineTo(this.x1, this.y1); c.stroke();
+    c.strokeStyle = 'rgba(40,48,58,0.9)'; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(this.x0, this.y0); c.lineTo(this.x1, this.y1); c.stroke();
+    for (const e of [[this.x0, this.y0, -1], [this.x1, this.y1, 1]]) {
+      const hot = this.hitT > 0 && this.end === e[2] ? this.hitT / 0.22 : 0;
+      c.fillStyle = '#2b3340'; rr(c, e[0] - 9, e[1] - 13, 18, 26, 4); c.fill();
+      c.strokeStyle = hot ? '#ffd08a' : 'rgba(150,165,185,0.5)';
+      c.lineWidth = hot ? 2.5 : 1.5;
+      rr(c, e[0] - 9, e[1] - 13, 18, 26, 4); c.stroke();
+      c.fillStyle = 'rgba(90,100,115,0.9)';
+      c.fillRect(e[0] - 5, e[1] - 9, 3, 3); c.fillRect(e[0] + 2, e[1] + 6, 3, 3);
+    }
+    c.restore();
+    // THE CARRIAGE. Drawn as a body with the blade in FRONT of it, because the
+    // first version drew ten open strokes on a bare disc and what came out was
+    // a white star — a sea urchin on a wire, not a machine. A saw blade is a
+    // solid plate with teeth cut into its rim, and the teeth only read as teeth
+    // if the plate behind them is there to be cut from.
+    const dirx = (this.x1 - this.x0) || 1, diry = this.y1 - this.y0;
+    const along = Math.atan2(diry, dirx);
+    const back = this.sp > 4 ? (this.x < (this.x0 + this.x1) / 2 ? -1 : 1) : -1;
+    c.save();
+    c.translate(this.x, this.y);
+    // motor body, sitting behind the blade along the rail
+    c.save();
+    c.rotate(along);
+    // TRAILING the blade, not hidden behind it. At first the body was drawn
+    // centred on the hub, where a blade of the same size covers it completely —
+    // so the rig read as a disc floating on a wire with no machine driving it.
+    const bx = back * (this.r * 0.95) - 11;
+    c.fillStyle = '#232a34';
+    rr(c, bx, -10, 22, 20, 4); c.fill();
+    c.strokeStyle = 'rgba(150,168,190,0.55)'; c.lineWidth = 1.4;
+    rr(c, bx, -10, 22, 20, 4); c.stroke();
+    c.fillStyle = '#39424f';
+    for (let i2 = 0; i2 < 3; i2++) c.fillRect(bx + 4 + i2 * 5, -6, 3, 12);
+    // the drive arm reaching from the motor to the hub
+    c.strokeStyle = 'rgba(170,186,206,0.7)'; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(bx + (back > 0 ? 0 : 22), 0); c.lineTo(0, 0); c.stroke();
+    c.fillStyle = P.glow;
+    c.globalAlpha = 0.55 + Math.sin(this.spin * 4) * 0.25;
+    c.fillRect(bx + 2, 5, 18, 2);
+    c.globalAlpha = 1;
+    c.restore();
+    // the blade: one filled plate, teeth cut around its rim
+    c.save();
+    c.rotate(this.spin);
+    const R = this.r, root = R * 0.74, N = 12;
+    c.beginPath();
+    for (let i2 = 0; i2 < N; i2++) {
+      const a0 = i2 / N * Math.PI * 2, a1 = (i2 + 0.42) / N * Math.PI * 2, a2 = (i2 + 1) / N * Math.PI * 2;
+      if (!i2) c.moveTo(Math.cos(a0) * root, Math.sin(a0) * root);
+      else c.lineTo(Math.cos(a0) * root, Math.sin(a0) * root);
+      c.lineTo(Math.cos(a0 + 0.02) * R, Math.sin(a0 + 0.02) * R);   // leading edge
+      c.lineTo(Math.cos(a1) * R, Math.sin(a1) * R);
+      c.lineTo(Math.cos(a2) * root, Math.sin(a2) * root);
+    }
+    c.closePath();
+    const bg = c.createLinearGradient(-R, -R, R, R);
+    bg.addColorStop(0, '#aab6c4'); bg.addColorStop(0.5, '#7c8896'); bg.addColorStop(1, '#5d6874');
+    c.fillStyle = bg; c.fill();
+    c.strokeStyle = 'rgba(240,248,255,0.55)'; c.lineWidth = 1; c.stroke();
+    // hub and bolts
+    c.fillStyle = '#39424f';
+    c.beginPath(); c.arc(0, 0, R * 0.3, 0, 7); c.fill();
+    c.fillStyle = '#1b2029';
+    c.beginPath(); c.arc(0, 0, R * 0.12, 0, 7); c.fill();
+    c.fillStyle = 'rgba(200,214,230,0.7)';
+    for (let i2 = 0; i2 < 3; i2++) {
+      const a3 = i2 / 3 * Math.PI * 2;
+      c.beginPath(); c.arc(Math.cos(a3) * R * 0.46, Math.sin(a3) * R * 0.46, 1.4, 0, 7); c.fill();
+    }
+    c.restore();
+    // it is turning far too fast to see: one soft ring sells the speed
+    c.save();
+    c.globalAlpha = 0.22;
+    c.strokeStyle = '#e8f0fa'; c.lineWidth = R * 0.24;
+    c.beginPath(); c.arc(0, 0, R * 0.88, 0, 7); c.stroke();
+    c.restore();
+    c.restore();
+    // heat glow, brighter the harder it is working
+    c.save();
+    c.globalCompositeOperation = 'lighter';
+    const k = 0.10 + clamp(this.sp / 300, 0, 1) * 0.16 + (this.hitT > 0 ? 0.3 : 0);
+    const g2 = c.createRadialGradient(this.x, this.y, 2, this.x, this.y, this.r * 2.4);
+    g2.addColorStop(0, 'rgba(255,176,90,' + k.toFixed(3) + ')');
+    g2.addColorStop(1, 'rgba(255,120,40,0)');
+    c.fillStyle = g2;
+    c.beginPath(); c.arc(this.x, this.y, this.r * 2.4, 0, 7); c.fill();
+    c.restore();
+  }
+}
 class MovingPlat {
   constructor(tx, ty, spec) {
     // spec: [dxTiles, dyTiles, periodSec, widthTiles?]
