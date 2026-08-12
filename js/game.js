@@ -328,6 +328,32 @@ function loadRoom(id) {
   cam.x = 0; cam.y = 0;
   persist();
 }
+// ---------------------------------------------------------------------------
+// WHAT THE POINTS ARE FOR. IQ is earned in the Trials and spent on skills, and
+// nothing in the game ever said so — a player could finish every trial, watch a
+// number climb, and never learn it buys anything. The moment they can actually
+// afford something, they are told once, by name: what is affordable, and which
+// button opens the place to spend it. Once per skill, so it is a nudge and not
+// a nag.
+// ---------------------------------------------------------------------------
+function iqNudge() {
+  if (!G.save || typeof SKILLS === 'undefined') return;
+  const own = G.save.skills || [];
+  const unlocked = own.length;
+  let best = null;
+  for (const sk of SKILLS) {
+    if (own.indexOf(sk.id) >= 0) continue;
+    if (typeof tierOpen === 'function' && !tierOpen(sk.tier, unlocked)) continue;
+    if ((G.save.iq || 0) < sk.cost) continue;
+    if (!best || sk.cost < best.cost) best = sk;
+  }
+  if (!best) return;
+  G.save.iqTold = G.save.iqTold || {};
+  if (G.save.iqTold[best.id]) return;
+  G.save.iqTold[best.id] = 1;
+  G.toast(t('tt_iq_ready') + ': ' + t('sk_' + best.id));
+  sfx('chargeReady');
+}
 function applyTheme() {
   PAL = (typeof THEMES !== 'undefined' && THEMES[themeId()].pal) || PAL_ROBO;
   for (const k in miniCache) delete miniCache[k];
@@ -881,7 +907,7 @@ function updateRiddle() {
   if (inP('OK')) {
     if (r.sel === r.def.correct) {
       G.save.flags['rd_' + r.def.id] = 1;
-      G.save.iq += r.def.iq;
+      G.save.iq += r.def.iq; iqNudge();
       r.st.opened = true;
       sfx('win'); G.toast(t('rd_reward') + '  +' + r.def.iq + ' ' + t('sk_iq'));
       burst(r.st.x + 13, r.st.y + 12, 24, '#b48cff', 260, 0.8, 100, 4, true);

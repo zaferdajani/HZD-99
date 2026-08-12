@@ -340,6 +340,7 @@ function bossSpoil(kind, pick) {
     G.save.scrap = (G.save.scrap || 0) + (big ? 220 : 140);
   } else if (g === 'iq') {
     G.save.iq = (G.save.iq || 0) + (big ? 6 : 4);
+    if (typeof iqNudge === 'function') iqNudge();
   } else {
     G.save.slots = Math.min(6, (G.save.slots || 3) + 1);
   }

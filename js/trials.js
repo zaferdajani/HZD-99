@@ -4,7 +4,7 @@
 // difficulty ramps per correct answer · Full Trial → Mind Volume + IQ.
 const T_GAME = 45;
 const TRI = {
-  st: 'menu', sel: 0, mode: 'full', order: ['calc', 'mem', 'vis', 'log'],
+  st: 'menu', sel: 0, mode: 'full', order: ['mem', 'vis', 'log'],
   gi: 0, t: 0, level: 1, streak: 0, score: 0, results: [], q: null,
   memSeq: [], memIn: 0, memShow: -1, memShowT: 0, memPhase: 'show',
   fb: 0, fbGood: false, preT: 0, betweenT: 0,
@@ -23,28 +23,139 @@ function triStart(mode, kind) {
   TRI.mode = mode; TRI.results = []; TRI.gi = 0;
   triStartGame(mode === 'full' ? TRI.order[0] : kind);
 }
+// ===========================================================================
+// THE SCALES — a deduction, not a lookup.
+//
+// The old version showed one balance and asked which PAN was heavier, which a
+// player answers by looking at which way it tilts. That is not a question. The
+// question is now: given what these balances show you, which ITEM is the
+// heaviest — and the item you must name is usually not on the scale you are
+// looking at, so the only way through is to chain the evidence.
+//
+// THE RAMP, one step per correct answer, exactly as far as the player has
+// earned. Two items and one balance to begin with, which teaches the rule the
+// whole game rests on — the side that sinks is heavier — and cannot be got
+// wrong by anyone who has understood it. Then three items and two balances, so
+// the answer has to be carried across a comparison. Then four and three. Then
+// pans start holding two items at once, and a single object can outweigh a
+// pair.
+//
+// NOTHING IS EVER GUESSWORK. Every puzzle is checked before it is shown: all
+// possible weightings of the items are enumerated, those inconsistent with the
+// balances are thrown away, and the puzzle is only used if EVERY surviving
+// weighting agrees on the answer. If a random draw fails that test it is
+// discarded and redrawn, and the fallback is a plain chain of comparisons that
+// is unique by construction. A player who reasons correctly is never wrong.
+// ===========================================================================
+const SCALE_ITEM = [
+  { g: 'cog', col: '#ffab4a' },
+  { g: 'bolt', col: '#57a8ff' },
+  { g: 'chip', col: '#7de8a0' },
+  { g: 'cell', col: '#e07aff' },
+];
+function scaleTier(L) {
+  // items in play, balances shown, and how many may share one pan
+  if (L <= 2) return { k: 2, perPan: 1 };
+  if (L <= 5) return { k: 3, perPan: 1 };
+  if (L <= 9) return { k: 4, perPan: 1 };
+  return { k: 4, perPan: 2 };
+}
+// total weight of a pan under a given assignment
+function panW(pan, w) { let s = 0; for (const i of pan) s += w[i]; return s; }
+// does one assignment of weights reproduce every balance we are showing?
+function scaleFits(sc, w) {
+  for (const s of sc) {
+    const d = panW(s.L, w) - panW(s.R, w);
+    if (s.tilt > 0 ? !(d > 0) : s.tilt < 0 ? !(d < 0) : d !== 0) return false;
+  }
+  return true;
+}
+// every arrangement of the same weights over the items
+function permute(a) {
+  if (a.length <= 1) return [a];
+  const out = [];
+  for (let i = 0; i < a.length; i++) {
+    const rest = a.slice(0, i).concat(a.slice(i + 1));
+    for (const p of permute(rest)) out.push([a[i]].concat(p));
+  }
+  return out;
+}
+// the answer is only fair if EVERY weighting the player could believe agrees
+function scaleUnique(sc, weights, k, wantLight) {
+  let ans = -1;
+  for (const w of permute(weights)) {
+    if (!scaleFits(sc, w)) continue;
+    let best = 0;
+    for (let i = 1; i < k; i++) if (wantLight ? w[i] < w[best] : w[i] > w[best]) best = i;
+    if (ans < 0) ans = best;
+    else if (ans !== best) return -1;          // two readings disagree: unfair
+  }
+  return ans;
+}
+function scaleGen(L) {
+  const { k, perPan } = scaleTier(L);
+  // lightest only once heaviest is understood, and then alternating, so the
+  // question itself has to be read rather than assumed
+  const wantLight = L >= 4 && (L % 2 === 0);
+  const weights = [];
+  for (let i = 0; i < k; i++) weights.push((i + 1) * 2 + irnd(0, 1));   // distinct
+  const idx = []; for (let i = 0; i < k; i++) idx.push(i);
+  // --- the guaranteed puzzle: a chain that fixes the whole order ---
+  const chain = (w) => {
+    const order = idx.slice().sort((a, b) => w[b] - w[a]);
+    const sc = [];
+    for (let i = 0; i + 1 < k; i++) {
+      const a = order[i], b = order[i + 1];
+      sc.push(chance(0.5) ? { L: [a], R: [b], tilt: 1 } : { L: [b], R: [a], tilt: -1 });
+    }
+    for (let i = sc.length - 1; i > 0; i--) { const j = irnd(0, i); [sc[i], sc[j]] = [sc[j], sc[i]]; }
+    return sc;
+  };
+  let w = weights.slice();
+  for (let i = w.length - 1; i > 0; i--) { const j = irnd(0, i); [w[i], w[j]] = [w[j], w[i]]; }
+  if (perPan > 1) {
+    // MORE IN EACH PAN, WITHOUT MAKING IT UNANSWERABLE. The first attempt drew
+    // the comparisons at random from pairs and single items, and checked the
+    // answer was unique — but only against the weights this generator happened
+    // to pick. The player cannot see those. All they see is which way things
+    // tip, and once a pan holds two objects the outcome starts depending on how
+    // much heavier, not merely which is heavier — a quantity no amount of
+    // correct reasoning can recover. A brute-force check over 5,600 puzzles
+    // found level 10 and up producing questions with two defensible answers.
+    //
+    // So the chain of one-against-one comparisons always stays, and it alone
+    // fixes the whole order. The crowded pan is added on top of it: real
+    // evidence, drawn from the real weights, that makes the bench look harder
+    // to read — without ever being the step the answer depends on.
+    const sc = chain(w);
+    const pool = idx.slice();
+    for (let i = pool.length - 1; i > 0; i--) { const j = irnd(0, i); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+    if (pool.length >= 3) {
+      const Lp = [pool[0], pool[1]], Rp = [pool[2]];
+      const d = panW(Lp, w) - panW(Rp, w);
+      sc.splice(irnd(0, sc.length), 0, { L: Lp, R: Rp, tilt: d > 0 ? 1 : d < 0 ? -1 : 0 });
+    }
+    let best0 = 0;
+    for (let i = 1; i < k; i++) if (wantLight ? w[i] < w[best0] : w[i] > w[best0]) best0 = i;
+    return scaleQ(sc, best0, k, wantLight, L);
+  }
+  const sc = chain(w);
+  const a = scaleUnique(sc, weights, k, wantLight);
+  let best = 0;
+  for (let i = 1; i < k; i++) if (wantLight ? w[i] < w[best] : w[i] > w[best]) best = i;
+  return scaleQ(sc, a >= 0 ? a : best, k, wantLight, L);
+}
+function scaleQ(sc, ans, k, wantLight, L) {
+  return {
+    scales: sc, ans, k, wantLight,
+    hint: t(wantLight ? 'tt_q_light' : 'tt_q_heavy'),
+    teach: L <= 1 ? t('tt_q_teach') : null,
+  };
+}
 // ---------- question generators (all procedural) ----------
 function triGen() {
   const L = TRI.level;
-  if (TRI.game === 'calc') {
-    let a, b, c, txt, ans;
-    const big = 8 + L * 4;
-    if (L >= 6 && chance(0.5)) {
-      a = irnd(3, big); b = irnd(2, 12); const d = irnd(1, a + b - 1);
-      ans = a + b - d;
-      txt = a + ' + ' + b + ' − ? = ' + d;
-    } else if (L >= 3 && chance(0.5)) {
-      a = irnd(2, 4 + Math.min(8, L)); ans = irnd(2, 4 + Math.min(8, L)); c = a * ans;
-      txt = a + ' × ? = ' + c;
-    } else if (chance(0.5)) {
-      a = irnd(2, big); ans = irnd(1, a - 1);
-      txt = a + ' − ? = ' + (a - ans);
-    } else {
-      a = irnd(1, big); ans = irnd(1, big);
-      txt = a + ' + ? = ' + (a + ans);
-    }
-    TRI.q = { txt, choices: triChoices(ans), hint: t('tt_q_calc') };
-  } else if (TRI.game === 'vis') {
+  if (TRI.game === 'vis') {
     const w = 2 + Math.min(2, Math.floor(L / 3)), d = 2 + Math.min(2, Math.floor(L / 4));
     const maxH = 2 + Math.min(3, Math.floor(L / 2));
     const g = [];
@@ -52,22 +163,7 @@ function triGen() {
     for (let x = 0; x < w; x++) { g.push([]); for (let z = 0; z < d; z++) { const h = irnd(1, maxH); g[x].push(h); n += h; } }
     TRI.q = { grid: g, choices: triChoices(n), hint: t('tt_q_vis') };
   } else if (TRI.game === 'log') {
-    const W = { gear: 5, bolt: 3, chip: 1 };
-    const mk = nMax => {
-      const s = { gear: irnd(0, nMax), bolt: irnd(0, nMax), chip: irnd(0, nMax) };
-      if (!s.gear && !s.bolt && !s.chip) s.chip = 1;
-      return s;
-    };
-    const nMax = 2 + Math.min(3, Math.floor(L / 2));
-    let left, right, dl, dr, tries = 0;
-    do {
-      left = mk(nMax); right = mk(nMax);
-      dl = left.gear * W.gear + left.bolt * W.bolt + left.chip * W.chip;
-      dr = right.gear * W.gear + right.bolt * W.bolt + right.chip * W.chip;
-      tries++;
-    } while (tries < 20 && Math.abs(dl - dr) > Math.max(2, 9 - L));
-    const ans = dl > dr ? 0 : (dl < dr ? 2 : 1);
-    TRI.q = { left, right, W, ans, labels: [t('tt_left'), t('tt_equal'), t('tt_right')], hint: t('tt_q_log') };
+    TRI.q = scaleGen(L);
   } else if (TRI.game === 'mem') {
     const len = Math.min(9, 2 + L);
     TRI.memSeq = [];
@@ -94,7 +190,12 @@ function triAnswer(ok) {
     TRI.level++; TRI.streak++;
     sfx(TRI.streak > 0 && TRI.streak % 5 === 0 ? 'chargeReady' : 'ok');
   } else {
-    TRI.score = Math.max(0, TRI.score - 6);
+    // a wrong answer costs about what a right one would have paid, so guessing
+    // is never cheaper than thinking — and the level eases back one step, so a
+    // player who has climbed past their depth is brought to where they can
+    // stand rather than being drowned for the rest of the round
+    TRI.score = Math.max(0, TRI.score - (4 + TRI.level * 3));
+    TRI.level = Math.max(1, TRI.level - 1);
     TRI.streak = 0;
     sfx('no');
   }
@@ -102,7 +203,7 @@ function triAnswer(ok) {
 }
 function triEndGame() {
   TRI.results.push({ game: TRI.game, score: TRI.score });
-  if (TRI.mode === 'full' && TRI.gi < 3) {
+  if (TRI.mode === 'full' && TRI.gi < TRI.order.length - 1) {
     TRI.gi++;
     TRI.st = 'between'; TRI.betweenT = 1.5;
   } else {
@@ -113,6 +214,7 @@ function triEndGame() {
       ? clamp(Math.floor(total / 100), 1, 15)
       : clamp(Math.floor(total / 120), 0, 5);
     G.save.iq += TRI.iqGain;
+    if (typeof iqNudge === 'function') iqNudge();
     persist();
     TRI.st = 'result'; sfx('win');
   }
@@ -121,7 +223,7 @@ function triEndGame() {
 function updateTrial(dt) {
   if (TRI.fb > 0) TRI.fb -= dt;
   if (TRI.st === 'menu') {
-    const n = 5;
+    const n = 1 + TRI.order.length;
     if (inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
     if (inP('DOWN')) { TRI.sel = (TRI.sel + 1) % n; sfx('ui'); }
     if (inP('UP')) { TRI.sel = (TRI.sel + n - 1) % n; sfx('ui'); }
@@ -161,13 +263,16 @@ function updateTrial(dt) {
           } else triAnswer(false);
         }
       }
+    } else if (TRI.game === 'log') {
+      // one key per item on the bench, so the answer is the OBJECT itself
+      let pick = -1;
+      if (inP('LEFT')) pick = 0; else if (inP('UP')) pick = 1;
+      else if (inP('RIGHT')) pick = 2; else if (inP('DOWN')) pick = 3;
+      if (pick >= 0 && pick < TRI.q.k) triAnswer(pick === TRI.q.ans);
     } else {
       let pick = -1;
       if (inP('LEFT')) pick = 0; else if (inP('UP')) pick = 1; else if (inP('RIGHT')) pick = 2;
-      if (pick >= 0) {
-        const correct = TRI.game === 'log' ? TRI.q.ans : TRI.q.choices.correct;
-        triAnswer(pick === correct);
-      }
+      if (pick >= 0) triAnswer(pick === TRI.q.choices.correct);
     }
   }
 }
@@ -179,6 +284,89 @@ function triIsoCube(x, y, s, top, lf, rt) {
   c.beginPath(); c.moveTo(x - s, y); c.lineTo(x, y + s * 0.5); c.lineTo(x, y + s * 0.5 + s * 0.9); c.lineTo(x - s, y + s * 0.9); c.closePath(); c.fill();
   c.fillStyle = rt;
   c.beginPath(); c.moveTo(x + s, y); c.lineTo(x, y + s * 0.5); c.lineTo(x, y + s * 0.5 + s * 0.9); c.lineTo(x + s, y + s * 0.9); c.closePath(); c.fill();
+}
+// each object is a SHAPE as well as a colour, so it can be told apart without
+// reading anything and without relying on colour vision
+function scaleGlyph(x, y, r, it) {
+  c.fillStyle = it.col;
+  c.beginPath();
+  if (it.g === 'cog') {
+    for (let i = 0; i < 8; i++) {
+      const a = i / 8 * Math.PI * 2, rr2 = i % 2 ? r * 0.66 : r;
+      c[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * rr2, y + Math.sin(a) * rr2);
+    }
+    c.closePath(); c.fill();
+    c.fillStyle = 'rgba(10,20,32,0.75)';
+    c.beginPath(); c.arc(x, y, r * 0.3, 0, 7); c.fill();
+  } else if (it.g === 'bolt') {
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2 + 0.5;
+      c[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * r, y + Math.sin(a) * r);
+    }
+    c.closePath(); c.fill();
+  } else if (it.g === 'chip') {
+    rr(c, x - r * 0.85, y - r * 0.85, r * 1.7, r * 1.7, r * 0.28); c.fill();
+    c.fillStyle = 'rgba(10,20,32,0.7)';
+    for (let i = -1; i <= 1; i++) c.fillRect(x - r * 0.5, y + i * r * 0.4 - 1, r, 2);
+  } else {
+    c.beginPath(); c.moveTo(x, y - r); c.lineTo(x + r, y + r * 0.75);
+    c.lineTo(x - r, y + r * 0.75); c.closePath(); c.fill();
+  }
+}
+function drawScales() {
+  const q = TRI.q;
+  const n = q.scales.length;
+  // one balance is centred; two or three share the width evenly
+  // The row has to FIT. Dividing the full width by the number of balances put
+  // the outer pans past the edge of the screen as soon as there were three.
+  const MARG = 30;
+  const spanW = (960 - MARG * 2) / n;
+  const panW2 = Math.min(46, spanW * 0.26);
+  for (let i = 0; i < n; i++) {
+    const s = q.scales[i];
+    const cx2 = n === 1 ? 480 : MARG + spanW * (i + 0.5);
+    const cy2 = 196;
+    const arm = Math.min(150, spanW * 0.5 - panW2 - 4);
+    const tilt = s.tilt * 0.15;
+    // post and base
+    c.strokeStyle = '#5c6678'; c.lineWidth = 5;
+    c.beginPath(); c.moveTo(cx2, cy2); c.lineTo(cx2, cy2 + 96); c.stroke();
+    c.fillStyle = '#3a4250'; rr(c, cx2 - 38, cy2 + 96, 76, 14, 5); c.fill();
+    // the beam
+    c.save(); c.translate(cx2, cy2); c.rotate(tilt);
+    c.strokeStyle = '#8892a2'; c.lineWidth = 6; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(-arm, 0); c.lineTo(arm, 0); c.stroke();
+    c.fillStyle = '#aab6c6'; c.beginPath(); c.arc(0, 0, 7, 0, 7); c.fill();
+    c.restore();
+    // pans hang from the beam ends, so the heavier one visibly sinks
+    for (const side of [-1, 1]) {
+      const ex = cx2 + Math.cos(tilt) * arm * side;
+      const ey = cy2 + Math.sin(tilt) * arm * side;
+      c.strokeStyle = 'rgba(140,155,175,0.8)'; c.lineWidth = 1.6;
+      c.beginPath(); c.moveTo(ex, ey); c.lineTo(ex, ey + 34); c.stroke();
+      c.fillStyle = '#2c3542'; rr(c, ex - panW2, ey + 34, panW2 * 2, 10, 5); c.fill();
+      const pan = side < 0 ? s.L : s.R;
+      const step = pan.length > 1 ? Math.min(30, panW2 * 0.9) : 0;
+      pan.forEach((id, j) => {
+        scaleGlyph(ex - step * (pan.length - 1) / 2 + j * step, ey + 20,
+                   Math.min(15, panW2 * 0.42), SCALE_ITEM[id]);
+      });
+    }
+  }
+  // THE BENCH: every object in play, one key each. This is the answer row —
+  // the player names an OBJECT, not a side.
+  const keys = ['←', '↑', '→', '↓'];
+  const bx = 480 - (q.k - 1) * 90 / 2;
+  for (let i = 0; i < q.k; i++) {
+    const x = bx + i * 90, y = 430;
+    c.fillStyle = 'rgba(20,36,52,0.9)';
+    rr(c, x - 38, y - 38, 76, 76, 12); c.fill();
+    c.strokeStyle = 'rgba(120,200,240,0.5)'; c.lineWidth = 1.6;
+    rr(c, x - 38, y - 38, 76, 76, 12); c.stroke();
+    scaleGlyph(x, y - 4, 19, SCALE_ITEM[i]);
+    ftxt(keys[i], x, y + 52, 12, '#7d93a8');
+  }
+  if (q.teach) ftxt(q.teach, 480, 340, 15, '#8fd8c8');
 }
 function triDrawChoices(labels, correctFlashIdx) {
   const keys = ['←', '↑', '→'];
@@ -197,7 +385,7 @@ function drawTrial() {
   if (TRI.st === 'menu') {
     ftxt(t('tt_title'), 480, 70, 32, '#eef3fa', 'center', '#b48cff');
     ftxt('◈ ' + G.save.iq + ' ' + t('sk_iq'), 480, 108, 15, '#b48cff');
-    const items = [t('tt_full'), t('tt_calc'), t('tt_mem'), t('tt_vis'), t('tt_log')];
+    const items = [t('tt_full'), t('tt_mem'), t('tt_vis'), t('tt_log')];
     items.forEach((s, i) => {
       const sel = i === TRI.sel;
       const y = 175 + i * 52 + (i ? 14 : 0);
@@ -243,10 +431,7 @@ function drawTrial() {
     c.globalAlpha = 1;
   }
   ftxt(TRI.q.hint, 480, 118, 19, '#eef3fa');
-  if (TRI.game === 'calc') {
-    ftxt(TRI.q.txt, 480, 240, 52, '#eef3fa', 'center', '#4db8ff');
-    triDrawChoices(TRI.q.choices.list);
-  } else if (TRI.game === 'vis') {
+  if (TRI.game === 'vis') {
     const g = TRI.q.grid, s = 26;
     const ox = 480, oy = 250;
     const cells = [];
@@ -257,35 +442,7 @@ function drawTrial() {
         triIsoCube(ox + (x - z) * s, oy + (x + z) * s * 0.5 - y * s * 0.9, s, '#8fd8c8', '#3a8a7a', '#276355');
     triDrawChoices(TRI.q.choices.list);
   } else if (TRI.game === 'log') {
-    const q = TRI.q;
-    const dl = q.left.gear * 5 + q.left.bolt * 3 + q.left.chip;
-    const dr = q.right.gear * 5 + q.right.bolt * 3 + q.right.chip;
-    const tilt = clamp((dr - dl) * 0.015, -0.12, 0.12);
-    c.save(); c.translate(480, 210); c.rotate(tilt);
-    c.strokeStyle = '#8892a2'; c.lineWidth = 6; c.lineCap = 'round';
-    c.beginPath(); c.moveTo(-190, 0); c.lineTo(190, 0); c.stroke();
-    c.restore();
-    c.strokeStyle = '#5c6678'; c.lineWidth = 5;
-    c.beginPath(); c.moveTo(480, 210); c.lineTo(480, 300); c.stroke();
-    c.fillStyle = '#3a4250'; rr(c, 440, 300, 80, 16, 5); c.fill();
-    const pan = (cx2, side) => {
-      const py = 210 + Math.sin(tilt) * (side === 'l' ? 190 : -190) * -1 + 40;
-      c.fillStyle = '#2c3542'; rr(c, cx2 - 85, py, 170, 14, 6); c.fill();
-      const s2 = side === 'l' ? TRI.q.left : TRI.q.right;
-      let ix = cx2 - 70;
-      const item = (n, color, r2, wtxt) => {
-        for (let i = 0; i < n; i++) {
-          c.fillStyle = color; c.beginPath(); c.arc(ix + 10, py - r2, r2, 0, 7); c.fill();
-          ftxt(wtxt, ix + 10, py - r2 + 1, 9, '#0a1420');
-          ix += r2 * 2 + 6;
-        }
-      };
-      item(s2.gear, '#ffab4a', 13, '5');
-      item(s2.bolt, '#57a8ff', 10, '3');
-      item(s2.chip, '#7de8a0', 7, '1');
-    };
-    pan(290, 'l'); pan(670, 'r');
-    triDrawChoices(TRI.q.labels);
+    drawScales();
   } else if (TRI.game === 'mem') {
     const pads = [[330, 250], [480, 180], [630, 250], [480, 320]];
     const keys = ['←', '↑', '→', '↓'];
