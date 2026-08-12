@@ -128,6 +128,54 @@ function processSheet(key, cols, rows) {
       }
     }
   }
+  // -------------------------------------------------------------------------
+  // THE GRADE. The minions are pre-rendered stills, and they looked it: flat,
+  // desaturated, no light on them, sliding around in front of rooms that are
+  // lit and coloured. The cat looks solid because she is DRAWN — gradients,
+  // ambient occlusion, a contour, a lit edge — and none of that can be added
+  // to a photograph after the fact by hand, eleven subjects at a time.
+  //
+  // So it is done to the pixels, once, when the sheet lands, and every draw
+  // afterwards is free. Three things, in the order a render would do them:
+  //
+  //   COLOUR   pushed away from grey, so the palette that survived the render
+  //            actually reaches the screen.
+  //   FORM     a vertical light ramp per cell — brighter at the crown, falling
+  //            into shadow at the feet. This is what a top key light does, and
+  //            it is the single cue that turns a silhouette into a body.
+  //   RIM      the boundary pixels facing up and left are lifted toward a cool
+  //            highlight, matching the key direction this atlas was rendered
+  //            with, so every machine carries an edge of light off its shoulder.
+  // -------------------------------------------------------------------------
+  const a1 = new Uint8ClampedArray(W * H);
+  for (let i = 0, p = 3; i < W * H; i++, p += 4) a1[i] = d[p];
+  const SAT = 1.5, CON = 1.1, RIM = 0.5;
+  for (let r = 0; r < rows; r++) {
+    const y0 = Math.floor(r * H / rows), y1 = Math.floor((r + 1) * H / rows);
+    const span = Math.max(1, y1 - y0 - 1);
+    for (let yy = y0; yy < y1; yy++) {
+      const v = (yy - y0) / span;                       // 0 crown .. 1 feet
+      const lk = 1.16 - v * 0.34;                       // the key light falling
+      for (let xx = 0; xx < W; xx++) {
+        const i = yy * W + xx, p = i * 4;
+        if (a1[i] < 8) continue;
+        let R = d[p], Gc = d[p + 1], B = d[p + 2];
+        const L = 0.299 * R + 0.587 * Gc + 0.114 * B;
+        R = L + (R - L) * SAT; Gc = L + (Gc - L) * SAT; B = L + (B - L) * SAT;
+        R *= lk; Gc *= lk; B *= lk;
+        R = 128 + (R - 128) * CON; Gc = 128 + (Gc - 128) * CON; B = 128 + (B - 128) * CON;
+        // rim: is this pixel on an edge that faces the light?
+        const up = yy > y0 ? a1[i - W] : 0, lf = xx > 0 ? a1[i - 1] : 0;
+        if (a1[i] > 200 && (up < 140 || lf < 140)) {
+          const k = RIM * (1 - Math.min(up, lf) / 140);
+          R += (232 - R) * k; Gc += (244 - Gc) * k; B += (255 - B) * k;
+        }
+        d[p] = R < 0 ? 0 : R > 255 ? 255 : R;
+        d[p + 1] = Gc < 0 ? 0 : Gc > 255 ? 255 : Gc;
+        d[p + 2] = B < 0 ? 0 : B > 255 ? 255 : B;
+      }
+    }
+  }
   x.putImageData(img, 0, 0);
   ATLAS_PROC[key] = cv;
   return cv;

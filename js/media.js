@@ -100,6 +100,14 @@ const MEDIA_SRC = {
     vox_roar_drg: 'assets/sfx/vox/roar_drg.ogg',
     vox_roar_prism: 'assets/sfx/vox/roar_prism.ogg',
     vox_roar_mother: 'assets/sfx/vox/roar_mother.ogg',
+    // The three cues the voice model could not make: it cannot produce a short
+    // mechanical blip at any length, and three synth beeps in a game that has
+    // recorded audio everywhere else is exactly where the seam shows. These are
+    // Kenney's CC0 Digital Audio pack (see kenney/LICENSE.txt) — public domain,
+    // no attribution required, and the right texture for a robot anyway.
+    sfx_jump: 'assets/sfx/kenney/sfx_jump.ogg',
+    sfx_pick: 'assets/sfx/kenney/sfx_pick.ogg',
+    sfx_edie: 'assets/sfx/kenney/sfx_edie.ogg',
   },
 };
 if (typeof window !== 'undefined' && window.EMBEDDED_MEDIA) {

@@ -387,6 +387,9 @@ function sfx(n) {
   if (n === 'edie' && playBuf('glass', 0.45, 0.9 + Math.random() * 0.25)) return;
   if (n === 'shoot' && playBuf('laser', 0.28)) return;
   if (n === 'cast' && playBuf('zap', 0.4)) return;
+  if (n === 'jump' && playBuf('sfx_jump', 0.34, 0.97 + Math.random() * 0.07)) return;
+  if (n === 'pick' && playBuf('sfx_pick', 0.32, 0.96 + Math.random() * 0.09)) return;
+  if (n === 'edie' && playBuf('sfx_edie', 0.4, 0.94 + Math.random() * 0.12)) return;
   if (n === 'chest' && playBuf('powerup', 0.4)) return;
   if (n === 'hurt' && playBuf('low', 0.5)) return;
   switch (n) {
