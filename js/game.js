@@ -310,7 +310,20 @@ function loadRoom(id) {
   if (player) player.oathUsed = false;      // the lion owes her once per room
   G.save.visited[id] = 1;
   tileDirty = true;
-  setMusic(def.zone);
+  // ---- WALKING INTO A GUARDIAN'S CHAMBER --------------------------------
+  // It used to be a doorway like any other: full brightness, the kingdom's
+  // theme still playing, and a boss-sized shape asleep in the corner. The room
+  // is held DARK for a beat and brought up — she is standing in a chamber where
+  // something has been sleeping, and the light finds it — while the theme
+  // cross-fades underneath. Her controls are hers again the moment the lights
+  // are up; the hold is short enough to read as staging, not as a cutscene.
+  G.bossEntry = null;
+  if (G.boss && !G.boss.dead && G.boss.st === 'dorm') {
+    G.bossEntry = { t: 0, dur: 2.3 };
+    setMusic('boss_' + G.boss.kind);
+  } else {
+    setMusic(def.zone);
+  }
   if (def.zone !== G.lastZone) { G.zoneToast = { text: t('z_' + def.zone), t: 2.6 }; G.lastZone = def.zone; }
   cam.x = 0; cam.y = 0;
   persist();
@@ -531,6 +544,12 @@ function update(dt) {
       if (!G.trans.half && G.trans.t < 0.14) { G.trans.half = true; applyTransition(); }
       if (G.trans.t <= 0) G.trans = null;
     } else {
+      // the chamber hold: the world keeps breathing, she does not move
+      if (G.bossEntry) {
+        G.bossEntry.t += dt;
+        if (G.bossEntry.t >= G.bossEntry.dur || !G.boss || G.boss.st !== 'dorm') G.bossEntry = null;
+        else if (player) player.vx = 0;
+      }
       if (typeof updateRoarFX === 'function') updateRoarFX(dt);
       // THE CACHE GATE: the floor entrance stays open until she is truly
       // inside — on her feet, clear of the hole — and only then does the
@@ -4160,6 +4179,27 @@ function draw(tms) {
   // in-world states render the world behind
   drawWorldFrame();
   drawFX();
+  // THE LIGHTS COMING UP on a guardian's chamber. Over the world and under the
+  // HUD, so the room is what darkens — a black frame with the player's own
+  // readouts sitting on top of it would just look like a broken screen. It
+  // holds nearly dark for the first beat, then lifts, with a vignette that
+  // stays a moment longer at the edges so the light reads as arriving from
+  // above rather than as an overlay being switched off.
+  if (G.bossEntry) {
+    const k = clamp(G.bossEntry.t / (G.bossEntry.dur * 0.72), 0, 1);
+    const e = k < 0.30 ? 0 : (k - 0.30) / 0.70;
+    const dark = (1 - e) * 0.88;
+    if (dark > 0.004) {
+      c.save();
+      c.fillStyle = 'rgba(2,4,8,' + dark.toFixed(3) + ')';
+      c.fillRect(0, 0, 960, 540);
+      const vg2 = c.createRadialGradient(480, 300, 120, 480, 300, 620);
+      vg2.addColorStop(0, 'rgba(0,0,0,0)');
+      vg2.addColorStop(1, 'rgba(0,0,0,' + (0.55 * (1 - e * 0.55)).toFixed(3) + ')');
+      c.fillStyle = vg2; c.fillRect(0, 0, 960, 540);
+      c.restore();
+    }
+  }
   if (typeof drawBrDelta === 'function') drawBrDelta();
   drawHUD();
   drawMapButton();

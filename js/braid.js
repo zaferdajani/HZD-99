@@ -475,11 +475,53 @@ function offerOpts() {
     { p: 'R', key: '\u25b6', col: '#ffd76a', lab: t('fb_beat'), d: 'fb_beat_d' },
   ];
 }
+// ---------------------------------------------------------------------------
+// THE CHOICE, WITHOUT WORDS. This is the one question the whole game turns on,
+// and until now it was two lines of English text. A child who cannot read the
+// label still has to be able to tell "let it live" from "finish it", so each
+// door carries a drawn sign: an open paw laid over a heart, or a claw striking
+// through. The words stay for everyone else.
+// ---------------------------------------------------------------------------
+function offerIcon(x, y, s, kind, col) {
+  c.save();
+  c.translate(x, y); c.scale(s, s);
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  if (kind === 'L') {
+    // a heart, with a paw print set into it — mercy, and whose mercy it is
+    c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 10;
+    c.beginPath();
+    c.moveTo(0, 9);
+    c.bezierCurveTo(-11, 1, -10, -8, -4.6, -8);
+    c.bezierCurveTo(-1.4, -8, 0, -5.2, 0, -5.2);
+    c.bezierCurveTo(0, -5.2, 1.4, -8, 4.6, -8);
+    c.bezierCurveTo(10, -8, 11, 1, 0, 9);
+    c.closePath(); c.fill();
+    c.shadowBlur = 0;
+    c.fillStyle = 'rgba(8,16,14,0.85)';                       // the pad
+    c.beginPath(); c.ellipse(0, 1.4, 3.1, 2.5, 0, 0, 7); c.fill();
+    for (let k = -1; k <= 1; k++) {                            // three toes
+      c.beginPath(); c.ellipse(k * 2.7, -2.9, 1.15, 1.5, k * 0.4, 0, 7); c.fill();
+    }
+  } else {
+    // three claw strokes cutting down through the frame
+    c.shadowColor = col; c.shadowBlur = 10;
+    for (let k = -1; k <= 1; k++) {
+      const o = k * 4.4, L = 9 - Math.abs(k) * 1.2;
+      c.strokeStyle = col; c.lineWidth = 2.6 - Math.abs(k) * 0.6;
+      c.beginPath();
+      c.moveTo(-L + o, -L - 1);
+      c.quadraticCurveTo(o * 0.4, 0, L * 0.8 + o, L + 1);
+      c.stroke();
+    }
+    c.shadowBlur = 0;
+  }
+  c.restore();
+}
 function offerBoxes() {
   if (!G.offer) return [];
   const opts = offerOpts();
-  const w = 250, h = 66, gap = 18;
-  const bx = 480, by = 348;
+  const w = 250, h = 104, gap = 18;
+  const bx = 480, by = 336;
   return opts.map((op, i) => ({
     op, w, h,
     x: bx + (i - (opts.length - 1) / 2) * (w + gap), y: by,
@@ -523,8 +565,9 @@ function drawOffer() {
     rr(c, ox - w / 2, oy - h / 2, w, h, 8); c.fill();
     c.strokeStyle = op.col; c.lineWidth = 2;
     rr(c, ox - w / 2, oy - h / 2, w, h, 8); c.stroke();
-    ftxt(op.key + '  ' + op.lab, ox, oy - 8, 17, op.col, 'center');
-    ftxt(t(op.d), ox, oy + 16, 11, '#8aa2b5', 'center');
+    offerIcon(ox, oy - 26, 1.55, op.p, op.col);
+    ftxt(op.key + '  ' + op.lab, ox, oy + 18, 17, op.col, 'center');
+    ftxt(t(op.d), ox, oy + 40, 11, '#8aa2b5', 'center');
   }
   // SAY HOW TO ANSWER. The fork has no timer and stops the world, so if the way
   // in is not obvious it reads as a trap rather than a choice.

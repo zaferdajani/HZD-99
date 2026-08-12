@@ -375,8 +375,12 @@ class Player {
     }
     // COOLANT FREEZE coats any floor in ice; NULL GRAVITY makes jumps go light
     const ice = !!G.roomDef.ice || (G.iceT || 0) > 0;
+    // THE CHAMBER HOLD. Standing in a guardian's room while the lights come up
+    // is staging, and staging that the player can walk out of is not staging.
+    // Her controls come back the moment the room is lit.
+    const held = !!G.bossEntry;
     // MOTHER'S SONG mirrors your inputs for its few seconds — fight it
-    const dirRaw = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
+    const dirRaw = held ? 0 : (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
     const dir = (G.revT || 0) > 0 ? -dirRaw : dirRaw;
     const healing = this.healT > 0;
 
@@ -507,7 +511,7 @@ class Player {
     // So the press is now held for a beat and spent the instant the swing is
     // free. This is the difference between "sluggish" and "tight", and it is
     // almost entirely this one buffer.
-    if (inP('ATK')) this.atkBuf = 0.2;
+    if (inP('ATK') && !G.bossEntry) this.atkBuf = 0.2;
     else this.atkBuf = (this.atkBuf || 0) - dt;
     if (this.atkBuf > 0 && this.atkCD <= 0) {
       this.atkBuf = 0;

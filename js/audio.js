@@ -45,8 +45,11 @@ function stopRecorded() {
   // fade the outgoing stream rather than cutting it dead mid-note
   let v = 0;
   try { v = n.el.volume; } catch (e) {}
+  // Long enough to hear as a CROSS-FADE. At a third of a second the old track
+  // is simply gone before the new one arrives, which is a cut with extra steps
+  // — and the moment this matters most is walking into a guardian's chamber.
   const iv = setInterval(() => {
-    v -= 0.14;
+    v -= 0.045;
     try {
       if (v <= 0.01) { n.el.pause(); n.el.src = ''; n.el.load(); clearInterval(iv); }
       else n.el.volume = Math.max(0, Math.min(1, v));
@@ -94,7 +97,7 @@ function playRecorded(key, gain) {
     let v = 0;
     const iv = setInterval(() => {
       if (RECNODE !== node) { clearInterval(iv); return; }
-      v += 0.14;
+      v += 0.05;
       try { el.volume = Math.max(0, Math.min(1, Math.min(target, v))); } catch (e) {}
       if (v >= target) clearInterval(iv);
     }, 40);
