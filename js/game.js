@@ -598,6 +598,7 @@ function update(dt) {
       }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
       sawHum(dt);
+      updateTutor(dt);
       // during a finishing blow she is driven, not steered — the choice was the
       // input, and nothing the player does now can fumble it
       if (G.finish && typeof updateFinisher === 'function') updateFinisher(dt);
@@ -745,6 +746,11 @@ function menuOptions() {
     const opts = [];
     if (loadStored(lk)) opts.push('continue');
     opts.push('newgame');
+    // THE OPENING, ON DEMAND. It played once, on the first boot ever, and after
+    // that a returning player never saw it again — which is most boots, for the
+    // person who has been testing the game all week. It is a piece of the game,
+    // not a one-time gate: it belongs on the menu like everything else.
+    if (lk !== 'hero') opts.push('film');
     return opts.concat(['controls', 'lang', 'sound', 'music']);
   }
   return ['play', 'controls', 'lang', 'sound', 'music'];
@@ -777,6 +783,7 @@ function updateMenu() {
         G.afterCine = 'DIFF'; startCine();
       } else G.state = 'DIFF';
     }
+    else if (o === 'film') { G.afterCine = null; startCine(); }
     else if (o === 'controls') { G.ctrlBack = 'MENU'; G.state = 'CTRL'; }
     else if (o === 'lang') { openLangSel('MENU'); }
     else if (o === 'sound') { MUTED = !MUTED; saveMeta(); }
@@ -3251,6 +3258,101 @@ addEventListener('mousedown', (e) => {
     G.state = 'BRAID'; braidView.ready = false; sfx('ui');
   }
 });
+// ===========================================================================
+// FIRST LESSONS. The game opened by handing a seven-year-old a robot cat and a
+// keyboard and saying nothing. Everything she can do is discoverable, which is
+// not the same as discovered — plenty of players never found the claw at all,
+// because nothing ever asked them to use it.
+//
+// So the first room teaches three verbs and no more: MOVE, JUMP, SCRATCH. Each
+// one waits for the player to actually do it — not to read about it and press
+// on — and each shows the control THIS player has in their hands: the on-screen
+// button on a phone, the pad button with a pad plugged in, the key otherwise.
+// It never blocks, it never pauses the game, and once a verb is learned it is
+// gone for good.
+// ===========================================================================
+const TUT_STEPS = [
+  { id: 'move', label: 'tut_move', hint: 'tut_move_h',
+    keys: '← →', pad: 'D-pad', touch: 'stick',
+    done: () => Math.abs(player.vx) > 40 },
+  { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h',
+    keys: 'Z / Space', pad: 'A', touch: 'JUMP',
+    done: () => !player.on && player.vy < -60 },
+  { id: 'atk', label: 'tut_atk', hint: 'tut_atk_h',
+    keys: 'X', pad: 'X', touch: 'ATK',
+    done: () => !!player.swing || player.comboT > 0 },
+];
+function tutHand(st) {
+  if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled) return st.touch;
+  if (typeof PAD !== 'undefined' && PAD && PAD.on) return st.pad;
+  return st.keys;
+}
+function updateTutor(dt) {
+  const sv = G.save;
+  if (!sv || !player || player.dead) return;
+  if (sv.flags && sv.flags.tut) return;                    // learned, for good
+  if (!G.tut) G.tut = { i: 0, t: 0, hold: 0, doneT: 0 };
+  const T = G.tut;
+  if (T.doneT > 0) { T.doneT -= dt; if (T.doneT <= 0 && sv.flags) sv.flags.tut = 1; return; }
+  const st = TUT_STEPS[T.i];
+  if (!st) { T.doneT = 1.8; return; }
+  T.t += dt;
+  if (T.hold > 0) { T.hold -= dt; if (T.hold <= 0) { T.i++; T.t = 0; } return; }
+  let ok = false;
+  try { ok = st.done(); } catch (e) { ok = false; }
+  if (ok && T.t > 0.25) {
+    T.hold = 0.7;
+    sfx('pick');
+    burst(player.x + player.w / 2, player.y + 4, 12, '#37ffd0', 190, 0.5, 220, 3, true);
+    if (T.i >= TUT_STEPS.length - 1 && sv.flags) { T.doneT = 1.6; }
+  }
+}
+function drawTutor() {
+  const sv = G.save;
+  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player) return;
+  const T = G.tut;
+  const px = player.x + player.w / 2 - cam.x, py = player.y - cam.y;
+  if (T.doneT > 0) {
+    c.save();
+    c.globalAlpha = Math.min(1, T.doneT / 0.5);
+    ftxt(t('tut_done'), px, py - 52, 18, '#37ffd0', 'center', '#37ffd0', '700');
+    c.restore(); c.globalAlpha = 1;
+    return;
+  }
+  const st = TUT_STEPS[T.i];
+  if (!st) return;
+  const learned = T.hold > 0;
+  const pu = 0.5 + Math.sin(performance.now() / 260) * 0.5;
+  // a card that floats over her head and follows her, so the lesson and the
+  // thing being taught are never in two different places on the screen
+  const key = tutHand(st);
+  c.font = '700 15px "Segoe UI", Tahoma, sans-serif';
+  const kw = c.measureText(key).width + 26;
+  c.font = '600 15px "Segoe UI", Tahoma, sans-serif';
+  const lw = c.measureText(t(st.label)).width;
+  const w = Math.max(150, kw + lw + 34), x = clamp(px - w / 2, 12, 948 - w), y = clamp(py - 78, 8, 430);
+  c.save();
+  c.globalAlpha = learned ? Math.max(0, T.hold / 0.7) : 1;
+  c.fillStyle = 'rgba(6,14,20,0.86)'; rr(c, x, y, w, 46, 10); c.fill();
+  c.strokeStyle = learned ? '#7de8a0' : 'rgba(55,255,208,' + (0.35 + pu * 0.45) + ')';
+  c.lineWidth = 2; rr(c, x, y, w, 46, 10); c.stroke();
+  // the control, drawn as the key cap it is
+  c.fillStyle = learned ? 'rgba(125,232,160,0.22)' : 'rgba(55,255,208,0.16)';
+  rr(c, x + 10, y + 10, kw, 26, 6); c.fill();
+  ftxt(key, x + 10 + kw / 2, y + 24, 15, learned ? '#bff5d2' : '#8ff0d4', 'center', null, '700');
+  ftxt(learned ? '✓ ' + t(st.label) : t(st.label), x + kw + 22, y + 20, 15,
+    learned ? '#bff5d2' : '#eef3fa', 'left', null, '600');
+  ftxt(t(st.hint), x + kw + 22, y + 36, 12, '#7d93a8', 'left');
+  c.restore(); c.globalAlpha = 1;
+  // a little arrow pointing down at her, so it is clear who the card is about
+  c.save();
+  c.globalAlpha = learned ? Math.max(0, T.hold / 0.7) * 0.8 : 0.8;
+  c.fillStyle = learned ? '#7de8a0' : '#37ffd0';
+  c.beginPath();
+  c.moveTo(px - 6, y + 48); c.lineTo(px + 6, y + 48); c.lineTo(px, y + 56);
+  c.closePath(); c.fill();
+  c.restore(); c.globalAlpha = 1;
+}
 function drawHUD() {
   const P = PAL[G.roomDef.zone];
   // DATA CORRUPTION: the whole HUD jitters, tears and lies for its 8 seconds
@@ -4204,7 +4306,7 @@ function draw(tms) {
       const opts = menuOptions();
       const labels = {
         play: t('menu_play'), continue: t('menu_continue'), newgame: t('menu_newgame'),
-        controls: t('menu_controls'),
+        film: t('menu_film'), controls: t('menu_controls'),
         lang: t('menu_language') + ': ' + langName(LANG), sound: MUTED ? t('menu_sound_off') : t('menu_sound_on'),
         music: MUSIC_ON ? t('menu_music_on') : t('menu_music_off'),
       };
@@ -4326,6 +4428,7 @@ function draw(tms) {
     }
   }
   if (typeof drawBrDelta === 'function') drawBrDelta();
+  drawTutor();
   drawHUD();
   drawMapButton();
   if (G.trans) {
