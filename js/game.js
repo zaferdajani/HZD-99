@@ -4316,6 +4316,12 @@ function startIntroFilm() {
 }
 function startCine() {
   G.cine = { page: 0, pt: 0, glitchT: 0, ending: false };
+  // THE OPENING HAS ITS OWN SCORE, and until now nothing ever asked for it:
+  // the slot existed, the track sat in assets/music, and setMusic('intro') was
+  // not called from anywhere in the game. So the prologue — a benevolent
+  // broadcast being overwritten into a command, and five guardians going to
+  // their knees — played out under the friendly title theme.
+  setMusic('intro');
   if (startIntroFilm()) return;
   G.state = 'CINE';
 }
@@ -4327,6 +4333,7 @@ const CINE_REVEAL = [8, 8, 10.5, 10.5];
 function cineEnd() {
   try { localStorage.setItem('cb_intro_seen', '1'); } catch (e) {}
   G.cine = null;
+  if (G.state !== 'PLAY') setMusic('title');       // back out to the menu's own theme
   if (G.afterCine === 'DIFF') {
     G.afterCine = null; G.diffIdx = 1;
     G.pendTheme = G.pendTheme || gameLock() || 'robo';
