@@ -42,7 +42,14 @@ for (const k in EMBED) {
   const ext = f.split('.').pop().toLowerCase();
   media[k] = 'data:' + MIME[ext] + ';base64,' + fs.readFileSync(f).toString('base64');
 }
-const files = ['vendor-three', 'model3d', 'beast', 'eagle', 'glaciere', 'furnace', 'mother', 'theme', 'mat', 'prism', 'types', 'i18n', 'media', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'pets', 'braid', 'game', 'touch']
+// vendor-three + model3d are NOT here on purpose. They render the driller in
+// live 3D, and nothing has called into them since that model was baked down to
+// the sprite atlas the game actually draws (driller_12x6.png) — verified: no
+// symbol in either file is referenced anywhere else. They stayed in the bundle
+// anyway, shipping 600 KB of Three.js to every player, which matters on the web
+// and matters more inside an app download. The files remain in the repo as the
+// offline tool that regenerates that atlas.
+const files = ['beast', 'eagle', 'glaciere', 'furnace', 'mother', 'theme', 'mat', 'prism', 'types', 'i18n', 'media', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'pets', 'braid', 'game', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 // THE MUSIC MANIFEST. Scored tracks are dropped into assets/music/ and turned
 // on by rebuilding — no code edit per track, and no reference to a file that is

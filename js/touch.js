@@ -10,7 +10,37 @@ const TOUCH = {
 };
 try { TOUCH.layout = JSON.parse(localStorage.getItem('cb_touch_layout') || '{}') || {}; } catch (e) { TOUCH.layout = {}; }
 function tLayoutSave() { try { localStorage.setItem('cb_touch_layout', JSON.stringify(TOUCH.layout)); } catch (e) {} }
-function tBuzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 10); } catch (e) {} }
+// ---------------------------------------------------------------------------
+// HAPTICS, AND WHERE THEY WERE SILENTLY DEAD. Every buzz in this game went
+// through navigator.vibrate — which iOS Safari does not implement at all. Not
+// "weakly", not "differently": nothing. Every rumble, every hit, every wheel
+// detent has been doing nothing whatsoever on iPhone since the day it was
+// written, with no error to say so.
+//
+// Inside the native shell there is a real Taptic Engine to talk to, so use it
+// when it is there and keep the web path for the browser.
+// ---------------------------------------------------------------------------
+const NATIVE = typeof window !== 'undefined' && window.Capacitor && window.Capacitor.isNativePlatform
+  ? !!window.Capacitor.isNativePlatform() : false;
+function capPlugin(name) {
+  try { return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[name]) || null; }
+  catch (e) { return null; }
+}
+function tBuzz(ms) {
+  const d = ms || 10;
+  if (NATIVE) {
+    const H = capPlugin('Haptics');
+    if (H) {
+      try {
+        // short taps read as impacts; anything sustained is a real vibration
+        if (d <= 24) H.impact({ style: d <= 10 ? 'Light' : d <= 16 ? 'Medium' : 'Heavy' });
+        else H.vibrate({ duration: d });
+        return;
+      } catch (e) {}
+    }
+  }
+  try { if (navigator.vibrate) navigator.vibrate(d); } catch (e) {}
+}
 let tc = null, tcx = null;
 function tcSetup() {
   tc = document.getElementById('tc');

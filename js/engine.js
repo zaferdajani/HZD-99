@@ -154,6 +154,21 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { keys[e.code] = 0; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = 0; });
+// THE ANDROID BACK BUTTON. In an app it is a real button on the device, and
+// its default behaviour is to close the app — which, mid-boss, is not a back
+// button, it is a quit button. It now means what BACK means everywhere else in
+// this game: leave the screen you are on, and pause the game if you are in it.
+if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins
+    && window.Capacitor.Plugins.App) {
+  try {
+    window.Capacitor.Plugins.App.addListener('backButton', () => {
+      if (typeof G === 'undefined') return;
+      if (G.state === 'PLAY') { G.state = 'PAUSE'; G.pauseIdx = 0; if (typeof sfx === 'function') sfx('ui'); }
+      else if (G.state === 'MENU') { /* the title screen is the floor: stay */ }
+      else { keys.VBACK = 1; keysP.VBACK = 1; setTimeout(() => { keys.VBACK = 0; }, 60); }
+    });
+  } catch (e) {}
+}
 function inD(n) { return KEYB[n].some(c => keys[c]); }
 function inP(n) { return KEYB[n].some(c => keysP[c]); }
 function clearP() { for (const k in keysP) keysP[k] = 0; }

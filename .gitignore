@@ -1,10 +1,11 @@
 node_modules/
 www/
-android/
-ios/
-*.apk
-*.aab
+tests/out/
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/app/src/main/assets/public/
+ios/App/App/public/
+ios/App/Pods/
 .DS_Store
-
-# agent worktrees + local Claude session data — never commit
-.claude/

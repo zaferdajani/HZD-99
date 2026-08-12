@@ -1,0 +1,28 @@
+{
+  "name": "clawbyte",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CLAWBYTE / NOSTOS — a zero-dependency canvas metroidvania, on the web and in a native shell",
+  "scripts": {
+    "build": "node build.cjs",
+    "serve": "http-server -p 8220 -s",
+    "test": "node tests/run.cjs",
+    "app:pack": "node build.cjs && node tools/pack-www.cjs",
+    "app:sync": "npm run app:pack && cap sync",
+    "app:android": "npm run app:sync && cap open android",
+    "app:apk": "npm run app:sync && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/cli": "^6.2.1",
+    "@capacitor/core": "^6.2.1",
+    "@capacitor/haptics": "^6.0.3",
+    "@capacitor/screen-orientation": "^6.0.4",
+    "@capacitor/splash-screen": "^6.0.4",
+    "@capacitor/status-bar": "^6.0.3"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "playwright": "^1.62.1"
+  }
+}
