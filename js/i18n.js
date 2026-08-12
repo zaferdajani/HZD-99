@@ -129,6 +129,7 @@ en: {
   sk_reflex: 'Predictive Reflex', sk_reflexd: 'Longer invincibility after taking a hit.',
   sk_router: 'Overvolt Router', sk_routerd: 'EMP pulse costs 18 volts instead of 26.',
   sk_triple: 'Triple Thruster', sk_tripled: 'A third jump in mid-air.',
+  sk_reach: 'Long Rake', sk_reachd: 'The finishing blow opens into a full-length claw arc.',
   sk_wave: 'Quantum Claw', sk_waved: 'Every slash releases a short energy wave.',
   pm_map: 'Map', pm_crests: 'Crests', pm_skills: 'Neural Tree', pm_relics: 'Relics',
   rl_title: 'Relics', rl_none: 'No relics yet. They drop from foes, hide in glimmers, and are torn from guardians.',

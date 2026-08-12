@@ -52,6 +52,7 @@ const SKILLS = [
   { id: 'reflex', cost: 30, tier: 1 },  // longer invincibility after hits
   { id: 'router', cost: 40, tier: 1 },  // cheaper EMP
   { id: 'triple', cost: 60, tier: 2 },  // third jump
+  { id: 'reach', cost: 50, tier: 1 },   // the finisher becomes the long rake
   { id: 'wave', cost: 80, tier: 2 },    // slashes fire an energy wave
 ];
 function tierOpen(tier, unlocked) { return tier === 0 || (tier === 1 && unlocked >= 1) || (tier === 2 && unlocked >= 3); }
