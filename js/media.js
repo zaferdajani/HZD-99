@@ -50,6 +50,17 @@ const MEDIA_SRC = {
     strataIceA: 'assets/backgrounds/strata_iceA.jpg',
     strataLava: 'assets/backgrounds/strata_lava.jpg',
     strataIceB: 'assets/backgrounds/strata_iceB.jpg',
+    // ONE FRAME LIFTED FROM EACH SHOT OF THE OPENING FILM. A browser that
+    // cannot decode the video still gets the same eight images in the same
+    // order, so the story is never replaced by a different one.
+    introS1: 'assets/intro/intro1.jpg',
+    introS2: 'assets/intro/intro2.jpg',
+    introS3: 'assets/intro/intro3.jpg',
+    introS4: 'assets/intro/intro4.jpg',
+    introS5: 'assets/intro/intro5.jpg',
+    introS6: 'assets/intro/intro6.jpg',
+    introS7: 'assets/intro/intro7.jpg',
+    introS8: 'assets/intro/intro8.jpg',
   },
   // Music is STREAMED, never decoded. decodeAudioData turns a 2 MB ogg into
   // ~60 MB of raw float PCM and holds it in RAM for the whole session — on a
