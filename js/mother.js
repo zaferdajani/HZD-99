@@ -93,7 +93,7 @@ const MVA = {
 const MV_SHARDS = ['shard1', 'shard2', 'shard3', 'shard4', 'shard5', 'shard6'];
 const MV_TENDS = ['tend1', 'tend2', 'tend3'];
 function mvArt() {
-  const im = (typeof MEDIA_IMG !== 'undefined') ? MEDIA_IMG.motherParts : null;
+  const im = (typeof MEDIA_IMG !== 'undefined') ? ((typeof softArt === 'function' && softArt('motherParts')) || MEDIA_IMG.motherParts) : null;
   return (im && im.naturalWidth) ? im : null;
 }
 // one part, centred on the current origin, at a given angle and pixel height

@@ -22,7 +22,10 @@ const DRG_P = {
   core: [913, 727, 48, 60],     // glow core — the molten orb
 };
 const DRG_CACHE = {};
-function drgImg() { return typeof MEDIA_IMG !== 'undefined' ? MEDIA_IMG.dragonParts : null; }
+function drgImg() {
+  if (typeof MEDIA_IMG === 'undefined') return null;
+  return (typeof softArt === 'function' && softArt('dragonParts')) || MEDIA_IMG.dragonParts;
+}
 
 // white-hot copy of the atlas for the meltdown: the sheet's own pixels pushed
 // toward #FFF5E0, crossfaded in by whiteHot/slag — never a painted-over glow

@@ -50,7 +50,7 @@ function egPureAtlas(im) {
   return (EG_PURE_CV = cv);
 }
 function eagleImg() {
-  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.eagleParts;
+  const im = typeof MEDIA_IMG !== 'undefined' && ((typeof softArt === 'function' && softArt('eagleParts')) || MEDIA_IMG.eagleParts);
   if (im && EG_PURE) { const pv = egPureAtlas(im); if (pv) return pv; }
   return im;
 }
@@ -60,7 +60,7 @@ function eagleImg() {
 function eagleAnchors() {
   if (EAGLE_CACHE.anchors) return EAGLE_CACHE.anchors;
   // always scan the RAW sheet: the purified remap moves the red the scan needs
-  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.eagleParts;
+  const im = typeof MEDIA_IMG !== 'undefined' && ((typeof softArt === 'function' && softArt('eagleParts')) || MEDIA_IMG.eagleParts);
   if (!im || !im.naturalWidth) return null;
   const cv = document.createElement('canvas');
   cv.width = im.naturalWidth; cv.height = im.naturalHeight;

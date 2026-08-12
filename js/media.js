@@ -150,6 +150,74 @@ const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
 // through the lazy map that innocent-looking check pulled 2.7 MB of art for
 // guardians that were not even in the room.
 function mediaHas(k) { return !!MEDIA_RAW[k]; }
+
+// ---------------------------------------------------------------------------
+// SOFT EDGES. The guardians' art arrived as figures cut out of a painted
+// background, and a cut-out has a hard edge: every pixel is either fully opaque
+// or fully gone. Against a dark room that reads as a sticker laid on the scene —
+// which is exactly how it looked next to the cat, who is drawn with vector
+// shapes and is anti-aliased for free.
+//
+// Two things happen here, once per sheet, and both only touch the boundary:
+//
+//   FEATHER — a pixel's alpha is capped at the average alpha around it, so a
+//   solid interior is untouched and the rim ramps out over a pixel or two.
+//   CLEAN   — the outermost pixels of a keyed cut-out carry a halo of whatever
+//   was behind them. Those are pulled toward their opaque neighbours, so the
+//   ghost of the old background stops outlining the figure.
+// ---------------------------------------------------------------------------
+const SOFT_ART = {};
+function softArt(key) {
+  if (SOFT_ART[key] !== undefined) return SOFT_ART[key];
+  const im = MEDIA_RAW[key];
+  if (!im || !im.naturalWidth) return null;              // not here yet; ask again
+  let out = im;
+  try {
+    const W = im.naturalWidth, H = im.naturalHeight;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const x = cv.getContext('2d');
+    x.drawImage(im, 0, 0);
+    const img = x.getImageData(0, 0, W, H), d = img.data;
+    const a0 = new Uint8ClampedArray(W * H);
+    for (let i = 0, p = 3; i < W * H; i++, p += 4) a0[i] = d[p];
+    for (let y = 0; y < H; y++) {
+      for (let xx = 0; xx < W; xx++) {
+        const i = y * W + xx;
+        if (!a0[i]) continue;                            // already empty
+        let sum = 0, n = 0, br = 0, bg = 0, bb = 0, bw = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+          const yy = y + dy; if (yy < 0 || yy >= H) continue;
+          for (let dx = -1; dx <= 1; dx++) {
+            const x2 = xx + dx; if (x2 < 0 || x2 >= W) continue;
+            const j = yy * W + x2;
+            sum += a0[j]; n++;
+            if (a0[j] === 255 && j !== i) {              // a solidly interior neighbour
+              bw++; br += d[j * 4]; bg += d[j * 4 + 1]; bb += d[j * 4 + 2];
+            }
+          }
+        }
+        const mean = sum / n;
+        if (mean < 255) {
+          d[i * 4 + 3] = Math.min(a0[i], mean);          // feather
+          if (bw && a0[i] < 250) {                       // and de-fringe the rim
+            d[i * 4] = (d[i * 4] + br / bw) / 2;
+            d[i * 4 + 1] = (d[i * 4 + 1] + bg / bw) / 2;
+            d[i * 4 + 2] = (d[i * 4 + 2] + bb / bw) / 2;
+          }
+        }
+      }
+    }
+    x.putImageData(img, 0, 0);
+    // every renderer in the game tests im.naturalWidth to know whether a sheet
+    // has arrived, and sizes its own scratch copies from it. A canvas has no
+    // such property, so it is given one and stays a drop-in for the image.
+    cv.naturalWidth = W; cv.naturalHeight = H;
+    out = cv;
+  } catch (e) { out = im; }                              // tainted canvas: ship it raw
+  SOFT_ART[key] = out;
+  return out;
+}
 let mediaAudioLoaded = false;
 function loadMedia() {
   if (mediaAudioLoaded || typeof AC === 'undefined' || !AC) return;

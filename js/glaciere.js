@@ -47,7 +47,7 @@ function glcPureAtlas(im) {
   return (GLC_PURE_CV = cv);
 }
 function glcImg() {
-  const im = typeof MEDIA_IMG !== 'undefined' ? MEDIA_IMG.glaciereParts : null;
+  const im = typeof MEDIA_IMG !== 'undefined' ? ((typeof softArt === 'function' && softArt('glaciereParts')) || MEDIA_IMG.glaciereParts) : null;
   if (im && GLC_PURE) { const pv = glcPureAtlas(im); if (pv) return pv; }
   return im;
 }

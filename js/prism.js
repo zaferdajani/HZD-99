@@ -51,7 +51,7 @@ const PRZ_FR = {
 const PRZ_REF_H = 118;
 
 function przImg() {
-  const im = (typeof MEDIA_IMG !== 'undefined') ? MEDIA_IMG.prismParts : null;
+  const im = (typeof MEDIA_IMG !== 'undefined') ? ((typeof softArt === 'function' && softArt('prismParts')) || MEDIA_IMG.prismParts) : null;
   return (im && im.naturalWidth) ? im : null;
 }
 

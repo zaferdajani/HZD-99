@@ -99,7 +99,10 @@ function bGlowOver(c, key, px, py, dim, sc) {
   c.restore();
 }
 
-function beastImg() { return typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.beastParts; }
+function beastImg() {
+  if (typeof MEDIA_IMG === 'undefined') return null;
+  return (typeof softArt === 'function' && softArt('beastParts')) || MEDIA_IMG.beastParts;
+}
 
 // ---------------------------------------------------------------------------
 // THE FRONT VIEW, built from the authored art itself. The sheet has no
