@@ -173,6 +173,7 @@ function tone(freq, dur, type, vol, slideTo, delay) {
   o.type = type || 'square';
   o.frequency.setValueAtTime(freq, t0);
   if (slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(28, slideTo), t0 + dur);
+  g.gain.value = vol || 0.07;
   g.gain.setValueAtTime(vol || 0.07, t0);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   o.connect(g).connect(AC.destination);
@@ -190,6 +191,7 @@ function hiss(dur, vol, delay) {
   const t0 = AC.currentTime + (delay || 0);
   const src = AC.createBufferSource(), g = AC.createGain();
   src.buffer = noiseBuf(dur);
+  g.gain.value = vol || 0.1;                       // see note below on delays
   g.gain.setValueAtTime(vol || 0.1, t0);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   src.connect(g).connect(AC.destination);
@@ -203,6 +205,7 @@ function whoosh(dur, f0, f1, vol, delay) {
   f.type = 'bandpass'; f.Q.value = 1.2;
   f.frequency.setValueAtTime(f0, t0);
   f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+  g.gain.value = vol;
   g.gain.setValueAtTime(vol, t0);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   src.connect(f).connect(g).connect(AC.destination);
@@ -236,6 +239,7 @@ function clawShear(f0, f1, dur, vol, delay, q) {
   f.type = 'bandpass'; f.Q.value = q || 7.5;
   f.frequency.setValueAtTime(f0, t0);
   f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+  g.gain.value = 0.0001;
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(vol, t0 + 0.004);   // instant, but not a click
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
@@ -448,6 +452,110 @@ function heroSfx(n) {
   }
   return false;   // everything else keeps the shared voice
 }
+// ---------------------------------------------------------------------------
+// THE LITTLE MELODIES. Every small cue in her world — jumping, landing,
+// dashing, picking something up, getting hurt — used to be a recorded voice
+// noise or a single beep. Recorded breaths made her sound like a person, and
+// single beeps sound like a prototype. What makes the sounds of a great
+// platformer feel COMPOSED rather than assembled is that they are all played by
+// the same instrument, in the same scale, so the whole game hums together.
+//
+// So there is one alphabet here and everything is spelled with it:
+//
+//   THE SCALE   C D E G A — a pentatonic, which has no wrong notes in it, and
+//               which sits inside the D minor the score is written in, so a cue
+//               never fights the music playing behind it.
+//   THE SHAPES  good things rise, bad things fall. A rising fourth is "yes"
+//               (jump), a rising fifth is "have it" (pick up), a falling minor
+//               third is "ouch" (hurt).
+//   THE VOICE   two slightly detuned square oscillators with a triangle an
+//               octave above — chip-bright, but the detune gives it warmth and
+//               keeps it from sounding like a 1980s test tone.
+//
+// Original melodies, not borrowed ones: the shapes are the common language of
+// the genre, the phrases are this game's own.
+// ---------------------------------------------------------------------------
+function blip(midi, dur, vol, delay, kind) {
+  if (!AC || MUTED) return;
+  const t0 = AC.currentTime + (delay || 0);
+  const f = mf(midi);
+  const g = AC.createGain();
+  // fast but not instant: 4 ms of attack is the difference between a note and
+  // a click, and a click is what a cheap game sounds like
+  g.gain.value = 0.0001;                           // a delayed note must not
+  g.gain.setValueAtTime(0.0001, t0);               // open at full gain first
+  g.gain.exponentialRampToValueAtTime(vol, t0 + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  g.connect(AC.destination);
+  const soft = kind === 'soft', bell = kind === 'bell';
+  const mk = (type, mult, lvl, cents) => {
+    const o = AC.createOscillator(), og = AC.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f * mult * Math.pow(2, (cents || 0) / 1200), t0);
+    og.gain.value = lvl;
+    o.connect(og).connect(g);
+    o.start(t0); o.stop(t0 + dur + 0.02);
+  };
+  if (soft) { mk('sine', 1, 0.9); mk('triangle', 2, 0.22, 4); }
+  else if (bell) { mk('triangle', 1, 0.8); mk('sine', 2, 0.45); mk('sine', 4, 0.12); }
+  else { mk('square', 1, 0.55, -6); mk('square', 1, 0.4, 7); mk('triangle', 2, 0.3); }
+}
+// a phrase: [midi, startMs, lengthMs] ...
+function motif(notes, vol, kind, spread) {
+  const k = spread == null ? 1 : spread;
+  for (const n of notes) blip(n[0], n[2] / 1000, vol * (n[3] || 1), n[1] * k / 1000, kind);
+}
+// THE PHRASES. Written on the scale above, two to five notes each, and short
+// enough to fire again before the last one has finished — which is what
+// actually happens when a player is jumping across a room.
+//   C5 72  D5 74  E5 76  G5 79  A5 81  C6 84  D6 86  E6 88  G6 91  A6 93
+const CUE = {
+  // UP A FOURTH: the "yes" of the whole game, and the one she does most
+  jump: () => {
+    motif([[79, 0, 90], [84, 48, 130]], 0.075);
+    whoosh(0.07, 320, 900, 0.022);
+  },
+  // the second jump is the spiral, so it is the same idea with a flourish on
+  // top — three notes, higher, faster, and a servo tick under the turn
+  djump: () => {
+    motif([[84, 0, 80], [88, 42, 80], [91, 84, 150]], 0.062);
+    chink(0.012, 0.02);
+  },
+  // coming down: the phrase inverts and settles, with the weight underneath
+  land: () => {
+    motif([[76, 0, 80], [72, 55, 150]], 0.05);
+    tone(120, 0.09, 'square', 0.028, 74);
+    hiss(0.05, 0.03);
+  },
+  // a run up the scale, as fast as her feet
+  dash: () => {
+    motif([[74, 0, 70], [76, 30, 70], [79, 60, 70], [81, 90, 130]], 0.058);
+    whoosh(0.15, 1500, 3800, 0.03);
+  },
+  // UP A FIFTH, on a bell: bigger interval than the jump so it can never be
+  // mistaken for one, and the brightest voice in the set so it cuts through a
+  // fight — you always hear that you got the thing
+  pick: () => motif([[81, 0, 90], [88, 55, 200]], 0.085, 'bell'),
+  // a soft climb; healing should feel like being put back together
+  heal: () => motif([[72, 0, 140], [76, 70, 140], [79, 140, 140], [84, 210, 320]], 0.065, 'soft'),
+  // the reward fanfare: the same climb, but it does not stop where you expect,
+  // and the last note is held and answered an octave up
+  chest: () => {
+    motif([[72, 0, 120], [76, 70, 120], [79, 140, 120], [81, 210, 120], [84, 280, 380]], 0.09);
+    motif([[91, 320, 300, 0.5]], 0.09, 'bell');
+  },
+  // DOWN A MINOR THIRD and then away: comic rather than grim — she is a robot
+  // cat taking a knock, not a soldier dying
+  hurt: () => {
+    motif([[76, 0, 90], [72, 60, 90], [69, 120, 200]], 0.07);
+    tone(150, 0.2, 'sawtooth', 0.05, 62, 0.03);
+  },
+  // something small comes apart: the scale falls over and pops
+  edie: () => {
+    motif([[81, 0, 70], [79, 34, 70], [76, 68, 70], [72, 102, 170]], 0.058);
+    hiss(0.14, 0.04, 0.07);
+  },
+};
 // ---------- sound effects ----------
 // ---------------------------------------------------------------------------
 // THE VOICE LAYER. NYA-9 and the guardians now have recorded voices, and they
@@ -460,8 +568,6 @@ function heroSfx(n) {
 // Hero-world sounds never reach this: heroSfx returns above.
 // ---------------------------------------------------------------------------
 const VOX = {
-  land: ['vox_land', 0.42], dash: ['vox_dash', 0.4],
-  hurt: ['vox_hurt', 0.6], djump: ['vox_djump', 0.42],
   purr: ['vox_purr', 0.5], win: ['vox_win', 0.5],
   roar_beast: ['vox_roar_beast', 0.75], roar_eagle: ['vox_roar_eagle', 0.75],
   roar_glc: ['vox_roar_glc', 0.75], roar_drg: ['vox_roar_drg', 0.8],
@@ -479,20 +585,17 @@ function sfx(n) {
     clawSlash((typeof player !== 'undefined' && player && player.combo) | 0);
     return;
   }
+  // HER LITTLE MELODIES — see the alphabet above. These come before any
+  // sample, because the whole point is that they are all the same instrument.
+  if (CUE[n]) { CUE[n](); return; }
   const v = VOX[n];
   if (v && playBuf(v[0], v[1], 0.97 + Math.random() * 0.06)) return;
   // recorded samples first (loaded from the CC0 library), synth fallback below
   if (n === 'hit' && playBuf(Math.random() < 0.5 ? 'hit1' : 'hit2', 0.45, 0.9 + Math.random() * 0.2)) return;
   if (n === 'bosshit' && playBuf('metal', 0.5, 0.85 + Math.random() * 0.15)) return;
   if (n === 'boom' && playBuf('explosion', 0.55)) return;
-  if (n === 'edie' && playBuf('glass', 0.45, 0.9 + Math.random() * 0.25)) return;
   if (n === 'shoot' && playBuf('laser', 0.28)) return;
   if (n === 'cast' && playBuf('zap', 0.4)) return;
-  if (n === 'jump' && playBuf('sfx_jump', 0.34, 0.97 + Math.random() * 0.07)) return;
-  if (n === 'pick' && playBuf('sfx_pick', 0.32, 0.96 + Math.random() * 0.09)) return;
-  if (n === 'edie' && playBuf('sfx_edie', 0.4, 0.94 + Math.random() * 0.12)) return;
-  if (n === 'chest' && playBuf('powerup', 0.4)) return;
-  if (n === 'hurt' && playBuf('low', 0.5)) return;
   switch (n) {
     case 'jump': tone(230, 0.13, 'square', 0.065, 470); whoosh(0.08, 300, 900, 0.03); break;
     case 'djump': tone(340, 0.13, 'square', 0.05, 700); break;

@@ -79,11 +79,8 @@ const MEDIA_SRC = {
     hit2: 'assets/sfx/hit_02.ogg',
     metal: 'assets/sfx/metal_05.ogg',
     explosion: 'assets/sfx/explosion.ogg',
-    glass: 'assets/sfx/glass_01.ogg',
     laser: 'assets/sfx/laser2.mp3',
     zap: 'assets/sfx/zapTwoTone.mp3',
-    powerup: 'assets/sfx/powerUp1.mp3',
-    low: 'assets/sfx/lowDown.mp3',
     // NPC proximity voices: drop a loopable file at any of these paths and
     // it replaces that character's synthesized hum automatically (a missing
     // file 404s silently and the synth voice keeps singing instead)
@@ -96,11 +93,7 @@ const MEDIA_SRC = {
     // NYA-9's voice and the guardians' roars. Short, mono, decoded once — about
     // 2.5 MB of PCM for the whole cast, against the 62 MB the music used to cost
     // before it was moved to streaming.
-    vox_land: 'assets/sfx/vox/land.ogg',
-    vox_dash: 'assets/sfx/vox/dash.ogg',
     vox_win: 'assets/sfx/vox/win.ogg',
-    vox_hurt: 'assets/sfx/vox/hurt.ogg',
-    vox_djump: 'assets/sfx/vox/djump.ogg',
     vox_purr: 'assets/sfx/vox/purr.ogg',
     vox_roar_beast: 'assets/sfx/vox/roar_beast.ogg',
     vox_roar_eagle: 'assets/sfx/vox/roar_eagle.ogg',
@@ -108,14 +101,10 @@ const MEDIA_SRC = {
     vox_roar_drg: 'assets/sfx/vox/roar_drg.ogg',
     vox_roar_prism: 'assets/sfx/vox/roar_prism.ogg',
     vox_roar_mother: 'assets/sfx/vox/roar_mother.ogg',
-    // The three cues the voice model could not make: it cannot produce a short
-    // mechanical blip at any length, and three synth beeps in a game that has
-    // recorded audio everywhere else is exactly where the seam shows. These are
-    // Kenney's CC0 Digital Audio pack (see kenney/LICENSE.txt) — public domain,
-    // no attribution required, and the right texture for a robot anyway.
-    sfx_jump: 'assets/sfx/kenney/sfx_jump.ogg',
-    sfx_pick: 'assets/sfx/kenney/sfx_pick.ogg',
-    sfx_edie: 'assets/sfx/kenney/sfx_edie.ogg',
+    // Impacts stay recorded — a hit has to sound like it hit something. Her
+    // small cues do not: jumping, landing, dashing, picking up, getting hurt
+    // and killing something are played, not sampled (see CUE in audio.js), so
+    // the samples they used to use are no longer fetched or decoded here.
   },
 };
 if (typeof window !== 'undefined' && window.EMBEDDED_MEDIA) {
