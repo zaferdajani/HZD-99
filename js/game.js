@@ -5492,8 +5492,29 @@ let lastT = 0;
 // a worse-feeling game.
 // ---------------------------------------------------------------------------
 let frameMs = 16.7, richBG = true, richK = 1, richHold = 0;
+// ---------------------------------------------------------------------------
+// A SLOW MACHINE MUST NOT BECOME A SLOW GAME. The loop simulated exactly one
+// step per frame, of at most a thirtieth of a second — and that ceiling is
+// necessary, because a single huge step (a tab left in the background, a stall)
+// would carry the player straight through a wall. But it also meant that a
+// machine drawing 20 frames a second only ever advanced 20 thirtieths of a
+// second per second: the entire game ran in slow motion, and it was worst
+// exactly where it hurts most, on the weaker device. Measured before this fix,
+// she crossed a room at 331 px/s above 30 fps, 265 at 24 fps, 220 at 20 fps and
+// 163 at 15 — half speed.
+//
+// The step size is still capped. What changed is that a long frame now runs
+// SEVERAL of those steps instead of one, so wall-clock speed is the same
+// whatever the frame rate. The catch-up is bounded: at most a tenth of a second
+// of simulation per frame, so a tab that was hidden for a minute resumes where
+// it was rather than fast-forwarding through it, and a machine too slow to
+// afford the catch-up degrades gently instead of spiralling.
+// ---------------------------------------------------------------------------
+const SIM_STEP = 1 / 30;      // the largest step collision can be trusted with
+const SIM_MAX = 0.1;          // and the most simulation any single frame may do
 function mainLoop(tms) {
-  const dt = Math.min((tms - lastT) / 1000, 1 / 30);
+  const raw = (tms - lastT) / 1000;
+  const dt = Math.min(raw, SIM_STEP);
   if (lastT) {
     frameMs += (Math.min(tms - lastT, 100) - frameMs) * 0.03;
     // THE DECISION HAS TO HOLD. The extras cost frames, and the frame rate is
@@ -5515,7 +5536,10 @@ function mainLoop(tms) {
   }
   lastT = tms;
   if (typeof pollGamepad === 'function') pollGamepad();
-  update(dt);
+  // one step on a healthy frame; two or three when the machine is struggling
+  let acc = Math.min(raw, SIM_MAX);
+  if (!(acc > 0)) acc = dt;
+  while (acc > 1e-4) { const st = Math.min(acc, SIM_STEP); update(st); acc -= st; }
   draw(tms);
   drawTouchUI();
   clearP();
