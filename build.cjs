@@ -66,6 +66,17 @@ try {
     if (VID_EXT.test(f)) vidFiles[f.replace(VID_EXT, '')] = 'assets/video/' + f;
   }
 } catch (e) { /* no video directory yet */ }
+// THE VOICE MANIFEST, on the same principle. Each file is <npc><line>.ogg —
+// servo0, sage2 — so a character gains a spoken line by dropping the file in
+// and rebuilding, and any line that was never recorded simply keeps the
+// synthesized voice it always had.
+const VOX_EXT = /\.(ogg|mp3|m4a|wav)$/i;
+const voxFiles = {};
+try {
+  for (const f of fs.readdirSync('assets/vox')) {
+    if (VOX_EXT.test(f)) voxFiles[f.replace(VOX_EXT, '')] = 'assets/vox/' + f;
+  }
+} catch (e) { /* no voice directory yet */ }
 const html = fs.readFileSync('dev.html', 'utf8');
 const buildId = Date.now().toString(36);
 // the loading screen paints while the megabytes below it still stream in
@@ -86,7 +97,8 @@ const emit = (fname, lock) => {
     '<script>window.BUILD_ID=' + JSON.stringify(buildId) +
     ';window.GAME_LOCK=' + JSON.stringify(lock) +
     ';window.MUS_FILES=' + JSON.stringify(musFiles) +
-    ';window.VID_FILES=' + JSON.stringify(vidFiles) + '</script>\n' +
+    ';window.VID_FILES=' + JSON.stringify(vidFiles) +
+    ';window.VOX_FILES=' + JSON.stringify(voxFiles) + '</script>\n' +
     '<script>\n' + files.join('\n') + '\n</script>\n</body>');
   fs.writeFileSync(fname, out);
   console.log(fname + ' built (' + lock + '):', (fs.statSync(fname).size / 1048576).toFixed(2) + 'MB');

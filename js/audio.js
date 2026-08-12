@@ -483,6 +483,38 @@ function sfxVoice(id) {
   for (let i = 0; i < 3; i++)
     tone(v[0] * (0.9 + Math.random() * 0.25), 0.07, v[1], 0.04, null, i * 0.07);
 }
+// ---------------------------------------------------------------------------
+// THE MACHINE FOLK, SPEAKING. Their lines are recorded per character and per
+// line — servo0, sage2 — and STREAMED rather than decoded: eighteen lines of
+// speech held as raw PCM would cost more memory than every sound effect in the
+// game put together, for audio that plays once and is never heard again in that
+// room. A line with no recording, or a language the cast was never recorded in,
+// falls back to the character's synthesized voice, which is what every line
+// used to be.
+// ---------------------------------------------------------------------------
+let NPCNODE = null;
+function npcSay(id, idx) {
+  const files = (typeof window !== 'undefined' && window.VOX_FILES) || null;
+  const src = files && LANG === 'en' && files[id + idx];
+  if (!src || MUTED) { sfxVoice(id); return; }
+  try {
+    if (NPCNODE) { NPCNODE.pause(); NPCNODE.src = ''; }
+  } catch (e) {}
+  try {
+    const el = new Audio();
+    el.src = src; el.volume = 0.85; el.preload = 'auto';
+    NPCNODE = el;
+    const pr = el.play();
+    // autoplay refused, or the file is not really there: the character still
+    // has to make a sound, so fall back rather than opening a silent mouth
+    if (pr && pr.catch) pr.catch(() => sfxVoice(id));
+    el.addEventListener('error', () => sfxVoice(id), { once: true });
+  } catch (e) { sfxVoice(id); }
+}
+function npcHush() {
+  try { if (NPCNODE) { NPCNODE.pause(); NPCNODE.src = ''; } } catch (e) {}
+  NPCNODE = null;
+}
 
 // ==================================================================
 // ORIGINAL CINEMATIC OST — 16th-note sequencer through a hall-reverb

@@ -431,7 +431,7 @@ function doInteract(s) {
       onEnd: s.extra === 'ratchet' ? () => { G.state = 'SHOP'; G.shopIdx = 0; }
         : s.extra === 'mono' ? () => trialOpen() : null,
     };
-    G.state = 'DIALOG'; sfxVoice(s.extra);
+    G.state = 'DIALOG'; npcSay(s.extra, 0);
   } else if (s.type === 'term') {
     G.dialog = { name: '…', lines: t('t' + s.extra).slice(), i: 0, onEnd: null, rs: RS_TERM[s.extra] };
     G.state = 'DIALOG'; sfx('ui');
@@ -646,8 +646,9 @@ function update(dt) {
       G.dialog.i++;
       if (G.dialog.i >= G.dialog.lines.length) {
         const cb = G.dialog.onEnd; G.dialog = null; G.state = 'PLAY';
+        npcHush();                      // cut the line short with the box
         if (cb) cb();
-      } else if (G.dialog.npc) sfxVoice(G.dialog.npc);
+      } else if (G.dialog.npc) npcSay(G.dialog.npc, G.dialog.i);
       else sfx('ui');
     }
   }
