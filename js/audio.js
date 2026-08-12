@@ -742,40 +742,83 @@ function npcSay(id, idx) {
 // If the audio engine is not running the line plays raw instead: routing it
 // through a suspended graph would replace a slightly wrong voice with silence.
 // ---------------------------------------------------------------------------
+// Per character: how fast the chassis oscillator runs, how much of it to mix
+// in, the band its little speaker can reproduce, the length of the tube the
+// voice comes out of, and the size of the machine (rate shifts pitch, so a
+// courier is small and bright and the sage is big and slow).
 const NPC_CHASSIS = {
-  servo:   { ring: 47, mix: 0.30, lo: 240, hi: 5200, comb: 0.0075 },
-  ratchet: { ring: 31, mix: 0.34, lo: 190, hi: 4200, comb: 0.011 },
-  mono:    { ring: 62, mix: 0.26, lo: 300, hi: 6500, comb: 0.005 },
-  sage:    { ring: 23, mix: 0.22, lo: 170, hi: 5600, comb: 0.014 },
-  patch:   { ring: 88, mix: 0.32, lo: 260, hi: 6000, comb: 0.004 },
-  lumen:   { ring: 71, mix: 0.20, lo: 320, hi: 7000, comb: 0.006 },
+  servo:   { ring: 47, mix: 0.34, lo: 240, hi: 5200, comb: 0.0075, rate: 1.06 },
+  ratchet: { ring: 31, mix: 0.38, lo: 190, hi: 4200, comb: 0.011,  rate: 0.93 },
+  mono:    { ring: 62, mix: 0.30, lo: 300, hi: 6500, comb: 0.005,  rate: 1.11 },
+  sage:    { ring: 23, mix: 0.26, lo: 170, hi: 5600, comb: 0.014,  rate: 0.88 },
+  patch:   { ring: 88, mix: 0.36, lo: 260, hi: 6000, comb: 0.004,  rate: 1.04 },
+  lumen:   { ring: 71, mix: 0.24, lo: 360, hi: 7000, comb: 0.0034, rate: 1.0 },
 };
-function npcVoiceChain(el, id) {
-  if (!AC || AC.state !== 'running') return false;
+// The chain itself, built from any source node in any context — which is what
+// lets it be rendered offline and MEASURED rather than trusted. The first
+// version of this was trusted, and it turned out to be doing almost nothing
+// except pushing the sum to a peak of 1.28, which is distortion.
+//
+// Gain staging is the whole job here. Three parallel paths summed at full
+// level are louder than the voice that fed them and clip the output; and the
+// ring modulator RE-CREATES content outside the band the filters just cleared,
+// because multiplying 240 Hz by 47 Hz puts energy at 193 Hz. So the band limit
+// is applied again AFTER the effects, and the sum is trimmed back to where it
+// started.
+function npcChainBuild(ctx, src, id) {
   const V = NPC_CHASSIS[id] || NPC_CHASSIS.servo;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = V.lo; hp.Q.value = 0.7;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = V.hi; lp.Q.value = 0.7;
+  src.connect(hp); hp.connect(lp);
+  const sum = ctx.createGain(); sum.gain.value = 1;
+  // the voice itself, still the loudest thing in the mix so the words win
+  const dry = ctx.createGain(); dry.gain.value = 1 - V.mix * 0.6;
+  lp.connect(dry); dry.connect(sum);
+  // the chassis oscillator, multiplied INTO the voice
+  const ring = ctx.createGain(); ring.gain.value = 0;
+  const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = V.ring;
+  const depth = ctx.createGain(); depth.gain.value = V.mix;
+  osc.connect(depth); depth.connect(ring.gain);
+  lp.connect(ring); ring.connect(sum);
+  // the tube it comes out of — quiet, or it smears the consonants
+  const dl = ctx.createDelay(0.05); dl.delayTime.value = V.comb;
+  const fb = ctx.createGain(); fb.gain.value = 0.25;
+  const cw = ctx.createGain(); cw.gain.value = 0.22;
+  lp.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(cw); cw.connect(sum);
+  // Clear the band again, because the ring modulator puts energy back OUTSIDE
+  // it: multiplying a 260 Hz vowel by an 88 Hz carrier lands a tone at 172 Hz,
+  // under the speaker this voice is supposed to be coming out of. One filter
+  // stage was not enough to catch it — a 12 dB/octave slope still passes most
+  // of something half an octave down, which is why the brightest chassis was
+  // measured GAINING low end. Two stages, and it goes.
+  const hp2 = ctx.createBiquadFilter(); hp2.type = 'highpass'; hp2.frequency.value = V.lo * 0.9;
+  const hp3 = ctx.createBiquadFilter(); hp3.type = 'highpass'; hp3.frequency.value = V.lo * 0.9;
+  const lp2 = ctx.createBiquadFilter(); lp2.type = 'lowpass'; lp2.frequency.value = V.hi;
+  const trim = ctx.createGain(); trim.gain.value = 0.7;
+  sum.connect(hp2); hp2.connect(hp3); hp3.connect(lp2); lp2.connect(trim);
+  try { osc.start(); } catch (e) {}
+  return { out: trim, osc };
+}
+// ---------------------------------------------------------------------------
+// THE MACHINE IN THEIR VOICES. The lines were recorded straight and played
+// straight, so the machine folk sounded like people in a booth — the one place
+// in the game where the illusion admitted what it was made of.
+//
+// If the audio engine is not running the line plays raw instead: routing it
+// through a suspended graph would replace a slightly wrong voice with silence.
+// ---------------------------------------------------------------------------
+function npcVoiceChain(el, id) {
+  const V = NPC_CHASSIS[id] || NPC_CHASSIS.servo;
+  // size of the machine, which the browser will give us for free as long as it
+  // is told not to "helpfully" correct the pitch back
+  try { el.preservesPitch = false; el.mozPreservesPitch = false; el.webkitPreservesPitch = false; } catch (e) {}
+  try { el.playbackRate = V.rate; } catch (e) {}
+  if (!AC || AC.state !== 'running') return false;
   try {
     const src = AC.createMediaElementSource(el);
-    const hp = AC.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = V.lo;
-    const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = V.hi;
-    const out = AC.createGain(); out.gain.value = 1;
-    src.connect(hp); hp.connect(lp);
-    // dry path, so the words stay words
-    const dry = AC.createGain(); dry.gain.value = 1 - V.mix * 0.5;
-    lp.connect(dry); dry.connect(out);
-    // ring-modulated path: the voice multiplied by a low carrier
-    const ring = AC.createGain(); ring.gain.value = 0;          // driven, not set
-    const osc = AC.createOscillator(); osc.type = 'sine'; osc.frequency.value = V.ring;
-    const depth = AC.createGain(); depth.gain.value = V.mix;
-    osc.connect(depth); depth.connect(ring.gain);
-    lp.connect(ring); ring.connect(out);
-    osc.start();
-    // a short comb: the same signal a few milliseconds late, which is what a
-    // chest cavity does to a speaker
-    const dl = AC.createDelay(0.05); dl.delayTime.value = V.comb;
-    const fb = AC.createGain(); fb.gain.value = 0.28;
-    lp.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(out);
-    out.connect(AC.destination);
-    el.addEventListener('ended', () => { try { osc.stop(); } catch (e) {} }, { once: true });
+    const ch = npcChainBuild(AC, src, id);
+    ch.out.connect(AC.destination);
+    el.addEventListener('ended', () => { try { ch.osc.stop(); } catch (e) {} }, { once: true });
     return true;
   } catch (e) { return false; }   // already routed, or no graph: play it raw
 }
