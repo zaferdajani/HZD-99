@@ -210,7 +210,7 @@ function tStateKind() {
   if (s === 'TCFG') return 'tcfg';
   if (s === 'MAP') return 'map';
   if (s === 'OFFER') return 'offer';
-  if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'RIDDLE' || s === 'SKILLS' || s === 'TRIAL') return 'menu';
+  if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'SKILLS' || s === 'TRIAL') return 'menu';
   return 'tap';
 }
 // layout-editor chrome: fixed controls that are not part of the layout
@@ -261,9 +261,6 @@ function tapMenu(x, y) {
   } else if (st === 'SHOP') {
     const i = Math.round((y - 130) / 46);
     if (i >= 0 && i < SHOP.length && Math.abs(y - (130 + i * 46)) <= 23) { G.shopIdx = i; tPress('VOK'); }
-  } else if (st === 'RIDDLE') {
-    const i = Math.round((y - 300) / 44);
-    if (G.riddle && i >= 0 && i < G.riddle.def.choices.length && Math.abs(y - (300 + i * 44)) <= 22) { G.riddle.sel = i; tPress('VOK'); }
   } else if (st === 'SKILLS') {
     for (let i = 0; i < SKILLS.length; i++) {
       const px2 = 330 + (i % 2) * 300, py2 = 150 + Math.floor(i / 2) * 105;

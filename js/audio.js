@@ -713,13 +713,71 @@ function npcSay(id, idx) {
   try {
     const el = new Audio();
     el.src = src; el.volume = 0.85; el.preload = 'auto';
+    el.crossOrigin = 'anonymous';
     NPCNODE = el;
+    npcVoiceChain(el, id);
     const pr = el.play();
     // autoplay refused, or the file is not really there: the character still
     // has to make a sound, so fall back rather than opening a silent mouth
     if (pr && pr.catch) pr.catch(() => sfxVoice(id));
     el.addEventListener('error', () => sfxVoice(id), { once: true });
   } catch (e) { sfxVoice(id); }
+}
+// ---------------------------------------------------------------------------
+// THE MACHINE IN THEIR VOICES. The lines were recorded straight and played
+// straight, so the machine folk sounded like people in a booth — the one place
+// in the game where the illusion admitted what it was made of. Each line now
+// runs through a small chain that puts them back inside a chassis:
+//
+//   a RING MODULATOR at a few dozen hertz, which is what has made a voice
+//     sound synthetic since the 1960s, mixed under the dry voice rather than
+//     over it so the words stay easy to understand;
+//   a COMB DELAY of a few milliseconds, the sound of a voice in a metal tube;
+//   a BAND LIMIT at 210 Hz and 6.5 kHz, because it is coming out of a small
+//     speaker in somebody's chest, not a studio monitor.
+//
+// Each character gets its own ring frequency and band, so a servo and a sage
+// are still two different machines rather than one effect applied twice.
+//
+// If the audio engine is not running the line plays raw instead: routing it
+// through a suspended graph would replace a slightly wrong voice with silence.
+// ---------------------------------------------------------------------------
+const NPC_CHASSIS = {
+  servo:   { ring: 47, mix: 0.30, lo: 240, hi: 5200, comb: 0.0075 },
+  ratchet: { ring: 31, mix: 0.34, lo: 190, hi: 4200, comb: 0.011 },
+  mono:    { ring: 62, mix: 0.26, lo: 300, hi: 6500, comb: 0.005 },
+  sage:    { ring: 23, mix: 0.22, lo: 170, hi: 5600, comb: 0.014 },
+  patch:   { ring: 88, mix: 0.32, lo: 260, hi: 6000, comb: 0.004 },
+  lumen:   { ring: 71, mix: 0.20, lo: 320, hi: 7000, comb: 0.006 },
+};
+function npcVoiceChain(el, id) {
+  if (!AC || AC.state !== 'running') return false;
+  const V = NPC_CHASSIS[id] || NPC_CHASSIS.servo;
+  try {
+    const src = AC.createMediaElementSource(el);
+    const hp = AC.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = V.lo;
+    const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = V.hi;
+    const out = AC.createGain(); out.gain.value = 1;
+    src.connect(hp); hp.connect(lp);
+    // dry path, so the words stay words
+    const dry = AC.createGain(); dry.gain.value = 1 - V.mix * 0.5;
+    lp.connect(dry); dry.connect(out);
+    // ring-modulated path: the voice multiplied by a low carrier
+    const ring = AC.createGain(); ring.gain.value = 0;          // driven, not set
+    const osc = AC.createOscillator(); osc.type = 'sine'; osc.frequency.value = V.ring;
+    const depth = AC.createGain(); depth.gain.value = V.mix;
+    osc.connect(depth); depth.connect(ring.gain);
+    lp.connect(ring); ring.connect(out);
+    osc.start();
+    // a short comb: the same signal a few milliseconds late, which is what a
+    // chest cavity does to a speaker
+    const dl = AC.createDelay(0.05); dl.delayTime.value = V.comb;
+    const fb = AC.createGain(); fb.gain.value = 0.28;
+    lp.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(out);
+    out.connect(AC.destination);
+    el.addEventListener('ended', () => { try { osc.stop(); } catch (e) {} }, { once: true });
+    return true;
+  } catch (e) { return false; }   // already routed, or no graph: play it raw
 }
 function npcHush() {
   try { if (NPCNODE) { NPCNODE.pause(); NPCNODE.src = ''; } } catch (e) {}

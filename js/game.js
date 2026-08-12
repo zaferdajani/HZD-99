@@ -264,7 +264,7 @@ function loadRoom(id) {
     } else if (kind === 'mod') {
       if (!G.save.abil[extra]) spawnStatic('mod', tx, ty, extra);
     } else if (kind === 'riddle') {
-      spawnStatic('riddle', tx, ty, extra, 'rd_' + RIDDLES[extra].id);
+      spawnStatic('riddle', tx, ty, extra, nodeKey(extra));
     } else if (kind === 'secret') {
       if (!G.save.flags['sr_' + extra]) spawnStatic('secret', tx, ty, extra);
     } else {
@@ -503,8 +503,8 @@ function doInteract(s) {
     G.statics.splice(G.statics.indexOf(s), 1);
     grantMod(s.extra);
   } else if (s.type === 'riddle') {
-    G.riddle = { def: RIDDLES[s.extra], sel: 0, st: s };
-    G.state = 'RIDDLE'; sfx('ui');
+    // a MIND NODE is one interactive puzzle now — see NODES in trials.js
+    triStartNode(s.extra | 0, s);
   } else if (s.type === 'secret') {
     G.save.flags['sr_' + s.extra] = 1;
     G.statics.splice(G.statics.indexOf(s), 1);
@@ -709,7 +709,6 @@ function update(dt) {
   }
   else if (G.state === 'CREST') updateCrest();
   else if (G.state === 'SHOP') updateShop();
-  else if (G.state === 'RIDDLE') updateRiddle();
   else if (G.state === 'SKILLS') updateSkills();
   else if (G.state === 'RELICS') updateRelics();
   else if (G.state === 'TRIAL') updateTrial(dt);
@@ -898,27 +897,6 @@ function updateShop() {
 }
 function shopSold(it) { return it.type === 'crest' ? G.save.crests.indexOf(it.id) >= 0 : !!G.save.shop[it.id]; }
 function effSlots() { return G.save.slots + (G.save.skills && G.save.skills.indexOf('mind') >= 0 ? 1 : 0); }
-function updateRiddle() {
-  const r = G.riddle;
-  if (!r || inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
-  const n = r.def.choices.length;
-  if (inP('DOWN')) { r.sel = (r.sel + 1) % n; sfx('ui'); }
-  if (inP('UP')) { r.sel = (r.sel + n - 1) % n; sfx('ui'); }
-  if (inP('OK')) {
-    if (r.sel === r.def.correct) {
-      G.save.flags['rd_' + r.def.id] = 1;
-      G.save.iq += r.def.iq; iqNudge();
-      r.st.opened = true;
-      sfx('win'); G.toast(t('rd_reward') + '  +' + r.def.iq + ' ' + t('sk_iq'));
-      burst(r.st.x + 13, r.st.y + 12, 24, '#b48cff', 260, 0.8, 100, 4, true);
-      if (RIDDLES.every(rd => G.save.flags['rd_' + rd.id])) G.grantRelic('sigil2');
-      persist();
-    } else {
-      sfx('no'); cam.shake = 6; G.toast(t('rd_wrong'));
-    }
-    G.state = 'PLAY';
-  }
-}
 function updateSkills() {
   if (inP('SKILL') || inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
   const n = SKILLS.length;
@@ -933,18 +911,6 @@ function updateSkills() {
     sfx('win'); persist();
     showItem(t('sk_' + sk.id), t('sk_' + sk.id + 'd'));
   }
-}
-function drawRiddle() {
-  const r = G.riddle;
-  dimPanel(150, 96, 660, 366);
-  ftxt(t('rd_title'), 480, 128, 22, '#b48cff', 'center', '#b48cff');
-  wrapText(r.def.q[LANG] || r.def.q.en, 560, 19).forEach((ln, i) => ftxt(ln, 480, 178 + i * 26, 19, '#eef3fa', 'center', null, '600'));
-  r.def.choices.forEach((ch, i) => {
-    const sel = i === r.sel, y = 300 + i * 44;
-    if (sel) { c.fillStyle = 'rgba(180,140,255,0.12)'; rr(c, 220, y - 18, 520, 36, 8); c.fill(); }
-    ftxt((sel ? '▸ ' : '') + (ch[LANG] || ch.en), 480, y, 17, sel ? '#eef3fa' : '#8aa2b5');
-  });
-  ftxt('+' + r.def.iq + ' ' + t('sk_iq'), 480, 442, 14, '#b48cff');
 }
 function drawSkills() {
   c.fillStyle = 'rgba(4,7,12,0.88)'; c.fillRect(0, 0, 960, 540);
@@ -4415,8 +4381,6 @@ function draw(tms) {
     drawCrest();
   } else if (st === 'SHOP') {
     drawShop();
-  } else if (st === 'RIDDLE' && G.riddle) {
-    drawRiddle();
   } else if (st === 'SKILLS') {
     drawSkills();
   } else if (st === 'RELICS') {

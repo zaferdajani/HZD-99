@@ -24,6 +24,66 @@ function triStart(mode, kind) {
   triStartGame(mode === 'full' ? TRI.order[0] : kind);
 }
 // ===========================================================================
+// A MIND NODE IS ONE PUZZLE, NOT A RIDDLE.
+//
+// These used to be word riddles with three written answers — "I carry a
+// thousand keys yet open no gate" — which is a vocabulary test wearing a
+// puzzle's clothes. A child who cannot read English fluently cannot even
+// attempt it, and the wrong answers are traps rather than alternatives. It is
+// also the one part of the game that could not be translated honestly: a
+// riddle rests on a pun, and a pun does not survive being carried into
+// another language.
+//
+// A node now hands the player ONE question from the same three games the
+// Trials use — remember the lights, read the cubes, weigh the objects — and
+// every one of them is understood by looking at it. Nothing to read, nothing
+// to translate, and nothing that rewards guessing.
+//
+// The eight nodes in the world are laid out from easiest to hardest in the
+// order a player meets them, and each starts with the game at the level it
+// needs, so the first one anybody finds teaches how these work.
+// ===========================================================================
+const NODES = [
+  { game: 'mem', level: 1, iq: 10 },   // three lights, in order
+  { game: 'vis', level: 1, iq: 10 },   // count the cubes
+  { game: 'log', level: 1, iq: 10 },   // one balance, two objects
+  { game: 'mem', level: 3, iq: 10 },
+  { game: 'vis', level: 3, iq: 10 },
+  { game: 'log', level: 4, iq: 10 },
+  { game: 'mem', level: 5, iq: 15 },
+  { game: 'log', level: 7, iq: 15 },   // the deepest one, in the cat's chamber
+];
+function nodeKey(i) { return 'rd_n' + i; }
+function triStartNode(i, st) {
+  const n = NODES[i] || NODES[0];
+  TRI.mode = 'node'; TRI.results = []; TRI.gi = 0;
+  TRI.node = { i, st, iq: n.iq };
+  TRI.t = 999; TRI.level = n.level; TRI.streak = 0; TRI.score = 0;
+  TRI.game = n.game; TRI.fb = 0;
+  triGen();
+  TRI.st = 'pre'; TRI.preT = 1.1;
+  G.state = 'TRIAL'; sfx('ui');
+}
+// one answer, then straight back to the room — right or wrong
+function triNodeAnswer(ok) {
+  const nd = TRI.node;
+  TRI.node = null; TRI.mode = 'full';
+  G.state = 'PLAY';
+  if (!nd) return;
+  if (!ok) { sfx('no'); cam.shake = 6; G.toast(t('rd_wrong')); return; }
+  G.save.flags[nodeKey(nd.i)] = 1;
+  G.save.iq += nd.iq;
+  if (typeof iqNudge === 'function') iqNudge();
+  if (nd.st) nd.st.opened = true;
+  sfx('win');
+  G.toast(t('rd_reward') + '  +' + nd.iq + ' ' + t('sk_iq'));
+  burst(nd.st ? nd.st.x + 13 : 480, nd.st ? nd.st.y + 12 : 270, 24, '#b48cff', 260, 0.8, 100, 4, true);
+  let all = true;
+  for (let i = 0; i < NODES.length; i++) if (!G.save.flags[nodeKey(i)]) all = false;
+  if (all) G.grantRelic('sigil2');
+  persist();
+}
+// ===========================================================================
 // THE SCALES — a deduction, not a lookup.
 //
 // The old version showed one balance and asked which PAN was heavier, which a
@@ -185,6 +245,7 @@ function triChoices(ans) {
 }
 function triAnswer(ok) {
   TRI.fb = 0.4; TRI.fbGood = ok;
+  if (TRI.mode === 'node') { triNodeAnswer(ok); return; }
   if (ok) {
     TRI.score += 8 + TRI.level * 4 + TRI.streak * 2;
     TRI.level++; TRI.streak++;
@@ -240,9 +301,11 @@ function updateTrial(dt) {
   } else if (TRI.st === 'result') {
     if (inP('OK') || inP('BACK')) { G.state = 'PLAY'; sfx('ui'); }
   } else if (TRI.st === 'play') {
-    TRI.t -= dt;
-    if (TRI.t <= 0) { triEndGame(); return; }
-    if (inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
+    if (TRI.mode !== 'node') {
+      TRI.t -= dt;
+      if (TRI.t <= 0) { triEndGame(); return; }
+    }
+    if (inP('BACK')) { TRI.node = null; TRI.mode = 'full'; G.state = 'PLAY'; sfx('ui'); return; }
     if (TRI.game === 'mem') {
       if (TRI.memPhase === 'show') {
         TRI.memShowT -= dt;
@@ -417,14 +480,22 @@ function drawTrial() {
     ftxt(t('press'), 480, 490, 14, '#7d93a8');
     return;
   }
-  // playing HUD
-  const k = TRI.t / T_GAME;
-  c.fillStyle = 'rgba(30,45,62,0.8)'; rr(c, 180, 34, 600, 12, 6); c.fill();
-  c.fillStyle = k < 0.2 ? '#ff5f6d' : '#37ffd0';
-  rr(c, 182, 36, 596 * clamp(k, 0, 1), 8, 4); c.fill();
-  ftxt(t('tt_' + TRI.game), 180, 70, 15, '#b48cff', 'left');
-  ftxt(t('tt_score') + ' ' + TRI.score, 780, 70, 15, '#ffd76a', 'right');
-  ftxt(t('tt_level') + ' ' + TRI.level + (TRI.streak >= 3 ? '  ×' + TRI.streak : ''), 480, 70, 14, '#8aa2b5');
+  // playing HUD. A Mind Node is one question with no clock and no running
+  // score, so it says what it IS and what it pays — a full timer bar that
+  // never moves is worse than no bar at all.
+  if (TRI.mode === 'node') {
+    ftxt(t('rd_title'), 480, 44, 20, '#b48cff', 'center', '#b48cff');
+    ftxt(t('tt_' + TRI.game), 180, 70, 15, '#b48cff', 'left');
+    ftxt('+' + (TRI.node ? TRI.node.iq : 10) + ' ' + t('sk_iq'), 780, 70, 15, '#ffd76a', 'right');
+  } else {
+    const k = TRI.t / T_GAME;
+    c.fillStyle = 'rgba(30,45,62,0.8)'; rr(c, 180, 34, 600, 12, 6); c.fill();
+    c.fillStyle = k < 0.2 ? '#ff5f6d' : '#37ffd0';
+    rr(c, 182, 36, 596 * clamp(k, 0, 1), 8, 4); c.fill();
+    ftxt(t('tt_' + TRI.game), 180, 70, 15, '#b48cff', 'left');
+    ftxt(t('tt_score') + ' ' + TRI.score, 780, 70, 15, '#ffd76a', 'right');
+    ftxt(t('tt_level') + ' ' + TRI.level + (TRI.streak >= 3 ? '  ×' + TRI.streak : ''), 480, 70, 14, '#8aa2b5');
+  }
   if (TRI.fb > 0) {
     c.globalAlpha = TRI.fb * 2;
     ftxt(TRI.fbGood ? '✓' : '✗', 880, 120, 40, TRI.fbGood ? '#7de8a0' : '#ff5f6d');
