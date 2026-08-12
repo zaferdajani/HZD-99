@@ -209,6 +209,62 @@ function whoosh(dur, f0, f1, vol, delay) {
   src.start(t0);
 }
 
+// ---------------------------------------------------------------------------
+// HER CLAWS, NOT A SWORDSMAN'S ARM. The attack used to fire a recorded battle
+// shout — a person yelling as they swing — under a broad airy whoosh. That is
+// the sound of a human fighting, and she is neither: she is a small machine
+// with three steel claws on a servo arm, and what you should hear is the arm
+// moving and the claws passing, not somebody's effort.
+//
+// So it is built from what is actually happening: the servo turns first, then
+// three (four on the heavy third hit) narrow, bright shears sweep DOWNWARD a
+// few milliseconds apart — a blade going past your ear, not a bat swinging
+// through open air — and the metal rings for an instant after the pass. The
+// third hit of the string adds the weight behind it and a small electrical
+// crackle off the strike.
+//
+// Synthesized rather than sampled because this sound has to land on the frame
+// the paw does: no file to fetch, no decode, no latency, and every swing can be
+// a few percent different so a long fight never turns into one clip repeating.
+// ---------------------------------------------------------------------------
+function clawShear(f0, f1, dur, vol, delay, q) {
+  if (!AC || MUTED) return;
+  const t0 = AC.currentTime + (delay || 0);
+  const src = AC.createBufferSource(), g = AC.createGain(), f = AC.createBiquadFilter();
+  src.buffer = noiseBuf(dur);
+  // narrow, so it reads as an EDGE going past rather than a gust of air
+  f.type = 'bandpass'; f.Q.value = q || 7.5;
+  f.frequency.setValueAtTime(f0, t0);
+  f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + 0.004);   // instant, but not a click
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(f).connect(g).connect(AC.destination);
+  src.start(t0);
+}
+function clawSlash(beat) {
+  if (!AC || MUTED) return;
+  const heavy = beat >= 2;
+  const j = () => 0.96 + Math.random() * 0.08;            // never twice the same
+  // 1. THE SERVO — the arm moves before the claws do
+  tone(heavy ? 150 : 190, 0.05, 'sawtooth', heavy ? 0.038 : 0.028, heavy ? 520 : 620);
+  chink(0.012, 0.034);
+  // 2. THE CLAWS — three passes, four when she puts both paws in
+  const n = heavy ? 4 : 3;
+  for (let i = 0; i < n; i++) {
+    const f0 = (heavy ? 4300 : 5200) * j() + i * 780;
+    clawShear(f0, f0 * 0.4, heavy ? 0.045 : 0.034, heavy ? 0.30 : 0.34, i * 0.017, heavy ? 6.5 : 8);
+  }
+  // 3. THE EDGE SINGS for an instant after the pass
+  tone((heavy ? 2150 : 2700) * j(), heavy ? 0.13 : 0.09, 'triangle', 0.034, 1450, 0.028);
+  // 4. THE HEAVY ONE lands with weight, and something shorts out on the strike
+  if (heavy) {
+    tone(96, 0.13, 'square', 0.095, 46, 0.02);
+    hiss(0.05, 0.055, 0.05);
+    tone(1180, 0.24, 'triangle', 0.038, 760, 0.055);
+  }
+}
+
 // ---------- NPC proximity voices ------------------------------------------
 // Every NPC sings its presence into the room: a looping voice whose volume
 // swells as you draw near and blooms while it speaks with you. A recorded
@@ -418,9 +474,10 @@ function sfx(n) {
   // does too: the combo index the player is actually on picks the take, and the
   // heavy third one is the one with the metal in its tail.
   if (n === 'atk' || n === 'swing') {
-    const c = (typeof player !== 'undefined' && player && player.combo) | 0;
-    if (playBuf('vox_atk' + (c === 2 ? 3 : c === 1 ? 2 : 1), c === 2 ? 0.5 : 0.42,
-      0.97 + Math.random() * 0.06)) return;
+    // the string still escalates — the third hit is the heavy one — but it
+    // escalates in her claws now, not in somebody's voice
+    clawSlash((typeof player !== 'undefined' && player && player.combo) | 0);
+    return;
   }
   const v = VOX[n];
   if (v && playBuf(v[0], v[1], 0.97 + Math.random() * 0.06)) return;

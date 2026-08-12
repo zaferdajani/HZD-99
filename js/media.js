@@ -96,9 +96,6 @@ const MEDIA_SRC = {
     // NYA-9's voice and the guardians' roars. Short, mono, decoded once — about
     // 2.5 MB of PCM for the whole cast, against the 62 MB the music used to cost
     // before it was moved to streaming.
-    vox_atk1: 'assets/sfx/vox/atk1.ogg',
-    vox_atk2: 'assets/sfx/vox/atk2.ogg',
-    vox_atk3: 'assets/sfx/vox/atk3.ogg',
     vox_land: 'assets/sfx/vox/land.ogg',
     vox_dash: 'assets/sfx/vox/dash.ogg',
     vox_win: 'assets/sfx/vox/win.ogg',
