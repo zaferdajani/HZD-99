@@ -9,3 +9,5 @@ android/app/src/main/assets/public/
 ios/App/App/public/
 ios/App/Pods/
 .DS_Store
+.claude/worktrees/
+.claude/agents-run/
