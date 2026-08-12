@@ -1723,6 +1723,10 @@ const purifyPre = {};
 // first frame until the element has been allowed to play once. Priming is
 // play-then-pause-then-rewind, which unlocks the element and decodes frame 0,
 // so the final blow starts it instantly instead of stuttering.
+// The second copy of every clip, in the codec the first one is not. Offering
+// both is the difference between a film that plays everywhere and a film that
+// plays on the machine it was tested on.
+const PURIFY_ALT = (typeof window !== 'undefined' && window.VID_ALT) || {};
 function purifyPreload(kind) {
   const s = PURIFY_VID[kind];
   if (!s || purifyPre[kind]) return;
@@ -1731,7 +1735,16 @@ function purifyPreload(kind) {
   v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
   v.setAttribute('webkit-playsinline', '');
   v.crossOrigin = 'anonymous';
-  v.src = s;
+  // sources rather than a src: the browser picks the first one it can decode,
+  // and only reports an error once it has failed at ALL of them
+  const add = (url, type) => {
+    if (!url) return;
+    const so = document.createElement('source');
+    so.src = url; so.type = type;
+    v.appendChild(so);
+  };
+  add(s, /\.webm$/i.test(s) ? 'video/webm' : 'video/mp4');
+  add(PURIFY_ALT[kind], 'video/webm');
   try { v.load(); } catch (e) {}
   purifyPre[kind] = v;
   if (VID_GESTURE) purifyPrime(v);

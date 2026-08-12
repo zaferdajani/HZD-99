@@ -59,12 +59,22 @@ try {
 // reel of eight clips that plays only the ones the player earned, and naming a
 // clip that is not on disk would park the ending on black while a watchdog
 // counted down — once per missing file.
+// EVERY CLIP SHIPS IN TWO CODECS, and both paths are handed over. H.264 is what
+// Safari and iOS will decode; VP9 is what a browser without the patent-licensed
+// decoder has. Naming only one of them is how a film ends up "not playing" on
+// somebody's machine with nothing in the log to say why — so the page offers
+// both and lets the browser take the one it can actually run.
 const VID_EXT = /\.(mp4|webm|mov)$/i;
-const vidFiles = {};
+const vidFiles = {}, vidAlt = {};
 try {
   for (const f of fs.readdirSync('assets/video')) {
-    if (VID_EXT.test(f)) vidFiles[f.replace(VID_EXT, '')] = 'assets/video/' + f;
+    if (!VID_EXT.test(f)) continue;
+    const base = f.replace(VID_EXT, '');
+    if (/\.webm$/i.test(f)) vidAlt[base] = 'assets/video/' + f;
+    else vidFiles[base] = 'assets/video/' + f;
   }
+  // a clip that ships ONLY as webm is still a clip
+  for (const k in vidAlt) if (!vidFiles[k]) { vidFiles[k] = vidAlt[k]; delete vidAlt[k]; }
 } catch (e) { /* no video directory yet */ }
 // THE VOICE MANIFEST, on the same principle. Each file is <npc><line>.ogg —
 // servo0, sage2 — so a character gains a spoken line by dropping the file in
@@ -98,6 +108,7 @@ const emit = (fname, lock) => {
     ';window.GAME_LOCK=' + JSON.stringify(lock) +
     ';window.MUS_FILES=' + JSON.stringify(musFiles) +
     ';window.VID_FILES=' + JSON.stringify(vidFiles) +
+    ';window.VID_ALT=' + JSON.stringify(vidAlt) +
     ';window.VOX_FILES=' + JSON.stringify(voxFiles) + '</script>\n' +
     '<script>\n' + files.join('\n') + '\n</script>\n</body>');
   fs.writeFileSync(fname, out);

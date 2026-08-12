@@ -52,7 +52,7 @@ let RECNODE = null;
 // now picks up where it left off. Fights and fanfares are excluded: those are
 // meant to start at the top every time.
 const MUS_POS = {};
-const MUS_RESTART = /^(boss|mus_null|mus_talon|mus_furnace|mus_glaciere|mus_prism|mus_mother|mus_title|mus_intro|mus_ending|ambient$)/;
+const MUS_RESTART = /^(boss|mus_boss|mus_null|mus_talon|mus_furnace|mus_glaciere|mus_prism|mus_mother|mus_title|mus_intro|mus_ending|ambient$)/;
 // EVERY MUSIC ELEMENT EVER MADE, so exactly one of them can be playing. A
 // stream that was asked for while the page was still silent is not playing and
 // not stopped — it is pending, and the tap that finally unlocks audio can wake
@@ -1034,20 +1034,26 @@ const MUS = { cur: null, name: null, step: 0, nextT: 0 };
 // why every fight already has music even though only one recording exists.
 // Each slot lists its candidates best-first, so a new score displaces the
 // placeholder it replaces and nothing loses the music it already had.
+// THE WHOLE SCORE IS ONE SET NOW, mastered by role rather than balanced by
+// guesswork here: the opening and the ending at -14 LUFS, fights at -15, the
+// rooms you live in at -16.5, the safe room quietest of all. Because the files
+// themselves carry that hierarchy, these numbers no longer need to differ much
+// — a per-track gain that fights the master is how a library drifts out of
+// balance every time one file is replaced.
 const RECORDED_TRACKS = {
-  title: [['mus_title', 0.5], ['ambient', 0.5]],
-  intro: [['mus_intro', 0.85], ['ambient', 0.5]],
-  A: [['mus_meadows', 0.4]], B: [['mus_conduits', 0.4]], C: [['mus_foundry', 0.42]],
-  D: [['mus_archives', 0.4]], E: [['mus_nest', 0.44]], X: [['mus_cache', 0.4]],
-  boss_glitch: [['mus_nullfang', 0.52], ['boss', 0.5]],
-  boss_brood: [['mus_talonhost', 0.52], ['boss', 0.5]],
-  boss_atlas: [['mus_furnace', 0.54], ['boss', 0.5]],
-  boss_zero: [['mus_glaciere', 0.5], ['boss', 0.5]],
-  boss_prism: [['mus_prism', 0.52], ['boss', 0.5]],
-  boss_mother: [['mus_mother', 0.56], ['boss', 0.58]],
-  boss: [['boss', 0.5]], mother: [['boss', 0.58]],
+  title: [['mus_title', 0.55], ['ambient', 0.5]],
+  intro: [['mus_intro', 0.75], ['ambient', 0.5]],
+  A: [['mus_meadows', 0.55]], B: [['mus_conduits', 0.55]], C: [['mus_foundry', 0.55]],
+  D: [['mus_archives', 0.55]], E: [['mus_nest', 0.55]], X: [['mus_cache', 0.55]],
+  boss_glitch: [['mus_nullfang', 0.6], ['mus_boss', 0.6]],
+  boss_brood: [['mus_talonhost', 0.6], ['mus_boss', 0.6]],
+  boss_atlas: [['mus_furnace', 0.6], ['mus_boss', 0.6]],
+  boss_zero: [['mus_glaciere', 0.6], ['mus_boss', 0.6]],
+  boss_prism: [['mus_prism', 0.6], ['mus_boss', 0.6]],
+  boss_mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
+  boss: [['mus_boss', 0.6], ['boss', 0.5]], mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
   // the one that plays over the ending, after the last blow has been swung
-  winTheme: [['mus_ending', 0.5], ['ambient', 0.45]],
+  winTheme: [['mus_ending', 0.6], ['ambient', 0.45]],
 };
 function pickRecorded(name) {
   const cand = RECORDED_TRACKS[name]; if (!cand) return false;
