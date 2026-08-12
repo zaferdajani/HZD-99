@@ -14,6 +14,22 @@ function audioOn() {
     } catch (e) {}
   }
   if (typeof loadMedia === 'function') loadMedia();
+  // A track that was START-ED while the page was still silent is sitting there
+  // paused, because no browser will play audio nobody asked for. This gesture
+  // is the permission it was waiting on — take it now, not on the next 2.5s
+  // watchdog tick, or the opening plays its first seconds mute.
+  musKick();
+}
+// Is the score being held back by the autoplay policy? True when a recorded
+// track has been asked for and the element is still paused — which is exactly
+// the state that should be showing the player a way to turn the sound on.
+function soundLocked() {
+  if (MUTED || !MUSIC_ON) return false;
+  const n = RECNODE;
+  // A track the browser cannot decode at all is not "waiting for a tap" — no
+  // tap will ever start it, so promising the player sound would be a lie.
+  if (!n || !n.el || n.el.error) return false;
+  return !!n.el.paused;
 }
 // ---------- recorded-sample playback (CC0 assets, synth fallback) ----------
 // ---------------------------------------------------------------------------
@@ -37,12 +53,37 @@ let RECNODE = null;
 // meant to start at the top every time.
 const MUS_POS = {};
 const MUS_RESTART = /^(boss|mus_null|mus_talon|mus_furnace|mus_glaciere|mus_prism|mus_mother|mus_title|mus_intro|mus_ending|ambient$)/;
+// EVERY MUSIC ELEMENT EVER MADE, so exactly one of them can be playing. A
+// stream that was asked for while the page was still silent is not playing and
+// not stopped — it is pending, and the tap that finally unlocks audio can wake
+// several at once. That is how two scores end up over each other. One place
+// now decides which single element is allowed to make sound.
+const MUS_ALL = [];
+function musSolo(keep) {
+  for (const el of MUS_ALL) {
+    // An element in a deliberate fade-out is the OTHER half of a cross-fade and
+    // must be left alone — cutting it is the hard music change this game goes
+    // out of its way not to make. Anything else playing is not meant to be.
+    if (el === keep || el._fading) continue;
+    try { if (!el.paused) el.pause(); el.volume = 0; } catch (e) {}
+  }
+}
+function musKill(el) {
+  try { el.pause(); el.volume = 0; el.src = ''; el.load(); } catch (e) {}
+  const i = MUS_ALL.indexOf(el);
+  if (i >= 0) MUS_ALL.splice(i, 1);
+}
 function stopRecorded() {
   const n = RECNODE;
   RECNODE = null;
   if (!n) return;
   try { if (!MUS_RESTART.test(n.key)) MUS_POS[n.key] = n.el.currentTime || 0; } catch (e) {}
+  // A stream that never actually started has nothing to fade — and fading it
+  // leaves it alive for another second, which is exactly long enough for a
+  // gesture to arrive and start it underneath its replacement.
+  try { if (n.el.paused) { musKill(n.el); return; } } catch (e) {}
   // fade the outgoing stream rather than cutting it dead mid-note
+  n.el._fading = true;
   let v = 0;
   try { v = n.el.volume; } catch (e) {}
   // Long enough to hear as a CROSS-FADE. At a third of a second the old track
@@ -51,7 +92,7 @@ function stopRecorded() {
   const iv = setInterval(() => {
     v -= 0.045;
     try {
-      if (v <= 0.01) { n.el.pause(); n.el.src = ''; n.el.load(); clearInterval(iv); }
+      if (v <= 0.01) { musKill(n.el); clearInterval(iv); }
       else n.el.volume = Math.max(0, Math.min(1, v));
     } catch (e) { clearInterval(iv); }
   }, 40);
@@ -69,6 +110,7 @@ function musKick() {
       const pr = n.el.play();
       if (pr && pr.catch) pr.catch(() => {});
     }
+    musSolo(n.el);
   } catch (e) {}
 }
 if (typeof addEventListener === 'function') {
@@ -94,6 +136,8 @@ function playRecorded(key, gain) {
     ['pause', 'stalled', 'suspend', 'waiting', 'ended'].forEach(ev =>
       el.addEventListener(ev, () => setTimeout(musKick, 150)));
     RECNODE = node;
+    MUS_ALL.push(el);
+    musSolo(el);
     let v = 0;
     const iv = setInterval(() => {
       if (RECNODE !== node) { clearInterval(iv); return; }
@@ -102,7 +146,7 @@ function playRecorded(key, gain) {
       if (v >= target) clearInterval(iv);
     }, 40);
     const pr = el.play();
-    if (pr && pr.catch) pr.catch(() => {});
+    if (pr && pr.then) pr.then(() => musSolo(el), () => {});
     return true;
   } catch (e) { return false; }
 }
@@ -832,7 +876,7 @@ const MUS = { cur: null, name: null, step: 0, nextT: 0 };
 // placeholder it replaces and nothing loses the music it already had.
 const RECORDED_TRACKS = {
   title: [['mus_title', 0.5], ['ambient', 0.5]],
-  intro: [['mus_intro', 0.55], ['ambient', 0.5]],
+  intro: [['mus_intro', 0.85], ['ambient', 0.5]],
   A: [['mus_meadows', 0.4]], B: [['mus_conduits', 0.4]], C: [['mus_foundry', 0.42]],
   D: [['mus_archives', 0.4]], E: [['mus_nest', 0.44]], X: [['mus_cache', 0.4]],
   boss_glitch: [['mus_nullfang', 0.52], ['boss', 0.5]],

@@ -21,8 +21,12 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
   const isCode = req.mode === 'navigate' || /(^|\/)index\.html$/.test(url.pathname);
   if (isCode) {
+    // 'reload' skips the BROWSER's own HTTP cache on the way out. GitHub Pages
+    // serves the page with ten minutes of freshness, so without this a player
+    // who opens the link right after a deploy can still be handed the previous
+    // build by their own browser, before this worker ever sees the network.
     e.respondWith(
-      fetch(req).then((r) => {
+      fetch(req, { cache: 'reload' }).catch(() => fetch(req)).then((r) => {
         if (r && r.ok) { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(req, cp)); }
         return r;
       }).catch(() => caches.match(req, { ignoreSearch: true }))

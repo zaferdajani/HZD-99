@@ -722,12 +722,6 @@ function update(dt) {
   else if (G.state === 'DIFF') updateDiff();
   else if (G.state === 'WHO') updateWho();
   else if (G.state === 'CTRL') updateCtrl();
-  else if (G.state === 'GATE') {
-    G.gate.t += dt;
-    // any button at all — this screen exists to collect the gesture, so it
-    // must not be picky about which one arrives
-    if (inP('OK') || inP('JUMP') || inP('ATK') || inP('BACK') || inP('PAUSE')) startCineNow();
-  }
   else if (G.state === 'INTRO') {
     G.introT += dt;
     if (inP('OK') || inP('ATK') || inP('BACK') || G.introT > 12.4) { G.state = 'PLAY'; sfx('ok'); }
@@ -1825,7 +1819,7 @@ function endPurifyCut() {
     while (G.reel.length) {
       const k = G.reel.shift();
       const cap = G.reelCap ? G.reelCap.shift() : null;
-      if (startPurifyCut(k)) { if (cap) G.cut.cap = cap; return; }
+      if (startPurifyCut(k)) { if (cap) { G.cut.cap = cap; G.cut.patient = true; } return; }
     }
     G.reel = null; G.reelCap = null;
     // the opening film hands over to the comic's own ending — the title card
@@ -1852,12 +1846,26 @@ function endPurifyCut() {
     if (b.rewardPend) { b.rewardPend = false; G.onBossDead(b.kind); }
   }
 }
+// THE FIRST TAP BUYS SOUND, NOT A SKIP. The badge asks the player to touch the
+// screen so the score can start; if that same touch also skipped the opening,
+// the game would answer "yes, music please" by throwing the film away. So while
+// the sound is still locked, the first press is spent unlocking it and nothing
+// else. Every press after that means what it says.
+function introSoundTap() {
+  if (G.introTapped) return false;
+  if (typeof soundLocked !== 'function' || !soundLocked()) return false;
+  G.introTapped = true;
+  try { audioOn(); } catch (e) {}
+  try { musKick(); } catch (e) {}
+  return true;
+}
 function updateCut(dt) {
   const ct = G.cut;
   if (!ct) { G.state = 'PLAY'; return; }
   ct.t += dt; ct.hint += dt;
   const v = ct.v;
   const skip = inP('OK') || inP('JUMP') || inP('ATK') || inP('PAUSE') || inP('BACK');
+  if (skip && ct.patient && introSoundTap()) return;
   if (skip && ct.ph !== 'out') { ct.ph = 'out'; ct.t = 0; ct.skipped = true; return; }
   if (ct.ph === 'in') {
     if (ct.t >= 0.34) { ct.ph = 'hold'; ct.t = 0; }
@@ -1867,7 +1875,7 @@ function updateCut(dt) {
     // black. If the film still is not ready, we simply wait here — the dark
     // reads as the moment before a memory surfaces, never as a stall.
     ct.held += dt;
-    if (purifyReady(ct.kind) || ct.held > 4) {
+    if (purifyReady(ct.kind) || ct.held > (ct.patient ? 14 : 4)) {
       const pr = v.play();
       if (pr && pr.catch) pr.catch(() => { if (G.cut) G.cut.failed = true; });
       ct.ph = 'play'; ct.t = 0;
@@ -1885,6 +1893,20 @@ function updateCut(dt) {
       || (v.duration && v.currentTime >= v.duration - 0.05);
     // hard ceiling: a film that never loads or never ends still hands back
     const cap = (v.duration && isFinite(v.duration)) ? v.duration + 2.5 : 12;
+    // A STALL IS NOT A VERDICT during the opening. Mid-fight, a film that will
+    // not decode has to get out of the way fast. The opening has nothing to get
+    // out of the way of — and on a phone on mobile data the first seconds of the
+    // first clip stall routinely, which used to throw away all eight of them and
+    // hand the player the fallback. Here we go back to waiting instead.
+    // Patience is not infinite: a browser that truly cannot decode this file
+    // would wait forever, so three returns to the dark is the limit, and a clip
+    // that has never shown one frame only gets one.
+    if (!dead && ct.patient && ct.stall > 1.5 && ct.t < cap
+        && (ct.waits || 0) < (ct.ran ? 3 : 1)) {
+      ct.waits = (ct.waits || 0) + 1;
+      ct.ph = 'hold'; ct.t = 0; ct.stall = 0; ct.held = Math.max(0, (ct.held || 0) - 4);
+      return;
+    }
     if (dead || ct.stall > 1.5 || ct.t > cap) { ct.ph = 'out'; ct.t = 0; }
     return;
   }
@@ -1965,6 +1987,7 @@ function drawCut() {
     ftxt(t('cut_skip'), 480, 516, 13, '#9fb8c8', 'center');
     c.restore();
   }
+  if (typeof drawSoundChip === 'function') drawSoundChip(performance.now() / 1000);
 }
 
 // One reused offscreen layer for the near depth plate, and one gradient built
@@ -3221,14 +3244,6 @@ function drawMapButton() {
   c.restore();
 }
 addEventListener('mousedown', (e) => {
-  // THE OPENING CARD TAKES A MOUSE TOO. It says "tap or press any key", and a
-  // desktop player reaching for the play glyph with a pointer is doing exactly
-  // what it asked — on a machine with no touch events to fall back to.
-  if (typeof G !== 'undefined' && G.state === 'GATE') {
-    try { audioOn(); } catch (err) {}
-    startCineNow();
-    return;
-  }
   // an offer is answered by clicking the option, on any device
   if (typeof G !== 'undefined' && G.offer && !G.offer.done && typeof offerTap === 'function') {
     const r0 = cv && cv.getBoundingClientRect ? cv.getBoundingClientRect() : null;
@@ -4161,7 +4176,6 @@ function draw(tms) {
   const tsec = tms / 1000;
   c.clearRect(0, 0, 960, 540);
   const st = G.state;
-  if (st === 'GATE') { drawGate(tsec); return; }
   if (st === 'CINE') { drawCine(); return; }
   if (st === 'CUT') { drawCut(); return; }
   if (st === 'MENU' || st === 'LANGSEL' || st === 'DIFF' || st === 'WHO' || (st === 'CTRL' && G.ctrlBack === 'MENU') || st === 'GAMEOVER') {
@@ -4430,7 +4444,7 @@ function startIntroFilm() {
     const [k, cap] = reel.shift();
     purifyPreload(k);
     if (startPurifyCut(k)) {
-      G.cut.cap = cap;
+      G.cut.cap = cap; G.cut.patient = true;
       G.reel = reel.map(s => s[0]);
       G.reelCap = reel.map(s => s[1]);
       G.reelEnd = 'CINE';
@@ -4453,17 +4467,10 @@ function startIntroFilm() {
 // arrive, and audio is allowed to start with it.
 // ---------------------------------------------------------------------------
 function startCine() {
-  // buy the network a head start while the player reads the card
   try { for (const s of INTRO_FILM) purifyPreload(s[0]); } catch (e) {}
-  // A player who reached here by pressing New Game has already given the
-  // browser its gesture — asking for a second one would be a door with nothing
-  // behind it. The card is only for the opening that starts at boot.
-  if (VID_GESTURE) { startCineNow(); return; }
-  G.gate = { t: 0 };
-  G.state = 'GATE';
+  startCineNow();
 }
 function startCineNow() {
-  G.gate = null;
   try { purifyGesture(); } catch (e) {}
   G.cine = { i: 0, t: 0 };
   // THE OPENING HAS ITS OWN SCORE, and until now nothing ever asked for it:
@@ -4491,40 +4498,40 @@ function startCineNow() {
 // which on a phone was every time.
 // ===========================================================================
 // ---------------------------------------------------------------------------
-// THE CARD THAT COLLECTS THE TAP. It is not a splash screen and not politeness:
-// it is the only way the opening can play at all. A browser refuses to start
-// video and audio that no human asked for, and this game was starting its
-// opening the instant the page loaded — so play() was rejected, the reel marked
-// itself undecodable, and the fallback came up instead. Behind one tap the
-// video is unlocked and primed, the files have had a moment to arrive, and the
-// score is allowed to start with the picture.
+// THE SOUND IS NOT MISSING, IT IS WAITING. No browser will start audio that no
+// human asked for — that is a rule of the platform, not a setting we can turn
+// off. So the opening starts on its own with picture (muted video IS allowed to
+// autoplay) and the score joins the instant anything is touched. Until then
+// this badge sits in the corner so silence never reads as a broken game: it
+// says what is missing and exactly how to get it, and it disappears by itself
+// the moment the music is running.
 // ---------------------------------------------------------------------------
-function drawGate(tsec) {
-  c.fillStyle = '#05070b'; c.fillRect(0, 0, 960, 540);
+function drawSoundChip(tsec) {
+  if (typeof soundLocked !== 'function' || !soundLocked()) return;
+  const pu = 0.5 + Math.sin(tsec * 2.6) * 0.5;
+  const txt = t('gate_sound');
   c.save();
-  const g = c.createRadialGradient(480, 250, 20, 480, 250, 460);
-  g.addColorStop(0, 'rgba(20,60,72,0.55)'); g.addColorStop(1, 'rgba(5,7,11,0)');
-  c.fillStyle = g; c.fillRect(0, 0, 960, 540);
-  c.restore();
-  // dust in a dark hangar, drifting up
-  c.fillStyle = 'rgba(150,220,230,0.20)';
-  for (let i = 0; i < 60; i++)
-    c.fillRect((i * 211 + hash2(i, 3) * 900) % 960, (540 - (hash2(i, 7) * 540 + tsec * 14) % 540), 1.6, 1.6);
-  const puls = 0.5 + Math.sin(tsec * 2.1) * 0.5;
-  ftxt(t('title'), 480, 236, 62, '#eef3fa', 'center', '#37ffd0', '800');
-  // the play glyph, breathing
-  c.save();
-  c.globalAlpha = 0.55 + puls * 0.45;
-  c.strokeStyle = '#37ffd0'; c.lineWidth = 2;
-  c.beginPath(); c.arc(480, 328, 26 + puls * 2, 0, 7); c.stroke();
+  c.globalAlpha = 0.72 + pu * 0.28;
+  c.font = '600 14px "Segoe UI", Tahoma, sans-serif';
+  const tw = c.measureText(txt).width;
+  const w = tw + 78, x = 480 - w / 2, y = 28, h = 34;
+  c.fillStyle = 'rgba(4,10,14,0.78)'; rr(c, x, y, w, h, h / 2); c.fill();
+  c.strokeStyle = 'rgba(55,255,208,' + (0.35 + pu * 0.4) + ')'; c.lineWidth = 1.5;
+  rr(c, x, y, w, h, h / 2); c.stroke();
+  // a little speaker with two arcs, drawn rather than trusting an emoji font
+  const ix = x + 20, iy = y + h / 2;
   c.fillStyle = '#37ffd0';
-  c.beginPath(); c.moveTo(472, 316); c.lineTo(494, 328); c.lineTo(472, 340); c.closePath(); c.fill();
+  c.beginPath();
+  c.moveTo(ix, iy - 4); c.lineTo(ix + 5, iy - 4); c.lineTo(ix + 11, iy - 9);
+  c.lineTo(ix + 11, iy + 9); c.lineTo(ix + 5, iy + 4); c.lineTo(ix, iy + 4);
+  c.closePath(); c.fill();
+  c.strokeStyle = '#37ffd0'; c.lineWidth = 1.6;
+  for (let i = 0; i < 2; i++) {
+    c.beginPath(); c.arc(ix + 12, iy, 5 + i * 4.5, -0.85, 0.85); c.stroke();
+  }
+  ftxt(txt, x + 54 + tw / 2, y + h / 2 + 1, 14, '#dff3ff', 'center', null, '600');
   c.restore();
-  c.save();
-  c.globalAlpha = 0.6 + puls * 0.4;
-  ftxt(t('gate_tap'), 480, 396, 20, '#cfe6f2', 'center', 'rgba(0,0,0,0.8)', '600');
-  c.restore();
-  ftxt(t('gate_sub'), 480, 428, 14, '#7d93a8', 'center');
+  c.globalAlpha = 1;
 }
 const CINE_HOLD = 6.4;    // seconds a shot is held
 const CINE_DISS = 0.9;    // and the dissolve from the shot before it
@@ -4547,6 +4554,7 @@ function updateCine(dt) {
   // shot on, back re-reads the one before, skip leaves
   const next = inP('OK') || inP('JUMP') || inP('ATK') || inP('RIGHT');
   const prev = inP('LEFT');
+  if ((next || prev) && introSoundTap()) return;
   if (inP('PAUSE') || inP('BACK')) { sfx('ui'); cineEnd(); return; }
   if (next) { sfx('ui'); ci.i++; ci.t = 0; }
   else if (prev && ci.i > 0) { sfx('ui'); ci.i--; ci.t = 0; }
@@ -4635,6 +4643,7 @@ function drawCine() {
     ftxt(t('gate_next'), 480, 524, 12, '#9fb8c8', 'center');
     c.restore();
   }
+  drawSoundChip(performance.now() / 1000);
 }
 // ---- the machine world's people ------------------------------------------
 // Rebuilt as VOLUMES, not stickers: every form is a path clipped to a
@@ -5454,10 +5463,15 @@ try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
 // English is always the default/standard start; the picker is reachable any
 // time from the menu's "Language" row (no forced foreign-language start).
 loadMeta();
-setMusic('title');
-// first boot only: "The Broadcast Falls" — the manga opening plays once,
-// then never again unless the save flag is cleared
-try { if (!localStorage.getItem('cb_intro_seen') && gameLock() !== 'hero') startCine(); } catch (e) {}
+// ASK FOR ONE TRACK, ONCE. Starting the title theme and replacing it a
+// millisecond later left two streams alive through the cross-fade — and while
+// the page is still silent neither has started, so the tap that finally
+// unlocks audio could wake both and play them over each other. On a first
+// boot the opening's score is the only thing anyone should hear.
+let introBoot = false;
+try { introBoot = !localStorage.getItem('cb_intro_seen') && gameLock() !== 'hero'; } catch (e) {}
+if (introBoot) { try { startCine(); } catch (e) { introBoot = false; } }
+if (!introBoot) setMusic('title');
 // look for a newer build at boot, and again every few minutes while idling
 G.updateStamp = 1;
 setTimeout(checkForUpdate, 2500);
