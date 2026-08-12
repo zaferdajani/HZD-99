@@ -4249,6 +4249,7 @@ const INTRO_FILM = [
   ['intro2', 'cine_c3'],   // MOTHER-V, the broadcast heart
   ['intro3', 'cine_c4'],   // something outside answers her Song
   ['intro4', 'cine_c5'],   // frequency by frequency, the signal turns
+  ['intro5', 'cine_c6'],   // one worker's eye goes from cyan to red: OBEY
   ['intro6', 'cine_c7'],   // the great guardians kneel first
   ['intro7', 'cine_c8'],   // one frame was never wired to the Song
   ['intro8', 'cine_c10'],  // she wakes to a silent city, and goes
