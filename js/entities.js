@@ -143,16 +143,53 @@ const SLASH = [
 const SLASH_X_B = { a0: 0.75, a1: -0.8, r0: 12, r1: 21 };
 // Both forelegs are built the same way; the far one is simply darker, so the
 // two read as near and far rather than as one arm that changed sides.
-function armBones(c, shX, shY, ex, ey, hx, hy, far) {
-  c.lineCap = 'round'; c.lineJoin = 'round';
-  c.strokeStyle = far ? 'rgba(32,41,54,0.9)' : 'rgba(38,48,62,0.9)';
-  c.lineWidth = far ? 5.2 : 5.8;
-  c.beginPath(); c.moveTo(shX, shY); c.lineTo(ex, ey); c.lineTo(hx, hy); c.stroke();
-  c.strokeStyle = far ? '#6d7a8c' : '#8593a6'; c.lineWidth = far ? 3.6 : 4;
-  c.beginPath(); c.moveTo(shX, shY); c.lineTo(ex, ey); c.lineTo(hx, hy); c.stroke();
-  c.strokeStyle = far ? 'rgba(190,205,224,0.35)' : 'rgba(226,236,250,0.55)';
-  c.lineWidth = 1.4;                                          // top-lit edge
-  c.beginPath(); c.moveTo(shX, shY - 1); c.lineTo(ex, ey - 1); c.stroke();
+// SHE IS A ROBOT, AND HER ARM SHOULD SAY SO. This was one unbroken polyline
+// from shoulder to paw — a single rounded tube that bent in the middle with
+// nothing at the bend. Solving the elbow properly made the shape correct and
+// somehow less convincing, because a smooth taper is what a LIMB looks like,
+// not what a MACHINE'S limb looks like. Her own art has segments: two separate
+// casings with a hinge between them.
+//
+// So the arm is built as two discrete bones with a real joint. Each bone is
+// drawn short of the pivot at both ends, leaving a visible gap; the shoulder
+// and elbow are pucks laid into those gaps, dark rings with a lit core, and the
+// elbow is drawn AFTER both bones so the hinge sits on top of the casings it
+// connects, the way a hinge does.
+function armBone(c, x0, y0, x1, y1, w, trim, dark, mid, lit) {
+  const dx = x1 - x0, dy = y1 - y0, d = Math.hypot(dx, dy) || 1;
+  const ux = dx / d, uy = dy / d;
+  const ax = x0 + ux * trim, ay = y0 + uy * trim;
+  const bx = x1 - ux * trim, by = y1 - uy * trim;
+  c.lineCap = 'round';
+  c.strokeStyle = dark; c.lineWidth = w + 1.8;
+  c.beginPath(); c.moveTo(ax, ay); c.lineTo(bx, by); c.stroke();
+  c.strokeStyle = mid; c.lineWidth = w;
+  c.beginPath(); c.moveTo(ax, ay); c.lineTo(bx, by); c.stroke();
+  if (lit) {                                     // top-lit edge along the casing
+    c.strokeStyle = lit; c.lineWidth = Math.max(0.9, w * 0.3);
+    c.beginPath();
+    c.moveTo(ax - uy * w * 0.24, ay + ux * w * 0.24 - 0.6);
+    c.lineTo(bx - uy * w * 0.24, by + ux * w * 0.24 - 0.6);
+    c.stroke();
+  }
+}
+function armJoint(c, x, y, r, dark, mid, glow) {
+  c.fillStyle = dark;
+  c.beginPath(); c.arc(x, y, r + 0.9, 0, 7); c.fill();
+  c.fillStyle = mid;
+  c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
+  if (glow) { c.fillStyle = glow; c.beginPath(); c.arc(x, y, r * 0.42, 0, 7); c.fill(); }
+}
+function armBones(c, shX, shY, ex, ey, hx, hy, far, glow) {
+  c.lineJoin = 'round';
+  const dark = far ? 'rgba(32,41,54,0.9)' : 'rgba(38,48,62,0.9)';
+  const mid = far ? '#6d7a8c' : '#8593a6';
+  const lit = far ? 'rgba(190,205,224,0.32)' : 'rgba(226,236,250,0.5)';
+  const w = far ? 3.4 : 3.8;
+  armBone(c, shX, shY, ex, ey, w, 1.5, dark, mid, lit);          // upper arm
+  armBone(c, ex, ey, hx, hy, w * 0.86, 1.5, dark, mid, lit);     // forearm
+  armJoint(c, shX, shY, w * 0.72, dark, far ? '#7e8b9d' : '#9aa7b8', glow);
+  armJoint(c, ex, ey, w * 0.62, dark, far ? '#8b98aa' : '#aab6c6', glow);
 }
 function armPaw(c, hx, hy, wr, spread, far) {
   c.save(); c.translate(hx, hy); c.rotate(wr);
@@ -1566,7 +1603,7 @@ class Player {
       // dark contour underneath, then the metal inside it. Without the contour
       // the arm is the same value as the belly it crosses and vanishes into it,
       // which is exactly what it used to do.
-      armBones(c, shX, shY, ex, ey, hx, hy, false);
+      armBones(c, shX, shY, ex, ey, hx, hy, false, P.glow);
       // THE PAW. It was a circle, which meant it pointed nowhere and could not
       // lead or trail the arm. It is now a pad with three toes, and its wrist
       // rides a softer spring than the arm does — so it drags behind the swing
@@ -1579,7 +1616,7 @@ class Player {
       if (this.swingVis && swingHand !== 'B')
         this._paw = { x: hx, y: hy, a: ang, dir: swingPose ? swingPose.dir : 1,
                       sgn: Math.sign(this.faceVis == null ? this.face : this.faceVis) || this.face || 1 };
-      c.fillStyle = P.glow; c.beginPath(); c.arc(shX, shY, 1.7, 0, 7); c.arc(ex, ey, 1.3, 0, 7); c.fill();
+      // (the shoulder and elbow lights are part of the joints themselves now)
       // FERAL CLAWS: three purple energy talons splay from the paw
       if (this.clawT > 0) {
         c.save(); c.translate(hx, hy); c.rotate(ang);
@@ -1637,7 +1674,7 @@ class Player {
         const bhx = bsx + Math.cos(ba) * br, bhy = bsy + Math.sin(ba) * br;
         const bbone = Math.max(7.2, br * 0.56);
         const bel = rigIK(bsx, bsy, bhx, bhy, bbone, bbone, -1);
-        armBones(c, bsx, bsy, bel.x, bel.y, bhx, bhy, true);
+        armBones(c, bsx, bsy, bel.x, bel.y, bhx, bhy, true, null);
         const bwr = rigAng(this, 'armFBW', ba, 520, this.rigDt);
         armPaw(c, bhx, bhy, bwr, 1 + Math.sin(bp.p * Math.PI) * 0.5, true);
         if (this.clawT <= 0) {
