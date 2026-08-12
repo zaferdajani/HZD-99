@@ -160,7 +160,7 @@ function newSave(diff) {
   return {
     v: 1, diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [], arms: [], armIdx: 0, stars: 6,
     slots: 3, iq: 0, skills: [], relics: [], flags: {}, broken: {}, visited: {}, shop: {},
-    bench: { room: 'A1', x: 80, y: 412 }, deaths: 0, lives: 0, time: 0,
+    bench: { room: 'A0', x: 70, y: 412 }, deaths: 0, lives: 0, time: 0,
     pouch: null, usedNine: false, won: false, evo: 0,
   };
 }
@@ -182,6 +182,7 @@ function checkEvo() {
 function grantMod(id) {
   G.save.abil[id] = 1;
   showItem(t('m_' + id), t('m_' + id + 'd'));
+  lessonStart(id);                                  // and then teach it
 }
 function grantCrest(id) {
   if (G.save.crests.indexOf(id) < 0) G.save.crests.push(id);
@@ -374,8 +375,9 @@ function startGame(save) {
   player = new Player(save.bench.x, save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
   updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
-  if (save.time < 1) { G.state = 'INTRO'; G.introT = 0; G.introSlam = false; }
-  else G.state = 'PLAY';
+  // No card, no crawl. The film has just told this story; repeating it in text
+  // is asking the player to read the thing they were watching a second ago.
+  G.state = 'PLAY';
 }
 function respawn() {
   if (G.save.diff === 2 && G.save.lives >= 9) { G.state = 'GAMEOVER'; return; }
@@ -599,6 +601,7 @@ function update(dt) {
       if (G.plats) for (const pl of G.plats) pl.update(dt);
       sawHum(dt);
       updateTutor(dt);
+      updateLesson(dt);
       // during a finishing blow she is driven, not steered — the choice was the
       // input, and nothing the player does now can fumble it
       if (G.finish && typeof updateFinisher === 'function') updateFinisher(dt);
@@ -1811,7 +1814,16 @@ function endPurifyCut() {
     while (G.reel.length) {
       const k = G.reel.shift();
       const cap = G.reelCap ? G.reelCap.shift() : null;
-      if (startPurifyCut(k)) { if (cap) { G.cut.cap = cap; G.cut.patient = true; } return; }
+      if (startPurifyCut(k)) {
+        if (cap) { G.cut.cap = cap; G.cut.patient = true; }
+        // straight into the next shot, over the frame the last one ended on
+        if (purifyReady(k)) {
+          G.cut.ph = 'play'; G.cut.t = 0; G.cut.diss = 0.5;
+          const pr = G.cut.v.play();
+          if (pr && pr.catch) pr.catch(() => { if (G.cut) G.cut.failed = true; });
+        }
+        return;
+      }
     }
     G.reel = null; G.reelCap = null;
     // the opening film hands over to the comic's own ending — the title card
@@ -1899,10 +1911,14 @@ function updateCut(dt) {
       ct.ph = 'hold'; ct.t = 0; ct.stall = 0; ct.held = Math.max(0, (ct.held || 0) - 4);
       return;
     }
-    if (dead || ct.stall > 1.5 || ct.t > cap) { ct.ph = 'out'; ct.t = 0; }
+    if (dead || ct.stall > 1.5 || ct.t > cap) {
+      ct.ph = 'out'; ct.t = 0;
+      // mid-reel the outgoing shot barely dips: the next one is already coming
+      ct.quick = !!(G.reel && G.reel.length);
+    }
     return;
   }
-  if (ct.t >= 0.65) endPurifyCut();
+  if (ct.t >= (ct.quick ? 0.16 : 0.65)) endPurifyCut();
 }
 function drawCut() {
   const ct = G.cut;
@@ -1928,7 +1944,16 @@ function drawCut() {
     c.restore();
     return;
   }
-  const a = ct.ph === 'out' ? 1 - clamp(ct.t / 0.65, 0, 1) : clamp(ct.t / 0.45, 0, 1);
+  const fadeIn = ct.diss ? ct.diss : 0.45;
+  const a = ct.ph === 'out' ? 1 - clamp(ct.t / (ct.quick ? 0.16 : 0.65), 0, 1) : clamp(ct.t / fadeIn, 0, 1);
+  // THE SHOT BEFORE THIS ONE, still there, going out as this one comes in.
+  // Without it the reel fades to black between every shot, and eight shots
+  // separated by black is a slideshow no matter how good the shots are.
+  if (ct.snap && ct.ph === 'play' && ct.t < fadeIn) {
+    c.save(); c.globalAlpha = 1 - ct.t / fadeIn;
+    try { c.drawImage(ct.snap, 0, 0, 960, 540); } catch (e) {}
+    c.restore();
+  }
   const v = ct.v;
   if (v && v.videoWidth) {
     // letterbox the film inside the frame — never crop the authored art
@@ -3273,29 +3298,64 @@ addEventListener('mousedown', (e) => {
 // ===========================================================================
 const TUT_STEPS = [
   { id: 'move', label: 'tut_move', hint: 'tut_move_h',
-    keys: '← →', pad: 'D-pad', touch: 'stick',
+    keys: '\u2190 \u2192', pad: 'D-pad', touch: 'stick', vb: null,
     done: () => Math.abs(player.vx) > 40 },
   { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h',
-    keys: 'Z / Space', pad: 'A', touch: 'JUMP',
+    keys: 'Z / Space', pad: 'A', touch: 'JUMP', vb: 'VJUMP',
     done: () => !player.on && player.vy < -60 },
   { id: 'atk', label: 'tut_atk', hint: 'tut_atk_h',
-    keys: 'X', pad: 'X', touch: 'ATK',
+    keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
     done: () => !!player.swing || player.comboT > 0 },
+  { id: 'go', label: 'tut_go', hint: 'tut_go_h',
+    keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
+    done: () => false },                       // ends by leaving the room
 ];
 function tutHand(st) {
   if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled) return st.touch;
   if (typeof PAD !== 'undefined' && PAD && PAD.on) return st.pad;
   return st.keys;
 }
+// The lessons are STAGED IN THE ROOM: open ground for the first, the step for
+// the second, and a machine walking at her for the third — held just short of
+// touching, because a lesson you can fail is not a lesson, it is a fight.
 function updateTutor(dt) {
   const sv = G.save;
   if (!sv || !player || player.dead) return;
-  if (sv.flags && sv.flags.tut) return;                    // learned, for good
+  if (sv.flags && sv.flags.tut) return;
+  if (G.roomId !== 'A0') {                       // the waking floor is behind her
+    if (sv.flags) sv.flags.tut = 1;
+    G.tut = null; if (typeof TOUCH !== 'undefined' && TOUCH) TOUCH.hi = null;
+    return;
+  }
   if (!G.tut) G.tut = { i: 0, t: 0, hold: 0, doneT: 0 };
   const T = G.tut;
-  if (T.doneT > 0) { T.doneT -= dt; if (T.doneT <= 0 && sv.flags) sv.flags.tut = 1; return; }
   const st = TUT_STEPS[T.i];
-  if (!st) { T.doneT = 1.8; return; }
+  // THE DUMMY. Calm, so it can never take a core off her, and stopped short of
+  // arm's length until the claw has been taught — then it walks in and is held
+  // there, close enough to be frightening and too far to touch.
+  const dum = G.enemies && G.enemies.find(e => e && !e.dead);
+  if (dum) {
+    dum.calm = true; dum.hypnoT = 1e9;
+    const gap = (dum.x + dum.w / 2) - (player.x + player.w / 2);
+    if (T.i < 2 || Math.abs(gap) < 96) { dum.vx = 0; dum.stagT = Math.max(dum.stagT || 0, 0.12); }
+  }
+  if (typeof TOUCH !== 'undefined' && TOUCH) TOUCH.hi = (st && st.vb && TOUCH.enabled) ? st.vb : null;
+  // THE DOOR WAITS. Nothing here can hurt her and nothing here can trap her —
+  // but a teaching room she can walk straight out of teaches only the first
+  // verb, which is what happened: she strolled past the machine she was being
+  // asked to scratch and into a room with real ones. The way out holds until
+  // the three verbs are done, and then opens itself.
+  if (T.i < 3) {
+    const lim = (G.roomDef.w - 2.2) * TILE - player.w;
+    if (player.x > lim) { player.x = lim; if (player.vx > 0) player.vx = 0; }
+  } else if (!T.opened) {
+    T.opened = true;
+    sfx('cast'); cam.shake = Math.max(cam.shake, 3);
+    for (let i = 0; i < 18; i++)
+      addPart((G.roomDef.w - 1.6) * TILE, 11 * TILE + rnd(0, 3.4 * TILE),
+        rnd(-40, 60), rnd(-70, 30), rnd(0.4, 0.8), '#37ffd0', 2.6, 120, true);
+  }
+  if (!st) return;
   T.t += dt;
   if (T.hold > 0) { T.hold -= dt; if (T.hold <= 0) { T.i++; T.t = 0; } return; }
   let ok = false;
@@ -3304,54 +3364,135 @@ function updateTutor(dt) {
     T.hold = 0.7;
     sfx('pick');
     burst(player.x + player.w / 2, player.y + 4, 12, '#37ffd0', 190, 0.5, 220, 3, true);
-    if (T.i >= TUT_STEPS.length - 1 && sv.flags) { T.doneT = 1.6; }
   }
 }
 function drawTutor() {
   const sv = G.save;
-  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player) return;
+  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player || G.roomId !== 'A0') return;
   const T = G.tut;
-  const px = player.x + player.w / 2 - cam.x, py = player.y - cam.y;
-  if (T.doneT > 0) {
-    c.save();
-    c.globalAlpha = Math.min(1, T.doneT / 0.5);
-    ftxt(t('tut_done'), px, py - 52, 18, '#37ffd0', 'center', '#37ffd0', '700');
-    c.restore(); c.globalAlpha = 1;
-    return;
-  }
   const st = TUT_STEPS[T.i];
   if (!st) return;
+  const px = player.x + player.w / 2 - cam.x, py = player.y - cam.y;
   const learned = T.hold > 0;
   const pu = 0.5 + Math.sin(performance.now() / 260) * 0.5;
-  // a card that floats over her head and follows her, so the lesson and the
-  // thing being taught are never in two different places on the screen
-  const key = tutHand(st);
+  // THE THING BEING TAUGHT, RINGED. A card that names a verb teaches nothing if
+  // the player cannot see what it is about — so the step gets a ring while the
+  // jump is being taught and the machine gets one while the claw is.
+  const mark = (wx, wy, r, col) => {
+    c.save();
+    c.strokeStyle = col; c.lineWidth = 2.5; c.globalAlpha = 0.35 + pu * 0.5;
+    c.setLineDash([6, 6]); c.lineDashOffset = -performance.now() / 70;
+    c.beginPath(); c.arc(wx - cam.x, wy - cam.y, r + pu * 3, 0, 7); c.stroke();
+    c.setLineDash([]); c.restore(); c.globalAlpha = 1;
+  };
+  if (st.id === 'jump') mark(17 * TILE + 12, 14 * TILE + 12, 34, '#37ffd0');
+  if (st.id === 'atk') {
+    const dum = G.enemies && G.enemies.find(e => e && !e.dead);
+    if (dum) mark(dum.x + dum.w / 2, dum.y + dum.h / 2, 30, '#ff8a6a');
+  }
+  if (st.id === 'go') mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
+  if (T.i < 3) {
+    // the held door: a light curtain, not a wall — it reads as "not yet"
+    const bx = (G.roomDef.w - 2.0) * TILE - cam.x;
+    c.save();
+    c.globalCompositeOperation = 'lighter';
+    const bg = c.createLinearGradient(bx - 10, 0, bx + 14, 0);
+    bg.addColorStop(0, 'rgba(55,255,208,0)');
+    bg.addColorStop(0.5, 'rgba(55,255,208,' + (0.16 + pu * 0.12).toFixed(3) + ')');
+    bg.addColorStop(1, 'rgba(55,255,208,0)');
+    c.fillStyle = bg;
+    c.fillRect(bx - 10, 10.4 * TILE - cam.y, 24, 4.6 * TILE);
+    c.strokeStyle = 'rgba(55,255,208,' + (0.3 + pu * 0.3).toFixed(3) + ')';
+    c.lineWidth = 1.5;
+    for (let i = 0; i < 5; i++) {
+      const yy = (10.6 + i * 0.9) * TILE - cam.y + Math.sin(performance.now() / 300 + i) * 3;
+      c.beginPath(); c.moveTo(bx - 7, yy); c.lineTo(bx + 7, yy); c.stroke();
+    }
+    c.restore();
+  }
+  tutCard(px, py, tutHand(st), t(st.label), t(st.hint), learned, Math.max(0, T.hold / 0.7));
+}
+// one card, used by the waking floor and by every power she is handed after it
+function tutCard(px, py, key, label, hint, learned, fade) {
+  const pu = 0.5 + Math.sin(performance.now() / 260) * 0.5;
   c.font = '700 15px "Segoe UI", Tahoma, sans-serif';
   const kw = c.measureText(key).width + 26;
   c.font = '600 15px "Segoe UI", Tahoma, sans-serif';
-  const lw = c.measureText(t(st.label)).width;
-  const w = Math.max(150, kw + lw + 34), x = clamp(px - w / 2, 12, 948 - w), y = clamp(py - 78, 8, 430);
+  const lw = Math.max(c.measureText(label).width, c.measureText(hint).width * 0.8);
+  const w = Math.max(160, kw + lw + 34), x = clamp(px - w / 2, 12, 948 - w), y = clamp(py - 78, 8, 430);
   c.save();
-  c.globalAlpha = learned ? Math.max(0, T.hold / 0.7) : 1;
+  c.globalAlpha = learned ? Math.max(0, fade) : 1;
   c.fillStyle = 'rgba(6,14,20,0.86)'; rr(c, x, y, w, 46, 10); c.fill();
   c.strokeStyle = learned ? '#7de8a0' : 'rgba(55,255,208,' + (0.35 + pu * 0.45) + ')';
   c.lineWidth = 2; rr(c, x, y, w, 46, 10); c.stroke();
-  // the control, drawn as the key cap it is
   c.fillStyle = learned ? 'rgba(125,232,160,0.22)' : 'rgba(55,255,208,0.16)';
   rr(c, x + 10, y + 10, kw, 26, 6); c.fill();
   ftxt(key, x + 10 + kw / 2, y + 24, 15, learned ? '#bff5d2' : '#8ff0d4', 'center', null, '700');
-  ftxt(learned ? '✓ ' + t(st.label) : t(st.label), x + kw + 22, y + 20, 15,
+  ftxt(learned ? '\u2713 ' + label : label, x + kw + 22, y + 20, 15,
     learned ? '#bff5d2' : '#eef3fa', 'left', null, '600');
-  ftxt(t(st.hint), x + kw + 22, y + 36, 12, '#7d93a8', 'left');
-  c.restore(); c.globalAlpha = 1;
-  // a little arrow pointing down at her, so it is clear who the card is about
-  c.save();
-  c.globalAlpha = learned ? Math.max(0, T.hold / 0.7) * 0.8 : 0.8;
+  ftxt(hint, x + kw + 22, y + 36, 12, '#7d93a8', 'left');
   c.fillStyle = learned ? '#7de8a0' : '#37ffd0';
+  c.globalAlpha = (learned ? Math.max(0, fade) : 1) * 0.8;
   c.beginPath();
   c.moveTo(px - 6, y + 48); c.lineTo(px + 6, y + 48); c.lineTo(px, y + 56);
   c.closePath(); c.fill();
   c.restore(); c.globalAlpha = 1;
+}
+// ===========================================================================
+// A POWER YOU CANNOT WORK IS NOT A POWER. Every guardian hands over something
+// new, and until now the handover was one line of text inside a dialogue box:
+// read it, close it, and by the time there is a wall worth clinging to it has
+// been forgotten. Each one now teaches itself the same way the first three
+// verbs do — the control this player has in their hands, what it is FOR in
+// four words, and it waits until they have actually done it once.
+// ===========================================================================
+const MOD_LESSON = {
+  dash:  { vb: 'VDASH', keys: 'C / Shift', pad: 'RB', touch: 'DASH',
+           done: () => player.dashT > 0 },
+  djump: { vb: 'VJUMP', keys: 'Z / Space', pad: 'A', touch: 'JUMP',
+           done: () => !player.on && player.airJumps < (hasSkill('triple') ? 2 : 1) },
+  wall:  { vb: null, keys: '\u2190 \u2192', pad: 'D-pad', touch: 'stick',
+           done: () => !!player.wallSlide },
+  emp:   { vb: 'VCAST', keys: 'V', pad: 'B', touch: 'CAST',
+           done: () => player.castCD > 0 },
+};
+function lessonStart(id) {
+  if (!MOD_LESSON[id]) return;
+  if (G.save && G.save.flags && G.save.flags['les_' + id]) return;
+  G.lesson = { id, t: 0, hold: 0 };
+}
+function updateLesson(dt) {
+  const L = G.lesson;
+  if (!L || !player || player.dead) return;
+  const M = MOD_LESSON[L.id];
+  if (!M) { G.lesson = null; return; }
+  if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled && !G.tut) TOUCH.hi = M.vb || null;
+  L.t += dt;
+  if (L.hold > 0) {
+    L.hold -= dt;
+    if (L.hold <= 0) {
+      if (G.save.flags) G.save.flags['les_' + L.id] = 1;
+      G.lesson = null;
+      if (typeof TOUCH !== 'undefined' && TOUCH) TOUCH.hi = null;
+      persist();
+    }
+    return;
+  }
+  let ok = false;
+  try { ok = M.done(); } catch (e) { ok = false; }
+  if (ok && L.t > 0.3) {
+    L.hold = 1.1;
+    sfx('pick');
+    burst(player.x + player.w / 2, player.y + 4, 14, '#37ffd0', 200, 0.5, 220, 3, true);
+  }
+}
+function drawLesson() {
+  const L = G.lesson;
+  if (!L || !player || G.state !== 'PLAY') return;
+  const M = MOD_LESSON[L.id];
+  if (!M) return;
+  tutCard(player.x + player.w / 2 - cam.x, player.y - cam.y, tutHand(M),
+    t('m_' + L.id), t('les_' + L.id), L.hold > 0, L.hold / 1.1);
 }
 function drawHUD() {
   const P = PAL[G.roomDef.zone];
@@ -4429,6 +4570,7 @@ function draw(tms) {
   }
   if (typeof drawBrDelta === 'function') drawBrDelta();
   drawTutor();
+  drawLesson();
   drawHUD();
   drawMapButton();
   if (G.trans) {
@@ -5554,10 +5696,16 @@ loadMeta();
 // the page is still silent neither has started, so the tap that finally
 // unlocks audio could wake both and play them over each other. On a first
 // boot the opening's score is the only thing anyone should hear.
-let introBoot = false;
-try { introBoot = !localStorage.getItem('cb_intro_seen') && gameLock() !== 'hero'; } catch (e) {}
-if (introBoot) { try { startCine(); } catch (e) { introBoot = false; } }
-if (!introBoot) setMusic('title');
+setMusic('title');
+// THE FILM BELONGS TO NEW GAME, not to the page load. It used to play itself
+// the first time the page was ever opened, which put a two-minute prologue in
+// front of somebody who had not yet decided to play — and then never again,
+// which meant the person who made it almost never saw it. It now starts when
+// New Game is pressed, and the clips are fetched here, quietly, while the menu
+// is on screen, so that press starts a film that is already in memory.
+if (gameLock() !== 'hero') {
+  setTimeout(() => { try { for (const sh of INTRO_FILM) purifyPreload(sh[0]); } catch (e) {} }, 900);
+}
 // look for a newer build at boot, and again every few minutes while idling
 G.updateStamp = 1;
 setTimeout(checkForUpdate, 2500);

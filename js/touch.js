@@ -669,6 +669,24 @@ function drawTouchUI() {
         tcx.fillStyle = g;
         tcx.beginPath(); tcx.arc(b.x, b.y, b.r + 10, 0, 7); tcx.fill();
       }
+      // THE BUTTON BEING TAUGHT. The lesson card names the control, but on a
+      // phone "ATK" is a word, not a place — so the tutor points at the actual
+      // button under the player's thumb and rings it until it is pressed.
+      if (TOUCH.hi && b.code === TOUCH.hi) {
+        const pu2 = 0.5 + Math.sin(performance.now() / 240) * 0.5;
+        tcx.save();
+        tcx.strokeStyle = 'rgba(55,255,208,' + (0.45 + pu2 * 0.5).toFixed(2) + ')';
+        tcx.lineWidth = 3;
+        tcx.setLineDash([8, 7]); tcx.lineDashOffset = -performance.now() / 60;
+        tcx.beginPath(); tcx.arc(b.x, b.y, b.r + 9 + pu2 * 4, 0, 7); tcx.stroke();
+        tcx.setLineDash([]);
+        const g2 = tcx.createRadialGradient(b.x, b.y, 3, b.x, b.y, b.r + 16);
+        g2.addColorStop(0, 'rgba(55,255,208,' + (0.22 * pu2 + 0.12).toFixed(2) + ')');
+        g2.addColorStop(1, 'rgba(55,255,208,0)');
+        tcx.fillStyle = g2;
+        tcx.beginPath(); tcx.arc(b.x, b.y, b.r + 16, 0, 7); tcx.fill();
+        tcx.restore();
+      }
       tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, null, b.sym, b.tint);
     }
   } else if (kind === 'menu') {

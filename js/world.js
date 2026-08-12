@@ -29,6 +29,21 @@ function openR(g) { const w = g[0].length; rect(g, w - 1, 11, w - 1, 14, '.'); }
 
 // ents: [kind, tileX, tileYFeetOn, extra?, condFlag?]
 const ROOMS = {
+  // ============ THE WAKING FLOOR ============
+  // Where she comes to. No enemy that can hurt her, no pit that can kill her,
+  // no way to go but right — a room whose only job is to teach three verbs, in
+  // the order they are needed, with the thing being taught standing in front of
+  // her when the lesson starts: open ground to walk, a step to jump, and one
+  // dormant machine to scratch. Every good platformer opens with a room like
+  // this and it is the one room this game never had.
+  A0: { zone: 'A', w: 34, h: 17, exits: { R: 'A1' },
+    ents: [['crawler', 25, 15]],
+    build(g) {
+      frame(g); openR(g);
+      rect(g, 16, 14, 18, 15, '#');       // the step she has to jump
+      hline(g, 4, 7, 12, '=');            // a lit shelf, for looking at
+      hline(g, 27, 30, 11, '=');
+    } },
   // ============ ZONE A — Scrap Meadows ============
   A1: { zone: 'A', w: 30, h: 17, exits: { R: 'A2' },
     ents: [['npc', 6, 15, 'servo'], ['crawler', 18, 15], ['crawler', 24, 15], ['scrap', 12, 15, 10]],
