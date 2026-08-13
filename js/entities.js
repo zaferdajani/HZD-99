@@ -188,8 +188,15 @@ function armBones(c, shX, shY, ex, ey, hx, hy, far, glow) {
   const w = far ? 3.4 : 3.8;
   armBone(c, shX, shY, ex, ey, w, 1.5, dark, mid, lit);          // upper arm
   armBone(c, ex, ey, hx, hy, w * 0.86, 1.5, dark, mid, lit);     // forearm
-  armJoint(c, shX, shY, w * 0.72, dark, far ? '#7e8b9d' : '#9aa7b8', glow);
-  armJoint(c, ex, ey, w * 0.62, dark, far ? '#8b98aa' : '#aab6c6', glow);
+  // TWO PUCKS PLUS A PAW IS THREE BEADS ON A STRING, and at the size she is
+  // played that is what the arm read as — a chain of knuckles rather than a
+  // limb. A shoulder is not a visible joint on a real body, it is where the
+  // arm disappears under the shoulder: it is drawn flush and unlit, no wider
+  // than the casing it caps, so it closes the bone instead of adding a bump.
+  // Only the ELBOW stays a hinge, because the elbow is the one that does
+  // something you can see it do.
+  armJoint(c, shX, shY, w * 0.52, dark, far ? '#7e8b9d' : '#9aa7b8', null);
+  armJoint(c, ex, ey, w * 0.6, dark, far ? '#8b98aa' : '#aab6c6', glow);
 }
 function armPaw(c, hx, hy, wr, spread, far) {
   c.save(); c.translate(hx, hy); c.rotate(wr);
@@ -1195,8 +1202,8 @@ class Player {
         const eb = kb < 0.5 ? 2 * kb * kb : 1 - Math.pow(-2 * kb + 2, 2) / 2;
         const tb = eb * Math.PI * 2, fb = Math.cos(tb);
         c.save();
-        c.scale((fb < 0 ? -1 : 1) * Math.max(0.33, Math.abs(fb)), 1);
-        c.rotate(Math.sin(tb) * 0.05);
+        c.scale((fb < 0 ? -1 : 1) * Math.max(0.52, Math.abs(fb)), 1);
+        c.rotate(Math.sin(tb) * 0.19);
         c.globalAlpha = 0.22 - g * 0.05;
         c.fillStyle = P.glow;
         rr(c, -13, -25, 26, 19, 9); c.fill();                    // body
@@ -1207,9 +1214,22 @@ class Player {
       }
       c.restore();
       c.globalAlpha = 1;
+      // SHE FOLDED LIKE PAPER, and a flat scale on x is exactly why: squeezing a
+      // drawing to a third of its width does not turn a body, it closes a book.
+      // Nothing about the figure got thicker as it turned edge-on, because a
+      // sheet has no thickness to show.
+      //
+      // A real body seen edge-on is still a body — narrower, but not gone, and
+      // its EDGE is what you see. So the squeeze stops at 0.52 rather than 0.33
+      // (a robot cat has depth: shoulders, a chest, a pack), the figure leans
+      // into the turn instead of staying bolt upright, and it lifts slightly at
+      // the profile pass the way a spinning thing does when it is not on a
+      // spit. Same one turn, same timing — it just has a third dimension now.
       const fx = Math.cos(th);
-      c.scale((fx < 0 ? -1 : 1) * Math.max(0.33, Math.abs(fx)), 1);
-      c.rotate(Math.sin(th) * 0.05);
+      const edge = 1 - Math.abs(fx);                 // 0 face-on, 1 edge-on
+      c.scale((fx < 0 ? -1 : 1) * Math.max(0.52, Math.abs(fx)), 1 + edge * 0.06);
+      c.rotate(Math.sin(th) * 0.19);
+      c.translate(0, -edge * 1.6);
     }
     c.scale(sx, sy * (1 - cr));
     // evolution: the frame grows with each power milestone (visual only — hitbox unchanged)
@@ -1419,6 +1439,57 @@ class Player {
         c.beginPath(); c.moveTo(-1.4, -2); c.lineTo(-1.4, -17); c.lineTo(0, -21); c.lineTo(1.4, -17); c.lineTo(1.4, -2); c.closePath(); c.fill();
         c.shadowBlur = 0; c.restore();
       }
+    }
+    // ---- THE FAR FORELEG -------------------------------------------------
+    // SHE HAD ONE ARM. The rear arm was only ever drawn while it was throwing
+    // the second beat of a combo — every other frame of the game, standing,
+    // walking, running, jumping, she was a one-armed cat, and at the size she
+    // is played that does not read as "the far arm is hidden behind her", it
+    // reads as a missing limb.
+    //
+    // It lives HERE, before the shell, because that is what makes it the far
+    // arm: drawn behind the body and darker, so the near arm crossing the
+    // belly still wins the eye. Its swing is the near arm's in antiphase — the
+    // opposite foreleg, which is what a walk actually is — and it is deliberately
+    // held closer to the body, since a rear limb that reaches as far forward as
+    // the front one stops reading as depth and starts reading as a second cat.
+    //
+    // AND IT HAS TO CLEAR THE SILHOUETTE. Mounted on the near side and aimed
+    // forward like the front arm, it is drawn every frame and hidden by the
+    // belly in all of them — which is exactly the bug it was added to fix,
+    // committed twice. It is mounted on the BACK edge of the chest and hangs
+    // down the far side, so the paw shows past the body's outline: a limb you
+    // can see is a limb, and one you cannot is nothing.
+    if (!hero) {
+      // SHE IS DRAWN ALMOST FRONT-ON — one visor, two eyes, both ears — so the
+      // far arm is not a limb hiding behind a profile, it is the other arm, and
+      // it belongs on the other shoulder doing the mirror of what this one does.
+      // Hung down the back edge instead, it spent every frame inside the belly:
+      // present in the code, absent from the screen, which is the same bug.
+      const fsX = -10, fsY = -19.5 + bob * 0.4;
+      const MIR = Math.PI;                                  // pi - a mirrors an angle
+      let fAng, fReach;
+      if (this.hurtPoseT > 0) {
+        fAng = MIR + 1.9 - Math.sin(this.anim * 30) * 0.75; fReach = 11.5;
+      } else if (this.wallSlide !== 0) {
+        fAng = MIR + 0.55; fReach = 11;                     // reaching away from the wall
+      } else if (run && sprintK > 0.25) {
+        fAng = MIR - 1.35 - sprintK * 0.5 + Math.sin(ph) * 0.12;
+        fReach = 13 + sprintK * 3;
+      } else if (!this.onGround) {
+        fAng = MIR - 0.62; fReach = 11.5;                   // tucked in the air
+      } else {
+        const sw = run ? Math.sin(ph) : 0;                  // ANTIPHASE to the near arm
+        fAng = MIR - 0.72 - sw * 0.26 - Math.sin(this.anim * 2 + 1.1) * 0.05;
+        fReach = 12.6 + sw * 1.1;
+      }
+      fAng = rigAng(this, 'armFA', fAng, 260, this.rigDt);
+      fReach = rigStep(this, 'armFR', fReach, 200, this.rigDt);
+      const fhx = fsX + Math.cos(fAng) * fReach, fhy = fsY + Math.sin(fAng) * fReach;
+      const fbone = Math.max(6.6, fReach * 0.56);
+      const fel = rigIK(fsX, fsY, fhx, fhy, fbone, fbone, -1);
+      armBones(c, fsX, fsY, fel.x, fel.y, fhx, fhy, true, null);
+      armPaw(c, fhx, fhy, fAng, 1, true);
     }
     // body — the CHUBBY ceramic shell (spec §1.1): rounded, bottom-heavy,
     // wider at the hips than the chest. A pear, not a box.
@@ -3802,6 +3873,19 @@ const TELL_ST = /warn|charge|crouch|coil|lock|prep|spin|gather|roar|volley|brood
 // and sound in every use, because roughly one man in twelve cannot rely on hue.
 const TELL_COL = '#ffc24a';
 const BURST_VOLTS = 25;
+// GLACIERE'S REST BEAT, in one place because it was wrong in five.
+//
+// Measured over twenty-five seconds of a real fight: SIXTY-TWO PER CENT of her
+// samples were `idle`. Every power ended with `this.st = 'idle'; this.t = 2.1`
+// — a two-second pause after a half-second telegraph — so the fight she
+// actually presents is a hovering unicorn waiting for a timer, punctuated. The
+// tell is not the problem and never was; the silence after it is.
+//
+// A rest beat has a job: it is the window you attack into. It has to be long
+// enough to be a window and short enough that you are still being fought.
+// Roughly one second, tightening as she loses, with a little variance so the
+// rhythm is not a metronome you can set your watch by.
+function glcRest(b) { return b.phase === 2 ? rnd(0.48, 0.72) : rnd(0.8, 1.1); }
 class Boss {
   constructor(kind, x, y) {
     const s = BSTAT[kind];
@@ -4693,11 +4777,31 @@ class Boss {
         const hovY = clamp(py - 130, 80, 330);
         if (this.st !== 'dash' && this.st !== 'dashwarn')
           this.face = Math.sign(px - this.cx()) || this.face || 1;
+        // leaving idle forgets the station, so coming back picks a new one
+        if (this.st !== 'idle') { this.glcStat = null; this._glcWas = this.st; }
         if (this.st === 'idle') {
-          // the float: glide toward a point flanking the prey
-          const tx2 = clamp(px + (this.cx() < px ? -190 : 190), 70, gW - 70);
-          this.x = lerp(this.x, tx2 - this.w / 2, dt * 1.1);
-          this.y = lerp(this.y, hovY, dt * 1.4);
+          // THE FLOAT, and why it read as waiting rather than flying.
+          //
+          // hovY is `clamp(py - 130, 80, 330)`, and a player standing on the
+          // floor of her room puts that value hard against 330 — so she parked
+          // at one altitude and stayed there for the whole fight, drifting
+          // sideways at a lerp rate of 1.1 that could not close the distance
+          // before the next timer fired. Fixed height plus imperceptible motion
+          // is a hovering statue however many powers it has.
+          //
+          // She now picks a fresh station each time she comes to rest — which
+          // side, how high, how far out — and MOVES to it, fast enough to be
+          // seen going. A guardian who flies should look like she chose where
+          // to be.
+          if (this.glcStat == null || this.st !== this._glcWas) {
+            this.glcStat = { side: this.cx() < px ? -1 : 1, out: rnd(150, 230), up: rnd(-40, 95) };
+          }
+          this._glcWas = 'idle';
+          const S = this.glcStat;
+          const tx2 = clamp(px + S.side * S.out, 70, gW - 70);
+          const ty2 = clamp(hovY - S.up, 70, 14 * TILE - this.h - 40);
+          this.x = lerp(this.x, tx2 - this.w / 2, dt * 2.6);
+          this.y = lerp(this.y, ty2, dt * 2.4);
           // DATA CORRUPTION makes the whole unit run hotter while your HUD lies
           this.t -= dt * ((G.hudGlitchT || 0) > 0 ? 1.45 : 1);
           const adist = Math.abs(px - this.cx());
@@ -4739,7 +4843,7 @@ class Boss {
               pr.glcFx = 'lance'; G.projs.push(pr);
             }
             sfx('cast'); cam.shake = 4;
-            this.st = 'idle'; this.t = this.phase === 2 ? 1.5 : 2.1;
+            this.st = 'idle'; this.t = glcRest(this);
           }
         } else if (this.st === 'shardwarn') {
           // ice condenses along the spine crystals, then the fan flies
@@ -4757,7 +4861,7 @@ class Boss {
                 pr.glcFx = 'shard'; pr.frost = true; G.projs.push(pr);
               } else this.glcShardQ.push({ a, d: 0.07 });
             }
-            sfx('shoot'); this.st = 'idle'; this.t = this.phase === 2 ? 1.4 : 2.0;
+            sfx('shoot'); this.st = 'idle'; this.t = glcRest(this);
           }
         } else if (this.st === 'dashwarn') {
           // she squares up and coils; the charge line is drawn in the air
@@ -4788,14 +4892,16 @@ class Boss {
         } else if (this.st === 'recover') {
           // spent from the charge — your window
           this.t -= dt; this.y = lerp(this.y, hovY, dt * 1.2);
-          if (this.t <= 0) { this.st = 'idle'; this.t = 0.9; }
+          if (this.t <= 0) { this.st = 'idle'; this.t = glcRest(this); }
         } else if (this.st === 'novawarn') {
           this.t -= dt; this.vx = 0; this.vy = 0;
           if (this.t <= 0) {
             this.nova = { r: 24 };
             burst(this.cx(), this.cy(), 26, '#e0f7fa', 380, 0.6, 0, 3.5, true);
             cam.shake = 7; sfx('break'); G.flash = Math.max(G.flash, 0.18);
-            this.st = 'idle'; this.t = 1.6;
+            // the nova already costs her a stagger; it does not also need a
+            // two-second nap on top of it
+            this.st = 'idle'; this.t = glcRest(this);
             this.stagT = Math.max(this.stagT, 0.55);   // spent for a breath
           }
         } else if (this.st === 'orbs') {
@@ -4807,7 +4913,7 @@ class Boss {
             for (let k = 0; k < n2; k++)
               this.orbs.push({ a: k / n2 * Math.PI * 2, cd: 1.4 + k * 0.5, t: 9, x: this.cx(), y: this.cy() });
             sfx('phase');
-            this.st = 'idle'; this.t = 2.0;
+            this.st = 'idle'; this.t = glcRest(this);
           }
         } else if (this.st === 'azhush') {
           this.t -= dt;
@@ -4828,7 +4934,7 @@ class Boss {
             // two follow-up beams while you are slowed — dodge on half speed
             this.marks.push({ x: px, t: 0.55 }, { x: px + (Math.sign(player.vx) || 1) * 70, t: 0.85 });
             this.azR = 0;
-            this.st = 'idle'; this.t = 2.0;
+            this.st = 'idle'; this.t = glcRest(this) + 0.4;   // her biggest rite earns the longest breath
           }
         } else if (this.st === 'dccast') {
           this.t -= dt;
@@ -4840,7 +4946,7 @@ class Boss {
           }
           if (this.t <= 0) {
             G.hudGlitchT = 8; G.toast(t('dc_warn')); sfx('phase');
-            this.st = 'idle'; this.t = 1.8;
+            this.st = 'idle'; this.t = glcRest(this);
           }
         }
         for (let i = this.marks.length - 1; i >= 0; i--) {

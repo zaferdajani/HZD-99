@@ -36,6 +36,19 @@ const BOSSES = {
       aIdle: [6, 282, 197, 149], aWalk: [209, 282, 207, 139],
       aRoar: [422, 282, 237, 159], aAtk: [665, 282, 207, 106],
     },
+    // The four action figures are ALTERNATIVE WHOLE DRAWINGS of the same
+    // animal, and the renderer aligns them by their rects — so they have to
+    // fill those rects or the lion changes size when he starts walking.
+    // Letterboxing them independently is how you get a boss that pops between
+    // frames, which is worse than any amount of proportion drift: the model
+    // draws a leaner lion than the sprite (up to 45% here) and every frame
+    // drifts differently.
+    //
+    // The tail joints fill for the opposite reason — they are a CHAIN, and a
+    // segment that sits short of its rect opens a gap in the middle of the
+    // tail. A 45x28 sleeve stretched to fit is invisible at play size; a hole
+    // in a tail is not.
+    fill: { aIdle: 1, aWalk: 1, aRoar: 1, aAtk: 1, tail0: 1, tail1: 1, tail2: 1, tail3: 1 },
   },
   eagle: {
     atlas: 'assets/characters/eagle_parts.png', table: 'EAGLE_P', src: 'js/eagle.js',

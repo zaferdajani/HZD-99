@@ -2913,6 +2913,18 @@ function drawBG(P, px, py) {
   gl.addColorStop(0, 'rgba(0,0,0,0)'); gl.addColorStop(1, P.mid);
   c.globalAlpha = 0.3; c.fillStyle = gl; c.fillRect(0, 380, 960, 160); c.globalAlpha = 1;
 }
+// What a hazard rail is MADE OF, per kingdom. The machine is the same in every
+// zone; the metal it was cast from, the livery painted on it and what has grown
+// over it since are not. `dress` is the weathering pass drawn over the finished
+// trench — rime in the cold, growth in the hatchery, crystal in the seam.
+const TRAP_SKIN = {
+  A: { dark: '#141a22', mid: '#4d5a66', lit: '#9fadba', hazA: '#c8ce18', hazB: '#1a1d24', dress: null },
+  B: { dark: '#101828', mid: '#3f4d70', lit: '#8fa3cc', hazA: '#38e6ff', hazB: '#121a2c', dress: null },
+  C: { dark: '#1c1310', mid: '#6a4a38', lit: '#c09070', hazA: '#ffa032', hazB: '#241511', dress: null },
+  D: { dark: '#131c26', mid: '#4a6070', lit: '#a8c6d8', hazA: '#bfe8ff', hazB: '#16222e', dress: 'rime' },
+  E: { dark: '#141c14', mid: '#4a5c46', lit: '#9fb894', hazA: '#b6e84a', hazB: '#16201a', dress: 'growth' },
+  X: { dark: '#1a1226', mid: '#544070', lit: '#b49ad8', hazA: '#d24bff', hazB: '#1e1430', dress: 'crystal' },
+};
 function drawTiles(P) {
   const g = G.grid, W = g[0].length, H = g.length;
   const x0 = 0, x1 = W - 1, y0 = 0, y1 = H - 1;
@@ -3072,34 +3084,117 @@ function drawTiles(P) {
       c.save();
       if (G.roomDef.zone === 'C' && !(typeof isHero === 'function' && isHero())) {
         // ---- THE MELT ----
+        //
+        // IT LOOKED LIKE A PLATFORM, and everything about the old drawing said
+        // so: a dead-level top edge, a hard bright line along it, and three
+        // rounded plates laid out in a row that read as BRICKS. Nothing moved.
+        // A still orange rectangle with a straight lip and a masonry pattern is
+        // a platform — that is what a platform is — and no amount of colour was
+        // going to argue the player out of standing on it.
+        //
+        // Lava is a LIQUID and it is HOT, and the two things that say so are
+        // motion and bloom. The surface is a moving wave rather than an edge,
+        // the crust drifts along it instead of sitting in courses, bubbles rise
+        // and burst, and the heat is thrown upward into the air above. The
+        // straight line is gone entirely — there is nothing left in it that
+        // resembles a place to stand.
+        const lt = performance.now() / 1000;
         const cr = rkMix(P.dark, '#000000', 0.55);
         c.fillStyle = cr; c.fillRect(X, Y, TILE, TILE);
+        // the surface, as a wave: two slow sines out of phase, sampled across
+        // the tile, so neighbouring tiles join into one continuous swell
+        const wav = (wx) => Math.sin(wx * 0.042 + lt * 1.15) * 3.6
+                          + Math.sin(wx * 0.017 - lt * 0.7) * 2.4;
+        const top = (wx) => Y + 5.5 + wav(wx);
+        c.save();
+        c.beginPath();
+        c.moveTo(X, Y + TILE);
+        for (let s = 0; s <= TILE; s += 4) c.lineTo(X + s, top(X + s));
+        c.lineTo(X + TILE, Y + TILE); c.closePath();
+        c.clip();
         // molten body, hottest at the surface
         const lg = c.createLinearGradient(0, Y + 2, 0, Y + TILE);
-        lg.addColorStop(0, '#fff1b8'); lg.addColorStop(0.22, '#ffae2e');
-        lg.addColorStop(0.6, '#e8460f'); lg.addColorStop(1, '#6b1204');
-        c.fillStyle = lg; c.fillRect(X, Y + 2, TILE, TILE - 2);
-        // crust: cooled plates floating on it, which is what sells DEPTH —
-        // without them a lava tile is just an orange rectangle
-        for (let k = 0; k < 3; k++) {
-          const h2 = hash2(tx * 11 + k * 17, ty * 5);
-          if (h2 < 0.42) continue;
-          c.fillStyle = 'rgba(38,12,8,0.82)';
-          rr(c, X + 2 + h2 * 18, Y + 5 + hash2(k, tx) * 16, 6 + h2 * 9, 3.5 + h2 * 2.5, 2); c.fill();
-          c.fillStyle = 'rgba(255,150,60,0.35)';
-          c.fillRect(X + 2 + h2 * 18, Y + 4.4 + hash2(k, tx) * 16, 6 + h2 * 9, 1);
+        lg.addColorStop(0, '#fffdf0'); lg.addColorStop(0.13, '#ffd070');
+        lg.addColorStop(0.42, '#ff7a12'); lg.addColorStop(1, '#8a1a04');
+        c.fillStyle = lg; c.fillRect(X, Y, TILE, TILE);
+        // CRUST THAT FLOATS. Irregular slabs carried along by the current, their
+        // position driven by time so the river is visibly running; they are torn
+        // shapes, never the tidy rounded rectangles that made courses of brick.
+        for (let k = 0; k < 2; k++) {
+          // THE SEED MUST CARRY tx. Without it every tile in the run drew the
+          // same slab at the same offset, and a row of identical dark blocks at
+          // even spacing is a course of BRICKS — which is precisely what made
+          // the melt read as masonry rather than liquid. The tile column is in
+          // the hash and in the drift phase, so no two rafts agree.
+          const seed = hash2(tx * 17 + k * 31 + 7, ty * 5 + k);
+          if (seed < 0.72) continue;      // sparse: a raft, never a course of brick
+          const drift = ((seed * 97 + tx * 11 + lt * 7.5) % (TILE * 3)) - TILE;
+          const cx0 = X + drift, cy0 = Y + 7 + seed * 13;
+          const cw = 7 + seed * 11, chh = 3 + seed * 2.4;
+          c.fillStyle = 'rgba(30,9,6,0.86)';
+          c.beginPath();
+          c.moveTo(cx0, cy0);
+          c.lineTo(cx0 + cw * 0.35, cy0 - chh * 0.75);
+          c.lineTo(cx0 + cw, cy0 - chh * 0.2);
+          c.lineTo(cx0 + cw * 0.7, cy0 + chh);
+          c.lineTo(cx0 + cw * 0.2, cy0 + chh * 0.6);
+          c.closePath(); c.fill();
+          c.fillStyle = 'rgba(255,158,64,0.4)';                 // hot rim on the leading edge
+          c.beginPath();
+          c.moveTo(cx0, cy0); c.lineTo(cx0 + cw * 0.35, cy0 - chh * 0.75);
+          c.lineTo(cx0 + cw * 0.33, cy0 - chh * 0.4); c.lineTo(cx0 + cw * 0.05, cy0 + 0.4);
+          c.closePath(); c.fill();
         }
-        // the meniscus where it laps the rock
-        c.fillStyle = 'rgba(255,236,180,0.85)'; c.fillRect(X, Y + 1.5, TILE, 1.6);
-        c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
-        const hg = c.createLinearGradient(0, Y - 10, 0, Y + 8);
-        hg.addColorStop(0, 'rgba(255,120,30,0)'); hg.addColorStop(1, 'rgba(255,150,50,0.7)');
-        c.fillStyle = hg; c.fillRect(X, Y - 10, TILE, 18);
+        // BUBBLES: gas coming up through it and breaking. Two per tile on their
+        // own cycles, swelling as they rise and flaring white as they burst.
+        for (let k = 0; k < 2; k++) {
+          const bs = hash2(tx * 13 + k * 41, ty * 7 + 3);
+          const ph2 = ((lt * (0.42 + bs * 0.35) + bs) % 1);
+          const bx = X + 4 + bs * 24;
+          const byy = Y + TILE - 3 - ph2 * (TILE - 7);
+          const br = (0.9 + bs * 1.5) * (0.45 + ph2);
+          c.fillStyle = ph2 > 0.86 ? 'rgba(255,246,214,0.9)' : 'rgba(255,196,96,0.5)';
+          c.beginPath(); c.arc(bx, byy, br * (ph2 > 0.86 ? 1.7 : 1), 0, 7); c.fill();
+        }
+        c.restore();
+        // the lip where the melt laps the rock — traced along the SAME wave, so
+        // there is no straight line anywhere in it
+        c.strokeStyle = 'rgba(255,240,196,0.85)'; c.lineWidth = 1.7;
+        c.beginPath();
+        for (let s = 0; s <= TILE; s += 4) {
+          const wy = top(X + s);
+          if (s === 0) c.moveTo(X + s, wy); else c.lineTo(X + s, wy);
+        }
+        c.stroke();
+        // and the heat it throws into the air above it
+        c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.9;
+        const hg = c.createLinearGradient(0, Y - 22, 0, Y + 12);
+        hg.addColorStop(0, 'rgba(255,110,24,0)');
+        hg.addColorStop(0.5, 'rgba(255,140,40,0.34)');
+        hg.addColorStop(1, 'rgba(255,190,96,1)');
+        c.fillStyle = hg; c.fillRect(X, Y - 22, TILE, 34);
+        // and the melt lights itself: the body is re-added over the grade so the
+        // room's darkening pass cannot turn a river of iron into brown paint
+        c.globalAlpha = 0.5;
+        c.fillStyle = 'rgba(255,120,30,0.55)';
+        c.fillRect(X, Y + 6, TILE, TILE - 6);
       } else {
         // ---- THE TRENCH ----
-        const steelD = '#141a22';
-        const steelM = rkMix('#4d5a66', P.edge, 0.1);
-        const steelL = rkMix('#9fadba', P.edge, 0.16);
+        // A TRAP BELONGS TO THE ROOM IT IS IN. This was one machined grey
+        // channel with black-and-yellow chevrons, dropped unchanged into a
+        // frozen archive and a crystal seam — construction-site livery in a
+        // place that has never seen a construction site. It read as imported,
+        // and anything that reads as imported reads as a game object rather
+        // than a thing that lives there.
+        //
+        // Same machine everywhere, because it IS the same machine — but built
+        // of what the kingdom is built of, and weathered by what that kingdom
+        // does to metal. The ice zone rimes it over, the hatchery grows on it,
+        // the crystal seam grows through it.
+        const SK = TRAP_SKIN[G.roomDef.zone] || TRAP_SKIN.A;
+        const steelD = SK.dark;
+        const steelM = rkMix(SK.mid, P.edge, 0.1);
+        const steelL = rkMix(SK.lit, P.edge, 0.16);
         // recess: the floor is cut away, and you can see it is cut away
         c.fillStyle = rkMix(P.dark, '#000000', 0.78); c.fillRect(X, Y, TILE, TILE);
         c.fillStyle = steelD; c.fillRect(X, Y + 2, TILE, TILE - 2);
@@ -3113,7 +3208,7 @@ function drawTiles(P) {
         // hazard chevrons, the universal "machinery runs here"
         c.globalAlpha = 0.55;
         for (let k = -1; k < 3; k++) {
-          c.fillStyle = k % 2 ? '#c8ce18' : '#1a1d24';
+          c.fillStyle = k % 2 ? SK.hazA : SK.hazB;
           c.beginPath();
           const cx0 = X + k * 11 + 4;
           c.moveTo(cx0, Y + 4); c.lineTo(cx0 + 6, Y + 4);
@@ -3158,6 +3253,58 @@ function drawTiles(P) {
           c.lineTo(bx, Y + TILE - 13 - h2 * 3);
           c.lineTo(bx + 3, Y + TILE - 7);
           c.closePath(); c.fill();
+        }
+        // ---- WHAT THE KINGDOM HAS DONE TO IT SINCE ----
+        // The weathering is what actually welds a machine into a room: clean
+        // steel anywhere reads as newly installed, and nothing in these depths
+        // is newly installed.
+        if (SK.dress === 'rime') {
+          // ice: rime crusted along the lip, and a fringe hanging into the cut
+          c.fillStyle = 'rgba(226,244,255,0.75)';
+          for (let k = 0; k < 5; k++) {
+            const h3 = hash2(tx * 9 + k * 13, ty * 3);
+            if (h3 < 0.3) continue;
+            c.beginPath();
+            c.ellipse(X + 3 + k * 7, Y + 1.5, 2.4 + h3 * 2.6, 1.3 + h3 * 1.1, 0, 0, 7);
+            c.fill();
+            c.beginPath();                                   // a short icicle
+            c.moveTo(X + 1.6 + k * 7, Y + 2.4);
+            c.lineTo(X + 3 + k * 7, Y + 5.5 + h3 * 4.5);
+            c.lineTo(X + 4.4 + k * 7, Y + 2.4);
+            c.closePath(); c.fill();
+          }
+        } else if (SK.dress === 'growth') {
+          // hatchery: the machine has been colonised — moss in the seams and
+          // pale stalks leaning out of the trench
+          for (let k = 0; k < 4; k++) {
+            const h3 = hash2(tx * 7 + k * 19, ty * 11);
+            if (h3 < 0.35) continue;
+            c.fillStyle = 'rgba(122,168,86,0.6)';
+            c.beginPath();
+            c.ellipse(X + 4 + k * 8, Y + 3.2, 3 + h3 * 3, 1.6, 0, 0, 7); c.fill();
+            c.strokeStyle = 'rgba(186,232,138,0.65)'; c.lineWidth = 1;
+            c.beginPath();
+            c.moveTo(X + 4 + k * 8, Y + 3);
+            c.quadraticCurveTo(X + 5 + k * 8 + (h3 - 0.5) * 5, Y - 2,
+                               X + 4 + k * 8 + (h3 - 0.5) * 8, Y - 5 - h3 * 3);
+            c.stroke();
+          }
+        } else if (SK.dress === 'crystal') {
+          // the seam: it is growing THROUGH the machine, not sitting on it
+          for (let k = 0; k < 4; k++) {
+            const h3 = hash2(tx * 11 + k * 29, ty * 5);
+            if (h3 < 0.42) continue;
+            const gx = X + 3 + k * 8, gh = 5 + h3 * 7;
+            const cg3 = c.createLinearGradient(gx, Y + 4, gx, Y + 4 - gh);
+            cg3.addColorStop(0, 'rgba(150,90,220,0.85)');
+            cg3.addColorStop(1, 'rgba(236,200,255,0.55)');
+            c.fillStyle = cg3;
+            c.beginPath();
+            c.moveTo(gx - 2.2 - h3, Y + 5);
+            c.lineTo(gx + (h3 - 0.5) * 3, Y + 5 - gh);
+            c.lineTo(gx + 2.2 + h3, Y + 5);
+            c.closePath(); c.fill();
+          }
         }
       }
       c.restore();
@@ -4157,9 +4304,14 @@ function drawHUD() {
     }
   }
   // toasts
+  // A TOAST AT y=440 IS INSIDE THE DIALOGUE BOX. "Errand taken" was landing on
+  // top of the line the NPC was saying — two pieces of white text stacked in the
+  // same place, both unreadable. A notification exists to be read, so it moves
+  // out of the way of whatever panel is open rather than competing with it.
+  const toastY = (G.state === 'DIALOG' || G.state === 'OFFER') ? 170 : 440;
   G.toasts.forEach((tt, i) => {
     c.globalAlpha = clamp(tt.t, 0, 1);
-    ftxt(tt.text, 480, 440 - i * 24, 15, '#eef3fa', 'center', 'rgba(120,220,255,0.7)');
+    ftxt(tt.text, 480, toastY - i * 24, 15, '#eef3fa', 'center', 'rgba(120,220,255,0.7)');
     c.globalAlpha = 1;
   });
   if (G.zoneToast) {
@@ -5174,22 +5326,28 @@ function draw(tms) {
     drawCtrl();
   } else if (st === 'DIALOG' && G.dialog) {
     const d = G.dialog;
-    dimPanel(140, 386, 680, 118);
+    // THE BOX IS SIZED FROM WHAT GOES IN IT. At a fixed 118 pixels a
+    // three-line answer, or a terminal line that also carries a row of alien
+    // glyphs, ran straight through the bottom edge and through the ▼ prompt.
+    // Measure first, then draw the frame around it.
+    const body = wrapText(d.lines[d.i], 620, d.rs ? 15 : 16);
+    const lh = d.rs ? 21 : 22;
+    const gh = d.rs ? 26 : 0;                      // the glyph row's own band
+    const bh = Math.max(118, 62 + gh + body.length * lh + 26);
+    const by = 504 - bh;                           // grows upward, foot stays put
+    dimPanel(140, by, 680, bh);
     // 64×64 portrait bust — face acting the sprite is too small to carry
     {
       let expr = 'neutral';
       if (player && player.cores <= 2) expr = 'hurt';
       else if (G.boss && !G.boss.dead) expr = 'determined';
       else if (d.rs || d.name === '…') expr = 'curious';
-      drawPortrait(c, LANG === 'ar' ? 744 : 152, 400, expr);
+      drawPortrait(c, LANG === 'ar' ? 744 : 152, by + 14, expr);
     }
-    ftxt(d.name, LANG === 'ar' ? 736 : 226, 410, 16, '#37ffd0', LANG === 'ar' ? 'right' : 'left');
-    if (d.rs) {
-      drawGlyphText(c, d.rs, 480, 432, 10, 'rgba(120,220,255,0.65)', 'rgba(120,220,255,0.4)');
-      wrapText(d.lines[d.i], 620, 15).forEach((ln, i) => ftxt(ln, 480, 460 + i * 21, 15, '#e6eef6', 'center', null, '600'));
-    } else {
-      wrapText(d.lines[d.i], 620, 16).forEach((ln, i) => ftxt(ln, 480, 442 + i * 22, 16, '#e6eef6', 'center', null, '600'));
-    }
+    ftxt(d.name, LANG === 'ar' ? 736 : 226, by + 24, 16, '#37ffd0', LANG === 'ar' ? 'right' : 'left');
+    let ty = by + 46;
+    if (d.rs) { drawGlyphText(c, d.rs, 480, ty, 10, 'rgba(120,220,255,0.65)', 'rgba(120,220,255,0.4)'); ty += gh; }
+    body.forEach((ln, i) => ftxt(ln, 480, ty + 12 + i * lh, d.rs ? 15 : 16, '#e6eef6', 'center', null, '600'));
     ftxt('▼', 480, 494, 13, '#7d93a8');
   } else if (st === 'OFFER') {
     drawOffer();

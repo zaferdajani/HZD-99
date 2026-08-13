@@ -48,10 +48,13 @@ const ROOMS = {
       hline(g, 27, 30, 11, '=');
     } },
   // ============ ZONE A — Scrap Meadows ============
-  A1: { zone: 'A', w: 30, h: 17, exits: { R: 'A2', T: 'A6' },
+  A1: { zone: 'A', w: 30, h: 17, exits: { R: 'A2', T: 'A6', L: 'A0' },
     ents: [['npc', 6, 15, 'servo'], ['crawler', 18, 15], ['guard', 24, 15], ['scrap', 12, 15, 10]],
     build(g) {
-      frame(g); openR(g);
+      // the way BACK to A0. Leaving the first room used to be permanent, which
+      // quietly took the trader, the Mind Node and the tutorial's whole economy
+      // out of the run the moment the player stepped right.
+      frame(g); openR(g); openL(g);
       hline(g, 5, 8, 12, '='); hline(g, 18, 21, 10, '=');
       // the climb into the gantries — the first thing in the game that is not
       // on the way to anywhere
@@ -192,10 +195,10 @@ const ROOMS = {
       hline(g, 5, 8, 11, '='); hline(g, 21, 24, 11, '=');
       rect(g, 28, 11, 29, 14, 'B');         // secret wall → B5
     } },
-  B5: { zone: 'B', w: 24, h: 17, exits: { L: 'B4', T: 'X1' },
+  B5: { zone: 'B', w: 24, h: 17, exits: { L: 'B4', T: 'X1', R: 'V1' },
     ents: [['chest', 12, 15, 'phantom'], ['scrap', 16, 15, 25], ['riddle', 19, 15, 2], ['vault', 21, 15]],
     build(g) {
-      frame(g); openL(g); hline(g, 8, 15, 12, '=');
+      frame(g); openL(g); openR(g); hline(g, 8, 15, 12, '=');
       // the secret shaft up to the Crystal Cache — the kingdom's true end,
       // beyond TALONHOST, behind a breakable ceiling
       rect(g, 6, 0, 8, 0, '.'); rect(g, 6, 1, 8, 1, 'B');
@@ -253,7 +256,10 @@ const ROOMS = {
   // behind it.
   C5: { zone: 'C', w: 32, h: 19, exits: { R: 'C2' },
     ents: [['turret', 4, 17], ['turret', 27, 11], ['crawler', 16, 17],
-           ['scrap', 15, 11, 35], ['saw', 20, 17, [5, 0, 2.6]]],
+           ['scrap', 15, 11, 35], ['saw', 20, 17, [5, 0, 2.6]],
+           // a leaf has to PAY. This one cost a fight and a saw run and gave
+           // back a handful of scrap, which is a toll, not a discovery.
+           ['chest', 3, 8, 'cr:forge']],
     build(g) {
       frame(g); openR(g);
       rect(g, 14, 4, 17, 15, '#');            // the pour column: the cover

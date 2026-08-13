@@ -312,7 +312,19 @@ function drawBrDelta() {
 // ---------------------------------------------------------------------------
 function brOffer(kind, x, y) {
   if (!G.save || (typeof isHero === 'function' && isHero())) return;
-  G.offer = { kind, t: 9e9, t0: 9e9, x: x || 0, y: y || 0, done: false };
+  // A SETTLE WINDOW, BECAUSE THE ANSWER KEYS ARE THE DODGE KEYS.
+  //
+  // The fork is answered with LEFT and RIGHT — and it opens on the frame a
+  // guardian's last hit lands, while the player is still holding a direction to
+  // stay out of its way. The most consequential press in the run was therefore
+  // decided by whichever way they happened to be running when it died. Not a
+  // choice at all; a coin toss the game pretended to ask about.
+  //
+  // So the doors are shut for a beat, every press made during that beat is
+  // eaten, and after it a direction only counts if the key was RELEASED first.
+  // Holding right through the kill can no longer end anything.
+  G.offer = { kind, t: 9e9, t0: 9e9, x: x || 0, y: y || 0, done: false,
+              lock: 0.8, armL: false, armR: false };
   G.state = 'OFFER';
 }
 
@@ -455,9 +467,21 @@ function updateBrDelta(dt) {
 // would end one by accident. Two doors, both reachable by key and by thumb —
 // refusing to auto-answer costs nothing and cannot strand anyone.
 function updateOffer(dt) {
-  if (!G.offer) return;
-  if (inP('LEFT')) return brAnswer('L');
-  if (inP('RIGHT')) return brAnswer('R');
+  const o = G.offer; if (!o) return;
+  if (o.lock > 0) {
+    o.lock -= dt;
+    offerEatDirs();                  // whatever was pressed in the window is gone
+    return;
+  }
+  // a key has to be up before it can answer: released once, then pressed
+  if (!inD('LEFT')) o.armL = true;
+  if (!inD('RIGHT')) o.armR = true;
+  if (o.armL && inP('LEFT')) return brAnswer('L');
+  if (o.armR && inP('RIGHT')) return brAnswer('R');
+}
+// swallow the one-frame press latch on both answer directions
+function offerEatDirs() {
+  for (const a of ['LEFT', 'RIGHT']) for (const code of KEYB[a]) keysP[code] = 0;
 }
 // ---------------------------------------------------------------------------
 // ONE geometry, shared by the drawing and the hit-test. They were separate, and
@@ -531,6 +555,7 @@ function offerBoxes() {
 // a tap or a click, in 960x540 screen space
 function offerTap(sx, sy) {
   const o = G.offer; if (!o || o.done) return false;
+  if (o.lock > 0) return true;       // shut for the settle beat, same as the keys
   for (const b of offerBoxes()) {
     // generous on a phone: the pad extends the target without moving the art
     if (Math.abs(sx - b.x) <= b.w / 2 + 10 && Math.abs(sy - b.y) <= b.h / 2 + 12) {
@@ -560,6 +585,10 @@ function drawOffer() {
     ftxt(t('br_prime2'), 480, by0 + 47, 12.5, '#9fd8e8', 'center');
     ftxt(t('br_prime3'), 480, by0 + 68, 12.5, '#ffd76a', 'center');
   }
+  // the settle beat is DRAWN, not just enforced: the doors fade up as they open,
+  // so a player who stabbed a direction can see that nothing was decided
+  const shut = clamp((o.lock || 0) / 0.8, 0, 1);
+  c.save(); c.globalAlpha = 1 - shut * 0.75;
   for (const b of offerBoxes()) {
     const op = b.op, ox = b.x, oy = b.y, w = b.w, h = b.h;
     c.fillStyle = 'rgba(8,14,22,0.9)';
@@ -570,6 +599,7 @@ function drawOffer() {
     ftxt(op.key + '  ' + op.lab, ox, oy + 18, 17, op.col, 'center');
     ftxt(t(op.d), ox, oy + 40, 11, '#8aa2b5', 'center');
   }
+  c.restore();
   // SAY HOW TO ANSWER. The fork has no timer and stops the world, so if the way
   // in is not obvious it reads as a trap rather than a choice.
   const touchy = typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled;

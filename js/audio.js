@@ -1212,13 +1212,30 @@ const RECORDED_TRACKS = {
   intro: [['mus_intro', 0.75], ['ambient', 0.5]],
   A: [['mus_meadows', 0.55]], B: [['mus_conduits', 0.55]], C: [['mus_foundry', 0.55]],
   D: [['mus_archives', 0.55]], E: [['mus_nest', 0.55]], X: [['mus_cache', 0.55]],
-  boss_glitch: [['mus_nullfang', 0.6], ['mus_boss', 0.6]],
-  boss_brood: [['mus_talonhost', 0.6], ['mus_boss', 0.6]],
-  boss_atlas: [['mus_furnace', 0.6], ['mus_boss', 0.6]],
-  boss_zero: [['mus_glaciere', 0.6], ['mus_boss', 0.6]],
-  boss_prism: [['mus_prism', 0.6], ['mus_boss', 0.6]],
-  boss_mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
-  boss: [['mus_boss', 0.6], ['boss', 0.5]], mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
+  // THE FIGHTS GET THE ORCHESTRA.
+  //
+  // `epic_combat` — a real recorded combat track, credited and cleared in
+  // assets/CREDITS.md — was listed LAST in the shared `boss` slot, behind a
+  // generated placeholder that always loads. pickRecorded takes the first
+  // candidate that plays, so the one genuinely epic recording in the library
+  // has never been heard in a boss fight: every guardian was scored by a
+  // generated stand-in, and next to the opening they sound exactly like what
+  // they are.
+  //
+  // It goes first now, for all six. This is a deliberate trade: every fight
+  // shares one theme instead of each carrying its own, and one strong theme
+  // beats six weak ones by a distance. The per-guardian tracks stay directly
+  // behind it as the fallback, so the moment a real score exists for a
+  // specific guardian it only has to move up one line.
+  boss_glitch: [['boss', 0.62], ['mus_nullfang', 0.6], ['mus_boss', 0.6]],
+  boss_brood: [['boss', 0.62], ['mus_talonhost', 0.6], ['mus_boss', 0.6]],
+  boss_atlas: [['boss', 0.62], ['mus_furnace', 0.6], ['mus_boss', 0.6]],
+  boss_zero: [['boss', 0.62], ['mus_glaciere', 0.6], ['mus_boss', 0.6]],
+  boss_prism: [['boss', 0.62], ['mus_prism', 0.6], ['mus_boss', 0.6]],
+  // MOTHER-V keeps her own, and only she does: the last fight is the one place
+  // a shared theme costs more than it gives.
+  boss_mother: [['mus_mother', 0.64], ['boss', 0.6], ['mus_boss', 0.6]],
+  boss: [['boss', 0.62], ['mus_boss', 0.6]], mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
   // the one that plays over the ending, after the last blow has been swung
   winTheme: [['mus_ending', 0.6], ['ambient', 0.45]],
 };
