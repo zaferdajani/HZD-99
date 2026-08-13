@@ -18,7 +18,9 @@ const keys = {}, keysP = {};
 // touch gutters disappear, the picture grows to fill the screen, and every
 // action moves onto a real button. Detection is automatic on first input.
 // ---------------------------------------------------------------------------
-const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST', 'GP_STAR'];
+const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST', 'GP_STAR',
+  // the d-pad alone, edge-detected like everything else — see pollGamepad
+  'GP_PL', 'GP_PR', 'GP_PU', 'GP_PD'];
 const GP_PREV = {};
 
 // Standard-mapping button indices, which every DualShock 4 / DualSense reports.
@@ -126,6 +128,17 @@ function pollGamepad() {
     // movement: left stick and d-pad both, always
     st.GP_L = P(14) || A0 < -0.4; st.GP_R = P(15) || A0 > 0.4;
     st.GP_U = P(12) || A1 < -0.4; st.GP_D = P(13) || A1 > 0.4;
+    // ...and the D-PAD ON ITS OWN, because a stick is not a d-pad.
+    //
+    // For running around, merging them is right: nobody cares which they used.
+    // For picking one of four answers it is wrong, and the Mind Nodes are where
+    // it showed. A stick pushed up-left crosses the 0.4 threshold on BOTH axes,
+    // so the puzzle sees LEFT and UP together and answers with whichever the
+    // if-chain tests first; rolling from one direction to the next passes
+    // through the diagonal and fires an answer nobody chose. In a memory
+    // sequence a wrong answer costs the attempt, so the fight the player was
+    // having was with the hardware.
+    st.GP_PL = P(14); st.GP_PR = P(15); st.GP_PU = P(12); st.GP_PD = P(13);
     // live state + edge capture, so the config screen can show presses and bind
     PAD.lastPress = -1;
     for (let i = 0; i < b.length; i++) {
@@ -139,12 +152,23 @@ function pollGamepad() {
     // while rebinding, swallow the actions so a bind press does not also fire
     if (PAD.listen) for (const c of GP_CODES) st[c] = false;
   }
+  let fresh = false;
   for (const code of GP_CODES) {
     const on = !!st[code];
-    if (on) { keys[code] = 1; if (!GP_PREV[code]) keysP[code] = 1; }
+    if (on) { keys[code] = 1; if (!GP_PREV[code]) { keysP[code] = 1; fresh = true; } }
     else keys[code] = 0;
     GP_PREV[code] = on;
   }
+  // A PAD PRESS IS NOT A USER GESTURE, and that is a browser rule we cannot
+  // argue with: audio stays locked until a click, tap or keypress. Somebody
+  // playing entirely on a controller therefore got a silent game and no way to
+  // fix it, because the "tap for sound" badge was only ever drawn over the
+  // opening film — by the time they were playing there was nothing on screen
+  // saying what was wrong. Two halves to the answer: try anyway (it costs
+  // nothing, and it DOES work once the page has any activation at all, which is
+  // common — clicking the window to focus it is enough), and keep the badge up
+  // during play so the one tap that is needed is asked for. See drawSoundChip.
+  if (fresh && typeof audioOn === 'function') audioOn();
 }
 addEventListener('keydown', e => {
   if (['Tab', 'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();

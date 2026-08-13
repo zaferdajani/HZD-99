@@ -76,18 +76,36 @@ const { chromium } = require('playwright');
   await record(now);
   const scrapAfter = await p.evaluate(() => G.save.scrap);
 
+  // THROUGH THE TRADER, not around him. This step used to call updateShop()
+  // directly, which is why it stayed green while the errand system quietly
+  // replaced the trader's shop with an errand and made the lesson impossible:
+  // the harness was testing the till, not the shopkeeper.
   now = await drive('buy', () => {
-    G.state = 'SHOP'; G.shopIdx = 0;
-    keysP['Enter'] = 1; keys['Enter'] = 1;
-    updateShop();
-    G.state = 'PLAY';
+    const npc = G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet');
+    if (!npc) return;
+    if (G.state === 'PLAY') { doInteract(npc); return; }
+    if (G.state === 'DIALOG') {                    // page through what he says
+      keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); return;
+    }
+    if (G.state === 'SHOP') {
+      G.shopIdx = 0;                               // the volt cell
+      keysP['Enter'] = 1; keys['Enter'] = 1;
+      updateShop();
+      G.state = 'PLAY';
+    }
   });
+  const shopReached = await p.evaluate(() => !!(G.save.flags && G.save.flags.tutBuy));
   await record(now);
   const bought = await p.evaluate(() => ({ volts: player.volts, scrap: G.save.scrap, flag: !!G.save.flags.tutBuy }));
 
   // the scripted hit should already have landed when the step opened
   const hurtTo = await p.evaluate(() => ({ cores: player.cores, max: player.maxCores() }));
-  now = await drive('heal', () => { player.cores = player.maxCores(); });
+  now = await drive('heal', () => {
+    // a player leaves the shop before doing anything else, and the tutorial
+    // only advances while the game is actually being played
+    if (G.state !== 'PLAY') G.state = 'PLAY';
+    player.cores = player.maxCores();
+  });
   await record(now);
 
   now = await drive('node', () => { G.save.iq = 10; });

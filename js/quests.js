@@ -76,6 +76,13 @@ function qSet(id, v) {
 }
 // what this NPC has to say about work, if anything
 function questFor(npc) {
+  // NOT DURING THE LESSON. The waking floor's trader exists to teach that scrap
+  // buys things, and the trader is `ratchet`, who also carries an errand —
+  // so the tutorial's shop step was answered with "go and stand in a room you
+  // cannot reach yet", the shop never opened, the cell could not be bought and
+  // the door that waits on that step never lifted. The kingdom's errands start
+  // once the kingdom does.
+  if (G.save && G.save.flags && !G.save.flags.tut) return null;
   for (const q of QUESTS) {
     if (q.npc !== npc) continue;
     if (qState(q.id) === 'done') continue;

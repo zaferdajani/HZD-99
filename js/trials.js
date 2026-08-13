@@ -285,6 +285,56 @@ function triEndGame() {
     TRI.st = 'result'; sfx('win');
   }
 }
+// ---------------------------------------------------------------------------
+// ONE PRESS, ONE ANSWER — the input a puzzle needs, which is not the input
+// running around needs.
+//
+// Movement is forgiving by design: press two directions and you get a diagonal,
+// hold one and you keep going, and none of that costs anything. A Mind Node is
+// the opposite. Each direction IS an answer, a wrong one ends the attempt, and
+// the read has to be exact. Three separate ways it was not:
+//
+//   THE STICK. Pushed up-left it crosses the threshold on both axes, so the
+//   node saw LEFT and UP in the same frame and took whichever the if-chain
+//   asked about first. Rolling from one direction to another passes through the
+//   diagonal and submits an answer nobody chose. On a controller the puzzle was
+//   unwinnable for reasons that had nothing to do with the puzzle.
+//
+//   THE HOLD. A direction held across two simulation steps — which happens on
+//   any machine running under 30 fps, because the loop then updates twice per
+//   frame — submitted twice.
+//
+//   THE AMBIGUITY. Two directions genuinely down at once is not a choice. It
+//   should answer nothing rather than guess.
+//
+// So: the D-PAD ONLY when a pad is connected (a stick cannot express a discrete
+// four-way choice and should not be asked to), exactly one direction, and a
+// gate that requires everything back to neutral before the next answer counts.
+// ---------------------------------------------------------------------------
+const TRI_ACTS = ['LEFT', 'UP', 'RIGHT', 'DOWN'];
+const TRI_PAD = ['GP_PL', 'GP_PU', 'GP_PR', 'GP_PD'];
+// spend the press, so one press can never be read as two answers
+function triEatDirs() {
+  for (const a of TRI_ACTS) for (const code of (KEYB[a] || [])) keysP[code] = 0;
+  for (const c of TRI_PAD) keysP[c] = 0;
+}
+function triDir(n) {
+  const pad = typeof PAD !== 'undefined' && PAD && PAD.on;
+  const down = pad ? TRI_PAD.map(c => !!keys[c]) : TRI_ACTS.map(a => !!inD(a));
+  const press = pad ? TRI_PAD.map(c => !!keysP[c]) : TRI_ACTS.map(a => !!inP(a));
+  let hit = -1, hits = 0;
+  for (let i = 0; i < 4; i++) if (press[i]) { hits++; if (hit < 0) hit = i; }
+  if (!hits) return -1;
+  // Whatever happens next, this press is spent. The loop runs `update` more
+  // than once in a frame whenever the machine is under 30 fps, and `keysP` is
+  // only cleared at the END of the frame — so without this the same press is
+  // still sitting there on the second pass and answers a second time.
+  triEatDirs();
+  if (hits !== 1) return -1;                      // a diagonal is not a choice
+  if (down.filter(Boolean).length > 1) return -1; // a second direction still held
+  if (hit >= n) return -1;                        // not a button this puzzle has
+  return hit;
+}
 // ---------- update ----------
 function updateTrial(dt) {
   if (TRI.fb > 0) TRI.fb -= dt;
@@ -320,9 +370,7 @@ function updateTrial(dt) {
           else { TRI.memShowT = Math.max(0.24, 0.42 - TRI.level * 0.02); sfxVoice('mono'); }
         }
       } else {
-        let pick = -1;
-        if (inP('LEFT')) pick = 0; else if (inP('UP')) pick = 1;
-        else if (inP('RIGHT')) pick = 2; else if (inP('DOWN')) pick = 3;
+        const pick = triDir(4);
         if (pick >= 0) {
           if (pick === TRI.memSeq[TRI.memIn]) {
             TRI.memIn++;
@@ -333,13 +381,10 @@ function updateTrial(dt) {
       }
     } else if (TRI.game === 'log') {
       // one key per item on the bench, so the answer is the OBJECT itself
-      let pick = -1;
-      if (inP('LEFT')) pick = 0; else if (inP('UP')) pick = 1;
-      else if (inP('RIGHT')) pick = 2; else if (inP('DOWN')) pick = 3;
-      if (pick >= 0 && pick < TRI.q.k) triAnswer(pick === TRI.q.ans);
+      const pick = triDir(TRI.q.k);
+      if (pick >= 0) triAnswer(pick === TRI.q.ans);
     } else {
-      let pick = -1;
-      if (inP('LEFT')) pick = 0; else if (inP('UP')) pick = 1; else if (inP('RIGHT')) pick = 2;
+      const pick = triDir(3);
       if (pick >= 0) triAnswer(pick === TRI.q.choices.correct);
     }
   }

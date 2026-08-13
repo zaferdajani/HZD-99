@@ -491,20 +491,35 @@ function doInteract(s) {
     // say depends on whether you have done it yet.
     const q = typeof questFor === 'function' ? questFor(s.extra) : null;
     let lines = t('d_' + s.extra).slice();
-    let after = s.extra === 'ratchet' ? () => { G.state = 'SHOP'; G.shopIdx = 0; }
+    // WHAT THIS PERSON IS FOR. The trader trades; the Oracle opens the Trials.
+    // That is their job and an errand does not replace it — which is exactly
+    // what the errand system did when it landed: the moment the trader had a
+    // job outstanding, `after` was overwritten and talking to him did NOTHING,
+    // forever, until you finished it. He stopped being a shop because he had
+    // asked you for a favour. Worse in the tutorial, where the trader IS the
+    // shop lesson and his errand hid it.
+    const base = s.extra === 'ratchet' ? () => { G.state = 'SHOP'; G.shopIdx = 0; }
       : s.extra === 'mono' ? () => trialOpen() : null;
+    let after = base;
     if (q) {
       const st = qState(q.id);
+      let qAct = null;
       if (st === 'none') {
         lines = [t('q_ask_' + q.id) || t('q_ask'), qText(q)];
-        after = () => { qSet(q.id, 'active'); G.toast(t('q_taken')); sfx('ok'); };
+        qAct = () => { qSet(q.id, 'active'); G.toast(t('q_taken')); sfx('ok'); };
       } else if (qDone(q)) {
         lines = [t('q_thanks_' + q.id) || t('q_thanks')];
-        after = () => questPay(q);
+        qAct = () => questPay(q);
       } else {
         lines = [qText(q), t('q_wait')];
-        after = null;
       }
+      after = () => {
+        if (qAct) qAct();
+        // ...and then they go back to being themselves. Guarded on the state
+        // still being PLAY, because a hand-in can hand over a relic, and that
+        // opens a card the shop must not slam shut.
+        if (base && G.state === 'PLAY') base();
+      };
     }
     G.dialog = { name: t('n_' + s.extra), lines, i: 0, npc: s.extra, onEnd: after };
     G.state = 'DIALOG'; npcSay(s.extra, 0);
@@ -4417,6 +4432,11 @@ function drawWorldFrame() {
   // ...and what falls off it, in FRONT of everything: a drip you watch pass
   // behind the cat is scenery, one that passes in front of her is a room.
   if (!(typeof isHero === 'function' && isHero())) drawCeilWeather(G.roomDef.zone);
+  // THE BADGE BELONGS IN THE GAME TOO. It was only ever drawn over the opening
+  // film, so a player whose audio never unlocked — anyone on a controller —
+  // reached the game and found it silent, with nothing on screen explaining
+  // why or what to do. It draws itself only while sound is actually locked.
+  if (typeof drawSoundChip === 'function') drawSoundChip(performance.now() / 1000);
   lightPass(P);
   if (G.flash > 0) {
     c.fillStyle = 'rgba(255,255,255,' + (G.flash * 0.32) + ')';
@@ -5149,7 +5169,11 @@ function startCineNow() {
 function drawSoundChip(tsec) {
   if (typeof soundLocked !== 'function' || !soundLocked()) return;
   const pu = 0.5 + Math.sin(tsec * 2.6) * 0.5;
-  const txt = t('gate_sound');
+  // A controller cannot unlock audio — a pad press is not a user gesture as far
+  // as the browser is concerned — so a pad player needs to be told what WILL
+  // work rather than "tap for sound" over a game they are playing with a stick.
+  const onPad = typeof PAD !== 'undefined' && PAD && PAD.on;
+  const txt = onPad ? t('gate_sound_pad') : t('gate_sound');
   c.save();
   c.globalAlpha = 0.72 + pu * 0.28;
   c.font = '600 14px "Segoe UI", Tahoma, sans-serif';
