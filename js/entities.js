@@ -1494,9 +1494,25 @@ class Player {
     // body — the CHUBBY ceramic shell (spec §1.1): rounded, bottom-heavy,
     // wider at the hips than the chest. A pear, not a box.
     const by0 = -24 + bob * 0.4;
-    const grad = c.createLinearGradient(0, by0 - 2, 0, by0 + 20);
-    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.32, '#f2f1e8');
-    grad.addColorStop(0.7, '#bcc5d2'); grad.addColorStop(1, '#77839c');
+    // WHY SHE READ FLAT. This gradient ran straight down — top-to-bottom, its
+    // axis CONCENTRIC with the outline — which is pillow shading: light bleeds
+    // in evenly from the edge and the form has no direction, so it reads as a
+    // sticker of a body rather than a body. Every value also sat in the light
+    // half (white, bone, pale grey, with the dark stop only touching the last
+    // pixel row), and a shape with no shadow side cannot be round.
+    //
+    // The light is committed now: upper-left, front-side-top, the same key that
+    // lights the guardians. The gradient axis runs DIAGONALLY ACROSS the shell,
+    // so there is a lit cheek and a shaded cheek, and it carries a real ramp —
+    // hue-shifted rather than mixed with grey: warm bone in the light, cool
+    // violet-slate in the shadow, because a shadow takes its colour from the
+    // sky and a highlight from the lamp.
+    const grad = c.createLinearGradient(-13, by0 - 2, 13, by0 + 19);
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.26, '#f6f2e6');      // warm light
+    grad.addColorStop(0.52, '#cbd0da');      // the turn
+    grad.addColorStop(0.78, '#8b93ab');      // terminator
+    grad.addColorStop(1, '#5d6480');         // cool core shadow
     c.fillStyle = grad;
     const belly = () => {
       c.beginPath();
@@ -1509,13 +1525,49 @@ class Player {
       c.closePath();
     };
     belly(); c.fill();
+    // Everything below is clipped to the shell, so shading stays ON the form.
+    c.save(); belly(); c.clip();
+    // CORE SHADOW. The darkest band on a round object is not its edge — it is
+    // just inside the edge on the shaded side, because the very rim picks up
+    // bounce. Without this a gradient still reads as a disc; with it the shell
+    // turns away from you.
+    const core = c.createRadialGradient(-5, by0 + 6, 3, -1, by0 + 10, 24);
+    core.addColorStop(0, 'rgba(60,70,95,0)');
+    core.addColorStop(0.62, 'rgba(58,68,92,0)');
+    core.addColorStop(0.88, 'rgba(52,60,84,0.5)');
+    core.addColorStop(1, 'rgba(70,80,104,0.22)');   // bounce lifts the last rim
+    c.fillStyle = core; c.fillRect(-20, by0 - 4, 40, 28);
     // ambient occlusion pooling under the round belly
     const ao2 = c.createLinearGradient(0, by0 + 10, 0, by0 + 21);
     ao2.addColorStop(0, 'rgba(60,75,95,0)'); ao2.addColorStop(1, 'rgba(45,58,75,0.5)');
-    c.fillStyle = ao2; belly(); c.fill();
-    // specular rim along the top-left of the shell
-    c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 1.4;
-    c.beginPath(); c.moveTo(-8, by0 + 1.5); c.quadraticCurveTo(-14, by0 + 4, -14.5, by0 + 11); c.stroke();
+    c.fillStyle = ao2; c.fillRect(-20, by0 - 4, 40, 28);
+    // CAST SHADOW FROM THE HEAD. The single strongest cue that two parts are at
+    // different depths, and it was missing entirely — the head simply sat in
+    // front of the chest touching nothing. A big round head above a chest puts
+    // a soft crescent across the top of it, offset to the shadow side.
+    const hcast = c.createRadialGradient(3, by0 - 8, 4, 3, by0 - 6, 20);
+    hcast.addColorStop(0, 'rgba(40,48,70,0.5)');
+    hcast.addColorStop(0.7, 'rgba(40,48,70,0.22)');
+    hcast.addColorStop(1, 'rgba(40,48,70,0)');
+    c.fillStyle = hcast; c.fillRect(-20, by0 - 4, 40, 20);
+    c.restore();
+    // SPECULAR, SEGMENTED. A rim stroked around the whole outline is the glass
+    // dome error — it reads as a transparent bubble. This is a short arc on the
+    // lit side only, fading to nothing at both ends.
+    const spec = c.createLinearGradient(-14, by0 + 2, -6, by0 + 14);
+    spec.addColorStop(0, 'rgba(255,255,255,0)');
+    spec.addColorStop(0.42, 'rgba(255,255,255,0.92)');
+    spec.addColorStop(1, 'rgba(255,255,255,0)');
+    c.strokeStyle = spec; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(-8, by0 + 1.5); c.quadraticCurveTo(-14, by0 + 4, -14.5, by0 + 12); c.stroke();
+    // and a COOL BACK-RIM on the shadow side, which is what actually lifts her
+    // off a dark background — the guardians all have one and she had none
+    const brim = c.createLinearGradient(9, by0 + 3, 15, by0 + 15);
+    brim.addColorStop(0, 'rgba(150,205,255,0)');
+    brim.addColorStop(0.45, 'rgba(150,205,255,0.5)');
+    brim.addColorStop(1, 'rgba(150,205,255,0)');
+    c.strokeStyle = brim; c.lineWidth = 1.3;
+    c.beginPath(); c.moveTo(10, by0 + 1.5); c.quadraticCurveTo(16.4, by0 + 5, 14.6, by0 + 15); c.stroke();
     c.strokeStyle = 'rgba(74,86,106,0.9)'; c.lineWidth = 1.2; belly(); c.stroke();
     // evolution gear on the torso
     if (!hero && evo >= 1) {
@@ -1551,16 +1603,56 @@ class Player {
     // what makes the silhouette read CAT at 36px. In the stride it bobs in
     // COUNTER-PHASE to the body — the dome stays level-ish while the hips pump
     const hy = -30 + (run ? -bob * 0.6 : bob);
-    const hgd = c.createLinearGradient(0, hy - 12, 0, hy + 8);
-    hgd.addColorStop(0, '#ffffff'); hgd.addColorStop(0.48, '#f0efe6'); hgd.addColorStop(1, '#96a2b6');
+    // The dome, lit by the same lamp as the shell — upper-left, gradient axis
+    // running diagonally ACROSS the form. Straight down the outline was the
+    // pillow-shading tell, and it made the biggest, roundest part of her the
+    // flattest thing on screen.
+    const hgd = c.createLinearGradient(-11, hy - 12, 14, hy + 8);
+    hgd.addColorStop(0, '#ffffff');
+    hgd.addColorStop(0.3, '#f4f0e4');
+    hgd.addColorStop(0.58, '#cdd2dc');
+    hgd.addColorStop(0.82, '#8f97ad');
+    hgd.addColorStop(1, '#646b86');
     c.fillStyle = hgd;
-    rr(c, -12, hy - 12, 27, 21, 10); c.fill();
-    c.strokeStyle = 'rgba(74,86,106,0.9)'; c.lineWidth = 1.2; rr(c, -12, hy - 12, 27, 21, 10); c.stroke();
-    // cheek/jaw shadow + top specular
-    c.fillStyle = 'rgba(70,88,110,0.26)';
-    rr(c, -12, hy + 3, 27, 6, 5); c.fill();
-    c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 1.3;
+    const dome = () => rr(c, -12, hy - 12, 27, 21, 10);
+    dome(); c.fill();
+    c.save(); dome(); c.clip();
+    // core shadow inside the lower-right edge, with the rim lifting again on
+    // bounce — the thing that separates a sphere from a disc
+    const hcore = c.createRadialGradient(-4, hy - 5, 3, 1, hy - 1, 22);
+    hcore.addColorStop(0, 'rgba(60,70,95,0)');
+    hcore.addColorStop(0.6, 'rgba(58,68,92,0)');
+    hcore.addColorStop(0.9, 'rgba(50,58,82,0.52)');
+    hcore.addColorStop(1, 'rgba(74,84,110,0.2)');
+    c.fillStyle = hcore; c.fillRect(-14, hy - 14, 32, 26);
+    // THE EARS CAST ONTO THE SKULL. Two roots, offset to the shadow side, and
+    // suddenly the ears are standing ON the head rather than stuck behind it.
+    if (!hero) {
+      c.fillStyle = 'rgba(46,54,78,0.34)';
+      c.beginPath(); c.ellipse(-4.5, hy - 9.5, 5.2, 3.4, -0.5, 0, 7); c.fill();
+      c.beginPath(); c.ellipse(9.5, hy - 9.5, 5.2, 3.4, 0.5, 0, 7); c.fill();
+    }
+    // cheek/jaw shadow — the underside of the dome turning away
+    const jaw = c.createLinearGradient(0, hy + 1, 0, hy + 9);
+    jaw.addColorStop(0, 'rgba(70,88,110,0)'); jaw.addColorStop(1, 'rgba(58,72,98,0.5)');
+    c.fillStyle = jaw; c.fillRect(-14, hy, 32, 12);
+    c.restore();
+    c.strokeStyle = 'rgba(74,86,106,0.9)'; c.lineWidth = 1.2; dome(); c.stroke();
+    // top specular, kept SHORT and fading at both ends — a highlight that runs
+    // the whole width is a glass dome, not a painted shell
+    const hspec = c.createLinearGradient(-7, hy - 11, 12, hy - 10);
+    hspec.addColorStop(0, 'rgba(255,255,255,0)');
+    hspec.addColorStop(0.35, 'rgba(255,255,255,0.95)');
+    hspec.addColorStop(1, 'rgba(255,255,255,0)');
+    c.strokeStyle = hspec; c.lineWidth = 1.4;
     c.beginPath(); c.moveTo(-6, hy - 10.4); c.quadraticCurveTo(4, hy - 11.6, 11, hy - 10); c.stroke();
+    // cool back-rim down the shadow edge of the skull
+    const hrim = c.createLinearGradient(13, hy - 8, 15, hy + 5);
+    hrim.addColorStop(0, 'rgba(150,205,255,0)');
+    hrim.addColorStop(0.45, 'rgba(150,205,255,0.55)');
+    hrim.addColorStop(1, 'rgba(150,205,255,0)');
+    c.strokeStyle = hrim; c.lineWidth = 1.3;
+    c.beginPath(); c.moveTo(14.4, hy - 8); c.quadraticCurveTo(15.6, hy - 2, 12.4, hy + 6); c.stroke();
     if (hero) {
       // bronze helmet with crimson crest (gold at apex)
       c.fillStyle = evo >= 3 ? '#e6c56f' : '#b8934c';
@@ -1583,15 +1675,69 @@ class Player {
       const eLx = this.earL || 0, eLy = clamp(-this.vy * 0.004, -3, 3);
       const lTx = eLx + (this.earTwitchSide < 0 ? eT : 0);
       const rTx = eLx + (this.earTwitchSide > 0 ? eT : 0);
-      c.fillStyle = '#e8e8ea';
-      c.beginPath(); c.moveTo(-11, hy - 8); c.lineTo(-6 + lTx, hy - 22 + eLy); c.lineTo(0, hy - 10); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(4, hy - 10); c.lineTo(10 + rTx, hy - 22 + eLy); c.lineTo(15, hy - 8); c.closePath(); c.fill();
-      c.strokeStyle = '#98a1b0'; c.lineWidth = 0.8;
-      c.beginPath(); c.moveTo(-11, hy - 8); c.lineTo(-6 + lTx, hy - 22 + eLy); c.lineTo(0, hy - 10);
-      c.moveTo(4, hy - 10); c.lineTo(10 + rTx, hy - 22 + eLy); c.lineTo(15, hy - 8); c.stroke();
-      c.fillStyle = P.glow; c.globalAlpha = 0.75;
-      c.beginPath(); c.moveTo(-9, hy - 9.5); c.lineTo(-6.4 + lTx * 0.72, hy - 17 + eLy * 0.72); c.lineTo(-3, hy - 10.5); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(6.4, hy - 10.5); c.lineTo(9.6 + rTx * 0.72, hy - 17 + eLy * 0.72); c.lineTo(12.6, hy - 9.5); c.closePath(); c.fill();
+      // AN EAR IS NOT A TRIANGLE. These were three straight lines each, filled
+      // flat, with a flat triangle of cyan inside — raw primitives at their
+      // default orientation, which is the exact signature of programmer art
+      // and the flattest thing left on her once the dome was lit. A real ear
+      // curves INWARD along its outer edge and cups toward the head; a
+      // triangle never does either.
+      //
+      // Each ear is now a path with a concave outer edge and a rounded tip,
+      // shaded by the same upper-left lamp as the rest of her — lit on the
+      // outer face, dropping into shadow toward the cup.
+      // ONE EAR, STATED PLAINLY. Written with sign arithmetic first and got
+      // knobs, spikes and splayed bulges out of it three times running — the
+      // control points are easier to reason about named than mirrored.
+      //   bo = base outer (against the skull)   bi = base inner
+      //   tip = where it points, carrying the twitch and the fall-inertia
+      // The outer edge bows INWARD on its way up, which is the one thing a
+      // triangle cannot do and the reason ears drawn as triangles read as
+      // cardboard.
+      const earPath = (bo, bi, tipX, co, ci) => {
+        const ty = hy - 21.5 + eLy;
+        c.beginPath();
+        c.moveTo(bo, hy - 8);
+        c.quadraticCurveTo(co, hy - 15.5, tipX, ty);          // outer, concave
+        c.quadraticCurveTo(ci, hy - 14.5, bi, hy - 9.6);      // inner, back to the skull
+        c.quadraticCurveTo((bo + bi) / 2, hy - 7.6, bo, hy - 8);
+        c.closePath();
+      };
+      const EARS = [
+        { bo: -11.5, bi: -1.5, tip: -6.5 + lTx, co: -11.2, ci: -3.4, gx: -12, gy: 0 },
+        { bo: 15.5, bi: 5.5, tip: 10.5 + rTx, co: 15.2, ci: 7.4, gx: 16, gy: 4 },
+      ];
+      for (const E of EARS) {
+        const eg = c.createLinearGradient(E.gx, hy - 20, E.bi, hy - 8);
+        eg.addColorStop(0, '#ffffff');
+        eg.addColorStop(0.4, '#e6e8ec');
+        eg.addColorStop(0.76, '#a6aebe');
+        eg.addColorStop(1, '#79839a');
+        c.fillStyle = eg; earPath(E.bo, E.bi, E.tip, E.co, E.ci); c.fill();
+        // the cup — the inner face turns away from the lamp hardest
+        c.save(); earPath(E.bo, E.bi, E.tip, E.co, E.ci); c.clip();
+        const cup = c.createLinearGradient(E.bi, hy - 9, E.tip, hy - 19);
+        cup.addColorStop(0, 'rgba(56,66,90,0.5)'); cup.addColorStop(1, 'rgba(56,66,90,0)');
+        c.fillStyle = cup; c.fillRect(-16, hy - 26, 36, 22);
+        c.restore();
+        c.strokeStyle = 'rgba(120,131,150,0.8)'; c.lineWidth = 0.8;
+        earPath(E.bo, E.bi, E.tip, E.co, E.ci); c.stroke();
+      }
+      // the sensor inside each ear: a lit membrane, brightest at the base where
+      // the light in it comes from, not a flat cyan wedge
+      const sens = (ax, tx2, bx2, ty) => {
+        const sg = c.createLinearGradient(0, ty, 0, hy - 9.5);
+        sg.addColorStop(0, 'rgba(255,255,255,0.5)');
+        sg.addColorStop(0.45, P.glow);
+        sg.addColorStop(1, 'rgba(20,60,70,0.55)');
+        c.fillStyle = sg;
+        c.beginPath(); c.moveTo(ax, hy - 9.5);
+        c.quadraticCurveTo((ax + tx2) / 2, hy - 14, tx2, ty);
+        c.quadraticCurveTo((tx2 + bx2) / 2, hy - 13.5, bx2, hy - 10.5);
+        c.closePath(); c.fill();
+      };
+      c.globalAlpha = 0.85;
+      sens(-9, -6.4 + lTx * 0.72, -3, hy - 17 + eLy * 0.72);
+      sens(12.6, 9.6 + rTx * 0.72, 6.4, hy - 17 + eLy * 0.72);
       c.globalAlpha = 1;
       if (evo >= 3) {
         // apex antennae with glowing tips
@@ -1602,17 +1748,63 @@ class Player {
         c.shadowBlur = 0;
       }
     }
-    // the visor — a full LED band across the dome, not two pinprick eyes
-    c.fillStyle = hero ? '#2a1e10' : '#0a1420'; rr(c, -8, hy - 7, 22, 10, 5); c.fill();
-    c.strokeStyle = 'rgba(58,58,74,0.9)'; c.lineWidth = 1; rr(c, -8, hy - 7, 22, 10, 5); c.stroke();
+    // THE VISOR — and this was the flattest thing on her, which matters more
+    // than anything else on the model because it is where the eye goes.
+    //
+    // It was a black capsule with two flat rectangles laid on top: features
+    // sitting ON the face as separate marks, the emoji-face error. A visor is
+    // a LENS SET INTO A SOCKET, and three things say so — the socket is cut
+    // into the skull and shades its own upper lip, the eyes glow from BEHIND
+    // the glass rather than being painted on it, and the glass carries a
+    // reflection of the room that the eyes do not move with.
+    const vis = () => rr(c, -8, hy - 7, 22, 10, 5);
+    c.fillStyle = hero ? '#2a1e10' : '#0a1420'; vis(); c.fill();
+    c.save(); vis(); c.clip();
+    // the socket is RECESSED: the skull above it casts down into the well
+    const well = c.createLinearGradient(0, hy - 7, 0, hy - 1);
+    well.addColorStop(0, 'rgba(0,0,0,0.75)'); well.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = well; c.fillRect(-9, hy - 8, 24, 8);
     // eye blocks slide inside the band when she glances around while idle
     const lk = clamp(this.lookX || 0, -2.4, 2.4);
-    c.fillStyle = this.healT > 0 ? '#aef7d8' : P.glow;
-    c.shadowColor = c.fillStyle; c.shadowBlur = 8;
-    c.fillRect(-5 + lk, hy - 4.8, 6.5, 5.6); c.fillRect(5 + lk, hy - 4.8, 6.5, 5.6);
+    const eyeCol = this.healT > 0 ? '#aef7d8' : P.glow;
+    // behind the glass: a soft bloom pool, then the hard element inside it, so
+    // the light has somewhere to come FROM
+    c.globalCompositeOperation = 'lighter';
+    for (const ex of [-1.75 + lk, 8.25 + lk]) {
+      const pool = c.createRadialGradient(ex, hy - 2, 0.5, ex, hy - 2, 7);
+      pool.addColorStop(0, eyeCol); pool.addColorStop(1, 'rgba(0,0,0,0)');
+      c.globalAlpha = 0.5; c.fillStyle = pool;
+      c.beginPath(); c.arc(ex, hy - 2, 7, 0, 7); c.fill();
+    }
+    c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
+    c.fillStyle = eyeCol; c.shadowColor = eyeCol; c.shadowBlur = 8;
+    rr(c, -5 + lk, hy - 4.8, 6.5, 5.6, 1.6); c.fill();
+    rr(c, 5 + lk, hy - 4.8, 6.5, 5.6, 1.6); c.fill();
     c.shadowBlur = 0;
-    c.fillStyle = 'rgba(160,255,240,0.55)';                // inner highlight line
-    c.fillRect(-5 + lk, hy - 4.8, 6.5, 1.4); c.fillRect(5 + lk, hy - 4.8, 6.5, 1.4);
+    c.fillStyle = 'rgba(190,255,246,0.75)';                // hot top edge of each element
+    c.fillRect(-5 + lk, hy - 4.8, 6.5, 1.3); c.fillRect(5 + lk, hy - 4.8, 6.5, 1.3);
+    // THE GLASS ITSELF, in front of everything: a curved sheen running down
+    // from the upper left, which is what makes the band read as a covered lens
+    // instead of a hole with lights in it. It does NOT track the eyes — a
+    // reflection belongs to the room, not to where she is looking.
+    const gl = c.createLinearGradient(-8, hy - 7, 6, hy + 3);
+    gl.addColorStop(0, 'rgba(255,255,255,0.34)');
+    gl.addColorStop(0.42, 'rgba(255,255,255,0.07)');
+    gl.addColorStop(0.62, 'rgba(255,255,255,0)');
+    c.fillStyle = gl;
+    c.beginPath();
+    c.moveTo(-8, hy - 7); c.lineTo(9, hy - 7);
+    c.quadraticCurveTo(-1, hy - 3.4, -8, hy + 1);
+    c.closePath(); c.fill();
+    c.restore();
+    c.strokeStyle = 'rgba(58,58,74,0.9)'; c.lineWidth = 1; vis(); c.stroke();
+    // a bright lip on the top edge of the bezel — the socket has a thickness
+    const lip = c.createLinearGradient(-6, hy - 7, 10, hy - 6);
+    lip.addColorStop(0, 'rgba(226,236,250,0)');
+    lip.addColorStop(0.4, 'rgba(226,236,250,0.7)');
+    lip.addColorStop(1, 'rgba(226,236,250,0)');
+    c.strokeStyle = lip; c.lineWidth = 1.1;
+    c.beginPath(); c.moveTo(-5, hy - 6.6); c.lineTo(11, hy - 6.6); c.stroke();
     if (!hero) {
       // whisker antennae
       c.strokeStyle = 'rgba(200,220,240,0.7)'; c.lineWidth = 1;
