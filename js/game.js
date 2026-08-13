@@ -5216,12 +5216,60 @@ function drawMenuBG(tsec) {
   }
   // NYA-9 keeping watch behind the menu. Suppressed on the chooser, where she would
   // otherwise show through the hero's card and lend him her antenna.
-  if (G.state !== 'WHO') {
-    c.save(); c.translate(772, 334); c.scale(1.02, 1.02);
-    c.globalAlpha = 0.58 + Math.sin(tsec * 2) * 0.07;
-    drawNyaP(c, true);
-    c.restore(); c.shadowBlur = 0; c.globalAlpha = 1;
+  if (G.state !== 'WHO') drawMenuCat(tsec);
+}
+// ---------------------------------------------------------------------------
+// THE TITLE MASCOT IS THE CHARACTER, DRAWN BY THE CHARACTER'S OWN CODE.
+//
+// It used to be `drawNyaP` — a separate flat vector head, at 58% alpha, with
+// different colours, no visor bar and ears the wrong shape. So the first
+// picture of her anybody ever saw was of somebody else, and every pass of
+// shading the real NYA-9 got (committed light, core shadow, cast shadows, the
+// recessed visor, the formed ears) arrived nowhere near the title screen.
+//
+// She is posed and drawn here by Player.draw at four times size. Two things
+// follow that are worth more than the picture: the title can never again
+// disagree with the game about what she looks like, and anything done to her
+// later shows up here for free.
+//
+// Player.draw reads the world it expects to be inside — the zone palette, the
+// save, the media manifest — so a menu with no run loaded has to lend it one.
+// The whole thing is wrapped: a mascot must never be able to take the title
+// screen down with it.
+let MENU_CAT = null, MENU_CAT_OFF = false;
+function drawMenuCat(tsec) {
+  if (MENU_CAT_OFF || typeof Player !== 'function') return;
+  c.save();
+  const heldRoom = G.roomDef, heldSave = G.save, heldGrid = G.grid;
+  try {
+    if (!MENU_CAT) {
+      MENU_CAT = new Player(0, 0);
+      MENU_CAT.cores = 5; MENU_CAT.volts = 60; MENU_CAT.on = true; MENU_CAT.face = -1;
+      MENU_CAT.faceVis = -1;                       // looking in toward the menu
+    }
+    const p = MENU_CAT;
+    p.anim = tsec;                                 // idle breathing, scarf, tail
+    p.rigDt = 1 / 60;
+    p.idleT = tsec;
+    p.x = 0; p.y = 0; p.vx = 0; p.vy = 0;
+    if (!G.roomDef) G.roomDef = { zone: 'A', w: 30, h: 17 };
+    if (!G.save) G.save = { skills: [], crests: [], relics: [], flags: {}, abil: {}, iq: 0, scrap: 0 };
+    // she stands on nothing here, and the contact-shadow probe walks the grid
+    // looking for what is under her feet — so lend it one tile of floor
+    if (!G.grid) G.grid = [['#']];
+    // a slow hover so she reads as alive rather than as a decal
+    const bob = Math.sin(tsec * 1.6) * 5;
+    c.translate(786, 384 + bob);
+    c.scale(4.1, 4.1);
+    c.translate(-p.w / 2, -p.h);
+    p.draw(c);
+  } catch (e) {
+    // one failure is enough: stop trying rather than throw every frame
+    MENU_CAT_OFF = true;
+    if (typeof console !== 'undefined') console.warn('menu mascot disabled:', e);
   }
+  G.roomDef = heldRoom; G.save = heldSave; G.grid = heldGrid;
+  c.restore(); c.shadowBlur = 0; c.globalAlpha = 1;
 }
 function draw(tms) {
   const tsec = tms / 1000;
