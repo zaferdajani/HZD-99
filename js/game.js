@@ -4405,9 +4405,15 @@ function drawHUD() {
   const toastHidden = { SKILLS: 1, CREST: 1, RELICS: 1, MAP: 1, BRAID: 1, PAUSE: 1,
                         CTRL: 1, SHOP: 1, TRIAL: 1, TCFG: 1, CINE: 1 };
   if (!toastHidden[G.state]) {
-    const toastY = (G.state === 'DIALOG' || G.state === 'OFFER') ? 170 : 452;
+    // ...and it sits in the SKY, not on the floor. At 452 a notification landed
+    // squarely on the ground the player and everything hunting her are standing
+    // on — a plate makes it legible, it does not make it welcome there. The band
+    // under the HUD is the one part of the frame that is empty in almost every
+    // room, and it is where the eye already goes for the zone name.
+    const toastY = (G.state === 'DIALOG' || G.state === 'OFFER') ? 178 : 146;
     G.toasts.forEach((tt, i) => {
-      const a = clamp(tt.t, 0, 1), y = toastY - i * 30;
+      // stacked DOWNWARD from the band: upward walked them into the zone banner
+      const a = clamp(tt.t, 0, 1), y = toastY + i * 30;
       c.font = '700 15px "Segoe UI", Tahoma, sans-serif';
       const w = Math.min(880, c.measureText(tt.text).width + 34);
       c.globalAlpha = a * 0.86;
@@ -5497,7 +5503,16 @@ function draw(tms) {
     // three-line answer, or a terminal line that also carries a row of alien
     // glyphs, ran straight through the bottom edge and through the ▼ prompt.
     // Measure first, then draw the frame around it.
-    const body = wrapText(d.lines[d.i], 620, d.rs ? 15 : 16);
+    // THE PORTRAIT HAS A COLUMN; THE WORDS GET THE REST.
+    //
+    // The body was centred on the whole panel and wrapped to 620 px, which put
+    // its left edge at x=170 — on top of a portrait that starts at 152. The
+    // face acting the line was underneath the line, in every conversation in
+    // the game. The bust is why the panel exists; it does not get written on.
+    const rtl = LANG === 'ar';
+    const px = rtl ? 744 : 152;                    // the 64-wide bust
+    const tw = 548, tx0 = rtl ? 176 : 236;         // and the column beside it
+    const body = wrapText(d.lines[d.i], tw, d.rs ? 15 : 16);
     const lh = d.rs ? 21 : 22;
     const gh = d.rs ? 26 : 0;                      // the glyph row's own band
     const bh = Math.max(118, 62 + gh + body.length * lh + 26);
@@ -5509,12 +5524,13 @@ function draw(tms) {
       if (player && player.cores <= 2) expr = 'hurt';
       else if (G.boss && !G.boss.dead) expr = 'determined';
       else if (d.rs || d.name === '…') expr = 'curious';
-      drawPortrait(c, LANG === 'ar' ? 744 : 152, by + 14, expr);
+      drawPortrait(c, px, by + 14, expr);
     }
-    ftxt(d.name, LANG === 'ar' ? 736 : 226, by + 24, 16, '#37ffd0', LANG === 'ar' ? 'right' : 'left');
+    ftxt(d.name || '', rtl ? tx0 + tw : tx0, by + 24, 16, '#37ffd0', rtl ? 'right' : 'left');
     let ty = by + 46;
-    if (d.rs) { drawGlyphText(c, d.rs, 480, ty, 10, 'rgba(120,220,255,0.65)', 'rgba(120,220,255,0.4)'); ty += gh; }
-    body.forEach((ln, i) => ftxt(ln, 480, ty + 12 + i * lh, d.rs ? 15 : 16, '#e6eef6', 'center', null, '600'));
+    if (d.rs) { drawGlyphText(c, d.rs, tx0 + tw / 2, ty, 10, 'rgba(120,220,255,0.65)', 'rgba(120,220,255,0.4)'); ty += gh; }
+    body.forEach((ln, i) => ftxt(ln, rtl ? tx0 + tw : tx0, ty + 12 + i * lh,
+      d.rs ? 15 : 16, '#e6eef6', rtl ? 'right' : 'left', null, '600'));
     ftxt('▼', 480, 494, 13, '#7d93a8');
   } else if (st === 'OFFER') {
     drawOffer();

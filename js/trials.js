@@ -504,29 +504,61 @@ function drawScales() {
   // THE BENCH: every object in play, one key each. This is the answer row —
   // the player names an OBJECT, not a side.
   const keys = ['←', '↑', '→', '↓'];
-  const bx = 480 - (q.k - 1) * 90 / 2;
-  for (let i = 0; i < q.k; i++) {
-    const x = bx + i * 90, y = 430;
+  (triTiles() || []).forEach((tl, i) => {
+    const x = tl[0], y = tl[1];
     c.fillStyle = 'rgba(20,36,52,0.9)';
     rr(c, x - 38, y - 38, 76, 76, 12); c.fill();
     c.strokeStyle = 'rgba(120,200,240,0.5)'; c.lineWidth = 1.6;
     rr(c, x - 38, y - 38, 76, 76, 12); c.stroke();
     scaleGlyph(x, y - 4, 19, SCALE_ITEM[i]);
     ftxt(keys[i], x, y + 52, 12, '#7d93a8');
-  }
+  });
   if (q.teach) ftxt(q.teach, 480, 340, 15, '#8fd8c8');
+}
+// ---------------------------------------------------------------------------
+// ONE GEOMETRY FOR THE ANSWER TILES, read by the drawing AND by the taps.
+//
+// There are three different answer layouts in here — the four Echo Glyph nodes
+// in a diamond, the three-wide choice row, and the Balances bench, which packs
+// however many objects the question has ninety pixels apart around the centre.
+// The touch handler knew about exactly one of them, the three-wide row, and
+// applied its maths to all three. On the Balances that meant a tap on the first
+// object answered with the SECOND — every time — so the puzzle could not be
+// solved by hand at all, which is what "it does not allow to press on them"
+// was. Written once here, nothing can drift again.
+//
+// Each tile is [centreX, centreY, halfW, halfH, inputCode].
+// ---------------------------------------------------------------------------
+const TRI_CODES = ['VL', 'VU', 'VR', 'VD'];
+function triTiles() {
+  if (TRI.st !== 'play') return null;
+  if (TRI.game === 'mem') {
+    if (TRI.memPhase !== 'input') return null;   // no answering while it plays
+    return [[330, 250, 46, 46, 'VL'], [480, 180, 46, 46, 'VU'],
+            [630, 250, 46, 46, 'VR'], [480, 320, 46, 46, 'VD']];
+  }
+  if (TRI.game === 'log') {
+    const k = (TRI.q && TRI.q.k) || 3, bx = 480 - (k - 1) * 90 / 2;
+    const out = [];
+    for (let i = 0; i < k; i++) out.push([bx + i * 90, 430, 42, 42, TRI_CODES[i]]);
+    return out;
+  }
+  const out = [];
+  for (let i = 0; i < 3; i++) out.push([300 + i * 180, 420, 74, 32, TRI_CODES[i]]);
+  return out;
 }
 function triDrawChoices(labels, correctFlashIdx) {
   const keys = ['←', '↑', '→'];
-  for (let i = 0; i < 3; i++) {
-    const x = 300 + i * 180, y = 420;
+  const tiles = triTiles() || [];
+  tiles.forEach((tl, i) => {
+    const x = tl[0], y = tl[1], hw = tl[2], hh = tl[3];
     c.fillStyle = 'rgba(20,36,52,0.9)';
-    rr(c, x - 74, y - 26, 148, 52, 10); c.fill();
+    rr(c, x - hw, y - hh, hw * 2, hh * 2, 10); c.fill();
     c.strokeStyle = 'rgba(120,200,240,0.5)'; c.lineWidth = 1.6;
-    rr(c, x - 74, y - 26, 148, 52, 10); c.stroke();
+    rr(c, x - hw, y - hh, hw * 2, hh * 2, 10); c.stroke();
     ftxt(String(labels[i]), x, y - 4, 21, '#eef3fa');
-    ftxt(keys[i], x, y + 30 + 8, 12, '#7d93a8');
-  }
+    ftxt(keys[i], x, y + hh + 12, 12, '#7d93a8');
+  });
 }
 function drawTrial() {
   c.fillStyle = 'rgba(3,6,11,0.94)'; c.fillRect(0, 0, 960, 540);
@@ -600,7 +632,7 @@ function drawTrial() {
   } else if (TRI.game === 'log') {
     drawScales();
   } else if (TRI.game === 'mem') {
-    const pads = [[330, 250], [480, 180], [630, 250], [480, 320]];
+    const pads = [[330, 250], [480, 180], [630, 250], [480, 320]];   // = triTiles
     const keys = ['←', '↑', '→', '↓'];
     const hit = TRI.memHit && TRI.memHit.t > 0 ? TRI.memHit : null;
     for (let i = 0; i < 4; i++) {

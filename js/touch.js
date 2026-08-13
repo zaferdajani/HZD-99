@@ -311,14 +311,12 @@ function tapMenu(x, y) {
     } else if (TRI.st === 'result' || TRI.st === 'pre' || TRI.st === 'between') {
       tPress('VOK');
     } else if (TRI.st === 'play') {
-      if (TRI.game === 'mem' && TRI.memPhase === 'input') {
-        const pads = [[330, 250, 'VL'], [480, 180, 'VU'], [630, 250, 'VR'], [480, 320, 'VD']];
-        for (const [px2, py2, code] of pads)
-          if (Math.hypot(x - px2, y - py2) < 46) { tPress(code); break; }
-      } else if (TRI.game !== 'mem' && y > 380 && y < 465) {
-        const i = Math.round((x - 300) / 180);
-        if (i >= 0 && i < 3 && Math.abs(x - (300 + i * 180)) <= 85) tPress(['VL', 'VU', 'VR'][i]);
-      }
+      // the same tiles the puzzle draws — see triTiles. Three different answer
+      // layouts used to be tapped with one layout's maths, which on the
+      // Balances answered with the tile NEXT to the one you touched.
+      const tiles = (typeof triTiles === 'function' && triTiles()) || [];
+      for (const tl of tiles)
+        if (Math.abs(x - tl[0]) <= tl[2] && Math.abs(y - tl[1]) <= tl[3]) { tPress(tl[4]); break; }
     }
   }
 }

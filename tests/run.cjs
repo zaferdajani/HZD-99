@@ -36,6 +36,7 @@ const SUITE = [
   ['padlife',   'a yanked controller releases the game; a live one keeps it'],
   ['climbout',  'every floor she can land on she can leave, and every gate names its power'],
   ['cover',     'the platform she is standing on stops a shot, from either side'],
+  ['tap',       'tap where a thing is drawn and that thing happens'],
 ];
 
 const want = process.argv.slice(2);
