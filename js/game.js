@@ -356,8 +356,11 @@ function loadRoom(id) {
 // button opens the place to spend it. Once per skill, so it is a nudge and not
 // a nag.
 // ---------------------------------------------------------------------------
-function iqNudge() {
-  if (!G.save || typeof SKILLS === 'undefined') return;
+// The cheapest thing she could learn RIGHT NOW, or null. One answer, read by
+// the one-off toast and by the standing HUD prompt, so the two can never
+// disagree about whether there is anything to spend on.
+function skillAffordable() {
+  if (!G.save || typeof SKILLS === 'undefined') return null;
   const own = G.save.skills || [];
   const unlocked = own.length;
   let best = null;
@@ -367,11 +370,17 @@ function iqNudge() {
     if ((G.save.iq || 0) < sk.cost) continue;
     if (!best || sk.cost < best.cost) best = sk;
   }
+  return best;
+}
+function iqNudge() {
+  const best = skillAffordable();
   if (!best) return;
   G.save.iqTold = G.save.iqTold || {};
   if (G.save.iqTold[best.id]) return;
   G.save.iqTold[best.id] = 1;
-  G.toast(t('tt_iq_ready') + ': ' + t('sk_' + best.id));
+  // "open SKILLS" is not an instruction, it is a noun. Say the button.
+  G.toast(t('tt_iq_ready').replace('%s', howToOpen('SKILL', t('pm_skills')))
+    + ': ' + t('sk_' + best.id));
   sfx('chargeReady');
 }
 function applyTheme() {
@@ -4281,6 +4290,17 @@ function drawHUD() {
   // scrap + knowledge
   ftxt('⚙ ' + G.save.scrap, 76, 66, 17, '#ffd76a', 'left', null, '700');
   ftxt('◈ ' + (G.save.iq || 0) + ' ' + t('sk_iq'), 76, 88, 13, '#b48cff', 'left');
+  // AND WHILE SOMETHING IS AFFORDABLE, KEEP SAYING SO. The one toast that
+  // announced it scrolled away in a couple of seconds, mid-fight, and after
+  // that the player was holding currency with no idea what opened the shop for
+  // it. This sits beside the counter for exactly as long as it is true, and
+  // names the control the player is actually holding.
+  if (typeof skillAffordable === 'function' && skillAffordable()) {
+    const pulse = 0.55 + Math.sin(performance.now() / 380) * 0.25;
+    c.globalAlpha = pulse;
+    ftxt('▸ ' + howToOpen('SKILL', t('pm_skills')), 76, 104, 11.5, '#d9b8ff', 'left');
+    c.globalAlpha = 1;
+  }
   // nine-lives counter
   if (G.save.diff === 2) ftxt('♥ ' + (9 - G.save.lives) + ' — ' + t('lives_left'), 934, 26, 15, '#ff8f9d', 'right');
   // audio blocked indicator (browser hasn't allowed sound yet)
@@ -6198,8 +6218,13 @@ function drawPadCfg() {
     ftxt(listening ? t('pad_press') : padLabel(btn), bx + 44, y, listening ? 12 : 14,
          listening ? '#ffd76a' : live ? '#eafff9' : '#cfe3ef');
   }
-  ftxt(t('pad_move'), 480, 424, 12, '#8aa2b5');
-  ftxt(t('pad_hint'), 480, 452, 13, '#cfe3ef');
+  ftxt(t('pad_move'), 480, 412, 12, '#8aa2b5');
+  // A ROW SHOWING "—" HAS TO SAY WHAT TO DO INSTEAD. Every real button on a
+  // pad is spoken for, so the Neural Tree and the Crests have none — and a
+  // dash with no explanation is how a player concludes the screen is simply
+  // unreachable, which is exactly what happened.
+  ftxt(t('pad_none').replace('%s', padLabel(PAD.map.PAUSE)), 480, 430, 12, '#b48cff');
+  ftxt(t('pad_hint'), 480, 454, 13, '#cfe3ef');
   ftxt(t('pad_reset'), 480, 476, 12, '#7d93a8');
 }
 const miniCache = {};

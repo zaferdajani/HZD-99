@@ -47,7 +47,20 @@ const PAD_DEFAULT = {
   STAR: 11,       // R3 — throw a shuriken
   CLAW: 10,       // L3
   MAP: 8,         // Share
-  SKILL: 16,      // PS
+  // THE NEURAL TREE WAS ON THE GUIDE BUTTON, WHICH IS NOT OURS TO USE.
+  //
+  // Button 16 is the PS / Xbox Guide button. Windows, Steam and the Game Bar
+  // all grab it before a page ever sees it, and the Gamepad spec does not even
+  // require a pad to report it — so on a controller the skill tree was not
+  // "hard to find", it was UNREACHABLE, and the game still cheerfully told the
+  // player to go and open it.
+  //
+  // Every real button is spoken for (four faces, four shoulders, two sticks,
+  // View, Options), so rather than steal one from combat this is honestly
+  // unbound and the route is Options ▸ Skills — which has always worked. It
+  // stays remappable for anyone who would rather give up a button for it, and
+  // padHowTo() below makes sure the game says the right thing either way.
+  SKILL: -1,
   CREST: -1,      // unbound by default; remap it if you want it on the pad
   PAUSE: 9,       // Options
 };
@@ -62,6 +75,28 @@ const PAD = {
 function padLabel(i) {
   if (i == null || i < 0) return '—';
   return (PAD.kind === 'xbox' ? PAD_BTN_XB[i] : PAD_BTN[i]) || ('B' + i);
+}
+// HOW DO I OPEN THIS? — answered for whatever the player is actually holding.
+//
+// The game knew four different ways to reach a screen and told the player none
+// of them. Worse, it told everyone the KEYBOARD way: "open SKILLS" is useless
+// advice on a controller, and the controller had no button for it at all.
+//
+// One function, asked wherever the game gives directions, so a prompt can never
+// again describe a control the player does not have. Screens that no longer sit
+// on a button of their own name their route through the pause menu instead,
+// which is a real answer rather than a shrug.
+function howToOpen(action, viaPause) {
+  if (typeof PAD !== 'undefined' && PAD && PAD.on) {
+    const b = PAD.map[action];
+    if (b != null && b >= 0) return padLabel(b);
+    return padLabel(PAD.map.PAUSE) + ' ▸ ' + (viaPause || action);
+  }
+  if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled)
+    return '☰ ▸ ' + (viaPause || action);
+  const codes = KEYB[action] || [];
+  const k = codes.find(c => /^Key|^Tab$|^Escape$|^Enter$/.test(c));
+  return k ? k.replace(/^Key/, '') : (viaPause || action);
 }
 function padKindOf(id) {
   const s = (id || '').toLowerCase();
