@@ -20,7 +20,14 @@ look at to answer "did that actually happen".
 | `furnace/` | FURNACE CHOIR | 14 |
 | `glaciere/` | GLACIERE, the Frozen Purifier | 11 |
 | `mother/` | MOTHER-V, the Null Core | 16 |
-| `_sheets/` | Contact sheets and before/after comparisons | 8 |
+| `_sheets/` | Contact sheets and before/after comparisons | 11 |
+
+`_sheets/rake_before.jpg` and `rake_after.jpg` are not generated art — they are
+`tools/slashshot.cjs` output, the claw rake photographed in the four states it
+was reported broken in (standing, sprinting either way, mid-double-jump) at four
+points of the swing. `rake_ingame.jpg` is the same swing thrown for real in room
+A1. They are here for the same reason everything else is: so "the slash was
+moved off her body" can be checked rather than believed.
 
 Each part name matches its rect key in `tools/bossparts.cjs` and in the boss's
 own `js/` file, so `furnace/wingL.jpg` is the art that occupies `DRG_P.wingL`.

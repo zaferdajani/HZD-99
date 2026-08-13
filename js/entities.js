@@ -643,7 +643,7 @@ class Player {
       }
       this.chargeT = 0;
     }
-    if (this.swingVis) { this.swingVis.t -= dt; if (this.swingVis.t <= 0) { this.swingVis = null; this._paw = null; } }
+    if (this.swingVis) { this.swingVis.t -= dt; if (this.swingVis.t <= 0) { this.swingVis = null; this._rake = null; } }
     // heal
     if (inD('HEAL') && this.on && this.dashT <= 0 && this.volts >= this.healCost() && this.cores < this.maxCores()) {
       this.healT += dt; this.vx = 0;
@@ -1127,6 +1127,9 @@ class Player {
       const air = clamp(probe / 200, 0, 1);
       contactShadow(c, this.x + this.w / 2, gy + probe, this.w * (0.6 - air * 0.25), 0.45 * (1 - air * 0.7));
     }
+    // where the paws finish this frame, recorded as they are drawn and read back
+    // once the body's transform has been popped (see rakeMark / the swing block)
+    this._rake = null;
     c.save();
     c.translate(this.x + this.w / 2, this.y + this.h);
     {
@@ -1177,6 +1180,16 @@ class Player {
              + (run ? sprintK * 0.3 : 0)                            // pitched forward, chasing the ground
              + (this.hurtPoseT > 0 ? -0.3 * (this.hurtPoseT / 0.3) : 0)  // thrown back, off balance
              + (this.idleT > 0.9 ? Math.sin(this.idleT * 0.9) * 0.022 : 0)); // idle weight shift
+    // THE FRAME THE CUT LIVES IN, captured here and not one line later. Below
+    // this point the transform stops describing where she IS and starts
+    // describing what her body is DOING to itself: the spiral of the double
+    // jump, the landing squash, the evolution scale. A mark left in the air
+    // takes part in none of that. Marked here, the cut always hangs on the side
+    // she is facing — mid-pirouette the arm may be anywhere, but the swipe is
+    // still thrown forward, which is the thing the player is reading.
+    // (only while a swing is alive — getTransform allocates, and the loop is
+    // meant to stay allocation-light)
+    if (this.swingVis) this._rakeM = c.getTransform();
     if (this.flipT > 0) {
       // THE SPIRAL: the double jump is a ninja pirouette about her own
       // VERTICAL axis — head to toe through the middle of the body — not a
@@ -1900,9 +1913,11 @@ class Player {
       armPaw(c, hx, hy, wr, spread, false);
       // the cut is drawn later, in world space, and has to know where this paw
       // finished — otherwise it goes back to guessing from the aim
-      if (this.swingVis && swingHand !== 'B')
-        this._paw = { x: hx, y: hy, a: ang, dir: swingPose ? swingPose.dir : 1,
-                      sgn: Math.sign(this.faceVis == null ? this.face : this.faceVis) || this.face || 1 };
+      // the same condition the near arm is drawn under, so the mark can never
+      // describe a limb that is not on screen: in hero form this arm throws
+      // every beat, in cat form the middle beat belongs to the other paw
+      if (this.swingVis && (hero || swingHand !== 'B'))
+        rakeMark(this, c, shX, shY, hx, hy, swingPose ? swingPose.dir : 1, false);
       // (the shoulder and elbow lights are part of the joints themselves now)
       // FERAL CLAWS: three purple energy talons splay from the paw
       if (this.clawT > 0) {
@@ -1921,14 +1936,13 @@ class Player {
         }
         c.restore();
       }
-      // THE RAKE ITSELF. The claws were always drawn; what was missing was the
-      // cut they leave in the air, and that absence is why the attack never
-      // read as a hit. It is an authored light effect, composited additively —
-      // the sheet is painted on black, so brightness IS the alpha and no
-      // cutting is needed. Each beat of the combo escalates the shape, and the
-      // finisher is a crossing double-rake.
-      if (this.swingVis && !hero && swingHand !== 'B')
-        drawRake(c, this, hx, hy, ang, P, swingPose && swingPose.dir);
+      // THE RAKE ITSELF used to be drawn here, and that was the bug. Inside her
+      // transform it inherits everything the body is doing: the double jump's
+      // spiral squashes it to half width and mirrors it, the sprint's forward
+      // pitch tips it over, and — because it was centred on a paw that is inside
+      // her silhouette at both ends of the swing — the arc washed straight
+      // across her chest. It is now composited in world space, after her, in
+      // front of her. See the swing block further down.
       // the cat's own claws bare from the paw for the strike: three hooked
       // talons splayed along the swipe, steel-white with glowing tips
       if (this.swingVis && this.clawT <= 0 && !hero && swingHand !== 'B') {
@@ -1979,10 +1993,7 @@ class Player {
           }
           c.restore();
         }
-        drawRake(c, this, bhx, bhy, ba, P, bp.dir, true);
-        if (swingHand === 'B')
-          this._paw = { x: bhx, y: bhy, a: ba, dir: bp.dir,
-                        sgn: Math.sign(this.faceVis == null ? this.face : this.faceVis) || this.face || 1 };
+        rakeMark(this, c, bsx, bsy, bhx, bhy, bp.dir, true);
       }
       // the blade, held IN the paw — hero form only
       if (this.swingVis && this.clawT <= 0 && hero) {
@@ -2039,6 +2050,33 @@ class Player {
       const divineHit = empowered && typeof isHero === 'function' && isHero();
       const clawed = empowered && !divineHit;
       const col = divineHit ? '#ffd76a' : clawed ? '#b06aff' : (sv.combo === 2 ? '#ffd76a' : gcol);
+      // Resolve the paws recorded during the body pass into world space. The old
+      // conversion did this by hand — body centre, plus the local x flipped by
+      // the facing sign — which quietly ignored the facing SCALE, the run lean,
+      // the landing squash, the evolution scale and, worst of all, the double
+      // jump's spiral. Ask the context instead: it knows the exact matrix each
+      // paw was drawn under, and the inverse of the world matrix takes it back.
+      const marks = [];
+      if (this._rake && this._rake.length) {
+        const inv = c.getTransform().invertSelf();
+        for (const rk of this._rake) {
+          const M = inv.multiply(rk.m);
+          const o = M.transformPoint(new DOMPoint(rk.sx, rk.sy));   // shoulder
+          const t = M.transformPoint(new DOMPoint(rk.x, rk.y));     // paw
+          // a mirrored frame reverses which way an arc sweeps, so the travel
+          // direction has to be mirrored with it or the cut bows the wrong way
+          const mir = M.a * M.d - M.b * M.c < 0 ? -1 : 1;
+          marks.push({ sx: o.x, sy: o.y, x: t.x, y: t.y,
+                       a: Math.atan2(t.y - o.y, t.x - o.x),
+                       r: Math.hypot(t.x - o.x, t.y - o.y),
+                       dir: rk.dir * mir, far: rk.far });
+        }
+      }
+      // THE AUTHORED RAKE, composited in world space so nothing the body is
+      // doing can deform it. Each beat of the combo escalates the shape and the
+      // finisher is a crossing double-rake; the sheet is painted on black, so
+      // brightness IS the alpha and no cutting is needed.
+      if (!hero) for (const mk of marks) drawRake(c, this, mk);
       // WRATH OF OLYMPUS: the cut lands as a forked thunderbolt
       const boltCut = (len, wid, alpha) => {
         const hl = len / 2;
@@ -2147,40 +2185,50 @@ class Player {
         c.globalAlpha = 1;
       } else {
       c.save();
-      // THE CUT COMES OFF THE PAW. It used to hang 56px out from the middle of
-      // her body, rotated by a fixed offset from the aim — so it sat wherever
-      // the aim pointed while the foreleg throwing it swung somewhere else
-      // entirely. That mismatch is the whole reason the hand looked like it was
-      // not moving with the slash. It is now anchored to the paw that threw it
-      // and rotated by that paw's live angle, and it is a THIRD of the length:
-      // a cat rakes close in, toward itself, not three body-lengths into the air.
-      const pw = this._paw;
-      const px3 = pw ? this.x + this.w / 2 + pw.sgn * pw.x
-                     : this.x + this.w / 2 + Math.cos(sv.ang) * 40;
-      const py3 = pw ? this.y + this.h + pw.y
-                     : this.y + this.h / 2 + Math.sin(sv.ang) * 40;
-      const pa3 = pw ? Math.atan2(Math.sin(pw.a), pw.sgn * Math.cos(pw.a)) : sv.ang;
-      const pd3 = pw ? pw.dir : 1;
-      c.translate(px3 + Math.cos(pa3) * 14, py3 + Math.sin(pa3) * 14);
+      // THE CUT COMES OFF THE PAW, AND HANGS IN FRONT OF HER.
+      //
+      // It was already anchored to the paw and rotated by the paw's live angle,
+      // which fixed the hand looking detached. What it was still doing wrong is
+      // sitting CENTRED on that paw — and the paw is inside her silhouette at
+      // the start and the end of every swing, and is dragged back inside it by
+      // its own spring whenever she is running or has just left the ground. So
+      // the rear half of every rake was painted across her own chest, and the
+      // faster she moved the more of it landed on her. A cat does not wear the
+      // mark it makes: the claws lead, the cut hangs in the air ahead of them.
+      //
+      // The stroke is now laid ACROSS the swing rather than along it — see
+      // rakePlace — and carried out to a radius that clears her, with the paw
+      // leading the mark it is making.
+      const mk3 = marks[0] || {
+        sx: this.x + this.w / 2, sy: this.y + this.h - 20,
+        x: this.x + this.w / 2 + Math.cos(sv.ang) * 26,
+        y: this.y + this.h - 20 + Math.sin(sv.ang) * 26,
+        a: sv.ang, r: 26, dir: 1,
+      };
+      const pd3 = mk3.dir;
       c.globalCompositeOperation = 'lighter';
       const grow = 0.55 + ease * 0.65;         // the cut extends as it lands
       const drift = (1 - ease) * 0.22;         // slight rotation as it settles
       // the rake materializes a frame AFTER the arm's wind-up — anticipation
       const gate = clamp((p - 0.07) / 0.07, 0, 1);
       const far3 = (typeof hasSkill === 'function' && hasSkill('reach')) || empowered;
+      // finisher: the X still crosses, but its span is earned — the long
+      // version belongs to the Long Rake skill and to the feral claws
+      const L3 = sv.combo === 2 ? (far3 ? 92 : 56) : (far3 ? 62 : 44);
+      rakePlace(c, mk3);
+      c.rotate(drift * pd3);
+      c.scale(grow, pd3);
+      c.translate(-L3 * RAKE_LAG, 0);
       if (sv.combo === 2) {
-        // finisher: the X still crosses, but its span is earned — the long
-        // version belongs to the Long Rake skill and to the feral claws
-        const L = far3 ? 104 : 62;
-        c.rotate(pa3 + 0.3 * pd3 + drift * pd3); c.scale(grow, pd3);
-        cut(L, L * 0.28, Math.min(1, (1 - p) * 1.7) * gate);
-        c.rotate(0.9 * -pd3); c.scale(1, -1);
-        cut(L, L * 0.28, Math.min(1, (1 - p) * 1.4) * gate);
+        // the finisher crosses two rakes. They have to open WIDE — at a narrow
+        // angle six streaks at slightly different tilts read as a firework, not
+        // as two paws closing on the same point.
+        c.rotate(-0.52);
+        cut(L3, L3 * 0.28, Math.min(1, (1 - p) * 1.7) * gate);
+        c.rotate(1.04); c.scale(1, -1);
+        cut(L3, L3 * 0.28, Math.min(1, (1 - p) * 1.4) * gate);
       } else {
-        // one diagonal rake, leaning the way the paw is actually travelling
-        c.rotate(pa3 + 0.35 * pd3 + drift * pd3);
-        c.scale(grow, pd3);
-        cut(far3 ? 74 : 52, 18, Math.min(1, (1 - p) * 1.7) * gate);
+        cut(L3, 18, Math.min(1, (1 - p) * 1.7) * gate);
       }
       c.restore();
       c.globalAlpha = 1;
@@ -3934,7 +3982,44 @@ const RAKE = {
   burstL: [807, 68, 168, 164], xrake: [37, 249, 304, 291], burstM: [542, 278, 159, 151],
   burstS: [407, 313, 83, 81], ring: [761, 329, 231, 60], streak: [372, 472, 374, 49],
 };
-function drawRake(c, pl, hx, hy, ang, P, dir, far) {
+// ---------------------------------------------------------------------------
+// WHERE THE CUT GOES — AND WHY IT WAS LANDING ON HER
+//
+// A CLAW MARK IS TANGENTIAL, NOT RADIAL. The claws swing on an arc about the
+// shoulder, so the streaks they leave run ACROSS the strike, curving around her
+// — three parallel crescents perpendicular to the line from shoulder to paw.
+// The cut used to be laid out the other way: its long axis pointed along that
+// line, so it ran from her chest outward like a spear, and everything from the
+// midpoint back was painted on the cat throwing it. Rotating it a quarter turn
+// is most of this fix, and it is why the effect never read as a swipe.
+//
+// The second half is the radius. A straight chord tangent to a circle lies
+// entirely OUTSIDE that circle, so once the arc is tangential, keeping its
+// midpoint at least RAKE_CLEAR from the shoulder puts the whole stroke clear of
+// her — at every angle, at every point in the swing, whatever the body is doing.
+// That is the property the old version could not have at any offset: a radial
+// stroke through her shoulder always crosses her.
+//
+// RAKE_CLEAR is measured from the shoulder (10, -20), which sits on her front
+// edge, out past the far side of her head and hips. RAKE_OUT then carries the
+// mark BEYOND the claws — a swipe leaves its mark in the air the claws opened,
+// not on the claws — and it is what stops a stroke this long from curling round
+// her: at radius 25 an arc of 44 subtends ninety degrees and wraps her like a
+// halo; the same arc at 34 subtends fifty and reads as a swipe through the air.
+const RAKE_CLEAR = 31, RAKE_OUT = 12;
+// how far the arc trails BEHIND the paw, as a fraction of its own length: the
+// claws lead the mark they are making
+const RAKE_LAG = 0.3;
+function rakePlace(c, mk) {
+  const r = mk.r || 1;
+  const R = Math.max(r + RAKE_OUT, RAKE_CLEAR);
+  c.translate(mk.sx + (mk.x - mk.sx) / r * R, mk.sy + (mk.y - mk.sy) / r * R);
+  // +x becomes the direction the paw is travelling; -y, after the caller's
+  // y-flip by dir, points away from the shoulder, so the crescent bows outward
+  c.rotate(mk.a + Math.PI / 2 * mk.dir);
+}
+function drawRake(c, pl, mk) {
+  const dir = mk.dir, far = mk.far;
   const im = (typeof MEDIA_IMG !== 'undefined') ? MEDIA_IMG.slashFx : null;
   if (!im || !im.naturalWidth) return;
   const sv = pl.swingVis, p = clamp(1 - sv.t / sv.t0, 0, 1);
@@ -3960,29 +4045,39 @@ function drawRake(c, pl, hx, hy, ang, P, dir, far) {
   // close in, where a cat actually pulls its claws.
   const h = (sv.combo === 2 ? (longRake ? 34 : 24) : sv.combo === 1 ? 21 : 19)
     * (claw ? 1.3 : 1) * (far ? 0.9 : 1) * (0.84 + p * 0.26);
+  // the art is WIDER than it is tall and its width is now the sweep, so it is
+  // sized by the length of the stroke rather than by its thickness
   const w = r[2] / r[3] * h;
   c.save();
   c.globalCompositeOperation = 'lighter';
-  c.translate(hx + Math.cos(ang) * h * 0.5, hy + Math.sin(ang) * h * 0.5);
-  // LEAN WITH THE TRAVEL, always. The offset used to be picked per combo beat
-  // and one of them leaned against its own arc, which is what made the cut look
-  // detached from the paw throwing it. One constant, flipped by the direction
-  // the arc actually sweeps.
-  c.rotate(ang + 0.35 * (dir == null ? 1 : dir));
+  rakePlace(c, mk);
+  c.scale(1, dir);                            // bow away from the shoulder
   // The finisher already has its own authored identity — the golden crossing X
   // drawn below. This sweep sits UNDER it at half strength so the third beat
   // reads as one heavier blow rather than two effects arguing.
   c.globalAlpha = a * (claw ? 0.95 : 0.8) * (sv.combo === 2 ? 0.5 : 1) * (far ? 0.8 : 1);
-  c.drawImage(im, r[0], r[1], r[2], r[3], -w * 0.42, -h / 2, w, h);
-  // the strike flash: one bright burst on the frame the hitbox is live
+  c.drawImage(im, r[0], r[1], r[2], r[3], -w * (0.5 + RAKE_LAG), -h / 2, w, h);
+  // the strike flash: one bright burst on the frame the hitbox is live, thrown
+  // at the LEADING tip of the stroke — where the claws are, not where they were
   if (p > 0.18 && p < 0.42 && sv.combo !== 2) {
     const b = RAKE.burstS;
     const bh = (sv.combo === 2 ? 22 : 15) * (claw ? 1.3 : 1);
     const bw = b[2] / b[3] * bh;
     c.globalAlpha = (1 - Math.abs(p - 0.3) / 0.12) * 0.85;
-    c.drawImage(im, b[0], b[1], b[2], b[3], w * 0.18 - bw / 2, -bh / 2, bw, bh);
+    c.drawImage(im, b[0], b[1], b[2], b[3], w * (0.5 - RAKE_LAG) - bw / 2, -bh / 2, bw, bh);
   }
   c.restore();
+}
+// Records where a paw was, and what it was swinging around, in the context it
+// was drawn in. The matrix is captured rather than the world position, because
+// by the time the cut is composited the body's transform — facing mirror, run
+// lean, landing squash, evolution scale and the double jump's spiral — has been
+// popped, and only the matrix knows what all of that did to these two points.
+function rakeMark(pl, c, sx, sy, hx, hy, dir, far) {
+  (pl._rake || (pl._rake = [])).push({
+    m: pl._rakeM || c.getTransform(), sx: sx, sy: sy, x: hx, y: hy,
+    dir: dir == null ? 1 : dir, far: !!far,
+  });
 }
 // EVERY GUARDIAN'S REAL BODY, AND THE SHEET IT ARRIVES IN. One table, checked
 // per kind. If a kind is in here it has authored art and must never be drawn as
