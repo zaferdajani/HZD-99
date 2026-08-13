@@ -45,9 +45,39 @@ const ROOMS = {
       hline(g, 27, 30, 11, '=');
     } },
   // ============ ZONE A — Scrap Meadows ============
-  A1: { zone: 'A', w: 30, h: 17, exits: { R: 'A2' },
-    ents: [['npc', 6, 15, 'servo'], ['crawler', 18, 15], ['crawler', 24, 15], ['scrap', 12, 15, 10]],
-    build(g) { frame(g); openR(g); hline(g, 5, 8, 12, '='); hline(g, 18, 21, 10, '='); } },
+  A1: { zone: 'A', w: 30, h: 17, exits: { R: 'A2', T: 'A6' },
+    ents: [['npc', 6, 15, 'servo'], ['crawler', 18, 15], ['guard', 24, 15], ['scrap', 12, 15, 10]],
+    build(g) {
+      frame(g); openR(g);
+      hline(g, 5, 8, 12, '='); hline(g, 18, 21, 10, '=');
+      // the climb into the gantries — the first thing in the game that is not
+      // on the way to anywhere
+      hline(g, 24, 27, 7, '='); hline(g, 19, 22, 4, '=');
+      rect(g, 19, 0, 22, 0, '.');
+    } },
+  // ---- THE GANTRIES: a wing, not a corridor. Up, across, and back down with
+  // the thing somebody asked for. Nothing here is required to finish the game.
+  A6: { zone: 'A', w: 26, h: 21, exits: { B: 'A1' },
+    ents: [['flier', 8, 8], ['flier', 17, 6], ['turret', 22, 12], ['scrap', 4, 12, 25],
+           ['item', 23, 6, 'coil'], ['plat', 10, 14, [0, -6, 3.2]]],
+    build(g) {
+      frame(g);
+      rect(g, 8, 20, 11, 20, '.');            // the way back down to A1
+      hline(g, 2, 6, 16, '='); hline(g, 13, 17, 13, '='); hline(g, 6, 10, 10, '=');
+      hline(g, 15, 19, 8, '='); hline(g, 20, 24, 7, '#');
+      hline(g, 11, 14, 18, '^');              // the floor is not safe to fall to
+    } },
+  // ---- THE SHAFT: straight down, in the dark, for the errand nobody takes.
+  A7: { zone: 'A', w: 22, h: 26, exits: { T: 'A5' },
+    ents: [['blob', 6, 24, 0], ['blob', 15, 24, 0], ['turret', 19, 18],
+           ['scrap', 10, 24, 45], ['secret', 3, 24, 'sigil3']],
+    build(g) {
+      frame(g);
+      rect(g, 9, 0, 12, 0, '.');              // the drop in from A5
+      hline(g, 4, 8, 20, '='); hline(g, 13, 18, 16, '='); hline(g, 5, 9, 12, '=');
+      hline(g, 14, 19, 8, '='); hline(g, 2, 6, 5, '=');
+      hline(g, 15, 20, 24, '^');
+    } },
   A2: { zone: 'A', w: 60, h: 17, exits: { L: 'A1', R: 'A3', B: 'A5' },
     ents: [['crawler', 20, 15], ['flier', 30, 7], ['guard', 46, 15], ['flier', 52, 7], ['scrap', 8, 15, 8], ['scrap', 35, 11, 12]],
     build(g) {
@@ -70,12 +100,15 @@ const ROOMS = {
   A4: { zone: 'A', w: 30, h: 17, exits: { L: 'A3' },
     ents: [['boss', 20, 15, 'glitch']],
     build(g) { frame(g); openL(g); hline(g, 4, 7, 11, '='); hline(g, 22, 25, 11, '='); } },
-  A5: { zone: 'A', w: 30, h: 17, exits: { T: 'A2' },
+  A5: { zone: 'A', w: 30, h: 17, exits: { T: 'A2', B: 'A7' },
     ents: [['chest', 20, 15, 'magnet'], ['term', 25, 15, 1], ['riddle', 15, 15, 0], ['scrap', 5, 15, 30], ['scrap', 7, 15, 25], ['scrap', 17, 15, 20]],
     build(g) {
       frame(g);
       hline(g, 2, 4, 12, '='); hline(g, 6, 8, 9, '='); hline(g, 9, 11, 6, '='); hline(g, 12, 14, 3, '=');
       rect(g, 12, 0, 14, 0, '.'); // ceiling opening back to A2
+      // the brittle floor over the shaft: you have to cut it to learn there is
+      // anything under the meadow at all
+      rect(g, 9, 15, 12, 16, 'B');
     } },
   // ============ ZONE B — Data Conduits ============
   B1: { zone: 'B', w: 30, h: 17, exits: { B: 'A3', R: 'B2' },
@@ -220,7 +253,8 @@ const ROOMS = {
 
 // map screen layout: [gridX, gridY, wCells, hCells]
 const MAPPOS = {
-  A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A3: [3, 3, 1, 1], A4: [4, 3, 1, 1], A5: [1, 4, 1, 1],
+  A0: [-1, 3, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A3: [3, 3, 1, 1], A4: [4, 3, 1, 1],
+  A5: [1, 4, 1, 1], A6: [0, 2, 1, 1], A7: [1, 5, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
   X1: [8, 1, 1, 1],
   C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1],

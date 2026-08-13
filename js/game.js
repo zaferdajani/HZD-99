@@ -161,7 +161,7 @@ function newSave(diff) {
     v: 1, diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [], arms: [], armIdx: 0, stars: 6,
     slots: 3, iq: 0, skills: [], relics: [], flags: {}, broken: {}, visited: {}, shop: {},
     bench: { room: 'A0', x: 70, y: 412 }, deaths: 0, lives: 0, time: 0,
-    pouch: null, usedNine: false, won: false, evo: 0, pace: 0,
+    pouch: null, usedNine: false, won: false, evo: 0, pace: 0, quests: {}, culls: {}, bag: {},
   };
 }
 // evolution fanfare: when a power milestone pushes the tier up, the character
@@ -197,7 +197,7 @@ function showItem(name, desc) {
 
 // ---------- room loading ----------
 function spawnStatic(type, tx, ty, extra, flagKey) {
-  const sizes = { bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [32, 40], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52] };
+  const sizes = { item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [32, 40], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52] };
   const [w, h] = sizes[type];
   G.statics.push({ type, x: tx * TILE + (TILE - w) / 2, y: ty * TILE - h, w, h, extra, flagKey, opened: !!(flagKey && G.save.flags[flagKey]), t: rnd(0, 9) });
 }
@@ -268,6 +268,10 @@ function loadRoom(id) {
       spawnStatic('chest', tx, ty, extra, 'ch_' + id + '_' + i);
     } else if (kind === 'mod') {
       if (!G.save.abil[extra]) spawnStatic('mod', tx, ty, extra);
+    } else if (kind === 'item') {
+      // an errand's object. It exists in exactly one place in the world, and
+      // once it is in the bag it does not come back.
+      if (!(G.save.bag && G.save.bag[extra])) spawnStatic('item', tx, ty, extra, null);
     } else if (kind === 'riddle') {
       spawnStatic('riddle', tx, ty, extra, nodeKey(extra));
     } else if (kind === 'secret') {
@@ -471,12 +475,28 @@ function findNear() {
 }
 function doInteract(s) {
   if (s.type === 'npc') {
-    const lines = t('d_' + s.extra).slice();
-    G.dialog = {
-      name: t('n_' + s.extra), lines, i: 0, npc: s.extra,
-      onEnd: s.extra === 'ratchet' ? () => { G.state = 'SHOP'; G.shopIdx = 0; }
-        : s.extra === 'mono' ? () => trialOpen() : null,
-    };
+    // THEY WANT SOMETHING NOW. Talking twice used to give you the same three
+    // lines forever; a character who cannot ask you for anything is scenery
+    // with a mouth. The errand comes first when there is one, and what they
+    // say depends on whether you have done it yet.
+    const q = typeof questFor === 'function' ? questFor(s.extra) : null;
+    let lines = t('d_' + s.extra).slice();
+    let after = s.extra === 'ratchet' ? () => { G.state = 'SHOP'; G.shopIdx = 0; }
+      : s.extra === 'mono' ? () => trialOpen() : null;
+    if (q) {
+      const st = qState(q.id);
+      if (st === 'none') {
+        lines = [t('q_ask_' + q.id) || t('q_ask'), qText(q)];
+        after = () => { qSet(q.id, 'active'); G.toast(t('q_taken')); sfx('ok'); };
+      } else if (qDone(q)) {
+        lines = [t('q_thanks_' + q.id) || t('q_thanks')];
+        after = () => questPay(q);
+      } else {
+        lines = [qText(q), t('q_wait')];
+        after = null;
+      }
+    }
+    G.dialog = { name: t('n_' + s.extra), lines, i: 0, npc: s.extra, onEnd: after };
     G.state = 'DIALOG'; npcSay(s.extra, 0);
   } else if (s.type === 'term') {
     G.dialog = { name: '…', lines: t('t' + s.extra).slice(), i: 0, onEnd: null, rs: RS_TERM[s.extra] };
@@ -509,6 +529,10 @@ function doInteract(s) {
   } else if (s.type === 'mod') {
     G.statics.splice(G.statics.indexOf(s), 1);
     grantMod(s.extra);
+  } else if (s.type === 'item') {
+    G.statics.splice(G.statics.indexOf(s), 1);
+    questTake(s.extra);
+    burst(s.x + 13, s.y + 13, 22, '#ffd76a', 260, 0.8, 100, 4, true);
   } else if (s.type === 'riddle') {
     // a MIND NODE is one interactive puzzle now — see NODES in trials.js
     triStartNode(s.extra | 0, s);
@@ -3050,6 +3074,26 @@ function drawStatics(P) {
       c.fillRect(-9, -9, 18, 18);
       c.fillStyle = '#0a1420'; c.fillRect(-4, -4, 8, 8);
       c.restore(); c.shadowBlur = 0;
+    } else if (s.type === 'item') {
+      // AN ERRAND'S OBJECT. It turns, it is lit from inside, and it is gold —
+      // the colour this game already reserves for something you get to keep.
+      const pu2 = 0.5 + Math.sin(performance.now() / 420 + s.x) * 0.5;
+      c.save(); c.translate(s.x + 13, s.y + 13 + bob);
+      c.globalCompositeOperation = 'lighter';
+      const gq = c.createRadialGradient(0, 0, 1, 0, 0, 26);
+      gq.addColorStop(0, 'rgba(255,215,106,' + (0.18 + pu2 * 0.16).toFixed(2) + ')');
+      gq.addColorStop(1, 'rgba(255,215,106,0)');
+      c.fillStyle = gq; c.beginPath(); c.arc(0, 0, 26, 0, 7); c.fill();
+      c.globalCompositeOperation = 'source-over';
+      c.rotate(performance.now() / 1100);
+      c.fillStyle = '#ffd76a'; c.strokeStyle = '#fff3c8'; c.lineWidth = 1.4;
+      c.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = i / 6 * Math.PI * 2, r2 = i % 2 ? 5 : 9;
+        i ? c.lineTo(Math.cos(a) * r2, Math.sin(a) * r2) : c.moveTo(r2, 0);
+      }
+      c.closePath(); c.fill(); c.stroke();
+      c.restore();
     } else if (s.type === 'riddle') {
       const pu = 0.5 + Math.sin(performance.now() / 500 + s.t) * 0.35;
       c.fillStyle = '#2c3542'; c.fillRect(s.x + 8, s.y + 26, 10, 10);
