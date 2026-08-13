@@ -150,6 +150,20 @@ problem even when it cannot remove it.
 
 ---
 
+## 5a. ARCHIVE EVERY GENERATED PART, IN THE SAME COMMIT
+
+Generated parts used to live in a scratch directory and only the composited
+atlas was committed, which meant a claim like "the guardian was restyled" could
+not be checked against anything. That is how a claim about the hero's art
+survived unchallenged while being false — the turnaround existed, the atlas row
+was declared, and the wiring was never done.
+
+Every generated asset goes to `assets/source/<subject>/<part>.jpg` **in the same
+commit that uses it**, along with the batch's contact sheet. Names match the rect
+keys, so a part can be traced from the archive to the tool table to the game.
+
+If it is not in `assets/source/`, it did not happen.
+
 ## 6. Licensing, non-negotiable
 
 Every file under `assets/` traces to a line in `assets/CREDITS.md`. Generated art
