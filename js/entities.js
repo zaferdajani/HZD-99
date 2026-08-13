@@ -3769,7 +3769,20 @@ const TELL_SWIPE = 0.5, TELL_FAST = 0.35, TELL_HEAVY = 0.7;
 // the state is ENTERED, centrally, so a new attack cannot be written without
 // one — which is exactly how the old swipe ended up with its sound on the hit
 // instead of on the warning.
-const TELL_ST = /warn|charge|crouch|coil|lock|prep|spin|gather/i;
+// THE STATE NAME IS THE CONTRACT. Any boss state whose name matches this fires
+// the tell cue exactly once on entry, which is how the audio channel of every
+// telegraph in the game gets handled without a boss author having to remember
+// it. The corollary is the trap: a wind-up state named something that does NOT
+// match is silently a ONE-CHANNEL telegraph, and nothing warns you.
+//
+// 'roar' is here because of exactly that. NULLFANG's roar opens with a 500 ms
+// inhale — orb gathering in the throat, debris lifting off the floor — and then
+// shoves the player across the room. The inhale is a real telegraph and it had
+// no sound of its own: the only audio was `roar_beast`, which plays 500 ms
+// LATER and is the hit, not the warning. On the game's FIRST boss, whose entire
+// job is to prove the telegraph contract is real before any later fight can
+// rely on the player trusting it.
+const TELL_ST = /warn|charge|crouch|coil|lock|prep|spin|gather|roar/i;
 // ONE COLOUR THAT MEANS ONE THING. The Hue Law already says crimson is infected
 // and cyan is clean — but those encode WHOSE side a thing is on, and nothing in
 // the palette meant "this is about to hit you". A tell needs a channel of its
@@ -4203,7 +4216,7 @@ class Boss {
           this.vx = (this.tx - this.sx) / 0.55; this.vy = 0;
           if (u2 >= 1) {
             this.x = this.tx; this.y = this.ty; this.vx = 0;
-            this.st = 'perch'; this.t = this.phase === 2 ? 1.0 : 1.4;
+            this.st = 'perch'; this.t = this.phase === 2 ? 1.0 : 1.4; this.perchTold = false;
             cam.shake = 5; sfx('land');
             // grit puffs off the ledge where the paws bite down
             for (let i = 0; i < 6; i++)
@@ -4215,7 +4228,15 @@ class Boss {
           // in the last half second — that is the dive coming
           this.vx = 0; this.vy = 0; this.t -= dt;
           this.face = Math.sign(dist) || 1;
-          if (this.t <= 0.45) this.windT = 0.3;
+          // The dive's telegraph is the LAST 450 ms of the perch, not the whole
+          // of it — it sits up there tracking you for a second first, and a cue
+          // on entry would be a warning that arrives before there is anything
+          // to warn about. So the state name deliberately stays outside TELL_ST
+          // and the cue is fired by hand, at the moment the body flattens.
+          if (this.t <= 0.45) {
+            this.windT = 0.3;
+            if (!this.perchTold) { this.perchTold = true; sfx('tell'); }
+          }
           if (this.t <= 0) {
             this.st = 'dive'; this.u = 0;
             this.sx = this.x; this.sy = this.y;

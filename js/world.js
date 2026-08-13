@@ -61,7 +61,12 @@ const ROOMS = {
   // ---- THE GANTRIES: a wing, not a corridor. Up, across, and back down with
   // the thing somebody asked for. Nothing here is required to finish the game.
   A6: { zone: 'A', w: 26, h: 21, exits: { B: 'A1' },
-    ents: [['flier', 8, 8], ['flier', 17, 6], ['turret', 22, 12], ['scrap', 4, 12, 25],
+    // Same fix as A2, and it matters more here: the gantries are a climb over
+    // spikes, so being harassed from two angles while airborne is not a fight
+    // you can lose well. One flier to keep you honest in the air, one crawler
+    // holding a ledge you have to land on — a threat you can choose to deal
+    // with, which is what makes the climb a route rather than a gauntlet.
+    ents: [['flier', 8, 8], ['crawler', 16, 12], ['turret', 22, 12], ['scrap', 4, 12, 25],
            ['item', 23, 6, 'coil'], ['plat', 10, 14, [0, -6, 3.2]]],
     build(g) {
       frame(g);
@@ -82,7 +87,13 @@ const ROOMS = {
       hline(g, 15, 20, 24, '^');
     } },
   A2: { zone: 'A', w: 60, h: 17, exits: { L: 'A1', R: 'A3', B: 'A5' },
-    ents: [['crawler', 20, 15], ['flier', 30, 7], ['guard', 46, 15], ['flier', 52, 7], ['scrap', 8, 15, 8], ['scrap', 35, 11, 12]],
+    // TWO DISRUPTORS ON ONE SCREEN WAS THE GAME'S SECOND FIGHT. Fliers dive and
+    // withdraw; two of them harassing from opposite angles leaves nothing to do
+    // about either, which is agency removal rather than difficulty. The second
+    // one is a hopper now: a vertical PRESSURE threat that asks the same
+    // question the guard beside it asks — can you wait for the right moment —
+    // instead of asking the player to be in two places at once.
+    ents: [['crawler', 20, 15], ['flier', 30, 7], ['guard', 46, 15], ['hopper', 52, 15], ['scrap', 8, 15, 8], ['scrap', 35, 11, 12]],
     build(g) {
       frame(g); openL(g); openR(g);
       // spike pits

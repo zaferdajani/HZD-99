@@ -29,6 +29,8 @@ const SUITE = [
   ['pace',      'the game-speed dial slows the simulation and nothing else'],
   ['ceiling',   'every kingdom has a roof that sheds its own weather, at every quality tier'],
   ['tutor',     'the waking floor teaches the whole loop: kill, take, spend, repair, think, spend'],
+  ['tells',     'every boss wind-up carries BOTH channels — no silently one-channel telegraphs'],
+  ['threat',    'threat concentration per screen, and the forbidden compositions'],
 ];
 
 const want = process.argv.slice(2);
