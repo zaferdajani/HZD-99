@@ -150,6 +150,19 @@ function hurtBoxOf(e) {
 }
 
 function dealDmg(e, dm, atkEl, x, y, noPenalty) {
+  // THE GUARD'S PLATE. Up by default, down only while it is winded from its
+  // own lunge — so the answer is not "hit it more", it is "hit it THEN".
+  // Deliberately not immunity: a player who keeps swinging still makes very
+  // slow progress and is never hard-stuck, they are simply being taught that
+  // there is a better moment.
+  if (e.guard) {
+    burst(x, y, 7, '#cfe0f0', 190, 0.3, 60, 2.2, true);
+    if (typeof sfx === 'function') sfx('bosshit');
+    e.hurtT = 0.12;
+    e.hp -= Math.max(1, Math.round(dm * 0.12));
+    if (e.hp <= 0 && !e.dead) e.die(Math.sign(x - (e.x + e.w / 2)) || 1, -0.3);
+    return 0;
+  }
   // ARC OVERLOAD: hiding inside the lightning — nothing lands until it ends
   if ((e.stormT || 0) > 0) {
     burst(x, y, 6, '#8ff6ff', 200, 0.3, 0, 2.5, true);

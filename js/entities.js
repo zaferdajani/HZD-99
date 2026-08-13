@@ -2671,8 +2671,70 @@ function drawTurretLock(c, e, cx) {
 // they DO and how they are combined — this is the floor under that, not the
 // mechanism itself.
 const ZONE_K = { A: 1.0, B: 1.15, C: 1.32, D: 1.5, E: 1.7, X: 1.6 };
+// ===========================================================================
+// THE MACHINES LEARN. Zone scaling makes them tougher the deeper you go; this
+// makes them CLEVERER the stronger you get, which is a different axis and the
+// more interesting one. A player who has taken four powers and three guardians
+// is not asking for enemies with more health — they are asking to be read.
+//
+// What rises with it: how soon they commit, whether they aim where she IS or
+// where she is GOING, whether they follow up, whether they track her while
+// winding up. What never rises with it: THE LENGTH OF THE WARNING. Difficulty
+// that comes from shortening the tell is difficulty bought by making the game
+// unreadable, and that trade is never worth taking — every attack stays as
+// readable at full cunning as it was in the first room.
+// ===========================================================================
+function foeIQ() {
+  const sv = typeof G !== 'undefined' && G.save;
+  if (!sv) return 0;
+  let mods = 0; for (const k in (sv.abil || {})) if (sv.abil[k]) mods++;
+  let won = 0;
+  for (const k of ['bossGlitch', 'bossBrood', 'bossAtlas', 'bossZero', 'bossPrism'])
+    if (sv.flags && sv.flags[k]) won++;
+  const skills = (sv.skills || []).length;
+  // four powers and three guardians is about three quarters of the way up
+  return clamp(mods * 0.11 + won * 0.10 + skills * 0.035, 0, 1);
+}
+// CUNNING IS ONE AXIS; MUSCLE IS THE OTHER. Getting smarter alone eventually
+// reads as an enemy that dodges well and still dies in two hits — the fight
+// gets fussier without getting bigger. This is the second dial: the same
+// machines, reinforced, as the virus gets more of the city to work with.
+// Multiplied with the zone curve, so depth and progress compound instead of
+// competing (a first-kingdom frame late in a run is still the weakest thing in
+// the game; a Nest frame late in a run is the hardest).
+function foePow() { return 1 + foeIQ() * 0.55; }
+// AND MIX AND MATCH. A flat multiplier makes every enemy the same enemy with
+// bigger numbers. Traits make the same room play differently twice: one crawler
+// is quick, the next is armoured, the one after goes off when it dies. Each is
+// marked on the body so it is read before it is discovered, and none of them
+// touches a telegraph — an enemy is never harder because it warned you less.
+const TRAITS = {
+  swift:    { spd: 1.32, hp: 0.92, col: '#7de8ff' },
+  tough:    { spd: 0.9,  hp: 1.75, col: '#c8b28a' },
+  volatile: { spd: 1.06, hp: 0.9,  col: '#ff9a5a' },
+};
+const TRAIT_KEYS = ['swift', 'tough', 'volatile'];
+function rollTraits(iq) {
+  // nothing at all early; one somewhere past the second power; a second one
+  // only once the player is genuinely equipped
+  const out = [];
+  if (iq < 0.2) return out;
+  const chance1 = 0.18 + iq * 0.42;
+  if (Math.random() < chance1) out.push(TRAIT_KEYS[Math.floor(Math.random() * 3)]);
+  if (iq > 0.62 && Math.random() < (iq - 0.62) * 1.1) {
+    const t2 = TRAIT_KEYS[Math.floor(Math.random() * 3)];
+    if (out.indexOf(t2) < 0) out.push(t2);
+  }
+  return out;
+}
+// where she will BE, not where she is — the single most human-feeling thing a
+// simple enemy can do, and it costs one line
+function leadX(px, k) {
+  return px + (typeof player !== 'undefined' && player ? player.vx : 0) * k;
+}
 const EKIND = {
   crawler: { w: 28, h: 20, hp: 30, spd: 62 },
+  guard: { w: 30, h: 22, hp: 44, spd: 52 },
   flier: { w: 26, h: 22, hp: 24, spd: 120 },
   turret: { w: 28, h: 30, hp: 45, spd: 0 },
   hopper: { w: 26, h: 24, hp: 36, spd: 180 },
@@ -2689,6 +2751,7 @@ class Enemy {
     // Every one of them would have failed silently in the shipped game exactly
     // as it failed in the harness: the enemy simply never winds up, with no
     // error anywhere. Declared here, once, where the fields belong.
+    this.iq = foeIQ();
     this.atkCD = rnd(0.5, 1.6);
     this.coilT = 0; this.lungeT = 0; this.windedT = 0;
     this.holdT = 0; this.diveT = 0; this.riseT = 0;
@@ -2700,13 +2763,23 @@ class Enemy {
     // deeper you go, the more the virus has done to them.
     const zk = ZONE_K[(G.roomDef && G.roomDef.zone) || 'A'] || 1;
     this.zoneK = zk;
-    this.hp = Math.round(k.hp * DF().ehp * zk); this.spd = k.spd * DF().espd * (0.88 + zk * 0.12);
+    const iq0 = foeIQ();
+    this.traits = rollTraits(iq0);
+    let th = 1, ts = 1;
+    for (const tr of this.traits) { th *= TRAITS[tr].hp; ts *= TRAITS[tr].spd; }
+    const pw = foePow();
+    this.hp = Math.round(k.hp * DF().ehp * zk * pw * th);
+    this.hpMax0 = this.hp;
+    this.spd = k.spd * DF().espd * (0.88 + zk * 0.12) * (0.94 + pw * 0.06) * ts;
     this.vx = 0; this.vy = 0; this.dir = chance(0.5) ? 1 : -1;
     this.t = rnd(0.5, 2); this.sx = x; this.sy = y; this.hurtT = 0; this.dead = false; this.anim = rnd(0, 9);
     this.kbT = 0; this.tr = [];
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    // cheap, and it means a machine that was in the room before you took a
+    // power is as sharp as one spawned after it
+    if ((this.iqT = (this.iqT || 0) - dt) <= 0) { this.iqT = 2.5; this.iq = foeIQ(); }
     // summoned brood expires: called minions burn out after their tour
     if (this.expireT != null && !this.dead) {
       this.expireT -= dt;
@@ -2769,17 +2842,30 @@ class Enemy {
       // The crawler asks: CAN YOU READ A WIND-UP? It patrols, and inside its
       // reach it stops, coils for TELL_FAST, and lunges — and the lunge leaves
       // it winded, which is where the player is meant to hit it.
+      // THE GUARD asks the question the whole game is built on and nothing had
+      // ever asked: CAN YOU WAIT? It holds a plate up and takes almost nothing
+      // through it, and it drops that plate only while it is winded from its
+      // own lunge. Mashing does not work; the punish window does. It is a
+      // crawler with one field changed — no new art, no new AI — which is the
+      // cheapest way there is to teach patience before a boss demands it.
+      case 'guard':
       case 'crawler': {
         this.vy += 2000 * dt;
+        this.guard = this.kind === 'guard' && this.windedT <= 0 && this.lungeT <= 0;
         if (this.lungeT > 0) {                              // committed
           this.lungeT -= dt;
           this.vx = this.dir * this.spd * 4.2;
-          if (this.lungeT <= 0) { this.windedT = 0.55; this.vx = 0; }
+          // the punish window shrinks with cunning but never closes: even at
+          // full sharpness there is a third of a second where it is yours
+          if (this.lungeT <= 0) { this.windedT = 0.55 - this.iq * 0.22; this.vx = 0; }
         } else if (this.windedT > 0) {                      // the punish window
           this.windedT -= dt; this.vx *= Math.pow(0.02, dt);
         } else if (this.coilT > 0) {                        // the tell
           this.coilT -= dt; this.vx = 0;
-          if (this.coilT <= 0) { this.lungeT = 0.22; sfx('dash'); }
+          // a clever one keeps its nose on her while it gathers, so stepping
+          // around it stops being a free answer
+          if (this.iq > 0.55) this.dir = Math.sign(px - cx) || this.dir;
+          if (this.coilT <= 0) { this.lungeT = 0.22 + this.iq * 0.06; sfx('dash'); }
         } else {
           this.vx = this.dir * this.spd;
           // IT NOTICES HER. Requiring it to already be facing the right way
@@ -2790,8 +2876,12 @@ class Enemy {
           if (!player.dead && Math.abs(px - cx) < 160 && Math.abs(py - cy) < 70
               && (this.atkCD -= dt) <= 0) {
             const want = Math.sign(px - cx) || this.dir;
-            if (want !== this.dir) { this.dir = want; this.atkCD = 0.28; }
-            else { this.coilT = TELL_FAST; this.atkCD = rnd(2.2, 3.4); this.vx = 0; sfx('tell'); }
+            if (want !== this.dir) { this.dir = want; this.atkCD = 0.28 - this.iq * 0.14; }
+            else {
+              this.coilT = TELL_FAST;                       // the tell never shortens
+              this.atkCD = rnd(2.2 - this.iq * 1.1, 3.4 - this.iq * 1.6);
+              this.vx = 0; sfx('tell');
+            }
           }
         }
         const col = moveEnt(this, dt);
@@ -2809,7 +2899,7 @@ class Enemy {
         this.vy += 2000 * dt;
         this.dripT = (this.dripT || rnd(0.6, 1.4)) - dt;
         if (this.dripT <= 0 && this.on !== false) {
-          this.dripT = rnd(1.1, 1.8);
+          this.dripT = rnd(1.1 - this.iq * 0.4, 1.8 - this.iq * 0.6);
           G.pools = G.pools || [];
           if (G.pools.length < 14) G.pools.push({ x: cx, y: this.y + this.h - 2, t: 4.2, t0: 4.2, r: 0 });
         }
@@ -2825,9 +2915,10 @@ class Enemy {
         const near = dist2(cx, cy, px, py) < 340 * 340 && !player.dead;
         if (this.diveT > 0) {
           this.diveT -= dt;
-          this.vx = lerp(this.vx, (px - cx) * 1.2, 0.12);
+          // it aims where she is GOING once it has learned to
+          this.vx = lerp(this.vx, (leadX(px, this.iq * 0.36) - cx) * 1.2, 0.12);
           this.vy = 430;
-          if (this.diveT <= 0 || moveEnt(this, dt).d) { this.diveT = 0; this.riseT = 0.9; }
+          if (this.diveT <= 0 || moveEnt(this, dt).d) { this.diveT = 0; this.riseT = 0.9 - this.iq * 0.35; }
           else break;
         } else if (this.riseT > 0) {                        // withdrawing
           this.riseT -= dt;
@@ -2842,8 +2933,9 @@ class Enemy {
           this.vx += (tx - cx) * 1.6 * dt; this.vy += (ty - cy) * 2.2 * dt;
           const sp = Math.hypot(this.vx, this.vy);
           if (sp > this.spd) { this.vx *= this.spd / sp; this.vy *= this.spd / sp; }
-          if (Math.abs(px - cx) < 46 && cy < py - 60 && (this.atkCD -= dt) <= 0) {
-            this.holdT = TELL_FAST; this.atkCD = rnd(2.4, 3.6); sfx('tell');
+          if (Math.abs(px - cx) < 46 + this.iq * 26 && cy < py - 60 && (this.atkCD -= dt) <= 0) {
+            this.holdT = TELL_FAST;                          // unchanged, always
+            this.atkCD = rnd(2.4 - this.iq * 1.1, 3.6 - this.iq * 1.5); sfx('tell');
           }
         } else {
           this.vx = lerp(this.vx, Math.sin(this.anim * 1.3) * 40, 0.05);
@@ -2859,15 +2951,20 @@ class Enemy {
           this.lockT -= dt;
           if (this.lockT <= 0) {
             this.lockT = 0;
-            const d = Math.hypot(px - cx, py - cy) || 1;
-            G.projs.push(new Proj(cx, cy - 6, (px - cx) / d * 340, (py - cy) / d * 340, false, 1, 6, '#ff5c6c'));
+            // a practised gunner shoots where you will be. The lock is still
+            // 0.55 s and the beam still shows you the line — what changes is
+            // that standing still stops being safe just because you were
+            // moving when it locked.
+            const aimX = leadX(px, this.iq * 0.42);
+            const d = Math.hypot(aimX - cx, py - cy) || 1;
+            G.projs.push(new Proj(cx, cy - 6, (aimX - cx) / d * 340, (py - cy) / d * 340, false, 1, 6, '#ff5c6c'));
             sfx('shoot');
             // FAR AWAY IT FIRES A BURST, close up a single shot. The question
             // it asks is "can you cross this ground?", and a burst is what
             // makes crossing a decision instead of a stroll.
             this.burst = (this.burst | 0) + 1;
             const far = dist2(cx, cy, px, py) > 240 * 240;
-            if (far && this.burst < 3) { this.t = 0.16; this.lockT = 0.0001; }
+            if (far && this.burst < 2 + Math.round(this.iq * 2)) { this.t = 0.16; this.lockT = 0.0001; }
             else { this.burst = 0; this.t = 2.0 / DF().espd; }
           }
         } else if (this.t <= 0 && !player.dead && dist2(cx, cy, px, py) < 440 * 440) {
@@ -2907,9 +3004,9 @@ class Enemy {
               break;
             }
             this.gathered = false;
-            this.t = rnd(1.1, 1.9);
-            this.dir = Math.sign(px - cx) || 1;
-            this.vy = -560; this.vx = this.dir * this.spd; this.wasAir = true;
+            this.t = rnd(1.1 - this.iq * 0.4, 1.9 - this.iq * 0.6);
+            this.dir = Math.sign(leadX(px, this.iq * 0.5) - cx) || 1;
+            this.vy = -560; this.vx = this.dir * this.spd * (1 + this.iq * 0.18); this.wasAir = true;
             sfx('jump');
           }
         }
@@ -2922,7 +3019,24 @@ class Enemy {
     // touch damage
     if (!player.dead && aabb(this, player)) player.hurt(DF().edmg, cx);
   }
+  // VOLATILE: it takes the room with it. Telegraphed by its own colour on the
+  // body and by a beat of warning light, so it is a thing you step away from
+  // rather than a thing that happens to you.
   die(kx, ky) {
+    if (this.traits && this.traits.indexOf('volatile') >= 0 && !this.dead && !this.popped) {
+      this.popped = true;
+      const bx = this.x + this.w / 2, by = this.y + this.h / 2;
+      G.pools = G.pools || [];
+      burst(bx, by, 22, TRAITS.volatile.col, 320, 0.55, 90, 3.2, true);
+      cam.shake = Math.max(cam.shake, 5);
+      if (typeof sfx === 'function') sfx('boom');
+      if (!player.dead && player.iT <= 0
+          && Math.hypot(player.x + player.w / 2 - bx, player.y + player.h / 2 - by) < 74)
+        player.hurt(DF().edmg, bx, this.kind + '.volatile');
+    }
+    return this._die0(kx, ky);
+  }
+  _die0(kx, ky) {
     if (this.dead) return;
     this.dead = true;
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
@@ -3014,6 +3128,42 @@ class Enemy {
     // a bullet was a sound. It is drawn HERE now, above every early return, and
     // it brings an aim line with it: the line finds you over the half second,
     // so the warning says where the shot is going as well as that it is coming.
+    // WHAT THIS ONE IS. A ring in the trait's own colour, plus a mark: a
+    // chevron for quick, a bar for armoured, a dot for the one that goes off.
+    // Colour alone would fail roughly one man in twelve, so the shape carries
+    // the same information.
+    if (this.traits && this.traits.length && !this.dead) {
+      c.save();
+      this.traits.forEach((tr, ti) => {
+        const T = TRAITS[tr]; if (!T) return;
+        const ry = this.y - 6 - ti * 7;
+        c.globalAlpha = 0.85;
+        c.strokeStyle = T.col; c.lineWidth = 1.6;
+        c.beginPath(); c.arc(cx, ry, 3.6, 0, 7); c.stroke();
+        c.fillStyle = T.col;
+        if (tr === 'swift') { c.beginPath(); c.moveTo(cx - 2, ry + 1.6); c.lineTo(cx, ry - 1.8); c.lineTo(cx + 2, ry + 1.6); c.closePath(); c.fill(); }
+        else if (tr === 'tough') c.fillRect(cx - 2.4, ry - 1.2, 4.8, 2.4);
+        else { c.beginPath(); c.arc(cx, ry, 1.7, 0, 7); c.fill(); }
+      });
+      c.restore(); c.globalAlpha = 1;
+    }
+    // the plate: up means wait, down means now
+    if (this.kind === 'guard' && !this.dead) {
+      const up = !!this.guard;
+      c.save();
+      c.translate(cx + this.dir * (this.w * 0.52), this.y + this.h * 0.5);
+      c.globalAlpha = up ? 0.95 : 0.35;
+      c.fillStyle = up ? '#9fb3c8' : '#5b6a7a';
+      rr(c, -3, -this.h * 0.5, 6, this.h, 2); c.fill();
+      c.strokeStyle = up ? '#dfeaf6' : 'rgba(190,210,230,0.4)'; c.lineWidth = 1.2;
+      rr(c, -3, -this.h * 0.5, 6, this.h, 2); c.stroke();
+      if (!up) {                                    // the window, made obvious
+        c.globalAlpha = 0.5 + Math.sin(performance.now() / 90) * 0.3;
+        c.strokeStyle = TELL_COL; c.lineWidth = 2;
+        c.beginPath(); c.arc(-this.dir * this.w * 0.52, 0, this.w * 0.75, 0, 7); c.stroke();
+      }
+      c.restore(); c.globalAlpha = 1;
+    }
     if ((this.lockT || 0) > 0 && !this.dead) drawTurretLock(c, this, cx);
     // EVERY WIND-UP WEARS THE SAME COLOUR. One hue, one meaning, used by
     // nothing else in the game — and always with motion and sound beside it,
@@ -3043,7 +3193,7 @@ class Enemy {
     }
     // Pre-rendered 3D turnaround. Selected by angle, never mirrored, so the baked
     // key light stays on the correct side as the machine turns.
-    if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
+    if (drawAtlas(c, this.kind === 'guard' ? 'crawler' : this.kind, this.faceVis, cx, this.y + this.h, this.h, {
           flash: this.hurtT > 0 ? 1 : 0,
           charm: this.hypnoT > 0 ? 1 : 0,
           grounded: this.kind !== 'flier',
