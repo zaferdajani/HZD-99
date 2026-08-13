@@ -37,6 +37,7 @@ const SUITE = [
   ['climbout',  'every floor she can land on she can leave, and every gate names its power'],
   ['cover',     'the platform she is standing on stops a shot, from either side'],
   ['tap',       'tap where a thing is drawn and that thing happens'],
+  ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
 ];
 
 const want = process.argv.slice(2);
