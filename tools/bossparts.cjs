@@ -128,11 +128,41 @@ async function main() {
         const nc = document.createElement('canvas'); nc.width = p.naturalWidth; nc.height = p.naturalHeight;
         const nx = nc.getContext('2d', { willReadFrequently: true });
         nx.drawImage(p, 0, 0);
+        // KEYING BY BRIGHTNESS DOES NOT WORK ON A DARK SUBJECT, which is most
+        // of them: NULLFANG is gunmetal on black, and its darkest plates sit in
+        // the same luminance range as the backdrop. A global threshold turned
+        // the lion into a ghost — every mid-tone panel half-dissolved, the
+        // bright rim light left floating.
+        //
+        // The backdrop is not "the dark pixels", it is "the dark pixels
+        // CONNECTED TO THE EDGE". So it is flood-filled inward from the border
+        // and only what the fill reaches is removed; a dark panel enclosed by
+        // the silhouette is never reached and survives at full opacity.
         const nd = nx.getImageData(0, 0, nc.width, nc.height);
-        const q = nd.data;
-        for (let i = 0; i < q.length; i += 4) {
-          const lum = q[i] * 0.3 + q[i + 1] * 0.59 + q[i + 2] * 0.11;
-          q[i + 3] = lum > 62 ? 255 : lum > 26 ? Math.round((lum - 26) / 36 * 255) : 0;
+        const q = nd.data, NW = nc.width, NH = nc.height;
+        const lumAt = i => q[i] * 0.3 + q[i + 1] * 0.59 + q[i + 2] * 0.11;
+        const bg = new Uint8Array(NW * NH);
+        const stack = [];
+        const BG_LUM = 40;                       // generous: the backdrop has bloom on it
+        for (let xx = 0; xx < NW; xx++) { stack.push(xx); stack.push(xx + (NH - 1) * NW); }
+        for (let yy = 0; yy < NH; yy++) { stack.push(yy * NW); stack.push(NW - 1 + yy * NW); }
+        while (stack.length) {
+          const n = stack.pop();
+          if (bg[n]) continue;
+          if (lumAt(n * 4) > BG_LUM) continue;
+          bg[n] = 1;
+          const xx = n % NW, yy = (n - xx) / NW;
+          if (xx > 0) stack.push(n - 1);
+          if (xx < NW - 1) stack.push(n + 1);
+          if (yy > 0) stack.push(n - NW);
+          if (yy < NH - 1) stack.push(n + NW);
+        }
+        for (let n = 0; n < NW * NH; n++) {
+          if (!bg[n]) { q[n * 4 + 3] = 255; continue; }
+          // a soft rim rather than a cut edge: background pixels that are
+          // nearly bright enough to be subject keep a little alpha
+          const l = lumAt(n * 4);
+          q[n * 4 + 3] = l > BG_LUM * 0.55 ? Math.round((l - BG_LUM * 0.55) / (BG_LUM * 0.45) * 200) : 0;
         }
         nx.putImageData(nd, 0, 0);
         const nb = inkBox(nx, nc.width, nc.height, true) || { x: 0, y: 0, w: nc.width, h: nc.height };
