@@ -92,6 +92,37 @@ function moveEnt(e, dt) {
   }
   return col;
 }
+// WHAT STOPS A SHOT — which is not the same question as what stops a BODY.
+//
+// '=' is a one-way platform: a body jumps up through it and lands on top. The
+// projectile test reused solidAt, which is correctly honest about '=' being
+// passable, so every shot fired from under a gantry went straight up through
+// the floor and hit whoever was standing on it. Standing on a platform reads
+// as cover and therefore has to BE cover — in both directions, and for her own
+// shuriken too, which is what makes it a position worth taking rather than a
+// place the rules happen to favour her.
+function blocksShot(tx, ty) {
+  const c = tileAt(tx, ty);
+  return c === '#' || c === 'B' || c === '=';
+}
+// SWEPT, NOT SAMPLED. A shot travels further than a tile in one step whenever
+// the machine is slow or the shot is fast, and a point test taken only at the
+// end of the step walks it clean through a one-tile floor without ever having
+// been inside it. Returns the last free point before the block, or null.
+function shotSweep(x0, y0, x1, y1) {
+  // a shot that STARTS inside terrain (a turret muzzle buried in its own
+  // mounting) is given the step to get out rather than killed on spawn
+  if (blocksShot(Math.floor(x0 / TILE), Math.floor(y0 / TILE))) return null;
+  const dx = x1 - x0, dy = y1 - y0;
+  const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 8));
+  let px = x0, py = y0;
+  for (let i = 1; i <= steps; i++) {
+    const x = x0 + dx * (i / steps), y = y0 + dy * (i / steps);
+    if (blocksShot(Math.floor(x / TILE), Math.floor(y / TILE))) return { x: px, y: py };
+    px = x; py = y;
+  }
+  return null;
+}
 function onSpike(e) {
   const x0 = Math.floor((e.x + 5) / TILE), x1 = Math.floor((e.x + e.w - 5) / TILE);
   const y0 = Math.floor((e.y + 6) / TILE), y1 = Math.floor((e.y + e.h - 2) / TILE);
@@ -2343,8 +2374,11 @@ class Proj {
   update(dt) {
     this.life -= dt; if (this.life <= 0) { this.dead = true; return; }
     this.vy += this.grav * dt;
+    const sx = this.x, sy = this.y;
     this.x += this.vx * dt; this.y += this.vy * dt;
-    if (solidAt(Math.floor(this.x / TILE), Math.floor(this.y / TILE))) {
+    const bump = shotSweep(sx, sy, this.x, this.y);
+    if (bump) {
+      this.x = bump.x; this.y = bump.y;
       this.dead = true; burst(this.x, this.y, 6, this.color, 130, 0.3, 400, 2, true); return;
     }
     if (this.friendly) {

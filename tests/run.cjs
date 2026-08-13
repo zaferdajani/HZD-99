@@ -34,6 +34,8 @@ const SUITE = [
   ['errands',   'every errand has a goal that exists and can be reached'],
   ['deadend',   'no broken exits, no one-way doors, no unreachable rooms, every leaf pays'],
   ['padlife',   'a yanked controller releases the game; a live one keeps it'],
+  ['climbout',  'every floor she can land on she can leave, and every gate names its power'],
+  ['cover',     'the platform she is standing on stops a shot, from either side'],
 ];
 
 const want = process.argv.slice(2);
