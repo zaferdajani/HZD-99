@@ -4825,11 +4825,14 @@ class Boss {
             else if (alt === 1) { this.st = 'shardwarn'; this.t = 0.5; this.windT = 0.4; sfx('cast'); }
             else if (alt === 3) { this.st = 'dashwarn'; this.t = 0.55; this.windT = 0.5; sfx('dash'); }
             else if (!this.orbs || !this.orbs.length) { this.st = 'orbs'; this.t = 1.0; this.windT = 0.5; sfx('cast'); }
-            else {
-              // an information prison: a cage of frozen void around you
-              this.prison = { x: px, y: py, t: 0, life: this.phase === 2 ? 3.4 : 2.6, held: 0 };
-              sfx('cast'); this.windT = 0.5; this.t = 2.2;
-            }
+            // THE PRISON GETS ITS OWN STATE. It used to be cast from inside
+            // `idle` — the state was never changed, only `windT` was set — and
+            // that makes `idle` itself a wind-up, which the telegraph auditor
+            // rightly calls a one-channel tell: there is no way to look at a
+            // hovering guardian and know a cage is coming. It only surfaced
+            // once her rest beats got short enough to enter idle eighty times
+            // a fight, but it was always a lie in the state machine.
+            else { this.st = 'prisonwarn'; this.t = 0.5; this.windT = 0.5; sfx('cast'); }
           }
         } else if (this.st === 'lancewarn') {
           // the horn drinks void light — hold, watch, then move OFF the line
@@ -4893,6 +4896,18 @@ class Boss {
           // spent from the charge — your window
           this.t -= dt; this.y = lerp(this.y, hovY, dt * 1.2);
           if (this.t <= 0) { this.st = 'idle'; this.t = glcRest(this); }
+        } else if (this.st === 'prisonwarn') {
+          // the void gathers around where she is looking, then closes
+          this.t -= dt; this.vx = 0; this.vy = 0;
+          if (chance(0.7)) {
+            const aa = rnd(0, 6.28), rr2 = 44 + rnd(-8, 8);
+            addPart(px + Math.cos(aa) * rr2, py + Math.sin(aa) * rr2,
+              -Math.cos(aa) * 90, -Math.sin(aa) * 90, 0.3, '#c88cff', 2.2, 0, true);
+          }
+          if (this.t <= 0) {
+            this.prison = { x: px, y: py, t: 0, life: this.phase === 2 ? 3.4 : 2.6, held: 0 };
+            sfx('cast'); this.st = 'idle'; this.t = glcRest(this);
+          }
         } else if (this.st === 'novawarn') {
           this.t -= dt; this.vx = 0; this.vy = 0;
           if (this.t <= 0) {
