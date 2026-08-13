@@ -508,6 +508,26 @@ function findNear() {
   }
   return best;
 }
+// ---------------------------------------------------------------------------
+// HOW THE WORLD SEES HER, AND WHETHER IT SAYS SO.
+//
+// The machinery for an underdog run was almost all here — a chassis that
+// evolves, a tree, a Braid that remembers, guardians that can be spared — and
+// one thing was missing that no mechanic can supply: nobody's opinion of her
+// ever changed. Servo called her "little frame" in the first hour and called
+// her "little frame" in the fifth, after she had put five guardians on their
+// knees. Growth you can measure is a number; growth somebody REMARKS ON is a
+// story, and it costs eighteen strings.
+//
+// Three tiers, because the shift has to be legible: nobody / one or two / most
+// of them. And the line has to be SPECIFIC, never flattering — "you are still
+// alive" carries the arc, "you are amazing" kills it.
+function guardiansFelled() {
+  const f = (G.save && G.save.flags) || {};
+  return ['Glitch', 'Brood', 'Atlas', 'Zero', 'Prism', 'Mother']
+    .filter(b => f['boss' + b]).length;
+}
+function standingTier() { const n = guardiansFelled(); return n >= 3 ? 2 : n >= 1 ? 1 : 0; }
 function doInteract(s) {
   if (s.type === 'npc') {
     // THEY WANT SOMETHING NOW. Talking twice used to give you the same three
@@ -516,6 +536,13 @@ function doInteract(s) {
     // say depends on whether you have done it yet.
     const q = typeof questFor === 'function' ? questFor(s.extra) : null;
     let lines = t('d_' + s.extra).slice();
+    // ...and the first thing out of their mouth is what they make of her NOW.
+    // It leads rather than trails, because it is the line the greeting used to
+    // be, and because a player who skips the rest still hears it.
+    {
+      const k = 'sl_' + s.extra + '_' + standingTier(), sl = t(k);
+      if (sl && sl !== k) lines.unshift(sl);
+    }
     // WHAT THIS PERSON IS FOR. The trader trades; the Oracle opens the Trials.
     // That is their job and an errand does not replace it — which is exactly
     // what the errand system did when it landed: the moment the trader had a
