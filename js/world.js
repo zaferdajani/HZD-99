@@ -125,7 +125,7 @@ const ROOMS = {
       rect(g, 9, 15, 12, 16, 'B');
     } },
   // ============ ZONE B — Data Conduits ============
-  B1: { zone: 'B', w: 30, h: 17, exits: { B: 'A3', R: 'B2' },
+  B1: { zone: 'B', w: 30, h: 17, exits: { B: 'A3', R: 'B2', T: 'B6' },
     ents: [['flier', 15, 6], ['turret', 5, 12], ['scrap', 22, 12, 10]],
     build(g) {
       frame(g);
@@ -135,6 +135,33 @@ const ROOMS = {
       rect(g, 25, 12, 28, 16, '.');         // shaft down to A3
       hline(g, 25, 28, 12, '=');
       rect(g, 29, 8, 29, 11, '.');          // exit R (upper level)
+      rect(g, 3, 0, 6, 0, '.');             // and up, into the relay gallery
+      hline(g, 2, 7, 4, '='); hline(g, 8, 11, 8, '=');   // the way to reach it
+    } },
+  // THE RELAY GALLERY — the Conduits' own wing.
+  //
+  // Zone B had two fighting rooms to zone A's five: the second kingdom was
+  // thinner than the first, which is the wrong shape for a difficulty curve and
+  // the wrong shape for a place. This is B's answer to A6 and A7 — a climb up
+  // the cable risers to a relay that stopped answering, and the errand that
+  // sends you there is the Oracle's.
+  //
+  // Composition (registry §4/§6): turret ZONER anchoring the bottom of the
+  // climb, hopper PRESSURE on the mid ledges, one flier DISRUPTOR at the top.
+  // Peak 5 in any one screen, under the measured ceiling of 9, and never two
+  // disruptors. The solution shape is "kill the turret from cover before you
+  // commit to the climb, because you cannot dodge on a ladder."
+  B6: { zone: 'B', w: 26, h: 24, exits: { B: 'B1' },
+    ents: [['turret', 6, 22], ['hopper', 18, 18], ['flier', 13, 5],
+           ['item', 22, 5, 'relay'], ['scrap', 3, 18, 30], ['plat', 9, 13, [0, -5, 3.4]]],
+    build(g) {
+      frame(g);
+      rect(g, 3, 23, 6, 23, '.');             // the way back down to B1
+      // the risers: staggered, so the climb is a route and not a stack
+      hline(g, 2, 7, 19, '='); hline(g, 12, 17, 19, '=');
+      hline(g, 16, 22, 15, '='); hline(g, 4, 9, 11, '=');
+      hline(g, 13, 19, 8, '='); hline(g, 20, 24, 6, '=');
+      hline(g, 10, 15, 22, '^');              // the floor is not a place to fall
     } },
   B2: { zone: 'B', w: 60, h: 17, exits: { L: 'B1', R: 'B3', B: 'V2' },
     ents: [['turret', 20, 15], ['hopper', 24, 15], ['turret', 38, 15], ['hopper', 42, 15], ['guard', 50, 15], ['scrap', 14, 15, 10], ['riddle', 55, 15, 1], ['secret', 51, 10, 'collar']],
@@ -270,6 +297,7 @@ const MAPPOS = {
   A0: [-1, 3, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A3: [3, 3, 1, 1], A4: [4, 3, 1, 1],
   A5: [1, 4, 1, 1], A6: [0, 2, 1, 1], A7: [1, 5, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
+  B6: [3, 1, 1, 1],
   X1: [8, 1, 1, 1],
   C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1],
   D1: [5, 6, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1],

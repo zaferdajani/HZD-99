@@ -3782,7 +3782,18 @@ const TELL_SWIPE = 0.5, TELL_FAST = 0.35, TELL_HEAVY = 0.7;
 // LATER and is the hit, not the warning. On the game's FIRST boss, whose entire
 // job is to prove the telegraph contract is real before any later fight can
 // rely on the player trusting it.
-const TELL_ST = /warn|charge|crouch|coil|lock|prep|spin|gather|roar/i;
+// 'volley' and 'broodcall' joined it for the same reason 'roar' did, found the
+// same way one zone later: TALONHOST spends 900 ms hauling itself to centre-top
+// with its wings loading before a seven-feather fan leaves, and 500 ms with its
+// head thrown back before the screech that calls the brood. Both are real
+// telegraphs, both were visual-only, and neither is called anything a list of
+// wind-up-sounding words would ever have contained.
+//
+// Which is the actual lesson: a lexical rule cannot find these. `tests/tells.cjs`
+// no longer guesses from state names — it watches for states that set `windT`,
+// because setting windT IS the engine declaring "I am winding up", and any state
+// that declares that and earns no cue is a one-channel telegraph by construction.
+const TELL_ST = /warn|charge|crouch|coil|lock|prep|spin|gather|roar|volley|broodcall/i;
 // ONE COLOUR THAT MEANS ONE THING. The Hue Law already says crimson is infected
 // and cyan is clean — but those encode WHOSE side a thing is on, and nothing in
 // the palette meant "this is about to hit you". A tell needs a channel of its

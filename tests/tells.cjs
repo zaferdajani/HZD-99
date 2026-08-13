@@ -19,9 +19,26 @@
 // next year is checked without anybody remembering to add it here.
 const { chromium } = require('playwright');
 
-// what a wind-up is called, independent of TELL_ST — deliberately WIDER than the
-// engine's own pattern, because the whole point is to catch the ones it misses
-const LOOKS_LIKE_WINDUP = /warn|charge|crouch|coil|lock|prep|spin|gather|roar|perch|wind|tell|aim|rear|raise|summon|cast/i;
+// HOW A WIND-UP IS IDENTIFIED, and why not by its name.
+//
+// The first version of this harness matched state names against a wider list of
+// wind-up-sounding words. It caught NULLFANG's 'roar' and 'perch' and then
+// missed TALONHOST's 'volley' — 900 ms of hauling to centre-top with the wings
+// loading before a seven-feather fan — because "volley" is not a word anybody
+// puts on a list of wind-ups. A lexical rule cannot find these. It can only find
+// the ones somebody already thought of, which are exactly the ones already fixed.
+//
+// So the rule is structural: a state that sets `windT` IS the engine declaring
+// "I am winding up" — that field exists for nothing else, and it is what drives
+// the wind-up pose. Any state that declares it and earns no audio cue is a
+// one-channel telegraph BY CONSTRUCTION, whatever it happens to be called.
+// The structural signal alone is not enough either: some bosses telegraph with a
+// named state and no windT at all (MOTHER-V's nwcharge, ringcharge, grabwarn).
+// So a state is a wind-up if EITHER signal says so — structural catches the ones
+// nobody would think to name, lexical catches the ones that never set the field.
+// Neither list is a superset of the other, which is why both are here.
+const WINDUP_WORDS = /warn|charge|crouch|coil|lock|prep|spin|gather|roar|perch|wind|tell|aim|rear|raise|summon|volley|call/i;
+const isWindup = (s) => s.wind || WINDUP_WORDS.test(s.st);
 // states that look like wind-ups but are genuinely not, with the reason
 const EXEMPT = {
   dccast: 'the cast IS the move; its own tell is the 500 ms windT before it',
@@ -79,7 +96,7 @@ const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1',
       // So the harness checks the RULE against the states actually entered,
       // which is what decides whether the cue fires, and separately proves the
       // central hook that applies the rule still exists.
-      const seen = new Map();     // state -> count
+      const seen = new Map();     // state -> {count, wind}
       let prev = bo.st;
       // Drive it long enough to cycle its whole moveset, twice, and through the
       // phase-two threshold so phase-only moves are reached too.
@@ -88,10 +105,23 @@ const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1',
         if (bo.dead) { bo.dead = false; bo.hp = bo.hpMax; }
         // keep the player in range so proximity moves fire
         player.x = bo.cx() - 110; player.y = bo.y;
+        // ATTRIBUTING windT IS THE WHOLE DIFFICULTY. A step that changes state is
+        // ambiguous in both directions: 'idle' can set windT for the warn state
+        // it is entering (blaming idle), and 'swipewarn' can set windT on the
+        // same step it hands over to 'swipe' (blaming swipe). Both readings
+        // produce a page of false positives, and I got each of them in turn.
+        // So transition steps are simply not used for this: a wind-up lasts
+        // 300-1100 ms, which is 9 to 33 steps, and the steady ones are
+        // unambiguous. Counting is unaffected.
+        const stBefore = bo.st;
+        bo.windT = 0;                       // so windT seen after the step is THIS step's
         try { bo.update(1 / 30); } catch (e) { /* a state that needs art we did not load */ }
-        if (bo.st !== prev) { seen.set(bo.st, (seen.get(bo.st) || 0) + 1); prev = bo.st; }
+        const r = seen.get(bo.st) || { count: 0, wind: false };
+        if (bo.st === stBefore && bo.windT > 0) r.wind = true;
+        if (bo.st !== prev) { r.count++; prev = bo.st; }
+        seen.set(bo.st, r);
       }
-      return [...seen.entries()].map(([st, count]) => ({ st, count, cued: TELL_ST.test(st) }));
+      return [...seen.entries()].map(([st, r]) => ({ st, count: r.count, wind: r.wind, cued: TELL_ST.test(st) }));
     }, { kind, room: ROOMS[kind] });
   }
   await b.close();
@@ -99,7 +129,7 @@ const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1',
   const fails = [];
   for (const kind of BOSSES) {
     const states = out[kind] || [];
-    const windups = states.filter(s => LOOKS_LIKE_WINDUP.test(s.st));
+    const windups = states.filter(isWindup);
     const silent = windups.filter(s => !s.cued && !EXEMPT[s.st] && !HAND_CUED[kind + '.' + s.st]);
     console.log('\n' + kind + '  — entered ' + states.length + ' states, ' + windups.length + ' of them wind-ups');
     for (const s of windups)

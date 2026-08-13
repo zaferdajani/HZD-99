@@ -39,6 +39,12 @@ const QUESTS = [
     reward: { scrap: 80, relic: 'coin' },
   },
   {
+    id: 'mono_relay',                    // B3 — sends you UP the cable risers
+    npc: 'mono', zone: 'B',
+    kind: 'fetch', item: 'relay',
+    reward: { scrap: 110, iq: 10 },
+  },
+  {
     id: 'patch_quiet',                   // C2 — the Foundry's own errand
     npc: 'patch', zone: 'C',
     kind: 'cull', foe: 'turret', count: 4,
