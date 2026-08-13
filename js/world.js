@@ -73,7 +73,13 @@ const ROOMS = {
            ['item', 23, 6, 'coil'], ['plat', 10, 14, [0, -6, 3.2]]],
     build(g) {
       frame(g);
-      rect(g, 8, 20, 11, 20, '.');            // the way back down to A1
+      // THE WAY BACK DOWN TO A1 — and it has to go through BOTH floor rows.
+      // frame() lays solid across h-2 AND h-1, and this used to clear only h-1,
+      // so the hole was a cellar under an unbroken floor. A6 is the first hidden
+      // wing in the game and its only exit is this drop: you could climb in and
+      // never get out. The bottom of the shaft was reachable, the room read as
+      // finished, and the run was over.
+      rect(g, 8, 19, 11, 20, '.');
       hline(g, 2, 6, 16, '='); hline(g, 13, 17, 13, '='); hline(g, 6, 10, 10, '=');
       hline(g, 15, 19, 8, '='); hline(g, 20, 24, 7, '#');
       hline(g, 11, 14, 18, '^');              // the floor is not safe to fall to
@@ -85,8 +91,24 @@ const ROOMS = {
     build(g) {
       frame(g);
       rect(g, 9, 0, 12, 0, '.');              // the drop in from A5
-      hline(g, 4, 8, 20, '='); hline(g, 13, 18, 16, '='); hline(g, 5, 9, 12, '=');
-      hline(g, 14, 19, 8, '='); hline(g, 2, 6, 5, '=');
+      // THE LADDER OUT, AT THREE TILES A RUNG.
+      //
+      // This was five rungs at FOUR tiles, and four tiles is not a jump she has.
+      // Integrated the way the game integrates it, one jump rises about 125 px —
+      // three tiles and most of a fourth — so a four-tile step is impossible by
+      // about three pixels. Which made this shaft a trap: you cut the brittle
+      // floor in A5 to find out there is anything under the meadow, you drop in,
+      // and the only way out is a climb that needs the double jump. The double
+      // jump is TALONHOST's, two kingdoms later. The room was a hole in zone A
+      // that swallowed the run, and the only exit was dying.
+      //
+      // Seven rungs at three tiles, alternating sides, all inside one jump both
+      // up and across. The climb is still the room's whole point; it is just a
+      // climb she can make. See tests/climbout.cjs.
+      hline(g, 3, 8, 21, '='); hline(g, 12, 19, 18, '=');
+      hline(g, 4, 9, 15, '='); hline(g, 13, 18, 12, '=');
+      hline(g, 3, 8, 9, '='); hline(g, 12, 17, 6, '=');
+      hline(g, 8, 13, 3, '=');                // the last rung, under the way out
       hline(g, 15, 20, 24, '^');
     } },
   A2: { zone: 'A', w: 60, h: 17, exits: { L: 'A1', R: 'A3', B: 'A5' },

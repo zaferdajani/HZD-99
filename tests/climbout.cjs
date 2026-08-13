@@ -5,10 +5,15 @@
 // can only climb with a skill bought later is not a challenge, it is a save
 // file thrown away, and it was reported by a player who fell into one.
 //
-// The model is deliberately GENEROUS — a real jump arc, rounded up, with no
-// ceiling checks — so a false alarm is nearly impossible and everything it
-// flags is real. It reads the base kit only: run, jump, coyote time. No double
-// jump, no dash, no wall cling, because those are what the player did not have.
+// It reads static tiles and three kits — base, +dash, +double jump — and names
+// the weakest one that frees each patch of ground, so a gate somebody designed
+// and a trap nobody noticed stop looking alike.
+//
+// WHAT IT DOES NOT SEE: moving platforms. A room whose only route up rides a
+// lift will be reported as gated when it is not — C1's climb back to B3 is the
+// standing example. That is the safe direction to be wrong in, but it is the
+// reason a `gated` line is a question rather than a verdict. A `TRAPPED` line
+// is a verdict.
 //
 //   node tests/climbout.cjs
 const { chromium } = require('playwright');
@@ -46,9 +51,11 @@ const { chromium } = require('playwright');
         ARC[tx] = Math.max(ARC[tx] || 0, -y);
         if (y > 0) break;                          // back below the launch line
       }
-      // a ledge can be caught anywhere up to the peak already passed
-      let best = 0;
-      for (let i = 0; i < ARC.length; i++) { best = Math.max(best, ARC[i] || 0); ARC[i] = best; }
+      for (let i = 0; i < ARC.length; i++) ARC[i] = ARC[i] || 0;
+      // NOT a running maximum. She has to be at that height WHEN she is at that
+      // x, and past the apex she is falling — a prefix-max says she can land at
+      // peak height any distance downrange, which is how a four-tile climb seven
+      // tiles away looked reachable.
     }
     const ACROSS = ARC.length;
     const UP = Math.floor(Math.max.apply(null, ARC) / 32);
@@ -102,7 +109,12 @@ const { chromium } = require('playwright');
       if (!def.build) continue;
       const g = mk(def.w, def.h);
       try { def.build(g); } catch (e) { out.push({ id: id, err: String(e) }); continue; }
-      const at = (x, y) => (y < 0 || y >= def.h || x < 0 || x >= def.w) ? '#' : g[y][x];
+      // Off the sides and off the top is stone; off the BOTTOM is the void she
+      // falls into. Returning stone in every direction made the last row of a
+      // drop shaft look like ground standing on bedrock, so the shaft's mouth
+      // counted as the door instead of the ledge you step off to reach it.
+      const at = (x, y) => (y >= def.h) ? '.'
+        : (y < 0 || x < 0 || x >= def.w) ? '#' : g[y][x];
 
       // ---- every cell she can stand in: air with a floor under it -----------
       const cells = [];
@@ -141,17 +153,44 @@ const { chromium } = require('playwright');
         }
         return adj;
       };
-      // ---- the exits: every doorway carved in the frame ---------------------
-      // grouped by side, because "can I get back to the door I came in by" is
-      // the question, and each side is one door
+      // ---- the exits: the HOLE, not merely somewhere near the edge ----------
+      //
+      // "a standing cell within three tiles of the bottom" was the old test and
+      // it is why A6 passed for months: its drop-out was carved through the
+      // lower floor row only, leaving a cellar under an unbroken floor, and the
+      // whole bottom of the room counted as a door because it was near the
+      // bottom. A door is where the frame is actually open, and the player has
+      // to be able to GET to that opening — walk into it, fall through it, or
+      // jump up through it. Anything else is a wall with a room behind it.
+      const ex = def.exits || {};
       const doors = {};
+      const near = (i, fn) => fn(cells[i].x, cells[i].y);
+      const openCol = [];                          // x where BOTH floor rows are open
+      for (let x = 0; x < def.w; x++)
+        if (!solid(at(x, def.h - 2)) && !solid(at(x, def.h - 1))) openCol.push(x);
+      const openTop = [];
+      for (let x = 0; x < def.w; x++) if (!solid(at(x, 0))) openTop.push(x);
+      const openL = [], openR = [];
+      for (let y = 0; y < def.h; y++) {
+        if (!solid(at(0, y))) openL.push(y);
+        if (!solid(at(def.w - 1, y))) openR.push(y);
+      }
       for (let i = 0; i < cells.length; i++) {
-        const cx = cells[i].x, cy = cells[i].y;
-        const ex = def.exits || {};
-        if (cx <= 1 && ex.L) (doors.L = doors.L || []).push(i);
-        if (cx >= def.w - 2 && ex.R) (doors.R = doors.R || []).push(i);
-        if (cy <= 2 && ex.T) (doors.T = doors.T || []).push(i);
-        if (cy >= def.h - 3 && (ex.B || ex.D)) (doors.B = doors.B || []).push(i);
+        // side doors: standing in the doorway's own rows, at the wall
+        if (ex.L && openL.length && near(i, (x, y) => x <= 1 && openL.indexOf(y) >= 0))
+          (doors.L = doors.L || []).push(i);
+        if (ex.R && openR.length && near(i, (x, y) => x >= def.w - 2 && openR.indexOf(y) >= 0))
+          (doors.R = doors.R || []).push(i);
+        // the drop-out: anywhere she can step off into the shaft. Height does
+        // not matter — falling is free — but being over the hole does.
+        if ((ex.B || ex.D) && openCol.length && near(i, (x) =>
+              x >= openCol[0] - 1 && x <= openCol[openCol.length - 1] + 1))
+          (doors.B = doors.B || []).push(i);
+        // the way up: close enough under the ceiling hole to jump through it
+        if (ex.T && openTop.length && near(i, (x, y) => {
+              for (const ox of openTop) if (canClimb(Math.abs(x - ox), y, KITS[KITS.length - 1])) return true;
+              return false;
+            })) (doors.T = doors.T || []).push(i);
       }
       const sides = Object.keys(doors);
       if (!sides.length) continue;                 // no way out at all is deadend.cjs's job
