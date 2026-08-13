@@ -165,7 +165,14 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty) {
       cam.shake = Math.max(cam.shake, 8); G.hitStop = Math.max(G.hitStop, 0.1);
       sfx('phase');
     } else if (!bossGateOpen(e)) {
-      dm = Math.max(1, Math.round(dm * 0.15));
+      // WRONG ARM USED TO MEAN 6.7x THE FIGHT. The design promises you may take
+      // the guardians in any order; this line then punished exactly that. The
+      // finale is gated behind an arm that drops from an OPTIONAL secret boss,
+      // so a player who never found it fought 750 HP at 7.3 damage a second —
+      // a hundred and three seconds of unbroken contact. It is still a strong
+      // reason to go and find the counter; it is no longer a wall in front of
+      // somebody who did not know there was one.
+      dm = Math.max(1, Math.round(dm * 0.40));
       G.elemPop = { t: 0.4, x, y, el: null };
     }
   }

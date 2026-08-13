@@ -25,6 +25,8 @@ const SUITE = [
   ['voxmeas',   'the NPC voice chain: no clipping, band limit, speech intact'],
   ['speed2',    'movement speed is identical from 12 to 144 fps'],
   ['saw',       'the chainsaw rig: sparks, impacts, contact damage'],
+  ['combat',    'every enemy telegraphs, does something different, and scales by zone'],
+  ['pace',      'the game-speed dial slows the simulation and nothing else'],
 ];
 
 const want = process.argv.slice(2);

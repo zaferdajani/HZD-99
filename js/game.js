@@ -161,7 +161,7 @@ function newSave(diff) {
     v: 1, diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [], arms: [], armIdx: 0, stars: 6,
     slots: 3, iq: 0, skills: [], relics: [], flags: {}, broken: {}, visited: {}, shop: {},
     bench: { room: 'A0', x: 70, y: 412 }, deaths: 0, lives: 0, time: 0,
-    pouch: null, usedNine: false, won: false, evo: 0,
+    pouch: null, usedNine: false, won: false, evo: 0, pace: 0,
   };
 }
 // evolution fanfare: when a power milestone pushes the tier up, the character
@@ -208,7 +208,7 @@ function loadRoom(id) {
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
-  G.wrecks = []; G.recharge = null; G.plats = []; G.saws = []; G.x1Bridge = false; G.x1T = 0;
+  G.wrecks = []; G.recharge = null; G.plats = []; G.saws = []; G.pools = []; G.x1Bridge = false; G.x1T = 0;
   // a scripted finishing blow belongs to the room it was swung in; carrying one
   // across a door would leave her driven by a boss that no longer exists
   G.finish = null; G.offer = null; G.forkBoss = null;
@@ -598,6 +598,20 @@ function update(dt) {
               rnd(-40, 40), rnd(-50, 20), 0.5, '#37ffd0', 2.4, 200, true);
         }
       }
+      // WHAT THE BLOB LEAVES BEHIND. It spreads for a moment, sits, and dries
+      // — and standing in it costs a core. It is the only thing in the game
+      // that makes NOT moving the mistake.
+      if (G.pools && G.pools.length) {
+        for (let i = G.pools.length - 1; i >= 0; i--) {
+          const q = G.pools[i];
+          q.t -= dt;
+          if (q.t <= 0) { G.pools.splice(i, 1); continue; }
+          q.r = Math.min(26, q.r + 34 * dt);
+          if (!player.dead && player.iT <= 0 && player.on
+              && Math.abs(player.x + player.w / 2 - q.x) < q.r
+              && Math.abs(player.y + player.h - q.y) < 16) player.hurt(DF().edmg, q.x, 'blob.pool');
+        }
+      }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
       sawHum(dt);
       updateTutor(dt);
@@ -832,11 +846,38 @@ function updateWho() {
   }
 }
 function pauseHasTouch() { return typeof TOUCH !== 'undefined' && TOUCH.enabled; }
+// ===========================================================================
+// THE PACE DIAL. The one assist that matters most for the player this game is
+// actually for, and the cheapest: one multiplier on dt slows every telegraph
+// in the game at once — including the ones nobody has tuned yet — without
+// touching a single enemy constant or making anybody invincible.
+//
+// It is SEPARATE from the difficulty presets on purpose. Kitten bundles seven
+// cores, weak enemies and a quarter of the damage into one switch, so a child
+// who needs nothing but more time to react has to accept being nearly
+// unkillable, and loses the achievement along with the challenge. Celeste's
+// designer found the assists that matter are the in-between ones — 20% slower,
+// one extra dash — the ones that let a player tune rather than trivialise.
+//
+// It is worded without judgement, it says what it does, and it is reachable
+// mid-fight from the pause menu rather than buried in a new-game choice.
+// ===========================================================================
+const PACE_STEPS = [1, 0.9, 0.8, 0.7];
+function paceK() {
+  const i = (G.save && G.save.pace) | 0;
+  return PACE_STEPS[clamp(i, 0, PACE_STEPS.length - 1)] || 1;
+}
+function paceLabel() { return Math.round(paceK() * 100) + '%'; }
 function updatePause() {
-  const n = pauseHasTouch() ? 8 : 7;
+  const n = pauseHasTouch() ? 9 : 8;
   if (inP('DOWN')) { G.pauseIdx = (G.pauseIdx + 1) % n; sfx('ui'); }
   if (inP('UP')) { G.pauseIdx = (G.pauseIdx + n - 1) % n; sfx('ui'); }
   if (inP('PAUSE')) { G.state = 'PLAY'; return; }
+  if (G.pauseIdx === 6 && (inP('LEFT') || inP('RIGHT'))) {
+    const d = inP('RIGHT') ? 1 : -1, n2 = PACE_STEPS.length;
+    G.save.pace = ((((G.save.pace | 0) + d) % n2) + n2) % n2;
+    sfx('ui'); persist();
+  }
   if (inP('OK')) {
     sfx('ok');
     const quitIdx = n - 1;
@@ -846,7 +887,11 @@ function updatePause() {
     else if (G.pauseIdx === 3) { G.state = 'SKILLS'; G.skillIdx = 0; }
     else if (G.pauseIdx === 4) G.state = 'RELICS';
     else if (G.pauseIdx === 5) { G.ctrlBack = 'PAUSE'; G.state = 'CTRL'; }
-    else if (pauseHasTouch() && G.pauseIdx === 6) G.state = 'TCFG';
+    else if (G.pauseIdx === 6) {
+      G.save.pace = (((G.save.pace | 0) + 1) % PACE_STEPS.length);
+      G.toast(t('pace') + '  ' + paceLabel()); persist();
+    }
+    else if (pauseHasTouch() && G.pauseIdx === 7) G.state = 'TCFG';
     else if (G.pauseIdx === quitIdx) { persist(); setMusic('title'); G.state = 'MENU'; G.menuIdx = 0; }
   }
 }
@@ -3759,6 +3804,20 @@ function drawWorldFrame() {
   drawSpikeMenace();
   drawBreakHint();
   for (const p of G.pickups) p.draw(c);
+  if (G.pools) for (const q of G.pools) {
+    const a = Math.min(1, q.t / 0.8) * 0.55;
+    c.save();
+    c.globalAlpha = a;
+    const g3 = c.createLinearGradient(0, q.y - 8, 0, q.y + 3);
+    g3.addColorStop(0, 'rgba(180,255,120,0.5)'); g3.addColorStop(1, 'rgba(90,190,60,0.15)');
+    c.fillStyle = g3;
+    c.beginPath(); c.ellipse(q.x, q.y, q.r, 5.5, 0, 0, 7); c.fill();
+    c.strokeStyle = 'rgba(200,255,150,' + (0.5 * a).toFixed(2) + ')'; c.lineWidth = 1.4;
+    c.beginPath(); c.ellipse(q.x, q.y, q.r, 5.5, 0, 0, 7); c.stroke();
+    // it bubbles, so it reads as active rather than as a decal
+    if (chance(0.25 * a)) addPart(q.x + rnd(-q.r, q.r), q.y - 2, rnd(-10, 10), rnd(-40, -12), 0.4, '#c8ff96', 1.8, 60, true);
+    c.restore(); c.globalAlpha = 1;
+  }
   if (G.plats) for (const pl of G.plats) pl.draw(c);
   if (G.saws) for (const sw of G.saws) sw.draw(c);
   for (const e of G.enemies) e.draw(c);
@@ -4584,7 +4643,8 @@ function draw(tms) {
   } else if (st === 'PAUSE') {
     c.fillStyle = 'rgba(4,7,12,0.75)'; c.fillRect(0, 0, 960, 540);
     ftxt(t('paused'), 480, 120, 38, '#eef3fa', 'center', '#37ffd0');
-    const pmItems = [t('resume'), t('pm_map'), t('pm_crests'), t('pm_skills'), t('pm_relics'), t('ctl_title')];
+    const pmItems = [t('resume'), t('pm_map'), t('pm_crests'), t('pm_skills'), t('pm_relics'), t('ctl_title'),
+                     t('pace') + ':  ' + paceLabel() + '   ◂ ▸'];
     if (pauseHasTouch()) pmItems.push(t('tl_title'));
     pmItems.push(t('to_menu'));
     pmItems.forEach((s, i) => {
@@ -4593,6 +4653,7 @@ function draw(tms) {
       if (last) { c.fillStyle = 'rgba(255,120,110,0.10)'; rr(c, 300, y - 20, 360, 34, 8); c.fill(); }
       ftxt((sel ? '▸ ' : '') + (last ? '⏻  ' : '') + s, 480, y, 21,
            sel ? '#eef3fa' : (last ? '#e88b86' : '#7d93a8'));
+      if (i === 6 && sel) ftxt(t('pace_d'), 480, y + 21, 12, '#7d93a8');
     });
     ftxt(GAME_VERSION, 930, 522, 12, '#44586b', 'right');
   } else if (st === 'TCFG') {
@@ -5771,7 +5832,7 @@ function mainLoop(tms) {
   lastT = tms;
   if (typeof pollGamepad === 'function') pollGamepad();
   // one step on a healthy frame; two or three when the machine is struggling
-  let acc = Math.min(raw, SIM_MAX);
+  let acc = Math.min(raw, SIM_MAX) * (G.state === 'PLAY' ? paceK() : 1);
   if (!(acc > 0)) acc = dt;
   while (acc > 1e-4) { const st = Math.min(acc, SIM_STEP); update(st); acc -= st; }
   draw(tms);

@@ -669,6 +669,15 @@ function sfx(n) {
     case 'break': hiss(0.2, 0.12); tone(200, 0.15, 'square', 0.07, 70); break;
     // steel meeting steel and not liking it: a bright scrape that falls away,
     // a bite of low thud under it, and one ringing partial off the housing
+    // THE WARNING. A short rising pair — rising, so it encodes time REMAINING
+    // rather than merely "something is happening", and pitched above the music
+    // bed so it survives a boss theme. Deliberately not a hit sound: this is
+    // the only cue in the game that means "it is about to".
+    case 'tell':
+      tone(560, 0.09, 'triangle', 0.05, 900);
+      tone(840, 0.12, 'triangle', 0.038, 1280, 0.07);
+      chink(0.014, 0.03);
+      break;
     case 'grind':
       whoosh(0.16, 5200, 1400, 0.075);
       hiss(0.07, 0.06);

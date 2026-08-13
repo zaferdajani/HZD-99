@@ -621,10 +621,19 @@ class Player {
         if (this.chargeTick <= 0) { this.chargeTick = 0.11; sfxChargeTick(Math.min(1, this.chargeT / 0.6)); }
         if (chance(0.55)) addPart(this.x + rnd(-16, 40), this.y + rnd(-12, 48), 0, 0, 0.25,
           this.chargeT >= 0.6 ? '#ffffff' : PAL[G.roomDef.zone].glow, 2.5, -170, true);
-        if (this.chargeT >= 0.6 && this.chargeT - dt < 0.6) sfx('chargeReady');
+        if (this.chargeT >= 0.6 && this.chargeT - dt < 0.6) sfx(this.volts >= BURST_VOLTS ? 'chargeReady' : 'no');
       }
     } else {
-      if (this.chargeT >= 0.6) this.releaseCharged();
+      // THE BURST COSTS SOMETHING NOW. Held attack put out 2.6x damage in a
+      // 128 px circle with full knockback, at no cost and no cooldown — which
+      // is strictly better than the combo the whole game is built around, so
+      // finding it ended the melee game rather than deepening it. It is a
+      // resource decision now, and it is in the controls screen where it can
+      // be found on purpose instead of by accident.
+      if (this.chargeT >= 0.6) {
+        if (this.volts >= BURST_VOLTS) { this.volts -= BURST_VOLTS; this.releaseCharged(); }
+        else { sfx('no'); this.chargeT = 0; }
+      }
       this.chargeT = 0;
     }
     if (this.swingVis) { this.swingVis.t -= dt; if (this.swingVis.t <= 0) { this.swingVis = null; this._paw = null; } }
@@ -863,14 +872,29 @@ class Player {
     const down = s.ay > 0 && !s.ax;
     // the down box starts at the feet and is wider than it is deep, so landing on
     // something slightly to one side still rebounds
-    const R = down ? 46 : (s.combo === 2 ? 50 : 44);
-    const half = down ? 32 : (s.combo === 2 ? 35 : 30);
+    // THE LONG RAKE, FOR REAL. 'reach' costs 50 IQ and promised the finisher a
+    // longer arc; it swapped the ARC ART from 62 px to 104 px and never touched
+    // this function, so the picture had been lying about where the claws were
+    // since the day it shipped. The hitbox now grows with the drawing.
+    const rk = s.combo === 2 && typeof hasSkill === 'function' && hasSkill('reach');
+    const R = down ? 46 : (s.combo === 2 ? (rk ? 68 : 50) : 44);
+    const half = down ? 32 : (s.combo === 2 ? (rk ? 46 : 35) : 30);
     const cx = this.x + this.w / 2 + s.ax / n * R;
     const cy = this.y + this.h / 2 + s.ay / n * R;
     return { x: cx - half, y: cy - half, w: half * 2, h: half * 2 };
   }
-  hurt(d, fromX) {
+  // The third argument is the point of this: WHAT hit her, by name. One
+  // parameter turns "I think that attack is unfair" into a ranked table, and
+  // the published heuristic is blunt — any single attack above about 40% of all
+  // damage taken has a telegraph problem. Nothing is sent anywhere; it lives in
+  // the run and is read from the console.
+  hurt(d, fromX, src) {
     if (this.dead || this.iT > 0) return;
+    try {
+      G.dmgLog = G.dmgLog || {};
+      const key = src || 'unknown';
+      G.dmgLog[key] = (G.dmgLog[key] | 0) + 1;
+    } catch (e) {}
     if (this.dashT > 0 && hasCrest('phantom')) return;
     if (relicHas('aegis') && !G.save.usedAegis) {
       G.save.usedAegis = true;
@@ -2623,6 +2647,30 @@ class RelicPickup {
   }
 }
 // ================= ENEMIES =================
+function drawTurretLock(c, e, cx) {
+  const cy = e.y + e.h / 2;
+  const k = 1 - clamp(e.lockT / 0.55, 0, 1);            // 0 -> 1 across the lock
+  const px = player ? player.x + player.w / 2 : cx, py = player ? player.y + player.h / 2 : cy;
+  c.save();
+  // the beam finds you: faint and wide at first, thin and bright at the end
+  c.globalAlpha = 0.10 + k * 0.5;
+  c.strokeStyle = TELL_COL; c.lineWidth = 3.5 - k * 2.2;
+  c.setLineDash([9, 7]); c.lineDashOffset = -performance.now() / 45;
+  c.beginPath(); c.moveTo(cx, cy); c.lineTo(px, py); c.stroke();
+  c.setLineDash([]);
+  // and the eye itself, quickening
+  c.globalAlpha = 0.55 + Math.sin(e.anim * (16 + k * 26)) * 0.35;
+  c.fillStyle = TELL_COL; c.shadowColor = TELL_COL; c.shadowBlur = 12;
+  c.beginPath(); c.arc(cx, cy - e.h * 0.34, 2.4 + k * 2.2, 0, 7); c.fill();
+  c.shadowBlur = 0;
+  c.restore();
+  c.globalAlpha = 1;
+}
+// Rising, but gently: at the deepest point a machine has 1.7x the plating and
+// about a fifth more pace. Difficulty is meant to arrive mostly through what
+// they DO and how they are combined — this is the floor under that, not the
+// mechanism itself.
+const ZONE_K = { A: 1.0, B: 1.15, C: 1.32, D: 1.5, E: 1.7, X: 1.6 };
 const EKIND = {
   crawler: { w: 28, h: 20, hp: 30, spd: 62 },
   flier: { w: 26, h: 22, hp: 24, spd: 120 },
@@ -2635,7 +2683,24 @@ class Enemy {
     const k = EKIND[kind];
     this.kind = kind; this.x = x; this.y = y; this.w = k.w; this.h = k.h;
     this.hypnoT = 0; this.stagT = 0; this.faceVis = 1;
-    this.hp = Math.round(k.hp * DF().ehp); this.spd = k.spd * DF().espd;
+    // EVERY TIMER STARTS AT A NUMBER. The new wind-ups read `(this.atkCD -= dt)`
+    // and `this.crouchT <= 0` — and on an undefined field the first gives NaN
+    // (and NaN <= 0 is false, forever) while the second is false immediately.
+    // Every one of them would have failed silently in the shipped game exactly
+    // as it failed in the harness: the enemy simply never winds up, with no
+    // error anywhere. Declared here, once, where the fields belong.
+    this.atkCD = rnd(0.5, 1.6);
+    this.coilT = 0; this.lungeT = 0; this.windedT = 0;
+    this.holdT = 0; this.diveT = 0; this.riseT = 0;
+    this.crouchT = 0; this.gathered = false; this.wasAir = false; this.burst = 0;
+    // THE WORLD USED TO BE FLAT. EKIND is one global table, so a crawler in the
+    // last kingdom was byte-identical to the one in the first — and the last
+    // NEW enemy type appears at the midpoint, which left the back half of the
+    // game escalating by terrain alone. The frames are the same machines; the
+    // deeper you go, the more the virus has done to them.
+    const zk = ZONE_K[(G.roomDef && G.roomDef.zone) || 'A'] || 1;
+    this.zoneK = zk;
+    this.hp = Math.round(k.hp * DF().ehp * zk); this.spd = k.spd * DF().espd * (0.88 + zk * 0.12);
     this.vx = 0; this.vy = 0; this.dir = chance(0.5) ? 1 : -1;
     this.t = rnd(0.5, 2); this.sx = x; this.sy = y; this.hurtT = 0; this.dead = false; this.anim = rnd(0, 9);
     this.kbT = 0; this.tr = [];
@@ -2690,27 +2755,96 @@ class Enemy {
       this.vx *= Math.pow(0.02, dt);
       if (onSpike(this)) { this.die(Math.sign(this.vx) || 1, -0.4); return; }
       if (this.y > G.roomDef.h * TILE + 40) { this.die(0, 1); return; }
-      if (!player.dead && aabb(this, player)) player.hurt(DF().edmg, this.x + this.w / 2);
+      if (!player.dead && aabb(this, player)) player.hurt(DF().edmg, this.x + this.w / 2, this.kind + '.knockback');
       return;
     }
     const px = player.x + player.w / 2, py = player.y + player.h / 2;
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     switch (this.kind) {
-      case 'crawler': case 'blob': {
-        this.vx = this.dir * this.spd * (this.kind === 'blob' ? (0.6 + Math.sin(this.anim * 4) * 0.4) : 1);
+      // EVERY FRAME NOW ASKS ITS OWN QUESTION. They used to share this case
+      // label — literally the same code, one of them slower — which is why the
+      // roster read as one enemy in five costumes. A cast needs each member to
+      // ask something different, or one of them is redundant.
+      //
+      // The crawler asks: CAN YOU READ A WIND-UP? It patrols, and inside its
+      // reach it stops, coils for TELL_FAST, and lunges — and the lunge leaves
+      // it winded, which is where the player is meant to hit it.
+      case 'crawler': {
         this.vy += 2000 * dt;
+        if (this.lungeT > 0) {                              // committed
+          this.lungeT -= dt;
+          this.vx = this.dir * this.spd * 4.2;
+          if (this.lungeT <= 0) { this.windedT = 0.55; this.vx = 0; }
+        } else if (this.windedT > 0) {                      // the punish window
+          this.windedT -= dt; this.vx *= Math.pow(0.02, dt);
+        } else if (this.coilT > 0) {                        // the tell
+          this.coilT -= dt; this.vx = 0;
+          if (this.coilT <= 0) { this.lungeT = 0.22; sfx('dash'); }
+        } else {
+          this.vx = this.dir * this.spd;
+          // IT NOTICES HER. Requiring it to already be facing the right way
+          // meant it ignored anyone who walked up behind it — which is most of
+          // the time, since she moves five times faster than it patrols. It
+          // TURNS to face her first and lunges on the following pass, so the
+          // turn itself becomes part of the warning.
+          if (!player.dead && Math.abs(px - cx) < 160 && Math.abs(py - cy) < 70
+              && (this.atkCD -= dt) <= 0) {
+            const want = Math.sign(px - cx) || this.dir;
+            if (want !== this.dir) { this.dir = want; this.atkCD = 0.28; }
+            else { this.coilT = TELL_FAST; this.atkCD = rnd(2.2, 3.4); this.vx = 0; sfx('tell'); }
+          }
+        }
+        const col = moveEnt(this, dt);
+        if (col.l) this.dir = 1; else if (col.r) this.dir = -1;
+        else if (col.d && !groundAhead(this, this.dir) && this.lungeT <= 0) this.dir *= -1;
+        break;
+      }
+      // The blob asks: ARE YOU STILL STANDING THERE? It is slow and it does not
+      // chase well — but it drips, and what it drips stays on the floor. It is
+      // the only enemy in the game that punishes holding a position, which is
+      // exactly the question the roster was missing, and it pairs with the
+      // turret (which punishes approaching) to make a room out of two enemies.
+      case 'blob': {
+        this.vx = this.dir * this.spd * (0.6 + Math.sin(this.anim * 4) * 0.4);
+        this.vy += 2000 * dt;
+        this.dripT = (this.dripT || rnd(0.6, 1.4)) - dt;
+        if (this.dripT <= 0 && this.on !== false) {
+          this.dripT = rnd(1.1, 1.8);
+          G.pools = G.pools || [];
+          if (G.pools.length < 14) G.pools.push({ x: cx, y: this.y + this.h - 2, t: 4.2, t0: 4.2, r: 0 });
+        }
         const col = moveEnt(this, dt);
         if (col.l) this.dir = 1; else if (col.r) this.dir = -1;
         else if (col.d && !groundAhead(this, this.dir)) this.dir *= -1;
         break;
       }
+      // The flier asks: CAN YOU MOVE OUT FROM UNDER SOMETHING? It takes station
+      // above you, holds — visibly, for TELL_FAST — and drops. Then it climbs
+      // back out of reach, so the fight has a rhythm instead of being a wasp.
       case 'flier': {
-        const near = dist2(cx, cy, px, py) < 300 * 300 && !player.dead;
-        if (near) {
-          const d = Math.hypot(px - cx, py - cy) || 1;
-          this.vx += (px - cx) / d * 260 * dt; this.vy += (py - cy) / d * 260 * dt;
-          const s = Math.hypot(this.vx, this.vy);
-          if (s > this.spd) { this.vx *= this.spd / s; this.vy *= this.spd / s; }
+        const near = dist2(cx, cy, px, py) < 340 * 340 && !player.dead;
+        if (this.diveT > 0) {
+          this.diveT -= dt;
+          this.vx = lerp(this.vx, (px - cx) * 1.2, 0.12);
+          this.vy = 430;
+          if (this.diveT <= 0 || moveEnt(this, dt).d) { this.diveT = 0; this.riseT = 0.9; }
+          else break;
+        } else if (this.riseT > 0) {                        // withdrawing
+          this.riseT -= dt;
+          this.vx = lerp(this.vx, (px - cx) * 0.5, 0.03);
+          this.vy = lerp(this.vy, -180, 0.1);
+        } else if (this.holdT > 0) {                        // the tell
+          this.holdT -= dt;
+          this.vx = lerp(this.vx, 0, 0.2); this.vy = lerp(this.vy, -20, 0.2);
+          if (this.holdT <= 0) this.diveT = 0.75;
+        } else if (near) {
+          const tx = px, ty = py - 120;                     // station above you
+          this.vx += (tx - cx) * 1.6 * dt; this.vy += (ty - cy) * 2.2 * dt;
+          const sp = Math.hypot(this.vx, this.vy);
+          if (sp > this.spd) { this.vx *= this.spd / sp; this.vy *= this.spd / sp; }
+          if (Math.abs(px - cx) < 46 && cy < py - 60 && (this.atkCD -= dt) <= 0) {
+            this.holdT = TELL_FAST; this.atkCD = rnd(2.4, 3.6); sfx('tell');
+          }
         } else {
           this.vx = lerp(this.vx, Math.sin(this.anim * 1.3) * 40, 0.05);
           this.vy = lerp(this.vy, (this.sy - this.y) * 1.2 + Math.cos(this.anim * 1.7) * 30, 0.05);
@@ -2724,10 +2858,17 @@ class Enemy {
         if ((this.lockT || 0) > 0) {
           this.lockT -= dt;
           if (this.lockT <= 0) {
-            this.t = 2.0 / DF().espd; this.lockT = 0;
+            this.lockT = 0;
             const d = Math.hypot(px - cx, py - cy) || 1;
             G.projs.push(new Proj(cx, cy - 6, (px - cx) / d * 340, (py - cy) / d * 340, false, 1, 6, '#ff5c6c'));
             sfx('shoot');
+            // FAR AWAY IT FIRES A BURST, close up a single shot. The question
+            // it asks is "can you cross this ground?", and a burst is what
+            // makes crossing a decision instead of a stroll.
+            this.burst = (this.burst | 0) + 1;
+            const far = dist2(cx, cy, px, py) > 240 * 240;
+            if (far && this.burst < 3) { this.t = 0.16; this.lockT = 0.0001; }
+            else { this.burst = 0; this.t = 2.0 / DF().espd; }
           }
         } else if (this.t <= 0 && !player.dead && dist2(cx, cy, px, py) < 440 * 440) {
           this.lockT = 0.55; sfx('ui');
@@ -2738,13 +2879,37 @@ class Enemy {
         this.vy += 2000 * dt;
         const col = moveEnt(this, dt);
         if (col.d) {
-          this.vx = 0; this.t -= dt;
+          // it LANDS HARD. The shock is a moment of danger on the ground next
+          // to it, which is what stops the answer from being "stand where it
+          // was and swing" every single time.
+          if (this.wasAir && Math.abs(px - cx) < 62 && Math.abs(py - cy) < 40 && !player.dead
+              && player.iT <= 0 && player.on) player.hurt(DF().edmg, cx, 'hopper.landing');
+          if (this.wasAir) {
+            cam.shake = Math.max(cam.shake, 2);
+            for (let i = 0; i < 7; i++)
+              addPart(cx + rnd(-16, 16), this.y + this.h, rnd(-90, 90), rnd(-120, -20), 0.35, '#b9c6d4', 2.2, 700);
+          }
+          this.wasAir = false;
+          this.vx = 0;
+          if (this.crouchT > 0) { this.crouchT -= dt; if (this.crouchT > 0) break; }
+          this.t -= dt;
           // it faces its prey while gathering — so the leap goes nose-first
           this.dir = Math.sign(px - cx) || this.dir || 1;
           if (this.t <= 0 && !player.dead && Math.abs(px - cx) < 380) {
+            // THE CROUCH. It used to launch on the frame a random timer hit
+            // zero — it faced you first, but facing is not a warning. Now it
+            // gathers for TELL_FAST with a cue, and the leap is a thing you
+            // saw coming.
+            if (this.crouchT <= 0 && !this.gathered) {
+              this.crouchT = TELL_FAST; this.gathered = true; sfx('tell');
+              this.dir = Math.sign(px - cx) || 1;
+              this.t = 0.01;
+              break;
+            }
+            this.gathered = false;
             this.t = rnd(1.1, 1.9);
             this.dir = Math.sign(px - cx) || 1;
-            this.vy = -560; this.vx = this.dir * this.spd;
+            this.vy = -560; this.vx = this.dir * this.spd; this.wasAir = true;
             sfx('jump');
           }
         }
@@ -2842,6 +3007,40 @@ class Enemy {
         && typeof drawBeastMini === 'function' && drawBeastMini(c, this)) return;
     // every flying minion is a small TALONHOST — talons only, no feathers
     if (!heroEn && this.kind === 'flier' && typeof drawEagleMini === 'function' && drawEagleMini(c, this)) return;
+    // THE TURRET'S HALF-SECOND, PUT BACK ON SCREEN. There has always been a red
+    // targeting light for the 0.55 s lock — drawn seven hundred lines below,
+    // inside the procedural fallback, which stopped executing the day the
+    // sprite atlas started loading. In the shipped game the only warning before
+    // a bullet was a sound. It is drawn HERE now, above every early return, and
+    // it brings an aim line with it: the line finds you over the half second,
+    // so the warning says where the shot is going as well as that it is coming.
+    if ((this.lockT || 0) > 0 && !this.dead) drawTurretLock(c, this, cx);
+    // EVERY WIND-UP WEARS THE SAME COLOUR. One hue, one meaning, used by
+    // nothing else in the game — and always with motion and sound beside it,
+    // because roughly one man in twelve cannot rely on hue alone.
+    if (!this.dead && ((this.coilT || 0) > 0 || (this.holdT || 0) > 0 || (this.crouchT || 0) > 0)) {
+      const w = Math.max(this.coilT || 0, this.holdT || 0, this.crouchT || 0);
+      const k = 1 - clamp(w / TELL_FAST, 0, 1);
+      c.save();
+      c.globalAlpha = 0.30 + k * 0.5;
+      c.strokeStyle = TELL_COL; c.lineWidth = 2 + k * 1.4;
+      c.setLineDash([5, 5]); c.lineDashOffset = -performance.now() / 55;
+      c.beginPath();
+      c.arc(cx, this.y + this.h / 2, this.w * 0.72 + 10 - k * 6, 0, 7);
+      c.stroke(); c.setLineDash([]);
+      // a wedge pointing where it is about to go — motion, not just colour
+      const dx = (this.coilT || this.crouchT) ? this.dir : 0, dy = this.holdT ? 1 : 0;
+      if (dx || dy) {
+        c.globalAlpha = 0.5 + k * 0.5; c.fillStyle = TELL_COL;
+        const ox = cx + dx * (this.w * 0.9 + k * 10), oy = this.y + this.h / 2 + dy * (this.h * 0.9 + k * 10);
+        c.beginPath();
+        c.moveTo(ox + dy * 7 + dx * 7, oy + dx * 7 + dy * 7);
+        c.lineTo(ox - dy * 7 - dx * 0, oy - dx * 7 - dy * 0);
+        c.lineTo(ox + dx * 13 + dy * 0, oy + dy * 13 + dx * 0);
+        c.closePath(); c.fill();
+      }
+      c.restore(); c.globalAlpha = 1;
+    }
     // Pre-rendered 3D turnaround. Selected by angle, never mirrored, so the baked
     // key light stays on the correct side as the machine turns.
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
@@ -3133,13 +3332,7 @@ class Enemy {
         }, true);
         eyes(-3.4, -8, 2);
         c.restore();
-        // LOCKED: the red targeting light — your half-second to move
-        if ((this.lockT || 0) > 0) {
-          c.save(); c.globalAlpha = 0.6 + Math.sin(this.anim * 30) * 0.35;
-          c.fillStyle = '#ff3c50'; c.shadowColor = '#ff3c50'; c.shadowBlur = 12;
-          c.beginPath(); c.arc(0, -14, 3.2, 0, 7); c.fill();
-          c.shadowBlur = 0; c.restore();
-        }
+        // (the lock light is drawn in draw(), above every early return)
         break;
       }
     }
@@ -3407,6 +3600,31 @@ function drawBossHold(c, b) {
   }
   c.restore();
 }
+// ---------------------------------------------------------------------------
+// HOW LONG A WARNING HAS TO BE. Not a feel value — a computed one:
+//
+//     tell = reaction time + time for the dodge to actually clear + buffer
+//
+// Simple visual reaction is ~250 ms for an adult and 280-350 ms at 8-10 years
+// old; choosing between four possible attacks is slower still. The dash needs
+// ~80 ms to carry her out of a swipe box, and rAF plus display latency eats
+// ~50 ms before she ever sees the frame. That puts the floor at half a second
+// for the player this game is built for. Hornet, in Hollow Knight, telegraphs
+// between 0.5 and 0.66 s — these are the same numbers arrived at twice.
+const TELL_SWIPE = 0.5, TELL_FAST = 0.35, TELL_HEAVY = 0.7;
+// Every state whose whole job is to say "this is coming". The cue fires when
+// the state is ENTERED, centrally, so a new attack cannot be written without
+// one — which is exactly how the old swipe ended up with its sound on the hit
+// instead of on the warning.
+const TELL_ST = /warn|charge|crouch|coil|lock|prep|spin|gather/i;
+// ONE COLOUR THAT MEANS ONE THING. The Hue Law already says crimson is infected
+// and cyan is clean — but those encode WHOSE side a thing is on, and nothing in
+// the palette meant "this is about to hit you". A tell needs a channel of its
+// own, used by nothing else, the way Cuphead's pink means parryable everywhere
+// with no exceptions. This amber is that channel. It is also paired with motion
+// and sound in every use, because roughly one man in twelve cannot rely on hue.
+const TELL_COL = '#ffc24a';
+const BURST_VOLTS = 25;
 class Boss {
   constructor(kind, x, y) {
     const s = BSTAT[kind];
@@ -3445,6 +3663,17 @@ class Boss {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    // THE WARNING GETS THE SOUND. It used to arrive with the hit, which is
+    // feedback, not a telegraph — and the ear is faster than the eye (an
+    // auditory stimulus reaches the brain in 8-10 ms against 20-40 ms for a
+    // visual one, ~140-160 ms of reaction against ~180-200 ms). Firing the cue
+    // the frame a tell BEGINS is therefore worth about 40 ms of the player's
+    // reaction budget for free, and it costs one line, here, for every boss
+    // move that exists or will ever exist.
+    if (this.st !== this._tellSt) {
+      this._tellSt = this.st;
+      if (TELL_ST.test(this.st || '')) sfx('tell');
+    }
     if (this.roarBuzzT > 0) {
       // the roar VIBRATES: a held tremble on the camera and, through the
       // rumble motors, on the controller — re-armed in short pulses
@@ -3638,9 +3867,20 @@ class Boss {
     // consequential press in a run: as the FIRST entry on the ledger it carries
     // roughly nine times the weight of the choice you will make an hour later.
     if (this.phase === 1 && this.hp < this.hpMax / 2) {
-      this.phase = 2; this.t = 1;
+      // THE MIDPOINT — the beat every one of these fights was missing. A boss
+      // is a dramatic structure, and the published shape puts a turning point
+      // at the middle: a moment of relief immediately before the hardest part.
+      // Going straight from phase one to phase two made escalation read as the
+      // fight getting grindier. This costs a second and a half, hands the
+      // player a guaranteed free punish exactly where frustration peaks, and
+      // makes the change of gear something you SEE rather than something you
+      // slowly infer from being hit more.
+      this.phase = 2; this.stagT = Math.max(this.stagT || 0, 1.5); this.t = 1.2; this.vx = 0; this.vy = 0;
       burst(this.cx(), this.cy(), 30, '#ffffff', 320, 0.7, 200, 4, true);
-      cam.shake = 12; sfx('phase');
+      burst(this.cx(), this.cy(), 22, TELL_COL, 240, 0.9, 60, 3, true);
+      cam.shake = 12; sfx('phase'); G.flash = Math.max(G.flash, 0.35);
+      G.hitStop = Math.max(G.hitStop, 0.12);
+      if (typeof padRumble === 'function') padRumble(0.8, 0.9, 380);
     }
     const px = player.x + player.w / 2, py = player.y + player.h / 2;
     // each boss up the chain is natively faster and more relentless
@@ -3705,7 +3945,7 @@ class Boss {
               this.st = 'springwarn'; this.t = 0.42; this.vx = 0;
             }
             this.ambushCD = rnd(this.phase === 2 ? 6 : 9, this.phase === 2 ? 9 : 12);
-          } else if (adist < 130) { this.st = 'swipewarn'; this.t = 0.32; this.vx = 0; }
+          } else if (adist < 130) { this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; }
           else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(5.5, 7); }
           else if (this.t <= 0 && adist > 170 && adist < 470) { this.st = 'crouch'; this.t = 0.45; this.vx = 0; }
           else if (this.t <= 0) this.t = rnd(1.1, 1.9);
@@ -3721,12 +3961,21 @@ class Boss {
             const box = { x: this.cx() + (f > 0 ? 6 : -114), y: this.y - 24, w: 108, h: this.h + 28 };
             burst(this.cx() + f * 66, this.cy(), 10, '#b06aff', 260, 0.35, 150, 3, true);
             sfx('atk');
-            if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st);
           }
           if (this.t <= 0) {
             // a lion swipes twice when it is angry
-            if (this.phase === 2 && chance(0.5)) { this.st = 'swipewarn'; this.t = 0.22; }
-            else { this.st = 'idle'; this.t = rnd(0.5, 0.9); }
+            // A LION SWIPES TWICE WHEN IT IS ANGRY — but it used to do so on a
+            // coin flip, with a 0.22 s tell. Two separate faults in one line:
+            // 0.22 s is below the reaction time of an ADULT (~0.25 s simple
+            // visual, slower again for a choice between four attacks), let
+            // alone the 8-10 year old this game is for; and firing it half the
+            // time means the same read produces different outcomes, which is
+            // what "unlearnable" means. It is now always twice in phase two,
+            // with a full tell. The pressure comes back as a shorter gap
+            // afterwards, which is the lever that does not cost readability.
+            if (this.phase === 2 && !this.swiped2) { this.swiped2 = true; this.st = 'swipewarn'; this.t = TELL_SWIPE; }
+            else { this.swiped2 = false; this.st = 'idle'; this.t = this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.5, 0.9); }
           }
         } else if (this.st === 'crouch') {
           // flat to the ground, trembling with intent — then the pounce
@@ -3850,13 +4099,25 @@ class Boss {
               addPart(this.cx() + rnd(-20, 20), this.y + this.h - 6,
                 rnd(-240, 240), rnd(-260, -140), 0.5, '#8a8a96', 2.5, 700, true);
             const box = { x: this.cx() - 92, y: this.y - 8, w: 184, h: this.h + 22 };
-            if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st);
             if (this.phase === 2 && typeof G.addRing === 'function') G.addRing(this.cx(), this.y + this.h - 8);
           }
         } else if (this.st === 'recover') {
           // a beat of stillness after the landing — your window
           this.vx *= 0.8; this.t -= dt;
           if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.4, 0.7); }
+        } else if (this.st === 'ringcharge') {
+          this.vx = 0; this.nwT -= dt;
+          const kk = 1 - clamp(this.nwT / 0.7, 0, 1);
+          for (let i = 0; i < 2; i++) {
+            const a2 = rnd(0, 6.28), rr2 = 130 - kk * 92;
+            addPart(this.cx() + Math.cos(a2) * rr2, this.cy() + Math.sin(a2) * rr2,
+              -Math.cos(a2) * 210, -Math.sin(a2) * 210, 0.3, TELL_COL, 2.6, 0, true);
+          }
+          if (this.nwT <= 0) {
+            this.ring((this.phase === 2 ? 14 : 10) + (this.mPhase || 0) * 2, 230 * (DF().espd || 1), this.anim);
+            this.st = 'idle'; this.t = 1.1;
+          }
         } else if (this.st === 'nullcharge') {
           // dead still while virus light crawls up off the floor and your
           // own jumps start to feel wrong — gravity is being unplugged
@@ -3915,7 +4176,7 @@ class Boss {
             addPart(this.cx() + rnd(-24, 24), this.y + this.h - rnd(4, 12),
               rnd(-30, 30), rnd(-80, -35), rnd(0.55, 0.8), '#8f846f', rnd(3.5, 5.5), 30);
           const box = { x: this.cx() - 80, y: this.y, w: 160, h: this.h + 8 };
-          if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx());
+          if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st);
           if (this.nullSeq > 0) {
             this.nullSeq--;
             if (this.nullSeq > 0) { this.st = 'nullhop'; this.t = 0.16; }
@@ -4464,8 +4725,14 @@ class Boss {
             sfx('wave');
           } else if (this.t <= 0) {
             const pick = this.cycle++ % 3;
-            if (pick === 0) { this.st = 'dashslash'; this.t = 0.42; this.vx = this.face * 720 * spd; }
-            else if (pick === 1) { this.st = 'pounce'; this.vy = -600; this.vx = this.face * 380 * spd; }
+            // THE FASTEST BOSS IN THE GAME HAD NO TELLS. Its dash covers 1022
+            // px/s against her 340 and fired straight out of idle — nothing to
+            // read, nothing to beat, and the same for the pounce. Both now
+            // gather first, on the shared budget, with the sound the tell
+            // system fires automatically on entering a *warn state. The fight
+            // is still the tightest cycle in the game; it is now a fair one.
+            if (pick === 0) { this.st = 'dashwarn'; this.t = TELL_FAST; this.vx = 0; }
+            else if (pick === 1) { this.st = 'pouncewarn'; this.t = TELL_FAST * 0.86; this.vx = 0; }
             else {
               this.vy = -480;
               for (let k = -1; k <= 1; k++) {
@@ -4514,6 +4781,18 @@ class Boss {
             this.strikes = []; this.strikeT = 0.2;
             G.flash = Math.max(G.flash, 0.3); cam.shake = 8; sfx('roar');
           }
+        } else if (this.st === 'dashwarn') {
+          this.vx = 0; this.t -= dt;
+          this.face = Math.sign(px - this.cx()) || this.face;
+          if (chance(0.7)) addPart(this.cx() + this.face * rnd(10, 34), this.cy() + rnd(-14, 14),
+            -this.face * rnd(60, 190), rnd(-30, 30), 0.22, TELL_COL, 2.4, 0, true);
+          if (this.t <= 0) { this.st = 'dashslash'; this.t = 0.42; this.vx = this.face * 720 * spd; }
+        } else if (this.st === 'pouncewarn') {
+          this.vx = 0; this.t -= dt;
+          this.face = Math.sign(px - this.cx()) || this.face;
+          if (chance(0.7)) addPart(this.cx() + rnd(-16, 16), this.y + this.h - rnd(0, 10),
+            rnd(-40, 40), -rnd(40, 150), 0.24, TELL_COL, 2.4, 0, true);
+          if (this.t <= 0) { this.st = 'pounce'; this.vy = -600; this.vx = this.face * 380 * spd; }
         } else if (this.st === 'arcstorm') {
           // hiding inside the storm: untouchable, but every strike is told
           // by its floor-glow a full second early
@@ -4663,7 +4942,12 @@ class Boss {
           } else {
             const which = this.cycle++ % 4;
             if (which === 0 && !this.nwave) { this.st = 'nwcharge'; this.nwT = 1.1; sfx('no'); }
-            else if (which === 1) this.ring((p2 ? 14 : 10) + (this.mPhase || 0) * 2, 230 * spd, this.anim);
+            // THE RING GATHERS FIRST. Sixteen projectiles used to appear in a
+            // single frame, in a 34-tile arena with no cover, while she is
+            // usually mid-air with her dash spent. The charge is short — this
+            // is still the last boss — but it exists, and the tell system
+            // sounds it automatically because the state name says 'charge'.
+            else if (which === 1) { this.st = 'ringcharge'; this.nwT = 0.7; }
             else if (which === 2 && (this.mPhase || 0) >= 2) { this.st = 'grabwarn'; this.nwT = 0.5; sfx('cast'); }
             else if (which === 2 && G.enemies.filter(e => !e.dead).length < 2) {
               const b = new Enemy('blob', this.cx() - 17, this.y + this.h);
