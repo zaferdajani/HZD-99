@@ -163,16 +163,41 @@ async function main() {
   // may be restyled independently, so they are excluded from extract and
   // ignored on rebuild even if a file for them is sitting in the directory.
   const DERIVED = new Set(B.derived || []);
+  // A PIXEL GRID IS A DESIGN THE MODEL WILL COPY. Handed a 43-pixel tail joint
+  // with a hard keyline, an image model reproduces the stair-steps and the
+  // outline faithfully — they are the most legible thing in the picture. Two
+  // rounds of "no pixel art, smooth antialiased silhouette" did not move
+  // NULLFANG's small parts at all, because the instruction was arguing with
+  // the reference and the reference wins.
+  //
+  // So the grid is removed before the model ever sees it: the part is drawn up
+  // 4x through the canvas's smooth resampler, which interpolates the steps into
+  // gradients. What arrives is a soft blurry picture of the right SHAPE with no
+  // rendering style worth stealing — exactly the division of labour the prompt
+  // was asking for in words. The rebuild still uses the original rect; this
+  // copy exists only to be uploaded.
+  const SOFT = 4;
   if (mode === 'extract') {
     fs.mkdirSync(dir, { recursive: true });
     for (const [k, r] of Object.entries(B.parts)) {
       if (DERIVED.has(k)) { console.log('  ' + k.padEnd(8) + ' skipped (derived from another rect)'); continue; }
-      const url = await page.evaluate(async ({ atlasUrl, r }) => {
+      const url = await page.evaluate(async ({ atlasUrl, r, SOFT }) => {
         const img = new Image(); img.src = atlasUrl; await img.decode();
-        const c = document.createElement('canvas'); c.width = r[2]; c.height = r[3];
-        c.getContext('2d').drawImage(img, r[0], r[1], r[2], r[3], 0, 0, r[2], r[3]);
+        const c = document.createElement('canvas'); c.width = r[2] * SOFT; c.height = r[3] * SOFT;
+        const x = c.getContext('2d');
+        // imageSmoothingQuality alone does NOT do it. On an integer upscale
+        // Chromium keeps the steps crisp enough that the grid survives intact —
+        // measured, not assumed: the 4x head came back as visibly the same
+        // staircase. An explicit blur is what actually removes it. Half a source
+        // pixel and a half is what it takes on art this chunky: the steps dissolve
+        // into gradients, the silhouette and the palette survive, and there is
+        // nothing left worth stealing. Detail the model invents inside that
+        // silhouette is exactly what is wanted on a 43-pixel joint.
+        x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+        x.filter = 'blur(' + (SOFT * 1.4).toFixed(2) + 'px)';
+        x.drawImage(img, r[0], r[1], r[2], r[3], 0, 0, c.width, c.height);
         return c.toDataURL('image/png');
-      }, { atlasUrl, r });
+      }, { atlasUrl, r, SOFT });
       fs.writeFileSync(path.join(dir, k + '.png'), Buffer.from(url.split(',')[1], 'base64'));
       console.log('  ' + k.padEnd(8) + ' ' + r[2] + 'x' + r[3]);
     }

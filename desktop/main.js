@@ -95,6 +95,29 @@ async function makeWindow() {
   });
   // nothing in this game should ever open a second window
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: 'deny' }; });
+
+  // GRANT THE PAGE A USER ACTIVATION, ONCE, AT LOAD.
+  //
+  // Chromium gates more than audio behind "has the user interacted with this
+  // page yet" — the GAMEPAD API is behind the same gate. navigator.getGamepads()
+  // returns an empty rack until activation is granted, no matter what is
+  // plugged in.
+  //
+  // On the web that never shows, because the "tap for sound" badge makes every
+  // player click before they reach the game. Here we deliberately removed the
+  // need to click, so the score could start with the picture — and the
+  // unintended consequence was that a player holding a controller and touching
+  // nothing else was never granted activation, and their controller genuinely
+  // did not exist as far as the page could tell. Silent, and impossible to
+  // guess at from inside the game.
+  //
+  // executeJavaScript's second argument is exactly this: run trivial script
+  // WITH a user gesture. It costs nothing and it is the shell's business to
+  // decide, the same way the autoplay policy above is.
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.executeJavaScript('void 0', true).catch(() => {});
+    win.focus();
+  });
   win.loadURL(`http://127.0.0.1:${port}/index.html`);
 }
 

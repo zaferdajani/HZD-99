@@ -110,10 +110,37 @@ addEventListener('gamepadconnected', e => {
 });
 addEventListener('gamepaddisconnected', () => padConnected(false, null));
 
+// WHY A CONTROLLER CAN BE PLUGGED IN AND STILL NOT EXIST.
+//
+// Chromium does not hand a page its gamepads until the page has been
+// interacted with — the same user-activation gate that keeps audio silent. On
+// the web that gate is always satisfied early, because the "tap for sound"
+// badge makes the player click before they get anywhere. In the desktop shell
+// we deliberately removed the need to click (the score starts with the
+// picture), and the unintended consequence was that a player who only ever
+// touches a controller never grants activation, so navigator.getGamepads()
+// keeps returning an empty rack and the game truthfully reports no pad. The
+// shell now grants that activation itself on load; this records what was
+// actually seen so the failure is never invisible again.
+const PAD_DIAG = { api: !!navigator.getGamepads, slots: 0, live: 0, seen: '' };
+function padDiag() {
+  if (!PAD_DIAG.api) return 'no gamepad API in this browser';
+  if (PAD_DIAG.live) return '';
+  return PAD_DIAG.seen
+    ? 'last seen: ' + PAD_DIAG.seen + ' — press a button on it'
+    : 'no controller detected (' + PAD_DIAG.slots + ' slots) — press a button on it';
+}
 function pollGamepad() {
   if (!navigator.getGamepads) return;
   let gp = null;
-  for (const pd of navigator.getGamepads()) if (pd && pd.connected) { gp = pd; break; }
+  const rack = navigator.getGamepads();
+  PAD_DIAG.slots = rack.length; PAD_DIAG.live = 0;
+  for (const pd of rack) if (pd) PAD_DIAG.live++;
+  // `connected` is the spec's flag, but a pad that reports buttons is a pad —
+  // some Bluetooth drivers flap that field, and refusing input from a
+  // controller we can plainly read is the wrong side to err on
+  for (const pd of rack) if (pd && (pd.connected || (pd.buttons && pd.buttons.length))) { gp = pd; break; }
+  if (gp && gp.id) PAD_DIAG.seen = gp.id.length > 40 ? gp.id.slice(0, 40) + '…' : gp.id;
   if (gp && !PAD.on) padConnected(true, gp);
   else if (!gp && PAD.on) padConnected(false, null);
   // the connect event does not always carry the pad (and some browsers fire a

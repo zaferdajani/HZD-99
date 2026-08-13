@@ -5969,11 +5969,50 @@ function drawCtrl() {
   // With a pad attached this screen becomes the controller map: every action,
   // the button it sits on, and a live highlight of whatever you are pressing.
   if (PAD.on) { drawPadCfg(); return; }
-  dimPanel(200, 80, 560, 390);
-  ftxt(t('ctl_title'), 480, 120, 30, '#eef3fa', 'center', '#37ffd0');
-  t('ctl').forEach((ln, i) => ftxt(ln, 480, 170 + i * 33, 15, '#cfe3ef', 'center', null, '600'));
-  ftxt(t('ctl_nopad'), 480, 424, 12, '#66788a');
-  ftxt(t('back') + ' — Esc / Enter', 480, 448, 13, '#7d93a8');
+  const lines = t('ctl');
+  // THE LIST GREW AND THE BOX DID NOT. This was a fixed 560x390 panel with
+  // hard-coded 33px steps from y=170: fine at nine lines, and every line added
+  // since — the Song, batting shots, Repair, Interact, Map — ran out of the
+  // bottom of the frame and printed on top of the footer. Nothing here is a
+  // constant any more; the panel is sized from the content and the content is
+  // fitted to the panel, so adding a line or translating into a language with
+  // longer ones cannot break it again.
+  const n = lines.length;
+  const PX = 120, PY = 52, PW = 720, PH = 476;          // 960x540 design space
+  dimPanel(PX, PY, PW, PH);
+  ftxt(t('ctl_title'), 480, PY + 40, 28, '#eef3fa', 'center', '#37ffd0');
+  const top = PY + 74, bot = PY + PH - 46;              // band left for the list
+  const step = Math.min(28, (bot - top) / n);
+  const size = Math.max(11, Math.min(15, step * 0.54));
+  // EVERY LINE IS ALREADY A TABLE ROW — "Jump — Z or Space (again in air…)" is
+  // an action and its explanation, and centring the two as one string is what
+  // made a wall of text out of a reference card. Split on the dash and set it
+  // as two columns: actions flush against the gutter, details flush away from
+  // it, so the eye finds the move first and reads the detail only if it wants
+  // it. A line with no dash is an aside and stays centred and dimmer.
+  const rtl = LANG === 'ar';
+  const gutL = rtl ? 500 : 460, gutR = rtl ? 484 : 496;
+  for (let i = 0; i < n; i++) {
+    const y = top + step * (i + 0.5);
+    const cut = String(lines[i]).indexOf(' — ');
+    // An action name is short. "Any swing knocks bullets out of the air — you
+    // can bat shots away" is a sentence that happens to contain a dash, and
+    // setting its first half as a column heading is worse than not splitting
+    // at all, so length decides rather than punctuation alone.
+    if (cut < 0 || cut > 18) {
+      ftxt(lines[i], 480, y, size * 0.92, '#93a9bd', 'center', null, '600');
+      continue;
+    }
+    ftxt(lines[i].slice(0, cut), gutL, y, size, '#dff3ff',
+      rtl ? 'left' : 'right', null, '700');
+    ftxt(lines[i].slice(cut + 3), gutR, y, size, '#a8bfd0',
+      rtl ? 'right' : 'left', null, '500');
+  }
+  // and when there is no pad, say what was actually looked for — "connect a
+  // controller" is useless advice to somebody who has connected one
+  const diag = typeof padDiag === 'function' ? padDiag() : '';
+  ftxt(diag || t('ctl_nopad'), 480, PY + PH - 30, 12, diag ? '#8a7a5e' : '#66788a');
+  ftxt(t('back') + ' — Esc / Enter', 480, PY + PH - 12, 13, '#7d93a8');
 }
 function drawPadCfg() {
   dimPanel(96, 42, 768, 464);
