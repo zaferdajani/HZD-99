@@ -227,7 +227,13 @@ const ROOMS = {
     } },
   // ============ ZONE C — The Foundry ============
   C1: { zone: 'C', w: 30, h: 34, exits: { T: 'B3', B: 'C2' },
-    ents: [['plat', 12, 22, [0, -8, 4.6, 2]], ['mod', 26, 18, 'wall'], ['flier', 15, 15], ['flier', 10, 25], ['turret', 20, 27], ['scrap', 3, 23, 15], ['riddle', 6, 23, 3], ['secret', 8, 23, 'sigil3']],
+    // The shaft's two fliers sat ten tiles apart in Y — one screen — and the
+    // audit missed it because it only slid a window sideways, which in a room
+    // 30 wide and 34 tall is the whole room. Descending past two disruptors
+    // with nothing to stand on is the worst version of the forbidden pair: you
+    // cannot even choose which one to answer. The lower one is a hopper now,
+    // holding the ledge at y=23 that the descent has to land on.
+    ents: [['plat', 12, 22, [0, -8, 4.6, 2]], ['mod', 26, 18, 'wall'], ['flier', 15, 15], ['hopper', 8, 22], ['turret', 20, 27], ['scrap', 3, 23, 15], ['riddle', 6, 23, 3], ['secret', 8, 23, 'sigil3']],
     build(g) {
       hline(g, 0, 29, 0, '#'); rect(g, 0, 32, 29, 33, '#');
       vline(g, 0, 0, 33, '#'); vline(g, 29, 0, 33, '#');
@@ -238,7 +244,24 @@ const ROOMS = {
       hline(g, 8, 14, 31, '^');
       rect(g, 22, 32, 25, 33, '.');         // bottom opening to C2
     } },
-  C2: { zone: 'C', w: 60, h: 17, exits: { T: 'C1', R: 'C3', B: 'D1' },
+  // THE POUR GALLERY — the Foundry's wing, and the room that makes the Tinker's
+  // errand a thing you do in his own kingdom. He asks for four gun emplacements
+  // silenced; the Foundry shipped two. Two more live here, in a crossfire that
+  // the registry allows only when the room provides a line that breaks one of
+  // them — so the gallery is built around a central pour column you can put
+  // between yourself and either gun, and the crawler is what stops you camping
+  // behind it.
+  C5: { zone: 'C', w: 32, h: 19, exits: { R: 'C2' },
+    ents: [['turret', 4, 17], ['turret', 27, 11], ['crawler', 16, 17],
+           ['scrap', 15, 11, 35], ['saw', 20, 17, [5, 0, 2.6]]],
+    build(g) {
+      frame(g); openR(g);
+      rect(g, 14, 4, 17, 15, '#');            // the pour column: the cover
+      hline(g, 2, 8, 13, '='); hline(g, 23, 30, 13, '=');
+      hline(g, 9, 13, 8, '='); hline(g, 18, 22, 8, '=');
+      hline(g, 9, 12, 17, '^'); hline(g, 19, 22, 17, '^');
+    } },
+  C2: { zone: 'C', w: 60, h: 17, exits: { T: 'C1', R: 'C3', B: 'D1', L: 'C5' },
     ents: [['plat', 33, 12, [5, 0, 3.6]], ['blob', 16, 15], ['turret', 22, 15], ['hopper', 42, 15], ['guard', 46, 15], ['blob', 55, 15], ['scrap', 5, 15, 12], ['npc', 25, 15, 'patch'],
            ['saw', 40, 15, [6, 0, 3.0]]],
     build(g) {
@@ -262,14 +285,41 @@ const ROOMS = {
   D1: { zone: 'D', w: 30, h: 17, exits: { T: 'C2', R: 'D2' }, ice: true,
     ents: [['bench', 6, 15], ['npc', 12, 15, 'sage'], ['term', 24, 15, 3]],
     build(g) { frame(g); openR(g); rect(g, 18, 0, 20, 0, '.'); hline(g, 15, 18, 11, '='); } },
-  D2: { zone: 'D', w: 60, h: 17, exits: { L: 'D1', R: 'D3' }, ice: true,
-    ents: [['flier', 20, 6], ['guard', 25, 15], ['flier', 40, 7], ['guard', 44, 15], ['turret', 55, 15], ['plat', 30, 10, [6, 0, 3.4]], ['scrap', 41, 11, 15], ['riddle', 21, 8, 5], ['secret', 41, 12, 'coin'],
+  D2: { zone: 'D', w: 60, h: 17, exits: { L: 'D1', R: 'D3', T: 'D4' }, ice: true,
+    // The two fliers sat at y=6 and y=7 — the same screen — and the audit read
+    // the heavier ground-level window three tiles below them and called the
+    // room clean. On ice, where you cannot stop, being pushed by two things at
+    // once is not a fight. The second is a hopper on the ledge now: it still
+    // owns the air above the spikes, and on a slippery floor a leap you have to
+    // read is worth more than a dive you cannot answer.
+    ents: [['flier', 20, 6], ['guard', 25, 15], ['hopper', 41, 11], ['guard', 44, 15], ['turret', 55, 15], ['plat', 30, 10, [6, 0, 3.4]], ['scrap', 41, 11, 15], ['riddle', 21, 8, 5], ['secret', 41, 12, 'coin'],
            ['saw', 19, 15, [7, 0, 3.4]]],
     build(g) {
       frame(g); openL(g); openR(g);
       hline(g, 10, 16, 15, '^'); hline(g, 30, 37, 15, '^'); hline(g, 46, 51, 15, '^');
       hline(g, 11, 15, 11, '='); hline(g, 46, 50, 11, '=');
       hline(g, 20, 23, 8, '='); hline(g, 40, 43, 12, '=');
+    } },
+  // THE COLD STACKS — the Archives' wing.
+  //
+  // Zone D shipped with ONE fighting room, which made the game's second-hardest
+  // kingdom also its thinnest: rest, fight, boss. The stacks are the climb the
+  // Archivist sends you on, and they are built around the one thing this zone
+  // owns that no other does — you cannot stop. Every ledge is a commitment.
+  //
+  // Composition: a guard ANCHOR at the top of the climb, because an anchor on
+  // ice is a genuinely new problem (you must arrive at a stop to use its
+  // window); one flier DISRUPTOR and one crawler PRESSURE below it. Peak 6.
+  D4: { zone: 'D', w: 34, h: 21, exits: { B: 'D2' }, ice: true,
+    ents: [['guard', 28, 7], ['flier', 12, 9], ['crawler', 7, 18],
+           ['item', 30, 7, 'index'], ['scrap', 4, 12, 40], ['plat', 16, 15, [7, 0, 3.2]]],
+    build(g) {
+      frame(g);
+      rect(g, 15, 20, 18, 20, '.');            // the way back down to D2
+      hline(g, 2, 9, 19, '='); hline(g, 24, 32, 16, '=');
+      hline(g, 3, 10, 13, '='); hline(g, 20, 27, 12, '=');
+      hline(g, 9, 15, 9, '='); hline(g, 24, 32, 8, '#');   // the shelf the guard holds
+      hline(g, 11, 22, 20, '^');               // the floor of the stacks is not floor
     } },
   D3: { zone: 'D', w: 30, h: 17, exits: { L: 'D2', B: { to: 'E1', flag: 'bossZero' } }, ice: true,
     ents: [['boss', 15, 15, 'zero']],
@@ -278,7 +328,30 @@ const ROOMS = {
   E1: { zone: 'E', w: 30, h: 17, exits: { T: 'D3', R: 'E2' },
     ents: [['blob', 10, 15], ['blob', 20, 15], ['hopper', 25, 15], ['riddle', 5, 15, 6], ['npc', 13, 15, 'lumen']],
     build(g) { frame(g); openR(g); rect(g, 15, 0, 17, 0, '.'); hline(g, 6, 9, 11, '='); } },
-  E2: { zone: 'E', w: 60, h: 17, exits: { L: 'E1', R: 'E3' },
+  // THE HATCHERY — the Nest's wing, and the room that makes lumen's errand
+  // possible at all.
+  //
+  // `lumen_light` has always asked for a beacon lens. The lens was never placed
+  // anywhere in the world: the quest could be accepted and could never be
+  // finished, and nothing in the game would have said so — an errand's goal is
+  // checked against the bag, and an item that does not exist simply never
+  // arrives. Found by listing every `item` entity and comparing it against every
+  // fetch quest, which is now what `tests/quests.cjs` does on every run.
+  //
+  // Composition: blob DENIAL owning the floor of a chamber you have to cross
+  // slowly, one turret ZONER above it, one crawler. Peak 5. The solution shape
+  // is "the blobs are the room — go over them, not through."
+  E4: { zone: 'E', w: 30, h: 20, exits: { B: 'E2' },
+    ents: [['blob', 8, 18], ['blob', 20, 18], ['turret', 26, 10], ['crawler', 14, 12],
+           ['item', 4, 12, 'lens'], ['scrap', 25, 18, 40]],
+    build(g) {
+      frame(g);
+      rect(g, 13, 19, 16, 19, '.');            // the drop back to E2
+      hline(g, 2, 8, 13, '='); hline(g, 12, 18, 13, '=');
+      hline(g, 22, 28, 11, '='); hline(g, 5, 11, 8, '=');
+      hline(g, 17, 24, 6, '=');
+    } },
+  E2: { zone: 'E', w: 60, h: 17, exits: { L: 'E1', R: 'E3', T: 'E4' },
     ents: [['plat', 22, 10, [5, 0, 2.8]], ['plat', 37, 12, [0, -4, 3.0]], ['turret', 31, 15], ['flier', 18, 6], ['guard', 34, 15], ['blob', 45, 15], ['hopper', 50, 15], ['bench', 52, 15], ['scrap', 11, 11, 20], ['secret', 17, 8, 'star'],
            ['saw', 43, 15, [6, 0, 2.6]], ['saw', 29, 9, [0, 4, 3.2]]],
     build(g) {
@@ -299,9 +372,9 @@ const MAPPOS = {
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
   B6: [3, 1, 1, 1],
   X1: [8, 1, 1, 1],
-  C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1],
-  D1: [5, 6, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1],
-  E1: [8, 7, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1],
+  C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1], C5: [4, 5, 1, 1],
+  D1: [5, 6, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1], D4: [6, 5, 1, 1],
+  E1: [8, 7, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1], E4: [9, 6, 1, 1],
 };
 
 const gridCache = {};

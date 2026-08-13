@@ -51,6 +51,12 @@ const QUESTS = [
     reward: { scrap: 140, iq: 15 },
   },
   {
+    id: 'sage_index',                    // D1 — the climb into the cold stacks
+    npc: 'sage', zone: 'D',
+    kind: 'fetch', item: 'index',
+    reward: { scrap: 150, iq: 15 },
+  },
+  {
     id: 'lumen_light',                   // E1 — the last one, in the Nest
     npc: 'lumen', zone: 'E',
     kind: 'fetch', item: 'lens',

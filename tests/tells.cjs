@@ -103,8 +103,14 @@ const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1',
       for (let i = 0; i < 4200; i++) {
         if (i === 2100) { bo.hp = bo.hpMax * 0.3; bo.phase = 2; }
         if (bo.dead) { bo.dead = false; bo.hp = bo.hpMax; }
-        // keep the player in range so proximity moves fire
-        player.x = bo.cx() - 110; player.y = bo.y;
+        // SWEEP THE DISTANCE. Holding the player at one range pins a boss in
+        // whichever move that range gates: FURNACE CHOIR sat in `slamwarn` for
+        // four thousand steps and its `forgebell` and `hymn` — both real
+        // telegraphs, both one-channel — were never reached, so the harness
+        // reported it clean. A fight is a function of distance; drive it as one.
+        const phase = (i % 600) / 600;
+        const far = 90 + phase * 460;
+        player.x = bo.cx() + (i % 1200 < 600 ? -far : far); player.y = bo.y;
         // ATTRIBUTING windT IS THE WHOLE DIFFICULTY. A step that changes state is
         // ambiguous in both directions: 'idle' can set windT for the warn state
         // it is entering (blaming idle), and 'swipewarn' can set windT on the

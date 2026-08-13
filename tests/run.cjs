@@ -31,6 +31,7 @@ const SUITE = [
   ['tutor',     'the waking floor teaches the whole loop: kill, take, spend, repair, think, spend'],
   ['tells',     'every boss wind-up carries BOTH channels — no silently one-channel telegraphs'],
   ['threat',    'threat concentration per screen, and the forbidden compositions'],
+  ['errands',   'every errand has a goal that exists and can be reached'],
 ];
 
 const want = process.argv.slice(2);
