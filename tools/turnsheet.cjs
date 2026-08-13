@@ -24,6 +24,25 @@ const fs = require('fs'), path = require('path');
 // and 4 faces screen-LEFT, because that is what yawColF() maps facing onto.
 // Column 5 is the back, kept for scripted moments. -1 = last figure detected.
 const COLS = ['R1', 'R0', 'L2', 'L1', 'L0', 'L-1'];
+// A '~' prefix mirrors that cell horizontally.
+//
+// THE ONE EXCEPTION, AND WHY IT IS ONE. Everything else here exists to avoid
+// mirroring: a mirrored frame flips the lit side onto the shadow side, which
+// undoes the fixed key light that is the entire reason these read as volumes.
+// The guard, alone, could not be turned. Three prompts and two reference-guided
+// passes all came back with its shield on the same side of its body — the model
+// simply will not render the other half of that silhouette. Left as it was, the
+// machine would present its shield leftward while walking right, and where a
+// guard's shield is pointing is not decoration, it is the fight: you have to
+// see which side is armoured to know when to hit it.
+//
+// So a gameplay-legible guard facing the wrong-lit way beats a correctly-lit
+// guard facing the wrong way. The compromise is made HERE, baked visibly into
+// the asset, rather than hidden as a runtime branch in the renderer — where it
+// would quietly become the general case again.
+const COL_OVERRIDE = {
+  guard: ['~L0', '~L1', 'L2', 'L1', 'L0', 'L-1'],
+};
 const SUBJECTS = ['servo', 'ratchet', 'mono', 'patch', 'sage', 'lumen', 'guard'];
 const CW = 200, CH = 260;                              // cell size in the sheet
 
@@ -68,7 +87,21 @@ window.cutStrip = async (dataUrl) => {
     if (last && b[0] - last[1] < W * 0.018) last[1] = b[1];
     else merged.push(b.slice());
   }
-  const figs = merged.filter(b => (b[1] - b[0]) > W * 0.025);
+  // Some renders come back with thin vertical rules between the cells. They
+  // survive a width floor (a 4 px line is a 4 px band) but they are not
+  // figures, and one of them counted as a figure shifts every pick in the row
+  // by one — which is how the Oracle ended up showing the back of its own head
+  // when it was supposed to be facing you. Judge each band against the WIDEST
+  // one instead: a divider is a fraction of a character, always.
+  let figs = merged.filter(b => (b[1] - b[0]) > W * 0.025);
+  if (figs.length) {
+    const wide = Math.max(...figs.map(b => b[1] - b[0]));
+    // A rule is one or two per cent of a character's width. A character seen
+    // edge-on is a third of one. Cut between those, not through them — at 0.45
+    // the Tinker's profile counted as a divider and two of its angles collapsed
+    // into one cell.
+    figs = figs.filter(b => (b[1] - b[0]) > wide * 0.22);
+  }
   // vertical extent per figure, so each one can be cropped to its own box
   const boxes = figs.map(([x0, x1]) => {
     let y0 = H, y1 = 0;
@@ -83,9 +116,15 @@ window.cutStrip = async (dataUrl) => {
   return boxes;
 };
 // --- paste one cropped figure into a cell, grounded and centred -------------
-window.pasteCell = async (dataUrl, box, col, row, CW, CH) => {
+window.pasteCell = async (dataUrl, box, col, row, CW, CH, flip) => {
   const img = new Image(); img.src = dataUrl; await img.decode();
   const x = window.__sheet.getContext('2d');
+  if (flip) {
+    x.save();
+    x.translate(col * CW + CW, row * CH);
+    x.scale(-1, 1);
+    x.translate(-col * CW, -row * CH);
+  }
   const bw = box.x1 - box.x0, bh = box.y1 - box.y0;
   // Normalise by HEIGHT, not by a single scale for the row. A turnaround whose
   // subject changes size between angles reads as a zoom rather than a rotation
@@ -99,6 +138,7 @@ window.pasteCell = async (dataUrl, box, col, row, CW, CH) => {
   const dx = col * CW + (CW - dw) / 2;
   const dy = row * CH + (CH - dh) - CH * 0.04;         // feet near the cell floor
   x.drawImage(img, box.x0, box.y0, bw, bh, dx, dy, dw, dh);
+  if (flip) x.restore();
 };
 `;
 
@@ -127,14 +167,17 @@ async function main() {
     }
     if (!strips.L) { console.log(s + ': NO LEFT STRIP — skipped'); continue; }
     // one scale for the whole row, from the tallest figure that will be used
-    const pick = (tag) => {
+    const pick = (tag0) => {
+      const flip = tag0[0] === '~';
+      const tag = flip ? tag0.slice(1) : tag0;
       const side = tag[0] === 'R' ? strips.R : strips.L;
       if (!side || !side.boxes.length) return null;
       let i = parseInt(tag.slice(1), 10);
       if (i < 0) i = side.boxes.length + i;
-      return side.boxes[i] ? { url: side.url, box: side.boxes[i] } : null;
+      return side.boxes[i] ? { url: side.url, box: side.boxes[i], flip } : null;
     };
-    const picks = COLS.map(pick);
+    const plan = COL_OVERRIDE[s] || COLS;
+    const picks = plan.map(pick);
     const used = picks.filter(Boolean);
     if (!used.length) { console.log(s + ': nothing detected'); continue; }
     const scale = Math.min(...used.map(u =>
@@ -144,11 +187,12 @@ async function main() {
       // a missing angle falls back to the nearest one that exists, so a row is
       // never a hole — a hole would draw nothing at all in game
       const p2 = picks[col] || used[Math.min(col, used.length - 1)];
-      await page.evaluate(async ({ url, box, col, row, CW, CH }) =>
-        window.pasteCell(url, box, col, row, CW, CH), { url: p2.url, box: p2.box, col, row, CW, CH });
+      await page.evaluate(async ({ url, box, col, row, CW, CH, flip }) =>
+        window.pasteCell(url, box, col, row, CW, CH, flip),
+        { url: p2.url, box: p2.box, col, row, CW, CH, flip: !!p2.flip });
     }
     report.push(s + ': left=' + strips.L.boxes.length + ' right=' + (strips.R ? strips.R.boxes.length : 0) +
-      ' cells=' + picks.map((p2, i) => p2 ? COLS[i] : '·').join(','));
+      ' cells=' + picks.map((p2, i) => p2 ? plan[i] : '·').join(','));
   }
   // DID IT ACTUALLY TURN? The generator does not always obey a direction: asked
   // for a right-facing profile it will happily hand back the left-facing one
