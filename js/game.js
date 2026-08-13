@@ -218,6 +218,7 @@ function loadRoom(id) {
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
   G.wrecks = []; G.recharge = null; G.plats = []; G.saws = []; G.pools = []; G.x1Bridge = false; G.x1T = 0;
   ceilReset();                       // the roof of the last room does not follow you
+  fringeMark();                      // and neither does what grew on its edges
   // a scripted finishing blow belongs to the room it was swung in; carrying one
   // across a door would leave her driven by a boss that no longer exists
   G.finish = null; G.offer = null; G.forkBoss = null;
@@ -1908,6 +1909,136 @@ function drawCeilWeather(zone) {
     }
   }
   c.restore();
+}
+// ===========================================================================
+// THE FRINGE — what grows on the edge of the world, and why it is drawn LAST.
+//
+// A tile grid ends in perfectly straight lines: every floor is a ruler, every
+// ledge a machined step, and the eye reads the whole room as a diagram of
+// rectangles because that is exactly what it is. No amount of texture INSIDE a
+// tile fixes that, because the giveaway is not the surface, it is the boundary.
+//
+// So the boundary gets something growing out of it — grass and vine on the
+// Meadows, cable ends in the Conduits, slag crust in the Foundry, frost teeth
+// in the Archives, fronds in the Nest, shards in the Crystal. Deterministic
+// per tile (hash2 on the tile coordinate), so it is stable across frames and
+// across visits, and built once per room into an offscreen layer that is then
+// a single blit.
+//
+// AND IT IS DRAWN OVER THE CHARACTER. That is the whole trick and it is worth
+// being explicit about: the fringe rises above the floor line, she stands ON
+// the floor line, so the last few pixels of her feet pass BEHIND it. Nothing
+// about her movement changes — she is not standing in anything, there is no
+// collision here at all — but the eye stops reading her as a sticker laid on
+// top of a diagram and starts reading the floor as having a near edge and a
+// far one. Depth for the price of a draw order.
+//
+// It is deliberately kept off hazards: a spike whose tip is dressed in grass is
+// a spike that killed you unfairly.
+// ===========================================================================
+const FRINGE_UP = 13;                    // how far above a tile top it may reach
+const FRINGE_KIND = { A: 'grass', B: 'cable', C: 'slag', D: 'frost', E: 'frond', X: 'shard' };
+let fringeCv = null, fringeDirty = true;
+function fringeMark() { fringeDirty = true; }
+function buildFringe() {
+  const g = G.grid; if (!g || !g[0]) return;
+  const W = g[0].length * TILE, H = g.length * TILE;
+  if (!fringeCv || fringeCv.width !== W || fringeCv.height !== H) {
+    fringeCv = document.createElement('canvas'); fringeCv.width = W; fringeCv.height = H;
+  }
+  const x = fringeCv.getContext('2d');
+  x.clearRect(0, 0, W, H);
+  const zone = G.roomDef.zone, P = PAL[zone] || PAL.A;
+  const kind = FRINGE_KIND[zone] || 'grass';
+  // fewer blades on a machine that is already struggling; the silhouette break
+  // survives at three, the lushness does not
+  const per = (typeof QUAL !== 'undefined' && !QUAL.glow) ? 3 : 5;
+  const solid = ch => ch === '#' || ch === '=' || ch === 'B';
+  for (let ty = 0; ty < g.length; ty++) for (let tx = 0; tx < g[0].length; tx++) {
+    const ch = tileAt(tx, ty);
+    if (!solid(ch)) continue;
+    const up = tileAt(tx, ty - 1);
+    if (solid(up) || up === '^' || up === 'v') continue;   // buried, or wearing a hazard
+    const X = tx * TILE, Y = ty * TILE;
+    for (let i = 0; i < per; i++) {
+      const r1 = hash2(tx * 7 + i, ty * 13 + 1), r2 = hash2(tx * 3 + i, ty * 11 + 5);
+      const bx = X + (i + 0.5) * (TILE / per) + (r1 - 0.5) * (TILE / per) * 0.8;
+      const hgt = 4 + r2 * (FRINGE_UP - 4);
+      const lean = (r1 - 0.5) * 6;
+      x.save();
+      if (kind === 'grass' || kind === 'frond') {
+        x.strokeStyle = kind === 'frond' ? '#8f4fb0' : '#5e8f4a';
+        x.globalAlpha = 0.55 + r2 * 0.4;
+        x.lineWidth = 1.6 + r1 * 1.2; x.lineCap = 'round';
+        x.beginPath(); x.moveTo(bx, Y + 3);
+        x.quadraticCurveTo(bx + lean * 0.5, Y - hgt * 0.6, bx + lean, Y - hgt);
+        x.stroke();
+        if (r1 > 0.72) {                       // a seed head / spore pod
+          x.fillStyle = kind === 'frond' ? '#e08aff' : '#b8d86a';
+          x.beginPath(); x.arc(bx + lean, Y - hgt, 1.6 + r2, 0, 7); x.fill();
+        }
+      } else if (kind === 'cable') {
+        x.strokeStyle = '#1a2b38'; x.globalAlpha = 0.85;
+        x.lineWidth = 2 + r1 * 1.6; x.lineCap = 'round';
+        x.beginPath(); x.moveTo(bx, Y + 4);
+        x.quadraticCurveTo(bx + lean, Y - hgt * 0.5, bx + lean * 1.6, Y - hgt * 0.7);
+        x.stroke();
+        if (r2 > 0.66) {                       // a live end, still lit
+          x.fillStyle = P.glow; x.globalAlpha = 0.7;
+          x.beginPath(); x.arc(bx + lean * 1.6, Y - hgt * 0.7, 1.4, 0, 7); x.fill();
+        }
+      } else if (kind === 'slag') {
+        x.fillStyle = r2 > 0.8 ? '#ff8a3a' : '#3a2418';
+        x.globalAlpha = 0.8;
+        x.beginPath();                          // a crust lump, not a blade
+        x.moveTo(bx - 3 - r1 * 3, Y + 2);
+        x.quadraticCurveTo(bx, Y - hgt * 0.7, bx + 3 + r2 * 3, Y + 2);
+        x.closePath(); x.fill();
+      } else if (kind === 'frost') {
+        // NOT TEETH. The first version drew rime as upward triangles in almost
+        // exactly the spike palette, on a floor that elsewhere carries real
+        // spike strips — a decoration that impersonates a hazard, which is the
+        // one thing scenery must never do. Rime is a rounded crust that pools
+        // and sags; it is drawn as such, and low.
+        const hh = Math.min(hgt, 8);
+        x.fillStyle = '#dff0fb'; x.globalAlpha = 0.5 + r2 * 0.3;
+        x.beginPath();
+        x.moveTo(bx - 4 - r1 * 3, Y + 3);
+        x.quadraticCurveTo(bx + lean * 0.3, Y - hh, bx + 4 + r2 * 3, Y + 3);
+        x.closePath(); x.fill();
+        if (r1 > 0.8) {                         // and a bead of melt hanging off
+          x.globalAlpha = 0.4;
+          x.beginPath(); x.ellipse(bx + lean * 0.3, Y + 5, 1.4, 2.6, 0, 0, 7); x.fill();
+        }
+      } else {                                  // shard — same rule: never a spike
+        const hh = Math.min(hgt, 9);
+        x.fillStyle = '#ffb0e6'; x.globalAlpha = 0.28 + r2 * 0.3;
+        x.beginPath();                          // a leaning splinter, not a cone
+        x.moveTo(bx - 2.6, Y + 2);
+        x.lineTo(bx + lean * 1.4 - 1, Y - hh);
+        x.lineTo(bx + lean * 1.4 + 1.6, Y - hh * 0.72);
+        x.lineTo(bx + 2.2, Y + 2);
+        x.closePath(); x.fill();
+      }
+      x.restore();
+    }
+    // and the horizontal line itself, chipped: a few pixels of the tile's own
+    // top edge bitten away so the ruler stops being a ruler
+    x.save();
+    x.globalCompositeOperation = 'destination-out';
+    for (let i = 0; i < 3; i++) {
+      const r = hash2(tx * 5 + i, ty * 17 + 3);
+      if (r < 0.45) continue;
+      x.beginPath(); x.arc(X + r * TILE, Y + 1, 1.2 + r * 1.6, 0, 7); x.fill();
+    }
+    x.restore();
+  }
+  fringeDirty = false;
+}
+function drawFringe() {
+  if (typeof QUAL !== 'undefined' && QUAL.ceil <= 0) return;
+  if (fringeDirty) buildFringe();
+  if (fringeCv) c.drawImage(fringeCv, 0, 0);
 }
 const STRATA = { C: 'strataLava', D: 'strataIceB', E: 'strataRubble' };
 const STRATA_TW = 512, STRATA_TH = 160;         // both multiples of TILE
@@ -4356,6 +4487,12 @@ function drawWorldFrame() {
     player.draw(c);
     c.restore();
   }
+  // ...and the edge of the world OVER her, so the last few pixels of her feet
+  // pass behind it. See the fringe block above: this draw order is the effect.
+  c.save();
+  c.translate(-Math.round(camSX()), -Math.round(camSY()));
+  drawFringe();
+  c.restore();
   // manga impact frame: white panel + radial action lines
   if (G.impact && G.impact.t > 0) {
     const k = G.impact.t / G.impact.t0;
