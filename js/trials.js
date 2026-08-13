@@ -318,13 +318,25 @@ function triEatDirs() {
   for (const a of TRI_ACTS) for (const code of (KEYB[a] || [])) keysP[code] = 0;
   for (const c of TRI_PAD) keysP[c] = 0;
 }
+// THE SAME FORGIVENESS SHE GETS. Her attack carries a 200 ms input buffer, so a
+// swing pressed slightly early still lands — and it is very nearly the single
+// biggest thing separating "tight" from "sluggish" in this game. The puzzles
+// had none: an answer pressed one frame before the lights finished showing was
+// simply dropped, in the one place a child is most likely to be pressing early.
+// A press is held for a beat here too, and spent the moment input opens.
+let TRI_BUF = -1, TRI_BUF_T = 0;
+function triBuffer(dt) { if (TRI_BUF >= 0) { TRI_BUF_T -= dt; if (TRI_BUF_T <= 0) TRI_BUF = -1; } }
 function triDir(n) {
   const pad = typeof PAD !== 'undefined' && PAD && PAD.on;
   const down = pad ? TRI_PAD.map(c => !!keys[c]) : TRI_ACTS.map(a => !!inD(a));
   const press = pad ? TRI_PAD.map(c => !!keysP[c]) : TRI_ACTS.map(a => !!inP(a));
   let hit = -1, hits = 0;
   for (let i = 0; i < 4; i++) if (press[i]) { hits++; if (hit < 0) hit = i; }
-  if (!hits) return -1;
+  if (!hits) {
+    // nothing this step — but something may be waiting from the last one
+    if (TRI_BUF >= 0 && TRI_BUF < n) { const b = TRI_BUF; TRI_BUF = -1; return b; }
+    return -1;
+  }
   // Whatever happens next, this press is spent. The loop runs `update` more
   // than once in a frame whenever the machine is under 30 fps, and `keysP` is
   // only cleared at the END of the frame — so without this the same press is
@@ -338,6 +350,7 @@ function triDir(n) {
 // ---------- update ----------
 function updateTrial(dt) {
   if (TRI.fb > 0) TRI.fb -= dt;
+  triBuffer(dt);
   if (TRI.st === 'menu') {
     const n = 1 + TRI.order.length;
     if (inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
@@ -363,6 +376,10 @@ function updateTrial(dt) {
     if (inP('BACK')) { TRI.node = null; TRI.mode = 'full'; G.state = 'PLAY'; sfx('ui'); return; }
     if (TRI.game === 'mem') {
       if (TRI.memPhase === 'show') {
+        // an answer pressed while the lights are still playing is REMEMBERED,
+        // not thrown away — it fires the moment input opens
+        const early = triDir(4);
+        if (early >= 0) { TRI_BUF = early; TRI_BUF_T = 0.2; }
         TRI.memShowT -= dt;
         if (TRI.memShowT <= 0) {
           TRI.memShow++;

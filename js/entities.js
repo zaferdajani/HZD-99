@@ -4592,7 +4592,16 @@ class Boss {
             this.st = 'meltwarn'; this.t = 1.2; this.vx = 0; sfx('cast');
           } else if (this.fbCD <= 0 && this.t <= 0.6) {
             // FORGE BELL: three rapid clapper strikes, three falling weapons
-            this.st = 'forgebell'; this.t = 1.35; this.vx = 0;
+            // THE SHORTEST TELL IN THE GAME, LENGTHENED. It ran 300 ms to the
+            // first clapper strike, which clears the 250 ms reaction floor by
+            // fifty — for an ADULT. This game is for eight- to ten-year-olds,
+            // whose choice-reaction time (four moves to tell apart, not one
+            // stimulus to press a key on) is materially slower than the number
+            // every window in docs/combat was checked against. 1.5 s to the
+            // first strike puts it at 450 ms, in line with the rest of the
+            // roster, and costs the fight nothing: its difficulty is the size
+            // of its openings, not the speed of its warnings.
+            this.st = 'forgebell'; this.t = 1.5; this.vx = 0;
             this.fbCD = rnd(11, 15); this.fbStruck = 0;
           } else if (Math.abs(px - this.cx()) < 100 && this.t < 2) { this.st = 'slamwarn'; this.t = 0.55; this.vx = 0; }
           else if (this.t <= 0) {
@@ -4613,7 +4622,8 @@ class Boss {
           // each strike rings out a spark shower, then the sky answers with
           // embedded white-hot weapons — break them before they burst
           this.vx = 0; this.t -= dt; this.windT = 0.3;
-          const due = Math.floor((1.35 - this.t) / 0.3);
+          // the first strike lands 450 ms in; the three are 300 ms apart after
+          const due = Math.floor((1.5 - 0.15 - this.t) / 0.3);
           while (this.fbStruck < Math.min(3, due)) {
             this.fbStruck++;
             cam.shake = 6; sfx('bosshit');
