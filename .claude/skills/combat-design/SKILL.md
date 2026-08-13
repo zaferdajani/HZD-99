@@ -11,6 +11,25 @@ and was measured, not assumed — re-measure rather than remember.
 
 ---
 
+## 0a. Read the hero's side first
+
+Before designing a boss move, read `docs/combat/HERO_ANSWERS.md`. It is the
+matrix of every threat SHAPE against every verb the player actually has, read
+out of the code rather than out of intent, and it names the three holes that
+every new move inherits:
+
+- **Passing through an attack is optional equipment.** `dash` grants no
+  invulnerability without the `phantom` crest (js/entities.js, the hurt guard),
+  so for most of a run the only answer to anything is to not be where it is.
+- **Expanding areas have exactly one answer** — outrun the radius. Check the
+  radius against her real run speed over the real wind-up, or the telegraph is
+  decoration.
+- **Control effects have no counter at all.** An unanswerable status is the
+  fastest way to make a fight feel unfair.
+
+A threat with no answer is a toll. A threat with one answer is a QTE. Aim for
+two or three, or write down which future skill is the key to the door.
+
 ## 0. What this game is, mechanically
 
 Before designing anything, internalise four facts about CLAWBYTE that make most
