@@ -20,6 +20,9 @@ const MEDIA_SRC = {
     demon: 'assets/characters/demon-idle.png',
     // pre-rendered 3D turnaround atlas: 11 subjects x 8 yaw angles
     roster: 'assets/characters/roster_8yaw.png',
+    // the second turnaround sheet: the six machine folk and the shield guard,
+    // 6 yaw angles each, assembled by tools/turnsheet.cjs from two half-turns
+    npcs: 'assets/characters/npc_6yaw.png',
     // 3D-rendered zone vistas: 2 cols x 3 rows, A B / C D / E X
     zones: 'assets/backgrounds/zones_far.jpg',
     // the ROOF of each kingdom, rendered from directly below with real
@@ -158,7 +161,7 @@ const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
 }) : MEDIA_RAW;
 // the handful that must never pop in late: the shared turnaround atlas, the
 // player's own sheets and the decks she is standing on
-['roster', 'platforms', 'driller', 'slashFx'].forEach(mediaFetch);
+['roster', 'npcs', 'platforms', 'driller', 'slashFx'].forEach(mediaFetch);
 // Asking "is this sheet here yet?" must NOT be what fetches it. Several guards
 // test four boss atlases in one condition to decide which renderer to use, and
 // through the lazy map that innocent-looking check pulled 2.7 MB of art for

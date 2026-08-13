@@ -3193,13 +3193,13 @@ class Enemy {
     }
     // Pre-rendered 3D turnaround. Selected by angle, never mirrored, so the baked
     // key light stays on the correct side as the machine turns.
-    if (drawAtlas(c, this.kind === 'guard' ? 'crawler' : this.kind, this.faceVis, cx, this.y + this.h, this.h, {
+    if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
           flash: this.hurtT > 0 ? 1 : 0,
           charm: this.hypnoT > 0 ? 1 : 0,
           grounded: this.kind !== 'flier',
           t: this.anim, vx: this.vx, vy: this.vy,
           air: this.kind === 'hopper' ? clamp(Math.abs(this.vy) / 400, 0, 1) : 0,
-          mode: { crawler: 'walk', hopper: 'spring', blob: 'pulse', flier: 'hover', turret: 'breathe' }[this.kind] || 'breathe',
+          mode: { crawler: 'walk', guard: 'walk', hopper: 'spring', blob: 'pulse', flier: 'hover', turret: 'breathe' }[this.kind] || 'breathe',
           yawScan: enemyYaw(this),
         })) return;
     c.save();
@@ -3552,7 +3552,10 @@ class Wreck {
     burst(cx, cy, 22, PAL[G.roomDef.zone].glow, 300, 0.6, 400, 4, true);
     burst(cx, cy, 10, '#ffd76a', 240, 0.5, 600, 3, true);
     G.addRing(cx, cy);
-    G.dropScrap(cx, cy, irnd(4, 9));
+    // The waking floor's one machine pays for the lesson that follows it: the
+    // trader two screens away is useless if the first kill cannot buy anything
+    // from him, and a tutorial that asks you to farm is not a tutorial.
+    G.dropScrap(cx, cy, G.roomId === 'A0' ? 18 : irnd(4, 9));
     G.maybeDropRelic(cx, cy);
   }
   draw(c) {

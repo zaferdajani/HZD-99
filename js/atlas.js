@@ -180,12 +180,56 @@ function processSheet(key, cols, rows) {
   ATLAS_PROC[key] = cv;
   return cv;
 }
-function sheetOf(key, cols, rows) {
+// The cleanup above exists to repair the ORIGINAL generated sheets, which
+// arrived with frame lines, neighbours poking across cell borders and white
+// keying fringe. A sheet this repo assembled itself has none of those, and
+// running it through anyway would be actively harmful: keeping only the largest
+// component deletes the Nymph's drifting spores, and eroding near-white
+// boundary pixels eats a porcelain Archivist from the outside in.
+function sheetOf(key, cols, rows, clean) {
+  if (clean === false) return MEDIA_IMG[key];
   const p = processSheet(key, cols, rows);
   return p || MEDIA_IMG[key];
 }
-function atlasReady() {
-  return typeof MEDIA_IMG !== 'undefined' && !!MEDIA_IMG[ATLAS.key];
+// ---------------------------------------------------------------------------
+// THE SECOND SHEET — the people, and the machine that blocks your way.
+//
+// The NPCs were the last characters in the game still drawn entirely by hand,
+// which meant they were the last ones that could not turn: a painted three-
+// quarter view is a picture, and rotating it is a picture being flipped. They
+// are rendered now, on the same terms as the roster — one authored angle per
+// column, a key light fixed to the world, and nothing ever mirrored.
+//
+// Six columns rather than eight, and that is a fact about the renders, not a
+// compromise in the code: a generator asked for eight angles returns six, so
+// the sheet is assembled out of two half-turns (see tools/turnsheet.cjs) and
+// six is what two honest half-turns cover. Columns 0-4 are the facing range
+// yawColF() addresses, right profile through to left; column 5 is the back.
+const ATLAS2 = {
+  key: 'npcs', cols: 6, rows: 7, clean: false,
+  // this sheet was keyed and laid out by tools/turnsheet.cjs, so the cells are
+  // already isolated and already have a real alpha ramp — no inset needed
+  ins: { top: 0.01, bottom: 0.01, side: 0.01 },
+  sub: {
+    servo:   { row: 0, k: 1.30, yOff: 0.02 },
+    ratchet: { row: 1, k: 1.45, yOff: 0.02 },
+    mono:    { row: 2, k: 1.50, yOff: 0.02 },
+    patch:   { row: 3, k: 1.40, yOff: 0.02 },
+    sage:    { row: 4, k: 1.55, yOff: 0.02 },
+    lumen:   { row: 5, k: 1.25, yOff: 0.02 },
+    guard:   { row: 6, k: 2.30, yOff: 0.05 },
+  },
+};
+// which sheet owns a subject. The roster is asked first, so a name that exists
+// in both keeps its original art and nothing silently changes underneath it.
+function atlasOf(subject) {
+  if (ATLAS.sub[subject]) return ATLAS;
+  if (ATLAS2.sub[subject]) return ATLAS2;
+  return null;
+}
+function atlasReady(A) {
+  const a = A || ATLAS;
+  return typeof MEDIA_IMG !== 'undefined' && !!MEDIA_IMG[a.key];
 }
 
 // eased facing -> authored angle. +1 right, 0 toward camera, -1 left.
@@ -209,10 +253,11 @@ function yawColF(faceVis) {
 const ATLAS_INSET = { top: 0.115, bottom: 0.055, side: 0.035 };
 
 function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
-  const S = ATLAS.sub[subject];
-  if (!S || !atlasReady()) return false;
-  const im = sheetOf(ATLAS.key, ATLAS.cols, ATLAS.rows);
-  const cw = im.width / ATLAS.cols, ch = im.height / ATLAS.rows;
+  const A = atlasOf(subject);
+  if (!A || !atlasReady(A)) return false;
+  const S = A.sub[subject];
+  const im = sheetOf(A.key, A.cols, A.rows, A.clean);
+  const cw = im.width / A.cols, ch = im.height / A.rows;
   const o = opts || {};
   const dh = hitH * S.k, dw = dh * (cw / ch);
   const dy = footY - dh + hitH * S.yOff;
@@ -241,7 +286,7 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   }
   if (o.alpha != null) c.globalAlpha = o.alpha;
   // rows whose neighbours crowd them harder get their own crop
-  const IN = Object.assign({}, ATLAS_INSET, S.ins || {});
+  const IN = Object.assign({}, ATLAS_INSET, A.ins || {}, S.ins || {});
   const sy = S.row * ch + ch * IN.top;
   const sw2 = cw * (1 - IN.side * 2);
   const sh2 = ch * (1 - IN.top - IN.bottom);
@@ -262,8 +307,8 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   if (o.yawSpin) fy = ((t * o.yawSpin) % 8 + 8) % 8;
   else if (o.yawScan) fy = o.yawScan.c + Math.sin(t * o.yawScan.r) * o.yawScan.a;
   else fy = yawColF(faceVis);
-  fy = ((fy % 8) + 8) % 8;
-  const col0 = Math.floor(fy) % ATLAS.cols, col1 = (col0 + 1) % ATLAS.cols;
+  fy = ((fy % A.cols) + A.cols) % A.cols;
+  const col0 = Math.floor(fy) % A.cols, col1 = (col0 + 1) % A.cols;
   const colF = fy - Math.floor(fy);
   let bob = 0, rot = 0, kx = 1, ky = 1, pivTop = false;
   switch (o.mode) {

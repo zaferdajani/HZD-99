@@ -27,6 +27,8 @@ const SUITE = [
   ['saw',       'the chainsaw rig: sparks, impacts, contact damage'],
   ['combat',    'every enemy telegraphs, does something different, and scales by zone'],
   ['pace',      'the game-speed dial slows the simulation and nothing else'],
+  ['ceiling',   'every kingdom has a roof that sheds its own weather, at every quality tier'],
+  ['tutor',     'the waking floor teaches the whole loop: kill, take, spend, repair, think, spend'],
 ];
 
 const want = process.argv.slice(2);

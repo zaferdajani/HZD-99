@@ -52,6 +52,11 @@ const NODES = [
   { game: 'log', level: 4, iq: 10 },
   { game: 'mem', level: 5, iq: 15 },
   { game: 'log', level: 7, iq: 15 },   // the deepest one, in the cat's chamber
+  // [8] THE WAKING FLOOR'S OWN NODE. It exists so the tutorial can teach where
+  // insight comes from without stealing a node the world already placed — the
+  // first one in the Meadows must still be there for a player who skipped this
+  // room, and two statics sharing an index would share a solved flag too.
+  { game: 'mem', level: 1, iq: 10 },
 ];
 function nodeKey(i) { return 'rd_n' + i; }
 function triStartNode(i, st) {

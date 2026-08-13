@@ -37,7 +37,10 @@ const ROOMS = {
   // dormant machine to scratch. Every good platformer opens with a room like
   // this and it is the one room this game never had.
   A0: { zone: 'A', w: 34, h: 17, exits: { R: 'A1' },
-    ents: [['crawler', 25, 15]],
+    // The waking floor teaches the whole loop, not just the verbs: the machine
+    // is what she scratches, the trader is what the scrap it drops is FOR, and
+    // the node is where the thinking she is about to need comes from.
+    ents: [['crawler', 21, 15], ['npc', 26, 15, 'ratchet'], ['riddle', 30, 15, 8]],
     build(g) {
       frame(g); openR(g);
       rect(g, 16, 14, 18, 15, '#');       // the step she has to jump

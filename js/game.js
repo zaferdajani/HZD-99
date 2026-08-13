@@ -45,6 +45,14 @@ function applyUpdate() {
 
 const CRESTS = { claws: 2, over: 2, plate: 2, magnet: 1, siphon: 1, phantom: 2, sprint: 1, ground: 2, nine: 3 };
 const SHOP = [
+  // SOMETHING SHE CAN ACTUALLY AFFORD. Every other line on this list costs more
+  // than a whole kingdom's scrap, which meant a new player met the shop, read
+  // seven prices they could not pay, and learned that money is a number that
+  // goes up. The cell is deliberately cheap, deliberately repeatable, and
+  // deliberately the thing HEALING runs on — so one purchase teaches the whole
+  // economy: scratch a machine, take its scrap, turn it into volts, spend the
+  // volts on a core.
+  { id: 'cell', type: 'cell', cost: 12 },
   { id: 'claws', type: 'crest', cost: 220 }, { id: 'over', type: 'crest', cost: 240 },
   { id: 'plate', type: 'crest', cost: 300 }, { id: 'siphon', type: 'crest', cost: 200 },
   { id: 'sprint', type: 'crest', cost: 180 },
@@ -980,12 +988,24 @@ function updateShop() {
     const cost = Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1));
     if (G.save.scrap < cost) { G.toast(t('poor')); sfx('no'); return; }
     G.save.scrap -= cost; sfx('buy');
+    if (it.type === 'cell') {
+      // consumable, so it never leaves the list and never stops being useful
+      player.volts = player.voltMax();
+      G.save.flags.tutBuy = 1;
+      G.toast(t('s_cell') + '  ⚡ ' + player.volts);
+      burst(player.x + player.w / 2, player.y + 6, 16, '#ffd76a', 200, 0.6, 120, 3, true);
+      persist();
+      return;
+    }
     if (it.type === 'crest') { G.save.crests.push(it.id); showItem(t('c_' + it.id), t('c_' + it.id + 'd')); }
     else if (it.type === 'slot') { G.save.slots++; G.save.shop[it.id] = 1; showItem(t('s_slot'), t('s_slotd')); }
     else { G.save.coresMax++; player.cores++; G.save.shop[it.id] = 1; showItem(t('s_core'), t('s_cored')); }
   }
 }
-function shopSold(it) { return it.type === 'crest' ? G.save.crests.indexOf(it.id) >= 0 : !!G.save.shop[it.id]; }
+function shopSold(it) {
+  if (it.type === 'cell') return false;          // a consumable is never sold out
+  return it.type === 'crest' ? G.save.crests.indexOf(it.id) >= 0 : !!G.save.shop[it.id];
+}
 function effSlots() { return G.save.slots + (G.save.skills && G.save.skills.indexOf('mind') >= 0 ? 1 : 0); }
 function updateSkills() {
   if (inP('SKILL') || inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
@@ -3355,6 +3375,20 @@ function drawStatics(P) {
     } else if (s.type === 'npc') {
       const talking = G.state === 'DIALOG' && G.dialog && G.dialog.npc === s.extra;
       const bob2 = talking ? bob * 1.9 : bob;
+      // THE TURN. Below, an NPC faces the cat by being MIRRORED — which flips
+      // its lit side onto its shadow side and re-flattens it into a picture the
+      // instant it turns. The machine folk are rendered now, so they turn the
+      // way everything else in this game turns: by selecting an authored angle
+      // off a turntable lit from a fixed point in the world. Drawn out here in
+      // world space, before the mirroring transform that it exists to replace.
+      const sheetDrew = !(typeof isHero === 'function' && isHero()) &&
+        drawAtlas(c, s.extra, (player && player.x + 12 < s.x) ? -1 : 1,
+                  s.x + s.w / 2, s.y + s.h + bob2 * 0.4, s.h, {
+          t: performance.now() / 1000 + (s.t || 0) * 1.7,
+          // the Oracle hangs from its cables and has no feet to stand on
+          mode: s.extra === 'mono' ? 'sway' : 'breathe',
+          grounded: s.extra !== 'mono',
+        });
       c.save(); c.translate(s.x + s.w / 2, s.y + s.h + bob2 * 0.4);
       if (player && player.x + 12 < s.x) c.scale(-1, 1);  // face the cat
       if (talking) {
@@ -3374,7 +3408,10 @@ function drawStatics(P) {
       if (typeof isHero === 'function' && isHero() && drawHeroNPC(c, id, s)) {
         // the Odyssey has its own people — robed, human, Greek. The machine
         // folk below belong to the Depths and stay there.
-      } else {
+      } else if (!sheetDrew) {
+        // the hand-drawn originals, still here and still correct: they are what
+        // the game shows while the sheet is loading, and on anything that
+        // cannot decode it at all
         drawNPCBody(c, id, performance.now() / 1000 + (s.t || 0) * 1.7, talking);
       }
       c.restore();
@@ -3596,10 +3633,55 @@ const TUT_STEPS = [
   { id: 'atk', label: 'tut_atk', hint: 'tut_atk_h',
     keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
     done: () => !!player.swing || player.comboT > 0 },
+  // ---- and now the LOOP, which is the part a verb tutorial never teaches ----
+  // Knowing which button swings is not knowing how to play this game. What a
+  // player actually has to learn is the circuit: a machine broken is scrap,
+  // scrap is volts, volts are cores, and thinking is a currency of its own that
+  // buys the abilities everything above runs on. Each of these steps is one
+  // link, taught in the order the circuit runs, on the floor where nothing can
+  // kill you for getting it wrong.
+  { id: 'kill', label: 'tut_kill', hint: 'tut_kill_h',
+    keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
+    done: () => !G.enemies.some(e => e && !e.dead) },
+  { id: 'coin', label: 'tut_coin', hint: 'tut_coin_h',
+    keys: '\u2190 \u2192', pad: 'D-pad', touch: 'stick', vb: null,
+    done: () => G.save.scrap >= 12 },
+  { id: 'buy', label: 'tut_buy', hint: 'tut_buy_h',
+    keys: 'E', pad: 'B', touch: 'INT', vb: 'VINT',
+    done: () => !!(G.save.flags && G.save.flags.tutBuy) },
+  { id: 'heal', label: 'tut_heal', hint: 'tut_heal_h',
+    keys: 'F', pad: 'Y', touch: 'HEAL', vb: 'VHEAL',
+    done: () => player.cores >= player.maxCores() },
+  { id: 'node', label: 'tut_node', hint: 'tut_node_h',
+    keys: 'E', pad: 'B', touch: 'INT', vb: 'VINT',
+    done: () => (G.save.iq | 0) >= 10 },
+  { id: 'skill', label: 'tut_skill', hint: 'tut_skill_h',
+    keys: 'T', pad: 'View', touch: 'SKILL', vb: 'VSKILL',
+    done: () => (G.save.skills && G.save.skills.length > 0) },
   { id: 'go', label: 'tut_go', hint: 'tut_go_h',
     keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
     done: () => false },                       // ends by leaving the room
 ];
+const TUT_LAST = TUT_STEPS.length - 1;         // the 'go' step, and the open door
+// Some lessons need the world to change before they make any sense.
+function tutEnter(st) {
+  if (!st || !player) return;
+  if (st.id === 'heal' && player.cores >= player.maxCores()) {
+    // THE FIRST HIT, ON PURPOSE. Repair cannot be taught to somebody at full
+    // health: the button does nothing, and a lesson whose demonstration is a
+    // no-op lands as noise. So the wreck she just made discharges once —
+    // scripted, capped at this single core, and staged in the only room in the
+    // game where nothing else can hurt her while she works out the answer.
+    player.cores = Math.max(1, player.cores - 1);
+    G.coreFlash = { i: player.cores, t: 0.6 };
+    player.iT = Math.max(player.iT || 0, 1.4);
+    cam.shake = Math.max(cam.shake, 5);
+    G.flash = Math.max(G.flash, 0.5);
+    sfx('hurt');
+    burst(player.x + player.w / 2, player.y + player.h / 2, 20, '#ff5f6d', 230, 0.6, 90, 3, true);
+    if (typeof tBuzz === 'function') tBuzz(60);
+  }
+}
 function tutHand(st) {
   if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled) return st.touch;
   if (typeof PAD !== 'undefined' && PAD && PAD.on) return st.pad;
@@ -3627,6 +3709,8 @@ function updateTutor(dt) {
   if (dum) {
     dum.calm = true; dum.hypnoT = 1e9;
     const gap = (dum.x + dum.w / 2) - (player.x + player.w / 2);
+    // held at arm's length until the claw has been taught, then let close —
+    // but never let loose: the kill step wants a target, not a fight
     if (T.i < 2 || Math.abs(gap) < 96) { dum.vx = 0; dum.stagT = Math.max(dum.stagT || 0, 0.12); }
   }
   if (typeof TOUCH !== 'undefined' && TOUCH) TOUCH.hi = (st && st.vb && TOUCH.enabled) ? st.vb : null;
@@ -3635,7 +3719,7 @@ function updateTutor(dt) {
   // verb, which is what happened: she strolled past the machine she was being
   // asked to scratch and into a room with real ones. The way out holds until
   // the three verbs are done, and then opens itself.
-  if (T.i < 3) {
+  if (T.i < TUT_LAST) {
     const lim = (G.roomDef.w - 2.2) * TILE - player.w;
     if (player.x > lim) { player.x = lim; if (player.vx > 0) player.vx = 0; }
   } else if (!T.opened) {
@@ -3647,7 +3731,7 @@ function updateTutor(dt) {
   }
   if (!st) return;
   T.t += dt;
-  if (T.hold > 0) { T.hold -= dt; if (T.hold <= 0) { T.i++; T.t = 0; } return; }
+  if (T.hold > 0) { T.hold -= dt; if (T.hold <= 0) { T.i++; T.t = 0; tutEnter(TUT_STEPS[T.i]); } return; }
   let ok = false;
   try { ok = st.done(); } catch (e) { ok = false; }
   if (ok && T.t > 0.25) {
@@ -3676,12 +3760,22 @@ function drawTutor() {
     c.setLineDash([]); c.restore(); c.globalAlpha = 1;
   };
   if (st.id === 'jump') mark(17 * TILE + 12, 14 * TILE + 12, 34, '#37ffd0');
-  if (st.id === 'atk') {
+  if (st.id === 'atk' || st.id === 'kill') {
     const dum = G.enemies && G.enemies.find(e => e && !e.dead);
     if (dum) mark(dum.x + dum.w / 2, dum.y + dum.h / 2, 30, '#ff8a6a');
   }
+  // ring the THING, not just the button: a card that names a verb teaches
+  // nothing if the player cannot see what it is about
+  if (st.id === 'coin') for (const p2 of G.pickups || [])
+    if (!p2.dead) mark(p2.x + 6, p2.y + 6, 18, '#ffd76a');
+  if (st.id === 'buy' || st.id === 'node') {
+    const want = st.id === 'buy' ? 'npc' : 'riddle';
+    const s2 = (G.statics || []).find(q => q.type === want && !q.opened);
+    if (s2) mark(s2.x + s2.w / 2, s2.y + s2.h / 2, 30, st.id === 'buy' ? '#ffd76a' : '#b48cff');
+  }
+  if (st.id === 'heal') mark(player.x + player.w / 2, player.y + player.h / 2, 32, '#aef7d8');
   if (st.id === 'go') mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
-  if (T.i < 3) {
+  if (T.i < TUT_LAST) {
     // the held door: a light curtain, not a wall — it reads as "not yet"
     const bx = (G.roomDef.w - 2.0) * TILE - cam.x;
     c.save();
