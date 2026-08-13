@@ -83,6 +83,33 @@ const { chromium } = require('playwright');
       wrong.length ? wrong : [], []);
   }
 
+  // ---- and the world's opinion of her actually reaches the screen ---------
+  // It did not, at first: an NPC with an errand outstanding replaces its whole
+  // line list, so a greeting written above that branch is discarded — which is
+  // every conversation in zone A, where all six have errands. Silent, and
+  // exactly the kind of thing that ships.
+  const said = await page.evaluate(async () => {
+    const out = [];
+    for (const n of [0, 1, 3]) {
+      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+      ['Glitch', 'Brood', 'Atlas'].slice(0, n).forEach(k => sv.flags['boss' + k] = 1);
+      startGame(sv); loadRoom('A1');
+      await new Promise(r => requestAnimationFrame(r));
+      await new Promise(r => requestAnimationFrame(r));
+      const sp = (G.statics || []).find(s => s.type === 'npc');
+      player.x = sp.x; player.y = sp.y - 6; player.vx = 0; player.vy = 0;
+      await new Promise(r => requestAnimationFrame(r));
+      G.near = findNear(); if (G.near) doInteract(G.near);
+      out.push({ tier: standingTier(), first: (G.dialog && G.dialog.lines[0]) || '',
+                 want: t('sl_' + sp.extra + '_' + standingTier()) });
+      G.dialog = null; G.state = 'PLAY';
+    }
+    return out;
+  });
+  check('standing line leads the conversation at every tier',
+    said.map(o => o.first === o.want ? o.tier : 'tier ' + o.tier + ' got "' + o.first.slice(0, 40) + '"'),
+    [0, 1, 2]);
+
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }

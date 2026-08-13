@@ -536,13 +536,6 @@ function doInteract(s) {
     // say depends on whether you have done it yet.
     const q = typeof questFor === 'function' ? questFor(s.extra) : null;
     let lines = t('d_' + s.extra).slice();
-    // ...and the first thing out of their mouth is what they make of her NOW.
-    // It leads rather than trails, because it is the line the greeting used to
-    // be, and because a player who skips the rest still hears it.
-    {
-      const k = 'sl_' + s.extra + '_' + standingTier(), sl = t(k);
-      if (sl && sl !== k) lines.unshift(sl);
-    }
     // WHAT THIS PERSON IS FOR. The trader trades; the Oracle opens the Trials.
     // That is their job and an errand does not replace it — which is exactly
     // what the errand system did when it landed: the moment the trader had a
@@ -572,6 +565,16 @@ function doInteract(s) {
         // opens a card the shop must not slam shut.
         if (base && G.state === 'PLAY') base();
       };
+    }
+    // ...and the first thing out of their mouth is what they make of her NOW.
+    // AFTER the errand branch, not before it: an NPC with a job outstanding
+    // replaces `lines` wholesale, so a greeting written above it is thrown away
+    // — which is every conversation in zone A, where all six have errands.
+    // It leads rather than trails, because it is the line the greeting used to
+    // be, and because a player who skips the rest still hears it.
+    {
+      const k = 'sl_' + s.extra + '_' + standingTier(), sl = t(k);
+      if (sl && sl !== k) lines = [sl].concat(lines);
     }
     G.dialog = { name: t('n_' + s.extra), lines, i: 0, npc: s.extra, onEnd: after };
     G.state = 'DIALOG'; npcSay(s.extra, 0);
