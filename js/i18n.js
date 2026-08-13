@@ -125,6 +125,8 @@ en: {
   e_crawler: 'crawlers', e_turret: 'gun emplacements', e_flier: 'fliers',
   e_hopper: 'hoppers', e_blob: 'blobs', e_guard: 'guards',
   pace: 'Game speed', pace_d: 'Slower gives you more time to react. Everything else stays the same.',
+  qual: 'Detail', q_auto: 'auto',
+  qual_d: 'Resolution and effects. Auto reads your device (%s) and adjusts as it runs.',
   ctl_title: 'Controls',
   ctl: [
     'Move — Arrow keys / A D',
@@ -428,6 +430,8 @@ ar: {
   e_crawler: 'زواحف', e_turret: 'مدافع ثابتة', e_flier: 'طائرات',
   e_hopper: 'قافزات', e_blob: 'كتل', e_guard: 'حرّاس',
   pace: 'سرعة اللعبة', pace_d: 'الأبطأ يمنحك وقتًا أطول للتصرّف. كل شيء آخر يبقى كما هو.',
+  qual: 'التفاصيل', q_auto: 'تلقائي',
+  qual_d: 'الدقة والمؤثرات. الوضع التلقائي يقرأ جهازك (%s) ويضبط نفسه أثناء اللعب.',
   ctl_title: 'أزرار التحكم',
   ctl: [
     'الحركة — الأسهم / A D',

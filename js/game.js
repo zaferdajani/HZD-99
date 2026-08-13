@@ -209,6 +209,7 @@ function loadRoom(id) {
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
   G.wrecks = []; G.recharge = null; G.plats = []; G.saws = []; G.pools = []; G.x1Bridge = false; G.x1T = 0;
+  ceilReset();                       // the roof of the last room does not follow you
   // a scripted finishing blow belongs to the room it was swung in; carrying one
   // across a door would leave her driven by a boss that no longer exists
   G.finish = null; G.offer = null; G.forkBoss = null;
@@ -374,6 +375,7 @@ function applyTheme() {
 function startGame(save) {
   save.iq = save.iq || 0; save.skills = save.skills || []; save.relics = save.relics || [];
   G.save = save;
+  if (typeof qualRestore === 'function') qualRestore();  // the player's own call outranks the guess
   applyTheme();
   loadRoom(save.bench.room);
   player = new Player(save.bench.x, save.bench.y);
@@ -637,6 +639,7 @@ function update(dt) {
         }
       }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
+      if (!(typeof isHero === 'function' && isHero())) ceilWeather(dt, G.roomDef.zone);
       sawHum(dt);
       updateTutor(dt);
       updateLesson(dt);
@@ -893,7 +896,7 @@ function paceK() {
 }
 function paceLabel() { return Math.round(paceK() * 100) + '%'; }
 function updatePause() {
-  const n = pauseHasTouch() ? 9 : 8;
+  const n = pauseHasTouch() ? 10 : 9;
   if (inP('DOWN')) { G.pauseIdx = (G.pauseIdx + 1) % n; sfx('ui'); }
   if (inP('UP')) { G.pauseIdx = (G.pauseIdx + n - 1) % n; sfx('ui'); }
   if (inP('PAUSE')) { G.state = 'PLAY'; return; }
@@ -902,6 +905,7 @@ function updatePause() {
     G.save.pace = ((((G.save.pace | 0) + d) % n2) + n2) % n2;
     sfx('ui'); persist();
   }
+  if (G.pauseIdx === 7 && (inP('LEFT') || inP('RIGHT'))) { qualCycle(); sfx('ui'); }
   if (inP('OK')) {
     sfx('ok');
     const quitIdx = n - 1;
@@ -915,7 +919,8 @@ function updatePause() {
       G.save.pace = (((G.save.pace | 0) + 1) % PACE_STEPS.length);
       G.toast(t('pace') + '  ' + paceLabel()); persist();
     }
-    else if (pauseHasTouch() && G.pauseIdx === 7) G.state = 'TCFG';
+    else if (G.pauseIdx === 7) { qualCycle(); G.toast(t('qual') + '  ' + qualLabel()); }
+    else if (pauseHasTouch() && G.pauseIdx === 8) G.state = 'TCFG';
     else if (G.pauseIdx === quitIdx) { persist(); setMusic('title'); G.state = 'MENU'; G.menuIdx = 0; }
   }
 }
@@ -1673,6 +1678,202 @@ function rockTex(zone) {
   return cv;
 }
 
+// ===========================================================================
+// THE CEILING. The floors have been authored for a while; above her head there
+// was nothing at all — the top of every room was the same flat tile as the
+// walls, in every kingdom, which is why the rooms read as cross-sections
+// rather than as places. A room you are INSIDE has something over you, and it
+// is doing something.
+//
+// Two halves, deliberately:
+//
+//   THE PLATE   an authored strip per kingdom, hung from the top, drawn at two
+//               depths — a dark far layer that barely moves and a near layer on
+//               full parallax — so the ceiling has thickness rather than being
+//               a sticker.
+//   THE WEATHER what that ceiling DOES, drawn procedurally over it and
+//               different in every kingdom: the Foundry beads and drips molten
+//               metal that falls and cools on the floor, the Archives grow
+//               icicles and shed snow, the Conduits arc and flicker, the
+//               Meadows drip condensation and their little service robots twitch
+//               on their clamps, the Nest breathes spores. It is the same
+//               principle as the enemy tells — a place is alive if it is
+//               DOING something on its own clock, not if it is merely detailed.
+// ===========================================================================
+const CEIL = { A: 'ceilA', B: 'ceilB', C: 'ceilC', D: 'ceilD', E: 'ceilE', X: 'ceilX' };
+const CEIL_TW = 512, CEIL_TH = 152;
+const ceilCache = {};
+function ceilTex(zone) {
+  const key = CEIL[zone];
+  if (!key) return null;
+  if (ceilCache[zone] !== undefined) return ceilCache[zone];
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[key];
+  if (!im || !im.naturalWidth) return null;         // retry next frame
+  const cv = document.createElement('canvas');
+  cv.width = CEIL_TW; cv.height = CEIL_TH;
+  const x = cv.getContext('2d');
+  x.drawImage(im, 0, 0, im.naturalWidth, im.naturalHeight, 0, 0, CEIL_TW, CEIL_TH);
+  // mirror-blend the right edge into the left so the horizontal wrap is seamless
+  x.save();
+  x.globalCompositeOperation = 'source-over';
+  const gx = x.createLinearGradient(CEIL_TW - 90, 0, CEIL_TW, 0);
+  gx.addColorStop(0, 'rgba(0,0,0,0)'); gx.addColorStop(1, 'rgba(0,0,0,1)');
+  x.globalCompositeOperation = 'destination-out';
+  x.fillStyle = gx; x.fillRect(CEIL_TW - 90, 0, 90, CEIL_TH);
+  x.globalCompositeOperation = 'source-over';
+  x.save(); x.scale(-1, 1);
+  x.drawImage(cv, 0, 0, 90, CEIL_TH, -CEIL_TW, 0, 90, CEIL_TH);
+  x.restore();
+  // and fade the underside so it sits into the room instead of ending in a line
+  x.globalCompositeOperation = 'destination-out';
+  const gy = x.createLinearGradient(0, CEIL_TH - 54, 0, CEIL_TH);
+  gy.addColorStop(0, 'rgba(0,0,0,0)'); gy.addColorStop(1, 'rgba(0,0,0,1)');
+  x.fillStyle = gy; x.fillRect(0, CEIL_TH - 54, CEIL_TW, 54);
+  x.restore();
+  ceilCache[zone] = cv;
+  return cv;
+}
+function drawCeiling(zone) {
+  const tex = ceilTex(zone);
+  if (!tex) return;
+  const P = PAL[zone];
+  const tier = typeof QUAL !== 'undefined' ? QUAL.ceil : 2;
+  if (tier <= 0) return;
+  // FAR: slow, dark, and wide — the thickness of the roof
+  if (tier >= 2) {
+    c.save();
+    c.globalAlpha = 0.55;
+    const fx = -((cam.x * 0.35) % CEIL_TW), fy = -cam.y * 0.22 - 26;
+    for (let x0 = fx - CEIL_TW; x0 < 960 + CEIL_TW; x0 += CEIL_TW)
+      c.drawImage(tex, x0, fy, CEIL_TW, CEIL_TH * 1.18);
+    c.fillStyle = 'rgba(0,0,0,0.45)'; c.fillRect(0, 0, 960, CEIL_TH * 1.18 + fy);
+    c.restore();
+  }
+  // NEAR: on the room's own parallax, so it belongs to the geometry
+  c.save();
+  const nx = -((cam.x * 0.92) % CEIL_TW), ny = -cam.y * 0.92 - 8;
+  for (let x0 = nx - CEIL_TW; x0 < 960 + CEIL_TW; x0 += CEIL_TW)
+    c.drawImage(tex, x0, ny, CEIL_TW, CEIL_TH);
+  // the kingdom's own light spilling down off it
+  c.globalCompositeOperation = 'lighter';
+  const g2 = c.createLinearGradient(0, ny + CEIL_TH * 0.55, 0, ny + CEIL_TH + 40);
+  g2.addColorStop(0, 'rgba(0,0,0,0)');
+  g2.addColorStop(0.6, (P && P.glow ? P.glow : '#37ffd0') + '22');
+  g2.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = g2; c.fillRect(0, ny + CEIL_TH * 0.55, 960, CEIL_TH * 0.5 + 40);
+  c.restore();
+}
+// ---------------------------------------------------------------------------
+// WHAT THE ROOF IS DOING. One list per room, refilled as things land, drawn
+// under the near ceiling plate so drips emerge from inside it. Everything here
+// is cosmetic on purpose — a place that can kill you from above is a hazard,
+// and hazards are designed, placed and telegraphed. This is weather.
+// ---------------------------------------------------------------------------
+let CEILFX = [], ceilT = 0, ceilRobot = 0;
+function ceilReset() { CEILFX = []; ceilT = 0; }
+function ceilWeather(dt, zone) {
+  if (!PAL[zone]) return;
+  ceilT += dt; ceilRobot += dt;
+  const W = G.roomDef.w * TILE;
+  const cap = typeof QUAL !== 'undefined' ? QUAL.weather : 90;
+  if (cap <= 0) return;
+  const push = (o) => { if (CEILFX.length < cap) CEILFX.push(o); };
+  const spawnX = () => cam.x + rnd(-80, 1040);
+  // ---- each kingdom sheds something different ----
+  if (zone === 'C' && chance(dt * 2.2)) {
+    // the Foundry beads, hangs, stretches, and lets go
+    push({ k: 'melt', x: spawnX(), y: 0, vy: 0, t: 0, hang: rnd(0.5, 1.4), r: rnd(2.4, 4.2) });
+  } else if (zone === 'D' && chance(dt * 3.2)) {
+    // the Archives shed: snow that drifts, and once in a while a whole icicle
+    push(chance(0.12)
+      ? { k: 'icicle', x: spawnX(), y: 0, vy: 0, t: 0, hang: rnd(0.8, 2.2), len: rnd(14, 30) }
+      : { k: 'snow', x: spawnX(), y: rnd(-20, 40), vy: rnd(26, 54), vx: rnd(-16, 16), t: 0, r: rnd(1.2, 2.6) });
+  } else if (zone === 'B' && chance(dt * 1.6)) {
+    // the Conduits arc between cable bundles
+    push({ k: 'arc', x: spawnX(), y: rnd(10, 46), t: 0, life: rnd(0.12, 0.26), w: rnd(30, 90) });
+  } else if (zone === 'A' && chance(dt * 1.5)) {
+    // the Meadows drip condensation off the vines
+    push({ k: 'drip', x: spawnX(), y: 0, vy: 0, t: 0, hang: rnd(0.4, 1.6), r: rnd(1.6, 2.6) });
+  } else if (zone === 'E' && chance(dt * 2.6)) {
+    // the Nest breathes
+    push({ k: 'spore', x: spawnX(), y: rnd(20, 70), vy: rnd(-6, 16), vx: rnd(-10, 10), t: 0, r: rnd(1.6, 3.4) });
+  } else if (zone === 'X' && chance(dt * 1.1)) {
+    push({ k: 'glint', x: spawnX(), y: rnd(14, 60), t: 0, life: rnd(0.5, 1.1) });
+  }
+  const floorY = (G.roomDef.h - 2) * TILE;
+  for (let i = CEILFX.length - 1; i >= 0; i--) {
+    const o = CEILFX[i];
+    o.t += dt;
+    if (o.k === 'melt' || o.k === 'drip' || o.k === 'icicle') {
+      if (o.hang > 0) { o.hang -= dt; }            // gathering, still attached
+      else { o.vy += 1500 * dt; o.y += o.vy * dt; }
+      if (o.y > floorY - CEIL_TH + 40) {
+        // it lands, and what it does when it lands is the point
+        if (o.k === 'melt') {
+          for (let q = 0; q < 5; q++)
+            addPart(o.x + rnd(-6, 6), o.y + CEIL_TH - 20, rnd(-70, 70), rnd(-120, -30), 0.4, '#ff9a4a', 2.2, 900, true);
+        } else if (o.k === 'icicle') {
+          for (let q = 0; q < 7; q++)
+            addPart(o.x + rnd(-8, 8), o.y + CEIL_TH - 20, rnd(-110, 110), rnd(-90, -20), 0.45, '#dff4ff', 2.4, 800, true);
+          if (typeof sfx === 'function' && Math.abs(o.x - (player ? player.x : 0)) < 420) sfx('edie');
+        } else {
+          for (let q = 0; q < 3; q++)
+            addPart(o.x + rnd(-3, 3), o.y + CEIL_TH - 20, rnd(-40, 40), rnd(-60, -10), 0.3, '#9fe8ff', 1.6, 700, true);
+        }
+        CEILFX.splice(i, 1); continue;
+      }
+    } else if (o.k === 'snow' || o.k === 'spore') {
+      o.y += o.vy * dt; o.x += o.vx * dt + Math.sin(ceilT * 1.4 + o.x) * 6 * dt;
+      if (o.y > 300 || o.t > 9) { CEILFX.splice(i, 1); continue; }
+    } else if (o.t > (o.life || 1)) { CEILFX.splice(i, 1); continue; }
+  }
+}
+function drawCeilWeather(zone) {
+  if (!CEILFX.length) return;
+  c.save();
+  for (const o of CEILFX) {
+    const x = o.x - cam.x, yTop = -cam.y * 0.92 - 8;
+    if (o.k === 'melt' || o.k === 'drip') {
+      const hot = o.k === 'melt';
+      const y = yTop + CEIL_TH - 34 + (o.hang > 0 ? 0 : o.y);
+      const stretch = o.hang > 0 ? 1 + (1 - clamp(o.hang, 0, 1)) * 2.2 : 2.6;
+      c.fillStyle = hot ? '#ffb257' : '#9fe8ff';
+      c.shadowColor = hot ? '#ff7a2a' : '#6fd0ff'; c.shadowBlur = hot ? 10 : 5;
+      c.beginPath(); c.ellipse(x, y, o.r, o.r * stretch, 0, 0, 7); c.fill();
+      c.shadowBlur = 0;
+    } else if (o.k === 'icicle') {
+      const y = yTop + CEIL_TH - 40 + (o.hang > 0 ? 0 : o.y);
+      c.fillStyle = 'rgba(223,244,255,0.85)';
+      c.beginPath(); c.moveTo(x - 3.5, y); c.lineTo(x + 3.5, y); c.lineTo(x, y + o.len); c.closePath(); c.fill();
+      c.strokeStyle = 'rgba(255,255,255,0.5)'; c.lineWidth = 0.8; c.stroke();
+    } else if (o.k === 'snow') {
+      c.globalAlpha = 0.75; c.fillStyle = '#eaf6ff';
+      c.beginPath(); c.arc(x, yTop + CEIL_TH - 30 + o.y, o.r, 0, 7); c.fill();
+      c.globalAlpha = 1;
+    } else if (o.k === 'spore') {
+      c.globalAlpha = 0.55 + Math.sin(ceilT * 3 + o.x) * 0.25;
+      c.fillStyle = '#e08aff'; c.shadowColor = '#d94aff'; c.shadowBlur = 8;
+      c.beginPath(); c.arc(x, yTop + CEIL_TH - 30 + o.y, o.r, 0, 7); c.fill();
+      c.shadowBlur = 0; c.globalAlpha = 1;
+    } else if (o.k === 'arc') {
+      const a = 1 - o.t / (o.life || 1);
+      c.globalAlpha = a; c.strokeStyle = '#9fd8ff'; c.lineWidth = 1.6;
+      c.shadowColor = '#4db8ff'; c.shadowBlur = 12;
+      c.beginPath();
+      let px2 = x, py2 = yTop + o.y;
+      c.moveTo(px2, py2);
+      for (let k = 0; k < 4; k++) { px2 += o.w / 4; py2 += rnd(-9, 9); c.lineTo(px2, py2); }
+      c.stroke(); c.shadowBlur = 0; c.globalAlpha = 1;
+    } else if (o.k === 'glint') {
+      const a = Math.sin(o.t / (o.life || 1) * Math.PI);
+      c.globalAlpha = a * 0.9; c.fillStyle = '#ffd0ee';
+      c.shadowColor = '#ff5ec8'; c.shadowBlur = 14;
+      c.beginPath(); c.arc(x, yTop + o.y + 30, 2.2, 0, 7); c.fill();
+      c.shadowBlur = 0; c.globalAlpha = 1;
+    }
+  }
+  c.restore();
+}
 const STRATA = { C: 'strataLava', D: 'strataIceB', E: 'strataRubble' };
 const STRATA_TW = 512, STRATA_TH = 160;         // both multiples of TILE
 const strataCache = {};
@@ -3765,6 +3966,7 @@ function drawLights(P) {
 let bloomCv = null, bloomCtx = null, bloomOK = true;
 function applyBloom(k) {
   if (!bloomOK) return;
+  if (typeof QUAL !== 'undefined' && !QUAL.bloom) return;   // the first thing a phone gives up
   if (!bloomCv) {
     bloomCv = document.createElement('canvas'); bloomCv.width = 384; bloomCv.height = 216;
     bloomCtx = bloomCv.getContext('2d');
@@ -3794,6 +3996,9 @@ function applyBloom(k) {
 function drawWorldFrame() {
   const P = PAL[G.roomDef.zone];
   drawBG(P, cam.x, cam.y);
+  // The roof, before the tiles: it is the far wall of the room's top, and
+  // anything solid the level actually built up there should occlude it.
+  if (!(typeof isHero === 'function' && isHero())) drawCeiling(G.roomDef.zone);
   c.save();
   c.translate(-Math.round(camSX()), -Math.round(camSY()));
   if (tileDirty) renderTileLayer(P);
@@ -4115,6 +4320,9 @@ function drawWorldFrame() {
     c.fill('evenodd');
     c.restore();
   }
+  // ...and what falls off it, in FRONT of everything: a drip you watch pass
+  // behind the cat is scenery, one that passes in front of her is a room.
+  if (!(typeof isHero === 'function' && isHero())) drawCeilWeather(G.roomDef.zone);
   lightPass(P);
   if (G.flash > 0) {
     c.fillStyle = 'rgba(255,255,255,' + (G.flash * 0.32) + ')';
@@ -4505,6 +4713,9 @@ function drawMenuBG(tsec) {
 }
 function draw(tms) {
   const tsec = tms / 1000;
+  // The backbuffer may be any size the device can afford; everything below this
+  // line is written against 960x540 and never needs to know which.
+  if (typeof qFrame === 'function') qFrame(c);
   c.clearRect(0, 0, 960, 540);
   const st = G.state;
   if (st === 'CINE') { drawCine(); return; }
@@ -4688,7 +4899,8 @@ function draw(tms) {
     c.fillStyle = 'rgba(4,7,12,0.75)'; c.fillRect(0, 0, 960, 540);
     ftxt(t('paused'), 480, 120, 38, '#eef3fa', 'center', '#37ffd0');
     const pmItems = [t('resume'), t('pm_map'), t('pm_crests'), t('pm_skills'), t('pm_relics'), t('ctl_title'),
-                     t('pace') + ':  ' + paceLabel() + '   ◂ ▸'];
+                     t('pace') + ':  ' + paceLabel() + '   ◂ ▸',
+                     t('qual') + ':  ' + qualLabel() + '   ◂ ▸'];
     if (pauseHasTouch()) pmItems.push(t('tl_title'));
     pmItems.push(t('to_menu'));
     pmItems.forEach((s, i) => {
@@ -4698,6 +4910,7 @@ function draw(tms) {
       ftxt((sel ? '▸ ' : '') + (last ? '⏻  ' : '') + s, 480, y, 21,
            sel ? '#eef3fa' : (last ? '#e88b86' : '#7d93a8'));
       if (i === 6 && sel) ftxt(t('pace_d'), 480, y + 21, 12, '#7d93a8');
+      if (i === 7 && sel) ftxt(t('qual_d').replace('%s', DEVICE.form), 480, y + 21, 12, '#7d93a8');
     });
     ftxt(GAME_VERSION, 930, 522, 12, '#44586b', 'right');
   } else if (st === 'TCFG') {
@@ -5872,6 +6085,8 @@ function mainLoop(tms) {
     const want = richBG ? 1 : 0;
     richK += (want - richK) * Math.min(1, dt * (want ? 1.6 : 6));
     if (richK < 0.02) richK = 0;
+    // and the coarser dial, which moves rarely and moves everything
+    if (typeof qualStep === 'function') qualStep(dt, frameMs);
   }
   lastT = tms;
   if (typeof pollGamepad === 'function') pollGamepad();

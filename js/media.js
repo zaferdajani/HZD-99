@@ -22,6 +22,15 @@ const MEDIA_SRC = {
     roster: 'assets/characters/roster_8yaw.png',
     // 3D-rendered zone vistas: 2 cols x 3 rows, A B / C D / E X
     zones: 'assets/backgrounds/zones_far.jpg',
+    // the ROOF of each kingdom, rendered from directly below with real
+    // overhangs, so a room has a top as well as a bottom. One plate per zone;
+    // ceilTex() wraps and fades them, and ceilWeather() decides what drips off.
+    ceilA: 'assets/backgrounds/ceil_a.jpg',
+    ceilB: 'assets/backgrounds/ceil_b.jpg',
+    ceilC: 'assets/backgrounds/ceil_c.jpg',
+    ceilD: 'assets/backgrounds/ceil_d.jpg',
+    ceilE: 'assets/backgrounds/ceil_e.jpg',
+    ceilX: 'assets/backgrounds/ceil_x.jpg',
     // full-frame futuristic vistas (newer set; the gloomy atlas stays for later)
     vistaCity: 'assets/backgrounds/vista_city.jpg',
     vistaCrystal: 'assets/backgrounds/vista_crystal.jpg',

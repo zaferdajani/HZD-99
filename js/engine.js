@@ -262,7 +262,9 @@ function camSY() { return cam.y + (cam.shake > 0 ? rnd(-cam.shake, cam.shake) : 
 
 let parts = [];
 function addPart(x, y, vx, vy, life, color, size, grav, glow) {
-  if (parts.length > 600) return;
+  // the budget is the device's, not the effect's — every burst in the game asks
+  // for as many as it wants and gets as many as this machine can draw
+  if (parts.length > (typeof QUAL !== 'undefined' ? QUAL.parts : 600)) return;
   parts.push({ x, y, vx, vy, life, life0: life, color, size: size || 3, grav: grav == null ? 600 : grav, glow: !!glow });
 }
 function burst(x, y, n, color, sp, life, grav, size, glow) {
@@ -280,9 +282,12 @@ function updateParts(dt) {
   }
 }
 function drawParts(c) {
+  // Canvas2D shadowBlur is a per-draw blur with no batching. Six hundred glowing
+  // particles is six hundred blurs, and on a phone that alone is the frame.
+  const glowOK = typeof QUAL === 'undefined' || QUAL.glow;
   for (const p of parts) {
     c.globalAlpha = Math.max(0, p.life / p.life0);
-    if (p.glow) { c.shadowColor = p.color; c.shadowBlur = 10; }
+    if (p.glow && glowOK) { c.shadowColor = p.color; c.shadowBlur = 10; }
     c.fillStyle = p.color;
     c.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
     c.shadowBlur = 0;
