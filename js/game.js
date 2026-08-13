@@ -372,14 +372,29 @@ function skillAffordable() {
   }
   return best;
 }
+// The cheapest thing she is SAVING for — reachable in the tree, not yet
+// affordable. The standing prompt shows its price, so the counter has a target
+// instead of being a number that goes up.
+function skillNext() {
+  if (!G.save || typeof SKILLS === 'undefined') return null;
+  const own = G.save.skills || [], unlocked = own.length;
+  let best = null;
+  for (const sk of SKILLS) {
+    if (own.indexOf(sk.id) >= 0) continue;
+    if (typeof tierOpen === 'function' && !tierOpen(sk.tier, unlocked)) continue;
+    if (!best || sk.cost < best.cost) best = sk;
+  }
+  return best;
+}
 function iqNudge() {
   const best = skillAffordable();
   if (!best) return;
   G.save.iqTold = G.save.iqTold || {};
   if (G.save.iqTold[best.id]) return;
   G.save.iqTold[best.id] = 1;
-  // "open SKILLS" is not an instruction, it is a noun. Say the button.
-  G.toast(t('tt_iq_ready').replace('%s', howToOpen('SKILL', t('pm_skills')))
+  // "open SKILLS" is not an instruction, it is a noun. Say the button AND the
+  // door — the bare key on its own was the reported failure.
+  G.toast(t('tt_iq_ready').replace('%s', howToOpenNamed('SKILL', t('pm_skills')))
     + ': ' + t('sk_' + best.id));
   sfx('chargeReady');
 }
@@ -928,33 +943,75 @@ function paceK() {
   return PACE_STEPS[clamp(i, 0, PACE_STEPS.length - 1)] || 1;
 }
 function paceLabel() { return Math.round(paceK() * 100) + '%'; }
+// ONE LIST, READ BY BOTH THE DRAWING AND THE KEYS.
+//
+// It used to be two: a literal array in the draw and a chain of index
+// comparisons in the update, plus the row count written down a third time as
+// `pauseHasTouch() ? 10 : 9`. Adding a row meant editing eight numbers in three
+// places and getting all of them right — which is why no row was ever added,
+// and why there was no way to restart a run.
+function pauseItems() {
+  const it = [
+    { id: 'resume', label: t('resume') },
+    { id: 'map', label: t('pm_map') },
+    { id: 'crests', label: t('pm_crests') },
+    { id: 'skills', label: t('pm_skills') },
+    { id: 'relics', label: t('pm_relics') },
+    { id: 'ctrl', label: t('ctl_title') },
+    { id: 'pace', label: t('pace') + ':  ' + paceLabel() + '   ◂ ▸', arrows: 1, hint: t('pace_d') },
+    { id: 'qual', label: t('qual') + ':  ' + qualLabel() + '   ◂ ▸', arrows: 1, hint: t('qual_d').replace('%s', DEVICE.form) },
+  ];
+  if (pauseHasTouch()) it.push({ id: 'touch', label: t('tl_title') });
+  it.push({ id: 'restart', label: t('pm_restart'), icon: '↻', warn: 1, hint: t('pm_restart_d') });
+  it.push({ id: 'quit', label: t('to_menu'), icon: '⏻', warn: 1, out: 1 });
+  return it;
+}
+// ...and one geometry, read by the drawing AND by the tap targets. They used to
+// be written out separately, which is how the touch hit-boxes ended up testing
+// for seven rows at a 40 px pitch against a menu that had ten at a different
+// one: on a phone the pause menu selected the wrong line.
+function pauseLayout() {
+  const items = pauseItems();
+  const step = Math.min(40, Math.floor(322 / items.length));
+  return { items: items, step: step, y0: 322 - (items.length - 1) * step / 2 };
+}
 function updatePause() {
-  const n = pauseHasTouch() ? 10 : 9;
-  if (inP('DOWN')) { G.pauseIdx = (G.pauseIdx + 1) % n; sfx('ui'); }
-  if (inP('UP')) { G.pauseIdx = (G.pauseIdx + n - 1) % n; sfx('ui'); }
-  if (inP('PAUSE')) { G.state = 'PLAY'; return; }
-  if (G.pauseIdx === 6 && (inP('LEFT') || inP('RIGHT'))) {
+  const pm = pauseLayout().items, n = pm.length;
+  if (inP('DOWN')) { G.pauseIdx = (G.pauseIdx + 1) % n; G.pauseConfirm = null; sfx('ui'); }
+  if (inP('UP')) { G.pauseIdx = (G.pauseIdx + n - 1) % n; G.pauseConfirm = null; sfx('ui'); }
+  if (inP('PAUSE')) { G.pauseConfirm = null; G.state = 'PLAY'; return; }
+  const cur = pm[G.pauseIdx] || pm[0];
+  if (cur.id === 'pace' && (inP('LEFT') || inP('RIGHT'))) {
     const d = inP('RIGHT') ? 1 : -1, n2 = PACE_STEPS.length;
     G.save.pace = ((((G.save.pace | 0) + d) % n2) + n2) % n2;
     sfx('ui'); persist();
   }
-  if (G.pauseIdx === 7 && (inP('LEFT') || inP('RIGHT'))) { qualCycle(); sfx('ui'); }
+  if (cur.id === 'qual' && (inP('LEFT') || inP('RIGHT'))) { qualCycle(); sfx('ui'); }
   if (inP('OK')) {
+    // THROWING A RUN AWAY TAKES TWO PRESSES. Restart and Quit sit at the bottom
+    // of a list the player scrolls through with the same key that confirms, and
+    // one of them cannot be undone.
+    if (cur.warn && G.pauseConfirm !== cur.id) { G.pauseConfirm = cur.id; sfx('ui'); return; }
+    G.pauseConfirm = null;
     sfx('ok');
-    const quitIdx = n - 1;
-    if (G.pauseIdx === 0) G.state = 'PLAY';
-    else if (G.pauseIdx === 1) G.state = 'MAP';
-    else if (G.pauseIdx === 2) { G.state = 'CREST'; G.crestIdx = 0; }
-    else if (G.pauseIdx === 3) { G.state = 'SKILLS'; G.skillIdx = 0; }
-    else if (G.pauseIdx === 4) G.state = 'RELICS';
-    else if (G.pauseIdx === 5) { G.ctrlBack = 'PAUSE'; G.state = 'CTRL'; }
-    else if (G.pauseIdx === 6) {
+    if (cur.id === 'resume') G.state = 'PLAY';
+    else if (cur.id === 'map') G.state = 'MAP';
+    else if (cur.id === 'crests') { G.state = 'CREST'; G.crestIdx = 0; }
+    else if (cur.id === 'skills') { G.state = 'SKILLS'; G.skillIdx = 0; }
+    else if (cur.id === 'relics') G.state = 'RELICS';
+    else if (cur.id === 'ctrl') { G.ctrlBack = 'PAUSE'; G.state = 'CTRL'; }
+    else if (cur.id === 'pace') {
       G.save.pace = (((G.save.pace | 0) + 1) % PACE_STEPS.length);
       G.toast(t('pace') + '  ' + paceLabel()); persist();
     }
-    else if (G.pauseIdx === 7) { qualCycle(); G.toast(t('qual') + '  ' + qualLabel()); }
-    else if (pauseHasTouch() && G.pauseIdx === 8) G.state = 'TCFG';
-    else if (G.pauseIdx === quitIdx) { persist(); setMusic('title'); G.state = 'MENU'; G.menuIdx = 0; }
+    else if (cur.id === 'qual') { qualCycle(); G.toast(t('qual') + '  ' + qualLabel()); }
+    else if (cur.id === 'touch') G.state = 'TCFG';
+    else if (cur.id === 'restart') {
+      // same difficulty, same world, nothing carried — the run starts over
+      const d = (G.save && G.save.diff) || 1;
+      startGame(newSave(d));
+    }
+    else if (cur.id === 'quit') { persist(); setMusic('title'); G.state = 'MENU'; G.menuIdx = 0; }
   }
 }
 function updateTouchCfg() {
@@ -4290,15 +4347,26 @@ function drawHUD() {
   // scrap + knowledge
   ftxt('⚙ ' + G.save.scrap, 76, 66, 17, '#ffd76a', 'left', null, '700');
   ftxt('◈ ' + (G.save.iq || 0) + ' ' + t('sk_iq'), 76, 88, 13, '#b48cff', 'left');
-  // AND WHILE SOMETHING IS AFFORDABLE, KEEP SAYING SO. The one toast that
-  // announced it scrolled away in a couple of seconds, mid-fight, and after
-  // that the player was holding currency with no idea what opened the shop for
-  // it. This sits beside the counter for exactly as long as it is true, and
-  // names the control the player is actually holding.
-  if (typeof skillAffordable === 'function' && skillAffordable()) {
-    const pulse = 0.55 + Math.sin(performance.now() / 380) * 0.25;
-    c.globalAlpha = pulse;
-    ftxt('▸ ' + howToOpen('SKILL', t('pm_skills')), 76, 104, 11.5, '#d9b8ff', 'left');
+  // AND FROM THE FIRST POINT EARNED, SAY WHERE IT GOES — BY NAME.
+  //
+  // This has been wrong twice. First it was a toast, which scrolled away in two
+  // seconds mid-fight. Then it was a standing prompt that printed the bare key:
+  // "▸ T". A letter on its own is not an instruction, and it only appeared once
+  // something was already affordable — so the player watching a counter climb
+  // from 1 to 9 was told nothing at all, and the one frame that would have
+  // helped never came.
+  //
+  // It now names the door, and it is up from the first point: the moment a
+  // counter starts moving is the moment the player wants to know what it is
+  // for. Dim with the target's cost while she is saving; lit and pulsing the
+  // moment she can spend.
+  if (typeof skillAffordable === 'function' && (G.save.iq || 0) > 0) {
+    const ready = skillAffordable();
+    const goal = ready || skillNext();
+    c.globalAlpha = ready ? 0.62 + Math.sin(performance.now() / 380) * 0.28 : 0.5;
+    ftxt('▸ ' + howToOpenNamed('SKILL', t('pm_skills'))
+         + (ready || !goal ? '' : '   ' + (G.save.iq || 0) + '/' + goal.cost),
+         76, 104, 11.5, ready ? '#d9b8ff' : '#8f7fb0', 'left');
     c.globalAlpha = 1;
   }
   // nine-lives counter
@@ -4328,13 +4396,34 @@ function drawHUD() {
   // top of the line the NPC was saying — two pieces of white text stacked in the
   // same place, both unreadable. A notification exists to be read, so it moves
   // out of the way of whatever panel is open rather than competing with it.
-  const toastY = (G.state === 'DIALOG' || G.state === 'OFFER') ? 170 : 440;
-  G.toasts.forEach((tt, i) => {
-    c.globalAlpha = clamp(tt.t, 0, 1);
-    ftxt(tt.text, 480, toastY - i * 24, 15, '#eef3fa', 'center', 'rgba(120,220,255,0.7)');
-    c.globalAlpha = 1;
-  });
-  if (G.zoneToast) {
+  //
+  // AND IT NEEDS SOMETHING BEHIND IT. Bare white text over the world is text
+  // over whatever happens to be standing there — reported as "text hides the
+  // characters", and true wherever the ground is pale or a fight is happening.
+  // A notification is UI, so it is drawn as UI: measured, on its own plate, and
+  // not drawn at all over a full-screen menu that has its own reading to do.
+  const toastHidden = { SKILLS: 1, CREST: 1, RELICS: 1, MAP: 1, BRAID: 1, PAUSE: 1,
+                        CTRL: 1, SHOP: 1, TRIAL: 1, TCFG: 1, CINE: 1 };
+  if (!toastHidden[G.state]) {
+    const toastY = (G.state === 'DIALOG' || G.state === 'OFFER') ? 170 : 452;
+    G.toasts.forEach((tt, i) => {
+      const a = clamp(tt.t, 0, 1), y = toastY - i * 30;
+      c.font = '700 15px "Segoe UI", Tahoma, sans-serif';
+      const w = Math.min(880, c.measureText(tt.text).width + 34);
+      c.globalAlpha = a * 0.86;
+      c.fillStyle = 'rgba(6,10,17,0.9)';
+      rr(c, 480 - w / 2, y - 14, w, 28, 8); c.fill();
+      c.globalAlpha = a * 0.5;
+      c.strokeStyle = 'rgba(120,220,255,0.55)'; c.lineWidth = 1;
+      rr(c, 480 - w / 2, y - 14, w, 28, 8); c.stroke();
+      c.globalAlpha = a;
+      ftxt(tt.text, 480, y, 15, '#eef3fa', 'center');
+      c.globalAlpha = 1;
+    });
+  }
+  // the zone banner is a PLAY-state flourish; over the pause menu it was just a
+  // second title crossing the first
+  if (G.zoneToast && G.state === 'PLAY') {
     c.globalAlpha = clamp(G.zoneToast.t, 0, 1);
     ftxt(G.zoneToast.text, 480, 90, 34, '#eef3fa', 'center', PAL[G.roomDef.zone].glow);
     c.globalAlpha = 1;
@@ -5320,20 +5409,30 @@ function draw(tms) {
     ftxt(t('death'), 480, 250, 46, '#ff5f6d', 'center', '#ff5f6d');
   } else if (st === 'PAUSE') {
     c.fillStyle = 'rgba(4,7,12,0.75)'; c.fillRect(0, 0, 960, 540);
-    ftxt(t('paused'), 480, 120, 38, '#eef3fa', 'center', '#37ffd0');
-    const pmItems = [t('resume'), t('pm_map'), t('pm_crests'), t('pm_skills'), t('pm_relics'), t('ctl_title'),
-                     t('pace') + ':  ' + paceLabel() + '   ◂ ▸',
-                     t('qual') + ':  ' + qualLabel() + '   ◂ ▸'];
-    if (pauseHasTouch()) pmItems.push(t('tl_title'));
-    pmItems.push(t('to_menu'));
-    pmItems.forEach((s, i) => {
-      const sel = i === G.pauseIdx, last = i === pmItems.length - 1, y = 190 + i * 40;
-      // the way OUT is highlighted so it can never be missed
-      if (last) { c.fillStyle = 'rgba(255,120,110,0.10)'; rr(c, 300, y - 20, 360, 34, 8); c.fill(); }
-      ftxt((sel ? '▸ ' : '') + (last ? '⏻  ' : '') + s, 480, y, 21,
-           sel ? '#eef3fa' : (last ? '#e88b86' : '#7d93a8'));
-      if (i === 6 && sel) ftxt(t('pace_d'), 480, y + 21, 12, '#7d93a8');
-      if (i === 7 && sel) ftxt(t('qual_d').replace('%s', DEVICE.form), 480, y + 21, 12, '#7d93a8');
+    ftxt(t('paused'), 480, 118, 34, '#eef3fa', 'center', '#37ffd0');
+    // THE LIST IS MEASURED, NOT COUNTED OUT IN FORTIES. At a fixed 40 px step
+    // from y=190 the last row landed at 510 on desktop and at 550 — off the
+    // bottom of a 540 px screen — as soon as the touch row appeared. The way
+    // OUT of the game was the row that fell off, which is the worst one to
+    // lose, and it is exactly what was reported: "the exit button is under the
+    // screen". The step now comes from how many rows there are.
+    const PL = pauseLayout(), pm = PL.items, step = PL.step, y0 = PL.y0;
+    const fs = Math.min(21, step * 0.56);
+    pm.forEach((it, i) => {
+      const sel = i === G.pauseIdx, y = y0 + i * step;
+      // the two irreversible rows are tinted so they can never be hit by feel
+      if (it.warn) {
+        c.fillStyle = it.out ? 'rgba(255,120,110,0.10)' : 'rgba(255,190,110,0.09)';
+        rr(c, 300, y - step * 0.5, 360, step * 0.86, 8); c.fill();
+      }
+      ftxt((sel ? '▸ ' : '') + (it.icon ? it.icon + '  ' : '') + it.label, 480, y, fs,
+           sel ? '#eef3fa' : (it.out ? '#e88b86' : it.warn ? '#e8bb86' : '#7d93a8'));
+      // the sub-line goes ABOVE the row near the foot of the list, where below
+      // is the next row's plate rather than empty space
+      const sy = y + step * (i >= pm.length - 2 ? -0.5 : 0.52);
+      // the confirm replaces the hint, because it is the more urgent sentence
+      if (sel && G.pauseConfirm === it.id) ftxt(t('pm_confirm'), 480, sy, 12, '#ffd76a');
+      else if (sel && it.hint) ftxt(it.hint, 480, sy, 12, '#7d93a8');
     });
     ftxt(GAME_VERSION, 930, 522, 12, '#44586b', 'right');
   } else if (st === 'TCFG') {

@@ -623,12 +623,34 @@ class Player {
     // hold attack to charge the volt-burst
     if (inD('ATK') && this.dashT <= 0) {
       this.chargeT += dt;
+      // CAN SHE ACTUALLY PAY FOR IT?
+      //
+      // The build-up used to look and sound identical whether or not she had
+      // the volts: same rising ticks, same brightening aura, same white flash
+      // at full charge — and then, on release, nothing but a soft refusal
+      // buried under the swing. A promise kept every time except when it isn't
+      // is not a cost, it is a bug, and it was reported as one.
+      //
+      // The charge still runs when she is short, because a move you cannot see
+      // is a move you never learn. It runs DULL: no rising ladder, sparse cold
+      // particles, and the price said out loud the first time she asks for it.
+      this.chargeOk = this.volts >= BURST_VOLTS;
       if (this.chargeT > 0.25) {
         this.chargeTick -= dt;
-        if (this.chargeTick <= 0) { this.chargeTick = 0.11; sfxChargeTick(Math.min(1, this.chargeT / 0.6)); }
-        if (chance(0.55)) addPart(this.x + rnd(-16, 40), this.y + rnd(-12, 48), 0, 0, 0.25,
-          this.chargeT >= 0.6 ? '#ffffff' : PAL[G.roomDef.zone].glow, 2.5, -170, true);
-        if (this.chargeT >= 0.6 && this.chargeT - dt < 0.6) sfx(this.volts >= BURST_VOLTS ? 'chargeReady' : 'no');
+        if (this.chargeTick <= 0) {
+          this.chargeTick = 0.11;
+          if (this.chargeOk) sfxChargeTick(Math.min(1, this.chargeT / 0.6));
+        }
+        if (chance(this.chargeOk ? 0.55 : 0.16)) addPart(this.x + rnd(-16, 40), this.y + rnd(-12, 48), 0, 0, 0.25,
+          !this.chargeOk ? '#7d6b8a' : this.chargeT >= 0.6 ? '#ffffff' : PAL[G.roomDef.zone].glow, 2.5, -170, true);
+        if (this.chargeT >= 0.6 && this.chargeT - dt < 0.6) {
+          sfx(this.chargeOk ? 'chargeReady' : 'no');
+          // said once, at the exact moment the player is asking the question
+          if (!this.chargeOk && !G.save.burstTold) {
+            G.save.burstTold = 1;
+            G.toast(t('tt_burst_need').replace('%n', BURST_VOLTS).replace('%v', Math.floor(this.volts)));
+          }
+        }
       }
     } else {
       // THE BURST COSTS SOMETHING NOW. Held attack put out 2.6x damage in a
@@ -2234,13 +2256,15 @@ class Player {
       c.globalAlpha = 1;
       }
     }
-    // charging aura on the blade
+    // charging aura on the blade — cold and thin when she cannot pay for it,
+    // so the screen answers "why did nothing happen" before it happens
     if (this.chargeT > 0.25) {
       const ck = Math.min(1, this.chargeT / 0.6);
+      const cok = this.chargeOk !== false;
       c.save(); c.globalCompositeOperation = 'lighter';
-      c.globalAlpha = 0.25 + ck * 0.35 + Math.sin(performance.now() / 90) * 0.12;
+      c.globalAlpha = (cok ? 0.25 + ck * 0.35 : 0.12 + ck * 0.1) + Math.sin(performance.now() / 90) * (cok ? 0.12 : 0.04);
       const cg = c.createRadialGradient(this.x + 12, this.y + 14, 4, this.x + 12, this.y + 14, 30 + ck * 22);
-      cg.addColorStop(0, ck >= 1 ? '#ffffff' : PAL[G.roomDef.zone].glow);
+      cg.addColorStop(0, !cok ? '#7d6b8a' : ck >= 1 ? '#ffffff' : PAL[G.roomDef.zone].glow);
       cg.addColorStop(1, 'rgba(0,0,0,0)');
       c.fillStyle = cg;
       c.beginPath(); c.arc(this.x + 12, this.y + 14, 30 + ck * 22, 0, 7); c.fill();

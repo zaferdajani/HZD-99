@@ -282,9 +282,15 @@ function tapMenu(x, y) {
     const i = Math.floor((y - 150) / 105);
     if (i >= 0 && i < 3 && y >= 150 && y <= 150 + 3 * 105) { G.diffIdx = i; tPress('VOK'); }
   } else if (st === 'PAUSE') {
-    const i = Math.round((y - 190) / 40);
-    const np = (typeof pauseHasTouch === 'function' && pauseHasTouch()) ? 8 : 7;
-    if (i >= 0 && i < np && Math.abs(y - (190 + i * 40)) <= 20) { G.pauseIdx = i; tPress('VOK'); }
+    // the same geometry the menu is drawn with — see pauseLayout
+    const PL = pauseLayout();
+    const i = Math.round((y - PL.y0) / PL.step);
+    if (i >= 0 && i < PL.items.length && Math.abs(y - (PL.y0 + i * PL.step)) <= PL.step / 2) {
+      // moving to a different row cancels a confirm that was waiting on the old
+      // one, so a tap can never confirm something the player did not aim at
+      if (i !== G.pauseIdx) G.pauseConfirm = null;
+      G.pauseIdx = i; tPress('VOK');
+    }
   } else if (st === 'CREST') {
     const i = Math.round((y - 170) / 40);
     if (G.save.crests.length && i >= 0 && i < G.save.crests.length && Math.abs(y - (170 + i * 40)) <= 20) { G.crestIdx = i; tPress('VOK'); }

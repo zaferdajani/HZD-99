@@ -328,8 +328,17 @@ let TRI_BUF = -1, TRI_BUF_T = 0;
 function triBuffer(dt) { if (TRI_BUF >= 0) { TRI_BUF_T -= dt; if (TRI_BUF_T <= 0) TRI_BUF = -1; } }
 function triDir(n) {
   const pad = typeof PAD !== 'undefined' && PAD && PAD.on;
-  const down = pad ? TRI_PAD.map(c => !!keys[c]) : TRI_ACTS.map(a => !!inD(a));
-  const press = pad ? TRI_PAD.map(c => !!keysP[c]) : TRI_ACTS.map(a => !!inP(a));
+  // THE TOUCH NODES ARE READ WHATEVER THE INPUT MODE SAYS. A tap on one node is
+  // already the unambiguous single choice this function goes to such lengths to
+  // extract from a stick — there is nothing to disambiguate. Ignoring it because
+  // the game believed a controller was attached is how the puzzles became
+  // unanswerable on a phone, and it stayed unanswerable because the belief was
+  // wrong and nothing in the puzzle could correct it.
+  const TRI_V = ['VL', 'VU', 'VR', 'VD'];
+  const down = TRI_PAD.map((cd, i) =>
+    (pad ? !!keys[cd] : !!inD(TRI_ACTS[i])) || !!keys[TRI_V[i]]);
+  const press = TRI_PAD.map((cd, i) =>
+    (pad ? !!keysP[cd] : !!inP(TRI_ACTS[i])) || !!keysP[TRI_V[i]]);
   let hit = -1, hits = 0;
   for (let i = 0; i < 4; i++) if (press[i]) { hits++; if (hit < 0) hit = i; }
   if (!hits) {
@@ -384,18 +393,27 @@ function updateTrial(dt) {
         if (TRI.memShowT <= 0) {
           TRI.memShow++;
           if (TRI.memShow >= TRI.memSeq.length) { TRI.memPhase = 'input'; TRI.memShow = -1; }
-          else { TRI.memShowT = Math.max(0.24, 0.42 - TRI.level * 0.02); sfxVoice('mono'); }
+          else {
+            TRI.memShowT = Math.max(0.24, 0.42 - TRI.level * 0.02);
+            sfxMemNote(TRI.memSeq[TRI.memShow], false);
+          }
         }
       } else {
         const pick = triDir(4);
         if (pick >= 0) {
+          // EVERY PRESS ANSWERS BACK. It used to make one generic click, which
+          // left the player with no way to know a press had registered at all —
+          // reported as not knowing how many times they had pressed. It now
+          // sounds its own node's note, flashes that node, and fills a pip.
+          TRI.memHit = { i: pick, t: 0.3 };
           if (pick === TRI.memSeq[TRI.memIn]) {
             TRI.memIn++;
-            sfx('ui');
+            sfxMemNote(pick, true);
             if (TRI.memIn >= TRI.memSeq.length) triAnswer(true);
-          } else triAnswer(false);
+          } else { sfxMemWrong(); triAnswer(false); }
         }
       }
+      if (TRI.memHit && TRI.memHit.t > 0) TRI.memHit.t -= dt;
     } else if (TRI.game === 'log') {
       // one key per item on the bench, so the answer is the OBJECT itself
       const pick = triDir(TRI.q.k);
@@ -584,18 +602,36 @@ function drawTrial() {
   } else if (TRI.game === 'mem') {
     const pads = [[330, 250], [480, 180], [630, 250], [480, 320]];
     const keys = ['←', '↑', '→', '↓'];
+    const hit = TRI.memHit && TRI.memHit.t > 0 ? TRI.memHit : null;
     for (let i = 0; i < 4; i++) {
       const [px2, py2] = pads[i];
       const lit = TRI.memPhase === 'show' && TRI.memShow >= 0 && TRI.memSeq[TRI.memShow] === i;
-      c.fillStyle = lit ? 'rgba(180,140,255,0.85)' : 'rgba(30,45,62,0.9)';
-      if (lit) { c.shadowColor = '#b48cff'; c.shadowBlur = 22; }
+      // the player's own press lights the node too, and fades over a third of a
+      // second rather than for one frame — a flash you can miss is not feedback
+      const own = hit && hit.i === i ? clamp(hit.t / 0.3, 0, 1) : 0;
+      const k = lit ? 1 : own;
+      c.fillStyle = k ? 'rgba(180,140,255,' + (0.28 + k * 0.57).toFixed(3) + ')' : 'rgba(30,45,62,0.9)';
+      if (k) { c.shadowColor = '#b48cff'; c.shadowBlur = 8 + k * 14; }
       c.beginPath(); c.arc(px2, py2, 38, 0, 7); c.fill();
       c.shadowBlur = 0;
-      c.strokeStyle = 'rgba(120,200,240,0.5)'; c.lineWidth = 1.6;
-      c.beginPath(); c.arc(px2, py2, 38, 0, 7); c.stroke();
-      if (typeof drawGlyphText === 'function') drawGlyphText(c, 'krum'[i], px2, py2, 20, lit ? '#0a1420' : '#8aa2b5');
+      c.strokeStyle = k ? 'rgba(214,188,255,' + (0.5 + k * 0.5).toFixed(3) + ')' : 'rgba(120,200,240,0.5)';
+      c.lineWidth = 1.6 + k * 1.8;
+      c.beginPath(); c.arc(px2, py2, 38 + own * 5, 0, 7); c.stroke();
+      if (typeof drawGlyphText === 'function') drawGlyphText(c, 'krum'[i], px2, py2, 20, k > 0.5 ? '#0a1420' : '#8aa2b5');
       ftxt(keys[i], px2, py2 + 54, 12, '#7d93a8');
     }
-    ftxt(TRI.memPhase === 'show' ? t('tt_q_mem_watch') : t('tt_q_mem') + '  (' + TRI.memIn + '/' + TRI.memSeq.length + ')', 480, 420, 16, '#8aa2b5');
+    // HOW MANY PRESSES IS THIS? One pip per note in the sequence, filled as she
+    // answers. The count was only ever in a line of small grey text, and the
+    // player reported not knowing how many times they were meant to press —
+    // which is the one thing a memory game must never leave you guessing.
+    const n2 = TRI.memSeq.length, sp = 22, x0 = 480 - (n2 - 1) * sp / 2;
+    for (let i = 0; i < n2; i++) {
+      const done = TRI.memPhase === 'input' && i < TRI.memIn;
+      c.beginPath(); c.arc(x0 + i * sp, 386, done ? 7 : 5.5, 0, 7);
+      if (done) { c.fillStyle = '#c9a6ff'; c.shadowColor = '#b48cff'; c.shadowBlur = 10; c.fill(); c.shadowBlur = 0; }
+      else { c.strokeStyle = 'rgba(150,175,200,0.55)'; c.lineWidth = 1.6; c.stroke(); }
+    }
+    ftxt(TRI.memPhase === 'show' ? t('tt_q_mem_watch')
+         : t('tt_q_mem') + '  (' + TRI.memIn + '/' + n2 + ')', 480, 420, 16, '#8aa2b5');
   }
 }

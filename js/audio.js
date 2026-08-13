@@ -743,6 +743,23 @@ function sfxChargeTick(k) {
   if (!AC || MUTED) return;
   tone(280 + k * 520, 0.09, 'sawtooth', 0.03 + k * 0.02);
 }
+// ECHO GLYPHS: one note per node, so the sequence is a little tune.
+//
+// Every step used to make the same sound, which throws away the whole reason
+// audio helps a memory game: a rising-falling four-note figure is far easier to
+// hold in your head than four identical beeps, and it lets the player HEAR that
+// their reply matches. The reply is played a fifth up and softer, so the two
+// passes are obviously the same shape said by two different voices.
+const MEM_NOTES = [57, 62, 66, 69];               // A3 D4 F#4 A4 — an open chord
+function sfxMemNote(i, reply) {
+  if (!AC || MUTED) return;
+  blip(MEM_NOTES[i % 4] + (reply ? 7 : 0), reply ? 0.2 : 0.3, reply ? 0.05 : 0.075, 0, 'bell');
+}
+// wrong answer: the same note bent flat under itself
+function sfxMemWrong() {
+  if (!AC || MUTED) return;
+  tone(300, 0.3, 'sawtooth', 0.05, 120);
+}
 // soft rising hum while repairing
 function sfxHealTick(k) {
   if (!AC || MUTED) return;

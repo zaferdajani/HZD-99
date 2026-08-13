@@ -98,6 +98,16 @@ function howToOpen(action, viaPause) {
   const k = codes.find(c => /^Key|^Tab$|^Escape$|^Enter$/.test(c));
   return k ? k.replace(/^Key/, '') : (viaPause || action);
 }
+// The same answer, phrased as an instruction rather than as a key. howToOpen
+// returns the bare button — "T" — which is what the HUD was printing, and a
+// letter on its own is a puzzle, not a prompt: the player who reported this had
+// been carrying IQ for an hour without ever finding the Neural Tree. Say the
+// button AND the door it opens. When the action has no button of its own the
+// answer is already a route ("Start ▸ Skills") and naming it twice is worse.
+function howToOpenNamed(action, name) {
+  const how = howToOpen(action, name);
+  return how.indexOf(name) >= 0 ? how : how + ' — ' + name;
+}
 function padKindOf(id) {
   const s = (id || '').toLowerCase();
   if (/dualshock|dualsense|playstation|054c|wireless controller/.test(s)) return 'ps';
@@ -165,16 +175,51 @@ function padDiag() {
     ? 'last seen: ' + PAD_DIAG.seen + ' — press a button on it'
     : 'no controller detected (' + PAD_DIAG.slots + ' slots) — press a button on it';
 }
+// IS THIS PAD ALIVE, OR IS IT A CORPSE THE BROWSER HAS NOT BURIED?
+//
+// After a disconnect Chromium can leave a dead object in the rack: `connected`
+// is false, `buttons` is still a full array of seventeen entries, and nothing
+// in it will ever move again. This test used to be "has buttons" — written to
+// survive Bluetooth stacks that flap `connected` on a pad that is plainly
+// working — and the cost of that was a disconnect/reconnect leaving PAD.on
+// stuck TRUE against the corpse. Which meant, all at once: the touch controls
+// hidden (they are hidden BECAUSE a pad is attached), no pad input arriving,
+// and the Mind Nodes reading pad-only codes that could never fire. The game was
+// unplayable and there was no way out of it from inside the game.
+//
+// So `connected` is believed when it is true, and when it is false the pad has
+// to PROVE it is alive: a pressed button, a deflected stick, or a timestamp
+// that is still advancing. A corpse proves none of those and is dropped.
+const PAD_STAMP = {};
+function padAlive(pd) {
+  if (!pd) return false;
+  const k = pd.index == null ? 'x' : pd.index;
+  const ts = pd.timestamp || 0;
+  const moved = PAD_STAMP[k] != null && ts > PAD_STAMP[k];
+  PAD_STAMP[k] = ts;
+  if (pd.connected) return true;
+  if (pd.buttons && pd.buttons.some(bt => bt && (bt.pressed || bt.value > 0.4))) return true;
+  if (pd.axes && pd.axes.some(a => Math.abs(a) > 0.4)) return true;
+  return moved;
+}
+// THE WAY BACK, which has to exist whatever else is wrong. If the game ever
+// believes in a controller that is not there, the player's own hand on the
+// screen is the correction — and it must work even though the touch layer is
+// deliberately pointer-transparent in pad mode, which is why this listens on
+// the window and captures. A pad genuinely in use keeps its mode: only silence
+// for three seconds lets a touch take it back.
+addEventListener('touchstart', () => {
+  if (typeof PAD === 'undefined' || !PAD.on) return;
+  if (performance.now() - (PAD.lastInput || 0) < 3000) return;
+  padConnected(false, null);
+}, { passive: true, capture: true });
 function pollGamepad() {
   if (!navigator.getGamepads) return;
   let gp = null;
   const rack = navigator.getGamepads();
   PAD_DIAG.slots = rack.length; PAD_DIAG.live = 0;
   for (const pd of rack) if (pd) PAD_DIAG.live++;
-  // `connected` is the spec's flag, but a pad that reports buttons is a pad —
-  // some Bluetooth drivers flap that field, and refusing input from a
-  // controller we can plainly read is the wrong side to err on
-  for (const pd of rack) if (pd && (pd.connected || (pd.buttons && pd.buttons.length))) { gp = pd; break; }
+  for (const pd of rack) if (padAlive(pd)) { gp = pd; break; }
   if (gp && gp.id) PAD_DIAG.seen = gp.id.length > 40 ? gp.id.slice(0, 40) + '…' : gp.id;
   if (gp && !PAD.on) padConnected(true, gp);
   else if (!gp && PAD.on) padConnected(false, null);
@@ -230,6 +275,9 @@ function pollGamepad() {
   // nothing, and it DOES work once the page has any activation at all, which is
   // common — clicking the window to focus it is enough), and keep the badge up
   // during play so the one tap that is needed is asked for. See drawSoundChip.
+  // when the pad last did anything at all — the touch escape hatch above needs
+  // to tell "in use" from "listed but gone"
+  if (fresh) PAD.lastInput = performance.now();
   if (fresh && typeof audioOn === 'function') audioOn();
 }
 addEventListener('keydown', e => {
