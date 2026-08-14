@@ -22,7 +22,17 @@ procedure. The short version:
 
 ## Before generating anything
 
-**All authored character art goes through Higgsfield. There is no fallback.**
+**You do not have the authority to make art or music yourself.** Art and music
+come from Higgsfield — always. Not procedurally, not by hand, not as a
+placeholder, not "for now". Writing the prompt, keying the plate, wiring it and
+measuring it is your job; making the pixels and the notes is not.
+
+**When it looks disconnected, assume you are wrong.** That has been true every
+time so far. The failure is never the connector — it is the reasoning that
+concludes "it is down, so I will do this another way", which is what produced
+line-art mini-bosses in a 3D game. Investigate, retry, tell the owner, wait.
+Never substitute. If it is genuinely unreachable, the correct output is a report
+and an unfinished task.
 
 If it looks unavailable, follow this and nothing else:
 

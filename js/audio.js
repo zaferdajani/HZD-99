@@ -1309,6 +1309,14 @@ const RECORDED_TRACKS = {
   // side fights is a lot of music spent on the part of the game the player
   // chose to go and find.
   boss_mini: [['mus_eye', 0.6], ['boss', 0.62], ['mus_boss', 0.6]],
+  // THE PACK ALPHA gets its own theme, and it is the only mini-boss that does.
+  // It is the first real boss the player meets and the only one in the game
+  // that is TAMED rather than destroyed, so it earns a name cue the way a
+  // guardian does — and it earns a second one for the moment it yields, which
+  // is not a victory fanfare but a truce: the same hunting-horn call, broken
+  // and alone, resolving from C minor into C major as the pack accepts her.
+  boss_alpha: [['mus_alpha', 0.62], ['boss', 0.6], ['mus_boss', 0.6]],
+  alphaTame: [['mus_alphatame', 0.6], ['ambient', 0.45]],
   boss: [['boss', 0.62], ['mus_boss', 0.6]], mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
   // the one that plays over the ending, after the last blow has been swung
   winTheme: [['mus_ending', 0.6], ['ambient', 0.45]],
@@ -1321,7 +1329,7 @@ function pickRecorded(name) {
 // when a per-guardian slot has neither a recording nor a synth track of its own
 const MUS_FALL = {
   boss_glitch: 'boss', boss_brood: 'boss', boss_atlas: 'boss',
-  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss',
+  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss', boss_alpha: 'boss', alphaTame: 'ambient',
   intro: 'title',
 };
 function setMusic(name) {

@@ -14,6 +14,30 @@ the test — do not make an exception in a comment.
 
 ---
 
+## 0.00 YOU DO NOT HAVE THE AUTHORITY TO MAKE ART OR MUSIC
+
+**Art and music are generated through Higgsfield. Always. That is not a
+preference about quality — it is a limit on what you are allowed to do.**
+
+You may not draw a character procedurally, hand-roll a sprite, or synthesise a
+score as a substitute for the pipeline. Not as a placeholder, not "for now", not
+because the result would be "close enough", and above all not because the
+connector looked unavailable. Composing the prompt, keying the plate, crushing
+it, wiring it, and measuring it are your job. MAKING the pixels and the notes is
+not.
+
+**And when it looks disconnected, the default assumption is that you are wrong.**
+That has now been the case every single time it has come up. The failure mode is
+not the connector; it is the reasoning that concludes "it is down, so I will do
+this another way" — which produced line-art mini-bosses in a 3D game and a
+message telling the owner to go and flip a switch he had never touched.
+
+So, in order: **investigate, retry, tell the owner, wait.** Never substitute.
+See §0 for the exact diagnostic. If the pipeline is genuinely unreachable, the
+correct output is a report and an unfinished task — not a hand-made stand-in.
+
+---
+
 ## 0.0 EVERY CHARACTER IS 3D. THIS NEVER HAS TO BE ASKED FOR.
 
 **Default, for every character in this game, existing or new: rendered 3D
@@ -38,7 +62,8 @@ its reason in this file:
 
 If a character is about to be drawn any other way, the reason must be one of
 those two — and if the reason is "the generator is unreachable", that is not a
-reason, it is a §0 problem. Fix the pipeline, or wait for it.
+reason, it is a §0 problem. Fix the pipeline, or wait for it. See §0.00: you do
+not have the authority to substitute your own work for the pipeline's.
 
 ---
 

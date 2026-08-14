@@ -23,7 +23,7 @@ look at to answer "did that actually happen".
 | `mother/` | MOTHER-V, the Null Core | 16 |
 | `lairs/` | The six boss lairs, as generated | 6 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
-| `beasts/` | The wolf line and the cheetah line, generated | 7 |
+| `beasts/` | The wolf line, the Alpha, and the cheetah line | 9 |
 | `_sheets/` | Contact sheets and before/after comparisons | 17 |
 
 `beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the
@@ -49,10 +49,18 @@ believing the code comments and photograph it.
 
 `beasts/` is the animal bestiary the owner asked for: electronic WOLVES to
 replace the small lions as zone A's first enemy (stand / lunge / coil), the WOLF
-PACK ALPHA that is tamed rather than destroyed, the same Alpha again with the
-virus gone and its light turned from red to warm gold, and the electronic
-CHEETAH line for the later kingdoms (stand / sprint / wind-up) which has no
-alpha and is simply killed. Generated and archived here; the wiring is the next
+PACK ALPHA in three states, and the electronic CHEETAH line for the later
+kingdoms (stand / sprint / wind-up) which has no alpha and is simply killed.
+
+THE ALPHA WAS REGENERATED. The first pass was the small wolf with a mantle on
+it — bulkier, but the same silhouette, which is not what a boss is. The owner
+said so and he was right. It is now a genuinely different animal: a double row
+of backswept spines running the length of its body, a collar of spikes at the
+throat, backswept temple horns, spurred elbows, a mace tail, oversized fangs, a
+broken horn and battle scars. `alpha_roar` is its wind-up — reared, roaring,
+amber arcing between the raised spines. `alpha_free` is the same creature after
+it yields: spines smoothed flat, light turned red to gold, still a weapon and no
+longer aimed at you. Generated and archived here; the wiring is the next
 piece of work, not this commit's claim.
 
 `eye/` is the five mini-bosses, two plates each — at rest and wound up. They
