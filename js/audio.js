@@ -630,7 +630,10 @@ const CUE = {
 // inside the machine, mixed under the impact so it colours the hit rather than
 // competing with it.
 const HZDVOX = {
-  atk: [['hzd_atk1', 0.30], ['hzd_atk2', 0.32], ['hzd_atk3', 0.40]],
+  // 0.30 was inaudible on a phone speaker under the synth impact — the barks
+  // were reported as simply not playing. They ride clearly on top now.
+  atk: [['hzd_atk1', 0.5], ['hzd_atk2', 0.52], ['hzd_atk3', 0.6]],
+  jump: [['hzd_jump', 0.42]],
   hurt: [['hzd_hurt', 0.55]], hurtbad: [['hzd_hurtbad', 0.68]],
   die: [['hzd_die', 0.7]], dash: [['hzd_dash', 0.30]],
   djump: [['hzd_djump', 0.30]], land: [['hzd_land', 0.26]],
@@ -687,6 +690,10 @@ function sfx(n) {
   }
   // ...and the rest of her, before any of the synth alphabet: these are the
   // moments the player is looking straight at her.
+  // THE JUMP SPEAKS TOO — a little Hup that RIDES ON the synth jump rather
+  // than replacing it (no return): the spring sound is the physics, the voice
+  // is her. Reported missing because it genuinely did not exist.
+  if (n === 'jump') hzdSay('jump', 200);
   if (n === 'hurt' && hzdSay(player && player.cores <= 1 ? 'hurtbad' : 'hurt', 260)) return;
   if (n === 'die' && hzdSay('die', 0)) return;
   if (n === 'dash' && hzdSay('dash', 200)) return;

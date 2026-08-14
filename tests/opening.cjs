@@ -41,11 +41,12 @@ const { chromium } = require('playwright');
     const sv = newSave(1);
     const chain = ['W1', 'W2', 'A0'];
     const missing = chain.filter(id => !ROOMS[id]);
-    const fwd = [], back = [];
-    for (let i = 0; i < chain.length - 1; i++) {
-      fwd.push((ROOMS[chain[i]].exits || {}).R === chain[i + 1]);
-      back.push((ROOMS[chain[i + 1]].exits || {}).L === chain[i]);
-    }
+    // W1 <-> W2 is an ordinary walk both ways. W2 -> A0 is NOT: the only way
+    // into the city is UP at the gates (gateEnter), and the gates close behind
+    // her — a right-hand side exit here is exactly the bug that let a player
+    // side-scroll past the gates without ever entering them.
+    const fwd = [(ROOMS.W1.exits || {}).R === 'W2', !!GATE_ROOM.W2 && GATE_ROOM.W2.to === 'A0'];
+    const back = [(ROOMS.W2.exits || {}).L === 'W1', (ROOMS.W2.exits || {}).R === undefined];
     // nothing in either waking room may be able to touch her
     const HOSTILE = ['crawler', 'guard', 'flier', 'turret', 'hopper', 'blob', 'boss', 'saw'];
     const danger = {};
@@ -64,8 +65,9 @@ const { chromium } = require('playwright');
   check('both waking rooms exist', !shape.missing.length, shape.missing.join(',') || 'W1, W2');
   check('the run STARTS in the cradle, not on the meadow',
     shape.start === 'W1', 'newSave starts at ' + shape.start);
-  check('W1 -> W2 -> A0 is walkable forward', shape.fwd.every(Boolean), JSON.stringify(shape.fwd));
-  check('...and she can walk back to look at where she woke',
+  check('W1 walks to W2, and the GATES are the only way into the city',
+    shape.fwd.every(Boolean), JSON.stringify(shape.fwd));
+  check('...she can walk back to the cradle, and there is NO side door past the gates',
     shape.back.every(Boolean), JSON.stringify(shape.back));
   check('both rooms are on the map', shape.onMap);
   check('nothing in either room can hurt her',
@@ -171,8 +173,13 @@ const { chromium } = require('playwright');
     await new Promise(r => requestAnimationFrame(r));
     G.wake = null;
     const seen = ['W1'];
+    let pressed = false;
     for (let f = 0; f < 60 * 45 && G.roomId !== 'A0'; f++) {
       keys.ArrowRight = 1;
+      // at the gates, she does what the chip says: press UP
+      if (!pressed && G.roomId === 'W2' && player.on && typeof gateHere === 'function' && gateHere()) {
+        keys.ArrowRight = 0; pressed = gateEnter();
+      }
       // HOLD the jump, do not tap it. Her jump is variable-height: a one-frame
       // press is a hop of about thirty pixels, which is a hair under the step
       // she is being taught on — so a tapping harness walks into a one-tile
@@ -187,7 +194,7 @@ const { chromium } = require('playwright');
     keys.ArrowRight = 0; keys.KeyZ = 0; keysP.KeyZ = 0;
     return { seen, end: G.roomId, dead: player.dead };
   });
-  check('holding right walks her all the way to the meadow',
+  check('the walk arrives: right to the gates, UP through them',
     walk.end === 'A0' && !walk.dead, walk.seen.join(' -> ') + (walk.dead ? ' (died)' : ''));
 
   // ---- 6. THE GATES ARE A DOOR, NOT A PICTURE ----------------------------

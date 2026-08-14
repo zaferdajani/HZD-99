@@ -103,6 +103,16 @@ const MEDIA_SRC = {
     cradle: 'assets/characters/gear/cradle.png',
     cradleOpen: 'assets/characters/gear/cradle_open.png',
     gateCity: 'assets/backgrounds/gate_city.jpg',
+    // HER OWN BACK — generated from her live body (assets/source/ref/), the
+    // first authored plates of the hero herself. Two stride frames armed, two
+    // unarmed (the sword becomes a pickup — task #78), and the sword waiting
+    // on the ground. The full 8-yaw turnarounds live in assets/characters/
+    // as hzd_8yaw.png / hzd_8yaw_bare.png for the atlas conversion.
+    heroBackA: 'assets/characters/hero/backwalk_a.png',
+    heroBackB: 'assets/characters/hero/backwalk_b.png',
+    heroBareBackA: 'assets/characters/hero/bare_bwalk_a.png',
+    heroBareBackB: 'assets/characters/hero/bare_bwalk_b.png',
+    swordGround: 'assets/characters/hero/sword_ground.png',
     // THE CHEETAH LINE — the second animal, for the kingdoms past the meadow.
     // No alpha, nothing to tame: these came off the same line as the wolves and
     // whatever was in them is gone. Three plates, same grammar as the wolf.
@@ -217,6 +227,7 @@ const MEDIA_SRC = {
     hzd_purr: 'assets/sfx/vox/hzd_purr2.wav',
     // the long press: a held note while the burst builds, and the shout she
     // spends it on
+    hzd_jump: 'assets/sfx/vox/hzd_jump.wav',
     hzd_charge: 'assets/sfx/vox/hzd_charge.wav',
     hzd_release: 'assets/sfx/vox/hzd_release.wav',
     vox_win: 'assets/sfx/vox/win.ogg',

@@ -60,10 +60,16 @@ const ROOMS = {
       // and nothing to jump onto: this room teaches ONE verb
       hline(g, 14, 18, 12, '=');
     } },
-  W2: { zone: 'A', w: 40, h: 17, exits: { L: 'W1', R: 'A0' },
+  // THE GATES ARE THE DOOR. W2 used to also have an ordinary right-hand exit
+  // into A0 — so a player holding right simply side-scrolled past the gates
+  // into the city, and the whole walk-into-the-depth moment never fired.
+  // Reported as "I'm just keep walking to the side". The right wall is solid
+  // now; the ONLY way into the city is UP at the gates (gateEnter), and the
+  // gates close behind her — the opening is one-way, like waking up is.
+  W2: { zone: 'A', w: 40, h: 17, exits: { L: 'W1' },
     ents: [],
     build(g) {
-      frame(g); openL(g); openR(g);
+      frame(g); openL(g);
       // THE STEP. One tile, inside one jump, and nothing else — the gap that
       // used to sit at tile 22 was a hole in the road right in front of the
       // city gates, which is exactly where the ground should look most
@@ -76,7 +82,7 @@ const ROOMS = {
       rect(g, 33, 14, 39, 15, '#');
       hline(g, 28, 31, 11, '=');
     } },
-  A0: { zone: 'A', w: 34, h: 17, exits: { R: 'A1', L: 'W2' },
+  A0: { zone: 'A', w: 34, h: 17, exits: { R: 'A1' },
     // The waking floor teaches the whole loop, not just the verbs: the machine
     // is what she scratches, the trader is what the scrap it drops is FOR, and
     // the node is where the thinking she is about to need comes from.

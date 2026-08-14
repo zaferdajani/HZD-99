@@ -305,7 +305,14 @@ if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugin
 }
 function inD(n) { return KEYB[n].some(c => keys[c]); }
 function inP(n) { return KEYB[n].some(c => keysP[c]); }
-function clearP() { for (const k in keysP) keysP[k] = 0; }
+function clearP() {
+  for (const k in keysP) keysP[k] = 0;
+  // ...and release the touch taps queued this frame — a tap is not a hold
+  if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.tapRel && TOUCH.tapRel.length) {
+    for (const c2 of TOUCH.tapRel) keys[c2] = 0;
+    TOUCH.tapRel.length = 0;
+  }
+}
 
 // ---------- gamepad rumble -------------------------------------------------
 // Dual-rumble haptics (Chrome/Edge vibrationActuator; hapticActuators pulse

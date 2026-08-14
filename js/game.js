@@ -4215,13 +4215,25 @@ function drawGateWalk() {
   const sc = 1 - 0.72 * e;
   c.save();
   c.globalAlpha = 1 - clamp((k - 0.62) / 0.38, 0, 1);
-  if (player) {
-    // walking toward the gap, whichever side of her it is on
+  // HER AUTHORED BACK. Generated from her own body (see assets/source/ref/ and
+  // ART_QUEUE §1) — the first time the game shows her from behind with real
+  // art rather than a side view scaled down. Two stride frames swap on the
+  // distance she has covered toward the gap, the same ground-driven rule the
+  // wolves walk by, so the walk cannot moonwalk however long the shot runs.
+  if (typeof mediaFetch === 'function') { mediaFetch('heroBackA'); mediaFetch('heroBackB'); }
+  const trav = Math.hypot(x - sx0, y - sy0);
+  const frame = (Math.floor(trav / 26) % 2) ? 'heroBackB' : 'heroBackA';
+  const im = MEDIA_IMG[frame];
+  if (im && im.naturalWidth) {
+    const dh = 92 * sc, dw = dh * (im.naturalWidth / im.naturalHeight);
+    // the gait's vertical, off the same stride counter as the frames
+    const rise = -Math.abs(Math.sin((trav / 26) * Math.PI)) * 2.2 * sc;
+    c.drawImage(im, x - dw / 2, y - dh + rise, dw, dh);
+  } else if (player) {
+    // the plates have not landed: her live body, walking, as before
     const dir = Math.sign(tx - sx0) || 1;
     const vx0 = player.vx, f0 = player.face, fv0 = player.faceVis;
     player.vx = dir * 210; player.face = dir; player.faceVis = dir;
-    // her feet land on (x, y): translate there, scale about that point, then
-    // undo her world position so her own draw lands where we put her
     c.translate(x, y);
     c.scale(sc, sc);
     c.translate(-(player.x + player.w / 2), -(player.y + player.h));
@@ -4904,7 +4916,7 @@ function tutEnter(st) {
 // next to "The gates / the city is still standing, go in" and read as a word
 // nobody asked for. The stick is the thing under the player's left thumb; it
 // does not need naming, it needs POINTING. Direction steps show the arrow.
-const TUT_DIR = { move: '\u2190 \u2192', out: '\u2192', gate: '\u2192', coin: '\u2190 \u2192', go: '\u2192' };
+const TUT_DIR = { move: '\u2190 \u2192', out: '\u2192', gate: '\u2191', coin: '\u2190 \u2192', go: '\u2192' };
 function tutHand(st) {
   if (TUT_DIR[st.id]) return TUT_DIR[st.id];
   if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled) return st.touch;

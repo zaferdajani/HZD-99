@@ -79,6 +79,24 @@ line. Keep the procedural body as the loading fallback only.
 
 ---
 
+## 1b. THE SWORD ARC (owner's design, 2026-08-14) — briefs pending
+
+The sword is GIVEN by the first NPC, not carried from birth: a SINGLE straight
+white-bladed saber first (a short Higgsfield VIDEO of the handover plays). The
+OTHER HALF is buried somewhere secret late-game; reuniting them makes the
+two-ended white-tipped saber — already generated as
+`assets/source/hero/sword_full.jpg` / `assets/characters/hero/sword_full.png` —
+which opens a NEW SKILL TREE ending in the boomerang throw (attack = throw the
+spinning saber, it returns). With the sword: three authored slash light-sheets
+(horizontal, diagonal, directional up / air-down) and Lost Crown-style combos.
+Tasks #79/#80/#81 carry the wiring; the video brief and slash-sheet briefs go
+here when written.
+
+**CANONICAL CHEST, settled:** the owner spotted two chest treatments across the
+sheets — brushed-STEEL plate with the dark vent grille vs an all-white belly.
+The STEEL PLATE + GRILLE (the reference's own chest) is canonical; the unarmed
+front half-turn was regenerated to match, and every future brief must name it.
+
 ## 2. TERRAIN DEPTH — the front layer (task #76)
 
 **Why:** the play plane is flat next to the backdrop. The brief came with a

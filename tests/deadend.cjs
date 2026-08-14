@@ -41,6 +41,12 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
   });
   await browser.close();
 
+  // THE SCRIPTED DOOR. W2 -> A0 is not an exit in the room table — it is the
+  // gate walk (gateEnter), a one-way scripted passage, and the gates close
+  // behind her. The graph analysis needs the edge or the whole city reads as
+  // unreachable from the waking rooms; it is injected here, marked, and the
+  // one-way-ness is BY DESIGN: the opening cannot be re-entered.
+  R.W2 = Object.assign({}, R.W2, { exits: Object.assign({ G: 'A0' }, R.W2.exits) });
   const ids = Object.keys(R);
   const OPP = { L: 'R', R: 'L', T: 'B', B: 'T' };
   let bad = 0;
@@ -64,14 +70,18 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
   if (oneway.length) { console.log('ONE-WAY DOORS:'); oneway.forEach(m => console.log('  ' + m)); bad += oneway.length; }
 
   // --- 3. reachability -----------------------------------------------------
-  const seen = new Set(['A0']), q = ['A0'];
+  // Seeded from the RUN'S start (the cradle), not from the meadow: the game
+  // begins in W1 now, and the scripted gate edge injected above carries the
+  // walk into the city. The opening is one-way by design, so nothing needs to
+  // reach W1 back FROM A0 — what matters is that the start reaches everything.
+  const seen = new Set(['W1']), q = ['W1'];
   while (q.length) {
     const id = q.shift();
     for (const to of Object.values(R[id].exits))
       if (R[to] && !seen.has(to)) { seen.add(to); q.push(to); }
   }
   const orphan = ids.filter(i => !seen.has(i));
-  if (orphan.length) { console.log('UNREACHABLE FROM A0: ' + orphan.join(', ')); bad += orphan.length; }
+  if (orphan.length) { console.log('UNREACHABLE FROM THE START: ' + orphan.join(', ')); bad += orphan.length; }
 
   // --- 3b. NO ROOM MAY BE SMALLER THAN THE WINDOW --------------------------
   // A room narrower than the viewport cannot scroll, so the camera runs out of

@@ -62,7 +62,7 @@ const { chromium } = require('playwright');
   });
 
   check('every take decodes', !m.some(o => o.err), m.filter(o => o.err).map(o => o.k + ' ' + o.err).join(', '));
-  check('the set is complete (15 takes)', m.length === 15, m.length + ' found');
+  check('the set is complete (16 takes)', m.length === 16, m.length + ' found');
 
   console.log('\n  take            len    peak   onset    rms   ch  sr');
   for (const o of m) {

@@ -229,7 +229,17 @@ function tLayout() {
   }
   return L0;
 }
-function tPress(code) { keys[code] = 1; keysP[code] = 1; tBuzz(10); }
+// A TAP IS A PRESS *AND A RELEASE*. tPress set keys[code]=1 and nothing ever
+// cleared it — clearP() only clears keysP — so the first node tapped in a Mind
+// Node stayed "held" forever, and triDir refused every other node as "a second
+// direction still held". Reported exactly so: one press works, the rest are
+// unclickable. Tapped codes are queued and released at end of frame (engine
+// clearP), which is what a tap is.
+function tPress(code) {
+  keys[code] = 1; keysP[code] = 1;
+  (TOUCH.tapRel || (TOUCH.tapRel = [])).push(code);
+  tBuzz(10);
+}
 function tSetK(code, on) {
   if (on && !keys[code]) { keys[code] = 1; keysP[code] = 1; }
   else if (!on) keys[code] = 0;
