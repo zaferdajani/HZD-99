@@ -596,10 +596,19 @@ class Player {
           this.takeoffT = this.takeoff0 = 0.12; this.takeoffCoil = 0;   // launch stretch only
           burst(this.wallSlide > 0 ? this.x + this.w : this.x, this.y + this.h / 2, 6, PAL[G.roomDef.zone].glow, 140, 0.3, 400, 3, true);
         } else if (this.airJumps > 0) {
+          // THE DOUBLE JUMP IS A BACK JET NOW, not a pirouette (owner's call).
+          // She is a robot: the second jump is HARDWARE — the back thruster
+          // lights and shoves her, the same family as the dash boots. boostT
+          // drives the thrust pose and the plume; the spin is retired from
+          // this move (the wall jump keeps its flip, which is a different
+          // gymnastic). Authored back-jet gear plates are queued in
+          // ART_QUEUE §1c; the plume itself is additive light, which is the
+          // one thing the art rules leave procedural (§0.0).
           this.vy = -680; this.airJumps--; this.jbuf = 0;
-          this.jetT = 0.3; this.flipT = FLIP_DUR; sfx('djump');
+          this.jetT = 0.34; this.boostT = 0.3; sfx('djump');
           this.takeoffT = this.takeoff0 = 0.12; this.takeoffCoil = 0;
           burst(this.x + this.w / 2, this.y + this.h, 10, '#8ff6ff', 160, 0.35, 500, 3, true);
+          if (typeof padRumble === 'function') padRumble(0.4, 0.3, 160);
         }
       }
       if (!inD('JUMP') && this.vy < -240) this.vy = -240;
@@ -623,6 +632,7 @@ class Player {
       + (!this.on && this.dashT <= 0 ? clamp(this.vy / 1800, -0.1, 0.16) : 0);
     this.lean = lerp(this.lean, leanT, 1 - Math.pow(0.002, dt));
     this.flipT = Math.max(0, this.flipT - dt);
+    this.boostT = Math.max(0, (this.boostT || 0) - dt);
     this.jetT = Math.max(0, this.jetT - dt);
     this.skidT = Math.max(0, this.skidT - dt);
     if (this.on && dir !== 0 && Math.sign(this.vx) === -dir && Math.abs(this.vx) > 200) {
@@ -1360,7 +1370,13 @@ class Player {
     // reading forward the way anything falling with intent does. Blended by
     // vertical speed so the apex passes through neutral instead of popping.
     let airRot = 0;
-    if (!this.on && this.wallSlide === 0 && this.dashT <= 0 && this.flipT <= 0
+    // THE BOOST POSE: the back jet is shoving her, so the body stretches hard
+    // along the thrust and tips back against it — a rocket, not a dancer.
+    if ((this.boostT || 0) > 0) {
+      const bk = this.boostT / 0.3;
+      sy += 0.20 * bk; sx -= 0.11 * bk;
+      airRot = -0.16 * bk;
+    } else if (!this.on && this.wallSlide === 0 && this.dashT <= 0 && this.flipT <= 0
         && this.landT <= 0 && this.hurtPoseT <= 0) {
       const vk = clamp(this.vy / 760, -1, 1);
       if (vk < 0) { sy += -vk * 0.13; sx -= -vk * 0.08; }   // the rise: drawn long
@@ -2212,6 +2228,30 @@ class Player {
         c.beginPath(); c.moveTo(-0.4, -5); c.lineTo(0, -bl + 4); c.stroke();   // edge highlight
         c.restore();
       }
+    }
+    // THE BACK JET at full burn — the double jump's engine. A single hard
+    // plume from the lower back, angled down and behind her, with shock
+    // diamonds stepped along it: a jet, not a candle. Additive light only —
+    // the authored gear plates for the pack itself are queued (§1c).
+    if ((this.boostT || 0) > 0) {
+      const bk = this.boostT / 0.3;
+      c.save(); c.globalCompositeOperation = 'lighter';
+      c.translate(-9, -14);                      // the pack sits on her lower back
+      c.rotate(0.5);                             // exhaust thrown down-behind
+      const L = 26 + bk * 22 + rnd(-2, 2);
+      const jg = c.createLinearGradient(0, 0, 0, L);
+      jg.addColorStop(0, '#ffffff'); jg.addColorStop(0.25, '#8ff6ff');
+      jg.addColorStop(0.6, '#37ffd0'); jg.addColorStop(1, 'rgba(55,255,208,0)');
+      c.fillStyle = jg; c.globalAlpha = 0.55 + bk * 0.4;
+      c.beginPath(); c.moveTo(-4.5, 0); c.lineTo(4.5, 0); c.lineTo(1.5, L); c.lineTo(-1.5, L); c.closePath(); c.fill();
+      // shock diamonds — the read that says PRESSURE rather than flame
+      c.fillStyle = '#ffffff';
+      for (let q = 1; q <= 3; q++) {
+        const dy2 = q * L * 0.24, w2 = (4.2 - q) * 1.15 * bk;
+        c.globalAlpha = (0.5 - q * 0.12) * bk;
+        c.beginPath(); c.moveTo(0, dy2 - w2); c.lineTo(w2, dy2); c.lineTo(0, dy2 + w2); c.lineTo(-w2, dy2); c.closePath(); c.fill();
+      }
+      c.restore();
     }
     // thruster jets
     if (this.jetT > 0 || (!this.on && this.vy < -140 && this.dashT <= 0)) {

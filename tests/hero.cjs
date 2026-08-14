@@ -48,6 +48,7 @@ const { chromium } = require('playwright');
       { n: 'swing', f: (p) => { p.swing = { t: 0.1, t0: 0.24, combo: 0, ang: -0.3 }; p.swingVis = p.swing; } },
       { n: 'combo2', f: (p) => { p.swing = { t: 0.1, t0: 0.24, combo: 2, ang: 0.4 }; p.swingVis = p.swing; } },
       { n: 'dash', f: (p) => { p.dashT = 0.12; p.vx = 620; } },
+      { n: 'boost', f: (p) => { p.vy = -300; p.on = false; p.boostT = 0.28; } },
       { n: 'skid', f: (p) => { p.vx = 300; p.skidT = 0.2; } },
       { n: 'wallcling', f: (p) => { p.vy = 60; p.on = false; p.wallSlide = 1; } },
       { n: 'song', f: (p) => { p.songT = 0.5; } },
@@ -81,7 +82,7 @@ const { chromium } = require('playwright');
         // still on it. landT in particular gates the airborne pose, so a
         // stale landing made `air` measure as idle in the full suite and pass
         // alone: a flake that was really an incomplete reset.
-        player.landT = 0; player.land0 = 0; player.flipT = 0; player.takeoffT = 0;
+        player.landT = 0; player.land0 = 0; player.flipT = 0; player.boostT = 0; player.takeoffT = 0;
         player.pogoT = 0; player.jetT = 0; player.iT = 0; player.idleT = 0;
         player.face = face; player.faceVis = face; player.anim = 1.2;
         pose.f(player);
@@ -159,7 +160,7 @@ const { chromium } = require('playwright');
     }
     return uni ? inter / uni : 1;
   };
-  const MUST_DIFFER = ['run', 'air', 'fall', 'swing', 'combo2', 'dash', 'skid',
+  const MUST_DIFFER = ['run', 'air', 'fall', 'swing', 'combo2', 'dash', 'boost', 'skid',
                        'wallcling', 'song', 'armfire', 'lowhp', 'charge', 'hurt', 'heal'];
   console.log('    IoU vs idle (must be <= ' + IOU_MAX + '):');
   const same = [];

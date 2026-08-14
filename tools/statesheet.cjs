@@ -20,7 +20,7 @@ const { chromium } = require('playwright');
       ['rise',        p2 => { p2.vy = -420; p2.on = false; p2.takeoffT = 0.1; }],
       ['apex',        p2 => { p2.vy = -20;  p2.on = false; }],
       ['fall',        p2 => { p2.vy = 430;  p2.on = false; }],
-      ['double jump', p2 => { p2.vy = -300; p2.on = false; p2.flipT = 0.22; p2.jetT = 0.3; }],
+      ['double jump', p2 => { p2.vy = -300; p2.on = false; p2.boostT = 0.28; p2.jetT = 0.3; }],
       ['land',        p2 => { p2.landT = 0.10; p2.land0 = 0.12; }],
       ['dash',        p2 => { p2.dashT = 0.12; p2.vx = 640; p2.jetT = 0.2; }],
       ['wall cling',  p2 => { p2.vy = 60; p2.on = false; p2.wallSlide = 1; }],
@@ -56,7 +56,7 @@ const { chromium } = require('playwright');
       player.vx = 0; player.vy = 0; player.on = true; player.dashT = 0; player.swing = null;
       player.swingVis = null; player.hurtT = 0; player.healT = 0; player.songT = 0;
       player.flipT = 0; player.landT = 0; player.jetT = 0; player.skidT = 0;
-      player.chargeT = 0; player.burstT = 0; player.armCD = 0; player.wallSlide = 0;
+      player.chargeT = 0; player.burstT = 0; player.armCD = 0; player.wallSlide = 0; player.boostT = 0;
       player.hurtPoseT = 0; player.takeoffT = 0; player.idleT = 0; player.cores = player.maxCores();
       player.iT = 0; player.anim = 1.35;
       player.face = face; player.faceVis = face;

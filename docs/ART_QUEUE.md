@@ -101,6 +101,50 @@ plate is superseded by the crystal set.
 Tasks #79/#80/#81 carry the wiring; the video brief and slash-sheet briefs go
 here when written.
 
+### 1b-i. THE SLASH LIGHT-SHEETS ✱ FIRE ON REBIND — the single crystal's patterns
+Four plates, 1:1, additive-light style (painted as pure light on black, drawn
+with 'lighter' like the RAKE sheet — brightness IS the alpha). Each is the ARC
+the crystal leaves, alone, no character: a ribbon of pure white light with a
+crystalline faceted edge and a white-hot leading rim, motes shedding off the
+trailing edge.
+  slash_h   a wide flat HORIZONTAL crescent, swept left, thickest mid-stroke
+  slash_d   a DIAGONAL crescent rising left-to-right at ~40°
+  slash_u   a vertical crescent bursting UPWARD, widest overhead
+  slash_dn  a downward-driving crescent with impact splash at its foot (the
+            air-down pogo slash)
+NEGATIVE for all: no character, no sword visible, no green, no text, no
+watermark, no cartoon outline. These become the sword-mode replacements for
+the RAKE arcs; combos re-tint the same four (task #81).
+
+### 1b-ii. REGRIPS + RESCALE ✱ FIRE ON REBIND
+  held_guard, double_guard  regenerate with: "her paw WRAPPED AROUND the hilt,
+    fingers closed over it, the hilt visibly INSIDE the grip" — the first pass
+    overlapped paw and hilt without gripping.
+  thrown  regenerate with: "the weapon LARGE in frame, the same apparent size
+    as when held — a two-ended crystal the length of her whole body, spinning"
+    — the owner caught the thrown plate reading smaller than the held one.
+    (In-engine the scale is set by the renderer, so gameplay never inherits
+    the plate's size; the archive still must not lie about it.)
+
+### 1c. THE BACK JET ✱ FIRE ON REBIND — the double jump is hardware now
+The double jump is a BACK JET THRUST (owner's call; the pirouette is retired —
+wired procedurally already, the plume is additive light per §0.0). Two gear
+plates, same treatment as the thrust boots:
+  jetpack        the pack alone as equipment: a compact dark-steel back unit
+                 with twin ribbed pressure bottles, one down-angled nozzle,
+                 cyan light seams, worn edges — bolted-on, not born-with
+  jetpack_fire   the same pack at FULL BURN, a hard cyan-white plume with
+                 shock diamonds blasting down-behind
+...and one character plate: her mid double-jump from the side, body stretched
+along the thrust, tipped back, the pack firing. Reference mandatory.
+
+### 1d. THE HANDOVER FILM ✱ FIRE ON REBIND (generate_video)
+Short clip for task #79: the first machine-folk trader holds out the single
+purifier crystal sword in both hands; the small robot cat takes it; the
+crystal flares white as her paw closes on it. Style matched to the intro
+films; her identity from the reference plate; end on the white flare (cuts to
+gameplay). ~6-8s.
+
 **CANONICAL CHEST, settled:** the owner spotted two chest treatments across the
 sheets — brushed-STEEL plate with the dark vent grille vs an all-white belly.
 The STEEL PLATE + GRILLE (the reference's own chest) is canonical; the unarmed
