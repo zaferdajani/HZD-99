@@ -478,7 +478,7 @@ class Player {
     // ...and the same hold covers the WAKING: the two seconds in which the
     // cradle lets go of her. A release you can walk out of halfway through is
     // a loading screen with a picture on it.
-    const held = !!G.bossEntry || !!G.wake;
+    const held = !!G.bossEntry || !!G.wake || !!G.gateWalk;
     // MOTHER'S SONG mirrors your inputs for its few seconds — fight it
     const dirRaw = held ? 0 : (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
     const dir = (G.revT || 0) > 0 ? -dirRaw : dirRaw;

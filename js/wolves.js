@@ -91,6 +91,8 @@ function beastPreload(zone) {
 }
 const CHEETAH_ART = {
   rest: { img: 'cheetahRest', k: 2.10, foot: 1 },
+  walkA: { img: 'cheetahWalkA', k: 2.10, foot: 1 },
+  walkB: { img: 'cheetahWalkB', k: 2.10, foot: 1 },
   coil: { img: 'cheetahWarn', k: 2.30, foot: 1 },
   lunge: { img: 'cheetahRun', k: 2.05, foot: 0, yOff: -0.18 },
 };
@@ -103,14 +105,38 @@ const CHEETAH_ART = {
 // the same way is what put the pounce fifteen pixels into the floor.
 const WOLF_ART = {
   rest: { img: 'wolfRest', k: 2.35, foot: 1 },
+  walkA: { img: 'wolfWalkA', k: 2.35, foot: 1 },
+  walkB: { img: 'wolfWalkB', k: 2.35, foot: 1 },
   coil: { img: 'wolfCoil', k: 2.20, foot: 1 },
   lunge: { img: 'wolfLunge', k: 2.15, foot: 0, yOff: -0.22 },
 };
-// which plate a wolf is showing, from the timers the crawler already keeps
+// ---------------------------------------------------------------------------
+// IT WALKS. IT DOES NOT GLIDE.
+//
+// The first cut hung ONE standing plate on the crawler, and the crawler slides:
+// it has no gait, it never had one, its old art was a machine on treads for
+// which sliding is correct. A wolf on treads is exactly what it looked like —
+// an animal skating along the floor with its legs locked — and that is a worse
+// lie than the machine it replaced, because a wolf has legs and you can see
+// them not working.
+//
+// So the cycle is driven by GROUND TRAVELLED, not by a clock. `_stride`
+// accumulates the pixels it has actually covered and the frame is a function of
+// that: at any speed, on any framerate, in slow motion, a paw plants once per
+// STRIDE of floor and the feet never slip. A timed cycle is what produces the
+// moonwalk — the legs run at their own rate while the body moves at another.
+const STRIDE = 30;                          // px of floor per half-step
 function wolfPose(e) {
   if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0 || e.on === false) return 'lunge';
   if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0) return 'coil';
-  return 'rest';
+  // how far it has really moved since the last frame, whatever moved it
+  const px = e._lastX == null ? e.x : e._lastX;
+  e._stride = (e._stride || 0) + Math.abs(e.x - px);
+  e._lastX = e.x;
+  if (Math.abs(e.vx || 0) < 6) return 'rest';       // standing still stands still
+  // contact, passing, contact (mirrored by the other pair), passing — four
+  // beats off two drawings, which is what a two-frame walk cycle is
+  return ((Math.floor(e._stride / STRIDE) % 4) & 1) ? 'walkB' : 'walkA';
 }
 
 // ---------------------------------------------------------------------------
@@ -137,9 +163,15 @@ function drawBeastPlate(c, e, ART, tame) {
 
   const cx = e.x + e.w / 2, footY = e.y + e.h;
   const dh = e.h * A.k, dw = dh * (im.naturalWidth / im.naturalHeight);
+  // A GAIT HAS A VERTICAL. A quadruped's shoulders rise on the passing frame
+  // and drop as the paw plants, so the body oscillates twice per stride — and
+  // a walk cycle without it reads as two pictures being swapped. Locked to the
+  // same stride counter as the frames, so it can never drift out of phase.
+  const gait = (pose === 'walkA' || pose === 'walkB')
+    ? -Math.abs(Math.sin(((e._stride || 0) / STRIDE) * Math.PI)) * 1.6 : 0;
   // grounded plates hang off the floor line; the airborne one hangs off centre
-  const yc = A.foot ? footY - dh / 2 + e.h * (A.yOff || 0)
-                    : e.y + e.h / 2 + dh * (A.yOff || 0);
+  const yc = (A.foot ? footY - dh / 2 + e.h * (A.yOff || 0)
+                     : e.y + e.h / 2 + dh * (A.yOff || 0)) + gait;
 
   c.save();
   c.translate(cx, yc);

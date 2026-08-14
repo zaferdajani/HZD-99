@@ -150,12 +150,15 @@ const { chromium } = require('playwright');
       const ok = await new Promise(r => { im.onload = () => r(1); im.onerror = () => r(0); im.src = src; });
       out.push({ k, ok: !!ok, w: im.naturalWidth });
     }
-    return { out, placed: { W1: !!ROOM_PROP.W1, W2: !!ROOM_PROP.W2 } };
+    // W1's cradle is a PROP standing in the room; W2's gates are the room's own
+    // BACKDROP. Two different jobs, checked as two different things — a
+    // full-frame painting drawn as a prop is the rectangle-with-a-seam bug.
+    return { out, placed: { W1: !!ROOM_PROP.W1, W2: ROOM_VISTA.W2 === 'gateCity' } };
   });
   const bad = props.out.filter(o => o.err || !o.ok);
   check('the cradle and the gates exist and decode', !bad.length,
     bad.map(o => o.k + ' ' + (o.err || 'failed')).join(', '));
-  check('...and both rooms actually place one',
+  check('...the cradle stands in its room and the gates ARE their room\'s horizon',
     props.placed.W1 && props.placed.W2, JSON.stringify(props.placed));
 
   // ---- 5. AND THE WALK ITSELF --------------------------------------------
@@ -186,6 +189,71 @@ const { chromium } = require('playwright');
   });
   check('holding right walks her all the way to the meadow',
     walk.end === 'A0' && !walk.dead, walk.seen.join(' -> ') + (walk.dead ? ' (died)' : ''));
+
+  // ---- 6. THE GATES ARE A DOOR, NOT A PICTURE ----------------------------
+  const doorway = await page.evaluate(async () => {
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
+    startGame(sv); loadRoom('W2');
+    await new Promise(r => requestAnimationFrame(r));
+    // the backdrop, not a prop: a full-frame painting drawn in-world is a
+    // rectangle with a seam down the room, which is what it was
+    const asBackdrop = ROOM_VISTA.W2 === 'gateCity' && !ROOM_PROP.W2;
+    // pressing UP anywhere else must NOT open them
+    player.x = 200; player.y = 444; player.on = true;
+    const farAway = !gateEnter();
+    // ...and at the gates it must
+    player.x = G.roomDef.w * TILE * 0.90 - 12;
+    const opened = gateEnter();
+    let drewBack = false;
+    for (let f = 0; f < 200 && G.gateWalk; f++) {
+      if (G.gateWalk.t > 0.2) drewBack = true;
+      update(1 / 60);
+    }
+    return { asBackdrop, farAway, opened, drewBack, end: G.roomId, x: Math.round(player.x) };
+  });
+  check('the gates are the room\'s backdrop, not a rectangle pasted into it',
+    doorway.asBackdrop);
+  check('pressing up away from the gates does nothing', doorway.farAway);
+  check('pressing up AT the gates walks her in', doorway.opened && doorway.drewBack);
+  check('...and she arrives inside the city, not past the far side of it',
+    doorway.end === 'A0' && doorway.x < 200, doorway.end + ' at x=' + doorway.x);
+
+  // ---- 7. NOTHING GLIDES -------------------------------------------------
+  // The wolves were one still plate on an entity that slides, so they skated
+  // with their legs locked. The cycle is driven by ground travelled, which is
+  // the only version that cannot moonwalk: a paw plants once per stride of
+  // floor at any speed, on any framerate.
+  const gait = await page.evaluate(async () => {
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
+    startGame(sv); loadRoom('A1');
+    await new Promise(r => requestAnimationFrame(r));
+    const e = G.enemies.find(x => isWolf(x));
+    if (!e) return { err: 'no wolf in A1' };
+    const walked = [];
+    for (let f = 0; f < 120; f++) { e.x += 4; e.vx = 240; walked.push(wolfPose(e)); }
+    const still = [];
+    e.vx = 0;
+    for (let f = 0; f < 10; f++) still.push(wolfPose(e));
+    // ...and at HALF the speed it must take twice as long per step, because the
+    // cycle answers to the floor and not to a clock
+    const slow = [];
+    e.vx = 120;
+    for (let f = 0; f < 120; f++) { e.x += 2; slow.push(wolfPose(e)); }
+    const flips = (a2) => { let n = 0; for (let i = 1; i < a2.length; i++) if (a2[i] !== a2[i - 1]) n++; return n; };
+    return { poses: [...new Set(walked)], flipsFast: flips(walked), flipsSlow: flips(slow),
+             still: [...new Set(still)] };
+  });
+  if (gait.err) check('the wolves walk', false, gait.err);
+  else {
+    check('a moving wolf cycles real walk frames',
+      gait.poses.length >= 2 && gait.poses.every(p2 => /^walk/.test(p2)),
+      gait.poses.join(','));
+    check('a standing wolf stands still',
+      gait.still.length === 1 && gait.still[0] === 'rest', gait.still.join(','));
+    check('the gait answers to the FLOOR, not to a clock (half speed = half the steps)',
+      gait.flipsSlow > 0 && Math.abs(gait.flipsFast / gait.flipsSlow - 2) < 0.45,
+      gait.flipsFast + ' steps fast vs ' + gait.flipsSlow + ' slow');
+  }
 
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();

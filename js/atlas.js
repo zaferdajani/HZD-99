@@ -304,7 +304,12 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   // own: yawSpin turns the full turntable (prism), yawScan sweeps like a
   // sentry looking along its arc (turret, archivist).
   let fy;
-  if (o.yawSpin) fy = ((t * o.yawSpin) % 8 + 8) % 8;
+  // THE BACK OF THE SHEET, ON PURPOSE. Columns 5-7 are the angles a
+  // side-scroller must never show by accident — and exactly the ones a scripted
+  // walk AWAY from the camera needs. `col` names one directly, bypassing the
+  // facing maths, and it is the only way into the back hemisphere.
+  if (o.col != null) fy = o.col;
+  else if (o.yawSpin) fy = ((t * o.yawSpin) % 8 + 8) % 8;
   else if (o.yawScan) fy = o.yawScan.c + Math.sin(t * o.yawScan.r) * o.yawScan.a;
   else fy = yawColF(faceVis);
   fy = ((fy % A.cols) + A.cols) % A.cols;

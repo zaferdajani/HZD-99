@@ -55,6 +55,10 @@ const MEDIA_SRC = {
     // pounce happens in the air where a grounded plate cannot go. Rest, coil,
     // lunge — one per phase of the only move it has.
     wolfRest: 'assets/characters/beasts/wolf.png',
+    // ...and the two WALK frames, because a plate that slides is a wolf on
+    // treads. See wolfPose(): the cycle is driven by ground travelled.
+    wolfWalkA: 'assets/characters/beasts/wolf_walka.png',
+    wolfWalkB: 'assets/characters/beasts/wolf_walkb.png',
     wolfCoil: 'assets/characters/beasts/wolf_coil.png',
     wolfLunge: 'assets/characters/beasts/wolf_lunge.png',
     // NINE PLATES FOR THE ALPHA, one per state, because it has five skills and
@@ -103,6 +107,8 @@ const MEDIA_SRC = {
     // No alpha, nothing to tame: these came off the same line as the wolves and
     // whatever was in them is gone. Three plates, same grammar as the wolf.
     cheetahRest: 'assets/characters/beasts/cheetah.png',
+    cheetahWalkA: 'assets/characters/beasts/cheetah_walka.png',
+    cheetahWalkB: 'assets/characters/beasts/cheetah_walkb.png',
     cheetahWarn: 'assets/characters/beasts/cheetah_warn.png',
     cheetahRun: 'assets/characters/beasts/cheetah_run.png',
     // THE LAIRS. One authored prop per guardian, keyed off its generation

@@ -902,6 +902,7 @@ function update(dt) {
       if (typeof updateBrDelta === 'function') updateBrDelta(dt);
       if (typeof updateSpoilQ === 'function') updateSpoilQ(dt);
       if (typeof updateWake === 'function') updateWake(dt);
+      if (typeof updateGateWalk === 'function') updateGateWalk(dt);
       G.enemies = G.enemies.filter(e => !e.dead);
       if (G.boss) G.boss.update(dt);
       for (const p of G.projs) if (!p.dead) p.update(dt);
@@ -946,7 +947,11 @@ function update(dt) {
       for (const p of G.pickups) if (p.dead && p.flagKey) G.save.flags[p.flagKey] = 1;
       G.pickups = G.pickups.filter(p => !p.dead);
       G.near = findNear();
-      if (G.near && (inP('INT') || (inP('UP') && player.on))) doInteract(G.near);
+      // UP AT THE GATES WALKS HER IN. Checked before the ordinary interact, and
+      // only when she is standing on the ground in front of them — pressing up
+      // anywhere else in the room does what it always did.
+      if (player.on && inP('UP') && typeof gateEnter === 'function' && gateEnter()) { /* she is going */ }
+      else if (G.near && (inP('INT') || (inP('UP') && player.on))) doInteract(G.near);
       checkTransitions();
       if (G.winT > 0) {
         G.winT -= dt;
@@ -1741,6 +1746,15 @@ const ZONE_CELL = { A: [0, 0], B: [1, 0], C: [0, 1], D: [1, 1], E: [0, 2], X: [1
 // zones with a dedicated full-frame vista use it; the gloomy atlas cells stay
 // wired underneath for the later stages
 const ZONE_VISTA = { A: 'vistaCity', B: 'vistaCrystal' };
+// ...and a few rooms own the whole horizon rather than borrowing the kingdom's.
+//
+// THE GATES WERE A RECTANGLE. They were drawn as a PROP — a full-frame 16:9
+// render pasted into the room — so the room had a hard vertical seam down it
+// and the backdrop stopped a third of the way from the right, which is exactly
+// what it looked like: a photograph laid on the scene rather than the scene
+// continuing. A full-frame painting is a BACKDROP. It goes where the backdrop
+// goes: behind everything, full bleed, panning with the camera, with no edges.
+const ROOM_VISTA = { W2: 'gateCity' };
 
 // ===========================================================================
 // THE POUR — the Foundry's molten iron, running continuously behind the play.
@@ -2488,7 +2502,20 @@ function purifyPrime(v) {
   if (!v || v._primed) return;
   v._primed = true;
   const pr = v.play();
-  const settle = () => { try { v.pause(); v.currentTime = 0; } catch (e) {} };
+  // THE PRIME MUST NOT PAUSE THE FILM THAT IS ACTUALLY PLAYING.
+  //
+  // Priming is a play() followed by a pause() — the only way to unlock a video
+  // element for later. play() returns a PROMISE, so the pause lands a beat
+  // after the call, and the opening primes all eight clips on the same tap
+  // that then starts the first one. The settle for clip one therefore arrived
+  // AFTER it had begun: pause, rewind to zero. On screen that is a glimpse of
+  // the film and then a stall, and a stalled clip is dropped — which is how
+  // pressing New Game showed a moment of video and went straight to the
+  // difficulty screen.
+  const settle = () => {
+    if (G.cut && G.cut.v === v) return;      // it is the live cut. Leave it alone.
+    try { v.pause(); v.currentTime = 0; } catch (e) {}
+  };
   if (pr && pr.then) pr.then(settle, () => { v._primed = false; });
   else settle();
 }
@@ -2633,6 +2660,12 @@ function updateCut(dt) {
     // reads as the moment before a memory surfaces, never as a stall.
     ct.held += dt;
     if (purifyReady(ct.kind) || ct.held > (ct.patient ? 14 : 4)) {
+      // REWIND ON THE FRAME IT STARTS, not when the cut was created. The seek
+      // requested in startPurifyCut is asynchronous and needs metadata; on a
+      // clip that has been played before, `currentTime` can still be sitting at
+      // the end when play() is called — and the very next check reads
+      // `currentTime >= duration` as "this film is over" and throws it away.
+      try { if (v.currentTime > 0.05) v.currentTime = 0; } catch (e) {}
       const pr = v.play();
       if (pr && pr.catch) pr.catch(() => { if (G.cut) G.cut.failed = true; });
       ct.ph = 'play'; ct.t = 0;
@@ -2645,9 +2678,16 @@ function updateCut(dt) {
     // her stand in the dark — the fight resumes as if the memory never came.
     if (v.currentTime > (ct.lastCT || 0) + 0.01) { ct.lastCT = v.currentTime; ct.stall = 0; ct.ran = true; }
     else ct.stall = (ct.stall || 0) + dt;
+    // A CLIP CANNOT BE OVER IN ITS FIRST QUARTER SECOND. `ended` and the
+    // duration check are both true for a video element parked at the end of a
+    // previous playthrough, and both are read on the frame play() was called —
+    // before the rewind has necessarily taken effect. Giving the clip a beat to
+    // actually start costs nothing and removes a whole class of "the film
+    // played for one frame".
+    const started = ct.t > 0.25;
     const dead = ct.failed || (v.error != null)
-      || (v.ended === true)
-      || (v.duration && v.currentTime >= v.duration - 0.05);
+      || (started && v.ended === true)
+      || (started && v.duration && v.currentTime >= v.duration - 0.05);
     // hard ceiling: a film that never loads or never ends still hands back
     const cap = (v.duration && isFinite(v.duration)) ? v.duration + 2.5 : 12;
     // A STALL IS NOT A VERDICT during the opening. Mid-fight, a film that will
@@ -2818,7 +2858,10 @@ function drawMotes(px, py, t3) {
   c.globalAlpha = 1;
 }
 function drawZoneVista(P, zone, px, py) {
-  const solo = ZONE_VISTA[zone] && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[ZONE_VISTA[zone]];
+  const own = ROOM_VISTA[G.roomId];
+  if (own && typeof mediaFetch === 'function') mediaFetch(own);
+  const solo = (own && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[own])
+    || (ZONE_VISTA[zone] && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[ZONE_VISTA[zone]]);
   const im = solo || (typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.zones);
   const cell = solo ? [0, 0] : ZONE_CELL[zone];
   if (!im || !cell) return false;
@@ -2847,6 +2890,12 @@ function drawZoneVista(P, zone, px, py) {
     const w2 = CW * s2, h2 = CH * s2;
     const cx2 = -(w2 - 960) * (0.5 + (fx - 0.5) * travel) + Math.sin(t3 * 0.17 + sway) * 3.5 * travel;
     const cy2 = -(h2 - 540) * 0.6 - py * vert - (yOff || 0);
+    // WHERE THE PAINTING ACTUALLY LANDED ON SCREEN. Anything that has to line
+    // up with something IN the backdrop — the gap between the city gates, for
+    // one — cannot guess: the plate is scaled to overfill and panned by the
+    // camera, so its rect is only known here. Recorded from the FAR copy,
+    // which is the one the architecture belongs to.
+    if (mul <= 1.001) G._vista = { x: cx2, y: cy2, w: w2, h: h2 };
     x2.drawImage(im, cell[0] * CW, cell[1] * CH, CW, CH, cx2, cy2, w2, h2);
   };
   // when the far plate is the only one, it carries the full travel — the
@@ -3969,7 +4018,9 @@ function floraPlan(id) {
 //   dim  — how far it is pushed back into the room's own colour
 const ROOM_PROP = {
   W1: { key: 'cradle', alt: 'cradleOpen', x: 0.16, k: 6.2, par: 0.90, dim: 0.20 },
-  W2: { key: 'gateCity', x: 0.86, k: 13.0, par: 0.78, dim: 0.10, wide: 1 },
+  // W2's gates are NOT here. They are a full-frame painting, and a full-frame
+  // painting drawn as a prop is a rectangle with a seam down the room — see
+  // ROOM_VISTA, where they belong.
 };
 function drawRoomProp() {
   if (typeof isHero === 'function' && isHero()) return;
@@ -3996,6 +4047,102 @@ function drawRoomProp() {
   if (G.roomId === 'W1' && G.wake && chance(0.6))
     addPart(fx + rnd(-w * 0.2, w * 0.2), fy - rnd(20, h * 0.7),
       rnd(-18, 18), rnd(-40, -12), 0.9, '#aef7d8', 2, -30, true);
+}
+// ===========================================================================
+// WALKING INTO THE CITY.
+//
+// The gates are the destination of the whole opening, and until now arriving
+// meant sliding off the right-hand edge of the room like any other doorway —
+// which is the one thing that would not do, because the gates are the picture
+// the walk was built toward. You press UP at them and she GOES IN: turns her
+// back on the camera, walks into the gap between the doors, and gets smaller.
+//
+// The back view is not new art. `roster_8yaw.png` row 0 is a full eight-angle
+// turnaround of her that has been in the repo, generated and archived and
+// never drawn, since the beginning — the one honest gap in the art record (see
+// assets/source/README.md). Columns 5-7 are the back hemisphere, the angles a
+// side-scroller must never show by accident. This is the moment they are for.
+// `gx`/`gy` are where the gap between the doors sits INSIDE the painting, as a
+// fraction of it — so the vanishing point follows the backdrop wherever the
+// camera has panned it to, instead of being a screen position that only lines
+// up from one spot in the room.
+const GATE_ROOM = { W2: { at: 0.90, to: 'A0', gx: 0.472, gy: 0.93 } };
+function gateTarget(G2) {
+  const v = G._vista;
+  if (!v) return { x: 960 * 0.5, y: 540 * 0.72 };
+  return { x: v.x + v.w * G2.gx, y: v.y + v.h * G2.gy };
+}
+function gateHere() {
+  const G2 = GATE_ROOM[G.roomId];
+  if (!G2 || !player) return null;
+  const x = G.roomDef.w * TILE * G2.at;
+  return Math.abs(player.x + player.w / 2 - x) < 90 ? G2 : null;
+}
+function gateEnter() {
+  const G2 = gateHere();
+  if (!G2 || G.gateWalk) return false;
+  // the vanishing point: the gap between the doors, in SCREEN space, since the
+  // gates are the room's backdrop and the backdrop does not scroll with the
+  // tiles (see ROOM_VISTA)
+  G.gateWalk = { t: 0, to: G2.to, x0: player.x + player.w / 2, y0: player.y + player.h, def: G2 };
+  sfx('ui');
+  if (typeof hzdSay === 'function') hzdSay('purr', 0);
+  return true;
+}
+const GATE_WALK = 2.2;
+function updateGateWalk(dt) {
+  const g = G.gateWalk; if (!g) return;
+  g.t += dt;
+  if (g.t >= GATE_WALK) {
+    G.gateWalk = null;
+    loadRoom(g.to);
+    // AND SHE COMES OUT OF THE OTHER SIDE OF THE GATE. loadRoom keeps whatever
+    // x she had, and she had the far right of a wider room — which put her past
+    // the right edge of the meadow and bounced her straight through it into the
+    // next room. Walking in through the gates has to arrive INSIDE the city.
+    if (player) {
+      player.x = 40; player.vx = 0; player.vy = 0;
+      player.face = player.faceVis = 1;
+      player.lastSafe = { x: player.x, y: player.y };
+    }
+  }
+}
+function drawGateWalk() {
+  const g = G.gateWalk; if (!g) return;
+  const k = clamp(g.t / GATE_WALK, 0, 1);
+  // she walks into the gap and away: position lerps toward the vanishing point
+  // in SCREEN space, scale falls off, and the last third fades to black so the
+  // room change lands on darkness rather than on a cut
+  const e = k * k * (3 - 2 * k);
+  const sx0 = g.x0 - camSX(), sy0 = g.y0 - camSY();
+  const tg = gateTarget(g.def);
+  const tx = tg.x, ty = tg.y;
+  const x = sx0 + (tx - sx0) * e, y = sy0 + (ty - sy0) * e;
+  const sc = 1 - 0.72 * e;
+  c.save();
+  c.globalAlpha = 1 - clamp((k - 0.62) / 0.38, 0, 1);
+  // her own authored back angle, walking. `col: 6` is 270 degrees — straight
+  // away from camera — and `mode: 'walk'` gives it the gait the sheet cannot.
+  const drewHer = typeof drawAtlas === 'function' && drawAtlas(c, 'hzd', 0, x, y, 36 * sc, {
+    col: 6, mode: 'walk', t: g.t * 2.4, vx: 120, grounded: false,
+  });
+  if (!drewHer) {
+    // the sheet has not landed: a silhouette walking away is still the shot
+    c.globalAlpha *= 0.9;
+    c.fillStyle = '#0a1014';
+    c.beginPath(); c.ellipse(x, y - 18 * sc, 11 * sc, 18 * sc, 0, 0, 7); c.fill();
+  }
+  c.restore();
+  // and the light from inside the gate reaches out for her
+  c.save(); c.globalCompositeOperation = 'lighter';
+  c.globalAlpha = 0.10 + e * 0.30;
+  const gg = c.createRadialGradient(tx, ty - 60, 8, tx, ty - 60, 260);
+  gg.addColorStop(0, 'rgba(255,214,138,0.9)'); gg.addColorStop(1, 'rgba(255,190,90,0)');
+  c.fillStyle = gg; c.beginPath(); c.arc(tx, ty - 60, 260, 0, 7); c.fill();
+  c.restore();
+  // ...and the world dims behind her as she leaves it
+  c.fillStyle = 'rgba(0,0,0,' + (clamp((k - 0.55) / 0.45, 0, 1) * 0.96).toFixed(3) + ')';
+  c.fillRect(0, 0, 960, 540);
 }
 // ---------------------------------------------------------------------------
 // THE WAKING. Two seconds in which she cannot do anything, on purpose.
@@ -4654,7 +4801,16 @@ function tutEnter(st) {
     if (typeof tBuzz === 'function') tBuzz(60);
   }
 }
+// WHAT THE CHIP SAYS, AND WHY IT STOPPED SAYING "stick".
+//
+// The chip names the control this player actually has in their hands, and for
+// the walking steps that was the literal string `stick` — which on a phone sat
+// next to "The gates / the city is still standing, go in" and read as a word
+// nobody asked for. The stick is the thing under the player's left thumb; it
+// does not need naming, it needs POINTING. Direction steps show the arrow.
+const TUT_DIR = { move: '\u2190 \u2192', out: '\u2192', gate: '\u2192', coin: '\u2190 \u2192', go: '\u2192' };
 function tutHand(st) {
+  if (TUT_DIR[st.id]) return TUT_DIR[st.id];
   if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled) return st.touch;
   if (typeof PAD !== 'undefined' && PAD && PAD.on) return st.pad;
   return st.keys;
@@ -5392,7 +5548,11 @@ function drawWorldFrame() {
   }
   // the character herself, post-grade: full pigment, no bloom wash. Her own
   // emissive accents (visor, jets, claws) still glow via their shadowBlur.
-  if (player && !G.recharge) {
+  // ...and NOT while she is walking into the gates. drawGateWalk draws her
+  // from behind, in screen space, shrinking toward the gap; leaving the live
+  // body on as well put two of her on screen at once — the one going in, and
+  // the one standing where she left.
+  if (player && !G.recharge && !G.gateWalk) {
     c.save();
     c.translate(-Math.round(camSX()), -Math.round(camSY()));
     player.draw(c);
@@ -6094,6 +6254,7 @@ function draw(tms) {
   }
   if (typeof drawBrDelta === 'function') drawBrDelta();
   drawTutor();
+  if (typeof drawGateWalk === 'function') drawGateWalk();
   drawLesson();
   drawHUD();
   drawMapButton();
