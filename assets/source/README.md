@@ -157,10 +157,12 @@ Two things the canon plate does NOT govern, and both are deliberate:
 blade glow, the jets, the charge aura and the claw arcs stay simulated and are
 drawn OVER these plates. What ends is the procedural BODY.
 
-**Not yet wired.** These plates are archived and reviewed, not yet on screen —
-`media.js` still fetches only the back-walk pair and the grounded sword. Wiring
-is tasks #79/#80/#81. Until then the procedural body remains what ships, which
-is why the honest record above matters more than the good news.
+**What is on screen, and what is not.** The art the game actually draws today —
+both 8-yaw turnaround sheets, the two back-walk pairs and the grounded sword —
+IS locked to the canon and has been replaced. The action plates in `hero/` are
+archived and reviewed but NOT yet wired: `media.js` fetches only the back-walk
+plates and the sword, and `Player.draw()` is still procedural. Wiring the action
+set is tasks #79/#80/#81. Until then the procedural body remains what ships.
 
 ---
 

@@ -100,11 +100,45 @@ frame) · §1c back-jet gear ×2 + her jet double-jump plate · `canon_front.jpg
 the neutral standing plate. The 12 green-blade plates and `sword_full.jpg` are
 DELETED, not superseded-in-place.
 
-STILL TO FIRE: §1d the handover video · **the two 8-yaw turnarounds, which are
-the last art still carrying the two-cats defect and are WIRED** · the opening
-film shots that show her (she wakes offline and rises — owner's instruction is
-that these are remade against the canon) · the armed-with-crystal variants of
-the action set, when sword mode needs them on screen.
+### CLOSING THE LOCK (2026-08-14, session B, second pass) — §1 IS FIRED
+The wired art is now locked too, and this is the part that actually changed
+what is on screen:
+- **Both 8-yaw turnarounds rebuilt** from matched half-turn strips —
+  `hzd_8yaw.png` (crystal on her back) and `hzd_8yaw_bare.png`. The two-cats
+  defect is gone; so is the black ground line the old bare sheet carried under
+  columns 4–7.
+- **The back-walk pairs and the ground sword re-fired and re-keyed** — these are
+  what the gate walk and the pickup actually draw.
+- **The green `sword_full.png` deleted**: orphan art, referenced by nothing.
+- **Films:** `intro7` (she sits offline, never wired to the Song) and `intro8`
+  (she wakes and goes) re-shot against the canon element — the old `intro8` was
+  a visibly DIFFERENT cat with square green eyes and green body markings. Plus
+  `sword_gift.mp4`, the §1d handover, ready for task #79.
+
+**Three warnings for whoever fires the next batch:**
+1. **"Pure black background" is not enough.** Two strips came back on WHITE
+   despite the negative. What worked on the third try was describing the
+   LIGHTING SITUATION instead: *"photographed in a pitch-dark room, no backdrop,
+   no floor, four spotlights pick out the figures and nothing else receives any
+   light."* A background colour reads as a style token; a dark room reads as a
+   scene.
+2. **Do NOT white-key her.** `blackkey.cjs --white` on a white-field plate of
+   her eats the ear tips and DELETES the white crystal blade outright — a white
+   subject cannot be keyed off a white field. Re-fire instead.
+3. **Say "bright and even exposure" on BOTH halves of a turnaround.** The first
+   armed pair came back with a bright front and a dark back, and the seam lands
+   exactly where `herosheet.cjs` joins them — which undoes the world-fixed key
+   light that makes a turn read as a volume.
+
+STILL TO FIRE: the armed-with-crystal variants of the action set, when sword
+mode needs them on screen · `intro7.webm` / `intro8.webm` (see below).
+
+**One honest gap.** This container has no ffmpeg, so the two re-shot intro
+clips ship as mp4 ONLY — their stale `.webm` siblings were DELETED rather than
+left to serve the old cat to any browser that prefers webm. `build.cjs` handles
+a missing alt fine. Re-encode them wherever ffmpeg exists. And this container's
+Chromium has no H.264, so **the three films were never watched by the machine
+that made them** — they are unverified by measurement, unlike every plate here.
 
 ### 1a. The turnaround — 8 yaw angles, one prompt each  ✅ DONE (both variants)
 `hzd_yaw0 … hzd_yaw7`: 0° (facing screen-right), 45°, 90° (facing camera),
