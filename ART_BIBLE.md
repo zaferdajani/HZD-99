@@ -170,12 +170,30 @@ needed angles" is the ruling, and it is the right one.
 
 **So she is authored now, like everything else, on these terms:**
 
-- **Generated FROM her, never from a description of her.**
-  `assets/source/ref/hzd99_body.png` (three facings of the live body, rendered
-  from the game) is the mandatory reference on every plate. This is the guard
-  against the stranger-cat incident: `roster_8yaw.png` row 0 already IS a
-  generated turnaround of a *different* robot cat, it went on screen once, and
-  it must never be mistaken for her again.
+- **Generated FROM one locked plate, never from a description of her.**
+  ✅ **The canon is `assets/source/ref/hzd99_canon.jpg`**, chosen by the owner on
+  2026-08-14, and it is bound to the generator as the reference element
+  `hzd99-canon` = `467c8e08-8161-483f-a4cf-439875ff04e2`. **Every plate, every
+  sheet and every VIDEO of her embeds `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`
+  in its prompt.** Not "attaches a reference" — embeds the element.
+
+  This replaced attaching `hzd99_body.png` and describing her in words, and the
+  reason is measured rather than argued: with prose plus a loose reference, the
+  front half and back half of the SAME turnaround sheet came back as two
+  different cats — different ears, different head size, the scarf grown into a
+  cape. Both shipped sheets have it. A description cannot pin geometry; the same
+  image injected into every generation can.
+
+  This is also the standing guard against the stranger-cat incident:
+  `roster_8yaw.png` row 0 IS a generated turnaround of a *different* robot cat,
+  it went on screen once, and a stale element named `NYA-9` describing yet
+  another cat still sits in the generator workspace. Neither is her.
+
+- **The canon plate governs body, face, materials and proportions ONLY.** It
+  carries the retired green blade, and that licenses nothing: the weapon is the
+  white purifier crystal (elements `purifier-crystal` /`purifier-double`) or she
+  is unarmed. Her chest is the canon plate's WHITE/IVORY belly with the dark
+  vent grille — this reversed an earlier "brushed steel is canonical" ruling.
 - **The arm rule survives the conversion.** One-piece limbs, two of them, no
   joint hardware — stated in every brief's negatives. A generator loves to add
   greebles at the elbow; the brief forbids them by name.

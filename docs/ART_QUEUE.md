@@ -58,19 +58,53 @@ the server's own turnaround workflow outranks a hand-rolled batch.
 steel, cyan/mint emissive accents, key light fixed to the WORLD upper-left in
 every plate (the turnaround rule — a turn must read as a volume rotating).
 
-### STATUS LEDGER (2026-08-14, session A) — do not regenerate what is done
-DONE, committed, in assets/: armed 8-yaw (hzd_8yaw.png) · unarmed 8-yaw with
-canonical chest (hzd_8yaw_bare.png) · back-walk pairs armed+unarmed (wired
-into the gate walk) · 12 armed action plates archived in assets/source/hero/
-(runA/runB/rise/fall/djump/land/dash/skid/claw/finisher/charge/hurt — note
-these carry the OLD green blade; regenerate only when the crystal versions are
-actually needed on screen) · the full crystal weapon set (assets/source/
-crystal/, 8 plates).
-STILL TO FIRE: §1b-i slash light-sheets ×4 · §1b-ii regrips ×2 + thrown
-rescale ×1 · §1c back-jet gear ×3 (the double jump is ALREADY a jet in code —
-the plates are the gear art) · §1d handover video · the unarmed SIDE action
-set for the opening (idle/walk/run pairs, unarmed) · apex, burst, heal kneel,
-the Song, low-health slump, wall cling.
+### THE IDENTITY LOCK (owner, 2026-08-14, session B) — read before firing anything
+The owner stopped the queue to say the obvious thing: **every sheet was a
+different cat.** He was right, and it was not one bad plate — it was structural.
+The two committed 8-yaw sheets each contain TWO cats, because `herosheet.cjs`
+stitches a front half-turn and a back half-turn that were generated
+INDEPENDENTLY: ear shape, head size and cape length all change across the seam.
+The action plates drifted the same way against each other.
+
+**The cause:** prose plus a loose reference image does not pin geometry. Every
+plate was an independent roll.
+
+**The fix, now mandatory:** the owner named `assets/source/ref/hzd99_canon.jpg`
+as canon. It is registered as the generator's reference element `hzd99-canon`
+= `467c8e08-8161-483f-a4cf-439875ff04e2`, and **every future plate, sheet and
+VIDEO of her must embed `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>` in its
+prompt.** The weapon has the same treatment: `purifier-crystal` =
+`d0a03e79-2887-4bcd-a209-11732c6754ef`, `purifier-double` =
+`bf160a06-9e42-46d0-a9f1-bc7c5dd1fcb5`.
+
+Two consequences of the canon plate, both settled:
+- **CHEST, INVERTED.** The canon plate has a WHITE/IVORY belly with the dark
+  vent grille. The earlier ruling that the brushed-STEEL chest plate was
+  canonical is **reversed** — the owner picked the white belly, and every brief
+  must now name that.
+- **The canon plate carries the old GREEN blade. It does not license green.**
+  The lock covers body, face, materials and proportions ONLY; the weapon is the
+  white crystal or nothing.
+- **Retire the stale element.** The workspace still holds a hero element named
+  `NYA-9` describing a *different* cat ("scuffed white and grey plating"). Never
+  use it.
+
+### STATUS LEDGER (2026-08-14, session B)
+DONE and locked to canon, in `assets/source/`: the unarmed SIDE action set in
+TRUE profile (idle/walk_a/walk_b/run_a/run_b) · the six missing states (apex,
+burst, heal, song, slump, wall_cling) · the full former-green action set
+regenerated unarmed (rise, fall, land, dash, skid, claw_1, claw_2, finisher,
+charge, hurt) · §1b-i slash light-sheets ×4 · §1b-ii regrips ×2 + thrown rescale
+(all three fixed: the paws now close ON the hilt, the thrown crystal fills its
+frame) · §1c back-jet gear ×2 + her jet double-jump plate · `canon_front.jpg`,
+the neutral standing plate. The 12 green-blade plates and `sword_full.jpg` are
+DELETED, not superseded-in-place.
+
+STILL TO FIRE: §1d the handover video · **the two 8-yaw turnarounds, which are
+the last art still carrying the two-cats defect and are WIRED** · the opening
+film shots that show her (she wakes offline and rises — owner's instruction is
+that these are remade against the canon) · the armed-with-crystal variants of
+the action set, when sword mode needs them on screen.
 
 ### 1a. The turnaround — 8 yaw angles, one prompt each  ✅ DONE (both variants)
 `hzd_yaw0 … hzd_yaw7`: 0° (facing screen-right), 45°, 90° (facing camera),

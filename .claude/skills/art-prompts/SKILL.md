@@ -17,15 +17,17 @@ result in the running game.
 
 ## 0. First decide whether to generate at all
 
-Generation is right for **authored sprite rigs** and wrong for two things:
+Generation is right for **authored sprite rigs** and wrong for one thing:
 
-- **Procedurally drawn characters.** HZD-99 is drawn live — IK arms, scarf
-  physics, the spiral flip. A generated sprite body cannot do any of that, so it
-  trades animation for fidelity. Fix her by *lighting* her instead; see
-  `game-character-art`.
 - **Pure additive glow.** Lava rings, halo rings, lit core states. Handed to a
   model they come back as beautifully lit solid objects, which is the wrong
   thing rendered well. The compositor blends them as light, not as objects.
+
+**HZD-99 used to be the other exception and is not any more** (owner, 2026-08-14):
+her body is authored now, and only the scarf, glow, jets, aura and claw arcs
+stay procedural, drawn over the plates. Generate her — but never freehand: every
+plate of her embeds the canon element
+`<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`. See ART_BIBLE.md §2.
 
 Ask: *does the renderer treat this as an object or as light?* Only generate
 objects.
