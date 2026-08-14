@@ -23,6 +23,7 @@ look at to answer "did that actually happen".
 | `mother/` | MOTHER-V, the Null Core | 16 |
 | `lairs/` | The six boss lairs, as generated | 6 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
+| `beasts/` | The wolf line and the cheetah line, generated | 7 |
 | `_sheets/` | Contact sheets and before/after comparisons | 17 |
 
 `beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the
@@ -45,6 +46,14 @@ is the evidence — coil, launch, rise, apex, fall and strike are the SAME
 standing drawing at slightly different scales, which is what "the way it jumps
 does not show a full motion of a lion jumping" looks like when you stop
 believing the code comments and photograph it.
+
+`beasts/` is the animal bestiary the owner asked for: electronic WOLVES to
+replace the small lions as zone A's first enemy (stand / lunge / coil), the WOLF
+PACK ALPHA that is tamed rather than destroyed, the same Alpha again with the
+virus gone and its light turned from red to warm gold, and the electronic
+CHEETAH line for the later kingdoms (stand / sprint / wind-up) which has no
+alpha and is simply killed. Generated and archived here; the wiring is the next
+piece of work, not this commit's claim.
 
 `eye/` is the five mini-bosses, two plates each — at rest and wound up. They
 were procedural line art first, on the argument that they are "geometry and
