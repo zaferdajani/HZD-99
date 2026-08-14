@@ -20,7 +20,14 @@ look at to answer "did that actually happen".
 | `furnace/` | FURNACE CHOIR | 14 |
 | `glaciere/` | GLACIERE, the Frozen Purifier | 11 |
 | `mother/` | MOTHER-V, the Null Core | 16 |
-| `_sheets/` | Contact sheets and before/after comparisons | 11 |
+| `_sheets/` | Contact sheets and before/after comparisons | 13 |
+
+`_sheets/lion_leap_before.jpg` and `lion_leap_after.jpg` are `tools/leapshot.cjs`
+output: NULLFANG's pounce laid out beat by beat, before and after. The "before"
+is the evidence — coil, launch, rise, apex, fall and strike are the SAME
+standing drawing at slightly different scales, which is what "the way it jumps
+does not show a full motion of a lion jumping" looks like when you stop
+believing the code comments and photograph it.
 
 `_sheets/rake_before.jpg` and `rake_after.jpg` are not generated art — they are
 `tools/slashshot.cjs` output, the claw rake photographed in the four states it

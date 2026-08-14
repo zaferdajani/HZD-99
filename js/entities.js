@@ -4580,7 +4580,19 @@ class Boss {
             this.swipeCD = rnd(1.5, 2.4);
           }
           else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(5.5, 7); }
-          else if (this.t <= 0 && adist > 170 && adist < 470) { this.st = 'crouch'; this.t = 0.45; this.vx = 0; }
+          else if (this.t <= 0 && adist > 170 && adist < 470) {
+            // THE COIL IS SHORTER NOW BECAUSE IT SAYS MORE. It ran 0.45 s, and
+            // for all that time the picture on screen was a standing lion —
+            // the only thing carrying the warning WAS the length, and a warning
+            // that long against one dodge is a move you beat by waiting. The
+            // coil is a real wind-up now (beastCoil): the hindquarters sink
+            // through three stages, the forelegs brace, the tail goes rigid a
+            // beat before launch. That reads in a third of a second, which is
+            // the tier a pounce belongs in — TELL_FAST, the same budget PRISM's
+            // dash gets — and it is still above the reaction floor.
+            this.st = 'crouch'; this.t = this.phase === 2 ? 0.26 : TELL_FAST;
+            this.vx = 0;
+          }
           else if (this.t <= 0) this.t = rnd(1.1, 1.9);
         } else if (this.st === 'swipewarn') {
           // the paw rises — that is your tell
@@ -4616,7 +4628,13 @@ class Boss {
           if (this.t <= 0) {
             this.st = 'pounce';
             this.face = Math.sign(dist) || 1;
-            this.vx = clamp(dist * 1.6, -640, 640) * (this.phase === 2 ? 1.15 : 1) * spd;
+            // AND IT LEADS HER. Aiming at where she is standing makes one
+            // sidestep the whole answer — you can beat it without moving your
+            // feet until the launch. Aiming at where she is GOING means the
+            // dodge has to be a real change of direction, which is the fight
+            // this move was always supposed to be.
+            const lead = dist + (player.vx || 0) * (this.phase === 2 ? 0.26 : 0.18);
+            this.vx = clamp(lead * 1.6, -680, 680) * (this.phase === 2 ? 1.15 : 1) * spd;
             this.vy = -(420 + Math.min(260, adist * 0.5));
             sfx('dash');
             // launch kickback: the hind paws throw dirt out behind the leap
@@ -4823,7 +4841,9 @@ class Boss {
             if (this.nullSeq > 0) { this.st = 'nullhop'; this.t = 0.16; }
             else { this.st = 'nullend'; this.t = 1.15; }
           } else {
-            this.st = 'recover'; this.t = this.phase === 2 ? 0.32 : 0.42;
+            // the punish window: long enough for the three-hit combo, not for
+            // three of them
+            this.st = 'recover'; this.t = this.phase === 2 ? 0.26 : 0.36;
           }
         }
         if (this.st === 'stalk' && (col.l || col.r)) this.face *= -1;

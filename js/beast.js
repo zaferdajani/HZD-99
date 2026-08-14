@@ -304,6 +304,106 @@ function bLeg(c, up, lo, ax, ay, a1, a2, kneeY, dark) {
 
 // pose fields: bob, pitch, crouch, neckA, headA, legs [f near, b near, f far, b far]
 // each {a1, a2}, tailA base wave, glow 0..1, slump 0..1 (death)
+// ===========================================================================
+// THE LEAP. A cat jumping is a MOTION, not a picture.
+//
+// Every beat of this pounce used to draw the same authored still — the standing
+// side view — squashed a little on the coil and stretched a little in the air.
+// Laid out frame by frame (tools/leapshot.cjs) it is unmistakable: a rigid lion
+// sliding along a parabola. Nothing coils, nothing extends, nothing reaches,
+// nothing lands. That is what "it does not show a full motion of a lion
+// jumping" is, and no amount of extra artwork fixes it, because the missing
+// thing is the frames BETWEEN the poses.
+//
+// So the leap is driven through the parts rig instead — the same restyled 3D
+// head, mane, body, four two-segment legs and tail the stalk and the landing
+// already use, and which already look far better than the still they were being
+// replaced by. Four beats, blended by where the body actually is in its arc:
+//
+//   COIL    hindquarters loaded and folded, forelegs braced, chest low, head
+//           level and locked on. The spring is visibly wound.
+//   DRIVE   hind legs snap straight back off the ground, forelegs fold up under
+//           the chest, nose up, tail streaming. This is the beat that was
+//           missing entirely and it is the one that sells the power.
+//   EXTEND  the flying cat: forelegs thrown forward claws-first, hind legs
+//           trailing straight out behind, spine long, level.
+//   REACH   nose down at the target, forepaws down and open, hind legs swinging
+//           forward under the hips to take the landing.
+//
+// Leg convention (see bLeg): a1 rotates the upper segment at the hip/shoulder,
+// a2 folds the knee. Negative a1 is forward. legs = [f near, b near, f far, b far].
+// ---------------------------------------------------------------------------
+// THE NUMBERS ARE BIG ON PURPOSE. The first pass of this used angles around a
+// third of these and the sheet came back with a lion that was merely tilted:
+// the legs are short next to the body mass, so a quarter-radian of hip does not
+// change the silhouette at all. A leap is read almost entirely from the
+// silhouette, so the pose has to commit — nose up nearly thirty degrees on the
+// drive, forelegs a full radian forward at the stretch, hind legs straight out
+// behind. Anything less and it is a standing cat on a slope.
+// AND THE SIGNS ARE THE OTHER WAY ROUND, which cost a round to find. The
+// authored figure faces LEFT, so a positive body rotation lifts the NOSE, and a
+// positive hip angle swings a leg FORWARD. The first version had both backwards
+// — it dived on the launch, reared on the strike, and drove with its forelegs.
+// (The pounce pose that was already in here, and never reached the screen, had
+// them backwards too. Two wrongs agreeing is not evidence.)
+const BEAST_LEAP = {
+  // pitch, front {a1,a2}, hind {a1,a2}, neck, head, tailUp, tailA, crouch
+  // DRIVE: nose up, forelegs folded up under the chest, hind legs straight back
+  drive:  { p: 0.46, f: [0.62, -1.05], h: [-1.28, -0.04], n: -0.26, hd: -0.20, tu: 0.45, ta: 0.34, c: -6 },
+  // EXTEND: the flying cat — forelegs thrown forward, hind trailing straight out
+  extend: { p: 0.14, f: [1.35, -0.22], h: [-1.18, -0.08], n: -0.22, hd: -0.06, tu: 0.78, ta: 0.14, c: -10 },
+  // REACH: nose down at her, forepaws open and leading, hind swinging under
+  reach:  { p: -0.46, f: [1.02, 0.32], h: [0.28, -0.98], n: 0.02, hd: 0.30, tu: 0.72, ta: -0.30, c: -4 },
+};
+function beastLerpLeap(A, B, k) {
+  const m = (a, b2) => a + (b2 - a) * k;
+  return {
+    p: m(A.p, B.p), n: m(A.n, B.n), hd: m(A.hd, B.hd),
+    tu: m(A.tu, B.tu), ta: m(A.ta, B.ta), c: m(A.c, B.c),
+    f: [m(A.f[0], B.f[0]), m(A.f[1], B.f[1])],
+    h: [m(A.h[0], B.h[0]), m(A.h[1], B.h[1])],
+  };
+}
+function beastLeap(P, b, t) {
+  const vy = b.vy || 0;
+  // where in the arc: 1 driving up, 0 at the top, 1 falling. The blend runs
+  // DRIVE -> EXTEND on the way up and EXTEND -> REACH on the way down, so the
+  // pose is a continuous function of the body's own motion and can never be
+  // out of step with it.
+  const up = Math.max(0, Math.min(1, -vy / 430));
+  const dn = Math.max(0, Math.min(1, vy / 430));
+  const K = vy < 0 ? beastLerpLeap(BEAST_LEAP.extend, BEAST_LEAP.drive, up)
+                   : beastLerpLeap(BEAST_LEAP.extend, BEAST_LEAP.reach, dn);
+  P.pitch = K.p; P.bob = 0; P.crouch = K.c;
+  P.neckA = K.n; P.headA = K.hd;
+  // the far pair trails the near pair very slightly, so the four legs do not
+  // read as two — the same trick the gallop uses
+  P.legs[0] = { a1: K.f[0], a2: K.f[1] };
+  P.legs[2] = { a1: K.f[0] + 0.10, a2: K.f[1] - 0.06 };
+  P.legs[1] = { a1: K.h[0], a2: K.h[1] };
+  P.legs[3] = { a1: K.h[0] - 0.09, a2: K.h[1] + 0.05 };
+  P.tailUp = K.tu; P.tailA = K.ta + Math.sin(t * 9) * 0.06;
+  P.glow = 1.15 + up * 0.25;
+}
+// THE COIL, which is also the tell. `k` runs 0 (settling) to 1 (about to go).
+function beastCoil(P, b, t, k, deep) {
+  const e = k * k * (3 - 2 * k);
+  P.crouch = 4 + (deep ? 34 : 26) * e;
+  P.pitch = -0.02 - 0.05 * e;
+  // forelegs BRACE: planted and straightening as the weight goes back
+  P.legs[0] = { a1: -0.22 - 0.20 * e, a2: 0.14 + 0.18 * e };
+  P.legs[2] = { a1: -0.18 - 0.20 * e, a2: 0.12 + 0.18 * e };
+  // hindquarters LOAD: hips fold hard under, the spring winding visibly
+  P.legs[1] = { a1: 0.48 + (deep ? 0.66 : 0.52) * e, a2: -0.62 - (deep ? 0.80 : 0.66) * e };
+  P.legs[3] = { a1: 0.44 + (deep ? 0.66 : 0.52) * e, a2: -0.58 - (deep ? 0.80 : 0.66) * e };
+  // the head comes LEVEL and forward — eyes locked, the last thing to move
+  P.neckA = -0.04 - 0.16 * e; P.headA = 0.12 - 0.20 * e;
+  // the tail lashes, then goes rigid and low a beat before the launch
+  const rigid = Math.max(0, (e - 0.62) / 0.38);
+  P.tailUp = -0.55 - 0.35 * e;
+  P.tailA = Math.sin(t * 11) * 0.30 * (1 - rigid) - 0.10 * rigid;
+  P.glow = 1.05 + e * 0.45;
+}
 function beastPose(b) {
   const t = b.anim, st = b.st;
   const P = {
@@ -479,11 +579,15 @@ function beastPose(b) {
     P.neckA = 0.04 * e; P.headA = 0.1 * e;
     P.glow = 1.4; P.tailA = -0.25 * e;
   } else if (st === 'spring' || st === 'dive') {
-    // airborne leap: forelegs reaching, hindlegs driving
-    P.pitch = st === 'dive' ? 0.3 : -0.22; P.bob = 0;
-    P.legs[0] = P.legs[2] = { a1: -0.7, a2: 0.5 };
-    P.legs[1] = P.legs[3] = { a1: 0.65, a2: -0.45 };
-    P.glow = 1.3; P.tailUp = 0.8; P.tailA = 0.3;
+    // the ambush leap off a gantry is the same motion — it just starts higher
+    beastLeap(P, b, t);
+  } else if (st === 'crouch') {
+    beastCoil(P, b, t, 1 - Math.max(0, Math.min(1, (b.t || 0) / (b.phase === 2 ? 0.26 : 0.35))), false);
+  } else if (st === 'springwarn') {
+    beastCoil(P, b, t, 1 - Math.max(0, Math.min(1, (b.t || 0) / 0.42)), false);
+  } else if (st === 'nullhop') {
+    // gravity is off and it knows: the same coil, wound past what a spine should
+    beastCoil(P, b, t, 1, true);
   } else if (st === 'perch') {
     // poised on the ledge — and the TAIL-LASH: a slow flat-topped draw one
     // way, a fast whip back, the cat deciding to kill
@@ -518,13 +622,7 @@ function beastPose(b) {
     P.legs.forEach(l => { l.a1 -= 0.06 * rq; });
     P.tailA = 0.12 + rq * 0.1; P.tailUp = -0.6;
   } else if (st === 'pounce') {
-    // pounce: forelegs reach, hindlegs drive, nose follows the arc
-    const dive = Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400));
-    P.pitch = dive; P.bob = 0;
-    P.legs[0] = P.legs[2] = { a1: -0.75, a2: 0.55 };
-    P.legs[1] = P.legs[3] = { a1: 0.7, a2: -0.5 };
-    P.neckA = -0.12; P.headA = dive * 0.6; P.glow = 1;
-    P.tailA = 0.4; P.tailUp = 0.9;
+    beastLeap(P, b, t);
   } else if (Math.abs(b.vx || 0) > 40) gallop(8, 0.22);
   return P;
 }
@@ -672,30 +770,17 @@ function drawBeast(c, b) {
       // staggered by the Song: cowering low, trembling
       BEAST_LIVE.glow = 0.35;
       bFig(c, 'aAtk', 0, 2.2);
-    } else if (b.st === 'pounce' && !b.dead) {
-      // the authored pounce riding the arc — STRETCHED past 1.0 on the
-      // launch drive, relaxing and spreading again as it tops out and drops
-      const dive = Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400));
+    // THE WHOLE LEAP USED TO BE INTERCEPTED HERE and handed to `aAtk` — the
+    // authored standing side view — squashed on the coil, stretched in the air.
+    // Six different beats, one drawing. It is the rig's job now (beastLeap /
+    // beastCoil): the same restyled 3D parts the stalk and the landing already
+    // use, posed through a motion instead of scaled through one. The body
+    // stretch stays, applied to the rig, because a leap wants the smear.
+    } else if ((b.st === 'pounce' || b.st === 'spring' || b.st === 'dive') && !b.dead) {
       const up = Math.max(0, Math.min(0.55, -(b.vy || 0) / 1000));
       const dn = Math.max(0, Math.min(0.5, (b.vy || 0) / 1000));
-      BEAST_LIVE.glow = 1.25;
-      bFig(c, 'aAtk', dive, 0, 1 - up * 0.16 + dn * 0.08, 1 + up * 0.26 - dn * 0.06);
-    } else if ((b.st === 'springwarn' || (b.st === 'perch' && (b.t || 0) <= 0.45)) && !b.dead) {
-      // the flattened crouch figure IS the tell, on the ground or the ledge
-      BEAST_LIVE.glow = 1.15;
-      bFig(c, 'aAtk', 0, 1.8, 1.04, 0.95);
-    } else if (b.st === 'crouch' && !b.dead) {
-      // the pounce anticipation: the sheet's own crouch, COMPRESSING in two
-      // beats — a slow settle, then one extra hard coil right before launch
-      const ck = 1 - Math.max(0, Math.min(1, (b.t || 0) / 0.45));
-      const beat2 = Math.max(0, Math.min(1, (ck - 0.72) / 0.28));
-      const cmp = ck * ck * 0.5 + beat2 * beat2 * (3 - 2 * beat2) * 0.5;
-      BEAST_LIVE.glow = 1.1 + cmp * 0.4;
-      bFig(c, 'aAtk', 0, 1.6, 1 + 0.09 * cmp, 1 - 0.14 * cmp);
-    } else if (b.st === 'nullhop' && !b.dead) {
-      // NULL GRAVITY coil: the same authored crouch, wound tighter
-      BEAST_LIVE.glow = 1.5;
-      bFig(c, 'aAtk', 0, 2.6, 1.1, 0.87);
+      c.scale(1 - up * 0.10 + dn * 0.05, 1 + up * 0.16 - dn * 0.04);
+      beastDraw(c, b, beastPose(b));
     } else if (b.st === 'nullend' && !b.dead) {
       // the field's collapse dropped it flat — sprawled and spent
       BEAST_LIVE.glow = 0.5;
