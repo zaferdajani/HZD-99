@@ -39,6 +39,7 @@ const SUITE = [
   ['tap',       'tap where a thing is drawn and that thing happens'],
   ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
   ['daze',      'a group of hits breaks NULLFANG open, pays out, closes, and cannot be held'],
+  ['artbible',  'ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor'],
 ];
 
 const want = process.argv.slice(2);

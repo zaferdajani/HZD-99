@@ -98,6 +98,24 @@ Two rules learned the hard way:
 - Keep the loop allocation-light: reuse scratch canvases, cap particle counts.
 - Comments explain **why**, especially why something is not the obvious way.
 
+## Characters and their art — read `ART_BIBLE.md` first
+
+Every character is one of four classes (live-drawn protagonist, parts-rig
+guardian, atlas creature, standing NPC) and the class decides everything else.
+All authored character art is generated through **Higgsfield**; if the connector
+looks unavailable, the bible's §0 has the diagnostic procedure and it is not
+"tell the user to toggle it".
+
+The rules that can be measured **are** measured, by `tests/artbible.cjs`:
+silhouettes must differ between states, wind-ups must raise the telegraph amber
+above that guardian's own rest, feet must be on the floor, and declared art must
+actually be drawn. If that harness is green the bible was followed — which is
+the point of it being a test and not a document.
+
+`G.artProbe` is the one measurement hook in the game: it suppresses
+ground-anchored decoration so the harness measures feet rather than the
+shockwave under them. New ground FX must respect it.
+
 ## Testing
 
 Harnesses in `tests/` drive the real build in a real browser. They exist

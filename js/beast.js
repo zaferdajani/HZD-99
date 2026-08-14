@@ -996,7 +996,10 @@ function beastPose(b) {
     // (pitch is small on purpose: c.rotate is clockwise and the figure faces
     // left, so POSITIVE pitch drops the nose. A fifth of a radian tipped the
     // whole animal onto its face and swung the tail through the floor.)
-    P.crouch = 20 + 30 * shake; P.pitch = 0.03 + 0.05 * shake;
+    // 50 px of sag against ~40 px of leg fold put the paws 20 px through the
+    // floor — measured, not guessed (tests/artbible.cjs, §3.4). The sag is the
+    // part that gives, because the splay is what says "buckling".
+    P.crouch = 16 + 22 * shake; P.pitch = 0.03 + 0.05 * shake;
     // the neck swings; the skull lags the neck by a beat, which is what makes
     // a shake look like weight rather than like a metronome. The head also
     // HANGS — a constant droop the swing oscillates around.
@@ -1009,7 +1012,10 @@ function beastPose(b) {
     P.legs[1] = { a1: -0.30 * shake, a2: -0.86 * shake };
     P.legs[3] = { a1: -0.38 * shake, a2: -0.80 * shake };
     P.bob = Math.sin(t * 23) * 3.4 * shake;
-    P.tailUp = -0.55 - 0.25 * shake; P.tailA = Math.sin(t * 5) * 0.10 * shake;
+    // and the tail comes UP, not down: at -0.80 its spade hung below the paws
+    // and was the lowest thing on the animal, which is what the ground check
+    // was actually reporting
+    P.tailUp = -0.30 - 0.14 * shake; P.tailA = Math.sin(t * 5) * 0.10 * shake;
     // the veins gutter instead of burning: this is the one state where the
     // virus light is LOSING, and it is the read the free-hit window rests on
     P.glow = 0.16 + Math.max(0, Math.sin(t * 13)) * 0.14 * shake;
@@ -1211,7 +1217,7 @@ function drawBeast(c, b) {
       // wind-up is half over throws away the half that matters most
       BEAST_LIVE.charge = 0.32 + 0.68 * k;
       beastDraw(c, b, beastPose(b));
-      beastCoilFx(c, b, k);
+      if (!G.artProbe) beastCoilFx(c, b, k);   // see G.artProbe in entities.js
       // THE FLASH. The last beat before it goes: one white pop over the whole
       // animal, so the cue to move is a single unmissable event rather than a
       // ramp the eye can sit through. It fires with just over a fifth of a
@@ -1255,7 +1261,7 @@ function drawBeast(c, b) {
       // broken open: the head shakes itself, the veins gutter, and it does not
       // defend. See the entities-side state — this branch only draws it.
       beastDraw(c, b, beastPose(b));
-      beastDazeFx(c, b);
+      if (!G.artProbe) beastDazeFx(c, b);      // see G.artProbe in entities.js
     } else if (b.st === 'nullend' && !b.dead) {
       // the field's collapse dropped it flat — sprawled and spent
       BEAST_LIVE.glow = 0.5;

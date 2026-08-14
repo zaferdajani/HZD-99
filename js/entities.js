@@ -6234,6 +6234,53 @@ class Boss {
     let a = 1;
     if (this.purified && (this.pureT || 0) < 0.7) a *= clamp((this.pureT || 0) / 0.7 + 0.15, 0.15, 1);
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
+    // THE TELEGRAPH WASH, and it lives HERE rather than in each guardian's own
+    // file on purpose. TELL_ST has fired the warning SOUND for every boss since
+    // it was written; the matching visual was left to each guardian to
+    // implement, and tests/artbible.cjs measured the result: NULLFANG's coil
+    // reaches 31% amber against a 0% rest, but GLACIERE's lance wind-up sits at
+    // 0.0% — no warning colour at all — and FURNACE CHOIR's fire-lob wind-up is
+    // actually DIMMER in amber than her own idle, because she is a fire dragon
+    // and her rest state already lives in that hue.
+    //
+    // So the floor is structural: any state whose NAME says a blow is coming
+    // gets a rising amber bloom behind the animal and a hot ring at its feet,
+    // for every guardian that exists and every guardian added later. It sits
+    // BEHIND the body — a wash in front would be the pasted badge ART_BIBLE.md
+    // §3.5 forbids — and it is a floor, not a ceiling: a guardian that lerps
+    // its own veins toward the amber (see NULLFANG's beastCoilFx) reads better,
+    // and should.
+    // (G.artProbe is the one measurement hook in this file. tests/artbible.cjs
+    // checks that a guardian's FEET are on the floor, and ground-anchored
+    // effects — this ring, a charge bead, a shockwave — are lit pixels below
+    // the foot line that are not feet. Suppressing decoration for the probe is
+    // honest; teaching the probe to guess which bright pixels are anatomy is
+    // not. Nothing in the game ever sets it.)
+    if (!this.dead && !G.artProbe && this.st && TELL_ST.test(this.st)) {
+      // ramp over the wind-up's own length, so the bloom grows as the blow
+      // approaches instead of switching on
+      const dur = Math.max(0.18, this._tellDur || (this._tellDur = Math.max(0.18, this.t || 0.4)));
+      const k = clamp(1 - (this.t || 0) / dur, 0, 1);
+      const e = Math.pow(k, 0.62);              // §3.6 — lit from the first frame
+      const bx = this.cx(), by = this.y + this.h * 0.55, R = Math.max(this.w, this.h) * 1.5;
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      const gg = c.createRadialGradient(bx, by, 4, bx, by, R);
+      const al = 0.16 + e * 0.30 + Math.sin((this.anim || 0) * 14) * 0.04 * e;
+      gg.addColorStop(0, 'rgba(255,232,168,' + Math.min(0.7, al) + ')');
+      gg.addColorStop(0.42, 'rgba(255,194,74,' + al * 0.6 + ')');
+      gg.addColorStop(1, 'rgba(255,150,40,0)');
+      c.fillStyle = gg;
+      c.beginPath(); c.ellipse(bx, by, R, R * 0.86, 0, 0, 7); c.fill();
+      // and the floor under it takes the light — the one place a wind-up is
+      // always visible even when the animal itself is off the top of the screen
+      c.strokeStyle = 'rgba(255,206,116,' + (0.22 + e * 0.5) + ')';
+      c.lineWidth = 2 + e * 3;
+      c.beginPath();
+      c.ellipse(bx, this.y + this.h - 2, this.w * (0.6 + e * 0.5), 9 + e * 6, 0, 0, 7);
+      c.stroke();
+      c.restore();
+    } else this._tellDur = 0;
     // A REACTION HAS TO HAPPEN IN THE CREATURE. Particles thrown around a
     // motionless body read as an effect played AT it; the bend is what turns a
     // poke into an answer. Rides inside the save above, so every early return
