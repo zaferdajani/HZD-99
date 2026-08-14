@@ -81,14 +81,23 @@ line. Keep the procedural body as the loading fallback only.
 
 ## 1b. THE SWORD ARC (owner's design, 2026-08-14) — briefs pending
 
-The sword is GIVEN by the first NPC, not carried from birth: a SINGLE straight
-white-bladed saber first (a short Higgsfield VIDEO of the handover plays). The
-OTHER HALF is buried somewhere secret late-game; reuniting them makes the
-two-ended white-tipped saber — already generated as
-`assets/source/hero/sword_full.jpg` / `assets/characters/hero/sword_full.png` —
-which opens a NEW SKILL TREE ending in the boomerang throw (attack = throw the
-spinning saber, it returns). With the sword: three authored slash light-sheets
-(horizontal, diagonal, directional up / air-down) and Lost Crown-style combos.
+The weapon is a PURIFIER WHITE CRYSTAL shaped like a sword (owner's final
+form): translucent faceted white crystal blade, dark-steel hilt, gold pommel
+ring that is a visible CONNECTOR. It is the instrument that DISINFECTS the
+sages when fought — the purification fork and the weapon are the same object,
+which is the story doing its own mechanics.
+
+The first NPC GIVES it to her (a short Higgsfield VIDEO of the handover
+plays). The OTHER HALF is buried somewhere secret late-game; the two pommel
+connectors LOCK into the double-ended purifier crystal, which opens a NEW
+SKILL TREE ending in the boomerang throw (attack = throw the spinning crystal,
+it returns). With the sword: three authored slash light-sheets (horizontal,
+diagonal, directional up / air-down) and Lost Crown-style combos.
+
+Full crystal art set fired 2026-08-14: single alone, reunited alone, held
+(guard + horizontal slash), double held (staff guard + spin), thrown (weapon
+spinning boomerang + her follow-through). The earlier green-blade sword_full
+plate is superseded by the crystal set.
 Tasks #79/#80/#81 carry the wiring; the video brief and slash-sheet briefs go
 here when written.
 
