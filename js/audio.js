@@ -636,6 +636,13 @@ const HZDVOX = {
   djump: [['hzd_djump', 0.30]], land: [['hzd_land', 0.26]],
   heal: [['hzd_heal', 0.5]], evo: [['hzd_evo', 0.6]],
   win: [['hzd_win', 0.6]], purr: [['hzd_purr', 0.45]],
+  // THE CHARGE, and it is a different KIND of vocal from everything above it.
+  // Every other bark is an event — one syllable on one frame. This one is a
+  // STATE: she holds a note for as long as she holds the button, and the note
+  // is the thing that tells you the move is still building. `charge` is the
+  // held vowel, `release` is what she spends it on.
+  charge: [['hzd_charge', 0.42]],
+  release: [['hzd_release', 0.55]],
 };
 // One gate for the whole voice: two barks on the same frame is a stutter, and
 // a bark every frame of a held dash is a nuisance. 90 ms is shorter than any

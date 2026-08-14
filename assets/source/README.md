@@ -24,6 +24,8 @@ look at to answer "did that actually happen".
 | `lairs/` | The six boss lairs, as generated | 6 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
 | `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line | 16 |
+| `flora/` | Alien plant life, two species per kingdom | 12 |
+| `gear/` | Thrust boots and the save pod, dormant + active | 4 |
 | `_sheets/` | Contact sheets and before/after comparisons | 17 |
 
 `beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the
@@ -146,3 +148,29 @@ and it should be made openly.
 
 Any generated asset is committed here **in the same commit that uses it**. If it
 is not in this directory, it did not happen.
+
+---
+
+## The world she walks through
+
+`flora/` is the alien plant life, two species per kingdom, generated in 3D on
+the same terms as the bestiary. Every room in the game was mineral before this —
+tiles, girders, spikes, a vista — so nothing in the world was ALIVE except the
+things trying to kill you, and a corridor read as a corridor rather than as a
+place. Some of them are robotic (the scrap-meadow bloom is a satellite dish
+grown on a spine of scavenged vertebrae; the conduit reed is a fibre-optic
+bundle with data visibly climbing it), some are mineral (the ice spindles, the
+prism lily), and exactly one — the deep lantern in zone E — is grown rather than
+assembled, which is the point being made about that kingdom.
+
+They are DRESSING and hold no collision: a plant that can hurt you is a trap,
+and traps live in the trap system where the player can be taught about them.
+Where they grow is hashed off the room's name and cached, never rolled — a
+plant that moves when you walk back through a door is worse than no plant.
+
+`gear/` is the hardware:
+
+| plate | what it is |
+|---|---|
+| `boots` / `boots_fire` | THE THRUST BOOTS. She is a machine, so the dash is a bolt-on, not a talent she discovers. The firing plate is drawn along the dash vector at her feet — the procedural cone was always there, the boots making it were not |
+| `pod` / `pod_on` | THE SAVE POD, at the size a save point deserves. It was thirty pixels of procedural tube; it is a horseshoe cradle on anti-vibration feet with a beacon mast, servicing arms and pressure tanks, standing four tiles tall. Dormant and awake are two plates, so stepping in is a state change and not a tint |

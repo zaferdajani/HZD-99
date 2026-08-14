@@ -70,6 +70,29 @@ const MEDIA_SRC = {
     alphaRecoil: 'assets/characters/beasts/alpha_recoil.png', // landed a hit — kicks back
     alphaTurn: 'assets/characters/beasts/alpha_turn.png',   // missed — spins to face her
     alphaFree: 'assets/characters/beasts/alpha_free.png',   // after it yields
+    // THE FLORA. Two species per kingdom, generated in 3D and keyed off black,
+    // so a room reads as somewhere that GROWS things rather than as a corridor
+    // with a vista behind it. Fetched when she walks into the zone, never at
+    // boot — see floraPreload().
+    floraA1: 'assets/characters/flora/a1.png',   // scrap-meadow bloom
+    floraA2: 'assets/characters/flora/a2.png',   // cable creeper
+    floraB1: 'assets/characters/flora/b1.png',   // conduit reed
+    floraB2: 'assets/characters/flora/b2.png',   // conduit fan
+    floraC1: 'assets/characters/flora/c1.png',   // foundry torch
+    floraC2: 'assets/characters/flora/c2.png',   // ember-grass
+    floraD1: 'assets/characters/flora/d1.png',   // archive frond
+    floraD2: 'assets/characters/flora/d2.png',   // ice spindle
+    floraE1: 'assets/characters/flora/e1.png',   // deep lantern
+    floraE2: 'assets/characters/flora/e2.png',   // deep coral
+    floraX1: 'assets/characters/flora/x1.png',   // prism lily
+    floraX2: 'assets/characters/flora/x2.png',   // prism thicket
+    // THE THRUST BOOTS. The dash is a bolt-on, and this is the bolt-on: idle,
+    // and at full burn under her while she crosses the gap.
+    bootsIdle: 'assets/characters/gear/boots.png',
+    bootsFire: 'assets/characters/gear/boots_fire.png',
+    // THE SAVE POD, at the size a save point deserves. Dormant, and awake.
+    pod: 'assets/characters/gear/pod.png',
+    podOn: 'assets/characters/gear/pod_on.png',
     // THE LAIRS. One authored prop per guardian, keyed off its generation
     // plate's black field by tools/blackkey.cjs, so each has real alpha and
     // occludes the room properly. Lazy like everything else: a lair is only
@@ -174,6 +197,10 @@ const MEDIA_SRC = {
     hzd_evo: 'assets/sfx/vox/hzd_evo.wav',
     hzd_win: 'assets/sfx/vox/hzd_win2.wav',
     hzd_purr: 'assets/sfx/vox/hzd_purr2.wav',
+    // the long press: a held note while the burst builds, and the shout she
+    // spends it on
+    hzd_charge: 'assets/sfx/vox/hzd_charge.wav',
+    hzd_release: 'assets/sfx/vox/hzd_release.wav',
     vox_win: 'assets/sfx/vox/win.ogg',
     vox_purr: 'assets/sfx/vox/purr.ogg',
     vox_roar_beast: 'assets/sfx/vox/roar_beast.ogg',

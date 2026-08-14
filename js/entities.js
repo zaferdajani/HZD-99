@@ -688,6 +688,19 @@ class Player {
       // is a move you never learn. It runs DULL: no rising ladder, sparse cold
       // particles, and the price said out loud the first time she asks for it.
       this.chargeOk = this.volts >= BURST_VOLTS;
+      // SHE HOLDS A NOTE WHILE IT BUILDS. Every other bark in the game is an
+      // event — one syllable on one frame — but a charge is a STATE, and the
+      // thing the player needs to hear is that it is still going. So the vocal
+      // starts once, a beat in, and is not re-triggered: the rising tick ladder
+      // is the clock, her voice is the effort under it.
+      //
+      // Only when she can PAY. The refusal path is deliberately dull (see
+      // below) and a hero straining for a move she cannot afford is exactly the
+      // promise-that-isn't this whole branch was rewritten to stop making.
+      if (this.chargeT > 0.14 && !this.chargeVoxed && this.chargeOk) {
+        this.chargeVoxed = true;
+        if (typeof hzdSay === 'function') hzdSay('charge', 0);
+      }
       if (this.chargeT > 0.25) {
         this.chargeTick -= dt;
         if (this.chargeTick <= 0) {
@@ -713,10 +726,16 @@ class Player {
       // resource decision now, and it is in the controls screen where it can
       // be found on purpose instead of by accident.
       if (this.chargeT >= 0.6) {
-        if (this.volts >= BURST_VOLTS) { this.volts -= BURST_VOLTS; this.releaseCharged(); }
-        else { sfx('no'); this.chargeT = 0; }
+        if (this.volts >= BURST_VOLTS) {
+          this.volts -= BURST_VOLTS;
+          // the held note ends in a shout — the one place her voice is allowed
+          // to sit ON TOP of the impact rather than under it, because this is
+          // the move the whole charge was for
+          if (typeof hzdSay === 'function') hzdSay('release', 0);
+          this.releaseCharged();
+        } else { sfx('no'); this.chargeT = 0; }
       }
-      this.chargeT = 0;
+      this.chargeT = 0; this.chargeVoxed = false;
     }
     if (this.swingVis) { this.swingVis.t -= dt; if (this.swingVis.t <= 0) { this.swingVis = null; this._rake = null; } }
     // heal
@@ -2326,6 +2345,8 @@ class Player {
     // FIREDASH — combustion-engine exhaust: white-hot core at the feet,
     // conical flame body fading behind, shock diamonds and shine flashes
     if (this.dashT > 0) {
+      // the hardware first, under its own light — see drawThrustBoots()
+      if (typeof drawThrustBoots === 'function') drawThrustBoots(c, this);
       const dvx = this.dashVX || this.face * 900, dvy = this.dashVY || 0;
       const dn = Math.hypot(dvx, dvy) || 1;
       const ex = -dvx / dn, ey = -dvy / dn;          // exhaust direction (backwards)

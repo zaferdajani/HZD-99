@@ -62,7 +62,7 @@ const { chromium } = require('playwright');
   });
 
   check('every take decodes', !m.some(o => o.err), m.filter(o => o.err).map(o => o.k + ' ' + o.err).join(', '));
-  check('the set is complete (13 takes)', m.length === 13, m.length + ' found');
+  check('the set is complete (15 takes)', m.length === 15, m.length + ' found');
 
   console.log('\n  take            len    peak   onset    rms   ch  sr');
   for (const o of m) {
@@ -86,6 +86,15 @@ const { chromium } = require('playwright');
   const longs = combat.filter(o => o.sec > 1.0);
   check('combat barks are short enough to not overlap (<= 1.0 s)',
     !longs.length, longs.map(o => o.k + ' ' + o.sec + 's').join(', '));
+  // THE CHARGE IS THE ONE TAKE ALLOWED TO BE LONG, and it has to be: the burst
+  // takes 0.6 s to build and the note has to still be going when it lands, or
+  // the voice stops before the move does and the hold reads as having failed.
+  const ch = good.find(o => o.k === 'hzd_charge');
+  check('the charge note outlasts the charge itself (>= 0.6 s)',
+    !!ch && ch.sec >= 0.6, ch ? ch.sec + 's vs 0.6 s of hold' : 'missing');
+  const rel = good.find(o => o.k === 'hzd_release');
+  check('...and there is a shout to spend it on', !!rel && rel.rms > 0.02,
+    rel ? rel.sec + 's' : 'missing');
   const stereo = good.filter(o => o.ch !== 1);
   check('all mono — a positional bark in stereo fights the mix',
     !stereo.length, stereo.map(o => o.k).join(', '));

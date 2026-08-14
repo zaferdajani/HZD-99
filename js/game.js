@@ -430,6 +430,10 @@ function loadRoom(id) {
     }
   }
   if (typeof purifyPreloadNear === 'function') purifyPreloadNear(id);
+  // the kingdom's own flora, fetched on arrival rather than at boot — twelve
+  // plates nobody in zone A will ever look at is twelve plates a phone should
+  // not be downloading to get to the first room
+  if (typeof floraPreload === 'function') floraPreload(ROOMS[id] && ROOMS[id].zone);
   if (player) player.oathUsed = false;      // the lion owes her once per room
   G.save.visited[id] = 1;
   tileDirty = true;
@@ -3875,6 +3879,144 @@ function drawLair() {
   c.fillRect(x0 - 4, y0 - 4, w + 8, h + 8);
   c.restore();
 }
+// ===========================================================================
+// THE FLORA — what actually grows in each kingdom.
+//
+// Every room in the game was mineral: tiles, girders, spikes, a vista behind
+// it. Nothing LIVED in the world except the things trying to kill you, which
+// is what makes a corridor read as a corridor rather than as a place. Each
+// kingdom now has two species of its own, generated in 3D on the same terms as
+// the bestiary (ART_BIBLE.md §3.2) and rooted along the floor.
+//
+// They are DRESSING, not level geometry: no collision, no damage, nothing to
+// learn. That is deliberate — a plant that can hurt you is a trap, and traps
+// belong to the trap system where the player can be taught about them. These
+// are here to answer "where am I", and the answer is different in every zone.
+//
+//   k   — how many TILES tall the plant stands
+//   par — parallax factor; under 1 it sits behind the play plane and drifts
+//   dim — how far it is pushed back into the room's own colour
+const FLORA = {
+  A: [{ key: 'floraA1', k: 3.4, par: 0.94, dim: 0.30 },   // scrap-meadow bloom
+      { key: 'floraA2', k: 1.7, par: 0.97, dim: 0.22 }],  // cable creeper
+  B: [{ key: 'floraB1', k: 3.8, par: 0.94, dim: 0.32 },   // conduit reed
+      { key: 'floraB2', k: 1.8, par: 0.97, dim: 0.24 }],  // conduit fan
+  C: [{ key: 'floraC1', k: 2.9, par: 0.94, dim: 0.28 },   // foundry torch
+      { key: 'floraC2', k: 1.9, par: 0.97, dim: 0.22 }],  // ember-grass
+  D: [{ key: 'floraD1', k: 3.2, par: 0.94, dim: 0.30 },   // archive frond
+      { key: 'floraD2', k: 2.4, par: 0.97, dim: 0.24 }],  // ice spindle
+  E: [{ key: 'floraE1', k: 3.4, par: 0.94, dim: 0.32 },   // deep lantern
+      { key: 'floraE2', k: 2.2, par: 0.97, dim: 0.26 }],  // deep coral
+  X: [{ key: 'floraX1', k: 3.0, par: 0.94, dim: 0.28 },   // prism lily
+      { key: 'floraX2', k: 1.8, par: 0.97, dim: 0.22 }],  // prism thicket
+};
+// WHERE THEY GROW, decided once per room and never again.
+//
+// Hashed off the room id rather than rolled: a plant that moves when you walk
+// back through a door is worse than no plant at all, and Math.random() in a
+// draw call would do exactly that. Same room, same garden, every visit, on
+// every platform — which is also the only version of this that RULE ONE can be
+// true of, since the phone and the web page must draw the same picture.
+const FLORA_CACHE = {};
+function floraPlan(id) {
+  if (FLORA_CACHE[id]) return FLORA_CACHE[id];
+  const def = ROOMS[id], set = FLORA[def && def.zone];
+  const out = [];
+  if (!def || !set) return (FLORA_CACHE[id] = out);
+  const g = buildRoom(id);
+  // a cheap deterministic stream seeded on the room's name
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = Math.imul(h, 16777619); }
+  const rnd2 = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 100000) / 100000; };
+  // one plant per stretch of floor, spaced so they never overlap each other
+  const W = def.w;
+  for (let x = 2; x < W - 2; x += 3 + Math.floor(rnd2() * 4)) {
+    if (rnd2() > 0.42) continue;                       // most gaps stay empty
+    // find the topmost solid tile in this column that has open air above it —
+    // a plant rooted in a ceiling, or buried inside a girder, is the tell that
+    // this was placed by arithmetic and not by a gardener
+    let gy = -1;
+    for (let y = 1; y < def.h - 1; y++) {
+      const here = g[y] && g[y][x], above = g[y - 1] && g[y - 1][x];
+      if ((here === '#' || here === '=') && (above === '.' || above === undefined)) { gy = y; break; }
+    }
+    if (gy < 2) continue;
+    const s = set[rnd2() < 0.42 ? 0 : 1];              // the tall one is rarer
+    out.push({ s, x: (x + 0.5) * TILE, y: gy * TILE,
+               flip: rnd2() < 0.5, sc: 0.82 + rnd2() * 0.36, ph: rnd2() * 6.283 });
+  }
+  return (FLORA_CACHE[id] = out);
+}
+function drawFlora() {
+  if (typeof isHero === 'function' && isHero()) return;   // the Odyssey has its own world
+  const plan = floraPlan(G.roomId);
+  if (!plan.length) return;
+  const zone = G.roomDef.zone, far = (PAL[zone] || {}).far || '#0b0d11';
+  const now = performance.now() / 1000;
+  for (const p of plan) {
+    const im = MEDIA_IMG[p.s.key];
+    if (!im || !im.naturalWidth) continue;
+    const h = p.s.k * TILE * p.sc, w = h * (im.naturalWidth / im.naturalHeight);
+    c.save();
+    c.translate(camSX() * (1 - p.s.par), camSY() * (1 - p.s.par));
+    // a slow sway, phase-offset per plant. Tiny — 0.02 rad — because a garden
+    // where every stalk swings in step reads as a screensaver.
+    c.translate(p.x, p.y);
+    c.rotate(Math.sin(now * 0.5 + p.ph) * 0.02);
+    if (p.flip) c.scale(-1, 1);
+    c.globalAlpha = 1 - p.s.dim;
+    c.drawImage(im, -w / 2, -h, w, h);
+    c.globalAlpha = p.s.dim * 0.55;
+    c.globalCompositeOperation = 'source-atop';
+    c.fillStyle = far;
+    c.fillRect(-w / 2 - 2, -h - 2, w + 4, h + 4);
+    c.restore();
+  }
+}
+// only fetch a kingdom's flora when she is standing in it
+function floraPreload(zone) {
+  const set = FLORA[zone];
+  if (!set || typeof mediaFetch !== 'function') return;
+  for (const s of set) mediaFetch(s.key);
+}
+// ===========================================================================
+// THE THRUST BOOTS — the hardware that explains the dash.
+//
+// She is a MACHINE, and a machine does not one day discover it can cross a gap
+// in a straight line at nine hundred pixels a second. It gets fitted for it.
+// The dash has always been NULLFANG's grant; these are the thing that grant
+// actually is, and until now the game showed the exhaust of a pair of boots
+// that did not exist.
+//
+// They are drawn during the DASH and only during the dash, which is not a
+// compromise — it is where the gear is doing something. Her legs are IK-solved
+// and her run cycle is procedural, so a static boot plate stapled to a moving
+// foot reads as a sticker; a boot plate aligned to the dash VECTOR, at the
+// moment both feet are locked together and pointing the same way, reads as the
+// machine it is. The authored plate carries its own exhaust, so it sits over
+// the procedural cone rather than replacing it: the cone is the light in the
+// room, the plate is the hardware making it.
+function drawThrustBoots(c, p) {
+  if (typeof isHero === 'function' && isHero()) return;
+  const im = MEDIA_IMG.bootsFire;
+  if (!im || !im.naturalWidth) { if (typeof mediaFetch === 'function') mediaFetch('bootsFire'); return; }
+  const dvx = p.dashVX || p.face * 900, dvy = p.dashVY || 0;
+  const dn = Math.hypot(dvx, dvy) || 1;
+  // the plate is authored pointing LEFT with its exhaust trailing right, so the
+  // angle is taken from the dash direction and mirrored for a rightward dash —
+  // never rotated a half turn, which would put the flames out in front of her
+  const rightward = dvx >= 0;
+  const ang = Math.atan2(dvy, dvx) + (rightward ? Math.PI : 0);
+  const h = 26, w = h * (im.naturalWidth / im.naturalHeight);
+  c.save();
+  c.translate(p.x + p.w / 2, p.y + p.h - 8);
+  c.rotate(ang);
+  if (rightward) c.scale(-1, 1);
+  // the boots sit slightly FORWARD of her centre — the feet lead a dash
+  c.globalAlpha = 0.95;
+  c.drawImage(im, -w * 0.26, -h / 2, w, h);
+  c.restore();
+}
 function drawStatics(P) {
   for (const s of G.statics) {
     const bob = Math.sin(performance.now() / 500 + s.t) * 3;
@@ -3925,6 +4067,49 @@ function drawStatics(P) {
       const mx = s.x + s.w / 2;
       const pu = 0.5 + Math.sin(performance.now() / 600 + s.t) * 0.3;
       const charging = G.recharge && Math.abs(G.recharge.x - mx) < 44;
+      // THE POD IS AUTHORED NOW, and it is the size the thing deserves to be.
+      //
+      // The save point is where a run gets its breath back — it is the one
+      // object in the world the player is HAPPY to see — and it was thirty
+      // pixels of procedural tube. It is a rendered machine: a horseshoe
+      // cradle on anti-vibration feet with a beacon mast, servicing arms and
+      // pressure tanks, standing three times her height. Two plates, dormant
+      // and awake, so stepping into it is a state change rather than a tint.
+      //
+      // The procedural pod stays UNDERNEATH as the fallback: the plate is
+      // lazy-loaded, and a save point that is invisible for the half second
+      // before its art arrives is the one object that must never be missable.
+      {
+        const key = charging ? 'podOn' : 'pod';
+        if (typeof mediaFetch === 'function') { mediaFetch('pod'); mediaFetch('podOn'); }
+        const im = MEDIA_IMG[key];
+        if (im && im.naturalWidth) {
+          // stood on the floor line and scaled off the room's tile grid rather
+          // than off `s.h` — the static's box is the INTERACTION volume, and
+          // the machine is deliberately much bigger than the thing you touch
+          const H = TILE * 4.2, W = H * (im.naturalWidth / im.naturalHeight);
+          const fy = s.y + s.h;
+          c.save();
+          // a slow breath while it idles, a brighter steadier one while it works
+          c.globalAlpha = charging ? 1 : 0.94;
+          c.drawImage(im, mx - W / 2, fy - H, W, H);
+          if (charging) {
+            // it is doing something to her, so it throws light into the room
+            c.globalCompositeOperation = 'lighter';
+            c.globalAlpha = 0.18 + pu * 0.12;
+            const g4 = c.createRadialGradient(mx, fy - H * 0.45, 6, mx, fy - H * 0.45, W * 0.75);
+            g4.addColorStop(0, '#ffe6b8'); g4.addColorStop(1, 'rgba(255,214,120,0)');
+            c.fillStyle = g4;
+            c.beginPath(); c.arc(mx, fy - H * 0.45, W * 0.75, 0, 7); c.fill();
+          }
+          c.restore();
+          // motes rising out of the cradle, so it is never a still picture
+          if (chance(charging ? 0.55 : 0.10))
+            addPart(mx + rnd(-14, 14), fy - rnd(8, H * 0.5), rnd(-6, 6), rnd(-40, -14),
+              0.8, charging ? '#ffe6b8' : '#8cf6ff', 2, -26, true);
+          continue;
+        }
+      }
       const tubeY = s.y + 6, tubeH = s.h - 16;
       // base pad
       c.fillStyle = '#2c3542'; rr(c, s.x - 6, s.y + s.h - 8, s.w + 12, 9, 3); c.fill();
@@ -4848,6 +5033,7 @@ function drawWorldFrame() {
   c.save();
   c.translate(-Math.round(camSX()), -Math.round(camSY()));
   drawLair();                       // behind the level — see the LAIR table
+  drawFlora();                      // ...and what grows in it — see FLORA
   if (tileDirty) renderTileLayer(P);
   c.drawImage(tileCv, 0, 0);
   // X1 hardlight bridge: alive while the Prowler stands, red and flickering
