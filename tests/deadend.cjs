@@ -73,6 +73,25 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
   const orphan = ids.filter(i => !seen.has(i));
   if (orphan.length) { console.log('UNREACHABLE FROM A0: ' + orphan.join(', ')); bad += orphan.length; }
 
+  // --- 3b. NO ROOM MAY BE SMALLER THAN THE WINDOW --------------------------
+  // A room narrower than the viewport cannot scroll, so the camera runs out of
+  // room before the screen does and the last stripe of the canvas shows
+  // NOTHING — a hard vertical seam with void behind it, about two thirds of the
+  // way across. It reads as a wall dropping out of the sky in the middle of the
+  // picture, and it was in twelve rooms at once because nothing ever checked.
+  //
+  // The floor is the window, not a feel value: 960x540 is the canvas.
+  const VIEW_W = 960, VIEW_H = 540, TILE_ = 32;
+  const small = ids.filter(i => R[i].w * TILE_ < VIEW_W || R[i].h * TILE_ < VIEW_H)
+                   .map(i => i + ' ' + (R[i].w * TILE_) + 'x' + (R[i].h * TILE_));
+  if (small.length) {
+    console.log('\nSMALLER THAN THE 960x540 WINDOW (they will show void at the edge):');
+    console.log('  ' + small.join('\n  '));
+    bad += small.length;
+  } else {
+    console.log('\nevery room fills the window: yes (' + ids.length + ' rooms)');
+  }
+
   // --- 4. leaves, and whether they pay ------------------------------------
   console.log('\nleaf rooms (one way in, one way out):');
   const empty = [];

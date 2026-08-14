@@ -179,18 +179,30 @@ const SLASH = [
 const SLASH_X_B = { a0: 0.75, a1: -0.8, r0: 12, r1: 21 };
 // Both forelegs are built the same way; the far one is simply darker, so the
 // two read as near and far rather than as one arm that changed sides.
-// SHE IS A ROBOT, AND HER ARM SHOULD SAY SO. This was one unbroken polyline
-// from shoulder to paw — a single rounded tube that bent in the middle with
-// nothing at the bend. Solving the elbow properly made the shape correct and
-// somehow less convincing, because a smooth taper is what a LIMB looks like,
-// not what a MACHINE'S limb looks like. Her own art has segments: two separate
-// casings with a hinge between them.
+// ===========================================================================
+// ONE LIMB. NO BEADS. THIS IS A RULE, NOT A PREFERENCE.
 //
-// So the arm is built as two discrete bones with a real joint. Each bone is
-// drawn short of the pivot at both ends, leaving a visible gap; the shoulder
-// and elbow are pucks laid into those gaps, dark rings with a lit core, and the
-// elbow is drawn AFTER both bones so the hinge sits on top of the casings it
-// connects, the way a hinge does.
+// The owner has ruled out the jointed arm repeatedly, and it kept coming back
+// because of what is written just below this line in the previous version of
+// this comment: an argument that a machine's arm SHOULD show its segments, and
+// that a smooth taper reads as flesh. That argument is mine, it is about my
+// taste, and it was never what was asked for. Worse, the last round of this
+// only SOFTENED it — three beads became two, the shoulder puck was flattened,
+// and the note congratulated itself for it. A rule half-applied is a rule
+// ignored with extra steps.
+//
+// So: her arm is ONE piece. A single continuous tapered casing from shoulder
+// to wrist, thick where it leaves the shoulder and narrow at the paw, bending
+// through the elbow as a CURVE rather than a hinge. No pucks. No rings. No gap
+// at the bend. Nothing on the limb that reads as a bead on a string.
+//
+// It still bends — the IK solve is unchanged, and the elbow is still where the
+// elbow was — but the bend is in the silhouette, the way it is in the opening
+// film, instead of being announced by hardware bolted to the outside.
+//
+// tests/hero.cjs enforces this: it spies on the draw and fails if a joint is
+// ever stamped onto her arm. That is the only version of this rule that has
+// ever survived a week.
 function armBone(c, x0, y0, x1, y1, w, trim, dark, mid, lit) {
   const dx = x1 - x0, dy = y1 - y0, d = Math.hypot(dx, dy) || 1;
   const ux = dx / d, uy = dy / d;
@@ -209,30 +221,79 @@ function armBone(c, x0, y0, x1, y1, w, trim, dark, mid, lit) {
     c.stroke();
   }
 }
+// KEPT, AND DELIBERATELY UNCALLED. This stamped the pucks onto her arm and is
+// the exact thing the rule forbids. It stays as a named function so
+// tests/hero.cjs can spy on it and fail the build the moment anything calls it
+// again — a rule with a tripwire under it, rather than a rule in a comment.
 function armJoint(c, x, y, r, dark, mid, glow) {
+  if (typeof G !== 'undefined' && G) G._armJointCalls = (G._armJointCalls || 0) + 1;
   c.fillStyle = dark;
   c.beginPath(); c.arc(x, y, r + 0.9, 0, 7); c.fill();
   c.fillStyle = mid;
   c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
   if (glow) { c.fillStyle = glow; c.beginPath(); c.arc(x, y, r * 0.42, 0, 7); c.fill(); }
 }
+// The limb, as one shape. Sampled along shoulder -> elbow -> wrist as a single
+// quadratic through the elbow, with the half-width tapering along it, so the
+// outline is continuous and the bend is a curve rather than a corner.
+const ARM_SEG = 14;
 function armBones(c, shX, shY, ex, ey, hx, hy, far, glow) {
   c.lineJoin = 'round';
-  const dark = far ? 'rgba(32,41,54,0.9)' : 'rgba(38,48,62,0.9)';
+  const dark = far ? 'rgba(32,41,54,0.92)' : 'rgba(38,48,62,0.92)';
   const mid = far ? '#6d7a8c' : '#8593a6';
-  const lit = far ? 'rgba(190,205,224,0.32)' : 'rgba(226,236,250,0.5)';
-  const w = far ? 3.4 : 3.8;
-  armBone(c, shX, shY, ex, ey, w, 1.5, dark, mid, lit);          // upper arm
-  armBone(c, ex, ey, hx, hy, w * 0.86, 1.5, dark, mid, lit);     // forearm
-  // TWO PUCKS PLUS A PAW IS THREE BEADS ON A STRING, and at the size she is
-  // played that is what the arm read as — a chain of knuckles rather than a
-  // limb. A shoulder is not a visible joint on a real body, it is where the
-  // arm disappears under the shoulder: it is drawn flush and unlit, no wider
-  // than the casing it caps, so it closes the bone instead of adding a bump.
-  // Only the ELBOW stays a hinge, because the elbow is the one that does
-  // something you can see it do.
-  armJoint(c, shX, shY, w * 0.52, dark, far ? '#7e8b9d' : '#9aa7b8', null);
-  armJoint(c, ex, ey, w * 0.6, dark, far ? '#8b98aa' : '#aab6c6', glow);
+  const lit = far ? 'rgba(190,205,224,0.34)' : 'rgba(226,236,250,0.52)';
+  const w0 = (far ? 3.4 : 3.8) * 1.16;          // shoulder half-width
+  const w1 = (far ? 3.4 : 3.8) * 0.62;          // wrist half-width
+  // the elbow is the control point of ONE curve, not a hinge between two bones
+  const px = [], py = [], pw = [];
+  for (let i = 0; i <= ARM_SEG; i++) {
+    const t = i / ARM_SEG, u = 1 - t;
+    px.push(u * u * shX + 2 * u * t * ex + t * t * hx);
+    py.push(u * u * shY + 2 * u * t * ey + t * t * hy);
+    // taper, with a little swell through the forearm so it is a limb and not
+    // a cone — a straight linear taper is the other way to look wrong
+    pw.push((w0 + (w1 - w0) * t) * (1 + 0.10 * Math.sin(t * Math.PI)) * 0.5);
+  }
+  const side = (sign) => {
+    for (let i = 0; i <= ARM_SEG; i++) {
+      const j = sign > 0 ? i : ARM_SEG - i;
+      const a2 = px[Math.min(ARM_SEG, j + 1)] - px[Math.max(0, j - 1)];
+      const b2 = py[Math.min(ARM_SEG, j + 1)] - py[Math.max(0, j - 1)];
+      const d = Math.hypot(a2, b2) || 1;
+      const nx = -b2 / d * pw[j] * sign, ny = a2 / d * pw[j] * sign;
+      const X = px[j] + nx, Y = py[j] + ny;
+      if (i === 0 && sign > 0) c.moveTo(X, Y); else c.lineTo(X, Y);
+    }
+  };
+  // contour, then the casing, as ONE closed outline
+  c.beginPath(); side(1); side(-1); c.closePath();
+  c.fillStyle = dark; c.fill();
+  c.save(); c.clip();
+  c.fillStyle = mid;
+  c.beginPath(); side(1); side(-1); c.closePath(); c.fill();
+  // one continuous top-lit edge running the whole length — the read that
+  // replaces the hinge: light says where the limb turns
+  c.strokeStyle = lit; c.lineWidth = Math.max(0.9, w0 * 0.34);
+  c.beginPath();
+  for (let i = 0; i <= ARM_SEG; i++) {
+    const a2 = px[Math.min(ARM_SEG, i + 1)] - px[Math.max(0, i - 1)];
+    const b2 = py[Math.min(ARM_SEG, i + 1)] - py[Math.max(0, i - 1)];
+    const d = Math.hypot(a2, b2) || 1;
+    const X = px[i] - b2 / d * pw[i] * 0.5, Y = py[i] + a2 / d * pw[i] * 0.5 - 0.5;
+    if (i === 0) c.moveTo(X, Y); else c.lineTo(X, Y);
+  }
+  c.stroke();
+  c.restore();
+  // the one light she keeps: a soft glow INSIDE the casing at the elbow, with
+  // no ring and no edge — the machine showing through the shell rather than a
+  // bolt sitting on it
+  if (glow) {
+    c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
+    const gg = c.createRadialGradient(ex, ey, 0, ex, ey, w0 * 1.5);
+    gg.addColorStop(0, glow); gg.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = gg; c.beginPath(); c.arc(ex, ey, w0 * 1.5, 0, 7); c.fill();
+    c.restore();
+  }
 }
 function armPaw(c, hx, hy, wr, spread, far) {
   c.save(); c.translate(hx, hy); c.rotate(wr);
