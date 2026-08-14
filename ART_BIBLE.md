@@ -102,6 +102,41 @@ specific way worth writing down:
 **Never tell the user to go and toggle something because a field said `false`.**
 State what you observed and what it does and does not prove.
 
+### 0.1 THE SECOND CAUSE: THE WORKER RESTARTED
+
+There is a second, completely different reason the tools can vanish, and it is
+NOT the session-attach lag above. Telling them apart matters, because the owner
+asked the fair question — "why do you keep seeing it as disconnected when my
+side says connected, and I have not touched it?" — and the honest answer is
+that two different layers are being reported:
+
+- **His UI reports the ACCOUNT.** Is the connector installed and authenticated?
+  That lives on the server and does not change when anything local dies.
+- **My tool list reports THIS PROCESS.** Is there a live MCP session held by the
+  worker running this conversation? That is a socket, and a socket dies with the
+  process that owns it.
+
+So `connected: true` and a missing tool list are not a contradiction. They are
+two true statements about two layers.
+
+**The fingerprint of a worker restart** — as opposed to anything the user did:
+
+- The harness says so outright ("The container was restarted").
+- Background shell jobs are killed in the same instant. A connector toggle
+  cannot kill a running `node tests/run.cjs`.
+- **Several servers drop together, and only some come back.** Observed here:
+  Higgsfield and Supermetrics both vanished on the restart; Supermetrics
+  re-attached under a NEW `installedServerId`, so every one of its tool names
+  changed prefix, while Higgsfield did not re-attach at all. One shows
+  `enabledInChat: true` and the other `false` with IDENTICAL account status.
+  No user action can do that to two connectors at once.
+
+**What it means for the work:** the art is not blocked on the owner and there
+is nothing for him to fix. It is blocked on this session getting its socket
+back. Retry step 1 periodically; a fresh session rebinds cleanly. Report it
+ONCE, in those terms — "this process lost its connection, your account is
+fine" — and never as "your connector is off".
+
 ---
 
 ## 1. THE FOUR CHARACTER CLASSES
