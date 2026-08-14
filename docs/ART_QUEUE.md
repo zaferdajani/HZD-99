@@ -16,80 +16,66 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
-## 1. HZD-99 FROM BEHIND — three plates ✱ HIGHEST PRIORITY
+## 1. HZD-99, REGENERATED — the full character, all angles, all moves ✱ FIRST
 
-**Why:** the walk into the city gates is supposed to show her turning her back
-on the camera and going in. It currently shows her from the side, shrinking,
-which reads as a character being scaled down rather than a character leaving.
+**The ruling (owner, 2026-08-14):** the procedural body is visibly below the
+rest of the cast — "not as good as the bosses and wolves" — and has no back
+view. *"Use it as a template and let Higgsfield do a clean new one with all
+needed angles."* ART_BIBLE.md §2 records the exception as revoked.
 
-**What went wrong the first time, and must not happen again:** the back angles
-of `roster_8yaw.png` row 0 were used instead. That sheet is a DIFFERENT robot
-cat — different build, different palette, a staff she does not carry — and for
-two seconds it replaced the protagonist with a stranger. **The reference below
-is not optional.** These plates are generated FROM her, or they are not
-generated.
+**The template is mandatory on every plate:** `assets/source/ref/hzd99_body.png`
+— three facings of her live in-engine body. Generated FROM her, or not
+generated. (`roster_8yaw.png` row 0 is a turnaround of a DIFFERENT robot cat;
+it reached the screen once. Never again.)
 
-**Reference to attach:** `assets/source/ref/hzd99_body.png` — three facings of
-her live in-engine body on black, rendered from the game itself, so the model
-is matching the character that actually walks around the game rather than a
-description of her.
+**Step 0 when the connector is back:** call
+`get_workflow_instructions({ workflow: "character-sheet" })` and follow it —
+the server's own turnaround workflow outranks a hand-rolled batch.
 
-**Model:** `nano_banana_pro` · **aspect:** `1:1` · **role:** `image`
+**The identity line, verbatim in every prompt:**
 
-### 1a. `hzd_back_stand`
+> The same small robot cat as the reference image, kept EXACTLY: rounded
+> off-white ceramic head, dark visor band with two bright cyan eye-lights, two
+> upright ears with mint-green inner surfaces, short whiskers, compact rounded
+> ceramic body with a small vent grille on the belly, gold shoulder discs, a
+> red scarf at the neck, and a glowing mint-green energy blade. Each arm is ONE
+> smooth tapered piece from shoulder to paw — no elbow hardware, no rings, no
+> segments, no exposed joints. Two arms, always.
 
-> Use the reference image as the EXACT character. It shows the same small robot
-> cat from three angles. Keep every design feature precisely: the rounded
-> off-white ceramic head with the dark visor band across it and two cyan eye
-> lights, the two upright cat ears with mint-green inner surfaces, the short
-> stubby whiskers, the compact rounded ceramic-and-steel body, the red-and-white
-> segmented arms with a gold shoulder joint, the short thick legs with wide
-> feet, and the glowing mint-green blade carried on her back.
->
-> Redraw that same character SEEN FROM DIRECTLY BEHIND, standing still, feet
-> flat on a ground line at the bottom of the frame, head level. NO FACE IS
-> VISIBLE — we are looking at the back of her head: the smooth rear curve of the
-> ceramic skull, the backs of both ears with the mint inner surface just
-> catching light at the edges, and the nape seam where the head meets the body.
-> The blade is carried diagonally across her back and is the clearest read in
-> the silhouette. Her scarf trails from her neck down her back.
->
-> STYLE: the same clean rendered three-dimensional look as the reference —
-> off-white ceramic with soft specular highlights, brushed steel joints, cyan
-> and mint emissive accents, gentle rim light from the upper left.
->
-> Pure black background, subject only, no ground plane, no cast shadow.
->
-> NEGATIVE: no face, no eyes, no visor visible, no staff, no different colour
-> scheme, no tan or brown body, no additional characters, no text, no watermark,
-> no flat 2D drawing, no cartoon outline, no side view, no front view.
+**The standing negatives, verbatim in every prompt:**
 
-### 1b. `hzd_back_walkA` — contact
+> NEGATIVE: no segmented arms, no elbow joints, no visible hinges, no staff,
+> no tan or brown palette, no second character, no text, no watermark, no flat
+> 2D drawing, no cartoon outline, no cast shadow, no ground plane. Pure black
+> background, subject only.
 
-> Same character, same rules, same reference. SEEN FROM DIRECTLY BEHIND,
-> WALKING AWAY — CONTACT FRAME: one leg extended forward with its foot just
-> planted, the other trailing back with the heel lifting, hips turned very
-> slightly toward the planted leg, shoulders counter-rotated. Both arms swing in
-> opposition. The blade on her back tilts with the shoulder rotation. The scarf
-> streams behind and to one side.
->
-> Same style, same negatives. Pure black background.
+**Style line:** clean high-detail 3D render, soft specular ceramic, brushed
+steel, cyan/mint emissive accents, key light fixed to the WORLD upper-left in
+every plate (the turnaround rule — a turn must read as a volume rotating).
 
-### 1c. `hzd_back_walkB` — passing
+### 1a. The turnaround — 8 yaw angles, one prompt each
+`hzd_yaw0 … hzd_yaw7`: 0° (facing screen-right), 45°, 90° (facing camera),
+135°, 180° (facing screen-left), 225°, **270° (directly away — the back the
+gate walk needs)**, 315°. Standing neutral, feet on the bottom ground line,
+blade on her back, scarf hanging. Assemble with `tools/turnsheet.cjs` exactly
+as the NPC sheet was.
 
-> Same character, same rules, same reference. SEEN FROM DIRECTLY BEHIND,
-> WALKING AWAY — PASSING FRAME: the legs are at their closest, one directly
-> under the hips and vertical, the other swinging through past it with the foot
-> clear of the ground. The body rides slightly HIGHER than in the standing
-> plate. Shoulders level. The scarf lifts.
->
-> Same style, same negatives. Pure black background.
+### 1b. The action plates — one per statesheet cell that needs a body
+From `assets/source/ref/hzd99_states.png` (the checklist): run contact + run
+passing · rise · apex · fall · double-jump tuck (mid-rotation) · land squash ·
+dash lunge · skid lean-back · wall cling (side-on against a vertical) · claw
+swing 1 / 2 / cross-finisher (arm thrown, ONE-PIECE limb) · charge crouch
+(braced, glowing) · burst release · hurt recoil · heal kneel · the Song (head
+up, visor bright, mouth open) · low-health slump · back-walk contact +
+back-walk passing (for the gates).
 
-**Wiring when they land:** `ROOM_VISTA`/`gateEnter` in `js/game.js` —
-`drawGateWalk()` swaps from `player.draw` to these three, cycling walkA/walkB
-on the same stride-driven counter the wolves use (`wolfPose` in `js/wolves.js`),
-and `tests/opening.cjs` gains a check that the plate drawn during the walk is
-one of these and never a roster subject.
+**Wiring when they land:** her body switches to the plates behind the same
+yaw/cross-fade renderer the bosses use (`drawAtlas` grammar, new sheet — NOT
+roster row 0, which is retired); scarf, blade glow, jets, charge aura and claw
+arcs stay procedural overlays. The gate walk uses yaw 270° + the two back-walk
+plates on the wolves' stride counter. `tests/hero.cjs` gains: every named
+state's plate exists, and no state silhouette matches idle above the §3.3 IoU
+line. Keep the procedural body as the loading fallback only.
 
 ---
 

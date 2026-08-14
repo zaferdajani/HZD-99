@@ -160,19 +160,38 @@ reverse. The test:
 
 ---
 
-## 2. CLASS A — the live-drawn protagonist
+## 2. CLASS A — the protagonist. THE EXCEPTION IS REVOKED.
 
-**She is deliberately NOT generated art, and that is a decision, not an
-oversight.** `assets/characters/roster_8yaw.png` row 0 contains a generated
-`nya` turnaround that **nothing has ever drawn**. It was generated, archived,
-declared in `js/atlas.js`, and never wired — and for a year the claim "every
-character was given 3D art" was true of the guardians and false of the player.
+**The owner has ended the procedural exception** (2026-08-14): with the whole
+cast on the pipeline, her live-drawn body was visibly the weakest art on the
+screen — flatter than the wolves standing next to her, and with no back view at
+all. "Use it as a template and let Higgsfield do a clean new one with all
+needed angles" is the ruling, and it is the right one.
 
-She stays procedural because her arms are IK-solved, her scarf is simulated and
-her double jump is a real rotation about a real axis. A sprite atlas can do none
-of that.
+**So she is authored now, like everything else, on these terms:**
 
-**So her "3D" is bought with light, not with a render:**
+- **Generated FROM her, never from a description of her.**
+  `assets/source/ref/hzd99_body.png` (three facings of the live body, rendered
+  from the game) is the mandatory reference on every plate. This is the guard
+  against the stranger-cat incident: `roster_8yaw.png` row 0 already IS a
+  generated turnaround of a *different* robot cat, it went on screen once, and
+  it must never be mistaken for her again.
+- **The arm rule survives the conversion.** One-piece limbs, two of them, no
+  joint hardware — stated in every brief's negatives. A generator loves to add
+  greebles at the elbow; the brief forbids them by name.
+- **Full coverage, measured.** An 8-yaw turnaround (the same grammar as the
+  roster: world-locked key light, never mirrored) PLUS action plates for every
+  state `tools/statesheet.cjs` renders. The statesheet is the checklist: a
+  state on that sheet with no authored plate is an open task, not a style.
+- **The simulation survives as OVERLAY.** Scarf spring-chain, blade glow, jets,
+  charge aura and the claw arcs stay procedural, drawn over the plates — that
+  is what the simulation was always good at. What ends is the procedural BODY.
+- The full brief, ready to fire, lives in `docs/ART_QUEUE.md` §1.
+
+Until the plates land she keeps the procedural body — a worse body on screen
+beats no body — and `tests/hero.cjs` holds its rules either way.
+
+**What the procedural body's "3D" was bought with, kept for the overlays:**
 
 - One committed light direction for the whole character, stated in a constant,
   never per-limb.
