@@ -304,10 +304,11 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   // own: yawSpin turns the full turntable (prism), yawScan sweeps like a
   // sentry looking along its arc (turret, archivist).
   let fy;
-  // THE BACK OF THE SHEET, ON PURPOSE. Columns 5-7 are the angles a
-  // side-scroller must never show by accident — and exactly the ones a scripted
-  // walk AWAY from the camera needs. `col` names one directly, bypassing the
-  // facing maths, and it is the only way into the back hemisphere.
+  // `col` names an authored angle directly, bypassing the facing maths. Nothing
+  // in the game uses it: it was added for a scripted walk away from camera and
+  // that shot draws the REAL character instead, because the sheet it would have
+  // come from is a different cat. Kept because a turntable renderer that cannot
+  // be asked for a specific angle is a turntable renderer with a hole in it.
   if (o.col != null) fy = o.col;
   else if (o.yawSpin) fy = ((t * o.yawSpin) % 8 + 8) % 8;
   else if (o.yawScan) fy = o.yawScan.c + Math.sin(t * o.yawScan.r) * o.yawScan.a;

@@ -4057,11 +4057,22 @@ function drawRoomProp() {
 // the walk was built toward. You press UP at them and she GOES IN: turns her
 // back on the camera, walks into the gap between the doors, and gets smaller.
 //
-// The back view is not new art. `roster_8yaw.png` row 0 is a full eight-angle
-// turnaround of her that has been in the repo, generated and archived and
-// never drawn, since the beginning — the one honest gap in the art record (see
-// assets/source/README.md). Columns 5-7 are the back hemisphere, the angles a
-// side-scroller must never show by accident. This is the moment they are for.
+// IT IS HER. NOT A SHEET OF HER.
+//
+// The first cut of this drew the walk-away from `roster_8yaw.png` row 0 — an
+// eight-angle turnaround of a robot cat that has sat in the repo unused since
+// the beginning. It has a back view, which is what this moment wants, and it
+// is A DIFFERENT CHARACTER: a different build, a different palette, a staff she
+// does not carry. Putting it on screen swapped the protagonist for a stranger
+// for two seconds, and the owner spotted it instantly and asked what had
+// happened to his hero. Nothing had; I had drawn somebody else.
+//
+// So this draws HER — the live, procedural, IK-solved body with the simulated
+// scarf, exactly the one that walks around every other room — positioned in
+// screen space and scaled down as she goes. Her gait is driven for the shot
+// (she is held, so her own velocity is zero) and restored immediately after.
+// If she is ever to be seen from behind it will be authored FOR her, from her,
+// and not borrowed off an old sheet.
 // `gx`/`gy` are where the gap between the doors sits INSIDE the painting, as a
 // fraction of it — so the vanishing point follows the backdrop wherever the
 // camera has panned it to, instead of being a screen position that only lines
@@ -4121,16 +4132,18 @@ function drawGateWalk() {
   const sc = 1 - 0.72 * e;
   c.save();
   c.globalAlpha = 1 - clamp((k - 0.62) / 0.38, 0, 1);
-  // her own authored back angle, walking. `col: 6` is 270 degrees — straight
-  // away from camera — and `mode: 'walk'` gives it the gait the sheet cannot.
-  const drewHer = typeof drawAtlas === 'function' && drawAtlas(c, 'hzd', 0, x, y, 36 * sc, {
-    col: 6, mode: 'walk', t: g.t * 2.4, vx: 120, grounded: false,
-  });
-  if (!drewHer) {
-    // the sheet has not landed: a silhouette walking away is still the shot
-    c.globalAlpha *= 0.9;
-    c.fillStyle = '#0a1014';
-    c.beginPath(); c.ellipse(x, y - 18 * sc, 11 * sc, 18 * sc, 0, 0, 7); c.fill();
+  if (player) {
+    // walking toward the gap, whichever side of her it is on
+    const dir = Math.sign(tx - sx0) || 1;
+    const vx0 = player.vx, f0 = player.face, fv0 = player.faceVis;
+    player.vx = dir * 210; player.face = dir; player.faceVis = dir;
+    // her feet land on (x, y): translate there, scale about that point, then
+    // undo her world position so her own draw lands where we put her
+    c.translate(x, y);
+    c.scale(sc, sc);
+    c.translate(-(player.x + player.w / 2), -(player.y + player.h));
+    player.draw(c);
+    player.vx = vx0; player.face = f0; player.faceVis = fv0;
   }
   c.restore();
   // and the light from inside the gate reaches out for her
