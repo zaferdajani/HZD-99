@@ -14,6 +14,34 @@ the test — do not make an exception in a comment.
 
 ---
 
+## 0.0 EVERY CHARACTER IS 3D. THIS NEVER HAS TO BE ASKED FOR.
+
+**Default, for every character in this game, existing or new: rendered 3D
+authored art.** Not flat art. Not line art. Not "procedural because it is
+geometry". Not "stylised 2D because it suits this one".
+
+This is written at the top because it has had to be said out loud more than
+once — most recently when the Eye's constructs shipped as line drawings and the
+owner had to point out they looked 2D in a 3D game. He should never have had to
+say it, and after this he does not.
+
+The three exceptions are exhaustive, and each is a decision on the record with
+its reason in this file:
+
+1. **NYA-9 / the hero** (§2) — procedural because her arms are IK-solved, her
+   scarf is simulated and her double jump is a real rotation. A sprite cannot do
+   any of that. She gets her volume from committed lighting instead.
+2. **Pure additive glow** (§6) — halos, lava rings, lit cores. The renderer
+   treats them as light, not as objects, and a model returns a beautifully lit
+   solid instead.
+3. **Nothing else.**
+
+If a character is about to be drawn any other way, the reason must be one of
+those two — and if the reason is "the generator is unreachable", that is not a
+reason, it is a §0 problem. Fix the pipeline, or wait for it.
+
+---
+
 ## 0. THE PIPELINE IS NOT OPTIONAL
 
 **All authored character art is generated through Higgsfield.** Not sourced,

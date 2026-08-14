@@ -131,6 +131,26 @@ const MEDIA_SRC = {
     // NYA-9's voice and the guardians' roars. Short, mono, decoded once — about
     // 2.5 MB of PCM for the whole cast, against the 62 MB the music used to cost
     // before it was moved to streaming.
+    // NYA-9's OWN VOICE. Cloned from a reference the game's owner supplied and
+    // spoken WORDLESSLY on purpose — sharp exhales, a cry, a sigh — for the two
+    // reasons that agree: it is the Silksong register (a character who sounds
+    // rather than speaks), and this game ships in five languages, so a bark
+    // with a word in it is a bark that is wrong in four of them.
+    // Trimmed to the frame the voice starts by tools/voxtrim.cjs, because the
+    // room tone in front of a generated take IS latency on a combat sound.
+    nya_atk1: 'assets/sfx/vox/nya_atk1.wav',
+    nya_atk2: 'assets/sfx/vox/nya_atk2.wav',
+    nya_atk3: 'assets/sfx/vox/nya_atk3.wav',
+    nya_hurt: 'assets/sfx/vox/nya_hurt.wav',
+    nya_hurtbad: 'assets/sfx/vox/nya_hurtbad.wav',
+    nya_die: 'assets/sfx/vox/nya_die.wav',
+    nya_dash: 'assets/sfx/vox/nya_dash.wav',
+    nya_djump: 'assets/sfx/vox/nya_djump.wav',
+    nya_land: 'assets/sfx/vox/nya_land.wav',
+    nya_heal: 'assets/sfx/vox/nya_heal.wav',
+    nya_evo: 'assets/sfx/vox/nya_evo.wav',
+    nya_win: 'assets/sfx/vox/nya_win2.wav',
+    nya_purr: 'assets/sfx/vox/nya_purr2.wav',
     vox_win: 'assets/sfx/vox/win.ogg',
     vox_purr: 'assets/sfx/vox/purr.ogg',
     vox_roar_beast: 'assets/sfx/vox/roar_beast.ogg',
