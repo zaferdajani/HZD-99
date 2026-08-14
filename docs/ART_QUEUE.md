@@ -36,11 +36,16 @@ the server's own turnaround workflow outranks a hand-rolled batch.
 
 > The same small robot cat as the reference image, kept EXACTLY: rounded
 > off-white ceramic head, dark visor band with two bright cyan eye-lights, two
-> upright ears with mint-green inner surfaces, short whiskers, compact rounded
-> ceramic body with a small vent grille on the belly, gold shoulder discs, a
-> red scarf at the neck, and a glowing mint-green energy blade. Each arm is ONE
-> smooth tapered piece from shoulder to paw — no elbow hardware, no rings, no
-> segments, no exposed joints. Two arms, always.
+> upright ears with mint-green inner surfaces, short whiskers, BRUSHED-STEEL
+> chest plate with a dark vent grille on the belly (canonical — see below),
+> gold shoulder discs, a red scarf at the neck. Each arm is ONE smooth tapered
+> piece from shoulder to paw — no elbow hardware, no rings, no segments, no
+> exposed joints. Two arms, always.
+>
+> WEAPON RULE (supersedes every older line naming a mint-green blade): she is
+> UNARMED by default — the weapon arrives mid-game as the PURIFIER WHITE
+> CRYSTAL sword (§1b). Armed plates carry the white crystal, never a green
+> blade. Any plate generated with a green blade after 2026-08-14 is off-model.
 
 **The standing negatives, verbatim in every prompt:**
 
@@ -53,7 +58,21 @@ the server's own turnaround workflow outranks a hand-rolled batch.
 steel, cyan/mint emissive accents, key light fixed to the WORLD upper-left in
 every plate (the turnaround rule — a turn must read as a volume rotating).
 
-### 1a. The turnaround — 8 yaw angles, one prompt each
+### STATUS LEDGER (2026-08-14, session A) — do not regenerate what is done
+DONE, committed, in assets/: armed 8-yaw (hzd_8yaw.png) · unarmed 8-yaw with
+canonical chest (hzd_8yaw_bare.png) · back-walk pairs armed+unarmed (wired
+into the gate walk) · 12 armed action plates archived in assets/source/hero/
+(runA/runB/rise/fall/djump/land/dash/skid/claw/finisher/charge/hurt — note
+these carry the OLD green blade; regenerate only when the crystal versions are
+actually needed on screen) · the full crystal weapon set (assets/source/
+crystal/, 8 plates).
+STILL TO FIRE: §1b-i slash light-sheets ×4 · §1b-ii regrips ×2 + thrown
+rescale ×1 · §1c back-jet gear ×3 (the double jump is ALREADY a jet in code —
+the plates are the gear art) · §1d handover video · the unarmed SIDE action
+set for the opening (idle/walk/run pairs, unarmed) · apex, burst, heal kneel,
+the Song, low-health slump, wall cling.
+
+### 1a. The turnaround — 8 yaw angles, one prompt each  ✅ DONE (both variants)
 `hzd_yaw0 … hzd_yaw7`: 0° (facing screen-right), 45°, 90° (facing camera),
 135°, 180° (facing screen-left), 225°, **270° (directly away — the back the
 gate walk needs)**, 315°. Standing neutral, feet on the bottom ground line,
