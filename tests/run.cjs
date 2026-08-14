@@ -43,6 +43,7 @@ const SUITE = [
   ['battery',   'one cell, one machine, and the shop waits for the lion'],
   ['minis',     "the Eye's five: they wake, telegraph, alternate, die and pay"],
   ['nyavox',    'her voice: on the frame she moves, never clipping, never twice at once'],
+  ['wolves',    'the pack, the Alpha and the flag that changes a whole species'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
 ];
 

@@ -156,6 +156,16 @@ function hurtBoxOf(e) {
 const DAZE_WINDOW = 1.1, DAZE_MUL = 1.6;
 
 function dealDmg(e, dm, atkEl, x, y, noPenalty) {
+  // NEVER PUNISH AFFECTION — and never let a mis-swing undo an hour of the run.
+  // A wolf that has changed sides cannot be hurt by her, at all: the swing
+  // lands as a hand on a flank instead (js/pets.js has the same law for the
+  // freed guardians). Without this, the reward for taming the Alpha would be a
+  // roomful of friends the player can accidentally delete.
+  if (typeof isWolf === 'function' && isWolf(e) && typeof packTamed === 'function' && packTamed()) {
+    burst(x, y, 5, '#9ffcff', 150, 0.3, 0, 2, true);
+    if (typeof sfx === 'function') sfx('pick');
+    return 0;
+  }
   // THE GUARD'S PLATE. Up by default, down only while it is winded from its
   // own lunge — so the answer is not "hit it more", it is "hit it THEN".
   // Deliberately not immunity: a player who keeps swinging still makes very

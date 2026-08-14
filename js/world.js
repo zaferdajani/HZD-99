@@ -111,7 +111,7 @@ const ROOMS = {
       hline(g, 8, 13, 3, '=');                // the last rung, under the way out
       hline(g, 15, 20, 24, '^');
     } },
-  A2: { zone: 'A', w: 60, h: 17, exits: { L: 'A1', R: 'A3', B: 'A5', T: 'A8' },
+  A2: { zone: 'A', w: 60, h: 17, exits: { L: 'A1', R: 'A10', B: 'A5', T: 'A8' },
     // TWO DISRUPTORS ON ONE SCREEN WAS THE GAME'S SECOND FIGHT. Fliers dive and
     // withdraw; two of them harassing from opposite angles leaves nothing to do
     // about either, which is agency removal rather than difficulty. The second
@@ -129,7 +129,22 @@ const ROOMS = {
       rect(g, 12, 15, 14, 16, 'B');
       hline(g, 33, 36, 12, '='); hline(g, 15, 18, 9, '='); hline(g, 48, 51, 12, '=');
     } },
-  A3: { zone: 'A', w: 30, h: 17, exits: { L: 'A2', R: 'A4', T: 'B1' },
+  // ---- THE DEN. The first fight in the game you can lose, and it is on the
+  // way rather than off it: the pack has been in the meadow since the first
+  // room, and this is where the thing that leads it has been the whole time.
+  // It sits between the meadow and the save point on purpose — you meet the
+  // Alpha, you take the pack, and THEN you walk into the room with the bench
+  // and the trader in it, which is where the run's first breath is.
+  A10: { zone: 'A', w: 34, h: 17, exits: { L: 'A2', R: 'A3' },
+    ents: [['boss', 22, 15, 'alpha']],
+    build(g) {
+      frame(g); openL(g); openR(g);
+      // Two low shelves and nothing else. The Alpha's leap is the move the room
+      // is built around, and a room full of geometry is a room where a
+      // committed pounce lands on a corner instead of on the floor.
+      hline(g, 5, 9, 11, '='); hline(g, 25, 29, 11, '=');
+    } },
+  A3: { zone: 'A', w: 30, h: 17, exits: { L: 'A10', R: 'A4', T: 'B1' },
     ents: [['bench', 8, 15], ['npc', 14, 15, 'ratchet']],
     build(g) {
       frame(g); openL(g); openR(g);
@@ -516,7 +531,7 @@ const ROOMS = {
 
 // map screen layout: [gridX, gridY, wCells, hCells]
 const MAPPOS = {
-  A0: [-1, 3, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A3: [3, 3, 1, 1], A4: [4, 3, 1, 1],
+  A0: [-1, 3, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A10: [3, 3, 1, 1], A3: [4, 3, 1, 1], A4: [5, 3, 1, 1],
   A5: [1, 4, 1, 1], A6: [0, 2, 1, 1], A7: [1, 5, 1, 1], A8: [1, 2, 1, 1], A9: [1, 1, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],

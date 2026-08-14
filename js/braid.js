@@ -310,8 +310,35 @@ function drawBrDelta() {
 // stops on exactly one fork — spare it, or end it. Nothing else in the game
 // interrupts you to ask anything.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// TAMING IS THE ONLY ENDING — FOR NOW.
+//
+// The fork below is finished code and it works. What is NOT finished is the
+// other half of the world it implies: a run in which you severed every
+// guardian should look and sound different from one in which you freed them
+// all, and it does not yet. Half a fork is worse than no fork — it asks the
+// player for the most consequential press in the run and then spends it on a
+// spoil roll.
+//
+// So the question is not asked. Every guardian, and the Alpha, is TAMED. The
+// machinery stays exactly where it is — the ledger still records, the spoils
+// still pay, the purification film still runs — and the day the severed path
+// is built, this constant goes back to false and the fork returns with its
+// history intact. Future game modes are the reason it is a switch and not a
+// deletion.
+const TAME_ONLY = true;
+
 function brOffer(kind, x, y) {
   if (!G.save || (typeof isHero === 'function' && isHero())) return;
+  if (TAME_ONLY) {
+    // answered on the spot, in mercy's direction. brAnswer reads G.offer, so
+    // the record is built first and consumed immediately — no OFFER state, no
+    // frame in which the doors are open.
+    G.offer = { kind, t: 9e9, t0: 9e9, x: x || 0, y: y || 0, done: false,
+                lock: 0, armL: false, armR: false, auto: true };
+    brAnswer('L');
+    return;
+  }
   // A SETTLE WINDOW, BECAUSE THE ANSWER KEYS ARE THE DODGE KEYS.
   //
   // The fork is answered with LEFT and RIGHT — and it opens on the frame a
@@ -387,7 +414,12 @@ function brAnswer(pick) {
     if (pick === 'L') {
       b2.hp = 0; b2.tamed = true;
       b2.die();                                  // the purification film: it lives
-      if (first) { G.save.flags.oath = 1; spoilLater({ name: t('oath_name'), desc: t('oath_desc') }); }
+      // THE ALPHA'S REWARD IS THE PACK, and it is paid in onBossDead. Rolling a
+      // guardian's spoil for it on top would be paying twice for one fight, and
+      // the spoil table's whole premise — that this creature had a life before
+      // the Song — is not true of something that was simply the biggest wolf.
+      if (b2.kind === 'alpha') { /* handled by G.onBossDead */ }
+      else if (first) { G.save.flags.oath = 1; spoilLater({ name: t('oath_name'), desc: t('oath_desc') }); }
       else spoilLater(bossSpoil(b2.kind, 'L'));
     } else {
       b2.hp = 0; b2.forceKill = true;

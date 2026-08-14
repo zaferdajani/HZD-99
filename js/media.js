@@ -47,6 +47,29 @@ const MEDIA_SRC = {
     eyeLatticeW: 'assets/characters/eye/lattice_w.png',
     eyeLens: 'assets/characters/eye/lens.png',
     eyeLensW: 'assets/characters/eye/lens_w.png',
+    // THE PACK. The first thing in the game that is ALIVE rather than
+    // industrial — three plates for the wolf and three for the one that leads
+    // it, keyed off black by tools/blackkey.cjs so each has real alpha.
+    //
+    // Three and not two: a wolf's whole read is coil-then-pounce, and the
+    // pounce happens in the air where a grounded plate cannot go. Rest, coil,
+    // lunge — one per phase of the only move it has.
+    wolfRest: 'assets/characters/beasts/wolf.png',
+    wolfCoil: 'assets/characters/beasts/wolf_coil.png',
+    wolfLunge: 'assets/characters/beasts/wolf_lunge.png',
+    // NINE PLATES FOR THE ALPHA, one per state, because it has five skills and
+    // two of them have their own recovery. A boss with five moves sharing two
+    // drawings is a boss with two moves as far as the player's eye is concerned.
+    alphaRest: 'assets/characters/beasts/alpha.png',        // prowling
+    alphaRoar: 'assets/characters/beasts/alpha_roar.png',   // the stunning roar
+    alphaHowl: 'assets/characters/beasts/alpha_howl.png',   // calling the betas
+    alphaLeap: 'assets/characters/beasts/alpha_leap.png',   // the spiral, airborne
+    alphaClaw: 'assets/characters/beasts/alpha_claw.png',   // the swipe
+    alphaBite: 'assets/characters/beasts/alpha_bite.png',   // the bite lands
+    alphaClinch: 'assets/characters/beasts/alpha_clinch.png', // ...and worries it
+    alphaRecoil: 'assets/characters/beasts/alpha_recoil.png', // landed a hit — kicks back
+    alphaTurn: 'assets/characters/beasts/alpha_turn.png',   // missed — spins to face her
+    alphaFree: 'assets/characters/beasts/alpha_free.png',   // after it yields
     // THE LAIRS. One authored prop per guardian, keyed off its generation
     // plate's black field by tools/blackkey.cjs, so each has real alpha and
     // occludes the room properly. Lazy like everything else: a lair is only

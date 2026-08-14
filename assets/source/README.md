@@ -23,7 +23,7 @@ look at to answer "did that actually happen".
 | `mother/` | MOTHER-V, the Null Core | 16 |
 | `lairs/` | The six boss lairs, as generated | 6 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
-| `beasts/` | The wolf line, the Alpha, and the cheetah line | 9 |
+| `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line | 16 |
 | `_sheets/` | Contact sheets and before/after comparisons | 17 |
 
 `beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the
@@ -48,20 +48,39 @@ does not show a full motion of a lion jumping" looks like when you stop
 believing the code comments and photograph it.
 
 `beasts/` is the animal bestiary the owner asked for: electronic WOLVES to
-replace the small lions as zone A's first enemy (stand / lunge / coil), the WOLF
-PACK ALPHA in three states, and the electronic CHEETAH line for the later
-kingdoms (stand / sprint / wind-up) which has no alpha and is simply killed.
+replace the small lions as zone A's first enemy (prowl / coil / pounce), THE
+ALPHA in nine states, and the electronic CHEETAH line for the later kingdoms
+(stand / sprint / wind-up) which has no alpha and is simply killed.
 
-THE ALPHA WAS REGENERATED. The first pass was the small wolf with a mantle on
-it — bulkier, but the same silhouette, which is not what a boss is. The owner
-said so and he was right. It is now a genuinely different animal: a double row
-of backswept spines running the length of its body, a collar of spikes at the
-throat, backswept temple horns, spurred elbows, a mace tail, oversized fangs, a
-broken horn and battle scars. `alpha_roar` is its wind-up — reared, roaring,
-amber arcing between the raised spines. `alpha_free` is the same creature after
-it yields: spines smoothed flat, light turned red to gold, still a weapon and no
-longer aimed at you. Generated and archived here; the wiring is the next
-piece of work, not this commit's claim.
+THE WOLF WAS REGENERATED ONCE AND THE ALPHA TWICE, and both for the same
+reason: a plate set is only a character if every plate is the SAME character.
+The first wolf rest plate was photoreal while its coil and lunge were painted,
+and the coil had gold eyes and a curled tail the other two did not have — three
+drawings of three animals. The first `alpha_roar` had a bushy metal tail and no
+mace ball, so the boss changed species every time it wound up. Both are now
+generated against a locked reference image of the prowl plate, which is the only
+method that has held.
+
+THE ALPHA'S NINE STATES exist because it has five skills and two of them have
+their own recovery (`ART_BIBLE.md` §3.3 — a five-move boss sharing two drawings
+has two moves as far as the player's eye is concerned):
+
+| plate | state | what it is |
+|---|---|---|
+| `alpha` | prowl | crimson seams, mace tail, double spine row. The rest pose |
+| `alpha_howl` | broodcall / howl | muzzle straight up, calling the betas in |
+| `alpha_roar` | roarwarn / roar | braced and screaming — the stun |
+| `alpha_leap` | leap | airborne, corkscrewed, amber spiralling round it |
+| `alpha_claw` | clawwarn / claw | the near foreleg thrown across in a rake |
+| `alpha_bite` | bitewarn / bite | jaws wide, head out over the forepaws |
+| `alpha_clinch` | clinch / shake | jaws locked and WRENCHING. The bite holds |
+| `alpha_recoil` | recoil | it landed the leap and kicks back off her |
+| `alpha_turn` | turn | it missed, and spins to bring its head round |
+| `alpha_free` | after it yields | the red gone out of it. Permanent |
+
+All nine are wired, all nine are measured by `tests/wolves.cjs`, and the
+wind-ups clear the silhouette law against the prowl by a wide margin — the
+worst of them, the roar, sits at IoU 0.69 against a 0.86 ceiling.
 
 `eye/` is the five mini-bosses, two plates each — at rest and wound up. They
 were procedural line art first, on the argument that they are "geometry and

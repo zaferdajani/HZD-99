@@ -32,8 +32,13 @@ const PET_ACTS = {
   zero: ['nuzzle', 'stamp', 'rear'],    // GLACIERE — the unicorn
   atlas: ['huff', 'duck', 'curl'],      // FURNACE CHOIR — the dragon
   prism: ['cheek', 'belly', 'knead'],   // PRISM PROWLER — the cat
+  // THE ALPHA. A wolf's answers, not a cat's: it leans its whole weight into
+  // you, it bows on its forelegs the way a dog asks to play, and it bonks its
+  // skull against your hand. The joke is the same one the lion's belly-flop
+  // makes — you remember what this thing was doing to you an hour ago.
+  alpha: ['bow', 'lean', 'bonk'],
 };
-const PET_NAMES = { glitch: 'NULLFANG', brood: 'TALONHOST', zero: 'GLACIERE', atlas: 'FURNACE CHOIR', prism: 'PRISM PROWLER' };
+const PET_NAMES = { glitch: 'NULLFANG', brood: 'TALONHOST', zero: 'GLACIERE', atlas: 'FURNACE CHOIR', prism: 'PRISM PROWLER', alpha: 'THE ALPHA' };
 
 function petBond(kind) {
   if (!G.save) return 0;

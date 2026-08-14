@@ -49,7 +49,7 @@ for (const k in EMBED) {
 // anyway, shipping 600 KB of Three.js to every player, which matters on the web
 // and matters more inside an app download. The files remain in the repo as the
 // offline tool that regenerates that atlas.
-const files = ['beast', 'eagle', 'glaciere', 'furnace', 'mother', 'theme', 'mat', 'prism', 'types', 'i18n', 'media', 'quests', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'pets', 'braid', 'game', 'perf', 'touch']
+const files = ['beast', 'eagle', 'glaciere', 'furnace', 'mother', 'theme', 'mat', 'prism', 'types', 'i18n', 'media', 'quests', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'wolves', 'pets', 'braid', 'game', 'perf', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 // THE MUSIC MANIFEST. Scored tracks are dropped into assets/music/ and turned
 // on by rebuilding — no code edit per track, and no reference to a file that is

@@ -5,6 +5,11 @@ const DIFFS = [
   { cores: 5, edmg: 2, ehp: 1.15, pdmg: 1, espd: 1.2, lives: 9 },
 ];
 function DF() { return DIFFS[G.save.diff]; }
+// The real input readers, aliased once. Player.update SHADOWS `inD`/`inP` with
+// dead stubs while she is stunned (one line instead of a check at every input
+// site), and a `const` cannot initialise from the name it is shadowing — so the
+// originals are captured here, at load, from the hoisted declarations.
+const IN_D = inD, IN_P = inP;
 function hasCrest(id) { return G.save.equip.indexOf(id) >= 0; }
 function hasMod(id) { return !!G.save.abil[id]; }
 function hasSkill(id) { return G.save.skills && G.save.skills.indexOf(id) >= 0; }
@@ -344,6 +349,11 @@ class Player {
     this.clawT = 0; this.clawCD = 0; this.pounceT = 0;   // FERAL CLAWS (robo-cat)
     this.armCD = 0; this.songT = 0; this.songCD = 0; this.starCD = 0;
     this.downBuf = 0; this.pogoT = 0; this.slowT = 0;   // frost-slow from the Archivist
+    // THE STUN. Nothing in the game took her controls away until the Wolf Pack
+    // Alpha's roar, and taking them away is the most expensive thing a boss can
+    // do to a player — so it is one field, read in exactly one place, and every
+    // move that sets it has a wind-up long enough to leave the radius.
+    this.stunT = 0;
     // scarf (4 segments) + tail (3 segments) spring chains — angles + velocities
     this.scarfA = [-0.4, -0.55, -0.7, -0.85]; this.scarfV = [0, 0, 0, 0];
     this.tailA = [0.9, 0.75, 0.6]; this.tailV = [0, 0, 0];
@@ -364,6 +374,18 @@ class Player {
   gainVolts(n) { this.volts = clamp(this.volts + Math.round(n * (hasCrest('siphon') ? 1.5 : 1)) + (relicHas('silk') ? 2 : 0), 0, this.voltMax()); }
   update(dt) {
     if (this.dead) return;
+    // ---- STUNNED: THE CONTROLS ARE GONE, AND THEY ARE GONE ALL AT ONCE ------
+    // Gating each input site separately is how a stun ends up letting you dash
+    // out of it because one branch was missed. `inD`/`inP` are top-level
+    // functions in the concatenated build, so SHADOWING them for the length of
+    // this method kills every read in it — walk, jump, attack, dash, cast, the
+    // pad, the touch controller — from one line, which is also the only way
+    // RULE ONE holds without four copies of the same check.
+    const _stun = (this.stunT = Math.max(0, (this.stunT || 0) - dt)) > 0;
+    const inD = _stun ? () => false : IN_D, inP = _stun ? () => false : IN_P;
+    if (_stun && chance(0.5))
+      addPart(this.x + this.w / 2 + rnd(-10, 10), this.y - 4,
+        rnd(-30, 30), rnd(-50, -20), 0.4, '#ffe08a', 2, 60);
     // she TURNS, fast but with weight: the body flexes through the flip in
     // ~100ms and kicks a little dust — same law as every creature in the game
     {
@@ -3172,6 +3194,12 @@ class Enemy {
       if (chance(dt * 2.2)) addPart(this.x + this.w / 2 + rnd(-5, 5), this.y - 2, rnd(-10, 10), -22, 0.7, '#37ffd0', 2, -20, true);
       return;
     }
+    // THE PACK CHANGED SIDES. Handled before every other behaviour and it
+    // returns, so nothing below it runs: not the hunt, not the wind-up, and —
+    // because touch damage lives at the BOTTOM of this method — not the
+    // contact hit either. A friendly wolf you cannot walk through is not
+    // friendly.
+    if (typeof wolfTameStep === 'function' && wolfTameStep(this, dt)) return;
     // charmed by the Song: it keeps the body and quiets the orders
     if (this.hypnoT > 0) {
       this.hypnoT -= dt; this.stagT = 0;
@@ -3481,11 +3509,15 @@ class Enemy {
         return;
       }
     }
-    // Zone A ground minions are the boss's WHELPS — smaller versions of the
-    // virus beast itself, assembled from the same parts rig. CLAWBYTE only:
-    // the Odyssey's creatures never fall back onto the machine art, not even
-    // for a frame while their own sheets load.
+    // ZONE A'S GROUND MACHINES ARE THE PACK. They used to be the boss's WHELPS
+    // — smaller copies of NULLFANG off the same parts rig — which made the
+    // first enemy in the game a spoiler for the first boss and left the opening
+    // kingdom reading as lion, lion, lion, big lion. They are electronic wolves
+    // now (js/wolves.js), and the whelp rig stays as the fallback for the one
+    // frame before the plates land. CLAWBYTE only: the Odyssey's creatures
+    // never fall back onto the machine art.
     const heroEn = typeof isHero === 'function' && isHero();
+    if (isWolf(this) && drawWolf(c, this)) return;
     if (!heroEn && G.roomDef && G.roomDef.zone === 'A' && (this.kind === 'crawler' || this.kind === 'hopper')
         && typeof drawBeastMini === 'function' && drawBeastMini(c, this)) return;
     // every flying minion is a small TALONHOST — talons only, no feathers
@@ -4198,8 +4230,15 @@ function bossFork(b) {
   if (typeof isHero === 'function' && isHero()) return false;
   b.forkAsked = true;
   b.hp = 0; b.vx = 0; b.vy = 0; b.stagT = 0;
-  brOffer(b.kind === 'glitch' ? 'firstboss' : 'boss');
+  // G.forkBoss FIRST, and that ordering is now load-bearing. It used to be set
+  // after brOffer because brOffer only opened a dialog and the answer arrived
+  // frames later. Under TAME_ONLY brOffer ANSWERS ON THE SPOT — and brAnswer
+  // reads G.forkBoss to find the creature it is answering about, so setting it
+  // afterwards meant every guardian resolved into an empty branch: no tame, no
+  // spoil, no flag, and a boss left standing at zero health. tests/wolves.cjs
+  // caught it on the Alpha.
   G.forkBoss = b;
+  brOffer(b.kind === 'glitch' ? 'firstboss' : 'boss');
   return true;
 }
 // `dazeAt` opts a guardian into the hit-group break (see DAZE_WINDOW in
@@ -4217,6 +4256,12 @@ const BSTAT = Object.assign({
   // still has to stand over NYA-9 (36), and at 34 it stood under her.
   prism: { w: 62, h: 46, hp: 520 },
   mother: { w: 120, h: 120, hp: 750 },
+  // THE ALPHA. The first mini-boss in the run, and the only one that is TAMED
+  // rather than destroyed — see js/wolves.js. Wider than NULLFANG and shorter:
+  // it is a quadruped that fights along the floor, and its reach is the length
+  // of it. 300 HP puts it just above the first guardian's 220 while she still
+  // has no dash, which is where the fight wants to sit — losable, not long.
+  alpha: { w: 104, h: 58, hp: 300 },
 // ...and the Eye's constructs join the same table, so every piece of machinery
 // that already works on a boss — the hurt flash, the health bar, the telegraph
 // wash, the artbible harness — works on them without a second code path. They
@@ -4649,6 +4694,20 @@ class Boss {
         }
         return;
       }
+      // THE ALPHA GETS A GUARDIAN'S CEREMONY, because it earns one: it is the
+      // first thing in the run with a name, a theme of its own and a fight you
+      // can lose. What it does not get is a guardian's REWARD chain — see
+      // onBossDead — and it does not get the fork, because taming is the only
+      // ending it has.
+      if (this.kind === 'alpha') {
+        if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
+          this.st = 'intro'; this.t = 2.0; this.roared = false;
+          sfx('ui'); cam.shake = Math.max(cam.shake, 3);
+          setMusic('boss_alpha');
+          G.toast(t('alpha_meet'));
+        }
+        return;
+      }
       if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
         // THE STIR: it hears her. The wake itself is quiet — servos, a
         // breath — the ROAR belongs to the moment it reaches full height.
@@ -4667,14 +4726,14 @@ class Boss {
         // the room answers: shake, rumble, a burst off the body
         this.roared = true;
         sfx({ glitch: 'roar_beast', brood: 'roar_eagle', zero: 'roar_glc',
-              atlas: 'roar_drg', prism: 'roar_prism' }[this.kind] || 'roar');
+              atlas: 'roar_drg', prism: 'roar_prism', alpha: 'roar_beast' }[this.kind] || 'roar');
         cam.shake = Math.max(cam.shake, 11);
         this.roarBuzzT = 0.8;
         if (typeof padRumble === 'function') padRumble(0.9, 0.7, 650);
         if (typeof roarWave === 'function')
           roarWave(this.cx(), this.cy() - this.h * 0.35,
             { glitch: '#b48cff', brood: '#ff5f6d', zero: '#a5d8ff',
-              atlas: '#ffd76a', prism: '#37ffd0' }[this.kind] || '#e05aff');
+              atlas: '#ffd76a', prism: '#37ffd0', alpha: '#ffc24a' }[this.kind] || '#e05aff');
         burst(this.cx(), this.cy() - this.h * 0.3, 16, '#ffffff', 260, 0.5, 160, 3, true);
       }
       if (this.kind === 'atlas' && this.nestFootY != null && this.t <= 0.6 && !this.nestLanded) {
@@ -6071,6 +6130,11 @@ class Boss {
       // thing; the grammar — drift, wind up with your name on it, commit,
       // recover — is the same, and being the same is what makes them
       // learnable in a game that is about to have five more fights in it.
+      // ---- THE ALPHA ---------------------------------------------------
+      // Five skills and two recoveries, all of it in js/wolves.js so this
+      // switch does not grow a sixth hand-written machine. It is not one of
+      // the Eye's constructs and it is not a guardian: it is the pack.
+      case 'alpha': alphaStep(this, dt, px, py); break;
       case 'chime': case 'carrier': case 'moth': case 'lattice': case 'lens': {
         const K = MINI_KIT[this.kind];
         const dist = px - this.cx(), adist = Math.abs(dist);
@@ -6507,7 +6571,8 @@ class Boss {
     // The old test ORed the art keys across bosses, so NULLFANG counted as
     // "has a body" whenever the EAGLE's sheet happened to be loaded. Per-kind,
     // from one table, is the only version of this that cannot be wrong.
-    if (this.dead && !heroWorld && !BOSS_ART[this.kind] && this.kind !== 'mother') return;
+    if (this.dead && !heroWorld && !BOSS_ART[this.kind] && this.kind !== 'mother'
+        && this.kind !== 'alpha') return;
     const P = PAL[G.roomDef.zone];
     // The intro used to fade the boss up from nothing, which made sense when it
     // arrived out of empty air. Now every guardian is already lying there in a
@@ -6609,6 +6674,10 @@ class Boss {
       // shatters into rainbow shards while its turntable spins down, and
       // MOTHER-V's finale plays out — plates one by one, limp tendrils,
       // the fallen halo ringing on the floor, the core flickering out LAST
+      // THE ALPHA DOES NOT DIE. It yields — so what stands in the room after
+      // the fight is the freed plate, not a death animation, and it stays
+      // there for the rest of the run (see PET_HOMES).
+      if (this.kind === 'alpha') { drawAlpha(c, this, cx, cy); c.restore(); return; }
       if (this.kind === 'mother') {
         if (typeof drawMother === 'function') drawMother(c, this);
         c.restore(); return;
@@ -6710,6 +6779,7 @@ class Boss {
     // rather than borrowing somebody else's.
     // the Eye's constructs are drawn, not composited — see MINIS
     if (isMini(this)) { drawMini(c, this, cx, cy); c.restore(); return; }
+    if (!heroWorld && this.kind === 'alpha') { drawAlpha(c, this, cx, cy); c.restore(); return; }
     if (!heroWorld && BOSS_ART[this.kind]) {
       if (typeof mediaFetch === 'function') mediaFetch(BOSS_ART[this.kind]);
       drawBossHold(c, this); c.restore(); return;

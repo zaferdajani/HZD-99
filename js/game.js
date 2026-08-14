@@ -118,6 +118,21 @@ const G = {
     // in them. Returning here keeps the guardians' whole reward chain (which
     // assumes a creature that had a life before the Song) off a thing that
     // never did.
+    // THE ALPHA. It is not a guardian and it is not one of the Eye's things, so
+    // it pays in the one currency neither of them can: THE PACK CHANGES SIDES.
+    // Every wolf in the game, in every room, from this moment — including the
+    // ones standing in rooms she cleared an hour ago, because the flag is read
+    // at draw time rather than baked into a spawn.
+    if (kind === 'alpha') {
+      this.save.flags.alpha = 1;
+      invAdd('batt');
+      showItem(t('alpha_won'), t('alpha_wond'));
+      this.save.scrap += 60;
+      // its own cue, and it is the only one in the game that resolves major
+      if (typeof setMusic === 'function') setMusic('alphaTame');
+      persist();
+      return;
+    }
     if (typeof MINIS !== 'undefined' && MINIS[kind]) {
       invAdd('batt');
       showItem(t('i_batt'), t('i_battd'));
@@ -379,7 +394,8 @@ function loadRoom(id) {
   });
   // the freed guardians stay home: every purified boss lives on in its
   // old arena as her pet, forever
-  const PET_HOMES = { A4: ['glitch', 20], B4: ['brood', 15], C3: ['atlas', 15], D3: ['zero', 15], X1: ['prism', 20] };
+  const PET_HOMES = { A4: ['glitch', 20], B4: ['brood', 15], C3: ['atlas', 15], D3: ['zero', 15], X1: ['prism', 20],
+                      A10: ['alpha', 20] };
   const ph2 = PET_HOMES[id];
   if (ph2 && G.save.flags['boss' + ph2[0].charAt(0).toUpperCase() + ph2[0].slice(1)] && !G.boss
       && !(G.save.flags.killed && G.save.flags.killed[ph2[0]])) {
