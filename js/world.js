@@ -64,12 +64,17 @@ const ROOMS = {
     ents: [],
     build(g) {
       frame(g); openL(g); openR(g);
-      // THE STEP, then THE GAP. Both are inside one jump and neither can kill
-      // her — the gap is two tiles of floor removed with solid ground under it,
-      // so a missed jump costs a moment and teaches the same lesson again.
+      // THE STEP. One tile, inside one jump, and nothing else — the gap that
+      // used to sit at tile 22 was a hole in the road right in front of the
+      // city gates, which is exactly where the ground should look most
+      // deliberate. It read as a pothole at the front door and it is gone.
       rect(g, 12, 14, 14, 15, '#');
-      rect(g, 22, 15, 23, 15, '.');
-      hline(g, 28, 32, 11, '=');
+      // ...and the THRESHOLD: the ground rises a step as she reaches the gates,
+      // so the approach ends on a made surface rather than on more of the same
+      // dirt. It is walk-up height, so it never asks for a jump she has not
+      // been taught yet.
+      rect(g, 33, 14, 39, 15, '#');
+      hline(g, 28, 31, 11, '=');
     } },
   A0: { zone: 'A', w: 34, h: 17, exits: { R: 'A1', L: 'W2' },
     // The waking floor teaches the whole loop, not just the verbs: the machine

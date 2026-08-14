@@ -3423,6 +3423,89 @@ function drawTiles(P) {
           }
         }
       }
+      // ===================================================================
+      // THE SIDES AND THE UNDERSIDE — the half of the terrain that was never
+      // drawn, and the reason the floor read as flat next to the backdrop.
+      //
+      // A raised block and a hole in the ground were both a texture cut with a
+      // ruler: perfectly vertical, perfectly straight, no lip, no crumble, no
+      // shadow, nothing hanging off it. The eye reads that as a cut-out, and
+      // no amount of depth in the SKY fixes it, because the plane the player
+      // is standing on is the one they are actually looking at.
+      //
+      // Three treatments, all derived from the tile's own position so they are
+      // stable frame to frame and continuous between neighbours:
+      //
+      //   THE BITE     an irregular silhouette on every exposed vertical face,
+      //                so the edge is broken rock rather than a straight line
+      //   THE LIP      a lit rim on the outer few pixels of that face, and a
+      //                dark band just inside it, which is what gives a vertical
+      //                surface its roundness
+      //   THE HANG     teeth and roots dropping off every OVERHANG, plus the
+      //                occlusion under it. This is the single loudest depth cue
+      //                in the reference and the game had none of it.
+      // ===================================================================
+      {
+        const L = tileAt(tx - 1, ty), R2 = tileAt(tx + 1, ty), D = tileAt(tx, ty + 1);
+        const solid2 = (q) => q === '#' || q === 'B';
+        const side = (dir) => {                       // dir -1 = left face
+          const fx = dir < 0 ? X : X + TILE;
+          c.save();
+          // the bite: shave a few pixels off in an irregular profile, using the
+          // rock behind it as the colour so the cut never shows a flat edge
+          c.globalCompositeOperation = 'destination-out';
+          c.beginPath(); c.moveTo(fx, Y);
+          for (let q = 0; q <= 4; q++) {
+            const yy = Y + (TILE / 4) * q;
+            const bite = hash2(tx * 11 + q, ty * 13) * 3.2;
+            c.lineTo(fx + dir * -bite, yy);
+          }
+          c.lineTo(fx, Y + TILE); c.lineTo(fx - dir * 4, Y + TILE); c.lineTo(fx - dir * 4, Y);
+          c.closePath(); c.fill();
+          c.restore();
+          // the dark band inside the face, then the lit rim on it
+          const gg2 = c.createLinearGradient(fx, 0, fx - dir * 9, 0);
+          gg2.addColorStop(0, 'rgba(0,0,0,0.42)');
+          gg2.addColorStop(1, 'rgba(0,0,0,0)');
+          c.fillStyle = gg2; c.fillRect(dir < 0 ? X : X + TILE - 9, Y, 9, TILE);
+          c.globalAlpha = exposed ? 0.5 : 0.28;
+          c.fillStyle = P.edge;
+          c.fillRect(dir < 0 ? X : X + TILE - 1.6, Y, 1.6, TILE);
+          c.globalAlpha = 1;
+        };
+        if (!solid2(L)) side(-1);
+        if (!solid2(R2)) side(1);
+        if (!solid2(D)) {
+          // THE HANG. Occlusion first, so what drops off the lip is lit against
+          // its own shadow rather than against the room behind it.
+          const og = c.createLinearGradient(0, Y + TILE, 0, Y + TILE + 22);
+          og.addColorStop(0, 'rgba(0,0,0,0.5)'); og.addColorStop(1, 'rgba(0,0,0,0)');
+          c.fillStyle = og; c.fillRect(X - 2, Y + TILE, TILE + 4, 22);
+          // ...and the teeth: three per tile, each a tapering root of the same
+          // material, length driven by the tile so a run of them reads as one
+          // ragged edge instead of a repeated stamp
+          const rock2 = (typeof isHero === 'function' && isHero()) ? null : rockTex(G.roomDef.zone);
+          for (let q = 0; q < 3; q++) {
+            const hx = X + 4 + q * 11 + hash2(tx * 7 + q, ty * 5) * 5;
+            const hl = 5 + hash2(tx * 3 + q, ty * 9) * (exposed ? 13 : 7);
+            const hw = 3.4 + hash2(tx + q, ty) * 2.6;
+            c.save();
+            c.beginPath();
+            c.moveTo(hx - hw / 2, Y + TILE - 1);
+            c.lineTo(hx + hw / 2, Y + TILE - 1);
+            c.lineTo(hx + (hash2(tx, q) - 0.5) * 3, Y + TILE + hl);
+            c.closePath();
+            c.clip();
+            if (rock2) c.drawImage(rock2, X % ROCK_TW, Y % ROCK_TH, TILE, TILE, X, Y + TILE - TILE + 2, TILE, TILE + hl);
+            else { c.fillStyle = P.solid; c.fillRect(X - 4, Y + TILE - 4, TILE + 8, hl + 8); }
+            // and darken as it hangs — the tip is furthest from the light
+            const tg = c.createLinearGradient(0, Y + TILE, 0, Y + TILE + hl);
+            tg.addColorStop(0, 'rgba(0,0,0,0)'); tg.addColorStop(1, 'rgba(0,0,0,0.55)');
+            c.fillStyle = tg; c.fillRect(X - 4, Y + TILE - 2, TILE + 8, hl + 4);
+            c.restore();
+          }
+        }
+      }
     } else if (ch === '=') {
       // the authored deck is drawn per RUN after this loop; this flat bar is
       // only the fallback for before the sheet lands (or if it never does)
