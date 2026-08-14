@@ -21,7 +21,8 @@ look at to answer "did that actually happen".
 | `furnace/` | FURNACE CHOIR | 14 |
 | `glaciere/` | GLACIERE, the Frozen Purifier | 11 |
 | `mother/` | MOTHER-V, the Null Core | 16 |
-| `_sheets/` | Contact sheets and before/after comparisons | 15 |
+| `lairs/` | The six boss lairs, as generated | 6 |
+| `_sheets/` | Contact sheets and before/after comparisons | 16 |
 
 `beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the
 same lion in the poses the rig has to hit: the open-jaw roar in profile, the
@@ -43,6 +44,17 @@ is the evidence — coil, launch, rise, apex, fall and strike are the SAME
 standing drawing at slightly different scales, which is what "the way it jumps
 does not show a full motion of a lion jumping" looks like when you stop
 believing the code comments and photograph it.
+
+`lairs/` is where each guardian sleeps, generated on pure black and keyed out
+by `tools/blackkey.cjs` into `assets/backgrounds/lair_*.png`. The JPEGs here are
+the originals with their black field intact — keep them, because the key is a
+lossy step and re-running it from the plate is the only way to change the
+feather or the threshold without regenerating the art. `_sheets/boss_lairs.jpg`
+is all six in the running game with the guardian still asleep in its bed.
+
+`_sheets/tell_wash.jpg` is the shared telegraph wash, three guardians shown
+rest-then-wind-up, which is the evidence for the two the harness caught having
+no warning colour at all.
 
 `_sheets/lion_coil_after.jpg` and `lion_claw_daze.jpg` are the same tool run on
 the finished work: the one-second coil beat by beat (stalk → 15% → 55% → the

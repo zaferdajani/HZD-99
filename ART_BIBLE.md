@@ -224,7 +224,37 @@ advantage is worth doing.
 not open on spaced hits, pays more damage, closes, and cannot be stunlocked
 (`tests/daze.cjs`).
 
-### 3.9 EVERY MOTION GETS A CONTACT SHEET, AND THE SHEET IS COMMITTED
+### 3.9 EVERY GUARDIAN HAS A LAIR, AND IT SAYS WHAT THE GUARDIAN IS
+
+A creature asleep on an empty floor tells you nothing about itself. Each arena
+carries **one authored prop the guardian was sleeping in**, and it must come
+from the animal's own nature, not from the zone's colour scheme:
+
+| Guardian | Lair |
+|---|---|
+| NULLFANG | a den scraped out of wrecked server racks, bedded with shredded boards |
+| TALONHOST | a nest woven from antenna spars and cable, on the crown of a mast |
+| FURNACE CHOIR | the cracked crucible it was cast in, still holding cooling slag |
+| GLACIERE | an ice peak standing out of a frozen spring, flat-crowned |
+| PRISM PROWLER | a geode alcove with a worn crystal ledge across its mouth |
+| MOTHER-V | a hanging cradle of braided fibre-optic root |
+
+Rules:
+
+- **It is scenery, not a cutscene.** The prop is drawn in the room layer, at the
+  boss's SPAWN position, and it stays there for the whole fight. The animal
+  walks away from its bed; the bed does not disappear.
+- **Anchored by where the boss's foot sits inside the plate** (`ax`/`ay` in
+  plate-fractions, `LAIR` in `js/game.js`). Not by a corner offset — corners
+  need re-guessing every time the art is regenerated, and it will be.
+- **Generated on pure black and keyed with `tools/blackkey.cjs`**, which finds
+  the background by FLOOD FILL from the borders. A luminance key looks fine on
+  the ice peak and destroys the lion's den, half of which *is* near-black
+  gunmetal; only black connected to the plate's edge is background.
+- **Lazy-loaded** like every other sheet — a lair is fetched when you are
+  standing in the arena that has it, never before.
+
+### 3.10 EVERY MOTION GETS A CONTACT SHEET, AND THE SHEET IS COMMITTED
 
 `tools/leapshot.cjs <out.png> [scale] [labelFilter]` lays a motion out beat by
 beat. Look at it. Then put it in `assets/source/_sheets/`.

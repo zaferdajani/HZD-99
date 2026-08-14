@@ -3596,6 +3596,76 @@ function renderTileLayer(P) {
   c = main;
   tileDirty = false;
 }
+// ===========================================================================
+// THE LAIR. Every guardian was already asleep when you walked in — `dorm` poses
+// and per-boss wake roars — but it was asleep on the FLOOR, in an empty room,
+// which says nothing about what it is. A creature is told by where it lives:
+// the eagle has a nest, the unicorn stands on ice over frozen water, the dragon
+// sleeps in the crucible it was cast in.
+//
+// So each arena now contains one authored prop, and the boss starts IN it. It
+// is not a cutscene — it is scenery the animal is standing on, and the wake is
+// the same movement it always was, just performed somewhere that means
+// something. The prop stays after the fight starts; it is the room, not an
+// intro.
+//
+// IT IS BACKGROUND, NOT FURNITURE. The first cut drew the lairs in the entity
+// layer at full strength and the den alone was 560 px of a 960 px room — a
+// large opaque object standing in the middle of an arena you have to fight in,
+// which is worse than an empty room, because now the floor you can use is
+// hidden behind a picture you cannot.
+//
+// So it goes BEHIND the tile layer, at parallax, dimmed into the room's own
+// air. The level's real geometry — floor, platforms, the ground she stands and
+// fights on — draws over the top of it, which means the prop can never take a
+// pixel of playable space and never lies about where a surface is. What is left
+// is what was wanted: the animal is asleep on something, and the something
+// recedes into the room instead of occupying it.
+//
+// Anchoring: `ax`/`ay` are where the boss's SPAWN FOOT sits inside the plate,
+// in plate-fractions. That is the only sane way to place these — measuring from
+// a corner means every plate needs its own offset re-guessed whenever the art
+// is regenerated, and the art will be regenerated.
+//   par  — parallax factor: how much of the camera's motion it takes. < 1 puts
+//          it behind the room without needing a second scene graph.
+//   dim  — how far it sinks into the room's air. Kept high; a lair that reads
+//          as strongly as the boss is competing with the boss.
+const LAIR = {
+  glitch: { key: 'lairDen',    w: 360, ax: 0.50, ay: 0.62, par: 0.86, dim: 0.38 },
+  brood:  { key: 'lairNest',   w: 250, ax: 0.50, ay: 0.50, par: 0.86, dim: 0.36 },
+  atlas:  { key: 'lairForge',  w: 340, ax: 0.50, ay: 0.70, par: 0.86, dim: 0.34 },
+  zero:   { key: 'lairPeak',   w: 210, ax: 0.46, ay: 0.30, par: 0.88, dim: 0.36 },
+  prism:  { key: 'lairVault',  w: 210, ax: 0.46, ay: 0.70, par: 0.88, dim: 0.36 },
+  mother: { key: 'lairCradle', w: 230, ax: 0.50, ay: 0.60, par: 0.88, dim: 0.36 },
+};
+function drawLair() {
+  const b = G.boss;
+  if (!b || (typeof isHero === 'function' && isHero())) return;
+  const L = LAIR[b.kind];
+  if (!L) return;
+  const im = MEDIA_IMG[L.key];
+  if (!im || !im.naturalWidth) return;
+  // the SPAWN position, not the live one — the whole point is that the lair
+  // stays where the animal was sleeping while the animal walks away from it
+  const fx = (b.spawnX != null ? b.spawnX : b.x) + b.w / 2;
+  const fy = (b.spawnY != null ? b.spawnY : b.y) + b.h;
+  const w = L.w, h = w * im.naturalHeight / im.naturalWidth;
+  const x0 = fx - w * L.ax, y0 = fy - h * L.ay;
+  c.save();
+  // parallax about the camera's centre: the caller has already translated by
+  // -cam, so shifting by (1 - par) x the camera offset slides it back
+  c.translate(camSX() * (1 - L.par), camSY() * (1 - L.par));
+  c.globalAlpha = 1 - L.dim;
+  c.drawImage(im, x0, y0, w, h);
+  // ...and a veil of the room's own colour over it, so it sits IN the air
+  // rather than behind a sheet of grey. Multiply-ish via the zone glow at low
+  // alpha keeps it the room's picture and not a decal.
+  c.globalAlpha = L.dim * 0.5;
+  c.globalCompositeOperation = 'source-atop';
+  c.fillStyle = (PAL[G.roomDef.zone] || {}).far || '#0b0d11';
+  c.fillRect(x0 - 4, y0 - 4, w + 8, h + 8);
+  c.restore();
+}
 function drawStatics(P) {
   for (const s of G.statics) {
     const bob = Math.sin(performance.now() / 500 + s.t) * 3;
@@ -4538,6 +4608,7 @@ function drawWorldFrame() {
   if (!(typeof isHero === 'function' && isHero())) drawCeiling(G.roomDef.zone);
   c.save();
   c.translate(-Math.round(camSX()), -Math.round(camSY()));
+  drawLair();                       // behind the level — see the LAIR table
   if (tileDirty) renderTileLayer(P);
   c.drawImage(tileCv, 0, 0);
   // X1 hardlight bridge: alive while the Prowler stands, red and flickering

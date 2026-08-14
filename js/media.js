@@ -34,6 +34,16 @@ const MEDIA_SRC = {
     ceilD: 'assets/backgrounds/ceil_d.jpg',
     ceilE: 'assets/backgrounds/ceil_e.jpg',
     ceilX: 'assets/backgrounds/ceil_x.jpg',
+    // THE LAIRS. One authored prop per guardian, keyed off its generation
+    // plate's black field by tools/blackkey.cjs, so each has real alpha and
+    // occludes the room properly. Lazy like everything else: a lair is only
+    // ever fetched when you are standing in the arena that has it.
+    lairDen: 'assets/backgrounds/lair_den.png',        // NULLFANG    — scrap den
+    lairNest: 'assets/backgrounds/lair_nest.png',      // TALONHOST   — mast nest
+    lairForge: 'assets/backgrounds/lair_forge.png',    // FURNACE     — the crucible
+    lairPeak: 'assets/backgrounds/lair_peak.png',      // GLACIERE    — ice over a frozen spring
+    lairVault: 'assets/backgrounds/lair_vault.png',    // PRISM       — geode shelf
+    lairCradle: 'assets/backgrounds/lair_cradle.png',  // MOTHER-V    — fibre cradle
     // full-frame futuristic vistas (newer set; the gloomy atlas stays for later)
     vistaCity: 'assets/backgrounds/vista_city.jpg',
     vistaCrystal: 'assets/backgrounds/vista_crystal.jpg',
