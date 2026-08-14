@@ -15,10 +15,13 @@ const fs = require('fs'), path = require('path');
 (async () => {
   const [dir, out, cellArg] = process.argv.slice(2);
   const cell = parseInt(cellArg || '300', 10);
-  const files = fs.readdirSync(dir).filter(f => /\.png$/i.test(f)).sort();
+  // jpg too: the archive stores its reference copies as 1024/q90 JPEG (see
+  // assets/source/README.md), so a PNG-only filter silently produced an empty
+  // sheet for every directory that had already been crushed.
+  const files = fs.readdirSync(dir).filter(f => /\.(png|jpe?g)$/i.test(f)).sort();
   if (!files.length) { console.log('no PNGs in ' + dir); process.exit(1); }
   const imgs = files.map(f => ({
-    name: f.replace(/\.png$/i, ''),
+    name: f.replace(/\.(png|jpe?g)$/i, ''),
     url: 'data:image/png;base64,' + fs.readFileSync(path.join(dir, f)).toString('base64'),
   }));
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });

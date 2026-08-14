@@ -149,6 +149,12 @@ function hurtBoxOf(e) {
   return e;
 }
 
+// How long a hit stays "recent" for the purposes of grouping, and what the
+// window is worth once it opens. 1.1 s is a little over three swings of a
+// three-hit combo at her cadence, so a committed player groups without having
+// to frame-count, and a player poking from range never does.
+const DAZE_WINDOW = 1.1, DAZE_MUL = 1.6;
+
 function dealDmg(e, dm, atkEl, x, y, noPenalty) {
   // THE GUARD'S PLATE. Up by default, down only while it is winded from its
   // own lunge — so the answer is not "hit it more", it is "hit it THEN".
@@ -193,6 +199,24 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty) {
   let mul = elemMul(atkEl, def);
   if (noPenalty && mul < 1) mul = 1;   // the blade never gets worse for the suit worn
   if (e.hypnoT > 0) mul *= 1.5;            // charmed things do not brace
+  // ---------------------------------------------------------------------
+  // THE HIT GROUP. A guardian that only ever loses HP gives the player no
+  // reason to press an advantage — every hit is worth the same, so trading
+  // one at a time from max range is optimal play and the fight goes quiet.
+  //
+  // So a run of hits landed CLOSE TOGETHER breaks it: the counter is on a
+  // rolling window, and it only counts because the window has not lapsed.
+  // Opting in is per-boss (`dazeAt`), the state change is REQUESTED here and
+  // taken by the boss's own update — damage code must not reach into a state
+  // machine, or the boss can be yanked out of a committed move mid-frame.
+  if (e.dazeAt && !e.dead && (e.dazeCD || 0) <= 0 && e.st !== 'daze') {
+    e.dazeHits = ((e.dazeWin || 0) > 0 ? (e.dazeHits || 0) : 0) + 1;
+    e.dazeWin = DAZE_WINDOW;
+    if (e.dazeHits >= e.dazeAt) { e.dazeReq = true; e.dazeHits = 0; }
+  }
+  // and while it IS broken open, hits land harder — the window has to be worth
+  // taking, or it is just a pause in the fight
+  if (e.st === 'daze') mul *= DAZE_MUL;
   const out = Math.max(1, Math.round(dm * mul));
   e.hp -= out; e.hurtT = 0.15;
   if (mul >= 2) {

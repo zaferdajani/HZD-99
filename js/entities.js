@@ -4014,8 +4014,14 @@ function bossFork(b) {
   G.forkBoss = b;
   return true;
 }
+// `dazeAt` opts a guardian into the hit-group break (see DAZE_WINDOW in
+// types.js): land this many hits inside the rolling window and it comes apart
+// for a second and a half. NULLFANG is the first guardian you meet and the one
+// whose whole read is "a big cat you can out-time", so it is the right place
+// to teach the mechanic; the others are deliberately left off until this one
+// has been played enough to know the number is right.
 const BSTAT = {
-  glitch: { w: 84, h: 56, hp: 220 },
+  glitch: { w: 84, h: 56, hp: 220, dazeAt: 5 },
   brood: { w: 96, h: 64, hp: 320 },
   atlas: { w: 62, h: 74, hp: 460 },
   zero: { w: 112, h: 62, hp: 500 },   // GLACIERE: a long floating quadruped
@@ -4262,6 +4268,7 @@ class Boss {
     this.hurtT = 0; this.dead = false; this.anim = 0; this.face = -1;
     this.cycle = 0; this.marks = []; this.beam = null;
     this.hypnoT = 0; this.stagT = 0;
+    this.dazeAt = s.dazeAt || 0; this.dazeHits = 0; this.dazeWin = 0; this.dazeCD = 0;
     // faceVis trails face, so a machine visibly TURNS instead of teleporting its
     // nose to the other side. Passing through zero squashes the body, which reads
     // as it swinging round.
@@ -4541,6 +4548,54 @@ class Boss {
         this.vy += 2100 * dt;
         this.swipeCD = this.swipeCD == null ? 0 : this.swipeCD - dt;
         const dist = px - this.cx(), adist = Math.abs(dist);
+        // ---- THE BREAK ----------------------------------------------------
+        // dealDmg counts hits landed close together and raises `dazeReq`. It
+        // is taken HERE and only here, and only out of a state the boss is not
+        // committed to: interrupting a launched pounce mid-air would leave the
+        // animal falling in a pose that has no landing, and interrupting the
+        // roar would eat the orb it has already spawned. Everything the player
+        // can stand next to and hit — the stalk, the idle, the wind-ups — is
+        // fair game, which is all of the fight that matters for this.
+        if (this.dazeReq) {
+          this.dazeReq = false;
+          const committed = this.st === 'pounce' || this.st === 'spring' || this.st === 'dive'
+            || this.st === 'nullcharge' || this.st === 'nullhop' || this.st === 'nullend'
+            || this.st === 'intro' || this.st === 'dorm' || this.st === 'daze';
+          if (!committed) {
+            this.st = 'daze';
+            // phase two shrugs it off faster — the same read, a smaller prize
+            this.dazeDur = this.phase === 2 ? 1.25 : 1.7;
+            this.t = this.dazeDur;
+            this.vx = 0; this.swiped = false; this.swiped2 = false;
+            // the break is an EVENT and gets announced on every channel the
+            // rest of the fight uses, or the player will not notice they have
+            // earned anything and will keep playing the safe way
+            sfx('phase'); sfx('bosshit');
+            cam.shake = Math.max(cam.shake, 8);
+            G.hitStop = Math.max(G.hitStop, 0.11);
+            burst(this.cx(), this.y + 50, 26, '#d68cff', 340, 0.7, 260, 4, true);
+            if (typeof roarWave === 'function') roarWave(this.cx(), this.y + 60, '#d68cff');
+            if (typeof padRumble === 'function') padRumble(0.75, 0.6, 220);
+            G.toast(t('daze_open'));
+          }
+        }
+        if ((this.dazeWin || 0) > 0) this.dazeWin -= dt;
+        if ((this.dazeCD || 0) > 0) this.dazeCD -= dt;
+        if (this.st === 'daze') {
+          this.vx = 0; this.t -= dt;
+          if (this.t <= 0) {
+            // it comes back UP, not straight back to work: `recover` is the
+            // existing landing settle and it already reads as "getting its feet
+            // under it", which is exactly the beat this wants.
+            this.st = 'recover'; this.t = 0.42;
+            // and it cannot be broken again immediately, or a fast player
+            // stunlocks the guardian and the fight stops being a fight
+            this.dazeCD = this.phase === 2 ? 7 : 5.5;
+            this.dazeHits = 0; this.dazeWin = 0;
+            this.swipeCD = Math.max(this.swipeCD, 0.5);
+          }
+          break;
+        }
         if (this.st === 'idle') {
           this.vx = 0; this.t -= dt;
           this.face = Math.sign(dist) || 1;
@@ -4581,17 +4636,23 @@ class Boss {
           }
           else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(5.5, 7); }
           else if (this.t <= 0 && adist > 170 && adist < 470) {
-            // THE COIL IS SHORTER NOW BECAUSE IT SAYS MORE. It ran 0.45 s, and
-            // for all that time the picture on screen was a standing lion —
-            // the only thing carrying the warning WAS the length, and a warning
-            // that long against one dodge is a move you beat by waiting. The
-            // coil is a real wind-up now (beastCoil): the hindquarters sink
-            // through three stages, the forelegs brace, the tail goes rigid a
-            // beat before launch. That reads in a third of a second, which is
-            // the tier a pounce belongs in — TELL_FAST, the same budget PRISM's
-            // dash gets — and it is still above the reaction floor.
-            this.st = 'crouch'; this.t = this.phase === 2 ? 0.26 : TELL_FAST;
-            this.vx = 0;
+            // THE COIL IS THE FIGHT'S BIGGEST SENTENCE, so it gets a second.
+            //
+            // I shortened this to a third of a second first, on the theory that
+            // better animation buys a shorter tell. Wrong instinct: this is the
+            // one move in the encounter that can cross the whole arena, and the
+            // player's answer to it is not a twitch, it is a decision about
+            // where to be. A decision needs time to make, and a moment that
+            // matters should LOOK like it matters.
+            //
+            // So it is a full second of a lion gathering itself — the hips
+            // loading, the veins running from virus purple to warning amber,
+            // sparks pulled INTO the haunches rather than thrown off them, arcs
+            // crawling up from the paws, and the claws coming out. See
+            // beastCoilFx. The difficulty is paid for on the other side: the
+            // leap leads her now, and in phase two it lands and goes again.
+            this.st = 'crouch'; this.t = this.phase === 2 ? 0.9 : 1.0;
+            this.vx = 0; this.coilTick = 0; this.coilFlashed = false;
           }
           else if (this.t <= 0) this.t = rnd(1.1, 1.9);
         } else if (this.st === 'swipewarn') {
@@ -4624,7 +4685,32 @@ class Boss {
           }
         } else if (this.st === 'crouch') {
           // flat to the ground, trembling with intent — then the pounce
-          this.vx = 0; this.t -= dt; this.windT = 0.3;
+          this.vx = 0; this.t -= dt; this.windT = 0.4;
+          {
+            // THE CHARGE, HEARD AND FELT. A tell carried on one channel is a
+            // tell half the room misses: the ladder climbs in pitch as the
+            // spring winds, the pad shakes harder, and the last quarter second
+            // trembles the camera so it lands even with the sound off.
+            const dur = this.phase === 2 ? 0.9 : 1.0;
+            const k = 1 - Math.max(0, Math.min(1, this.t / dur));
+            this.coilK = k;
+            this.coilTick = (this.coilTick || 0) - dt;
+            if (this.coilTick <= 0) {
+              this.coilTick = 0.16 - k * 0.09;
+              sfxChargeTick(0.15 + k * 0.85);
+              if (typeof padRumble === 'function') padRumble(0.12 + k * 0.5, 0.1 + k * 0.35, 90);
+            }
+            if (k > 0.74) cam.shake = Math.max(cam.shake, 1.5 + (k - 0.74) * 14);
+            // ...and the flash is an EVENT, so it gets one sound and one jolt
+            // rather than being part of the ramp. This is the beat that means
+            // "move now", and it lands with a fifth of a second still to go.
+            if (k > 0.80 && !this.coilFlashed) {
+              this.coilFlashed = true;
+              sfx('chargeReady'); cam.shake = Math.max(cam.shake, 6);
+              G.flash = Math.max(G.flash || 0, 0.10);
+              if (typeof padRumble === 'function') padRumble(0.8, 0.55, 140);
+            }
+          }
           if (this.t <= 0) {
             this.st = 'pounce';
             this.face = Math.sign(dist) || 1;
@@ -4636,7 +4722,19 @@ class Boss {
             const lead = dist + (player.vx || 0) * (this.phase === 2 ? 0.26 : 0.18);
             this.vx = clamp(lead * 1.6, -680, 680) * (this.phase === 2 ? 1.15 : 1) * spd;
             this.vy = -(420 + Math.min(260, adist * 0.5));
-            sfx('dash');
+            sfx('dash'); sfx('boom');
+            cam.shake = Math.max(cam.shake, 9);
+            G.flash = Math.max(G.flash || 0, 0.16);
+            this.coilK = 0;
+            // the stored charge LEAVES: a ring of it blows off the hind paws
+            for (let i = 0; i < 14; i++) {
+              const a = rnd(2.2, 4.1);
+              addPart(this.cx() - this.face * 18, this.y + this.h - 8,
+                Math.cos(a) * rnd(120, 300), Math.sin(a) * rnd(60, 220),
+                rnd(0.25, 0.45), i % 3 ? TELL_COL : '#fff6df', rnd(2.5, 4), 120, true);
+            }
+            if (typeof roarWave === 'function')
+              roarWave(this.cx(), this.y + this.h - 10, TELL_COL);
             // launch kickback: the hind paws throw dirt out behind the leap
             for (let i = 0; i < 7; i++)
               addPart(this.cx() - this.face * rnd(10, 40), this.y + this.h - rnd(0, 6),

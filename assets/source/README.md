@@ -16,11 +16,26 @@ look at to answer "did that actually happen".
 | Directory | Boss | Parts |
 |---|---|---|
 | `beast/` | NULLFANG, the Virus Beast | 15 |
+| `beast/motion/` | NULLFANG motion plates — roar, daze, claw, coil, leap | 11 |
 | `eagle/` | TALONHOST, the Iron Eagle | 19 |
 | `furnace/` | FURNACE CHOIR | 14 |
 | `glaciere/` | GLACIERE, the Frozen Purifier | 11 |
 | `mother/` | MOTHER-V, the Null Core | 16 |
-| `_sheets/` | Contact sheets and before/after comparisons | 13 |
+| `_sheets/` | Contact sheets and before/after comparisons | 15 |
+
+`beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the
+same lion in the poses the rig has to hit: the open-jaw roar in profile, the
+head-shake and the head-hang of the daze, the claw cocked / striking / studied
+close up, the amber coil, the launch, full airborne extension, the claws-first
+strike, and the stalk. They are **reference, not shipped art** — nothing in
+`js/` loads them. They exist so that "the leap has a real motion now" and "the
+swipe shows the claws" can be checked against a drawing of what those are
+supposed to look like, instead of against my description of what I did.
+
+Two of them changed the code after the fact, which is the point of having them:
+`07_coil` holds the tail rigid and DEAD LEVEL behind the spine where the rig had
+it low (a low tail reads as caution, a level one as commitment), and `05_claw_strike`
+draws the rake as FOUR separate claw trails rather than one ribbon.
 
 `_sheets/lion_leap_before.jpg` and `lion_leap_after.jpg` are `tools/leapshot.cjs`
 output: NULLFANG's pounce laid out beat by beat, before and after. The "before"
@@ -28,6 +43,11 @@ is the evidence — coil, launch, rise, apex, fall and strike are the SAME
 standing drawing at slightly different scales, which is what "the way it jumps
 does not show a full motion of a lion jumping" looks like when you stop
 believing the code comments and photograph it.
+
+`_sheets/lion_coil_after.jpg` and `lion_claw_daze.jpg` are the same tool run on
+the finished work: the one-second coil beat by beat (stalk → 15% → 55% → the
+flash at 88% → launch), and the near game — the claw cocked, mid-rake and
+following through, then the daze at its worst and on its way out.
 
 `_sheets/rake_before.jpg` and `rake_after.jpg` are not generated art — they are
 `tools/slashshot.cjs` output, the claw rake photographed in the four states it

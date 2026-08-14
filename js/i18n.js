@@ -13,6 +13,7 @@ function langName(id) { const l = LANGS.find(x => x.id === id); return l ? l.nam
 function isRTL() { const l = LANGS.find(x => x.id === LANG); return !!(l && l.rtl); }
 const I18N = {
 en: {
+  daze_open: '⚡ NULLFANG is reeling — hit it NOW',
   title: 'CLAWBYTE',
   pad_title: 'Controller', pad_generic: 'Gamepad connected',
   pad_on: '🎮 Controller connected — touch controls hidden',
@@ -363,6 +364,7 @@ en: {
   map_ctl: 'Drag or ✥ to pan   ·   wheel / pinch / Z · X to zoom   ·   E fit   ·   Q recentre   ·   M close',
 },
 ar: {
+  daze_open: '⚡ ناب العدم مترنّح — اضربه الآن',
   title: 'CLAWBYTE',
   pad_title: 'وحدة التحكم', pad_generic: 'تم توصيل وحدة تحكم',
   pad_on: '🎮 تم توصيل وحدة التحكم — أُخفيت أزرار اللمس',
@@ -691,6 +693,7 @@ ar: {
   map_ctl: 'اسحب للتحريك · عجلة أو تقريب بالإصبعين · E ملء الشاشة · Q توسيط · M إغلاق',
 },
 tr: {
+  daze_open: '⚡ NULLFANG sersemledi — ŞİMDİ vur',
   title: 'CLAWBYTE', subtitle: 'Makine Derinliklerinde bir robot-kedi metroidvania', press: 'Enter’a bas',
   menu_play: 'Oyna', menu_controls: 'Kontroller',
   who_new: 'Yeni sefer', who_cont: 'Sefere devam',
@@ -744,6 +747,7 @@ tr: {
   vault_hint: 'E — Mühürlü Kasa', door_locked: 'Mühürlü. Daha büyük bir güç onu kapalı tutuyor.',
 },
 zh: {
+  daze_open: '⚡ 空牙踉跄了 —— 趁现在打',
   title: 'CLAWBYTE', subtitle: '机械深渊中的机械猫银河恶魔城', press: '按 Enter',
   menu_play: '开始游戏', menu_controls: '操作',
   who_new: '新的航程', who_cont: '继续航程',
@@ -797,6 +801,7 @@ zh: {
   vault_hint: 'E — 封印宝库', door_locked: '已封印。更强大的力量将它锁住。',
 },
 ru: {
+  daze_open: '⚡ NULLFANG оглушён — бей СЕЙЧАС',
   title: 'CLAWBYTE', subtitle: 'Метроидвания о коте-роботе в Машинных Глубинах', press: 'Нажми Enter',
   menu_play: 'Играть', menu_controls: 'Управление',
   who_new: 'Новое плавание', who_cont: 'Продолжить плавание',
