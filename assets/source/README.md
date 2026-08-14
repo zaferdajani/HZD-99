@@ -22,7 +22,8 @@ look at to answer "did that actually happen".
 | `glaciere/` | GLACIERE, the Frozen Purifier | 11 |
 | `mother/` | MOTHER-V, the Null Core | 16 |
 | `lairs/` | The six boss lairs, as generated | 6 |
-| `_sheets/` | Contact sheets and before/after comparisons | 16 |
+| `eye/` | The Eye's five constructs, rest + wound-up | 10 |
+| `_sheets/` | Contact sheets and before/after comparisons | 17 |
 
 `beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the
 same lion in the poses the rig has to hit: the open-jaw roar in profile, the
@@ -44,6 +45,13 @@ is the evidence — coil, launch, rise, apex, fall and strike are the SAME
 standing drawing at slightly different scales, which is what "the way it jumps
 does not show a full motion of a lion jumping" looks like when you stop
 believing the code comments and photograph it.
+
+`eye/` is the five mini-bosses, two plates each — at rest and wound up. They
+were procedural line art first, on the argument that they are "geometry and
+light rather than creatures"; that argument was written while the generator was
+unreachable and it was a rationalisation. Photographed next to a guardian they
+read as flat 2D drawings in a 3D game, which is what they were. Both plates are
+needed because a class with no rig cannot change its silhouette any other way.
 
 `lairs/` is where each guardian sleeps, generated on pure black and keyed out
 by `tools/blackkey.cjs` into `assets/backgrounds/lair_*.png`. The JPEGs here are

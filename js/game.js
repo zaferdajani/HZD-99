@@ -113,8 +113,26 @@ const G = {
   onBossDead(kind) {
     const cap = kind.charAt(0).toUpperCase() + kind.slice(1);
     this.save.flags['boss' + cap] = 1;
+    // THE EYE'S CONSTRUCTS pay a cell and nothing else. No ability, no arm, no
+    // trophy relic — they were built around the cell and there is nothing else
+    // in them. Returning here keeps the guardians' whole reward chain (which
+    // assumes a creature that had a life before the Song) off a thing that
+    // never did.
+    if (typeof MINIS !== 'undefined' && MINIS[kind]) {
+      invAdd('batt');
+      showItem(t('i_batt'), t('i_battd'));
+      this.save.scrap += 40;
+      if (typeof setMusic === 'function') setMusic('room');
+      return;
+    }
     const grants = { glitch: 'dash', brood: 'djump', atlas: 'emp', zero: 'key' };
     if (grants[kind]) grantMod(grants[kind]);
+    // THE CELL. Every guardian was built around one, and it comes out when the
+    // guardian stops. NULLFANG's is the one that opens the shop — which is why
+    // the trader is standing in the room next door and why he has been dark
+    // since you walked past him.
+    invAdd('batt');
+    showItem(t('i_batt'), t('i_battd'));
     // …and the suit it was wearing. This is the Mega Man X loop: the thing that
     // beat you becomes the thing that beats the next one.
     const arm = ARM_BY_BOSS[kind];
@@ -170,7 +188,72 @@ function newSave(diff) {
     slots: 3, iq: 0, skills: [], relics: [], flags: {}, broken: {}, visited: {}, shop: {},
     bench: { room: 'A0', x: 70, y: 412 }, deaths: 0, lives: 0, time: 0,
     pouch: null, usedNine: false, won: false, evo: 0, pace: 0, quests: {}, culls: {}, bag: {},
+    // SHE STARTS WITH ONE CELL, AND ONLY ONE. See INV/npcCharge below: the
+    // machine folk were offline when the Song went out, so nothing infected
+    // them — and nothing charged them either. That single cell is the first
+    // decision in the game and the reason the second NPC matters.
+    items: { batt: 1 },
   };
+}
+// ===========================================================================
+// THE INVENTORY, and the arc it exists for.
+//
+// The story the world never told: every NPC in the Depths was POWERED DOWN on
+// the night the Song went out. That is why they are still themselves — the
+// broadcast could not reach a machine that was not listening. It is also why
+// they are standing there dark: nobody has charged them since.
+//
+// So a Power Cell is the game's real currency of progress. She starts with one.
+// NULLFANG carries one. Every mini-boss the Eye made is sitting on another. The
+// supply is exactly the demand — there is no cell to waste and none to hoard,
+// which is what makes "who do I wake first" a question rather than a formality.
+//
+// `bag` already existed for quest fetch-items and is boolean; this is counted,
+// and the inventory screen shows both.
+const INV = {
+  batt: { icon: '⚡', col: '#ffd76a' },
+  kit:  { icon: '✚', col: '#7dff9a' },
+  coil: { icon: '◎', col: '#57a8ff' },
+};
+function invCount(id) { return (G.save.items && G.save.items[id]) || 0; }
+function invAdd(id, n) {
+  G.save.items = G.save.items || {};
+  G.save.items[id] = invCount(id) + (n == null ? 1 : n);
+  persist();
+}
+function invTake(id, n) {
+  const need = n == null ? 1 : n;
+  if (invCount(id) < need) return false;
+  G.save.items[id] -= need;
+  if (G.save.items[id] <= 0) delete G.save.items[id];
+  persist();
+  return true;
+}
+// A PLACEMENT, NOT A SUBJECT. `ratchet` stands in two rooms — the waking floor
+// and the camp by NULLFANG's door — and they are two different meetings with
+// the same trader. Keying the charge on the subject alone would wake both at
+// once and hand you the shop before you had earned it, so the key is the room
+// as well.
+function npcKey(s) { return (s.room || G.roomId) + '|' + s.extra; }
+// ONE ENGINE, TWO WORLDS. The cells are a CLAWBYTE story — machines that were
+// switched off when the broadcast went out. NOSTOS's people are people; they
+// are not waiting for a battery, and gating a Greek elder behind one would be
+// the theme bleed this codebase has had to fix twice already.
+function npcLive(s) {
+  if (typeof isHero === 'function' && isHero()) return true;
+  return !!G.save.flags['on_' + npcKey(s)];
+}
+function npcCharge(s) {
+  G.save.flags['on_' + npcKey(s)] = 1;
+  persist();
+  const cx = s.x + s.w / 2, cy = s.y + s.h / 2;
+  sfx('powerUp'); sfx('chargeReady');
+  G.flash = Math.max(G.flash || 0, 0.22);
+  cam.shake = Math.max(cam.shake, 5);
+  if (typeof padRumble === 'function') padRumble(0.6, 0.5, 260);
+  burst(cx, cy, 26, '#ffd76a', 260, 0.7, 60, 3, true);
+  burst(cx, cy, 14, '#ffffff', 150, 0.5, -40, 2, true);
+  if (typeof roarWave === 'function') roarWave(cx, s.y + s.h, '#ffd76a');
 }
 // evolution fanfare: when a power milestone pushes the tier up, the character
 // visibly grows and gains gear (drawn in entities.js) — announce it
@@ -207,7 +290,11 @@ function showItem(name, desc) {
 function spawnStatic(type, tx, ty, extra, flagKey) {
   const sizes = { item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [32, 40], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52] };
   const [w, h] = sizes[type];
-  G.statics.push({ type, x: tx * TILE + (TILE - w) / 2, y: ty * TILE - h, w, h, extra, flagKey, opened: !!(flagKey && G.save.flags[flagKey]), t: rnd(0, 9) });
+  // `room` is stamped at spawn rather than read from G.roomId at use time,
+  // because npcKey() must stay stable for a static that outlives a room change
+  // (the pet follows, the reward queue drains a room late) — and because a key
+  // that depends on when you ask it is not a key.
+  G.statics.push({ type, room: G.roomId, x: tx * TILE + (TILE - w) / 2, y: ty * TILE - h, w, h, extra, flagKey, opened: !!(flagKey && G.save.flags[flagKey]), t: rnd(0, 9) });
 }
 function loadRoom(id) {
   if (G.boss && G.boss.dead && G.boss.rewardPend) {
@@ -528,12 +615,56 @@ function guardiansFelled() {
     .filter(b => f['boss' + b]).length;
 }
 function standingTier() { const n = guardiansFelled(); return n >= 3 ? 2 : n >= 1 ? 1 : 0; }
+// WHAT EACH ONE REPAYS THE CELL WITH, by placement. Keyed on room|subject for
+// the reason npcKey exists: the trader on the waking floor and the trader at
+// the camp are two meetings, and only the second one opens a shop.
+const NPC_GIFT = {
+  // the first unit she ever wakes, on the waking floor: a repair kit. The thing
+  // she needs most, from the one who needed her most.
+  'A0|ratchet': () => { invAdd('kit'); showItem(t('i_kit'), t('i_kitd')); },
+  // and the trader at the camp by NULLFANG's door — this is the shop, and it
+  // does not exist until the lion's cell has paid for it
+  'A3|ratchet': () => { G.toast(t('npc_shop_open')); },
+  'A1|servo':  () => { invAdd('kit'); showItem(t('i_kit'), t('i_kitd')); },
+  '*': () => { G.save.scrap += 25; G.toast(t('npc_thanks_scrap')); },
+};
 function doInteract(s) {
   if (s.type === 'npc') {
     // THEY WANT SOMETHING NOW. Talking twice used to give you the same three
     // lines forever; a character who cannot ask you for anything is scenery
     // with a mouth. The errand comes first when there is one, and what they
     // say depends on whether you have done it yet.
+    // ---- DARK, AND WHY -------------------------------------------------
+    // Nothing here works until it has been charged. A dark unit has no quest,
+    // no shop and no trial: it is a body standing in a room. That is the whole
+    // point of the arc — the world is full of people who are not gone, just
+    // switched off, and you are the one carrying the cells.
+    if (!npcLive(s)) {
+      const key = npcKey(s);
+      if (invCount('batt') <= 0) {
+        // no cell: it says nothing, because it cannot. The line is HERS.
+        G.dialog = { name: t('n_' + s.extra), lines: [t('npc_dark'), t('npc_need')], i: 0, npc: s.extra, onEnd: null };
+        G.state = 'DIALOG'; sfx('ui');
+        return;
+      }
+      G.dialog = {
+        name: t('n_' + s.extra), lines: [t('npc_dark'), t('npc_give')], i: 0, npc: s.extra,
+        onEnd: () => {
+          if (!invTake('batt')) return;
+          npcCharge(s);
+          G.toast(t('npc_woke').replace('%s', t('n_' + s.extra)));
+          // WHAT IT GIVES BACK. Every unit repays the cell, because a hand-off
+          // that buys nothing is a fetch quest wearing a story. The first one
+          // she ever wakes gives her a repair kit — the thing she needs most,
+          // from the person who needed her most, which is the whole game in
+          // one exchange.
+          const gift = NPC_GIFT[key] || NPC_GIFT['*'];
+          if (gift) gift();
+        },
+      };
+      G.state = 'DIALOG'; sfx('ui'); npcSay(s.extra, 0);
+      return;
+    }
     const q = typeof questFor === 'function' ? questFor(s.extra) : null;
     let lines = t('d_' + s.extra).slice();
     // WHAT THIS PERSON IS FOR. The trader trades; the Oracle opens the Trials.
@@ -836,6 +967,7 @@ function update(dt) {
     if (inP('MAP') || inP('BACK') || inP('PAUSE')) { G.state = 'PLAY'; mapView.ready = false; sfx('ui'); }
     else updateMap(dt);
   }
+  else if (G.state === 'BAG') updateBag();
   else if (G.state === 'CREST') updateCrest();
   else if (G.state === 'SHOP') updateShop();
   else if (G.state === 'SKILLS') updateSkills();
@@ -984,6 +1116,7 @@ function pauseItems() {
   const it = [
     { id: 'resume', label: t('resume') },
     { id: 'map', label: t('pm_map') },
+    { id: 'bag', label: t('pm_bag') },
     { id: 'crests', label: t('pm_crests') },
     { id: 'skills', label: t('pm_skills') },
     { id: 'relics', label: t('pm_relics') },
@@ -1026,6 +1159,7 @@ function updatePause() {
     sfx('ok');
     if (cur.id === 'resume') G.state = 'PLAY';
     else if (cur.id === 'map') G.state = 'MAP';
+    else if (cur.id === 'bag') { G.state = 'BAG'; G.bagIdx = 0; }
     else if (cur.id === 'crests') { G.state = 'CREST'; G.crestIdx = 0; }
     else if (cur.id === 'skills') { G.state = 'SKILLS'; G.skillIdx = 0; }
     else if (cur.id === 'relics') G.state = 'RELICS';
@@ -1071,6 +1205,65 @@ function drawRelics() {
       ftxt(t('rl_' + id + 'd'), x + 30, y + 11, 12, '#8aa2b5', 'left', null, '600');
     });
   }
+  ftxt(t('rl_close'), 480, 516, 12, '#7d93a8');
+}
+// ===========================================================================
+// THE BAG. Asked for by name: "there should be an inventory for the hero so we
+// can check it out."
+//
+// It lists two things that were previously invisible — the counted items the
+// battery arc runs on, and the quest fetch-items that `bag` has silently held
+// since errands landed. A player carrying a Power Cell had no way to know it,
+// which made the one decision the arc is built around unreadable.
+//
+// Usable items are used from here. The kit is the only one so far, and it is
+// deliberately not bound to a key: a heal you can fire by reflex is a heal that
+// gets wasted, and this one is rare.
+function bagList() {
+  const out = [];
+  for (const id in (G.save.items || {})) {
+    if (invCount(id) > 0) out.push({ id, n: invCount(id), use: id === 'kit' });
+  }
+  for (const id in (G.save.bag || {})) if (G.save.bag[id]) out.push({ id, n: 1, quest: 1 });
+  return out;
+}
+function updateBag() {
+  const list = bagList();
+  if (inP('BACK') || inP('CREST')) { G.state = 'PLAY'; sfx('ui'); return; }
+  if (!list.length) return;
+  G.bagIdx = Math.min(G.bagIdx || 0, list.length - 1);
+  if (inP('DOWN')) { G.bagIdx = (G.bagIdx + 1) % list.length; sfx('ui'); }
+  if (inP('UP')) { G.bagIdx = (G.bagIdx + list.length - 1) % list.length; sfx('ui'); }
+  if (inP('OK')) {
+    const it = list[G.bagIdx];
+    if (it && it.use && player && player.cores < player.maxCores()) {
+      invTake(it.id);
+      player.cores = Math.min(player.maxCores(), player.cores + 2);
+      sfx('heal'); G.toast(t('i_kit_used'));
+      G.state = 'PLAY';
+    } else sfx('no');
+  }
+}
+function drawBag() {
+  c.fillStyle = 'rgba(4,7,12,0.85)'; c.fillRect(0, 0, 960, 540);
+  ftxt(t('bag_title'), 480, 50, 28, '#eef3fa', 'center', '#ffd76a');
+  ftxt(t('bag_sub'), 480, 82, 13, '#8aa2b5');
+  const list = bagList();
+  if (!list.length) { ftxt(t('bag_none'), 480, 280, 17, '#7d93a8'); ftxt(t('rl_close'), 480, 516, 12, '#7d93a8'); return; }
+  const rtl = LANG === 'ar';
+  list.forEach((it, i) => {
+    const sel = i === (G.bagIdx || 0);
+    const y = 140 + i * 44;
+    if (sel) { c.fillStyle = 'rgba(255,215,106,0.09)'; rr(c, 170, y - 19, 620, 38, 8); c.fill(); }
+    const meta = INV[it.id] || { icon: '◆', col: '#8aa2b5' };
+    const x0 = rtl ? 770 : 190, al = rtl ? 'right' : 'left';
+    ftxt(meta.icon, rtl ? 782 : 178, y + 1, 19, meta.col, 'center');
+    const nm = t('i_' + it.id);
+    ftxt(nm + (it.n > 1 ? '  ×' + it.n : ''), x0 + (rtl ? -22 : 22), y - 6, 17,
+         sel ? '#eef3fa' : '#a9bccd', al);
+    ftxt(t('i_' + it.id + 'd'), x0 + (rtl ? -22 : 22), y + 12, 12, '#7d93a8', al);
+    if (it.use) ftxt(t('i_use'), rtl ? 190 : 770, y, 12, sel ? '#7dff9a' : '#5d7a8f', rtl ? 'left' : 'right');
+  });
   ftxt(t('rl_close'), 480, 516, 12, '#7d93a8');
 }
 function updateCrest() {
@@ -3833,7 +4026,20 @@ function drawStatics(P) {
       }
     } else if (s.type === 'npc') {
       const talking = G.state === 'DIALOG' && G.dialog && G.dialog.npc === s.extra;
-      const bob2 = talking ? bob * 1.9 : bob;
+      // A DARK UNIT DOES NOT BREATHE. No bob, no ambient sparks, no turn to
+      // face her — it is a body standing where it was standing when the power
+      // went. The read has to be instant from across a room, or the player
+      // walks past six of them wondering why nobody talks.
+      const live = npcLive(s);
+      const bob2 = live ? (talking ? bob * 1.9 : bob) : 0;
+      if (!live) {
+        c.save();
+        // the one thing that still moves: a dying status lamp, and a slow
+        // amber pip when she is carrying a cell that would fix it
+        const dead = 0.30 + 0.10 * Math.sin(performance.now() / 900 + (s.t || 0));
+        c.globalAlpha = dead;
+        c.filter = 'grayscale(1) brightness(0.55)';
+      }
       // THE TURN. Below, an NPC faces the cat by being MIRRORED — which flips
       // its lit side onto its shadow side and re-flattens it into a picture the
       // instant it turns. The machine folk are rendered now, so they turn the
@@ -3874,6 +4080,23 @@ function drawStatics(P) {
         drawNPCBody(c, id, performance.now() / 1000 + (s.t || 0) * 1.7, talking);
       }
       c.restore();
+      if (!live) {
+        c.restore();                       // close the grayscale/alpha save
+        c.filter = 'none';
+        // and the prompt that this one can be fixed — an amber pip over the
+        // head, only while she actually has a cell to spend. Without the
+        // condition it is a quest marker; with it, it is an answer.
+        if (invCount('batt') > 0) {
+          const px = s.x + s.w / 2, py = s.y - 14 + Math.sin(performance.now() / 320) * 3;
+          c.save(); c.globalCompositeOperation = 'lighter';
+          const gg = c.createRadialGradient(px, py, 0, px, py, 15);
+          gg.addColorStop(0, 'rgba(255,236,168,0.95)');
+          gg.addColorStop(1, 'rgba(255,180,60,0)');
+          c.fillStyle = gg; c.beginPath(); c.arc(px, py, 15, 0, 7); c.fill();
+          c.restore();
+          ftxt('⚡', px, py + 5, 13, '#2a1b06');
+        }
+      }
     }
   }
   // interact hint
@@ -5639,6 +5862,8 @@ function draw(tms) {
     drawBraidView();
   } else if (st === 'MAP') {
     drawMap();
+  } else if (st === 'BAG') {
+    drawBag();
   } else if (st === 'CREST') {
     drawCrest();
   } else if (st === 'SHOP') {

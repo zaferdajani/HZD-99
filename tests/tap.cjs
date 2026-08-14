@@ -97,6 +97,12 @@ const { chromium } = require('playwright');
       await new Promise(r => requestAnimationFrame(r));
       await new Promise(r => requestAnimationFrame(r));
       const sp = (G.statics || []).find(s => s.type === 'npc');
+      // A DARK UNIT HAS NO OPINION OF HER, because it cannot speak: every NPC
+      // now starts powered down (see the battery arc in game.js) and says one
+      // line about being cold until a Power Cell brings it back. This check is
+      // about what a LIVE one leads with, so charge it first — which is also
+      // the honest shape of the feature, and it is checked on its own below.
+      G.save.flags['on_' + npcKey(sp)] = 1;
       player.x = sp.x; player.y = sp.y - 6; player.vx = 0; player.vy = 0;
       await new Promise(r => requestAnimationFrame(r));
       G.near = findNear(); if (G.near) doInteract(G.near);

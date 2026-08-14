@@ -17,18 +17,24 @@
 // reads as a sticker laid on the scene — the same lesson media.js learned about
 // the guardians.
 //
-//   node tools/blackkey.cjs <in.png> <out.png> [threshold 0-255] [feather px]
+// Generators do not always honour "pure black background" — one plate in ten
+// comes back on WHITE instead, and a black key on it keeps 100% of the image.
+// So the field colour is a flag rather than an assumption.
+//
+//   node tools/blackkey.cjs <in.png> <out.png> [threshold 0-255] [feather px] [--white]
 const { chromium } = require('playwright');
 const fs = require('fs');
 
 (async () => {
-  const [inp, out, thrArg, fArg] = process.argv.slice(2);
+  const argv = process.argv.slice(2);
+  const white = argv.includes('--white');
+  const [inp, out, thrArg, fArg] = argv.filter(a => a !== '--white');
   if (!inp || !out) { console.log('usage: blackkey.cjs <in> <out> [thr] [feather]'); process.exit(1); }
   const thr = parseInt(thrArg || '38', 10), feather = parseFloat(fArg || '2');
   const b64 = fs.readFileSync(inp).toString('base64');
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
-  const url = await page.evaluate(async ({ b64, thr, feather }) => {
+  const url = await page.evaluate(async ({ b64, thr, feather, white }) => {
     const im = new Image();
     await new Promise((res, rej) => { im.onload = res; im.onerror = rej; im.src = 'data:image/png;base64,' + b64; });
     const W = im.naturalWidth, H = im.naturalHeight;
@@ -39,10 +45,16 @@ const fs = require('fs');
 
     const dark = new Uint8Array(W * H);
     for (let i = 0, p = 0; i < d.length; i += 4, p++) {
-      // max channel, not average: a deep blue shadow has a low mean and is not
-      // background, and this is the plate's own black we are looking for
-      const m = Math.max(d[i], d[i + 1], d[i + 2]);
-      dark[p] = m <= thr ? 1 : 0;
+      // max channel for a black field (a deep blue shadow has a low mean and is
+      // not background); MIN channel for a white one, for the mirror reason —
+      // a pale highlight on the subject is not the paper behind it
+      if (white) {
+        const m = Math.min(d[i], d[i + 1], d[i + 2]);
+        dark[p] = m >= 255 - thr ? 1 : 0;
+      } else {
+        const m = Math.max(d[i], d[i + 1], d[i + 2]);
+        dark[p] = m <= thr ? 1 : 0;
+      }
     }
     // flood the connected background in from all four borders
     const bg = new Uint8Array(W * H);
@@ -90,7 +102,7 @@ const fs = require('fs');
     const oc = document.createElement('canvas'); oc.width = cw; oc.height = ch;
     oc.getContext('2d').drawImage(cv, x0, y0, cw, ch, 0, 0, cw, ch);
     return { url: oc.toDataURL('image/png'), kept, W, H, cw, ch };
-  }, { b64, thr, feather });
+  }, { b64, thr, feather, white });
   await browser.close();
   if (!url) { console.log('nothing survived the key — raise the threshold'); process.exit(1); }
   fs.writeFileSync(out, Buffer.from(url.url.split(',')[1], 'base64'));

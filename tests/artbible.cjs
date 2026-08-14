@@ -70,6 +70,26 @@ const CAST = [
     rest: 'idle', pairs: [['idle', 'lancewarn', 0.94], ['idle', 'dashwarn', 0.94]],
     tell: ['lancewarn'], cold: ['idle'], grnd: [],
   },
+  // ---- CLASS E: the Eye's constructs ------------------------------------
+  // They are procedural geometry and light rather than authored creatures
+  // (ART_BIBLE.md §1), but the SILHOUETTE LAW and the HUE LAW are about what
+  // the player can read, not about how the pixels were made, so they are held
+  // to both. `grnd` only where the construct stands on the floor.
+  { kind: 'chime', name: 'CHIME', room: 'A9',
+    states: { idle: { vx: 0, vy: 0, t: 1 }, ringwarn: { vx: 0, vy: 0, t: 0.15 } },
+    rest: 'idle', pairs: [], tell: ['ringwarn'], cold: ['idle'], grnd: [] },
+  { kind: 'carrier', name: 'CARRIER', room: 'B8',
+    states: { idle: { vx: 0, vy: 0, t: 1 }, tosswarn: { vx: 0, vy: 0, t: 0.15 } },
+    rest: 'idle', pairs: [], tell: ['tosswarn'], cold: ['idle'], grnd: [] },
+  { kind: 'moth', name: 'KILN-MOTH', room: 'C7',
+    states: { idle: { vx: 0, vy: 0, t: 1 }, cinderwarn: { vx: 0, vy: 0, t: 0.15 } },
+    rest: 'idle', pairs: [], tell: ['cinderwarn'], cold: ['idle'], grnd: [] },
+  { kind: 'lattice', name: 'LATTICE', room: 'D6',
+    states: { idle: { vx: 0, vy: 0, t: 1 }, growwarn: { vx: 0, vy: 0, t: 0.15 } },
+    rest: 'idle', pairs: [], tell: ['growwarn'], cold: ['idle'], grnd: ['idle', 'growwarn'] },
+  { kind: 'lens', name: 'THE LENS', room: 'E6',
+    states: { idle: { vx: 0, vy: 0, t: 1 }, beamwarn: { vx: 0, vy: 0, t: 0.15 } },
+    rest: 'idle', pairs: [], tell: ['beamwarn'], cold: ['idle'], grnd: [] },
 ];
 
 // the game's one reserved "this is coming" amber, from js/entities.js
@@ -168,9 +188,27 @@ const TELL_RGB = [0xff, 0xc2, 0x4a];
       // scored every silhouette pair at IoU 1.000 and blamed the rig.
       // and a state the boss does not have must not pass by rendering its
       // default: every name in the list has to appear in the boss's own code.
+      // Two ways a state name can be real. Most are string literals in the
+      // update switch. The Eye's constructs BUILD theirs — `K.far + 'warn'` —
+      // so the literal never appears in the source and a source scan called
+      // every one of them a typo. Check those against the kit that names them,
+      // which is the game's own data rather than a second list here.
       const src = (Boss.prototype.update || function () {}).toString();
-      const bogus = Object.keys(S.states).filter(st => !src.includes("'" + st + "'"));
+      const kit = (typeof MINI_KIT !== 'undefined' && MINI_KIT[S.kind]) || null;
+      const built = kit ? [kit.close, kit.far, kit.close + 'warn', kit.far + 'warn'] : [];
+      const bogus = Object.keys(S.states).filter(st =>
+        !src.includes("'" + st + "'") && built.indexOf(st) < 0);
       if (bogus.length) return { err: 'not a real state: ' + bogus.join(',') };
+      // the Eye's constructs load two authored plates of their own, lazily like
+      // everything else — shooting before they land measured an empty mask
+      const MA = (typeof MINI_ART !== 'undefined' && MINI_ART[S.kind]) || null;
+      if (MA) {
+        mediaFetch(MA.rest); mediaFetch(MA.warn);
+        const t1 = Date.now();
+        while (Date.now() - t1 < 20000 && !(mediaHas(MA.rest) && mediaHas(MA.warn)))
+          await new Promise(r => setTimeout(r, 50));
+        if (!mediaHas(MA.rest) || !mediaHas(MA.warn)) return { err: 'eye plates never loaded' };
+      }
       const sheet = BOSS_ART[S.kind];
       if (sheet) {
         mediaFetch(sheet);

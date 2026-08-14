@@ -14,10 +14,21 @@
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..'), WWW = path.join(ROOT, 'www');
 
-function copyDir(from, to) {
+// ...and assets/source/ is NOT. It is the generation archive — every plate the
+// art pipeline ever produced, kept permanently so a claim about the art can be
+// checked (assets/source/README.md). Nothing in js/ loads a single byte of it,
+// and the tree walk that copies assets/ was copying all of it into the phone:
+// megabytes of reference JPEGs shipped to a player who can never see them. The
+// exclusion is by NAME rather than by a copy allowlist, deliberately — an
+// allowlist is a list somebody has to remember to add to, and forgetting it
+// means a new asset silently missing on Android while the web build is fine.
+// Excluding is safe by default; including is not.
+const SKIP = new Set(['source']);
+function copyDir(from, to, top) {
   fs.mkdirSync(to, { recursive: true });
   let n = 0, bytes = 0;
   for (const e of fs.readdirSync(from, { withFileTypes: true })) {
+    if (top && SKIP.has(e.name)) continue;
     const a = path.join(from, e.name), b = path.join(to, e.name);
     if (e.isDirectory()) { const r = copyDir(a, b); n += r.n; bytes += r.bytes; }
     else { fs.copyFileSync(a, b); n++; bytes += fs.statSync(a).size; }
@@ -35,7 +46,7 @@ for (const f of ['index.html', 'odyssey.html']) {
   html = html.replace(/navigator\.serviceWorker\.register\('sw\.js'\)/g, 'void 0');
   fs.writeFileSync(path.join(WWW, f), html);
 }
-const a = copyDir(path.join(ROOT, 'assets'), path.join(WWW, 'assets'));
+const a = copyDir(path.join(ROOT, 'assets'), path.join(WWW, 'assets'), true);
 
 const mb = (b) => (b / 1048576).toFixed(1) + ' MB';
 const html = fs.statSync(path.join(WWW, 'index.html')).size + fs.statSync(path.join(WWW, 'odyssey.html')).size;

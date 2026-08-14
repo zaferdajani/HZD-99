@@ -1252,6 +1252,11 @@ const RECORDED_TRACKS = {
   // MOTHER-V keeps her own, and only she does: the last fight is the one place
   // a shared theme costs more than it gives.
   boss_mother: [['mus_mother', 0.64], ['boss', 0.6], ['mus_boss', 0.6]],
+  // the Eye's constructs share the general boss score. They are not
+  // guardians and do not get a name theme; five bespoke cues for five
+  // side fights is a lot of music spent on the part of the game the player
+  // chose to go and find.
+  boss_mini: [['mus_eye', 0.6], ['boss', 0.62], ['mus_boss', 0.6]],
   boss: [['boss', 0.62], ['mus_boss', 0.6]], mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
   // the one that plays over the ending, after the last blow has been swung
   winTheme: [['mus_ending', 0.6], ['ambient', 0.45]],
@@ -1264,7 +1269,7 @@ function pickRecorded(name) {
 // when a per-guardian slot has neither a recording nor a synth track of its own
 const MUS_FALL = {
   boss_glitch: 'boss', boss_brood: 'boss', boss_atlas: 'boss',
-  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother',
+  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss',
   intro: 'title',
 };
 function setMusic(name) {

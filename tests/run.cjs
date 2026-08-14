@@ -12,7 +12,7 @@ const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
 
 const SUITE = [
-  ['regress',   'boots both builds, walks all 24 rooms, watches for page errors'],
+  ['regress',   'boots both builds, walks every room in ROOMS, watches for page errors'],
   ['wake',      'the opening: film, waking floor, move -> jump -> scratch -> out'],
   ['lesson',    'every power teaches itself and completes on real use'],
   ['nodes',     'all eight Mind Nodes open a puzzle and pay out'],
@@ -40,6 +40,9 @@ const SUITE = [
   ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
   ['daze',      'a group of hits breaks NULLFANG open, pays out, closes, and cannot be held'],
   ['artbible',  'ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor'],
+  ['battery',   'one cell, one machine, and the shop waits for the lion'],
+  ['minis',     "the Eye's five: they wake, telegraph, alternate, die and pay"],
+  ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
 ];
 
 const want = process.argv.slice(2);

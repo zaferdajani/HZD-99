@@ -111,7 +111,7 @@ const ROOMS = {
       hline(g, 8, 13, 3, '=');                // the last rung, under the way out
       hline(g, 15, 20, 24, '^');
     } },
-  A2: { zone: 'A', w: 60, h: 17, exits: { L: 'A1', R: 'A3', B: 'A5' },
+  A2: { zone: 'A', w: 60, h: 17, exits: { L: 'A1', R: 'A3', B: 'A5', T: 'A8' },
     // TWO DISRUPTORS ON ONE SCREEN WAS THE GAME'S SECOND FIGHT. Fliers dive and
     // withdraw; two of them harassing from opposite angles leaves nothing to do
     // about either, which is agency removal rather than difficulty. The second
@@ -188,7 +188,7 @@ const ROOMS = {
       hline(g, 13, 19, 8, '='); hline(g, 20, 24, 6, '=');
       hline(g, 10, 15, 22, '^');              // the floor is not a place to fall
     } },
-  B2: { zone: 'B', w: 60, h: 17, exits: { L: 'B1', R: 'B3', B: 'V2' },
+  B2: { zone: 'B', w: 60, h: 17, exits: { L: 'B1', R: 'B3', B: 'V2', T: 'B7' },
     ents: [['turret', 20, 15], ['hopper', 24, 15], ['turret', 38, 15], ['hopper', 42, 15], ['guard', 50, 15], ['scrap', 14, 15, 10], ['riddle', 55, 15, 1], ['secret', 51, 10, 'collar']],
     build(g) {
       frame(g); openR(g);
@@ -299,7 +299,7 @@ const ROOMS = {
       hline(g, 9, 12, 11, '='); hline(g, 47, 52, 11, '=');
       rect(g, 18, 15, 20, 16, 'B');         // breakable floor → D1
     } },
-  C3: { zone: 'C', w: 30, h: 17, exits: { L: 'C2', R: 'C4' },
+  C3: { zone: 'C', w: 30, h: 17, exits: { L: 'C2', R: 'C4', T: 'C6' },
     ents: [['boss', 22, 6, 'atlas'], ['plat', 7, 9, [9, 0, 4.2]]],
     build(g) {
       frame(g); openL(g);
@@ -313,7 +313,7 @@ const ROOMS = {
   D1: { zone: 'D', w: 30, h: 17, exits: { T: 'C2', R: 'D2' }, ice: true,
     ents: [['bench', 6, 15], ['npc', 12, 15, 'sage'], ['term', 24, 15, 3]],
     build(g) { frame(g); openR(g); rect(g, 18, 0, 20, 0, '.'); hline(g, 15, 18, 11, '='); } },
-  D2: { zone: 'D', w: 60, h: 17, exits: { L: 'D1', R: 'D3', T: 'D4' }, ice: true,
+  D2: { zone: 'D', w: 60, h: 17, exits: { L: 'D1', R: 'D3', T: 'D4', B: 'D5' }, ice: true,
     // The two fliers sat at y=6 and y=7 — the same screen — and the audit read
     // the heavier ground-level window three tiles below them and called the
     // room clean. On ice, where you cannot stop, being pushed by two things at
@@ -379,7 +379,7 @@ const ROOMS = {
       hline(g, 22, 28, 11, '='); hline(g, 5, 11, 8, '=');
       hline(g, 17, 24, 6, '=');
     } },
-  E2: { zone: 'E', w: 60, h: 17, exits: { L: 'E1', R: 'E3', T: 'E4' },
+  E2: { zone: 'E', w: 60, h: 17, exits: { L: 'E1', R: 'E3', T: 'E4', B: 'E5' },
     ents: [['plat', 22, 10, [5, 0, 2.8]], ['plat', 37, 12, [0, -4, 3.0]], ['turret', 31, 15], ['flier', 18, 6], ['guard', 34, 15], ['blob', 45, 15], ['hopper', 50, 15], ['bench', 52, 15], ['scrap', 11, 11, 20], ['secret', 17, 8, 'star'],
            ['saw', 43, 15, [6, 0, 2.6]], ['saw', 29, 9, [0, 4, 3.2]]],
     build(g) {
@@ -391,18 +391,142 @@ const ROOMS = {
   E3: { zone: 'E', w: 34, h: 17, exits: { L: 'E2' },
     ents: [['boss', 17, 15, 'mother']],
     build(g) { frame(g); openL(g); hline(g, 4, 7, 11, '='); hline(g, 26, 29, 11, '='); } },
+
+  // ==========================================================================
+  // THE SPURS — five side branches, one per kingdom, each ending on one of the
+  // Eye's constructs and the Power Cell it was built around.
+  //
+  // The game was too short, and the honest reason is that every kingdom was a
+  // corridor: hub, fight, boss, next kingdom. Adding corridor would have made
+  // it longer without making it bigger. A spur adds length that is ABOUT
+  // something — a climb or a descent you take because you know a machine
+  // person is standing dark two rooms back and this is where its cell is.
+  //
+  // Each spur is two rooms: a traversal room that asks one question of the
+  // moveset you have by then, and an arena with the construct in it. Both are
+  // built so the way back out is always inside one jump — see
+  // tests/climbout.cjs, which is the harness that caught A7 being a hole the
+  // run fell into.
+
+  // ---- ZONE A: the Chime, up above the meadow ------------------------------
+  A8: { zone: 'A', w: 26, h: 21, exits: { B: 'A2', T: 'A9' },
+    ents: [['crawler', 8, 15], ['flier', 18, 9], ['scrap', 4, 15, 20], ['scrap', 21, 9, 25]],
+    build(g) {
+      frame(g);
+      rect(g, 11, 19, 14, 20, '.');            // the way back down to A2
+      rect(g, 11, 0, 14, 0, '.');              // and up to the Chime
+      // a staggered climb, every rung inside one jump of the last
+      hline(g, 3, 9, 15, '='); hline(g, 14, 21, 12, '=');
+      hline(g, 4, 10, 9, '='); hline(g, 15, 22, 6, '=');
+      hline(g, 9, 16, 3, '=');
+    } },
+  A9: { zone: 'A', w: 28, h: 17, exits: { B: 'A8' },
+    ents: [['boss', 18, 15, 'chime']],
+    build(g) {
+      frame(g);
+      rect(g, 12, 15, 15, 16, '.');            // the drop back to A8
+      hline(g, 3, 8, 11, '='); hline(g, 20, 25, 11, '=');
+    } },
+
+  // ---- ZONE B: the Carrier, still running its route ------------------------
+  B7: { zone: 'B', w: 30, h: 22, exits: { B: 'B2', T: 'B8' },
+    ents: [['turret', 6, 15], ['flier', 20, 8], ['blob', 24, 15], ['scrap', 12, 15, 30]],
+    build(g) {
+      frame(g);
+      rect(g, 13, 20, 16, 21, '.');
+      rect(g, 13, 0, 16, 0, '.');
+      // conveyor shelves: the climb is off moving-platform stops, so it reads
+      // as the canals rather than as a ladder wearing a different palette
+      hline(g, 2, 8, 16, '='); hline(g, 12, 19, 13, '=');
+      hline(g, 3, 9, 10, '='); hline(g, 13, 20, 7, '=');
+      hline(g, 4, 10, 4, '='); hline(g, 14, 21, 3, '=');
+      hline(g, 22, 27, 12, '^');               // the drop you do not want
+    } },
+  B8: { zone: 'B', w: 30, h: 17, exits: { B: 'B7' },
+    ents: [['boss', 20, 15, 'carrier']],
+    build(g) {
+      frame(g);
+      rect(g, 14, 15, 17, 16, '.');
+      hline(g, 3, 9, 10, '='); hline(g, 21, 27, 10, '=');
+    } },
+
+  // ---- ZONE C: the Kiln-Moth, gone to the heat -----------------------------
+  C6: { zone: 'C', w: 26, h: 22, exits: { B: 'C3', T: 'C7' },
+    ents: [['hopper', 9, 15], ['turret', 20, 11], ['blob', 15, 15], ['scrap', 4, 15, 35]],
+    build(g) {
+      frame(g);
+      rect(g, 11, 20, 14, 21, '.');
+      rect(g, 11, 0, 14, 0, '.');
+      hline(g, 2, 8, 16, '='); hline(g, 13, 20, 13, '=');
+      hline(g, 3, 9, 10, '='); hline(g, 14, 21, 7, '=');
+      hline(g, 8, 15, 4, '=');
+      hline(g, 17, 23, 17, '^');
+    } },
+  C7: { zone: 'C', w: 30, h: 18, exits: { B: 'C6' },
+    ents: [['boss', 20, 16, 'moth']],
+    build(g) {
+      frame(g);
+      rect(g, 12, 16, 15, 17, '.');
+      hline(g, 3, 9, 11, '='); hline(g, 21, 27, 11, '=');
+    } },
+
+  // ---- ZONE D: the Lattice, growing under the archives ---------------------
+  D5: { zone: 'D', w: 28, h: 24, exits: { T: 'D2', B: 'D6' }, ice: true,
+    ents: [['blob', 8, 22, 0], ['turret', 21, 16], ['flier', 14, 8], ['scrap', 4, 22, 40]],
+    build(g) {
+      frame(g);
+      rect(g, 12, 0, 15, 0, '.');
+      rect(g, 12, 22, 15, 23, '.');
+      // a descent, and the rungs still have to work going UP, because the only
+      // way home is back through here
+      hline(g, 3, 9, 5, '='); hline(g, 14, 21, 8, '=');
+      hline(g, 4, 10, 11, '='); hline(g, 15, 22, 14, '=');
+      hline(g, 3, 9, 17, '='); hline(g, 14, 21, 20, '=');
+    } },
+  D6: { zone: 'D', w: 30, h: 17, exits: { T: 'D5' }, ice: true,
+    ents: [['boss', 20, 15, 'lattice']],
+    build(g) {
+      frame(g);
+      rect(g, 13, 0, 16, 0, '.');
+      hline(g, 3, 9, 10, '='); hline(g, 21, 27, 10, '=');
+      hline(g, 11, 18, 5, '=');                // the rung back up to the door
+    } },
+
+  // ---- ZONE E / the Eye: the Lens, watching the nest -----------------------
+  E5: { zone: 'E', w: 30, h: 24, exits: { T: 'E2', B: 'E6' },
+    ents: [['blob', 7, 22, 1], ['hopper', 17, 22], ['turret', 25, 15], ['scrap', 4, 22, 45]],
+    build(g) {
+      frame(g);
+      rect(g, 13, 0, 16, 0, '.');
+      rect(g, 13, 22, 16, 23, '.');
+      hline(g, 3, 9, 5, '='); hline(g, 15, 22, 8, '=');
+      hline(g, 4, 10, 11, '='); hline(g, 16, 23, 14, '=');
+      hline(g, 3, 9, 17, '='); hline(g, 15, 22, 20, '=');
+      hline(g, 20, 27, 21, '^');
+    } },
+  E6: { zone: 'E', w: 32, h: 17, exits: { T: 'E5' },
+    ents: [['boss', 22, 15, 'lens']],
+    build(g) {
+      frame(g);
+      rect(g, 13, 0, 16, 0, '.');
+      hline(g, 3, 9, 10, '='); hline(g, 22, 29, 10, '=');
+      hline(g, 11, 18, 5, '=');
+    } },
 };
 
 // map screen layout: [gridX, gridY, wCells, hCells]
 const MAPPOS = {
   A0: [-1, 3, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A3: [3, 3, 1, 1], A4: [4, 3, 1, 1],
-  A5: [1, 4, 1, 1], A6: [0, 2, 1, 1], A7: [1, 5, 1, 1],
+  A5: [1, 4, 1, 1], A6: [0, 2, 1, 1], A7: [1, 5, 1, 1], A8: [1, 2, 1, 1], A9: [1, 1, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
-  B6: [3, 1, 1, 1],
+  B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],
   X1: [8, 1, 1, 1],
   C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1], C5: [4, 5, 1, 1],
+  C6: [7, 4, 1, 1], C7: [7, 3, 1, 1],
   D1: [5, 6, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1], D4: [6, 5, 1, 1],
+  D5: [6, 7, 1, 1], D6: [6, 8, 1, 1],
   E1: [8, 7, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1], E4: [9, 6, 1, 1],
+  E5: [9, 8, 1, 1], E6: [9, 9, 1, 1],
 };
 
 const gridCache = {};

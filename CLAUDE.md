@@ -1,5 +1,41 @@
 # CLAWBYTE / NOSTOS — working notes
 
+## RULE ONE: every platform gets the same game
+
+**Web page, mobile web, the Capacitor app, the desktop shell — one build, one
+game, updated together. No change ships to one and not the others.**
+
+This is the highest rule in this file. It is not a preference; it is the thing
+that decides whether "I fixed it" means anything.
+
+It is already true STRUCTURALLY, and that is on purpose: `build.cjs` emits
+`index.html` + `odyssey.html`, and every platform consumes those two files.
+`tools/pack-www.cjs` copies them into `www/` for Capacitor; `tools/pack-desktop.cjs`
+stages `www/` for the desktop shell; `sw.js` is a runtime cache with no
+precache manifest, so there is no list of files to keep in sync. `www/` is
+generated and untracked — it can never be stale in git because it is never in
+git.
+
+So the ways this rule actually gets broken are narrow, and they are what
+`tests/platform.cjs` checks every run:
+
+- **An asset the game references that the packer does not copy.** The packer
+  walks the whole `assets/` tree with no allowlist, which is the safe default —
+  an allowlist is a list somebody has to remember, and forgetting it means a
+  new file silently missing on Android while the web build is fine.
+- **A page difference that is not one of the two deliberate ones.** The app
+  strips the service-worker registration (inside a package there is nothing to
+  be newer than) and nothing else. Any other divergence is a bug.
+- **Input.** Keyboard, gamepad and touch are three paths to the same actions;
+  a feature reachable by only one of them is broken on the platforms that lack
+  it. Every new screen needs a touch hit-box derived from its own drawing (see
+  `tests/tap.cjs`) and a pad binding.
+- **Weight.** `assets/source/` is the generation archive, 11 MB that nothing
+  loads. It is excluded from the package by name.
+
+After any change that touches assets, pages or input: `node build.cjs && npm
+run app:pack && node tests/run.cjs`.
+
 Two games, one engine. `index.html` is CLAWBYTE (robo-cat, machine city);
 `odyssey.html` is NOSTOS (the hero's world). Same code, hard-locked to one
 world each by `window.GAME_LOCK`; `isHero()` is the switch.

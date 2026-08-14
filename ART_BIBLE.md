@@ -61,6 +61,7 @@ Every character is exactly one of these, and the class decides everything else.
 | **B. Parts-rig guardian** | authored parts, posed live by a rig | NULLFANG, TALONHOST, FURNACE CHOIR, GLACIERE, MOTHER-V, PRISM PROWLER | **Yes** — §3 |
 | **C. Atlas creature** | one 8-yaw turnaround, cell-selected | crawler, hopper, blob, flier, turret | **Yes** — §4 |
 | **D. Standing NPC** | one 6-yaw sheet, no combat poses | merchants, sages, wardens | **Yes** — §5 |
+| **E. The Eye's construct** | two authored plates, rest + wound-up, moved by code | CHIME, CARRIER, KILN-MOTH, LATTICE, THE LENS | **Yes** — §5.5 |
 
 Choosing the class is the first decision and the one that is expensive to
 reverse. The test:
@@ -294,6 +295,34 @@ it has been promoted to class B and needs a rig.
   to a 36 px player is not a boss.
 - No combat poses, no telegraph colours. An NPC that never fights must never
   wear the fight's amber.
+
+---
+
+## 5.5 CLASS E — the Eye's constructs
+
+The mini-bosses. Objects rather than animals — a wind-chime, a courier drone, a
+sheet-metal moth, a growing frost lattice, an optical instrument — because
+"made by the enemy" does not have to mean teeth, and the Eye builds INSTRUMENTS.
+
+**They are generated and rendered like everything else.** The first cut of them
+was procedural line art on the argument that they are "geometry and light, not
+creatures" — that argument was written while the art connector was unreachable,
+and it was a rationalisation. Next to a rendered guardian they read as flat 2D
+drawings in a 3D game, which is exactly what they were. If you catch yourself
+reasoning your way out of the pipeline, check whether the pipeline is simply
+down (§0) before you believe the reasoning.
+
+- **Two plates each**: at rest, and wound up. Not one plate tinted — the
+  wind-up must be a different DRAWING, because a class with no rig cannot
+  satisfy the silhouette law (§3.3) any other way.
+- Generated on a plain field and keyed with `tools/blackkey.cjs`. The field is
+  usually black; roughly one plate in ten comes back on white, so the keyer
+  takes `--white` rather than assuming.
+- **Moved by code, not posed**: bob, lean into their own velocity, a swell on
+  the wind-up, constant rotation for the ones with no up. A static plate slid
+  around a room is the failure NULLFANG's leap was rebuilt to stop being.
+- Same hue law, same ground truth, same harness (`tests/artbible.cjs`), same
+  fight grammar (`tests/minis.cjs`).
 
 ---
 

@@ -4003,7 +4003,195 @@ const BOSS_SELF_STAG = { nullend: 1, cffloor: 1 };
 // The question therefore lives HERE, and die() asks it before doing anything
 // else. Whatever kills a guardian, it kneels first.
 // ---------------------------------------------------------------------------
+// ===========================================================================
+// THE EYE'S CONSTRUCTS — the mini-bosses, and why they are a different kind of
+// thing from a guardian.
+//
+// A guardian is a MACHINE THAT WAS INFECTED. It had a life before the Song and
+// it can have one after, which is why the fight ends in a question and why
+// sparing one turns it into something that follows you home.
+//
+// These did not. They were MADE by the source of the Song — the Eye — and there
+// is nothing underneath the virus to give back. So they are destroyed, they are
+// never offered the fork, and they leave no trophy but the Power Cell they were
+// built around.
+//
+// AND THEY ARE NOT UGLY, deliberately. The obvious reading of "made by the
+// enemy" is teeth and spikes, and that reading is wrong here: the Eye does not
+// build monsters, it builds INSTRUMENTS. A wind-chime. A courier still running
+// its route. A moth going to the heat. A frost lattice growing toward you. Each
+// is clean, symmetrical, almost pretty — and each is trying to kill you. The
+// unease is the point, and it is the reason they are procedural geometry and
+// light rather than authored creatures (ART_BIBLE.md §1, class E).
+const MINIS = {
+  chime:  { w: 44, h: 58, hp: 130, zone: 'A', col: '#9fe8ff', acc: '#eefcff' },
+  carrier:{ w: 52, h: 46, hp: 165, zone: 'B', col: '#57a8ff', acc: '#cfe6ff' },
+  moth:   { w: 60, h: 48, hp: 200, zone: 'C', col: '#ffab4a', acc: '#ffe6b8' },
+  lattice:{ w: 50, h: 62, hp: 235, zone: 'D', col: '#bfeaff', acc: '#ffffff' },
+  lens:   { w: 46, h: 46, hp: 270, zone: 'X', col: '#ff7ad1', acc: '#ffd9f2' },
+};
+function isMini(b) { return !!(b && MINIS[b.kind]); }
+// TWO AUTHORED PLATES EACH, and the reason there are two is the silhouette law.
+//
+// The first cut of these was procedural line art — a few strokes and a glow —
+// on the argument that they are "geometry and light, not creatures". That was
+// a rationalisation written while the art connector was down, and it shows:
+// next to a rendered guardian they read as flat 2D drawings in a 3D game. They
+// are generated and rendered like everything else now.
+//   k    — how many hitbox-heights the plate occupies
+//   fly  — bob amplitude and lean, for the ones that hover
+//   spin — constant rotation, for the ones that have no up
+const MINI_ART = {
+  chime:   { rest: 'eyeChime',   warn: 'eyeChimeW',   k: 1.9, fly: 1 },
+  carrier: { rest: 'eyeCarrier', warn: 'eyeCarrierW', k: 1.8, fly: 1 },
+  moth:    { rest: 'eyeMoth',    warn: 'eyeMothW',    k: 1.7, fly: 1 },
+  // `foot` anchors the plate by its BOTTOM instead of its centre. The two
+  // lattice plates have different aspect ratios (it grows), so centring them
+  // moved the thing's base 11 px off the floor between rest and wind-up —
+  // which tests/artbible.cjs measures as feet leaving the ground.
+  lattice: { rest: 'eyeLattice', warn: 'eyeLatticeW', k: 1.8, fly: 0, spin: 0.22, foot: 1 },
+  lens:    { rest: 'eyeLens',    warn: 'eyeLensW',    k: 1.7, fly: 1, spin: 0.35 },
+};
+// ---------------------------------------------------------------------------
+// HOW THEY LOOK, and why none of them has a face.
+//
+// "They do not need to look evil" is the brief, and the honest way to honour it
+// is not to soften a monster — it is not to draw a monster. Each of these is an
+// OBJECT that happens to be hunting you: a mobile, a courier, a moth, a growing
+// crystal, a lens. Clean, symmetrical, mostly still. Nothing snarls, nothing
+// bares anything, and that is exactly what makes them uncomfortable to be in a
+// room with.
+//
+// They are procedural on purpose (ART_BIBLE.md §1, class E): every one of them
+// is geometry and light rather than a creature with anatomy, and a generator
+// asked for "a beautiful lethal machine" returns a beautiful lethal ANIMAL.
+function drawMini(c, b, cx, cy) {
+  const M = MINIS[b.kind], A = MINI_ART[b.kind], t = b.anim || 0;
+  const warn = /warn$/.test(b.st || '');
+  c.save();
+  c.translate(cx, cy);
+  if (b.dead) c.globalAlpha *= Math.max(0, 1 - (1.6 - (b.deathAnimT || 0)) / 1.6);
+  // the wash behind it, which is what the wind-up is read from at a glance
+  {
+    const R = Math.max(b.w, b.h) * 1.7;
+    const g = c.createRadialGradient(0, 0, 0, 0, 0, R);
+    g.addColorStop(0, M.col); g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.save(); c.globalCompositeOperation = 'lighter';
+    c.globalAlpha = (warn ? 0.26 : 0.14) * (0.85 + 0.15 * Math.sin(t * 6));
+    c.fillStyle = g; c.beginPath(); c.arc(0, 0, R, 0, 7); c.fill(); c.restore();
+  }
+  const im = MEDIA_IMG[warn ? A.warn : A.rest];
+  if (im && im.naturalWidth) {
+    // scaled to the hitbox by HEIGHT and drawn about its centre. The wind-up
+    // plate is a different drawing rather than the same one tinted, so the
+    // silhouette genuinely changes — which is the one rule this class cannot
+    // satisfy with a rig, because it has no rig.
+    const k = (b.h * A.k) / im.naturalHeight;
+    const w = im.naturalWidth * k, h = im.naturalHeight * k;
+    // and it is ALIVE: a bob, a lean into its own motion, and a swell on the
+    // wind-up. A static plate slid around a room is the thing the guardians'
+    // leap was rebuilt to stop being.
+    const bob = Math.sin(t * (A.fly ? 3.1 : 1.6)) * (A.fly ? 4 : 1.6);
+    // grounded constructs hang off the floor line, not off their own middle
+    const foot = A.foot ? (b.h / 2 - h / 2) : 0;
+    const lean = clamp((b.vx || 0) / 900, -0.22, 0.22) * (A.fly ? 1 : 0.4);
+    const pop = warn ? 1 + 0.06 * Math.sin(t * 22) : 1;
+    c.save();
+    c.translate(0, bob + foot);
+    c.rotate(lean + (A.spin ? t * A.spin : 0));
+    c.scale(pop * (b.face > 0 ? -1 : 1), pop);
+    if (b.hurtT > 0) { c.globalAlpha *= 0.85; }
+    c.drawImage(im, -w / 2, -h / 2, w, h);
+    // hurt flash: the plate re-drawn as pure white through a lighter pass
+    if (b.hurtT > 0) {
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
+      c.drawImage(im, -w / 2, -h / 2, w, h); c.restore();
+    }
+    c.restore();
+  }
+  c.restore();
+}
+// The five differ in the SHAPE of a move, never in its grammar.
+//   near  — inside this, use `close`; outside it, use `far`
+//   dur   — how long the committed move lasts
+//   fly   — holds a station in the air instead of standing on the floor
+const MINI_KIT = {
+  // CHIME — a mobile of tuning forks. It sings, and the song is a ring of
+  // notes. Slow, wide, and completely avoidable if you read the wind-up.
+  chime:   { fly: 1, spd: 120, stand: 150, hover: 90, near: 190,
+             close: 'note', far: 'ring', dur: 0.5, lungeV: 0 },
+  // CARRIER — a courier that never stopped. It throws the parcel, then runs
+  // its route straight through you.
+  carrier: { fly: 1, spd: 175, stand: 200, hover: 70, near: 230,
+             close: 'lunge', far: 'toss', dur: 0.42, lungeV: 480 },
+  // MOTH — going to the heat. Scatters cinders, then climbs and drops.
+  moth:    { fly: 1, spd: 150, stand: 170, hover: 130, near: 210,
+             close: 'drop', far: 'cinder', dur: 0.55, lungeV: 0 },
+  // LATTICE — it does not chase. It GROWS toward you, and what it grows is
+  // solid until it shatters.
+  lattice: { fly: 0, spd: 90, stand: 0, hover: 0, near: 260,
+             close: 'spike', far: 'grow', dur: 0.6, lungeV: 0 },
+  // LENS — the Eye's own instrument. It focuses, and then the line it drew is
+  // where the beam goes.
+  lens:    { fly: 1, spd: 140, stand: 240, hover: 120, near: 300,
+             close: 'lunge', far: 'beam', dur: 0.7, lungeV: 420 },
+};
+// WHAT EACH COMMITTED MOVE ACTUALLY DOES. Split out of the state machine so the
+// machine stays readable — the machine is about WHEN, this is about WHAT.
+function miniFire(b, st, K) {
+  const col = MINIS[b.kind].col;
+  const cx = b.cx(), cy = b.cy();
+  // Player has no cx()/cy() — only Boss does. Writing player.cy() crashed every
+  // aimed move the moment it fired, and tests/minis.cjs found it before the
+  // fight was ever played.
+  const pcx = player.x + player.w / 2, pcy = player.y + player.h / 2;
+  if (st === 'ring') {
+    // a ring of eight notes, slow enough to walk out of
+    b.ring(8, 180, b.anim);
+    sfx('shoot');
+  } else if (st === 'note') {
+    // three aimed notes in a narrow fan
+    const a0 = Math.atan2(pcy - cy, pcx - cx);
+    for (let i = -1; i <= 1; i++)
+      b.shoot(Math.cos(a0 + i * 0.22) * 260, Math.sin(a0 + i * 0.22) * 260, 6);
+    sfx('shoot');
+  } else if (st === 'toss') {
+    // the parcel: a heavy arc that lands where she IS, not where she was
+    const dx = pcx - cx;
+    G.projs.push(new Proj(cx, cy, clamp(dx * 1.05, -420, 420), -300, false, 1, 9, col, 900, 3));
+    sfx('shoot');
+  } else if (st === 'cinder') {
+    // cinders scattered wide and falling — an area to leave, not a shot to dodge
+    for (let i = 0; i < 7; i++)
+      G.projs.push(new Proj(cx + rnd(-30, 30), cy, rnd(-180, 180), rnd(-260, -140), false, 1, 5, col, 780, 3));
+    sfx('shoot');
+  } else if (st === 'drop') {
+    b.vy = 620; b.vx = 0;                    // straight down onto her
+    sfx('dash');
+  } else if (st === 'grow') {
+    // IT BUILDS. Three columns of ice marching toward her along the floor —
+    // the only construct whose attack persists in the room after it fires.
+    const gy = b.y + b.h;
+    for (let i = 1; i <= 3; i++) {
+      const gx = cx + b.face * i * 92;
+      G.projs.push(new Proj(gx, gy - 14, 0, -170, false, 1, 8, col, -520, 1.1));
+    }
+    sfx('cast');
+  } else if (st === 'spike') {
+    for (let i = -1; i <= 1; i++) b.shoot(b.face * 300, i * 130, 7);
+    sfx('shoot');
+  } else if (st === 'beam') {
+    // the focus already told you the line; this is that line arriving
+    const a0 = Math.atan2(pcy - cy, pcx - cx);
+    for (let i = 0; i < 5; i++)
+      G.projs.push(new Proj(cx + Math.cos(a0) * i * 22, cy + Math.sin(a0) * i * 22,
+        Math.cos(a0) * 520, Math.sin(a0) * 520, false, 1, 6, col, 0, 1.6));
+    sfx('shoot');
+  }
+}
 function bossFork(b) {
+  // the Eye's constructs are never offered mercy: there is nobody in there
+  if (isMini(b)) return false;
   if (!b || b.forkAsked || b.dead || b.kind === 'mother') return false;
   if (typeof brOffer !== 'function' || typeof G === 'undefined') return false;
   if (typeof player === 'undefined' || !player || player.dead) return false;
@@ -4020,7 +4208,7 @@ function bossFork(b) {
 // whose whole read is "a big cat you can out-time", so it is the right place
 // to teach the mechanic; the others are deliberately left off until this one
 // has been played enough to know the number is right.
-const BSTAT = {
+const BSTAT = Object.assign({
   glitch: { w: 84, h: 56, hp: 220, dazeAt: 5 },
   brood: { w: 96, h: 64, hp: 320 },
   atlas: { w: 62, h: 74, hp: 460 },
@@ -4029,7 +4217,11 @@ const BSTAT = {
   // still has to stand over NYA-9 (36), and at 34 it stood under her.
   prism: { w: 62, h: 46, hp: 520 },
   mother: { w: 120, h: 120, hp: 750 },
-};
+// ...and the Eye's constructs join the same table, so every piece of machinery
+// that already works on a boss — the hurt flash, the health bar, the telegraph
+// wash, the artbible harness — works on them without a second code path. They
+// differ in what they ARE, not in how they are plumbed.
+}, MINIS);
 // ===========================================================================
 // THE RAKE — NYA-9's claw arc, from an authored light sheet.
 //
@@ -4442,6 +4634,21 @@ class Boss {
       if (!BOSS_SELF_STAG[this.st]) return;             // Song / weakness stagger
     }
     if (this.st === 'dorm') {
+      // THE EYE'S CONSTRUCTS DO NOT GET A GUARDIAN'S AWAKENING. The shared
+      // handler below rises, ROARS, shakes the room and starts a named boss
+      // theme — which is the right ceremony for one of the six and completely
+      // wrong for a side fight you went looking for. Worse, it left `intro` in
+      // their state list: an attack-shaped state with no wind-up, which is
+      // exactly what tests/minis.cjs flagged.
+      if (isMini(this)) {
+        if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 340) {
+          this.st = 'idle'; this.t = 0.45;
+          sfx('cast'); cam.shake = Math.max(cam.shake, 3);
+          setMusic('boss_mini');
+          G.toast(t('mini_' + this.kind));
+        }
+        return;
+      }
       if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 380) {
         // THE STIR: it hears her. The wake itself is quiet — servos, a
         // breath — the ROAR belongs to the moment it reaches full height.
@@ -5856,6 +6063,81 @@ class Boss {
         }
         break;
       }
+      // ---- THE EYE'S CONSTRUCTS ----------------------------------------
+      // ONE state machine for all five, parameterised by MINI_KIT, because
+      // five hand-written machines is five places for a telegraph to go
+      // missing and the whole point of these is that they are LEGIBLE. What
+      // differs between them is the shape of the attack and the shape of the
+      // thing; the grammar — drift, wind up with your name on it, commit,
+      // recover — is the same, and being the same is what makes them
+      // learnable in a game that is about to have five more fights in it.
+      case 'chime': case 'carrier': case 'moth': case 'lattice': case 'lens': {
+        const K = MINI_KIT[this.kind];
+        const dist = px - this.cx(), adist = Math.abs(dist);
+        this.face = Math.sign(dist) || 1;
+        this.t -= dt;
+        // ---- WHAT IT IS DOING ------------------------------------------
+        // Written as one pass with NO early breaks. The first cut broke out of
+        // the idle branch and out of the wind-up branch, and the integrate sat
+        // at the bottom of the case — so the body only moved during the two
+        // tenths of a second it was actually attacking, and every construct
+        // measured 60-98% motionless. The state machine decides intent; the
+        // block after it always runs.
+        if (this.st === 'idle' || this.st === 'rest') {
+          if (this.t <= 0) {
+            // alternate the two moves rather than rolling for them: a coin
+            // flip between attacks is what combat-design calls unlearnable,
+            // and it is why NULLFANG's double swipe was fixed
+            this.miniAlt = !this.miniAlt;
+            const far = adist > K.near;
+            this.st = (far ? K.far : (this.miniAlt ? K.close : K.far)) + 'warn';
+            this.t = TELL_FAST;
+          }
+        } else if (/warn$/.test(this.st)) {
+          // every wind-up is named <move>warn, so TELL_ST fires its sound and
+          // Boss.draw paints the amber — no per-construct telegraph code
+          this.windT = TELL_FAST;
+          if (this.t <= 0) {
+            this.st = this.st.replace(/warn$/, '');
+            this.t = K.dur; this.fired = false; this.lunged = false;
+          }
+        } else {
+          if (!this.fired) { this.fired = true; miniFire(this, this.st, K); }
+          if (this.st === 'lunge' && !this.lunged) {
+            this.lunged = true; this.vx = this.face * K.lungeV; if (K.fly) this.vy = 0;
+          }
+          if (this.st === 'lunge' && !player.dead && player.iT <= 0 && aabb(hurtBoxOf(this), player))
+            player.hurt(DF().edmg, this.cx(), this.kind + '.lunge');
+          if (this.t <= 0) { this.lunged = false; this.st = 'rest'; this.t = bossRest(this, 0.55); }
+        }
+        // ---- AND WHERE IT IS -------------------------------------------
+        // It is NEVER parked. A construct that holds a station between moves is
+        // a turret with a wind-up, which is the complaint the guardians were
+        // retuned for; these ride a slow figure-of-eight around the station and
+        // keep riding it through the telegraph.
+        const held = /warn$/.test(this.st) ? 0.55 : 1;
+        if (K.fly) {
+          const tgt = px - this.face * K.stand, ty2 = py - K.hover;
+          this.vx += clamp((tgt - this.cx()) * 2.4, -520, 520) * dt * held;
+          this.vy += clamp((ty2 - this.cy()) * 2.4, -420, 420) * dt * held;
+          this.vx += Math.cos(this.anim * 1.7) * K.spd * 2.6 * dt * held;
+          this.vy += Math.sin(this.anim * 2.6) * 210 * dt * held;
+          this.vx = clamp(this.vx, -K.spd * 3.2, K.spd * 3.2);
+          this.vy = clamp(this.vy, -240, 240);
+          this.x += this.vx * dt; this.y += this.vy * dt;
+          this.vx *= 0.985; this.vy *= 0.975;
+          const fy = 15 * TILE - this.h;
+          if (this.y > fy) { this.y = fy; if (this.vy > 0) this.vy = 0; }
+          if (this.y < TILE) { this.y = TILE; if (this.vy < 0) this.vy = 0; }
+        } else {
+          this.vy += 2100 * dt;
+          // it walks, and it keeps walking through its own wind-up — a lattice
+          // that stops dead to telegraph is a lattice you can ignore
+          if (this.st !== 'spike') this.vx = this.face * K.spd * (0.9 * held + 0.25) * spd;
+          moveEnt(this, dt);
+        }
+        break;
+      }
     }
     // arena guard: a boss can never leave the room (out-of-bounds tiles read as
     // empty, so a charge through a doorway would escape and fall into the void)
@@ -6262,7 +6544,14 @@ class Boss {
       const dur = Math.max(0.18, this._tellDur || (this._tellDur = Math.max(0.18, this.t || 0.4)));
       const k = clamp(1 - (this.t || 0) / dur, 0, 1);
       const e = Math.pow(k, 0.62);              // §3.6 — lit from the first frame
-      const bx = this.cx(), by = this.y + this.h * 0.55, R = Math.max(this.w, this.h) * 1.5;
+      // A FLOOR ON THE RADIUS, not a pure multiple of the body. Scaled purely
+      // off size, the smallest construct (the Carrier, 52x46) got a 78 px bloom
+      // and measured 4.6% amber against a guardian's 180 px — a fainter warning
+      // for a faster enemy, which is backwards. The player's eye needs the same
+      // signal whatever the thing's size, so small things get proportionally
+      // more of it.
+      const bx = this.cx(), by = this.y + this.h * 0.55;
+      const R = Math.max(104, Math.max(this.w, this.h) * 1.5);
       c.save();
       c.globalCompositeOperation = 'lighter';
       const gg = c.createRadialGradient(bx, by, 4, bx, by, R);
@@ -6419,6 +6708,8 @@ class Boss {
     // a leftover asset, a fallback firing while the real sheet was still in
     // flight. A guardian that HAS a body now waits behind its own silhouette
     // rather than borrowing somebody else's.
+    // the Eye's constructs are drawn, not composited — see MINIS
+    if (isMini(this)) { drawMini(c, this, cx, cy); c.restore(); return; }
     if (!heroWorld && BOSS_ART[this.kind]) {
       if (typeof mediaFetch === 'function') mediaFetch(BOSS_ART[this.kind]);
       drawBossHold(c, this); c.restore(); return;

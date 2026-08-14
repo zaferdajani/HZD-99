@@ -34,6 +34,19 @@ const MEDIA_SRC = {
     ceilD: 'assets/backgrounds/ceil_d.jpg',
     ceilE: 'assets/backgrounds/ceil_e.jpg',
     ceilX: 'assets/backgrounds/ceil_x.jpg',
+    // THE EYE'S CONSTRUCTS. Two plates each — at rest, and wound up — so the
+    // wind-up is a different DRAWING and not the same drawing tinted, which is
+    // the silhouette law applied to a class that has no rig to pose.
+    eyeChime: 'assets/characters/eye/chime.png',
+    eyeChimeW: 'assets/characters/eye/chime_w.png',
+    eyeCarrier: 'assets/characters/eye/carrier.png',
+    eyeCarrierW: 'assets/characters/eye/carrier_w.png',
+    eyeMoth: 'assets/characters/eye/moth.png',
+    eyeMothW: 'assets/characters/eye/moth_w.png',
+    eyeLattice: 'assets/characters/eye/lattice.png',
+    eyeLatticeW: 'assets/characters/eye/lattice_w.png',
+    eyeLens: 'assets/characters/eye/lens.png',
+    eyeLensW: 'assets/characters/eye/lens_w.png',
     // THE LAIRS. One authored prop per guardian, keyed off its generation
     // plate's black field by tools/blackkey.cjs, so each has real alpha and
     // occludes the room properly. Lazy like everything else: a lair is only
@@ -105,7 +118,10 @@ const MEDIA_SRC = {
     zap: 'assets/sfx/zapTwoTone.mp3',
     // NPC proximity voices: drop a loopable file at any of these paths and
     // it replaces that character's synthesized hum automatically (a missing
-    // file 404s silently and the synth voice keeps singing instead)
+    // file 404s silently and the synth voice keeps singing instead).
+    // These are OVERRIDE SLOTS, not missing assets — see MEDIA_OPTIONAL below,
+    // which is how that promise stops being a comment and becomes something
+    // tests/platform.cjs can tell apart from a genuine hole in the package.
     hum_servo: 'assets/sfx/hum_servo.ogg',
     hum_ratchet: 'assets/sfx/hum_ratchet.ogg',
     hum_mono: 'assets/sfx/hum_mono.ogg',
@@ -146,6 +162,15 @@ if (typeof window !== 'undefined' && window.EMBEDDED_MEDIA) {
 // already guards on that (`if (!im || !im.naturalWidth) return`) because sheets
 // have always been able to arrive late, so nothing else had to change.
 // ---------------------------------------------------------------------------
+// SLOTS THAT ARE ALLOWED TO BE EMPTY. Everything else in MEDIA_SRC must exist
+// on disk and must be in the package on every platform (RULE ONE in CLAUDE.md,
+// checked by tests/platform.cjs). These six are extension points by design: the
+// game synthesises each NPC's voice, and dropping a file at the path takes over.
+// Declaring that here rather than only in a comment is the difference between a
+// harness that can enforce the rule and one that has to be told to ignore things.
+const MEDIA_OPTIONAL = new Set([
+  'hum_servo', 'hum_ratchet', 'hum_mono', 'hum_sage', 'hum_patch', 'hum_lumen',
+]);
 const MEDIA_RAW = {}, MEDIA_PEND = {}, MBUF = {};
 function mediaFetch(k) {
   if (MEDIA_RAW[k] || MEDIA_PEND[k] || !MEDIA_SRC.images[k]) return;
