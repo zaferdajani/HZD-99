@@ -93,6 +93,18 @@ const MEDIA_SRC = {
     // THE SAVE POD, at the size a save point deserves. Dormant, and awake.
     pod: 'assets/characters/gear/pod.png',
     podOn: 'assets/characters/gear/pod_on.png',
+    // THE CRADLE she wakes out of, still hooked and just released, and the
+    // CITY GATES at the end of the walk. Both belong to the two rooms in front
+    // of the meadow and are fetched only when she is standing in them.
+    cradle: 'assets/characters/gear/cradle.png',
+    cradleOpen: 'assets/characters/gear/cradle_open.png',
+    gateCity: 'assets/backgrounds/gate_city.jpg',
+    // THE CHEETAH LINE — the second animal, for the kingdoms past the meadow.
+    // No alpha, nothing to tame: these came off the same line as the wolves and
+    // whatever was in them is gone. Three plates, same grammar as the wolf.
+    cheetahRest: 'assets/characters/beasts/cheetah.png',
+    cheetahWarn: 'assets/characters/beasts/cheetah_warn.png',
+    cheetahRun: 'assets/characters/beasts/cheetah_run.png',
     // THE LAIRS. One authored prop per guardian, keyed off its generation
     // plate's black field by tools/blackkey.cjs, so each has real alpha and
     // occludes the room properly. Lazy like everything else: a lair is only
@@ -266,7 +278,11 @@ const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
 }) : MEDIA_RAW;
 // the handful that must never pop in late: the shared turnaround atlas, the
 // player's own sheets and the decks she is standing on
-['roster', 'npcs', 'platforms', 'driller', 'slashFx'].forEach(mediaFetch);
+// `driller` is deliberately NOT in here any more. Nothing in the CLAWBYTE build
+// draws it — the legacy procedural bosses are unreachable (see Boss.draw) — so
+// preloading it spent a request on a sprite sheet whose only remaining job was
+// to occasionally appear instead of the right creature.
+['roster', 'npcs', 'platforms', 'slashFx'].forEach(mediaFetch);
 // Asking "is this sheet here yet?" must NOT be what fetches it. Several guards
 // test four boss atlases in one condition to decide which renderer to use, and
 // through the lazy map that innocent-looking check pulled 2.7 MB of art for

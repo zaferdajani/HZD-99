@@ -44,6 +44,7 @@ const SUITE = [
   ['minis',     "the Eye's five: they wake, telegraph, alternate, die and pay"],
   ['hzdvox',    'her voice: on the frame she moves, never clipping, never twice at once'],
   ['wolves',    'the pack, the Alpha and the flag that changes a whole species'],
+  ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
 ];
 

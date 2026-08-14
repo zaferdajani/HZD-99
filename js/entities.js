@@ -475,7 +475,10 @@ class Player {
     // THE CHAMBER HOLD. Standing in a guardian's room while the lights come up
     // is staging, and staging that the player can walk out of is not staging.
     // Her controls come back the moment the room is lit.
-    const held = !!G.bossEntry;
+    // ...and the same hold covers the WAKING: the two seconds in which the
+    // cradle lets go of her. A release you can walk out of halfway through is
+    // a loading screen with a picture on it.
+    const held = !!G.bossEntry || !!G.wake;
     // MOTHER'S SONG mirrors your inputs for its few seconds — fight it
     const dirRaw = held ? 0 : (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
     const dir = (G.revT || 0) > 0 ? -dirRaw : dirRaw;
@@ -3283,7 +3286,14 @@ class Enemy {
           // a clever one keeps its nose on her while it gathers, so stepping
           // around it stops being a free answer
           if (this.iq > 0.55) this.dir = Math.sign(px - cx) || this.dir;
-          if (this.coilT <= 0) { this.lungeT = 0.22 + this.iq * 0.06; sfx('dash'); }
+          if (this.coilT <= 0) {
+            // A CHEETAH COVERS MORE GROUND WITH THE SAME WARNING. Same tell
+            // length, half again the commit — which is what makes the second
+            // animal a different problem rather than the first one reskinned.
+            this.lungeT = (0.22 + this.iq * 0.06)
+              * (typeof isCheetah === 'function' && isCheetah(this) ? 1.5 : 1);
+            sfx('dash');
+          }
         } else {
           this.vx = this.dir * this.spd;
           // IT NOTICES HER. Requiring it to already be facing the right way
@@ -3539,6 +3549,7 @@ class Enemy {
     // never fall back onto the machine art.
     const heroEn = typeof isHero === 'function' && isHero();
     if (isWolf(this) && drawWolf(c, this)) return;
+    if (isCheetah(this) && drawCheetah(c, this)) return;
     if (!heroEn && G.roomDef && G.roomDef.zone === 'A' && (this.kind === 'crawler' || this.kind === 'hopper')
         && typeof drawBeastMini === 'function' && drawBeastMini(c, this)) return;
     // every flying minion is a small TALONHOST — talons only, no feathers
@@ -6715,7 +6726,14 @@ class Boss {
         if (typeof drawFurnace === 'function') drawFurnace(c, this);
       } else if (this.kind === 'brood') {
         if (typeof drawEagle === 'function') drawEagle(c, this);
-      } else if (!(typeof drawBeast === 'function' && drawBeast(c, this))) drawDriller(c, this);
+      } else if (!(typeof drawBeast === 'function' && drawBeast(c, this))) {
+        // NEVER THE DRILLER. This used to fall back to the legacy procedural
+        // NULL-SEEKER — a drill-nosed walker off driller_12x6.png — whenever
+        // the lion's parts sheet was not in memory yet, which is exactly when
+        // a player is most likely to be looking: the frame it dies. It was
+        // reported as "the old one that has a drill as a nose", and it was.
+        drawBossHold(c, this);
+      }
       c.restore(); return;
     }
     // telegraphs
@@ -6813,6 +6831,18 @@ class Boss {
           yawSpin: this.kind === 'prism' ? 0.9 : 0,
           yawScan: this.kind === 'zero' ? { c: yawColF(this.faceVis), r: 0.4, a: 0.7 } : null,
         })) { c.restore(); return; }
+    // ---- THE LEGACY PROCEDURAL BODIES END HERE, FOR CLAWBYTE ----------------
+    // Everything below this line is the pre-authored-art cast: the drill-nosed
+    // NULL-SEEKER, the procedural eagle, and the rest. Every one of them has a
+    // rendered body now, and the ONLY way to reach these is a sheet that has
+    // not arrived yet — so what the player gets is a boss wearing the wrong
+    // species for a frame or two. That is worse than showing nothing, because
+    // "nothing" is a dark silhouette with two eyes in it and reads as menace,
+    // while a drill-nosed walker reads as the wrong game.
+    //
+    // The Odyssey keeps them: its creatures are hand-animated sheets and these
+    // are their honest fallback, not a different cast.
+    if (!heroWorld) { drawBossHold(c, this); c.restore(); return; }
     c.translate(cx, cy);
     // The bodies are authored nose-LEFT, but face = +1 means "the player is to my
     // right", so scaling by face directly made every boss charge backwards. Scale

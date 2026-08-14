@@ -43,7 +43,8 @@ const { chromium } = require('playwright');
   const art = await page.evaluate(async () => {
     const keys = ['wolfRest', 'wolfCoil', 'wolfLunge', 'alphaRest', 'alphaRoar',
                   'alphaHowl', 'alphaLeap', 'alphaClaw', 'alphaBite', 'alphaClinch',
-                  'alphaRecoil', 'alphaTurn', 'alphaFree'];
+                  'alphaRecoil', 'alphaTurn', 'alphaFree',
+                  'cheetahRest', 'cheetahWarn', 'cheetahRun'];
     const out = [];
     for (const k of keys) {
       const src = MEDIA_SRC.images[k];
@@ -55,8 +56,8 @@ const { chromium } = require('playwright');
     return out;
   });
   const missing = art.filter(a => a.err || !a.ok);
-  check('every plate is declared and decodes (13)',
-    art.length === 13 && !missing.length,
+  check('every plate is declared and decodes (16)',
+    art.length === 16 && !missing.length,
     missing.map(a => a.k + ' ' + (a.err || 'failed to load')).join(', '));
 
   // ---- 2. THE WOLF SHOWS THREE DIFFERENT DRAWINGS -------------------------
@@ -254,7 +255,12 @@ const { chromium } = require('playwright');
   // ---- 5. THE STUN IS A STUN, AND IT ENDS --------------------------------
   const stun = await page.evaluate(async () => {
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+    // a fresh save now starts inside the cradle's release, which holds her
+    // controls for two seconds — exactly the thing this block is measuring the
+    // ABSENCE of, so the waking is marked done first
+    sv.flags.woke = 1;
     startGame(sv);
+    G.wake = null;
     await new Promise(r => requestAnimationFrame(r));
     player.stunT = 0.5;
     // she is holding right and mashing attack: neither may do anything
@@ -353,6 +359,54 @@ const { chromium } = require('playwright');
     check('after the Alpha, it will not touch her',
       !pack.stillHurtsHer && !pack.winds);
     check('...and she cannot hurt it, even standing on it', !pack.stillTakesDamage);
+  }
+
+  // ---- 8. THE SECOND ANIMAL, AND THE THING IT IS NOT ---------------------
+  // The cheetah runs the same frames in the later kingdoms. Two claims have to
+  // hold, and they pull in opposite directions: it must be the SAME grammar
+  // (so the player's hard-won read of a wolf still means something) and it must
+  // never inherit the wolf's ending (there is no alpha, nothing yields, and the
+  // flag that turned every wolf friendly must not touch it).
+  const cat = await page.evaluate(async () => {
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+    sv.flags.alpha = 1;                        // the pack has ALREADY changed sides
+    startGame(sv);
+    // a zone C room with ground machines in it
+    let room = null;
+    for (const id in ROOMS) {
+      if (ROOMS[id].zone !== 'C') continue;
+      if ((ROOMS[id].ents || []).some(e => e[0] === 'crawler' || e[0] === 'hopper')) { room = id; break; }
+    }
+    if (!room) return { err: 'no zone C room with ground machines' };
+    loadRoom(room);
+    await new Promise(r => requestAnimationFrame(r));
+    const e = G.enemies.find(q => q.kind === 'crawler' || q.kind === 'hopper');
+    if (!e) return { err: 'none spawned in ' + room };
+    const asCheetah = isCheetah(e), asWolf = isWolf(e);
+    // it is NOT friendly, even with the Alpha's flag set
+    player.iT = -1; player.cores = 9;
+    const hp0 = e.hp;
+    dealDmg(e, 12, null, e.x, e.y, true);
+    const takesDamage = e.hp < hp0;
+    player.cores = 9; player.iT = -1;
+    const c0 = player.cores;
+    for (let f = 0; f < 30; f++) { e.x = player.x; e.y = player.y; e.update(1 / 60); }
+    const hurtsHer = player.cores < c0;
+    // ...and it uses the same three plates
+    const plates = { rest: CHEETAH_ART.rest.img, coil: CHEETAH_ART.coil.img, lunge: CHEETAH_ART.lunge.img };
+    return { room, asCheetah, asWolf, takesDamage, hurtsHer, plates };
+  });
+  if (cat.err) check('the cheetah line reaches the later kingdoms', false, cat.err);
+  else {
+    check('past the meadow, the ground machines are cheetahs and not wolves',
+      cat.asCheetah && !cat.asWolf, cat.room + ': cheetah ' + cat.asCheetah + ', wolf ' + cat.asWolf);
+    check('taming the Alpha does NOT make them friendly',
+      cat.takesDamage && cat.hurtsHer,
+      'took damage ' + cat.takesDamage + ', hurt her ' + cat.hurtsHer);
+    check('...and it has its own three plates, not the wolf\'s',
+      new Set(Object.values(cat.plates)).size === 3
+        && !Object.values(cat.plates).some(k => /^wolf/.test(k)),
+      Object.values(cat.plates).join(', '));
   }
 
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }

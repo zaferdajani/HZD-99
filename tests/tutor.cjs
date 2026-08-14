@@ -22,7 +22,10 @@ const { chromium } = require('playwright');
   // a fresh run, with the tutorial NOT already flagged done
   await p.evaluate(() => {
     const sv = newSave(1); sv.time = 99;
-    sv.bench = { room: 'A0', x: 4 * 32, y: 13 * 32 };
+    // starts where the game starts: in the cradle, with the release skipped so
+    // the harness is measuring the LESSON and not the two-second hold
+    sv.bench = { room: 'W1', x: 3 * 32, y: 13 * 32 };
+    sv.flags = sv.flags || {}; sv.flags.woke = 1;
     startGame(sv);
   });
   await p.waitForTimeout(900);
@@ -54,7 +57,14 @@ const { chromium } = require('playwright');
   await record('move');
   let now = await drive('move', () => { player.vx = 200; player.x += 3; });
   await record(now);
+  // THE WALK TO THE CITY now sits between the first verb and the second: the
+  // lesson runs across three rooms (cradle -> road -> meadow), and the two
+  // steps that carry her between them are completed by GOING, not by pressing.
+  now = await drive('out', () => { loadRoom('W2'); });
+  await record(now);
   now = await drive('jump', () => { player.on = false; player.vy = -300; });
+  await record(now);
+  now = await drive('gate', () => { loadRoom('A0'); });
   await record(now);
   now = await drive('atk', () => { keysP['KeyX'] = 1; keys['KeyX'] = 1; });
   await record(now);
@@ -69,7 +79,12 @@ const { chromium } = require('playwright');
 
   const scrapBefore = await p.evaluate(() => G.save.scrap);
   now = await drive('coin', () => {
-    // walk onto whatever the wreck dropped
+    // A DEAD MACHINE IS NOT SCRAP YET. It leaves a WRECK, and the scrap comes
+    // out when the wreck is broken — which is the lesson. This used to rely on
+    // a stray swing from the previous step happening to smash it, so the step
+    // passed or hung depending on timing; it breaks the wreck explicitly now.
+    const w = G.wrecks && G.wrecks.find(x => x && !x.dead);
+    if (w) { w.hp = 0; if (typeof w.die === 'function') w.die(); else w.dead = true; }
     const q = G.pickups.find(x => x && !x.dead);
     if (q) { player.x = q.x - 4; player.y = q.y - 8; }
   });

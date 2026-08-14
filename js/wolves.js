@@ -36,10 +36,21 @@
 // not a new EKIND: giving the pack its own entity type would have meant
 // touching every room list, every spawn table and every harness that counts
 // enemies, to arrive at a crawler with a different picture on it.
+// THE OLD ART HAS NO ZONES LEFT TO HIDE IN. The first cut covered zone A only,
+// which quietly left every ground machine in the back four kingdoms drawing
+// from the roster atlas — the same generic crawler the wolves were brought in
+// to replace. Walking east far enough put the old enemy back on screen, and it
+// was reported as "the game is still loading the old image enemies", which is
+// exactly what it was.
+//
+// So the split is total: the pack holds the first two kingdoms, the cheetah
+// line holds the last four, and no crawler or hopper anywhere falls through to
+// the roster. tests/wolves.cjs checks every zone, not the two it started with.
+const WOLF_ZONES = { A: 1, B: 1 };
 function isWolf(e) {
   if (!e || (typeof isHero === 'function' && isHero())) return false;
   if (e.kind !== 'crawler' && e.kind !== 'hopper') return false;
-  return !!(G.roomDef && G.roomDef.zone === 'A');
+  return !!(G.roomDef && WOLF_ZONES[G.roomDef.zone]);
 }
 // ...and whether the pack has changed sides. One flag, set by the Alpha's
 // yield, read everywhere — including on a save loaded a week later, which is
@@ -47,6 +58,42 @@ function isWolf(e) {
 function packTamed() {
   return !!(G.save && G.save.flags && G.save.flags.alpha);
 }
+
+// ---------------------------------------------------------------------------
+// THE CHEETAH LINE — the second animal, and the one that has no leader.
+//
+// Zones C and D run the same frames as the meadow, and running them as wolves
+// would say the wrong thing twice: that the pack reaches everywhere, and that
+// taming the Alpha bought you the whole world. It did not. These came off the
+// same production line and whatever was in them is gone — there is nothing at
+// the head of them to yield, no bargain to strike, and the flag that turned
+// every wolf in the game friendly does not touch a single one of them.
+//
+// Mechanically identical to the wolf, deliberately: prowl, coil, pounce, three
+// plates. Same grammar, different animal, and it is FASTER — a cheetah that
+// read like a heavy wolf would be a reskin, so it takes the same wind-up and
+// covers half again the distance with it.
+const CAT_ZONES = { C: 1, D: 1, E: 1, X: 1 };
+function isCheetah(e) {
+  if (!e || (typeof isHero === 'function' && isHero())) return false;
+  if (e.kind !== 'crawler' && e.kind !== 'hopper') return false;
+  return !!(G.roomDef && CAT_ZONES[G.roomDef.zone]);
+}
+// Fetched on arrival, not on first draw. A lazy plate means the first frame in
+// a room shows whatever the fallback is — and the fallback is the old art the
+// whole line exists to replace, so "it flashes the wrong enemy for a moment"
+// and "it draws the wrong enemy" look identical to somebody playing it.
+function beastPreload(zone) {
+  if (typeof mediaFetch !== 'function') return;
+  const set = WOLF_ZONES[zone] ? WOLF_ART : (CAT_ZONES[zone] ? CHEETAH_ART : null);
+  if (!set) return;
+  for (const k in set) mediaFetch(set[k].img);
+}
+const CHEETAH_ART = {
+  rest: { img: 'cheetahRest', k: 2.10, foot: 1 },
+  coil: { img: 'cheetahWarn', k: 2.30, foot: 1 },
+  lunge: { img: 'cheetahRun', k: 2.05, foot: 0, yOff: -0.18 },
+};
 
 // THREE PLATES, ONE PER PHASE OF THE ONLY MOVE IT HAS.
 //   k    — how many hitbox-heights the plate occupies on screen
@@ -71,21 +118,24 @@ function wolfPose(e) {
 // the caller falls through to whatever it was doing before rather than drawing
 // nothing — the same contract every authored body in this engine has.
 // ---------------------------------------------------------------------------
-function drawWolf(c, e) {
+function drawWolf(c, e) { return drawBeastPlate(c, e, WOLF_ART, packTamed()); }
+// The cheetah rides the same renderer, and can never be tamed — the `tame`
+// argument is the only difference between the two animals in this file.
+function drawCheetah(c, e) { return drawBeastPlate(c, e, CHEETAH_ART, false); }
+function drawBeastPlate(c, e, ART, tame) {
   const pose = wolfPose(e);
-  const A = WOLF_ART[pose];
+  const A = ART[pose];
   if (typeof mediaHas === 'function' && !mediaHas(A.img) && typeof mediaFetch === 'function') {
     mediaFetch(A.img);
-    // and pull the other two while we are here: a wolf that has to wait for its
-    // coil plate the first time it winds up shows a rest pose through the tell,
-    // which is the one frame the player must not be lied to about
-    for (const k in WOLF_ART) mediaFetch(WOLF_ART[k].img);
+    // and pull the other two while we are here: an animal that has to wait for
+    // its coil plate the first time it winds up shows a rest pose through the
+    // tell, which is the one frame the player must not be lied to about
+    for (const k in ART) mediaFetch(ART[k].img);
   }
   const im = MEDIA_IMG[A.img];
   if (!im || !im.naturalWidth) return false;
 
   const cx = e.x + e.w / 2, footY = e.y + e.h;
-  const tame = packTamed();
   const dh = e.h * A.k, dw = dh * (im.naturalWidth / im.naturalHeight);
   // grounded plates hang off the floor line; the airborne one hangs off centre
   const yc = A.foot ? footY - dh / 2 + e.h * (A.yOff || 0)

@@ -36,7 +36,42 @@ const ROOMS = {
   // her when the lesson starts: open ground to walk, a step to jump, and one
   // dormant machine to scratch. Every good platformer opens with a room like
   // this and it is the one room this game never had.
-  A0: { zone: 'A', w: 34, h: 17, exits: { R: 'A1' },
+  // ============ THE WAKING — before the meadow, before any enemy ============
+  //
+  // The film ends with her opening her eyes. The GAME used to begin two rooms
+  // and one dormant machine later, which meant the first thing the player did
+  // after "she wakes up" was learn to punch something. So the waking is
+  // playable now, and it is two rooms long:
+  //
+  //   W1 — she is still in the cradle. It lets her go, she stands, she walks.
+  //        That is the whole room. MOVE is taught here, with nothing else on
+  //        screen and nothing that can touch her.
+  //   W2 — outside, in the light, with the city gates at the far end. A step
+  //        and a gap teach JUMP on the way to them.
+  //
+  // Only then does A0 exist, with the trader, the node and the first machine —
+  // and by the time she meets it she can already walk and jump, which is the
+  // whole reason the order was wrong before. See TUT_ROOMS in game.js.
+  W1: { zone: 'A', w: 22, h: 17, exits: { R: 'W2' },
+    ents: [],                                 // nothing. That is the point.
+    build(g) {
+      frame(g); openR(g);
+      // a low shelf on the far wall so the room has a depth to read against,
+      // and nothing to jump onto: this room teaches ONE verb
+      hline(g, 14, 18, 12, '=');
+    } },
+  W2: { zone: 'A', w: 40, h: 17, exits: { L: 'W1', R: 'A0' },
+    ents: [],
+    build(g) {
+      frame(g); openL(g); openR(g);
+      // THE STEP, then THE GAP. Both are inside one jump and neither can kill
+      // her — the gap is two tiles of floor removed with solid ground under it,
+      // so a missed jump costs a moment and teaches the same lesson again.
+      rect(g, 12, 14, 14, 15, '#');
+      rect(g, 22, 15, 23, 15, '.');
+      hline(g, 28, 32, 11, '=');
+    } },
+  A0: { zone: 'A', w: 34, h: 17, exits: { R: 'A1', L: 'W2' },
     // The waking floor teaches the whole loop, not just the verbs: the machine
     // is what she scratches, the trader is what the scrap it drops is FOR, and
     // the node is where the thinking she is about to need comes from.
@@ -531,7 +566,7 @@ const ROOMS = {
 
 // map screen layout: [gridX, gridY, wCells, hCells]
 const MAPPOS = {
-  A0: [-1, 3, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A10: [3, 3, 1, 1], A3: [4, 3, 1, 1], A4: [5, 3, 1, 1],
+  W1: [-3, 3, 1, 1], W2: [-2, 3, 1, 1], A0: [-1, 3, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A10: [3, 3, 1, 1], A3: [4, 3, 1, 1], A4: [5, 3, 1, 1],
   A5: [1, 4, 1, 1], A6: [0, 2, 1, 1], A7: [1, 5, 1, 1], A8: [1, 2, 1, 1], A9: [1, 1, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],

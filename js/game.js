@@ -201,7 +201,10 @@ function newSave(diff) {
   return {
     v: 1, diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [], arms: [], armIdx: 0, stars: 6,
     slots: 3, iq: 0, skills: [], relics: [], flags: {}, broken: {}, visited: {}, shop: {},
-    bench: { room: 'A0', x: 70, y: 412 }, deaths: 0, lives: 0, time: 0,
+    // SHE STARTS IN THE CRADLE, not on the meadow floor. W1 is the room the
+    // opening film hands her to; A0 is where the game's economy starts, two
+    // rooms and two learned verbs later.
+    bench: { room: 'W1', x: 96, y: 412 }, deaths: 0, lives: 0, time: 0,
     pouch: null, usedNine: false, won: false, evo: 0, pace: 0, quests: {}, culls: {}, bag: {},
     // SHE STARTS WITH ONE CELL, AND ONLY ONE. See INV/npcCharge below: the
     // machine folk were offline when the Song went out, so nothing infected
@@ -434,6 +437,10 @@ function loadRoom(id) {
   // plates nobody in zone A will ever look at is twelve plates a phone should
   // not be downloading to get to the first room
   if (typeof floraPreload === 'function') floraPreload(ROOMS[id] && ROOMS[id].zone);
+  if (typeof beastPreload === 'function') beastPreload(ROOMS[id] && ROOMS[id].zone);
+  // the machine lets go of her the first time she stands in the room it kept
+  // her in, and never again
+  if (id === 'W1' && typeof wakeStart === 'function') wakeStart();
   if (player) player.oathUsed = false;      // the lion owes her once per room
   G.save.visited[id] = 1;
   tileDirty = true;
@@ -894,6 +901,7 @@ function update(dt) {
       if (typeof updatePets === 'function') updatePets(dt);
       if (typeof updateBrDelta === 'function') updateBrDelta(dt);
       if (typeof updateSpoilQ === 'function') updateSpoilQ(dt);
+      if (typeof updateWake === 'function') updateWake(dt);
       G.enemies = G.enemies.filter(e => !e.dead);
       if (G.boss) G.boss.update(dt);
       for (const p of G.projs) if (!p.dead) p.update(dt);
@@ -3947,6 +3955,75 @@ function floraPlan(id) {
   }
   return (FLORA_CACHE[id] = out);
 }
+// ===========================================================================
+// THE TWO ROOMS IN FRONT OF THE MEADOW, and the props that make them places.
+//
+// W1 is the cradle she was hooked into. W2 is the road to the city, with the
+// gates standing open at the end of it. Both are drawn in the same pass as the
+// lair — behind the tile layer, on parallax — so she walks IN the room rather
+// than in front of a picture of it.
+//
+//   x    — where it sits, as a fraction of the room's width
+//   k    — how many TILES tall it stands
+//   par  — parallax factor
+//   dim  — how far it is pushed back into the room's own colour
+const ROOM_PROP = {
+  W1: { key: 'cradle', alt: 'cradleOpen', x: 0.16, k: 6.2, par: 0.90, dim: 0.20 },
+  W2: { key: 'gateCity', x: 0.86, k: 13.0, par: 0.78, dim: 0.10, wide: 1 },
+};
+function drawRoomProp() {
+  if (typeof isHero === 'function' && isHero()) return;
+  const P = ROOM_PROP[G.roomId];
+  if (!P) return;
+  if (typeof mediaFetch === 'function') { mediaFetch(P.key); if (P.alt) mediaFetch(P.alt); }
+  // the cradle swaps to its RELEASED plate the instant it lets her go, and
+  // stays there for the rest of the run — the room remembers being left
+  const released = P.alt && !(G.wake && G.wake.t > 0.55);
+  const im = MEDIA_IMG[released ? P.alt : P.key];
+  if (!im || !im.naturalWidth) return;
+  const h = P.k * TILE, w = h * (im.naturalWidth / im.naturalHeight);
+  const fx = G.roomDef.w * TILE * P.x, fy = 15 * TILE;
+  c.save();
+  c.translate(camSX() * (1 - P.par), camSY() * (1 - P.par));
+  c.globalAlpha = 1 - P.dim;
+  c.drawImage(im, fx - w / 2, fy - h, w, h);
+  c.globalAlpha = P.dim * 0.5;
+  c.globalCompositeOperation = 'source-atop';
+  c.fillStyle = (PAL[G.roomDef.zone] || {}).far || '#0b0d11';
+  c.fillRect(fx - w / 2 - 4, fy - h - 4, w + 8, h + 8);
+  c.restore();
+  // the moment itself: coolant vapour off the disconnecting umbilicals
+  if (G.roomId === 'W1' && G.wake && chance(0.6))
+    addPart(fx + rnd(-w * 0.2, w * 0.2), fy - rnd(20, h * 0.7),
+      rnd(-18, 18), rnd(-40, -12), 0.9, '#aef7d8', 2, -30, true);
+}
+// ---------------------------------------------------------------------------
+// THE WAKING. Two seconds in which she cannot do anything, on purpose.
+//
+// The opening film ends on her eyes opening; this is the machine letting go of
+// her. Her controls are held for it — the same hold the guardian chambers use —
+// because a release you can walk out of halfway through is not a release, it is
+// a loading screen with a picture on it. It happens exactly once per save.
+function wakeStart() {
+  if (!G.save || (G.save.flags && G.save.flags.woke)) return;
+  G.wake = { t: 2.0 };
+  if (typeof sfx === 'function') sfx('powerUp');
+  if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 4);
+  if (typeof padRumble === 'function') padRumble(0.5, 0.4, 700);
+}
+function updateWake(dt) {
+  if (!G.wake) return;
+  const before = G.wake.t;
+  G.wake.t -= dt;
+  // the clunk of the last umbilical coming off, half a second in
+  if (before > 1.45 && G.wake.t <= 1.45) { sfx('metal'); cam.shake = Math.max(cam.shake, 6); }
+  if (G.wake.t <= 0) {
+    G.wake = null;
+    if (G.save.flags) G.save.flags.woke = 1;
+    if (typeof persist === 'function') persist();
+    if (typeof hzdSay === 'function') hzdSay('purr', 0);
+  }
+}
 function drawFlora() {
   if (typeof isHero === 'function' && isHero()) return;   // the Odyssey has its own world
   const plan = floraPlan(G.roomId);
@@ -4510,9 +4587,21 @@ const TUT_STEPS = [
   { id: 'move', label: 'tut_move', hint: 'tut_move_h',
     keys: '\u2190 \u2192', pad: 'D-pad', touch: 'stick', vb: null,
     done: () => Math.abs(player.vx) > 40 },
+  // ...and now she has to USE it, which is the step that carries the story:
+  // the door out of the room she woke in. It cannot be completed by pressing
+  // anything — only by going, which is exactly what the moment is.
+  { id: 'out', label: 'tut_out', hint: 'tut_out_h',
+    keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
+    done: () => (TUT_ROOMS[G.roomId] || 0) >= 1 },
   { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h',
     keys: 'Z / Space', pad: 'A', touch: 'JUMP', vb: 'VJUMP',
     done: () => !player.on && player.vy < -60 },
+  // THE GATES. The second half of the walk, and the reason the walk exists: a
+  // tutorial that ends at a door you can see from where you started gives the
+  // verbs somewhere to have been going.
+  { id: 'gate', label: 'tut_gate', hint: 'tut_gate_h',
+    keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
+    done: () => (TUT_ROOMS[G.roomId] || 0) >= 2 },
   { id: 'atk', label: 'tut_atk', hint: 'tut_atk_h',
     keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
     done: () => !!player.swing || player.comboT > 0 },
@@ -4573,11 +4662,24 @@ function tutHand(st) {
 // The lessons are STAGED IN THE ROOM: open ground for the first, the step for
 // the second, and a machine walking at her for the third — held just short of
 // touching, because a lesson you can fail is not a lesson, it is a fight.
+// THE LESSON SPANS THREE ROOMS NOW, and which verb belongs to which is the
+// whole point of the change: MOVE in the cradle room, JUMP on the walk to the
+// city, and everything that involves a machine on the waking floor once she
+// can already do both. A tutorial that teaches you to punch before it teaches
+// you to walk is a tutorial written in the order the code was, not the order
+// the player needs.
+//
+// Leaving the chain forward (W1 -> W2 -> A0) advances it; leaving BACKWARD
+// does not end it, because walking left to look at the room you woke in is
+// curiosity, not a decision to skip the tutorial.
+const TUT_ROOMS = { W1: 0, W2: 1, A0: 2 };
+// which step opens each room's door — see the fence in updateTutor()
+const TUT_DOOR = { W1: 'out', W2: 'gate', A0: 'go' };
 function updateTutor(dt) {
   const sv = G.save;
   if (!sv || !player || player.dead) return;
   if (sv.flags && sv.flags.tut) return;
-  if (G.roomId !== 'A0') {                       // the waking floor is behind her
+  if (TUT_ROOMS[G.roomId] === undefined) {       // the whole waking is behind her
     if (sv.flags) sv.flags.tut = 1;
     G.tut = null; if (typeof TOUCH !== 'undefined' && TOUCH) TOUCH.hi = null;
     return;
@@ -4602,11 +4704,22 @@ function updateTutor(dt) {
   // verb, which is what happened: she strolled past the machine she was being
   // asked to scratch and into a room with real ones. The way out holds until
   // the three verbs are done, and then opens itself.
-  if (T.i < TUT_LAST) {
+  // ...and now there are THREE doors, because the lesson spans three rooms.
+  // Each one holds until the room it belongs to has finished teaching, and the
+  // step that opens it is the step that asks her to go through it — which is
+  // why `out` and `gate` are steps at all rather than just walking.
+  //
+  // The fence used to be a single `T.i < TUT_LAST`, and with the waking rooms
+  // in front of A0 that fenced her into the cradle for the whole tutorial: the
+  // door out of W1 could not open until the LAST lesson in A0 was done, in a
+  // room she could not reach. tests/opening.cjs caught it — she walked to
+  // x=610 and stopped there forever.
+  const openAt = TUT_STEPS.findIndex(q => q.id === (TUT_DOOR[G.roomId] || 'go'));
+  if (openAt >= 0 && T.i < openAt) {
     const lim = (G.roomDef.w - 2.2) * TILE - player.w;
     if (player.x > lim) { player.x = lim; if (player.vx > 0) player.vx = 0; }
-  } else if (!T.opened) {
-    T.opened = true;
+  } else if (T.opened !== G.roomId) {
+    T.opened = G.roomId;                       // per ROOM, not once per run
     sfx('cast'); cam.shake = Math.max(cam.shake, 3);
     for (let i = 0; i < 18; i++)
       addPart((G.roomDef.w - 1.6) * TILE, 11 * TILE + rnd(0, 3.4 * TILE),
@@ -4625,7 +4738,7 @@ function updateTutor(dt) {
 }
 function drawTutor() {
   const sv = G.save;
-  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player || G.roomId !== 'A0') return;
+  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player || TUT_ROOMS[G.roomId] === undefined) return;
   const T = G.tut;
   const st = TUT_STEPS[T.i];
   if (!st) return;
@@ -4642,7 +4755,11 @@ function drawTutor() {
     c.beginPath(); c.arc(wx - cam.x, wy - cam.y, r + pu * 3, 0, 7); c.stroke();
     c.setLineDash([]); c.restore(); c.globalAlpha = 1;
   };
-  if (st.id === 'jump') mark(17 * TILE + 12, 14 * TILE + 12, 34, '#37ffd0');
+  // the thing being taught, ringed — and WHICH thing depends on the room now
+  if (st.id === 'jump')
+    mark(G.roomId === 'W2' ? 13 * TILE : 17 * TILE + 12, 14 * TILE + 12, 34, '#37ffd0');
+  if (st.id === 'out' || st.id === 'gate')
+    mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
   if (st.id === 'atk' || st.id === 'kill') {
     const dum = G.enemies && G.enemies.find(e => e && !e.dead);
     if (dum) mark(dum.x + dum.w / 2, dum.y + dum.h / 2, 30, '#ff8a6a');
@@ -5033,6 +5150,7 @@ function drawWorldFrame() {
   c.save();
   c.translate(-Math.round(camSX()), -Math.round(camSY()));
   drawLair();                       // behind the level — see the LAIR table
+  drawRoomProp();                   // the cradle, the gates — see ROOM_PROP
   drawFlora();                      // ...and what grows in it — see FLORA
   if (tileDirty) renderTileLayer(P);
   c.drawImage(tileCv, 0, 0);

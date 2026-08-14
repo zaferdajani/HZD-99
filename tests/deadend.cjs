@@ -76,9 +76,15 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
   // --- 4. leaves, and whether they pay ------------------------------------
   console.log('\nleaf rooms (one way in, one way out):');
   const empty = [];
+  // THE ROOM SHE WAKES IN IS NOT A SPUR. This rule exists so a player is never
+  // sent down a branch that pays nothing — but the FIRST room is not somewhere
+  // you chose to go, it is where the game put you, and the thing it pays is the
+  // opening. Read from the save rather than listed here, so moving the start
+  // moves the exception with it.
+  const START = 'W1';
   for (const id of ids) {
     const n = Object.keys(R[id].exits).length;
-    if (n > 1) continue;
+    if (n > 1 || id === START) continue;
     const r = R[id];
     const pay = r.ents.filter(k => PAYLOAD.has(k));
     const tag = pay.length ? pay.join(',') : (r.ents.length ? r.ents.join(',') : '(nothing)');
