@@ -48,12 +48,18 @@ const { chromium } = require('playwright');
       { n: 'swing', f: (p) => { p.swing = { t: 0.1, t0: 0.24, combo: 0, ang: -0.3 }; p.swingVis = p.swing; } },
       { n: 'combo2', f: (p) => { p.swing = { t: 0.1, t0: 0.24, combo: 2, ang: 0.4 }; p.swingVis = p.swing; } },
       { n: 'dash', f: (p) => { p.dashT = 0.12; p.vx = 620; } },
+      { n: 'skid', f: (p) => { p.vx = 300; p.skidT = 0.2; } },
+      { n: 'wallcling', f: (p) => { p.vy = 60; p.on = false; p.wallSlide = 1; } },
+      { n: 'song', f: (p) => { p.songT = 0.5; } },
+      { n: 'armfire', f: (p) => { p.armCD = 0.28; } },
+      { n: 'lowhp', f: (p) => { p.cores = 1; p.vx = 0; } },
+      { n: 'charge', f: (p) => { p.chargeT = 0.45; p.chargeOk = true; p.volts = 99; } },
       // the two that BLINK. She flickers while invulnerable and while repairing,
       // which is correct and which means a single sample can legitimately catch
       // her mid-blink and see nothing. They are swept across the blink phase
       // below rather than excluded — the joint tripwire has to cover them too,
       // and those are exactly the states where a limb gets redrawn specially.
-      { n: 'hurt', f: (p) => { p.hurtT = 0.3; p.iT = 0.9; }, blink: 1 },
+      { n: 'hurt', f: (p) => { p.hurtPoseT = 0.3; p.hurtT = 0.3; p.iT = 0.9; }, blink: 1 },
       { n: 'heal', f: (p) => { p.healT = 0.5; p.vx = 0; }, blink: 1 },
     ];
     const cv2 = document.createElement('canvas');
@@ -67,6 +73,16 @@ const { chromium } = require('playwright');
         // a clean slate per pose so one does not leak into the next
         player.vx = 0; player.vy = 0; player.on = true; player.dashT = 0;
         player.swing = null; player.swingVis = null; player.hurtT = 0; player.healT = 0;
+        player.skidT = 0; player.wallSlide = 0; player.songT = 0; player.armCD = 0;
+        player.hurtPoseT = 0; player.chargeT = 0; player.cores = player.maxCores();
+        // ...and the residue of LIVE play. The harness borrows the real player
+        // out of a running room, and whatever it was doing a frame earlier —
+        // a landing squash, a takeoff coil, leftover invulnerability — is
+        // still on it. landT in particular gates the airborne pose, so a
+        // stale landing made `air` measure as idle in the full suite and pass
+        // alone: a flake that was really an incomplete reset.
+        player.landT = 0; player.land0 = 0; player.flipT = 0; player.takeoffT = 0;
+        player.pogoT = 0; player.jetT = 0; player.iT = 0; player.idleT = 0;
         player.face = face; player.faceVis = face; player.anim = 1.2;
         pose.f(player);
         // a blinking state is sampled across the blink until she is on screen,
@@ -90,10 +106,14 @@ const { chromium } = require('playwright');
         // strongly asymmetric about its own spine at the shoulder height.
         const d = d0;
         let left = 0, right = 0;
-        for (let yy = 150; yy < 215; yy++) for (let xx = 0; xx < 320; xx++) {
-          if (d[(yy * 320 + xx) * 4 + 3] > 40) { if (xx < 160) left++; else right++; }
+        // ...and the full silhouette, packed to bits, for the IoU law below
+        const mask = [];
+        for (let yy = 0; yy < 320; yy += 2) for (let xx = 0; xx < 320; xx += 2) {
+          const on2 = d[(yy * 320 + xx) * 4 + 3] > 40 ? 1 : 0;
+          mask.push(on2);
+          if (on2 && yy >= 150 && yy < 215) { if (xx < 160) left++; else right++; }
         }
-        shots.push({ pose: pose.n, face, left, right });
+        shots.push({ pose: pose.n, face, left, right, mask: face > 0 ? mask : null });
       }
     }
     return { joints: G._armJointCalls, shots };
@@ -121,7 +141,39 @@ const { chromium } = require('playwright');
     !lopsided.length,
     lopsided.map(s => s.pose + '/' + (s.face > 0 ? 'R' : 'L')).join(', '));
 
-  // ---- 3. AND SHE IS ACTUALLY THERE ---------------------------------------
+  // ---- 3. THE SILHOUETTE LAW, APPLIED TO HER ------------------------------
+  // The guardians have obeyed this since the art bible was written (§3.3): a
+  // named state must DIFFER from rest in silhouette, measured as IoU, because
+  // "she has the mechanic but not the pose" is invisible in code and glaring
+  // on screen. The state sheet caught three states drawn as idle; this is what
+  // keeps the count at zero. The line is looser than the guardians' 0.86 —
+  // she is a small character whose poses are carriage and lean, not limbs
+  // thrown a body-length — but it is a LINE, and it fails the build.
+  const IOU_MAX = 0.90;
+  const idleMask = m.shots.find(s => s.pose === 'idle' && s.face > 0).mask;
+  const iou = (a2, b2) => {
+    let inter = 0, uni = 0;
+    for (let i = 0; i < a2.length; i++) {
+      if (a2[i] & b2[i]) inter++;
+      if (a2[i] | b2[i]) uni++;
+    }
+    return uni ? inter / uni : 1;
+  };
+  const MUST_DIFFER = ['run', 'air', 'fall', 'swing', 'combo2', 'dash', 'skid',
+                       'wallcling', 'song', 'armfire', 'lowhp', 'charge', 'hurt', 'heal'];
+  console.log('    IoU vs idle (must be <= ' + IOU_MAX + '):');
+  const same = [];
+  for (const n of MUST_DIFFER) {
+    const sh = m.shots.find(s2 => s2.pose === n && s2.face > 0);
+    if (!sh || !sh.mask) { same.push(n + ' (no mask)'); continue; }
+    const v = iou(idleMask, sh.mask);
+    console.log('      ' + n.padEnd(10) + v.toFixed(3) + (v > IOU_MAX ? '   <-- DRAWN AS IDLE' : ''));
+    if (v > IOU_MAX) same.push(n + ' ' + v.toFixed(3));
+  }
+  check('every named state differs from idle in SILHOUETTE',
+    !same.length, same.join(', '));
+
+  // ---- 4. AND SHE IS ACTUALLY THERE ---------------------------------------
   const empty = m.shots.filter(s => s.left + s.right < 200);
   check('...and she is drawn at all in every state',
     !empty.length, empty.map(s => s.pose).join(', '));

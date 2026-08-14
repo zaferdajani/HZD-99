@@ -1331,12 +1331,55 @@ class Player {
         sy += 0.18 * q; sx -= 0.1 * q;
       }
     }
+    // ---- THE THREE POSES THE STATE SHEET CAUGHT MISSING -------------------
+    // The full-state audit (tools/statesheet.cjs) put every state next to idle
+    // and three of them were the same drawing: the Song, the beat after firing
+    // an arm, and standing at one core. Each is a MECHANIC the body ignored.
+    // The fixes live here, in the same carriage/rotation stage as every other
+    // pose, so they compose with running, landing and the rest instead of
+    // fighting them — and tests/hero.cjs now holds each one to the guardians'
+    // silhouette law, so none of them can quietly become idle again.
+    //
+    // THE SONG: she stands INTO it — up on her toes, chest lifted, head back.
+    // A note thrown at the sky, which is what the Song is in the fiction.
+    const songK = this.songT > 0 ? clamp(this.songT / 0.5, 0, 1) : 0;
+    // ARM FIRE: the shot has a beat of recoil. The body rocks back off the
+    // firing line and settles as the cooldown runs out, so every arm reads as
+    // having KICK even before its projectile is seen.
+    const kick = this.armCD > 0 ? clamp(this.armCD / 0.3, 0, 1) : 0;
+    // ONE CORE LEFT: she is hurt and it shows between fights — shoulders
+    // dropped, carriage low, the run unaffected (a limp that slows the PLAYER
+    // is punishing the state twice; this is body language, not a debuff).
+    const lowK = (this.cores <= 1 && this.on && !run && this.dashT <= 0
+                  && !this.swingVis && this.healT <= 0) ? 1 : 0;
+    // AIRBORNE — the find that put this block under a harness: mid-air she
+    // measured 0.92 IoU against standing still. A standing picture on a
+    // parabola is exactly what NULLFANG's leap was convicted of, and she had
+    // been doing it herself all along. The rise stretches her ALONG the jump
+    // and tips her back off it; the fall compresses and pitches her INTO it,
+    // reading forward the way anything falling with intent does. Blended by
+    // vertical speed so the apex passes through neutral instead of popping.
+    let airRot = 0;
+    if (!this.on && this.wallSlide === 0 && this.dashT <= 0 && this.flipT <= 0
+        && this.landT <= 0 && this.hurtPoseT <= 0) {
+      const vk = clamp(this.vy / 760, -1, 1);
+      if (vk < 0) { sy += -vk * 0.13; sx -= -vk * 0.08; }   // the rise: drawn long
+      else { sy -= vk * 0.05; sx += vk * 0.04; }            // the fall: gathered
+      airRot = vk < 0 ? vk * 0.07 : vk * 0.12;              // back off it, then into it
+    }
     const cr = (this.skidT > 0 ? 0.2 : (this.wallSlide !== 0 ? 0.1 : 0))
-             + (run ? sprintK * 0.12 : 0);                          // low, coiled sprint carriage
+             + (run ? sprintK * 0.12 : 0)                           // low, coiled sprint carriage
+             - songK * 0.08                                        // the Song: drawn UP, not down
+             + lowK * 0.11;                                        // one core: sagging carriage
     if (this.wallSlide !== 0) c.translate(2.5, 0);                  // body pressed INTO the wall
+    if (kick > 0) c.translate(-2.6 * kick, 0);                      // rocked off the firing line
     c.rotate(this.lean + (this.skidT > 0 ? -0.14 : 0) + (this.wallSlide !== 0 ? 0.1 : 0)
              + (run ? sprintK * 0.3 : 0)                            // pitched forward, chasing the ground
              + (this.hurtPoseT > 0 ? -0.3 * (this.hurtPoseT / 0.3) : 0)  // thrown back, off balance
+             + airRot                                       // the leap's own pitch
+             - songK * 0.13                                        // head and chest thrown back to sing
+             - kick * 0.09                                         // recoil rocks her heels-back
+             + lowK * 0.07                                         // one core: hunched forward
              + (this.idleT > 0.9 ? Math.sin(this.idleT * 0.9) * 0.022 : 0)); // idle weight shift
     // THE FRAME THE CUT LIVES IN, captured here and not one line later. Below
     // this point the transform stops describing where she IS and starts

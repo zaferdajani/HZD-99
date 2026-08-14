@@ -23,18 +23,21 @@ const { chromium } = require('playwright');
       ['double jump', p2 => { p2.vy = -300; p2.on = false; p2.flipT = 0.22; p2.jetT = 0.3; }],
       ['land',        p2 => { p2.landT = 0.10; p2.land0 = 0.12; }],
       ['dash',        p2 => { p2.dashT = 0.12; p2.vx = 640; p2.jetT = 0.2; }],
-      ['wall cling',  p2 => { p2.vy = 60; p2.on = false; p2.wallSide = 1; p2.wallT = 0.2; }],
+      ['wall cling',  p2 => { p2.vy = 60; p2.on = false; p2.wallSlide = 1; }],
       ['claw 1',      p2 => { p2.swing = { t: 0.10, t0: 0.24, combo: 0, ang: -0.35 }; p2.swingVis = p2.swing; }],
       ['claw 2',      p2 => { p2.swing = { t: 0.10, t0: 0.24, combo: 1, ang: 0.20 }; p2.swingVis = p2.swing; }],
       ['finisher',    p2 => { p2.swing = { t: 0.09, t0: 0.26, combo: 2, ang: 0.45 }; p2.swingVis = p2.swing; }],
       ['charging',    p2 => { p2.chargeT = 0.45; p2.chargeOk = true; p2.volts = 99; }],
       ['burst',       p2 => { p2.chargeT = 0; p2.burstT = 0.2; p2.volts = 40; }],
-      ['arm: shard',  p2 => { G.save.armIdx = 1; p2.armCD = 0.2; }],
-      ['arm: frost',  p2 => { G.save.armIdx = 4; p2.armCD = 0.2; }],
-      ['arm: arc',    p2 => { G.save.armIdx = 5; p2.armCD = 0.2; }],
+      ['arm: shard',  p2 => { G.save.armIdx = 1; p2.armCD = 0.28; }],
+      ['arm: frost',  p2 => { G.save.armIdx = 4; p2.armCD = 0.28; }],
+      ['arm: arc',    p2 => { G.save.armIdx = 5; p2.armCD = 0.28; }],
       ['the Song',    p2 => { p2.songT = 0.5; }],
       ['heal',        p2 => { p2.healT = 0.55; p2.iT = 0.2; }],
-      ['hurt',        p2 => { p2.hurtT = 0.28; p2.iT = 0.35; }],
+      // hurtPoseT is the RECOIL; hurtT alone is only the white flash. The
+      // first cut of this sheet drove the flash and reported the recoil
+      // missing — the audit tool audited the wrong field.
+      ['hurt',        p2 => { p2.hurtPoseT = 0.3; p2.hurtT = 0.28; p2.iT = 0.35; }],
       ['low health',  p2 => { p2.cores = 1; }],
       ['crouch/idle2',p2 => { p2.idleT = 6; p2.lookX = 0.8; }],
     ];
@@ -53,8 +56,8 @@ const { chromium } = require('playwright');
       player.vx = 0; player.vy = 0; player.on = true; player.dashT = 0; player.swing = null;
       player.swingVis = null; player.hurtT = 0; player.healT = 0; player.songT = 0;
       player.flipT = 0; player.landT = 0; player.jetT = 0; player.skidT = 0;
-      player.chargeT = 0; player.burstT = 0; player.armCD = 0; player.wallT = 0;
-      player.takeoffT = 0; player.idleT = 0; player.cores = player.maxCores();
+      player.chargeT = 0; player.burstT = 0; player.armCD = 0; player.wallSlide = 0;
+      player.hurtPoseT = 0; player.takeoffT = 0; player.idleT = 0; player.cores = player.maxCores();
       player.iT = 0; player.anim = 1.35;
       player.face = face; player.faceVis = face;
       fn(player);
