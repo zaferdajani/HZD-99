@@ -2,7 +2,7 @@
 
 A dual-world metroidvania. At "Who are you?" you choose your game:
 
-- **A robo-cat ninja** — NYA-9, a maintenance unit who slept through the fall of
+- **A robo-cat ninja** — HZD-99, a maintenance unit who slept through the fall of
   the Machine Depths, hunting the virus that repurposed every machine it touched.
 - **A hero of the Odyssey** — the long way home to Ithaca, through the Halls of
   the Dead and the Forge of the Cyclopes.

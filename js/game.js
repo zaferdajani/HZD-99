@@ -2396,7 +2396,7 @@ const PURIFY_VID = {
 // vignette per guardian that plays only if that guardian is still alive.
 //
 // Every vignette is the same meadow at the same hour, shot as a slow left-to-
-// right dolly at the same height and speed, with no other guardian and no NYA-9
+// right dolly at the same height and speed, with no other guardian and no HZD-99
 // in frame. That is what makes them cuttable: any subset, in order, joins into
 // one continuous travelling move. A player who spared nobody gets the same
 // sunrise and the same last frame over an emptier field — which is the honest
@@ -5192,7 +5192,7 @@ function drawWorldFrame() {
 // THE LIGHT IN THE ROOM.
 //
 // Every character in this game carries its own lighting, baked in when it was
-// drawn or rendered, and none of it knows where it is standing. NYA-9 is lit
+// drawn or rendered, and none of it knows where it is standing. HZD-99 is lit
 // cool white in the Foundry, where everything else in frame is lit by molten
 // iron; the Archive's machines are lit the same way they were in the Meadows.
 // That is the last thing making them read as pasted onto the scene rather than
@@ -5260,17 +5260,17 @@ function dimPanel(x, y, w, h) {
 // fine work that turns to mush at portrait size.
 //
 // Both follow STORY.md's art rules: red light means infected, so nothing friendly
-// glows red — NYA-9 reads teal, the hero reads gold, and the crimson crest is
+// glows red — HZD-99 reads teal, the hero reads gold, and the crimson crest is
 // pigment rather than emission. Nothing here is new, so both carry wear.
 // ---------------------------------------------------------------------------
-// Corrected to the reference sheet: NYA-9 is WHITE CERAMIC over brushed steel
+// Corrected to the reference sheet: HZD-99 is WHITE CERAMIC over brushed steel
 // with oxidized bronze fittings and cyan light — not the dark blue-teal she was.
-const NYA_P  = { core:'#3a3730', shade:'#6b665d', mid:'#c2bcae', lit:'#f2eee6', glow:'#3fd8ee' };
+const HZD_P  = { core:'#3a3730', shade:'#6b665d', mid:'#c2bcae', lit:'#f2eee6', glow:'#3fd8ee' };
 const WRAP_P = { core:'#20262b', shade:'#333c44', mid:'#4e5a64' };
 const BRZ_P  = { core:'#2b1f12', shade:'#5f4520', mid:'#9a7534', lit:'#d9b56a', glow:'#ffd98a' };
 const CRE_P  = { core:'#5e1a22', shade:'#a8323c', mid:'#e0484f', lit:'#f2887f' };
 
-function nyaSkullP(x) {
+function hzdSkullP(x) {
   x.beginPath();
   x.moveTo(-48,-92);
   x.bezierCurveTo(-20,-110, 20,-110, 48,-92);
@@ -5283,24 +5283,24 @@ function nyaSkullP(x) {
   x.bezierCurveTo(-104,-36, -86,-70, -48,-92);
   x.closePath();
 }
-function nyaEarP(x, dir) {
+function hzdEarP(x, dir) {
   x.save(); x.scale(dir, 1);
   x.beginPath();
   x.moveTo(36,-76); x.quadraticCurveTo(56,-130, 74,-176); x.quadraticCurveTo(104,-114, 92,-60);
   x.closePath(); x.restore();
 }
-function nyaEyeP(x) {
+function hzdEyeP(x) {
   x.beginPath();
   x.moveTo(-25, 1); x.quadraticCurveTo(-20,-12, 2,-13); x.quadraticCurveTo(23,-13, 28,-4);
   x.quadraticCurveTo(23, 10, 2, 11); x.quadraticCurveTo(-20, 10, -25, 1);
   x.closePath();
 }
-// NYA-9: a maintenance unit, not a soldier — round-dominant skull, level brow and
+// HZD-99: a maintenance unit, not a soldier — round-dominant skull, level brow and
 // alert (not narrowed) eyes. The asymmetry is a repair patch she riveted on herself.
 function drawNyaP(x, detail) {
   x.save(); x.rotate(-0.03);
   const sg = x.createLinearGradient(-90, 60, 90, 190);
-  sg.addColorStop(0, NYA_P.shade); sg.addColorStop(1, NYA_P.core);
+  sg.addColorStop(0, HZD_P.shade); sg.addColorStop(1, HZD_P.core);
   x.fillStyle = sg;
   x.beginPath(); x.moveTo(-40,44); x.lineTo(40,44); x.lineTo(52,120); x.lineTo(-52,120); x.closePath(); x.fill();
   x.beginPath(); x.moveTo(-126,196); x.quadraticCurveTo(-98,116,-46,106);
@@ -5328,7 +5328,7 @@ function drawNyaP(x, detail) {
   x.quadraticCurveTo(-112,76,-58,72); x.closePath(); x.fill();
 
   x.fillStyle = ramp(x, MAT.ceramic, -60,-180, 60,-60, 0.85);
-  nyaEarP(x,-1); x.fill(); nyaEarP(x,1); x.fill();
+  hzdEarP(x,-1); x.fill(); hzdEarP(x,1); x.fill();
   x.fillStyle = ramp(x, MAT.bronze, -20,-160, 20,-70, 0.8);
   for (const d of [-1, 1]) {
     x.save(); x.scale(d,1);
@@ -5342,7 +5342,7 @@ function drawNyaP(x, detail) {
     for (let i = 0; i < 3; i++) { x.beginPath(); x.arc(62+i*13,-115+i*5, 2, 0, 7); x.fill(); }
   }
 
-  x.save(); nyaSkullP(x); x.clip();
+  x.save(); hzdSkullP(x); x.clip();
   x.fillStyle = ramp(x, MAT.ceramic, -96,-114, 88, 76);
   x.fillRect(-150,-210, 300, 330);
   // the ears and the brow sit above the face, so they cast onto it
@@ -5361,17 +5361,17 @@ function drawNyaP(x, detail) {
   }
   x.restore();
 
-  x.save(); nyaSkullP(x); x.clip();
+  x.save(); hzdSkullP(x); x.clip();
   const rg = x.createLinearGradient(-106,-116, 40, 46);
   rg.addColorStop(0,'rgba(214,243,231,0)'); rg.addColorStop(0.18,'rgba(214,243,231,0.92)');
   rg.addColorStop(0.52,'rgba(214,243,231,0)');
-  x.strokeStyle = rg; x.lineWidth = 8; nyaSkullP(x); x.stroke();
+  x.strokeStyle = rg; x.lineWidth = 8; hzdSkullP(x); x.stroke();
   const bg2 = x.createLinearGradient(80, 86, 0, 6);
   bg2.addColorStop(0,'rgba(55,255,208,0.40)'); bg2.addColorStop(1,'rgba(55,255,208,0)');
-  x.strokeStyle = bg2; x.lineWidth = 5; nyaSkullP(x); x.stroke();
+  x.strokeStyle = bg2; x.lineWidth = 5; hzdSkullP(x); x.stroke();
   x.restore();
 
-  x.save(); nyaSkullP(x); x.clip();
+  x.save(); hzdSkullP(x); x.clip();
   x.fillStyle = ramp(x, MAT.steel, -92,-52, 92,-24);
   x.beginPath(); x.moveTo(-92,-50); x.quadraticCurveTo(0,-36, 92,-50);
   x.lineTo(92,-28); x.quadraticCurveTo(0,-15, -92,-28); x.closePath(); x.fill();
@@ -5379,7 +5379,7 @@ function drawNyaP(x, detail) {
   x.beginPath(); x.moveTo(-90,-49); x.quadraticCurveTo(0,-35, 90,-49); x.stroke();
   x.restore();
 
-  x.save(); nyaSkullP(x); x.clip();
+  x.save(); hzdSkullP(x); x.clip();
   const wg = x.createLinearGradient(-60, 24, 70, 84);
   wg.addColorStop(0, WRAP_P.mid); wg.addColorStop(1, WRAP_P.core);
   x.fillStyle = wg;
@@ -5402,10 +5402,10 @@ function drawNyaP(x, detail) {
   // because she slept through the broadcast and it never reached her
   for (const [d, cx, s, rot] of [[-1,-50,1.0,0.10],[1,51,0.9,-0.10]]) {
     x.save(); x.translate(cx,-8); x.rotate(rot); x.scale(d*s, s);
-    x.fillStyle = MAT.steel.deep; x.save(); x.scale(1.2,1.34); nyaEyeP(x); x.fill(); x.restore();
+    x.fillStyle = MAT.steel.deep; x.save(); x.scale(1.2,1.34); hzdEyeP(x); x.fill(); x.restore();
     occl(x, 0, 0, 34, 20, 0.5);
     x.shadowColor = MAT.cyan.mid; x.shadowBlur = 22; x.fillStyle = MAT.cyan.mid;
-    nyaEyeP(x); x.fill(); x.shadowBlur = 0;
+    hzdEyeP(x); x.fill(); x.shadowBlur = 0;
     x.fillStyle = MAT.cyan.lit; x.beginPath(); x.ellipse(6,-5, 9, 3.2, -0.2, 0, 7); x.fill();
     x.restore();
   }
@@ -5560,7 +5560,7 @@ function drawMenuBG(tsec) {
     c.fillStyle = 'rgba(120,220,255,' + (0.1 + hash2(i, 14) * 0.3) + ')';
     c.fillRect(xx, yy, 2.4, 2.4);
   }
-  // NYA-9 keeping watch behind the menu. Suppressed on the chooser, where she would
+  // HZD-99 keeping watch behind the menu. Suppressed on the chooser, where she would
   // otherwise show through the hero's card and lend him her antenna.
   if (G.state !== 'WHO') drawMenuCat(tsec);
 }
@@ -5570,7 +5570,7 @@ function drawMenuBG(tsec) {
 // It used to be `drawNyaP` — a separate flat vector head, at 58% alpha, with
 // different colours, no visor bar and ears the wrong shape. So the first
 // picture of her anybody ever saw was of somebody else, and every pass of
-// shading the real NYA-9 got (committed light, core shadow, cast shadows, the
+// shading the real HZD-99 got (committed light, core shadow, cast shadows, the
 // recessed visor, the formed ears) arrived nowhere near the title screen.
 //
 // She is posed and drawn here by Player.draw at four times size. Two things

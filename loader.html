@@ -28,7 +28,7 @@
                                   : ['cat', 'cat', 'beast', 'eagle', 'hero'];
   var who = cast[(Math.random() * cast.length) | 0];
   var qp = /[?&]lchar=(\w+)/.exec(location.search); if (qp) who = qp[1];
-  var names = { cat: 'NYA-9', beast: 'NULLFANG', eagle: 'TALONHOST', hero: 'THE WANDERER' };
+  var names = { cat: 'HZD-99', beast: 'NULLFANG', eagle: 'TALONHOST', hero: 'THE WANDERER' };
   var nm = document.getElementById('cbloadn'); if (nm) nm.textContent = names[who] || '';
 
   function ground(t) {
@@ -50,7 +50,7 @@
     x.fillStyle = g; x.beginPath(); x.arc(px, py, r, 0, 7); x.fill();
   }
 
-  // NYA-9 sprinting, claws out on a beat
+  // HZD-99 sprinting, claws out on a beat
   function cat(t) {
     var ph = t * 11, sl = (t % 1.5) / 1.5, slashing = sl < 0.24;
     var lunge = slashing ? 6 * (1 - sl / 0.24) : 0;

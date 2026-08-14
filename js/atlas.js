@@ -22,7 +22,7 @@ const ATLAS = {
   // k    = how many hitbox-heights the CELL should occupy on screen
   // yOff = nudge in hitbox-heights; hovering things do not stand on the cell floor
   sub: {
-    nya:     { row: 0,  k: 1.75, yOff: 0.00 },
+    hzd:     { row: 0,  k: 1.75, yOff: 0.00 },
     crawler: { row: 1,  k: 3.10, yOff: 0.06 },
     hopper:  { row: 2,  k: 2.70, yOff: 0.04 },
     blob:    { row: 3,  k: 2.85, yOff: 0.06 },

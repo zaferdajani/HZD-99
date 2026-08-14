@@ -52,7 +52,7 @@ say it, and after this he does not.
 The three exceptions are exhaustive, and each is a decision on the record with
 its reason in this file:
 
-1. **NYA-9 / the hero** (§2) — procedural because her arms are IK-solved, her
+1. **HZD-99 / the hero** (§2) — procedural because her arms are IK-solved, her
    scarf is simulated and her double jump is a real rotation. A sprite cannot do
    any of that. She gets her volume from committed lighting instead.
 2. **Pure additive glow** (§6) — halos, lava rings, lit cores. The renderer
@@ -110,7 +110,7 @@ Every character is exactly one of these, and the class decides everything else.
 
 | Class | Rendering | Examples | Authored art? |
 |---|---|---|---|
-| **A. Live-drawn protagonist** | procedural Canvas 2D, IK limbs, simulated cloth | NYA-9 / the hero | **No** — see §2 |
+| **A. Live-drawn protagonist** | procedural Canvas 2D, IK limbs, simulated cloth | HZD-99 / the hero | **No** — see §2 |
 | **B. Parts-rig guardian** | authored parts, posed live by a rig | NULLFANG, TALONHOST, FURNACE CHOIR, GLACIERE, MOTHER-V, PRISM PROWLER | **Yes** — §3 |
 | **C. Atlas creature** | one 8-yaw turnaround, cell-selected | crawler, hopper, blob, flier, turret | **Yes** — §4 |
 | **D. Standing NPC** | one 6-yaw sheet, no combat poses | merchants, sages, wardens | **Yes** — §5 |

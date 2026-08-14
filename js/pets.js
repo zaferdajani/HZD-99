@@ -19,7 +19,7 @@
 //   2. TRUE TO THE ANIMAL, AND TO THE FIGHT. The lion that used to roar the
 //      room apart now rolls over for its belly. The joke only works because
 //      you remember the boss.
-//   3. SHE ANSWERS BACK. NYA-9 hops, her ears flick. One-way affection is a
+//   3. SHE ANSWERS BACK. HZD-99 hops, her ears flick. One-way affection is a
 //      vending machine; two-way is a friendship.
 //   4. IT GIVES SOMETHING. Not loot for grinding — a bond that visibly grows,
 //      and at milestones the creature does something it has never done before.

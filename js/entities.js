@@ -2925,7 +2925,7 @@ class Scrap {
     c.restore(); c.shadowBlur = 0;
   }
 }
-// THE HUSK — what is left standing where NYA-9 fell.
+// THE HUSK — what is left standing where HZD-99 fell.
 // Hollow Knight leaves a shade you must fight. A repair unit leaves something
 // worse and more personal: her own previous chassis, still upright, still running
 // the last orders she gave it, with the broadcast already behind its eyes. It
@@ -3741,7 +3741,7 @@ class Enemy {
         break;
       }
       case 'hopper': {
-        // NIKK — a leak-seeker that copied NYA-9's own frame. It is the only
+        // NIKK — a leak-seeker that copied HZD-99's own frame. It is the only
         // mimic with ears, and it has them because it was imitating her.
         const ph = this.anim * 9;
         const squash = 1 + Math.sin(ph) * 0.06;
@@ -3893,7 +3893,7 @@ class Enemy {
 
 // ---------------------------------------------------------------------------
 // THE SCALE LAW (sprite spec, section C: WORLD SCALE / CHARACTER SCALE).
-// NYA-9 is the canonical reference. Ordinary minions must read SMALLER than her;
+// HZD-99 is the canonical reference. Ordinary minions must read SMALLER than her;
 // every boss must read LARGER. Two minions had drifted out of that order: the
 // flier and the blob were drawn at boss-like multiples of their own hitbox
 // (~2.5x and ~2.7x, against ~1.45x for everything else), which pushed both above
@@ -4253,7 +4253,7 @@ const BSTAT = Object.assign({
   atlas: { w: 62, h: 74, hp: 460 },
   zero: { w: 112, h: 62, hp: 500 },   // GLACIERE: a long floating quadruped
   // PRISM is the nimble rival, so it stays the smallest guardian — but a boss
-  // still has to stand over NYA-9 (36), and at 34 it stood under her.
+  // still has to stand over HZD-99 (36), and at 34 it stood under her.
   prism: { w: 62, h: 46, hp: 520 },
   mother: { w: 120, h: 120, hp: 750 },
   // THE ALPHA. The first mini-boss in the run, and the only one that is TAMED
@@ -4268,7 +4268,7 @@ const BSTAT = Object.assign({
 // differ in what they ARE, not in how they are plumbed.
 }, MINIS);
 // ===========================================================================
-// THE RAKE — NYA-9's claw arc, from an authored light sheet.
+// THE RAKE — HZD-99's claw arc, from an authored light sheet.
 //
 // The sheet is painted on pure black, which is the whole trick: drawn with
 // 'lighter' the black contributes nothing and the glow composites correctly

@@ -1,4 +1,4 @@
-// NYA-9'S VOICE, MEASURED.
+// HZD-99'S VOICE, MEASURED.
 //
 // This repo's rule is that sound is testable — tests/cuepitch.cjs checks the
 // notes coming out are the notes written, tests/voxmeas.cjs caught an NPC chain
@@ -15,7 +15,7 @@
 //   AND THE GATE. Two barks on one frame is a stutter; the whole set is useless
 //     if the gate does not hold.
 //
-//   node tests/nyavox.cjs
+//   node tests/hzdvox.cjs
 const { chromium } = require('playwright');
 
 (async () => {
@@ -30,11 +30,11 @@ const { chromium } = require('playwright');
     console.log('  ' + (ok ? 'ok   ' : 'FAIL ') + name + (detail == null ? '' : '  ' + detail));
     if (!ok) fails.push(name + (detail == null ? '' : ' — ' + detail));
   };
-  console.log('── nyavox — her voice: no dead air in front of it, no clipping, and it holds its gate');
+  console.log('── hzdvox — her voice: no dead air in front of it, no clipping, and it holds its gate');
 
   // decode every take in the browser and measure the waveform itself
   const m = await page.evaluate(async () => {
-    const keys = Object.keys(MEDIA_SRC.audio).filter(k => k.indexOf('nya_') === 0);
+    const keys = Object.keys(MEDIA_SRC.audio).filter(k => k.indexOf('hzd_') === 0);
     const AC2 = new (window.AudioContext || window.webkitAudioContext)();
     const out = [];
     for (const k of keys) {
@@ -101,19 +101,19 @@ const { chromium } = require('playwright');
     if (typeof audioOn === 'function') audioOn();
     if (typeof loadMedia === 'function') loadMedia();
     const t0 = Date.now();
-    while (Date.now() - t0 < 15000 && !(MBUF.nya_atk1 && MBUF.nya_atk2 && MBUF.nya_atk3))
+    while (Date.now() - t0 < 15000 && !(MBUF.hzd_atk1 && MBUF.hzd_atk2 && MBUF.hzd_atk3))
       await new Promise(r => setTimeout(r, 80));
     const played = [];
     const real = window.playBuf;
     window.playBuf = function (k, v, r2) { played.push(k); return real.apply(this, arguments); };
     // two attacks on the same frame must produce one bark
-    NYAT = 0;
+    HZDT = 0;
     sfx('atk'); const first = played.length;
     sfx('atk'); const second = played.length;
     // ...and one after the gap must produce another
-    NYAT = 0;
+    HZDT = 0;
     sfx('atk'); const third = played.length;
-    const barks = played.filter(k => k.indexOf('nya_') === 0);
+    const barks = played.filter(k => k.indexOf('hzd_') === 0);
     window.playBuf = real;
     return { first, second, third, barks, all: played };
   });

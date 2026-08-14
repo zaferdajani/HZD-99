@@ -30,7 +30,7 @@ none.
 
 | Asset | Serves | Size | Origin | Verified | Status |
 |---|---|---|---|---|---|
-| `roster_8yaw.png` | NYA-9 + 5 minions + 4 bosses, 8 yaw angles | 1254×1254 | earlier session | in-game | shipped |
+| `roster_8yaw.png` | HZD-99 + 5 minions + 4 bosses, 8 yaw angles | 1254×1254 | earlier session | in-game | shipped |
 | `npc_6yaw.png` | 6 machine folk + **the guard**, 6 yaw angles | 900×1365 | this session — `tools/turnsheet.cjs` | `regress`, screenshots | shipped |
 | `beast_parts.png` | NULLFANG cut-out rig | 1500×447 | prior | in-game | shipped |
 | `eagle_parts.png` | TALONHOST | 1500×575 | prior | in-game | shipped |

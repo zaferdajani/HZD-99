@@ -8,7 +8,7 @@ shipped code and assets, not from intention.*
 ## 1. GAME OVERVIEW
 
 - **Game title:** CLAWBYTE (working family: two themes in one engine — *CLAWBYTE:
-  The Machine Depths* starring robo-cat NYA-9, and *Odyssey*, the same world
+  The Machine Depths* starring robo-cat HZD-99, and *Odyssey*, the same world
   reskinned around a human wanderer hero; the player picks the theme at new
   game, and the two are planned to split into separate releases).
 - **Genre:** 2D action platformer / metroidvania with Mega Man X-style boss-power
@@ -71,12 +71,12 @@ shipped code and assets, not from intention.*
   Mobile (touch controls), Blasphemous (painterly backdrop contrast).
 - **Screens:**
   - **Loading:** black screen replaced by an instant-paint vignette — a random
-    cast member animates (NYA-9 sprinting/slashing, NULLFANG galloping,
+    cast member animates (HZD-99 sprinting/slashing, NULLFANG galloping,
     TALONHOST flapping on its cable, the Wanderer drilling sword cuts) over a
     name tag, glowing CLAWBYTE wordmark, shimmer bar. Theme-aware for the
     future split; `?lchar=` forces a character.
   - **Title:** starfield, big glowing CLAWBYTE, tagline, menu (Play / Controls /
-    Language / Sound / Music), large procedural NYA-9 mascot bust right,
+    Language / Sound / Music), large procedural HZD-99 mascot bust right,
     version stamp "CLAWBYTE v4.3", update banner when a new build is live.
   - **Gameplay HUD:** cat-head life cores top-left, volt meter ring, scrap ⚙
     and IQ ◆ counters, suit wheel + arm badge, 6 shuriken pips (next pip
@@ -99,7 +99,7 @@ shipped code and assets, not from intention.*
 
 ### Playable
 
-**NYA-9** — *Playable (CLAWBYTE theme)*
+**HZD-99** — *Playable (CLAWBYTE theme)*
 - Visual: small white ceramic robo-cat, ~36 px tall; cyan LED visor eyes,
   triangular antenna-ears, red scarf with real flutter physics, segmented
   torso with vent seams, articulated front arm (shoulder→elbow→paw rig).
@@ -277,7 +277,7 @@ shipped code and assets, not from intention.*
 - [x] **Cast art consistency** — NULLFANG/TALONHOST/minions/backdrops are on
   the owner's commissioned pixel-art style; the four later bosses still use
   the older pre-rendered roster, and the *player characters remain procedural
-  vector* — the single largest style gap. Needs: NYA-9 + Wanderer sheets in
+  vector* — the single largest style gap. Needs: HZD-99 + Wanderer sheets in
   the same style, then sheets for FURNACE CHOIR / ARCHIVIST / PRISM / MOTHER-V.
 - [x] **Animations** — big-cast animation is strong now (cutout + flip-book +
   tells); whelp gait and player-cat limbs could use more frames of polish.
@@ -291,7 +291,7 @@ shipped code and assets, not from intention.*
 - [ ] Missing visual feedback — largely solved; remaining: damage numbers are
   absent by design (elemental popups instead).
 - [ ] Muddy palette — no; palette law is enforced per zone.
-- [x] **Characters lack personality** — bosses now have it; NYA-9 has motion
+- [x] **Characters lack personality** — bosses now have it; HZD-99 has motion
   personality but no *face* acting (no expressions, no dialogue portraits).
 - [x] Other: **iOS haptics impossible on web**; volume-button controls
   impossible on web (documented); Odyssey/CLAWBYTE theme split pending.
@@ -303,7 +303,7 @@ shipped code and assets, not from intention.*
 - [x] Character concept art — DONE for NULLFANG + TALONHOST (owner-provided
   sheets, fully integrated). **NEEDED next, same sheet format** (side view +
   ANIMATIONS EXAMPLE row + BODY PARTS row, white background, max ~8 MB):
-  1. NYA-9 the robo-cat (priority one — the star is the last vector holdout),
+  1. HZD-99 the robo-cat (priority one — the star is the last vector holdout),
   2. FURNACE CHOIR, 3. THE ARCHIVIST, 4. PRISM PROWLER, 5. MOTHER-V,
   6. The Wanderer (Odyssey split).
 - [x] Sprite-sheet references — pipeline proven: white-key flood + enclosed
@@ -322,7 +322,7 @@ shipped code and assets, not from intention.*
 - [ ] Particle/VFX concepts — in-engine; could add boss-specific death
   cinematics.
 - [ ] Marketing/promo art — loading-screen vignettes double as promo language;
-  a key-art piece (NYA-9 vs NULLFANG under the neon city) would be the poster.
+  a key-art piece (HZD-99 vs NULLFANG under the neon city) would be the poster.
 
 ---
 
@@ -332,12 +332,12 @@ shipped code and assets, not from intention.*
   above a moving ground line; name tag, glowing wordmark, shimmer bar; fades
   into the title on first frame.
 - **Title:** starfield night, CLAWBYTE in glowing mint capitals, English/
-  Arabic/Turkish/Chinese/Russian localization, NYA-9 bust with slow-blinking
+  Arabic/Turkish/Chinese/Russian localization, HZD-99 bust with slow-blinking
   visor and beaded tail.
 - **Zone A gameplay:** teal neon cityscape ("ZONE 03", paw-print billboards,
   TECH/NEXT-GEN signage) panning in parallax behind green-lit platforms and
   grass-fringed floors; spike pits of pale teal blades; whelps prowling,
-  mini-eagles overhead; NYA-9 trailing scarf, cyan claw-arcs hanging in air.
+  mini-eagles overhead; HZD-99 trailing scarf, cyan claw-arcs hanging in air.
 - **NULLFANG arena (A4):** two elevated platforms; the lion stalks between
   them, springs onto ledges, dives; boss bar + "PLATED" line below; dust and
   purple motes everywhere.

@@ -24,7 +24,7 @@ const BOSS_EL = { glitch: 'skarn', brood: 'vann', atlas: 'hott', zero: 'glazz', 
 // the five mimic frames, typed by the job each was built to do
 const MIMIC_EL = {
   crawler: 'skarn',   // a hauler that read the word "hound" and did its best
-  hopper:  'vann',    // a leak-seeker; it copied NYA-9's own frame
+  hopper:  'vann',    // a leak-seeker; it copied HZD-99's own frame
   blob:    'hott',    // foundry spillage that cooled into legs
   flier:   'zizt',    // a survey lens that hovers and discharges
   turret:  'zizt',    // a fixed emplacement running on the same arc supply
@@ -243,7 +243,7 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty) {
 }
 
 // ---------------------------------------------------------------------------
-// The Song. NYA-9 is a repair unit, so her signature is a diagnostic tool: the
+// The Song. HZD-99 is a repair unit, so her signature is a diagnostic tool: the
 // fabricators were tuned by tone, and mimics have no idea what music is.
 // Costs volts, exactly as RUSTSONG.md specified:
 //   "Nikk, volk klin gavt, murr gross takk." — give a little energy, take back
@@ -332,7 +332,7 @@ function drawArmBadge(c, id, r, lit) {
   c.restore();
 }
 
-// the keytar NYA-9 carries — drawn in the player's local space while playing
+// the keytar HZD-99 carries — drawn in the player's local space while playing
 function drawKeytar(c, face, t) {
   c.save(); c.scale(face, 1);
   c.fillStyle = '#1b2b36';

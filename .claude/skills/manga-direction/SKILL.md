@@ -141,7 +141,7 @@ The hierarchy of readable expression, most to least legible at small size:
 3. **Mouth shape** — open square = shout, small = tension.
 4. **Head tilt** — a few degrees does more than any amount of detail.
 
-**NYA-9 has a visor and no mouth**, so her entire expressive range is eye
+**HZD-99 has a visor and no mouth**, so her entire expressive range is eye
 aperture, eye colour, head tilt, ear angle and body lean. That is a real
 constraint and it is the same one every helmeted character faces. Use the ears
 as the brow — they are the largest, most readable moving part on her silhouette

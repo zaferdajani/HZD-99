@@ -19,7 +19,7 @@ result in the running game.
 
 Generation is right for **authored sprite rigs** and wrong for two things:
 
-- **Procedurally drawn characters.** NYA-9 is drawn live — IK arms, scarf
+- **Procedurally drawn characters.** HZD-99 is drawn live — IK arms, scarf
   physics, the spiral flip. A generated sprite body cannot do any of that, so it
   trades animation for fidelity. Fix her by *lighting* her instead; see
   `game-character-art`.

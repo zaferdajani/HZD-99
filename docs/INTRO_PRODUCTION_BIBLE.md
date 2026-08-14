@@ -17,7 +17,7 @@ kept alive by one signal, sung by the machine at its heart. When that signal is
 corrupted, every unit that was listening kneels. The great guardians hear it loudest
 and fall hardest.
 
-NYA-9 is a maintenance frame. She was never important enough to be wired into the Song,
+HZD-99 is a maintenance frame. She was never important enough to be wired into the Song,
 which is exactly why the command finds nothing in her to hold. She wakes into a city
 that has stopped, and she goes to give the Song back.
 
@@ -61,7 +61,7 @@ not menace. They are being taken, not turning evil.
 ### IV · The One That Slept
 > "Deep under the broadcast floor, one frame was never wired to the Song. A maintenance unit. A cat."
 > "The command found nothing to hold. Her frequency was her own."
-> "NYA-9 woke to a silent city — and went to give the Song back."
+> "HZD-99 woke to a silent city — and went to give the Song back."
 
 Intimate scale. A maintenance bay, hanging cables, one cyan worklight. She is on standby
 in a cradle. The command sweeps the room and passes through her. Her visor boots — a
@@ -75,7 +75,7 @@ ghost offset ~2px) every couple of seconds — the virus is still in the signal.
 
 ## 3. The cast
 
-### NYA-9 — protagonist, maintenance frame
+### HZD-99 — protagonist, maintenance frame
 Small, round, ceramic-shelled robot cat. Built for repair, not war. Always the warmest,
 most saturated thing on screen.
 
@@ -144,7 +144,7 @@ Locked palettes, taken from the shipped build.
 
 ## 5. Visual law — non-negotiable
 
-1. **The colour law.** Cyan belongs to NYA-9 and clean machines. Red belongs to the
+1. **The colour law.** Cyan belongs to HZD-99 and clean machines. Red belongs to the
    infection. Violet belongs to the null signal. Gold is brief power. Nothing else glows.
 2. **The turn law.** Nothing flips like a paper doll. A creature turning passes through
    real intermediate views, flexing thin at the crossing frame, crouching into its feet
@@ -207,7 +207,7 @@ evil, in one continuous move, without a single word.
 
 | Character | Anchor text |
 |---|---|
-| NYA-9 | NYA-9, a small chubby cartoon robot cat with a glossy white ceramic shell, an oversized round head, two tall pointed antenna ears, and NO eyes and NO mouth — instead a single glowing cyan horizontal LED visor band across her face — with a long crimson red scarf |
+| HZD-99 | HZD-99, a small chubby cartoon robot cat with a glossy white ceramic shell, an oversized round head, two tall pointed antenna ears, and NO eyes and NO mouth — instead a single glowing cyan horizontal LED visor band across her face — with a long crimson red scarf |
 | MOTHER-V | MOTHER-V, a colossal suspended machine core: a huge glowing sphere ringed by eight thick metal plates that open and close like a heartbeat, a floating halo ring above it, long cables hanging below |
 | The machine folk | three friendly cartoon robots — a small round robot on tank treads with a single warm cyan eye-light, a stocky robot trader hung with salvage, and a tall thin robot with an old CRT monitor for a face |
 | NULLFANG | NULLFANG, a massive mechanical lion built from dark scratched steel plates with a heavy mane of angular metal shards |
@@ -294,19 +294,19 @@ Story panel, no combat, no text anywhere. Very wide shot of the whole machine ci
 ### Shot 13 · The one it missed — 8s
 
 ```
-Story panel, no combat, no text anywhere. Quiet dark maintenance bay far below the city — hanging cables, dripping pipes, one narrow cyan work-light from above. NYA-9, a small chubby cartoon robot cat with a glossy white ceramic shell, an oversized round head, two tall pointed antenna ears, and NO eyes and NO mouth — instead a single glowing cyan horizontal LED visor band across her face — with a long crimson red scarf lies curled up asleep and switched off in a cradle basket, her visor dark, her scarf hanging still. Dust drifts through the light beam. The red-violet corrupted wave sweeps through the room and passes straight through her without touching her, leaving her white shell completely clean and uninfected. Slow push in on the sleeping cat. Near-black with one cyan shaft. Tender, hushed, safe.
+Story panel, no combat, no text anywhere. Quiet dark maintenance bay far below the city — hanging cables, dripping pipes, one narrow cyan work-light from above. HZD-99, a small chubby cartoon robot cat with a glossy white ceramic shell, an oversized round head, two tall pointed antenna ears, and NO eyes and NO mouth — instead a single glowing cyan horizontal LED visor band across her face — with a long crimson red scarf lies curled up asleep and switched off in a cradle basket, her visor dark, her scarf hanging still. Dust drifts through the light beam. The red-violet corrupted wave sweeps through the room and passes straight through her without touching her, leaving her white shell completely clean and uninfected. Slow push in on the sleeping cat. Near-black with one cyan shaft. Tender, hushed, safe.
 ```
 
 ### Shot 14 · She wakes — 8s
 
 ```
-Story panel, no combat, no text anywhere. Extreme close-up on the face of NYA-9, a small chubby cartoon robot cat with a glossy white ceramic shell, an oversized round head, two tall pointed antenna ears, and NO eyes and NO mouth — instead a single glowing cyan horizontal LED visor band across her face — with a long crimson red scarf, asleep with her visor band dark. The visor flickers, then a single line of cyan light ignites and spreads left to right across it until the whole band glows steadily and warm. Her two antenna ears twitch and lift alert. Cyan light spills down onto her crimson scarf. Locked-off close-up, no camera move. Near-black with one growing cyan light. Hopeful, quiet, the first warm moment since the fall.
+Story panel, no combat, no text anywhere. Extreme close-up on the face of HZD-99, a small chubby cartoon robot cat with a glossy white ceramic shell, an oversized round head, two tall pointed antenna ears, and NO eyes and NO mouth — instead a single glowing cyan horizontal LED visor band across her face — with a long crimson red scarf, asleep with her visor band dark. The visor flickers, then a single line of cyan light ignites and spreads left to right across it until the whole band glows steadily and warm. Her two antenna ears twitch and lift alert. Cyan light spills down onto her crimson scarf. Locked-off close-up, no camera move. Near-black with one growing cyan light. Hopeful, quiet, the first warm moment since the fall.
 ```
 
 ### Shot 15 · She goes — 8s
 
 ```
-Story panel, no combat, no text anywhere. NYA-9, a small chubby cartoon robot cat with a glossy white ceramic shell, an oversized round head, two tall pointed antenna ears, and NO eyes and NO mouth — instead a single glowing cyan horizontal LED visor band across her face — with a long crimson red scarf stands very small in the foreground, back to camera, on a ledge looking out over the vast dead city below where thousands of red and violet eyes stare back. Her scarf lifts and ripples in the draught. She takes one step forward. Slow pull back to reveal how enormous the city is compared to her tiny figure. Black silhouette against deep red, her cyan visor glow the only clean colour left in the world. Resolute, tiny, brave.
+Story panel, no combat, no text anywhere. HZD-99, a small chubby cartoon robot cat with a glossy white ceramic shell, an oversized round head, two tall pointed antenna ears, and NO eyes and NO mouth — instead a single glowing cyan horizontal LED visor band across her face — with a long crimson red scarf stands very small in the foreground, back to camera, on a ledge looking out over the vast dead city below where thousands of red and violet eyes stare back. Her scarf lifts and ripples in the draught. She takes one step forward. Slow pull back to reveal how enormous the city is compared to her tiny figure. Black silhouette against deep red, her cyan visor glow the only clean colour left in the world. Resolute, tiny, brave.
 ```
 
 ### Shot 16 · Title plate — 8s

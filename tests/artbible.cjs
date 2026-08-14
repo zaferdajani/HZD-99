@@ -160,11 +160,11 @@ const TELL_RGB = [0xff, 0xc2, 0x4a];
     }
     return subs.filter(s => !kinds.has(s));
   });
-  // `nya` is the ONE knowing exception and ART_BIBLE.md §2 says why: she is
+  // `hzd` is the ONE knowing exception and ART_BIBLE.md §2 says why: she is
   // drawn procedurally because her arms are IK-solved and her scarf is
   // simulated, and the generated row was never wired. It is listed here so the
   // exception is a decision on the record and not an oversight nobody noticed.
-  const ALLOWED_DEAD = ['nya'];
+  const ALLOWED_DEAD = ['hzd'];
   const surprise = dead.filter(s => !ALLOWED_DEAD.includes(s));
   check('no atlas subject is declared and never drawn',
     !surprise.length, surprise.length ? surprise.join(',') : 'known: ' + ALLOWED_DEAD.join(','));

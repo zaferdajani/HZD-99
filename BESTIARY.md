@@ -117,7 +117,7 @@ furnace core. It sings to the foundry. Heat rises when it sings, and metal obeys
 of heat across the arena — two of them, three once it overheats.
 **And it can be silenced.** Play the Song while a hymn is expanding and the two
 collide: dissonance kills the ring and staggers the Choir for a second. This is
-the only boss that fights with NYA-9's own weapon, so it is the only one she can
+the only boss that fights with HZD-99's own weapon, so it is the only one she can
 argue with. Bring the Song to this fight.
 **Drops: the FORGE suit — arm `Slag Burst`.** A lobbed glob of molten metal that
 pools and burns where it lands. The only arm that leaves damage behind it.
@@ -174,7 +174,7 @@ what they were *trying* to be, in Rustsong.
 | Frame | Mimic name | Element | What it actually is |
 |---|---|---|---|
 | `crawler` | **Drakk** (*drakk* — hound) | SKARN | A four-legged hauler that read the word "hound" and did its best. Runs; cannot turn well. |
-| `hopper` | **Nikk** (*nikk* — kitten) | VANN | A leak-seeker that copied NYA-9's own frame. Small, fast, and it follows you. |
+| `hopper` | **Nikk** (*nikk* — kitten) | VANN | A leak-seeker that copied HZD-99's own frame. Small, fast, and it follows you. |
 | `blob` | **Brut** (*brut* — brood) | HOTT | Foundry spillage that cooled into something with legs. |
 | `flier` | **Okk** (*okk* — eye) | ZIZT | A survey lens that hovers and discharges. |
 | `turret` | **Vakt** (*varrt* — wait) | ZIZT | An emplacement still guarding a door that no longer leads anywhere. |
@@ -199,7 +199,7 @@ tells you *what* it is and *how close* it is to acting, without a health bar.
 
 **MURR** — *murr*, music. The one element no enemy carries and no enemy resists.
 
-NYA-9 is a maintenance unit, so her weapon is not a gun. It is a diagnostic tool:
+HZD-99 is a maintenance unit, so her weapon is not a gun. It is a diagnostic tool:
 fabricators were tuned by **tone**, and she carries the tool that sings to them.
 
 ### The Rustsong Keytar

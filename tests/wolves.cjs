@@ -271,7 +271,7 @@ const { chromium } = require('playwright');
     keys.ArrowRight = 0; keysP.KeyJ = 0;
     return { movedWhileStunned, after, movedAfter };
   });
-  check('a stunned NYA-9 cannot walk out of it',
+  check('a stunned HZD-99 cannot walk out of it',
     stun.movedWhileStunned < 1, stun.movedWhileStunned.toFixed(2) + ' px');
   check('...and the stun expires and gives her back',
     stun.after <= 0 && stun.movedAfter > 20,

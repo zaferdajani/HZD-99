@@ -98,7 +98,7 @@ const MEDIA_SRC = {
     // red cat it became, and the clear blue cat underneath it
     prismParts: 'assets/characters/prism_parts.png',
     motherParts: 'assets/characters/mother_parts.png',
-    // NYA-9's claw arc, painted as glowing light on pure black so it can be
+    // HZD-99's claw arc, painted as glowing light on pure black so it can be
     // composited additively with no alpha channel to cut
     slashFx: 'assets/fx/slash.png',
     // authored STRATA: four platform decks (clean / virus-grown / forge /
@@ -151,29 +151,29 @@ const MEDIA_SRC = {
     hum_sage: 'assets/sfx/hum_sage.ogg',
     hum_patch: 'assets/sfx/hum_patch.ogg',
     hum_lumen: 'assets/sfx/hum_lumen.ogg',
-    // NYA-9's voice and the guardians' roars. Short, mono, decoded once — about
+    // HZD-99's voice and the guardians' roars. Short, mono, decoded once — about
     // 2.5 MB of PCM for the whole cast, against the 62 MB the music used to cost
     // before it was moved to streaming.
-    // NYA-9's OWN VOICE. Cloned from a reference the game's owner supplied and
+    // HZD-99's OWN VOICE. Cloned from a reference the game's owner supplied and
     // spoken WORDLESSLY on purpose — sharp exhales, a cry, a sigh — for the two
     // reasons that agree: it is the Silksong register (a character who sounds
     // rather than speaks), and this game ships in five languages, so a bark
     // with a word in it is a bark that is wrong in four of them.
     // Trimmed to the frame the voice starts by tools/voxtrim.cjs, because the
     // room tone in front of a generated take IS latency on a combat sound.
-    nya_atk1: 'assets/sfx/vox/nya_atk1.wav',
-    nya_atk2: 'assets/sfx/vox/nya_atk2.wav',
-    nya_atk3: 'assets/sfx/vox/nya_atk3.wav',
-    nya_hurt: 'assets/sfx/vox/nya_hurt.wav',
-    nya_hurtbad: 'assets/sfx/vox/nya_hurtbad.wav',
-    nya_die: 'assets/sfx/vox/nya_die.wav',
-    nya_dash: 'assets/sfx/vox/nya_dash.wav',
-    nya_djump: 'assets/sfx/vox/nya_djump.wav',
-    nya_land: 'assets/sfx/vox/nya_land.wav',
-    nya_heal: 'assets/sfx/vox/nya_heal.wav',
-    nya_evo: 'assets/sfx/vox/nya_evo.wav',
-    nya_win: 'assets/sfx/vox/nya_win2.wav',
-    nya_purr: 'assets/sfx/vox/nya_purr2.wav',
+    hzd_atk1: 'assets/sfx/vox/hzd_atk1.wav',
+    hzd_atk2: 'assets/sfx/vox/hzd_atk2.wav',
+    hzd_atk3: 'assets/sfx/vox/hzd_atk3.wav',
+    hzd_hurt: 'assets/sfx/vox/hzd_hurt.wav',
+    hzd_hurtbad: 'assets/sfx/vox/hzd_hurtbad.wav',
+    hzd_die: 'assets/sfx/vox/hzd_die.wav',
+    hzd_dash: 'assets/sfx/vox/hzd_dash.wav',
+    hzd_djump: 'assets/sfx/vox/hzd_djump.wav',
+    hzd_land: 'assets/sfx/vox/hzd_land.wav',
+    hzd_heal: 'assets/sfx/vox/hzd_heal.wav',
+    hzd_evo: 'assets/sfx/vox/hzd_evo.wav',
+    hzd_win: 'assets/sfx/vox/hzd_win2.wav',
+    hzd_purr: 'assets/sfx/vox/hzd_purr2.wav',
     vox_win: 'assets/sfx/vox/win.ogg',
     vox_purr: 'assets/sfx/vox/purr.ogg',
     vox_roar_beast: 'assets/sfx/vox/roar_beast.ogg',

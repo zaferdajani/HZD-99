@@ -33,7 +33,7 @@ That is why the infected still look like what they were. The horror of the
 Depths is not monsters. It is **familiar machines, still doing their jobs, with
 red light behind their eyes.**
 
-## NYA-9
+## HZD-99
 
 A small cat-frame maintenance unit — built to crawl the ducts the big machines
 could not reach — was powered down in a service cradle when the broadcast went

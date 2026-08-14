@@ -607,7 +607,7 @@ const CUE = {
 };
 // ---------- sound effects ----------
 // ---------------------------------------------------------------------------
-// THE VOICE LAYER. NYA-9 and the guardians now have recorded voices, and they
+// THE VOICE LAYER. HZD-99 and the guardians now have recorded voices, and they
 // take precedence over the synth for the events they cover. Everything not in
 // this table still plays the synthesised cue, which is deliberate: several of
 // her small chirps could not be generated convincingly and the synth versions
@@ -619,7 +619,7 @@ const CUE = {
 // ---------------------------------------------------------------------------
 // HER VOICE, AND WHERE IT GOES.
 //
-// NYA-9 speaks in sounds, never in words: sharp exhales when she swings, a cry
+// HZD-99 speaks in sounds, never in words: sharp exhales when she swings, a cry
 // when she is hit, a sigh when she patches herself, a purr when she is safe.
 // That is the Silksong register — a character you hear rather than one who
 // talks — and it is also the only design that survives five languages.
@@ -629,31 +629,31 @@ const CUE = {
 // purpose, and moving it back would flatten both); the voice is the animal
 // inside the machine, mixed under the impact so it colours the hit rather than
 // competing with it.
-const NYAVOX = {
-  atk: [['nya_atk1', 0.30], ['nya_atk2', 0.32], ['nya_atk3', 0.40]],
-  hurt: [['nya_hurt', 0.55]], hurtbad: [['nya_hurtbad', 0.68]],
-  die: [['nya_die', 0.7]], dash: [['nya_dash', 0.30]],
-  djump: [['nya_djump', 0.30]], land: [['nya_land', 0.26]],
-  heal: [['nya_heal', 0.5]], evo: [['nya_evo', 0.6]],
-  win: [['nya_win', 0.6]], purr: [['nya_purr', 0.45]],
+const HZDVOX = {
+  atk: [['hzd_atk1', 0.30], ['hzd_atk2', 0.32], ['hzd_atk3', 0.40]],
+  hurt: [['hzd_hurt', 0.55]], hurtbad: [['hzd_hurtbad', 0.68]],
+  die: [['hzd_die', 0.7]], dash: [['hzd_dash', 0.30]],
+  djump: [['hzd_djump', 0.30]], land: [['hzd_land', 0.26]],
+  heal: [['hzd_heal', 0.5]], evo: [['hzd_evo', 0.6]],
+  win: [['hzd_win', 0.6]], purr: [['hzd_purr', 0.45]],
 };
 // One gate for the whole voice: two barks on the same frame is a stutter, and
 // a bark every frame of a held dash is a nuisance. 90 ms is shorter than any
 // take and longer than any single input.
-let NYAT = 0;
-function nyaSay(key, gapMs) {
-  const set = NYAVOX[key];
+let HZDT = 0;
+function hzdSay(key, gapMs) {
+  const set = HZDVOX[key];
   if (!set || !AC) return false;
   const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-  if (now - NYAT < (gapMs == null ? 90 : gapMs)) return false;
+  if (now - HZDT < (gapMs == null ? 90 : gapMs)) return false;
   const pick = set[(Math.random() * set.length) | 0];
   if (!playBuf(pick[0], pick[1], 0.96 + Math.random() * 0.08)) return false;
-  NYAT = now;
+  HZDT = now;
   return true;
 }
 const VOX = {
   // her own takes first; the originals stay as the fallback
-  purr: ['nya_purr', 0.45], win: ['nya_win', 0.6],
+  purr: ['hzd_purr', 0.45], win: ['hzd_win', 0.6],
   roar_beast: ['vox_roar_beast', 0.75], roar_eagle: ['vox_roar_eagle', 0.75],
   roar_glc: ['vox_roar_glc', 0.75], roar_drg: ['vox_roar_drg', 0.8],
   roar_prism: ['vox_roar_prism', 0.75],
@@ -671,21 +671,21 @@ function sfx(n) {
     // enough that it is the animal inside the swing rather than a second swing.
     const cb = (typeof player !== 'undefined' && player && player.combo) | 0;
     clawSlash(cb);
-    const take = NYAVOX.atk[Math.min(NYAVOX.atk.length - 1, cb)];
+    const take = HZDVOX.atk[Math.min(HZDVOX.atk.length - 1, cb)];
     if (take && AC) {
       const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-      if (now - NYAT >= 90 && playBuf(take[0], take[1], 0.96 + Math.random() * 0.08)) NYAT = now;
+      if (now - HZDT >= 90 && playBuf(take[0], take[1], 0.96 + Math.random() * 0.08)) HZDT = now;
     }
     return;
   }
   // ...and the rest of her, before any of the synth alphabet: these are the
   // moments the player is looking straight at her.
-  if (n === 'hurt' && nyaSay(player && player.cores <= 1 ? 'hurtbad' : 'hurt', 260)) return;
-  if (n === 'die' && nyaSay('die', 0)) return;
-  if (n === 'dash' && nyaSay('dash', 200)) return;
-  if (n === 'djump' && nyaSay('djump', 160)) return;
-  if (n === 'heal' && nyaSay('heal', 0)) return;
-  if (n === 'chargeReady' && nyaSay('evo', 400)) return;
+  if (n === 'hurt' && hzdSay(player && player.cores <= 1 ? 'hurtbad' : 'hurt', 260)) return;
+  if (n === 'die' && hzdSay('die', 0)) return;
+  if (n === 'dash' && hzdSay('dash', 200)) return;
+  if (n === 'djump' && hzdSay('djump', 160)) return;
+  if (n === 'heal' && hzdSay('heal', 0)) return;
+  if (n === 'chargeReady' && hzdSay('evo', 400)) return;
   // HER LITTLE MELODIES — see the alphabet above. These come before any
   // sample, because the whole point is that they are all the same instrument.
   if (CUE[n]) { CUE[n](); return; }
