@@ -26,6 +26,91 @@ function frame(g) {
 }
 function openL(g) { rect(g, 0, 11, 0, 14, '.'); }
 function openR(g) { const w = g[0].length; rect(g, w - 1, 11, w - 1, 14, '.'); }
+// ---------------------------------------------------------------------------
+// THE CAVE SHAPE RULE (owner, 2026-08-15): "you can never find caves as
+// spheres or squares or perpendicular. It's always caves." So no cave room
+// is ever drawn with frame() and runway platforms. Every cave is CARVED:
+// solid rock first, then a cavity whose ceiling and floor breathe on two
+// wavelengths with per-column jitter — no straight line survives. Ledges
+// are short and staggered. And the rock keeps SECRETS: pockets sealed
+// behind a breakable bite ('B'), because tunnels and hidden places are how
+// the caves pay — the hiding is structural, not decorative.
+//
+// Deterministic per seed (the room id): the same cave is always the same
+// cave, and no two caves are alike. The floor is clamped to steps of one so
+// every rise is a walk or a hop; anchors flatten a guaranteed spot under
+// everything that must stand somewhere (a door, a bench, a pillar).
+function caveCarve(g, seedStr, o) {
+  o = o || {};
+  const W = g[0].length, H = g.length;
+  let s = 2166136261;
+  for (let i = 0; i < seedStr.length; i++) { s ^= seedStr.charCodeAt(i); s = (s * 16777619) >>> 0; }
+  const R = () => (s = (s * 1103515245 + 12345) >>> 0, (s >>> 9) / (1 << 23));
+  const ph = [R() * 6.28, R() * 6.28, R() * 6.28, R() * 6.28];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) g[y][x] = '#';
+  // a TUNNEL, not a hall: the ceiling hangs low enough to stay on screen, so
+  // the rock above her is a presence, and both surfaces carry a fast third
+  // wave so no flat stretch survives longer than a few tiles
+  let prevFl = H - 2, lastBump = -9;
+  for (let x = 1; x < W - 1; x++) {
+    const t = x / W;
+    let cl = Math.round(H - 12.4 + Math.sin(t * 8.3 + ph[0]) * 2.1 + Math.sin(t * 21 + ph[1]) * 1.2 + (R() - 0.5) * 1.4);
+    let fl = Math.round(H - 3.2 + Math.sin(t * 6.7 + ph[2]) * 1.5 + Math.sin(t * 15 + ph[3]) * 0.9
+      + Math.sin(t * 31 + ph[0]) * 0.8 + (R() - 0.5) * 1.3);
+    fl = Math.max(prevFl - 1, Math.min(prevFl + 1, Math.min(fl, H - 2)));
+    prevFl = fl;
+    cl = Math.max(2, Math.min(cl, fl - 5));
+    for (let y = cl; y <= fl; y++) g[y][x] = '.';
+    // ceiling teeth — the rock reaches down, one tile, sometimes two
+    if (R() < 0.16 && fl - cl > 6) {
+      g[cl][x] = '#';
+      if (R() < 0.35 && fl - cl > 7) g[cl + 1][x] = '#';
+    }
+    // floor knobs — a single-column bump breaks every runway; spaced so the
+    // floor stays walkable, never a staircase of them
+    if (R() < 0.2 && x - lastBump > 2 && fl - cl > 6) { g[fl][x] = '#'; lastBump = x; }
+  }
+  // where a door or an exit meets the room, the rock steps aside: a cleared
+  // approach with a flat shelf, so arrivals land and departures climb out
+  for (const side of (o.open || [])) {
+    const xs = side === 'L' ? [0, 1, 2, 3, 4] : [W - 1, W - 2, W - 3, W - 4, W - 5];
+    for (const x of xs) {
+      for (let y = 11; y <= 14; y++) g[y][x] = '.';
+      if (x !== 0 && x !== W - 1) { g[15][x] = '.'; g[16] && (g[16][x] = '#'); }
+    }
+  }
+  // anchors: a flat, open spot for everything that must stand somewhere
+  for (const a of (o.anchor || [])) {
+    const w2 = a.w2 || 1, h2 = a.h2 || 2;
+    for (let x = a.x - w2; x <= a.x + w2; x++) {
+      for (let y = a.y - h2; y <= a.y; y++) if (g[y]) g[y][x] = '.';
+      if (g[a.y + 1]) g[a.y + 1][x] = '#';
+    }
+  }
+  // ledges: short, staggered, never a runway
+  const nL = o.ledges == null ? 4 : o.ledges;
+  for (let i = 0; i < nL; i++) {
+    const lx = 4 + Math.floor(R() * (W - 12));
+    const ly = 6 + Math.floor(R() * Math.max(2, H - 12));
+    const len = 3 + Math.floor(R() * 3);
+    for (let k = 0; k < len; k++) {
+      const yy = ly + (k > len / 2 && R() < 0.4 ? 1 : 0);
+      if (g[yy] && g[yy][lx + k] === '.') g[yy][lx + k] = '=';
+    }
+  }
+  // pockets: hidden chambers EMBEDDED IN ROCK — the surrounding mass is
+  // stamped first so the chamber is always inside something, whether that is
+  // the ceiling or a hanging boulder; the way in is the breakable bite in
+  // its underside. Break it from below, climb up into what the Deaf System
+  // put away.
+  for (const p of (o.pocket || [])) {
+    for (let x = p.x - 2; x <= p.x + 2; x++)
+      for (let y = p.y - 1; y <= p.y + 2; y++) if (g[y] && g[y][x] != null) g[y][x] = '#';
+    for (let x = p.x - 1; x <= p.x + 1; x++)
+      for (let y = p.y; y <= p.y + 1; y++) if (g[y]) g[y][x] = '.';
+    if (g[p.y + 2]) g[p.y + 2][p.x] = 'B';
+  }
+}
 
 // ents: [kind, tileX, tileYFeetOn, extra?, condFlag?]
 const ROOMS = {
@@ -505,38 +590,42 @@ const ROOMS = {
   // Also the first stroke of the world tripling: every room here is wider
   // than the viewport ever was.
   CV1: { zone: 'X', cave: 1, w: 46, h: 17, exits: { R: 'CV2' },
-    // the entry hall: light from the mouth behind her, stepping ledges over a
-    // broken floor, one crawler patrolling — the cave says what it is
-    ents: [['crawler', 26, 15], ['scrap', 12, 11, 15], ['scrap', 34, 15, 10]],
+    // the entry hall: light from the mouth behind her, a CARVED cavity (the
+    // cave shape rule — no straight lines), one crawler patrolling, and the
+    // first hidden pocket so the cave teaches on entry that its rock keeps
+    // things
+    ents: [['crawler', 26, 15], ['scrap', 14, 7, 15], ['scrap', 34, 15, 10]],
     build(g) {
-      frame(g); openR(g);
-      hline(g, 8, 12, 12, '='); hline(g, 15, 19, 10, '=');
-      hline(g, 23, 27, 12, '='); hline(g, 31, 35, 9, '=');
-      hline(g, 38, 42, 12, '=');
+      caveCarve(g, 'CV1', {
+        open: ['R'],
+        anchor: [{ x: 4, y: 15, w2: 2 }, { x: 26, y: 15, w2: 2 }, { x: 34, y: 15 }],
+        pocket: [{ x: 14, y: 6 }],
+      });
     } },
-  CV2: { zone: 'X', cave: 1, w: 52, h: 22, exits: { L: 'CV1', R: 'CV3' },
-    // the climb: taller, darker, two hoppers and a crawler; spikes under the
-    // long jumps so a miss costs a sting, never the run
-    ents: [['hopper', 14, 20], ['hopper', 33, 20], ['crawler', 44, 20],
-           ['scrap', 8, 14, 20], ['scrap', 26, 9, 25], ['scrap', 48, 20, 15]],
+  CV2: { zone: 'X', cave: 1, w: 52, h: 17, exits: { L: 'CV1', R: 'CV3' },
+    // the long dark middle: hoppers in the hollows, a crawler on the far
+    // slope, two pockets for the thorough
+    ents: [['hopper', 14, 15], ['hopper', 33, 15], ['crawler', 44, 15],
+           ['scrap', 22, 7, 25], ['scrap', 40, 7, 20], ['scrap', 8, 15, 20]],
     build(g) {
-      frame(g); openL(g); openR(g);
-      // openings carve rows 11-14; the left ledge catches her arrival
-      hline(g, 1, 5, 15, '=');
-      hline(g, 7, 11, 14, '='); hline(g, 14, 18, 11, '=');
-      hline(g, 21, 25, 8, '='); hline(g, 28, 33, 11, '=');
-      hline(g, 36, 40, 14, '='); hline(g, 43, 47, 15, '=');
-      rect(g, 19, 20, 21, 20, '^'); rect(g, 34, 20, 36, 20, '^');
+      caveCarve(g, 'CV2', {
+        open: ['L', 'R'], ledges: 5,
+        anchor: [{ x: 14, y: 15 }, { x: 33, y: 15 }, { x: 44, y: 15 }, { x: 8, y: 15 }],
+        pocket: [{ x: 22, y: 6 }, { x: 40, y: 6 }],
+      });
     } },
   CV3: { zone: 'X', cave: 1, w: 46, h: 17, exits: { L: 'CV2' },
-    // the end of the dark: a long low gallery, two crawlers between her and
-    // the PILLAR — which needs the supercharged claw, and the crawlers are
-    // where the volts for it come from. That is the room teaching the tool.
-    ents: [['crawler', 16, 15], ['crawler', 30, 15], ['scrap', 22, 15, 20],
+    // the end of the dark: two crawlers between her and the PILLAR — which
+    // needs the supercharged claw, and the crawlers are where the volts for
+    // it come from. That is the room teaching the tool.
+    ents: [['crawler', 16, 15], ['crawler', 30, 15], ['scrap', 10, 7, 20],
            ['pillar', 41, 15]],
     build(g) {
-      frame(g); openL(g);
-      hline(g, 10, 13, 12, '='); hline(g, 24, 27, 12, '=');
+      caveCarve(g, 'CV3', {
+        open: ['L'],
+        anchor: [{ x: 16, y: 15 }, { x: 30, y: 15 }, { x: 41, y: 15, w2: 2, h2: 4 }],
+        pocket: [{ x: 10, y: 6 }],
+      });
     } },
 
   // ---- ZONE B: the Carrier, still running its route ------------------------
@@ -643,32 +732,60 @@ const MAPPOS = {
 
 // ==== THE GUARDIAN GROTTOES — every fall or taming REVEALS A CAVE ==========
 // The owner's rule, verbatim: "defeating a boss or a sage always reveals a
-// cave. Whether this cave will give something... or I need to do another
-// challenge inside is a different story." The RULE ships now; each cave's
-// own story is written later, in place. Every lair grows a depth door
-// (GATE_ROOM in game.js, gated on the boss's flag) into a crystal-veined
-// grotto: shared bones today — scrap and a rest — so a reveal always pays
-// SOMETHING, and the map marks each mouth with the cave sign.
+// cave"; and the caves ARE the story: when the corrupted song came, the
+// BROKEN were the lucky ones — every unit whose ears were dead heard
+// nothing, and nothing is what saved them. They went under, into rock where
+// the signal dies, and rebuilt as THE DEAF SYSTEM. Each grotto is the
+// doorway to one of their refuges.
+//
+// AND THE CAVES ARE THE WORLD-GROWTH DOCTRINE (docs/DEAF_SYSTEM.md): the
+// game grows through MANY SMALL UNCONNECTED cave networks, not one giant
+// connected map. This engine makes that free — rooms are procedural tile
+// grids built lazily per-room (buildRoom/gridCache), the networks share the
+// zone-X palette and tile deck, and a network costs nothing until she walks
+// into it. Small parallel maps, cheap memory, no loading spikes: the
+// owner's call, and structurally true here.
+//
+// Every lair grows a depth door (GATE_ROOM in game.js, gated on the boss's
+// flag) into a two-room start of a network: the GROTTO (scrap and a rest —
+// a reveal always pays SOMETHING) and the TUNNEL behind it, where a Deaf
+// System terminal tells the story. Deeper rooms per network are added per
+// cave, each its own story.
 const GROTTOES = [
-  // [room, lair it opens from, flag that opens it, map cell x, y]
-  ['GA1', 'A4', 'bossGlitch', 5, 4],
-  ['GA2', 'A10', 'alpha', 2, 2],
-  ['GB1', 'B4', 'bossBrood', 7, 1],
-  ['GC1', 'C3', 'bossAtlas', 8, 4],
-  ['GD1', 'D3', 'bossZero', 10, 6],
-  ['GX1', 'X1', 'bossPrism', 9, 1],
-  ['GE1', 'E3', 'bossMother', 11, 6],
+  // [grotto, tunnel, lair, flag that opens it, grotto cell, tunnel cell]
+  ['GA1', 'GA1T', 'A4', 'bossGlitch', [5, 4], [6, 4]],
+  ['GA2', 'GA2T', 'A10', 'alpha', [2, 2], [2, 1]],
+  ['GB1', 'GB1T', 'B4', 'bossBrood', [7, 1], [6, 1]],
+  ['GC1', 'GC1T', 'C3', 'bossAtlas', [8, 4], [9, 4]],
+  ['GD1', 'GD1T', 'D3', 'bossZero', [10, 6], [10, 5]],
+  ['GX1', 'GX1T', 'X1', 'bossPrism', [9, 1], [10, 1]],
+  ['GE1', 'GE1T', 'E3', 'bossMother', [11, 6], [12, 6]],
 ];
-for (const [gid, lair, flag, mx, my] of GROTTOES) {
+for (const [gid, tid, lair, flag, gcell, tcell] of GROTTOES) {
   ROOMS[gid] = {
-    zone: 'X', cave: 1, w: 36, h: 17, exits: {},
-    ents: [['scrap', 8, 15, 40], ['scrap', 18, 11, 40], ['scrap', 28, 15, 60], ['bench', 32, 15]],
+    zone: 'X', cave: 1, w: 36, h: 17, exits: { R: tid },
+    ents: [['scrap', 8, 15, 40], ['scrap', 18, 7, 40], ['scrap', 28, 15, 60], ['bench', 32, 15]],
     build(g) {
-      frame(g);
-      hline(g, 6, 10, 12, '='); hline(g, 15, 20, 11, '='); hline(g, 24, 28, 12, '=');
+      caveCarve(g, gid, {
+        open: ['R'],
+        anchor: [{ x: 3, y: 15, w2: 2 }, { x: 8, y: 15 }, { x: 28, y: 15 }, { x: 32, y: 15, w2: 2 }],
+        pocket: [{ x: 18, y: 6 }],
+      });
     },
   };
-  MAPPOS[gid] = [mx, my, 1, 1];
+  ROOMS[tid] = {
+    zone: 'X', cave: 1, w: 40, h: 17, exits: { L: gid },
+    ents: [['term', 20, 15, 5], ['scrap', 8, 15, 30], ['scrap', 30, 7, 40]],
+    build(g) {
+      caveCarve(g, tid, {
+        open: ['L'],
+        anchor: [{ x: 8, y: 15 }, { x: 20, y: 15, w2: 2 }],
+        pocket: [{ x: 30, y: 6 }],
+      });
+    },
+  };
+  MAPPOS[gid] = [gcell[0], gcell[1], 1, 1];
+  MAPPOS[tid] = [tcell[0], tcell[1], 1, 1];
 }
 
 const gridCache = {};
