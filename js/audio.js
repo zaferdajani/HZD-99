@@ -246,10 +246,78 @@ function clawShear(f0, f1, dur, vol, delay, q) {
   src.connect(f).connect(g).connect(AC.destination);
   src.start(t0);
 }
+// ===========================================================================
+// THREE WEAPONS, THREE VOICES. The swing is the sound the player hears more
+// than any other in the game, and one whoosh serving all three weapons would
+// make the crystal an upgrade you cannot HEAR. The owner's spec, verbatim:
+// the claw's whoosh, the single crystal's, and the reunited double's are three
+// different sounds — and the claw itself needed body, not just claws.
+//
+//   CLAW      air first, then three shears. The old mix was shears-only —
+//             precise but THIN, all click and no cut, which on a phone speaker
+//             is why it read as "basic". A broad low air-cut now moves under
+//             the passes, so the arm displaces air before the claws split it.
+//   CRYSTAL   one clean pass. Less noise, more tone: a rising cut with a
+//             GLASS RING that hangs after it — two detuned high partials, the
+//             crystal still singing after the arm has stopped. Nothing else in
+//             the vocabulary sustains above 1.8 kHz, which is what makes it
+//             measurable (tests/slashsnd.cjs).
+//   DOUBLE    both ends pass. TWO overlapping cuts ~55 ms apart, centred
+//             lower, with the ring an octave down plus its fifth — a heavier,
+//             turning sound, because the weapon is now rotating mass.
+//
+// Which one plays is read from the save, so the moment tasks #79/#80 set the
+// flags the audio follows with no further wiring. Until then: claw.
+function wielded() {
+  const f = (typeof G !== 'undefined' && G.save && G.save.flags) || {};
+  return f.crystal2 ? 'crystal2' : (f.crystal ? 'crystal1' : 'claw');
+}
+function crystalSlash(beat) {
+  if (!AC || MUTED) return;
+  const heavy = beat >= 2;
+  const j = () => 0.97 + Math.random() * 0.06;
+  // the cut: cleaner and more tonal than the claw — less Q on the noise,
+  // rising, one single pass
+  whoosh(heavy ? 0.20 : 0.14, 600 * j(), heavy ? 3600 : 3200, heavy ? 0.10 : 0.08);
+  // the ring: the crystal keeps singing after the pass. Two detuned partials a
+  // few cents apart beat gently against each other — glass, not steel.
+  tone(1976 * j(), heavy ? 0.42 : 0.34, 'sine', 0.030, 1976 * j(), 0.03);
+  tone(2093 * j(), heavy ? 0.38 : 0.30, 'sine', 0.024, 2093 * j(), 0.045);
+  if (heavy) {                                  // the third hit lands with light
+    tone(988, 0.30, 'triangle', 0.030, 988, 0.02);
+    tone(74, 0.10, 'square', 0.07, 40, 0.015);
+  }
+}
+function crystalSlash2(beat) {
+  if (!AC || MUTED) return;
+  const heavy = beat >= 2;
+  const j = () => 0.97 + Math.random() * 0.06;
+  // both ends pass: two cuts, offset, centred lower than the single's
+  whoosh(0.16, 350 * j(), 1700, 0.09);
+  whoosh(0.16, 480 * j(), 2200, 0.085, 0.055);
+  if (heavy) whoosh(0.18, 420 * j(), 2600, 0.09, 0.11);   // the third end of a spin
+  // the ring, an octave down plus its fifth — a bigger piece of crystal
+  tone(988 * j(), 0.40, 'sine', 0.032, 988 * j(), 0.04);
+  tone(1480 * j(), 0.34, 'sine', 0.024, 1480 * j(), 0.06);
+  if (heavy) { tone(494, 0.34, 'triangle', 0.034, 494, 0.03); tone(66, 0.12, 'square', 0.08, 36, 0.02); }
+}
+// THE JOIN — the sound of the two halves locking, for the reunion moment
+// (task #80): a glass glissando climbing into a settled two-note chord, over
+// one deep confirmation. Not a fanfare; a mechanism completing.
+function crystalJoin() {
+  if (!AC || MUTED) return;
+  for (let i = 0; i < 6; i++) tone(660 * Math.pow(1.335, i), 0.16, 'sine', 0.028, 660 * Math.pow(1.335, i), i * 0.055);
+  tone(988, 0.9, 'sine', 0.034, 988, 0.36);
+  tone(1480, 0.8, 'sine', 0.026, 1480, 0.40);
+  tone(110, 0.30, 'triangle', 0.07, 74, 0.34);
+}
 function clawSlash(beat) {
   if (!AC || MUTED) return;
   const heavy = beat >= 2;
   const j = () => 0.96 + Math.random() * 0.08;            // never twice the same
+  // 0. THE AIR — the whole arm displaces air before the claws split it. This
+  // is the body the mix was missing: broad, low, under everything.
+  whoosh(heavy ? 0.16 : 0.12, 260 * j(), heavy ? 1500 : 1300, heavy ? 0.085 : 0.07);
   // 1. THE SERVO — the arm moves before the claws do
   tone(heavy ? 150 : 190, 0.05, 'sawtooth', heavy ? 0.038 : 0.028, heavy ? 520 : 620);
   chink(0.012, 0.034);
@@ -680,7 +748,10 @@ function sfx(n) {
     // combo index so the shout and the steel escalate together, and mixed low
     // enough that it is the animal inside the swing rather than a second swing.
     const cb = (typeof player !== 'undefined' && player && player.combo) | 0;
-    clawSlash(cb);
+    const w = wielded();
+    if (w === 'crystal2') crystalSlash2(cb);
+    else if (w === 'crystal1') crystalSlash(cb);
+    else clawSlash(cb);
     const take = HZDVOX.atk[Math.min(HZDVOX.atk.length - 1, cb)];
     if (take && AC) {
       const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
@@ -700,6 +771,7 @@ function sfx(n) {
   if (n === 'djump' && hzdSay('djump', 160)) return;
   if (n === 'heal' && hzdSay('heal', 0)) return;
   if (n === 'chargeReady' && hzdSay('evo', 400)) return;
+  if (n === 'crystalJoin') { crystalJoin(); return; }
   // HER LITTLE MELODIES — see the alphabet above. These come before any
   // sample, because the whole point is that they are all the same instrument.
   if (CUE[n]) { CUE[n](); return; }
