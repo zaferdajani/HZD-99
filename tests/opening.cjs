@@ -208,8 +208,9 @@ const { chromium } = require('playwright');
     // pressing UP anywhere else must NOT open them
     player.x = 200; player.y = 444; player.on = true;
     const farAway = !gateEnter();
-    // ...and at the gates it must
-    player.x = G.roomDef.w * TILE * 0.90 - 12;
+    // ...and at the gates it must — read the spot from the table, not a
+    // hardcoded fraction that goes stale when the gate moves
+    player.x = G.roomDef.w * TILE * GATE_ROOM.W2.at - 12;
     const opened = gateEnter();
     let drewBack = false;
     // 260 sim-frames > GATE_WALK (3.4s of careful walk) with headroom

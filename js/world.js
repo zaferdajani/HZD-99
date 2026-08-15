@@ -192,10 +192,12 @@ const ROOMS = {
       // dirt. It is walk-up height, so it never asks for a jump she has not
       // been taught yet.
       rect(g, 33, 14, 39, 15, '#');
-      // the practice shelf sat at 28-31 — right over the gate approach, where
-      // the owner called it out for ruining the scenery. The lesson moved to
-      // mid-room; the last ten tiles belong to the gates alone.
-      hline(g, 18, 21, 11, '=');
+      // the practice shelf has moved TWICE now: from 28-31 (over the old gate
+      // approach) to 18-21 — which the gate then moved onto ("why is there a
+      // plate in the middle of the gate?!"). It lives at 7-10 now, over the
+      // walk-up BEFORE the step at 12: first the shelf teaches the hop, then
+      // the step confirms it, and the gate at tile 20 stands alone.
+      hline(g, 7, 10, 11, '=');
       // THE CITY WALL HAS A BODY. Sealing the side exit left the right edge a
       // single frame() column — one tile of green against the dark, which the
       // owner read as the wall having been REMOVED. A city's outer wall is the

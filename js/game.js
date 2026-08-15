@@ -4142,46 +4142,72 @@ function drawDeck(cx2, X, Y, RW, DH, variant) {
   cx2.restore();
   return true;
 }
+// THE DECK IS CACHED AND ERODED NOW. The honest failure the owner called
+// out: the NO RIGHT ANGLES pass ran on the tile layer, but the platform
+// decks draw per-frame ON TOP of it — so the squarest thing on screen was
+// the one thing the erosion never touched. The runs render once into an
+// offscreen canvas, the same scallop treatment bites their top and bottom
+// edges, and the frame blits the result.
+let platCv = null, platCvKey = '';
 function drawPlatformRuns() {
   if (!platReady()) return;
-  const im = MEDIA_IMG.platforms, S = PLAT_SLOT[platVariant()];
-  const g = G.grid, W = g[0].length, H = g.length;
-  // the deck stands taller than its collision line so it reads as built
-  // MASS, not a stripe — the walking surface stays exactly on the tile top
-  const DH = 30, LIFT = 5;
-  const capS = Math.round(S.w * 0.27);            // sculpted end, in sheet px
-  const midS = S.w - capS * 2;
-  const capD = Math.round(DH * (capS / S.h) * 1.35);
-  for (let ty = 0; ty < H; ty++) {
-    let tx = 0;
-    while (tx < W) {
-      if (tileAt(tx, ty) !== '=') { tx++; continue; }
-      let e = tx;
-      while (e + 1 < W && tileAt(e + 1, ty) === '=') e++;
-      const X = tx * TILE, RW = (e - tx + 1) * TILE, Y = ty * TILE - LIFT;
-      const cw = Math.min(capD, Math.floor(RW / 2));
-      c.save();
-      // a short run gets the caps squeezed rather than a stretched middle
-      c.drawImage(im, S.x, S.y, capS, S.h, X, Y, cw, DH);
-      const midW = RW - cw * 2;
-      if (midW > 0) {
-        // repeat the middle band instead of smearing it — the pipes and the
-        // light strip keep their real proportions at any length
-        const step = Math.max(24, Math.round(capD * 1.4));
-        let dx = X + cw;
-        while (dx < X + cw + midW) {
-          const w2 = Math.min(step, X + cw + midW - dx);
-          c.drawImage(im, S.x + capS, S.y, Math.round(midS * (w2 / step)), S.h, dx, Y, w2, DH);
-          dx += w2;
+  const key = G.roomId + '|' + platVariant();
+  const W2px = G.roomDef.w * TILE, H2px = G.roomDef.h * TILE;
+  if (platCvKey !== key || !platCv || platCv.width !== W2px) {
+    platCvKey = key;
+    platCv = document.createElement('canvas'); platCv.width = W2px; platCv.height = H2px;
+    const p2 = platCv.getContext('2d');
+    const im = MEDIA_IMG.platforms, S = PLAT_SLOT[platVariant()];
+    const g = G.grid, W = g[0].length, H = g.length;
+    const DH = 30, LIFT = 5;
+    const capS = Math.round(S.w * 0.27);          // sculpted end, in sheet px
+    const midS = S.w - capS * 2;
+    const capD = Math.round(DH * (capS / S.h) * 1.35);
+    let h2 = 2166136261 >>> 0;
+    for (const ch of key) { h2 ^= ch.charCodeAt(0); h2 = Math.imul(h2, 16777619); }
+    const prnd = () => (((h2 = Math.imul(h2 ^ (h2 >>> 15), 2246822519) >>> 0)) % 1000) / 1000;
+    for (let ty = 0; ty < H; ty++) {
+      let tx = 0;
+      while (tx < W) {
+        if (tileAt(tx, ty) !== '=') { tx++; continue; }
+        let e = tx;
+        while (e + 1 < W && tileAt(e + 1, ty) === '=') e++;
+        const X = tx * TILE, RW = (e - tx + 1) * TILE, Y = ty * TILE - LIFT;
+        const cw = Math.min(capD, Math.floor(RW / 2));
+        // a short run gets the caps squeezed rather than a stretched middle
+        p2.drawImage(im, S.x, S.y, capS, S.h, X, Y, cw, DH);
+        const midW = RW - cw * 2;
+        if (midW > 0) {
+          const step = Math.max(24, Math.round(capD * 1.4));
+          let dx = X + cw;
+          while (dx < X + cw + midW) {
+            const w2 = Math.min(step, X + cw + midW - dx);
+            p2.drawImage(im, S.x + capS, S.y, Math.round(midS * (w2 / step)), S.h, dx, Y, w2, DH);
+            dx += w2;
+          }
         }
+        p2.save(); p2.translate(X + RW, 0); p2.scale(-1, 1);
+        p2.drawImage(im, S.x, S.y, capS, S.h, 0, Y, cw, DH);
+        p2.restore();
+        // THE BITE. Scallops out of the long edges — the lip keeps its walk
+        // line (shallow nibbles on top), the underside hangs ragged (deeper),
+        // and each end loses a corner chunk so no silhouette closes square.
+        p2.save(); p2.globalCompositeOperation = 'destination-out';
+        const nib = (nx, ny, r) => { p2.beginPath(); p2.arc(nx, ny, r, 0, 7); p2.fill(); };
+        for (let nx = X + 4; nx < X + RW - 4; nx += 7 + prnd() * 9) {
+          if (prnd() < 0.6) nib(nx, Y - 0.5, 1.2 + prnd() * 2.2);          // top lip
+          nib(X + RW - (nx - X), Y + DH + 0.5, 2 + prnd() * 3.6);          // underside
+        }
+        nib(X + 1, Y + DH - 2 - prnd() * 5, 3 + prnd() * 3);               // end corners
+        nib(X + RW - 1, Y + DH - 2 - prnd() * 5, 3 + prnd() * 3);
+        nib(X + 1 + prnd() * 3, Y + 2, 2 + prnd() * 2);
+        nib(X + RW - 1 - prnd() * 3, Y + 2, 2 + prnd() * 2);
+        p2.restore();
+        tx = e + 1;
       }
-      c.save(); c.translate(X + RW, 0); c.scale(-1, 1);
-      c.drawImage(im, S.x, S.y, capS, S.h, 0, Y, cw, DH);
-      c.restore();
-      c.restore();
-      tx = e + 1;
     }
   }
+  c.drawImage(platCv, 0, 0);
 }
 // tile layer cache — tiles are static per room, so render once and blit
 let tileCv = null, tileDirty = true;
