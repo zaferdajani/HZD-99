@@ -77,6 +77,13 @@ const WWW = path.join(ROOT, 'www');
     // fallbacks where the web build draws art — RULE ONE, exactly.
     const L = window.LOWRES || {};
     for (const k in L) push(k, L[k]);
+    // ...and the films, in every form the page can ask for: the master, the
+    // webm sibling, and the light tier a phone on mobile data is handed. These
+    // were never checked here at all, which is a gap RULE ONE cannot have — a
+    // film missing from the package is a story beat that silently does not play.
+    for (const m of [window.VID_FILES, window.VID_ALT, window.VID_LIGHT]) {
+      for (const k in (m || {})) push(k, m[k]);
+    }
     return out;
   });
   const missing = named.filter(p => !fs.existsSync(path.join(WWW, p)));

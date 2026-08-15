@@ -235,3 +235,29 @@ the most recently heard.
 | Art resolution | one tier | **two — quarter-scale webp stands in** | a missing sheet drew the *wrong picture*, not a soft one |
 | Low tier priority | n/a | **−1, ahead of the nearest full sheet** | 0.55 MB buys every room in the game being drawable |
 | `CACHE_MAX_ART` | 130 | **220** | 68 new files; 130 would have started evicting art again |
+| Films | one weight (mp4 33 MB / webm 13.4 MB) | **plus a light mp4 tier, 33 → 13.6 MB** | webm browsers already had a cheap option; iOS takes mp4 and had none |
+| `tests/platform.cjs` coverage | 138 assets | **275** | the low tier and the films in all three forms were never checked |
+
+---
+
+## 7. The films
+
+960×540 already — exactly the game's internal resolution — so there is nothing
+to gain by making them smaller in *pixels* and something to lose. What they were
+was **over-encoded**: `intro1` shipped at 2615 kb/s for a picture that is
+visually identical at less than half that, checked frame against frame.
+
+`tools/lightvid.cjs` derives a second copy at CRF 26 (**33.0 MB → 13.6 MB, 41%**)
+and leaves the masters alone, per RULE ZERO. It is **mp4 only** on purpose:
+browsers that take webm already have a cheap option, and it is iOS Safari —
+which takes mp4 and nothing else — that was paying full price for every film.
+
+`videoLight()` decides who gets it, on the same terms as the art policy: never
+in a packaged app (the file is already on the device, so a smaller copy buys
+nothing and costs picture), and on the web only for Save-Data, 2g or 3g. The
+light copy is added as the **first** `<source>` rather than swapped in, so a
+device that cannot decode it simply walks on to the next one.
+
+`-movflags +faststart` is not optional here: without the index at the front of
+the file, a streamed mp4 must arrive completely before it can start, which would
+undo the whole point.

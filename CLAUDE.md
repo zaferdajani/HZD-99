@@ -1,5 +1,41 @@
 # CLAWBYTE / NOSTOS — working notes
 
+## RULE ZERO: author at full quality, DERIVE everything cheaper
+
+**Never author down. Make the good version once, and let a tool in `tools/`
+produce the small one — automatically, reproducibly, from the master.**
+
+The owner's standing instruction, and it is the cheapest way to work as well as
+the best-looking: taste and effort go in once, and every platform after that is
+a script. The alternative — deciding at authoring time that a phone will not
+need the detail — is a decision that cannot be undone and has to be re-made
+every time a new platform appears.
+
+The masters are the archive; the shipped tiers are generated:
+
+| what | master | derived tier | tool |
+|---|---|---|---|
+| art sheets | `assets/characters`, `assets/backgrounds`, … | `assets/lowres/` — 0.55 MB for 24.2 MB | `tools/lowres.cjs` |
+| films | `assets/video/*.mp4` | `assets/video/light/` — about half | `tools/lightvid.cjs` |
+| rendering | the full effect stack | the quality dial: resolution, ceilings, weather, glow, bloom | `js/perf.js` |
+| generation plates | `assets/source/` — 11 MB, never shipped | the composited sheets | `tools/*.cjs` |
+
+Consequences that bind every change:
+
+- A new heavy asset is not finished until its cheaper tier exists. Regenerate
+  with `node tools/lowres.cjs && node build.cjs` after any art change.
+- The engine never assumes it has the good version. Every renderer already
+  guards on "the sheet is not here yet"; a derived tier is the same situation.
+- **The one exception is measured, not assumed**: six guardian parts atlases are
+  addressed by absolute pixel rect and must have no small copy.
+  `tests/lowres.cjs` re-derives that from the source rather than trusting a list.
+- The delivery path this feeds is `docs/DELIVERY.md`. Read it before changing
+  how anything reaches a device.
+
+**Multi-platform is the target, not an afterthought**: browser and phone first,
+desktop (Steam) next, console possible later. Every tier above exists so that
+adding a platform is a configuration decision rather than an art project.
+
 ## RULE ONE: every platform gets the same game
 
 **Web page, mobile web, the Capacitor app, the desktop shell — one build, one

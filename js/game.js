@@ -2520,6 +2520,25 @@ const purifyPre = {};
 // both is the difference between a film that plays everywhere and a film that
 // plays on the machine it was tested on.
 const PURIFY_ALT = (typeof window !== 'undefined' && window.VID_ALT) || {};
+const PURIFY_LIGHT = (typeof window !== 'undefined' && window.VID_LIGHT) || {};
+// WHO GETS THE LIGHT FILMS. The same shape of decision preloadPolicy() makes
+// about art, and for the same reason: a data plan is somebody's money.
+//
+// A packaged app never takes it — the files are already on the device, so a
+// smaller copy buys nothing and costs picture. Everywhere else it is the
+// connection that decides, and Save-Data is an explicit yes.
+function videoLight() {
+  if (!PURIFY_LIGHT || !Object.keys(PURIFY_LIGHT).length) return false;
+  const packaged = (typeof window !== 'undefined') &&
+    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:');
+  if (packaged) return false;
+  const c = (typeof navigator !== 'undefined') &&
+    (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
+  if (!c) return false;                       // unknown: assume a desk, give it the master
+  if (c.saveData) return true;
+  const t = c.effectiveType || '4g';
+  return t === 'slow-2g' || t === '2g' || t === '3g';
+}
 function purifyPreload(kind) {
   const s = PURIFY_VID[kind];
   if (!s || purifyPre[kind]) return;
@@ -2536,6 +2555,17 @@ function purifyPreload(kind) {
     so.src = url; so.type = type;
     v.appendChild(so);
   };
+  // THE LIGHT TIER FIRST, WHERE IT IS WORTH IT. Browsers that take webm already
+  // have a cheap option — the webm set is 13.4 MB against the mp4 set's 33 —
+  // so it is iOS Safari, which takes mp4 and nothing else, that pays full price
+  // for every film. On a metered or slow connection it gets the light mp4
+  // instead: the same 960x540 picture, encoded at about half the bytes, which
+  // frame-for-frame comparison could not tell from the master.
+  //
+  // Ordered rather than switched: the browser walks the <source> list and takes
+  // the FIRST one it can decode, so putting the light copy in front costs a
+  // device that cannot play it nothing at all.
+  if (videoLight()) add(PURIFY_LIGHT[kind], 'video/mp4');
   add(s, /\.webm$/i.test(s) ? 'video/webm' : 'video/mp4');
   add(PURIFY_ALT[kind], 'video/webm');
   try { v.load(); } catch (e) {}
