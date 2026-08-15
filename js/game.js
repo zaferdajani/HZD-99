@@ -2973,8 +2973,9 @@ function drawZoneVista(P, zone, px, py) {
     // up with something IN the backdrop — the gap between the city gates, for
     // one — cannot guess: the plate is scaled to overfill and panned by the
     // camera, so its rect is only known here. Recorded from the FAR copy,
-    // which is the one the architecture belongs to.
-    if (mul <= 1.001) G._vista = { x: cx2, y: cy2, w: w2, h: h2 };
+    // which is the one the architecture belongs to. Stamped with the room, so
+    // a stale rect from the previous room can never place this room's door.
+    if (mul <= 1.001) { G._vista = { x: cx2, y: cy2, w: w2, h: h2 }; G._vistaRoom = G.roomId; }
     x2.drawImage(im, cell[0] * CW, cell[1] * CH, CW, CH, cx2, cy2, w2, h2);
   };
   // when the far plate is the only one, it carries the full travel — the
@@ -3020,7 +3021,7 @@ function drawZoneVista(P, zone, px, py) {
 }
 function drawMachineBG(P, px, py, horizon) {
   const zone = G.roomDef.zone, now = performance.now();
-  if (drawZoneVista(P, zone, px, py)) return;
+  if (drawZoneVista(P, zone, px, py)) { if (typeof drawGateDoors === 'function') drawGateDoors(P); return; }
   const rep = (span, speed, fn) => {
     const off = ((px * speed) % span + span) % span;
     for (let i = -1; i < 3; i++) fn(i * span - off, i);
@@ -4363,8 +4364,116 @@ function gateTarget(G2) {
 // rect. Null when no backdrop has rendered yet.
 function gateDrawnX(G2) {
   const v = G._vista;
-  if (!v) return null;
+  if (!v || G._vistaRoom !== G.roomId) return null;
   return v.x + v.w * G2.gx;
+}
+// ---------------------------------------------------------------------------
+// THE DOOR HAS A BODY NOW (owner: "create 3D structures looking like a huge
+// door on top of the background door, but still in the background —
+// multilayers that open dynamically when you press up"). Two layers of
+// architecture stand over the painted gap: a colossal dim arch glued to the
+// backdrop, and a nearer frame with two massive leaves that drift with their
+// own parallax — the drift IS the depth. The leaves crack when she stands
+// close (anticipation) and slide wide while the walk carries her through,
+// light spilling out of the opening. Screen-space, drawn with the backdrop,
+// under everything that plays. Authored door plates can replace the leaf
+// faces later; the mechanism stays.
+function drawGateDoors(P) {
+  const def = GATE_ROOM[G.roomId];
+  if (!def || !player) { G._doorK = 0; return; }
+  if (def.need && !(G.save && G.save.flags && G.save.flags[def.need])) return;
+  const ds = gateDrawnX(def);
+  if (ds == null) return;
+  const gy = (G.roomDef.h - 2) * TILE - camSY();
+  const near = Math.abs(player.x + player.w / 2 - camSX() - ds) < 130;
+  const want = G.gateWalk ? 1 : near ? 0.14 : 0;
+  G._doorK = (G._doorK == null ? 0 : G._doorK) + (want - (G._doorK || 0)) * (G.gateWalk ? 0.07 : 0.04);
+  const k = G._doorK;
+  // the structure is NEARER than the painting: it slides a little against it
+  const roomW = G.roomDef.w * TILE;
+  const drift = roomW > 960 ? (camSX() / (roomW - 960) - 0.5) * -34 : 0;
+  const cx2 = ds + drift;
+  const H3 = 330, W3 = 108, GAPW = 26;
+  c.save();
+  // ---- far layer: the colossal arch, glued to the backdrop ----
+  c.globalAlpha = 0.55;
+  const arch = c.createLinearGradient(0, gy - H3 - 90, 0, gy);
+  arch.addColorStop(0, '#060a10'); arch.addColorStop(1, '#101823');
+  c.fillStyle = arch;
+  c.fillRect(ds - W3 - GAPW - 46, gy - H3 - 90, 40, H3 + 90);
+  c.fillRect(ds + W3 + GAPW + 6, gy - H3 - 90, 40, H3 + 90);
+  c.fillRect(ds - W3 - GAPW - 46, gy - H3 - 90, (W3 + GAPW + 46) * 2, 34);
+  c.globalAlpha = 1;
+  // ---- near layer: the frame ----
+  const pyl = (x0, flip) => {
+    const g2 = c.createLinearGradient(x0, 0, x0 + 30 * flip, 0);
+    g2.addColorStop(0, '#1b2531'); g2.addColorStop(0.7, '#0c121a'); g2.addColorStop(1, '#070b11');
+    c.fillStyle = g2;
+    c.fillRect(Math.min(x0, x0 + 30 * flip), gy - H3 - 46, 30, H3 + 46);
+    c.strokeStyle = 'rgba(160,200,230,0.25)'; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(x0, gy - H3 - 46); c.lineTo(x0, gy); c.stroke();
+  };
+  pyl(cx2 - W3 - GAPW, -1);
+  pyl(cx2 + W3 + GAPW, 1);
+  // the lintel, with its glow seam
+  const lin = c.createLinearGradient(0, gy - H3 - 64, 0, gy - H3 - 10);
+  lin.addColorStop(0, '#05080d'); lin.addColorStop(0.6, '#141d29'); lin.addColorStop(1, '#0a1017');
+  c.fillStyle = lin;
+  c.fillRect(cx2 - W3 - GAPW - 30, gy - H3 - 64, (W3 + GAPW + 30) * 2, 54);
+  c.save(); c.globalCompositeOperation = 'lighter';
+  c.globalAlpha = 0.35 + k * 0.4;
+  c.fillStyle = P.glow;
+  c.fillRect(cx2 - W3 - GAPW - 20, gy - H3 - 16, (W3 + GAPW + 20) * 2, 2.5);
+  c.restore();
+  // ---- the LEAVES — they slide into the pylons as k opens ----
+  const slide = k * (W3 - 6);
+  for (const s of [-1, 1]) {
+    const inner = cx2 + s * (GAPW * 0.32 + slide);       // the crack edge
+    const outer = inner + s * W3;
+    const lg = c.createLinearGradient(inner, 0, outer, 0);
+    lg.addColorStop(0, '#2a3a4c'); lg.addColorStop(0.25, '#182432');
+    lg.addColorStop(0.85, '#0b1219'); lg.addColorStop(1, '#070b11');
+    c.fillStyle = lg;
+    c.beginPath();
+    c.moveTo(inner, gy);
+    c.lineTo(inner, gy - H3 + 8);
+    c.lineTo(inner + s * 14, gy - H3 - 8);                // the leaf crowns lean in
+    c.lineTo(outer, gy - H3 - 8);
+    c.lineTo(outer, gy);
+    c.closePath(); c.fill();
+    // panel ribs — the relief that makes it read as mass, not a rectangle
+    c.strokeStyle = 'rgba(0,0,0,0.5)'; c.lineWidth = 2;
+    for (let r2 = 1; r2 <= 3; r2++) {
+      const rx = inner + s * (W3 * r2 / 4);
+      c.beginPath(); c.moveTo(rx, gy - 8); c.lineTo(rx, gy - H3 + 4); c.stroke();
+    }
+    c.strokeStyle = 'rgba(150,190,225,0.16)'; c.lineWidth = 1;
+    for (let r2 = 1; r2 <= 3; r2++) {
+      const rx = inner + s * (W3 * r2 / 4) + s * 2;
+      c.beginPath(); c.moveTo(rx, gy - 8); c.lineTo(rx, gy - H3 + 4); c.stroke();
+    }
+    // the lit inner edge of each leaf — the crack is where the light lives
+    c.strokeStyle = 'rgba(200,230,255,0.5)'; c.lineWidth = 1.6;
+    c.beginPath(); c.moveTo(inner, gy); c.lineTo(inner, gy - H3 + 8); c.stroke();
+  }
+  // ---- the light through the opening ----
+  const gapNow = GAPW * 0.32 + slide;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const spill = c.createLinearGradient(cx2, gy - H3, cx2, gy);
+  spill.addColorStop(0, 'rgba(255,226,160,' + (0.10 + k * 0.5) + ')');
+  spill.addColorStop(1, 'rgba(255,200,110,' + (0.05 + k * 0.3) + ')');
+  c.fillStyle = spill;
+  c.fillRect(cx2 - gapNow, gy - H3 + 4, gapNow * 2, H3 - 4);
+  // and it pools on the ground when the doors stand open
+  if (k > 0.05) {
+    const pool = c.createRadialGradient(cx2, gy, 6, cx2, gy, 90 + k * 120);
+    pool.addColorStop(0, 'rgba(255,220,150,' + (0.22 * k) + ')');
+    pool.addColorStop(1, 'rgba(255,200,110,0)');
+    c.fillStyle = pool;
+    c.beginPath(); c.ellipse(cx2, gy, 90 + k * 120, 22 + k * 10, 0, 0, 7); c.fill();
+  }
+  c.restore();
+  c.restore();
 }
 function gateHere() {
   const G2 = GATE_ROOM[G.roomId];
