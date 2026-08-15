@@ -133,12 +133,47 @@ what is on screen:
 STILL TO FIRE: the armed-with-crystal variants of the action set, when sword
 mode needs them on screen · `intro7.webm` / `intro8.webm` (see below).
 
-**One honest gap.** This container has no ffmpeg, so the two re-shot intro
-clips ship as mp4 ONLY — their stale `.webm` siblings were DELETED rather than
-left to serve the old cat to any browser that prefers webm. `build.cjs` handles
-a missing alt fine. Re-encode them wherever ffmpeg exists. And this container's
-Chromium has no H.264, so **the three films were never watched by the machine
-that made them** — they are unverified by measurement, unlike every plate here.
+**Both gaps are closed.** A static ffmpeg from npm (kept out of `package.json`
+— the game still ships nothing from npm) re-encoded `intro7.webm` /
+`intro8.webm` and decoded all three films for review. `sword_gift` was re-shot:
+the first take flared the crystal while it was still in the trader's hands, and
+the handover IS the beat.
+
+### ⚠ THE WIRING IS BLOCKED ON A PRESENTATION DECISION — READ BEFORE #79/#80/#81
+
+`tools/herostates.cjs` and `assets/source/_sheets/hero_state_sheet.jpg` exist:
+22 keyed, foot-aligned, uniformly-scaled cells, one per state. The renderer was
+NOT switched over, for a reason worth stating plainly:
+
+**The game draws her ALMOST FRONT-ON.** `js/entities.js` says so at the body
+shell — *"SHE IS DRAWN ALMOST FRONT-ON — one visor, two eyes, both ears"* — and
+`assets/source/ref/hzd99_states.png`, the checklist this whole section was built
+from, shows every single state that way. **The action plates in `hero/` are TRUE
+SIDE PROFILE**, because session B forced profile on the reasoning that "a
+side-scroller needs profile". That is a real convention in other games and it is
+NOT this game's convention.
+
+So wiring the sheet as it stands would not merely make her body authored — it
+would silently change her presentation from front-on to profile, which is a much
+larger visual change than the one that was asked for, and it would throw away
+what the procedural body is carefully doing (both ears, both eyes, the visor
+read, the committed upper-left key, the core shadow, the head's cast shadow).
+
+Two ways forward, and it is the owner's call, not the pipeline's:
+- **Keep front-on** (matches everything shipped): regenerate the grounded states
+  — idle, walk ×2, run ×2, land, skid, claw ×2, finisher, charge, burst, heal,
+  song, slump, hurt — as three-quarter FRONT views, then wire. The profile set
+  stays archived and is still right for `wall_cling` and `dash`.
+- **Move to profile** (a deliberate restyle): wire what exists, and accept that
+  she now reads side-on, losing the two-eye visor read that the front-on
+  presentation was built around.
+
+Whichever is chosen, the renderer work is the same shape: a sprite short-circuit
+in the ROBO-CAT branch of `Player.draw()` — NOT `drawHeroSprite`/`drawHeroRig`,
+which belong to NOSTOS's human hero behind `isHero()` and are a dead pixel-art
+path expecting `heroIdle`/`heroRun`/`heroJump`/`heroAtk` sheets that do not
+exist. Scarf, jets, charge aura and claw arcs stay procedural overlays; the
+procedural body becomes the loading fallback.
 
 ### 1a. The turnaround — 8 yaw angles, one prompt each  ✅ DONE (both variants)
 `hzd_yaw0 … hzd_yaw7`: 0° (facing screen-right), 45°, 90° (facing camera),
