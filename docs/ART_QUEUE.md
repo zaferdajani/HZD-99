@@ -292,6 +292,15 @@ woven talon arch, the Eye an organic sphincter-iris. Closed + open variant
 each (or a parted pair the engine can slide). Dark-room phrasing, subject
 only, per the standing §3.2 rules.
 
+**Terrain rule that binds EVERY plate in this section (owner, 2026-08-15):
+elevations, steps and obstacles MIMIC OBJECTS FROM THE ROOM'S BACKGROUND** —
+a city ledge is a vent housing, a crate stack, a fallen sign; a Foundry step
+is a slag mound or machine housing; a cave step is rock. The platform deck
+plates (§2a-2l) and every future step/obstacle plate are generated as the
+backdrop's own furniture, matched to that zone's painted vista, so terrain
+feels like part of the room rather than blocks placed on it. And per the NO
+RIGHT ANGLES law: no plate presents a square silhouette.
+
 **Cave mouths ×5 — irregular ROCK OPENINGS, never doors.** For the cave
 networks (A/B/C/D/E grottoes + the crystal cave): a jagged-edged dark
 opening in living rock — asymmetric, weather-worn, roots/moss per zone,

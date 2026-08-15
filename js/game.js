@@ -4618,10 +4618,11 @@ function drawRoomProp() {
 // grottoes appear: every boss or sage resolved reveals its lair's cave
 // (world.js GROTTOES; the owner's rule).
 const GATE_ROOM = {
-  // 0.85 sets the gates AGAINST the massed city wall (tiles 37-39) instead
-  // of half-buried inside it — the doorway pierces the wall, which is what a
-  // city gate is. gx/gy are legacy vista fractions, kept only as annotation.
-  W2:  { at: 0.85, to: 'A0',  gx: 0.472, gy: 0.93 },
+  // 0.50 stands the monument OVER the backdrop's own painted gates — at 0.85
+  // the two read as TWO different gates ("why two gates?"). The painting is
+  // scenery behind the structure; one spot, one gate. The massed wall at
+  // 37-39 stays the kingdom's outer boundary behind both.
+  W2:  { at: 0.50, to: 'A0',  gx: 0.472, gy: 0.93 },
   A5:  { at: 0.64, to: 'CV1', gx: 0.50,  gy: 0.86, ax: 0.10 },
   CV1: { at: 0.10, to: 'A5',  gx: 0.50,  gy: 0.86, ax: 0.64 },
   // the grottoes — one per guardian, opened by its fall or taming
@@ -4677,20 +4678,38 @@ function drawCaveMouth(cx2, gy, P, k) {
   let h = 2166136261 >>> 0;
   for (const ch of G.roomId) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
   const rnd2 = () => ((h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0) % 1000) / 1000;
-  const MW = 92, MH = 168, N = 15;
+  // EVERY CAVE HAS ITS OWN FACE (owner: "caves have different opening
+  // shapes"). The room's seed picks a shape family — a wide low arch, a
+  // tall crack, a leaning maw, a round hollow — and every layer inherits
+  // its build, so no two networks share a mouth.
+  const FAM = (h >>> 0) % 4;   // h is imul-signed; a negative index reads undefined and NaNs the whole mouth
+  const wMul = [1.35, 0.62, 1.0, 1.1][FAM];
+  const hMul = [0.78, 1.3, 1.05, 0.92][FAM];
+  const skew = [0, 0, 0.38, 0][FAM] * ((h >>> 0) & 1 ? 1 : -1);   // the maw leans
+  const jit = [0.4, 0.55, 0.42, 0.2][FAM];                 // the hollow is rounder
+  const MW = 92 * wMul, MH = 168 * hMul, N = 15;
   // one jagged silhouette maker; every layer gets its OWN irregular edge
   const rim = (w2, h2, baseY) => {
     c.beginPath();
     c.moveTo(cx2 - w2 * 1.15, baseY);
     for (let i = 0; i <= N; i++) {
       const a = Math.PI - (i / N) * Math.PI;
-      c.lineTo(cx2 + Math.cos(a) * w2 * (0.8 + rnd2() * 0.4),
-               baseY - Math.sin(a) * h2 * (0.72 + rnd2() * 0.34));
+      const yy = Math.sin(a) * h2 * (1 - jit * 0.35 + rnd2() * jit);
+      c.lineTo(cx2 + Math.cos(a) * w2 * (1 - jit / 2 + rnd2() * jit) + skew * yy,
+               baseY - yy);
     }
     c.lineTo(cx2 + w2 * 1.15, baseY);
     c.closePath();
   };
   c.save();
+  // AN OBJECT IN THE ROOM, NOT A SHADOW ON THE WALL (owner: "they are
+  // objects in the room that stand out"): a soft ambient halo separates the
+  // mound from whatever backdrop stands behind it before any rock draws
+  const halo = c.createRadialGradient(cx2, gy - MH * 0.5, MW * 0.4, cx2, gy - MH * 0.5, MW * 2.1);
+  halo.addColorStop(0, 'rgba(120,160,190,0.16)');
+  halo.addColorStop(1, 'rgba(120,160,190,0)');
+  c.fillStyle = halo;
+  c.beginPath(); c.ellipse(cx2, gy - MH * 0.5, MW * 2.1, MH * 1.15, 0, 0, 7); c.fill();
   // LAYERED, AND SOLID (owner: "add depth and layers... cave should not be
   // translucent"). The first pass was one 0.75-alpha shape — the city read
   // straight through the rock. Four opaque layers now, each darker and
@@ -4704,6 +4723,12 @@ function drawCaveMouth(cx2, gy, P, k) {
   // moss line riding the outer lip
   c.strokeStyle = 'rgba(110,160,90,0.35)'; c.lineWidth = 3;
   rim(MW + 60, MH + 50, gy); c.stroke();
+  // ...and the kingdom's own light catching one shoulder — the rim light
+  // that makes the mound read as a BODY standing in the room
+  c.save(); c.globalCompositeOperation = 'lighter';
+  c.strokeStyle = P.glow; c.lineWidth = 2.2; c.globalAlpha = 0.22;
+  rim(MW + 56, MH + 46, gy); c.stroke();
+  c.restore();
   // 2 — the mid rim: a darker collar inside the shoulder
   const md = c.createLinearGradient(0, gy - MH - 30, 0, gy);
   md.addColorStop(0, '#10151b'); md.addColorStop(1, '#080b0f');

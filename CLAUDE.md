@@ -46,7 +46,15 @@ it global. Consequences:
   VISUAL: the drawn silhouette must bury the square underneath it.
 - Gates/doors: cave entrances look like CAVE MOUTHS — irregular rock
   openings — never rectangular doors; built gates vary in shape per zone
-  (see ART_QUEUE briefs).
+  (see ART_QUEUE briefs). Only the CITY gate is the huge epic multilayer
+  monument.
+- **Elevations, steps and obstacles MIMIC OBJECTS FROM THE ROOM'S
+  BACKGROUND** (owner, 2026-08-15): a ledge in the city is a vent housing, a
+  crate stack, a fallen sign — the same furniture the backdrop paints — so
+  the platform feels like part of the room, not a block placed on it. Caves
+  use rock; the Foundry uses slag and machine housings; and so on per zone.
+  This binds both authored terrain plates (task #76 / ART_QUEUE §2) and any
+  procedural stand-in.
 
 ## RULE ZERO: author at full quality, DERIVE everything cheaper
 
