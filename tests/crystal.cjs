@@ -32,7 +32,7 @@ const { chromium } = require('playwright');
   const m = await page.evaluate(async () => {
     const out = {};
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
-    startGame(sv); loadRoom('A0');
+    startGame(sv); loadRoom('A0B');   // the trader lives in his booth den now
     await new Promise(r => setTimeout(r, 600));
     G.wake = null; G.state = 'PLAY';
 
@@ -42,7 +42,7 @@ const { chromium } = require('playwright');
     // the first NPC's gift closure, exactly as doInteract would fire it:
     // it must NOT hand over the crystal any more (the owner's rewrite — the
     // sword is forged from a shard she quarries, never given)
-    NPC_GIFT['A0|ratchet']();
+    NPC_GIFT['A0B|ratchet']();
     out.giftIsKit = invCount('kit') > 0 && !G.save.flags.crystal;
     G.dialog = null; G.state = 'PLAY';
     // ---- the quest exists and the FORGE pays it ------------------------

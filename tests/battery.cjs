@@ -54,7 +54,7 @@ const { chromium } = require('playwright');
   // ---- 2. A DARK UNIT IS INERT, AND ONE CELL WAKES ONE UNIT --------------
   const hand = await page.evaluate(async () => {
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
-    startGame(sv); loadRoom('A0');
+    startGame(sv); loadRoom('A0B');   // the trader lives in his booth den now
     await new Promise(r => requestAnimationFrame(r));
     const sp = G.statics.find(s => s.type === 'npc');
     const key = npcKey(sp);
@@ -86,7 +86,7 @@ const { chromium } = require('playwright');
   const broke = await page.evaluate(async () => {
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
     sv.items = {};                                  // spent it elsewhere
-    startGame(sv); loadRoom('A0');
+    startGame(sv); loadRoom('A0B');   // the trader lives in his booth den now
     await new Promise(r => requestAnimationFrame(r));
     const sp = G.statics.find(s => s.type === 'npc');
     doInteract(sp);
@@ -132,7 +132,7 @@ const { chromium } = require('playwright');
     .then(() => page.waitForFunction(() => typeof startGame === 'function', { timeout: 20000 }))
     .then(() => page.evaluate(async () => {
       const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
-      startGame(sv); loadRoom('A0');
+      startGame(sv); loadRoom('A0B');   // the trader lives in his booth den now
       await new Promise(r => requestAnimationFrame(r));
       const sp = G.statics.find(s => s.type === 'npc');
       return sp ? npcLive(sp) : null;
