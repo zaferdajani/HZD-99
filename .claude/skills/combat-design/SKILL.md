@@ -9,6 +9,17 @@ This is an operating procedure, not an essay. Follow it in order and finish with
 the checklist. Every number it depends on lives in `docs/combat/GLOBAL_REGISTRY.md`
 and was measured, not assumed — re-measure rather than remember.
 
+**This file is the arithmetic. The rest of the combat family:**
+
+| skill | reach for it when |
+|---|---|
+| `boss-openings` | designing/auditing punish windows; the owner's opening doctrine and its escalation ladder |
+| `boss-movegen` | inventing a new attack — the threat-shape catalog and per-shape counters |
+| `boss-patterns` | writing step/deck logic — sentences, weighted decks, the recognizability law |
+| `boss-scale` | choosing boss size — giant vs hero-scale duelist vs elite, and what each changes |
+| `combat-education` | placing enemies as lessons — the teaching chain, death as curriculum |
+| `encounter-gen` | composing whole rooms/waves/mini-bosses — briefs, pairings, threat budget |
+
 ---
 
 ## 0a. Read the hero's side first
