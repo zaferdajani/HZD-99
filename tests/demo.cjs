@@ -75,6 +75,63 @@ const check = (name, ok, detail) => {
   check('...while every door inside the chapter stays open',
         doors.inside >= 18, doors.inside + ' interior routes untouched');
 
+  // ---- 2b. ONE KINGDOM, AND NO OTHER WAY IN -------------------------------
+  // "The free version is one stage" is a claim about the whole map, not about
+  // one door. Closing A3's ceiling only means something if there is no second
+  // route — and a door is not the only way into a kingdom in a game like this.
+  // So this walks the world the way a player does, from the room a new game
+  // starts in, through every exit the boundary allows, and insists the set of
+  // rooms it can reach is exactly the free kingdom.
+  //
+  // The other ways in, checked here or ruled out by construction:
+  //   fast travel  — does not exist. The bench is a save point, not a warp.
+  //   respawn      — goes to the bench, which is only ever a room she reached.
+  //   the map      — draws G.save.visited only, so it cannot show or route to
+  //                  a kingdom she has not been in.
+  //   the GATE     — W2 reaches A0 by the gate walk, not by an exit. The first
+  //                  version of this walk did not know that, stopped dead at
+  //                  W2, and reported the free chapter as two rooms while
+  //                  passing every assertion in the block. Gate edges are read
+  //                  from GATE_ROOM here for the same reason tests/deadend.cjs
+  //                  injects them: a route the player can take is a route.
+  const reach = await page.evaluate(() => {
+    const real = demoOn;
+    demoOn = () => true;
+    const edges = (id) => {
+      const out = [];
+      const ex = ROOMS[id].exits || {};
+      for (const k in ex) out.push((typeof ex[k] === 'object') ? ex[k].to : ex[k]);
+      if (typeof GATE_ROOM !== 'undefined' && GATE_ROOM[id]) out.push(GATE_ROOM[id].to);
+      return out;
+    };
+    const seen = { W1: 1 }, q = ['W1'], zones = {};
+    while (q.length) {
+      const id = q.shift();
+      zones[ROOMS[id].zone] = (zones[ROOMS[id].zone] || 0) + 1;
+      for (const to of edges(id)) {
+        if (!ROOMS[to] || seen[to]) continue;
+        const was = G.roomId, wasDef = G.roomDef;
+        G.roomId = id; G.roomDef = ROOMS[id];
+        const blocked = demoWall(to);
+        G.roomId = was; G.roomDef = wasDef;
+        if (blocked) continue;
+        seen[to] = 1; q.push(to);
+      }
+    }
+    demoOn = real;
+    const all = Object.keys(ROOMS).length;
+    return { zones, rooms: Object.keys(seen).length, all,
+             strays: Object.keys(seen).filter(id => ROOMS[id].zone !== DEMO_ZONE) };
+  });
+  check('the free version really is ONE kingdom, by every route there is',
+        reach.strays.length === 0,
+        Object.entries(reach.zones).map(([z, n]) => z + ':' + n).join(' ')
+        + (reach.strays.length ? ' — escaped into ' + reach.strays.join(',') : ''));
+  check('...and the paid kingdoms are the rest of the game, not a scrap of it',
+        reach.rooms < reach.all * 0.4,
+        reach.rooms + ' of ' + reach.all + ' rooms free ('
+        + Math.round(reach.rooms / reach.all * 100) + '%)');
+
   // ---- 3. A BOUGHT COPY IS NEVER THE DEMO ---------------------------------
   const flagWorks = await page.evaluate(() => {
     // demoOn() reads DEMO_OFFER, which is a const — so the purchase flag is

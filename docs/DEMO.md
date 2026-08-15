@@ -38,6 +38,20 @@ id would be a second copy of the map that somebody has to remember to update;
 `tests/demo.cjs` confirms the derivation closes exactly one door and leaves all
 22 routes inside the chapter open.
 
+**One kingdom, and no other way in.** That is a claim about the whole map, not
+about one door, so `tests/demo.cjs` walks the world the way a player does —
+from the room a new game starts in, through every route the boundary allows —
+and insists the reachable set is exactly kingdom A: **13 rooms, 30% of the
+game**. The other ways into a kingdom are checked or ruled out by construction:
+
+| Route | Why it cannot leave |
+|---|---|
+| Doors | the walk above |
+| The gate walk (W2 → A0) | not an exit, so it is read from `GATE_ROOM` and walked too |
+| Fast travel | **does not exist in this game.** A bench is a save point, not a warp |
+| Respawn | returns to the bench, which is only ever a room she reached |
+| The map screen | draws `G.save.visited` only, so it cannot show or route to a kingdom she has not entered |
+
 What the player gets before it:
 
 - waking in the cradle, and the walk to the city gates
