@@ -70,6 +70,7 @@ const SUITE = [
   ['twin',      'the swirl: four passes, a ring not a punch, and two blades afterwards'],
   ['crystal',   'the purifier: gift, tree, reach, rising finisher, launcher, the throw that returns'],
   ['sage',      'the duelist that can only be cleansed: floor, lock, purity, tame, the once-paid gift'],
+  ['memnote',   'the memory game is audible: phone-register bells, and the music steps aside'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
 ];
 

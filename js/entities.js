@@ -93,7 +93,29 @@ function moveEnt(e, dt) {
     }
   } else {
     const ty = Math.floor(e.y / TILE);
-    for (let tx = x0; tx <= x1; tx++) if (solidAt(tx, ty)) { e.y = (ty + 1) * TILE + 0.01; e.vy = 0; col.u = 1; break; }
+    let bonk = false;
+    for (let tx = x0; tx <= x1; tx++) if (solidAt(tx, ty)) { bonk = true; break; }
+    // CORNER CORRECTION (opt-in via e.ccorr — the player only). Clipping a
+    // ceiling corner by a few pixels on the way up is an aiming error smaller
+    // than a paw; the canon answer (Celeste nudges up to 4px, we allow 8) is
+    // to slide the body sideways around the corner and keep the jump's speed
+    // instead of bonking. Only a small shift qualifies, and only into space
+    // that is actually clear for the whole body — otherwise it is a real
+    // ceiling and stops her like one.
+    if (bonk && e.ccorr) {
+      const clearAt = (nx) => {
+        const a0 = Math.floor(nx / TILE), a1 = Math.floor((nx + e.w - 1) / TILE);
+        for (let tx = a0; tx <= a1; tx++) if (solidAt(tx, ty)) return false;
+        const b0 = Math.floor(e.y / TILE), b1 = Math.floor((e.y + e.h - 1) / TILE);
+        for (let ty2 = b0; ty2 <= b1; ty2++) if (solidAt(a0, ty2) || solidAt(a1, ty2)) return false;
+        return true;
+      };
+      const dxR = (Math.floor(e.x / TILE) + 1) * TILE + 0.01 - e.x;          // clear the left corner
+      const dxL = e.x + e.w - Math.floor((e.x + e.w - 1) / TILE) * TILE + 0.01; // clear the right corner
+      if (dxR > 0 && dxR <= 8 && clearAt(e.x + dxR)) { e.x += dxR; bonk = false; }
+      else if (dxL > 0 && dxL <= 8 && clearAt(e.x - dxL)) { e.x -= dxL; bonk = false; }
+    }
+    if (bonk) { e.y = (ty + 1) * TILE + 0.01; e.vy = 0; col.u = 1; }
   }
   return col;
 }
@@ -414,6 +436,11 @@ function rigIK(sx, sy, hx, hy, l1, l2, bend) {
 // the procedural rig as the fallback), pointed at her for the first time. Her
 // procedural body is not deleted: it draws until the sheet loads, and it draws
 // forever if the sheet is missing.
+// Horizontal registration nudges, as a fraction of the drawn plate width.
+// Measured from the sheet (tools note in drawRoboPlate): walk_a's head center
+// sits at cell x 102.7, walk_b's at 88.1 — aligning them to their midpoint
+// means walk_a shifts left and walk_b right by 7.3/160 of the cell each.
+const HERO_REG = { walk_a: -0.046, walk_b: 0.046 };
 const HERO_CELL = {
   idle: 0, walk_a: 1, walk_b: 2, run_a: 3, run_b: 4, rise: 5, apex: 6,
   fall: 7, land: 8, dash: 9, skid: 10, wall_cling: 11, djump_jet: 12,
@@ -530,6 +557,7 @@ class Player {
     this.vx = 0; this.vy = 0; this.face = 1; this.faceVis = 1; this.on = false;
     this.cores = 5; this.volts = 33;
     this.coyote = 0; this.jbuf = 0; this.airJumps = 0;
+    this.ccorr = true;   // moveEnt slides her around clipped ceiling corners
     this.dashT = 0; this.dashCD = 0; this.iT = 0; this.atkCD = 0;
     this.swing = null; this.healT = 0; this.castCD = 0;
     this.dead = false; this.wallSlide = 0; this.trail = [];
@@ -694,7 +722,12 @@ class Player {
       // horizontal — crisp starts and stops
       const acc = (ice ? 1000 : 3000), fric = ice ? 260 : 2900;
       if (dir !== 0 && !healing) {
-        this.vx += dir * acc * dt;
+        // TURN BOOST: reversing bites harder than accelerating. Pressing away
+        // from current speed is always a correction the player already wants
+        // finished — every feel-canon movement kit does this (not on ice:
+        // ice keeps its commitment, that is what ice IS).
+        const turn = !ice && Math.sign(this.vx) === -dir ? 1.6 : 1;
+        this.vx += dir * acc * turn * dt;
         // frozen joints: the Archivist's beams halve her top speed for a spell
         const cap = this.speed() * (this.slowT > 0 ? 0.5 : 1);
         this.vx = clamp(this.vx, -cap, cap);
@@ -1554,7 +1587,7 @@ class Player {
       // re-fired upright (the re-fire is on the firing list). A cute robot
       // hurries: same upright steps, faster, with the mechanical bounce and
       // lean drawRoboPlate adds on top.
-      const k = Math.floor(this.anim * (run ? 13 : 7)) % 2;
+      const k = Math.floor(this.anim * (run ? 10 : 7)) % 2;
       return k ? 'walk_b' : 'walk_a';
     }
     return 'idle';
@@ -1587,10 +1620,17 @@ class Player {
       && this.dashT <= 0 && this.landT <= 0 && this.skidT <= 0
       && this.hurtPoseT <= 0 && this.healT <= 0 && this.chargeT <= 0.05;
     if (moving) {
-      const step = Math.abs(Math.sin(this.anim * (run ? 13 : 7) * Math.PI / 2));
+      const step = Math.abs(Math.sin(this.anim * (run ? 10 : 7) * Math.PI / 2));
       c.rotate(run ? 0.055 : 0.022);
-      c.translate(0, -step * (run ? 2.6 : 1.4));
+      c.translate(0, -step * (run ? 1.6 : 1.2));
     }
+    // REGISTRATION: the two walk plates were fired as independent stills and
+    // their heads do not sit at the same x (measured: centers 14.6px apart in
+    // the 160px cell). Flipped raw at run cadence that is a strobing head —
+    // the owner's "head is over-mobile". These offsets pull each plate so the
+    // HEAD holds still and the legs do the moving, which is how a walk reads.
+    const reg = HERO_REG[st];
+    if (reg) c.translate(reg * dw, 0);
     c.drawImage(im, col * cw, 0, cw, ch, -dw / 2, dy, dw, dh);
     this.drawHeroEyes(c, st, dw, dh, dy);
     c.restore();

@@ -8423,6 +8423,9 @@ function mainLoop(tms) {
   // owns the decision now, and it still refuses during a transition, a boss
   // fight, and a film that is not playing cleanly.
   if (typeof preloadTick === 'function') { try { preloadTick(); } catch (e) {} }
+  // the music steps back while a trial is open: the trial's notes are the
+  // interface, and they lose to a stream at full volume (audio.js MUS_DUCK)
+  if (typeof MUS_DUCK !== 'undefined') MUS_DUCK = G.state === 'TRIAL' ? 0.3 : 1;
   draw(tms);
   drawTouchUI();
   clearP();

@@ -117,6 +117,25 @@ if (typeof addEventListener === 'function') {
   addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(musKick, 200); });
   setInterval(musKick, 2500);
 }
+// THE DUCK. While a trial is open the stream steps back to a third of its
+// volume, because the trial's notes ARE the interface — the memory game is
+// unreadable by ear with music over it. The game loop sets MUS_DUCK from
+// G.state every frame (see updateMusic's caller); this interval eases the
+// element toward target*duck from wherever the fade-in left it. It leaves a
+// stream that is fading OUT alone — that fade owns the element until it dies.
+let MUS_DUCK = 1;
+if (typeof setInterval === 'function') {
+  setInterval(() => {
+    const n = RECNODE;
+    if (!n || n.el._fading) return;
+    try {
+      const want = Math.max(0, Math.min(1, n.target * MUS_DUCK));
+      const v = n.el.volume;
+      if (Math.abs(v - want) > 0.025) n.el.volume = v + Math.sign(want - v) * 0.05;
+      else if (v !== want) n.el.volume = want;
+    } catch (e) {}
+  }, 90);
+}
 function playRecorded(key, gain) {
   stopRecorded();
   const src = MEDIA_SRC.stream && MEDIA_SRC.stream[key];
@@ -142,7 +161,7 @@ function playRecorded(key, gain) {
     const iv = setInterval(() => {
       if (RECNODE !== node) { clearInterval(iv); return; }
       v += 0.05;
-      try { el.volume = Math.max(0, Math.min(1, Math.min(target, v))); } catch (e) {}
+      try { el.volume = Math.max(0, Math.min(1, Math.min(target * MUS_DUCK, v))); } catch (e) {}
       if (v >= target) clearInterval(iv);
     }, 40);
     const pr = el.play();
@@ -934,10 +953,16 @@ function sfxChargeTick(k) {
 // hold in your head than four identical beeps, and it lets the player HEAR that
 // their reply matches. The reply is played a fifth up and softer, so the two
 // passes are obviously the same shape said by two different voices.
-const MEM_NOTES = [57, 62, 66, 69];               // A3 D4 F#4 A4 — an open chord
+//
+// The register is a PHONE decision, not a musical one: the first table sat on
+// A3-A4 (220-440 Hz) and the owner heard nothing — a phone speaker rolls off
+// hard below ~500 Hz, and the music stream was playing over the top at full
+// volume besides (see MUS_DUCK). One octave up keeps the chord shape and puts
+// every note where small speakers actually speak.
+const MEM_NOTES = [69, 74, 78, 81];               // A4 D5 F#5 A5 — an open chord
 function sfxMemNote(i, reply) {
   if (!AC || MUTED) return;
-  blip(MEM_NOTES[i % 4] + (reply ? 7 : 0), reply ? 0.2 : 0.3, reply ? 0.05 : 0.075, 0, 'bell');
+  blip(MEM_NOTES[i % 4] + (reply ? 7 : 0), reply ? 0.2 : 0.3, reply ? 0.08 : 0.115, 0, 'bell');
 }
 // wrong answer: the same note bent flat under itself
 function sfxMemWrong() {
