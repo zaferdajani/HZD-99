@@ -4678,43 +4678,74 @@ function drawCaveMouth(cx2, gy, P, k) {
   for (const ch of G.roomId) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
   const rnd2 = () => ((h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0) % 1000) / 1000;
   const MW = 92, MH = 168, N = 15;
+  // one jagged silhouette maker; every layer gets its OWN irregular edge
+  const rim = (w2, h2, baseY) => {
+    c.beginPath();
+    c.moveTo(cx2 - w2 * 1.15, baseY);
+    for (let i = 0; i <= N; i++) {
+      const a = Math.PI - (i / N) * Math.PI;
+      c.lineTo(cx2 + Math.cos(a) * w2 * (0.8 + rnd2() * 0.4),
+               baseY - Math.sin(a) * h2 * (0.72 + rnd2() * 0.34));
+    }
+    c.lineTo(cx2 + w2 * 1.15, baseY);
+    c.closePath();
+  };
   c.save();
-  // the rock shoulder around the opening — a dark irregular mound
-  c.fillStyle = 'rgba(8,10,14,0.75)';
-  c.beginPath();
-  c.moveTo(cx2 - MW - 58, gy);
-  for (let i = 0; i <= N; i++) {
-    const a = Math.PI - (i / N) * Math.PI;
-    const rr = (MW + 44) * (0.85 + rnd2() * 0.35);
-    c.lineTo(cx2 + Math.cos(a) * rr, gy - Math.sin(a) * (MH + 34) * (0.8 + rnd2() * 0.3));
+  // LAYERED, AND SOLID (owner: "add depth and layers... cave should not be
+  // translucent"). The first pass was one 0.75-alpha shape — the city read
+  // straight through the rock. Four opaque layers now, each darker and
+  // smaller than the last, which is what depth IS: shoulder, rim, throat,
+  // and the tunnel rings receding inside it.
+  // 1 — the outer shoulder: full rock mass, lit faintly from above
+  const sh = c.createLinearGradient(0, gy - MH - 80, 0, gy);
+  sh.addColorStop(0, '#1a2129'); sh.addColorStop(0.5, '#12171e'); sh.addColorStop(1, '#0b0f14');
+  c.fillStyle = sh;
+  rim(MW + 62, MH + 52, gy); c.fill();
+  // moss line riding the outer lip
+  c.strokeStyle = 'rgba(110,160,90,0.35)'; c.lineWidth = 3;
+  rim(MW + 60, MH + 50, gy); c.stroke();
+  // 2 — the mid rim: a darker collar inside the shoulder
+  const md = c.createLinearGradient(0, gy - MH - 30, 0, gy);
+  md.addColorStop(0, '#10151b'); md.addColorStop(1, '#080b0f');
+  c.fillStyle = md;
+  rim(MW + 26, MH + 14, gy); c.fill();
+  // 3 — the throat: near-black, fully opaque
+  c.fillStyle = '#030405';
+  rim(MW, MH, gy); c.fill();
+  // 4 — the tunnel recedes: ever-smaller, ever-lower arcs stepping down
+  // into the hill, each a shade off pure black so the eye reads distance
+  for (let d2 = 0; d2 < 3; d2++) {
+    c.fillStyle = ['#07090c', '#0a0d11', '#0d1116'][d2];
+    rim(MW * (0.72 - d2 * 0.17), MH * (0.74 - d2 * 0.16), gy - 2 - d2 * 5);
+    c.fill();
+    c.fillStyle = '#030405';
+    rim(MW * (0.66 - d2 * 0.17), MH * (0.66 - d2 * 0.16), gy - 2 - d2 * 5);
+    c.fill();
   }
-  c.lineTo(cx2 + MW + 58, gy);
-  c.closePath(); c.fill();
-  // the opening itself — blacker, and no two runs of its edge parallel
-  c.fillStyle = '#020304';
-  c.beginPath();
-  c.moveTo(cx2 - MW * 0.9, gy);
-  for (let i = 0; i <= N; i++) {
-    const a = Math.PI - (i / N) * Math.PI;
-    const rr = MW * (0.62 + rnd2() * 0.42);
-    c.lineTo(cx2 + Math.cos(a) * rr, gy - Math.sin(a) * MH * (0.66 + rnd2() * 0.38));
-  }
-  c.lineTo(cx2 + MW * 0.9, gy);
-  c.closePath(); c.fill();
-  // hanging teeth off the rim, drooping into the dark
-  c.fillStyle = 'rgba(10,13,18,0.9)';
+  // hanging teeth off the throat rim, drooping into the dark
+  c.fillStyle = '#0a0d12';
   for (let i = 0; i < 5; i++) {
     const tx = cx2 + (rnd2() - 0.5) * MW * 1.4, tw = 7 + rnd2() * 10, th = 14 + rnd2() * 26;
     const ty = gy - MH * (0.72 + rnd2() * 0.2);
     c.beginPath(); c.moveTo(tx - tw / 2, ty); c.quadraticCurveTo(tx + (rnd2() - 0.5) * 6, ty + th, tx + tw / 2, ty); c.closePath(); c.fill();
   }
-  // the light inside — it breathes wider as she nears, floods as she enters
+  // boulders shed at the feet of the mouth, half-buried
+  c.fillStyle = '#131920';
+  for (let i = 0; i < 4; i++) {
+    const bx = cx2 + (rnd2() - 0.5) * (MW + 90) * 2, br = 8 + rnd2() * 16;
+    c.beginPath();
+    c.moveTo(bx - br, gy);
+    c.quadraticCurveTo(bx - br * 0.5, gy - br * (0.8 + rnd2() * 0.5), bx + (rnd2() - 0.5) * 6, gy - br);
+    c.quadraticCurveTo(bx + br * 0.8, gy - br * 0.5, bx + br, gy);
+    c.closePath(); c.fill();
+  }
+  // the light inside — deep in the throat, breathing wider as she nears
   c.globalCompositeOperation = 'lighter';
-  const gl = c.createRadialGradient(cx2, gy - MH * 0.4, 4, cx2, gy - MH * 0.4, MW * (0.5 + k * 1.1));
-  gl.addColorStop(0, 'rgba(255,232,170,' + (0.12 + k * 0.55) + ')');
+  const gl = c.createRadialGradient(cx2, gy - MH * 0.32, 4, cx2, gy - MH * 0.32, MW * (0.42 + k * 1.1));
+  gl.addColorStop(0, 'rgba(255,232,170,' + (0.14 + k * 0.55) + ')');
   gl.addColorStop(1, 'rgba(255,210,120,0)');
   c.fillStyle = gl;
-  c.beginPath(); c.ellipse(cx2, gy - MH * 0.42, MW * (0.55 + k * 1.1), MH * (0.5 + k * 0.5), 0, 0, 7); c.fill();
+  c.beginPath(); c.ellipse(cx2, gy - MH * 0.34, MW * (0.45 + k * 1.1), MH * (0.4 + k * 0.5), 0, 0, 7); c.fill();
   if (k > 0.05) {
     const pool = c.createRadialGradient(cx2, gy, 4, cx2, gy, 70 + k * 100);
     pool.addColorStop(0, 'rgba(255,220,150,' + (0.2 * k) + ')');
@@ -4924,11 +4955,18 @@ function drawGateWalk() {
   // travel is a step or two — DEPTH does the work: the scale falls away
   // steadily with every step, with a slight rise into the gap.
   const x = sx0 + (tx - sx0) * e, y = sy0 + (ty - sy0) * (e * e);
-  const sc = 1 - 0.84 * e;
+  // TWO WAYS TO LEAVE THE WORLD (owner): through a GATE she recedes — the
+  // doorway has depth and she gets smaller down its length, fading only at
+  // the end. Into a CAVE she is SWALLOWED — a cave mouth has no lit hall to
+  // shrink down; she keeps her size and the darkness takes her a little
+  // more with every step.
+  const dest2 = typeof ROOMS !== 'undefined' && ROOMS[g.to];
+  const intoCave = (G.roomDef && G.roomDef.cave) || (dest2 && dest2.cave);
+  const sc = intoCave ? 1 - 0.16 * e : 1 - 0.84 * e;
   c.save();
-  // the fade is the END of the walk, not half of it: she is small and deep
-  // before the dark starts taking her
-  c.globalAlpha = 1 - clamp((k - 0.74) / 0.26, 0, 1);
+  c.globalAlpha = intoCave
+    ? 1 - clamp((k - 0.18) / 0.66, 0, 1)           // the dark takes her early and steadily
+    : 1 - clamp((k - 0.74) / 0.26, 0, 1);          // small and deep before the fade
   // HER AUTHORED BACK. Generated from her own body (see assets/source/ref/ and
   // ART_QUEUE §1) — the first time the game shows her from behind with real
   // art rather than a side view scaled down. Two stride frames swap on the
