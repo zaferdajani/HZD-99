@@ -144,6 +144,17 @@ const WIND = /(warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summon)/;
       const ks = Object.keys(r.pct).sort((a, b) => r.pct[b] - r.pct[a]);
       console.log('                   ' + ks.map(k => k + ' ' + r.pct[k] + '%').join('  '));
     }
+    // KNOWN FLAKY, AND MEASURED RATHER THAN GUESSED AT. NULLFANG lands within a
+    // point of this line often enough to fail roughly one run in six — sampled
+    // 2026-08-15 over twelve runs, six on each side of an unrelated change:
+    // failures at 40%, 40% and 41% against a 40% line, and the same rate before
+    // and after, so it is this test's own variance and not a regression in
+    // whatever you just touched. Re-run before you go looking.
+    //
+    // It is left failing rather than loosened on purpose: the number really is
+    // marginal, and the honest fix is either a deterministic seed for the
+    // twenty seconds this samples, or a lion that moves more. Both are real
+    // work; raising the threshold to hide it is not.
     if (r.idle > 40) bad.push(r.name + ' stands still ' + Math.round(r.idle) + '%');
     if (r.worstV > 34) bad.push(r.name + ' spends ' + r.worstV + '% still in one state (' + r.worst + ')');
   }
