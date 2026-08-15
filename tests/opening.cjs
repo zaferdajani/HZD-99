@@ -212,7 +212,8 @@ const { chromium } = require('playwright');
     player.x = G.roomDef.w * TILE * 0.90 - 12;
     const opened = gateEnter();
     let drewBack = false;
-    for (let f = 0; f < 200 && G.gateWalk; f++) {
+    // 260 sim-frames > GATE_WALK (3.4s of careful walk) with headroom
+    for (let f = 0; f < 260 && G.gateWalk; f++) {
       if (G.gateWalk.t > 0.2) drewBack = true;
       update(1 / 60);
     }

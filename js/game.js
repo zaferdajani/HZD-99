@@ -4204,7 +4204,12 @@ function renderTileLayer(P) {
   // and the vertical walls, which had never been touched), and lumps of the
   // rock's own texture pushed OUTWARD past the line. Runs once per room
   // render, on the cached canvas — free at frame time.
-  if (G.roomDef && G.roomDef.cave) erodeCaveEdges(tctx);
+  // ...and the pass is GLOBAL now. The owner's rule graduated from caves to
+  // the whole game — "no 90 degree elevation or walls in all game!!" — so
+  // every room's exposed tile faces get the erosion: scallops bitten into
+  // tops, undersides and verticals, texture lumps pushed past the line. The
+  // collision grid stays square; the SILHOUETTE never is.
+  if (G.roomDef) erodeCaveEdges(tctx);
   tileDirty = false;
 }
 function erodeCaveEdges(x) {
@@ -4872,7 +4877,11 @@ function drawGatePrompt() {
   }
   c.restore();
 }
-const GATE_WALK = 2.2;
+// 3.4s: a CAREFUL walk, not a dash through a doorway. The owner's direction:
+// "a careful steady walk into the unknown, getting smaller as I go deeper,
+// until fading." Steady means near-constant pace — the easing below keeps
+// the speed level instead of rushing the middle.
+const GATE_WALK = 3.4;
 function updateGateWalk(dt) {
   const g = G.gateWalk; if (!g) return;
   g.t += dt;
@@ -4902,20 +4911,24 @@ function drawGateWalk() {
   // she walks into the gap and away: position lerps toward the vanishing point
   // in SCREEN space, scale falls off, and the last third fades to black so the
   // room change lands on darkness rather than on a cut
-  const e = k * k * (3 - 2 * k);
+  // A CAREFUL, STEADY WALK INTO THE UNKNOWN (owner's direction). The first
+  // tenth eases her into the stride; after that the pace is CONSTANT — no
+  // smoothstep rush through the middle — and she simply gets smaller the
+  // deeper she goes, until the dark takes her.
+  const e = k < 0.1 ? (k * k) / 0.1 * 0.5 + k * 0.5 : k;
   const sx0 = g.x0 - camSX(), sy0 = g.y0 - camSY();
   const tg = gateTarget(g.def);
   const tx = tg.x, ty = tg.y;
   // INTO the background, not along the floor. She is already standing at the
   // door when the walk starts (the trigger requires it), so the horizontal
   // travel is a step or two — DEPTH does the work: the scale falls away
-  // faster than she moves, with a slight rise into the gap. The owner's
-  // report — "I am moving inside the floor instead of into the background" —
-  // was the old motion path crossing half the screen at floor height.
+  // steadily with every step, with a slight rise into the gap.
   const x = sx0 + (tx - sx0) * e, y = sy0 + (ty - sy0) * (e * e);
-  const sc = 1 - 0.78 * e;
+  const sc = 1 - 0.84 * e;
   c.save();
-  c.globalAlpha = 1 - clamp((k - 0.62) / 0.38, 0, 1);
+  // the fade is the END of the walk, not half of it: she is small and deep
+  // before the dark starts taking her
+  c.globalAlpha = 1 - clamp((k - 0.74) / 0.26, 0, 1);
   // HER AUTHORED BACK. Generated from her own body (see assets/source/ref/ and
   // ART_QUEUE §1) — the first time the game shows her from behind with real
   // art rather than a side view scaled down. Two stride frames swap on the
@@ -4955,8 +4968,9 @@ function drawGateWalk() {
   gg.addColorStop(0, 'rgba(255,214,138,0.9)'); gg.addColorStop(1, 'rgba(255,190,90,0)');
   c.fillStyle = gg; c.beginPath(); c.arc(tx, ty - 60, 260, 0, 7); c.fill();
   c.restore();
-  // ...and the world dims behind her as she leaves it
-  c.fillStyle = 'rgba(0,0,0,' + (clamp((k - 0.55) / 0.45, 0, 1) * 0.96).toFixed(3) + ')';
+  // ...and the world dims behind her as she leaves it — late and slow, so
+  // the small figure walking away is the shot, not the blackout
+  c.fillStyle = 'rgba(0,0,0,' + (clamp((k - 0.68) / 0.32, 0, 1) * 0.96).toFixed(3) + ')';
   c.fillRect(0, 0, 960, 540);
 }
 // ---------------------------------------------------------------------------
