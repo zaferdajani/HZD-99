@@ -538,6 +538,12 @@ function respawn() {
   player = new Player(G.save.bench.x, G.save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
   updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
+  // SHE COMES BACK SAD, and only if she actually lost something. Waking at the
+  // bench with your scrap lying somewhere else in the world is the one moment
+  // the game is unkind to her, so it is the one moment her eyes are — for two
+  // seconds, then she is herself again. Without the pouch test she would mope
+  // after a death that cost her nothing, which is sulking, not grief.
+  if (G.save.pouch && player.moodSet) player.moodSet('sad', 2.0);
   if (G.save.pouch) G.toast(t('pouch') + '  (' + t('z_' + ROOMS[G.save.pouch.room].zone) + ')');
   G.state = 'PLAY';
 }
@@ -6438,6 +6444,13 @@ function draw(tms) {
       else if (G.boss && !G.boss.dead) expr = 'determined';
       else if (d.rs || d.name === '…') expr = 'curious';
       drawPortrait(c, px, by + 14, expr);
+      // ...AND HER BODY WEARS THE SAME FACE. The bust and the sprite are the
+      // same character and used to disagree: the portrait could be listening
+      // curiously while the cat on the floor behind it stared blankly ahead.
+      // 'neutral' maps to her resting cute face rather than to nothing, so a
+      // plain conversation still leaves her looking like herself.
+      if (player && player.moodSet)
+        player.moodSet(expr === 'neutral' ? 'calm' : expr, 0.4);
     }
     ftxt(d.name || '', rtl ? tx0 + tw : tx0, by + 24, 16, '#37ffd0', rtl ? 'right' : 'left');
     let ty = by + 46;
