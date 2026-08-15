@@ -151,7 +151,12 @@ function playRecorded(key, gain) {
   } catch (e) { return false; }
 }
 function playBuf(key, vol, rate) {
-  if (!AC || MUTED || !MBUF[key]) return false;
+  if (!AC || MUTED) return false;
+  // a sound in the second wave that is asked for early jumps the queue. This
+  // call misses once — sfx() falls through to the synthesised version, which is
+  // what it does for a sound that has not arrived for any other reason — and
+  // every call after it is the real take.
+  if (!MBUF[key]) { if (typeof mediaAudio === 'function') mediaAudio(key); return false; }
   const s = AC.createBufferSource(), g = AC.createGain();
   s.buffer = MBUF[key];
   if (rate) s.playbackRate.value = rate;
@@ -313,6 +318,43 @@ function crystalJoin() {
   tone(988, 0.9, 'sine', 0.034, 988, 0.36);
   tone(1480, 0.8, 'sine', 0.026, 1480, 0.40);
   tone(110, 0.30, 'triangle', 0.07, 74, 0.34);
+}
+// THE SWIRL — the two-hand dance. This deliberately does NOT reuse 'chargedHit',
+// which is a shove: a low sawtooth thud under a hiss, all of it over in an
+// instant. The swirl is 640 ms the player is meant to WATCH, and a move that
+// looks like a dance and sounds like a punch reads as a reskin.
+//
+// So the cue is built on the move's own clock: four whooshes and four rising
+// notes at SWIRL_STEP (160 ms), which is the same spacing as the damage passes.
+// The ear therefore COUNTS the passes — you can hear that the fourth is still
+// coming, which is exactly the information the greedy trade needs (stay for it,
+// or leave). The figure is a rising pentatonic run, light and glassy rather than
+// heavy, and it settles on the same 988/1480 pair the JOIN ends on, so the two
+// halves being in her paws is audibly the same instrument as the two halves
+// locking together.
+function crystalSwirl() {
+  if (!AC || MUTED) return;
+  const j = () => 0.97 + Math.random() * 0.06;
+  // the lift — she leaves the floor, and the low end goes UP with her rather
+  // than down as it would on an impact
+  tone(240, 0.45, 'triangle', 0.030, 620);
+  hiss(0.12, 0.035);
+  // four turns, four notes, on the pass clock
+  const NOTE = [784, 988, 1175, 1568];                 // G5 B5 D6 G6
+  for (let i = 0; i < 4; i++) {
+    const t = i * 0.16;
+    whoosh(0.15, 520 * j(), 2400 + i * 400, 0.055 - i * 0.004, t);
+    tone(NOTE[i] * j(), 0.20, 'sine', 0.036, NOTE[i] * j(), t);
+    // the sparkle is a FIFTH above, not an octave: 784 doubled is 1568, which is
+    // the fourth note of the run, and a harmonic sitting exactly on a later note
+    // makes the phrase unreadable — to a listener and to the harness alike
+    tone(NOTE[i] * 1.5 * j(), 0.14, 'triangle', 0.018, null, t + 0.02);
+    chink(0.016, t + 0.01);
+  }
+  // and it settles where the JOIN settles — AFTER the last pass (0.64), so the
+  // held pair reads as her landing rather than as a fifth turn
+  tone(988, 0.55, 'sine', 0.030, 988, 0.66);
+  tone(1480, 0.48, 'sine', 0.022, 1480, 0.69);
 }
 function clawSlash(beat) {
   if (!AC || MUTED) return;
@@ -775,6 +817,7 @@ function sfx(n) {
   if (n === 'heal' && hzdSay('heal', 0)) return;
   if (n === 'chargeReady' && hzdSay('evo', 400)) return;
   if (n === 'crystalJoin') { crystalJoin(); return; }
+  if (n === 'crystalSwirl') { crystalSwirl(); return; }
   // HER LITTLE MELODIES — see the alphabet above. These come before any
   // sample, because the whole point is that they are all the same instrument.
   if (CUE[n]) { CUE[n](); return; }

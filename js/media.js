@@ -108,6 +108,12 @@ const MEDIA_SRC = {
     // unarmed (the sword becomes a pickup — task #78), and the sword waiting
     // on the ground. The full 8-yaw turnarounds live in assets/characters/
     // as hzd_8yaw.png / hzd_8yaw_bare.png for the atlas conversion.
+    // HER BODY. One keyed, foot-aligned cell per state, assembled by
+    // tools/herostates.cjs; HERO_CELL in entities.js indexes it by state name.
+    // Lazy like everything else, and the procedural body draws until it lands —
+    // which is the same arrangement NOSTOS's hero already uses (drawHeroSprite
+    // first, drawHeroRig as the fallback), pointed at her for the first time.
+    heroStates: 'assets/characters/hero/states.png',
     heroBackA: 'assets/characters/hero/backwalk_a.png',
     heroBackB: 'assets/characters/hero/backwalk_b.png',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.png',
@@ -271,15 +277,65 @@ const MEDIA_OPTIONAL = new Set([
   'hum_servo', 'hum_ratchet', 'hum_mono', 'hum_sage', 'hum_patch', 'hum_lumen',
 ]);
 const MEDIA_RAW = {}, MEDIA_PEND = {}, MBUF = {};
-function mediaFetch(k) {
-  if (MEDIA_RAW[k] || MEDIA_PEND[k] || !MEDIA_SRC.images[k]) return;
+// ---------------------------------------------------------------------------
+// TWO RESOLUTIONS, AND WHICHEVER ARRIVES FIRST IS DRAWN.
+//
+// Until now a sheet that had not landed meant the PROCEDURAL fallback was
+// drawn — a different picture, not a rougher one — and the swap when the real
+// art arrived read as the room changing its mind. tools/lowres.cjs bakes a
+// quarter-scale copy of every sheet that is safe to have one, and the whole
+// game's art at that size is 0.55 MB against 24.2 MB. So a phone can hold the
+// entire world at low resolution for less than one of today's heavy rooms.
+//
+//   MEDIA_LOW[k]  0/undefined  nothing tried
+//                 1            the small copy is in flight
+//                 2            the small copy is STANDING IN for the full one
+//                 3            the full sheet is here; nothing more to do
+//
+// Everything downstream is dimension-agnostic on purpose: sheets are sliced
+// proportionally (`im.width / cols`) everywhere except the six guardian parts
+// atlases, which use absolute pixel rectangles — and those six have no small
+// copy at all. tests/lowres.cjs re-derives that exclusion from the source, so
+// a seventh atlas with a rect table cannot quietly acquire one.
+const MEDIA_LOW = {};
+// A stand-in has to be forgotten by everything that CACHED a derivative of it,
+// or the room keeps the soft version forever and the upgrade never shows.
+function mediaDirty(k) {
+  try { delete SOFT_ART[k]; } catch (e) {}
+  try { delete ATLAS_PROC[k]; } catch (e) {}
+  // the tile layer is baked once per room — a sheet that lands after that
+  // first render would never appear, so force a repaint when art arrives
+  if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {
+    try { tileDirty = true; } catch (e) {}
+  }
+}
+function mediaLow(k) {
+  const L = (typeof window !== 'undefined') && window.LOWRES;
+  if (!L || !L[k] || MEDIA_RAW[k] || MEDIA_LOW[k]) return;
+  MEDIA_LOW[k] = 1;
+  const im = new Image();
+  im.onload = () => {
+    if (MEDIA_RAW[k]) return;              // the full one won the race
+    MEDIA_RAW[k] = im; MEDIA_LOW[k] = 2;
+    mediaDirty(k);
+  };
+  im.onerror = () => { MEDIA_LOW[k] = 0; };  // no webp on this browser: no loss
+  im.src = L[k];
+}
+// `urgent` means SOMETHING IS DRAWING THIS RIGHT NOW — the lazy map's own
+// accessor sets it. Only then is the small copy worth a second request; the
+// prefetcher has time and asks for full size directly.
+function mediaFetch(k, urgent) {
+  if (urgent) mediaLow(k);
+  if (MEDIA_RAW[k] && MEDIA_LOW[k] !== 2) return;   // a stand-in still wants the real one
+  if (MEDIA_PEND[k] || !MEDIA_SRC.images[k]) return;
   MEDIA_PEND[k] = 1;
   const im = new Image();
   im.onload = () => {
-    MEDIA_RAW[k] = im;
-    // the tile layer is baked once per room — a sheet that lands after that
-    // first render would never appear, so force a repaint when art arrives
-    if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {
+    const wasLow = MEDIA_LOW[k] === 2;
+    MEDIA_RAW[k] = im; MEDIA_LOW[k] = 3;
+    if (wasLow) mediaDirty(k);
+    else if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {
       try { tileDirty = true; } catch (e) {}
     }
   };
@@ -289,7 +345,7 @@ const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
   get(t, k) {
     if (typeof k !== 'string') return t[k];
     if (t[k]) return t[k];
-    mediaFetch(k);
+    mediaFetch(k, true);
     return undefined;
   },
 }) : MEDIA_RAW;
@@ -373,15 +429,56 @@ function softArt(key) {
   SOFT_ART[key] = out;
   return out;
 }
+// ---------------------------------------------------------------------------
+// SOUND, IN TWO WAVES.
+//
+// This used to open all 36 audio requests on the same frame as the first tap —
+// 1.18 MB, and six of them guaranteed 404s (the NPC hum override slots, which
+// are empty by design). Bytes were never the problem; SIMULTANEITY was. A phone
+// on a slow link opening three dozen sockets at once finishes all of them later
+// than it would finish the six that matter, and the six that matter are the
+// only ones needed in the first minute of play.
+//
+// So: her voice and the impacts go out immediately, and the rest — the six
+// guardian roars, the ending takes, the hum override slots — drain a few at a
+// time behind them. Nothing is ever permanently absent: playBuf() pulls a
+// missing buffer forward on first use, and until it lands sfx() falls through
+// to the synthesised version of the same sound, which is the fallback the whole
+// audio engine is already built on.
+//
+// The optional slots stay in the SECOND wave on purpose. They are expected to
+// 404, and a 404 that happens forty seconds in costs nothing; six of them
+// racing the player's first hit sound cost something.
+const AUDIO_CORE = [
+  'hit1', 'hit2', 'metal', 'explosion', 'laser', 'zap',
+  'hzd_atk1', 'hzd_atk2', 'hzd_atk3', 'hzd_hurt', 'hzd_hurtbad', 'hzd_die',
+  'hzd_dash', 'hzd_djump', 'hzd_land', 'hzd_heal', 'hzd_jump', 'hzd_charge',
+  'hzd_release', 'hzd_evo',
+];
+const MBUF_PEND = {};
+function mediaAudio(k) {
+  if (MBUF[k] || MBUF_PEND[k] || !MEDIA_SRC.audio[k]) return;
+  if (typeof AC === 'undefined' || !AC) return;
+  MBUF_PEND[k] = 1;
+  fetch(MEDIA_SRC.audio[k])
+    .then(r => r.arrayBuffer())
+    .then(b => AC.decodeAudioData(b))
+    .then(buf => { MBUF[k] = buf; })
+    .catch(() => {});
+}
 let mediaAudioLoaded = false;
 function loadMedia() {
   if (mediaAudioLoaded || typeof AC === 'undefined' || !AC) return;
   mediaAudioLoaded = true;
-  for (const k in MEDIA_SRC.audio) {
-    fetch(MEDIA_SRC.audio[k])
-      .then(r => r.arrayBuffer())
-      .then(b => AC.decodeAudioData(b))
-      .then(buf => { MBUF[k] = buf; })
-      .catch(() => {});
-  }
+  for (const k of AUDIO_CORE) mediaAudio(k);
+  const rest = [];
+  for (const k in MEDIA_SRC.audio) if (!MBUF_PEND[k]) rest.push(k);
+  // four at a time, a third of a second apart: the tail is fully in memory
+  // about a second and a half later, without ever being in competition with
+  // the sounds the player can already trigger
+  const drain = () => {
+    for (let i = 0; i < 4 && rest.length; i++) mediaAudio(rest.shift());
+    if (rest.length) setTimeout(drain, 320);
+  };
+  setTimeout(drain, 320);
 }

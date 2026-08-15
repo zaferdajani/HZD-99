@@ -22,6 +22,8 @@ look at to answer "did that actually happen".
 | `glaciere/` | GLACIERE, the Frozen Purifier | 11 |
 | `mother/` | MOTHER-V, the Null Core | 16 |
 | `lairs/` | The six boss lairs, as generated | 6 |
+| `hero/` | HZD-99 herself, every plate locked to `ref/hzd99_canon.jpg` | 26 |
+| `crystal/` | The purifier crystal: the weapon, the grips, the four slash light-sheets | 15 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
 | `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line | 16 |
 | `flora/` | Alien plant life, two species per kingdom | 12 |
@@ -119,28 +121,48 @@ own `js/` file, so `furnace/wingL.jpg` is the art that occupies `DRG_P.wingL`.
 
 ---
 
-## The hero is NOT in here, and that is the honest record
+## The hero IS in here now, and there is one plate that rules the rest
 
-`assets/characters/roster_8yaw.png` contains a generated 8-yaw turnaround whose
-row 0 is declared as `nya` in `js/atlas.js`. **Nothing in the game has ever drawn
-it.** `Player.draw()` is entirely procedural — there is no `drawAtlas` call in
-it, and a search for the `nya` subject returns only the declaration.
+`hero/` holds her authored set. It replaced a green-blade set that is gone from
+this directory on purpose — see the identity rule below, which is the reason all
+of it had to be made twice.
 
-So the earlier claim that every character had been given generated 3D art was
-true for the guardians and the NPCs and **false for the player**: the art was
-generated, archived and declared, and the wiring was never done.
+**`ref/hzd99_canon.jpg` is the canon.** The owner chose it (2026-08-14) out of
+the plates then on disk, and it is the ONLY description of her that outranks
+prose. It is registered with the generator as the reference element
+`hzd99-canon` (`467c8e08-8161-483f-a4cf-439875ff04e2`), and **every plate in
+`hero/` was generated with that element embedded in its prompt.**
 
-She is instead drawn live, and was given real form shading in a later pass —
-committed light direction, core shadow, cast shadows, a recessed visor, formed
-ears (see `.claude/skills/game-character-art` and the `sheet_before` /
-`sheet_after` pair in `_sheets/`). That is a different thing from a rendered
-model, and the two should not be described as if they were the same.
+**Why the element and not a written description.** Every earlier plate was an
+independent generation anchored only by words plus a loose reference image, and
+words do not pin geometry: the committed turnaround sheets each ended up
+containing TWO different cats, because their front half and back half were
+separate generations stitched together — different ear shape, different head
+size, and a scarf that became a full-length cape across the seam. Prose could
+not stop that and did not. The element does, because the same image is injected
+into every generation.
 
-**Why she is still procedural, deliberately:** her arms are IK-solved, her scarf
-is simulated, and the double jump is a real rotation. A sprite atlas cannot do
-any of that, so swapping her to authored art would trade animation for fidelity.
-That trade may still be worth making — but it is a decision, not an oversight,
-and it should be made openly.
+Two things the canon plate does NOT govern, and both are deliberate:
+
+- **The weapon.** The canon plate carries the old green blade. Green was retired
+  on 2026-08-14; the weapon is the white purifier crystal (`crystal/`), which
+  has its own two elements — `purifier-crystal` and `purifier-double` — for the
+  same reason she does. The canon governs body, face, materials and proportions
+  only.
+- **Nothing else.** It is an airborne pose. It is an identity anchor, not a
+  posing reference; `hero/canon_front.jpg` is the neutral standing plate
+  generated from it, kept for eyeballing the lock.
+
+**Still procedural, and still deliberately so:** the scarf spring-chain, the
+blade glow, the jets, the charge aura and the claw arcs stay simulated and are
+drawn OVER these plates. What ends is the procedural BODY.
+
+**What is on screen, and what is not.** The art the game actually draws today —
+both 8-yaw turnaround sheets, the two back-walk pairs and the grounded sword —
+IS locked to the canon and has been replaced. The action plates in `hero/` are
+archived and reviewed but NOT yet wired: `media.js` fetches only the back-walk
+plates and the sword, and `Player.draw()` is still procedural. Wiring the action
+set is tasks #79/#80/#81. Until then the procedural body remains what ships.
 
 ---
 

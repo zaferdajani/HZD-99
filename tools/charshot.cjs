@@ -43,7 +43,9 @@ const POSES = ['idle', 'run', 'air'];
     const pose = (n) => {
       keys.ArrowRight = 0; player.onGround = true;
       if (n === 'run') { keys.ArrowRight = 1; player.vx = 260; player.anim += 0.3; }
-      if (n === 'air') { player.onGround = false; player.vy = -120; }
+      // the field is `on`, not `onGround` — this said onGround for a long time,
+      // which meant the AIR panel was quietly photographing a grounded pose
+      if (n === 'air') { player.on = false; player.vy = -120; }
     };
     const CW = 200, CH = 210;                      // one cell, in design units
     const sheet = document.createElement('canvas');

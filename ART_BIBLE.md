@@ -170,12 +170,54 @@ needed angles" is the ruling, and it is the right one.
 
 **So she is authored now, like everything else, on these terms:**
 
-- **Generated FROM her, never from a description of her.**
-  `assets/source/ref/hzd99_body.png` (three facings of the live body, rendered
-  from the game) is the mandatory reference on every plate. This is the guard
-  against the stranger-cat incident: `roster_8yaw.png` row 0 already IS a
-  generated turnaround of a *different* robot cat, it went on screen once, and
-  it must never be mistaken for her again.
+- **Generated FROM one locked plate, never from a description of her.**
+  ✅ **The canon is `assets/source/ref/hzd99_canon.jpg`**, chosen by the owner on
+  2026-08-14, and it is bound to the generator as the reference element
+  `hzd99-canon` = `467c8e08-8161-483f-a4cf-439875ff04e2`. **Every plate, every
+  sheet and every VIDEO of her embeds `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`
+  in its prompt.** Not "attaches a reference" — embeds the element.
+
+  This replaced attaching `hzd99_body.png` and describing her in words, and the
+  reason is measured rather than argued: with prose plus a loose reference, the
+  front half and back half of the SAME turnaround sheet came back as two
+  different cats — different ears, different head size, the scarf grown into a
+  cape. Both shipped sheets have it. A description cannot pin geometry; the same
+  image injected into every generation can.
+
+  This is also the standing guard against the stranger-cat incident:
+  `roster_8yaw.png` row 0 IS a generated turnaround of a *different* robot cat,
+  it went on screen once, and a stale element named `NYA-9` describing yet
+  another cat still sits in the generator workspace. Neither is her.
+
+- **HER EYES ARE THE ONLY PART OF HER THAT ACTS, AND THEY ARE NEVER BAKED.**
+  She has no mouth and no brows: two lights carry every feeling she has. So the
+  eye-lights on every plate are COVERED at runtime and repainted live
+  (`drawRoboPlate` → `drawHeroEyes`), because art with an expression baked into
+  it gives her one face per pose forever — the same face landing a jump as
+  taking a hit.
+
+  **Her resting face is CUTE, and that is a rule and not a default.** `calm` is
+  two big soft rounded lights with a slow blink; every other mood is a departure
+  that decays back to it. A protagonist whose neutral face is neutral reads as
+  an appliance. Hers reads as a kid, and the game is what hardens it.
+
+  **Shape carries the emotion, never hue.** Red is the virus and amber is the
+  reserved telegraph (§3.5), so her feelings may not reach for either — an angry
+  cat with red eyes reads as infected. Her range is her own cyan-to-mint, and
+  what changes is the shape: narrowed to slits, inner corners down for anger,
+  outer corners down for sadness, shut upward for a smile, one eye small for a
+  question. The mood names match `drawPortrait`'s expressions on purpose, so the
+  bust in the dialogue box and the body on the floor never wear different faces.
+
+  ✅ **Enforced** by `tests/hero.cjs`: every mood must differ from `calm` across
+  a real fraction of her lit pixels, measured on cyan only. Nine moods that
+  render as three faces is the failure it exists to catch.
+
+- **The canon plate governs body, face, materials and proportions ONLY.** It
+  carries the retired green blade, and that licenses nothing: the weapon is the
+  white purifier crystal (elements `purifier-crystal` /`purifier-double`) or she
+  is unarmed. Her chest is the canon plate's WHITE/IVORY belly with the dark
+  vent grille — this reversed an earlier "brushed steel is canonical" ruling.
 - **The arm rule survives the conversion.** One-piece limbs, two of them, no
   joint hardware — stated in every brief's negatives. A generator loves to add
   greebles at the elbow; the brief forbids them by name.

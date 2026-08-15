@@ -311,6 +311,12 @@ function tapMenu(x, y) {
       if (i !== G.pauseIdx) G.pauseConfirm = null;
       G.pauseIdx = i; tPress('VOK');
     }
+  } else if (st === 'MORE') {
+    // the same geometry the screen is drawn with — see moreLayout()
+    const L = moreLayout();
+    const i = Math.round((y - L.y0) / L.step);
+    if (i >= 0 && i < L.rows.length && Math.abs(y - (L.y0 + i * L.step)) <= L.h / 2
+        && Math.abs(x - 480) <= L.w / 2) { G.moreIdx = i; tPress('VOK'); }
   } else if (st === 'CREST') {
     const i = Math.round((y - 170) / 40);
     if (G.save.crests.length && i >= 0 && i < G.save.crests.length && Math.abs(y - (170 + i * 40)) <= 20) { G.crestIdx = i; tPress('VOK'); }

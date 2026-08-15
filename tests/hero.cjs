@@ -179,6 +179,107 @@ const { chromium } = require('playwright');
   check('...and she is drawn at all in every state',
     !empty.length, empty.map(s => s.pose).join(', '));
 
+  // ---- 5. HER AUTHORED BODY: EVERY NAMED CELL EXISTS ----------------------
+  // She is drawn from assets/characters/hero/states.png now, and the failure
+  // this stops is the one that has already happened twice in this repo from the
+  // other direction: art DECLARED and never drawn. This is its mirror — a state
+  // NAMED in HERO_CELL that runs off the end of the sheet. It does not throw;
+  // drawImage on a source rect past the right edge just draws nothing, so she
+  // would silently vanish in exactly one state and only in the build where that
+  // state is reachable. Cheap arithmetic, permanent tripwire.
+  const cells = await page.evaluate(() => {
+    if (typeof HERO_CELL === 'undefined') return { skip: true };
+    const im = (typeof MEDIA_IMG !== 'undefined') && MEDIA_IMG.heroStates;
+    if (!im) return { skip: true };
+    const names = Object.keys(HERO_CELL);
+    const max = Math.max(...names.map(n => HERO_CELL[n]));
+    return {
+      skip: false, names: names.length, max, declared: HERO_CELLS,
+      cols: im.width / (im.width / HERO_CELLS),      // sanity: the sheet divides
+      w: im.width, h: im.height,
+      // every index must be inside the sheet, and distinct
+      over: names.filter(n => HERO_CELL[n] >= HERO_CELLS),
+      dupe: names.length !== new Set(names.map(n => HERO_CELL[n])).size,
+    };
+  });
+  if (cells.skip) {
+    console.log('  ·  her state sheet is not loaded — procedural body in use, cells not checked');
+  } else {
+    console.log('    state sheet ' + cells.w + 'x' + cells.h + ', ' + cells.declared +
+                ' cells, ' + cells.names + ' names, highest index ' + cells.max);
+    check('every state she can be in has a cell on the sheet',
+      !cells.over.length, cells.over.join(', '));
+    check('...and no two states share one cell', !cells.dupe);
+    check('...and the sheet divides evenly into its cells',
+      cells.w % cells.declared === 0,
+      cells.w + ' / ' + cells.declared + ' = ' + (cells.w / cells.declared) + ' px per cell');
+  }
+
+  // ---- 6. HER EYES ARE THE ONLY PART OF HER THAT ACTS ---------------------
+  // She has no mouth and no brows, so every feeling she has is two lights. The
+  // failure this stops is the one that makes an emotion system pointless: moods
+  // that are DECLARED but look the same. A table of nine numbers that render as
+  // three faces is worse than three moods honestly named.
+  //
+  // So each mood is rendered on the real body and compared to `calm` as pixels.
+  // Nothing here judges whether angry looks angry — that is what
+  // tools/moodshot.cjs is for — only that it looks DIFFERENT, which is the part
+  // arithmetic can hold.
+  const moods = await page.evaluate(() => {
+    if (typeof HERO_MOOD === 'undefined') return { skip: true };
+    if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG.heroStates) return { skip: true };
+    const names = Object.keys(HERO_MOOD);
+    const S = 6, W = 46 * S, H = 46 * S;
+    const shot = (m) => {
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const x = cv.getContext('2d');
+      x.setTransform(S, 0, 0, S, 0, 0); x.translate(23, 58);
+      player.mood = m; player.moodT = 99; player.anim = 1.0;
+      const sx = player.x, sy = player.y;
+      player.x = 0; player.y = 0; player.on = true; player.vx = 0;
+      x.save(); x.translate(-player.w / 2, -player.h); player.draw(x); x.restore();
+      player.x = sx; player.y = sy;
+      return x.getImageData(0, 0, W, H).data;
+    };
+    const base = shot('calm');
+    const out = {};
+    for (const m of names) {
+      if (m === 'calm') continue;
+      const d = shot(m);
+      let diff = 0, lit = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        // ONLY THE CYAN. The first version of this counted every bright pixel
+        // as "lit", which meant her entire ivory body — identical in every mood
+        // — was in the denominator, and a total change of expression scored 5%.
+        // Her eye-lights are the only strongly cyan thing on her, so the test
+        // is: was this pixel cyan in either shot, and did it change.
+        const ac = (base[i + 1] + base[i + 2]) / 2 - base[i];
+        const bc = (d[i + 1] + d[i + 2]) / 2 - d[i];
+        if (ac > 40 || bc > 40) {
+          lit++;
+          if (Math.abs(ac - bc) > 40 ||
+              Math.abs(base[i + 1] - d[i + 1]) > 60) diff++;
+        }
+      }
+      out[m] = lit ? diff / lit : 0;
+    }
+    player.mood = null; player.moodT = 0;
+    return { skip: false, out };
+  });
+  if (moods.skip) {
+    console.log('  ·  moods not checked — state sheet not loaded');
+  } else {
+    const MOOD_MIN = 0.12;
+    const dull = [];
+    console.log('    mood vs calm (must differ over ' + MOOD_MIN + ' of lit pixels):');
+    for (const m of Object.keys(moods.out)) {
+      const v = moods.out[m];
+      console.log('      ' + m.padEnd(11) + v.toFixed(3) + (v < MOOD_MIN ? '   <-- SAME AS CALM' : ''));
+      if (v < MOOD_MIN) dull.push(m + ' ' + v.toFixed(3));
+    }
+    check('every mood puts a different face on her', !dull.length, dull.join(', '));
+  }
+
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }

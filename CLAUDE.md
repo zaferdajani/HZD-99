@@ -1,5 +1,41 @@
 # CLAWBYTE / NOSTOS — working notes
 
+## RULE ZERO: author at full quality, DERIVE everything cheaper
+
+**Never author down. Make the good version once, and let a tool in `tools/`
+produce the small one — automatically, reproducibly, from the master.**
+
+The owner's standing instruction, and it is the cheapest way to work as well as
+the best-looking: taste and effort go in once, and every platform after that is
+a script. The alternative — deciding at authoring time that a phone will not
+need the detail — is a decision that cannot be undone and has to be re-made
+every time a new platform appears.
+
+The masters are the archive; the shipped tiers are generated:
+
+| what | master | derived tier | tool |
+|---|---|---|---|
+| art sheets | `assets/characters`, `assets/backgrounds`, … | `assets/lowres/` — 0.55 MB for 24.2 MB | `tools/lowres.cjs` |
+| films | `assets/video/*.mp4` | `assets/video/light/` — about half | `tools/lightvid.cjs` |
+| rendering | the full effect stack | the quality dial: resolution, ceilings, weather, glow, bloom | `js/perf.js` |
+| generation plates | `assets/source/` — 11 MB, never shipped | the composited sheets | `tools/*.cjs` |
+
+Consequences that bind every change:
+
+- A new heavy asset is not finished until its cheaper tier exists. Regenerate
+  with `node tools/lowres.cjs && node build.cjs` after any art change.
+- The engine never assumes it has the good version. Every renderer already
+  guards on "the sheet is not here yet"; a derived tier is the same situation.
+- **The one exception is measured, not assumed**: six guardian parts atlases are
+  addressed by absolute pixel rect and must have no small copy.
+  `tests/lowres.cjs` re-derives that from the source rather than trusting a list.
+- The delivery path this feeds is `docs/DELIVERY.md`. Read it before changing
+  how anything reaches a device.
+
+**Multi-platform is the target, not an afterthought**: browser and phone first,
+desktop (Steam) next, console possible later. Every tier above exists so that
+adding a platform is a configuration decision rather than an art project.
+
 ## RULE ONE: every platform gets the same game
 
 **Web page, mobile web, the Capacitor app, the desktop shell — one build, one
@@ -75,6 +111,34 @@ Assets are **not** inlined. `build.cjs` scans `assets/music`, `assets/video`
 and `assets/vox` and hands the page a manifest, so adding a track is: drop the
 file in, rebuild. Nothing in code may name a file that is not on disk.
 
+It also compiles in **`assets/roomassets.json`** — which art each room needs,
+measured by `tools/roomassets.cjs` actually playing every room, because that
+cannot be read off the source (it depends on zone, enemy list, boss, NPCs and
+ceiling tier). `js/preload.js` uses it to fetch ahead over the room graph.
+**Regenerate it whenever rooms or art change** — serve the repo, then
+`node tools/roomassets.cjs && node build.cjs`. It is not fatal if it is stale or
+missing: prefetch simply does less, and the lazy map behaves as it always did.
+
+**The package is two different problems and the numbers decide everything**
+(measured 2026-08-15): 132 MB total, of which **100 MB is music and video that
+is STREAMED and must never be preloaded**, and 32 MB is art — 11.6 MB of shared
+boot set plus 18.9 MB spread over 43 rooms, 24 of which add nothing at all. So
+the whole prefetch problem is 32 MB, small enough that on a good connection the
+right end state is "all of it". `sw.js` counts art and streams in separate
+buckets for the same reason: one ceiling let a handful of 4 MB tracks evict the
+entire art set, and the next open bought the same bytes twice.
+
+And there is a **quarter-scale copy of nearly all of that art** —
+`tools/lowres.cjs`, 68 webp files, **0.55 MB for 24.2 MB of sheets**. It is
+front-loaded ahead of everything, so within a second or two every room in the
+game can be drawn correctly rather than falling back to the procedural
+renderer, and the full sheets sharpen it from behind. Six sheets are excluded
+and must stay excluded: the guardian parts atlases are addressed by **absolute
+pixel rect**, so a smaller copy assembles the boss out of the wrong quarter of
+itself. `tests/lowres.cjs` re-derives that rule from the source rather than
+trusting the list. **The whole delivery path is `docs/DELIVERY.md`; regenerate
+the tier with `node tools/lowres.cjs && node build.cjs` whenever art changes.**
+
 ## Architecture
 
 | file | what lives there |
@@ -85,6 +149,7 @@ file in, rebuild. Nothing in code may name a file that is not on disk.
 | `beast/eagle/glaciere/furnace/prism/mother.js` | one guardian's art and moves each |
 | `world.js` | every room: tile grid, entity list, exits |
 | `touch.js` | the on-screen controller, the power wheel, layout editor |
+| `preload.js` | room-graph prefetch and the low tier: see `docs/DELIVERY.md` |
 | `i18n.js` | all six languages. Never hard-code display text |
 | `trials.js` | the puzzle games (memory / cubes / balances) and Mind Nodes |
 | `braid.js` | THE BRAID — the run's ledger and what it changes |

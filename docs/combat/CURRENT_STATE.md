@@ -69,6 +69,10 @@ Source: `js/entities.js` class `Player` unless noted.
 | Hitstop, normal hit | **50 ms** | 1.5 | 763 | |
 | Hitstop, finisher | **85 ms** | 2.6 | 763 | |
 | Hitstop, boss hit | **60 ms** | 1.8 | 763 | |
+| Charged burst | **600 ms hold, 25 volts, ×2.6, R 128, no recovery** | 18 | `releaseCharged` | One instant, everything in the circle thrown outward. |
+| **The swirl** (both crystal halves) | **640 ms active, 4 passes @ 160 ms, ×0.95 each, R 62** | 19.2 / 4.8 | `swirl` / `swirlPass` | Replaces the burst when `crystal2` is held. Lifts instead of throwing, so the ring stays populated. `docs/combat/HERO_SWIRL.md` |
+| Swirl recovery | **300 ms** | 9.0 | `swirlT ≤ 0` | The only charged move that pays recovery. `opening_ms = 267` **against her**. |
+| Twin window after the swirl | **6 s** | — | `SWIRL_TWIN` | Her combo swings both halves; closes with `sfx('crystalJoin')`. |
 
 ### Hitbox rects (sprite space, relative to her centre)
 
@@ -80,6 +84,11 @@ Source: `js/entities.js` class `Player` unless noted.
 | Finisher (combo 2) | 50 | 35 | |
 | Finisher with `reach` skill | 68 | 46 | the long rake |
 | Down-attack | 46 | 32 | straight down; diagonal aim is suppressed |
+
+Multipliers on top of the rect: `wield` (crystal ×1.2, joined ×1.35) scales
+**both** `R` and the half-extent; `twin` (×1.45, during the six-second window
+after a swirl) scales the **half-extent only** — the second blade buys coverage,
+not reach. Measured 81 → 117 px wide, centre unchanged (`tests/twin.cjs`).
 
 ---
 

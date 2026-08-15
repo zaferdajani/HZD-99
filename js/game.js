@@ -334,6 +334,8 @@ function loadRoom(id) {
   }
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
+  // re-aim the prefetcher: the art for the rooms she can now REACH
+  if (typeof preloadRoom === 'function') { try { preloadRoom(id); } catch (e) {} }
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
   G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
   G.wrecks = []; G.recharge = null; G.plats = []; G.saws = []; G.pools = []; G.x1Bridge = false; G.x1T = 0;
@@ -561,10 +563,87 @@ function respawn() {
   player = new Player(G.save.bench.x, G.save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
   updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
+  // SHE COMES BACK SAD, and only if she actually lost something. Waking at the
+  // bench with your scrap lying somewhere else in the world is the one moment
+  // the game is unkind to her, so it is the one moment her eyes are — for two
+  // seconds, then she is herself again. Without the pouch test she would mope
+  // after a death that cost her nothing, which is sulking, not grief.
+  if (G.save.pouch && player.moodSet) player.moodSet('sad', 2.0);
   if (G.save.pouch) G.toast(t('pouch') + '  (' + t('z_' + ROOMS[G.save.pouch.room].zone) + ')');
   G.state = 'PLAY';
 }
 function bossActive() { return G.boss && !G.boss.dead && G.boss.st !== 'dorm'; }
+
+// ===========================================================================
+// THE DEMO BOUNDARY — where the free version stops, and says so properly.
+//
+// THE SHAPE OF THE DECISION. The free web build is the shop window: it opens
+// on any phone from any maker with no download and no account, which is the one
+// distribution advantage this game has and the app stores cannot match. What it
+// is NOT is the place anyone can be charged. So the free version ends, and the
+// end has to feel like a chapter closing rather than the game breaking.
+//
+// WHERE IT ENDS is derived, never listed. Any exit that leaves DEMO_ZONE is the
+// boundary — which today is exactly one door, A3 going up into B1, and which
+// stays correct if the world is ever re-plumbed. A hard-coded room id would be
+// a second copy of the map that somebody has to remember to update.
+//
+// The player gets the whole first kingdom to that point: waking in the cradle,
+// the walk to the gates, the first machine folk, the purifier, the Alpha and
+// its pack, and NULLFANG. Two boss fights and an ending, which is what makes
+// this a chapter and not a wall. Stopping mid-corridor would read as a fault.
+//
+// ONE BUILD STILL, and that is deliberate (RULE ONE). This is not a demo BUILD;
+// it is the same file everywhere, deciding at run time. A packaged app — the
+// Steam shell, the phone app — is by definition the bought copy and is never
+// the demo. The web page is, until a save says otherwise.
+//
+// `G.save.full` is the hook the Steam link will hang off later: whatever proves
+// a purchase eventually sets that flag and the same page becomes the whole
+// game. Nothing here needs to change when it does.
+//
+// AND IT IS OFF UNTIL THE OWNER SWITCHES IT ON. Flipping DEMO_OFFER to true is
+// a product decision with a store page behind it, not a code change, so the
+// default cannot be the one that quietly truncates a game that is already live.
+const DEMO_ZONE = 'A';
+const DEMO_OFFER = false;
+// Where the full game is sold. Empty until there is a page to point at — the
+// screen then says the game continues without offering a link that 404s.
+const DEMO_URL = '';
+function demoOn() {
+  if (!DEMO_OFFER) return false;
+  const packaged = (typeof window !== 'undefined') &&
+    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:');
+  if (packaged) return false;
+  if (G.save && G.save.full) return false;
+  return true;
+}
+// Does stepping through this door leave the free chapter?
+function demoWall(destId) {
+  if (!demoOn()) return false;
+  const a = ROOMS[G.roomId], b = ROOMS[destId];
+  return !!(a && b && a.zone === DEMO_ZONE && b.zone !== DEMO_ZONE);
+}
+// She is standing in the doorway when this fires, which means she is OUTSIDE
+// the room bounds — put her back inside first or the moment the screen closes
+// the same door fires again and she is stuck in a loop of her own ending.
+function demoStop(side) {
+  const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
+  if (side === 'T') { player.y = 6; player.vy = 90; }
+  else if (side === 'B') { player.y = H - player.h - 8; player.vy = 0; }
+  else if (side === 'L') { player.x = 8; player.vx = 40; }
+  else { player.x = W - player.w - 8; player.vx = -40; }
+  player.lastSafe = { x: player.x, y: player.y };
+  G.state = 'MORE'; G.moreIdx = 0;
+  sfx('ui');
+}
+// ONE GEOMETRY, used by the drawing AND by touch. Written out separately they
+// drift, and a screen whose buttons are somewhere other than where they are
+// painted is the exact failure tests/tap.cjs exists for.
+function moreLayout() {
+  const rows = [DEMO_URL ? 'demo_get' : 'demo_soon', 'demo_stay'];
+  return { rows, y0: 372, step: 54, w: 420, h: 44 };
+}
 
 // ---------- transitions ----------
 function checkTransitions() {
@@ -604,6 +683,7 @@ function checkTransitions() {
     if (!G.save.flags[dest.flag]) return;
     dest = dest.to;
   }
+  if (demoWall(dest)) { demoStop(side); return; }
   G.trans = { t: 0.28, to: dest, side, half: false };
 }
 function applyTransition() {
@@ -700,6 +780,13 @@ function forgeCrystal() {
   if (player) {
     burst(player.x + player.w / 2, player.y + player.h / 2, 30, '#ffffff', 320, 0.9, 60, 3, true);
     burst(player.x + player.w / 2, player.y + player.h / 2, 16, '#bfe9ff', 240, 1.1, 20, 2.6, true);
+  }
+  // THE FORGING CINEMATIC — §1d, fired by the sister session against the
+  // canon element. It plays through the purify-cut player; the card is the
+  // fallback when the clip cannot run, so the grant never waits on a codec.
+  if (PURIFY_VID.gift) {
+    purifyPreload('gift');
+    if (startPurifyCut('gift')) return;
   }
   showItem(t('i_crystal'), t('i_crystald'));
 }
@@ -1079,9 +1166,25 @@ function update(dt) {
     G.introT += dt;
     if (inP('OK') || inP('ATK') || inP('BACK') || G.introT > 12.4) { G.state = 'PLAY'; sfx('ok'); }
   }
+  else if (G.state === 'MORE') updateMore();
   else if (G.state === 'WIN') { if (inP('OK')) { G.state = 'MENU'; G.menuIdx = 0; setMusic('title'); } }
   else if (G.state === 'GAMEOVER') {
     if (inP('OK')) { wipeSave(G.save && G.save.theme); G.save = null; G.state = 'MENU'; G.menuIdx = 0; setMusic('title'); }
+  }
+}
+function updateMore() {
+  const L = moreLayout();
+  if (inP('UP')) { G.moreIdx = (G.moreIdx + L.rows.length - 1) % L.rows.length; sfx('ui'); }
+  if (inP('DOWN')) { G.moreIdx = (G.moreIdx + 1) % L.rows.length; sfx('ui'); }
+  // BACK always just returns her to the room. A player who wants to keep
+  // playing the part they have must never have to go through the sales pitch
+  // to get there, and the pad's cancel button is where they will look first.
+  if (inP('BACK') || inP('PAUSE')) { G.state = 'PLAY'; sfx('ui'); return; }
+  if (inP('OK') || inP('ATK') || inP('JUMP')) {
+    if (L.rows[G.moreIdx] === 'demo_get' && DEMO_URL) {
+      try { window.open(DEMO_URL, '_blank', 'noopener'); } catch (e) {}
+    }
+    G.state = 'PLAY'; sfx('ok');
   }
 }
 function menuOptions() {
@@ -2486,6 +2589,7 @@ function strataTex(zone) {
 // A hard timeout and an error path guarantee this can never trap the player.
 // ===========================================================================
 const PURIFY_VID = {
+  gift: 'assets/video/sword_gift.mp4',      // THE FORGING   - task #79's film
   glitch: 'assets/video/purify_glitch.mp4', // NULLFANG      - the lion
   brood: 'assets/video/purify_brood.mp4',   // TALONHOST     - the eagle
   zero: 'assets/video/purify_zero.mp4',     // GLACIERE      - the unicorn
@@ -2555,6 +2659,25 @@ const purifyPre = {};
 // both is the difference between a film that plays everywhere and a film that
 // plays on the machine it was tested on.
 const PURIFY_ALT = (typeof window !== 'undefined' && window.VID_ALT) || {};
+const PURIFY_LIGHT = (typeof window !== 'undefined' && window.VID_LIGHT) || {};
+// WHO GETS THE LIGHT FILMS. The same shape of decision preloadPolicy() makes
+// about art, and for the same reason: a data plan is somebody's money.
+//
+// A packaged app never takes it — the files are already on the device, so a
+// smaller copy buys nothing and costs picture. Everywhere else it is the
+// connection that decides, and Save-Data is an explicit yes.
+function videoLight() {
+  if (!PURIFY_LIGHT || !Object.keys(PURIFY_LIGHT).length) return false;
+  const packaged = (typeof window !== 'undefined') &&
+    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:');
+  if (packaged) return false;
+  const c = (typeof navigator !== 'undefined') &&
+    (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
+  if (!c) return false;                       // unknown: assume a desk, give it the master
+  if (c.saveData) return true;
+  const t = c.effectiveType || '4g';
+  return t === 'slow-2g' || t === '2g' || t === '3g';
+}
 function purifyPreload(kind) {
   const s = PURIFY_VID[kind];
   if (!s || purifyPre[kind]) return;
@@ -2571,11 +2694,40 @@ function purifyPreload(kind) {
     so.src = url; so.type = type;
     v.appendChild(so);
   };
+  // THE LIGHT TIER FIRST, WHERE IT IS WORTH IT. Browsers that take webm already
+  // have a cheap option — the webm set is 13.4 MB against the mp4 set's 33 —
+  // so it is iOS Safari, which takes mp4 and nothing else, that pays full price
+  // for every film. On a metered or slow connection it gets the light mp4
+  // instead: the same 960x540 picture, encoded at about half the bytes, which
+  // frame-for-frame comparison could not tell from the master.
+  //
+  // Ordered rather than switched: the browser walks the <source> list and takes
+  // the FIRST one it can decode, so putting the light copy in front costs a
+  // device that cannot play it nothing at all.
+  if (videoLight()) add(PURIFY_LIGHT[kind], 'video/mp4');
   add(s, /\.webm$/i.test(s) ? 'video/webm' : 'video/mp4');
   add(PURIFY_ALT[kind], 'video/webm');
   try { v.load(); } catch (e) {}
   purifyPre[kind] = v;
   if (VID_GESTURE) purifyPrime(v);
+}
+// THE ROLLING WINDOW, and why a reel must not be fetched as a reel.
+//
+// The opening is eight shots. Preloading all eight put 4.4 MB of webm — or
+// 13.1 MB of mp4, which is what iOS Safari takes — on the wire 900 ms after the
+// page loaded, every session, INCLUDING the sessions where the player presses
+// Continue and never sees a frame of it. On mobile data that was the single
+// most expensive thing the boot did, and it was competing with the room art the
+// player was actually about to need.
+//
+// A reel is a QUEUE. Each shot runs about fifteen seconds, so shot n+1 has a
+// quarter of a minute to arrive while shot n is on screen — an eternity on any
+// connection that can play video at all. Two ahead is the whole cushion needed,
+// and it makes the boot cost one clip (0.93 MB) instead of eight.
+const FILM_AHEAD = 2;
+function filmAhead(list, n) {
+  if (!list) return;
+  for (let i = 0; i < Math.min(n == null ? FILM_AHEAD : n, list.length); i++) purifyPreload(list[i]);
 }
 function purifyPrime(v) {
   if (!v || v._primed) return;
@@ -2675,6 +2827,9 @@ function endPurifyCut() {
       const cap = G.reelCap ? G.reelCap.shift() : null;
       if (startPurifyCut(k)) {
         if (cap) { G.cut.cap = cap; G.cut.patient = true; }
+        // and top the window back up: this shot is playing, the next two are
+        // arriving behind it
+        filmAhead(G.reel);
         // straight into the next shot, over the frame the last one ended on
         if (purifyReady(k)) {
           G.cut.ph = 'play'; G.cut.t = 0; G.cut.diss = 0.5;
@@ -4257,6 +4412,116 @@ const ROOM_PROP = {
   // painting drawn as a prop is a rectangle with a seam down the room — see
   // ROOM_VISTA, where they belong.
 };
+// ===========================================================================
+// THE FRONTIER — the last room of a kingdom can SEE the next one.
+//
+// WHY THIS EXISTS. The free chapter ends at the door out of the Scrap Meadows,
+// and the screen there asks the player to want five more kingdoms. Until now
+// they had no reason to: every room in the game shares its kingdom's horizon,
+// so a player reaching that door had seen exactly one kind of place and was
+// being asked to imagine the rest. A promise is weaker than a glimpse.
+//
+// WHAT IT IS NOT. Not a painting pasted into the room — this codebase has
+// already learned that lesson twice (see ROOM_VISTA on the city gates: a
+// full-frame render dropped in as a prop reads as a photograph laid on the
+// scene, with a hard seam down it). And not the next kingdom's backdrop swapped
+// in behind this one, which would just look like the room got the wrong art.
+//
+// What it is: LIGHT FROM SOMEWHERE ELSE. A3's build already cuts an opening in
+// its ceiling — `rect(g, 25, 0, 28, 0, '.')`, the hole she climbs through to
+// reach B1 — and the Data Conduits are lit in a cold cyan (PAL.B.glow, #5fc8e8)
+// that nothing in the warm scrap-yellow Meadows uses. So the hole is bright
+// with a colour this kingdom does not own, and a shaft of it falls the full
+// height of the room. It says "there is somewhere else up there, and it is not
+// like here" without contradicting a single thing about where she is standing.
+//
+// The colour is read from the destination zone's own palette rather than typed
+// in, so a kingdom re-themed later re-lights its own frontier for free.
+const FRONTIER = {
+  // room: the ceiling opening in tiles, and which kingdom is on the other side
+  A3: { tx0: 25, tx1: 29, zone: 'B' },
+};
+function drawFrontier() {
+  if (typeof isHero === 'function' && isHero()) return;
+  const F = FRONTIER[G.roomId];
+  if (!F) return;
+  const col = ((typeof PAL !== 'undefined' && PAL[F.zone]) || {}).glow || '#5fc8e8';
+  const x0 = F.tx0 * TILE, x1 = F.tx1 * TILE, w = x1 - x0, cx = (x0 + x1) / 2;
+  const H = G.roomDef.h * TILE;
+  const drop = H * 0.86;                       // how far the light reaches down
+  const spread = 1.7;                          // and how much it opens out
+  const t = performance.now() / 1000;
+  // a live shaft, not a decal: the intensity breathes and the edges waver, the
+  // way light through a gap does when there is air moving in it
+  const breathe = 0.86 + Math.sin(t * 0.55) * 0.10 + Math.sin(t * 1.7) * 0.04;
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  // THE NUMBERS ARE MEASURED, NOT CHOSEN. The first pass of this used the
+  // alphas a subtle background effect would use — 0.20 on the shaft, 0.55 on
+  // the mouth — and pixel-probing the live frame showed it adding about 14/33/46
+  // to a floor already sitting near 68/59/47. Technically present, and on a
+  // phone in daylight completely invisible. This is the one moment in the free
+  // chapter whose whole job is to be noticed, so it is lit like a set piece:
+  // roughly three times that, in two layers, with a near-white core.
+  // 1. THE SHAFT — a soft trapezoid opening downward, fading as it falls
+  const shaft = (widen, a, top) => {
+    const g1 = c.createLinearGradient(0, 0, 0, drop);
+    g1.addColorStop(0, top); g1.addColorStop(0.30, col); g1.addColorStop(1, 'rgba(0,0,0,0)');
+    c.globalAlpha = a * breathe;
+    c.fillStyle = g1;
+    c.beginPath();
+    c.moveTo(cx - w * 0.5 * (widen > 1 ? 1 : 0.55), 0);
+    c.lineTo(cx + w * 0.5 * (widen > 1 ? 1 : 0.55), 0);
+    c.lineTo(cx + w * widen / 2, drop); c.lineTo(cx - w * widen / 2, drop);
+    c.closePath(); c.fill();
+  };
+  shaft(spread, 0.30, col);                    // the body of the beam
+  shaft(spread * 0.5, 0.34, '#ffffff');        // and the hot core inside it
+  // 2. THE HALO — light does not stop at the edge of the hole it came through
+  const g0 = c.createRadialGradient(cx, TILE * 0.4, 0, cx, TILE * 0.4, w * 1.5);
+  g0.addColorStop(0, col); g0.addColorStop(1, 'rgba(0,0,0,0)');
+  c.globalAlpha = 0.42 * breathe;
+  c.fillStyle = g0;
+  c.beginPath(); c.arc(cx, TILE * 0.4, w * 1.5, 0, 7); c.fill();
+  // 3. THE MOUTH — the opening itself, blown out. Drawn from y=0 rather than
+  // above it: the camera sits within a few pixels of the room's top edge here,
+  // so anything painted off the top of the room is simply never seen.
+  c.globalAlpha = 0.95 * breathe;
+  const g2 = c.createLinearGradient(0, 0, 0, TILE * 2.6);
+  g2.addColorStop(0, '#ffffff'); g2.addColorStop(0.35, col); g2.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = g2;
+  c.fillRect(x0 - 6, 0, w + 12, TILE * 2.6);
+  // 3. WHAT DRIFTS IN IT. Dust only exists where light is, which is the oldest
+  // trick there is for making a beam read as volume rather than as a gradient.
+  const mote = (typeof QUAL !== 'undefined' && !QUAL.glow) ? 0 : 22;
+  c.globalAlpha = 0.5;
+  c.fillStyle = col;
+  for (let i = 0; i < mote; i++) {
+    // deterministic per-speck, so nothing is allocated and nothing flickers
+    const ph = i * 2.399;
+    const k = ((t * (0.05 + (i % 5) * 0.012) + i * 0.137) % 1);
+    const y = k * drop;
+    const wide = w * (1 + (spread - 1) * (y / drop));
+    const x = cx + Math.sin(ph + t * 0.3 + k * 4) * wide * 0.42;
+    const a = Math.sin(k * Math.PI);           // born and dies inside the beam
+    c.globalAlpha = 0.7 * a * breathe;
+    c.beginPath(); c.arc(x, y, 1.1 + (i % 3) * 0.5, 0, 7); c.fill();
+  }
+  // 4. WHERE IT LANDS. Ground-anchored, so it obeys the art harness's probe —
+  // tests/artbible.cjs measures her FEET against the floor and a glow pooled
+  // under them is exactly the decoration G.artProbe exists to switch off.
+  if (!G.artProbe) {
+    const fy = drop;
+    const g3 = c.createRadialGradient(cx, fy, 0, cx, fy, w * spread * 0.6);
+    g3.addColorStop(0, col); g3.addColorStop(1, 'rgba(0,0,0,0)');
+    c.globalAlpha = 0.30 * breathe;
+    c.fillStyle = g3;
+    c.beginPath(); c.ellipse(cx, fy, w * spread * 0.6, TILE * 0.9, 0, 0, 7); c.fill();
+  }
+  c.restore();
+  c.globalAlpha = 1;
+  c.globalCompositeOperation = 'source-over';
+}
 function drawRoomProp() {
   if (typeof isHero === 'function' && isHero()) return;
   const P = ROOM_PROP[G.roomId];
@@ -5855,6 +6120,7 @@ function drawWorldFrame() {
   drawFlora();                      // ...and what grows in it — see FLORA
   if (tileDirty) renderTileLayer(P);
   c.drawImage(tileCv, 0, 0);
+  drawFrontier();                   // the next kingdom, seen from the last room
   // X1 hardlight bridge: alive while the Prowler stands, red and flickering
   // through the collapse, gone when the wreck settles
   if (G.roomId === 'X1' && G.x1Bridge && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)) {
@@ -6752,6 +7018,33 @@ function draw(tms) {
     ftxt(t('intro_skip'), 480, 512, 13, '#546b7d');
     return;
   }
+  if (st === 'MORE') {
+    // the world stays behind it, dimmed. She is standing in the doorway she
+    // cannot go through yet, and the screen should read as her looking at it
+    drawWorldFrame();
+    c.fillStyle = 'rgba(3,7,12,0.86)'; c.fillRect(0, 0, 960, 540);
+    ftxt(t('demo_end1'), 480, 132, 44, '#aef7d8', 'center', '#37ffd0');
+    ftxt(t('demo_end2'), 480, 196, 19, '#cfe3ef');
+    ftxt(t('demo_end3'), 480, 232, 17, '#8aa2b5');
+    const s = G.save;
+    const mins = Math.floor(s.time / 60), secs = Math.floor(s.time % 60);
+    const bosses = ['Glitch', 'Alpha'].filter(b => s.flags['boss' + b]).length;
+    ftxt(t('stats_time') + '  ' + mins + ':' + String(secs).padStart(2, '0')
+      + '     ' + t('demo_guardians') + '  ' + bosses + '/2',
+      480, 292, 16, '#7d93a8');
+    const L = moreLayout();
+    L.rows.forEach((k, i) => {
+      const y = L.y0 + i * L.step, on = i === G.moreIdx;
+      c.save();
+      c.fillStyle = on ? 'rgba(55,255,208,0.14)' : 'rgba(120,150,170,0.07)';
+      c.strokeStyle = on ? '#37ffd0' : '#31465a';
+      c.lineWidth = on ? 2 : 1;
+      c.beginPath(); c.rect(480 - L.w / 2, y - L.h / 2, L.w, L.h); c.fill(); c.stroke();
+      c.restore();
+      ftxt(t(k), 480, y + 6, 18, on ? '#eef3fa' : '#9db3c4', 'center', on ? '#37ffd0' : null);
+    });
+    return;
+  }
   if (st === 'WIN') {
     drawMenuBG(tsec);
     ftxt(t('win1'), 480, 120, 52, '#aef7d8', 'center', '#37ffd0');
@@ -6877,6 +7170,13 @@ function draw(tms) {
       else if (G.boss && !G.boss.dead) expr = 'determined';
       else if (d.rs || d.name === '…') expr = 'curious';
       drawPortrait(c, px, by + 14, expr);
+      // ...AND HER BODY WEARS THE SAME FACE. The bust and the sprite are the
+      // same character and used to disagree: the portrait could be listening
+      // curiously while the cat on the floor behind it stared blankly ahead.
+      // 'neutral' maps to her resting cute face rather than to nothing, so a
+      // plain conversation still leaves her looking like herself.
+      if (player && player.moodSet)
+        player.moodSet(expr === 'neutral' ? 'calm' : expr, 0.4);
     }
     ftxt(d.name || '', rtl ? tx0 + tw : tx0, by + 24, 16, '#37ffd0', rtl ? 'right' : 'left');
     let ty = by + 46;
@@ -6940,6 +7240,7 @@ function startIntroFilm() {
       G.reel = reel.map(s => s[0]);
       G.reelCap = reel.map(s => s[1]);
       G.reelEnd = 'CINE';
+      filmAhead(G.reel);
       return true;
     }
   }
@@ -6959,7 +7260,9 @@ function startIntroFilm() {
 // arrive, and audio is allowed to start with it.
 // ---------------------------------------------------------------------------
 function startCine() {
-  try { for (const s of INTRO_FILM) purifyPreload(s[0]); } catch (e) {}
+  // the first two shots, not all eight — startIntroFilm keeps the window
+  // topped up from there. See filmAhead().
+  try { filmAhead(INTRO_FILM.map(s => s[0])); } catch (e) {}
   startCineNow();
 }
 function startCineNow() {
@@ -8024,11 +8327,25 @@ setMusic('title');
 // the first time the page was ever opened, which put a two-minute prologue in
 // front of somebody who had not yet decided to play — and then never again,
 // which meant the person who made it almost never saw it. It now starts when
-// New Game is pressed, and the clips are fetched here, quietly, while the menu
-// is on screen, so that press starts a film that is already in memory.
-if (gameLock() !== 'hero') {
-  setTimeout(() => { try { for (const sh of INTRO_FILM) purifyPreload(sh[0]); } catch (e) {} }, 900);
+// New Game is pressed, and the FIRST SHOT is fetched here, quietly, while the
+// menu is on screen, so that press starts a film that is already in memory.
+//
+// One shot and not eight: a player who presses Continue never watches the
+// opening, and eight shots is 4.4 MB of webm (13.1 MB of mp4, which is what
+// iOS takes) spent on their behalf before they have chosen anything. The rest
+// of the reel arrives two ahead of the shot on screen — see filmAhead().
+//
+// ...and only for somebody who has no save. A returning player's next press is
+// Continue, and the opening is the one thing on this menu they have already
+// seen. If they do start a new game the film simply waits in the dark for a
+// beat — updateCut's `hold` phase is built for exactly that and will sit there
+// patiently for up to fourteen seconds.
+if (gameLock() !== 'hero' && !anySave()) {
+  setTimeout(() => { try { filmAhead(INTRO_FILM.map(s => s[0]), 1); } catch (e) {} }, 900);
 }
+// ...and the art for where she is about to be starts arriving on the title
+// screen, which used to fetch nothing at all. See preloadBoot().
+setTimeout(() => { try { if (typeof preloadBoot === 'function') preloadBoot(); } catch (e) {} }, 400);
 // look for a newer build at boot, and again every few minutes while idling
 G.updateStamp = 1;
 setTimeout(checkForUpdate, 2500);
@@ -8099,6 +8416,13 @@ function mainLoop(tms) {
   let acc = Math.min(raw, SIM_MAX) * (G.state === 'PLAY' ? paceK() : 1);
   if (!(acc > 0)) acc = dt;
   while (acc > 1e-4) { const st = Math.min(acc, SIM_STEP); update(st); acc -= st; }
+  // ONE PREFETCH SLOT PER FRAME, IN EVERY STATE. This used to live inside the
+  // PLAY branch of update(), which meant the title screen, the map, a shop and
+  // the whole two-minute opening fetched nothing at all — the quietest moments
+  // in the session were the only ones the prefetcher sat out. preloadIdle()
+  // owns the decision now, and it still refuses during a transition, a boss
+  // fight, and a film that is not playing cleanly.
+  if (typeof preloadTick === 'function') { try { preloadTick(); } catch (e) {} }
   draw(tms);
   drawTouchUI();
   clearP();

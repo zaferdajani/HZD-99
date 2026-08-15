@@ -58,19 +58,155 @@ the server's own turnaround workflow outranks a hand-rolled batch.
 steel, cyan/mint emissive accents, key light fixed to the WORLD upper-left in
 every plate (the turnaround rule — a turn must read as a volume rotating).
 
-### STATUS LEDGER (2026-08-14, session A) — do not regenerate what is done
-DONE, committed, in assets/: armed 8-yaw (hzd_8yaw.png) · unarmed 8-yaw with
-canonical chest (hzd_8yaw_bare.png) · back-walk pairs armed+unarmed (wired
-into the gate walk) · 12 armed action plates archived in assets/source/hero/
-(runA/runB/rise/fall/djump/land/dash/skid/claw/finisher/charge/hurt — note
-these carry the OLD green blade; regenerate only when the crystal versions are
-actually needed on screen) · the full crystal weapon set (assets/source/
-crystal/, 8 plates).
-STILL TO FIRE: §1b-i slash light-sheets ×4 · §1b-ii regrips ×2 + thrown
-rescale ×1 · §1c back-jet gear ×3 (the double jump is ALREADY a jet in code —
-the plates are the gear art) · §1d handover video · the unarmed SIDE action
-set for the opening (idle/walk/run pairs, unarmed) · apex, burst, heal kneel,
-the Song, low-health slump, wall cling.
+### THE IDENTITY LOCK (owner, 2026-08-14, session B) — read before firing anything
+The owner stopped the queue to say the obvious thing: **every sheet was a
+different cat.** He was right, and it was not one bad plate — it was structural.
+The two committed 8-yaw sheets each contain TWO cats, because `herosheet.cjs`
+stitches a front half-turn and a back half-turn that were generated
+INDEPENDENTLY: ear shape, head size and cape length all change across the seam.
+The action plates drifted the same way against each other.
+
+**The cause:** prose plus a loose reference image does not pin geometry. Every
+plate was an independent roll.
+
+**The fix, now mandatory:** the owner named `assets/source/ref/hzd99_canon.jpg`
+as canon. It is registered as the generator's reference element `hzd99-canon`
+= `467c8e08-8161-483f-a4cf-439875ff04e2`, and **every future plate, sheet and
+VIDEO of her must embed `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>` in its
+prompt.** The weapon has the same treatment: `purifier-crystal` =
+`d0a03e79-2887-4bcd-a209-11732c6754ef`, `purifier-double` =
+`bf160a06-9e42-46d0-a9f1-bc7c5dd1fcb5`.
+
+Two consequences of the canon plate, both settled:
+- **CHEST, INVERTED.** The canon plate has a WHITE/IVORY belly with the dark
+  vent grille. The earlier ruling that the brushed-STEEL chest plate was
+  canonical is **reversed** — the owner picked the white belly, and every brief
+  must now name that.
+- **The canon plate carries the old GREEN blade. It does not license green.**
+  The lock covers body, face, materials and proportions ONLY; the weapon is the
+  white crystal or nothing.
+- **Retire the stale element.** The workspace still holds a hero element named
+  `NYA-9` describing a *different* cat ("scuffed white and grey plating"). Never
+  use it.
+
+### STATUS LEDGER (2026-08-14, session B)
+DONE and locked to canon, in `assets/source/`: the unarmed SIDE action set in
+TRUE profile (idle/walk_a/walk_b/run_a/run_b) · the six missing states (apex,
+burst, heal, song, slump, wall_cling) · the full former-green action set
+regenerated unarmed (rise, fall, land, dash, skid, claw_1, claw_2, finisher,
+charge, hurt) · §1b-i slash light-sheets ×4 · §1b-ii regrips ×2 + thrown rescale
+(all three fixed: the paws now close ON the hilt, the thrown crystal fills its
+frame) · §1c back-jet gear ×2 + her jet double-jump plate · `canon_front.jpg`,
+the neutral standing plate. The 12 green-blade plates and `sword_full.jpg` are
+DELETED, not superseded-in-place.
+
+### CLOSING THE LOCK (2026-08-14, session B, second pass) — §1 IS FIRED
+The wired art is now locked too, and this is the part that actually changed
+what is on screen:
+- **Both 8-yaw turnarounds rebuilt** from matched half-turn strips —
+  `hzd_8yaw.png` (crystal on her back) and `hzd_8yaw_bare.png`. The two-cats
+  defect is gone; so is the black ground line the old bare sheet carried under
+  columns 4–7.
+- **The back-walk pairs and the ground sword re-fired and re-keyed** — these are
+  what the gate walk and the pickup actually draw.
+- **The green `sword_full.png` deleted**: orphan art, referenced by nothing.
+- **Films:** `intro7` (she sits offline, never wired to the Song) and `intro8`
+  (she wakes and goes) re-shot against the canon element — the old `intro8` was
+  a visibly DIFFERENT cat with square green eyes and green body markings. Plus
+  `sword_gift.mp4`, the §1d handover, ready for task #79.
+
+**Three warnings for whoever fires the next batch:**
+1. **"Pure black background" is not enough.** Two strips came back on WHITE
+   despite the negative. What worked on the third try was describing the
+   LIGHTING SITUATION instead: *"photographed in a pitch-dark room, no backdrop,
+   no floor, four spotlights pick out the figures and nothing else receives any
+   light."* A background colour reads as a style token; a dark room reads as a
+   scene.
+2. **Do NOT white-key her.** `blackkey.cjs --white` on a white-field plate of
+   her eats the ear tips and DELETES the white crystal blade outright — a white
+   subject cannot be keyed off a white field. Re-fire instead.
+3. **Say "bright and even exposure" on BOTH halves of a turnaround.** The first
+   armed pair came back with a bright front and a dark back, and the seam lands
+   exactly where `herosheet.cjs` joins them — which undoes the world-fixed key
+   light that makes a turn read as a volume.
+
+STILL TO FIRE: the armed-with-crystal variants of the action set, when sword
+mode needs them on screen · `intro7.webm` / `intro8.webm` (see below).
+
+**Both gaps are closed.** A static ffmpeg from npm (kept out of `package.json`
+— the game still ships nothing from npm) re-encoded `intro7.webm` /
+`intro8.webm` and decoded all three films for review. `sword_gift` was re-shot:
+the first take flared the crystal while it was still in the trader's hands, and
+the handover IS the beat.
+
+### ✅ SHE IS WIRED. One thing is still provisional — read it.
+`Player.draw()` now draws her from `assets/characters/hero/states.png` through
+`drawRoboPlate()`, with the procedural body as the loading fallback exactly as
+§2 asks. `tests/hero.cjs` measures it and the silhouette numbers IMPROVED
+against the procedural rig it replaced — run 0.198 (was 0.569), air 0.613 (was
+0.858), charge 0.259 (was 0.441). Lower IoU is the §3.3 law being obeyed harder:
+these are genuinely different drawings per state, not one drawing re-posed.
+
+**RESOLVED: the sheet on disk is now the FRONT-ON set**, which is the
+presentation the game has always used — both eye-lights, both ears, the visor
+read. The profile set it replaced is gone from `hero/`. Swapping took no code
+change at all, which is the point of the split: `node tools/herostates.cjs <dir>
+<out>`, re-crush to `assets/characters/hero/states.png`, done.
+
+**Model note.** The front-on set is **Seedream 4.5**, not Nano Banana Pro. Every
+Nano Banana job — a fresh single-image test included — sat in `waiting` for over
+half an hour while Seedream ran in seconds, so the jam was the provider's and
+model-specific. The canon element pins identity across models, which is exactly
+what it is for; the swap cost nothing in likeness. If Nano Banana is healthy
+when you next fire, either is fine — keep a whole SET on one model rather than
+mixing within a sheet.
+
+### THE PRESENTATION DECISION BEHIND THAT — READ BEFORE #79/#80/#81
+
+`tools/herostates.cjs` and `assets/source/_sheets/hero_state_sheet.jpg` exist:
+22 keyed, foot-aligned, uniformly-scaled cells, one per state. The renderer was
+NOT switched over, for a reason worth stating plainly:
+
+**The game draws her ALMOST FRONT-ON.** `js/entities.js` says so at the body
+shell — *"SHE IS DRAWN ALMOST FRONT-ON — one visor, two eyes, both ears"* — and
+`assets/source/ref/hzd99_states.png`, the checklist this whole section was built
+from, shows every single state that way. **The action plates in `hero/` are TRUE
+SIDE PROFILE**, because session B forced profile on the reasoning that "a
+side-scroller needs profile". That is a real convention in other games and it is
+NOT this game's convention.
+
+So wiring the sheet as it stands would not merely make her body authored — it
+would silently change her presentation from front-on to profile, which is a much
+larger visual change than the one that was asked for, and it would throw away
+what the procedural body is carefully doing (both ears, both eyes, the visor
+read, the committed upper-left key, the core shadow, the head's cast shadow).
+
+Two ways forward, and it is the owner's call, not the pipeline's:
+- **Keep front-on** (matches everything shipped): regenerate the grounded states
+  — idle, walk ×2, run ×2, land, skid, claw ×2, finisher, charge, burst, heal,
+  song, slump, hurt — as three-quarter FRONT views, then wire. The profile set
+  stays archived and is still right for `wall_cling` and `dash`.
+- **Move to profile** (a deliberate restyle): wire what exists, and accept that
+  she now reads side-on, losing the two-eye visor read that the front-on
+  presentation was built around.
+
+Whichever is chosen, the renderer work is the same shape: a sprite short-circuit
+in the ROBO-CAT branch of `Player.draw()` — NOT `drawHeroSprite`/`drawHeroRig`,
+which belong to NOSTOS's human hero behind `isHero()`.
+
+**And that hero is the precedent to copy, not a cautionary tale.** He is ALREADY
+sprite-first: `drawHeroSprite` picks a frame out of `heroIdle`/`heroRun`/
+`heroJump`/`heroAtk` (the `gothic-hero-*.png` sheets, which are on disk and in
+`MEDIA_SRC`), returns true, and `drawHeroRig` — the procedural body — only runs
+when those images have not loaded. That is exactly the arrangement §2 asks for
+on HZD-99: authored art first, procedural body as the loading fallback. The
+shape is proven in this codebase; it just has never been pointed at her.
+
+For her, the split is: `js/entities.js` **1481–2232 is the body** (scarf, rear
+arm, shell, head, ears, visor, legs) and is what a plate replaces; **2233–2269
+is the jet plume** and stays. Scarf, jets, charge aura and claw arcs stay
+procedural overlays — except the scarf/cape, which is BAKED INTO the plates, so
+drawing the procedural scarf on top would double it.
 
 ==== THE FIRING LIST (2026-08-15, consolidated — run top to bottom) =========
 Whoever holds the Higgsfield binding (session B, or this session once it
@@ -205,6 +341,22 @@ the RAKE arcs; combos re-tint the same four (task #81).
     — the owner caught the thrown plate reading smaller than the held one.
     (In-engine the scale is set by the renderer, so gameplay never inherits
     the plate's size; the archive still must not lie about it.)
+
+### 1b-iii. THE TWO-HAND TECHNIQUE  ✅ DONE (2026-08-15, canon + crystal elements)
+Four plates, fired against the canon element so the dancing cat is the same cat
+as everywhere else. Archived to `assets/source/crystal/`, contact sheet at
+`assets/source/_sheets/crystal_twin.jpg`.
+  twin_guard   both halves up, one high one low, the ready stance of the
+               six-second twin window
+  swirl_wind   up onto one toe, the turn beginning, scarf already carrying it
+  swirl_peak   mid-dance, both blades out, the ring half-drawn
+  swirl_fx     the arc ALONE, no character: a five-petal crystalline flower of
+               white light — additive, black ground, brightness IS the alpha
+The in-game ring is procedural and drawn from `swirl_fx`'s shape (a five-petal
+rose curve, squashed to the ground plane); the three character plates are the
+reference the pose was animated against, not sheets the engine loads. The move
+itself — every number and why — is `docs/combat/HERO_SWIRL.md`, measured by
+`tests/twin.cjs`.
 
 ### 1c. THE BACK JET ✱ FIRE ON REBIND — the double jump is hardware now
 The double jump is a BACK JET THRUST (owner's call; the pirouette is retired —

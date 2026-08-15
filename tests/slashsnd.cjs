@@ -72,6 +72,22 @@ const { chromium } = require('playwright');
     // ---- THE THREE WEAPONS SOUND LIKE THREE WEAPONS -----------------------
     // wielded() reads the save flags, so the harness plays the player's whole
     // arsenal by setting them — the same route the real unlocks will take.
+    //
+    // HER VOICE IS SILENCED FOR THIS BLOCK, and that is the difference between
+    // measuring a weapon and measuring a mix. sfx('atk') puts her bark on top
+    // of whatever she is holding, the same bark for all three, and it is a
+    // ~300 ms sample that lands squarely in the 150-400 ms window the ring is
+    // read from. It swamped the crystal's actual signature — the claw scored a
+    // 0.424 "ring" made entirely of her voice, against the crystal's real
+    // 0.007 — and inverted the result while every number on screen looked
+    // plausible. hzdSay() gates on HZDT, so parking that in the far future is
+    // an off switch that needs no game-side flag. The voice itself is measured
+    // in tests/hzdvox.cjs, which is where it belongs.
+    //
+    // It went unnoticed until the audio loader changed: nothing here ever
+    // produced a user gesture, so her samples had simply never been decoded and
+    // the harness had been measuring a voiceless claw by accident.
+    HZDT = 1e18;
     player.combo = 0;
     G.save.flags.crystal = 0; G.save.flags.crystal2 = 0;
     out.wClaw = await finger(() => sfx('atk'));

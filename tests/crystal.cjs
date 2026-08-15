@@ -54,7 +54,10 @@ const { chromium } = require('playwright');
     questPay(fq);
     out.crystalAfterForge = !!G.save.flags.crystal;
     out.bagCleared = !(G.save.bag && G.save.bag.cshard);
-    out.cardShown = G.state === 'DIALOG' || !!(G.dialog);
+    // the moment is either the FORGING CINEMATIC (the fired §1d film opens a
+    // CUT) or, when the clip cannot run, the item card — both count
+    out.cardShown = G.state === 'CUT' || !!G.cut || G.state === 'DIALOG' || !!(G.dialog);
+    if (G.cut) { try { G.cut.v.pause(); } catch (e) {} G.cut = null; }
     G.dialog = null; G.state = 'PLAY';
     out.pool1 = skillPool().length;
     G.save.flags.crystal2 = 1;
