@@ -364,9 +364,13 @@ function loadRoom(id) {
         // should read as PEACEFUL, not as empty. Most of what survives mercy is
         // still there; it has simply stopped wanting to kill her.
         const keep = clamp((0.66 + zi * 0.34) * U.foeK, 0.2, 1.6);
-        if (keep < 1 && ((i * 2654435761) % 1000) / 1000 > keep) return;
+        // a SAGE is never culled by the Braid — it is a story, not population
+        if (kind !== 'sage' && keep < 1 && ((i * 2654435761) % 1000) / 1000 > keep) return;
       }
       const en = new Enemy(kind, tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h);
+      // a purified sage STAYS purified: the tame is a save fact, re-applied
+      // at spawn, so leaving the chamber never re-infects it
+      if (kind === 'sage' && G.save.flags['sageTame_' + id]) { en.tame = 1; en.calm = true; en.pureM = 1; }
       if (U) {
         const zi = U.inf[def.zone] != null ? U.inf[def.zone] : 1;
         en.spd *= U.spdK * (0.82 + zi * 0.32);
@@ -5643,6 +5647,14 @@ function drawLights(P) {
     G._auraCount++;
     for (const e of G.enemies) {
       if (e.dead) continue;
+      // the sages carry their OWN halos: black-with-ember while infected
+      // (drawn with the body — black cannot ride this additive pass), blue
+      // once purified. Counted here either way so the sense reads complete.
+      if (e.kind === 'sage') {
+        if (e.tame) lightAt(e.x + e.w / 2, e.y + e.h / 2, 60, '#57a8ff', 0.14 * pu);
+        G._auraCount++;
+        continue;
+      }
       lightAt(e.x + e.w / 2, e.y + e.h / 2, 46 + Math.max(e.w, e.h) * 0.4, '#b06aff', 0.13 * pu);
       G._auraCount++;
     }

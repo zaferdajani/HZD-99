@@ -89,6 +89,11 @@ re-plumbing when it lands:
   Brief notes: Ratchet has a SMALL CRYSTAL ON HIS CHEST (his backstory — it
   once burned the corrupted song out of him); make it visible and glowing in
   the film, and queue a chest-crystal touch-up of his NPC plate to match.
+- §2e THE SAGE (docs/combat/SAGE.md): atlas-creature plates for the robed
+  machine monk — standing (hooded, ember eyes), coil (drawn back, sleeves
+  tight), lunge, gather (ember pooling in both sleeves), the KNEELING
+  song-lock chant, and the purified variant re-lit blue. Hero-scale
+  (duelist class). `drawSage` in js/entities.js is the placement reference.
 - §2d THE ROBOT BAT (new enemy, owner 2026-08-15): atlas-creature plates —
   hanging (wings folded around the body, head down, one dull optic),
   shiver (same pose, wings rustling, optic hot), dive (wings swept back,

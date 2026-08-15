@@ -648,6 +648,7 @@ class Player {
     this.clawCD = Math.max(0, this.clawCD - dt);
     this.pounceT = Math.max(0, this.pounceT - dt);
     G._pillarToldT = Math.max(0, (G._pillarToldT || 0) - dt);
+    G._sgToldT = Math.max(0, (G._sgToldT || 0) - dt);
     const heroP = typeof isHero === 'function' && isHero();
     if (inP('CLAW') && this.clawCD <= 0 && this.clawT <= 0 && this.volts >= 30) {
       this.volts -= 30;
@@ -3457,6 +3458,7 @@ const EKIND = {
   hopper: { w: 26, h: 24, hp: 36, spd: 180 },
   blob: { w: 34, h: 26, hp: 52, spd: 30 },
   bat: { w: 24, h: 18, hp: 18, spd: 150 },
+  sage: { w: 26, h: 42, hp: 150, spd: 170 },
 };
 class Enemy {
   constructor(kind, x, y) {
@@ -3474,6 +3476,7 @@ class Enemy {
     this.coilT = 0; this.lungeT = 0; this.windedT = 0;
     this.holdT = 0; this.diveT = 0; this.riseT = 0;
     this.crouchT = 0; this.gathered = false; this.wasAir = false; this.burst = 0;
+    this.gatherT = 0; this.stepT = 0; this.denied = 0; this.pureM = 0;
     // THE WORLD USED TO BE FLAT. EKIND is one global table, so a crawler in the
     // last kingdom was byte-identical to the one in the first — and the last
     // NEW enemy type appears at the midpoint, which left the back half of the
@@ -3713,6 +3716,79 @@ class Enemy {
         this.hang = 1;                              // never idles in mid-air
         break;
       }
+      // THE SAGE — docs/combat/SAGE.md. A hero-scale DUELIST: it wears her
+      // own verbs, its openings are temporal, and it can only be CLEANSED,
+      // never killed — the reason the purifier exists. Sentences, in words:
+      //   coil -> lunge -> lunge -> EXHALE     (the exhale is the opening)
+      //   gather -> EMBER RING                 (grounded; jump it)
+      // Three denied openings force a long exhale — the cold-dice floor.
+      case 'sage': {
+        if (this.tame) {
+          // purified: it kneels in peace and cannot touch her (return skips
+          // the contact hit at the bottom, the wolves' own law)
+          this.vx = 0; this.vy += 900 * dt; moveEnt(this, dt);
+          this.faceVis = Math.sign(px - cx) || this.faceVis;
+          if (chance(dt * 1.4)) addPart(cx + rnd(-8, 8), this.y + 6, rnd(-6, 6), -18, 0.7, '#57a8ff', 1.8, -20, true);
+          return;
+        }
+        if (this.locked) {
+          // SONG-LOCKED: kneeling, chanting, knitting itself back together.
+          // Claws got it here; only the crystal gets it further (sageStruck).
+          this.vx = 0; this.vy += 900 * dt; moveEnt(this, dt);
+          const fl = this.hpMax0 * 0.45;
+          if (this.hp < fl) this.hp = Math.min(fl, this.hp + this.hpMax0 * 0.06 * dt);
+          if (chance(dt * 5)) addPart(cx + rnd(-9, 9), this.y + rnd(0, 12), rnd(-8, 8), -30, 0.6,
+            chance(0.5) ? '#ff6a3a' : '#3a1a20', 2, -30, true);
+          return;                                // the duel is over; the choice is hers
+        }
+        this.vy += 900 * dt;
+        // the ember ring runs on its own clock once cast
+        if (this.ringR != null) {
+          this.ringR += 200 * dt;
+          const rd = Math.abs(Math.hypot(px - cx, py - (this.y + this.h)) - this.ringR);
+          if (rd < 16 && player.on && !player.dead) player.hurt(DF().edmg, cx, 'sage.ring');
+          if (this.ringR > 250) this.ringR = null;
+        }
+        if (this.windedT > 0) {                   // THE EXHALE — the opening
+          this.windedT -= dt; this.vx = 0; moveEnt(this, dt);
+          if (this.windedT <= 0) {
+            if (!this.struck) this.denied++; else this.denied = 0;
+            this.struck = false;
+          }
+          break;
+        }
+        if (this.lungeT > 0) {
+          this.lungeT -= dt; moveEnt(this, dt);
+          if (this.lungeT <= 0) {
+            if (this.lunges > 0) { this.lunges--; this.vx = Math.sign(px - cx) * this.spd * 2.2; this.lungeT = 0.22; }
+            else this.windedT = 0.7;
+          }
+          break;
+        }
+        if (this.coilT > 0) {
+          this.coilT -= dt; this.vx = 0; moveEnt(this, dt);
+          if (this.coilT <= 0) { this.lunges = 1; this.vx = Math.sign(px - cx) * this.spd * 2.2; this.lungeT = 0.22; }
+          break;
+        }
+        if (this.gatherT > 0) {
+          this.gatherT -= dt; this.vx = 0; moveEnt(this, dt);
+          if (this.gatherT <= 0) { this.ringR = 20; sfx('boom'); cam.shake = Math.max(cam.shake, 5); }
+          break;
+        }
+        // neutral: hold duel range, decide on the beat
+        const dxp = px - cx;
+        this.vx = Math.abs(dxp) > 160 ? Math.sign(dxp) * this.spd * 0.6
+          : Math.abs(dxp) < 70 ? -Math.sign(dxp) * this.spd * 0.4 : 0;
+        this.dir = Math.sign(dxp) || 1;
+        moveEnt(this, dt);
+        if ((this.stepT -= dt) <= 0 && !player.dead && Math.abs(dxp) < 420) {
+          this.stepT = 0.9;
+          if (this.denied >= 3) { this.windedT = 1.2; this.denied = 0; }
+          else if (Math.abs(dxp) < 190 && chance(0.65)) { this.coilT = TELL_SWIPE; sfx('tell'); }
+          else if (chance(0.5)) { this.gatherT = TELL_HEAVY; sfx('tell'); }
+        }
+        break;
+      }
       case 'turret': {
         // sweep → LOCK (the red light is the tell) → fire
         this.t -= dt;
@@ -3860,6 +3936,7 @@ class Enemy {
     // queued (ART_QUEUE) — this is the engine-drawn first pass, same standing
     // as the other minion fallbacks
     if (this.kind === 'bat') { drawBat(c, this); return; }
+    if (this.kind === 'sage') { drawSage(c, this); return; }
     // ---- hero world: real hand-animated creatures ----
     if (typeof isHero === 'function' && isHero()) {
       const SPR = {
@@ -4849,6 +4926,175 @@ function rakeMark(pl, c, sx, sy, hx, hy, dir, far) {
     m: pl._rakeM || c.getTransform(), sx: sx, sy: sy, x: hx, y: hy,
     dir: dir == null ? 1 : dir, far: !!far,
   });
+}
+// THE SAGE'S LAW OF HARM (docs/combat/SAGE.md). Fighting: normal damage
+// down to a hard floor at 30% — the song holds the body together past it,
+// and reaching the floor drops it into the SONG-LOCK. Locked: claws glance
+// (sparks and the hint line — Ratchet said it in dialogue, the fight says
+// it in play); crystal strikes fill PURITY, and full purity tames it.
+// Tamed: strikes are pokes, the wolves' own mercy law.
+function sageStruck(e, dm, x, y) {
+  if (e.tame) {
+    burst(x, y, 5, '#9ffcff', 150, 0.3, 0, 2, true);
+    if (typeof sfx === 'function') sfx('pick');
+    return 0;
+  }
+  const wield = typeof wielded === 'function' ? wielded() : 'claw';
+  const floor = Math.round(e.hpMax0 * 0.3);
+  if (e.locked) {
+    if (wield === 'claw') {
+      burst(x, y, 6, '#bfe9ff', 180, 0.22, 220, 2, true);
+      sfx('no');
+      if ((G._sgToldT || 0) <= 0) { G._sgToldT = 4; G.toast(t('sg_hint')); }
+      return 0;
+    }
+    e.pureM += (wield === 'crystal2' ? 0.34 : 0.25);
+    e.hurtT = 0.15;
+    burst(x, y, 14, '#ffffff', 260, 0.5, 60, 3, true);
+    sfx('bosshit');
+    G.hitStop = Math.max(G.hitStop, 0.06);
+    if (e.pureM >= 1) sageTame(e);
+    return 0;
+  }
+  e.struck = true;
+  if (e.hp - dm <= floor) {
+    e.hp = floor; e.locked = true; e.hurtT = 0.2;
+    e.coilT = e.gatherT = e.lungeT = e.windedT = 0; e.ringR = null;
+    G.flash = Math.max(G.flash, 0.3);
+    cam.shake = Math.max(cam.shake, 6);
+    sfx('tell');
+    if (!G.save.flags.sgLockSeen) { G.save.flags.sgLockSeen = 1; G.toast(t('sg_lock')); persist(); }
+    return dm;
+  }
+  e.hp -= dm; e.hurtT = 0.2;
+  return dm;
+}
+function sageTame(e) {
+  e.tame = 1; e.locked = false; e.calm = true; e.pureM = 1;
+  const key = 'sageTame_' + G.roomId;
+  G.save.flags[key] = 1;
+  sfx('win');
+  G.flash = Math.max(G.flash, 0.5);
+  const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
+  G.addRing(cx, cy);
+  burst(cx, cy, 30, '#ffffff', 320, 0.9, 60, 3, true);
+  burst(cx, cy, 18, '#57a8ff', 260, 1.1, 20, 2.6, true);
+  // THE GIFT — the cave gives "instead of taking from the tamed sage"
+  if (!G.save.flags['sageGift_' + G.roomId]) {
+    G.save.flags['sageGift_' + G.roomId] = 1;
+    G.save.scrap += 120; G.save.iq += 15;
+    if (typeof showItem === 'function') showItem(t('sg_tamed'), t('sg_tamedd'));
+    if (typeof iqNudge === 'function') iqNudge();
+  }
+  persist();
+}
+// THE SAGE, DRAWN — a robed machine monk, hooded, kneeling half-inside the
+// song. Engine-drawn first pass in the minion fallback style; authored
+// plates queued (ART_QUEUE). The aura rule lives here too: while she holds
+// crystal light an infected sage wears the BLACK HALO WITH THE EMBER RIM
+// (the owner's spec — black cannot ride the additive pass, so it is its own
+// dark ring), and a purified one shows blue from the light pass.
+function drawSage(c, e) {
+  const cx = e.x + e.w / 2, base = e.y + e.h;
+  const t2 = e.anim;
+  const kneel = e.locked || e.tame;
+  const bob = kneel ? 0 : Math.sin(t2 * 2.2) * 1.6;
+  // the aura sense: the black halo, under everything
+  if (typeof auraSense === 'function' && auraSense() && !e.tame) {
+    const fl = 0.75 + Math.sin(t2 * 7 + Math.sin(t2 * 13)) * 0.25;
+    c.save();
+    const dg = c.createRadialGradient(cx, base - e.h * 0.5, 4, cx, base - e.h * 0.5, 52);
+    dg.addColorStop(0, 'rgba(0,0,0,0.5)'); dg.addColorStop(0.72, 'rgba(10,2,4,0.3)');
+    dg.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = dg; c.beginPath(); c.arc(cx, base - e.h * 0.5, 52, 0, 7); c.fill();
+    c.globalCompositeOperation = 'lighter';
+    c.globalAlpha = 0.3 * fl;
+    c.strokeStyle = '#ff5a2a'; c.lineWidth = 2.5;
+    c.shadowColor = '#ff5a2a'; c.shadowBlur = 8;
+    c.beginPath(); c.arc(cx, base - e.h * 0.5, 40 + fl * 4, 0, 7); c.stroke();
+    c.shadowBlur = 0;
+    c.restore();
+  }
+  c.save();
+  c.translate(cx, base + bob);
+  const lean = kneel ? 0 : clamp(e.vx / 260, -1, 1) * 0.12;
+  c.rotate(lean);
+  const H2 = kneel ? e.h * 0.72 : e.h;
+  const coil = e.coilT > 0 ? 1 - e.coilT / TELL_SWIPE : 0;
+  const gath = e.gatherT > 0 ? 1 - e.gatherT / TELL_HEAVY : 0;
+  // the robe — a tapered cowl, torn at the hem
+  const rg = c.createLinearGradient(0, -H2, 0, 0);
+  rg.addColorStop(0, e.tame ? '#54687e' : '#54404c');
+  rg.addColorStop(1, e.tame ? '#242f3c' : '#241820');
+  c.fillStyle = rg;
+  c.beginPath();
+  c.moveTo(-4, -H2);
+  c.quadraticCurveTo(-13 - coil * 3, -H2 * 0.55, -11, 0);
+  for (let k = -11; k < 11; k += 4) c.lineTo(k + 2, k % 8 === 1 ? -3 : 0);
+  c.lineTo(11, 0);
+  c.quadraticCurveTo(13 + coil * 3, -H2 * 0.55, 4, -H2);
+  c.closePath(); c.fill();
+  // the rim light — one lit edge, so the silhouette reads against dark rock
+  // (black-on-black was invisible in the render-and-look pass)
+  c.strokeStyle = e.tame ? '#8fb0cc' : '#8a6a7a';
+  c.lineWidth = 1.4; c.globalAlpha = 0.85;
+  c.beginPath();
+  c.moveTo(-4, -H2);
+  c.quadraticCurveTo(-13 - coil * 3, -H2 * 0.55, -11, 0);
+  c.stroke();
+  c.globalAlpha = 1;
+  // the hood — deep, and nothing in it but the eyes
+  c.fillStyle = e.tame ? '#2c3a4c' : '#241820';
+  c.beginPath();
+  c.ellipse(0, -H2 + 4, 9, 8, 0, Math.PI * 0.95, Math.PI * 2.05);
+  c.quadraticCurveTo(7, -H2 + 12, 0, -H2 + 13);
+  c.quadraticCurveTo(-7, -H2 + 12, -9, -H2 + 4);
+  c.closePath(); c.fill();
+  c.fillStyle = '#05070a';
+  c.beginPath(); c.ellipse(0, -H2 + 8, 6, 5.5, 0, 0, 7); c.fill();
+  // gathering: ember light pools in the sleeves
+  if (gath > 0) {
+    c.save(); c.globalCompositeOperation = 'lighter';
+    c.globalAlpha = gath;
+    for (const s of [-1, 1]) {
+      c.fillStyle = '#ff8a4a'; c.shadowColor = '#ff5a2a'; c.shadowBlur = 10;
+      c.beginPath(); c.arc(s * (12 + gath * 4), -H2 * 0.4, 3 + gath * 2.5, 0, 7); c.fill();
+    }
+    c.shadowBlur = 0; c.restore();
+  }
+  // the eyes — ember while the song holds it, blue once it lets go
+  const hot = e.coilT > 0 || e.gatherT > 0 || e.lungeT > 0;
+  const ec = e.tame ? '#6ac8ff' : hot ? '#ff7a3a' : '#c85a3a';
+  c.fillStyle = ec; c.shadowColor = ec; c.shadowBlur = hot ? 9 : 5;
+  const blink = e.locked ? 0.6 + Math.sin(t2 * 6) * 0.4 : 1;
+  c.globalAlpha = blink;
+  for (const s of [-1, 1]) { c.beginPath(); c.arc(s * 2.6, -H2 + 8, 1.4, 0, 7); c.fill(); }
+  c.globalAlpha = 1; c.shadowBlur = 0;
+  c.restore();
+  // the ember ring HUGS THE GROUND — it hurts her feet, so it is drawn at
+  // her feet: a squashed ellipse crawling outward, not a hoop in the air
+  // (the first render read as a giant circle over the whole room)
+  if (e.ringR != null) {
+    c.save(); c.globalCompositeOperation = 'lighter';
+    c.globalAlpha = clamp(1 - e.ringR / 250, 0.12, 0.55);
+    c.strokeStyle = '#ff6a3a'; c.lineWidth = 3;
+    c.shadowColor = '#ff5a2a'; c.shadowBlur = 6;
+    c.beginPath(); c.ellipse(cx, base, e.ringR, 9, 0, Math.PI, Math.PI * 2); c.stroke();
+    // sparks riding the wavefront
+    for (const s of [-1, 1]) {
+      c.fillStyle = '#ffb08a';
+      c.beginPath(); c.arc(cx + s * e.ringR, base - 2, 2, 0, 7); c.fill();
+    }
+    c.shadowBlur = 0; c.restore();
+  }
+  // purity, shown: the lock chant dims as the crystal fills it
+  if (e.locked && e.pureM > 0) {
+    c.save(); c.globalCompositeOperation = 'lighter';
+    c.globalAlpha = 0.5 + e.pureM * 0.4;
+    c.fillStyle = '#ffffff'; c.shadowColor = '#cfe8ff'; c.shadowBlur = 8;
+    c.fillRect(cx - 14, base - e.h - 10, 28 * clamp(e.pureM, 0, 1), 3);
+    c.restore();
+  }
 }
 // THE ROBOT BAT, DRAWN. Hanging: folded wing panels around the body, head
 // down, one red optic — one more dark shape in the ceiling until it shivers.

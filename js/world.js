@@ -816,15 +816,18 @@ for (const [gid, tid, did, lair, flag, gcell, tcell, dcell] of GROTTOES) {
   // sage's gift, a challenge, a settlement). Until that story is written it
   // is the richest dig in the network: two pockets, real scrap, and the
   // bats own the ceiling.
+  // ...and the SAGE kneels at the far end of it (docs/combat/SAGE.md): the
+  // duel ground is anchored flat, and the chamber's other machines thin out
+  // so the duel is a duel, not a brawl
   ROOMS[did] = {
     zone: 'X', cave: 1, w: 44, h: 17, exits: { L: tid },
-    ents: [['bat', 18, 5], ['bat', 30, 5], ['crawler', 26, 15],
-           ['scrap', 8, 15, 30], ['scrap', 22, 7, 50], ['scrap', 36, 7, 40], ['scrap', 40, 15, 60]],
+    ents: [['bat', 14, 5], ['sage', 33, 15],
+           ['scrap', 8, 15, 30], ['scrap', 22, 7, 50], ['scrap', 40, 15, 60]],
     build(g) {
       caveCarve(g, did, {
-        open: ['L'], ledges: 5,
-        anchor: [{ x: 8, y: 15 }, { x: 26, y: 15 }, { x: 40, y: 15 }],
-        pocket: [{ x: 22, y: 6 }, { x: 36, y: 6 }],
+        open: ['L'], ledges: 4,
+        anchor: [{ x: 8, y: 15 }, { x: 33, y: 15, w2: 5 }, { x: 40, y: 15 }],
+        pocket: [{ x: 22, y: 6 }],
       });
     },
   };

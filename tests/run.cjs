@@ -64,6 +64,7 @@ const SUITE = [
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],
   ['crystal',   'the purifier: gift, tree, reach, rising finisher, launcher, the throw that returns'],
+  ['sage',      'the duelist that can only be cleansed: floor, lock, purity, tame, the once-paid gift'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
 ];
 

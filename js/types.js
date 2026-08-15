@@ -156,6 +156,10 @@ function hurtBoxOf(e) {
 const DAZE_WINDOW = 1.1, DAZE_MUL = 1.6;
 
 function dealDmg(e, dm, atkEl, x, y, noPenalty) {
+  // THE SAGE IS NEVER KILLED. Every strike on one routes through its own
+  // law (js/entities.js sageStruck): claws break it down to the floor and
+  // no further; the crystal purifies. docs/combat/SAGE.md.
+  if (e.kind === 'sage' && typeof sageStruck === 'function') return sageStruck(e, dm, x, y);
   // NEVER PUNISH AFFECTION — and never let a mis-swing undo an hour of the run.
   // A wolf that has changed sides cannot be hurt by her, at all: the swing
   // lands as a hand on a flank instead (js/pets.js has the same law for the
