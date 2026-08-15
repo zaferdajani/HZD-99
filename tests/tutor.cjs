@@ -97,7 +97,18 @@ const { chromium } = require('playwright');
   // the harness was testing the till, not the shopkeeper.
   now = await drive('buy', () => {
     const npc = G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet');
-    if (!npc) return;
+    if (!npc) {
+      // the trader lives in his BOOTH now — walk in through the depth door
+      const gr = typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId];
+      if (gr && gr.style === 'booth' && G.state === 'PLAY') {
+        if (!G.gateWalk) {
+          player.x = gateWorldX(gr) - player.w / 2; player.vx = 0; player.on = true;
+          gateEnter();
+        }
+        update(1 / 10);                            // the careful walk, at speed
+      }
+      return;
+    }
     if (G.state === 'PLAY') { doInteract(npc); return; }
     if (G.state === 'DIALOG') {                    // page through what he says
       keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); return;

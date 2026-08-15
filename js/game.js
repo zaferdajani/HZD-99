@@ -763,7 +763,7 @@ const NPC_GIFT = {
   // it out of him — too small, so it faded, and he pulled his own plug before
   // the song could creep back. Her cell is what woke him. All of that is the
   // errand's ASK text, delivered in dialogue where lore belongs.
-  'A0|ratchet': () => { invAdd('kit'); showItem(t('i_kit'), t('i_kitd')); },
+  'A0B|ratchet': () => { invAdd('kit'); showItem(t('i_kit'), t('i_kitd')); },
   // and the trader at the camp by NULLFANG's door — this is the shop, and it
   // does not exist until the lion's cell has paid for it
   'A3|ratchet': () => { G.toast(t('npc_shop_open')); },
@@ -911,6 +911,12 @@ function doInteract(s) {
     sfx('chest');
     if (s.extra === 'slot') { G.save.slots++; showItem(t('s_slot'), t('s_slotd')); }
     else if (s.extra.indexOf('rl:') === 0) G.grantRelic(s.extra.slice(3));
+    else if (s.extra.indexOf('it:') === 0) {
+      // an inventory item kept in a chest — the booth's spare power cell
+      const it = s.extra.slice(3);
+      invAdd(it);
+      showItem(t('i_' + it), t('i_' + it + 'd'));
+    }
     else grantCrest(s.extra);
   } else if (s.type === 'mod') {
     G.statics.splice(G.statics.indexOf(s), 1);
@@ -4649,6 +4655,9 @@ const GATE_ROOM = {
   // scenery behind the structure; one spot, one gate. The massed wall at
   // 37-39 stays the kingdom's outer boundary behind both.
   W2:  { at: 0.50, to: 'A0',  gx: 0.472, gy: 0.93 },
+  // the trader's booth on the waking floor, and the way back out of it
+  A0:  { at: 0.765, to: 'A0B', ax: 0.12, style: 'booth' },
+  A0B: { at: 0.12,  to: 'A0',  ax: 0.765, style: 'booth' },
   A5:  { at: 0.64, to: 'CV1', gx: 0.50,  gy: 0.86, ax: 0.10 },
   CV1: { at: 0.10, to: 'A5',  gx: 0.50,  gy: 0.86, ax: 0.64 },
   // the grottoes — one per guardian, opened by its fall or taming
@@ -4806,6 +4815,83 @@ function drawCaveMouth(cx2, gy, P, k) {
   }
   c.restore();
 }
+// THE TRADER'S BOOTH (owner's design): a kiosk standing on the meadow the
+// way the backdrop's own stalls and vent housings stand — leaning posts, a
+// sagging canopy, cloth flaps over a warm doorway — per the MIMIC-THE-
+// BACKGROUND rule and the NO RIGHT ANGLES law (nothing here is plumb).
+// The flaps part as she approaches (k); the light inside is Ratchet's.
+function drawBooth(cx2, gy, P, k) {
+  const BW = 74, BH = 118;
+  c.save();
+  // the back shell, leaning a few degrees the way a well-used stall does
+  c.fillStyle = '#101820';
+  c.beginPath();
+  c.moveTo(cx2 - BW - 8, gy);
+  c.lineTo(cx2 - BW + 4, gy - BH + 8);
+  c.lineTo(cx2 + BW + 10, gy - BH - 2);
+  c.lineTo(cx2 + BW + 2, gy);
+  c.closePath(); c.fill();
+  // the canopy: a sagging sheet with a scalloped hem, thrown over the top
+  c.fillStyle = '#1c2836';
+  c.beginPath();
+  c.moveTo(cx2 - BW - 26, gy - BH + 14);
+  c.quadraticCurveTo(cx2, gy - BH - 26, cx2 + BW + 28, gy - BH + 10);
+  c.lineTo(cx2 + BW + 20, gy - BH + 30);
+  for (let i = 5; i >= 0; i--) {
+    const hx = cx2 - BW - 14 + (i + 0.5) * ((BW * 2 + 34) / 6);
+    c.quadraticCurveTo(hx + 9, gy - BH + 44, hx - 9, gy - BH + 30);
+  }
+  c.closePath(); c.fill();
+  c.strokeStyle = 'rgba(255,214,120,0.25)'; c.lineWidth = 1.4;
+  c.beginPath();
+  c.moveTo(cx2 - BW - 26, gy - BH + 14);
+  c.quadraticCurveTo(cx2, gy - BH - 26, cx2 + BW + 28, gy - BH + 10);
+  c.stroke();
+  // leaning support posts, tapered — poles, not columns
+  c.fillStyle = '#0b1119';
+  for (const s of [-1, 1]) {
+    c.beginPath();
+    c.moveTo(cx2 + s * (BW + 14), gy);
+    c.lineTo(cx2 + s * (BW + 4), gy - BH + 16);
+    c.lineTo(cx2 + s * (BW - 2), gy - BH + 18);
+    c.lineTo(cx2 + s * (BW + 6), gy);
+    c.closePath(); c.fill();
+  }
+  // the doorway: warm light, with two cloth flaps that part as she nears
+  const doorW = 44, doorH = BH - 34;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const gl = c.createLinearGradient(0, gy - doorH, 0, gy);
+  gl.addColorStop(0, 'rgba(255,214,130,' + (0.10 + k * 0.5) + ')');
+  gl.addColorStop(1, 'rgba(255,190,100,' + (0.16 + k * 0.55) + ')');
+  c.fillStyle = gl;
+  c.beginPath();
+  c.moveTo(cx2 - doorW / 2, gy);
+  c.quadraticCurveTo(cx2 - doorW / 2 - 6, gy - doorH * 0.7, cx2 - 8, gy - doorH);
+  c.quadraticCurveTo(cx2 + 14, gy - doorH - 6, cx2 + doorW / 2 + 4, gy - doorH * 0.6);
+  c.lineTo(cx2 + doorW / 2, gy);
+  c.closePath(); c.fill();
+  c.restore();
+  const part = k * 24;
+  c.fillStyle = '#141e2a';
+  for (const s of [-1, 1]) {
+    const ex = cx2 + s * (6 + part);
+    c.beginPath();
+    c.moveTo(ex, gy - doorH + 6 * s);
+    c.quadraticCurveTo(ex + s * 16, gy - doorH * 0.5, ex + s * 8, gy);
+    c.lineTo(ex + s * 30, gy);
+    c.lineTo(ex + s * 26, gy - doorH + 2);
+    c.closePath(); c.fill();
+  }
+  // his sign: a small hung board with the bolt, swinging slightly
+  const sw = Math.sin(performance.now() / 900) * 0.06;
+  c.save();
+  c.translate(cx2 - BW + 18, gy - BH + 34); c.rotate(sw - 0.08);
+  c.fillStyle = '#0d141d'; c.fillRect(-13, 0, 26, 20);
+  c.fillStyle = '#ffd76a'; c.globalAlpha = 0.85;
+  ftxt('⚡', 0, 15, 13, '#ffd76a');
+  c.restore();
+  c.restore();
+}
 function drawGateDoors(P) {
   const def = GATE_ROOM[G.roomId];
   if (!def || !player) { G._doorK = 0; return; }
@@ -4823,6 +4909,8 @@ function drawGateDoors(P) {
   // cave on EITHER side of the passage: it is a mouth, not a door
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
   if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) { drawCaveMouth(ds, gy, P, k); return; }
+  // a booth is a STALL, not a monument — the trader's kiosk on the meadow
+  if (def.style === 'booth') { drawBooth(ds, gy, P, k); return; }
   const cx2 = ds;
   // THE CITY GATE IS THE MONUMENT (owner: "only the city gate should be
   // huge and epic with multi layers and inscriptions and shapes — it's a
@@ -5869,9 +5957,11 @@ function tutHand(st) {
 // Leaving the chain forward (W1 -> W2 -> A0) advances it; leaving BACKWARD
 // does not end it, because walking left to look at the room you woke in is
 // curiosity, not a decision to skip the tutorial.
-const TUT_ROOMS = { W1: 0, W2: 1, A0: 2 };
+const TUT_ROOMS = { W1: 0, W2: 1, A0: 2, A0B: 2 };
 // which step opens each room's door — see the fence in updateTutor()
-const TUT_DOOR = { W1: 'out', W2: 'gate', A0: 'go' };
+// (the booth interior is part of the waking floor's stage: stepping into it
+// mid-lesson must not end the tutorial)
+const TUT_DOOR = { W1: 'out', W2: 'gate', A0: 'go', A0B: 'go' };
 // ===========================================================================
 // SEQUENTIAL CONTROLS (owner's order): a control does not EXIST until the
 // lesson that teaches it begins. Buttons appear on the touch layout the
@@ -5996,6 +6086,11 @@ function drawTutor() {
     const want = st.id === 'buy' ? 'npc' : 'riddle';
     const s2 = (G.statics || []).find(q => q.type === want && !q.opened);
     if (s2) mark(s2.x + s2.w / 2, s2.y + s2.h / 2, 30, st.id === 'buy' ? '#ffd76a' : '#b48cff');
+    else if (st.id === 'buy') {
+      // the trader is inside his booth now: the lesson rings the booth door
+      const gr2 = typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId];
+      if (gr2 && gr2.style === 'booth') mark(gateWorldX(gr2), 13 * TILE, 34, '#ffd76a');
+    }
   }
   if (st.id === 'heal') mark(player.x + player.w / 2, player.y + player.h / 2, 32, '#aef7d8');
   if (st.id === 'go') mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');

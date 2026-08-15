@@ -26,7 +26,7 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
   await page.goto('http://127.0.0.1:8220/index.html');
   await page.waitForFunction(() => typeof ROOMS === 'object', { timeout: 20000 });
 
-  const R = await page.evaluate(() => {
+  const { R, gates } = await page.evaluate(() => {
     const out = {};
     for (const [id, r] of Object.entries(ROOMS)) {
       const ex = {};
@@ -37,29 +37,20 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
         extras: (r.ents || []).map(e => e[3]).filter(Boolean),
       };
     }
-    return out;
+    return { R: out, gates: Object.entries(GATE_ROOM).map(([room, def]) => [room, def.to]) };
   });
   await browser.close();
 
-  // THE SCRIPTED DOOR. W2 -> A0 is not an exit in the room table — it is the
-  // gate walk (gateEnter), a one-way scripted passage, and the gates close
-  // behind her. The graph analysis needs the edge or the whole city reads as
-  // unreachable from the waking rooms; it is injected here, marked, and the
-  // one-way-ness is BY DESIGN: the opening cannot be re-entered.
-  R.W2 = Object.assign({}, R.W2, { exits: Object.assign({ G: 'A0' }, R.W2.exits) });
-  // ...and the DEPTH DOORS proper (GATE_ROOM pairs): A5 <-> CV1 is the crystal
-  // cave, a two-way pair of background doors. Injected as G-edges both ways so
-  // the cave is reachable in the graph and does not read as a one-way trap.
-  R.A5 = Object.assign({}, R.A5, { exits: Object.assign({ G: 'CV1' }, R.A5.exits) });
-  R.CV1 = Object.assign({}, R.CV1, { exits: Object.assign({ G: 'A5' }, R.CV1.exits) });
-  // ...and the guardian grottoes: each lair <-> its revealed cave. The doors
-  // are flag-gated in play (they appear when the boss falls); the graph
-  // carries them unconditionally, because a room that is only reachable
-  // after a fight is still a room that must be reachable.
-  for (const [a, b2] of [['A4', 'GA1'], ['A10', 'GA2'], ['B4', 'GB1'], ['C3', 'GC1'],
-                         ['D3', 'GD1'], ['X1', 'GX1'], ['E3', 'GE1']]) {
-    R[a] = Object.assign({}, R[a], { exits: Object.assign({ G: b2 }, R[a].exits) });
-    R[b2] = Object.assign({}, R[b2], { exits: Object.assign({ G: a }, R[b2].exits) });
+  // THE DEPTH DOORS, from the TABLE. These edges used to be a hand-copied
+  // list here, which went stale the day the trader's booth added a new pair
+  // and the harness cried "unreachable". Every GATE_ROOM entry is one
+  // directed G-edge (two-way doors are two entries; W2 -> A0 is one-way BY
+  // DESIGN — the opening cannot be re-entered). Flag-gated doors are carried
+  // unconditionally: a room only reachable after a fight is still a room
+  // that must be reachable.
+  for (const [a, b2] of gates) {
+    if (!R[a] || !R[b2]) continue;
+    R[a] = Object.assign({}, R[a], { exits: Object.assign({ ['G' + b2]: b2 }, R[a].exits) });
   }
   const ids = Object.keys(R);
   const OPP = { L: 'R', R: 'L', T: 'B', B: 'T' };

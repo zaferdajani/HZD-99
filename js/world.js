@@ -210,12 +210,26 @@ const ROOMS = {
     // The waking floor teaches the whole loop, not just the verbs: the machine
     // is what she scratches, the trader is what the scrap it drops is FOR, and
     // the node is where the thinking she is about to need comes from.
-    ents: [['crawler', 21, 15], ['npc', 26, 15, 'ratchet'], ['riddle', 30, 15, 8]],
+    // Ratchet is not standing in the weather any more — his BOOTH stands at
+    // tile 26 (the depth door in GATE_ROOM) and he rests inside it (A0B).
+    ents: [['crawler', 21, 15], ['riddle', 30, 15, 8]],
     build(g) {
       frame(g); openR(g);
       rect(g, 16, 14, 18, 15, '#');       // the step she has to jump
       hline(g, 4, 7, 12, '=');            // a lit shelf, for looking at
-      hline(g, 27, 30, 11, '=');
+      // (the second shelf at 27-30 stood exactly where the booth stands now)
+    } },
+  // THE TRADER'S BOOTH (owner's design): she finds the booth on the meadow,
+  // walks INTO it through the depth door, and inside is a den — a crafting
+  // bench of a room where the disconnected unit RESTS instead of standing in
+  // a field, with a spare power cell kept beside him. Wake him with hers or
+  // with that one; either way the first light she gives away has a roof
+  // over it.
+  A0B: { zone: 'A', w: 30, h: 17, exits: {},
+    ents: [['npc', 17, 15, 'ratchet'], ['chest', 20, 15, 'it:batt']],
+    build(g) {
+      frame(g);
+      hline(g, 19, 23, 12, '=');          // the workbench loft over his corner
     } },
   // ============ ZONE A — Scrap Meadows ============
   A1: { zone: 'A', w: 32, h: 17, exits: { R: 'A2', T: 'A6', L: 'A0' },
@@ -756,7 +770,7 @@ const ROOMS = {
 
 // map screen layout: [gridX, gridY, wCells, hCells]
 const MAPPOS = {
-  W1: [-3, 3, 1, 1], W2: [-2, 3, 1, 1], A0: [-1, 3, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A10: [3, 3, 1, 1], A3: [4, 3, 1, 1], A4: [5, 3, 1, 1],
+  W1: [-3, 3, 1, 1], W2: [-2, 3, 1, 1], A0: [-1, 3, 1, 1], A0B: [-1, 2, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A10: [3, 3, 1, 1], A3: [4, 3, 1, 1], A4: [5, 3, 1, 1],
   A5: [1, 4, 1, 1], A6: [0, 2, 1, 1], A7: [1, 5, 1, 1], A8: [1, 2, 1, 1], A9: [1, 1, 1, 1],
   CV1: [2, 4, 1, 1], CV2: [3, 4, 1, 1], CV3: [4, 4, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
