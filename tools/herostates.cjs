@@ -42,7 +42,13 @@ const STATES = [
   ['hurt',      false], ['heal',      true ], ['song',      true ],
   ['slump',     true ],
 ];
-const CW = 240, CH = 300;             // cell box, generous enough for the X of the finisher
+// Cell HEIGHT is fixed. Cell WIDTH is MEASURED, not guessed, because a fixed
+// width that the widest pose overflows does not clip it — it BLEEDS into the
+// neighbouring cell, and then the next pose's thrown-out arm rides beside her
+// head in-game on every single idle frame. The finisher (both arms out in an X)
+// is roughly twice as wide as she is tall, so guessing this wrong is the
+// default outcome.
+const CH = 300, CW_MARGIN = 1.10;
 
 const PAGE = `
 window.cut = async (dataUrl) => {
@@ -115,6 +121,9 @@ window.compose = async (cells, CW, CH, scale) => {
   const gh = cells.filter(c => c.grounded).map(c => c.h).sort((a, b) => a - b);
   const med = gh[Math.floor(gh.length / 2)];
   const scale = (CH * 0.82) / med;          // 0.82 leaves headroom for the tall poses
+  // now the width, from the widest figure once that scale is applied
+  const widest = Math.max(...cells.map(c => c.w)) * scale;
+  const CW = Math.ceil(widest * CW_MARGIN / 2) * 2;   // even, so the half-width is exact
   const url = await page.evaluate(({ cells, CW, CH, scale }) => window.compose(cells, CW, CH, scale),
                                   { cells, CW, CH, scale });
   fs.writeFileSync(out, Buffer.from(url.split(',')[1], 'base64'));

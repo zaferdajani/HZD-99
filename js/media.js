@@ -108,6 +108,12 @@ const MEDIA_SRC = {
     // unarmed (the sword becomes a pickup — task #78), and the sword waiting
     // on the ground. The full 8-yaw turnarounds live in assets/characters/
     // as hzd_8yaw.png / hzd_8yaw_bare.png for the atlas conversion.
+    // HER BODY. One keyed, foot-aligned cell per state, assembled by
+    // tools/herostates.cjs; HERO_CELL in entities.js indexes it by state name.
+    // Lazy like everything else, and the procedural body draws until it lands —
+    // which is the same arrangement NOSTOS's hero already uses (drawHeroSprite
+    // first, drawHeroRig as the fallback), pointed at her for the first time.
+    heroStates: 'assets/characters/hero/states.png',
     heroBackA: 'assets/characters/hero/backwalk_a.png',
     heroBackB: 'assets/characters/hero/backwalk_b.png',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.png',

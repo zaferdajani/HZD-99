@@ -139,7 +139,23 @@ mode needs them on screen · `intro7.webm` / `intro8.webm` (see below).
 the first take flared the crystal while it was still in the trader's hands, and
 the handover IS the beat.
 
-### ⚠ THE WIRING IS BLOCKED ON A PRESENTATION DECISION — READ BEFORE #79/#80/#81
+### ✅ SHE IS WIRED. One thing is still provisional — read it.
+`Player.draw()` now draws her from `assets/characters/hero/states.png` through
+`drawRoboPlate()`, with the procedural body as the loading fallback exactly as
+§2 asks. `tests/hero.cjs` measures it and the silhouette numbers IMPROVED
+against the procedural rig it replaced — run 0.198 (was 0.569), air 0.613 (was
+0.858), charge 0.259 (was 0.441). Lower IoU is the §3.3 law being obeyed harder:
+these are genuinely different drawings per state, not one drawing re-posed.
+
+**PROVISIONAL: the sheet currently on disk is the SIDE-PROFILE set.** The
+front-on regeneration was submitted and sat in the generator's queue longer than
+the session lasted. The renderer does not care which way she faces — swapping is
+`node tools/herostates.cjs <dir> <out>` and re-crushing to
+`assets/characters/hero/states.png`, no code change — so finish it by dropping
+the front-on plates into the states directory and rebuilding. Until then she
+reads side-on in game, which is a look nobody signed off.
+
+### THE PRESENTATION DECISION BEHIND THAT — READ BEFORE #79/#80/#81
 
 `tools/herostates.cjs` and `assets/source/_sheets/hero_state_sheet.jpg` exist:
 22 keyed, foot-aligned, uniformly-scaled cells, one per state. The renderer was

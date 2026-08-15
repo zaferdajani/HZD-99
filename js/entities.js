@@ -393,6 +393,36 @@ function rigIK(sx, sy, hx, hy, l1, l2, bend) {
   return { x: sx + Math.cos(a) * l1, y: sy + Math.sin(a) * l1, base };
 }
 
+// ---- HER AUTHORED BODY -----------------------------------------------------
+// assets/characters/hero/states.png: one keyed, foot-aligned cell per state,
+// assembled by tools/herostates.cjs. Indexed BY NAME, never by number — the
+// tool's STATES array is the wire format, and naming keeps appending to it safe.
+//
+// This is the arrangement NOSTOS's hero has always used (drawHeroSprite first,
+// the procedural rig as the fallback), pointed at her for the first time. Her
+// procedural body is not deleted: it draws until the sheet loads, and it draws
+// forever if the sheet is missing.
+const HERO_CELL = {
+  idle: 0, walk_a: 1, walk_b: 2, run_a: 3, run_b: 4, rise: 5, apex: 6,
+  fall: 7, land: 8, dash: 9, skid: 10, wall_cling: 11, djump_jet: 12,
+  claw_1: 13, claw_2: 14, finisher: 15, charge: 16, burst: 17, hurt: 18,
+  heal: 19, song: 20, slump: 21,
+};
+const HERO_CELLS = 22;
+// The plate is drawn from the FOOT, like everything else in this file: y=0 is
+// the floor and up is negative. HERO_DH is the whole cell's height in world
+// units — bigger than she is, because the cell has headroom over her ears — and
+// HERO_FLOOR is the 4px margin herostates.cjs leaves under the grounded poses,
+// scaled into those units so her soles land on y=0 and not just near it.
+const HERO_DH = 60, HERO_FLOOR = 1.2;
+// Airborne cells are CENTRED in their cell rather than stood on its floor (the
+// tool does this, because a flying pose has no contact point to align). They
+// must be drawn centred too, or she steps up a few pixels the frame she leaves
+// the ground.
+const HERO_AIR = {
+  run_b: 1, rise: 1, apex: 1, fall: 1, dash: 1, wall_cling: 1, djump_jet: 1, hurt: 1,
+};
+
 // ================= PLAYER =================
 class Player {
   constructor(x, y) {
@@ -1009,7 +1039,9 @@ class Player {
     G.flash = Math.max(G.flash, 0.55);
     G.impact = { t: 0.16, t0: 0.16, x: cx, y: cy };
     G.addRing(cx, cy); G.addRing(cx, cy, 55);
-    this.swingVis = { t: 0.32, t0: 0.32, ang: 0, combo: 3 };
+    // flagged so the body can draw the BURST plate rather than the ordinary
+    // third-hit finisher — same combo number, different blow
+    this.swingVis = { t: 0.32, t0: 0.32, ang: 0, combo: 3, charged: true };
     burst(cx, cy, 34, '#ffffff', 400, 0.6, 200, 4, true);
     burst(cx, cy, 20, PAL[G.roomDef.zone].glow, 300, 0.8, 100, 4, true);
     const R = 128, dm = Math.round(this.dmg() * 2.6);
@@ -1133,6 +1165,67 @@ class Player {
   }
   // Odyssey hero — real hand-animated character art (CC0, ansimuz), with the
   // code-drawn rig kept as an automatic fallback until the sheets decode.
+  // Which authored plate she is in RIGHT NOW.
+  //
+  // Ordered by what overrides what, and the order is the design: a state her
+  // body is PUT INTO (hurt, healing, singing) beats one she chose (running),
+  // because the read the player needs is the one she is not in control of.
+  // Everything below the airborne test is a ground state, so the test for
+  // "is she on the floor" sits in the middle rather than at the top.
+  heroState(run) {
+    if (this.hurtPoseT > 0) return 'hurt';
+    if (this.healT > 0) return 'heal';
+    if (this.songT > 0) return 'song';
+    if (this.swingVis) {
+      // releaseCharged() flags its own swing: the charged blow is a BURST, a
+      // different drawing from the third hit of an ordinary combo.
+      if (this.swingVis.charged) return 'burst';
+      return this.swingVis.combo >= 3 ? 'finisher' : this.swingVis.combo === 2 ? 'claw_2' : 'claw_1';
+    }
+    if (this.chargeT > 0.05) return 'charge';
+    if (this.dashT > 0) return 'dash';
+    if (this.wallSlide !== 0 && !this.on) return 'wall_cling';
+    if (!this.on) {
+      if ((this.boostT || 0) > 0) return 'djump_jet';
+      if (this.vy < -140) return 'rise';
+      if (this.vy < 140) return 'apex';                 // the hang, both ways through zero
+      return 'fall';
+    }
+    if (this.skidT > 0) return 'skid';
+    if (this.landT > 0) return 'land';
+    // one core left and standing still: the carriage sags. Moving cancels it —
+    // a limp that survives a sprint reads as a bug, not as damage.
+    if (this.cores <= 1 && Math.abs(this.vx) < 20) return 'slump';
+    if (Math.abs(this.vx) > 12) {
+      // two-frame gait, driven by anim so it keeps time with the procedural
+      // stride the rest of the body effects are still cut to
+      const k = Math.floor(this.anim * (run ? 11 : 7)) % 2;
+      return run ? (k ? 'run_b' : 'run_a') : (k ? 'walk_b' : 'walk_a');
+    }
+    return 'idle';
+  }
+  // Draw the authored plate for the current state. Returns false if the sheet
+  // has not loaded, so the caller falls back to the procedural body rather than
+  // drawing nothing — the same contract drawAtlas() has with the guardians.
+  //
+  // Facing, squash, lean and the pirouette are ALREADY in the transform by the
+  // time this runs (see the c.scale at the top of draw()), so this draws her
+  // square-on at the origin and inherits all of it. That does mean a leftward
+  // facing mirrors the plate and flips its lit side; the procedural body has
+  // always been mirrored the same way, so this matches what shipped rather
+  // than introducing a new inconsistency.
+  drawRoboPlate(c, run) {
+    if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG.heroStates) return false;
+    const im = MEDIA_IMG.heroStates;
+    const cw = im.width / HERO_CELLS, ch = im.height;
+    const st = this.heroState(run);
+    const col = HERO_CELL[st] || 0;
+    const dh = HERO_DH, dw = dh * (cw / ch);
+    // grounded cells stand on the cell's floor line; airborne cells are centred
+    const dy = HERO_AIR[st] ? -dh * 0.5 - 18 : -dh + HERO_FLOOR;
+    c.drawImage(im, col * cw, 0, cw, ch, -dw / 2, dy, dw, dh);
+    return true;
+  }
   drawHeroSprite(c, run, evo) {
     if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG.heroIdle || !MEDIA_IMG.heroRun
         || !MEDIA_IMG.heroJump || !MEDIA_IMG.heroAtk) return false;
@@ -1479,6 +1572,18 @@ class Player {
     if (hero) {
       this.drawHeroRig(c, P, bob, run, ph, spdK, evo);
     } else {
+    // HER BODY, authored or drawn. drawRoboPlate() puts the authored plate for
+    // the current state on screen and returns true; everything guarded below is
+    // the procedural body, which now runs only until the sheet loads (and
+    // forever, unchanged, if it never does).
+    //
+    // The guard stops at the thruster jets on purpose. The plates carry her
+    // shell, head, ears, visor, limbs AND her scarf — so the procedural scarf
+    // must not run over them, or she wears two. The jets are additive light
+    // fired from the body rather than part of it (§0.0), they respond to state
+    // the art cannot know, and they are the same in both paths, so they sit
+    // OUTSIDE the guard and draw either way.
+    if (!this.drawRoboPlate(c, run)) {
     if (hero && evo >= 2) {
       // crimson war-cloak flowing behind
       const cwv = Math.sin(this.anim * 5) * (2 + spdK * 4);
@@ -2253,6 +2358,7 @@ class Player {
       }
       c.restore();
     }
+    }  // end of the procedural body — the jets below draw in BOTH paths
     // thruster jets
     if (this.jetT > 0 || (!this.on && this.vy < -140 && this.dashT <= 0)) {
       c.save(); c.globalCompositeOperation = 'lighter';

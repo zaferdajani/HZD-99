@@ -179,6 +179,42 @@ const { chromium } = require('playwright');
   check('...and she is drawn at all in every state',
     !empty.length, empty.map(s => s.pose).join(', '));
 
+  // ---- 5. HER AUTHORED BODY: EVERY NAMED CELL EXISTS ----------------------
+  // She is drawn from assets/characters/hero/states.png now, and the failure
+  // this stops is the one that has already happened twice in this repo from the
+  // other direction: art DECLARED and never drawn. This is its mirror — a state
+  // NAMED in HERO_CELL that runs off the end of the sheet. It does not throw;
+  // drawImage on a source rect past the right edge just draws nothing, so she
+  // would silently vanish in exactly one state and only in the build where that
+  // state is reachable. Cheap arithmetic, permanent tripwire.
+  const cells = await page.evaluate(() => {
+    if (typeof HERO_CELL === 'undefined') return { skip: true };
+    const im = (typeof MEDIA_IMG !== 'undefined') && MEDIA_IMG.heroStates;
+    if (!im) return { skip: true };
+    const names = Object.keys(HERO_CELL);
+    const max = Math.max(...names.map(n => HERO_CELL[n]));
+    return {
+      skip: false, names: names.length, max, declared: HERO_CELLS,
+      cols: im.width / (im.width / HERO_CELLS),      // sanity: the sheet divides
+      w: im.width, h: im.height,
+      // every index must be inside the sheet, and distinct
+      over: names.filter(n => HERO_CELL[n] >= HERO_CELLS),
+      dupe: names.length !== new Set(names.map(n => HERO_CELL[n])).size,
+    };
+  });
+  if (cells.skip) {
+    console.log('  ·  her state sheet is not loaded — procedural body in use, cells not checked');
+  } else {
+    console.log('    state sheet ' + cells.w + 'x' + cells.h + ', ' + cells.declared +
+                ' cells, ' + cells.names + ' names, highest index ' + cells.max);
+    check('every state she can be in has a cell on the sheet',
+      !cells.over.length, cells.over.join(', '));
+    check('...and no two states share one cell', !cells.dupe);
+    check('...and the sheet divides evenly into its cells',
+      cells.w % cells.declared === 0,
+      cells.w + ' / ' + cells.declared + ' = ' + (cells.w / cells.declared) + ' px per cell');
+  }
+
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
