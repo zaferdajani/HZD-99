@@ -552,6 +552,77 @@ function respawn() {
 }
 function bossActive() { return G.boss && !G.boss.dead && G.boss.st !== 'dorm'; }
 
+// ===========================================================================
+// THE DEMO BOUNDARY — where the free version stops, and says so properly.
+//
+// THE SHAPE OF THE DECISION. The free web build is the shop window: it opens
+// on any phone from any maker with no download and no account, which is the one
+// distribution advantage this game has and the app stores cannot match. What it
+// is NOT is the place anyone can be charged. So the free version ends, and the
+// end has to feel like a chapter closing rather than the game breaking.
+//
+// WHERE IT ENDS is derived, never listed. Any exit that leaves DEMO_ZONE is the
+// boundary — which today is exactly one door, A3 going up into B1, and which
+// stays correct if the world is ever re-plumbed. A hard-coded room id would be
+// a second copy of the map that somebody has to remember to update.
+//
+// The player gets the whole first kingdom to that point: waking in the cradle,
+// the walk to the gates, the first machine folk, the purifier, the Alpha and
+// its pack, and NULLFANG. Two boss fights and an ending, which is what makes
+// this a chapter and not a wall. Stopping mid-corridor would read as a fault.
+//
+// ONE BUILD STILL, and that is deliberate (RULE ONE). This is not a demo BUILD;
+// it is the same file everywhere, deciding at run time. A packaged app — the
+// Steam shell, the phone app — is by definition the bought copy and is never
+// the demo. The web page is, until a save says otherwise.
+//
+// `G.save.full` is the hook the Steam link will hang off later: whatever proves
+// a purchase eventually sets that flag and the same page becomes the whole
+// game. Nothing here needs to change when it does.
+//
+// AND IT IS OFF UNTIL THE OWNER SWITCHES IT ON. Flipping DEMO_OFFER to true is
+// a product decision with a store page behind it, not a code change, so the
+// default cannot be the one that quietly truncates a game that is already live.
+const DEMO_ZONE = 'A';
+const DEMO_OFFER = false;
+// Where the full game is sold. Empty until there is a page to point at — the
+// screen then says the game continues without offering a link that 404s.
+const DEMO_URL = '';
+function demoOn() {
+  if (!DEMO_OFFER) return false;
+  const packaged = (typeof window !== 'undefined') &&
+    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:');
+  if (packaged) return false;
+  if (G.save && G.save.full) return false;
+  return true;
+}
+// Does stepping through this door leave the free chapter?
+function demoWall(destId) {
+  if (!demoOn()) return false;
+  const a = ROOMS[G.roomId], b = ROOMS[destId];
+  return !!(a && b && a.zone === DEMO_ZONE && b.zone !== DEMO_ZONE);
+}
+// She is standing in the doorway when this fires, which means she is OUTSIDE
+// the room bounds — put her back inside first or the moment the screen closes
+// the same door fires again and she is stuck in a loop of her own ending.
+function demoStop(side) {
+  const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
+  if (side === 'T') { player.y = 6; player.vy = 90; }
+  else if (side === 'B') { player.y = H - player.h - 8; player.vy = 0; }
+  else if (side === 'L') { player.x = 8; player.vx = 40; }
+  else { player.x = W - player.w - 8; player.vx = -40; }
+  player.lastSafe = { x: player.x, y: player.y };
+  G.state = 'MORE'; G.moreIdx = 0;
+  sfx('ui');
+}
+// ONE GEOMETRY, used by the drawing AND by touch. Written out separately they
+// drift, and a screen whose buttons are somewhere other than where they are
+// painted is the exact failure tests/tap.cjs exists for.
+function moreLayout() {
+  const rows = [DEMO_URL ? 'demo_get' : 'demo_soon', 'demo_stay'];
+  return { rows, y0: 372, step: 54, w: 420, h: 44 };
+}
+
 // ---------- transitions ----------
 function checkTransitions() {
   if (G.trans) return;
@@ -590,6 +661,7 @@ function checkTransitions() {
     if (!G.save.flags[dest.flag]) return;
     dest = dest.to;
   }
+  if (demoWall(dest)) { demoStop(side); return; }
   G.trans = { t: 0.28, to: dest, side, half: false };
 }
 function applyTransition() {
@@ -1052,9 +1124,25 @@ function update(dt) {
     G.introT += dt;
     if (inP('OK') || inP('ATK') || inP('BACK') || G.introT > 12.4) { G.state = 'PLAY'; sfx('ok'); }
   }
+  else if (G.state === 'MORE') updateMore();
   else if (G.state === 'WIN') { if (inP('OK')) { G.state = 'MENU'; G.menuIdx = 0; setMusic('title'); } }
   else if (G.state === 'GAMEOVER') {
     if (inP('OK')) { wipeSave(G.save && G.save.theme); G.save = null; G.state = 'MENU'; G.menuIdx = 0; setMusic('title'); }
+  }
+}
+function updateMore() {
+  const L = moreLayout();
+  if (inP('UP')) { G.moreIdx = (G.moreIdx + L.rows.length - 1) % L.rows.length; sfx('ui'); }
+  if (inP('DOWN')) { G.moreIdx = (G.moreIdx + 1) % L.rows.length; sfx('ui'); }
+  // BACK always just returns her to the room. A player who wants to keep
+  // playing the part they have must never have to go through the sales pitch
+  // to get there, and the pad's cancel button is where they will look first.
+  if (inP('BACK') || inP('PAUSE')) { G.state = 'PLAY'; sfx('ui'); return; }
+  if (inP('OK') || inP('ATK') || inP('JUMP')) {
+    if (L.rows[G.moreIdx] === 'demo_get' && DEMO_URL) {
+      try { window.open(DEMO_URL, '_blank', 'noopener'); } catch (e) {}
+    }
+    G.state = 'PLAY'; sfx('ok');
   }
 }
 function menuOptions() {
@@ -6408,6 +6496,33 @@ function draw(tms) {
       if (T < 10.2) { c.fillStyle = 'rgba(255,255,255,' + Math.max(0, 1 - (T - 9.6) / 0.6) + ')'; c.fillRect(0, 0, 960, 540); }
     }
     ftxt(t('intro_skip'), 480, 512, 13, '#546b7d');
+    return;
+  }
+  if (st === 'MORE') {
+    // the world stays behind it, dimmed. She is standing in the doorway she
+    // cannot go through yet, and the screen should read as her looking at it
+    drawWorldFrame();
+    c.fillStyle = 'rgba(3,7,12,0.86)'; c.fillRect(0, 0, 960, 540);
+    ftxt(t('demo_end1'), 480, 132, 44, '#aef7d8', 'center', '#37ffd0');
+    ftxt(t('demo_end2'), 480, 196, 19, '#cfe3ef');
+    ftxt(t('demo_end3'), 480, 232, 17, '#8aa2b5');
+    const s = G.save;
+    const mins = Math.floor(s.time / 60), secs = Math.floor(s.time % 60);
+    const bosses = ['Glitch', 'Alpha'].filter(b => s.flags['boss' + b]).length;
+    ftxt(t('stats_time') + '  ' + mins + ':' + String(secs).padStart(2, '0')
+      + '     ' + t('demo_guardians') + '  ' + bosses + '/2',
+      480, 292, 16, '#7d93a8');
+    const L = moreLayout();
+    L.rows.forEach((k, i) => {
+      const y = L.y0 + i * L.step, on = i === G.moreIdx;
+      c.save();
+      c.fillStyle = on ? 'rgba(55,255,208,0.14)' : 'rgba(120,150,170,0.07)';
+      c.strokeStyle = on ? '#37ffd0' : '#31465a';
+      c.lineWidth = on ? 2 : 1;
+      c.beginPath(); c.rect(480 - L.w / 2, y - L.h / 2, L.w, L.h); c.fill(); c.stroke();
+      c.restore();
+      ftxt(t(k), 480, y + 6, 18, on ? '#eef3fa' : '#9db3c4', 'center', on ? '#37ffd0' : null);
+    });
     return;
   }
   if (st === 'WIN') {
