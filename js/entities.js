@@ -3456,6 +3456,7 @@ const EKIND = {
   turret: { w: 28, h: 30, hp: 45, spd: 0 },
   hopper: { w: 26, h: 24, hp: 36, spd: 180 },
   blob: { w: 34, h: 26, hp: 52, spd: 30 },
+  bat: { w: 24, h: 18, hp: 18, spd: 150 },
 };
 class Enemy {
   constructor(kind, x, y) {
@@ -3674,6 +3675,44 @@ class Enemy {
         moveEnt(this, dt);
         break;
       }
+      // THE BAT — the caves' own hazard (owner: "robot bats, coming from the
+      // ceiling"). It hangs in the rock like one more stalactite until she is
+      // beneath it, SHIVERS for the tell, drops in a swooping dive, and
+      // climbs home when the swoop is spent. The opening is the climb: on
+      // the way back up it is slow, lit, and cannot hurt her.
+      case 'bat': {
+        if (this.hang == null) this.hang = 1;
+        const near = Math.abs(px - cx) < 150 + this.iq * 70 && py > cy - 20 && !player.dead;
+        if (this.hang) {
+          this.vx = 0; this.vy = 0;
+          if (this.holdT > 0) {                     // the shiver — wings rustle
+            this.holdT -= dt;
+            if (this.holdT <= 0) { this.hang = 0; this.diveT = 0.85; this.vy = 80; }
+          } else if (near && (this.atkCD -= dt) <= 0) {
+            this.holdT = TELL_FAST; sfx('tell');
+            this.atkCD = rnd(2.6 - this.iq, 4 - this.iq * 1.4);
+          }
+          break;                                    // anchored to the rock
+        }
+        if (this.diveT > 0) {
+          this.diveT -= dt;
+          this.vx = lerp(this.vx, (leadX(px, this.iq * 0.3) - cx) * 1.7, 0.1);
+          this.vy = lerp(this.vy, 300 + Math.sin(this.anim * 9) * 90, 0.12);
+          if (moveEnt(this, dt).d || this.diveT <= 0) { this.diveT = 0; this.riseT = 1.2; }
+          break;
+        }
+        if (this.riseT > 0) {                       // climbing home, harmless-slow
+          this.riseT -= dt;
+          this.vx = lerp(this.vx, Math.sin(this.anim * 5) * 60, 0.08);
+          this.vy = lerp(this.vy, -230, 0.1);
+          const m = moveEnt(this, dt);
+          if (m.u) { this.hang = 1; this.riseT = 0; this.vx = 0; this.vy = 0; }
+          else if (this.riseT <= 0) this.riseT = 0.6;   // keep climbing till rock
+          break;
+        }
+        this.hang = 1;                              // never idles in mid-air
+        break;
+      }
       case 'turret': {
         // sweep → LOCK (the red light is the tell) → fire
         this.t -= dt;
@@ -3816,7 +3855,11 @@ class Enemy {
       ? -TP.dir * (TP.pose === 'q' ? 0.82 + TP.t * 0.18 : 1)
       : -TP.dir;
     // grounded creatures cast a contact shadow (lighting pass)
-    if (this.kind !== 'flier') contactShadow(c, cx, this.y + this.h, this.w * 0.55, 0.38);
+    if (this.kind !== 'flier' && this.kind !== 'bat') contactShadow(c, cx, this.y + this.h, this.w * 0.55, 0.38);
+    // the cave bat is its own machine, hanging or flying; authored plates are
+    // queued (ART_QUEUE) — this is the engine-drawn first pass, same standing
+    // as the other minion fallbacks
+    if (this.kind === 'bat') { drawBat(c, this); return; }
     // ---- hero world: real hand-animated creatures ----
     if (typeof isHero === 'function' && isHero()) {
       const SPR = {
@@ -4806,6 +4849,60 @@ function rakeMark(pl, c, sx, sy, hx, hy, dir, far) {
     m: pl._rakeM || c.getTransform(), sx: sx, sy: sy, x: hx, y: hy,
     dir: dir == null ? 1 : dir, far: !!far,
   });
+}
+// THE ROBOT BAT, DRAWN. Hanging: folded wing panels around the body, head
+// down, one red optic — one more dark shape in the ceiling until it shivers.
+// Flying: angular metal wings flapping from the shoulder joint. All paths
+// and gradients, in the minion fallback style; authored plates queued.
+function drawBat(c, e) {
+  const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
+  const hang = !!e.hang;
+  const shiver = hang && e.holdT > 0 ? Math.sin(performance.now() / 24) * 1.6 : 0;
+  const flap = Math.sin(e.anim * 18) * (e.diveT > 0 ? 0.9 : 0.6);
+  c.save();
+  c.translate(cx + shiver, cy);
+  if (hang) c.scale(1, -1);                    // head down, feet in the rock
+  // body — a gunmetal teardrop
+  const bg = c.createLinearGradient(0, -9, 0, 9);
+  bg.addColorStop(0, '#3a4450'); bg.addColorStop(1, '#1c232c');
+  c.fillStyle = bg;
+  c.beginPath(); c.ellipse(0, 0, 6.5, 9, 0, 0, 7); c.fill();
+  // wings — folded shells while hanging, angular panels in flight
+  c.fillStyle = '#242e3a';
+  c.strokeStyle = '#39434f'; c.lineWidth = 1;
+  for (const s of [-1, 1]) {
+    c.save();
+    if (hang) {
+      c.translate(s * 4.5, -1);
+      c.rotate(s * 0.18 + shiver * 0.05 * s);
+      c.beginPath();
+      c.moveTo(0, -7); c.quadraticCurveTo(s * 7, -2, s * 5, 8);
+      c.quadraticCurveTo(s * 2, 10, 0, 7); c.closePath();
+      c.fill(); c.stroke();
+    } else {
+      c.translate(s * 5, -3);
+      c.rotate(s * (0.5 + flap));
+      c.beginPath();
+      c.moveTo(0, 0); c.lineTo(s * 13, -4); c.lineTo(s * 16, 2);
+      c.lineTo(s * 9, 3); c.lineTo(s * 12, 8); c.lineTo(s * 3, 6);
+      c.closePath(); c.fill(); c.stroke();
+    }
+    c.restore();
+  }
+  // claw feet gripping the rock (they read as the attachment)
+  if (hang) {
+    c.strokeStyle = '#4a5663'; c.lineWidth = 1.6;
+    for (const s of [-1, 1]) {
+      c.beginPath(); c.moveTo(s * 2, 8); c.lineTo(s * 3.4, 11.5); c.stroke();
+    }
+  }
+  // the optic — dull while it sleeps, hot through the shiver and the dive
+  const hot = e.holdT > 0 || e.diveT > 0;
+  c.fillStyle = hot ? '#ff5f6d' : '#7a3540';
+  if (hot) { c.shadowColor = '#ff5f6d'; c.shadowBlur = 8; }
+  c.beginPath(); c.arc(0, hang ? 5.5 : -4.5, 2.1, 0, 7); c.fill();
+  c.shadowBlur = 0;
+  c.restore();
 }
 // EVERY GUARDIAN'S REAL BODY, AND THE SHEET IT ARRIVES IN. One table, checked
 // per kind. If a kind is in here it has authored art and must never be drawn as

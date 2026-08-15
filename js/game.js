@@ -4022,7 +4022,79 @@ function renderTileLayer(P) {
   const main = c; c = tctx;
   drawTiles(P);
   c = main;
+  // THE CAVE SHAPE RULE, AT THE PIXEL. The carve killed the straight lines
+  // in the tile GRID; this kills them in the tile FACES — the owner's
+  // report after the carve shipped was "still seeing straight lines walls
+  // and floors!", and the ruler that remained was the edge of the tile art
+  // itself. Cave rooms get an erosion pass over the finished layer: deep
+  // hash-driven scallops bitten INTO every exposed face (tops, undersides,
+  // and the vertical walls, which had never been touched), and lumps of the
+  // rock's own texture pushed OUTWARD past the line. Runs once per room
+  // render, on the cached canvas — free at frame time.
+  if (G.roomDef && G.roomDef.cave) erodeCaveEdges(tctx);
   tileDirty = false;
+}
+function erodeCaveEdges(x) {
+  const g = buildRoom(G.roomId);
+  const Wt = G.roomDef.w, Ht = G.roomDef.h;
+  const solid = (tx2, ty2) => {
+    if (tx2 < 0 || ty2 < 0 || tx2 >= Wt || ty2 >= Ht) return true;
+    const ch = g[ty2][tx2];
+    return ch === '#' || ch === 'B';
+  };
+  // outward lumps FIRST (they copy clean face pixels), erosion second
+  for (let ty = 0; ty < Ht; ty++) for (let tx = 0; tx < Wt; tx++) {
+    if (!solid(tx, ty)) continue;
+    const X = tx * TILE, Y = ty * TILE;
+    // [edge, air-check, lump src rect + dst offset]
+    const edges = [];
+    if (!solid(tx, ty - 1)) edges.push('T');
+    if (!solid(tx, ty + 1)) edges.push('B');
+    if (!solid(tx - 1, ty)) edges.push('L');
+    if (!solid(tx + 1, ty)) edges.push('R');
+    for (const ed of edges) {
+      const r0 = hash2(tx * 11 + ed.charCodeAt(0), ty * 19 + 7);
+      // a lump of the face itself, shoved past the line
+      if (r0 > 0.35) {
+        const u = 3 + hash2(tx * 5, ty * 3 + r0 * 9) * (TILE - 14);
+        const lw = 7 + r0 * 9, lh = 4 + r0 * 4;
+        try {
+          if (ed === 'T') x.drawImage(tileCv, X + u, Y + 2, lw, lh, X + u - 1, Y - lh + 2, lw, lh);
+          if (ed === 'B') x.drawImage(tileCv, X + u, Y + TILE - 2 - lh, lw, lh, X + u + 1, Y + TILE - 2, lw, lh);
+          if (ed === 'L') x.drawImage(tileCv, X + 2, Y + u, lh, lw, X - lh + 2, Y + u + 1, lh, lw);
+          if (ed === 'R') x.drawImage(tileCv, X + TILE - 2 - lh, Y + u, lh, lw, X + TILE - 2, Y + u - 1, lh, lw);
+        } catch (e) {}
+      }
+    }
+  }
+  x.save();
+  x.globalCompositeOperation = 'destination-out';
+  for (let ty = 0; ty < Ht; ty++) for (let tx = 0; tx < Wt; tx++) {
+    if (!solid(tx, ty)) continue;
+    const X = tx * TILE, Y = ty * TILE;
+    const bite = (ex, ey, big) => {
+      x.beginPath(); x.arc(ex, ey, big, 0, 7); x.fill();
+    };
+    // one large scallop and a few small ones per exposed face; positions and
+    // depths off the tile coordinate so the coastline is stable every frame
+    const face = (ed) => {
+      for (let i = 0; i < 4; i++) {
+        const rA = hash2(tx * 13 + ed * 3 + i, ty * 23 + 2 + i * 7);
+        const u1 = rA * TILE;
+        const rad = i < 2 ? 3.5 + rA * 5 : 1.5 + rA * 2.2;   // two big, two small
+        if (i < 2 && rA < 0.25) continue;                    // some faces keep a big edge
+        if (ed === 1) bite(X + u1, Y - 0.5, rad);
+        if (ed === 2) bite(X + u1, Y + TILE + 0.5, rad);
+        if (ed === 3) bite(X - 0.5, Y + u1, rad);
+        if (ed === 4) bite(X + TILE + 0.5, Y + u1, rad);
+      }
+    };
+    if (!solid(tx, ty - 1)) face(1);
+    if (!solid(tx, ty + 1)) face(2);
+    if (!solid(tx - 1, ty)) face(3);
+    if (!solid(tx + 1, ty)) face(4);
+  }
+  x.restore();
 }
 // ===========================================================================
 // THE LAIR. Every guardian was already asleep when you walked in — `dorm` poses

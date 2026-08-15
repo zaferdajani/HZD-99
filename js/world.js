@@ -49,26 +49,31 @@ function caveCarve(g, seedStr, o) {
   const ph = [R() * 6.28, R() * 6.28, R() * 6.28, R() * 6.28];
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) g[y][x] = '#';
   // a TUNNEL, not a hall: the ceiling hangs low enough to stay on screen, so
-  // the rock above her is a presence, and both surfaces carry a fast third
-  // wave so no flat stretch survives longer than a few tiles
-  let prevFl = H - 2, lastBump = -9;
+  // the rock above her is a presence. The surfaces follow slow waves through
+  // HYSTERESIS — the level only steps when the wave has truly moved a tile —
+  // which makes rolling mounds with treads of natural, varying width. Never
+  // per-column jitter in the level itself: that made STAIRCASES, and the
+  // owner's correction stands — "almost never in nature you would find
+  // caves that have ups and downs vertical like stairs."
+  let flLv = null, clLv = null, lastBump = -9;
   for (let x = 1; x < W - 1; x++) {
     const t = x / W;
-    let cl = Math.round(H - 12.4 + Math.sin(t * 8.3 + ph[0]) * 2.1 + Math.sin(t * 21 + ph[1]) * 1.2 + (R() - 0.5) * 1.4);
-    let fl = Math.round(H - 3.2 + Math.sin(t * 6.7 + ph[2]) * 1.5 + Math.sin(t * 15 + ph[3]) * 0.9
-      + Math.sin(t * 31 + ph[0]) * 0.8 + (R() - 0.5) * 1.3);
-    fl = Math.max(prevFl - 1, Math.min(prevFl + 1, Math.min(fl, H - 2)));
-    prevFl = fl;
-    cl = Math.max(2, Math.min(cl, fl - 5));
+    const clF = H - 12.4 + Math.sin(t * 8.3 + ph[0]) * 2.3 + Math.sin(t * 19 + ph[1]) * 1.1;
+    const flF = H - 3.4 + Math.sin(t * 6.7 + ph[2]) * 1.7 + Math.sin(t * 13 + ph[3]) * 0.9;
+    if (flLv == null) flLv = Math.round(flF);
+    if (clLv == null) clLv = Math.round(clF);
+    if (flF > flLv + 0.9) flLv++; else if (flF < flLv - 0.9) flLv--;
+    if (clF > clLv + 0.9) clLv++; else if (clF < clLv - 0.9) clLv--;
+    const fl = Math.min(flLv, H - 2);
+    const cl = Math.max(2, Math.min(clLv, fl - 5));
     for (let y = cl; y <= fl; y++) g[y][x] = '.';
     // ceiling teeth — the rock reaches down, one tile, sometimes two
     if (R() < 0.16 && fl - cl > 6) {
       g[cl][x] = '#';
       if (R() < 0.35 && fl - cl > 7) g[cl + 1][x] = '#';
     }
-    // floor knobs — a single-column bump breaks every runway; spaced so the
-    // floor stays walkable, never a staircase of them
-    if (R() < 0.2 && x - lastBump > 2 && fl - cl > 6) { g[fl][x] = '#'; lastBump = x; }
+    // floor knobs — a lone bump breaks a long tread; spaced, never stacked
+    if (R() < 0.16 && x - lastBump > 3 && fl - cl > 6) { g[fl][x] = '#'; lastBump = x; }
   }
   // where a door or an exit meets the room, the rock steps aside: a cleared
   // approach with a flat shelf, so arrivals land and departures climb out
@@ -79,9 +84,11 @@ function caveCarve(g, seedStr, o) {
       if (x !== 0 && x !== W - 1) { g[15][x] = '.'; g[16] && (g[16][x] = '#'); }
     }
   }
-  // anchors: a flat, open spot for everything that must stand somewhere
+  // anchors: a flat, open spot for everything that must stand somewhere —
+  // with three rows of headroom, because a bowl she can stand in but cannot
+  // JUMP out of is a trap wearing a floor
   for (const a of (o.anchor || [])) {
-    const w2 = a.w2 || 1, h2 = a.h2 || 2;
+    const w2 = a.w2 || 1, h2 = a.h2 || 3;
     for (let x = a.x - w2; x <= a.x + w2; x++) {
       for (let y = a.y - h2; y <= a.y; y++) if (g[y]) g[y][x] = '.';
       if (g[a.y + 1]) g[a.y + 1][x] = '#';
@@ -98,6 +105,26 @@ function caveCarve(g, seedStr, o) {
       if (g[yy] && g[yy][lx + k] === '.') g[yy][lx + k] = '=';
     }
   }
+  // NO PIT DEEPER THAN A JUMP. Anchors dig flat bowls into a rolling floor,
+  // and where the roll was high the bowl's wall could pass the three tiles a
+  // jump clears (tests/climbout.cjs measured it: CV2 trapped three cells this
+  // way). Walk the floor profile and shave any step taller than three down
+  // to three, on both sides, until it settles. Mounds survive; traps do not.
+  const ground = [];
+  const groundAt = (x) => {
+    for (let y = H - 2; y >= 1; y--)
+      if (g[y][x] !== '#' && g[y + 1][x] === '#') return y;
+    return H - 2;
+  };
+  for (let x = 1; x < W - 1; x++) ground[x] = groundAt(x);
+  for (let pass = 0; pass < 4; pass++)
+    for (let x = 2; x < W - 2; x++)
+      for (const nx of [x - 1, x + 1])
+        if (ground[x] - ground[nx] > 3) {
+          const ny = ground[x] - 3;
+          for (let y = ground[nx] + 1; y <= ny; y++) g[y][nx] = '.';
+          ground[nx] = ny;
+        }
   // pockets: hidden chambers EMBEDDED IN ROCK — the surrounding mass is
   // stamped first so the chamber is always inside something, whether that is
   // the ceiling or a hanging boulder; the way in is the breakable bite in
@@ -606,6 +633,7 @@ const ROOMS = {
     // the long dark middle: hoppers in the hollows, a crawler on the far
     // slope, two pockets for the thorough
     ents: [['hopper', 14, 15], ['hopper', 33, 15], ['crawler', 44, 15],
+           ['bat', 28, 6],
            ['scrap', 22, 7, 25], ['scrap', 40, 7, 20], ['scrap', 8, 15, 20]],
     build(g) {
       caveCarve(g, 'CV2', {
@@ -618,8 +646,8 @@ const ROOMS = {
     // the end of the dark: two crawlers between her and the PILLAR — which
     // needs the supercharged claw, and the crawlers are where the volts for
     // it come from. That is the room teaching the tool.
-    ents: [['crawler', 16, 15], ['crawler', 30, 15], ['scrap', 10, 7, 20],
-           ['pillar', 41, 15]],
+    ents: [['crawler', 16, 15], ['crawler', 30, 15], ['bat', 24, 6], ['bat', 36, 6],
+           ['scrap', 10, 7, 20], ['pillar', 41, 15]],
     build(g) {
       caveCarve(g, 'CV3', {
         open: ['L'],
@@ -775,7 +803,7 @@ for (const [gid, tid, lair, flag, gcell, tcell] of GROTTOES) {
   };
   ROOMS[tid] = {
     zone: 'X', cave: 1, w: 40, h: 17, exits: { L: gid },
-    ents: [['term', 20, 15, 5], ['scrap', 8, 15, 30], ['scrap', 30, 7, 40]],
+    ents: [['term', 20, 15, 5], ['bat', 14, 6], ['scrap', 8, 15, 30], ['scrap', 30, 7, 40]],
     build(g) {
       caveCarve(g, tid, {
         open: ['L'],

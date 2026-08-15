@@ -89,6 +89,12 @@ re-plumbing when it lands:
   Brief notes: Ratchet has a SMALL CRYSTAL ON HIS CHEST (his backstory — it
   once burned the corrupted song out of him); make it visible and glowing in
   the film, and queue a chest-crystal touch-up of his NPC plate to match.
+- §2d THE ROBOT BAT (new enemy, owner 2026-08-15): atlas-creature plates —
+  hanging (wings folded around the body, head down, one dull optic),
+  shiver (same pose, wings rustling, optic hot), dive (wings swept back,
+  optic hot), flight ×2 (wing up / wing down for the flap). Small machine
+  in the minion family style; the engine-drawn fallback in js/entities.js
+  drawBat is the placement reference.
 - §2c THE CRYSTAL CAVE (new, quest 1): two backdrop paintings —
   `caveMouth` (A5: the kingdom's rock face with a dark cave opening she can
   walk INTO; the depth door aims at gx 0.50 / gy 0.86 of the plate) and
