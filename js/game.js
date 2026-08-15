@@ -4358,11 +4358,27 @@ function gateTarget(G2) {
   if (!v) return { x: 960 * 0.5, y: 540 * 0.72 };
   return { x: v.x + v.w * G2.gx, y: v.y + v.h * G2.gy };
 }
+// Where the door is DRAWN, in screen space: the backdrop pans with the
+// camera, so the painted gap's position is only known from the live vista
+// rect. Null when no backdrop has rendered yet.
+function gateDrawnX(G2) {
+  const v = G._vista;
+  if (!v) return null;
+  return v.x + v.w * G2.gx;
+}
 function gateHere() {
   const G2 = GATE_ROOM[G.roomId];
   if (!G2 || !player) return null;
   // a door with an unmet `need` does not exist yet — no prompt, no walk
   if (G2.need && !(G.save && G.save.flags && G.save.flags[G2.need])) return null;
+  // THE DOOR IS WHERE IT IS PAINTED. The trigger used to be a fixed room
+  // fraction, which in W2 sat by the right wall while the gates' gap sat
+  // mid-screen — reported exactly so: "accessing the city from side, not in
+  // the middle of screen at the background door." She is at the door when
+  // SHE lines up with the DRAWN gap. The old fixed spot stays as a silent
+  // fallback so a room whose backdrop has not rendered can never lock her out.
+  const ds = gateDrawnX(G2);
+  if (ds != null && Math.abs(player.x + player.w / 2 - camSX() - ds) < 70) return G2;
   const x = G.roomDef.w * TILE * G2.at;
   return Math.abs(player.x + player.w / 2 - x) < 90 ? G2 : null;
 }
@@ -4386,7 +4402,10 @@ function drawGatePrompt() {
   const def = GATE_ROOM[G.roomId];
   if (!def || G.gateWalk || !player || player.dead) return;
   if (def.need && !(G.save && G.save.flags && G.save.flags[def.need])) return;
-  const gx = G.roomDef.w * TILE * def.at;
+  // the glimmer marks the PAINTED door, wherever the pan has put it — the
+  // fixed room fraction is only the fallback for an unrendered backdrop
+  const ds = typeof gateDrawnX === 'function' ? gateDrawnX(def) : null;
+  const gx = ds != null ? ds + camSX() : G.roomDef.w * TILE * def.at;
   const gy = (G.roomDef.h - 2) * TILE;
   const d = Math.abs(player.x + player.w / 2 - gx);
   if (d > 260) return;
