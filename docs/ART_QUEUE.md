@@ -147,13 +147,19 @@ against the procedural rig it replaced — run 0.198 (was 0.569), air 0.613 (was
 0.858), charge 0.259 (was 0.441). Lower IoU is the §3.3 law being obeyed harder:
 these are genuinely different drawings per state, not one drawing re-posed.
 
-**PROVISIONAL: the sheet currently on disk is the SIDE-PROFILE set.** The
-front-on regeneration was submitted and sat in the generator's queue longer than
-the session lasted. The renderer does not care which way she faces — swapping is
-`node tools/herostates.cjs <dir> <out>` and re-crushing to
-`assets/characters/hero/states.png`, no code change — so finish it by dropping
-the front-on plates into the states directory and rebuilding. Until then she
-reads side-on in game, which is a look nobody signed off.
+**RESOLVED: the sheet on disk is now the FRONT-ON set**, which is the
+presentation the game has always used — both eye-lights, both ears, the visor
+read. The profile set it replaced is gone from `hero/`. Swapping took no code
+change at all, which is the point of the split: `node tools/herostates.cjs <dir>
+<out>`, re-crush to `assets/characters/hero/states.png`, done.
+
+**Model note.** The front-on set is **Seedream 4.5**, not Nano Banana Pro. Every
+Nano Banana job — a fresh single-image test included — sat in `waiting` for over
+half an hour while Seedream ran in seconds, so the jam was the provider's and
+model-specific. The canon element pins identity across models, which is exactly
+what it is for; the swap cost nothing in likeness. If Nano Banana is healthy
+when you next fire, either is fine — keep a whole SET on one model rather than
+mixing within a sheet.
 
 ### THE PRESENTATION DECISION BEHIND THAT — READ BEFORE #79/#80/#81
 
