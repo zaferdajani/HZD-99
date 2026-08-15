@@ -305,7 +305,14 @@ const ROOMS = {
     } },
   // ============ ZONE X — Crystal Cache (secret) ============
   X1: { zone: 'X', w: 32, h: 17, exits: { B: 'B5' },
-    ents: [['boss', 20, 15, 'prism'], ['chest', 24, 15, 'nine', 'bossPrism'], ['scrap', 4, 15, 20], ['riddle', 3, 15, 7]],
+    // THE OTHER END sleeps here — the buried half of the purifier (the one
+    // secret in the game that is not a relic; see doInteract). Past the
+    // Prowler, at the far wall of the deepest secret in the game: the blade
+    // was split on purpose, and the half was hidden where only somebody who
+    // finds everything would look. The join fires the crystalJoin sting and
+    // opens the boomer node in the tree.
+    ents: [['boss', 20, 15, 'prism'], ['chest', 24, 15, 'nine', 'bossPrism'], ['scrap', 4, 15, 20], ['riddle', 3, 15, 7],
+           ['secret', 29, 15, 'crystal2']],
     build(g) {
       frame(g);
       rect(g, 6, 15, 8, 16, '.');           // floor opening back down to B5

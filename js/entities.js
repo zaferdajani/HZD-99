@@ -698,12 +698,45 @@ class Player {
       if (ay > 0) ax = 0;
       if (!ax && !ay) ax = this.face;
       if (ax) this.face = ax;
+      // WHAT IS IN HER PAW. 0 = her own claws, 1 = the single purifier
+      // crystal, 2 = the joined two-ended blade. The flag IS the weapon —
+      // the same switch audio.js reads, so the hand and the whoosh can
+      // never disagree. While the thrown blade is out she is bare-clawed
+      // (see G.boomer below), which the audio router also honours.
+      const wield = (G.boomer ? 0
+        : (G.save.flags && G.save.flags.crystal2) ? 2
+        : (G.save.flags && G.save.flags.crystal) ? 1 : 0);
+      let threw = false;
+      if (wield === 2 && typeof hasSkill === 'function' && hasSkill('boomer')
+          && (this.comboT > 0 ? (this.combo + 1) % 3 : 0) === 2 && !ay) {
+        // THE THROW. With both ends joined, the big slash IS the throw
+        // (owner: "instead of a big slash, you will throw the sword at the
+        // enemy that will come back to you"). The chain's finisher slot
+        // spends the blade: it flies flat, bites on the way out and the way
+        // back, and until her paw closes on it again she fights with claws.
+        this.combo = 0; this.comboT = 0; this.atkCD = 0.5;
+        G.boomer = { x: this.x + this.w / 2, y: this.y + this.h / 2 - 4,
+          vx: (ax || this.face) * 640, vy: 0, t: 0, out: true, spin: 0, set: new Set() };
+        cam.shake = Math.max(cam.shake, 3);
+        this.vx -= (ax || this.face) * 90;   // the release pushes back on her
+        if (typeof padRumble === 'function') padRumble(0.3, 0.4, 90);
+        this.healT = 0; sfx('atk');
+        threw = true;
+      }
+      if (!threw) {
       this.combo = this.comboT > 0 ? (this.combo + 1) % 3 : 0;
       this.comboT = 0.9;
-      const ang = Math.atan2(ay, ax);
+      // THE CRYSTAL'S FINISHER RISES. Lost Crown grammar: the third beat of a
+      // grounded chain is a diagonal cut that carries UP-forward, so a chain
+      // that ends near a wall or a jumper ends by reaching after them. Claw
+      // chains keep their flat finisher — the rake is a cat's move, not a
+      // swordsman's.
+      let aay = ay;
+      if (wield >= 1 && this.combo === 2 && !ay && this.on) aay = -0.55;
+      const ang = Math.atan2(aay, ax);
       // active a touch longer, so a swing that looks like it should connect does
-      this.swing = { t: 0.15, ax, ay, ang, combo: this.combo, set: new Set() };
-      this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo };
+      this.swing = { t: 0.15, ax, ay: aay, ang, combo: this.combo, set: new Set(), wield, pure: wield >= 1 };
+      this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo, wield };
       if (hasSkill('wave')) {
         const wn = Math.hypot(ax, ay) || 1;
         G.projs.push(new Proj(this.x + this.w / 2 + ax / wn * 22, this.y + this.h / 2 - 2 + ay / wn * 22,
@@ -746,6 +779,7 @@ class Player {
         }
       }
       this.healT = 0; sfx('atk');
+      }
     }
     // hold attack to charge the volt-burst
     if (inD('ATK') && this.dashT <= 0) {
@@ -917,7 +951,15 @@ class Player {
         if (aabb(hb, hurtBoxOf(e))) {
           this.swing.set.add(e);
           let dm = Math.round(this.dmg() * (this.swing.combo === 2 ? (hasSkill('calc') ? 1.55 : 1.35) : 1)
-                              * (this.clawT > 0 ? 1.45 : 1));   // claws rake deeper
+                              * (this.clawT > 0 ? 1.45 : 1)     // claws rake deeper
+                              * (this.swing.wield === 2 ? 1.45 : this.swing.wield ? 1.25 : 1));  // the crystal has an edge
+          // PURITY: the crystal is a disinfectant before it is a weapon. With
+          // the skill, a pure edge bites the Eye's own machines — bosses and
+          // the corrupted — harder, and says so in white.
+          if (this.swing.pure && hasSkill('purity') && (e instanceof Boss || e.miniboss)) {
+            dm = Math.round(dm * 1.3);
+            burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 8, '#ffffff', 220, 0.3, -60, 2.4, true);
+          }
           if (relicHas('lens') && chance(0.1)) {
             dm *= 2;
             burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 10, '#ffffff', 340, 0.4, 100, 4, true);
@@ -927,6 +969,13 @@ class Player {
             e.kbT = 0.26;
             e.vx += kx * 310;
             e.vy = Math.min(e.vy, 0) + ky * 220 - 120;
+            // RISECUT: the up-slash becomes a LAUNCHER (Lost Crown's juggle
+            // grammar). The enemy goes up far enough to meet an air chain,
+            // and a grounded cut that connects lifts her into the juggle too.
+            if (this.swing.ay < 0 && this.swing.wield >= 1 && hasSkill('risecut')) {
+              e.vy = -430; e.kbT = 0.4;
+              if (this.on) this.vy = -300, this.on = false;
+            }
           }
           this.gainVolts(11);
           // IMPACT, WEIGHTED. One flat freeze for every hit makes a finisher land
@@ -985,6 +1034,25 @@ class Player {
         } else if (c === '^' && this.swing.ay > 0) pogo = true;
       }
       if (pogo && this.swing.ay > 0) {
+        // PLUNGE: with the skill, the down-slash's rebound frame also slams a
+        // ring into the floor — everything grounded nearby takes a smaller,
+        // second bite. Priced as a tier-2 node because it turns the pogo from
+        // an escape move into an opener.
+        if (this.swing.wield >= 1 && hasSkill('plunge')) {
+          const px0 = this.x + this.w / 2, py0 = this.y + this.h;
+          G.addRing(px0, py0);
+          cam.shake = Math.max(cam.shake, 6);
+          burst(px0, py0, 18, '#e8f4ff', 300, 0.5, 200, 3, true);
+          for (const e2 of G.enemies) {
+            if (e2.dead || this.swing.set.has(e2)) continue;
+            if (Math.abs(e2.x + e2.w / 2 - px0) < 78 && Math.abs(e2.y + e2.h - py0) < 40) {
+              this.swing.set.add(e2);
+              dealDmg(e2, Math.round(this.dmg() * 0.6), armEl(), e2.x + e2.w / 2, e2.y + e2.h / 2, true);
+              e2.kbT = 0.3; e2.vx += Math.sign(e2.x - px0) * 260; e2.vy = -180;
+              if (e2.hp <= 0) e2.die(Math.sign(e2.x - px0) || 1, -0.4);
+            }
+          }
+        }
         // A short, crisp rebound rather than a free jump — hold JUMP to get the
         // taller one. Either way you leave the enemy instead of falling into it.
         this.vy = inD('JUMP') ? -880 : -660;
@@ -1000,6 +1068,55 @@ class Player {
       }
     }
     for (let i = this.trail.length - 1; i >= 0; i--) { this.trail[i].t -= dt; if (this.trail[i].t <= 0) this.trail.splice(i, 1); }
+    this.updateBoomer(dt);
+  }
+  // ---- THE THROWN BLADE ---------------------------------------------------
+  // Out flat and fast, a beat of hang, then home to her paw — and it cuts on
+  // every pass: the same enemy can be hit going and coming, which is the
+  // whole reason a boomerang is not just a slower projectile. While it flies
+  // she is unarmed (the atk router and the audio's wielded() both check
+  // G.boomer), so a throw is a real decision, not free damage.
+  updateBoomer(dt) {
+    const b = G.boomer;
+    if (!b) return;
+    b.t += dt; b.spin += dt * 22;
+    if (b.out) {
+      b.vx *= Math.pow(0.14, dt);            // the air bleeds the throw off
+      if (Math.abs(b.vx) < 130 || b.t > 0.55) { b.out = false; b.set.clear(); }
+    } else {
+      // homing return — to where she IS, not where she stood when she threw
+      const tx = this.x + this.w / 2, ty = this.y + this.h / 2 - 4;
+      const dx = tx - b.x, dy = ty - b.y, d = Math.hypot(dx, dy) || 1;
+      const sp = Math.min(980, 560 + b.t * 500);
+      b.vx = dx / d * sp; b.vy = dy / d * sp;
+      if (d < 26) {                          // the catch
+        G.boomer = null;
+        this.atkCD = Math.min(this.atkCD, 0.08);
+        sfx('chargeReady');
+        burst(tx, ty, 8, '#ffffff', 160, 0.25, 60, 2, true);
+        if (typeof padRumble === 'function') padRumble(0.2, 0.3, 60);
+        return;
+      }
+    }
+    b.x += b.vx * dt; b.y += (b.vy || 0) * dt;
+    // it cuts both ways, once per pass
+    const bb = { x: b.x - 16, y: b.y - 16, w: 32, h: 32 };
+    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+    for (const e of targets) {
+      if (e.dead || b.set.has(e)) continue;
+      if (typeof isPet === 'function' && isPet(e)) continue;
+      if (aabb(bb, hurtBoxOf(e))) {
+        b.set.add(e);
+        const dm = dealDmg(e, Math.round(this.dmg() * 1.15), armEl(), b.x, b.y, true);
+        sfx(e instanceof Boss ? 'bosshit' : 'hit');
+        G.hitStop = Math.max(G.hitStop, 0.05);
+        burst(b.x, b.y, 10, '#ffffff', 240, 0.3, 120, 2.6, true);
+        if (!(e instanceof Boss) && e.kind !== 'turret') { e.kbT = 0.22; e.vx += Math.sign(b.vx) * 240; }
+        if (e.hp <= 0) e.die(Math.sign(b.vx) || 1, -0.3);
+      }
+    }
+    // walls turn it around early rather than eating it
+    if (b.out && solidAt(Math.floor((b.x + Math.sign(b.vx) * 16) / TILE), Math.floor(b.y / TILE))) { b.out = false; b.set.clear(); }
   }
   releaseCharged() {
     this.chargeT = 0;
@@ -1052,8 +1169,13 @@ class Player {
     // this function, so the picture had been lying about where the claws were
     // since the day it shipped. The hitbox now grows with the drawing.
     const rk = s.combo === 2 && typeof hasSkill === 'function' && hasSkill('reach');
-    const R = down ? 46 : (s.combo === 2 ? (rk ? 68 : 50) : 44);
-    const half = down ? 32 : (s.combo === 2 ? (rk ? 46 : 35) : 30);
+    // a sword out-reaches a paw: the crystal adds real length to every cut,
+    // and the joined blade a little more. The DRAWN arc grows the same way
+    // (drawRake), because a hitbox the picture does not admit to is the exact
+    // lie the long-rake fix above was about.
+    const wm = s.wield === 2 ? 1.35 : s.wield ? 1.2 : 1;
+    const R = (down ? 46 : (s.combo === 2 ? (rk ? 68 : 50) : 44)) * wm;
+    const half = (down ? 32 : (s.combo === 2 ? (rk ? 46 : 35) : 30)) * wm;
     const cx = this.x + this.w / 2 + s.ax / n * R;
     const cy = this.y + this.h / 2 + s.ay / n * R;
     return { x: cx - half, y: cy - half, w: half * 2, h: half * 2 };
@@ -4505,6 +4627,12 @@ function drawRake(c, pl, mk) {
   const a = p < 0.22 ? p / 0.22 : Math.pow(1 - (p - 0.22) / 0.78, 1.5);
   if (a <= 0.02) return;
   const claw = pl.clawT > 0;
+  // THE CRYSTAL'S CUT IS LIGHT. Until the authored slash sheets (ART_QUEUE
+  // §1b-i) land as MEDIA keys, the purifier's arc is drawn as pure additive
+  // light — the one channel the art rules leave procedural (§0.0) — and never
+  // as the claw sheet, which is claw art and would put a cat's rake on a
+  // sword's cut.
+  if (sv.wield) { drawCrystalArc(c, pl, mk, sv, p); return; }
   // THE LONG RAKE IS EARNED. The wide shining arc is the best-looking thing in
   // the sheet, and spending it on every third punch from the first room leaves
   // nothing to grow into. The default finisher is a heavier version of the same
@@ -4542,6 +4670,77 @@ function drawRake(c, pl, mk) {
     const bw = b[2] / b[3] * bh;
     c.globalAlpha = (1 - Math.abs(p - 0.3) / 0.12) * 0.85;
     c.drawImage(im, b[0], b[1], b[2], b[3], w * (0.5 - RAKE_LAG) - bw / 2, -bh / 2, bw, bh);
+  }
+  c.restore();
+}
+// The purifier's stroke: a tapered crescent of white light, bright at the
+// leading edge, with a cold blue wash behind it. The joined blade (wield 2)
+// cuts TWICE — a second crescent trails the first by a beat, which is the
+// visual twin of the doubled whoosh in audio.js. All additive; no body art.
+function drawCrystalArc(c, pl, mk, sv, p) {
+  const heavy = sv.combo === 2;
+  const L = (heavy ? 50 : sv.combo === 1 ? 38 : 33) * (sv.wield === 2 ? 1.15 : 1);
+  const TH = heavy ? 13 : 9;
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  rakePlace(c, mk);
+  c.scale(1, mk.dir);
+  const passes = sv.wield === 2 ? [0, 0.16] : [0];
+  for (const off of passes) {
+    const q = clamp(p - off, 0, 1);
+    if (q <= 0.05) continue;
+    const env = q < 0.22 ? q / 0.22 : Math.pow(1 - (q - 0.22) / 0.78, 1.5);
+    if (env <= 0.02) continue;
+    const grow = 0.8 + q * 0.35;
+    const a0 = -Math.PI * 0.78, a1 = -Math.PI * 0.22;
+    c.beginPath();
+    c.arc(0, L * 0.62 * grow, L * grow, a0, a1);
+    c.arc(0, L * 0.62 * grow, (L - TH) * grow, a1, a0, true);
+    c.closePath();
+    const g = c.createRadialGradient(0, L * 0.62 * grow, (L - TH) * grow, 0, L * 0.62 * grow, L * grow);
+    g.addColorStop(0, 'rgba(140,190,255,0)');
+    g.addColorStop(0.55, 'rgba(210,235,255,' + (0.5 * env) + ')');
+    g.addColorStop(1, 'rgba(255,255,255,' + (0.9 * env) + ')');
+    c.fillStyle = g;
+    c.shadowColor = '#cfe8ff'; c.shadowBlur = 10 * env;
+    c.fill();
+    c.shadowBlur = 0;
+    // the leading tip flashes on the frames the hitbox is live
+    if (q > 0.18 && q < 0.45) {
+      const tipA = a1, R2 = (L - TH / 2) * grow;
+      c.globalAlpha = (1 - Math.abs(q - 0.3) / 0.16) * 0.9;
+      c.fillStyle = '#ffffff';
+      c.beginPath();
+      c.arc(Math.cos(tipA) * R2, L * 0.62 * grow + Math.sin(tipA) * R2, heavy ? 4.5 : 3.2, 0, 7);
+      c.fill();
+      c.globalAlpha = 1;
+    }
+  }
+  c.restore();
+}
+// The blade in flight — a dark grip with two white crystal ends, spinning.
+// Drawn in world space from the game's draw pass (after projectiles).
+function drawBoomer(c) {
+  const b = G.boomer;
+  if (!b) return;
+  c.save();
+  c.translate(b.x, b.y);
+  c.rotate(b.spin);
+  // the grip is a solid thing and drawn as one
+  c.fillStyle = '#2a3442';
+  c.beginPath(); c.roundRect ? c.roundRect(-5, -2.6, 10, 5.2, 2.4) : c.rect(-5, -2.6, 10, 5.2); c.fill();
+  c.globalCompositeOperation = 'lighter';
+  for (const s of [1, -1]) {
+    const g = c.createLinearGradient(0, 0, s * 24, 0);
+    g.addColorStop(0, 'rgba(210,235,255,0.15)');
+    g.addColorStop(0.55, 'rgba(240,250,255,0.95)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = g;
+    c.shadowColor = '#cfe8ff'; c.shadowBlur = 8;
+    c.beginPath();
+    c.moveTo(s * 5, -3); c.lineTo(s * 20, -1.7); c.lineTo(s * 24, 0);
+    c.lineTo(s * 20, 1.7); c.lineTo(s * 5, 3);
+    c.closePath(); c.fill();
   }
   c.restore();
 }

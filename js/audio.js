@@ -269,6 +269,9 @@ function clawShear(f0, f1, dur, vol, delay, q) {
 // Which one plays is read from the save, so the moment tasks #79/#80 set the
 // flags the audio follows with no further wiring. Until then: claw.
 function wielded() {
+  // while the thrown blade is out she fights bare-clawed, and the sound
+  // agrees with the hand: claw whoosh until the catch
+  if (typeof G !== 'undefined' && G.boomer) return 'claw';
   const f = (typeof G !== 'undefined' && G.save && G.save.flags) || {};
   return f.crystal2 ? 'crystal2' : (f.crystal ? 'crystal1' : 'claw');
 }
