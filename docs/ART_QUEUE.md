@@ -81,8 +81,21 @@ re-plumbing when it lands:
 - §1b-ii thrown plate → replace the polygon blades in `drawBoomer`
   (js/entities.js). Scale law: the thrown blade is BODY LENGTH — the owner
   already rejected a thrown sprite smaller than the held one.
-- §1d handover video → plays from `NPC_GIFT['A0|ratchet']` in js/game.js,
-  which is where the crystal flag is granted today.
+- §1d is now THE FORGING CINEMATIC (owner's rewrite 2026-08-15, supersedes
+  the handover video): a short CARTOONISH film — Ratchet at his bench, the
+  pillar shard going in, sparks, the white crystal sword taking shape, her
+  paws receiving it. It plays from `forgeCrystal()` in js/game.js (the
+  ratchet_forge quest's payoff — the hook is live, the grant never waits).
+  Brief notes: Ratchet has a SMALL CRYSTAL ON HIS CHEST (his backstory — it
+  once burned the corrupted song out of him); make it visible and glowing in
+  the film, and queue a chest-crystal touch-up of his NPC plate to match.
+- §2c THE CRYSTAL CAVE (new, quest 1): two backdrop paintings —
+  `caveMouth` (A5: the kingdom's rock face with a dark cave opening she can
+  walk INTO; the depth door aims at gx 0.50 / gy 0.86 of the plate) and
+  `caveExit` (CV1: the view back out — bright mouth in dark rock, same
+  anchor). Plus a `pillar` plate: a tall pure-crystal pillar, three white
+  spears from a rock socle, to replace the procedural light version drawn in
+  js/game.js drawStatics.
 - The buried half sits in world.js X1 (`['secret', 29, 15, 'crystal2']`);
   a bespoke ground plate for it can replace the generic glimmer.
 - tests/crystal.cjs measures the arc end-to-end (14 checks) and stays green

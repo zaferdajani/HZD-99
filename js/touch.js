@@ -240,6 +240,16 @@ function tPress(code) {
   (TOUCH.tapRel || (TOUCH.tapRel = [])).push(code);
   tBuzz(10);
 }
+// A BUTTON IS A PRESS *WITHOUT* A RELEASE — the finger owns the release
+// (touchend, TOUCH.held). Routing the game buttons through tPress made every
+// one of them a TAP: clearP released JUMP one frame after it was pressed, the
+// variable-jump cut read the button as let go, and every touch jump became
+// the short hop — reported as "the jump is so much shorter now". Menus tap;
+// buttons hold; the two must never share a code path again.
+function tHold(code) {
+  keys[code] = 1; keysP[code] = 1;
+  tBuzz(10);
+}
 function tSetK(code, on) {
   if (on && !keys[code]) { keys[code] = 1; keysP[code] = 1; }
   else if (!on) keys[code] = 0;
@@ -365,7 +375,7 @@ function tStart(e) {
         tBuzz(10);
         continue;
       }
-      if (hit) { TOUCH.held[t.identifier] = hit.code; tPress(hit.code); }
+      if (hit) { TOUCH.held[t.identifier] = hit.code; tHold(hit.code); }
       else if (x < L.W * 0.46 && y > 130 && !TOUCH.joy) {
         // COD/PUBG-style floating stick: it appears UNDER the thumb, wherever
         // the thumb lands on the left half, and follows on long drags

@@ -38,17 +38,96 @@ const { chromium } = require('playwright');
 
     // ---- the tree grows with the weapon --------------------------------
     out.pool0 = skillPool().length;
-    // ---- the gift ------------------------------------------------------
-    // the first NPC's gift closure, exactly as doInteract would fire it
-    out.giftKeyExists = typeof NPC_GIFT === 'object' && !!NPC_GIFT['A0|ratchet'];
+    // ---- the gift is a KIT, the crystal is EARNED ----------------------
+    // the first NPC's gift closure, exactly as doInteract would fire it:
+    // it must NOT hand over the crystal any more (the owner's rewrite — the
+    // sword is forged from a shard she quarries, never given)
     NPC_GIFT['A0|ratchet']();
-    out.crystalAfterGift = !!G.save.flags.crystal;
+    out.giftIsKit = invCount('kit') > 0 && !G.save.flags.crystal;
+    G.dialog = null; G.state = 'PLAY';
+    // ---- the quest exists and the FORGE pays it ------------------------
+    const fq = questById('ratchet_forge');
+    out.questExists = !!fq && fq.kind === 'fetch' && fq.item === 'cshard';
+    out.deepWaits = (questById('ratchet_deep') || {}).after === 'ratchet_forge';
+    qSet('ratchet_forge', 'active');
+    G.save.bag = { cshard: 1 };
+    questPay(fq);
+    out.crystalAfterForge = !!G.save.flags.crystal;
+    out.bagCleared = !(G.save.bag && G.save.bag.cshard);
     out.cardShown = G.state === 'DIALOG' || !!(G.dialog);
     G.dialog = null; G.state = 'PLAY';
     out.pool1 = skillPool().length;
     G.save.flags.crystal2 = 1;
     out.pool2 = skillPool().length;
     G.save.flags.crystal2 = 0;
+
+    // ---- the quarry: the pillar ignores claws, shatters for the burst --
+    G.save.flags.crystal = 0; delete G.save.bag;   // back to a pre-forge save
+    loadRoom('CV3');
+    await new Promise(r => setTimeout(r, 400));
+    G.wake = null; G.state = 'PLAY'; G.hitStop = 0;
+    const pil = G.statics.find(s => s.type === 'pillar');
+    out.pillarExists = !!pil;
+    if (pil) {
+      player.x = pil.x - 30; player.y = pil.y + pil.h - player.h;
+      player.on = true; player.vy = 0; player.face = 1;
+      player.swing = null; player.atkCD = 0; player.combo = 0; player.comboT = 0;
+      keys.KeyJ = true; keysP.KeyJ = true;
+      update(1 / 30); update(1 / 30); update(1 / 30);
+      for (const k in keys) keys[k] = false;
+      out.pillarSurvivesClaw = G.statics.indexOf(pil) >= 0;
+      player.swing = null; player.swingVis = null; G.hitStop = 0;
+      player.volts = 99; player.chargeOk = true;
+      player.releaseCharged();
+      out.pillarShattered = G.statics.indexOf(pil) < 0;
+      out.shardInBag = !!(G.save.bag && G.save.bag.cshard);
+      out.pillarFlagSet = !!G.save.flags.pl_cshard;
+      // ...and it does not grow back
+      loadRoom('CV3');
+      await new Promise(r => setTimeout(r, 200));
+      out.pillarStaysDown = !G.statics.find(s => s.type === 'pillar');
+      G.state = 'PLAY';
+    }
+
+    // ---- the depth door, round trip (the owner: it must be SOLID) ------
+    delete G.save.flags.crystal2;
+    loadRoom('A5');
+    await new Promise(r => setTimeout(r, 300));
+    G.wake = null; G.state = 'PLAY'; G.hitStop = 0;
+    const dA5 = GATE_ROOM.A5, dCV = GATE_ROOM.CV1;
+    out.doorPair = !!dA5 && dA5.to === 'CV1' && !!dCV && dCV.to === 'A5';
+    player.x = G.roomDef.w * TILE * dA5.at - player.w / 2;
+    player.on = true; player.vy = 0;
+    out.doorOpens = gateEnter();
+    out.doorRefusesTwice = !gateEnter();          // no double-trigger mid-walk
+    let n2 = 0;
+    while (G.gateWalk && n2++ < 200) update(1 / 30);
+    out.walkArrives = G.roomId === 'CV1';
+    out.arriveInside = player.x > TILE && player.x < G.roomDef.w * TILE - TILE;
+    // and straight back out
+    player.x = G.roomDef.w * TILE * dCV.at - player.w / 2;
+    player.on = true; player.vy = 0;
+    out.doorBack = gateEnter();
+    n2 = 0;
+    while (G.gateWalk && n2++ < 200) update(1 / 30);
+    out.walkReturns = G.roomId === 'A5';
+    out.returnsAtMouth = Math.abs(player.x + player.w / 2 - G.roomDef.w * TILE * dA5.at) < 130;
+
+    // ---- the aura sense ------------------------------------------------
+    // crystal light in her possession = she glows white and the world shows
+    // its allegiances (quiet halos). Counted from the light pass itself, on
+    // real rendered frames: her + the room's machines while the sense is on,
+    // and NOTHING once she carries no crystal light at all.
+    G.save.flags.crystal = 1;
+    loadRoom('A1');                              // a crawler, a guard, a dark NPC
+    await new Promise(r => setTimeout(r, 500));
+    G.wake = null; G.state = 'PLAY';
+    await new Promise(r => setTimeout(r, 350));
+    out.auraOn = (G._auraCount || 0) >= 3;
+    out.auraOnCount = G._auraCount || 0;
+    G.save.flags.crystal = 0; delete G.save.bag;
+    await new Promise(r => setTimeout(r, 350));
+    out.auraOff = (G._auraCount || 0) === 0;
 
     // ---- reach: same swing, longer box ---------------------------------
     const box = (wield, combo) => {
@@ -136,12 +215,33 @@ const { chromium } = require('playwright');
     return out;
   });
 
-  // the tree
+  // the tree, and the quest that grows it
   check('the bare tree has no crystal nodes', m.pool0 === 7, m.pool0 + ' nodes');
-  check('the first NPC\'s gift is the crystal', m.giftKeyExists && m.crystalAfterGift && m.cardShown,
-    'flag ' + m.crystalAfterGift + ', card ' + m.cardShown);
+  check('the waking gift is a KIT — the crystal is never handed over', m.giftIsKit);
+  check('the forge quest exists and gates ratchet\'s second errand',
+    m.questExists && m.deepWaits);
+  check('handing Ratchet the shard FORGES the crystal',
+    m.crystalAfterForge && m.bagCleared && m.cardShown,
+    'flag ' + m.crystalAfterForge + ', bag cleared ' + m.bagCleared + ', card ' + m.cardShown);
   check('the crystal grows the branch (+3)', m.pool1 === 10, m.pool1 + ' nodes');
   check('the joined blade opens the throw node (+1)', m.pool2 === 11, m.pool2 + ' nodes');
+  // the quarry
+  check('the pillar stands in the cave\'s last room', m.pillarExists);
+  check('claws glance off it', m.pillarSurvivesClaw);
+  check('the supercharged claw shatters it, into the bag',
+    m.pillarShattered && m.shardInBag && m.pillarFlagSet,
+    'down ' + m.pillarShattered + ', bag ' + m.shardInBag + ', flag ' + m.pillarFlagSet);
+  check('...and it does not grow back', m.pillarStaysDown);
+  // the depth door
+  check('A5 and CV1 are a two-way door pair', m.doorPair);
+  check('UP at the mouth opens the walk, and only once', m.doorOpens && m.doorRefusesTwice);
+  check('the walk arrives inside the cave', m.walkArrives && m.arriveInside);
+  check('and walks back out to the mouth', m.doorBack && m.walkReturns && m.returnsAtMouth,
+    'back ' + m.doorBack + ', room ' + m.walkReturns + ', at mouth ' + m.returnsAtMouth);
+  // the aura sense
+  check('crystal light turns the aura sense ON (her + the machines)',
+    m.auraOn, m.auraOnCount + ' halos');
+  check('no crystal light, no halos', m.auraOff);
   // the reach
   check('the crystal out-reaches the claw, the joined blade more',
     m.cry1W > m.clawW && m.cry2W > m.cry1W,

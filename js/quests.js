@@ -21,6 +21,21 @@
 // ===========================================================================
 const QUESTS = [
   {
+    // THE GAME'S FIRST QUEST — the sword is EARNED, not handed over.
+    // Ratchet's story (the ask text): the corrupted song took every unit
+    // around him; the small crystal on his chest lit and burned the song out
+    // of him — but it was too small, its charge faded, and before the song
+    // could creep back he pulled his own plug. Her cell woke him. He can
+    // forge a PURIFIER from pure crystal, if she quarries a shard of the
+    // pillar in the crystal cave (the depth door in A5's backdrop). Until
+    // then her claws BREAK the small machines but cannot CLEANSE anything —
+    // which is the point of the whole errand.
+    id: 'ratchet_forge',
+    npc: 'ratchet', zone: 'A',
+    kind: 'fetch', item: 'cshard',
+    reward: { forge: 1, iq: 10 },
+  },
+  {
     id: 'servo_coil',                    // A1 — sends you UP, into the gantries
     npc: 'servo', zone: 'A',
     kind: 'fetch', item: 'coil',
@@ -34,7 +49,7 @@ const QUESTS = [
   },
   {
     id: 'ratchet_deep',                  // A3 — the drop nobody takes
-    npc: 'ratchet', zone: 'A',
+    npc: 'ratchet', zone: 'A', after: 'ratchet_forge',
     kind: 'reach', room: 'A7',
     reward: { scrap: 80, relic: 'coin' },
   },
@@ -141,6 +156,9 @@ function questPay(q) {
   qSet(q.id, 'done');
   sfx('win');
   burst(player.x + player.w / 2, player.y, 24, '#ffd76a', 280, 0.8, 120, 4, true);
+  // the forge is a REWARD KIND, not a special-cased NPC: any future quest can
+  // end in a making (see forgeCrystal in game.js — the cinematic's code hook)
+  if (r.forge && typeof forgeCrystal === 'function') forgeCrystal();
 }
 // how many are open, for the pause screen
 function questOpen() {

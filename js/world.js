@@ -496,6 +496,49 @@ const ROOMS = {
       hline(g, 3, 8, 11, '='); hline(g, 20, 25, 11, '=');
     } },
 
+  // ==== THE CRYSTAL CAVE — quest 1's wing, entered through A5's BACKDROP ====
+  // The first use of the depth door outside the opening (GATE_ROOM in game.js:
+  // UP at the cave mouth in A5 walks her INTO the painting; the same door in
+  // CV1 walks her back out). Three big rooms, and the brief is the owner's:
+  // obstacles to jump "challenging but easy", a small enemy here and there,
+  // and the pillar SHINING at the end of the dark — the shine is the guide.
+  // Also the first stroke of the world tripling: every room here is wider
+  // than the viewport ever was.
+  CV1: { zone: 'X', w: 46, h: 17, exits: { R: 'CV2' },
+    // the entry hall: light from the mouth behind her, stepping ledges over a
+    // broken floor, one crawler patrolling — the cave says what it is
+    ents: [['crawler', 26, 15], ['scrap', 12, 11, 15], ['scrap', 34, 15, 10]],
+    build(g) {
+      frame(g); openR(g);
+      hline(g, 8, 12, 12, '='); hline(g, 15, 19, 10, '=');
+      hline(g, 23, 27, 12, '='); hline(g, 31, 35, 9, '=');
+      hline(g, 38, 42, 12, '=');
+    } },
+  CV2: { zone: 'X', w: 52, h: 22, exits: { L: 'CV1', R: 'CV3' },
+    // the climb: taller, darker, two hoppers and a crawler; spikes under the
+    // long jumps so a miss costs a sting, never the run
+    ents: [['hopper', 14, 20], ['hopper', 33, 20], ['crawler', 44, 20],
+           ['scrap', 8, 14, 20], ['scrap', 26, 9, 25], ['scrap', 48, 20, 15]],
+    build(g) {
+      frame(g); openL(g); openR(g);
+      // openings carve rows 11-14; the left ledge catches her arrival
+      hline(g, 1, 5, 15, '=');
+      hline(g, 7, 11, 14, '='); hline(g, 14, 18, 11, '=');
+      hline(g, 21, 25, 8, '='); hline(g, 28, 33, 11, '=');
+      hline(g, 36, 40, 14, '='); hline(g, 43, 47, 15, '=');
+      rect(g, 19, 20, 21, 20, '^'); rect(g, 34, 20, 36, 20, '^');
+    } },
+  CV3: { zone: 'X', w: 46, h: 17, exits: { L: 'CV2' },
+    // the end of the dark: a long low gallery, two crawlers between her and
+    // the PILLAR — which needs the supercharged claw, and the crawlers are
+    // where the volts for it come from. That is the room teaching the tool.
+    ents: [['crawler', 16, 15], ['crawler', 30, 15], ['scrap', 22, 15, 20],
+           ['pillar', 41, 15]],
+    build(g) {
+      frame(g); openL(g);
+      hline(g, 10, 13, 12, '='); hline(g, 24, 27, 12, '=');
+    } },
+
   // ---- ZONE B: the Carrier, still running its route ------------------------
   B7: { zone: 'B', w: 32, h: 22, exits: { B: 'B2', T: 'B8' },
     ents: [['turret', 6, 15], ['flier', 20, 8], ['blob', 24, 15], ['scrap', 12, 15, 30]],
@@ -586,6 +629,7 @@ const ROOMS = {
 const MAPPOS = {
   W1: [-3, 3, 1, 1], W2: [-2, 3, 1, 1], A0: [-1, 3, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A10: [3, 3, 1, 1], A3: [4, 3, 1, 1], A4: [5, 3, 1, 1],
   A5: [1, 4, 1, 1], A6: [0, 2, 1, 1], A7: [1, 5, 1, 1], A8: [1, 2, 1, 1], A9: [1, 1, 1, 1],
+  CV1: [2, 4, 1, 1], CV2: [3, 4, 1, 1], CV3: [4, 4, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],
   X1: [8, 1, 1, 1],

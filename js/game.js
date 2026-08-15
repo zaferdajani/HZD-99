@@ -232,6 +232,7 @@ const INV = {
   batt: { icon: '⚡', col: '#ffd76a' },
   kit:  { icon: '✚', col: '#7dff9a' },
   coil: { icon: '◎', col: '#57a8ff' },
+  cshard: { icon: '◆', col: '#dff2ff' },
 };
 function invCount(id) { return (G.save.items && G.save.items[id]) || 0; }
 function invAdd(id, n) {
@@ -306,7 +307,7 @@ function showItem(name, desc) {
 
 // ---------- room loading ----------
 function spawnStatic(type, tx, ty, extra, flagKey) {
-  const sizes = { item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [32, 40], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52] };
+  const sizes = { item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [32, 40], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52], pillar: [46, 96] };
   const [w, h] = sizes[type];
   // `room` is stamped at spawn rather than read from G.roomId at use time,
   // because npcKey() must stay stable for a static that outlives a room change
@@ -392,6 +393,10 @@ function loadRoom(id) {
       spawnStatic('riddle', tx, ty, extra, nodeKey(extra));
     } else if (kind === 'secret') {
       if (!G.save.flags['sr_' + extra]) spawnStatic('secret', tx, ty, extra);
+    } else if (kind === 'pillar') {
+      // the crystal pillar is quarried once per save — the shard in the bag
+      // IS the pillar now, and a pillar that regrew would un-tell the story
+      if (!G.save.flags['pl_' + (extra || 'cshard')]) spawnStatic('pillar', tx, ty, extra || 'cshard');
     } else {
       spawnStatic(kind, tx, ty, extra, kind === 'term' ? null : null);
     }
@@ -647,27 +652,40 @@ function standingTier() { const n = guardiansFelled(); return n >= 3 ? 2 : n >= 
 // the reason npcKey exists: the trader on the waking floor and the trader at
 // the camp are two meetings, and only the second one opens a shop.
 const NPC_GIFT = {
-  // THE FIRST UNIT SHE EVER WAKES HANDS HER THE PURIFIER (owner's ruling: the
-  // sword is given by the first NPC). A repair kit still comes with it — the
-  // practical gift rides along quietly; the CARD is the crystal, because the
-  // card is the moment. The white crystal is shaped like a sword; its handle
-  // was built to CONNECT to something, and the game says so on day one so the
-  // buried other half is a promise kept rather than a twist invented later.
-  // The authored handover film (ART_QUEUE §1d) drops in over this hook when
-  // its asset lands; the grant itself never waits on the art.
-  'A0|ratchet': () => {
-    invAdd('kit');
-    G.save.flags.crystal = 1; persist();
-    sfx('chargeReady');
-    burst(player.x + player.w / 2, player.y + player.h / 2, 26, '#ffffff', 280, 0.8, 60, 3, true);
-    showItem(t('i_crystal'), t('i_crystald'));
-  },
+  // the first unit she ever wakes, on the waking floor: a repair kit. The
+  // crystal is NOT handed over any more — the owner's story is that Ratchet
+  // FORGES it, and forging needs raw crystal she has to quarry herself (the
+  // ratchet_forge errand in quests.js; forgeCrystal below is the payoff).
+  // What Ratchet gives on waking is the practical thing and his story: he
+  // survived the corrupted song because the small crystal on his chest burned
+  // it out of him — too small, so it faded, and he pulled his own plug before
+  // the song could creep back. Her cell is what woke him. All of that is the
+  // errand's ASK text, delivered in dialogue where lore belongs.
+  'A0|ratchet': () => { invAdd('kit'); showItem(t('i_kit'), t('i_kitd')); },
   // and the trader at the camp by NULLFANG's door — this is the shop, and it
   // does not exist until the lion's cell has paid for it
   'A3|ratchet': () => { G.toast(t('npc_shop_open')); },
   'A1|servo':  () => { invAdd('kit'); showItem(t('i_kit'), t('i_kitd')); },
   '*': () => { G.save.scrap += 25; G.toast(t('npc_thanks_scrap')); },
 };
+// THE FORGING — the payoff of the game's first quest. She brings the pillar
+// shard back to Ratchet; he makes the PURIFIER out of it. The cartoonish
+// forging cinematic is queued in ART_QUEUE (§1d, Higgsfield); this function
+// is its code hook — when the film asset lands it plays from here, and until
+// then the moment is the flash, the sting and the card. The grant itself
+// never waits on the art.
+function forgeCrystal() {
+  G.save.flags.crystal = 1;
+  persist();
+  sfx('chargeReady');
+  G.flash = Math.max(G.flash, 0.6);
+  if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 6);
+  if (player) {
+    burst(player.x + player.w / 2, player.y + player.h / 2, 30, '#ffffff', 320, 0.9, 60, 3, true);
+    burst(player.x + player.w / 2, player.y + player.h / 2, 16, '#bfe9ff', 240, 1.1, 20, 2.6, true);
+  }
+  showItem(t('i_crystal'), t('i_crystald'));
+}
 function doInteract(s) {
   if (s.type === 'npc') {
     // THEY WANT SOMETHING NOW. Talking twice used to give you the same three
@@ -1790,7 +1808,15 @@ const ZONE_VISTA = { A: 'vistaCity', B: 'vistaCrystal' };
 // what it looked like: a photograph laid on the scene rather than the scene
 // continuing. A full-frame painting is a BACKDROP. It goes where the backdrop
 // goes: behind everything, full bleed, panning with the camera, with no edges.
-const ROOM_VISTA = { W2: 'gateCity' };
+const ROOM_VISTA = {
+  W2: 'gateCity',
+  // the crystal cave (quest 1): the mouth in the kingdom's rock, and the view
+  // back out of the dark. Both paintings are queued in ART_QUEUE §2c; until
+  // they land the rooms borrow their zone's atlas cell, and the depth doors
+  // work either way — the walk aims at whatever backdrop is actually there.
+  A5: 'caveMouth',
+  CV1: 'caveExit',
+};
 
 // ===========================================================================
 // THE POUR — the Foundry's molten iron, running continuously behind the play.
@@ -4196,7 +4222,29 @@ function drawRoomProp() {
 // fraction of it — so the vanishing point follows the backdrop wherever the
 // camera has panned it to, instead of being a screen position that only lines
 // up from one spot in the room.
-const GATE_ROOM = { W2: { at: 0.90, to: 'A0', gx: 0.472, gy: 0.93 } };
+// ---------------------------------------------------------------------------
+// THE DEPTH DOOR — the one mechanic for walking INTO the background, and the
+// owner's ruling is that it is load-bearing: "we will keep using it." So it is
+// a TABLE, not a special case. Each entry is a doorway standing in a room's
+// backdrop; UP in front of it walks her in (the authored back-walk), the room
+// changes under the fade, and she arrives at a stated fraction of the target
+// room rather than at a hard-coded pixel.
+//
+//   at  — where the door stands, as a fraction of the room's width
+//   to  — the room the walk arrives in
+//   gx/gy — the vanishing point inside the backdrop painting (vista-relative)
+//   ax  — arrival x in the TARGET room, as a fraction of ITS width.
+//         Omitted = x=40, the original city-gate behaviour.
+//
+// Two doors may face each other (A5 <-> CV1, the crystal cave) and the pair is
+// a two-way passage; a door may also be one-way by simply having no partner
+// (W2 -> A0, the opening — the city gates close behind her). tests/crystal.cjs
+// drives a full round trip; tests/deadend.cjs carries these as graph edges.
+const GATE_ROOM = {
+  W2:  { at: 0.90, to: 'A0',  gx: 0.472, gy: 0.93 },
+  A5:  { at: 0.64, to: 'CV1', gx: 0.50,  gy: 0.86, ax: 0.10 },
+  CV1: { at: 0.10, to: 'A5',  gx: 0.50,  gy: 0.86, ax: 0.64 },
+};
 function gateTarget(G2) {
   const v = G._vista;
   if (!v) return { x: 960 * 0.5, y: 540 * 0.72 };
@@ -4219,6 +4267,33 @@ function gateEnter() {
   if (typeof hzdSay === 'function') hzdSay('purr', 0);
   return true;
 }
+// Every depth door advertises itself: a soft glimmer where it stands, and an
+// UP chevron once she is close enough to use it. Without this a door in a
+// painting is a secret — the city gate only got away with it because the
+// tutorial chip pointed at it, and new doors are not tutorials. Drawn in
+// world space, from the same pass as the projectiles.
+function drawGatePrompt() {
+  const def = GATE_ROOM[G.roomId];
+  if (!def || G.gateWalk || !player || player.dead) return;
+  const gx = G.roomDef.w * TILE * def.at;
+  const gy = (G.roomDef.h - 2) * TILE;
+  const d = Math.abs(player.x + player.w / 2 - gx);
+  if (d > 260) return;
+  const near = d < 90, t = performance.now() / 1000;
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  c.globalAlpha = (near ? 0.85 : 0.4) * (0.7 + Math.sin(t * 2.4) * 0.3);
+  const g2 = c.createRadialGradient(gx, gy - 30, 2, gx, gy - 30, 42);
+  g2.addColorStop(0, 'rgba(255,240,200,0.8)'); g2.addColorStop(1, 'rgba(255,220,140,0)');
+  c.fillStyle = g2; c.beginPath(); c.arc(gx, gy - 30, 42, 0, 7); c.fill();
+  if (near) {
+    c.globalAlpha = 0.95;
+    c.fillStyle = '#fff2cf';
+    c.font = 'bold 20px monospace'; c.textAlign = 'center';
+    c.fillText('↑', gx, gy - 44 + Math.sin(t * 3.2) * 3);
+  }
+  c.restore();
+}
 const GATE_WALK = 2.2;
 function updateGateWalk(dt) {
   const g = G.gateWalk; if (!g) return;
@@ -4229,9 +4304,15 @@ function updateGateWalk(dt) {
     // AND SHE COMES OUT OF THE OTHER SIDE OF THE GATE. loadRoom keeps whatever
     // x she had, and she had the far right of a wider room — which put her past
     // the right edge of the meadow and bounced her straight through it into the
-    // next room. Walking in through the gates has to arrive INSIDE the city.
+    // next room. Walking in through a door has to arrive INSIDE the far room:
+    // at the door's declared arrival fraction (ax), clamped into the room so a
+    // mis-typed table entry can never strand her in a wall.
     if (player) {
-      player.x = 40; player.vx = 0; player.vy = 0;
+      const rw = G.roomDef.w * TILE;
+      const ax = (g.def && g.def.ax != null)
+        ? Math.round(rw * g.def.ax - player.w / 2) : 40;
+      player.x = clamp(ax, TILE + 4, rw - TILE - 4 - player.w);
+      player.vx = 0; player.vy = 0;
       player.face = player.faceVis = 1;
       player.lastSafe = { x: player.x, y: player.y };
     }
@@ -4583,6 +4664,39 @@ function drawStatics(P) {
       c.fillStyle = P.glow; c.globalAlpha = 0.7;
       for (let k = 0; k < 3; k++) c.fillRect(s.x + 4, s.y + 4 + k * 5, s.w - 8 - k * 5, 2);
       c.globalAlpha = 1;
+    } else if (s.type === 'pillar') {
+      // THE PILLAR — pure crystal, shining at the end of the dark cave. Three
+      // spears of white light out of a rock socle, breathing; the shine IS the
+      // landmark, which is why the cave is dark around it. Drawn procedurally
+      // as additive light (the allowed channel); an authored plate is queued.
+      const pu = 0.5 + Math.sin(performance.now() / 700 + s.t) * 0.5;
+      c.fillStyle = '#1a222c';
+      c.beginPath();
+      c.moveTo(s.x - 6, s.y + s.h); c.lineTo(s.x + 4, s.y + s.h - 14);
+      c.lineTo(s.x + s.w - 4, s.y + s.h - 14); c.lineTo(s.x + s.w + 6, s.y + s.h);
+      c.closePath(); c.fill();
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      const spears = [[0.5, 1.0, 0], [0.24, 0.62, 0.4], [0.78, 0.7, 0.9]];
+      for (const [fx2, fh, ph] of spears) {
+        const bx = s.x + s.w * fx2, tipY = s.y + s.h * (1 - fh);
+        const g3 = c.createLinearGradient(bx, s.y + s.h, bx, tipY);
+        g3.addColorStop(0, 'rgba(150,200,255,0.12)');
+        g3.addColorStop(0.65, 'rgba(220,240,255,' + (0.5 + pu * 0.25) + ')');
+        g3.addColorStop(1, 'rgba(255,255,255,' + (0.85 + pu * 0.15) + ')');
+        c.fillStyle = g3;
+        c.shadowColor = '#cfe8ff'; c.shadowBlur = 14 + pu * 10 + Math.sin(ph * 7) * 2;
+        const hw = 7 * fh + 3;
+        c.beginPath();
+        c.moveTo(bx - hw, s.y + s.h - 12);
+        c.lineTo(bx - hw * 0.35, tipY + 6); c.lineTo(bx, tipY);
+        c.lineTo(bx + hw * 0.35, tipY + 6); c.lineTo(bx + hw, s.y + s.h - 12);
+        c.closePath(); c.fill();
+      }
+      c.shadowBlur = 0;
+      c.restore();
+      if (chance(0.12)) addPart(s.x + rnd(0, s.w), s.y + rnd(0, s.h * 0.7),
+        rnd(-8, 8), rnd(-26, -6), 0.6, '#dff2ff', 1.7, -30, true);
     } else if (s.type === 'secret') {
       const d = player ? Math.hypot(player.x - s.x, player.y - s.y) : 999;
       if (chance(0.08)) addPart(s.x + rnd(0, 24), s.y + rnd(0, 24), rnd(-10, 10), rnd(-30, -5), 0.5, '#ffd76a', 1.8, -20, true);
@@ -5397,13 +5511,52 @@ function lightAt(x, y, r, color, a) {
   c.globalAlpha = a; c.fillStyle = g;
   c.fillRect(x - r, y - r, r * 2, r * 2);
 }
+// THE AURA SENSE. While she holds crystal light — the quarried shard on the
+// way back, then the forged sword, then the joined blade — the world shows
+// its allegiances. She glows halo-white; hostile machines carry a faint
+// purple glow, guardians a reddish one, and the woken and the purified a
+// blue one. Deliberately QUIET (the owner: "it shouldn't be obvious. It's
+// just a glow") — low alpha in the additive pass, a slow shared breath, no
+// outlines. The infected sages' black-halo-with-ember variant hangs off the
+// same sense when the sages land; black cannot be additive, so theirs will
+// be a dark ring pass of its own.
+function auraSense() {
+  if (!G.save) return false;
+  const f = G.save.flags || {};
+  return !!(f.crystal || f.crystal2 || (G.save.bag && G.save.bag.cshard));
+}
 function drawLights(P) {
   c.save(); c.globalCompositeOperation = 'lighter';
   if (player && !player.dead)
     lightAt(player.x + 12, player.y + 18, 150, P.glow, 0.13 + (player.dashT > 0 ? 0.14 : 0) + (player.healT > 0 ? 0.12 : 0));
+  G._auraCount = 0;
+  if (auraSense() && player && !player.dead && G.state !== 'FILM') {
+    const pu = 0.8 + Math.sin(performance.now() / 640) * 0.2;
+    lightAt(player.x + player.w / 2, player.y + player.h / 2, 130, '#ffffff', 0.16 * pu);
+    G._auraCount++;
+    for (const e of G.enemies) {
+      if (e.dead) continue;
+      lightAt(e.x + e.w / 2, e.y + e.h / 2, 46 + Math.max(e.w, e.h) * 0.4, '#b06aff', 0.13 * pu);
+      G._auraCount++;
+    }
+    if (G.boss && !G.boss.dead && G.boss.st !== 'dorm' && G.boss.st !== 'intro') {
+      // a dormant guardian keeps its secret — the halo lights when IT wakes
+      const pet = typeof isPet === 'function' && isPet(G.boss);
+      lightAt(G.boss.x + G.boss.w / 2, G.boss.y + G.boss.h / 2,
+        70 + Math.max(G.boss.w, G.boss.h) * 0.35,
+        pet ? '#57a8ff' : '#ff5f6d', (pet ? 0.12 : 0.14) * pu);
+      G._auraCount++;
+    }
+    for (const s of G.statics) {
+      if (s.type !== 'npc' || !npcLive(s)) continue;
+      lightAt(s.x + s.w / 2, s.y + s.h / 2, 52, '#57a8ff', 0.12 * pu);
+      G._auraCount++;
+    }
+  }
   for (const p of G.projs) lightAt(p.x, p.y, 62, p.color, 0.4);
   if (G.boomer) lightAt(G.boomer.x, G.boomer.y, 72, '#e8f4ff', 0.5);
   for (const s of G.statics) {
+    if (s.type === 'pillar') lightAt(s.x + s.w / 2, s.y + s.h * 0.4, 210, '#cfe8ff', 0.5);
     if (s.type === 'bench') lightAt(s.x + s.w / 2, s.y, 80, '#aef7d8', 0.22);
     else if (s.type === 'mod') lightAt(s.x + 12, s.y + 12, 90, P.glow, 0.4);
     else if (s.type === 'chest' && !s.opened) lightAt(s.x + s.w / 2, s.y + 10, 55, '#ffd76a', 0.28);
@@ -5527,6 +5680,7 @@ function drawWorldFrame() {
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
   for (const p of G.projs) p.draw(c);
   if (G.boomer && typeof drawBoomer === 'function') drawBoomer(c);
+  if (typeof drawGatePrompt === 'function') drawGatePrompt();
   if (typeof drawRoarFX === 'function') drawRoarFX(c);
   // the player is drawn AFTER the cinematic grade (bloom + zone wash) so she
   // stays solid and rich instead of being swallowed by the atmosphere — the

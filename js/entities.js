@@ -647,6 +647,7 @@ class Player {
     this.clawT = Math.max(0, this.clawT - dt);
     this.clawCD = Math.max(0, this.clawCD - dt);
     this.pounceT = Math.max(0, this.pounceT - dt);
+    G._pillarToldT = Math.max(0, (G._pillarToldT || 0) - dt);
     const heroP = typeof isHero === 'function' && isHero();
     if (inP('CLAW') && this.clawCD <= 0 && this.clawT <= 0 && this.volts >= 30) {
       this.volts -= 30;
@@ -997,6 +998,16 @@ class Player {
           if (e.hp <= 0) e.die(kx, ky);
         }
       }
+      // the pillar shrugs off ordinary claws — and SAYS so, because a wall
+      // that eats hits silently reads as a bug rather than a lock. Sparks fly
+      // on every hit; the hint line is throttled so it teaches, not nags.
+      for (const s2 of G.statics) {
+        if (s2.type !== 'pillar' || this.swing.pilHit || !aabb(hb, s2)) continue;
+        this.swing.pilHit = true;                       // one clink per swing
+        burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 6, '#bfe9ff', 180, 0.22, 220, 2, true);
+        sfx('no');
+        if ((G._pillarToldT || 0) <= 0) { G._pillarToldT = 3; G.toast(t('pl_hint')); }
+      }
       // WHIFF. A miss used to be silent, which made a missed swing feel like a
       // dropped input rather than a mistake. The blade now cuts air on the frame
       // the window closes, and only if nothing was struck.
@@ -1149,6 +1160,27 @@ class Player {
     const t0y = Math.floor((cy - R) / TILE), t1y = Math.floor((cy + R) / TILE);
     for (let ty = t0y; ty <= t1y; ty++) for (let tx = t0x; tx <= t1x; tx++)
       if (tileAt(tx, ty) === 'B') G.breakTile(tx, ty);
+    // THE PILLAR ANSWERS ONLY TO THIS. Ordinary claws glance off pure crystal
+    // (see the swing's hint below); the supercharged claw is the quarry tool —
+    // the owner's design, and the reason the burst was taught before the cave.
+    // Shattering is once per save (flags.pl_*), and the shard goes into the
+    // BAG so the inventory screen shows what she is carrying back to Ratchet.
+    for (let i = G.statics.length - 1; i >= 0; i--) {
+      const s = G.statics[i];
+      if (s.type !== 'pillar') continue;
+      const sx = s.x + s.w / 2, sy = s.y + s.h / 2;
+      if (Math.hypot(sx - cx, sy - cy) > R + 60) continue;
+      G.statics.splice(i, 1);
+      G.save.flags['pl_' + (s.extra || 'cshard')] = 1;
+      sfx('glass');
+      cam.shake = Math.max(cam.shake, 11);
+      G.flash = Math.max(G.flash, 0.65);
+      G.hitStop = Math.max(G.hitStop, 0.1);
+      burst(sx, sy, 42, '#ffffff', 400, 0.9, 160, 4, true);
+      burst(sx, sy, 26, '#bfe9ff', 320, 1.2, 60, 3, true);
+      if (typeof padRumble === 'function') padRumble(0.8, 0.7, 360);
+      if (typeof questTake === 'function') questTake('cshard');
+    }
     if (hasSkill('wave')) {
       for (let k = 0; k < 8; k++) {
         const a = k / 8 * Math.PI * 2;
@@ -2578,7 +2610,11 @@ class Player {
       // finisher: the X still crosses, but its span is earned — the long
       // version belongs to the Long Rake skill and to the feral claws
       const L3 = sv.combo === 2 ? (far3 ? 92 : 56) : (far3 ? 62 : 44);
-      rakePlace(c, mk3);
+      // captured marks live in body space (aim must fold facing out); the
+      // synthesized fallback is world space (aim is the raw swing angle)
+      rakePlace(c, mk3, marks[0]
+        ? Math.atan2(Math.sin(sv.ang), Math.cos(sv.ang) * (this.faceVis || 1))
+        : sv.ang);
       c.rotate(drift * pd3);
       c.scale(grow, pd3);
       c.translate(-L3 * RAKE_LAG, 0);
@@ -4609,10 +4645,23 @@ const RAKE_CLEAR = 31, RAKE_OUT = 12;
 // how far the arc trails BEHIND the paw, as a fraction of its own length: the
 // claws lead the mark they are making
 const RAKE_LAG = 0.3;
-function rakePlace(c, mk) {
+function rakePlace(c, mk, aim) {
   const r = mk.r || 1;
   const R = Math.max(r + RAKE_OUT, RAKE_CLEAR);
-  c.translate(mk.sx + (mk.x - mk.sx) / r * R, mk.sy + (mk.y - mk.sy) / r * R);
+  let ux = (mk.x - mk.sx) / r, uy = (mk.y - mk.sy) / r;
+  if (aim != null) {
+    // THE MARK FOLLOWS THE AIM, NOT THE PAW. The paw is high in the wind-up
+    // and low in the follow-through, so a mark anchored to it landed over her
+    // head mid-swing and under her feet at the end — reported exactly so:
+    // "scratching under her feet instead of in front of her like a normal
+    // cat." The cut's sweep still comes from the paw's travel; only its HOME
+    // is now two-thirds the swing's aim, one-third the paw — a forward cut
+    // marks forward at chest height, an up-cut above, a pogo below.
+    const bx = Math.cos(aim), by = Math.sin(aim);
+    ux = ux * 0.34 + bx * 0.66; uy = uy * 0.34 + by * 0.66;
+    const n = Math.hypot(ux, uy) || 1; ux /= n; uy /= n;
+  }
+  c.translate(mk.sx + ux * R, mk.sy + uy * R);
   // +x becomes the direction the paw is travelling; -y, after the caller's
   // y-flip by dir, points away from the shoulder, so the crescent bows outward
   c.rotate(mk.a + Math.PI / 2 * mk.dir);
@@ -4623,6 +4672,9 @@ function drawRake(c, pl, mk) {
   if (!im || !im.naturalWidth) return;
   const sv = pl.swingVis, p = clamp(1 - sv.t / sv.t0, 0, 1);
   if (p < 0.06) return;                       // nothing during the wind-up
+  // the swing's aim in the MARK's (body) space: the body transform mirrors
+  // with facing, so forward is +x either way — fold the facing out of ang
+  const abody = Math.atan2(Math.sin(sv.ang), Math.cos(sv.ang) * (pl.faceVis || 1));
   // snaps in, holds a moment, thins away — a cut does not fade evenly
   const a = p < 0.22 ? p / 0.22 : Math.pow(1 - (p - 0.22) / 0.78, 1.5);
   if (a <= 0.02) return;
@@ -4632,7 +4684,7 @@ function drawRake(c, pl, mk) {
   // light — the one channel the art rules leave procedural (§0.0) — and never
   // as the claw sheet, which is claw art and would put a cat's rake on a
   // sword's cut.
-  if (sv.wield) { drawCrystalArc(c, pl, mk, sv, p); return; }
+  if (sv.wield) { drawCrystalArc(c, pl, mk, sv, p, abody); return; }
   // THE LONG RAKE IS EARNED. The wide shining arc is the best-looking thing in
   // the sheet, and spending it on every third punch from the first room leaves
   // nothing to grow into. The default finisher is a heavier version of the same
@@ -4655,7 +4707,7 @@ function drawRake(c, pl, mk) {
   const w = r[2] / r[3] * h;
   c.save();
   c.globalCompositeOperation = 'lighter';
-  rakePlace(c, mk);
+  rakePlace(c, mk, abody);
   c.scale(1, dir);                            // bow away from the shoulder
   // The finisher already has its own authored identity — the golden crossing X
   // drawn below. This sweep sits UNDER it at half strength so the third beat
@@ -4677,13 +4729,13 @@ function drawRake(c, pl, mk) {
 // leading edge, with a cold blue wash behind it. The joined blade (wield 2)
 // cuts TWICE — a second crescent trails the first by a beat, which is the
 // visual twin of the doubled whoosh in audio.js. All additive; no body art.
-function drawCrystalArc(c, pl, mk, sv, p) {
+function drawCrystalArc(c, pl, mk, sv, p, abody) {
   const heavy = sv.combo === 2;
   const L = (heavy ? 50 : sv.combo === 1 ? 38 : 33) * (sv.wield === 2 ? 1.15 : 1);
   const TH = heavy ? 13 : 9;
   c.save();
   c.globalCompositeOperation = 'lighter';
-  rakePlace(c, mk);
+  rakePlace(c, mk, abody);
   c.scale(1, mk.dir);
   const passes = sv.wield === 2 ? [0, 0.16] : [0];
   for (const off of passes) {

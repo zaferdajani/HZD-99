@@ -27,6 +27,10 @@ const { chromium } = require('playwright');
       const R = ROOMS[id]; if (!R || !R.ents) continue;
       for (const e of R.ents) {
         if (e[0] === 'item') (items[e[3]] = items[e[3]] || []).push(id);
+        // the crystal pillar is a fetch SOURCE too: quarrying it (the
+        // supercharged claw) is what puts its shard in the bag — the item is
+        // real, it just is not lying on the floor
+        if (e[0] === 'pillar') (items[e[3] || 'cshard'] = items[e[3] || 'cshard'] || []).push(id);
         else if (e[0] === 'npc') (npcs[e[3]] = npcs[e[3]] || []).push(id);
         else (foes[e[0]] = foes[e[0]] || []).push(id);
       }

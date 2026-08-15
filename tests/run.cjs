@@ -8,8 +8,25 @@
 //
 // A local server must be serving the repo root on :8220 —
 //   npx http-server -p 8220 -s &
-const { execFileSync } = require('child_process');
+const { execFileSync, execSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
+
+// THE SERVER DIES. Not sometimes — regularly, mid-suite, and every time it
+// does, a dozen harnesses report ERR_CONNECTION_REFUSED and the run reads as
+// a code failure when it is an infrastructure one. So the runner OWNS the
+// server now: before every harness it checks :8220 and revives it if it has
+// gone, which turns "restart the server and rerun" from a human chore into a
+// line of code.
+function ensureServer() {
+  try {
+    execSync('curl -s -o /dev/null -m 2 http://127.0.0.1:8220/index.html', { stdio: 'ignore' });
+    return;
+  } catch (e) { /* dead or never started */ }
+  const child = spawn('npx', ['http-server', '-p', '8220', '-s'],
+    { cwd: path.join(__dirname, '..'), detached: true, stdio: 'ignore' });
+  child.unref();
+  execSync('sleep 4');
+}
 
 const SUITE = [
   ['regress',   'boots both builds, walks every room in ROOMS, watches for page errors'],
@@ -57,6 +74,7 @@ for (const [name, what] of run) {
   const file = path.join(__dirname, name + '.cjs');
   if (!fs.existsSync(file)) { console.log('· ' + name + ' — missing'); continue; }
   console.log('\n── ' + name + '  — ' + what);
+  ensureServer();
   try {
     console.log(execFileSync('node', [file], { encoding: 'utf8', timeout: 300000 }).trim());
   } catch (e) {

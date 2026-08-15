@@ -47,6 +47,11 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
   // unreachable from the waking rooms; it is injected here, marked, and the
   // one-way-ness is BY DESIGN: the opening cannot be re-entered.
   R.W2 = Object.assign({}, R.W2, { exits: Object.assign({ G: 'A0' }, R.W2.exits) });
+  // ...and the DEPTH DOORS proper (GATE_ROOM pairs): A5 <-> CV1 is the crystal
+  // cave, a two-way pair of background doors. Injected as G-edges both ways so
+  // the cave is reachable in the graph and does not read as a one-way trap.
+  R.A5 = Object.assign({}, R.A5, { exits: Object.assign({ G: 'CV1' }, R.A5.exits) });
+  R.CV1 = Object.assign({}, R.CV1, { exits: Object.assign({ G: 'A5' }, R.CV1.exits) });
   const ids = Object.keys(R);
   const OPP = { L: 'R', R: 'L', T: 'B', B: 'T' };
   let bad = 0;

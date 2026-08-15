@@ -39,6 +39,28 @@ const { chromium } = require('playwright');
 
   console.log('── tap  — tap where a thing is drawn and that thing happens');
 
+  // ---- a BUTTON is a hold, a MENU TAP is a tap ----------------------------
+  // The one-tap Mind Node fix made tPress queue an end-of-frame RELEASE —
+  // correct for menus, catastrophic for the game buttons, which were routed
+  // through the same function: JUMP read as let-go one frame after the press
+  // and the variable-jump cut turned every touch jump into a short hop
+  // ("the jump is so much shorter now"). Buttons go through tHold now; this
+  // pins the two contracts apart so they cannot be re-merged silently.
+  const holdSem = await page.evaluate(() => {
+    G.state = 'PLAY'; G.wake = null;
+    tPress('VOK');                       // menu-tap semantics: self-releasing
+    update(1 / 30); clearP();            // clearP is the main loop's frame end
+    const tapCleared = !keys.VOK;
+    tHold('VJUMP');                      // button semantics: the finger owns it
+    update(1 / 30); clearP(); update(1 / 30); clearP(); update(1 / 30); clearP();
+    const stillHeld = !!keys.VJUMP;
+    const notQueued = !(TOUCH.tapRel || []).includes('VJUMP');
+    keys.VJUMP = 0;
+    return { tapCleared, stillHeld, notQueued };
+  });
+  check('a tap releases itself; a held button stays down until the finger lifts',
+    holdSem, { tapCleared: true, stillHeld: true, notQueued: true });
+
   // ---- the pause menu: tapping row i selects row i, for every row ----------
   const pause = await page.evaluate(() => {
     G.state = 'PAUSE';
