@@ -71,6 +71,12 @@ const WWW = path.join(ROOT, 'www');
     };
     for (const k in (MEDIA_SRC.images || {})) push(k, MEDIA_SRC.images[k]);
     for (const k in (MEDIA_SRC.audio || {})) push(k, MEDIA_SRC.audio[k]);
+    // ...and the quarter-scale tier, which is named by window.LOWRES rather
+    // than by MEDIA_SRC. It is 68 more files that the game genuinely asks for,
+    // and a packer that missed them would leave the app drawing procedural
+    // fallbacks where the web build draws art — RULE ONE, exactly.
+    const L = window.LOWRES || {};
+    for (const k in L) push(k, L[k]);
     return out;
   });
   const missing = named.filter(p => !fs.existsSync(path.join(WWW, p)));

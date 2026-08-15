@@ -92,6 +92,17 @@ right end state is "all of it". `sw.js` counts art and streams in separate
 buckets for the same reason: one ceiling let a handful of 4 MB tracks evict the
 entire art set, and the next open bought the same bytes twice.
 
+And there is a **quarter-scale copy of nearly all of that art** —
+`tools/lowres.cjs`, 68 webp files, **0.55 MB for 24.2 MB of sheets**. It is
+front-loaded ahead of everything, so within a second or two every room in the
+game can be drawn correctly rather than falling back to the procedural
+renderer, and the full sheets sharpen it from behind. Six sheets are excluded
+and must stay excluded: the guardian parts atlases are addressed by **absolute
+pixel rect**, so a smaller copy assembles the boss out of the wrong quarter of
+itself. `tests/lowres.cjs` re-derives that rule from the source rather than
+trusting the list. **The whole delivery path is `docs/DELIVERY.md`; regenerate
+the tier with `node tools/lowres.cjs && node build.cjs` whenever art changes.**
+
 ## Architecture
 
 | file | what lives there |
@@ -102,7 +113,7 @@ entire art set, and the next open bought the same bytes twice.
 | `beast/eagle/glaciere/furnace/prism/mother.js` | one guardian's art and moves each |
 | `world.js` | every room: tile grid, entity list, exits |
 | `touch.js` | the on-screen controller, the power wheel, layout editor |
-| `preload.js` | room-graph prefetch: the art for rooms she can REACH, fetched before she reaches them |
+| `preload.js` | room-graph prefetch and the low tier: see `docs/DELIVERY.md` |
 | `i18n.js` | all six languages. Never hard-code display text |
 | `trials.js` | the puzzle games (memory / cubes / balances) and Mind Nodes |
 | `braid.js` | THE BRAID — the run's ledger and what it changes |

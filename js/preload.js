@@ -52,12 +52,14 @@
 // exchange for a saving nobody measured. If that ever changes, measure first.
 
 const PRE = {
-  q: [],            // [key, priority] — sorted, deduped
-  seen: {},         // keys already queued or fetched
+  q: [],            // [key, priority, low?] — sorted, deduped
+  seen: {},         // keys already queued or fetched at full size
+  seenLow: {},      // ...and at quarter size, which is a separate race
   inflight: 0,
   max: 2,           // concurrent image requests
   depth: 3,         // how many doors ahead
   far: true,        // fetch the rest of the game once the near set is done
+  lowAll: true,     // ...and the whole game at quarter size before any of it
   on: true,
   started: 0,
 };
@@ -66,19 +68,25 @@ const PRE = {
 // with the connection and Save-Data turns the whole thing off but for the next
 // door. A packaged app pays nothing — the files are already on the device — so
 // it prefetches everything immediately and the only cost is decode time.
+// THE LOW TIER IS ALMOST FREE AND IT IS THE WHOLE GAME. 0.55 MB buys every
+// sheet in every room at quarter size — less than one of today's heavy rooms —
+// so `lowAll` stays on even where `far` is switched off. A 2g connection is
+// exactly the case where "all of it, roughly" beats "a third of it, sharply".
+// Save-Data is the one exception, because there the player has asked, and 550
+// unrequested kilobytes is still 550 unrequested kilobytes.
 function preloadPolicy() {
   // Capacitor / desktop shell: assets are local, there is no data plan to spend
   const packaged = (typeof window !== 'undefined') &&
     (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:');
-  if (packaged) return { depth: 99, far: true, max: 4 };
+  if (packaged) return { depth: 99, far: true, max: 4, lowAll: false };  // no race to win locally
   const c = (typeof navigator !== 'undefined') &&
     (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
-  if (!c) return { depth: 3, far: true, max: 2 };            // unknown: assume desktop-ish
-  if (c.saveData) return { depth: 1, far: false, max: 1 };   // they asked. Respect it.
+  if (!c) return { depth: 3, far: true, max: 2, lowAll: true };            // unknown: assume desktop-ish
+  if (c.saveData) return { depth: 1, far: false, max: 1, lowAll: false };  // they asked. Respect it.
   const t = c.effectiveType || '4g';
-  if (t === 'slow-2g' || t === '2g') return { depth: 1, far: false, max: 1 };
-  if (t === '3g') return { depth: 2, far: false, max: 2 };
-  return { depth: 3, far: true, max: 2 };
+  if (t === 'slow-2g' || t === '2g') return { depth: 1, far: false, max: 1, lowAll: true };
+  if (t === '3g') return { depth: 2, far: false, max: 2, lowAll: true };
+  return { depth: 3, far: true, max: 2, lowAll: true };
 }
 
 // Rooms within `depth` doors, breadth-first, returned with their distance.
@@ -100,9 +108,23 @@ function preloadNear(from, depth) {
 
 function preloadPush(key, pri) {
   if (!key || PRE.seen[key]) return;
-  if (typeof mediaHas === 'function' && mediaHas(key)) { PRE.seen[key] = 1; return; }
+  // a key standing in at quarter size still wants its full sheet, so mediaHas
+  // alone is not the answer any more — MEDIA_LOW says which one is there
+  const stand = (typeof MEDIA_LOW !== 'undefined') && MEDIA_LOW[key] === 2;
+  if (!stand && typeof mediaHas === 'function' && mediaHas(key)) { PRE.seen[key] = 1; return; }
   PRE.seen[key] = 1;
   PRE.q.push([key, pri]);
+}
+// Priority -1: BEFORE the nearest full-size sheet, always. The entire low tier
+// is smaller than one heavy room, so front-loading it costs a moment and buys
+// a game in which nothing is ever drawn by the wrong renderer.
+function preloadPushLow(key) {
+  if (!key || PRE.seenLow[key]) return;
+  const L = (typeof window !== 'undefined') && window.LOWRES;
+  if (!L || !L[key]) return;                       // no small copy exists
+  PRE.seenLow[key] = 1;
+  if (typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[key]) return;
+  PRE.q.push([key, -1, 1]);
 }
 
 // Called when a room loads. Rebuilds the queue around where she is now.
@@ -110,13 +132,17 @@ function preloadRoom(roomId) {
   const M = (typeof window !== 'undefined') && window.ROOM_ASSETS;
   if (!M || !PRE.on) return;
   const P = preloadPolicy();
-  PRE.depth = P.depth; PRE.far = P.far; PRE.max = P.max;
+  PRE.depth = P.depth; PRE.far = P.far; PRE.max = P.max; PRE.lowAll = P.lowAll;
+  // THE WHOLE GAME, ROUGHLY, FIRST. Not the neighbourhood — all of it, because
+  // all of it is 0.55 MB and a room she reaches in a minute is worth the same
+  // twelve kilobytes as the one next door.
+  if (PRE.lowAll) for (const id in M.rooms) for (const k of M.rooms[id].keys) preloadPushLow(k);
   // a re-sort rather than a reset: anything already queued keeps its place in
   // `seen`, so walking back and forth between two rooms does not re-enqueue
   for (const [id, d] of preloadNear(roomId, PRE.depth)) {
     const r = M.rooms[id];
     if (!r) continue;
-    for (const k of r.keys) preloadPush(k, d);
+    for (const k of r.keys) { preloadPushLow(k); preloadPush(k, d); }
   }
   if (PRE.far) {
     for (const id in M.rooms) for (const k of M.rooms[id].keys) preloadPush(k, 9);
@@ -184,10 +210,20 @@ function preloadTick() {
   const src = (typeof MEDIA_SRC !== 'undefined') && MEDIA_SRC.images;
   if (!src) return;
   while (PRE.q.length && PRE.inflight < max) {
-    const [key] = PRE.q.shift();
+    const [key, , low] = PRE.q.shift();
     const url = src[key];
     if (!url) continue;
-    if (typeof mediaHas === 'function' && mediaHas(key)) continue;
+    if (low) {
+      // quarter size: a dozen kilobytes, and the only thing standing between a
+      // room and being drawn correctly rather than procedurally
+      if (typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[key]) continue;
+      PRE.inflight++;
+      try { mediaLow(key); } catch (e) {}
+      setTimeout(() => { PRE.inflight = Math.max(0, PRE.inflight - 1); }, 60);
+      continue;
+    }
+    if (typeof mediaHas === 'function' && mediaHas(key)
+        && !(typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[key] === 2)) continue;
     PRE.inflight++;
     // Going through the lazy map rather than around it: mediaFetch() is what
     // owns the pending set, the onload bookkeeping and the tile-repaint hook,

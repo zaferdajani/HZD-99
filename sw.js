@@ -4,17 +4,22 @@
 const CACHE = 'clawbyte-v2';
 // TWO BUCKETS, BECAUSE THE PACKAGE IS TWO DIFFERENT PROBLEMS.
 //
-// Measured 2026-08-15: 111 art files totalling 32 MB, and 125 music/video files
-// totalling 100 MB. One cache with one ceiling put those in competition, and the
-// streams won every time — a handful of 4 MB tracks would evict the entire art
-// set, so the next open re-downloaded sheets the prefetcher had already paid
-// for. On mobile data that is the same bytes bought twice.
+// Measured 2026-08-15: 179 art files totalling 32.4 MB (111 full-size sheets
+// plus the 68-file quarter-scale tier, which is only 0.55 MB of that), and 152
+// music/video files totalling 100 MB. One cache with one ceiling put those in
+// competition, and the streams won every time — a handful of 4 MB tracks would
+// evict the entire art set, so the next open re-downloaded sheets the
+// prefetcher had already paid for. On mobile data that is the same bytes
+// bought twice.
 //
 // So art and streams are counted separately:
 //   ART     all of it fits, and it is what the game needs to LOOK right. Held.
+//           The small copies live in this bucket too and must never be evicted
+//           in favour of a full sheet — they are what makes a cold room correct
+//           on the frame it appears, and they cost 8 KB each.
 //   STREAM  4 MB each and played through once. A handful of recent ones is all
 //           the value there is; the rest re-fetch on demand as they always did.
-const CACHE_MAX_ART = 130;      // > the 111 that exist: the whole art set stays
+const CACHE_MAX_ART = 220;      // > the 179 that exist: the whole art set stays
 const CACHE_MAX_STREAM = 6;     // ~24 MB of the most recently heard/seen
 const STREAM_RE = /\.(m4a|ogg|mp3|wav|mp4|webm|mov)$/i;
 async function trim() {

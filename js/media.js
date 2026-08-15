@@ -277,15 +277,65 @@ const MEDIA_OPTIONAL = new Set([
   'hum_servo', 'hum_ratchet', 'hum_mono', 'hum_sage', 'hum_patch', 'hum_lumen',
 ]);
 const MEDIA_RAW = {}, MEDIA_PEND = {}, MBUF = {};
-function mediaFetch(k) {
-  if (MEDIA_RAW[k] || MEDIA_PEND[k] || !MEDIA_SRC.images[k]) return;
+// ---------------------------------------------------------------------------
+// TWO RESOLUTIONS, AND WHICHEVER ARRIVES FIRST IS DRAWN.
+//
+// Until now a sheet that had not landed meant the PROCEDURAL fallback was
+// drawn — a different picture, not a rougher one — and the swap when the real
+// art arrived read as the room changing its mind. tools/lowres.cjs bakes a
+// quarter-scale copy of every sheet that is safe to have one, and the whole
+// game's art at that size is 0.55 MB against 24.2 MB. So a phone can hold the
+// entire world at low resolution for less than one of today's heavy rooms.
+//
+//   MEDIA_LOW[k]  0/undefined  nothing tried
+//                 1            the small copy is in flight
+//                 2            the small copy is STANDING IN for the full one
+//                 3            the full sheet is here; nothing more to do
+//
+// Everything downstream is dimension-agnostic on purpose: sheets are sliced
+// proportionally (`im.width / cols`) everywhere except the six guardian parts
+// atlases, which use absolute pixel rectangles — and those six have no small
+// copy at all. tests/lowres.cjs re-derives that exclusion from the source, so
+// a seventh atlas with a rect table cannot quietly acquire one.
+const MEDIA_LOW = {};
+// A stand-in has to be forgotten by everything that CACHED a derivative of it,
+// or the room keeps the soft version forever and the upgrade never shows.
+function mediaDirty(k) {
+  try { delete SOFT_ART[k]; } catch (e) {}
+  try { delete ATLAS_PROC[k]; } catch (e) {}
+  // the tile layer is baked once per room — a sheet that lands after that
+  // first render would never appear, so force a repaint when art arrives
+  if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {
+    try { tileDirty = true; } catch (e) {}
+  }
+}
+function mediaLow(k) {
+  const L = (typeof window !== 'undefined') && window.LOWRES;
+  if (!L || !L[k] || MEDIA_RAW[k] || MEDIA_LOW[k]) return;
+  MEDIA_LOW[k] = 1;
+  const im = new Image();
+  im.onload = () => {
+    if (MEDIA_RAW[k]) return;              // the full one won the race
+    MEDIA_RAW[k] = im; MEDIA_LOW[k] = 2;
+    mediaDirty(k);
+  };
+  im.onerror = () => { MEDIA_LOW[k] = 0; };  // no webp on this browser: no loss
+  im.src = L[k];
+}
+// `urgent` means SOMETHING IS DRAWING THIS RIGHT NOW — the lazy map's own
+// accessor sets it. Only then is the small copy worth a second request; the
+// prefetcher has time and asks for full size directly.
+function mediaFetch(k, urgent) {
+  if (urgent) mediaLow(k);
+  if (MEDIA_RAW[k] && MEDIA_LOW[k] !== 2) return;   // a stand-in still wants the real one
+  if (MEDIA_PEND[k] || !MEDIA_SRC.images[k]) return;
   MEDIA_PEND[k] = 1;
   const im = new Image();
   im.onload = () => {
-    MEDIA_RAW[k] = im;
-    // the tile layer is baked once per room — a sheet that lands after that
-    // first render would never appear, so force a repaint when art arrives
-    if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {
+    const wasLow = MEDIA_LOW[k] === 2;
+    MEDIA_RAW[k] = im; MEDIA_LOW[k] = 3;
+    if (wasLow) mediaDirty(k);
+    else if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {
       try { tileDirty = true; } catch (e) {}
     }
   };
@@ -295,7 +345,7 @@ const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
   get(t, k) {
     if (typeof k !== 'string') return t[k];
     if (t[k]) return t[k];
-    mediaFetch(k);
+    mediaFetch(k, true);
     return undefined;
   },
 }) : MEDIA_RAW;
