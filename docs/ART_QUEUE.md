@@ -208,6 +208,22 @@ is the jet plume** and stays. Scarf, jets, charge aura and claw arcs stay
 procedural overlays — except the scarf/cape, which is BAKED INTO the plates, so
 drawing the procedural scarf on top would double it.
 
+WIRING NOTE (2026-08-15): the crystal arc is LIVE in code and every asset
+above has a hook waiting for it — nothing blocks on art, and nothing needs
+re-plumbing when it lands:
+- §1b-i slash sheets → replace `drawCrystalArc` in js/entities.js (the
+  procedural white crescent is the declared fallback; the function is the
+  single place the swap happens).
+- §1b-ii thrown plate → replace the polygon blades in `drawBoomer`
+  (js/entities.js). Scale law: the thrown blade is BODY LENGTH — the owner
+  already rejected a thrown sprite smaller than the held one.
+- §1d handover video → plays from `NPC_GIFT['A0|ratchet']` in js/game.js,
+  which is where the crystal flag is granted today.
+- The buried half sits in world.js X1 (`['secret', 29, 15, 'crystal2']`);
+  a bespoke ground plate for it can replace the generic glimmer.
+- tests/crystal.cjs measures the arc end-to-end (14 checks) and stays green
+  through any art swap — it reads state, not pixels.
+
 ### 1a. The turnaround — 8 yaw angles, one prompt each  ✅ DONE (both variants)
 `hzd_yaw0 … hzd_yaw7`: 0° (facing screen-right), 45°, 90° (facing camera),
 135°, 180° (facing screen-left), 225°, **270° (directly away — the back the

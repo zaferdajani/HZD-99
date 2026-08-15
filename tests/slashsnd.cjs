@@ -40,15 +40,71 @@ const { chromium } = require('playwright');
       return { peak: +peak.toFixed(3), onsetMs: onset, lenMs: tail, passes: hits.length,
                at: hits.slice(0, 6), edgeKHz: +(zc / 2 / (n / 44100) / 1000).toFixed(1) };
     };
+    // spectral fingerprint over the whole render: centroid via zero-crossings
+    // per window, and the RING — energy above ~1.8 kHz still present after the
+    // cut (150-400 ms), which is the crystal's signature and the claw's absence
+    const finger = async (fire) => {
+      const off = new OfflineAudioContext(1, 44100, 44100);
+      const save = AC; AC = off; MUTED = false;
+      fire();
+      const buf = await off.startRendering();
+      AC = save;
+      const d = buf.getChannelData(0);
+      let zc = 0, n = 22050;
+      for (let i = 1; i < n; i++) if ((d[i] < 0) !== (d[i - 1] < 0)) zc++;
+      const centroid = zc / 2 / (n / 44100);
+      // crude high-band ring: zero-cross rate AND amplitude inside 150-400ms
+      let zr = 0, amp = 0;
+      const a0 = Math.floor(0.15 * 44100), a1 = Math.floor(0.40 * 44100);
+      for (let i = a0 + 1; i < a1; i++) {
+        if ((d[i] < 0) !== (d[i - 1] < 0)) zr++;
+        amp = Math.max(amp, Math.abs(d[i]));
+      }
+      const ringHz = zr / 2 / ((a1 - a0) / 44100);
+      return { centroid: Math.round(centroid), ringHz: Math.round(ringHz), ringAmp: +amp.toFixed(3) };
+    };
     const out = {};
     for (const beat of [0, 1, 2]) {
       player.combo = beat;
       out['slash beat ' + (beat + 1)] = await measure(() => sfx('atk'));
     }
     for (const k of ['hit', 'jump', 'dash']) out['(ref) ' + k] = await measure(() => sfx(k));
+    // ---- THE THREE WEAPONS SOUND LIKE THREE WEAPONS -----------------------
+    // wielded() reads the save flags, so the harness plays the player's whole
+    // arsenal by setting them — the same route the real unlocks will take.
+    player.combo = 0;
+    G.save.flags.crystal = 0; G.save.flags.crystal2 = 0;
+    out.wClaw = await finger(() => sfx('atk'));
+    G.save.flags.crystal = 1;
+    out.wCrystal = await finger(() => sfx('atk'));
+    G.save.flags.crystal2 = 1;
+    out.wDouble = await finger(() => sfx('atk'));
+    G.save.flags.crystal = 0; G.save.flags.crystal2 = 0;
+    out.join = await finger(() => sfx('crystalJoin'));
     return out;
   });
   for (const k in r) console.log(k.padEnd(14), JSON.stringify(r[k]));
+  let bad = 0;
+  const chk = (name, ok, det) => { console.log((ok ? 'ok   ' : 'FAIL ') + name + (det ? '  ' + det : '')); if (!ok) bad++; };
+  // the crystal RINGS after the cut; the claw does not
+  chk('single crystal sustains a glass ring the claw lacks',
+    r.wCrystal.ringAmp > r.wClaw.ringAmp * 2 && r.wCrystal.ringHz > 1200,
+    'claw ' + r.wClaw.ringAmp + ' vs crystal ' + r.wCrystal.ringAmp + ' @' + r.wCrystal.ringHz + 'Hz');
+  // the double rings LOWER than the single — a bigger piece of crystal
+  chk('the double\'s ring sits below the single\'s',
+    r.wDouble.ringHz < r.wCrystal.ringHz * 0.85,
+    r.wDouble.ringHz + ' vs ' + r.wCrystal.ringHz + ' Hz');
+  // three distinct spectral centres — no two weapons share a voice
+  const cs = [['claw', r.wClaw.centroid], ['crystal', r.wCrystal.centroid], ['double', r.wDouble.centroid]];
+  let distinct = true;
+  for (let i = 0; i < 3; i++) for (let k = i + 1; k < 3; k++) {
+    const lo = Math.min(cs[i][1], cs[k][1]), hi = Math.max(cs[i][1], cs[k][1]);
+    if (lo / hi > 0.88) distinct = false;
+  }
+  chk('no two weapons share a spectral centre (>=12% apart)',
+    distinct, cs.map(c => c[0] + ' ' + c[1] + 'Hz').join(', '));
+  chk('the join sting exists and rings', r.join.ringAmp > 0.01, 'ringAmp ' + r.join.ringAmp);
   console.log('pageerrors:', errs.length ? errs.slice(0, 2) : 'none');
   await b.close();
+  if (bad || errs.length) { console.log('FAILED: ' + bad + ' check(s)'); process.exit(1); }
 })();

@@ -323,6 +323,7 @@ function loadRoom(id) {
   // re-aim the prefetcher: the art for the rooms she can now REACH
   if (typeof preloadRoom === 'function') { try { preloadRoom(id); } catch (e) {} }
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
+  G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
   G.wrecks = []; G.recharge = null; G.plats = []; G.saws = []; G.pools = []; G.x1Bridge = false; G.x1T = 0;
   ceilReset();                       // the roof of the last room does not follow you
   fringeMark();                      // and neither does what grew on its edges
@@ -480,7 +481,7 @@ function skillAffordable() {
   const own = G.save.skills || [];
   const unlocked = own.length;
   let best = null;
-  for (const sk of SKILLS) {
+  for (const sk of skillPool()) {
     if (own.indexOf(sk.id) >= 0) continue;
     if (typeof tierOpen === 'function' && !tierOpen(sk.tier, unlocked)) continue;
     if ((G.save.iq || 0) < sk.cost) continue;
@@ -495,7 +496,7 @@ function skillNext() {
   if (!G.save || typeof SKILLS === 'undefined') return null;
   const own = G.save.skills || [], unlocked = own.length;
   let best = null;
-  for (const sk of SKILLS) {
+  for (const sk of skillPool()) {
     if (own.indexOf(sk.id) >= 0) continue;
     if (typeof tierOpen === 'function' && !tierOpen(sk.tier, unlocked)) continue;
     if (!best || sk.cost < best.cost) best = sk;
@@ -654,9 +655,21 @@ function standingTier() { const n = guardiansFelled(); return n >= 3 ? 2 : n >= 
 // the reason npcKey exists: the trader on the waking floor and the trader at
 // the camp are two meetings, and only the second one opens a shop.
 const NPC_GIFT = {
-  // the first unit she ever wakes, on the waking floor: a repair kit. The thing
-  // she needs most, from the one who needed her most.
-  'A0|ratchet': () => { invAdd('kit'); showItem(t('i_kit'), t('i_kitd')); },
+  // THE FIRST UNIT SHE EVER WAKES HANDS HER THE PURIFIER (owner's ruling: the
+  // sword is given by the first NPC). A repair kit still comes with it — the
+  // practical gift rides along quietly; the CARD is the crystal, because the
+  // card is the moment. The white crystal is shaped like a sword; its handle
+  // was built to CONNECT to something, and the game says so on day one so the
+  // buried other half is a promise kept rather than a twist invented later.
+  // The authored handover film (ART_QUEUE §1d) drops in over this hook when
+  // its asset lands; the grant itself never waits on the art.
+  'A0|ratchet': () => {
+    invAdd('kit');
+    G.save.flags.crystal = 1; persist();
+    sfx('chargeReady');
+    burst(player.x + player.w / 2, player.y + player.h / 2, 26, '#ffffff', 280, 0.8, 60, 3, true);
+    showItem(t('i_crystal'), t('i_crystald'));
+  },
   // and the trader at the camp by NULLFANG's door — this is the shop, and it
   // does not exist until the lion's cell has paid for it
   'A3|ratchet': () => { G.toast(t('npc_shop_open')); },
@@ -786,6 +799,18 @@ function doInteract(s) {
     G.save.flags['sr_' + s.extra] = 1;
     G.statics.splice(G.statics.indexOf(s), 1);
     burst(s.x + 12, s.y + 12, 26, '#ffd76a', 280, 0.8, 100, 4, true);
+    // THE OTHER END. Buried in the Crystal Cache — the one secret that is not
+    // a relic. The two halves were made for each other and the join says so
+    // out loud: the reunion sting (audio.js crystalJoin) fires here and
+    // nowhere else in the game.
+    if (s.extra === 'crystal2') {
+      G.save.flags.crystal2 = 1; persist();
+      sfx('crystalJoin');
+      G.flash = Math.max(G.flash, 0.5);
+      burst(s.x + 12, s.y + 12, 34, '#ffffff', 320, 1.0, 40, 4, true);
+      showItem(t('i_crystal2'), t('i_crystal2d'));
+      return;
+    }
     G.grantRelic(s.extra);
   } else if (s.type === 'trial') {
     trialOpen();
@@ -1359,11 +1384,12 @@ function shopSold(it) {
 function effSlots() { return G.save.slots + (G.save.skills && G.save.skills.indexOf('mind') >= 0 ? 1 : 0); }
 function updateSkills() {
   if (inP('SKILL') || inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
-  const n = SKILLS.length;
+  const pool = skillPool(), n = pool.length;
+  G.skillIdx = Math.min(G.skillIdx, n - 1);
   if (inP('DOWN') || inP('RIGHT')) { G.skillIdx = (G.skillIdx + 1) % n; sfx('ui'); }
   if (inP('UP') || inP('LEFT')) { G.skillIdx = (G.skillIdx + n - 1) % n; sfx('ui'); }
   if (inP('OK')) {
-    const sk = SKILLS[G.skillIdx];
+    const sk = pool[G.skillIdx];
     if (G.save.skills.indexOf(sk.id) >= 0) { sfx('no'); return; }
     if (!tierOpen(sk.tier, G.save.skills.length)) { G.toast(t('sk_locked')); sfx('no'); return; }
     if (G.save.iq < sk.cost) { G.toast(t('sk_poor')); sfx('no'); return; }
@@ -1376,27 +1402,37 @@ function drawSkills() {
   c.fillStyle = 'rgba(4,7,12,0.88)'; c.fillRect(0, 0, 960, 540);
   ftxt(t('sk_title'), 480, 46, 28, '#eef3fa', 'center', '#b48cff');
   ftxt(t('sk_iq') + '  ' + G.save.iq, 480, 82, 17, '#b48cff');
-  const pos = i => ({ x: 330 + (i % 2) * 300, y: 150 + Math.floor(i / 2) * 105 });
+  // the tree BREATHES when the crystal branch appears: two columns while she
+  // is claws-only (the layout every save so far has known), three once the
+  // pool outgrows it, with the rows squeezed to keep the description clear
+  const pool = skillPool();
+  const cols = pool.length > 8 ? 3 : 2;
+  const pos = cols === 2
+    ? i => ({ x: 330 + (i % 2) * 300, y: 150 + Math.floor(i / 2) * 105 })
+    : i => ({ x: 240 + (i % 3) * 240, y: 138 + Math.floor(i / 3) * 88 });
   c.strokeStyle = 'rgba(180,140,255,0.3)'; c.lineWidth = 2;
-  for (let i = 2; i < SKILLS.length; i++) {
-    const a = pos(i - 2), b = pos(i);
+  for (let i = cols; i < pool.length; i++) {
+    const a = pos(i - cols), b = pos(i);
     c.beginPath(); c.moveTo(a.x, a.y + 26); c.lineTo(b.x, b.y - 26); c.stroke();
   }
-  SKILLS.forEach((sk, i) => {
+  pool.forEach((sk, i) => {
     const p2 = pos(i), owned = G.save.skills.indexOf(sk.id) >= 0;
     const open = tierOpen(sk.tier, G.save.skills.length);
     const afford = open && !owned && G.save.iq >= sk.cost;
     const sel = i === G.skillIdx;
+    const cry = !!sk.need;   // the purifier branch shows its colour
     c.beginPath(); c.arc(p2.x, p2.y, 26, 0, 7);
-    c.fillStyle = owned ? 'rgba(125,232,160,0.25)' : afford ? 'rgba(180,140,255,' + (0.16 + Math.sin(performance.now() / 300) * 0.08) + ')' : 'rgba(40,50,66,0.6)';
+    c.fillStyle = owned ? 'rgba(125,232,160,0.25)'
+      : afford ? (cry ? 'rgba(235,245,255,' : 'rgba(180,140,255,') + (0.16 + Math.sin(performance.now() / 300) * 0.08) + ')'
+      : 'rgba(40,50,66,0.6)';
     c.fill();
     c.lineWidth = sel ? 3 : 1.5;
-    c.strokeStyle = sel ? '#ffffff' : owned ? '#7de8a0' : afford ? '#b48cff' : '#44586b';
+    c.strokeStyle = sel ? '#ffffff' : owned ? '#7de8a0' : afford ? (cry ? '#e8f4ff' : '#b48cff') : '#44586b';
     c.stroke();
     ftxt(owned ? '✓' : (open ? String(sk.cost) : '🔒'), p2.x, p2.y, owned ? 18 : 13, owned ? '#7de8a0' : open ? '#dbe7f2' : '#607386');
     ftxt(t('sk_' + sk.id), p2.x, p2.y + 44, 14, sel ? '#eef3fa' : '#8aa2b5');
   });
-  const cur = SKILLS[G.skillIdx];
+  const cur = pool[Math.min(G.skillIdx, pool.length - 1)];
   wrapText(t('sk_' + cur.id + 'd'), 520, 14).forEach((ln, i) => ftxt(ln, 480, 474 + i * 19, 14, '#9fb8c8'));
   ftxt(t('sk_hint'), 480, 518, 12, '#7d93a8');
 }
@@ -5378,6 +5414,7 @@ function drawLights(P) {
   if (player && !player.dead)
     lightAt(player.x + 12, player.y + 18, 150, P.glow, 0.13 + (player.dashT > 0 ? 0.14 : 0) + (player.healT > 0 ? 0.12 : 0));
   for (const p of G.projs) lightAt(p.x, p.y, 62, p.color, 0.4);
+  if (G.boomer) lightAt(G.boomer.x, G.boomer.y, 72, '#e8f4ff', 0.5);
   for (const s of G.statics) {
     if (s.type === 'bench') lightAt(s.x + s.w / 2, s.y, 80, '#aef7d8', 0.22);
     else if (s.type === 'mod') lightAt(s.x + 12, s.y + 12, 90, P.glow, 0.4);
@@ -5501,6 +5538,7 @@ function drawWorldFrame() {
   if (G.boss) G.boss.draw(c);
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
   for (const p of G.projs) p.draw(c);
+  if (G.boomer && typeof drawBoomer === 'function') drawBoomer(c);
   if (typeof drawRoarFX === 'function') drawRoarFX(c);
   // the player is drawn AFTER the cinematic grade (bloom + zone wash) so she
   // stays solid and rich instead of being swallowed by the atmosphere — the
