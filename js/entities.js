@@ -4969,6 +4969,20 @@ function sageStruck(e, dm, x, y) {
   e.hp -= dm; e.hurtT = 0.2;
   return dm;
 }
+// EVERY SAGE IS SOMEBODY. Seven chambers, seven identities, and what each
+// one gives is what its kingdom valued — a cell kept safe, a mending kit,
+// teaching, weight of metal. The identity card carries the cave's story
+// beat; the gift closure carries its economy. A chamber with no row falls
+// back to the generic payout, so a new network is never silently giftless.
+const SAGE_GIFT = {
+  GA1D: () => invAdd('batt'),                                    // a cell, kept safe
+  GA2D: () => { invAdd('kit'); G.save.scrap += 80; },            // what a pack values
+  GB1D: () => { G.save.iq += 25; },                              // it teaches
+  GC1D: () => { G.save.scrap += 200; },                          // weight of metal
+  GD1D: () => { G.save.scrap += 150; G.save.iq += 10; },         // the Archives hoard
+  GX1D: () => { G.save.scrap += 120; G.save.iq += 15; },         // tribute to the sword
+  GE1D: () => invAdd('batt'),                                    // it knelt closest and held on
+};
 function sageTame(e) {
   e.tame = 1; e.locked = false; e.calm = true; e.pureM = 1;
   const key = 'sageTame_' + G.roomId;
@@ -4982,9 +4996,22 @@ function sageTame(e) {
   // THE GIFT — the cave gives "instead of taking from the tamed sage"
   if (!G.save.flags['sageGift_' + G.roomId]) {
     G.save.flags['sageGift_' + G.roomId] = 1;
-    G.save.scrap += 120; G.save.iq += 15;
-    if (typeof showItem === 'function') showItem(t('sg_tamed'), t('sg_tamedd'));
+    (SAGE_GIFT[G.roomId] || (() => { G.save.scrap += 120; G.save.iq += 15; }))();
+    const ik = 'sg_t_' + G.roomId;
+    const nm = t(ik) === ik ? t('sg_tamed') : t(ik);
+    const ds = t(ik + 'd') === ik + 'd' ? t('sg_tamedd') : t(ik + 'd');
+    if (typeof showItem === 'function') showItem(nm, ds);
     if (typeof iqNudge === 'function') iqNudge();
+  }
+  // THE RULE, FOR SAGES TOO: "defeating a boss or a sage always reveals a
+  // cave." Chamber sages are already inside theirs; a future SURFACE sage
+  // needs only a GATE_ROOM row gated on 'sageTame_<its room>' and this
+  // fires the reveal the moment it is purified.
+  for (const rid in (typeof GATE_ROOM !== 'undefined' ? GATE_ROOM : {})) {
+    if (GATE_ROOM[rid].need !== key) continue;
+    G.toast(t('cave_open'));
+    sfx('chargeReady');
+    break;
   }
   persist();
 }

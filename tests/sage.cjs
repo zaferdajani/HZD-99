@@ -64,15 +64,23 @@ const { chromium } = require('playwright');
 
     // ---- crystal: purity fills, full purity tames -----------------------
     G.save.flags.crystal = 1;
+    const battBefore = invCount('batt');
     let hits = 0;
     while (!sg.tame && hits++ < 10) dealDmg(sg, 20, null, sg.x, sg.y, true);
     out.purified = sg.tame === 1 && hits <= 5;
     out.neverDies = !sg.dead && sg.hp > 0;
-    out.giftPaid = !!G.save.flags['sageGift_GA1D'] && G.save.scrap >= 120;
-    const scrapAfter = G.save.scrap;
+    // the Meadow Sage's OWN gift: the power cell it kept safe
+    out.giftPaid = !!G.save.flags['sageGift_GA1D'] && invCount('batt') === battBefore + 1;
+    const battAfter = invCount('batt'), scrapAfter = G.save.scrap;
     dealDmg(sg, 99, null, sg.x, sg.y, true);   // a poke now
     out.tamedUnharmed = !sg.dead && sg.tame === 1;
-    out.giftOnce = G.save.scrap === scrapAfter;
+    out.giftOnce = invCount('batt') === battAfter && G.save.scrap === scrapAfter;
+    // every chamber sage has an identity card and a gift row, both languages
+    const IDS = ['GA1D', 'GA2D', 'GB1D', 'GC1D', 'GD1D', 'GX1D', 'GE1D'];
+    out.identities = IDS.every(id2 =>
+      I18N.en['sg_t_' + id2] && I18N.en['sg_t_' + id2 + 'd']
+      && I18N.ar['sg_t_' + id2] && I18N.ar['sg_t_' + id2 + 'd']
+      && typeof SAGE_GIFT[id2] === 'function');
 
     // ---- the tame persists across a reload ------------------------------
     loadRoom('GA1T');
@@ -94,6 +102,8 @@ const { chromium } = require('playwright');
   check('the crystal purifies it — tamed, never killed',
     m.purified && m.neverDies);
   check('the gift pays, and pays once', m.giftPaid && m.giftOnce);
+  check('all seven sages have an identity, a story line and a gift, in both languages',
+    m.identities);
   check('a purified sage cannot be harmed', m.tamedUnharmed);
   check('the purification is a save fact — it survives the room reload', m.tamePersists);
 

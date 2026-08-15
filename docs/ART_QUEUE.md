@@ -72,6 +72,27 @@ the plates are the gear art) · §1d handover video · the unarmed SIDE action
 set for the opening (idle/walk/run pairs, unarmed) · apex, burst, heal kneel,
 the Song, low-health slump, wall cling.
 
+==== THE FIRING LIST (2026-08-15, consolidated — run top to bottom) =========
+Whoever holds the Higgsfield binding (session B, or this session once it
+rebinds) fires these in order. Reference for her body: media_id
+4bca85e7-7e54-4d0b-b80a-4b947f12545a (assets/source/ref/hzd99_body.png).
+Every item's full brief is in its section below; this is the checklist.
+
+  1. §1b-i  slash light-sheets ×4        (slash_h / slash_d / slash_u / slash_dn)
+  2. §1b-ii regrips ×2 + thrown blade ×1 (thrown = BODY LENGTH — owner ruling)
+  3. §1c    back-jet gear ×3             (idle / mid-boost / full burn)
+  4. §1d    THE FORGING CINEMATIC ×1     (cartoonish; Ratchet's chest crystal visible)
+  5. §2e    sage plates ×6               (stand/coil/lunge/gather/kneel-lock/purified)
+  6. §2d    robot bat plates ×5          (hang/shiver/dive/flap-up/flap-down)
+  7. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
+  8. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
+  9. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
+
+Estimated spend: ~45-55 credits of session B's balance. After each block:
+git pull, run the pipeline (blackkey -> img-crush -> archive -> wire), and
+node tests/run.cjs artbible hero sage combat platform.
+=============================================================================
+
 WIRING NOTE (2026-08-15): the crystal arc is LIVE in code and every asset
 above has a hook waiting for it — nothing blocks on art, and nothing needs
 re-plumbing when it lands:
