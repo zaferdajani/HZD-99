@@ -192,7 +192,10 @@ const ROOMS = {
       // dirt. It is walk-up height, so it never asks for a jump she has not
       // been taught yet.
       rect(g, 33, 14, 39, 15, '#');
-      hline(g, 28, 31, 11, '=');
+      // the practice shelf sat at 28-31 — right over the gate approach, where
+      // the owner called it out for ruining the scenery. The lesson moved to
+      // mid-room; the last ten tiles belong to the gates alone.
+      hline(g, 18, 21, 11, '=');
       // THE CITY WALL HAS A BODY. Sealing the side exit left the right edge a
       // single frame() column — one tile of green against the dark, which the
       // owner read as the wall having been REMOVED. A city's outer wall is the

@@ -150,7 +150,9 @@ const G = {
       invAdd('batt');
       showItem(t('i_batt'), t('i_battd'));
       this.save.scrap += 40;
-      if (typeof setMusic === 'function') setMusic('room');
+      // 'room' was never a real track key — resolve to the zone's own theme,
+      // which is exactly what loadRoom plays for a non-boss room
+      if (typeof setMusic === 'function') setMusic(G.roomDef ? G.roomDef.zone : 'A');
       return;
     }
     const grants = { glitch: 'dash', brood: 'djump', atlas: 'emp', zero: 'key' };
@@ -320,7 +322,10 @@ function showItem(name, desc) {
 
 // ---------- room loading ----------
 function spawnStatic(type, tx, ty, extra, flagKey) {
-  const sizes = { item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [32, 40], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52], pillar: [46, 96] };
+  // npc was 32x40 — a head shorter than the player's own 60px plate, and the
+  // owner's read of the first one he ever met was "very small, easy to miss".
+  // The machine folk stand at her scale now.
+  const sizes = { item: [26, 26], bench: [44, 52], chest: [30, 24], mod: [24, 24], term: [26, 32], npc: [40, 56], riddle: [26, 36], secret: [24, 24], trial: [34, 44], vault: [40, 52], pillar: [46, 96] };
   const [w, h] = sizes[type];
   // `room` is stamped at spawn rather than read from G.roomId at use time,
   // because npcKey() must stay stable for a static that outlives a room change
@@ -822,6 +827,14 @@ function doInteract(s) {
           // one exchange.
           const gift = NPC_GIFT[key] || NPC_GIFT['*'];
           if (gift) gift();
+          // THE STORY RIDES THE WAKING. A unit that just came back has the
+          // most to say of its whole life, and making the player guess to
+          // press E a second time is how the first story beat got missed
+          // ("it doesn't have a story"). When the gift card closes, the
+          // conversation reopens itself — straight into the errand ask,
+          // which for Ratchet IS the backstory: the song, the chest
+          // crystal, the sword he can forge.
+          if (G.dialog && !G.dialog.onEnd) G.dialog.onEnd = () => doInteract(s);
         },
       };
       G.state = 'DIALOG'; sfx('ui'); npcSay(s.extra, 0);
@@ -4600,7 +4613,10 @@ function drawRoomProp() {
 // grottoes appear: every boss or sage resolved reveals its lair's cave
 // (world.js GROTTOES; the owner's rule).
 const GATE_ROOM = {
-  W2:  { at: 0.90, to: 'A0',  gx: 0.472, gy: 0.93 },
+  // 0.85 sets the gates AGAINST the massed city wall (tiles 37-39) instead
+  // of half-buried inside it — the doorway pierces the wall, which is what a
+  // city gate is. gx/gy are legacy vista fractions, kept only as annotation.
+  W2:  { at: 0.85, to: 'A0',  gx: 0.472, gy: 0.93 },
   A5:  { at: 0.64, to: 'CV1', gx: 0.50,  gy: 0.86, ax: 0.10 },
   CV1: { at: 0.10, to: 'A5',  gx: 0.50,  gy: 0.86, ax: 0.64 },
   // the grottoes — one per guardian, opened by its fall or taming
@@ -4619,18 +4635,20 @@ const GATE_ROOM = {
   GX1: { at: 0.06, to: 'X1',  gx: 0.50, gy: 0.86, ax: 0.45 },
   GE1: { at: 0.06, to: 'E3',  gx: 0.50, gy: 0.86, ax: 0.86 },
 };
+// THE DOOR STANDS STILL. It used to be anchored to the painted backdrop,
+// which pans at parallax speed — so as the player walked, the whole gate
+// structure slid against the world. The owner, in a cave: "the gate is
+// moving with me in the background... making me hard to locate the actual
+// gate." A door is a place; places do not follow you. The gate now lives at
+// a fixed WORLD x (the stand spot in the table), the painted gap behind it
+// stays pure scenery, and the prompt, the trigger, the structure and the
+// walk-in all agree on the one spot.
+function gateWorldX(G2) { return G.roomDef.w * TILE * G2.at; }
+// the vanishing point of the walk-in, in screen space: the middle of the
+// gap, lifted off the floor so she recedes INTO the doorway instead of
+// sliding along the ground (the owner's exact complaint)
 function gateTarget(G2) {
-  const v = G._vista;
-  if (!v) return { x: 960 * 0.5, y: 540 * 0.72 };
-  return { x: v.x + v.w * G2.gx, y: v.y + v.h * G2.gy };
-}
-// Where the door is DRAWN, in screen space: the backdrop pans with the
-// camera, so the painted gap's position is only known from the live vista
-// rect. Null when no backdrop has rendered yet.
-function gateDrawnX(G2) {
-  const v = G._vista;
-  if (!v || G._vistaRoom !== G.roomId) return null;
-  return v.x + v.w * G2.gx;
+  return { x: gateWorldX(G2) - camSX(), y: (G.roomDef.h - 2) * TILE - camSY() - 46 };
 }
 // ---------------------------------------------------------------------------
 // THE DOOR HAS A BODY NOW (owner: "create 3D structures looking like a huge
@@ -4643,24 +4661,85 @@ function gateDrawnX(G2) {
 // light spilling out of the opening. Screen-space, drawn with the backdrop,
 // under everything that plays. Authored door plates can replace the leaf
 // faces later; the mechanism stays.
+// A CAVE HAS A MOUTH, NOT A DOOR (owner, 2026-08-15: "caves should look
+// like a cave opening, not a door"). Any gate touching a cave — the room it
+// stands in or the room it leads to — draws as an irregular rock opening:
+// a seeded jagged rim, hanging teeth, no straight edge anywhere (the NO
+// RIGHT ANGLES rule). The "doors opening" read becomes the inner glow
+// swelling as she approaches and walks in. Authored mouth plates (ART_QUEUE
+// §2f) will replace this at the same anchor.
+function drawCaveMouth(cx2, gy, P, k) {
+  let h = 2166136261 >>> 0;
+  for (const ch of G.roomId) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  const rnd2 = () => ((h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0) % 1000) / 1000;
+  const MW = 92, MH = 168, N = 15;
+  c.save();
+  // the rock shoulder around the opening — a dark irregular mound
+  c.fillStyle = 'rgba(8,10,14,0.75)';
+  c.beginPath();
+  c.moveTo(cx2 - MW - 58, gy);
+  for (let i = 0; i <= N; i++) {
+    const a = Math.PI - (i / N) * Math.PI;
+    const rr = (MW + 44) * (0.85 + rnd2() * 0.35);
+    c.lineTo(cx2 + Math.cos(a) * rr, gy - Math.sin(a) * (MH + 34) * (0.8 + rnd2() * 0.3));
+  }
+  c.lineTo(cx2 + MW + 58, gy);
+  c.closePath(); c.fill();
+  // the opening itself — blacker, and no two runs of its edge parallel
+  c.fillStyle = '#020304';
+  c.beginPath();
+  c.moveTo(cx2 - MW * 0.9, gy);
+  for (let i = 0; i <= N; i++) {
+    const a = Math.PI - (i / N) * Math.PI;
+    const rr = MW * (0.62 + rnd2() * 0.42);
+    c.lineTo(cx2 + Math.cos(a) * rr, gy - Math.sin(a) * MH * (0.66 + rnd2() * 0.38));
+  }
+  c.lineTo(cx2 + MW * 0.9, gy);
+  c.closePath(); c.fill();
+  // hanging teeth off the rim, drooping into the dark
+  c.fillStyle = 'rgba(10,13,18,0.9)';
+  for (let i = 0; i < 5; i++) {
+    const tx = cx2 + (rnd2() - 0.5) * MW * 1.4, tw = 7 + rnd2() * 10, th = 14 + rnd2() * 26;
+    const ty = gy - MH * (0.72 + rnd2() * 0.2);
+    c.beginPath(); c.moveTo(tx - tw / 2, ty); c.quadraticCurveTo(tx + (rnd2() - 0.5) * 6, ty + th, tx + tw / 2, ty); c.closePath(); c.fill();
+  }
+  // the light inside — it breathes wider as she nears, floods as she enters
+  c.globalCompositeOperation = 'lighter';
+  const gl = c.createRadialGradient(cx2, gy - MH * 0.4, 4, cx2, gy - MH * 0.4, MW * (0.5 + k * 1.1));
+  gl.addColorStop(0, 'rgba(255,232,170,' + (0.12 + k * 0.55) + ')');
+  gl.addColorStop(1, 'rgba(255,210,120,0)');
+  c.fillStyle = gl;
+  c.beginPath(); c.ellipse(cx2, gy - MH * 0.42, MW * (0.55 + k * 1.1), MH * (0.5 + k * 0.5), 0, 0, 7); c.fill();
+  if (k > 0.05) {
+    const pool = c.createRadialGradient(cx2, gy, 4, cx2, gy, 70 + k * 100);
+    pool.addColorStop(0, 'rgba(255,220,150,' + (0.2 * k) + ')');
+    pool.addColorStop(1, 'rgba(255,200,110,0)');
+    c.fillStyle = pool;
+    c.beginPath(); c.ellipse(cx2, gy, 70 + k * 100, 18 + k * 8, 0, 0, 7); c.fill();
+  }
+  c.restore();
+}
 function drawGateDoors(P) {
   const def = GATE_ROOM[G.roomId];
   if (!def || !player) { G._doorK = 0; return; }
   if (def.need && !(G.save && G.save.flags && G.save.flags[def.need])) return;
-  const ds = gateDrawnX(def);
-  if (ds == null) return;
+  // WORLD-LOCKED: one x for the trigger, the prompt and the structure. The
+  // parallax depth read now comes from the arch being dimmer and the leaves
+  // being lit, not from the whole doorway crawling against the terrain.
+  const ds = gateWorldX(def) - camSX();
+  if (ds < -320 || ds > 1280) return;
   const gy = (G.roomDef.h - 2) * TILE - camSY();
-  const near = Math.abs(player.x + player.w / 2 - camSX() - ds) < 130;
+  const near = Math.abs(player.x + player.w / 2 - gateWorldX(def)) < 130;
   const want = G.gateWalk ? 1 : near ? 0.14 : 0;
   G._doorK = (G._doorK == null ? 0 : G._doorK) + (want - (G._doorK || 0)) * (G.gateWalk ? 0.07 : 0.04);
   const k = G._doorK;
-  // the structure is NEARER than the painting: it slides a little against it
-  const roomW = G.roomDef.w * TILE;
-  const drift = roomW > 960 ? (camSX() / (roomW - 960) - 0.5) * -34 : 0;
-  const cx2 = ds + drift;
+  // cave on EITHER side of the passage: it is a mouth, not a door
+  const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
+  if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) { drawCaveMouth(ds, gy, P, k); return; }
+  const cx2 = ds;
   const H3 = 330, W3 = 108, GAPW = 26;
   c.save();
-  // ---- far layer: the colossal arch, glued to the backdrop ----
+  // ---- far layer: the colossal arch, the dimmer, deeper bones ----
   c.globalAlpha = 0.55;
   const arch = c.createLinearGradient(0, gy - H3 - 90, 0, gy);
   arch.addColorStop(0, '#060a10'); arch.addColorStop(1, '#101823');
@@ -4745,15 +4824,11 @@ function gateHere() {
   if (!G2 || !player) return null;
   // a door with an unmet `need` does not exist yet — no prompt, no walk
   if (G2.need && !(G.save && G.save.flags && G.save.flags[G2.need])) return null;
-  // THE DOOR IS WHERE IT IS PAINTED. The trigger used to be a fixed room
-  // fraction, which in W2 sat by the right wall while the gates' gap sat
-  // mid-screen — reported exactly so: "accessing the city from side, not in
-  // the middle of screen at the background door." She is at the door when
-  // SHE lines up with the DRAWN gap. The old fixed spot stays as a silent
-  // fallback so a room whose backdrop has not rendered can never lock her out.
-  const ds = gateDrawnX(G2);
-  if (ds != null && Math.abs(player.x + player.w / 2 - camSX() - ds) < 70) return G2;
-  const x = G.roomDef.w * TILE * G2.at;
+  // THE DOOR IS ONE PLACE. It was briefly "where the backdrop painted it",
+  // which moved with the parallax pan — the same slide the owner reported in
+  // the caves. The stand spot in the table is the door, full stop; the
+  // structure, prompt and walk all draw at that world x now.
+  const x = gateWorldX(G2);
   return Math.abs(player.x + player.w / 2 - x) < 90 ? G2 : null;
 }
 function gateEnter() {
@@ -4776,10 +4851,9 @@ function drawGatePrompt() {
   const def = GATE_ROOM[G.roomId];
   if (!def || G.gateWalk || !player || player.dead) return;
   if (def.need && !(G.save && G.save.flags && G.save.flags[def.need])) return;
-  // the glimmer marks the PAINTED door, wherever the pan has put it — the
-  // fixed room fraction is only the fallback for an unrendered backdrop
-  const ds = typeof gateDrawnX === 'function' ? gateDrawnX(def) : null;
-  const gx = ds != null ? ds + camSX() : G.roomDef.w * TILE * def.at;
+  // the glimmer marks the door's one world spot — same anchor as the
+  // structure and the trigger, so what pulses is what you press UP at
+  const gx = gateWorldX(def);
   const gy = (G.roomDef.h - 2) * TILE;
   const d = Math.abs(player.x + player.w / 2 - gx);
   if (d > 260) return;
@@ -4832,8 +4906,14 @@ function drawGateWalk() {
   const sx0 = g.x0 - camSX(), sy0 = g.y0 - camSY();
   const tg = gateTarget(g.def);
   const tx = tg.x, ty = tg.y;
-  const x = sx0 + (tx - sx0) * e, y = sy0 + (ty - sy0) * e;
-  const sc = 1 - 0.72 * e;
+  // INTO the background, not along the floor. She is already standing at the
+  // door when the walk starts (the trigger requires it), so the horizontal
+  // travel is a step or two — DEPTH does the work: the scale falls away
+  // faster than she moves, with a slight rise into the gap. The owner's
+  // report — "I am moving inside the floor instead of into the background" —
+  // was the old motion path crossing half the screen at floor height.
+  const x = sx0 + (tx - sx0) * e, y = sy0 + (ty - sy0) * (e * e);
+  const sc = 1 - 0.78 * e;
   c.save();
   c.globalAlpha = 1 - clamp((k - 0.62) / 0.38, 0, 1);
   // HER AUTHORED BACK. Generated from her own body (see assets/source/ref/ and
@@ -4841,10 +4921,16 @@ function drawGateWalk() {
   // art rather than a side view scaled down. Two stride frames swap on the
   // distance she has covered toward the gap, the same ground-driven rule the
   // wolves walk by, so the walk cannot moonwalk however long the shot runs.
-  if (typeof mediaFetch === 'function') { mediaFetch('heroBackA'); mediaFetch('heroBackB'); }
-  const trav = Math.hypot(x - sx0, y - sy0);
+  //
+  // ...but ONLY once she carries the crystal: the fired back pair has the
+  // sword on her back baked in, and the owner met it in the opening — a
+  // sword she does not own yet. Unarmed runs use her live body until an
+  // unarmed back pair is fired (queued in ART_QUEUE §1e note).
+  const armed = !!(G.save && G.save.flags && G.save.flags.crystal);
+  if (armed && typeof mediaFetch === 'function') { mediaFetch('heroBackA'); mediaFetch('heroBackB'); }
+  const trav = Math.hypot(x - sx0, y - sy0) + e * 60;   // depth counts as stride
   const frame = (Math.floor(trav / 26) % 2) ? 'heroBackB' : 'heroBackA';
-  const im = MEDIA_IMG[frame];
+  const im = armed ? MEDIA_IMG[frame] : null;
   if (im && im.naturalWidth) {
     const dh = 92 * sc, dw = dh * (im.naturalWidth / im.naturalHeight);
     // the gait's vertical, off the same stride counter as the frames
@@ -5274,14 +5360,29 @@ function drawStatics(P) {
         // head, only while she actually has a cell to spend. Without the
         // condition it is a quest marker; with it, it is an answer.
         if (invCount('batt') > 0) {
-          const px = s.x + s.w / 2, py = s.y - 14 + Math.sin(performance.now() / 320) * 3;
+          // the owner walked straight past this at 15px. A dark unit she can
+          // fix is the most important thing in the room: the pip is a BEACON
+          // now — a light shaft up from the body, a breathing ring around it,
+          // and the bolt riding the top. Still conditional on the cell, so it
+          // stays an answer and never becomes a quest marker.
+          const px = s.x + s.w / 2, py = s.y - 18 + Math.sin(performance.now() / 320) * 3;
+          const pu2 = 0.5 + Math.sin(performance.now() / 300) * 0.5;
           c.save(); c.globalCompositeOperation = 'lighter';
-          const gg = c.createRadialGradient(px, py, 0, px, py, 15);
+          const shaft = c.createLinearGradient(0, s.y - 60, 0, s.y + s.h);
+          shaft.addColorStop(0, 'rgba(255,210,110,0)');
+          shaft.addColorStop(0.55, 'rgba(255,214,120,' + (0.10 + pu2 * 0.08) + ')');
+          shaft.addColorStop(1, 'rgba(255,214,120,0)');
+          c.fillStyle = shaft;
+          c.fillRect(px - s.w * 0.7, s.y - 60, s.w * 1.4, s.h + 60);
+          c.strokeStyle = 'rgba(255,214,120,' + (0.25 + pu2 * 0.35) + ')';
+          c.lineWidth = 2;
+          c.beginPath(); c.ellipse(px, s.y + s.h, s.w * 0.9 + pu2 * 6, 7, 0, 0, 7); c.stroke();
+          const gg = c.createRadialGradient(px, py, 0, px, py, 24);
           gg.addColorStop(0, 'rgba(255,236,168,0.95)');
           gg.addColorStop(1, 'rgba(255,180,60,0)');
-          c.fillStyle = gg; c.beginPath(); c.arc(px, py, 15, 0, 7); c.fill();
+          c.fillStyle = gg; c.beginPath(); c.arc(px, py, 24, 0, 7); c.fill();
           c.restore();
-          ftxt('⚡', px, py + 5, 13, '#2a1b06');
+          ftxt('⚡', px, py + 5, 15, '#2a1b06');
         }
       }
     }
@@ -5593,6 +5694,28 @@ function tutHand(st) {
 const TUT_ROOMS = { W1: 0, W2: 1, A0: 2 };
 // which step opens each room's door — see the fence in updateTutor()
 const TUT_DOOR = { W1: 'out', W2: 'gate', A0: 'go' };
+// ===========================================================================
+// SEQUENTIAL CONTROLS (owner's order): a control does not EXIST until the
+// lesson that teaches it begins. Buttons appear on the touch layout the
+// moment they are needed and not before; keys and pad buttons for untaught
+// verbs are ignored. This is enforcement, not decoration — the bug it ends
+// is the player interacting with the trader before the fight lesson, opening
+// a shop with zero scrap, and reading the whole game as broken ("I cannot
+// redeem anything"). WHEEL/CREST are not taught in the walk at all, so they
+// arrive with the door out ('go'). Movement, pause and the map are never
+// gated: walking is the first lesson, and trapping a player unable to pause
+// is not teaching.
+// ===========================================================================
+const TUT_UNLOCK = { JUMP: 'jump', ATK: 'atk', INT: 'buy', HEAL: 'heal', SKILL: 'skill', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
+function tutAllows(act) {
+  const need = TUT_UNLOCK[act];
+  if (!need) return true;
+  if (!G || !G.save || !G.tut) return true;
+  if (G.save.flags && G.save.flags.tut) return true;
+  if (TUT_ROOMS[G.roomId] === undefined) return true;
+  const idx = TUT_STEPS.findIndex(q => q.id === need);
+  return idx < 0 || G.tut.i >= idx;
+}
 function updateTutor(dt) {
   const sv = G.save;
   if (!sv || !player || player.dead) return;
@@ -5676,8 +5799,13 @@ function drawTutor() {
   // the thing being taught, ringed — and WHICH thing depends on the room now
   if (st.id === 'jump')
     mark(G.roomId === 'W2' ? 13 * TILE : 17 * TILE + 12, 14 * TILE + 12, 34, '#37ffd0');
-  if (st.id === 'out' || st.id === 'gate')
-    mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
+  if (st.id === 'out' || st.id === 'gate') {
+    // the gate step points at the GATE, not at the wall: W2's way out is the
+    // depth door at the stand spot, and the massed city wall now owns the
+    // last three tiles where the old mark used to hover
+    const gr = typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId];
+    mark(gr ? gr.at * G.roomDef.w * TILE : (G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
+  }
   if (st.id === 'atk' || st.id === 'kill') {
     const dum = G.enemies && G.enemies.find(e => e && !e.dead);
     if (dum) mark(dum.x + dum.w / 2, dum.y + dum.h / 2, 30, '#ff8a6a');
@@ -5693,8 +5821,10 @@ function drawTutor() {
   }
   if (st.id === 'heal') mark(player.x + player.w / 2, player.y + player.h / 2, 32, '#aef7d8');
   if (st.id === 'go') mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
-  if (T.i < TUT_LAST) {
-    // the held door: a light curtain, not a wall — it reads as "not yet"
+  if (T.i < TUT_LAST && !(typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId])) {
+    // the held door: a light curtain, not a wall — it reads as "not yet".
+    // Not in W2: its way out is the depth gate, which glimmers for itself,
+    // and the curtain's old berth is inside the massed city wall now.
     const bx = (G.roomDef.w - 2.0) * TILE - cam.x;
     c.save();
     c.globalCompositeOperation = 'lighter';

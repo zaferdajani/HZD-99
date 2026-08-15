@@ -28,6 +28,26 @@ the owner's ruling ends the pattern. The protocol that replaces it:
 The retired branch `claude/art-queue-section-1-fire-yqlyc0` is fully merged
 and must never receive another commit.
 
+## NO RIGHT ANGLES (owner's standing order, 2026-08-15)
+
+**"No 90-degree elevation or walls in all game."** Nothing the player reads
+as terrain may present a perfect vertical face, a perfect horizontal ledge
+lip, or a square step — anywhere, not just in caves. Elevation changes are
+OBJECTS (rocks, wrecks, mounds, roots) or eroded ground, never extruded
+rectangles. The cave rule ("caves are never spheres, squares or
+perpendicular") was the first statement of this; the owner has since made
+it global. Consequences:
+
+- `erodeCaveEdges` was the cave-only fix; the whole tile renderer needs the
+  same treatment everywhere (edge scallops, corner breakup, face texture).
+- A "step" in a room build is a placeholder for an object with an organic
+  silhouette. New rooms must not add bare `rect(..., '#')` steps.
+- Collision may stay tile-based (the engine has no slopes); the RULE IS
+  VISUAL: the drawn silhouette must bury the square underneath it.
+- Gates/doors: cave entrances look like CAVE MOUTHS — irregular rock
+  openings — never rectangular doors; built gates vary in shape per zone
+  (see ART_QUEUE briefs).
+
 ## RULE ZERO: author at full quality, DERIVE everything cheaper
 
 **Never author down. Make the good version once, and let a tool in `tools/`

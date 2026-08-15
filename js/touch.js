@@ -198,25 +198,39 @@ function tLayout() {
   const L0 = {
     r, W, H, rgx, lgx, u,
     btns: [
-      { code: 'VJUMP', x: rgx, y: H - 60 * u, r: Math.min(44 * u, TOUCH.gut / 2 - 8), icon: '⤒', show: () => true },
+      { code: 'VJUMP', x: rgx, y: H - 60 * u, r: Math.min(44 * u, TOUCH.gut / 2 - 8), icon: '⤒',
+        show: () => tAllow('JUMP') },
       { code: 'VATK', x: rgx, y: H - 148 * u, r: 33 * u, sym: 'claw',
-        tint: { fill: 'rgba(255,150,150,0.95)', ring: 'rgba(255,110,110,0.7)' }, show: () => true },
-      { code: 'VHEAL', x: rgx, y: H - 230 * u, r: 27 * u, icon: '✚', show: () => true },
+        tint: { fill: 'rgba(255,150,150,0.95)', ring: 'rgba(255,110,110,0.7)' }, show: () => tAllow('ATK') },
+      { code: 'VHEAL', x: rgx, y: H - 230 * u, r: 27 * u, icon: '✚', show: () => tAllow('HEAL') },
       // THE POWER WHEEL. Everything situational used to be its own button, and
       // they were added one per power as the game grew: six of them stacked up
       // the right edge, the topmost sitting in the upper fifth of a phone
       // screen where a resting thumb cannot reach, each shrunk to twenty pixels
       // to make room, and the last two overlapping. They live in one ring now.
       { code: 'VWHEEL', x: rgx, y: H - 306 * u, r: 27 * u, icon: '✦',
-        show: () => wheelItems().length > 0 },
-      { code: 'VINT', x: lgx, y: H * 0.28, r: 26 * u, icon: 'E', show: () => !!G.near },
+        show: () => tAllow('WHEEL') && wheelItems().length > 0 },
+      // THE DASH IS A BUTTON, NOT A WHEEL SEAT. It sat only in the wheel, and
+      // the owner earned it and reported it "did not show in the controllers"
+      // — which for a twitch verb the thumb needs mid-jump is the truth even
+      // when the seat exists. It appears the moment the power does, inner
+      // diagonal by the jump where the resting thumb already is. (The wheel
+      // seat stays; a wheel throw is still a valid way to fire it.)
+      { code: 'VDASH', x: rgx - 88 * u, y: H - 100 * u, r: 30 * u, icon: '≫',
+        show: () => tAllow('DASH') && !!(G.save && G.save.abil && G.save.abil.dash) },
+      // INTERACT lives in the ACTION cluster now. Its old berth (left column,
+      // H*0.28) sat exactly between the crest and skill corner buttons, and
+      // the owner caught it rendering on top of the skills button. Inner
+      // column, between the attack and heal rows, clear of everything.
+      { code: 'VINT', x: rgx - 84 * u, y: H - 196 * u, r: 26 * u, icon: 'E',
+        show: () => !!G.near && tAllow('INT') },
     ],
     // menu buttons live in the LEFT column, actions in the right — no clutter
     corners: [
-      { code: 'VPAUSE', x: lgx, y: 26 * u + 4, r: 16 * u + 2, icon: '▐▌' },
-      { code: 'VMAP', x: lgx, y: 68 * u + 4, r: 16 * u + 2, icon: '▦' },
-      { code: 'VCREST', x: lgx, y: 110 * u + 4, r: 16 * u + 2, icon: '◇' },
-      { code: 'VSKILL', x: lgx, y: 152 * u + 4, r: 16 * u + 2, icon: '◈' },
+      { code: 'VPAUSE', x: lgx, y: 26 * u + 4, r: 16 * u + 2, icon: '▐▌', show: () => true },
+      { code: 'VMAP', x: lgx, y: 68 * u + 4, r: 16 * u + 2, icon: '▦', show: () => true },
+      { code: 'VCREST', x: lgx, y: 110 * u + 4, r: 16 * u + 2, icon: '◇', show: () => tAllow('CREST') },
+      { code: 'VSKILL', x: lgx, y: 152 * u + 4, r: 16 * u + 2, icon: '◈', show: () => tAllow('SKILL') },
     ],
   };
   // the player's own arrangement wins over every default
@@ -235,6 +249,9 @@ function tLayout() {
 // direction still held". Reported exactly so: one press works, the rest are
 // unclickable. Tapped codes are queued and released at end of frame (engine
 // clearP), which is what a tap is.
+// visibility gate shared by every button: the tutorial's sequential reveal
+// (tutAllows in game.js) decides whether a control exists yet at all
+function tAllow(a) { return typeof tutAllows !== 'function' || tutAllows(a); }
 function tPress(code) {
   keys[code] = 1; keysP[code] = 1;
   (TOUCH.tapRel || (TOUCH.tapRel = [])).push(code);
@@ -374,7 +391,7 @@ function tStart(e) {
         continue;
       }
       let hit = null;
-      for (const b of L.corners) if (Math.hypot(x - b.x, y - b.y) < b.r + 9) { hit = b; break; }
+      for (const b of L.corners) if (b.show() && Math.hypot(x - b.x, y - b.y) < b.r + 9) { hit = b; break; }
       if (!hit) for (const b of L.btns) if (b.show() && Math.hypot(x - b.x, y - b.y) < b.r + 9) { hit = b; break; }
       if (hit && hit.code === 'VWHEEL') {
         TOUCH.wheel = { id: t.identifier, sel: null, moved: false, open: false };
@@ -686,7 +703,7 @@ function drawTouchUI() {
       TOUCH.wheelFire.t++;
       if (TOUCH.wheelFire.t > 1) { keys[TOUCH.wheelFire.code] = 0; TOUCH.wheelFire = null; }
     }
-    for (const b of L.corners) tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, 12);
+    for (const b of L.corners) if (b.show()) tCircle(b.x, b.y, b.r, !!keys[b.code], b.icon, 12);
     // the map is the one corner control worth naming: an unlabelled glyph in a
     // column of glyphs is not a button anybody finds
     const mb = L.corners.find(b => b.code === 'VMAP');

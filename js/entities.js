@@ -4252,6 +4252,12 @@ class Enemy {
         this.dir = Math.sign(dxp) || 1;
         moveEnt(this, dt);
         if ((this.stepT -= dt) <= 0 && !player.dead && Math.abs(dxp) < 420) {
+          // A DUEL GETS DUEL MUSIC. The chambers inherited their zone's
+          // ambient stream, so a sage fight played over walking music — the
+          // owner: "not epic, not from the theme, sounds like old Atari."
+          // The moment the sage takes its first beat at her, the guardian
+          // fight track takes the room; the taming resolves it (sageTame).
+          if (!this.duelMus) { this.duelMus = 1; if (typeof setMusic === 'function') setMusic('boss'); }
           this.stepT = 0.9;
           if (this.denied >= 3) { this.windedT = 1.2; this.denied = 0; }
           else if (Math.abs(dxp) < 190 && chance(0.65)) { this.coilT = TELL_SWIPE; sfx('tell'); }
@@ -5457,6 +5463,9 @@ function sageTame(e) {
   e.tame = 1; e.locked = false; e.calm = true; e.pureM = 1;
   const key = 'sageTame_' + G.roomId;
   G.save.flags[key] = 1;
+  // the duel track resolves: the chamber goes back to its zone's own quiet
+  // (the zone key is what loadRoom itself plays for a non-boss room)
+  if (e.duelMus && typeof setMusic === 'function' && G.roomDef) setMusic(G.roomDef.zone);
   sfx('win');
   G.flash = Math.max(G.flash, 0.5);
   const cx = e.x + e.w / 2, cy = e.y + e.h / 2;

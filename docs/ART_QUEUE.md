@@ -227,8 +227,9 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   6. §2e    sage plates ×6               (stand/coil/lunge/gather/kneel-lock/purified)
   7. §2d    robot bat plates ×5          (hang/shiver/dive/flap-up/flap-down)
   8. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
-  9. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
- 10. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
+  9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   (owner 2026-08-15 — see brief below)
+ 10. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
+ 11. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
 
 Estimated spend: ~45-55 credits of session B's balance. After each block:
 git pull, run the pipeline (blackkey -> img-crush -> archive -> wire), and
@@ -274,6 +275,29 @@ re-plumbing when it lands:
   a bespoke ground plate for it can replace the generic glimmer.
 - tests/crystal.cjs measures the arc end-to-end (14 checks) and stays green
   through any art swap — it reads state, not pixels.
+
+### 2f. GATE SHAPES + CAVE MOUTHS ✱ FIRE ON REBIND (owner, 2026-08-15)
+
+The owner's order, verbatim intent: **"Ask Higgsfield to produce different
+shapes of gates! And caves should look like a cave opening, not a door!"**
+Every depth door currently draws the same rectangular multilayer city-gate
+structure. Two families replace it:
+
+**Gates ×6 — one per built zone, DIFFERENT SHAPES.** Each is a backdrop
+plate of a monumental doorway matching its kingdom, and none of them is a
+plain rectangle (the NO RIGHT ANGLES rule binds art too): the city gets its
+towering leaves, the Foundry a furnace-arch with a poured-metal rim, the
+Archives a split shelf-stack, the Conduits a cable-parted iris, the Nest a
+woven talon arch, the Eye an organic sphincter-iris. Closed + open variant
+each (or a parted pair the engine can slide). Dark-room phrasing, subject
+only, per the standing §3.2 rules.
+
+**Cave mouths ×5 — irregular ROCK OPENINGS, never doors.** For the cave
+networks (A/B/C/D/E grottoes + the crystal cave): a jagged-edged dark
+opening in living rock — asymmetric, weather-worn, roots/moss per zone,
+absolutely no straight jambs, no lintel, no symmetry. The engine's
+procedural fallback (drawCaveMouth in game.js) is the placement reference;
+the plate replaces it at the same anchor.
 
 ### 1e. THE RUN PAIR RE-FIRE ✱ FIRE ON REBIND — the owner rejected v1
 

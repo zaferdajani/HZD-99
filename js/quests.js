@@ -91,13 +91,17 @@ function qSet(id, v) {
 }
 // what this NPC has to say about work, if anything
 function questFor(npc) {
-  // NOT DURING THE LESSON. The waking floor's trader exists to teach that scrap
-  // buys things, and the trader is `ratchet`, who also carries an errand —
-  // so the tutorial's shop step was answered with "go and stand in a room you
-  // cannot reach yet", the shop never opened, the cell could not be bought and
-  // the door that waits on that step never lifted. The kingdom's errands start
-  // once the kingdom does.
-  if (G.save && G.save.flags && !G.save.flags.tut) return null;
+  // DURING THE LESSON the errand may SPEAK — it may not take over. The old
+  // guard here silenced every quest until the tutorial ended, which cost the
+  // game its first story beat: Ratchet wakes on the waking floor and says
+  // NOTHING about the song, the chest crystal, or the sword — the owner's
+  // exact report ("it doesn't have a story"). The bug the guard was patched
+  // in for was `after` being OVERWRITTEN so the shop lesson never opened;
+  // doInteract chains base() after the errand now, so the ask can play and
+  // the shop still opens behind it. The one thing still held back during the
+  // walk is everyone EXCEPT the trader — side errands can wait for the
+  // kingdom; his story cannot.
+  if (G.save && G.save.flags && !G.save.flags.tut && npc !== 'ratchet') return null;
   for (const q of QUESTS) {
     if (q.npc !== npc) continue;
     if (qState(q.id) === 'done') continue;

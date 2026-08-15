@@ -303,8 +303,12 @@ if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugin
     });
   } catch (e) {}
 }
-function inD(n) { return KEYB[n].some(c => keys[c]); }
-function inP(n) { return KEYB[n].some(c => keysP[c]); }
+// The tutorial gate lives INSIDE the read, not at every call site: during the
+// waking rooms a verb that has not been taught reads as not pressed, whatever
+// the finger did. See TUT_UNLOCK in game.js (function hoisting makes it
+// callable from here despite file order).
+function inD(n) { if (typeof tutAllows === 'function' && !tutAllows(n)) return false; return KEYB[n].some(c => keys[c]); }
+function inP(n) { if (typeof tutAllows === 'function' && !tutAllows(n)) return false; return KEYB[n].some(c => keysP[c]); }
 function clearP() {
   for (const k in keysP) keysP[k] = 0;
   // ...and release the touch taps queued this frame — a tap is not a hold
