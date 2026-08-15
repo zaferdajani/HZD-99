@@ -193,6 +193,13 @@ const ROOMS = {
       // been taught yet.
       rect(g, 33, 14, 39, 15, '#');
       hline(g, 28, 31, 11, '=');
+      // THE CITY WALL HAS A BODY. Sealing the side exit left the right edge a
+      // single frame() column — one tile of green against the dark, which the
+      // owner read as the wall having been REMOVED. A city's outer wall is the
+      // biggest made thing the opening ever shows; three tiles of mass, full
+      // height, so the room visibly ENDS and the gates are a door THROUGH
+      // something rather than a spot beside nothing.
+      rect(g, 37, 0, 39, 16, '#');
     } },
   A0: { zone: 'A', w: 34, h: 17, exits: { R: 'A1' },
     // The waking floor teaches the whole loop, not just the verbs: the machine
