@@ -780,16 +780,16 @@ const MAPPOS = {
 // System terminal tells the story. Deeper rooms per network are added per
 // cave, each its own story.
 const GROTTOES = [
-  // [grotto, tunnel, lair, flag that opens it, grotto cell, tunnel cell]
-  ['GA1', 'GA1T', 'A4', 'bossGlitch', [5, 4], [6, 4]],
-  ['GA2', 'GA2T', 'A10', 'alpha', [2, 2], [2, 1]],
-  ['GB1', 'GB1T', 'B4', 'bossBrood', [7, 1], [6, 1]],
-  ['GC1', 'GC1T', 'C3', 'bossAtlas', [8, 4], [9, 4]],
-  ['GD1', 'GD1T', 'D3', 'bossZero', [10, 6], [10, 5]],
-  ['GX1', 'GX1T', 'X1', 'bossPrism', [9, 1], [10, 1]],
-  ['GE1', 'GE1T', 'E3', 'bossMother', [11, 6], [12, 6]],
+  // [grotto, tunnel, deep chamber, lair, flag, grotto/tunnel/deep map cells]
+  ['GA1', 'GA1T', 'GA1D', 'A4', 'bossGlitch', [5, 4], [6, 4], [10, 4]],
+  ['GA2', 'GA2T', 'GA2D', 'A10', 'alpha', [2, 2], [2, 1], [1, 1]],
+  ['GB1', 'GB1T', 'GB1D', 'B4', 'bossBrood', [7, 1], [6, 1], [5, 1]],
+  ['GC1', 'GC1T', 'GC1D', 'C3', 'bossAtlas', [8, 4], [9, 4], [9, 5]],
+  ['GD1', 'GD1T', 'GD1D', 'D3', 'bossZero', [10, 6], [10, 5], [11, 5]],
+  ['GX1', 'GX1T', 'GX1D', 'X1', 'bossPrism', [9, 1], [10, 1], [11, 1]],
+  ['GE1', 'GE1T', 'GE1D', 'E3', 'bossMother', [11, 6], [12, 6], [13, 6]],
 ];
-for (const [gid, tid, lair, flag, gcell, tcell] of GROTTOES) {
+for (const [gid, tid, did, lair, flag, gcell, tcell, dcell] of GROTTOES) {
   ROOMS[gid] = {
     zone: 'X', cave: 1, w: 36, h: 17, exits: { R: tid },
     ents: [['scrap', 8, 15, 40], ['scrap', 18, 7, 40], ['scrap', 28, 15, 60], ['bench', 32, 15]],
@@ -802,18 +802,35 @@ for (const [gid, tid, lair, flag, gcell, tcell] of GROTTOES) {
     },
   };
   ROOMS[tid] = {
-    zone: 'X', cave: 1, w: 40, h: 17, exits: { L: gid },
+    zone: 'X', cave: 1, w: 40, h: 17, exits: { L: gid, R: did },
     ents: [['term', 20, 15, 5], ['bat', 14, 6], ['scrap', 8, 15, 30], ['scrap', 30, 7, 40]],
     build(g) {
       caveCarve(g, tid, {
-        open: ['L'],
+        open: ['L', 'R'],
         anchor: [{ x: 8, y: 15 }, { x: 20, y: 15, w2: 2 }],
         pocket: [{ x: 30, y: 6 }],
       });
     },
   };
+  // the DEEP CHAMBER — where each network's own story will live (a tamed
+  // sage's gift, a challenge, a settlement). Until that story is written it
+  // is the richest dig in the network: two pockets, real scrap, and the
+  // bats own the ceiling.
+  ROOMS[did] = {
+    zone: 'X', cave: 1, w: 44, h: 17, exits: { L: tid },
+    ents: [['bat', 18, 5], ['bat', 30, 5], ['crawler', 26, 15],
+           ['scrap', 8, 15, 30], ['scrap', 22, 7, 50], ['scrap', 36, 7, 40], ['scrap', 40, 15, 60]],
+    build(g) {
+      caveCarve(g, did, {
+        open: ['L'], ledges: 5,
+        anchor: [{ x: 8, y: 15 }, { x: 26, y: 15 }, { x: 40, y: 15 }],
+        pocket: [{ x: 22, y: 6 }, { x: 36, y: 6 }],
+      });
+    },
+  };
   MAPPOS[gid] = [gcell[0], gcell[1], 1, 1];
   MAPPOS[tid] = [tcell[0], tcell[1], 1, 1];
+  MAPPOS[did] = [dcell[0], dcell[1], 1, 1];
 }
 
 const gridCache = {};
