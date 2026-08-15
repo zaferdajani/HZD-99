@@ -1,5 +1,33 @@
 # CLAWBYTE / NOSTOS — working notes
 
+## ONE BRANCH (owner's standing order, 2026-08-15)
+
+**Every session working on this game — code sessions, art sessions, all of
+them — commits to the SAME branch: `claude/clawbyte-repo-migration-byhyl8`.
+No forks. No side branches. The two sessions are one.**
+
+The last side branch cost a full merge with conflicts in both built pages;
+the owner's ruling ends the pattern. The protocol that replaces it:
+
+1. **Before starting any work:** `git pull --rebase origin
+   claude/clawbyte-repo-migration-byhyl8`. Always. A session that skips the
+   pull is editing a game that no longer exists.
+2. **After every commit:** push immediately — `git push origin
+   claude/clawbyte-repo-migration-byhyl8`, then mirror the same commit to
+   `main` and `odyssey` (`git push origin <branch>:main <branch>:odyssey`).
+   Small frequent pushes; the other session may be minutes behind you.
+3. **If the push is rejected** (the other session pushed first): pull
+   --rebase, re-run `node build.cjs && node tests/run.cjs`, push again.
+   Never force-push; never resolve by branching.
+4. **Built pages are never hand-merged.** On any conflict in `index.html` /
+   `odyssey.html`: take either side, run `node build.cjs`, commit what it
+   emits. The sources are the truth; the pages are output.
+5. `docs/ART_QUEUE.md` stays the coordination ledger — what is fired, what
+   is wired, what is next — so the sessions never fire the same brief twice.
+
+The retired branch `claude/art-queue-section-1-fire-yqlyc0` is fully merged
+and must never receive another commit.
+
 ## RULE ZERO: author at full quality, DERIVE everything cheaper
 
 **Never author down. Make the good version once, and let a tool in `tools/`

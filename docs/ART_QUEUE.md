@@ -214,6 +214,11 @@ rebinds) fires these in order. Reference for her body: media_id
 4bca85e7-7e54-4d0b-b80a-4b947f12545a (assets/source/ref/hzd99_body.png).
 Every item's full brief is in its section below; this is the checklist.
 
+**ONE BRANCH (owner's order — see CLAUDE.md top):** all work, art firing
+included, happens ON `claude/clawbyte-repo-migration-byhyl8` — pull --rebase
+before starting, push after every commit, mirror to main/odyssey. No new
+branches, ever. §1 is DONE and merged; the list below is what remains.
+
   1. §1b-i  slash light-sheets ×4        (slash_h / slash_d / slash_u / slash_dn)
   2. §1b-ii regrips ×2 + thrown blade ×1 (thrown = BODY LENGTH — owner ruling)
   3. §1c    back-jet gear ×3             (idle / mid-boost / full burn)
