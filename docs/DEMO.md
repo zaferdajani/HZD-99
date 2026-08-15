@@ -52,6 +52,55 @@ ends on a boss reads as *finishing something*.
 
 ---
 
+## Making it sell the rest
+
+A first area is, by nature, a game's humblest: it has to teach, so it is gentle,
+and it is usually the plainest-looking part of the whole thing. That is exactly
+backwards for something whose job is to advertise. The free chapter has to be
+the tutorial **and** the trailer, and those pull against each other.
+
+### The frontier — done
+
+The ending screen asks the player to want five more kingdoms. Until now it
+offered no evidence there were any: every room in the game shares its kingdom's
+horizon, so somebody reaching that door had seen exactly one kind of place and
+was being asked to imagine the rest. **A promise is weaker than a glimpse.**
+
+A3's build already cuts an opening in its ceiling — the hole she climbs through
+to reach B1 — and the Data Conduits are lit in a cold blue that nothing in the
+warm scrap-yellow Meadows uses. So the hole is blown out in that colour and a
+shaft of it falls the full height of the room, landing on the floor she walks
+across on her way to NULLFANG. It says *there is somewhere else up there, and it
+is not like here* without contradicting one thing about where she is standing.
+
+Two things it deliberately is **not**: the next kingdom's backdrop swapped in
+behind this one (which reads as the room getting the wrong art), and a painting
+pasted in as a prop — a lesson this codebase has already learned twice, see
+`ROOM_VISTA` on the city gates.
+
+The colour is read from the destination zone's own palette rather than typed in,
+so a kingdom re-themed later re-lights its own frontier for free.
+
+**The alphas are measured, not chosen.** The first pass used the numbers a
+subtle background effect would use, and probing the live frame showed it adding
+about 14 to a channel — technically present, and on a phone in daylight
+completely invisible. `tests/demo.cjs` now measures it in the rendered frame:
+it must add real brightness inside the beam (48 today), be measurably *bluer*
+than the kingdom it is falling into (+59 on blue over red), and add nothing
+beside the beam (0), so it can never quietly fade back to decoration.
+
+### Still open
+
+- **One moment that feels expensive.** The flashiest thing she can do — the
+  two-blade swirl — needs both halves of the purifier, which is deep in the
+  game. Nobody in the free chapter will ever see it. Something of that weight
+  needs to land inside kingdom A.
+- **End on a question.** After NULLFANG she has freed one guardian. Something
+  should tell her there are five more and that this was the smallest.
+- **Spend the art budget unevenly.** Most people who ever open this game will
+  only see kingdom A. It should be the most polished area in it, which is the
+  opposite of how games usually get made.
+
 ## Turning it on
 
 One line, in `js/game.js`:

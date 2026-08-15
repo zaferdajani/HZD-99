@@ -4288,6 +4288,116 @@ const ROOM_PROP = {
   // painting drawn as a prop is a rectangle with a seam down the room — see
   // ROOM_VISTA, where they belong.
 };
+// ===========================================================================
+// THE FRONTIER — the last room of a kingdom can SEE the next one.
+//
+// WHY THIS EXISTS. The free chapter ends at the door out of the Scrap Meadows,
+// and the screen there asks the player to want five more kingdoms. Until now
+// they had no reason to: every room in the game shares its kingdom's horizon,
+// so a player reaching that door had seen exactly one kind of place and was
+// being asked to imagine the rest. A promise is weaker than a glimpse.
+//
+// WHAT IT IS NOT. Not a painting pasted into the room — this codebase has
+// already learned that lesson twice (see ROOM_VISTA on the city gates: a
+// full-frame render dropped in as a prop reads as a photograph laid on the
+// scene, with a hard seam down it). And not the next kingdom's backdrop swapped
+// in behind this one, which would just look like the room got the wrong art.
+//
+// What it is: LIGHT FROM SOMEWHERE ELSE. A3's build already cuts an opening in
+// its ceiling — `rect(g, 25, 0, 28, 0, '.')`, the hole she climbs through to
+// reach B1 — and the Data Conduits are lit in a cold cyan (PAL.B.glow, #5fc8e8)
+// that nothing in the warm scrap-yellow Meadows uses. So the hole is bright
+// with a colour this kingdom does not own, and a shaft of it falls the full
+// height of the room. It says "there is somewhere else up there, and it is not
+// like here" without contradicting a single thing about where she is standing.
+//
+// The colour is read from the destination zone's own palette rather than typed
+// in, so a kingdom re-themed later re-lights its own frontier for free.
+const FRONTIER = {
+  // room: the ceiling opening in tiles, and which kingdom is on the other side
+  A3: { tx0: 25, tx1: 29, zone: 'B' },
+};
+function drawFrontier() {
+  if (typeof isHero === 'function' && isHero()) return;
+  const F = FRONTIER[G.roomId];
+  if (!F) return;
+  const col = ((typeof PAL !== 'undefined' && PAL[F.zone]) || {}).glow || '#5fc8e8';
+  const x0 = F.tx0 * TILE, x1 = F.tx1 * TILE, w = x1 - x0, cx = (x0 + x1) / 2;
+  const H = G.roomDef.h * TILE;
+  const drop = H * 0.86;                       // how far the light reaches down
+  const spread = 1.7;                          // and how much it opens out
+  const t = performance.now() / 1000;
+  // a live shaft, not a decal: the intensity breathes and the edges waver, the
+  // way light through a gap does when there is air moving in it
+  const breathe = 0.86 + Math.sin(t * 0.55) * 0.10 + Math.sin(t * 1.7) * 0.04;
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  // THE NUMBERS ARE MEASURED, NOT CHOSEN. The first pass of this used the
+  // alphas a subtle background effect would use — 0.20 on the shaft, 0.55 on
+  // the mouth — and pixel-probing the live frame showed it adding about 14/33/46
+  // to a floor already sitting near 68/59/47. Technically present, and on a
+  // phone in daylight completely invisible. This is the one moment in the free
+  // chapter whose whole job is to be noticed, so it is lit like a set piece:
+  // roughly three times that, in two layers, with a near-white core.
+  // 1. THE SHAFT — a soft trapezoid opening downward, fading as it falls
+  const shaft = (widen, a, top) => {
+    const g1 = c.createLinearGradient(0, 0, 0, drop);
+    g1.addColorStop(0, top); g1.addColorStop(0.30, col); g1.addColorStop(1, 'rgba(0,0,0,0)');
+    c.globalAlpha = a * breathe;
+    c.fillStyle = g1;
+    c.beginPath();
+    c.moveTo(cx - w * 0.5 * (widen > 1 ? 1 : 0.55), 0);
+    c.lineTo(cx + w * 0.5 * (widen > 1 ? 1 : 0.55), 0);
+    c.lineTo(cx + w * widen / 2, drop); c.lineTo(cx - w * widen / 2, drop);
+    c.closePath(); c.fill();
+  };
+  shaft(spread, 0.30, col);                    // the body of the beam
+  shaft(spread * 0.5, 0.34, '#ffffff');        // and the hot core inside it
+  // 2. THE HALO — light does not stop at the edge of the hole it came through
+  const g0 = c.createRadialGradient(cx, TILE * 0.4, 0, cx, TILE * 0.4, w * 1.5);
+  g0.addColorStop(0, col); g0.addColorStop(1, 'rgba(0,0,0,0)');
+  c.globalAlpha = 0.42 * breathe;
+  c.fillStyle = g0;
+  c.beginPath(); c.arc(cx, TILE * 0.4, w * 1.5, 0, 7); c.fill();
+  // 3. THE MOUTH — the opening itself, blown out. Drawn from y=0 rather than
+  // above it: the camera sits within a few pixels of the room's top edge here,
+  // so anything painted off the top of the room is simply never seen.
+  c.globalAlpha = 0.95 * breathe;
+  const g2 = c.createLinearGradient(0, 0, 0, TILE * 2.6);
+  g2.addColorStop(0, '#ffffff'); g2.addColorStop(0.35, col); g2.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = g2;
+  c.fillRect(x0 - 6, 0, w + 12, TILE * 2.6);
+  // 3. WHAT DRIFTS IN IT. Dust only exists where light is, which is the oldest
+  // trick there is for making a beam read as volume rather than as a gradient.
+  const mote = (typeof QUAL !== 'undefined' && !QUAL.glow) ? 0 : 22;
+  c.globalAlpha = 0.5;
+  c.fillStyle = col;
+  for (let i = 0; i < mote; i++) {
+    // deterministic per-speck, so nothing is allocated and nothing flickers
+    const ph = i * 2.399;
+    const k = ((t * (0.05 + (i % 5) * 0.012) + i * 0.137) % 1);
+    const y = k * drop;
+    const wide = w * (1 + (spread - 1) * (y / drop));
+    const x = cx + Math.sin(ph + t * 0.3 + k * 4) * wide * 0.42;
+    const a = Math.sin(k * Math.PI);           // born and dies inside the beam
+    c.globalAlpha = 0.7 * a * breathe;
+    c.beginPath(); c.arc(x, y, 1.1 + (i % 3) * 0.5, 0, 7); c.fill();
+  }
+  // 4. WHERE IT LANDS. Ground-anchored, so it obeys the art harness's probe —
+  // tests/artbible.cjs measures her FEET against the floor and a glow pooled
+  // under them is exactly the decoration G.artProbe exists to switch off.
+  if (!G.artProbe) {
+    const fy = drop;
+    const g3 = c.createRadialGradient(cx, fy, 0, cx, fy, w * spread * 0.6);
+    g3.addColorStop(0, col); g3.addColorStop(1, 'rgba(0,0,0,0)');
+    c.globalAlpha = 0.30 * breathe;
+    c.fillStyle = g3;
+    c.beginPath(); c.ellipse(cx, fy, w * spread * 0.6, TILE * 0.9, 0, 0, 7); c.fill();
+  }
+  c.restore();
+  c.globalAlpha = 1;
+  c.globalCompositeOperation = 'source-over';
+}
 function drawRoomProp() {
   if (typeof isHero === 'function' && isHero()) return;
   const P = ROOM_PROP[G.roomId];
@@ -5602,6 +5712,7 @@ function drawWorldFrame() {
   drawFlora();                      // ...and what grows in it — see FLORA
   if (tileDirty) renderTileLayer(P);
   c.drawImage(tileCv, 0, 0);
+  drawFrontier();                   // the next kingdom, seen from the last room
   // X1 hardlight bridge: alive while the Prowler stands, red and flickering
   // through the collapse, gone when the wreck settles
   if (G.roomId === 'X1' && G.x1Bridge && G.boss && (!G.boss.dead || (G.boss.deathAnimT || 0) > 0)) {

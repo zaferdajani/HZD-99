@@ -138,6 +138,87 @@ const check = (name, ok, detail) => {
   check('the ending screen has words in every language', !lang.missing.length,
         lang.langs.join(', ') + (lang.missing.length ? ' — missing ' + lang.missing.slice(0, 4) : ''));
 
+  // ---- 7. THE FRONTIER ----------------------------------------------------
+  // The ending screen asks the player to want five more kingdoms. The light
+  // falling through A3's ceiling is the only evidence it offers that there ARE
+  // any, so it has to be (a) pointing at a door that exists, (b) coming out of
+  // a hole that exists, and (c) actually visible — the first version of this
+  // was drawn correctly at alphas so low that probing the live frame found it
+  // adding about 14 to a channel. Present, and invisible. Hence a MEASUREMENT
+  // rather than "the code runs".
+  const front = await page.evaluate(() => {
+    const out = { table: [] };
+    for (const id in FRONTIER) {
+      const F = FRONTIER[id], R = ROOMS[id];
+      const exits = Object.values((R && R.exits) || {}).map(d => (typeof d === 'object' ? d.to : d));
+      const leadsThere = exits.some(to => ROOMS[to] && ROOMS[to].zone === F.zone);
+      // ...and the opening it shines through is a real gap in the room's roof
+      const was = G.roomId;
+      loadRoom(id);
+      let open = 0;
+      for (let tx = F.tx0; tx < F.tx1; tx++) if (G.grid[0][tx] === '.') open++;
+      out.table.push({ id, zone: F.zone, leadsThere, open, want: F.tx1 - F.tx0 });
+      loadRoom(was);
+    }
+    return out;
+  });
+  check('every frontier points at a kingdom the room really connects to',
+        front.table.every(r => r.leadsThere),
+        front.table.map(r => r.id + '->' + r.zone).join(', '));
+  check('...and shines through a real hole in that room\'s roof',
+        front.table.every(r => r.open === r.want),
+        front.table.map(r => r.id + ' ' + r.open + '/' + r.want + ' tiles open').join(', '));
+
+  const lit = await page.evaluate(() => {
+    loadRoom('A3'); G.state = 'PLAY'; G.toasts = []; G.card = null; G.zoneToast = null;
+    const F = FRONTIER.A3;
+    player.x = 26 * TILE; player.y = 14 * TILE; player.vx = 0; player.vy = 0;
+    updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
+    const x = cv.getContext('2d');
+    const rd = (sx, sy) => {
+      const d = x.getImageData(Math.round(sx * cv.width / 960), Math.round(sy * cv.height / 540), 1, 1).data;
+      return [d[0], d[1], d[2]];
+    };
+    // the middle of the shaft, and the same height well outside it
+    const cxr = (F.tx0 + F.tx1) / 2 * TILE - camSX();
+    // where the beam actually lands, read from the same expression that draws
+    // it rather than eyeballed off a screenshot — the first version of this
+    // sampled 46 px above the pool and reported it missing
+    const landY = G.roomDef.h * TILE * 0.86 - camSY();
+    const shot = () => {
+      draw(performance.now());
+      return { in: rd(cxr, 150), out: rd(cxr - 300, 150), land: rd(cxr, landY) };
+    };
+    const on = shot();
+    const keep = FRONTIER.A3; delete FRONTIER.A3;
+    const off = shot();
+    FRONTIER.A3 = keep;
+    G.artProbe = 1;
+    const probed = shot();
+    G.artProbe = 0;
+    return { on, off, probed, cxr: Math.round(cxr) };
+  });
+  const lum = (p) => (p[0] + p[1] + p[2]) / 3;
+  const gain = lum(lit.on.in) - lum(lit.off.in);
+  const blueGain = (lit.on.in[2] - lit.off.in[2]) - (lit.on.in[0] - lit.off.in[0]);
+  check('the light is actually visible in the frame', gain > 30,
+        'shaft adds ' + Math.round(gain) + ' brightness (' + lit.off.in.join(',')
+        + ' -> ' + lit.on.in.join(',') + ')');
+  check('...and it is the NEXT kingdom\'s colour, not this one\'s', blueGain > 12,
+        'blue gains ' + Math.round(blueGain) + ' more than red');
+  // A SHAFT IS A LOCAL THING. Comparing absolute brightness inside the beam
+  // against a point beside it does not test that — the backdrop is painted, and
+  // the spot 300 px to the left is a lit building. What has to be true is that
+  // the LIGHT WE ADDED is local: switching the frontier off must change the
+  // pixel inside the beam and leave the one outside it alone.
+  const gainOut = lum(lit.on.out) - lum(lit.off.out);
+  check('...and it is the shaft, not the whole room getting brighter',
+        gain > gainOut * 3 + 10,
+        'adds ' + Math.round(gain) + ' inside the beam, ' + Math.round(gainOut) + ' beside it');
+  check('the pool on the floor obeys the art probe',
+        lum(lit.probed.land) < lum(lit.on.land),
+        'probe ' + Math.round(lum(lit.probed.land)) + ' vs normal ' + Math.round(lum(lit.on.land)));
+
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
