@@ -4773,9 +4773,25 @@ function drawGateDoors(P) {
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
   if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) { drawCaveMouth(ds, gy, P, k); return; }
   const cx2 = ds;
-  const H3 = 330, W3 = 108, GAPW = 26;
+  // THE CITY GATE IS THE MONUMENT (owner: "only the city gate should be
+  // huge and epic with multi layers and inscriptions and shapes — it's a
+  // futuristic robot city gate!"). Every cave passage takes the mouth, so
+  // this structure now belongs to one place and can afford to be colossal:
+  // three depth layers of architecture, glyph inscriptions burning on the
+  // lintel and leaves, circuit traces, a split iris emblem where the two
+  // leaves meet, and tapered spires against the sky.
+  const H3 = 410, W3 = 126, GAPW = 26;
+  let gh = 2166136261 >>> 0;
+  for (const ch of 'citygate') { gh ^= ch.charCodeAt(0); gh = Math.imul(gh, 16777619); }
+  const grnd = () => ((gh = Math.imul(gh ^ (gh >>> 15), 2246822519) >>> 0) % 1000) / 1000;
   c.save();
-  // ---- far layer: the colossal arch, the dimmer, deeper bones ----
+  // ---- layer 0: the super-arch, deepest bones against the sky ----
+  c.globalAlpha = 0.35;
+  c.fillStyle = '#0a1119';
+  c.fillRect(ds - W3 - GAPW - 92, gy - H3 - 150, 34, H3 + 150);
+  c.fillRect(ds + W3 + GAPW + 58, gy - H3 - 150, 34, H3 + 150);
+  c.fillRect(ds - W3 - GAPW - 92, gy - H3 - 150, (W3 + GAPW + 92) * 2, 26);
+  // ---- layer 1: the colossal arch, the dimmer middle bones ----
   c.globalAlpha = 0.55;
   const arch = c.createLinearGradient(0, gy - H3 - 90, 0, gy);
   arch.addColorStop(0, '#060a10'); arch.addColorStop(1, '#101823');
@@ -4784,7 +4800,7 @@ function drawGateDoors(P) {
   c.fillRect(ds + W3 + GAPW + 6, gy - H3 - 90, 40, H3 + 90);
   c.fillRect(ds - W3 - GAPW - 46, gy - H3 - 90, (W3 + GAPW + 46) * 2, 34);
   c.globalAlpha = 1;
-  // ---- near layer: the frame ----
+  // ---- layer 2: the frame, with spires ----
   const pyl = (x0, flip) => {
     const g2 = c.createLinearGradient(x0, 0, x0 + 30 * flip, 0);
     g2.addColorStop(0, '#1b2531'); g2.addColorStop(0.7, '#0c121a'); g2.addColorStop(1, '#070b11');
@@ -4792,10 +4808,21 @@ function drawGateDoors(P) {
     c.fillRect(Math.min(x0, x0 + 30 * flip), gy - H3 - 46, 30, H3 + 46);
     c.strokeStyle = 'rgba(160,200,230,0.25)'; c.lineWidth = 1.5;
     c.beginPath(); c.moveTo(x0, gy - H3 - 46); c.lineTo(x0, gy); c.stroke();
+    // a tapered spire off each pylon crown — antennae of a machine city
+    c.fillStyle = '#0e141c';
+    c.beginPath();
+    c.moveTo(x0 + 2 * flip, gy - H3 - 46);
+    c.lineTo(x0 + 13 * flip, gy - H3 - 118);
+    c.lineTo(x0 + 22 * flip, gy - H3 - 46);
+    c.closePath(); c.fill();
+    c.fillStyle = P.glow; c.globalAlpha = 0.5 + Math.sin(performance.now() / 700) * 0.3;
+    c.beginPath(); c.arc(x0 + 13 * flip, gy - H3 - 120, 2.6, 0, 7); c.fill();
+    c.globalAlpha = 1;
   };
   pyl(cx2 - W3 - GAPW, -1);
   pyl(cx2 + W3 + GAPW, 1);
-  // the lintel, with its glow seam
+  // the lintel, with its glow seam and THE INSCRIPTION — a course of
+  // machine glyphs burning across the whole beam
   const lin = c.createLinearGradient(0, gy - H3 - 64, 0, gy - H3 - 10);
   lin.addColorStop(0, '#05080d'); lin.addColorStop(0.6, '#141d29'); lin.addColorStop(1, '#0a1017');
   c.fillStyle = lin;
@@ -4804,6 +4831,18 @@ function drawGateDoors(P) {
   c.globalAlpha = 0.35 + k * 0.4;
   c.fillStyle = P.glow;
   c.fillRect(cx2 - W3 - GAPW - 20, gy - H3 - 16, (W3 + GAPW + 20) * 2, 2.5);
+  c.strokeStyle = P.glow; c.lineWidth = 1.6;
+  c.globalAlpha = 0.4 + k * 0.35 + Math.sin(performance.now() / 900) * 0.1;
+  for (let gi = -6; gi <= 6; gi++) {
+    const gx2 = cx2 + gi * 22, gyy = gy - H3 - 40;
+    c.beginPath();
+    const kind = (gi + 60) % 4;
+    if (kind === 0) { c.moveTo(gx2 - 5, gyy + 6); c.lineTo(gx2, gyy - 6); c.lineTo(gx2 + 5, gyy + 6); }
+    else if (kind === 1) { c.arc(gx2, gyy, 5.5, 0.6, 5.7); }
+    else if (kind === 2) { c.moveTo(gx2 - 5, gyy - 5); c.lineTo(gx2 + 5, gyy - 5); c.moveTo(gx2, gyy - 5); c.lineTo(gx2, gyy + 7); }
+    else { c.moveTo(gx2 - 5, gyy); c.lineTo(gx2, gyy - 6); c.lineTo(gx2 + 5, gyy); c.lineTo(gx2, gyy + 6); c.closePath(); }
+    c.stroke();
+  }
   c.restore();
   // ---- the LEAVES — they slide into the pylons as k opens ----
   const slide = k * (W3 - 6);
@@ -4835,6 +4874,42 @@ function drawGateDoors(P) {
     // the lit inner edge of each leaf — the crack is where the light lives
     c.strokeStyle = 'rgba(200,230,255,0.5)'; c.lineWidth = 1.6;
     c.beginPath(); c.moveTo(inner, gy); c.lineTo(inner, gy - H3 + 8); c.stroke();
+    // CIRCUIT TRACES — inscriptions etched into the metal, faintly alive.
+    // Seeded polylines that step only horizontally/vertically, like board
+    // traces, each ending in a via dot.
+    c.save(); c.globalCompositeOperation = 'lighter';
+    c.strokeStyle = P.glow; c.fillStyle = P.glow; c.lineWidth = 1.1;
+    c.globalAlpha = 0.16 + k * 0.25;
+    for (let t2 = 0; t2 < 6; t2++) {
+      let px2 = inner + s * (10 + grnd() * (W3 - 24));
+      let py2 = gy - 20 - grnd() * (H3 - 60);
+      c.beginPath(); c.moveTo(px2, py2);
+      for (let seg = 0; seg < 4; seg++) {
+        if (grnd() < 0.5) px2 += s * (8 + grnd() * 22) * (grnd() < 0.5 ? 1 : -1);
+        else py2 -= (10 + grnd() * 26) * (grnd() < 0.5 ? 1 : -1);
+        px2 = Math.max(Math.min(px2, Math.max(inner, outer) - 6), Math.min(inner, outer) + 6);
+        c.lineTo(px2, py2);
+      }
+      c.stroke();
+      c.beginPath(); c.arc(px2, py2, 2, 0, 7); c.fill();
+    }
+    // rivet studs down the outer band
+    c.globalAlpha = 0.3;
+    for (let rv = 0; rv < 7; rv++) {
+      c.beginPath(); c.arc(outer - s * 8, gy - 26 - rv * (H3 - 50) / 6, 1.8, 0, 7); c.fill();
+    }
+    // THE SPLIT IRIS EMBLEM — half a great ringed circle on each leaf, whole
+    // only when the gate is shut, parting with the leaves as they open
+    c.globalAlpha = 0.5 + k * 0.3;
+    c.lineWidth = 2.2;
+    const ey = gy - H3 * 0.56;
+    for (const er of [44, 30]) {
+      c.beginPath();
+      c.arc(inner, ey, er, s === -1 ? Math.PI / 2 : -Math.PI / 2, s === -1 ? Math.PI * 1.5 : Math.PI / 2);
+      c.stroke();
+    }
+    c.beginPath(); c.moveTo(inner, ey - 16); c.lineTo(inner, ey + 16); c.stroke();
+    c.restore();
   }
   // ---- the light through the opening ----
   const gapNow = GAPW * 0.32 + slide;
