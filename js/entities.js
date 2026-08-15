@@ -169,6 +169,18 @@ const FLIP_DUR = 0.62;   // the double-jump pirouette, start to finish
 //          arc here ends lower than it starts.
 //   r0→r1: reach at the start and at full extension
 // ===========================================================================
+// THE SWIRL — the twin-blade supercharge. Numbers in seconds, because the loop
+// is a fixed-step float accumulator and frame integers would be fabricated
+// precision (see the combat skill, §0.1).
+//
+//   startup   ~0     she is already committed when the charge releases
+//   active    0.64   FOUR passes, one every 0.16
+//   recovery  0.30   she lands out of the turn; this is the cost
+//
+// Her own recovery is the risk she is buying the ring with. 300 ms is longer
+// than any of her combo beats (0.23–0.33) and is meant to be felt: the swirl is
+// a decision, not a better button.
+const SWIRL_T = 0.64, SWIRL_STEP = 0.16, SWIRL_R = 62, SWIRL_TWIN = 6;
 const SLASH = [
   { hand: 'F', a0: -0.95, a1: 0.42, r0: 11.5, r1: 21 },   // beat 1 — right paw, steep down-rake
   { hand: 'B', a0: -0.45, a1: 0.92, r0: 11, r1: 20 },     // beat 2 — left paw, shallower, crosses under
@@ -520,6 +532,9 @@ class Player {
     this.combo = 0; this.comboT = 0; this.dashVX = 0; this.dashVY = 0; this.rechargeT = 0;
     this.chargeT = 0; this.chargeTick = 0; this.healTick = 0;
     this.mood = null; this.moodT = 0;      // a scripted feeling, and its clock
+    // THE SWIRL and the window it leaves: while twinT runs the blade is in two
+    // and her combo swings both. See swirl().
+    this.swirlT = 0; this.swirlTick = 0; this.swirlHits = 0; this.twinT = 0;
     this.clawT = 0; this.clawCD = 0; this.pounceT = 0;   // FERAL CLAWS (robo-cat)
     this.armCD = 0; this.songT = 0; this.songCD = 0; this.starCD = 0;
     this.downBuf = 0; this.pogoT = 0; this.slowT = 0;   // frost-slow from the Archivist
@@ -848,8 +863,15 @@ class Player {
       if (wield >= 1 && this.combo === 2 && !ay && this.on) aay = -0.55;
       const ang = Math.atan2(aay, ax);
       // active a touch longer, so a swing that looks like it should connect does
-      this.swing = { t: 0.15, ax, ay: aay, ang, combo: this.combo, set: new Set(), wield, pure: wield >= 1 };
-      this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo, wield };
+      // TWIN: the swirl leaves the blade in two for a few seconds, and while it
+      // is she swings BOTH. Not a damage buff with a new name — the second
+      // blade opens the arc, so a chain that used to catch one thing in front of
+      // her sweeps a wedge either side. Reach is the single blade's; what she
+      // buys is COVERAGE, which is what a second sword is actually for.
+      const twin = this.twinT > 0 && wield >= 1;
+      this.swing = { t: 0.15, ax, ay: aay, ang, combo: this.combo, set: new Set(), wield,
+                     pure: wield >= 1, twin };
+      this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo, wield, twin };
       if (hasSkill('wave')) {
         const wn = Math.hypot(ax, ay) || 1;
         G.projs.push(new Proj(this.x + this.w / 2 + ax / wn * 22, this.y + this.h / 2 - 2 + ay / wn * 22,
@@ -974,6 +996,22 @@ class Player {
     } else this.healT = 0;
     this.armCD -= dt; this.songT -= dt; this.songCD -= dt; this.starCD -= dt;
     if (this.moodT > 0) this.moodT -= dt;
+    // THE SWIRL runs on its own clock so its four passes keep their spacing
+    // whatever the frame rate is doing
+    if (this.swirlT > 0) {
+      this.swirlT -= dt; this.swirlTick += dt;
+      while (this.swirlTick >= SWIRL_STEP && this.swirlT > -SWIRL_STEP) {
+        this.swirlTick -= SWIRL_STEP;
+        this.swirlPass();
+      }
+      if (this.swirlT <= 0) { this.swirlTick = 0; this.atkCD = Math.max(this.atkCD, 0.30); }
+    }
+    if (this.twinT > 0) {
+      this.twinT -= dt;
+      // they lock again with a chime, so the window's end is audible and she is
+      // never quietly weaker than the player thinks she is
+      if (this.twinT <= 0) { this.twinT = 0; try { sfx('crystalJoin'); } catch (e) {} }
+    }
     // shuriken — hers from the start, aimed with UP or DOWN
     if (inP('STAR') && this.starCD <= 0) throwStar(this);
     // cycle the suit wheel (slot 0 is the plain bolt, so EMP is never lost)
@@ -1232,7 +1270,71 @@ class Player {
     // walls turn it around early rather than eating it
     if (b.out && solidAt(Math.floor((b.x + Math.sign(b.vx) * 16) / TILE), Math.floor(b.y / TILE))) { b.out = false; b.set.clear(); }
   }
+  // ---- THE SWIRL: the twin-blade supercharge --------------------------------
+  //
+  // With both halves in her paws the charged blow is not a punch, it is a DANCE.
+  // She comes up onto one toe and turns, and the two crystals draw a flower in
+  // the air around her — the same five-petal ring the art plate carries.
+  //
+  // WHY IT IS A DIFFERENT MOVE AND NOT A BIGGER ONE. The single-crystal burst is
+  // a shove: one hit, everything within 128 px, over in a moment. The swirl is
+  // FOUR passes over 640 ms in a tighter ring, so it does more to a thing that
+  // stays and much less to a thing that leaves. That makes it a positioning
+  // move — you open with it when something is committed, not when something is
+  // approaching — and it is the greedy axis from the combat skill: the window
+  // fits three passes comfortably and tempts you to stand there for the fourth.
+  //
+  // AND IT LEAVES HER SPLIT. For SWIRL_TWIN seconds afterwards the blade stays
+  // in two, and her combo swings BOTH — which is the two-hand technique itself
+  // rather than a one-off flourish. They lock again with a chime. So the fantasy
+  // arrives in the right order: she finds the second half and can fight with the
+  // pair, and joining them is the thing she grows into.
+  swirl() {
+    const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
+    this.chargeT = 0;
+    this.swirlT = SWIRL_T; this.swirlTick = 0; this.swirlHits = 0;
+    this.twinT = SWIRL_TWIN;
+    // she rises and turns: light, buoyant, off the floor for the whole move
+    this.vy = Math.min(this.vy, -110);
+    // its OWN cue, on the pass clock — not the burst's thud. See crystalSwirl()
+    sfx('crystalSwirl');
+    // NO cam.shake here. The combat skill's camera rule is that the screen must
+    // never shake through a frame the player has to read, and the whole point of
+    // this move is that you watch it. The flash and the ring carry the weight.
+    G.flash = Math.max(G.flash, 0.4);
+    G.addRing(cx, cy, 30);
+    this.swingVis = { t: SWIRL_T, t0: SWIRL_T, ang: 0, combo: 3, charged: true, swirl: true };
+    burst(cx, cy, 22, '#ffffff', 260, 0.7, 90, 3, true);
+  }
+  // one damage pass of the swirl, called on its own clock from update()
+  swirlPass() {
+    const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
+    const R = SWIRL_R, dm = Math.max(1, Math.round(this.dmg() * 0.95));
+    const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
+    let hit = 0;
+    for (const e of targets) {
+      if (e.dead) continue;
+      const ex = e.x + e.w / 2 - cx, ey = e.y + e.h / 2 - cy;
+      const d = Math.hypot(ex, ey);
+      if (d > R + Math.max(e.w, e.h) / 2) continue;
+      hit++;
+      e.hp -= dm; e.hurtT = 0.18;
+      const n = d || 1;
+      // it LIFTS rather than throws: a thing juggled inside the ring stays in
+      // it for the next pass, which is what makes standing your ground pay
+      if (!(e instanceof Boss) && e.kind !== 'turret') {
+        e.kbT = 0.16; e.vx += ex / n * 120; e.vy = Math.min(e.vy, -60);
+      }
+      this.gainVolts(4);
+      if (e.hp <= 0) e.die(ex / n, ey / n);
+    }
+    if (hit) { G.hitStop = Math.max(G.hitStop, 0.035); sfx('hit'); }
+    this.swirlHits += hit;
+    burst(cx, cy, 8, '#eafffb', 210, 0.35, 60, 2, true);
+  }
   releaseCharged() {
+    // both halves in her paws: the charged blow is the dance instead
+    if ((G.save.flags && G.save.flags.crystal2) && !G.boomer) return this.swirl();
     this.chargeT = 0;
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     sfx('chargedHit');
@@ -1290,8 +1392,12 @@ class Player {
     // (drawRake), because a hitbox the picture does not admit to is the exact
     // lie the long-rake fix above was about.
     const wm = s.wield === 2 ? 1.35 : s.wield ? 1.2 : 1;
+    // TWIN widens, it does not lengthen. The second blade covers the ground
+    // either side of the first, so `half` grows and `R` does not — she is not
+    // reaching further, she is filling more of what she can already reach.
+    const tw = s.twin ? 1.45 : 1;
     const R = (down ? 46 : (s.combo === 2 ? (rk ? 68 : 50) : 44)) * wm;
-    const half = (down ? 32 : (s.combo === 2 ? (rk ? 46 : 35) : 30)) * wm;
+    const half = (down ? 32 : (s.combo === 2 ? (rk ? 46 : 35) : 30)) * wm * tw;
     const cx = this.x + this.w / 2 + s.ax / n * R;
     const cy = this.y + this.h / 2 + s.ay / n * R;
     return { x: cx - half, y: cy - half, w: half * 2, h: half * 2 };
@@ -2664,6 +2770,49 @@ class Player {
     if (this.swingVis) {
       const sv = this.swingVis;
       const p = 1 - sv.t / sv.t0;
+      // ---- THE SWIRL draws its own thing and nothing else ------------------
+      // The rake arcs follow her PAWS, and through a pirouette the paws go
+      // round with her — which would draw two arcs chasing each other's tails
+      // and read as a mess. The dance is one shape, so it is drawn as one: a
+      // ring the blades are cutting, opened into petals where they cross.
+      if (sv.swirl) {
+        const cx = this.x + this.w / 2, cy = this.y + this.h / 2 - 4;
+        const spin = p * Math.PI * 3.2;                 // a turn and a half
+        const grow = Math.sin(Math.min(1, p * 1.25) * Math.PI * 0.5);   // opens fast
+        const fade = 1 - Math.max(0, (p - 0.72) / 0.28);                // closes late
+        c.save();
+        c.globalCompositeOperation = 'lighter';
+        c.translate(cx, cy);
+        c.rotate(spin);
+        c.scale(1, 0.46);                               // seen from above-ish, so it lies flat
+        const R = SWIRL_R * (0.55 + grow * 0.55);
+        // FIVE PETALS, the shape the art plate carries: a rose curve, which is
+        // what two blades crossing on a turn actually leave behind
+        for (const pass of [0, 1]) {
+          c.beginPath();
+          for (let i = 0; i <= 96; i++) {
+            const a = i / 96 * Math.PI * 2;
+            const rr2 = R * (0.72 + 0.28 * Math.cos(a * 5 + pass * Math.PI));
+            const px = Math.cos(a) * rr2, py = Math.sin(a) * rr2;
+            i ? c.lineTo(px, py) : c.moveTo(px, py);
+          }
+          c.closePath();
+          c.strokeStyle = pass ? 'rgba(190,245,255,' + (0.5 * fade).toFixed(3) + ')'
+                               : 'rgba(255,255,255,' + (0.85 * fade).toFixed(3) + ')';
+          c.lineWidth = pass ? 5.5 : 2.4;
+          c.shadowColor = '#dff6ff'; c.shadowBlur = pass ? 16 : 7;
+          c.stroke();
+        }
+        c.restore();
+        // motes thrown off the ring, in world space so they do not spin with it
+        if (chance(0.7)) {
+          const a = rnd(0, 7);
+          addPart(cx + Math.cos(a) * SWIRL_R * 0.9, cy + Math.sin(a) * SWIRL_R * 0.42,
+                  Math.cos(a) * 90, Math.sin(a) * 42 - 30, 0.4, '#ffffff', 2.2, 40, true);
+        }
+        c.globalCompositeOperation = 'source-over';
+        return;
+      }
       const ease = p * p * (3 - 2 * p);
       const gcol = PAL[G.roomDef.zone].glow;
       const empowered = this.clawT > 0;

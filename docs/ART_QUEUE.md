@@ -297,6 +297,22 @@ the RAKE arcs; combos re-tint the same four (task #81).
     (In-engine the scale is set by the renderer, so gameplay never inherits
     the plate's size; the archive still must not lie about it.)
 
+### 1b-iii. THE TWO-HAND TECHNIQUE  ✅ DONE (2026-08-15, canon + crystal elements)
+Four plates, fired against the canon element so the dancing cat is the same cat
+as everywhere else. Archived to `assets/source/crystal/`, contact sheet at
+`assets/source/_sheets/crystal_twin.jpg`.
+  twin_guard   both halves up, one high one low, the ready stance of the
+               six-second twin window
+  swirl_wind   up onto one toe, the turn beginning, scarf already carrying it
+  swirl_peak   mid-dance, both blades out, the ring half-drawn
+  swirl_fx     the arc ALONE, no character: a five-petal crystalline flower of
+               white light — additive, black ground, brightness IS the alpha
+The in-game ring is procedural and drawn from `swirl_fx`'s shape (a five-petal
+rose curve, squashed to the ground plane); the three character plates are the
+reference the pose was animated against, not sheets the engine loads. The move
+itself — every number and why — is `docs/combat/HERO_SWIRL.md`, measured by
+`tests/twin.cjs`.
+
 ### 1c. THE BACK JET ✱ FIRE ON REBIND — the double jump is hardware now
 The double jump is a BACK JET THRUST (owner's call; the pirouette is retired —
 wired procedurally already, the plume is additive light per §0.0). Two gear
