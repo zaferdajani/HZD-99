@@ -170,10 +170,21 @@ Two ways forward, and it is the owner's call, not the pipeline's:
 
 Whichever is chosen, the renderer work is the same shape: a sprite short-circuit
 in the ROBO-CAT branch of `Player.draw()` — NOT `drawHeroSprite`/`drawHeroRig`,
-which belong to NOSTOS's human hero behind `isHero()` and are a dead pixel-art
-path expecting `heroIdle`/`heroRun`/`heroJump`/`heroAtk` sheets that do not
-exist. Scarf, jets, charge aura and claw arcs stay procedural overlays; the
-procedural body becomes the loading fallback.
+which belong to NOSTOS's human hero behind `isHero()`.
+
+**And that hero is the precedent to copy, not a cautionary tale.** He is ALREADY
+sprite-first: `drawHeroSprite` picks a frame out of `heroIdle`/`heroRun`/
+`heroJump`/`heroAtk` (the `gothic-hero-*.png` sheets, which are on disk and in
+`MEDIA_SRC`), returns true, and `drawHeroRig` — the procedural body — only runs
+when those images have not loaded. That is exactly the arrangement §2 asks for
+on HZD-99: authored art first, procedural body as the loading fallback. The
+shape is proven in this codebase; it just has never been pointed at her.
+
+For her, the split is: `js/entities.js` **1481–2232 is the body** (scarf, rear
+arm, shell, head, ears, visor, legs) and is what a plate replaces; **2233–2269
+is the jet plume** and stays. Scarf, jets, charge aura and claw arcs stay
+procedural overlays — except the scarf/cape, which is BAKED INTO the plates, so
+drawing the procedural scarf on top would double it.
 
 ### 1a. The turnaround — 8 yaw angles, one prompt each  ✅ DONE (both variants)
 `hzd_yaw0 … hzd_yaw7`: 0° (facing screen-right), 45°, 90° (facing camera),
