@@ -426,7 +426,13 @@ const HERO_CELLS = 22;
 // units — bigger than she is, because the cell has headroom over her ears — and
 // HERO_FLOOR is the 4px margin herostates.cjs leaves under the grounded poses,
 // scaled into those units so her soles land on y=0 and not just near it.
-const HERO_DH = 60, HERO_FLOOR = 1.2;
+// HERO_FLOOR sinks the plate to the SOIL LINE: the cells carry a baked
+// contact shadow and a few px of margin under the feet, and anchoring the
+// cell bottom to the floor stood her on top of the grass fringe — reported
+// as "running on top of grass instead of the ground". Sunk, her feet meet
+// the dirt and the front grass blades brush her ankles, which is what
+// standing IN a meadow looks like.
+const HERO_DH = 60, HERO_FLOOR = 6;
 // Airborne cells are CENTRED in their cell rather than stood on its floor (the
 // tool does this, because a flying pose has no contact point to align). They
 // must be drawn centred too, or she steps up a few pixels the frame she leaves
@@ -1542,10 +1548,14 @@ class Player {
     // a limp that survives a sprint reads as a bug, not as damage.
     if (this.cores <= 1 && Math.abs(this.vx) < 20) return 'slump';
     if (Math.abs(this.vx) > 12) {
-      // two-frame gait, driven by anim so it keeps time with the procedural
-      // stride the rest of the body effects are still cut to
-      const k = Math.floor(this.anim * (run ? 11 : 7)) % 2;
-      return run ? (k ? 'run_b' : 'run_a') : (k ? 'walk_b' : 'walk_a');
+      // THE RUN IS THE WALK, HURRIED. The fired run pair came back as a low
+      // feline lunge — the owner's exact words: "moving like a cat instead
+      // of running like a cute robot" — so those two cells are PARKED until
+      // re-fired upright (the re-fire is on the firing list). A cute robot
+      // hurries: same upright steps, faster, with the mechanical bounce and
+      // lean drawRoboPlate adds on top.
+      const k = Math.floor(this.anim * (run ? 13 : 7)) % 2;
+      return k ? 'walk_b' : 'walk_a';
     }
     return 'idle';
   }
@@ -1568,8 +1578,22 @@ class Player {
     const dh = HERO_DH, dw = dh * (cw / ch);
     // grounded cells stand on the cell's floor line; airborne cells are centred
     const dy = HERO_AIR[st] ? -dh * 0.5 - 18 : -dh + HERO_FLOOR;
+    c.save();
+    // THE ROBOT HURRY. The plates are stills; the machine in them comes from
+    // this: a forward lean and a hard little bounce timed to the step flips,
+    // so she pistons along like a wind-up toy instead of gliding. Grounded
+    // locomotion only — everything else keeps the plate's own pose.
+    const moving = this.on && Math.abs(this.vx) > 12 && !this.swingVis
+      && this.dashT <= 0 && this.landT <= 0 && this.skidT <= 0
+      && this.hurtPoseT <= 0 && this.healT <= 0 && this.chargeT <= 0.05;
+    if (moving) {
+      const step = Math.abs(Math.sin(this.anim * (run ? 13 : 7) * Math.PI / 2));
+      c.rotate(run ? 0.055 : 0.022);
+      c.translate(0, -step * (run ? 2.6 : 1.4));
+    }
     c.drawImage(im, col * cw, 0, cw, ch, -dw / 2, dy, dw, dh);
     this.drawHeroEyes(c, st, dw, dh, dy);
+    c.restore();
     return true;
   }
   // What she is FEELING, which is a different question from what she is doing.

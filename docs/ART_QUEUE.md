@@ -223,11 +223,12 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   2. §1b-ii regrips ×2 + thrown blade ×1 (thrown = BODY LENGTH — owner ruling)
   3. §1c    back-jet gear ×3             (idle / mid-boost / full burn)
   4. §1d    THE FORGING CINEMATIC ×1     (cartoonish; Ratchet's chest crystal visible)
-  5. §2e    sage plates ×6               (stand/coil/lunge/gather/kneel-lock/purified)
-  6. §2d    robot bat plates ×5          (hang/shiver/dive/flap-up/flap-down)
-  7. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
-  8. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
-  9. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
+  5. §1e    RUN PAIR RE-FIRE ×2          (run_a / run_b — see brief below; owner rejected v1)
+  6. §2e    sage plates ×6               (stand/coil/lunge/gather/kneel-lock/purified)
+  7. §2d    robot bat plates ×5          (hang/shiver/dive/flap-up/flap-down)
+  8. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
+  9. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
+ 10. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
 
 Estimated spend: ~45-55 credits of session B's balance. After each block:
 git pull, run the pipeline (blackkey -> img-crush -> archive -> wire), and
@@ -273,6 +274,36 @@ re-plumbing when it lands:
   a bespoke ground plate for it can replace the generic glimmer.
 - tests/crystal.cjs measures the arc end-to-end (14 checks) and stays green
   through any art swap — it reads state, not pixels.
+
+### 1e. THE RUN PAIR RE-FIRE ✱ FIRE ON REBIND — the owner rejected v1
+
+The fired `run_a`/`run_b` cells came back as a LOW FELINE LUNGE — body
+horizontal, paws forward like a sprinting cat. The owner's exact words
+(2026-08-15): *"Hero is moving like a cat instead of running like a cute
+robot."* Those two cells are PARKED — `heroState()` in js/entities.js
+substitutes the walk pair at 13 fps with a mechanical lean+bounce
+(drawRoboPlate) until the re-fire lands. Wiring is a two-line revert in
+`heroState()` once the new cells pass review.
+
+The brief, per cell (canon element `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`
+in the prompt, identity line + standing negatives as always):
+
+- **run_a**: UPRIGHT hurrying jog, torso vertical with a slight forward
+  lean, front leg reaching, back leg pushing off — a wind-up-toy hurry, not
+  an animal sprint. Side view facing right.
+- **run_b**: the opposite stride — other leg forward, arms swapped — same
+  upright carriage, same lean. Side view facing right.
+
+Hard requirements learned from v1: NO ground streaks, NO motion-blur smears,
+NO baked cast shadow or floor patch under her (v1 shipped with gray slab
+remnants in 8 cells — `tools/cleanstates.cjs` had to scrub them; the
+generation warnings in the STATUS LEDGER apply: dark-room phrasing beats
+"pure black background", never white-key her, bright and even exposure).
+After keying: paste into `assets/characters/hero/states.png` cells 3 and 4
+(HERO_CELL run_a/run_b), archive the fired originals in
+`assets/source/hero/`, re-run `tools/heroeyes.cjs` for the two cells' eye
+rects, then `node tools/lowres.cjs && node build.cjs` and
+`node tests/run.cjs hero artbible`.
 
 ### 1a. The turnaround — 8 yaw angles, one prompt each  ✅ DONE (both variants)
 `hzd_yaw0 … hzd_yaw7`: 0° (facing screen-right), 45°, 90° (facing camera),
