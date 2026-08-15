@@ -6093,7 +6093,15 @@ function drawTutor() {
     }
   }
   if (st.id === 'heal') mark(player.x + player.w / 2, player.y + player.h / 2, 32, '#aef7d8');
-  if (st.id === 'go') mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
+  if (st.id === 'go') {
+    // "go right" is a lie inside the booth: the den's only way out is the
+    // door she came in by. The five-player validation caught a six-year-old
+    // holding right into the den wall for six minutes. In a room with no
+    // right-hand exit, the mark rings the depth door instead.
+    const gr3 = typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId];
+    if (!G.roomDef.exits.R && gr3) mark(gateWorldX(gr3), 13 * TILE, 30, '#ffd76a');
+    else mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
+  }
   if (T.i < TUT_LAST && !(typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId])) {
     // the held door: a light curtain, not a wall — it reads as "not yet".
     // Not in W2: its way out is the depth gate, which glimmers for itself,
