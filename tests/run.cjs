@@ -46,6 +46,7 @@ const SUITE = [
   ['wolves',    'the pack, the Alpha and the flag that changes a whole species'],
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],
+  ['preload',   'the art for the rooms she can reach is fetched before she reaches them'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
 ];
 

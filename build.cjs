@@ -49,12 +49,22 @@ for (const k in EMBED) {
 // anyway, shipping 600 KB of Three.js to every player, which matters on the web
 // and matters more inside an app download. The files remain in the repo as the
 // offline tool that regenerates that atlas.
-const files = ['beast', 'eagle', 'glaciere', 'furnace', 'mother', 'theme', 'mat', 'prism', 'types', 'i18n', 'media', 'quests', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'entities', 'wolves', 'pets', 'braid', 'game', 'perf', 'touch']
+const files = ['beast', 'eagle', 'glaciere', 'furnace', 'mother', 'theme', 'mat', 'prism', 'types', 'i18n', 'media', 'quests', 'atlas', 'audio', 'engine', 'lang', 'riddles', 'trials', 'world', 'preload', 'entities', 'wolves', 'pets', 'braid', 'game', 'perf', 'touch']
   .map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 // THE MUSIC MANIFEST. Scored tracks are dropped into assets/music/ and turned
 // on by rebuilding — no code edit per track, and no reference to a file that is
 // not there (a missing stream would start an <audio> element that silently
 // never plays instead of falling back to the synth score).
+// THE ROOM→ART MANIFEST, compiled in. js/preload.js uses it to fetch the art
+// for rooms she can REACH before she reaches them, breadth-first over the room
+// graph. It cannot be derived by reading the source — which sheets a room wants
+// depends on its zone, its enemy list, its boss, its NPCs and its ceiling tier —
+// so it is MEASURED by tools/roomassets.cjs playing every room, and regenerated
+// whenever rooms or art change. Missing is not fatal: preload.js does nothing
+// without it and the lazy map behaves exactly as it did before.
+let roomAssets = 'null';
+try { roomAssets = fs.readFileSync('assets/roomassets.json', 'utf8').trim(); }
+catch (e) { console.log('  (no assets/roomassets.json — prefetch disabled; run tools/roomassets.cjs)'); }
 const MUS_EXT = /\.(ogg|mp3|m4a|wav)$/i;
 const musFiles = {};
 try {
@@ -116,7 +126,8 @@ const emit = (fname, lock) => {
     ';window.MUS_FILES=' + JSON.stringify(musFiles) +
     ';window.VID_FILES=' + JSON.stringify(vidFiles) +
     ';window.VID_ALT=' + JSON.stringify(vidAlt) +
-    ';window.VOX_FILES=' + JSON.stringify(voxFiles) + '</script>\n' +
+    ';window.VOX_FILES=' + JSON.stringify(voxFiles) +
+    ';window.ROOM_ASSETS=' + roomAssets + '</script>\n' +
     '<script>\n' + files.join('\n') + '\n</script>\n</body>');
   fs.writeFileSync(fname, out);
   console.log(fname + ' built (' + lock + '):', (fs.statSync(fname).size / 1048576).toFixed(2) + 'MB');

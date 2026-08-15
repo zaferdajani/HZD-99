@@ -1,19 +1,37 @@
 // CLAWBYTE service worker — repeat opens come from cache, code stays fresh.
 // index.html is network-first (the newest build always wins; cache only as
 // the offline fallback). Assets are cache-first with background refresh.
-const CACHE = 'clawbyte-v1';
-// A phone is not a hard drive. Cache-first with no ceiling means every asset the
-// player ever loads sits on their device forever; this keeps the most recent
-// slice and lets the browser re-fetch the rest from the cloud on demand.
-const CACHE_MAX = 60;
+const CACHE = 'clawbyte-v2';
+// TWO BUCKETS, BECAUSE THE PACKAGE IS TWO DIFFERENT PROBLEMS.
+//
+// Measured 2026-08-15: 111 art files totalling 32 MB, and 125 music/video files
+// totalling 100 MB. One cache with one ceiling put those in competition, and the
+// streams won every time — a handful of 4 MB tracks would evict the entire art
+// set, so the next open re-downloaded sheets the prefetcher had already paid
+// for. On mobile data that is the same bytes bought twice.
+//
+// So art and streams are counted separately:
+//   ART     all of it fits, and it is what the game needs to LOOK right. Held.
+//   STREAM  4 MB each and played through once. A handful of recent ones is all
+//           the value there is; the rest re-fetch on demand as they always did.
+const CACHE_MAX_ART = 130;      // > the 111 that exist: the whole art set stays
+const CACHE_MAX_STREAM = 6;     // ~24 MB of the most recently heard/seen
+const STREAM_RE = /\.(m4a|ogg|mp3|wav|mp4|webm|mov)$/i;
 async function trim() {
   const c = await caches.open(CACHE);
   const keys = await c.keys();
-  if (keys.length <= CACHE_MAX) return;
-  for (let i = 0; i < keys.length - CACHE_MAX; i++) await c.delete(keys[i]);
+  const stream = [], art = [];
+  for (const k of keys) (STREAM_RE.test(k.url) ? stream : art).push(k);
+  // insertion order, so the oldest of each kind goes first
+  for (let i = 0; i < stream.length - CACHE_MAX_STREAM; i++) await c.delete(stream[i]);
+  for (let i = 0; i < art.length - CACHE_MAX_ART; i++) await c.delete(art[i]);
 }
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+self.addEventListener('activate', (e) => e.waitUntil((async () => {
+  // drop the old single-bucket cache, or its 60 mixed entries sit there forever
+  for (const k of await caches.keys()) if (k !== CACHE) await caches.delete(k);
+  await self.clients.claim();
+})()));
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   let url;

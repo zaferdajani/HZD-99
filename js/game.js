@@ -320,6 +320,8 @@ function loadRoom(id) {
   }
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
+  // re-aim the prefetcher: the art for the rooms she can now REACH
+  if (typeof preloadRoom === 'function') { try { preloadRoom(id); } catch (e) {} }
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
   G.wrecks = []; G.recharge = null; G.plats = []; G.saws = []; G.pools = []; G.x1Bridge = false; G.x1T = 0;
   ceilReset();                       // the roof of the last room does not follow you
@@ -975,6 +977,10 @@ function update(dt) {
       }
     }
     updateCam(player.x + player.w / 2, player.y + player.h / 2, G.roomDef.w * TILE, G.roomDef.h * TILE, dt);
+    // one prefetch slot per frame at most, and only when the game is idle
+    // enough to spare it — preloadTick decides, and does nothing during a
+    // transition or a boss fight
+    if (typeof preloadTick === 'function') { try { preloadTick(); } catch (e) {} }
     updateParts(dt);
     for (const tt of G.toasts) tt.t -= dt;
     G.toasts = G.toasts.filter(tt => tt.t > 0);

@@ -75,6 +75,23 @@ Assets are **not** inlined. `build.cjs` scans `assets/music`, `assets/video`
 and `assets/vox` and hands the page a manifest, so adding a track is: drop the
 file in, rebuild. Nothing in code may name a file that is not on disk.
 
+It also compiles in **`assets/roomassets.json`** — which art each room needs,
+measured by `tools/roomassets.cjs` actually playing every room, because that
+cannot be read off the source (it depends on zone, enemy list, boss, NPCs and
+ceiling tier). `js/preload.js` uses it to fetch ahead over the room graph.
+**Regenerate it whenever rooms or art change** — serve the repo, then
+`node tools/roomassets.cjs && node build.cjs`. It is not fatal if it is stale or
+missing: prefetch simply does less, and the lazy map behaves as it always did.
+
+**The package is two different problems and the numbers decide everything**
+(measured 2026-08-15): 132 MB total, of which **100 MB is music and video that
+is STREAMED and must never be preloaded**, and 32 MB is art — 11.6 MB of shared
+boot set plus 18.9 MB spread over 43 rooms, 24 of which add nothing at all. So
+the whole prefetch problem is 32 MB, small enough that on a good connection the
+right end state is "all of it". `sw.js` counts art and streams in separate
+buckets for the same reason: one ceiling let a handful of 4 MB tracks evict the
+entire art set, and the next open bought the same bytes twice.
+
 ## Architecture
 
 | file | what lives there |
@@ -85,6 +102,7 @@ file in, rebuild. Nothing in code may name a file that is not on disk.
 | `beast/eagle/glaciere/furnace/prism/mother.js` | one guardian's art and moves each |
 | `world.js` | every room: tile grid, entity list, exits |
 | `touch.js` | the on-screen controller, the power wheel, layout editor |
+| `preload.js` | room-graph prefetch: the art for rooms she can REACH, fetched before she reaches them |
 | `i18n.js` | all six languages. Never hard-code display text |
 | `trials.js` | the puzzle games (memory / cubes / balances) and Mind Nodes |
 | `braid.js` | THE BRAID — the run's ledger and what it changes |
