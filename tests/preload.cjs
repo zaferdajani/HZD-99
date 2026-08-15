@@ -109,18 +109,36 @@ const check = (name, ok, detail) => {
   // A prefetcher that runs during a boss fight or a room transition is a
   // downgrade: it spends the bandwidth and the main thread at the two moments
   // the player can feel it.
+  //
+  // THIS BLOCK USED TO ASSERT THE OPPOSITE ABOUT MENUS and it was wrong. The
+  // rule was `G.state === 'PLAY'`, so a shop, the map, a dialogue and the title
+  // screen all fetched nothing — the moments when NOTHING is moving were the
+  // only ones the prefetcher sat out, which is exactly backwards. The rule is
+  // inverted now: everywhere except where the network genuinely belongs to
+  // something else, and the something-elses are named here one by one.
   const yields = await page.evaluate(() => {
     const out = {};
-    const st = G.state, tr = G.trans;
-    G.state = 'PLAY'; G.trans = null; out.play = preloadIdle();
+    const st = G.state, tr = G.trans, cu = G.cut;
+    G.state = 'PLAY'; G.trans = null; G.cut = null; out.play = preloadIdle();
     G.trans = { t: 1 };                out.trans = preloadIdle();
-    G.trans = tr; G.state = 'PAUSE';   out.menu = preloadIdle();
-    G.state = st;
+    G.trans = null; G.state = 'PAUSE'; out.menu = preloadIdle();
+    G.state = 'MENU';                  out.title = preloadIdle();
+    // a film that is running cleanly is a two-minute idle window and is used;
+    // the same film the instant its frame clock hesitates is not
+    G.state = 'CUT';
+    G.cut = { ph: 'play', ran: true, stall: 0 };  out.filmOk = preloadIdle();
+    G.cut = { ph: 'play', ran: true, stall: 0.4 }; out.filmStalling = preloadIdle();
+    G.cut = { ph: 'hold', ran: false, stall: 0 };  out.filmWaiting = preloadIdle();
+    G.state = st; G.trans = tr; G.cut = cu;
     return out;
   });
   check('it runs while she is playing', yields.play === true);
   check('...and stands down during a room transition', yields.trans === false);
-  check('...and while the game is not being played', yields.menu === false);
+  check('...and USES a menu rather than sitting it out', yields.menu === true);
+  check('...and the title screen too', yields.title === true);
+  check('...and a film that is playing cleanly', yields.filmOk === true);
+  check('...but backs off the moment that film hesitates', yields.filmStalling === false);
+  check('...and never competes with one still trying to start', yields.filmWaiting === false);
 
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();

@@ -151,7 +151,12 @@ function playRecorded(key, gain) {
   } catch (e) { return false; }
 }
 function playBuf(key, vol, rate) {
-  if (!AC || MUTED || !MBUF[key]) return false;
+  if (!AC || MUTED) return false;
+  // a sound in the second wave that is asked for early jumps the queue. This
+  // call misses once — sfx() falls through to the synthesised version, which is
+  // what it does for a sound that has not arrived for any other reason — and
+  // every call after it is the real take.
+  if (!MBUF[key]) { if (typeof mediaAudio === 'function') mediaAudio(key); return false; }
   const s = AC.createBufferSource(), g = AC.createGain();
   s.buffer = MBUF[key];
   if (rate) s.playbackRate.value = rate;

@@ -1002,10 +1002,6 @@ function update(dt) {
       }
     }
     updateCam(player.x + player.w / 2, player.y + player.h / 2, G.roomDef.w * TILE, G.roomDef.h * TILE, dt);
-    // one prefetch slot per frame at most, and only when the game is idle
-    // enough to spare it — preloadTick decides, and does nothing during a
-    // transition or a boss fight
-    if (typeof preloadTick === 'function') { try { preloadTick(); } catch (e) {} }
     updateParts(dt);
     for (const tt of G.toasts) tt.t -= dt;
     G.toasts = G.toasts.filter(tt => tt.t > 0);
@@ -2546,6 +2542,24 @@ function purifyPreload(kind) {
   purifyPre[kind] = v;
   if (VID_GESTURE) purifyPrime(v);
 }
+// THE ROLLING WINDOW, and why a reel must not be fetched as a reel.
+//
+// The opening is eight shots. Preloading all eight put 4.4 MB of webm — or
+// 13.1 MB of mp4, which is what iOS Safari takes — on the wire 900 ms after the
+// page loaded, every session, INCLUDING the sessions where the player presses
+// Continue and never sees a frame of it. On mobile data that was the single
+// most expensive thing the boot did, and it was competing with the room art the
+// player was actually about to need.
+//
+// A reel is a QUEUE. Each shot runs about fifteen seconds, so shot n+1 has a
+// quarter of a minute to arrive while shot n is on screen — an eternity on any
+// connection that can play video at all. Two ahead is the whole cushion needed,
+// and it makes the boot cost one clip (0.93 MB) instead of eight.
+const FILM_AHEAD = 2;
+function filmAhead(list, n) {
+  if (!list) return;
+  for (let i = 0; i < Math.min(n == null ? FILM_AHEAD : n, list.length); i++) purifyPreload(list[i]);
+}
 function purifyPrime(v) {
   if (!v || v._primed) return;
   v._primed = true;
@@ -2644,6 +2658,9 @@ function endPurifyCut() {
       const cap = G.reelCap ? G.reelCap.shift() : null;
       if (startPurifyCut(k)) {
         if (cap) { G.cut.cap = cap; G.cut.patient = true; }
+        // and top the window back up: this shot is playing, the next two are
+        // arriving behind it
+        filmAhead(G.reel);
         // straight into the next shot, over the frame the last one ended on
         if (purifyReady(k)) {
           G.cut.ph = 'play'; G.cut.t = 0; G.cut.diss = 0.5;
@@ -6558,6 +6575,7 @@ function startIntroFilm() {
       G.reel = reel.map(s => s[0]);
       G.reelCap = reel.map(s => s[1]);
       G.reelEnd = 'CINE';
+      filmAhead(G.reel);
       return true;
     }
   }
@@ -6577,7 +6595,9 @@ function startIntroFilm() {
 // arrive, and audio is allowed to start with it.
 // ---------------------------------------------------------------------------
 function startCine() {
-  try { for (const s of INTRO_FILM) purifyPreload(s[0]); } catch (e) {}
+  // the first two shots, not all eight — startIntroFilm keeps the window
+  // topped up from there. See filmAhead().
+  try { filmAhead(INTRO_FILM.map(s => s[0])); } catch (e) {}
   startCineNow();
 }
 function startCineNow() {
@@ -7631,11 +7651,25 @@ setMusic('title');
 // the first time the page was ever opened, which put a two-minute prologue in
 // front of somebody who had not yet decided to play — and then never again,
 // which meant the person who made it almost never saw it. It now starts when
-// New Game is pressed, and the clips are fetched here, quietly, while the menu
-// is on screen, so that press starts a film that is already in memory.
-if (gameLock() !== 'hero') {
-  setTimeout(() => { try { for (const sh of INTRO_FILM) purifyPreload(sh[0]); } catch (e) {} }, 900);
+// New Game is pressed, and the FIRST SHOT is fetched here, quietly, while the
+// menu is on screen, so that press starts a film that is already in memory.
+//
+// One shot and not eight: a player who presses Continue never watches the
+// opening, and eight shots is 4.4 MB of webm (13.1 MB of mp4, which is what
+// iOS takes) spent on their behalf before they have chosen anything. The rest
+// of the reel arrives two ahead of the shot on screen — see filmAhead().
+//
+// ...and only for somebody who has no save. A returning player's next press is
+// Continue, and the opening is the one thing on this menu they have already
+// seen. If they do start a new game the film simply waits in the dark for a
+// beat — updateCut's `hold` phase is built for exactly that and will sit there
+// patiently for up to fourteen seconds.
+if (gameLock() !== 'hero' && !anySave()) {
+  setTimeout(() => { try { filmAhead(INTRO_FILM.map(s => s[0]), 1); } catch (e) {} }, 900);
 }
+// ...and the art for where she is about to be starts arriving on the title
+// screen, which used to fetch nothing at all. See preloadBoot().
+setTimeout(() => { try { if (typeof preloadBoot === 'function') preloadBoot(); } catch (e) {} }, 400);
 // look for a newer build at boot, and again every few minutes while idling
 G.updateStamp = 1;
 setTimeout(checkForUpdate, 2500);
@@ -7706,6 +7740,13 @@ function mainLoop(tms) {
   let acc = Math.min(raw, SIM_MAX) * (G.state === 'PLAY' ? paceK() : 1);
   if (!(acc > 0)) acc = dt;
   while (acc > 1e-4) { const st = Math.min(acc, SIM_STEP); update(st); acc -= st; }
+  // ONE PREFETCH SLOT PER FRAME, IN EVERY STATE. This used to live inside the
+  // PLAY branch of update(), which meant the title screen, the map, a shop and
+  // the whole two-minute opening fetched nothing at all — the quietest moments
+  // in the session were the only ones the prefetcher sat out. preloadIdle()
+  // owns the decision now, and it still refuses during a transition, a boss
+  // fight, and a film that is not playing cleanly.
+  if (typeof preloadTick === 'function') { try { preloadTick(); } catch (e) {} }
   draw(tms);
   drawTouchUI();
   clearP();

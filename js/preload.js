@@ -124,22 +124,66 @@ function preloadRoom(roomId) {
   PRE.q.sort((a, b) => a[1] - b[1]);
 }
 
+// SEEDING, BEFORE ANYTHING IS PLAYING. preloadRoom() is called from loadRoom,
+// which means the queue was empty for the whole time the title screen was up —
+// the single longest guaranteed-idle window most sessions have. This is called
+// at boot instead, and it knows where the player is about to be:
+//
+//   a save exists  -> the room its bench is in. Continue lands there.
+//   no save        -> W1, the cradle room the opening film hands her to.
+//
+// Getting this wrong costs nothing (the wrong neighbourhood is still art the
+// game will want eventually), which is why it can be a guess at all.
+function preloadBoot() {
+  if (!PRE.on) return;
+  let start = 'W1';
+  try {
+    const s = (typeof loadStored === 'function') &&
+      (loadStored(typeof gameLock === 'function' && gameLock() === 'hero' ? 'hero' : 'robo'));
+    if (s && s.bench && s.bench.room) start = s.bench.room;
+  } catch (e) {}
+  try { preloadRoom(start); } catch (e) {}
+}
+
 // Is now a good moment to spend a request and a decode?
+//
+// THIS USED TO BE `G.state === 'PLAY'` AND NOTHING ELSE, which had it exactly
+// backwards. A menu, the map, a shop, a dialogue, the title screen — those are
+// the moments when nothing is moving, nothing is being read at 60 fps and the
+// network is doing nothing at all. Refusing to prefetch through them threw away
+// most of the idle time in a session to protect a frame budget that was not
+// under any pressure.
+//
+// So the rule is inverted: prefetch everywhere EXCEPT the places where the
+// network or the main thread genuinely belongs to something else.
 function preloadIdle() {
   if (typeof G === 'undefined') return false;
-  if (G.state !== 'PLAY') return false;          // menus, dialogue, the film
   if (G.trans) return false;                     // mid-transition: the visible moment
   if (typeof bossActive === 'function' && bossActive()) return false;
+  // A FILM IS THE OTHER CLAIM ON THE NETWORK. Two minutes of opening is the
+  // biggest idle window in the game and it would be a waste to sit it out — but
+  // a stalling film is the failure this codebase fought hardest, so the deal is
+  // conditional: fetch only while the clip is genuinely playing, and get out
+  // the instant its frame clock hesitates. `ran` means at least one frame has
+  // been decoded; `stall` is the same counter updateCut uses to give up.
+  if (G.state === 'CUT') {
+    const ct = G.cut;
+    return !!(ct && ct.ph === 'play' && ct.ran && !(ct.stall > 0));
+  }
   return true;
 }
 
 function preloadTick() {
-  if (!PRE.on || !PRE.q.length || PRE.inflight >= PRE.max) return;
+  if (!PRE.on || !PRE.q.length) return;
   if (!preloadIdle()) return;
+  // half rate while a film is on screen: it is playing cleanly (preloadIdle
+  // checked) but it is still the thing the bandwidth belongs to
+  const max = (typeof G !== 'undefined' && G.state === 'CUT') ? 1 : PRE.max;
+  if (PRE.inflight >= max) return;
   const M = (typeof window !== 'undefined') && window.ROOM_ASSETS;
   const src = (typeof MEDIA_SRC !== 'undefined') && MEDIA_SRC.images;
   if (!src) return;
-  while (PRE.q.length && PRE.inflight < PRE.max) {
+  while (PRE.q.length && PRE.inflight < max) {
     const [key] = PRE.q.shift();
     const url = src[key];
     if (!url) continue;

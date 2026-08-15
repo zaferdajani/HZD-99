@@ -379,15 +379,56 @@ function softArt(key) {
   SOFT_ART[key] = out;
   return out;
 }
+// ---------------------------------------------------------------------------
+// SOUND, IN TWO WAVES.
+//
+// This used to open all 36 audio requests on the same frame as the first tap —
+// 1.18 MB, and six of them guaranteed 404s (the NPC hum override slots, which
+// are empty by design). Bytes were never the problem; SIMULTANEITY was. A phone
+// on a slow link opening three dozen sockets at once finishes all of them later
+// than it would finish the six that matter, and the six that matter are the
+// only ones needed in the first minute of play.
+//
+// So: her voice and the impacts go out immediately, and the rest — the six
+// guardian roars, the ending takes, the hum override slots — drain a few at a
+// time behind them. Nothing is ever permanently absent: playBuf() pulls a
+// missing buffer forward on first use, and until it lands sfx() falls through
+// to the synthesised version of the same sound, which is the fallback the whole
+// audio engine is already built on.
+//
+// The optional slots stay in the SECOND wave on purpose. They are expected to
+// 404, and a 404 that happens forty seconds in costs nothing; six of them
+// racing the player's first hit sound cost something.
+const AUDIO_CORE = [
+  'hit1', 'hit2', 'metal', 'explosion', 'laser', 'zap',
+  'hzd_atk1', 'hzd_atk2', 'hzd_atk3', 'hzd_hurt', 'hzd_hurtbad', 'hzd_die',
+  'hzd_dash', 'hzd_djump', 'hzd_land', 'hzd_heal', 'hzd_jump', 'hzd_charge',
+  'hzd_release', 'hzd_evo',
+];
+const MBUF_PEND = {};
+function mediaAudio(k) {
+  if (MBUF[k] || MBUF_PEND[k] || !MEDIA_SRC.audio[k]) return;
+  if (typeof AC === 'undefined' || !AC) return;
+  MBUF_PEND[k] = 1;
+  fetch(MEDIA_SRC.audio[k])
+    .then(r => r.arrayBuffer())
+    .then(b => AC.decodeAudioData(b))
+    .then(buf => { MBUF[k] = buf; })
+    .catch(() => {});
+}
 let mediaAudioLoaded = false;
 function loadMedia() {
   if (mediaAudioLoaded || typeof AC === 'undefined' || !AC) return;
   mediaAudioLoaded = true;
-  for (const k in MEDIA_SRC.audio) {
-    fetch(MEDIA_SRC.audio[k])
-      .then(r => r.arrayBuffer())
-      .then(b => AC.decodeAudioData(b))
-      .then(buf => { MBUF[k] = buf; })
-      .catch(() => {});
-  }
+  for (const k of AUDIO_CORE) mediaAudio(k);
+  const rest = [];
+  for (const k in MEDIA_SRC.audio) if (!MBUF_PEND[k]) rest.push(k);
+  // four at a time, a third of a second apart: the tail is fully in memory
+  // about a second and a half later, without ever being in competition with
+  // the sounds the player can already trigger
+  const drain = () => {
+    for (let i = 0; i < 4 && rest.length; i++) mediaAudio(rest.shift());
+    if (rest.length) setTimeout(drain, 320);
+  };
+  setTimeout(drain, 320);
 }

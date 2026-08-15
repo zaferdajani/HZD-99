@@ -47,6 +47,7 @@ const SUITE = [
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],
   ['preload',   'the art for the rooms she can reach is fetched before she reaches them'],
+  ['boot',      'a cold open spends what it needs and buys the rest behind itself'],
   ['twin',      'the swirl: four passes, a ring not a punch, and two blades afterwards'],
   ['crystal',   'the purifier: gift, tree, reach, rising finisher, launcher, the throw that returns'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
