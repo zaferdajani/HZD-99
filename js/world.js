@@ -504,7 +504,7 @@ const ROOMS = {
   // and the pillar SHINING at the end of the dark — the shine is the guide.
   // Also the first stroke of the world tripling: every room here is wider
   // than the viewport ever was.
-  CV1: { zone: 'X', w: 46, h: 17, exits: { R: 'CV2' },
+  CV1: { zone: 'X', cave: 1, w: 46, h: 17, exits: { R: 'CV2' },
     // the entry hall: light from the mouth behind her, stepping ledges over a
     // broken floor, one crawler patrolling — the cave says what it is
     ents: [['crawler', 26, 15], ['scrap', 12, 11, 15], ['scrap', 34, 15, 10]],
@@ -514,7 +514,7 @@ const ROOMS = {
       hline(g, 23, 27, 12, '='); hline(g, 31, 35, 9, '=');
       hline(g, 38, 42, 12, '=');
     } },
-  CV2: { zone: 'X', w: 52, h: 22, exits: { L: 'CV1', R: 'CV3' },
+  CV2: { zone: 'X', cave: 1, w: 52, h: 22, exits: { L: 'CV1', R: 'CV3' },
     // the climb: taller, darker, two hoppers and a crawler; spikes under the
     // long jumps so a miss costs a sting, never the run
     ents: [['hopper', 14, 20], ['hopper', 33, 20], ['crawler', 44, 20],
@@ -528,7 +528,7 @@ const ROOMS = {
       hline(g, 36, 40, 14, '='); hline(g, 43, 47, 15, '=');
       rect(g, 19, 20, 21, 20, '^'); rect(g, 34, 20, 36, 20, '^');
     } },
-  CV3: { zone: 'X', w: 46, h: 17, exits: { L: 'CV2' },
+  CV3: { zone: 'X', cave: 1, w: 46, h: 17, exits: { L: 'CV2' },
     // the end of the dark: a long low gallery, two crawlers between her and
     // the PILLAR — which needs the supercharged claw, and the crawlers are
     // where the volts for it come from. That is the room teaching the tool.
@@ -640,6 +640,36 @@ const MAPPOS = {
   E1: [8, 7, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1], E4: [9, 6, 1, 1],
   E5: [9, 8, 1, 1], E6: [9, 9, 1, 1],
 };
+
+// ==== THE GUARDIAN GROTTOES — every fall or taming REVEALS A CAVE ==========
+// The owner's rule, verbatim: "defeating a boss or a sage always reveals a
+// cave. Whether this cave will give something... or I need to do another
+// challenge inside is a different story." The RULE ships now; each cave's
+// own story is written later, in place. Every lair grows a depth door
+// (GATE_ROOM in game.js, gated on the boss's flag) into a crystal-veined
+// grotto: shared bones today — scrap and a rest — so a reveal always pays
+// SOMETHING, and the map marks each mouth with the cave sign.
+const GROTTOES = [
+  // [room, lair it opens from, flag that opens it, map cell x, y]
+  ['GA1', 'A4', 'bossGlitch', 5, 4],
+  ['GA2', 'A10', 'alpha', 2, 2],
+  ['GB1', 'B4', 'bossBrood', 7, 1],
+  ['GC1', 'C3', 'bossAtlas', 8, 4],
+  ['GD1', 'D3', 'bossZero', 10, 6],
+  ['GX1', 'X1', 'bossPrism', 9, 1],
+  ['GE1', 'E3', 'bossMother', 11, 6],
+];
+for (const [gid, lair, flag, mx, my] of GROTTOES) {
+  ROOMS[gid] = {
+    zone: 'X', cave: 1, w: 36, h: 17, exits: {},
+    ents: [['scrap', 8, 15, 40], ['scrap', 18, 11, 40], ['scrap', 28, 15, 60], ['bench', 32, 15]],
+    build(g) {
+      frame(g);
+      hline(g, 6, 10, 12, '='); hline(g, 15, 20, 11, '='); hline(g, 24, 28, 12, '=');
+    },
+  };
+  MAPPOS[gid] = [mx, my, 1, 1];
+}
 
 const gridCache = {};
 function buildRoom(id) {

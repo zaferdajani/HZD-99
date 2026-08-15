@@ -113,6 +113,19 @@ const G = {
   onBossDead(kind) {
     const cap = kind.charAt(0).toUpperCase() + kind.slice(1);
     this.save.flags['boss' + cap] = 1;
+    // THE RULE: every guardian resolved — felled or tamed — REVEALS A CAVE.
+    // The lair grows a depth door (GATE_ROOM `need` flags), the map grows the
+    // cave sign, and the player is told the ground moved so the reveal is an
+    // event, not a secret. What waits inside each grotto is its own story.
+    {
+      const opened = kind === 'alpha' ? 'alpha' : 'boss' + cap;
+      for (const rid in (typeof GATE_ROOM !== 'undefined' ? GATE_ROOM : {})) {
+        if (GATE_ROOM[rid].need !== opened) continue;
+        G.toast(t('cave_open'));
+        sfx('chargeReady');
+        break;
+      }
+    }
     // THE EYE'S CONSTRUCTS pay a cell and nothing else. No ability, no arm, no
     // trophy relic — they were built around the cell and there is nothing else
     // in them. Returning here keeps the guardians' whole reward chain (which
@@ -4240,10 +4253,29 @@ function drawRoomProp() {
 // a two-way passage; a door may also be one-way by simply having no partner
 // (W2 -> A0, the opening — the city gates close behind her). tests/crystal.cjs
 // drives a full round trip; tests/deadend.cjs carries these as graph edges.
+// A door may carry `need`: the save flag that makes it EXIST. Until the flag
+// is set there is no door — no prompt, no walk — which is how the guardian
+// grottoes appear: every boss or sage resolved reveals its lair's cave
+// (world.js GROTTOES; the owner's rule).
 const GATE_ROOM = {
   W2:  { at: 0.90, to: 'A0',  gx: 0.472, gy: 0.93 },
   A5:  { at: 0.64, to: 'CV1', gx: 0.50,  gy: 0.86, ax: 0.10 },
   CV1: { at: 0.10, to: 'A5',  gx: 0.50,  gy: 0.86, ax: 0.64 },
+  // the grottoes — one per guardian, opened by its fall or taming
+  A4:  { at: 0.14, to: 'GA1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossGlitch' },
+  A10: { at: 0.12, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, need: 'alpha' },
+  B4:  { at: 0.86, to: 'GB1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossBrood' },
+  C3:  { at: 0.12, to: 'GC1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossAtlas' },
+  D3:  { at: 0.86, to: 'GD1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossZero' },
+  X1:  { at: 0.45, to: 'GX1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossPrism' },
+  E3:  { at: 0.86, to: 'GE1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossMother' },
+  GA1: { at: 0.06, to: 'A4',  gx: 0.50, gy: 0.86, ax: 0.14 },
+  GA2: { at: 0.06, to: 'A10', gx: 0.50, gy: 0.86, ax: 0.12 },
+  GB1: { at: 0.06, to: 'B4',  gx: 0.50, gy: 0.86, ax: 0.86 },
+  GC1: { at: 0.06, to: 'C3',  gx: 0.50, gy: 0.86, ax: 0.12 },
+  GD1: { at: 0.06, to: 'D3',  gx: 0.50, gy: 0.86, ax: 0.86 },
+  GX1: { at: 0.06, to: 'X1',  gx: 0.50, gy: 0.86, ax: 0.45 },
+  GE1: { at: 0.06, to: 'E3',  gx: 0.50, gy: 0.86, ax: 0.86 },
 };
 function gateTarget(G2) {
   const v = G._vista;
@@ -4253,6 +4285,8 @@ function gateTarget(G2) {
 function gateHere() {
   const G2 = GATE_ROOM[G.roomId];
   if (!G2 || !player) return null;
+  // a door with an unmet `need` does not exist yet — no prompt, no walk
+  if (G2.need && !(G.save && G.save.flags && G.save.flags[G2.need])) return null;
   const x = G.roomDef.w * TILE * G2.at;
   return Math.abs(player.x + player.w / 2 - x) < 90 ? G2 : null;
 }
@@ -4275,6 +4309,7 @@ function gateEnter() {
 function drawGatePrompt() {
   const def = GATE_ROOM[G.roomId];
   if (!def || G.gateWalk || !player || player.dead) return;
+  if (def.need && !(G.save && G.save.flags && G.save.flags[def.need])) return;
   const gx = G.roomDef.w * TILE * def.at;
   const gy = (G.roomDef.h - 2) * TILE;
   const d = Math.abs(player.x + player.w / 2 - gx);
@@ -7648,8 +7683,19 @@ function drawMap() {
     c.drawImage(mc, mx, my, mw, mh);
     c.restore(); c.imageSmoothingEnabled = true;
     c.strokeStyle = P.edge; c.lineWidth = 1.5; rr(c, rc.x, rc.y, rc.w, rc.h, 5); c.stroke();
-    if (BENCH_ROOMS.indexOf(id) >= 0) ftxt('◆', rc.x + 10, rc.y + 11, 11, '#aef7d8');
+    if (BENCH_ROOMS.indexOf(id) >= 0 || (ROOMS[id].cave && ROOMS[id].ents.some(e => e[0] === 'bench')))
+      ftxt('◆', rc.x + 10, rc.y + 11, 11, '#aef7d8');
     if (id === 'A3') ftxt('⚙', rc.x + 10, rc.y + rc.h - 11, 11, '#ffd76a');
+    // THE CAVE SIGN (owner: "the caves on the map should appear as a cave
+    // sign... the starting of several caves in several locations"): the arch
+    // marks any visited room whose backdrop holds a REVEALED depth door into
+    // a cave — the mouth is where you go, so the mouth is what the map marks.
+    {
+      const gd = GATE_ROOM[id];
+      if (gd && ROOMS[gd.to] && ROOMS[gd.to].cave
+          && (!gd.need || (G.save.flags && G.save.flags[gd.need])))
+        ftxt('∩', rc.x + rc.w - 11, rc.y + rc.h - 10, 13, '#dff2ff');
+    }
     if (MAP_BOSSROOM[id]) {
       const done = G.save.flags['boss' + MAP_BOSSROOM[id]];
       ftxt(done ? '✓' : '☠', rc.x + rc.w - 11, rc.y + 11, 12, done ? '#7de8a0' : '#ff6a7a');
@@ -7675,7 +7721,7 @@ function drawMap() {
     ftxt(b.icon, b.x, b.y, b.icon.length > 1 ? 12 : 19, '#cfe8ff', 'center');
   }
   ftxt(Math.round(mapView.z * 100) + '%', 900, 96, 12, '#7d93a8', 'center');
-  ftxt('● ' + t('map_here') + '   ◆ ' + t('rest').replace('E — ', '') + '   ☠ ' + t('map_boss') + '   ⚙ ' + t('map_shop'), 480, 502, 13, '#7d93a8');
+  ftxt('● ' + t('map_here') + '   ◆ ' + t('rest').replace('E — ', '') + '   ☠ ' + t('map_boss') + '   ⚙ ' + t('map_shop') + '   ∩ ' + t('map_cave'), 480, 502, 13, '#7d93a8');
   ftxt(t('map_ctl'), 480, 522, 12, '#5f7488');
 }
 // the three on-screen controls, shared by the mouse and the touch layer

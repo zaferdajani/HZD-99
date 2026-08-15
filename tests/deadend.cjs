@@ -52,6 +52,15 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
   // the cave is reachable in the graph and does not read as a one-way trap.
   R.A5 = Object.assign({}, R.A5, { exits: Object.assign({ G: 'CV1' }, R.A5.exits) });
   R.CV1 = Object.assign({}, R.CV1, { exits: Object.assign({ G: 'A5' }, R.CV1.exits) });
+  // ...and the guardian grottoes: each lair <-> its revealed cave. The doors
+  // are flag-gated in play (they appear when the boss falls); the graph
+  // carries them unconditionally, because a room that is only reachable
+  // after a fight is still a room that must be reachable.
+  for (const [a, b2] of [['A4', 'GA1'], ['A10', 'GA2'], ['B4', 'GB1'], ['C3', 'GC1'],
+                         ['D3', 'GD1'], ['X1', 'GX1'], ['E3', 'GE1']]) {
+    R[a] = Object.assign({}, R[a], { exits: Object.assign({ G: b2 }, R[a].exits) });
+    R[b2] = Object.assign({}, R[b2], { exits: Object.assign({ G: a }, R[b2].exits) });
+  }
   const ids = Object.keys(R);
   const OPP = { L: 'R', R: 'L', T: 'B', B: 'T' };
   let bad = 0;

@@ -113,6 +113,31 @@ const { chromium } = require('playwright');
     out.walkReturns = G.roomId === 'A5';
     out.returnsAtMouth = Math.abs(player.x + player.w / 2 - G.roomDef.w * TILE * dA5.at) < 130;
 
+    // ---- the rule: a guardian resolved reveals a cave ------------------
+    // A4 is NULLFANG's lair. Before the flag: no door at the mouth. After:
+    // the door exists, the walk enters the grotto and returns, and the map
+    // sign logic (revealed door into a cave room) turns true.
+    delete G.save.flags.bossGlitch;
+    loadRoom('A4');
+    await new Promise(r => setTimeout(r, 300));
+    G.wake = null; G.state = 'PLAY'; G.hitStop = 0; G.bossEntry = null;
+    const dA4 = GATE_ROOM.A4;
+    player.x = G.roomDef.w * TILE * dA4.at - player.w / 2; player.on = true; player.vy = 0;
+    out.lairClosed = !gateHere();
+    G.save.flags.bossGlitch = 1;
+    out.lairOpen = !!gateHere();
+    out.caveMarked = !!(ROOMS[dA4.to] && ROOMS[dA4.to].cave);
+    out.enterGrotto = gateEnter();
+    let n3 = 0;
+    while (G.gateWalk && n3++ < 200) update(1 / 30);
+    out.inGrotto = G.roomId === 'GA1';
+    out.grottoPays = G.roomDef.ents.some(e => e[0] === 'scrap') && G.roomDef.ents.some(e => e[0] === 'bench');
+    // every grotto pair is complete: lair door needs its boss, grotto door back
+    out.allGrottoes = [['A4','GA1','bossGlitch'],['A10','GA2','alpha'],['B4','GB1','bossBrood'],
+      ['C3','GC1','bossAtlas'],['D3','GD1','bossZero'],['X1','GX1','bossPrism'],['E3','GE1','bossMother']]
+      .every(([a, g2, f]) => GATE_ROOM[a] && GATE_ROOM[a].to === g2 && GATE_ROOM[a].need === f
+        && GATE_ROOM[g2] && GATE_ROOM[g2].to === a && ROOMS[g2] && ROOMS[g2].cave && MAPPOS[g2]);
+
     // ---- the aura sense ------------------------------------------------
     // crystal light in her possession = she glows white and the world shows
     // its allegiances (quiet halos). Counted from the light pass itself, on
@@ -238,6 +263,12 @@ const { chromium } = require('playwright');
   check('the walk arrives inside the cave', m.walkArrives && m.arriveInside);
   check('and walks back out to the mouth', m.doorBack && m.walkReturns && m.returnsAtMouth,
     'back ' + m.doorBack + ', room ' + m.walkReturns + ', at mouth ' + m.returnsAtMouth);
+  // the reveal rule
+  check('a lair holds NO cave door before its guardian falls', m.lairClosed);
+  check('...and grows one the moment it does', m.lairOpen && m.caveMarked);
+  check('the revealed door walks into the grotto', m.enterGrotto && m.inGrotto);
+  check('...which pays something (scrap and a rest)', m.grottoPays);
+  check('every guardian has its grotto pair, cave-marked and on the map', m.allGrottoes);
   // the aura sense
   check('crystal light turns the aura sense ON (her + the machines)',
     m.auraOn, m.auraOnCount + ' halos');
