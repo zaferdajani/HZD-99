@@ -3160,7 +3160,14 @@ function drawZoneVista(P, zone, px, py) {
   // scale the painting past the screen and pan across the excess as the camera
   // crosses the room — a single painting, so it pans rather than tiles. Wide
   // solo paintings are width-bound so there is always horizontal travel.
-  const sc = Math.max((540 / CH) * 1.12, (960 / CW) * 1.16);
+  // per-room zoom on the painting itself (owner, in the den: "the background
+  // was supposed to be a representation of the room in a size proportionate
+  // to the hero and npc"). A workshop painted at photographic distance makes
+  // a workbench tower like a building next to a 90px character — zooming the
+  // plate crops to a slice whose furniture stands at character scale. The pan
+  // machinery already handles the overfill.
+  const VZOOM = { denInterior: 1.45 };
+  const sc = Math.max((540 / CH) * 1.12, (960 / CW) * 1.16) * (own && VZOOM[own] || 1);
   const dw = CW * sc, dh = CH * sc;
   const roomW = G.roomDef.w * TILE;
   // THE PAINTING FOLLOWS HER, NOT THE CAMERA (owner: "it stays still, and it
@@ -6496,9 +6503,10 @@ function drawStatics(P) {
         if (typeof mediaFetch === 'function') mediaFetch('ratchetResting');
         const rIm = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.ratchetResting;
         if (rIm && rIm.naturalWidth) {
-          // 1.5×: he is a big vendor unit folded into a chair, and the owner's
-          // first complaint about this npc was that he was too small to notice
-          const dh = s.h * 1.5, dw = dh * (rIm.naturalWidth / rIm.naturalHeight);
+          // 2.6×: the owner's ruling in the den — 'the npc is too small, it
+          // should be double my size' — and she reads ~2x the npc hitbox, so
+          // the resting body needs ~2.6 hitbox-heights to stand double her
+          const dh = s.h * 2.6, dw = dh * (rIm.naturalWidth / rIm.naturalHeight);
           c.drawImage(rIm, s.x + s.w / 2 - dw / 2, s.y + s.h - dh, dw, dh);
           plateDrew = true;
         }

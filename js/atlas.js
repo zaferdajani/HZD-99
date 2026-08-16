@@ -218,7 +218,7 @@ const ATLAS2 = {
   ins: { top: 0.01, bottom: 0.01, side: 0.01 },
   sub: {
     servo:   { row: 0, k: 1.30, yOff: 0.02 },
-    ratchet: { row: 1, k: 1.45, yOff: 0.02 },
+    ratchet: { row: 1, k: 2.60, yOff: 0.02 },  // owner: 'the npc is too small, it should be double my size'
     mono:    { row: 2, k: 1.50, yOff: 0.02 },
     patch:   { row: 3, k: 1.40, yOff: 0.02 },
     sage:    { row: 4, k: 1.55, yOff: 0.02 },

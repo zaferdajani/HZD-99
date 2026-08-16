@@ -816,7 +816,14 @@ function sfx(n) {
     if (w === 'crystal2') crystalSlash2(cb);
     else if (w === 'crystal1') crystalSlash(cb);
     else clawSlash(cb);
-    const take = HZDVOX.atk[Math.min(HZDVOX.atk.length - 1, cb)];
+    // the big open-throat take (hzd_atk3) is OUT of the normal rotation — the
+    // owner: "it keeps saying the yaaa! voice with normal hit sequence when it
+    // was supposed to be for the supercharged one." Normal hits rotate the two
+    // short barks; the third hit repeats the first a shade louder, and the big
+    // shout belongs to the charged burst alone (hzd_release).
+    const seq = [0, 1, 0][Math.min(2, cb)];
+    const take = HZDVOX.atk[seq] &&
+      [HZDVOX.atk[seq][0], HZDVOX.atk[seq][1] + (cb >= 2 ? 0.06 : 0)];
     if (take && AC) {
       const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
       if (now - HZDT >= 90 && playBuf(take[0], take[1], 0.96 + Math.random() * 0.08)) HZDT = now;

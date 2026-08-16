@@ -1588,14 +1588,17 @@ class Player {
     // a limp that survives a sprint reads as a bug, not as damage.
     if (this.cores <= 1 && Math.abs(this.vx) < 20) return 'slump';
     if (Math.abs(this.vx) > 12) {
-      // THE RUN PAIR, UN-PARKED (§1e). The first fired run was a low feline
-      // lunge — the owner: "moving like a cat instead of running like a cute
-      // robot" — and the run states borrowed the walk cells while a re-fire
-      // waited. The art session's upright re-fire is in the sheet now: torso
-      // vertical, head high, one leg reaching and one pushing off, a wind-up
-      // toy in a hurry. The walk substitution ends here.
+      // THE RUN PAIR, RE-PARKED (owner, 2026-08-16, on seeing the re-fire in
+      // play): "my character is hopping in one leg and backward" and "I
+      // specifically instructed you to keep the short legs... you changed it
+      // to the long version". The re-fired run cells fail on three counts —
+      // the long-legged proportions he rejected, a facing that reads
+      // backward in motion, and two poses too alike to cycle. So the run is
+      // the walk, hurried, AGAIN — the read he approved — until a re-fire
+      // that keeps the short legs and the house facing lands (ART_QUEUE §1e,
+      // re-opened with those constraints written into the brief).
       const k = Math.floor(this.anim * (run ? 10 : 7)) % 2;
-      return run ? (k ? 'run_b' : 'run_a') : (k ? 'walk_b' : 'walk_a');
+      return k ? 'walk_b' : 'walk_a';
     }
     return 'idle';
   }

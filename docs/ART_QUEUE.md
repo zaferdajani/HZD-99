@@ -233,14 +233,14 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   2. §1b-ii regrips ×2 + thrown blade ×1 (thrown = BODY LENGTH — owner ruling)
   3. §1c    back-jet gear ×3             (idle / mid-boost / full burn)
   4. §1d    THE FORGING CINEMATIC ×1     ✅ WIRED 2026-08-16 — the forging plays at the grant (code session)
-  5. §1e    RUN PAIR RE-FIRE ×2          ✅ FIRED 2026-08-16 — cells in, code revert pending
+  5. §1e    RUN PAIR RE-FIRE ×2          ❌ REFUSED BY OWNER 2026-08-16 — re-parked; RE-FIRE with constraints below
   6. §2e    sage plates ×6               ✅ WIRED 2026-08-16 — drawSage is plate-first, six states (code session)
   7. §2d    robot bat plates ×5          ✅ WIRED 2026-08-16 — drawBat is plate-first, five states (code session)
   8. §2c    caveMouth + caveExit + pillar ×3  ✅ WIRED 2026-08-16 — vistas + pillar plate live; cave tile deck still to fire
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   ✅ WIRED 2026-08-16 — per-zone maps live, feather-masked; city monument untouched
  10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ CLOSED 2026-08-16 — all three plates fired, approved and wired
  11. §3m    BOSS MOTION PLATES (task #93)     ⏸ PREPARED 2026-08-16 — refs shot, recipe written, NOT fired
- 12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
+ 12. §1     PAIRED PAW SET — every pose WITH and WITHOUT the claw (owner's ruling 2026-08-16) + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
  14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   ✅ WIRED 2026-08-16 — shrine plate + parlor vista live (code session)
  15. §2i    THE BREAKER ×3                    ✅ WIRED 2026-08-16 — surge is plate-first, three states (code session)
@@ -251,7 +251,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  20. §2n    THE RIME COIL ×3                  (rest / crown-up tell / dark — new zone-D enemy)
  21. §2o    THE NYMPH'S POD + HOLLOW ×2       (hollowFront / hollowInterior — kingdom 5)
  22. §2p    THE NEST SNARE ×3                 (rest / maw-open tell / limp — new zone-E enemy)
- 23. §2q    THE PACK'S RUN PAIRS ×4           (wolfRunA/B + cheetahRunA/B — the gait split is wired, walk pair carries it until these land)
+ 23. §2q    BEAST GAIT REPAIR ×8              (wolf+cheetah walk pairs RE-FIRED + run pairs — see §2q, the leg and identity faults are written there)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -1497,3 +1497,69 @@ them, identity-lock style, one per animal then the second against the
 first). Side view facing LEFT like every plate in js/wolves.js. NEGATIVE:
 no ground, no dust, no motion blur, no background, subject only — the
 engine draws the ground and the speed.
+
+### §1e ADDENDUM — THE RUN PAIR REFUSED (owner, 2026-08-16, in play)
+
+The re-fired run_a/run_b are REFUSED on three counts, in the owner's words:
+"my character is hopping in one leg and backward" and "I specifically
+instructed you to keep the short legs in the game but you now changed it to
+the long version." The cells are re-parked (the run is the walk pair,
+hurried, which he approved) until a re-fire that satisfies ALL of:
+1. **SHORT LEGS** — the in-game proportions he explicitly kept, NOT the
+   model sheet's longer legs. Fire against walk_a as the proportion AND
+   identity reference; the model render is only the face/material canon.
+2. **THE HOUSE FACING** — same facing as walk_a/dash/claw in
+   assets/characters/hero/states.png. Compare against those cells before
+   keying; a run that reads backward in motion is an automatic refuse.
+3. **TWO DISTINCT STRIDES** — run_a and run_b must differ in BOTH legs and
+   the arm swing (reach vs gather), or the cycle reads as hopping on one
+   leg. Overlay the two frames before shipping: if the silhouettes match
+   anywhere below the waist, re-fire.
+4. **NO pedestal, NO ground pool, NO baked shadow** — the idle cell shipped
+   standing on a figurine display base and it took three passes to cut out.
+   Negatives on every ground-touching plate: no base, no plinth, no ground
+   glow, no floor shadow.
+
+### 2q. BEAST GAIT REPAIR ×8 (expanded 2026-08-16 — the owner saw the seams)
+
+Owner, watching the pack: "wolf walking with only one leg while sliding the
+rest." Measured against the plates, he is exactly right, twice over:
+
+- **wolf.png / wolf_walka.png / wolf_walkb.png are nearly one drawing** —
+  the only difference between the walk pair is ONE front leg. A two-frame
+  cycle where one limb moves reads as one leg pumping while the body glides.
+  RE-FIRE the wolf walk pair: walkA = diagonal pair forward (left fore +
+  right hind reaching, the other two planted and pushing), walkB = the
+  mirror diagonal. ALL FOUR legs must differ between the frames — overlay
+  them before keying, and if any leg matches, re-fire. Same wolf, same
+  palette, fire against wolf.png as the identity.
+- **cheetah_walka/walkb are DIFFERENT MACHINES from cheetah.png** — the
+  rest plate is a gold/tan unit, walkA is a white skeletal one, walkB is
+  silver with orange seams: the walking cheetah shape-shifts every half
+  step. THE IDENTITY LOCK exists for exactly this (§2d's five-bats lesson).
+  RE-FIRE both walk cells against cheetah.png as the one identity, with the
+  same all-four-legs rule as the wolf.
+- The RUN PAIRS (wolfRunA/B, cheetahRunA/B) stay as briefed above — reach
+  and gather, fired against the REPAIRED walk pairs once those land.
+
+Keys and fallbacks are already wired in js/wolves.js; media.js entries for
+the run keys land with the plates.
+
+### §1 ADDENDUM — THE PAIRED PAW RULE (owner, 2026-08-16)
+
+Owner, reading the state cells side by side: "why different paw situations
+showing here? each pose needs to show with and without the claw." He is
+looking at a real inconsistency: the cells were fired across different
+batches with no rule about claw state, so some poses carry the claws out
+and some do not, arbitrarily — the paw state flickers as she changes state.
+
+THE RULE, from here on: **every pose in the state sheet exists as a PAIR —
+one cell with the claws out, one without — and the two cells of a pair are
+IDENTICAL except for the claws.** Fire the clawless cell first, then the
+clawed one against it as reference (same pose, same light, same frame), the
+way the 8-yaw sheet already pairs hzd_8yaw with hzd_8yaw_bare. Any state
+where the pair differs in anything but the claws is a refuse.
+
+Wiring note (code session): heroState will select armed/unarmed by the
+weapon state once the bare sheet lands — the same switch the back-walk
+already makes between backwalk_* and bare_bwalk_*.
