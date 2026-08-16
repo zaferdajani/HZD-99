@@ -347,21 +347,41 @@ the plate replaces it at the same anchor.
 ### 2g. THE TRADER'S BOOTH + DEN — PARTIALLY FIRED 2026-08-16, READ BEFORE FIRING
 
 **STATUS (2026-08-16, code session — do not double-fire):**
-- **boothFront — FIRED + OWNER-APPROVED + WIRED** (job d469ad29, keyed to
-  `assets/backgrounds/booth_front.png`, source archived). The owner's
-  standing quality ruling: the ART SESSION's work is better — it MAY
-  re-fire this to beat the current plate (owner judges); same file path
-  swaps it in with zero re-plumbing. Don't re-fire merely to duplicate.
-- **denInterior — FIRED + OWNER-APPROVED + WIRED** (job 3bd98cc3, crushed
-  to `assets/backgrounds/den_interior.jpg`, source archived). Same ruling:
-  an art-session upgrade at the same path is welcome, duplication is not.
-- **ratchetResting — FIRED AND REFUSED** (job f026eef7: not our Ratchet — a
-  generic humanoid — and it ignored "subject only", baking in a background).
-  **THE RE-FIRE IS THE ART SESSION'S**: attach Ratchet's in-game reference
-  (his cells in `assets/characters/npc_6yaw.png`, or assets/source if a
-  cleaner ref exists) as reference media so the resting figure is
-  recognisably the SAME vendor unit, keep the chest-crystal beat, dark
-  unlit room, subject only. Owner reviews before keying.
+- **boothFront — REPLACED BY THE ART SESSION 2026-08-16** (job b983ed7a).
+  The code session's plate (d469ad29) keyed cleanly but the art session's
+  re-fire beats it on material, canopy and interior read, so it took over
+  `assets/backgrounds/booth_front.png` — same path, zero re-plumbing, as
+  the owner's quality ruling allows. Fired-as-is archived at
+  `assets/source/booth/booth_front_artsession_asfired.jpg`.
+- **denInterior — THE CODE SESSION'S PLATE STANDS** (job 3bd98cc3). The
+  art session fired a competing interior and judged it WORSE for the room
+  and did not ship it: its foreground bench fills the lower right, which
+  is exactly where the player walks, while the wired plate keeps open
+  floor across the middle. A prettier picture that eats the play plane is
+  not an upgrade. Not re-fired again.
+- **ratchetResting — RE-FIRED AND SHIPPED 2026-08-16** (job 6b2a7128).
+  Fired against Ratchet's own atlas row as reference media, so the
+  resting figure is recognisably the same vendor unit: pot belly, bone
+  plating, the strapped canister rig, eye-lights dark, chest crystal the
+  only light. Keyed to `assets/characters/npc/ratchet_resting.png`,
+  sources + the reference strip in `assets/source/ratchet/`.
+  **NEEDS WIRING** — add `ratchetResting:
+  'assets/characters/npc/ratchet_resting.png'` to js/media.js and draw it
+  at the A0B npc anchor until the waking, then the standing atlas takes
+  over. Generation is the art session's; wiring is the code session's.
+
+**KEYING NOTE, learned on both plates (2026-08-16).** `tools/blackkey.cjs`
+failed on both and for the same reason twice: it decides by luminance, and
+these plates have dark subject against dark field. Ratchet's shadowed far
+leg keyed as background and came back full of holes; the booth's render
+carried a soft glow in one corner that survived every threshold that did
+not also eat the teal panels. Raising the threshold ate the subject,
+lowering it kept the field — there is no threshold that works, so stop
+sweeping for one. **What worked was Higgsfield's own matting pass
+(`remove_background` on the generation job id), which reads the subject
+rather than the exposure.** Both shipped plates are matted, not keyed. Use
+it first on any plate whose subject has genuinely dark regions; blackkey
+stays right for bright subjects on clean black.
 
 The code session fired the first three before this ledger entry existed —
 that mistake is why this block leads the section now. Generation belongs
