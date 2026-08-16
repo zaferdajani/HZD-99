@@ -156,9 +156,13 @@ All CC0, all free commercially, none requiring attribution. Feed these to a
   *Verified caveat:* commenters report not every listed animation is present in
   the download. Open it before planning around it.
 - **Quaternius, Universal Animation Library 1 & 2** —
-  <https://quaternius.itch.io/universal-animation-library>. **CC0**, 120+
-  animations on a universal humanoid rig, built for retargeting: locomotion in
-  every direction, combat, emotes. This is the hero's move set, free, authored.
+  <https://quaternius.itch.io/universal-animation-library>. **CC0** ("Free to
+  use in personal, educational and commercial projects. (CC0 License)" —
+  Creative Commons Zero v1.0 Universal, read off the itch page 2026-08-16).
+  **CORRECTED: the free Standard tier is 45 animations.** The 120+ set is the
+  paid Pro tier ($9.99+); Source with .blend files is $14.99+. FBX/GLB exports
+  for Unity/Unreal/Godot. The 45 free ones still cover core locomotion and a
+  usable combat slice — plan around 45, not 120.
 - **CMU Graphics Lab Motion Capture Database** — <http://mocap.cs.cmu.edu/>,
   free for commercial use, 2,548 human motions. BVH conversions by cgspeed:
   <https://sites.google.com/a/cgspeed.com/cgspeed/motion-capture>. Real mocap,
@@ -174,7 +178,57 @@ All CC0, all free commercially, none requiring attribution. Feed these to a
 
 ---
 
-## 5. What I would actually do
+## 5. COMBAT — fight animation sources, same standard as everything above
+
+Checked 2026-08-16, licences read on the source pages, refusals recorded.
+
+### Usable
+- **Quaternius, Universal Animation Library — Standard tier.** CC0 (see §4,
+  corrected entry). Of the 45 free animations, the combat slice is the reason
+  it is in this section: punches, sword swings, hit reactions, dodges on a
+  universal humanoid rig. Bake material for the HERO's move set only — the
+  animals need quadruped data, which this is not.
+- **Rokoko free packs** — 13 fight (<https://www.rokoko.com/resources/rokoko-mocap-13-free-fight-animations>),
+  6 martial arts, 10 fight-and-weapon, all FBX at 30 fps on a Mixamo-named
+  skeleton, real mocap. Licence, read 2026-08-16: the page grants use "in any
+  animation, VFX, game, 3D art etc project you want, from passion project to
+  commercial use." **That is a marketing sentence, not a licence document**:
+  it is NOT CC0, and redistribution of the files themselves is nowhere
+  granted. Terms of use for this repo therefore: **bake-only.** The FBX never
+  ships, never enters this public repository, and never leaves the offline
+  bake step — what ships is our own rendered sheet, which the commercial-use
+  grant covers as a derivative in our own project. Archive a dated copy of
+  the page wording with any download (docs/STEAM.md provenance rule).
+
+### Refused, with reasons
+- **Mixamo** — refused already in §4 and stays refused for combat: Adobe
+  terms, not open source, redistribution restricted. (Rokoko's use of the
+  Mixamo SKELETON naming is fine — a bone-name convention is not Adobe's
+  data; the motion is Rokoko's own capture.)
+- **AMASS / SMPL** — research licence, no commercial use. Stays refused; the
+  fight sets in it are the most tempting and the most poisonous.
+- **Quaternius Pro tier as a "free" plan** — it is not free; see the §4
+  correction. Buying it ($9.99, CC0 once bought) is a legitimate option but
+  is an owner decision, not a default.
+
+### The Yuka question, settled
+**Verdict: keep hand-rolling. Do not add Yuka for the pack's combat states.**
+Measured, not felt: the pack's combat brain is `alphaStep` + the crawler
+machine — roughly 200 lines, band-driven, with every regression the harness
+ever caught (`tests/wolves.cjs`: the one-skill deadlock, the 60–98%
+motionless bug) now encoded as a test. Yuka's 123 KB buys steering and
+flocking for agent counts this game never reaches — `packMax` is 3, and the
+tamed escort caps its logic at three distance bands. Replacing a tuned,
+harness-guarded 200 lines with a library integration would trade known
+behaviour for integration risk and grow the one-file bundle by ~8% for zero
+visible change. **Revisit trigger, written down so it is not re-litigated
+from scratch:** if the pack ever exceeds six simultaneous members, needs
+real obstacle avoidance, or the tamed pack must path-follow her across
+rooms, Yuka is the right library and this verdict flips.
+
+---
+
+## 6. What I would actually do
 
 1. **Take the wolf's motion, not the wolf.** Six-frame run, eight-frame walk,
    ten-frame howl, CC0, side view, already timed. Repaint at the game's scale

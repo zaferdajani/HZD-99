@@ -251,6 +251,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  20. §2n    THE RIME COIL ×3                  (rest / crown-up tell / dark — new zone-D enemy)
  21. §2o    THE NYMPH'S POD + HOLLOW ×2       (hollowFront / hollowInterior — kingdom 5)
  22. §2p    THE NEST SNARE ×3                 (rest / maw-open tell / limp — new zone-E enemy)
+ 23. §2q    THE PACK'S RUN PAIRS ×4           (wolfRunA/B + cheetahRunA/B — the gait split is wired, walk pair carries it until these land)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -1470,3 +1471,29 @@ Substitute the kingdom line into the template:
 vertical faces in `drawTiles`; `fore_<zone>` becomes a parallax layer drawn
 AFTER the player at ~1.15 travel, two or three per room, placed off the room's
 own hash so they never land on a doorway.
+
+### 2q. THE PACK'S RUN PAIRS ×4 ✱ FIRE ON REBIND (code session, 2026-08-16)
+
+The gait now SPLITS AT SPEED (js/wolves.js): above 95 px/s a wolf or cheetah
+is running — longer stride, suspension beat, back flexion — with the motion
+timing taken from the measured CC0 reference (docs/MOVEMENT_SOURCES.md §2:
+ScratchIO's wolf, 6-frame run vs 8-frame walk). The transforms carry the run
+today over the WALK plates; what is missing is the two run poses themselves.
+
+Four plates, keys `wolfRunA` / `wolfRunB` / `cheetahRunA` / `cheetahRunB`
+(js/wolves.js already resolves these and falls back to the walk pair until
+they land — add the media.js entries in the wiring commit):
+
+- **runA — REACH**: full extension. Forelegs stretched far forward, hind
+  legs driving off behind, back long and slightly hollowed, head level with
+  the spine. The wolf bounds; the cheetah's reach is longer and lower.
+- **runB — GATHER**: the airborne fold. All four paws off the ground and
+  gathered under the body, back FLEXED into an arch, head driven forward.
+  This is the suspension frame — the one the walk pair cannot fake.
+
+Same animal, same palette, same fixed key light and same scale as the wired
+walk pairs (`wolfWalkA` … `cheetahWalkB` are the references — fire AGAINST
+them, identity-lock style, one per animal then the second against the
+first). Side view facing LEFT like every plate in js/wolves.js. NEGATIVE:
+no ground, no dust, no motion blur, no background, subject only — the
+engine draws the ground and the speed.

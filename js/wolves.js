@@ -93,9 +93,18 @@ const CHEETAH_ART = {
   rest: { img: 'cheetahRest', k: 2.10, foot: 1 },
   walkA: { img: 'cheetahWalkA', k: 2.10, foot: 1 },
   walkB: { img: 'cheetahWalkB', k: 2.10, foot: 1 },
+  // the run pair is on THE FIRING LIST (§2q); until the plates land these
+  // keys resolve to nothing and drawBeastPlate falls back to the walk pair,
+  // with the run's weight carried by the transform work
+  runA: { img: 'cheetahRunA', k: 2.10, foot: 1, walkOf: 'walkA' },
+  runB: { img: 'cheetahRunB', k: 2.10, foot: 1, walkOf: 'walkB' },
   coil: { img: 'cheetahWarn', k: 2.30, foot: 1 },
   lunge: { img: 'cheetahRun', k: 2.05, foot: 0, yOff: -0.18 },
 };
+// how each animal carries its run (drawBeastPlate): a wolf bounds, a cheetah
+// runs a rotary gallop — longer reach, deeper back flexion, harder suspension
+const WOLF_GAIT = { strideMul: 1.0, pitch: 0.065, runAmp: 2.6, susp: 1.4 };
+const CAT_GAIT = { strideMul: 1.22, pitch: 0.10, runAmp: 3.0, susp: 2.2 };
 
 // THREE PLATES, ONE PER PHASE OF THE ONLY MOVE IT HAS.
 //   k    — how many hitbox-heights the plate occupies on screen
@@ -107,6 +116,8 @@ const WOLF_ART = {
   rest: { img: 'wolfRest', k: 2.35, foot: 1 },
   walkA: { img: 'wolfWalkA', k: 2.35, foot: 1 },
   walkB: { img: 'wolfWalkB', k: 2.35, foot: 1 },
+  runA: { img: 'wolfRunA', k: 2.35, foot: 1, walkOf: 'walkA' },
+  runB: { img: 'wolfRunB', k: 2.35, foot: 1, walkOf: 'walkB' },
   coil: { img: 'wolfCoil', k: 2.20, foot: 1 },
   lunge: { img: 'wolfLunge', k: 2.15, foot: 0, yOff: -0.22 },
 };
@@ -125,18 +136,33 @@ const WOLF_ART = {
 // that: at any speed, on any framerate, in slow motion, a paw plants once per
 // STRIDE of floor and the feet never slip. A timed cycle is what produces the
 // moonwalk — the legs run at their own rate while the body moves at another.
-const STRIDE = 30;                          // px of floor per half-step
+// THE GAIT SPLITS AT SPEED, the way the CC0 reference does (ScratchIO's wolf,
+// docs/MOVEMENT_SOURCES.md §2: an 8-frame walk and a SEPARATE 6-frame run —
+// fewer poses, longer reach, a suspension beat where every paw is off the
+// ground). Patrol speed is 62; anything faster than 95 is running. The run
+// stride is half again the walk's, which is where the reach comes from.
+const STRIDE = 30;                          // px of floor per half-step, walking
+const STRIDE_RUN = 46;                      // ...and running (the cheetah adds more)
 function wolfPose(e) {
   if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0 || e.on === false) return 'lunge';
   if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0) return 'coil';
-  // how far it has really moved since the last frame, whatever moved it
+  // how far it has really moved since the last frame, whatever moved it —
+  // accumulated in HALF-STEPS of the current stride, so a wolf that breaks
+  // into a run keeps its phase instead of snapping to a new foot
   const px = e._lastX == null ? e.x : e._lastX;
-  e._stride = (e._stride || 0) + Math.abs(e.x - px);
+  const run = Math.abs(e.vx || 0) > 95;
+  e._runG = run;
+  const stride = run ? STRIDE_RUN * (e._strideMul || 1) : STRIDE;
+  e._ph = (e._ph || 0) + Math.abs(e.x - px) / stride;
   e._lastX = e.x;
   if (Math.abs(e.vx || 0) < 6) return 'rest';       // standing still stands still
   // contact, passing, contact (mirrored by the other pair), passing — four
-  // beats off two drawings, which is what a two-frame walk cycle is
-  return ((Math.floor(e._stride / STRIDE) % 4) & 1) ? 'walkB' : 'walkA';
+  // beats off two drawings, which is what a two-frame cycle is. The run wants
+  // its own pair (ART_QUEUE §2q); until those plates land the walk pair
+  // carries the run cycle and the transform work below carries the weight.
+  const b2 = (Math.floor(e._ph) % 4) & 1;
+  if (run) return b2 ? 'runB' : 'runA';
+  return b2 ? 'walkB' : 'walkA';
 }
 
 // ---------------------------------------------------------------------------
@@ -149,8 +175,13 @@ function drawWolf(c, e) { return drawBeastPlate(c, e, WOLF_ART, packTamed()); }
 // argument is the only difference between the two animals in this file.
 function drawCheetah(c, e) { return drawBeastPlate(c, e, CHEETAH_ART, false); }
 function drawBeastPlate(c, e, ART, tame) {
+  const GAIT = ART === CHEETAH_ART ? CAT_GAIT : WOLF_GAIT;
+  e._strideMul = GAIT.strideMul;
   const pose = wolfPose(e);
-  const A = ART[pose];
+  // the run pair falls back to the walk pair until its plates land (§2q) —
+  // motion first, art when the FIRING LIST reaches it
+  let A = ART[pose] || ART.rest;
+  if (A.walkOf && !(typeof mediaHas === 'function' && mediaHas(A.img))) A = ART[A.walkOf];
   if (typeof mediaHas === 'function' && !mediaHas(A.img) && typeof mediaFetch === 'function') {
     mediaFetch(A.img);
     // and pull the other two while we are here: an animal that has to wait for
@@ -163,12 +194,28 @@ function drawBeastPlate(c, e, ART, tame) {
 
   const cx = e.x + e.w / 2, footY = e.y + e.h;
   const dh = e.h * A.k, dw = dh * (im.naturalWidth / im.naturalHeight);
-  // A GAIT HAS A VERTICAL. A quadruped's shoulders rise on the passing frame
-  // and drop as the paw plants, so the body oscillates twice per stride — and
-  // a walk cycle without it reads as two pictures being swapped. Locked to the
-  // same stride counter as the frames, so it can never drift out of phase.
-  const gait = (pose === 'walkA' || pose === 'walkB')
-    ? -Math.abs(Math.sin(((e._stride || 0) / STRIDE) * Math.PI)) * 1.6 : 0;
+  // A GAIT HAS A VERTICAL — AND A RUN HAS A BACK. The vertical is weight
+  // transfer taken from the measured CC0 cycles (docs/MOVEMENT_SOURCES.md):
+  // a sharp rise onto the planted paw and a soft settle, not a symmetric
+  // wave. The run adds two things the walk does not have: a suspension beat
+  // (all four paws off the floor once per stride — the extra lift below) and
+  // back flexion (the pitch), which is most of what separates a gallop from
+  // a fast walk on screen. All of it rides the same distance-driven phase as
+  // the frames, so nothing can drift.
+  const moving = pose === 'walkA' || pose === 'walkB' || pose === 'runA' || pose === 'runB';
+  const run = !!e._runG && moving;
+  const p = (e._ph || 0) % 1;
+  let gait = 0, pitch = 0;
+  if (moving) {
+    const amp = run ? GAIT.runAmp : 1.6;
+    gait = -Math.pow(Math.abs(Math.sin(p * Math.PI)), 0.7) * amp;
+    if (run) {
+      gait -= Math.max(0, Math.sin((p + 0.3) * Math.PI * 2)) * GAIT.susp;
+      pitch = Math.sin(((e._ph || 0) % 2) * Math.PI) * GAIT.pitch;
+    } else {
+      pitch = Math.sin(((e._ph || 0) % 2) * Math.PI) * 0.028;
+    }
+  }
   // grounded plates hang off the floor line; the airborne one hangs off centre
   const yc = (A.foot ? footY - dh / 2 + e.h * (A.yOff || 0)
                      : e.y + e.h / 2 + dh * (A.yOff || 0)) + gait;
@@ -198,6 +245,9 @@ function drawBeastPlate(c, e, ART, tame) {
   // the subject is symmetric about its own spine.
   const dir = (e.faceVis != null ? e.faceVis : e.dir) || -1;
   c.scale(dir > 0 ? -1 : 1, 1);
+  // the back flexes in plate space (after the mirror), so the flexion reads
+  // the same whichever way it is running
+  if (pitch) c.rotate(pitch);
   if (e.hurtT > 0) c.globalAlpha *= 0.85;
   c.drawImage(im, -dw / 2, -dh / 2, dw, dh);
   if (e.hurtT > 0) {
@@ -614,6 +664,20 @@ function drawAlpha(c, b, cx, cy) {
   if (shk) c.translate(Math.sin((b.anim || 0) * 31 + 0.5) * 5, 0);
   // authored facing LEFT, like every plate in this file
   c.scale(pop * ((b.face || -1) > 0 ? -1 : 1), pop);
+  // THE HOWL RISES. The CC0 reference cycle (docs/MOVEMENT_SOURCES.md — the
+  // wolf's ten-frame howl) spends most of its frames on the head going BACK,
+  // then holds. So the broodcall wind-up is the rise — the muzzle climbs over
+  // the 0.7s tell, weight rocking to the haunches — and the howl itself is
+  // the held throat with a small tremor. One plate, choreographed; the plate
+  // is the pose, the rise is the motion. Applied in plate space (after the
+  // mirror) so the muzzle climbs whichever way it stands.
+  if (b.st === 'broodcall' || b.st === 'howl') {
+    const hk = b.st === 'broodcall'
+      ? Math.pow(clamp(1 - (b.t || 0) / TELL_HEAVY, 0, 1), 0.8) : 1;
+    const trem = b.st === 'howl' ? Math.sin(t2 * 26) * 0.015 : 0;
+    c.translate(dh * 0.04 * hk, dh * 0.02 * hk);       // weight onto the haunches
+    c.rotate(0.22 * hk + trem);                         // muzzle up (nose is -x)
+  }
   if (b.hurtT > 0) c.globalAlpha *= 0.85;
   c.drawImage(im, -dw / 2, -dh / 2, dw, dh);
   if (b.hurtT > 0) {

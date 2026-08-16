@@ -254,8 +254,12 @@ const { chromium } = require('playwright');
   });
   if (gait.err) check('the wolves walk', false, gait.err);
   else {
-    check('a moving wolf cycles real walk frames',
-      gait.poses.length >= 2 && gait.poses.every(p2 => /^walk/.test(p2)),
+    // a fast wolf now RUNS (the gait split, js/wolves.js): runA/runB are real
+    // cycling frames — they resolve to the walk plates until §2q's run pair
+    // lands, and to the run plates after. Either gait satisfies the intent
+    // here, which is "it cycles two frames, it is not one plate sliding".
+    check('a moving wolf cycles real gait frames',
+      gait.poses.length >= 2 && gait.poses.every(p2 => /^(walk|run)/.test(p2)),
       gait.poses.join(','));
     check('a standing wolf stands still',
       gait.still.length === 1 && gait.still[0] === 'rest', gait.still.join(','));
