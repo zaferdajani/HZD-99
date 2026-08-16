@@ -309,7 +309,25 @@ absolutely no straight jambs, no lintel, no symmetry. The engine's
 procedural fallback (drawCaveMouth in game.js) is the placement reference;
 the plate replaces it at the same anchor.
 
-### 2g. THE TRADER'S BOOTH + DEN ✱ FIRE ON REBIND (owner's design, 2026-08-16)
+### 2g. THE TRADER'S BOOTH + DEN — PARTIALLY FIRED 2026-08-16, READ BEFORE FIRING
+
+**STATUS (2026-08-16, code session — do not double-fire):**
+- **boothFront — FIRED + OWNER-APPROVED + WIRED.** Job d469ad29. Keyed to
+  `assets/backgrounds/booth_front.png`, source archived in
+  `assets/source/booth/`. Do not re-fire.
+- **denInterior — FIRED + OWNER-APPROVED + WIRED.** Job 3bd98cc3. Crushed
+  to `assets/backgrounds/den_interior.jpg`, source archived. Do not re-fire.
+- **ratchetResting — FIRED AND REFUSED** (job f026eef7: not our Ratchet — a
+  generic humanoid — and it ignored "subject only", baking in a background).
+  **THE RE-FIRE IS THE ART SESSION'S**: attach Ratchet's in-game reference
+  (his cells in `assets/characters/npc_6yaw.png`, or assets/source if a
+  cleaner ref exists) as reference media so the resting figure is
+  recognisably the SAME vendor unit, keep the chest-crystal beat, dark
+  unlit room, subject only. Owner reviews before keying.
+
+The code session fired the first three before this ledger entry existed —
+that mistake is why this block leads the section now. Generation belongs
+to the art session; the code session wires and verifies.
 
 Ratchet's booth is LIVE in code as a procedural stand-in (drawBooth in
 js/game.js; the den is room A0B in js/world.js) — the owner asked whether

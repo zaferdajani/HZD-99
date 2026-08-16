@@ -4824,6 +4824,27 @@ function drawCaveMouth(cx2, gy, P, k) {
 // BACKGROUND rule and the NO RIGHT ANGLES law (nothing here is plumb).
 // The flaps part as she approaches (k); the light inside is Ratchet's.
 function drawBooth(cx2, gy, P, k) {
+  // THE FIRED PLATE FIRST (§2g, owner-approved): the authored kiosk stands
+  // where the procedural one stood, bottom-anchored on the same spot, with
+  // the approach glow swelling over it as k opens. The hand-drawn stall
+  // below stays as the loading/missing fallback, per the atlas contract.
+  if (typeof mediaFetch === 'function') mediaFetch('boothFront');
+  const bim = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.boothFront;
+  if (bim && bim.naturalWidth) {
+    const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
+    c.save();
+    c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
+    if (k > 0.02) {
+      c.globalCompositeOperation = 'lighter';
+      const gl = c.createRadialGradient(cx2, gy - dh * 0.32, 6, cx2, gy - dh * 0.32, dw * (0.3 + k * 0.4));
+      gl.addColorStop(0, 'rgba(255,214,130,' + (0.18 * k + 0.08) + ')');
+      gl.addColorStop(1, 'rgba(255,190,100,0)');
+      c.fillStyle = gl;
+      c.beginPath(); c.ellipse(cx2, gy - dh * 0.32, dw * (0.3 + k * 0.4), dh * 0.4, 0, 0, 7); c.fill();
+    }
+    c.restore();
+    return;
+  }
   const BW = 74, BH = 118;
   c.save();
   // the back shell, leaning a few degrees the way a well-used stall does

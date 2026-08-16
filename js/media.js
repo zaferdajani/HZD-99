@@ -103,9 +103,11 @@ const MEDIA_SRC = {
     cradle: 'assets/characters/gear/cradle.png',
     cradleOpen: 'assets/characters/gear/cradle_open.png',
     gateCity: 'assets/backgrounds/gate_city.jpg',
-    // §2g den/booth plates: add denInterior / boothFront / ratchetResting
-    // entries HERE in the same commit as the files — the platform harness
-    // rightly fails any manifest name with no file on disk
+    // THE TRADER'S BOOTH AND DEN (§2g) — fired 2026-08-16, owner-approved.
+    // ratchetResting is still to come: v1 was refused (not our Ratchet,
+    // dirty background) and re-fires with his in-game reference attached.
+    boothFront: 'assets/backgrounds/booth_front.png',
+    denInterior: 'assets/backgrounds/den_interior.jpg',
     // HER OWN BACK — generated from her live body (assets/source/ref/), the
     // first authored plates of the hero herself. Two stride frames armed, two
     // unarmed (the sword becomes a pickup — task #78), and the sword waiting
