@@ -500,7 +500,238 @@ updated in the same commit.
 
 ---
 
-## 8. RUNNING THE CHECKS
+## 9. STAGE READABILITY — the frame is the unit, not the asset
+
+**Everything before this chapter constrains ONE ASSET. That is why the game can
+be green on every rule in it and still lose to a competent side-scroller
+frame.** A teardown against *Prince of Persia: The Lost Crown* (2026-08-16)
+found eleven defects and every one of them was a RELATIONSHIP between assets —
+which `tests/artbible.cjs` cannot see, because it measures one sheet at a time.
+
+So this chapter and the next have a different unit: **the assembled picture**,
+and they are enforced by `tests/grammar.cjs`.
+
+### 9.1 THE THREE-PLANE VALUE LAW
+
+✅ **Enforced.** Every frame is three luminance bands, and they never overlap:
+
+| plane | luminance | treatment |
+|---|---|---|
+| background | **10–25%** | desaturated, cooled, soft edges, haze layer at 5–10% |
+| playable mid-plane | **35–60%** | hard edges, full material detail |
+| actors and objectives | **70–95%** | the brightest things in frame, always |
+
+**The squint test is the acceptance test:** blur the frame until shapes go, and
+the player and the current objective must be the two brightest elements left.
+If a background lamp survives that test, the background is wrong.
+
+- ✅ **Enforced:** character-vs-background mean luminance delta **≥ 30 points**.
+- ✅ **Enforced:** far, mid and near thirds ordered monotonically in luminance.
+
+### 9.2 THE SACRED GROUND PLANE
+
+✅ **Enforced.** Every walkable surface carries a **lit top edge**, and every
+standing object casts a **hard contact shadow**. No pure-black floors: the
+shadow floor never drops below **8% luminance**.
+
+The reason is not beauty. A floor the player cannot distinguish from the wall
+behind it is a playability defect, and this game shipped one — `platforms.png`
+was lighter and lower-contrast than the backgrounds it sat on.
+
+### 9.3 ONE SIGNATURE ACCENT PER CHARACTER
+
+✅ **Enforced.** Every character reads as a unique pure-black cutout, and each
+carries **exactly one** saturated signature accent, documented here:
+
+| character | signature accent |
+|---|---|
+| HZD-99 (the protagonist) | the red scarf, at full saturation |
+| NULLFANG | virus violet |
+| GLACIERE | ice blue |
+| TALONHOST | brass amber-gold |
+| THE CHOIR | furnace orange |
+| PRISM | rose magenta |
+
+**One accent means one.** A guardian whose whole body glows has no accent; it
+has a colour. `beasts/wolf_coil.png` currently wears the reserved telegraph
+amber over its entire resting body, which spends the game's one "this is
+coming" signal on an animal standing still.
+
+### 9.4 THE TWO-COLOUR SCRIPT PER ZONE
+
+Each zone declares **one dominant environmental key hue**. **Teal is reserved,
+globally, for interactive and UI** — nothing environmental may wear it.
+
+- Interactive objects edge-light in teal when in range. That is the only way
+  the player is told a thing can be touched.
+- UI draws in the accent hue alone.
+
+### 9.5 EDGE DISCIPLINE
+
+**Hard edges mean gameplay-relevant. Soft edges mean atmosphere.** The mid-plane
+is sharpened; background plates are blurred. An atmospheric detail rendered at
+mid-plane sharpness is a lie about what the player can stand on.
+
+This also kills the sticker problem: a binary matte gives every asset a uniform
+hard rim all the way round, so nothing has air around it. Matting erodes alpha
+by 1px, feathers 1.5–2px, and multiplies the outermost ring by ~0.6.
+
+### 9.6 SINGLE-KEY LIGHT LOGIC
+
+✅ **Enforced by brief.** Every scene declares **one key light** in its
+metadata and all prop shading obeys it. Secondary sources are local accents
+only.
+
+**The house key is: warm, upper-left, ~40° elevation; cool ambient fill from
+the lower right; the shadow side of every form falls into near-darkness.**
+That paragraph goes at the TOP of every generation prompt from here on.
+
+**And this line is struck from every brief in the repository:**
+
+> ~~"photographed in a pitch-dark room, spotlights pick out the subject and
+> nothing else receives any light"~~
+
+That is a product-photography brief. It is correct for isolating a subject to
+matte and wrong for an object that must stand in someone else's room, and it
+is why six shipped plates each carry a different key direction.
+
+### 9.7 THE GLOBAL ZONE LUT
+
+Per zone: lifted blacks, a shadow tint complementary to the key hue, a gentle
+vignette. This is `lightPass()` in `js/game.js`, and it is the instrument that
+makes independently-generated assets share a room.
+
+**It must never run at zero.** It is currently the first thing dropped when the
+frame rate slips, which means the one thing holding the picture together is the
+first thing switched off. It gets its own floor.
+
+---
+
+## 10. TERRAIN SILHOUETTE GRAMMAR
+
+> **The world is ruined machines, caves and tunnels. Nothing here was built
+> yesterday and nothing is level. The Mario grid is banned.**
+
+The owner's standing order — "no 90-degree elevation or walls in all game" —
+has been in `CLAUDE.md` since 2026-08-15 and the game kept shipping rectangles
+anyway. The reason is that the order was a prohibition without a grammar: it
+said what not to draw and never said what to draw instead. This chapter is the
+grammar, and `tests/grammar.cjs` is its enforcement.
+
+### 10.1 TWO-MESH SEPARATION — the idea everything else rests on
+
+**Terrain is authored as two layers that are allowed to disagree:**
+
+- **(a) the collision polyline** — simplified, forgiving, boring on purpose.
+  Gameplay stays clean. This engine has no slopes, so the collider stays
+  tile-quantised, and *that is fine* — it is layer (b) that the player looks at.
+- **(b) the visual surface mesh** — deliberately **4–12px rougher** than the
+  collider: overhang, crumble, protrusion, sag.
+
+**The player walks on the collider; the eye sees the ruin.** Every rule below
+is a rule about layer (b). None of them touch collision, which is why all of
+them can ship without an engine change.
+
+### 10.2 NO **UNDECORATED** AXIS-ALIGNED RUNS
+
+**The original form of this rule was "no axis-aligned run may exceed 96px",
+and it was checked against the reference before it was written down here. It
+does not survive the check.**
+
+*Prince of Persia: The Lost Crown* — the game this chapter is modelled on —
+breaks that rule in almost every frame. Its ruins are cut masonry: long
+horizontal ledges, square-stepped staircases, rectangular stone blocks with
+intact 90° corners. So does *Hollow Knight*. A law that the reference itself
+fails is not a law, it is a superstition, and enforcing it here would have
+meant rebuilding a tile engine to chase something that was never the
+difference.
+
+**What the reference actually never does is show a BARE straight edge.** Every
+long run it draws carries the three-part edge of §10.3 — a lit crest, a
+material body, and a broken under-hang of vines, roots, rubble or hanging
+debris — and sits in a different value band from what is behind it. The eye
+reads "ruin" from the decoration and the depth, not from the absence of
+straight lines.
+
+✅ **Enforced, in the form that survives the reference:** a horizontal run
+longer than **96px** is permitted **only if it carries both a lit lip and a
+broken skirt** (§10.3). A long run with a flat top and a flat underside is a
+failure. An undecorated straight edge of any length above 96px is a failure.
+
+Where organic terrain IS the right answer — caves, earth, ice, growth — the
+old advice still applies and is the cheapest way to pass: tilt segments ±3–15°,
+height jitter 2–8px, chipped corners, sagging mid-spans, and rubble ramps
+instead of clean quantised stairs. That is a technique, not the law.
+
+**And this game's collider never has to change to comply**, because §10.1
+separates the meshes. The engine has no slopes; it does not need any.
+
+### 10.3 THE THREE-PART EDGE — every walkable edge owes three things
+
+This is the single most transferable rule in the chapter, and the one the game
+has never done:
+
+1. **The lip** — a bright, irregular **2–4px lit crest** along the top, obeying
+   the sacred-ground-plane law.
+2. **The body** — the material face: cracked plating, rock strata, cable
+   bundles, whatever the zone lexicon says.
+3. **The skirt** — a **dark under-hang, 8–24px**, that breaks the bottom line:
+   dripping wires, broken struts, stalactite rubble, torn mesh.
+
+✅ **Enforced:** **a platform with a flat underside is a failure.** Undersides
+hang, drip and trail. A rectangle with a nice top is still a rectangle.
+
+### 10.4 THE CORNER DESTRUCTION RULE
+
+**Same correction as §10.2, for the same reason:** the reference is full of
+intact 90° masonry corners. What it has and we do not is that **no corner is
+ever left bare** — every one is chipped, capped, silted, overgrown or in
+shadow.
+
+✅ **Enforced:** **no *bare* 90° outer or inner corner survives.**
+
+- **Outer corners:** chipped, bent, or capped with a debris cluster.
+- **Inner corners:** filled with silt, scrap piles, root or cable growth, or a
+  curved fillet.
+
+Each material owns a **corner-piece library of at least 6 variants**, and the
+tiler is required to use it. Six is not decoration — below that the eye finds
+the repeat inside one screen.
+
+### 10.5 THE ZONE SURFACE LEXICON
+
+**Every platform is assembled from its zone's lexicon, never from a blank
+rectangle.** This is the mimic-the-background rule from `CLAUDE.md` made
+specific:
+
+| zone | surface lexicon |
+|---|---|
+| Machine Depths | buckled hull plating · snapped conveyor segments · frost-heaved panels · collapsed catwalks tilted 15–25° · walls of fused scrap-and-stone |
+| Scrap Meadows | rusted vehicle carcasses · pressed-earth banks · root-split concrete · toppled fencing |
+| The Foundry | slag crust · machine housings · spilled ingot runs · bent walkway grating |
+| Glaciere | frost-heaved rock · rime shelves · cracked ice plates over dark water |
+| The Nest | woven cable mats · shell debris · torn mesh · organic strut growth |
+| Odyssey (NOSTOS) | eroded stone · root-broken ledges · fallen column drums · silted steps |
+
+### 10.6 ELEVATION LOGIC — height changes tell a story
+
+A "step up" is **a fallen girder, a slumped rock shelf, a tilted machine
+carcass** — never a clean quantised stair. Where verticality is needed: irregular
+ledges, spacing varied **±20%**, mixed slope approaches.
+
+### 10.7 THE ANTI-TILING LAW
+
+✅ **Enforced.** No visible tile repetition within one screen width:
+
+- **≥ 4 variants** per terrain module
+- random flip/rotation within slope tolerance
+- overlay decals — stains, moss, frost, scorch — at **20–40% density**
+
+---
+
+---
+
+## 11. RUNNING THE CHECKS
 
 ```bash
 node build.cjs

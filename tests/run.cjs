@@ -57,6 +57,7 @@ const SUITE = [
   ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
   ['daze',      'a group of hits breaks NULLFANG open, pays out, closes, and cannot be held'],
   ['artbible',  'ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor'],
+  ['grammar',   'ART_BIBLE §9/§10 measured on the ASSEMBLED FRAME: value bands, straight runs, corners, skirts, tiling'],
   ['battery',   'one cell, one machine, and the shop waits for the lion'],
   ['minis',     "the Eye's five: they wake, telegraph, alternate, die and pay"],
   ['hzdvox',    'her voice: on the frame she moves, never clipping, never twice at once'],
