@@ -239,7 +239,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   8. §2c    caveMouth + caveExit + pillar ×3  ✅ WIRED 2026-08-16 — vistas + pillar plate live; cave tile deck still to fire
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   ✅ WIRED 2026-08-16 — per-zone maps live, feather-masked; city monument untouched
  10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ CLOSED 2026-08-16 — all three plates fired, approved and wired
- 11. §3m    BOSS MOTION PLATES (task #93)     ⏸ PREPARED 2026-08-16 — refs shot, recipe written, NOT fired
+ 11. §3m    BOSS MOTION PLATES (task #93)     ◐ STARTED 2026-08-16 — NULLFANG walk+coil shipped; 4 guardians to go
  12. §1     PAIRED PAW SET — every pose WITH and WITHOUT the claw (owner's ruling 2026-08-16) + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
  14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   ✅ WIRED 2026-08-16 — shrine plate + parlor vista live (code session)
@@ -925,6 +925,48 @@ swap a strut for a drone without redrawing the room.
 Scope, unfired: one support set per built zone (A/B/C/D/E/X) — static support
 + moving element — plus the drone-platform creature when its kingdom arrives.
 `MovingPlat` in js/entities.js is the placement reference.
+
+### 3m STARTED — NULLFANG FIRST, AND THE RECIPE IS PROVEN (2026-08-16)
+
+**Shipped:** `assets/characters/guardians/nullfang_walk.png` and
+`nullfang_coil.png` (jobs ad218a4e, 1781bba8), matted, sources archived.
+
+**The owner asked why this was still open and he was right to.** It was held
+back on the argument that the rows-vs-new-sheet decision belongs to the code
+session and changes what the plates must be. That argument is wrong: the
+POSES do not change either way — only where the pixels are pasted does — so
+the plates could have been fired at any point. Held work is not caution.
+
+**The recipe works and costs two fires per guardian.** The in-game
+screenshot, cropped to the boss, is a good SHAPE reference precisely because
+it is small and soft — art-prompts §2 wants a reference with no rendering
+style worth stealing. Everything else comes from prose: the creature named
+concretely, the palette in words, the black void, the pose stated as which
+limb goes where.
+
+- **walk** — diagonal-pair stride, all four legs in different positions, the
+  same rule that repaired the wolf in §2q.
+- **coil** — the wind-up: body gathered low, hindquarters hunched over folded
+  back legs, head thrust forward along the charge line, and the blade-mane
+  RAISED and flared far wider than it sits when walking. Its silhouette has
+  to be the most drawn-back shape the animal makes, per §3.3.
+
+**Two things to fix or accept when the next four are fired:**
+1. **Facing drifted.** The walk faces left (the house facing for these
+   plates); the coil came back angled with its head toward the right. Fire
+   the second plate of each pair AGAINST THE FIRST rather than against the
+   screenshot — the §2q lesson, where the wolf pair only matched once walkB
+   was anchored on walkA instead of on their common ancestor.
+2. Both came back on studio backgrounds despite the void phrasing and needed
+   matting; budget for that.
+
+**Remaining: TALONHOST (atlas, room C3), FURNACE CHOIR (brood, B4), GLACIERE
+(zero, D3), PRISM PROWLER (prism, X1)** — screenshots already committed in
+`assets/source/guardians/`. MOTHER-V is stationary and exempt.
+
+**Wiring is still the code session's decision** (new atlas rows shift every
+absolute rect in `js/` and in `tools/bossparts.cjs`'s mirror table; a
+separate sheet does not). That decision no longer blocks generation.
 
 ### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
 
