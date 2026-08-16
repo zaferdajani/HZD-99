@@ -235,7 +235,7 @@ const ROOMS = {
     // the story already built for shelter — she wakes Ratchet under this
     // roof, and from then on the roof is where she comes back to. A3's bench
     // keeps its job as the meadow's own breath after the pack.
-    ents: [['npc', 17, 15, 'ratchet'], ['chest', 20, 15, 'it:batt'], ['bench', 25, 15]],
+    ents: [['npc', 17, 15, 'ratchet'], ['chest', 14, 15, 'it:batt'], ['bench', 28, 15]],  // pod BUILT INTO the corner facing him; chest left of him — the WORK TABLE stands to his right
     build(g) {
       frame(g);
       hline(g, 19, 23, 12, '=');          // the workbench loft over his corner

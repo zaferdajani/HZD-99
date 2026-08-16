@@ -13,6 +13,10 @@ function langName(id) { const l = LANGS.find(x => x.id === id); return l ? l.nam
 function isRTL() { const l = LANGS.find(x => x.id === LANG); return !!(l && l.rtl); }
 const I18N = {
 en: {
+  sl_pod_lesson: "See that cradle in the corner? Built it into the wall myself. Step in and it remembers you — everything you are, kept safe — and it patches your plating while you stand there. Use it. That is what it is for.",
+  sl_heal_gift: "And take this — my repair protocol. For the cell you brought me. I wrote it for my own chassis, but it will run on yours.",
+  sl_heal_how: "Hits you land charge the ring at the top. When there is charge in it, hold HEAL and spend it to mend a core. It is empty now — go earn some.",
+  i_heal: "Repair Protocol", i_heald: "Ratchet's own self-repair routine — his first gift. Hold HEAL to spend volts mending a core.",
   demo_end1: 'END OF THE FREE CHAPTER',
   demo_end2: 'The Scrap Meadows are behind her. The Data Conduits are not.',
   demo_end3: 'Five kingdoms, five more guardians and the Null Core are waiting in the full game.',
@@ -436,6 +440,10 @@ en: {
   map_ctl: 'Drag or ✥ to pan   ·   wheel / pinch / Z · X to zoom   ·   E fit   ·   Q recentre   ·   M close',
 },
 ar: {
+  sl_pod_lesson: "أترى تلك الحاضنة في الزاوية؟ بنيتُها في الجدار بنفسي. قف فيها فتتذكرك — كل ما أنت عليه محفوظ — وترمّم دروعك وأنت واقف. استخدمها، فلهذا صُنعت.",
+  sl_heal_gift: "وخذ هذا — بروتوكول الإصلاح خاصتي. مقابل الخلية التي أحضرتها لي. كتبته لهيكلي، لكنه سيعمل على هيكلك.",
+  sl_heal_how: "ضرباتك تشحن الحلقة في الأعلى. حين يكون فيها شحن، اضغط مطولًا على العلاج لتصلح نواة. إنها فارغة الآن — اذهب واكسب شحنة.",
+  i_heal: "بروتوكول الإصلاح", i_heald: "روتين الإصلاح الذاتي لراتشيت — هديته الأولى. اضغط مطولًا على العلاج لإنفاق الفولتات وإصلاح نواة.",
   demo_end1: 'نهاية الفصل المجاني',
   demo_end2: 'مروج الخردة خلفها الآن. أما قنوات البيانات فلا.',
   demo_end3: 'خمس ممالك وخمسة حُرّاس آخرون ونواة العدم تنتظرك في اللعبة الكاملة.',
@@ -832,6 +840,10 @@ ar: {
   map_ctl: 'اسحب للتحريك · عجلة أو تقريب بالإصبعين · E ملء الشاشة · Q توسيط · M إغلاق',
 },
 tr: {
+  sl_pod_lesson: "Köşedeki kabini görüyor musun? Duvara kendim yerleştirdim. İçine gir, seni hatırlar — olduğun her şey güvende kalır — ve sen orada dururken zırhını onarır. Kullan onu; bunun için var.",
+  sl_heal_gift: "Bunu da al — kendi onarım protokolüm. Bana getirdiğin hücreye karşılık. Kendi gövdem için yazmıştım ama seninkinde de çalışır.",
+  sl_heal_how: "İndirdiğin darbeler üstteki halkayı doldurur. İçinde yük varken İYİLEŞ tuşunu basılı tut, bir çekirdek onar. Şimdi boş — git ve doldur.",
+  i_heal: "Onarım Protokolü", i_heald: "Ratchet'in kendi onarım rutini — ilk hediyesi. Çekirdek onarmak için İYİLEŞ ile volt harca.",
   demo_end1: 'ÜCRETSİZ BÖLÜMÜN SONU',
   demo_end2: 'Hurda Çayırları artık arkasında. Veri Kanalları değil.',
   demo_end3: 'Beş krallık, beş muhafız daha ve Boş Çekirdek tam oyunda bekliyor.',
@@ -916,6 +928,10 @@ tr: {
   vault_hint: 'E — Mühürlü Kasa', door_locked: 'Mühürlü. Daha büyük bir güç onu kapalı tutuyor.',
 },
 zh: {
+  sl_pod_lesson: "看见角落里那台舱了吗？是我亲手嵌进墙里的。站进去，它就会记住你——你的一切都会被保存——还会趁你站着修补装甲。用它吧，它就是为这个造的。",
+  sl_heal_gift: "还有，拿着——我的修复协议。算是你带回电池的报答。本是为我自己的机体写的，但在你身上也能跑。",
+  sl_heal_how: "你打出的攻击会给顶上的圆环充能。环里有电时，按住治疗就能修复一颗核心。现在是空的——去挣点电吧。",
+  i_heal: "修复协议", i_heald: "拉奇自用的自修复程序——他的第一份礼物。按住治疗消耗伏特修复核心。",
   demo_end1: '免费章节到此结束',
   demo_end2: '废料原野已在身后，数据回廊尚未开启。',
   demo_end3: '五个王国、另外五位守护者与虚空核心，都在完整版中等待。',
@@ -1000,6 +1016,10 @@ zh: {
   vault_hint: 'E — 封印宝库', door_locked: '已封印。更强大的力量将它锁住。',
 },
 ru: {
+  sl_pod_lesson: "Видишь капсулу в углу? Сам встроил её в стену. Встань в неё — она запомнит тебя, всё, что ты есть, будет сохранено, — и подлатает броню, пока стоишь. Пользуйся. Для этого она и есть.",
+  sl_heal_gift: "И возьми вот это — мой протокол ремонта. За ту батарею, что ты принесла. Писал для своего корпуса, но на твоём тоже пойдёт.",
+  sl_heal_how: "Твои удары заряжают кольцо сверху. Когда в нём есть заряд, держи ЛЕЧЕНИЕ — потратишь его и починишь ядро. Сейчас оно пустое — иди заработай.",
+  i_heal: "Протокол ремонта", i_heald: "Собственная программа самопочинки Рэтчета — его первый подарок. Держи ЛЕЧЕНИЕ, чтобы тратить вольты на ремонт ядра.",
   demo_end1: 'КОНЕЦ БЕСПЛАТНОЙ ГЛАВЫ',
   demo_end2: 'Луга Лома позади. Каналы Данных — ещё нет.',
   demo_end3: 'Пять королевств, ещё пять стражей и Пустое Ядро ждут в полной версии.',

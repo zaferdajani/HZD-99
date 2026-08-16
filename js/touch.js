@@ -202,7 +202,7 @@ function tLayout() {
         show: () => tAllow('JUMP') },
       { code: 'VATK', x: rgx, y: H - 148 * u, r: 33 * u, sym: 'claw',
         tint: { fill: 'rgba(255,150,150,0.95)', ring: 'rgba(255,110,110,0.7)' }, show: () => tAllow('ATK') },
-      { code: 'VHEAL', x: rgx, y: H - 230 * u, r: 27 * u, icon: '✚', show: () => tAllow('HEAL') },
+      { code: 'VHEAL', x: rgx, y: H - 230 * u, r: 27 * u, icon: '✚', show: () => tAllow('HEAL') && (typeof healUnlocked !== 'function' || healUnlocked()) },
       // THE POWER WHEEL. Everything situational used to be its own button, and
       // they were added one per power as the game grew: six of them stacked up
       // the right edge, the topmost sitting in the upper fifth of a phone

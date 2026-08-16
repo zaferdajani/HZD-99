@@ -273,6 +273,12 @@ function npcKey(s) { return (s.room || G.roomId) + '|' + s.extra; }
 // switched off when the broadcast went out. NOSTOS's people are people; they
 // are not waiting for a battery, and gating a Greek elder behind one would be
 // the theme bleed this codebase has had to fix twice already.
+// HEALING IS EARNED, NOT INNATE (owner's design): Ratchet's first gift for
+// the battery. NOSTOS's hero keeps it from the start — people are people.
+function healUnlocked() {
+  if (typeof isHero === 'function' && isHero()) return true;
+  return !!(G.save && G.save.flags && G.save.flags.heal);
+}
 function npcLive(s) {
   if (typeof isHero === 'function' && isHero()) return true;
   return !!G.save.flags['on_' + npcKey(s)];
@@ -763,7 +769,14 @@ const NPC_GIFT = {
   // it out of him — too small, so it faded, and he pulled his own plug before
   // the song could creep back. Her cell is what woke him. All of that is the
   // errand's ASK text, delivered in dialogue where lore belongs.
-  'A0B|ratchet': () => { invAdd('kit'); showItem(t('i_kit'), t('i_kitd')); },
+  // THE FIRST WAKING PAYS TWICE (owner's design): the repair kit, and the
+  // HEAL PROTOCOL itself — healing is not a button she was born with, it is
+  // Ratchet's first gift for the battery, with his pod lesson around it.
+  'A0B|ratchet': () => {
+    invAdd('kit');
+    if (G.save && G.save.flags) { G.save.flags.heal = 1; persist(); }
+    showItem(t('i_heal'), t('i_heald'));
+  },
   // and the trader at the camp by NULLFANG's door — this is the shop, and it
   // does not exist until the lion's cell has paid for it
   'A3|ratchet': () => { G.toast(t('npc_shop_open')); },
@@ -834,7 +847,24 @@ function doInteract(s) {
           // conversation reopens itself — straight into the errand ask,
           // which for Ratchet IS the backstory: the song, the chest
           // crystal, the sword he can forge.
-          if (G.dialog && !G.dialog.onEnd) G.dialog.onEnd = () => doInteract(s);
+          //
+          // ...and in the DEN, the waking teaches the two survival systems
+          // first (owner's design): the pod in the corner — how saving and
+          // recharging work — and the heal protocol he just handed over,
+          // including that the volt ring starts empty. THEN the errand talk.
+          if (G.dialog && !G.dialog.onEnd) {
+            if (key === 'A0B|ratchet') {
+              G.dialog.onEnd = () => {
+                G.dialog = {
+                  name: t('n_' + s.extra),
+                  lines: [t('sl_pod_lesson'), t('sl_heal_gift'), t('sl_heal_how')],
+                  i: 0, npc: s.extra,
+                  onEnd: () => doInteract(s),
+                };
+                G.state = 'DIALOG'; sfx('ui'); npcSay(s.extra, 0);
+              };
+            } else G.dialog.onEnd = () => doInteract(s);
+          }
         },
       };
       G.state = 'DIALOG'; sfx('ui'); npcSay(s.extra, 0);
@@ -3147,9 +3177,43 @@ function drawMotes(px, py, t3) {
   c.restore();
   c.globalAlpha = 1;
 }
+// THE INTERIOR FIT (owner, in the den: "make room smaller in a fade into
+// black surrounding until npc looks like sitting next to table"). An interior
+// painting stretched to fill the screen makes its workbench a building; drawn
+// SMALLER — bottom on the floor line, feathered edges dying into darkness —
+// the same painting becomes a lamplit room whose table stands beside the
+// sitting npc. The number is the fraction of the full-bleed cover scale.
+const INTERIOR_FIT = { denInterior: 0.62, oracleInterior: 0.68 };
 function drawZoneVista(P, zone, px, py) {
   const own = ROOM_VISTA[G.roomId];
   if (own && typeof mediaFetch === 'function') mediaFetch(own);
+  if (own && INTERIOR_FIT[own] && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[own]
+      && typeof scenePlate === 'function') {
+    const fim = scenePlate(own);            // the feathered copy — edges fade out
+    if (fim) {
+      // the room floats in the dark of the larger structure it is dug into
+      c.fillStyle = '#030608'; c.fillRect(0, 0, 960, 540);
+      const im0 = MEDIA_IMG[own];
+      const cover = Math.max(540 / im0.naturalHeight, 960 / im0.naturalWidth) * 1.12;
+      const dh2 = im0.naturalHeight * cover * INTERIOR_FIT[own];
+      const dw2 = dh2 * (fim.naturalWidth / fim.naturalHeight);
+      // bottom on the play floor, drifting gently with her progress
+      const roomW2 = G.roomDef.w * TILE;
+      const pcx2 = (typeof player !== 'undefined' && player) ? player.x + player.w / 2 : 480;
+      const fxp = clamp(pcx2 / Math.max(1, roomW2), 0, 1);
+      const x0 = 480 - dw2 / 2 - (fxp - 0.5) * Math.max(0, dw2 - 960) * 0.5;
+      const y0 = G.roomDef.h * TILE - 20 - (py || 0) - dh2;
+      c.drawImage(fim, x0, y0, dw2, dh2);
+      // a breath of the lamp's warmth bleeding past the plate edge
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const wg = c.createRadialGradient(480, y0 + dh2 * 0.4, 40, 480, y0 + dh2 * 0.4, dw2 * 0.62);
+      wg.addColorStop(0, 'rgba(120,100,60,0.06)'); wg.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = wg; c.fillRect(0, 0, 960, 540);
+      c.restore();
+      G._vista = { x: x0, y: y0, w: dw2, h: dh2 }; G._vistaRoom = G.roomId;
+      return true;
+    }
+  }
   const solo = (own && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[own])
     || (ZONE_VISTA[zone] && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[ZONE_VISTA[zone]]);
   const im = solo || (typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.zones);
@@ -4839,6 +4903,42 @@ function scenePlate(key) {
   SCENE_PLATE[key] = cv;
   return cv;
 }
+// THE WORK TABLE (§2r stand-in). The owner's build order for the den: "the
+// table behind it, even though it's part of the image, you should create an
+// object in the same shape, the same size, put it in front of it as an
+// extension to it" — the crystal sword is forged HERE. So the object IS the
+// painting's own lamplit workbench: cropped to the bench silhouette
+// (backboard, top, drawer, legs — not the wall around it), every cut edge
+// feathered so it reads as furniture standing in the room and not a pasted
+// card. The top-left of that crop is bare wall above the bench's left
+// surface; a diagonal corner fade removes it, which no rectangular crop can.
+let WORK_TABLE = null;
+function workTablePlate() {
+  if (WORK_TABLE) return WORK_TABLE;
+  if (typeof mediaFetch === 'function') mediaFetch('denInterior');
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.denInterior;
+  if (!im || !im.naturalWidth) return null;
+  const sx = im.naturalWidth * 0.520, sy = im.naturalHeight * 0.435;
+  const sw = im.naturalWidth * 0.450, sh = im.naturalHeight * 0.460;
+  const W = 420, H = Math.round(W * sh / sw);
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  x.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
+  x.globalCompositeOperation = 'destination-out';
+  const fade = (x0, y0, x1, y1) => {
+    const g = x.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+  };
+  fade(0, 0, W * 0.13, 0);
+  fade(W, 0, W - W * 0.10, 0);
+  fade(0, 0, 0, H * 0.16);
+  fade(0, H, 0, H - H * 0.10);
+  fade(0, 0, W * 0.34, H * 0.44);   // the wall triangle over the left surface
+  cv.naturalWidth = W; cv.naturalHeight = H;
+  WORK_TABLE = cv;
+  return cv;
+}
 // the per-zone mapping the §2f wiring note asks for: which fired doorway
 // stands at a depth door in each kingdom. W is absent on purpose — the CITY
 // gate is the procedural monument and gate_city.jpg, the one epic gate.
@@ -6305,7 +6405,14 @@ function drawStatics(P) {
           c.save();
           // a slow breath while it idles, a brighter steadier one while it works
           c.globalAlpha = charging ? 1 : 0.94;
-          c.drawImage(im, mx - W / 2, fy - H, W, H);
+          // THE POD FACES THE PERSON IT BELONGS WITH (owner: "make the pod
+          // facing the NPC instead of the other side"): if the room has an
+          // npc, the cradle opens toward them
+          const npcS = G.statics.find(q => q.type === 'npc');
+          const pfd = npcS && npcS.x + npcS.w / 2 < mx ? -1 : 1;
+          c.save(); c.translate(mx, 0); c.scale(pfd, 1);
+          c.drawImage(im, -W / 2, fy - H, W, H);
+          c.restore();
           if (charging) {
             // it is doing something to her, so it throws light into the room
             c.globalCompositeOperation = 'lighter';
@@ -6527,8 +6634,13 @@ function drawStatics(P) {
       // way everything else in this game turns: by selecting an authored angle
       // off a turntable lit from a fixed point in the world. Drawn out here in
       // world space, before the mirroring transform that it exists to replace.
+      // the woken tinker is AT WORK (owner: "start working on the table") —
+      // in his den he faces his bench on the right, and only turns from it
+      // when she actually talks to him. Every other NPC faces the cat.
+      const atBench = live && npcKey(s) === 'A0B|ratchet' && !talking;
+      const fdir = atBench ? 1 : ((player && player.x + 12 < s.x) ? -1 : 1);
       const sheetDrew = plateDrew || (!(typeof isHero === 'function' && isHero()) &&
-        drawAtlas(c, s.extra, (player && player.x + 12 < s.x) ? -1 : 1,
+        drawAtlas(c, s.extra, fdir,
                   s.x + s.w / 2, s.y + s.h + bob2 * 0.4, s.h, {
           t: performance.now() / 1000 + (s.t || 0) * 1.7,
           // the Oracle hangs from its cables and has no feet to stand on
@@ -6536,7 +6648,7 @@ function drawStatics(P) {
           grounded: s.extra !== 'mono',
         }));
       c.save(); c.translate(s.x + s.w / 2, s.y + s.h + bob2 * 0.4);
-      if (player && player.x + 12 < s.x) c.scale(-1, 1);  // face the cat
+      if (fdir < 0) c.scale(-1, 1);  // face the cat (or the bench — see fdir)
       if (talking) {
         const tp = 0.5 + Math.sin(performance.now() / 140) * 0.5;
         c.save(); c.scale(player && player.x + 12 < s.x ? -1 : 1, 1);
@@ -6595,6 +6707,26 @@ function drawStatics(P) {
           ftxt('⚡', px, py + 5, 15, '#2a1b06');
         }
       }
+    }
+  }
+  // THE WORK TABLE (owner: "the table behind it, even though it's part of the
+  // image, you should create an object in the same shape, the same size, put
+  // it in front of it as an extension — this is where the NPC will start
+  // working on the sword, from the crystal"). The object IS the painting's
+  // own bench: the lamplit workbench region of denInterior, cropped and stood
+  // on the den floor at Ratchet's right hand — same shape and size by
+  // construction, drawn after the statics so it stands in front of him. The
+  // forging of the crystal happens here. A dedicated fired object plate is
+  // §2r on THE FIRING LIST; this crop is its stand-in and its reference.
+  if (G.roomId === 'A0B' && typeof workTablePlate === 'function') {
+    const tIm = workTablePlate();
+    if (tIm) {
+      const TH = 150, TW = TH * (tIm.naturalWidth / tIm.naturalHeight);
+      const tx = 18.6 * TILE, tb = (G.roomDef.h - 1) * TILE + 6;
+      // shadow first: the feathered legs let it show through, which is what
+      // roots the bench on the den floor instead of floating over it
+      if (typeof contactShadow === 'function') contactShadow(c, tx + TW * 0.5, tb, TW * 0.36, 0.5);
+      c.drawImage(tIm, tx, tb - TH, TW, TH);
     }
   }
   // interact hint
@@ -7440,6 +7572,16 @@ function drawLights(P) {
       if (s.type !== 'npc' || !npcLive(s)) continue;
       lightAt(s.x + s.w / 2, s.y + s.h / 2, 52, '#57a8ff', 0.12 * pu);
       G._auraCount++;
+    }
+    // the den's work lamp: once Ratchet is awake and at his bench, the pool
+    // under the painting's hanging lamp becomes a real light, so he works lit
+    // instead of standing in the ambient dark like a second powered-down body
+    if (G.roomId === 'A0B') {
+      const rs = G.statics.find(q => q.type === 'npc');
+      if (rs && npcLive(rs)) {
+        lightAt(19.5 * TILE, (G.roomDef.h - 3) * TILE, 150, '#ffd28a', 0.20);
+        G._auraCount++;
+      }
     }
   }
   for (const p of G.projs) lightAt(p.x, p.y, 62, p.color, 0.4);

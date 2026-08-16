@@ -252,6 +252,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  21. §2o    THE NYMPH'S POD + HOLLOW ×2       ✅ FIRED 2026-08-16 — needs wiring
  22. §2p    THE NEST SNARE ×3                 ✅ FIRED 2026-08-16 — assets/characters/snare/, needs wiring
  23. §2q    BEAST GAIT REPAIR ×8              (wolf+cheetah walk pairs RE-FIRED + run pairs — see §2q, the leg and identity faults are written there)
+ 24. §2r    THE FORGE TABLE ×1                (the den bench as a matted object — crop stand-in wired, fire against it)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -1995,3 +1996,17 @@ room around an implied standing character on the floor line —
 RE-FIRE denInterior against this contract (it replaces the wired plate at
 the same path, assets/backgrounds/den_interior.jpg). The §2h/§2m/§2o
 interior briefs inherit this contract without re-stating it.
+
+### 2r. THE FORGE TABLE ×1 ✱ FIRE ON REBIND (owner's design, 2026-08-16)
+
+The owner's order in the den: the workbench from the denInterior painting
+becomes an OBJECT — same shape, same size — standing in front of Ratchet,
+because "this is where the NPC will start working on the sword, from the
+crystal." The stand-in ships already: the lamplit bench region of the den
+painting (x 0.52-0.92, y 0.42-0.82), cropped and stood on the floor at his
+right hand (js/game.js drawStatics tail). Fire the real object plate
+AGAINST that crop as reference: the same heavy timber bench, same tools and
+spools, matted subject-only on transparency, lit by the same overhead lamp
+warmth, no background wall, no floor, no right angles presenting (the
+timber sags and leans). Key `forgeTable`, and the wiring swap is one line
+where the crop draws today.
