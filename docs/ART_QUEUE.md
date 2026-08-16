@@ -228,8 +228,9 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   7. §2d    robot bat plates ×5          (hang/shiver/dive/flap-up/flap-down)
   8. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   (owner 2026-08-15 — see brief below)
- 10. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
- 11. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
+ 10. §2g    THE TRADER'S BOOTH + DEN ×3       (boothFront / denInterior / ratchetResting)
+ 11. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
+ 12. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
 
 Estimated spend: ~45-55 credits of session B's balance. After each block:
 git pull, run the pipeline (blackkey -> img-crush -> archive -> wire), and
@@ -307,6 +308,29 @@ opening in living rock — asymmetric, weather-worn, roots/moss per zone,
 absolutely no straight jambs, no lintel, no symmetry. The engine's
 procedural fallback (drawCaveMouth in game.js) is the placement reference;
 the plate replaces it at the same anchor.
+
+### 2g. THE TRADER'S BOOTH + DEN ✱ FIRE ON REBIND (owner's design, 2026-08-16)
+
+Ratchet's booth is LIVE in code as a procedural stand-in (drawBooth in
+js/game.js; the den is room A0B in js/world.js) — the owner asked whether
+Higgsfield built it, and the answer is not yet: this session does not hold
+the binding. Three plates replace the stand-in at the same anchors:
+
+1. **boothFront** — a scrap-market kiosk standing on the meadow: leaning
+   tapered posts, a sagging scallop-hemmed canopy, cloth flaps over a warm
+   doorway, a small hung sign with a bolt glyph. Built from the SAME
+   furniture the Scrap Meadows backdrop paints (mimic-the-background rule),
+   nothing plumb or square (NO RIGHT ANGLES). Closed + flaps-parted variant.
+2. **denInterior** — a backdrop painting for A0B: a one-room workshop —
+   crafting bench, hanging tools, coil bundles, shelf clutter, one warm
+   lamp — cosy, low, lived-in. The depth door back out sits at gx 0.12.
+3. **ratchetResting** — a pose plate of Ratchet POWERED DOWN in his chair
+   by the bench, slumped, dark, the small chest crystal barely glowing
+   (his backstory made visible). drawSage-style placement at the A0B npc
+   anchor; the standing plate takes over after the waking.
+
+Estimated 3 fires. After keying: archive sources, wire, photograph,
+node tests/run.cjs tutor battery crystal deadend.
 
 ### 1e. THE RUN PAIR RE-FIRE ✱ FIRE ON REBIND — the owner rejected v1
 
