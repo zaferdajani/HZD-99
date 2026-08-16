@@ -242,9 +242,9 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  11. §3m    BOSS MOTION PLATES (task #93)     ⏸ PREPARED 2026-08-16 — refs shot, recipe written, NOT fired
  12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
- 14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   (oracleBooth / oracleInterior)
- 15. §2i    THE BREAKER ×3                    (rest / fins-flared tell / vented — new zone-B enemy)
- 16. §2j    SERVO'S WINDING HOUSE ×1          (kingdom 1 session, 2026-08-16 — see brief below)
+ 14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   ✅ FIRED 2026-08-16 — needs wiring
+ 15. §2i    THE BREAKER ×3                    ✅ FIRED 2026-08-16 — needs wiring
+ 16. §2j    SERVO'S WINDING HOUSE ×1          ⚠ FIRED ×2, NEITHER KEYABLE — see §2h+2i+2j below
  17. §2k    THE TINKER'S QUENCH HOOD + FORGE ×2 (forgeFront / forgeInterior — kingdom 3)
  18. §2l    THE KILN VENT ×3                  (rest / petals-open tell / spent — new zone-C enemy)
 
@@ -505,6 +505,68 @@ opening in living rock — asymmetric, weather-worn, roots/moss per zone,
 absolutely no straight jambs, no lintel, no symmetry. The engine's
 procedural fallback (drawCaveMouth in game.js) is the placement reference;
 the plate replaces it at the same anchor.
+
+### 2h + 2i + 2j — KINGDOM 2 PLATES, FIRED 2026-08-16 (art session)
+
+**§2h THE ORACLE ✅ both plates shipped** —
+`assets/backgrounds/oracle_booth.png` (matted) and `oracle_interior.jpg`.
+The shrine is leaning pipe-bundle posts with junction housings, a sagging
+swag of dead cable thrown over as a canopy, fibre-optic strands hanging with
+blue-lit tips, parted cable curtains over a doorway glowing cold cathode
+blue, a cracked monitor hung crooked with one sine wave alive on it, one
+magenta indicator. The parlor is leaning monitor stacks, a sagging rack,
+drooping cable swags, one live screen, magenta accent, and floor left clear
+across the middle for the play plane.
+
+**The first oracleBooth came back as a STONE CHAPEL WITH A CROSS ON IT.** The
+verbatim brief opens "a small roadside shrine", and that noun dragged a whole
+building typology in behind it — masonry, columns, a pediment, a crucifix —
+and comfortably outvoted every clause about conduit parts that followed. The
+fix was to lead with the material and refuse the typology outright: "made
+ENTIRELY of salvaged electrical and data-cable parts; it is scrap, not
+architecture; no stone, no masonry, no columns, no religious building of any
+kind." **A noun that names a building type is a style token with a floor plan
+attached** — watch for it in any brief that says shrine, temple, altar, tomb.
+
+**§2i THE BREAKER ✅ all three shipped**, `assets/characters/breaker/`.
+Three genuinely different silhouettes, which is the whole job for a machine
+whose purpose is teaching a timing lesson: `rest` low and shut with the three
+ceramic fins folded flat along its back, `tell` risen with the fins upright
+and spread, `vented` slumped off-level with a side panel fallen open on its
+hinge showing hot amber slots inside. No legs and no barrel, so it never
+reads as the turret.
+
+It got there by accident and the accident is worth keeping: the plate fired
+for `rest` came back with its fins standing up, which is not rest — it is the
+tell. Rather than re-roll it, it was kept AS the tell and the other two were
+fired against it as reference. One wrong plate became the anchor the set
+needed, which is the §2d rule arriving early for once.
+
+**§2j SERVO'S WINDING HOUSE ⚠ FIRED TWICE, NEITHER KEYABLE, NOT SHIPPED.**
+Both plates are archived —
+`assets/source/kingdom2/winchHouse_asfired.jpg` and `winchHouse_v2_asfired.jpg`
+— and the second is the better winch: spoked wheel, drum wound with cable,
+scalloped canvas awning, lantern, spare coil, crooked stool, teal-and-gunmetal
+poles.
+
+What stops it is the CUT-OUT. The first came back on a pale studio field with
+the canvas nearly white — the white-on-white case the §1 warnings say to
+re-fire rather than key. The re-fire used the corrected void phrasing this
+session leaned on everywhere else, naming each offence (no floor, no ground,
+no grass, no backdrop, no gradient, no vignette, no visible lamps) — and came
+back on a lit warm floor with a cast shadow ANYWAY. `remove_background`
+refused both jobs, four calls, the same server error each time, while
+accepting every other subject fired today.
+
+**A hypothesis for the third attempt, instead of a third identical one.**
+This is the only subject in the session that is a large structure STANDING ON
+LEGS, and legs imply ground: a four-legged frame appears to pull a floor in
+behind it the same way "shrine" pulled in a chapel, because the model
+resolves what the thing is standing on. Say what the legs DO rather than only
+forbidding the floor — suspended, hanging in darkness, feet ending in
+nothing, seen from slightly below. And fire it to be BLACK-KEYED rather than
+matted, since the matte service is declining this one subject: field
+genuinely at value zero, canvas kept dark grey-brown rather than pale.
 
 ### ⚠ tests/hero.cjs's two-arm check is SITTING ON ITS THRESHOLD (noticed 2026-08-16)
 
