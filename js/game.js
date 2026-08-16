@@ -6774,15 +6774,25 @@ function drawStatics(P) {
   // construction, drawn after the statics so it stands in front of him. The
   // forging of the crystal happens here. A dedicated fired object plate is
   // §2r on THE FIRING LIST; this crop is its stand-in and its reference.
-  if (G.roomId === 'A0B' && typeof workTablePlate === 'function') {
-    const tIm = workTablePlate();
-    if (tIm) {
-      const TH = 150, TW = TH * (tIm.naturalWidth / tIm.naturalHeight);
-      const tx = 18.6 * TILE, tb = (G.roomDef.h - 1) * TILE + 6;
-      // shadow first: the feathered legs let it show through, which is what
-      // roots the bench on the den floor instead of floating over it
-      if (typeof contactShadow === 'function') contactShadow(c, tx + TW * 0.5, tb, TW * 0.36, 0.5);
-      c.drawImage(tIm, tx, tb - TH, TW, TH);
+  if (G.roomId === 'A0B') {
+    const tb = (G.roomDef.h - 1) * TILE + 6;
+    // §2r FIRED: the real forge-table plate stands in the moment it decodes;
+    // the painting-crop stand-in below keeps the room whole until then.
+    if (typeof mediaFetch === 'function') mediaFetch('forgeTable');
+    const fIm = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.forgeTable;
+    if (fIm && fIm.naturalWidth && typeof drawPlateAnchored === 'function') {
+      if (typeof contactShadow === 'function') contactShadow(c, 22.6 * TILE, tb, 95, 0.5);
+      drawPlateAnchored(c, 'forgeTable', 22.6 * TILE, tb, 150, false);
+    } else if (typeof workTablePlate === 'function') {
+      const tIm = workTablePlate();
+      if (tIm) {
+        const TH = 150, TW = TH * (tIm.naturalWidth / tIm.naturalHeight);
+        const tx = 18.6 * TILE;
+        // shadow first: the feathered legs let it show through, which is what
+        // roots the bench on the den floor instead of floating over it
+        if (typeof contactShadow === 'function') contactShadow(c, tx + TW * 0.5, tb, TW * 0.36, 0.5);
+        c.drawImage(tIm, tx, tb - TH, TW, TH);
+      }
     }
   }
   // interact hint

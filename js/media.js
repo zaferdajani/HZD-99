@@ -61,6 +61,11 @@ const MEDIA_SRC = {
     wolfWalkB: 'assets/characters/beasts/wolf_walkb.png',
     wolfCoil: 'assets/characters/beasts/wolf_coil.png',
     wolfLunge: 'assets/characters/beasts/wolf_lunge.png',
+    // ...and the RUN pair (§2q FINAL BATCH): reach — all four legs at full
+    // extension, back hollowed — and gather, all four paws folded under the
+    // belly, back arched. Fired against the repaired walk pair.
+    wolfRunA: 'assets/characters/beasts/wolf_runa.png',
+    wolfRunB: 'assets/characters/beasts/wolf_runb.png',
     // NINE PLATES FOR THE ALPHA, one per state, because it has five skills and
     // two of them have their own recovery. A boss with five moves sharing two
     // drawings is a boss with two moves as far as the player's eye is concerned.
@@ -254,6 +259,34 @@ const MEDIA_SRC = {
     cheetahWalkB: 'assets/characters/beasts/cheetah_walkb.png',
     cheetahWarn: 'assets/characters/beasts/cheetah_warn.png',
     cheetahRun: 'assets/characters/beasts/cheetah_run.png',
+    // the RUN pair (§2q FINAL BATCH) — and the cheetah kept its tan-and-gold
+    // identity this time, which was the whole point of the re-fire.
+    cheetahRunA: 'assets/characters/beasts/cheetah_runa.png',
+    cheetahRunB: 'assets/characters/beasts/cheetah_runb.png',
+    // GUARDIAN MOTION PLATES (§3m / task #93). Full-body poses fired against
+    // each rig's canon: the rigs are parts atlases, so folding these into the
+    // fights is #93's overhaul — the keys are registered here so the plates
+    // preload, soft-key and measure like everything else the moment that
+    // wiring lands. glide = level, wings wide, talons tucked; strike = reared
+    // upright, talons swung forward; stalk = all four legs mid-stride, glow
+    // low; coil = crouched flat, every shard flared, glow risen to magenta.
+    talonhostGlide: 'assets/characters/guardians/talonhost_glide.png',
+    talonhostStrike: 'assets/characters/guardians/talonhost_strike.png',
+    prismStalk: 'assets/characters/guardians/prism_stalk.png',
+    prismCoil: 'assets/characters/guardians/prism_coil.png',
+    glaciereTravel: 'assets/characters/guardians/glaciere_travel.png',
+    glaciereCoil: 'assets/characters/guardians/glaciere_coil.png',
+    choirDrift: 'assets/characters/guardians/choir_drift.png',
+    choirClench: 'assets/characters/guardians/choir_clench.png',
+    // THE FORGE TABLE (§2r, fired and matted): the real object plate for
+    // Ratchet's workbench — it replaces the painting-crop stand-in the frame
+    // it decodes (see the A0B block at the drawStatics tail).
+    forgeTable: 'assets/backgrounds/forge_table.png',
+    // THE MIND NODE OBELISK (FINAL BATCH): a monument several times her
+    // height, machine glyphs blazing cyan. Registered so it preloads; it
+    // draws nothing until the node moves out of the NPC's room — that
+    // placement is the kingdom session's call, per the firing note.
+    mindnodeObelisk: 'assets/backgrounds/mindnode_obelisk.png',
     // THE LAIRS. One authored prop per guardian, keyed off its generation
     // plate's black field by tools/blackkey.cjs, so each has real alpha and
     // occludes the room properly. Lazy like everything else: a lair is only
