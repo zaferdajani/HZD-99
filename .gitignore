@@ -12,3 +12,4 @@ ios/App/Pods/
 .claude/worktrees/
 .claude/agents-run/
 build/
+reference/movement/
