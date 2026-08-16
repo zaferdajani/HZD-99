@@ -91,6 +91,28 @@ window.compose = async (cells, CW, CH, scale) => {
     x.drawImage(im, cell.x0, cell.y0, cell.x1 - cell.x0 + 1, cell.y1 - cell.y0 + 1,
                 dx, dy, bw, bh);
   }
+  // SCRUB THE STUDIO POOL. Generation renders some grounded poses standing on
+  // a soft white ground glow, and it survives keying because it is bright and
+  // near-opaque — then it ships as a lamp under her feet in every dark room
+  // (the owner reported it three times before it was traced HERE). The pool is
+  // whitish, lives in the bottom rows, and has no body above it; her feet are
+  // whitish too but always continue upward into legs. So: bottom 18 rows,
+  // whitish, and nothing opaque 16-26 rows above -> not her, gone.
+  {
+    const img = x.getImageData(0, 0, c.width, c.height), d = img.data;
+    const W = c.width;
+    for (let y = c.height - 18; y < c.height; y++) {
+      for (let px = 0; px < W; px++) {
+        const i = (y * W + px) * 4;
+        if (!(d[i+3] > 8 && d[i] > 165 && d[i+1] > 160 && d[i+2] > 150)) continue;
+        let leg = false;
+        for (let yy = y - 26; yy <= y - 16; yy++)
+          if (d[(yy * W + px) * 4 + 3] > 100) { leg = true; break; }
+        if (!leg) d[i+3] = 0;
+      }
+    }
+    x.putImageData(img, 0, 0);
+  }
   return c.toDataURL('image/png');
 };
 `;

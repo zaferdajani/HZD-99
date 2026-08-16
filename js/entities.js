@@ -1673,19 +1673,26 @@ class Player {
     const blink = M.sq > 0.6 && ((t * 0.47) % 3.1) < 0.10 ? 0.12 : 1;
     const pulse = M.pu ? 1 + Math.sin(t * M.pu) * 0.16 : 1;
     const px = (nx) => -dw / 2 + nx * dw, py = (ny) => dy + ny * dh;
-    const ew = E.ew * dw, eh = E.eh * dh;
+    // ew/eh are the eye's MEASURED FULL SIZE in the baked art; the ellipse
+    // calls below take RADII. Passing them straight through drew every eye at
+    // double the plate's size — two huge lights swallowing the visor mask the
+    // owner approved on the model ('the eyes and the mask is different, and I
+    // don't like it in the game'). Halved, the repaint sits exactly where the
+    // baked eye is, the dark visor band around it stays visible, and the
+    // blink/mood machinery keeps working at the correct scale.
+    const ew = E.ew * dw * 0.5, eh = E.eh * dh * 0.5;
     c.save();
     for (const side of [-1, 1]) {
       const ex = px(side < 0 ? E.lx : E.rx), ey = py(side < 0 ? E.ly : E.ry);
       // 1. COVER the baked light with the visor's own dark. Soft-edged, because
       //    a hard patch on a rendered face reads as a sticker — the same lesson
       //    media.js learned about cutting the guardians out.
-      const g = c.createRadialGradient(ex, ey, 0, ex, ey, Math.max(ew, eh) * 1.5);
+      const g = c.createRadialGradient(ex, ey, 0, ex, ey, Math.max(ew, eh) * 1.3);
       g.addColorStop(0, 'rgba(14,19,26,1)');
       g.addColorStop(0.62, 'rgba(14,19,26,0.96)');
       g.addColorStop(1, 'rgba(14,19,26,0)');
       c.fillStyle = g;
-      c.beginPath(); c.ellipse(ex, ey, ew * 1.6, eh * 1.5, 0, 0, 7); c.fill();
+      c.beginPath(); c.ellipse(ex, ey, ew * 1.25, eh * 1.2, 0, 0, 7); c.fill();
       // 2. DRAW the light she is actually wearing.
       c.save();
       c.translate(ex, ey);
@@ -1696,7 +1703,7 @@ class Player {
       const lit = 0.55 + 0.45 * Math.min(1.4, M.gl * pulse);
       c.globalCompositeOperation = 'lighter';
       c.fillStyle = 'rgba(' + Math.round(90 * lit) + ',' + Math.round(255 * lit) + ',' + Math.round(232 * lit) + ',1)';
-      c.shadowColor = '#37ffd0'; c.shadowBlur = 6 * M.gl * pulse;
+      c.shadowColor = '#37ffd0'; c.shadowBlur = 3 * M.gl * pulse;
       c.beginPath(); c.ellipse(0, 0, Math.max(0.6, rw), Math.max(0.35, rh), 0, 0, 7); c.fill();
       // a white-hot core, because a light with no hotter centre reads as paint
       c.fillStyle = 'rgba(235,255,250,' + (0.55 * lit).toFixed(2) + ')';
