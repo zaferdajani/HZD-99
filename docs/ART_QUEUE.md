@@ -233,12 +233,12 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   2. §1b-ii regrips ×2 + thrown blade ×1 (thrown = BODY LENGTH — owner ruling)
   3. §1c    back-jet gear ×3             (idle / mid-boost / full burn)
   4. §1d    THE FORGING CINEMATIC ×1     (cartoonish; Ratchet's chest crystal visible)
-  5. §1e    RUN PAIR RE-FIRE ×2          (run_a / run_b — see brief below; owner rejected v1)
+  5. §1e    RUN PAIR RE-FIRE ×2          ✅ FIRED 2026-08-16 — cells in, code revert pending
   6. §2e    sage plates ×6               (stand/coil/lunge/gather/kneel-lock/purified)
   7. §2d    robot bat plates ×5          (hang/shiver/dive/flap-up/flap-down)
   8. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   (owner 2026-08-15 — see brief below)
- 10. §2g    THE TRADER'S BOOTH + DEN ×3       (boothFront / denInterior / ratchetResting)
+ 10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ FIRED 2026-08-16 — ratchetResting needs its media.js entry
  11. §3m    BOSS MOTION PLATES (task #93)     (walk pair + attack-anticipation per guardian)
  12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
@@ -553,7 +553,46 @@ After keying: archive the source, wire as a media.js entry drawn at the
 ROOM_PROPS A1 anchor with `drawWinchHouse` kept as the loading fallback,
 photograph, then node tests/run.cjs boot deadend platform.
 
-### 1e. THE RUN PAIR RE-FIRE ✱ FIRE ON REBIND — the owner rejected v1
+### 1e. THE RUN PAIR RE-FIRE ✅ FIRED AND SHIPPED 2026-08-16 (art session)
+
+**Done.** Jobs e53d354e (run_a) and f997ec67 (run_b). She hurries upright now —
+torso vertical, head level, one leg reaching and one pushing off, cape
+trailing — instead of lunging along the floor like a cat, which is what the
+owner rejected. Both cells are in `assets/characters/hero/states.png` at cells
+3 and 4, sources archived to `assets/source/hero/run_a.jpg` / `run_b.jpg`,
+eye anchors re-measured and updated, `tests/run.cjs hero artbible` green.
+
+**STILL PARKED IN CODE.** `heroState()` in js/entities.js is still substituting
+the walk pair at 13 fps for the run — the two-line revert is the code session's
+and the new cells do not reach the screen until it lands.
+
+Three things this fire taught, all of them about COMPOSITION rather than pose:
+
+1. **A strip reference makes a strip.** The first pair was fired with three
+   cells of her own sheet attached as reference, to pin camera and scale. It
+   pinned those perfectly and then also copied the LAYOUT: both results came
+   back as three-panel strips with the figure cut by the panel borders. The
+   fix is to say the composition out loud and first — "ONE SINGLE FIGURE,
+   alone, centred, entire body inside the frame, not a sheet, not a strip, not
+   split into panels" — before any word about the character.
+2. **Even then it may hand you two.** The second run_b came back as two
+   figures side by side. That is recoverable and worth recovering: they share
+   one camera, one light and one scale, so splitting them yields a genuinely
+   matched pair. `tools/herocell.cjs` and the split are in this commit's
+   scratch work; the two shipped cells are one from each fire.
+3. **The strides must actually differ.** The two figures in a single plate
+   looked like a pair and were nearly the same stride — §3.3 would have called
+   that one drawing twice. The shipped pair is one figure from each fire, with
+   opposite legs forward.
+
+Wiring, for whoever does it: `node tools/herocell.cjs <sheet> <out>
+run_a=<a>,ground run_b=<b>,air` replaces cells in place without rebuilding the
+sheet — which matters, because `herostates.cjs` re-derives the global scale
+from whatever directory it is given and would move the other twenty cells.
+
+---
+
+### 1e (original brief, kept for the record) — the owner rejected v1
 
 The fired `run_a`/`run_b` cells came back as a LOW FELINE LUNGE — body
 horizontal, paws forward like a sprinting cat. The owner's exact words
