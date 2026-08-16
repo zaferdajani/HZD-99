@@ -3163,7 +3163,15 @@ function drawZoneVista(P, zone, px, py) {
   const sc = Math.max((540 / CH) * 1.12, (960 / CW) * 1.16);
   const dw = CW * sc, dh = CH * sc;
   const roomW = G.roomDef.w * TILE;
-  const fx = roomW > 980 ? clamp(px / (roomW - 960), 0, 1) : 0.5;
+  // THE PAINTING FOLLOWS HER, NOT THE CAMERA (owner: "it stays still, and it
+  // moves when the character passes the middle... instead of smoothly
+  // following"). The camera clamps at the room edges and cannot move at all
+  // in a one-screen room, so a vista panned by the camera holds still and
+  // then lurches. Panned by her PROGRESS through the room instead, the
+  // backdrop drifts continuously from the first step to the last, in every
+  // room, at every width.
+  const pcx = (typeof player !== 'undefined' && player) ? player.x + player.w / 2 : px + 480;
+  const fx = clamp(pcx / Math.max(1, roomW), 0, 1);
   // ---- DEPTH. One painting, drawn twice, at two different distances. ----
   // A single plate panned as one plane is a backdrop: everything in it, the
   // far skyline and the wreck ten metres away, slides at exactly one rate,
@@ -3430,6 +3438,19 @@ function drawMachineBG(P, px, py, horizon) {
 }
 function drawBG(P, px, py) {
   py = py || 0;
+  // THE BACKDROP NEVER HOLDS STILL WHILE SHE WALKS. The camera clamps at the
+  // room edges — and in a one-screen room it cannot move at all — so every
+  // parallax layer fed by the camera freezes exactly when she is nearest a
+  // wall, then lurches when the camera unpins. Half of the travel the camera
+  // refuses is handed to the background instead: mid-room in a wide room the
+  // drift is zero (the camera is doing the work), and at the pinned ranges
+  // the layers keep drifting with her at parallax fractions of half speed —
+  // the slight, continuous follow the owner asked for.
+  if (typeof player !== 'undefined' && player && G.roomDef) {
+    const span = Math.max(0, G.roomDef.w * TILE - 960);
+    const ideal = player.x + player.w / 2 - 480;
+    px += (ideal - clamp(ideal, 0, span)) * 0.5;
+  }
   const horiz0 = 285 - (py || 0) * 0.18;
   // each world gets its own story-built scenery
   if (typeof isHero === 'function' && isHero()) { drawGreekBG(P, px, py, horiz0); return; }

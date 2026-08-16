@@ -2037,7 +2037,12 @@ class Player {
     c.scale(sx, sy * (1 - cr));
     // evolution: the frame grows with each power milestone (visual only — hitbox unchanged)
     const evo = typeof evoTier === 'function' ? evoTier() : 0;
-    c.scale(1 + evo * 0.07, 1 + evo * 0.07);
+    // ...on top of a base presence scale (owner, from his phone: "my hero is
+    // so small... increase by twenty to thirty percent"). Visual only, feet
+    // anchored at the origin, hitbox untouched — the same contract as the
+    // evolution growth, so she is easier to hit exactly never.
+    const VIS = 1.25;
+    c.scale(VIS * (1 + evo * 0.07), VIS * (1 + evo * 0.07));
     const hero = typeof isHero === 'function' && isHero();
     const spdK = Math.min(1, Math.abs(this.vx) / 360);
     if (evo >= 3) {
@@ -5236,6 +5241,17 @@ class Enemy {
         const vented = (this.windedT || 0) > 0;
         const k2 = tell ? 1 - clamp(this.crouchT / TELL_SWIPE, 0, 1) : 0;
         const hum = Math.sin(this.anim * (tell ? 26 : 7)) * (tell ? 1.2 : 0.4);
+        // THE AUTHORED BREAKER (§2i): three plates on the reads the fallback
+        // teaches — latched flat, fins flared, vents fallen open. The engine
+        // drum below stays the stand-in while a plate is in flight.
+        {
+          const bp = vented ? 'breakerVented' : tell ? 'breakerTell' : 'breakerRest';
+          c.save(); c.scale(1 / flip, 1);       // symmetric machine, never flips
+          const bDrew = typeof drawPlateAnchored === 'function' &&
+            drawPlateAnchored(c, bp, 0, this.h / 2, this.h * (tell ? 1.35 : 1.1), false);
+          c.restore();
+          if (bDrew) break;
+        }
         // symmetric machine: undo the flip so it never appears to jump sides
         c.save(); c.scale(1 / flip, 1);
         // cable stubs arcing into the rail on both sides — it is PLUMBED in

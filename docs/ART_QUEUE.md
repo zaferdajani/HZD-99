@@ -242,8 +242,8 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  11. §3m    BOSS MOTION PLATES (task #93)     ⏸ PREPARED 2026-08-16 — refs shot, recipe written, NOT fired
  12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
- 14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   ✅ FIRED 2026-08-16 — needs wiring
- 15. §2i    THE BREAKER ×3                    ✅ FIRED 2026-08-16 — needs wiring
+ 14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   ✅ WIRED 2026-08-16 — shrine plate + parlor vista live (code session)
+ 15. §2i    THE BREAKER ×3                    ✅ WIRED 2026-08-16 — surge is plate-first, three states (code session)
  16. §2j    SERVO'S WINDING HOUSE ×1          ⚠ FIRED ×2, NEITHER KEYABLE — see §2h+2i+2j below
  17. §2k    THE TINKER'S QUENCH HOOD + FORGE ×2 (forgeFront / forgeInterior — kingdom 3)
  18. §2l    THE KILN VENT ×3                  (rest / petals-open tell / spent — new zone-C enemy)

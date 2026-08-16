@@ -140,6 +140,16 @@ const MEDIA_SRC = {
     batDive: 'assets/characters/bat/dive.png',
     batFlapUp: 'assets/characters/bat/flap_up.png',
     batFlapDn: 'assets/characters/bat/flap_dn.png',
+    // THE ORACLE'S SHRINE + PARLOR (§2h) — the cable shrine standing in B3
+    // (drawOracleBooth's hook was live before the plate) and the data-den
+    // backdrop behind it (ROOM_VISTA B3B).
+    oracleBooth: 'assets/backgrounds/oracle_booth.png',
+    oracleInterior: 'assets/backgrounds/oracle_interior.jpg',
+    // THE BREAKER (§2i) — the Conduits' own machine in its three reads:
+    // latched flat, fins flared (the tell), vents fallen open (the spend).
+    breakerRest: 'assets/characters/breaker/rest.png',
+    breakerTell: 'assets/characters/breaker/tell.png',
+    breakerVented: 'assets/characters/breaker/vented.png',
     // THE TRADER'S BOOTH AND DEN (§2g) — fired 2026-08-16, owner-approved.
     // ratchetResting is the art session's v2 — fired from his own npc_6yaw
     // row as reference, matted by Higgsfield rather than keyed (his shadowed
