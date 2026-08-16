@@ -5853,6 +5853,23 @@ function drawSage(c, e) {
     c.shadowBlur = 0;
     c.restore();
   }
+  // THE AUTHORED SAGE (§2e): six plates indexed by the same state the whole
+  // fight reads — amber on exactly the three telegraph states, ember gone and
+  // crystal blue on pure. The procedural monk below stays as the fallback
+  // while a plate is in flight, which is the house arrangement everywhere.
+  const sagePlate = e.tame ? 'sagePure'
+    : e.locked ? 'sageLock'
+    : e.gatherT > 0 ? 'sageGather'
+    : e.coilT > 0 ? 'sageCoil'
+    : e.lungeT > 0 ? 'sageLunge' : 'sageStand';
+  // per-state height: the silhouettes are genuinely different shapes, so each
+  // maps its own opaque-box height to the body rather than one shared number
+  const sageH = { sagePure: 0.72, sageLock: 0.66, sageLunge: 0.62 }[sagePlate] || 1.12;
+  const sageFlip = !!(typeof player !== 'undefined' && player && player.x + player.w / 2 < cx);
+  if (typeof drawPlateAnchored === 'function' &&
+      drawPlateAnchored(c, sagePlate, cx, base + bob, e.h * sageH, sageFlip)) {
+    // the plate carries the body; the ring, purity bar and halo still ride it
+  } else {
   c.save();
   c.translate(cx, base + bob);
   const lean = kneel ? 0 : clamp(e.vx / 260, -1, 1) * 0.12;
@@ -5909,6 +5926,7 @@ function drawSage(c, e) {
   for (const s of [-1, 1]) { c.beginPath(); c.arc(s * 2.6, -H2 + 8, 1.4, 0, 7); c.fill(); }
   c.globalAlpha = 1; c.shadowBlur = 0;
   c.restore();
+  }
   // the ember ring HUGS THE GROUND — it hurts her feet, so it is drawn at
   // her feet: a squashed ellipse crawling outward, not a hoop in the air
   // (the first render read as a giant circle over the whole room)
@@ -5943,6 +5961,18 @@ function drawBat(c, e) {
   const hang = !!e.hang;
   const shiver = hang && e.holdT > 0 ? Math.sin(performance.now() / 24) * 1.6 : 0;
   const flap = Math.sin(e.anim * 18) * (e.diveT > 0 ? 0.9 : 0.6);
+  // THE AUTHORED BAT (§2d): five plates on the same reads the fallback uses.
+  // hang is the only one with its optic dark; shiver rattles amber out of the
+  // seams; flap_up/flap_dn alternate on the stride counter; dive is the
+  // swept-back arrowhead. Hanging plates are authored head-down, so they
+  // anchor from the ceiling by their opaque top; fliers centre on the body.
+  const batPlate = hang ? (e.holdT > 0 ? 'batShiver' : 'batHang')
+    : e.diveT > 0 ? 'batDive'
+    : (Math.sin(e.anim * 18) > 0 ? 'batFlapUp' : 'batFlapDn');
+  const batH = e.h * (hang ? 1.3 : batPlate === 'batDive' ? 1.15 : 1.75);
+  const batBase = hang ? e.y + batH : cy + batH / 2;
+  if (typeof drawPlateAnchored === 'function' &&
+      drawPlateAnchored(c, batPlate, cx + shiver, batBase, batH, !hang && e.vx < 0)) return;
   c.save();
   c.translate(cx + shiver, cy);
   if (hang) c.scale(1, -1);                    // head down, feet in the rock

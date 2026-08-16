@@ -2630,7 +2630,11 @@ function strataTex(zone) {
 // A hard timeout and an error path guarantee this can never trap the player.
 // ===========================================================================
 const PURIFY_VID = {
-  gift: 'assets/video/sword_gift.mp4',      // THE FORGING   - task #79's film
+  // THE FORGING — §1d's film: Ratchet at his anvil, the shard, the chest
+  // crystal, ending on the same white flare the grant flashes. It supersedes
+  // sword_gift.mp4 (the tight handover close-up), which stays on disk as good
+  // work but is no longer the moment the quest pays off on.
+  gift: 'assets/video/sword_forge.mp4',
   glitch: 'assets/video/purify_glitch.mp4', // NULLFANG      - the lion
   brood: 'assets/video/purify_brood.mp4',   // TALONHOST     - the eagle
   zero: 'assets/video/purify_zero.mp4',     // GLACIERE      - the unicorn
@@ -2745,9 +2749,13 @@ function purifyPreload(kind) {
   // Ordered rather than switched: the browser walks the <source> list and takes
   // the FIRST one it can decode, so putting the light copy in front costs a
   // device that cannot play it nothing at all.
-  if (videoLight()) add(PURIFY_LIGHT[kind], 'video/mp4');
+  // the manifests are keyed by file basename (sword_forge, purify_glitch…),
+  // not by the cut's kind (gift, glitch…) — looking up by kind alone made the
+  // light and webm tiers silently never attach
+  const vb = (s.split('/').pop() || '').replace(/\.\w+$/, '');
+  if (videoLight()) add(PURIFY_LIGHT[kind] || PURIFY_LIGHT[vb], 'video/mp4');
   add(s, /\.webm$/i.test(s) ? 'video/webm' : 'video/mp4');
-  add(PURIFY_ALT[kind], 'video/webm');
+  add(PURIFY_ALT[kind] || PURIFY_ALT[vb], 'video/webm');
   try { v.load(); } catch (e) {}
   purifyPre[kind] = v;
   if (VID_GESTURE) purifyPrime(v);
@@ -4680,8 +4688,11 @@ const GATE_ROOM = {
   // the trader's booth on the waking floor, and the way back out of it
   A0:  { at: 0.765, to: 'A0B', ax: 0.12, style: 'booth' },
   A0B: { at: 0.12,  to: 'A0',  ax: 0.765, style: 'booth' },
-  A5:  { at: 0.64, to: 'CV1', gx: 0.50,  gy: 0.86, ax: 0.10 },
-  CV1: { at: 0.10, to: 'A5',  gx: 0.50,  gy: 0.86, ax: 0.64 },
+  // 0.68 is measured off the fired plate (§2c): the painted opening's centre
+  // sits at gx 0.68, and aiming the walk at the old 0.64 sent her into rock
+  // a shoulder's width left of the hole
+  A5:  { at: 0.72, to: 'CV1', gx: 0.68,  gy: 0.62, ax: 0.10 },
+  CV1: { at: 0.10, to: 'A5',  gx: 0.516, gy: 0.563, ax: 0.72 },
   // the Oracle's parlor off B3 — the booth pattern again, but its OWN style:
   // Ratchet's fired kiosk plate must never stand in the Conduits, so the
   // Oracle's shrine draws its own stand-in (drawOracleBooth) until its plate
@@ -4745,7 +4756,67 @@ function gateTarget(G2) {
 // RIGHT ANGLES rule). The "doors opening" read becomes the inner glow
 // swelling as she approaches and walks in. Authored mouth plates (ART_QUEUE
 // §2f) will replace this at the same anchor.
+// A FIRED SCENE PLATE, STOOD IN THE ROOM. The §2f gates and cave mouths are
+// full-frame paintings, and a full-frame painting drawn as a rectangle is a
+// photograph laid on the scene — the exact fault the vista rework fixed. So
+// each plate is masked once into a cached canvas: edges feathered away on all
+// four sides, harder at the sides and the sky, a whisper at the ground line
+// where it has to sit on the floor. What draws is a standing formation, not a
+// card. Cached at most 1100px wide — the draw is ~300 world-px tall, so full
+// 2K residency would buy nothing but memory.
+const SCENE_PLATE = {};
+function scenePlate(key) {
+  if (SCENE_PLATE[key]) return SCENE_PLATE[key];
+  if (typeof mediaFetch === 'function') mediaFetch(key);
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[key];
+  if (!im || !im.naturalWidth) return null;
+  const scl = Math.min(1, 1100 / im.naturalWidth);
+  const W = Math.round(im.naturalWidth * scl), H = Math.round(im.naturalHeight * scl);
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  x.drawImage(im, 0, 0, W, H);
+  x.globalCompositeOperation = 'destination-out';
+  const fade = (x0, y0, x1, y1) => {
+    const g = x.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+  };
+  fade(0, 0, W * 0.16, 0);
+  fade(W, 0, W - W * 0.16, 0);
+  fade(0, 0, 0, H * 0.20);
+  fade(0, H, 0, H - H * 0.06);
+  cv.naturalWidth = W; cv.naturalHeight = H;
+  SCENE_PLATE[key] = cv;
+  return cv;
+}
+// the per-zone mapping the §2f wiring note asks for: which fired doorway
+// stands at a depth door in each kingdom. W is absent on purpose — the CITY
+// gate is the procedural monument and gate_city.jpg, the one epic gate.
+const GATE_PLATE_BY_ZONE = { B: 'gateConduits', C: 'gateFoundry', D: 'gateArchives', E: 'gateNest', X: 'gateDeep' };
+// ...and which rock family a cave mouth wears. X borrows E's — the Deep's
+// pale-flesh-and-violet material IS its family.
+const MOUTH_PLATE_BY_ZONE = { A: 'caveMouthA', B: 'caveMouthB', C: 'caveMouthC', D: 'caveMouthD', E: 'caveMouthE', X: 'caveMouthE' };
 function drawCaveMouth(cx2, gy, P, k) {
+  // THE FIRED MOUTH (§2f): one material family per grotto network, standing
+  // on the floor at the same anchor. The seeded procedural mouth below stays
+  // the fallback while the plate is in flight.
+  const mplate = MOUTH_PLATE_BY_ZONE[G.roomDef && G.roomDef.zone];
+  const mim = mplate && scenePlate(mplate);
+  if (mim) {
+    const MH2 = 292, MW2 = MH2 * (mim.naturalWidth / mim.naturalHeight);
+    c.save();
+    c.drawImage(mim, cx2 - MW2 / 2, gy - MH2, MW2, MH2);
+    // the dark inside breathes, and deepens as she walks in — the plate is a
+    // still, and the swallow is what makes it a passage
+    const br = 0.35 + Math.sin(performance.now() / 900) * 0.05 + k * 0.45;
+    const th = c.createRadialGradient(cx2, gy - MH2 * 0.34, 8, cx2, gy - MH2 * 0.34, MH2 * 0.52);
+    th.addColorStop(0, 'rgba(0,0,0,' + Math.min(0.92, br) + ')');
+    th.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = th;
+    c.fillRect(cx2 - MW2 / 2, gy - MH2, MW2, MH2);
+    c.restore();
+    return;
+  }
   let h = 2166136261 >>> 0;
   for (const ch of G.roomId) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
   const rnd2 = () => ((h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0) % 1000) / 1000;
@@ -5252,6 +5323,29 @@ function drawGateDoors(P) {
   // ...and the Tinker's quench hood is HIS — the Foundry's own furniture,
   // the Foundry's own light
   if (def.style === 'forge') { drawTinkerForge(ds, gy, P, k); return; }
+  // THE ZONE GATES (§2f): every kingdom's depth door is its own fired
+  // monument — a furnace arch, a parted shelf-stack, a cable iris, a talon
+  // arch, an organic iris — and ONLY the city keeps the colossal multilayer
+  // monument below (owner's order). Until a zone's plate arrives the room
+  // falls through to the monument, which is what it drew yesterday.
+  if (G.roomId !== 'W2') {
+    const gplate = GATE_PLATE_BY_ZONE[G.roomDef && G.roomDef.zone];
+    const gim = gplate && scenePlate(gplate);
+    if (gim) {
+      const GH = 330, GW = GH * (gim.naturalWidth / gim.naturalHeight);
+      c.save();
+      c.drawImage(gim, ds - GW / 2, gy - GH, GW, GH);
+      // the kingdom's own light waking in the opening as she nears
+      c.globalCompositeOperation = 'lighter';
+      const og = c.createRadialGradient(ds, gy - GH * 0.32, 6, ds, gy - GH * 0.32, GH * 0.45);
+      og.addColorStop(0, 'rgba(255,255,255,' + (0.06 + k * 0.22) + ')');
+      og.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = og;
+      c.fillRect(ds - GW / 2, gy - GH, GW, GH);
+      c.restore();
+      return;
+    }
+  }
   const cx2 = ds;
   // THE CITY GATE IS THE MONUMENT (owner: "only the city gate should be
   // huge and epic with multi layers and inscriptions and shapes — it's a
@@ -5955,11 +6049,26 @@ function drawStatics(P) {
       for (let k = 0; k < 3; k++) c.fillRect(s.x + 4, s.y + 4 + k * 5, s.w - 8 - k * 5, 2);
       c.globalAlpha = 1;
     } else if (s.type === 'pillar') {
-      // THE PILLAR — pure crystal, shining at the end of the dark cave. Three
-      // spears of white light out of a rock socle, breathing; the shine IS the
-      // landmark, which is why the cave is dark around it. Drawn procedurally
-      // as additive light (the allowed channel); an authored plate is queued.
+      // THE PILLAR — pure crystal, shining at the end of the dark cave. The
+      // authored plate (§2c): three white spears out of a jagged eroded rock
+      // clump, lit from inside. Until it arrives, the procedural light spears
+      // below draw the same landmark. The breathing halo rides both versions:
+      // the plate is a still, and the pulse is what makes it alive.
       const pu = 0.5 + Math.sin(performance.now() / 700 + s.t) * 0.5;
+      if (typeof drawPlateAnchored === 'function' &&
+          drawPlateAnchored(c, 'pillarPlate', s.x + s.w / 2, s.y + s.h, s.h * 1.18, false)) {
+        c.save(); c.globalCompositeOperation = 'lighter';
+        const hg = c.createRadialGradient(s.x + s.w / 2, s.y + s.h * 0.45, 6,
+                                          s.x + s.w / 2, s.y + s.h * 0.45, s.h * 0.9);
+        hg.addColorStop(0, 'rgba(220,240,255,' + (0.16 + pu * 0.12) + ')');
+        hg.addColorStop(1, 'rgba(220,240,255,0)');
+        c.fillStyle = hg;
+        c.fillRect(s.x - s.h, s.y - s.h * 0.4, s.w + s.h * 2, s.h * 1.6);
+        c.restore();
+        if (chance(0.12)) addPart(s.x + rnd(0, s.w), s.y + rnd(0, s.h * 0.7),
+          rnd(-8, 8), rnd(-26, -6), 0.6, '#dff2ff', 1.7, -30, true);
+        continue;
+      }
       c.fillStyle = '#1a222c';
       c.beginPath();
       c.moveTo(s.x - 6, s.y + s.h); c.lineTo(s.x + 4, s.y + s.h - 14);

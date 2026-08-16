@@ -232,12 +232,12 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   1. §1b-i  slash light-sheets ×4        (slash_h / slash_d / slash_u / slash_dn)
   2. §1b-ii regrips ×2 + thrown blade ×1 (thrown = BODY LENGTH — owner ruling)
   3. §1c    back-jet gear ×3             (idle / mid-boost / full burn)
-  4. §1d    THE FORGING CINEMATIC ×1     ✅ FIRED 2026-08-16 — sword_forge.mp4/.webm, needs the hook repointed
+  4. §1d    THE FORGING CINEMATIC ×1     ✅ WIRED 2026-08-16 — the forging plays at the grant (code session)
   5. §1e    RUN PAIR RE-FIRE ×2          ✅ FIRED 2026-08-16 — cells in, code revert pending
-  6. §2e    sage plates ×6               ✅ FIRED 2026-08-16 — assets/characters/sage/, needs wiring
-  7. §2d    robot bat plates ×5          ✅ FIRED 2026-08-16 — assets/characters/bat/, needs wiring
-  8. §2c    caveMouth + caveExit + pillar ×3  ✅ FIRED 2026-08-16 — cave tile deck still to fire
-  9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   ✅ FIRED 2026-08-16 — 5 gates + 5 mouths; city monument left alone
+  6. §2e    sage plates ×6               ✅ WIRED 2026-08-16 — drawSage is plate-first, six states (code session)
+  7. §2d    robot bat plates ×5          ✅ WIRED 2026-08-16 — drawBat is plate-first, five states (code session)
+  8. §2c    caveMouth + caveExit + pillar ×3  ✅ WIRED 2026-08-16 — vistas + pillar plate live; cave tile deck still to fire
+  9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   ✅ WIRED 2026-08-16 — per-zone maps live, feather-masked; city monument untouched
  10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ CLOSED 2026-08-16 — all three plates fired, approved and wired
  11. §3m    BOSS MOTION PLATES (task #93)     ⏸ PREPARED 2026-08-16 — refs shot, recipe written, NOT fired
  12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling

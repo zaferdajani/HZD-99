@@ -103,6 +103,43 @@ const MEDIA_SRC = {
     cradle: 'assets/characters/gear/cradle.png',
     cradleOpen: 'assets/characters/gear/cradle_open.png',
     gateCity: 'assets/backgrounds/gate_city.jpg',
+    // THE CRYSTAL CAVE (§2c) — both sides of the rock, and the pillar. The
+    // mouth and exit are full-bleed vistas (ROOM_VISTA A5 / CV1); the pillar
+    // is a matted plate replacing the procedural light spears in drawStatics.
+    caveMouth: 'assets/backgrounds/cave_mouth.jpg',
+    caveExit: 'assets/backgrounds/cave_exit.jpg',
+    pillarPlate: 'assets/characters/gear/pillar.png',
+    // GATE SHAPES (§2f) — one monumental doorway per kingdom, no two the
+    // same shape, and none of them a rectangle. The CITY gate is gate_city
+    // above: the one epic multilayer monument, deliberately not re-fired.
+    gateFoundry: 'assets/backgrounds/gate_foundry.jpg',
+    gateArchives: 'assets/backgrounds/gate_archives.jpg',
+    gateConduits: 'assets/backgrounds/gate_conduits.jpg',
+    gateNest: 'assets/backgrounds/gate_nest.jpg',
+    gateDeep: 'assets/backgrounds/gate_deep.jpg',
+    // CAVE MOUTHS (§2f) — irregular rock openings, never doors, one material
+    // family per grotto network, all sharing one composition so one anchor
+    // rule covers the family.
+    caveMouthA: 'assets/backgrounds/cave_mouth_a.jpg',
+    caveMouthB: 'assets/backgrounds/cave_mouth_b.jpg',
+    caveMouthC: 'assets/backgrounds/cave_mouth_c.jpg',
+    caveMouthD: 'assets/backgrounds/cave_mouth_d.jpg',
+    caveMouthE: 'assets/backgrounds/cave_mouth_e.jpg',
+    // THE SAGE (§2e) — six authored states replacing drawSage's procedural
+    // body at the same anchor. Amber on exactly the three telegraph states.
+    sageStand: 'assets/characters/sage/stand.png',
+    sageCoil: 'assets/characters/sage/coil.png',
+    sageLunge: 'assets/characters/sage/lunge.png',
+    sageGather: 'assets/characters/sage/gather.png',
+    sageLock: 'assets/characters/sage/lock.png',
+    sagePure: 'assets/characters/sage/pure.png',
+    // THE ROBOT BAT (§2d) — five authored states replacing drawBat's
+    // procedural body. hang is the only one with its optic dark.
+    batHang: 'assets/characters/bat/hang.png',
+    batShiver: 'assets/characters/bat/shiver.png',
+    batDive: 'assets/characters/bat/dive.png',
+    batFlapUp: 'assets/characters/bat/flap_up.png',
+    batFlapDn: 'assets/characters/bat/flap_dn.png',
     // THE TRADER'S BOOTH AND DEN (§2g) — fired 2026-08-16, owner-approved.
     // ratchetResting is the art session's v2 — fired from his own npc_6yaw
     // row as reference, matted by Higgsfield rather than keyed (his shadowed
@@ -438,6 +475,64 @@ function softArt(key) {
   SOFT_ART[key] = out;
   return out;
 }
+// ---------------------------------------------------------------------------
+// PLATE ANCHORING. A matted plate arrives with unpredictable margins, and a
+// figure that must stand with its feet on the floor (tests/artbible.cjs
+// measures exactly that) cannot be anchored by the frame edge — it anchors by
+// where the body actually ends. The opaque bounding box is measured once per
+// plate at 1/8 scale (the answer only steers a drawImage; a pixel of slack is
+// invisible, and a full-resolution scan of a 1024² plate is not free) and
+// cached as fractions of the frame.
+// ---------------------------------------------------------------------------
+const PLATE_BOX = {};
+function plateBox(key) {
+  if (PLATE_BOX[key]) return PLATE_BOX[key];
+  const im = MEDIA_RAW[key];
+  if (!im || !im.naturalWidth) return null;
+  try {
+    const S = 8;
+    const W = Math.max(1, Math.round(im.naturalWidth / S));
+    const H = Math.max(1, Math.round(im.naturalHeight / S));
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const x = cv.getContext('2d', { willReadFrequently: true });
+    x.drawImage(im, 0, 0, W, H);
+    const d = x.getImageData(0, 0, W, H).data;
+    let minX = W, maxX = -1, minY = H, maxY = -1;
+    for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) {
+      if (d[(y * W + xx) * 4 + 3] > 24) {
+        if (xx < minX) minX = xx; if (xx > maxX) maxX = xx;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+      }
+    }
+    if (maxX < 0) return null;                         // nothing opaque yet
+    PLATE_BOX[key] = {
+      x: minX * S / im.naturalWidth, y: minY * S / im.naturalHeight,
+      w: (maxX - minX + 1) * S / im.naturalWidth,
+      h: (maxY - minY + 1) * S / im.naturalHeight,
+    };
+  } catch (e) { PLATE_BOX[key] = { x: 0, y: 0, w: 1, h: 1 }; }  // tainted: whole frame
+  return PLATE_BOX[key];
+}
+// Draw a matted plate so its opaque box stands on `base`, centred on `cx`,
+// scaled so the box is `targetH` world-pixels tall. Returns false while the
+// plate has not arrived, which is every caller's cue to draw the procedural
+// body instead — the same arrangement every renderer in this game uses.
+function drawPlateAnchored(c, key, cx, base, targetH, flip) {
+  mediaFetch(key);
+  const im = softArt(key);
+  if (!im || !im.naturalWidth) return false;
+  const box = plateBox(key);
+  if (!box) return false;
+  const scale = targetH / (box.h * im.naturalHeight);
+  const dw = im.naturalWidth * scale, dh = im.naturalHeight * scale;
+  c.save();
+  c.translate(cx, base);
+  if (flip) c.scale(-1, 1);
+  c.drawImage(im, -(box.x + box.w / 2) * dw, -(box.y + box.h) * dh, dw, dh);
+  c.restore();
+  return true;
+}
+
 // ---------------------------------------------------------------------------
 // SOUND, IN TWO WAVES.
 //
