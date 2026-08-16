@@ -31,6 +31,8 @@ const MIMIC_EL = {
   surge:   'zizt',    // a line breaker venting the same arc supply down its rail
   kiln:    'hott',    // a casting vent still breathing the crucible's heat
   rime:    'glazz',   // an archive condenser still holding the stacks at zero
+  snare:   'vizrr',   // a nest polyp running on the broadcast itself — the
+                      // first minion to glow with the infection's own red
 };
 
 // suits, in the order they are offered on the wheel

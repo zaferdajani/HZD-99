@@ -3941,6 +3941,9 @@ const EKIND = {
   // THE RIME COIL — the Archives' own machine (kingdom 4). spd is the
   // RING's growth speed, not the body's: the coil is bolted where it stands.
   rime: { w: 28, h: 26, hp: 44, spd: 300 },
+  // THE NEST SNARE — the Virus Nest's own machine (kingdom 5). spd is the
+  // REEL's base pull, not the body's: the polyp is rooted where it grew.
+  snare: { w: 28, h: 26, hp: 46, spd: 720 },
   sage: { w: 26, h: 42, hp: 150, spd: 170 },
 };
 class Enemy {
@@ -4526,6 +4529,89 @@ class Enemy {
         }
         break;
       }
+      // THE NEST SNARE (kingdom 5's own machine) asks MOTHER-V's question a
+      // kingdom early — the only question in the game the Null Core asks
+      // with her own hands: THE NEST DOES NOT STRIKE YOU, IT DRAWS YOU IN,
+      // AND STANDING YOUR GROUND IS A DECISION YOU MAKE WITH YOUR FEET. A
+      // thorned polyp rooted where it grew. When she is in its patch it
+      // charges for TELL_HEAVY — the maw leans open, a tendril arcs OUT
+      // toward her and hovers, the amber ring reads — and the whole tell is
+      // spent showing the line it wants to close. Then it LATCHES: if she is
+      // inside the told reach at that instant the reel begins — 0.9 s of
+      // steady horizontal drag toward the thorned core, grounded or airborne
+      // alike (the surge owns the floor, the kiln owns the lane, the rime
+      // owns the radius, the snare owns the LINE OF PULL — four machines,
+      // four different answers). And unlike its three siblings the failure
+      // is RECOVERABLE, which is the actual lesson: run against the reel
+      // and the moment the line is overstretched it snaps — exactly the
+      // read MOTHER-V's tendril grab demands for keeps ("break line-of-pull
+      // by moving"). A latch that finds nobody inside the reach whiffs, and
+      // the whiff pays the same as the snap. Then the tendril hangs LIMP
+      // for 1.0 s — a window that fits two hits and tempts three.
+      // Disruptor; threat 2; the tell never shortens with iq — cunning buys
+      // a longer reach and a harder grip, never a shorter warning;
+      // TELL_HEAVY, not TELL_SWIPE, because the answer costs ground and the
+      // warning has to pay for the ground it costs.
+      case 'snare': {
+        this.vy += 2000 * dt; this.vx = 0;
+        moveEnt(this, dt);
+        this.dir = 0;                 // omnidirectional: no misleading tell wedge
+        if (this.windedT > 0) {            // LIMP — the punish window (1.0 s)
+          this.windedT -= dt;
+          break;
+        }
+        if ((this.reelT || 0) > 0) {       // LATCHED — the line is closing
+          this.reelT -= dt;
+          const rdx = px - cx, rdy = py - cy;
+          const rd = Math.hypot(rdx, rdy) || 1;
+          if (rd > (this.reachR || 150) * 1.4) {
+            // SHE BROKE IT: running against the reel overstretched the line.
+            // The correct answer is rewarded with the same limp window the
+            // timer would have paid, so fighting free is never worse than
+            // waiting out the drag.
+            this.reelT = 0;
+            burst(lerp(cx, px, 0.5), lerp(cy, py, 0.5), 8, '#ff9a9a', 180, 0.3, 60, 2, true);
+          } else if (!player.dead) {
+            // the reel is horizontal, like the guardian's own grab: jumping
+            // does not answer a pull, motion against it does
+            player.vx += (Math.sign(cx - px) || 1) * (this.pull || this.spd) * dt;
+            if (chance(0.5)) addPart(lerp(cx, px, rnd(0.2, 0.9)), lerp(cy, py, rnd(0.2, 0.9)),
+              rnd(-24, 24), rnd(-24, 24), 0.2, '#ff4d4d', 1.8, 0, true);
+          }
+          if (this.reelT <= 0) { this.windedT = 1.0; sfx('cast'); }
+          break;
+        }
+        if (this.crouchT > 0) {            // the reach — tendril out, hovering
+          this.crouchT -= dt;
+          if (this.crouchT <= 0) {
+            const ldx = px - cx, ldy = py - cy;
+            const r = this.reachR || 150;
+            if (!player.dead && ldx * ldx + ldy * ldy < r * r) {
+              this.reelT = 0.9; sfx('dash');           // THE LATCH
+            } else {
+              // the whiff teaches as well as the hit: the tendril closes on
+              // nothing and the polyp pays the full limp window for it
+              this.windedT = 1.0; sfx('cast');
+            }
+          }
+          break;
+        }
+        // idle: rooted, pulsing on the broadcast, watching its patch — the
+        // band is a little wider than the longest reach, so the first read
+        // is free
+        if (!player.dead && Math.abs(px - cx) < 250 && Math.abs(py - cy) < 130
+            && (this.atkCD -= dt) <= 0) {
+          this.crouchT = TELL_HEAVY;       // the kingdom floor: the tell never shortens
+          // cunning buys REACH and GRIP: a longer line and a harder pull
+          // each iq step, never less warning (and never past the guardian's
+          // own 1150 — the minion must stay the lesson, not the exam)
+          this.reachR = 150 + this.iq * 70;
+          this.pull = this.spd * (0.9 + this.iq * 0.35);
+          this.atkCD = rnd(2.6 - this.iq * 0.8, 3.8 - this.iq * 1.2);
+          sfx('tell');
+        }
+        break;
+      }
     }
     // spikes are spikes for everyone: a machine that lands in the pit dies
     // in it — no creature camps where the player cannot stand
@@ -4793,6 +4879,59 @@ class Enemy {
         c.beginPath(); c.arc(cx, ry, r, 0, 7); c.fill();
         c.strokeStyle = '#ff5f6d'; c.globalAlpha = a; c.lineWidth = 2.6;
         c.beginPath(); c.arc(cx, ry, r, 0, 7); c.stroke();
+      }
+      c.restore(); c.globalAlpha = 1;
+    }
+    // the snare's tendril is the READ, drawn in world space because the line
+    // it threatens runs from the body to HER. Through the tell it stretches
+    // out and hovers (amber — a warning is amber everywhere in this game,
+    // and the reach boundary is dashed at the told radius so the latch
+    // circle never lies); through the reel it is taut and infection-red —
+    // the registry's danger hue, worn at the moment the line is real
+    if (this.kind === 'snare' && !this.dead
+        && ((this.crouchT || 0) > 0 || (this.reelT || 0) > 0)) {
+      const sy = this.y + this.h * 0.28;
+      const tpx = player ? player.x + player.w / 2 : cx;
+      const tpy = player ? player.y + player.h / 2 : sy;
+      c.save();
+      if ((this.crouchT || 0) > 0) {
+        const k = 1 - clamp(this.crouchT / TELL_HEAVY, 0, 1);
+        const r = this.reachR || 150;
+        // the told reach: a dim dashed arc at the latch radius — the honest
+        // boundary, like the rime's held ring, drawn low so it reads as
+        // ground the line can claim
+        c.globalAlpha = 0.16 + k * 0.3;
+        c.strokeStyle = TELL_COL; c.lineWidth = 1.6;
+        c.setLineDash([5, 7]); c.lineDashOffset = -performance.now() / 50;
+        c.beginPath(); c.arc(cx, sy, r, 0, 7); c.stroke(); c.setLineDash([]);
+        // the tendril, growing toward her across the whole tell and hovering
+        // just short — when it can touch the drawing of you, it can take you
+        const gk = Math.min(1, k * 1.25);
+        const ex = lerp(cx, tpx, gk * 0.86), ey = lerp(sy, tpy, gk * 0.86);
+        c.globalAlpha = 0.35 + k * 0.45;
+        c.strokeStyle = TELL_COL; c.lineWidth = 2.6 - k * 0.8; c.lineCap = 'round';
+        c.beginPath(); c.moveTo(cx, sy);
+        c.quadraticCurveTo(lerp(cx, ex, 0.5), Math.min(sy, ey) - 26 - k * 10, ex, ey);
+        c.stroke();
+        // the open hook at its tip, quickening on the body's own pulse
+        c.globalAlpha = 0.5 + Math.sin(this.anim * (14 + k * 22)) * 0.3;
+        c.fillStyle = TELL_COL; c.shadowColor = TELL_COL; c.shadowBlur = 9;
+        c.beginPath(); c.arc(ex, ey, 2.2 + k * 1.8, 0, 7); c.fill();
+        c.shadowBlur = 0;
+      } else {
+        // LATCHED: the line is real — taut, red, vibrating with the reel
+        const jit = Math.sin(this.anim * 46) * 2.2;
+        c.globalCompositeOperation = 'lighter';
+        c.globalAlpha = 0.7;
+        c.strokeStyle = '#ff4d4d'; c.lineWidth = 2.4; c.lineCap = 'round';
+        c.beginPath(); c.moveTo(cx, sy);
+        c.quadraticCurveTo(lerp(cx, tpx, 0.5), lerp(sy, tpy, 0.5) + jit, tpx, tpy);
+        c.stroke();
+        c.globalAlpha = 0.35;
+        c.strokeStyle = '#ff9a9a'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(cx, sy);
+        c.quadraticCurveTo(lerp(cx, tpx, 0.5), lerp(sy, tpy, 0.5) - jit, tpx, tpy);
+        c.stroke();
       }
       c.restore(); c.globalAlpha = 1;
     }
@@ -5323,6 +5462,94 @@ class Enemy {
         }
         eyes(-3, -3, 1.8);
         c.restore();   // bobbin shiver/sag
+        c.restore();   // the un-flip
+        break;
+      }
+      case 'snare': {
+        // KNOT — a nest polyp that grew around a maintenance node and kept
+        // its grip. Base geometry no other mimic owns: a ROOTED TEARDROP
+        // BULB under an open thorn maw — no legs (blob), no horizontal drum
+        // (the breaker), no flared crucible mouth (the kiln: its mouth is a
+        // machine part; this is a mouth), no waisted bobbin (the rime), no
+        // barrel (the turret), no wedge (the crawler). Engine-drawn
+        // stand-in; authored plates are queued (ART_QUEUE §2p) per the
+        // four-class art bible.
+        const tell = (this.crouchT || 0) > 0;
+        const reel = (this.reelT || 0) > 0;
+        const limp = (this.windedT || 0) > 0;
+        const k2 = tell ? 1 - clamp(this.crouchT / TELL_HEAVY, 0, 1) : 0;
+        // the heartbeat: the broadcast's own ~0.9 Hz, racing when the line
+        // is real — the one machine in the game that pulses like its boss
+        const beat = limp ? 0 : (Math.sin(this.anim * (reel ? 11 : 5.65)) + 1) / 2;
+        // symmetric machine: undo the flip, then LEAN toward the target —
+        // the body aims where the tendril goes, so the read has a direction
+        // without a wedge lying about one
+        const twd = (typeof player !== 'undefined' && player)
+          ? (Math.sign(player.x + player.w / 2 - (this.x + this.w / 2)) || 1) : 1;
+        c.save(); c.scale(1 / flip, 1);
+        // the holdfast: root-tendrils splayed into the floor — it GREW here
+        c.strokeStyle = MAT.steel.dark; c.lineWidth = 2.4; c.lineCap = 'round';
+        for (const [rx, ry2] of [[-11, 13], [-5, 13.5], [6, 13.5], [12, 13]]) {
+          c.beginPath(); c.moveTo(rx * 0.35, 8);
+          c.quadraticCurveTo(rx * 0.8, 10.5, rx, ry2); c.stroke();
+        }
+        c.save();
+        c.translate(twd * (tell ? k2 * 2.2 : reel ? 2.2 : 0), limp ? 1.6 : -beat * 1.1);
+        if (limp) c.rotate(twd * 0.14);              // sagged off its rooting
+        // the bulb: a woven teardrop, fuller on one side — tissue, not turning
+        plate(() => {
+          c.beginPath();
+          c.moveTo(-3, -11);
+          c.quadraticCurveTo(-9.5, -8.5, -10.5, -1);
+          c.quadraticCurveTo(-11.5, 6.5, -6, 9.5);
+          c.quadraticCurveTo(0, 11.5, 6.5, 9);
+          c.quadraticCurveTo(11.5, 6, 10, -1.5);
+          c.quadraticCurveTo(9, -8, 3.5, -10.5);
+          c.quadraticCurveTo(0, -12, -3, -11);
+          c.closePath();
+        }, -11, 10);
+        // the winding strands: dead cable-tissue wrapped over the weave —
+        // bronze, sagging, never a clean hoop
+        c.strokeStyle = ramp(c, MAT.bronze, -9, -2, 9, 8); c.lineWidth = 1.6; c.lineCap = 'round';
+        c.beginPath(); c.moveTo(-10, 0.5); c.quadraticCurveTo(-2, 3.6, 9.5, 1); c.stroke();
+        c.beginPath(); c.moveTo(-8.5, 5.5); c.quadraticCurveTo(1, 8, 8, 5); c.stroke();
+        seam(-6, -7.5, 5, -8.5, 0.18);
+        // the maw: a ring of thorn hooks around the crown — closed low at
+        // rest, SPREAD through the tell (the silhouette is the state, art
+        // bible §3.3), clenched during the reel, hanging slack when limp
+        const spread = tell ? 0.35 + k2 * 1.0 : reel ? 0.2 : limp ? 0.06 : 0.3;
+        for (const [nx, s] of [[-6, -1], [-2, -0.4], [2.5, 0.4], [6.5, 1]]) {
+          c.save(); c.translate(nx, -9 + Math.abs(s) * 1.4);
+          if (limp) c.rotate(s * 2.1 + 0.3);         // thorns drooped over
+          else c.rotate(s * (1.15 - spread * 0.7));  // fanning open
+          frame(() => {
+            c.beginPath(); c.moveTo(-1.8, 0);
+            c.quadraticCurveTo(-0.6, -2.5 - spread * 5.5, 0.9, -3.2 - spread * 6);
+            c.quadraticCurveTo(0.9, -1.4 - spread * 3, 1.8, 0);
+            c.closePath();
+          }, -13 - spread * 5, -8);
+          c.restore();
+        }
+        // the core in the bulb's heart: the infection's own red, pulsing on
+        // the beat — white-hot through the tell, DEAD DARK for the whole
+        // limp window, so the opening reads across a room
+        c.save();
+        c.globalAlpha = limp ? 0.1 : tell ? 0.7 + k2 * 0.3 : 0.35 + beat * 0.3;
+        accent(() => { c.beginPath(); c.ellipse(twd * 0.8, -2.5, 4.2 + k2 * 2, 5 + k2, 0, 0, 7); c.fill(); }, tell || reel);
+        c.restore();
+        if (limp) {
+          // the spent tendril, lying where it fell — visibly empty hands
+          c.strokeStyle = '#5a2430'; c.lineWidth = 2; c.lineCap = 'round';
+          c.beginPath(); c.moveTo(twd * 3, -8);
+          c.quadraticCurveTo(twd * 12, -2, twd * 17, 12);
+          c.quadraticCurveTo(twd * 20, 13.5, twd * 23, 13); c.stroke();
+        } else if (!tell && !reel && chance(0.04)) {
+          // idle breath: a spore mote drifting UP off the maw — the Nest
+          // exhales; the Archives' cold falls, this rises
+          addPart(cx + rnd(-4, 4), this.y - 2, rnd(-8, 8), -rnd(8, 24), 0.6, '#ff9a9a', 1.5, -24, true);
+        }
+        eyes(-4, -6, 1.7);
+        c.restore();   // the lean
         c.restore();   // the un-flip
         break;
       }

@@ -400,11 +400,18 @@ const ROOMS = {
   // disruptors. The solution shape is "kill the turret from cover before you
   // commit to the climb, because you cannot dodge on a ladder."
   B6: { zone: 'B', w: 32, h: 24, exits: { B: 'B1' },
-    ents: [['turret', 6, 22], ['hopper', 18, 18], ['flier', 13, 5],
+    // the turret moved one column off the mouth it guards: carving the
+    // passage through both floor rows put its old footing over the hole
+    ents: [['turret', 8, 22], ['hopper', 18, 18], ['flier', 13, 5],
            ['item', 22, 5, 'relay'], ['scrap', 3, 18, 30], ['plat', 9, 13, [0, -5, 3.4]]],
     build(g) {
       frame(g);
-      rect(g, 3, 23, 6, 23, '.');             // the way back down to B1
+      // the way back down to B1 — carved through BOTH floor rows. It used to
+      // open row 23 only, under a still-solid row 22: the D4/E4 fault class,
+      // found by the kingdom-5 audit's two-deep probe (an edge-only count
+      // calls this open). The relay gallery — the whole room, errand item
+      // and all — could be neither entered nor left.
+      rect(g, 3, 22, 6, 23, '.');
       // the risers: staggered, so the climb is a route and not a stack
       hline(g, 2, 7, 19, '='); hline(g, 12, 17, 19, '=');
       hline(g, 16, 22, 15, '='); hline(g, 4, 9, 11, '=');
@@ -724,9 +731,47 @@ const ROOMS = {
     ents: [['boss', 15, 15, 'zero']],
     build(g) { frame(g); openL(g); hline(g, 5, 8, 11, '='); hline(g, 21, 24, 11, '='); rect(g, 15, 15, 17, 16, '.'); } },
   // ============ ZONE E — The Virus Nest ============
+  // Lumen no longer stands in the corridor. Her HOLLOW is the depth door at
+  // mid-room (GATE_ROOM E1, the A0/A0B booth pattern, style 'hollow'): walk
+  // UP into the burst cocoon-pod and the Lost Nymph is inside, in a place of
+  // her own — the same promotion Ratchet, the Oracle, the Tinker and the
+  // Sage got, one per kingdom.
+  //
+  // THE SNARE'S FIRST ROOM (registry §6.4: a new machine gets one room to be
+  // read in — the kingdom's first screen holds it on a clean flat floor with
+  // nothing else near it). One blob is gone for it: the first screen of the
+  // Nest now asks its OWN question — the Nest does not strike you, it DRAWS
+  // YOU IN, and standing your ground is a decision you make with your feet —
+  // instead of re-asking zone E's old denial question at the door. It is
+  // MOTHER-V's tendril-grab read ("break the line of pull by MOVING"),
+  // taught a kingdom before the guardian asks it for keeps. Solution shape:
+  // be outside the told reach when the tendril closes, or run against the
+  // reel until the line snaps; then spend its 1.0 s limp window. Failure
+  // mode: freezing — the one answer the Nest never accepts. Placed out of
+  // reach of both arrivals (the drop from D3 lands at 15-17; the walk from
+  // E2 enters at the right edge).
   E1: { zone: 'E', w: 32, h: 17, exits: { T: 'D3', R: 'E2' },
-    ents: [['blob', 10, 15], ['blob', 20, 15], ['hopper', 25, 15], ['riddle', 5, 15, 6], ['npc', 13, 15, 'lumen']],
+    // (the riddle moved out of the snare's told reach, and the blob gave it
+    // the ground: nothing optional to READ may stand inside a latch radius)
+    ents: [['snare', 6, 15], ['blob', 22, 15], ['hopper', 25, 15], ['riddle', 18, 15, 6]],
     build(g) { frame(g); openR(g); rect(g, 15, 0, 17, 0, '.'); hline(g, 6, 9, 11, '='); } },
+  // THE NYMPH'S HOLLOW (kingdom 5's own interior, the E-side of A0B/B3B/
+  // C5B/D1B): a one-room den inside a burst cocoon-pod woven of dead
+  // cable-tissue behind the columns in E1, where Lumen actually LIVES — the
+  // leaf-wrapped light in a nest of shed leaves, with lantern-buds strung
+  // off the weave. The one pocket of the Nest her glow keeps clean: the
+  // infection veins in the walls run grey where her light reaches (which is
+  // the whole reason a frightened light could survive this deep). Dressing
+  // mimics the Nest backdrop per the mimic rule (tissue-of-cable walls,
+  // pods, veins); the procedural interior is a stand-in — the authored
+  // plate is queued (ART_QUEUE §2o, hollowInterior). The loft is a sagging
+  // strand of the weave, and the scrap on it is what the climb pays.
+  E1B: { zone: 'E', w: 30, h: 17, exits: {},
+    ents: [['npc', 15, 15, 'lumen'], ['scrap', 22, 11, 35]],
+    build(g) {
+      frame(g);
+      hline(g, 19, 25, 12, '=');          // the hammock-strand loft over the nest corner
+    } },
   // THE HATCHERY — the Nest's wing, and the room that makes lumen's errand
   // possible at all.
   //
@@ -738,17 +783,31 @@ const ROOMS = {
   // fetch quest, which is now what `tests/quests.cjs` does on every run.
   //
   // Composition: blob DENIAL owning the floor of a chamber you have to cross
-  // slowly, one turret ZONER above it, one crawler. Peak 5. The solution shape
-  // is "the blobs are the room — go over them, not through."
+  // slowly, and the SNARE on the high shelf where the turret used to sit —
+  // the recurrence room (registry §6.4): the pull closes over the ledge hops
+  // the lens climb must land, so the answer she learned on E1's flat floor
+  // is re-asked where losing it costs her the footing instead of the hit.
+  // The turret was generic (zone A's question at zone E's depth); the snare
+  // is the Nest's own. Peak 7. The solution shape is still "the blobs are
+  // the room — go over them, not through" — but now the over-route argues back.
   E4: { zone: 'E', w: 32, h: 20, exits: { B: 'E2' },
-    ents: [['blob', 8, 18], ['blob', 20, 18], ['turret', 26, 10], ['crawler', 14, 12],
+    ents: [['blob', 8, 18], ['blob', 20, 18], ['snare', 26, 10], ['crawler', 14, 12],
            ['item', 4, 12, 'lens'], ['scrap', 25, 18, 40]],
     build(g) {
       frame(g);
-      rect(g, 13, 19, 16, 19, '.');            // the drop back to E2
+      // the drop back to E2 — carved through BOTH floor rows. It used to open
+      // row 19 only, under a still-solid row 18: the same fault D4 had (the
+      // seal's little sibling — the zone-E audit, run kingdom-wide, found the
+      // Hatchery could be neither entered nor left through its own declared
+      // exit, lens and all).
+      rect(g, 13, 18, 16, 19, '.');
       hline(g, 2, 8, 13, '='); hline(g, 12, 18, 13, '=');
       hline(g, 22, 28, 11, '='); hline(g, 5, 11, 8, '=');
       hline(g, 17, 24, 6, '=');
+      // the first rung, over the mouth itself: floor to shelf was a 5-row
+      // jump and she clears 3, so the lens shelf was never hers — the rung
+      // both catches the climb IN from E2 and starts the climb UP
+      hline(g, 12, 16, 15, '=');
     } },
   E2: { zone: 'E', w: 60, h: 17, exits: { L: 'E1', R: 'E3', T: 'E4', B: 'E5' },
     ents: [['plat', 22, 10, [5, 0, 2.8]], ['plat', 37, 12, [0, -4, 3.0]], ['turret', 31, 15], ['flier', 18, 6], ['guard', 34, 15], ['blob', 45, 15], ['hopper', 50, 15], ['bench', 52, 15], ['scrap', 11, 11, 20], ['secret', 17, 8, 'star'],
@@ -953,7 +1012,7 @@ const MAPPOS = {
   C6: [7, 4, 1, 1], C7: [7, 3, 1, 1],
   D1: [5, 6, 1, 1], D1B: [5, 7, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1], D4: [6, 5, 1, 1],
   D5: [6, 7, 1, 1], D6: [6, 8, 1, 1],
-  E1: [8, 7, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1], E4: [9, 6, 1, 1],
+  E1: [8, 7, 1, 1], E1B: [8, 8, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1], E4: [9, 6, 1, 1],
   E5: [9, 8, 1, 1], E6: [9, 9, 1, 1],
 };
 

@@ -249,6 +249,8 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  18. §2l    THE KILN VENT ×3                  (rest / petals-open tell / spent — new zone-C enemy)
  19. §2m    THE SAGE'S STACKS + CARREL ×2     (carrelFront / carrelInterior — kingdom 4)
  20. §2n    THE RIME COIL ×3                  (rest / crown-up tell / dark — new zone-D enemy)
+ 21. §2o    THE NYMPH'S POD + HOLLOW ×2       (hollowFront / hollowInterior — kingdom 5)
+ 22. §2p    THE NEST SNARE ×3                 (rest / maw-open tell / limp — new zone-E enemy)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -1104,6 +1106,117 @@ NEGATIVE for all: no legs, no horizontal drum (it must never read as the
 breaker), no flared open mouth (nor the kiln), no barrel or gun (nor the
 turret), no second character, no text, no watermark; dark-room phrasing
 per the §1 warnings, subject only.
+
+### 2o. THE NYMPH'S POD + HOLLOW ✱ NEW (2026-08-16, kingdom 5 pass)
+
+Lumen — the Lost Nymph, the leaf-wrapped light — has her own place now: a
+depth door at mid-E1 (GATE_ROOM E1, the A0/A0B booth pattern, style
+`hollow`) into the den E1B, a burst cocoon-pod behind the Nest's tissue
+columns. Two plates replace the procedural stand-ins at the same anchors,
+both built from the VIRUS NEST backdrop's own furniture (the mimic rule:
+tissue-of-cable columns, cocoon pods, infection veins) and nothing plumb
+or square (NO RIGHT ANGLES):
+
+1. **hollowFront** — the pod standing in the corridor: a burst teardrop
+   cocoon woven of dead cable-strands, slung LOW between two cable-tissue
+   columns that lean together (a fifth silhouette — not the kiosk's
+   canopy, not the shrine's cable swag, not the quench hood's bell, not
+   the stacks' crevice-arch: a HANGING POD), every strand course a
+   different sag, an off-centre tear for a doorway with curled-back lips,
+   the tear breathing LEAF-GREEN light (#7dff9a, zone E's acc2 — NOT lamp
+   amber (Ratchet's), not CRT blue (the Oracle's), not molten orange (the
+   Tinker's), not pale ice (the Archivist's): Lumen's own glow), the
+   Nest's red/magenta infection veins pulsing on the columns' OUTER edges
+   and running dead grey where they near the mouth — her light keeps this
+   one pocket clean — a drift of dry shed leaf-scales at the base, and a
+   lantern-bud (a closed leaf-flower glowing from inside) drooping off
+   one column as a sign. `drawLumenHollow` in js/game.js is the placement
+   reference; same bottom anchor and ~236 px height as boothFront.
+2. **hollowInterior** — a 16:9 backdrop for E1B: a one-room den inside
+   the cocoon — woven cable-tissue walls curving up like the inside of a
+   basket, a nest of soft dry leaves in the middle under a pool of warm
+   leaf-green light, small lantern-buds strung off the weave at different
+   heights each glowing faintly, one sagging strand-hammock along a wall,
+   the walls' infection veins visible but GREY and still wherever the
+   green light reaches with one faint magenta pulse far up in the dark of
+   the ceiling (the Nest is still out there), the whole room in deep
+   violet-dark. Safe the way a blanket fort is safe: the only calm room
+   in the kingdom, and the light is why. The depth door back out sits at
+   gx 0.12. `ROOM_VISTA.E1B` is already pointed at `hollowInterior`; add
+   the media.js entries in the same commit as the files.
+
+**The prompts, verbatim — fire as-is:**
+
+> (hollowFront) A small den entrance grown rather than built, seen
+> straight on: a large burst teardrop-shaped cocoon pod woven from dead
+> grey-violet cables and organic strands, slung low between two thick
+> columns of cable-tissue that lean toward each other, every woven strand
+> sagging a different amount, an off-centre vertical tear in the pod
+> forming a narrow doorway with softly curled-back lips, the tear
+> breathing a gentle leaf-green light from inside with tiny green motes
+> drifting out, thin red and magenta veins pulsing faintly on the outer
+> edges of the columns but fading to dead grey where they approach the
+> glowing doorway, a drift of dry fallen leaves around the base, and a
+> single closed flower-bud lantern glowing green from inside, drooping on
+> a curved stem from one column. Deep violet and dark purple palette,
+> soft leaf-green light in the doorway only. Nothing plumb, nothing
+> square — every strand sags, leans or curls. Clean high-detail 3D
+> render, soft organic specular, dark moody lighting. NEGATIVE: no text,
+> no watermark, no characters, no straight rectangular frame, no cast
+> shadow, no ground plane. Photographed in a pitch-dark room, no
+> backdrop, no floor, spotlights pick out the structure and nothing else
+> receives any light.
+
+> (hollowInterior, 16:9 backdrop) The inside of a one-room den within a
+> woven cocoon, wide interior view: walls of tightly woven dead cables
+> and organic strands curving up and inward like the inside of a basket,
+> a round nest of soft dry leaves on the floor under a pool of warm
+> leaf-green light, several small closed flower-bud lanterns strung from
+> the weave at different heights each glowing gentle green, a sagging
+> strand-hammock along one wall, thin infection veins visible in the
+> weave but dead grey and still wherever the green light reaches, one
+> faint magenta pulse far up in the dark of the ceiling, everything else
+> falling into deep violet darkness. Safe, warm, hidden — the only calm
+> room in an infected place. No right angles presenting: every line of
+> the room is a curve of the weave. Clean high-detail 3D render.
+> NEGATIVE: no characters, no text, no watermark, no doors, no windows
+> with daylight.
+
+### 2p. THE NEST SNARE (snare — new zone-E enemy, 2026-08-16) ✱ NEW
+
+The Virus Nest's own machine (js/entities.js, kind `snare`): a thorned
+polyp rooted where it grew that reaches a tendril out through its whole
+tell, LATCHES anything inside the told radius and reels it into the
+thorns — the kingdom's lesson that the Nest does not strike you, it
+DRAWS YOU IN, and the failure is recoverable: run against the reel and
+the overstretched line snaps. It is MOTHER-V's tendril-grab read ("break
+line-of-pull by MOVING"), taught a kingdom before the guardian asks it
+for keeps, and the first minion to glow with the infection's own red
+(MIMIC_EL `vizrr`). Atlas-creature plates in the minion family style
+(small machine-flesh hybrid, reads smaller than HZD-99); the engine-drawn
+fallback (`case 'snare'` in Enemy.draw, js/entities.js) is the placement
+reference:
+
+- **rest** — a woven teardrop bulb of grey-violet cable-tissue rooted to
+  the floor by four splayed holdfast tendrils (never a plinth), two dead
+  cable-strands wrapped sagging around its belly, a ring of four short
+  thorn hooks folded low around its crown, a dull red pulse deep in the
+  bulb's heart — a slow heartbeat, the broadcast's own.
+- **tell** — the thorn crown SPREAD wide open and the bulb leaning, one
+  long tendril arced up and out of the maw with an open hook at its tip
+  (the amber wash and the reach arc are code; the POSE is the plate —
+  silhouette must differ from rest per ART_BIBLE §3.3), core burning
+  bright red.
+- **limp** — the tendril fallen and lying slack along the ground, thorn
+  hooks drooped over the crown's rim, bulb sagged sideways off its
+  rooting, core dead dark: visibly spent, the punish window made
+  readable across a room.
+
+NEGATIVE for all: no legs, no horizontal drum (it must never read as the
+breaker), no flared metal crucible mouth (nor the kiln), no waisted
+bobbin (nor the rime), no barrel or gun (nor the turret), no face, no
+second character, no text, no watermark; dark-room phrasing per the §1
+warnings, subject only.
 
 ### 1e. THE RUN PAIR RE-FIRE ✅ FIRED AND SHIPPED 2026-08-16 (art session)
 

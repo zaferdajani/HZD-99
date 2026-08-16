@@ -48,7 +48,7 @@ const { chromium } = require('playwright');
     const fwd = [(ROOMS.W1.exits || {}).R === 'W2', !!GATE_ROOM.W2 && GATE_ROOM.W2.to === 'A0'];
     const back = [(ROOMS.W2.exits || {}).L === 'W1', (ROOMS.W2.exits || {}).R === undefined];
     // nothing in either waking room may be able to touch her
-    const HOSTILE = ['crawler', 'guard', 'flier', 'turret', 'hopper', 'blob', 'surge', 'kiln', 'rime', 'boss', 'saw'];
+    const HOSTILE = ['crawler', 'guard', 'flier', 'turret', 'hopper', 'blob', 'surge', 'kiln', 'rime', 'snare', 'boss', 'saw'];
     const danger = {};
     for (const id of ['W1', 'W2'])
       danger[id] = (ROOMS[id].ents || []).filter(e => HOSTILE.indexOf(e[0]) >= 0).map(e => e[0]);

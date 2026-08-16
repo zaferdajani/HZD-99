@@ -1981,6 +1981,9 @@ const ROOM_VISTA = {
   // leaning shelf-stacks in D1. Unfired — the room borrows the zone-D atlas
   // cell until the plate lands.
   D1B: 'carrelInterior',
+  // the Nymph's hollow (§2o): Lumen's den inside the burst cocoon-pod in E1.
+  // Unfired — the room borrows the zone-E atlas cell until the plate lands.
+  E1B: 'hollowInterior',
 };
 
 // ===========================================================================
@@ -4718,6 +4721,13 @@ const GATE_ROOM = {
   // hover — between the bench and the terminal, a door's width from both.
   D1:  { at: 0.40, to: 'D1B', ax: 0.12, style: 'carrel' },
   D1B: { at: 0.12, to: 'D1',  ax: 0.40, style: 'carrel' },
+  // the Nymph's hollow off E1 — the booth pattern a fifth time, its OWN
+  // style again: no other kingdom's shrine may stand in the Nest, so the
+  // burst cocoon-pod draws its own stand-in (drawLumenHollow) until the
+  // plate lands (ART_QUEUE §2o). It stands where Lumen used to stand —
+  // between the riddle and the way east, lit with her own leaf-green.
+  E1:  { at: 0.42, to: 'E1B', ax: 0.12, style: 'hollow' },
+  E1B: { at: 0.12, to: 'E1',  ax: 0.42, style: 'hollow' },
   // the grottoes — one per guardian, opened by its fall or taming
   A4:  { at: 0.14, to: 'GA1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossGlitch' },
   A10: { at: 0.12, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, need: 'alpha' },
@@ -5451,6 +5461,188 @@ function drawSageCarrel(cx2, gy, P, k) {
   c.restore();
   c.restore();
 }
+// THE NYMPH'S HOLLOW (kingdom 5): the depth door into Lumen's den off E1.
+// Built from the Nest backdrop's own furniture per the mimic rule — the
+// backdrop grows tissue-of-cable columns and pulsing infection veins, so the
+// door is a burst COCOON-POD woven of dead cable-strands, slung low between
+// two of those columns leaning together. The fifth shrine keeps a fifth
+// silhouette (kiosk canopy, cable swag, quench hood, leaning stacks... and
+// now a hanging teardrop pod), and its own light: the split breathes Lumen's
+// LEAF-GREEN (#7dff9a, zone E's acc2 — NOT Ratchet's lamp amber, not the
+// Oracle's CRT blue, not the Tinker's molten orange, not the Archivist's
+// pale ice). Around the mouth the infection veins run GREY — her glow keeps
+// this one pocket of the Nest clean, which is the story the structure tells
+// before she says a word. Nothing plumb, nothing square (NO RIGHT ANGLES).
+// Procedural STAND-IN awaiting its fired plate (ART_QUEUE §2o, hollowFront):
+// the mediaFetch hook below goes live the commit the plate and its media.js
+// entry land, exactly like its four siblings'.
+function drawLumenHollow(cx2, gy, P, k) {
+  if (typeof mediaFetch === 'function') mediaFetch('hollowFront');
+  const bim = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.hollowFront;
+  if (bim && bim.naturalWidth) {
+    const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
+    c.save();
+    c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
+    if (k > 0.02) {
+      c.globalCompositeOperation = 'lighter';
+      const gl = c.createRadialGradient(cx2, gy - dh * 0.35, 6, cx2, gy - dh * 0.35, dw * (0.3 + k * 0.4));
+      gl.addColorStop(0, 'rgba(125,255,154,' + (0.16 * k + 0.07) + ')');
+      gl.addColorStop(1, 'rgba(125,255,154,0)');
+      c.fillStyle = gl;
+      c.beginPath(); c.ellipse(cx2, gy - dh * 0.35, dw * (0.3 + k * 0.4), dh * 0.42, 0, 0, 7); c.fill();
+    }
+    c.restore();
+    return;
+  }
+  const BW = 58, BH = 132;
+  const t = performance.now();
+  c.save();
+  // the back shroud — deep nest violet, tallest where the two columns meet
+  c.fillStyle = '#160a20';
+  c.beginPath();
+  c.moveTo(cx2 - BW - 12, gy);
+  c.quadraticCurveTo(cx2 - BW * 0.6, gy - BH * 0.9, cx2 - BW * 0.2, gy - BH - 6);
+  c.quadraticCurveTo(cx2 + BW * 0.3, gy - BH - 12, cx2 + BW * 0.5, gy - BH * 0.8);
+  c.quadraticCurveTo(cx2 + BW + 4, gy - BH * 0.3, cx2 + BW + 10, gy);
+  c.closePath(); c.fill();
+  // the two tissue columns, leaning together — the backdrop's own cable
+  // tissue, breathing very slowly, each strand a slightly different sag
+  for (const s of [-1, 1]) {
+    const lean = Math.sin(t / 2400 + s) * 2;
+    for (let i = 0; i < 3; i++) {
+      const bx = cx2 + s * (BW - 6 - i * 9);
+      c.fillStyle = i % 2 ? '#2a1240' : '#331a4a';
+      c.beginPath();
+      c.moveTo(bx - 5, gy);
+      c.quadraticCurveTo(bx - 8 + lean + s * -10, gy - BH * 0.55, bx + s * -16 + lean, gy - BH - 4);
+      c.lineTo(bx + s * -10 + lean, gy - BH - 2);
+      c.quadraticCurveTo(bx + 3 + lean + s * -8, gy - BH * 0.5, bx + 6, gy);
+      c.closePath(); c.fill();
+    }
+  }
+  // the infection veins on the columns: alive and colored at the edges of
+  // the structure, fading to DEAD GREY as they near the mouth — her light
+  // is why
+  for (const s of [-1, 1]) {
+    for (let i = 0; i < 2; i++) {
+      const vx = cx2 + s * (BW - 4 - i * 13);
+      const pulse = (Math.sin(t / 500 + i * 1.3 + s) + 1) / 2;
+      const near = 1 - i * 0.5;                      // inner veins are nearer her
+      c.save(); c.globalCompositeOperation = 'lighter';
+      c.globalAlpha = (0.1 + pulse * 0.24) * (1 - near * 0.55);
+      c.strokeStyle = i % 2 ? '#ff4f6d' : '#e05aff';
+      c.lineWidth = 1.6;
+      c.beginPath(); c.moveTo(vx, gy - BH * 0.95);
+      for (let y = gy - BH * 0.8; y < gy; y += 26)
+        c.lineTo(vx + Math.sin(y / 22 + i + s) * 5 - s * (gy - y) * 0.04, y);
+      c.stroke(); c.restore();
+      // the grey remainder near the mouth: the same vein, quieted
+      c.globalAlpha = 0.3;
+      c.strokeStyle = '#4a4152'; c.lineWidth = 1.2;
+      c.beginPath(); c.moveTo(vx - s * 8, gy - BH * 0.5);
+      c.quadraticCurveTo(vx - s * 14, gy - BH * 0.25, vx - s * 12, gy);
+      c.stroke(); c.globalAlpha = 1;
+    }
+  }
+  // THE POD: a burst cocoon slung between the columns — a woven teardrop,
+  // wider low, its whole outline built of strand curves. It sways a hair.
+  const sway = Math.sin(t / 1900) * 1.6;
+  c.save(); c.translate(sway, 0);
+  c.fillStyle = '#241332';
+  c.beginPath();
+  c.moveTo(cx2 - 8, gy - BH + 2);                        // the hanging point
+  c.quadraticCurveTo(cx2 - BW * 0.78, gy - BH * 0.62, cx2 - BW * 0.6, gy - BH * 0.24);
+  c.quadraticCurveTo(cx2 - BW * 0.5, gy - 2, cx2 - BW * 0.16, gy);
+  c.lineTo(cx2 + BW * 0.2, gy);
+  c.quadraticCurveTo(cx2 + BW * 0.56, gy - 4, cx2 + BW * 0.6, gy - BH * 0.3);
+  c.quadraticCurveTo(cx2 + BW * 0.66, gy - BH * 0.66, cx2 + 2, gy - BH + 2);
+  c.closePath(); c.fill();
+  // the weave: strand courses following the pod's belly, each sagging its
+  // own amount — basketry, never lathe-work
+  c.strokeStyle = '#3a2050'; c.lineWidth = 2; c.lineCap = 'round';
+  for (let i = 0; i < 6; i++) {
+    const wy = gy - BH * 0.82 + i * (BH * 0.13);
+    const ww = BW * (0.36 + i * 0.05) * (i === 5 ? 0.9 : 1);
+    c.beginPath();
+    c.moveTo(cx2 - ww, wy + Math.sin(i * 2.1) * 3);
+    c.quadraticCurveTo(cx2 + (i % 2 ? 4 : -5), wy + 7 + (i % 3) * 2, cx2 + ww, wy + Math.sin(i * 3.3) * 3);
+    c.stroke();
+  }
+  // THE SPLIT: the burst that made it a doorway — an off-centre tear,
+  // breathing Lumen's leaf-green from inside
+  const doorH = BH * 0.72;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const breathe = Math.sin(t / 1500) * 0.04;
+  const gl = c.createLinearGradient(0, gy - doorH, 0, gy);
+  gl.addColorStop(0, 'rgba(125,255,154,' + (0.08 + k * 0.4 + breathe) + ')');
+  gl.addColorStop(1, 'rgba(210,255,222,' + (0.14 + k * 0.5 + breathe) + ')');
+  c.fillStyle = gl;
+  c.beginPath();
+  c.moveTo(cx2 - 15, gy);
+  c.quadraticCurveTo(cx2 - 22, gy - doorH * 0.5, cx2 - 4, gy - doorH);
+  c.quadraticCurveTo(cx2 + 3, gy - doorH * 0.72, cx2 + 19, gy - doorH * 0.42);
+  c.quadraticCurveTo(cx2 + 22, gy - doorH * 0.2, cx2 + 16, gy);
+  c.closePath(); c.fill();
+  // her motes drifting OUT the light — the same green sparks she sheds in
+  // person (see the lumen NPC draw) — more the nearer she stands
+  const gn = 2 + Math.round(k * 3);
+  for (let i = 0; i < gn; i++) {
+    const ph = (t / 2300 + i * 0.43) % 1;
+    const gx2 = cx2 + Math.sin(i * 4.3 + t / 1400) * 12;
+    c.globalAlpha = Math.sin(ph * Math.PI) * (0.3 + k * 0.4);
+    c.fillStyle = '#7dff9a';
+    c.beginPath(); c.arc(gx2, gy - 10 - ph * (doorH - 16), 1.6, 0, 7); c.fill();
+  }
+  c.globalAlpha = 1;
+  c.restore();
+  // the curl-back lips of the tear, catching her light on their inner edge
+  c.strokeStyle = 'rgba(125,255,154,0.35)'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(cx2 - 15, gy);
+  c.quadraticCurveTo(cx2 - 22, gy - doorH * 0.5, cx2 - 4, gy - doorH); c.stroke();
+  c.strokeStyle = 'rgba(125,255,154,0.22)'; c.lineWidth = 1.4;
+  c.beginPath(); c.moveTo(cx2 + 16, gy);
+  c.quadraticCurveTo(cx2 + 22, gy - doorH * 0.28, cx2 + 19, gy - doorH * 0.42); c.stroke();
+  c.restore();   // pod sway
+  // the shed-leaf drift at the base: dry leaf-scales blown out of the den,
+  // parting as she nears — the booth-flap k, worn by leaves instead of cloth
+  const part = k * 18;
+  for (const s of [-1, 1]) {
+    for (let i = 0; i < 4; i++) {
+      const px2 = cx2 + s * (8 + part + i * 6.5), py2 = gy - 1.5 - (i % 2) * 2.5;
+      c.save();
+      c.translate(px2, py2); c.rotate(s * (0.3 + i * 0.2) + Math.sin(i * 4.7) * 0.12);
+      c.fillStyle = i % 2 ? '#1d3a26' : '#27492f';
+      c.beginPath(); c.moveTo(-4.5, 0);
+      c.quadraticCurveTo(0, -3.6, 4.5, 0);
+      c.quadraticCurveTo(0, 2.6, -4.5, 0); c.closePath(); c.fill();
+      c.strokeStyle = 'rgba(125,255,154,0.2)'; c.lineWidth = 0.7;
+      c.beginPath(); c.moveTo(-3.2, 0); c.lineTo(3.2, 0); c.stroke();
+      c.restore();
+    }
+  }
+  // its sign: a lantern-bud — a closed flower of leaves on a drooping stem
+  // strung off the left column, glowing from inside as she breathes — her
+  // trade where the others hang a lamp, a monitor, a gear and a reading hood
+  const sw = Math.sin(t / 1200) * 0.08;
+  c.save();
+  c.translate(cx2 - BW + 14, gy - BH + 34); c.rotate(sw - 0.18);
+  c.strokeStyle = '#2a1240'; c.lineWidth = 1.6;
+  c.beginPath(); c.moveTo(0, -10); c.quadraticCurveTo(4, -5, 0, 0); c.stroke();
+  c.fillStyle = '#1d3a26';
+  for (const s of [-1, 0, 1]) {
+    c.save(); c.rotate(s * 0.5);
+    c.beginPath(); c.moveTo(0, 0);
+    c.quadraticCurveTo(-2.6, 4, 0, 7.5);
+    c.quadraticCurveTo(2.6, 4, 0, 0); c.closePath(); c.fill();
+    c.restore();
+  }
+  const lp = 0.45 + Math.sin(t / 800) * 0.22;
+  c.fillStyle = 'rgba(125,255,154,' + lp + ')';
+  c.shadowColor = '#7dff9a'; c.shadowBlur = 8;
+  c.beginPath(); c.ellipse(0, 4.4, 2.6, 3.4, 0, 0, 7); c.fill(); c.shadowBlur = 0;
+  c.restore();
+  c.restore();
+}
 function drawGateDoors(P) {
   const def = GATE_ROOM[G.roomId];
   if (!def || !player) { G._doorK = 0; return; }
@@ -5479,6 +5671,9 @@ function drawGateDoors(P) {
   // ...and the Sage's carrel is the SAGE'S — the Archives' own furniture,
   // the Archivist's own reading light
   if (def.style === 'carrel') { drawSageCarrel(ds, gy, P, k); return; }
+  // ...and the Nymph's hollow is LUMEN'S — the Nest's own tissue, woven,
+  // and the one door in the game lit leaf-green
+  if (def.style === 'hollow') { drawLumenHollow(ds, gy, P, k); return; }
   // THE ZONE GATES (§2f): every kingdom's depth door is its own fired
   // monument — a furnace arch, a parted shelf-stack, a cable iris, a talon
   // arch, an organic iris — and ONLY the city keeps the colossal multilayer
