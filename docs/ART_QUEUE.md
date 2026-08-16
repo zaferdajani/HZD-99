@@ -506,6 +506,32 @@ absolutely no straight jambs, no lintel, no symmetry. The engine's
 procedural fallback (drawCaveMouth in game.js) is the placement reference;
 the plate replaces it at the same anchor.
 
+### ⚠ tests/hero.cjs's two-arm check is SITTING ON ITS THRESHOLD (noticed 2026-08-16)
+
+Not a break, and not caused by any plate in this session — but it will bite
+whoever unparks the run, so it is written down here.
+
+`tests/hero.cjs` fails a pose when the quieter side of her body carries less
+than **0.16** of the busier side at shoulder height. The run pose currently
+measures **145–147 against 906, i.e. 0.160–0.162** — over the line by about
+one part in five hundred. It failed once during this session's §2h/§2i test
+run and passed three consecutive runs immediately afterwards, at the
+committed state and with the working tree both. Nothing changed between; the
+sample did.
+
+Two things follow:
+
+- **The measurement is real, not noise.** The run pose IS lopsided, because
+  `heroState()` still substitutes the WALK pair for the run (the §1e cells
+  are parked), and the walk cells hide the far arm behind the body and cape.
+  It has always been this close to failing; it just never tipped before.
+- **Unparking the run changes this number, and nobody knows which way yet.**
+  The §1e cells are a different drawing with a different arm carriage. Before
+  the two-line revert in `heroState()` lands, run `node tests/hero.cjs` and
+  read the run/R and run/L rows — if the ratio drops under 0.16 the fix is a
+  re-fire with the far arm clear of the body, NOT a loosened threshold. The
+  threshold is what stops a one-armed cat reaching the screen.
+
 ### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
 
 **Not started, and deliberately so.** This is the largest block left — five
