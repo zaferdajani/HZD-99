@@ -61,11 +61,6 @@ const MEDIA_SRC = {
     wolfWalkB: 'assets/characters/beasts/wolf_walkb.png',
     wolfCoil: 'assets/characters/beasts/wolf_coil.png',
     wolfLunge: 'assets/characters/beasts/wolf_lunge.png',
-    // ...and the RUN pair (§2q FINAL BATCH): reach — all four legs at full
-    // extension, back hollowed — and gather, all four paws folded under the
-    // belly, back arched. Fired against the repaired walk pair.
-    wolfRunA: 'assets/characters/beasts/wolf_runa.png',
-    wolfRunB: 'assets/characters/beasts/wolf_runb.png',
     // NINE PLATES FOR THE ALPHA, one per state, because it has five skills and
     // two of them have their own recovery. A boss with five moves sharing two
     // drawings is a boss with two moves as far as the player's eye is concerned.
@@ -259,34 +254,10 @@ const MEDIA_SRC = {
     cheetahWalkB: 'assets/characters/beasts/cheetah_walkb.png',
     cheetahWarn: 'assets/characters/beasts/cheetah_warn.png',
     cheetahRun: 'assets/characters/beasts/cheetah_run.png',
-    // the RUN pair (§2q FINAL BATCH) — and the cheetah kept its tan-and-gold
-    // identity this time, which was the whole point of the re-fire.
-    cheetahRunA: 'assets/characters/beasts/cheetah_runa.png',
-    cheetahRunB: 'assets/characters/beasts/cheetah_runb.png',
-    // GUARDIAN MOTION PLATES (§3m / task #93). Full-body poses fired against
-    // each rig's canon: the rigs are parts atlases, so folding these into the
-    // fights is #93's overhaul — the keys are registered here so the plates
-    // preload, soft-key and measure like everything else the moment that
-    // wiring lands. glide = level, wings wide, talons tucked; strike = reared
-    // upright, talons swung forward; stalk = all four legs mid-stride, glow
-    // low; coil = crouched flat, every shard flared, glow risen to magenta.
-    talonhostGlide: 'assets/characters/guardians/talonhost_glide.png',
-    talonhostStrike: 'assets/characters/guardians/talonhost_strike.png',
-    prismStalk: 'assets/characters/guardians/prism_stalk.png',
-    prismCoil: 'assets/characters/guardians/prism_coil.png',
-    glaciereTravel: 'assets/characters/guardians/glaciere_travel.png',
-    glaciereCoil: 'assets/characters/guardians/glaciere_coil.png',
-    choirDrift: 'assets/characters/guardians/choir_drift.png',
-    choirClench: 'assets/characters/guardians/choir_clench.png',
-    // THE FORGE TABLE (§2r, fired and matted): the real object plate for
-    // Ratchet's workbench — it replaces the painting-crop stand-in the frame
-    // it decodes (see the A0B block at the drawStatics tail).
-    forgeTable: 'assets/backgrounds/forge_table.png',
-    // THE MIND NODE OBELISK (FINAL BATCH): a monument several times her
-    // height, machine glyphs blazing cyan. Registered so it preloads; it
-    // draws nothing until the node moves out of the NPC's room — that
-    // placement is the kingdom session's call, per the firing note.
-    mindnodeObelisk: 'assets/backgrounds/mindnode_obelisk.png',
+    // (the §2q RUN pairs, the §3m guardian motion plates, the §2r forge
+    // table and the Mind Node monument are registered in the fired-plates
+    // section above — both sessions wired the same batch and this comment
+    // marks the dedupe, so nobody re-adds them here.)
     // THE LAIRS. One authored prop per guardian, keyed off its generation
     // plate's black field by tools/blackkey.cjs, so each has real alpha and
     // occludes the room properly. Lazy like everything else: a lair is only
@@ -640,7 +611,7 @@ function plateBox(key) {
 // outside the subject's own alpha, so no masking is needed.
 // ---------------------------------------------------------------------------
 const POP_ART = {};
-function popArt(key, src) {
+function popArt(key, src, lift) {
   if (POP_ART[key] !== undefined) return POP_ART[key];
   const im = src || MEDIA_RAW[key];
   if (!im || !im.naturalWidth) return null;               // not here yet; ask again
@@ -652,6 +623,22 @@ function popArt(key, src) {
     x.drawImage(im, 0, 0);
     x.globalCompositeOperation = 'overlay'; x.globalAlpha = 0.32; x.drawImage(im, 0, 0);
     x.globalCompositeOperation = 'screen'; x.globalAlpha = 0.14; x.drawImage(im, 0, 0);
+    // `lift` is a gamma exponent (<1) for art that is DARK ON DARK — the
+    // machine folk are rusty bronze in the dimmest rooms in the game, and
+    // screen/overlay passes move near-black pixels almost nowhere (screening
+    // dark with dark stays dark — that is just the math). A real shadow lift
+    // needs the pixels: one cached LUT pass, gamma-up on RGB, alpha kept.
+    // Same-origin sheets only, and the try/catch already ships raw if not.
+    if (lift) {
+      const lut = new Uint8ClampedArray(256);
+      for (let i = 0; i < 256; i++) lut[i] = 255 * Math.pow(i / 255, lift);
+      const id = x.getImageData(0, 0, cv.width, cv.height), d = id.data;
+      for (let i = 0; i < d.length; i += 4) {
+        if (!d[i + 3]) continue;
+        d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
+      }
+      x.putImageData(id, 0, 0);
+    }
     cv.naturalWidth = cv.width; cv.naturalHeight = cv.height;
     out = cv;
   } catch (e) {}                                           // tainted: ship it raw

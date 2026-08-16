@@ -2584,7 +2584,10 @@ function buildFringe() {
   const x = fringeCv.getContext('2d');
   x.clearRect(0, 0, W, H);
   const zone = G.roomDef.zone, P = PAL[zone] || PAL.A;
-  const kind = FRINGE_KIND[zone] || 'grass';
+  // no lawn indoors (owner, 2026-08-16): a workshop floor grows shavings and
+  // dropped scrap, not grass — the interior rooms swap to the scrap kind
+  const kind = (typeof interiorVista === 'function' && interiorVista())
+    ? 'scrap' : (FRINGE_KIND[zone] || 'grass');
   // fewer blades on a machine that is already struggling; the silhouette break
   // survives at three, the lushness does not
   const per = (typeof QUAL !== 'undefined' && !QUAL.glow) ? 3 : 5;
@@ -2644,6 +2647,21 @@ function buildFringe() {
         if (r1 > 0.8) {                         // and a bead of melt hanging off
           x.globalAlpha = 0.4;
           x.beginPath(); x.ellipse(bx + lean * 0.3, Y + 5, 1.4, 2.6, 0, 0, 7); x.fill();
+        }
+      } else if (kind === 'scrap') {
+        // indoors: shavings and dropped bits, sparse and low — floor clutter
+        // a tinker actually makes, not vegetation
+        if (r2 < 0.55) { x.restore(); continue; }
+        const hh = Math.min(hgt * 0.5, 5);
+        x.fillStyle = r1 > 0.85 ? '#8a6a3a' : '#241c14';
+        x.globalAlpha = 0.55 + r2 * 0.3;
+        x.beginPath();                          // a curl of swarf / a dropped nut
+        x.moveTo(bx - 2 - r1 * 2.5, Y + 2);
+        x.quadraticCurveTo(bx + lean * 0.4, Y - hh, bx + 2 + r2 * 2.5, Y + 2);
+        x.closePath(); x.fill();
+        if (r1 > 0.9) {                         // one glint of brass in the dark
+          x.fillStyle = '#c8a04a'; x.globalAlpha = 0.5;
+          x.beginPath(); x.arc(bx + lean * 0.4, Y - 1, 1.1, 0, 7); x.fill();
         }
       } else {                                  // shard — same rule: never a spike
         const hh = Math.min(hgt, 9);
@@ -3240,6 +3258,78 @@ function drawMotes(px, py, t3) {
 // the same painting becomes a lamplit room whose table stands beside the
 // sitting npc. The number is the fraction of the full-bleed cover scale.
 const INTERIOR_FIT = { denInterior: 0.62, oracleInterior: 0.68 };
+// which rooms ARE a painting: their vista key names an interior plate
+function interiorVista() {
+  const own = G.roomId && ROOM_VISTA[G.roomId];
+  return own && /Interior$/.test(own) ? own : null;
+}
+// ===========================================================================
+// THE INTERIOR FLOOR (owner, 2026-08-16: "the table on the floor looks very
+// bad — it's all because you refuse to create floor texture instead of the
+// straight line"). In a room that IS a painting, the walkable strip cannot be
+// the zone's soil band wearing a ruler edge and a lawn: it has to be the
+// painting's OWN ground, carried forward to where she walks. So the band
+// from the walk surface down is re-surfaced with the plate's bottom strip —
+// its actual floor — and the seam where it meets the room is eaten into an
+// irregular edge (bites in, lumps of its own texture pushed up past the
+// line), per NO RIGHT ANGLES. Built once per room into an offscreen layer.
+// ===========================================================================
+let INT_FLOOR = null;                       // { key, cv, top[] }
+function interiorFloorCv() {
+  const own = interiorVista();
+  if (!own) return null;
+  const ck = own + ':' + G.roomId;
+  if (INT_FLOOR && INT_FLOOR.key === ck) return INT_FLOOR.cv;
+  if (typeof mediaFetch === 'function') mediaFetch(own);
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[own];
+  if (!im || !im.naturalWidth) return null;
+  const g = G.grid; if (!g || !g[0]) return null;
+  const W = g[0].length * TILE, H = g.length * TILE;
+  const solid = ch => ch === '#' || ch === 'B';
+  // the walk surface, per column — interiors are flat but nothing here
+  // assumes it: the strip follows whatever the room actually built
+  let floorY = H;
+  for (let ty = g.length - 1; ty >= 0; ty--) {
+    const ch = g[ty][Math.floor(g[0].length / 2)];
+    if (solid(ch) && ty > 0 && !solid(g[ty - 1][Math.floor(g[0].length / 2)])) { floorY = ty * TILE; break; }
+  }
+  if (floorY >= H) return null;
+  const UP = 9;                             // how far the lumps may rise
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = (H - floorY) + UP;
+  const x = cv.getContext('2d');
+  // the painting's own floor: its bottom strip, stretched across the room.
+  // Texture, not geometry — a stretch reads as ground where a tile never will.
+  const sy = im.naturalHeight * 0.86, sh = im.naturalHeight * 0.14;
+  x.drawImage(im, 0, sy, im.naturalWidth, sh, 0, UP, W, cv.height - UP);
+  // settle it into the room's dark: a touch of shade toward the bottom
+  const shade = x.createLinearGradient(0, UP, 0, cv.height);
+  shade.addColorStop(0, 'rgba(3,6,8,0)'); shade.addColorStop(1, 'rgba(3,6,8,0.55)');
+  x.fillStyle = shade; x.fillRect(0, UP, W, cv.height - UP);
+  // the seam: lumps of the floor's own texture pushed UP past the line first
+  // (they copy clean pixels), then bites eaten INTO the edge — same grammar
+  // as erodeCaveEdges, so the line stops being a line
+  for (let bx = 0; bx < W; bx += 7) {
+    const r = hash2(bx * 3 + 1, floorY), r2 = hash2(bx, floorY * 7 + 5);
+    if (r > 0.4) {
+      const lw = 4 + r2 * 8, lh = 2 + r * (UP - 2);
+      x.drawImage(cv, bx, UP + 1, lw, lh, bx - 1, UP - lh + 2, lw + 2, lh);
+    }
+  }
+  x.globalCompositeOperation = 'destination-out';
+  for (let bx = 0; bx < W; bx += 5) {
+    const r = hash2(bx * 5 + 3, floorY + 11);
+    if (r < 0.35) continue;
+    x.beginPath(); x.arc(bx + r * 5, UP + (r - 0.5) * 3, 1.2 + r * 3.4, 0, 7); x.fill();
+  }
+  x.globalCompositeOperation = 'source-over';
+  INT_FLOOR = { key: ck, cv, y: floorY - UP };
+  return cv;
+}
+function drawInteriorFloor() {
+  const cv = interiorFloorCv();
+  if (cv) c.drawImage(cv, 0, INT_FLOOR.y);
+}
 function drawZoneVista(P, zone, px, py) {
   const own = ROOM_VISTA[G.roomId];
   if (own && typeof mediaFetch === 'function') mediaFetch(own);
@@ -6690,6 +6780,24 @@ function drawStatics(P) {
       // way everything else in this game turns: by selecting an authored angle
       // off a turntable lit from a fixed point in the world. Drawn out here in
       // world space, before the mirroring transform that it exists to replace.
+      // THE EYE MUST FIND HIM FIRST (owner: "NPC is faded — not visible at
+      // all"). A live machine-person is rusty bronze standing against
+      // furniture the same colour in the darkest rooms in the game, so before
+      // the body draws, a warm work-light halo goes on BEHIND it: the centre
+      // is covered by the sprite, and what survives is a lit rim that cuts
+      // the silhouette free of the backdrop.
+      if (live) {
+        const AK = typeof atlasOf === 'function' && atlasOf(s.extra);
+        const kk = (AK && AK.sub[s.extra] && AK.sub[s.extra].k) || 1.4;
+        const bh = s.h * kk;
+        const hx = s.x + s.w / 2, hcy = s.y + s.h - bh * 0.5;
+        const hg = c.createRadialGradient(hx, hcy, 4, hx, hcy, bh * 0.8);
+        hg.addColorStop(0, 'rgba(255,216,150,0.34)');
+        hg.addColorStop(0.6, 'rgba(255,200,120,0.14)');
+        hg.addColorStop(1, 'rgba(255,200,120,0)');
+        c.fillStyle = hg;
+        c.beginPath(); c.arc(hx, hcy, bh * 0.8, 0, 7); c.fill();
+      }
       // the woken tinker is AT WORK (owner: "start working on the table") —
       // in his den he faces his bench on the right, and only turns from it
       // when she actually talks to him. Every other NPC faces the cat.
@@ -7645,7 +7753,7 @@ function drawLights(P) {
     if (G.roomId === 'A0B') {
       const rs = G.statics.find(q => q.type === 'npc');
       if (rs && npcLive(rs)) {
-        lightAt(19.5 * TILE, (G.roomDef.h - 3) * TILE, 150, '#ffd28a', 0.20);
+        lightAt(19.5 * TILE, (G.roomDef.h - 3) * TILE, 170, '#ffd28a', 0.28);
         G._auraCount++;
       }
     }
@@ -7707,6 +7815,7 @@ function drawWorldFrame() {
   drawFlora();                      // ...and what grows in it — see FLORA
   if (tileDirty) renderTileLayer(P);
   c.drawImage(tileCv, 0, 0);
+  drawInteriorFloor();              // a painting-room walks on the painting's floor
   drawFrontier();                   // the next kingdom, seen from the last room
   // X1 hardlight bridge: alive while the Prowler stands, red and flickering
   // through the collapse, gone when the wreck settles

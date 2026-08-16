@@ -187,14 +187,15 @@ function processSheet(key, cols, rows) {
 // component deletes the Nymph's drifting spores, and eroding near-white
 // boundary pixels eats a porcelain Archivist from the outside in.
 function sheetOf(key, cols, rows, clean) {
-  if (clean === false) return MEDIA_IMG[key];
-  const p = processSheet(key, cols, rows);
-  const base = p || MEDIA_IMG[key];
+  const base = clean === false ? MEDIA_IMG[key]
+    : (processSheet(key, cols, rows) || MEDIA_IMG[key]);
   // the roster is the ENEMY sheet — it takes the pop grade (see media.js) so
   // the cast reads against the backdrop instead of dissolving into it. The
-  // npcs sheet does not: friendly faces keep the room's own light.
-  if (key === 'roster' && base && typeof popArt === 'function')
-    return popArt('sheet:' + key, base) || base;
+  // npcs sheet takes it too now (owner, 2026-08-16: "NPC is faded!"): the
+  // machine folk stand in the darkest rooms in the game, and a friendly face
+  // the eye cannot find is not keeping the room's light, it is missing.
+  if ((key === 'roster' || key === 'npcs') && base && typeof popArt === 'function')
+    return popArt('sheet:' + key, base, key === 'npcs' ? 0.68 : 0) || base;
   return base;
 }
 // ---------------------------------------------------------------------------
