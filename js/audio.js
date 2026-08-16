@@ -169,6 +169,30 @@ function playRecorded(key, gain) {
     return true;
   } catch (e) { return false; }
 }
+// THE MACHINE IN HER THROAT (owner: "a minimal echo for the character's voice
+// to make it a little more mechanic"). Every recorded take of HER voice runs
+// through one short metallic slapback on top of the dry signal: a single
+// 55 ms feedback comb — the classic Schroeder comb stage, the same unit
+// freeverb-family reverbs are built from — band-limited around 1.9 kHz so
+// the repeats ring like a small steel chamber rather than a canyon. Wet sits
+// at about a fifth of the dry level: the voice stays the recorded take, the
+// room it speaks in becomes the machine. One shared chain, built lazily and
+// rebuilt if the AudioContext is ever replaced; overlapping barks share it,
+// which is both cheaper and how a real room behaves.
+let VOXMECH = null;
+function voxMech() {
+  if (!AC) return null;
+  if (VOXMECH && VOXMECH.ac === AC) return VOXMECH;
+  const f = AC.createBiquadFilter();
+  f.type = 'bandpass'; f.frequency.value = 1900; f.Q.value = 1.1;
+  const d = AC.createDelay(0.3); d.delayTime.value = 0.055;
+  const fb = AC.createGain(); fb.gain.value = 0.30;
+  const wet = AC.createGain(); wet.gain.value = 0.22;
+  f.connect(d); d.connect(fb); fb.connect(d);
+  d.connect(wet); wet.connect(AC.destination);
+  VOXMECH = { ac: AC, in: f };
+  return VOXMECH;
+}
 function playBuf(key, vol, rate) {
   if (!AC || MUTED) return false;
   // a sound in the second wave that is asked for early jumps the queue. This
@@ -181,6 +205,10 @@ function playBuf(key, vol, rate) {
   if (rate) s.playbackRate.value = rate;
   g.gain.value = vol;
   s.connect(g); g.connect(AC.destination);
+  if (key.indexOf('hzd_') === 0) {
+    const m = voxMech();
+    if (m) g.connect(m.in);
+  }
   s.start();
   return true;
 }

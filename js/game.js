@@ -821,14 +821,30 @@ function doInteract(s) {
     // switched off, and you are the one carrying the cells.
     if (!npcLive(s)) {
       const key = npcKey(s);
+      // THE NOTE (owner, 2026-08-16). Ratchet is not like the other dark
+      // units: nothing drained him and nothing infected him. He pulled his
+      // OWN cell when the broadcast took the city — the one sane move left —
+      // and he left a note on his chest for whoever came after. So in the
+      // den she does not stare at a silent body wondering; she READS, and
+      // the note itself is the ask: put the cell back when it is safe. (It
+      // even tells her where he hid it — the chest across the room.)
+      const note = key === 'A0B|ratchet'
+        ? [t('sl_note1'), t('sl_note2'), t('sl_note3')] : null;
       if (invCount('batt') <= 0) {
-        // no cell: it says nothing, because it cannot. The line is HERS.
-        G.dialog = { name: t('n_' + s.extra), lines: [t('npc_dark'), t('npc_need')], i: 0, npc: s.extra, onEnd: null };
+        // no cell: it says nothing, because it cannot. The line is HERS —
+        // unless there is a note, in which case the note speaks for him.
+        G.dialog = {
+          name: t('n_' + s.extra),
+          lines: note ? note.concat([t('npc_need')]) : [t('npc_dark'), t('npc_need')],
+          i: 0, npc: s.extra, onEnd: null,
+        };
         G.state = 'DIALOG'; sfx('ui');
         return;
       }
       G.dialog = {
-        name: t('n_' + s.extra), lines: [t('npc_dark'), t('npc_give')], i: 0, npc: s.extra,
+        name: t('n_' + s.extra),
+        lines: note ? note.concat([t('npc_give')]) : [t('npc_dark'), t('npc_give')],
+        i: 0, npc: s.extra,
         onEnd: () => {
           if (!invTake('batt')) return;
           npcCharge(s);
@@ -855,13 +871,24 @@ function doInteract(s) {
           if (G.dialog && !G.dialog.onEnd) {
             if (key === 'A0B|ratchet') {
               G.dialog.onEnd = () => {
-                G.dialog = {
-                  name: t('n_' + s.extra),
-                  lines: [t('sl_pod_lesson'), t('sl_heal_gift'), t('sl_heal_how')],
-                  i: 0, npc: s.extra,
-                  onEnd: () => doInteract(s),
+                const lesson = () => {
+                  G.dialog = {
+                    name: t('n_' + s.extra),
+                    lines: [t('sl_pod_lesson'), t('sl_heal_gift'), t('sl_heal_how')],
+                    i: 0, npc: s.extra,
+                    onEnd: () => doInteract(s),
+                  };
+                  G.state = 'DIALOG'; sfx('ui'); npcSay(s.extra, 0);
                 };
-                G.state = 'DIALOG'; sfx('ui'); npcSay(s.extra, 0);
+                // THE MEMORY (owner): the first thing he does with his cell
+                // back in is TELL — the fired film of the city falling and
+                // the necklace that saved him. When the clip is not on disk
+                // yet the wake flows straight on to the lessons.
+                if (PURIFY_VID.memory) {
+                  purifyPreload('memory');
+                  if (startPurifyCut('memory')) { G.cutEnd = lesson; return; }
+                }
+                lesson();
               };
             } else G.dialog.onEnd = () => doInteract(s);
           }
@@ -924,6 +951,23 @@ function doInteract(s) {
       }
       const sl = t(k);
       if (sl && sl !== k) lines = [sl].concat(lines);
+    }
+    // THE STORY COMES IN FRAGMENTS (owner: "give us fragments of the story
+    // with every advancement"). The memory film is the whole of what happened
+    // to the city; these are the shards he can only say out loud once she has
+    // proven she can carry them — one new fragment each time a guardian's
+    // fork has been answered, told the next time she comes home to the den.
+    if (s.extra === 'ratchet') {
+      const forks = ((typeof braid === 'function' && braid()) || {}).forks || 0;
+      const told = G.save.flags.rfrag || 0;
+      if (forks > told && told < 5) {
+        const fl = t('sl_rfrag' + (told + 1));
+        if (fl && fl.indexOf('sl_rfrag') !== 0) {
+          lines = [fl].concat(lines);
+          G.save.flags.rfrag = told + 1;
+          if (typeof persist === 'function') persist();
+        }
+      }
     }
     G.dialog = { name: t('n_' + s.extra), lines, i: 0, npc: s.extra, onEnd: after };
     G.state = 'DIALOG'; npcSay(s.extra, 0);
@@ -2717,6 +2761,13 @@ Object.assign(PURIFY_VID, ENDING_VID);
 {
   const have = (typeof window !== 'undefined' && window.VID_FILES) || null;
   if (have) for (const k in have) if (k.indexOf('intro') === 0) PURIFY_VID[k] = have[k];
+  // THE MEMORY FILM (owner, 2026-08-16): the moment his cell goes back in,
+  // Ratchet tells what happened to the city — the necklace, the red flicker,
+  // the crystal turning his eyes back blue, and his own hands opening his
+  // chest. §3n on THE FIRING LIST. Registered only when the fired clip is
+  // actually on disk, so until it lands the wake goes straight to the gift
+  // and never waits on black.
+  if (have && have.ratchet_memory) PURIFY_VID.memory = have.ratchet_memory;
 }
 function endingReel() {
   const killed = (G.save && G.save.flags && G.save.flags.killed) || {};
@@ -2949,6 +3000,11 @@ function endPurifyCut() {
     b.pureT = Math.max(b.pureT || 0, 1.2);
     if (b.rewardPend) { b.rewardPend = false; G.onBossDead(b.kind); }
   }
+  // a film chained out of a conversation hands BACK to it (the memory film
+  // plays inside the wake sequence): one-shot, cleared before it runs so a
+  // callback that starts another cut cannot re-fire itself.
+  const chain = G.cutEnd;
+  if (chain) { G.cutEnd = null; chain(); }
 }
 // THE FIRST TAP BUYS SOUND, NOT A SKIP. The badge asks the player to touch the
 // screen so the score can start; if that same touch also skipped the opening,

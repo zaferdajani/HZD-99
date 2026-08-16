@@ -2032,10 +2032,48 @@ The owner's order in the den: the workbench from the denInterior painting
 becomes an OBJECT — same shape, same size — standing in front of Ratchet,
 because "this is where the NPC will start working on the sword, from the
 crystal." The stand-in ships already: the lamplit bench region of the den
-painting (x 0.52-0.92, y 0.42-0.82), cropped and stood on the floor at his
-right hand (js/game.js drawStatics tail). Fire the real object plate
+painting (x 0.520-0.970, y 0.435-0.895 — the bench silhouette with its
+backboard, top, drawer and legs), cropped, every cut edge feathered and the
+wall corner above its left surface faded out diagonally, stood on the floor
+at his right hand (js/game.js workTablePlate + the drawStatics tail). Fire
+the real object plate
 AGAINST that crop as reference: the same heavy timber bench, same tools and
 spools, matted subject-only on transparency, lit by the same overhead lamp
 warmth, no background wall, no floor, no right angles presenting (the
 timber sags and leans). Key `forgeTable`, and the wiring swap is one line
 where the crop draws today.
+
+### 3n. THE MEMORY FILM ×1 ✱ FIRE ON REBIND (generate_video — owner's design, 2026-08-16)
+
+The owner's story order, beat for beat. When the hero puts Ratchet's cell
+back in, he tells what happened to the city — as a FILM, played through the
+purify-cut player the moment the wake gift closes. The wiring is live: the
+clip lands as `assets/video/ratchet_memory.mp4` and registers itself
+(PURIFY_VID.memory, guarded on the build manifest — until the file exists
+the wake skips straight to the lessons, nothing waits on black).
+
+The film, in the owner's words, structured:
+
+1. **The city, the day it began.** The broadcast takes the machines —
+   show it as the neighbours going quiet and turning, not as violence.
+2. **The necklace.** Close on Ratchet: a small crystal pendant at his
+   chest, shining WHITE.
+3. **The infection reaches him.** His eye-lights flicker RED — the song
+   is taking him like everyone else.
+4. **The crystal answers.** He closes his eyes; the pendant's shine
+   swells; when the eyes open they are BLUE again. The infection is
+   prevented — the crystal did it.
+5. **The sane move.** Knowing red comes for everyone who stays powered,
+   he opens his own chest and takes out his own battery — writes the note,
+   sets it on his chest plate, and goes dark in his chair to wait for
+   someone worth waking for.
+
+Continuity locks: the pendant crystal is THE crystal family (same cut and
+light as the chest crystal / sword shard canon); the den is HIS den
+(denInterior is the set); resting pose ends exactly where
+ratchet_resting.png begins, so the film's last frame hands off to the body
+she actually finds. Eye colour grammar is canon now: red = infected,
+blue = himself, and nothing else in the film may use those two colours for
+anything eye-like. In-game, the same story is told again in five spoken
+fragments (sl_rfrag1-5, one per guardian fork answered) — the film is the
+whole; the fragments are the shards, and they must not contradict it.
