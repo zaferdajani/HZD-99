@@ -28,6 +28,29 @@ the owner's ruling ends the pattern. The protocol that replaces it:
 The retired branch `claude/art-queue-section-1-fire-yqlyc0` is fully merged
 and must never receive another commit.
 
+### THE SESSION FLEET (owner's protocol, 2026-08-16)
+
+The owner opens a session per JOB, when asked, and each session does only
+its job — all on the ONE branch above:
+
+- **The CODE session** (this protocol's reader, usually): code, gameplay,
+  wiring, tests, world. It is also THE INTEGRATOR: it pulls frequently,
+  merges what the others push, verifies with the full suite, ships, and
+  reports. A job is not done until the integrator has pulled it, tested
+  it, and confirmed it live.
+- **The ART session**: holds the Higgsfield binding. Fires THE FIRING LIST
+  in docs/ART_QUEUE.md top to bottom, WITH THE OWNER REVIEWING each result
+  before it is keyed and committed — the owner refuses art he does not
+  like, and credits are his. It never edits game logic beyond wiring notes.
+- Further sessions (music, video, a heavy migration) follow the same shape:
+  one job, named at open, same branch, coordinated through the ledgers
+  (ART_QUEUE for art, the task list for code).
+
+When a needed session does not exist, the correct move is to ASK THE OWNER
+to open one and hand him its kickoff instruction — never to substitute for
+its job (see ART IS HIGGSFIELD'S above), and never to sit on the work
+silently.
+
 ## ART IS HIGGSFIELD'S, CODE IS OURS (owner's standing order, restated 2026-08-16)
 
 **"All arts, videos, images, STRUCTURES should be created through
