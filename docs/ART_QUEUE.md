@@ -246,6 +246,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  15. §2i    THE BREAKER ×3                    (rest / fins-flared tell / vented — new zone-B enemy)
  16. §2j    SERVO'S WINDING HOUSE ×1          (kingdom 1 session, 2026-08-16 — see brief below)
  17. §2k    THE TINKER'S QUENCH HOOD + FORGE ×2 (forgeFront / forgeInterior — kingdom 3)
+ 18. §2l    THE KILN VENT ×3                  (rest / petals-open tell / spent — new zone-C enemy)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -835,6 +836,32 @@ rule: pour ladles, slag, chains, machine hoods) and nothing plumb or square
 > right angles presenting: shelves sag, posts lean, chains curve. Clean
 > high-detail 3D render. NEGATIVE: no characters, no text, no watermark,
 > no doors, no windows with daylight.
+
+### 2l. THE KILN VENT (kiln — new zone-C enemy, 2026-08-16) ✱ NEW
+
+The Foundry's own machine (js/entities.js, kind `kiln`): a squat casting
+pot plumbed into the floor that blows a standing column of furnace heat
+straight up off its mouth on a told beat — the kingdom's lesson in heat
+running on a rhythm and in how much of the quiet you dare spend, taught
+before FURNACE CHOIR runs the greed test for keeps (registry §4). Atlas-
+creature plates in the minion family style (small machine, reads smaller
+than HZD-99); the engine-drawn fallback (`case 'kiln'` in Enemy.draw,
+js/entities.js) is the placement reference:
+
+- **rest** — a squat vertical crucible with a flared mouth, sitting in its
+  own cooled slag skirt (never a square plinth), bronze mouth collar,
+  three ceramic damper petals folded flat over the mouth, feed pipes
+  arcing into the ground both sides, a dull ember light in the throat.
+- **tell** — damper petals HINGED WIDE off the rim, the middle one lifted,
+  throat white-hot (the amber wash is code; the POSE is the plate —
+  silhouette must differ from rest per ART_BIBLE §3.3), body swelling.
+- **spent** — petals hanging drooped past wide, throat dead dark, side
+  grates fallen open showing hot amber slots: visibly empty, the punish
+  window made readable across a room.
+
+NEGATIVE for all: no legs, no horizontal drum (it must never read as the
+breaker), no barrel or gun (nor the turret), no second character, no
+text, no watermark; dark-room phrasing per the §1 warnings, subject only.
 
 ### 1e. THE RUN PAIR RE-FIRE ✅ FIRED AND SHIPPED 2026-08-16 (art session)
 

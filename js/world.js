@@ -504,7 +504,17 @@ const ROOMS = {
     // with nothing to stand on is the worst version of the forbidden pair: you
     // cannot even choose which one to answer. The lower one is a hopper now,
     // holding the ledge at y=23 that the descent has to land on.
-    ents: [['plat', 12, 22, [0, -8, 4.6, 2]], ['mod', 26, 18, 'wall'], ['flier', 15, 15], ['hopper', 8, 22], ['turret', 20, 27], ['scrap', 3, 23, 15], ['riddle', 6, 23, 3], ['secret', 8, 23, 'sigil3']],
+    //
+    // THE KILN'S FIRST ROOM (registry §6.4: a new machine gets one room to be
+    // read in — its own screen window holds it ALONE here, threat 2). It
+    // replaces the last flier: the kingdom's first screen now asks its OWN
+    // question — the vent on the third rung charges as you descend toward it,
+    // and the air over the ledge is briefly not yours — instead of re-asking
+    // zone A's flier question on the way in. Solution shape: land the rung's
+    // far half through the tell, cross on the beat's quiet or punish the
+    // 0.95 s of open grates; failure mode: dropping straight down the vent's
+    // lane during the blow meets the column mid-fall.
+    ents: [['plat', 12, 22, [0, -8, 4.6, 2]], ['mod', 26, 18, 'wall'], ['kiln', 6, 12], ['hopper', 8, 22], ['turret', 20, 27], ['scrap', 3, 23, 15], ['riddle', 6, 23, 3], ['secret', 8, 23, 'sigil3']],
     build(g) {
       hline(g, 0, 29, 0, '#'); rect(g, 0, 32, 29, 33, '#');
       vline(g, 0, 0, 33, '#'); vline(g, 29, 0, 33, '#');
@@ -566,7 +576,14 @@ const ROOMS = {
     // with two of the errand's four guns in it — sat sealed behind a solid
     // frame wall. Found walking the wall, not the graph: deadend.cjs reads
     // exits, and exits lie when the wall disagrees.
-    ents: [['plat', 33, 12, [5, 0, 3.6]], ['blob', 16, 15], ['turret', 22, 15], ['hopper', 42, 15], ['guard', 46, 15], ['blob', 55, 15], ['scrap', 5, 15, 12],
+    //
+    // The kiln recurs here (taught one room up), replacing the first blob:
+    // it sits hard against the spike run's landing, so the crossing is a
+    // read — bait the blow from the spikes' far lip, cross behind the plume,
+    // take the pot in its spent window before the turret's next arc. Threat
+    // and peak unchanged (blob and kiln are both 2); the hall keeps its
+    // second blob, so zone C's denial lesson still stands where it stood.
+    ents: [['plat', 33, 12, [5, 0, 3.6]], ['kiln', 16, 15], ['turret', 22, 15], ['hopper', 42, 15], ['guard', 46, 15], ['blob', 55, 15], ['scrap', 5, 15, 12],
            ['saw', 40, 15, [6, 0, 3.0]]],
     build(g) {
       frame(g); openR(g); openL(g);

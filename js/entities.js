@@ -3931,6 +3931,9 @@ const EKIND = {
   // THE BREAKER — the Data Conduits' own machine (kingdom 2). spd is the
   // WAVE's speed, not the body's: the drum is bolted where it stands.
   surge: { w: 30, h: 24, hp: 40, spd: 250 },
+  // THE KILN VENT — the Foundry's own machine (kingdom 3). spd is the
+  // PLUME's rise speed, not the body's: the pot is plumbed where it stands.
+  kiln: { w: 30, h: 26, hp: 42, spd: 460 },
   sage: { w: 26, h: 42, hp: 150, spd: 170 },
 };
 class Enemy {
@@ -4396,6 +4399,62 @@ class Enemy {
         }
         break;
       }
+      // THE KILN VENT (kingdom 3's own machine) asks FURNACE CHOIR's question
+      // a kingdom early: HEAT RUNS ON A BEAT — AND HOW MUCH OF THE QUIET WILL
+      // YOU SPEND STANDING IN ITS LANE? A squat casting pot plumbed into the
+      // Foundry floor. When she is in its patch it charges for TELL_SWIPE —
+      // damper petals hinge open, the amber ring reads — then it BLOWS: a
+      // column of furnace heat stands straight up off the mouth, and the air
+      // over the vent is briefly not hers, grounded or airborne alike (the
+      // surge owns the floor; the kiln owns the LANE — two different answers).
+      // The column is side-stepped (finite half-width), out-waited (finite
+      // burn), or never met at all (cross on the beat's quiet). Then the pot
+      // is SPENT: grates fall open for 0.95 s — a window that fits two hits
+      // and tempts three, which is exactly the greed axis its guardian's
+      // whole fight is built on (registry §4: FURNACE CHOIR, greed test).
+      // Zoner; threat 2; the tell never shortens with iq — cunning buys a
+      // taller plume and a shorter rest, not a shorter warning.
+      case 'kiln': {
+        this.vy += 2000 * dt; this.vx = 0;
+        moveEnt(this, dt);
+        this.dir = 0;                 // omnidirectional: no misleading tell wedge
+        if ((this.plumeT || 0) > 0) {      // BLOWING — the lane is closed
+          this.plumeT -= dt;
+          this.plumeH = Math.min(this.plumeMax || 150, (this.plumeH || 0) + this.spd * dt);
+          const my = this.y + 2;           // the mouth: the column stands on it
+          if (!player.dead && player.iT <= 0
+              && Math.abs(player.x + player.w / 2 - cx) < 19
+              && player.y + player.h > my - this.plumeH && player.y < my + 6)
+            player.hurt(DF().edmg, cx, 'kiln.plume');
+          if (chance(dt * 26)) addPart(cx + rnd(-8, 8), my - rnd(0, this.plumeH),
+            rnd(-24, 24), rnd(-160, -60), 0.3, chance(0.4) ? '#ffd08a' : '#ff5f6d', 2.2, -80, true);
+          if (this.plumeT <= 0) { this.plumeH = 0; this.windedT = 0.95; }
+          break;
+        }
+        if (this.windedT > 0) {            // SPENT — the punish window (0.95 s)
+          this.windedT -= dt;
+          break;
+        }
+        if (this.crouchT > 0) {            // the charge — petals up, amber on
+          this.crouchT -= dt;
+          if (this.crouchT <= 0) {
+            this.plumeT = 0.8; this.plumeH = 0;
+            // cunning buys REACH: a taller column each iq step, never less warning
+            this.plumeMax = 140 + this.iq * 70;
+            sfx('cast');
+          }
+          break;
+        }
+        // idle: plumbed in, breathing embers, watching its patch — the band
+        // reaches UP, because the lane it closes does
+        if (!player.dead && Math.abs(px - cx) < 210 && py > cy - 190 && py < cy + 70
+            && (this.atkCD -= dt) <= 0) {
+          this.crouchT = TELL_SWIPE;       // the kingdom floor: the tell never shortens
+          this.atkCD = rnd(2.2 - this.iq * 0.7, 3.4 - this.iq * 1.1);
+          sfx('tell');
+        }
+        break;
+      }
     }
     // spikes are spikes for everyone: a machine that lands in the pit dies
     // in it — no creature camps where the player cannot stand
@@ -4583,6 +4642,44 @@ class Enemy {
         c.fillStyle = gl;
         c.beginPath(); c.ellipse(w.x, w.y - 3, 26, 12, 0, 0, 7); c.fill();
       }
+      c.restore(); c.globalAlpha = 1;
+    }
+    // the kiln's plume stands on the mouth, not on the body — drawn in world
+    // space, danger red at its skin per the registry (area denial, "this space
+    // is briefly not yours"), white-hot only at the throat where it is born
+    if (this.kind === 'kiln' && (this.plumeT || 0) > 0 && !this.dead) {
+      const my = this.y + 2, ph = this.plumeH || 0;
+      const a = clamp(this.plumeT * 4, 0, 1);
+      c.save(); c.globalCompositeOperation = 'lighter';
+      // the column: a gradient stalk born white and dying danger red
+      const gl = c.createLinearGradient(0, my, 0, my - ph);
+      gl.addColorStop(0, 'rgba(255,242,221,' + 0.5 * a + ')');
+      gl.addColorStop(0.4, 'rgba(255,148,48,' + 0.4 * a + ')');
+      gl.addColorStop(1, 'rgba(255,95,109,' + 0.16 * a + ')');
+      c.fillStyle = gl;
+      c.beginPath();
+      c.moveTo(cx - 13, my);
+      c.quadraticCurveTo(cx - 15 + Math.sin(this.anim * 21) * 3, my - ph * 0.55, cx - 8 + Math.sin(this.anim * 17) * 3, my - ph);
+      c.lineTo(cx + 8 + Math.sin(this.anim * 19 + 2) * 3, my - ph);
+      c.quadraticCurveTo(cx + 15 + Math.sin(this.anim * 23 + 4) * 3, my - ph * 0.55, cx + 13, my);
+      c.closePath(); c.fill();
+      // tongues climbing the stalk — the crest that says it is MOVING up
+      c.strokeStyle = '#ff5f6d'; c.lineWidth = 2; c.lineCap = 'round';
+      c.globalAlpha = 0.5 * a;
+      for (let i = 0; i < 3; i++) {
+        const ty = my - ((this.anim * 130 + i * ph / 3) % Math.max(ph, 1));
+        const tw = 10 - i * 2;
+        c.beginPath();
+        c.moveTo(cx - tw, ty);
+        c.quadraticCurveTo(cx + Math.sin(this.anim * 25 + i * 2.4) * 5, ty - 9, cx + tw, ty);
+        c.stroke();
+      }
+      // the crown: where the reach STOPS, marked so the read is a shape
+      c.globalAlpha = 0.4 * a;
+      const cg = c.createRadialGradient(cx, my - ph, 1, cx, my - ph, 20);
+      cg.addColorStop(0, '#ff5f6d'); cg.addColorStop(1, 'rgba(255,95,109,0)');
+      c.fillStyle = cg;
+      c.beginPath(); c.ellipse(cx, my - ph, 20, 9, 0, 0, 7); c.fill();
       c.restore(); c.globalAlpha = 1;
     }
     // EVERY WIND-UP WEARS THE SAME COLOUR. One hue, one meaning, used by
@@ -4934,6 +5031,91 @@ class Enemy {
         }
         eyes(-3, -5.5, 1.9);
         c.restore();   // drum lift
+        c.restore();   // the un-flip
+        break;
+      }
+      case 'kiln': {
+        // GLOD — a casting pot that never stopped being fed. Base geometry no
+        // other mimic owns: a squat VERTICAL CRUCIBLE with a flared mouth and
+        // three damper petals on the rim — no legs (blob), no horizontal drum
+        // (the breaker), no barrel (the turret), no wedge (the crawler).
+        // Engine-drawn stand-in; authored plates are queued (ART_QUEUE §2l)
+        // per the four-class art bible.
+        const tell = (this.crouchT || 0) > 0;
+        const blowing = (this.plumeT || 0) > 0;
+        const spent = (this.windedT || 0) > 0;
+        const k2 = tell ? 1 - clamp(this.crouchT / TELL_SWIPE, 0, 1) : 0;
+        const shiver = blowing ? Math.sin(this.anim * 40) * 1.1 : tell ? Math.sin(this.anim * 24) * k2 * 0.8 : 0;
+        // symmetric machine: undo the flip so it never appears to jump sides
+        c.save(); c.scale(1 / flip, 1);
+        // feed pipes arcing into the floor on both sides — it is PLUMBED in
+        c.strokeStyle = MAT.steel.dark; c.lineWidth = 2.4; c.lineCap = 'round';
+        for (const s of [-1, 1]) {
+          c.beginPath(); c.moveTo(s * 10, 8);
+          c.quadraticCurveTo(s * 17, 9, s * 19, 13); c.stroke();
+        }
+        // the slag skirt it sits in — cooled spillage, never a square plinth
+        frame(() => {
+          c.beginPath(); c.moveTo(-14, 13);
+          c.quadraticCurveTo(-11, 7, -6, 8.5);
+          c.quadraticCurveTo(0, 6.5, 6, 8.5);
+          c.quadraticCurveTo(11, 7, 14, 13);
+          c.closePath();
+        }, 7, 13);
+        for (const bx of [-8, 8]) joint(bx, 11.5, 1.4);
+        // the pot — swells a little as it charges, sags a little spent
+        const sag = spent ? 1.2 : 0;
+        c.save(); c.translate(shiver, sag);
+        plate(() => {
+          c.beginPath();
+          c.moveTo(-9, -8);                          // the flared mouth lip
+          c.quadraticCurveTo(-13, -4, -11.5, 2);     // belly out
+          c.quadraticCurveTo(-10, 8, 0, 9);
+          c.quadraticCurveTo(10, 8, 11.5, 2);
+          c.quadraticCurveTo(13, -4, 9, -8);
+          c.quadraticCurveTo(0, -10, -9, -8);        // no straight rim
+          c.closePath();
+        }, -9, 9);
+        seam(-10, 1, 10, 1, 0.2);
+        // bronze mouth collar
+        c.strokeStyle = ramp(c, MAT.bronze, -10, -10, 10, -6);
+        c.lineWidth = 2.2;
+        c.beginPath(); c.ellipse(0, -8, 9.6, 2.6, 0, 0, 7); c.stroke();
+        // damper petals: folded over the mouth at rest, HINGED OPEN through
+        // the charge, hanging wide and drooped when spent — the silhouette IS
+        // the state (art bible §3.3)
+        const open = tell ? 0.35 + k2 * 1.15 : blowing ? 1.6 : spent ? 1.85 : 0.25;
+        for (const [px2, s] of [[-6, -1], [0, 0], [6, 1]]) {
+          c.save(); c.translate(px2, -8.5);
+          if (s) c.rotate(s * open);                 // side petals hinge out
+          else c.translate(0, -open * 2.2);          // the middle petal lifts
+          plate(() => {
+            c.beginPath(); c.moveTo(-3, 0);
+            c.quadraticCurveTo(0, -4.5 - open * 2.4, 3, 0);
+            c.closePath();
+          }, -13 - open * 3, -8);
+          c.restore();
+        }
+        // the throat: dull embers at rest, white through the charge and the
+        // blow, dead dark when spent — plus fallen-open side grates while it
+        // is spent, so the window reads across the room
+        c.save();
+        c.globalAlpha = spent ? 0.22 : blowing ? 1 : 0.6 + k2 * 0.4;
+        accent(() => { c.beginPath(); c.ellipse(0, -7.5, 5.5 + k2 * 2, 2 + k2, 0, 0, 7); c.fill(); }, tell || blowing);
+        c.restore();
+        if (spent) {
+          c.fillStyle = '#1a222c';
+          for (const s of [-1, 1]) c.fillRect(s * 8.5 - 2, 0, 4, 6);
+          c.save(); c.globalAlpha = 0.4 + Math.sin(this.anim * 9) * 0.2;
+          c.fillStyle = '#ff9a6a';
+          for (const s of [-1, 1]) c.fillRect(s * 8.5 - 1.2, 1, 2.4, 4);
+          c.restore();
+        } else if (!blowing && chance(0.06)) {
+          // idle breath: one ember slipping the dampers now and then
+          addPart(cx + rnd(-3, 3), this.y - 2, rnd(-8, 8), rnd(-40, -20), 0.5, '#ff9430', 1.6, -30, true);
+        }
+        eyes(-4, 2.5, 1.8);
+        c.restore();   // pot shiver/sag
         c.restore();   // the un-flip
         break;
       }
