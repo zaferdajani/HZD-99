@@ -14,8 +14,8 @@
 // Roles and threat values come from docs/combat/GLOBAL_REGISTRY.md §4.
 const { chromium } = require('playwright');
 
-const THREAT = { crawler: 1, hopper: 1, flier: 2, turret: 2, blob: 2, guard: 3, surge: 2, kiln: 2 };
-const ROLE = { crawler: 'pressure', hopper: 'pressure', flier: 'disruptor', turret: 'zoner', blob: 'denial', guard: 'anchor', surge: 'zoner', kiln: 'zoner' };
+const THREAT = { crawler: 1, hopper: 1, flier: 2, turret: 2, blob: 2, guard: 3, surge: 2, kiln: 2, rime: 2 };
+const ROLE = { crawler: 'pressure', hopper: 'pressure', flier: 'disruptor', turret: 'zoner', blob: 'denial', guard: 'anchor', surge: 'zoner', kiln: 'zoner', rime: 'zoner' };
 const SCREEN_TILES_X = 30;        // 960 px at TILE = 32
 const SCREEN_TILES_Y = 17;        // 540 px, rounded up — the other half of a screen
 

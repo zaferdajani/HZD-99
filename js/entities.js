@@ -3938,6 +3938,9 @@ const EKIND = {
   // THE KILN VENT — the Foundry's own machine (kingdom 3). spd is the
   // PLUME's rise speed, not the body's: the pot is plumbed where it stands.
   kiln: { w: 30, h: 26, hp: 42, spd: 460 },
+  // THE RIME COIL — the Archives' own machine (kingdom 4). spd is the
+  // RING's growth speed, not the body's: the coil is bolted where it stands.
+  rime: { w: 28, h: 26, hp: 44, spd: 300 },
   sage: { w: 26, h: 42, hp: 150, spd: 170 },
 };
 class Enemy {
@@ -4459,6 +4462,70 @@ class Enemy {
         }
         break;
       }
+      // THE RIME COIL (kingdom 4's own machine) asks GLACIERE's question a
+      // kingdom early: THE COLD CLOSES AS A CIRCLE, AND JUMPING IS NOT AN
+      // ANSWER TO A RADIUS — DISTANCE IS. A waisted condenser bobbin bolted
+      // into the Archives floor. When she is in its patch it charges for
+      // TELL_HEAVY — the frost crown extends, the amber ring reads — and the
+      // whole tell is SPENT GROWING THE BOUNDARY: a frost ring swells from
+      // the coil to a told edge and holds there, so the read is a shape on
+      // the ground, not a timer in her head. Then it SNAPS: everything
+      // inside the circle at that instant is hit, grounded or airborne alike
+      // (the surge owns the floor, the kiln owns the lane, the rime owns the
+      // RADIUS — three machines, three different answers). On ice, where the
+      // Archives already forbid stopping, leaving a circle is a commitment
+      // made EARLY — which is exactly the read GLACIERE's ABSOLUTE ZERO
+      // hush demands for keeps ("be outside it when the silence lands").
+      // Then it is DARK: the core dies for 1.0 s — a window that fits two
+      // hits and tempts three. Zoner; threat 2; the tell never shortens with
+      // iq — cunning buys a wider circle and a shorter rest, never a shorter
+      // warning; TELL_HEAVY, not TELL_SWIPE, because the answer costs
+      // ground and the warning has to pay for the ground it costs.
+      case 'rime': {
+        this.vy += 2000 * dt; this.vx = 0;
+        moveEnt(this, dt);
+        this.dir = 0;                 // omnidirectional: no misleading tell wedge
+        if ((this.snapT || 0) > 0) this.snapT -= dt;   // the flash decays on its own
+        if (this.windedT > 0) {            // DARK — the punish window (1.0 s)
+          this.windedT -= dt;
+          break;
+        }
+        if (this.crouchT > 0) {            // the charge — crown up, boundary growing
+          this.crouchT -= dt;
+          this.ringR = Math.min(this.ringMax || 120, (this.ringR || 0) + this.spd * dt);
+          if (this.crouchT <= 0) {
+            // THE SNAP: one instant, one circle — inside is hit, outside is not
+            const r = this.ringR || 0;
+            const ddx = player.x + player.w / 2 - cx, ddy = player.y + player.h / 2 - cy;
+            if (!player.dead && player.iT <= 0 && ddx * ddx + ddy * ddy < r * r)
+              player.hurt(DF().edmg, cx, 'rime.snap');
+            // the circle's death is drawn where its edge WAS, so the miss
+            // teaches as well as the hit
+            this.snapR = r; this.snapT = 0.22;
+            for (let i = 0; i < 14; i++) {
+              const a = i / 14 * 6.283 + rnd(-0.1, 0.1);
+              addPart(cx + Math.cos(a) * r, cy + Math.sin(a) * r,
+                Math.cos(a) * rnd(20, 60), -rnd(20, 90), 0.35, i % 3 ? '#a8e4f4' : '#e6fbff', 2, 160, true);
+            }
+            this.ringR = 0;
+            this.windedT = 1.0;            // opening_ms = 1000 − 33: two hits, tempts three
+            sfx('cast');
+          }
+          break;
+        }
+        // idle: bolted in, breathing cold, watching its patch — the band is
+        // a little wider than the widest circle, so the first read is free
+        if (!player.dead && Math.abs(px - cx) < 240 && Math.abs(py - cy) < 150
+            && (this.atkCD -= dt) <= 0) {
+          this.crouchT = TELL_HEAVY;       // the kingdom floor: the tell never shortens
+          this.ringR = 0;
+          // cunning buys REACH: a wider circle each iq step, never less warning
+          this.ringMax = 104 + this.iq * 48;
+          this.atkCD = rnd(2.6 - this.iq * 0.8, 3.8 - this.iq * 1.2);
+          sfx('tell');
+        }
+        break;
+      }
     }
     // spikes are spikes for everyone: a machine that lands in the pit dies
     // in it — no creature camps where the player cannot stand
@@ -4684,6 +4751,49 @@ class Enemy {
       cg.addColorStop(0, '#ff5f6d'); cg.addColorStop(1, 'rgba(255,95,109,0)');
       c.fillStyle = cg;
       c.beginPath(); c.ellipse(cx, my - ph, 20, 9, 0, 0, 7); c.fill();
+      c.restore(); c.globalAlpha = 1;
+    }
+    // the rime's circle is the READ, drawn in world space as the TRUE hit
+    // shape — a circle on the body's centre, because the snap tests exactly
+    // that circle and a floor ellipse would lie about the air. Frost skin,
+    // amber at the growing edge (a warning is amber everywhere in this game);
+    // danger red only for the one beat the circle is real (the registry's
+    // area-denial hue, worn at the moment the area denies)
+    if (this.kind === 'rime' && !this.dead && ((this.ringR || 0) > 2 || (this.snapT || 0) > 0)) {
+      const ry = this.y + this.h / 2;
+      c.save();
+      if ((this.ringR || 0) > 2) {
+        const r = this.ringR;
+        const held = r >= (this.ringMax || 120) - 1;     // the edge has arrived
+        c.globalCompositeOperation = 'lighter';
+        // the cold filling the circle, thin — presence, not opacity
+        const fg = c.createRadialGradient(cx, ry, r * 0.3, cx, ry, r);
+        fg.addColorStop(0, 'rgba(168,228,244,0)');
+        fg.addColorStop(1, 'rgba(168,228,244,0.16)');
+        c.fillStyle = fg;
+        c.beginPath(); c.arc(cx, ry, r, 0, 7); c.fill();
+        // the boundary itself: frost line under an amber dashed rim — the
+        // same amber the body wears, because they are the same warning
+        c.strokeStyle = 'rgba(230,251,255,0.55)'; c.lineWidth = 2;
+        c.beginPath(); c.arc(cx, ry, r, 0, 7); c.stroke();
+        c.strokeStyle = TELL_COL; c.lineWidth = held ? 2.4 : 1.6;
+        c.globalAlpha = held ? 0.8 + Math.sin(this.anim * 26) * 0.2 : 0.55;
+        c.setLineDash([6, 6]); c.lineDashOffset = -performance.now() / 40;
+        c.beginPath(); c.arc(cx, ry, r, 0, 7); c.stroke(); c.setLineDash([]);
+      }
+      if ((this.snapT || 0) > 0) {
+        // the snap: the circle is REAL for one flash, then it is gone
+        const a = clamp(this.snapT / 0.22, 0, 1), r = this.snapR || 0;
+        c.globalCompositeOperation = 'lighter';
+        const sg = c.createRadialGradient(cx, ry, 2, cx, ry, r);
+        sg.addColorStop(0, 'rgba(230,251,255,' + 0.5 * a + ')');
+        sg.addColorStop(0.75, 'rgba(255,95,109,' + 0.3 * a + ')');
+        sg.addColorStop(1, 'rgba(255,95,109,' + 0.45 * a + ')');
+        c.fillStyle = sg;
+        c.beginPath(); c.arc(cx, ry, r, 0, 7); c.fill();
+        c.strokeStyle = '#ff5f6d'; c.globalAlpha = a; c.lineWidth = 2.6;
+        c.beginPath(); c.arc(cx, ry, r, 0, 7); c.stroke();
+      }
       c.restore(); c.globalAlpha = 1;
     }
     // EVERY WIND-UP WEARS THE SAME COLOUR. One hue, one meaning, used by
@@ -5120,6 +5230,99 @@ class Enemy {
         }
         eyes(-4, 2.5, 1.8);
         c.restore();   // pot shiver/sag
+        c.restore();   // the un-flip
+        break;
+      }
+      case 'rime': {
+        // RIM — an archive climate unit that never stopped chilling. Base
+        // geometry no other mimic owns: a WAISTED CONDENSER BOBBIN — two
+        // lobes and a pinched middle, wrapped in a cooling coil — no legs
+        // (blob), no horizontal drum (the breaker), no flared crucible mouth
+        // (the kiln), no barrel (the turret), no wedge (the crawler).
+        // Engine-drawn stand-in; authored plates are queued (ART_QUEUE §2n)
+        // per the four-class art bible.
+        const tell = (this.crouchT || 0) > 0;
+        const dark = (this.windedT || 0) > 0;
+        const k2 = tell ? 1 - clamp(this.crouchT / TELL_HEAVY, 0, 1) : 0;
+        const shiver = tell ? Math.sin(this.anim * 30) * k2 * 1.1 : 0;
+        // symmetric machine: undo the flip so it never appears to jump sides
+        c.save(); c.scale(1 / flip, 1);
+        // feed lines arcing into the floor both sides — it is PLUMBED into
+        // the stacks' chiller loop
+        c.strokeStyle = MAT.steel.dark; c.lineWidth = 2.2; c.lineCap = 'round';
+        for (const s of [-1, 1]) {
+          c.beginPath(); c.moveTo(s * 9, 9);
+          c.quadraticCurveTo(s * 16, 10, s * 18, 13); c.stroke();
+        }
+        // the hoar skirt it stands in — frost crust, never a square plinth
+        frame(() => {
+          c.beginPath(); c.moveTo(-13, 13);
+          c.quadraticCurveTo(-10, 8, -5, 9.5);
+          c.quadraticCurveTo(0, 7.5, 5, 9.5);
+          c.quadraticCurveTo(10, 8, 13, 13);
+          c.closePath();
+        }, 8, 13);
+        for (const bx of [-7, 7]) joint(bx, 11.5, 1.4);
+        // the bobbin — lifts a hair as it charges, slumps a hair when dark
+        const sag = dark ? 1.1 : tell ? -k2 * 1.6 : 0;
+        c.save(); c.translate(shiver, sag);
+        plate(() => {
+          c.beginPath();
+          c.moveTo(-8, -10);                          // upper lobe
+          c.quadraticCurveTo(-11.5, -6, -9, -1.5);
+          c.quadraticCurveTo(-5.5, 0.5, -9.5, 3);     // the pinched waist
+          c.quadraticCurveTo(-12, 7.5, -7, 9.5);      // lower lobe
+          c.quadraticCurveTo(0, 11, 7, 9.5);
+          c.quadraticCurveTo(12, 7.5, 9.5, 3);
+          c.quadraticCurveTo(5.5, 0.5, 9, -1.5);
+          c.quadraticCurveTo(11.5, -6, 8, -10);
+          c.quadraticCurveTo(0, -12, -8, -10);        // no straight shoulder
+          c.closePath();
+        }, -11, 10);
+        // the cooling coil wrapped around the waist — bronze, three sagging turns
+        c.strokeStyle = ramp(c, MAT.bronze, -8, 0, 8, 5); c.lineWidth = 1.8; c.lineCap = 'round';
+        for (let i = 0; i < 3; i++) {
+          c.beginPath();
+          c.moveTo(-8.5 + i * 0.7, 0.4 + i * 2.1);
+          c.quadraticCurveTo(0, 2.6 + i * 2.1, 8.5 - i * 0.7, 0.2 + i * 2.1);
+          c.stroke();
+        }
+        seam(-7, -8, 7, -8, 0.2);
+        // the frost crown around the upper collar: laid low at rest, EXTENDED
+        // through the charge, snapped drooping when it is dark — the
+        // silhouette IS the state (art bible §3.3)
+        const ext = tell ? 0.4 + k2 * 1.2 : dark ? 0.08 : 0.3;
+        for (const [nx, s] of [[-5.5, -1], [0, 0], [5.5, 1]]) {
+          c.save(); c.translate(nx, -9.5);
+          if (dark) c.rotate(s * 1.9 + (s === 0 ? 0.5 : 0));   // snapped over
+          else c.rotate(s * (0.6 - ext * 0.35));               // fanning upright
+          plate(() => {
+            c.beginPath(); c.moveTo(-2.2, 0);
+            c.lineTo(-0.7, -3 - ext * 7); c.lineTo(0.7, -3 - ext * 7);
+            c.lineTo(2.2, 0); c.closePath();
+          }, -12 - ext * 6, -9);
+          c.restore();
+        }
+        // the cold core in the upper lobe: a dull pulse at rest, white-bright
+        // through the charge, DEAD DARK for the whole window — plus fallen-
+        // open frost vents while it is dark, so the window reads across a room
+        c.save();
+        c.globalAlpha = dark ? 0.12 : tell ? 0.75 + k2 * 0.25 : 0.45 + Math.sin(this.anim * 2.2) * 0.15;
+        accent(() => { c.beginPath(); c.ellipse(0, -5.5, 4.5 + k2 * 2, 3.4 + k2, 0, 0, 7); c.fill(); }, tell);
+        c.restore();
+        if (dark) {
+          c.fillStyle = '#131c26';
+          for (const s of [-1, 1]) c.fillRect(s * 7.5 - 2, 2, 4, 6);
+          c.save(); c.globalAlpha = 0.35 + Math.sin(this.anim * 9) * 0.15;
+          c.fillStyle = '#a8e4f4';
+          for (const s of [-1, 1]) c.fillRect(s * 7.5 - 1.2, 3, 2.4, 4.4);
+          c.restore();
+        } else if (!tell && chance(0.05)) {
+          // idle breath: cold FALLS — one frost mote slipping off the crown
+          addPart(cx + rnd(-4, 4), this.y + 2, rnd(-6, 6), rnd(8, 26), 0.6, '#bfeaff', 1.5, 30, true);
+        }
+        eyes(-3, -3, 1.8);
+        c.restore();   // bobbin shiver/sag
         c.restore();   // the un-flip
         break;
       }

@@ -247,6 +247,8 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  16. §2j    SERVO'S WINDING HOUSE ×1          ⚠ FIRED ×2, NEITHER KEYABLE — see §2h+2i+2j below
  17. §2k    THE TINKER'S QUENCH HOOD + FORGE ×2 (forgeFront / forgeInterior — kingdom 3)
  18. §2l    THE KILN VENT ×3                  (rest / petals-open tell / spent — new zone-C enemy)
+ 19. §2m    THE SAGE'S STACKS + CARREL ×2     (carrelFront / carrelInterior — kingdom 4)
+ 20. §2n    THE RIME COIL ×3                  (rest / crown-up tell / dark — new zone-D enemy)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -1003,6 +1005,105 @@ js/entities.js) is the placement reference:
 NEGATIVE for all: no legs, no horizontal drum (it must never read as the
 breaker), no barrel or gun (nor the turret), no second character, no
 text, no watermark; dark-room phrasing per the §1 warnings, subject only.
+
+### 2m. THE SAGE'S STACKS + CARREL ✱ NEW (2026-08-16, kingdom 4 pass)
+
+The Nine-Lives Sage — the Archivist orb — has its own place now: a depth
+door at mid-D1 (GATE_ROOM D1, the A0/A0B booth pattern, style `carrel`)
+into the reading den D1B, dug into the frozen card-index behind the
+corridor. Two plates replace the procedural stand-ins at the same anchors,
+both built from the ARCHIVES backdrop's own furniture (the mimic rule:
+shelf stacks, card drawers, ledgers, hoarfrost) and nothing plumb or
+square (NO RIGHT ANGLES):
+
+1. **carrelFront** — the shelf-stacks standing in the corridor: two piles
+   of frozen ledger slabs leaning TOWARD each other into an accidental
+   crevice-arch (a fourth silhouette — not the kiosk's canopy, not the
+   shrine's cable swag, not the quench hood's bell), every course a
+   different length and lean, a frost sheet flowed over the taller pile,
+   icicles off the lintel spines, a drift of spilled index cards frozen
+   mid-slide at the base, the crevice doorway breathing pale glacial
+   glyph-light (NOT lamp amber — Ratchet's; not CRT blue — the Oracle's;
+   not molten orange — the Tinker's; this is the Archivist's own reading
+   light, the #9fe8ff the sage itself glows), and a small hooded reading
+   lamp hung crooked from one lintel spine as a sign. `drawSageCarrel` in
+   js/game.js is the placement reference; same bottom anchor and ~236 px
+   height as boothFront.
+2. **carrelInterior** — a 16:9 backdrop for D1B: a one-room reading den —
+   a wall of frozen card-index drawers with one drawer half-open and
+   faintly glowing, a lectern with an open ledger and a pool of pale
+   reading light over it, a sagging loft shelf stacked with ledger slabs
+   along one wall, hoarfrost feathering every shadowed edge but pulled
+   back around the lectern (the one floor in the kingdom the frost never
+   took), the whole room in deep archive blue-dark with one violet accent
+   (zone D's acc2). Quiet the way a library after closing is quiet. The
+   depth door back out sits at gx 0.12. `ROOM_VISTA.D1B` is already
+   pointed at `carrelInterior`; add the media.js entries in the same
+   commit as the files.
+
+**The prompts, verbatim — fire as-is:**
+
+> (carrelFront) A small reading-den entrance built from salvaged archive
+> shelving, seen straight on: two tall piles of thick frozen ledger slabs
+> and data-cassettes stacked like books, leaning toward each other until
+> they touch and form a narrow crevice doorway, every slab a different
+> length and angle, a smooth sheet of ice flowed over the taller left
+> pile, thin icicles hanging from the slabs that bridge the top, a drift
+> of spilled index cards frozen mid-slide around the base, the crevice
+> breathing a pale glacial blue-white light from inside with faint
+> geometric glyphs drifting up in it, and a small hooded reading lamp
+> hanging crooked from one protruding slab. Deep archive navy and
+> blue-grey palette, pale ice-white light in the doorway only, one small
+> violet indicator. Nothing plumb, nothing square — every slab leans,
+> sags or overhangs. Clean high-detail 3D render, soft frosted specular,
+> dark moody lighting. NEGATIVE: no text, no watermark, no characters, no
+> straight rectangular frame, no cast shadow, no ground plane.
+> Photographed in a pitch-dark room, no backdrop, no floor, spotlights
+> pick out the structure and nothing else receives any light.
+
+> (carrelInterior, 16:9 backdrop) The inside of a one-room frozen reading
+> den, wide interior view: a wall of old card-index drawers furred with
+> hoarfrost with one drawer half-open and glowing faintly, a leaning
+> lectern holding an open oversized ledger under a pool of pale blue-white
+> reading light, a sagging loft shelf stacked with thick ledger slabs
+> along one wall, frost feathering every dark edge but melted back to
+> clean floor in a circle around the lectern, the rest falling into deep
+> archive navy darkness, one small violet status lamp. Hushed, cold,
+> lived-in by something that reads forever. No right angles presenting:
+> shelves sag, drawers sit crooked, ice rounds every corner. Clean
+> high-detail 3D render. NEGATIVE: no characters, no text, no watermark,
+> no doors, no windows with daylight.
+
+### 2n. THE RIME COIL (rime — new zone-D enemy, 2026-08-16) ✱ NEW
+
+The Frozen Archives' own machine (js/entities.js, kind `rime`): a waisted
+condenser bobbin bolted into the stacks' floor that grows a frost ring to
+a told edge and SNAPS everything inside the circle, grounded or airborne
+alike — the kingdom's lesson that the cold closes as a RADIUS and jumping
+is not an answer to a radius, distance is, taught before GLACIERE's
+ABSOLUTE ZERO hush asks it for keeps ("be outside it when the silence
+lands"). Atlas-creature plates in the minion family style (small machine,
+reads smaller than HZD-99); the engine-drawn fallback (`case 'rime'` in
+Enemy.draw, js/entities.js) is the placement reference:
+
+- **rest** — a waisted vertical bobbin (two rounded lobes, pinched
+  middle) standing in its own hoarfrost skirt (never a square plinth), a
+  bronze cooling coil wrapped in three sagging turns around the waist,
+  feed lines arcing into the ground both sides, three short frost
+  needles laid low around the upper collar, a dull pale-ice pulse in the
+  upper lobe.
+- **tell** — the frost-needle crown EXTENDED and fanned upright off the
+  collar, body lifted, core white-bright (the amber wash and the growing
+  ring are code; the POSE is the plate — silhouette must differ from
+  rest per ART_BIBLE §3.3).
+- **dark** — crown needles snapped over and drooping, core dead dark,
+  side frost-vents fallen open showing pale glowing slots: visibly
+  empty, the punish window made readable across a room.
+
+NEGATIVE for all: no legs, no horizontal drum (it must never read as the
+breaker), no flared open mouth (nor the kiln), no barrel or gun (nor the
+turret), no second character, no text, no watermark; dark-room phrasing
+per the §1 warnings, subject only.
 
 ### 1e. THE RUN PAIR RE-FIRE ✅ FIRED AND SHIPPED 2026-08-16 (art session)
 

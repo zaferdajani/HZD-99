@@ -604,8 +604,28 @@ const ROOMS = {
     build(g) { frame(g); openL(g); } },
   // ============ ZONE D — Frozen Archives ============
   D1: { zone: 'D', w: 32, h: 17, exits: { T: 'C2', R: 'D2' }, ice: true,
-    ents: [['bench', 6, 15], ['npc', 12, 15, 'sage'], ['term', 24, 15, 3]],
+    // The Nine-Lives Sage no longer stands in the draught. Their CARREL is the
+    // depth door at mid-room (GATE_ROOM D1, the A0/A0B booth pattern): walk UP
+    // into the leaning shelf-stacks and the sage is inside, in a place of
+    // their own — the same promotion Ratchet, the Oracle and the Tinker got.
+    ents: [['bench', 6, 15], ['term', 24, 15, 3]],
     build(g) { frame(g); openR(g); rect(g, 18, 0, 20, 0, '.'); hline(g, 15, 18, 11, '='); } },
+  // THE SAGE'S CARREL (kingdom 4's own interior, the D-side of A0B/B3B/C5B):
+  // a one-room reading den dug into the frozen card-index behind the leaning
+  // stacks in D1, where the Nine-Lives Sage actually KEEPS its ninth life —
+  // the porcelain orb turning over an open ledger instead of hovering in the
+  // corridor's draught. Dressing mimics the Archives backdrop per the mimic
+  // rule (shelf stacks, card drawers, a reading loft, hoarfrost); the
+  // procedural interior is a stand-in — the authored plate is queued
+  // (ART_QUEUE §2m, carrelInterior). No ice flag: the carrel is the one floor
+  // in the kingdom the frost never reached, which is the whole reason a sage
+  // could live nine lives in it.
+  D1B: { zone: 'D', w: 30, h: 17, exits: {},
+    ents: [['npc', 15, 15, 'sage'], ['scrap', 23, 11, 30]],
+    build(g) {
+      frame(g);
+      hline(g, 20, 26, 12, '=');          // the reading loft over the index corner
+    } },
   D2: { zone: 'D', w: 60, h: 17, exits: { L: 'D1', R: 'D3', T: 'D4', B: 'D5' }, ice: true,
     // The two fliers sat at y=6 and y=7 — the same screen — and the audit read
     // the heavier ground-level window three tiles below them and called the
@@ -613,13 +633,35 @@ const ROOMS = {
     // once is not a fight. The second is a hopper on the ledge now: it still
     // owns the air above the spikes, and on a slippery floor a leap you have to
     // read is worth more than a dive you cannot answer.
-    ents: [['flier', 20, 6], ['guard', 25, 15], ['hopper', 41, 11], ['guard', 44, 15], ['turret', 55, 15], ['plat', 30, 10, [6, 0, 3.4]], ['scrap', 41, 11, 15], ['riddle', 21, 8, 5], ['secret', 41, 12, 'coin'],
+    //
+    // THE RIME'S FIRST ROOM (registry §6.4: a new machine gets one room to be
+    // read in — the kingdom's first screen holds it with nothing else on the
+    // ground). The last flier is gone with it: the first screen of the
+    // Archives now asks its OWN question — the coil's frost ring grows to a
+    // told edge and SNAPS, and on ice, leaving a circle is a commitment you
+    // make EARLY — instead of re-asking zone A's flier question at the door.
+    // It is GLACIERE's absolute-zero read, taught a kingdom before the
+    // guardian asks it for keeps: jumping does not answer a radius; distance
+    // does. Solution shape: start walking the moment the ring is born, or
+    // never enter it; then spend its 1.0 s of dark-core recovery. Failure
+    // mode: reading the tell late and trying to stop your slide at the edge.
+    //
+    // AND THE WINGS ARE OPEN NOW. exits.T has named D4 and exits.B has named
+    // D5 since the wings were built, but the build never carved either — the
+    // Cold Stacks (with the index the Archivist's errand wants) and the whole
+    // Lattice descent sat sealed behind an unbroken frame. Found by building
+    // the grid and reading the rows, not the graph: deadend.cjs reads exits,
+    // and exits lie when the wall disagrees (the C5 lesson, one kingdom up).
+    ents: [['rime', 6, 15], ['guard', 25, 15], ['hopper', 41, 11], ['guard', 44, 15], ['turret', 55, 15], ['plat', 30, 10, [6, 0, 3.4]], ['scrap', 41, 11, 15], ['riddle', 21, 8, 5], ['secret', 41, 12, 'coin'],
            ['saw', 19, 15, [7, 0, 3.4]]],
     build(g) {
       frame(g); openL(g); openR(g);
-      hline(g, 10, 16, 15, '^'); hline(g, 30, 37, 15, '^'); hline(g, 46, 51, 15, '^');
+      rect(g, 15, 0, 18, 0, '.');           // up into the Cold Stacks (D4's chute)
+      rect(g, 12, 15, 15, 16, '.');         // the shaft down to the Lattice (D5)
+      hline(g, 8, 11, 15, '^'); hline(g, 30, 37, 15, '^'); hline(g, 46, 51, 15, '^');
       hline(g, 11, 15, 11, '='); hline(g, 46, 50, 11, '=');
       hline(g, 20, 23, 8, '='); hline(g, 40, 43, 12, '=');
+      hline(g, 15, 18, 4, '=');             // the last rung under the Stacks' mouth
     } },
   // THE COLD STACKS — the Archives' wing.
   //
@@ -631,16 +673,29 @@ const ROOMS = {
   // Composition: a guard ANCHOR at the top of the climb, because an anchor on
   // ice is a genuinely new problem (you must arrive at a stop to use its
   // window); one flier DISRUPTOR and one crawler PRESSURE below it. Peak 6.
+  // The rime recurs here (taught at the kingdom's door), replacing the flier
+  // on the mid-climb shelf: the ring closes over the very rung the ascent has
+  // to land on, so the climb is a read — wait below through the snap, then
+  // take the rung and the coil in its 1.0 s dark-core window before the
+  // guard's shelf. Threat and peak unchanged (flier and rime are both 2), and
+  // the Stacks keep their one disruptor slot empty, which is what the D2
+  // audit already demanded of this wing.
   D4: { zone: 'D', w: 34, h: 21, exits: { B: 'D2' }, ice: true,
-    ents: [['guard', 28, 7], ['flier', 12, 9], ['crawler', 7, 18],
+    ents: [['guard', 28, 7], ['rime', 12, 9], ['crawler', 7, 18],
            ['item', 30, 7, 'index'], ['scrap', 4, 12, 40], ['plat', 16, 15, [7, 0, 3.2]]],
     build(g) {
       frame(g);
-      rect(g, 15, 20, 18, 20, '.');            // the way back down to D2
       hline(g, 2, 9, 19, '='); hline(g, 24, 32, 16, '=');
       hline(g, 3, 10, 13, '='); hline(g, 20, 27, 12, '=');
       hline(g, 9, 15, 9, '='); hline(g, 24, 32, 8, '#');   // the shelf the guard holds
       hline(g, 11, 22, 20, '^');               // the floor of the stacks is not floor
+      // the way back down to D2 — carved LAST, and BOTH floor rows. The old
+      // build carved row 20 only, before the spike line: frame()'s row 19
+      // stayed solid over the hole and the spikes then repaved the hole
+      // itself, so the Stacks' one declared exit was a chute you could see
+      // and never fall through (the D2 seal's little sibling, found the same
+      // way — by reading the built rows, not the graph).
+      rect(g, 15, 19, 18, 20, '.');
     } },
   D3: { zone: 'D', w: 32, h: 17, exits: { L: 'D2', B: { to: 'E1', flag: 'bossZero' } }, ice: true,
     ents: [['boss', 15, 15, 'zero']],
@@ -865,7 +920,7 @@ const MAPPOS = {
   X1: [8, 1, 1, 1],
   C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1], C5: [4, 5, 1, 1], C5B: [4, 6, 1, 1],
   C6: [7, 4, 1, 1], C7: [7, 3, 1, 1],
-  D1: [5, 6, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1], D4: [6, 5, 1, 1],
+  D1: [5, 6, 1, 1], D1B: [5, 7, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1], D4: [6, 5, 1, 1],
   D5: [6, 7, 1, 1], D6: [6, 8, 1, 1],
   E1: [8, 7, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1], E4: [9, 6, 1, 1],
   E5: [9, 8, 1, 1], E6: [9, 9, 1, 1],

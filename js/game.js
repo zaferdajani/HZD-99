@@ -1977,6 +1977,10 @@ const ROOM_VISTA = {
   // the Tinker's forge (§2k): Patch-7's smithy behind the quench hood in C5.
   // Unfired — the room borrows the zone-C atlas cell until the plate lands.
   C5B: 'forgeInterior',
+  // the Sage's carrel (§2m): the Nine-Lives Sage's reading den behind the
+  // leaning shelf-stacks in D1. Unfired — the room borrows the zone-D atlas
+  // cell until the plate lands.
+  D1B: 'carrelInterior',
 };
 
 // ===========================================================================
@@ -4707,6 +4711,13 @@ const GATE_ROOM = {
   // holds — the errand's targets are the guns outside his own door.
   C5:  { at: 0.8125, to: 'C5B', ax: 0.12, style: 'forge' },
   C5B: { at: 0.12, to: 'C5',  ax: 0.8125, style: 'forge' },
+  // the Sage's carrel off D1 — the booth pattern a fourth time, its OWN
+  // style again: no other kingdom's shrine may stand in the Archives, so
+  // the leaning shelf-stacks draw their own stand-in (drawSageCarrel) until
+  // the plate lands (ART_QUEUE §2m). It stands where the sage used to
+  // hover — between the bench and the terminal, a door's width from both.
+  D1:  { at: 0.40, to: 'D1B', ax: 0.12, style: 'carrel' },
+  D1B: { at: 0.12, to: 'D1',  ax: 0.40, style: 'carrel' },
   // the grottoes — one per guardian, opened by its fall or taming
   A4:  { at: 0.14, to: 'GA1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossGlitch' },
   A10: { at: 0.12, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, need: 'alpha' },
@@ -5298,6 +5309,148 @@ function drawTinkerForge(cx2, gy, P, k) {
   c.restore();
   c.restore();
 }
+// THE SAGE'S CARREL (kingdom 4): the depth door into the Nine-Lives Sage's
+// reading den off D1. Built from the Archives backdrop's own furniture per
+// the mimic rule — two shelf-stacks of frozen ledger slabs leaning together
+// into an accidental crevice, a frost sheet flowing over the taller pile,
+// icicles off the lintel spines, a drift of spilled index cards frozen
+// mid-slide at the base, and a doorway breathing the sage's own pale-ice
+// glyph light (NOT Ratchet's lamp amber, not the Oracle's CRT blue, not the
+// Tinker's molten orange — the Archivist's reading light). Nothing plumb,
+// nothing square (NO RIGHT ANGLES). Procedural STAND-IN awaiting its fired
+// plate (ART_QUEUE §2m, carrelFront): the mediaFetch hook below goes live the
+// commit the plate and its media.js entry land, exactly like its three
+// siblings'.
+function drawSageCarrel(cx2, gy, P, k) {
+  if (typeof mediaFetch === 'function') mediaFetch('carrelFront');
+  const bim = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.carrelFront;
+  if (bim && bim.naturalWidth) {
+    const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
+    c.save();
+    c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
+    if (k > 0.02) {
+      c.globalCompositeOperation = 'lighter';
+      const gl = c.createRadialGradient(cx2, gy - dh * 0.3, 6, cx2, gy - dh * 0.3, dw * (0.3 + k * 0.4));
+      gl.addColorStop(0, 'rgba(159,232,255,' + (0.18 * k + 0.08) + ')');
+      gl.addColorStop(1, 'rgba(159,232,255,0)');
+      c.fillStyle = gl;
+      c.beginPath(); c.ellipse(cx2, gy - dh * 0.3, dw * (0.3 + k * 0.4), dh * 0.4, 0, 0, 7); c.fill();
+    }
+    c.restore();
+    return;
+  }
+  const BW = 62, BH = 130;
+  c.save();
+  // the back shroud — deep archive blue, tallest in the MIDDLE where the two
+  // stacks meet: the fourth shrine keeps a fourth silhouette (kiosk canopy,
+  // cable swag, quench hood... and now a leaning-together crevice)
+  c.fillStyle = '#0c1620';
+  c.beginPath();
+  c.moveTo(cx2 - BW - 10, gy);
+  c.lineTo(cx2 - BW * 0.42, gy - BH - 8);
+  c.lineTo(cx2 + BW * 0.36, gy - BH - 2);
+  c.lineTo(cx2 + BW + 8, gy);
+  c.closePath(); c.fill();
+  // the two shelf-stacks: piles of frozen ledger slabs, every course a
+  // slightly different length and lean — book spines, never masonry
+  for (const s of [-1, 1]) {
+    let sy = gy, i = 0;
+    const lean = s * -0.06;                    // both piles fall toward the door
+    while (sy > gy - BH + (s < 0 ? 10 : 26)) {
+      const th = 7 + ((i * 5 + (s < 0 ? 2 : 4)) % 5);
+      const wd = 34 - i * 1.3 + ((i * 7) % 9);
+      const ox = cx2 + s * (BW - 8 - i * 2.4) + Math.sin(i * 2.7 + s) * 3;
+      c.save();
+      c.translate(ox, sy - th / 2); c.rotate(lean + Math.sin(i * 1.9) * 0.05);
+      c.fillStyle = i % 3 === 1 ? '#152535' : i % 3 === 2 ? '#101c2c' : '#1b3040';
+      c.beginPath();
+      c.moveTo(-wd / 2, th / 2);
+      c.quadraticCurveTo(-wd / 2 - 2, 0, -wd / 2 + 1, -th / 2);
+      c.lineTo(wd / 2 - 1, -th / 2 + 1.5);
+      c.quadraticCurveTo(wd / 2 + 2, 0, wd / 2 - 2, th / 2);
+      c.closePath(); c.fill();
+      // a spine label catching the door light
+      c.fillStyle = 'rgba(159,232,255,' + (0.05 + ((i * 13) % 7) * 0.012) + ')';
+      c.fillRect(-wd * 0.24, -th * 0.22, wd * 0.2, th * 0.34);
+      c.restore();
+      sy -= th - 1.5; i++;
+    }
+  }
+  // the frost sheet flowing over the left (taller) stack, and icicles off the
+  // lintel where the two piles lean together
+  c.fillStyle = 'rgba(191,234,255,0.18)';
+  c.beginPath();
+  c.moveTo(cx2 - BW - 4, gy - BH * 0.35);
+  c.quadraticCurveTo(cx2 - BW * 0.7, gy - BH * 0.9, cx2 - BW * 0.24, gy - BH - 4);
+  c.quadraticCurveTo(cx2 - BW * 0.5, gy - BH * 0.72, cx2 - BW + 4, gy - BH * 0.3);
+  c.closePath(); c.fill();
+  for (let i = 0; i < 6; i++) {
+    const ix = cx2 - 26 + i * 10 + Math.sin(i * 3.1) * 3;
+    const il = 7 + ((i * 11) % 13), iy = gy - BH + 12 + Math.sin(i * 1.4) * 5;
+    c.fillStyle = 'rgba(191,234,255,' + (0.3 - i * 0.02) + ')';
+    c.beginPath();
+    c.moveTo(ix - 2.4, iy); c.quadraticCurveTo(ix, iy + il * 0.7, ix + 0.3, iy + il);
+    c.quadraticCurveTo(ix + 1.4, iy + il * 0.5, ix + 2.4, iy); c.closePath(); c.fill();
+  }
+  // the doorway: the crevice between the piles, breathing pale reading light
+  const doorW = 42, doorH = BH - 36;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const breathe = Math.sin(performance.now() / 1600) * 0.04;
+  const gl = c.createLinearGradient(0, gy - doorH, 0, gy);
+  gl.addColorStop(0, 'rgba(159,232,255,' + (0.09 + k * 0.42 + breathe) + ')');
+  gl.addColorStop(1, 'rgba(230,251,255,' + (0.13 + k * 0.5 + breathe) + ')');
+  c.fillStyle = gl;
+  c.beginPath();
+  c.moveTo(cx2 - doorW / 2, gy);
+  c.quadraticCurveTo(cx2 - doorW / 2 - 7, gy - doorH * 0.55, cx2 - 9, gy - doorH);
+  c.quadraticCurveTo(cx2 + 8, gy - doorH - 9, cx2 + doorW / 2 + 3, gy - doorH * 0.6);
+  c.lineTo(cx2 + doorW / 2, gy);
+  c.closePath(); c.fill();
+  // glyph motes drifting UP the light — the sage's own threads, read from
+  // its idle draw — more the nearer she stands
+  const gn = 2 + Math.round(k * 3);
+  c.font = '9px monospace'; c.textAlign = 'center';
+  for (let i = 0; i < gn; i++) {
+    const ph = (performance.now() / 2600 + i * 0.41) % 1;
+    const gx2 = cx2 + Math.sin(i * 4.7 + performance.now() / 1500) * (doorW * 0.26);
+    c.globalAlpha = Math.sin(ph * Math.PI) * (0.25 + k * 0.4);
+    c.fillStyle = '#9fe8ff';
+    c.fillText(['◇', '△', '□', '∴', '≡'][i % 5], gx2, gy - 8 - ph * (doorH - 14));
+  }
+  c.globalAlpha = 1;
+  c.restore();
+  // the card drift at the base: spilled index cards frozen mid-slide, parting
+  // as she nears — the booth-flap k, worn by paper instead of cloth
+  const part = k * 20;
+  for (const s of [-1, 1]) {
+    for (let i = 0; i < 4; i++) {
+      const px2 = cx2 + s * (6 + part + i * 7), py2 = gy - 2 - (i % 2) * 3;
+      c.save();
+      c.translate(px2, py2); c.rotate(s * (0.2 + i * 0.16) + Math.sin(i * 5.1) * 0.1);
+      c.fillStyle = i % 2 ? '#22384c' : '#2c4a62';
+      c.fillRect(-5, -3.4, 10, 6.8);
+      c.strokeStyle = 'rgba(159,232,255,0.25)'; c.lineWidth = 0.8;
+      c.beginPath(); c.moveTo(-3.4, -1.2); c.lineTo(3.4, -1.2); c.stroke();
+      c.restore();
+    }
+  }
+  // its sign: a hooded reading lamp hung crooked off a lintel spine, swaying —
+  // the sage's trade where the others hang a lamp, a monitor and a gear
+  const sw = Math.sin(performance.now() / 1300) * 0.07;
+  c.save();
+  c.translate(cx2 + BW - 22, gy - BH + 30); c.rotate(sw + 0.14);
+  c.strokeStyle = '#1b3040'; c.lineWidth = 1.6;
+  c.beginPath(); c.moveTo(0, -9); c.quadraticCurveTo(3, -4, 0, 0); c.stroke();
+  c.fillStyle = '#152535';
+  c.beginPath(); c.moveTo(-6, 0); c.quadraticCurveTo(0, -6, 6, 0);
+  c.quadraticCurveTo(0, 2.5, -6, 0); c.closePath(); c.fill();
+  const lp = 0.5 + Math.sin(performance.now() / 900) * 0.2;
+  c.fillStyle = 'rgba(159,232,255,' + lp + ')';
+  c.shadowColor = '#9fe8ff'; c.shadowBlur = 7;
+  c.beginPath(); c.ellipse(0, 1.6, 3.4, 1.8, 0, 0, 7); c.fill(); c.shadowBlur = 0;
+  c.restore();
+  c.restore();
+}
 function drawGateDoors(P) {
   const def = GATE_ROOM[G.roomId];
   if (!def || !player) { G._doorK = 0; return; }
@@ -5323,6 +5476,9 @@ function drawGateDoors(P) {
   // ...and the Tinker's quench hood is HIS — the Foundry's own furniture,
   // the Foundry's own light
   if (def.style === 'forge') { drawTinkerForge(ds, gy, P, k); return; }
+  // ...and the Sage's carrel is the SAGE'S — the Archives' own furniture,
+  // the Archivist's own reading light
+  if (def.style === 'carrel') { drawSageCarrel(ds, gy, P, k); return; }
   // THE ZONE GATES (§2f): every kingdom's depth door is its own fired
   // monument — a furnace arch, a parted shelf-stack, a cable iris, a talon
   // arch, an organic iris — and ONLY the city keeps the colossal multilayer

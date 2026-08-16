@@ -30,6 +30,7 @@ const MIMIC_EL = {
   turret:  'zizt',    // a fixed emplacement running on the same arc supply
   surge:   'zizt',    // a line breaker venting the same arc supply down its rail
   kiln:    'hott',    // a casting vent still breathing the crucible's heat
+  rime:    'glazz',   // an archive condenser still holding the stacks at zero
 };
 
 // suits, in the order they are offered on the wheel
