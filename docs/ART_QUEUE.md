@@ -243,6 +243,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
  14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   (oracleBooth / oracleInterior)
+ 15. §2i    THE BREAKER ×3                    (rest / fins-flared tell / vented — new zone-B enemy)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -475,6 +476,29 @@ plumb or square (NO RIGHT ANGLES):
 > right angles presenting: racks lean, shelves sag, cables curve. Clean
 > high-detail 3D render. NEGATIVE: no characters, no text, no watermark,
 > no doors, no windows with daylight.
+
+### 2i. THE BREAKER (surge — new zone-B enemy, 2026-08-16) ✱ NEW
+
+The Data Conduits' own machine (js/entities.js, kind `surge`): a squat
+breaker drum bolted to the conduit rail that vents its overload as a charge
+wave crawling the floor BOTH ways — the kingdom's lesson in being airborne
+on a beat, taught before TALONHOST asks "where are you standing?" for
+keeps. Atlas-creature plates in the minion family style (small machine,
+reads smaller than HZD-99); the engine-drawn fallback (`case 'surge'` in
+Enemy.draw, js/entities.js) is the placement reference:
+
+- **rest** — the drum low and latched on its bolted saddle, three ceramic
+  insulator fins folded flat along its back, bronze end caps, cable stubs
+  arcing into the ground on both sides, one dull violet charge-window.
+- **tell** — fins FLARED upright and spread, body lifted off the saddle,
+  charge-window hot (the amber wash is code; the POSE is the plate —
+  silhouette must differ from rest per ART_BIBLE §3.3).
+- **vented** — side vents fallen open showing hot amber slots, fins
+  drooped, body sagging: visibly spent, the punish window made readable.
+
+NEGATIVE for all: no legs, no barrel or gun (it must never read as the
+turret), no second character, no text, no watermark; dark-room phrasing
+per the §1 warnings, subject only.
 
 ### 1e. THE RUN PAIR RE-FIRE ✱ FIRE ON REBIND — the owner rejected v1
 

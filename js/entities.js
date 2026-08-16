@@ -3928,6 +3928,9 @@ const EKIND = {
   hopper: { w: 26, h: 24, hp: 36, spd: 180 },
   blob: { w: 34, h: 26, hp: 52, spd: 30 },
   bat: { w: 24, h: 18, hp: 18, spd: 150 },
+  // THE BREAKER — the Data Conduits' own machine (kingdom 2). spd is the
+  // WAVE's speed, not the body's: the drum is bolted where it stands.
+  surge: { w: 30, h: 24, hp: 40, spd: 250 },
   sage: { w: 26, h: 42, hp: 150, spd: 170 },
 };
 class Enemy {
@@ -4333,6 +4336,66 @@ class Enemy {
         }
         break;
       }
+      // THE BREAKER (kingdom 2's own machine) asks: CAN YOU BE AIRBORNE ON A
+      // BEAT? A squat breaker drum bolted to the conduit rail. When she is in
+      // its band it charges for TELL_SWIPE — fins flare, the amber ring reads —
+      // then VENTS: a charge wave crawls the floor BOTH ways at wave speed,
+      // and the floor under her feet is briefly not hers. The wave is jumped
+      // (grounded-only damage), out-ranged (finite reach, dies at walls and
+      // gaps, never climbs a ledge), or never met at all (bait the vent and
+      // walk in behind it: 0.9 s of open vents is a two-hit window that
+      // tempts three — the greed axis, per the combat registry). It is what
+      // the Conduits teach before TALONHOST asks "where are you standing?"
+      // for keeps. Zoner; threat 2; tell never shortens with iq — cunning
+      // buys a faster wave and a shorter rest, not a shorter warning.
+      case 'surge': {
+        this.vy += 2000 * dt; this.vx = 0;
+        moveEnt(this, dt);
+        this.dir = 0;                 // omnidirectional: no misleading tell wedge
+        // the waves run on their own clock once vented
+        if (this.waves && this.waves.length) {
+          for (let i = this.waves.length - 1; i >= 0; i--) {
+            const w = this.waves[i];
+            w.x += w.dir * w.spd * dt; w.life -= dt; w.ph += dt * 30;
+            const wtx = Math.floor(w.x / TILE);
+            const fty = Math.floor((w.y + 4) / TILE);      // the rail it rides
+            const bty = Math.floor((w.y - 10) / TILE);     // the air it needs
+            const railOn = (tt => tt === '#' || tt === 'B' || tt === '=')(tileAt(wtx, fty));
+            if (w.life <= 0 || !railOn || solidAt(wtx, bty)) { this.waves.splice(i, 1); continue; }
+            // grounded-only: feet near the rail line is the hit, air is the answer
+            if (!player.dead && player.iT <= 0
+                && Math.abs(player.x + player.w / 2 - w.x) < 18
+                && player.y + player.h > w.y - 26 && player.y + player.h < w.y + 8)
+              player.hurt(DF().edmg, w.x, 'surge.wave');
+            if (chance(dt * 22)) addPart(w.x + rnd(-5, 5), w.y - rnd(2, 14), rnd(-30, 30), rnd(-90, -30), 0.28, '#ff5f6d', 2, 300, true);
+          }
+        }
+        if (this.windedT > 0) {            // VENTED — the punish window (0.9 s)
+          this.windedT -= dt;
+          break;
+        }
+        if (this.crouchT > 0) {            // the charge — fins up, amber on
+          this.crouchT -= dt;
+          if (this.crouchT <= 0) {
+            const fy = this.y + this.h;
+            const life = Math.min(1.05, 300 / Math.max(1, this.spd));
+            this.waves = this.waves || [];
+            for (const s of [-1, 1])
+              this.waves.push({ x: cx + s * (this.w / 2 + 6), y: fy, dir: s, spd: this.spd, life, ph: 0 });
+            this.windedT = 0.9;            // opening_ms = 900 − 33: two hits, tempts three
+            sfx('cast');
+          }
+          break;
+        }
+        // idle: latched, humming, watching its band
+        if (!player.dead && Math.abs(px - cx) < 230 && Math.abs(py - cy) < 90
+            && (this.atkCD -= dt) <= 0) {
+          this.crouchT = TELL_SWIPE;       // zone-B floor: the tell never shortens
+          this.atkCD = rnd(2.4 - this.iq * 0.8, 3.6 - this.iq * 1.2);
+          sfx('tell');
+        }
+        break;
+      }
     }
     // spikes are spikes for everyone: a machine that lands in the pit dies
     // in it — no creature camps where the player cannot stand
@@ -4496,6 +4559,32 @@ class Enemy {
       c.restore(); c.globalAlpha = 1;
     }
     if ((this.lockT || 0) > 0 && !this.dead) drawTurretLock(c, this, cx);
+    // the breaker's charge waves live on the rail, not on the body — drawn in
+    // world space, danger red per the registry: area denial, "the floor going
+    // hostile", exactly what the hue is reserved to mean
+    if (this.kind === 'surge' && this.waves && this.waves.length) {
+      c.save(); c.globalCompositeOperation = 'lighter';
+      for (const w of this.waves) {
+        const a = clamp(w.life * 2.2, 0, 1);
+        c.globalAlpha = 0.55 * a;
+        c.strokeStyle = '#ff5f6d'; c.lineWidth = 2; c.lineCap = 'round';
+        // a crest of crawling arcs, tallest at the front edge
+        for (let i = 0; i < 3; i++) {
+          const ax = w.x - w.dir * i * 7;
+          const ah = (14 - i * 3.5) * (0.7 + Math.sin(w.ph + i * 1.7) * 0.3);
+          c.beginPath();
+          c.moveTo(ax - 5, w.y);
+          c.quadraticCurveTo(ax + rnd(-2, 2), w.y - ah, ax + 5, w.y);
+          c.stroke();
+        }
+        c.globalAlpha = 0.3 * a;
+        const gl = c.createRadialGradient(w.x, w.y - 4, 1, w.x, w.y - 4, 26);
+        gl.addColorStop(0, '#ff5f6d'); gl.addColorStop(1, 'rgba(255,95,109,0)');
+        c.fillStyle = gl;
+        c.beginPath(); c.ellipse(w.x, w.y - 3, 26, 12, 0, 0, 7); c.fill();
+      }
+      c.restore(); c.globalAlpha = 1;
+    }
     // EVERY WIND-UP WEARS THE SAME COLOUR. One hue, one meaning, used by
     // nothing else in the game — and always with motion and sound beside it,
     // because roughly one man in twelve cannot rely on hue alone.
@@ -4785,6 +4874,67 @@ class Enemy {
         c.strokeStyle = MAT.bronze.mid; c.lineWidth = 1;
         c.beginPath(); c.moveTo(0, -10.5); c.lineTo(0.6, -14); c.stroke();
         c.restore();
+        break;
+      }
+      case 'surge': {
+        // BRYT — a line breaker that kept its rail and lost its manners. Base
+        // geometry no other mimic owns: a low HORIZONTAL DRUM with insulator
+        // fins on its back — no legs (blob has legs), no barrel (that is the
+        // turret), no wedge (the crawler's). Engine-drawn stand-in; authored
+        // plates are queued (ART_QUEUE §2i) per the four-class art bible.
+        const tell = (this.crouchT || 0) > 0;
+        const vented = (this.windedT || 0) > 0;
+        const k2 = tell ? 1 - clamp(this.crouchT / TELL_SWIPE, 0, 1) : 0;
+        const hum = Math.sin(this.anim * (tell ? 26 : 7)) * (tell ? 1.2 : 0.4);
+        // symmetric machine: undo the flip so it never appears to jump sides
+        c.save(); c.scale(1 / flip, 1);
+        // cable stubs arcing into the rail on both sides — it is PLUMBED in
+        c.strokeStyle = MAT.steel.dark; c.lineWidth = 2.2; c.lineCap = 'round';
+        for (const s of [-1, 1]) {
+          c.beginPath(); c.moveTo(s * 11, 6);
+          c.quadraticCurveTo(s * 17, 7, s * 19, 12); c.stroke();
+        }
+        // the mount saddle it is bolted to
+        frame(() => { c.beginPath(); c.moveTo(-13, 12); c.lineTo(-11, 7); c.lineTo(11, 7); c.lineTo(13, 12); c.closePath(); }, 6, 12);
+        for (const bx of [-9, 9]) joint(bx, 10.4, 1.5);
+        // the drum — lifts a little as it charges, sags a little vented
+        const lift = tell ? -k2 * 2.5 : vented ? 1.2 : 0;
+        c.save(); c.translate(hum * 0.4, lift);
+        plate(() => { c.beginPath(); c.ellipse(0, 0, 13, 8.5, 0, 0, 7); c.closePath(); }, -9, 9);
+        seam(-11, -2.5, 11, -2.5, 0.2);
+        // end caps
+        c.fillStyle = ramp(c, MAT.bronze, -14, -4, -10, 4);
+        c.beginPath(); c.ellipse(-11.4, 0, 2.6, 6.8, 0, 0, 7); c.fill();
+        c.beginPath(); c.ellipse(11.4, 0, 2.6, 6.8, 0, 0, 7); c.fill();
+        // insulator fins: folded flat at rest, FLARED through the charge,
+        // drooped when vented — the silhouette IS the state (art bible §3.3)
+        const flare = tell ? 0.55 + k2 * 0.75 : vented ? 0.12 : 0.3;
+        for (const [fx, fs] of [[-6, -0.25], [0, 0], [6, 0.25]]) {
+          c.save(); c.translate(fx, -7); c.rotate(fs * (1 - flare));
+          plate(() => {
+            c.beginPath(); c.moveTo(-2.6, 0);
+            c.lineTo(-1.6, -3 - flare * 6.5); c.lineTo(1.6, -3 - flare * 6.5);
+            c.lineTo(2.6, 0); c.closePath();
+          }, -10 - flare * 6, -6);
+          c.restore();
+        }
+        // the charge window: dull at rest, hot through the tell, dark vented —
+        // plus open side vents while it is spent, so the window reads
+        c.save();
+        c.globalAlpha = vented ? 0.35 : 0.75 + k2 * 0.25;
+        accent(() => { c.beginPath(); c.ellipse(0, 1.5, 5 + k2 * 1.5, 3 + k2, 0, 0, 7); c.fill(); }, tell);
+        c.restore();
+        if (vented) {
+          c.fillStyle = '#1a222c';
+          for (const s of [-1, 1]) c.fillRect(s * 8 - 2, -1, 4, 5.5);
+          c.save(); c.globalAlpha = 0.4 + Math.sin(this.anim * 9) * 0.2;
+          c.fillStyle = '#ff9a6a';
+          for (const s of [-1, 1]) c.fillRect(s * 8 - 1.2, 0, 2.4, 3.6);
+          c.restore();
+        }
+        eyes(-3, -5.5, 1.9);
+        c.restore();   // drum lift
+        c.restore();   // the un-flip
         break;
       }
       default: {

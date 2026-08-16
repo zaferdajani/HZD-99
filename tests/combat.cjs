@@ -22,7 +22,7 @@ const { chromium } = require('playwright');
 
     // 2. each enemy: drive it next to the player and watch what it does
     loadRoom('A0');
-    for (const kind of ['crawler', 'flier', 'turret', 'hopper', 'blob', 'bat']) {
+    for (const kind of ['crawler', 'flier', 'turret', 'hopper', 'blob', 'bat', 'surge']) {
       G.enemies.length = 0; G.pools = [];
       // the airborne kinds start in the air — the bat hangs where a ceiling
       // would be, and its trigger is "she is BENEATH it"
@@ -47,6 +47,7 @@ const { chromium } = require('playwright');
         if ((G.pools || []).length > poolsMade) { poolsMade = G.pools.length; seen.add('pool'); }
         if (e.burst) seen.add('burst');
         if (e.wasAir) seen.add('leap');
+        if ((e.waves || []).length) seen.add('wave');
       }
       out.enemies[kind] = { telegraphed, tellSeconds: +(tellFrames / 60).toFixed(2), does: [...seen].join('+') || 'walks' };
     }

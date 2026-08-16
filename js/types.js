@@ -28,6 +28,7 @@ const MIMIC_EL = {
   blob:    'hott',    // foundry spillage that cooled into legs
   flier:   'zizt',    // a survey lens that hovers and discharges
   turret:  'zizt',    // a fixed emplacement running on the same arc supply
+  surge:   'zizt',    // a line breaker venting the same arc supply down its rail
 };
 
 // suits, in the order they are offered on the wheel

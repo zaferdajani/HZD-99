@@ -349,8 +349,16 @@ const ROOMS = {
       rect(g, 9, 15, 12, 16, 'B');
     } },
   // ============ ZONE B — Data Conduits ============
+  // THE BREAKER'S FIRST ROOM (registry §6.4: a new machine gets one room to
+  // be read in — one other machine here, threat 4, same as before the swap).
+  // It replaces the turret on the left tower: the kingdom's first screen now
+  // asks its OWN question — the surge charges as you climb its tower, and
+  // the floor is briefly not yours — instead of re-asking zone A's turret
+  // question. Solution shape: wait below the tower lip through the vent,
+  // then climb and punish the open vents (0.9 s, two hits); failure mode:
+  // climbing during the charge meets the wave with nowhere to land.
   B1: { zone: 'B', w: 32, h: 17, exits: { B: 'A3', R: 'B2', T: 'B6' },
-    ents: [['flier', 15, 6], ['turret', 5, 12], ['scrap', 22, 12, 10]],
+    ents: [['flier', 15, 6], ['surge', 5, 12], ['scrap', 22, 12, 10]],
     build(g) {
       frame(g);
       rect(g, 1, 12, 10, 14, '#');          // left tower
@@ -388,7 +396,14 @@ const ROOMS = {
       hline(g, 10, 15, 22, '^');              // the floor is not a place to fall
     } },
   B2: { zone: 'B', w: 60, h: 17, exits: { L: 'B1', R: 'B3', B: 'V2', T: 'B7' },
-    ents: [['turret', 20, 15], ['hopper', 24, 15], ['turret', 38, 15], ['hopper', 42, 15], ['guard', 50, 15], ['scrap', 14, 15, 10], ['riddle', 55, 15, 1], ['secret', 51, 10, 'collar']],
+    // The hall used to ask the same turret+hopper question twice. The second
+    // pair's turret is the BREAKER now (taught one room back): mid-hall the
+    // hopper's leap and the surge's floor wave stack into a genuinely new
+    // read — be airborne on the wave's beat WITHOUT landing under the leap.
+    // Solution shape: bait the vent from the 42-45 ledge, drop in behind the
+    // wave, kill the breaker in its window, then take the hopper on open
+    // ground. Threat and peak unchanged (turret and surge are both 2).
+    ents: [['turret', 20, 15], ['hopper', 24, 15], ['surge', 38, 15], ['hopper', 42, 15], ['guard', 50, 15], ['scrap', 14, 15, 10], ['riddle', 55, 15, 1], ['secret', 51, 10, 'collar']],
     build(g) {
       frame(g); openR(g);
       rect(g, 0, 8, 0, 11, '.');            // entry from B1 (upper left)
