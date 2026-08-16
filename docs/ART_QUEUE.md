@@ -238,7 +238,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   7. §2d    robot bat plates ×5          (hang/shiver/dive/flap-up/flap-down)
   8. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   (owner 2026-08-15 — see brief below)
- 10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ FIRED 2026-08-16 — ratchetResting needs its media.js entry
+ 10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ CLOSED 2026-08-16 — all three plates fired, approved and wired
  11. §3m    BOSS MOTION PLATES (task #93)     (walk pair + attack-anticipation per guardian)
  12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
@@ -365,10 +365,13 @@ the plate replaces it at the same anchor.
   plating, the strapped canister rig, eye-lights dark, chest crystal the
   only light. Keyed to `assets/characters/npc/ratchet_resting.png`,
   sources + the reference strip in `assets/source/ratchet/`.
-  **NEEDS WIRING** — add `ratchetResting:
-  'assets/characters/npc/ratchet_resting.png'` to js/media.js and draw it
-  at the A0B npc anchor until the waking, then the standing atlas takes
-  over. Generation is the art session's; wiring is the code session's.
+  **WIRED 2026-08-16 by the code session** (commit fd2d93e): media.js
+  knows `ratchetResting`, and the A0B npc anchor draws the plate at 1.5×
+  npc height whenever he is a dark unit — skipping the grayscale-and-dim
+  treatment, because the plate IS the powered-down read and the filter
+  would kill the chest-crystal glow the image is about. The moment a cell
+  wakes him the standing atlas takes over exactly as before. Lowres tier
+  + roomassets regenerated. §2g is CLOSED end to end.
 
 **KEYING NOTE, learned on both plates (2026-08-16).** `tools/blackkey.cjs`
 failed on both and for the same reason twice: it decides by luminance, and
