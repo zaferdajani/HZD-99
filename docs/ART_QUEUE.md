@@ -811,6 +811,53 @@ Two separate causes, and only one of them is art:
   the shipped pair was not visibly affected — but the tool was wrong and
   would have bitten the next set).
 
+### ⬛ FOUR MORE OWNER REPORTS — THE TALKING AND TEACHING PASS (2026-08-16)
+
+All four are about how the game SPEAKS to the player. Three are code/UX; one
+uncovered a real art gap. Logged in his words so none of it is lost.
+
+**6. THE SKILL UNLOCK DOES NOT SHOW WHERE THE SKILL LIVES — CODE/UX.** *"When
+it asked me to add a skill, it did not guide me to the skill button. It just
+told me to add it."* Telling a player they have a point to spend is not
+teaching them where to spend it. The prompt needs to POINT — highlight or
+arrow the actual button, the way the guided walk already points at controls.
+
+**7. THE HEALING GIFT'S STORY IS LOST IN THE CLICK-THROUGH — CODE/UX.** *"The
+story behind the healing gift was mixed up with other instructions and
+stories. So if the user is just clicking, it will miss the story."* His fix
+is a staged beat rather than a line buried in a queue: *"the healing object
+should be HANDED to the hero from the NPC, and it should show on the screen
+that it was handed to me as a healing object. Then it should show the healing
+icon."* Hand-over first, name the object, then the icon appears — three
+readable steps instead of one paragraph competing with tutorial text.
+
+**8. THE NPC's FACE SHOULD BE IN THE SPEECH BOX — CODE + AN ART GAP.** *"The
+NPC face should appear when it's talking, in the speech screen."*
+
+**Checked, and he is pointing at a real defect:** `drawDialog` in js/game.js
+(~line 8551) calls `drawPortrait(...)` unconditionally, and `drawPortrait`
+draws **HZD-99's** face. So when Ratchet or the Oracle or Servo speaks, the
+bust above their words is HER, not them. The comment beside it is about
+keeping the bust and her sprite in agreement — which is right, and is the
+wrong rule when somebody else is doing the talking.
+
+Two halves, and the art half is genuinely missing:
+- **Code:** pick the portrait by SPEAKER — her face when she speaks, the
+  NPC's when they do.
+- **ART (new, goes on this list):** there are no NPC bust plates. The
+  cheapest honest route is to crop busts from `assets/characters/npc_6yaw.png`
+  column 2 (the front cell) per row — servo, ratchet, mono, patch, sage,
+  lumen — which needs no generation at all and guarantees the bust matches
+  the character on screen. Only if those read too small should new portrait
+  plates be fired.
+
+**9. DIALOGUE SKIPS ON ANY TAP — CODE/UX.** *"Don't make it easy to skip by
+touching the screen. If I'm on mobile it should be kept on, and advance by
+clicking a certain button, maybe like an attack or another button on a
+controller."* Advancing on any screen touch means a player who taps to move
+destroys the line they were reading. Bind advance to a specific control on
+every platform, and make an accidental tap do nothing.
+
 ### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
 
 **Not started, and deliberately so.** This is the largest block left — five
