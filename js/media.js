@@ -523,14 +523,49 @@ function plateBox(key) {
   } catch (e) { PLATE_BOX[key] = { x: 0, y: 0, w: 1, h: 1 }; }  // tainted: whole frame
   return PLATE_BOX[key];
 }
+// ---------------------------------------------------------------------------
+// THE POP GRADE. The room grade pulls everything toward the kingdom's palette,
+// which is right for scenery and wrong for the cast: an enemy that blends into
+// the backdrop is an ambush the player was never meant to be in (the owner:
+// "their light exposure is dull, so they blend with the background instead of
+// showing as true enemies"). Once per sheet, cached: the image blended over
+// ITSELF in overlay raises midtone contrast and saturation — the cartoon pop,
+// not a new look — and a whisper of screen lifts the exposure. Composite blend
+// modes rather than ctx.filter on purpose: filter is dead on iOS Safari, and
+// the phone is where the dullness was reported. Self-blending cannot grow
+// outside the subject's own alpha, so no masking is needed.
+// ---------------------------------------------------------------------------
+const POP_ART = {};
+function popArt(key, src) {
+  if (POP_ART[key] !== undefined) return POP_ART[key];
+  const im = src || MEDIA_RAW[key];
+  if (!im || !im.naturalWidth) return null;               // not here yet; ask again
+  let out = im;
+  try {
+    const cv = document.createElement('canvas');
+    cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+    const x = cv.getContext('2d');
+    x.drawImage(im, 0, 0);
+    x.globalCompositeOperation = 'overlay'; x.globalAlpha = 0.32; x.drawImage(im, 0, 0);
+    x.globalCompositeOperation = 'screen'; x.globalAlpha = 0.14; x.drawImage(im, 0, 0);
+    cv.naturalWidth = cv.width; cv.naturalHeight = cv.height;
+    out = cv;
+  } catch (e) {}                                           // tainted: ship it raw
+  POP_ART[key] = out;
+  return out;
+}
+
 // Draw a matted plate so its opaque box stands on `base`, centred on `cx`,
 // scaled so the box is `targetH` world-pixels tall. Returns false while the
 // plate has not arrived, which is every caller's cue to draw the procedural
 // body instead — the same arrangement every renderer in this game uses.
-function drawPlateAnchored(c, key, cx, base, targetH, flip) {
+// `pop` runs the plate through the pop grade — hostile bodies only; props and
+// friendly faces keep the room's own light.
+function drawPlateAnchored(c, key, cx, base, targetH, flip, pop) {
   mediaFetch(key);
-  const im = softArt(key);
+  let im = softArt(key);
   if (!im || !im.naturalWidth) return false;
+  if (pop) im = popArt('soft:' + key, im) || im;
   const box = plateBox(key);
   if (!box) return false;
   const scale = targetH / (box.h * im.naturalHeight);

@@ -189,8 +189,11 @@ function drawBeastPlate(c, e, ART, tame) {
     // tell, which is the one frame the player must not be lied to about
     for (const k in ART) mediaFetch(ART[k].img);
   }
-  const im = MEDIA_IMG[A.img];
-  if (!im || !im.naturalWidth) return false;
+  const im0 = MEDIA_IMG[A.img];
+  if (!im0 || !im0.naturalWidth) return false;
+  // the pack takes the pop grade (media.js): a predator that blends into the
+  // meadow is an ambush, and the owner reported exactly that
+  const im = (typeof popArt === 'function' && popArt(A.img)) || im0;
 
   const cx = e.x + e.w / 2, footY = e.y + e.h;
   const dh = e.h * A.k, dw = dh * (im.naturalWidth / im.naturalHeight);
@@ -632,8 +635,9 @@ function drawAlpha(c, b, cx, cy) {
   if (typeof mediaFetch === 'function')
     for (const k in ALPHA_ART) mediaFetch(ALPHA_ART[k].img);
   const A = alphaPlate(b);
-  const im = MEDIA_IMG[A.img];
-  if (!im || !im.naturalWidth) { drawBossHold(c, b); return; }
+  const im0 = MEDIA_IMG[A.img];
+  if (!im0 || !im0.naturalWidth) { drawBossHold(c, b); return; }
+  const im = (typeof popArt === 'function' && popArt(A.img)) || im0;
   const t2 = b.anim || 0;
   const warn = !!(b.st && TELL_ST.test(b.st));
   // Scaled to the hitbox by HEIGHT. The nine plates have wildly different

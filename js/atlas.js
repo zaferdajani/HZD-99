@@ -189,7 +189,13 @@ function processSheet(key, cols, rows) {
 function sheetOf(key, cols, rows, clean) {
   if (clean === false) return MEDIA_IMG[key];
   const p = processSheet(key, cols, rows);
-  return p || MEDIA_IMG[key];
+  const base = p || MEDIA_IMG[key];
+  // the roster is the ENEMY sheet — it takes the pop grade (see media.js) so
+  // the cast reads against the backdrop instead of dissolving into it. The
+  // npcs sheet does not: friendly faces keep the room's own light.
+  if (key === 'roster' && base && typeof popArt === 'function')
+    return popArt('sheet:' + key, base) || base;
+  return base;
 }
 // ---------------------------------------------------------------------------
 // THE SECOND SHEET — the people, and the machine that blocks your way.
