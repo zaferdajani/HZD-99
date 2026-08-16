@@ -245,11 +245,11 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   ✅ WIRED 2026-08-16 — shrine plate + parlor vista live (code session)
  15. §2i    THE BREAKER ×3                    ✅ WIRED 2026-08-16 — surge is plate-first, three states (code session)
  16. §2j    SERVO'S WINDING HOUSE ×1          ✅ SHIPPED 2026-08-16 on the third fire — needs wiring
- 17. §2k    THE TINKER'S QUENCH HOOD + FORGE ×2 (forgeFront / forgeInterior — kingdom 3)
+ 17. §2k    THE TINKER'S QUENCH HOOD + FORGE ×2 ✅ FIRED 2026-08-16 — needs wiring
  18. §2l    THE KILN VENT ×3                  ✅ FIRED 2026-08-16 — assets/characters/kiln/, needs wiring
- 19. §2m    THE SAGE'S STACKS + CARREL ×2     (carrelFront / carrelInterior — kingdom 4)
+ 19. §2m    THE SAGE'S STACKS + CARREL ×2     ✅ FIRED 2026-08-16 — needs wiring
  20. §2n    THE RIME COIL ×3                  ✅ FIRED 2026-08-16 — assets/characters/rime/, needs wiring
- 21. §2o    THE NYMPH'S POD + HOLLOW ×2       (hollowFront / hollowInterior — kingdom 5)
+ 21. §2o    THE NYMPH'S POD + HOLLOW ×2       ✅ FIRED 2026-08-16 — needs wiring
  22. §2p    THE NEST SNARE ×3                 ✅ FIRED 2026-08-16 — assets/characters/snare/, needs wiring
  23. §2q    BEAST GAIT REPAIR ×8              (wolf+cheetah walk pairs RE-FIRED + run pairs — see §2q, the leg and identity faults are written there)
 
@@ -705,6 +705,39 @@ enemy replaces its engine-drawn fallback at the same anchor —
 `case 'kiln'` / `case 'rime'` / `case 'snare'` in `Enemy.draw` — and the
 winch replaces `drawWinchHouse` at the ROOM_PROPS A1 anchor, with the
 procedural version kept as the loading fallback.
+
+### 2k + 2m + 2o — KINGDOMS 3, 4 AND 5 GET THEIR PLACES (art session, 2026-08-16)
+
+Six plates. Fronts matted to `assets/backgrounds/{forge,carrel,hollow}_front.png`;
+interiors crushed to `{forge,carrel,hollow}_interior.jpg`. Sources in
+`assets/source/kingdom345/`, contact sheet
+`assets/source/_sheets/kingdom345_places.png`.
+
+**The five silhouettes stay five silhouettes**, which is what these briefs
+were really asking for — each kingdom's doorway has to be recognisable at a
+glance and none may repeat another's shape:
+- kiosk canopy (Ratchet) · cable swag (the Oracle) · **quench-hood bell**
+  (the Tinker) · **crevice-arch of leaning ledger stacks** (the Archivist) ·
+  **hanging cocoon pod** (Lumen).
+
+And each keeps its own light, which is the other half of telling them apart:
+molten orange in the forge doorway, pale glacial blue in the carrel crevice,
+leaf-green at the pod's tear — never Ratchet's lamp amber and never the
+Oracle's CRT blue. On the hollow, the Nest's red infection veins run on the
+columns' OUTER edges and die to grey near the mouth, because Lumen's light
+keeps that one pocket clean; that detail survived the fire intact.
+
+**One incidental win worth recording:** `forgeFront` came back with a small
+brick building grown behind the hood — the "shrine → chapel" pull from §2h,
+in its Foundry dialect. The MATTE removed it for free, because the brickwork
+was background and the hood was subject. When a plate is going to be cut out
+anyway, a stray background structure is not always worth a re-fire: check
+what the matte does with it first.
+
+**WIRING (code session):** six media.js entries. The fronts replace
+`drawTinkerForge` / `drawSageCarrel` / `drawLumenHollow` at their existing
+anchors (same bottom anchor and ~236 px height as boothFront); the interiors
+are ROOM_VISTA backdrops for C5B, D1B and E1B.
 
 ### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
 
