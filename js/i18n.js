@@ -277,6 +277,12 @@ en: {
     'When the song came, the broken were the lucky ones. Cracked receivers, stripped antennae, factory rejects — every unit whose ears were dead heard NOTHING. And nothing is what saved them.',
     'They went under. Into the rock, where the signal dies. They rebuilt down here — a system of the deaf, wired by touch and light. No radio. No song.',
     'The caves do not connect to each other. That is not a flaw. A tunnel the song cannot walk is a tunnel worth keeping short.'],
+  // the meadow refuge's OWN page of the ledger (GA1T) — the tunnel tells the
+  // sage's story two rooms before she kneels in front of it
+  t6: ['LOG // MEADOW REFUGE — first cut after the fall',
+    'One of the wise ones counted our dead from the meadow above. We carried it under when the counting stopped making sense — but its ears were too good, and the song found it even in the rock.',
+    'We could not silence it and we would not end it. We sealed it in the deep chamber. It kneels there still, counting the other way.',
+    'If you carry clean light, go in to it. It kept one cell charged through everything. It always said somebody would come.'],
   crest_title: 'Crests', crest_slots: 'Sockets',
   crest_hint: 'Enter — equip / unequip', crest_full: 'Not enough sockets',
   crest_none: 'No crests found yet. Seek chests and merchants.',
@@ -331,6 +337,10 @@ en: {
   sl_ratchet_0: "Cat-frame. Cute. Don't touch the stock with those claws.",
   sl_ratchet_1: 'Heard the Meadows went quiet. Heard it was you. Prices stand, mind.',
   sl_ratchet_2: 'Take what you need. I salvage from the dead, and you keep making fewer of them.',
+  // the trader's OWN arc: the sword he forged, then what it did in the deep
+  // chamber — the kingdom's ending, heard from the machine that made it
+  sl_ratchet_forged: 'That blade on your back is the best work these hands ever did. Something under this kingdom is still singing — go and let it meet my crystal.',
+  sl_ratchet_sage: 'Word crawls up even from the deaf places: a sage knelt down there and STOOD UP clean. My forge did that. You did that. Prices still stand, mind.',
   sl_mono_0: 'Query: purpose. A single maintenance unit against a network is not a plan.',
   sl_mono_1: 'Correction logged. One unit is not a plan. It is, apparently, a method.',
   sl_mono_2: 'I have rewritten your entry three times. I am going to stop rewriting it now.',
@@ -722,6 +732,8 @@ ar: {
   sl_ratchet_0: 'هيكل قطة. ظريف. لا تلمسي البضاعة بتلك المخالب.',
   sl_ratchet_1: 'سمعت أن المروج صمتت. سمعت أنها أنتِ. الأسعار كما هي طبعًا.',
   sl_ratchet_2: 'خذي ما تحتاجين. أنا أنتشل من الموتى، وأنتِ تقلّلين عددهم.',
+  sl_ratchet_forged: 'ذلك النصل على ظهرك أفضل ما صنعته هاتان اليدان يومًا. شيءٌ ما تحت هذه المملكة ما زال يغني — اذهبي ودعيه يلقى بلّورتي.',
+  sl_ratchet_sage: 'الأخبار تزحف حتى من الأماكن الصمّاء: حكيمٌ ركع هناك في الأسفل ثم وقف نظيفًا. مسبكي فعل ذلك. وأنتِ فعلتِها. الأسعار كما هي طبعًا.',
   sl_mono_0: 'استعلام: الغرض. وحدة صيانة واحدة ضد شبكة ليست خطة.',
   sl_mono_1: 'سُجّل التصحيح. وحدة واحدة ليست خطة. لكنها، فيما يبدو، أسلوب.',
   sl_mono_2: 'أعدت كتابة سجلّك ثلاث مرات. سأتوقف عن إعادة كتابته الآن.',
@@ -768,6 +780,10 @@ ar: {
     'خلف الجليد يرقد أمين الأرشيف. إنه يحرس مفتاح النواة.',
     'أنفق أرواحك بحكمة أيتها الهريرة. التاسعة هي التي تُحسب.',
   ],
+  t6: ['سجلّ // ملجأ المروج — أول ما حُفر بعد السقوط',
+    'أحد الحكماء كان يُحصي موتانا من المرج في الأعلى. حملناه إلى الأسفل حين لم يعد للإحصاء معنى — لكن أذنيه كانتا أجود مما ينبغي، فوجدته الأغنية حتى في الصخر.',
+    'لم نستطع إسكاته ولم نشأ إنهاءه. ختمنا عليه في الحجرة العميقة. وما زال راكعًا هناك، يُحصي بالاتجاه المعاكس.',
+    'إن كنتِ تحملين ضوءًا نظيفًا فادخلي إليه. أبقى خليةً واحدة مشحونة عبر كل شيء. لطالما قال إن أحدًا سيأتي.'],
   t1: ['سجلّ صيانة 0x2F: أُغلقت الفتحة الفرعية بعد إشارة شاذة. إن وُجدت — لا تُجب عليها.'],
   t2: ['شذرة أرشيف، اليوم 1042: الفيروس لا يدمّر. بل يعيد التوظيف. وهذا أسوأ.'],
   t3: ['ملاحظة التخزين البارد: سرق الجوّالُ الوسامَ التجريبي التاسع وفرّ نحو عروق البلّور.'],

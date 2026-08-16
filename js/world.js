@@ -903,6 +903,15 @@ for (const [gid, tid, did, lair, flag, gcell, tcell, dcell] of GROTTOES) {
   MAPPOS[did] = [dcell[0], dcell[1], 1, 1];
 }
 
+// KINGDOM 1 ENDS AT THIS SAGE, so its tunnel carries the ledger's own page
+// rather than the generic Deaf System log: the meadow refuge log (t6) tells
+// how the counting sage was carried under, sealed in the deep chamber, and
+// kept a cell charged for whoever came with clean light — two rooms before
+// she kneels in front of it, so the chamber is an arrival rather than a
+// surprise. The other networks keep t5 until their kingdoms' own sessions
+// write their pages.
+ROOMS.GA1T.ents = ROOMS.GA1T.ents.map(e => (e[0] === 'term' ? ['term', e[1], e[2], 6] : e));
+
 const gridCache = {};
 function buildRoom(id) {
   if (gridCache[id]) return gridCache[id];

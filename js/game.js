@@ -879,7 +879,20 @@ function doInteract(s) {
     // It leads rather than trails, because it is the line the greeting used to
     // be, and because a player who skips the rest still hears it.
     {
-      const k = 'sl_' + s.extra + '_' + standingTier(), sl = t(k);
+      // THE KINGDOM'S OWN MILESTONES OUTRANK THE WAR'S. The tier lines count
+      // fallen guardians — the whole game's arc — but the trader's opinion of
+      // her should move on HIS arc first: the sword he forged, and what it
+      // did in the deep chamber under this kingdom. Two overrides, in story
+      // order, both specific per the standing-line law (what changed, never
+      // how great she is): the forge line points the blade at the sage it
+      // was made for, and the sage line is the kingdom's ending heard from
+      // the mouth of the machine that made it possible.
+      let k = 'sl_' + s.extra + '_' + standingTier();
+      if (s.extra === 'ratchet') {
+        if (G.save.flags['sageTame_GA1D']) k = 'sl_ratchet_sage';
+        else if (G.save.flags.crystal) k = 'sl_ratchet_forged';
+      }
+      const sl = t(k);
       if (sl && sl !== k) lines = [sl].concat(lines);
     }
     G.dialog = { name: t('n_' + s.extra), lines, i: 0, npc: s.extra, onEnd: after };

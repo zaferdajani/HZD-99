@@ -33,6 +33,8 @@ const THEMES = {
           'Everything I sell was salvaged from ships that no longer needed things.',
           'The stall? Built her from four dead hulls and a festival sail. Everything on this shore is somebody\'s afterwards — mind you don\'t become stock.',
         ],
+        sl_ratchet_forged: 'That white blade is the finest hour these hands ever had. Something beneath this kingdom still sings — go and let it meet my work.',
+        sl_ratchet_sage: 'Word climbs even out of the silent places: the Sibyl knelt down there and stood up clean. My forge did that. You did that. Prices still stand, mind.',
         d_mono: [
           'I once read the fates of every kingdom. Now I read only ruins.',
           'They say the hunger sings from beneath the Halls of the Dead — a voice the sailors follow down.',
@@ -128,6 +130,8 @@ const THEMES = {
           'كل ما أبيعه جُمع من سفنٍ لم تعد تحتاج شيئًا.',
           'المنصّة؟ بنيتُها من أربعة هياكل سفنٍ ميتة وشراعِ مهرجان. كلُّ شيء على هذا الشاطئ هو "ما بعد" أحدهم — فاحذر أن تصير بضاعة.',
         ],
+        sl_ratchet_forged: 'ذلك النصل الأبيض أروع ساعةٍ عرفتها هاتان اليدان. شيءٌ ما تحت هذه المملكة ما زال يغني — اذهب ودعه يلقى صنعتي.',
+        sl_ratchet_sage: 'الأخبار تصعد حتى من الأماكن الصامتة: الكاهنة ركعت هناك في الأسفل ثم وقفت نظيفة. مسبكي فعل ذلك. وأنت فعلتها. الأسعار كما هي طبعًا.',
         d_mono: [
           'قرأتُ يومًا مصائر الممالك كلها. والآن لا أقرأ إلا الأطلال.',
           'يقولون إن الجوع يغني من تحت قاعات الموتى — صوتٌ يتبعه البحّارة إلى الأسفل.',
