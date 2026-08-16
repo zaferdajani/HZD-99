@@ -360,10 +360,12 @@ en: {
     'Move with the arrows, leap with Z, and swipe those claws with X.',
     'Claw the corrupted to harvest volts. Then stand still, hold F — the ✚ pad on a phone — and your frame will mend a core.',
     'The virus corrupts every machine it touches. Purge it, little paw — or rust with the rest of us.',
+    'See the winding house behind me? I raised every gantry over this meadow off that drum, cable by cable. The drum still turns. My climbing days are what rusted.',
   ],
   d_ratchet: [
     "Heh. A cat-frame. You'll be wanting upgrades, then. Scrap talks, friend.",
     'Everything I sell I salvaged myself — mostly from units that stopped needing things.',
+    'The booth? Built her from four dead haulers and a parade banner. Everything out here is somebody\'s afterwards — mind you don\'t become stock.',
   ],
   d_mono: [
     'I archived the whole network, once. Now I archive its ruins.',
@@ -749,10 +751,12 @@ ar: {
     'تحرّك بالأسهم، واقفز بـ Z، واضرب بمخالبك بـ X.',
     'اخدش الآلات الفاسدة لتجمع الفولتات، ثم قف ثابتًا واستمر بالضغط على F — أو زر ✚ على الهاتف — وسيُرمّم هيكلُك نواةً.',
     'الفيروس يفسد كل آلة يلمسها. طهّر الأعماق أيها المخلب الصغير — أو اصدأ مع بقيتنا.',
+    'أترى بيتَ الرفع خلفي؟ رفعتُ كل الممرات المعلّقة فوق هذا المرج بذلك الطبل، كبلًا كبلًا. الطبل ما زال يدور. أيامُ تسلّقي هي التي صدئت.',
   ],
   d_ratchet: [
     'هه. هيكل قطّ. ستحتاج تحسينات إذًا. الخردة هي لغة التفاهم هنا يا صديقي.',
     'كل ما أبيعه جمعته بنفسي — غالبًا من وحداتٍ لم تعد تحتاج شيئًا.',
+    'الكشك؟ بنيتُه من أربع ناقلاتٍ ميتة وراية استعراض. كلُّ شيء هنا هو "ما بعد" أحدهم — فاحذري أن تصيري بضاعة.',
   ],
   d_mono: [
     'أرشفتُ الشبكة كلها ذات يوم. والآن أؤرشف أطلالها.',

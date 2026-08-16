@@ -244,6 +244,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
  14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   (oracleBooth / oracleInterior)
  15. §2i    THE BREAKER ×3                    (rest / fins-flared tell / vented — new zone-B enemy)
+ 16. §2j    SERVO'S WINDING HOUSE ×1          (kingdom 1 session, 2026-08-16 — see brief below)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -499,6 +500,38 @@ Enemy.draw, js/entities.js) is the placement reference:
 NEGATIVE for all: no legs, no barrel or gun (it must never read as the
 turret), no second character, no text, no watermark; dark-room phrasing
 per the §1 warnings, subject only.
+
+### 2j. SERVO'S WINDING HOUSE ✱ FIRE ON REBIND (kingdom 1 session, 2026-08-16)
+
+The kingdom protocol asks that every NPC have a PLACE or a reason; Old Servo
+now has both. His coil errand already says he cannot climb any more, and his
+standing line says he built half the district — so the structure behind him
+in A1 is the winch he raised the gantries with: drum, A-frame, sagging
+canvas, the cable still made off toward the climb. `drawWinchHouse` in
+js/game.js (drawn via ROOM_PROPS) is the procedural stand-in and the
+placement reference — one plate replaces it at the same ground anchor
+(tile 3, ground line, roughly 110×100 px on screen). Mimic-the-background
+rule: it is built from the same scrap furniture the Scrap Meadows backdrop
+paints. NO RIGHT ANGLES: every edge leans, sags or curves.
+
+> (winchHouse) A small salvaged cable-winch station on a scrap meadow, seen
+> straight on: a big round cable drum with worn spokes hung slightly askew
+> in a leaning A-frame of two tapered scrap-metal poles, a patched canvas
+> sheet with a sagging scalloped hem thrown over the top, a heavy cable
+> running off the drum up toward the upper right and out of frame, a coil
+> of spare cable and a crooked one-legged stool at the base, one small
+> work lamp hanging from the frame giving a tired warm amber glow.
+> Weathered teal-and-gunmetal palette, verdigris staining, warm amber only
+> at the lamp. Nothing plumb, nothing square — every edge leans, sags or
+> curves. Clean high-detail 3D render, soft specular metal, dark moody
+> dusk lighting. NEGATIVE: no text, no watermark, no characters, no
+> straight rectangular frame, no cast shadow, no ground plane.
+> Photographed in a pitch-dark room, no backdrop, no floor, spotlights
+> pick out the structure and nothing else receives any light.
+
+After keying: archive the source, wire as a media.js entry drawn at the
+ROOM_PROPS A1 anchor with `drawWinchHouse` kept as the loading fallback,
+photograph, then node tests/run.cjs boot deadend platform.
 
 ### 1e. THE RUN PAIR RE-FIRE ✱ FIRE ON REBIND — the owner rejected v1
 

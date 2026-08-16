@@ -5469,7 +5469,100 @@ function drawThrustBoots(c, p) {
   c.drawImage(im, -w * 0.26, -h / 2, w, h);
   c.restore();
 }
+// ---------------------------------------------------------------------------
+// ROOM FURNITURE — placed set pieces that are scenery, not statics: nothing
+// here can be interacted with, so it never enters G.statics (findNear would
+// offer a prompt for it) and never costs a save flag. World coordinates,
+// drawn with the statics so it sits in the same light.
+//
+// SERVO'S WINDING HOUSE (kingdom 1 protocol: every NPC has a place, or a
+// reason). Old Servo built the gantries over the meadow — his own line — and
+// his coil errand says why he stands at their foot: "I cannot climb any
+// more." What was missing was the PLACE that sentence implies. This is it:
+// the winch he raised the gantries with, drum and frame and sagging canvas,
+// standing behind him with its cable still made off toward the climb. The
+// drawing is a PROCEDURAL STAND-IN awaiting its fired plate (ART_QUEUE §2h),
+// same law as drawBooth; nothing in it presents a right angle.
+const ROOM_PROPS = { A1: [{ kind: 'winch', tx: 3, ty: 15 }] };
+function drawWinchHouse(wx, gy) {
+  c.save();
+  // the back shell: a lean-to of scrap plate, tipped the way the booth tips
+  c.fillStyle = '#101820';
+  c.beginPath();
+  c.moveTo(wx - 52, gy);
+  c.lineTo(wx - 40, gy - 78);
+  c.lineTo(wx + 46, gy - 88);
+  c.lineTo(wx + 54, gy);
+  c.closePath(); c.fill();
+  // two tapered poles crossing at the head — an A-frame, not a doorway
+  c.fillStyle = '#0b1119';
+  for (const s of [-1, 1]) {
+    c.beginPath();
+    c.moveTo(wx + s * 44, gy);
+    c.lineTo(wx + s * 8, gy - 96);
+    c.lineTo(wx + s * 2, gy - 92);
+    c.lineTo(wx + s * 36, gy);
+    c.closePath(); c.fill();
+  }
+  // the sagging canvas thrown over the head, scallop-hemmed like the booth's
+  c.fillStyle = '#1c2836';
+  c.beginPath();
+  c.moveTo(wx - 58, gy - 74);
+  c.quadraticCurveTo(wx - 4, gy - 112, wx + 56, gy - 80);
+  c.lineTo(wx + 50, gy - 62);
+  for (let i = 3; i >= 0; i--) {
+    const hx = wx - 50 + (i + 0.5) * 27;
+    c.quadraticCurveTo(hx + 8, gy - 50, hx - 8, gy - 62);
+  }
+  c.closePath(); c.fill();
+  // THE DRUM — the winding gear itself, hung slightly askew in the frame
+  const dx = wx + 2, dy = gy - 44, dr = 20;
+  const spin = Math.sin(performance.now() / 2600) * 0.2;   // it still turns, barely
+  c.save();
+  c.translate(dx, dy); c.rotate(0.12 + spin * 0.04);
+  c.fillStyle = '#141e2a';
+  c.beginPath(); c.arc(0, 0, dr, 0, 7); c.fill();
+  c.strokeStyle = '#2a3a4c'; c.lineWidth = 3;
+  c.beginPath(); c.arc(0, 0, dr - 3, 0, 7); c.stroke();
+  c.strokeStyle = '#0b1119'; c.lineWidth = 2.4;
+  for (let i = 0; i < 3; i++) {
+    const a = spin + i / 3 * Math.PI;
+    c.beginPath(); c.moveTo(Math.cos(a) * (dr - 4), Math.sin(a) * (dr - 4));
+    c.lineTo(-Math.cos(a) * (dr - 4), -Math.sin(a) * (dr - 4)); c.stroke();
+  }
+  c.restore();
+  // the cable: off the drum, up and away toward the gantry climb, sagging
+  // under its own weight and fading before it can claim a destination
+  const cg = c.createLinearGradient(dx, dy, dx + 250, dy - 170);
+  cg.addColorStop(0, 'rgba(90,110,132,0.8)'); cg.addColorStop(1, 'rgba(90,110,132,0)');
+  c.strokeStyle = cg; c.lineWidth = 2;
+  c.beginPath();
+  c.moveTo(dx + dr - 3, dy - 6);
+  c.quadraticCurveTo(dx + 120, dy - 30, dx + 250, dy - 170);
+  c.stroke();
+  // a coil of spare line and a one-legged stool at the base: somebody WORKS here
+  c.strokeStyle = '#232a35'; c.lineWidth = 3;
+  c.beginPath(); c.arc(wx - 30, gy - 7, 7, 0.3, 5.6); c.stroke();
+  c.beginPath(); c.arc(wx - 30, gy - 7, 4, 0.6, 5.2); c.stroke();
+  c.fillStyle = '#141e2a';
+  c.beginPath();
+  c.moveTo(wx + 30, gy - 14); c.quadraticCurveTo(wx + 40, gy - 17, wx + 46, gy - 12);
+  c.lineTo(wx + 42, gy); c.lineTo(wx + 36, gy);
+  c.closePath(); c.fill();
+  // one small work lamp hung off the frame, warm and tired
+  const lx = wx - 14, ly = gy - 84;
+  c.fillStyle = '#0d141d';
+  c.beginPath(); c.arc(lx, ly, 5, 0, 7); c.fill();
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const lg = c.createRadialGradient(lx, ly + 3, 1, lx, ly + 3, 26);
+  lg.addColorStop(0, 'rgba(255,214,120,0.30)'); lg.addColorStop(1, 'rgba(255,190,100,0)');
+  c.fillStyle = lg; c.beginPath(); c.arc(lx, ly + 3, 26, 0, 7); c.fill();
+  c.restore();
+  c.restore();
+}
 function drawStatics(P) {
+  for (const pr of (ROOM_PROPS[G.roomId] || []))
+    if (pr.kind === 'winch') drawWinchHouse(pr.tx * TILE + 16, pr.ty * TILE);
   for (const s of G.statics) {
     const bob = Math.sin(performance.now() / 500 + s.t) * 3;
     if (s.type === 'bench' && typeof isHero === 'function' && isHero()) {

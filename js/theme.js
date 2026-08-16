@@ -26,10 +26,12 @@ const THEMES = {
           'Move with the arrows, leap with Z, and let your blade speak with X.',
           'Strike the beasts to gather vigor. Then stand still, hold F — the ✚ mark — and your wounds will close.',
           'A hunger from the deep corrupts every creature it touches. Drive it out, wanderer — or be claimed like the rest.',
+          'That windlass behind me hauled our ships ashore, once — I raised half this coast with it, rope by rope. The rope still holds. My knees are what gave.',
         ],
         d_ratchet: [
           'A hero, washed up with empty pockets? Ha! Fortune favors me today. Bronze talks, friend.',
           'Everything I sell was salvaged from ships that no longer needed things.',
+          'The stall? Built her from four dead hulls and a festival sail. Everything on this shore is somebody\'s afterwards — mind you don\'t become stock.',
         ],
         d_mono: [
           'I once read the fates of every kingdom. Now I read only ruins.',
@@ -119,10 +121,12 @@ const THEMES = {
           'تحرّك بالأسهم، واقفز بـ Z، ودع سيفك يتكلم بـ X.',
           'اضرب الوحوش لتجمع القوة، ثم قف ثابتًا واستمر بالضغط على F — علامة ✚ — وستلتئم جراحك.',
           'جوعٌ من الأعماق يفسد كل مخلوق يلمسه. اطرده أيها التائه — أو تُؤخذ مثل الآخرين.',
+          'تلك الرافعة خلفي سحبت سفننا إلى الشاطئ يومًا — رفعتُ نصف هذا الساحل بها، حبلًا حبلًا. الحبل ما زال يشدّ. ركبتاي هما اللتان خانتا.',
         ],
         d_ratchet: [
           'بطلٌ ألقاه البحر بجيوب فارغة؟ ها! الحظ يبتسم لي اليوم. البرونز هو لغة التفاهم يا صديقي.',
           'كل ما أبيعه جُمع من سفنٍ لم تعد تحتاج شيئًا.',
+          'المنصّة؟ بنيتُها من أربعة هياكل سفنٍ ميتة وشراعِ مهرجان. كلُّ شيء على هذا الشاطئ هو "ما بعد" أحدهم — فاحذر أن تصير بضاعة.',
         ],
         d_mono: [
           'قرأتُ يومًا مصائر الممالك كلها. والآن لا أقرأ إلا الأطلال.',
