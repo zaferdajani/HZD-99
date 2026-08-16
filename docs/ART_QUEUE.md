@@ -233,7 +233,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   2. §1b-ii regrips ×2 + thrown blade ×1 (thrown = BODY LENGTH — owner ruling)
   3. §1c    back-jet gear ×3             ✅ SHIPPED 2026-08-16 (were fired+archived, never keyed) — needs wiring
   4. §1d    THE FORGING CINEMATIC ×1     ✅ WIRED 2026-08-16 — the forging plays at the grant (code session)
-  5. §1e    RUN PAIR RE-FIRE ×2          ❌ REFUSED BY OWNER 2026-08-16 — re-parked; RE-FIRE with constraints below
+  5. §1e    RUN PAIR RE-FIRE ×2          ✅ RE-FIRED v3 2026-08-16 to all four constraints — awaiting owner + the unpark
   6. §2e    sage plates ×6               ✅ WIRED 2026-08-16 — drawSage is plate-first, six states (code session)
   7. §2d    robot bat plates ×5          ✅ WIRED 2026-08-16 — drawBat is plate-first, five states (code session)
   8. §2c    caveMouth + caveExit + pillar ×3  ✅ WIRED 2026-08-16 — vistas + pillar plate live; cave tile deck still to fire
@@ -1567,6 +1567,50 @@ hurried, which he approved) until a re-fire that satisfies ALL of:
    standing on a figurine display base and it took three passes to cut out.
    Negatives on every ground-touching plate: no base, no plinth, no ground
    glow, no floor shadow.
+
+### §1e v3 — RE-FIRED TO ALL FOUR CONSTRAINTS (art session, 2026-08-16)
+
+Jobs 7471abbd (`run_a`, the step) and 9bca5a37 (`run_b`, the airborne tuck),
+both matted, both placed with `tools/herocell.cjs`. Sources in
+`assets/source/hero/run_a.jpg` / `run_b.jpg`. Eye anchors re-measured —
+the detector is confident on both.
+
+**Against the owner's four constraints, measured rather than claimed:**
+1. **SHORT LEGS** — fired against `walk_a` as the proportion authority, and
+   the thing that actually worked was constraining the STRIDE GEOMETRICALLY
+   instead of asking for short legs: *"the horizontal gap between her two
+   feet is no wider than her own body is wide."* A stumpy-legged body cannot
+   take a long stride, so pinning the stride pins the legs. Two earlier
+   attempts asked for "short legs" in prose and got a lean sprinter both
+   times — the model's prior for "running character" is athletic and it wins
+   every argument made in adjectives.
+2. **HOUSE FACING** — three-quarter FRONT, both eye-lights and both ears
+   visible, body angled RIGHT, cape trailing LEFT, leading foot ahead of the
+   nose-line. This is what the refused pair got wrong: it faced right while
+   its stride reached left, which is precisely the "backward" the owner saw.
+   Checked against `walk_a`, `dash` and `claw_1` before keying.
+3. **TWO DISTINCT STRIDES** — the owner asked for the two frames to be
+   overlaid. They were, by a scratch tool that normalises both to one height
+   and bottom-aligns them: **silhouette IoU 0.40 whole-body, 0.53 below the
+   waist**, against the §3.3 line of 0.86. The legs genuinely differ.
+4. **NO pedestal, ground pool or baked shadow** — flat black field, nothing
+   under her, matted rather than keyed.
+
+**A fifth thing, unasked but worth having:** `tools/armbal.cjs` puts the new
+cells at **run_a 0.926 and run_b 0.552**, where the walk cells they replace
+measure 0.751 and 0.541. So the two-arm check gets safer when the run is
+unparked, not more dangerous — which is what the earlier flake note predicted.
+
+`run_b` took one extra fire. The first tuck leaned BACK, and given constraint
+2 makes a backward read an automatic refuse, a plate that merely might read
+that way is not worth shipping. Re-fired with the lean stated as the most
+important thing in the picture — head and chest leading, out ahead of the
+hips — and the arm balance doubled as a side effect.
+
+**STILL PARKED IN CODE**, and that is correct until the owner has looked:
+`heroState()` still substitutes the walk pair. The two-line revert is the
+code session's, and it should follow the owner's word on these cells, not
+precede it.
 
 ### 2q. BEAST GAIT REPAIR ×8 (expanded 2026-08-16 — the owner saw the seams)
 
