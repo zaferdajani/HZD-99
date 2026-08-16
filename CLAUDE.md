@@ -28,6 +28,18 @@ the owner's ruling ends the pattern. The protocol that replaces it:
 The retired branch `claude/art-queue-section-1-fire-yqlyc0` is fully merged
 and must never receive another commit.
 
+## ART IS HIGGSFIELD'S, CODE IS OURS (owner's standing order, restated 2026-08-16)
+
+**"All arts, videos, images, STRUCTURES should be created through
+Higgsfield. You are not good at it. You can create the code, you can
+create the gameplay, but not the art."** Structures is the word that
+changed: the booth, the city gate monument, the cave mouths — anything
+that reads as a built or natural THING — are Higgsfield plates, not
+procedural drawings. Every procedural structure currently in the game
+(drawBooth, drawGateDoors, drawCaveMouth) is a wiring stand-in awaiting
+its fired plate on THE FIRING LIST (§2f, §2g), and no new structure may
+be added without its brief going on that list in the same commit.
+
 ## NO RIGHT ANGLES (owner's standing order, 2026-08-15)
 
 **"No 90-degree elevation or walls in all game."** Nothing the player reads
