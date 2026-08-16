@@ -587,12 +587,19 @@ Two things follow:
   `heroState()` still substitutes the WALK pair for the run (the §1e cells
   are parked), and the walk cells hide the far arm behind the body and cape.
   It has always been this close to failing; it just never tipped before.
-- **Unparking the run changes this number, and nobody knows which way yet.**
-  The §1e cells are a different drawing with a different arm carriage. Before
-  the two-line revert in `heroState()` lands, run `node tests/hero.cjs` and
-  read the run/R and run/L rows — if the ratio drops under 0.16 the fix is a
-  re-fire with the far arm clear of the body, NOT a loosened threshold. The
-  threshold is what stops a one-armed cat reaching the screen.
+- **Unparking the run probably HELPS, and that is now measured rather than
+  hoped.** `node tools/armbal.cjs` (new, this commit) reports the same
+  quantity per CELL on the sheet, before anything is wired. The cells the run
+  currently borrows are the weaker pair — `walk_a` 0.751 and `walk_b` **0.541**
+  — while the §1e run cells are `run_a` **0.888** and `run_b` **0.777**. So the
+  pose that is scraping the floor in-game is being drawn by the most lopsided
+  plate on the sheet, and the parked replacements are markedly better balanced.
+- Sheet ratios are not game ratios — the game adds facing, lean, scarf and
+  jets on top, which is why 0.541 on the sheet reads as ~0.16 on screen. Read
+  `armbal.cjs` for "does the far arm exist at all" and `tests/hero.cjs` for
+  the verdict. If the number still drops under 0.16 after the revert, the fix
+  is a re-fire with the far arm clear of the body, NOT a loosened threshold:
+  the threshold is what stops a one-armed cat reaching the screen.
 
 ### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
 
