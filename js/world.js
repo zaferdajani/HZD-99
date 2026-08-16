@@ -321,6 +321,11 @@ const ROOMS = {
       // secret breakable floor down to A5 (pogo it)
       rect(g, 12, 15, 14, 16, 'B');
       hline(g, 33, 36, 12, '='); hline(g, 15, 18, 9, '='); hline(g, 48, 51, 12, '=');
+      // the way UP to A8 — the exit was declared but the ceiling was never
+      // carved (the audit that found C5 and D2 sealed found this whole class).
+      // Hole matches A8's floor opening at 11-14, with two shelves to reach it.
+      rect(g, 11, 0, 14, 0, '.');
+      hline(g, 11, 14, 6, '='); hline(g, 12, 15, 3, '=');
     } },
   // ---- THE DEN. The first fight in the game you can lose, and it is on the
   // way rather than off it: the pack has been in the meadow since the first
@@ -375,7 +380,9 @@ const ROOMS = {
       hline(g, 11, 18, 15, '^');            // spike gap (needs dash)
       rect(g, 25, 12, 28, 16, '.');         // shaft down to A3
       hline(g, 25, 28, 12, '=');
-      rect(g, 29, 8, 29, 11, '.');          // exit R (upper level)
+      rect(g, 29, 8, 31, 11, '.');          // exit R (upper level) — carved to
+                                            // the EDGE: it used to stop at col
+                                            // 29, leaving the frame sealed
       rect(g, 3, 0, 6, 0, '.');             // and up, into the relay gallery
       hline(g, 2, 7, 4, '='); hline(g, 8, 11, 8, '=');   // the way to reach it
     } },
@@ -429,6 +436,10 @@ const ROOMS = {
       hline(g, 27, 32, 11, '=');
       hline(g, 2, 4, 4, '='); hline(g, 5, 7, 7, '='); hline(g, 2, 4, 10, '=');
       hline(g, 42, 45, 12, '='); hline(g, 50, 53, 10, '=');
+      // the way UP to B7 — declared, never carved. Hole matches B7's floor
+      // opening at 13-16; one more shelf bridges the left ladder to it.
+      rect(g, 13, 0, 16, 0, '.');
+      hline(g, 8, 11, 2, '=');
     } },
   B3: { zone: 'B', w: 32, h: 17, exits: { L: 'B2', R: 'B4', B: 'C1' },
     // The Oracle no longer stands in the corridor. Her PARLOR is the depth
@@ -455,6 +466,9 @@ const ROOMS = {
       frame(g); openL(g);
       hline(g, 5, 8, 11, '='); hline(g, 21, 24, 11, '=');
       rect(g, 28, 11, 29, 14, 'B');         // secret wall → B5
+      rect(g, 30, 11, 31, 14, '.');         // ...and the passage BEHIND it:
+                                            // breaking the wall used to reveal
+                                            // two more columns of solid frame
     } },
   B5: { zone: 'B', w: 32, h: 17, exits: { L: 'B4', T: 'X1', R: 'V1' },
     ents: [['chest', 12, 15, 'phantom'], ['scrap', 16, 15, 25], ['riddle', 19, 15, 2], ['vault', 21, 15]],
@@ -597,7 +611,16 @@ const ROOMS = {
     build(g) {
       frame(g); openL(g);
       hline(g, 5, 8, 11, '='); hline(g, 21, 24, 11, '='); rect(g, 28, 11, 29, 14, 'B');
+      rect(g, 30, 11, 31, 14, '.');       // the passage behind the secret wall
+                                          // (same fault as B4's: the frame
+                                          // stayed solid behind the breakable)
       hline(g, 19, 25, 6, '#');           // the dragon's roost ledge, high right
+      // the way UP to C6 — declared, never carved. Hole matches C6's floor
+      // opening at 11-14. The roost is the DRAGON's, not a rung — she cannot
+      // reach it (5 rows from the shelves, jump clears 3) — so the climb is
+      // its own ladder off the right shelf, 3-row steps like A3's.
+      rect(g, 11, 0, 14, 0, '.');
+      hline(g, 17, 20, 8, '='); hline(g, 13, 16, 5, '='); hline(g, 12, 15, 3, '=');
     } },
   C4: { zone: 'C', w: 32, h: 17, exits: { L: 'C3' },
     ents: [['chest', 10, 15, 'slot'], ['scrap', 14, 15, 40], ['riddle', 6, 15, 4]],
@@ -735,6 +758,14 @@ const ROOMS = {
       hline(g, 8, 14, 15, '^'); hline(g, 22, 27, 15, '^'); hline(g, 36, 41, 15, '^');
       hline(g, 9, 13, 12, '=');
       hline(g, 16, 19, 8, '=');
+      // both vertical exits were declared and neither was carved. UP to E4:
+      // hole matches E4's floor opening at 13-16, two shelves continue the
+      // existing ladder. DOWN to E5: the drop matches E5's ceiling opening,
+      // and carving it trims the first spike run to 8-12 — the hole IS the
+      // safe landing in that strip now.
+      rect(g, 13, 0, 16, 0, '.');
+      hline(g, 13, 16, 5, '='); hline(g, 14, 17, 2, '=');
+      rect(g, 13, 15, 16, 16, '.');
     } },
   E3: { zone: 'E', w: 34, h: 17, exits: { L: 'E2' },
     ents: [['boss', 17, 15, 'mother']],
