@@ -7389,8 +7389,14 @@ function auraSense() {
 function drawLights(P) {
   c.save(); c.globalCompositeOperation = 'lighter';
   G._shadAcc = 0;
+  // her presence light — the reason she is findable in a dark room. It was a
+  // 150px pool centred low enough that its bottom half painted the floor
+  // beneath her (the owner, twice: the light under her feet). Now a tight
+  // rim on the upper body whose gradient dies at her ankles: she still
+  // carries light, the ground under her carries only her shadow. Dash and
+  // heal still flare it — those are moments, not a standing lamp.
   if (player && !player.dead)
-    lightAt(player.x + 12, player.y + 18, 150, P.glow, 0.13 + (player.dashT > 0 ? 0.14 : 0) + (player.healT > 0 ? 0.12 : 0));
+    lightAt(player.x + 12, player.y + 12, 56, P.glow, 0.15 + (player.dashT > 0 ? 0.14 : 0) + (player.healT > 0 ? 0.12 : 0));
   G._auraCount = 0;
   if (auraSense() && player && !player.dead && G.state !== 'FILM') {
     const pu = 0.8 + Math.sin(performance.now() / 640) * 0.2;
