@@ -73,6 +73,7 @@ plate can be traced back to the generation it came from.
 | `characters/sage/*.png` | Higgsfield, Seedream 4.5 | the sage's six states (§2e); five matted with `remove_background`, all six one identity |
 | `characters/bat/*.png` | Higgsfield, Seedream 4.5 | the robot bat's five states (§2d); one plate anchored the design, four fired against it |
 | `backgrounds/cave_mouth.jpg` / `cave_exit.jpg`, `characters/gear/pillar.png` | Higgsfield, Seedream 4.5 | the crystal cave (§2c); the exit fired against the mouth so both sides are one rock |
+| `backgrounds/gate_*.jpg`, `backgrounds/cave_mouth_[a-e].jpg` | Higgsfield, Seedream 4.5 | the five kingdom gates and five grotto mouths (§2f); the mouths fired against `cave_mouth.jpg` |
 | `video/sword_forge.mp4` / `.webm` | Higgsfield, Seedance 2.5 | the forging cinematic (§1d), animated from a Seedream opening frame |
 | `characters/hero/*`, `characters/hzd_8yaw*.png` | Higgsfield | HZD-99's body and turnarounds (§1), all pinned to the canon reference element |
 | `characters/npc_6yaw.png`, `characters/roster_8yaw.png` | Higgsfield | the NPC and creature turnaround sheets |

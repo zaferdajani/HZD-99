@@ -237,7 +237,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   6. §2e    sage plates ×6               ✅ FIRED 2026-08-16 — assets/characters/sage/, needs wiring
   7. §2d    robot bat plates ×5          ✅ FIRED 2026-08-16 — assets/characters/bat/, needs wiring
   8. §2c    caveMouth + caveExit + pillar ×3  ✅ FIRED 2026-08-16 — cave tile deck still to fire
-  9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   (owner 2026-08-15 — see brief below)
+  9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   ✅ FIRED 2026-08-16 — 5 gates + 5 mouths; city monument left alone
  10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ CLOSED 2026-08-16 — all three plates fired, approved and wired
  11. §3m    BOSS MOTION PLATES (task #93)     (walk pair + attack-anticipation per guardian)
  12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
@@ -503,6 +503,63 @@ opening in living rock — asymmetric, weather-worn, roots/moss per zone,
 absolutely no straight jambs, no lintel, no symmetry. The engine's
 procedural fallback (drawCaveMouth in game.js) is the placement reference;
 the plate replaces it at the same anchor.
+
+### 2f. GATE SHAPES + CAVE MOUTHS ✅ TEN PLATES FIRED 2026-08-16 (art session)
+
+The owner's order was *"ask Higgsfield to produce different shapes of gates,
+and caves should look like a cave opening, not a door"*. Both halves are
+done, and no two of these are the same shape.
+
+**Gates ×5**, in `assets/backgrounds/`:
+- `gate_foundry.jpg` — a horseshoe furnace arch whose rim is poured metal,
+  frozen mid-run in lobed drips, orange still alive in the cracks; two cast
+  slabs meeting in a ragged seam that reads as sliding apart.
+- `gate_archives.jpg` — a wall of stacked shelves and drawers PARTED down
+  the middle into a stepped cleft, shelf-ends interlocking, frost on every
+  lip and loose index cards caught in the gap.
+- `gate_conduits.jpg` — a lopsided cable iris: dozens of bundles drawn in
+  from the rim to a knotted centre, fibre-optic light bleeding from the
+  broken ends.
+- `gate_nest.jpg` — two enormous horn talons leaning together over a wide
+  teardrop opening, packed around with woven branch, wire, bone and feather.
+- `gate_deep.jpg` — a ringed organic iris of dull flesh in wet mineral,
+  violet light only in the tendrils.
+
+**THE CITY GATE IS DELIBERATELY NOT RE-FIRED.** `gate_city.jpg` already
+exists and is the one gate the standing order singles out as the huge epic
+multilayer monument. Re-rolling it would have been duplication, which the
+ledger forbids, so the sixth slot is spent and closed rather than filled.
+
+**Cave mouths ×5**, in `assets/backgrounds/` as `cave_mouth_a` … `_e`, one
+per grotto network: scrap plate and wire-grass (A), cable bundles with
+fibre-optic strands hanging out of the breaks (B), scorched slag with frozen
+metal drips and orange in the cracks (C), frost-shot stone with ice growing
+down the lip like teeth (D), dark mineral crusted with pale fleshy growth
+and violet tendrils (E). All five were fired against `cave_mouth.jpg` as
+reference, so the whole family shares one composition and one grammar of
+opening while the material changes per kingdom — the anchor-first rule from
+§2d, applied on purpose this time instead of after a failed batch.
+
+Sources in `assets/source/gates/`; contact sheets at
+`assets/source/_sheets/gates_contact.png` and `cave_mouths_contact.png`.
+
+**NEEDS WIRING (code session).** Ten media.js entries and the per-zone
+depth-door mapping. Every plate uses the same composition contract as §2c:
+flat-on, ground across the bottom eighth, opening standing ON that ground in
+the horizontal centre — so one anchor rule covers the whole family instead of
+eleven measured exceptions. Verify against the running rooms and adjust per
+plate if any opening sits off centre.
+
+The composition contract is the reusable part of this section. Every one of
+these plates says the same four things before it says anything about
+material: flat and straight on with no perspective, the ground across the
+bottom eighth, the opening standing ON that ground in the horizontal centre,
+and no right angles anywhere. Fired that way, ten independent generations
+came back as one coherent set. The one plate that broke rank was the first
+nest gate, which read its brief's "tall pointed opening" as a narrow vertical
+slot with straight parallel sides; naming the shape wanted — "wide,
+asymmetric, lopsided, like a leaf or a teardrop" — and forbidding the slot
+outright fixed it in one.
 
 ### 2g. THE TRADER'S BOOTH + DEN — PARTIALLY FIRED 2026-08-16, READ BEFORE FIRING
 
