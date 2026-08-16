@@ -45,6 +45,8 @@
  "cradle": "assets/lowres/cradle.webp",
  "cradleOpen": "assets/lowres/cradleOpen.webp",
  "gateCity": "assets/lowres/gateCity.webp",
+ "boothFront": "assets/lowres/boothFront.webp",
+ "denInterior": "assets/lowres/denInterior.webp",
  "heroStates": "assets/lowres/heroStates.webp",
  "heroBackA": "assets/lowres/heroBackA.webp",
  "heroBackB": "assets/lowres/heroBackB.webp",
