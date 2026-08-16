@@ -71,6 +71,7 @@ plate can be traced back to the generation it came from.
 | `backgrounds/den_interior.jpg` | Higgsfield | the A0B workshop backdrop (§2g) |
 | `characters/npc/ratchet_resting.png` | Higgsfield, Seedream 4.5 | Ratchet powered down (§2g); fired against his own atlas row as reference |
 | `characters/sage/*.png` | Higgsfield, Seedream 4.5 | the sage's six states (§2e); five matted with `remove_background`, all six one identity |
+| `characters/bat/*.png` | Higgsfield, Seedream 4.5 | the robot bat's five states (§2d); one plate anchored the design, four fired against it |
 | `video/sword_forge.mp4` / `.webm` | Higgsfield, Seedance 2.5 | the forging cinematic (§1d), animated from a Seedream opening frame |
 | `characters/hero/*`, `characters/hzd_8yaw*.png` | Higgsfield | HZD-99's body and turnarounds (§1), all pinned to the canon reference element |
 | `characters/npc_6yaw.png`, `characters/roster_8yaw.png` | Higgsfield | the NPC and creature turnaround sheets |

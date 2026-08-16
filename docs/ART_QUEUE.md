@@ -235,7 +235,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   4. §1d    THE FORGING CINEMATIC ×1     ✅ FIRED 2026-08-16 — sword_forge.mp4/.webm, needs the hook repointed
   5. §1e    RUN PAIR RE-FIRE ×2          ✅ FIRED 2026-08-16 — cells in, code revert pending
   6. §2e    sage plates ×6               ✅ FIRED 2026-08-16 — assets/characters/sage/, needs wiring
-  7. §2d    robot bat plates ×5          (hang/shiver/dive/flap-up/flap-down)
+  7. §2d    robot bat plates ×5          ✅ FIRED 2026-08-16 — assets/characters/bat/, needs wiring
   8. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   (owner 2026-08-15 — see brief below)
  10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ CLOSED 2026-08-16 — all three plates fired, approved and wired
@@ -387,6 +387,45 @@ Three things this batch cost a round each, worth knowing before the next set:
    sitting in a dust cloud, and the matte kept it as a grey smear stuck to
    the robe. Negatives for dust, smoke, mist and haze belong on every
    subject-only plate.
+
+### 2d. THE ROBOT BAT ✅ FIRED AND SHIPPED 2026-08-16 (art session)
+
+Five plates in `assets/characters/bat/` — `hang`, `shiver`, `dive`,
+`flap_up`, `flap_dn` — sources in `assets/source/bat/`, contact sheet at
+`assets/source/_sheets/bat_contact.png`. A small machine the size of a cat:
+riveted gunmetal barrel body, blunt snout with two pointed metal ears, ONE
+round amber optic, thin segmented wings on jointed steel ribs, little hooked
+steel claws. All five matted.
+
+The five silhouettes are five shapes, which is the whole point of a minion
+you have to read at speed: compact folded teardrop hanging head-down, the
+same teardrop rattling with amber leaking out of its seams, a narrow
+swept-back arrowhead diving, wings high and wide at the top of the beat,
+wings driven low beneath the body at the bottom of it. `hang` is the only one
+with its optic DARK — that is the difference the player reads before it
+drops on them.
+
+**NEEDS WIRING (code session).** These replace `drawBat` in js/entities.js at
+the same anchor: `hang`/`shiver` for the perched states, `flap_up`/`flap_dn`
+alternating on the stride counter for flight, `dive` for the attack run.
+
+**THE LESSON, AND IT COST FIVE PLATES.** The first batch was fired from prose
+alone — one careful paragraph of description, five times. It came back as
+FIVE DIFFERENT BATS: different bodies, different wings, different scales, one
+with a cat's face, one on a riveted metal wall the negatives had forbidden,
+and one that was a zeppelin with a small animal hanging underneath it. This
+is exactly the failure THE IDENTITY LOCK records for the hero, arriving again
+at the other end of the roster, and the fix is the same one §2 of the
+art-prompts skill already prescribes: **generate ONE plate, pick the best,
+and make it the reference for every other plate in the set.** The four
+re-fires against `flap_up` are all recognisably the same machine. Do this
+first next time rather than second — it would have halved the spend.
+
+Second, smaller: "infinite empty black void" alone did not stop backdrops
+appearing. What stopped them was naming the offence — no wall, no backdrop,
+no metal panels, no rivets in the background, no gradient, no vignette — as
+explicit negatives. Generic void language describes a mood; a negative names
+a thing.
 
 ### 2f. GATE SHAPES + CAVE MOUTHS ✱ FIRE ON REBIND (owner, 2026-08-15)
 
