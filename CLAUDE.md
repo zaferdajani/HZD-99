@@ -51,6 +51,29 @@ to open one and hand him its kickoff instruction — never to substitute for
 its job (see ART IS HIGGSFIELD'S above), and never to sit on the work
 silently.
 
+### KINGDOMS ARE THE UNIT (owner's protocol, 2026-08-16)
+
+The fleet is organised BY KINGDOM, and the kingdom has a shape:
+
+- **A kingdom runs from its opening to ITS SAGE and the sage's cave.**
+  Kingdom 1 begins the moment the character wakes and ends at the first
+  sage. The next kingdom begins fresh — new visual art, new enemies, new
+  skills.
+- **Every kingdom has at least one NPC with its own IDENTITY and its own
+  PLACE** — a workshop, office or home (the booth/den pattern from A0 is
+  the template). The NPC may stand outside it, but the place is theirs.
+- **Every kingdom has at least one save point** (bench).
+- **One session per kingdom** does everything in-world for it: rooms,
+  enemies, the NPC and their place, the sage and its cave. All kingdom
+  data moves to and is done in that session.
+- The ART/video/audio session (owner-opened, Higgsfield-bound, owner
+  reviewing) serves every kingdom through THE FIRING LIST; the code
+  session holds gameplay, story and twists, and INTEGRATES everyone.
+- The code session CAN and SHOULD spawn and command kingdom sessions
+  directly (create_session / send_message) — the owner is not a relay.
+  Only the art session is owner-opened, because connector bindings and
+  art approval are his.
+
 ## ART IS HIGGSFIELD'S, CODE IS OURS (owner's standing order, restated 2026-08-16)
 
 **"All arts, videos, images, STRUCTURES should be created through
