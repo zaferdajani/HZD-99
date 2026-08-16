@@ -239,7 +239,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   8. §2c    caveMouth + caveExit + pillar ×3  ✅ FIRED 2026-08-16 — cave tile deck still to fire
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   ✅ FIRED 2026-08-16 — 5 gates + 5 mouths; city monument left alone
  10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ CLOSED 2026-08-16 — all three plates fired, approved and wired
- 11. §3m    BOSS MOTION PLATES (task #93)     (walk pair + attack-anticipation per guardian)
+ 11. §3m    BOSS MOTION PLATES (task #93)     ⏸ PREPARED 2026-08-16 — refs shot, recipe written, NOT fired
  12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
  14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   (oracleBooth / oracleInterior)
@@ -505,6 +505,52 @@ opening in living rock — asymmetric, weather-worn, roots/moss per zone,
 absolutely no straight jambs, no lintel, no symmetry. The engine's
 procedural fallback (drawCaveMouth in game.js) is the placement reference;
 the plate replaces it at the same anchor.
+
+### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
+
+**Not started, and deliberately so.** This is the largest block left — five
+guardians × (walk pair + one anticipation frame) is fifteen plates minimum,
+each needing TWO reference images, and half-firing it is worse than not
+firing it: a fight where one guardian has authored stride frames and the
+four beside it do not reads as broken rather than unfinished. It wants a
+session that can carry the whole block.
+
+**The preparation is done and committed**, so the next session starts at the
+prompts rather than at the plumbing:
+
+1. **The guardians are photographed in the running game** —
+   `assets/source/guardians/{alpha,atlas,brood,zero,prism}_ingame.jpg`,
+   captured with `node tools/bossshot.cjs <room> <out.png> 90` against a
+   served build. Boss→room map, which is not written down anywhere else:
+   `alpha` A10 · `atlas` C3 · `brood` B4 · `zero` D3 · `prism` X1 ·
+   `mother` E3 (exempt, stationary).
+2. **Each shot needs cropping to the boss** before use — the guardian is
+   roughly a sixth of a 1280×720 frame and the HUD is in shot. Crop, upscale,
+   and let it stay soft: art-prompts §2 wants the shape reference to have no
+   rendering style worth stealing.
+3. **Fire with TWO references, stated as two jobs**, which is the technique
+   that fixed the lion: *"IMAGE 1 is a soft plate of the assembled guardian —
+   take from it ONLY the silhouette, proportions and orientation. IMAGE 2 is
+   this guardian's own parts atlas — copy its MATERIAL, LIGHTING and FINISH
+   exactly, and ignore which body part each piece shows."* The parts atlases
+   are `assets/characters/{beast,eagle,glaciere,dragon}_parts.png`.
+
+**And read this before writing a single prompt:** the composition contract
+from §2c/§2f applies to every plate — whole creature small in frame, flat
+black field with the offences named (no wall, no backdrop, no gradient, no
+vignette), no dust or haze, and never put the state's NAME in the prompt or
+it gets rendered into the picture (§2e). Matting via `remove_background`
+rather than `blackkey.cjs`, per §2g.
+
+**The wiring is not a media.js line this time and should be scoped before
+firing.** Parts atlases are addressed by ABSOLUTE PIXEL RECT — that is why
+they are the six sheets `tools/lowres.cjs` excludes — so adding atlas rows
+moves every rect below them, in `js/` and in `tools/bossparts.cjs`'s mirror
+table both. `bossparts.cjs verify <boss>` exists precisely because those two
+tables drifting apart makes every slice wrong invisibly. Whether the new
+poses go in as extra rows or as a separate sheet is a CODE decision and
+belongs to the code session; the art session should ask before firing, since
+the answer changes what the plates have to be.
 
 ### 2f. GATE SHAPES + CAVE MOUTHS ✅ TEN PLATES FIRED 2026-08-16 (art session)
 
