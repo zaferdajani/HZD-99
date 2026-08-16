@@ -440,7 +440,11 @@ function rigIK(sx, sy, hx, hy, l1, l2, bend) {
 // Measured from the sheet (tools note in drawRoboPlate): walk_a's head center
 // sits at cell x 102.7, walk_b's at 88.1 — aligning them to their midpoint
 // means walk_a shifts left and walk_b right by 7.3/160 of the cell each.
-const HERO_REG = { walk_a: -0.046, walk_b: 0.046 };
+// ...and the same correction for the §1e run pair, derived from the re-fired
+// cells' HERO_EYE measurements: run_a's eye midpoint sits at 0.455 of the
+// cell, run_b's at 0.382 — 11.7px of head drift at cell scale, the exact
+// strobing the owner reported on the walk. Aligned to their common midpoint.
+const HERO_REG = { walk_a: -0.046, walk_b: 0.046, run_a: -0.0365, run_b: 0.0365 };
 const HERO_CELL = {
   idle: 0, walk_a: 1, walk_b: 2, run_a: 3, run_b: 4, rise: 5, apex: 6,
   fall: 7, land: 8, dash: 9, skid: 10, wall_cling: 11, djump_jet: 12,
@@ -1581,14 +1585,14 @@ class Player {
     // a limp that survives a sprint reads as a bug, not as damage.
     if (this.cores <= 1 && Math.abs(this.vx) < 20) return 'slump';
     if (Math.abs(this.vx) > 12) {
-      // THE RUN IS THE WALK, HURRIED. The fired run pair came back as a low
-      // feline lunge — the owner's exact words: "moving like a cat instead
-      // of running like a cute robot" — so those two cells are PARKED until
-      // re-fired upright (the re-fire is on the firing list). A cute robot
-      // hurries: same upright steps, faster, with the mechanical bounce and
-      // lean drawRoboPlate adds on top.
+      // THE RUN PAIR, UN-PARKED (§1e). The first fired run was a low feline
+      // lunge — the owner: "moving like a cat instead of running like a cute
+      // robot" — and the run states borrowed the walk cells while a re-fire
+      // waited. The art session's upright re-fire is in the sheet now: torso
+      // vertical, head high, one leg reaching and one pushing off, a wind-up
+      // toy in a hurry. The walk substitution ends here.
       const k = Math.floor(this.anim * (run ? 10 : 7)) % 2;
-      return k ? 'walk_b' : 'walk_a';
+      return run ? (k ? 'run_b' : 'run_a') : (k ? 'walk_b' : 'walk_a');
     }
     return 'idle';
   }
