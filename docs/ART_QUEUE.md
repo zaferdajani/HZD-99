@@ -862,6 +862,70 @@ controller."* Advancing on any screen touch means a player who taps to move
 destroys the line they were reading. Bind advance to a specific control on
 every platform, and make an accidental tap do nothing.
 
+### ⬛ THE GLOW UNDER HER FEET IS **CODE**, AND HERE IS THE LINE (2026-08-16)
+
+Owner, twice, and on the title screen too: *"I do not want the glow. Looks
+fake."* / *"I can still see the light shining underneath the legs when the
+character is standing. When it runs, it goes. But when it stands, it's still
+there."*
+
+**It is not baked into the art, and that was checked rather than assumed.**
+`tools/herobase.cjs` (new, this commit) hunts a figurine display base by
+SHAPE — a disc is far wider than the legs standing on it — across all 22
+cells of the state sheet. It found **zero**. The earlier scrub of the
+figurine bases worked; nothing is left in the plates.
+
+**It is the CONTACT SHADOW, and on the title screen it is provably so.**
+`drawMenuCat` (js/game.js ~8242) builds a live `Player` and calls `p.draw(c)`,
+and because the contact-shadow probe walks the grid looking for floor, the
+menu deliberately **lends it one tile** — `if (!G.grid) G.grid = [['#']]`,
+with the comment "she stands on nothing here". So the title screen is
+literally drawing ground-contact light under a character standing in space.
+In play it is the same effect (js/entities.js ~1877), which "tightens and
+darkens as the hero nears the ground" — hence his exact observation that it
+is worst when she STANDS and goes when she runs, because running keeps her
+bobbing off the floor.
+
+**The fix is code, in two places, and no re-fire will help:**
+1. **Title screen:** stop lending the floor tile, or set the art-probe
+   suppression flag the harness already uses (`G.artProbe` suppresses
+   ground-anchored decoration for exactly this reason), so the menu cat has
+   no ground contact at all.
+2. **In play:** the owner's ruling is that the effect looks fake, so it wants
+   removing or reducing far below its current strength — not just at rest.
+
+### ⬛ HANGING PLATFORMS NEED VISIBLE SUPPORT — ART, NEW (owner, 2026-08-16)
+
+*"Anything that is hanging in the room should either have something it stands
+on in the background as a layer, to show how this thing is hanging in the air
+— whether something is holding it from up or something is holding it from
+down — as a drawing to complete it."*
+
+Every floating platform in the game currently hangs on nothing, which reads
+as a game object rather than as part of the world. Each needs a SUPPORT
+LAYER drawn behind it, per zone and in that zone's own furniture (the
+mimic-the-background rule): chains and hooks into the ceiling, a bracket arm
+off the back wall, a pillar or strut up from the floor, cable bundles, a
+gantry.
+
+**And it must be built for MOTION, because it is coming:** *"in the later
+stages platforms will be moving, so it needs to show wheels or something
+that's moving behind it — like gears moving."* So the support art wants a
+static layer plus a MOVING element the engine can animate: a geared rack the
+platform climbs, a chain that scrolls, a winch drum that turns.
+
+**The end state he named, and it should shape the design now:** *"later on we
+can make it as if DRONES are moving, and the platform is actually the back of
+the drone that we can jump on."* A drone-backed platform is a different asset
+class — a creature-machine with a flat deck, hovering, with its own idle and
+travel states. Anything fired for supports should not contradict that: prefer
+supports that read as machinery rather than as masonry, so a zone can later
+swap a strut for a drone without redrawing the room.
+
+Scope, unfired: one support set per built zone (A/B/C/D/E/X) — static support
++ moving element — plus the drone-platform creature when its kingdom arrives.
+`MovingPlat` in js/entities.js is the placement reference.
+
 ### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
 
 **Not started, and deliberately so.** This is the largest block left — five
