@@ -927,6 +927,46 @@ Scope, unfired: one support set per built zone (A/B/C/D/E/X) — static support
 + moving element — plus the drone-platform creature when its kingdom arrives.
 `MovingPlat` in js/entities.js is the placement reference.
 
+### ⬛ WIRED IN (art session, 2026-08-16) — the owner asked, so this session did it
+
+Normally generation is this session's and wiring is the code session's. The
+owner overrode that ("wire it all in the game and fix any errors"), so it is
+done here. Three parts:
+
+**1. FORTY-NINE MANIFEST KEYS.** Most of the wiring was never code at all —
+the draw sites were already written and waiting on their names.
+`drawTinkerForge` already called `mediaFetch('forgeFront')` and drew the
+plate if it was there; `js/wolves.js` already resolved `wolfRunA` and fell
+back to the walk pair without it; `ROOM_VISTA` already pointed at the
+interiors. Adding the keys is what switched all of it on: the slash sheets,
+the jet gear, the winch, the forge table, the Mind Node, the three kingdom
+doorways and dens, the nine enemy states, the ten guardian motion plates, the
+four beast run frames and the six NPC busts.
+
+**2. THREE PLATE-FIRST ENEMY BRANCHES.** `kiln`, `rime` and `snare` now draw
+their authored plates through the same `drawPlateAnchored` helper the breaker
+uses, picking by state — rest / tell / spent — with the engine drawing kept
+underneath as the loading fallback. Each branch is inserted after its own
+state variables so it reads `tell`, `spent`/`dark`/`limp` from the case that
+owns them, and each undoes the horizontal flip first, because these are
+symmetric machines that must never appear to jump sides.
+
+**3. THE SPEECH BOX SHOWS THE SPEAKER.** `drawDialog` drew HZD-99's portrait
+in every conversation, including the ones where somebody else was talking.
+`G.dialog.npc` already carried the speaker id, so the bust is now chosen from
+it — `bustRatchet`, `bustServo` and so on — clipped to the same 64 px circle
+the portrait used. **Her portrait remains the fallback**, so an unnamed
+speaker or a bust that has not loaded yet draws exactly what it always did;
+nothing regresses if a file is missing.
+
+**Not wired, and deliberately:** the guardian motion plates have their keys
+but no draw site yet, because that is the atlas-row-versus-separate-sheet
+decision — parts atlases are addressed by ABSOLUTE PIXEL RECT, so new rows
+shift every rect in `js/` and in `tools/bossparts.cjs`'s mirror table at
+once. The plates and their names are in place for whoever takes that
+decision; guessing it here would be the one change that breaks six bosses
+invisibly.
+
 ### THE FINAL BATCH — 11 PLATES FIRED, 4 KEYED AND SHIPPED (2026-08-16)
 
 Everything remaining that could be generated was fired in one batch of

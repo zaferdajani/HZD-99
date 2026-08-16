@@ -8746,7 +8746,29 @@ function draw(tms) {
       if (player && player.cores <= 2) expr = 'hurt';
       else if (G.boss && !G.boss.dead) expr = 'determined';
       else if (d.rs || d.name === '…') expr = 'curious';
-      drawPortrait(c, px, by + 14, expr);
+      // WHOSE FACE IS IT? The bust used to be HERS in every conversation,
+      // including the ones where Ratchet or the Oracle was doing the talking
+      // (owner, 2026-08-16: "the NPC face should appear when it's talking").
+      // G.dialog.npc carries the speaker, and tools/npcbusts.cjs cut a bust
+      // per NPC out of the turnaround sheet, so the face above the words can
+      // be the character the player is standing in front of. Her portrait is
+      // still the fallback: an unnamed speaker, or a bust that has not
+      // loaded, draws the same face it always did.
+      let bustDrawn = false;
+      if (d.npc) {
+        const bk = 'bust' + d.npc.charAt(0).toUpperCase() + d.npc.slice(1);
+        if (typeof mediaFetch === 'function') mediaFetch(bk);
+        const bi = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[bk];
+        if (bi && bi.naturalWidth) {
+          const S = 64;
+          c.save();
+          c.beginPath(); c.arc(px + S / 2, by + 14 + S / 2, S / 2, 0, 7); c.clip();
+          c.drawImage(bi, px, by + 14, S, S);
+          c.restore();
+          bustDrawn = true;
+        }
+      }
+      if (!bustDrawn) drawPortrait(c, px, by + 14, expr);
       // ...AND HER BODY WEARS THE SAME FACE. The bust and the sprite are the
       // same character and used to disagree: the portrait could be listening
       // curiously while the cat on the floor behind it stared blankly ahead.

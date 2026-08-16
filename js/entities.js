@@ -5335,6 +5335,17 @@ class Enemy {
         const spent = (this.windedT || 0) > 0;
         const k2 = tell ? 1 - clamp(this.crouchT / TELL_SWIPE, 0, 1) : 0;
         const shiver = blowing ? Math.sin(this.anim * 40) * 1.1 : tell ? Math.sin(this.anim * 24) * k2 * 0.8 : 0;
+        // PLATE FIRST (ART_QUEUE §2l/§2n/§2p). Three states, three
+        // silhouettes: at rest, the tell, and spent. The engine drawing
+        // below stays the loading fallback, exactly as the breaker does.
+        {
+          const pk = spent ? 'kilnSpent' : tell ? 'kilnTell' : 'kilnRest';
+          c.save(); c.scale(1 / flip, 1);   // symmetric machine, never flips
+          const drew = typeof drawPlateAnchored === 'function' &&
+            drawPlateAnchored(c, pk, 0, this.h / 2, this.h * (tell ? 1.35 : 1.1), false, true);
+          c.restore();
+          if (drew) break;
+        }
         // symmetric machine: undo the flip so it never appears to jump sides
         c.save(); c.scale(1 / flip, 1);
         // feed pipes arcing into the floor on both sides — it is PLUMBED in
@@ -5420,6 +5431,17 @@ class Enemy {
         const dark = (this.windedT || 0) > 0;
         const k2 = tell ? 1 - clamp(this.crouchT / TELL_HEAVY, 0, 1) : 0;
         const shiver = tell ? Math.sin(this.anim * 30) * k2 * 1.1 : 0;
+        // PLATE FIRST (ART_QUEUE §2l/§2n/§2p). Three states, three
+        // silhouettes: at rest, the tell, and spent. The engine drawing
+        // below stays the loading fallback, exactly as the breaker does.
+        {
+          const pk = dark ? 'rimeDark' : tell ? 'rimeTell' : 'rimeRest';
+          c.save(); c.scale(1 / flip, 1);   // symmetric machine, never flips
+          const drew = typeof drawPlateAnchored === 'function' &&
+            drawPlateAnchored(c, pk, 0, this.h / 2, this.h * (tell ? 1.35 : 1.1), false, true);
+          c.restore();
+          if (drew) break;
+        }
         // symmetric machine: undo the flip so it never appears to jump sides
         c.save(); c.scale(1 / flip, 1);
         // feed lines arcing into the floor both sides — it is PLUMBED into
@@ -5517,6 +5539,17 @@ class Enemy {
         // the heartbeat: the broadcast's own ~0.9 Hz, racing when the line
         // is real — the one machine in the game that pulses like its boss
         const beat = limp ? 0 : (Math.sin(this.anim * (reel ? 11 : 5.65)) + 1) / 2;
+        // PLATE FIRST (ART_QUEUE §2l/§2n/§2p). Three states, three
+        // silhouettes: at rest, the tell, and spent. The engine drawing
+        // below stays the loading fallback, exactly as the breaker does.
+        {
+          const pk = limp ? 'snareLimp' : tell ? 'snareTell' : 'snareRest';
+          c.save(); c.scale(1 / flip, 1);   // symmetric machine, never flips
+          const drew = typeof drawPlateAnchored === 'function' &&
+            drawPlateAnchored(c, pk, 0, this.h / 2, this.h * (tell ? 1.4 : 1.1), false, true);
+          c.restore();
+          if (drew) break;
+        }
         // symmetric machine: undo the flip, then LEAN toward the target —
         // the body aims where the tendril goes, so the read has a direction
         // without a wedge lying about one

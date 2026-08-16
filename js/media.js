@@ -156,6 +156,77 @@ const MEDIA_SRC = {
     // far leg defeats every threshold). Drawn at the A0B anchor while he is
     // a dark unit; the plate IS the powered-down read, so it skips the
     // grayscale treatment the other dark units get.
+    // ===== THE ART SESSION'S 2026-08-16 BATCH ==========================
+    // Every draw site below was already written and waiting on its key —
+    // drawTinkerForge fetches forgeFront, wolves.js resolves wolfRunA, and so
+    // on — so these entries are what switch the authored art on. Lazy like
+    // everything else; each renderer keeps its procedural fallback for the
+    // frames before the file lands.
+    //
+    // §1b-i the crystal slash light-sheets. BLACK-FIELD, additive: they are
+    // drawn with 'lighter' where brightness IS the alpha, exactly like the
+    // rake sheet, so they must never be alpha-keyed.
+    slashH: 'assets/fx/slash_h.png',
+    slashD: 'assets/fx/slash_d.png',
+    slashU: 'assets/fx/slash_u.png',
+    slashDn: 'assets/fx/slash_dn.png',
+    // §1c the back-jet gear: the pack as equipment, and at full burn. The
+    // plume itself stays procedural additive light (§0.0).
+    jetpack: 'assets/characters/gear/jetpack.png',
+    jetpackFire: 'assets/characters/gear/jetpack_fire.png',
+    // §2j Servo's winch, and §2r the Tinker's bench — objects, not vistas.
+    winchHouse: 'assets/backgrounds/winch_house.png',
+    forgeTable: 'assets/backgrounds/forge_table.png',
+    // THE MIND NODE as a monument (owner 2026-08-16: "it should be like a
+    // monument, not a small object"). The plate only pays off once the node
+    // itself moves out of the NPC's room.
+    mindNode: 'assets/backgrounds/mindnode_obelisk.png',
+    // §2k / §2m / §2o — kingdoms 3, 4 and 5 get their doorways and dens.
+    forgeFront: 'assets/backgrounds/forge_front.png',
+    forgeInterior: 'assets/backgrounds/forge_interior.jpg',
+    carrelFront: 'assets/backgrounds/carrel_front.png',
+    carrelInterior: 'assets/backgrounds/carrel_interior.jpg',
+    hollowFront: 'assets/backgrounds/hollow_front.png',
+    hollowInterior: 'assets/backgrounds/hollow_interior.jpg',
+    // §2l / §2n / §2p — one machine per kingdom, three states each: at rest,
+    // the tell, and spent. The tell is the pose; the amber wash is code.
+    kilnRest: 'assets/characters/kiln/rest.png',
+    kilnTell: 'assets/characters/kiln/tell.png',
+    kilnSpent: 'assets/characters/kiln/spent.png',
+    rimeRest: 'assets/characters/rime/rest.png',
+    rimeTell: 'assets/characters/rime/tell.png',
+    rimeDark: 'assets/characters/rime/dark.png',
+    snareRest: 'assets/characters/snare/rest.png',
+    snareTell: 'assets/characters/snare/tell.png',
+    snareLimp: 'assets/characters/snare/limp.png',
+    // §3m boss motion — a travel pose and a wind-up per guardian. MOTHER-V is
+    // stationary and exempt.
+    nullfangWalk: 'assets/characters/guardians/nullfang_walk.png',
+    nullfangCoil: 'assets/characters/guardians/nullfang_coil.png',
+    glaciereTravel: 'assets/characters/guardians/glaciere_travel.png',
+    glaciereCoil: 'assets/characters/guardians/glaciere_coil.png',
+    choirDrift: 'assets/characters/guardians/choir_drift.png',
+    choirClench: 'assets/characters/guardians/choir_clench.png',
+    talonhostGlide: 'assets/characters/guardians/talonhost_glide.png',
+    talonhostStrike: 'assets/characters/guardians/talonhost_strike.png',
+    prismStalk: 'assets/characters/guardians/prism_stalk.png',
+    prismCoil: 'assets/characters/guardians/prism_coil.png',
+    // §2q the beast RUN pairs — reach and gather. js/wolves.js already
+    // resolves these names and falls back to the walk pair without them.
+    wolfRunA: 'assets/characters/beasts/wolf_runa.png',
+    wolfRunB: 'assets/characters/beasts/wolf_runb.png',
+    cheetahRunA: 'assets/characters/beasts/cheetah_runa.png',
+    cheetahRunB: 'assets/characters/beasts/cheetah_runb.png',
+    // NPC DIALOGUE BUSTS, cut from npc_6yaw.png by tools/npcbusts.cjs. They
+    // exist so drawDialog can show the SPEAKER's face instead of always
+    // drawing HZD-99's (owner 2026-08-16).
+    bustServo: 'assets/characters/npc/bust/servo.png',
+    bustRatchet: 'assets/characters/npc/bust/ratchet.png',
+    bustMono: 'assets/characters/npc/bust/mono.png',
+    bustPatch: 'assets/characters/npc/bust/patch.png',
+    bustSage: 'assets/characters/npc/bust/sage.png',
+    bustLumen: 'assets/characters/npc/bust/lumen.png',
+    // ===================================================================
     boothFront: 'assets/backgrounds/booth_front.png',
     denInterior: 'assets/backgrounds/den_interior.jpg',
     ratchetResting: 'assets/characters/npc/ratchet_resting.png',
