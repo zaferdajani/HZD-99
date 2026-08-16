@@ -927,6 +927,52 @@ Scope, unfired: one support set per built zone (A/B/C/D/E/X) — static support
 + moving element — plus the drone-platform creature when its kingdom arrives.
 `MovingPlat` in js/entities.js is the placement reference.
 
+### THE FINAL BATCH — 11 PLATES FIRED, 4 KEYED AND SHIPPED (2026-08-16)
+
+Everything remaining that could be generated was fired in one batch of
+eleven. **All eleven as-fired sources are committed** (`assets/source/` under
+`guardians/`, `beasts/`, `hero/`, `monument/`, `kingdom2/`), contact sheets at
+`_sheets/final_batch.png` and `final_batch_keyed.png`, so nothing here has to
+be paid for twice.
+
+**Shipped, keyed clean on the first pass:**
+`guardians/talonhost_glide.png` · `guardians/prism_stalk.png` ·
+`beasts/wolf_runa.png` · `beasts/cheetah_runa.png`.
+
+**Fired, archived, awaiting a matting pass** (they keyed with background
+bands or a residual plinth, and `remove_background` is the answer per the
+size rule below): TALONHOST's strike, PRISM PROWLER's coil, the wolf and
+cheetah gather frames, **her arms-crossed charge pose**, **the Mind Node
+obelisk** and the forge table.
+
+**What they are, so the next pass does not re-derive it:**
+- **TALONHOST** glides level with wings wide and talons tucked; strikes
+  reared upright with wings thrown up and back and both taloned legs swung
+  forward, claws spread.
+- **PRISM PROWLER** stalks with all four legs in different positions; coils
+  crouched almost to the ground with every shoulder and spine shard flared
+  and the internal glow risen to fierce magenta.
+- **The beast run pairs** are reach (all four legs at full extension, back
+  hollowed) and gather (all four paws folded under the belly, back arched) —
+  fired against the repaired walk pairs, and the cheetah held its tan-and-gold
+  identity this time, which was the whole point of §2q.
+- **The charge pose** answers the owner directly: she stands FULLY UPRIGHT,
+  legs straight and neutral, arms crossed in a tight X at her chest with the
+  power gathering cyan-white where the forearms meet. Because nothing about
+  it is grounded, it composites over a jump — which is exactly why the crouch
+  had to go.
+- **The Mind Node obelisk** is a monument, several times her height, its
+  faces carrying dense vertical columns of angular machine glyphs blazing
+  electric cyan with current crawling between the cuts. It is meant to be
+  seen across a room and walked to. **It does nothing until the node moves
+  out of the NPC's room** — that placement is the code/kingdom session's.
+
+**KEYING NOTE:** a batch fired on mixed backgrounds cannot be keyed with one
+polarity. Four of these arrived on near-black and keyed straight; the rest
+came on white or grey studio fields where `blackkey --white` leaves bands.
+Those want `remove_background`, downscaled to ~1400 px first per the size
+ceiling recorded in the kingdom-345 entry.
+
 ### 3m — GLACIERE AND THE FURNACE CHOIR SHIPPED TOO (2026-08-16)
 
 `assets/characters/guardians/`: `glaciere_travel.png` + `glaciere_coil.png`,
