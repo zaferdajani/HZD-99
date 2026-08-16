@@ -74,6 +74,25 @@ The fleet is organised BY KINGDOM, and the kingdom has a shape:
   Only the art session is owner-opened, because connector bindings and
   art approval are his.
 
+## NO BACKLOG RECITALS (owner's standing order, 2026-08-16)
+
+**"Never tell me 'still not done' at all. You are not a kid that I need to
+keep monitoring. You have the resources and approvals that you needed."**
+
+Do not close a report with a list of what remains. The owner has already
+given the approvals and the credits; enumerating the backlog at him is asking
+to be supervised, and it spends his attention on work he has already
+authorised instead of on the work that landed.
+
+- **Report what SHIPPED**, what it fixes, and anything he must decide or that
+  another session must wire.
+- **The queue lives in `docs/ART_QUEUE.md`.** That file is the backlog. It is
+  where remaining work is tracked, and it is complete enough that no verbal
+  recital adds anything.
+- Say something is unfinished ONLY when he needs it: a blocker he alone can
+  clear, or a defect shipped that he would otherwise discover himself.
+- Then keep firing. The list is run top to bottom without being narrated.
+
 ## ART IS HIGGSFIELD'S, CODE IS OURS (owner's standing order, restated 2026-08-16)
 
 **"All arts, videos, images, STRUCTURES should be created through

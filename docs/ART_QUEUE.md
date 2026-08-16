@@ -239,7 +239,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   8. §2c    caveMouth + caveExit + pillar ×3  ✅ WIRED 2026-08-16 — vistas + pillar plate live; cave tile deck still to fire
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   ✅ WIRED 2026-08-16 — per-zone maps live, feather-masked; city monument untouched
  10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ CLOSED 2026-08-16 — all three plates fired, approved and wired
- 11. §3m    BOSS MOTION PLATES (task #93)     ◐ STARTED 2026-08-16 — NULLFANG walk+coil shipped; 4 guardians to go
+ 11. §3m    BOSS MOTION PLATES (task #93)     ◐ 3 of 5 SHIPPED 2026-08-16 — NULLFANG, GLACIERE, FURNACE CHOIR
  12. §1     PAIRED PAW SET — every pose WITH and WITHOUT the claw (owner's ruling 2026-08-16) + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
  14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   ✅ WIRED 2026-08-16 — shrine plate + parlor vista live (code session)
@@ -926,6 +926,35 @@ swap a strut for a drone without redrawing the room.
 Scope, unfired: one support set per built zone (A/B/C/D/E/X) — static support
 + moving element — plus the drone-platform creature when its kingdom arrives.
 `MovingPlat` in js/entities.js is the placement reference.
+
+### 3m — GLACIERE AND THE FURNACE CHOIR SHIPPED TOO (2026-08-16)
+
+`assets/characters/guardians/`: `glaciere_travel.png` + `glaciere_coil.png`,
+`choir_drift.png` + `choir_clench.png`. All matted, sources archived.
+
+- **GLACIERE** travels as a low shallow S-curve with its crystal spines laid
+  back along the line of motion, and winds up REARED — neck hauled high and
+  drawn back over its own coils like a snake loading, jaws parted, every
+  shard along the spine flared and standing. A serpent has no stride, so
+  "walk" is a travel pose for this one; the pair still obeys §3.3 because the
+  two silhouettes could not be less alike.
+- **THE FURNACE CHOIR** drifts with its petal-blades hanging loose and
+  splayed and a low red throat, and winds up CLENCHED — blades drawn tight
+  into a closed downward spike, pod hauled up above them, fin ring snapped
+  upright, white-hot light blazing through the seams. It hovers, so neither
+  plate touches ground.
+
+**I re-broke my own §2e rule and paid for it in one round.** Three of the
+first four plates came back with their own state names rendered into the
+picture — "THE WIND-UP", "THE FURNACE CHOIR", "BLOOM" — because the prompts
+used the state as a HEADING ("THE POSE — THE WIND-UP:"). §2e already says
+never to title a pose, and a heading is a title. Rewritten as plain prose
+("Give it this posture:"), with `ABSOLUTELY NO WRITING ANYWHERE IN THE IMAGE`
+carried explicitly, all three came back clean.
+
+The rule is therefore stronger than it was written: **the state name must not
+appear in the prompt AT ALL** — not as a heading, not in caps, not as a
+label. Describe the posture and never name it.
 
 ### 3m STARTED — NULLFANG FIRST, AND THE RECIPE IS PROVEN (2026-08-16)
 
