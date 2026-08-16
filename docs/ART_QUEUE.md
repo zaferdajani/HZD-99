@@ -232,9 +232,9 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   1. §1b-i  slash light-sheets ×4        (slash_h / slash_d / slash_u / slash_dn)
   2. §1b-ii regrips ×2 + thrown blade ×1 (thrown = BODY LENGTH — owner ruling)
   3. §1c    back-jet gear ×3             (idle / mid-boost / full burn)
-  4. §1d    THE FORGING CINEMATIC ×1     (cartoonish; Ratchet's chest crystal visible)
+  4. §1d    THE FORGING CINEMATIC ×1     ✅ FIRED 2026-08-16 — sword_forge.mp4/.webm, needs the hook repointed
   5. §1e    RUN PAIR RE-FIRE ×2          ✅ FIRED 2026-08-16 — cells in, code revert pending
-  6. §2e    sage plates ×6               (stand/coil/lunge/gather/kneel-lock/purified)
+  6. §2e    sage plates ×6               ✅ FIRED 2026-08-16 — assets/characters/sage/, needs wiring
   7. §2d    robot bat plates ×5          (hang/shiver/dive/flap-up/flap-down)
   8. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   (owner 2026-08-15 — see brief below)
@@ -311,6 +311,82 @@ re-plumbing when it lands:
   a bespoke ground plate for it can replace the generic glimmer.
 - tests/crystal.cjs measures the arc end-to-end (14 checks) and stays green
   through any art swap — it reads state, not pixels.
+
+### 1d. THE FORGING CINEMATIC ✅ FIRED AND SHIPPED 2026-08-16 (art session)
+
+**Done.** Opening frame 8742e113 (Seedream 4.5), animated by 52 credits of
+Seedance 2.5 omni_reference, job b83d3226. Eight seconds, one continuous
+shot, and it hits every beat the owner asked for: Ratchet at his anvil with
+the raw shard, the strikes and the spark showers, his CHEST CRYSTAL pulsing
+brighter with each blow, the shard elongating and faceting into the blade
+with the dark hilt and gold pommel ring resolving last, the offer across both
+palms, her paws closing on it, and the white flare that fills frame and ends
+the film. Both characters hold identity the whole way through.
+
+Shipped as `assets/video/sword_forge.mp4` + `.webm`, light tier derived.
+Opening frame archived at `assets/source/forge/forge_openframe.jpg`.
+
+**NEEDS THE HOOK REPOINTED (code session).** `js/game.js` line ~2630 still
+has `gift: 'assets/video/sword_gift.mp4'` for `forgeCrystal()`. That file is
+the SUPERSEDED HANDOVER — a tight close-up of hands passing the finished
+sword, no forging, no Ratchet, no chest crystal. It is deliberately NOT
+overwritten: it is good work, it still ends on the same white flare, and the
+two could even run in sequence (forge, then the handover as its coda). The
+one-line decision is the code session's: repoint `gift` to `sword_forge`, or
+add a second entry and play both.
+
+Two production notes for the next film:
+- **Seedance returns HEVC.** The raw job mp4 is `hevc`, which browsers will
+  not reliably decode. Every film has to be re-encoded to h264 (and to VP9
+  webm) before it goes in `assets/video/` — the house format is h264
+  1920x1080. The repo still ships nothing from npm; a static ffmpeg outside
+  the tree does the work, and `FFMPEG=/path/to/ffmpeg node tools/lightvid.cjs`
+  then derives the light tier.
+- **Audio off.** Generated with `generate_audio: false` on purpose — the game
+  scores its own cinematics through audio.js, and a baked soundtrack would
+  play over the top of it.
+
+### 2e. THE SAGE ✅ FIRED AND SHIPPED 2026-08-16 (art session)
+
+Six plates in `assets/characters/sage/` — `stand`, `coil`, `lunge`,
+`gather`, `lock`, `pure` — sources in `assets/source/sage/`, contact sheet
+at `assets/source/_sheets/sage_contact.png`. The robed machine monk of
+docs/combat/SAGE.md and `drawSage`: pointed hood over a faceplate with two
+ember eye-lights, tapered plum-and-charcoal robe with a torn hem that never
+makes a straight line, gunmetal segmented hands.
+
+The set was built to be MEASURABLE against the bible, not just to look
+right:
+- **§3.5, the hue law.** Amber appears on exactly the three telegraph
+  states — `coil` (seams bleeding amber), `gather` (ember pooling in both
+  open sleeves, motes drawn INWARD because he is storing it) and `lock`
+  (amber pouring out of the split faceplate). `stand` and `lunge` carry
+  none: the warning has to mean something, so it cannot be decoration.
+- **§3.3, the silhouette law.** Five genuinely different shapes — narrow
+  upright, compressed and wound, long horizontal at full extension, widest
+  spread, low kneel. Nothing here is one drawing rescaled.
+- **`pure`** is the same body with its light changed: ember gone, crystal
+  blue-white in the eyes and seams, cloth lifted from dusty plum to clean
+  slate-blue, faceplate closed, hands loose. The robe is washed, not
+  replaced — the hem is still torn.
+
+**NEEDS WIRING (code session).** These replace `drawSage` in js/entities.js
+at the same anchor, indexed by state name. Six media.js entries and the
+state→plate mapping are the wiring; `tests/sage.cjs` and
+`tests/artbible.cjs` both stay green as they read state, not pixels.
+
+Three things this batch cost a round each, worth knowing before the next set:
+1. **Naming a state in the prompt prints the name.** `coil` and `gather`
+   came back with "THE COIL" and two "The Gather" callout labels rendered
+   into the frame, because the prompt used those words as headings. Describe
+   the pose; never title it.
+2. **"Whole body in frame" needs "zoom out" next to it.** The first `pure`
+   framed her hood off the top edge. Asking for margin is not enough — say
+   the figure is SMALL in the frame.
+3. **Ambient effects survive matting.** The first `lock` was rendered
+   sitting in a dust cloud, and the matte kept it as a grey smear stuck to
+   the robe. Negatives for dust, smoke, mist and haze belong on every
+   subject-only plate.
 
 ### 2f. GATE SHAPES + CAVE MOUTHS ✱ FIRE ON REBIND (owner, 2026-08-15)
 
