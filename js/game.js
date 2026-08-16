@@ -1955,6 +1955,9 @@ const ROOM_VISTA = {
   // work either way — the walk aims at whatever backdrop is actually there.
   A5: 'caveMouth',
   CV1: 'caveExit',
+  // the trader's den (§2g): the one-room workshop painting. Until it lands
+  // the room borrows the zone atlas cell like every other unfired vista.
+  A0B: 'denInterior',
 };
 
 // ===========================================================================

@@ -329,8 +329,44 @@ the binding. Three plates replace the stand-in at the same anchors:
    (his backstory made visible). drawSage-style placement at the A0B npc
    anchor; the standing plate takes over after the waking.
 
-Estimated 3 fires. After keying: archive sources, wire, photograph,
-node tests/run.cjs tutor battery crystal deadend.
+Estimated 3 fires. After keying: archive sources, wire (ROOM_VISTA.A0B is
+already pointed at `denInterior`; add the three media.js entries in the
+same commit as the files), photograph, then
+node tests/run.cjs tutor battery crystal deadend platform.
+
+**The prompts, verbatim — fire as-is:**
+
+> (boothFront) A small scrap-market vendor kiosk seen straight on, built
+> from salvaged machine parts: two leaning tapered metal poles, a sagging
+> canvas canopy with a scalloped worn hem thrown over the top, patched
+> cloth flaps hanging over a doorway glowing warm amber from inside, a
+> small metal sign hanging crooked from one pole bearing a lightning-bolt
+> glyph. Weathered teal-and-gunmetal palette with warm amber light in the
+> doorway only. Nothing plumb, nothing square — every edge leans, sags or
+> curves. Clean high-detail 3D render, soft specular metal, dark moody
+> dusk lighting. NEGATIVE: no text, no watermark, no characters, no
+> straight rectangular frame, no cast shadow, no ground plane. Dark
+> unlit room behind the subject, subject only.
+
+> (denInterior, 16:9 backdrop) The inside of a one-room machine-tinker's
+> workshop, wide interior view: a heavy workbench along the right wall
+> covered in coils and small tools, tools hanging from hooks, shelf
+> clutter of jars and scrap parts, cable bundles drooping from a low
+> ceiling, wooden crates, one warm hanging lamp pooling amber light over
+> the bench, the rest falling into cosy teal darkness. Lived-in, low,
+> warm. Weathered teal-gunmetal-amber palette. No right angles
+> presenting: shelves sag, the bench leans, the lamp hangs crooked.
+> Clean high-detail 3D render. NEGATIVE: no characters, no text, no
+> watermark, no doors, no windows with daylight.
+
+> (ratchetResting) A boxy vendor robot slumped POWERED DOWN in a worn
+> chair beside a workbench, seen from the side: head bowed, arms hanging,
+> body dark and unlit except a SINGLE SMALL CRYSTAL embedded in its chest
+> giving a faint dying white-blue glow. Weathered gunmetal body with
+> brass fittings. The pose reads instantly as switched off, not dead —
+> intact, waiting. Clean high-detail 3D render, soft specular metal.
+> NEGATIVE: no cast shadow, no ground plane, no second character, no
+> text, no watermark. Dark unlit room, subject only.
 
 ### 1e. THE RUN PAIR RE-FIRE ✱ FIRE ON REBIND — the owner rejected v1
 

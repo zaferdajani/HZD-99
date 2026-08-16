@@ -103,6 +103,9 @@ const MEDIA_SRC = {
     cradle: 'assets/characters/gear/cradle.png',
     cradleOpen: 'assets/characters/gear/cradle_open.png',
     gateCity: 'assets/backgrounds/gate_city.jpg',
+    // §2g den/booth plates: add denInterior / boothFront / ratchetResting
+    // entries HERE in the same commit as the files — the platform harness
+    // rightly fails any manifest name with no file on disk
     // HER OWN BACK — generated from her live body (assets/source/ref/), the
     // first authored plates of the hero herself. Two stride frames armed, two
     // unarmed (the sword becomes a pickup — task #78), and the sword waiting
