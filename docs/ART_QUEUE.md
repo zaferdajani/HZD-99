@@ -242,6 +242,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  11. §3m    BOSS MOTION PLATES (task #93)     (walk pair + attack-anticipation per guardian)
  12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
+ 14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   (oracleBooth / oracleInterior)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -420,6 +421,60 @@ node tests/run.cjs tutor battery crystal deadend platform.
 > intact, waiting. Clean high-detail 3D render, soft specular metal.
 > NEGATIVE: no cast shadow, no ground plane, no second character, no
 > text, no watermark. Dark unlit room, subject only.
+
+### 2h. THE ORACLE'S SHRINE + PARLOR ✱ NEW (2026-08-16, kingdom 2 pass)
+
+Mono — the Oracle — has her own place now: a depth door at mid-B3 (the
+A0/A0B booth pattern, GATE_ROOM style `oracle`) into the parlor room B3B.
+Two plates replace the procedural stand-ins at the same anchors, both built
+from the CONDUITS backdrop's own furniture (the mimic rule) and nothing
+plumb or square (NO RIGHT ANGLES):
+
+1. **oracleBooth** — the shrine standing in the corridor: two leaning
+   conduit-pipe posts with junction-box hips, a heavy sagging swag of dead
+   cable bundles thrown over them as a canopy, loose fibre-optic strands
+   hanging like roots with faintly lit tips, parted cable curtains over a
+   doorway glowing CRT blue (NOT amber — amber is Ratchet's lamp; blue is
+   the Oracle's screen), and a small cracked monitor hung crooked from one
+   post with a single sine wave still alive on it. `drawOracleBooth` in
+   js/game.js is the placement reference; same bottom anchor and ~236 px
+   height as boothFront.
+2. **oracleInterior** — a 16:9 backdrop for B3B: a one-room data-den —
+   stacks of dead monitors along one wall, one alive with drifting glyphs,
+   cable drapery drooping from a low ceiling, a leaning rack shelf, junction
+   clutter, the whole room pooled in cold CRT blue-on-dark with one deep
+   pink accent (zone B's acc2). Cosy the way a server closet is cosy.
+   The depth door back out sits at gx 0.12. `ROOM_VISTA.B3B` is already
+   pointed at `oracleInterior`; add the media.js entries in the same commit
+   as the files.
+
+**The prompts, verbatim — fire as-is:**
+
+> (oracleBooth) A small roadside shrine built from salvaged data-conduit
+> parts, seen straight on: two leaning bundles of vertical pipes as posts
+> with boxy junction housings, a heavy sagging swag of dead cable bundles
+> thrown over the top as a canopy, loose fibre-optic strands hanging down
+> like roots with faint blue-lit tips, parted hanging-cable curtains over a
+> doorway glowing cold cathode blue from inside, and a small cracked
+> monitor hanging crooked from one post showing a single faint sine wave.
+> Deep navy and gunmetal palette with cold blue light in the doorway only,
+> one small magenta indicator. Nothing plumb, nothing square — every edge
+> leans, sags or curves. Clean high-detail 3D render, soft specular metal,
+> dark moody lighting. NEGATIVE: no text, no watermark, no characters, no
+> straight rectangular frame, no cast shadow, no ground plane. Photographed
+> in a pitch-dark room, no backdrop, no floor, spotlights pick out the
+> shrine and nothing else receives any light.
+
+> (oracleInterior, 16:9 backdrop) The inside of a one-room data-den, wide
+> interior view: a wall of stacked dead monitors with one screen still
+> alive showing drifting glyphs, heavy cable bundles drooping from a low
+> ceiling like vines, a leaning equipment rack shelf, junction boxes and
+> coiled fibre clutter on the floor, cold cathode blue light pooling from
+> the live screen over everything, the rest falling into deep navy
+> darkness, one small magenta status lamp. Lived-in, low, humming. No
+> right angles presenting: racks lean, shelves sag, cables curve. Clean
+> high-detail 3D render. NEGATIVE: no characters, no text, no watermark,
+> no doors, no windows with daylight.
 
 ### 1e. THE RUN PAIR RE-FIRE ✱ FIRE ON REBIND — the owner rejected v1
 

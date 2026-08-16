@@ -407,8 +407,24 @@ const ROOMS = {
       hline(g, 42, 45, 12, '='); hline(g, 50, 53, 10, '=');
     } },
   B3: { zone: 'B', w: 32, h: 17, exits: { L: 'B2', R: 'B4', B: 'C1' },
-    ents: [['bench', 12, 15], ['npc', 18, 15, 'mono'], ['term', 22, 15, 2], ['trial', 25, 15]],
+    // The Oracle no longer stands in the corridor. Her PARLOR is the depth
+    // door at mid-room (GATE_ROOM B3, the A0/A0B booth pattern): walk UP into
+    // the cable-shrine and she is inside, in a place of her own — the same
+    // promotion Ratchet got when the meadow stopped being his shop floor.
+    ents: [['bench', 12, 15], ['term', 22, 15, 2], ['trial', 25, 15]],
     build(g) { frame(g); openL(g); openR(g); rect(g, 4, 15, 6, 16, '.'); } },
+  // THE ORACLE'S PARLOR (kingdom 2's own interior, the B-side of A0B): a
+  // one-room den behind the cable-shrine in B3 where mono actually LIVES —
+  // the CRT face on its shroud of dead cables, reading a river of data in the
+  // dark. Dressing mimics the Conduits backdrop per the mimic rule (cable
+  // drapery, a rack loft, junction clutter); the procedural interior is a
+  // stand-in — the authored plate is queued (ART_QUEUE §2h, oracleInterior).
+  B3B: { zone: 'B', w: 30, h: 17, exits: {},
+    ents: [['npc', 16, 15, 'mono'], ['scrap', 21, 15, 25]],
+    build(g) {
+      frame(g);
+      hline(g, 18, 22, 12, '=');          // the rack loft over her data corner
+    } },
   B4: { zone: 'B', w: 32, h: 17, exits: { L: 'B3', R: 'B5' },
     ents: [['boss', 15, 15, 'brood']],
     build(g) {
@@ -773,7 +789,7 @@ const MAPPOS = {
   W1: [-3, 3, 1, 1], W2: [-2, 3, 1, 1], A0: [-1, 3, 1, 1], A0B: [-1, 2, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A10: [3, 3, 1, 1], A3: [4, 3, 1, 1], A4: [5, 3, 1, 1],
   A5: [1, 4, 1, 1], A6: [0, 2, 1, 1], A7: [1, 5, 1, 1], A8: [1, 2, 1, 1], A9: [1, 1, 1, 1],
   CV1: [2, 4, 1, 1], CV2: [3, 4, 1, 1], CV3: [4, 4, 1, 1],
-  B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
+  B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],
   X1: [8, 1, 1, 1],
   C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1], C5: [4, 5, 1, 1],
@@ -809,7 +825,8 @@ const GROTTOES = [
   // [grotto, tunnel, deep chamber, lair, flag, grotto/tunnel/deep map cells]
   ['GA1', 'GA1T', 'GA1D', 'A4', 'bossGlitch', [5, 4], [6, 4], [10, 4]],
   ['GA2', 'GA2T', 'GA2D', 'A10', 'alpha', [2, 2], [2, 1], [1, 1]],
-  ['GB1', 'GB1T', 'GB1D', 'B4', 'bossBrood', [7, 1], [6, 1], [5, 1]],
+  // GB1's tunnel/deep cells moved up a row: [6,1] is the Oracle's parlor now
+  ['GB1', 'GB1T', 'GB1D', 'B4', 'bossBrood', [7, 1], [7, 0], [6, 0]],
   ['GC1', 'GC1T', 'GC1D', 'C3', 'bossAtlas', [8, 4], [9, 4], [9, 5]],
   ['GD1', 'GD1T', 'GD1D', 'D3', 'bossZero', [10, 6], [10, 5], [11, 5]],
   ['GX1', 'GX1T', 'GX1D', 'X1', 'bossPrism', [9, 1], [10, 1], [11, 1]],

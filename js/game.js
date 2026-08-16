@@ -1958,6 +1958,9 @@ const ROOM_VISTA = {
   // the trader's den (§2g): the one-room workshop painting. Until it lands
   // the room borrows the zone atlas cell like every other unfired vista.
   A0B: 'denInterior',
+  // the Oracle's parlor (§2h): mono's data-den behind the cable shrine in B3.
+  // Unfired — the room borrows the zone-B atlas cell until the plate lands.
+  B3B: 'oracleInterior',
 };
 
 // ===========================================================================
@@ -4663,6 +4666,12 @@ const GATE_ROOM = {
   A0B: { at: 0.12,  to: 'A0',  ax: 0.765, style: 'booth' },
   A5:  { at: 0.64, to: 'CV1', gx: 0.50,  gy: 0.86, ax: 0.10 },
   CV1: { at: 0.10, to: 'A5',  gx: 0.50,  gy: 0.86, ax: 0.64 },
+  // the Oracle's parlor off B3 — the booth pattern again, but its OWN style:
+  // Ratchet's fired kiosk plate must never stand in the Conduits, so the
+  // Oracle's shrine draws its own stand-in (drawOracleBooth) until its plate
+  // lands (ART_QUEUE §2h)
+  B3:  { at: 0.50, to: 'B3B', ax: 0.12, style: 'oracle' },
+  B3B: { at: 0.12, to: 'B3',  ax: 0.50, style: 'oracle' },
   // the grottoes — one per guardian, opened by its fall or taming
   A4:  { at: 0.14, to: 'GA1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossGlitch' },
   A10: { at: 0.12, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, need: 'alpha' },
@@ -4916,6 +4925,117 @@ function drawBooth(cx2, gy, P, k) {
   c.restore();
   c.restore();
 }
+// THE ORACLE'S SHRINE (kingdom 2): the depth door into mono's parlor off B3.
+// Built from the Conduits backdrop's own furniture per the mimic rule — a
+// sagging canopy of dead cable bundles thrown over two leaning conduit posts,
+// loose fibre strands hanging like roots, and a doorway glowing the CRT blue
+// of the Oracle herself instead of Ratchet's lamp amber. Nothing plumb,
+// nothing square (NO RIGHT ANGLES). Procedural STAND-IN awaiting its fired
+// plate (ART_QUEUE §2h, oracleBooth): the mediaFetch hook below goes live the
+// commit the plate and its media.js entry land, exactly like drawBooth's.
+function drawOracleBooth(cx2, gy, P, k) {
+  if (typeof mediaFetch === 'function') mediaFetch('oracleBooth');
+  const bim = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.oracleBooth;
+  if (bim && bim.naturalWidth) {
+    const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
+    c.save();
+    c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
+    if (k > 0.02) {
+      c.globalCompositeOperation = 'lighter';
+      const gl = c.createRadialGradient(cx2, gy - dh * 0.32, 6, cx2, gy - dh * 0.32, dw * (0.3 + k * 0.4));
+      gl.addColorStop(0, 'rgba(87,168,255,' + (0.18 * k + 0.08) + ')');
+      gl.addColorStop(1, 'rgba(77,184,255,0)');
+      c.fillStyle = gl;
+      c.beginPath(); c.ellipse(cx2, gy - dh * 0.32, dw * (0.3 + k * 0.4), dh * 0.4, 0, 0, 7); c.fill();
+    }
+    c.restore();
+    return;
+  }
+  const BW = 70, BH = 122;
+  c.save();
+  // the back shroud, leaning the other way from Ratchet's stall — two shrines
+  // must never share a silhouette
+  c.fillStyle = '#0a1226';
+  c.beginPath();
+  c.moveTo(cx2 - BW - 4, gy);
+  c.lineTo(cx2 - BW - 12, gy - BH + 2);
+  c.lineTo(cx2 + BW - 2, gy - BH + 12);
+  c.lineTo(cx2 + BW + 8, gy);
+  c.closePath(); c.fill();
+  // the canopy: a heavy swag of dead cable bundles thrown over the posts,
+  // sagging in catenaries — the Conduits' own ceiling furniture
+  c.strokeStyle = '#101c3e'; c.lineCap = 'round';
+  for (let i = 0; i < 4; i++) {
+    c.lineWidth = 9 - i * 1.6;
+    c.beginPath();
+    c.moveTo(cx2 - BW - 24 + i * 5, gy - BH + 10 + i * 4);
+    c.quadraticCurveTo(cx2 + 4 - i * 3, gy - BH + 40 + i * 7, cx2 + BW + 22 - i * 4, gy - BH + 4 + i * 5);
+    c.stroke();
+  }
+  // loose fibre strands hanging off the swag, tips faintly lit
+  for (let i = 0; i < 6; i++) {
+    const fx = cx2 - BW + 12 + i * (BW / 3.1), sway = Math.sin(performance.now() / 1100 + i * 1.9) * 3;
+    const fy = gy - BH + 34 + (i % 3) * 8, fl = 16 + (i * 7) % 22;
+    c.strokeStyle = '#16244a'; c.lineWidth = 1.6;
+    c.beginPath(); c.moveTo(fx, fy); c.quadraticCurveTo(fx + sway, fy + fl * 0.6, fx + sway * 1.6, fy + fl); c.stroke();
+    c.fillStyle = 'rgba(87,168,255,0.55)';
+    c.beginPath(); c.arc(fx + sway * 1.6, fy + fl, 1.3, 0, 7); c.fill();
+  }
+  // leaning conduit posts — pipe bundles, not columns, junction box hips
+  c.fillStyle = '#0b142e';
+  for (const s of [-1, 1]) {
+    c.beginPath();
+    c.moveTo(cx2 + s * (BW + 12), gy);
+    c.lineTo(cx2 + s * (BW - 2), gy - BH + 12);
+    c.lineTo(cx2 + s * (BW - 9), gy - BH + 15);
+    c.lineTo(cx2 + s * (BW + 3), gy);
+    c.closePath(); c.fill();
+    c.fillStyle = '#122048';
+    c.fillRect(cx2 + s * (BW - 2) - 7, gy - BH * 0.52, 14, 18);
+    c.fillStyle = '#0b142e';
+  }
+  // the doorway: parted cable curtains and the Oracle's CRT light inside
+  const doorW = 46, doorH = BH - 30;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const gl = c.createLinearGradient(0, gy - doorH, 0, gy);
+  gl.addColorStop(0, 'rgba(87,168,255,' + (0.10 + k * 0.45) + ')');
+  gl.addColorStop(1, 'rgba(77,184,255,' + (0.14 + k * 0.5) + ')');
+  c.fillStyle = gl;
+  c.beginPath();
+  c.moveTo(cx2 - doorW / 2, gy);
+  c.quadraticCurveTo(cx2 - doorW / 2 - 8, gy - doorH * 0.62, cx2 - 6, gy - doorH);
+  c.quadraticCurveTo(cx2 + 16, gy - doorH - 8, cx2 + doorW / 2 + 2, gy - doorH * 0.66);
+  c.lineTo(cx2 + doorW / 2, gy);
+  c.closePath(); c.fill();
+  // a scanline flicker deep inside — the CRT breathing in the dark
+  c.globalAlpha = 0.10 + k * 0.25 + Math.sin(performance.now() / 130) * 0.04;
+  c.fillStyle = '#57a8ff';
+  for (let y2 = gy - doorH * 0.8; y2 < gy - 8; y2 += 7) c.fillRect(cx2 - 12, y2, 24, 1.4);
+  c.restore();
+  // the cable curtains part as she nears — the same k the booth flaps use
+  const part = k * 26;
+  for (const s of [-1, 1]) {
+    const ex = cx2 + s * (5 + part);
+    c.strokeStyle = '#0e1a3a'; c.lineWidth = 4; c.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      c.beginPath();
+      c.moveTo(ex + s * i * 7, gy - doorH + 4);
+      c.quadraticCurveTo(ex + s * (i * 7 + 10), gy - doorH * 0.5, ex + s * (i * 7 + 4), gy);
+      c.stroke();
+    }
+  }
+  // her sign: a dim cracked monitor hung crooked, one sine wave still on it
+  const sw = Math.sin(performance.now() / 1000) * 0.05;
+  c.save();
+  c.translate(cx2 + BW - 16, gy - BH + 40); c.rotate(sw + 0.1);
+  c.fillStyle = '#060b1c'; c.fillRect(-14, 0, 28, 20);
+  c.strokeStyle = 'rgba(87,168,255,0.8)'; c.lineWidth = 1.4;
+  c.beginPath();
+  for (let i = 0; i <= 12; i++) c[i ? 'lineTo' : 'moveTo'](-10 + i * 1.7, 10 - Math.sin(i / 12 * 6.28 + performance.now() / 400) * 4);
+  c.stroke();
+  c.restore();
+  c.restore();
+}
 function drawGateDoors(P) {
   const def = GATE_ROOM[G.roomId];
   if (!def || !player) { G._doorK = 0; return; }
@@ -4935,6 +5055,9 @@ function drawGateDoors(P) {
   if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) { drawCaveMouth(ds, gy, P, k); return; }
   // a booth is a STALL, not a monument — the trader's kiosk on the meadow
   if (def.style === 'booth') { drawBooth(ds, gy, P, k); return; }
+  // ...and the Oracle's shrine is HERS: same depth-door mechanics, its own
+  // body, so the trader's plate never stands in the Conduits
+  if (def.style === 'oracle') { drawOracleBooth(ds, gy, P, k); return; }
   const cx2 = ds;
   // THE CITY GATE IS THE MONUMENT (owner: "only the city gate should be
   // huge and epic with multi layers and inscriptions and shapes — it's a
