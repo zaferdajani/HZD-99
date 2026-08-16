@@ -939,11 +939,21 @@ be paid for twice.
 `guardians/talonhost_glide.png` · `guardians/prism_stalk.png` ·
 `beasts/wolf_runa.png` · `beasts/cheetah_runa.png`.
 
-**Fired, archived, awaiting a matting pass** (they keyed with background
-bands or a residual plinth, and `remove_background` is the answer per the
-size rule below): TALONHOST's strike, PRISM PROWLER's coil, the wolf and
-cheetah gather frames, **her arms-crossed charge pose**, **the Mind Node
-obelisk** and the forge table.
+**✅ ALL ELEVEN NOW SHIPPED.** The seven that would not black-key went
+through `remove_background` and cut clean:
+`guardians/talonhost_strike.png` · `guardians/prism_coil.png` ·
+`beasts/wolf_runb.png` · `beasts/cheetah_runb.png` ·
+`backgrounds/mindnode_obelisk.png` · `backgrounds/forge_table.png` · and the
+charge pose, which went into the STATE SHEET at cell 16 through
+`tools/herocell.cjs` rather than shipping as a loose file.
+
+**A trap the charge cell walked into, worth the warning.** After placing a
+new cell, `heroeyeclean.cjs` was run with the OLD anchor table still in
+`tools/heroeye.json` — and the new pose has her head in a different place, so
+it painted over her SCARF instead of her eyes (the sampled fill came back
+red, which is what gave it away). **Order matters: place the cell, re-measure
+with `heroeyes.cjs`, update `tools/heroeye.json` AND `HERO_EYE`, and only
+then clean.** Cleaning with a stale anchor damages the plate silently.
 
 **What they are, so the next pass does not re-derive it:**
 - **TALONHOST** glides level with wings wide and talons tucked; strikes
