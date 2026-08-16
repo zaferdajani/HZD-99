@@ -229,9 +229,9 @@ included, happens ON `claude/clawbyte-repo-migration-byhyl8` — pull --rebase
 before starting, push after every commit, mirror to main/odyssey. No new
 branches, ever. §1 is DONE and merged; the list below is what remains.
 
-  1. §1b-i  slash light-sheets ×4        (slash_h / slash_d / slash_u / slash_dn)
+  1. §1b-i  slash light-sheets ×4        ✅ SHIPPED 2026-08-16 (were fired+archived, never keyed) — needs wiring
   2. §1b-ii regrips ×2 + thrown blade ×1 (thrown = BODY LENGTH — owner ruling)
-  3. §1c    back-jet gear ×3             (idle / mid-boost / full burn)
+  3. §1c    back-jet gear ×3             ✅ SHIPPED 2026-08-16 (were fired+archived, never keyed) — needs wiring
   4. §1d    THE FORGING CINEMATIC ×1     ✅ WIRED 2026-08-16 — the forging plays at the grant (code session)
   5. §1e    RUN PAIR RE-FIRE ×2          ❌ REFUSED BY OWNER 2026-08-16 — re-parked; RE-FIRE with constraints below
   6. §2e    sage plates ×6               ✅ WIRED 2026-08-16 — drawSage is plate-first, six states (code session)
@@ -605,6 +605,54 @@ Two things follow:
   the verdict. If the number still drops under 0.16 after the revert, the fix
   is a re-fire with the far arm clear of the body, NOT a loosened threshold:
   the threshold is what stops a one-armed cat reaching the screen.
+
+### THE ORPHAN AUDIT (art session, 2026-08-16) — three items were never missing, they were never SHIPPED
+
+The owner asked what was missing. The most useful answer was not in the
+backlog: **items 1, 2 and 3 at the top of this list had already been fired and
+archived, and never reached the game.** They sat in `assets/source/` with no
+counterpart in the shipped tree and no manifest key, which is invisible to
+every check the project has — `tests/platform.cjs` catches a manifest name
+with no FILE, and nothing catches a file with no manifest name.
+
+The cause is a word. This ledger's STATUS section calls §1b-i / §1b-ii / §1c
+"DONE", and in that section done means FIRED. The checklist ticks mean
+SHIPPED. Two meanings, one word, and the gap between them held seven plates
+for two days.
+
+**Fixed in this commit:**
+- **§1b-i — the four crystal slash light-sheets** are now
+  `assets/fx/slash_h.png`, `slash_d.png`, `slash_u.png`, `slash_dn.png`.
+  They keep their BLACK FIELD on purpose: these are additive-light plates
+  drawn with `'lighter'` where brightness IS the alpha, exactly like the
+  existing rake sheet. Alpha-keying them would be wrong.
+- **§1c — the back-jet gear** is now `assets/characters/gear/jetpack.png` and
+  `jetpack_fire.png`, black-keyed like its siblings. Every other plate in
+  that folder (boots, pod, cradle) already had both an archive entry and a
+  shipped file; the jet pack had only the archive.
+
+**Still orphaned: §1b-ii.** `assets/source/crystal/held_guard.jpg`,
+`double_guard.jpg` and `throw_pose.jpg` are archived and unshipped. They are
+left alone deliberately — unlike the other two, their wiring note calls for
+replacing the polygon blades inside `drawBoomer` (js/entities.js:6172), which
+is a rendering change and the code session's call, not a file drop. Shipping
+the plate without that decision would just move the orphan.
+
+**WIRING (code session), both of the above:**
+- `drawCrystalArc` (js/entities.js:6129) is still the procedural white
+  crescent, which its own comment names as the declared fallback. The four
+  sheets replace it: `slash_h` horizontal, `slash_d` diagonal, `slash_u` the
+  upward burst, `slash_dn` the air-down pogo with its impact splash. Four
+  media.js keys.
+- The jet pack draws at her back through the double-jump; `jetpack_fire` is
+  the full-burn variant, though note the plume itself is already procedural
+  additive light per §0.0, so the fire plate may serve as reference rather
+  than as a drawn sheet. Two media.js keys.
+
+**And a check worth keeping:** anything in `assets/source/` whose name has no
+counterpart in the shipped tree and appears nowhere in `js/` is either
+composited into an atlas (the boss parts, the turnarounds — legitimate) or it
+is an orphan. That sweep is how these three were found and it takes seconds.
 
 ### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
 
