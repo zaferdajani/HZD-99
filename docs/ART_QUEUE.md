@@ -244,13 +244,13 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
  14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   ✅ WIRED 2026-08-16 — shrine plate + parlor vista live (code session)
  15. §2i    THE BREAKER ×3                    ✅ WIRED 2026-08-16 — surge is plate-first, three states (code session)
- 16. §2j    SERVO'S WINDING HOUSE ×1          ⚠ FIRED ×2, NEITHER KEYABLE — see §2h+2i+2j below
+ 16. §2j    SERVO'S WINDING HOUSE ×1          ✅ SHIPPED 2026-08-16 on the third fire — needs wiring
  17. §2k    THE TINKER'S QUENCH HOOD + FORGE ×2 (forgeFront / forgeInterior — kingdom 3)
- 18. §2l    THE KILN VENT ×3                  (rest / petals-open tell / spent — new zone-C enemy)
+ 18. §2l    THE KILN VENT ×3                  ✅ FIRED 2026-08-16 — assets/characters/kiln/, needs wiring
  19. §2m    THE SAGE'S STACKS + CARREL ×2     (carrelFront / carrelInterior — kingdom 4)
- 20. §2n    THE RIME COIL ×3                  (rest / crown-up tell / dark — new zone-D enemy)
+ 20. §2n    THE RIME COIL ×3                  ✅ FIRED 2026-08-16 — assets/characters/rime/, needs wiring
  21. §2o    THE NYMPH'S POD + HOLLOW ×2       (hollowFront / hollowInterior — kingdom 5)
- 22. §2p    THE NEST SNARE ×3                 (rest / maw-open tell / limp — new zone-E enemy)
+ 22. §2p    THE NEST SNARE ×3                 ✅ FIRED 2026-08-16 — assets/characters/snare/, needs wiring
  23. §2q    BEAST GAIT REPAIR ×8              (wolf+cheetah walk pairs RE-FIRED + run pairs — see §2q, the leg and identity faults are written there)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
@@ -653,6 +653,58 @@ the plate without that decision would just move the orphan.
 counterpart in the shipped tree and appears nowhere in `js/` is either
 composited into an atlas (the boss parts, the turnarounds — legitimate) or it
 is an orphan. That sweep is how these three were found and it takes seconds.
+
+### 2j CLOSED + 2l / 2n / 2p FIRED (art session, 2026-08-16)
+
+**§2j SERVO'S WINDING HOUSE ✅ SHIPPED on the third fire**, as
+`assets/backgrounds/winch_house.png`. The hypothesis in the previous entry
+was right: this is the only subject in the queue that is a large structure
+STANDING ON LEGS, and legs imply ground — the model kept resolving what it
+stood on. Naming the floor in the negatives never worked. What worked was
+saying what the legs DO: *"it is not standing on anything; it hangs
+suspended in empty darkness, the four feet of its frame END IN NOTHING."*
+No floor, no shadow, first try. Sources for all three attempts are archived.
+
+**§2l THE KILN VENT ✅ · §2n THE RIME COIL ✅ · §2p THE NEST SNARE ✅** —
+nine plates in `assets/characters/{kiln,rime,snare}/`, sources in
+`assets/source/kingdom345/`, contact sheet at
+`assets/source/_sheets/kingdom345_enemies.png`. All matted.
+
+Each is a three-silhouette read, which is the entire job for machines whose
+purpose is teaching a beat:
+- **kiln** — `rest` capped and dark; `tell` mouth open with the throat lit
+  and the side grate hot; `spent` petals flung wide and drooping, side grate
+  fallen open on its hinge, throat dead.
+- **rime** — `rest` frost needles folded low against the collar; `tell`
+  needles standing and fanned, the body taller; `dark` needles snapped over,
+  frost-vent panels hanging open showing pale slots, core dead, shell cracked.
+- **snare** — `rest` bulb bunched with the thorn ring curled shut and a dull
+  red heartbeat; `tell` crown spread wide with one long tendril arcing out of
+  the maw, hook open, core burning; `limp` tendril fallen slack, thorns
+  drooping, light out.
+
+**THE ACCIDENT THAT KEEPS PAYING.** Twice more the first plate of a triad
+came back in the WRONG state — the rime with its needles up, the kiln with
+its mouth open — and both times the answer was not to re-roll it but to
+RELABEL it as the tell and fire the other two against it as reference. That
+is now three enemies built this way (the breaker was the first). A plate in
+the wrong state is not waste; it is the anchor, and it is usually the most
+expressive plate in the set because the model reaches for the dramatic pose
+by default. Fire the dramatic state first ON PURPOSE next time.
+
+**NEW, AND IT EXPLAINS EVERY MATTE REFUSAL SO FAR:** `remove_background`
+refuses very large sources. `kiln_spent` (21.6 MB, 4096²) failed four calls
+with a server error; the identical image downscaled to 1400 px was accepted
+immediately and matted perfectly. The §2e `pure` plate and both earlier winch
+attempts were the largest files of their batches too, so this was never about
+the subject. **Downscale to ~1400 px before matting** — the shipped plate is
+640 px anyway, so nothing is lost.
+
+**WIRING (code session):** ten media.js entries and the state maps. Each
+enemy replaces its engine-drawn fallback at the same anchor —
+`case 'kiln'` / `case 'rime'` / `case 'snare'` in `Enemy.draw` — and the
+winch replaces `drawWinchHouse` at the ROOM_PROPS A1 anchor, with the
+procedural version kept as the loading fallback.
 
 ### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
 
