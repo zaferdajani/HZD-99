@@ -844,12 +844,16 @@ wrong rule when somebody else is doing the talking.
 Two halves, and the art half is genuinely missing:
 - **Code:** pick the portrait by SPEAKER — her face when she speaks, the
   NPC's when they do.
-- **ART (new, goes on this list):** there are no NPC bust plates. The
-  cheapest honest route is to crop busts from `assets/characters/npc_6yaw.png`
-  column 2 (the front cell) per row — servo, ratchet, mono, patch, sage,
-  lumen — which needs no generation at all and guarantees the bust matches
-  the character on screen. Only if those read too small should new portrait
-  plates be fired.
+- **ART ✅ DONE IN THE SAME SITTING, for nothing.** Six busts now exist at
+  `assets/characters/npc/bust/{servo,ratchet,mono,patch,sage,lumen}.png`,
+  cut from `npc_6yaw.png`'s front column by the new `tools/npcbusts.cjs` —
+  no generation, and the bust is therefore guaranteed to be the same
+  character the player is standing in front of. Contact sheet at
+  `assets/source/_sheets/npc_busts.png`. Each reads clearly at bust size:
+  Servo's dome and antenna, Ratchet's amber optics over his brass rig,
+  Mono's waveform screen, Patch's goggles, the Sage's caged orb, Lumen's
+  petals. Six media.js entries and a speaker check in `drawDialog` are all
+  that is left, and both are code.
 
 **9. DIALOGUE SKIPS ON ANY TAP — CODE/UX.** *"Don't make it easy to skip by
 touching the screen. If I'm on mobile it should be kept on, and advance by
