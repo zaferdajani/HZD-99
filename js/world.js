@@ -226,7 +226,16 @@ const ROOMS = {
   // with that one; either way the first light she gives away has a roof
   // over it.
   A0B: { zone: 'A', w: 30, h: 17, exits: {},
-    ents: [['npc', 17, 15, 'ratchet'], ['chest', 20, 15, 'it:batt']],
+    // THE DEN IS THE KINGDOM'S FIRST ROOF, so it is also its first rest.
+    // The bench audit (kingdom protocol: every kingdom has at least one save
+    // point, PLACED for the arc) found the only touchable bench before the
+    // Alpha was… none: the save stayed on the cradle default, so losing the
+    // game's first losable fight (A10) respawned her five rooms back in W1,
+    // gate cutscene included. The den pod fixes the retry loop at the place
+    // the story already built for shelter — she wakes Ratchet under this
+    // roof, and from then on the roof is where she comes back to. A3's bench
+    // keeps its job as the meadow's own breath after the pack.
+    ents: [['npc', 17, 15, 'ratchet'], ['chest', 20, 15, 'it:batt'], ['bench', 25, 15]],
     build(g) {
       frame(g);
       hline(g, 19, 23, 12, '=');          // the workbench loft over his corner
