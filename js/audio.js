@@ -1487,6 +1487,10 @@ function pickRecorded(name) {
 const MUS_FALL = {
   boss_glitch: 'boss', boss_brood: 'boss', boss_atlas: 'boss',
   boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss', boss_alpha: 'boss', alphaTame: 'ambient',
+  // the sage duel has its OWN slot now: drop mus_sage.m4a into assets/music
+  // (ART_QUEUE brief) and every chamber picks it up; until then the duels
+  // borrow the guardian track through this fallback
+  sage: 'boss',
   intro: 'title',
 };
 function setMusic(name) {

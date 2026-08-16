@@ -239,8 +239,30 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   8. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   (owner 2026-08-15 — see brief below)
  10. §2g    THE TRADER'S BOOTH + DEN ×3       (boothFront / denInterior / ratchetResting)
- 11. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
- 12. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
+ 11. §3m    BOSS MOTION PLATES (task #93)     (walk pair + attack-anticipation per guardian)
+ 12. §1     unarmed side action set + apex/burst/heal/Song/slump/wallcling
+ 13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
+
+### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
+movements need a lot of improvements")
+
+The code half shipped 2026-08-16: every guardian now leans into its own
+acceleration, bobs with its stride and compresses on landing (the weight
+pass in Boss.update/Boss.draw). What code cannot do is move the LIMBS —
+that is these plates. Per guardian (NULLFANG, TALONHOST, FURNACE CHOIR,
+GLACIERE, PRISM PROWLER — MOTHER-V is stationary and exempt):
+
+- **walk_a / walk_b** — two stride poses of its existing body (same sheet
+  identity, same fixed key light), legs genuinely committed per §3.3
+  (silhouette IoU ≤ 0.86 against each other and against idle).
+- **attack anticipation** — one plate per signature attack: the drawn-back
+  frame the wind-up holds (coil deeper, wings higher, lance further back
+  than any existing pose). The amber wash is code; the POSE is the plate.
+
+Wire notes: the parts-rig guardians (beast/eagle) take these as new atlas
+rows for their existing draw files; the sheet guardians swap cells. Every
+fire uses the guardian's own current sheet as reference media so identity
+holds. tests/artbible.cjs silhouette + tell measurements bind them all.
 
 Estimated spend: ~45-55 credits of session B's balance. After each block:
 git pull, run the pipeline (blackkey -> img-crush -> archive -> wire), and

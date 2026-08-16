@@ -4257,7 +4257,7 @@ class Enemy {
           // owner: "not epic, not from the theme, sounds like old Atari."
           // The moment the sage takes its first beat at her, the guardian
           // fight track takes the room; the taming resolves it (sageTame).
-          if (!this.duelMus) { this.duelMus = 1; if (typeof setMusic === 'function') setMusic('boss'); }
+          if (!this.duelMus) { this.duelMus = 1; if (typeof setMusic === 'function') setMusic('sage'); }
           this.stepT = 0.9;
           if (this.denied >= 3) { this.windedT = 1.2; this.denied = 0; }
           else if (Math.abs(dxp) < 190 && chance(0.65)) { this.coilT = TELL_SWIPE; sfx('tell'); }
@@ -5810,6 +5810,17 @@ class Boss {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    // THE WEIGHT PASS (#93, the code half). Every guardian carries momentum
+    // now, from one place, for every boss that exists or will ever exist:
+    // a lean INTO acceleration, and a landing squash when a fall dies. The
+    // matching draw-side transform lives at the top of Boss.draw; per-plate
+    // walk cycles are the art half (ART_QUEUE boss-motion block).
+    const wAx = dt > 1e-4 ? (this.vx - (this._pvx == null ? this.vx : this._pvx)) / dt : 0;
+    const wantLean = clamp(this.vx / 460, -1, 1) * 0.055 + clamp(wAx / 4200, -0.6, 0.6) * 0.035;
+    this._lean = (this._lean || 0) + (wantLean - (this._lean || 0)) * (1 - Math.pow(0.002, dt));
+    if ((this._pvy || 0) > 150 && Math.abs(this.vy) < 24 && !this._squashT) this._squashT = 0.22;
+    if (this._squashT > 0) this._squashT = Math.max(0, this._squashT - dt);
+    this._pvx = this.vx; this._pvy = this.vy;
     // THE WARNING GETS THE SOUND. It used to arrive with the hit, which is
     // feedback, not a telegraph — and the ear is faster than the eye (an
     // auditory stimulus reaches the brain in 8-10 ms against 20-40 ms for a
@@ -7921,6 +7932,25 @@ class Boss {
       c.translate(_px + _pp.dx, _py + _pp.dy);
       c.rotate(_pp.rot); c.scale(_pp.sx, _pp.sy);
       c.translate(-_px, -_py);
+    }
+    // THE WEIGHT PASS, draw half: the momentum bookkeeping from update()
+    // becomes a body that leans into its own speed, bobs with its stride,
+    // and compresses when a fall lands — pivoted at the FEET so mass stays
+    // planted. Suppressed for the art probe (it measures feet, not physics)
+    // and for the dead (their collapses are choreographed per guardian).
+    if (!this.dead && !G.artProbe) {
+      const wx = this.cx(), wy = this.y + this.h;
+      const spd = Math.abs(this.vx);
+      const bob = Math.abs(this.vy) < 30 && spd > 26
+        ? Math.abs(Math.sin(this.anim * (6 + Math.min(6, spd / 90)))) * Math.min(4, spd / 90) : 0;
+      const sq = this._squashT > 0 ? Math.sin((this._squashT / 0.22) * Math.PI) * 0.09 : 0;
+      if (this._lean || sq || bob) {
+        c.translate(wx, wy);
+        c.rotate(this._lean || 0);
+        c.scale(1 + sq * 0.7, 1 - sq);
+        c.translate(-wx, -wy);
+        c.translate(0, -bob);
+      }
     }
     const cx = this.cx(), cy = this.cy();
     if (this.dead) {
