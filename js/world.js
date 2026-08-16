@@ -522,6 +522,12 @@ const ROOMS = {
   // them — so the gallery is built around a central pour column you can put
   // between yourself and either gun, and the crawler is what stops you camping
   // behind it.
+  // The Tinker LIVES here now (kingdom 3): the depth door at the right end of
+  // the gallery (GATE_ROOM C5, the A0/A0B booth pattern) leads into his
+  // workshop, C5B — and the second turret sits on the platform directly over
+  // his doorway. The errand was always "silence the four guns"; now two of
+  // them are the guns outside his own door, and the wing that holds his
+  // errand's targets is also the wing where he hands it out.
   C5: { zone: 'C', w: 32, h: 19, exits: { R: 'C2' },
     ents: [['turret', 4, 17], ['turret', 27, 11], ['crawler', 16, 17],
            ['scrap', 15, 11, 35], ['saw', 20, 17, [5, 0, 2.6]],
@@ -535,11 +541,35 @@ const ROOMS = {
       hline(g, 9, 13, 8, '='); hline(g, 18, 22, 8, '=');
       hline(g, 9, 12, 17, '^'); hline(g, 19, 22, 17, '^');
     } },
+  // THE TINKER'S FORGE (kingdom 3's own interior, the C-side of A0B/B3B): a
+  // one-room smithy behind the quench-hood door in C5 where Patch-7 actually
+  // WORKS — the copper-domed unit at his own hearth instead of standing in
+  // the traffic of the pour hall. Dressing mimics the Foundry backdrop per
+  // the mimic rule (a slag-crusted tool loft, ladle clutter, the hearth's
+  // molten light); the procedural interior is a stand-in — the authored
+  // plate is queued (ART_QUEUE §2k, forgeInterior). Per the kingdom bench
+  // audit (see A0B) this roof is also zone C's rest: the Foundry had NO
+  // touchable bench at all, so a death anywhere in the kingdom respawned
+  // her a kingdom back in B3. The forge pod is the retry loop's fix, placed
+  // where the story already built shelter.
+  C5B: { zone: 'C', w: 30, h: 17, exits: {},
+    ents: [['npc', 16, 15, 'patch'], ['bench', 21, 15], ['scrap', 6, 11, 25]],
+    build(g) {
+      frame(g);
+      hline(g, 3, 9, 12, '=');            // the slag-crusted tool loft
+    } },
   C2: { zone: 'C', w: 60, h: 17, exits: { T: 'C1', R: 'C3', B: 'D1', L: 'C5' },
-    ents: [['plat', 33, 12, [5, 0, 3.6]], ['blob', 16, 15], ['turret', 22, 15], ['hopper', 42, 15], ['guard', 46, 15], ['blob', 55, 15], ['scrap', 5, 15, 12], ['npc', 25, 15, 'patch'],
+    // Patch-7 no longer stands in the corridor — his forge is behind the
+    // depth door in C5 (the same promotion Ratchet and the Oracle got).
+    // And the door to that wing WORKS now: exits.L said C5 since the wing
+    // was built, but the build never carved openL, so the Pour Gallery —
+    // with two of the errand's four guns in it — sat sealed behind a solid
+    // frame wall. Found walking the wall, not the graph: deadend.cjs reads
+    // exits, and exits lie when the wall disagrees.
+    ents: [['plat', 33, 12, [5, 0, 3.6]], ['blob', 16, 15], ['turret', 22, 15], ['hopper', 42, 15], ['guard', 46, 15], ['blob', 55, 15], ['scrap', 5, 15, 12],
            ['saw', 40, 15, [6, 0, 3.0]]],
     build(g) {
-      frame(g); openR(g);
+      frame(g); openR(g); openL(g);
       rect(g, 22, 0, 25, 0, '.');           // ceiling opening from C1
       hline(g, 8, 13, 15, '^'); hline(g, 33, 38, 15, '^'); hline(g, 48, 52, 15, '^');
       hline(g, 9, 12, 11, '='); hline(g, 47, 52, 11, '=');
@@ -816,7 +846,7 @@ const MAPPOS = {
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],
   X1: [8, 1, 1, 1],
-  C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1], C5: [4, 5, 1, 1],
+  C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1], C5: [4, 5, 1, 1], C5B: [4, 6, 1, 1],
   C6: [7, 4, 1, 1], C7: [7, 3, 1, 1],
   D1: [5, 6, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1], D4: [6, 5, 1, 1],
   D5: [6, 7, 1, 1], D6: [6, 8, 1, 1],

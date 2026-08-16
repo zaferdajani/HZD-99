@@ -245,6 +245,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   (oracleBooth / oracleInterior)
  15. §2i    THE BREAKER ×3                    (rest / fins-flared tell / vented — new zone-B enemy)
  16. §2j    SERVO'S WINDING HOUSE ×1          (kingdom 1 session, 2026-08-16 — see brief below)
+ 17. §2k    THE TINKER'S QUENCH HOOD + FORGE ×2 (forgeFront / forgeInterior — kingdom 3)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -772,6 +773,68 @@ paints. NO RIGHT ANGLES: every edge leans, sags or curves.
 After keying: archive the source, wire as a media.js entry drawn at the
 ROOM_PROPS A1 anchor with `drawWinchHouse` kept as the loading fallback,
 photograph, then node tests/run.cjs boot deadend platform.
+
+### 2k. THE TINKER'S QUENCH HOOD + FORGE ✱ NEW (2026-08-16, kingdom 3 pass)
+
+Patch-7 — the Tinker — has his own place now: a depth door at the right end
+of the Pour Gallery (GATE_ROOM C5, the A0/A0B booth pattern, style `forge`)
+into the workshop room C5B, under the very platform one of his errand's gun
+emplacements holds. Two plates replace the procedural stand-ins at the same
+anchors, both built from the FOUNDRY backdrop's own furniture (the mimic
+rule: pour ladles, slag, chains, machine hoods) and nothing plumb or square
+(NO RIGHT ANGLES):
+
+1. **forgeFront** — the quench hood standing in the gallery: a scorched
+   extraction bell sagging between two leaning chain-wrapped pipe
+   stanchions, slag crusted and heaped around the base with ember seams
+   still alive in it, a tipped pour ladle resting against the left post,
+   hanging chains with hooks off the hood lip, a chain curtain over a
+   doorway breathing molten orange from inside (NOT lamp amber — that is
+   Ratchet's; not CRT blue — that is the Oracle's; this is the pour light
+   the hall already casts), and a small gear-wheel sign hung crooked from
+   the hood lip. `drawTinkerForge` in js/game.js is the placement
+   reference; same bottom anchor and ~236 px height as boothFront.
+2. **forgeInterior** — a 16:9 backdrop for C5B: a one-room smithy — a low
+   hearth glowing at one side, an anvil-block and scattered tongs, a
+   slag-crusted tool loft sagging along one wall hung with hammers and
+   ladles, coiled chain and cog clutter on the floor, the whole room lit
+   by the hearth's molten orange with deep rust-brown darkness above and
+   one pale-gold accent (zone C's acc2). Lived-in the way a one-man
+   workshop is lived-in. The depth door back out sits at gx 0.12.
+   `ROOM_VISTA.C5B` is already pointed at `forgeInterior`; add the
+   media.js entries in the same commit as the files.
+
+**The prompts, verbatim — fire as-is:**
+
+> (forgeFront) A small salvaged smithy entrance built from foundry
+> equipment, seen straight on: a big scorched sheet-metal extraction hood
+> sagging between two leaning pipe stanchions wrapped in slack chain
+> loops, cooled slag heaped and crusted around the base with faint orange
+> ember seams still glowing in the crust, a tipped metal pour ladle
+> resting against the left post with a residue of molten glow inside, a
+> few hanging chains with open hooks swinging from the hood lip, a
+> hanging-chain curtain over a doorway breathing warm molten orange light
+> from inside, and a small worn gear wheel hung crooked from the hood lip
+> as a sign. Deep rust-brown and soot-black palette, molten orange light
+> in the doorway and ember seams only. Nothing plumb, nothing square —
+> every edge leans, sags or curves. Clean high-detail 3D render, soft
+> specular scorched metal, dark moody lighting. NEGATIVE: no text, no
+> watermark, no characters, no straight rectangular frame, no cast
+> shadow, no ground plane. Photographed in a pitch-dark room, no
+> backdrop, no floor, spotlights pick out the structure and nothing else
+> receives any light.
+
+> (forgeInterior, 16:9 backdrop) The inside of a one-room machine smithy,
+> wide interior view: a low open hearth glowing molten orange at one
+> side, a heavy anvil block with scattered tongs and a half-finished
+> mechanism on it, a sagging slag-crusted loft shelf along one wall hung
+> with hammers and ladles, coiled chains and gear wheels cluttering the
+> floor, warm molten light pooling from the hearth over everything, the
+> rest falling into deep rust-brown darkness, one pale gold indicator
+> lamp. Lived-in, low, warm, one machine's whole life in one room. No
+> right angles presenting: shelves sag, posts lean, chains curve. Clean
+> high-detail 3D render. NEGATIVE: no characters, no text, no watermark,
+> no doors, no windows with daylight.
 
 ### 1e. THE RUN PAIR RE-FIRE ✅ FIRED AND SHIPPED 2026-08-16 (art session)
 

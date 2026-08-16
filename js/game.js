@@ -1974,6 +1974,9 @@ const ROOM_VISTA = {
   // the Oracle's parlor (§2h): mono's data-den behind the cable shrine in B3.
   // Unfired — the room borrows the zone-B atlas cell until the plate lands.
   B3B: 'oracleInterior',
+  // the Tinker's forge (§2k): Patch-7's smithy behind the quench hood in C5.
+  // Unfired — the room borrows the zone-C atlas cell until the plate lands.
+  C5B: 'forgeInterior',
 };
 
 // ===========================================================================
@@ -4685,6 +4688,14 @@ const GATE_ROOM = {
   // lands (ART_QUEUE §2h)
   B3:  { at: 0.50, to: 'B3B', ax: 0.12, style: 'oracle' },
   B3B: { at: 0.12, to: 'B3',  ax: 0.50, style: 'oracle' },
+  // the Tinker's forge off C5 — the booth pattern a third time, its OWN
+  // style again: neither the trader's kiosk nor the Oracle's shrine may
+  // stand in the Foundry, so the quench hood draws its own stand-in
+  // (drawTinkerForge) until its plate lands (ART_QUEUE §2k). It stands at
+  // the right end of the Pour Gallery, under the platform the second gun
+  // holds — the errand's targets are the guns outside his own door.
+  C5:  { at: 0.8125, to: 'C5B', ax: 0.12, style: 'forge' },
+  C5B: { at: 0.12, to: 'C5',  ax: 0.8125, style: 'forge' },
   // the grottoes — one per guardian, opened by its fall or taming
   A4:  { at: 0.14, to: 'GA1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossGlitch' },
   A10: { at: 0.12, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, need: 'alpha' },
@@ -5049,6 +5060,173 @@ function drawOracleBooth(cx2, gy, P, k) {
   c.restore();
   c.restore();
 }
+// THE TINKER'S QUENCH HOOD (kingdom 3): the depth door into Patch-7's forge
+// off C5. Built from the Foundry backdrop's own furniture per the mimic rule —
+// a scorched extraction hood sagging between two leaning chain-wrapped
+// stanchions, slag crusted and heaped around the base, a tipped ladle resting
+// against one post, hanging chains, and a doorway breathing the molten orange
+// the pours already paint the hall with (NOT Ratchet's lamp amber, not the
+// Oracle's CRT blue — the Foundry's own light). Nothing plumb, nothing square
+// (NO RIGHT ANGLES). Procedural STAND-IN awaiting its fired plate (ART_QUEUE
+// §2k, forgeFront): the mediaFetch hook below goes live the commit the plate
+// and its media.js entry land, exactly like drawBooth's and drawOracleBooth's.
+function drawTinkerForge(cx2, gy, P, k) {
+  if (typeof mediaFetch === 'function') mediaFetch('forgeFront');
+  const bim = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.forgeFront;
+  if (bim && bim.naturalWidth) {
+    const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
+    c.save();
+    c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
+    if (k > 0.02) {
+      c.globalCompositeOperation = 'lighter';
+      const gl = c.createRadialGradient(cx2, gy - dh * 0.3, 6, cx2, gy - dh * 0.3, dw * (0.3 + k * 0.4));
+      gl.addColorStop(0, 'rgba(255,148,48,' + (0.18 * k + 0.08) + ')');
+      gl.addColorStop(1, 'rgba(255,171,74,0)');
+      c.fillStyle = gl;
+      c.beginPath(); c.ellipse(cx2, gy - dh * 0.3, dw * (0.3 + k * 0.4), dh * 0.4, 0, 0, 7); c.fill();
+    }
+    c.restore();
+    return;
+  }
+  const BW = 66, BH = 126;
+  c.save();
+  // the back shroud — soot-dark, leaning right where the Oracle's leans left:
+  // three shrines, three silhouettes
+  c.fillStyle = '#170a05';
+  c.beginPath();
+  c.moveTo(cx2 - BW - 8, gy);
+  c.lineTo(cx2 - BW + 2, gy - BH + 14);
+  c.lineTo(cx2 + BW + 6, gy - BH + 2);
+  c.lineTo(cx2 + BW + 14, gy);
+  c.closePath(); c.fill();
+  // the slag crust heaped around the base: cooled blobby mounds, never steps
+  c.fillStyle = '#2a1206';
+  for (const [mx, mw, mh] of [[-BW - 2, 30, 16], [-BW + 26, 22, 10], [BW - 10, 34, 18], [BW + 12, 18, 9]]) {
+    c.beginPath();
+    c.moveTo(cx2 + mx - mw / 2, gy);
+    c.quadraticCurveTo(cx2 + mx - mw * 0.2, gy - mh, cx2 + mx + mw * 0.24, gy - mh * 0.8);
+    c.quadraticCurveTo(cx2 + mx + mw / 2, gy - mh * 0.3, cx2 + mx + mw / 2 + 3, gy);
+    c.closePath(); c.fill();
+    // an ember seam still alive in the crust
+    c.strokeStyle = 'rgba(255,148,48,0.28)'; c.lineWidth = 1.2;
+    c.beginPath();
+    c.moveTo(cx2 + mx - mw * 0.3, gy - mh * 0.5);
+    c.quadraticCurveTo(cx2 + mx, gy - mh * 0.7, cx2 + mx + mw * 0.28, gy - mh * 0.45);
+    c.stroke();
+    c.fillStyle = '#2a1206';
+  }
+  // two leaning stanchions, chain-wrapped — pipe legs with collar hips
+  c.fillStyle = '#241008';
+  for (const s of [-1, 1]) {
+    c.beginPath();
+    c.moveTo(cx2 + s * (BW + 8), gy);
+    c.lineTo(cx2 + s * (BW - 6), gy - BH + 16);
+    c.lineTo(cx2 + s * (BW - 13), gy - BH + 20);
+    c.lineTo(cx2 + s * (BW - 1), gy);
+    c.closePath(); c.fill();
+    // the chain wrap: three sagging loops around each post
+    c.strokeStyle = '#3a2410'; c.lineWidth = 2.4; c.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      const wy = gy - 24 - i * 26;
+      c.beginPath();
+      c.moveTo(cx2 + s * (BW + 6 - i * 2), wy);
+      c.quadraticCurveTo(cx2 + s * (BW - 2 - i * 2), wy + 7, cx2 + s * (BW - 9 - i * 2), wy + 1);
+      c.stroke();
+    }
+    c.fillStyle = '#241008';
+  }
+  // THE HOOD: a scorched extraction bell sagging between the posts — the
+  // same curved sheet the backdrop hangs over its own pour ladles
+  c.fillStyle = '#1d0e06';
+  c.beginPath();
+  c.moveTo(cx2 - BW - 16, gy - BH + 22);
+  c.quadraticCurveTo(cx2 - BW * 0.3, gy - BH - 12, cx2 + BW * 0.34, gy - BH - 4);
+  c.quadraticCurveTo(cx2 + BW + 4, gy - BH + 4, cx2 + BW + 18, gy - BH + 30);
+  c.quadraticCurveTo(cx2 + BW * 0.3, gy - BH + 40, cx2 - BW * 0.42, gy - BH + 44);
+  c.quadraticCurveTo(cx2 - BW - 6, gy - BH + 38, cx2 - BW - 16, gy - BH + 22);
+  c.closePath(); c.fill();
+  // heat stain blooming up the hood's throat
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const hs = c.createRadialGradient(cx2, gy - BH + 34, 4, cx2, gy - BH + 34, BW * 0.9);
+  hs.addColorStop(0, 'rgba(255,148,48,' + (0.14 + k * 0.2) + ')');
+  hs.addColorStop(1, 'rgba(255,148,48,0)');
+  c.fillStyle = hs;
+  c.beginPath(); c.ellipse(cx2, gy - BH + 34, BW * 0.9, 26, 0, 0, 7); c.fill();
+  c.restore();
+  // hanging chains off the hood lip, hooks swaying in the updraft
+  for (let i = 0; i < 5; i++) {
+    const hx = cx2 - BW + 14 + i * (BW / 2.4), sway = Math.sin(performance.now() / 900 + i * 2.3) * 3;
+    const hy = gy - BH + 42, hl = 14 + (i * 9) % 24;
+    c.strokeStyle = '#33200e'; c.lineWidth = 1.8;
+    c.beginPath(); c.moveTo(hx, hy); c.quadraticCurveTo(hx + sway, hy + hl * 0.6, hx + sway * 1.5, hy + hl); c.stroke();
+    c.strokeStyle = '#4a3012'; c.lineWidth = 1.4;
+    c.beginPath(); c.arc(hx + sway * 1.5, hy + hl + 3, 3, -0.6, 2.6); c.stroke();
+  }
+  // the tipped ladle resting against the left post — the backdrop's own tool
+  c.save();
+  c.translate(cx2 - BW - 6, gy - 12); c.rotate(-0.42);
+  c.fillStyle = '#211008';
+  c.beginPath(); c.ellipse(0, 0, 15, 9, 0, 0, Math.PI); c.fill();
+  c.fillStyle = 'rgba(255,148,48,0.5)';
+  c.beginPath(); c.ellipse(0, -1.5, 9, 3, 0, 0, Math.PI); c.fill();
+  c.strokeStyle = '#2c1809'; c.lineWidth = 3; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(13, -4); c.quadraticCurveTo(30, -18, 38, -30); c.stroke();
+  c.restore();
+  // the doorway: the hearth breathing inside, molten light rising
+  const doorW = 44, doorH = BH - 34;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const breathe = Math.sin(performance.now() / 700) * 0.05;
+  const gl = c.createLinearGradient(0, gy - doorH, 0, gy);
+  gl.addColorStop(0, 'rgba(255,148,48,' + (0.08 + k * 0.4 + breathe) + ')');
+  gl.addColorStop(1, 'rgba(255,208,138,' + (0.16 + k * 0.5 + breathe) + ')');
+  c.fillStyle = gl;
+  c.beginPath();
+  c.moveTo(cx2 - doorW / 2, gy);
+  c.quadraticCurveTo(cx2 - doorW / 2 - 9, gy - doorH * 0.58, cx2 - 8, gy - doorH);
+  c.quadraticCurveTo(cx2 + 12, gy - doorH - 7, cx2 + doorW / 2 + 4, gy - doorH * 0.62);
+  c.lineTo(cx2 + doorW / 2, gy);
+  c.closePath(); c.fill();
+  // embers drifting up out of the doorway — more the nearer she stands
+  const en = 2 + Math.round(k * 4);
+  for (let i = 0; i < en; i++) {
+    const ph = (performance.now() / 1400 + i * 0.37) % 1;
+    const ex = cx2 + Math.sin(i * 5.1 + performance.now() / 800) * (doorW * 0.3);
+    c.globalAlpha = (1 - ph) * (0.3 + k * 0.4);
+    c.fillStyle = i % 2 ? '#ffd08a' : '#ff9430';
+    c.beginPath(); c.arc(ex, gy - 6 - ph * (doorH - 8), 1.2 + (i % 3) * 0.5, 0, 7); c.fill();
+  }
+  c.globalAlpha = 1;
+  c.restore();
+  // the chain curtain over the doorway parts as she nears — the booth-flap k
+  const part = k * 24;
+  for (const s of [-1, 1]) {
+    const ex = cx2 + s * (4 + part);
+    c.strokeStyle = '#26150a'; c.lineWidth = 3.4; c.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      c.beginPath();
+      c.moveTo(ex + s * i * 6, gy - doorH + 3);
+      c.quadraticCurveTo(ex + s * (i * 6 + 9), gy - doorH * 0.48, ex + s * (i * 6 + 3), gy);
+      c.stroke();
+    }
+  }
+  // his sign: a small gear hung crooked from the hood lip, swinging — the
+  // Tinker's trade where the Oracle hangs a monitor and Ratchet hangs a lamp
+  const sw = Math.sin(performance.now() / 1100) * 0.09;
+  c.save();
+  c.translate(cx2 + BW - 12, gy - BH + 46); c.rotate(sw - 0.12);
+  c.strokeStyle = '#33200e'; c.lineWidth = 1.6;
+  c.beginPath(); c.moveTo(0, -8); c.lineTo(0, 0); c.stroke();
+  c.fillStyle = '#42280f';
+  c.beginPath(); c.arc(0, 8, 8, 0, 7); c.fill();
+  for (let i = 0; i < 7; i++) {
+    const a = i / 7 * 6.283 + sw;
+    c.fillRect(Math.cos(a) * 8 - 1.4, 8 + Math.sin(a) * 8 - 1.4, 2.8, 2.8);
+  }
+  c.fillStyle = 'rgba(255,148,48,0.4)';
+  c.beginPath(); c.arc(0, 8, 3, 0, 7); c.fill();
+  c.restore();
+  c.restore();
+}
 function drawGateDoors(P) {
   const def = GATE_ROOM[G.roomId];
   if (!def || !player) { G._doorK = 0; return; }
@@ -5071,6 +5249,9 @@ function drawGateDoors(P) {
   // ...and the Oracle's shrine is HERS: same depth-door mechanics, its own
   // body, so the trader's plate never stands in the Conduits
   if (def.style === 'oracle') { drawOracleBooth(ds, gy, P, k); return; }
+  // ...and the Tinker's quench hood is HIS — the Foundry's own furniture,
+  // the Foundry's own light
+  if (def.style === 'forge') { drawTinkerForge(ds, gy, P, k); return; }
   const cx2 = ds;
   // THE CITY GATE IS THE MONUMENT (owner: "only the city gate should be
   // huge and epic with multi layers and inscriptions and shapes — it's a
