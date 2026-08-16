@@ -3160,14 +3160,15 @@ function drawZoneVista(P, zone, px, py) {
   // scale the painting past the screen and pan across the excess as the camera
   // crosses the room — a single painting, so it pans rather than tiles. Wide
   // solo paintings are width-bound so there is always horizontal travel.
-  // per-room zoom on the painting itself (owner, in the den: "the background
-  // was supposed to be a representation of the room in a size proportionate
-  // to the hero and npc"). A workshop painted at photographic distance makes
-  // a workbench tower like a building next to a 90px character — zooming the
-  // plate crops to a slice whose furniture stands at character scale. The pan
-  // machinery already handles the overfill.
-  const VZOOM = { denInterior: 1.45 };
-  const sc = Math.max((540 / CH) * 1.12, (960 / CW) * 1.16) * (own && VZOOM[own] || 1);
+  // NO per-room zoom (tried and reverted the same day): zooming a painting
+  // whose furniture is already too big makes the furniture BIGGER. When an
+  // interior's furniture towers over the characters ("the table in the
+  // background is bigger than the npc") the fault is the painting's own
+  // composition, and the fix is a re-fire with the scale contract in
+  // ART_QUEUE §2g — a standing character reaches 40% of frame height, a
+  // workbench top meets that character's waist, nothing on a table is
+  // bigger than their head.
+  const sc = Math.max((540 / CH) * 1.12, (960 / CW) * 1.16);
   const dw = CW * sc, dh = CH * sc;
   const roomW = G.roomDef.w * TILE;
   // THE PAINTING FOLLOWS HER, NOT THE CAMERA (owner: "it stays still, and it

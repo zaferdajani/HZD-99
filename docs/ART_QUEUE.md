@@ -1563,3 +1563,29 @@ where the pair differs in anything but the claws is a refuse.
 Wiring note (code session): heroState will select armed/unarmed by the
 weapon state once the bare sheet lands — the same switch the back-walk
 already makes between backwalk_* and bare_bwalk_*.
+
+### §2g ADDENDUM — THE INTERIOR SCALE CONTRACT (owner, 2026-08-16)
+
+Owner, in the den: "use logic when you create a background! ... the
+background was supposed to be a representation of the room in a size
+proportionate to the hero and npc" and "the table in the background is
+bigger than the npc." He is right and no code zoom can fix it — the
+denInterior painting is composed at photographic wide-angle, so its
+workbench and the spools on it tower over a character standing in the room.
+
+**THE SCALE CONTRACT, binding EVERY interior plate from now on (den re-fire,
+oracle/forge/carrel/hollow interiors, and any future room):** compose the
+room around an implied standing character on the floor line —
+- the floor is the bottom eighth of the frame, the ceiling is the top edge;
+- a standing adult machine-person on that floor reaches ~40% of frame
+  height (state this in the prompt as an invisible scale reference);
+- a workbench or table top meets that figure's waist (~20-22% of frame
+  height off the floor line), a stool seat their knee, a shelf their head;
+- NO prop on any surface larger than that figure's head — no barrel-sized
+  spools, no oversized tools;
+- NEGATIVE: no people, no characters (the reference figure is scale only,
+  never drawn).
+
+RE-FIRE denInterior against this contract (it replaces the wired plate at
+the same path, assets/backgrounds/den_interior.jpg). The §2h/§2m/§2o
+interior briefs inherit this contract without re-stating it.
