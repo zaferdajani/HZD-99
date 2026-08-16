@@ -236,7 +236,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   5. §1e    RUN PAIR RE-FIRE ×2          ✅ FIRED 2026-08-16 — cells in, code revert pending
   6. §2e    sage plates ×6               ✅ FIRED 2026-08-16 — assets/characters/sage/, needs wiring
   7. §2d    robot bat plates ×5          ✅ FIRED 2026-08-16 — assets/characters/bat/, needs wiring
-  8. §2c    caveMouth + caveExit + pillar ×3, then the cave tile deck
+  8. §2c    caveMouth + caveExit + pillar ×3  ✅ FIRED 2026-08-16 — cave tile deck still to fire
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   (owner 2026-08-15 — see brief below)
  10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ CLOSED 2026-08-16 — all three plates fired, approved and wired
  11. §3m    BOSS MOTION PLATES (task #93)     (walk pair + attack-anticipation per guardian)
@@ -426,6 +426,51 @@ appearing. What stopped them was naming the offence — no wall, no backdrop,
 no metal panels, no rivets in the background, no gradient, no vignette — as
 explicit negatives. Generic void language describes a mood; a negative names
 a thing.
+
+### 2c. THE CRYSTAL CAVE ✅ THREE PLATES FIRED 2026-08-16 (art session)
+
+- `assets/backgrounds/cave_mouth.jpg` (job 35528818) — room A5's rock face
+  with the opening she walks into.
+- `assets/backgrounds/cave_exit.jpg` (job c76e8ac5) — room CV1, the view
+  back out: near-black interior rock, one hole full of daylight, roots
+  silhouetted against the glare, light dying across the floor. Fired against
+  the mouth as reference so both sides are the same rock.
+- `assets/characters/gear/pillar.png` (job ea28f95e, matted) — three white
+  crystal spears out of an irregular broken rock clump, lit from inside.
+  Replaces the procedural light version in `drawStatics`.
+
+Sources in `assets/source/cave/`.
+
+**THE DOOR ANCHORS DO NOT MATCH THE BRIEF, AND THE PLATES ARE RIGHT.** The
+brief specified gx 0.50 / gy 0.86 for both. What the plates actually have,
+measured off the images rather than guessed:
+
+- **cave_exit**: opening centre **gx 0.516 / gy 0.563**, its base at gy 0.79.
+  Measured cleanly — the daylight hole is the only bright thing in the frame.
+- **cave_mouth**: opening centre **gx 0.68 / gy 0.62** by inspection, base
+  around gy 0.85. Read off the image, not measured: a darkest-pixel centroid
+  is contaminated here by the dusk sky and the wall shadow, so treat this one
+  as approximate and check it against the running room.
+
+Set the anchors to the plates. Aiming the walk at 0.50/0.86 on cave_mouth
+would send her into solid rock a fifth of a screen left of the hole. The
+scratch tool that measured this is in the session scratchpad; it finds the
+extreme 6% of pixels by luminance and averages their positions.
+
+Two things the first round got wrong, both about composition rather than
+material:
+1. **A rock face wants "flat and straight on" said explicitly.** The first
+   cave_mouth came back in perspective, the wall receding to the left, with
+   the opening halfway up it — unreachable for a character standing on the
+   ground. Naming the ground ("a stony floor across the bottom eighth of the
+   frame") and putting the opening ON it fixed both faults at once.
+2. **"No square base" is not enough for a socle.** The first pillar grew a
+   neat cut plinth with flat faces and a level bottom — a right angle in a
+   game whose standing order forbids them. What worked was describing the
+   base as a thing rather than negating a shape: "a jagged, lumpy, eroded
+   mass of fractured stone, torn out of the ground, not a carved pedestal".
+
+Still to fire in this section: the cave tile deck.
 
 ### 2f. GATE SHAPES + CAVE MOUTHS ✱ FIRE ON REBIND (owner, 2026-08-15)
 
