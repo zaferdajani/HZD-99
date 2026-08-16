@@ -208,6 +208,16 @@ is the jet plume** and stays. Scarf, jets, charge aura and claw arcs stay
 procedural overlays — except the scarf/cape, which is BAKED INTO the plates, so
 drawing the procedural scarf on top would double it.
 
+**AUTO-APPROVAL (owner, 2026-08-16): the art session fires this list and
+keys, archives, commits and pushes WITHOUT waiting for per-plate review.**
+The owner's words: "you have my auto approval." Discipline replaces the
+wait: every plate is self-reviewed against its brief and the bible before
+keying (identity lines honoured, negatives absent, silhouette/palette
+right — the measurable parts are enforced by tests/artbible.cjs on the
+integrator side), and the owner may refuse any plate AFTER the fact, which
+sends it back here as a re-fire with his correction. Generation still
+belongs to the art session alone; the code session wires and verifies.
+
 ==== THE FIRING LIST (2026-08-15, consolidated — run top to bottom) =========
 Whoever holds the Higgsfield binding (session B, or this session once it
 rebinds) fires these in order. Reference for her body: media_id
