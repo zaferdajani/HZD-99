@@ -104,10 +104,14 @@ const MEDIA_SRC = {
     cradleOpen: 'assets/characters/gear/cradle_open.png',
     gateCity: 'assets/backgrounds/gate_city.jpg',
     // THE TRADER'S BOOTH AND DEN (§2g) — fired 2026-08-16, owner-approved.
-    // ratchetResting is still to come: v1 was refused (not our Ratchet,
-    // dirty background) and re-fires with his in-game reference attached.
+    // ratchetResting is the art session's v2 — fired from his own npc_6yaw
+    // row as reference, matted by Higgsfield rather than keyed (his shadowed
+    // far leg defeats every threshold). Drawn at the A0B anchor while he is
+    // a dark unit; the plate IS the powered-down read, so it skips the
+    // grayscale treatment the other dark units get.
     boothFront: 'assets/backgrounds/booth_front.png',
     denInterior: 'assets/backgrounds/den_interior.jpg',
+    ratchetResting: 'assets/characters/npc/ratchet_resting.png',
     // HER OWN BACK — generated from her live body (assets/source/ref/), the
     // first authored plates of the hero herself. Two stride frames armed, two
     // unarmed (the sword becomes a pickup — task #78), and the sword waiting

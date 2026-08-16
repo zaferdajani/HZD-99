@@ -5824,7 +5824,25 @@ function drawStatics(P) {
       // walks past six of them wondering why nobody talks.
       const live = npcLive(s);
       const bob2 = live ? (talking ? bob * 1.9 : bob) : 0;
-      if (!live) {
+      // THE RESTING PLATE (§2g): in his den, dark Ratchet is not the standing
+      // turnaround grayed out — he is his authored powered-down body, slumped,
+      // eye-lights out, the chest crystal the only light in the picture. The
+      // plate IS the dark read, so it must not go through the grayscale below:
+      // that filter would kill the one glow the image is about.
+      let plateDrew = false;
+      if (!live && npcKey(s) === 'A0B|ratchet') {
+        if (typeof mediaFetch === 'function') mediaFetch('ratchetResting');
+        const rIm = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.ratchetResting;
+        if (rIm && rIm.naturalWidth) {
+          // 1.5×: he is a big vendor unit folded into a chair, and the owner's
+          // first complaint about this npc was that he was too small to notice
+          const dh = s.h * 1.5, dw = dh * (rIm.naturalWidth / rIm.naturalHeight);
+          c.drawImage(rIm, s.x + s.w / 2 - dw / 2, s.y + s.h - dh, dw, dh);
+          plateDrew = true;
+        }
+      }
+      const dimmed = !live && !plateDrew;
+      if (dimmed) {
         c.save();
         // the one thing that still moves: a dying status lamp, and a slow
         // amber pip when she is carrying a cell that would fix it
@@ -5838,14 +5856,14 @@ function drawStatics(P) {
       // way everything else in this game turns: by selecting an authored angle
       // off a turntable lit from a fixed point in the world. Drawn out here in
       // world space, before the mirroring transform that it exists to replace.
-      const sheetDrew = !(typeof isHero === 'function' && isHero()) &&
+      const sheetDrew = plateDrew || (!(typeof isHero === 'function' && isHero()) &&
         drawAtlas(c, s.extra, (player && player.x + 12 < s.x) ? -1 : 1,
                   s.x + s.w / 2, s.y + s.h + bob2 * 0.4, s.h, {
           t: performance.now() / 1000 + (s.t || 0) * 1.7,
           // the Oracle hangs from its cables and has no feet to stand on
           mode: s.extra === 'mono' ? 'sway' : 'breathe',
           grounded: s.extra !== 'mono',
-        });
+        }));
       c.save(); c.translate(s.x + s.w / 2, s.y + s.h + bob2 * 0.4);
       if (player && player.x + 12 < s.x) c.scale(-1, 1);  // face the cat
       if (talking) {
@@ -5873,8 +5891,10 @@ function drawStatics(P) {
       }
       c.restore();
       if (!live) {
-        c.restore();                       // close the grayscale/alpha save
-        c.filter = 'none';
+        if (dimmed) {
+          c.restore();                     // close the grayscale/alpha save
+          c.filter = 'none';
+        }
         // and the prompt that this one can be fixed — an amber pip over the
         // head, only while she actually has a cell to spend. Without the
         // condition it is a quest marker; with it, it is an answer.
