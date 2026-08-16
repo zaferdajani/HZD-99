@@ -7356,6 +7356,17 @@ function drawHUD() {
 }
 function lightAt(x, y, r, color, a) {
   if (!color) return;
+  // HER SHADOW LISTENS. Every light drawn near her this frame pushes the
+  // contact shadow away from itself, weighted by strength and closeness —
+  // so the shadow leans with the room's lighting instead of sitting under
+  // her like a printed disc (the owner's exact complaint). Accumulated
+  // here, committed at the end of drawLights, read one frame later by the
+  // player's shadow — a frame of lag no eye can see.
+  if (typeof player !== 'undefined' && player && !player.dead) {
+    const dx = player.x + player.w / 2 - x, dy = player.y + player.h - y;
+    const d = Math.hypot(dx, dy);
+    if (d > 1 && d < r * 1.6) G._shadAcc = (G._shadAcc || 0) + (dx / d) * (a || 0.1) * (1 - d / (r * 1.6));
+  }
   const g = c.createRadialGradient(x, y, 0, x, y, r);
   g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)');
   c.globalAlpha = a; c.fillStyle = g;
@@ -7377,12 +7388,17 @@ function auraSense() {
 }
 function drawLights(P) {
   c.save(); c.globalCompositeOperation = 'lighter';
+  G._shadAcc = 0;
   if (player && !player.dead)
     lightAt(player.x + 12, player.y + 18, 150, P.glow, 0.13 + (player.dashT > 0 ? 0.14 : 0) + (player.healT > 0 ? 0.12 : 0));
   G._auraCount = 0;
   if (auraSense() && player && !player.dead && G.state !== 'FILM') {
     const pu = 0.8 + Math.sin(performance.now() / 640) * 0.2;
-    lightAt(player.x + player.w / 2, player.y + player.h / 2, 130, '#ffffff', 0.16 * pu);
+    // the halo rides her BODY, not the floor: centred on her chest at a
+    // radius that dies out above her feet, so the sense reads as a glow on
+    // her and never as a lit disc she is standing on (the owner: "a circuit
+    // of light underneath its legs instead of the actual shadowing")
+    lightAt(player.x + player.w / 2, player.y + player.h * 0.35, 74, '#ffffff', 0.13 * pu);
     G._auraCount++;
     for (const e of G.enemies) {
       if (e.dead) continue;
@@ -7421,6 +7437,8 @@ function drawLights(P) {
   }
   if (G.boss && !G.boss.dead) lightAt(G.boss.cx(), G.boss.cy(), 180, P.glow, 0.16);
   for (const p of G.pickups) if (p instanceof Scrap) lightAt(p.x + 5, p.y + 5, 26, '#ffd76a', 0.3);
+  // commit this frame's light direction for her shadow (read next frame)
+  G._shadX = clamp((G._shadAcc || 0) * 5, -1, 1);
   c.restore(); c.globalAlpha = 1;
 }
 let bloomCv = null, bloomCtx = null, bloomOK = true;

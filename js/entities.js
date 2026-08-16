@@ -1861,12 +1861,18 @@ class Player {
       rr(c, -5, -19, 15, 6, 3); c.fill();
       c.restore(); c.globalAlpha = 1;
     }
-    // contact shadow — tightens and darkens as the hero nears the ground
+    // contact shadow — tightens and darkens as the hero nears the ground,
+    // and LEANS AWAY FROM THE ROOM'S LIGHT: drawLights accumulates every
+    // light near her into G._shadX, and the shadow is thrown up to 9px in
+    // the opposite direction, slightly longer the harder it is pushed — a
+    // shadow that answers the scene instead of a disc printed under her
     {
       let gy = this.y + this.h, probe = 0;
       while (probe < 240 && !solidAt(Math.floor((this.x + this.w / 2) / TILE), Math.floor((gy + probe) / TILE))) probe += 8;
       const air = clamp(probe / 200, 0, 1);
-      contactShadow(c, this.x + this.w / 2, gy + probe, this.w * (0.6 - air * 0.25), 0.45 * (1 - air * 0.7));
+      const throwX = (G._shadX || 0) * 9;
+      contactShadow(c, this.x + this.w / 2 + throwX, gy + probe,
+        this.w * (0.6 - air * 0.25) * (1 + Math.abs(throwX) * 0.03), 0.45 * (1 - air * 0.7));
     }
     // where the paws finish this frame, recorded as they are drawn and read back
     // once the body's transform has been popped (see rakeMark / the swing block)
