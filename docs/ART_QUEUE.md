@@ -312,11 +312,14 @@ the plate replaces it at the same anchor.
 ### 2g. THE TRADER'S BOOTH + DEN — PARTIALLY FIRED 2026-08-16, READ BEFORE FIRING
 
 **STATUS (2026-08-16, code session — do not double-fire):**
-- **boothFront — FIRED + OWNER-APPROVED + WIRED.** Job d469ad29. Keyed to
-  `assets/backgrounds/booth_front.png`, source archived in
-  `assets/source/booth/`. Do not re-fire.
-- **denInterior — FIRED + OWNER-APPROVED + WIRED.** Job 3bd98cc3. Crushed
-  to `assets/backgrounds/den_interior.jpg`, source archived. Do not re-fire.
+- **boothFront — FIRED + OWNER-APPROVED + WIRED** (job d469ad29, keyed to
+  `assets/backgrounds/booth_front.png`, source archived). The owner's
+  standing quality ruling: the ART SESSION's work is better — it MAY
+  re-fire this to beat the current plate (owner judges); same file path
+  swaps it in with zero re-plumbing. Don't re-fire merely to duplicate.
+- **denInterior — FIRED + OWNER-APPROVED + WIRED** (job 3bd98cc3, crushed
+  to `assets/backgrounds/den_interior.jpg`, source archived). Same ruling:
+  an art-session upgrade at the same path is welcome, duplication is not.
 - **ratchetResting — FIRED AND REFUSED** (job f026eef7: not our Ratchet — a
   generic humanoid — and it ignored "subject only", baking in a background).
   **THE RE-FIRE IS THE ART SESSION'S**: attach Ratchet's in-game reference
