@@ -96,6 +96,22 @@ window.bbox = (ctx, x0, y0, w, h) => {
     }
     const targetH = refH.reduce((a, b) => a + b, 0) / refH.length;
 
+    // ONE SCALE FOR THE WHOLE CALL, and this is the whole point.
+    //
+    // Normalising each plate to targetH independently is what an earlier
+    // version did, and it is wrong in a way that only shows up in motion: a
+    // tucked or crouched pose is genuinely SHORTER than a standing one, so
+    // forcing it to the same height scales the character UP for that frame.
+    // Played back at run cadence that is the owner's report — "making it
+    // smaller and bigger" — a body that pulses instead of a body that runs.
+    // herostates.cjs derives one global scale for the same reason.
+    //
+    // So the scale comes from the FIRST plate in the call, which should be a
+    // full-height grounded pose, and every other plate in that call inherits
+    // it. Relative sizes between the poses are then preserved exactly as the
+    // generator drew them.
+    let K = null;
+
     const report = [];
     for (const p of plates) {
       const im = new Image(); im.src = 'data:image/png;base64,' + p.b64; await im.decode();
@@ -106,7 +122,8 @@ window.bbox = (ctx, x0, y0, w, h) => {
       const b = window.bbox(tc, 0, 0, tmp.width, tmp.height);
       if (!b) { report.push({ name: p.name, err: 'empty plate' }); continue; }
 
-      const k = targetH / b.h;
+      if (K === null) K = targetH / b.h;   // first plate sets the scale
+      const k = K;
       const bw = b.w * k, bh = b.h * k;
       const x = CELL[p.name] * CW;
       c.clearRect(x, 0, CW, CH);

@@ -739,6 +739,78 @@ what the matte does with it first.
 anchors (same bottom anchor and ~236 px height as boothFront); the interiors
 are ROOM_VISTA backdrops for C5B, D1B and E1B.
 
+### ⬛ FIVE OWNER REPORTS FROM PLAY (2026-08-16, in his words) — ROUTED
+
+He played the build and sent five. Two are art and go on this list; three are
+CODE and are logged here only so they are not lost. Nothing below is fixed
+yet except where it says so.
+
+**1. THE GATE TRANSITION IS FAR TOO LONG — CODE.** *"Going inside or outside
+a gate should not take that much... I'm just passing from one gate to another
+... you should recognise if it's just a gate, I'm just passing through, so
+I'm turning my head back, going inside, fading into the black. I don't have
+to keep running for long."* The walk-into-depth is the CITY-GATE ceremony
+being spent on ordinary doorways. A plain gate wants: turn, one or two steps
+in, fade to black — about a third of the current distance and time. The long
+version should be reserved for the one monument that earns it.
+
+**2. THE SUPERCHARGE POSE MUST NOT BE A CROUCH — ART (this list) + code.**
+*"When I recharge or charge for the supercharge hit, the character should not
+be crouching down. It can just put its arms together like a cross to charge,
+like a Wolverine putting its arms."* And his reason is a real bug, not a
+preference: *"when it jumps, it can't stay crouching and jump and charged at
+the same time."* A crouch is a GROUNDED pose being drawn in mid-air. The new
+`charge` plate is arms crossed in front of the chest, body UPRIGHT, feet
+neutral so it composites over a jump — fired as a §1 state-sheet cell
+replacement (cell 16).
+
+**3. THE MIND NODE IS INVISIBLE — ART (this list) + code placement.** *"The
+node that requires thinking or solving a problem is not visible for the
+players. Find an appropriate futuristic object — a pillar made of metal that
+looks like the Egyptian pillar, with holographic inscriptions on it, but make
+it the robotic alien language shining from it in an electrical way. It should
+be obvious to go to it. It should be like a MONUMENT, not a small object."*
+So: an OBELISK, hero-scale, taller than she is by several times, its faces
+carrying electric holographic glyphs in the machine tongue.
+
+**And it must MOVE OUT OF THE NPC's ROOM:** *"it should not be inside the
+room of the NPC. It should be outside, next to it, or in the next room, or in
+the next frame."* That is a world change and belongs to the code/kingdom
+session — the plate is useless if it stays where it is now, tucked behind
+Ratchet's bench where the screenshot shows it.
+
+**4. THE GROUND GLOW UNDER HER FEET IS STILL THERE AT REST — CODE (probably).**
+*"I can still see the light shining underneath the legs when the character is
+standing. When it runs, it goes. But when it stands, it's still there."* Note
+the tell: it disappears when she RUNS and returns when she STANDS. That means
+it is tied to the idle/standing state specifically, not to a global ground
+FX — either baked into the standing cell of the sheet or drawn by a
+rest-state effect. A previous pass already found one of these baked into art
+("the last light under her feet was IN the art"); this is another instance
+and the state it belongs to is the clue.
+
+**5. THE RUN MOVES THE WHOLE BODY — CODE, plus one art-tool bug now FIXED.**
+*"The walking also is not smooth... It should move its legs without moving a
+lot in its body, or making it smaller and bigger. It's just running or
+jogging, but you're moving the whole body."*
+
+Two separate causes, and only one of them is art:
+- **Code:** `drawRoboPlate` adds a mechanical lean and bounce on top of the
+  plates (`rotate(0.055)` and a vertical `translate` per step at run
+  cadence), and `heroState()` is still substituting the WALK pair for the
+  run. Body-level rotation and translation are exactly "moving the whole
+  body". With authored run cells that carry their own motion, most of that
+  overlay should come off.
+- **Art, and this was mine:** `tools/herocell.cjs` normalised EACH cell to
+  the same height independently, so a tucked pose — genuinely shorter than a
+  standing one — got scaled UP for that frame. Played at run cadence that is
+  literally "making it smaller and bigger". **Fixed in this commit:** one
+  scale is derived from the first plate in the call and every other plate
+  inherits it, which is the rule `herostates.cjs` already followed. The §1e
+  run cells were re-placed with it (they happened to differ by under 1%, so
+  the shipped pair was not visibly affected — but the tool was wrong and
+  would have bitten the next set).
+
 ### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
 
 **Not started, and deliberately so.** This is the largest block left — five
