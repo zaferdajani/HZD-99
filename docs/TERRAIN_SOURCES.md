@@ -95,3 +95,41 @@ detector must recognise crests of any legal thickness and the crest's own
 air-side edge, and the ground has no underside for the skirt law to bind.
 The harness stays `pending` in tests/run.cjs (tied to #76) until the D3
 residue and the B4 borderline are gone and the count stops breathing.
+
+## 6. PER-KINGDOM TERRAIN THEMES (owner's spec, 2026-08-17)
+
+The §10 grammar shipped as ONE grammar — the same wave, crest and hang in all
+six kingdoms. The owner's second terrain spec names that as the defect: the
+silhouette stopped being straight everywhere at once, and became uniform,
+which is its own kind of flat. `TERRAIN_THEME` in `js/game.js` now gives each
+kingdom its own numbers and its own decoration, and the three §10 passes read
+from it:
+
+| zone | rough | lip | skirt | crack | crest grows | hang is made of |
+|---|---|---|---|---|---|---|
+| A Meadows   | 6  | 4 | 12 | 0.30 | neon glow      | plates   |
+| B Conduits  | 8  | 5 | 18 | 0.50 | crystal teeth  | roots    |
+| C Foundry   | 10 | 6 | 20 | 0.40 | molten seams   | slag     |
+| D Archives  | 7  | 5 | 16 | 0.20 | icicles        | frost    |
+| E Nest      | 5  | 3 | 10 | 0.15 | prism glints   | glass    |
+| X Deep      | 12 | 4 | 24 | 0.80 | infected red   | tendrils |
+
+**Two deliberate departures from the spec, both recorded where they are made:**
+
+1. **The crack test is hashed, not `Math.random()`.** The spec's version
+   re-rolls on every call; the terrain draws into a CACHED layer that
+   re-renders on room load and quality change, so a random test would crack
+   the world differently every rebuild — the exact flicker the per-room seed
+   exists to prevent. `hash2(tx, ty)` gives the same crack in the same tile
+   forever.
+2. **The decoration is baked, not per-frame.** The spec paints crest and
+   skirt detail in the draw loop, some of it animated off
+   `performance.now()`. This engine renders terrain once per room into
+   `tileCv` and blits it, so all of the above costs nothing at frame time —
+   which is also why the animated variants (pulsing flesh, flickering molten)
+   are painted as static state rather than as animation. If a kingdom ever
+   wants a genuinely breathing edge it belongs in a per-frame overlay pass,
+   not in the cached layer.
+
+Measured after the theme pass: bare long edges 3 → **2** (both D3, ≤152px),
+corners 0, §10.7 green in all five sampled rooms, all 45 harnesses green.
