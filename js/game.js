@@ -2600,8 +2600,15 @@ const TERRAIN_THEME = {
   B: { rough: 8,  lip: 5, skirt: 18, crack: 0.50, edge: 'crystal', hang: 'roots'    },
   C: { rough: 10, lip: 6, skirt: 20, crack: 0.40, edge: 'molten',  hang: 'slag'     },
   D: { rough: 7,  lip: 5, skirt: 16, crack: 0.20, edge: 'ice',     hang: 'frost'    },
-  E: { rough: 5,  lip: 3, skirt: 10, crack: 0.15, edge: 'prism',   hang: 'glass'    },
-  X: { rough: 12, lip: 4, skirt: 24, crack: 0.80, edge: 'flesh',   hang: 'tendrils' },
+  // E AND X WERE SWAPPED, inherited from a brief written without this repo in
+  // front of it. That brief's zone list belongs to another game — it has E as a
+  // prism facility and X as a void. Here E is THE VIRUS NEST (ZONE_LIGHT:
+  // "infection red") and X is the CRYSTAL CACHE ("prism glow"), so the table
+  // was giving the Nest cracked glass panels and the Cache hanging flesh.
+  // The owner's own standing instruction is to preserve existing lore, names
+  // and zone themes; these two now match the world they are drawing.
+  E: { rough: 12, lip: 4, skirt: 24, crack: 0.80, edge: 'flesh',   hang: 'tendrils' },
+  X: { rough: 5,  lip: 3, skirt: 10, crack: 0.15, edge: 'prism',   hang: 'glass'    },
 };
 function terrainTheme() {
   return TERRAIN_THEME[G.roomDef && G.roomDef.zone] || TERRAIN_THEME.A;
