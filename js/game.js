@@ -2603,34 +2603,40 @@ function buildFringe() {
       const bx = X + (i + 0.5) * (TILE / per) + (r1 - 0.5) * (TILE / per) * 0.8;
       const hgt = 4 + r2 * (FRINGE_UP - 4);
       const lean = (r1 - 0.5) * 6;
+      // the fringe grows out of the ERODED surface, not the tile line: the
+      // same wave the erosion pass sinks the silhouette with (seed 641), so
+      // every blade root and crust pool rides the terrain's actual coastline.
+      // A shared flat baseline was the last ruler the floor had — hundreds of
+      // crust bottoms all sitting on Y+3 add up to one straight line.
+      const gY = Y + (typeof fbm1 === 'function' ? Math.round(fbm1(bx, 641) * 10) : 0);
       x.save();
       if (kind === 'grass' || kind === 'frond') {
         x.strokeStyle = kind === 'frond' ? '#8f4fb0' : '#5e8f4a';
         x.globalAlpha = 0.55 + r2 * 0.4;
         x.lineWidth = 1.6 + r1 * 1.2; x.lineCap = 'round';
-        x.beginPath(); x.moveTo(bx, Y + 3);
-        x.quadraticCurveTo(bx + lean * 0.5, Y - hgt * 0.6, bx + lean, Y - hgt);
+        x.beginPath(); x.moveTo(bx, gY + 3);
+        x.quadraticCurveTo(bx + lean * 0.5, gY - hgt * 0.6, bx + lean, gY - hgt);
         x.stroke();
         if (r1 > 0.72) {                       // a seed head / spore pod
           x.fillStyle = kind === 'frond' ? '#e08aff' : '#b8d86a';
-          x.beginPath(); x.arc(bx + lean, Y - hgt, 1.6 + r2, 0, 7); x.fill();
+          x.beginPath(); x.arc(bx + lean, gY - hgt, 1.6 + r2, 0, 7); x.fill();
         }
       } else if (kind === 'cable') {
         x.strokeStyle = '#1a2b38'; x.globalAlpha = 0.85;
         x.lineWidth = 2 + r1 * 1.6; x.lineCap = 'round';
-        x.beginPath(); x.moveTo(bx, Y + 4);
-        x.quadraticCurveTo(bx + lean, Y - hgt * 0.5, bx + lean * 1.6, Y - hgt * 0.7);
+        x.beginPath(); x.moveTo(bx, gY + 4);
+        x.quadraticCurveTo(bx + lean, gY - hgt * 0.5, bx + lean * 1.6, gY - hgt * 0.7);
         x.stroke();
         if (r2 > 0.66) {                       // a live end, still lit
           x.fillStyle = P.glow; x.globalAlpha = 0.7;
-          x.beginPath(); x.arc(bx + lean * 1.6, Y - hgt * 0.7, 1.4, 0, 7); x.fill();
+          x.beginPath(); x.arc(bx + lean * 1.6, gY - hgt * 0.7, 1.4, 0, 7); x.fill();
         }
       } else if (kind === 'slag') {
         x.fillStyle = r2 > 0.8 ? '#ff8a3a' : '#3a2418';
         x.globalAlpha = 0.8;
         x.beginPath();                          // a crust lump, not a blade
-        x.moveTo(bx - 3 - r1 * 3, Y + 2);
-        x.quadraticCurveTo(bx, Y - hgt * 0.7, bx + 3 + r2 * 3, Y + 2);
+        x.moveTo(bx - 3 - r1 * 3, gY + 2);
+        x.quadraticCurveTo(bx, gY - hgt * 0.7, bx + 3 + r2 * 3, gY + 2);
         x.closePath(); x.fill();
       } else if (kind === 'frost') {
         // NOT TEETH. The first version drew rime as upward triangles in almost
@@ -2638,15 +2644,22 @@ function buildFringe() {
         // spike strips — a decoration that impersonates a hazard, which is the
         // one thing scenery must never do. Rime is a rounded crust that pools
         // and sags; it is drawn as such, and low.
+        // rime POOLS — it does not carpet. A crust drawn at every blade slot
+        // merges into one continuous bright mass whose coastline the grammar
+        // harness (and the eye) reads as a line; real rime collects where the
+        // surface dips and leaves bare rock between. The same wave that sinks
+        // the silhouette decides where it pools, so the gaps land in the
+        // hollows' shoulders.
+        if (typeof fbm1 === 'function' && fbm1(bx, 651) < 0.35) { x.restore(); continue; }
         const hh = Math.min(hgt, 8);
         x.fillStyle = '#dff0fb'; x.globalAlpha = 0.5 + r2 * 0.3;
         x.beginPath();
-        x.moveTo(bx - 4 - r1 * 3, Y + 3);
-        x.quadraticCurveTo(bx + lean * 0.3, Y - hh, bx + 4 + r2 * 3, Y + 3);
+        x.moveTo(bx - 4 - r1 * 3, gY + 3);
+        x.quadraticCurveTo(bx + lean * 0.3, gY - hh, bx + 4 + r2 * 3, gY + 3);
         x.closePath(); x.fill();
         if (r1 > 0.8) {                         // and a bead of melt hanging off
           x.globalAlpha = 0.4;
-          x.beginPath(); x.ellipse(bx + lean * 0.3, Y + 5, 1.4, 2.6, 0, 0, 7); x.fill();
+          x.beginPath(); x.ellipse(bx + lean * 0.3, gY + 5, 1.4, 2.6, 0, 0, 7); x.fill();
         }
       } else if (kind === 'scrap') {
         // indoors: shavings and dropped bits, sparse and low — floor clutter
@@ -2656,21 +2669,21 @@ function buildFringe() {
         x.fillStyle = r1 > 0.85 ? '#8a6a3a' : '#241c14';
         x.globalAlpha = 0.55 + r2 * 0.3;
         x.beginPath();                          // a curl of swarf / a dropped nut
-        x.moveTo(bx - 2 - r1 * 2.5, Y + 2);
-        x.quadraticCurveTo(bx + lean * 0.4, Y - hh, bx + 2 + r2 * 2.5, Y + 2);
+        x.moveTo(bx - 2 - r1 * 2.5, gY + 2);
+        x.quadraticCurveTo(bx + lean * 0.4, gY - hh, bx + 2 + r2 * 2.5, gY + 2);
         x.closePath(); x.fill();
         if (r1 > 0.9) {                         // one glint of brass in the dark
           x.fillStyle = '#c8a04a'; x.globalAlpha = 0.5;
-          x.beginPath(); x.arc(bx + lean * 0.4, Y - 1, 1.1, 0, 7); x.fill();
+          x.beginPath(); x.arc(bx + lean * 0.4, gY - 1, 1.1, 0, 7); x.fill();
         }
       } else {                                  // shard — same rule: never a spike
         const hh = Math.min(hgt, 9);
         x.fillStyle = '#ffb0e6'; x.globalAlpha = 0.28 + r2 * 0.3;
         x.beginPath();                          // a leaning splinter, not a cone
-        x.moveTo(bx - 2.6, Y + 2);
-        x.lineTo(bx + lean * 1.4 - 1, Y - hh);
-        x.lineTo(bx + lean * 1.4 + 1.6, Y - hh * 0.72);
-        x.lineTo(bx + 2.2, Y + 2);
+        x.moveTo(bx - 2.6, gY + 2);
+        x.lineTo(bx + lean * 1.4 - 1, gY - hh);
+        x.lineTo(bx + lean * 1.4 + 1.6, gY - hh * 0.72);
+        x.lineTo(bx + 2.2, gY + 2);
         x.closePath(); x.fill();
       }
       x.restore();
@@ -3842,10 +3855,27 @@ function drawTiles(P) {
           c.drawImage(tex, X % STRATA_TW, Y % STRATA_TH, TILE, TILE, X, Y, TILE, TILE);
           c.globalAlpha = 1;
         }
-        // depth: tiles buried under other tiles sit further from the light
+        // depth: tiles buried under other tiles sit further from the light.
+        // The shade used to start exactly on the tile line under the whole
+        // floor — the grammar harness measured it as an 800px ruled double
+        // line. On the first buried row the shade's upper boundary now
+        // wanders on fBm (2px column strips, smooth alpha), so the darkening
+        // arrives the way light actually gives out: unevenly.
         if (!exposed) {
-          c.globalAlpha = 0.1 + hash2(tx * 3, ty * 7) * 0.13;
-          c.fillStyle = P.dark; c.fillRect(X, Y, TILE, TILE);
+          c.fillStyle = P.dark;
+          const upSolid = tileAt(tx, ty - 1) === '#' || tileAt(tx, ty - 1) === 'B';
+          const up2 = tileAt(tx, ty - 2);
+          const firstBuried = upSolid && up2 !== '#' && up2 !== 'B';
+          if (firstBuried && typeof fbm1 === 'function') {
+            for (let sx = 0; sx < TILE; sx += 2) {
+              const off = Math.round(fbm1(X + sx, 553) * 14) - 4;   // -4..+10
+              c.globalAlpha = 0.08 + fbm1(X + sx, 557) * 0.15;
+              c.fillRect(X + sx, Y + off, 2, TILE - off);
+            }
+          } else {
+            c.globalAlpha = 0.1 + hash2(tx * 3, ty * 7) * 0.13;
+            c.fillRect(X, Y, TILE, TILE);
+          }
           c.globalAlpha = 1;
         }
       } else {
@@ -4464,27 +4494,50 @@ function drawPlatformRuns() {
           let dx = X + cw;
           while (dx < X + cw + midW) {
             const w2 = Math.min(step, X + cw + midW - dx);
-            p2.drawImage(im, S.x + capS, S.y, Math.round(midS * (w2 / step)), S.h, dx, Y, w2, DH);
+            // per-slice source jitter (§10.7): two decks built from the same
+            // slice of the same plate ARE each other, and the repeat detector
+            // proved it — every mid slice now samples a wandering window of
+            // the plate, so no two runs (and no two slices) match.
+            const sj = Math.round(prnd() * midS * 0.35);
+            p2.drawImage(im, S.x + capS + sj, S.y,
+              Math.max(8, Math.round(midS * (w2 / step)) - sj), S.h, dx, Y, w2, DH);
             dx += w2;
           }
         }
         p2.save(); p2.translate(X + RW, 0); p2.scale(-1, 1);
         p2.drawImage(im, S.x, S.y, capS, S.h, 0, Y, cw, DH);
         p2.restore();
-        // THE BITE. Scallops out of the long edges — the lip keeps its walk
-        // line (shallow nibbles on top), the underside hangs ragged (deeper),
-        // and each end loses a corner chunk so no silhouette closes square.
+        // THE BITE — and both long edges ride the low-frequency wave now,
+        // not just per-spot nibbles: white-noise nibbles average back into
+        // the straight line they were meant to break (the same measured
+        // lesson as the crest — see fbm1).
         p2.save(); p2.globalCompositeOperation = 'destination-out';
         const nib = (nx, ny, r) => { p2.beginPath(); p2.arc(nx, ny, r, 0, 7); p2.fill(); };
+        for (let sx = 0; sx < RW; sx += 2) {
+          const dTop = fbm1(X + sx + ty * 977, 661) * 5;
+          if (dTop > 0.5) p2.fillRect(X + sx, Y - 1, 2, dTop + 1);
+          const dBot = fbm1(X + sx + ty * 977, 663) * 6;
+          if (dBot > 0.5) p2.fillRect(X + sx, Y + DH - dBot, 2, dBot + 8);
+        }
         for (let nx = X + 4; nx < X + RW - 4; nx += 7 + prnd() * 9) {
           if (prnd() < 0.6) nib(nx, Y - 0.5, 1.2 + prnd() * 2.2);          // top lip
-          nib(X + RW - (nx - X), Y + DH + 0.5, 2 + prnd() * 3.6);          // underside
         }
         nib(X + 1, Y + DH - 2 - prnd() * 5, 3 + prnd() * 3);               // end corners
         nib(X + RW - 1, Y + DH - 2 - prnd() * 5, 3 + prnd() * 3);
         nib(X + 1 + prnd() * 3, Y + 2, 2 + prnd() * 2);
         nib(X + RW - 1 - prnd() * 3, Y + 2, 2 + prnd() * 2);
         p2.restore();
+        // THE SKIRT (§10.3), grown AFTER the bite so nothing erases it:
+        // tags of the deck's own bottom material stretched down 3-16px (on
+        // the ice plate those pixels are icicle; on fire, slag). A platform's
+        // flat underside was the one §10.3 failure erosion could never fix,
+        // because erosion only removes.
+        for (let nx = X + 3; nx < X + RW - 6; nx += 5 + prnd() * 8) {
+          const hang = prnd() < 0.3 ? 6 + prnd() * 10 : 2 + prnd() * 5;
+          const sw3 = 3 + prnd() * 3;
+          p2.drawImage(im, S.x + capS + prnd() * midS * 0.6, S.y + S.h - 9, 6, 8,
+            nx, Y + DH - 4 - prnd() * 4, sw3, hang + 5);
+        }
         tx = e + 1;
       }
     }
@@ -4542,6 +4595,33 @@ function renderTileLayer(P) {
   }
   tileDirty = false;
 }
+// 1D fractal value noise (fBm) on the hash2 lattice: three octaves of
+// smoothly interpolated values. This exists because of a measured lesson —
+// the crest below first varied its height with PER-PIXEL hash noise, and the
+// grammar harness still caught the crest-to-face boundary as a ruled line
+// hundreds of px long. White noise has a flat mean: jitter every pixel ±3px
+// and the STATISTICAL edge is still exactly straight, and so is what the eye
+// reads at a glance. What breaks a line is low-frequency wander — swells over
+// tens of px with detail on top — which is fBm (the construction every noise
+// library ships: FastNoiseLite, Red Blob's terrain-from-noise; re-derived
+// here in ten lines because the game takes no packages, see
+// docs/TERRAIN_SOURCES.md).
+function fbm1(x, seed) {
+  let v = 0, amp = 1, freq = 1 / 61, tot = 0;
+  for (let o = 0; o < 3; o++) {
+    const px = x * freq, i0 = Math.floor(px), f = px - i0;
+    const s = f * f * (3 - 2 * f);                 // smoothstep between lattice values
+    const a = hash2(i0, seed + o * 97), b = hash2(i0 + 1, seed + o * 97);
+    v += (a + (b - a) * s) * amp; tot += amp;
+    amp *= 0.5; freq *= 2.3;                       // 2.3, not 2: octaves never phase-lock
+  }
+  // contrast-stretched: summed octaves bunch around 0.5 (they are an average),
+  // and a wave that mostly whispers ±1px of its mean is a ruler with fuzz —
+  // the same measured failure the per-pixel hash had. Stretch ×2.1 about the
+  // centre so the output genuinely visits its whole range, clamped.
+  const q = (v / tot - 0.5) * 2.1 + 0.5;
+  return q < 0 ? 0 : q > 1 ? 1 : q;
+}
 // The lip and the skirt. Runs once per room render on the cached layer, so it
 // costs nothing at frame time — the same deal erodeCaveEdges takes.
 //
@@ -4575,8 +4655,12 @@ function edgeGrammarPass(x) {
         while (Y < y0 + TILE && (px(X, Math.max(0, Y))[3] < 40)) Y++;
         if (Y >= y0 + TILE) continue;
         const [r, gg, b] = px(X, Math.min(Ht * TILE - 1, Y + 3));
-        // §10.3 asks for 2-4px, irregular. hash2 keeps it stable per room.
-        const h = 2 + Math.floor(hash2(X, 917) * 3);
+        // §10.3 asks for irregular — and irregular means fBm, not per-pixel
+        // hash: the harness measured the old per-pixel crest's lower boundary
+        // as a ruled line, because white noise averages straight. The crest
+        // now swells 2-9px on low-frequency wander with a ±1px chip on top,
+        // so the crest-to-face transition genuinely meanders.
+        const h = 2 + Math.round(fbm1(X, 917) * 7 + (hash2(X, 919) - 0.5) * 2);
         for (let k = 0; k < h; k++) {
           const i = (((Y + k) * W + X) << 2);
           if (d[i + 3] < 40) continue;
@@ -4585,6 +4669,7 @@ function edgeGrammarPass(x) {
           d[i + 1] = Math.min(255, gg + 68 * t);
           d[i + 2] = Math.min(255, b  + 60 * t);
         }
+<<<<<<< HEAD
         // AND THE SHADOW UNDER IT. Lifting the crest alone does nothing on a
         // material that is already near-white — D3's ice floor clamped at 255
         // and the edge stayed invisible. A lit lip is a STEP, so the band just
@@ -4598,6 +4683,19 @@ function edgeGrammarPass(x) {
           d[i]     = Math.round(d[i]     * m);
           d[i + 1] = Math.round(d[i + 1] * m);
           d[i + 2] = Math.round(d[i + 2] * m);
+=======
+        // ...and the lip GLOWS (owner's mesh spec): a soft two-pixel fringe
+        // into the air above the crest, so the walk line reads at a glance in
+        // the dark rooms without lightPass having to shout for it.
+        for (let k = 1; k <= 2; k++) {
+          if (Y - k < 0) break;
+          const gi = (((Y - k) * W + X) << 2);
+          if (d[gi + 3] >= 40) continue;          // air only — never over rock
+          d[gi]     = Math.min(255, Math.round(r * 0.7) + 70);
+          d[gi + 1] = Math.min(255, Math.round(gg * 0.7) + 70);
+          d[gi + 2] = Math.min(255, Math.round(b * 0.7) + 62);
+          d[gi + 3] = Math.max(d[gi + 3], k === 1 ? 88 : 44);
+>>>>>>> 6421777 (The line is dead: fBm silhouettes, pooled rime, platform skirts, and a harness that measures terrain instead of the picture frame)
         }
       }
     }
@@ -4636,6 +4734,7 @@ function edgeGrammarPass(x) {
       }
     }
   }
+<<<<<<< HEAD
   // ---- 3. THE ANTI-TILING PASS (§10.7) ------------------------------------
   // B4 and C3 autocorrelated at exactly 32px — the tile pitch — which is the
   // signature of every tile drawing itself identically. §10.7 asks for four
@@ -4684,6 +4783,44 @@ function edgeGrammarPass(x) {
             d[i]     = Math.max(0, Math.min(255, Math.round(d[i]     * m)));
             d[i + 1] = Math.max(0, Math.min(255, Math.round(d[i + 1] * m)));
             d[i + 2] = Math.max(0, Math.min(255, Math.round(d[i + 2] * m)));
+=======
+
+  // ---- 3. THE WALL EDGE: the same grammar, rotated 90° ---------------------
+  // The harness found the room-border walls as bare vertical rules hundreds
+  // of px tall — the lip/skirt passes only ever looked at tops and bottoms.
+  // A vertical exposed face gets a narrow lit edge whose depth wanders on the
+  // same fBm the crest uses, so neither the face line nor its lit band is
+  // straight. Left faces are lit, right faces get the dark version — one
+  // world light direction, per the sacred-ground-plane law.
+  for (let ty = 0; ty < Ht; ty++) {
+    for (let tx = 0; tx < Wt; tx++) {
+      if (!solid(tx, ty)) continue;
+      for (const [side, lit] of [[-1, true], [1, false]]) {
+        if (solid(tx + side, ty)) continue;
+        const xf = side < 0 ? tx * TILE : tx * TILE + TILE - 1;
+        const inward = -side;                     // from the air into the rock
+        for (let Y = ty * TILE; Y < ty * TILE + TILE; Y++) {
+          // walk in from 6px out in the air to the drawn material — erosion
+          // has already moved the true surface off the tile line
+          let X = xf + side * 6, steps = 0;
+          while (steps < TILE && px(Math.max(0, Math.min(W - 1, X)), Y)[3] < 40) { X += inward; steps++; }
+          if (steps >= TILE) continue;
+          const wdepth = 1 + Math.round(fbm1(Y, lit ? 421 : 431) * 3 + (hash2(Y, 433) - 0.5));
+          for (let k = 0; k < wdepth; k++) {
+            const XX = X + inward * k;
+            const i = ((Y * W + Math.max(0, Math.min(W - 1, XX))) << 2);
+            if (d[i + 3] < 40) continue;
+            const t = 1 - k / (wdepth + 0.5);
+            if (lit) {
+              d[i]     = Math.min(255, d[i]     + 44 * t);
+              d[i + 1] = Math.min(255, d[i + 1] + 42 * t);
+              d[i + 2] = Math.min(255, d[i + 2] + 38 * t);
+            } else {
+              d[i]     = Math.round(d[i]     * (1 - 0.30 * t));
+              d[i + 1] = Math.round(d[i + 1] * (1 - 0.30 * t));
+              d[i + 2] = Math.round(d[i + 2] * (1 - 0.28 * t));
+            }
+>>>>>>> 6421777 (The line is dead: fBm silhouettes, pooled rime, platform skirts, and a harness that measures terrain instead of the picture frame)
           }
         }
       }
@@ -4750,6 +4887,35 @@ function erodeCaveEdges(x) {
     if (!solid(tx, ty + 1)) face(2);
     if (!solid(tx - 1, ty)) face(3);
     if (!solid(tx + 1, ty)) face(4);
+    // THE LOW-FREQUENCY WAVE — §10.1's "4-12px rougher", finally measured in.
+    // Scallops and lumps roughen the line LOCALLY, but their mean stays on
+    // the tile line, so a long floor still reads — and the grammar harness
+    // still measures — as a rule with fuzz on it. A slow fBm wave now sinks
+    // the whole silhouette 0-10px on ~30-140px wavelengths (the technique
+    // every terrain-noise source reduces to: low-frequency swell, detail on
+    // top — docs/TERRAIN_SOURCES.md). The crest pass walks down to whatever
+    // surface it finds, so the lit lip rides the wave for free, and the
+    // collider never moves: this is layer (b) work only.
+    if (typeof fbm1 === 'function') {
+      if (!solid(tx, ty - 1)) {
+        for (let sx = 0; sx < TILE; sx += 2) {
+          const dep = fbm1(X + sx, 641) * 10;
+          if (dep > 0.5) x.fillRect(X + sx, Y - 0.5, 2, dep + 0.5);
+        }
+      }
+      if (!solid(tx - 1, ty)) {
+        for (let sy = 0; sy < TILE; sy += 2) {
+          const dep = fbm1(Y + sy, 643) * 8;
+          if (dep > 0.5) x.fillRect(X - 0.5, Y + sy, dep + 0.5, 2);
+        }
+      }
+      if (!solid(tx + 1, ty)) {
+        for (let sy = 0; sy < TILE; sy += 2) {
+          const dep = fbm1(Y + sy, 647) * 8;
+          if (dep > 0.5) x.fillRect(X + TILE - dep, Y + sy, dep + 0.5, 2);
+        }
+      }
+    }
   }
   x.restore();
 }
