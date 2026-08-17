@@ -145,7 +145,6 @@ const DETECTORS = function () {
     const xs = [];
     for (let k = 0; k < 12; k++) xs.push(t.start + Math.floor(t.len * (k + 0.5) / 12));
 
-<<<<<<< HEAD
     // LIP: a bright 2-4px crest sitting just above the edge line
     // A LIT LIP IS BRIGHTER THAN ITS OWN BODY, not brighter than the sky. The
     // first version compared the crest to the pixels ABOVE it — the background
@@ -158,42 +157,6 @@ const DETECTORS = function () {
       const crest = (lum(at(x, Math.max(1, t.a))) + lum(at(x, Math.min(H - 1, t.a + 1)))) / 2;
       const body = (lum(at(x, Math.min(H - 1, t.a + 5))) + lum(at(x, Math.min(H - 1, t.a + 7)))) / 2;
       if (crest - body > 6) lipHits++;
-=======
-    // LIP: a bright crest sitting on the edge. The first version compared the
-    // two rows above the run against the two rows above THOSE — which detects
-    // a crest exactly 2-3px thick and nothing else. The engine's own §10.3
-    // pass paints crests 2-9px deep now, and a 6px crest put the comparison
-    // rows INSIDE the bright band, so the harness failed the very edges its
-    // own grammar produces. A crest of any legal depth is a row within 10px
-    // above the run that is brighter than both the air above it and the face
-    // below the run.
-    let lipHits = 0;
-    for (const x of xs) {
-      if (x < 2 || x >= W - 2) continue;
-      const below = lum(at(x, Math.min(H - 1, t.a + 4)));
-      let found = false;
-      for (let k = 1; k <= 10 && !found; k++) {
-        const cy = t.a - k;
-        if (cy < 4) break;
-        const crest = lum(at(x, cy));
-        const above = lum(at(x, cy - 4));
-        if (crest - above > 6 && crest - below > 6) found = true;
-      }
-      // ...and a dark→bright edge is the crest's own UPPER boundary seen from
-      // the air. That edge cannot carry a second lip above itself — it IS the
-      // lip, provided the bright band under it is a crest and not the whole
-      // mass: a darker material face must arrive within 14px below.
-      if (!found) {
-        const crest2 = lum(at(x, Math.min(H - 1, t.a + 2)));
-        const above2 = lum(at(x, Math.max(0, t.a - 3)));
-        if (crest2 - above2 > 6) {
-          for (let k = 5; k <= 14 && !found; k++) {
-            if (crest2 - lum(at(x, Math.min(H - 1, t.a + k))) > 6) found = true;
-          }
-        }
-      }
-      if (found) lipHits++;
->>>>>>> 6421777 (The line is dead: fBm silhouettes, pooled rime, platform skirts, and a harness that measures terrain instead of the picture frame)
     }
     const lip = lipHits >= xs.length * 0.5;
 
@@ -233,7 +196,6 @@ const DETECTORS = function () {
   // §10.7: no visible repeat within one screen width. Take a patch from the
   // terrain band and slide it across the same row; a near-exact match at a
   // regular offset is a tile repeating.
-<<<<<<< HEAD
   // Pick the band with the most texture rather than a fixed one. A fixed band
   // landed on flat sky in every room sampled, which made the check vacuous —
   // it passed because there was nothing there, not because nothing repeated.
@@ -245,28 +207,6 @@ const DETECTORS = function () {
     const m = row.reduce((a, b) => a + b, 0) / row.length;
     const sd = Math.sqrt(row.reduce((a, b) => a + (b - m) ** 2, 0) / row.length);
     if (sd > bandSd) { bandSd = sd; bandY = by; }
-=======
-  //
-  // MEASUREMENT CORRECTION (same species as the speech-panel one above): the
-  // first version pinned the band at 72% frame height, and in four of five
-  // sampled rooms that row is EMPTY AIR — near-black background between the
-  // platforms and the floor. A flat patch matches another flat patch at every
-  // offset, so the detector reported "tile repeats" that were darkness
-  // agreeing with darkness. Two fixes, both about content rather than about
-  // loosening the law: the band is now CHOSEN as the most contentful row-band
-  // in the lower two thirds of the frame (that is where the terrain is), and
-  // a base patch with no contrast in it disqualifies the measurement instead
-  // of failing every room that has a quiet stretch at one fixed height.
-  const PW = 32;
-  let bandY = Math.floor(H * 0.72), bandVar = -1;
-  for (let y0 = Math.floor(H * 0.34); y0 < H - 26; y0 += 12) {
-    let s = 0, s2 = 0, n = 0;
-    for (let y = y0; y < y0 + 24; y += 3) for (let x = 40; x < W - 40; x += 6) {
-      const L = lum(at(x, y)); s += L; s2 += L * L; n++;
-    }
-    const v = s2 / n - (s / n) ** 2;
-    if (v > bandVar) { bandVar = v; bandY = y0; }
->>>>>>> 6421777 (The line is dead: fBm silhouettes, pooled rime, platform skirts, and a harness that measures terrain instead of the picture frame)
   }
   let bestRepeat = { score: 1e9, dx: 0 };
   const patchAt = (x) => {
@@ -276,7 +216,6 @@ const DETECTORS = function () {
     return p;
   };
   const base = patchAt(40);
-<<<<<<< HEAD
   // A FLAT REGION MATCHES ITSELF AT EVERY OFFSET. B4 and C3 reported a 32px
   // "repeat" at Δ0.2 and would not move across a tile-variation pass, a decal
   // pass and a background mottle — because the sampled band is near-uniform
@@ -292,18 +231,6 @@ const DETECTORS = function () {
     for (let k = 0; k < base.length; k++) s += Math.abs(base[k] - q[k]);
     s /= base.length;
     if (s < bestRepeat.score) bestRepeat = { score: s, dx };
-=======
-  const bMean = base.reduce((a, b) => a + b, 0) / base.length;
-  const bVar = Math.sqrt(base.reduce((a, b) => a + (b - bMean) ** 2, 0) / base.length);
-  if (bVar >= 3) {                 // a void cannot repeat; only structure can
-    for (let dx = PW; dx < W - PW - 40; dx += 4) {
-      const q = patchAt(40 + dx);
-      let s = 0;
-      for (let k = 0; k < base.length; k++) s += Math.abs(base[k] - q[k]);
-      s /= base.length;
-      if (s < bestRepeat.score) bestRepeat = { score: s, dx };
-    }
->>>>>>> 6421777 (The line is dead: fBm silhouettes, pooled rime, platform skirts, and a harness that measures terrain instead of the picture frame)
   }
 
   // --- (a) and (c) VALUE BANDS + CHROMA ------------------------------------

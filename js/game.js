@@ -4669,7 +4669,6 @@ function edgeGrammarPass(x) {
           d[i + 1] = Math.min(255, gg + 68 * t);
           d[i + 2] = Math.min(255, b  + 60 * t);
         }
-<<<<<<< HEAD
         // AND THE SHADOW UNDER IT. Lifting the crest alone does nothing on a
         // material that is already near-white — D3's ice floor clamped at 255
         // and the edge stayed invisible. A lit lip is a STEP, so the band just
@@ -4683,7 +4682,7 @@ function edgeGrammarPass(x) {
           d[i]     = Math.round(d[i]     * m);
           d[i + 1] = Math.round(d[i + 1] * m);
           d[i + 2] = Math.round(d[i + 2] * m);
-=======
+        }
         // ...and the lip GLOWS (owner's mesh spec): a soft two-pixel fringe
         // into the air above the crest, so the walk line reads at a glance in
         // the dark rooms without lightPass having to shout for it.
@@ -4695,7 +4694,6 @@ function edgeGrammarPass(x) {
           d[gi + 1] = Math.min(255, Math.round(gg * 0.7) + 70);
           d[gi + 2] = Math.min(255, Math.round(b * 0.7) + 62);
           d[gi + 3] = Math.max(d[gi + 3], k === 1 ? 88 : 44);
->>>>>>> 6421777 (The line is dead: fBm silhouettes, pooled rime, platform skirts, and a harness that measures terrain instead of the picture frame)
         }
       }
     }
@@ -4734,7 +4732,6 @@ function edgeGrammarPass(x) {
       }
     }
   }
-<<<<<<< HEAD
   // ---- 3. THE ANTI-TILING PASS (§10.7) ------------------------------------
   // B4 and C3 autocorrelated at exactly 32px — the tile pitch — which is the
   // signature of every tile drawing itself identically. §10.7 asks for four
@@ -4783,7 +4780,11 @@ function edgeGrammarPass(x) {
             d[i]     = Math.max(0, Math.min(255, Math.round(d[i]     * m)));
             d[i + 1] = Math.max(0, Math.min(255, Math.round(d[i + 1] * m)));
             d[i + 2] = Math.max(0, Math.min(255, Math.round(d[i + 2] * m)));
-=======
+          }
+        }
+      }
+    }
+  }
 
   // ---- 3. THE WALL EDGE: the same grammar, rotated 90° ---------------------
   // The harness found the room-border walls as bare vertical rules hundreds
@@ -4820,7 +4821,6 @@ function edgeGrammarPass(x) {
               d[i + 1] = Math.round(d[i + 1] * (1 - 0.30 * t));
               d[i + 2] = Math.round(d[i + 2] * (1 - 0.28 * t));
             }
->>>>>>> 6421777 (The line is dead: fBm silhouettes, pooled rime, platform skirts, and a harness that measures terrain instead of the picture frame)
           }
         }
       }
