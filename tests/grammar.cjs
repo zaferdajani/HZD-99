@@ -237,6 +237,7 @@ const DETECTORS = function () {
       // not the other leaves the loop drawing the overlay path with no dialog
       // in it. Both are pinned for the duration of the measurement.
       Object.defineProperty(G, 'state', { get: () => 'PLAY', set: () => {}, configurable: true });
+      G.planeProbe = {};   // ask the engine to measure the background alone
     }, room);
     await page.waitForTimeout(900);
     // and confirm it, rather than trusting that it took
@@ -246,6 +247,8 @@ const DETECTORS = function () {
       fails.push('could not reach gameplay in ' + room);
       continue;
     }
+    const probe = await page.evaluate(() => (G.planeProbe && G.planeProbe.bg) || null);
+    const mid2 = await page.evaluate(() => (G.planeProbe && G.planeProbe.mid) || null);
     const r = await page.evaluate(function (src) {
       const cv = document.querySelector('canvas');
       const c = cv.getContext('2d');
@@ -254,7 +257,7 @@ const DETECTORS = function () {
       // eslint-disable-next-line no-new-func
       return (new Function('return ' + src))().call(ctx);
     }, DETECTORS.toString());
-    results.push({ room, ...r });
+    results.push({ room, probe, mid2, ...r });
   }
   await browser.close();
 
@@ -290,25 +293,33 @@ const DETECTORS = function () {
           r.repeat.score.toFixed(1) + ')').join('; ') : 'closest match Δ' +
           Math.min(...results.map(r => r.repeat.score)).toFixed(1));
 
-  // ---- (a) three-plane value law ------------------------------------------
-  const badBand = results.filter(r => !(r.far.lum < r.mid.lum && r.mid.lum < r.near.lum));
-  check('§9.1 far < mid < near in luminance',
-        !badBand.length,
-        badBand.length ? badBand.map(r => r.room + ' ' + [r.far, r.mid, r.near]
-          .map(b => b.lum.toFixed(0)).join('/')).join('; ')
-        : results.map(r => r.room + ' ' + [r.far, r.mid, r.near].map(b => b.lum.toFixed(0)).join('/')).join('  '));
+  // ---- (a) THREE-PLANE VALUE LAW, measured on the real planes --------------
+  const noProbe = results.filter(r => !r.probe);
+  if (noProbe.length) {
+    check('the plane probe reported', false, 'no background sample in ' +
+          noProbe.map(r => r.room).join(', '));
+  } else {
+    // §9.1: the background sits at 10-25% luminance. The full frame, which is
+    // the background plus terrain plus cast, must sit clearly above it.
+    const bgHot = results.filter(r => r.probe.lum > 25);
+    check('§9.1 the background plane sits at or under 25% luminance',
+          !bgHot.length,
+          results.map(r => r.room + ' ' + r.probe.lum.toFixed(0)).join('  '));
 
-  const thinDelta = results.filter(r => (r.near.lum - r.far.lum) < 30);
-  check('§9.1 near-to-far luminance delta ≥ 30 points',
-        !thinDelta.length,
-        thinDelta.map(r => r.room + ' Δ' + (r.near.lum - r.far.lum).toFixed(0)).join(' ') || 'all ≥ 30');
+    const mids = results.filter(r => r.mid2);
+    const thin = mids.filter(r => (r.mid2.lum - r.probe.lum) < 10);
+    check('§9.1 the playable plane stands clear of the background',
+          mids.length === results.length && !thin.length,
+          mids.map(r => r.room + ' terrain ' + r.mid2.lum.toFixed(0) +
+                   ' vs bg ' + r.probe.lum.toFixed(0)).join('  '));
 
-  // ---- (c) chroma budget ---------------------------------------------------
-  const loudBg = results.filter(r => r.far.chroma >= r.near.chroma);
-  check('§9.4 the background is quieter in chroma than the playable plane',
-        !loudBg.length,
-        loudBg.map(r => r.room + ' bg ' + r.far.chroma.toFixed(0) +
-          ' vs near ' + r.near.chroma.toFixed(0)).join('; ') || 'background quieter everywhere');
+    // §9.4: the background is the quiet one. This is the check that was
+    // backwards before the background pass existed.
+    const loud = results.filter(r => r.probe.sat > 12);
+    check('§9.4 the background plane is desaturated (absolute chroma ≤ 12)',
+          !loud.length,
+          results.map(r => r.room + ' sat ' + r.probe.sat.toFixed(0)).join('  '));
+  }
 
   check('no page errors while sampling the rooms', !errs.length, errs[0] || '');
 

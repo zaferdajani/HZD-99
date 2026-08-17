@@ -4518,7 +4518,111 @@ function renderTileLayer(P) {
   // tops, undersides and verticals, texture lumps pushed past the line. The
   // collision grid stays square; the SILHOUETTE never is.
   if (G.roomDef) erodeCaveEdges(tctx);
+  // ART_BIBLE §10.3 — THE THREE-PART EDGE, after the erosion and for a
+  // different reason. Erosion answers "is the silhouette straight"; this
+  // answers "is the edge BARE", which is the thing the reference actually
+  // never ships. tests/grammar.cjs measured 12 of 12 long edges in this game
+  // with neither a lit crest nor a broken underside — a flat top and a flat
+  // bottom, which is a rectangle however wobbly you make its outline.
+  if (G.roomDef) edgeGrammarPass(tctx);
+  // §9.1 — and lift the whole plane. Pushing the background down is only half
+  // of aerial perspective; measured after the background pass alone, B4's
+  // terrain still sat 9 points off its backdrop where the law asks for 10.
+  // A screen wash in the zone's light lifts the face without touching hue.
+  {
+    const L = ZONE_LIGHT[G.roomDef.zone];
+    if (L) {
+      tctx.save();
+      tctx.globalCompositeOperation = 'screen';
+      tctx.globalAlpha = 0.14;
+      tctx.fillStyle = 'rgb(' + L.wash[0] + ',' + L.wash[1] + ',' + L.wash[2] + ')';
+      tctx.fillRect(0, 0, tileCv.width, tileCv.height);
+      tctx.restore();
+    }
+  }
   tileDirty = false;
+}
+// The lip and the skirt. Runs once per room render on the cached layer, so it
+// costs nothing at frame time — the same deal erodeCaveEdges takes.
+//
+// Both colours are SAMPLED from the tile face rather than chosen, because this
+// pass has to work over every zone's material and over authored tile art it
+// has never seen. Lighten what is there for the crest, darken it for the
+// hang; the material stays whatever the room said it was.
+function edgeGrammarPass(x) {
+  const g = buildRoom(G.roomId);
+  const Wt = G.roomDef.w, Ht = G.roomDef.h;
+  const solid = (tx, ty) => {
+    if (tx < 0 || ty < 0 || tx >= Wt || ty >= Ht) return false;
+    const ch = g[ty][tx];
+    return ch === '#' || ch === 'B';
+  };
+  const W = Wt * TILE;
+  const img = x.getImageData(0, 0, W, Ht * TILE), d = img.data;
+  const px = (X, Y) => { const i = ((Y * W + X) << 2); return [d[i], d[i + 1], d[i + 2], d[i + 3]]; };
+
+  // ---- 1. THE LIP: a bright, irregular crest on every top face -------------
+  for (let ty = 0; ty < Ht; ty++) {
+    for (let tx = 0; tx < Wt; tx++) {
+      if (!solid(tx, ty) || solid(tx, ty - 1)) continue;
+      const y0 = ty * TILE;
+      for (let X = tx * TILE; X < tx * TILE + TILE; X++) {
+        // find the true top of the drawn material in this column — erosion has
+        // already moved it off the tile line, and a crest painted on the tile
+        // line instead of on the ROCK is exactly the pasted-on look we are
+        // removing.
+        let Y = y0 - 6;
+        while (Y < y0 + TILE && (px(X, Math.max(0, Y))[3] < 40)) Y++;
+        if (Y >= y0 + TILE) continue;
+        const [r, gg, b] = px(X, Math.min(Ht * TILE - 1, Y + 3));
+        // §10.3 asks for 2-4px, irregular. hash2 keeps it stable per room.
+        const h = 2 + Math.floor(hash2(X, 917) * 3);
+        for (let k = 0; k < h; k++) {
+          const i = (((Y + k) * W + X) << 2);
+          if (d[i + 3] < 40) continue;
+          const t = 1 - k / h;                    // brightest at the very crest
+          d[i]     = Math.min(255, r  + 70 * t);
+          d[i + 1] = Math.min(255, gg + 68 * t);
+          d[i + 2] = Math.min(255, b  + 60 * t);
+        }
+      }
+    }
+  }
+
+  // ---- 2. THE SKIRT: a broken under-hang on every bottom face --------------
+  // This is also the answer to the owner's standing note that a platform
+  // hanging in mid-air needs something holding it. A skirt that drips and
+  // trails reads as structure; a flat underside reads as a floating slab.
+  for (let ty = 0; ty < Ht; ty++) {
+    for (let tx = 0; tx < Wt; tx++) {
+      if (!solid(tx, ty) || solid(tx, ty + 1)) continue;
+      const yb = (ty + 1) * TILE;
+      for (let X = tx * TILE; X < tx * TILE + TILE; X++) {
+        let Y = yb + 6;
+        while (Y > yb - TILE && px(X, Math.max(0, Math.min(Ht * TILE - 1, Y)))[3] < 40) Y--;
+        if (Y <= yb - TILE) continue;
+        const [r, gg, b] = px(X, Math.max(0, Y - 3));
+        // strands of varying length — §10.3 wants 8-24px, and wants it broken,
+        // so most columns hang short and a few hang long.
+        const n = hash2(X, 331);
+        const len = n > 0.82 ? 12 + Math.floor(hash2(X, 332) * 12)
+                  : n > 0.55 ? 4 + Math.floor(hash2(X, 333) * 6)
+                  : 0;
+        for (let k = 1; k <= len; k++) {
+          const YY = Y + k;
+          if (YY >= Ht * TILE) break;
+          const i = ((YY * W + X) << 2);
+          if (d[i + 3] > 40) continue;            // never paint over real tile
+          const t = 1 - k / (len + 2);
+          d[i]     = Math.round(r  * 0.34);
+          d[i + 1] = Math.round(gg * 0.34);
+          d[i + 2] = Math.round(b  * 0.36);
+          d[i + 3] = Math.round(235 * t);
+        }
+      }
+    }
+  }
+  x.putImageData(img, 0, 0);
 }
 function erodeCaveEdges(x) {
   const g = buildRoom(G.roomId);
@@ -7808,12 +7912,34 @@ function drawWorldFrame() {
   // The roof, before the tiles: it is the far wall of the room's top, and
   // anything solid the level actually built up there should occlude it.
   if (!(typeof isHero === 'function' && isHero())) drawCeiling(G.roomDef.zone);
+  // ART_BIBLE §9.1/§9.4 — THE BACKGROUND PASS. Everything drawn so far is the
+  // far plane, and this is the only moment it can be graded alone: after it,
+  // the terrain and the cast land on top and a full-frame wash can no longer
+  // tell them apart. Measured before this existed, every room read 16/16/11
+  // across far/mid/near — five points of range in the whole picture — and the
+  // background came back MORE saturated than the plane the player stands on.
+  // Pushing the background down and the chroma out of it is what buys the
+  // depth the single end-of-frame wash never could.
+  bgPlanePass();
+  // THE PLANE PROBE — the measurement hook for ART_BIBLE §9.1/§9.4, and the
+  // reason it exists is that the obvious test is wrong. Sampling the top third
+  // of the frame as "far" only works if height correlates with depth; here the
+  // backdrop is a wall filling the frame at every height, so a band test
+  // measures vertical composition and calls it depth. THIS is the only instant
+  // the background exists alone on the canvas, so it is the only honest place
+  // to measure it. Off unless a harness asks: it costs a full readback.
+  if (G.planeProbe) G.planeProbe.bg = framePlaneStats();
   c.save();
   c.translate(-Math.round(camSX()), -Math.round(camSY()));
   drawLair();                       // behind the level — see the LAIR table
   drawRoomProp();                   // the cradle, the gates — see ROOM_PROP
   drawFlora();                      // ...and what grows in it — see FLORA
   if (tileDirty) renderTileLayer(P);
+  // §9.1 — the playable plane is the TILE LAYER, not the bottom third of the
+  // screen. Measuring a screen band called the floor "near" while it was
+  // mostly backdrop, and reported a negative delta for a frame that had just
+  // been correctly separated. The terrain is a canvas of its own; measure it.
+  if (G.planeProbe && !G.planeProbe.mid) G.planeProbe.mid = layerStats(tileCv);
   c.drawImage(tileCv, 0, 0);
   drawInteriorFloor();              // a painting-room walks on the painting's floor
   drawFrontier();                   // the next kingdom, seen from the last room
@@ -8195,6 +8321,108 @@ const ZONE_LIGHT = {
   E: { wash: [230, 90, 110], k: 0.28, from: 0.5 },    // The Virus Nest — infection red
   X: { wash: [210, 140, 235], k: 0.24, from: 0.5 },   // Crystal Cache — prism glow
 };
+// ART_BIBLE §9.1 THREE-PLANE VALUE LAW and §9.4 THE TWO-COLOUR SCRIPT.
+//
+// Two composites over the far plane only, and between them they are the whole
+// of the aerial perspective this game never had:
+//
+//   1. DESATURATE. A grey plate in 'saturation' mode pulls the background's
+//      chroma toward its own luminance. This is the half that matters most —
+//      tests/grammar.cjs measured the background as MORE saturated than the
+//      playable plane in every room sampled, which is exactly backwards, and
+//      is why nothing in the cast could pop without popArt() shouting.
+//   2. DARKEN + HAZE. A multiply toward the zone's shadow, then a thin veil of
+//      the zone's light on top. The veil is what stops the darkened background
+//      reading as merely underexposed: haze lifts the blacks as it removes
+//      contrast, which is what distance actually does to a picture.
+//
+// It is deliberately NOT on the richK budget. lightPass is a luxury and drops
+// first; this is the frame's depth structure, and a frame that loses it does
+// not look cheaper, it looks flat. That was the §11 finding in the teardown:
+// the one thing holding the picture together was the first thing switched off.
+// Mean luminance and mean saturation of whatever is currently on the canvas,
+// 0..100 each. Used only by the plane probe above and by tests/grammar.cjs.
+// Same statistics over an offscreen layer, ignoring its transparent pixels —
+// terrain is mostly holes, and counting them as black makes any solid look dim.
+function layerStats(cv) {
+  const cx = cv.getContext('2d');
+  const im = cx.getImageData(0, 0, cv.width, cv.height).data;
+  let L = 0, S = 0, n = 0;
+  for (let y = 0; y < cv.height; y += 3) {
+    for (let x = 0; x < cv.width; x += 3) {
+      const i = ((y * cv.width + x) << 2);
+      if (im[i + 3] < 60) continue;
+      const r = im[i], g = im[i + 1], b = im[i + 2];
+      L += (0.2126 * r + 0.7152 * g + 0.0722 * b) / 2.55;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      // ABSOLUTE chroma (spread over the full range), not relative to the
+      // brightest channel. Relative chroma is nonsense on dark pixels — a
+      // near-black rgb(30,12,4) scores 87 — and that artefact is what made the
+      // Foundry look like it was ignoring a desaturation pass that was in fact
+      // working: the pass moved the numbers barely at all across a fourfold
+      // change in strength, which is the signature of a broken measurement
+      // rather than a stubborn frame.
+      S += ((mx - mn) / 255) * 100;
+      n++;
+    }
+  }
+  return n ? { lum: L / n, sat: S / n } : null;
+}
+
+function framePlaneStats() {
+  const im = c.getImageData(0, 0, 960, 540).data;
+  let L = 0, S = 0, n = 0;
+  for (let y = 0; y < 540; y += 4) {
+    for (let x = 0; x < 960; x += 4) {
+      const i = (y * 960 + x) << 2;
+      const r = im[i], g = im[i + 1], b = im[i + 2];
+      L += (0.2126 * r + 0.7152 * g + 0.0722 * b) / 2.55;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      S += ((mx - mn) / 255) * 100;   // ABSOLUTE chroma: see layerStats
+      n++;
+    }
+  }
+  return { lum: L / n, sat: S / n };
+}
+
+function bgPlanePass() {
+  const L = ZONE_LIGHT[G.roomDef.zone];
+  if (!L) return;
+  const [wr, wg, wb] = L.wash;
+  c.save();
+  // 1 — pull the chroma out
+  c.globalCompositeOperation = 'saturation';
+  c.fillStyle = 'hsl(0,0%,50%)';
+  // 0.62 left the Foundry at 76 and 0.82 at 56. The Foundry is molten iron —
+  // the zone whose whole identity is saturated orange — so it is the room that
+  // decides this number, and §9.4 is explicit that the reserved chroma belongs
+  // to the cast and the interactables, not to the wall behind them.
+  c.globalAlpha = 0.94;
+  c.fillRect(0, 0, 960, 540);
+  // 2 — sit it down in value, toward the zone's own shadow rather than to grey
+  c.globalCompositeOperation = 'multiply';
+  c.globalAlpha = 1;
+  c.fillStyle = 'rgb(' + Math.round(wr * 0.42) + ',' + Math.round(wg * 0.42) + ',' +
+                Math.round(wb * 0.42) + ')';
+  c.fillRect(0, 0, 960, 540);
+  // 3 — and the haze that keeps it from reading as underexposure. §9.1 asks for
+  //     5-10%; the top of the frame is furthest away and takes the most.
+  c.globalCompositeOperation = 'source-over';
+  // The haze is MUTED before it is laid down. Painting the zone's own wash on
+  // neat put the chroma straight back: over a background already darkened to
+  // ~9% luminance, 13% of the Foundry's saturated orange measured 75 on a law
+  // that asks for 34. Distance removes colour; a haze that adds it is a lamp.
+  const hz = (v) => Math.round(v * 0.42 + ((wr + wg + wb) / 3) * 0.58);
+  const hr = hz(wr), hg2 = hz(wg), hb = hz(wb);
+  const h = c.createLinearGradient(0, 0, 0, 540);
+  h.addColorStop(0, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',0.13)');
+  h.addColorStop(1, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',0.04)');
+  c.fillStyle = h;
+  c.fillRect(0, 0, 960, 540);
+  c.restore();
+  c.globalAlpha = 1;
+}
+
 function lightPass(P) {
   // The whole pass is a luxury: it makes the picture better and does nothing
   // for how the game plays, so it rides the same frame budget as the
