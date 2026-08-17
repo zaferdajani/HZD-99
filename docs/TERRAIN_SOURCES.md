@@ -144,3 +144,43 @@ this one.
 
 Measured after the theme pass: bare long edges 3 → **2** (both D3, ≤152px),
 corners 0, §10.7 green in all five sampled rooms, all 45 harnesses green.
+
+## 7. THE FLOOR ROLL — measured before it was believed (2026-08-17)
+
+The owner's report: the floor is a flat bar in every kingdom. Measured first,
+on the CACHED TILE LAYER directly (no lighting, no fringe, no backdrop — just
+where the drawn rock starts, per column, across 860px of floor):
+
+| room | sd of surface height | range | longest run at ONE height |
+|---|---|---|---|
+| A1 | 3.66px | 12px | 23px |
+| C3 | 4.66px | 25px | 24px |
+| D3 | **1.28px** | **5px** | **96px** |
+
+So the report was half right in a way that matters: A1 and C3 genuinely roll,
+and **D3's floor genuinely was a bar** — which is also the room that has been
+failing §10.2/§10.3 all along. Two findings came out of the fix:
+
+**1. The obvious fix is wrong, and the spec asking for it does not say why.**
+"Deepen the erosion wave" cannot work: erosion only REMOVES. Sink the drawn
+surface 10px into a dip and the collider stays where it was, so the player
+crosses that dip standing 10px above the floor she can see. So the roll is
+built UPWARD from the collision line instead — each exposed top column copies
+a strip of the tile's own face up by an fBm height, making the collision line
+the FLOOR of the roll rather than its middle. The player is never above the
+drawn surface, at worst slightly bedded into it, which is how a real figure
+stands on real ground. §10.1's two-mesh separation, used in the one direction
+that is safe for gameplay. No collider changed.
+
+**2. Wavelength, not amplitude, is what makes a floor read as a bar.** At
+fbm1's base period (~61px) a smooth wave is nearly level for tens of pixels
+around every crest and trough — which is exactly where the 67-96px dead-flat
+stretches were coming from. Sampling ~2.4× faster puts a full rise-and-fall
+inside ~25px, with a slower term mixed under it so the ground rolls instead
+of corrugating.
+
+Measured after: longest flat run **A1 67→27px, C3 71→24px**. **D3 is still
+96px and is NOT fixed** — its floor row is structurally identical to A1's
+(same chars, same two rows), so the cause is zone-specific and not yet found.
+It is the same room as the residual §10.2 failures. Next session takes the
+D3 floor specifically, with the profiler above as the instrument.

@@ -5052,7 +5052,7 @@ function erodeCaveEdges(x) {
     const ch = g[ty2][tx2];
     return ch === '#' || ch === 'B';
   };
-  // outward lumps FIRST (they copy clean face pixels), erosion second
+  // outward lumps (they copy clean face pixels), erosion second
   for (let ty = 0; ty < Ht; ty++) for (let tx = 0; tx < Wt; tx++) {
     if (!solid(tx, ty)) continue;
     const X = tx * TILE, Y = ty * TILE;
@@ -5137,6 +5137,47 @@ function erodeCaveEdges(x) {
     }
   }
   x.restore();
+  // ---- THE SURFACE ROLL, and why it BUILDS UP rather than digging down ----
+  // The owner's floor report, measured before it was believed: A1 sd 3.7px,
+  // C3 sd 4.7px — and D3 sd 1.28px with a 96px stretch at one exact height.
+  // The Archives floor genuinely was a bar.
+  //
+  // The obvious fix — deepen the erosion wave — is WRONG, and the spec that
+  // asks for it does not know why. Erosion only REMOVES: sink the drawn
+  // surface 10px into a dip and the collider stays where it was, so the
+  // player walks across the dip standing 10px above the floor she can see.
+  // That is not organic ground, it is a floating character.
+  //
+  // So the roll is built UPWARD from the collision line instead. Each exposed
+  // top column copies a strip of the tile's own face up by an fBm height, and
+  // the collision line becomes the FLOOR of the roll rather than its middle —
+  // the player is never above the drawn surface, at worst slightly bedded
+  // into it, which is exactly how a real figure stands on real ground. This
+  // is ART_BIBLE §10.1's two-mesh separation used in the direction that is
+  // safe for gameplay, and it is why no collider changes.
+  const THr = (typeof terrainTheme === 'function' ? terrainTheme() : { rough: 8 }).rough;
+  for (let ty = 0; ty < Ht; ty++) for (let tx = 0; tx < Wt; tx++) {
+    if (!solid(tx, ty) || solid(tx, ty - 1)) continue;
+    const X = tx * TILE, Y = ty * TILE;
+    for (let sx = 0; sx < TILE; sx += 2) {
+      // WAVELENGTH IS THE WHOLE FIGHT, and it was measured: at fbm1's base
+      // period (~61px) a smooth wave is nearly level for tens of pixels
+      // around each crest and trough, which is precisely the 67-96px dead-flat
+      // stretches the floor profiler found. Sampling ~2.4x faster puts a full
+      // rise-and-fall inside ~25px, so no part of the surface can hold one
+      // height long enough to read as a bar — and a second, slower term keeps
+      // the ground from becoming corrugated instead of rolling.
+      const rise = Math.round((fbm1((X + sx) * 2.4, 601) * 0.7
+                             + fbm1((X + sx) * 0.5, 607) * 0.3) * THr * 1.8);
+      if (rise < 1) continue;
+      try {
+        // the strip is the tile's own top material, so the roll is made of
+        // whatever this kingdom's rock actually is
+        x.drawImage(tileCv, X + sx, Y + 1, 2, Math.min(TILE - 2, rise + 3),
+                            X + sx, Y + 1 - rise, 2, Math.min(TILE - 2, rise + 3));
+      } catch (e) {}
+    }
+  }
 }
 // ===========================================================================
 // THE LAIR. Every guardian was already asleep when you walked in — `dorm` poses
