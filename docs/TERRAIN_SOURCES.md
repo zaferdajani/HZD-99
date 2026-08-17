@@ -111,8 +111,19 @@ from it:
 | B Conduits  | 8  | 5 | 18 | 0.50 | crystal teeth  | roots    |
 | C Foundry   | 10 | 6 | 20 | 0.40 | molten seams   | slag     |
 | D Archives  | 7  | 5 | 16 | 0.20 | icicles        | frost    |
-| E Nest      | 5  | 3 | 10 | 0.15 | prism glints   | glass    |
-| X Deep      | 12 | 4 | 24 | 0.80 | infected red   | tendrils |
+| E Nest      | 12 | 4 | 24 | 0.80 | infected red   | tendrils |
+| X Cache     | 5  | 3 | 10 | 0.15 | prism glints   | glass    |
+
+**E and X were swapped in the first version of this table, and the sibling
+session caught it in play.** The owner's spec names its zones ZIZT (arc prism
+facility) and VIZRR (the void) — a zone list from another game. In THIS world
+E is the Virus Nest (`ZONE_LIGHT`: infection red) and X is the Crystal Cache
+(prism glow), so the table was giving the Nest cracked glass and the Cache
+hanging flesh. The lesson is the one this file already states for code and
+assets, now extended to lore: **take the technique from a brief, never its
+world.** A pasted spec's zone names, palette labels and enemy names are about
+whatever game the brief was written against; the repo is the authority on
+this one.
 
 **Two deliberate departures from the spec, both recorded where they are made:**
 
