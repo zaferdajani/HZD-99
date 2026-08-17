@@ -141,20 +141,28 @@ const DETECTORS = function () {
     const lip = lipHits >= xs.length * 0.5;
 
     // SKIRT: how irregular is the bottom of this mass?
-    const bottoms = xs.map(x => {
+    const rawBottoms = xs.map(x => {
       if (x < 1 || x >= W - 1) return H;
       let y = t.a + 2;
       const base = lum(at(x, t.a + 2));
       while (y < H - 2 && Math.abs(lum(at(x, y)) - base) < 26) y++;
       return y;
-    }).filter(y => y < H - 3);
-    let skirt = false, varr = 0;
-    if (bottoms.length >= 6) {
+    });
+    // grounded is decided on the RAW bottoms: the filter below drops exactly
+    // the columns that run off the frame, which are the ones that prove it.
+    const grounded = rawBottoms.filter(y => y >= H - 6).length >= rawBottoms.length * 0.6;
+    const bottoms = rawBottoms.filter(y => y < H - 3);
+    // A mass that runs to the bottom of the frame HAS no underside. D3's floor
+    // is the last two tile rows of a 17-row room, so there is nowhere for a
+    // skirt to hang, and demanding one there is not a standard — it is a check
+    // that cannot be satisfied. Those edges owe a lit lip and nothing else.
+    let skirt = grounded, varr = 0;
+    if (!grounded && bottoms.length >= 6) {
       const mean = bottoms.reduce((a, b) => a + b, 0) / bottoms.length;
       varr = Math.sqrt(bottoms.reduce((a, b) => a + (b - mean) ** 2, 0) / bottoms.length);
       skirt = varr >= 4;      // §10.3 wants 8-24px of irregular under-hang
     }
-    edges.push({ len: t.len, y: t.a, lip, skirt, varr: +varr.toFixed(1) });
+    edges.push({ len: t.len, y: t.a, lip, skirt, grounded, varr: +varr.toFixed(1) });
   }
   const bare = edges.filter(e => e.len > 96 && !(e.lip && e.skirt));
 

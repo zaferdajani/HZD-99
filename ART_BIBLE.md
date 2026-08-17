@@ -681,6 +681,12 @@ has never done:
 ✅ **Enforced:** **a platform with a flat underside is a failure.** Undersides
 hang, drip and trail. A rectangle with a nice top is still a rectangle.
 
+**The one exception, and it is geometric rather than stylistic:** a mass that
+runs to the bottom of the level has no underside to decorate. A ground floor
+owes a lit lip and nothing else. Demanding a skirt there is not a standard, it
+is a check that cannot be satisfied — which is how D3 came back with seven
+"bare" edges that were the same floor seen seven times.
+
 ### 10.4 THE CORNER DESTRUCTION RULE
 
 **Same correction as §10.2, for the same reason:** the reference is full of
