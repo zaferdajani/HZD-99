@@ -4617,6 +4617,7 @@ function renderTileLayer(P) {
   // never ships. tests/grammar.cjs measured 12 of 12 long edges in this game
   // with neither a lit crest nor a broken underside — a flat top and a flat
   // bottom, which is a rectangle however wobbly you make its outline.
+  if (G.roomDef) organicSilhouettePass(tctx);
   if (G.roomDef) edgeGrammarPass(tctx);
   // §9.1 — and lift the whole plane. Pushing the background down is only half
   // of aerial perspective; measured after the background pass alone, B4's
@@ -4669,6 +4670,79 @@ function fbm1(x, seed) {
 // pass has to work over every zone's material and over authored tile art it
 // has never seen. Lighten what is there for the crest, darken it for the
 // hang; the material stays whatever the room said it was.
+// ART_BIBLE §10.1 — THE VISUAL MESH. erodeCaveEdges bites scallops out of the
+// raster edge; this replaces the tile's OUTLINE with a curved polygon, which is
+// the difference between a wobbly rectangle and a shape that was never square.
+//
+// IT ERASES ONLY INSIDE EACH TILE'S OWN RECT, and that bound is the entire
+// design rather than a detail. The first attempt built one path over every
+// solid tile and applied destination-in to the finished layer — which keeps the
+// destination ONLY where the path covers, so every pixel drawn OUTSIDE a solid
+// tile went with it. That is most of the room's dressing: the grass standing
+// above the floor, the props, the flora. It photographed as a deleted floor
+// under grass that was floating in mid-air. Per-tile, rect-bounded, the worst a
+// bug in here can do is shave a corner.
+//
+// Vertices are shared per GRID CORNER, not per tile, so the four tiles meeting
+// at a corner agree on where it moved and interior seams stay watertight. And
+// every vertex moves INWARD only: outward would need paint outside the rect
+// this erase is bounded by, and the outward bulge is the wall pass's job.
+//
+// hash2 rather than a new noise function: it is already in this file, already
+// deterministic, and this layer is CACHED to tileCv and redrawn only when
+// tileDirty — so anything seeded on time or Math.random would give a room
+// different edges on every render.
+function organicSilhouettePass(x) {
+  const g = G.grid;
+  if (!g || !g.length || !g[0]) return;
+  const Ht = g.length, Wt = g[0].length;
+  const th = (typeof terrainTheme === 'function' ? terrainTheme() : null);
+  const R = Math.min(9, th ? th.rough * 0.75 : 5);
+  // '=' is terrain too. The first version's solid test was copied from
+  // erodeCaveEdges and knew only '#' and 'B', so it treated every floating
+  // platform as air and left them out of the mesh entirely.
+  const sol = (tx, ty) => {
+    if (tx < 0 || ty < 0 || tx >= Wt || ty >= Ht) return false;
+    const ch = g[ty][tx];
+    return ch === '#' || ch === 'B' || ch === '=';
+  };
+  // per-corner inset, 0..R, stable for a given room
+  const ins = (cx, cy) => hash2(cx * 2.3 + 17, cy * 2.3 + 41) * R;
+  const mid = (a, b) => hash2(a * 1.9 + 71, b * 1.9 + 13) * R;
+
+  for (let ty = 0; ty < Ht; ty++) {
+    for (let tx = 0; tx < Wt; tx++) {
+      if (!sol(tx, ty)) continue;
+      const up = !sol(tx, ty - 1), dn = !sol(tx, ty + 1);
+      const lf = !sol(tx - 1, ty), rt = !sol(tx + 1, ty);
+      if (!up && !dn && !lf && !rt) continue;      // buried: it stays square
+      const X = tx * TILE, Y = ty * TILE;
+
+      const tlx = X + (lf ? ins(tx, ty) : 0),               tly = Y + (up ? ins(tx, ty) : 0);
+      const trx = X + TILE - (rt ? ins(tx + 1, ty) : 0),    try_ = Y + (up ? ins(tx + 1, ty) : 0);
+      const brx = X + TILE - (rt ? ins(tx + 1, ty + 1) : 0), bry = Y + TILE - (dn ? ins(tx + 1, ty + 1) : 0);
+      const blx = X + (lf ? ins(tx, ty + 1) : 0),           bly = Y + TILE - (dn ? ins(tx, ty + 1) : 0);
+
+      x.save();
+      x.beginPath();
+      x.rect(X, Y, TILE, TILE);                    // outer: the tile
+      x.moveTo(tlx, tly);                          // inner: the shape kept
+      if (up) x.quadraticCurveTo(X + TILE / 2, Y + mid(tx, ty) * 1.5, trx, try_);
+      else x.lineTo(trx, try_);
+      if (rt) x.quadraticCurveTo(X + TILE - mid(tx + 1, ty) * 1.5, Y + TILE / 2, brx, bry);
+      else x.lineTo(brx, bry);
+      if (dn) x.quadraticCurveTo(X + TILE / 2, Y + TILE - mid(tx, ty + 1) * 1.5, blx, bly);
+      else x.lineTo(blx, bly);
+      if (lf) x.quadraticCurveTo(X + mid(tx, ty + 2) * 1.5, Y + TILE / 2, tlx, tly);
+      else x.lineTo(tlx, tly);
+      x.closePath();
+      x.globalCompositeOperation = 'destination-out';
+      x.fillStyle = '#000';
+      x.fill('evenodd');                           // the rim between the two
+      x.restore();
+    }
+  }
+}
 function edgeGrammarPass(x) {
   const g = buildRoom(G.roomId);
   const TH = typeof terrainTheme === 'function' ? terrainTheme() : { rough: 10, lip: 4, skirt: 16, crack: 0.3, edge: 'glow', hang: 'plates' };
