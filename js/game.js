@@ -4585,6 +4585,20 @@ function edgeGrammarPass(x) {
           d[i + 1] = Math.min(255, gg + 68 * t);
           d[i + 2] = Math.min(255, b  + 60 * t);
         }
+        // AND THE SHADOW UNDER IT. Lifting the crest alone does nothing on a
+        // material that is already near-white — D3's ice floor clamped at 255
+        // and the edge stayed invisible. A lit lip is a STEP, so the band just
+        // beneath it is pushed down; that reads as an edge at any base value,
+        // and it is what the eye actually uses to find the top of a solid.
+        for (let k = h; k < h + 5; k++) {
+          const i = (((Y + k) * W + X) << 2);
+          if (d[i + 3] < 40) continue;
+          const t = 1 - (k - h) / 5;
+          const m = 1 - 0.30 * t;
+          d[i]     = Math.round(d[i]     * m);
+          d[i + 1] = Math.round(d[i + 1] * m);
+          d[i + 2] = Math.round(d[i + 2] * m);
+        }
       }
     }
   }
@@ -4618,6 +4632,59 @@ function edgeGrammarPass(x) {
           d[i + 1] = Math.round(gg * 0.34);
           d[i + 2] = Math.round(b  * 0.36);
           d[i + 3] = Math.round(235 * t);
+        }
+      }
+    }
+  }
+  // ---- 3. THE ANTI-TILING PASS (§10.7) ------------------------------------
+  // B4 and C3 autocorrelated at exactly 32px — the tile pitch — which is the
+  // signature of every tile drawing itself identically. §10.7 asks for four
+  // variants, random flips and decals; all three are ways of saying "make the
+  // pitch stop being findable", and per-tile variation does it without needing
+  // four hand-authored sheets for a renderer that is procedural anyway.
+  //
+  // Deliberately subtle. This runs over the finished face, so a heavy hand
+  // reads as dirt rather than as material — the target is to break the
+  // correlation, not to decorate.
+  for (let ty = 0; ty < Ht; ty++) {
+    for (let tx = 0; tx < Wt; tx++) {
+      if (!solid(tx, ty)) continue;
+      // one variant per tile, four of them, plus a per-tile value offset
+      const v = Math.floor(hash2(tx * 7 + 1, ty * 13 + 3) * 4);
+      const k = 0.90 + hash2(tx + 41, ty + 97) * 0.20;      // 0.90 .. 1.10
+      const x0 = tx * TILE, y0 = ty * TILE;
+      for (let Y = y0; Y < y0 + TILE; Y++) {
+        for (let X = x0; X < x0 + TILE; X++) {
+          const i = ((Y * W + X) << 2);
+          if (d[i + 3] < 40) continue;
+          // the variant rotates WHICH sub-band of the tile gets lifted, so two
+          // tiles with the same k still differ in where the light sits
+          const lx = (X - x0), ly = (Y - y0);
+          const band = ((v === 0 ? ly : v === 1 ? lx : v === 2 ? lx + ly : lx - ly + TILE) >> 3) & 3;
+          const kk = k * (1 + (band - 1.5) * 0.028);
+          d[i]     = Math.max(0, Math.min(255, Math.round(d[i]     * kk)));
+          d[i + 1] = Math.max(0, Math.min(255, Math.round(d[i + 1] * kk)));
+          d[i + 2] = Math.max(0, Math.min(255, Math.round(d[i + 2] * kk)));
+        }
+      }
+      // ...and a decal on some tiles — §10.7 wants 20-40% density
+      if (hash2(tx + 211, ty + 307) < 0.32) {
+        const cxp = x0 + 4 + hash2(tx, ty + 5) * (TILE - 8);
+        const cyp = y0 + 4 + hash2(tx + 5, ty) * (TILE - 8);
+        const rad = 3 + hash2(tx + 9, ty + 9) * 6;
+        const dark = hash2(tx + 17, ty + 17) < 0.5;
+        for (let Y = Math.max(0, cyp - rad) | 0; Y < Math.min(Ht * TILE, cyp + rad); Y++) {
+          for (let X = Math.max(0, cxp - rad) | 0; X < Math.min(W, cxp + rad); X++) {
+            const dx = X - cxp, dy = Y - cyp;
+            const q = 1 - (dx * dx + dy * dy) / (rad * rad);
+            if (q <= 0) continue;
+            const i = ((Y * W + X) << 2);
+            if (d[i + 3] < 40) continue;
+            const m = 1 + (dark ? -0.20 : 0.16) * q;
+            d[i]     = Math.max(0, Math.min(255, Math.round(d[i]     * m)));
+            d[i + 1] = Math.max(0, Math.min(255, Math.round(d[i + 1] * m)));
+            d[i + 2] = Math.max(0, Math.min(255, Math.round(d[i + 2] * m)));
+          }
         }
       }
     }
@@ -8385,6 +8452,35 @@ function framePlaneStats() {
   return { lum: L / n, sat: S / n };
 }
 
+// §10.7 for the FAR PLANE. The anti-tiling work in the tile layer did nothing
+// for B4 and C3 because their 32px autocorrelation was never in the terrain —
+// it is the backdrop drawing the same motif every tile pitch. The background
+// is redrawn every frame, so per-pixel work there is not affordable; a mottle
+// baked ONCE and composited is. Its features are deliberately sized off the
+// tile pitch (11, 19, 29px) so it cannot reinforce the thing it is breaking.
+let bgMottleCv = null;
+function bgMottle() {
+  if (bgMottleCv) return bgMottleCv;
+  const cv = document.createElement('canvas');
+  cv.width = 960; cv.height = 540;
+  const x = cv.getContext('2d');
+  x.fillStyle = 'rgb(128,128,128)';
+  x.fillRect(0, 0, 960, 540);
+  for (let i = 0; i < 520; i++) {
+    const px2 = hash2(i, 61) * 960, py2 = hash2(i, 67) * 540;
+    const r = 11 + hash2(i, 71) * 18;
+    const up = hash2(i, 73) < 0.5;
+    const g = x.createRadialGradient(px2, py2, 0, px2, py2, r);
+    const v = up ? 168 : 92;
+    g.addColorStop(0, 'rgba(' + v + ',' + v + ',' + v + ',0.55)');
+    g.addColorStop(1, 'rgba(128,128,128,0)');
+    x.fillStyle = g;
+    x.beginPath(); x.arc(px2, py2, r, 0, 7); x.fill();
+  }
+  bgMottleCv = cv;
+  return cv;
+}
+
 function bgPlanePass() {
   const L = ZONE_LIGHT[G.roomDef.zone];
   if (!L) return;
@@ -8419,6 +8515,11 @@ function bgPlanePass() {
   h.addColorStop(1, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',0.04)');
   c.fillStyle = h;
   c.fillRect(0, 0, 960, 540);
+  // ...and break the pitch. Overlay keeps mid-grey neutral, so this only
+  // pushes the background's own values apart — it never tints it.
+  c.globalCompositeOperation = 'overlay';
+  c.globalAlpha = 0.55;
+  c.drawImage(bgMottle(), 0, 0);
   c.restore();
   c.globalAlpha = 1;
 }

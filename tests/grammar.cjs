@@ -124,19 +124,32 @@ const DETECTORS = function () {
   // reference never ships is a BARE straight edge, so that is what is measured:
   // for each long horizontal run, does it carry a lit crest above it, and is
   // its underside broken?
-  const tops = merged.filter(r => r.horizontal).slice(0, 8);
+  // ONLY WALKABLE TOPS. The detector cannot tell a platform's top from a
+  // ceiling's underside by pixels alone, so it was demanding a lit crest from
+  // ceilings, which can never have one — that was the whole of D3's residue.
+  // The tile grid knows the difference, so the page hands it over in screen
+  // space and the pixel pass uses it.
+  const WT = this.walkTops || [];
+  const isTop = (r) => WT.some(w => Math.abs(w.y - r.a) <= 8 &&
+                                    w.x1 > r.start && w.x0 < r.start + r.len);
+  const tops = merged.filter(r => r.horizontal && (!WT.length || isTop(r))).slice(0, 8);
   const edges = [];
   for (const t of tops) {
     const xs = [];
     for (let k = 0; k < 12; k++) xs.push(t.start + Math.floor(t.len * (k + 0.5) / 12));
 
     // LIP: a bright 2-4px crest sitting just above the edge line
+    // A LIT LIP IS BRIGHTER THAN ITS OWN BODY, not brighter than the sky. The
+    // first version compared the crest to the pixels ABOVE it — the background
+    // — which fails for D3's white ice floor under a pale ceiling, where the
+    // crest is legitimately darker than what is behind it. What makes an edge
+    // read as lit is the step down into the material it caps.
     let lipHits = 0;
     for (const x of xs) {
       if (x < 2 || x >= W - 2) continue;
-      const above = (lum(at(x, Math.max(1, t.a - 3))) + lum(at(x, Math.max(1, t.a - 2)))) / 2;
-      const crest = (lum(at(x, Math.max(1, t.a - 1))) + lum(at(x, t.a))) / 2;
-      if (crest - above > 6) lipHits++;
+      const crest = (lum(at(x, Math.max(1, t.a))) + lum(at(x, Math.min(H - 1, t.a + 1)))) / 2;
+      const body = (lum(at(x, Math.min(H - 1, t.a + 5))) + lum(at(x, Math.min(H - 1, t.a + 7)))) / 2;
+      if (crest - body > 6) lipHits++;
     }
     const lip = lipHits >= xs.length * 0.5;
 
@@ -170,8 +183,18 @@ const DETECTORS = function () {
   // §10.7: no visible repeat within one screen width. Take a patch from the
   // terrain band and slide it across the same row; a near-exact match at a
   // regular offset is a tile repeating.
-  const bandY = Math.floor(H * 0.72);
+  // Pick the band with the most texture rather than a fixed one. A fixed band
+  // landed on flat sky in every room sampled, which made the check vacuous —
+  // it passed because there was nothing there, not because nothing repeated.
   const PW = 32;
+  let bandY = Math.floor(H * 0.72), bandSd = -1;
+  for (let by = Math.floor(H * 0.30); by < H - 30; by += 12) {
+    const row = [];
+    for (let x = 40; x < W - 40; x += 3) row.push(lum(at(x, by)));
+    const m = row.reduce((a, b) => a + b, 0) / row.length;
+    const sd = Math.sqrt(row.reduce((a, b) => a + (b - m) ** 2, 0) / row.length);
+    if (sd > bandSd) { bandSd = sd; bandY = by; }
+  }
   let bestRepeat = { score: 1e9, dx: 0 };
   const patchAt = (x) => {
     const p = [];
@@ -180,6 +203,15 @@ const DETECTORS = function () {
     return p;
   };
   const base = patchAt(40);
+  // A FLAT REGION MATCHES ITSELF AT EVERY OFFSET. B4 and C3 reported a 32px
+  // "repeat" at Δ0.2 and would not move across a tile-variation pass, a decal
+  // pass and a background mottle — because the sampled band is near-uniform
+  // there, and a uniform patch scores a perfect match against every shift of
+  // itself. Emptiness is not repetition; a band with no texture has nothing to
+  // repeat, and calling that a tiling failure is the third time in this file a
+  // metric has been meaningless on degenerate input.
+  const bMean = base.reduce((a, b) => a + b, 0) / base.length;
+  const bSd = Math.sqrt(base.reduce((a, b) => a + (b - bMean) ** 2, 0) / base.length);
   for (let dx = PW; dx < W - PW - 40; dx += 4) {
     const q = patchAt(40 + dx);
     let s = 0;
@@ -206,7 +238,7 @@ const DETECTORS = function () {
     corners: uniqCorners.length,
     tops: tops.length,
     edges, bare: bare.length,
-    repeat: bestRepeat,
+    repeat: bestRepeat, bSd: +bSd.toFixed(1),
     far, mid, near,
   };
 };
@@ -261,7 +293,20 @@ const DETECTORS = function () {
       const cv = document.querySelector('canvas');
       const c = cv.getContext('2d');
       const img = c.getImageData(0, 0, cv.width, cv.height);
-      const ctx = { W: cv.width, H: cv.height, d: img.data };
+      const spans = [];
+      try {
+        const g = buildRoom(G.roomId), TW = G.roomDef.w, TH2 = G.roomDef.h;
+        const sx = Math.round(camSX()), sy = Math.round(camSY());
+        const sol = (tx, ty) => {
+          if (tx < 0 || ty < 0 || tx >= TW || ty >= TH2) return false;
+          const ch = g[ty][tx]; return ch === '#' || ch === 'B';
+        };
+        for (let ty = 0; ty < TH2; ty++) for (let tx = 0; tx < TW; tx++) {
+          if (!sol(tx, ty) || sol(tx, ty - 1)) continue;
+          spans.push({ y: ty * TILE - sy, x0: tx * TILE - sx, x1: (tx + 1) * TILE - sx });
+        }
+      } catch (e) { /* leave empty: the harness then measures every edge */ }
+      const ctx = { W: cv.width, H: cv.height, d: img.data, walkTops: spans };
       // eslint-disable-next-line no-new-func
       return (new Function('return ' + src))().call(ctx);
     }, DETECTORS.toString());
@@ -294,12 +339,13 @@ const DETECTORS = function () {
         totalCorners + ' corner(s)  (' + results.map(r => r.room + ':' + r.corners).join(' ') + ')');
 
   // ---- (g) tiling ----------------------------------------------------------
-  const rep = results.filter(r => r.repeat.score < 3);
+  // textured AND self-similar is a repeat; flat is just flat
+  const rep = results.filter(r => r.repeat.score < 3 && r.bSd > 4);
   check('§10.7 no visible tile repeat within one screen width',
         !rep.length,
         rep.length ? rep.map(r => r.room + ' repeats at ' + r.repeat.dx + 'px (Δ' +
-          r.repeat.score.toFixed(1) + ')').join('; ') : 'closest match Δ' +
-          Math.min(...results.map(r => r.repeat.score)).toFixed(1));
+          r.repeat.score.toFixed(1) + ')').join('; ') : results.map(r => r.room + ' Δ' +
+          r.repeat.score.toFixed(1) + '/sd' + r.bSd).join('  '));
 
   // ---- (a) THREE-PLANE VALUE LAW, measured on the real planes --------------
   const noProbe = results.filter(r => !r.probe);
