@@ -4707,6 +4707,13 @@ function organicSilhouettePass(x) {
     return ch === '#' || ch === 'B' || ch === '=';
   };
   // per-corner inset, 0..R, stable for a given room
+  // A TOP FACE ROLLS, a side face only roughens. The floor reading as a box is
+  // not a lighting problem — the surface LINE is flat, and no crest fixes that.
+  // Top insets run 2..ROLL px and are keyed on the grid corner alone, so the
+  // two tiles sharing a corner get the same height and the surface is
+  // continuous across the whole run rather than stepping per tile.
+  const ROLL = 9;
+  const insTop = (cx) => 2 + hash2(cx * 3.1 + 23, 7) * (ROLL - 2);
   const ins = (cx, cy) => hash2(cx * 2.3 + 17, cy * 2.3 + 41) * R;
   const mid = (a, b) => hash2(a * 1.9 + 71, b * 1.9 + 13) * R;
 
@@ -4718,8 +4725,8 @@ function organicSilhouettePass(x) {
       if (!up && !dn && !lf && !rt) continue;      // buried: it stays square
       const X = tx * TILE, Y = ty * TILE;
 
-      const tlx = X + (lf ? ins(tx, ty) : 0),               tly = Y + (up ? ins(tx, ty) : 0);
-      const trx = X + TILE - (rt ? ins(tx + 1, ty) : 0),    try_ = Y + (up ? ins(tx + 1, ty) : 0);
+      const tlx = X + (lf ? ins(tx, ty) : 0),               tly = Y + (up ? insTop(tx) : 0);
+      const trx = X + TILE - (rt ? ins(tx + 1, ty) : 0),    try_ = Y + (up ? insTop(tx + 1) : 0);
       const brx = X + TILE - (rt ? ins(tx + 1, ty + 1) : 0), bry = Y + TILE - (dn ? ins(tx + 1, ty + 1) : 0);
       const blx = X + (lf ? ins(tx, ty + 1) : 0),           bly = Y + TILE - (dn ? ins(tx, ty + 1) : 0);
 
@@ -4727,7 +4734,7 @@ function organicSilhouettePass(x) {
       x.beginPath();
       x.rect(X, Y, TILE, TILE);                    // outer: the tile
       x.moveTo(tlx, tly);                          // inner: the shape kept
-      if (up) x.quadraticCurveTo(X + TILE / 2, Y + mid(tx, ty) * 1.5, trx, try_);
+      if (up) x.quadraticCurveTo(X + TILE / 2, Y + (insTop(tx) + insTop(tx + 1)) * 0.5 + mid(tx, ty) * 0.8, trx, try_);
       else x.lineTo(trx, try_);
       if (rt) x.quadraticCurveTo(X + TILE - mid(tx + 1, ty) * 1.5, Y + TILE / 2, brx, bry);
       else x.lineTo(brx, bry);
