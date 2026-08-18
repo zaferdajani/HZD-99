@@ -9141,7 +9141,20 @@ function drawWorldFrame() {
   }
   drawSeals(P);
   c.restore();
-  drawDepthPlane('fore');            // ...and the near plane, in front of her
+  // THE NEAR PLATE IS OFF UNTIL IT IS RE-FIRED, and the reason is a mistake in
+  // my own brief: it asked for a NEAR-BLACK silhouette on a BLACK field, and
+  // then the keyer cut it by luminance. A near-black subject on a black ground
+  // cannot be luminance-keyed — subject and field are the same value. Measured
+  // on fore_a.png: the source is 100% opaque at mean luminance 5, and after
+  // keying only 18.8% survived at mean luminance 23.8, of which 45.8% is
+  // bluish. The keyer deleted the body and kept the indicator lights. That is
+  // the floating blue the owner asked about — a foreground layer reduced to its
+  // own light-pips.
+  // Re-fired on a WHITE field so a near-black silhouette can actually be cut
+  // from it: 29-51% of each plate now survives the key at mean luminance
+  // 2.5-14.7, against 18.8% at luminance 23.8 before, of which nearly half was
+  // the blue pips.
+  drawDepthPlane('fore');
   applyBloom();
   // ---- cinematic grade: zone-tinted light wash + vignette (the "expensive" look) ----
   {
