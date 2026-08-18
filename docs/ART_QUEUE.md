@@ -2333,3 +2333,45 @@ come back in two variants — one that keeps the machine detail inside the ink,
 one that strips it to the Silksong density — and the owner picks which one the
 other four rows are fired to. Firing rows 2-5 before that choice is made is how
 a hundred plates get generated twice.
+
+### 1f ADDENDUM — THE DRAWN PASS, TRIAL FIRED (art session, 2026-08-18)
+
+**Four cells restyled as a trial before committing to all 22**: idle, walk_a,
+run_a, claw_1. Sources archived in `assets/source/hero/drawn_trial/`, cut with
+the new `tools/herocut.cjs`.
+
+**The style works and the identity holds.** Ink contour, three or four flat
+value steps, gouache grain inside the flats, one warm rim. Same head, ears,
+scarf, collar, cyan lenses. This is the fix for the teardown's §1 finding — the
+game currently ships FOUR material languages and she is the only asset in one
+nothing else shares.
+
+**herocut.cjs puts each cell on FLAT BLACK and pads it.** Both are lessons paid
+for elsewhere: a generator handed transparency invents its own background, and
+a subject touching the frame edge comes back cropped (four guardian plates).
+She is near-white, so black is the field her silhouette can actually be keyed
+off — the inverse mistake is what turned the foreground plates into floating
+blue pips.
+
+**FRAMING HAS TO BE THE FIRST LINE OF THE PROMPT.** Stated after the style, v1
+came back at four different scales with claw_1 cropped to a close-up of head and
+chest — its thrown-out arm, which is the entire point of that cell, gone.
+Promoted to the top with "do NOT zoom, do NOT crop, the same fraction of the
+picture as the reference", v2 kept the full body in every cell. Same promotion
+that fixed the cropped guardians and edge_C.
+
+**Two open questions put to the owner rather than decided:**
+
+1. **The plates bake her eyes.** §2 says the eye-lights are never baked — they
+   are covered at runtime and repainted live, because art with an expression
+   baked in gives her one face per pose forever. The pipeline exists
+   (`tools/heroeyeclean.cjs`) but it is a per-cell step and it once painted over
+   her scarf when run against a stale anchor. Order matters: place cells, then
+   re-measure anchors into `tools/heroeye.json`, THEN clean.
+2. **The contour is heavier than the reference.** She reads as a mascot sticker
+   with a thick white halo rather than as Hornet — Silksong's ink is thin and
+   broken, its value steps darker, the figure sitting IN shadow. One more trial
+   cell should land the weight before 18 more are fired against it.
+
+**Known and mine to fix, not a question:** walk_a came back with a painted panel
+border despite the ban. Either a re-fire or a trim pass.
