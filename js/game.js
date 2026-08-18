@@ -345,6 +345,7 @@ function loadRoom(id) {
   }
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
+  surfCurve = null; surfRoom = null;   // the surface curve belongs to the room
   // re-aim the prefetcher: the art for the rooms she can now REACH
   if (typeof preloadRoom === 'function') { try { preloadRoom(id); } catch (e) {} }
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
@@ -4618,6 +4619,7 @@ function renderTileLayer(P) {
   // with neither a lit crest nor a broken underside — a flat top and a flat
   // bottom, which is a rectangle however wobbly you make its outline.
   if (G.roomDef) organicSilhouettePass(tctx);
+  if (G.roomDef) surfaceCurvePass(tctx);   // §10.1 — the surface stops being cells
   if (G.roomDef) edgeGrammarPass(tctx);
   // §9.1 — and lift the whole plane. Pushing the background down is only half
   // of aerial perspective; measured after the background pass alone, B4's
@@ -4692,6 +4694,213 @@ function fbm1(x, seed) {
 // deterministic, and this layer is CACHED to tileCv and redrawn only when
 // tileDirty — so anything seeded on time or Math.random would give a room
 // different edges on every render.
+// ART_BIBLE §10.1 — THE SURFACE CURVE. This is the piece that was missing, and
+// its absence is why every previous pass decorated a staircase instead of
+// removing one.
+//
+// The unit stops being the cell. One continuous polyline is computed across the
+// whole room at sub-tile resolution, the grid's 32px steps are RAMPED rather
+// than stepped, and noise is added at an amplitude LARGER THAN A TILE IS TALL.
+// The old pass bounded every vertex inside its own tile rect and moved it
+// inward only — a safety rule adopted after an earlier attempt erased the room,
+// and one that mathematically caps deviation at ~9px on a 32px cell. It made
+// the fix impossible. This one is bounded per COLUMN to the band around the
+// surface instead, which is just as safe and does not cap the shape.
+//
+// The collider never learns about any of this. She walks the same squares.
+let surfCurve = null, surfRoom = null;
+const SURF_STEP = 4;                 // horizontal sampling, well under a tile
+
+function buildSurfaceCurve() {
+  const g = G.grid;
+  if (!g || !g.length || !g[0]) return null;
+  const Wt = g[0].length, Ht = g.length;
+  const sol = (tx, ty) => {
+    if (tx < 0 || ty < 0 || tx >= Wt || ty >= Ht) return false;
+    const ch = g[ty][tx];
+    return ch === '#' || ch === 'B' || ch === '=';
+  };
+  const W = Wt * TILE, N = Math.ceil(W / SURF_STEP);
+  const raw = new Float32Array(N).fill(NaN);
+  const soft = new Float32Array(N);          // 1 where the surface is a platform
+  for (let i = 0; i < N; i++) {
+    const tx = Math.floor((i * SURF_STEP) / TILE);
+    // SKIP THE CEILING. Row 0 is solid clear across most rooms, so "topmost
+    // solid" returns the roof and the whole picture gets treated as ground.
+    let ty = 0;
+    while (ty < Ht && sol(tx, ty)) ty++;
+    while (ty < Ht && !sol(tx, ty)) ty++;
+    if (ty >= Ht) continue;
+    raw[i] = ty * TILE;
+    soft[i] = g[ty][tx] === '=' ? 1 : 0;
+  }
+  // RAMP the steps. A one-tile step is a 32px vertical jump; spreading it over
+  // ~1.5 tiles is the single operation that kills the staircase, and it is why
+  // the curve has to be computed across the span rather than per tile.
+  const N2 = new Float32Array(N), RAD = Math.round((TILE * 1.5) / SURF_STEP);
+  for (let i = 0; i < N; i++) {
+    let acc = 0, wsum = 0;
+    for (let k = -RAD; k <= RAD; k++) {
+      const j = i + k; if (j < 0 || j >= N || isNaN(raw[j])) continue;
+      const w = 1 - Math.abs(k) / (RAD + 1);
+      acc += raw[j] * w; wsum += w;
+    }
+    N2[i] = wsum ? acc / wsum : NaN;
+  }
+  const h1 = (n) => { const s = Math.sin(n * 127.1) * 43758.5453; return s - Math.floor(s); };
+  const vn = (x) => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return h1(i) * (1 - u) + h1(i + 1) * u; };
+  const fbm = (x) => vn(x) * 0.55 + vn(x * 2.3 + 11) * 0.28 + vn(x * 4.7 + 31) * 0.17;
+
+  const AMP = 26;
+  const out = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    if (isNaN(N2[i])) { out[i] = NaN; continue; }
+    const x = (i * SURF_STEP) / TILE;
+    // PLATFORMS KEEP A FLATTER CREST. A rounded mound tells the player "walk
+    // up" where a ledge says "jump onto"; rolling a platform as hard as the
+    // ground would quietly change what the level is asking of her.
+    const amp = AMP * (soft[i] ? 0.35 : 1);
+    // THE ROLL IS BIASED UPWARD, and the measurement is why. Symmetric noise
+    // puts half its travel below the grid, where the cut cap immediately throws
+    // it away — the surface came out deviating 8px on average, barely more than
+    // the per-cell inset this whole pass exists to replace. Riding ABOVE the
+    // grid line costs nothing and can never remove ground she stands on, so the
+    // grid becomes the FLOOR of the range rather than its centre.
+    const rise = fbm(x * 0.55) * amp + fbm(x * 1.9 + 7) * amp * 0.45;
+    let y = N2[i] - rise;
+    // FRACTURES. Smooth noise reads as landscape; this world is a fallen city,
+    // so the curve carries occasional hard breaks — a slab dropped a few px
+    // against its neighbour — instead of only rolling.
+    const fseed = Math.floor(x * 0.7);
+    if (h1(fseed * 3.7) > 0.72) y += (h1(fseed * 9.1) - 0.5) * 16;
+    // ADD FREELY, CUT CONSERVATIVELY — and this asymmetry is the whole rule.
+    // Smoothing a one-tile step produces a ramp that lies BELOW the platform's
+    // own top for most of its length, and cutting to that ramp erased 40px of
+    // real platform: the mound came out as a hollow arch. Rising above the grid
+    // invents new material and is free; falling below destroys material she is
+    // meant to stand on, so it is capped at a few px of erosion.
+    const t = raw[i];
+    if (!isNaN(t)) y = Math.max(t - 46, Math.min(y, t + 6));
+    out[i] = y;
+  }
+  return { y: out, N, W };
+}
+function surfaceCurve() {
+  if (surfCurve && surfRoom === G.roomId) return surfCurve;
+  surfCurve = buildSurfaceCurve();
+  surfRoom = G.roomId;
+  return surfCurve;
+}
+
+// Redraw the terrain's top surface to the curve: ADD material where the curve
+// rises above the grid line, REMOVE it where the curve falls below, then lay
+// the lit crest along the result. Bounded per column to the band around the
+// surface, so the worst a bug can do is roughen one strip of ground.
+function surfaceCurvePass(x) {
+  const cur = surfaceCurve();
+  if (!cur) return;
+  const g = G.grid, Wt = g[0].length, Ht = g.length;
+  const sol = (tx, ty) => {
+    if (tx < 0 || ty < 0 || tx >= Wt || ty >= Ht) return false;
+    const ch = g[ty][tx]; return ch === '#' || ch === 'B' || ch === '=';
+  };
+  const P = PAL[G.roomDef.zone] || PAL.A;
+  const rock = (typeof isHero === 'function' && isHero()) ? null
+             : (typeof rockTex === 'function' ? rockTex(G.roomDef.zone) : null);
+  const W = Wt * TILE, H = Ht * TILE;
+
+  // the grid's own surface height per sample, for comparison against the curve
+  const top = new Float32Array(cur.N).fill(NaN);
+  for (let i = 0; i < cur.N; i++) {
+    if (isNaN(cur.y[i])) continue;
+    const tx = Math.floor((i * SURF_STEP) / TILE);
+    let ty = 0;
+    while (ty < Ht && sol(tx, ty)) ty++;
+    while (ty < Ht && !sol(tx, ty)) ty++;
+    if (ty < Ht) top[i] = ty * TILE;
+  }
+
+  // Walk the samples in runs of the same SIGN — curve above the grid, or below —
+  // and treat each run as ONE REGION. Painting per 4px column instead left the
+  // added mass hollow and the crest stippled, because neighbouring columns at
+  // different heights never joined up.
+  const regions = [];
+  let i0 = 0;
+  const sign = (i) => (isNaN(cur.y[i]) || isNaN(top[i])) ? 0
+                    : (cur.y[i] < top[i] - 0.5 ? 1 : cur.y[i] > top[i] + 0.5 ? -1 : 0);
+  while (i0 < cur.N) {
+    const sg = sign(i0);
+    let i1 = i0;
+    while (i1 + 1 < cur.N && sign(i1 + 1) === sg) i1++;
+    if (sg !== 0 && i1 > i0) regions.push({ a: i0, b: i1, sg });
+    i0 = i1 + 1;
+  }
+
+  const regionPath = (r) => {
+    x.beginPath();
+    x.moveTo(r.a * SURF_STEP, cur.y[r.a]);
+    for (let i = r.a + 1; i <= r.b; i++) x.lineTo(i * SURF_STEP, cur.y[i]);
+    for (let i = r.b; i >= r.a; i--) x.lineTo(i * SURF_STEP, top[i]);
+    x.closePath();
+  };
+
+  for (const r of regions) {
+    if (r.sg > 0) {
+      // FILL THE POLYGON DIRECTLY. Clipping to the region and then painting a
+      // rect through it kept coming back empty — a clip is only as good as the
+      // path, and a region whose ends touch a NaN sample degenerates silently.
+      // Filling the path itself cannot half-work: either the polygon has area
+      // or it does not.
+      let lo = Infinity, hi = -Infinity;
+      for (let i = r.a; i <= r.b; i++) { lo = Math.min(lo, cur.y[i]); hi = Math.max(hi, top[i]); }
+      regionPath(r);
+      x.fillStyle = P.solid; x.fill();
+      x.save(); x.globalAlpha = 0.45; x.fillStyle = P.dark;
+      regionPath(r); x.fill(); x.restore();
+      if (rock) {
+        x.save();
+        regionPath(r); x.clip();
+        const x0 = Math.floor(r.a * SURF_STEP / TILE) * TILE, x1 = (r.b + 1) * SURF_STEP;
+        for (let yy = Math.floor(lo / TILE) * TILE; yy < hi + TILE; yy += TILE)
+          for (let xx = x0; xx < x1 + TILE; xx += TILE) {
+            const sx = xx % ROCK_TW, sy = yy % ROCK_TH;
+            if (sx + TILE > ROCK_TW || sy + TILE > ROCK_TH) continue;
+            x.globalAlpha = 0.7;
+            x.drawImage(rock, sx, sy, TILE, TILE, xx, yy, TILE, TILE);
+          }
+        x.restore();
+      }
+    } else {
+      // the curve sits BELOW: cut the grid's square shoulder away
+      x.save();
+      x.globalCompositeOperation = 'destination-out';
+      regionPath(r);
+      x.fillStyle = '#000'; x.fill();
+      x.restore();
+    }
+  }
+
+  // THE CREST, as one continuous stroked polyline rather than per-column rects.
+  // Stroking is also what lets it follow a slope without stair-stepping.
+  const strokeCurve = (col, wdt, off, alpha) => {
+    x.save();
+    x.globalAlpha = alpha;
+    x.strokeStyle = col; x.lineWidth = wdt;
+    x.lineJoin = 'round'; x.lineCap = 'round';
+    x.beginPath();
+    let started = false;
+    for (let i = 0; i < cur.N; i++) {
+      if (isNaN(cur.y[i])) { started = false; continue; }
+      const X = i * SURF_STEP, Y = cur.y[i] + off;
+      if (!started) { x.moveTo(X, Y); started = true; } else x.lineTo(X, Y);
+    }
+    x.stroke();
+    x.restore();
+  };
+  strokeCurve(P.dark, 7, 6, 0.34);     // the shadow step under the lip
+  strokeCurve(P.edge, 3, 1, 0.8);      // the lit crest itself
+}
+
 function organicSilhouettePass(x) {
   const g = G.grid;
   if (!g || !g.length || !g[0]) return;
