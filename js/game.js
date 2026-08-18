@@ -4619,6 +4619,7 @@ function renderTileLayer(P) {
   // with neither a lit crest nor a broken underside — a flat top and a flat
   // bottom, which is a rectangle however wobbly you make its outline.
   if (G.roomDef) organicSilhouettePass(tctx);
+  if (G.roomDef) slabSilhouettePass(tctx);  // §10.3 — the other three sides
   if (G.roomDef) surfaceCurvePass(tctx);   // §10.1 — the surface stops being cells
   if (G.roomDef) edgeGrammarPass(tctx);
   // §9.1 — and lift the whole plane. Pushing the background down is only half
@@ -4808,6 +4809,86 @@ function surfaceCurve() {
 // rises above the grid line, REMOVE it where the curve falls below, then lay
 // the lit crest along the result. Bounded per column to the band around the
 // surface, so the worst a bug can do is roughen one strip of ground.
+// The curve owns the TOP surface. This owns the other three sides.
+//
+// Six rooms side by side made it obvious that fixing only the top was fixing
+// the half nobody was complaining about in half the game: in the Conduits, the
+// Archives and the Cache the floating slabs ARE the terrain the player looks
+// at, and they were still rectangles with straight vertical faces and a flat
+// underside — a rolling top edge on a box is still a box.
+//
+// Same asymmetry as the surface curve, for the same reason: material is ADDED
+// outward and downward freely, because inventing silhouette can never remove
+// ground she stands on, while cutting inward is capped hard.
+function slabSilhouettePass(x) {
+  const g = G.grid;
+  if (!g || !g.length || !g[0]) return;
+  const Wt = g[0].length, Ht = g.length;
+  const sol = (tx, ty) => {
+    if (tx < 0 || ty < 0 || tx >= Wt || ty >= Ht) return false;
+    const ch = g[ty][tx]; return ch === '#' || ch === 'B' || ch === '=';
+  };
+  const P = PAL[G.roomDef.zone] || PAL.A;
+  const th = (typeof terrainTheme === 'function') ? terrainTheme() : null;
+  const HANG = th ? Math.min(22, th.skirt) : 16;
+  const h1 = (n) => { const s = Math.sin(n * 127.1) * 43758.5453; return s - Math.floor(s); };
+  const vn = (v) => { const i = Math.floor(v), f = v - i, u = f * f * (3 - 2 * f); return h1(i) * (1 - u) + h1(i + 1) * u; };
+
+  // ---- UNDERSIDES: hang material off every exposed bottom ------------------
+  for (let ty = 0; ty < Ht; ty++) {
+    let tx = 0;
+    while (tx < Wt) {
+      if (!(sol(tx, ty) && !sol(tx, ty + 1))) { tx++; continue; }
+      let tx2 = tx;
+      while (tx2 + 1 < Wt && sol(tx2 + 1, ty) && !sol(tx2 + 1, ty + 1)) tx2++;
+      const X0 = tx * TILE, X1 = (tx2 + 1) * TILE, YB = (ty + 1) * TILE;
+      x.save();
+      x.beginPath();
+      x.moveTo(X0, YB - 1);
+      for (let X = X0; X <= X1; X += 4) {
+        // most columns hang short and a few hang long, so the line BREAKS
+        // rather than merely wobbling — a uniform fringe is another ruler
+        const n = vn(X / 26 + ty * 3.1);
+        const hang = n > 0.66 ? HANG * (0.5 + n * 0.5) : HANG * 0.18 * n;
+        x.lineTo(X, YB + hang);
+      }
+      x.lineTo(X1, YB - 1);
+      x.closePath();
+      x.fillStyle = P.solid; x.fill();
+      x.globalAlpha = 0.62; x.fillStyle = P.dark; x.fill();
+      x.restore();
+      tx = tx2 + 1;
+    }
+  }
+
+  // ---- VERTICAL FACES: add an irregular skin so the wall is not a ruler ----
+  for (let tx = 0; tx < Wt; tx++) {
+    for (const dir of [-1, 1]) {
+      let ty = 0;
+      while (ty < Ht) {
+        if (!(sol(tx, ty) && !sol(tx + dir, ty))) { ty++; continue; }
+        let ty2 = ty;
+        while (ty2 + 1 < Ht && sol(tx, ty2 + 1) && !sol(tx + dir, ty2 + 1)) ty2++;
+        const XE = dir < 0 ? tx * TILE : (tx + 1) * TILE;
+        const Y0 = ty * TILE, Y1 = (ty2 + 1) * TILE;
+        x.save();
+        x.beginPath();
+        x.moveTo(XE, Y0);
+        for (let Y = Y0; Y <= Y1; Y += 4) {
+          const n = vn(Y / 23 + tx * 5.7 + (dir < 0 ? 0 : 41));
+          x.lineTo(XE + dir * n * 9, Y);         // outward only: never eats the slab
+        }
+        x.lineTo(XE, Y1);
+        x.closePath();
+        x.fillStyle = P.solid; x.fill();
+        x.globalAlpha = 0.5; x.fillStyle = P.dark; x.fill();
+        x.restore();
+        ty = ty2 + 1;
+      }
+    }
+  }
+}
+
 function surfaceCurvePass(x) {
   const cur = surfaceCurve();
   if (!cur) return;
@@ -4820,6 +4901,13 @@ function surfaceCurvePass(x) {
   const rock = (typeof isHero === 'function' && isHero()) ? null
              : (typeof rockTex === 'function' ? rockTex(G.roomDef.zone) : null);
   const W = Wt * TILE, H = Ht * TILE;
+
+  // a copy of the finished tile layer, so material can be read while the layer
+  // itself is being written
+  const surfSnap = document.createElement('canvas');
+  surfSnap.width = W; surfSnap.height = H;
+  const surfSnapCtx = surfSnap.getContext('2d', { willReadFrequently: true });
+  surfSnapCtx.drawImage(tileCv, 0, 0);
 
   // the grid's own surface height per sample, for comparison against the curve
   const top = new Float32Array(cur.N).fill(NaN);
@@ -4858,30 +4946,49 @@ function surfaceCurvePass(x) {
 
   for (const r of regions) {
     if (r.sg > 0) {
-      // FILL THE POLYGON DIRECTLY. Clipping to the region and then painting a
-      // rect through it kept coming back empty — a clip is only as good as the
-      // path, and a region whose ends touch a NaN sample degenerates silently.
-      // Filling the path itself cannot half-work: either the polygon has area
-      // or it does not.
+      // EXTEND THE REAL MATERIAL UPWARD, do not repaint a lookalike. Filling
+      // the added band with P.solid + P.dark + a rock overlay produced a tone
+      // that did not match the tiles below it, so the old straight tile edge
+      // came back as a SEAM: a rolling ridge sitting on a flat shelf, which is
+      // worse than the flat shelf alone. Copying the drawn pixels from just
+      // under the grid line and tiling them upward cannot mismatch, because it
+      // is the same material.
+      // FILL THE POLYGON, and take the colour FROM the material rather than
+      // guessing it. Two things were learned the hard way here: drawing through
+      // a clip on this path renders nothing, while filling the same path works
+      // — so the fill is the mechanism; and painting the band in palette
+      // colours produced a tone that did not match the tiles, which brought the
+      // old straight tile edge back as a visible SEAM. A ridge sitting on a
+      // flat shelf is worse than the shelf alone. Sampling the drawn material
+      // just under the grid line cannot mismatch it.
+      const rx = r.a * SURF_STEP, rw = (r.b - r.a + 1) * SURF_STEP;
       let lo = Infinity, hi = -Infinity;
       for (let i = r.a; i <= r.b; i++) { lo = Math.min(lo, cur.y[i]); hi = Math.max(hi, top[i]); }
+      let cr = 0, cg = 0, cb = 0, cn = 0;
+      try {
+        // 18px DOWN, not 2. The passes before this one paint a lit crest and a
+        // shadow step in the first few px under the tile top, so sampling there
+        // reads the highlight instead of the material and the added mass came
+        // out pale — a bright shelf instead of an invisible join.
+        const sy = Math.max(0, Math.min(H - 6, hi + 18));
+        const sd = surfSnapCtx.getImageData(Math.max(0, rx), sy, Math.max(1, Math.min(rw, W - rx)), 5).data;
+        for (let q = 0; q < sd.length; q += 16) {
+          if (sd[q + 3] < 60) continue;
+          cr += sd[q]; cg += sd[q + 1]; cb += sd[q + 2]; cn++;
+        }
+      } catch (e) { /* fall through to the palette */ }
       regionPath(r);
-      x.fillStyle = P.solid; x.fill();
-      x.save(); x.globalAlpha = 0.45; x.fillStyle = P.dark;
-      regionPath(r); x.fill(); x.restore();
-      if (rock) {
-        x.save();
-        regionPath(r); x.clip();
-        const x0 = Math.floor(r.a * SURF_STEP / TILE) * TILE, x1 = (r.b + 1) * SURF_STEP;
-        for (let yy = Math.floor(lo / TILE) * TILE; yy < hi + TILE; yy += TILE)
-          for (let xx = x0; xx < x1 + TILE; xx += TILE) {
-            const sx = xx % ROCK_TW, sy = yy % ROCK_TH;
-            if (sx + TILE > ROCK_TW || sy + TILE > ROCK_TH) continue;
-            x.globalAlpha = 0.7;
-            x.drawImage(rock, sx, sy, TILE, TILE, xx, yy, TILE, TILE);
-          }
-        x.restore();
-      }
+      x.fillStyle = cn ? 'rgb(' + Math.round(cr / cn) + ',' + Math.round(cg / cn) + ',' +
+                                  Math.round(cb / cn) + ')' : P.solid;
+      x.fill();
+      // a touch of depth so the added mass is not a flat plate of one colour
+      x.save();
+      regionPath(r); x.clip();
+      const gg = x.createLinearGradient(0, lo, 0, hi + TILE);
+      gg.addColorStop(0, 'rgba(255,255,255,0.03)');
+      gg.addColorStop(1, 'rgba(0,0,0,0.22)');
+      x.fillStyle = gg; x.fillRect(rx, lo, rw, hi - lo + TILE);
+      x.restore();
     } else {
       // the curve sits BELOW: cut the grid's square shoulder away
       x.save();
