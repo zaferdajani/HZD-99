@@ -4742,7 +4742,7 @@ function fbm1(x, seed) {
 // surface instead, which is just as safe and does not cap the shape.
 //
 // The collider never learns about any of this. She walks the same squares.
-let surfCurve = null, surfRoom = null;
+let surfCurve = null, surfRoom = null, surfSnapCv = null;
 const SURF_STEP = 4;                 // horizontal sampling, well under a tile
 
 function buildSurfaceCurve() {
@@ -4998,9 +4998,16 @@ function surfaceCurvePass(x) {
 
   // a copy of the finished tile layer, so material can be read while the layer
   // itself is being written
-  const surfSnap = document.createElement('canvas');
-  surfSnap.width = W; surfSnap.height = H;
+  // REUSED, not reallocated. This pass ran a fresh full-room canvas allocation
+  // plus a full-canvas draw on every room render, and tests/tutor.cjs — which
+  // walks the whole opening under a time budget — failed only when the suite
+  // was running everything else alongside it, three times for three alone.
+  // That is the signature of a load-sensitive cost, not a broken step.
+  if (!surfSnapCv) surfSnapCv = document.createElement('canvas');
+  if (surfSnapCv.width !== W || surfSnapCv.height !== H) { surfSnapCv.width = W; surfSnapCv.height = H; }
+  const surfSnap = surfSnapCv;
   const surfSnapCtx = surfSnap.getContext('2d', { willReadFrequently: true });
+  surfSnapCtx.clearRect(0, 0, W, H);
   surfSnapCtx.drawImage(tileCv, 0, 0);
 
   // the grid's own surface height per sample — taken FROM the curve, which
@@ -8891,7 +8898,18 @@ function drawWorldFrame() {
   // the background exists alone on the canvas, so it is the only honest place
   // to measure it. Off unless a harness asks: it costs a full readback.
   if (G.planeProbe) G.planeProbe.bg = framePlaneStats();
-  drawDepthPlane('edge');            // the band she stands on, behind the cast
+  // THE MID PLATE IS NOT DRAWN. It was the second floor: a ground-level wreck
+  // field with its own rail run and ground edge, so wherever it was placed it
+  // read as a floor, and the player could not tell which of the two was hers.
+  // Pushing it back — half parallax, dimmed, lifted clear of her line — helped
+  // and did not fix it, because the plate DEPICTS ground and a depicted ground
+  // line competes at any distance.
+  //
+  // The rule it breaks is about depth, not about art: terrain-like shapes may
+  // not sit at the player's plane. The plates stay in the repo, keyed and
+  // archived; a distant wreck field belongs in drawBG with the skyline, and
+  // that is where it should return. The near plate stays — a foreground
+  // occluder crosses IN FRONT of her and can never be mistaken for footing.
   c.save();
   c.translate(-Math.round(camSX()), -Math.round(camSY()));
   drawLair();                       // behind the level — see the LAIR table
@@ -9415,9 +9433,20 @@ function drawDepthPlane(kind) {
   const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[key];
   if (!im || !im.naturalWidth) return;
   const near = kind === 'fore';
-  // fore sits nearer, so it is drawn larger and scrolls faster than the world
-  const par = near ? 1.16 : 0.82;
-  const scale = (near ? 0.46 : 0.72) * 540 / im.naturalHeight;
+  // THE DOUBLE FLOOR. The mid plate used to sit at 0.82 parallax with its ground
+  // band just above the walk line, which made it read as a SECOND FLOOR — it
+  // carries a rail run and a ground edge of its own, so the player saw a wavy
+  // organic floor and a flat one and could not tell which was hers. Suppressing
+  // the depth planes and re-shooting the same room proved it: one floor,
+  // unmistakably organic, the moment this plate was off.
+  //
+  // It is not deleted, because the ART is right and the rule is about DEPTH:
+  // background shapes belong in the backdrop, not at the player's plane. So the
+  // mid plate moves back to where it is scenery — half the parallax, smaller,
+  // dimmed, and lifted so its own ground line sits well ABOVE hers and can
+  // never be mistaken for something she could stand on.
+  const par = near ? 1.16 : 0.42;
+  const scale = (near ? 0.46 : 0.52) * 540 / im.naturalHeight;
   const w = im.naturalWidth * scale, h = im.naturalHeight * scale;
   // ANCHOR TO THE ROOM'S FLOOR, NOT TO THE VIEWPORT. Anchoring to the bottom of
   // the screen puts the crest wherever the camera happens to be, so she stood
@@ -9441,7 +9470,7 @@ function drawDepthPlane(kind) {
   // line. Anchoring it below put the whole plate under the tile layer and left
   // only a sliver of glow showing. The near plate is the opposite: it hangs off
   // the bottom of the frame and only its top outline should be in shot.
-  const y = near ? floorY - h * 0.22 : floorY - h * 0.86;
+  const y = near ? floorY - h * 0.22 : floorY - h * 1.02;   // mid: fully above her line
   let x = -((cam.x * par) % w);
   if (x > 0) x -= w;
   // MIRROR EVERY OTHER STAMP. This plate is one painting repeated along the
