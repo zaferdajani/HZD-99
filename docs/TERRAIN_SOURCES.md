@@ -184,3 +184,26 @@ Measured after: longest flat run **A1 67→27px, C3 71→24px**. **D3 is still
 (same chars, same two rows), so the cause is zone-specific and not yet found.
 It is the same room as the residual §10.2 failures. Next session takes the
 D3 floor specifically, with the profiler above as the instrument.
+
+### §7 FOLLOW-UP: D3 solved by the sibling session (2026-08-17)
+
+The Archives floor left open above — sd 1.28px, a 96px stretch at one exact
+height — was found and fixed by the sibling ("the ground floor rolls too, and
+the seam that was hiding it"). Re-measured with the same profiler, on the
+merged tree:
+
+| room | sd before | sd after | longest flat run before → after |
+|---|---|---|---|
+| A1 | 2.11px | 13.28px | 27 → 28px |
+| C3 | 3.48px | 15.03px | 24 → 64px |
+| D3 | **1.93px** | **12.57px** | **96 → 22px** |
+
+**A measurement note worth keeping, because it nearly produced a false
+alarm:** the first re-measure reported every room clamping at exactly -20px
+with flat runs jumping to ~105px, which reads like a hard clip flattening the
+tops of the roll. It was not the renderer — -20 was the profiler's own scan
+window, which started 20px above the tile line and could not see a surface
+that now rises further than that. Widening the window to 48px produced the
+table above. The instrument needed re-ranging before its output meant
+anything; a profiler that saturates reports a plateau that is entirely its
+own.
