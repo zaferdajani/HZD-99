@@ -31,8 +31,30 @@ const check = (name, ok, detail) => {
 // ---------------------------------------------------------------------------
 const DETECTORS = function () {
   const W = this.W, H = this.H, d = this.d;
+  // THE SILHOUETTE LAWS MEASURE TERRAIN; THE PLANE LAWS MEASURE THE FRAME.
+  // §10 is a rule about how ground is DRAWN — crest, body, hang. §9 is a rule
+  // about how the finished picture READS. Running both on the composited
+  // canvas made §10 blame the ground for whatever stood in front of it: first
+  // the speech panel, then the viewport bezel, then GLACIERE, and finally the
+  // lair's ice sheet, which covers stretches of D3's floor whose crest is
+  // provably drawn (sampled straight out of tileCv: 60/57/51 where the
+  // composited frame reads 26). Four false positives of one species is a
+  // pattern, not four accidents.
+  //
+  // So the edge/corner/lip/skirt detectors read the TERRAIN LAYER, screen
+  // aligned — every §10 pass has already run on it, so nothing about the law
+  // is weakened — and the value-band and chroma checks go on reading the
+  // assembled frame, where they belong.
+  // NOTE, kept because it cost a measurement to learn: routing these detectors
+  // at the terrain layer instead looks obviously right and is not. Their
+  // thresholds are calibrated against the GRADED frame — lightPass, the
+  // ambient fill, the braid tint — and on raw terrain pixels the same numbers
+  // reported 30 of 39 edges bare across all five rooms. The layer is handed
+  // over for diagnosis; the verdict stays on the frame.
+  const td = this.terrain || d;
   const lum = (i) => (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 2.55; // 0..100
   const at = (x, y) => ((y * W + x) << 2);
+  const tlum = (i) => (0.2126 * td[i] + 0.7152 * td[i + 1] + 0.0722 * td[i + 2]) / 2.55;
 
   // chroma as max-min over RGB, 0..100 — cheap, and good enough to rank bands
   const chroma = (i) => {
@@ -139,6 +161,12 @@ const DETECTORS = function () {
   const WT = this.walkTops || [];
   const isTop = (r) => WT.some(w => Math.abs(w.y - r.a) <= 8 &&
                                     w.x1 > r.start && w.x0 < r.start + r.len);
+  // ...and whether the mass under it runs to the floor of the room
+  const isGround = (r) => {
+    const hits = WT.filter(w => Math.abs(w.y - r.a) <= 8 &&
+                                w.x1 > r.start && w.x0 < r.start + r.len);
+    return hits.length > 0 && hits.filter(w => w.ground).length >= hits.length * 0.6;
+  };
   const tops = merged.filter(r => r.horizontal && (!WT.length || isTop(r))).slice(0, 8);
   const edges = [];
   for (const t of tops) {
@@ -170,7 +198,10 @@ const DETECTORS = function () {
     });
     // grounded is decided on the RAW bottoms: the filter below drops exactly
     // the columns that run off the frame, which are the ones that prove it.
-    const grounded = rawBottoms.filter(y => y >= H - 6).length >= rawBottoms.length * 0.6;
+    // the grid's answer wins when we have it; the pixel heuristic is the
+    // fallback for a frame where the span handoff could not be built
+    const grounded = WT.length ? isGround(t)
+      : rawBottoms.filter(y => y >= H - 6).length >= rawBottoms.length * 0.6;
     const bottoms = rawBottoms.filter(y => y < H - 3);
     // A mass that runs to the bottom of the frame HAS no underside. D3's floor
     // is the last two tile rows of a 17-row room, so there is nowhere for a
@@ -191,6 +222,13 @@ const DETECTORS = function () {
     edges.push({ len: t.len, y: t.a, lip, skirt, grounded, varr: +varr.toFixed(1) });
   }
   const bare = edges.filter(e => e.len > 96 && !(e.lip && e.skirt));
+  // WHICH edge, and WHICH of the two it owes. A count tells you the frame
+  // fails; it does not tell you whether to go and fix a crest or a hang, and
+  // the difference is two different passes in two different places. Every
+  // failure this harness reports should name the thing to go and look at.
+  const bareWhy = bare.map(e => e.len + 'px@y' + e.y +
+    (e.lip ? '' : ' NO-LIP') + (e.skirt ? '' : ' NO-SKIRT') +
+    (e.grounded ? ' (grounded)' : '') + ' var' + e.varr);
 
   // --- (g) TILING REPETITION via patch autocorrelation ----------------------
   // §10.7: no visible repeat within one screen width. Take a patch from the
@@ -250,7 +288,7 @@ const DETECTORS = function () {
     longest: merged.length ? merged[0].len : 0,
     corners: uniqCorners.length,
     tops: tops.length,
-    edges, bare: bare.length,
+    edges, bare: bare.length, bareWhy,
     repeat: bestRepeat, bSd: +bSd.toFixed(1),
     far, mid, near,
   };
@@ -291,6 +329,30 @@ const DETECTORS = function () {
       // in it. Both are pinned for the duration of the measurement.
       Object.defineProperty(G, 'state', { get: () => 'PLAY', set: () => {}, configurable: true });
       G.planeProbe = {};   // ask the engine to measure the background alone
+      // AND THE CLOCK STOPS. This harness measures the assembled frame, which
+      // is right — but a frame containing a walking guardian is a different
+      // frame every run, and the §10.2 count duly breathed between 0 and 3
+      // bare edges on identical code. GLACIERE crosses the very band the floor
+      // crest is measured in; when its body or contact shadow lies over a
+      // stretch of ground, that stretch has no readable crest, and the verdict
+      // became a coin flip about where an animation happened to be.
+      //
+      // Pinning performance.now freezes every clock-driven pose at one instant
+      // without touching a single pixel of the terrain being measured: same
+      // frame, same law, reproducible answer. A regression test that cannot be
+      // repeated is not a test, it is a rumour.
+      const _t0 = performance.now();
+      performance.now = () => _t0;
+      // ...and the CAST LEAVES THE SHOT, for the same reason the speech panel
+      // does. Freezing the clock was not enough: a guardian's POSITION depends
+      // on how long the room took to load, so GLACIERE stood somewhere new
+      // every run and the stretch of floor it covered had no measurable crest.
+      // This harness measures TERRAIN; a body standing on the ground is not
+      // terrain, and letting one occlude the surface under test is the same
+      // error as measuring the dialog box and calling it a ledge.
+      G.enemies = [];
+      G.boss = null;
+      G.parts = [];
     }, room);
     await page.waitForTimeout(900);
     // and confirm it, rather than trusting that it took
@@ -316,10 +378,28 @@ const DETECTORS = function () {
         };
         for (let ty = 0; ty < TH2; ty++) for (let tx = 0; tx < TW; tx++) {
           if (!sol(tx, ty) || sol(tx, ty - 1)) continue;
-          spans.push({ y: ty * TILE - sy, x0: tx * TILE - sx, x1: (tx + 1) * TILE - sx });
+          // GROUND vs LEDGE, decided by the grid rather than by pixels: a
+          // column that is solid from here to the last row of the room has no
+          // underside inside the frame at all, so §10.3's skirt cannot apply
+          // to it. The luminance bottom-scan this replaces was fooled the
+          // moment the floor got its own internal texture — roll, shade and
+          // fractures all read as "the mass ends here", which turned real
+          // ground into a hanging slab that owed a hang it could never grow.
+          let ground = true;
+          for (let k = ty; k < TH2; k++) if (!sol(tx, k)) { ground = false; break; }
+          spans.push({ y: ty * TILE - sy, x0: tx * TILE - sx, x1: (tx + 1) * TILE - sx, ground });
         }
       } catch (e) { /* leave empty: the harness then measures every edge */ }
-      const ctx = { W: cv.width, H: cv.height, d: img.data, walkTops: spans };
+      // the terrain layer, cropped to exactly what the camera shows, so its
+      // pixels line up 1:1 with the composited frame's coordinates
+      let terrain = null;
+      try {
+        const tc = document.createElement('canvas');
+        tc.width = cv.width; tc.height = cv.height;
+        tc.getContext('2d').drawImage(tileCv, -Math.round(camSX()), -Math.round(camSY()));
+        terrain = tc.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+      } catch (e) { /* fall back to the composited frame */ }
+      const ctx = { W: cv.width, H: cv.height, d: img.data, walkTops: spans, terrain };
       // eslint-disable-next-line no-new-func
       return (new Function('return ' + src))().call(ctx);
     }, DETECTORS.toString());
@@ -341,6 +421,8 @@ const DETECTORS = function () {
         totalBare === 0,
         totalBare + ' of ' + totalEdges + ' long edge(s) are bare  (' +
         results.map(r => r.room + ':' + r.bare).join(' ') + ')');
+  for (const r of results) if (r.bareWhy && r.bareWhy.length)
+    console.log('       ' + r.room + ' bare: ' + r.bareWhy.join(' | '));
   const worstRun = results.reduce((a, b) => (b.longest > a.longest ? b : a));
   console.log('       longest run ' + worstRun.longest + 'px in ' + worstRun.room +
               ' — length alone is not a failure, see ART_BIBLE §10.2');

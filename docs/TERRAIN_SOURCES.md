@@ -207,3 +207,47 @@ that now rises further than that. Widening the window to 48px produced the
 table above. The instrument needed re-ranging before its output meant
 anything; a profiler that saturates reports a plateau that is entirely its
 own.
+
+## 8. THE D3 CREST, AND FOUR FALSE POSITIVES OF ONE SPECIES (2026-08-17)
+
+Chasing the last red in the suite produced three fixes, one instrument
+upgrade, and one recorded dead end.
+
+**Fixed in the renderer.** The surface roll (§7) lifts ground by up to ~13px,
+but the crest pass searched for the surface only 6px above the tile line. On a
+raised column it found rock at once and painted the lit lip SIX PIXELS INSIDE
+the mass, where nothing can see it — a bug introduced by the roll itself. The
+search now starts 28px up, clearing the deepest roll any kingdom asks for. The
+sub-crest shadow also scales with the crest's own luminance now (30% on dark
+rock, up to 48% on the Archives' near-white ice), because a lift has nowhere
+to go on a face that already clamps at 255 — the STEP is what reads.
+
+**Fixed in the harness.** `grounded` asked a luminance scan to find the bottom
+of a mass, and the floor's own new texture — roll, shade, fractures — stopped
+that scan mid-body, so real ground read as a hanging slab and was failed for
+lacking an under-hang it cannot grow. It asks the GRID now: a column solid to
+the last row of the room is ground. And every failure names the edge and what
+it owes (`160px@y475 NO-LIP (grounded)`), because a count tells you the frame
+fails without telling you whether to go and fix a crest or a hang.
+
+**Made repeatable.** The count breathed 0-3 bare edges on identical code.
+Freezing the clock was not enough — a guardian's POSITION depends on how long
+the room took to load — so the cast now leaves the shot for a terrain
+measurement, as the speech panel already does. Removing GLACIERE made the
+failure *consistent*, which is the better outcome: it had been covering the
+defect.
+
+**The dead end, kept so it is not repeated.** Routing the §10 detectors at the
+terrain layer instead of the composited frame looks obviously right and is
+not: their thresholds are calibrated against the GRADED frame, and on raw
+terrain pixels the same numbers reported 30 of 39 edges bare across all five
+rooms. Reverted; the layer is still handed over, for diagnosis only.
+
+**What remains, with evidence.** D3 keeps two edges (~160px and ~97px, both
+NO-LIP, both grounded). The crest there is provably DRAWN — sampled out of
+`tileCv` at 60/57/51 where the composited frame reads 26 — and what sits over
+it is the lair's ice sheet. That is scenery in front of ground, the fourth
+false positive of the same species as the speech panel, the viewport bezel,
+and the boss. The floor itself rolls: D3 sd 12.4, longest flat run 22px. The
+harness keeps its `pending` flag until prop occlusion is excluded the way the
+other three now are.

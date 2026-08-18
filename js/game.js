@@ -5101,7 +5101,15 @@ function edgeGrammarPass(x) {
         // already moved it off the tile line, and a crest painted on the tile
         // line instead of on the ROCK is exactly the pasted-on look we are
         // removing.
-        let Y = y0 - 6;
+        // START ABOVE THE ROLL, not above the tile line. This search used to
+        // begin 6px up, which was generous when the only thing above the line
+        // was an erosion lump — and wrong the moment the surface roll began
+        // lifting ground by up to ~13px. On a raised column the walk found
+        // rock at once and painted the crest six pixels INSIDE the mass,
+        // where nothing can see it: the grammar harness read those stretches
+        // as ground with no lit lip, and it was right. 28px clears the
+        // deepest roll any kingdom asks for.
+        let Y = y0 - 28;
         while (Y < y0 + TILE && (px(X, Math.max(0, Y))[3] < 40)) Y++;
         if (Y >= y0 + TILE) continue;
         const [r, gg, b] = px(X, Math.min(Ht * TILE - 1, Y + 3));
@@ -5124,11 +5132,21 @@ function edgeGrammarPass(x) {
         // and the edge stayed invisible. A lit lip is a STEP, so the band just
         // beneath it is pushed down; that reads as an edge at any base value,
         // and it is what the eye actually uses to find the top of a solid.
-        for (let k = h; k < h + 5; k++) {
+        // ...and the step is DEEPER the brighter the material, because on a
+        // near-white face the lift has nowhere to go. The Archives' ice floor
+        // clamps at 255, so a fixed 30% shadow left one stretch of ground in
+        // three frames with no readable crest at all (grammar: "129px@y479
+        // NO-LIP"). The darkening now scales with the crest's own luminance —
+        // dark rock keeps its gentle 30%, white ice gets up to 48% — so the
+        // STEP survives at any base value, which was always the point of
+        // having a step rather than a highlight.
+        const crestL = (0.2126 * r + 0.7152 * gg + 0.0722 * b) / 255;
+        const dark = 0.30 + 0.18 * Math.max(0, Math.min(1, (crestL - 0.45) / 0.45));
+        for (let k = h; k < h + 6; k++) {
           const i = (((Y + k) * W + X) << 2);
           if (d[i + 3] < 40) continue;
-          const t = 1 - (k - h) / 5;
-          const m = 1 - 0.30 * t;
+          const t = 1 - (k - h) / 6;
+          const m = 1 - dark * t;
           d[i]     = Math.round(d[i]     * m);
           d[i + 1] = Math.round(d[i + 1] * m);
           d[i + 2] = Math.round(d[i + 2] * m);
