@@ -218,7 +218,19 @@ Two games, one engine. `index.html` is CLAWBYTE (robo-cat, machine city);
 `odyssey.html` is NOSTOS (the hero's world). Same code, hard-locked to one
 world each by `window.GAME_LOCK`; `isHero()` is the switch.
 
-Live: https://zaferdajani.github.io/odyssey/
+## THE LIVE LINK (owner's standing order, 2026-08-18)
+
+**Live: https://zaferdajani.github.io/HZD-99/**
+
+That is the ONLY URL any session may quote. The old
+`zaferdajani.github.io/odyssey/` path is dead — it returns GitHub's
+"Site not found" 404, so a report that ends with it hands the owner a
+broken link. The name changed; the link changed with it.
+
+It is also the URL the deploy check must md5 against: comparing
+`git show HEAD:index.html` to a 404 page produces a mismatch that looks
+exactly like a failed deploy, and that is how twenty minutes were spent
+chasing a deploy that had in fact succeeded.
 
 ## Commands
 

@@ -1,6 +1,6 @@
 # CLAWBYTE / ODYSSEY — Comprehensive Game Design Document
 *For art and gameplay feedback. Reflects the live build as deployed at
-https://zaferdajani.github.io/odyssey/ — every fact below is taken from the
+https://zaferdajani.github.io/HZD-99/ — every fact below is taken from the
 shipped code and assets, not from intention.*
 
 ---

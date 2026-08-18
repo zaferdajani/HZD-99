@@ -393,4 +393,4 @@ whooshes, sub-heavy impacts. Score richer if you like, but keep impacts dry and 
 eagle, dragon, unicorn, crystal cat), platform and environment paintings, and a playable
 link to the current build.
 
-Playable build: https://zaferdajani.github.io/odyssey/
+Playable build: https://zaferdajani.github.io/HZD-99/

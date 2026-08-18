@@ -11492,6 +11492,14 @@ function mainLoop(tms) {
   // one step on a healthy frame; two or three when the machine is struggling
   let acc = Math.min(raw, SIM_MAX) * (G.state === 'PLAY' ? paceK() : 1);
   if (!(acc > 0)) acc = dt;
+  // THE SIMULATED CLOCK, PUBLISHED — the third measurement hook in this file,
+  // beside G.artProbe and G.planeProbe, and it exists for the same reason they
+  // do. A frame advances min(raw, SIM_MAX) x paceK() seconds of world, NOT the
+  // wall-clock time it took, so on a busy machine the world falls behind the
+  // wall and any harness weighting by real elapsed ms is charging the fight for
+  // time it never got. tests/bosspace.cjs did exactly that and carried a
+  // documented flake for it. One addition per frame, no branch, no allocation.
+  G.simClock = (G.simClock || 0) + acc;
   while (acc > 1e-4) { const st = Math.min(acc, SIM_STEP); update(st); acc -= st; }
   // ONE PREFETCH SLOT PER FRAME, IN EVERY STATE. This used to live inside the
   // PLAY branch of update(), which meant the title screen, the map, a shop and

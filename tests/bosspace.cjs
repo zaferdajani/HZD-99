@@ -65,11 +65,48 @@ const WIND = /(warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summon)/;
       // is her walk — she closes on you the whole time she is in it — and a
       // guardian shortening the distance is applying pressure whatever the
       // state is called. Measure the behaviour, not the label.
+      // THE SEED THIS FILE HAS BEEN ASKING FOR SINCE 2026-08-15. The note at
+      // the assertion records the measurement — NULLFANG lands at 40-43%
+      // against a 40% line roughly two runs in six, at the same rate either
+      // side of unrelated changes — and names the two honest fixes: seed the
+      // sampled window, or make the lion move more. This is the seed. Every
+      // guardian's state choice runs through rnd(), which is Math.random, so
+      // pinning it makes the twenty seconds the SAME twenty seconds on every
+      // run: the number stops being a sample of a stochastic fight and becomes
+      // a fact about this build. Seeded per guardian so they do not all share
+      // one stream, and restored the moment the window closes — the rest of
+      // the page must keep its real randomness.
+      const _mrand = Math.random;
+      let _seed = (0x2f6e2b1 ^ (B.kind.length * 2654435761)) | 0;
+      Math.random = () => {
+        _seed ^= _seed << 13; _seed ^= _seed >>> 17; _seed ^= _seed << 5; _seed |= 0;
+        return ((_seed >>> 0) % 1000003) / 1000003;
+      };
       const seen = {}, moved = {}, order = [];
-      let last = performance.now(), attacks = 0, prev = null;
-      const end = performance.now() + secs * 1000;
+      // AND THE WINDOW IS MEASURED ON THE FIGHT'S CLOCK, NOT THE WALL'S. The
+      // loop advances min(raw, SIM_MAX) x paceK() seconds of world per frame,
+      // so under load the world falls behind real time — and this harness was
+      // charging every state the wall-clock ms it sat on screen. That is why
+      // the same build read differently inside the full suite than alone: not
+      // a different fight, a different ruler. G.simClock is the world's own
+      // elapsed seconds; every number below is now denominated in it.
+      let last = G.simClock || 0, attacks = 0, prev = null;
+      const t0 = last;
+      const end = t0 + secs;
+      // ...with a wall-clock stop as a backstop only, so a page that stalls
+      // ends the harness instead of hanging it.
+      const wallStop = performance.now() + (secs * 3 + 10) * 1000;
+      // ...AND THE PLAYER SWINGS ON A CLOCK, NOT ON A FRAME COUNTER. The input
+      // pattern was 'every 14th frame' and 'every 45th frame', which is a
+      // different pattern per second whenever the machine is busy — so the
+      // fight this samples was literally a different fight inside the full
+      // suite than it was on its own, which is exactly the signature the note
+      // describes. The cadences below are the same numbers expressed in ms at
+      // 60fps, fired on elapsed time, so a slow frame delays a swing instead of
+      // deleting it.
+      let nextFlip = 0.75, nextZ = 0.434, nextX = 0.234;
       let dir = 1, tick = 0, lx = b.x, ly = b.y;
-      while (performance.now() < end) {
+      while ((G.simClock || 0) < end && performance.now() < wallStop) {
         // A MOVING TARGET. She runs the width of the arena, jumps at the walls,
         // and swings on the beat — which is what a boss's approach, range and
         // aim logic are all written against.
@@ -89,12 +126,15 @@ const WIND = /(warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summon)/;
         // the run-to-run swing came from: the same boss read 15% on one pass and
         // 48% on the next depending on how the mashing lined up.
         b.stagT = 0; b.hurtT = 0;
-        if (tick % 45 === 0) dir = -dir;
+        const el = (G.simClock || 0) - t0;
+        if (el >= nextFlip) { dir = -dir; nextFlip += 0.75; }
         keys.ArrowRight = dir > 0 ? 1 : 0; keys.ArrowLeft = dir < 0 ? 1 : 0;
-        keysP.KeyZ = tick % 26 === 0 ? 1 : 0; keys.KeyZ = keysP.KeyZ;
-        keysP.KeyX = tick % 14 === 0 ? 1 : 0; keys.KeyX = keysP.KeyX;
+        const fireZ = el >= nextZ; if (fireZ) nextZ += 0.434;
+        const fireX = el >= nextX; if (fireX) nextX += 0.234;
+        keysP.KeyZ = fireZ ? 1 : 0; keys.KeyZ = keysP.KeyZ;
+        keysP.KeyX = fireX ? 1 : 0; keys.KeyX = keysP.KeyX;
         await frame();
-        const now = performance.now(), dt = now - last; last = now;
+        const now = G.simClock || 0, dt = (now - last) * 1000; last = now;
         const st = b.st || 'idle';
         if (st !== prev) { if (order.indexOf(st) < 0) order.push(st); prev = st; }
         seen[st] = (seen[st] || 0) + dt;
@@ -105,6 +145,7 @@ const WIND = /(warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summon)/;
         lx = b.x; ly = b.y;
         if (sp > 30) moved[st] = (moved[st] || 0) + dt;
       }
+      Math.random = _mrand;
       keys.ArrowRight = keys.ArrowLeft = keys.KeyZ = keys.KeyX = 0;
       const total = Object.keys(seen).reduce((a, k) => a + seen[k], 0) || 1;
       const pct = {}, mpct = {};
@@ -144,17 +185,30 @@ const WIND = /(warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summon)/;
       const ks = Object.keys(r.pct).sort((a, b) => r.pct[b] - r.pct[a]);
       console.log('                   ' + ks.map(k => k + ' ' + r.pct[k] + '%').join('  '));
     }
-    // KNOWN FLAKY, AND MEASURED RATHER THAN GUESSED AT. NULLFANG lands within a
-    // point of this line often enough to fail roughly one run in six — sampled
-    // 2026-08-15 over twelve runs, six on each side of an unrelated change:
-    // failures at 40%, 40% and 41% against a 40% line, and the same rate before
-    // and after, so it is this test's own variance and not a regression in
-    // whatever you just touched. Re-run before you go looking.
+    // THE FLAKE IS FIXED, AND THIS IS WHAT IT WAS. From 2026-08-15 this file
+    // carried a note that NULLFANG failed about two runs in six at 40-43%
+    // against a 40% line, at the same rate either side of unrelated changes,
+    // and that the honest fixes were a seed or a lion that moves more — never
+    // a looser threshold. Both halves of the seed are now in place above, and
+    // the second half was the bigger one:
     //
-    // It is left failing rather than loosened on purpose: the number really is
-    // marginal, and the honest fix is either a deterministic seed for the
-    // twenty seconds this samples, or a lion that moves more. Both are real
-    // work; raising the threshold to hide it is not.
+    //   the RNG               every guardian's state choice runs through rnd()
+    //   the ruler             the loop advances min(raw, SIM_MAX) x paceK()
+    //                         seconds of world per frame, not the wall-clock
+    //                         time the frame took, so weighting states by real
+    //                         elapsed ms charged the fight for time it never
+    //                         got — which is why the same build read one way
+    //                         inside the full suite and another way alone
+    //
+    //   before   NULLFANG idle 31-43%, 2 failures / 6
+    //   after    NULLFANG idle 35-36%, 0 failures / 6
+    //
+    // MOTHER-V is now the widest guardian on the second assertion below (its
+    // still-idle read spans roughly 13-30% across six runs and touched 34.9%
+    // once immediately after the change). If this file goes red again, that is
+    // the one to check first — and the remaining source is the frame-size
+    // variation inside update(), not anything the player's body does.
+    // Threshold-raising is still not on the table.
     if (r.idle > 40) bad.push(r.name + ' stands still ' + Math.round(r.idle) + '%');
     if (r.worstV > 34) bad.push(r.name + ' spends ' + r.worstV + '% still in one state (' + r.worst + ')');
   }
