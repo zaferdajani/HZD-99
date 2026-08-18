@@ -4779,8 +4779,20 @@ function buildSurfaceCurve() {
     // real platform: the mound came out as a hollow arch. Rising above the grid
     // invents new material and is free; falling below destroys material she is
     // meant to stand on, so it is capped at a few px of erosion.
-    const t = raw[i];
-    if (!isNaN(t)) y = Math.max(t - 46, Math.min(y, t + 6));
+    // CLAMP AGAINST THE SMOOTHED PROFILE, NEVER THE RAW GRID. Clamping to
+    // raw[i] re-quantised the curve onto the staircase it had just finished
+    // ramping: raw jumps a full tile between adjacent columns at a step, so a
+    // ±6px cut cap measured against it forces the surface back into a square
+    // shoulder. The floor rolled everywhere except at steps — the one place it
+    // matters. N2 is the ramped profile, so bounding deviation against it keeps
+    // the ramp and still stops the surface sinking away from her feet.
+    // ...but a PLATFORM clamps against its own raw top, not the ramp. Ground
+    // and platforms want opposite things here: ground should ramp through its
+    // steps, while a platform has a defined top the player reads as "jump onto"
+    // — clamping it to the ramp too dissolved it into a dome and quietly
+    // changed what the level was asking of her.
+    const t = soft[i] ? raw[i] : N2[i];
+    if (!isNaN(t)) y = Math.max(t - (soft[i] ? 14 : 46), Math.min(y, t + 8));
     out[i] = y;
   }
   return { y: out, N, W };
