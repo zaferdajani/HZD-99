@@ -2632,6 +2632,21 @@ function buildFringe() {
   // fewer blades on a machine that is already struggling; the silhouette break
   // survives at three, the lushness does not
   const per = (typeof QUAL !== 'undefined' && !QUAL.glow) ? 3 : 5;
+  // THE COASTLINE THE BLADES GROW ON IS THE ONE THAT IS DRAWN. The surface
+  // curve lifts the painted silhouette as much as 46px above the tile line;
+  // rooting the fringe on the tile line instead put every snow crust and every
+  // blade on a second horizon BELOW the visible one, so the picture had two
+  // ground lines — a rolling one made of rock and a ruled one made of snow.
+  // The straight one is the one the eye finds. Reading the curve here costs
+  // nothing: it is cached per room and this canvas is cached too.
+  const cur = (typeof surfaceCurve === 'function') ? surfaceCurve() : null;
+  const curveY = (wx) => {
+    if (!cur) return null;
+    const i = Math.round(wx / SURF_STEP);
+    if (i < 0 || i >= cur.N) return null;
+    const v = cur.y[i];
+    return isNaN(v) ? null : v;
+  };
   const solid = ch => ch === '#' || ch === '=' || ch === 'B';
   for (let ty = 0; ty < g.length; ty++) for (let tx = 0; tx < g[0].length; tx++) {
     const ch = tileAt(tx, ty);
@@ -2649,7 +2664,12 @@ function buildFringe() {
       // every blade root and crust pool rides the terrain's actual coastline.
       // A shared flat baseline was the last ruler the floor had — hundreds of
       // crust bottoms all sitting on Y+3 add up to one straight line.
-      const gY = Y + (typeof fbm1 === 'function' ? Math.round(fbm1(bx, 641) * 10) : 0);
+      // the curve owns the ground; a floating deck is nowhere near it, so a
+      // sample that lands more than a tile and a half away is not this tile's
+      // surface and the tile line stays the fallback.
+      const cy = curveY(bx);
+      const gY = (cy != null && Math.abs(cy - Y) < TILE * 1.5) ? cy + 2
+        : Y + (typeof fbm1 === 'function' ? Math.round(fbm1(bx, 641) * 10) : 0);
       x.save();
       if (kind === 'grass' || kind === 'frond') {
         x.strokeStyle = kind === 'frond' ? '#8f4fb0' : '#5e8f4a';
@@ -3892,8 +3912,21 @@ function drawTiles(P) {
         // the painted kingdom plate, where one exists, laid over the rock as
         // colour and grime rather than as the surface itself
         if (tex) {
-          c.globalAlpha = 0.3;
-          c.drawImage(tex, X % STRATA_TW, Y % STRATA_TH, TILE, TILE, X, Y, TILE, TILE);
+          // BREAK THE PLATE'S EXACT PERIOD. The rock and the kingdom plate are
+          // both sampled at world position modulo their own width, which is
+          // continuous — the right property — and also exactly periodic, which
+          // is the one the autocorrelation test in tests/grammar.cjs keeps
+          // finding: a patch of C3's floor matched another patch most of a
+          // screen away to within 2.7 luminance units. The plate is an OVERLAY
+          // at a third alpha, so its phase can be shifted per block and its
+          // strength modulated per column without any seam appearing: nothing
+          // structural moves, only how much of which part of the picture lands
+          // where. The rock underneath stays continuous.
+          const ph = (typeof fbm1 === 'function')
+            ? Math.floor(fbm1(Math.floor(X / 128) * 53, 733) * 8) * TILE : 0;
+          c.globalAlpha = (typeof fbm1 === 'function')
+            ? 0.22 + fbm1(X * 0.7 + Y * 0.31, 739) * 0.17 : 0.3;
+          c.drawImage(tex, (X + ph) % STRATA_TW, Y % STRATA_TH, TILE, TILE, X, Y, TILE, TILE);
           c.globalAlpha = 1;
         }
         // depth: tiles buried under other tiles sit further from the light.
@@ -4716,24 +4749,50 @@ function buildSurfaceCurve() {
   const g = G.grid;
   if (!g || !g.length || !g[0]) return null;
   const Wt = g[0].length, Ht = g.length;
-  const sol = (tx, ty) => {
+  const solidAt = (tx, ty) => {
     if (tx < 0 || ty < 0 || tx >= Wt || ty >= Ht) return false;
     const ch = g[ty][tx];
-    return ch === '#' || ch === 'B' || ch === '=';
+    return ch === '#' || ch === 'B';
   };
+  const platAt = (tx, ty) =>
+    tx >= 0 && ty >= 0 && tx < Wt && ty < Ht && g[ty][tx] === '=';
   const W = Wt * TILE, N = Math.ceil(W / SURF_STEP);
   const raw = new Float32Array(N).fill(NaN);
   const soft = new Float32Array(N);          // 1 where the surface is a platform
-  for (let i = 0; i < N; i++) {
-    const tx = Math.floor((i * SURF_STEP) / TILE);
-    // SKIP THE CEILING. Row 0 is solid clear across most rooms, so "topmost
-    // solid" returns the roof and the whole picture gets treated as ground.
+  // A FLOATING DECK IS NOT THIS COLUMN'S GROUND, and mistaking one for the
+  // other is what photographed as "flat boxes on the floor". The surface used
+  // to be "first solid OR platform below the ceiling", so every column under a
+  // mid-air '=' run reported its ground at the DECK's height. The ramp then
+  // blended that height into the real floor on both sides, and the fill pass
+  // duly built the ramp as material — two solid legs sloping from the deck's
+  // ends down to the floor, with an untouched rectangle of backdrop between
+  // them. A table. It is in no collision grid, she walks straight through it,
+  // and its inner faces are the straightest verticals in the room.
+  //
+  // A platform counts as this column's surface only when it is a LIP ON THE
+  // TERRAIN — ground within a tile underneath it — which is the case the
+  // 'soft' branch below was written for. A deck in mid-air is drawn by
+  // drawPlatformRuns, which owns its own crest and skirt; the ground curve
+  // walks underneath it and never sees it.
+  const surfaceOf = (tx) => {
     let ty = 0;
-    while (ty < Ht && sol(tx, ty)) ty++;
-    while (ty < Ht && !sol(tx, ty)) ty++;
-    if (ty >= Ht) continue;
-    raw[i] = ty * TILE;
-    soft[i] = g[ty][tx] === '=' ? 1 : 0;
+    while (ty < Ht && solidAt(tx, ty)) ty++;              // skip the ceiling
+    while (ty < Ht) {
+      while (ty < Ht && !solidAt(tx, ty) && !platAt(tx, ty)) ty++;
+      if (ty >= Ht) return null;
+      if (solidAt(tx, ty)) return { ty, soft: 0 };
+      let k = ty + 1, gap = 0;                             // air under the deck
+      while (k < Ht && !solidAt(tx, k)) { gap++; k++; }
+      if (gap <= 1) return { ty, soft: 1 };
+      ty++;                                                // walk past the deck
+    }
+    return null;
+  };
+  for (let i = 0; i < N; i++) {
+    const s = surfaceOf(Math.floor((i * SURF_STEP) / TILE));
+    if (!s) continue;
+    raw[i] = s.ty * TILE;
+    soft[i] = s.soft;
   }
   // RAMP the steps. A one-tile step is a 32px vertical jump; spreading it over
   // ~1.5 tiles is the single operation that kills the staircase, and it is why
@@ -4796,7 +4855,13 @@ function buildSurfaceCurve() {
     if (!isNaN(t)) y = Math.max(t - (soft[i] ? 14 : 46), Math.min(y, t + 8));
     out[i] = y;
   }
-  return { y: out, raw, N, W };
+  // THE PASS AND THE COLLIDER MUST BOTH MEASURE AGAINST THE SURFACE THIS CURVE
+  // WAS BUILT FROM. surfaceCurvePass used to recompute its own 'top' with a
+  // different definition of solid, so the two disagreed about every platform in
+  // the game and the sign of their difference — add material or cut it — was
+  // decided by the mismatch. Both names are exported for the same array: 'raw'
+  // is what the collision side calls it, 'top' is what the paint side does.
+  return { y: out, raw, top: raw, N, W };
 }
 function surfaceCurve() {
   if (surfCurve && surfRoom === G.roomId) return surfCurve;
@@ -4938,16 +5003,9 @@ function surfaceCurvePass(x) {
   const surfSnapCtx = surfSnap.getContext('2d', { willReadFrequently: true });
   surfSnapCtx.drawImage(tileCv, 0, 0);
 
-  // the grid's own surface height per sample, for comparison against the curve
-  const top = new Float32Array(cur.N).fill(NaN);
-  for (let i = 0; i < cur.N; i++) {
-    if (isNaN(cur.y[i])) continue;
-    const tx = Math.floor((i * SURF_STEP) / TILE);
-    let ty = 0;
-    while (ty < Ht && sol(tx, ty)) ty++;
-    while (ty < Ht && !sol(tx, ty)) ty++;
-    if (ty < Ht) top[i] = ty * TILE;
-  }
+  // the grid's own surface height per sample — taken FROM the curve, which
+  // computed it, so the two can never drift apart again
+  const top = cur.top;
 
   // Walk the samples in runs of the same SIGN — curve above the grid, or below —
   // and treat each run as ONE REGION. Painting per 4px column instead left the
@@ -4965,13 +5023,24 @@ function surfaceCurvePass(x) {
     i0 = i1 + 1;
   }
 
-  const regionPath = (r) => {
+  // THE ADDED MASS HAS TO SWALLOW THE TILE'S OWN LIP, and this 'over' is the
+  // whole of it. drawTiles paints a lit band down the first 12px of every
+  // exposed tile — the walking surface. Filling only as far as the tile line
+  // left that band showing UNDER the new crest, so the floor grew a second,
+  // ruler-straight highlight a few px below the rolling one: exactly the
+  // double horizon this pass exists to remove, moved down by a tile. Painting
+  // 16px past the line covers it, and everything under that line is solid
+  // material anyway, so there is nothing there to damage. The cut branch
+  // passes 0: erasing past the line would take ground she stands on.
+  const regionPath = (r, over) => {
+    const ov = over || 0;
     x.beginPath();
     x.moveTo(r.a * SURF_STEP, cur.y[r.a]);
     for (let i = r.a + 1; i <= r.b; i++) x.lineTo(i * SURF_STEP, cur.y[i]);
-    for (let i = r.b; i >= r.a; i--) x.lineTo(i * SURF_STEP, top[i]);
+    for (let i = r.b; i >= r.a; i--) x.lineTo(i * SURF_STEP, top[i] + ov);
     x.closePath();
   };
+  const OVER = 16;
 
   for (const r of regions) {
     if (r.sg > 0) {
@@ -5006,17 +5075,42 @@ function surfaceCurvePass(x) {
           cr += sd[q]; cg += sd[q + 1]; cb += sd[q + 2]; cn++;
         }
       } catch (e) { /* fall through to the palette */ }
-      regionPath(r);
+      regionPath(r, OVER);
       x.fillStyle = cn ? 'rgb(' + Math.round(cr / cn) + ',' + Math.round(cg / cn) + ',' +
                                   Math.round(cb / cn) + ')' : P.solid;
       x.fill();
-      // a touch of depth so the added mass is not a flat plate of one colour
+      // ...and then GIVE IT THE FLOOR'S GRAIN. A mean colour is the right base
+      // — it can never mismatch the tone — but a band of one flat colour reads
+      // as a shadow lying on the ground rather than as ground, which is what
+      // photographed as a dark shape sitting above a straight snow line. The
+      // material is re-stamped from the finished layer 24px under the grid
+      // line, tiled upward through the region, so the grain is literally the
+      // same rock: same texture, same zone plate, same erosion.
       x.save();
-      regionPath(r); x.clip();
-      const gg = x.createLinearGradient(0, lo, 0, hi + TILE);
-      gg.addColorStop(0, 'rgba(255,255,255,0.03)');
-      gg.addColorStop(1, 'rgba(0,0,0,0.22)');
-      x.fillStyle = gg; x.fillRect(rx, lo, rw, hi - lo + TILE);
+      regionPath(r, OVER); x.clip();
+      const srcY = Math.max(0, Math.min(H - 8, hi + 24));
+      const bandH = Math.min(TILE, H - srcY);
+      if (bandH > 4) {
+        x.globalAlpha = 0.62;
+        for (let yy = hi + bandH; yy > lo - bandH; yy -= bandH)
+          x.drawImage(surfSnap, rx, srcY, rw, bandH, rx, yy - bandH, rw, bandH);
+        x.globalAlpha = 1;
+      }
+      x.restore();
+      // a touch of depth so the added mass is not a flat plate of one colour —
+      // and it FADES TO NOTHING at the join. Running the darkening to full
+      // strength at the bottom of the region put a 22% black step exactly on
+      // the tile line, where the untouched body below it carried none: the
+      // added mass read as a shadow lying on the floor rather than as the
+      // floor, and the seam between them was the straightest line in the room.
+      // Depth belongs under the crest, where the light actually falls off.
+      x.save();
+      regionPath(r, OVER); x.clip();
+      const gg = x.createLinearGradient(0, lo, 0, hi + OVER);
+      gg.addColorStop(0, 'rgba(255,255,255,0.05)');
+      gg.addColorStop(0.35, 'rgba(0,0,0,0.12)');
+      gg.addColorStop(1, 'rgba(0,0,0,0)');
+      x.fillStyle = gg; x.fillRect(rx, lo, rw, hi - lo + OVER + 2);
       x.restore();
     } else {
       // the curve sits BELOW: cut the grid's square shoulder away
@@ -9280,6 +9374,25 @@ function bgMottle() {
     x.fillStyle = g;
     x.beginPath(); x.arc(px2, py2, r, 0, 7); x.fill();
   }
+  // ...AND A SECOND LAYER AT SCREEN SCALE, because the first one cannot reach
+  // the failure it is aimed at. Blobs 11-29px wide break a 32px pitch and do
+  // essentially nothing to a match found 868px apart — the autocorrelation
+  // test slides its patch across the WHOLE screen, and at that range two
+  // stretches of backdrop are told apart by broad tonal drift or not at all.
+  // So: a handful of very large, very low-contrast lobes, sized so no two
+  // parts of one screen sit at the same brightness. It is also simply how a
+  // painted backdrop behaves — light pools and falls off across a hall.
+  for (let i = 0; i < 26; i++) {
+    const px2 = hash2(i, 131) * 1100 - 70, py2 = hash2(i, 137) * 640 - 50;
+    const r = 90 + hash2(i, 139) * 140;
+    const up = hash2(i, 149) < 0.5;
+    const g = x.createRadialGradient(px2, py2, 0, px2, py2, r);
+    const v = up ? 152 : 104;
+    g.addColorStop(0, 'rgba(' + v + ',' + v + ',' + v + ',0.42)');
+    g.addColorStop(1, 'rgba(128,128,128,0)');
+    x.fillStyle = g;
+    x.beginPath(); x.arc(px2, py2, r, 0, 7); x.fill();
+  }
   bgMottleCv = cv;
   return cv;
 }
@@ -9331,9 +9444,27 @@ function drawDepthPlane(kind) {
   const y = near ? floorY - h * 0.22 : floorY - h * 0.86;
   let x = -((cam.x * par) % w);
   if (x > 0) x -= w;
+  // MIRROR EVERY OTHER STAMP. This plate is one painting repeated along the
+  // room, and at its own width it repeated INSIDE a single screen — the exact
+  // 868px match tests/grammar.cjs kept reporting in the Foundry, which is the
+  // plate's width and nothing else. Flipping alternate stamps doubles the
+  // period past a screen for free and cannot open a seam: a mirrored copy
+  // meets the one before it along the same edge pixels, so the join is
+  // continuous by construction. The index is taken from the WORLD, not from
+  // the loop, so which stamps are mirrored does not change as she walks.
+  let k = Math.round((cam.x * par + x) / w);
   c.save();
   if (!near) c.globalAlpha = 0.95;
-  for (; x < 960; x += w - 1) c.drawImage(im, Math.round(x), Math.round(y), Math.ceil(w), Math.ceil(h));
+  const Wd = Math.ceil(w), Hd = Math.ceil(h), Y = Math.round(y);
+  for (; x < 960; x += w - 1, k++) {
+    const X = Math.round(x);
+    if ((k & 1) === 0) { c.drawImage(im, X, Y, Wd, Hd); continue; }
+    c.save();
+    c.translate(X + Wd, Y);
+    c.scale(-1, 1);
+    c.drawImage(im, 0, 0, Wd, Hd);
+    c.restore();
+  }
   c.restore();
   c.globalAlpha = 1;
 }

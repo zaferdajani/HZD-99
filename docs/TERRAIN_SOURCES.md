@@ -251,3 +251,61 @@ false positive of the same species as the speech panel, the viewport bezel,
 and the boss. The floor itself rolls: D3 sd 12.4, longest flat run 22px. The
 harness keeps its `pending` flag until prop occlusion is excluded the way the
 other three now are.
+
+## 9. THE THING THAT WAS ACTUALLY WRONG (2026-08-18)
+
+Eight sections of this file are silhouette theory, and the defect the owner kept
+photographing was not a silhouette defect at all. It was one line in
+`buildSurfaceCurve`.
+
+The ground curve found a column's surface as **"the first solid OR platform
+below the ceiling"**. Under a mid-air `=` deck — D3 has two, B4 has one, most
+rooms have several — that returned the DECK's height as the ground height of
+the columns beneath it. The ±1.5-tile ramp then blended that height into the
+real floor on both sides, and `surfaceCurvePass` built the ramp as material.
+
+What that draws is a **table**: the deck as a top, two solid legs sloping from
+its ends down to the floor, and an untouched rectangle of backdrop between them.
+It is in no collision grid, she walks straight through it, and the inner faces
+of the two legs are the straightest vertical edges in the room. Every "flat
+boxes on the floor" report was this.
+
+The fix is `surfaceOf(tx)`: a platform is this column's surface only when there
+is ground within a tile underneath it — a LIP on the terrain, which is the case
+the `soft` branch was written for. A deck in mid-air is drawn by
+`drawPlatformRuns`, which owns its own crest and skirt, and the ground curve now
+walks underneath it without seeing it. `buildSurfaceCurve` also returns the
+surface array it computed, because the pass used to recompute its own with a
+different definition of solid, and the sign of their disagreement decided
+whether material got added or cut.
+
+**Three more followed from looking at the picture instead of the metric:**
+
+- **The fringe was on the wrong horizon.** Snow crusts, blades and slag lumps
+  were rooted on the TILE LINE plus a small sink, while the curve lifts the
+  drawn silhouette up to 46px above it. Two ground lines, one rolling and one
+  ruled, and the eye finds the ruled one. `buildFringe` now samples the curve.
+- **The added mass ended in a 22% black step exactly on the tile line**, where
+  the body below it carried none — so it read as a shadow lying on the floor
+  rather than as floor. The depth gradient now fades to nothing at the join.
+- **The added mass stopped at the tile line**, leaving `drawTiles`' own lit
+  12px walking-surface band showing underneath the new crest: a second
+  ruler-straight highlight one tile down. It now paints 16px past the line.
+
+**And two things the harness was measuring that were not there.**
+
+`tests/grammar.cjs` welded the floor left of D3's three-tile hole, the depth
+door drawn down inside the hole, and the floor right of it into one 160px "flat
+run", then failed it for carrying no crest — because a third of its length was
+a door. Runs are now clipped to the walk-top spans the grid reports, and each
+surviving piece is judged on its own length. Two short real edges and a prop
+between them are not one long edge, and no amount of drawing on the floor could
+have satisfied that measurement.
+
+The tile-repeat failure that kept moving between B4 and C3 was real and was
+`drawDepthPlane`: the authored plate is stamped along the room at its own width,
+and in the Foundry that width is 868px — inside one screen. Alternate stamps are
+now mirrored, which doubles the period past a screen and cannot open a seam,
+because a mirrored copy meets the one before it along the same edge pixels.
+
+`tests/grammar.cjs` is green and its `pending` flag is off.

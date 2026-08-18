@@ -2249,3 +2249,87 @@ wreck standing behind it, so most of it belongs ABOVE the walk line.
 
 **Zones B, D, E and X still have no pair** — they draw nothing and fall back
 exactly as before, which is the same guard every other plate takes.
+
+### 1f. THE DRAWN PASS — every character re-rendered as an ILLUSTRATION ✱ NEW, FIRE ON REBIND (owner, 2026-08-18)
+
+**The owner's words:** *"can you generate from the three d model of the game's
+hero, NPC, enemies, boss, a drawing character just like Hornet and Silksong? The
+artwork looks like a drawing instead of pure three d."*
+
+This is a STYLE pass over the whole cast, not new characters. Every plate the
+game already ships was generated as a 3D render, and a 3D render put next to a
+hand-painted backdrop reads as a model standing in a painting. Silksong's cast
+is the reference because it solves exactly this: the characters are drawn —
+inked contour, few flat value steps, painted texture inside the line — and they
+sit INSIDE their world instead of on top of it.
+
+**THE SOURCE IS THE EXISTING PLATE.** Every firing in this section is
+image-to-image from the sheet already on disk, never text-to-image from
+scratch. The identity lock in §1 is not reopened by this brief: same silhouette,
+same proportions, same palette, same costume, same number of arms. If a
+regenerated head is a different head, the plate is refused — the owner reviews
+every result and that is the first thing to check.
+
+**THE STYLE, stated as the loudest line in every prompt:**
+
+> Hand-drawn 2D game-art illustration. A clean dark ink contour around the whole
+> figure and around each major form inside it. Interior shading in three or four
+> FLAT value steps, not a smooth gradient. Visible painted texture — dry brush,
+> gouache grain — inside the flats. One warm rim light along a single edge.
+> Matte, absorbent surfaces; NO photoreal specular highlights, NO subsurface
+> glow, NO rendered metal reflections. It must read as a drawing, not as a
+> render.
+
+**AND WHAT MUST NOT CHANGE, stated second:**
+
+> Keep the pose, the framing, the scale within the frame, the exact silhouette
+> and the exact colours of the source image. Restyle only.
+
+**THE GEOMETRY IS A CONTRACT, and this is the part that breaks the build if it
+is missed.** Three families of sheet, three different rules:
+
+| family | sheet | rule |
+|---|---|---|
+| the protagonist | the 11×8 turnaround atlas | the CELL GRID is addressed by index — every cell must land in the same cell, same size, same footprint on the floor line |
+| the guardians | six parts atlases | addressed by **absolute pixel rect**. A part that moves by 3px dislocates the rig. Re-fire PART BY PART, back into its own rect, never as a whole new sheet |
+| NPCs + creatures | `npcs` / `roster` atlases | same cell-grid rule as the protagonist |
+
+The guardian atlases are also the six sheets `tools/lowres.cjs` deliberately
+excludes from the small tier (`tests/lowres.cjs` re-derives that rule from the
+source). Nothing about that changes; the drawn plate replaces the rendered one
+at the same size, in the same rect.
+
+**FIRING ORDER — one owner review per row, and stop at the first refusal:**
+
+1. **HZD-99 / NYA-9** — the 8-yaw turnaround first. She is the character the
+   player looks at for the whole game, and she is also the calibration: if the
+   drawn style is right on her, every later prompt reuses her result as a style
+   reference image. If it is wrong on her, nothing else should be spent.
+2. **Her action plates** — run pair, slash set, jet, hurt, the rest of §1b.
+3. **The NPCs** — Ratchet first (he is the one the player meets first and stands
+   still next to for the longest), then the Oracle, the Tinker, the Sage, the
+   Nymph, Servo, the merchant.
+4. **The creature roster** — wolves, the cheetah, the blobs, the five Eye
+   mini-bosses, the per-kingdom enemies (breaker, kiln, rime, snare).
+5. **The guardians, part by part** — NULLFANG, TALONHOST, FURNACE CHOIR,
+   GLACIERE, PRISM PROWLER, MOTHER-V. Six atlases, and the most expensive row:
+   fire one part, key it, look at the rig in play, then continue. A guardian is
+   ~20 parts and a wrong style choice found at part 20 costs the whole sheet.
+
+**WHAT THE CODE SESSION OWES THIS, and it is nothing.** No renderer change, no
+new key, no new manifest entry: the drawn plate lands on the same filename at
+the same size and the game draws it exactly as before. That is the whole reason
+the geometry contract above is written the way it is. The only code work is the
+regeneration chain after each batch — `node tools/lowres.cjs && node build.cjs`
+— and `tests/artbible.cjs`, which will keep measuring silhouette difference,
+telegraph amber and feet-on-floor against the new plates and should stay green
+by construction if the restyle really was a restyle.
+
+**THE ONE JUDGEMENT CALL TO PUT TO THE OWNER BEFORE ROW 2.** Silksong's cast
+carries almost no interior detail at small sizes — the read is silhouette plus
+two values. This game's characters currently carry a lot of panel-line and
+mechanical detail, which is what makes them legible as MACHINES. Row 1 should
+come back in two variants — one that keeps the machine detail inside the ink,
+one that strips it to the Silksong density — and the owner picks which one the
+other four rows are fired to. Firing rows 2-5 before that choice is made is how
+a hundred plates get generated twice.

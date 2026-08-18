@@ -57,13 +57,14 @@ const SUITE = [
   ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
   ['daze',      'a group of hits breaks NULLFANG open, pays out, closes, and cannot be held'],
   ['artbible',  'ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor'],
-  // grammar is the ACCEPTANCE TEST for task #76 (terrain depth) — it landed
-  // before the work it measures, and it reads red on every sampled room
-  // today (bare long runs, tile repeats, no far<mid<near value layering).
-  // A suite that is red forever trains every session to ignore red, so this
-  // one runs and reports without failing the build UNTIL #76 ships; then the
-  // pending flag comes off and it guards like everything else.
-  ['grammar',   'ART_BIBLE §9/§10 measured on the ASSEMBLED FRAME: value bands, straight runs, corners, skirts, tiling', { pending: '#76 terrain depth' }],
+  // grammar was the ACCEPTANCE TEST for task #76 (terrain depth): it landed
+  // before the work it measures and read red on every sampled room, so it ran
+  // without failing the build while the work caught up. It is green as of the
+  // floating-deck fix (the ground curve no longer treats a mid-air platform as
+  // the ground under it), the fringe moving onto the drawn silhouette, and the
+  // depth plate mirroring alternate stamps. The flag is off; it guards like
+  // everything else, and a room that goes flat again fails the build.
+  ['grammar',   'ART_BIBLE §9/§10 measured on the ASSEMBLED FRAME: value bands, straight runs, corners, skirts, tiling'],
   ['battery',   'one cell, one machine, and the shop waits for the lion'],
   ['minis',     "the Eye's five: they wake, telegraph, alternate, die and pay"],
   ['hzdvox',    'her voice: on the frame she moves, never clipping, never twice at once'],

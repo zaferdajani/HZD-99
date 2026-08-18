@@ -167,7 +167,36 @@ const DETECTORS = function () {
                                 w.x1 > r.start && w.x0 < r.start + r.len);
     return hits.length > 0 && hits.filter(w => w.ground).length >= hits.length * 0.6;
   };
-  const tops = merged.filter(r => r.horizontal && (!WT.length || isTop(r))).slice(0, 8);
+  // A RUN IS AN EDGE ONLY WHERE THERE IS GROUND UNDER IT. D3's floor has a
+  // three-tile hole in it with the depth door drawn down in the gap, and the
+  // edge map cheerfully welded the floor left of the hole, the door's own lit
+  // top, and the floor right of the hole into one 160px "flat run" — then
+  // failed it for carrying no crest, because a third of its length was a door.
+  // Two short real edges and a prop between them are not one long edge, and no
+  // amount of drawing on the floor could have satisfied that measurement.
+  // The tile grid knows exactly where ground is, so every run is clipped to it
+  // and each surviving piece is judged on its own length.
+  const clipToGround = (r) => {
+    if (!WT.length) return isTop(r) ? [r] : [];
+    const hits = WT.filter(w => Math.abs(w.y - r.a) <= 8 &&
+                                w.x1 > r.start && w.x0 < r.start + r.len)
+                   .sort((p, q) => p.x0 - q.x0);
+    const out = [];
+    let cur = null;
+    for (const w of hits) {
+      const a = Math.max(w.x0, r.start), b = Math.min(w.x1, r.start + r.len);
+      if (b <= a) continue;
+      if (cur && a - cur.b <= 2) cur.b = Math.max(cur.b, b);
+      else { if (cur) out.push(cur); cur = { a, b }; }
+    }
+    if (cur) out.push(cur);
+    return out.map(s => ({ horizontal: true, a: r.a, start: s.a, len: s.b - s.a }));
+  };
+  const tops = merged.filter(r => r.horizontal)
+    .reduce((acc, r) => acc.concat(clipToGround(r)), [])
+    .filter(r => r.len > 40)
+    .sort((p, q) => q.len - p.len)
+    .slice(0, 8);
   const edges = [];
   for (const t of tops) {
     const xs = [];
