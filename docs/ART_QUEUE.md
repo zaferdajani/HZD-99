@@ -2173,3 +2173,51 @@ blue = himself, and nothing else in the film may use those two colours for
 anything eye-like. In-game, the same story is told again in five spoken
 fragments (sl_rfrag1-5, one per guardian fork answered) — the film is the
 whole; the fragments are the shards, and they must not contradict it.
+
+### 2s. TERRAIN DEPTH PLATES — FIRST FOUR FIRED (art session, 2026-08-18)
+
+**The owner asked what terrain in a futuristic kingdom should look like, and
+for it in two depths.** This is task #76 / §2's `edge_` + `fore_` layers, and
+it is the fix for the finding that closed the last round: the floor reads as a
+bar because it is nearly the same VALUE as the room behind it, and no amount of
+procedural shape work repairs that. Authored depth planes do.
+
+**Fired** (jobs 9ecae8f1, d113839b, 29fe7e04, 800f2953), sources archived in
+`assets/source/terrain/`:
+
+- `edge_A` / `fore_A` — Scrap Meadows. **Both good, and the pair works.**
+- `edge_C` / `fore_C` — The Foundry. fore_C is good; **edge_C needs a re-fire**,
+  see below.
+
+**The design, for the next zone's brief.** A futuristic kingdom's ground should
+not read as rock or as floor — it reads as A CITY THAT FELL OVER AND HAS BEEN
+WALKED ON FOR A CENTURY. Strata of collapsed infrastructure: buckled hull
+plating, a burst conduit bundle re-fused into the mass, a service rail swallowed
+by pressed earth. Neon survives only in the cracks — light that LEAKS rather
+than light that illuminates. That last clause is what keeps §9.4's chroma budget
+intact: the saturation is sparse and small, so the cast still owns the frame.
+
+**Two planes, because one plate cannot do both jobs:**
+
+| plane | value | detail | job |
+|---|---|---|---|
+| `edge_` mid | 35–60% | full material, lit crest, broken skirt | the band she stands on |
+| `fore_` near | near-black | almost none — outline only | crosses in FRONT of her |
+
+The fore plate is the counter-intuitive one and the brief has to say it
+outright: **a foreground occluder works by SHAPE, not by texture.** Ask for
+detail and the model returns a midground.
+
+**edge_C must be re-fired.** It filled the frame instead of sitting as a band
+with black above it, so it carries a hard straight top edge — the exact defect
+the whole grammar exists to prevent. The band-in-the-lower-half instruction
+needs to be the loudest line in the prompt, the same promotion that fixed the
+cropped guardians.
+
+**Two of the four came back on a WHITE field despite the prompt naming black.**
+Budget for it: the keyer must detect the field rather than assume it. That cost
+a compositing pass that showed white sheets and read as broken art.
+
+**Not wired.** `tools/depthdemo.cjs` composites them for review. Wiring is a
+render-order change in the code session's hands: `edge_` draws after the
+backdrop and before the cast, `fore_` draws after the cast.
