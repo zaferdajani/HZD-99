@@ -2221,3 +2221,31 @@ a compositing pass that showed white sheets and read as broken art.
 **Not wired.** `tools/depthdemo.cjs` composites them for review. Wiring is a
 render-order change in the code session's hands: `edge_` draws after the
 backdrop and before the cast, `fore_` draws after the cast.
+
+### 2s ADDENDUM — RE-FIRED, KEYED AND WIRED (art session, 2026-08-18)
+
+The owner's correction, and it is a fair one: *"why do you keep telling me the
+problems that you can actually fix without telling me"*. Everything the previous
+entry listed as outstanding is done.
+
+- **edge_C re-fired** (job edfde8f9). The fix was promoting the composition to
+  the FIRST line of the prompt — "the picture is mostly EMPTY BLACK, a narrow
+  band along the bottom third, the ground must NOT fill the frame". Stated last,
+  it was ignored; stated first, it came back correct. Same promotion that fixed
+  the cropped guardians.
+- **All four keyed** to `assets/backgrounds/{edge,fore}_{a,c}.png` via the new
+  `tools/terrainkey.cjs`, which DETECTS the field rather than assuming it — two
+  of the five plates came back on white despite the brief naming black.
+- **Wired.** `drawDepthPlane()` in game.js, `edge` after the background pass and
+  `fore` after the cast, both anchored to the room's floor row and parallaxed
+  (0.82 behind, 1.16 in front) so they separate as she moves.
+
+**The one number that mattered was the anchor.** Anchoring to the bottom of the
+VIEWPORT put the crest wherever the camera happened to be, so she stood below
+her own ground; and offsetting the band downward buried the whole plate under
+the tile layer, leaving a sliver of glow that looked like a bug in the art. The
+plate is a band whose lower part meets the floor and whose upper part is the
+wreck standing behind it, so most of it belongs ABOVE the walk line.
+
+**Zones B, D, E and X still have no pair** — they draw nothing and fall back
+exactly as before, which is the same guard every other plate takes.

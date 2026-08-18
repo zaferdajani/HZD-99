@@ -8422,6 +8422,7 @@ function drawWorldFrame() {
   // the background exists alone on the canvas, so it is the only honest place
   // to measure it. Off unless a harness asks: it costs a full readback.
   if (G.planeProbe) G.planeProbe.bg = framePlaneStats();
+  drawDepthPlane('edge');            // the band she stands on, behind the cast
   c.save();
   c.translate(-Math.round(camSX()), -Math.round(camSY()));
   drawLair();                       // behind the level — see the LAIR table
@@ -8653,6 +8654,7 @@ function drawWorldFrame() {
   }
   drawSeals(P);
   c.restore();
+  drawDepthPlane('fore');            // ...and the near plane, in front of her
   applyBloom();
   // ---- cinematic grade: zone-tinted light wash + vignette (the "expensive" look) ----
   {
@@ -8905,6 +8907,60 @@ function bgMottle() {
   }
   bgMottleCv = cv;
   return cv;
+}
+
+// ART_BIBLE §9.1 — THE AUTHORED DEPTH PLANES (task #76). Two strips per zone:
+// edge_ is the mid plane, the band she stands on, drawn BEHIND the cast; fore_
+// is the near plane and draws in FRONT of her. Between them they are what makes
+// a floor stop reading as a bar, and the reason is value rather than shape —
+// the procedural floor sat within a few points of the backdrop it was supposed
+// to stand clear of, and no amount of silhouette work fixes that.
+//
+// Parallax is the point of having two: the mid plane scrolls slower than the
+// world and the fore plane faster, so they separate as she moves rather than
+// only in a still frame.
+function drawDepthPlane(kind) {
+  const zone = G.roomDef && G.roomDef.zone;
+  if (!zone) return;
+  const key = kind + zone;
+  if (typeof mediaFetch === 'function') mediaFetch(key);
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[key];
+  if (!im || !im.naturalWidth) return;
+  const near = kind === 'fore';
+  // fore sits nearer, so it is drawn larger and scrolls faster than the world
+  const par = near ? 1.16 : 0.82;
+  const scale = (near ? 0.46 : 0.72) * 540 / im.naturalHeight;
+  const w = im.naturalWidth * scale, h = im.naturalHeight * scale;
+  // ANCHOR TO THE ROOM'S FLOOR, NOT TO THE VIEWPORT. Anchoring to the bottom of
+  // the screen puts the crest wherever the camera happens to be, so she stood
+  // below her own ground. The floor is the lowest row the grid actually calls
+  // solid; the mid plane's crest goes on its top edge, and the near plane sits
+  // a little below that so it crosses her shins rather than her head.
+  let floorY = 540;
+  const g = G.grid;
+  if (g && g.length) {
+    for (let ty = g.length - 1; ty >= 0; ty--) {
+      let n = 0;
+      for (let tx = 0; tx < g[ty].length; tx++) {
+        const ch = g[ty][tx];
+        if (ch === '#' || ch === 'B' || ch === '=') n++;
+      }
+      if (n > g[ty].length * 0.5) { floorY = ty * TILE - camSY(); break; }
+    }
+  }
+  // The mid plate is a BAND whose lower part meets the floor and whose upper
+  // part is the wreck standing behind it, so most of it belongs ABOVE the walk
+  // line. Anchoring it below put the whole plate under the tile layer and left
+  // only a sliver of glow showing. The near plate is the opposite: it hangs off
+  // the bottom of the frame and only its top outline should be in shot.
+  const y = near ? floorY - h * 0.22 : floorY - h * 0.86;
+  let x = -((cam.x * par) % w);
+  if (x > 0) x -= w;
+  c.save();
+  if (!near) c.globalAlpha = 0.95;
+  for (; x < 960; x += w - 1) c.drawImage(im, Math.round(x), Math.round(y), Math.ceil(w), Math.ceil(h));
+  c.restore();
+  c.globalAlpha = 1;
 }
 
 function bgPlanePass() {

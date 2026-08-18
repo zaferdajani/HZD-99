@@ -227,6 +227,14 @@ const MEDIA_SRC = {
     bustSage: 'assets/characters/npc/bust/sage.png',
     bustLumen: 'assets/characters/npc/bust/lumen.png',
     // ===================================================================
+    // §2s TERRAIN DEPTH PLANES — the authored answer to a floor that reads as a
+    // bar. edge_ is the band she stands on and draws behind the cast; fore_
+    // crosses in front of her. Named per zone; a zone without a pair simply
+    // draws nothing, which is the same fallback every other plate takes.
+    edgeA: 'assets/backgrounds/edge_a.png',
+    foreA: 'assets/backgrounds/fore_a.png',
+    edgeC: 'assets/backgrounds/edge_c.png',
+    foreC: 'assets/backgrounds/fore_c.png',
     boothFront: 'assets/backgrounds/booth_front.png',
     denInterior: 'assets/backgrounds/den_interior.jpg',
     ratchetResting: 'assets/characters/npc/ratchet_resting.png',
