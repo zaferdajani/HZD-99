@@ -117,6 +117,28 @@ function moveEnt(e, dt) {
     }
     if (bonk) { e.y = (ty + 1) * TILE + 0.01; e.vy = 0; col.u = 1; }
   }
+  // THE HEIGHTFIELD. The tile resolver above snaps a landing to ty * TILE — the
+  // top of a square — which is why the level stayed a flat line however the
+  // terrain was drawn. Where the surface curve rises above that tile top, real
+  // material was added and she should stand ON it: mounds become things she
+  // walks over and jumps onto, not scenery she passes through.
+  //
+  // Only upward. Where the curve dips below the tile, the square still wins —
+  // a body sinking into drawn ground is how a floor stops being trustworthy.
+  if (e.vy >= 0 && !e.noHeightfield && typeof groundColumnAt === 'function') {
+    const cx = e.x + e.w / 2;
+    const gc = groundColumnAt(cx);
+    if (gc) {
+      const gy = gc[0], gTop = gc[1];      // surface, and the tile top under it
+      const feet = e.y + e.h;
+      // She is caught by the mound when her feet are between its surface and
+      // the square top it was built on — that band IS the added material. The
+      // tile top is what proves something solid is holding it up.
+      if (gy < gTop && feet > gy - 0.5 && feet <= gTop + 1.5) {
+        e.y = gy - e.h - 0.01; e.vy = 0; col.d = 1;
+      }
+    }
+  }
   return col;
 }
 // WHAT STOPS A SHOT — which is not the same question as what stops a BODY.

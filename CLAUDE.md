@@ -119,8 +119,17 @@ it global. Consequences:
   same treatment everywhere (edge scallops, corner breakup, face texture).
 - A "step" in a room build is a placeholder for an object with an organic
   silhouette. New rooms must not add bare `rect(..., '#')` steps.
-- Collision may stay tile-based (the engine has no slopes); the RULE IS
-  VISUAL: the drawn silhouette must bury the square underneath it.
+- ~~Collision may stay tile-based (the engine has no slopes); the RULE IS
+  VISUAL~~ — **SUPERSEDED (owner, 2026-08-18).** "The curves are not about
+  drawing lines or curved lines as much as an actual terrain structure that
+  allows character to jump on or move on instead of a straight line." Keeping
+  the collider square is what made this rule unfixable for weeks: every pass
+  decorated a staircase the body still walked as a flat line, and a drawn hill
+  she passes through is worse than no hill. The surface curve is now a
+  HEIGHTFIELD the body stands on (`groundColumnAt` in game.js, applied in the
+  vertical resolver in entities.js). It lifts ONLY where the curve rises above
+  the tile top — real material was added there — and never lets a body sink
+  below the square, because that is how a floor stops being trustworthy.
 - Gates/doors: cave entrances look like CAVE MOUTHS — irregular rock
   openings — never rectangular doors; built gates vary in shape per zone
   (see ART_QUEUE briefs). Only the CITY gate is the huge epic multilayer

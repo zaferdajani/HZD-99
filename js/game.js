@@ -4796,7 +4796,7 @@ function buildSurfaceCurve() {
     if (!isNaN(t)) y = Math.max(t - (soft[i] ? 14 : 46), Math.min(y, t + 8));
     out[i] = y;
   }
-  return { y: out, N, W };
+  return { y: out, raw, N, W };
 }
 function surfaceCurve() {
   if (surfCurve && surfRoom === G.roomId) return surfCurve;
@@ -4820,6 +4820,35 @@ function surfaceCurve() {
 // Same asymmetry as the surface curve, for the same reason: material is ADDED
 // outward and downward freely, because inventing silhouette can never remove
 // ground she stands on, while cutting inward is capped hard.
+// THE CURVE AS GROUND, not as a picture of ground.
+//
+// Everything before this treated the surface curve as decoration and kept the
+// collider square, on the reasoning that gameplay must not change. The owner's
+// correction is that this made the rule unfixable: "the curves are not about
+// drawing lines as much as an actual terrain structure that allows character to
+// jump on or move on instead of a straight line." A drawn hill she walks
+// through is worse than no hill.
+//
+// So the curve becomes a HEIGHTFIELD the body stands on. It is only ever used
+// where it sits ABOVE the tile top — real material was added there, so standing
+// on it is standing on something that exists. Where the curve dips below the
+// tile the collider still wins, because letting a body sink into drawn ground
+// is how a floor stops being trustworthy.
+// Returns [surfaceY, tileTopY] for a column, or null. Both are needed: the
+// surface is where she stands, the tile top is the proof that something solid
+// is under it. Testing for solid material half a tile BELOW the surface — the
+// first version — fails on exactly the terrain this exists for, because half a
+// tile below a 46px mound is still air, so she only ever got 16px of the lift.
+function groundColumnAt(worldX) {
+  const cur = (typeof surfaceCurve === 'function') ? surfaceCurve() : null;
+  if (!cur) return null;
+  const i = Math.round(worldX / SURF_STEP);
+  if (i < 0 || i >= cur.N) return null;
+  const y = cur.y[i], t = cur.raw[i];
+  if (isNaN(y) || isNaN(t)) return null;
+  return [y, t];
+}
+
 function slabSilhouettePass(x) {
   const g = G.grid;
   if (!g || !g.length || !g[0]) return;
