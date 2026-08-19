@@ -9438,6 +9438,19 @@ function bgMottle() {
 // Parallax is the point of having two: the mid plane scrolls slower than the
 // world and the fore plane faster, so they separate as she moves rather than
 // only in a still frame.
+let floorAnchorRoom = null, floorAnchorY = 0;
+function roomFloorAnchor(fallbackWorldY) {
+  if (floorAnchorRoom === G.roomId) return floorAnchorY;
+  let v = fallbackWorldY;
+  const cur = (typeof surfaceCurve === 'function') ? surfaceCurve() : null;
+  if (cur && cur.raw) {
+    const ys = [];
+    for (let i = 0; i < cur.N; i++) { const y = cur.raw[i]; if (!isNaN(y)) ys.push(y); }
+    if (ys.length) { ys.sort((a, b) => a - b); v = ys[ys.length >> 1]; }
+  }
+  floorAnchorRoom = G.roomId; floorAnchorY = v;
+  return v;
+}
 function drawDepthPlane(kind) {
   const zone = G.roomDef && G.roomDef.zone;
   if (!zone) return;
@@ -9478,6 +9491,23 @@ function drawDepthPlane(kind) {
       if (n > g[ty].length * 0.5) { floorY = ty * TILE - camSY(); break; }
     }
   }
+  // ...BUT THE ANCHOR IS THE SURFACE SHE WALKS ON, not the room's lowest solid
+  // row, and the difference is the whole reason the near plate did nothing.
+  //
+  // Measured in A1: the lowest >50%-solid row put floorY at 508 while her feet
+  // were at 452. The near plate's top edge therefore landed at 454 — TWO PIXELS
+  // BELOW HER SOLES — so the one object in the scene whose entire job is to
+  // cross in FRONT of her drew a black band under her feet instead, and she came
+  // out as the frontmost thing pasted onto a painting. That is the "she looks
+  // like she is in the background" report, and no amount of art fixes it.
+  //
+  // The walk surface is the MEDIAN of the curve's own tile tops, taken once per
+  // room. Median rather than the value under the camera: sampling live would
+  // hand the foreground the terrain's roll and make it bob as she walks, and a
+  // background that moves vertically with the player is worse than one in the
+  // wrong place. Pits and high ledges are outvoted, which is what a median is
+  // for — the answer wanted is "how high is the ground in this room".
+  floorY = roomFloorAnchor(floorY + camSY()) - camSY();
   // The mid plate is a BAND whose lower part meets the floor and whose upper
   // part is the wreck standing behind it, so most of it belongs ABOVE the walk
   // line. Anchoring it below put the whole plate under the tile layer and left

@@ -118,10 +118,32 @@ function moveEnt(e, dt) {
     if (bonk) { e.y = (ty + 1) * TILE + 0.01; e.vy = 0; col.u = 1; }
   }
   // How far below her feet the ground may be and still count as underfoot.
-  // One frame at full run is about 11 px of travel, so this has to clear the
-  // steepest descent the surface curve can make in that distance; 14 does, and
-  // it stays well under a tile so a real ledge is still a real ledge.
-  const GROUND_SNAP = 14;
+  //
+  // A CONSTANT WAS THE WRONG SHAPE, and measuring said so. The first pass used
+  // 14 px, reasoning that one frame at full run is ~11 px of travel. Then the
+  // curve was asked directly how far it descends over 11 px inside a single
+  // tile row: A0/A1/D3 reach 15.9 px, B4 28.9, and the Foundry 51.8. So 14 was
+  // under the commonest case — that is the one skip the gait harness still
+  // caught — and no constant can be right for all four, because 52 px is a
+  // tile and a half and would glue her over real drops.
+  //
+  // A SLOPE LIMIT is the right shape and is what character controllers use:
+  // ground counts as underfoot if reaching it is a walkable descent RELATIVE TO
+  // HOW FAR SHE TRAVELLED. Fast, she keeps contact over steeper ground; slow or
+  // still, almost none — so it can never quietly hold her over a cliff. The
+  // small constant term keeps a standing body on the ground it is standing on.
+  //
+  // The Foundry stays a fall, and that is correct rather than conceded: a
+  // surface that drops 52 px in 11 is not a slope, it is a cliff drawn inside
+  // one tile row, and the fix for that lives in the terrain amplitude and not
+  // in the collider.
+  // The constant term is not padding: buildSurfaceCurve deliberately puts
+  // FRACTURES in the curve — 'a slab dropped a few px against its neighbour',
+  // up to 16 px of hard break between adjacent samples. A fracture is a step,
+  // not a slope, so no speed-proportional term can cover it and a body walking
+  // over one falls off a cliff a fifth of her height. 10 clears the downward
+  // half of that amplitude at any speed, standing still included.
+  const GROUND_SNAP = 10 + Math.abs(e.vx || 0) * dt * 1.6;
   // THE HEIGHTFIELD. The tile resolver above snaps a landing to ty * TILE — the
   // top of a square — which is why the level stayed a flat line however the
   // terrain was drawn. Where the surface curve rises above that tile top, real
