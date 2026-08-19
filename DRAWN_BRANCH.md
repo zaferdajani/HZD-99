@@ -306,3 +306,29 @@ animal, no detached floating pieces* — and all seven landed.
 
 **Still open, and it is one plate: `npc__servo`** frames with its chin off the
 bottom edge. Four firings, including one with composition as the loudest line.
+
+### CORRECTION TO THAT FINDING (integrator, 2026-08-19)
+
+Two of the three were real and are fixed; **one of them was my error and the
+art session should not spend a credit on it.**
+
+- **THE CHOIR is whole.** He assembles as a full drawn mechanical dragon —
+  head, wings, segmented neck, burning tail, orange plating. The egg is gone.
+- **PRISM's `aim` and `beam` are whole.** Both read as the animal firing,
+  not as fragments.
+- **MOTHER-V's shell was never broken.** Photographed side by side from the
+  same tool, her core is a near-black sphere with two violet eyes in the
+  RENDERED build too — it is her design, not a keyed-out plate. I called it a
+  defect from the drawn shot alone without shooting the original to compare,
+  which is the same mistake this file warns about in the other direction: judge
+  the assembled rig, and judge it against what it is supposed to look like.
+
+So the drawn cast is complete: six guardians, all six assembling correctly.
+
+The parts check has moved to the shipping branch, where it guards the rendered
+cast too. Measured there on art it was not written for: NULLFANG 5 bands,
+TALONHOST 5, THE CHOIR 5, GLACIERE 8, the five constructs 5-6, against a floor
+of 3. Worth knowing for the next restyle: it is a whole-silhouette measure, so
+it would NOT have caught a flattened MOTHER-V shell if that had been real —
+her tendrils and crown carry enough bands on their own. A per-part version is
+the stronger check if one is ever wanted.
