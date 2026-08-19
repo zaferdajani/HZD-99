@@ -109,3 +109,44 @@ instruction NOT to add a glow those poses do not have.
 once with the composition rule as the loudest line and a demand for margin on
 all four sides, and it comes back with the chin running off the bottom edge
 every time. Everything else in the set framed correctly.
+
+## The guardians — NULLFANG done, and how the rig is kept, 2026-08-19
+
+A guardian is not a picture, it is a RIG: `BEAST_P` and its five siblings
+address the atlas by absolute pixel rect, and a head that comes back four
+pixels taller is not scaled — it is drawn from the same rect, and the animal
+comes apart at the neck. No prompt can promise that. So the promise is made
+mechanically instead, by two tools:
+
+- **`tools/rigcut.cjs`** reads the rect table out of the source itself (never a
+  copy that can drift), cuts each rect onto flat black with padding, and
+  records the part's own outline.
+- **`tools/rigpaste.cjs`** puts each restyled part back by FITTING ITS BOX to
+  the box the original occupied, then CLIPPING IT to the original silhouette.
+  Whatever the generator did to scale, position or outline is undone. The cost
+  is that the new ink contour lands a pixel inside the old edge instead of on
+  it; that is invisible at play size, and a leg four pixels out is a broken boss.
+
+Both tools MEASURE what "empty" means on the sheet rather than assuming it —
+some of these atlases are alpha-cut and some are opaque with black between the
+parts, and guessing wrong fails in opposite directions: an alpha test on an
+opaque sheet marks every pixel as part, and a tone test on an alpha sheet eats
+every dark plate the creature has. Getting this wrong the first time put an
+opaque black box around all sixteen of NULLFANG's parts.
+
+**NULLFANG is done and verified in the game**, not on the sheet:
+`docs/drawn_nullfang.png` is its own `draw()` in its own room, in four states.
+`tools/bossshot.cjs` takes that photograph, and draws to a bare canvas rather
+than screenshotting the room — the first version photographed the room and
+produced four frames of a tutorial panel with the boss behind it.
+
+Green afterwards: `artbible`, `tells`, `daze`, `bosspace`, `lowres`, `platform`.
+The lowres harness matters most here — it re-derives, from the source, that no
+sheet addressed by absolute pixel rect gets a small copy, and it still names
+all six guardian files.
+
+Fragments restyle less reliably than whole figures, and that is worth knowing
+before the next five: `full`, `aIdle`, `aWalk`, `aRoar` and `aAtk` came back
+excellent, while `body` was returned as a small whole lion and `fleg0` as a
+cylinder. The box-fit and the clip make even those usable, because what
+survives is the surface, not the shape.
