@@ -19,23 +19,56 @@
 // than on it. That is the right trade: a line 1px in is invisible at play
 // size, a leg 4px out is a broken boss.
 //
-//   node rigpaste.cjs <atlas.png> <meta.json> <keyeddir> <out.png>
+// The clip is to the old outline GROWN by an allowance, and the allowance is a
+// FRACTION OF THE PART, not a constant. Zero tolerance was too strict — where a
+// restyled pose drifted at all, an exact clip cut the animal into fragments and
+// lost its head. But a flat 3px was wrong in the other direction: 3px on a 70px
+// leg is a real tolerance, and 3px on GLACIERE's 445px standing assembly is
+// nothing, so her assembly and her gallop still came back shredded while the
+// small parts were fine.
+//
+// So it scales: 5% of the part's short side, floored at 3px. A leg keeps a
+// tight 3px seam because it has to meet a neighbour; a whole-figure panel,
+// which meets nothing and is placed by its own anchor, gets the room a redrawn
+// pose actually needs. Either way the part cannot wander outside its rect.
+//
+// SUB-RECTS ARE NOT PARTS. Some entries in these tables are not separate pieces
+// of art at all — they are CROPS OF ANOTHER RECT, used to pull a detail out of a
+// figure for an effect pass. GLACIERE's `mane` and `tailW` are windows onto her
+// `hero` figure. Firing a crop as if it were its own drawing produces a picture
+// that no longer lines up with the figure it was cut from, and pasting it back
+// stamps a mismatched rectangle over the animal — which is exactly how her head
+// ended up behind a black wedge.
+//
+// So any rect that lies wholly inside another is not fired or pasted: after the
+// real parts land, it is simply RE-CUT from its parent's new pixels. That is
+// pure geometry, derived from the table, with nothing to keep in step by hand.
+//
+//   node rigpaste.cjs <atlas.png> <meta.json> <keyeddir> <out.png> [growFrac=0.05]
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 
 (async () => {
-  const [atlas, metaFile, keyedDir, out] = process.argv.slice(2);
+  const [atlas, metaFile, keyedDir, out, growArg] = process.argv.slice(2);
+  const growFrac = growArg == null ? 0.05 : +growArg;
   const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
   const alphaSheet = meta._alphaSheet !== false;
-  const names = Object.keys(meta).filter(n => n[0] !== '_').filter(n =>
-    fs.existsSync(path.join(keyedDir, n + '.png')));
+  const all = Object.keys(meta).filter(n => n[0] !== '_');
+  const inside = (a, b) => a !== b &&
+    a[0] >= b[0] && a[1] >= b[1] &&
+    a[0] + a[2] <= b[0] + b[2] && a[1] + a[3] <= b[1] + b[3];
+  const derived = all.filter(n => all.some(m => inside(meta[n].rect, meta[m].rect)));
+  const names = all.filter(n => !derived.includes(n))
+    .filter(n => fs.existsSync(path.join(keyedDir, n + '.png')));
+  if (derived.length)
+    console.log('  derived from their parent rect, not fired: ' + derived.join(', '));
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('atlasBytes', () => fs.readFileSync(atlas).toString('base64'));
   await page.exposeFunction('partBytes', n =>
     fs.readFileSync(path.join(keyedDir, n + '.png')).toString('base64'));
 
-  const res = await page.evaluate(async ({ meta, names, alphaSheet }) => {
+  const res = await page.evaluate(async ({ meta, names, alphaSheet, growFrac }) => {
     const im = new Image();
     im.src = 'data:image/png;base64,' + (await window.atlasBytes());
     await im.decode();
@@ -80,15 +113,33 @@ const fs = require('fs'), path = require('path');
       const oc = o.getContext('2d');
       oc.drawImage(im, r[0], r[1], r[2], r[3], 0, 0, r[2], r[3]);
       const od = oc.getImageData(0, 0, r[2], r[3]).data;
+      // grow the old outline by `grow` px, so a line drawn a hair outside the
+      // render's edge survives while the part still cannot wander
+      const RW = r[2], RH = r[3];
+      let keepMask = new Uint8Array(RW * RH);
+      for (let i = 0; i < RW * RH; i++) {
+        const j = i * 4;
+        keepMask[i] = (alphaSheet
+          ? od[j + 3] > 24
+          : (od[j] * 0.299 + od[j + 1] * 0.587 + od[j + 2] * 0.114) > 16) ? 1 : 0;
+      }
+      const grow = Math.max(3, Math.round(Math.min(RW, RH) * growFrac));
+      for (let g = 0; g < grow; g++) {
+        const nx = new Uint8Array(keepMask);
+        for (let y = 0; y < RH; y++) for (let x = 0; x < RW; x++) {
+          const i = y * RW + x;
+          if (keepMask[i]) continue;
+          if ((x && keepMask[i - 1]) || (x < RW - 1 && keepMask[i + 1]) ||
+              (y && keepMask[i - RW]) || (y < RH - 1 && keepMask[i + RW])) nx[i] = 1;
+        }
+        keepMask = nx;
+      }
       const td = tc.getImageData(0, 0, r[2], r[3]);
       const q = td.data;
       let kept = 0, lost = 0;
       for (let i = 0; i < r[2] * r[3]; i++) {
         const j = i * 4;
-        const lit = alphaSheet
-          ? od[j + 3] > 24
-          : (od[j] * 0.299 + od[j + 1] * 0.587 + od[j + 2] * 0.114) > 16;
-        if (!lit) { if (q[j + 3] > 24) lost++; q[j + 3] = 0; }
+        if (!keepMask[i]) { if (q[j + 3] > 24) lost++; q[j + 3] = 0; }
         else if (q[j + 3] > 24) kept++;
       }
       tc.putImageData(td, 0, 0);
@@ -104,10 +155,10 @@ const fs = require('fs'), path = require('path');
       c.drawImage(t, r[0], r[1]);
       c.restore();
       report.push(name + ': fit ' + sw + 'x' + sh + ' -> ' + tw + 'x' + th
-        + ', clipped ' + lost + 'px outside the old outline');
+        + ', ' + grow + 'px allowance, clipped ' + lost + 'px beyond it');
     }
     return { url: cv.toDataURL('image/png'), report, W, H };
-  }, { meta, names, alphaSheet });
+  }, { meta, names, alphaSheet, growFrac });
 
   fs.writeFileSync(out, Buffer.from(res.url.split(',')[1], 'base64'));
   res.report.forEach(l => console.log('  ' + l));

@@ -150,3 +150,39 @@ before the next five: `full`, `aIdle`, `aWalk`, `aRoar` and `aAtk` came back
 excellent, while `body` was returned as a small whole lion and `fleg0` as a
 cylinder. The box-fit and the clip make even those usable, because what
 survives is the surface, not the shape.
+
+## Three guardians drawn, and two more things the rig taught
+
+NULLFANG, TALONHOST and GLACIERE are redrawn and verified in the game:
+`docs/drawn_nullfang.png`, `docs/drawn_talonhost.png`, `docs/drawn_glaciere.png`.
+Green after all three: `artbible`, `tells`, `bosspace`, `daze`, `lowres`,
+`platform`.
+
+**The allowance has to scale with the part.** A clip to the exact old outline
+shredded GLACIERE — her standing assembly and her gallop both drifted slightly
+inside their boxes and came back as fragments without a head. But a flat 3px
+was wrong the other way: real on a 70px leg, nothing on a 445px figure. It is
+now 5% of the part's short side, floored at 3px, so a leg keeps a tight seam
+because it must meet a neighbour, while a whole-figure panel — which meets
+nothing and is placed by its own anchor — gets the room a redrawn pose needs.
+
+**Some entries in these tables are not parts at all.** `mane` and `tailW` are
+not pieces of GLACIERE; they are CROPS of her `hero` figure, windows the effect
+pass looks through. Fired as if they were their own drawings they come back no
+longer lining up with the figure they were cut from, and pasting them stamps a
+mismatched rectangle over the animal — which is how her head spent three rounds
+behind a black wedge. `rigpaste` now detects any rect that lies wholly inside
+another and RE-CUTS it from its parent's new pixels instead of firing it. Pure
+geometry, read from the table, nothing to keep in step by hand.
+
+**Two defects the owner should know about rather than find:**
+
+- **GLACIERE still carries a dark wedge at the chest.** Three re-fires of the
+  parts around it did not shift it. It reads as a dark armour plate at play
+  size rather than as damage, but it is not what the original had, and her tail
+  now sits shorter than its anchor expects.
+- **`npc__servo`** still frames with its chin off the bottom edge (see above).
+
+THE CHOIR, PRISM and MOTHER-V still wear their rendered art. The pipeline that
+does them is built, tuned and proven on three: cut with `rigrects` + `rigcut`,
+fire, key with `inkkey`, put back with `rigpaste`, photograph with `bossshot`.
