@@ -38,8 +38,22 @@ const check = (name, ok, detail) => {
     triStartNode(0, 'mem');
   });
 
-  // let the show phase play its lights
-  await page.waitForTimeout(2600);
+  // WAIT FOR THE SHOW PHASE, DO NOT GUESS HOW LONG IT TAKES. This was a flat
+  // 2600 ms, and the check it feeds is named "the show phase actually reaches
+  // the synth" -- which is a question about whether the notes arrive at all,
+  // not about whether they arrive inside a number somebody typed once.
+  //
+  // Measured on this build, the three notes land at 1477 / 1867 / 2302 ms, so
+  // the margin was 300 ms; a branch that adds startup art pushed them to
+  // 2255 / 2660 / 3083 and the harness reported "1 note for a sequence of 3" --
+  // a red that says the audio is broken when the audio is fine.
+  //
+  // Waiting on the note count keeps every assertion below exactly as strict:
+  // if the notes never come, this still times out and the same check still
+  // fails, with the same message. It only stops the clock being the subject.
+  await page.waitForFunction(
+    () => window._notes && TRI.memSeq && window._notes.length >= TRI.memSeq.length,
+    { timeout: 15000 }).catch(() => {});
   const mid = await page.evaluate(() => ({
     notes: window._notes, duck: MUS_DUCK, st: G.state,
     seqLen: TRI.memSeq.length, ac: AC ? AC.state : 'NO-AC',

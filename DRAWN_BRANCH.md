@@ -332,3 +332,42 @@ of 3. Worth knowing for the next restyle: it is a whole-silhouette measure, so
 it would NOT have caught a flattened MOTHER-V shell if that had been real —
 her tendrils and crown carry enough bands on their own. A per-part version is
 the stronger check if one is ever wanted.
+
+### THE WORLD ART COSTS ~780 ms OF STARTUP (integrator, 2026-08-19)
+
+Measured, because a harness went red on this branch and green on the shipping
+one with the same code. `tests/memnote.cjs` counts the memory trial's three
+show-phase notes:
+
+| branch | note 1 | note 2 | note 3 |
+|---|---|---|---|
+| shipping (procedural rock) | 1477 ms | 1867 ms | 2302 ms |
+| this branch (drawn rock + ceilings) | 2255 ms | 2660 ms | 3083 ms |
+
+Everything is shifted by roughly 780 ms, first note included, so it is not the
+trial being slow — it is the room taking longer to get going. Six rock slabs
+and six ceiling plates is the difference.
+
+**The harness was fixed on the shipping branch** — it slept a flat 2600 ms and
+then counted, which made the clock the subject of a check named "the show phase
+actually reaches the synth". It now waits for the notes and times out at 15 s,
+so it still fails, identically, if they never come. That fix is not a licence to
+spend the 780 ms; it stops a real red from being reported as an audio fault.
+
+**What is worth looking at here**, in the order it is likely to pay:
+
+1. `rockTex()` is called once per solid tile inside `drawTiles`, and it now
+   calls `rockPlate()` first — which calls `mediaHas` and, when the plate has
+   not landed, `mediaFetch` — several hundred times per bake, before the
+   `rockCache` short-circuit is ever reached. Moving the cache check ahead of
+   `rockPlate` costs nothing and removes the whole hot path.
+2. The slabs are PNG. The ceilings next to them are JPG. Six full-size PNGs is
+   the heaviest way to ship a texture that has no alpha.
+3. Both tiers now invalidate the tile bake (correctly — that was the `else` bug
+   the same commit fixed), so a room bakes up to three times on first entry:
+   procedural, low tier, full plate. The bake is the most expensive thing in the
+   renderer now that the silhouette passes live in it.
+
+None of this is wrong, and the fix in that commit was a real bug fix. It is the
+first time the drawn branch has cost anything measurable, and it is worth
+knowing before the rest of the world follows the cast.
