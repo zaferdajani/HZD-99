@@ -2243,8 +2243,40 @@ function rkMix(a, b, t2) {
   const p = (i) => Math.round(A[i] + (B[i] - A[i]) * t2).toString(16).padStart(2, '0');
   return '#' + p(0) + p(1) + p(2);
 }
+// THE DRAWN ROCK. One slab per kingdom, and because every solid tile is cut
+// from it, six files change the floor, the walls and the ceiling of the whole
+// game at once. The bake below stays exactly where it is: art is lazy, so the
+// procedural slab is what is on screen until the plate lands, and it is what
+// stays on screen if the plate never does (RULE ZERO — the engine never assumes
+// it has the good version).
+const ROCK_ART = { A: 'rockA', B: 'rockB', C: 'rockC', D: 'rockD', E: 'rockE', X: 'rockX' };
+function rockPlate(zone) {
+  const k = ROCK_ART[zone];
+  if (!k || typeof mediaHas !== 'function') return null;
+  // asking must not be what fetches — see mediaHas in media.js — so the request
+  // is made explicitly, once, and the answer is "not yet" until it lands
+  if (!mediaHas(k)) { if (typeof mediaFetch === 'function') mediaFetch(k); return null; }
+  const im = (typeof softArt === 'function' && softArt(k)) || MEDIA_IMG[k];
+  return (im && (im.naturalWidth || im.width)) ? im : null;
+}
+
 function rockTex(zone) {
-  if (rockCache[zone]) return rockCache[zone];
+  const plate = rockPlate(zone);
+  // The cache remembers WHICH IMAGE made it, not merely that an image did. The
+  // low-resolution tier lands first and is a real image, so a cache keyed on
+  // "art or not" would hold the 128px stand-in for the rest of the session and
+  // the full slab would never be drawn.
+  const had = rockCache[zone];
+  if (had && had._img === plate) return had;
+  if (plate) {
+    const w = plate.naturalWidth || plate.width, h = plate.naturalHeight || plate.height;
+    const pv = document.createElement('canvas');
+    pv.width = w; pv.height = h;
+    pv.getContext('2d').drawImage(plate, 0, 0);
+    pv._src = 'art'; pv._img = plate;
+    rockCache[zone] = pv;
+    return pv;
+  }
   const P = PAL[zone]; if (!P) return null;
   const cv = document.createElement('canvas');
   cv.width = ROCK_TW; cv.height = ROCK_TH;
@@ -2346,6 +2378,7 @@ function rockTex(zone) {
   // while the value says "this is rock, the character is what matters".
   x.globalAlpha = 0.14; x.fillStyle = '#000'; x.fillRect(0, 0, ROCK_TW, ROCK_TH);
   x.globalAlpha = 1;
+  cv._src = 'proc'; cv._img = null;
   rockCache[zone] = cv;
   return cv;
 }
@@ -3908,7 +3941,9 @@ function drawTiles(P) {
       if (rock) {
         // the material itself, sampled where this tile sits in the world so
         // neighbouring tiles are continuous rock rather than repeated stamps
-        c.drawImage(rock, X % ROCK_TW, Y % ROCK_TH, TILE, TILE, X, Y, TILE, TILE);
+        // sampled by the slab's own size, not by the constant: the drawn slab
+        // is larger than the procedural bake and both have to tile correctly
+        c.drawImage(rock, X % rock.width, Y % rock.height, TILE, TILE, X, Y, TILE, TILE);
         // the painted kingdom plate, where one exists, laid over the rock as
         // colour and grime rather than as the surface itself
         if (tex) {
@@ -4130,7 +4165,7 @@ function drawTiles(P) {
             c.lineTo(hx + (hash2(tx, q) - 0.5) * 3, Y + TILE + hl);
             c.closePath();
             c.clip();
-            if (rock2) c.drawImage(rock2, X % ROCK_TW, Y % ROCK_TH, TILE, TILE, X, Y + TILE - TILE + 2, TILE, TILE + hl);
+            if (rock2) c.drawImage(rock2, X % rock2.width, Y % rock2.height, TILE, TILE, X, Y + TILE - TILE + 2, TILE, TILE + hl);
             else { c.fillStyle = P.solid; c.fillRect(X - 4, Y + TILE - 4, TILE + 8, hl + 8); }
             // and darken as it hangs — the tip is furthest from the light
             const tg = c.createLinearGradient(0, Y + TILE, 0, Y + TILE + hl);
@@ -4414,7 +4449,7 @@ function drawTiles(P) {
         // cannot stop seeing it. The fracture below just confirms what the
         // grain already said.
         const OX = 101, OY = 53;
-        c.drawImage(rockB, (X + OX) % ROCK_TW, (Y + OY) % ROCK_TH, TILE, TILE, X, Y, TILE, TILE);
+        c.drawImage(rockB, (X + OX) % rockB.width, (Y + OY) % rockB.height, TILE, TILE, X, Y, TILE, TILE);
         const texB = strataTex(G.roomDef.zone);
         if (texB) {
           c.globalAlpha = 0.3;

@@ -2,6 +2,9 @@
  "roster": "assets/lowres/roster.webp",
  "npcs": "assets/lowres/npcs.webp",
  "zones": "assets/lowres/zones.webp",
+ "ceilB": "assets/lowres/ceilB.webp",
+ "ceilC": "assets/lowres/ceilC.webp",
+ "ceilD": "assets/lowres/ceilD.webp",
  "eyeChime": "assets/lowres/eyeChime.webp",
  "eyeChimeW": "assets/lowres/eyeChimeW.webp",
  "eyeCarrier": "assets/lowres/eyeCarrier.webp",
@@ -142,5 +145,11 @@
  "vistaCrystal": "assets/lowres/vistaCrystal.webp",
  "driller": "assets/lowres/driller.webp",
  "slashFx": "assets/lowres/slashFx.webp",
+ "rockA": "assets/lowres/rockA.webp",
+ "rockB": "assets/lowres/rockB.webp",
+ "rockC": "assets/lowres/rockC.webp",
+ "rockD": "assets/lowres/rockD.webp",
+ "rockE": "assets/lowres/rockE.webp",
+ "rockX": "assets/lowres/rockX.webp",
  "platforms": "assets/lowres/platforms.webp"
 }
