@@ -117,6 +117,11 @@ function moveEnt(e, dt) {
     }
     if (bonk) { e.y = (ty + 1) * TILE + 0.01; e.vy = 0; col.u = 1; }
   }
+  // How far below her feet the ground may be and still count as underfoot.
+  // One frame at full run is about 11 px of travel, so this has to clear the
+  // steepest descent the surface curve can make in that distance; 14 does, and
+  // it stays well under a tile so a real ledge is still a real ledge.
+  const GROUND_SNAP = 14;
   // THE HEIGHTFIELD. The tile resolver above snaps a landing to ty * TILE — the
   // top of a square — which is why the level stayed a flat line however the
   // terrain was drawn. Where the surface curve rises above that tile top, real
@@ -135,6 +140,24 @@ function moveEnt(e, dt) {
       // the square top it was built on — that band IS the added material. The
       // tile top is what proves something solid is holding it up.
       if (gy < gTop && feet > gy - 0.5 && feet <= gTop + 1.5) {
+        e.y = gy - e.h - 0.01; e.vy = 0; col.d = 1;
+      } else if (e.on && e.vy >= 0 && gy < gTop && feet <= gy && gy - feet <= GROUND_SNAP) {
+        // DOWNHILL, which is the half that was missing and the reason running
+        // looked wrong. Going UP a mound her feet land inside the band above and
+        // she is caught. Going DOWN, the next column's surface is LOWER than her
+        // feet, so she is outside that band entirely — unsupported, in mid-air,
+        // one frame of gravity, caught again on the next column, over and over.
+        //
+        // Measured before this line existed: running across level ground she was
+        // airborne 8 frames in 24, her feet juddering 20 px, vy spiking to 153,
+        // and the pose snapping to a falling plate that is drawn CENTRED instead
+        // of from the foot — so she also popped and changed size. She was not
+        // running, she was skipping.
+        //
+        // A body that was standing on the ground keeps standing on it while the
+        // ground is still under its feet. That is the ground snap every
+        // platformer with slopes has, and it cannot glue her over a pit: the
+        // gy < gTop test means there is a solid tile holding this surface up.
         e.y = gy - e.h - 0.01; e.vy = 0; col.d = 1;
       }
     }
@@ -1600,10 +1623,22 @@ class Player {
     if (this.dashT > 0) return 'dash';
     if (this.wallSlide !== 0 && !this.on) return 'wall_cling';
     if (!this.on) {
-      if ((this.boostT || 0) > 0) return 'djump_jet';
-      if (this.vy < -140) return 'rise';
-      if (this.vy < 140) return 'apex';                 // the hang, both ways through zero
-      return 'fall';
+      // A ONE-FRAME DROP IS NOT A FALL. Stepping off a lip, cresting a mound,
+      // any bump in the floor takes her off the ground for a frame or two, and
+      // swapping to an airborne plate for that long is a flicker rather than a
+      // pose — the airborne cells are drawn centred instead of from the foot, so
+      // she jumps and grows every time it happens. The jump already has a 0.1 s
+      // coyote grace; the DRAWING never used it.
+      //
+      // A real jump is unaffected: it leaves the ground rising, and the guard
+      // only holds while she is not (vy >= 0).
+      const hop = this.coyote > 0 && this.vy >= 0;
+      if (!hop) {
+        if ((this.boostT || 0) > 0) return 'djump_jet';
+        if (this.vy < -140) return 'rise';
+        if (this.vy < 140) return 'apex';               // the hang, both ways through zero
+        return 'fall';
+      }
     }
     if (this.skidT > 0) return 'skid';
     if (this.landT > 0) return 'land';
