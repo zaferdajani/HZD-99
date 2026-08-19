@@ -60,7 +60,8 @@ const check = (name, ok, detail) => {
       }
       return false;
     };
-    const air = [], feet = [], states = [], vys = [], over = [];
+    const air = [], feet = [], states = [], vys = [], over = [], lifts = [];
+    const strideStart = player.stridePh || 0, animStart = player.anim;
     for (let i = 0; i < 48; i++) {
       await frame();
       // she is not the subject of the room's hazards here
@@ -71,6 +72,7 @@ const check = (name, ok, detail) => {
       feet.push(player.y + player.h);
       vys.push(Math.abs(player.vy));
       states.push(player.heroState(Math.abs(player.vx) > 140));
+      lifts.push(player._stepLift || 0);
     }
     keys.ArrowRight = 0;
     // AND WHERE DOES THE FOREGROUND SIT? The near depth plate exists to cross in
@@ -87,7 +89,9 @@ const check = (name, ok, detail) => {
       const anchor = roomFloorAnchor(0) - camSY();
       fore = { top: anchor - h * 0.22, feet: player.y + player.h - camSY() };
     }
-    return { air, feet, states, vys, over, fore, vx: Math.round(player.vx) };
+    return { air, feet, states, vys, over, fore, lifts,
+             strideStart, animStart, strideEnd: player.stridePh || 0, animEnd: player.anim,
+             vx: Math.round(player.vx) };
   });
 
   // only the frames with ground under her
@@ -107,15 +111,13 @@ const check = (name, ok, detail) => {
     if (i && onFloor[i - 1]) runs[runs.length - 1]++; else runs.push(1);
   }
   const skips = runs.filter(n => n <= 2).length;
-  // THE BAR IS ONE, AND THAT IS AN ADMISSION RATHER THAN A ROUND NUMBER.
-  // Before the ground snap: eight short skips in twenty-four frames, every run.
-  // After: zero or one in forty-odd, intermittently. The last one does not
-  // answer to the snap distance — raising the constant from 5 to 10 px and
-  // making the rest slope-proportional did not move it — so it is a different
-  // mechanism that has not been found yet, not a tuning number. Left visible at
-  // one instead of hidden at two: if it ever reads two, something new is wrong.
+  // THE BAR IS ZERO, and it is met. Before the ground snap: eight short skips
+  // in twenty-four frames, every run. The one that survived it was not a
+  // tuning number after all — groundColumnAt refused to answer for the last
+  // three pixels of every room, so no snap distance could have fixed it. Five
+  // runs for five now report no departures at all.
   check('she does not skip: no one-frame departures from ground that is there',
-    skips <= 1,
+    skips === 0,
     skips + ' skip(s) of 1-2 frames; departures ' + (runs.length ? runs.join('/') : 'none') +
     ' over ' + floorFrames + ' floor frames (vx ' + r.vx + ')');
 
@@ -154,6 +156,39 @@ const check = (name, ok, detail) => {
   for (let i = 0; i < onFloor.length; i++) if (onFloor[i] && !onFloor[i - 1]) episodes++;
   check('she leaves the ground once and deliberately, not over and over',
     episodes <= 2, episodes + ' separate departure(s) from solid floor');
+
+  // THE STRIDE HAS A VERTICAL, AND IT IS ON THE RIGHT FOOT.
+  //
+  // The body's rise and fall was computed for years and handed only to the
+  // procedural fallback; the authored plate — the thing players see — held one
+  // height while two pictures alternated. Two things are checked, because the
+  // first without the second is worse than nothing: that the body MOVES
+  // vertically at all, and that it is LOWEST at the footfall, which is the
+  // frame the cell swaps on. A bob on the wrong foot reads as a limp.
+  const range = Math.max(...r.lifts) - Math.min(...r.lifts);
+  check('her body rises and falls as she strides', range >= 1.5,
+    'vertical travel ' + range.toFixed(2) + ' px over the run');
+  // THE CADENCE IS THE THING TO GUARD, and the phase is not measurable here.
+  //
+  // Three attempts went into checking that the body is lowest ON the footfall.
+  // All three measured the SAMPLER: draw runs once per frame while update runs
+  // up to three times, so the frame on which a cell change is noticed can be a
+  // third of a step past the crossing, and a correct bob reports as inverted.
+  // The bob and the cell are driven off the same variable one line apart in
+  // entities.js; that is a fact about the source, not something frame samples
+  // can confirm, and a check that measures its own resolution is worse than no
+  // check at all.
+  //
+  // What IS measurable, and what was actually wrong: HOW OFTEN SHE STEPS. The
+  // cell used to be chosen by floor(anim * 10) with anim in seconds — ten
+  // footfalls a second, measured at 9.81. A sprinting human turns over about
+  // four; ten with two poses is a strobe, not a gait. Bounds are set wide
+  // enough to be about biology rather than taste.
+  const steps = r.strideEnd - r.strideStart, secs = r.animEnd - r.animStart;
+  const cadence = secs > 0 ? steps / secs : 0;
+  check('she steps at a rate a body could produce',
+    cadence >= 2.5 && cadence <= 5.5,
+    cadence.toFixed(2) + ' steps/sec at vx ' + r.vx);
 
   if (r.fore) {
     const above = r.fore.feet - r.fore.top;

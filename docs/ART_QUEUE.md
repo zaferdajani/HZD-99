@@ -2375,3 +2375,69 @@ that fixed the cropped guardians and edge_C.
 
 **Known and mine to fix, not a question:** walk_a came back with a painted panel
 border despite the ban. Either a re-fire or a trim pass.
+
+### 1g. THE RUN AND WALK CYCLES ✱ NEW, FIRE ON REBIND (owner, 2026-08-19)
+
+**The owner's report:** *"The cat movement is horrible. I mean, very, very, very
+bad."* Half of that was code and is fixed (see the gait commits: she was
+airborne a third of the time while running, her cadence was ten footfalls a
+second, and the authored body had no vertical at all). **The half that is left
+is this section, and no code closes it.**
+
+**HER RUN IS HER WALK.** `run_a` and `run_b` exist in the sheet and are not
+drawn. `heroState()` returns the walk pair for running too — the comment there
+records why: the re-fired run cells came back with the long-legged proportions
+the owner rejected, a facing that reads backward in motion, and two poses too
+alike to cycle. So the game alternates **two plates**, and two plates is not a
+cycle at any cadence. Hornet's run is eight frames. Nothing in the engine turns
+two pictures into eight.
+
+**WHAT TO FIRE — and the first line is the one that matters most:**
+
+> **ONE CYCLE FROM ONE RIG.** All frames of a cycle are the same character in
+> the same costume at the same scale, drawn as consecutive moments of a single
+> continuous motion — not N independent illustrations of "a cat running".
+
+That constraint is not style, it is the difference between a cycle and a
+flicker, and this repo has already paid for ignoring it: `HERO_REG` in
+entities.js carries hand-measured horizontal nudges (`walk_a -0.046`,
+`walk_b +0.046`, and the same again for the run pair) because two
+independently-generated plates put her head in two different places and she
+strobed as she walked. Eight independent plates would need eight such
+corrections and would still swim.
+
+| cycle | frames | notes |
+|---|---|---|
+| run | 8 | contact, down, passing, up — twice, once per leg |
+| walk | 6 | the same shape, slower and lower |
+| turn | 2 | the plant and the push-off of a direction change |
+| land | 2 | the absorb and the recover, to follow the existing `land` cell |
+
+**THE CONSTRAINTS THE OWNER HAS ALREADY GIVEN, restated because the last fire
+broke all three:**
+
+- **Short legs.** The stubby proportions of the shipped body. He asked for this
+  explicitly and the re-fire came back long-legged.
+- **The house facing.** She reads as travelling the way she is drawn to face.
+  The rejected run pair read as running backward.
+- **Poses that differ.** Two cells too alike to cycle is what put the run back
+  on the walk pair in the first place. Consecutive frames of one motion differ
+  by construction; independent illustrations do not.
+
+**THE GEOMETRY CONTRACT (same as §1f):** the sheet is addressed by CELL INDEX.
+New cells append to `tools/herostates.cjs`'s STATES array and to `HERO_CELL` in
+entities.js; every cell is the same size with the same footprint on the floor
+line. Airborne cells are centred, grounded cells stand on the cell floor —
+`HERO_AIR` records which is which and a new cell must be declared there.
+
+**WHAT THE CODE WILL DO WITH THEM, so the frame count is not wasted.** The
+stride phase already exists and is already speed-driven: `this.stridePh`
+advances at `|vx| / 88` steps per second, capped at 4.6, and both the cell
+choice and the body's rise and fall read from it. Going from 2 frames to 8 is
+one line — `Math.floor(stridePh * 4) % 8` instead of `Math.floor(stridePh) % 2`
+— and the bob, the contact squash and the cadence all keep working unchanged.
+**The engine is waiting for the frames; nothing else has to be built.**
+
+And `tests/gait.cjs` already measures the result: that she stays on the ground,
+that her body rises and falls as she strides, and that she steps at a rate a
+body could produce.

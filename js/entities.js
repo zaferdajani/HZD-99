@@ -760,6 +760,22 @@ class Player {
       return;
     }
     this.anim += dt;
+    // THE CADENCE IS HUMAN NOW, AND IT WAS NOT. `anim` is seconds, so a cell
+    // chosen by floor(anim * 10) flips the picture TEN TIMES A SECOND —
+    // measured at 9.81 at full run. A sprinting human turns over about four
+    // steps a second and a walk about two; ten is roughly double the fastest
+    // cadence a body can produce, and with two poses to alternate it is not a
+    // stride at all, it is a strobe. It is most of what reads as "unnatural",
+    // and the new step bob inherited it and became a buzz rather than a rise
+    // and fall.
+    //
+    // A dedicated phase, advanced by SPEED rather than by the clock, because
+    // that is the relationship a gait actually has: she takes more steps per
+    // second because she is travelling faster, not because more time passed.
+    // Airborne it does not advance at all — feet that keep walking in mid-air
+    // are the other classic tell.
+    this.stridePh = (this.stridePh || 0)
+      + dt * (this.on ? clamp(Math.abs(this.vx) / 88, 0, 4.6) : 0);
     this.dashCD -= dt; this.atkCD -= dt; this.iT -= dt; this.castCD -= dt;
     this.jbuf -= dt; this.landT -= dt; this.comboT -= dt;
     if (this.slowT > 0) {
@@ -1677,7 +1693,7 @@ class Player {
       // the walk, hurried, AGAIN — the read he approved — until a re-fire
       // that keeps the short legs and the house facing lands (ART_QUEUE §1e,
       // re-opened with those constraints written into the brief).
-      const k = Math.floor(this.anim * (run ? 10 : 7)) % 2;
+      const k = Math.floor(this.stridePh || 0) % 2;
       return k ? 'walk_b' : 'walk_a';
     }
     return 'idle';
@@ -2055,10 +2071,65 @@ class Player {
       else { sy -= vk * 0.05; sx += vk * 0.04; }            // the fall: gathered
       airRot = vk < 0 ? vk * 0.07 : vk * 0.12;              // back off it, then into it
     }
+    // THE STRIDE HAS A VERTICAL, and the authored body had none at all.
+    //
+    // `bob` is computed thirty lines up and handed ONLY to drawHeroRig — the
+    // procedural fallback that draws for a second before the sheet loads. The
+    // PLATE path, which is what every player actually sees, translated
+    // horizontally at a constant height while two pictures alternated. A
+    // running body's centre of mass rises and falls once per step; hers did not
+    // move at all, and a figure that holds one height while its picture flips
+    // is a cut-out sliding along the floor. That is most of what "the movement
+    // is horrible" is pointing at.
+    //
+    // IN PHASE WITH THE PLATE, which is the half that has to be right. The cell
+    // swaps on floor(anim * F), so every integer of that product is a FOOTFALL:
+    // the body is lowest there and highest between. Driving this off any other
+    // clock — including the rig's own `ph`, which runs at a different rate —
+    // puts the rise on the wrong foot and reads worse than no rise at all.
+    //
+    // Suppressed under G.artProbe with every other ground-anchored effect:
+    // tests/artbible.cjs measures her soles against the floor, and a body
+    // legitimately mid-stride is not the frame that question is asking about.
+    const usePlate = !(typeof isHero === 'function' && isHero())
+      && typeof MEDIA_IMG !== 'undefined' && !!MEDIA_IMG.heroStates;
+    let stepLift = 0;
+    if (usePlate && this.on && Math.abs(this.vx) > 12 && this.dashT <= 0
+        && !this.swingVis && this.landT <= 0 && this.skidT <= 0
+        && this.hurtPoseT <= 0 && !(typeof G !== 'undefined' && G.artProbe)) {
+      const sp = this.stridePh || 0;
+      const lift = Math.abs(Math.sin(Math.PI * sp));     // 0 at contact, 1 between
+      stepLift = -lift * (run ? 1.6 + sprintK * 1.8 : 1.3);
+      // ...AND THE FOOT LANDS. A short compression at contact, gone by mid
+      // stride — the weight arriving, which is the other half of a step. Volume
+      // conserving like every other deformation in this block, so she squashes
+      // rather than shrinking.
+      const hit = Math.pow(1 - lift, 5) * (run ? 0.05 : 0.03);
+      sy -= hit; sx += hit * 0.7;
+    }
     const cr = (this.skidT > 0 ? 0.2 : (this.wallSlide !== 0 ? 0.1 : 0))
              + (run ? sprintK * 0.12 : 0)                           // low, coiled sprint carriage
              - songK * 0.08                                        // the Song: drawn UP, not down
              + lowK * 0.11;                                        // one core: sagging carriage
+    // recorded so tests/gait.cjs can check the PHASE rather than trust it: a
+    // bob that is out of step with the footfall is worse than none, and that
+    // is not something a still frame or a reading of this file would show.
+    //
+    // AND THE PHASE IS CAUGHT HERE, NOT SAMPLED FROM OUTSIDE. The cell swaps
+    // roughly every third frame, so a harness reading one frame in one can miss
+    // the crossing by most of a step and report a correct bob as inverted —
+    // which is exactly what it did. This sees every frame: the worst |lift|
+    // ever observed ON a cell change. Zero is right; anything near the
+    // amplitude means the two clocks have drifted apart.
+    this._stepLift = stepLift;
+    if (usePlate) {
+      const gc = this.heroState(run);
+      if (gc !== this._gaitCell) {
+        this._gaitCell = gc;
+        if (/^walk_/.test(gc)) this._swapLift = Math.max(this._swapLift || 0, Math.abs(stepLift));
+      }
+    }
+    if (stepLift) c.translate(0, stepLift);                         // the step's own rise and fall
     if (this.wallSlide !== 0) c.translate(2.5, 0);                  // body pressed INTO the wall
     if (kick > 0) c.translate(-2.6 * kick, 0);                      // rocked off the firing line
     c.rotate(this.lean + (this.skidT > 0 ? -0.14 : 0) + (this.wallSlide !== 0 ? 0.1 : 0)

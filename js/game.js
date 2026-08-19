@@ -4907,8 +4907,20 @@ function surfaceCurve() {
 function groundColumnAt(worldX) {
   const cur = (typeof surfaceCurve === 'function') ? surfaceCurve() : null;
   if (!cur) return null;
-  const i = Math.round(worldX / SURF_STEP);
-  if (i < 0 || i >= cur.N) return null;
+  // CLAMP, DO NOT REFUSE — and this was the intermittent skip.
+  //
+  // The curve holds N samples spaced SURF_STEP apart, so it describes
+  // x = 0 .. (N-1)*SURF_STEP. A room 32 tiles wide is 1024 px and its last
+  // sample sits at 1020, so for the final three pixels of EVERY room this
+  // returned null: the ground snap had nothing to hold her with and she fell
+  // through a floor that was plainly there — measured at x 1023 with solid tile
+  // directly under her feet, vy jumping to 102 the next frame.
+  //
+  // It is why raising the snap distance did nothing. The answer was never "the
+  // ground is too far below", it was "I do not know where the ground is", and
+  // no distance fixes a missing number. The surface against the wall is the
+  // surface at the last sample.
+  const i = Math.min(cur.N - 1, Math.max(0, Math.round(worldX / SURF_STEP)));
   const y = cur.y[i], t = cur.raw[i];
   if (isNaN(y) || isNaN(t)) return null;
   return [y, t];
