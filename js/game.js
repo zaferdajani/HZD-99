@@ -2256,7 +2256,11 @@ function rockPlate(zone) {
   // asking must not be what fetches — see mediaHas in media.js — so the request
   // is made explicitly, once, and the answer is "not yet" until it lands
   if (!mediaHas(k)) { if (typeof mediaFetch === 'function') mediaFetch(k); return null; }
-  const im = (typeof softArt === 'function' && softArt(k)) || MEDIA_IMG[k];
+  // NOT through softArt: that pass exists to feather the edge of a CUTOUT so
+  // it does not read as a sticker, and a slab has no edge — it is a texture
+  // that must join itself. Running it here bought a full extra copy of every
+  // slab and 22 ms of work for no visible difference.
+  const im = MEDIA_IMG[k];
   return (im && (im.naturalWidth || im.width)) ? im : null;
 }
 
@@ -4655,11 +4659,43 @@ function drawPlatformRuns() {
 }
 // tile layer cache — tiles are static per room, so render once and blit
 let tileCv = null, tileDirty = true;
+// DO NOT BAKE A FLOOR YOU ARE ABOUT TO THROW AWAY.
+//
+// Baking the tile layer for a large room measures at about 940 ms, and the rock
+// slab it is cut from is lazy like all art here. Bake first and the slab lands a
+// moment later, the bake is discarded and paid for again: two seconds of stalled
+// frames in the first three seconds of play. tests/memnote.cjs is what found it
+// — a stalled loop plays one note of a three-note trial — and the frame counter
+// agreed afterwards: 16 frames in 2.6 s against 37 before.
+//
+// So the bake WAITS for the slab, briefly, and does nothing else. A frame or two
+// with no tile layer costs nothing; a wasted second costs the opening. The wait
+// is bounded and per room: if the slab does not arrive the procedural bake runs
+// and the floor is quieter, which is the same fallback everything else here has.
+let rockWaitRoom = null, rockWaitT0 = 0;
+const ROCK_WAIT_MS = 1200;
+function rockBakeReady(zone) {
+  if (typeof isHero === 'function' && isHero()) return true;
+  const k = ROCK_ART[zone];
+  if (!k || typeof mediaHas !== 'function' || !MEDIA_SRC || !MEDIA_SRC.images[k]) return true;
+  if (mediaHas(k)) return true;
+  if (typeof mediaFetch === 'function') mediaFetch(k, true);   // and ask, once asking matters
+  const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  if (rockWaitRoom !== G.roomId) { rockWaitRoom = G.roomId; rockWaitT0 = now; }
+  return now - rockWaitT0 > ROCK_WAIT_MS;
+}
+
 function renderTileLayer(P) {
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
+  // THE CANVAS IS MADE FIRST, ALWAYS. The wait below returns without baking,
+  // and the draw path composites this layer unconditionally — returning before
+  // the canvas existed handed drawImage a null and threw once per frame, which
+  // is not "a frame or two with no tile layer", it is a dead game.
   if (!tileCv || tileCv.width !== W || tileCv.height !== H) {
     tileCv = document.createElement('canvas'); tileCv.width = W; tileCv.height = H;
   }
+  // tileDirty is deliberately left set: this is "not yet", not "done"
+  if (!rockBakeReady(G.roomDef.zone)) return;
   const tctx = tileCv.getContext('2d');
   tctx.clearRect(0, 0, W, H);
   const main = c; c = tctx;

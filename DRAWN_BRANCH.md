@@ -371,3 +371,81 @@ spend the 780 ms; it stops a real red from being reported as an audio fault.
 None of this is wrong, and the fix in that commit was a real bug fix. It is the
 first time the drawn branch has cost anything measurable, and it is worth
 knowing before the rest of the world follows the cast.
+
+## The world follows the cast — 2026-08-19
+
+The owner's ruling: **the videos stay 3D and are not part of this branch.** What
+changes here is the ART — and not only the characters. The background, the floor,
+the walls and the terrain have to be the same hand.
+
+**THE ROCK is the whole world's surface, and that is a fact about the engine.**
+Every solid tile in the game — floor, wall and ceiling alike — is cut from one
+slab per kingdom (`rockTex` in js/game.js). So six drawn slabs restyle every
+surface in the world. They are wired the way all art here is wired: the
+procedural bake stays and draws until the plate lands, and keeps drawing if the
+plate never does.
+
+| what | files | how it is used |
+|---|---|---|
+| the rock | `rock_a` … `rock_x` | every solid tile, tiled on both axes |
+| the roofs | `ceil_a` … `ceil_x` | the ceiling band, tiled horizontally |
+| the strata | `strata_lava`, `strata_iceB`, `strata_rubble` | mid-depth band, and a grime overlay on the tiles |
+| the backdrops | `zones_far` (6 cells), `vista_city`, `vista_crystal` | the far plane behind everything |
+| the decks | `platforms.png` (4 rects) | every one-way platform, three-sliced |
+
+**Three tools landed with it, and they are branch-neutral:**
+
+- **`tools/rockslab.cjs`** makes a slab tile on both axes. A generator cannot be
+  asked to close a texture on all four edges, so it is arithmetic: offset by half
+  on both axes — which makes the borders join by construction, because they
+  become the plate's own interior — then heal the cross that lands in the middle
+  with the original centre, through a feathered mask that never reaches a border.
+  It MEASURES the result, the difference across the wrap against the difference
+  one pixel inside it, and prints both.
+- **`tools/vistaatlas.cjs`** composes the six backdrops into `zones_far.jpg`.
+  ZONE_CELL addresses that sheet as 2×3 — A B / C D / E X — so a backdrop in the
+  wrong cell puts the Foundry behind the Archives.
+- **`tools/roomshot.cjs`** is the review instrument: rooms of the real game on one
+  labelled sheet, speech panel sealed, the room's lazy art waited for.
+- **`tools/flatten.cjs`** ships a keyed plate over a flat ground at the size and
+  the path the engine already reads, so choosing a style stays a file copy.
+
+**What this pass taught:**
+
+- **NAMING A THING FORBIDS NOTHING.** "No brick courses" returned six brick walls.
+  "The lower third is empty" returned a sheet of white paper. Saying what the
+  picture IS — *irregular lumps packed like scree*, *the bottom half is solid
+  black paint* — got both right on the first try.
+- **A LOW-TIER STAND-IN IS A REAL IMAGE.** The quarter-scale slab lands first, and
+  a cache that only asked "is there art yet" would have held the 128px stand-in
+  for the whole session. The cache remembers WHICH image made it, and media.js
+  dirties the tile bake whether or not the arriving sheet replaced a stand-in —
+  it was an `else`, and both things have to happen.
+- **THE WORLD IS DARK BY LAW, NOT BY ACCIDENT.** `tests/grammar.cjs` §9.1 holds
+  the background plane at or under 25% luminance and §9.4 holds it near-grey, so
+  a backdrop that looks glorious on the contact sheet is correctly buried on
+  screen. Measured after this pass: 7–11% against a ceiling of 25. That headroom
+  is deliberate and is not to be spent.
+
+- **A LATE SHEET CAN COST A SECOND OF PLAY, AND THE FIX IS NOT TO FETCH IT
+  EARLIER.** The tile layer is baked, and baking one large room measures at about
+  940 ms. A rock slab arriving after that bake throws it away and pays for a
+  second one: 16 frames in the first 2.6 seconds against 37 before.
+  `tests/memnote.cjs` found it — a stalled loop plays one note of a three-note
+  trial — and `tests/tutor.cjs`, which walks the opening under a time budget,
+  agreed. Front-loading the six slabs fixed the stall and broke
+  `tests/boot.cjs` instead, which measures that the SAVED room's art is fetched
+  first and counts positions: six more eager sheets pushed it from 5 to 11. The
+  right fix was neither — **the bake WAITS for the slab**, briefly and per room,
+  and does nothing at all in the meantime. A frame or two with no tile layer
+  costs nothing; a wasted second costs the opening. 38 frames, zero re-bakes,
+  and the save-room's art still lands at position 5.
+- **AN EARLY RETURN STILL HAS TO LEAVE A CANVAS BEHIND.** The first version of
+  that wait returned before `tileCv` was created, and the draw path composites
+  the tile layer unconditionally — so `drawImage` was handed a null and threw
+  once per frame. That is not "a frame or two with no tile layer", it is a dead
+  game, and it presented as a trial that never opened rather than as an error.
+
+**Still 3D, and next in this order:** the terrain depth planes (`edge_*`,
+`fore_*`), the cave mouths and zone gates, and the interiors (booth, den, forge,
+carrel, hollow, oracle) plus the six guardian lairs.

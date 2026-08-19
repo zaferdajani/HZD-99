@@ -8,18 +8,23 @@
 // format it had before. Keeping the path and the format is the whole point:
 // choosing a style stays a file copy rather than a code change.
 //
-//   node tools/flatten.cjs <in.png> <out.jpg|png> [w] [h] [bg=#000] [darken=0]
+// `crop` trims a fraction off every side before anything else, for the plates
+// that come back framed: told not to draw a border, the generator paints a
+// white paper margin round the picture often enough that trimming is cheaper
+// than arguing with it.
+//
+//   node tools/flatten.cjs <in.png> <out.jpg|png> [w] [h] [bg=#000] [darken=0] [crop=0]
 const { chromium } = require('playwright');
 const fs = require('fs');
 
 (async () => {
-  const [inp, out, wArg, hArg, bgArg, darkArg] = process.argv.slice(2);
+  const [inp, out, wArg, hArg, bgArg, darkArg, cropArg] = process.argv.slice(2);
   if (!inp || !out) { console.error('usage: flatten.cjs <in.png> <out> [w] [h] [bg] [darken]'); process.exit(2); }
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('plateBytes', () => fs.readFileSync(inp).toString('base64'));
   const jpg = /\.jpe?g$/i.test(out);
-  const res = await page.evaluate(async ({ wArg, hArg, bgArg, darkArg, jpg }) => {
+  const res = await page.evaluate(async ({ wArg, hArg, bgArg, darkArg, cropArg, jpg }) => {
     const im = new Image();
     im.src = 'data:image/png;base64,' + await window.plateBytes();
     await im.decode();
@@ -30,13 +35,16 @@ const fs = require('fs');
     c.fillStyle = bgArg || '#000'; c.fillRect(0, 0, W, H);
     // COVER, not stretch: a band squashed to a different aspect stretches the
     // grain, and stretched grain is the one thing that reads as "resized art"
-    const s = Math.max(W / im.width, H / im.height);
-    const dw = im.width * s, dh = im.height * s;
-    c.drawImage(im, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    const cf = cropArg ? +cropArg : 0;
+    const sx = im.width * cf, sy = im.height * cf;
+    const sw = im.width - sx * 2, sh = im.height - sy * 2;
+    const s = Math.max(W / sw, H / sh);
+    const dw = sw * s, dh = sh * s;
+    c.drawImage(im, sx, sy, sw, sh, (W - dw) / 2, (H - dh) / 2, dw, dh);
     const dk = darkArg ? +darkArg : 0;
     if (dk > 0) { c.globalAlpha = dk; c.fillStyle = '#000'; c.fillRect(0, 0, W, H); c.globalAlpha = 1; }
     return cv.toDataURL(jpg ? 'image/jpeg' : 'image/png', 0.9);
-  }, { wArg, hArg, bgArg, darkArg, jpg });
+  }, { wArg, hArg, bgArg, darkArg, cropArg, jpg });
   fs.writeFileSync(out, Buffer.from(res.split(',')[1], 'base64'));
   console.log('  ' + out + '  ' + (fs.statSync(out).size / 1024).toFixed(0) + ' KB');
   await browser.close();
