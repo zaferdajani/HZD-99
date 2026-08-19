@@ -479,3 +479,21 @@ window guessing where a note will be, rather than waiting for it.
 **Still 3D, and next in this order:** the terrain depth planes (`edge_*`,
 `fore_*`), the cave mouths and zone gates, and the interiors (booth, den, forge,
 carrel, hollow, oracle) plus the six guardian lairs.
+
+### HOUSEKEEPING (integrator, 2026-08-19)
+
+`perf_tmp.cjs` was committed to the repository ROOT in 19b6040 — a scratch
+Playwright probe, the kind of thing the scratchpad exists for. Removed. Nothing
+referenced it; it was measurement, and the measurement it produced is already
+written up above, which is the part worth keeping.
+
+The `tests/boot.cjs` generalisation went to the shipping branch: the prefetch
+allowance is now the neighbourhood's own length plus the eager parse-time
+fetches, rather than a fixed ten. It is a better statement of the same check —
+"nothing from the far set jumped the queue" — and it is verified green on the
+shipping branch too, whose neighbourhoods are still the old size, so it did not
+quietly turn itself off there.
+
+The bake-wait and the softArt skip stay here: both are no-ops where no rock
+plate exists, so there is nothing for the shipping branch to gain from them
+until the world art is the world art.
