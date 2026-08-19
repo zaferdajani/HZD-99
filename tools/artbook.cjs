@@ -17,10 +17,10 @@ const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
 // [key prefix, directory, max edge, webp quality, crop to alpha]
 const SETS = [
-  ['hero', 'assets/source/hero/drawnA', 460, 0.74, true],
-  ['cast', 'assets/source/cast/drawnA', 430, 0.72, true],
+  ['hero', 'assets/source/hero/drawnA', 560, 0.78, true],
+  ['cast', 'assets/source/cast/drawnA', 520, 0.76, true],
   ['cover', 'assets/source/hero/drawnA', 1000, 0.86, true, ['idle', 'apex', 'finisher']],
-  ['guardian', 'docs', 1460, 0.80, false, null, /^drawn_(nullfang|talonhost|glaciere|choir|prism|mother)\.png$/],
+  ['guardian', 'docs', 1800, 0.82, false, null, /^drawn_(nullfang|talonhost|glaciere|choir|prism|mother)\.png$/],
 ];
 
 (async () => {
@@ -88,10 +88,10 @@ const SETS = [
   }
   await browser.close();
 
-  const html = fs.readFileSync(path.join(ROOT, tpl), 'utf8');
+  const html = fs.readFileSync(path.resolve(ROOT, tpl), 'utf8');
   if (!html.includes('/*PLATES*/')) { console.error('template has no /*PLATES*/ slot'); process.exit(2); }
-  fs.writeFileSync(path.join(ROOT, out), html.replace('/*PLATES*/', JSON.stringify(plates)));
+  fs.writeFileSync(path.resolve(ROOT, out), html.replace('/*PLATES*/', JSON.stringify(plates)));
   const kb = n => (n / 1024 / 1024).toFixed(2) + ' MB';
   console.log('  ' + jobs.length + ' plates, ' + kb(bytes) + ' embedded -> ' + out
-    + ' (' + kb(fs.statSync(path.join(ROOT, out)).size) + ')');
+    + ' (' + kb(fs.statSync(path.resolve(ROOT, out)).size) + ')');
 })();

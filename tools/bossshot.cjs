@@ -66,6 +66,12 @@ const fs = require('fs');
       b.st = st; b.t = 0.4; b.dead = false; b.hp = b.hpMax;
       b.hurtT = 0; b.stagT = 0; b.anim = 1.7; b.face = -1; b.faceVis = -1; b.phase = 1;
       b.x = CW / 2 - b.w / 2; b.y = GY - b.h;
+      // Guardians keep DRAW-SIDE MEMORY of the state they were last in, so a
+      // roar can hold its pose for half a second after the state has moved on.
+      // Photographing states back to back leaves that memory primed, and the
+      // measure pass primed it for the render pass: every cell of THE CHOIR
+      // came out as the same reared figure. Each cell starts from no memory.
+      b.fc = null;
     };
     const M = 26;                                   // breathing room in the cell
     let U = null;
@@ -74,14 +80,25 @@ const fs = require('fs');
       q.clearRect(0, 0, CW, CH);
       q.save(); try { b.draw(q); } catch (e) {} q.restore();
       const d = q.getImageData(0, 0, CW, CH).data;
+      // Rows and columns are counted before the box is taken, and a line of
+      // one or two pixels does not get a vote. TALONHOST hangs from a cable
+      // that runs off the top of the cell: measured naively, that hairline set
+      // the zoom and photographed the eagle as a speck under a long thread.
+      // The zoom is set by the MASS, not by whatever reaches furthest.
+      const rows = new Uint16Array(CH), cols = new Uint16Array(CW);
       for (let i = 3, p = 0; i < d.length; i += 4, p++) {
         if (d[i] < 10) continue;
-        const x = p % CW, y = (p / CW) | 0;
-        if (!U) U = { x0: x, y0: y, x1: x, y1: y };
-        else {
-          if (x < U.x0) U.x0 = x; if (x > U.x1) U.x1 = x;
-          if (y < U.y0) U.y0 = y; if (y > U.y1) U.y1 = y;
-        }
+        cols[p % CW]++; rows[(p / CW) | 0]++;
+      }
+      const MIN = 6;
+      for (let x = 0; x < CW; x++) if (cols[x] >= MIN) {
+        if (!U) U = { x0: x, y0: 0, x1: x, y1: 0 };
+        if (x < U.x0) U.x0 = x; if (x > U.x1) U.x1 = x;
+      }
+      for (let y = 0; y < CH; y++) if (rows[y] >= MIN) {
+        if (!U) U = { x0: 0, y0: y, x1: 0, y1: y };
+        if (!U.hasY) { U.y0 = y; U.y1 = y; U.hasY = 1; }
+        if (y < U.y0) U.y0 = y; if (y > U.y1) U.y1 = y;
       }
     }
     const fx = CW / 2, fy = GY;                     // the anchor draw() works from

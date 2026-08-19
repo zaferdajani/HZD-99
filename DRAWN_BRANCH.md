@@ -223,3 +223,86 @@ have caught this and it will catch the next one.
 Everything else on this branch is sound and merged up to the shipping branch, so
 re-firing the CHOIR's and MOTHER-V's body parts and PRISM's `aim`/`beam` rects
 is all that stands between this and a complete cast.
+
+### Answered, same day — and the harness gap was real
+
+Photographed again after the re-fires, from the same tool, and the sheets are
+in `docs/`:
+
+- **PRISM's `aim` and `beam` were real and are fixed.** Seven of its forty-five
+  frames came apart, and every one of them was a whole-body pose while every
+  walk and run frame was clean. Re-fired anchored on the original frame.
+- **THE CHOIR assembles as a full mechanical dragon** — head, neck, four limbs,
+  both wings, burning tail — in all four states. What made him read as an egg
+  was the photograph, not the plate: `bossshot` was shooting at GAME scale, and
+  a 62×74 boss in a 560 px cell is a dark speck with two lit dots whatever it
+  is made of. It now measures a zoom and applies it before `draw()`.
+- **MOTHER-V's dark disc is her design, not a keyed-out plate.** Shot with the
+  ORIGINAL atlas she has the same flat dark circle: she is built cold-around-warm
+  so the one golden core reads as the only living thing in the room
+  (`js/mother.js`, first paragraph). The drawn version is brighter than the
+  rendered one, not darker.
+
+**The suggested check was worth writing and is now in the suite.** `artbible`
+asked whether states differ in shape, whether a tell wears the amber and whether
+the feet are down — and a flat blob with two eyes and a lava ring passes all
+three. It now also asks whether the silhouette still has PARTS: bucket the lit
+pixels into eight value bands and require at least three of them to carry real
+area. A rig assembled from sixteen drawn pieces cannot be one flat value, and
+that is measurable without looking.
+
+## All six guardians, and the art book — 2026-08-19
+
+THE CHOIR, PRISM and MOTHER-V are redrawn, which finishes the cast: 22 hero
+cells, 64 cast plates, six guardian sheets, 131 archived rig parts. The book
+that shows all of it is `docs/artbook.tpl.html` + `tools/artbook.cjs`, and the
+tool derives its own image tier the way `tools/lowres.cjs` does — crop each
+1024 cutout to its own alpha box, fit it to a short edge, encode webp — so a
+page that would have been 90 MB of masters is 4.4 MB and opens on a phone.
+
+**The crop is what makes the book readable, not the encode.** A 1024² plate of
+a bat is mostly nothing; without cropping to the ink, ninety plates in a grid
+are ninety stamps floating in ninety empty squares.
+
+**A photograph of a guardian is a measurement, and it needed three fixes.**
+`tools/bossshot.cjs` now:
+
+- **Zooms before it draws, not after.** These animals are 46–120 px tall in a
+  560 px cell; at game scale the contact sheet was a row of specks. Scaling the
+  CONTEXT means the atlas is sampled larger and the plate is sharper, where
+  scaling the finished bitmap only blurs it. One zoom for the whole sheet,
+  taken from the largest pose, so a crouch still reads smaller than a roar.
+- **Lets the mass set that zoom, not whatever reaches furthest.** TALONHOST
+  hangs from a cable that runs off the top of the cell. Measured naively the
+  hairline set the scale and photographed the eagle as a speck under a thread;
+  rows and columns are counted first and a line of one or two pixels gets no
+  vote.
+- **Clears the boss's draw-side memory between cells.** Guardians hold a pose
+  for a beat after the state has moved on — that is what makes a roar land.
+  Photographing states back to back leaves that memory primed, and the measure
+  pass primed it for the render pass: all four cells of THE CHOIR came out as
+  the same reared figure.
+
+**THE CHOIR's feet were never the art.** `artbible` failed at exactly +11 px on
+two unrelated states, and a constant that identical is never a drawing. It was
+his lava ring — floor decoration spreading 20 px past his claws — being
+measured as his lowest lit pixel. `G.artProbe` exists to switch exactly that
+off and the ring was never gated: the old plate's lower half was too dim to
+pass the lit test, so a brighter plate turned an old hole into a failure.
+
+**Both disclosed defects are gone.** GLACIERE's dark chest wedge and her
+detached tail were `body`, `asm` and `hero` coming back broken, not a rig
+problem. Re-fired with the failure named in the prompt — *the tail is attached,
+draw the join; the torso is solid, there is no hole* — and `hero` re-pasted
+with a wide allowance, because a whole-figure panel meets no neighbour and
+clipping it to the old outline is what cut the tail off in the first place.
+
+**PRISM had seven bad frames out of forty-five**, and only whole-body ones:
+`i_beam`, `i_burst`, `i_hurt`, `i_roar_0`, `i_roar_2`, `i_slash`, `p_turn` came
+back as scattered fragments while every walk, run and idle frame was clean. Fragments
+restyle worse than figures, and a reared pose is read as fragments. Re-fired
+anchored on the original frame with the connection named — *one connected
+animal, no detached floating pieces* — and all seven landed.
+
+**Still open, and it is one plate: `npc__servo`** frames with its chin off the
+bottom edge. Four firings, including one with composition as the loudest line.

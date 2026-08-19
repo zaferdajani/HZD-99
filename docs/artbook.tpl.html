@@ -1,0 +1,503 @@
+<title>The Drawn Cast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,700;1,6..96,400&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:ital,wght@0,300;0,400;0,600;1,400&display=swap">
+
+<style>
+/* ---------------------------------------------------------------------------
+   Palette: cool bond paper and blue-black ink, because the cast is machinery.
+   The one saturated note is #ffc24a — the game's RESERVED TELEGRAPH AMBER, the
+   colour a wind-up raises so the player can read what is about to hit them. It
+   is spent here exactly where the game spends it: on wind-up plates and on the
+   legend that explains them. Nowhere else.
+
+   The plate tiles stay DARK in both themes. These are cutouts drawn for a dark
+   stage; on white paper the pale ink washes out and the contour stops reading.
+--------------------------------------------------------------------------- */
+:root {
+  --paper:  #dde3e8;
+  --card:   #eef2f5;
+  --ink:    #101820;
+  --ink-2:  #3b4a56;
+  --muted:  #64737f;
+  --rule:   #c2ccd4;
+  --rule-2: #d6dee4;
+  --tell:   #9a6a05;          /* amber, darkened so it holds on paper */
+  --tell-dot: #e8a41f;
+  --stage:  #12171d;          /* the tile every cutout stands on */
+  --tick:   #3d4b58;
+  --shadow: 0 1px 0 rgba(16,24,32,.05), 0 8px 24px -18px rgba(16,24,32,.5);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:  #080b0f;
+    --card:   #111820;
+    --ink:    #e3eaf0;
+    --ink-2:  #b0bec9;
+    --muted:  #7b8b98;
+    --rule:   #212e38;
+    --rule-2: #1a242c;
+    --tell:   #ffc24a;
+    --tell-dot: #ffc24a;
+    --stage:  #0d1218;
+    --tick:   #34434f;
+    --shadow: 0 1px 0 rgba(0,0,0,.4), 0 10px 30px -20px #000;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:  #080b0f;
+  --card:   #111820;
+  --ink:    #e3eaf0;
+  --ink-2:  #b0bec9;
+  --muted:  #7b8b98;
+  --rule:   #212e38;
+  --rule-2: #1a242c;
+  --tell:   #ffc24a;
+  --tell-dot: #ffc24a;
+  --stage:  #0d1218;
+  --tick:   #34434f;
+  --shadow: 0 1px 0 rgba(0,0,0,.4), 0 10px 30px -20px #000;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 17px/1.65 "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+/* ---- type scale ---------------------------------------------------------- */
+h1, h2, h3 { font-family: "Bodoni Moda", "Times New Roman", serif; font-weight: 700;
+             text-wrap: balance; margin: 0; letter-spacing: -.01em; }
+h1 { font-size: clamp(46px, 8vw, 92px); line-height: .96; }
+h2 { font-size: clamp(30px, 4.4vw, 46px); line-height: 1.04; }
+h3 { font-size: 23px; line-height: 1.15; }
+p  { margin: 0 0 1.05em; max-width: 66ch; }
+.lede { font-size: 20px; line-height: 1.6; color: var(--ink-2); }
+.eyebrow, .num, figcaption { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace; }
+.eyebrow { font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase;
+           color: var(--muted); margin: 0 0 14px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---- cover --------------------------------------------------------------- */
+.cover { position: relative; padding: 64px 0 8px; overflow: hidden; }
+#wash { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.cover .wrap { position: relative; }
+.cover-grid { display: grid; gap: 40px 56px; align-items: end;
+              grid-template-columns: minmax(0, 1fr) minmax(0, 340px); }
+@media (max-width: 820px) { .cover-grid { grid-template-columns: 1fr; align-items: start; } }
+.cover h1 em { font-style: italic; font-weight: 400; }
+.cover-plate { background: var(--stage); border: 1px solid var(--rule);
+               border-radius: 2px; padding: 18px; box-shadow: var(--shadow); }
+.cover-plate img { display: block; width: 100%; height: auto; }
+.tagline { margin-top: 22px; }
+.facts { display: flex; flex-wrap: wrap; gap: 0 34px; margin: 30px 0 0;
+         padding: 18px 0 0; border-top: 1px solid var(--rule); list-style: none; }
+.facts li { font-family: "IBM Plex Mono", monospace; font-size: 12.5px;
+            letter-spacing: .04em; color: var(--muted); }
+.facts b { display: block; font-family: "Bodoni Moda", serif; font-weight: 700;
+           font-size: 27px; color: var(--ink); letter-spacing: 0; }
+
+/* ---- legend -------------------------------------------------------------- */
+.legend { margin: 56px 0 0; padding: 24px 26px; background: var(--card);
+          border: 1px solid var(--rule); border-radius: 2px; display: grid;
+          gap: 8px 34px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.legend div { font-size: 14.5px; color: var(--ink-2); }
+.legend b { color: var(--ink); }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+       background: var(--tell-dot); vertical-align: 1px; margin-right: 7px; }
+
+/* ---- sections ------------------------------------------------------------ */
+section { padding: 74px 0 0; }
+.head { border-top: 2px solid var(--ink); padding-top: 16px; margin-bottom: 34px;
+        display: grid; gap: 4px 40px; grid-template-columns: minmax(0,1fr) auto;
+        align-items: baseline; }
+.head .eyebrow { grid-column: 1 / -1; grid-row: 1; margin-bottom: 6px; }
+.head h2 { grid-column: 1; grid-row: 2; }
+.head .count { grid-column: 2; grid-row: 2; font-family: "IBM Plex Mono", monospace;
+               font-size: 12.5px; letter-spacing: .12em; color: var(--muted);
+               white-space: nowrap; }
+.head p { grid-column: 1 / -1; grid-row: 3; margin: 12px 0 0; color: var(--ink-2); }
+
+/* ---- plate grid ---------------------------------------------------------- */
+.grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
+.grid.wide { grid-template-columns: repeat(auto-fill, minmax(214px, 1fr)); }
+figure { margin: 0; }
+.tile { position: relative; background: var(--stage); border: 1px solid var(--rule-2);
+        border-radius: 2px; aspect-ratio: 1 / 1; display: grid; place-items: center;
+        padding: 13px; overflow: hidden; }
+.tile::before, .tile::after { content: ""; position: absolute; width: 11px; height: 11px;
+        border: 1px solid var(--tick); pointer-events: none; }
+.tile::before { top: 6px; left: 6px; border-right: 0; border-bottom: 0; }
+.tile::after  { bottom: 6px; right: 6px; border-left: 0; border-top: 0; }
+.tile img { max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; }
+figcaption { margin-top: 9px; font-size: 12px; line-height: 1.45; color: var(--muted);
+             letter-spacing: .02em; }
+figcaption strong { display: block; font-weight: 500; color: var(--ink-2); }
+.tell figcaption strong { color: var(--tell); }
+.tell .tile { border-color: var(--tell); }
+
+.band { margin: 34px 0 0; }
+.band-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+             margin: 0 0 15px; padding-bottom: 9px; border-bottom: 1px solid var(--rule); }
+.band-head span { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--muted); }
+.band-head em { font-style: normal; font-size: 15px; color: var(--ink-2); }
+
+/* ---- guardians ----------------------------------------------------------- */
+.guard { margin: 0 0 46px; }
+.guard-head { display: grid; gap: 4px 30px; grid-template-columns: minmax(0,1fr) auto;
+              align-items: baseline; border-bottom: 1px solid var(--rule);
+              padding-bottom: 11px; margin-bottom: 16px; }
+.guard-head h3 { grid-column: 1; grid-row: 1; }
+.guard-head .tag { grid-column: 2; grid-row: 1; font-family: "IBM Plex Mono", monospace;
+                   font-size: 12px; letter-spacing: .1em; color: var(--muted); white-space: nowrap; }
+.guard-head p { grid-column: 1 / -1; grid-row: 2; margin: 9px 0 0;
+                color: var(--ink-2); font-size: 16px; }
+.strip { border: 1px solid var(--rule-2); border-radius: 2px; overflow-x: auto;
+         background: var(--stage); }
+.strip img { display: block; width: 100%; min-width: 720px; height: auto; }
+
+/* ---- notes / colophon ---------------------------------------------------- */
+.notes { padding: 74px 0 90px; }
+.notes .wrap > div { display: grid; gap: 30px 46px;
+                     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.note h3 { font-size: 19px; margin-bottom: 8px; }
+.note p { font-size: 15px; color: var(--ink-2); margin-bottom: 0; }
+.colophon { margin-top: 54px; padding-top: 18px; border-top: 1px solid var(--rule);
+            font-family: "IBM Plex Mono", monospace; font-size: 12px;
+            color: var(--muted); letter-spacing: .04em; }
+
+/* ---- scroll reveal ------------------------------------------------------- */
+.rv { opacity: 0; transform: translateY(10px); transition: opacity .5s ease, transform .5s ease; }
+.rv.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
+:focus-visible { outline: 2px solid var(--tell-dot); outline-offset: 3px; }
+</style>
+
+<div class="cover">
+  <canvas id="wash" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="cover-grid">
+      <div>
+        <p class="eyebrow">Style trial A &middot; broken ink &middot; ninety-two plates</p>
+        <h1>The Drawn<br><em>Cast</em></h1>
+        <p class="lede tagline">
+          Every character in CLAWBYTE / NOSTOS, redrawn by hand in one style:
+          a fine dark contour that <strong>breaks</strong> — thickening on the shadow
+          side, tapering to nothing on the lit side — over three or four flat
+          steps of value, matte, with a dry-brush grain.
+        </p>
+        <ul class="facts">
+          <li><b class="num">22</b> hero cells</li>
+          <li><b class="num">64</b> cast plates</li>
+          <li><b class="num">6</b> guardians</li>
+          <li><b class="num">131</b> rig parts</li>
+        </ul>
+      </div>
+      <div class="cover-plate"><img id="coverimg" alt="HZD-99, the finisher pose, redrawn"></div>
+    </div>
+
+    <div class="legend">
+      <div><b>Every plate is real art.</b> Each one is a generated drawing, cut
+        out and placed into the sheet the game already loads — no mock-ups.</div>
+      <div><span class="dot"></span><b>Amber marks a wind-up.</b> #ffc24a is the
+        game's reserved telegraph colour. A plate carrying it is a tell the
+        player must be able to read.</div>
+      <div><b>The dark tile is the stage.</b> These are cutouts drawn for a dark
+        room; they are shown on the ground they actually stand on.</div>
+    </div>
+  </div>
+</div>
+
+<main id="book"></main>
+
+<div class="notes">
+  <div class="wrap">
+    <p class="eyebrow">What this pass had to solve</p>
+    <div>
+      <div class="note">
+        <h3>The field cannot be won by prompting</h3>
+        <p>Told &ldquo;flat black, no ground&rdquo;, the generator paints an ink wash;
+        told louder, it paints a white paper border with a brushed black rectangle
+        inside it. The background is removed mechanically instead, by a keyer that
+        walks inward from the frame and stops at drawn lines.</p>
+      </div>
+      <div class="note">
+        <h3>A broken contour is a doorway</h3>
+        <p>The style's whole idea — a line that stops — is also a hole a flood fill
+        walks through, and the first cuts came back as outlines with hollow torsos.
+        The keyer restores anything enclosed on all eight sides, because the colour
+        was always there; only the transparency was wrong.</p>
+      </div>
+      <div class="note">
+        <h3>A guardian is a rig, not a picture</h3>
+        <p>Six of these characters are addressed by absolute pixel rectangle. A head
+        that returns four pixels taller is not scaled — it is drawn from the same
+        rectangle, and the animal comes apart at the neck. Every restyled part is
+        fitted back onto the box the original held and clipped to its outline, so
+        the rig cannot move.</p>
+      </div>
+      <div class="note">
+        <h3>The warning colour is a system, not a palette</h3>
+        <p>A style pass that says &ldquo;desaturate everything&rdquo; silently deletes
+        how the game tells you what is coming. Every wind-up plate carries its amber
+        as an explicit exception to its own colour rule — and a test measures that
+        each tell still raises the amber above that creature's own resting state.</p>
+      </div>
+    </div>
+    <p class="colophon">
+      CLAWBYTE / NOSTOS &middot; style trial A, &ldquo;broken ink&rdquo; &middot;
+      branch claude/clawbyte-drawn-cast &middot; the shipped cast is unchanged until a style is chosen
+    </p>
+  </div>
+</div>
+
+<script>
+const PLATES = /*PLATES*/;
+
+/* --------------------------------------------------------------------------
+   The book's structure is the game's own: ART_BIBLE.md sorts every character
+   into a class, and the class decides how it is drawn and how it is rigged.
+   The sections below ARE those classes, in the order a player meets them.
+-------------------------------------------------------------------------- */
+const HERO_ORDER = ['idle','walk_a','walk_b','run_a','run_b','skid','rise','apex','fall','land',
+                    'dash','djump_jet','wall_cling','claw_1','claw_2','charge','burst','finisher',
+                    'hurt','slump','heal','song'];
+const HERO_NOTE = {
+  idle:'at rest', walk_a:'walk, first step', walk_b:'walk, second step',
+  run_a:'run, reach', run_b:'run, drive', skid:'stopping hard',
+  rise:'jump, going up', apex:'the top of the arc', fall:'coming down',
+  land:'the landing crouch', dash:'the dash', djump_jet:'second jump, jets lit',
+  wall_cling:'hanging off a wall', claw_1:'first claw', claw_2:'second claw',
+  charge:'holding a charge', burst:'the release', finisher:'the finisher',
+  hurt:'taking a hit', slump:'down', heal:'mending', song:'singing'
+};
+
+const SUBJECTS = {
+  alpha:   { name:'The Alpha',      note:'The armoured pack leader — the one mini-boss that is tamed rather than destroyed.' },
+  wolf:    { name:'The Pack',       note:'They hunt in numbers, and they coil before they lunge.' },
+  cheetah: { name:'The Fast One',   note:'Closes the room before you have finished reading it.' },
+  bat:     { name:'The Ceiling',    note:'Hangs, shivers, drops.' },
+  breaker: { name:'Breaker',        note:'Vents, then swings.' },
+  kiln:    { name:'Kiln',           note:'Runs hot until it is spent.' },
+  rime:    { name:'Rime',           note:'The frost machine — its warning is cold, not amber.' },
+  snare:   { name:'Snare',          note:'Fast, and it limps once it is broken.' },
+  sage:    { name:'The Duellist',   note:'The only enemy that cannot be broken, only cleansed.' },
+  eye:     { name:"The Eye's Five", note:'Five instruments, each drawn at rest and again at its wind-up.' },
+  npc:     { name:'The Folk',       note:'The ones still standing, and still talking.' }
+};
+const CAST_NOTE = {
+  'eye__carrier':'Carrier — a courier that never stopped',
+  'eye__carrier_w':'Carrier, winding up to throw',
+  'eye__chime':'Chime — a mobile of tuning forks',
+  'eye__chime_w':'Chime, drawing breath to ring',
+  'eye__lattice':'Lattice — it does not chase, it grows',
+  'eye__lattice_w':'Lattice, about to grow',
+  'eye__lens':'Lens — the Eye’s own instrument',
+  'eye__lens_w':'Lens, focusing the beam',
+  'eye__moth':'Kiln-moth — going to the heat',
+  'eye__moth_w':'Kiln-moth, gathering cinders',
+  'npc__servo':'Servo — built half the district',
+  'npc__ratchet':'Ratchet — salvages from the dead, forges the Purifier',
+  'npc__ratchet_resting':'Ratchet, at his bench',
+  'npc__patch':'Patch — cannot work while the guns are up',
+  'npc__lumen':'Lumen — mending, and short of light',
+  'npc__mono':'Mono',
+  'npc__sage':'The sage, before the duel'
+};
+
+/* A wind-up is not a label somebody remembered to add: it is derived from the
+   plate's own name, the same way the game names its telegraph states. */
+const isTell = k => /(_w|_tell|_warn|coil|gather|charge)$/.test(k);
+
+const GUARDIANS = [
+  { key:'nullfang',  name:'NULLFANG',           tag:'boss 01 · rig of 16 parts',
+    note:'The virus-infected robot beast. Every part — head, neck, body, two-segment legs, chained tail — is its own drawing hung on nested pivots, so the walk is legs actually swinging and the roar is the neck actually turning.' },
+  { key:'talonhost', name:'TALONHOST',          tag:'boss 02 · rig of 20 parts',
+    note:'The robot eagle, and its flock. It hangs from a mount until it wakes, and every state it flies in is an authored figure aligned on the glowing chest core so nothing jumps between frames.' },
+  { key:'choir',     name:'THE FURNACE CHOIR',  tag:'boss 03 · rig of 16 parts',
+    note:'The corrupted mecha dragon. Three full poses, a large flying figure for the Forge Roar, and the parts column he breaks into when he dies — wings first, then the head, then the body drops.' },
+  { key:'glaciere',  name:'GLACIERE',           tag:'boss 04 · rig of 14 parts',
+    note:'The frozen purifier, the corrupted unicorn of the void. A galloping figure for flight, a standing assembly for the gathered moments, and the row of pieces she shatters into.' },
+  { key:'prism',     name:'PRISM PROWLER',      tag:'boss 05 · atlas of 45 frames',
+    note:'The rival robo-cat: the one machine the network never indexed, so the broadcast never touched it. It is drawn frame by frame rather than rigged — and it keeps a second, cleansed set of frames for after you free it.' },
+  { key:'mother',    name:'MOTHER-V',           tag:'boss 06 · atlas of 20 parts',
+    note:'The null core, the broadcast source. Not a machine and not a creature: a transmission that grew mass. Everything sits in the cold dark bands so the single golden core reads as the only living thing in the room.' }
+];
+
+const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c;
+                          if (h != null) n.innerHTML = h; return n; };
+
+function plateFigure(src, title, note, tell) {
+  const f = el('figure', tell ? 'tell rv' : 'rv');
+  const t = el('div', 'tile');
+  const i = new Image(); i.src = src; i.alt = title; i.loading = 'lazy';
+  t.appendChild(i); f.appendChild(t);
+  f.appendChild(el('figcaption', null,
+    '<strong>' + (tell ? '<span class="dot"></span>' : '') + title + '</strong>' + (note || '')));
+  return f;
+}
+
+function section(id, eyebrow, title, count, blurb) {
+  const s = el('section'); s.id = id;
+  const w = el('div', 'wrap');
+  const h = el('div', 'head');
+  h.appendChild(el('p', 'eyebrow', eyebrow));
+  h.appendChild(el('h2', null, title));
+  h.appendChild(el('span', 'count', count));
+  if (blurb) h.appendChild(el('p', null, blurb));
+  w.appendChild(h); s.appendChild(w);
+  return { s, w };
+}
+
+const book = document.getElementById('book');
+
+/* ---- the protagonist ---------------------------------------------------- */
+{
+  const r = section('hero', 'Class one · live-drawn protagonist', 'HZD-99',
+    HERO_ORDER.length + ' state cells',
+    'She is drawn every frame rather than played back, because her arms are solved to what she is reaching for and her scarf is simulated. These twenty-two cells are the states that drawing switches between — and her eyes are deliberately left unbaked, so two lights carry every expression she has.');
+  const g = el('div', 'grid');
+  for (const k of HERO_ORDER) {
+    const src = PLATES['hero:' + k]; if (!src) continue;
+    g.appendChild(plateFigure(src, k.replace(/_/g, ' '), HERO_NOTE[k] || '', false));
+  }
+  r.w.appendChild(g); book.appendChild(r.s);
+}
+
+/* ---- the guardians ------------------------------------------------------ */
+{
+  const r = section('guardians', 'Class two · parts-rig guardians', 'The Six', '6 guardians',
+    'Each one is photographed here by its own code, in its own room, assembled by its own rig from the redrawn sheet — not laid out on a page. If a part had come back the wrong size, this is where it would show.');
+  for (const gd of GUARDIANS) {
+    const src = PLATES['guardian:' + gd.key]; if (!src) continue;
+    const box = el('div', 'guard rv');
+    const h = el('div', 'guard-head');
+    h.appendChild(el('h3', null, gd.name));
+    h.appendChild(el('span', 'tag', gd.tag));
+    h.appendChild(el('p', null, gd.note));
+    box.appendChild(h);
+    const strip = el('div', 'strip');
+    const i = new Image(); i.src = src; i.alt = gd.name + ', four states drawn by the game';
+    i.loading = 'lazy'; strip.appendChild(i);
+    box.appendChild(strip);
+    r.w.appendChild(box);
+  }
+  book.appendChild(r.s);
+}
+
+/* ---- the rest of the cast, by class ------------------------------------- */
+const CAST_SECTIONS = [
+  { id:'bestiary', eyebrow:'Class three · atlas creatures', title:'The Bestiary',
+    blurb:'Animals built from a sheet of poses the code selects between. They share one rule: the shape has to change enough between states that you can tell a stalk from a coil at a glance.',
+    subs:['alpha','wolf','cheetah','bat'] },
+  { id:'machines', eyebrow:'Class three · atlas creatures', title:'The Machines',
+    blurb:'Four working machines that were left running. Each is drawn at rest, at its wind-up, and in the state it is left in once it is broken.',
+    subs:['breaker','kiln','rime','snare'] },
+  { id:'eye', eyebrow:'Class three · atlas creatures', title:"The Eye's Constructs",
+    blurb:'They are instruments rather than animals, and they are held to the same reading rules anyway: rest and wind-up must not look alike.',
+    subs:['eye'] },
+  { id:'duellist', eyebrow:'Class three · atlas creatures', title:'The Duellist',
+    blurb:'The one enemy claws cannot finish. It has to be cleansed, and its last plate is what it becomes afterwards.',
+    subs:['sage'] },
+  { id:'folk', eyebrow:'Class four · standing NPCs', title:'The Folk',
+    blurb:'Drawn once, standing, because that is how you meet them — and each one has a place of their own in the world they are standing in front of.',
+    subs:['npc'] }
+];
+
+const castKeys = Object.keys(PLATES).filter(k => k.indexOf('cast:') === 0).map(k => k.slice(5));
+const bySub = {};
+for (const k of castKeys) {
+  const sub = k.split('__')[0];
+  (bySub[sub] = bySub[sub] || []).push(k);
+}
+for (const sub in bySub) bySub[sub].sort();
+
+for (const sec of CAST_SECTIONS) {
+  const n = sec.subs.reduce((a, s2) => a + ((bySub[s2] || []).length), 0);
+  if (!n) continue;
+  const r = section(sec.id, sec.eyebrow, sec.title, n + ' plates', sec.blurb);
+  for (const sub of sec.subs) {
+    const keys = bySub[sub] || []; if (!keys.length) continue;
+    const band = el('div', 'band rv');
+    // A band head only earns its line when the section holds more than one
+    // subject. On a section that IS one subject, it just says the heading twice.
+    if (sec.subs.length > 1) {
+      const bh = el('div', 'band-head');
+      const meta = SUBJECTS[sub] || { name: sub, note: '' };
+      bh.appendChild(el('h3', null, meta.name));
+      bh.appendChild(el('span', null, keys.length + ' plates'));
+      if (meta.note) bh.appendChild(el('em', null, meta.note));
+      band.appendChild(bh);
+    }
+    const g = el('div', 'grid' + (sub === 'npc' || sub === 'eye' ? ' wide' : ''));
+    for (const k of keys) {
+      let pose = k.slice(sub.length + 2);
+      if (pose.indexOf(sub + '_') === 0) pose = pose.slice(sub.length + 1);
+      else if (pose === sub) pose = 'standing';
+      const title = CAST_NOTE[k] || pose.replace(/_/g, ' ');
+      g.appendChild(plateFigure(PLATES['cast:' + k], title, '', isTell(k)));
+    }
+    band.appendChild(g);
+    r.w.appendChild(band);
+  }
+  book.appendChild(r.s);
+}
+
+/* ---- cover plate and its wash ------------------------------------------- */
+document.getElementById('coverimg').src =
+  PLATES['cover:finisher'] || PLATES['cover:apex'] || PLATES['cover:idle'] || PLATES['hero:idle'];
+
+/* A dry-brush wash behind the cover: the same gesture the style is built on —
+   strokes that fade in and out rather than start and stop, because a mark with
+   hard ends reads as a bar, and this hand does not make bars. */
+(function wash() {
+  const cv = document.getElementById('wash');
+  const c = cv.getContext('2d');
+  const draw = () => {
+    const w = cv.width = cv.offsetWidth, h = cv.height = cv.offsetHeight;
+    if (!w || !h) return;
+    const bg = getComputedStyle(document.body).backgroundColor;
+    const parts = bg.match(/\d+/g) || ['255', '255', '255'];
+    const lum = (+parts[0] + +parts[1] + +parts[2]) / 3;
+    const light = lum > 96;
+    const hue = light ? '43,58,70' : '127,166,196';
+    c.clearRect(0, 0, w, h);
+    let seed = 20260819;
+    const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
+    for (let i = 0; i < 22; i++) {
+      const y = h * (0.06 + rnd() * 0.9);
+      const x0 = -w * 0.15 + rnd() * w * 0.8, len = w * (0.25 + rnd() * 0.6);
+      const drop = (rnd() - 0.5) * 26;
+      const a = (light ? 0.05 : 0.075) * (0.25 + rnd() * 0.75);
+      const g = c.createLinearGradient(x0, 0, x0 + len, 0);
+      g.addColorStop(0,    'rgba(' + hue + ',0)');
+      g.addColorStop(0.22, 'rgba(' + hue + ',' + a + ')');
+      g.addColorStop(0.6,  'rgba(' + hue + ',' + (a * 0.7) + ')');
+      g.addColorStop(1,    'rgba(' + hue + ',0)');
+      c.strokeStyle = g;
+      c.lineWidth = 1 + rnd() * 15;
+      c.beginPath();
+      c.moveTo(x0, y);
+      c.bezierCurveTo(x0 + len * 0.32, y + drop * 0.6,
+                      x0 + len * 0.7, y - drop * 0.4, x0 + len, y + drop);
+      c.stroke();
+    }
+  };
+  draw();
+  addEventListener('resize', draw, { passive: true });
+})();
+
+/* ---- scroll reveal ------------------------------------------------------- */
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.querySelectorAll('.rv').forEach(n => n.classList.add('in'));
+} else {
+  const io = new IntersectionObserver((es) => {
+    for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.rv').forEach(n => io.observe(n));
+}
+</script>
