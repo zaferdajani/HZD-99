@@ -819,7 +819,14 @@ class Player {
         const turn = !ice && Math.sign(this.vx) === -dir ? 1.6 : 1;
         this.vx += dir * acc * turn * dt;
         // frozen joints: the Archivist's beams halve her top speed for a spell
-        const cap = this.speed() * (this.slowT > 0 ? 0.5 : 1);
+        // ...and THE STICK'S PUSH IS A SPEED, on the surface that has one. A
+        // phone's thumb-stick is analogue and this game threw the magnitude
+        // away, so touch had exactly one gait: full sprint, always. There is no
+        // way to inch up to a ledge with a control that only knows "go".
+        // Keyboard and pad are untouched — a key has no magnitude to read, and
+        // TOUCH.axis is 0 unless a thumb is actually on the stick.
+        const push = (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.axis) || 1;
+        const cap = this.speed() * (this.slowT > 0 ? 0.5 : 1) * push;
         this.vx = clamp(this.vx, -cap, cap);
         this.face = dir;
       } else {

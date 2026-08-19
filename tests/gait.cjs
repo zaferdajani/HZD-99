@@ -200,6 +200,44 @@ const check = (name, ok, detail) => {
     console.log('  --   no near plate in this zone, nothing to place');
   }
 
+  // THE PHONE'S STICK HAS A MAGNITUDE, and for a long time it did not. It was
+  // two comparisons against one threshold, so an 11 px push and a 56 px push
+  // produced the same signal and touch had exactly one gait: full sprint,
+  // always. There is no way to inch toward a ledge with a control that only
+  // knows "go", and the phone is what the owner plays on.
+  //
+  // Also checked: a thumb trembling ON the boundary must not chatter the key.
+  // One threshold toggles under a stationary hand and reads as the game
+  // dropping inputs; the trigger is hysteretic now.
+  const touch = await page.evaluate(async () => {
+    const frame = () => new Promise(r => requestAnimationFrame(r));
+    const speeds = {};
+    for (const px of [20, 56]) {
+      TOUCH.joy = { id: 1, ox: 0, oy: 0, dx: px, dy: 0 };
+      tApplyJoy();
+      for (let i = 0; i < 45; i++) await frame();
+      speeds[px] = Math.round(Math.abs(player.vx));
+      TOUCH.joy = { id: 1, ox: 0, oy: 0, dx: 0, dy: 0 }; tApplyJoy();
+      for (let i = 0; i < 25; i++) await frame();
+    }
+    let flips = 0, last = null;
+    for (let i = 0; i < 40; i++) {
+      TOUCH.joy = { id: 1, ox: 0, oy: 0, dx: 11 + (i % 2 ? 1.5 : -1.5), dy: 0 };
+      tApplyJoy();
+      const on = !!keys.VR;
+      if (last !== null && on !== last) flips++;
+      last = on;
+      await frame();
+    }
+    TOUCH.joy = null; tApplyJoy();
+    return { walk: speeds[20], run: speeds[56], flips };
+  });
+  check('a light push on the phone stick is a walk, not a sprint',
+    touch.walk > 40 && touch.walk < touch.run * 0.8,
+    touch.walk + ' px/s at a light push vs ' + touch.run + ' at full');
+  check('a thumb resting on the threshold does not chatter the input',
+    touch.flips === 0, touch.flips + ' on/off flips under a trembling thumb');
+
   check('no page errors while running', !errs.length, errs[0] || '');
 
   console.log('');

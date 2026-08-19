@@ -289,11 +289,36 @@ function tEditChrome(L) {
     { code: 'EMINUS', x: 214, y: 44, r: 22, icon: '－' },
   ];
 }
+// THE STICK HAD NO MAGNITUDE, AND THAT IS THE WHOLE OF "I CANNOT MOVE
+// PRECISELY ON A PHONE". It was two comparisons against a single threshold, so
+// a thumb pushed 11 px and a thumb pushed 56 px produced the identical signal:
+// on touch she was ALWAYS at full sprint, and inching toward a ledge or lining
+// up a drop was not something the controller could express at all. A keyboard
+// at least has a walk in the fiction; the phone had one speed.
+//
+// TOUCH.axis carries the real push now, 0..1 past the dead zone, and the
+// player scales her target speed by it (see Player.update). The digital keys
+// stay exactly as they were so nothing else in the game has to know.
+//
+// AND THE THRESHOLD IS A SCHMITT TRIGGER. One boundary means a thumb resting
+// near it toggles the key on and off as it trembles — she starts and stops
+// under a stationary thumb, which reads as the game dropping inputs. ON at 14,
+// OFF at 8: once committed to a direction it takes a deliberate move back to
+// give it up.
+const JOY_ON = 14, JOY_OFF = 8, JOY_FULL = 46;
+function tHyst(prev, v, on, off) { return v > (prev ? off : on); }
 function tApplyJoy() {
   const j = TOUCH.joy;
   const dx = j ? j.dx : 0, dy = j ? j.dy : 0;
-  tSetK('VL', dx < -10); tSetK('VR', dx > 10);
-  tSetK('VU', dy < -26); tSetK('VD', dy > 26);
+  const L = tHyst(keys.VL, -dx, JOY_ON, JOY_OFF);
+  const R = tHyst(keys.VR, dx, JOY_ON, JOY_OFF);
+  tSetK('VL', L); tSetK('VR', R);
+  tSetK('VU', tHyst(keys.VU, -dy, 26, 18));
+  tSetK('VD', tHyst(keys.VD, dy, 26, 18));
+  // 0 at the dead zone, 1 at a full push — a curve rather than a cliff, so the
+  // first third of the throw is a genuine walk instead of a slower sprint
+  const mag = Math.min(1, Math.max(0, (Math.abs(dx) - JOY_OFF) / (JOY_FULL - JOY_OFF)));
+  TOUCH.axis = (L || R) ? 0.34 + mag * 0.66 : 0;
 }
 function tapMenu(x, y) {
   const st = G.state;
