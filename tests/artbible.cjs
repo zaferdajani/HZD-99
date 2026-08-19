@@ -250,12 +250,19 @@ const TELL_RGB = [0xff, 0xc2, 0x4a];
         // coverage mask, plus the two measurements the bible needs from it
         const mask = new Uint8Array(W * H);
         let n = 0, amber = 0, lit = 0, lowest = -1, lowestLit = -1;
+        // VALUE BANDS inside the silhouette. A guardian assembled from a
+        // sheet of drawn parts cannot be one flat tone; a keyed-out plate
+        // can, and a flat blob with two lit eyes and a lava ring passes
+        // every other rule in this file. Eight buckets over the opaque
+        // pixels is the cheapest question that tells them apart.
+        const bands = new Int32Array(8);
         for (let i = 0, p = 0; i < d.length; i += 4, p++) {
           const a = d[i + 3];
           if (a < 40) continue;
           mask[p] = 1; n++;
           const y = (p / W) | 0; if (y > lowest) lowest = y;
           const r = d[i], g = d[i + 1], bl = d[i + 2];
+          bands[Math.min(7, ((r * 2 + g * 5 + bl) / 8) >> 5)]++;
           if (r + g + bl < 150) continue;              // ignore near-black plate
           lit++;
           // ...and the ground-contact measurement uses the LIT pixels only.
@@ -278,7 +285,8 @@ const TELL_RGB = [0xff, 0xc2, 0x4a];
           if (dp[i] + dp[i + 1] + dp[i + 2] < 150) continue;   // the contact shadow
           const y = (p / W) | 0; if (y > lowestLit) lowestLit = y;
         }
-        out[st] = { mask: Array.from(mask), n, amber, lit, lowest, lowestLit, GY };
+        out[st] = { mask: Array.from(mask), n, amber, lit, lowest, lowestLit, GY,
+                    bands: Array.from(bands) };
       }
       return { out, W, H, GY };
     }, { S, TELL_RGB });
@@ -324,6 +332,24 @@ const TELL_RGB = [0xff, 0xc2, 0x4a];
       // the level a telegraph does — nothing cold may pass for a wind-up
       check(S.name + ': ' + st + ' does not pass for a wind-up',
         pct < restPct + 0.08, (pct * 100).toFixed(1) + '% of lit pixels');
+    }
+
+    // ---- §1 THE PARTS ARE STILL THERE -------------------------------------
+    // Written after a restyle returned THE FURNACE CHOIR as a featureless dark
+    // egg with two lit dots and every check in this file stayed green: shapes
+    // differed (the ring animates), the tell wore its amber (the eyes), the
+    // feet were down. Nothing asked whether the animal still had the parts it
+    // is assembled from. This does, and it does it without a reference image:
+    // spread the opaque pixels over eight value bands and require at least
+    // three of them to carry real area. Sixteen drawn pieces under one key
+    // light cannot land in one bucket; a keyed-out plate can only land in one.
+    {
+      const m = M[S.rest];
+      if (m && m.n && m.bands) {
+        const live = m.bands.filter(b3 => b3 >= m.n * 0.04).length;
+        check(S.name + ': ' + S.rest + ' still reads as PARTS, not one flat tone (>= 3 value bands)',
+          live >= 3, live + ' of 8 bands carry area');
+      }
     }
 
     // ---- §3.4 GROUND TRUTH ------------------------------------------------
