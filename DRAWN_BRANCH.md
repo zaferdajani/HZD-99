@@ -62,3 +62,50 @@ Three tools landed with this and are branch-neutral — they belong on the main
 branch whichever cast wins: `tools/contact.cjs` (a labelled contact sheet of any
 plate directory), `tools/inkkey.cjs` (the keyer above), `tools/alphastat.cjs`
 (coverage, subject box, and whether the frame border survived the cut).
+
+## The rest of the cast, fired — 64 plates, 2026-08-19
+
+Every enemy, every machine, the duelling sage and all seven NPCs are redrawn in
+the same broken-ink hand: `assets/source/cast/drawnA/`, judged in
+`docs/drawn_cast_beasts.png` and `docs/drawn_cast_rest.png`.
+
+| family | plates | what it is |
+|---|---|---|
+| alpha | 10 | the armoured pack leader |
+| cheetah | 7 | the fast one |
+| wolf | 7 | the pack |
+| bat | 5 | the ceiling |
+| breaker / kiln / rime / snare | 12 | the four machines |
+| sage | 6 | the duellist that can only be cleansed |
+| eye | 10 | the Eye's five, each in rest and wind-up |
+| npc | 7 | the busts and Ratchet at his bench |
+
+**The telegraph amber survived the restyle, and that was the point.** These
+plates are not decoration: `tests/artbible.cjs` measures that a wind-up raises
+the amber above that creature's own rest, because it is how a player reads what
+is about to hit them. A style pass that says "desaturate everything" silently
+deletes the game's warning system. So every prompt carries the lights as an
+explicit EXCEPTION to its own colour rule, named per plate — the amber blaze on
+a wind-up, the red seams on a resting body, the cold blue on the frost machine,
+and, on `alpha_free`, `kiln_spent` and `snare_limp`, an equally explicit
+instruction NOT to add a glow those poses do not have.
+
+**What the cast pass added to what the hero pass taught:**
+
+- **The model draws graphic furniture.** Black wedges, bars and triangles behind
+  the subject, and floating chips of debris beside it. No keyer can tell those
+  from the creature's own dark plate — they are drawn, not field — so they have
+  to be banned in the prompt, and six plates were re-fired to do it.
+- **One keyer setting does not fit every plate.** The walk tolerance that cuts a
+  dark beast cleanly hollows out a pale robe, and the one that keeps a pale robe
+  whole leaves a wedge attached to a dark machine. `tools/inkkey.cjs` takes the
+  step as an argument for exactly this: 11 for pale subjects (the sage standing,
+  Servo, Lumen), 20 by default, 32 where a dark shape needs reaching into.
+- **Fragment count is not a defect signal.** `finisher` keyed into 1205 pieces
+  and `wolf_runb` into a handful; both were whole afterwards. What matters is
+  whether the pieces are near the mass, not how many there are.
+
+**One plate still needs a hand: `npc__servo`.** Fired three times, including
+once with the composition rule as the loudest line and a demand for margin on
+all four sides, and it comes back with the chin running off the bottom edge
+every time. Everything else in the set framed correctly.
