@@ -186,3 +186,40 @@ geometry, read from the table, nothing to keep in step by hand.
 THE CHOIR, PRISM and MOTHER-V still wear their rendered art. The pipeline that
 does them is built, tuned and proven on three: cut with `rigrects` + `rigcut`,
 fire, key with `inkkey`, put back with `rigpaste`, photograph with `bossshot`.
+
+## ⚠ INTEGRATOR FINDING, 2026-08-19 — two of the last three are not usable yet
+
+The code session merged the shipping branch in and photographed all six
+guardians through their own rigs. **Four read; two do not**, and the harnesses
+cannot see it — all 45 are green on this branch, which is the important part of
+this note rather than an aside.
+
+| guardian | verdict |
+|---|---|
+| NULLFANG | good |
+| TALONHOST | good |
+| GLACIERE | usable, with the chest wedge and short tail already logged above |
+| PRISM PROWLER | `idle` and `pounce` are good; **`aim` and `beam` come apart** into disconnected fragments |
+| THE FURNACE CHOIR | **lost.** He assembles as a featureless black egg with two amber dots — no head, no wings, no tail, no limbs |
+| MOTHER-V | tendrils and crown read; **the central shell is a flat black disc with two dots** |
+
+**The CHOIR is the clearest case and the one to debug first.** Shot side by side
+from the same tool: rendered, he is a full mechanical dragon with lit wings, a
+segmented neck and a burning tail. Drawn, he is an egg. That is not a restyle
+that came back ugly — it is a keyed-out plate, the same failure mode
+`tools/inkkey.cjs` was written for, landing on the body parts instead of the
+field. MOTHER-V's shell is the same signature at smaller scale.
+
+**Why green tests missed it, and this is worth fixing in the harness.**
+`tests/artbible.cjs` asks three things of a guardian: do its states differ in
+SHAPE, does a wind-up raise the amber above its own rest, and are its feet on
+the floor. A black egg with an animated lava ring and two amber eyes passes all
+three. Nothing in the suite asks whether the animal still has the parts it is
+made of. The measurable version of that question is INTERNAL CONTRAST inside
+the silhouette — a rig assembled from twenty drawn parts cannot be one flat
+value — and it belongs in `artbible` before the next restyle, because it would
+have caught this and it will catch the next one.
+
+Everything else on this branch is sound and merged up to the shipping branch, so
+re-firing the CHOIR's and MOTHER-V's body parts and PRISM's `aim`/`beam` rects
+is all that stands between this and a complete cast.
