@@ -19,7 +19,12 @@
 // brighter than that bake, not darker, so it takes the same pass — otherwise
 // the floor is the loudest thing on screen and the character is not.
 //
-//   node tools/rockslab.cjs <in.png> <out.png> [w=512] [h=256] [darken=0.22]
+// The output format follows the output NAME. A slab has no alpha — it is a
+// texture that must join itself, not a cutout — so it ships as JPEG next to
+// the ceiling and strata bands rather than as a full-size PNG, which is the
+// heaviest way there is to carry a picture with nothing to key.
+//
+//   node tools/rockslab.cjs <in.png> <out.jpg|png> [w=512] [h=256] [darken=0.22]
 const { chromium } = require('playwright');
 const fs = require('fs');
 
@@ -32,7 +37,8 @@ const fs = require('fs');
   const page = await browser.newPage();
   await page.exposeFunction('plateBytes', () => fs.readFileSync(inp).toString('base64'));
 
-  const res = await page.evaluate(async ({ W, H, DARK }) => {
+  const jpg = /\.jpe?g$/i.test(out);
+  const res = await page.evaluate(async ({ W, H, DARK, jpg }) => {
     const im = new Image();
     im.src = 'data:image/png;base64,' + await window.plateBytes();
     await im.decode();
@@ -117,11 +123,11 @@ const fs = require('fs');
       return t / (W * 3);
     };
     return {
-      png: off.toDataURL('image/png'),
+      png: off.toDataURL(jpg ? 'image/jpeg' : 'image/png', 0.92),
       wrapX: rowDiff(W - 1, 0), innerX: rowDiff(W / 2 | 0, (W / 2 | 0) + 1),
       wrapY: colDiff(H - 1, 0), innerY: colDiff(H / 2 | 0, (H / 2 | 0) + 1),
     };
-  }, { W, H, DARK });
+  }, { W, H, DARK, jpg });
 
   fs.writeFileSync(out, Buffer.from(res.png.split(',')[1], 'base64'));
   const f = n => n.toFixed(2);

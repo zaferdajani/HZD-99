@@ -98,17 +98,23 @@ async function boot(withSave) {
   // A4, which is nowhere near the default start, so a prefetcher that ignored
   // the save would fail this and pass every other check in the file.
   //
-  // Measured against POSITION, not proportion: the four sheets media.js fetches
-  // eagerly at parse time (the shared atlases and the deck she stands on) will
-  // always be in front, and a neighbourhood is only a handful of files, so
-  // "most of the first ten" is not a claim that can hold. "All of them land
-  // before the far set starts" is.
+  // Measured against POSITION, not proportion: the handful of sheets media.js
+  // fetches eagerly at parse time (the shared atlases and the deck she stands
+  // on) will always be in front, so "most of the first ten" is not a claim that
+  // can hold. "All of them land before the far set starts" is.
+  //
+  // The allowance is RELATIVE TO THE NEIGHBOURHOOD, not a fixed ten. It was ten
+  // when a neighbourhood was one sheet; the drawn branch gave every room a rock
+  // slab and the same correct behaviour then read as a failure at position 13.
+  // What the check is for is that nothing from the far set jumped the queue —
+  // so the near set may occupy as many slots as it has, plus the eager few.
+  const EAGER = 6;                    // parse-time fetches, with a slot to spare
   const order = img.map(r => r.url);
   const at = ret.q.near.map(u => [u, order.indexOf(u)]);
   const missing = at.filter(([, i]) => i < 0).map(([u]) => u);
   const last = Math.max(...at.map(([, i]) => i));
   check('...and it starts with the room the SAVE is in, not the default start',
-        !missing.length && last < 10,
+        !missing.length && last < at.length + EAGER,
         'saved in ' + ret.q.start + ': its ' + at.length + ' sheets land at positions '
         + at.map(([, i]) => i).sort((a, b) => a - b).join(',')
         + (missing.length ? ' — never fetched: ' + missing.join(',') : ''));

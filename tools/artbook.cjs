@@ -21,6 +21,11 @@ const SETS = [
   ['cast', 'assets/source/cast/drawnA', 520, 0.76, true],
   ['cover', 'assets/source/hero/drawnA', 1000, 0.86, true, ['idle', 'apex', 'finisher']],
   ['guardian', 'docs', 1800, 0.82, false, null, /^drawn_(nullfang|talonhost|glaciere|choir|prism|mother)\.png$/],
+  // the world: the sheet of real rooms, the six slabs every solid tile is cut
+  // from, and the six far backdrops
+  ['world', 'docs', 1800, 0.82, false, null, /^drawn_world\.png$/],
+  ['rock', 'assets/backgrounds', 620, 0.80, false, null, /^rock_[abcdex]\.jpg$/],
+  ['far', 'assets/backgrounds', 1500, 0.82, false, null, /^zones_far\.jpg$/],
 ];
 
 (async () => {
@@ -32,9 +37,9 @@ const SETS = [
     const full = path.join(ROOT, dir);
     if (!fs.existsSync(full)) { console.log('  (skip ' + dir + ' — not on disk)'); continue; }
     for (const f of fs.readdirSync(full).sort()) {
-      if (!/\.png$/i.test(f)) continue;
+      if (!/\.(png|jpe?g)$/i.test(f)) continue;
       if (re && !re.test(f)) continue;
-      const base = f.replace(/\.png$/i, '');
+      const base = f.replace(/\.(png|jpe?g)$/i, '');
       if (only && !only.includes(base)) continue;
       jobs.push({ key: pre + ':' + base.replace(/^drawn_/, ''), file: path.join(full, f), edge, q, crop });
     }
@@ -52,7 +57,10 @@ const SETS = [
   for (const j of jobs) {
     const uri = await page.evaluate(async ({ file, edge, q, crop }) => {
       const img = new Image();
-      img.src = 'data:image/png;base64,' + await window.plateBytes(file);
+      // the source's own type: a JPEG handed to the decoder as image/png is
+      // simply not decoded, and the plate comes back a blank square
+      const mime = /\.jpe?g$/i.test(file) ? 'image/jpeg' : 'image/png';
+      img.src = 'data:' + mime + ';base64,' + await window.plateBytes(file);
       await img.decode();
       const cv = document.createElement('canvas');
       const c = cv.getContext('2d', { willReadFrequently: true });

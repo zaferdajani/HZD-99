@@ -301,12 +301,12 @@ const MEDIA_SRC = {
     // floor, wall, ceiling — is cut from it, so these six files are the whole
     // world's surface. Lazy like everything else: js/game.js bakes its
     // procedural slab until the plate lands and swaps to the plate when it does.
-    rockA: 'assets/backgrounds/rock_a.png',
-    rockB: 'assets/backgrounds/rock_b.png',
-    rockC: 'assets/backgrounds/rock_c.png',
-    rockD: 'assets/backgrounds/rock_d.png',
-    rockE: 'assets/backgrounds/rock_e.png',
-    rockX: 'assets/backgrounds/rock_x.png',
+    rockA: 'assets/backgrounds/rock_a.jpg',
+    rockB: 'assets/backgrounds/rock_b.jpg',
+    rockC: 'assets/backgrounds/rock_c.jpg',
+    rockD: 'assets/backgrounds/rock_d.jpg',
+    rockE: 'assets/backgrounds/rock_e.jpg',
+    rockX: 'assets/backgrounds/rock_x.jpg',
     // authored STRATA: four platform decks (clean / virus-grown / forge /
     // frozen) cut from the owner's sheet, and the four scene bands behind them
     platforms: 'assets/tiles/platforms.png',

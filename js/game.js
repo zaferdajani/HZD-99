@@ -2265,12 +2265,20 @@ function rockPlate(zone) {
 }
 
 function rockTex(zone) {
-  const plate = rockPlate(zone);
-  // The cache remembers WHICH IMAGE made it, not merely that an image did. The
-  // low-resolution tier lands first and is a real image, so a cache keyed on
-  // "art or not" would hold the 128px stand-in for the rest of the session and
-  // the full slab would never be drawn.
+  // THE CACHE IS CHECKED FIRST, and that is a hot path, not tidiness: this is
+  // called once per solid tile inside drawTiles, so several hundred times per
+  // bake. Reaching rockPlate() first meant a mediaHas — and, before the plate
+  // landed, a mediaFetch — on every one of them.
+  //
+  // `_final` means the cache was built from the FULL-SIZE plate, after which
+  // nothing can change and the question never has to be asked again.
   const had = rockCache[zone];
+  if (had && had._final) return had;
+  const plate = rockPlate(zone);
+  // Otherwise the cache remembers WHICH IMAGE made it, not merely that an image
+  // did: the low-resolution tier lands first and is a real image, so a cache
+  // keyed on "art or not" would hold the 128px stand-in for the rest of the
+  // session and the full slab would never be drawn.
   if (had && had._img === plate) return had;
   if (plate) {
     const w = plate.naturalWidth || plate.width, h = plate.naturalHeight || plate.height;
@@ -2278,6 +2286,7 @@ function rockTex(zone) {
     pv.width = w; pv.height = h;
     pv.getContext('2d').drawImage(plate, 0, 0);
     pv._src = 'art'; pv._img = plate;
+    pv._final = (typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[ROCK_ART[zone]] === 3);
     rockCache[zone] = pv;
     return pv;
   }
@@ -4678,7 +4687,10 @@ function rockBakeReady(zone) {
   if (typeof isHero === 'function' && isHero()) return true;
   const k = ROCK_ART[zone];
   if (!k || typeof mediaHas !== 'function' || !MEDIA_SRC || !MEDIA_SRC.images[k]) return true;
-  if (mediaHas(k)) return true;
+  // ...and it waits for the FULL slab, not for the first thing that answers.
+  // Both tiers dirty the bake, so accepting the quarter-scale stand-in here
+  // bakes the room twice over: once from the stand-in and once from the plate.
+  if (typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[k] === 3) return true;
   if (typeof mediaFetch === 'function') mediaFetch(k, true);   // and ask, once asking matters
   const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
   if (rockWaitRoom !== G.roomId) { rockWaitRoom = G.roomId; rockWaitT0 = now; }

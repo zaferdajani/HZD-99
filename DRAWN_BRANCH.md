@@ -446,6 +446,36 @@ plate never does.
   once per frame. That is not "a frame or two with no tile layer", it is a dead
   game, and it presented as a trial that never opened rather than as an error.
 
+**Acted on the integrator's three notes, and one of them cost a re-fire:**
+
+- The `rockCache` check now runs BEFORE `rockPlate()`. It is called once per
+  solid tile, so several hundred times per bake, and reaching a `mediaHas` — and,
+  before the plate landed, a `mediaFetch` — on every one of them was pure waste.
+  A `_final` flag short-circuits the whole question once the full-size plate has
+  been baked in.
+- **The slabs ship as JPEG.** 1.5 MB of PNG for six textures that have no alpha
+  became 250 KB. A slab is not a cutout; there is nothing to key.
+- **And the bake waits for the FULL tier, not the first thing that answers.**
+  Both tiers dirty the bake, so accepting the quarter-scale stand-in baked every
+  room twice — once from the stand-in and once from the plate.
+
+**A 512-wide slab repeated inside one screen, and the test said so.** `grammar`
+§10.7 caught `rock_b` matching itself 736 px away: the rock is sampled at exact
+world period, and a distinctive drawn texture repeats where procedural noise did
+not. The slabs are 1024×512 now — longer than the 960 px screen, so the repeat
+cannot be seen within one.
+
+**And `tests/boot.cjs` had a constant that was a proxy for a claim.** It asserted
+that the saved room's art lands in the first ten fetches; that was chosen when a
+neighbourhood was ONE sheet, and giving every room a rock slab made nine correct
+fetches read as a failure at position 13. The allowance is relative to the
+neighbourhood now, which is what its own comment always said it was for.
+
+**For the code session: `tests/twin.cjs` is flaky**, one failure in two runs on
+an unchanged build — `the swirl has its OWN cue` measured `2 1 2 3` instead of
+`0 1 2 3`. It is the same shape as the memnote bug you just fixed: a fixed 160 ms
+window guessing where a note will be, rather than waiting for it.
+
 **Still 3D, and next in this order:** the terrain depth planes (`edge_*`,
 `fore_*`), the cave mouths and zone gates, and the interiors (booth, den, forge,
 carrel, hollow, oracle) plus the six guardian lairs.

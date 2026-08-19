@@ -185,7 +185,8 @@ figcaption strong { display: block; font-weight: 500; color: var(--ink-2); }
         <p class="eyebrow">Style trial A &middot; broken ink &middot; ninety-two plates</p>
         <h1>The Drawn<br><em>Cast</em></h1>
         <p class="lede tagline">
-          Every character in CLAWBYTE / NOSTOS, redrawn by hand in one style:
+          Every character in CLAWBYTE / NOSTOS &mdash; and the world they stand in &mdash;
+          redrawn by hand in one style:
           a fine dark contour that <strong>breaks</strong> — thickening on the shadow
           side, tapering to nothing on the lit side — over three or four flat
           steps of value, matte, with a dry-brush grain.
@@ -195,6 +196,7 @@ figcaption strong { display: block; font-weight: 500; color: var(--ink-2); }
           <li><b class="num">64</b> cast plates</li>
           <li><b class="num">6</b> guardians</li>
           <li><b class="num">131</b> rig parts</li>
+          <li><b class="num">21</b> world plates</li>
         </ul>
       </div>
       <div class="cover-plate"><img id="coverimg" alt="HZD-99, the finisher pose, redrawn"></div>
@@ -239,6 +241,13 @@ figcaption strong { display: block; font-weight: 500; color: var(--ink-2); }
         rectangle, and the animal comes apart at the neck. Every restyled part is
         fitted back onto the box the original held and clipped to its outline, so
         the rig cannot move.</p>
+      </div>
+      <div class="note">
+        <h3>Naming a thing forbids nothing</h3>
+        <p>&ldquo;No brick courses&rdquo; returned six brick walls; &ldquo;the lower
+        third is empty&rdquo; returned a sheet of white paper. Saying what the picture
+        IS &mdash; irregular lumps packed like scree, the bottom half is solid black
+        paint &mdash; got both right on the first try.</p>
       </div>
       <div class="note">
         <h3>The warning colour is a system, not a palette</h3>
@@ -443,6 +452,57 @@ for (const sec of CAST_SECTIONS) {
     }
     band.appendChild(g);
     r.w.appendChild(band);
+  }
+  book.appendChild(r.s);
+}
+
+/* ---- the world ---------------------------------------------------------- */
+{
+  const ROCK = { a:'Scrap Meadows', b:'Data Conduits', c:'The Foundry',
+                 d:'Frozen Archives', e:'The Null Core', x:'Crystal Cache' };
+  const r = section('world', 'The ground they stand on', 'The World', '13 plates',
+    'The cast could not be the only thing drawn by hand. In this engine that turns out to be a small number of files: every solid tile in the game — floor, wall and ceiling alike — is cut from ONE slab per kingdom, so six drawn slabs restyle every surface there is. Six far backdrops, six ceiling bands and four platform decks finish it.');
+
+  if (PLATES['world:world']) {
+    const box = el('div', 'guard rv');
+    const h = el('div', 'guard-head');
+    h.appendChild(el('h3', null, 'Six rooms, photographed by the game'));
+    h.appendChild(el('span', 'tag', 'the assembled frame'));
+    h.appendChild(el('p', null, 'Not a mock-up and not a plate: the real build, in the real rooms, with the lazy art waited for. The backdrops are deliberately almost invisible — a test holds the background plane at or under a quarter of full brightness, and that headroom is the reason the character reads at all.'));
+    box.appendChild(h);
+    const strip = el('div', 'strip');
+    const i = new Image(); i.src = PLATES['world:world'];
+    i.alt = 'six rooms of the game with the drawn world'; i.loading = 'lazy';
+    strip.appendChild(i); box.appendChild(strip);
+    r.w.appendChild(box);
+  }
+
+  const band = el('div', 'band rv');
+  const bh = el('div', 'band-head');
+  bh.appendChild(el('h3', null, 'The Rock'));
+  bh.appendChild(el('span', null, '6 slabs'));
+  bh.appendChild(el('em', null, 'Every solid tile in the game is cut from one of these, tiled on both axes.'));
+  band.appendChild(bh);
+  const g = el('div', 'grid wide');
+  for (const k in ROCK) {
+    const src = PLATES['rock:rock_' + k]; if (!src) continue;
+    g.appendChild(plateFigure(src, ROCK[k], '', false));
+  }
+  band.appendChild(g);
+  r.w.appendChild(band);
+
+  if (PLATES['far:zones_far']) {
+    const band2 = el('div', 'band rv');
+    const bh2 = el('div', 'band-head');
+    bh2.appendChild(el('h3', null, 'The Far Backdrops'));
+    bh2.appendChild(el('span', null, '6 cells'));
+    bh2.appendChild(el('em', null, 'One sheet, two columns by three rows, addressed by kingdom.'));
+    band2.appendChild(bh2);
+    const strip2 = el('div', 'strip');
+    const i2 = new Image(); i2.src = PLATES['far:zones_far'];
+    i2.alt = 'the six kingdom backdrops on one sheet'; i2.loading = 'lazy';
+    strip2.appendChild(i2); band2.appendChild(strip2);
+    r.w.appendChild(band2);
   }
   book.appendChild(r.s);
 }
