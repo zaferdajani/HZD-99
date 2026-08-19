@@ -49,15 +49,58 @@ const fs = require('fs');
 
     const cell = document.createElement('canvas');
     cell.width = CW; cell.height = CH;
-    const q = cell.getContext('2d');
-    for (let i = 0; i < states.length; i++) {
-      b.st = states[i]; b.t = 0.4; b.dead = false; b.hp = b.hpMax;
+    const q = cell.getContext('2d', { willReadFrequently: true });
+
+    // A guardian is 46-120 px tall in a 560 px cell, so photographing it at
+    // game scale produces a contact sheet of specks — which is what the first
+    // one did. The fix is a ZOOM APPLIED BEFORE draw(), not after: scaling the
+    // context means the atlas is sampled at the larger size and the plate is
+    // actually sharper, where scaling the finished bitmap would only blur it.
+    //
+    // The zoom is measured, and it is ONE zoom for the whole sheet. Fitting
+    // each state to its own cell would silently equalise a crouch and a reared
+    // roar, and the difference in size between those poses is the thing the
+    // sheet exists to show — so every state is measured first, the widest and
+    // tallest of them sets the scale, and all of them are drawn at it.
+    const pose = (st) => {
+      b.st = st; b.t = 0.4; b.dead = false; b.hp = b.hpMax;
       b.hurtT = 0; b.stagT = 0; b.anim = 1.7; b.face = -1; b.faceVis = -1; b.phase = 1;
       b.x = CW / 2 - b.w / 2; b.y = GY - b.h;
+    };
+    const M = 26;                                   // breathing room in the cell
+    let U = null;
+    for (const st of states) {
+      pose(st);
+      q.clearRect(0, 0, CW, CH);
+      q.save(); try { b.draw(q); } catch (e) {} q.restore();
+      const d = q.getImageData(0, 0, CW, CH).data;
+      for (let i = 3, p = 0; i < d.length; i += 4, p++) {
+        if (d[i] < 10) continue;
+        const x = p % CW, y = (p / CW) | 0;
+        if (!U) U = { x0: x, y0: y, x1: x, y1: y };
+        else {
+          if (x < U.x0) U.x0 = x; if (x > U.x1) U.x1 = x;
+          if (y < U.y0) U.y0 = y; if (y > U.y1) U.y1 = y;
+        }
+      }
+    }
+    const fx = CW / 2, fy = GY;                     // the anchor draw() works from
+    let Z = 1;
+    if (U) Z = Math.max(1, Math.min((CW - M * 2) / (U.x1 - U.x0 + 1),
+                                    (GY - M) / Math.max(1, fy - U.y0)));
+    const cx2 = U ? fx + ((U.x0 + U.x1) / 2 - fx) * Z : fx;
+    const dx = U ? CW / 2 - cx2 : 0;
+
+    for (let i = 0; i < states.length; i++) {
+      pose(states[i]);
       q.clearRect(0, 0, CW, CH);
       q.fillStyle = '#171b24'; q.fillRect(0, 0, CW, CH);
       q.fillStyle = '#0d1017'; q.fillRect(0, GY, CW, CH - GY);
-      q.save(); try { b.draw(q); } catch (e) {} q.restore();
+      q.save();
+      q.translate(dx, 0);
+      q.translate(fx, fy); q.scale(Z, Z); q.translate(-fx, -fy);
+      try { b.draw(q); } catch (e) {}
+      q.restore();
       const x = PAD + i * (CW + PAD);
       c.drawImage(cell, x, HEAD);
       c.fillStyle = '#93a0b8'; c.font = '17px system-ui, sans-serif';

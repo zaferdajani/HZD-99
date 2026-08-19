@@ -384,7 +384,12 @@ function drawFurnace(c, b) {
     const wakeK2 = b.st === 'intro' ? clamp(1 - (b.t || 0) / 2, 0, 1) : (b.st === 'dorm' ? 0 : 1);
     const ringGate = b.st === 'dorm' ? 0 : b.st === 'intro' ? (b.nestLanded ? 1 : 0) : 1;
     const grounded = Math.abs(b.vy || 0) < 120;
-    if (grounded && ringGate > 0.01) {
+    // The ring is DECORATION PAINTED ON THE FLOOR, spreading 20 px below his
+    // feet, so it is exactly what G.artProbe exists to switch off (entities.js).
+    // It was never gated because the old plate's lower half was too dim to pass
+    // the harness's lit-pixel test; a brighter plate made the same ring measure
+    // as his feet standing 11 px through the ground, in every state, identically.
+    if (grounded && ringGate > 0.01 && !G.artProbe) {
       const rg = DRG_P.ring;
       const hotStat = b.st === 'hymn' || b.st === 'forgebell' || b.st === 'meltwarn';
       const ra = (0.2 + Math.sin(b.anim * 2.6) * 0.07 + (hotStat ? 0.22 : 0) + wk * 0.25) * ringGate;
