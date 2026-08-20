@@ -2419,6 +2419,28 @@ corrections and would still swim.
 | turn | 2 | the plant and the push-off of a direction change |
 | land | 2 | the absorb and the recover, to follow the existing `land` cell |
 
+**LANDED 2026-08-21 — and one of the two is benched.** The opposite-beat pair
+arrived as cells 22 (`walk_c`) and 23 (`run_c`) on a 24-cell sheet, cells 0–21
+byte-identical to the shipped one.
+
+- **`walk_c` is in.** Measured against the walk pair at the same figure height
+  (130px) its skull is 58 cell-pixels wide against their 62 and 70-at-the-pass —
+  in family — and its soles are 64px apart against `walk_a`'s 68, i.e. the same
+  step on the other leg, which is exactly what an opposite contact is. The walk
+  is a four-beat cycle now: contact → passing → opposite contact → passing.
+- **`run_c` is keyed but NOT cycled.** At the same 130px figure height its skull
+  measures **72 cell-pixels wide against run_a's 60 and run_b's 56** — a quarter
+  wider — its ears are longer and thinner, and its whiskers are two marks on one
+  cheek where the rest of the sheet carries three plus the far-side pair. Cycled
+  in, her head would swell every fourth frame of every sprint. **What to re-fire:
+  one run contact pose, same rig and same scale as cells 3 and 4**, and the day
+  it lands `heroState`'s run branch becomes `['run_a','run_b','run_c'][k]` and
+  the run has four beats too. The cell index is already reserved.
+
+Nothing else on this list changes: the run still wants its full eight and the
+walk its six. These two bought the walk its opposite beat, which is the single
+biggest step toward it.
+
 **THE CONSTRAINTS THE OWNER HAS ALREADY GIVEN, restated because the last fire
 broke all three:**
 

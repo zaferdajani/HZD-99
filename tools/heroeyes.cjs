@@ -29,7 +29,10 @@ const fs = require('fs');
 
 const STATES = ['idle', 'walk_a', 'walk_b', 'run_a', 'run_b', 'rise', 'apex', 'fall',
   'land', 'dash', 'skid', 'wall_cling', 'djump_jet', 'claw_1', 'claw_2', 'finisher',
-  'charge', 'burst', 'hurt', 'heal', 'song', 'slump'];
+  'charge', 'burst', 'hurt', 'heal', 'song', 'slump',
+  // the opposite-beat cells, appended 2026-08-21 (never inserted — the index
+  // IS the wire format between this tool, the sheet and HERO_CELL)
+  'walk_c', 'run_c'];
 
 // THE THREE IT CANNOT DO, SET BY HAND AND SAID OUT LOUD.
 //

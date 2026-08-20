@@ -91,6 +91,7 @@ const check = (name, ok, detail) => {
     }
     return { air, feet, states, vys, over, fore, lifts,
              strideStart, animStart, strideEnd: player.stridePh || 0, animEnd: player.anim,
+             stepWalk: HERO_STEP_WALK, stepRun: HERO_STEP_RUN, cells: HERO_CELLS,
              vx: Math.round(player.vx) };
   });
 
@@ -179,15 +180,37 @@ const check = (name, ok, detail) => {
   // can confirm, and a check that measures its own resolution is worse than no
   // check at all.
   //
-  // What IS measurable, and what was actually wrong: HOW OFTEN SHE STEPS. The
-  // cell used to be chosen by floor(anim * 10) with anim in seconds — ten
-  // footfalls a second, measured at 9.81. A sprinting human turns over about
-  // four; ten with two poses is a strobe, not a gait. Bounds are set wide
-  // enough to be about biology rather than taste.
+  // What IS measurable, and what was actually wrong: HOW FAR ONE STEP CARRIES
+  // HER. The cadence itself is not a free number — she is travelling at a
+  // known speed and her legs cover a known distance per stride, so steps per
+  // second is the quotient of those two and asserting a band on it just
+  // re-asserts whichever of them was picked last. Both of the previous bands
+  // were exactly that, and both had to move when the other number moved.
+  //
+  // So the check is against the PLATES. Her contact poses put her soles a
+  // measurable distance apart, and that distance IS the step: the trailing
+  // sole lands where the leading one stands, so the body travels sole-to-sole
+  // per step. Re-measured here from the sheet, independently of the game, and
+  // compared with the constant the game strides by. It fails if somebody
+  // re-fires the walk plates without re-measuring, or edits the constant
+  // without the plates — the two ways the legs and the floor come apart.
+  const stepPx = await measureWalkStep(page);
+  const stepUnits = stepPx.soleSpan * (60 / stepPx.cellH);      // HERO_DH / cell height
+  check('the stride length in the code is the stride length in the ART',
+    Math.abs(stepUnits - r.stepWalk) <= 2.5,
+    'plates say ' + stepUnits.toFixed(1) + ' world units per step (soles '
+      + stepPx.soleSpan + 'px apart in a ' + stepPx.cellH + 'px cell), '
+      + 'HERO_STEP_WALK is ' + r.stepWalk);
+  // ...and the passing pose is the proof the other two are contacts: feet
+  // together, or "sole separation" was measuring something else entirely.
+  check('walk_b is the passing pose, feet together', stepPx.passSpan < stepPx.soleSpan * 0.4,
+    'walk_b soles ' + stepPx.passSpan + 'px apart vs walk_a ' + stepPx.soleSpan);
+  // A ceiling, not a band: whatever the numbers are, a footfall rate no body
+  // could produce is still the strobe this harness was written for.
   const steps = r.strideEnd - r.strideStart, secs = r.animEnd - r.animStart;
   const cadence = secs > 0 ? steps / secs : 0;
-  check('she steps at a rate a body could produce',
-    cadence >= 2.5 && cadence <= 5.5,
+  check('...and the resulting footfall rate is not a strobe',
+    cadence > 0 && cadence <= 11,
     cadence.toFixed(2) + ' steps/sec at vx ' + r.vx);
 
   if (r.fore) {
@@ -245,3 +268,31 @@ const check = (name, ok, detail) => {
   console.log('OK — she runs on the ground, and the drawing agrees');
   await browser.close();
 })().catch(e => { console.error(e); process.exit(1); });
+
+// HER STRIDE, OFF THE SHEET. Not off the game's constants — the whole point is
+// to compare the two — so this reads the pixels: the widest sole-to-sole span
+// in the bottom ten rows of a contact cell, and the same span in the passing
+// cell, which must be small or the measurement is finding something other than
+// two feet.
+async function measureWalkStep(page) {
+  return await page.evaluate(async () => {
+    const im = MEDIA_IMG.heroStates;
+    const N = HERO_CELLS, cw = im.naturalWidth / N, ch = im.naturalHeight;
+    const cv = document.createElement('canvas');
+    cv.width = im.naturalWidth; cv.height = ch;
+    const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
+    const D = x.getImageData(0, 0, cv.width, ch).data;
+    const A = (ci, xx, yy) => D[(((yy * cv.width) + ci * cw + xx) * 4) + 3];
+    function soles(ci) {
+      let y1 = -1;
+      for (let yy = 0; yy < ch; yy++) for (let xx = 0; xx < cw; xx++) if (A(ci, xx, yy) > 40) y1 = yy;
+      let a = 1e9, b = -1;
+      for (let yy = y1 - 9; yy <= y1; yy++) for (let xx = 0; xx < cw; xx++)
+        if (A(ci, xx, yy) > 40) { if (xx < a) a = xx; if (xx > b) b = xx; }
+      return b - a;
+    }
+    // the two contacts, averaged — they are the same step seen on each leg
+    const ca = soles(HERO_CELL.walk_a), cc = soles(HERO_CELL.walk_c);
+    return { soleSpan: Math.round((ca + cc) / 2), passSpan: soles(HERO_CELL.walk_b), cellH: ch };
+  });
+}

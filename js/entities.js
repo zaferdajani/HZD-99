@@ -511,14 +511,19 @@ function rigIK(sx, sy, hx, hy, l1, l2, bend) {
 // cells' HERO_EYE measurements: run_a's eye midpoint sits at 0.455 of the
 // cell, run_b's at 0.382 — 11.7px of head drift at cell scale, the exact
 // strobing the owner reported on the walk. Aligned to their common midpoint.
-const HERO_REG = { walk_a: -0.046, walk_b: 0.046, run_a: -0.031, run_b: 0.031 };
+const HERO_REG = { walk_a: -0.046, walk_b: 0.046, run_a: -0.031, run_b: 0.031,
+  // walk_c is the opposite contact, fired 2026-08-21. Its head centre sits
+  // right of the walk pair's common midpoint, so it is nudged back the same
+  // way they are — the whole point of this table is that the SKULL does not
+  // jump sideways as the cycle turns over.
+  walk_c: 0.064 };
 const HERO_CELL = {
   idle: 0, walk_a: 1, walk_b: 2, run_a: 3, run_b: 4, rise: 5, apex: 6,
   fall: 7, land: 8, dash: 9, skid: 10, wall_cling: 11, djump_jet: 12,
   claw_1: 13, claw_2: 14, finisher: 15, charge: 16, burst: 17, hurt: 18,
-  heal: 19, song: 20, slump: 21,
+  heal: 19, song: 20, slump: 21, walk_c: 22, run_c: 23,
 };
-const HERO_CELLS = 22;
+const HERO_CELLS = 24;
 // The plate is drawn from the FOOT, like everything else in this file: y=0 is
 // the floor and up is negative. HERO_DH is the whole cell's height in world
 // units — bigger than she is, because the cell has headroom over her ears — and
@@ -531,6 +536,36 @@ const HERO_CELLS = 22;
 // the dirt and the front grass blades brush her ankles, which is what
 // standing IN a meadow looks like.
 const HERO_DH = 60, HERO_FLOOR = 6;
+// ---- HOW FAR ONE STEP CARRIES HER, OFF THE PLATES THEMSELVES ---------------
+//
+// The step length is the foot-to-foot distance at CONTACT: when the trailing
+// sole leaves the floor it lands where the leading one is, so the body travels
+// exactly that far per step. Measured on the sheet, in the bottom ten rows of
+// each cell: walk_a spans 68 cell-pixels sole to sole and walk_c 64 — call it
+// 66 — and the plate is drawn HERO_DH tall out of a 169px cell, so
+//   66 * (60 / 169) = 23.4 world units.
+// walk_b spans 15px, which is the passing pose with the feet together, and is
+// the check that the other two are really contacts.
+//
+// THE RUN NUMBER IS NOT MEASURED AND SAYS SO. run_a and run_b span 20 and 18
+// cell-pixels — neither is a contact pose, so the sheet cannot answer it, and
+// the one run cell that does show a contact (run_c) is off-model (see
+// heroState). So the run uses the walk's measured step scaled by 1.6, the
+// ordinary walk-to-run stride ratio. When an on-model run contact is fired,
+// measure it the same way and delete this paragraph.
+const HERO_STEP_WALK = 23, HERO_STEP_RUN = 38;
+// One place, because the pose cycle, the stride phase and the foot-plant lock
+// must all agree about how long a step is — three copies of 23 is three
+// chances for a future edit to desynchronise the legs from the floor.
+// WHERE A WALK BECOMES A RUN. 120 was most of the way to useless: `speed()` is
+// 340, so anything past a third of the stick was already a "run" and the walk
+// cells drew almost never — measured, a light push on the phone stick lands at
+// 186 px/s and was picking run poses. The analogue stick's reachable band is
+// 116 (its dead-zone floor) to 340, so the split goes at 210: a light push is a
+// walk, a committed push is a run, and the keyboard — which has no analogue and
+// always asks for everything — stays a run, as it should.
+const HERO_RUN_VX = 210;
+function heroStepLen(vx) { return Math.abs(vx) > HERO_RUN_VX ? HERO_STEP_RUN : HERO_STEP_WALK; }
 // Airborne cells are CENTRED in their cell rather than stood on its floor (the
 // tool does this, because a flying pose has no contact point to align). They
 // must be drawn centred too, or she steps up a few pixels the frame she leaves
@@ -570,10 +605,15 @@ const HERO_EYE = {
   idle:        { lx: 0.410, ly: 0.510, rx: 0.510, ry: 0.509, ew: 0.044, eh: 0.060 },
   walk_a:      { lx: 0.702, ly: 0.450, rx: 0.759, ry: 0.453, ew: 0.030, eh: 0.050 },
   walk_b:      { lx: 0.609, ly: 0.406, rx: 0.692, ry: 0.409, ew: 0.044, eh: 0.063 },
-  // re-measured off the re-fired cells (tools/heroeyes.cjs) — a new plate
-  // means new eye positions, and a stale pair paints her lights onto her chest
-  run_a:       { lx: 0.575, ly: 0.287, rx: 0.706, ry: 0.293, ew: 0.038, eh: 0.089 },
-  run_b:       { lx: 0.522, ly: 0.281, rx: 0.637, ry: 0.281, ew: 0.034, eh: 0.083 },
+  // RE-DERIVED BY THE TOOL, not by hand (2026-08-21). The run pair's entries
+  // were hand-entered when the cells were re-fired and put her lights at
+  // ly 0.28 — the FOREHEAD, most of a head above the visor — so the cover
+  // patch missed the baked eyes and a second, live pair floated over her
+  // brow. `node tools/heroeyes.cjs assets/characters/hero/states.png --mark`
+  // finds them; both came back high-confidence and the mark image shows the
+  // rings on the visor. Hand-entering an anchor is what broke this.
+  run_a:       { lx: 0.676, ly: 0.432, rx: 0.741, ry: 0.434, ew: 0.034, eh: 0.056 },
+  run_b:       { lx: 0.623, ly: 0.417, rx: 0.681, ry: 0.420, ew: 0.028, eh: 0.056 },
   rise:        { lx: 0.460, ly: 0.205, rx: 0.523, ry: 0.203, ew: 0.028, eh: 0.032 },
   apex:        { lx: 0.450, ly: 0.376, rx: 0.548, ry: 0.377, ew: 0.048, eh: 0.057 },
   fall:        { lx: 0.582, ly: 0.610, rx: 0.674, ry: 0.577, ew: 0.058, eh: 0.063 },
@@ -591,6 +631,9 @@ const HERO_EYE = {
   heal:        { lx: 0.663, ly: 0.578, rx: 0.744, ry: 0.571, ew: 0.055, eh: 0.033 },
   song:        { lx: 0.522, ly: 0.470, rx: 0.617, ry: 0.463, ew: 0.045, eh: 0.035 },
   slump:       { lx: 0.681, ly: 0.447, rx: 0.746, ry: 0.465, ew: 0.050, eh: 0.030 },
+  // the opposite-beat cells, both measured by the tool at high confidence
+  walk_c:      { lx: 0.609, ly: 0.431, rx: 0.660, ry: 0.433, ew: 0.031, eh: 0.065 },
+  run_c:       { lx: 0.652, ly: 0.530, rx: 0.753, ry: 0.543, ew: 0.044, eh: 0.077 },
 };
 
 // THE MOODS. Same names as drawPortrait()'s expressions in game.js, on purpose:
@@ -781,8 +824,16 @@ class Player {
     // second because she is travelling faster, not because more time passed.
     // Airborne it does not advance at all — feet that keep walking in mid-air
     // are the other classic tell.
+    //
+    // ...and the DIVISOR IS THE ART'S STEP, measured, not chosen. 88 units a
+    // step was a number from before the plates existed; her walk contacts put
+    // her soles 68 and 64 cell-pixels apart (walk_a, walk_c), which at the
+    // plate's draw scale of HERO_DH/169 is HERO_STEP_WALK world units. The body
+    // was covering three and a half of those for every step the legs claimed,
+    // and a leg that claims a step it did not take IS the skating the owner
+    // kept reporting. See HERO_STEP_WALK for how the run number is arrived at.
     this.stridePh = (this.stridePh || 0)
-      + dt * (this.on ? clamp(Math.abs(this.vx) / 88, 0, 4.6) : 0);
+      + dt * (this.on ? clamp(Math.abs(this.vx) / heroStepLen(this.vx), 0, 11) : 0);
     this.dashCD -= dt; this.atkCD -= dt; this.iT -= dt; this.castCD -= dt;
     this.jbuf -= dt; this.landT -= dt; this.comboT -= dt;
     if (this.slowT > 0) {
@@ -1707,9 +1758,27 @@ class Player {
       // Cycled on the same speed-driven stride phase the walk uses, so
       // crossing the walk/run threshold lands on a footfall instead of a pop —
       // the two gaits share a clock rather than each keeping their own.
-      const k = Math.floor(this.stridePh || 0) % 2;
-      if (Math.abs(this.vx) > 120) return k ? 'run_b' : 'run_a';
-      return k ? 'walk_b' : 'walk_a';
+      // FOUR BEATS AT A WALK. Two poses flipped at stride cadence is a
+      // flipbook: the same leg leads every step, so she hops rather than
+      // walks. A stride is contact -> passing -> OPPOSITE contact -> passing,
+      // and walk_c is the fired opposite contact. The passing pose serves both
+      // halves — at cycle speed no eye separates a left-foot pass from a
+      // right-foot pass drawn the same, and firing a second one would buy a
+      // frame nobody can see.
+      const k = [0, 1, 2, 1][Math.floor(this.stridePh || 0) % 4];
+      if (Math.abs(this.vx) > HERO_RUN_VX) {
+        // THE RUN STAYS ON TWO. run_c came back off-model and is benched, not
+        // deleted: measured against run_a and run_b at the same figure height
+        // (130px) its skull is 72 cell-pixels wide against their 60 and 56 —
+        // a quarter wider — its ears are longer and thinner, and its whiskers
+        // are two marks on one cheek where the rest of the sheet carries
+        // three plus the far pair. Cycled in, her head would swell every
+        // fourth frame. The cell is keyed and the brief is on THE FIRING LIST
+        // (ART_QUEUE §1g); the day an on-model one lands, this becomes
+        // ['run_a', 'run_b', 'run_c'][k] and the run has four beats too.
+        return k === 1 ? 'run_b' : 'run_a';
+      }
+      return ['walk_a', 'walk_b', 'walk_c'][k];
     }
     return 'idle';
   }
@@ -1756,6 +1825,34 @@ class Player {
     // HEAD holds still and the legs do the moving, which is how a walk reads.
     const reg = HERO_REG[st];
     if (reg) c.translate(reg * dw, 0);
+    // FOOT-PLANT LOCK. The plate translated with the body while the legs
+    // flipped underneath it, so the planted sole slid backwards across the
+    // ground on every step — the skating half of "the walking is not natural",
+    // and the half that survived getting the cadence right. A sole on the
+    // floor belongs to the WORLD, not to the body: through one cell the plate
+    // is drawn half a step ahead at footfall and half a step behind at the
+    // hand-off, giving back exactly the travel the body took, and the pose
+    // swap passes the plant to the other foot, which lands ahead again.
+    // AND IT IS DELIBERATELY SMALL, for a reason that is measurable. A FULL
+    // lock means the drawn body separates from the collider by half a step —
+    // ±11 world units at a walk on a body 57 wide — and a body that far from
+    // its own hitbox stops being trustworthy: hits, ledges and the sword's
+    // reach all read off the box, not the picture. tests/hero.cjs caught the
+    // first draft doing exactly this: at a maximal stride phase a third of her
+    // silhouette had crossed her own spine, and she measured one-armed.
+    // Capped at about three world units at a walk and four at a run — enough to
+    // stop a sole scrubbing backwards, small enough that she is still where she
+    // is drawn.
+    //
+    // ...and it EASES with speed rather than switching on. The correction
+    // vanishing the instant `moving` goes false would jump her body sideways by
+    // its full amount on every stop, which is a worse artefact than the one
+    // being fixed.
+    if (moving && !(typeof G !== 'undefined' && G.artProbe)) {
+      const lockPx = run ? 4 : 3;
+      const ease = clamp((Math.abs(this.vx) - 12) / 48, 0, 1);
+      c.translate((0.5 - ((this.stridePh || 0) % 1)) * 2 * lockPx * ease, 0);
+    }
     c.drawImage(im, col * cw, 0, cw, ch, -dw / 2, dy, dw, dh);
     this.drawHeroEyes(c, st, dw, dh, dy);
     c.restore();

@@ -2670,17 +2670,28 @@ function buildFringe() {
       const cy = curveY(bx);
       const gY = (cy != null && Math.abs(cy - Y) < TILE * 1.5) ? cy + 2
         : Y + (typeof fbm1 === 'function' ? Math.round(fbm1(bx, 641) * 10) : 0);
+      // NOT A LAWN. One species at one height on even spacing reads as a comb,
+      // and the eye flags a perfect fringe as fake in well under a second — the
+      // same failure the tile repeats had, one scale down. A verge is clumps
+      // and gaps, so a sixth of the blades simply never grew here.
+      const r3 = hash2(tx * 5 + i * 3, ty * 7 + 2);
+      if (r3 < 0.16) continue;
       x.save();
       if (kind === 'grass' || kind === 'frond') {
-        x.strokeStyle = kind === 'frond' ? '#8f4fb0' : '#5e8f4a';
+        // a few greens, not one: the hue walks blade to blade, and a rare tuft
+        // stands half again as tall as its neighbours
+        const greens = ['#527c40', '#5e8f4a', '#6da054'];
+        x.strokeStyle = kind === 'frond' ? (r3 < 0.5 ? '#8f4fb0' : '#7d44a0')
+          : greens[Math.floor(r3 * 5.9) % 3];
         x.globalAlpha = 0.55 + r2 * 0.4;
         x.lineWidth = 1.6 + r1 * 1.2; x.lineCap = 'round';
+        const hgt2 = hgt * (r2 > 0.86 ? 1.5 : 1);
         x.beginPath(); x.moveTo(bx, gY + 3);
-        x.quadraticCurveTo(bx + lean * 0.5, gY - hgt * 0.6, bx + lean, gY - hgt);
+        x.quadraticCurveTo(bx + lean * 0.5, gY - hgt2 * 0.6, bx + lean, gY - hgt2);
         x.stroke();
         if (r1 > 0.72) {                       // a seed head / spore pod
           x.fillStyle = kind === 'frond' ? '#e08aff' : '#b8d86a';
-          x.beginPath(); x.arc(bx + lean, gY - hgt, 1.6 + r2, 0, 7); x.fill();
+          x.beginPath(); x.arc(bx + lean, gY - hgt2, 1.6 + r2, 0, 7); x.fill();
         }
       } else if (kind === 'cable') {
         x.strokeStyle = '#1a2b38'; x.globalAlpha = 0.85;
@@ -5801,7 +5812,8 @@ function floraPlan(id) {
     if (gy < 2) continue;
     const s = set[rnd2() < 0.42 ? 0 : 1];              // the tall one is rarer
     out.push({ s, x: (x + 0.5) * TILE, y: gy * TILE,
-               flip: rnd2() < 0.5, sc: 0.82 + rnd2() * 0.36, ph: rnd2() * 6.283 });
+               flip: rnd2() < 0.5, sc: 0.68 + rnd2() * 0.62,
+               lean: (rnd2() - 0.5) * 0.14, ph: rnd2() * 6.283 });
   }
   return (FLORA_CACHE[id] = out);
 }
@@ -6319,14 +6331,25 @@ function drawBooth(cx2, gy, P, k) {
     const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
     c.save();
     c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
-    if (k > 0.02) {
-      c.globalCompositeOperation = 'lighter';
-      const gl = c.createRadialGradient(cx2, gy - dh * 0.32, 6, cx2, gy - dh * 0.32, dw * (0.3 + k * 0.4));
-      gl.addColorStop(0, 'rgba(255,214,130,' + (0.18 * k + 0.08) + ')');
-      gl.addColorStop(1, 'rgba(255,190,100,0)');
-      c.fillStyle = gl;
-      c.beginPath(); c.ellipse(cx2, gy - dh * 0.32, dw * (0.3 + k * 0.4), dh * 0.4, 0, 0, 7); c.fill();
-    }
+    // LIT AT REST, NOT ONLY ON APPROACH. An interactive structure has to be the
+    // warmest thing in its sightline or nobody walks to it — unlit until she
+    // was already inside its radius, the stall was the darkest prop in its own
+    // square. A low ember burns in the doorway at all times now, swells as she
+    // nears, and spills a pool onto the ground the way a lantern does. The
+    // breath is on the sim clock, not the wall clock, so a paused game does not
+    // keep pulsing.
+    c.globalCompositeOperation = 'lighter';
+    const bbr = 0.9 + Math.sin((G.simClock || 0) * 1.1) * 0.1;
+    const gl = c.createRadialGradient(cx2, gy - dh * 0.32, 6, cx2, gy - dh * 0.32, dw * (0.34 + k * 0.4));
+    gl.addColorStop(0, 'rgba(255,214,130,' + ((0.17 + 0.15 * k) * bbr).toFixed(3) + ')');
+    gl.addColorStop(1, 'rgba(255,190,100,0)');
+    c.fillStyle = gl;
+    c.beginPath(); c.ellipse(cx2, gy - dh * 0.32, dw * (0.34 + k * 0.4), dh * 0.4, 0, 0, 7); c.fill();
+    const pool = c.createRadialGradient(cx2, gy, 2, cx2, gy, dw * 0.42);
+    pool.addColorStop(0, 'rgba(255,200,110,' + ((0.14 + 0.09 * k) * bbr).toFixed(3) + ')');
+    pool.addColorStop(1, 'rgba(255,190,100,0)');
+    c.fillStyle = pool;
+    c.beginPath(); c.ellipse(cx2, gy, dw * 0.42, Math.max(4, dh * 0.07), 0, 0, 7); c.fill();
     c.restore();
     return;
   }
@@ -7474,7 +7497,12 @@ function drawFlora() {
     // a slow sway, phase-offset per plant. Tiny — 0.02 rad — because a garden
     // where every stalk swings in step reads as a screensaver.
     c.translate(p.x, p.y);
-    c.rotate(Math.sin(now * 0.5 + p.ph) * 0.02);
+    // NO TWINS. Two of the same plant at the same size and the same posture in
+    // one frame read as copy-paste however good the asset is, so each carries
+    // its own lean on top of the shared sway — hashed off the room like
+    // everything else here, which keeps it the same garden on every visit and
+    // on every platform (RULE ONE).
+    c.rotate((p.lean || 0) + Math.sin(now * 0.5 + p.ph) * 0.02);
     if (p.flip) c.scale(-1, 1);
     c.globalAlpha = 1 - p.s.dim;
     c.drawImage(im, -w / 2, -h, w, h);
@@ -7940,12 +7968,35 @@ function drawStatics(P) {
         const kk = (AK && AK.sub[s.extra] && AK.sub[s.extra].k) || 1.4;
         const bh = s.h * kk;
         const hx = s.x + s.w / 2, hcy = s.y + s.h - bh * 0.5;
+        // VALUE SEPARATION FIRST, THEN THE RIM. A warm halo alone cannot free
+        // a silhouette that matches its backdrop in VALUE, and the Tinker is
+        // bronze standing against a bronze wall at the same brightness. A soft
+        // dark disc knocks the wall behind him down a step; the warm halo then
+        // lights his edge against that dark instead of against his own colour.
+        // Squint at the den now and he survives it.
+        const dg = c.createRadialGradient(hx, hcy, 4, hx, hcy, bh * 0.95);
+        dg.addColorStop(0, 'rgba(4,6,10,0.40)');
+        dg.addColorStop(0.7, 'rgba(4,6,10,0.22)');
+        dg.addColorStop(1, 'rgba(4,6,10,0)');
+        c.fillStyle = dg;
+        c.beginPath(); c.arc(hx, hcy, bh * 0.95, 0, 7); c.fill();
         const hg = c.createRadialGradient(hx, hcy, 4, hx, hcy, bh * 0.8);
         hg.addColorStop(0, 'rgba(255,216,150,0.34)');
         hg.addColorStop(0.6, 'rgba(255,200,120,0.14)');
         hg.addColorStop(1, 'rgba(255,200,120,0)');
         c.fillStyle = hg;
         c.beginPath(); c.arc(hx, hcy, bh * 0.8, 0, 7); c.fill();
+      }
+      // GROUNDED, NOT STICKERED. The cat, every walking enemy and every boss
+      // already cast a contact shadow; the standing NPCs were the one class
+      // that did not, which is why they read as cut-outs pasted in front of a
+      // painted floor rather than people standing on it. Same helper, so they
+      // are lit by the same rule. The Oracle hangs from its cables and has no
+      // feet to stand on, so it gets none — the same exception `grounded`
+      // already makes for it two lines down.
+      if (s.extra !== 'mono' && typeof contactShadow === 'function'
+          && !(typeof G !== 'undefined' && G.artProbe)) {
+        contactShadow(c, s.x + s.w / 2, s.y + s.h, s.w * 0.72, 0.34);
       }
       // the woken tinker is AT WORK (owner: "start working on the table") —
       // in his den he faces his bench on the right, and only turns from it
@@ -8700,6 +8751,26 @@ function drawHUD() {
     ftxt(a ? t('arm_' + a.id) : t('arm_none'), 44, 146, 12, a ? ELEM[a.el].glow : '#7d93a8', 'left');
     if (!(TOUCH && TOUCH.enabled)) ftxt('G', 26, 118, 11, '#546b7d');
   }
+  // ONE PANEL, ONE CLUSTER. The song glyph, the shuriken pips and their key
+  // hints floated loose over the art with nothing behind them, and on a tall
+  // phone the pip row lands mid-screen — six glowing diamonds hovering in the
+  // world, which reads as collectibles, not as a counter. A single dim plate
+  // ties the corner together: UI lives on glass, the world does not. Drawn
+  // first so everything in the cluster sits on it.
+  const smP = starMax();
+  {
+    const px0 = 906 - (smP - 1) * 15 - 22;
+    // A PLATE, NOT A SLAB. Flat 0.42 black over these rooms is a rectangle
+    // floating on the wall — the fix reads as another object in the scene,
+    // which is the fault it was fixing. A vertical fade instead: solid enough
+    // behind the pips to take them out of the world, gone by its own edges.
+    const pg = c.createLinearGradient(0, 100, 0, 196);
+    pg.addColorStop(0, 'rgba(5,9,15,0.05)');
+    pg.addColorStop(0.45, 'rgba(5,9,15,0.34)');
+    pg.addColorStop(1, 'rgba(5,9,15,0.05)');
+    c.fillStyle = pg;
+    rr(c, px0, 100, 950 - px0, 96, 12); c.fill();
+  }
   // the Song is always available — it is hers, not a boss's
   const songReady = player.volts >= SONG_COST;
   ftxt('♪', 934, 118, 20, songReady ? ELEM.murr.glow : 'rgba(125,147,168,0.5)', 'right');
@@ -8728,7 +8799,12 @@ function drawHUD() {
   if (!(TOUCH && TOUCH.enabled)) ftxt('R', 934, 186, 11, sc ? '#8fd8c8' : '#546b7d', 'right');
 
   // scrap + knowledge
-  ftxt('⚙ ' + G.save.scrap, 76, 66, 17, '#ffd76a', 'left', null, '700');
+  // A NUT, NOT A GEAR. ⚙ reads as SETTINGS to every player alive, and this
+  // counter is money — the gear stays where it means the Tinker's trade (his
+  // shop sign and the map legend), never the wallet. ⬢ and not the 🔩 emoji:
+  // measured in a canvas, the bolt renders as a COLOUR emoji that ignores
+  // fillStyle, so the money counter came out sky blue in an all-amber HUD.
+  ftxt('⬢ ' + G.save.scrap, 76, 66, 17, '#ffd76a', 'left', null, '700');
   ftxt('◈ ' + (G.save.iq || 0) + ' ' + t('sk_iq'), 76, 88, 13, '#b48cff', 'left');
   // AND FROM THE FIRST POINT EARNED, SAY WHERE IT GOES — BY NAME.
   //
@@ -11493,7 +11569,7 @@ function drawCrest() {
 function drawShop() {
   c.fillStyle = 'rgba(4,7,12,0.85)'; c.fillRect(0, 0, 960, 540);
   ftxt(t('shop_title'), 480, 50, 28, '#eef3fa', 'center', '#ffd76a');
-  ftxt('⚙ ' + G.save.scrap, 480, 86, 17, '#ffd76a');
+  ftxt('⬢ ' + G.save.scrap, 480, 86, 17, '#ffd76a');
   SHOP.forEach((it, i) => {
     const sel = i === G.shopIdx, sold = shopSold(it);
     const y = 130 + i * 46;
@@ -11503,7 +11579,7 @@ function drawShop() {
     const col = sold ? '#5a6a78' : sel ? '#eef3fa' : '#9ab0c2';
     ftxt(name, LANG === 'ar' ? 780 : 180, y - 6, 17, col, LANG === 'ar' ? 'right' : 'left');
     ftxt(desc, LANG === 'ar' ? 780 : 180, y + 13, 12, sold ? '#46545f' : '#7d93a8', LANG === 'ar' ? 'right' : 'left', null, '600');
-    ftxt(sold ? t('sold') : '⚙ ' + Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1)), LANG === 'ar' ? 180 : 780, y, 16, sold ? '#5a6a78' : '#ffd76a', LANG === 'ar' ? 'left' : 'right');
+    ftxt(sold ? t('sold') : '⬢ ' + Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1)), LANG === 'ar' ? 180 : 780, y, 16, sold ? '#5a6a78' : '#ffd76a', LANG === 'ar' ? 'left' : 'right');
   });
   ftxt(t('shop_hint'), 480, 512, 13, '#7d93a8');
 }

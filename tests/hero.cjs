@@ -84,6 +84,14 @@ const { chromium } = require('playwright');
         // alone: a flake that was really an incomplete reset.
         player.landT = 0; player.land0 = 0; player.flipT = 0; player.boostT = 0; player.takeoffT = 0;
         player.pogoT = 0; player.jetT = 0; player.iT = 0; player.idleT = 0;
+        // ...and the STRIDE PHASE, for the same reason and one more. It picks
+        // which cell of the cycle is drawn, so left unreset this samples a
+        // random frame; and it now also drives the foot-plant lock's sideways
+        // offset, so a random phase measures her silhouette at a random
+        // horizontal displacement — which is a question about the lock, not
+        // about whether she has two arms. Mid-stride: the lock contributes
+        // exactly zero there, and the pose is the first of the cycle.
+        player.stridePh = 0.5;
         player.face = face; player.faceVis = face; player.anim = 1.2;
         pose.f(player);
         // a blinking state is sampled across the blink until she is on screen,
