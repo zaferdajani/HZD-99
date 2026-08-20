@@ -213,12 +213,34 @@ const { chromium } = require('playwright');
     player.x = G.roomDef.w * TILE * GATE_ROOM.W2.at - 12;
     const opened = gateEnter();
     let drewBack = false;
-    // 260 sim-frames > GATE_WALK (3.4s of careful walk) with headroom
-    for (let f = 0; f < 260 && G.gateWalk; f++) {
-      if (G.gateWalk.t > 0.2) drewBack = true;
+    // SHE TURNS HER BACK. The old check only asked whether the shot had been
+    // running for a fifth of a second, which is not a claim about anything —
+    // and underneath it the unarmed path was drawing her SIDE view scaled down,
+    // reported by the owner as "going in background looks fake". So measure the
+    // plate: every frame of the walk must draw one of her four back plates, and
+    // an unarmed run must reach for the BARE pair (no sword she does not own).
+    const keys = {};
+    let sideFrames = 0;
+    // The loop below is synchronous, so nothing in it ever yields to the event
+    // loop and no <img> can finish loading inside it. The game gets frames; this
+    // has to ask for them. Bounded, and its own assertion: if her back never
+    // decodes here it never decodes anywhere.
+    let backWait = 0;
+    while (!gateBackReady() && backWait++ < 180) {
+      await new Promise(r => requestAnimationFrame(r));
+    }
+    const backDecoded = gateBackReady();
+    // 340 sim-frames covers the plate hold (<=0.75s) plus GATE_WALK's 3.4s
+    for (let f = 0; f < 340 && G.gateWalk; f++) {
+      if (G.gateWalk.t > 0.2) {
+        drewBack = true;
+        drawGateWalk();
+        if (G.gateBackKey) keys[G.gateBackKey] = 1; else sideFrames++;
+      }
       update(1 / 60);
     }
-    return { asBackdrop, farAway, opened, drewBack, end: G.roomId, x: Math.round(player.x) };
+    return { asBackdrop, farAway, opened, drewBack, end: G.roomId, x: Math.round(player.x),
+      keys: Object.keys(keys).sort(), sideFrames, backDecoded };
   });
   check('the gates are the room\'s backdrop, not a rectangle pasted into it',
     doorway.asBackdrop);
@@ -226,6 +248,13 @@ const { chromium } = require('playwright');
   check('pressing up AT the gates walks her in', doorway.opened && doorway.drewBack);
   check('...and she arrives inside the city, not past the far side of it',
     doorway.end === 'A0' && doorway.x < 200, doorway.end + ' at x=' + doorway.x);
+  check('her back plates decode', doorway.backDecoded);
+  check('she walks away with her BACK to us, never her side view',
+    doorway.sideFrames === 0 && doorway.keys.length > 0,
+    doorway.keys.join(',') + ' / ' + doorway.sideFrames + ' side frames');
+  check('...and unarmed she wears the BARE back pair, not the sword she lacks',
+    doorway.keys.length > 0 && doorway.keys.every(k => k.indexOf('BareBack') > 0),
+    doorway.keys.join(','));
 
   // ---- 7. NOTHING GLIDES -------------------------------------------------
   // The wolves were one still plate on an entity that slides, so they skated

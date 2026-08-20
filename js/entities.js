@@ -511,7 +511,7 @@ function rigIK(sx, sy, hx, hy, l1, l2, bend) {
 // cells' HERO_EYE measurements: run_a's eye midpoint sits at 0.455 of the
 // cell, run_b's at 0.382 — 11.7px of head drift at cell scale, the exact
 // strobing the owner reported on the walk. Aligned to their common midpoint.
-const HERO_REG = { walk_a: -0.046, walk_b: 0.046, run_a: -0.0365, run_b: 0.0365 };
+const HERO_REG = { walk_a: -0.046, walk_b: 0.046, run_a: -0.031, run_b: 0.031 };
 const HERO_CELL = {
   idle: 0, walk_a: 1, walk_b: 2, run_a: 3, run_b: 4, rise: 5, apex: 6,
   fall: 7, land: 8, dash: 9, skid: 10, wall_cling: 11, djump_jet: 12,
@@ -536,7 +536,12 @@ const HERO_DH = 60, HERO_FLOOR = 6;
 // must be drawn centred too, or she steps up a few pixels the frame she leaves
 // the ground.
 const HERO_AIR = {
-  run_b: 1, rise: 1, apex: 1, fall: 1, dash: 1, wall_cling: 1, djump_jet: 1, hurt: 1,
+  // run_b LEFT THE AIR LIST. The old second run cell was a LEAP — feet off
+  // the ground — so it was centred in its cell like every other airborne pose.
+  // The re-fired pair is contact and passing, two grounded steps of one stride,
+  // and a grounded cell stands on the cell's floor line. Left in the air list
+  // it would float half a body above the floor on every other frame.
+  rise: 1, apex: 1, fall: 1, dash: 1, wall_cling: 1, djump_jet: 1, hurt: 1,
 };
 
 // ---- THE EYES ARE THE ONLY PART OF HER THAT ACTS ---------------------------
@@ -565,8 +570,10 @@ const HERO_EYE = {
   idle:        { lx: 0.410, ly: 0.510, rx: 0.510, ry: 0.509, ew: 0.044, eh: 0.060 },
   walk_a:      { lx: 0.702, ly: 0.450, rx: 0.759, ry: 0.453, ew: 0.030, eh: 0.050 },
   walk_b:      { lx: 0.609, ly: 0.406, rx: 0.692, ry: 0.409, ew: 0.044, eh: 0.063 },
-  run_a:       { lx: 0.343, ly: 0.404, rx: 0.415, ry: 0.403, ew: 0.034, eh: 0.050 },
-  run_b:       { lx: 0.738, ly: 0.365, rx: 0.798, ry: 0.381, ew: 0.041, eh: 0.047 },
+  // re-measured off the re-fired cells (tools/heroeyes.cjs) — a new plate
+  // means new eye positions, and a stale pair paints her lights onto her chest
+  run_a:       { lx: 0.575, ly: 0.287, rx: 0.706, ry: 0.293, ew: 0.038, eh: 0.089 },
+  run_b:       { lx: 0.522, ly: 0.281, rx: 0.637, ry: 0.281, ew: 0.034, eh: 0.083 },
   rise:        { lx: 0.460, ly: 0.205, rx: 0.523, ry: 0.203, ew: 0.028, eh: 0.032 },
   apex:        { lx: 0.450, ly: 0.376, rx: 0.548, ry: 0.377, ew: 0.048, eh: 0.057 },
   fall:        { lx: 0.582, ly: 0.610, rx: 0.674, ry: 0.577, ew: 0.058, eh: 0.063 },
@@ -1691,16 +1698,17 @@ class Player {
     // a limp that survives a sprint reads as a bug, not as damage.
     if (this.cores <= 1 && Math.abs(this.vx) < 20) return 'slump';
     if (Math.abs(this.vx) > 12) {
-      // THE RUN PAIR, RE-PARKED (owner, 2026-08-16, on seeing the re-fire in
-      // play): "my character is hopping in one leg and backward" and "I
-      // specifically instructed you to keep the short legs... you changed it
-      // to the long version". The re-fired run cells fail on three counts —
-      // the long-legged proportions he rejected, a facing that reads
-      // backward in motion, and two poses too alike to cycle. So the run is
-      // the walk, hurried, AGAIN — the read he approved — until a re-fire
-      // that keeps the short legs and the house facing lands (ART_QUEUE §1e,
-      // re-opened with those constraints written into the brief).
+      // THE RUN PAIR, RE-FIRED AND UNPARKED (2026-08-20). The last firing
+      // failed three ways — long legs, a facing that read backward, and a
+      // second pose that was a LEAP, so the cycle hopped rather than ran. The
+      // new pair keeps the short legs and the house facing, and its two poses
+      // are CONTACT and PASSING: the opposite steps of one stride.
+      //
+      // Cycled on the same speed-driven stride phase the walk uses, so
+      // crossing the walk/run threshold lands on a footfall instead of a pop —
+      // the two gaits share a clock rather than each keeping their own.
       const k = Math.floor(this.stridePh || 0) % 2;
+      if (Math.abs(this.vx) > 120) return k ? 'run_b' : 'run_a';
       return k ? 'walk_b' : 'walk_a';
     }
     return 'idle';
@@ -1733,9 +1741,13 @@ class Player {
       && this.dashT <= 0 && this.landT <= 0 && this.skidT <= 0
       && this.hurtPoseT <= 0 && this.healT <= 0 && this.chargeT <= 0.05;
     if (moving) {
-      const step = Math.abs(Math.sin(this.anim * (run ? 10 : 7) * Math.PI / 2));
+      // NO SECOND BOUNCE. The rise and fall lives in draw()'s stepLift, phase
+      // locked to the stride counter; the bounce that used to be here ran on
+      // the raw anim clock — ten cycles a second at a run — and fought it. Two
+      // bobs at different rates is most of what read as a judder, and it was
+      // invisible in the source because they are three hundred lines apart.
+      // The forward lean stays: that one is a carriage, not a cycle.
       c.rotate(run ? 0.055 : 0.022);
-      c.translate(0, -step * (run ? 1.6 : 1.2));
     }
     // REGISTRATION: the two walk plates were fired as independent stills and
     // their heads do not sit at the same x (measured: centers 14.6px apart in

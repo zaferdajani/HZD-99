@@ -108,7 +108,13 @@ what is on screen:
   defect is gone; so is the black ground line the old bare sheet carried under
   columns 4–7.
 - **The back-walk pairs and the ground sword re-fired and re-keyed** — these are
-  what the gate walk and the pickup actually draw.
+  what the gate walk and the pickup actually draw. **WIRED IN FULL 2026-08-20:**
+  the bare pair (`bare_bwalk_a/b`) had been fired, keyed and then never reached,
+  because `drawGateWalk` only used a back plate once she carried the crystal and
+  fell back to her SIDE view otherwise — so every gate and cave in the opening
+  showed her running sideways into the backdrop. Both pairs are now prefetched
+  when the walk arms, the unarmed run wears the bare pair, and the side view is
+  reachable only if neither pair decodes. `tests/opening.cjs` measures the plate.
 - **The green `sword_full.png` deleted**: orphan art, referenced by nothing.
 - **Films:** `intro7` (she sits offline, never wired to the Song) and `intro8`
   (she wakes and goes) re-shot against the canon element — the old `intro8` was

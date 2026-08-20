@@ -7234,6 +7234,16 @@ function gateEnter() {
   // gates are the room's backdrop and the backdrop does not scroll with the
   // tiles (see ROOM_VISTA)
   G.gateWalk = { t: 0, to: G2.to, x0: player.x + player.w / 2, y0: player.y + player.h, def: G2 };
+  // ASK FOR HER BACK NOW, not on the frame that draws it. The walk-away shot is
+  // the only place in the game she is seen from behind, and the four plates that
+  // do it are lazy-loaded like everything else — requested at draw time they
+  // arrive a few frames in, and those few frames are exactly the ones that used
+  // to show her side-on. Both pairs, because which one she wears depends on the
+  // sword and the small copies cost a few kilobytes each.
+  if (typeof mediaFetch === 'function') {
+    mediaFetch('heroBackA', 1); mediaFetch('heroBackB', 1);
+    mediaFetch('heroBareBackA', 1); mediaFetch('heroBareBackB', 1);
+  }
   sfx('ui');
   if (typeof hzdSay === 'function') hzdSay('purr', 0);
   return true;
@@ -7275,6 +7285,15 @@ function drawGatePrompt() {
 const GATE_WALK = 3.4;
 function updateGateWalk(dt) {
   const g = G.gateWalk; if (!g) return;
+  // SHE DOES NOT TURN UNTIL THERE IS A BACK TO TURN. Holding the first moments
+  // of the shot at the door costs nothing — she is standing there anyway, drawn
+  // the way she always is — and it buys the plates the fraction of a second they
+  // need. Capped, so a browser that cannot decode webp at all still leaves the
+  // room instead of standing in the doorway forever.
+  if (typeof gateBackReady === 'function' && !gateBackReady()) {
+    g.hold = (g.hold || 0) + dt;
+    if (g.hold < 0.75) return;
+  }
   g.t += dt;
   if (g.t >= GATE_WALK) {
     G.gateWalk = null;
@@ -7295,6 +7314,18 @@ function updateGateWalk(dt) {
       player.lastSafe = { x: player.x, y: player.y };
     }
   }
+}
+// Her back plates, and the one question the walk-away shot asks of them: is
+// there anything here that can be DRAWN this frame? MEDIA_IMG's accessor
+// fetches on read, which is what we want the first time and harmless after —
+// but an Image that is still loading has naturalWidth 0 and must not count.
+function gateBackImg(k) {
+  const im = MEDIA_IMG[k];
+  return (im && im.naturalWidth) ? im : null;
+}
+function gateBackReady() {
+  return !!(gateBackImg('heroBackA') || gateBackImg('heroBackB')
+    || gateBackImg('heroBareBackA') || gateBackImg('heroBareBackB'));
 }
 function drawGateWalk() {
   const g = G.gateWalk; if (!g) return;
@@ -7324,34 +7355,63 @@ function drawGateWalk() {
   const intoCave = (G.roomDef && G.roomDef.cave) || (dest2 && dest2.cave);
   const sc = intoCave ? 1 - 0.16 * e : 1 - 0.84 * e;
   c.save();
-  c.globalAlpha = intoCave
-    ? 1 - clamp((k - 0.18) / 0.66, 0, 1)           // the dark takes her early and steadily
-    : 1 - clamp((k - 0.74) / 0.26, 0, 1);          // small and deep before the fade
+  // SWALLOWED BY DARK, NOT DISSOLVED. The old fade dropped globalAlpha, which
+  // shows the room THROUGH her — a ghost, not a shadow, and the same wrong read
+  // as the powered-down NPCs below. Walking into an unlit passage the LIGHT
+  // leaves her: she stays opaque and dims to a black silhouette (brightness,
+  // smoothstepped so the falloff is soft at both ends), and only her last few
+  // steps dissolve into the dark at all.
+  // Older Safari has no canvas filter — there she keeps the old alpha ramp,
+  // which is worse but is not nothing.
+  const filterOK = typeof c.filter === 'string';
+  const darkK = intoCave
+    ? clamp((k - 0.15) / 0.65, 0, 1)               // the dark takes her early and steadily
+    : clamp((k - 0.55) / 0.40, 0, 1);              // small and deep before the light dies
+  const darkE = darkK * darkK * (3 - 2 * darkK);
+  if (filterOK) {
+    c.filter = 'brightness(' + (1 - darkE).toFixed(3) + ')';
+    c.globalAlpha = 1 - clamp((k - 0.93) / 0.07, 0, 1);
+  } else {
+    c.globalAlpha = intoCave
+      ? 1 - clamp((k - 0.18) / 0.66, 0, 1)
+      : 1 - clamp((k - 0.74) / 0.26, 0, 1);
+  }
   // HER AUTHORED BACK. Generated from her own body (see assets/source/ref/ and
   // ART_QUEUE §1) — the first time the game shows her from behind with real
   // art rather than a side view scaled down. Two stride frames swap on the
   // distance she has covered toward the gap, the same ground-driven rule the
   // wolves walk by, so the walk cannot moonwalk however long the shot runs.
   //
-  // ...but ONLY once she carries the crystal: the fired back pair has the
-  // sword on her back baked in, and the owner met it in the opening — a
-  // sword she does not own yet. Unarmed runs use her live body until an
-  // unarmed back pair is fired (queued in ART_QUEUE §1e note).
+  // WHICH BACK depends on the sword: the armed pair carries the purifier across
+  // her shoulders, the bare pair does not, and showing the wrong one hands the
+  // owner a sword in the opening that he has not been given yet. What the gate
+  // is NOT allowed to do — the owner's instruction, 2026-08-20 — is fall back to
+  // her side view: "it should turn its back, not as if it's running to a
+  // direction. It's just turning back, walking inside the background." So the
+  // wrong-sword back beats the right-sword side, and the live body is the last
+  // resort of a browser that loaded neither.
   const armed = !!(G.save && G.save.flags && G.save.flags.crystal);
-  if (armed && typeof mediaFetch === 'function') { mediaFetch('heroBackA'); mediaFetch('heroBackB'); }
   const trav = Math.hypot(x - sx0, y - sy0) + e * 60;   // depth counts as stride
-  const frame = (Math.floor(trav / 26) % 2) ? 'heroBackB' : 'heroBackA';
-  const im = armed ? MEDIA_IMG[frame] : null;
-  if (im && im.naturalWidth) {
+  const b = (Math.floor(trav / 26) % 2) ? 'B' : 'A';
+  const want = armed ? 'heroBack' + b : 'heroBareBack' + b;
+  const alt = armed ? 'heroBareBack' + b : 'heroBack' + b;
+  const im = gateBackImg(want) || gateBackImg(alt);
+  // what the shot actually drew her as, for tests/opening.cjs — "she turned her
+  // back" is the whole point of this function and it is not readable from the
+  // outside otherwise
+  G.gateBackKey = im ? (gateBackImg(want) ? want : alt) : '';
+  if (im) {
     const dh = 92 * sc, dw = dh * (im.naturalWidth / im.naturalHeight);
     // the gait's vertical, off the same stride counter as the frames
     const rise = -Math.abs(Math.sin((trav / 26) * Math.PI)) * 2.2 * sc;
     c.drawImage(im, x - dw / 2, y - dh + rise, dw, dh);
   } else if (player) {
-    // the plates have not landed: her live body, walking, as before
+    // Neither back plate decoded. Her live body is all that is left — but it is
+    // driven at WALK speed, not the old 210, so that at worst the shot reads as
+    // someone walking off rather than sprinting sideways into a wall.
     const dir = Math.sign(tx - sx0) || 1;
     const vx0 = player.vx, f0 = player.face, fv0 = player.faceVis;
-    player.vx = dir * 210; player.face = dir; player.faceVis = dir;
+    player.vx = dir * 96; player.face = dir; player.faceVis = dir;
     c.translate(x, y);
     c.scale(sc, sc);
     c.translate(-(player.x + player.w / 2), -(player.y + player.h));
@@ -7368,7 +7428,8 @@ function drawGateWalk() {
   c.restore();
   // ...and the world dims behind her as she leaves it — late and slow, so
   // the small figure walking away is the shot, not the blackout
-  c.fillStyle = 'rgba(0,0,0,' + (clamp((k - 0.68) / 0.32, 0, 1) * 0.96).toFixed(3) + ')';
+  const wDim = clamp((k - 0.62) / 0.38, 0, 1), wDimE = wDim * wDim * (3 - 2 * wDim);
+  c.fillStyle = 'rgba(0,0,0,' + (wDimE * 0.97).toFixed(3) + ')';
   c.fillRect(0, 0, 960, 540);
 }
 // ---------------------------------------------------------------------------
@@ -7853,11 +7914,14 @@ function drawStatics(P) {
       const dimmed = !live && !plateDrew;
       if (dimmed) {
         c.save();
-        // the one thing that still moves: a dying status lamp, and a slow
-        // amber pip when she is carrying a cell that would fix it
-        const dead = 0.30 + 0.10 * Math.sin(performance.now() / 900 + (s.t || 0));
-        c.globalAlpha = dead;
-        c.filter = 'grayscale(1) brightness(0.55)';
+        // A DEAD MACHINE IS DARK, NOT TRANSPARENT. The old read dropped
+        // globalAlpha to about a third and let the room show THROUGH the body —
+        // a ghost. A powered-down unit is a solid thing with the lights out:
+        // full opacity, colour and brightness crushed by the filter alone. The
+        // one thing that still moves — the dying status lamp — is drawn
+        // separately below, outside this pass, so the BODY never pulses.
+        c.filter = 'grayscale(1) brightness(0.5)';
+        if (typeof c.filter !== 'string') c.globalAlpha = 0.88;  // old Safari: dim, never ghost
       }
       // THE TURN. Below, an NPC faces the cat by being MIRRORED — which flips
       // its lit side onto its shadow side and re-flattens it into a picture the
@@ -7924,8 +7988,22 @@ function drawStatics(P) {
       c.restore();
       if (!live) {
         if (dimmed) {
-          c.restore();                     // close the grayscale/alpha save
+          c.restore();                     // close the grayscale save
           c.filter = 'none';
+          // THE DYING STATUS LAMP. It used to BE the body's alpha pulsing —
+          // which is what made the whole machine read as a ghost. Now the body
+          // stays solid and the lamp is a small amber ember at the chest,
+          // breathing slowly, drawn additively over the dark.
+          const lampK = 0.5 + 0.5 * Math.sin(performance.now() / 900 + (s.t || 0));
+          const lampX = s.x + s.w / 2, lampY = s.y + s.h * 0.42;
+          c.save(); c.globalCompositeOperation = 'lighter';
+          const lampG = c.createRadialGradient(lampX, lampY, 0, lampX, lampY, 10);
+          lampG.addColorStop(0, 'rgba(255,200,100,' + (0.28 + lampK * 0.24).toFixed(3) + ')');
+          lampG.addColorStop(1, 'rgba(255,180,60,0)');
+          c.fillStyle = lampG; c.beginPath(); c.arc(lampX, lampY, 10, 0, 7); c.fill();
+          c.fillStyle = 'rgba(255,230,170,' + (0.45 + lampK * 0.35).toFixed(3) + ')';
+          c.beginPath(); c.arc(lampX, lampY, 1.7, 0, 7); c.fill();
+          c.restore();
         }
         // and the prompt that this one can be fixed — an amber pip over the
         // head, only while she actually has a cell to spend. Without the
