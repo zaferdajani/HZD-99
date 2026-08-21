@@ -297,6 +297,16 @@ const MEDIA_SRC = {
     // HZD-99's claw arc, painted as glowing light on pure black so it can be
     // composited additively with no alpha channel to cut
     slashFx: 'assets/fx/slash.png',
+    // THE ROCK, drawn. One slab per kingdom, and every solid tile in the game —
+    // floor, wall, ceiling — is cut from it, so these six files are the whole
+    // world's surface. Lazy like everything else: js/game.js bakes its
+    // procedural slab until the plate lands and swaps to the plate when it does.
+    rockA: 'assets/backgrounds/rock_a.jpg',
+    rockB: 'assets/backgrounds/rock_b.jpg',
+    rockC: 'assets/backgrounds/rock_c.jpg',
+    rockD: 'assets/backgrounds/rock_d.jpg',
+    rockE: 'assets/backgrounds/rock_e.jpg',
+    rockX: 'assets/backgrounds/rock_x.jpg',
     // authored STRATA: four platform decks (clean / virus-grown / forge /
     // frozen) cut from the owner's sheet, and the four scene bands behind them
     platforms: 'assets/tiles/platforms.png',
@@ -473,10 +483,19 @@ function mediaFetch(k, urgent) {
   im.onload = () => {
     const wasLow = MEDIA_LOW[k] === 2;
     MEDIA_RAW[k] = im; MEDIA_LOW[k] = 3;
-    if (wasLow) mediaDirty(k);
-    else if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {
+    // the tile layer is BAKED, so a sheet that lands after the bake changes
+    // nothing until the bake is thrown away. The rock slabs belong here for
+    // exactly that reason: they are the surface itself.
+    //
+    // AND IT IS NOT AN `else`. A sheet that arrives over a low-tier stand-in
+    // takes the mediaDirty path, and that path does not touch the bake — so a
+    // quarter-scale rock slab landed first, got baked, and the full-size one
+    // that followed it was never drawn. Both things have to happen.
+    if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava'
+        || /^rock[A-EX]$/.test(k)) {
       try { tileDirty = true; } catch (e) {}
     }
+    if (wasLow) mediaDirty(k);
   };
   im.src = MEDIA_SRC.images[k];
 }
