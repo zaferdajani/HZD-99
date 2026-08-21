@@ -80,6 +80,99 @@ const { chromium } = require('playwright');
     hand.before.batt === 1 && hand.after.batt === 0, hand.before.batt + ' -> ' + hand.after.batt);
   check('and it wakes', hand.after.live === true);
   check('the first unit repays with a repair kit', hand.after.kit === 1, 'kit ×' + hand.after.kit);
+
+  // ---- A DARK MACHINE IS STILL A MACHINE YOU CAN SEE --------------------
+  //
+  // Reported twice, as the same word — "a ghost" — for two different reasons.
+  // First it was ALPHA: the body drew at a third opacity and the room showed
+  // through it. That was fixed, and the fix (grayscale(1) brightness(0.5))
+  // earned the same word again, because it is a LUMINANCE ghost: halving the
+  // light on art whose white point is 180 and then removing all of its colour
+  // leaves about forty levels of flat grey over a room whose backdrop is 17.
+  // Nothing left to read a form by.
+  //
+  // THIS MEASURES THE FILTER, NOT A FRAME, and that is deliberate. The first
+  // version of this check tried to photograph the NPC in A1 and mask him by
+  // subtraction; draw() clamps the camera, so the screen position computed from
+  // the camera value that was ASSIGNED pointed at empty backdrop, and it was
+  // measuring the room. The defect is a filter string, the regression would be
+  // a filter string, so the filter is what gets measured: real sheet, real
+  // pixels, no camera and no room to get in the way.
+  const filt = await page.evaluate(async () => {
+    mediaFetch('npcs', 1);
+    for (let i = 0; i < 200; i++) await new Promise(r => requestAnimationFrame(r));
+    const im = MEDIA_IMG.npcs;
+    if (!im || !im.naturalWidth) return { err: 'npcs sheet did not load' };
+    // one NPC cell, through the same grade atlas.js gives the sheet
+    const cw = im.naturalWidth / 6, ch = im.naturalHeight / 7;
+    const cell = document.createElement('canvas'); cell.width = cw; cell.height = ch;
+    cell.getContext('2d').drawImage(im, 0, ch, cw, ch, 0, 0, cw, ch);
+    // atlas.js's grade, run here rather than called: popArt takes an <img> and
+    // caches by key, and handing it a canvas quietly returned the cell
+    // ungraded — the charged reference then measured the RAW sheet and the
+    // comparison meant nothing.
+    const graded = (() => {
+      const t = document.createElement('canvas'); t.width = cw; t.height = ch;
+      const x = t.getContext('2d'); x.drawImage(cell, 0, 0);
+      x.globalCompositeOperation = 'overlay'; x.globalAlpha = 0.32; x.drawImage(cell, 0, 0);
+      x.globalCompositeOperation = 'screen';  x.globalAlpha = 0.14; x.drawImage(cell, 0, 0);
+      x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1;
+      // the gamma here MUST track atlas.js's npcs lift or the charged
+      // reference is a fiction
+      const lut = new Uint8ClampedArray(256);
+      for (let i = 0; i < 256; i++) lut[i] = 255 * Math.pow(i / 255, 0.45);
+      const id = x.getImageData(0, 0, cw, ch), d = id.data;
+      for (let i = 0; i < d.length; i += 4) {
+        if (!d[i + 3]) continue;
+        d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
+      }
+      x.putImageData(id, 0, 0);
+      return t;
+    })();
+    const stat = (src) => {
+      const t = document.createElement('canvas'); t.width = cw; t.height = ch;
+      const x = t.getContext('2d');
+      if (src.filter) x.filter = src.filter;
+      x.drawImage(graded, 0, 0);
+      const D = x.getImageData(0, 0, cw, ch).data;
+      const L = [], S = [];
+      for (let i = 0; i < D.length; i += 4) {
+        if (D[i + 3] < 200) continue;
+        const r = D[i], g = D[i + 1], b2 = D[i + 2];
+        L.push(0.2126 * r + 0.7152 * g + 0.0722 * b2);
+        const mx = Math.max(r, g, b2), mn = Math.min(r, g, b2);
+        S.push(mx ? (mx - mn) / mx : 0);
+      }
+      L.sort((a, z) => a - z); S.sort((a, z) => a - z);
+      const q = (a, f) => a.length ? +a[Math.floor(f * (a.length - 1))].toFixed(2) : 0;
+      return { mid: q(L, 0.5), white: q(L, 0.95),
+               range: +(q(L, 0.95) - q(L, 0.05)).toFixed(1), sat: q(S, 0.5) };
+    };
+    // the string the game itself uses, by NAME. Scraping the page for
+    // /c\.filter = '(grayscale...)'/ found a different dimming filter
+    // elsewhere in the build and measured that instead.
+    const src = typeof NPC_DARK_FILTER === 'string' ? NPC_DARK_FILTER : '';
+    return { charged: stat({}), dark: stat({ filter: src }), src };
+  });
+  if (filt.err) check('the NPC sheet can be measured', false, filt.err);
+  else {
+    check('the powered-down filter was found in the build', !!filt.src, filt.src || '(none)');
+    // RELATIVE, NOT ABSOLUTE. The first version of this asserted range >= 90,
+    // a number calibrated before the NPC grade was lifted; raising the lift
+    // compresses the 5-95 span of the WHOLE sheet, charged included, and the
+    // check went red while the picture got better. The rule that actually
+    // matters is that the powered-down filter must not throw away form the
+    // charged unit has — so it is measured against the charged unit.
+    check('an uncharged NPC is not a smudge — it keeps the form the lit one has',
+      filt.dark.range >= filt.charged.range * 0.85,
+      'range ' + filt.dark.range + ' vs charged ' + filt.charged.range);
+    check('...and it carries a real highlight, not flat middle grey',
+      filt.dark.white >= 140, 'white ' + filt.dark.white + ' (charged ' + filt.charged.white + ')');
+    check('...and it still reads as powered DOWN — drained of colour, not of form',
+      filt.dark.sat <= 0.18 && filt.dark.mid < filt.charged.mid,
+      'sat ' + filt.dark.sat + ' vs ' + filt.charged.sat
+      + ', mid ' + filt.dark.mid + ' vs ' + filt.charged.mid);
+  }
   check('a woken unit talks instead of asking again', hand.second === 'DIALOG');
 
   // ---- 3. NO CELL, NO WAKE ------------------------------------------------

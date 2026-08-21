@@ -139,6 +139,8 @@ en: {
   les_wall: 'hold toward a wall as you fall',
   les_emp: 'a pulse that stuns everything near',
   menu_language: 'Language', lang_title: 'Choose Language', lang_hint: 'Enter — select  ·  Esc — back',
+  menu_bright: 'Brightness',
+  bright_0: 'Off', bright_1: 'Low', bright_2: 'Medium', bright_3: 'High', bright_4: 'Very high',
   menu_sound_on: 'Sound: On',
   menu_sound_off: 'Sound: Off',
   menu_music_on: 'Music: On',

@@ -343,6 +343,15 @@ const DETECTORS = function () {
       G.save = sv;
       startGame(sv);
       loadRoom(room);
+      // ...AND THE FRAME MUST BE THE ART, NOT THE VIEWER'S DIAL. The screen
+      // brightness lift is a preference: a screen composite that scales every
+      // value in the frame by (1 - g) and offsets it by g. At the default it
+      // compresses all contrast by 18%, which walks straight into the absolute
+      // deltas this file measures in — §10.7's tile-repeat check reported
+      // "C3 repeats at 32px (delta 2.4)" purely because 2.9 had been squeezed
+      // to 2.4. The terrain had not changed. Whether a deck repeats is a fact
+      // about the deck, so it is measured with the dial at zero.
+      if (typeof BRIGHT_SET !== 'undefined') BRIGHT_SET = 0;
       // THE FRAME MUST BE THE WORLD, NOT THE UI. The first version of this
       // harness sampled whatever was on the canvas, and entering a room fires
       // an evolution dialog and a tutorial toast — so it measured the SPEECH

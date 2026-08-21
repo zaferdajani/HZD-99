@@ -204,11 +204,18 @@ function loadStored(theme) {
 }
 function anySave() { return !!(loadStored('robo') || loadStored('hero')); }
 function wipeSave(theme) { try { localStorage.removeItem(saveKeyFor(theme)); localStorage.removeItem(SAVE_KEY); } catch (e) {} }
-function saveMeta() { try { localStorage.setItem(META_KEY, JSON.stringify({ lang: LANG, muted: MUTED, music: MUSIC_ON })); } catch (e) {} }
+function saveMeta() { try { localStorage.setItem(META_KEY, JSON.stringify({ lang: LANG, muted: MUTED, music: MUSIC_ON, bright: BRIGHT_SET })); } catch (e) {} }
 function loadMeta() {
   try {
     const m = JSON.parse(localStorage.getItem(META_KEY));
-    if (m) { LANG = m.lang || 'en'; MUTED = !!m.muted; MUSIC_ON = m.music !== false; return true; }
+    if (m) {
+      LANG = m.lang || 'en'; MUTED = !!m.muted; MUSIC_ON = m.music !== false;
+      // a screen setting belongs to the SCREEN, so it rides in meta with the
+      // language and the mute rather than in the save — it must survive a new
+      // game, and it must not travel to a different device with one
+      if (typeof m.bright === 'number') BRIGHT_SET = m.bright;
+      return true;
+    }
   } catch (e) {}
   return false;
 }
@@ -319,6 +326,11 @@ function checkEvo() {
 // text. (bootsFire is the other half and is already worn — drawThrustBoots
 // aligns it to the dash vector; this is its portrait, not its rig.)
 const MOD_ART = { djump: 'jetpack', dash: 'bootsIdle' };
+// The powered-down look, as ONE named string. It is a constant rather than a
+// literal at the draw site because tests/battery.cjs measures it: this exact
+// filter has now been got wrong twice, and a test that repeats the string in
+// its own source would keep passing while the game changed underneath it.
+const NPC_DARK_FILTER = 'grayscale(0.8) brightness(0.8) contrast(1.25)';
 function grantMod(id) {
   G.save.abil[id] = 1;
   if (MOD_ART[id] && typeof mediaFetch === 'function') mediaFetch(MOD_ART[id], 1);
@@ -1318,9 +1330,47 @@ function menuOptions() {
     // person who has been testing the game all week. It is a piece of the game,
     // not a one-time gate: it belongs on the menu like everything else.
     if (lk !== 'hero') opts.push('film');
-    return opts.concat(['controls', 'lang', 'sound', 'music']);
+    return opts.concat(['controls', 'lang', 'bright', 'sound', 'music']);
   }
-  return ['play', 'controls', 'lang', 'sound', 'music'];
+  return ['play', 'controls', 'lang', 'bright', 'sound', 'music'];
+}
+// ---------------------------------------------------------------------------
+// SCREEN BRIGHTNESS — a real setting, because a game this dark cannot be
+// mastered on one screen and shipped to another.
+//
+// MEASURED, over eight rooms: mean frame luminance 13-22 out of 255, and in
+// SEVEN of the eight the MEDIAN PIXEL IS ZERO — between 62% and 80% of every
+// screen is within a hair of black. On a desktop monitor in a dim room that is
+// atmosphere. On a phone, which is where this game is actually played and often
+// in daylight, it is a black rectangle with a cat in it. The owner's word for
+// it, three times: "all so dark".
+//
+// The lift is a SCREEN composite, not a brightness multiply, and that choice is
+// the whole point: multiplying a black pixel by anything leaves it black, which
+// is why a CSS brightness filter does nothing for a frame that is 70% black.
+// screen(dst, g) = 1-(1-dst)(1-g) raises the floor to g and leaves a white
+// highlight white — it lifts exactly the region that is missing and nothing
+// else. One fillRect a frame, so it costs nothing on the phone it is for.
+//
+// It is a SETTING and not a new constant because I cannot see his screen, and
+// the last three attempts to guess a number from here were all still too dark.
+const BRIGHT_STEPS = [0, 16, 30, 46, 66];      // the black floor each step lifts to
+const BRIGHT_NAMES = ['bright_0', 'bright_1', 'bright_2', 'bright_3', 'bright_4'];
+function brightIdx() {
+  const v = (typeof BRIGHT_SET === 'number') ? BRIGHT_SET : 2;
+  return Math.max(0, Math.min(BRIGHT_STEPS.length - 1, v));
+}
+// Default 3, not the middle. The middle is a compromise between a screen I can
+// see and one I cannot, and the one I cannot is the one being played on.
+let BRIGHT_SET = 3;
+function drawScreenLift() {
+  const g = BRIGHT_STEPS[brightIdx()];
+  if (!g) return;
+  c.save();
+  c.globalCompositeOperation = 'screen';
+  c.fillStyle = 'rgb(' + g + ',' + g + ',' + g + ')';
+  c.fillRect(0, 0, 960, 540);
+  c.restore();
 }
 function gameLock() { return (typeof window !== 'undefined' && window.GAME_LOCK) || null; }
 function updateMenu() {
@@ -1353,6 +1403,12 @@ function updateMenu() {
     else if (o === 'film') { G.afterCine = null; startCine(); }
     else if (o === 'controls') { G.ctrlBack = 'MENU'; G.state = 'CTRL'; }
     else if (o === 'lang') { openLangSel('MENU'); }
+    else if (o === 'bright') {
+      // steps round, like every other toggle on this menu — and it applies the
+      // moment it changes, with the menu itself lit by it, so the choice is
+      // made by LOOKING rather than by reading a number
+      BRIGHT_SET = (brightIdx() + 1) % BRIGHT_STEPS.length; saveMeta();
+    }
     else if (o === 'sound') { MUTED = !MUTED; saveMeta(); }
     else if (o === 'music') {
       MUSIC_ON = !MUSIC_ON; saveMeta();
@@ -7985,13 +8041,38 @@ function drawStatics(P) {
       const dimmed = !live && !plateDrew;
       if (dimmed) {
         c.save();
-        // A DEAD MACHINE IS DARK, NOT TRANSPARENT. The old read dropped
-        // globalAlpha to about a third and let the room show THROUGH the body —
-        // a ghost. A powered-down unit is a solid thing with the lights out:
-        // full opacity, colour and brightness crushed by the filter alone. The
-        // one thing that still moves — the dying status lamp — is drawn
-        // separately below, outside this pass, so the BODY never pulses.
-        c.filter = 'grayscale(1) brightness(0.5)';
+        // A DEAD MACHINE IS DARK, NOT TRANSPARENT — and it is still a MACHINE
+        // YOU CAN SEE. The first version of this dropped globalAlpha to about a
+        // third and let the room show through the body: a ghost. It was
+        // replaced by grayscale(1) brightness(0.5), which fixed the
+        // transparency and then produced the same complaint again — "why don't
+        // I see any feature of the NPC, it's like a ghost" — because it is a
+        // LUMINANCE ghost instead of an alpha one.
+        //
+        // Measured, on the sheet these NPCs actually draw from: the art enters
+        // this filter at mid 115 / white 180 / saturation 0.30 and leaves at
+        // mid 57 / white 90 / saturation 0.00, against a den backdrop whose own
+        // luminance is about 17. Halving the brightness of art whose white
+        // point is already 180 leaves no highlight for a form to read by, and
+        // grayscale(1) removes the only thing separating warm bronze from a
+        // cold wall. Forty levels of flat grey over the room is a smudge.
+        //
+        // So: still dark, still desaturated — powered down has to LOOK powered
+        // down — but the contrast is pushed back up so the plates, pipes, lamp
+        // and helmet survive. This lands at mid 90 / white 178 / saturation
+        // 0.10 — and then the whole NPC grade was lifted under it (atlas.js,
+        // 0.68 -> 0.45) because the owner's next word on a phone was "all so
+        // dark", which was true of the CHARGED unit as well. It now lands at
+        // mid 118 against a charged 150: a third brighter than it was, still a
+        // clear thirty levels below awake, and still drained of colour. The
+        // read is deliberately close to that of ratchet_resting.png,
+        // the authored powered-down plate in the den: that art is the game's
+        // own answer to "what does a dark machine look like", and it keeps deep
+        // blacks AND real highlights rather than crushing everything to middle
+        // grey. The lit eyes and the warm chest lamp are drawn separately below
+        // and remain the signal that says charged; colour and light level say
+        // the rest.
+        c.filter = NPC_DARK_FILTER;
         if (typeof c.filter !== 'string') c.globalAlpha = 0.88;  // old Safari: dim, never ghost
       }
       // THE TURN. Below, an NPC faces the cat by being MIRRORED — which flips
@@ -9430,6 +9511,11 @@ function drawWorldFrame() {
   c.translate(-Math.round(camSX()), -Math.round(camSY()));
   drawFringe();
   c.restore();
+  // THE SCREEN LIFT, on the WORLD only — after the room, the cast and the
+  // fringe, and before the HUD and the films. The HUD is already legible and
+  // its dark panels are what make the text on them readable; screening those
+  // up would wash the interface to fix the world.
+  drawScreenLift();
   // manga impact frame: white panel + radial action lines
   if (G.impact && G.impact.t > 0) {
     const k = G.impact.t / G.impact.t0;
@@ -10270,7 +10356,9 @@ function draw(tms) {
       const labels = {
         play: t('menu_play'), continue: t('menu_continue'), newgame: t('menu_newgame'),
         film: t('menu_film'), controls: t('menu_controls'),
-        lang: t('menu_language') + ': ' + langName(LANG), sound: MUTED ? t('menu_sound_off') : t('menu_sound_on'),
+        lang: t('menu_language') + ': ' + langName(LANG),
+        bright: t('menu_bright') + ': ' + t(BRIGHT_NAMES[brightIdx()]),
+        sound: MUTED ? t('menu_sound_off') : t('menu_sound_on'),
         music: MUSIC_ON ? t('menu_music_on') : t('menu_music_off'),
       };
       opts.forEach((o, i) => {

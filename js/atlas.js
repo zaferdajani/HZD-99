@@ -194,8 +194,17 @@ function sheetOf(key, cols, rows, clean) {
   // npcs sheet takes it too now (owner, 2026-08-16: "NPC is faded!"): the
   // machine folk stand in the darkest rooms in the game, and a friendly face
   // the eye cannot find is not keeping the room's light, it is missing.
+  // ...and 0.68 was not enough of a lift. The owner plays on a phone, and on a
+  // phone every one of these rooms reads "all so dark": the sheet arrives at
+  // mid 83 / white 145, a 0.68 gamma took it to mid 115 / white 180, and the
+  // den's own backdrop is about 17 — so a machine-person stood in it as a shape
+  // with no readable surface. 0.45 puts him at mid 150 / white 202, which is
+  // where he stops being a silhouette and starts being bronze with a lamp on
+  // it. Measured against the alternatives: 0.38 and 0.32 keep going and wash
+  // the bronze out entirely, and they close the gap to the powered-down state
+  // until "needs a battery" stops reading.
   if ((key === 'roster' || key === 'npcs') && base && typeof popArt === 'function')
-    return popArt('sheet:' + key, base, key === 'npcs' ? 0.68 : 0) || base;
+    return popArt('sheet:' + key, base, key === 'npcs' ? 0.45 : 0) || base;
   return base;
 }
 // ---------------------------------------------------------------------------
