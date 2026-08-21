@@ -7527,10 +7527,15 @@ function gateEnter() {
   // do it are lazy-loaded like everything else — requested at draw time they
   // arrive a few frames in, and those few frames are exactly the ones that used
   // to show her side-on. Both pairs, because which one she wears depends on the
-  // sword and the small copies cost a few kilobytes each.
+  // sword and the small copies cost a few kilobytes each — but THE PAIR SHE
+  // WILL WEAR GOES FIRST. Requested armed-first regardless, the armed pair won
+  // the race on an unarmed run often enough that the shot showed her carrying a
+  // sword she does not own; four parallel fetches have no order of their own, so
+  // the order has to be given here.
   if (typeof mediaFetch === 'function') {
-    mediaFetch('heroBackA', 1); mediaFetch('heroBackB', 1);
-    mediaFetch('heroBareBackA', 1); mediaFetch('heroBareBackB', 1);
+    const armed = !!(G.save && G.save.flags && G.save.flags.crystal);
+    for (const k of gateBackPair(armed)) mediaFetch(k, 1);
+    for (const k of gateBackPair(!armed)) mediaFetch(k, 1);
   }
   sfx('ui');
   if (typeof hzdSay === 'function') hzdSay('purr', 0);
@@ -7611,9 +7616,30 @@ function gateBackImg(k) {
   const im = MEDIA_IMG[k];
   return (im && im.naturalWidth) ? im : null;
 }
+// READY MEANS THE PAIR SHE WILL WALK IN, NOT ANY ONE PLATE OF FOUR.
+//
+// This used to return true the moment ONE of the four had decoded, and the hold
+// released on that — so the shot could start with only backwalk_a in hand and
+// every frame of the B half of the stride fell through to her SIDE view, which
+// is the "going in background looks fake" report all over again. It was
+// intermittent because it depended on which of four fetches happened to land
+// first, and it got worse as the boot set grew: a run measured 89 side frames
+// out of a 3.4-second walk while a run minutes earlier measured none.
+//
+// A stride needs BOTH of its frames. Waiting for the pair costs nothing she can
+// see — the hold is capped at 0.75s and she is standing in the doorway drawn
+// the way she always is — and it is the difference between a walk and a flicker.
+function gateBackPair(armed) {
+  return armed ? ['heroBackA', 'heroBackB'] : ['heroBareBackA', 'heroBareBackB'];
+}
+// Ready means HER pair — not the other one. The substitute exists so a browser
+// that never gets the right plates still shows a back rather than a side view,
+// and it is drawGateWalk's last resort once this hold has spent its 0.75s. If
+// it counted as ready here, the hold would release the moment the WRONG pair
+// landed and she would walk out wearing a sword she does not own.
 function gateBackReady() {
-  return !!(gateBackImg('heroBackA') || gateBackImg('heroBackB')
-    || gateBackImg('heroBareBackA') || gateBackImg('heroBareBackB'));
+  const want = gateBackPair(!!(G.save && G.save.flags && G.save.flags.crystal));
+  return !!(gateBackImg(want[0]) && gateBackImg(want[1]));
 }
 function drawGateWalk() {
   const g = G.gateWalk; if (!g) return;
@@ -7680,14 +7706,25 @@ function drawGateWalk() {
   // resort of a browser that loaded neither.
   const armed = !!(G.save && G.save.flags && G.save.flags.crystal);
   const trav = Math.hypot(x - sx0, y - sy0) + e * 60;   // depth counts as stride
-  const b = (Math.floor(trav / 26) % 2) ? 'B' : 'A';
-  const want = armed ? 'heroBack' + b : 'heroBareBack' + b;
-  const alt = armed ? 'heroBareBack' + b : 'heroBack' + b;
-  const im = gateBackImg(want) || gateBackImg(alt);
+  const b = (Math.floor(trav / 26) % 2) ? 1 : 0;
+  // ONE COSTUME FOR THE WHOLE WALK. This picked its plate per frame with the
+  // other pair as a per-frame fallback, so a run where three of the four had
+  // decoded drew her stride as bare-A, armed-B, bare-A — she changed costume
+  // twice a second on her way through the gate. The pair is chosen ONCE, on the
+  // first drawn frame, and it is whichever pair is whole: the right one if it
+  // is here, the substitute if it is not, and if neither is she keeps her side
+  // view for that frame and the choice is left open for the next one.
+  if (!g.pair) {
+    const want = gateBackPair(armed), altp = gateBackPair(!armed);
+    if (gateBackImg(want[0]) && gateBackImg(want[1])) g.pair = want;
+    else if (gateBackImg(altp[0]) && gateBackImg(altp[1])) g.pair = altp;
+  }
+  const want = g.pair ? g.pair[b] : '';
+  const im = want ? gateBackImg(want) : null;
   // what the shot actually drew her as, for tests/opening.cjs — "she turned her
   // back" is the whole point of this function and it is not readable from the
   // outside otherwise
-  G.gateBackKey = im ? (gateBackImg(want) ? want : alt) : '';
+  G.gateBackKey = im ? want : '';
   if (im) {
     const dh = 92 * sc, dw = dh * (im.naturalWidth / im.naturalHeight);
     // the gait's vertical, off the same stride counter as the frames
