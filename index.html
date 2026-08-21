@@ -1,5 +1,27 @@
-<!doctype html><html><head><meta charset="utf-8"><title>CLAWBYTE</title></head><body><script>
-fetch('https://raw.githubusercontent.com/zaferdajani/HZD-99/27b1458ec042ce7c751dcc88e8c9322d4632b8b0/index.html')
-  .then(function(r){return r.text();})
-  .then(function(t){document.open();document.write(t);document.close();});
+<!doctype html><html><head><meta charset="utf-8"><title>CLAWBYTE</title>
+<style>html,body{margin:0;background:#06090f;height:100%;overflow:hidden}#boot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#7d93a8;font:14px monospace;letter-spacing:.2em}</style>
+</head><body>
+<div id="boot">LOADING CLAWBYTE&hellip;</div>
+<script src="patch_runtime.js"></script>
+<script>
+(function(){
+  var OLD='https://raw.githubusercontent.com/zaferdajani/HZD-99/27b1458ec042ce7c751dcc88e8c9322d4632b8b0/index.html';
+  function show(t){document.open();document.write(t);document.close();}
+  fetch(OLD).then(function(r){return r.text();}).then(function(t){
+    try{
+      var P=window.CB_PATCH, out=t, cur=0, ok=true;
+      for(var k=0;k<P.pairs.length;k++){
+        var o=P.pairs[k][0], n=P.pairs[k][1];
+        var i=out.indexOf(o,cur);
+        if(i<0){ok=false;break;}
+        out=out.slice(0,i)+n+out.slice(i+o.length);
+        cur=i+n.length;
+      }
+      if(ok && out.length===P.target && out.indexOf('_gndY')>0 && out.indexOf('stepLen')>0){ show(out); return; }
+    }catch(e){}
+    show(t);
+  }).catch(function(){
+    document.getElementById('boot').textContent='LOAD FAILED — HARD-REFRESH (CTRL+SHIFT+R)';
+  });
+})();
 </script></body></html>
