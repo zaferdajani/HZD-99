@@ -245,7 +245,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
   8. §2c    caveMouth + caveExit + pillar ×3  ✅ WIRED 2026-08-16 — vistas + pillar plate live; cave tile deck still to fire
   9. §2f    GATE SHAPES ×6 + CAVE MOUTHS ×5   ✅ WIRED 2026-08-16 — per-zone maps live, feather-masked; city monument untouched
  10. §2g    THE TRADER'S BOOTH + DEN ×3       ✅ CLOSED 2026-08-16 — all three plates fired, approved and wired
- 11. §3m    BOSS MOTION PLATES (task #93)     ◐ 3 of 5 SHIPPED 2026-08-16 — NULLFANG, GLACIERE, FURNACE CHOIR
+ 11. §3m    BOSS MOTION PLATES (task #93)     ◐ 1 of 10 WIRED 2026-08-21 — see the WIRING AUDIT in §3m: six plates are the wrong creature, two need their pair
  12. §1     PAIRED PAW SET — every pose WITH and WITHOUT the claw (owner's ruling 2026-08-16) + apex/burst/heal/Song/slump/wallcling
  13. §2     zone terrain briefs (edge_/fore_ per zone — task #76)
  14. §2h    THE ORACLE'S SHRINE + PARLOR ×2   ✅ WIRED 2026-08-16 — shrine plate + parlor vista live (code session)
@@ -262,6 +262,37 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
+
+**WIRING AUDIT 2026-08-21 (code session). SIX OF THE TEN ARE A DIFFERENT
+CREATURE FROM THE GUARDIAN THAT SHIPPED — do not re-fire blind, and do not
+wire them.** Every plate was photographed against the rig it was meant to
+replace, in the same state, in the same frame, using the BOSS_MOTION_OFF
+switch in js/entities.js (set it true and the rig draws where a plate would).
+The comparisons are reproducible from that switch.
+
+| plate | verdict |
+|---|---|
+| `nullfang_coil` | **WIRED.** Species, silhouette and armour match the rig. Two faults fixed in code: it is drawn facing RIGHT while every other plate and the engine's own convention face LEFT (per-plate `faceRight` now), and its matte carries a soft contact shadow below the feet, so it floated until the anchor was lowered. **One open question for the owner: its seams and eyes are RED; the rig's virus glow is VIOLET.** The swap lasts about a second, so it may read as a colour flicker. |
+| `nullfang_walk` | Not wired, and not a fault of the art. §3m asked for walk_a AND walk_b so travel is a CYCLE; one stride pose came back. A held stride slid along the floor is the skating that took three passes to get out of the wolves and out of her. **Fire its partner and it wires immediately.** |
+| `prism_stalk` | Same: one stride pose, needs its partner. |
+| `prism_coil` | Held. Same species and colour family as the rig, but much PALER — the rig is dark magenta with red core light, the plate is pale pink crystal. Borderline; held pending the owner's eye rather than wired on my judgement. |
+| `glaciere_travel` | **MISS.** The shipped GLACIERE is a horned unicorn-serpent with a flowing violet mane and hooved legs. The plate is a hornless, maneless, legless gharial. Same palette, different animal. |
+| `glaciere_coil` | **MISS.** Same fault — a coiled snake where the guardian has a horn, a mane and legs. |
+| `choir_drift` | **MISS.** The shipped FURNACE CHOIR is a winged mechanical DRAGON. The plate is a haloed bell/jellyfish. Not the same creature at all. |
+| `choir_clench` | **MISS.** Same. |
+| `talonhost_glide` | **MISS.** The shipped TALONHOST is a large teal-and-orange mechanical bird on a cable. The plate is a small brown-and-gold eagle. Wrong palette, wrong scale. |
+| `talonhost_strike` | **MISS.** Same. |
+
+**What the re-fire needs.** The brief already said it — "every fire uses the
+guardian's own current sheet as reference media so identity holds" — and the
+six misses are what happens when that step is skipped. The reference for each
+is its parts atlas in `assets/characters/guardians/`: `glaciere_parts.png`,
+`beast_parts.png`, `eagle_parts.png`, `prism_parts.png`. Fire against those,
+not against the guardian's NAME: "FURNACE CHOIR" reads as a bell if you have
+never seen the dragon.
+
+**And every travel pose is a PAIR or it is not wired.** One stride is a
+statue. This is now a rule of the section, not a preference.
 
 The code half shipped 2026-08-16: every guardian now leans into its own
 acceleration, bobs with its stride and compresses on landing (the weight

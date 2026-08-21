@@ -660,7 +660,11 @@ function popArt(key, src, lift) {
 // body instead — the same arrangement every renderer in this game uses.
 // `pop` runs the plate through the pop grade — hostile bodies only; props and
 // friendly faces keep the room's own light.
-function drawPlateAnchored(c, key, cx, base, targetH, flip, pop) {
+// ...and the same plate anchored by its MIDDLE rather than its feet. A serpent
+// riding the air, a bell hanging from a cable and a bird in a stoop have no
+// contact point to stand on; anchoring those by the box's bottom edge hangs
+// them off whatever y they were handed. `anchor` is 'foot' (default) or 'mid'.
+function drawPlateAnchored(c, key, cx, base, targetH, flip, pop, anchor) {
   mediaFetch(key);
   let im = softArt(key);
   if (!im || !im.naturalWidth) return false;
@@ -672,7 +676,8 @@ function drawPlateAnchored(c, key, cx, base, targetH, flip, pop) {
   c.save();
   c.translate(cx, base);
   if (flip) c.scale(-1, 1);
-  c.drawImage(im, -(box.x + box.w / 2) * dw, -(box.y + box.h) * dh, dw, dh);
+  const ay = anchor === 'mid' ? (box.y + box.h / 2) : (box.y + box.h);
+  c.drawImage(im, -(box.x + box.w / 2) * dw, -ay * dh, dw, dh);
   c.restore();
   return true;
 }

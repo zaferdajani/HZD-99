@@ -6918,6 +6918,37 @@ function bossRest(b, k) {
   const base = b.phase === 2 ? rnd(0.45, 0.62) : rnd(0.74, 0.98);
   return base * (k || 1);
 }
+// ---------------------------------------------------------------------------
+// §3m — WHICH PLATE, IN WHICH STATE, AT WHAT SIZE (task #93).
+//
+// ONE ENTRY, AND THE REASON THERE IS ONLY ONE IS WRITTEN BELOW. Ten plates were
+// fired for this and I photographed every one against the rig it was meant to
+// replace, same pose, same frame (tools: the BOSS_MOTION_OFF switch below).
+// Six of the ten are a DIFFERENT CREATURE from the guardian that shipped, and a
+// body that changes species mid-fight is worse than a parts rig. The findings
+// are written up per plate in docs/ART_QUEUE.md §3m for the art session.
+//
+// `h` is the drawn height as a multiple of the collider height, calibrated
+// against what the rig already draws — drawBeast uses b.h * 2.35, and a plate
+// that does not match its own rig's footprint pops the frame it swaps on.
+// `lift` shifts the anchor by a fraction of the collider: these plates carry a
+// soft contact shadow inside the matte, so the opaque box bottom is a few
+// pixels BELOW the feet and the figure floats without it.
+// `faceRight` is per PLATE, not per guardian — the fired set is not consistent
+// with itself (nullfang_walk faces left, nullfang_coil faces right), and the
+// engine's convention is that a guardian faces left at face = -1.
+const BOSS_MOTION = {
+  // NULLFANG — the coil, and only the coil.
+  //
+  // Not the stalk: the brief asked for walk_a AND walk_b so travel is a CYCLE,
+  // and one stride pose came back. A held stride slid along the floor is the
+  // skating that took three passes to get out of the wolves and out of her, so
+  // nullfang_walk waits for its partner. A tell is a held pose by definition —
+  // that is what makes it readable — so the coil has no such problem.
+  glitch: { h: 2.5, anchor: 'foot', lift: 0.03,
+            states: { crouch: { k: 'nullfangCoil', faceRight: 1 },
+                      springwarn: { k: 'nullfangCoil', faceRight: 1 } } },
+};
 class Boss {
   constructor(kind, x, y) {
     const s = BSTAT[kind];
@@ -9221,6 +9252,45 @@ class Boss {
         c.restore();
         c.restore();
         return;
+      }
+    }
+    // =====================================================================
+    // §3m THE MOTION PLATES (task #93). Every guardian was fired a travel pose
+    // and a wind-up pose — ten plates, 4.4 MB — and until now not one of them
+    // was drawn by anything. They were keyed in media.js and that was the whole
+    // wiring; the code half that shipped was the WEIGHT pass (lean into
+    // acceleration, bob with stride, compress on landing), which is motion of
+    // the body and not of the limbs. These are the limbs.
+    //
+    // WHY ONLY EIGHT OF THE TEN. The brief (ART_QUEUE §3m) asked for walk_a AND
+    // walk_b — a PAIR, so travel is a cycle. What came back is one travel pose
+    // each. That is fine for a body that genuinely holds its pose while
+    // travelling: a serpent gliding, a bell drifting on its cable, a bird in a
+    // stoop. It is wrong for a quadruped mid-stride — a held stride slid along
+    // the floor is the skating that took three passes to get out of the wolves
+    // and out of her. So nullfang_walk and prism_stalk stay UNWIRED until their
+    // walk_b partner is fired (queued in §3m), and the two cats keep their
+    // animated rigs. Better a rig that steps than a painting that skates.
+    //
+    // The wind-ups have no such problem: a tell is a HELD pose by definition,
+    // which is what makes it readable, so all five wire.
+    //
+    // Drawn here, after drawAbilities, so the telegraph rings and the amber
+    // wash still land on top — "the amber wash is code; the POSE is the plate".
+    if (!heroWorld && !this.dead && this.hurtT <= 0 && this.stagT <= 0
+        && !this.purified && !G.bossRig && typeof drawPlateAnchored === 'function') {
+      const bm = BOSS_MOTION[this.kind];
+      const mp = bm && bm.states[this.st];
+      if (mp) {
+        const fv = this.faceVis == null ? (this.face || -1) : this.faceVis;
+        // mid-turn belongs to the rig: the plates are one yaw, and a plate
+        // cannot foreshorten through a turn the way the constructed front does
+        const flip = mp.faceRight ? fv < 0 : fv > 0;
+        if (Math.abs(fv) > 0.7 &&
+            drawPlateAnchored(c, mp.k, cx, this.y + this.h - (bm.lift || 0) * this.h,
+                              this.h * bm.h, flip, true, bm.anchor)) {
+          c.restore(); return;
+        }
       }
     }
     // the machine's authored art is CLAWBYTE-only — hard theme gate
