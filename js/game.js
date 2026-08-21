@@ -310,18 +310,28 @@ function checkEvo() {
     showItem(t('evo' + tv), t('evo' + tv + 'd'));
   }
 }
+// THE GEAR HAS A PICTURE OF ITSELF. Two cold plates were fired for the hardware
+// that explains her movement — jetpack.png for the double jump, boots_idle.png
+// for the dash — and both were keyed in media.js and drawn by NOTHING. They are
+// not rig parts: they are the object, square-on, lit, with no exhaust and no
+// motion. There is exactly one moment in the game that wants that picture, and
+// it is the moment she is HANDED the thing. Until now that moment was a line of
+// text. (bootsFire is the other half and is already worn — drawThrustBoots
+// aligns it to the dash vector; this is its portrait, not its rig.)
+const MOD_ART = { djump: 'jetpack', dash: 'bootsIdle' };
 function grantMod(id) {
   G.save.abil[id] = 1;
-  showItem(t('m_' + id), t('m_' + id + 'd'));
+  if (MOD_ART[id] && typeof mediaFetch === 'function') mediaFetch(MOD_ART[id], 1);
+  showItem(t('m_' + id), t('m_' + id + 'd'), MOD_ART[id]);
   lessonStart(id);                                  // and then teach it
 }
 function grantCrest(id) {
   if (G.save.crests.indexOf(id) < 0) G.save.crests.push(id);
   showItem(t('c_' + id), t('c_' + id + 'd'));
 }
-function showItem(name, desc) {
+function showItem(name, desc, art) {
   sfx('win');
-  G.dialog = { name: t('got'), lines: [name + ' — ' + desc], i: 0, onEnd: null };
+  G.dialog = { name: t('got'), lines: [name + ' — ' + desc], i: 0, onEnd: null, art: art || null };
   G.state = 'DIALOG';
   persist();
 }
@@ -10493,7 +10503,32 @@ function draw(tms) {
       // still the fallback: an unnamed speaker, or a bust that has not
       // loaded, draws the same face it always did.
       let bustDrawn = false;
-      if (d.npc) {
+      // ...AND WHEN THE CARD IS A HANDOVER, THE PICTURE IS THE THING. A "GOT
+      // IT" card has no speaker — her own face over "Thrust Boots — cross a gap
+      // in a straight line" tells the player nothing they did not already know.
+      // The object goes in the portrait's column instead, drawn larger than a
+      // bust because it is the subject rather than a listener, on a soft warm
+      // disc so a dark machined housing still reads against the dim panel.
+      if (d.art) {
+        const ai = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[d.art];
+        if (ai && ai.naturalWidth) {
+          const S = 84, cx4 = px + 32, cy4 = by + 14 + 32;
+          c.save();
+          c.globalCompositeOperation = 'lighter';
+          const ag = c.createRadialGradient(cx4, cy4, 4, cx4, cy4, S * 0.62);
+          ag.addColorStop(0, 'rgba(255,214,130,0.20)');
+          ag.addColorStop(1, 'rgba(255,190,100,0)');
+          c.fillStyle = ag;
+          c.beginPath(); c.arc(cx4, cy4, S * 0.62, 0, 7); c.fill();
+          c.restore();
+          // contained, never stretched: the two plates have different aspects
+          const sc4 = Math.min(S / ai.naturalWidth, S / ai.naturalHeight);
+          const aw = ai.naturalWidth * sc4, ah = ai.naturalHeight * sc4;
+          c.drawImage(ai, cx4 - aw / 2, cy4 - ah / 2, aw, ah);
+          bustDrawn = true;
+        }
+      }
+      if (d.npc && !bustDrawn) {
         const bk = 'bust' + d.npc.charAt(0).toUpperCase() + d.npc.slice(1);
         if (typeof mediaFetch === 'function') mediaFetch(bk);
         const bi = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[bk];
