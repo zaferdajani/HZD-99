@@ -1,1 +1,1 @@
-<PATCH_RUNTIME_JS>
+window.CB_PATCH=null;
