@@ -2425,8 +2425,53 @@ function rkMix(a, b, t2) {
   const p = (i) => Math.round(A[i] + (B[i] - A[i]) * t2).toString(16).padStart(2, '0');
   return '#' + p(0) + p(1) + p(2);
 }
+// THE DRAWN ROCK. One slab per kingdom, and because every solid tile is cut
+// from it, six files change the floor, the walls and the ceiling of the whole
+// game at once. The bake below stays exactly where it is: art is lazy, so the
+// procedural slab is what is on screen until the plate lands, and it is what
+// stays on screen if the plate never does (RULE ZERO — the engine never assumes
+// it has the good version).
+const ROCK_ART = { A: 'rockA', B: 'rockB', C: 'rockC', D: 'rockD', E: 'rockE', X: 'rockX' };
+function rockPlate(zone) {
+  const k = ROCK_ART[zone];
+  if (!k || typeof mediaHas !== 'function') return null;
+  // asking must not be what fetches — see mediaHas in media.js — so the request
+  // is made explicitly, once, and the answer is "not yet" until it lands
+  if (!mediaHas(k)) { if (typeof mediaFetch === 'function') mediaFetch(k); return null; }
+  // NOT through softArt: that pass exists to feather the edge of a CUTOUT so
+  // it does not read as a sticker, and a slab has no edge — it is a texture
+  // that must join itself. Running it here bought a full extra copy of every
+  // slab and 22 ms of work for no visible difference.
+  const im = MEDIA_IMG[k];
+  return (im && (im.naturalWidth || im.width)) ? im : null;
+}
+
 function rockTex(zone) {
-  if (rockCache[zone]) return rockCache[zone];
+  // THE CACHE IS CHECKED FIRST, and that is a hot path, not tidiness: this is
+  // called once per solid tile inside drawTiles, so several hundred times per
+  // bake. Reaching rockPlate() first meant a mediaHas — and, before the plate
+  // landed, a mediaFetch — on every one of them.
+  //
+  // `_final` means the cache was built from the FULL-SIZE plate, after which
+  // nothing can change and the question never has to be asked again.
+  const had = rockCache[zone];
+  if (had && had._final) return had;
+  const plate = rockPlate(zone);
+  // Otherwise the cache remembers WHICH IMAGE made it, not merely that an image
+  // did: the low-resolution tier lands first and is a real image, so a cache
+  // keyed on "art or not" would hold the 128px stand-in for the rest of the
+  // session and the full slab would never be drawn.
+  if (had && had._img === plate) return had;
+  if (plate) {
+    const w = plate.naturalWidth || plate.width, h = plate.naturalHeight || plate.height;
+    const pv = document.createElement('canvas');
+    pv.width = w; pv.height = h;
+    pv.getContext('2d').drawImage(plate, 0, 0);
+    pv._src = 'art'; pv._img = plate;
+    pv._final = (typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[ROCK_ART[zone]] === 3);
+    rockCache[zone] = pv;
+    return pv;
+  }
   const P = PAL[zone]; if (!P) return null;
   const cv = document.createElement('canvas');
   cv.width = ROCK_TW; cv.height = ROCK_TH;
@@ -2528,6 +2573,7 @@ function rockTex(zone) {
   // while the value says "this is rock, the character is what matters".
   x.globalAlpha = 0.14; x.fillStyle = '#000'; x.fillRect(0, 0, ROCK_TW, ROCK_TH);
   x.globalAlpha = 1;
+  cv._src = 'proc'; cv._img = null;
   rockCache[zone] = cv;
   return cv;
 }
@@ -4101,7 +4147,9 @@ function drawTiles(P) {
       if (rock) {
         // the material itself, sampled where this tile sits in the world so
         // neighbouring tiles are continuous rock rather than repeated stamps
-        c.drawImage(rock, X % ROCK_TW, Y % ROCK_TH, TILE, TILE, X, Y, TILE, TILE);
+        // sampled by the slab's own size, not by the constant: the drawn slab
+        // is larger than the procedural bake and both have to tile correctly
+        c.drawImage(rock, X % rock.width, Y % rock.height, TILE, TILE, X, Y, TILE, TILE);
         // the painted kingdom plate, where one exists, laid over the rock as
         // colour and grime rather than as the surface itself
         if (tex) {
@@ -4323,7 +4371,7 @@ function drawTiles(P) {
             c.lineTo(hx + (hash2(tx, q) - 0.5) * 3, Y + TILE + hl);
             c.closePath();
             c.clip();
-            if (rock2) c.drawImage(rock2, X % ROCK_TW, Y % ROCK_TH, TILE, TILE, X, Y + TILE - TILE + 2, TILE, TILE + hl);
+            if (rock2) c.drawImage(rock2, X % rock2.width, Y % rock2.height, TILE, TILE, X, Y + TILE - TILE + 2, TILE, TILE + hl);
             else { c.fillStyle = P.solid; c.fillRect(X - 4, Y + TILE - 4, TILE + 8, hl + 8); }
             // and darken as it hangs — the tip is furthest from the light
             const tg = c.createLinearGradient(0, Y + TILE, 0, Y + TILE + hl);
@@ -4607,7 +4655,7 @@ function drawTiles(P) {
         // cannot stop seeing it. The fracture below just confirms what the
         // grain already said.
         const OX = 101, OY = 53;
-        c.drawImage(rockB, (X + OX) % ROCK_TW, (Y + OY) % ROCK_TH, TILE, TILE, X, Y, TILE, TILE);
+        c.drawImage(rockB, (X + OX) % rockB.width, (Y + OY) % rockB.height, TILE, TILE, X, Y, TILE, TILE);
         const texB = strataTex(G.roomDef.zone);
         if (texB) {
           c.globalAlpha = 0.3;
@@ -4813,11 +4861,46 @@ function drawPlatformRuns() {
 }
 // tile layer cache — tiles are static per room, so render once and blit
 let tileCv = null, tileDirty = true;
+// DO NOT BAKE A FLOOR YOU ARE ABOUT TO THROW AWAY.
+//
+// Baking the tile layer for a large room measures at about 940 ms, and the rock
+// slab it is cut from is lazy like all art here. Bake first and the slab lands a
+// moment later, the bake is discarded and paid for again: two seconds of stalled
+// frames in the first three seconds of play. tests/memnote.cjs is what found it
+// — a stalled loop plays one note of a three-note trial — and the frame counter
+// agreed afterwards: 16 frames in 2.6 s against 37 before.
+//
+// So the bake WAITS for the slab, briefly, and does nothing else. A frame or two
+// with no tile layer costs nothing; a wasted second costs the opening. The wait
+// is bounded and per room: if the slab does not arrive the procedural bake runs
+// and the floor is quieter, which is the same fallback everything else here has.
+let rockWaitRoom = null, rockWaitT0 = 0;
+const ROCK_WAIT_MS = 1200;
+function rockBakeReady(zone) {
+  if (typeof isHero === 'function' && isHero()) return true;
+  const k = ROCK_ART[zone];
+  if (!k || typeof mediaHas !== 'function' || !MEDIA_SRC || !MEDIA_SRC.images[k]) return true;
+  // ...and it waits for the FULL slab, not for the first thing that answers.
+  // Both tiers dirty the bake, so accepting the quarter-scale stand-in here
+  // bakes the room twice over: once from the stand-in and once from the plate.
+  if (typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[k] === 3) return true;
+  if (typeof mediaFetch === 'function') mediaFetch(k, true);   // and ask, once asking matters
+  const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  if (rockWaitRoom !== G.roomId) { rockWaitRoom = G.roomId; rockWaitT0 = now; }
+  return now - rockWaitT0 > ROCK_WAIT_MS;
+}
+
 function renderTileLayer(P) {
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
+  // THE CANVAS IS MADE FIRST, ALWAYS. The wait below returns without baking,
+  // and the draw path composites this layer unconditionally — returning before
+  // the canvas existed handed drawImage a null and threw once per frame, which
+  // is not "a frame or two with no tile layer", it is a dead game.
   if (!tileCv || tileCv.width !== W || tileCv.height !== H) {
     tileCv = document.createElement('canvas'); tileCv.width = W; tileCv.height = H;
   }
+  // tileDirty is deliberately left set: this is "not yet", not "done"
+  if (!rockBakeReady(G.roomDef.zone)) return;
   const tctx = tileCv.getContext('2d');
   tctx.clearRect(0, 0, W, H);
   const main = c; c = tctx;
