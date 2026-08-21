@@ -479,3 +479,80 @@ window guessing where a note will be, rather than waiting for it.
 **Still 3D, and next in this order:** the terrain depth planes (`edge_*`,
 `fore_*`), the cave mouths and zone gates, and the interiors (booth, den, forge,
 carrel, hollow, oracle) plus the six guardian lairs.
+
+## The NPC stops reading like a slideshow — 2026-08-21
+
+Two reports from the owner, one after the other: *"npc words are long and
+repeated and destracts me from reading the messages"*, and *"npc story should be
+short generated video to stimulate player, npc movements looks as a its a slide
+show gif instead of a live machine doing its work"*.
+
+Both were arithmetic, not taste.
+
+**The words.** Ratchet's forge ask was ONE string of 687 characters — his whole
+backstory, plus the errand, plus the route, plus the mechanic, in a single
+speech bubble. And the standing line ("what he makes of her now") leads every
+conversation, so between two guardians falling he opened with the same sentence
+every single time she walked up. A player learns to skip the top of the panel,
+and skipping the top is how the errand gets missed. Now: the ask is a LIST of
+short beats rather than one wall (`lines` takes either — `[].concat` does the
+work), and the standing line is said ONCE per key. When the tier moves, or his
+own arc moves, the key changes and he says the new one.
+
+**The story is a film now, and the hole for it was already there.** The den wake
+has asked for `PURIFY_VID.memory` by name since it was written — the code
+session left the call in place with no file behind it. That film exists:
+`assets/video/memory.mp4`, eight seconds, generated from his own plate. The
+workshop floor, the Song taking every machine in the room, his chest crystal
+flaring white and burning it out of him, and the cable he pulls himself. It
+replaced the first beat of the ask outright.
+
+**The movement.** The pose set was seven stills held about a second each. That
+is one frame per second, and one frame per second IS a slideshow — no amount of
+re-firing the stills fixes it. So a clip of this same body working was generated
+and CUT INTO FRAMES: `tools/vidstrip.cjs` samples a video at N even times, keys
+it off its black field, and writes one horizontal strip with the subject
+bottom-aligned in square cells. Video is the frame source; the sprite strip is
+what ships, because a `<video>` drawn into the world carries a black rectangle
+with it and has no alpha. The work beats run those twelve frames at 10 fps; the
+tic, the vent, the notice and the talk keep their held plates, because those are
+ACTS and an act wants a held frame.
+
+**What that tool had to learn, in order:**
+
+- **A 2 MB video will not load as a data: URI**, and the failure reads exactly
+  like a codec failure. It is served over the same local server the harnesses
+  use instead.
+- **...which then taints the canvas**, and the error arrives at `getImageData`
+  rather than at the load. The page navigates to the clip's own origin first.
+- **Headless Chromium has no H.264.** The generated mp4 has to be transcoded to
+  webm before a frame can be read out of it. `ffmpeg-static` is an npm install
+  away and is not kept.
+- **A luminance key eats a dark boot.** At threshold 26 his legs came out
+  ghosted; the plating is pale but the boots are near-black. 10 keeps them.
+- **The crop is taken across ALL frames, not per frame.** Cropping each frame to
+  its own content makes the character jitter around its own centre, which is the
+  one thing an idle loop must not do.
+
+**And the framing had to be fired twice.** Told "locked camera, does not change
+size", the model turned him to face the lens and pushed in until his legs were
+out of frame. What worked was naming the frame instead of forbidding the move:
+*the whole robot stays in frame from the top of its helmet to the soles of both
+feet, with empty space above and below, the whole time.*
+
+**And two things the harness had to be taught, because the change made its old
+question meaningless.** `tests/tinker.cjs` asserted that no two of the seven
+poses share a silhouette — but `work1` and `work2` are two names for one loop
+now, so that pair is a tautology rather than a measurement. It is dropped, and
+in its place the LOOP is sampled at six phases and required to move: closest
+pair 0.617 against a ceiling of 0.86. It also had to be told to wait for the
+strip, which is not in `TINKER_PLATE` — waiting only for the plate set measured
+the still fallback and duly reported a loop that never moved.
+
+**A constant offset shared by every frame is never the animation; it is always
+the box.** Every sampled frame reported its feet exactly 5 px off the floor, and
+the cause was one frame in twelve whose vent smoke reached 16 px lower than the
+boots — that outlier set the union crop, and bottom-aligning to it lifted the
+whole loop. The foot line is the MEDIAN frame's now, and the tool prints the
+row it chose against every frame's own, so the next one of these is visible
+without a debugger: `foot row 943 of 943/943/943/959/943/…`.

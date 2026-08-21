@@ -253,6 +253,13 @@ const MEDIA_SRC = {
     ratchetTalk1: 'assets/characters/npc/ratchet/talk_1.png',
     ratchetTalk2: 'assets/characters/npc/ratchet/talk_2.png',
     ratchetVent: 'assets/characters/npc/ratchet/vent.png',
+    // THE WORK LOOP, 12 cells on one strip. The owner's report on the pose
+    // set was 'looks as a slide show gif instead of a live machine doing its
+    // work', and he was describing the arithmetic: seven stills held about a
+    // second each is 1 fps. These twelve are frames of a generated clip of
+    // this same body working, cut and keyed by tools/vidstrip.cjs — one
+    // image, bottom-aligned, so the feet never move between cells.
+    ratchetLoop: 'assets/characters/npc/ratchet/work_loop.png',
     // HER OWN BACK — generated from her live body (assets/source/ref/), the
     // first authored plates of the hero herself. Two stride frames armed, two
     // unarmed (the sword becomes a pickup — task #78), and the sword waiting
@@ -794,6 +801,28 @@ function plateFoot(key) {
 // REFERENCE plate at the size the room wants; every other key in the set is
 // then scaled so its silhouette covers the same area as the reference's, which
 // is what keeps them one character rather than one height.
+// One cell of a horizontal strip, anchored on its foot line.
+//
+// A strip needs no plateFoot: tools/vidstrip.cjs writes square cells with the
+// subject bottom-aligned and centred, so the anchor IS the bottom centre of the
+// cell. That is the whole reason the strip is built that way — a per-cell foot
+// measurement would wander by a pixel or two per frame, and an idle loop that
+// wanders is worse than one that does not move at all.
+function drawStripCell(c, key, cell, cells, cx, base, h, flip) {
+  mediaFetch(key);
+  const im = MEDIA_RAW[key];
+  if (!im || !im.naturalWidth) return false;
+  const cw = im.naturalWidth / cells, ch = im.naturalHeight;
+  const i = ((cell % cells) + cells) % cells;
+  const dw = h * (cw / ch);
+  c.save();
+  c.translate(cx, base);
+  if (flip) c.scale(-1, 1);
+  c.drawImage(im, i * cw, 0, cw, ch, -dw / 2, -h, dw, h);
+  c.restore();
+  return true;
+}
+
 function drawSetPlate(c, key, cx, base, frameH, flip, refKey) {
   mediaFetch(key);
   // RAW, NOT softArt. softArt exists to feather a HARD key — a cut-out whose

@@ -53,12 +53,17 @@ const IOU_MAX = 0.86;
     poses.forEach(p2 => mediaFetch(TINKER_PLATE[p2]));
     // 840 KB a plate: wait for the art rather than measure the atlas fallback,
     // which would pass check 1 and mean nothing
+    // ...and the WORK STRIP too. It is not in TINKER_PLATE — it is the loop the
+    // work beats draw instead of a plate — so waiting only for the plate set
+    // measured the still fallback and reported a loop that never moved.
+    mediaFetch('ratchetLoop');
     const t0 = Date.now();
     while (Date.now() - t0 < 30000) {
       await new Promise(r2 => requestAnimationFrame(r2));
-      if (poses.every(p2 => mediaHas(TINKER_PLATE[p2]))) break;
+      if (poses.every(p2 => mediaHas(TINKER_PLATE[p2])) && mediaHas('ratchetLoop')) break;
     }
-    const missing = poses.filter(p2 => !mediaHas(TINKER_PLATE[p2]));
+    const missing = poses.filter(p2 => !mediaHas(TINKER_PLATE[p2]))
+      .concat(mediaHas('ratchetLoop') ? [] : ['ratchetLoop']);
 
     // Drawn LARGE and on a bare field: the den's own backdrop, halo and
     // contact shadow are not the subject and would be counted as one.
@@ -94,13 +99,61 @@ const IOU_MAX = 0.86;
                      h: maxY - minY + 1, w: maxX - minX + 1,
                      mask: Array.from(mask) };
     }
+    // THE WORK BEATS ARE A LOOP NOW, so measuring work1 against work2 asks
+    // whether two names for the same animation differ — they do not, and cannot.
+    // What matters instead is whether the LOOP moves, which is the thing the
+    // owner reported it did not do ("a slide show gif instead of a live
+    // machine"). Sample its own phase and compare the frames to each other.
+    const loop = [];
+    {
+      const shim = { x: 0, y: 0, w: s.w, h: s.h, extra: 'ratchet', room: 'A0B', t: 0, _tk: null };
+      tinkerRig(shim);
+      for (let f = 0; f < 6; f++) {
+        q.clearRect(0, 0, W, H);
+        shim._tk.pose = 'work1'; shim._tk.t = 9; shim._tk.ph = f * 0.2;   // 12 cells at 10 fps
+        q.save(); q.translate(W / 2, BASE); q.scale(Z, Z); q.translate(-shim.w / 2, -shim.h);
+        drawTinker(q, shim, false);
+        q.restore();
+        const d2 = q.getImageData(0, 0, W, H).data;
+        const m2 = new Uint8Array(W * H);
+        let n2 = 0, low = -1;
+        for (let k = 0; k < W * H; k++) {
+          if (d2[k * 4 + 3] > 60) { m2[k] = 1; n2++; const y2 = (k / W) | 0; if (y2 > low) low = y2; }
+        }
+        loop.push({ mask: m2, px: n2, foot: low - BASE });
+      }
+    }
+    let loopWorst = 0, loopPairs = 0;
+    for (let i = 0; i < loop.length; i++) for (let j = i + 1; j < loop.length; j++) {
+      let inter = 0, uni = 0;
+      const A2 = loop[i].mask, B2 = loop[j].mask;
+      for (let k = 0; k < A2.length; k++) { if (A2[k] || B2[k]) uni++; if (A2[k] && B2[k]) inter++; }
+      const v = uni ? inter / uni : 1;
+      loopPairs++;
+      if (v > loopWorst) loopWorst = v;
+    }
+    const loopBest = Math.min.apply(null, loop.map((_, i) =>
+      Math.min.apply(null, loop.map((__, j) => {
+        if (i === j) return 1;
+        let inter = 0, uni = 0;
+        const A2 = loop[i].mask, B2 = loop[j].mask;
+        for (let k = 0; k < A2.length; k++) { if (A2[k] || B2[k]) uni++; if (A2[k] && B2[k]) inter++; }
+        return uni ? inter / uni : 1;
+      }))));
+    const loopFoot = loop.map(f2 => f2.foot);
+    const loopPx = loop.map(f2 => f2.px);
+
     // pairwise silhouette overlap
     const iou = [];
     for (let i = 0; i < poses.length; i++) for (let j = i + 1; j < poses.length; j++) {
       const A = shot[poses[i]].mask, B = shot[poses[j]].mask;
       let inter = 0, uni = 0;
       for (let k = 0; k < A.length; k++) { if (A[k] || B[k]) uni++; if (A[k] && B[k]) inter++; }
-      iou.push({ a: poses[i], b: poses[j], v: uni ? inter / uni : 1 });
+      // work1 and work2 are two names for one loop now; the pair is not a
+      // measurement, it is a tautology. The loop is measured above instead.
+      const pair = poses[i] + '/' + poses[j];
+      if (pair !== 'work1/work2' && pair !== 'work2/work1')
+        iou.push({ a: poses[i], b: poses[j], v: uni ? inter / uni : 1 });
     }
     for (const p2 of poses) delete shot[p2].mask;         // do not ship 290k ints back
 
@@ -119,7 +172,7 @@ const IOU_MAX = 0.86;
     drawTinker(q, vs, false);
     const puff2 = parts.length;
     parts.length = 0;
-    return { poses, missing, shot, iou, puff, puff2 };
+    return { poses, missing, shot, iou, puff, puff2, loopBest, loopWorst, loopFoot, loopPx };
   });
 
   if (r.err) { console.log('  FAIL ' + r.err); process.exit(1); }
@@ -137,6 +190,22 @@ const IOU_MAX = 0.86;
         same.length === 0,
         'worst ' + worst.a + '/' + worst.b + ' ' + worst.v.toFixed(3) + ' (max ' + IOU_MAX + ')' +
         (same.length ? ' — ' + same.length + ' pairs over' : ''));
+
+  // 2b — AND THE LOOP MOVES. Twelve frames at 10 fps replaced the two work
+  // stills; a strip that came back as twelve copies of one drawing would pass
+  // every other check in this file and be exactly the slideshow it replaced.
+  check('the work loop actually moves between frames',
+        r.loopBest <= IOU_MAX,
+        'closest pair of six sampled frames ' + r.loopBest.toFixed(3) +
+        ' (max ' + IOU_MAX + '), widest ' + (1 - r.loopWorst).toFixed(3) + ' apart');
+  {
+    const bad = r.loopFoot.filter(f => Math.abs(f) > 4);
+    check('...and it keeps its feet on the floor in every frame', bad.length === 0,
+          'foot offsets ' + r.loopFoot.join(',') + 'px');
+    const lo2 = Math.min.apply(null, r.loopPx), hi2 = Math.max.apply(null, r.loopPx);
+    check('...and does not pump in size while it plays', (hi2 - lo2) / hi2 <= 0.18,
+          lo2 + 'px .. ' + hi2 + 'px  spread ' + (((hi2 - lo2) / hi2) * 100).toFixed(1) + '%');
+  }
 
   // 3 — feet on the floor. drawSetPlate anchors the mask bottom to the base, so
   // this is really asking whether the matte left anything hanging below him.

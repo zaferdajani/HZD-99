@@ -346,6 +346,9 @@ function drawTinker(c, s, talking) {
   // interrupting somebody rather than approaching a shop fixture.
   const working = inDen && !talking && !near;
   r.t -= dt; r.tic -= dt;
+  // the work loop's own clock, and it only runs while he is working: a loop
+  // that keeps counting behind a tic comes back mid-swing
+  if (working) r.ph = (r.ph || 0) + dt;
   if (working) r.vent -= dt;                             // he only cooks while he works
   const locked = r.pose === 'tic' || r.pose === 'vent';  // these two run to the end
   if (locked) {
@@ -371,7 +374,22 @@ function drawTinker(c, s, talking) {
   // the plates were fired facing frame-right, which is the way he faces his
   // bench. Turning is therefore only for the talking poses.
   const face = working ? 1 : ((player && player.x + 12 < s.x) ? -1 : 1);
-  const drew = drawSetPlate(c, TINKER_PLATE[r.pose], cx, base, frameH, face < 0, 'ratchetWork1');
+  // THE WORK BEATS ARE A LOOP, NOT TWO STILLS. work1 and work2 were two plates
+  // held 1.15 s and 1.55 s — a cut every second and a bit, which is what the
+  // owner read as a slide show. They are replaced by twelve frames of a clip of
+  // this same body working, run at 10 fps off one clock so the phase does not
+  // reset when the pose does. The other four beats keep their plates: the tic,
+  // the vent, the notice and the talk are ACTS, and an act wants a held frame.
+  //
+  // Falls back to the stills whenever the strip has not landed, which is the
+  // same deal every other sheet in this file has.
+  let drew = false;
+  if (r.pose === 'work1' || r.pose === 'work2') {
+    const CELLS = 12, FPS = 10;
+    drew = drawStripCell(c, 'ratchetLoop', Math.floor((r.ph || 0) * FPS), CELLS,
+                         cx, base, s.h * 2.6, face < 0);
+  }
+  if (!drew) drew = drawSetPlate(c, TINKER_PLATE[r.pose], cx, base, frameH, face < 0, 'ratchetWork1');
   if (!drew) return false;
   // THE STACK, in the frame he was just drawn at: up over the far shoulder.
   // Measured off the plate rather than guessed — the rack tops out at about
@@ -1052,7 +1070,11 @@ function doInteract(s) {
       const st = qState(q.id);
       let qAct = null;
       if (st === 'none') {
-        lines = [t('q_ask_' + q.id) || t('q_ask'), qText(q)];
+        // AN ASK MAY BE SEVERAL SHORT BEATS. It used to be one string, so the
+        // only way to tell a story here was to write a paragraph into a speech
+        // bubble — and the owner read one: 'npc words are long and repeated'.
+        // concat takes either, so a line stays a line and a story is a list.
+        lines = [].concat(t('q_ask_' + q.id) || t('q_ask'), qText(q));
         qAct = () => { qSet(q.id, 'active'); G.toast(t('q_taken')); sfx('ok'); };
       } else if (qDone(q)) {
         lines = [t('q_thanks_' + q.id) || t('q_thanks')];
@@ -1088,8 +1110,21 @@ function doInteract(s) {
         if (G.save.flags['sageTame_GA1D']) k = 'sl_ratchet_sage';
         else if (G.save.flags.crystal) k = 'sl_ratchet_forged';
       }
+      // ...AND HE SAYS IT ONCE. This line is what the NPC makes of her now, so
+      // it leads every conversation — which meant that between two guardians
+      // falling, every single approach opened with the same sentence, and the
+      // player learned to skip past the top of the dialog to reach the part
+      // that changes. Skipping the top is how the errand gets missed.
+      //
+      // It is keyed on the LINE, not on the NPC: when the tier moves, or the
+      // trader's own arc moves, the key changes and he says the new one.
       const sl = t(k);
-      if (sl && sl !== k) lines = [sl].concat(lines);
+      const said = G.save.flags.said || (G.save.flags.said = {});
+      if (sl && sl !== k && !said[k]) {
+        said[k] = 1;
+        if (typeof persist === 'function') persist();
+        lines = [sl].concat(lines);
+      }
     }
     // THE STORY COMES IN FRAGMENTS (owner: "give us fragments of the story
     // with every advancement"). The memory film is the whole of what happened
@@ -3204,6 +3239,14 @@ const PURIFY_VID = {
   // crystal, ending on the same white flare the grant flashes. It supersedes
   // sword_gift.mp4 (the tight handover close-up), which stays on disk as good
   // work but is no longer the moment the quest pays off on.
+  // THE MEMORY — the den wake already asks for this film by name and has
+  // done since the wake was written; it just had no file. It is what he
+  // tells her the moment his cell is back in: the workshop floor, the Song
+  // taking every machine in the room, his chest crystal burning it out of
+  // him, and the cable he pulled himself. It replaced 687 characters of
+  // speech bubble, which is the owner's own instruction — 'npc story should
+  // be short generated video'.
+  memory: 'assets/video/memory.mp4',
   gift: 'assets/video/sword_forge.mp4',
   glitch: 'assets/video/purify_glitch.mp4', // NULLFANG      - the lion
   brood: 'assets/video/purify_brood.mp4',   // TALONHOST     - the eagle
