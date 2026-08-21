@@ -224,6 +224,60 @@ integrator side), and the owner may refuse any plate AFTER the fact, which
 sends it back here as a re-fire with his correction. Generation still
 belongs to the art session alone; the code session wires and verifies.
 
+==== THE KEYING FAULT (2026-08-21, code session) — READ BEFORE RE-FIRING ====
+
+**`assets/characters/npc_6yaw.png` shipped with 45.6% of Ratchet's interior
+keyed away.** Not dark — GONE. His shoulder, the middle of his pack and his
+legs are transparent, and the room shows through them. The owner circled those
+three areas on a contact sheet; before that he had called it "a ghost" twice and
+"all so dark" three times, and three rounds went into chasing brightness before
+anyone looked at the alpha channel. Nothing about a hole gets brighter.
+
+**The cause was `tools/turnsheet.cjs`, in two compounding ways, both now fixed:**
+
+1. **It keyed by a global luminance threshold with no idea of inside or
+   outside.** `lum < 26 -> alpha 0`, applied to every pixel in the frame. Every
+   shadowed pocket WITHIN a figure fell below it. The comment in that function
+   had already named the trade-off — "a flat threshold either eats the dark
+   parts of a gunmetal robot or keeps the halo" — and the ramp that was supposed
+   to split the difference ate the robot. Background is now what the OUTSIDE CAN
+   REACH: a flood from the border, so anything the figure encloses stays opaque
+   however dark it is. Real see-through gaps still key out, because they reach
+   the border.
+2. **The band was hard-coded far above the actual backdrop.** Measured on the
+   surviving source (`assets/source/ratchet/ratchet_ref_npc6yaw.png`): the
+   backdrop is TRUE BLACK, 99.9th percentile of the border ring is 0, no floor
+   gradient at all. A floor at 26 was discarding everything from 1 to 25, which
+   on a machine-person lit by one key is most of the shadow side. The band is
+   read off the border ring now and sits just above whatever is really there.
+
+**THE SHIPPED SHEET CANNOT BE REPAIRED FROM ITSELF.** The key zeroed the colour
+along with the alpha — only 5.5% of the hole pixels retain any RGB. It needs a
+RE-KEY from the raw strips, and **those strips are not in this repo**: the tool
+reads `<indir>/<subject>.png` and `<subject>_r.png` for all seven subjects and
+only a two-pose Ratchet reference survives in `assets/source/`. Whoever holds
+them can re-run `node tools/turnsheet.cjs <indir> assets/characters/npc_6yaw.png`
+and the fixed key does the rest — no credits.
+
+**AND THE NEXT FIRE SHOULD NOT USE A PURE-BLACK BACKDROP.** Part of this loss is
+not the key's fault at all: the render's own shadow side reaches EXACT ZERO in
+places, which no keying can tell from a black backdrop. On the surviving strip
+1.5% of the frame is exact-black enclosed by the figure — recoverable, and the
+fix recovers it — but the black-on-black at the silhouette edge is gone for
+good. Fire against a backdrop the subject never matches: a mid-grey, or a
+saturated key colour. Then the alpha is exact instead of inferred.
+
+**WHAT IS AND IS NOT AFFECTED**, measured with `node tools/holecheck.cjs`:
+- `npc_6yaw.png` — the fault. Every standing NPC in the game comes off it.
+- `npc/ratchet_resting.png` — ZERO holes. It came through a different route and
+  it is the best-looking NPC art in the game (mid 98, contrast 206). It is the
+  reference for what the others should look like.
+- `hero/states.png` — 1.3%, and those read as genuine gaps between limbs.
+- 68 of 112 sheets report SOME enclosed transparency, but parts atlases have
+  gutters between their pieces and bodies have real gaps, so that number is a
+  starting point for looking, not a defect count. Compare against the source
+  before acting on any of it — that comparison is what made this case certain.
+
 ==== THE FIRING LIST (2026-08-15, consolidated — run top to bottom) =========
 Whoever holds the Higgsfield binding (session B, or this session once it
 rebinds) fires these in order. Reference for her body: media_id

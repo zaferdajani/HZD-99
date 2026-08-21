@@ -58,13 +58,84 @@ window.cutStrip = async (dataUrl) => {
   // and a bloom halo around each figure. A flat threshold either eats the dark
   // parts of a gunmetal robot or keeps the halo, so alpha RAMPS across a band
   // — below it is background, above it is subject, between it fades.
-  const LO = 26, HI = 62;
-  const col = new Float64Array(W);
+  //
+  // ...AND THE RAMP ALONE ATE THE ROBOTS. That trade-off was called out in this
+  // comment and then lost anyway: the threshold was applied to every pixel with
+  // no idea of inside or outside, so every shadowed pocket WITHIN a figure —
+  // the inside of a pack, the shaded flank, the dark under a leg — fell below
+  // LO and was keyed to nothing. Measured on the shipped sheet: 45.6% of the
+  // interior of Ratchet's cell is transparent, and the colour under it is gone
+  // (only 5.5% of those pixels retain any RGB), so the sheet cannot be repaired
+  // from itself. The owner's word for the result, twice, was "a ghost" — the
+  // room showing through the middle of a character.
+  //
+  // BACKGROUND IS WHAT THE OUTSIDE CAN REACH. The luminance ramp still decides
+  // what LOOKS like backdrop, but only pixels connected to the border through
+  // other backdrop pixels are actually cleared; anything the figure encloses
+  // stays opaque however dark it is. A four-way flood from the frame edge, once
+  // per strip. Genuine see-through gaps — between an arm and a torso, through a
+  // handle — reach the border and still key out correctly.
+  // ...AND THE BAND IS MEASURED, NOT ASSUMED. LO 26 / HI 62 was the second half
+  // of the fault and the larger one. This source's backdrop is TRUE BLACK — the
+  // 99.9th percentile of its border ring is 0, no floor gradient at all — so a
+  // floor at 26 was discarding every pixel from 1 to 25, which on a gunmetal
+  // robot lit by one key is most of its shadow side. Read the border instead
+  // and sit the ramp just above whatever is actually there: on a clean black
+  // plate that is a hair above zero, and on a render that really does have a
+  // lifted floor it still lands where it should.
+  let LO = 26, HI = 62;
+  {
+    const ring = [];
+    const step = Math.max(1, Math.floor(W / 320));
+    for (let xx = 0; xx < W; xx += step) {
+      for (const yy of [0, 1, H - 2, H - 1]) {
+        const i = (yy * W + xx) * 4;
+        ring.push(p[i] * 0.30 + p[i + 1] * 0.59 + p[i + 2] * 0.11);
+      }
+    }
+    for (let yy = 0; yy < H; yy += step) {
+      for (const xx of [0, 1, W - 2, W - 1]) {
+        const i = (yy * W + xx) * 4;
+        ring.push(p[i] * 0.30 + p[i + 1] * 0.59 + p[i + 2] * 0.11);
+      }
+    }
+    ring.sort((a, b2) => a - b2);
+    const floor = ring[Math.floor(ring.length * 0.99)];
+    LO = floor + 1;
+    HI = floor + 9;                    // a narrow ramp: enough to eat a halo
+  }
+  const N = W * H;
+  const bg = new Uint8Array(N);          // 1 = looks like backdrop
+  const lumA = new Float64Array(N);
   for (let i = 0, q = 0; i < p.length; i += 4, q++) {
     const lum = p[i] * 0.30 + p[i + 1] * 0.59 + p[i + 2] * 0.11;
-    let a = 0;
+    lumA[q] = lum;
+    if (lum <= HI) bg[q] = 1;            // at or under the ramp's top
+  }
+  // flood the "looks like backdrop" region inward from every edge pixel
+  const outside = new Uint8Array(N);
+  const stack = new Int32Array(N);
+  let sp = 0;
+  for (let xx = 0; xx < W; xx++) { stack[sp++] = xx; stack[sp++] = (H - 1) * W + xx; }
+  for (let yy = 0; yy < H; yy++) { stack[sp++] = yy * W; stack[sp++] = yy * W + W - 1; }
+  while (sp > 0) {
+    const q = stack[--sp];
+    if (outside[q] || !bg[q]) continue;
+    outside[q] = 1;
+    const qx = q % W, qy = (q / W) | 0;
+    if (qx > 0) stack[sp++] = q - 1;
+    if (qx < W - 1) stack[sp++] = q + 1;
+    if (qy > 0) stack[sp++] = q - W;
+    if (qy < H - 1) stack[sp++] = q + W;
+  }
+  const col = new Float64Array(W);
+  for (let i = 0, q = 0; i < p.length; i += 4, q++) {
+    const lum = lumA[q];
+    let a;
     if (lum > HI) a = 255;
+    else if (!outside[q]) a = 255;       // enclosed by the figure: it IS the figure
     else if (lum > LO) a = Math.round((lum - LO) / (HI - LO) * 255);
+    else a = 0;
     p[i + 3] = a;
     if (a > 140) col[q % W] += 1;
   }
