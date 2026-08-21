@@ -2432,6 +2432,137 @@ function rkMix(a, b, t2) {
 // stays on screen if the plate never does (RULE ZERO — the engine never assumes
 // it has the good version).
 const ROCK_ART = { A: 'rockA', B: 'rockB', C: 'rockC', D: 'rockD', E: 'rockE', X: 'rockX' };
+
+// ---------------------------------------------------------------------------
+// A ROOM WITH A ROOF IS NOT THE FIELD OUTSIDE IT (owner, 2026-08-21: "why is
+// the terrain inside tent same as outside!").
+//
+// It was, exactly, and for a reason worth writing down: EVERY ground decision
+// in this engine was keyed on the room's ZONE, and an interior room keeps its
+// kingdom's zone because it belongs to that kingdom. So Ratchet's workshop —
+// walls, roof, bench, hanging lamp — was floored with Scrap Meadows: the
+// zone's rock slab, the zone's strata plate, and wire-grass tufts sprouting
+// along the boards in the kingdom's own teal. Alien flora was planted in it
+// too, by the same rule. Three separate systems all asking the zone and none
+// of them asking whether the room has a roof.
+//
+// The floor is now a property of the ROOM. `indoor` on the room def (js/world.js)
+// switches the material to that interior's own — which is the mimic rule the
+// owner already set for elevations, applied to the ground they stand on: a
+// workshop floor is the workshop's boards, a data-den's is deck plate.
+//
+// THE PLATES ARE HIGGSFIELD'S. Every key below is queued in ART_QUEUE §2u and
+// UNFIRED; floorBake() underneath is the wiring stand-in, and it is deliberately
+// a plain worn floor rather than an attempt at art. The keys light up the moment
+// the plates are keyed into media.js — nothing else has to change.
+const INDOOR_ART = {
+  A0B: 'floorDen',        // the Tinker's workshop: oiled boards, swarf, burn marks
+  B3B: 'floorParlor',     // the Oracle's data-den: deck plate, cable gutters
+  C5B: 'floorForge',      // Patch-7's smithy: slag-crusted plate, quench stains
+  D1B: 'floorCarrel',     // the Sage's carrel: dry boards, drifted paper dust
+  E1B: 'floorHollow',     // Lumen's hollow: grown chitin, soft and shell-like
+};
+// The interior's palette, in the same three roles the zone palettes use. Named
+// here rather than derived from the zone, because the whole point is that the
+// room is not its zone.
+// ...and the LIGHT, which turned out to be the loudest half of the complaint.
+// The tile layer is finished with a screen wash in ZONE_LIGHT — aerial
+// perspective, §9.1, and correct outdoors. Zone A's is [120,190,175]: dead
+// teal daylight. Sprayed over the den it neutralised the boards to the same
+// grey-green as the meadow AND lit the crest along the whole floor in mint,
+// which is the glowing ribbon in the owner's screenshot. A room with a roof is
+// not lit by the sky over the kingdom; it is lit by whatever is burning in the
+// room, and in Ratchet's case that is one hanging lamp.
+const INDOOR_PAL = {
+  floorDen:    { base: '#3b3128', join: '#241d16', lit: '#6d5c46', wash: [210, 155, 90],  k: 0.10 },
+  floorParlor: { base: '#26303a', join: '#161d25', lit: '#4a5c6e', wash: [110, 150, 210], k: 0.12 },
+  floorForge:  { base: '#3a2f2a', join: '#211913', lit: '#6b4f38', wash: [255, 150, 70],  k: 0.14 },
+  floorCarrel: { base: '#37312a', join: '#201c17', lit: '#645846', wash: [205, 175, 125], k: 0.10 },
+  floorHollow: { base: '#2f3a30', join: '#1a221b', lit: '#586b56', wash: [150, 210, 150], k: 0.12 },
+};
+function indoorKey() {
+  return (G.roomDef && G.roomDef.indoor) ? (INDOOR_ART[G.roomId] || 'floorDen') : null;
+}
+const floorCache = {};
+function floorTex(key) {
+  const had = floorCache[key];
+  if (had && had._final) return had;
+  // the authored plate, IF it has been keyed — asking for a key that media.js
+  // does not carry would name a file that is not on disk, which is the one
+  // thing the manifest rule forbids
+  const named = (typeof MEDIA_SRC !== 'undefined') && MEDIA_SRC.images && MEDIA_SRC.images[key];
+  if (named && typeof mediaHas === 'function') {
+    if (!mediaHas(key)) { if (typeof mediaFetch === 'function') mediaFetch(key); }
+    else {
+      const im = MEDIA_IMG[key];
+      if (im && (im.naturalWidth || im.width)) {
+        if (had && had._img === im) return had;
+        const w = im.naturalWidth || im.width, h = im.naturalHeight || im.height;
+        const pv = document.createElement('canvas');
+        pv.width = w; pv.height = h;
+        pv.getContext('2d').drawImage(im, 0, 0);
+        pv._img = im;
+        pv._final = (typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[key] === 3);
+        return (floorCache[key] = pv);
+      }
+    }
+  }
+  if (had) return had;
+  return (floorCache[key] = floorBake(key));
+}
+// THE STAND-IN. Boards, not rock: bands that run with the floor, joins that
+// wander rather than rule (the no-right-angles order holds indoors too), and
+// wear pooled where feet and work would put it. One bake per interior, cached.
+function floorBake(key) {
+  const P = INDOOR_PAL[key] || INDOOR_PAL.floorDen;
+  const cv = document.createElement('canvas');
+  cv.width = ROCK_TW; cv.height = ROCK_TH;
+  const x = cv.getContext('2d');
+  let s = 0;
+  for (let i = 0; i < key.length; i++) s = (s * 31 + key.charCodeAt(i)) % 99991;
+  const rr2 = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; };
+  x.fillStyle = P.base; x.fillRect(0, 0, ROCK_TW, ROCK_TH);
+  // the boards: horizontal courses of slightly different tone, so the floor
+  // reads as laid rather than poured
+  const courses = 4;
+  for (let i = 0; i < courses; i++) {
+    const y = (i * ROCK_TH) / courses;
+    x.globalAlpha = 0.10 + rr2() * 0.16;
+    x.fillStyle = rr2() > 0.5 ? P.lit : P.join;
+    x.fillRect(0, y, ROCK_TW, ROCK_TH / courses);
+    // the join between courses WANDERS — a ruled line across a room is the
+    // thing the grammar harness keeps finding and the owner keeps seeing
+    x.globalAlpha = 0.5;
+    x.strokeStyle = P.join; x.lineWidth = 1.2;
+    x.beginPath();
+    for (let px = 0; px <= ROCK_TW; px += 8) {
+      const wy = y + (typeof fbm1 === 'function' ? (fbm1(px * 0.9 + i * 40, 91) - 0.5) * 3 : 0);
+      if (px === 0) x.moveTo(px, wy); else x.lineTo(px, wy);
+    }
+    x.stroke();
+  }
+  // wear and spills: soft dark pools, then a few bright scratches across them
+  x.globalAlpha = 1;
+  for (let i = 0; i < 14; i++) {
+    const cx2 = rr2() * ROCK_TW, cy2 = rr2() * ROCK_TH, r = 6 + rr2() * 26;
+    const gd = x.createRadialGradient(cx2, cy2, 1, cx2, cy2, r);
+    gd.addColorStop(0, 'rgba(0,0,0,0.30)');
+    gd.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = gd;
+    x.beginPath(); x.arc(cx2, cy2, r, 0, 7); x.fill();
+  }
+  for (let i = 0; i < 22; i++) {
+    const sx2 = rr2() * ROCK_TW, sy2 = rr2() * ROCK_TH, len = 4 + rr2() * 22;
+    x.globalAlpha = 0.10 + rr2() * 0.18;
+    x.strokeStyle = P.lit; x.lineWidth = 0.8 + rr2();
+    x.beginPath(); x.moveTo(sx2, sy2);
+    x.lineTo(sx2 + len, sy2 + (rr2() - 0.5) * 3);
+    x.stroke();
+  }
+  x.globalAlpha = 1;
+  cv._final = true;                                   // a bake never improves
+  return cv;
+}
 function rockPlate(zone) {
   const k = ROCK_ART[zone];
   if (!k || typeof mediaHas !== 'function') return null;
@@ -2839,7 +2970,34 @@ const TERRAIN_THEME = {
   E: { rough: 12, lip: 4, skirt: 24, crack: 0.80, edge: 'flesh',   hang: 'tendrils' },
   X: { rough: 5,  lip: 3, skirt: 10, crack: 0.15, edge: 'prism',   hang: 'glass'    },
 };
+// AN INTERIOR IS NOT A LANDSCAPE (owner, 2026-08-21: "why is the terrain inside
+// tent same as outside!"). The material was already the painting's own floor —
+// drawInteriorFloor lays the den's boards over the tile layer — so what he was
+// reading as "the same" is the SHAPE, and the shape came from this table.
+//
+// Every number here is per ZONE, and an interior room keeps its kingdom's zone
+// because it belongs to that kingdom. So Ratchet's workshop got the Scrap
+// Meadows' terrain grammar: a 6px eroded ridge, a 4px scalloped crest, and 12px
+// of material hanging off the underside — a rock outcrop, drawn under a roof,
+// beside a workbench. The floor of a room is not weathered by anything. It is
+// swept, it is worn where feet fall, and its edge is a skirting rather than a
+// crest, so all four numbers go down and nothing grows on it.
+//
+// It does NOT go to zero: the no-right-angles order is global, and a floor
+// ruled straight across a room is exactly what that order forbids. Two pixels
+// of wander is a laid floor; six is a cliff.
+const TERRAIN_INDOOR = {
+  rough: 2, lip: 2, skirt: 0, crack: 0.10, edge: 'none', hang: 'plates',
+  // ...and the lip does not GLOW. Outdoors that two-pixel fringe into the air
+  // above the crest is doing real work — it is how the walk line reads at a
+  // glance in the dark rooms without the light pass having to shout. Indoors it
+  // is a strip light buried in the floorboards, and it traced the workshop's
+  // ground in the kingdom's own teal, following the terrain contour: the single
+  // loudest reason the den read as the meadow with a roof on it.
+  noGlow: 1,
+};
 function terrainTheme() {
+  if (G.roomDef && G.roomDef.indoor) return TERRAIN_INDOOR;
   return TERRAIN_THEME[G.roomDef && G.roomDef.zone] || TERRAIN_THEME.A;
 }
 let fringeCv = null, fringeDirty = true;
@@ -4142,8 +4300,14 @@ function drawTiles(P) {
     if (ch === '#') {
       const up = tileAt(tx, ty - 1);
       const exposed = up !== '#' && up !== 'B';
-      const rock = (typeof isHero === 'function' && isHero()) ? null : rockTex(G.roomDef.zone);
-      const tex = strataTex(G.roomDef.zone);
+      // INDOORS THE FLOOR IS THE ROOM'S, NOT THE KINGDOM'S — see INDOOR_ART.
+      // The strata plate is a geology plate; a workshop has no geology, so it
+      // is skipped rather than tinted, which is what made the boards read as
+      // meadow with a roof over them.
+      const inKey = indoorKey();
+      const rock = (typeof isHero === 'function' && isHero()) ? null
+        : (inKey ? floorTex(inKey) : rockTex(G.roomDef.zone));
+      const tex = inKey ? null : strataTex(G.roomDef.zone);
       if (rock) {
         // the material itself, sampled where this tile sits in the world so
         // neighbouring tiles are continuous rock rather than repeated stamps
@@ -4278,6 +4442,22 @@ function drawTiles(P) {
             const bx = X + 4 + hash2(tx, 6) * 20;
             c.fillStyle = P.spike; c.globalAlpha = 0.9;
             c.beginPath(); c.moveTo(bx, Y); c.lineTo(bx + 3, Y - 6 - hash2(tx, 7) * 5); c.lineTo(bx + 6, Y); c.closePath(); c.fill();
+            c.globalAlpha = 1;
+          }
+        } else if (G.roomDef.indoor) {
+          // NOTHING GROWS ON A WORKSHOP FLOOR. This branch used to fall through
+          // to the wire-grass below and sprout the kingdom's own teal along the
+          // boards inside Ratchet's den, which is what the owner saw. What a
+          // swept floor has instead is what got dropped on it: swarf, filings,
+          // the odd offcut, in the room's own metal rather than in a plant hue.
+          const P2 = INDOOR_PAL[indoorKey()] || INDOOR_PAL.floorDen;
+          for (let k = 0; k < 2; k++) {
+            if (hash2(tx * 7 + k, ty * 5) < 0.55) continue;
+            const dx2 = X + 3 + hash2(tx * 5 + k, ty * 3) * 24;
+            const dw2 = 1.5 + hash2(tx, k + 5) * 3.5;
+            c.fillStyle = k ? P2.lit : P2.join;
+            c.globalAlpha = 0.35 + hash2(tx, k + 9) * 0.35;
+            c.fillRect(dx2, Y - 1, dw2, 1.6);
             c.globalAlpha = 1;
           }
         } else {
@@ -4936,11 +5116,18 @@ function renderTileLayer(P) {
   // terrain still sat 9 points off its backdrop where the law asks for 10.
   // A screen wash in the zone's light lifts the face without touching hue.
   {
-    const L = ZONE_LIGHT[G.roomDef.zone];
+    // INDOORS THE LIGHT IS THE ROOM'S — see INDOOR_PAL. This wash is the last
+    // thing that touches the floor, so whatever colour it is, is the colour the
+    // floor is: the den's boards were baked warm and came out the same grey-
+    // green as the meadow because zone A's dead teal daylight was screened over
+    // them afterwards, and the same wash lit the crest in mint along the whole
+    // room. Both symptoms, one line.
+    const ik = (typeof indoorKey === 'function') && indoorKey();
+    const L = ik ? (INDOOR_PAL[ik] || INDOOR_PAL.floorDen) : ZONE_LIGHT[G.roomDef.zone];
     if (L) {
       tctx.save();
       tctx.globalCompositeOperation = 'screen';
-      tctx.globalAlpha = 0.14;
+      tctx.globalAlpha = ik ? (L.k || 0.10) : 0.14;
       tctx.fillStyle = 'rgb(' + L.wash[0] + ',' + L.wash[1] + ',' + L.wash[2] + ')';
       tctx.fillRect(0, 0, tileCv.width, tileCv.height);
       tctx.restore();
@@ -5434,8 +5621,17 @@ function surfaceCurvePass(x) {
     x.stroke();
     x.restore();
   };
-  strokeCurve(P.dark, 7, 6, 0.34);     // the shadow step under the lip
-  strokeCurve(P.edge, 3, 1, 0.8);      // the lit crest itself
+  // THE CREST IS THE KINGDOM'S OUTSIDE AND THE ROOM'S INSIDE. P.edge is zone
+  // A's bright rim, stroked 3px wide at 0.8 along the whole surface: outdoors
+  // that is the walk line reading at a glance across a dark meadow, and it is
+  // right. Indoors it is a lit strip following the workshop floor in the
+  // kingdom's own colour — traced, continuous, and the single most visible
+  // reason the den read as the field outside it. A floor still needs an edge,
+  // so it keeps one, in the room's own material and quietly.
+  const ik2 = (typeof indoorKey === 'function') && indoorKey();
+  const IP = ik2 && (INDOOR_PAL[ik2] || INDOOR_PAL.floorDen);
+  strokeCurve(IP ? IP.join : P.dark, 7, 6, IP ? 0.26 : 0.34);   // the shadow step
+  strokeCurve(IP ? IP.lit  : P.edge, 2, 1, IP ? 0.40 : 0.8);    // the lit crest
 }
 
 function organicSilhouettePass(x) {
@@ -5572,7 +5768,7 @@ function edgeGrammarPass(x) {
         // ...and the lip GLOWS (owner's mesh spec): a soft two-pixel fringe
         // into the air above the crest, so the walk line reads at a glance in
         // the dark rooms without lightPass having to shout for it.
-        for (let k = 1; k <= 2; k++) {
+        for (let k = 1; k <= 2 && !TH.noGlow; k++) {
           if (Y - k < 0) break;
           const gi = (((Y - k) * W + X) << 2);
           if (d[gi + 3] >= 40) continue;          // air only — never over rock
@@ -6057,6 +6253,10 @@ function floraPlan(id) {
   const def = ROOMS[id], set = FLORA[def && def.zone];
   const out = [];
   if (!def || !set) return (FLORA_CACHE[id] = out);
+  // ...and no garden grows inside a room either. The planter walks the zone's
+  // species list over every room the zone owns, and an interior is one of them,
+  // so cable creeper was rooted in the Tinker's floorboards.
+  if (def.indoor) return (FLORA_CACHE[id] = out);
   const g = buildRoom(id);
   // a cheap deterministic stream seeded on the room's name
   let h = 2166136261;

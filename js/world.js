@@ -238,7 +238,7 @@ const ROOMS = {
   // a field, with a spare power cell kept beside him. Wake him with hers or
   // with that one; either way the first light she gives away has a roof
   // over it.
-  A0B: { zone: 'A', w: 30, h: 17, exits: {},
+  A0B: { zone: 'A', indoor: 1, w: 30, h: 17, exits: {},
     // THE DEN IS THE KINGDOM'S FIRST ROOF, so it is also its first rest.
     // The bench audit (kingdom protocol: every kingdom has at least one save
     // point, PLACED for the arc) found the only touchable bench before the
@@ -474,7 +474,7 @@ const ROOMS = {
   // dark. Dressing mimics the Conduits backdrop per the mimic rule (cable
   // drapery, a rack loft, junction clutter); the procedural interior is a
   // stand-in — the authored plate is queued (ART_QUEUE §2h, oracleInterior).
-  B3B: { zone: 'B', w: 30, h: 17, exits: {},
+  B3B: { zone: 'B', indoor: 1, w: 30, h: 17, exits: {},
     ents: [['npc', 16, 15, 'mono'], ['scrap', 21, 15, 25]],
     build(g) {
       frame(g);
@@ -596,7 +596,7 @@ const ROOMS = {
   // touchable bench at all, so a death anywhere in the kingdom respawned
   // her a kingdom back in B3. The forge pod is the retry loop's fix, placed
   // where the story already built shelter.
-  C5B: { zone: 'C', w: 30, h: 17, exits: {},
+  C5B: { zone: 'C', indoor: 1, w: 30, h: 17, exits: {},
     ents: [['npc', 16, 15, 'patch'], ['bench', 21, 15], ['scrap', 6, 11, 25]],
     build(g) {
       frame(g);
@@ -663,7 +663,7 @@ const ROOMS = {
   // (ART_QUEUE §2m, carrelInterior). No ice flag: the carrel is the one floor
   // in the kingdom the frost never reached, which is the whole reason a sage
   // could live nine lives in it.
-  D1B: { zone: 'D', w: 30, h: 17, exits: {},
+  D1B: { zone: 'D', indoor: 1, w: 30, h: 17, exits: {},
     ents: [['npc', 15, 15, 'sage'], ['scrap', 23, 11, 30]],
     build(g) {
       frame(g);
@@ -779,7 +779,7 @@ const ROOMS = {
   // pods, veins); the procedural interior is a stand-in — the authored
   // plate is queued (ART_QUEUE §2o, hollowInterior). The loft is a sagging
   // strand of the weave, and the scrap on it is what the climb pays.
-  E1B: { zone: 'E', w: 30, h: 17, exits: {},
+  E1B: { zone: 'E', indoor: 1, w: 30, h: 17, exits: {},
     ents: [['npc', 15, 15, 'lumen'], ['scrap', 22, 11, 35]],
     build(g) {
       frame(g);

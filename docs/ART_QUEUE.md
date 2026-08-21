@@ -2638,3 +2638,65 @@ itself — no re-cropping, no per-key table.
 two share a silhouette, feet on the floor, one size across the set — and
 **`tools/tinkershot.cjs`** photographs the set the way the game draws it.
 Sources for all three firings are in `assets/source/ratchet/`.
+
+---
+
+### 2u. INTERIOR FLOORS — THE ROOM IS NOT ITS KINGDOM ✱ FIRE ON REBIND (2026-08-21)
+
+**The owner, on a screenshot of Ratchet's den: "why is the terrain inside tent
+same as outside!"** It was, and the code side of it shipped in the same commit
+as this entry. What is left is the art.
+
+**WHY IT HAPPENED, because the shape of the bug matters more than the fix.**
+Every ground decision in this engine was keyed on the room's ZONE, and an
+interior room keeps its kingdom's zone because it belongs to that kingdom. So
+the workshop — walls, roof, bench, hanging lamp — was floored with Scrap
+Meadows five times over, by five systems that had never been asked whether the
+room has a roof:
+
+1. **the material** — `rockTex(zone)` + the zone's strata plate;
+2. **the surface** — wire-grass tufts sprouting along the boards in the
+   kingdom's own teal;
+3. **the garden** — the flora planter walks every room the zone owns, so cable
+   creeper was rooted in the floorboards;
+4. **the light** — the tile layer is finished with a screen wash in
+   `ZONE_LIGHT`, and zone A's is dead teal daylight [120,190,175], which
+   neutralised the warm boards back to meadow grey;
+5. **the crest** — `strokeCurve(P.edge, …)`, a continuous 3px polyline of the
+   kingdom's rim colour traced along the whole walk surface. Outdoors that is
+   the walk line reading at a glance in a dark room and it is right. Indoors it
+   is a strip light buried in the floor, and it is the glowing ribbon in the
+   owner's screenshot.
+
+All five now branch on `indoor` on the room def, and the interior's own
+material, light and crest colour come from `INDOOR_PAL` in js/game.js. The
+terrain grammar gets an interior variant too (`TERRAIN_INDOOR`): a floor is not
+weathered by anything, so rough/lip/skirt come down and nothing grows on it —
+but NOT to zero, because the no-right-angles order is global and a floor ruled
+straight across a room is exactly what it forbids.
+
+**WHAT IS UNFIRED.** `floorBake()` is a procedural STAND-IN and is deliberately
+a plain worn floor rather than an attempt at art — per the owner's standing
+order, structures are Higgsfield's. Five plates, keyed in media.js in the same
+commit as the files, at which point `floorTex` picks them up and nothing else
+changes. Each is a seamless tiling floor texture, 1024×512, no perspective, no
+objects standing on it, lit flat:
+
+1. **floorDen** (A0B, Ratchet's workshop) — oiled dark boards laid in courses,
+   almost black in the joins, worn pale where feet fall, swarf and filings
+   trodden in, two or three old burn scars and an oil stain.
+2. **floorParlor** (B3B, the Oracle's data-den) — riveted deck plate in cold
+   gunmetal, cable gutters running with the courses, screen-blue grime in the
+   seams, worn bright along one walking line.
+3. **floorForge** (C5B, Patch-7's smithy) — heavy plate crusted with cooled
+   slag, quench stains, scale flakes, a few spatter pits still dark orange.
+4. **floorCarrel** (D1B, the Sage's carrel) — dry pale boards, drifted paper
+   dust in the joins, ink spots, the grain lifted and split with age.
+5. **floorHollow** (E1B, Lumen's hollow) — grown rather than laid: soft chitin
+   plates with organic seams, faintly translucent, a wet sheen in the hollows.
+
+Common to all five: **NOTHING PLUMB, NOTHING SQUARE** — courses wander, joins
+are not parallel, no course runs the full width. NEGATIVE on every one: no
+objects, no furniture, no characters, no perspective, no vignette, no text, no
+watermark, no strong directional light, no shadows cast by anything outside
+the frame.
