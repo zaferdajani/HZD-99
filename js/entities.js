@@ -1722,6 +1722,13 @@ class Player {
       if (this.swingVis.charged) return 'burst';
       return this.swingVis.combo >= 3 ? 'finisher' : this.swingVis.combo === 2 ? 'claw_2' : 'claw_1';
     }
+    // THE WOLVERINE CROSS (owner report #2). The charge pose is arms crossed at
+    // the chest, body UPRIGHT, feet neutral — verified against cell 16 of the
+    // sheet, which was re-fired that way. Upright matters because this pose
+    // composites over a JUMP: the old crouch was a grounded pose drawn in
+    // mid-air, and a character crouching while airborne reads as a bug, which
+    // is what "can't stay crouching and jump and charged at the same time"
+    // was describing. No code change is needed for it — the plate is the pose.
     if (this.chargeT > 0.05) return 'charge';
     if (this.dashT > 0) return 'dash';
     if (this.wallSlide !== 0 && !this.on) return 'wall_cling';
@@ -1802,22 +1809,21 @@ class Player {
     // grounded cells stand on the cell's floor line; airborne cells are centred
     const dy = HERO_AIR[st] ? -dh * 0.5 - 18 : -dh + HERO_FLOOR;
     c.save();
-    // THE ROBOT HURRY. The plates are stills; the machine in them comes from
-    // this: a forward lean and a hard little bounce timed to the step flips,
-    // so she pistons along like a wind-up toy instead of gliding. Grounded
-    // locomotion only — everything else keeps the plate's own pose.
+    // THE ROBOT HURRY — LEAN REMOVED (owner report #5, 2026-08-21). The bounce
+    // went first; the forward lean was kept on the argument that it is a
+    // carriage rather than a cycle, and that argument was wrong. The authored
+    // plates already carry their own lean — cell by cell, drawn by someone who
+    // could see the whole body — so rotating the composited result on top of
+    // them tips the HEAD through an arc every time the pose flips. That is the
+    // "moving the whole body, making it smaller and bigger" the owner reported:
+    // a rotation about the feet swings the top of a 60-unit sprite sideways and
+    // its bounding box in and out, which the eye reads as scale.
+    //
+    // Nothing rotates the body here any more. `moving` is still computed
+    // because the registration below is a locomotion-only correction.
     const moving = this.on && Math.abs(this.vx) > 12 && !this.swingVis
       && this.dashT <= 0 && this.landT <= 0 && this.skidT <= 0
       && this.hurtPoseT <= 0 && this.healT <= 0 && this.chargeT <= 0.05;
-    if (moving) {
-      // NO SECOND BOUNCE. The rise and fall lives in draw()'s stepLift, phase
-      // locked to the stride counter; the bounce that used to be here ran on
-      // the raw anim clock — ten cycles a second at a run — and fought it. Two
-      // bobs at different rates is most of what read as a judder, and it was
-      // invisible in the source because they are three hundred lines apart.
-      // The forward lean stays: that one is a carriage, not a cycle.
-      c.rotate(run ? 0.055 : 0.022);
-    }
     // REGISTRATION: the two walk plates were fired as independent stills and
     // their heads do not sit at the same x (measured: centers 14.6px apart in
     // the 160px cell). Flipped raw at run cadence that is a strobing head —
@@ -3107,8 +3113,18 @@ class Player {
     }
     // THE BACK JET at full burn — the double jump's engine. A single hard
     // plume from the lower back, angled down and behind her, with shock
-    // diamonds stepped along it: a jet, not a candle. Additive light only —
-    // the authored gear plates for the pack itself are queued (§1c).
+    // diamonds stepped along it: a jet, not a candle. Additive light only.
+    //
+    // AND IT IS SCOPED TO THIS BRANCH ON PURPOSE — checked 2026-08-21 against
+    // the request to composite assets/characters/gear/jetpack_fire.png onto her
+    // back here. The plate path does not need it: heroState returns 'djump_jet'
+    // for the whole boost and cell 12 of the sheet ALREADY has the pack strapped
+    // on and firing, drawn at her scale from her own side view. Compositing the
+    // gear render over it puts a second jetpack across her chest — measured, not
+    // guessed. The two gear plates are illustrations of the object, not rig
+    // parts; the surface that wants them is the shop/inventory card, not the
+    // body. This plume is for the seconds before the sheet lands, and that is
+    // the only body that has no engine drawn on it.
     if ((this.boostT || 0) > 0) {
       const bk = this.boostT / 0.3;
       c.save(); c.globalCompositeOperation = 'lighter';

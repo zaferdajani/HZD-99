@@ -7810,6 +7810,38 @@ function drawStatics(P) {
       c.restore();
     } else if (s.type === 'riddle') {
       const pu = 0.5 + Math.sin(performance.now() / 500 + s.t) * 0.35;
+      // THE MIND NODE IS AN OBELISK. The fired plate (mindnode_obelisk.png) was
+      // keyed in media.js and drawn by nothing, so a puzzle the game asks the
+      // player to seek out looked like a parking meter — 26x36, the same box as
+      // a wall terminal. It stands several times her height now, which is what
+      // makes it a LANDMARK: something you see across a room and walk toward,
+      // rather than furniture you notice when you bump into it.
+      //
+      // The interact box is unchanged on purpose. The prompt belongs at its
+      // FOOT, where she stands, not floating at the top of a monolith.
+      const mn = MEDIA_IMG.mindNode;
+      if (mn && mn.naturalWidth) {
+        const oh = 168, ow = oh * (mn.naturalWidth / mn.naturalHeight);
+        const ox = s.x + s.w / 2 - ow / 2, oy = s.y + s.h - oh;
+        if (!s.opened) {
+          // the light it works by, thrown on the ground before the stone
+          c.save(); c.globalCompositeOperation = 'lighter';
+          const og = c.createRadialGradient(s.x + s.w / 2, s.y + s.h - 8, 4,
+                                            s.x + s.w / 2, s.y + s.h - 8, ow * 0.85);
+          og.addColorStop(0, 'rgba(180,140,255,' + (0.10 + pu * 0.10).toFixed(3) + ')');
+          og.addColorStop(1, 'rgba(180,140,255,0)');
+          c.fillStyle = og;
+          c.beginPath(); c.ellipse(s.x + s.w / 2, s.y + s.h - 8, ow * 0.85, oh * 0.34, 0, 0, 7); c.fill();
+          c.restore();
+        }
+        // solved, it stops calling: the violet drains out and it stands quiet
+        if (s.opened) { c.save(); if (typeof c.filter === 'string') c.filter = 'grayscale(0.7) brightness(0.72)'; }
+        c.drawImage(mn, ox, oy, ow, oh);
+        if (s.opened) c.restore();
+        if (s.opened) ftxt('✓', s.x + s.w / 2, s.y + s.h - 20, 13, '#7de8a0');
+        else if (chance(0.06)) addPart(s.x + s.w / 2 + rnd(-ow * 0.3, ow * 0.3),
+          s.y + s.h - rnd(6, oh * 0.8), rnd(-12, 12), rnd(-34, -6), 0.4, '#b48cff', 2, 0, true);
+      } else {
       c.fillStyle = '#2c3542'; c.fillRect(s.x + 8, s.y + 26, 10, 10);
       c.fillStyle = '#232a35'; rr(c, s.x, s.y, s.w, 26, 6); c.fill();
       c.strokeStyle = s.opened ? 'rgba(125,232,160,0.8)' : '#b48cff';
@@ -7820,6 +7852,7 @@ function drawStatics(P) {
       c.shadowBlur = 0;
       if (s.opened) ftxt('✓', s.x + 13, s.y + 14, 11, '#7de8a0');
       else if (chance(0.05)) addPart(s.x + 13 + rnd(-8, 8), s.y + rnd(2, 20), rnd(-15, 15), rnd(-30, 0), 0.3, '#b48cff', 2, 0, true);
+      }
     } else if (s.type === 'vault') {
       const have = ['sigil1', 'sigil2', 'sigil3'].filter(id => relicHas(id)).length;
       const open = !!G.save.flags.vaultOpen;
@@ -8822,11 +8855,38 @@ function drawHUD() {
   if (typeof skillAffordable === 'function' && (G.save.iq || 0) > 0) {
     const ready = skillAffordable();
     const goal = ready || skillNext();
+    // POINT AT THE DOOR, NOT AT THE WORD. A line of text naming a key teaches
+    // nothing on a phone, where there is no key — the player has a screen full
+    // of buttons and no reason to think one of them is the answer. When a point
+    // is actually SPENDABLE the prompt gets a lit plate behind it so it stops
+    // being another grey line in the corner, and the SKILL button on the touch
+    // layout is ringed by the same tutor highlight that teaches every other
+    // verb. It clears itself the moment she can no longer afford anything.
+    if (ready) {
+      const pu3 = 0.5 + Math.sin(performance.now() / 320) * 0.5;
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      c.globalAlpha = 0.16 + pu3 * 0.20;
+      const hg = c.createLinearGradient(60, 0, 300, 0);
+      hg.addColorStop(0, 'rgba(190,150,255,0.85)');
+      hg.addColorStop(1, 'rgba(190,150,255,0)');
+      c.fillStyle = hg;
+      rr(c, 62, 94, 238, 20, 7); c.fill();
+      c.restore();
+      // ...and the button under her thumb, on the layout that has one. Never
+      // while the tutorial is running: that highlight is the lesson's, and two
+      // things asking to be pressed at once is worse than neither.
+      if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled && !G.tut) TOUCH.hi = 'VSKILL';
+    } else if (typeof TOUCH !== 'undefined' && TOUCH && !G.tut && TOUCH.hi === 'VSKILL') {
+      TOUCH.hi = null;
+    }
     c.globalAlpha = ready ? 0.62 + Math.sin(performance.now() / 380) * 0.28 : 0.5;
     ftxt('▸ ' + howToOpenNamed('SKILL', t('pm_skills'))
          + (ready || !goal ? '' : '   ' + (G.save.iq || 0) + '/' + goal.cost),
          76, 104, 11.5, ready ? '#d9b8ff' : '#8f7fb0', 'left');
     c.globalAlpha = 1;
+  } else if (typeof TOUCH !== 'undefined' && TOUCH && !G.tut && TOUCH.hi === 'VSKILL') {
+    TOUCH.hi = null;                       // nothing left to buy: stop pointing
   }
   // nine-lives counter
   if (G.save.diff === 2) ftxt('♥ ' + (9 - G.save.lives) + ' — ' + t('lives_left'), 934, 26, 15, '#ff8f9d', 'right');
@@ -10128,9 +10188,13 @@ function drawMenuCat(tsec) {
     p.x = 0; p.y = 0; p.vx = 0; p.vy = 0;
     if (!G.roomDef) G.roomDef = { zone: 'A', w: 30, h: 17 };
     if (!G.save) G.save = { skills: [], crests: [], relics: [], flags: {}, abil: {}, iq: 0, scrap: 0 };
-    // she stands on nothing here, and the contact-shadow probe walks the grid
-    // looking for what is under her feet — so lend it one tile of floor
-    if (!G.grid) G.grid = [['#']];
+    // NO FAKE FLOOR (owner ruling, 2026-08-21). This lent the menu a one-tile
+    // slab so a ground probe would find something under her feet; there is no
+    // contact shadow any more, so the slab is a floor nothing stands on. The
+    // grid still has to EXIST — tileAt reads its length unguarded, and the
+    // mascot draw is inside a try/catch that permanently disables the mascot on
+    // a throw — so it is one tile of AIR: present to be read, solid to nothing.
+    if (!G.grid) G.grid = [['.']];
     // a slow hover so she reads as alive rather than as a decal
     const bob = Math.sin(tsec * 1.6) * 5;
     c.translate(786, 384 + bob);

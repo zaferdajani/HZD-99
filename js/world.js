@@ -212,7 +212,20 @@ const ROOMS = {
     // the node is where the thinking she is about to need comes from.
     // Ratchet is not standing in the weather any more — his BOOTH stands at
     // tile 26 (the depth door in GATE_ROOM) and he rests inside it (A0B).
-    ents: [['crawler', 21, 15], ['riddle', 30, 15, 8]],
+    // THE NODE IS NOT THE TRADER'S FURNITURE (owner report #7). It stood at
+    // tile 30, four tiles from the booth at 26 — close enough that it read as
+    // part of his pitch rather than as a thing of its own. It stands at 11 now,
+    // most of a screen west of him: the first landmark she passes walking in
+    // from the gate, and a separate destination from the shop.
+    //
+    // It could not leave A0 entirely, and that is a rule of the room rather
+    // than a preference: TUT_DOOR.A0 is 'go', so the fence at A0's east edge
+    // opens only on the LAST lesson, and the `node` lesson before it is done
+    // when iq >= 10 — which needs this node solved. Put it in A1 and the
+    // tutorial fences her into A0 with nothing left to solve. Moving it out of
+    // the room means extending the tutorial into A1, whose crawler and guard
+    // are the game's first real fight; that is a design call, not a wiring one.
+    ents: [['crawler', 21, 15], ['riddle', 11, 15, 8]],
     build(g) {
       frame(g); openR(g);
       rect(g, 16, 14, 18, 15, '#');       // the step she has to jump
