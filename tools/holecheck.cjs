@@ -26,10 +26,14 @@
 // A finding is only a defect once it has been compared against the source the
 // sheet was keyed from. That comparison is what made the npc_6yaw case certain.
 //
-//   node tools/holecheck.cjs
+//   node tools/holecheck.cjs [dir]
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
-const ROOT = require('path').join(__dirname, '..', 'assets', 'characters');
+// A directory may be named, so a plate can be checked BEFORE it enters the
+// tree — finding the fault after the commit is how npc_6yaw shipped.
+const ROOT = process.argv[2]
+  ? require('path').resolve(process.argv[2])
+  : require('path').join(__dirname, '..', 'assets', 'characters');
 function walk(d, out) {
   for (const f of fs.readdirSync(d)) {
     const p = path.join(d, f);

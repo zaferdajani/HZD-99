@@ -196,3 +196,37 @@ plant that moves when you walk back through a door is worse than no plant.
 |---|---|
 | `boots` / `boots_fire` | THE THRUST BOOTS. She is a machine, so the dash is a bolt-on, not a talent she discovers. The firing plate is drawn along the dash vector at her feet — the procedural cone was always there, the boots making it were not |
 | `pod` / `pod_on` | THE SAVE POD, at the size a save point deserves. It was thirty pixels of procedural tube; it is a horseshoe cradle on anti-vibration feet with a beacon mast, servicing arms and pressure tanks, standing four tiles tall. Dormant and awake are two plates, so stepping in is a state change and not a tint |
+
+---
+
+## `ratchet/` — the tinker's plate set, and how it was got wrong twice
+
+Seven poses of the first NPC, plus every plate fired to reach them. He stopped
+being an atlas row here (ART_BIBLE §1 class D — one 6-yaw sheet and a breathe
+cycle) because none of what the owner asked for fits in that class: a work loop,
+an uncontrollable tic, a heat vent, and two talking poses.
+
+`*_asfired.jpg` is the first firing, `*_v2_asfired.jpg` the second, `work2_v3`
+and `work1_v3` the third. That count is the record of two real mistakes, and
+both are worth knowing before firing the next set:
+
+**The first firing did not animate.** Every plate was fired against the anchor
+plate with "same camera, same framing, CHANGE ONLY THE POSE" — and an editing
+model told to preserve a composition preserves it. `notice` and `work_1` came
+back with a silhouette IoU of **0.992**: the same drawing with the hands moved.
+Five other pairs were over the line too. The fix was to fire from the SEATED
+reference instead — a pose the new one cannot be an edit of — with the pose
+described first, at length, and the framing lock removed.
+
+**The second firing did not register.** The generator decides for itself how
+much of the frame to fill and varies it by a third between plates of the same
+character, so a set is not registered by construction and cannot be made so by
+asking. It is registered by MEASUREMENT, at load, in `plateFoot`: feet to the
+bottom of the mask, horizontal to the centroid of the mask's bottom slice, and
+scale to silhouette AREA. Area, not bounding box — this character's box is
+topped by his canister rack, so a small body under a high rack measures the
+same as a big body under a low one, and that is how a visibly wrong set
+measured within 2%.
+
+`tests/tinker.cjs` is those two failures as arithmetic. `tools/tinkershot.cjs`
+is the photograph.

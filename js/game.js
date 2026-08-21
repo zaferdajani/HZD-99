@@ -276,6 +276,122 @@ function invTake(id, n) {
 // once and hand you the shop before you had earned it, so the key is the room
 // as well.
 function npcKey(s) { return (s.room || G.roomId) + '|' + s.extra; }
+
+// ---------------------------------------------------------------------------
+// RATCHET, THE ONE WHO NEVER FINISHED (owner, 2026-08-21: "give it a
+// character... give it, like, uncontrollable tick... keeps happening while
+// working or while talking. And maybe smoke coming out of it... just keep it
+// busy until I talk to it").
+//
+// THE CHARACTER, because the animation is only legible if the story under it
+// is. He was mid-reach for a tool when the Song fell. That instruction never
+// completed — and it still fires: the arm goes out, the fingers open, there is
+// nothing there. That is the tic, and it is not a twitch bolted on for
+// flavour, it is the one thing that broke and never got repaired. His coolant
+// regulator did not come back either, so he runs hot and blows it off through
+// the canister rack on his back. And what he is building, endlessly, out of
+// salvage that does not fit, is a replacement regulator — which is why he is
+// always busy, always hot, never finished, and why he wants her scrap.
+//
+// WHY THIS IS NOT AN ATLAS ROW. Class D (ART_BIBLE §1) is one 6-yaw sheet and
+// a breathe cycle: it can turn and it can bob, and that is the whole
+// vocabulary. None of the above fits in it. So Ratchet changes class — he is a
+// PLATE SET now, seven authored poses of one body, and the code's job is to
+// choose which one and when.
+//
+// THE SMOKE IS CODE, DELIBERATELY. art-prompts §0: additive glow handed to a
+// generator comes back as a beautifully lit SOLID OBJECT, because the model
+// renders a thing and the compositor wanted light. So the plates were fired
+// with "no smoke, no steam, no vapour" in every negative, and the vent is
+// particles drawn over them — which also means it can react to the beat
+// instead of being baked into one frame of it.
+const TINKER_PLATE = {
+  work1: 'ratchetWork1', work2: 'ratchetWork2', tic: 'ratchetTic',
+  notice: 'ratchetNotice', talk1: 'ratchetTalk1', talk2: 'ratchetTalk2',
+  vent: 'ratchetVent',
+};
+// how long each beat holds, in seconds. The tic is SHORT — a spasm the length
+// of a real one — and the work beats are uneven so the loop does not tick like
+// a metronome.
+const TINKER_HOLD = {
+  work1: 1.15, work2: 1.55, tic: 0.42, notice: 1.0,
+  talk1: 1.6, talk2: 1.35, vent: 1.1,
+};
+function tinkerRig(s) {
+  if (!s._tk) {
+    s._tk = { pose: 'work1', t: 0.6, last: 0, tic: rnd(3, 7), vent: rnd(9, 16), blew: false };
+    // his den is the only room that plays the whole set; at the booth he is
+    // standing and talking, so the three work plates are never asked for and
+    // must not be fetched.
+    const all = npcKey(s) === 'A0B|ratchet';
+    for (const k in TINKER_PLATE) {
+      if (all || k === 'talk1' || k === 'talk2' || k === 'notice' || k === 'tic') mediaFetch(TINKER_PLATE[k]);
+    }
+  }
+  return s._tk;
+}
+// Returns true once it has drawn him — false means the plates are not here yet
+// and the caller should fall through to the atlas, exactly as every other
+// authored renderer in this file degrades.
+function drawTinker(c, s, talking) {
+  if (typeof isHero === 'function' && isHero()) return false;   // NOSTOS has its own trader
+  const r = tinkerRig(s);
+  const now = performance.now() / 1000;
+  const dt = r.last ? Math.min(0.1, now - r.last) : 0;   // clamped: a tabbed-out
+  r.last = now;                                          // page must not fire ten tics at once
+  const inDen = npcKey(s) === 'A0B|ratchet';
+  const near = player && Math.abs((player.x + player.w / 2) - (s.x + s.w / 2)) < 140;
+  // he works while she is not standing over him. The moment she is close he
+  // has looked up — which is what makes walking into the den feel like
+  // interrupting somebody rather than approaching a shop fixture.
+  const working = inDen && !talking && !near;
+  r.t -= dt; r.tic -= dt;
+  if (working) r.vent -= dt;                             // he only cooks while he works
+  const locked = r.pose === 'tic' || r.pose === 'vent';  // these two run to the end
+  if (locked) {
+    if (r.t <= 0) { r.pose = talking ? 'talk1' : (working ? 'work1' : 'notice'); r.t = TINKER_HOLD[r.pose]; }
+  } else if (r.tic <= 0) {
+    r.pose = 'tic'; r.t = TINKER_HOLD.tic; r.tic = rnd(5.5, 11);
+  } else if (r.vent <= 0 && working) {
+    r.pose = 'vent'; r.t = TINKER_HOLD.vent; r.vent = rnd(14, 24); r.blew = false;
+  } else if (r.t <= 0) {
+    if (talking) r.pose = (r.pose === 'talk1') ? 'talk2' : 'talk1';
+    else if (working) r.pose = (r.pose === 'work1') ? 'work2' : 'work1';
+    else r.pose = near ? 'notice' : 'talk1';             // at the booth, talk1 IS his standing idle
+    r.t = TINKER_HOLD[r.pose];
+  }
+  // ONE SCALE FOR THE WHOLE SET (see drawSetPlate). work_1 is the reference:
+  // it is sized to the room, and every other pose is registered to it by
+  // silhouette area, so the crouch stays a crouch instead of being stretched
+  // up to standing height and the tic does not grow an arm's worth of body.
+  const bodyH = s.h * 2.6;                               // the owner's den ruling, unchanged
+  const box = (typeof plateBox === 'function') && plateBox('ratchetWork1');
+  const frameH = (box && box.h) ? bodyH / box.h : bodyH * 1.12;
+  const cx = s.x + s.w / 2, base = s.y + s.h;
+  // the plates were fired facing frame-right, which is the way he faces his
+  // bench. Turning is therefore only for the talking poses.
+  const face = working ? 1 : ((player && player.x + 12 < s.x) ? -1 : 1);
+  const drew = drawSetPlate(c, TINKER_PLATE[r.pose], cx, base, frameH, face < 0, 'ratchetWork1');
+  if (!drew) return false;
+  // THE STACK, in the frame he was just drawn at: up over the far shoulder.
+  // Measured off the plate rather than guessed — the rack tops out at about
+  // 0.72 of the drawn height and sits a fifth of it behind his centre line.
+  const vx = cx - face * frameH * 0.20, vy = base - frameH * 0.72;
+  if (r.pose === 'vent' && !r.blew) {
+    r.blew = true;
+    for (let i = 0; i < 16; i++) {
+      addPart(vx + rnd(-7, 7), vy + rnd(-5, 5), rnd(-45, 45) - face * 24, rnd(-80, -30),
+              rnd(0.9, 1.8), 'rgba(152,154,164,0.55)', rnd(4, 8), -20);
+    }
+    if (typeof sfx === 'function') sfx('vent');
+  } else if (working && chance(0.10)) {
+    // the idle curl: one wisp every few frames, so the rack is never quite
+    // still even in the frames where his body is
+    addPart(vx + rnd(-3, 3), vy, rnd(-9, 9) - face * 7, rnd(-27, -14),
+            1.5, 'rgba(142,144,154,0.38)', rnd(3, 5), -13);
+  }
+  return true;
+}
 // ONE ENGINE, TWO WORLDS. The cells are a CLAWBYTE story — machines that were
 // switched off when the broadcast went out. NOSTOS's people are people; they
 // are not waiting for a battery, and gating a Greek elder behind one would be
@@ -8127,7 +8243,14 @@ function drawStatics(P) {
       // when she actually talks to him. Every other NPC faces the cat.
       const atBench = live && npcKey(s) === 'A0B|ratchet' && !talking;
       const fdir = atBench ? 1 : ((player && player.x + 12 < s.x) ? -1 : 1);
-      const sheetDrew = plateDrew || (!(typeof isHero === 'function' && isHero()) &&
+      // THE TINKER IS A PLATE SET, NOT A ROW. drawTinker owns his poses, his
+      // tic and his vent (see the block above npcKey); it returns false until
+      // the plates land and the atlas covers those frames as it always did.
+      // It replaces the atlas EVERYWHERE he is awake, not only in his den:
+      // his row on npc_6yaw is the one the keyer punched 45.6% of the body
+      // out of, so the booth was showing the room through his chest.
+      const sheetDrew = plateDrew || (live && s.extra === 'ratchet' && drawTinker(c, s, talking)) ||
+        (!(typeof isHero === 'function' && isHero()) &&
         drawAtlas(c, s.extra, fdir,
                   s.x + s.w / 2, s.y + s.h + bob2 * 0.4, s.h, {
           t: performance.now() / 1000 + (s.t || 0) * 1.7,

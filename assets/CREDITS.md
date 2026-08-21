@@ -70,6 +70,13 @@ plate can be traced back to the generation it came from.
 | `backgrounds/booth_front.png` | Higgsfield, Seedream 4.5 | Ratchet's kiosk (ART_QUEUE §2g); matted with Higgsfield `remove_background` |
 | `backgrounds/den_interior.jpg` | Higgsfield | the A0B workshop backdrop (§2g) |
 | `characters/npc/ratchet_resting.png` | Higgsfield, Seedream 4.5 | Ratchet powered down (§2g); fired against his own atlas row as reference |
+| `characters/npc/ratchet/work_1.png` | Higgsfield, Nano Banana Pro | Ratchet at work: hammering (§2t) |
+| `characters/npc/ratchet/work_2.png` | Higgsfield, Nano Banana Pro | Ratchet at work: folded over, turning the piece (§2t) |
+| `characters/npc/ratchet/tic.png` | Higgsfield, Nano Banana Pro | Ratchet's tic — the reach that never completed (§2t) |
+| `characters/npc/ratchet/notice.png` | Higgsfield, Nano Banana Pro | Ratchet looks up: she is here (§2t) |
+| `characters/npc/ratchet/talk_1.png` | Higgsfield, Nano Banana Pro | Ratchet talking, hand on his own helmet (§2t) |
+| `characters/npc/ratchet/talk_2.png` | Higgsfield, Nano Banana Pro | Ratchet talking, presenting the part (§2t) |
+| `characters/npc/ratchet/vent.png` | Higgsfield, Nano Banana Pro | Ratchet braced, blowing off heat (§2t) |
 | `characters/sage/*.png` | Higgsfield, Seedream 4.5 | the sage's six states (§2e); five matted with `remove_background`, all six one identity |
 | `characters/bat/*.png` | Higgsfield, Seedream 4.5 | the robot bat's five states (§2d); one plate anchored the design, four fired against it |
 | `backgrounds/cave_mouth.jpg` / `cave_exit.jpg`, `characters/gear/pillar.png` | Higgsfield, Seedream 4.5 | the crystal cave (§2c); the exit fired against the mouth so both sides are one rock |
@@ -78,7 +85,7 @@ plate can be traced back to the generation it came from.
 | `video/sword_forge.mp4` / `.webm` | Higgsfield, Seedance 2.5 | the forging cinematic (§1d), animated from a Seedream opening frame |
 | `characters/hero/*`, `characters/hzd_8yaw*.png` | Higgsfield | HZD-99's body and turnarounds (§1), all pinned to the canon reference element |
 | `fx/slash_[h,d,u,dn].png`, `characters/gear/jetpack*.png` | Higgsfield | the crystal slash light-sheets (§1b-i) and the back-jet gear (§1c) |
-| `characters/{kiln,rime,snare}/*.png`, `backgrounds/winch_house.png` | Higgsfield, Seedream 4.5 | the zone C/D/E enemies (§2l, §2n, §2p) and Servo's winch (§2j) |
+| `characters/{kiln,rime,snare}/*.png`, `backgrounds/winch_house.png` | Higgsfield, Seedream 4.5 | the zone C/D/E enemies (§2l, §2n, §2p) and Servo's winch (§2t) |
 | `backgrounds/{forge,carrel,hollow}_front.png` / `_interior.jpg` | Higgsfield, Seedream 4.5 | the Tinker's forge (§2k), the Archivist's carrel (§2m) and Lumen's hollow (§2o) |
 | `characters/npc_6yaw.png`, `characters/roster_8yaw.png` | Higgsfield | the NPC and creature turnaround sheets |
 | `characters/beasts/*`, `characters/flora/*`, `characters/gear/*` | Higgsfield | the animal line, the flora deck, the equipment plates |

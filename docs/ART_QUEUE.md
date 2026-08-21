@@ -2554,3 +2554,87 @@ one line — `Math.floor(stridePh * 4) % 8` instead of `Math.floor(stridePh) % 2
 And `tests/gait.cjs` already measures the result: that she stays on the ground,
 that her body rises and falls as she strides, and that she steps at a rate a
 body could produce.
+
+---
+
+### 2t. RATCHET IS A CHARACTER NOW — FIRED, WIRED, SHIPPED (2026-08-21)
+
+**The owner's brief, verbatim:** *"Refire it in a way that is unique. Give it
+gestures, moves, a tick or something since it was deactivated for a while. Give
+it, like, uncontrollable tick or something. Keeps happening while working or
+while talking. And maybe smoke coming out of it. I don't know. Give it a
+character. Think of it first. Then create it. Then create the artwork that has
+all the movements that allows for this artwork to move and make the movement
+freely. It can be working, busy working, doing something, creating something on
+the table, crafting something. I'm not sure. Just keep it busy until I talk to
+it."*
+
+**THE CHARACTER — RATCHET, THE ONE WHO NEVER FINISHED.** He was mid-reach for a
+tool when the Song fell. That instruction never completed, and it still fires:
+the arm goes out, the fingers open, there is nothing there. **That is the tic**
+— not a twitch bolted on for flavour, but the one thing that broke and was never
+repaired. His coolant regulator did not come back either, so he runs hot and
+blows it off through the canister rack already strapped to his back. **That is
+the smoke**, and it has a rule rather than a mood. And what he is building,
+endlessly, out of salvage that does not fit, is a replacement regulator — which
+is why he is always busy, always hot, never done, and why he wants her scrap.
+The existing shop hook was waiting for exactly this reason.
+
+**HE CHANGES CLASS.** ART_BIBLE §1 class D is one 6-yaw sheet and a breathe
+cycle: it can turn and it can bob, and that is the entire vocabulary. None of
+the above fits in it. He is a PLATE SET now — seven authored poses of one body,
+`assets/characters/npc/ratchet/`, and `drawTinker` in js/game.js chooses which
+and when. This also retires his row on `npc_6yaw.png`, which is the row the
+keyer punched 45.6% of the body out of (see THE KEYING FAULT above): the booth
+was showing the room through his chest, and it no longer is.
+
+| plate | the beat |
+|---|---|
+| `work_1` | hammering — hammer cocked, part held at the belly, head bowed |
+| `work_2` | folded double from the waist, turning the piece over near his shins |
+| `tic` | the spasm: arm bolt straight out, fingers splayed, head snapped away |
+| `notice` | straightened right out of the hunch, looking at her |
+| `talk_1` | weight on one hip, hand up on his own helmet |
+| `talk_2` | leaning in, presenting the part as the evidence in an argument |
+| `vent` | head back, shoulders up, arms swept back — bracing against the heat |
+
+**THE SMOKE IS CODE, DELIBERATELY.** art-prompts §0: additive glow handed to a
+generator comes back as a beautifully lit SOLID OBJECT. So every plate was fired
+with "no smoke, no steam, no vapour" in its negatives, and the vent is particles
+drawn over the plate from a point measured off his rack — which also lets it
+react to the beat instead of being baked into one frame of it. `sfx('vent')` is
+a new cue in the vocabulary: pressure out, then the rack ringing.
+
+#### TWO FAILURES, BOTH NOW ARITHMETIC — read this before firing the next set
+
+**1. The first firing did not animate.** All seven were fired against the anchor
+plate with *"same camera, same framing, CHANGE ONLY THE POSE"*, and an editing
+model told to preserve a composition preserves it — it moves as little as it can
+get away with. `notice` vs `work_1` came back at **0.992 silhouette IoU**: the
+same drawing with the hands moved. Twenty of the twenty-one pairs were over the
+§3.3 line. Every one of them looked fine on the contact sheet.
+
+*The fix:* fire from the **SEATED reference** — a pose the new plate cannot be
+an edit of — with the pose stated **first** and at length, and the framing lock
+removed entirely. Re-fired that way the worst pair is 0.73.
+
+**2. The second firing did not register.** The generator decides for itself how
+much of the frame to fill and varies it by a **third** between plates of the
+same character. A set is therefore not registered by construction and cannot be
+made so by asking for it. It is registered by MEASUREMENT, at load, in
+`plateFoot` (js/media.js): feet to the bottom of the mask, horizontal to the
+centroid of the mask's bottom slice — because an arm thrown out sideways moves
+the bounding box and must not drag the body with it — and **scale to silhouette
+AREA**.
+
+Area and not bounding box, and that distinction cost a round on its own: this
+character's box is topped by his canister rack, so a small body under a high
+rack measures the same as a big body under a low one. Every pose measured within
+2% by box height while one of them was visibly a third smaller. Silhouette area
+is what the eye is comparing. The payoff is that a re-fired plate now registers
+itself — no re-cropping, no per-key table.
+
+**`tests/tinker.cjs`** is both failures as measurements — every pose draws, no
+two share a silhouette, feet on the floor, one size across the set — and
+**`tools/tinkershot.cjs`** photographs the set the way the game draws it.
+Sources for all three firings are in `assets/source/ratchet/`.

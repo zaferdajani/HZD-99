@@ -922,6 +922,12 @@ function sfx(n) {
       tone(2050 * (0.94 + Math.random() * 0.12), 0.14, 'sawtooth', 0.035, 900);
       tone(150, 0.1, 'square', 0.05, 72);
       break;
+    case 'vent':      // Ratchet blowing off heat: pressure out, then the rack ringing
+      whoosh(0.5, 2200, 380, 0.055);
+      hiss(0.34, 0.05);
+      tone(74, 0.26, 'sine', 0.045, 38);
+      tone(320, 0.2, 'triangle', 0.012, 140, 0.28);
+      break;
     case 'bench': [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, 'sine', 0.05, null, i * 0.1)); break;
     case 'boss': case 'roar': tone(55, 0.9, 'sawtooth', 0.14, 30); tone(110, 0.7, 'square', 0.055, 45); hiss(0.6, 0.06); break;
     // each guardian wakes with its OWN voice — pitched to the machine it is

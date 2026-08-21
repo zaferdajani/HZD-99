@@ -238,6 +238,21 @@ const MEDIA_SRC = {
     boothFront: 'assets/backgrounds/booth_front.png',
     denInterior: 'assets/backgrounds/den_interior.jpg',
     ratchetResting: 'assets/characters/npc/ratchet_resting.png',
+    // THE TINKER AT WORK (owner, 2026-08-21: "give it a character... keep it
+    // busy until I talk to it"). Ratchet stops being a standing atlas row and
+    // becomes a PLATE SET: seven poses of one body, fired against
+    // ratchet_resting.png so it is the same unit that was slumped in the
+    // chair, and matted rather than keyed for the reason §2g already records.
+    // The loop, the interruption and the fault are all in here; the smoke is
+    // not, because additive light handed to a model comes back as a solid
+    // object (art-prompts §0) and the vent is drawn in code over the plate.
+    ratchetWork1: 'assets/characters/npc/ratchet/work_1.png',
+    ratchetWork2: 'assets/characters/npc/ratchet/work_2.png',
+    ratchetTic: 'assets/characters/npc/ratchet/tic.png',
+    ratchetNotice: 'assets/characters/npc/ratchet/notice.png',
+    ratchetTalk1: 'assets/characters/npc/ratchet/talk_1.png',
+    ratchetTalk2: 'assets/characters/npc/ratchet/talk_2.png',
+    ratchetVent: 'assets/characters/npc/ratchet/vent.png',
     // HER OWN BACK — generated from her live body (assets/source/ref/), the
     // first authored plates of the hero herself. Two stride frames armed, two
     // unarmed (the sword becomes a pickup — task #78), and the sword waiting
@@ -678,6 +693,113 @@ function drawPlateAnchored(c, key, cx, base, targetH, flip, pop, anchor) {
   if (flip) c.scale(-1, 1);
   const ay = anchor === 'mid' ? (box.y + box.h / 2) : (box.y + box.h);
   c.drawImage(im, -(box.x + box.w / 2) * dw, -ay * dh, dw, dh);
+  c.restore();
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// A PLATE SET IS NOT A COLLECTION OF PLATES.
+//
+// drawPlateAnchored normalises every key to the same drawn HEIGHT. That is
+// right for unrelated art and exactly wrong for several poses of ONE body: the
+// hunched frame gets scaled up until it matches the standing one, and the
+// character PUMPS between sizes every time the loop cycles. art-prompts §3
+// names this as the worst of the aspect behaviours for a reason — a boss that
+// changes size between frames reads as broken in a way that no proportion
+// drift does.
+//
+// So a set shares ONE scale. The frames come off one camera at one distance,
+// so the FRAME is the scale, and whatever the model drew inside it is the
+// relative size it meant. Each plate then anchors on its OWN FEET:
+//
+//   - the floor line is the bottom of the alpha mask, not the bottom of the
+//     frame, so a crop that leaves different margin does not float him;
+//   - the horizontal is the centroid of the mask's bottom slice, NOT the
+//     centre of the bounding box, because an arm thrown out sideways — which
+//     is the whole point of the tic plate — moves the box a long way and must
+//     not drag the body with it.
+//
+// And the scale is derived from SILHOUETTE AREA, not from the frame and not
+// from the bounding box. Two attempts got this wrong first. The frame is not
+// the scale, because the generator decides for itself how much of the frame to
+// fill and varies it by a third between plates of the same character. The
+// bounding box is not the scale either, and that one is worth remembering:
+// every pose measured within 2% by box height while one of them was visibly a
+// third smaller, because this character's box is topped by his canister rack —
+// a small body under a high rack measures the same as a big body under a low
+// one. Area is what the eye compares. Folding a body over does cost some area
+// to self-occlusion, so a crouch comes out a few percent large; that is the
+// residual, and it is a tenth of what it replaced.
+//
+// The payoff is that a re-fired plate registers itself. Nothing has to be
+// re-cropped, no per-key table has to be maintained, and the next person to
+// replace one of these does not have to know any of this.
+//
+// Measured once per key and cached; the mask is read at 1/8 scale like
+// plateBox, which is plenty for an anchor and costs nothing.
+const PLATE_FOOT = {};
+function plateFoot(key) {
+  if (PLATE_FOOT[key]) return PLATE_FOOT[key];
+  const im = MEDIA_RAW[key];
+  if (!im || !im.naturalWidth) return null;
+  try {
+    const S = 8;
+    const W = Math.max(1, Math.round(im.naturalWidth / S));
+    const H = Math.max(1, Math.round(im.naturalHeight / S));
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const x = cv.getContext('2d', { willReadFrequently: true });
+    x.drawImage(im, 0, 0, W, H);
+    const d = x.getImageData(0, 0, W, H).data;
+    let minY = H, maxY = -1;
+    for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) {
+      if (d[(y * W + xx) * 4 + 3] > 24) { if (y < minY) minY = y; if (y > maxY) maxY = y; }
+    }
+    if (maxY < 0) return null;                          // nothing opaque yet
+    // the feet: the bottom tenth of the body, never less than two rows
+    const band = Math.max(2, Math.round((maxY - minY + 1) * 0.10));
+    let sx = 0, n = 0;
+    for (let y = Math.max(minY, maxY - band + 1); y <= maxY; y++)
+      for (let xx = 0; xx < W; xx++) if (d[(y * W + xx) * 4 + 3] > 24) { sx += xx; n++; }
+    let solid = 0;
+    for (let i = 0; i < W * H; i++) if (d[i * 4 + 3] > 24) solid++;
+    PLATE_FOOT[key] = {
+      cx: (n ? sx / n : W / 2) / W,
+      y: (maxY + 1) / H,
+      area: solid / (W * H),                            // the scale landmark
+    };
+  } catch (e) { PLATE_FOOT[key] = { cx: 0.5, y: 1, area: 0 }; }  // tainted
+  return PLATE_FOOT[key];
+}
+
+// Draw one plate of a set. `frameH` is the drawn frame height that puts the
+// REFERENCE plate at the size the room wants; every other key in the set is
+// then scaled so its silhouette covers the same area as the reference's, which
+// is what keeps them one character rather than one height.
+function drawSetPlate(c, key, cx, base, frameH, flip, refKey) {
+  mediaFetch(key);
+  // RAW, NOT softArt. softArt exists to feather a HARD key — a cut-out whose
+  // every pixel is either fully opaque or fully gone, with a halo of the old
+  // background around the rim. These plates were MATTED by the generator, so
+  // the alpha is already soft and the pass buys an edge nobody can see. What
+  // it costs is a full-resolution scratch canvas per key, and a set is seven
+  // of them: 29 MB of canvas on a phone for a cosmetic rim.
+  const im = MEDIA_RAW[key];
+  if (!im || !im.naturalWidth) return false;
+  const ft = plateFoot(key);
+  if (!ft) return false;
+  let k = 1;
+  if (refKey && refKey !== key) {
+    const rf = plateFoot(refKey);
+    // no reference yet is not a reason to draw nothing — draw him unregistered
+    // for the frame or two before it lands, exactly as every other plate here
+    // degrades while its art is in flight
+    if (rf && rf.area > 0 && ft.area > 0) k = Math.sqrt(rf.area / ft.area);
+  }
+  const dh = frameH * k, dw = dh * (im.naturalWidth / im.naturalHeight);
+  c.save();
+  c.translate(cx, base);
+  if (flip) c.scale(-1, 1);
+  c.drawImage(im, -ft.cx * dw, -ft.y * dh, dw, dh);
   c.restore();
   return true;
 }
