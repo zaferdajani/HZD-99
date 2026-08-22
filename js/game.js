@@ -334,6 +334,110 @@ function tinkerRig(s) {
   return s._tk;
 }
 // ---------------------------------------------------------------------------
+// AND THE REST OF THE FOLK HAVE JOBS TOO (owner, 2026-08-22, on Ratchet: "some
+// work that does not look repeated... doing something instead").
+//
+// The same complaint applies to every other machine-person in the game, and
+// they had it worse: Ratchet was at least looping, they were a standing
+// turnaround cell with a 1.8 Hz breath on it. Furniture that says a line.
+//
+// They have more vocabulary than anyone used. The turntable is SIX authored
+// angles, `drawAtlas` cross-fades between the two nearest, and facing only ever
+// asks for 0..4 — so column 5, the one where the body is turned away into its
+// own work, has never been drawn in this game. Its own comment says so: "a
+// turntable renderer that cannot be asked for a specific angle is a turntable
+// renderer with a hole in it."
+//
+// So each of them gets a JOB in the same shape as the tinker's: a short list of
+// beats, each a place to be looking and a spread of how long to look there,
+// with the TURN BETWEEN THEM EASED so the turn is itself the motion. The order
+// is walked with a skip, the holds are re-rolled every beat, and the arc is
+// nobody's multiple of anybody else's — so no two of them fall into step, which
+// is the failure mode a shared idle always has.
+//
+// It stops the moment she is near or talking: then they face her, exactly as
+// before. Turning your back on someone who is standing in front of you is worse
+// than standing still, and being interrupted at work is the read that made the
+// tinker's den feel like a room somebody lives in.
+const NPC_JOB = {
+  // Old Servo runs the winding house: he is turned INTO the winch most of the
+  // time, and what he turns back for is to look at what came off it
+  servo: [{ col: 5, t: [3.0, 5.5] }, { col: 1, t: [1.6, 2.8] },
+          { col: 4, t: [2.2, 4.0] }, { col: 0, t: [1.2, 2.2] }],
+  // the Oracle hangs from her cables in front of a wall of dead monitors. She
+  // does not work; she WATCHES, and the beats are which screen still has
+  // something on it. Long holds — she is patient in a way the others are not.
+  mono:  [{ col: 2, t: [3.5, 6.5] }, { col: 4, t: [3.0, 5.0] },
+          { col: 1, t: [2.5, 4.5] }],
+  // Patch-7 at the quench: quick, fussy, always turning between the fire and
+  // the bench. The shortest holds of anyone here.
+  patch: [{ col: 5, t: [1.4, 2.6] }, { col: 2, t: [0.9, 1.8] },
+          { col: 4, t: [1.3, 2.4] }, { col: 0, t: [0.8, 1.6] }],
+  // the Nymph drifts. Her beats are barely a job at all — she turns the way
+  // something growing turns, slowly and without a reason you can see.
+  lumen: [{ col: 1, t: [4.0, 7.0] }, { col: 3, t: [3.5, 6.0] },
+          { col: 5, t: [3.0, 5.5] }],
+  // the Sage is the still one, and stillness has to be AUTHORED or it reads as a
+  // bug. The first pass gave him two angles one step apart and he measured as
+  // frozen — which is the difference between a person being still and a picture
+  // being still. A person at rest shifts: three angles, long holds, and one of
+  // them further round than the others so the shift is occasionally visible.
+  sage:  [{ col: 2, t: [6.0, 10.0] }, { col: 3, t: [5.0, 9.0] }, { col: 1, t: [4.0, 7.5] }],
+  // Ratchet AT THE BOOTH — not in the den, where drawTinker owns him. A
+  // shopkeeper turns to his stock and back to the road.
+  ratchet: [{ col: 0, t: [2.0, 3.6] }, { col: 5, t: [2.4, 4.2] },
+            { col: 1, t: [1.6, 3.0] }],
+};
+// She is standing over them: the same radius the tinker uses, so the whole cast
+// reacts to being approached on one rule rather than five.
+function nearNpc(s) {
+  return !!(player && Math.abs((player.x + player.w / 2) - (s.x + s.w / 2)) < 140);
+}
+// Per-body wall clock. The draw path has no dt of its own, and this is
+// presentation, so it takes one from the frame — clamped, because a tabbed-out
+// page must not hand it four seconds and spin the whole cast round.
+function npcDt(s) {
+  const now = performance.now() / 1000;
+  const dt = s._jt ? Math.min(0.1, now - s._jt) : 0;
+  s._jt = now;
+  return dt;
+}
+// how fast a body turns, in authored columns per second. Slow enough to be a
+// turn and not a cut; the cross-fade in drawAtlas does the rest.
+const NPC_TURN = 1.6;
+function npcJobCol(s, dt) {
+  const list = NPC_JOB[s.extra];
+  if (!list) return null;
+  let j = s._job;
+  if (!j) {
+    // start each of them on a different beat and a different part of it, so a
+    // room with two people in it does not have them moving together
+    const i = Math.floor(rnd(0, list.length));
+    j = s._job = { i, t: rnd(list[i].t[0], list[i].t[1]) * rnd(0.2, 1), col: list[i].col };
+  }
+  j.t -= dt;
+  if (j.t <= 0) {
+    // walk the list with an occasional skip: a fixed cycle of four beats is a
+    // four-beat loop, which is the thing this exists to not be
+    j.i = (j.i + (chance(0.28) ? 2 : 1)) % list.length;
+    const b = list[j.i];
+    j.t = rnd(b.t[0], b.t[1]);
+    // what he decided to do and for how long — tests/folk.cjs reads the BEATS,
+    // because a body holding one angle for eight seconds autocorrelates at 89%
+    // by standing still, and standing still is not a loop
+    j.beat = b.col + '@' + j.t.toFixed(1);
+    j.beats = (j.beats || 0) + 1;
+  }
+  const want = list[j.i].col;
+  // ease toward the beat's angle rather than snapping to it — the TURN is the
+  // motion, and on a six-angle turntable it is most of the motion available
+  const d = want - j.col;
+  const step = NPC_TURN * dt;
+  j.col += Math.abs(d) <= step ? d : Math.sign(d) * step;
+  return j.col;
+}
+
+// ---------------------------------------------------------------------------
 // THE TASK, NOT THE LOOP (owner, 2026-08-22: "the loop where I see the NPC
 // working is somewhat short... make it not repeat, doing something instead of
 // actually naturally doing something").
@@ -8705,6 +8809,12 @@ function drawStatics(P) {
       // It replaces the atlas EVERYWHERE he is awake, not only in his den:
       // his row on npc_6yaw is the one the keyer punched 45.6% of the body
       // out of, so the booth was showing the room through his chest.
+      // THE JOB, for everyone the tinker's renderer does not own — see NPC_JOB.
+      // It runs only while she is not standing over them and not talking, and
+      // it drives the turntable ANGLE, which is the one piece of vocabulary
+      // these bodies have that nothing was using.
+      const npcBusy = live && !talking && !nearNpc(s);
+      const jobCol = npcBusy ? npcJobCol(s, npcDt(s)) : (s._job = null, null);
       const sheetDrew = plateDrew || (live && s.extra === 'ratchet' && drawTinker(c, s, talking)) ||
         (!(typeof isHero === 'function' && isHero()) &&
         drawAtlas(c, s.extra, fdir,
@@ -8713,6 +8823,7 @@ function drawStatics(P) {
           // the Oracle hangs from its cables and has no feet to stand on
           mode: s.extra === 'mono' ? 'sway' : 'breathe',
           grounded: s.extra !== 'mono',
+          col: jobCol,
         }));
       c.save(); c.translate(s.x + s.w / 2, s.y + s.h + bob2 * 0.4);
       if (fdir < 0) c.scale(-1, 1);  // face the cat (or the bench — see fdir)

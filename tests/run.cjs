@@ -72,6 +72,7 @@ const SUITE = [
   ['gait',      'she runs ON the ground: no bouncing, no falling plate mid-stride'],
   ['motion',    'the fired guardian plates are on screen, not just in the manifest'],
   ['tinker',    "Ratchet's plate set is seven poses, not one picture seven times"],
+  ['folk',      'the machine folk have jobs, and no two of them share a beat'],
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],
   ['preload',   'the art for the rooms she can reach is fetched before she reaches them'],
