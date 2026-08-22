@@ -319,7 +319,10 @@ const TINKER_HOLD = {
 };
 function tinkerRig(s) {
   if (!s._tk) {
-    s._tk = { pose: 'work1', t: 0.6, last: 0, tic: rnd(3, 7), vent: rnd(9, 16), blew: false };
+    s._tk = { pose: 'work1', t: 0.6, last: 0, tic: rnd(3, 7), vent: rnd(9, 16), blew: false,
+              // the task machine — see tinkerTask()
+              job: 'shape', jt: rnd(5, 8), ph: rnd(0, 12),
+              play: 0, hold: 0, fps: 10, dir: 1 };
     // his den is the only room that plays the whole set; at the booth he is
     // standing and talking, so the three work plates are never asked for and
     // must not be fetched.
@@ -330,6 +333,82 @@ function tinkerRig(s) {
   }
   return s._tk;
 }
+// ---------------------------------------------------------------------------
+// THE TASK, NOT THE LOOP (owner, 2026-08-22: "the loop where I see the NPC
+// working is somewhat short... make it not repeat, doing something instead of
+// actually naturally doing something").
+//
+// He was right and the number says why: twelve cells at a fixed 10 fps is a
+// 1.2-SECOND CYCLE, played continuously, forever. Nothing about that is a
+// craftsman — it is a spinning gear. And the fix is not more frames, because
+// any fixed-rate cycle of any length eventually reads as a cycle; a 3-second
+// loop is a loop you notice four seconds later instead of two.
+//
+// What stops reading as a loop is that a person at a bench is not performing a
+// motion, they are DOING A JOB, and a job has shape:
+//
+//   SHAPE   he works the part — bursts of strokes, 2 to 5 at a time, then a
+//           beat with the hammer up while he looks at what he did
+//   CHECK   he folds over it and turns it in his hands (the work_2 plate, a
+//           genuinely different silhouette, held — an ACT wants a held frame)
+//   FIT     he offers it up to the rack — slower, fewer strokes, longer pauses
+//   REJECT  it does not fit. He goes still. Then he runs hot, or he starts again
+//
+// ...and then he starts over, which is his whole character (§2t): he is building
+// a replacement regulator out of salvage that does not fit, so the job is MEANT
+// to fail and restart. The loop the player sees is the story.
+//
+// FIVE THINGS BREAK THE PERIOD, and they compound:
+//   1. BURSTS, not a continuous cycle. The single loudest tell is a motion that
+//      never stops; irregular pauses destroy the beat by themselves.
+//   2. TEMPO PER BURST. 8-13 fps while shaping, 5-7 while fitting. The eye
+//      reads cadence long before it reads pose, and a fixed rate is metronomic.
+//   3. THE PHASE NEVER RESETS and each burst starts wherever the last one
+//      stopped, so a given cell never lands on the same beat twice.
+//   4. PING-PONG. Some bursts run the strip forward and back — a stroke and a
+//      return — which also doubles what twelve cells can say.
+//   5. THE ARC IS 14-26 SECONDS and re-rolled every time, and the tic and the
+//      vent interrupt it on their own unrelated timers, so the compound period
+//      is not a period at all.
+//
+// Measured rather than asserted: tests/tinker.cjs autocorrelates the sequence of
+// frames he actually draws over half a minute and fails if any lag under five
+// seconds is a strong match — the same test grammar.cjs runs on tile repeats.
+const TINKER_JOB = {
+  //        how long the stage runs   fps range    burst length, in cells
+  shape:  { t: [4.5, 8.0],  fps: [8, 13], run: [14, 60], hold: [0.22, 0.70] },
+  fit:    { t: [2.5, 4.5],  fps: [5, 7],  run: [8, 22],  hold: [0.45, 1.10] },
+  check:  { t: [1.1, 2.1] },                       // a held plate, no strip
+  reject: { t: [0.5, 1.0] },                       // one frozen cell
+};
+// the order is fixed because a JOB has an order — what varies is how long each
+// stage lasts, how it is played, and whether the reject vents
+const TINKER_NEXT = { shape: 'check', check: 'fit', fit: 'reject', reject: 'shape' };
+function tinkerTask(r, dt) {
+  const R = (a) => rnd(a[0], a[1]);
+  r.jt -= dt;
+  if (r.jt <= 0) {
+    r.job = TINKER_NEXT[r.job] || 'shape';
+    r.jt = R(TINKER_JOB[r.job].t);
+    r.play = 0; r.hold = 0;                        // a new stage starts fresh
+    // the reject is where he runs hot: half the time it goes straight into the
+    // vent rather than waiting for the vent's own timer to come round
+    if (r.job === 'reject' && chance(0.5)) r.vent = 0;
+  }
+  const J = TINKER_JOB[r.job];
+  if (!J.fps) return;                              // check / reject hold a frame
+  if (r.hold > 0) { r.hold -= dt; return; }        // frozen mid-stroke
+  if (r.play <= 0) {                               // start a burst
+    r.play = R(J.run);
+    r.fps = R(J.fps);
+    r.dir = chance(0.35) ? -1 : 1;                 // some strokes run back
+  }
+  const step = r.fps * dt;
+  r.ph += step * r.dir;
+  r.play -= step;
+  if (r.play <= 0) r.hold = R(J.hold);             // ...and rest on this frame
+}
+
 // Returns true once it has drawn him — false means the plates are not here yet
 // and the caller should fall through to the atlas, exactly as every other
 // authored renderer in this file degrades.
@@ -346,9 +425,9 @@ function drawTinker(c, s, talking) {
   // interrupting somebody rather than approaching a shop fixture.
   const working = inDen && !talking && !near;
   r.t -= dt; r.tic -= dt;
-  // the work loop's own clock, and it only runs while he is working: a loop
-  // that keeps counting behind a tic comes back mid-swing
-  if (working) r.ph = (r.ph || 0) + dt;
+  // the job's own clock, and it only runs while he is working: a task that
+  // keeps advancing behind a tic comes back mid-stroke in the wrong stage
+  if (working) tinkerTask(r, dt);
   if (working) r.vent -= dt;                             // he only cooks while he works
   const locked = r.pose === 'tic' || r.pose === 'vent';  // these two run to the end
   if (locked) {
@@ -359,7 +438,7 @@ function drawTinker(c, s, talking) {
     r.pose = 'vent'; r.t = TINKER_HOLD.vent; r.vent = rnd(14, 24); r.blew = false;
   } else if (r.t <= 0) {
     if (talking) r.pose = (r.pose === 'talk1') ? 'talk2' : 'talk1';
-    else if (working) r.pose = (r.pose === 'work1') ? 'work2' : 'work1';
+    else if (working) r.pose = 'work1';   // the JOB decides what shows — see tinkerTask
     else r.pose = near ? 'notice' : 'talk1';             // at the booth, talk1 IS his standing idle
     r.t = TINKER_HOLD[r.pose];
   }
@@ -384,12 +463,26 @@ function drawTinker(c, s, talking) {
   // Falls back to the stills whenever the strip has not landed, which is the
   // same deal every other sheet in this file has.
   let drew = false;
-  if (r.pose === 'work1' || r.pose === 'work2') {
-    const CELLS = 12, FPS = 10;
-    drew = drawStripCell(c, 'ratchetLoop', Math.floor((r.ph || 0) * FPS), CELLS,
-                         cx, base, s.h * 2.6, face < 0);
+  if (working && (r.pose === 'work1' || r.pose === 'work2')) {
+    // CHECK is the one stage that is a PLATE: he folds over the piece and turns
+    // it, which is a different silhouette rather than a different frame of the
+    // same swing, and an act wants a held frame (§3.3 is the same law).
+    if (r.job === 'check') {
+      drew = drawSetPlate(c, TINKER_PLATE.work2, cx, base, frameH, face < 0, 'ratchetWork1');
+      if (drew) G.tinkerFrame = 'check';
+    }
+    if (!drew) {
+      const cell = ((Math.floor(r.ph || 0) % 12) + 12) % 12;
+      drew = drawStripCell(c, 'ratchetLoop', cell, 12, cx, base, s.h * 2.6, face < 0);
+      // what he actually drew, for tests/tinker.cjs — "it does not repeat" is
+      // only a claim if the frames it draws can be read from outside
+      if (drew) G.tinkerFrame = r.job + ':' + cell;
+    }
   }
-  if (!drew) drew = drawSetPlate(c, TINKER_PLATE[r.pose], cx, base, frameH, face < 0, 'ratchetWork1');
+  if (!drew) {
+    drew = drawSetPlate(c, TINKER_PLATE[r.pose], cx, base, frameH, face < 0, 'ratchetWork1');
+    if (drew) G.tinkerFrame = r.pose;
+  }
   if (!drew) return false;
   // THE STACK, in the frame he was just drawn at: up over the far shoulder.
   // Measured off the plate rather than guessed — the rack tops out at about

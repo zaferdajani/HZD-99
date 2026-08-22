@@ -2700,3 +2700,48 @@ are not parallel, no course runs the full width. NEGATIVE on every one: no
 objects, no furniture, no characters, no perspective, no vignette, no text, no
 watermark, no strong directional light, no shadows cast by anything outside
 the frame.
+
+---
+
+### 2v. RATCHET'S OTHER ACTIONS ✱ FIRE ON REBIND (2026-08-22)
+
+**The owner:** *"the loop where I see the NPC working is somewhat short. I
+needed to do some work that does not look repeated... doing something instead
+of actually naturally doing something."*
+
+**The CODE half shipped in the same commit as this entry** and it is the half
+that was actually broken: twelve cells at a fixed 10 fps is a 1.2-second cycle
+played forever, and no length of cycle fixes that — a 3-second loop is a loop
+you notice four seconds later. It is now a JOB with stages (shape → check →
+fit → reject, 14-26s, re-rolled every time), played in bursts of 2-5 strokes at
+a tempo that varies per burst, with holds between them, ping-pong on some
+strokes, and a phase that never resets. `tests/tinker.cjs` autocorrelates the
+frames he actually draws over thirty seconds: the strongest repeat inside five
+seconds now matches 24%, where a loop would sit near 100%.
+
+**What CODE cannot fix is the VOCABULARY.** Every stage is still played out of
+one twelve-cell strip of one hammer swing. Cadence makes it stop reading as a
+loop; it cannot make him do a second thing. Three more strips would, and they
+are what turns "he is animated" into "he is working":
+
+1. **work_reach** (12 cells) — he turns from the bench, reaches UP AND BACK to
+   a shelf out of frame, takes something, and brings it down to the bench. The
+   turn is the point: it is the only time his back changes angle.
+2. **work_wipe** (12 cells) — he sweeps the bench with the side of one hand,
+   twice, and shakes the swarf off his fingers. Short, low, lateral — the
+   opposite axis to the hammer.
+3. **work_set** (10 cells) — he sets the piece DOWN, straightens, and rolls the
+   shoulder that has been doing the work. This is the one that reads as fatigue
+   and it is the strongest of the three.
+
+All three: same body, same camera, same distance, same light as
+`assets/characters/npc/ratchet/work_loop.png`, cut as a horizontal strip of
+equal cells on a FLAT NEUTRAL MID-GREY FIELD, feet on the same line in every
+cell, first and last cell continuous with the neutral standing pose so the job
+machine can cut into and out of them. NEGATIVE: no bench, no shelf, no props
+beyond what is in his hands, no ground plane, no cast shadow, no smoke, no
+sparks, no text, no watermark.
+
+Wiring is one line each: add the key to `TINKER_STRIP` and the stage to
+`TINKER_JOB` / `TINKER_NEXT` in js/game.js. The machine already varies tempo,
+bursts and order, so a new action inherits all of that for free.

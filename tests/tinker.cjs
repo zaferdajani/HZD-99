@@ -106,11 +106,19 @@ const IOU_MAX = 0.86;
     // machine"). Sample its own phase and compare the frames to each other.
     const loop = [];
     {
+      // SHE STANDS BACK, because the work only runs when she is not over him —
+      // walking up is what makes him look up, and the spawn is inside that
+      // radius, so sampling there measures the `notice` plate six times. The
+      // PLAYER moves, not the shim: moving the shim moves where he is drawn,
+      // and the first attempt at this put him 900px off the right of the cell.
+      const pkeep = player.x; player.x = s.x + 4000;
       const shim = { x: 0, y: 0, w: s.w, h: s.h, extra: 'ratchet', room: 'A0B', t: 0, _tk: null };
       tinkerRig(shim);
       for (let f = 0; f < 6; f++) {
         q.clearRect(0, 0, W, H);
-        shim._tk.pose = 'work1'; shim._tk.t = 9; shim._tk.ph = f * 0.2;   // 12 cells at 10 fps
+        // `ph` counts CELLS now, not seconds — the job machine owns the tempo
+        // and it varies it, so there is no fps to multiply by any more
+        shim._tk.pose = 'work1'; shim._tk.t = 9; shim._tk.job = 'shape'; shim._tk.ph = f * 2;
         q.save(); q.translate(W / 2, BASE); q.scale(Z, Z); q.translate(-shim.w / 2, -shim.h);
         drawTinker(q, shim, false);
         q.restore();
@@ -122,6 +130,7 @@ const IOU_MAX = 0.86;
         }
         loop.push({ mask: m2, px: n2, foot: low - BASE });
       }
+      player.x = pkeep;
     }
     let loopWorst = 0, loopPairs = 0;
     for (let i = 0; i < loop.length; i++) for (let j = i + 1; j < loop.length; j++) {
@@ -172,7 +181,46 @@ const IOU_MAX = 0.86;
     drawTinker(q, vs, false);
     const puff2 = parts.length;
     parts.length = 0;
-    return { poses, missing, shot, iou, puff, puff2, loopBest, loopWorst, loopFoot, loopPx };
+
+    // ---- THE JOB DOES NOT REPEAT -------------------------------------------
+    // The loop checks above ask whether the strip MOVES. This asks the owner's
+    // actual question — whether it repeats — and it is the measurement
+    // grammar.cjs runs on tile repeats, pointed at time instead of space.
+    //
+    // Run him as the game runs him: working, undisturbed, 30 simulated seconds
+    // at 60 fps, recording the frame he draws each tick. drawTinker reads its
+    // own wall clock, so the clock is driven by hand here — deterministic, and
+    // it takes a second rather than half a minute.
+    const jkeep = player.x; player.x = s.x + 4000;      // she stands back — see above
+    const js = { x: 0, y: 0, w: s.w, h: s.h, extra: 'ratchet', room: 'A0B', t: 0, _tk: null };
+    tinkerRig(js);
+    const seq = [];
+    const realNow = performance.now;
+    let clock = 1000;
+    js._tk.last = clock;
+    performance.now = () => clock * 1000;
+    for (let f = 0; f < 1800; f++) {
+      clock += 1 / 60;
+      q.clearRect(0, 0, W, H);
+      G.tinkerFrame = '';
+      drawTinker(q, js, false);
+      seq.push(G.tinkerFrame || '-');
+    }
+    performance.now = realNow;
+    player.x = jkeep;
+    parts.length = 0;
+    const distinct = new Set(seq).size;
+    // normalised autocorrelation, lags from a fifth of a second to five
+    // seconds: what fraction of frames match themselves that far back
+    let bestLag = 0, bestScore = 0;
+    for (let lag = 12; lag <= 300; lag++) {
+      let hit = 0, n = 0;
+      for (let i = lag; i < seq.length; i++) { n++; if (seq[i] === seq[i - lag]) hit++; }
+      const sc = n ? hit / n : 0;
+      if (sc > bestScore) { bestScore = sc; bestLag = lag; }
+    }
+    return { poses, missing, shot, iou, puff, puff2, loopBest, loopWorst, loopFoot, loopPx,
+             seqLen: seq.length, distinct, bestLag, bestScore };
   });
 
   if (r.err) { console.log('  FAIL ' + r.err); process.exit(1); }
@@ -227,6 +275,16 @@ const IOU_MAX = 0.86;
   check('he is the same size in every pose', (hi - lo) / hi <= 0.18,
         small + ' ' + lo + 'px .. ' + big + ' ' + hi + 'px  spread ' +
         (((hi - lo) / hi) * 100).toFixed(1) + '%');
+
+  // the owner's report: "the loop where I see the NPC working is somewhat
+  // short... make it not repeat". A fixed-rate cycle of any length shows a
+  // sharp peak at its period; a job with stages, bursts and varying tempo has
+  // no period to find.
+  check('he draws a long, varied sequence', r.seqLen > 900 && r.distinct >= 10,
+        r.seqLen + ' frames, ' + r.distinct + ' distinct');
+  check('no short period — he is working, not looping', r.bestScore < 0.55,
+        'strongest repeat at ' + (r.bestLag / 60).toFixed(2) + 's matches ' +
+        (r.bestScore * 100).toFixed(0) + '% (max 55%)');
 
   check('the vent actually smokes', r.puff >= 8, r.puff + ' particles');
   check('...once, not every frame it holds', r.puff2 === r.puff,
