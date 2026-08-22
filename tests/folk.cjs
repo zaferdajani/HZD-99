@@ -101,7 +101,26 @@ const check = (name, ok, detail) => {
       const sc = hit / A.length;
       if (sc > pairWorst) { pairWorst = sc; pairName = who[i] + '/' + who[j]; }
     }
-    return { who, out, pairWorst, pairName, yielded };
+    // how long until each body with a strip first asks for it, and how far the
+    // strip gets while it plays
+    const loops = Object.keys(NPC_LOOP).filter(k => NPC_JOB[k]);
+    const reached = {}, phase = {};
+    for (const k of loops) {
+      const sh = { x: 0, extra: k, w: 24 };
+      let t = 0, ph0 = null;
+      player.x = 5000;
+      for (let f = 0; f < 60 * 120 && reached[k] === undefined; f++) {
+        npcJobCol(sh, 1 / 60); t += 1 / 60;
+        if (sh._job.work) reached[k] = t;
+      }
+      if (reached[k] !== undefined) {
+        ph0 = sh._job.ph || 0;
+        for (let f = 0; f < 60 * 3; f++) npcJobCol(sh, 1 / 60);
+        phase[k] = Math.abs((sh._job.ph || 0) - ph0);
+      }
+      player.x = pkeep;
+    }
+    return { who, out, pairWorst, pairName, yielded, loops, reached, phase };
   });
 
   const still = r.who.filter(k => r.out[k].span < 15 || r.out[k].distinct < 12);
@@ -120,6 +139,21 @@ const check = (name, ok, detail) => {
         r.pairName + ' agree ' + (r.pairWorst * 100).toFixed(0) + '% of frames (max 50%)');
 
   check('the job yields when she walks up', r.yielded === 'ok', r.yielded);
+
+  // THE STRIP IS REACHABLE. tests/npcstrip.cjs measures the five work strips as
+  // SHEETS — every cell draws a body, no two cells are the same, feet aligned,
+  // no pumping — and every one of those was true on the commit where nothing in
+  // the game drew them at all. media.js said "wired through NPC_LOOP in
+  // js/game.js" and there was no NPC_LOOP. Good art, declared, never on screen:
+  // the exact failure ART_BIBLE §7 exists for, and a sheet test cannot see it.
+  // So this asks the other half — does the behaviour ever CALL for the strip.
+  const unreachable = r.loops.filter(k => !r.reached[k]);
+  check('every work strip is reachable from the job', unreachable.length === 0,
+        unreachable.length ? 'never played: ' + unreachable.join(' ')
+                           : r.loops.map(k => k + ' after ' + r.reached[k].toFixed(1) + 's').join('  '));
+  const frozen = r.loops.filter(k => (r.phase[k] || 0) < 6);
+  check('...and the strip advances while it plays', frozen.length === 0,
+        r.loops.map(k => k + ' ' + (r.phase[k] || 0).toFixed(0) + ' cells').join('  '));
 
   if (errs.length) check('no page errors', false, errs[0]);
   await browser.close();
