@@ -16,6 +16,175 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 1g. THE WORLD, DRAWN — 40 plates restyled, and the RULE that made it safe ✅ SHIPPED 2026-08-22 (art session)
+
+**The owner's standing line for this pass:** *"the only change in the branch is
+the artwork for the characters as drawings. also, the background should follow
+those drawings alongside the floor and the walls and the terrain."* The cast,
+the rock, the roofs, the strata and the backdrops went first. These forty were
+what was left in 3D — the depth planes she stands on, the cave mouths, the
+kingdom gates, the interiors, the NPCs' own places and the six guardian lairs.
+
+Every one is **image-to-image from the plate already on disk**. Nothing here is
+a new composition; the identity lock in §1 is not reopened.
+
+### THE FINDING THAT SHOULD OUTLIVE THIS ENTRY
+
+Told, in the loudest terms the prompt could carry, that *the black margins are
+emptiness and must stay black*, the generator painted into them anyway.
+Measured with the new `tools/alphacmp.cjs` on the eight terrain depth planes:
+**seven of eight came back with a different silhouette**, and `edge_c` went
+from 39% alpha coverage to 86% because it had filled the empty half of the
+frame with a lava cavern and handed back a rectangle. A rectangle dropped into
+a room does not read as bad art; it reads as a rendering bug.
+
+Saying it louder is not the fix — that is the standing lesson of this pipeline
+(NAMING A THING FORBIDS NOTHING). The fix is to stop asking:
+
+> **`tools/replate.cjs`: RGB comes from the restyle, ALPHA comes from the plate
+> on disk.**
+
+which makes "restyle only" true by construction instead of true by inspection.
+Alignment is arithmetic — the same 18% square padding `tools/plateprep.cjs`
+applies, inverted — so it does not depend on the generator's framing either.
+All forty plates then measured at **100% silhouette overlap** with what they
+replaced. Every anchor, occluder rect and exit alignment in the game is
+untouched, which is why this pass needed no code change at all.
+
+### WHAT WENT IN
+
+| group | plates |
+|---|---|
+| terrain depth planes | `edge_a` `edge_c` `fore_a` `fore_b` `fore_c` `fore_d` `fore_e` `fore_x` |
+| cave mouths | `cave_mouth` `cave_exit` `cave_mouth_a`…`cave_mouth_e` |
+| kingdom gates | `gate_city` `gate_foundry` `gate_archives` `gate_conduits` `gate_nest` `gate_deep` |
+| interiors | `den_interior` `oracle_interior` `forge_interior` `carrel_interior` `hollow_interior` |
+| the NPCs' places | `booth_front` `oracle_booth` `forge_front` `forge_table` `carrel_front` `hollow_front` `winch_house` |
+| guardian lairs | `lair_den` `lair_nest` `lair_forge` `lair_peak` `lair_vault` `lair_cradle` |
+| the monument | `mindnode_obelisk` |
+
+**They came back DARKER, which the grammar wanted anyway.** `tools/platemeas.cjs`
+measured every backdrop against the plate it replaces: mean luminance fell on
+17 of 18 and blown highlights went from 33.4% of the frame to 0.0% on
+`cave_mouth_d`, 9.0% to 0.6% on `carrel_interior`. Chroma fell too. §9.1 and
+§9.4 are further from their ceilings than before this pass, not nearer.
+
+**One refusal, and it was the owner's kind of refusal:** `cave_mouth_c` came
+back with a small human figure standing in the cave opening — a person, in a
+machine kingdom, in a plate the player walks up to. Re-fired with the picture
+named as empty of life, and the second take is what shipped.
+
+**The 3D masters are not archived to `assets/source/`** and deliberately so:
+git already holds the exact bytes at `e48e2fd`. Duplicating six megabytes into
+the tree to say "we kept the master" is weight for a claim git already makes.
+`git show e48e2fd:assets/backgrounds/<name>` is the recovery path.
+
+## 1h. FIVE WORK STRIPS, FIRED AND ARCHIVED — ⚠ THE CODE SESSION OWES THEM A DRAW SITE (art session, 2026-08-22)
+
+**The art is done and shipped. It is not drawn yet, and that is deliberate —
+read this before wiring anything.**
+
+Five twelve-frame strips, cut from generated clips of each machine-person doing
+its own job: the warden works its console, the archivist draws tape through its
+hands, the tinker welds, the orrery turns, the nymph breathes light.
+
+    assets/characters/npc/{servo,mono,patch,sage,lumen}/work_loop.png
+    manifest keys: servoLoop monoLoop patchLoop sageLoop lumenLoop
+
+`tests/npcstrip.cjs` measures all sixty cells through `drawStripCell` — every
+cell draws a body, no two cells are the same cell, the feet hold to ±1px, and
+the body does not pump. Green.
+
+### WHY THEY ARE NOT WIRED, and it is the protocol working rather than failing
+
+This session fired these against the owner's *"npc movements looks as a its a
+slide show gif"*. **The code session was solving the same complaint at the same
+time, and got further:** `NPC_JOB` gives all six bodies a job on the six-angle
+turntable with eased turns, and `TINKER_JOB` / `tinkerTask` plays Ratchet's
+strip in bursts with varying tempo, ping-pong and a phase that never resets —
+because the owner had already come back with *"the loop where I see the NPC
+working is somewhat short... make it not repeat"*, which is a verdict on any
+fixed-rate cycle, including the one this session had written.
+
+So the art session's own `drawNPCLoop` was **dropped on the rebase, on purpose.**
+A flat 12-cell strip at a fixed 10 fps is the thing the owner has already
+rejected once, and `NPC_JOB` and the task machine are game logic — which
+CLAUDE.md puts with the code session, not this one. Two draw paths competing
+for the same five bodies is worse than one good one.
+
+### THE WIRING NOTE — what to do with them
+
+The two systems are on **different axes and both are wanted**: `NPC_JOB` says
+where a body is LOOKING, the strip says what its hands are DOING. A turnaround
+cell cannot show an arm welding, and a flat strip cannot turn away into its
+work. The composition that fits what is already built:
+
+1. Play each strip through the **same machine `tinkerTask` already is** —
+   bursts, per-burst tempo, ping-pong, phase that carries across pauses. Do not
+   give them a fixed rate; that is the rejected version.
+2. Let the strip draw on the beats where the body is **turned into its job**
+   and let `drawAtlas` with the eased `jobCol` carry the beats where it looks
+   up and around. Ratchet's renderer is already exactly this shape: the loop on
+   the work beats, a held plate for the acts.
+3. **Facing is per character, and it is not `yawCol()`** — measured off the cut
+   strips, servo, patch, sage and lumen face frame-LEFT and mono faces RIGHT.
+   The archivist works its tape to the right, and a mirrored NPC works its
+   bench through its own back. Values as measured: `servo -1, mono +1,
+   patch -1, sage -1, lumen -1`.
+4. Scale is the atlas row's own `k` (`ATLAS.sub[name].k`), so the strip lands at
+   the height the still it replaces used to. Anchor is the bottom centre of the
+   cell — `tools/vidstrip.cjs` writes them that way and `drawStripCell` assumes
+   it, so no `plateFoot` is needed.
+5. Add **no procedural bob under them.** The clip already moves, and a bob under
+   real motion is the double-motion that made the guardians look like they were
+   floating.
+
+Until that lands the five draw exactly as they do today and nothing regresses —
+this is the same "the key is here, the draw site is coming" arrangement every
+other entry in this file has, inverted.
+
+### THE MEASUREMENT THAT SHOULD OUTLIVE THIS ENTRY
+
+**A BLACK SUBJECT CANNOT BE FIRED ON A BLACK FIELD.** The archivist's cable
+cloak and the tinker's coat came back at **luminance 2 — the same value as the
+empty corner of the frame.** There is no information in those pixels for any
+key to find, and the first cut of both was a hollow outline with the chest and
+legs punched out. No threshold recovers it, and neither does a flood fill.
+
+So `tools/vidstrip.cjs` now DETECTS the field instead of assuming it:
+
+- **black field** → flood fill from the border, so black in a fold, a hollow or
+  under an arm survives (the `tools/blackkey.cjs` lesson, ported);
+- **chroma field** → colour distance with a despill pass, because a chroma
+  screen separates a black coat from its background by HUE, which is exactly
+  the axis luminance threw away.
+
+Those two clips were re-fired on green and both came back whole. **Any future
+clip of a dark-costumed character is fired on green, not on black.**
+
+### NEW TOOLS THIS PASS
+
+| tool | what it settles |
+|---|---|
+| `tools/replate.cjs` | restyle in, plate's own alpha out — the geometry contract, enforced |
+| `tools/alphacmp.cjs` | did the silhouette survive? coverage + overlap, so nobody squints at a contact sheet |
+| `tools/platemeas.cjs` | luminance / chroma / blown-highlight drift against the plate being replaced |
+| `tools/insidemeas.cjs` | the same, measured INSIDE the silhouette only — catches a detailed band flattened to a solid shape |
+| `tools/npccut.cjs` | lifts one NPC cell off `npc_6yaw` onto black, square, as a generation source |
+| `tests/npcstrip.cjs` | all sixty cells of the five strips: they land, no two are the same, feet stay down, no pumping |
+
+**`tests/npcstrip.cjs` reported two false failures before it was right, and the
+reason is worth keeping.** It judged movement by SILHOUETTE overlap, the way
+§3.3 judges a guardian pose — and called the warden and the tinker static at
+98.6% identical. They are not: the warden sweeps an arm across a console it is
+already holding and irises a lens, the tinker tracks a torch along a seam.
+Almost all of that happens INSIDE an outline that barely changes. A pose IS an
+outline and is rightly measured as one; a work loop is not. It now measures
+mean luminance change over the pixels either frame covers — twelve copies of
+one cell score exactly 0, and the quietest real pair scores 1.8.
+
+---
+
 ## 1. HZD-99, REGENERATED — the full character, all angles, all moves ✱ FIRST
 
 **The ruling (owner, 2026-08-14):** the procedural body is visibly below the

@@ -260,6 +260,21 @@ const MEDIA_SRC = {
     // this same body working, cut and keyed by tools/vidstrip.cjs — one
     // image, bottom-aligned, so the feet never move between cells.
     ratchetLoop: 'assets/characters/npc/ratchet/work_loop.png',
+    // ...AND THE SAME TREATMENT FOR EVERYONE ELSE STANDING IN A ROOM. The
+    // trader was the first NPC the owner met and the first he called a slide
+    // show; the other five were WORSE, because they were not a slide show at
+    // all — they were ONE atlas cell with a procedural breathe on it, a
+    // statue that swelled. Each of these is twelve frames of that same
+    // machine doing its own job: the warden reads its console, the archivist
+    // draws tape through its hands, the tinker welds, the orrery turns, the
+    // nymph breathes light. Wired through NPC_LOOP in js/game.js, and lazy
+    // like everything else — the atlas covers the frames before the strip
+    // lands, exactly as it always did.
+    servoLoop: 'assets/characters/npc/servo/work_loop.png',
+    monoLoop: 'assets/characters/npc/mono/work_loop.png',
+    patchLoop: 'assets/characters/npc/patch/work_loop.png',
+    sageLoop: 'assets/characters/npc/sage/work_loop.png',
+    lumenLoop: 'assets/characters/npc/lumen/work_loop.png',
     // HER OWN BACK — generated from her live body (assets/source/ref/), the
     // first authored plates of the hero herself. Two stride frames armed, two
     // unarmed (the sword becomes a pickup — task #78), and the sword waiting
