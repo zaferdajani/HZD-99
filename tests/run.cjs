@@ -76,6 +76,7 @@ const SUITE = [
   ['rubble',    'the first tunnel is buried, it calls, and it takes the blade'],
   ['shopread',  'a structure she can enter is never the wall behind it'],
   ['cross',     'a room crossing is a move, not a cut'],
+  ['seam',      'a room boundary is a place she walks through, not a door'],
   ['meadow',    'the greenery keeps its colour all the way to the screen'],
   ['npcstrip',  'the five work strips are twelve frames of work, foot-aligned and steady'],
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],

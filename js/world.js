@@ -27,6 +27,34 @@ function frame(g) {
 function openL(g) { rect(g, 0, 11, 0, 14, '.'); }
 function openR(g) { const w = g[0].length; rect(g, w - 1, 11, w - 1, 14, '.'); }
 // ---------------------------------------------------------------------------
+// THE SEAM — a boundary she WALKS THROUGH, not a door she passes.
+//
+// openL/openR punch a four-tile hole in a full-height wall, so every
+// horizontal join in the game is a doorway with eleven tiles of rock over her
+// head. Measured across kingdom 1, every one of them reads the same:
+//
+//     ###########....##        A1|A2, A2|A10, A10|A3, A3|A4 — all of them
+//
+// The camera carries through a crossing now (tests/cross.cjs) and the room
+// under it keeps running — but it carries her through a DOOR, and two rooms
+// joined by a door are two rooms. That is the whole of the owner's report
+// (2026-08-23): "instead of one big room... it's actual world connected."
+//
+// A seam opens the standing space instead. The lid stays — row 0 is the
+// kingdom's roof and drawCeiling hangs over it on its own parallax, tiled
+// horizontally, with no relationship to this grid, so the roof runs across the
+// join by itself. The ground stays — the bottom two rows reach the edge
+// unbroken, which is what keeps void off the frame edge (tests/deadend.cjs).
+// Everything between them is simply gone, and what is left at the boundary is
+// no face at all: the only way to end a room without a right angle in it.
+//
+// BOTH SIDES MUST AGREE, and that is not a style rule. applyTransition keeps
+// player.y across an L/R crossing, so a row open on the side she leaves and
+// solid on the side she arrives puts her inside rock at head height.
+// tests/seam.cjs measures every horizontal exit in the game for exactly that.
+function seamL(g) { rect(g, 0, 1, 0, g.length - 3, '.'); }
+function seamR(g) { const w = g[0].length; rect(g, w - 1, 1, w - 1, g.length - 3, '.'); }
+// ---------------------------------------------------------------------------
 // THE CAVE SHAPE RULE (owner, 2026-08-15): "you can never find caves as
 // spheres or squares or perpendicular. It's always caves." So no cave room
 // is ever drawn with frame() and runway platforms. Every cave is CARVED:
@@ -78,9 +106,33 @@ function caveCarve(g, seedStr, o) {
   // where a door or an exit meets the room, the rock steps aside: a cleared
   // approach with a flat shelf, so arrivals land and departures climb out
   for (const side of (o.open || [])) {
+    // THE TUNNEL DOES NOT PINCH AT THE JOIN (o.mouth — the crystal cave opts
+    // in; every other network keeps the old four-tile approach until its own
+    // kingdom's session comes to it).
+    //
+    // The carve gives each column a cavity eight or ten tiles tall, and then
+    // this loop used to flatten the last five columns to a 4-row rectangle —
+    // so the one place the two rooms actually meet was the one place the rock
+    // came down to a ruled slot. That is a right angle standing exactly where
+    // the crossing shows it, and it is why a tunnel reads as a row of cells.
+    //
+    // The mouth height is derived from the SEAM'S OWN NAME instead, so both
+    // rooms compute the same number without either knowing about the other —
+    // 'CV1>CV2' is the same string read from CV1's right side and CV2's left.
+    // Matching is not cosmetic here: applyTransition keeps her y, so a mouth
+    // that is ten tiles tall on one side and four on the other lands a jumped
+    // crossing inside rock.
+    let top = 11;
+    if (o.mouth) {
+      const ex = (ROOMS[seedStr] && ROOMS[seedStr].exits) || {};
+      const seam = side === 'L' ? (ex.L || '?') + '>' + seedStr : seedStr + '>' + (ex.R || '?');
+      let q = 2166136261;
+      for (let i = 0; i < seam.length; i++) { q ^= seam.charCodeAt(i); q = (q * 16777619) >>> 0; }
+      top = 5 + (q % 4);                    // 5..8 — a mouth she can jump through
+    }
     const xs = side === 'L' ? [0, 1, 2, 3, 4] : [W - 1, W - 2, W - 3, W - 4, W - 5];
     for (const x of xs) {
-      for (let y = 11; y <= 14; y++) g[y][x] = '.';
+      for (let y = top; y <= 14; y++) g[y][x] = '.';
       if (x !== 0 && x !== W - 1) { g[15][x] = '.'; g[16] && (g[16][x] = '#'); }
     }
   }
@@ -167,7 +219,7 @@ const ROOMS = {
   W1: { zone: 'A', w: 32, h: 17, exits: { R: 'W2' },
     ents: [],                                 // nothing. That is the point.
     build(g) {
-      frame(g); openR(g);
+      frame(g); seamR(g);
       // a low shelf on the far wall so the room has a depth to read against,
       // and nothing to jump onto: this room teaches ONE verb
       hline(g, 14, 18, 12, '=');
@@ -181,7 +233,7 @@ const ROOMS = {
   W2: { zone: 'A', w: 40, h: 17, exits: { L: 'W1' },
     ents: [],
     build(g) {
-      frame(g); openL(g);
+      frame(g); seamL(g);
       // THE STEP. One tile, inside one jump, and nothing else — the gap that
       // used to sit at tile 22 was a hole in the road right in front of the
       // city gates, which is exactly where the ground should look most
@@ -227,7 +279,7 @@ const ROOMS = {
     // are the game's first real fight; that is a design call, not a wiring one.
     ents: [['crawler', 21, 15], ['riddle', 11, 15, 8]],
     build(g) {
-      frame(g); openR(g);
+      frame(g); seamR(g);
       rect(g, 16, 14, 18, 15, '#');       // the step she has to jump
       hline(g, 4, 7, 12, '=');            // a lit shelf, for looking at
       // (the second shelf at 27-30 stood exactly where the booth stands now)
@@ -260,7 +312,7 @@ const ROOMS = {
       // the way BACK to A0. Leaving the first room used to be permanent, which
       // quietly took the trader, the Mind Node and the tutorial's whole economy
       // out of the run the moment the player stepped right.
-      frame(g); openR(g); openL(g);
+      frame(g); seamR(g); seamL(g);
       hline(g, 5, 8, 12, '='); hline(g, 18, 21, 10, '=');
       // the climb into the gantries — the first thing in the game that is not
       // on the way to anywhere
@@ -326,7 +378,7 @@ const ROOMS = {
     // instead of asking the player to be in two places at once.
     ents: [['crawler', 20, 15], ['flier', 30, 7], ['guard', 46, 15], ['hopper', 52, 15], ['scrap', 8, 15, 8], ['scrap', 35, 11, 12]],
     build(g) {
-      frame(g); openL(g); openR(g);
+      frame(g); seamL(g); seamR(g);
       // spike pits
       hline(g, 24, 28, 15, '^'); rect(g, 24, 15, 28, 15, '^');
       hline(g, 40, 44, 15, '^');
@@ -349,7 +401,7 @@ const ROOMS = {
   A10: { zone: 'A', w: 34, h: 17, exits: { L: 'A2', R: 'A3' },
     ents: [['boss', 22, 15, 'alpha']],
     build(g) {
-      frame(g); openL(g); openR(g);
+      frame(g); seamL(g); seamR(g);
       // Two low shelves and nothing else. The Alpha's leap is the move the room
       // is built around, and a room full of geometry is a room where a
       // committed pounce lands on a corner instead of on the floor.
@@ -358,13 +410,13 @@ const ROOMS = {
   A3: { zone: 'A', w: 32, h: 17, exits: { L: 'A10', R: 'A4', T: 'B1' },
     ents: [['bench', 8, 15], ['npc', 14, 15, 'ratchet']],
     build(g) {
-      frame(g); openL(g); openR(g);
+      frame(g); seamL(g); seamR(g);
       hline(g, 18, 21, 12, '='); hline(g, 23, 26, 9, '='); hline(g, 19, 22, 6, '='); hline(g, 25, 28, 3, '=');
       rect(g, 25, 0, 28, 0, '.'); // ceiling opening to B1
     } },
   A4: { zone: 'A', w: 32, h: 17, exits: { L: 'A3' },
     ents: [['boss', 20, 15, 'glitch']],
-    build(g) { frame(g); openL(g); hline(g, 4, 7, 11, '='); hline(g, 22, 25, 11, '='); } },
+    build(g) { frame(g); seamL(g); hline(g, 4, 7, 11, '='); hline(g, 22, 25, 11, '='); } },
   A5: { zone: 'A', w: 32, h: 17, exits: { T: 'A2', B: 'A7' },
     ents: [['chest', 20, 15, 'magnet'], ['term', 25, 15, 1], ['riddle', 15, 15, 0], ['scrap', 5, 15, 30], ['scrap', 7, 15, 25], ['scrap', 17, 15, 20]],
     build(g) {
@@ -895,7 +947,7 @@ const ROOMS = {
     ents: [['crawler', 26, 15], ['scrap', 14, 7, 15], ['scrap', 34, 15, 10]],
     build(g) {
       caveCarve(g, 'CV1', {
-        open: ['R'],
+        mouth: 1, open: ['R'],
         anchor: [{ x: 4, y: 15, w2: 2 }, { x: 26, y: 15, w2: 2 }, { x: 34, y: 15 }],
         pocket: [{ x: 14, y: 6 }],
       });
@@ -933,7 +985,7 @@ const ROOMS = {
            ['scrap', 22, 7, 25], ['scrap', 40, 7, 20], ['scrap', 8, 15, 20]],
     build(g) {
       caveCarve(g, 'CV2', {
-        open: ['L', 'R'], ledges: 5,
+        mouth: 1, open: ['L', 'R'], ledges: 5,
         anchor: [{ x: 14, y: 15 }, { x: 33, y: 15 }, { x: 44, y: 15 }, { x: 8, y: 15 }],
         pocket: [{ x: 22, y: 6 }, { x: 40, y: 6 }],
       });
@@ -946,7 +998,7 @@ const ROOMS = {
            ['scrap', 10, 7, 20], ['pillar', 41, 15]],
     build(g) {
       caveCarve(g, 'CV3', {
-        open: ['L'],
+        mouth: 1, open: ['L'],
         anchor: [{ x: 16, y: 15 }, { x: 30, y: 15 }, { x: 41, y: 15, w2: 2, h2: 4 }],
         pocket: [{ x: 10, y: 6 }],
       });
