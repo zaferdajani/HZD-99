@@ -21,14 +21,22 @@
 // its own content makes the character jitter around its own centre, which is
 // the one thing an idle loop must not do.
 //
-//   node tools/vidstrip.cjs <in.mp4> <out.png> [frames=12] [cell=320] [thr=26]
+//   node tools/vidstrip.cjs <in.mp4> <out.png> [frames=12] [cell=320] [thr=26] [from] [to]
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 
 (async () => {
-  const [inp, out, nArg, cellArg, thrArg] = process.argv.slice(2);
+  const [inp, out, nArg, cellArg, thrArg, fromArg, toArg] = process.argv.slice(2);
   if (!inp || !out) { console.error('usage: vidstrip.cjs <in.mp4> <out.png> [frames] [cell] [thr]'); process.exit(2); }
   const N = parseInt(nArg || '12', 10), CELL = parseInt(cellArg || '320', 10);
+  // A WINDOW, because a swing is not a loop. An idle cycle fills its whole
+  // clip and can be sampled end to end; a STRIKE is a fraction of one — the
+  // generator is asked for several swings so at least one comes out clean, and
+  // then exactly one of them has to be cut out. Sampling the whole clip instead
+  // gives six frames spread across three strikes and two guards, which is a
+  // flipbook of unrelated poses. Seconds; omit for the whole clip.
+  const FROM = fromArg === undefined ? null : parseFloat(fromArg);
+  const TO = toArg === undefined ? null : parseFloat(toArg);
   const THR = parseInt(thrArg || '26', 10);
 
   // OVER HTTP, NOT AS A DATA URI. A 2 MB base64 video URL is refused outright,
@@ -59,7 +67,8 @@ const fs = require('fs'), path = require('path');
     const feet = [];
     let x0 = W, y0 = H, x1 = -1, y1 = -1;
     for (let i = 0; i < N; i++) {
-      await seek(Math.min(D - 0.02, (i + 0.5) * D / N));
+      const t0w = (FROM === null ? 0 : FROM), t1w = (TO === null ? D : Math.min(TO, D));
+      await seek(Math.min(D - 0.02, t0w + (i + 0.5) * (t1w - t0w) / N));
       c.clearRect(0, 0, W, H);
       c.drawImage(v, 0, 0, W, H);
       const im = c.getImageData(0, 0, W, H), d = im.data;

@@ -16,6 +16,68 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2w. THE SWING IS A POSE, NOT A MOVE — every attack snaps still-to-hit ✱ DIAGNOSED 2026-08-23 (art session)
+
+**The owner's words:** *"The act of scratching and hitting with a sword need to
+be dynamic more. It's not an image that shows hits as images. It should
+transition in milliseconds from one frame to another showing like a cartoonish
+slash or hit with a sword. And this is a standard for all sword moods and the
+slash. What you're doing is three kind of hits with three moves that changes
+from still to hit without transitions in between."*
+
+**He is describing one line of code, and the same file already does it right for
+the other game.** `js/entities.js`:
+
+```js
+// CLAWBYTE — one pose for the whole swing; swingVis.t is never read
+if (this.swingVis) {
+  if (this.swingVis.charged) return 'burst';
+  return this.swingVis.combo >= 3 ? 'finisher' : this.swingVis.combo === 2 ? 'claw_2' : 'claw_1';
+}
+
+// NOSTOS — six frames stepped across the swing
+key = 'heroAtk'; n = 6;
+const p = clamp(1 - this.swingVis.t / this.swingVis.t0, 0, 0.999);
+fr = Math.floor(p * n);
+```
+
+`swingVis` runs **240 ms** for an ordinary blow and 320 ms for a charged one.
+For all of it her body holds ONE cell, then snaps back to idle. Three attacks,
+three stills. That is the whole defect, and no amount of effect work covers it.
+
+**And the mismatch makes it worse.** The blade's arc DOES animate —
+`swAng = -1.5 + p * 2.7` sweeps the sword through the swing — so the weapon
+travels while the body behind it is frozen. A moving blade bolted to a still
+body reads as a sticker being dragged, which is why the sword feels faker than
+the claw.
+
+**THE ART THIS NEEDS, and why it is video and not stills.** Every attack wants
+the classic four beats — anticipation, the SMEAR through the arc, contact fully
+extended, recovery — at roughly 40 ms a frame, which is exactly the "milliseconds
+from one frame to another" the owner asked for. Stills cannot deliver it: the
+run pass immediately before this one asked the image generator five times, three
+different phrasings, to move a limb from one place to another and it refused
+every time, once returning a pixel-near copy of its own reference. The video
+model does move limbs, and `tools/vidstrip.cjs` already cuts a clip into a
+registered, bottom-aligned strip — that is how the five NPC work loops were
+made.
+
+`tools/vidstrip.cjs` gained a **time window** for this: an idle loop fills its
+whole clip and can be sampled end to end, but a STRIKE is a fraction of one. The
+generator is asked for several swings so at least one comes out clean, and then
+exactly one of them is cut out. Sampling the whole clip instead gives six frames
+spread across three strikes and two guards — a flipbook of unrelated poses.
+
+**Four strips are wanted**, one per attack: `claw_1` (combo 1), `claw_2`
+(combo 2), `finisher` (combo 3) and `burst` (charged). The wiring is the shape
+`drawNPCLoop` already has and the shape `heroAtk` already has — index the cell
+by `p` instead of returning one pose name — so the code owed to this is small
+and the plates are the expensive part.
+
+**Fire one, key it, look at it in play, then continue.** This is a §1f-class row:
+four strips at six frames each is twenty-four drawings of the character the
+player looks at all game, and a wrong call found at strip four costs all of them.
+
 ### ⚠ tests/folk.cjs "the strip advances while it plays" IS FLAKY — 3 in 5 (art session, 2026-08-23)
 
 **Not caused by the run fix above.** Measured on `4b3afe9` itself, in a clean
