@@ -76,7 +76,13 @@ function manifest() {
     if (SKIP.has(key)) { skipped++; continue; }
     if (size < MIN_BYTES) { small++; continue; }
     const b64 = fs.readFileSync(abs).toString('base64');
-    const mime = /\.png$/i.test(rel) ? 'image/png' : 'image/jpeg';
+    // MIME BY EXTENSION, AND WEBP IS ONE OF THEM NOW. The shipped art tier
+    // moved from PNG to webp (tools/webptier.cjs, 79.5 MB to 13.9 MB), and
+    // this line used to read "png or else jpeg" — which would have handed a
+    // webp source a data: URI claiming to be a JPEG, and the decode fails
+    // silently into a sheet with no low tier at all.
+    const mime = /\.png$/i.test(rel) ? 'image/png'
+      : /\.webp$/i.test(rel) ? 'image/webp' : 'image/jpeg';
     const r = await page.evaluate(async ({ b64, mime, SCALE, QUALITY }) => {
       const im = new Image();
       await new Promise((res, rej) => { im.onload = res; im.onerror = rej; im.src = 'data:' + mime + ';base64,' + b64; });
