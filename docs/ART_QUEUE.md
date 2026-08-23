@@ -16,6 +16,41 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+### ⚠ tests/folk.cjs "the strip advances while it plays" IS FLAKY — 3 in 5 (art session, 2026-08-23)
+
+**Not caused by the run fix above.** Measured on `4b3afe9` itself, in a clean
+worktree with that commit's own build and this change absent: **three failures
+in five runs.** On the branch with the run fix it is the same rate, and the run
+fix touches `states.png`, `HERO_REG`, `tools/herocell.cjs` and docs — nothing
+the NPC job system reads.
+
+The failing line, across runs:
+
+```
+FAIL ...and the strip advances while it plays  servo 22  mono  6  patch 19  sage  8  lumen  9
+FAIL ...and the strip advances while it plays  servo  8  mono 13  patch 28  sage  6  lumen 16
+FAIL ...and the strip advances while it plays  servo 21  mono 11  patch  0  sage 12  lumen 14
+ok   ...and the strip advances while it plays  servo 25  mono 11  patch 12  sage  8  lumen 17
+```
+
+**It is asserting a floor on a quantity the design deliberately randomises.**
+The commit that added it says so itself: bursts play "at a tempo re-rolled per
+burst, with holds between", and `NPC_WORK` sets 3-5 fps for the sage against
+9-14 for Patch-7. A fixed sample window over a re-rolled tempo with holds has a
+low tail, and the low tail crosses the floor. `patch 0` in one run is the same
+cause at its limit — the window closed inside a hold.
+
+**This is the code session's to retune, not the art session's**, because the
+floor encodes what the job system is meant to guarantee and only its author
+knows which. Two shapes that would both keep the check honest: sample until
+every body has been observed inside a burst rather than for a fixed span, or
+assert per-character against that character's own `NPC_WORK` fps rather than one
+shared number.
+
+Worth fixing quickly rather than living with: this is a NEW check, it is the
+one that caught real wiring rot, and a check that is red three runs in five is
+one everybody learns to scroll past.
+
 ## 1i. THE RUN HAD NO CONTACT POSE ✅ FIXED 2026-08-23 (art session)
 
 **The owner's report:** *"While the hero runs, you are only moving the back leg,
