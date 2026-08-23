@@ -87,8 +87,19 @@ const { chromium } = require('playwright');
     // out when the wreck is broken — which is the lesson. This used to rely on
     // a stray swing from the previous step happening to smash it, so the step
     // passed or hung depending on timing; it breaks the wreck explicitly now.
+    // A WRECK HAS NO die(). It has explode(), and explode() is what drops the
+    // scrap — so `w.die ? w.die() : w.dead = true` fell through to the else and
+    // marked the wreck dead WITHOUT its payout. The step passed anyway for as
+    // long as the wreck happened to blow itself up first (it explodes on its
+    // own bounce count or after ~1s), which is exactly the timing dependence
+    // the comment below was already complaining about. Call the real method.
     const w = G.wrecks && G.wrecks.find(x => x && !x.dead);
-    if (w) { w.hp = 0; if (typeof w.die === 'function') w.die(); else w.dead = true; }
+    if (w) {
+      w.hp = 0;
+      if (typeof w.explode === 'function') w.explode();
+      else if (typeof w.die === 'function') w.die();
+      else w.dead = true;
+    }
     const q = G.pickups.find(x => x && !x.dead);
     // ...and DRIVE the pickup rather than waiting for the loop to do it. Every
     // action that only sets up a condition and then hopes the game's own rAF
