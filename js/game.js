@@ -1096,7 +1096,14 @@ function checkTransitions() {
     dest = dest.to;
   }
   if (demoWall(dest)) { demoStop(side); return; }
-  G.trans = { t: 0.28, to: dest, side, half: false };
+  G.trans = { t: TRANS_DUR, to: dest, side, half: false };
+  // HOLD THE PICTURE NOW, not at draw time. The loop runs a fixed step and may
+  // call update() several times in one frame (SIM_STEP/SIM_MAX), so the frame
+  // that creates a crossing is often the same frame that applies it — by the
+  // time the renderer looked, the old room was already gone and the slide had
+  // nothing to slide. The canvas still holds the last frame drawn, and the
+  // last frame drawn is the room she is leaving.
+  transSnap = transHeld ? transCv : null;
 }
 function applyTransition() {
   const tr = G.trans, from = { x: player.x, y: player.y, vx: player.vx, vy: player.vy };
@@ -1460,7 +1467,8 @@ function doInteract(s) {
         sfx('chest'); G.toast(t('vault_open'));
         burst(s.x + s.w / 2, s.y + 20, 30, '#ffd76a', 300, 0.9, 100, 4, true);
       }
-      G.trans = { t: 0.28, to: 'V1', side: 'R', half: false };
+      G.trans = { t: TRANS_DUR, to: 'V1', side: 'R', half: false };
+      transSnap = transHeld ? transCv : null;
     } else {
       G.toast(t('vault_locked') + '  ' + have + '/3');
       sfx('no');
@@ -1506,11 +1514,21 @@ function update(dt) {
     fxDecay(dt);
     rubbleTick(dt);
     if (G.hitStop > 0) { G.hitStop -= dt; updateParts(dt * 0.25); return; }
+    // THE CROSSING IS A MOVE, NOT A CUT (owner, 2026-08-23: "the map... becomes
+    // cubicles of rooms connected... instead, it's actual world connected").
+    // Every screen edge used to fade the picture to solid black over 0.28s,
+    // swap the room at the halfway point, and fade back — and the world was
+    // frozen for the whole of it. Two rooms joined by a blackout are two
+    // rooms; the same two joined by the camera carrying through are a place.
+    // The room now swaps on the FIRST frame of the crossing and the outgoing
+    // picture is PUSHED off the side she left by (see transSnap in the draw),
+    // while the world underneath keeps running — so her walk never stops.
     if (G.trans) {
       G.trans.t -= dt;
-      if (!G.trans.half && G.trans.t < 0.14) { G.trans.half = true; applyTransition(); }
+      if (!G.trans.half) { G.trans.half = true; applyTransition(); }
       if (G.trans.t <= 0) G.trans = null;
-    } else {
+    }
+    {
       // the chamber hold: the world keeps breathing, she does not move
       if (G.bossEntry) {
         G.bossEntry.t += dt;
@@ -5329,6 +5347,37 @@ function drawPlatformRuns() {
 }
 // tile layer cache — tiles are static per room, so render once and blit
 let tileCv = null, tileDirty = true;
+// THE CROSSING'S HELD FRAME. One canvas, reused: the picture she is leaving,
+// kept for the third of a second it takes to slide off the edge she left by.
+// Reused rather than allocated per crossing — a full backbuffer copy every
+// time she walks through a doorway is a garbage-collection pause in the one
+// moment the game is asking to feel continuous.
+const TRANS_DUR = 0.34;
+let transSnap = null, transCv = null, transHeld = false;
+// Only within reach of an edge she can actually leave by — so the cost is a
+// second or two of blits before a doorway and nothing at all anywhere else.
+function holdFrameNearExit() {
+  transHeld = false;
+  if (G.state !== 'PLAY' || G.trans || !player || !G.roomDef) return;
+  const ex = G.roomDef.exits || {}, W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
+  const px = player.x + player.w / 2, py = player.y + player.h / 2;
+  const near = (ex.L && px < 260) || (ex.R && px > W - 260) ||
+               (ex.T && py < 240) || (ex.B && py > H - 240);
+  if (!near) return;
+  grabFrame();
+  transHeld = true;
+}
+function grabFrame() {
+  if (!transCv) transCv = document.createElement('canvas');
+  if (transCv.width !== cv.width || transCv.height !== cv.height) {
+    transCv.width = cv.width; transCv.height = cv.height;
+  }
+  const tc = transCv.getContext('2d');
+  tc.setTransform(1, 0, 0, 1, 0, 0);
+  tc.clearRect(0, 0, transCv.width, transCv.height);
+  tc.drawImage(cv, 0, 0);
+  return transCv;
+}
 // DO NOT BAKE A FLOOR YOU ARE ABOUT TO THROW AWAY.
 //
 // Baking the tile layer for a large room measures at about 940 ms, and the rock
@@ -11798,16 +11847,52 @@ function draw(tms) {
       c.restore();
     }
   }
+  // THE HELD FRAME IS THE WORLD, NOT THE SCREEN. Grabbing the finished screen
+  // meant the crossing slid the HUD too — two map buttons and two rows of
+  // hearts, which reads as a glitch rather than as travel. It is taken HERE,
+  // before the interface goes on, and only in the moments a crossing could
+  // actually start: a full-backbuffer blit every frame of the game to serve a
+  // third of a second at a doorway is not a trade worth making.
+  holdFrameNearExit();
   if (typeof drawBrDelta === 'function') drawBrDelta();
   drawTutor();
   if (typeof drawGateWalk === 'function') drawGateWalk();
   drawLesson();
   drawHUD();
   drawMapButton();
+  // THE PUSH. The frame she left is held and slid off the edge she left by, so
+  // the two rooms read as one continuous space travelled through rather than
+  // two pictures swapped. Drawn in RAW DEVICE PIXELS — the quality dial scales
+  // the backbuffer, and a slide measured in layout units tears at the seam.
   if (G.trans) {
-    const k = G.trans.half ? 1 - (0.14 - G.trans.t) / 0.14 : (0.28 - G.trans.t) / 0.14;
-    c.fillStyle = 'rgba(3,5,9,' + clamp(k, 0, 1) + ')'; c.fillRect(0, 0, 960, 540);
-  }
+    if (transSnap) {
+      const k = clamp(1 - G.trans.t / TRANS_DUR, 0, 1);
+      // eased so it leaves fast and settles: a linear slide reads as a wipe
+      const e = 1 - Math.pow(1 - k, 2.2);
+      const W = cv.width, H = cv.height;
+      const sd = G.trans.side;
+      const dx = sd === 'R' ? -e * W : sd === 'L' ? e * W : 0;
+      const dy = sd === 'T' ? e * H : sd === 'B' ? -e * H : 0;
+      c.save();
+      c.setTransform(1, 0, 0, 1, 0, 0);
+      c.drawImage(transSnap, dx, dy);
+      // the seam: a thin shadow on the leading edge of the room she is
+      // entering, so the join is a doorway of light rather than a hard cut
+      const sw = 26;
+      if (dx || dy) {
+        const gx0 = dx ? (sd === 'R' ? dx + W : dx - sw) : 0;
+        const gy0 = dy ? (sd === 'T' ? dy + H : dy - sw) : 0;
+        const g4 = dx ? c.createLinearGradient(gx0, 0, gx0 + (sd === 'R' ? sw : -sw), 0)
+                      : c.createLinearGradient(0, gy0, 0, gy0 + (sd === 'T' ? sw : -sw));
+        g4.addColorStop(0, 'rgba(3,5,9,0.55)');
+        g4.addColorStop(1, 'rgba(3,5,9,0)');
+        c.fillStyle = g4;
+        if (dx) c.fillRect(Math.min(gx0, gx0 + (sd === 'R' ? sw : -sw)), 0, sw, H);
+        else c.fillRect(0, Math.min(gy0, gy0 + (sd === 'T' ? sw : -sw)), W, sw);
+      }
+      c.restore();
+    }
+  } else if (transSnap) { transSnap = null; }
   if (st === 'DEAD') {
     c.fillStyle = 'rgba(8,4,8,' + clamp((1.8 - G.deadT) * 1.2, 0, 0.85) + ')';
     c.fillRect(0, 0, 960, 540);

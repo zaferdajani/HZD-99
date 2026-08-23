@@ -127,8 +127,16 @@ const { chromium } = require('playwright');
       return;
     }
     if (G.state === 'PLAY') { doInteract(npc); return; }
-    if (G.state === 'DIALOG') {                    // page through what he says
-      keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); return;
+    if (G.state === 'DIALOG') {
+      // PAGE IT THROUGH IN ONE TRY, for the same reason the walk is done in
+      // one: Ratchet's first talk is a long story, one page per try spent the
+      // budget on reading, and the step ran out as "buy, buy, buy, buy".
+      for (let i = 0; i < 200 && G.state === 'DIALOG'; i++) {
+        keysP['Enter'] = 1; keys['Enter'] = 1;
+        update(1 / 30);
+        keys['Enter'] = 0;
+      }
+      return;
     }
     if (G.state === 'SHOP') {
       G.shopIdx = 0;                               // the volt cell

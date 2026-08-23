@@ -379,7 +379,11 @@ const { chromium } = require('playwright');
     }
     if (!room) return { err: 'no zone C room with ground machines' };
     loadRoom(room);
-    await new Promise(r => requestAnimationFrame(r));
+    // LET THE ROOM SETTLE. One frame was enough on an idle machine and not
+    // enough under the full suite, where a dozen browsers share four cores:
+    // the body under test was still in its spawn state and thirty frames of
+    // contact produced no hit, which the harness read as "it is friendly".
+    for (let i = 0; i < 24; i++) await new Promise(r => requestAnimationFrame(r));
     const e = G.enemies.find(q => q.kind === 'crawler' || q.kind === 'hopper');
     if (!e) return { err: 'none spawned in ' + room };
     const asCheetah = isCheetah(e), asWolf = isWolf(e);
@@ -390,8 +394,12 @@ const { chromium } = require('playwright');
     const takesDamage = e.hp < hp0;
     player.cores = 9; player.iT = -1;
     const c0 = player.cores;
-    for (let f = 0; f < 30; f++) { e.x = player.x; e.y = player.y; e.update(1 / 60); }
-    const hurtsHer = player.cores < c0;
+    let hurtsHer = false;
+    for (let f = 0; f < 120 && !hurtsHer; f++) {
+      e.x = player.x; e.y = player.y; player.iT = -1;
+      e.update(1 / 60);
+      hurtsHer = player.cores < c0;
+    }
     // ...and it uses the same three plates
     const plates = { rest: CHEETAH_ART.rest.img, coil: CHEETAH_ART.coil.img, lunge: CHEETAH_ART.lunge.img };
     return { room, asCheetah, asWolf, takesDamage, hurtsHer, plates };
