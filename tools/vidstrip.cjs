@@ -50,7 +50,7 @@ const fs = require('fs'), path = require('path');
   // error arrives at the read rather than at the load.
   try { await page.goto(new URL(SRC).origin + '/'); } catch (e) {}
 
-  const res = await page.evaluate(async ({ N, CELL, THR, SRC }) => {
+  const res = await page.evaluate(async ({ N, CELL, THR, SRC, FROM, TO }) => {
     const v = document.createElement('video');
     v.muted = true; v.playsInline = true;
     v.src = SRC;
@@ -211,7 +211,7 @@ const fs = require('fs'), path = require('path');
         i * CELL + (CELL - dw) / 2, CELL - dh, dw, dh);
     }
     return { png: strip.toDataURL('image/png'), N, CELL, src: W + 'x' + H, dur: +D.toFixed(2), box: bw + 'x' + bh, feet, foot };
-  }, { N, CELL, THR, SRC });
+  }, { N, CELL, THR, SRC, FROM, TO });
 
   if (res.err) { console.error('  ' + res.err); process.exit(1); }
   fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
