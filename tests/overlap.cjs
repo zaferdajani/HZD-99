@@ -22,7 +22,11 @@ const { chromium } = require('playwright');
   await p.goto('http://127.0.0.1:8220/index.html');
   await p.waitForTimeout(4000);
   await p.keyboard.press('Enter'); await p.waitForTimeout(1500);   // sound tap
-  await p.keyboard.press('Enter'); await p.waitForTimeout(2500);   // skip out
+  // SKIPPING IS A HOLD (js/game.js CUT_SKIP_HOLD). A second press used to end
+  // the film; it costs 0.8 s of deliberate contact now, so that the story
+  // cannot be spent by a stray touch on a phone.
+  await p.keyboard.down('Enter'); await p.waitForTimeout(1000); await p.keyboard.up('Enter');
+  await p.waitForTimeout(2500);                                    // skip out
   await p.evaluate(() => { setMusic('A'); });  await p.waitForTimeout(1800);
   await p.evaluate(() => { setMusic('boss_glitch'); }); await p.waitForTimeout(1800);
   await p.evaluate(() => { setMusic('title'); }); await p.waitForTimeout(1800);
