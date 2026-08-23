@@ -66,6 +66,15 @@ const fs = require('fs'), path = require('path');
     const frames = [];
     const feet = [];
     let x0 = W, y0 = H, x1 = -1, y1 = -1;
+    // HOW MUCH SUBJECT EACH COLUMN AND ROW ACTUALLY HOLDS, summed over every
+    // frame. The extreme box alone cannot tell the character from a hairline:
+    // this generator drew a one-pixel HORIZON straight across the plate behind
+    // her, the fill could not cross it, and the union box came back 1280 wide
+    // for a cat 400 wide — every cell then framed the room instead of her.
+    // Raising the key threshold does not help, because the line is brighter
+    // than she is in places. Mass does: a horizon contributes two pixels to a
+    // column, a shoulder contributes three hundred.
+    const colMass = new Float64Array(W), rowMass = new Float64Array(H);
     for (let i = 0; i < N; i++) {
       const t0w = (FROM === null ? 0 : FROM), t1w = (TO === null ? D : Math.min(TO, D));
       await seek(Math.min(D - 0.02, t0w + (i + 0.5) * (t1w - t0w) / N));
@@ -163,6 +172,7 @@ const fs = require('fs'), path = require('path');
         // tests/tinker.cjs read that as him hovering.
         if (a > 60) {
           const x = p % W, y = (p / W) | 0;
+          colMass[x]++; rowMass[y]++;
           if (x < x0) x0 = x; if (x > x1) x1 = x;
           if (y < y0) y0 = y; if (y > y1) y1 = y;
         }
@@ -174,6 +184,25 @@ const fs = require('fs'), path = require('path');
       frames.push(im);
     }
     if (x1 < 0) return { err: 'every frame keyed to nothing — wrong threshold?' };
+    // ...and the box is trimmed to the columns and rows that carry real mass.
+    // The floor is one per cent of the frame — thin enough to keep a whisker,
+    // a claw tip and a cape edge, thick enough to drop a drawn horizon or a
+    // stray one-pixel scanline. Only ever tightens: if nothing is thin, this
+    // does nothing at all, which is why every strip cut before it is unchanged.
+    // COLUMNS ONLY, and that asymmetry is deliberate. The artifact this exists
+    // for is a HORIZONTAL hairline, which is thin in every column it crosses
+    // and enormous in the one row it occupies — so columns can be judged by
+    // mass and rows cannot: her EAR TIPS are legitimately thin rows, and a row
+    // rule strict enough to drop a horizon would cut the top off her head.
+    // Rows are already anchored below by the median foot line.
+    const wide0 = x0, wide1 = x1;
+    {
+      const cMin = N * H * 0.012;             // ~9 px of subject per frame
+      let a2 = x0, b2 = x1;
+      while (a2 < b2 && colMass[a2] < cMin) a2++;
+      while (b2 > a2 && colMass[b2] < cMin) b2--;
+      if (b2 > a2 + 16) { x0 = a2; x1 = b2; }
+    }
     // PAD THE TOP AND THE SIDES. NEVER THE BOTTOM. The bottom of the union box
     // IS the foot line, and the cell is drawn with its bottom on the floor — so
     // three per cent of breathing room under the lowest pixel is three per cent

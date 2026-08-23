@@ -6,13 +6,20 @@
 // blow. It drives her to swing, then captures every frame of swingVis with the
 // canvas cropped to her body.
 //
-//   node tools/swingshot.cjs <out.png> [frames=6]   (needs the repo on :8220)
+//   node tools/swingshot.cjs <out.png> [frames=6] [attack]  (repo on :8220)
+//
+// attack is claw_1 (default), claw_2, finisher or burst. There are four strips
+// now and three of them are unreachable from a single press — combo 2 and the
+// finisher need a chain, the burst needs a held charge — so the swing is
+// opened once and then told which blow it is, which is exactly the state the
+// renderer reads.
 const { chromium } = require('playwright');
 const fs = require('fs');
 
 (async () => {
-  const [out, nArg] = process.argv.slice(2);
+  const [out, nArg, atkArg] = process.argv.slice(2);
   const N = parseInt(nArg || '6', 10);
+  const ATK = atkArg || 'claw_1';
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
@@ -37,16 +44,20 @@ const fs = require('fs');
   // That is the same p the renderer indexes the strip by, so what comes out is
   // exactly the frames the player sees, in order.
   const shots = [];
-  await page.evaluate(() => {
+  await page.evaluate((ATK) => {
     keysP['KeyX'] = 1; keys['KeyX'] = 1;
     update(1 / 120);                       // one step to open the swing
+    if (player.swingVis) {
+      player.swingVis.charged = ATK === 'burst';
+      player.swingVis.combo = ATK === 'finisher' ? 3 : ATK === 'claw_2' ? 2 : 1;
+    }
     // ...AND THEN FREEZE THE LOOP. The page's own rAF keeps running between
     // screenshots and drains swingVis.t to zero long before the next capture,
     // which is why stepping p by hand still caught one frame of six. With
     // update() stubbed out nothing advances but the clock this tool sets.
     window.__realUpdate = update;
     window.update = () => {};
-  });
+  }, ATK);
   for (let i = 0; i < N; i++) {
     const box = await page.evaluate((k) => {
       if (player.swingVis) {

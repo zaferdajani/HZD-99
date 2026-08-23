@@ -290,6 +290,9 @@ const MEDIA_SRC = {
     // sheets, which can react to the hit in a way a baked streak never will.
     // Light stays in code, the body stays in the plate (ART_BIBLE §0).
     swingClaw1: 'assets/characters/hero/swing/claw_1.webp',
+    swingClaw2: 'assets/characters/hero/swing/claw_2.webp',
+    swingFinisher: 'assets/characters/hero/swing/finisher.webp',
+    swingBurst: 'assets/characters/hero/swing/burst.webp',
     servoLoop: 'assets/characters/npc/servo/work_loop.webp',
     monoLoop: 'assets/characters/npc/mono/work_loop.webp',
     patchLoop: 'assets/characters/npc/patch/work_loop.webp',

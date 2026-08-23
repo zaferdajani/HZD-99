@@ -78,6 +78,38 @@ and the plates are the expensive part.
 four strips at six frames each is twenty-four drawings of the character the
 player looks at all game, and a wrong call found at strip four costs all of them.
 
+### ✔ ALL FOUR STRIPS ARE FIRED AND WIRED (art session, 2026-08-23)
+
+`claw_1` went first and shipped alone on purpose; the other three followed once
+it read correctly in play. Every attack now steps six frames across its own
+240 ms (320 ms charged): `claw_2` is the backhand — guard, reach, extension,
+smear across the body, pull, recovery; `finisher` is the two-paw overhead slam
+that lands her on all fours in her own dust; `burst` is the charged release —
+tuck, rise, and two frames of arms blurring open. Fired on the state sheet's own
+cell as the start frame, so the strip and the sheet are the same character.
+
+Two things were learned cutting them, and both are now in the tools:
+
+**A LINE ACROSS THE PLATE IS NOT THE CHARACTER.** The generator drew a
+one-pixel horizon behind her. The flood-fill key cannot cross a line brighter
+than its threshold, so the union box came back 1280 wide for a cat 400 wide and
+every cell framed the room instead of her. Raising the threshold cannot fix it
+— the line is brighter than her cape — so `tools/vidstrip.cjs` now trims the
+box to the columns that carry real MASS: a horizon puts two pixels in a column,
+a shoulder puts three hundred. Columns only; her ear tips are legitimately thin
+rows and a row rule strict enough to drop a horizon would cut the top off her
+head.
+
+**THE DRAW SCALE IS PER STRIP AND IT IS MEASURED.** A strip cell is square and
+the figure fills whatever fraction of it that swing's widest frame allows, so
+one shared constant makes her swell on one attack and shrink on the next.
+`tools/swingk.cjs` measures each strip against THE CELL THAT HOLDS THE SAME
+POSE as the sheet cell it replaces — the video is started from that pose, so
+the comparison is like for like. Measuring cell 0 blindly reads the burst's
+tuck against the sheet's arms-wide release and comes back 27% out. It
+reproduces claw_1's hand-derived constant to four decimals, which is how the
+method was checked before the other three trusted it.
+
 ### ⚠ tests/folk.cjs "the strip advances while it plays" IS FLAKY — 3 in 5 (art session, 2026-08-23)
 
 **Not caused by the run fix above.** Measured on `4b3afe9` itself, in a clean

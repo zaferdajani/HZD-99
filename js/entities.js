@@ -543,13 +543,26 @@ const HERO_CELLS = 24;
 // standing IN a meadow looks like.
 const HERO_DH = 60, HERO_FLOOR = 6;
 // Six frames of the real blow per attack (js/media.js swingClaw1 and friends).
-// Only claw_1 is fired so far — the rest fall through to their pose cell, which
-// is exactly what shipped before, so a half-finished set costs nothing.
+// All four are fired: combo 1, combo 2, the combo-3 finisher and the charged
+// burst. Anything not here still falls through to its pose cell, which is the
+// contract the half-done set shipped under and is worth keeping.
+//
+// K IS PER STRIP AND IT IS MEASURED, NOT CHOSEN. A strip cell is square and
+// the figure fills whatever fraction of it that swing's widest frame allows —
+// so drawing every strip at HERO_DH makes her a different size in each attack.
+// Each k matches the strip cell that holds the SAME POSE as the sheet cell it
+// replaces (tools/swingk.cjs prints them): the sheet's subject fraction over
+// the strip's, so the character comes out the size she already was.
+//   claw_1   sheet 140/169  strip 236/320 (cell 0, the guard)
+//   claw_2   sheet 140/169  strip 306/320 (cell 2, the arm extended)
+//   finisher sheet 131/169  strip 283/320 (cell 0, both arms up)
+//   burst    sheet 132/169  strip 241/320 (cell 5, arms flung wide)
 const SWING_STRIP = {
-  claw_1: { key: 'swingClaw1', cells: 6 },
+  claw_1:   { key: 'swingClaw1',    cells: 6, k: 1.1233 },
+  claw_2:   { key: 'swingClaw2',    cells: 6, k: 0.8663 },
+  finisher: { key: 'swingFinisher', cells: 6, k: 0.8765 },
+  burst:    { key: 'swingBurst',    cells: 6, k: 1.0371 },
 };
-// measured: the strip's figure is 236 of a 320 cell, the sheet's is 140 of 169
-const SWING_K = (320 / 236) / (169 / 140);
 // ---- HOW FAR ONE STEP CARRIES HER, OFF THE PLATES THEMSELVES ---------------
 //
 // The step length is the foot-to-foot distance at CONTACT: when the trailing
@@ -1843,12 +1856,10 @@ class Player {
                           : sv.combo === 2 ? 'claw_2' : 'claw_1'];
     if (!S) return false;
     const p = clamp(1 - sv.t / sv.t0, 0, 0.999);
-    // THE CELL IS SIZED TO THE SHEET, NOT TO ITSELF. A strip cell is square and
-    // the figure fills whatever fraction of it the swing's widest frame allows
-    // — 236 of 320 here against the sheet's 140 of 169 — so drawing it at
-    // HERO_DH would land her a tenth short and she would shrink the instant she
-    // attacked. Measured once, against the cell this replaces.
-    const h = HERO_DH * SWING_K;
+    // THE CELL IS SIZED TO THE SHEET, NOT TO ITSELF — see SWING_STRIP: each
+    // strip carries its own measured k, because drawing them all at HERO_DH
+    // makes her shrink or swell the instant she attacks.
+    const h = HERO_DH * S.k;
     return drawStripCell(c, S.key, Math.floor(p * S.cells), S.cells,
                          0, HERO_FLOOR, h, false);
   }
