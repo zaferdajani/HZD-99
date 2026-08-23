@@ -3241,3 +3241,44 @@ Two are failures of the ART, not of the wiring:
 
 Nothing here changes the wiring: all six already stand in the right plane, and
 `tests/shopread.cjs` will hold that. The plates only have to be legible.
+
+---
+
+### 2y. THE MEADOW READ PALE BLUE — the code half, and the plates that are left (2026-08-23)
+
+**The owner, looking at the scrap meadow:** *"This greenery background is giving
+me very pale blue vibe instead of vibrant one even though it's in a scrapyard
+or whatever. It shouldn't be so electronic. It needs to be even though
+electronic, but vibrant, even though all the machines are dead right now."*
+
+**Measured before it was believed.** The wire-grass fringe canvas ALONE is
+**49.7 saturation at hue 100** — a true yellow-green, exactly as authored. On
+screen it came out at **27.8 at hue 113**. The cinematic grade was innocent:
+turning `lightPass` off changed the numbers by 0.1. The loss was a per-blade
+alpha that started at **0.55** — a blade at 55% over dark teal rock is 45%
+rock, so half the chroma went and the hue was dragged toward the ground it
+stands on.
+
+**Fixed in code, same commit.** The alpha floor is 0.86, the greens go a step
+up in chroma and a step toward yellow, and every blade now gets a thin OPAQUE
+lit core down its middle — which is also the story: in a kingdom where every
+machine is dead, the grass is the thing still running. On screen the greenery
+is now **36.8 saturation at hue 105**, and `tests/meadow.cjs` holds it by
+taking the fringe away and measuring the pixels it owns.
+
+**What is left is the PLATES, with numbers:**
+
+1. **`floraA1` / `floraA2` measure 28 saturation at hue 130.** The blades
+   around them are 63 at hue 98. Hue 130 is cyan-green — the sky's half of the
+   wheel — so the plants read as part of the backdrop rather than as things
+   growing out of the floor, and no compositing change can fix a plate that is
+   painted that colour. Re-fire the meadow flora at **45-60 saturation and hue
+   90-110**: yellow-green, lit from within, wire and leaf. Keep them
+   electronic — this is a machine meadow — but a machine meadow that is ALIVE
+   while everything around it is dead. That contrast is the whole image.
+2. **The scrap-meadow backdrop is the other half of the pale blue.** It is the
+   largest surface in the room and it sets the eye's white point; grass at 37
+   against a wall at 12 is already a strong read, but the room will keep its
+   "pale blue vibe" until the painting itself has some warmth in the wreckage —
+   rust, sodium lamps, oxidised copper — against the cold. Not a re-fire of the
+   whole plate necessarily: a warm pass over the near wreck field would do it.

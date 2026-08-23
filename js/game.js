@@ -3364,17 +3364,53 @@ function buildFringe() {
       if (kind === 'grass' || kind === 'frond') {
         // a few greens, not one: the hue walks blade to blade, and a rare tuft
         // stands half again as tall as its neighbours
-        const greens = ['#527c40', '#5e8f4a', '#6da054'];
-        x.strokeStyle = kind === 'frond' ? (r3 < 0.5 ? '#8f4fb0' : '#7d44a0')
+        // THE MEADOW IS ALIVE, AND IT HAS TO LOOK IT (owner, 2026-08-23: "this
+        // greenery background is giving me very pale blue vibe instead of
+        // vibrant one... it shouldn't be so electronic. It needs to be, even
+        // though electronic, but vibrant, even though all the machines are
+        // dead right now").
+        //
+        // He was reading the composite, not the paint. Measured: the fringe
+        // canvas ALONE is 49.7 saturation at hue 100 — a true yellow-green,
+        // exactly as authored — and on screen it was 27.8 at hue 113. The
+        // cinematic grade was innocent (turning it off changed nothing); the
+        // loss was HERE, in a per-blade alpha that started at 0.55. A blade at
+        // 55% over dark teal rock is 45% rock: half the chroma gone and the
+        // hue dragged toward the ground it is standing on.
+        //
+        // The alpha still varies — blades at different depths must — but from
+        // 0.78, not 0.55, so a blade is a blade and not a stain. And the
+        // greens go up a step in chroma and down a step toward yellow: still
+        // wire-grass, still a machine meadow, but growing rather than glowing.
+        const greens = ['#4f8b32', '#5da33c', '#71bf49'];
+        x.strokeStyle = kind === 'frond' ? (r3 < 0.5 ? '#9a4fc4' : '#8544b4')
           : greens[Math.floor(r3 * 5.9) % 3];
-        x.globalAlpha = 0.55 + r2 * 0.4;
-        x.lineWidth = 1.6 + r1 * 1.2; x.lineCap = 'round';
+        x.globalAlpha = 0.86 + r2 * 0.14;
+        x.lineWidth = 1.9 + r1 * 1.3; x.lineCap = 'round';
         const hgt2 = hgt * (r2 > 0.86 ? 1.5 : 1);
-        x.beginPath(); x.moveTo(bx, gY + 3);
-        x.quadraticCurveTo(bx + lean * 0.5, gY - hgt2 * 0.6, bx + lean, gY - hgt2);
-        x.stroke();
+        const blade = () => {
+          x.beginPath(); x.moveTo(bx, gY + 3);
+          x.quadraticCurveTo(bx + lean * 0.5, gY - hgt2 * 0.6, bx + lean, gY - hgt2);
+          x.stroke();
+        };
+        blade();
+        // A BLADE NEEDS A CORE. A 2px stroke is nearly all antialiased edge,
+        // and an antialiased edge is half the rock behind it — which is why
+        // the paint measured 63 saturation and the screen measured 34. The
+        // second pass is thinner, opaque and a step brighter: a lit filament
+        // down the middle of the leaf. It is also the story — in a kingdom
+        // where every machine is dead, the grass is the thing still running.
+        if (kind !== 'frond') {
+          x.globalAlpha = 1;
+          x.lineWidth = Math.max(0.9, (1.9 + r1 * 1.3) * 0.45);
+          x.strokeStyle = r2 > 0.5 ? '#8fe05c' : '#7ccf4e';
+          blade();
+        }
         if (r1 > 0.72) {                       // a seed head / spore pod
-          x.fillStyle = kind === 'frond' ? '#e08aff' : '#b8d86a';
+          // the seed head is the brightest thing at ankle height, and it is
+          // what makes a field read as a FIELD rather than as texture
+          x.globalAlpha = Math.min(1, x.globalAlpha + 0.15);
+          x.fillStyle = kind === 'frond' ? '#f09dff' : '#cbef72';
           x.beginPath(); x.arc(bx + lean, gY - hgt2, 1.6 + r2, 0, 7); x.fill();
         }
       } else if (kind === 'cable') {
@@ -3458,6 +3494,10 @@ function buildFringe() {
   fringeDirty = false;
 }
 function drawFringe() {
+  // the measurement hook, the same shape as G.artProbe: with it set the fringe
+  // is not drawn, so a harness can photograph the room with and without its
+  // greenery and measure exactly the pixels the grass owns
+  if (G.fringeProbe) return;
   if (typeof QUAL !== 'undefined' && QUAL.ceil <= 0) return;
   if (fringeDirty) buildFringe();
   if (fringeCv) c.drawImage(fringeCv, 0, 0);
@@ -5354,6 +5394,8 @@ let tileCv = null, tileDirty = true;
 // moment the game is asking to feel continuous.
 const TRANS_DUR = 0.34;
 let transSnap = null, transCv = null, transHeld = false;
+// the erosion pass's read-only copy of the tile layer — see erodeCaveEdges
+let erodeSrc = null, erodeMask = null;
 // Only within reach of an edge she can actually leave by — so the cost is a
 // second or two of blits before a doorway and nothing at all anywhere else.
 function holdFrameNearExit() {
@@ -6344,6 +6386,24 @@ function edgeGrammarPass(x) {
 function erodeCaveEdges(x) {
   const g = buildRoom(G.roomId);
   const Wt = G.roomDef.w, Ht = G.roomDef.h;
+  // NEVER READ THE CANVAS YOU ARE DRAWING ON. The outward lumps below copy a
+  // patch of a tile's own face and shove it past the line — and they used to
+  // copy it out of tileCv, which is the very canvas being drawn to. A browser
+  // cannot alias a canvas with itself, so every one of those calls snapshots
+  // the WHOLE source: the cost of one seven-pixel lump is the area of the
+  // room. Measured with tools/bakecost.cjs: the bake was 716 ms for an
+  // ordinary 32x17 room and TWENTY-ONE SECONDS for a three-by-two-screen one,
+  // and 94-99.7% of it was this function — the tile draw itself is 47 ms and
+  // barely moves with room size. One copy up front, thousands of reads from
+  // it, and room size stops being a rendering decision. That is what the
+  // owner's "one big room... actual world connected" needs underneath it.
+  if (!erodeSrc) erodeSrc = document.createElement('canvas');
+  if (erodeSrc.width !== tileCv.width || erodeSrc.height !== tileCv.height) {
+    erodeSrc.width = tileCv.width; erodeSrc.height = tileCv.height;
+  }
+  const esx = erodeSrc.getContext('2d');
+  esx.clearRect(0, 0, erodeSrc.width, erodeSrc.height);
+  esx.drawImage(tileCv, 0, 0);
   const solid = (tx2, ty2) => {
     if (tx2 < 0 || ty2 < 0 || tx2 >= Wt || ty2 >= Ht) return true;
     const ch = g[ty2][tx2];
@@ -6366,16 +6426,33 @@ function erodeCaveEdges(x) {
         const u = 3 + hash2(tx * 5, ty * 3 + r0 * 9) * (TILE - 14);
         const lw = 7 + r0 * 9, lh = 4 + r0 * 4;
         try {
-          if (ed === 'T') x.drawImage(tileCv, X + u, Y + 2, lw, lh, X + u - 1, Y - lh + 2, lw, lh);
-          if (ed === 'B') x.drawImage(tileCv, X + u, Y + TILE - 2 - lh, lw, lh, X + u + 1, Y + TILE - 2, lw, lh);
-          if (ed === 'L') x.drawImage(tileCv, X + 2, Y + u, lh, lw, X - lh + 2, Y + u + 1, lh, lw);
-          if (ed === 'R') x.drawImage(tileCv, X + TILE - 2 - lh, Y + u, lh, lw, X + TILE - 2, Y + u - 1, lh, lw);
+          if (ed === 'T') x.drawImage(erodeSrc, X + u, Y + 2, lw, lh, X + u - 1, Y - lh + 2, lw, lh);
+          if (ed === 'B') x.drawImage(erodeSrc, X + u, Y + TILE - 2 - lh, lw, lh, X + u + 1, Y + TILE - 2, lw, lh);
+          if (ed === 'L') x.drawImage(erodeSrc, X + 2, Y + u, lh, lw, X - lh + 2, Y + u + 1, lh, lw);
+          if (ed === 'R') x.drawImage(erodeSrc, X + TILE - 2 - lh, Y + u, lh, lw, X + TILE - 2, Y + u - 1, lh, lw);
         } catch (e) {}
       }
     }
   }
-  x.save();
-  x.globalCompositeOperation = 'destination-out';
+  // ...AND ONE DESTINATION-OUT, NOT TEN THOUSAND. Every scallop and every
+  // two-pixel wave step used to erase straight into the tile layer under a
+  // destination-out composite, and a compositing erase is not clipped to the
+  // shape it draws the way an ordinary fill is — each one costs the layer.
+  // That, not the lumps, was the room-size ceiling: 618 ms of erosion on an
+  // ordinary room and eighteen seconds on a three-by-two-screen one. The bites
+  // are painted into a MASK with a plain fill — cheap, and exactly the same
+  // union, because every one of them is opaque — and the mask is taken out of
+  // the layer once at the end.
+  if (!erodeMask) erodeMask = document.createElement('canvas');
+  if (erodeMask.width !== tileCv.width || erodeMask.height !== tileCv.height) {
+    erodeMask.width = tileCv.width; erodeMask.height = tileCv.height;
+  }
+  const xReal = x;
+  x = erodeMask.getContext('2d');
+  x.setTransform(1, 0, 0, 1, 0, 0);
+  x.clearRect(0, 0, erodeMask.width, erodeMask.height);
+  x.globalCompositeOperation = 'source-over';
+  x.fillStyle = '#000';
   for (let ty = 0; ty < Ht; ty++) for (let tx = 0; tx < Wt; tx++) {
     if (!solid(tx, ty)) continue;
     const X = tx * TILE, Y = ty * TILE;
@@ -6433,7 +6510,19 @@ function erodeCaveEdges(x) {
       }
     }
   }
+  x = xReal;
+  x.save();
+  x.globalCompositeOperation = 'destination-out';
+  x.drawImage(erodeMask, 0, 0);
   x.restore();
+  // THE ROLL BELOW READS THE LAYER TOO — sixteen two-pixel strips per exposed
+  // top face, and each one was a self-copy of the whole tile canvas. THAT was
+  // the room-size ceiling: a 96x34 room asked for fifteen hundred snapshots of
+  // a twelve-megabyte canvas. The read-only copy is refreshed once, here,
+  // after the erasing, so the strips are made of the material as it now
+  // stands, and the roll costs one copy instead of fifteen hundred.
+  esx.clearRect(0, 0, erodeSrc.width, erodeSrc.height);
+  esx.drawImage(tileCv, 0, 0);
   // ---- THE SURFACE ROLL, and why it BUILDS UP rather than digging down ----
   // The owner's floor report, measured before it was believed: A1 sd 3.7px,
   // C3 sd 4.7px — and D3 sd 1.28px with a 96px stretch at one exact height.
@@ -6470,8 +6559,8 @@ function erodeCaveEdges(x) {
       try {
         // the strip is the tile's own top material, so the roll is made of
         // whatever this kingdom's rock actually is
-        x.drawImage(tileCv, X + sx, Y + 1, 2, Math.min(TILE - 2, rise + 3),
-                            X + sx, Y + 1 - rise, 2, Math.min(TILE - 2, rise + 3));
+        x.drawImage(erodeSrc, X + sx, Y + 1, 2, Math.min(TILE - 2, rise + 3),
+                              X + sx, Y + 1 - rise, 2, Math.min(TILE - 2, rise + 3));
       } catch (e) {}
     }
   }
@@ -6564,7 +6653,7 @@ function drawLair() {
 //   par — parallax factor; under 1 it sits behind the play plane and drifts
 //   dim — how far it is pushed back into the room's own colour
 const FLORA = {
-  A: [{ key: 'floraA1', k: 3.4, par: 0.94, dim: 0.30 },   // scrap-meadow bloom
+  A: [{ key: 'floraA1', k: 3.4, par: 0.94, dim: 0.20 },   // scrap-meadow bloom
       { key: 'floraA2', k: 1.7, par: 0.97, dim: 0.22 }],  // cable creeper
   B: [{ key: 'floraB1', k: 3.8, par: 0.94, dim: 0.32 },   // conduit reed
       { key: 'floraB2', k: 1.8, par: 0.97, dim: 0.24 }],  // conduit fan
@@ -8849,7 +8938,22 @@ function drawFlora() {
   if (typeof isHero === 'function' && isHero()) return;   // the Odyssey has its own world
   const plan = floraPlan(G.roomId);
   if (!plan.length) return;
-  const zone = G.roomDef.zone, far = (PAL[zone] || {}).far || '#0b0d11';
+  const zone = G.roomDef.zone, far0 = (PAL[zone] || {}).far || '#0b0d11';
+  // AERIAL PERSPECTIVE MAY TAKE THE LIGHT. IT MAY NOT TAKE THE LIFE.
+  // The push-back below paints the kingdom's FAR colour over every plant, and
+  // in the meadow that colour is a cold teal — so the plants came out the same
+  // pale blue as the sky behind them, which is what the owner reported: "very
+  // pale blue vibe instead of vibrant... it shouldn't be so electronic."
+  // Distance does drain colour, so the tint stays; it is mixed halfway to its
+  // own grey first, so what it takes is VALUE and only half as much HUE.
+  const far = (() => {
+    const m = /^#([0-9a-f]{6})$/i.exec(far0);
+    if (!m) return far0;
+    const v = parseInt(m[1], 16), r = v >> 16 & 255, g2 = v >> 8 & 255, b = v & 255;
+    const y = Math.round((r + g2 + b) / 3);
+    const mix = (a, b2) => Math.round((a + b2) / 2);
+    return 'rgb(' + mix(r, y) + ',' + mix(g2, y) + ',' + mix(b, y) + ')';
+  })();
   const now = performance.now() / 1000;
   for (const p of plan) {
     const im = MEDIA_IMG[p.s.key];
@@ -8869,7 +8973,7 @@ function drawFlora() {
     if (p.flip) c.scale(-1, 1);
     c.globalAlpha = 1 - p.s.dim;
     c.drawImage(im, -w / 2, -h, w, h);
-    c.globalAlpha = p.s.dim * 0.55;
+    c.globalAlpha = p.s.dim * 0.38;
     c.globalCompositeOperation = 'source-atop';
     c.fillStyle = far;
     c.fillRect(-w / 2 - 2, -h - 2, w + 4, h + 4);

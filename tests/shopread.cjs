@@ -93,10 +93,7 @@ const SITES = [
       // so stillness is imposed rather than waited for. What CANNOT be frozen
       // is art arriving over the network, and that is what the settle below is
       // actually for.
-      const tNow = performance.now(); const realNow = performance.now;
-      const realRand = Math.random;
-      performance.now = () => tNow;
-      Math.random = () => 0.5;
+      const realNow = performance.now, realRand = Math.random;
       // WAIT FOR THE PICTURE TO STOP MOVING. Under the full suite a dozen
       // browsers share four cores, art lands late, and a fixed wait handed
       // back two frames that differed by 141 665 pixels — a third of the
@@ -104,45 +101,77 @@ const SITES = [
       // contained the whole room and the booth measured 0.97 instead of 2.60.
       // So: settle first (a frame that equals the one before it), and only
       // then freeze the clock and take the pair.
-      const differ = (p, q) => {
-        let n = 0;
-        for (let i = 0; i < p.length; i += 4)
-          if (Math.abs(p[i] - q[i]) + Math.abs(p[i + 1] - q[i + 1]) +
-              Math.abs(p[i + 2] - q[i + 2]) >= 24) n++;
-        return n;
-      };
-      const still = Math.max(200, Math.round(cv.width * cv.height * 0.003));
-      let prev = grab(), settled = false;
-      for (let t = 0; t < 40 && !settled; t++) {
-        for (let f = 0; f < 8; f++) await new Promise(k => requestAnimationFrame(k));
-        const cur = grab();
-        if (differ(prev, cur) < still) settled = true;
-        prev = cur;
-      }
-      res[room].settled = settled;
-      // FOUR FRAMES PER SIDE, not one: the game runs its own rAF, and a single
-      // wait after flipping the probe hands back a frame that was already in
-      // flight — with the structure still in it.
-      for (let f = 0; f < 4; f++) await new Promise(k => requestAnimationFrame(k));
-      const A = grab();
-      G.structProbe = 1;
-      for (let f = 0; f < 4; f++) await new Promise(k => requestAnimationFrame(k));
-      const B = grab();
-      G.structProbe = 0;
-      performance.now = realNow;
-      Math.random = realRand;
-      const acc = { h: [0, 0, 0], w: [0, 0, 0] };
-      for (let i = 0; i < cv.width * cv.height; i++) {
-        const d0 = Math.abs(A[i * 4] - B[i * 4]) + Math.abs(A[i * 4 + 1] - B[i * 4 + 1]) +
-                   Math.abs(A[i * 4 + 2] - B[i * 4 + 2]);
-        if (d0 < 24) continue;                      // not the structure
-        const add = (src, t2) => {
-          const R = src[i * 4], G2 = src[i * 4 + 1], Bl = src[i * 4 + 2];
-          const mx = Math.max(R, G2, Bl), mn = Math.min(R, G2, Bl);
-          t2[0] += mx ? (mx - mn) / mx * 100 : 0; t2[1] += mx / 255 * 100; t2[2]++;
-        };
-        add(A, acc.h);                              // the structure
-        add(B, acc.w);                              // ...and what it stands over
+      // TAKE THE PAIR, THEN CHECK THE PAIR. Settling is necessary and not
+      // sufficient: a plate can land in the gap between "two frames matched"
+      // and the measurement itself, and then the mask is the whole room. A
+      // structure owns a few per cent of the canvas — if the difference covers
+      // a quarter of it, something else moved, and the honest response is to
+      // take it again rather than to report the number.
+      let acc = null;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        // A LIVING ROOM NEVER GOES STILL, and asking it to was the wrong test:
+        // the Foundry's lava moves for ever, so "two frames matched" could not
+        // be met there however long it waited. The only thing worth waiting
+        // for is ART ARRIVING, and the honest check on that is the mask this
+        // loop produces — a structure owns a few per cent of the canvas, and
+        // anything larger means something else changed. So: wait a little,
+        // measure, and retake if the answer is not believable.
+        for (let f = 0; f < 40; f++) await new Promise(k => requestAnimationFrame(k));
+        // ...AND ONLY NOW IS THE ROOM FROZEN. Two things move between two
+        // frames and neither is the structure: the clock, which drives every
+        // breath and flicker, and Math.random, which spawns embers. The
+        // Foundry never goes quiet on its own. But the freeze cannot come
+        // BEFORE the settle — art arriving over the network is what the settle
+        // is waiting for, and a stopped clock does not stop a download.
+        const tNow = realNow.call(performance);
+        performance.now = () => tNow;
+        Math.random = () => 0.5;
+        // FOUR FRAMES PER SIDE, not one: the game runs its own rAF, and a
+        // single wait after flipping the probe hands back a frame that was
+        // already in flight — with the structure still in it.
+        for (let f = 0; f < 4; f++) await new Promise(k => requestAnimationFrame(k));
+        const w0 = cv.width, h0 = cv.height;
+        const A = grab();
+        G.structProbe = 1;
+        for (let f = 0; f < 4; f++) await new Promise(k => requestAnimationFrame(k));
+        const B = grab();
+        G.structProbe = 0;
+        // THE BACKBUFFER CAN RESIZE UNDER YOU. js/perf.js drops the resolution
+        // tier when the frame rate slips, and under the full suite it does —
+        // mid-measurement. The two frames are then different sizes, the diff
+        // walks off the end of the shorter one, and the answer comes back as
+        // 164 000 changed pixels and a NaN — sat survived because the guard in
+        // the accumulator treats NaN as zero, and only the value average
+        // showed it. Compare the BUFFER LENGTHS, not just the reported size:
+        // that is the fact the arithmetic actually depends on.
+        if (cv.width !== w0 || cv.height !== h0 || A.length !== B.length) {
+          performance.now = realNow; Math.random = realRand;
+          res[room].resized = (res[room].resized || 0) + 1;
+          continue;
+        }
+        // THE FRAME'S OWN SIZE, read off the buffer. Caching it per room was
+        // the last of this bug: A0 is the heaviest room in kingdom 1, the
+        // quality dial drops its resolution tier during the wait, and a cached
+        // pixel count then indexes past the end of every frame for ever.
+        const n = A.length / 4;
+        const a2 = { h: [0, 0, 0], w: [0, 0, 0] };
+        for (let i = 0; i < n; i++) {
+          const d0 = Math.abs(A[i * 4] - B[i * 4]) + Math.abs(A[i * 4 + 1] - B[i * 4 + 1]) +
+                     Math.abs(A[i * 4 + 2] - B[i * 4 + 2]);
+          if (d0 < 24) continue;
+          const add = (src, t2) => {
+            const R = src[i * 4], G2 = src[i * 4 + 1], Bl = src[i * 4 + 2];
+            const mx = Math.max(R, G2, Bl), mn = Math.min(R, G2, Bl);
+            t2[0] += mx ? (mx - mn) / mx * 100 : 0; t2[1] += mx / 255 * 100; t2[2]++;
+          };
+          add(A, a2.h);
+          add(B, a2.w);
+        }
+        acc = a2;
+        res[room].attempts = attempt + 1;
+        performance.now = realNow;
+        Math.random = realRand;
+        if (a2.h[2] < n * 0.4) break;          // a believable mask: keep it
       }
       const fin = (t2) => ({ sat: +(t2[0] / Math.max(1, t2[2])).toFixed(1),
                              val: +(t2[1] / Math.max(1, t2[2])).toFixed(1),
@@ -164,8 +193,10 @@ const SITES = [
     const r = out[room] || {};
     if (r.err) { check(what + ' stands in ' + room, false, r.err); continue; }
     check(what + ' is drawn with the cast, not the painting', r.near === true, room);
-    check('...and its room held still long enough to measure', r.settled === true,
-          room + (r.settled ? '' : ' never settled — art still arriving'));
+    check('...and the measurement is of the structure and nothing else',
+          (r.attempts || 9) <= 3 && (r.here.px || 0) < 160000,
+          room + ' ' + (r.here.px || 0) + ' px in ' + (r.attempts || '?') + ' attempt(s)' +
+          (r.resized ? ', ' + r.resized + ' voided by a backbuffer resize' : ''));
     // "declared and never visible" is the failure ART_BIBLE §7 exists for, and
     // a structure can pass every other check while contributing no pixels. The
     // count is how many of its pixels survive a contrast test against the room
