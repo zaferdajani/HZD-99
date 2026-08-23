@@ -3181,3 +3181,63 @@ pile is the same stand-in and it wants the same three plates, in the tunnel's
 own rock rather than the meadow's: colder grey, no machine plating, wetter.
 Fire `rubble_full/half/last` for zone X alongside the zone-A set, same camera
 and contact line, and both mouths key from one wiring line.
+
+---
+
+### 2x. THE SHOP WAS THE WALL — the plane fix, and what it leaves for the plates (2026-08-23)
+
+**The owner, about the first shop:** *"the colors are still in dull faded three
+d instead of drawings like the characters. So it's might... the player might
+actually miss it. It's not appealing to the… human player to enter."*
+
+**He was reading a number.** Every depth-door structure was drawn inside
+`drawBG`, which put it under `bgPlanePass` — the pass that pulls **94% of the
+chroma out** of the far plane and multiplies its value to 42%, so the picture
+has depth. Measured in A0: the booth's mean saturation was **12.4 against a
+backdrop of 11.9**. To within a point and a half, the shop WAS the wall behind
+it. ART_BIBLE §9.4 had already written the rule — "the reserved chroma belongs
+to the cast and the interactables, not to the wall behind them" — and the booth
+was on the wrong side of it.
+
+**Fixed in code, in the same commit as this entry.** `gateDoorNear` splits the
+table: anything she walks up to and presses UP at (booth, shrine, forge hood,
+carrel, hollow, and every cave mouth) is now drawn in world space immediately
+before the standing NPCs, so a stall and the person who runs it take the same
+light; the monumental zone gates stay in the painting, which is what they are.
+Every one of them also carries the always-on ember the trader's stall had to
+itself. `tests/shopread.cjs` measures it by taking the structure away and
+comparing the pixels it owned with what was behind them.
+
+**A0 now reads 2.60** (sat 18.3 vs 10.5, value ×2.13). Two other stand-ins came
+along for free: the quench hood 1.90, the carrel 1.82, the hollow 1.10.
+
+**What is left is the PLATES, and here are the numbers for whoever fires them:**
+
+| room | structure | pixels that survive contrast | reads |
+|---|---|---|---|
+| A0 | the trader's stall (fired) | 16 644 | **2.60** |
+| C5 | the quench hood (stand-in) | 15 905 | 1.90 |
+| D1 | the Sage's carrel (stand-in) | 19 528 | 1.82 |
+| E1 | the Nymph's hollow (stand-in) | 16 961 | 1.10 |
+| A5 | the first cave mouth (fired) | 36 681 | **0.32** |
+| B3 | the Oracle's shrine (stand-in) | **38** | 1.06 |
+
+Two are failures of the ART, not of the wiring:
+
+1. **§2h — THE ORACLE'S SHRINE IS INVISIBLE.** Thirty-eight pixels of it
+   survive a contrast test against its own room. It is a dark blue-black
+   silhouette standing on the Conduits' dark brown wall, and the two are within
+   noise of each other. When the shrine plate is fired it must sit at least
+   **40% above the Conduits wall in value** — a lit shrine, lamps burning
+   inside it, not a shape cut out of the dark. Warm light will not save it: an
+   amber ember in an amber room was tried and measured, and it cancelled.
+   Its own light must be COLD (the Oracle is cyan/violet) so that hue as well
+   as value separates it from the kingdom.
+2. **§2f — THE FIRST CAVE MOUTH READS 0.32.** It is 16% BRIGHTER than the rock
+   it is cut into, and a hole is not brighter than the wall. The fired
+   `caveMouthA` plate needs a genuinely black throat — the interior at or below
+   half the rock's value — with the light confined to a thin rim on the upper
+   lip. Every zone's mouth plate takes the same note.
+
+Nothing here changes the wiring: all six already stand in the right plane, and
+`tests/shopread.cjs` will hold that. The plates only have to be legible.

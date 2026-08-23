@@ -40,13 +40,17 @@ const { chromium } = require('playwright');
 
   // Drives one step to completion by doing what it asks, then waits for the
   // step index to move. Never more than a couple of seconds per step.
+  // 150 tries at 60 ms rather than 60 at 120: the same wall clock on a step
+  // that stalls, two and a half times the attempts on a step that is merely
+  // slow. Under the full suite a dozen browsers share four cores and the
+  // game's own frame rate is what runs short, not the lesson.
   async function drive(id, action) {
-    for (let tries = 0; tries < 60; tries++) {
+    for (let tries = 0; tries < 150; tries++) {
       const s = await step();
       if (!s) break;
       if (s.id !== id) return s.id;            // already past it
       await p.evaluate(action);
-      await p.waitForTimeout(120);
+      await p.waitForTimeout(60);
     }
     return (await step() || {}).id;
   }
@@ -86,7 +90,14 @@ const { chromium } = require('playwright');
     const w = G.wrecks && G.wrecks.find(x => x && !x.dead);
     if (w) { w.hp = 0; if (typeof w.die === 'function') w.die(); else w.dead = true; }
     const q = G.pickups.find(x => x && !x.dead);
-    if (q) { player.x = q.x - 4; player.y = q.y - 8; }
+    // ...and DRIVE the pickup rather than waiting for the loop to do it. Every
+    // action that only sets up a condition and then hopes the game's own rAF
+    // runs is a step that passes on an idle machine and hangs on a busy one:
+    // under the full suite this one stalled as "coin, coin, coin, coin".
+    if (q) {
+      player.x = q.x - 4; player.y = q.y - 8; player.vy = 0;
+      for (let i = 0; i < 12 && !q.dead; i++) update(1 / 60);
+    }
   });
   await record(now);
   const scrapAfter = await p.evaluate(() => G.save.scrap);
@@ -106,7 +117,12 @@ const { chromium } = require('playwright');
           player.x = gateWorldX(gr) - player.w / 2; player.vx = 0; player.on = true;
           gateEnter();
         }
-        update(1 / 10);                            // the careful walk, at speed
+        // THE WHOLE WALK IN ONE TRY. It used to advance a tenth of a second per
+        // try, and the walk is 3.4 seconds — thirty-four of `drive`'s sixty
+        // tries spent on one doorway, leaving too few for the dialog and the
+        // shop behind it. Under the full suite that ran out and the harness
+        // reported "buy, buy, buy, buy, buy": not a broken lesson, a budget.
+        for (let i = 0; i < 80 && G.gateWalk; i++) update(1 / 10);
       }
       return;
     }

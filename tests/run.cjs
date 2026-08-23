@@ -74,6 +74,7 @@ const SUITE = [
   ['tinker',    "Ratchet's plate set is seven poses, not one picture seven times"],
   ['folk',      'the machine folk have jobs, and no two of them share a beat'],
   ['rubble',    'the first tunnel is buried, it calls, and it takes the blade'],
+  ['shopread',  'a structure she can enter is never the wall behind it'],
   ['npcstrip',  'the five work strips are twelve frames of work, foot-aligned and steady'],
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],

@@ -4217,7 +4217,7 @@ function drawZoneVista(P, zone, px, py) {
 }
 function drawMachineBG(P, px, py, horizon) {
   const zone = G.roomDef.zone, now = performance.now();
-  if (drawZoneVista(P, zone, px, py)) { if (typeof drawGateDoors === 'function') drawGateDoors(P); return; }
+  if (drawZoneVista(P, zone, px, py)) { if (typeof drawGateDoors === 'function') drawGateDoors(P, 0); return; }
   const rep = (span, speed, fn) => {
     const off = ((px * speed) % span + span) % span;
     for (let i = -1; i < 3; i++) fn(i * span - off, i);
@@ -8031,18 +8031,110 @@ function gateDoors(id) {
     if (!d.need || (G.save && G.save.flags && G.save.flags[d.need])) out.push(d);
   return out;
 }
-function drawGateDoors(P) {
+// WHICH PLANE A DOOR STANDS IN, and it is the whole of the owner's complaint
+// about the first shop: "the colors are still in dull faded three d instead of
+// drawings like the characters... the player might actually miss it. It's not
+// appealing to the... human player to enter."
+//
+// He was reading a real number. Every depth-door structure was drawn inside
+// drawBG, which means bgPlanePass ran over it — 94% of the chroma pulled out
+// and the value multiplied to 42%, because that pass exists to push the FAR
+// plane back. Measured in A0: the booth's mean saturation was 12.4 against a
+// backdrop of 11.9. The shop was, to within one point, the wall behind it.
+//
+// ART_BIBLE §9.4 already said where it belongs — "the reserved chroma belongs
+// to the cast and the INTERACTABLES, not to the wall behind them" — and the
+// booth is the most interactable object in kingdom 1. So the doors split:
+// anything she walks up to and presses UP at is drawn with the cast, after the
+// background is graded; the monumental zone gates stay in the painting, which
+// is what they are.
+// A DOOR ADVERTISES ITSELF WITH LIGHT, ALWAYS — not only once she is already
+// beside it. The trader's stall learned this on its own ("LIT AT REST, NOT
+// ONLY ON APPROACH" in drawBooth) and nothing else did, so the Oracle's
+// shrine, the quench hood, the carrel and the hollow all sat at the value of
+// the wall they stand against. Measured by tests/shopread.cjs: a structure
+// must differ from what it covers in CHROMA or in LIGHT, and the shrine
+// differed in neither.
+//
+// Warm for anything built and lit from inside; COLD for a cave mouth, which
+// reads by being a hole rather than by being a lamp.
+function structBeacon(cx2, gy, w, h, k, cold) {
+  const br = 0.9 + Math.sin((G.simClock || 0) * 1.1) * 0.1;
+  c.save();
+  if (cold) {
+    // the throat goes DARK, and the rim takes a thin cold light: a mouth that
+    // glows is a doorway, and this is a hole in rock
+    const th = c.createRadialGradient(cx2, gy - h * 0.40, 4, cx2, gy - h * 0.40, w * 0.52);
+    th.addColorStop(0, 'rgba(0,0,0,' + (0.94 + 0.05 * k).toFixed(3) + ')');
+    th.addColorStop(0.62, 'rgba(0,0,0,' + (0.82 + 0.1 * k).toFixed(3) + ')');
+    th.addColorStop(0.88, 'rgba(0,0,0,' + (0.36 + 0.14 * k).toFixed(3) + ')');
+    th.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = th;
+    c.beginPath(); c.ellipse(cx2, gy - h * 0.40, w * 0.52, h * 0.5, 0, 0, 7); c.fill();
+    c.globalCompositeOperation = 'lighter';
+    const rim = c.createRadialGradient(cx2, gy - h * 0.62, w * 0.42, cx2, gy - h * 0.62, w * 0.66);
+    rim.addColorStop(0, 'rgba(120,180,215,0)');
+    rim.addColorStop(0.72, 'rgba(130,190,220,' + (0.05 * br).toFixed(3) + ')');
+    rim.addColorStop(1, 'rgba(120,180,215,0)');
+    c.fillStyle = rim;
+    c.beginPath(); c.ellipse(cx2, gy - h * 0.62, w * 0.66, h * 0.62, 0, 0, 7); c.fill();
+    c.restore();
+    return;
+  }
+  // ONE WARM EMBER, everywhere. A cool lamp in the hot kingdoms was tried and
+  // measured worse in every room it touched: cyan light landing on orange rock
+  // cancels to grey, so the Foundry's hood went from reading 2.00 to 0.72.
+  // Contrast between a doorway and its kingdom is the ART's job — the fired
+  // plates in ART_QUEUE §2h/§2k carry it — and light alone cannot buy it.
+  const C1 = [255, 206, 116], C2 = [255, 186, 92], C3 = [255, 228, 168];
+  const rgba = (v, a) => 'rgba(' + v[0] + ',' + v[1] + ',' + v[2] + ',' + a.toFixed(3) + ')';
+  c.globalCompositeOperation = 'lighter';
+  const gl = c.createRadialGradient(cx2, gy - h * 0.34, 6, cx2, gy - h * 0.34, w * (0.40 + k * 0.36));
+  gl.addColorStop(0, rgba(C1, (0.30 + 0.16 * k) * br));
+  gl.addColorStop(0.5, rgba(C2, (0.15 + 0.10 * k) * br));
+  gl.addColorStop(1, rgba(C2, 0));
+  c.fillStyle = gl;
+  c.beginPath(); c.ellipse(cx2, gy - h * 0.34, w * (0.40 + k * 0.36), h * 0.46, 0, 0, 7); c.fill();
+  // ...and a small HOT core in the doorway. The wide glow lifts the value; a
+  // hard little source is what says "there is a lamp in there".
+  const core = c.createRadialGradient(cx2, gy - h * 0.30, 1, cx2, gy - h * 0.30, w * 0.17);
+  core.addColorStop(0, rgba(C3, (0.38 + 0.2 * k) * br));
+  core.addColorStop(1, rgba(C1, 0));
+  c.fillStyle = core;
+  c.beginPath(); c.ellipse(cx2, gy - h * 0.30, w * 0.17, h * 0.22, 0, 0, 7); c.fill();
+  const pool = c.createRadialGradient(cx2, gy, 2, cx2, gy, w * 0.46);
+  pool.addColorStop(0, rgba(C2, (0.16 + 0.09 * k) * br));
+  pool.addColorStop(1, rgba(C2, 0));
+  c.fillStyle = pool;
+  c.beginPath(); c.ellipse(cx2, gy, w * 0.46, Math.max(4, h * 0.08), 0, 0, 7); c.fill();
+  c.restore();
+}
+function gateDoorNear(def) {
+  if (def.style) return true;                       // booth, shrine, forge, carrel, hollow
+  const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
+  return !!((G.roomDef && G.roomDef.cave) || (dest && dest.cave));   // and cave mouths
+}
+function drawGateDoors(P, near) {
+  // the measurement hook, the same shape as G.artProbe: with it set, the near
+  // pass draws nothing, so a harness can photograph the room with and without
+  // its structures and measure exactly the pixels they own. Any geometric
+  // guess at "where the booth is" measures the empty sky above it as well.
+  if (near && G.structProbe) return;
   const list = player ? gateDoors() : [];
   if (!list.length) { G._doorK = 0; return; }
-  for (const d of list) drawGateDoor(P, d);
+  for (const d of list) if (gateDoorNear(d) === !!near) drawGateDoor(P, d, near);
 }
-function drawGateDoor(P, def) {
+function drawGateDoor(P, def, nearPlane) {
   // WORLD-LOCKED: one x for the trigger, the prompt and the structure. The
   // parallax depth read now comes from the arch being dimmer and the leaves
   // being lit, not from the whole doorway crawling against the terrain.
-  const ds = gateWorldX(def) - camSX();
-  if (ds < -320 || ds > 1280) return;
-  const gy = (G.roomDef.h - 2) * TILE - camSY();
+  // the near pass draws inside the camera transform, so it wants WORLD
+  // coordinates; the far pass draws in screen space. One anchor, two frames.
+  const wx = gateWorldX(def), wy = (G.roomDef.h - 2) * TILE;
+  const sx2 = wx - camSX();
+  if (sx2 < -320 || sx2 > 1280) return;
+  const ds = nearPlane ? wx : sx2;
+  const gy = nearPlane ? wy : wy - camSY();
   const near = Math.abs(player.x + player.w / 2 - gateWorldX(def)) < 130;
   // THE OPEN AMOUNT BELONGS TO THE DOOR. It used to be one number on G, which
   // was correct while a room had one door and wrong the moment it had two:
@@ -8053,21 +8145,21 @@ function drawGateDoor(P, def) {
   const k = G._doorK = def._k;
   // cave on EITHER side of the passage: it is a mouth, not a door
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
-  if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) { drawCaveMouth(ds, gy, P, k); return; }
+  if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) { drawCaveMouth(ds, gy, P, k); structBeacon(ds, gy, 200, 272, k, 1); return; }
   // a booth is a STALL, not a monument — the trader's kiosk on the meadow
   if (def.style === 'booth') { drawBooth(ds, gy, P, k); return; }
   // ...and the Oracle's shrine is HERS: same depth-door mechanics, its own
   // body, so the trader's plate never stands in the Conduits
-  if (def.style === 'oracle') { drawOracleBooth(ds, gy, P, k); return; }
+  if (def.style === 'oracle') { drawOracleBooth(ds, gy, P, k); structBeacon(ds, gy, 200, 236, k); return; }
   // ...and the Tinker's quench hood is HIS — the Foundry's own furniture,
   // the Foundry's own light
-  if (def.style === 'forge') { drawTinkerForge(ds, gy, P, k); return; }
+  if (def.style === 'forge') { drawTinkerForge(ds, gy, P, k); structBeacon(ds, gy, 200, 236, k); return; }
   // ...and the Sage's carrel is the SAGE'S — the Archives' own furniture,
   // the Archivist's own reading light
-  if (def.style === 'carrel') { drawSageCarrel(ds, gy, P, k); return; }
+  if (def.style === 'carrel') { drawSageCarrel(ds, gy, P, k); structBeacon(ds, gy, 200, 236, k); return; }
   // ...and the Nymph's hollow is LUMEN'S — the Nest's own tissue, woven,
   // and the one door in the game lit leaf-green
-  if (def.style === 'hollow') { drawLumenHollow(ds, gy, P, k); return; }
+  if (def.style === 'hollow') { drawLumenHollow(ds, gy, P, k); structBeacon(ds, gy, 200, 236, k); return; }
   // THE ZONE GATES (§2f): every kingdom's depth door is its own fired
   // monument — a furnace arch, a parted shelf-stack, a cable iris, a talon
   // arch, an organic iris — and ONLY the city keeps the colossal multilayer
@@ -10472,6 +10564,15 @@ function drawWorldFrame() {
     }
     if (U.darkK) { c.fillStyle = 'rgba(2,4,10,0.4)'; c.fillRect(cam.x - 12, cam.y - 12, 984, 564); }
   }
+  // THE INTERACTABLE STRUCTURES, in the CAST'S plane and not the painting's.
+  // The booth, the shrine, the forge hood, the carrel, the hollow and every
+  // cave mouth stand here — immediately before the standing NPCs, so a stall
+  // and the person who runs it take exactly the same light and the same
+  // chroma. They were in drawBG, where bgPlanePass pulls 94% of the colour out
+  // to push the far plane back, and the owner read the result correctly: "the
+  // colors are still in dull faded three d instead of drawings like the
+  // characters... the player might actually miss it." See gateDoorNear.
+  if (typeof drawGateDoors === 'function') drawGateDoors(P, 1);
   drawStatics(P);
   drawSpikeMenace();
   drawBreakHint();
