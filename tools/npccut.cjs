@@ -19,7 +19,7 @@ const ROWS = { servo:0, ratchet:1, mono:2, patch:3, sage:4, lumen:5, guard:6 };
   const S = process.env.S, COL = +(process.env.COL || 1);
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
-  await p.exposeFunction('by', () => fs.readFileSync('assets/characters/npc_6yaw.png').toString('base64'));
+  await p.exposeFunction('by', () => fs.readFileSync('assets/characters/npc_6yaw.webp').toString('base64'));
   const out = await p.evaluate(async ({ ROWS, COL }) => {
     const im = new Image(); im.src = 'data:image/png;base64,' + await window.by(); await im.decode();
     const CW = im.width / 6, CH = im.height / 7;

@@ -14,7 +14,7 @@ const fs = require('fs'), path = require('path');
   const imgs = {
     midA: b64(path.join(S, 't_mid_A.png')),  foreA: b64(path.join(S, 't_fore_A.png')),
     midC: b64(path.join(S, 't_mid_C.png')),  foreC: b64(path.join(S, 't_fore_C.png')),
-    hero: b64(path.join(__dirname, '..', 'assets/characters/hero/states.png')),
+    hero: b64(path.join(__dirname, '..', 'assets/characters/hero/states.webp')),
   };
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();

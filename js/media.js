@@ -5,24 +5,24 @@ const MEDIA_SRC = {
   images: {
     bgFar: 'assets/backgrounds/sci_fi_bg1.jpg',
     bgMid: 'assets/backgrounds/scifi_platform_BG1.jpg',
-    indFar: 'assets/backgrounds/ind_far.png',
-    indMid: 'assets/backgrounds/ind_mid.png',
-    indFg: 'assets/backgrounds/ind_fg.png',
+    indFar: 'assets/backgrounds/ind_far.webp',
+    indMid: 'assets/backgrounds/ind_mid.webp',
+    indFg: 'assets/backgrounds/ind_fg.webp',
     heroIdle: 'assets/characters/gothic-hero-idle.png',
     heroRun: 'assets/characters/gothic-hero-run.png',
-    heroJump: 'assets/characters/gothic-hero-jump.png',
+    heroJump: 'assets/characters/gothic-hero-jump.webp',
     heroAtk: 'assets/characters/gothic-hero-attack.png',
-    houndRun: 'assets/characters/hell-hound-run.png',
+    houndRun: 'assets/characters/hell-hound-run.webp',
     houndIdle: 'assets/characters/hell-hound-idle.png',
-    ghost: 'assets/characters/ghost-idle.png',
+    ghost: 'assets/characters/ghost-idle.webp',
     skull: 'assets/characters/fire-skull.png',
     beast: 'assets/characters/hell-beast-idle.png',
     demon: 'assets/characters/demon-idle.png',
     // pre-rendered 3D turnaround atlas: 11 subjects x 8 yaw angles
-    roster: 'assets/characters/roster_8yaw.png',
+    roster: 'assets/characters/roster_8yaw.webp',
     // the second turnaround sheet: the six machine folk and the shield guard,
     // 6 yaw angles each, assembled by tools/turnsheet.cjs from two half-turns
-    npcs: 'assets/characters/npc_6yaw.png',
+    npcs: 'assets/characters/npc_6yaw.webp',
     // 3D-rendered zone vistas: 2 cols x 3 rows, A B / C D / E X
     zones: 'assets/backgrounds/zones_far.jpg',
     // the ROOF of each kingdom, rendered from directly below with real
@@ -37,16 +37,16 @@ const MEDIA_SRC = {
     // THE EYE'S CONSTRUCTS. Two plates each — at rest, and wound up — so the
     // wind-up is a different DRAWING and not the same drawing tinted, which is
     // the silhouette law applied to a class that has no rig to pose.
-    eyeChime: 'assets/characters/eye/chime.png',
-    eyeChimeW: 'assets/characters/eye/chime_w.png',
-    eyeCarrier: 'assets/characters/eye/carrier.png',
-    eyeCarrierW: 'assets/characters/eye/carrier_w.png',
-    eyeMoth: 'assets/characters/eye/moth.png',
-    eyeMothW: 'assets/characters/eye/moth_w.png',
-    eyeLattice: 'assets/characters/eye/lattice.png',
-    eyeLatticeW: 'assets/characters/eye/lattice_w.png',
-    eyeLens: 'assets/characters/eye/lens.png',
-    eyeLensW: 'assets/characters/eye/lens_w.png',
+    eyeChime: 'assets/characters/eye/chime.webp',
+    eyeChimeW: 'assets/characters/eye/chime_w.webp',
+    eyeCarrier: 'assets/characters/eye/carrier.webp',
+    eyeCarrierW: 'assets/characters/eye/carrier_w.webp',
+    eyeMoth: 'assets/characters/eye/moth.webp',
+    eyeMothW: 'assets/characters/eye/moth_w.webp',
+    eyeLattice: 'assets/characters/eye/lattice.webp',
+    eyeLatticeW: 'assets/characters/eye/lattice_w.webp',
+    eyeLens: 'assets/characters/eye/lens.webp',
+    eyeLensW: 'assets/characters/eye/lens_w.webp',
     // THE PACK. The first thing in the game that is ALIVE rather than
     // industrial — three plates for the wolf and three for the one that leads
     // it, keyed off black by tools/blackkey.cjs so each has real alpha.
@@ -54,61 +54,61 @@ const MEDIA_SRC = {
     // Three and not two: a wolf's whole read is coil-then-pounce, and the
     // pounce happens in the air where a grounded plate cannot go. Rest, coil,
     // lunge — one per phase of the only move it has.
-    wolfRest: 'assets/characters/beasts/wolf.png',
+    wolfRest: 'assets/characters/beasts/wolf.webp',
     // ...and the two WALK frames, because a plate that slides is a wolf on
     // treads. See wolfPose(): the cycle is driven by ground travelled.
-    wolfWalkA: 'assets/characters/beasts/wolf_walka.png',
-    wolfWalkB: 'assets/characters/beasts/wolf_walkb.png',
-    wolfCoil: 'assets/characters/beasts/wolf_coil.png',
-    wolfLunge: 'assets/characters/beasts/wolf_lunge.png',
+    wolfWalkA: 'assets/characters/beasts/wolf_walka.webp',
+    wolfWalkB: 'assets/characters/beasts/wolf_walkb.webp',
+    wolfCoil: 'assets/characters/beasts/wolf_coil.webp',
+    wolfLunge: 'assets/characters/beasts/wolf_lunge.webp',
     // NINE PLATES FOR THE ALPHA, one per state, because it has five skills and
     // two of them have their own recovery. A boss with five moves sharing two
     // drawings is a boss with two moves as far as the player's eye is concerned.
-    alphaRest: 'assets/characters/beasts/alpha.png',        // prowling
-    alphaRoar: 'assets/characters/beasts/alpha_roar.png',   // the stunning roar
-    alphaHowl: 'assets/characters/beasts/alpha_howl.png',   // calling the betas
-    alphaLeap: 'assets/characters/beasts/alpha_leap.png',   // the spiral, airborne
-    alphaClaw: 'assets/characters/beasts/alpha_claw.png',   // the swipe
-    alphaBite: 'assets/characters/beasts/alpha_bite.png',   // the bite lands
-    alphaClinch: 'assets/characters/beasts/alpha_clinch.png', // ...and worries it
-    alphaRecoil: 'assets/characters/beasts/alpha_recoil.png', // landed a hit — kicks back
-    alphaTurn: 'assets/characters/beasts/alpha_turn.png',   // missed — spins to face her
-    alphaFree: 'assets/characters/beasts/alpha_free.png',   // after it yields
+    alphaRest: 'assets/characters/beasts/alpha.webp',        // prowling
+    alphaRoar: 'assets/characters/beasts/alpha_roar.webp',   // the stunning roar
+    alphaHowl: 'assets/characters/beasts/alpha_howl.webp',   // calling the betas
+    alphaLeap: 'assets/characters/beasts/alpha_leap.webp',   // the spiral, airborne
+    alphaClaw: 'assets/characters/beasts/alpha_claw.webp',   // the swipe
+    alphaBite: 'assets/characters/beasts/alpha_bite.webp',   // the bite lands
+    alphaClinch: 'assets/characters/beasts/alpha_clinch.webp', // ...and worries it
+    alphaRecoil: 'assets/characters/beasts/alpha_recoil.webp', // landed a hit — kicks back
+    alphaTurn: 'assets/characters/beasts/alpha_turn.webp',   // missed — spins to face her
+    alphaFree: 'assets/characters/beasts/alpha_free.webp',   // after it yields
     // THE FLORA. Two species per kingdom, generated in 3D and keyed off black,
     // so a room reads as somewhere that GROWS things rather than as a corridor
     // with a vista behind it. Fetched when she walks into the zone, never at
     // boot — see floraPreload().
-    floraA1: 'assets/characters/flora/a1.png',   // scrap-meadow bloom
-    floraA2: 'assets/characters/flora/a2.png',   // cable creeper
-    floraB1: 'assets/characters/flora/b1.png',   // conduit reed
-    floraB2: 'assets/characters/flora/b2.png',   // conduit fan
-    floraC1: 'assets/characters/flora/c1.png',   // foundry torch
-    floraC2: 'assets/characters/flora/c2.png',   // ember-grass
-    floraD1: 'assets/characters/flora/d1.png',   // archive frond
-    floraD2: 'assets/characters/flora/d2.png',   // ice spindle
-    floraE1: 'assets/characters/flora/e1.png',   // deep lantern
-    floraE2: 'assets/characters/flora/e2.png',   // deep coral
-    floraX1: 'assets/characters/flora/x1.png',   // prism lily
-    floraX2: 'assets/characters/flora/x2.png',   // prism thicket
+    floraA1: 'assets/characters/flora/a1.webp',   // scrap-meadow bloom
+    floraA2: 'assets/characters/flora/a2.webp',   // cable creeper
+    floraB1: 'assets/characters/flora/b1.webp',   // conduit reed
+    floraB2: 'assets/characters/flora/b2.webp',   // conduit fan
+    floraC1: 'assets/characters/flora/c1.webp',   // foundry torch
+    floraC2: 'assets/characters/flora/c2.webp',   // ember-grass
+    floraD1: 'assets/characters/flora/d1.webp',   // archive frond
+    floraD2: 'assets/characters/flora/d2.webp',   // ice spindle
+    floraE1: 'assets/characters/flora/e1.webp',   // deep lantern
+    floraE2: 'assets/characters/flora/e2.webp',   // deep coral
+    floraX1: 'assets/characters/flora/x1.webp',   // prism lily
+    floraX2: 'assets/characters/flora/x2.webp',   // prism thicket
     // THE THRUST BOOTS. The dash is a bolt-on, and this is the bolt-on: idle,
     // and at full burn under her while she crosses the gap.
-    bootsIdle: 'assets/characters/gear/boots.png',
-    bootsFire: 'assets/characters/gear/boots_fire.png',
+    bootsIdle: 'assets/characters/gear/boots.webp',
+    bootsFire: 'assets/characters/gear/boots_fire.webp',
     // THE SAVE POD, at the size a save point deserves. Dormant, and awake.
-    pod: 'assets/characters/gear/pod.png',
-    podOn: 'assets/characters/gear/pod_on.png',
+    pod: 'assets/characters/gear/pod.webp',
+    podOn: 'assets/characters/gear/pod_on.webp',
     // THE CRADLE she wakes out of, still hooked and just released, and the
     // CITY GATES at the end of the walk. Both belong to the two rooms in front
     // of the meadow and are fetched only when she is standing in them.
-    cradle: 'assets/characters/gear/cradle.png',
-    cradleOpen: 'assets/characters/gear/cradle_open.png',
+    cradle: 'assets/characters/gear/cradle.webp',
+    cradleOpen: 'assets/characters/gear/cradle_open.webp',
     gateCity: 'assets/backgrounds/gate_city.jpg',
     // THE CRYSTAL CAVE (§2c) — both sides of the rock, and the pillar. The
     // mouth and exit are full-bleed vistas (ROOM_VISTA A5 / CV1); the pillar
     // is a matted plate replacing the procedural light spears in drawStatics.
     caveMouth: 'assets/backgrounds/cave_mouth.jpg',
     caveExit: 'assets/backgrounds/cave_exit.jpg',
-    pillarPlate: 'assets/characters/gear/pillar.png',
+    pillarPlate: 'assets/characters/gear/pillar.webp',
     // GATE SHAPES (§2f) — one monumental doorway per kingdom, no two the
     // same shape, and none of them a rectangle. The CITY gate is gate_city
     // above: the one epic multilayer monument, deliberately not re-fired.
@@ -127,29 +127,29 @@ const MEDIA_SRC = {
     caveMouthE: 'assets/backgrounds/cave_mouth_e.jpg',
     // THE SAGE (§2e) — six authored states replacing drawSage's procedural
     // body at the same anchor. Amber on exactly the three telegraph states.
-    sageStand: 'assets/characters/sage/stand.png',
-    sageCoil: 'assets/characters/sage/coil.png',
-    sageLunge: 'assets/characters/sage/lunge.png',
-    sageGather: 'assets/characters/sage/gather.png',
-    sageLock: 'assets/characters/sage/lock.png',
-    sagePure: 'assets/characters/sage/pure.png',
+    sageStand: 'assets/characters/sage/stand.webp',
+    sageCoil: 'assets/characters/sage/coil.webp',
+    sageLunge: 'assets/characters/sage/lunge.webp',
+    sageGather: 'assets/characters/sage/gather.webp',
+    sageLock: 'assets/characters/sage/lock.webp',
+    sagePure: 'assets/characters/sage/pure.webp',
     // THE ROBOT BAT (§2d) — five authored states replacing drawBat's
     // procedural body. hang is the only one with its optic dark.
-    batHang: 'assets/characters/bat/hang.png',
-    batShiver: 'assets/characters/bat/shiver.png',
-    batDive: 'assets/characters/bat/dive.png',
-    batFlapUp: 'assets/characters/bat/flap_up.png',
-    batFlapDn: 'assets/characters/bat/flap_dn.png',
+    batHang: 'assets/characters/bat/hang.webp',
+    batShiver: 'assets/characters/bat/shiver.webp',
+    batDive: 'assets/characters/bat/dive.webp',
+    batFlapUp: 'assets/characters/bat/flap_up.webp',
+    batFlapDn: 'assets/characters/bat/flap_dn.webp',
     // THE ORACLE'S SHRINE + PARLOR (§2h) — the cable shrine standing in B3
     // (drawOracleBooth's hook was live before the plate) and the data-den
     // backdrop behind it (ROOM_VISTA B3B).
-    oracleBooth: 'assets/backgrounds/oracle_booth.png',
+    oracleBooth: 'assets/backgrounds/oracle_booth.webp',
     oracleInterior: 'assets/backgrounds/oracle_interior.jpg',
     // THE BREAKER (§2i) — the Conduits' own machine in its three reads:
     // latched flat, fins flared (the tell), vents fallen open (the spend).
-    breakerRest: 'assets/characters/breaker/rest.png',
-    breakerTell: 'assets/characters/breaker/tell.png',
-    breakerVented: 'assets/characters/breaker/vented.png',
+    breakerRest: 'assets/characters/breaker/rest.webp',
+    breakerTell: 'assets/characters/breaker/tell.webp',
+    breakerVented: 'assets/characters/breaker/vented.webp',
     // THE TRADER'S BOOTH AND DEN (§2g) — fired 2026-08-16, owner-approved.
     // ratchetResting is the art session's v2 — fired from his own npc_6yaw
     // row as reference, matted by Higgsfield rather than keyed (his shadowed
@@ -166,78 +166,78 @@ const MEDIA_SRC = {
     // §1b-i the crystal slash light-sheets. BLACK-FIELD, additive: they are
     // drawn with 'lighter' where brightness IS the alpha, exactly like the
     // rake sheet, so they must never be alpha-keyed.
-    slashH: 'assets/fx/slash_h.png',
-    slashD: 'assets/fx/slash_d.png',
-    slashU: 'assets/fx/slash_u.png',
-    slashDn: 'assets/fx/slash_dn.png',
+    slashH: 'assets/fx/slash_h.webp',
+    slashD: 'assets/fx/slash_d.webp',
+    slashU: 'assets/fx/slash_u.webp',
+    slashDn: 'assets/fx/slash_dn.webp',
     // §1c the back-jet gear: the pack as equipment, and at full burn. The
     // plume itself stays procedural additive light (§0.0).
-    jetpack: 'assets/characters/gear/jetpack.png',
-    jetpackFire: 'assets/characters/gear/jetpack_fire.png',
+    jetpack: 'assets/characters/gear/jetpack.webp',
+    jetpackFire: 'assets/characters/gear/jetpack_fire.webp',
     // §2j Servo's winch, and §2r the Tinker's bench — objects, not vistas.
-    winchHouse: 'assets/backgrounds/winch_house.png',
-    forgeTable: 'assets/backgrounds/forge_table.png',
+    winchHouse: 'assets/backgrounds/winch_house.webp',
+    forgeTable: 'assets/backgrounds/forge_table.webp',
     // THE MIND NODE as a monument (owner 2026-08-16: "it should be like a
     // monument, not a small object"). The plate only pays off once the node
     // itself moves out of the NPC's room.
-    mindNode: 'assets/backgrounds/mindnode_obelisk.png',
+    mindNode: 'assets/backgrounds/mindnode_obelisk.webp',
     // §2k / §2m / §2o — kingdoms 3, 4 and 5 get their doorways and dens.
-    forgeFront: 'assets/backgrounds/forge_front.png',
+    forgeFront: 'assets/backgrounds/forge_front.webp',
     forgeInterior: 'assets/backgrounds/forge_interior.jpg',
-    carrelFront: 'assets/backgrounds/carrel_front.png',
+    carrelFront: 'assets/backgrounds/carrel_front.webp',
     carrelInterior: 'assets/backgrounds/carrel_interior.jpg',
-    hollowFront: 'assets/backgrounds/hollow_front.png',
+    hollowFront: 'assets/backgrounds/hollow_front.webp',
     hollowInterior: 'assets/backgrounds/hollow_interior.jpg',
     // §2l / §2n / §2p — one machine per kingdom, three states each: at rest,
     // the tell, and spent. The tell is the pose; the amber wash is code.
-    kilnRest: 'assets/characters/kiln/rest.png',
-    kilnTell: 'assets/characters/kiln/tell.png',
-    kilnSpent: 'assets/characters/kiln/spent.png',
-    rimeRest: 'assets/characters/rime/rest.png',
-    rimeTell: 'assets/characters/rime/tell.png',
-    rimeDark: 'assets/characters/rime/dark.png',
-    snareRest: 'assets/characters/snare/rest.png',
-    snareTell: 'assets/characters/snare/tell.png',
-    snareLimp: 'assets/characters/snare/limp.png',
+    kilnRest: 'assets/characters/kiln/rest.webp',
+    kilnTell: 'assets/characters/kiln/tell.webp',
+    kilnSpent: 'assets/characters/kiln/spent.webp',
+    rimeRest: 'assets/characters/rime/rest.webp',
+    rimeTell: 'assets/characters/rime/tell.webp',
+    rimeDark: 'assets/characters/rime/dark.webp',
+    snareRest: 'assets/characters/snare/rest.webp',
+    snareTell: 'assets/characters/snare/tell.webp',
+    snareLimp: 'assets/characters/snare/limp.webp',
     // §3m boss motion — a travel pose and a wind-up per guardian. MOTHER-V is
     // stationary and exempt.
-    nullfangWalk: 'assets/characters/guardians/nullfang_walk.png',
-    nullfangCoil: 'assets/characters/guardians/nullfang_coil.png',
-    glaciereTravel: 'assets/characters/guardians/glaciere_travel.png',
-    glaciereCoil: 'assets/characters/guardians/glaciere_coil.png',
-    choirDrift: 'assets/characters/guardians/choir_drift.png',
-    choirClench: 'assets/characters/guardians/choir_clench.png',
-    talonhostGlide: 'assets/characters/guardians/talonhost_glide.png',
-    talonhostStrike: 'assets/characters/guardians/talonhost_strike.png',
-    prismStalk: 'assets/characters/guardians/prism_stalk.png',
-    prismCoil: 'assets/characters/guardians/prism_coil.png',
+    nullfangWalk: 'assets/characters/guardians/nullfang_walk.webp',
+    nullfangCoil: 'assets/characters/guardians/nullfang_coil.webp',
+    glaciereTravel: 'assets/characters/guardians/glaciere_travel.webp',
+    glaciereCoil: 'assets/characters/guardians/glaciere_coil.webp',
+    choirDrift: 'assets/characters/guardians/choir_drift.webp',
+    choirClench: 'assets/characters/guardians/choir_clench.webp',
+    talonhostGlide: 'assets/characters/guardians/talonhost_glide.webp',
+    talonhostStrike: 'assets/characters/guardians/talonhost_strike.webp',
+    prismStalk: 'assets/characters/guardians/prism_stalk.webp',
+    prismCoil: 'assets/characters/guardians/prism_coil.webp',
     // §2q the beast RUN pairs — reach and gather. js/wolves.js already
     // resolves these names and falls back to the walk pair without them.
-    wolfRunA: 'assets/characters/beasts/wolf_runa.png',
-    wolfRunB: 'assets/characters/beasts/wolf_runb.png',
-    cheetahRunA: 'assets/characters/beasts/cheetah_runa.png',
-    cheetahRunB: 'assets/characters/beasts/cheetah_runb.png',
+    wolfRunA: 'assets/characters/beasts/wolf_runa.webp',
+    wolfRunB: 'assets/characters/beasts/wolf_runb.webp',
+    cheetahRunA: 'assets/characters/beasts/cheetah_runa.webp',
+    cheetahRunB: 'assets/characters/beasts/cheetah_runb.webp',
     // NPC DIALOGUE BUSTS, cut from npc_6yaw.png by tools/npcbusts.cjs. They
     // exist so drawDialog can show the SPEAKER's face instead of always
     // drawing HZD-99's (owner 2026-08-16).
-    bustServo: 'assets/characters/npc/bust/servo.png',
-    bustRatchet: 'assets/characters/npc/bust/ratchet.png',
-    bustMono: 'assets/characters/npc/bust/mono.png',
-    bustPatch: 'assets/characters/npc/bust/patch.png',
-    bustSage: 'assets/characters/npc/bust/sage.png',
-    bustLumen: 'assets/characters/npc/bust/lumen.png',
+    bustServo: 'assets/characters/npc/bust/servo.webp',
+    bustRatchet: 'assets/characters/npc/bust/ratchet.webp',
+    bustMono: 'assets/characters/npc/bust/mono.webp',
+    bustPatch: 'assets/characters/npc/bust/patch.webp',
+    bustSage: 'assets/characters/npc/bust/sage.webp',
+    bustLumen: 'assets/characters/npc/bust/lumen.webp',
     // ===================================================================
     // §2s TERRAIN DEPTH PLANES — the authored answer to a floor that reads as a
     // bar. edge_ is the band she stands on and draws behind the cast; fore_
     // crosses in front of her. Named per zone; a zone without a pair simply
     // draws nothing, which is the same fallback every other plate takes.
-    edgeA: 'assets/backgrounds/edge_a.png',
-    foreA: 'assets/backgrounds/fore_a.png',
-    edgeC: 'assets/backgrounds/edge_c.png',
-    foreC: 'assets/backgrounds/fore_c.png',
-    boothFront: 'assets/backgrounds/booth_front.png',
+    edgeA: 'assets/backgrounds/edge_a.webp',
+    foreA: 'assets/backgrounds/fore_a.webp',
+    edgeC: 'assets/backgrounds/edge_c.webp',
+    foreC: 'assets/backgrounds/fore_c.webp',
+    boothFront: 'assets/backgrounds/booth_front.webp',
     denInterior: 'assets/backgrounds/den_interior.jpg',
-    ratchetResting: 'assets/characters/npc/ratchet_resting.png',
+    ratchetResting: 'assets/characters/npc/ratchet_resting.webp',
     // THE TINKER AT WORK (owner, 2026-08-21: "give it a character... keep it
     // busy until I talk to it"). Ratchet stops being a standing atlas row and
     // becomes a PLATE SET: seven poses of one body, fired against
@@ -246,20 +246,20 @@ const MEDIA_SRC = {
     // The loop, the interruption and the fault are all in here; the smoke is
     // not, because additive light handed to a model comes back as a solid
     // object (art-prompts §0) and the vent is drawn in code over the plate.
-    ratchetWork1: 'assets/characters/npc/ratchet/work_1.png',
-    ratchetWork2: 'assets/characters/npc/ratchet/work_2.png',
-    ratchetTic: 'assets/characters/npc/ratchet/tic.png',
-    ratchetNotice: 'assets/characters/npc/ratchet/notice.png',
-    ratchetTalk1: 'assets/characters/npc/ratchet/talk_1.png',
-    ratchetTalk2: 'assets/characters/npc/ratchet/talk_2.png',
-    ratchetVent: 'assets/characters/npc/ratchet/vent.png',
+    ratchetWork1: 'assets/characters/npc/ratchet/work_1.webp',
+    ratchetWork2: 'assets/characters/npc/ratchet/work_2.webp',
+    ratchetTic: 'assets/characters/npc/ratchet/tic.webp',
+    ratchetNotice: 'assets/characters/npc/ratchet/notice.webp',
+    ratchetTalk1: 'assets/characters/npc/ratchet/talk_1.webp',
+    ratchetTalk2: 'assets/characters/npc/ratchet/talk_2.webp',
+    ratchetVent: 'assets/characters/npc/ratchet/vent.webp',
     // THE WORK LOOP, 12 cells on one strip. The owner's report on the pose
     // set was 'looks as a slide show gif instead of a live machine doing its
     // work', and he was describing the arithmetic: seven stills held about a
     // second each is 1 fps. These twelve are frames of a generated clip of
     // this same body working, cut and keyed by tools/vidstrip.cjs — one
     // image, bottom-aligned, so the feet never move between cells.
-    ratchetLoop: 'assets/characters/npc/ratchet/work_loop.png',
+    ratchetLoop: 'assets/characters/npc/ratchet/work_loop.webp',
     // ...AND THE SAME TREATMENT FOR EVERYONE ELSE STANDING IN A ROOM. The
     // trader was the first NPC the owner met and the first he called a slide
     // show; the other five were WORSE, because they were not a slide show at
@@ -289,12 +289,12 @@ const MEDIA_SRC = {
     // with black halos around it; and the game already draws its own slash
     // sheets, which can react to the hit in a way a baked streak never will.
     // Light stays in code, the body stays in the plate (ART_BIBLE §0).
-    swingClaw1: 'assets/characters/hero/swing/claw_1.png',
-    servoLoop: 'assets/characters/npc/servo/work_loop.png',
-    monoLoop: 'assets/characters/npc/mono/work_loop.png',
-    patchLoop: 'assets/characters/npc/patch/work_loop.png',
-    sageLoop: 'assets/characters/npc/sage/work_loop.png',
-    lumenLoop: 'assets/characters/npc/lumen/work_loop.png',
+    swingClaw1: 'assets/characters/hero/swing/claw_1.webp',
+    servoLoop: 'assets/characters/npc/servo/work_loop.webp',
+    monoLoop: 'assets/characters/npc/mono/work_loop.webp',
+    patchLoop: 'assets/characters/npc/patch/work_loop.webp',
+    sageLoop: 'assets/characters/npc/sage/work_loop.webp',
+    lumenLoop: 'assets/characters/npc/lumen/work_loop.webp',
     // HER OWN BACK — generated from her live body (assets/source/ref/), the
     // first authored plates of the hero herself. Two stride frames armed, two
     // unarmed (the sword becomes a pickup — task #78), and the sword waiting
@@ -305,20 +305,20 @@ const MEDIA_SRC = {
     // Lazy like everything else, and the procedural body draws until it lands —
     // which is the same arrangement NOSTOS's hero already uses (drawHeroSprite
     // first, drawHeroRig as the fallback), pointed at her for the first time.
-    heroStates: 'assets/characters/hero/states.png',
-    heroBackA: 'assets/characters/hero/backwalk_a.png',
-    heroBackB: 'assets/characters/hero/backwalk_b.png',
-    heroBareBackA: 'assets/characters/hero/bare_bwalk_a.png',
-    heroBareBackB: 'assets/characters/hero/bare_bwalk_b.png',
-    swordGround: 'assets/characters/hero/sword_ground.png',
+    heroStates: 'assets/characters/hero/states.webp',
+    heroBackA: 'assets/characters/hero/backwalk_a.webp',
+    heroBackB: 'assets/characters/hero/backwalk_b.webp',
+    heroBareBackA: 'assets/characters/hero/bare_bwalk_a.webp',
+    heroBareBackB: 'assets/characters/hero/bare_bwalk_b.webp',
+    swordGround: 'assets/characters/hero/sword_ground.webp',
     // THE CHEETAH LINE — the second animal, for the kingdoms past the meadow.
     // No alpha, nothing to tame: these came off the same line as the wolves and
     // whatever was in them is gone. Three plates, same grammar as the wolf.
-    cheetahRest: 'assets/characters/beasts/cheetah.png',
-    cheetahWalkA: 'assets/characters/beasts/cheetah_walka.png',
-    cheetahWalkB: 'assets/characters/beasts/cheetah_walkb.png',
-    cheetahWarn: 'assets/characters/beasts/cheetah_warn.png',
-    cheetahRun: 'assets/characters/beasts/cheetah_run.png',
+    cheetahRest: 'assets/characters/beasts/cheetah.webp',
+    cheetahWalkA: 'assets/characters/beasts/cheetah_walka.webp',
+    cheetahWalkB: 'assets/characters/beasts/cheetah_walkb.webp',
+    cheetahWarn: 'assets/characters/beasts/cheetah_warn.webp',
+    cheetahRun: 'assets/characters/beasts/cheetah_run.webp',
     // (the §2q RUN pairs, the §3m guardian motion plates, the §2r forge
     // table and the Mind Node monument are registered in the fired-plates
     // section above — both sessions wired the same batch and this comment
@@ -327,33 +327,33 @@ const MEDIA_SRC = {
     // plate's black field by tools/blackkey.cjs, so each has real alpha and
     // occludes the room properly. Lazy like everything else: a lair is only
     // ever fetched when you are standing in the arena that has it.
-    lairDen: 'assets/backgrounds/lair_den.png',        // NULLFANG    — scrap den
-    lairNest: 'assets/backgrounds/lair_nest.png',      // TALONHOST   — mast nest
-    lairForge: 'assets/backgrounds/lair_forge.png',    // FURNACE     — the crucible
-    lairPeak: 'assets/backgrounds/lair_peak.png',      // GLACIERE    — ice over a frozen spring
-    lairVault: 'assets/backgrounds/lair_vault.png',    // PRISM       — geode shelf
-    lairCradle: 'assets/backgrounds/lair_cradle.png',  // MOTHER-V    — fibre cradle
+    lairDen: 'assets/backgrounds/lair_den.webp',        // NULLFANG    — scrap den
+    lairNest: 'assets/backgrounds/lair_nest.webp',      // TALONHOST   — mast nest
+    lairForge: 'assets/backgrounds/lair_forge.webp',    // FURNACE     — the crucible
+    lairPeak: 'assets/backgrounds/lair_peak.webp',      // GLACIERE    — ice over a frozen spring
+    lairVault: 'assets/backgrounds/lair_vault.webp',    // PRISM       — geode shelf
+    lairCradle: 'assets/backgrounds/lair_cradle.webp',  // MOTHER-V    — fibre cradle
     // full-frame futuristic vistas (newer set; the gloomy atlas stays for later)
     vistaCity: 'assets/backgrounds/vista_city.jpg',
     vistaCrystal: 'assets/backgrounds/vista_crystal.jpg',
-    driller: 'assets/characters/driller_12x6.png',
+    driller: 'assets/characters/driller_12x6.webp',
     // the first boss: virus-infected robot beast, parts atlas for the cutout rig
-    beastParts: 'assets/characters/beast_parts.png',
+    beastParts: 'assets/characters/beast_parts.webp',
     // boss 01: virus-infected robot eagle, parts atlas for the cutout rig
-    eagleParts: 'assets/characters/eagle_parts.png',
+    eagleParts: 'assets/characters/eagle_parts.webp',
     // the frost boss: GLACIERE, corrupted unicorn — figures, parts and fx
-    glaciereParts: 'assets/characters/glaciere_parts.png',
+    glaciereParts: 'assets/characters/glaciere_parts.webp',
     // the forge boss: FURNACE CHOIR, corrupted mecha dragon — poses, parts,
     // the glow core and the lava ring
-    dragonParts: 'assets/characters/dragon_parts.png',
+    dragonParts: 'assets/characters/dragon_parts.webp',
     // the crystal boss: PRISM PROWLER, authored pose atlas. Unlike the other
     // guardians this sheet carries BOTH halves of the character — the virus-lit
     // red cat it became, and the clear blue cat underneath it
-    prismParts: 'assets/characters/prism_parts.png',
-    motherParts: 'assets/characters/mother_parts.png',
+    prismParts: 'assets/characters/prism_parts.webp',
+    motherParts: 'assets/characters/mother_parts.webp',
     // HZD-99's claw arc, painted as glowing light on pure black so it can be
     // composited additively with no alpha channel to cut
-    slashFx: 'assets/fx/slash.png',
+    slashFx: 'assets/fx/slash.webp',
     // THE ROCK, drawn. One slab per kingdom, and every solid tile in the game —
     // floor, wall, ceiling — is cut from it, so these six files are the whole
     // world's surface. Lazy like everything else: js/game.js bakes its
@@ -366,7 +366,7 @@ const MEDIA_SRC = {
     rockX: 'assets/backgrounds/rock_x.jpg',
     // authored STRATA: four platform decks (clean / virus-grown / forge /
     // frozen) cut from the owner's sheet, and the four scene bands behind them
-    platforms: 'assets/tiles/platforms.png',
+    platforms: 'assets/tiles/platforms.webp',
     strataRubble: 'assets/backgrounds/strata_rubble.jpg',
     strataIceA: 'assets/backgrounds/strata_iceA.jpg',
     strataLava: 'assets/backgrounds/strata_lava.jpg',

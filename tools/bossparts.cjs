@@ -26,7 +26,7 @@ const fs = require('fs'), path = require('path');
 // composite a boss out of the wrong slices, so `verify` checks them.
 const BOSSES = {
   beast: {
-    atlas: 'assets/characters/beast_parts.png', table: 'BEAST_P', src: 'js/beast.js',
+    atlas: 'assets/characters/beast_parts.webp', table: 'BEAST_P', src: 'js/beast.js',
     parts: {
       head: [6, 6, 154, 158], neck: [166, 6, 69, 88], body: [241, 6, 204, 144],
       fleg0: [451, 6, 68, 82], fleg1: [525, 6, 70, 109],
@@ -51,7 +51,7 @@ const BOSSES = {
     fill: { aIdle: 1, aWalk: 1, aRoar: 1, aAtk: 1, tail0: 1, tail1: 1, tail2: 1, tail3: 1 },
   },
   eagle: {
-    atlas: 'assets/characters/eagle_parts.png', table: 'EAGLE_P', src: 'js/eagle.js',
+    atlas: 'assets/characters/eagle_parts.webp', table: 'EAGLE_P', src: 'js/eagle.js',
     parts: {
       eHead: [6, 6, 85, 107], eBody: [97, 6, 105, 134],
       eWingU: [208, 6, 181, 107], eWingL: [395, 6, 147, 90], eWingT: [548, 6, 73, 70],
@@ -71,7 +71,7 @@ const BOSSES = {
     fill: { fea0: 1, fea1: 1, fea2: 1 },
   },
   furnace: {
-    atlas: 'assets/characters/dragon_parts.png', table: 'DRG_P', src: 'js/furnace.js',
+    atlas: 'assets/characters/dragon_parts.webp', table: 'DRG_P', src: 'js/furnace.js',
     parts: {
       hero: [6, 6, 608, 541], ring: [620, 6, 512, 96],
       idle: [1138, 6, 170, 165], walk: [6, 553, 196, 168], fly: [208, 553, 230, 168],
@@ -91,7 +91,7 @@ const BOSSES = {
     stretchMax: { tail: 1.35 },
   },
   glaciere: {
-    atlas: 'assets/characters/glaciere_parts.png', table: 'GLC_P', src: 'js/glaciere.js',
+    atlas: 'assets/characters/glaciere_parts.webp', table: 'GLC_P', src: 'js/glaciere.js',
     parts: {
       hero: [6, 6, 610, 413],
       head: [622, 6, 114, 129], neck: [742, 6, 63, 130], body: [811, 6, 192, 123],
@@ -110,7 +110,7 @@ const BOSSES = {
     fill: { lance: 1, shard1: 1, novaCr: 1 },
   },
   mother: {
-    atlas: 'assets/characters/mother_parts.png', table: 'MVA', src: 'js/mother.js',
+    atlas: 'assets/characters/mother_parts.webp', table: 'MVA', src: 'js/mother.js',
     parts: {
       plate: [427, 2, 175, 238], plateB: [604, 2, 175, 228],
       crack: [326, 360, 177, 216], crack2: [505, 360, 181, 216],
