@@ -511,7 +511,13 @@ function rigIK(sx, sy, hx, hy, l1, l2, bend) {
 // cells' HERO_EYE measurements: run_a's eye midpoint sits at 0.455 of the
 // cell, run_b's at 0.382 — 11.7px of head drift at cell scale, the exact
 // strobing the owner reported on the walk. Aligned to their common midpoint.
-const HERO_REG = { walk_a: -0.046, walk_b: 0.046, run_a: -0.031, run_b: 0.031,
+// run_a/run_b re-measured 2026-08-23 after the run contact was fired (see
+// below): the new cell carries her head 0.045 of a cell further right than
+// the pose it replaced, so the old +-0.031 no longer put the two skulls on
+// a common midpoint. Both numbers come from ONE measurement of the same
+// landmark on both cells, so their difference is right even though the
+// landmark (the visor's cyan centroid) is not the one the walk pair used.
+const HERO_REG = { walk_a: -0.046, walk_b: 0.046, run_a: -0.0355, run_b: 0.0355,
   // walk_c is the opposite contact, fired 2026-08-21. Its head centre sits
   // right of the walk pair's common midpoint, so it is nudged back the same
   // way they are — the whole point of this table is that the SKULL does not

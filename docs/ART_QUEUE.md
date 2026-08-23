@@ -16,6 +16,88 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 1i. THE RUN HAD NO CONTACT POSE ✅ FIXED 2026-08-23 (art session)
+
+**The owner's report:** *"While the hero runs, you are only moving the back leg,
+the one that is grayed out, which makes the other one seem as if it is just
+sliding forward without actually running. As if we're standing on a scooter and
+pushing with the other leg. That's why it looks fake."*
+
+He was describing the cause, not just the symptom, and the sheet confirms it.
+Counting the soles that sit near the floor line in each cell:
+
+| cell | soles near the floor | sole-to-sole |
+|---|---|---|
+| `walk_a` | 2 | **69 px** |
+| `walk_c` | 2 | **64 px** |
+| `run_a` | **1** | 0 |
+| `run_b` | **1** | 0 |
+
+**The run had no contact pose at all.** Both run cells were single-support poses
+with the SAME knee up, so the near leg never travelled and the only thing
+changing between frames was one bent knee while the body slid forward. The walk
+has a 69px stride to stand on; the run had nothing. js/entities.js had already
+written the number down without drawing the conclusion: *"run_a and run_b span
+20 and 18 cell-pixels — neither is a contact pose."*
+
+**Fixed** by firing a real running contact into `run_a` — foot planted well
+ahead of the body, trailing leg extended back and lifted. The cycle is now
+contact → passing → contact → passing instead of passing → passing.
+`HERO_REG.run_a`/`run_b` were re-measured with it: the new cell carries her
+skull 0.045 of a cell further right than the pose it replaced, which is the same
+size of head drift this table was built to cancel.
+
+### THE GENERATOR WILL NOT SWAP TWO LIMBS — FIVE ATTEMPTS
+
+`run_c`, the opposite contact, was asked for five times and refused every time:
+
+1. as a described pose, from `run_a` — same leg leading;
+2. as an absolute description naming which leg is dark and which is bright —
+   same leg leading, and measurably so (forward mass 142.6 vs trailing 139.4:
+   the two legs came back lit almost identically, so it had not swapped them,
+   it had only opened the stride wider);
+3. as an explicit "reverse the stride, the near leg goes back" instruction —
+   came back a pixel-near copy of its own reference;
+4. from `walk_c` as a pose template, asking only to convert a walk contact into
+   a sprint without changing which leg leads — same leg leading;
+5. with the head and lighting locked and only the legs described — same again.
+
+**Mirroring the legs mechanically does not work either**, and it was worth
+trying because that is the move that beat the black-margin problem
+(`tools/replate.cjs`). A horizontal mirror of the leg band about the torso's own
+axis SHOULD swap which leg leads and carry each leg's shading with it. It does —
+but the cape and the pelvis do not separate on a horizontal cut, so every cut
+line either mangled the scarf or left a seam at the hip. The tool was written,
+measured, and deleted rather than shipped.
+
+**This matters less than it looks, because of what the walk turned out to be
+doing.** `walk_c` — the shipped "opposite contact" — ALSO leads with the near
+leg (forward mass 153.1 vs trailing 96.2, the same sign as `walk_a`). The walk
+has never had a true left/right alternation. It reads correctly because both
+feet plant WIDE APART, not because the legs alternate. Wide contacts are what
+sell a gait at this size. The run now has one.
+
+### A FIRING CAME BACK WITH HER EYES OFF
+
+The first accepted contact had an unlit visor — a dark empty lens where the rest
+of the sheet carries two glowing cyan eye-lights. Cycled at 1:1 against `run_b`
+that strobes her face on and off every other frame, which is a worse defect than
+the one being fixed. Caught by laying the cycle out in play order rather than
+looking at the cell alone, and re-fired with the glow named explicitly: the
+replacement measures 79 against `run_b`'s 79.
+
+**The lesson for the next pose fired into this sheet:** name the lit parts. The
+identity lock in §1 lists silhouette, proportion, palette and costume, and the
+generator honoured all four while quietly switching her eyes off — because
+nothing in the brief said they were ON.
+
+### WHAT IS STILL OPEN
+
+`run_c` stays benched and the run stays two-beat. An on-model opposite contact
+needs a source the generator cannot drift: a render from the model, or a hand
+pose-over of `run_a`. The brief stays here.
+---
+
 ## 1g. THE WORLD, DRAWN — 40 plates restyled, and the RULE that made it safe ✅ SHIPPED 2026-08-22 (art session)
 
 **The owner's standing line for this pass:** *"the only change in the branch is

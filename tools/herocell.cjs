@@ -28,14 +28,19 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 
-// mirrors HERO_CELL in js/entities.js — the sheet's wire format
+// mirrors HERO_CELL in js/entities.js — the sheet's wire format.
+// KEEP THESE TWO IN STEP. This table went stale once already: walk_c and run_c
+// were appended to the sheet (24 cells now, not 22) and this copy still said
+// 22, so the tool would have rebuilt the sheet a cell-pair SHORT and silently
+// dropped the two opposite-contact poses off the end. A mirror that is allowed
+// to drift is a mirror that deletes art.
 const CELL = {
   idle: 0, walk_a: 1, walk_b: 2, run_a: 3, run_b: 4, rise: 5, apex: 6,
   fall: 7, land: 8, dash: 9, skid: 10, wall_cling: 11, djump_jet: 12,
   claw_1: 13, claw_2: 14, finisher: 15, charge: 16, burst: 17, hurt: 18,
-  heal: 19, song: 20, slump: 21,
+  heal: 19, song: 20, slump: 21, walk_c: 22, run_c: 23,
 };
-const CELLS = 22;
+const CELLS = 24;
 const FLOOR = 4;   // the margin herostates.cjs leaves under a grounded pose
 
 const PAGE = `
