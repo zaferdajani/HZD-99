@@ -3864,14 +3864,38 @@ function introSoundTap() {
   try { musKick(); } catch (e) {}
   return true;
 }
+// How long a deliberate skip takes. Long enough that a stray touch cannot
+// spend the story, short enough that a player who has seen it twice is not
+// held hostage by it.
+const CUT_SKIP_HOLD = 0.8;
 function updateCut(dt) {
   const ct = G.cut;
   if (!ct) { G.state = 'PLAY'; return; }
   ct.t += dt; ct.hint += dt;
   const v = ct.v;
-  const skip = inP('OK') || inP('JUMP') || inP('ATK') || inP('PAUSE') || inP('BACK');
-  if (skip && ct.patient && introSoundTap()) return;
-  if (skip && ct.ph !== 'out') { ct.ph = 'out'; ct.t = 0; ct.skipped = true; return; }
+  // SKIPPING IS A HOLD, NOT A TAP (owner, 2026-08-23): "we should prevent
+  // skipping the videos by single tap. It should be holding a certain button to
+  // skip it instead of accidental skipping the story."
+  //
+  // He is right about the failure mode and it is worse on a phone than anywhere
+  // else: the screen IS the button, the film asks to be touched to start its
+  // sound, and every one of those touches used to be a live skip. The story is
+  // the one thing in this game a player cannot get back by trying again.
+  //
+  // The press still does two things it always did — it buys sound while the
+  // sound is locked, and it is what the hold is measured from — but throwing
+  // the film away now costs CUT_SKIP_HOLD seconds of deliberate contact, drawn
+  // as a filling bar so the player can see the cost before paying it.
+  const pressed = inP('OK') || inP('JUMP') || inP('ATK') || inP('PAUSE') || inP('BACK');
+  const holding = inD('OK') || inD('JUMP') || inD('ATK') || inD('PAUSE') || inD('BACK');
+  if (pressed && ct.patient && introSoundTap()) { ct.skipHold = 0; return; }
+  // the bar only fills once the film is actually on screen; holding through the
+  // fade-in would skip a story the player has not been shown yet
+  if (holding && ct.ph === 'play') ct.skipHold = (ct.skipHold || 0) + dt;
+  else ct.skipHold = 0;
+  if (ct.skipHold >= CUT_SKIP_HOLD && ct.ph !== 'out') {
+    ct.ph = 'out'; ct.t = 0; ct.skipped = true; return;
+  }
   if (ct.ph === 'in') {
     if (ct.t >= 0.34) { ct.ph = 'hold'; ct.t = 0; }
     return;
@@ -3881,12 +3905,28 @@ function updateCut(dt) {
     // reads as the moment before a memory surfaces, never as a stall.
     ct.held += dt;
     if (purifyReady(ct.kind) || ct.held > (ct.patient ? 14 : 4)) {
-      // REWIND ON THE FRAME IT STARTS, not when the cut was created. The seek
-      // requested in startPurifyCut is asynchronous and needs metadata; on a
-      // clip that has been played before, `currentTime` can still be sitting at
-      // the end when play() is called — and the very next check reads
-      // `currentTime >= duration` as "this film is over" and throws it away.
-      try { if (v.currentTime > 0.05) v.currentTime = 0; } catch (e) {}
+      // WAIT FOR THE REWIND TO LAND. Asking for currentTime = 0 and calling
+      // play() on the same frame is a RACE, and it is the one the owner kept
+      // losing: "the first story glitches most of the time, I need to replay it
+      // multiple times to force it to show from the beginning."
+      //
+      // The opening is where it bites hardest, because the very tap that starts
+      // it is also the gesture that primes every clip in the game, and priming
+      // IS a play(). purifyPrime's settle deliberately leaves the live cut
+      // alone — correct, or it would pause the film it just started — so clip
+      // one arrives here already running, at whatever position the prime
+      // reached. A seek is asynchronous: request it, call play() immediately,
+      // and the browser resumes from the OLD position. On screen that is the
+      // film starting somewhere in its middle.
+      //
+      // So the rewind is now a state, not a statement. Ask once, stay in the
+      // dark until the clip is actually at the start, and only then play. The
+      // hold timeout above still bounds it, so a browser that will not seek
+      // falls through exactly as it did before instead of hanging.
+      if (v.currentTime > 0.05) {
+        if (!ct.rewound) { ct.rewound = true; try { v.pause(); v.currentTime = 0; } catch (e) {} }
+        return;                                  // still seeking — hold the black
+      }
       const pr = v.play();
       if (pr && pr.catch) pr.catch(() => { if (G.cut) G.cut.failed = true; });
       ct.ph = 'play'; ct.t = 0;
@@ -4014,8 +4054,20 @@ function drawCut() {
   }
   if (ct.ph === 'play' && ct.hint > 1.6) {
     c.save();
-    c.globalAlpha = 0.35 + Math.sin(performance.now() / 420) * 0.12;
-    ftxt(t('cut_skip'), 480, 516, 13, '#9fb8c8', 'center');
+    const k = clamp((ct.skipHold || 0) / CUT_SKIP_HOLD, 0, 1);
+    // A HOLD THE PLAYER CANNOT SEE IS JUST A BUTTON THAT DOES NOT WORK. The
+    // prompt brightens the moment contact starts and a bar fills under it, so
+    // the second of deliberate pressure reads as progress rather than as the
+    // game ignoring them — and letting go visibly costs nothing.
+    c.globalAlpha = k > 0 ? 1 : 0.35 + Math.sin(performance.now() / 420) * 0.12;
+    ftxt(t('cut_skip'), 480, 516, 13, k > 0 ? '#eaf4ff' : '#9fb8c8', 'center');
+    if (k > 0) {
+      const W = 96, H = 3, X = 480 - W / 2, Y = 524;
+      c.fillStyle = 'rgba(160,190,210,0.28)';
+      rr(c, X, Y, W, H, 1.5); c.fill();
+      c.fillStyle = '#eaf4ff';
+      rr(c, X, Y, Math.max(2, W * k), H, 1.5); c.fill();
+    }
     c.restore();
   }
   if (typeof drawSoundChip === 'function') drawSoundChip(performance.now() / 1000);

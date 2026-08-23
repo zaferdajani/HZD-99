@@ -480,6 +480,22 @@ function tStart(e) {
       if (x >= L.r.left && x <= L.r.right && y >= L.r.top && y <= L.r.bottom) {
         tapMenu((x - L.r.left) * 960 / L.r.width, (y - L.r.top) * 540 / L.r.height);
       }
+    } else if (typeof G !== 'undefined' && G.state === 'CUT') {
+      // A FILM IS SKIPPED BY HOLDING, SO THE TOUCH HAS TO ACTUALLY HOLD.
+      // Everything else in this branch is a menu-ish screen where a tap means
+      // "yes", and tPress is right for those: it presses and auto-releases
+      // through TOUCH.tapRel. A cut is the one state that now reads inD() over
+      // a real duration (updateCut, CUT_SKIP_HOLD), and an auto-released press
+      // is down for a frame or two — so hold-to-skip would have worked on a
+      // keyboard and been UNREACHABLE on a phone, which is the platform the
+      // accidental skipping was reported on.
+      //
+      // So the finger owns the release here, exactly as it does for the game
+      // buttons: register it in TOUCH.held and let tEnd clear it. The press
+      // edge still fires, which is what buys the sound on the first touch.
+      TOUCH.held[t.identifier] = 'VOK';
+      keys.VOK = 1; keysP.VOK = 1;
+      tBuzz(10);
     } else {
       tPress('VOK');
     }
