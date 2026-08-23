@@ -270,6 +270,26 @@ const MEDIA_SRC = {
     // nymph breathes light. Wired through NPC_LOOP in js/game.js, and lazy
     // like everything else — the atlas covers the frames before the strip
     // lands, exactly as it always did.
+    // HER SWING, AS A MOVE. The attack cells claw_1/claw_2/finisher/burst are
+    // POSES: heroState returns one of them and holds it for the whole 240 ms of
+    // swingVis without ever reading swingVis.t, so her body is identical from
+    // the first millisecond of a blow to the last and then snaps back. The
+    // owner's report is that exact arithmetic — "three kind of hits with three
+    // moves that changes from still to hit without transitions in between".
+    //
+    // These are six frames cut from a clip of that same body actually throwing
+    // the blow: guard, wind-up, the SMEAR with the arm stretched long through
+    // the arc, contact fully extended, follow-through, recovery. At 240 ms that
+    // is 40 ms a frame, which is the "milliseconds from one frame to another"
+    // he asked for.
+    //
+    // NO LIGHT IS BAKED IN. The first take came back with a glowing crescent
+    // trailing the claw and it was refused for two reasons: the arc encircles
+    // background the flood-fill key cannot reach from the border, so it keyed
+    // with black halos around it; and the game already draws its own slash
+    // sheets, which can react to the hit in a way a baked streak never will.
+    // Light stays in code, the body stays in the plate (ART_BIBLE §0).
+    swingClaw1: 'assets/characters/hero/swing/claw_1.png',
     servoLoop: 'assets/characters/npc/servo/work_loop.png',
     monoLoop: 'assets/characters/npc/mono/work_loop.png',
     patchLoop: 'assets/characters/npc/patch/work_loop.png',

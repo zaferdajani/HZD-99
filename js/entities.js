@@ -542,6 +542,14 @@ const HERO_CELLS = 24;
 // the dirt and the front grass blades brush her ankles, which is what
 // standing IN a meadow looks like.
 const HERO_DH = 60, HERO_FLOOR = 6;
+// Six frames of the real blow per attack (js/media.js swingClaw1 and friends).
+// Only claw_1 is fired so far — the rest fall through to their pose cell, which
+// is exactly what shipped before, so a half-finished set costs nothing.
+const SWING_STRIP = {
+  claw_1: { key: 'swingClaw1', cells: 6 },
+};
+// measured: the strip's figure is 236 of a 320 cell, the sheet's is 140 of 169
+const SWING_K = (320 / 236) / (169 / 140);
 // ---- HOW FAR ONE STEP CARRIES HER, OFF THE PLATES THEMSELVES ---------------
 //
 // The step length is the foot-to-foot distance at CONTACT: when the trailing
@@ -1812,8 +1820,43 @@ class Player {
   // facing mirrors the plate and flips its lit side; the procedural body has
   // always been mirrored the same way, so this matches what shipped rather
   // than introducing a new inconsistency.
+  // THE SWING IS A MOVE, NOT A POSE — and this file already proved the point
+  // for the other game. drawHeroSprite steps six frames across the swing with
+  // Math.floor(p * n); heroState() returns ONE cell name for the cat and never
+  // reads swingVis.t, so her body holds a single drawing for all 240 ms of a
+  // blow and then snaps back. The owner: "it should transition in milliseconds
+  // from one frame to another... what you're doing is three kind of hits with
+  // three moves that changes from still to hit without transitions in between."
+  //
+  // The blade made it worse rather than covering it: swAng sweeps the sword
+  // through the arc with p, so the weapon travelled while the body behind it
+  // stood still — a moving blade on a frozen body reads as a sticker dragged
+  // across the screen, which is why the sword felt faker than the claw.
+  //
+  // ONE STRIP PER ATTACK, indexed by the swing's own progress. Falls through to
+  // the pose cell whenever the strip is not here yet, which is the same
+  // contract every other authored renderer in this file keeps.
+  drawRoboSwing(c) {
+    const sv = this.swingVis;
+    if (!sv || sv.swirl) return false;          // the swirl has its own drawing
+    const S = SWING_STRIP[sv.charged ? 'burst' : sv.combo >= 3 ? 'finisher'
+                          : sv.combo === 2 ? 'claw_2' : 'claw_1'];
+    if (!S) return false;
+    const p = clamp(1 - sv.t / sv.t0, 0, 0.999);
+    // THE CELL IS SIZED TO THE SHEET, NOT TO ITSELF. A strip cell is square and
+    // the figure fills whatever fraction of it the swing's widest frame allows
+    // — 236 of 320 here against the sheet's 140 of 169 — so drawing it at
+    // HERO_DH would land her a tenth short and she would shrink the instant she
+    // attacked. Measured once, against the cell this replaces.
+    const h = HERO_DH * SWING_K;
+    return drawStripCell(c, S.key, Math.floor(p * S.cells), S.cells,
+                         0, HERO_FLOOR, h, false);
+  }
   drawRoboPlate(c, run) {
     if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG.heroStates) return false;
+    // the swing plays its own strip when one is fired for that attack; it
+    // returns false until the art lands and the pose cell covers it meanwhile
+    if (this.swingVis && this.drawRoboSwing(c)) return true;
     const im = MEDIA_IMG.heroStates;
     const cw = im.width / HERO_CELLS, ch = im.height;
     const st = this.heroState(run);
