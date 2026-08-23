@@ -104,7 +104,7 @@ const check = (name, ok, detail) => {
     // how long until each body with a strip first asks for it, and how far the
     // strip gets while it plays
     const loops = Object.keys(NPC_LOOP).filter(k => NPC_JOB[k]);
-    const reached = {}, phase = {};
+    const reached = {}, phase = {}, floor = {};
     for (const k of loops) {
       const sh = { x: 0, extra: k, w: 24 };
       let t = 0, ph0 = null;
@@ -114,13 +114,37 @@ const check = (name, ok, detail) => {
         if (sh._job.work) reached[k] = t;
       }
       if (reached[k] !== undefined) {
-        ph0 = sh._job.ph || 0;
-        for (let f = 0; f < 60 * 3; f++) npcJobCol(sh, 1 / 60);
-        phase[k] = Math.abs((sh._job.ph || 0) - ph0);
+        // MEASURE ONLY THE FRAMES THAT ARE ACTUALLY PLAYING, and measure the
+        // DISTANCE TRAVELLED rather than where it ended up. The first version
+        // of this did neither and flaked three runs in five (the art session
+        // measured the rate and wrote it up in ART_QUEUE):
+        //
+        //   - it sampled a fixed three-second window against a system that
+        //     re-rolls tempo per burst and inserts holds of up to 2.4s for the
+        //     sage. A window can close entirely inside a hold, which is how one
+        //     run reported `patch 0` — not a frozen strip, a designed pause.
+        //   - and it took `|end - start|`, which is NET. Bursts ping-pong on
+        //     purpose (a stroke and a return), so a burst that runs forward and
+        //     back nets to nothing while playing perfectly.
+        //
+        // The property actually being claimed is "while a burst plays, the
+        // phase moves". So: accumulate |Δph| across playing frames only, and
+        // compare it against what this character's OWN slowest tempo would
+        // produce over the seconds it was seen playing. Nothing random is left
+        // in the comparison, so there is no tail to cross a floor.
+        let played = 0, moved = 0;
+        for (let f = 0; f < 60 * 60 && played < 90; f++) {
+          const before = sh._job.ph || 0;
+          const live = sh._job.work && sh._job.hold <= 0 && sh._job.play > 0;
+          npcJobCol(sh, 1 / 60);
+          if (live) { played++; moved += Math.abs((sh._job.ph || 0) - before); }
+        }
+        phase[k] = moved;
+        floor[k] = (played / 60) * NPC_WORK[k].fps[0] * 0.9;
       }
       player.x = pkeep;
     }
-    return { who, out, pairWorst, pairName, yielded, loops, reached, phase };
+    return { who, out, pairWorst, pairName, yielded, loops, reached, phase, floor };
   });
 
   const still = r.who.filter(k => r.out[k].span < 15 || r.out[k].distinct < 12);
@@ -151,9 +175,10 @@ const check = (name, ok, detail) => {
   check('every work strip is reachable from the job', unreachable.length === 0,
         unreachable.length ? 'never played: ' + unreachable.join(' ')
                            : r.loops.map(k => k + ' after ' + r.reached[k].toFixed(1) + 's').join('  '));
-  const frozen = r.loops.filter(k => (r.phase[k] || 0) < 6);
+  const frozen = r.loops.filter(k => (r.phase[k] || 0) < (r.floor[k] || 0));
   check('...and the strip advances while it plays', frozen.length === 0,
-        r.loops.map(k => k + ' ' + (r.phase[k] || 0).toFixed(0) + ' cells').join('  '));
+        r.loops.map(k => k + ' ' + (r.phase[k] || 0).toFixed(0) + '/' +
+                  (r.floor[k] || 0).toFixed(0)).join('  '));
 
   if (errs.length) check('no page errors', false, errs[0]);
   await browser.close();

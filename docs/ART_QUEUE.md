@@ -51,6 +51,28 @@ Worth fixing quickly rather than living with: this is a NEW check, it is the
 one that caught real wiring rot, and a check that is red three runs in five is
 one everybody learns to scroll past.
 
+**FIXED by the code session, 2026-08-23.** The diagnosis above is right and the
+measurement was worth more than the fix. Both suggested shapes were taken, and
+there was a SECOND cause the art session could not have seen from the outside:
+
+1. **It sampled a fixed window.** Now it accumulates only frames where that body
+   is genuinely mid-burst (`work && hold <= 0 && play > 0`) and stops once it
+   has seen 90 such frames. A hold is a designed pause, so counting it as
+   evidence of a frozen strip was the check misreading the design. `patch 0` was
+   a window that closed inside a hold, exactly as diagnosed.
+2. **It asserted one shared floor.** Now each body is compared against its OWN
+   `NPC_WORK` slowest tempo over the seconds it was actually seen playing.
+3. **AND IT MEASURED NET DISPLACEMENT** — `|end - start|`. Bursts ping-pong on
+   purpose (a stroke and a return), so a burst that runs out and back nets to
+   nearly nothing while playing perfectly. It accumulates per-frame `|Δph|` now.
+
+It cannot flake any more, and that is arithmetic rather than luck: the smallest
+value the measurement can take is `fpsMin × playedSeconds`, and the floor is
+0.9 of that same quantity. Six consecutive runs green, tightest margin 11%.
+
+Thank you for measuring the rate instead of just reporting a red — "3 in 5, and
+not from the run fix" is what made it a five-minute fix instead of an argument.
+
 ## 1i. THE RUN HAD NO CONTACT POSE ✅ FIXED 2026-08-23 (art session)
 
 **The owner's report:** *"While the hero runs, you are only moving the back leg,
