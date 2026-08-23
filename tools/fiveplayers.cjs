@@ -90,7 +90,7 @@ const PERSONAS = [
         } else if (G.state === 'PLAY') {
           if (st === 'move') { K('ArrowRight', 1); if (rnd3() < PP.wander) { K('ArrowRight', 0); K('ArrowLeft', 1); } }
           else if (st === 'out' || st === 'gate' || st === 'go') {
-            const gr = typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId];
+            const gr = (typeof gateDoors === 'function' ? gateDoors() : [])[0];
             if (st === 'gate' && gr) { if (goTo(gateWorldX(gr))) { K('ArrowUp', 1); if (!G.gateWalk && player.on) gateEnter(); } }
             else K('ArrowRight', 1);
             // the step and the shelf on the way: jump when a wall is ahead
@@ -110,7 +110,7 @@ const PERSONAS = [
             const npc = G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet');
             if (npc) { if (goTo(npc.x + npc.w / 2)) { K('KeyE', 1); reactT = PP.react; } }
             else {
-              const gr = GATE_ROOM[G.roomId];
+              const gr = gateDoors()[0];
               if (gr && gr.style === 'booth') { if (goTo(gateWorldX(gr))) { K('ArrowUp', 1); if (!G.gateWalk && player.on) gateEnter(); } }
             }
           }
@@ -119,7 +119,7 @@ const PERSONAS = [
             const rd = G.statics.find(s => s.type === 'riddle');
             if (rd) { if (goTo(rd.x + rd.w / 2)) { K('KeyE', 1); reactT = PP.react + PP.dwell / 4; } }
             else {
-              const gr = GATE_ROOM[G.roomId];   // still in the booth: walk out
+              const gr = gateDoors()[0];   // still in the booth: walk out
               if (gr) { if (goTo(gateWorldX(gr))) { K('ArrowUp', 1); if (!G.gateWalk && player.on) gateEnter(); } }
             }
           }
@@ -127,7 +127,7 @@ const PERSONAS = [
           else if (st === 'free') { K('ArrowRight', 1); if (player.on && Math.abs(player.vx) < 12) jumpNow(); }
           // any walking step inside a room with no right exit: leave by the door
           if ((st === 'go' || st === 'free') && G.roomDef && !G.roomDef.exits.R) {
-            const gr2 = GATE_ROOM[G.roomId];
+            const gr2 = gateDoors()[0];
             if (gr2) { clearAll(); if (jumpT > 0) K('KeyZ', 1); if (goTo(gateWorldX(gr2))) { K('ArrowUp', 1); if (!G.gateWalk && player.on) gateEnter(); } }
           }
         } else { K('Enter', 1); }

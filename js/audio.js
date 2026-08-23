@@ -522,6 +522,21 @@ function npcVoxBuild(id) {
     case 'sage':    osc(440, 'sine', 0.12); osc(554.4, 'sine', 0.1); osc(659.3, 'sine', 0.08, 0.3, 2); break; // a held chord, almost song
     case 'patch':   nz(0.22, 2400, 0.8); osc(96, 'square', 0.05, 7, 5); break;              // tools and tiny arcs
     case 'lumen':   osc(880, 'sine', 0.1, 1.7, 12); osc(1318.5, 'sine', 0.05, 2.3, 9); break; // wandering shimmer
+    // THE LURE (owner, 2026-08-23: "it should emit a sound from within that
+    // attracts me to go there"). Not a machine and not a person — a HOLE:
+    // a sub-bass the room breathes through, a hollow throat resonance an
+    // octave and a fifth above it, and a thin wandering shimmer that is the
+    // only part with a melody. It is deliberately the lowest voice in the
+    // game, because low is what carries through rock and what a player walks
+    // toward without being told to. Upgrades itself the moment a fired
+    // 'hum_cave' loop lands in MBUF (see the head of this block).
+    case 'cave':
+      osc(38, 'sine', 0.62, 0.13, 2);
+      osc(57, 'sine', 0.2, 0.09, 1.5);
+      nz(0.09, 150, 6);
+      nz(0.05, 620, 9);
+      osc(494, 'sine', 0.028, 0.21, 7);
+      break;
     default:        osc(110, 'sine', 0.3);
   }
   return { g, nodes };
@@ -927,6 +942,23 @@ function sfx(n) {
       hiss(0.34, 0.05);
       tone(74, 0.26, 'sine', 0.045, 38);
       tone(320, 0.2, 'triangle', 0.012, 140, 0.28);
+      break;
+    // THE BURIED MOUTH. Two halves of one event, and they are different
+    // sounds on purpose: a blade into a rock pile is DRY and small — it tells
+    // her the wall answers — and the pile giving way is the biggest low sound
+    // in the room, with the tunnel's own held air let out behind it.
+    case 'rock':
+      chink(0.02, 0.05);
+      tone(128 * (0.9 + Math.random() * 0.2), 0.16, 'square', 0.075, 58);
+      hiss(0.26, 0.055);
+      tone(2600 * (0.85 + Math.random() * 0.3), 0.07, 'triangle', 0.02, 1400, 0.02);
+      break;
+    case 'collapse':
+      tone(52, 0.9, 'sawtooth', 0.15, 26);
+      tone(104, 0.6, 'square', 0.07, 38);
+      hiss(0.8, 0.09);
+      chink(0.05, 0.16);
+      whoosh(0.75, 900, 170, 0.05, 0.1);
       break;
     case 'bench': [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, 'sine', 0.05, null, i * 0.1)); break;
     case 'boss': case 'roar': tone(55, 0.9, 'sawtooth', 0.14, 30); tone(110, 0.7, 'square', 0.055, 45); hiss(0.6, 0.06); break;

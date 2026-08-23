@@ -900,6 +900,31 @@ const ROOMS = {
         pocket: [{ x: 14, y: 6 }],
       });
     } },
+  // THE SEAM — the tunnel's first BRANCH, and the first room in the game
+  // reached by a room's SECOND depth door (GATE_ROOM CV1 is an array now; see
+  // gateDoors in game.js). The owner asked for two things at once: "the game
+  // itself should be built in a way that enables me to add levels within
+  // levels" and "the tunnel system itself should be rich in experience", and
+  // they are the same request — a tunnel is rich when it has somewhere ELSE
+  // to be. It is buried like the mouth that led here, so the rubble the
+  // entrance taught her about is the rubble that pays her for remembering.
+  //
+  // What is in it is the tunnel's SAVE POINT. The bench audit found the last
+  // rest before the pillar was A3, four rooms and a cave back; the run to the
+  // crystal is the longest unbenched stretch in kingdom 1.
+  // 32 wide, not 28: a room narrower than the 960x540 window shows void at its
+  // edge, and tests/deadend.cjs measures exactly that (it caught this one).
+  CV1B: { zone: 'X', cave: 1, w: 32, h: 17, exits: {},
+    ents: [['bench', 16, 15], ['bat', 23, 6],
+           ['scrap', 24, 15, 35], ['scrap', 9, 7, 25], ['scrap', 28, 15, 20]],
+    build(g) {
+      caveCarve(g, 'CV1B', {
+        open: [], ledges: 3,
+        anchor: [{ x: 4, y: 15, w2: 2 }, { x: 16, y: 15, w2: 2 },
+                 { x: 24, y: 15 }, { x: 28, y: 15 }],
+        pocket: [{ x: 9, y: 6 }],
+      });
+    } },
   CV2: { zone: 'X', cave: 1, w: 52, h: 17, exits: { L: 'CV1', R: 'CV3' },
     // the long dark middle: hoppers in the hollows, a crawler on the far
     // slope, two pockets for the thorough
@@ -1017,7 +1042,7 @@ const ROOMS = {
 const MAPPOS = {
   W1: [-3, 3, 1, 1], W2: [-2, 3, 1, 1], A0: [-1, 3, 1, 1], A0B: [-1, 2, 1, 1], A1: [0, 3, 1, 1], A2: [1, 3, 2, 1], A10: [3, 3, 1, 1], A3: [4, 3, 1, 1], A4: [5, 3, 1, 1],
   A5: [1, 4, 1, 1], A6: [0, 2, 1, 1], A7: [1, 5, 1, 1], A8: [1, 2, 1, 1], A9: [1, 1, 1, 1],
-  CV1: [2, 4, 1, 1], CV2: [3, 4, 1, 1], CV3: [4, 4, 1, 1],
+  CV1: [2, 4, 1, 1], CV1B: [2, 5, 1, 1], CV2: [3, 4, 1, 1], CV3: [4, 4, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],
   X1: [8, 1, 1, 1],

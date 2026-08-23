@@ -1352,6 +1352,10 @@ class Player {
           if (e.hp <= 0) e.die(kx, ky);
         }
       }
+      // THE BURIED MOUTH takes the blade. Any blade, any claw, once per swing:
+      // the first tunnel must not be gated behind a skill a run may not own.
+      if (!this.swing.rubHit && typeof rubbleHit === 'function' && rubbleHit(hb, false))
+        this.swing.rubHit = true;
       // the pillar shrugs off ordinary claws — and SAYS so, because a wall
       // that eats hits silently reads as a bug rather than a lock. Sparks fly
       // on every hit; the hint line is throttled so it teaches, not nags.
@@ -1580,6 +1584,9 @@ class Player {
     const t0y = Math.floor((cy - R) / TILE), t1y = Math.floor((cy + R) / TILE);
     for (let ty = t0y; ty <= t1y; ty++) for (let tx = t0x; tx <= t1x; tx++)
       if (tileAt(tx, ty) === 'B') G.breakTile(tx, ty);
+    // ...and the pile over the first tunnel goes down three courses at once
+    if (typeof rubbleHit === 'function')
+      rubbleHit({ x: cx - R, y: cy - R, w: R * 2, h: R * 2 }, true);
     // THE PILLAR ANSWERS ONLY TO THIS. Ordinary claws glance off pure crystal
     // (see the swing's hint below); the supercharged claw is the quarry tool —
     // the owner's design, and the reason the burst was taught before the cave.
@@ -6610,7 +6617,7 @@ function sageTame(e) {
   // needs only a GATE_ROOM row gated on 'sageTame_<its room>' and this
   // fires the reveal the moment it is purified.
   for (const rid in (typeof GATE_ROOM !== 'undefined' ? GATE_ROOM : {})) {
-    if (GATE_ROOM[rid].need !== key) continue;
+    if (!gateDoorsAll(rid).some(d => d.need === key)) continue;
     G.toast(t('cave_open'));
     sfx('chargeReady');
     break;

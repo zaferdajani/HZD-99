@@ -99,8 +99,9 @@ const { chromium } = require('playwright');
     const npc = G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet');
     if (!npc) {
       // the trader lives in his BOOTH now — walk in through the depth door
-      const gr = typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId];
-      if (gr && gr.style === 'booth' && G.state === 'PLAY') {
+      // read through gateDoors: a room's row may be an ARRAY of doors now
+      const gr = (typeof gateDoors === 'function' ? gateDoors() : []).find(d => d.style === 'booth');
+      if (gr && G.state === 'PLAY') {
         if (!G.gateWalk) {
           player.x = gateWorldX(gr) - player.w / 2; player.vx = 0; player.on = true;
           gateEnter();

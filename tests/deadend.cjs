@@ -37,7 +37,13 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
         extras: (r.ents || []).map(e => e[3]).filter(Boolean),
       };
     }
-    return { R: out, gates: Object.entries(GATE_ROOM).map(([room, def]) => [room, def.to]) };
+    // a room may hold MORE THAN ONE depth door now (gateDoorsAll): every one
+    // of them is a graph edge, and missing the second is how a branch that goes
+    // nowhere passes an audit
+    const gates = [];
+    for (const room in GATE_ROOM)
+      for (const def of gateDoorsAll(room)) gates.push([room, def.to]);
+    return { R: out, gates };
   });
   await browser.close();
 

@@ -97,10 +97,21 @@ const { chromium } = require('playwright');
     loadRoom('A5');
     await new Promise(r => setTimeout(r, 300));
     G.wake = null; G.state = 'PLAY'; G.hitStop = 0;
-    const dA5 = GATE_ROOM.A5, dCV = GATE_ROOM.CV1;
+    // GATE_ROOM rows may be ARRAYS now — a room can hold more than one depth
+    // door (CV1 is the first: the way back to the meadow, and the buried side
+    // passage into the Seam) — so the pair is read through gateDoors rather
+    // than off the row. Reading .to off an array is how this test found the
+    // change: it produced undefined, and player.x went NaN behind it.
+    const dA5 = gateDoors('A5')[0], dCV = gateDoors('CV1').find(d => d.to === 'A5');
     out.doorPair = !!dA5 && dA5.to === 'CV1' && !!dCV && dCV.to === 'A5';
     player.x = G.roomDef.w * TILE * dA5.at - player.w / 2;
     player.on = true; player.vy = 0;
+    // THE MOUTH IS BURIED (owner, 2026-08-23). It refuses UP until the pile is
+    // down — that is the point of it — so the round trip starts with the blade.
+    out.mouthRefusesBuried = !gateEnter() && !G.gateWalk;
+    let nb = 0;
+    while (G.rubble && G.rubble.hp > 0 && nb++ < 30) rubbleHit(rubbleBox(G.rubble), false);
+    out.bladeOpensMouth = !!G.save.flags.rubbleA5;
     out.doorOpens = gateEnter();
     out.doorRefusesTwice = !gateEnter();          // no double-trigger mid-walk
     let n2 = 0;
@@ -262,6 +273,8 @@ const { chromium } = require('playwright');
   check('...and it does not grow back', m.pillarStaysDown);
   // the depth door
   check('A5 and CV1 are a two-way door pair', m.doorPair);
+  check('the first mouth is buried and refuses the walk', m.mouthRefusesBuried);
+  check('...and the blade is what opens it', m.bladeOpensMouth);
   check('UP at the mouth opens the walk, and only once', m.doorOpens && m.doorRefusesTwice);
   check('the walk arrives inside the cave', m.walkArrives && m.arriveInside);
   check('and walks back out to the mouth', m.doorBack && m.walkReturns && m.returnsAtMouth,

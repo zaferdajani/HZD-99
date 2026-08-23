@@ -101,7 +101,7 @@ const check = (name, ok, detail) => {
       const out = [];
       const ex = ROOMS[id].exits || {};
       for (const k in ex) out.push((typeof ex[k] === 'object') ? ex[k].to : ex[k]);
-      if (typeof GATE_ROOM !== 'undefined' && GATE_ROOM[id]) out.push(GATE_ROOM[id].to);
+      if (typeof gateDoorsAll === 'function') for (const d of gateDoorsAll(id)) out.push(d.to);
       return out;
     };
     const seen = { W1: 1 }, q = ['W1'], zones = {};

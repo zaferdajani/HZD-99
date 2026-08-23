@@ -3053,3 +3053,69 @@ sparks, no text, no watermark.
 Wiring is one line each: add the key to `TINKER_STRIP` and the stage to
 `TINKER_JOB` / `TINKER_NEXT` in js/game.js. The machine already varies tempo,
 bursts and order, so a new action inherits all of that for free.
+
+---
+
+### 2w. THE BURIED MOUTH — the first tunnel's rubble ✱ FIRE ON REBIND (2026-08-23)
+
+**The owner:** *"The first cave or tunnel that I face needs to be covered with
+rubbles, and it should emit a sound from within that attracts me to go there…
+there should be a rubble. There should be a sound from within that I hear, and
+I have to go and hit the rubble to go inside."*
+
+**Everything that is not the pixels shipped in the same commit as this entry.**
+The A5 mouth is buried on a fresh save (`GATE_ROOM.A5.rubble`); it refuses the
+walk-in and says so; the blade takes it down over six blows, metered by MASS so
+every blow removes the same share of the heap; it collapses over 0.6s instead
+of blinking off; a new `cave` voice in `npcVoxBuild` calls from behind it with
+gain driven purely by distance and muffled by the rock still standing, so it
+opens up as she digs. `tests/rubble.cjs` measures all of it, including the
+ART_BIBLE §3.3 silhouette rule applied to a structure (worst consecutive state
+pair, IoU 0.84 against a 0.86 ceiling) and the §3.4 feet rule (the pile's foot
+is within 7 px of the floor her body stands on).
+
+**What is a stand-in is the ROCK.** `drawRubble` in js/game.js draws seeded
+eroded boulders with fracture lines and a light leaking between them. It is
+honest terrain and it obeys the no-right-angles rule, but it is a procedural
+structure, and structures are Higgsfield's. Three plates replace it:
+
+1. **rubble_full** — the heap at rest, completely closing an irregular rock
+   opening about 156 px wide and 178 px tall at game scale. Broken slabs and
+   scree of the zone-A material: dry grey-brown stone with a few sheets of
+   fallen machine plating mixed in, because the roof of a hole in the scrap
+   fields is half machine. NO opening visible; a hairline of cold blue-white
+   light escaping between two stones near the crown is the only tell.
+2. **rubble_half** — the same heap with its top third gone, the crown stones
+   scattered at the foot as fresh chips. A gap the width of two stones open at
+   the top, the cold light now clearly pouring out of it. The shoulders are
+   still packed.
+3. **rubble_last** — the last course: two or three heavy base slabs and a low
+   scree bank, the opening above them clear. This is what she sees on the blow
+   before it goes.
+
+All three: same camera, same distance, same key light (from above and slightly
+left, matching the meadow's overcast), on a FLAT NEUTRAL MID-GREY FIELD, the
+heap's contact line at the same y in every plate so the code can swap them
+without the pile jumping. Aspect as close to 1:1 as the frame set allows.
+NEGATIVE: no cave interior painted behind it, no ground plane, no cast shadow,
+no grass, no text, no watermark, no pixel grid, no outline, no cel shading.
+
+Wiring is a key check in `drawRubble`: three plates, chosen by
+`r.hp / r.max`, drawn through `scenePlate` with the procedural heap as the
+fallback it already is. The collapse, the shake, the dust, the light and the
+whole hit machine stay where they are.
+
+**And a sound, if the art session is firing audio:** a `hum_cave` loop —
+30-60s, seamless, a hollow sub-bass with a slow breath in it and a thin
+irregular metallic ring far away inside the rock. `npcVoxBuild` picks up
+`MBUF['hum_cave']` automatically and retires the synth voice the moment it
+lands; nothing else changes.
+
+**Addendum, same day — THE SEAM.** The rubble machine grew a second customer
+in the same commit: `GATE_ROOM` rows may now be ARRAYS of doors (`gateDoors`
+in js/game.js), CV1 is the first row to use it, and its second door is a
+buried side passage into **CV1B, the Seam** — the tunnel's save point. Its
+pile is the same stand-in and it wants the same three plates, in the tunnel's
+own rock rather than the meadow's: colder grey, no machine plating, wetter.
+Fire `rubble_full/half/last` for zone X alongside the zone-A set, same camera
+and contact line, and both mouths key from one wiring line.

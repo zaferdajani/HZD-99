@@ -120,7 +120,7 @@ const G = {
     {
       const opened = kind === 'alpha' ? 'alpha' : 'boss' + cap;
       for (const rid in (typeof GATE_ROOM !== 'undefined' ? GATE_ROOM : {})) {
-        if (GATE_ROOM[rid].need !== opened) continue;
+        if (!gateDoorsAll(rid).some(d => d.need === opened)) continue;
         G.toast(t('cave_open'));
         sfx('chargeReady');
         break;
@@ -879,6 +879,7 @@ function loadRoom(id) {
   if (id === 'W1' && typeof wakeStart === 'function') wakeStart();
   if (player) player.oathUsed = false;      // the lion owes her once per room
   G.save.visited[id] = 1;
+  rubbleInit();          // the buried mouth, if this room has one
   tileDirty = true;
   // ---- WALKING INTO A GUARDIAN'S CHAMBER --------------------------------
   // It used to be a doorway like any other: full brightness, the kingdom's
@@ -1498,11 +1499,12 @@ function tickNPCVox() {
   }
 }
 function update(dt) {
-  if (G.state === 'PLAY' || G.state === 'DIALOG') tickNPCVox();
+  if (G.state === 'PLAY' || G.state === 'DIALOG') { tickNPCVox(); tickCaveLure(); }
   else if (typeof npcVoxQuietAll === 'function') npcVoxQuietAll();
   if (G.state === 'PLAY') {
     G.save.time += dt;
     fxDecay(dt);
+    rubbleTick(dt);
     if (G.hitStop > 0) { G.hitStop -= dt; updateParts(dt * 0.25); return; }
     if (G.trans) {
       G.trans.t -= dt;
@@ -6785,8 +6787,21 @@ const GATE_ROOM = {
   // 0.68 is measured off the fired plate (§2c): the painted opening's centre
   // sits at gx 0.68, and aiming the walk at the old 0.64 sent her into rock
   // a shoulder's width left of the hole
-  A5:  { at: 0.72, to: 'CV1', gx: 0.68,  gy: 0.62, ax: 0.10 },
-  CV1: { at: 0.10, to: 'A5',  gx: 0.516, gy: 0.563, ax: 0.72 },
+  // BURIED (owner, 2026-08-23: "the first cave or tunnel that I face needs to
+  // be covered with rubbles, and it should emit a sound from within that
+  // attracts me to go there... I have to go and hit the rubble to go inside").
+  // `rubble` names the save flag that records it opened. Until then the mouth
+  // refuses the walk-in and takes hits instead — see rubbleHit().
+  A5:  { at: 0.72, to: 'CV1', gx: 0.68,  gy: 0.62, ax: 0.10, rubble: 'rubbleA5' },
+  // TWO DOORS, and the first row in the table to carry an array. The way back
+  // out to the meadow, and — buried, like the mouth she broke to get in here —
+  // the side passage into THE SEAM. This row is the proof that a room can hold
+  // more than one way inward; adding a third is adding a comma.
+  CV1: [
+    { at: 0.10, to: 'A5',  gx: 0.516, gy: 0.563, ax: 0.72 },
+    { at: 0.62, to: 'CV1B', ax: 0.12, rubble: 'rubbleCV1B' },
+  ],
+  CV1B: { at: 0.12, to: 'CV1', ax: 0.62 },
   // the Oracle's parlor off B3 — the booth pattern again, but its OWN style:
   // Ratchet's fired kiosk plate must never stand in the Conduits, so the
   // Oracle's shrine draws its own stand-in (drawOracleBooth) until its plate
@@ -6940,6 +6955,218 @@ const GATE_PLATE_BY_ZONE = { B: 'gateConduits', C: 'gateFoundry', D: 'gateArchiv
 // ...and which rock family a cave mouth wears. X borrows E's — the Deep's
 // pale-flesh-and-violet material IS its family.
 const MOUTH_PLATE_BY_ZONE = { A: 'caveMouthA', B: 'caveMouthB', C: 'caveMouthC', D: 'caveMouthD', E: 'caveMouthE', X: 'caveMouthE' };
+// THE PILE, drawn as a STAND-IN. Structures are Higgsfield's (the owner's
+// standing order) and the fired plate set is briefed in ART_QUEUE §2w — three
+// states, because a pile that only ever fades out is not a pile coming down.
+// Until it lands this draws boulders, and it obeys the same rule the terrain
+// does: no straight edge anywhere, and the material is the material the room
+// is made of, so the heap reads as the mouth's own roof having fallen in.
+function rubbleShape(r) {
+  if (r._sh) return r._sh;
+  let h = r.seed >>> 0;
+  const rnd = () => ((h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0) % 10000) / 10000;
+  const list = [];
+  // pack a dome over the opening: six courses, heaviest at the base, every
+  // stone jittered off its slot and sized independently, because a heap of
+  // one stone size is a pattern and a pattern is not rock
+  const ROWS = [7, 6, 6, 5, 4, 3], H = 152;   // courses OVERLAP: a heap is a mass, not a stack
+  for (let ri = 0; ri < ROWS.length; ri++) {
+    const n = ROWS[ri];
+    const yy = -6 - (ri + 0.5) * (H / ROWS.length);
+    const span = 152 * (1 - ri * 0.115);
+    for (let i = 0; i < n; i++) {
+      const xx = -span / 2 + (i + 0.5) * (span / n) + (rnd() - 0.5) * 20;
+      const rad = 14 + rnd() * rnd() * 24;                 // squared: many chips, few boulders
+      // aspect per stone, not per pile: a heap of one proportion reads as a
+      // bag of the same pebble, which is what the first pass looked like
+      const asp = 0.72 + rnd() * 0.62;
+      const pts = [], N = 9 + Math.floor(rnd() * 4);
+      for (let a2 = 0; a2 < N; a2++) {
+        const th = (a2 / N) * Math.PI * 2 + (rnd() - 0.5) * 0.22;
+        // let the radius DIP as well as swell. Purely convex blobs came back
+        // looking like balloons; a rock's outline goes in as often as it goes out.
+        const rr = rad * (a2 % 3 === 1 ? 0.58 + rnd() * 0.24 : 0.84 + rnd() * 0.34);
+        pts.push([Math.cos(th) * rr, Math.sin(th) * rr * asp]);
+      }
+      // two or three fracture lines per stone, in its own local frame. This is
+      // the single thing that separates rock from a soft grey shape.
+      const fr = [];
+      for (let f = 0; f < 2 + Math.floor(rnd() * 2); f++)
+        fr.push([(rnd() - 0.5) * rad * 1.5, (rnd() - 0.5) * rad * asp * 1.4,
+                 (rnd() - 0.5) * rad * 1.5, (rnd() - 0.5) * rad * asp * 1.4]);
+      list.push({ x: xx, y: yy + (rnd() - 0.5) * 12, r: rad, asp, pts, fr,
+                  tone: 0.5 + rnd() * 0.62, rot: (rnd() - 0.5) * 0.8,
+                  scrap: rnd() < 0.2, pri: ri + rnd() * 0.8 });
+    }
+  }
+  // she brings the TOP down first, so the top is what disappears first
+  list.sort((a2, b2) => b2.pri - a2.pri);
+  // ...and removal is metered by MASS, not by count. Counting stones made one
+  // blow take three chips off the crown (a 94% silhouette match — a wall that
+  // ate a hit) and another take two boulders. Every blow now removes the same
+  // share of the heap's area, whatever that happens to be in stones.
+  let tot = 0;
+  for (const b of list) { b.area = Math.PI * b.r * b.r * b.asp; tot += b.area; }
+  let acc = 0;
+  for (const b of list) { acc += b.area; b.cum = acc / tot; }
+  return (r._sh = list);
+}
+// one closed ERODED outline through the stone's points. Quadratics anchored at
+// the midpoints, control points on the points themselves: the curve never
+// touches a vertex, so nothing in the silhouette is a straight run and nothing
+// is a corner — the owner's rule, applied to the smallest object that has one.
+function rubbleOutline(pts) {
+  const n = pts.length;
+  const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  let m = mid(pts[n - 1], pts[0]);
+  c.beginPath();
+  c.moveTo(m[0], m[1]);
+  for (let i = 0; i < n; i++) {
+    const nx = mid(pts[i], pts[(i + 1) % n]);
+    c.quadraticCurveTo(pts[i][0], pts[i][1], nx[0], nx[1]);
+  }
+  c.closePath();
+}
+function drawRubble(r, cx2, gy, P) {
+  if (!r || (r.hp <= 0 && r.fall == null)) return;
+  const list = rubbleShape(r);
+  // FRONT-LOADED on purpose. Linear removal took three small stones off the
+  // crown for the first blow — a 94% silhouette match, which is a wall that
+  // ate a hit. The curve makes the first blow the one that visibly opens it,
+  // and the last blows the ones that clear the shoulders.
+  // FRONT-LOADED on purpose: the first blow is the one that visibly opens it,
+  // the last ones clear the shoulders.
+  const want = Math.pow(1 - r.hp / r.max, 0.78) * 0.9;
+  let gone = 0;
+  while (gone < list.length && list[gone].cum <= want) gone++;
+  const open = 1 - r.hp / r.max;
+  const now = performance.now() / 1000;
+  const jx = r.shake > 0 ? (Math.random() - 0.5) * r.shake * 9 : 0;
+  const jy = r.shake > 0 ? (Math.random() - 0.5) * r.shake * 6 : 0;
+  c.save();
+  c.translate(cx2 + jx, gy + jy);
+  // IT SETTLES. Removing stones alone was not enough to change the silhouette
+  // every blow — the ones that went were often behind ones that stayed, and two
+  // states measured 89% identical. A heap that loses a course also SLUMPS, and
+  // the slump is what the eye reads as "it moved". Compressed toward the floor,
+  // because that is the direction gravity works in.
+  c.scale(1, 1 - (1 - r.hp / r.max) * 0.2);
+  // 1 — THE LIGHT FROM INSIDE, before any rock, so the stones occlude it. It
+  // breathes on the lure's own period: what she hears and what leaks out are
+  // the same thing arriving through two senses.
+  const br = 0.28 + Math.sin(now * 1.15) * 0.08 + open * 0.42;
+  c.globalCompositeOperation = 'lighter';
+  const lg = c.createRadialGradient(0, -92, 4, 0, -92, 78 + open * 44);
+  lg.addColorStop(0, 'rgba(140,196,220,' + (0.26 * br).toFixed(3) + ')');
+  lg.addColorStop(0.45, 'rgba(84,142,184,' + (0.12 * br).toFixed(3) + ')');
+  lg.addColorStop(1, 'rgba(64,112,164,0)');
+  c.fillStyle = lg;
+  c.beginPath(); c.ellipse(0, -92, 78 + open * 44, 94 + open * 30, 0, 0, 7); c.fill();
+  c.globalCompositeOperation = 'source-over';
+  // 2 — the stones. The room is dark, so the material is a dark cool rock with
+  // ONE lit crest each: mass comes from the light being on top of every stone
+  // and nowhere else, not from an outline, which only ever reads as a cartoon.
+  // the collapse: every remaining stone drops out of the frame on its own
+  // curve, spinning, fading — 0.6s of the pile getting out of the way
+  const fk = r.fall != null ? 1 - Math.max(0, r.fall) / 0.6 : 0;
+  for (let i = gone; i < list.length; i++) {
+    const b = list[i];
+    c.save();
+    if (fk > 0) {
+      const sp = 0.4 + ((i * 37) % 100) / 100;
+      c.globalAlpha = Math.max(0, 1 - fk * 1.25);
+      c.translate(b.x + (b.x * 0.5) * fk * sp, b.y + 250 * fk * fk * sp);
+      c.rotate(b.rot + fk * sp * 2.2 * (b.x < 0 ? -1 : 1));
+    } else {
+      c.translate(b.x, b.y);
+      c.rotate(b.rot);
+    }
+    rubbleOutline(b.pts);
+    const g2 = c.createLinearGradient(0, -b.r, 0, b.r);
+    if (b.scrap) {
+      g2.addColorStop(0, 'rgba(' + Math.round(78 * b.tone) + ',' + Math.round(84 * b.tone) + ',' + Math.round(92 * b.tone) + ',1)');
+      g2.addColorStop(0.5, 'rgba(40,45,52,1)');
+      g2.addColorStop(1, 'rgba(15,18,22,1)');
+    } else {
+      g2.addColorStop(0, 'rgba(' + Math.round(74 * b.tone) + ',' + Math.round(70 * b.tone) + ',' + Math.round(64 * b.tone) + ',1)');
+      g2.addColorStop(0.5, 'rgba(38,36,33,1)');
+      g2.addColorStop(1, 'rgba(14,13,12,1)');
+    }
+    c.fillStyle = g2; c.fill();
+    c.save();
+    c.clip();
+    // the light on top: a soft pool, not a rim. A stroked rim gave every stone
+    // the same drawn edge and the pile came back looking like beans on a plate.
+    const tp = c.createRadialGradient(-b.r * 0.2, -b.r * b.asp * 0.66, 1,
+                                      -b.r * 0.2, -b.r * b.asp * 0.66, b.r * 0.62);
+    tp.addColorStop(0, 'rgba(198,192,178,' + (0.12 + b.tone * 0.13).toFixed(3) + ')');
+    tp.addColorStop(1, 'rgba(198,192,178,0)');
+    c.fillStyle = tp;
+    c.fillRect(-b.r * 1.4, -b.r * 1.4, b.r * 2.8, b.r * 2.8);
+    // the shadow the stone above casts into it, which is what packs a heap
+    const sh2 = c.createLinearGradient(0, -b.r * b.asp, 0, b.r * b.asp * 0.15);
+    sh2.addColorStop(0, 'rgba(6,7,9,0.62)');
+    sh2.addColorStop(1, 'rgba(6,7,9,0)');
+    c.fillStyle = sh2;
+    c.fillRect(-b.r * 1.4, -b.r * 1.4, b.r * 2.8, b.r * 1.55);
+    // ...and the bottom goes to nearly nothing, so the stone below reads as
+    // being IN FRONT rather than merely overlapping
+    const sh3 = c.createLinearGradient(0, b.r * b.asp * 0.1, 0, b.r * b.asp);
+    sh3.addColorStop(0, 'rgba(5,6,8,0)');
+    sh3.addColorStop(1, 'rgba(5,6,8,0.7)');
+    c.fillStyle = sh3;
+    c.fillRect(-b.r * 1.4, 0, b.r * 2.8, b.r * 1.5);
+    // the fractures
+    c.lineWidth = 1.2;
+    c.strokeStyle = 'rgba(10,10,11,0.5)';
+    for (const f of b.fr) { c.beginPath(); c.moveTo(f[0], f[1]); c.lineTo(f[2], f[3]); c.stroke(); }
+    c.lineWidth = 1;
+    c.strokeStyle = 'rgba(180,176,164,0.13)';
+    for (const f of b.fr) { c.beginPath(); c.moveTo(f[0], f[1] - 1.2); c.lineTo(f[2], f[3] - 1.2); c.stroke(); }
+    c.restore();
+    c.restore();
+  }
+  // 3 — the seams glow as the pile loosens. Held BELOW the stones' own value so
+  // it reads as light escaping between them rather than as the heap turning on.
+  if (open > 0.05) {
+    c.globalCompositeOperation = 'lighter';
+    c.globalAlpha = Math.min(0.55, 0.08 + open * 0.5);
+    for (let i = gone; i < Math.min(list.length, gone + 6); i++) {
+      const b = list[i];
+      const sg = c.createRadialGradient(b.x, b.y - b.r * 0.3, 1, b.x, b.y - b.r * 0.3, b.r * 1.35);
+      sg.addColorStop(0, 'rgba(158,206,230,0.42)');
+      sg.addColorStop(1, 'rgba(110,168,210,0)');
+      c.fillStyle = sg;
+      c.beginPath(); c.arc(b.x, b.y - b.r * 0.3, b.r * 1.35, 0, 7); c.fill();
+    }
+    c.globalAlpha = 1;
+    c.globalCompositeOperation = 'source-over';
+  }
+  // 4 — chips and grit at the foot: the heap has been shedding since it fell,
+  // and a pile that meets the floor on a clean line is a cut-out
+  c.fillStyle = 'rgba(30,27,24,0.95)';
+  const hg = (n) => { const v = Math.sin(n * 91.3 + r.seed * 0.017) * 24634.6345; return v - Math.floor(v); };
+  for (let i = 0; i < 11; i++) {
+    const a2 = hg(i * 2.3), a3 = hg(i * 5.9 + 17);
+    const dx = (a2 - 0.5) * 210, rr = 3 + a3 * 7;
+    c.beginPath(); c.ellipse(dx, -2 - a3 * 5, rr, rr * 0.55, a3, 0, 7); c.fill();
+  }
+  // 5 — dust still hanging from the last blow
+  if (r.dust > 0.02) {
+    c.globalAlpha = Math.min(0.22, r.dust * 0.16);
+    c.fillStyle = '#b7a992';
+    // HASHED, not stepped: (seed + i*977) % 1000 walks a straight ramp, and the
+    // plume came out as a stack of pancakes at even spacing
+    const hs = (n) => { const v = Math.sin(n * 127.1 + r.seed * 0.013) * 43758.5453; return v - Math.floor(v); };
+    for (let i = 0; i < 14; i++) {
+      const a2 = hs(i * 3.7), a4 = hs(i * 9.1 + 31);
+      const dx = (a2 - 0.5) * 200, dy = -14 - a4 * 150 - (1.5 - r.dust) * 24;
+      c.beginPath(); c.ellipse(dx, dy, 8 + a4 * 14, 5 + a2 * 8, a2 * 2, 0, 7); c.fill();
+    }
+    c.globalAlpha = 1;
+  }
+  c.restore();
+}
 function drawCaveMouth(cx2, gy, P, k) {
   // THE FIRED MOUTH (§2f): one material family per grotto network, standing
   // on the floor at the same anchor. The seeded procedural mouth below stays
@@ -7777,10 +8004,39 @@ function drawLumenHollow(cx2, gy, P, k) {
   c.restore();
   c.restore();
 }
+// ---------- LEVELS WITHIN LEVELS -------------------------------------------
+// The owner, 2026-08-23: "the game itself should be built in a way that
+// enables me to add levels within levels. so that I can expand whenever I
+// want from here."
+//
+// GATE_ROOM held ONE door per room, and that single fact was the ceiling on
+// the whole idea. A room could lead inward to exactly one other place, so a
+// hub with three side chambers — a tunnel with a branch, a shop with a back
+// room, a lair with two grottoes — could not be written down at all, however
+// many rooms world.js grew. The value of a row may now be a door OR AN ARRAY
+// OF DOORS, and everything that reads the table goes through these two.
+//
+// Existing rows are untouched: one door is still one object, and every field
+// on it means what it meant. Adding a second is adding a comma.
+function gateDoorsAll(id) {
+  const g = GATE_ROOM[id == null ? G.roomId : id];
+  return !g ? [] : (Array.isArray(g) ? g : [g]);
+}
+// ...and this is the one the game uses: the doors that EXIST right now. A door
+// with an unmet `need` is not hidden, it has not been built yet — no prompt,
+// no structure, no walk — which is how the guardian grottoes appear.
+function gateDoors(id) {
+  const out = [];
+  for (const d of gateDoorsAll(id))
+    if (!d.need || (G.save && G.save.flags && G.save.flags[d.need])) out.push(d);
+  return out;
+}
 function drawGateDoors(P) {
-  const def = GATE_ROOM[G.roomId];
-  if (!def || !player) { G._doorK = 0; return; }
-  if (def.need && !(G.save && G.save.flags && G.save.flags[def.need])) return;
+  const list = player ? gateDoors() : [];
+  if (!list.length) { G._doorK = 0; return; }
+  for (const d of list) drawGateDoor(P, d);
+}
+function drawGateDoor(P, def) {
   // WORLD-LOCKED: one x for the trigger, the prompt and the structure. The
   // parallax depth read now comes from the arch being dimmer and the leaves
   // being lit, not from the whole doorway crawling against the terrain.
@@ -7788,9 +8044,13 @@ function drawGateDoors(P) {
   if (ds < -320 || ds > 1280) return;
   const gy = (G.roomDef.h - 2) * TILE - camSY();
   const near = Math.abs(player.x + player.w / 2 - gateWorldX(def)) < 130;
-  const want = G.gateWalk ? 1 : near ? 0.14 : 0;
-  G._doorK = (G._doorK == null ? 0 : G._doorK) + (want - (G._doorK || 0)) * (G.gateWalk ? 0.07 : 0.04);
-  const k = G._doorK;
+  // THE OPEN AMOUNT BELONGS TO THE DOOR. It used to be one number on G, which
+  // was correct while a room had one door and wrong the moment it had two:
+  // standing at either one opened both.
+  const walking = !!(G.gateWalk && G.gateWalk.def === def);
+  const want = walking ? 1 : near ? 0.14 : 0;
+  def._k = (def._k == null ? 0 : def._k) + (want - (def._k || 0)) * (walking ? 0.07 : 0.04);
+  const k = G._doorK = def._k;
   // cave on EITHER side of the passage: it is a mouth, not a door
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
   if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) { drawCaveMouth(ds, gy, P, k); return; }
@@ -7989,21 +8249,190 @@ function drawGateDoors(P) {
   c.restore();
   c.restore();
 }
+// ---------- THE BURIED MOUTH -----------------------------------------------
+// The owner, 2026-08-23: "the first cave or tunnel that I face needs to be
+// covered with rubbles, and it should emit a sound from within that attracts
+// me to go there... I have to go and hit the rubble to go inside."
+//
+// So the first tunnel is not a door she walks into — it is a WALL she hears
+// through. Three parts, and each carries a third of the idea:
+//   1. a pile with HP that answers to the blade          — rubbleHit()
+//   2. a voice from behind it whose loudness IS distance  — tickCaveLure()
+//   3. a gate that refuses the walk-in until it is gone   — gateEnter()
+// It rides on GATE_ROOM (`rubble` names its save flag) rather than being a
+// room entity, because the pile has to stand exactly where the door stands.
+// Two places for one thing is the bug that made the doors slide in the first
+// place, and a heap a shoulder's width off its own mouth is the same bug.
+const RUBBLE_HP = 6;
+// ONE PILE PER DOOR, because there is more than one door now: a hub can bury
+// its side passage and leave its main way open, which is most of what makes a
+// branch worth finding.
+function rubbleFor(def) {
+  if (!def || !def.rubble || !G.rubbles) return null;
+  for (const r of G.rubbles) if (r.flag === def.rubble && r.hp > 0) return r;
+  return null;
+}
+function rubbleInit() {
+  G.rubbles = [];
+  G.rubble = null;
+  if (!G.roomDef) return;
+  for (const g of gateDoors()) {
+    if (!g.rubble) continue;
+    if (G.save && G.save.flags && G.save.flags[g.rubble]) continue;   // already opened
+    // seeded off the door, so it is the SAME pile every visit. A heap that
+    // reshuffles on re-entry reads as weather, not as rock, and a wall she is
+    // meant to remember hitting must look like the wall she hit.
+    let h = 2166136261 >>> 0;
+    for (const ch of G.roomId + '|' + g.rubble) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+    G.rubbles.push({ flag: g.rubble, door: g, hp: RUBBLE_HP, max: RUBBLE_HP,
+                     x: gateWorldX(g), y: (G.roomDef.h - 2) * TILE,
+                     shake: 0, dust: 0, told: 0, seed: h >>> 0, t: 0 });
+  }
+  // the one she is nearest to, kept for everything that only ever deals with
+  // the pile in front of her
+  G.rubble = G.rubbles[0] || null;
+}
+// THE PILE STANDS ON THE GROUND SHE STANDS ON. The gate's own anchor is the
+// tile row (h-2), which is where the BACKDROP is painted from — and the
+// heightfield lifts the walkable surface above that wherever the curve rises,
+// so anchoring the pile on the tile row buried its bottom third in terrain.
+// The body's floor and the pile's floor have to be the same number.
+function rubbleFoot(r) {
+  const g = (typeof groundColumnAt === 'function') ? groundColumnAt(r.x) : null;
+  return g && !isNaN(g[0]) ? Math.min(r.y, g[0]) : r.y;
+}
+function rubbleBox(r) {
+  r = r || G.rubble; if (!r) return null;
+  const fy = rubbleFoot(r);
+  return { x: r.x - 78, y: fy - 178, w: 156, h: 182 };
+}
+// One swing takes one point off the pile; the supercharged burst takes three.
+// ORDINARY CLAWS WORK — deliberately. The pillar teaches "some rock needs the
+// charge", and repeating that lesson at the first tunnel would gate the whole
+// map behind a skill a new run may not have bought yet.
+function rubbleHit(box, heavy) {
+  let any = false;
+  for (const r of (G.rubbles || [])) if (rubbleHitOne(r, box, heavy)) any = true;
+  return any;
+}
+function rubbleHitOne(r, box, heavy) {
+  if (!r || r.hp <= 0) return false;
+  const b = rubbleBox(r);
+  if (!(box.x < b.x + b.w && box.x + box.w > b.x &&
+        box.y < b.y + b.h && box.y + box.h > b.y)) return false;
+  r.hp -= heavy ? 3 : 1;
+  r.shake = Math.max(r.shake, heavy ? 1 : 0.6);
+  r.dust = Math.min(1.5, r.dust + 0.55);
+  const px = r.x, py = r.y - 96;
+  cam.shake = Math.max(cam.shake, heavy ? 9 : 4.2);
+  G.hitStop = Math.max(G.hitStop, heavy ? 0.075 : 0.05);
+  if (typeof padRumble === 'function') padRumble(heavy ? 0.5 : 0.32, 0.55, heavy ? 110 : 70);
+  if (r.hp > 0) {
+    sfx('rock');
+    burst(px, py, 12, '#c9b79a', 210, 0.55, 240, 3, true);
+    burst(px, py + 46, 7, '#8b7d68', 150, 0.8, 50, 2.4, true);
+    // it SAYS how far in she is: the count is the only honest progress bar a
+    // rock pile can have, and a wall that eats hits silently reads as a bug
+    if ((G._rubToldT || 0) <= 0) { G._rubToldT = 2.2; G.toast(t('rub_hit')); }
+    return true;
+  }
+  // THE PILE GIVES WAY
+  r.hp = 0;
+  if (G.save) { G.save.flags = G.save.flags || {}; G.save.flags[r.flag] = 1; }
+  if (typeof persist === 'function') persist();
+  sfx('collapse');
+  cam.shake = Math.max(cam.shake, 15);
+  G.flash = Math.max(G.flash, 0.5);
+  G.hitStop = Math.max(G.hitStop, 0.12);
+  if (typeof padRumble === 'function') padRumble(0.8, 0.9, 320);
+  burst(px, py, 46, '#c9b79a', 380, 1.1, 320, 4, true);
+  burst(px, py + 40, 30, '#7c6f5c', 260, 1.6, 60, 3.4, true);
+  burst(px, py - 20, 16, '#ffe6b0', 300, 0.7, 140, 3, true);
+  G.toast(t('rub_open'));
+  if (typeof hzdSay === 'function') hzdSay('purr', 0);
+  // IT FALLS, it does not vanish. The gate is open on this frame — hp is 0 and
+  // gateEnter stops refusing — but the stones need half a second to get out of
+  // the way, or the biggest moment in the room is a pile blinking off.
+  r.fall = 0.6;
+  return true;
+}
+function rubbleTick(dt) {
+  G._rubToldT = Math.max(0, (G._rubToldT || 0) - dt);
+  if (!G.rubbles || !G.rubbles.length) { G.rubble = null; return; }
+  let near = null, nd = 1e9;
+  for (let i = G.rubbles.length - 1; i >= 0; i--) {
+    const r = G.rubbles[i];
+    r.t += dt;
+    if (r.fall != null) { r.fall -= dt; if (r.fall <= 0) { G.rubbles.splice(i, 1); continue; } }
+    r.shake = Math.max(0, r.shake - dt * 2.6);
+    r.dust = Math.max(0, r.dust - dt * 0.9);
+    if (!player) continue;
+    const d = Math.abs(player.x + player.w / 2 - r.x);
+    if (d < nd) { nd = d; near = r; }
+    // the nudge, once: she is standing at a hole she cannot enter, and the
+    // game has never asked her to hit scenery before
+    if (!r.told && d < 150) { r.told = 1; G.toast(t('rub_hint')); }
+  }
+  G.rubble = near || G.rubbles[0] || null;
+}
+// THE VOICE FROM INSIDE. Gain is distance and nothing else, which is what makes
+// it a lure rather than an ambience: it is audible from the far end of the room
+// and it grows as she walks, so the room teaches its own direction. The rock
+// still muffles it — the pile's remaining HP scales the top end — so knocking
+// it down makes the sound OPEN, and that is the reward for the first two hits.
+function tickCaveLure() {
+  if (typeof npcVoxTick !== 'function' || !player) return;
+  // the nearest hole is the one she can hear. Two calling at once is a chord,
+  // not a direction, and a lure that does not point is not a lure.
+  let r = null, x = null, nd = 1e9;
+  const px = player.x + player.w / 2;
+  for (const q of (G.rubbles || [])) { const d2 = Math.abs(px - q.x); if (d2 < nd) { nd = d2; r = q; x = q.x; } }
+  if (!r) for (const g of gateDoors()) {
+    if (!g.rubble) continue;
+    const gx2 = gateWorldX(g), d2 = Math.abs(px - gx2);
+    if (d2 < nd) { nd = d2; x = gx2; }
+  }
+  if (x == null) return;
+  const d = Math.abs(px - x);
+  const k = clamp(1 - d / 900, 0, 1);
+  // buried: muffled, and it un-muffles as the rock goes. Opened: it stays, at
+  // half, because a tunnel that fell silent the moment it opened would read as
+  // a switch rather than as a place.
+  const muffle = r ? 0.5 + 0.5 * (1 - r.hp / r.max) : 0.5;
+  npcVoxTick('cave', (0.10 + k * k * 0.62) * muffle);
+}
 function gateHere() {
-  const G2 = GATE_ROOM[G.roomId];
-  if (!G2 || !player) return null;
-  // a door with an unmet `need` does not exist yet — no prompt, no walk
-  if (G2.need && !(G.save && G.save.flags && G.save.flags[G2.need])) return null;
+  if (!player) return null;
   // THE DOOR IS ONE PLACE. It was briefly "where the backdrop painted it",
   // which moved with the parallax pan — the same slide the owner reported in
   // the caves. The stand spot in the table is the door, full stop; the
   // structure, prompt and walk all draw at that world x now.
-  const x = gateWorldX(G2);
-  return Math.abs(player.x + player.w / 2 - x) < 90 ? G2 : null;
+  // With more than one door in a room, the NEAREST one in reach is the one she
+  // is standing at — never the first in the table, which would make a hub's
+  // second door unusable from inside its own stand spot.
+  const px = player.x + player.w / 2;
+  let best = null, bd = 90;
+  for (const d of gateDoors()) {
+    const dx = Math.abs(px - gateWorldX(d));
+    if (dx < bd) { bd = dx; best = d; }
+  }
+  return best;
 }
 function gateEnter() {
   const G2 = gateHere();
   if (!G2 || G.gateWalk) return false;
+  // BURIED: the mouth is there, she can hear through it, and it will not take
+  // her. Refusing LOUDLY matters — a door that silently ignores UP is a dead
+  // input, and she has to learn that this one is opened with the blade.
+  const buried = rubbleFor(G2);
+  if (buried) {
+    sfx('no');
+    buried.shake = Math.max(buried.shake, 0.35);
+    cam.shake = Math.max(cam.shake, 2.4);
+    burst(buried.x, buried.y - 90, 6, '#8b7d68', 120, 0.6, 40, 2.2, true);
+    if ((G._rubToldT || 0) <= 0) { G._rubToldT = 2.2; G.toast(t('rub_hint')); }
+    return false;
+  }
   // the vanishing point: the gap between the doors, in SCREEN space, since the
   // gates are the room's backdrop and the backdrop does not scroll with the
   // tiles (see ROOM_VISTA)
@@ -8033,16 +8462,21 @@ function gateEnter() {
 // tutorial chip pointed at it, and new doors are not tutorials. Drawn in
 // world space, from the same pass as the projectiles.
 function drawGatePrompt() {
-  const def = GATE_ROOM[G.roomId];
-  if (!def || G.gateWalk || !player || player.dead) return;
-  if (def.need && !(G.save && G.save.flags && G.save.flags[def.need])) return;
+  if (G.gateWalk || !player || player.dead) return;
+  for (const d of gateDoors()) drawOneGatePrompt(d);
+}
+function drawOneGatePrompt(def) {
   // the glimmer marks the door's one world spot — same anchor as the
   // structure and the trigger, so what pulses is what you press UP at
   const gx = gateWorldX(def);
   const gy = (G.roomDef.h - 2) * TILE;
   const d = Math.abs(player.x + player.w / 2 - gx);
   if (d > 260) return;
-  const near = d < 90, t = performance.now() / 1000;
+  // a buried mouth advertises itself with the pile's own cracklight and the
+  // sound behind it — never with the UP chevron, which would promise a walk
+  // the door is going to refuse
+  const buried = !!(def.rubble && rubbleFor(def));
+  const near = d < 90 && !buried, t = performance.now() / 1000;
   c.save();
   c.globalCompositeOperation = 'lighter';
   c.globalAlpha = (near ? 0.85 : 0.4) * (0.7 + Math.sin(t * 2.4) * 0.3);
@@ -9410,7 +9844,7 @@ function drawTutor() {
     // the gate step points at the GATE, not at the wall: W2's way out is the
     // depth door at the stand spot, and the massed city wall now owns the
     // last three tiles where the old mark used to hover
-    const gr = typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId];
+    const gr = (typeof gateDoors === 'function' ? gateDoors() : [])[0];
     mark(gr ? gr.at * G.roomDef.w * TILE : (G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
   }
   if (st.id === 'atk' || st.id === 'kill') {
@@ -9427,8 +9861,8 @@ function drawTutor() {
     if (s2) mark(s2.x + s2.w / 2, s2.y + s2.h / 2, 30, st.id === 'buy' ? '#ffd76a' : '#b48cff');
     else if (st.id === 'buy') {
       // the trader is inside his booth now: the lesson rings the booth door
-      const gr2 = typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId];
-      if (gr2 && gr2.style === 'booth') mark(gateWorldX(gr2), 13 * TILE, 34, '#ffd76a');
+      const gr2 = (typeof gateDoors === 'function' ? gateDoors() : []).find(d => d.style === 'booth');
+      if (gr2) mark(gateWorldX(gr2), 13 * TILE, 34, '#ffd76a');
     }
   }
   if (st.id === 'heal') mark(player.x + player.w / 2, player.y + player.h / 2, 32, '#aef7d8');
@@ -9437,7 +9871,7 @@ function drawTutor() {
     // door she came in by. The five-player validation caught a six-year-old
     // holding right into the den wall for six minutes. In a room with no
     // right-hand exit, the mark rings the depth door instead.
-    const gr3 = typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId];
+    const gr3 = (typeof gateDoors === 'function' ? gateDoors() : [])[0];
     if (!G.roomDef.exits.R && gr3) mark(gateWorldX(gr3), 13 * TILE, 30, '#ffd76a');
     else mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
   }
@@ -10056,6 +10490,13 @@ function drawWorldFrame() {
     if (chance(0.25 * a)) addPart(q.x + rnd(-q.r, q.r), q.y - 2, rnd(-10, 10), rnd(-40, -12), 0.4, '#c8ff96', 1.8, 60, true);
     c.restore(); c.globalAlpha = 1;
   }
+  // THE PILE IS AN OBJECT, NOT SCENERY. It was briefly drawn with the cave
+  // mouth in the backdrop pass, where the room's own haze washed it down to a
+  // ghost — correctly, because that pass is for painted distance. She stands
+  // beside this and hits it, so it belongs in the world layer with everything
+  // else that has a hitbox, in front of the terrain and behind her.
+  if (G.rubbles && typeof drawRubble === 'function')
+    for (const rb of G.rubbles) drawRubble(rb, rb.x, rubbleFoot(rb) + 4, PAL[G.roomDef.zone]);
   if (G.plats) for (const pl of G.plats) pl.draw(c);
   if (G.saws) for (const sw of G.saws) sw.draw(c);
   for (const e of G.enemies) e.draw(c);
@@ -12417,9 +12858,9 @@ function drawMap() {
     // marks any visited room whose backdrop holds a REVEALED depth door into
     // a cave — the mouth is where you go, so the mouth is what the map marks.
     {
-      const gd = GATE_ROOM[id];
-      if (gd && ROOMS[gd.to] && ROOMS[gd.to].cave
-          && (!gd.need || (G.save.flags && G.save.flags[gd.need])))
+      // ANY revealed door into a cave marks the room — a hub with two of them
+      // is still one room with a mouth in it
+      if (gateDoors(id).some(gd => ROOMS[gd.to] && ROOMS[gd.to].cave))
         ftxt('∩', rc.x + rc.w - 11, rc.y + rc.h - 10, 13, '#dff2ff');
     }
     if (MAP_BOSSROOM[id]) {
