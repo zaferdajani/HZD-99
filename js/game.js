@@ -12090,7 +12090,13 @@ const CINE_DISS = 0.9;    // and the dissolve from the shot before it
 function cineEnd() {
   try { localStorage.setItem('cb_intro_seen', '1'); } catch (e) {}
   G.cine = null;
-  if (G.state !== 'PLAY') setMusic('title');       // back out to the menu's own theme
+  // THE OPENING DOES NOT HAND BACK TO THE MENU LOOP. Measured (docs/ACT_ONE.md):
+  // forty-six seconds of the `intro` score, and then the difficulty picker
+  // snapped the room back to `title` — the last thing a player hears before
+  // gameplay was the tune from before the film. The reel's own theme carries
+  // through the ONE choice that follows it and hands over to the kingdom when
+  // the run starts. Backing out to the menu proper still takes the menu's tune.
+  if (G.state !== 'PLAY' && G.afterCine !== 'DIFF') setMusic('title');
   if (G.afterCine === 'DIFF') {
     G.afterCine = null; G.diffIdx = 1;
     G.pendTheme = G.pendTheme || gameLock() || 'robo';
