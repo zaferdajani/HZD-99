@@ -79,7 +79,25 @@ async function boot(withSave) {
   const vid = ret.req.filter(r => /\.(mp4|webm)$/.test(r.url));
   const vidBytes = vid.reduce((a, r) => a + r.size, 0);
   const intro = vid.filter(r => /intro/.test(r.url));
-  const img = ret.req.filter(r => /\.(png|jpg|jpeg)$/.test(r.url));
+  // WEBP IS ART TOO. This read /\.(png|jpg|jpeg)$/ and so went blind the day
+  // the shipped tier moved to webp (tools/webptier.cjs): every converted
+  // sheet stopped counting, the title screen appeared to prefetch 18 sheets
+  // instead of 58, and the save room's own art was reported as NEVER FETCHED
+  // while the browser was demonstrably requesting it. A harness that decides
+  // what counts as art by file extension has to be told when the extension
+  // changes, or it fails the game for the test's own blind spot.
+  // FULL-SIZE ART ONLY, AND IT IS THE PATH THAT SAYS SO — not the extension.
+  // This read /\.(png|jpg|jpeg)$/, which quietly did two jobs: it selected art,
+  // AND it excluded the low tier, because webp used to mean nothing but the low
+  // tier. tools/webptier.cjs moved the shipped sheets to webp and broke both
+  // halves at once — first the converted sheets stopped counting at all (the
+  // title screen appeared to prefetch 18 of them instead of 58, and the save
+  // room's art read as NEVER FETCHED while the browser was demonstrably asking
+  // for it), and then adding webp back let the quarter-size front-load into the
+  // ordering, which pushed the near set from position 5 to position 28.
+  // /assets/lowres/ is what actually separates the two, and always was.
+  const img = ret.req.filter(r => /\.(png|jpg|jpeg|webp)$/.test(r.url)
+                             && !/\/assets\/lowres\//.test(r.url));
   const imgBytes = img.reduce((a, r) => a + r.size, 0);
   const four04 = ret.req.filter(r => r.status === 404);
 
@@ -108,16 +126,27 @@ async function boot(withSave) {
   // slab and the same correct behaviour then read as a failure at position 13.
   // What the check is for is that nothing from the far set jumped the queue —
   // so the near set may occupy as many slots as it has, plus the eager few.
-  const EAGER = 6;                    // parse-time fetches, with a slot to spare
+  // CONTIGUITY, NOT POSITION, because position is a proxy that keeps expiring.
+  // "last < near.length + EAGER" was true when nine seconds moved 58 sheets and
+  // false when the same nine seconds moved 96 — which is what happened the day
+  // the art tier went to webp and every sheet got 2.6x lighter. The near set had
+  // not slipped; the queue in front of it had simply got through more. Twice now
+  // this number has been re-tuned for a change that made the game FASTER.
+  //
+  // What the check has always been for is stated two paragraphs up: nothing from
+  // the far set jumped the queue. That is a claim about the near set being an
+  // UNBROKEN RUN — every one of its sheets fetched, and no stranger in between —
+  // and it holds however much art the window happens to carry.
   const order = img.map(r => r.url);
   const at = ret.q.near.map(u => [u, order.indexOf(u)]);
   const missing = at.filter(([, i]) => i < 0).map(([u]) => u);
-  const last = Math.max(...at.map(([, i]) => i));
+  const idx = at.map(([, i]) => i).filter(i => i >= 0).sort((a, b) => a - b);
+  const gaps = idx.length ? (idx[idx.length - 1] - idx[0]) - (idx.length - 1) : 0;
   check('...and it starts with the room the SAVE is in, not the default start',
-        !missing.length && last < at.length + EAGER,
-        'saved in ' + ret.q.start + ': its ' + at.length + ' sheets land at positions '
-        + at.map(([, i]) => i).sort((a, b) => a - b).join(',')
-        + (missing.length ? ' — never fetched: ' + missing.join(',') : ''));
+        !missing.length && gaps === 0,
+        'saved in A4: its ' + at.length + ' sheets land at positions ' + at.map(([, i2]) => i2).join(',')
+        + (missing.length ? ' — never fetched: ' + missing.join(',') : '')
+        + (gaps ? ' — ' + gaps + ' stranger(s) interleaved' : ' — one unbroken run'));
 
   // ---- 3. NOTHING IS FETCHED THAT IS KNOWN NOT TO EXIST during the opening
   // seconds. The six NPC hum slots are allowed to 404 — later.

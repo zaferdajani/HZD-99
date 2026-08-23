@@ -96,6 +96,17 @@ const check = (name, ok, detail) => {
         wired.manifest + ' keys in window.LOWRES');
   check('...and the prefetcher is told to front-load it', wired.inPolicy === true);
 
+  // THE PROBE IS TAKEN FROM THE MANIFEST, NOT NAMED. This used to drive the key
+  // 'lairDen' by hand, which was a sheet with a small copy on the day it was
+  // written and stopped being one the moment the art tier moved to webp: at
+  // 68 KB it now falls under lowres.cjs's 120 KB floor, mediaLow() hands back
+  // the FULL sheet, and the check read "620 -> 620 px" — a stand-in that never
+  // stood in for anything. The property is still worth testing; the probe just
+  // has to be a sheet that actually has a small copy, which only the manifest
+  // knows.
+  const probeKey = await page.evaluate(() => Object.keys(window.LOWRES || {})[0]);
+  if (!probeKey) { check('the manifest names at least one small copy', false, 'none'); }
+
   // drive one key through the whole life cycle by hand, so the STAND-IN and the
   // UPGRADE are both observed rather than assumed
   const life = await page.evaluate(async (k) => {
@@ -111,7 +122,7 @@ const check = (name, ok, detail) => {
     for (let i = 0; i < 100 && MEDIA_LOW[k] !== 3; i++) await wait(50);
     return { small, big: MEDIA_RAW[k] ? MEDIA_RAW[k].naturalWidth : 0,
              clearedByLow, clearedByFull: SOFT_ART[k] === undefined, state: MEDIA_LOW[k] };
-  }, 'lairDen');
+  }, probeKey);
 
   check('a small copy stands in for a sheet that has not arrived', life.small > 0,
         life.small + ' px wide');
