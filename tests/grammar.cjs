@@ -352,6 +352,30 @@ const DETECTORS = function () {
       // to 2.4. The terrain had not changed. Whether a deck repeats is a fact
       // about the deck, so it is measured with the dial at zero.
       if (typeof BRIGHT_SET !== 'undefined') BRIGHT_SET = 0;
+      // AND THE PICTURE IS MEASURED AT ONE SIZE. Every number in this file is
+      // in design pixels — a 96px edge, a 32px patch, "one screen width" — and
+      // the backbuffer is not: perf.js sizes it from the viewport times a
+      // quality tier, and the AUTO dial moves that tier mid-run off measured
+      // frame time. So identical code sampled this terrain at 960, 1126 or
+      // 1280 px depending on how loaded the machine was, and §10.7's D3
+      // verdict duly flipped between Δ5.2 and Δ2.7 — three resolutions, three
+      // different pictures, one of them failing. Which tier a player's device
+      // settles on is a comfort setting; it is not allowed to decide what the
+      // art measures. Pinned to the design resolution, where one canvas pixel
+      // is one world pixel and every threshold in this file means what it says.
+      QAUTO = false;
+      const cvEl = document.getElementById('cv');
+      RS = 1; cvEl.width = 960; cvEl.height = 540;
+      if (typeof tileDirty !== 'undefined') tileDirty = true;
+      // ...AND THE WEATHER IS NOT TERRAIN, for the same reason the cast below
+      // is not. The Archives shed snow and icicles; two flakes crossing the
+      // sampled row are enough to move WHICH row this harness picks as the
+      // most textured one — y462 with snow, y366 without — and those are two
+      // measurements of two different bands. Same species as the walking
+      // guardian: a thing that happens to be in front of the ground is not
+      // the ground.
+      if (typeof QUAL !== 'undefined') QUAL.weather = 0;
+      if (typeof ceilReset === 'function') ceilReset();
       // THE FRAME MUST BE THE WORLD, NOT THE UI. The first version of this
       // harness sampled whatever was on the canvas, and entering a room fires
       // an evolution dialog and a tutorial toast — so it measured the SPEECH
