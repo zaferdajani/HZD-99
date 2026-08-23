@@ -530,13 +530,22 @@ function npcVoxBuild(id) {
     // game, because low is what carries through rock and what a player walks
     // toward without being told to. Upgrades itself the moment a fired
     // 'hum_cave' loop lands in MBUF (see the head of this block).
-    case 'cave':
+    case 'cave': {
       osc(38, 'sine', 0.62, 0.13, 2);
       osc(57, 'sine', 0.2, 0.09, 1.5);
       nz(0.09, 150, 6);
       nz(0.05, 620, 9);
-      osc(494, 'sine', 0.028, 0.21, 7);
+      // THE THIN PART IS THE MESSAGE, and it changes once she has read it.
+      // Before: a slow wandering shimmer — something searching, which is what
+      // a beacon broadcasting into rock that nobody answers actually is.
+      // After: a steady fifth, no wobble. Same voice, and it has stopped
+      // looking. The gain is driven from the walk (CAVE_BEACON in game.js);
+      // this is the only thing that says whether the walk finished.
+      const found = !!(typeof G !== 'undefined' && G.save && G.save.flags && G.save.flags.beacon);
+      if (found) { osc(494, 'sine', 0.034); osc(741, 'sine', 0.014); }
+      else osc(494, 'sine', 0.028, 0.21, 7);
       break;
+    }
     default:        osc(110, 'sine', 0.3);
   }
   return { g, nodes };

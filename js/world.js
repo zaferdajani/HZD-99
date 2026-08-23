@@ -980,13 +980,28 @@ const ROOMS = {
   CV2: { zone: 'X', cave: 1, w: 52, h: 17, exits: { L: 'CV1', R: 'CV3' },
     // the long dark middle: hoppers in the hollows, a crawler on the far
     // slope, two pockets for the thorough
+    // THE BEACON, and the sound she has been following since the meadow.
+    // The owner asked for a buried mouth that "emits a sound from within that
+    // attracts me to go there" — and it did, and then the sound was scenery.
+    // It has a SOURCE now: the Deaf System's own log-beacon, in the middle of
+    // the long dark, still broadcasting into rock that nobody was listening
+    // through. The lure is loudest here (see CAVE_BEACON in js/game.js) and
+    // reading it settles the voice from a search into a carrier.
+    //
+    // Terminal 5 is the founding log — who the Deaf System are and why the
+    // caves do not connect. docs/DEAF_SYSTEM.md says "the first terminal of
+    // every network tells this story in-world"; every grotto tunnel had it
+    // and the crystal cave, the first network a player ever walks, did not.
+    // So the world's own explanation of itself arrived only AFTER the first
+    // guardian, in a room a player can miss entirely.
     ents: [['hopper', 14, 15], ['hopper', 33, 15], ['crawler', 44, 15],
-           ['bat', 28, 6],
+           ['bat', 28, 6], ['term', 26, 15, 5],
            ['scrap', 22, 7, 25], ['scrap', 40, 7, 20], ['scrap', 8, 15, 20]],
     build(g) {
       caveCarve(g, 'CV2', {
         mouth: 1, open: ['L', 'R'], ledges: 5,
-        anchor: [{ x: 14, y: 15 }, { x: 33, y: 15 }, { x: 44, y: 15 }, { x: 8, y: 15 }],
+        anchor: [{ x: 14, y: 15 }, { x: 26, y: 15, w2: 2 }, { x: 33, y: 15 },
+                 { x: 44, y: 15 }, { x: 8, y: 15 }],
         pocket: [{ x: 22, y: 6 }, { x: 40, y: 6 }],
       });
     } },

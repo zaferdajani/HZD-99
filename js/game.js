@@ -1399,6 +1399,16 @@ function doInteract(s) {
   } else if (s.type === 'term') {
     G.dialog = { name: '…', lines: t('t' + s.extra).slice(), i: 0, onEnd: null, rs: RS_TERM[s.extra] };
     G.state = 'DIALOG'; sfx('ui');
+    // THE CALL IS ANSWERED. This is the thing that has been sounding through
+    // the rock since the meadow (CAVE_BEACON), and reading it is the first
+    // time anything in the world has spoken to her rather than at her. The
+    // voice settles from a search into a carrier from here on.
+    if (CAVE_BEACON[G.roomId] && CAVE_BEACON[G.roomId].far === 0 &&
+        !(G.save.flags && G.save.flags.beacon)) {
+      G.save.flags = G.save.flags || {}; G.save.flags.beacon = 1;
+      if (typeof persist === 'function') persist();
+      G.toast(t('beacon_found'));
+    }
   } else if (s.type === 'bench') {
     G.save.bench = { room: G.roomId, x: s.x, y: s.y + s.h - 38 };
     G.save.usedNine = false; G.save.usedAegis = false;
@@ -8610,26 +8620,58 @@ function rubbleTick(dt) {
 // and it grows as she walks, so the room teaches its own direction. The rock
 // still muffles it — the pile's remaining HP scales the top end — so knocking
 // it down makes the sound OPEN, and that is the reward for the first two hits.
+// THE SOUND HAS A SOURCE, AND SHE CAN WALK TO IT.
+//
+// The owner asked for a buried mouth that "emits a sound from within that
+// attracts me to go there" — and it did, and then the sound was scenery: an
+// ambience anchored on the door, which got quieter as she went deeper, which
+// is backwards. A lure that does not lead anywhere is a trick.
+//
+// It leads to the Deaf System's log-beacon in CV2 now, and the whole tunnel
+// is scored against the walk to it: muffled through rock at the mouth, closer
+// in the entry hall, and in the beacon's own room the volume is the distance
+// to the terminal. Reading it settles the voice — see 'cave' in npcVoxBuild.
+//
+// The table is DEPTH, not geometry. These rooms are separate tile grids with
+// no shared coordinate space, so "how far away is it" can only be answered by
+// how many rooms lie between; a network adds its own row when it grows one.
+const CAVE_BEACON = {
+  A5:   { room: 'CV2', far: 0.16 },   // through the rubble, from the meadow
+  CV1:  { room: 'CV2', far: 0.34 },   // the entry hall — one room off
+  CV1B: { room: 'CV2', far: 0.26 },   // the Seam is a pocket, not the way down
+  CV3:  { room: 'CV2', far: 0.34 },   // past it, and behind her now
+  CV2:  { room: 'CV2', far: 0 },      // here. the distance below does the work
+};
 function tickCaveLure() {
   if (typeof npcVoxTick !== 'function' || !player) return;
-  // the nearest hole is the one she can hear. Two calling at once is a chord,
-  // not a direction, and a lure that does not point is not a lure.
-  let r = null, x = null, nd = 1e9;
+  const B = CAVE_BEACON[G.roomId];
   const px = player.x + player.w / 2;
-  for (const q of (G.rubbles || [])) { const d2 = Math.abs(px - q.x); if (d2 < nd) { nd = d2; r = q; x = q.x; } }
-  if (!r) for (const g of gateDoors()) {
-    if (!g.rubble) continue;
-    const gx2 = gateWorldX(g), d2 = Math.abs(px - gx2);
-    if (d2 < nd) { nd = d2; x = gx2; }
+  let gain = 0;
+  if (B) {
+    if (B.far > 0) {
+      // a room away: a steady bed, louder for the doors that lead toward it.
+      // The pile still muffles it, and knocking the pile down opens it up —
+      // which is the reward for the first two hits.
+      let muffle = 1;
+      for (const q of (G.rubbles || [])) muffle = Math.min(muffle, 0.45 + 0.55 * (1 - q.hp / q.max));
+      // ...and within the room, leaning toward the way down
+      let lead = 0;
+      for (const g of gateDoors()) {
+        if (!CAVE_BEACON[g.to] && g.to !== 'CV2') continue;
+        lead = Math.max(lead, clamp(1 - Math.abs(px - gateWorldX(g)) / 700, 0, 1));
+      }
+      gain = (B.far + lead * 0.22) * muffle;
+    } else {
+      // ITS OWN ROOM: the volume IS the distance to the thing making it
+      const t2 = (G.statics || []).find(q => q.type === 'term');
+      const d = t2 ? Math.abs(px - (t2.x + t2.w / 2)) : 600;
+      gain = 0.30 + clamp(1 - d / 620, 0, 1) * 0.55;
+    }
   }
-  if (x == null) return;
-  const d = Math.abs(px - x);
-  const k = clamp(1 - d / 900, 0, 1);
-  // buried: muffled, and it un-muffles as the rock goes. Opened: it stays, at
-  // half, because a tunnel that fell silent the moment it opened would read as
-  // a switch rather than as a place.
-  const muffle = r ? 0.5 + 0.5 * (1 - r.hp / r.max) : 0.5;
-  npcVoxTick('cave', (0.10 + k * k * 0.62) * muffle);
+  if (gain <= 0) return;
+  // and once she has read it, it stops searching: quieter, and steady
+  if (G.save && G.save.flags && G.save.flags.beacon) gain *= 0.55;
+  npcVoxTick('cave', gain);
 }
 function gateHere() {
   if (!player) return null;

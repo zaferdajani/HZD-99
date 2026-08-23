@@ -146,6 +146,43 @@ const check = (name, ok, detail) => {
     while (G.gateWalk && n3++ < 300) update(1 / 30);
     out.backInTunnel = G.roomId === 'CV1';
 
+
+    // ---- 7. THE SOUND LEADS SOMEWHERE ---------------------------------------
+    // The owner asked for a mouth that "emits a sound from within that attracts
+    // me to go there". It did — and then the sound was scenery: anchored on the
+    // door, so it got QUIETER the deeper she went, which is a lure pointing
+    // backwards. It is scored against the walk to its source now.
+    const heardAt = {};
+    window.npcVoxTick = (id, v) => { if (id === 'cave') heardAt[G.roomId] = v; };
+    for (const room of ['A5', 'CV1', 'CV2']) {
+      loadRoom(room);
+      G.save.flags.rubbleA5 = 1; G.save.flags.rubbleCV1B = 1; rubbleInit();
+      delete G.save.flags.beacon;
+      G.wake = null; G.state = 'PLAY';
+      for (let i = 0; i < 20; i++) await new Promise(k => requestAnimationFrame(k));
+      // stood at the same place in each: the middle of the room
+      player.x = G.roomDef.w * TILE * 0.5;
+      tickCaveLure();
+    }
+    out.heard = heardAt;
+    // ...and in the beacon's own room it is loudest AT the beacon
+    loadRoom('CV2');
+    for (let i = 0; i < 20; i++) await new Promise(k => requestAnimationFrame(k));
+    const term = (G.statics || []).find(q => q.type === 'term');
+    out.hasBeacon = !!term;
+    if (term) {
+      player.x = 4 * TILE; tickCaveLure();
+      const far = heardAt.CV2;
+      player.x = term.x + term.w / 2; tickCaveLure();
+      out.nearBeacon = heardAt.CV2; out.farInRoom = far;
+      // and reading it is what settles the call
+      out.beaconBefore = !!G.save.flags.beacon;
+      doInteract(term);
+      out.beaconAfter = !!G.save.flags.beacon;
+      out.beaconText = !!(G.dialog && G.dialog.lines && G.dialog.lines.length >= 3);
+      G.dialog = null; G.state = 'PLAY';
+    }
+
     window.npcVoxTick = vox0;
     return out;
   });
@@ -174,6 +211,20 @@ const check = (name, ok, detail) => {
   check('the blade opens the branch', r.seamOpens && r.inSeam, 'in ' + (r.inSeam ? 'CV1B' : 'nowhere'));
   check('the Seam is the tunnel\'s rest', r.seamRests);
   check('...and it walks back out', r.seamReturns && r.backInTunnel);
+
+  // THE LURE LEADS TO SOMETHING — the other half of "a sound from within that
+  // attracts me to go there".
+  const h = r.heard || {};
+  check('the sound gets LOUDER the deeper she goes',
+        h.A5 != null && h.CV1 != null && h.CV2 != null && h.A5 < h.CV1 && h.CV1 < h.CV2,
+        'A5 ' + (h.A5 || 0).toFixed(2) + ' -> CV1 ' + (h.CV1 || 0).toFixed(2) +
+        ' -> CV2 ' + (h.CV2 || 0).toFixed(2));
+  check('...and there is something down there making it', r.hasBeacon);
+  check('...loudest standing at it', (r.nearBeacon || 0) > (r.farInRoom || 0) + 0.1,
+        'at the beacon ' + (r.nearBeacon || 0).toFixed(2) + ' vs across the room ' +
+        (r.farInRoom || 0).toFixed(2));
+  check('...and it says something worth the walk', r.beaconText);
+  check('...and reading it answers the call', !r.beaconBefore && r.beaconAfter);
 
   if (errs.length) check('no page errors', false, errs[0]);
   await browser.close();
