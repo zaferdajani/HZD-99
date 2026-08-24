@@ -3314,3 +3314,58 @@ taking the fringe away and measuring the pixels it owns.
    "pale blue vibe" until the painting itself has some warmth in the wreckage —
    rust, sodium lamps, oxidised copper — against the cold. Not a re-fire of the
    whole plate necessarily: a warm pass over the near wreck field would do it.
+
+---
+
+### 2z. THE CAVE IS DARK NOW — what that changes for every plate down there (2026-08-23)
+
+`world.js` has called the crystal cave *"the long dark"* since it was written,
+and said of its far end *"the pillar SHINING at the end of the dark — the shine
+is the guide"*. Neither sentence was true on screen. The cave was lit end to
+end like a corridor with the lights on: the beacon terminal she is meant to
+walk sixty tiles toward was six pixels of amber in a fully lit magenta room,
+and the buried branch into the Seam was exactly as legible as the way on.
+Nothing could be a guide, because everything was equally visible.
+
+**Shipped in code:** `drawCaveDark()` — a half-resolution shadow plate in the
+zone's own tint with holes punched in it by every light in the room, plus an
+additive glow pass on the quality dial. It runs in `cave: 1` rooms only.
+`tests/cavedark.cjs` holds it, and every number in it is measured POST-LIFT.
+
+Two findings that bind anything fired for these rooms:
+
+1. **`drawScreenLift` is affine and it flattens everything.** The accessibility
+   floor is a `screen` with grey 46 at the default setting — `out = 46 + 0.82 ×
+   raw` — so every contrast in a dark room is compressed into the top of the
+   range. The first version of the pass took a patch of rock from raw 32 to raw
+   13.9, a 57% cut, and the player saw 72 → 57. It now draws AFTER the lift for
+   that reason. **A plate judged in a screenshot taken with the lift off is not
+   the plate the owner will see.** Anything fired for the caves should be
+   checked against the shipped page, not against the raw canvas.
+2. **The cave mouths now have a light budget, and it is the opposite of §2f's
+   note.** A mouth is a LIGHT SOURCE from inside the cave — daylight leaking
+   down the throat, and the way back that is never lost — and a DARK HOLE from
+   outside it. Both are already wired (`gateDoors` feeds the light list; a
+   buried door under rubble emits nothing until it is broken open, which is the
+   rubble's reward stated in light instead of in a toast, measured at 25 → 109).
+   §2f's standing note still holds for the OUTSIDE face: black throat, light on
+   a thin rim of the upper lip. The plate does not need to paint the spill —
+   the pass does that, and a plate that paints its own glow will double it.
+
+**The numbers the room now hits, for whoever fires into it:**
+
+| what | measured |
+|---|---|
+| far rock, lit vs dark | 61.6 → 29.8 — a 52% cut |
+| the unlit floor she still has to read | 29.8 (the harness floor is 22) |
+| the ground beside her vs across the room | ×2.8 |
+| the beacon's corner, with it and without | 152.9 vs 76.9 — ×2.0 |
+| the rock beside the pillar | 104.3 vs 24.0 — ×4.4 |
+| the pillar's reach at 300 px | ×1.74, where the beacon is ×1.00 |
+| a buried mouth, before and after the rubble | 25.3 → 109.4 |
+
+**What a plate must NOT do down here:** paint its own ambient light. Every
+fixture in a cave room already casts — the terminal warm, the pillar cold and
+further, the bench warm and small, the sage in his own light, and every animal
+a pair of dim red embers before it is an animal. A plate that arrives with a
+baked glow gets it twice and the pool goes white.

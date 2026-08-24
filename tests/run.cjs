@@ -75,6 +75,7 @@ const SUITE = [
   ['tinker',    "Ratchet's plate set is seven poses, not one picture seven times"],
   ['folk',      'the machine folk have jobs, and no two of them share a beat'],
   ['rubble',    'the first tunnel is buried, it calls, and it takes the blade'],
+  ['cavedark',  'the cave is dark, and light is the only map of it'],
   ['shopread',  'a structure she can enter is never the wall behind it'],
   ['cross',     'a room crossing is a move, not a cut'],
   ['seam',      'a room boundary is a place she walks through, not a door'],
