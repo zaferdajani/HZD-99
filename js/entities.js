@@ -1341,9 +1341,18 @@ class Player {
       // Only when she can PAY. The refusal path is deliberately dull (see
       // below) and a hero straining for a move she cannot afford is exactly the
       // promise-that-isn't this whole branch was rewritten to stop making.
-      if (this.chargeT > 0.14 && !this.chargeVoxed && this.chargeOk) {
+      // ...AND IT STARTS WHERE THE CHARGE BECOMES VISIBLE, NOT BEFORE IT.
+      //
+      // 0.14 was earlier than the move's own tell: the tick ladder and the
+      // particles both start at 0.25, so her voice was committing to a charge a
+      // tenth of a second before anything on screen agreed, and an ordinary tap
+      // held 150 ms — which is most of them — started a 1.60 second held vowel
+      // for a burst that never happened. 0.30 sits after the visual tell and
+      // far beyond any tap, so the order is: the ladder starts, then she leans
+      // into it, then it fires at 0.6.
+      if (this.chargeT > 0.30 && !this.chargeVoxed && this.chargeOk) {
         this.chargeVoxed = true;
-        if (typeof hzdSay === 'function') hzdSay('charge', 0);
+        if (typeof hzdHold === 'function') hzdHold('charge');
       }
       if (this.chargeT > 0.25) {
         this.chargeTick -= dt;
@@ -1375,10 +1384,17 @@ class Player {
           // the held note ends in a shout — the one place her voice is allowed
           // to sit ON TOP of the impact rather than under it, because this is
           // the move the whole charge was for
+          // the held note gives way to the shout rather than fighting it: two
+          // of her voices overlapping is the mud, not the drama
+          if (typeof hzdRelease === 'function') hzdRelease(0.05);
           if (typeof hzdSay === 'function') hzdSay('release', 0);
           this.releaseCharged();
         } else { sfx('no'); this.chargeT = 0; }
       }
+      // AND AN ABANDONED CHARGE ENDS ITS NOTE. Letting go early is the common
+      // case — it is every ordinary attack — so this is the line that stops her
+      // straining through a fight she is winning in single hits.
+      if (this.chargeVoxed && typeof hzdRelease === 'function') hzdRelease();
       this.chargeT = 0; this.chargeVoxed = false;
     }
     if (this.swingVis) { this.swingVis.t -= dt; if (this.swingVis.t <= 0) { this.swingVis = null; this._rake = null; } }

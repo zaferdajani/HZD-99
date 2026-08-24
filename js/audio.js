@@ -193,6 +193,50 @@ function voxMech() {
   VOXMECH = { ac: AC, in: f };
   return VOXMECH;
 }
+// A HELD NOTE HAS TO BE ABLE TO STOP.
+//
+// The charge vocal is the one sound in the game that is a STATE rather than an
+// event — its own comment says so: "she holds a note for as long as she holds
+// the button". It did not. playBuf fires and forgets, and hzd_charge is 1.60
+// SECONDS, the longest take she has and twice an ordinary attack bark. So a
+// tap that grazed the charge threshold started a note that outlived the swing
+// by more than a second and bled over the next two hits of the string. That is
+// the owner's report (2026-08-24): "the long ya is appearing all the time even
+// though without charging, which was created for the charged hit."
+//
+// hzdHold returns a handle. Releasing the button releases the note, with a
+// short fade rather than a cut, because a voice stopped dead is a click.
+let HZDHOLD = null;
+function hzdHold(key) {
+  hzdRelease(0.02);
+  const set = HZDVOX[key];
+  if (!set || !AC || MUTED) return false;
+  const pick = set[(Math.random() * set.length) | 0];
+  if (!MBUF[pick[0]]) { if (typeof mediaAudio === 'function') mediaAudio(pick[0]); return false; }
+  const src = AC.createBufferSource(), g = AC.createGain();
+  src.buffer = MBUF[pick[0]];
+  src.playbackRate.value = 0.96 + Math.random() * 0.08;
+  g.gain.value = pick[1];
+  src.connect(g); g.connect(AC.destination);
+  const m = voxMech(); if (m) g.connect(m.in);
+  src.start();
+  HZDHOLD = { src: src, gain: g };
+  src.onended = () => { if (HZDHOLD && HZDHOLD.src === src) HZDHOLD = null; };
+  HZDT = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  return true;
+}
+function hzdRelease(fade) {
+  if (!HZDHOLD || !AC) return;
+  const h = HZDHOLD; HZDHOLD = null;
+  const t = AC.currentTime, f = fade == null ? 0.09 : fade;
+  try {
+    // .value as well as the ramp: a GainNode holds its default until its first
+    // scheduled event, which is the lesson already written into this file.
+    h.gain.gain.setValueAtTime(h.gain.gain.value, t);
+    h.gain.gain.linearRampToValueAtTime(0.0001, t + f);
+    h.src.stop(t + f + 0.01);
+  } catch (e) { try { h.src.stop(); } catch (e2) {} }
+}
 function playBuf(key, vol, rate) {
   if (!AC || MUTED) return false;
   // a sound in the second wave that is asked for early jumps the queue. This

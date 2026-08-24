@@ -130,6 +130,71 @@ const { chromium } = require('playwright');
   check('two swings on one frame do not stutter',
     gate.second - gate.first <= 1, 'delta ' + (gate.second - gate.first));
 
+  // ---- THE HELD NOTE, WHICH IS A STATE AND NOT AN EVENT --------------------
+  //
+  // The owner, 2026-08-24: "the long ya is appearing all the time even though
+  // without charging, which was created for the charged hit."
+  //
+  // hzd_charge is 1.60 seconds — the longest take she has, twice an ordinary
+  // attack bark — and it fired at 0.14 s of hold, which is earlier than the
+  // charge's own visible tell (the tick ladder and particles both start at
+  // 0.25) and shorter than an ordinary tap. So a normal attack started a note
+  // that outlived its own swing by more than a second and bled over the next
+  // two hits of the string. Twice over: it also never stopped when the button
+  // did, because playBuf fires and forgets.
+  //
+  // This drives the real charge and counts the DECISION rather than listening
+  // to the output, so it means the same thing on a machine with no audio
+  // device: the harness owns hzdHold/hzdRelease for the length of the test.
+  const hold = await page.evaluate(async () => {
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+    sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
+    startGame(sv); loadRoom('A1');
+    G.dialog = null; G.trans = null; G.state = 'PLAY'; G.enemies = []; G.boss = null;
+    for (let i = 0; i < 30; i++) await new Promise(k => requestAnimationFrame(k));
+    let holds = 0, rels = 0;
+    const rH = window.hzdHold, rR = window.hzdRelease;
+    window.hzdHold = function () { holds++; return true; };
+    window.hzdRelease = function () { rels++; };
+    // Hold the claw until chargeT passes `upto`, then let go. Driving off
+    // chargeT rather than off wall-clock frames is what makes this stable on a
+    // slow machine: it is the same quantity the code under test branches on.
+    const press = async (upto, volts) => {
+      holds = 0; rels = 0;
+      player.volts = volts; player.chargeT = 0; player.chargeVoxed = false;
+      for (const k in keys) keys[k] = 0;
+      keys.KeyX = 1; keysP.KeyX = 1;   // ATK, which is what chargeT reads
+      for (let f = 0; f < 240; f++) {
+        await new Promise(k => requestAnimationFrame(k));
+        if (player.chargeT >= upto) break;
+      }
+      const reached = player.chargeT;
+      keys.KeyX = 0; keysP.KeyX = 0;
+      for (let f = 0; f < 8; f++) await new Promise(k => requestAnimationFrame(k));
+      return { holds, rels, reached: +reached.toFixed(2) };
+    };
+    const out = {};
+    out.tap = await press(0.20, 60);        // an ordinary attack, button held 200 ms
+    out.charging = await press(0.45, 60);   // past the tell, short of the burst
+    out.full = await press(0.70, 60);       // all the way through
+    out.broke = await press(0.45, 5);       // ...and with nothing to spend
+    window.hzdHold = rH; window.hzdRelease = rR;
+    return out;
+  });
+
+  check('an ordinary tap never starts the held note',
+    hold.tap.holds === 0, 'held ' + hold.tap.reached + 's, note started ' + hold.tap.holds + ' time(s)');
+  check('...and a real charge does', hold.charging.holds === 1,
+    'held ' + hold.charging.reached + 's, note started ' + hold.charging.holds + ' time(s)');
+  check('...and letting go ends it', hold.charging.rels >= 1,
+    hold.charging.rels + ' release(s)');
+  check('...and so does firing it', hold.full.holds === 1 && hold.full.rels >= 1,
+    'held ' + hold.full.reached + 's, ' + hold.full.holds + ' start / ' + hold.full.rels + ' release');
+  // the refusal path stays dull on purpose: a hero straining for a move she
+  // cannot afford is the promise-that-isn't the charge was rewritten to stop
+  check('a charge she cannot pay for stays silent', hold.broke.holds === 0,
+    hold.broke.holds + ' note(s) on ' + hold.broke.reached + 's with 5 volts');
+
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
