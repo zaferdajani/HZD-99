@@ -698,6 +698,54 @@ function plateBox(key) {
 // outside the subject's own alpha, so no masking is needed.
 // ---------------------------------------------------------------------------
 const POP_ART = {};
+// A BACKDROP THAT CAN BE SEEN, without a grey veil over the whole frame.
+//
+// The owner, four times now, most recently: "Background is toooooo dark and
+// faded" and "can't even see the door artwork". Measured, on the room in his
+// screenshot: the frame reads 11.6% luminance with 77% of its pixels crushed
+// below 12% BEFORE the screen-lift dial — and the plates themselves are the
+// floor of it. gateCity, the painting the door he cannot see is painted into,
+// is 16.2% mean luminance with 31% of its own pixels already crushed. Four
+// darkening passes then run over it, and the frame-budget dial had switched
+// OFF the only pass that puts light back.
+//
+// The fix that reads as light rather than as fog is a GAMMA LIFT: raise the
+// mid-tones and leave white alone, on the plate, once, cached. That is what a
+// grade does. What the screen-lift dial does instead is add a flat grey to
+// every pixel including the black ones, which is precisely the definition of
+// faded — and it is why three previous attempts at this ended with a brighter
+// number and the same complaint.
+//
+// Same LUT as popArt's `lift`, without popArt's contrast passes: those exist to
+// make a hostile body shout, and a backdrop shouting is the opposite of what
+// §9.1 asks for. The plate keeps its alpha and its size.
+const BG_LIFT = {};
+function bgLift(key, src, gamma) {
+  const ck = key + '@' + gamma;
+  if (BG_LIFT[ck] !== undefined) return BG_LIFT[ck];
+  const im = src || MEDIA_RAW[key];
+  if (!im || !im.naturalWidth) return null;                // not here yet; ask again
+  let out = im;
+  try {
+    const cv = document.createElement('canvas');
+    cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+    const x = cv.getContext('2d', { willReadFrequently: true });
+    x.drawImage(im, 0, 0);
+    const lut = new Uint8ClampedArray(256);
+    for (let i = 0; i < 256; i++) lut[i] = 255 * Math.pow(i / 255, gamma);
+    const id = x.getImageData(0, 0, cv.width, cv.height), d = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (!d[i + 3]) continue;
+      d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
+    }
+    x.putImageData(id, 0, 0);
+    cv.naturalWidth = cv.width; cv.naturalHeight = cv.height;
+    out = cv;
+  } catch (e) {}                                           // tainted: ship it raw
+  BG_LIFT[ck] = out;
+  return out;
+}
+
 function popArt(key, src, lift) {
   if (POP_ART[key] !== undefined) return POP_ART[key];
   const im = src || MEDIA_RAW[key];

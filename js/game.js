@@ -4307,6 +4307,13 @@ function drawInteriorFloor() {
   const cv = interiorFloorCv();
   if (cv) c.drawImage(cv, 0, INT_FLOOR.y);
 }
+// How hard the painting is sat down so the playfield reads in front of it.
+// Named for the same reason the far-plane knobs are: these were guessed, and
+// the guess was measured wrong. See the note inside drawZoneVista.
+let VISTA_SEAT = 0.34;    // was 0.62 — the bottom of the seating gradient
+let VISTA_VEIL = 0.06;    // was 0.14 — a flat black wash over the entire frame
+let VISTA_GAMMA = 0.84;   // the mid-tone lift on the painting itself (1 = none)
+let WORLD_VEIL = 0.06;    // was 0.16 — the flat wash over the whole view
 function drawZoneVista(P, zone, px, py) {
   const own = ROOM_VISTA[G.roomId];
   if (own && typeof mediaFetch === 'function') mediaFetch(own);
@@ -4354,9 +4361,17 @@ function drawZoneVista(P, zone, px, py) {
   }
   const solo = (own && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[own])
     || (ZONE_VISTA[zone] && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[ZONE_VISTA[zone]]);
-  const im = solo || (typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.zones);
+  const im0 = solo || (typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.zones);
   const cell = solo ? [0, 0] : ZONE_CELL[zone];
-  if (!im || !cell) return false;
+  if (!im0 || !cell) return false;
+  // THE PAINTING IS LIFTED BEFORE ANYTHING IS DONE TO IT. These plates are dark
+  // in themselves — the city gate painting measures 16% mean luminance with a
+  // third of its pixels already crushed — and four passes then sit on top. A
+  // gamma lift raises what is in the shadows and leaves the highlights where
+  // the painter put them, which is what makes the architecture in the plate
+  // visible instead of merely brighter. Cached per plate; see media.js bgLift.
+  const im = (typeof bgLift === 'function'
+    && bgLift((solo ? (own || ZONE_VISTA[zone]) : 'zones'), im0, VISTA_GAMMA)) || im0;
   const CW = solo ? im.naturalWidth : im.naturalWidth / 2;
   const CH = solo ? im.naturalHeight : im.naturalHeight / 3;
   // scale the painting past the screen and pan across the excess as the camera
@@ -4433,11 +4448,21 @@ function drawZoneVista(P, zone, px, py) {
   air.addColorStop(1, 'rgba(120,150,175,0)');
   c.fillStyle = air; c.fillRect(0, 0, 960, 540);
   // seat the playfield: darken the lower third and cool the whole frame slightly
-  // toward the zone palette so gameplay reads against the painting
+  // toward the zone palette so gameplay reads against the painting.
+  //
+  // MEASURED, AFTER THE OWNER REPORTED IT FOR THE FOURTH TIME. This is one of
+  // FOUR darkening passes stacked on the same pixels — this seat, the flat veil
+  // under it, bgPlanePass, and the zone wash — and the frame that came out of
+  // them measured 14.3% luminance with 45% of its pixels crushed below 12%.
+  // The screen-lift dial then put grey back over all of it to compensate,
+  // which is where the second half of "too dark AND FADED" comes from: you
+  // cannot restore a picture you have already removed, you can only raise the
+  // floor it was removed to. So the seat and the veil come down, and the lift
+  // has less to do. tools/gradesweep.cjs measures the result.
   const hz = c.createLinearGradient(0, 250, 0, 540);
-  hz.addColorStop(0, 'rgba(5,9,14,0)'); hz.addColorStop(1, 'rgba(5,9,14,0.62)');
+  hz.addColorStop(0, 'rgba(5,9,14,0)'); hz.addColorStop(1, 'rgba(5,9,14,' + VISTA_SEAT + ')');
   c.fillStyle = hz; c.fillRect(0, 0, 960, 540);
-  c.fillStyle = 'rgba(5,9,14,0.14)'; c.fillRect(0, 0, 960, 540);
+  if (VISTA_VEIL > 0) { c.fillStyle = 'rgba(5,9,14,' + VISTA_VEIL + ')'; c.fillRect(0, 0, 960, 540); }
   drawMotes(px, py, t3);
   if (zone === 'C') drawLavaFalls(px, py);
   // rooms narrower than the screen: the painting must stop at the walls
@@ -5624,6 +5649,10 @@ function rockBakeReady(zone) {
   return now - rockWaitT0 > ROCK_WAIT_MS;
 }
 
+// The mid-tone lift on the plane she stands on. See the note at the end of
+// renderTileLayer: the readability law is about the GAP between the playfield
+// and the wall, and this game had been making the gap by darkening the wall.
+let TERRAIN_GAMMA = 0.74;
 function renderTileLayer(P) {
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
   // THE CANVAS IS MADE FIRST, ALWAYS. The wait below returns without baking,
@@ -5686,6 +5715,34 @@ function renderTileLayer(P) {
       tctx.fillRect(0, 0, tileCv.width, tileCv.height);
       tctx.restore();
     }
+  }
+  // THE PLAYABLE PLANE IS LIT, NOT THE BACKGROUND CRUSHED.
+  //
+  // §9.1 asks for ten points of luminance between the ground she stands on and
+  // the wall behind it, and this game has been buying that gap by taking light
+  // OUT of the background — which is the whole of the owner's report. Measured:
+  // the terrain plane itself sits at 23-31%, so the law forced the background
+  // down to 13 in the darkest rooms, and no amount of tuning the background
+  // could make the picture brighter without breaking the separation that makes
+  // the game readable.
+  //
+  // Raising the FLOOR raises the ceiling. One gamma pass on the tile layer —
+  // built once per room, not per frame, so it costs nothing in the loop — lifts
+  // the plane the player reads and lets the background come up with it. The
+  // separation is preserved because both move; the picture gets brighter
+  // because both move UP.
+  if (TERRAIN_GAMMA < 1) {
+    try {
+      const tx2 = tileCv.getContext('2d', { willReadFrequently: true });
+      const lut = new Uint8ClampedArray(256);
+      for (let i = 0; i < 256; i++) lut[i] = 255 * Math.pow(i / 255, TERRAIN_GAMMA);
+      const id = tx2.getImageData(0, 0, tileCv.width, tileCv.height), d = id.data;
+      for (let i = 0; i < d.length; i += 4) {
+        if (!d[i + 3]) continue;                       // holes stay holes
+        d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
+      }
+      tx2.putImageData(id, 0, 0);
+    } catch (e) {}
   }
   tileDirty = false;
 }
@@ -11085,7 +11142,13 @@ function drawWorldFrame() {
     ftxt('✦', 16.5 * TILE, 15.8 * TILE, 22, '#e05aff', 'center', '#e05aff');
   }
   // ambient darkness — dynamic lights lift what matters
-  c.fillStyle = 'rgba(3,6,14,0.16)';
+  // ONE MORE FLAT VEIL OVER THE WHOLE VIEW, and it is the fifth. Counted while
+  // chasing "background is toooooo dark and faded": the far-plane grade, the
+  // painting's seating gradient, the painting's flat veil, this, and the
+  // screen-lift dial's grey — five full-frame operations on one picture, none
+  // of which knows about the others. This one is a hair of atmosphere; at 0.16
+  // it was taking a sixth of the light out of every frame in the game.
+  c.fillStyle = 'rgba(3,6,14,' + WORLD_VEIL + ')';
   c.fillRect(cam.x - 12, cam.y - 12, 984, 564);
   // THE BRAID writes itself onto the air of the room. A kingdom still deep in
   // the rot runs violet; one she has bought back runs clean. STARLESS worlds
@@ -12033,51 +12096,114 @@ function drawCaveDark() {
   }
   c.restore();
 }
+// THE THREE NUMBERS THAT DECIDE HOW FAR THE BACKGROUND IS PUSHED BACK, named
+// so they can be measured and swept (tools/gradesweep.cjs) instead of guessed.
+// Guessing is what produced the frame the owner reported as "toooooo dark and
+// faded", and the guessing had a signature: the background was crushed to a
+// tenth of its value and 94% of its colour, and then the SCREEN LIFT put grey
+// back over the whole frame to compensate. Crush plus lift is the exact recipe
+// for faded — it removes the picture and then raises the floor it was removed
+// to.
+//
+// The laws these serve have a ceiling, and the measurements were nowhere near
+// it: §9.1 allows the background plane up to 25% luminance and it was sitting
+// at 8-13, §9.4 allows 12 chroma and it was at 3-7. Half the permitted light
+// and a quarter of the permitted colour, thrown away for nothing.
+let BG_DESAT = 0.80;   // how much chroma the far plane gives up
+let BG_SIT = 0.55;     // how hard the far plane is sat down: 0 untouched, 1 full wash
+let BG_HAZE = 0.13;    // the veil that keeps distance from reading as underexposure
+let BG_TINT = 0.25;    // how much of the zone's hue survives in the darkening (0 = grey)
+// AND THE PASS HAS TO KNOW WHAT IS BEHIND IT.
+//
+// This grade was written for the PROCEDURAL backdrop — bands of machine city
+// drawn in code, which arrived too bright and too saturated and needed pushing
+// back. It then ran, unchanged and at full strength, over the authored
+// paintings as well. Photographed step by step (tools/gradesweep.cjs and the
+// layer snapshots that found this), the gate painting arrives warm, rusty and
+// completely readable, the desaturation takes its colour, and the multiply
+// takes two thirds of its light: what reaches the player is the flat teal murk
+// the owner sent a screenshot of, with the door he asked about invisible in it.
+//
+// A painting already contains its own aerial perspective. The gate plate is
+// painted with haze, with depth, and with a warm light behind the doors — that
+// is what the brief asked Higgsfield for and it is what came back. Grading it
+// again is not depth, it is repainting, and ART_BIBLE §0 is explicit about who
+// owns the paint. So the pass keeps its full strength over procedural ground
+// and goes light over an authored plate: enough to seat it behind the
+// playfield, not enough to take it away.
+let BG_ART_DESAT = 0.38, BG_ART_SIT = 0.62, BG_ART_HAZE = 0.10;
 function bgPlanePass() {
   const L = ZONE_LIGHT[G.roomDef.zone];
   if (!L) return;
   const [wr, wg, wb] = L.wash;
-  // AERIAL PERSPECTIVE IS ABOUT DISTANCE, AND AN INTERIOR HAS NONE.
+  // HOW HARD THIS PASS PUSHES DEPENDS ON WHAT IS BEHIND THE FRAME, and there
+  // are two ways it can be wrong. Both were reported, from opposite ends, and
+  // both are the same mistake: a grade written for one kind of backdrop running
+  // at full strength over another.
   //
-  // Everything below is the three-plane law and it is right: a far plane that
-  // holds more chroma than the cast is backwards, and the fix is to strip the
-  // background's colour and sit it down in value so the playable plane reads
-  // in front of it. Outdoors that models the real thing — kilometres of air
-  // between her and the skyline.
+  // AERIAL PERSPECTIVE IS ABOUT DISTANCE, AND AN INTERIOR HAS NONE. Outdoors
+  // the law models the real thing — kilometres of air between her and the
+  // skyline. In the trader's den the "far plane" is the wall she is standing a
+  // metre from, and stripping its chroma and multiplying it down does not push
+  // it into the distance, it turns the room she is inside into a grey
+  // photograph of somewhere else: "as if I'm looking at a framed image instead
+  // of an actual background of the actual shop".
   //
-  // In the trader's den the "far plane" is the wall she is standing a metre
-  // from. Stripping 94% of its chroma and multiplying it to 0.42 of the zone's
-  // shadow does not push it into the distance, it turns the room she is inside
-  // into a grey photograph of somewhere else — which is the whole of the
-  // owner's report: "too dark, too dull, not vibrant... as if I'm looking at a
-  // framed image instead of an actual background of the actual shop". The
-  // painting was graded up and this pass took all of it straight back off.
+  // AND AN AUTHORED PAINTING ALREADY CONTAINS ITS OWN. The gate plate is
+  // painted with haze, with depth and with a warm light behind the doors,
+  // because that is what the brief asked Higgsfield for. Photographed step by
+  // step, it arrives warm and completely readable and this pass takes it back
+  // off: what reached the player was the flat teal murk in the owner's
+  // screenshot, with the door he asked about invisible in it. Grading a
+  // painting again is not depth, it is repainting, and ART_BIBLE §0 is
+  // explicit about who owns the paint.
   //
-  // So the law is kept and its STRENGTH is made a function of how far away the
-  // background actually is. A room's wall gets a quarter of the desaturation
-  // and almost none of the darkening: enough separation that she still reads in
-  // front of it, nowhere near enough to send it to another country.
+  // So the law is kept and its STRENGTH is a function of what it is grading.
+  // Procedural ground outdoors takes it in full; a wall she is standing next to
+  // and a painted plate take a fraction — enough separation that she still
+  // reads in front of it, nowhere near enough to send it to another country.
   const inr = !!(G.roomDef && G.roomDef.indoor);
+  const painted = G._vistaRoom === G.roomId;      // drawZoneVista records its rect
+  const soft = inr || painted;
+  const DESAT = inr ? 0.24 : painted ? BG_ART_DESAT : BG_DESAT;
+  const SIT = inr ? 0.08 : painted ? BG_ART_SIT : BG_SIT;
+  const HAZE = inr ? 0.04 : painted ? BG_ART_HAZE : BG_HAZE;
   c.save();
   // 1 — pull the chroma out
   c.globalCompositeOperation = 'saturation';
   c.fillStyle = 'hsl(0,0%,50%)';
-  // 0.62 left the Foundry at 76 and 0.82 at 56. The Foundry is molten iron —
-  // the zone whose whole identity is saturated orange — so it is the room that
-  // decides this number, and §9.4 is explicit that the reserved chroma belongs
-  // to the cast and the interactables, not to the wall behind them.
-  c.globalAlpha = inr ? 0.24 : 0.94;
+  // 0.62 left the Foundry at 76 and 0.82 at 56 on the RELATIVE chroma measure
+  // that was later found to be meaningless on dark pixels; on the absolute one
+  // this file measures with now, 0.94 was costing the background nearly all of
+  // its colour to stay a quarter under a limit it could not have reached.
+  c.globalAlpha = DESAT;
   c.fillRect(0, 0, 960, 540);
   // 2 — sit it down in value, toward the zone's own shadow rather than to grey.
-  //     Indoors the multiply is nearly a no-op and it goes toward a warm lamp
-  //     shadow instead of the kingdom's outdoor light: the corners of a lit
-  //     workshop are brown, not teal.
+  //
+  // THE TINT IS MUTED BEFORE IT DARKENS, which is the difference between depth
+  // and repainting. A multiply by a SATURATED colour does not dim a picture, it
+  // rewrites it: zone A's wash is [120,190,175], so its red channel is 0.63 of
+  // its green whatever strength it is used at, and every warm plate in the
+  // Meadows lost 37% of its red before anything else touched it. The haze below
+  // has muted itself toward its own mean since it was written, for exactly this
+  // reason; the darkening never did. Indoors it goes toward a warm lamp shadow
+  // instead of the kingdom's outdoor light — the corners of a lit workshop are
+  // brown, not teal.
+  //
+  // AND `SIT` IS A STRENGTH NOW, WHICH IT WAS NOT. It used to SCALE the wash
+  // colour, and a wash is already about 0.6 of white — so `sit = 1`, which
+  // reads like "leave it alone", still multiplied the frame by (0.51, 0.72,
+  // 0.67): a 35% darkening and a hard cut to red that no value of the knob
+  // could turn off. That is why softening it from 0.42 to 0.92 changed the
+  // number and never the picture. Interpolated from WHITE instead, 0 means
+  // untouched and 1 means the full wash, which is what a strength is.
+  const tw = inr ? [250, 232, 214] : [wr, wg, wb];
+  const tmean = (tw[0] + tw[1] + tw[2]) / 3;
+  const mute = (v) => v * (1 - BG_TINT) + tmean * BG_TINT;
+  const toward = (v) => Math.round(255 - (255 - mute(v)) * SIT);
   c.globalCompositeOperation = 'multiply';
   c.globalAlpha = 1;
-  const mk = inr ? 0.92 : 0.42;
-  const mr = inr ? 250 : wr, mg = inr ? 232 : wg, mb = inr ? 214 : wb;
-  c.fillStyle = 'rgb(' + Math.round(mr * mk) + ',' + Math.round(mg * mk) + ',' +
-                Math.round(mb * mk) + ')';
+  c.fillStyle = 'rgb(' + toward(tw[0]) + ',' + toward(tw[1]) + ',' + toward(tw[2]) + ')';
   c.fillRect(0, 0, 960, 540);
   // 3 — and the haze that keeps it from reading as underexposure. §9.1 asks for
   //     5-10%; the top of the frame is furthest away and takes the most.
@@ -12089,16 +12215,19 @@ function bgPlanePass() {
   const hz = (v) => Math.round(v * 0.42 + ((wr + wg + wb) / 3) * 0.58);
   const hr = hz(wr), hg2 = hz(wg), hb = hz(wb);
   const h = c.createLinearGradient(0, 0, 0, 540);
-  // and barely any haze indoors — haze is suspended air, and there are four
-  // metres of it in a shed
-  h.addColorStop(0, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',' + (inr ? 0.04 : 0.13) + ')');
-  h.addColorStop(1, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',' + (inr ? 0.01 : 0.04) + ')');
+  // barely any haze indoors — haze is suspended air, and there are four metres
+  // of it in a shed
+  h.addColorStop(0, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',' + HAZE + ')');
+  h.addColorStop(1, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',' + (HAZE * 0.31).toFixed(3) + ')');
   c.fillStyle = h;
   c.fillRect(0, 0, 960, 540);
   // ...and break the pitch. Overlay keeps mid-grey neutral, so this only
-  // pushes the background's own values apart — it never tints it.
+  // pushes the background's own values apart — it never tints it. A PAINTING
+  // does not need it: the mottle exists so a procedurally repeated backdrop
+  // cannot match itself across a screen (§10.7), and a painted plate has its
+  // own light pooling in it already.
   c.globalCompositeOperation = 'overlay';
-  c.globalAlpha = 0.55;
+  c.globalAlpha = painted ? 0.42 : 0.55;
   c.drawImage(bgMottle(), 0, 0);
   c.restore();
   c.globalAlpha = 1;
