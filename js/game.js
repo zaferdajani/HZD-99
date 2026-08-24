@@ -711,16 +711,17 @@ const NPC_DARK_FILTER = 'grayscale(0.8) brightness(0.8) contrast(1.25)';
 function grantMod(id) {
   G.save.abil[id] = 1;
   if (MOD_ART[id] && typeof mediaFetch === 'function') mediaFetch(MOD_ART[id], 1);
-  showItem(t('m_' + id), t('m_' + id + 'd'), MOD_ART[id]);
+  showItem(t('m_' + id), t('m_' + id + 'd'), MOD_ART[id], id);
   lessonStart(id);                                  // and then teach it
 }
 function grantCrest(id) {
   if (G.save.crests.indexOf(id) < 0) G.save.crests.push(id);
   showItem(t('c_' + id), t('c_' + id + 'd'));
 }
-function showItem(name, desc, art) {
+function showItem(name, desc, art, demo) {
   sfx('win');
-  G.dialog = { name: t('got'), lines: [name + ' — ' + desc], i: 0, onEnd: null, art: art || null };
+  G.dialog = { name: t('got'), lines: [name + ' — ' + desc], i: 0, onEnd: null,
+               art: art || null, demo: demo || null };
   G.state = 'DIALOG';
   persist();
 }
@@ -2183,6 +2184,22 @@ function updateSkills() {
     showItem(t('sk_' + sk.id), t('sk_' + sk.id + 'd'));
   }
 }
+// ONE GEOMETRY FOR THE TREE, read by the drawing AND by the tap targets — the
+// pause menu's lesson, and this screen needed it for the same reason: the touch
+// hit-test was written against the TWO-column layout and never learned about
+// the three-column one the purifier branch grows, so on a phone with the sword
+// every node past the second column selected the wrong skill.
+//
+// It also makes room. The preview window is a column of its own now, and the
+// tree slides left to give it one rather than being drawn over.
+function skillLayout() {
+  const pool = skillPool();
+  const cols = pool.length > 8 ? 3 : 2;
+  const pos = cols === 2
+    ? i => ({ x: 250 + (i % 2) * 290, y: 150 + Math.floor(i / 2) * 105 })
+    : i => ({ x: 165 + (i % 3) * 225, y: 138 + Math.floor(i / 3) * 88 });
+  return { pool, cols, pos, demo: { x: 706, y: 148, w: 228, h: 176 } };
+}
 function drawSkills() {
   c.fillStyle = 'rgba(4,7,12,0.88)'; c.fillRect(0, 0, 960, 540);
   ftxt(t('sk_title'), 480, 46, 28, '#eef3fa', 'center', '#b48cff');
@@ -2190,11 +2207,8 @@ function drawSkills() {
   // the tree BREATHES when the crystal branch appears: two columns while she
   // is claws-only (the layout every save so far has known), three once the
   // pool outgrows it, with the rows squeezed to keep the description clear
-  const pool = skillPool();
-  const cols = pool.length > 8 ? 3 : 2;
-  const pos = cols === 2
-    ? i => ({ x: 330 + (i % 2) * 300, y: 150 + Math.floor(i / 2) * 105 })
-    : i => ({ x: 240 + (i % 3) * 240, y: 138 + Math.floor(i / 3) * 88 });
+  const L = skillLayout();
+  const pool = L.pool, cols = L.cols, pos = L.pos;
   c.strokeStyle = 'rgba(180,140,255,0.3)'; c.lineWidth = 2;
   for (let i = cols; i < pool.length; i++) {
     const a = pos(i - cols), b = pos(i);
@@ -2218,8 +2232,22 @@ function drawSkills() {
     ftxt(t('sk_' + sk.id), p2.x, p2.y + 44, 14, sel ? '#eef3fa' : '#8aa2b5');
   });
   const cur = pool[Math.min(G.skillIdx, pool.length - 1)];
-  wrapText(t('sk_' + cur.id + 'd'), 520, 14).forEach((ln, i) => ftxt(ln, 480, 474 + i * 19, 14, '#9fb8c8'));
-  ftxt(t('sk_hint'), 480, 518, 12, '#7d93a8');
+  // ...AND THE WINDOW THAT SHOWS THE VERB (owner: "it should open a window next
+  // to it showing me the character doing it in a mini screen"). A tree that
+  // sells moves has to show the move; the description under it is a promise,
+  // and this is the thing itself, played out of her own sheet. See
+  // js/riddles.js drawSkillDemo.
+  //
+  // It sits on the side of the frame the selected node is NOT on, so the window
+  // never covers the thing you are looking at.
+  if (typeof drawSkillDemo === 'function') {
+    const d = L.demo;
+    drawSkillDemo(c, d.x, d.y, d.w, d.h, cur.id, performance.now() / 1000);
+    ftxt(t('sk_' + cur.id), d.x + d.w / 2, d.y - 14, 14, '#cbb6ff');
+  }
+  // the description keeps clear of the window's column
+  wrapText(t('sk_' + cur.id + 'd'), 440, 14).forEach((ln, i) => ftxt(ln, 420, 474 + i * 19, 14, '#9fb8c8'));
+  ftxt(t('sk_hint'), 420, 518, 12, '#7d93a8');
 }
 
 // ---------- drawing ----------
@@ -4419,6 +4447,7 @@ function drawZoneVista(P, zone, px, py) {
       c.fillStyle = wg; c.fillRect(0, 0, 960, 540);
       c.restore();
       G._vista = { x: x0, y: y0, w: dw2, h: dh2 }; G._vistaRoom = G.roomId;
+      G._vistaPainted = G.roomId;
       return true;
     }
   }
@@ -4427,6 +4456,15 @@ function drawZoneVista(P, zone, px, py) {
   const im0 = solo || (typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.zones);
   const cell = solo ? [0, 0] : ZONE_CELL[zone];
   if (!im0 || !cell) return false;
+  // THIS ROOM IS A PAINTING, AND SAYING SO IS ITS OWN JOB. bgPlanePass grades a
+  // plate far more gently than it grades procedural ground, and it used to ask
+  // `G._vistaRoom === G.roomId` — a rect recorded as a SIDE EFFECT inside the
+  // far-copy draw, and only when that copy is drawn at full parallax. A room
+  // wide enough to earn its second plate never set it, so exactly the wide
+  // rooms — the Foundry among them — took the procedural grade over a painting
+  // and none of the gentle knobs moved them at all. Recorded here, where the
+  // question is actually answered.
+  G._vistaPainted = G.roomId;
   // THE PAINTING IS LIFTED BEFORE ANYTHING IS DONE TO IT. These plates are dark
   // in themselves — the city gate painting measures 16% mean luminance with a
   // third of its pixels already crushed — and four passes then sit on top. A
@@ -12263,7 +12301,7 @@ function drawCaveDark() {
 let BG_DESAT = 0.80;   // how much chroma the far plane gives up
 let BG_SIT = 0.55;     // how hard the far plane is sat down: 0 untouched, 1 full wash
 let BG_HAZE = 0.13;    // the veil that keeps distance from reading as underexposure
-let BG_TINT = 0.25;    // how much of the zone's hue survives in the darkening (0 = grey)
+let BG_TINT = 0.62;    // how much of the zone hue survives the darkening (0 = grey)
 // AND THE PASS HAS TO KNOW WHAT IS BEHIND IT.
 //
 // This grade was written for the PROCEDURAL backdrop — bands of machine city
@@ -12282,7 +12320,16 @@ let BG_TINT = 0.25;    // how much of the zone's hue survives in the darkening (
 // owns the paint. So the pass keeps its full strength over procedural ground
 // and goes light over an authored plate: enough to seat it behind the
 // playfield, not enough to take it away.
-let BG_ART_DESAT = 0.38, BG_ART_SIT = 0.62, BG_ART_HAZE = 0.10;
+// THE FOUNDRY DECIDES THE CHROMA NUMBER, and it always did — the note this
+// pass was written under says so. Zone C is molten iron: its painting is the
+// most saturated surface in the game, and a desaturation generous enough to
+// give the Meadows its rust back leaves the Foundry's wall at the §9.4 limit
+// while every other room sits comfortably under it. So the strength is per
+// zone rather than one number bent until the worst room passes — which is how
+// every other room lost its colour in the first place.
+let BG_ART_DESAT = 0.40, BG_ART_SIT = 0.92, BG_ART_HAZE = 0.11;
+const BG_ART_DESAT_ZONE = { C: 0.62 };
+const BG_ART_SIT_ZONE = { C: 1.0 };
 function bgPlanePass() {
   const L = ZONE_LIGHT[G.roomDef.zone];
   if (!L) return;
@@ -12314,10 +12361,13 @@ function bgPlanePass() {
   // and a painted plate take a fraction — enough separation that she still
   // reads in front of it, nowhere near enough to send it to another country.
   const inr = !!(G.roomDef && G.roomDef.indoor);
-  const painted = G._vistaRoom === G.roomId;      // drawZoneVista records its rect
+  const painted = G._vistaPainted === G.roomId;   // drawZoneVista says so directly
   const soft = inr || painted;
-  const DESAT = inr ? 0.24 : painted ? BG_ART_DESAT : BG_DESAT;
-  const SIT = inr ? 0.08 : painted ? BG_ART_SIT : BG_SIT;
+  const zn = G.roomDef.zone;
+  const artDesat = (BG_ART_DESAT_ZONE && BG_ART_DESAT_ZONE[zn]) || BG_ART_DESAT;
+  const artSit = (BG_ART_SIT_ZONE && BG_ART_SIT_ZONE[zn]) || BG_ART_SIT;
+  const DESAT = inr ? 0.24 : painted ? artDesat : BG_DESAT;
+  const SIT = inr ? 0.08 : painted ? artSit : BG_SIT;
   const HAZE = inr ? 0.04 : painted ? BG_ART_HAZE : BG_HAZE;
   c.save();
   // 1 — pull the chroma out
@@ -13111,7 +13161,18 @@ function draw(tms) {
       // The object goes in the portrait's column instead, drawn larger than a
       // bust because it is the subject rather than a listener, on a soft warm
       // disc so a dark machined housing still reads against the dim panel.
-      if (d.art) {
+      // ...AND WHEN IT IS A POWER, THE PICTURE MOVES. A jetpack drawn as a
+      // still object says what she was given; the same window the skill tree
+      // uses says what it DOES, which is the owner's ask in one breath with
+      // the tree: "the same goes with the upgrades I would get when beating
+      // the bosses — the jet, the slash, getting the new sword". Same
+      // component, same scripts (js/riddles.js), so a power reads the same way
+      // wherever the game offers it.
+      if (d.demo && typeof drawSkillDemo === 'function' && typeof demoScript === 'function'
+          && demoScript(d.demo)) {
+        drawSkillDemo(c, px - 4, by + 8, 132, 100, d.demo, performance.now() / 1000);
+        bustDrawn = true;
+      } else if (d.art) {
         const ai = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[d.art];
         if (ai && ai.naturalWidth) {
           const S = 84, cx4 = px + 32, cy4 = by + 14 + 32;

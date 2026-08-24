@@ -372,9 +372,14 @@ function tapMenu(x, y) {
     const i = Math.round((y - 130) / 46);
     if (i >= 0 && i < SHOP.length && Math.abs(y - (130 + i * 46)) <= 23) { G.shopIdx = i; tPress('VOK'); }
   } else if (st === 'SKILLS') {
-    for (let i = 0; i < SKILLS.length; i++) {
-      const px2 = 330 + (i % 2) * 300, py2 = 150 + Math.floor(i / 2) * 105;
-      if (Math.hypot(x - px2, y - py2) < 42) { G.skillIdx = i; tPress('VOK'); break; }
+    // the same geometry the tree is drawn with — see skillLayout(). This used
+    // the two-column formula against SKILLS rather than the pool, so with the
+    // purifier branch grown every node past the second column selected the
+    // wrong skill on a phone.
+    const SL = skillLayout();
+    for (let i = 0; i < SL.pool.length; i++) {
+      const p2 = SL.pos(i);
+      if (Math.hypot(x - p2.x, y - p2.y) < 40) { G.skillIdx = i; tPress('VOK'); break; }
     }
   } else if (st === 'TRIAL') {
     if (TRI.st === 'menu') {

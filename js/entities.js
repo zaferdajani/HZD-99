@@ -689,6 +689,11 @@ const HERO_CELL = {
   heal: 19, song: 20, slump: 21, walk_c: 22, run_c: 23,
 };
 const HERO_CELLS = 24;
+// Per-pose size corrections, measured off the sheet with tools/cellmeas.cjs —
+// the figure's height inside its cell, against the idle she is supposed to
+// still be the same size as. 117/131 for the charge; nothing else in the sheet
+// is off in a way the eye reads as the character changing size.
+const HERO_POSE_K = { charge: 0.893 };
 // The plate is drawn from the FOOT, like everything else in this file: y=0 is
 // the floor and up is negative. HERO_DH is the whole cell's height in world
 // units — bigger than she is, because the cell has headroom over her ears — and
@@ -2190,8 +2195,17 @@ class Player {
     // ...and every other moment the body is mid-change plays its clip the same
     // way, for the same reason, with the same fallback
     if (this.drawRoboTrans(c, st)) return true;
+    // SHE IS THE SAME CAT IN EVERY POSE. Every cell is drawn at HERO_DH, which
+    // is the CELL's height and not hers — so a pose whose figure fills more of
+    // its cell arrives on screen as a bigger character. Measured across the
+    // sheet, the charge cell is 72x131 against a median of 120x131 and an idle
+    // of 77x117: standing to charge made her 12% TALLER than standing still and
+    // no wider, which is exactly the owner's "becomes slimmer". Corrected back
+    // to her idle height. Only the poses that were measured wrong are listed —
+    // a crouch is legitimately shorter and a jump stretch legitimately longer,
+    // and normalising those would flatten the animation rather than fix it.
     const col = HERO_CELL[st] || 0;
-    const dh = HERO_DH, dw = dh * (cw / ch);
+    const dh = HERO_DH * (HERO_POSE_K[st] || 1), dw = dh * (cw / ch);
     // grounded cells stand on the cell's floor line; airborne cells are centred
     const dy = HERO_AIR[st] ? -dh * 0.5 - 18 : -dh + HERO_FLOOR;
     c.save();
@@ -3801,18 +3815,108 @@ class Player {
       c.globalAlpha = 1;
       }
     }
-    // charging aura on the blade — cold and thin when she cannot pay for it,
-    // so the screen answers "why did nothing happen" before it happens
-    if (this.chargeT > 0.25) {
-      const ck = Math.min(1, this.chargeT / 0.6);
+    // THE CHARGE IS A SURGE GATHERING, NOT A LAMP SWITCHED ON.
+    //
+    // The owner: "why does my hero become slimmer and motionless instead of
+    // aura gathering or electrical surge charging with animated sparks coming
+    // from it". Both halves were true. This used to be one soft blob offset to
+    // the side of her — on the blade, not on her — that faded up and sat there,
+    // and it did not start until a quarter second in, so the beginning of the
+    // hold looked like nothing was happening at all.
+    //
+    // What a charge looks like is POWER ARRIVING FROM SOMEWHERE. So: rings that
+    // sweep IN toward her core rather than a glow that swells out, sparks
+    // riding those rings and being pulled in with them, arcs that snap from the
+    // sparks to her chest, and the whole thing tightening and quickening as it
+    // fills. It is all additive light, which is the one part of this game's look
+    // that is ours to draw rather than Higgsfield's (ART_BIBLE §0.0).
+    if (this.chargeT > 0.02 && !(typeof G !== 'undefined' && G.artProbe)) {
+      const ck = clamp(this.chargeT / 0.6, 0, 1);
       const cok = this.chargeOk !== false;
-      c.save(); c.globalCompositeOperation = 'lighter';
-      c.globalAlpha = (cok ? 0.25 + ck * 0.35 : 0.12 + ck * 0.1) + Math.sin(performance.now() / 90) * (cok ? 0.12 : 0.04);
-      const cg = c.createRadialGradient(this.x + 12, this.y + 14, 4, this.x + 12, this.y + 14, 30 + ck * 22);
-      cg.addColorStop(0, !cok ? '#7d6b8a' : ck >= 1 ? '#ffffff' : PAL[G.roomDef.zone].glow);
+      const now = performance.now() / 1000;
+      const cx = this.x + this.w / 2, cy = this.y + this.h * 0.42;   // her chest, not her blade
+      const hot = !cok ? '#7d6b8a' : ck >= 1 ? '#ffffff' : PAL[G.roomDef.zone].glow;
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+
+      // --- the core: small, and it grows only a little. A core that balloons
+      //     is what made her read as a different size while charging.
+      const coreR = 7 + ck * 7 + Math.sin(now * 14) * (cok ? 1.4 : 0.4);
+      const cg = c.createRadialGradient(cx, cy, 1, cx, cy, coreR * 2.6);
+      cg.addColorStop(0, hot);
+      cg.addColorStop(0.35, !cok ? 'rgba(125,107,138,0.35)' : 'rgba(255,255,255,0.28)');
       cg.addColorStop(1, 'rgba(0,0,0,0)');
+      c.globalAlpha = cok ? 0.5 + ck * 0.4 : 0.22;
       c.fillStyle = cg;
-      c.beginPath(); c.arc(this.x + 12, this.y + 14, 30 + ck * 22, 0, 7); c.fill();
+      c.beginPath(); c.arc(cx, cy, coreR * 2.6, 0, 7); c.fill();
+
+      // --- gathering rings: each one sweeps from far out to the core and
+      //     dies there. Three of them, evenly staggered, so there is always
+      //     one arriving — that is what makes it read as GATHERING.
+      const period = 0.62 - ck * 0.26;                 // quickens as it fills
+      for (let i = 0; i < 3; i++) {
+        const ph = ((now / period) + i / 3) % 1;
+        const r = 12 + (1 - ph) * (54 + ck * 14);
+        c.globalAlpha = (cok ? 0.34 : 0.13) * ph * (0.5 + ck * 0.5);
+        c.strokeStyle = hot;
+        c.lineWidth = 1 + ph * 1.8;
+        c.beginPath(); c.arc(cx, cy, r, 0, 7); c.stroke();
+
+        // --- sparks riding the ring in. They are ON the ring, so they arrive
+        //     with it; the count rises with the charge.
+        const n = 3 + Math.round(ck * 4);
+        for (let k2 = 0; k2 < n; k2++) {
+          const a = (k2 / n) * Math.PI * 2 + now * (1.6 + i * 0.4) + i;
+          const sx = cx + Math.cos(a) * r, sy = cy + Math.sin(a) * r * 0.82;
+          const sr = (cok ? 1.5 : 0.9) + ph * 1.2;
+          c.globalAlpha = (cok ? 0.85 : 0.3) * ph;
+          c.fillStyle = hot;
+          c.beginPath(); c.arc(sx, sy, sr, 0, 7); c.fill();
+          // its trail, pointing back along the ring's travel (outward)
+          c.globalAlpha *= 0.45;
+          c.lineWidth = sr * 0.9;
+          c.strokeStyle = hot;
+          c.beginPath();
+          c.moveTo(sx, sy);
+          c.lineTo(cx + Math.cos(a) * (r + 9), cy + Math.sin(a) * (r + 9) * 0.82);
+          c.stroke();
+        }
+      }
+
+      // --- and it CRACKLES. Jagged arcs from the gathering radius to the
+      //     core, struck on their own clock so they flicker rather than
+      //     animate, which is what electricity does.
+      if (cok) {
+        const strikes = 1 + Math.round(ck * 3);
+        for (let i = 0; i < strikes; i++) {
+          // a stable pseudo-random per strike per 60ms slot: no allocation, no
+          // Math.random in the draw path, and it reads as a new arc each time
+          const slot = Math.floor(now / 0.06) + i * 37;
+          const a = hash2(slot, 11) * Math.PI * 2;
+          const r = 20 + hash2(slot, 13) * (26 + ck * 16);
+          if (hash2(slot, 17) > 0.35 + ck * 0.35) continue;      // not every slot
+          c.globalAlpha = 0.5 + ck * 0.5;
+          c.strokeStyle = ck >= 1 ? '#ffffff' : hot;
+          c.lineWidth = 1.1;
+          c.beginPath();
+          let px2 = cx + Math.cos(a) * r, py2 = cy + Math.sin(a) * r * 0.82;
+          c.moveTo(px2, py2);
+          for (let seg = 1; seg <= 3; seg++) {
+            const f = 1 - seg / 3;
+            const jx = (hash2(slot, 19 + seg) - 0.5) * 12 * f;
+            const jy = (hash2(slot, 23 + seg) - 0.5) * 12 * f;
+            c.lineTo(cx + (px2 - cx) * f + jx, cy + (py2 - cy) * f + jy);
+          }
+          c.stroke();
+        }
+      }
+
+      // --- full: a held halo so "ready" is unmistakable without another sound
+      if (ck >= 1 && cok) {
+        c.globalAlpha = 0.22 + Math.sin(now * 18) * 0.1;
+        c.strokeStyle = '#ffffff'; c.lineWidth = 2;
+        c.beginPath(); c.arc(cx, cy, 26 + Math.sin(now * 18) * 2, 0, 7); c.stroke();
+      }
       c.restore(); c.globalAlpha = 1;
     }
     // FIREDASH — combustion-engine exhaust: white-hot core at the feet,

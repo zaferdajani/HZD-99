@@ -178,6 +178,58 @@ written, the code that consumes them is in and tested. **Only the owner can
 clear this.** Everything downstream of it is one `vidstrip` cut and one line in
 `HERO_TRANS` per strip.
 
+## 2y. THE MINI STAGE — a tree that sells verbs has to show them ✔ SHIPPED 2026-08-24
+
+**The owner:** *"when I choose the skill from the tree, it should open a window
+next to it showing me the character doing it in a mini screen... And the same
+goes with the upgrades I would get when beating the bosses — the jet, the
+slash, getting the new sword."*
+
+A node called "Quantum Claw" with a line of description under it is a purchase
+made on faith. `js/riddles.js` `drawSkillDemo` is a window that plays the move:
+her own cells from her own sheet, in the order the game plays them, with the
+thing the skill ADDS drawn beside her in the game's own vocabulary of light —
+the crescent leaving the blade for the wave, the third jet for the triple
+jump, the shockwave for the plunge, the blade going out and coming back for
+the boomerang. Eleven skill scripts and six power scripts; anything without a
+script draws her standing, which is honest rather than misleading.
+
+The same component draws the ACQUIRED card when a boss hands over a power, so
+the jet and the sword are shown doing their job rather than sitting still as
+an object.
+
+**Two things fell out of building it.** The tree now has a column for the
+window rather than the window covering the tree; and the touch hit-test was
+written against the TWO-column layout and never learned about the three-column
+one the purifier branch grows — so on a phone, with the sword, every node past
+the second column selected the wrong skill. Both screens read one
+`skillLayout()` now, the same fix the pause menu and the film gallery already
+carry.
+
+**What is NOT in it:** the scripts are pose sequences plus procedural light,
+not fired video. If the owner wants these to be little films of her performing
+each move, that is a firing list of seventeen clips and it goes on THE FIRING
+LIST — the mechanism to play them already exists (`vidstrip` → strip →
+`drawStripCell`), which is how the four attack strips work.
+
+### ⚠ tests/terrainrun.cjs "she gets moving in every room" FAILS IN C2 — PRE-EXISTING (art session, 2026-08-24)
+
+**For the code session; not touched from here.** `C2 0px` — she never moves at
+all in that room. **Reproduced with this session's changes stashed and the
+build regenerated from the stash-clean tree**, so it is not the NPC voice, the
+gate walk or the grade pass. It also fails on its own, twice out of two, so it
+is a real defect rather than a load flake: something in C2 is holding her still
+from the first frame.
+
+`tests/twin.cjs` "...but reaches no further — centre unchanged" fails the same
+way and for the same reason: **twice out of two alone, and it still fails with
+this session's changes stashed.** Also the code session's.
+
+`tests/tutor.cjs` failed in the same suite run and PASSES ALONE — that one is
+the load-dependent kind: it stalls on the `coin` step under a full suite and
+completes the whole `move → out → jump → gate → atk → kill → coin → buy → heal
+→ node → skill → go` chain when run by itself.
+
 ### ⚠ tests/cavedark.cjs "the dark stays in the cave" FLAKES UNDER LOAD (art session, 2026-08-24)
 
 **For the code session, whose harness it is — not touched from here, because it
