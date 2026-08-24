@@ -309,6 +309,7 @@ the tier with `node tools/lowres.cjs && node build.cjs` whenever art changes.**
 | `braid.js` | THE BRAID — the run's ledger and what it changes |
 | `atlas.js` | sprite-atlas slicing and the colour/light grade |
 | `media.js` | the lazy asset manifest |
+| `packs.js` | campaign packs: `?pack=<id>` loads `packs/<id>/pack.json` over the world — see `docs/PACKS.md` |
 
 **State.** One global `G` holds the run (`G.state`, `G.enemies`, `G.save`,
 `G.roomId`…), plus a handful of loose top-level globals: `player`, `cam`,

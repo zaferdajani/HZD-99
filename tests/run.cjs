@@ -96,6 +96,7 @@ const SUITE = [
   ['memnote',   'the memory game is audible: phone-register bells, and the music steps aside'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
   ['packs',     'a campaign pack is a folder of JSON: loads by query, saves apart, base game untouched'],
+  ['bake3d',    'any authored GLB bakes to a turnaround the atlas can wear: grounded, rotating, silhouettes apart'],
 ];
 
 const want = process.argv.slice(2);
