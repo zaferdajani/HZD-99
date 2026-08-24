@@ -47,6 +47,10 @@ for (const f of ['index.html', 'odyssey.html']) {
   fs.writeFileSync(path.join(WWW, f), html);
 }
 const a = copyDir(path.join(ROOT, 'assets'), path.join(WWW, 'assets'), true);
+// campaign packs ship too — RULE ONE: a DLC that exists on the web page and
+// not in the app is two different games. The folder is small (JSON + any
+// pack-local art) and absent is fine: the base game carries no packs/ yet.
+if (fs.existsSync(path.join(ROOT, 'packs'))) copyDir(path.join(ROOT, 'packs'), path.join(WWW, 'packs'));
 
 const mb = (b) => (b / 1048576).toFixed(1) + ' MB';
 const html = fs.statSync(path.join(WWW, 'index.html')).size + fs.statSync(path.join(WWW, 'odyssey.html')).size;

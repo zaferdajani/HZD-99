@@ -95,6 +95,7 @@ const SUITE = [
   ['kingdom1',  'kingdom 1 holds its rules: the den rest catches deaths, the tunnel tells the sage, NPCs own their places'],
   ['memnote',   'the memory game is audible: phone-register bells, and the music steps aside'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
+  ['packs',     'a campaign pack is a folder of JSON: loads by query, saves apart, base game untouched'],
 ];
 
 const want = process.argv.slice(2);
