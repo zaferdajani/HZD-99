@@ -7851,6 +7851,87 @@ function drawCaveMouth(cx2, gy, P, k) {
 // sagging canopy, cloth flaps over a warm doorway — per the MIMIC-THE-
 // BACKGROUND rule and the NO RIGHT ANGLES law (nothing here is plumb).
 // The flaps part as she approaches (k); the light inside is Ratchet's.
+// WHERE THE DOOR IS IN THE PAINTING, measured off the painting.
+//
+// A plate is drawn centred on its stand spot, which silently asserts that the
+// painted way in sits at the plate's middle. The booth's does not: its opening
+// is at 0.61 of the plate, so the stall was drawn 34 px — very nearly one body
+// width — to the right of where the game aimed her, and "run at the shop" put
+// her squarely in front of the cloth panel BESIDE the door. That is the owner's
+// report: "I should be running inside the door... instead of just fading into
+// the walls of this store." A5 already carries the hand-measured version of
+// this fix (`gx: 0.68`, "aiming the walk at the old 0.64 sent her into rock a
+// shoulder's width left of the hole"); this is the same correction derived
+// rather than typed, so a re-fired plate moves its own door with it instead of
+// going quietly stale.
+//
+// The measure is the doorway's own light: in the lower half of the plate, the
+// contiguous run of columns that are bright AND warm. A lit opening is the one
+// thing in a stall that is both, and a canopy hem — bright but not warm at that
+// height — does not answer. One scan per plate, cached; on anything it cannot
+// read it returns 0.5, which is exactly today's behaviour.
+const PLATE_DOOR = {};
+function plateDoorFrac(img, key) {
+  if (PLATE_DOOR[key] != null) return PLATE_DOOR[key];
+  if (!img || !img.naturalWidth) return 0.5;
+  let frac = 0.5;
+  try {
+    const W = img.naturalWidth, H = img.naturalHeight;
+    const sc = Math.min(1, 256 / W);                 // the band is broad; full res buys nothing
+    const w = Math.max(16, Math.round(W * sc)), h = Math.max(16, Math.round(H * sc));
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const cc = cv.getContext('2d', { willReadFrequently: true });
+    cc.drawImage(img, 0, 0, w, h);
+    const d = cc.getImageData(0, 0, w, h).data;
+    const y0 = Math.round(h * 0.55), y1 = Math.round(h * 0.92);
+    // COVERAGE, NOT BRIGHTNESS — and then smoothed, because the thing that
+    // beats this measure is a lantern. A hung lamp is the most intensely warm
+    // pixel on the plate and it is not a way in; peak-and-grow on raw warmth
+    // locked onto the booth's lamp at 0.83 and shoved the whole stall 104 px.
+    // A doorway is warm over MOST of a column's height across MANY columns; a
+    // lamp is warm over a few pixels of one. So each column scores the fraction
+    // of its height that is lit, and the profile is box-blurred over 8% of the
+    // plate — a door survives that, a lamp does not.
+    const col = new Array(w).fill(0);
+    for (let x = 0; x < w; x++) {
+      let hit = 0, n = 0;
+      for (let y = y0; y < y1; y++) {
+        const i = (y * w + x) << 2;
+        if (d[i + 3] < 40) continue;
+        const r = d[i], g = d[i + 1], b = d[i + 2];
+        const lum = r * 0.299 + g * 0.587 + b * 0.114;
+        if (lum > 105 && r - b > 40) hit++;
+        n++;
+      }
+      col[x] = n ? hit / n : 0;
+    }
+    const rad = Math.max(1, Math.round(w * 0.04));
+    const sm = new Array(w).fill(0);
+    for (let x = 0; x < w; x++) {
+      let sum = 0, n = 0;
+      for (let k = -rad; k <= rad; k++) { const j = x + k; if (j >= 0 && j < w) { sum += col[j]; n++; } }
+      sm[x] = sum / n;
+    }
+    let pk = 0;
+    for (let x = 1; x < w; x++) if (sm[x] > sm[pk]) pk = x;
+    if (sm[pk] > 0.10) {                              // a plate with no lit way in keeps 0.5
+      const thr = sm[pk] * 0.55;
+      let lo = pk, hi = pk;
+      while (lo > 0 && sm[lo - 1] >= thr) lo--;
+      while (hi < w - 1 && sm[hi + 1] >= thr) hi++;
+      const found = ((lo + hi) / 2) / w;
+      // A DOOR IS ON THE STRUCTURE. Anything this near an edge is a rim
+      // highlight or a lamp on a pole, not a way in — the Sage's carrel reads
+      // 0.93 that way, and acting on it would shove the whole plate 135 px to
+      // fix a door that was never there. An unreadable plate keeps 0.5, which
+      // is exactly the behaviour every plate had before this existed: the
+      // measure can decline, and declining costs nothing.
+      if (found >= 0.15 && found <= 0.85) frac = found;
+    }
+  } catch (e) { frac = 0.5; }                          // a tainted canvas is not a crash
+  PLATE_DOOR[key] = frac;
+  return frac;
+}
 function drawBooth(cx2, gy, P, k) {
   // THE FIRED PLATE FIRST (§2g, owner-approved): the authored kiosk stands
   // where the procedural one stood, bottom-anchored on the same spot, with
@@ -7861,7 +7942,16 @@ function drawBooth(cx2, gy, P, k) {
   if (bim && bim.naturalWidth) {
     const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
     c.save();
-    c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
+    // THE PAINTED DOOR LANDS ON THE STAND SPOT, not the plate's middle. cx2 is
+    // where the table says the door is — where the prompt draws, where the walk
+    // aims, where she ends up — so the picture is offset to put its own opening
+    // there, rather than the stand spot being bent to match a painting. One
+    // source of truth for "where the door is", and it stays true for the next
+    // plate the art session fires. It also puts this structure's ember back IN
+    // the doorway: the glow is drawn at cx2 and was burning on the wall beside
+    // the way in.
+    const dcx = cx2 - dw * (plateDoorFrac(bim, 'boothFront') - 0.5);
+    c.drawImage(bim, dcx - dw / 2, gy - dh, dw, dh);
     // LIT AT REST, NOT ONLY ON APPROACH. An interactive structure has to be the
     // warmest thing in its sightline or nobody walks to it — unlit until she
     // was already inside its radius, the stall was the darkest prop in its own
@@ -7969,7 +8059,16 @@ function drawOracleBooth(cx2, gy, P, k) {
   if (bim && bim.naturalWidth) {
     const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
     c.save();
-    c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
+    // THE PAINTED DOOR LANDS ON THE STAND SPOT, not the plate's middle. cx2 is
+    // where the table says the door is — where the prompt draws, where the walk
+    // aims, where she ends up — so the picture is offset to put its own opening
+    // there, rather than the stand spot being bent to match a painting. One
+    // source of truth for "where the door is", and it stays true for the next
+    // plate the art session fires. It also puts this structure's ember back IN
+    // the doorway: the glow is drawn at cx2 and was burning on the wall beside
+    // the way in.
+    const dcx = cx2 - dw * (plateDoorFrac(bim, 'oracleBooth') - 0.5);
+    c.drawImage(bim, dcx - dw / 2, gy - dh, dw, dh);
     if (k > 0.02) {
       c.globalCompositeOperation = 'lighter';
       const gl = c.createRadialGradient(cx2, gy - dh * 0.32, 6, cx2, gy - dh * 0.32, dw * (0.3 + k * 0.4));
@@ -8082,7 +8181,16 @@ function drawTinkerForge(cx2, gy, P, k) {
   if (bim && bim.naturalWidth) {
     const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
     c.save();
-    c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
+    // THE PAINTED DOOR LANDS ON THE STAND SPOT, not the plate's middle. cx2 is
+    // where the table says the door is — where the prompt draws, where the walk
+    // aims, where she ends up — so the picture is offset to put its own opening
+    // there, rather than the stand spot being bent to match a painting. One
+    // source of truth for "where the door is", and it stays true for the next
+    // plate the art session fires. It also puts this structure's ember back IN
+    // the doorway: the glow is drawn at cx2 and was burning on the wall beside
+    // the way in.
+    const dcx = cx2 - dw * (plateDoorFrac(bim, 'forgeFront') - 0.5);
+    c.drawImage(bim, dcx - dw / 2, gy - dh, dw, dh);
     if (k > 0.02) {
       c.globalCompositeOperation = 'lighter';
       const gl = c.createRadialGradient(cx2, gy - dh * 0.3, 6, cx2, gy - dh * 0.3, dw * (0.3 + k * 0.4));
@@ -8251,7 +8359,16 @@ function drawSageCarrel(cx2, gy, P, k) {
   if (bim && bim.naturalWidth) {
     const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
     c.save();
-    c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
+    // THE PAINTED DOOR LANDS ON THE STAND SPOT, not the plate's middle. cx2 is
+    // where the table says the door is — where the prompt draws, where the walk
+    // aims, where she ends up — so the picture is offset to put its own opening
+    // there, rather than the stand spot being bent to match a painting. One
+    // source of truth for "where the door is", and it stays true for the next
+    // plate the art session fires. It also puts this structure's ember back IN
+    // the doorway: the glow is drawn at cx2 and was burning on the wall beside
+    // the way in.
+    const dcx = cx2 - dw * (plateDoorFrac(bim, 'carrelFront') - 0.5);
+    c.drawImage(bim, dcx - dw / 2, gy - dh, dw, dh);
     if (k > 0.02) {
       c.globalCompositeOperation = 'lighter';
       const gl = c.createRadialGradient(cx2, gy - dh * 0.3, 6, cx2, gy - dh * 0.3, dw * (0.3 + k * 0.4));
@@ -8396,7 +8513,16 @@ function drawLumenHollow(cx2, gy, P, k) {
   if (bim && bim.naturalWidth) {
     const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
     c.save();
-    c.drawImage(bim, cx2 - dw / 2, gy - dh, dw, dh);
+    // THE PAINTED DOOR LANDS ON THE STAND SPOT, not the plate's middle. cx2 is
+    // where the table says the door is — where the prompt draws, where the walk
+    // aims, where she ends up — so the picture is offset to put its own opening
+    // there, rather than the stand spot being bent to match a painting. One
+    // source of truth for "where the door is", and it stays true for the next
+    // plate the art session fires. It also puts this structure's ember back IN
+    // the doorway: the glow is drawn at cx2 and was burning on the wall beside
+    // the way in.
+    const dcx = cx2 - dw * (plateDoorFrac(bim, 'hollowFront') - 0.5);
+    c.drawImage(bim, dcx - dw / 2, gy - dh, dw, dh);
     if (k > 0.02) {
       c.globalCompositeOperation = 'lighter';
       const gl = c.createRadialGradient(cx2, gy - dh * 0.35, 6, cx2, gy - dh * 0.35, dw * (0.3 + k * 0.4));
