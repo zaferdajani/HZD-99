@@ -1225,6 +1225,19 @@ class Player {
       // a down-attack goes straight down. Diagonal aim used to push the hitbox
       // forward of whatever you were standing over, which is why it kept missing.
       if (ay > 0) ax = 0;
+      // SHE TURNS TO WHAT SHE IS FIGHTING when the player has not said
+      // otherwise (owner, 2026-08-24: "facing my first enemy was not accurate").
+      //
+      // ax was only ever the HELD direction, so the commonest way to meet the
+      // first wolf — run at it, let go, swing — kept whatever facing the run
+      // left behind, and a wolf that had run PAST her got clawed at empty air
+      // while it bit her back. Holding a direction is an explicit statement and
+      // still wins outright; this only fills the silence, and only for a target
+      // close enough that no other reading is plausible.
+      if (!ax && !ay) {
+        const near = this.nearestFoe(96);
+        ax = near ? near : this.face;
+      }
       if (!ax && !ay) ax = this.face;
       if (ax) this.face = ax;
       // WHAT IS IN HER PAW. 0 = her own claws, 1 = the single purifier
@@ -1856,7 +1869,46 @@ class Player {
     const half = (down ? 32 : (s.combo === 2 ? (rk ? 46 : 35) : 30)) * wm * tw;
     const cx = this.x + this.w / 2 + s.ax / n * R;
     const cy = this.y + this.h / 2 + s.ay / n * R;
-    return { x: cx - half, y: cy - half, w: half * 2, h: half * 2 };
+    const box = { x: cx - half, y: cy - half, w: half * 2, h: half * 2 };
+    // ...AND THE NEAR EDGE REACHES BACK TO HER OWN BODY.
+    //
+    // The box was centred R in front of her and R is 44 for a claw, so with
+    // half at 30 it covered 14 to 74 px out — and anything that had closed
+    // INSIDE 14 px was behind the claws and could not be hit at all. That is
+    // the other half of the owner's report: the claw appearing past the enemy
+    // rather than at a safe distance from it. A wolf that runs into her is the
+    // commonest fight in the game and it was the one the hitbox could not
+    // answer.
+    //
+    // Only the near edge moves. The far edge is the move's reach and stays
+    // exactly where the drawing says it is — this does not extend her range, it
+    // stops there being a dead ring around her feet.
+    if (!down) {
+      const bx = this.x, bw = this.w;
+      if (s.ax > 0 && box.x > bx + bw) { box.w += box.x - (bx + bw); box.x = bx + bw; }
+      else if (s.ax < 0 && box.x + box.w < bx) { box.w += bx - (box.x + box.w); }
+    }
+    return box;
+  }
+  // Which side the nearest living thing she can fight is on, or 0 for none in
+  // range. Sign only: this decides FACING, and a facing assist that also moved
+  // her would be the game playing itself.
+  nearestFoe(range) {
+    const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
+    let best = null, bd = range * range;
+    const consider = (e) => {
+      if (!e || e.dead || e.tame || e.calm) return;
+      const dx = (e.x + e.w / 2) - cx, dy = (e.y + e.h / 2) - cy;
+      // vertical window: something on a shelf above her is not what this swing
+      // is about, and turning to it would be worse than not turning at all
+      if (Math.abs(dy) > 56) return;
+      const d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = dx; }
+    };
+    for (const e of (G.enemies || [])) consider(e);
+    if (G.boss) consider(G.boss);
+    if (best == null) return 0;
+    return best === 0 ? this.face : (best > 0 ? 1 : -1);
   }
   // The third argument is the point of this: WHAT hit her, by name. One
   // parameter turns "I think that attack is unfair" into a ranked table, and

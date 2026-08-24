@@ -10338,7 +10338,20 @@ const TUT_DOOR = { W1: 'out', W2: 'gate', A0: 'go', A0B: 'go' };
 // gated: walking is the first lesson, and trapping a player unable to pause
 // is not teaching.
 // ===========================================================================
-const TUT_UNLOCK = { JUMP: 'jump', ATK: 'atk', INT: 'buy', HEAL: 'heal', SKILL: 'skill', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
+// JUMP IS NOT ON THIS LIST ANY MORE (owner, 2026-08-24: "start with direction
+// controllers and jump from the very beginning").
+//
+// It was gated behind its own lesson, which sits two steps in — after she has
+// walked and after she has left the room she woke in. So the first minute of
+// the game handed the player a stick and nothing else, and a jump button that
+// appeared later reads as the game having been broken until then rather than
+// as a lesson. Walking and jumping are the two things a player will try before
+// they read anything, and both now answer from the first frame.
+//
+// The LESSON still happens where there is something to clear — the step in W2
+// — because teaching a verb is not the same as permitting it. What changed is
+// that pressing jump before that point does what it looks like it should.
+const TUT_UNLOCK = { ATK: 'atk', INT: 'buy', HEAL: 'heal', SKILL: 'skill', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
 function tutAllows(act) {
   const need = TUT_UNLOCK[act];
   if (!need) return true;
