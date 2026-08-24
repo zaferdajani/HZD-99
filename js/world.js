@@ -55,6 +55,28 @@ function openR(g) { const w = g[0].length; rect(g, w - 1, 11, w - 1, 14, '.'); }
 function seamL(g) { rect(g, 0, 1, 0, g.length - 3, '.'); }
 function seamR(g) { const w = g[0].length; rect(g, w - 1, 1, w - 1, g.length - 3, '.'); }
 // ---------------------------------------------------------------------------
+// THE SKY — the roof gets the seam treatment (owner, 2026-08-24: "you need to
+// do the same for roof also"). Outdoors, row 0 was a wall over her head: a
+// solid band across the top of the meadow with the kingdom's ceiling plate
+// hung on it, exactly the lidded version of the doorways the seams removed.
+//
+// skyLid runs LAST in a sky room's build. It remembers the authored ceiling
+// opening first (the T exit's hole, cut with rect(...,0,...,'.') — the sky is
+// about to erase the line it was cut in, and checkTransitions still needs to
+// know where the way up actually is), then clears the lid everywhere the row
+// below is open — so a wall, a sealed edge or the gate monument keeps its
+// top, and everything between them is open air. A jump can now rise past the
+// frame; gravity is the ceiling. The room def carries `sky: 1` so the
+// renderer hangs no roof plate (game.js) and the seam harness knows an open
+// lid here is the point, not a leak.
+function skyLid(g) {
+  const w = g[0].length;
+  let g0 = -1, g1 = -1;
+  for (let x = 1; x < w - 1; x++) if (g[0][x] === '.') { if (g0 < 0) g0 = x; g1 = x; }
+  if (g0 >= 0) g.tGap = [g0, g1];
+  for (let x = 0; x < w; x++) if (g[1][x] !== '#') g[0][x] = '.';
+}
+// ---------------------------------------------------------------------------
 // THE MEADOW'S OWN FURNITURE.
 //
 // NO RIGHT ANGLES is global, and its second clause is what binds room
@@ -324,7 +346,7 @@ const ROOMS = {
   // Reported as "I'm just keep walking to the side". The right wall is solid
   // now; the ONLY way into the city is UP at the gates (gateEnter), and the
   // gates close behind her — the opening is one-way, like waking up is.
-  W2: { zone: 'A', w: 60, h: 17, exits: { L: 'W1' },
+  W2: { zone: 'A', sky: 1, w: 60, h: 17, exits: { L: 'W1' },
     ents: [],
     build(g) {
       frame(g); seamL(g);
@@ -395,7 +417,7 @@ const ROOMS = {
       // about ground she reads as landscape.)
       rect(g, 57, 0, 59, 16, '#');
     } },
-  A0: { zone: 'A', w: 64, h: 17, exits: { R: 'A1' },
+  A0: { zone: 'A', sky: 1, w: 64, h: 17, exits: { R: 'A1' },
     // The waking floor teaches the whole loop, not just the verbs: the machine
     // is what she scratches, the trader is what the scrap it drops is FOR, and
     // the node is where the thinking she is about to need comes from.
@@ -465,7 +487,7 @@ const ROOMS = {
       hline(g, 19, 23, 12, '=');          // the workbench loft over his corner
     } },
   // ============ ZONE A — Scrap Meadows ============
-  A1: { zone: 'A', w: 56, h: 17, exits: { R: 'A2', T: 'A6', L: 'A0' },
+  A1: { zone: 'A', sky: 1, w: 56, h: 17, exits: { R: 'A2', T: 'A6', L: 'A0' },
     ents: [['npc', 6, 15, 'servo'], ['crawler', 18, 15], ['guard', 30, 15], ['scrap', 12, 15, 10],
            ['scrap', 44, 15, 12]],
     build(g) {
@@ -589,7 +611,7 @@ const ROOMS = {
       hline(g, 24, 29, 27, '=');
       hull(g, 30, 38, 2, 141);
     } },
-  A2: { zone: 'A', w: 88, h: 17, exits: { L: 'A1', R: 'A10', B: 'A5', T: 'A8' },
+  A2: { zone: 'A', sky: 1, w: 88, h: 17, exits: { L: 'A1', R: 'A10', B: 'A5', T: 'A8' },
     // TWO DISRUPTORS ON ONE SCREEN WAS THE GAME'S SECOND FIGHT. Fliers dive and
     // withdraw; two of them harassing from opposite angles leaves nothing to do
     // about either, which is agency removal rather than difficulty. The second
@@ -637,7 +659,7 @@ const ROOMS = {
   // It sits between the meadow and the save point on purpose — you meet the
   // Alpha, you take the pack, and THEN you walk into the room with the bench
   // and the trader in it, which is where the run's first breath is.
-  A10: { zone: 'A', w: 46, h: 17, exits: { L: 'A2', R: 'A3' },
+  A10: { zone: 'A', sky: 1, w: 46, h: 17, exits: { L: 'A2', R: 'A3' },
     ents: [['boss', 27, 15, 'alpha']],
     build(g) {
       frame(g); seamL(g); seamR(g);
@@ -658,7 +680,7 @@ const ROOMS = {
       hull(g, 9, 15, 2, 71);
       hull(g, 39, 45, 2, 73);
     } },
-  A3: { zone: 'A', w: 52, h: 17, exits: { L: 'A10', R: 'A4', T: 'B1' },
+  A3: { zone: 'A', sky: 1, w: 52, h: 17, exits: { L: 'A10', R: 'A4', T: 'B1' },
     ents: [['bench', 8, 15], ['npc', 14, 15, 'ratchet'], ['scrap', 40, 15, 14]],
     build(g) {
       frame(g); seamL(g); seamR(g);
@@ -680,7 +702,7 @@ const ROOMS = {
       mound(g, 31, 44, 3, 83);
       hull(g, 46, 50, 1, 85);
     } },
-  A4: { zone: 'A', w: 44, h: 17, exits: { L: 'A3' },
+  A4: { zone: 'A', sky: 1, w: 44, h: 17, exits: { L: 'A3' },
     ents: [['boss', 24, 15, 'glitch']],
     build(g) {
       frame(g); seamL(g);
@@ -1540,6 +1562,9 @@ function buildRoom(id) {
   const def = ROOMS[id];
   const g = mk(def.w, def.h);
   def.build(g);
+  // sky rooms lose the lid after everything else is built, so the pass sees
+  // the authored ceiling opening before erasing it — pack rooms included
+  if (def.sky) skyLid(g);
   gridCache[id] = g;
   return g;
 }

@@ -39,6 +39,8 @@ function packApply(def) {
     ROOMS[id] = {
       zone: r.zone || 'A', w: r.w, h: r.h,
       cave: r.cave ? 1 : undefined,
+      sky: r.sky ? 1 : undefined,       // open air: no lid, no ceiling plate
+      indoor: r.indoor ? 1 : undefined,
       exits: r.exits || {},
       ents: (r.ents || []).map((e) => e.slice()),
       pack: def.id,

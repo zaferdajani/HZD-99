@@ -1085,6 +1085,19 @@ function checkTransitions() {
   else if (player.x > W + 2 && ex.R) side = 'R';
   else if (player.y + player.h < -2 && ex.T) side = 'T';
   else if (player.y > H + 40 && ex.B) side = 'B';
+  // THE SKY IS NOT A DOOR. With the lid open (js/world.js skyLid) a jump can
+  // rise past the frame anywhere, but the way UP is still the authored
+  // opening the sky remembered — a T crossing keeps her x, so triggering it
+  // from the wrong column would land her inside A6's geometry. And no side
+  // crossing happens above the roofline: the next room may still wear a lid,
+  // and arriving on top of it is a walk on a roof no camera will follow.
+  if (G.roomDef.sky) {
+    if (side === 'T' && G.grid.tGap) {
+      const cx = player.x + player.w / 2;
+      if (cx < G.grid.tGap[0] * TILE - 8 || cx > (G.grid.tGap[1] + 1) * TILE + 8) side = null;
+    }
+    if ((side === 'L' || side === 'R') && player.y < 0) side = null;
+  }
   if (!side) {
     player.x = clamp(player.x, ex.L ? -60 : 2, ex.R ? W + 60 : W - player.w - 2);
     if (player.y > H + 40 && !ex.B) { player.hurt(1, player.x); player.x = player.lastSafe.x; player.y = player.lastSafe.y; player.vy = 0; }
@@ -3134,8 +3147,12 @@ function ceilWeather(dt, zone) {
     // the Conduits arc between cable bundles
     push({ k: 'arc', x: spawnX(), y: rnd(10, 46), t: 0, life: rnd(0.12, 0.26), w: rnd(30, 90) });
   } else if (zone === 'A' && chance(dt * 1.5)) {
-    // the Meadows drip condensation off the vines
-    push({ k: 'drip', x: spawnX(), y: 0, vy: 0, t: 0, hang: rnd(0.4, 1.6), r: rnd(1.6, 2.6) });
+    // the Meadows drip condensation off the vines — and where the sky is open
+    // there is no vine overhead to hang from, so the same water arrives the
+    // way meadow water does: already falling
+    push(G.roomDef.sky
+      ? { k: 'drip', x: spawnX(), y: -10, vy: rnd(70, 120), t: 0, hang: 0, r: rnd(1.4, 2.2) }
+      : { k: 'drip', x: spawnX(), y: 0, vy: 0, t: 0, hang: rnd(0.4, 1.6), r: rnd(1.6, 2.6) });
   } else if (zone === 'E' && chance(dt * 2.6)) {
     // the Nest breathes
     push({ k: 'spore', x: spawnX(), y: rnd(20, 70), vy: rnd(-6, 16), vx: rnd(-10, 10), t: 0, r: rnd(1.6, 3.4) });
@@ -11080,7 +11097,12 @@ function drawWorldFrame() {
   // trader's den too — a machine-yard roof stretched across a workshop that
   // already has rafters painted into it. That is half of "the background does
   // not blend with the items in it": two different ceilings in one room.
-  if (!(typeof isHero === 'function' && isHero()) && !(G.roomDef && G.roomDef.indoor))
+  // ...AND THE OPEN AIR HAS NO ROOF AT ALL. A sky room (js/world.js skyLid)
+  // hangs no kingdom plate: the vista's own sky is what is up there, the same
+  // way a seam's boundary is no wall at all. Indoors keeps its rafters, caves
+  // keep their rock, and the hero's world never had the plate to begin with.
+  if (!(typeof isHero === 'function' && isHero()) && !(G.roomDef && G.roomDef.indoor)
+      && !(G.roomDef && G.roomDef.sky))
     drawCeiling(G.roomDef.zone);
   // ART_BIBLE §9.1/§9.4 — THE BACKGROUND PASS. Everything drawn so far is the
   // far plane, and this is the only moment it can be graded alone: after it,

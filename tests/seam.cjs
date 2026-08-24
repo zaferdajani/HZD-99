@@ -82,7 +82,11 @@ const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A10', 'A3', 'A4'];
       const rows = Math.min(ca.length, cb.length);
       const bad = [];
       let open = 0;
-      for (let y = 0; y < rows; y++) {
+      // row 0 is the LID and has its own law below — a sky room (skyLid) is
+      // open there while a lidded neighbor is not, and no body is ever in
+      // row 0 at a seam (the seam opens rows 1..h-3), so the body-agreement
+      // rule starts under the roofline
+      for (let y = 1; y < rows; y++) {
         const sa = solid(ca[y]), sb = solid(cb[y]);
         if (sa !== sb) bad.push(y + ':' + ca[y] + '|' + cb[y]);
         if (!sa && !sb) open++;
@@ -97,7 +101,7 @@ const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A10', 'A3', 'A4'];
       for (const side of ['L', 'R']) {
         if (!ex[side]) continue;
         const x = side === 'L' ? 0 : W - 1;
-        out.edges.push({ id, side,
+        out.edges.push({ id, side, sky: !!def.sky,
           lid: solid(g[0][x]),
           floor: solid(g[H - 2][x]) && solid(g[H - 1][x]) });
       }
@@ -136,9 +140,15 @@ const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A10', 'A3', 'A4'];
     caveJoins.map(j => `${j.id}|${j.to}=${j.open}`).join(' '));
 
   // ---- 3. the roof and the ground survive it ------------------------------
-  const noLid = r.edges.filter(e => !e.lid);
-  check('a seam never opens the lid', noLid.length === 0,
-    noLid.length ? noLid.map(e => e.id + '.' + e.side).join(' ') : `${r.edges.length} seam columns`);
+  // ...unless the room is OPEN SKY (js/world.js skyLid): there the missing lid
+  // is the feature, and physics closes the hole instead — no side crossing
+  // happens above the roofline (checkTransitions), so a body never walks from
+  // open air onto a neighbor's roof
+  const noLid = r.edges.filter(e => !e.lid && !e.sky);
+  const skyEdges = r.edges.filter(e => e.sky).length;
+  check('a seam never opens the lid (sky rooms excepted)', noLid.length === 0,
+    noLid.length ? noLid.map(e => e.id + '.' + e.side).join(' ')
+                 : `${r.edges.length - skyEdges} lidded + ${skyEdges} open-sky seam columns`);
   const noFloor = r.edges.filter(e => !e.floor);
   check('...and never opens the ground under it', noFloor.length === 0,
     noFloor.length ? noFloor.map(e => e.id + '.' + e.side).join(' ') : 'ground unbroken to every edge');
