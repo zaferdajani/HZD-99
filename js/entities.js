@@ -7465,6 +7465,15 @@ class Boss {
   // heaviest. A kingdom session can override per boss with `tell:` in BSTAT
   // rather than fight the thresholds.
   tellCue() {
+    // ITS OWN VOICE FIRST (owner, 2026-08-24: each guardian gets its own tell,
+    // SOUND_BIBLE §10). The gesture is shared — a rising pair, because a rise
+    // encodes time remaining — and only the instrument is the creature's, so
+    // the cue stays learnable while saying WHICH thing is about to move.
+    if (typeof TELL_VOICE !== 'undefined' && TELL_VOICE[this.kind]) return 'tell_' + this.kind;
+    // ...and a guardian with no voice of its own is never silent: it falls back
+    // to the weight its own footprint earns, which is what the player sees
+    // coming. PRISM is small and quick and takes the light tell whatever its
+    // HP; MOTHER-V at 120x120 takes the heaviest.
     const st = BSTAT[this.kind];
     if (st && st.tell) return st.tell;
     const area = this.w * this.h;

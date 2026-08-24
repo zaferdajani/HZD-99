@@ -173,10 +173,14 @@ confused.
 
 ---
 
-## 6. THE WARNING — ONE SOUND AT THREE SIZES
+## 6. THE WARNING — ONE GESTURE, SEVEN VOICES
 
-**This family is deliberately NOT split, and it is the decision in this
-document I would most want you to push back on if you disagree.**
+> **You ruled on this (2026-08-24): §10 should.** Each guardian now has its own
+> tell. What follows is the original argument, kept because it was right about
+> the part it was right about, and then what changed.
+
+**This family was deliberately NOT split, and it was the decision in this
+document I most wanted you to push back on.**
 
 The other three were scattered because one cue for many events told you
 nothing. This one is the opposite case. `tell` is the only cue in the game that
@@ -200,6 +204,43 @@ changes is the **weight underneath**.
 A guardian arrives with **twenty times** the body of a machine's twitch, while
 speaking the same sentence. Its sub arrives *before* the pair, so you feel one
 decide before you hear it.
+
+### 6b. AND THEN EACH GUARDIAN GOT ITS OWN — your ruling
+
+The argument above holds for the *gesture* and I have not touched it. What
+makes a tell worth having is that it is learned once, and the learned part is
+the **rising pair** — rising because a rise encodes *time remaining*, pitched
+above the music bed. Every cue below keeps that exactly.
+
+What the three weights could not do is tell you **which** thing is about to
+move. In a game where each guardian is fought on its own terms, that is the more
+useful fact, and it is free: the sentence stays the same, the **instrument**
+becomes the creature's. A player who has never heard one still knows what it
+means; a player who has knows *who*, without looking away from his own body.
+
+| cue | guardian | length | rises | weight | bright |
+|---|---|---|---|---|---|
+| `tell_glitch` | NULLFANG — a virus wearing a lion; detuned against itself, so the rise **beats** rather than sings | 0.28s | x1.50 | 1.15 | 1462 |
+| `tell_brood` | TALONHOST — thin, high, edged, the swarm fluttering under it instead of a body | 0.23s | x1.42 | 0.19 | 5888 |
+| `tell_atlas` | FURNACE CHOIR — struck metal being bent upward under heat | 0.37s | x3.03 | 0.78 | 1311 |
+| `tell_zero` | GLACIERE — frost first, then something crystalline *growing* | 0.36s | x3.82 | 0.58 | 3947 |
+| `tell_prism` | PRISM PROWLER — the fastest rise in the set. Glass deciding, and very little time | 0.19s | x1.79 | 0.13 | 3547 |
+| `tell_mother` | MOTHER-V — the only tell with voices in it; the sub arrives before the rise | 0.45s | x1.90 | **5.14** | 667 |
+| `tell_alpha` | THE ALPHA — a growl tipping into a bark. The rise is an animal's, not a machine's | 0.26s | x2.13 | 0.73 | 1917 |
+
+The three sized cues in §6 have not gone anywhere: they still carry every
+machine, every sage, and any guardian that has no voice of its own yet — a new
+one is never silent while it waits for one.
+
+**Two things this cost, both worth writing down.** The rise law was only ever
+checked on the three generics, so the foundry bell shipped a first draft at
+rise **x1.00** — a bell that rang and never climbed — while the harness printed
+"all three climb". It checks all ten now. And the family sweep was partly
+measuring dice: `wreck` scatters its debris with `Math.random`, so
+`icecolumn/wreck` came back separate on three runs in four and identical on the
+fourth. The dice are pinned to a seeded sequence — the same spread every run,
+rather than a constant, which would have stacked all five of wreck's hits on one
+instant and measured a cue you will never hear.
 
 ---
 
@@ -278,9 +319,8 @@ Nothing in this document is waiting on a decision from you to be *correct* —
 it is all shipped and measured. These are the places where taste, not
 measurement, decides:
 
-1. **The warnings.** §6 is a design decision, not a measurement. If you want a
-   guardian's tell to be its own sound rather than a heavier version of the
-   same one, say so and it is a small change.
+1. ~~**The warnings.**~~ **RULED, 2026-08-24: each guardian has its own.** See
+   §6b — seven voices, one gesture, all measured separate.
 2. **`msong` is the only chord in the game.** That is deliberate — Mother is
    singing, not making an effect — but it means she has a musical identity
    nothing else has. If that should be a whole motif rather than one chord, it

@@ -60,15 +60,46 @@ const check = (name, ok, detail) => {
   // having. So the three sizes must share one gesture and differ only in
   // weight, and this harness has to hold BOTH halves of that or the family
   // drifts apart the first time someone tunes one of them.
-  const WARN = ['tell', 'tellmid', 'tellbig'];
+  const WARN = ['tell', 'tellmid', 'tellbig',
+    // ...and the seven guardian voices (owner, 2026-08-24). They join WARN, not
+    // FAM, because the rise law is theirs too: whatever instrument a guardian
+    // warns with, the gesture must still climb, because the climb is what
+    // encodes time remaining. Their separation from each other is checked
+    // below — seven voices that measure the same are one voice with seven
+    // names, which is the defect this whole family exists to prevent.
+    'tell_glitch', 'tell_brood', 'tell_atlas', 'tell_zero',
+    'tell_prism', 'tell_mother', 'tell_alpha'];
   const FAM = FIRED.concat(GATHERED).concat(LANDED);
   const r = await page.evaluate(async ({ FAM, WARN }) => {
     const SR = 44100, N = SR * 2;
     const out = {};
+    // THE DICE ARE PINNED, AND NOT TO A CONSTANT.
+    //
+    // Several cues vary themselves on purpose — 'wreck' scatters five debris
+    // chinks across 0.26s with Math.random, so no two wrecks land alike. That
+    // is right for the game and wrong for a measurement: this harness asks
+    // whether two cues differ BY DESIGN, and with live randomness it was
+    // partly measuring the throw. It showed: icecolumn/wreck came back
+    // separate on three runs out of four and identical on the fourth, which is
+    // a harness that reports a coin flip as a verdict.
+    //
+    // Pinning to a constant would be worse than useless — Math.random() = 0.5
+    // stacks all five of wreck's chinks on the same instant and measures a cue
+    // the player will never hear. A seeded sequence keeps the spread and makes
+    // it the SAME spread every run: one fixed, representative instance of each
+    // cue, which is the thing worth comparing.
+    const realRand = Math.random;
+    let seed = 0x2f6e2b1;
+    const reseed = () => { seed = 0x2f6e2b1; };
+    Math.random = () => {
+      seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5; seed |= 0;
+      return ((seed >>> 0) % 100000) / 100000;
+    };
     for (const cue of FAM) {
       const off = new OfflineAudioContext(1, N, SR);
       const save = AC; AC = off; MUTED = false;
-      sfx(cue);
+      reseed();                       // ...and each cue gets the SAME throw,
+      sfx(cue);                       // so its sample cannot depend on order
       const d = (await off.startRendering()).getChannelData(0);
       AC = save;
       let pk = 0, tot = 0;
@@ -94,7 +125,8 @@ const check = (name, ok, detail) => {
     for (const cue of WARN) {
       const off = new OfflineAudioContext(1, N, SR);
       const save = AC; AC = off; MUTED = false;
-      sfx(cue);
+      reseed();                       // ...and each cue gets the SAME throw,
+      sfx(cue);                       // so its sample cannot depend on order
       const d = (await off.startRendering()).getChannelData(0);
       AC = save;
       let pk = 0; for (let i = 0; i < N; i++) pk = Math.max(pk, Math.abs(d[i]));
@@ -137,10 +169,19 @@ const check = (name, ok, detail) => {
       // is a cheap stand-in for "how much is happening below a few hundred Hz"
       let lp = 0, acc = 0, w = 0;
       for (let i = 0; i < end; i++) { lp += (d[i] - lp) * 0.004; acc += Math.abs(lp); w++; }
+      // ...and a TIMBRE axis, needed only since the guardians got voices of
+      // their own: "does it rise" says nothing about whether a bell and an ice
+      // shelf are the same sound. Zero crossings over the audible part, which
+      // is coarse but is exactly the "how bright is it" the family sweep uses.
+      let zc = 0, prev = 0;
+      for (let i = lo0; i <= loEnd; i++) { const v = d[i]; if (i > lo0 && (v >= 0) !== (prev >= 0)) zc++; prev = v; }
       out.__warn[cue] = { rise: +(domIn(loMid, loEnd) / Math.max(1, domIn(lo0, loMid))).toFixed(2),
                           weight: +(acc / Math.max(1, w) * 1000).toFixed(2),
+                          bright: Math.round(zc / Math.max(0.001, (loEnd - lo0) / SR)),
+                          pk: +pk.toFixed(3),
                           dur: +(end / SR).toFixed(3) };
     }
+    Math.random = realRand;
     return out;
   }, { FAM, WARN });
 
@@ -208,14 +249,51 @@ const check = (name, ok, detail) => {
   for (const c of ['tell', 'tellmid', 'tellbig'])
     if (W[c]) console.log('    ' + c.padEnd(9) + ' ' + W[c].dur + 's  rise x' + W[c].rise + '  weight ' + W[c].weight);
   console.log('');
-  const notRising = ['tell', 'tellmid', 'tellbig'].filter(c => !W[c] || W[c].rise < 1.15);
+  // EVERY warning, not just the three generics. This was scoped to the generics
+  // because they were all there was, and the moment guardians got voices of
+  // their own it was checking the safe cases and skipping the new ones: the
+  // foundry bell shipped a first draft at rise x1.00 — a bell that rang and
+  // never climbed — and this line read "all three climb" while it did.
+  const notRising = WARN.filter(c => !W[c] || W[c].rise < 1.15);
   check('every warning RISES, because that is what encodes time remaining',
     notRising.length === 0,
-    notRising.length ? notRising.join(', ') : 'all three climb across the cue');
-  check('...and they get heavier with the thing making them, not different',
+    notRising.length ? notRising.join(', ') : 'all ' + WARN.length + ' climb across the cue');
+  check('...and the generic three get heavier with the thing making them, not different',
     W.tell && W.tellmid && W.tellbig &&
     W.tellbig.weight > W.tellmid.weight && W.tellmid.weight > W.tell.weight,
     W.tell ? 'weight ' + W.tell.weight + ' -> ' + W.tellmid.weight + ' -> ' + W.tellbig.weight : '');
+
+  // ---- THE SEVEN GUARDIAN VOICES (owner, 2026-08-24) ----------------------
+  // The gesture is shared on purpose — that is what keeps a tell learnable —
+  // so they are NOT asked to differ in shape. They are asked to differ in
+  // MATERIAL, which is the whole content of the owner's ruling: a bell, an ice
+  // shelf and a virus must not be one sound with three names.
+  const VOICES = ['tell_glitch', 'tell_brood', 'tell_atlas', 'tell_zero',
+                  'tell_prism', 'tell_mother', 'tell_alpha'];
+  const have = VOICES.filter(v => W[v]);
+  console.log('');
+  for (const v of have)
+    console.log('    ' + v.padEnd(12) + ' ' + W[v].dur + 's  rise x' + W[v].rise +
+                '  weight ' + String(W[v].weight).padStart(6) + '  bright ' + String(W[v].bright).padStart(6));
+  check('every guardian has a tell of its own', have.length === VOICES.length,
+    have.length + ' of ' + VOICES.length + (have.length === VOICES.length ? '' :
+      ' — missing ' + VOICES.filter(v => !W[v]).join(', ')));
+  const dupes = [];
+  for (let i = 0; i < have.length; i++)
+    for (let j = i + 1; j < have.length; j++) {
+      const a = W[have[i]], b = W[have[j]];
+      const briR = Math.max(a.bright, b.bright) / Math.max(1, Math.min(a.bright, b.bright));
+      const wtR = Math.max(a.weight, b.weight) / Math.max(0.001, Math.min(a.weight, b.weight));
+      const durR = Math.max(a.dur, b.dur) / Math.max(0.001, Math.min(a.dur, b.dur));
+      if (briR < 1.25 && wtR < 1.5 && durR < 1.25) dupes.push(have[i] + '/' + have[j]);
+    }
+  check('...and no two guardians warn with the same instrument',
+    dupes.length === 0, dupes.length ? dupes.join(', ') :
+      'all ' + (have.length * (have.length - 1) / 2) + ' pairs separate');
+  const hot = have.filter(v => W[v].pk >= 1);
+  check('...and none of the new voices clips', hot.length === 0,
+    hot.length ? hot.map(v => v + ' ' + W[v].pk).join(', ') :
+      'loudest ' + Math.max(...have.map(v => W[v].pk)).toFixed(2));
 
   if (errs.length) check('no page errors', false, errs[0]);
   await browser.close();

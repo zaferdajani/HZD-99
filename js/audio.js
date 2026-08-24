@@ -59,6 +59,13 @@ const MUS_RESTART = /^(boss|mus_boss|mus_null|mus_talon|mus_furnace|mus_glaciere
 // several at once. That is how two scores end up over each other. One place
 // now decides which single element is allowed to make sound.
 const MUS_ALL = [];
+// WHICH GUARDIANS HAVE A TELL OF THEIR OWN (owner, 2026-08-24, SOUND_BIBLE §10).
+// The list is here, beside the cues it names, so adding a voice is adding its
+// case and its key — and a kind that is not on it is not silent, it falls back
+// to the weight its footprint earns (Boss.tellCue). Kept as data rather than a
+// try/catch around sfx() because a missing cue must be a fallback, never a
+// swallowed error.
+const TELL_VOICE = { glitch: 1, brood: 1, atlas: 1, zero: 1, prism: 1, mother: 1, alpha: 1 };
 function musSolo(keep) {
   for (const el of MUS_ALL) {
     // An element in a deliberate fade-out is the OTHER half of a cross-fade and
@@ -1389,6 +1396,94 @@ function sfx(n) {
       tone(480, 0.22, 'triangle', 0.050, 740, 0.15);
       tone(96, 0.26, 'sawtooth', 0.045, 140, 0.06);
       chink(0.022, 0.07);
+      break;
+    // ===================================================================
+    // ...AND THEN THE OWNER RULED: EACH GUARDIAN GETS ITS OWN (2026-08-24).
+    //
+    // The argument above is still right about the part it was right about, and
+    // nothing below throws it away. What made 'tell' worth having is the
+    // GESTURE — a short rising pair, rising because a rise encodes time
+    // REMAINING, pitched above the music bed. That is the grammar, it is
+    // learned once, and every cue here keeps it exactly.
+    //
+    // What changes is the INSTRUMENT. Three weights told the player how big the
+    // thing was; they could not tell him WHICH thing, and in a game where each
+    // guardian is fought on its own terms that is the more useful fact. So the
+    // rise stays and the material underneath it becomes the creature's own —
+    // the same sentence spoken in seven voices. A player who has never heard
+    // one before still knows what it means; a player who has heard it before
+    // knows who is about to move, without looking away from his own body.
+    //
+    // Each falls back to its sized generic if a kind has no voice of its own
+    // (Boss.tellCue), so a new guardian is never silent while it waits for one.
+    // ===================================================================
+    // NULLFANG — a virus wearing a lion. Detuned against itself so the rise
+    // BEATS rather than sings: the sound of something running on corrupt code.
+    case 'tell_glitch':
+      tone(300, 0.15, 'square', 0.042, 470);
+      tone(307, 0.15, 'square', 0.038, 481, 0.005);
+      tone(452, 0.19, 'sawtooth', 0.030, 700, 0.06);
+      tone(78, 0.20, 'square', 0.040, 116, 0.01);
+      chink(0.016, 0.05);
+      break;
+    // TALONHOST — a brood carried on metal feathers. Thin, high and edged, with
+    // the flutter of the swarm under it rather than a body.
+    case 'tell_brood':
+      hiss(0.13, 0.030);
+      tone(760, 0.11, 'triangle', 0.040, 1180);
+      tone(1140, 0.15, 'triangle', 0.030, 1760, 0.05);
+      tone(196, 0.12, 'sawtooth', 0.022, 268, 0.01);
+      chink(0.013, 0.02);
+      break;
+    // FURNACE CHOIR — it warns the way a foundry warns: a struck bell, and the
+    // rise carried in the partial above it rather than in the strike.
+    case 'tell_atlas':
+      // The strike CLIMBS. A first draft held the fundamental at 233 and put
+      // the rise only in the partial above it; the fundamental won, the cue
+      // measured at rise x1.00, and a bell that rings without climbing is a
+      // bell, not a warning. The foundry still speaks in struck metal — it is
+      // the metal that is being bent upward under the heat.
+      tone(233, 0.34, 'sine', 0.060, 340);
+      tone(466, 0.30, 'sine', 0.040, 760, 0.02);
+      tone(699, 0.22, 'triangle', 0.030, 1180, 0.10);
+      tone(88, 0.24, 'sawtooth', 0.032, 128, 0.00);
+      chink(0.020, 0.06);
+      break;
+    // GLACIERE — ice under load. A frost hiss first, then the rise arriving as
+    // something crystalline growing rather than something struck.
+    case 'tell_zero':
+      hiss(0.20, 0.026);
+      tone(392, 0.22, 'sine', 0.030, 620, 0.03);
+      tone(1046, 0.24, 'sine', 0.028, 1580, 0.09);
+      tone(1568, 0.16, 'triangle', 0.018, 2100, 0.15);
+      tone(104, 0.20, 'sine', 0.034, 138, 0.01);
+      break;
+    // PRISM PROWLER — the nimble rival, so its tell is the FASTEST rise in the
+    // set. Pure partials, no body: glass deciding, and very little time.
+    case 'tell_prism':
+      tone(880, 0.08, 'sine', 0.042, 1500);
+      tone(1320, 0.10, 'sine', 0.032, 2240, 0.035);
+      tone(1760, 0.09, 'triangle', 0.020, 2800, 0.07);
+      chink(0.015, 0.02);
+      break;
+    // MOTHER-V — the heaviest thing in the game, and the only tell with VOICES
+    // in it. The sub arrives before the rise: you feel her decide, then hear it.
+    case 'tell_mother':
+      tone(41, 0.42, 'sine', 0.098, 30);
+      tone(174, 0.30, 'sine', 0.052, 262, 0.06);
+      tone(261, 0.30, 'triangle', 0.040, 392, 0.09);
+      tone(392, 0.26, 'sine', 0.030, 588, 0.13);
+      tone(87, 0.30, 'sawtooth', 0.042, 118, 0.05);
+      chink(0.022, 0.08);
+      break;
+    // THE ALPHA — the first thing in the run that hunts her. A growl that tips
+    // into a bark: the rise is an animal's, not a machine's.
+    case 'tell_alpha':
+      tone(124, 0.20, 'sawtooth', 0.058, 190);
+      tone(186, 0.18, 'sawtooth', 0.040, 300, 0.05);
+      tone(560, 0.12, 'square', 0.026, 880, 0.11);
+      hiss(0.09, 0.028);
+      chink(0.016, 0.04);
       break;
     case 'grind':
       whoosh(0.16, 5200, 1400, 0.075);
