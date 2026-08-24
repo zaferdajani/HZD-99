@@ -148,6 +148,44 @@ const check = (name, ok, detail) => {
         + ', biggest step ' + max + '%');
   }
 
+  // ---- 1b. THE STRIP IS PLAYED WHOLE ---------------------------------------
+  // A strip declares how many cells it has and the renderer indexes by that
+  // number. Get it wrong and the blow plays the wrong part of itself, silently
+  // and forever: re-cutting these at the film's own frame rate turned six cells
+  // into thirteen, and until the table caught up the game played cells 0-5 of
+  // 13 — the first 46% of the swing, ending on the wind-up. Nothing looked
+  // broken. It just was not the move.
+  //
+  // The image knows its own count: the cells are square, so width/height IS the
+  // number of them, and the declared count has to agree.
+  const counts = await page.evaluate(async () => {
+    const out = {};
+    for (const name of Object.keys(SWING_STRIP)) {
+      const S = SWING_STRIP[name];
+      mediaFetch(S.key);
+      const im = await new Promise(ok => {
+        const t0 = Date.now();
+        const tick = () => {
+          const i2 = MEDIA_RAW[S.key];
+          if (i2 && i2.naturalWidth) return ok(i2);
+          if (Date.now() - t0 > 8000) return ok(null);
+          setTimeout(tick, 30);
+        };
+        tick();
+      });
+      out[name] = im
+        ? { declared: S.cells, actual: Math.round(im.naturalWidth / im.naturalHeight) }
+        : { declared: S.cells, actual: null };
+    }
+    return out;
+  });
+  for (const name of Object.keys(counts)) {
+    const r = counts[name];
+    check(name + ': the strip is played whole, every cell the film holds',
+      r.actual !== null && r.actual === r.declared,
+      'declared ' + r.declared + ' cells, the sheet holds ' + (r.actual === null ? 'nothing yet' : r.actual));
+  }
+
   // ---- 2. the transition mechanism ----------------------------------------
   // A synthetic strip, because the point is the WIRING: that the cell drawn is
   // the cell the clock asks for. Six cells that differ only in which sixth of

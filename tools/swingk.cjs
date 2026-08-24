@@ -21,11 +21,15 @@
 //     with no arguments it measures the four shipped strips.
 const { chromium } = require('playwright'); const fs = require('fs');
 const CELLMAP = { claw_1: 13, claw_2: 14, finisher: 15, burst: 17 };
+// [file, which cell shows the SAME pose as the sheet cell it replaces]. The
+// indices moved when the strips were re-cut at the film's own frame rate —
+// a reference cell is a moment in the move, not a fixed slot, so it has to be
+// re-picked whenever the cell count changes.
 const DEF = {
   claw_1: ['assets/characters/hero/swing/claw_1.webp', 0],
-  claw_2: ['assets/characters/hero/swing/claw_2.webp', 2],
+  claw_2: ['assets/characters/hero/swing/claw_2.webp', 4],
   finisher: ['assets/characters/hero/swing/finisher.webp', 0],
-  burst: ['assets/characters/hero/swing/burst.webp', 5],
+  burst: ['assets/characters/hero/swing/burst.webp', 7],
 };
 const args = process.argv.slice(2);
 const STRIPS = args.length ? Object.fromEntries(args.map(a => {
@@ -63,6 +67,7 @@ const STRIPS = args.length ? Object.fromEntries(args.map(a => {
       const sh = boxOf(sheet, CELLMAP[k] * cw, cw);
       const sp = boxOf(st, STRIPS[k][1] * st.height, st.height);   // cells are square
       res[k] = { sheetSubj: sh.h, sheetCell: sh.cell, stripSubj: sp.h, stripCell: sp.cell,
+                 cells: Math.round(st.width / st.height),
                  ref: STRIPS[k][1], k: +((sh.h / sh.cell) * (sp.cell / sp.h)).toFixed(4) };
     }
     return res;
@@ -71,7 +76,7 @@ const STRIPS = args.length ? Object.fromEntries(args.map(a => {
   for (const k of Object.keys(out)) {
     const r = out[k];
     console.log('  ' + k.padEnd(9) + ' sheet ' + r.sheetSubj + '/' + r.sheetCell +
-      '   strip ' + r.stripSubj + '/' + r.stripCell + ' (cell ' + r.ref + ')   k = ' + r.k);
+      '   strip ' + r.stripSubj + '/' + r.stripCell + ' (' + r.cells + ' cells, ref ' + r.ref + ')   k = ' + r.k);
   }
   await b.close();
 })();

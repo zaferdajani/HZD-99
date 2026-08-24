@@ -178,6 +178,41 @@ written, the code that consumes them is in and tested. **Only the owner can
 clear this.** Everything downstream of it is one `vidstrip` cut and one line in
 `HERO_TRANS` per strip.
 
+## 2z. THE FILMS WERE BEING PLAYED AT HALF THEIR FRAME RATE ✔ SHIPPED 2026-08-24
+
+**The owner:** *"use the films to actually improve the actual ingame move by
+maximizing frames for each move."*
+
+He is describing something that was really happening. Six cells per attack was
+chosen before a single clip existed. The takes are **24 fps** and the blows run
+0.30 to 0.54 seconds, so each film HELD nine to thirteen distinct frames of the
+move — and the game was showing six of them. The other frames were sitting in
+the scratchpad, already paid for.
+
+Re-cut at the source frame rate, from the same clips, at **no credit cost**:
+
+| attack | window | was | now | per frame |
+|---|---|---|---|---|
+| `claw_1` | 3.02–3.56 s | 6 | **13** | 40 ms → 18 ms |
+| `claw_2` | 1.90–2.34 s | 6 | **11** | 40 ms → 22 ms |
+| `finisher` | 2.56–2.95 s | 6 | **9** | 40 ms → 27 ms |
+| `burst` | 3.17–3.58 s | 6 | **10** | 53 ms → 32 ms |
+
+Past that there is nothing to gain: a strip longer than the moving part of its
+clip is duplicate frames wearing a bigger file. Each window is the stretch of
+that take where the body is actually moving.
+
+**A cell count is not a constant, it is a fact about a file** — and getting it
+wrong is silent. Re-cutting turned six cells into thirteen, and until the table
+caught up the game played cells 0-5 of 13: the first 46% of the swing, ending on
+the wind-up, with nothing on screen looking broken. `tests/frames.cjs` asserts
+the declared count against the sheet's own width/height now, so the next re-cut
+cannot ship half a move.
+
+The reference cell each draw scale is measured against moved with the recount
+too — it is a moment in the move, not a fixed slot. `tools/swingk.cjs` DEF is
+re-pointed and re-run whenever a strip is re-cut.
+
 ## 2y. THE MINI STAGE — a tree that sells verbs has to show them ✔ SHIPPED 2026-08-24
 
 **The owner:** *"when I choose the skill from the tree, it should open a window
@@ -211,6 +246,15 @@ not fired video. If the owner wants these to be little films of her performing
 each move, that is a firing list of seventeen clips and it goes on THE FIRING
 LIST — the mechanism to play them already exists (`vidstrip` → strip →
 `drawStripCell`), which is how the four attack strips work.
+
+### ⚠ tests/tells.cjs ASSERTS A STRING ITS OWN ENGINE NO LONGER HAS (art session, 2026-08-24)
+
+**For the code session.** `the central cue hook is gone from the build — TELL_ST
+matches nothing to a sound`. It is not gone: commit `63571c8` ("The warning is
+one sound at three sizes, and that is on purpose") changed the hook from
+`sfx('tell')` to `sfx('tellbig')`, and the harness still greps `index.html` for
+the literal `if (TELL_ST.test(this.st || '')) sfx('tell')`. The rule is being
+applied; the test is looking for last week's spelling of it.
 
 ### ⚠ tests/terrainrun.cjs "she gets moving in every room" FAILS IN C2 — PRE-EXISTING (art session, 2026-08-24)
 

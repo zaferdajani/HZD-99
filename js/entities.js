@@ -759,11 +759,32 @@ const HERO_TRANS = {
 // makes the arc read as one move at any jump height, including the clipped ones
 // a variable-height jump produces. 53 pose changes a minute collapse into it.
 let HERO_AIR_STRIP = null;     // { key: 'transAir', cells: 6, k: 1, up: 770, down: 700 }
+// AND THE CELL COUNT IS THE FILM'S, NOT A ROUND NUMBER (owner: "use the films
+// to actually improve the actual ingame move by maximizing frames for each
+// move"). Six was chosen before any of these clips existed. They are 24 fps and
+// the blows run 0.30 to 0.54 seconds, so each take HELD nine to thirteen
+// distinct frames of the move and the game was showing six of them. Re-cut at
+// the source frame rate, every frame the camera caught is on screen: claw_1
+// went from six drawings to thirteen across the same 240 ms, which is 18 ms a
+// frame instead of 40.
+//
+// Past that there is nothing to gain — a strip longer than the moving part of
+// its clip is duplicate frames wearing a bigger file. Each window is the part
+// of that take where the body is actually moving, and each count is exactly
+// that window times 24.
+//
+// The reference cell each k is measured against MOVED with the recount: it is a
+// moment in the move, not a fixed slot, so tools/swingk.cjs is re-run and its
+// DEF table re-pointed whenever a strip is re-cut.
+//   claw_1   sheet 140/169  strip 257/320 (13 cells, ref 0 — the guard)
+//   claw_2   sheet 140/169  strip 310/320 (11 cells, ref 4 — the arm extended)
+//   finisher sheet 131/169  strip 256/320 ( 9 cells, ref 0 — both arms up)
+//   burst    sheet 132/169  strip 247/320 (10 cells, ref 7 — arms flung wide)
 const SWING_STRIP = {
-  claw_1:   { key: 'swingClaw1',    cells: 6, k: 1.1233 },
-  claw_2:   { key: 'swingClaw2',    cells: 6, k: 0.8663 },
-  finisher: { key: 'swingFinisher', cells: 6, k: 0.8765 },
-  burst:    { key: 'swingBurst',    cells: 6, k: 1.0371 },
+  claw_1:   { key: 'swingClaw1',    cells: 13, k: 1.0315 },
+  claw_2:   { key: 'swingClaw2',    cells: 11, k: 0.8551 },
+  finisher: { key: 'swingFinisher', cells: 9,  k: 0.9689 },
+  burst:    { key: 'swingBurst',    cells: 10, k: 1.0119 },
 };
 // ---- HOW FAR ONE STEP CARRIES HER, OFF THE PLATES THEMSELVES ---------------
 //
