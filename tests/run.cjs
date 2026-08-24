@@ -35,6 +35,7 @@ const SUITE = [
   ['nodes',     'all eight Mind Nodes open a puzzle and pay out'],
   ['film',      'the intro reel plays all eight shots without falling back'],
   ['cutskip',   'a tap does not spend the story, and a film starts at its start'],
+  ['frames',    'every verb is a move, not one pose held for a quarter second'],
   ['whatplays', 'every music cue resolves to the intended track'],
   ['overlap',   'never two music streams audible outside a cross-fade'],
   ['cuepitch',  'every written note is the strongest pitch in its own window'],

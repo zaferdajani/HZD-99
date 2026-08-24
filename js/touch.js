@@ -277,7 +277,7 @@ function tStateKind() {
   if (s === 'TCFG') return 'tcfg';
   if (s === 'MAP') return 'map';
   if (s === 'OFFER') return 'offer';
-  if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'SKILLS' || s === 'TRIAL') return 'menu';
+  if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'SKILLS' || s === 'TRIAL' || s === 'FILMS') return 'menu';
   return 'tap';
 }
 // layout-editor chrome: fixed controls that are not part of the layout
@@ -353,6 +353,12 @@ function tapMenu(x, y) {
       if (i !== G.pauseIdx) G.pauseConfirm = null;
       G.pauseIdx = i; tPress('VOK');
     }
+  } else if (st === 'FILMS') {
+    // the same geometry the gallery is drawn with — see filmsLayout()
+    const L = filmsLayout();
+    const i = Math.round((y - L.y0) / L.step);
+    if (i >= 0 && i < L.rows.length && Math.abs(y - (L.y0 + i * L.step)) <= L.h / 2
+        && Math.abs(x - 480) <= L.w / 2) { G.filmIdx = i; tPress('VOK'); }
   } else if (st === 'MORE') {
     // the same geometry the screen is drawn with — see moreLayout()
     const L = moreLayout();

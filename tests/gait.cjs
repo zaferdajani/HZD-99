@@ -74,6 +74,24 @@ const check = (name, ok, detail) => {
       states.push(player.heroState(Math.abs(player.vx) > 140));
       lifts.push(player._stepLift || 0);
     }
+    // THE BOB IS SAMPLED OVER A STRIDE, NOT OVER A NUMBER OF FRAMES. The rise
+    // and fall is a function of stridePh, and 48 real frames cover however much
+    // of that the machine's frame rate happens to deliver — so on a loaded box
+    // the samples landed at similar phases and the range collapsed to 1.34 px
+    // against the same code that reads 2.94 px unloaded. A measurement whose
+    // answer depends on the load of the machine measuring it is not a test.
+    // This keeps sampling until the stride itself has advanced two full cycles.
+    const bob = [];
+    {
+      const ph0 = player.stridePh || 0;
+      for (let i = 0; i < 240; i++) {
+        await frame();
+        player.iT = Math.max(player.iT, 1); player.cores = 5;
+        G.enemies = [];
+        bob.push(player._stepLift || 0);
+        if ((player.stridePh || 0) - ph0 >= 2.2) break;
+      }
+    }
     keys.ArrowRight = 0;
     // AND WHERE DOES THE FOREGROUND SIT? The near depth plate exists to cross in
     // FRONT of her; if its top edge is at or below her soles it is a black band
@@ -89,7 +107,7 @@ const check = (name, ok, detail) => {
       const anchor = roomFloorAnchor(0) - camSY();
       fore = { top: anchor - h * 0.22, feet: player.y + player.h - camSY() };
     }
-    return { air, feet, states, vys, over, fore, lifts,
+    return { air, feet, states, vys, over, fore, lifts, bob,
              strideStart, animStart, strideEnd: player.stridePh || 0, animEnd: player.anim,
              stepWalk: HERO_STEP_WALK, stepRun: HERO_STEP_RUN, cells: HERO_CELLS,
              vx: Math.round(player.vx) };
@@ -166,7 +184,8 @@ const check = (name, ok, detail) => {
   // first without the second is worse than nothing: that the body MOVES
   // vertically at all, and that it is LOWEST at the footfall, which is the
   // frame the cell swaps on. A bob on the wrong foot reads as a limp.
-  const range = Math.max(...r.lifts) - Math.min(...r.lifts);
+  const lifts = (r.bob && r.bob.length > 8) ? r.bob : r.lifts;
+  const range = Math.max(...lifts) - Math.min(...lifts);
   check('her body rises and falls as she strides', range >= 1.5,
     'vertical travel ' + range.toFixed(2) + ' px over the run');
   // THE CADENCE IS THE THING TO GUARD, and the phase is not measurable here.
@@ -235,13 +254,22 @@ const check = (name, ok, detail) => {
   const touch = await page.evaluate(async () => {
     const frame = () => new Promise(r => requestAnimationFrame(r));
     const speeds = {};
+    // SHE ACCELERATES IN PLACE. This measures what the STICK asks for, and it
+    // used to measure that by letting her run for 45 real frames and reading
+    // her speed at the end — which also measured whatever she ran into. The
+    // light push moves her ~140 px before the full push starts from there, so
+    // on a loaded machine (a full suite run, bigger frame deltas, more distance
+    // per frame) she reached a wall during the second leg and the check
+    // reported 186 against a "full push" of 100. Pinning x cannot hit anything,
+    // and vx is integrated independently of it, so the number is the control's.
     for (const px of [20, 56]) {
       TOUCH.joy = { id: 1, ox: 0, oy: 0, dx: px, dy: 0 };
       tApplyJoy();
-      for (let i = 0; i < 45; i++) await frame();
+      const x0 = player.x;
+      for (let i = 0; i < 45; i++) { await frame(); player.x = x0; }
       speeds[px] = Math.round(Math.abs(player.vx));
       TOUCH.joy = { id: 1, ox: 0, oy: 0, dx: 0, dy: 0 }; tApplyJoy();
-      for (let i = 0; i < 25; i++) await frame();
+      for (let i = 0; i < 25; i++) { await frame(); player.x = x0; }
     }
     let flips = 0, last = null;
     for (let i = 0; i < 40; i++) {

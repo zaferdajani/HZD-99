@@ -1702,6 +1702,7 @@ function update(dt) {
   }
   else if (G.state === 'BAG') updateBag();
   else if (G.state === 'CREST') updateCrest();
+  else if (G.state === 'FILMS') updateFilms();
   else if (G.state === 'SHOP') updateShop();
   else if (G.state === 'SKILLS') updateSkills();
   else if (G.state === 'RELICS') updateRelics();
@@ -1917,6 +1918,7 @@ function pauseItems() {
     { id: 'pace', label: t('pace') + ':  ' + paceLabel() + '   ◂ ▸', arrows: 1, hint: t('pace_d') },
     { id: 'qual', label: t('qual') + ':  ' + qualLabel() + '   ◂ ▸', arrows: 1, hint: t('qual_d').replace('%s', DEVICE.form) },
   ];
+  it.push({ id: 'films', label: t('film_title') });
   if (pauseHasTouch()) it.push({ id: 'touch', label: t('tl_title') });
   it.push({ id: 'restart', label: t('pm_restart'), icon: '↻', warn: 1, hint: t('pm_restart_d') });
   it.push({ id: 'quit', label: t('to_menu'), icon: '⏻', warn: 1, out: 1 });
@@ -1962,6 +1964,7 @@ function updatePause() {
       G.toast(t('pace') + '  ' + paceLabel()); persist();
     }
     else if (cur.id === 'qual') { qualCycle(); G.toast(t('qual') + '  ' + qualLabel()); }
+    else if (cur.id === 'films') { G.state = 'FILMS'; G.filmIdx = 0; }
     else if (cur.id === 'touch') G.state = 'TCFG';
     else if (cur.id === 'restart') {
       // same difficulty, same world, nothing carried — the run starts over
@@ -3762,6 +3765,82 @@ function purifyPreloadNear(id) {
     scan(typeof d === 'object' ? d.to : d);
   }
 }
+// ---------------------------------------------------------------------------
+// THE FILM GALLERY — a story you earned should be a thing you own.
+//
+// Every film in this game was seen ONCE and then gone. That is the wrong shape
+// for the thing they are: the owner's word for them is REWARD, and a reward
+// you cannot go back and look at is closer to an interruption you got through.
+// It is also what makes the two halves of the game work on each other — the
+// better the playing gets, the more a film is worth earning, and a film you can
+// return to is what makes it worth having earned.
+//
+// Only the SINGLE CLIPS are listed. The opening and the ending are REELS —
+// eight shots cut to what the player did — and a reel is played by a different
+// path (G.reel) that hands its ending to the comic or the win screen; putting
+// one behind a menu row would need that path to learn where it came from. They
+// are noted here so the omission is a decision rather than an oversight.
+const FILM_GALLERY = ['memory', 'gift', 'glitch', 'brood', 'zero', 'atlas', 'prism'];
+// SEEN IS RECORDED WHERE THE FILM ACTUALLY STARTS, not where it is triggered
+// from — every path into a film goes through startPurifyCut, including the
+// gallery itself, so there is exactly one place this can be missed.
+function filmSee(kind) {
+  if (!G.save) return;
+  if (!G.save.films) G.save.films = {};
+  if (G.save.films[kind]) return;
+  G.save.films[kind] = 1;
+  if (typeof persist === 'function') persist();
+}
+function filmHas(kind) { return !!(G.save && G.save.films && G.save.films[kind]); }
+// A GUARDIAN'S FILM IS CALLED WHAT THE GUARDIAN IS CALLED, and those names are
+// already written in all five languages (b_glitch and friends) — so the gallery
+// borrows them rather than adding a second set to keep in sync, which is how
+// two names for one creature drift apart.
+const FILM_BOSS = { glitch: 1, brood: 1, zero: 1, atlas: 1, prism: 1 };
+function filmTitle(k) { return t(FILM_BOSS[k] ? 'b_' + k : 'film_' + k); }
+// one geometry, read by the drawing AND by the tap targets — the pause menu's
+// lesson, which cost a release in which the phone selected the wrong row
+function filmsLayout() {
+  const rows = FILM_GALLERY.filter(k => PURIFY_VID[k]);
+  return { rows, step: 44, y0: 300 - (rows.length - 1) * 22, w: 560, h: 38 };
+}
+function updateFilms() {
+  const L = filmsLayout(), n = L.rows.length;
+  if (inP('BACK') || inP('PAUSE')) { G.state = 'PAUSE'; sfx('ui'); return; }
+  if (!n) return;
+  if (inP('DOWN')) { G.filmIdx = (G.filmIdx + 1) % n; sfx('ui'); }
+  if (inP('UP')) { G.filmIdx = (G.filmIdx + n - 1) % n; sfx('ui'); }
+  if (inP('OK')) {
+    const k = L.rows[G.filmIdx];
+    if (!filmHas(k)) { sfx('no'); return; }
+    sfx('ok');
+    // ...and it comes back HERE rather than to the room. G.cutEnd is the
+    // one-shot the memory film already uses to hand back to the conversation
+    // that started it; a film opened from a menu owes the menu the same.
+    if (startPurifyCut(k)) G.cutEnd = () => { G.state = 'FILMS'; };
+    else G.toast(t('film_wait'));
+  }
+}
+function drawFilms() {
+  c.fillStyle = 'rgba(4,7,12,0.88)'; c.fillRect(0, 0, 960, 540);
+  ftxt(t('film_title'), 480, 62, 28, '#eef3fa', 'center', '#8ff6ff');
+  const L = filmsLayout();
+  const got = L.rows.filter(filmHas).length;
+  ftxt(got + ' / ' + L.rows.length, 480, 100, 15, '#8aa2b5');
+  L.rows.forEach((k, i) => {
+    const sel = i === G.filmIdx, have = filmHas(k);
+    const y = L.y0 + i * L.step;
+    if (sel) { c.fillStyle = 'rgba(143,246,255,0.09)'; rr(c, 480 - L.w / 2, y - L.h / 2, L.w, L.h, 9); c.fill(); }
+    // A LOCKED ROW IS NOT A TITLE THE PLAYER HAS NOT EARNED YET — naming the
+    // films still to come spoils the count of guardians left and which of them
+    // there are. It is a shape with nothing in it, which is what an unseen
+    // story looks like.
+    const label = have ? filmTitle(k) : '— — —';
+    ftxt((have ? '▸ ' : '· ') + label, LANG === 'ar' ? 480 + L.w / 2 - 20 : 480 - L.w / 2 + 20, y + 6,
+      18, have ? (sel ? '#eef3fa' : '#9fb8c8') : '#4a5a68', LANG === 'ar' ? 'right' : 'left');
+  });
+  ftxt(t('film_hint'), 480, 500, 13, '#7d93a8');
+}
 function startPurifyCut(kind) {
   if (!PURIFY_VID[kind]) return false;
   let v = purifyPre[kind];
@@ -3777,6 +3856,7 @@ function startPurifyCut(kind) {
   G.cut = { kind, v, snap, t: 0, ph: 'in', hint: 0, failed: false, held: 0 };
   try { v.currentTime = 0; } catch (e) {}
   G.state = 'CUT';
+  filmSee(kind);
   return true;
 }
 // Start the ending reel. Returns false when there is nothing to play — no
@@ -12672,6 +12752,8 @@ function draw(tms) {
     drawBag();
   } else if (st === 'CREST') {
     drawCrest();
+  } else if (st === 'FILMS') {
+    drawFilms();
   } else if (st === 'SHOP') {
     drawShop();
   } else if (st === 'SKILLS') {

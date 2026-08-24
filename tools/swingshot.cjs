@@ -63,6 +63,9 @@ const fs = require('fs');
       if (player.swingVis) {
         player.swingVis.t = player.swingVis.t0 * (1 - k);   // set p directly
       }
+      // the manga impact panel whites out the frame and its clock only ticks
+      // in update(), which is stubbed above — so it would sit over every shot
+      G.impact = null;
       if (typeof draw === 'function') draw();
       const cv = document.querySelector('canvas');
       const r = cv.getBoundingClientRect();

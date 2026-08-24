@@ -110,6 +110,106 @@ tuck against the sheet's arms-wide release and comes back 27% out. It
 reproduces claw_1's hand-derived constant to four decimals, which is how the
 method was checked before the other three trusted it.
 
+## 2x. THE TRANSITION STRIPS — the rest of the body, in census order ✱ OPEN
+
+**The owner's ask:** *"How can you transform the game into the same quality of
+motion done by the studio of those games? ... So to achieve double pleasure of
+the actual gameplay and the videos."*
+
+**The gap is not the physics.** Coyote time, jump buffering, a variable-height
+jump, weight-scaled hitstop, a camera that leads — all measured present in
+`js/entities.js` and `js/engine.js`. What Hollow Knight and Prince of Persia
+have that this does not is that their motion vocabulary is TRANSITIONS and
+ours is POSES: their animation layer owns the state, and the body cannot leave
+a move until the move has played.
+
+**The layer is now in** (`js/entities.js` HERO_TRANS / HERO_AIR_STRIP). It is
+`drawRoboSwing` generalised — a fired strip indexed by the clock the physics
+already keeps for that moment (`landT`, `skidT`, `takeoffT`), with the pose cell
+as the fallback for everything not fired. `tests/frames.cjs` measures both the
+wiring and the defect itself: a verb whose consecutive frames do not change is
+a held pose, and that is now a failing number rather than a thing the owner has
+to notice on his own screen.
+
+**WHAT TO FIRE, AND IN WHAT ORDER — measured, not guessed.**
+`tools/statecensus.cjs` plays the real game headlessly across fifteen rooms and
+counts what the body actually does: **446 pose changes a minute.** In order of
+what each strip buys:
+
+| strip | what it replaces | per minute | notes |
+|---|---|---|---|
+| `transAir` | rise → apex → fall | **53** | ONE strip for the whole arc, indexed by her own `vy` — 12% of every pose change in the game. Fire this first. |
+| `transLand` | fall → land | 8 | the impact. Lowest count of the top rows and the most conspicuous when missing: a drop that ends with no compression is the clearest "this body has no weight" tell there is. |
+| `transTurn` | the run-turnaround (`skid`) | 6 | plant, lean against the momentum, whip the shoulders round |
+| `transWall` | apex → wall_cling → rise | 15 | the catch and the kick-off, two clips |
+| `transDash` | idle/run → dash → out | 12 | |
+
+The three start frames are prepped and uploaded
+(`scratchpad/trans/{land,skid,rise}.png`, the state sheet's own cells on the
+black field). **The firing itself is blocked on credits** — see below.
+
+**And `run_c` is still the missing opposite contact**, which is a cycle rather
+than a transition: `run_a>run_b` and back is 55/min, the largest single pair in
+the census, and it is two poses where a stride is four.
+
+### 🎬 THE FILM GALLERY IS IN (2026-08-24)
+
+The other half of the owner's ask — *"maintaining the nice videos as a reward"*.
+Every film was seen once and gone, which is the wrong shape for a reward. The
+pause menu has a **Films** row now: the seven single-clip films, earned ones
+watchable by name, unearned ones a shape with nothing in it (naming them would
+spoil how many guardians are left). Playing one hands back to the gallery
+through `G.cutEnd`, the same one-shot the memory film already used. Recorded in
+`G.save.films` at `startPurifyCut`, which is the single place every path into a
+film goes through. Five languages, and the tap targets come off `filmsLayout()`
+so the phone cannot select a different row than the drawing shows.
+
+The opening and the ending are REELS, not clips — eight shots cut to what the
+player did, played through `G.reel`, which hands its ending to the comic or the
+win screen. Listing one behind a menu row needs that path to learn where it was
+started from. Deliberately left out, not overlooked.
+
+### ⛔ BLOCKED: THE HIGGSFIELD BALANCE IS SPENT (2026-08-24)
+
+`98.53 → 1.03` credits: the four swing strips took it. The three transition
+clips above were submitted and refused — *"Out of credits on pro (annual) plan
+in Private workspace"*. Start frames are prepped and uploaded, the prompts are
+written, the code that consumes them is in and tested. **Only the owner can
+clear this.** Everything downstream of it is one `vidstrip` cut and one line in
+`HERO_TRANS` per strip.
+
+### ⚠ tests/cavedark.cjs "the dark stays in the cave" FLAKES UNDER LOAD (art session, 2026-08-24)
+
+**For the code session, whose harness it is — not touched from here, because it
+is new and being worked on.** In a full-suite run it reported
+`A1 reads 17.37 with the pass and 60.7 without it`, i.e. the cave-dark pass
+darkening a room that is not a cave. Run on its own on the same build,
+three times: `60.88/60.83`, `60.78/60.85`, `61.35/61.43` — the pass correctly
+makes no difference in A1.
+
+So the measurement is being taken before the room it names is actually the room
+on screen. Two other harnesses in this suite had the same shape of defect and
+both were fixed the same way — by waiting on the STATE rather than on a number
+of frames (see gait's stride bob below, and grammar's resolution pin).
+
+### ⚠ tests/gait.cjs HAD TWO LOAD-DEPENDENT CHECKS — both fixed (art session, 2026-08-24)
+
+Neither was a game defect, and both failed only inside a full suite run:
+
+**"a light push on the phone stick is a walk, not a sprint"** — `186 px/s at a
+light push vs 100 at full`. It measured the stick by letting her RUN for 45 real
+frames and reading her speed at the end, which also measured whatever she ran
+into: the light-push leg carries her ~140 px before the full-push leg starts
+from there, and on a loaded machine the bigger frame deltas carried her into a
+wall. She accelerates in place now — `player.x` is pinned each frame, `vx` is
+integrated independently of it, so the number is the control's.
+
+**"her body rises and falls as she strides"** — `1.34 px` against a 1.5 px floor
+and a 2.94 px norm. The bob is a function of `stridePh`, and 48 real frames
+cover however much of a stride the frame rate happens to deliver. It samples
+until the stride itself has advanced two full cycles now: 2.25 / 2.79 / 3.10 /
+2.96 over four runs.
+
 ### ⚠ tests/folk.cjs "the strip advances while it plays" IS FLAKY — 3 in 5 (art session, 2026-08-23)
 
 **Not caused by the run fix above.** Measured on `4b3afe9` itself, in a clean

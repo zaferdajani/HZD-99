@@ -160,8 +160,23 @@ function preloadRoom(roomId) {
 //
 // Getting this wrong costs nothing (the wrong neighbourhood is still art the
 // game will want eventually), which is why it can be a guess at all.
+// WHAT SHE IS MADE OF, WHICH NO ROOM MEASUREMENT CAN SEE.
+//
+// tools/roomassets.cjs discovers a room's art by PLAYING that room, so it finds
+// every backdrop, tile deck, NPC and enemy — and cannot find the sheets that
+// only appear when the PLAYER does something. Her four swing strips are drawn
+// the first time she attacks, which is usually within seconds of the first room
+// and long before a room-graph walk would reach them.
+//
+// That gap is not cosmetic: measured in tests/frames.cjs, a strip that has not
+// arrived falls back to its pose cell, which is exactly the held still the
+// strips exist to replace. So the first blow of a session was the defect, every
+// session. They are 0.27 MB together.
+const BODY_KEYS = ['swingClaw1', 'swingClaw2', 'swingFinisher', 'swingBurst'];
+
 function preloadBoot() {
   if (!PRE.on) return;
+  for (const k of BODY_KEYS) { preloadPushLow(k); preloadPush(k, 0); }
   let start = 'W1';
   try {
     const s = (typeof loadStored === 'function') &&

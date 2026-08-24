@@ -696,6 +696,44 @@ const HERO_DH = 60, HERO_FLOOR = 6;
 //   claw_2   sheet 140/169  strip 306/320 (cell 2, the arm extended)
 //   finisher sheet 131/169  strip 283/320 (cell 0, both arms up)
 //   burst    sheet 132/169  strip 241/320 (cell 5, arms flung wide)
+// ---------------------------------------------------------------------------
+// THE TRANSITION LAYER — what separates this body's motion from a studio's.
+//
+// Measured, not assumed: tools/statecensus.cjs plays the real game headlessly
+// and counts what the body actually does. Over two minutes across fifteen
+// rooms it changes pose 446 times a MINUTE, and the jump arc alone —
+// rise>apex>fall — is 12% of every change that happens. Every one of those is
+// currently a hard cut between two stills.
+//
+// A studio does not draw the poses and cut between them; it draws the MOVE and
+// lets the pose be whatever frame the move is on. The mechanism for that is
+// already in this file — drawRoboSwing indexes a fired strip by the swing's
+// own clock — it was just wearing an attack's name. Generalised here.
+//
+// THE TRIGGERS ARE THE CLOCKS THE PHYSICS ALREADY KEEPS. landT counts out the
+// impact, skidT the turn, takeoffT the push; every transition worth drawing
+// already has a timer, because the game already knew the moment was happening.
+// A pose is simply what gets drawn when there is no clip for that clock.
+//
+// Anything with no strip fired falls through to its pose cell — the same
+// contract the half-finished swing set shipped under, and the reason this can
+// land before the art does.
+const HERO_TRANS = {
+  // st: { key, cells, k, t: p => timer, t0: p => duration }
+  //
+  // WAITING ON ART (docs/ART_QUEUE.md §2x), in census order:
+  //   land   fall>land>idle|run, the impact — 8/min and the most conspicuous
+  //          when missing, because a drop that ends with no compression is the
+  //          single clearest "this body has no weight" tell
+  //   skid   the run-turnaround — plant, lean against the momentum, whip round
+};
+// THE JUMP IS AN ARC, NOT A CLOCK, so it is indexed differently: rise, apex and
+// fall are three stills of ONE continuous movement, and the thing that says
+// where in it she is, is her own vertical speed. Cell 0 is the takeoff stretch,
+// the middle cells are the hang, the last are the reach for the ground — which
+// makes the arc read as one move at any jump height, including the clipped ones
+// a variable-height jump produces. 53 pose changes a minute collapse into it.
+let HERO_AIR_STRIP = null;     // { key: 'transAir', cells: 6, k: 1, up: 770, down: 700 }
 const SWING_STRIP = {
   claw_1:   { key: 'swingClaw1',    cells: 6, k: 1.1233 },
   claw_2:   { key: 'swingClaw2',    cells: 6, k: 0.8663 },
@@ -2003,6 +2041,31 @@ class Player {
     return drawStripCell(c, S.key, Math.floor(p * S.cells), S.cells,
                          0, HERO_FLOOR, h, false);
   }
+  // ONE TRANSITION CLIP, indexed by the clock that made the transition happen.
+  // Returns false whenever the art for this moment is not fired, which is most
+  // of them for now — and false here means the pose cell draws, exactly as it
+  // always did. Nothing about the physics or the state machine changes; this
+  // only decides what is on screen while a state the game already entered
+  // plays out.
+  drawRoboTrans(c, st) {
+    const A = HERO_AIR_STRIP;
+    if (A && (st === 'rise' || st === 'apex' || st === 'fall')) {
+      // her own vertical speed is the position in the arc
+      const p = clamp((this.vy + A.up) / (A.up + A.down), 0, 0.999);
+      const h = HERO_DH * A.k;
+      // airborne cells are centred rather than stood on the floor, and a strip
+      // cell is anchored at its bottom — so the bottom goes half a cell below
+      // the same centre the pose cells use
+      return drawStripCell(c, A.key, Math.floor(p * A.cells), A.cells, 0, -18 + h / 2, h, false);
+    }
+    const T = HERO_TRANS[st];
+    if (!T) return false;
+    const t = T.t(this), t0 = T.t0(this);
+    if (!(t > 0) || !(t0 > 0)) return false;
+    const p = clamp(1 - t / t0, 0, 0.999);
+    return drawStripCell(c, T.key, Math.floor(p * T.cells), T.cells,
+                         0, HERO_FLOOR, HERO_DH * T.k, false);
+  }
   drawRoboPlate(c, run) {
     if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG.heroStates) return false;
     // the swing plays its own strip when one is fired for that attack; it
@@ -2011,6 +2074,9 @@ class Player {
     const im = MEDIA_IMG.heroStates;
     const cw = im.width / HERO_CELLS, ch = im.height;
     const st = this.heroState(run);
+    // ...and every other moment the body is mid-change plays its clip the same
+    // way, for the same reason, with the same fallback
+    if (this.drawRoboTrans(c, st)) return true;
     const col = HERO_CELL[st] || 0;
     const dh = HERO_DH, dw = dh * (cw / ch);
     // grounded cells stand on the cell's floor line; airborne cells are centred
