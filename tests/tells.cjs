@@ -86,9 +86,24 @@ const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1',
     for (const k of kinds) { const b = new Boss(k, 300, 300); out[k] = b.tellCue(); }
     return out;
   }, BOSSES);
+  // A LEGAL WARNING IS A DECLARED ONE. The three sizes carry every machine and
+  // sage and any guardian still waiting for a voice; a guardian WITH a voice
+  // asks for 'tell_<kind>', and TELL_VOICE is the list that says which kinds
+  // have one. Checking against that list rather than against a hardcoded set is
+  // the difference between "this cue exists" and "this cue is spelled like the
+  // ones I remember" — the second is what went stale the day the voices landed.
+  const voiced = await p.evaluate(() => Object.keys(
+    (typeof TELL_VOICE !== 'undefined' && TELL_VOICE) || {}));
+  const SIZES = ['tell', 'tellmid', 'tellbig'];
   const cues = Object.values(sizes);
-  const legal = cues.every(c => c === 'tell' || c === 'tellmid' || c === 'tellbig');
+  const legal = Object.entries(sizes).every(([kind, c]) =>
+    SIZES.includes(c) || (c === 'tell_' + kind && voiced.includes(kind)));
   const varied = new Set(cues).size >= 2;
+  // ...and a guardian that HAS a voice must actually be given it, or the
+  // fallback has quietly swallowed the whole feature.
+  const unvoiced = Object.entries(sizes)
+    .filter(([kind, c]) => voiced.includes(kind) && c !== 'tell_' + kind)
+    .map(([kind, c]) => kind + '=' + c);
   console.log('warning size per guardian: ' +
     Object.entries(sizes).map(([k, c]) => k + '=' + c).join('  '));
 
@@ -165,8 +180,9 @@ const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1',
   }
 
   if (!hooked) fails.push('the central cue hook is gone from the build — TELL_ST matches nothing to a sound');
-  if (!legal) fails.push('a guardian asks for a warning that is not one of the three sizes: ' + JSON.stringify(sizes));
-  if (!varied) fails.push('every guardian makes the SAME warning — the three sizes are decoration, not information');
+  if (!legal) fails.push('a guardian asks for a warning that is neither a declared size nor its own declared voice: ' + JSON.stringify(sizes));
+  if (!varied) fails.push('every guardian makes the SAME warning — the sizes are decoration, not information');
+  if (unvoiced.length) fails.push('a guardian with a voice of its own was given a generic instead: ' + unvoiced.join(', '));
   if (errs.length) fails.push('page errors: ' + errs.slice(0, 3).join(' | '));
   if (fails.length) { console.log('\nFAIL\n - ' + fails.join('\n - ')); process.exit(1); }
   console.log('\nOK — every wind-up reached carries both channels');
