@@ -39,6 +39,8 @@
  "servoLoop": "assets/lowres/servoLoop.webp",
  "monoLoop": "assets/lowres/monoLoop.webp",
  "patchLoop": "assets/lowres/patchLoop.webp",
+ "sageLoop": "assets/lowres/sageLoop.webp",
+ "lumenLoop": "assets/lowres/lumenLoop.webp",
  "heroStates": "assets/lowres/heroStates.webp",
  "lairCradle": "assets/lowres/lairCradle.webp",
  "vistaCity": "assets/lowres/vistaCity.webp",

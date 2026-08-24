@@ -416,12 +416,35 @@ const NPC_LOOP = {
 // how long a work beat plays for and how fast, per body — the same shape as
 // the tinker's TINKER_JOB, and per-character for the same reason: the warden
 // reading a console and the tinker welding do not move at one speed.
+// HOW MANY CELLS EACH BODY'S STRIP ACTUALLY HOLDS.
+//
+// It was the literal 12 at the draw site, which was true of every strip when it
+// was written and stopped being true the moment one was re-cut. The five job
+// clips are 5.04 seconds at 24 fps — 121 filmed frames — and twelve of them
+// were reaching the screen. Re-cut at 24, from the same clips, at no credit
+// cost (owner: "maximizing frames for each move").
+//
+// This does NOT contradict the cadence note below. That note is right: more
+// frames never stops a cycle reading as a cycle, and the fix for loopiness was
+// bursts, varying tempo and holds. Frame count is the other axis entirely —
+// whether the motion inside a burst is smooth or steps. Both were wrong; the
+// cadence was fixed then, this is the other half.
+//
+// Ratchet's loop was cut in an earlier pass and its clip is not in the
+// scratchpad any more, so he keeps his twelve until he is re-fired — which is
+// exactly why this is a table and not a constant.
+const NPC_LOOP_CELLS = { servo: 24, mono: 24, patch: 24, sage: 24, lumen: 24 };
+function npcLoopCells(id) { return NPC_LOOP_CELLS[id] || 12; }
+// ...and the tempo doubles with the cell count, or the same job plays at half
+// speed: fps is COLUMNS a second and run is a burst measured in COLUMNS, so
+// twice as many columns for the same movement needs twice as many of both to
+// take the same time. The holds are seconds and do not move.
 const NPC_WORK = {
-  servo: { fps: [6, 9],  run: [10, 30], hold: [0.30, 0.90] },
-  mono:  { fps: [4, 6],  run: [6, 18],  hold: [0.60, 1.60] },
-  patch: { fps: [9, 14], run: [14, 40], hold: [0.18, 0.55] },
-  sage:  { fps: [3, 5],  run: [5, 14],  hold: [1.00, 2.40] },
-  lumen: { fps: [4, 7],  run: [8, 20],  hold: [0.50, 1.40] },
+  servo: { fps: [12, 18], run: [20, 60], hold: [0.30, 0.90] },
+  mono:  { fps: [8, 12],  run: [12, 36], hold: [0.60, 1.60] },
+  patch: { fps: [18, 28], run: [28, 80], hold: [0.18, 0.55] },
+  sage:  { fps: [6, 10],  run: [10, 28], hold: [1.00, 2.40] },
+  lumen: { fps: [8, 14],  run: [16, 40], hold: [0.50, 1.40] },
 };
 // how fast a body turns, in authored columns per second. Slow enough to be a
 // turn and not a cut; the cross-fade in drawAtlas does the rest.
@@ -10188,11 +10211,12 @@ function drawStatics(P) {
       if (npcBusy && s._job && s._job.work && !(typeof isHero === 'function' && isHero())) {
         const A = typeof atlasOf === 'function' && atlasOf(s.extra);
         const kk = (A && A.sub[s.extra] && A.sub[s.extra].k) || 1.4;
+        const nc = npcLoopCells(s.extra);
         stripDrew = drawStripCell(c, NPC_LOOP[s.extra],
-                                  Math.floor(s._job.ph || 0), 12,
+                                  Math.floor(s._job.ph || 0), nc,
                                   s.x + s.w / 2, s.y + s.h + bob2 * 0.4, s.h * kk,
                                   fdir < 0);
-        if (stripDrew) G.npcFrame = s.extra + ':' + (((Math.floor(s._job.ph || 0) % 12) + 12) % 12);
+        if (stripDrew) G.npcFrame = s.extra + ':' + (((Math.floor(s._job.ph || 0) % nc) + nc) % nc);
       }
       const sheetDrew = plateDrew || stripDrew ||
         (live && s.extra === 'ratchet' && drawTinker(c, s, talking)) ||

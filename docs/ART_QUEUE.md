@@ -202,6 +202,22 @@ Past that there is nothing to gain: a strip longer than the moving part of its
 clip is duplicate frames wearing a bigger file. Each window is the stretch of
 that take where the body is actually moving.
 
+**AND THE FIVE JOB LOOPS WERE WORSE.** Those clips are 5.04 s at 24 fps — 121
+filmed frames — cut to **twelve**, one in ten. Re-cut at 24 from the same
+clips: servo, mono, patch, sage and lumen. The tempo doubles with them, because
+`fps` is columns a second and `run` is a burst measured in columns, so twice as
+many columns for the same movement needs twice as many of both to take the same
+time; the holds are seconds and do not move.
+
+This does not contradict the cadence work of 2026-08-23. That note is right —
+more frames never stops a cycle reading as a cycle, and the fix for loopiness
+was bursts, varying tempo and holds. Frame count is the other axis entirely:
+whether the motion inside a burst is smooth or steps. Both were wrong, and this
+is the other half. Ratchet keeps his twelve until his clip is re-fired, which
+is why `NPC_LOOP_CELLS` is a table and not a constant — the literal `12` at the
+draw site was true of every strip when it was written and false the moment one
+was re-cut.
+
 **A cell count is not a constant, it is a fact about a file** — and getting it
 wrong is silent. Re-cutting turned six cells into thirteen, and until the table
 caught up the game played cells 0-5 of 13: the first 46% of the swing, ending on
