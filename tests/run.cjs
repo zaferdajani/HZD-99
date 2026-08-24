@@ -80,6 +80,7 @@ const SUITE = [
   ['cross',     'a room crossing is a move, not a cut'],
   ['seam',      'a room boundary is a place she walks through, not a door'],
   ['mapgrid',   'two rooms cannot stand on the same square of the map'],
+  ['glowcost',  'the most expensive thing the renderer does, counted'],
   ['meadow',    'the greenery keeps its colour all the way to the screen'],
   ['npcstrip',  'the five work strips are twelve frames of work, foot-aligned and steady'],
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],

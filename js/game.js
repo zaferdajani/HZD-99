@@ -4136,7 +4136,17 @@ function drawMotes(px, py, t3) {
 // SMALLER — bottom on the floor line, feathered edges dying into darkness —
 // the same painting becomes a lamplit room whose table stands beside the
 // sitting npc. The number is the fraction of the full-bleed cover scale.
-const INTERIOR_FIT = { denInterior: 0.62, oracleInterior: 0.68 };
+// HOW MUCH OF THE FRAME THE ROOM'S OWN PAINTING FILLS.
+//
+// 0.62 put the den's workshop in the bottom third and left the rest of the
+// frame empty — and empty is the one thing lighting cannot fix, because there
+// is nothing up there to light. That is the literal shape of "dull and dark":
+// a warm, detailed, lamplit painting with a large blank rectangle sitting on
+// top of it. The intent was that the room "floats in the dark of the larger
+// structure it is dug into", and that still reads at 0.88 — the plate's own
+// edges are feathered, so it fades into the dark rather than ending at a line.
+// It simply floats in a room now instead of in a void.
+const INTERIOR_FIT = { denInterior: 0.88, oracleInterior: 0.68 };
 // which rooms ARE a painting: their vista key names an interior plate
 function interiorVista() {
   const own = G.roomId && ROOM_VISTA[G.roomId];
@@ -10319,6 +10329,74 @@ function drawLesson() {
   tutCard(player.x + player.w / 2 - cam.x, player.y - cam.y, tutHand(M),
     t('m_' + L.id), t('les_' + L.id), L.hold > 0, L.hold / 1.1);
 }
+// ---------------------------------------------------------------------------
+// THE HUD'S RESTING ICONS, BAKED.
+//
+// Every icon in the core row is the same drawing every frame and each one costs
+// a shadowBlur — the most expensive per-draw operation Canvas2D has, because it
+// is a real gaussian with no batching behind it. Baking them turns fifteen
+// blurs a frame into five drawImage calls of a 48x48 sprite.
+//
+// Keyed on the kingdom's glow colour as well as the shape, because P.glow is
+// what the blur is tinted with and it changes per zone — a cache that ignored
+// it would carry the Meadows' teal into the Foundry.
+const HUD_ICO = 24;                       // half-size: 20x17 of art + room for an 8px blur
+const hudIcoCache = {};
+function starIcon() {
+  const hit = hudIcoCache.star;
+  if (hit !== undefined) return hit;
+  let cv = null;
+  try {
+    cv = document.createElement('canvas');
+    cv.width = HUD_ICO * 2; cv.height = HUD_ICO * 2;
+    const x = cv.getContext('2d');
+    x.translate(HUD_ICO, HUD_ICO); x.rotate(0.5);
+    x.fillStyle = ELEM.zizt.glow;
+    x.shadowColor = ELEM.zizt.col; x.shadowBlur = 6;
+    x.beginPath();
+    for (let k = 0; k < 4; k++) {
+      const a = k / 4 * Math.PI * 2;
+      x.lineTo(Math.cos(a) * 5.4, Math.sin(a) * 5.4);
+      x.lineTo(Math.cos(a + 0.39) * 1.9, Math.sin(a + 0.39) * 1.9);
+    }
+    x.closePath(); x.fill();
+  } catch (e) { cv = null; }
+  hudIcoCache.star = cv;
+  return cv;
+}
+function heartIcon(heroHud, full, glowCol) {
+  const key = (heroHud ? 'h' : 'r') + (full ? '1' : '0') + (glowCol || '');
+  const hit = hudIcoCache[key];
+  if (hit !== undefined) return hit;
+  let cv = null;
+  try {
+    cv = document.createElement('canvas');
+    cv.width = HUD_ICO * 2; cv.height = HUD_ICO * 2;
+    const x = cv.getContext('2d');
+    x.translate(HUD_ICO, HUD_ICO);
+    if (heroHud) {
+      x.fillStyle = full ? '#d9b56a' : 'rgba(110,98,70,0.4)';
+      if (full) { x.shadowColor = glowCol; x.shadowBlur = 8; }
+      x.beginPath(); x.arc(0, -2, 11, 0, Math.PI * 2); x.fill();
+      x.shadowBlur = 0;
+      if (full) {
+        x.strokeStyle = '#8a6f38'; x.lineWidth = 2;
+        x.beginPath(); x.arc(0, -2, 11, 0, Math.PI * 2); x.stroke();
+        x.fillStyle = '#e0484f'; x.beginPath(); x.arc(0, -2, 4, 0, Math.PI * 2); x.fill();
+      }
+    } else {
+      x.fillStyle = full ? '#eef3fa' : 'rgba(90,105,125,0.45)';
+      if (full) { x.shadowColor = glowCol; x.shadowBlur = 8; }
+      rr(x, -10, -8, 20, 17, 6); x.fill();
+      x.beginPath(); x.moveTo(-9, -6); x.lineTo(-6, -15); x.lineTo(-1, -7); x.closePath(); x.fill();
+      x.beginPath(); x.moveTo(1, -7); x.lineTo(6, -15); x.lineTo(9, -6); x.closePath(); x.fill();
+      x.shadowBlur = 0;
+      if (full) { x.fillStyle = '#0a1420'; x.fillRect(-6, -2, 4, 4); x.fillRect(2, -2, 4, 4); }
+    }
+  } catch (e) { cv = null; }              // no canvas here: fall back to drawing live
+  hudIcoCache[key] = cv;
+  return cv;
+}
 function drawHUD() {
   const P = PAL[G.roomDef.zone];
   // DATA CORRUPTION: the whole HUD jitters, tears and lies for its 8 seconds
@@ -10340,6 +10418,20 @@ function drawHUD() {
   for (let i = 0; i < player.maxCores(); i++) {
     const x = 26 + i * 30, y = 26, full = i < player.cores;
     const fl = G.coreFlash && G.coreFlash.i === i ? G.coreFlash.t : 0;
+    // THE RESTING HEART IS A CACHED PICTURE. Measured in the den: drawHUD was
+    // issuing FIFTEEN blurred fills a frame — three per heart, five hearts —
+    // and every one of them drew the identical icon. Canvas2D shadowBlur is a
+    // per-draw blur with no batching, so that is fifteen gaussian passes per
+    // frame, forever, in every room, to redraw a picture that never changes.
+    // It was 27% of every draw call the den made.
+    //
+    // Baked once per (kind, full, kingdom glow) and blitted since. The FLASHING
+    // heart still draws live — it scales and changes colour, one heart at a
+    // time, and a cache keyed on a continuous value is not a cache.
+    if (fl <= 0) {
+      const ico = heartIcon(heroHud, full, P.glow);
+      if (ico) { c.drawImage(ico, x - HUD_ICO, y - HUD_ICO); continue; }
+    }
     c.save(); c.translate(x, y);
     if (fl > 0) c.scale(1 + fl * 0.9, 1 + fl * 0.9);
     if (heroHud) {
@@ -10430,6 +10522,13 @@ function drawHUD() {
     // the next pip charges up visibly as the suit condenses a new star
     const charging = !on && i === sc && G.starRegenT > 0;
     const chg = charging ? Math.min(1, G.starRegenT / STAR_REGEN_T) : 0;
+    // A RESTING PIP IS A FIXED PICTURE TOO — same rotation, same colour, same
+    // blur — and there are up to six of them. Baked like the cores; only the
+    // one that is CHARGING spins and fades, and only one ever charges at once.
+    if (on && !charging) {
+      const ico = starIcon();
+      if (ico) { c.drawImage(ico, bx - HUD_ICO, 164 - HUD_ICO); continue; }
+    }
     c.save(); c.translate(bx, 164); c.rotate(0.5 + (charging ? chg * 6.28 : 0));
     c.fillStyle = on ? ELEM.zizt.glow
       : charging ? 'rgba(190,240,255,' + (0.28 + chg * 0.6).toFixed(2) + ')'
@@ -10721,7 +10820,13 @@ function drawWorldFrame() {
   drawBG(P, cam.x, cam.y);
   // The roof, before the tiles: it is the far wall of the room's top, and
   // anything solid the level actually built up there should occlude it.
-  if (!(typeof isHero === 'function' && isHero())) drawCeiling(G.roomDef.zone);
+  // AN INTERIOR HAS ITS OWN ROOF, IN ITS OWN PAINTING. The kingdom's ceiling
+  // plate is scrapyard gantry hung on parallax, and it was drawing over the
+  // trader's den too — a machine-yard roof stretched across a workshop that
+  // already has rafters painted into it. That is half of "the background does
+  // not blend with the items in it": two different ceilings in one room.
+  if (!(typeof isHero === 'function' && isHero()) && !(G.roomDef && G.roomDef.indoor))
+    drawCeiling(G.roomDef.zone);
   // ART_BIBLE §9.1/§9.4 — THE BACKGROUND PASS. Everything drawn so far is the
   // far plane, and this is the only moment it can be graded alone: after it,
   // the terrain and the cast land on top and a full-frame wash can no longer
@@ -11150,7 +11255,11 @@ function drawWorldFrame() {
   }
   // ...and what falls off it, in FRONT of everything: a drip you watch pass
   // behind the cat is scenery, one that passes in front of her is a room.
-  if (!(typeof isHero === 'function' && isHero())) drawCeilWeather(G.roomDef.zone);
+  // ...and neither does its weather. The Meadows drip condensation off their
+  // roof; indoors that put cold blue droplets through a lamplit workshop, five
+  // blurred draws a frame of an effect that belongs to a place she is not in.
+  if (!(typeof isHero === 'function' && isHero()) && !(G.roomDef && G.roomDef.indoor))
+    drawCeilWeather(G.roomDef.zone);
   // THE BADGE BELONGS IN THE GAME TOO. It was only ever drawn over the opening
   // film, so a player whose audio never unlocked — anyone on a controller —
   // reached the game and found it silent, with nothing on screen explaining
@@ -11581,8 +11690,101 @@ function caveLightList() {
   for (const p2 of G.projs) add(p2.x, p2.y, 82, 0.56, '210,238,255', 0.7);
   return L;
 }
+// ---------------------------------------------------------------------------
+// AN INTERIOR IS A DARK ROOM WITH THE LAMPS ON, WHICH IS NOT THE SAME THING
+// AS A CAVE.
+//
+// The owner, on the trader's den: "a dark room for a workshop, but it needs to
+// also look lively... the background should blend with the items within it,
+// instead of being dull and dark."
+//
+// What he was reading is real and it is a LIGHTING failure, not an art one.
+// The den's painting is a warm workshop — Ratchet under a lamp, a lit bench,
+// tools — and it is bottom-anchored, so two thirds of the frame above it was
+// flat unlit dark with nothing in it. Meanwhile every character was drawn at
+// full brightness with a cold teal rim, because the only light in the room was
+// the one baked into each sprite. So the painted lamps lit nothing, the empty
+// air was a black rectangle, and she stood in front of it all rather than in
+// it. The picture had no single light to agree on.
+//
+// The caves solved this problem already (drawCaveDark), and the answer is the
+// same one: put the light in the ROOM and let it fall on everything. What
+// differs is the recipe, because a workshop is not a cave —
+//
+//   IT IS DIMMER, NOT BLIND. The cave takes 74% of the room away because not
+//     being able to see is the cave's whole subject. A workshop with its lamps
+//     lit is 55%: shadowed, warm, and readable everywhere.
+//   THE LAMPS PUT BACK MORE. A small room with painted light bounces; the
+//     additive pass runs harder here than underground, and that — not the
+//     shadow — is what makes it read as LIVELY rather than merely dark.
+//   THE DARK IS WARM. Cave rock is cold purple. Unlit corners of a lamplit
+//     workshop are brown, because they are the same light with less of it.
+//   SHE STOPS CARRYING THE SUN. In a cave her lamp is the map; indoors it is
+//     a courtesy, so it drops to a fifth of the reach. Being LIT by the room
+//     instead of self-lit is the whole of what makes her belong in it.
+// TUNED AGAINST THE PICTURE, not in the abstract. At 0.55/0.62 the mask was
+// winning and it was darkening the painting's OWN lit areas — the booth's lit
+// front, the lamp on his lap — which is the one thing a lighting pass over
+// authored art must never do. The shadow comes down and the lamps come up: the
+// room is barely masked and heavily re-lit, so what the eye reads is the light
+// rather than the dark. That is the difference between moody and dull.
+const INT_K = 0.40, INT_ADD = 0.95;
+const INT_TINT = 'rgb(30,19,12)';
+// each kingdom's interior takes its own warm accent, so the Foundry's forge and
+// the Archives' carrel are lamplit in their own colour rather than the meadow's
+function warmRGB(zone) {
+  const P = PAL[zone] || PAL.A;
+  const h = (P.acc2 || '#ffb347').replace('#', '');
+  const n = parseInt(h.length === 3 ? h.replace(/(.)/g, '$1$1') : h, 16);
+  return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255);
+}
+function interiorLightList() {
+  const L = [], now = performance.now() / 1000;
+  const add2 = (x, y, r, hard, rgb, lit) => L.push({ x, y, r, hard, rgb, lit: lit == null ? 1 : lit });
+  const zone = G.roomDef.zone, warm = warmRGB(zone);
+  const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
+
+  // HER OWN, kept small on purpose — see the note above. Enough that she is
+  // never a silhouette in her own room, nowhere near enough to be the reason
+  // the room is visible.
+  add2(player.x + player.w / 2, player.y + player.h * 0.44, 132, 0.62, '208,214,226', 0.34);
+
+  // THE FIXTURES ARE THE ROOM. Everything somebody works at is a light: the
+  // keeper's own lamp is the brightest thing in here because he is what the
+  // room is for.
+  for (const s2 of G.statics) {
+    const cx = s2.x + s2.w / 2, cy = s2.y + s2.h / 2;
+    if (s2.type === 'npc') add2(cx, cy - 8, 300, 0.95, warm, 1.35);
+    else if (s2.type === 'bench') add2(cx, cy, 210, 0.8, '255,206,120', 0.9);
+    else if (s2.type === 'term') add2(cx, cy - 6, 190, 0.8, '255,178,86', 0.85);
+    else if (s2.type === 'chest' || s2.type === 'vault' || s2.type === 'mod' ||
+             s2.type === 'item' || s2.type === 'trial') add2(cx, cy, 150, 0.7, '255,196,120', 0.6);
+  }
+
+  // THE WORK SURFACES CARRY STRIP LIGHT. A loft or a bench in one of these
+  // rooms is where the work happens, so it is lit — and because these hang
+  // high on the wall, they are also what finally puts something in the empty
+  // air above the painting. One lamp per run of platform, over its middle.
+  const g = G.grid;
+  if (g) for (let ty = 0; ty < g.length; ty++) {
+    let tx = 0;
+    while (tx < g[0].length) {
+      if (g[ty][tx] !== '=') { tx++; continue; }
+      let e = tx; while (e + 1 < g[0].length && g[ty][e + 1] === '=') e++;
+      add2((tx + e + 1) / 2 * TILE, ty * TILE - 10, 236, 0.72, warm, 0.8);
+      tx = e + 1;
+    }
+  }
+
+  // ...and a hanging lamp, breathing, so the ceiling is a place with something
+  // in it rather than the top edge of the picture
+  add2(W * 0.62, H * 0.30, (260 + Math.sin(now * 0.9) * 8), 0.66, warm, 0.72);
+  add2(W * 0.24, H * 0.34, 190, 0.55, warm, 0.5);
+  return L;
+}
 function drawCaveDark() {
-  if (G.darkProbe || !G.roomDef || !G.roomDef.cave || !player) return;
+  const indoor = !!(G.roomDef && G.roomDef.indoor);
+  if (G.darkProbe || !G.roomDef || !(G.roomDef.cave || indoor) || !player) return;
   if (!darkCv) {
     darkCv = document.createElement('canvas'); darkCv.width = DARK_W; darkCv.height = DARK_H;
     litCv  = document.createElement('canvas'); litCv.width  = DARK_W; litCv.height  = DARK_H;
@@ -11601,7 +11803,7 @@ function drawCaveDark() {
   const S = DARK_W / 960;                        // world px -> mask px
   const ox = Math.round(camSX()), oy = Math.round(camSY());
   dx.globalCompositeOperation = 'source-over';
-  dx.fillStyle = DARK_TINT; dx.fillRect(0, 0, DARK_W, DARK_H);
+  dx.fillStyle = indoor ? INT_TINT : DARK_TINT; dx.fillRect(0, 0, DARK_W, DARK_H);
   dx.globalCompositeOperation = 'destination-out';
   if (glow) {
     lx.globalCompositeOperation = 'source-over';
@@ -11610,7 +11812,7 @@ function drawCaveDark() {
   }
 
   const shadow = shadowSprite();
-  for (const L of caveLightList()) {
+  for (const L of (indoor ? interiorLightList() : caveLightList())) {
     const sx = (L.x - ox) * S, sy = (L.y - oy) * S, r = L.r * S;
     // off-screen lights still count: a glow whose centre is past the edge is
     // exactly how a room tells you there is something over there
@@ -11633,11 +11835,11 @@ function drawCaveDark() {
   // shadow into a corner of it. lightPass and drawScreenLift both fillRect
   // 0,0,960,540 for the same reason; this follows them.
   c.save();
-  c.globalAlpha = DARK_K;
+  c.globalAlpha = indoor ? INT_K : DARK_K;
   c.globalCompositeOperation = 'source-over';
   c.drawImage(darkCv, 0, 0, 960, 540);
   if (glow) {
-    c.globalAlpha = DARK_ADD * glowK;
+    c.globalAlpha = (indoor ? INT_ADD : DARK_ADD) * glowK;
     c.globalCompositeOperation = 'lighter';
     c.drawImage(litCv, 0, 0, 960, 540);
   }
