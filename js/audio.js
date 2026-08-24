@@ -968,7 +968,117 @@ function sfx(n) {
     case 'hurt': tone(120, 0.28, 'sawtooth', 0.12, 50); hiss(0.2, 0.08); break;
     case 'pick': tone(880, 0.07, 'sine', 0.05, 1370); break;
     case 'heal': tone(520, 0.3, 'sine', 0.05, 1040); break;
-    case 'shoot': tone(980, 0.1, 'square', 0.04, 340); break;
+    // ===================================================================
+    // THINGS THAT ARE FIRED, AND THEY ARE NOT ALL THE SAME THING.
+    //
+    // 'shoot' was one line — tone(980, 0.1, 'square') — and it played for
+    // seventeen call sites: a turret's aimed bolt, a lobbed cinder falling
+    // under gravity, a plucked note, a fan of quills, an ice shard, a violet
+    // orb, a five-shot lance, and TWICE for spawning a flier, which is not a
+    // shot at all. The owner (2026-08-24): "the audio effect is not connected
+    // ideally with the moves it's doing. It needs better and more audios to
+    // make more sense."
+    //
+    // A cue's job is to say what just happened. One blip for eight events says
+    // only "something", which is the one thing the player already knew. Each of
+    // these is built from what the projectile physically IS, so the ear can
+    // tell a mortar from a rifle without looking.
+    // ===================================================================
+    // THE BOLT — aimed, flat, and gone. A crack has a transient before it has
+    // a pitch, which is the whole difference between a shot and a beep.
+    case 'shoot':
+      chink(0.030, 0);
+      tone(1180, 0.055, 'square', 0.045, 380);
+      tone(310, 0.07, 'sawtooth', 0.030, 150, 0.01);
+      hiss(0.05, 0.022, 0.005);
+      break;
+    // THE LOB — heaved, not fired. It leaves slowly and it is going UP, so the
+    // sweep rises and there is no crack anywhere in it.
+    // ...and it is DARK and SLOW where the lance is bright and fast. The first
+    // pass had them at 0.21 s and 0.23 s with the same brightness, which
+    // tests/cuefamily.cjs rejected as one sound wearing two names — correctly:
+    // a thing heaved over your head and a thing driven through you are not
+    // neighbours, and naming them apart is not the same as making them apart.
+    case 'lob':
+      whoosh(0.50, 120, 380, 0.080);
+      tone(96, 0.42, 'sine', 0.070, 168, 0.02);
+      tone(64, 0.34, 'triangle', 0.045, 110, 0.10);
+      hiss(0.16, 0.024, 0.06);
+      break;
+    // THE CINDERS — seven of them, thrown up and falling back. Spit and
+    // crackle at uneven offsets: a handful of fire, not one object.
+    case 'cinder':
+      hiss(0.22, 0.055);
+      whoosh(0.26, 700, 240, 0.05);
+      for (let i = 0; i < 6; i++)
+        tone(1500 + Math.random() * 1800, 0.045, 'sawtooth', 0.020, 420,
+             Math.random() * 0.20);
+      tone(84, 0.20, 'sine', 0.045, 52);
+      break;
+    // THE QUILLS — a fan of blades leaving at once and fanning out in time.
+    // clawShear is exactly this sound already; it is staggered so the volley
+    // reads as several things rather than one wide thing.
+    case 'quill': {
+      const n = 5;
+      for (let i = 0; i < n; i++)
+        clawShear(3600 + i * 520, 1500, 0.055, 0.028, i * 0.022, 7);
+      whoosh(0.20, 420, 1500, 0.055);
+      tone(190, 0.09, 'square', 0.032, 96);
+      break;
+    }
+    // THE SHARD — ice. Brittle, glassy, and it rings for an instant because a
+    // crystal is a tuned object whether anyone meant it to be or not.
+    case 'shard':
+      chink(0.040, 0);
+      tone(2950, 0.14, 'triangle', 0.040, 2100);
+      tone(4400, 0.08, 'sine', 0.022, 3800, 0.012);
+      hiss(0.07, 0.020, 0.01);
+      break;
+    // THE ORB — no attack at all. It does not leave, it DEPARTS: a soft body
+    // that swells and drifts, which is why it reads as something alive.
+    case 'orbshot':
+      tone(240, 0.34, 'sine', 0.055, 330);
+      tone(361, 0.30, 'sine', 0.026, 480, 0.04);
+      whoosh(0.34, 900, 300, 0.028, 0.02);
+      break;
+    // THE RING — one source, going out in every direction. Three partials
+    // struck together and spreading, so the ear hears a circle.
+    case 'ringshot':
+      bellToll(392.0, 0.075, 0);
+      tone(587.3, 0.26, 'sine', 0.030, 520, 0.01);
+      tone(784.0, 0.20, 'triangle', 0.022, 700, 0.02);
+      whoosh(0.42, 300, 1400, 0.038, 0.01);
+      break;
+    // THE LANCE — five shots in a line, which is one long stab and not five
+    // taps. The pitch climbs along the shaft as it extends.
+    case 'lance':
+      chink(0.042, 0);
+      whoosh(0.13, 900, 5200, 0.080);
+      tone(760, 0.11, 'sawtooth', 0.055, 3400);
+      tone(4200, 0.075, 'triangle', 0.032, 3000, 0.03);
+      break;
+    // THE ERUPTION — it comes out of the FLOOR. Not fired by anything: the
+    // ground opens and throws material up, so the order is rupture first, then
+    // the debris, and the low end is the room rather than a muzzle.
+    case 'erupt':
+      tone(58, 0.36, 'sine', 0.115, 34);
+      hiss(0.30, 0.075, 0.01);
+      whoosh(0.34, 160, 780, 0.065, 0.02);
+      for (let i = 0; i < 5; i++) chink(0.016, 0.05 + Math.random() * 0.22);
+      tone(150, 0.18, 'sawtooth', 0.038, 78, 0.03);
+      break;
+    // SOMETHING ARRIVES. Not a shot — a body enters the room. Wingbeats over a
+    // rising breath, and a short call on top so it is a CREATURE rather than a
+    // spawn event. This is the one that was most wrong: summoning a flier
+    // played the rifle.
+    case 'summon': {
+      whoosh(0.55, 140, 520, 0.070);
+      for (let i = 0; i < 4; i++)
+        whoosh(0.085, 900, 300, 0.036, 0.10 + i * 0.085);   // wingbeats
+      tone(196, 0.18, 'sawtooth', 0.038, 300, 0.05);
+      tone(740, 0.14, 'triangle', 0.030, 1050, 0.30);       // the call
+      break;
+    }
     case 'phit': tone(300, 0.08, 'square', 0.05, 120); break;
     case 'boom': hiss(0.45, 0.16); tone(90, 0.4, 'sawtooth', 0.12, 34); break;
     case 'edie': hiss(0.22, 0.11); tone(150, 0.2, 'sawtooth', 0.08, 42); tone(500, 0.12, 'square', 0.04, 120); break;

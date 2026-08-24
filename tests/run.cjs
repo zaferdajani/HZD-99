@@ -80,6 +80,7 @@ const SUITE = [
   ['terrainrun', 'irregularity is not elevation: she runs it, and so do they'],
   ['reach',     'she hits what she is standing next to, and she turns to it'],
   ['gatecue',   'the first built thing the player finds sounds like one'],
+  ['cuefamily', 'the things she is shot at with do not all sound alike'],
   ['shopread',  'a structure she can enter is never the wall behind it'],
   ['cross',     'a room crossing is a move, not a cut'],
   ['seam',      'a room boundary is a place she walks through, not a door'],

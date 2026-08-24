@@ -6585,7 +6585,7 @@ function miniFire(b, st, K) {
   if (st === 'ring') {
     // a ring of eight notes, slow enough to walk out of
     b.ring(8, 180, b.anim);
-    sfx('shoot');
+    sfx('ringshot');
   } else if (st === 'note') {
     // three aimed notes in a narrow fan
     const a0 = Math.atan2(pcy - cy, pcx - cx);
@@ -6596,12 +6596,12 @@ function miniFire(b, st, K) {
     // the parcel: a heavy arc that lands where she IS, not where she was
     const dx = pcx - cx;
     G.projs.push(new Proj(cx, cy, clamp(dx * 1.05, -420, 420), -300, false, 1, 9, col, 900, 3));
-    sfx('shoot');
+    sfx('lob');
   } else if (st === 'cinder') {
     // cinders scattered wide and falling — an area to leave, not a shot to dodge
     for (let i = 0; i < 7; i++)
       G.projs.push(new Proj(cx + rnd(-30, 30), cy, rnd(-180, 180), rnd(-260, -140), false, 1, 5, col, 780, 3));
-    sfx('shoot');
+    sfx('cinder');
   } else if (st === 'drop') {
     b.vy = 620; b.vx = 0;                    // straight down onto her
     sfx('dash');
@@ -6623,7 +6623,7 @@ function miniFire(b, st, K) {
     for (let i = 0; i < 5; i++)
       G.projs.push(new Proj(cx + Math.cos(a0) * i * 22, cy + Math.sin(a0) * i * 22,
         Math.cos(a0) * 520, Math.sin(a0) * 520, false, 1, 6, col, 0, 1.6));
-    sfx('shoot');
+    sfx('lance');
   }
 }
 function bossFork(b) {
@@ -7342,7 +7342,7 @@ class Boss {
       const a = off + i / n * Math.PI * 2;
       this.shoot(Math.cos(a) * speed, Math.sin(a) * speed, 6);
     }
-    sfx('shoot');
+    sfx('ringshot');
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
@@ -8107,7 +8107,7 @@ class Boss {
               this.st = 'volley'; this.t = this.phase === 2 ? 1.6 : 1.9; this.fired = 0;
               if (G.enemies.filter(e => !e.dead && e.kind === 'flier').length < (this.phase === 2 ? 2 : 1)) {
                 const f = new Enemy('flier', this.cx() - 13, this.y + this.h);
-                G.enemies.push(f); sfx('shoot');
+                G.enemies.push(f); sfx('summon');
                 burst(this.cx(), this.y + this.h, 10, PAL.B.glow, 180, 0.4, 300, 3, true);
               }
             }
@@ -8129,7 +8129,7 @@ class Boss {
               this.feaQ.push({ d: Math.abs(i - (n - 1) / 2) * 0.033, i, n });
             this.cabV = (this.cabV || 0) + (this.fired === 1 ? 1.3 : -1.3);
             this.fireKick = 1;
-            sfx('shoot'); cam.shake = 4;
+            sfx('quill'); cam.shake = 4;
           }
           if (this.feaQ && this.feaQ.length) {
             for (const q of this.feaQ) {
@@ -8220,7 +8220,7 @@ class Boss {
               const left = this.bcN % 2 === 0;
               const f = new Enemy('flier', left ? 16 : G.roomDef.w * TILE - 42, rnd(70, 150));
               f.hp = 1; f.expireT = 10; f.dir = left ? 1 : -1;
-              G.enemies.push(f); sfx('shoot');
+              G.enemies.push(f); sfx('summon');
               burst(f.x + f.w / 2, f.y + f.h / 2, 8, '#ff4c5c', 160, 0.35, 0, 2.5, true);
             }
           }
@@ -8308,7 +8308,7 @@ class Boss {
           this.vx = 0; this.t -= dt; this.windT = 0.3;
           if (this.t <= 0) {
             const d = px - this.cx();
-            this.shoot(clamp(d * 1.1, -300, 300), -460, 8, 900); sfx('shoot');
+            this.shoot(clamp(d * 1.1, -300, 300), -460, 8, 900); sfx('lob');
             this.st = 'idle'; this.t = bossRest(this, 1.1);
           }
         } else if (this.st === 'forgebell') {
@@ -8473,7 +8473,7 @@ class Boss {
                 pr.glcFx = 'shard'; pr.frost = true; G.projs.push(pr);
               } else this.glcShardQ.push({ a, d: 0.07 });
             }
-            sfx('shoot'); this.st = 'idle'; this.t = glcRest(this);
+            sfx('shard'); this.st = 'idle'; this.t = glcRest(this);
           }
         } else if (this.st === 'dashwarn') {
           // she squares up and coils; the charge line is drawn in the air
@@ -8579,7 +8579,7 @@ class Boss {
             const pr = new Proj(m.x, 15 * TILE - 6, 0, -520, false, 1, 8, '#eefcff', 0, 0.9);
             pr.frost = true;                       // contact freezes the joints
             G.projs.push(pr);
-            sfx('shoot'); this.marks.splice(i, 1);
+            sfx('shard'); this.marks.splice(i, 1);
           }
         }
         // FROST NOVA in flight: a ring of biting cold, jump it or wear it
@@ -8603,7 +8603,7 @@ class Boss {
               ob.cd = this.phase === 2 ? 1.5 : 2.1;
               const a = Math.atan2(py - ob.y, px - ob.x);
               G.projs.push(new Proj(ob.x, ob.y, Math.cos(a) * 300, Math.sin(a) * 300, false, 1, 6, '#d24bff', 0, 2));
-              sfx('shoot');
+              sfx('orbshot');
             }
             if (ob.t <= 0) {
               burst(ob.x, ob.y, 8, '#d24bff', 160, 0.4, 0, 2.5, true);
@@ -8904,7 +8904,7 @@ class Boss {
           if (this.nwT <= 0) {
             this.ring((this.phase === 2 ? 16 : 12) + (this.mPhase || 0) * 2,
                       250 * (DF().espd || 1), this.anim);
-            sfx('shoot'); cam.shake = 6;
+            sfx('orbshot'); cam.shake = 6;
             this.st = 'idle'; this.t = bossRest(this, 1.2);
           }
         } else if (this.t <= 0) {
@@ -9059,7 +9059,7 @@ class Boss {
           G.projs.push(pr);
         }
         burst(b.x, gy - 10, 10, MAT.crimson.mid, 220, 0.5, -200, 3, true);
-        sfx('shoot');
+        sfx('erupt');
       }
     }
     // the hymn: expanding rings. The Song cancels it — dissonance. That is the
