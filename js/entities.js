@@ -1919,7 +1919,11 @@ class Player {
     const half = (down ? 32 : (s.combo === 2 ? (rk ? 46 : 35) : 30)) * wm * tw;
     const cx = this.x + this.w / 2 + s.ax / n * R;
     const cy = this.y + this.h / 2 + s.ay / n * R;
-    const box = { x: cx - half, y: cy - half, w: half * 2, h: half * 2 };
+    // ax0/ay0 is the swing's ANCHOR — where R put the box before any edge rule
+    // touched it. It is carried on the box because the twin's law is about the
+    // anchor ("half grows, R does not") and the near-edge floor below moves the
+    // box's geometric centre, so centre-of-box stopped being a witness for it.
+    const box = { x: cx - half, y: cy - half, w: half * 2, h: half * 2, ax0: cx, ay0: cy };
     // ...AND THE NEAR EDGE REACHES BACK TO HER OWN BODY.
     //
     // The box was centred R in front of her and R is 44 for a claw, so with
@@ -6790,7 +6794,11 @@ function bossFork(b) {
 const BSTAT = Object.assign({
   glitch: { w: 84, h: 56, hp: 220, dazeAt: 5 },
   brood: { w: 96, h: 64, hp: 320 },
-  atlas: { w: 62, h: 74, hp: 460 },
+  // `tell` overrides the warning size footprint would derive (see
+  // Boss.tellCue). FURNACE CHOIR is tall and narrow, so its footprint reads
+  // small, but it is a foundry that warns with bells and a hymn — the light
+  // tell under that is the wrong instrument for the thing arriving.
+  atlas: { w: 62, h: 74, hp: 460, tell: 'tellmid' },
   zero: { w: 112, h: 62, hp: 500 },   // GLACIERE: a long floating quadruped
   // PRISM is the nimble rival, so it stays the smallest guardian — but a boss
   // still has to stand over HZD-99 (36), and at 34 it stood under her.
@@ -7443,6 +7451,25 @@ const BOSS_MOTION = {
                       springwarn: { k: 'nullfangCoil', faceRight: 1 } } },
 };
 class Boss {
+  // WHICH OF THE THREE WARNINGS THIS GUARDIAN MAKES.
+  //
+  // The warning is one sound at three sizes, and the size has to track the
+  // thing making it or the three sizes are decoration. It shipped for one
+  // build wired to 'tellbig' for every boss, which meant a brood wasp and
+  // MOTHER-V made the identical 4.36-weight noise and the player learned
+  // nothing from hearing it.
+  //
+  // Footprint is the read, because footprint is what the player SEES coming:
+  // PRISM is small and quick and gets the light tell however much HP it has,
+  // MOTHER-V at 120x120 is more than double anything else and gets the
+  // heaviest. A kingdom session can override per boss with `tell:` in BSTAT
+  // rather than fight the thresholds.
+  tellCue() {
+    const st = BSTAT[this.kind];
+    if (st && st.tell) return st.tell;
+    const area = this.w * this.h;
+    return area >= 9000 ? 'tellbig' : area >= 4800 ? 'tellmid' : 'tell';
+  }
   constructor(kind, x, y) {
     const s = BSTAT[kind];
     this.kind = kind; this.w = s.w; this.h = s.h;
@@ -7501,7 +7528,7 @@ class Boss {
     // move that exists or will ever exist.
     if (this.st !== this._tellSt) {
       this._tellSt = this.st;
-      if (TELL_ST.test(this.st || '')) sfx('tellbig');
+      if (TELL_ST.test(this.st || '')) sfx(this.tellCue());
     }
     if (this.roarBuzzT > 0) {
       // the roar VIBRATES: a held tremble on the camera and, through the

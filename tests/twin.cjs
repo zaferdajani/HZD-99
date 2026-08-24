@@ -94,11 +94,23 @@ const check = (name, ok, detail) => {
       player.swing = { t: 0.15, ax: 1, ay: 0, ang: 0, combo: 0, set: new Set(),
                        wield: 2, pure: true, twin: twin };
       const b = player.hitbox();
-      return { w: Math.round(b.w), cx: Math.round(b.x + b.w / 2) };
+      // ax0 is the swing's ANCHOR, not the box's centre. The twin's law is
+      // "half grows, R does not", and centre-of-box only witnessed that while
+      // nothing else touched the box — the near edge now reaches back to her
+      // body, which moves the centre of the narrower box and left this
+      // measuring the wrong quantity. The anchor says it directly.
+      return { w: Math.round(b.w), cx: Math.round(b.ax0),
+               near: Math.round(b.x), far: Math.round(b.x + b.w) };
     };
     const plain = box(false), twinB = box(true);
     out.plainW = plain.w; out.twinW = twinB.w;
-    out.sameReach = plain.cx === twinB.cx;   // wider, not longer
+    out.sameReach = plain.cx === twinB.cx;   // wider, not longer: R did not move
+    // ...and the twin box is SYMMETRIC about that anchor: it spreads equally
+    // both ways rather than only forwards. (The plain box cannot be checked
+    // this way — it is the narrow one, so the near-edge floor binds on it and
+    // deliberately pushes its near side back to her body.)
+    out.twinSym = Math.abs((twinB.cx - twinB.near) - (twinB.far - twinB.cx)) <= 1;
+    out.twinSpread = (twinB.cx - twinB.near) + ':' + (twinB.far - twinB.cx);
     player.twinT = 0; player.swing = null;
     return out;
   });
@@ -173,7 +185,11 @@ const check = (name, ok, detail) => {
   check('it is a RING — it hits what is behind her too', m.hitBehind > 0, m.hitBehind + ' damage behind');
   check('the twin window opens after it', m.twinT >= 5, m.twinT + 's');
   check('...and the twin swing is WIDER', m.twinW > m.plainW, m.plainW + ' -> ' + m.twinW + ' px');
-  check('...but reaches no further', m.sameReach, 'centre unchanged');
+  check('...but reaches no further', m.sameReach, 'anchor unchanged');
+  // the widening is SYMMETRIC about that anchor: whatever the far edge gained,
+  // the near edge gained the same going the other way. Without this, "the
+  // anchor did not move" would still pass a box that only grew forwards.
+  check('...and it grows both ways, not forwards', m.twinSym, 'behind:ahead ' + m.twinSpread);
 
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();

@@ -73,9 +73,24 @@ const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1',
   // ...and proof that the rule is still APPLIED. Checking state names against a
   // pattern is worthless if the one line that turns a match into a sound has
   // been deleted, so the hook itself is asserted rather than assumed.
-  const hooked = require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8')
-    .includes("if (TELL_ST.test(this.st || '')) sfx('tell')");
+  const hooked = /TELL_ST\.test\(this\.st \|\| ''\)\) sfx\(/.test(
+    require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8'));
   console.log('central cue hook present: ' + hooked);
+  // ...and that the sound it fires is SIZED. The hook used to name one cue
+  // literally, so matching the literal was proof enough. It is not any more:
+  // the warning is one sound at three sizes and the size tracks the guardian,
+  // which shipped once wired to 'tellbig' for every boss — a hook that fires
+  // is not a hook that says anything. Both halves are asserted.
+  const sizes = await p.evaluate((kinds) => {
+    const out = {};
+    for (const k of kinds) { const b = new Boss(k, 300, 300); out[k] = b.tellCue(); }
+    return out;
+  }, BOSSES);
+  const cues = Object.values(sizes);
+  const legal = cues.every(c => c === 'tell' || c === 'tellmid' || c === 'tellbig');
+  const varied = new Set(cues).size >= 2;
+  console.log('warning size per guardian: ' +
+    Object.entries(sizes).map(([k, c]) => k + '=' + c).join('  '));
 
   const out = {};
   for (const kind of BOSSES) {
@@ -150,6 +165,8 @@ const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1',
   }
 
   if (!hooked) fails.push('the central cue hook is gone from the build — TELL_ST matches nothing to a sound');
+  if (!legal) fails.push('a guardian asks for a warning that is not one of the three sizes: ' + JSON.stringify(sizes));
+  if (!varied) fails.push('every guardian makes the SAME warning — the three sizes are decoration, not information');
   if (errs.length) fails.push('page errors: ' + errs.slice(0, 3).join(' | '));
   if (fails.length) { console.log('\nFAIL\n - ' + fails.join('\n - ')); process.exit(1); }
   console.log('\nOK — every wind-up reached carries both channels');
