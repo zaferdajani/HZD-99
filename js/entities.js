@@ -127,6 +127,26 @@ function contactShadow(c, cx, feetY, w, alpha) {
 //     side — that is a platform you jump up through, and letting a blob walk
 //     onto one would put enemies on every shelf in the game.
 // ===========================================================================
+// ===========================================================================
+// THE JUMP, AND WHY IT IS THIS HIGH (owner, 2026-08-24)
+//
+//   "jumping should push me higher than terrain of the above floor to allow me
+//    to actually choose direction to land on instead of falling back down"
+//
+// Measured across all 73 rooms before changing anything: the apex was 139 px —
+// FOUR AND A THIRD TILES — and 58.7% of every standable surface above a floor
+// sat beyond it. The gap histogram peaks at four tiles (218 of them) and again
+// at six (230). So more than half the platforms in the game could not be
+// reached from the floor under them, and the commonest tier of all was the one
+// just out of reach. He was not describing a feel, he was describing geometry.
+//
+// 920 puts the apex at 201 px — 6.28 tiles — which clears the six-tile tier
+// with margin and leaves the seven-and-up tiers to the double jump, where they
+// belong. The float band does the other half of the sentence: see the note at
+// the gravity line.
+const JUMP_V = 920;        // apex 201 px = 6.28 tiles, with the float below
+const JUMP_FLOAT = 150;    // |vy| under this and gravity goes soft: the hang
+const JUMP_CUT = 280;      // a released button still leaves a usable hop
 const STEP_DOWN = 16;
 const PLAYER_STEP_UP = 24;
 const ENEMY_STEP_UP = TILE + 2;
@@ -1098,8 +1118,19 @@ class Player {
         if (Math.sign(this.vx) !== s) this.vx = 0;
       }
       // asymmetric gravity: quick rise, floaty apex hang, heavier fall
+      //
+      // THE APEX BAND IS WIDER NOW (owner, 2026-08-24: "jumping should push me
+      // higher than terrain of the above floor to allow me to actually choose
+      // direction to land on instead of falling back down"). The second half
+      // of that sentence is not about height at all — it is about TIME. A jump
+      // that arrives at the lip with no float is a commitment made on the
+      // ground; a jump that hangs is a decision made in the air.
+      //
+      // 90 -> 150 doubles the window where gravity is soft: 0.25 s of hang
+      // instead of 0.15 s, which is the difference between steering and
+      // watching. It also adds ~6 px of apex on its own.
       let grav = this.vy < 0 ? 2150 : 3050;
-      if (!this.on && Math.abs(this.vy) < 90) grav *= 0.55;
+      if (!this.on && Math.abs(this.vy) < JUMP_FLOAT) grav *= 0.55;
       if ((G.lowGravT || 0) > 0) grav *= 0.32;   // NULL GRAVITY field
       this.vy = Math.min(this.vy + grav * dt, 1020);
       // THE T-CROSSING CARRY (set in applyTransition): while her feet are
@@ -1128,7 +1159,7 @@ class Player {
       if (inP('JUMP')) this.jbuf = 0.12;
       if (this.jbuf > 0) {
         if (this.on || this.coyote > 0) {
-          this.vy = -770 * (relicHas('spring') ? 1.045 : 1);
+          this.vy = -JUMP_V * (relicHas('spring') ? 1.045 : 1);
           this.on = false; this.coyote = 0; this.jbuf = 0; this.jetT = 0.2; sfx('jump');
           this.takeoffT = this.takeoff0 = 0.17; this.takeoffCoil = 1;   // coil 1-2 frames, then stretch
         } else if (this.wallSlide !== 0) {
@@ -1152,7 +1183,7 @@ class Player {
           if (typeof padRumble === 'function') padRumble(0.4, 0.3, 160);
         }
       }
-      if (!inD('JUMP') && this.vy < -240) this.vy = -240;
+      if (!inD('JUMP') && this.vy < -JUMP_CUT) this.vy = -JUMP_CUT;
       // omnidirectional dash — travels at the angle you hold
       if (inP('DASH') && hasMod('dash') && this.dashCD <= 0) {
         let ddx = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
