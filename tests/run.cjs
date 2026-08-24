@@ -79,6 +79,7 @@ const SUITE = [
   ['cavedark',  'the cave is dark, and light is the only map of it'],
   ['terrainrun', 'irregularity is not elevation: she runs it, and so do they'],
   ['reach',     'she hits what she is standing next to, and she turns to it'],
+  ['gatecue',   'the first built thing the player finds sounds like one'],
   ['shopread',  'a structure she can enter is never the wall behind it'],
   ['cross',     'a room crossing is a move, not a cut'],
   ['seam',      'a room boundary is a place she walks through, not a door'],

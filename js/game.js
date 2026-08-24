@@ -9115,7 +9115,17 @@ function gateEnter() {
     for (const k of gateBackPair(armed)) mediaFetch(k, 1);
     for (const k of gateBackPair(!armed)) mediaFetch(k, 1);
   }
-  sfx('ui');
+  // THE GATE SOUNDS LIKE A GATE. It played sfx('ui') — the same three-frame
+  // tick a menu row makes — for the biggest built thing in the opening. The
+  // first opening of the CITY gate gets the big version: arriving somewhere for
+  // the first time is a different event from going through a door you know.
+  const cityFirst = G.roomId === 'W2' && !(G.save.flags && G.save.flags.gateOpened);
+  if (cityFirst) { G.save.flags.gateOpened = 1; persist(); }
+  if (typeof sfxGate === 'function') sfxGate(cityFirst);
+  else sfx('ui');
+  // and the room answers with its own mass
+  cam.shake = Math.max(cam.shake, cityFirst ? 5 : 2.5);
+  if (typeof padRumble === 'function') padRumble(cityFirst ? 0.55 : 0.3, 0.5, cityFirst ? 340 : 160);
   if (typeof hzdSay === 'function') hzdSay('purr', 0);
   return true;
 }

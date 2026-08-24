@@ -1068,6 +1068,56 @@ function sfx(n) {
   }
 }
 // rising charge whine while holding the attack button
+// ===========================================================================
+// THE GATE. The first built thing the player ever finds, and it played the UI
+// blip — the same three-frame tick a menu row makes (owner, 2026-08-24: "gate
+// needs an epic play at the beginning as its the first thing player will
+// find"). A city wall three tiles thick, a monument the whole opening walks
+// toward, announced by a click.
+//
+// It is a STRUCTURE, so it sounds like mass moving, and the layers are the
+// thing itself rather than a sound effect laid over it:
+//
+//   THE SUB      what a thing that heavy does to the floor. It arrives first
+//                and under everything, because weight is heard before it is
+//                identified.
+//   THE STONE    a low noise sweep opening upward: the seam parting, dust and
+//                grit off the faces, the throat of the gap.
+//   THE MECHANISM  the city is a machine. Two servo tones a beat apart, the
+//                second higher — locks releasing in sequence, not together.
+//   THE TOLL     one bell, struck once, tuned to the zone. This is the line
+//                between "a door opened" and "you have arrived somewhere",
+//                and it is the only part of the cue a player will hum back.
+//   THE AIR      the room beyond breathes out past her — the long tail that
+//                makes the space on the other side sound bigger than the one
+//                she is standing in.
+//
+// `big` is the first time she ever opens it. Same cue, a fifth lower, longer
+// tail, and the bell answered an octave up — arriving somewhere for the first
+// time is a different event from going through a door you know.
+// ===========================================================================
+function sfxGate(big) {
+  if (!AC || MUTED) return;
+  const j = () => 0.98 + Math.random() * 0.04;
+  const B = big ? 1 : 0;
+  // 1. THE SUB — the floor answers before anything is identifiable
+  tone(big ? 34 : 42, big ? 1.5 : 1.0, 'sine', big ? 0.30 : 0.20, big ? 24 : 30);
+  tone(big ? 51 : 63, big ? 0.9 : 0.6, 'triangle', 0.10, big ? 38 : 46, 0.03);
+  // 2. THE STONE — the seam parts, and it opens UPWARD as the gap widens
+  whoosh(big ? 1.25 : 0.85, 90 * j(), big ? 1150 : 900, big ? 0.10 : 0.075, 0.05);
+  hiss(big ? 0.55 : 0.36, big ? 0.055 : 0.04, 0.12);
+  // grit off the faces — a handful of ticks, never evenly spaced
+  for (let i = 0; i < (big ? 7 : 4); i++)
+    chink(0.016 + Math.random() * 0.014, 0.10 + i * (0.055 + Math.random() * 0.05));
+  // 3. THE MECHANISM — locks releasing in sequence, because a city is a machine
+  tone(big ? 128 : 150, 0.14, 'sawtooth', 0.055, big ? 92 : 108, 0.16);
+  tone(big ? 196 : 225, 0.12, 'sawtooth', 0.042, big ? 150 : 172, 0.34);
+  // 4. THE TOLL — the line between a door opening and arriving somewhere
+  bellToll(big ? 146.8 : 196.0, big ? 0.17 : 0.12, big ? 0.42 : 0.30);
+  if (big) bellToll(293.7, 0.085, 0.86);        // answered an octave up, once
+  // 5. THE AIR beyond — the tail that makes the far side sound bigger
+  whoosh(big ? 1.8 : 1.1, big ? 620 : 520, 120, big ? 0.055 : 0.038, big ? 0.5 : 0.36);
+}
 function sfxChargeTick(k) {
   if (!AC || MUTED) return;
   tone(280 + k * 520, 0.09, 'sawtooth', 0.03 + k * 0.02);
