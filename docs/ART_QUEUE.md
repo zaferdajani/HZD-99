@@ -2715,6 +2715,36 @@ RE-FIRE denInterior against this contract (it replaces the wired plate at
 the same path, assets/backgrounds/den_interior.jpg). The §2h/§2m/§2o
 interior briefs inherit this contract without re-stating it.
 
+**REPORTED AGAIN 2026-08-24, AND THE CODE SIDE IS NOW EXHAUSTED.** The owner,
+in the den: "a huge image of a workshop that is not proportionate to the
+actual characters and the actual table in the terrain. These items are smaller
+than the background... as if I'm looking at a framed image instead of an
+actual background of the actual shop with the actual portions of the items in
+it." Same fault, same room, eight days on. **This contract has never been
+fired.** The plate on disk is still the original wide-angle one.
+
+Measured this time rather than argued, so the re-fire has a number to hit: the
+play plane runs at about **70 pixels to the metre** (a 32px tile, a 36px
+character), and the den painting runs at about **180** — its camera stands at
+eye level inside the room, so a person in it fills most of the frame. It is
+roughly **2.5x overscale by composition**. No fit value can correct that, and
+the attempt is now on record twice: INTERIOR_FIT was raised 0.62 -> 0.88 on
+2026-08-23 to fill the empty upper frame and it made every part of the report
+worse, exactly as the note in js/game.js said it would. It is back at 0.62 and
+carries a warning.
+
+Everything else in that report WAS code and is fixed (2026-08-24): the plate
+is graded up (it was authored dark and desaturated), the surround is sampled
+from the plate instead of filled with black so it stops reading as a framed
+picture, and bgPlanePass — the §9.1 aerial-perspective law, which was stripping
+94% of the background's chroma — now scales with actual distance, because the
+wall of a shed is a metre away and not a horizon. What is LEFT of the report
+after all of that is the proportion, and only the re-fire can move it.
+
+**FIRE THIS FIRST of the interior briefs.** It is the room the player meets in
+the first ten minutes, it is the kingdom's only NPC interior, and it has been
+reported twice.
+
 ### 2r. THE FORGE TABLE ×1 ✱ FIRE ON REBIND (owner's design, 2026-08-16)
 
 The owner's order in the den: the workbench from the denInterior painting

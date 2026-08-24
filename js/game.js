@@ -4218,15 +4218,23 @@ function drawMotes(px, py, t3) {
 // sitting npc. The number is the fraction of the full-bleed cover scale.
 // HOW MUCH OF THE FRAME THE ROOM'S OWN PAINTING FILLS.
 //
-// 0.62 put the den's workshop in the bottom third and left the rest of the
-// frame empty — and empty is the one thing lighting cannot fix, because there
-// is nothing up there to light. That is the literal shape of "dull and dark":
-// a warm, detailed, lamplit painting with a large blank rectangle sitting on
-// top of it. The intent was that the room "floats in the dark of the larger
-// structure it is dug into", and that still reads at 0.88 — the plate's own
-// edges are feathered, so it fades into the dark rather than ending at a line.
-// It simply floats in a room now instead of in a void.
-const INTERIOR_FIT = { denInterior: 0.88, oracleInterior: 0.68 };
+// DO NOT RAISE THIS TO FILL THE FRAME. It has now been tried twice and reverted
+// twice, and the second time is on me: 0.62 -> 0.88 made the room bigger and
+// every complaint about it worse, because the den's painting is composed at
+// photographic wide-angle. Its camera stands at eye level in the room, so a
+// person in it would fill most of the frame — the play plane runs at roughly
+// 70px to the metre (a 32px tile, a 36px character) and the painting runs at
+// roughly 180. It is about two and a half times overscale BY COMPOSITION, and
+// scaling a picture cannot change what is inside it: zooming a painting whose
+// workbench already towers over the cat only makes the workbench taller.
+//
+// The fix is the re-fire in docs/ART_QUEUE.md §2g ADDENDUM — THE INTERIOR SCALE
+// CONTRACT, which was written for exactly this report on 2026-08-16 and has not
+// been fired yet. Until that plate lands, this value keeps the painted furniture
+// as close to character scale as a single number can, and everything else that
+// can be fixed in code — the exposure, the surround, the light — is fixed
+// around it rather than by moving it.
+const INTERIOR_FIT = { denInterior: 0.62, oracleInterior: 0.68 };
 // which rooms ARE a painting: their vista key names an interior plate
 function interiorVista() {
   const own = G.roomId && ROOM_VISTA[G.roomId];
@@ -4306,8 +4314,23 @@ function drawZoneVista(P, zone, px, py) {
       && typeof scenePlate === 'function') {
     const fim = scenePlate(own);            // the feathered copy — edges fade out
     if (fim) {
-      // the room floats in the dark of the larger structure it is dug into
-      c.fillStyle = '#030608'; c.fillRect(0, 0, 960, 540);
+      // THE ROOM DOES NOT END AT THE EDGE OF THE PICTURE.
+      //
+      // This used to fill the frame with #030608 and feather the plate into it,
+      // which is precisely how you draw A PICTURE HANGING ON A WALL: a
+      // rectangle of workshop, dissolving at its border into black that is not
+      // part of any room. The owner's words — "as if I'm looking at a framed
+      // image instead of an actual background of the actual shop".
+      //
+      // The surround is sampled FROM THE PLATE instead — its own ceiling colour
+      // at the top, its own wall at the middle, its own floor at the bottom —
+      // so what the plate feathers into is more of the same room, a little
+      // darker and without detail, the way the far corners of a workshop
+      // actually look. Same feather, same plate, no frame: the picture stops
+      // having an outside.
+      const wash = plateWash(own);
+      if (wash) { c.fillStyle = wash; c.fillRect(0, 0, 960, 540); }
+      else { c.fillStyle = '#0d0a08'; c.fillRect(0, 0, 960, 540); }
       const im0 = MEDIA_IMG[own];
       const cover = Math.max(540 / im0.naturalHeight, 960 / im0.naturalWidth) * 1.12;
       const dh2 = im0.naturalHeight * cover * INTERIOR_FIT[own];
@@ -7178,6 +7201,78 @@ function gateTarget(G2) {
 // card. Cached at most 1100px wide — the draw is ~300 world-px tall, so full
 // 2K residency would buy nothing but memory.
 const SCENE_PLATE = {};
+// The grade, per plate: [saturation, gain, black lift, warm R, warm G, warm B].
+// Only the rooms she stands INSIDE — the interiors are the ones lit by lamps
+// and the ones a player reads as "the shop", so they are the ones that have to
+// look alive rather than atmospheric.
+const PLATE_GRADE = {
+  denInterior:    [1.62, 1.44, 36, 1.08, 1.0, 0.88],
+  oracleInterior: [1.35, 1.2, 20, 1.0, 1.0, 1.04],
+  forgeInterior:  [1.4, 1.25, 22, 1.08, 1.0, 0.9],
+  carrelInterior: [1.3, 1.22, 22, 1.02, 1.0, 1.02],
+  hollowInterior: [1.4, 1.24, 22, 1.0, 1.03, 1.0],
+};
+function gradePlate(x, W, H, g) {
+  let d;
+  try { d = x.getImageData(0, 0, W, H); } catch (e) { return; }   // tainted canvas: leave it
+  const p = d.data, [SAT, GAIN, LIFT, WR, WG, WB] = g;
+  for (let i = 0; i < p.length; i += 4) {
+    const r = p[i], gr = p[i + 1], b = p[i + 2];
+    const lum = r * 0.299 + gr * 0.587 + b * 0.114;
+    // saturate around luma, then expose, then lift the floor — in that order,
+    // because saturating AFTER a lift pushes the lifted grey into colour noise
+    let R = (lum + (r - lum) * SAT) * GAIN * WR + LIFT;
+    let G2 = (lum + (gr - lum) * SAT) * GAIN * WG + LIFT;
+    let B = (lum + (b - lum) * SAT) * GAIN * WB + LIFT;
+    p[i] = R < 0 ? 0 : R > 255 ? 255 : R;
+    p[i + 1] = G2 < 0 ? 0 : G2 > 255 ? 255 : G2;
+    p[i + 2] = B < 0 ? 0 : B > 255 ? 255 : B;
+  }
+  x.putImageData(d, 0, 0);
+}
+// THE SURROUND, SAMPLED FROM THE PICTURE ITSELF.
+// Three bands averaged off the graded plate — ceiling, wall, floor — returned
+// as a vertical gradient. Cached per key: it is a handful of getImageData rows
+// once per plate, never per frame.
+const PLATE_WASH = {};
+function plateWash(key) {
+  if (PLATE_WASH[key] !== undefined) return PLATE_WASH[key];
+  const cv = scenePlate(key);
+  if (!cv) return null;                      // not loaded yet — ask again next frame
+  let out = null;
+  try {
+    const x = cv.getContext('2d'), W = cv.width, H = cv.height;
+    const band = (y0, y1) => {
+      const d = x.getImageData(0, y0, W, Math.max(1, y1 - y0)).data;
+      let r = 0, g = 0, b = 0, n = 0;
+      // step over pixels: an average does not need every one of them, and the
+      // alpha from the feather must not drag the edges toward nothing
+      for (let i = 0; i < d.length; i += 4 * 17) {
+        const a = d[i + 3]; if (a < 8) continue;
+        r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+      }
+      if (!n) return null;
+      // Barely darker than the plate. 0.62 was the first try and it was wrong by
+      // the whole width of the complaint: the surround is most of the frame in a
+      // room whose painting only reaches the lower half, so darkening it is
+      // darkening the ROOM, not adding depth behind it. This is the same wall a
+      // little further from the lamp, not a different, gloomier place.
+      return [Math.round(r / n * 0.9), Math.round(g / n * 0.9), Math.round(b / n * 0.9)];
+    };
+    const top = band(0, Math.round(H * 0.22));
+    const mid = band(Math.round(H * 0.38), Math.round(H * 0.62));
+    const bot = band(Math.round(H * 0.86), H);
+    if (top && mid && bot) {
+      const gd = c.createLinearGradient(0, 0, 0, 540);
+      gd.addColorStop(0, 'rgb(' + top + ')');
+      gd.addColorStop(0.55, 'rgb(' + mid + ')');
+      gd.addColorStop(1, 'rgb(' + bot + ')');
+      out = gd;
+    }
+  } catch (e) { out = null; }
+  PLATE_WASH[key] = out;
+  return out;
+}
 function scenePlate(key) {
   if (SCENE_PLATE[key]) return SCENE_PLATE[key];
   if (typeof mediaFetch === 'function') mediaFetch(key);
@@ -7188,6 +7283,16 @@ function scenePlate(key) {
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const x = cv.getContext('2d');
   x.drawImage(im, 0, 0, W, H);
+  // A LAMPLIT WORKSHOP IS NOT A GLOOMY ONE. The den plate is authored dark and
+  // desaturated — a teal-shadowed room with one warm pool under the lamp — and
+  // the owner's report is that the room reads "too dark, too dull, not vibrant
+  // ... so gloomy". Every lighting pass in front of it can only add light to
+  // what is there; none of them can put back chroma the plate never had. So the
+  // plate itself is graded, once, into this cached copy: shadows lifted off the
+  // floor so nothing is crushed, saturation raised so the wood and brass are
+  // wood and brass, and the whole thing pushed a step warm because it is lit by
+  // a hanging bulb. Interiors only — a cave mouth is supposed to be dim.
+  if (PLATE_GRADE[key]) gradePlate(x, W, H, PLATE_GRADE[key]);
   x.globalCompositeOperation = 'destination-out';
   const fade = (x0, y0, x1, y1) => {
     const g = x.createLinearGradient(x0, y0, x1, y1);
@@ -11808,7 +11913,10 @@ function caveLightList() {
 // authored art must never do. The shadow comes down and the lamps come up: the
 // room is barely masked and heavily re-lit, so what the eye reads is the light
 // rather than the dark. That is the difference between moody and dull.
-const INT_K = 0.40, INT_ADD = 0.95;
+// ...and once the plate itself is graded up, the mask has far less work to do:
+// its job here is shape, not exposure. 0.22 is a room with corners rather than
+// a room with the lights off, and the lamps still carry the reading.
+const INT_K = 0.22, INT_ADD = 0.95;
 const INT_TINT = 'rgb(30,19,12)';
 // each kingdom's interior takes its own warm accent, so the Foundry's forge and
 // the Archives' carrel are lamplit in their own colour rather than the meadow's
@@ -11929,6 +12037,27 @@ function bgPlanePass() {
   const L = ZONE_LIGHT[G.roomDef.zone];
   if (!L) return;
   const [wr, wg, wb] = L.wash;
+  // AERIAL PERSPECTIVE IS ABOUT DISTANCE, AND AN INTERIOR HAS NONE.
+  //
+  // Everything below is the three-plane law and it is right: a far plane that
+  // holds more chroma than the cast is backwards, and the fix is to strip the
+  // background's colour and sit it down in value so the playable plane reads
+  // in front of it. Outdoors that models the real thing — kilometres of air
+  // between her and the skyline.
+  //
+  // In the trader's den the "far plane" is the wall she is standing a metre
+  // from. Stripping 94% of its chroma and multiplying it to 0.42 of the zone's
+  // shadow does not push it into the distance, it turns the room she is inside
+  // into a grey photograph of somewhere else — which is the whole of the
+  // owner's report: "too dark, too dull, not vibrant... as if I'm looking at a
+  // framed image instead of an actual background of the actual shop". The
+  // painting was graded up and this pass took all of it straight back off.
+  //
+  // So the law is kept and its STRENGTH is made a function of how far away the
+  // background actually is. A room's wall gets a quarter of the desaturation
+  // and almost none of the darkening: enough separation that she still reads in
+  // front of it, nowhere near enough to send it to another country.
+  const inr = !!(G.roomDef && G.roomDef.indoor);
   c.save();
   // 1 — pull the chroma out
   c.globalCompositeOperation = 'saturation';
@@ -11937,13 +12066,18 @@ function bgPlanePass() {
   // the zone whose whole identity is saturated orange — so it is the room that
   // decides this number, and §9.4 is explicit that the reserved chroma belongs
   // to the cast and the interactables, not to the wall behind them.
-  c.globalAlpha = 0.94;
+  c.globalAlpha = inr ? 0.24 : 0.94;
   c.fillRect(0, 0, 960, 540);
-  // 2 — sit it down in value, toward the zone's own shadow rather than to grey
+  // 2 — sit it down in value, toward the zone's own shadow rather than to grey.
+  //     Indoors the multiply is nearly a no-op and it goes toward a warm lamp
+  //     shadow instead of the kingdom's outdoor light: the corners of a lit
+  //     workshop are brown, not teal.
   c.globalCompositeOperation = 'multiply';
   c.globalAlpha = 1;
-  c.fillStyle = 'rgb(' + Math.round(wr * 0.42) + ',' + Math.round(wg * 0.42) + ',' +
-                Math.round(wb * 0.42) + ')';
+  const mk = inr ? 0.92 : 0.42;
+  const mr = inr ? 250 : wr, mg = inr ? 232 : wg, mb = inr ? 214 : wb;
+  c.fillStyle = 'rgb(' + Math.round(mr * mk) + ',' + Math.round(mg * mk) + ',' +
+                Math.round(mb * mk) + ')';
   c.fillRect(0, 0, 960, 540);
   // 3 — and the haze that keeps it from reading as underexposure. §9.1 asks for
   //     5-10%; the top of the frame is furthest away and takes the most.
@@ -11955,8 +12089,10 @@ function bgPlanePass() {
   const hz = (v) => Math.round(v * 0.42 + ((wr + wg + wb) / 3) * 0.58);
   const hr = hz(wr), hg2 = hz(wg), hb = hz(wb);
   const h = c.createLinearGradient(0, 0, 0, 540);
-  h.addColorStop(0, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',0.13)');
-  h.addColorStop(1, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',0.04)');
+  // and barely any haze indoors — haze is suspended air, and there are four
+  // metres of it in a shed
+  h.addColorStop(0, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',' + (inr ? 0.04 : 0.13) + ')');
+  h.addColorStop(1, 'rgba(' + hr + ',' + hg2 + ',' + hb + ',' + (inr ? 0.01 : 0.04) + ')');
   c.fillStyle = h;
   c.fillRect(0, 0, 960, 540);
   // ...and break the pitch. Overlay keeps mid-grey neutral, so this only
