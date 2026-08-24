@@ -969,6 +969,139 @@ function sfx(n) {
     case 'pick': tone(880, 0.07, 'sine', 0.05, 1370); break;
     case 'heal': tone(520, 0.3, 'sine', 0.05, 1040); break;
     // ===================================================================
+    // THINGS THAT ARE GATHERED, AND THE THINGS THAT WERE NEVER CASTS AT ALL.
+    //
+    // 'cast' carried twenty-six call sites: her claw arming, an EMP, a saw's
+    // floor wave, a kiln's plume, a frost ring, a snare reeling in, ground
+    // spikes rising, six different boss wind-ups, ice columns out of the
+    // floor, a whip lash, a prison closing, Mother's Song, and a beam warning.
+    //
+    // A wind-up is the most information-dense sound in a fight — it is the one
+    // cue that means "it is about to", and WHICH it is about to decides what
+    // the player does about it. Playing one hum for all of them is the same as
+    // playing none: it says a boss is doing something, which the boss is
+    // always doing.
+    //
+    // So the gathers are split BY ELEMENT, because element is what the answer
+    // depends on, and the six that were never gathers get to be what they are.
+    // ===================================================================
+    // FIRE GATHERING — it draws air IN before it lets go. Rising noise, a
+    // crackle riding it, and no pitch at the top: heat has no note.
+    case 'castfire':
+      // FIRE IS A ROAR, NOT A HISS. The first pass swept up to 1500 with the
+      // crackle sitting above a kilohertz and measured brighter than frost,
+      // which is wrong about both elements. Weight it low: the roar is the
+      // sound, and the crackle is detail inside it rather than on top of it.
+      whoosh(0.62, 190, 700, 0.090);
+      tone(58, 0.55, 'sine', 0.085, 96);
+      tone(104, 0.46, 'sawtooth', 0.050, 168, 0.04);
+      hiss(0.34, 0.030, 0.08);
+      for (let i = 0; i < 5; i++)
+        tone(320 + Math.random() * 380, 0.06, 'sawtooth', 0.016, 190, 0.12 + i * 0.09);
+      break;
+    // FROST GATHERING — the opposite motion. It goes UP and thins out, and it
+    // is tuned, because ice grows in structures and structures ring.
+    case 'castice':
+      // AND FROST IS A BUILD. That is what separates it from the shard, which
+      // is the same material arriving all at once: this one has to GROW, so
+      // its loudest moment is late and the crystals keep accreting under it.
+      // A gather and a strike can share a timbre; they cannot share a shape.
+      tone(2100, 0.62, 'triangle', 0.026, 4200);
+      tone(3150, 0.54, 'sine', 0.034, 5600, 0.16);
+      tone(4700, 0.40, 'sine', 0.030, 6600, 0.30);
+      for (let i = 0; i < 8; i++) chink(0.008 + i * 0.003, 0.06 + i * 0.055);
+      break;
+    // THE NULL GATHERING — it takes sound away. A detuned pair beating against
+    // each other and sliding DOWN, which is the one gesture in the whole
+    // vocabulary that reads as something being removed rather than added.
+    case 'castnull':
+      tone(196, 0.75, 'sine', 0.070, 96);
+      tone(203, 0.75, 'sine', 0.055, 99);        // 7 Hz apart: it beats
+      whoosh(0.70, 1400, 180, 0.045, 0.04);
+      tone(49, 0.55, 'triangle', 0.060, 33, 0.12);
+      break;
+    // ARC GATHERING — electrical. A buzz that climbs and tightens, with the
+    // ticks getting closer together, because that is what charging sounds like
+    // on every machine anyone has ever stood next to.
+    case 'castarc':
+      // AND IT SITS LOW. A charging machine is a heavy buzz you feel before you
+      // hear detail in it; the first pass put it brighter than frost, which is
+      // backwards for every real object either word describes.
+      tone(78, 0.50, 'sawtooth', 0.085, 190);
+      tone(117, 0.44, 'sawtooth', 0.045, 280, 0.03);
+      tone(59, 0.40, 'square', 0.035, 132, 0.06);
+      for (let i = 0; i < 7; i++) chink(0.011, i * (0.075 - i * 0.006));
+      break;
+    // THE SNARE — a line going taut. The whole sound is TENSION: a scrape that
+    // climbs as the slack comes out, and one hard stop when there is none left.
+    case 'snarecast':
+      whoosh(0.34, 320, 1250, 0.055);
+      tone(240, 0.30, 'sawtooth', 0.045, 700);
+      chink(0.030, 0.30);
+      break;
+    // THE PLUME — heat from BELOW. It arrives at the floor and travels up, so
+    // the sweep rises and the body stays under it the whole way.
+    case 'plume':
+      tone(64, 0.50, 'sine', 0.080, 46);
+      whoosh(0.62, 180, 900, 0.070, 0.03);
+      hiss(0.44, 0.045, 0.05);
+      break;
+    // SPIKES OUT OF THE GROUND — three of them, in a row, away from her. Stone
+    // splitting and something hard arriving, three times, walking outward.
+    case 'spikeup':
+      for (let i = 0; i < 3; i++) {
+        tone(140 - i * 14, 0.13, 'sawtooth', 0.055, 320 + i * 60, i * 0.075);
+        chink(0.030, i * 0.075 + 0.02);
+      }
+      hiss(0.18, 0.045);
+      tone(58, 0.26, 'sine', 0.065, 40);
+      break;
+    // ICE COLUMNS — the same event in the other element: brittle, tuned, and
+    // it keeps ringing after it has stopped moving.
+    case 'icecolumn':
+      tone(70, 0.30, 'sine', 0.070, 48);
+      for (let i = 0; i < 4; i++) {
+        chink(0.034, i * 0.055);
+        tone(2400 + i * 420, 0.16, 'triangle', 0.030, 1900, i * 0.055 + 0.01);
+      }
+      hiss(0.22, 0.035, 0.02);
+      break;
+    // THE LASH — a whip. All of it is the tip: a very fast sweep with a crack
+    // at the far end of it, and nothing underneath.
+    case 'lash':
+      whoosh(0.10, 400, 4200, 0.085);
+      chink(0.045, 0.085);
+      tone(2600, 0.09, 'triangle', 0.030, 1200, 0.09);
+      break;
+    // THE PRISON — a cage closing around her. Four bars landing in sequence
+    // and then a lid: the sequence is what makes it read as ENCLOSURE rather
+    // than as an impact.
+    case 'prison':
+      for (let i = 0; i < 4; i++)
+        tone(320 - i * 40, 0.10, 'square', 0.045, 180 - i * 20, i * 0.055);
+      bellToll(110.0, 0.075, 0.24);
+      hiss(0.20, 0.030, 0.24);
+      break;
+    // MOTHER'S SONG — the only cue in the game that is a CHORD. She is not
+    // making an effect, she is singing, and a minor triad with a fifth over it
+    // is the shortest way to say something is beautiful and wrong.
+    case 'msong':
+      tone(220.0, 1.10, 'sine', 0.055, 220.0);
+      tone(261.6, 1.05, 'sine', 0.045, 261.6, 0.04);
+      tone(329.6, 1.00, 'sine', 0.038, 329.6, 0.08);
+      tone(659.3, 0.80, 'triangle', 0.022, 659.3, 0.20);
+      whoosh(1.20, 900, 260, 0.030, 0.10);
+      break;
+    // A BEAM IS COMING, AND IT IS ALREADY POINTING AT YOU. A held tone that
+    // does not move — the stillness is the threat — with the level creeping up
+    // under it.
+    case 'beamwarn':
+      tone(880, 0.70, 'sine', 0.038, 880);
+      tone(1320, 0.60, 'triangle', 0.022, 1320, 0.10);
+      hiss(0.55, 0.030, 0.08);
+      tone(110, 0.66, 'sawtooth', 0.040, 150, 0.04);
+      break;
+    // ===================================================================
     // THINGS THAT ARE FIRED, AND THEY ARE NOT ALL THE SAME THING.
     //
     // 'shoot' was one line — tone(980, 0.1, 'square') — and it played for
@@ -1033,6 +1166,12 @@ function sfx(n) {
       tone(2950, 0.14, 'triangle', 0.040, 2100);
       tone(4400, 0.08, 'sine', 0.022, 3800, 0.012);
       hiss(0.07, 0.020, 0.01);
+      // ...AND IT RINGS AFTERWARDS, which is the whole difference between it
+      // and the lance. Both are bright and fast; only one of them is a tuned
+      // object. tests/cuefamily.cjs called them the same sound until this line
+      // existed, and it was right to.
+      tone(3136, 0.52, 'sine', 0.020, 3136, 0.03);
+      tone(4699, 0.34, 'sine', 0.011, 4699, 0.06);
       break;
     // THE ORB — no attack at all. It does not leave, it DEPARTS: a soft body
     // that swells and drifts, which is why it reads as something alive.
@@ -1044,10 +1183,15 @@ function sfx(n) {
     // THE RING — one source, going out in every direction. Three partials
     // struck together and spreading, so the ear hears a circle.
     case 'ringshot':
-      bellToll(392.0, 0.075, 0);
-      tone(587.3, 0.26, 'sine', 0.030, 520, 0.01);
-      tone(784.0, 0.20, 'triangle', 0.022, 700, 0.02);
-      whoosh(0.42, 300, 1400, 0.038, 0.01);
+      // A STRIKE THAT SPREADS, not a chord that is held. It measured 1.28 s at
+      // brightness 789 — the same shape as Mother's Song, which is a thing
+      // being sung. This one is a thing being struck: the partials are bright
+      // and they get out of the way.
+      chink(0.032, 0);
+      tone(784.0, 0.30, 'triangle', 0.040, 700);
+      tone(1174.7, 0.22, 'sine', 0.026, 1050, 0.015);
+      tone(1568.0, 0.16, 'sine', 0.018, 1400, 0.03);
+      whoosh(0.34, 500, 2600, 0.045, 0.01);
       break;
     // THE LANCE — five shots in a line, which is one long stab and not five
     // taps. The pitch climbs along the shaft as it extends.

@@ -1194,7 +1194,7 @@ class Player {
     if (inP('CLAW') && this.clawCD <= 0 && this.clawT <= 0 && this.volts >= 30) {
       this.volts -= 30;
       this.clawT = 7; this.clawCD = 11;
-      sfx('chargeReady'); sfx('cast');
+      sfx('chargeReady'); sfx('castarc');
       G.flash = Math.max(G.flash, heroP ? 0.42 : 0.3);
       cam.shake = Math.max(cam.shake, heroP ? 7 : 5);
       G.addRing(this.x + this.w / 2, this.y + this.h / 2);
@@ -1471,7 +1471,7 @@ class Player {
       this.volts -= arm.cost; this.armCD = arm.cd;
       fireArm(this, arm);
     } else if (inP('CAST') && !arm && hasMod('emp') && this.castCD <= 0 && this.volts >= empCost) {
-      this.volts -= empCost; this.castCD = 0.5; sfx('cast');
+      this.volts -= empCost; this.castCD = 0.5; sfx('castarc');
       G.projs.push(new Proj(this.x + this.w / 2 + this.face * 16, this.y + this.h / 2 - 4, this.face * 540, 0, true, Math.round(22 * DF().pdmg), 11, '#7df3ff'));
     }
     // the Song — quiets the orders without touching the body
@@ -5061,7 +5061,7 @@ class Enemy {
             for (const s of [-1, 1])
               this.waves.push({ x: cx + s * (this.w / 2 + 6), y: fy, dir: s, spd: this.spd, life, ph: 0 });
             this.windedT = 0.9;            // opening_ms = 900 − 33: two hits, tempts three
-            sfx('cast');
+            sfx('spikeup');
           }
           break;
         }
@@ -5116,7 +5116,7 @@ class Enemy {
             this.plumeT = 0.8; this.plumeH = 0;
             // cunning buys REACH: a taller column each iq step, never less warning
             this.plumeMax = 140 + this.iq * 70;
-            sfx('cast');
+            sfx('plume');
           }
           break;
         }
@@ -5177,7 +5177,7 @@ class Enemy {
             }
             this.ringR = 0;
             this.windedT = 1.0;            // opening_ms = 1000 − 33: two hits, tempts three
-            sfx('cast');
+            sfx('castice');
           }
           break;
         }
@@ -5243,7 +5243,7 @@ class Enemy {
             if (chance(0.5)) addPart(lerp(cx, px, rnd(0.2, 0.9)), lerp(cy, py, rnd(0.2, 0.9)),
               rnd(-24, 24), rnd(-24, 24), 0.2, '#ff4d4d', 1.8, 0, true);
           }
-          if (this.reelT <= 0) { this.windedT = 1.0; sfx('cast'); }
+          if (this.reelT <= 0) { this.windedT = 1.0; sfx('snarecast'); }
           break;
         }
         if (this.crouchT > 0) {            // the reach — tendril out, hovering
@@ -5256,7 +5256,7 @@ class Enemy {
             } else {
               // the whiff teaches as well as the hit: the tendril closes on
               // nothing and the polyp pays the full limp window for it
-              this.windedT = 1.0; sfx('cast');
+              this.windedT = 1.0; sfx('snarecast');
             }
           }
           break;
@@ -6613,7 +6613,7 @@ function miniFire(b, st, K) {
       const gx = cx + b.face * i * 92;
       G.projs.push(new Proj(gx, gy - 14, 0, -170, false, 1, 8, col, -520, 1.1));
     }
-    sfx('cast');
+    sfx('spikeup');
   } else if (st === 'spike') {
     for (let i = -1; i <= 1; i++) b.shoot(b.face * 300, i * 130, 7);
     sfx('shoot');
@@ -7511,7 +7511,7 @@ class Boss {
       if (isMini(this)) {
         if (!player.dead && Math.abs(player.x + player.w / 2 - this.cx()) < 340) {
           this.st = 'idle'; this.t = 0.45;
-          sfx('cast'); cam.shake = Math.max(cam.shake, 3);
+          sfx('castnull'); cam.shake = Math.max(cam.shake, 3);
           setMusic('boss_mini');
           G.toast(t('mini_' + this.kind));
         }
@@ -7698,7 +7698,7 @@ class Boss {
             // NULL GRAVITY: once per fight, below half health, the virus
             // overrides the room's gravity — the charge-up is the tell
             this.nullUsed = true;
-            this.st = 'nullcharge'; this.t = 1.1; this.vx = 0; sfx('cast');
+            this.st = 'nullcharge'; this.t = 1.1; this.vx = 0; sfx('castnull');
           } else if (this.ambushCD <= 0) {
             // scan the room for perches ('=' platform runs)
             const per = [];
@@ -8271,7 +8271,7 @@ class Boss {
             // MELTDOWN: below a third the furnace stops holding itself back —
             // the bell runs white-hot and the floor starts to pour
             this.meltUsed = true;
-            this.st = 'meltwarn'; this.t = 1.2; this.vx = 0; sfx('cast');
+            this.st = 'meltwarn'; this.t = 1.2; this.vx = 0; sfx('castfire');
           } else if (this.fbCD <= 0 && this.t <= 0.6) {
             // FORGE BELL: three rapid clapper strikes, three falling weapons
             // THE SHORTEST TELL IN THE GAME, LENGTHENED. It ran 300 ms to the
@@ -8418,22 +8418,22 @@ class Boss {
             // DATA CORRUPTION: once, below 40% — the void uploads itself
             // into your visor and scrambles everything you trust
             this.dcUsed = true;
-            this.st = 'dccast'; this.t = 0.9; sfx('cast'); this.windT = 0.5;
+            this.st = 'dccast'; this.t = 0.9; sfx('castnull'); this.windT = 0.5;
           } else if (this.azCD <= 0 && this.t <= 0.4) {
             // ABSOLUTE ZERO: the purifier's hush — the expanding frost aura
             // is the tell; be outside it when the silence lands
             this.st = 'azhush'; this.t = 1.1; this.azCD = rnd(13, 17); this.windT = 0.5;
-            sfx('cast');
+            sfx('castice');
           } else if (adist < 140 && Math.abs(py - this.cy()) < 120 && this.novaCD <= 0) {
             // FROST NOVA is reactive: crowd her and the cold answers — she
             // drops onto the standing frame and gathers, that is the tell
-            this.st = 'novawarn'; this.t = 0.6; this.novaCD = 7; sfx('cast'); this.windT = 0.5;
+            this.st = 'novawarn'; this.t = 0.6; this.novaCD = 7; sfx('castice'); this.windT = 0.5;
           } else if (this.t <= 0) {
             const alt = this.cycle++ % 5;
-            if (alt === 0 || alt === 2) { this.st = 'lancewarn'; this.t = 0.7; this.windT = 0.5; sfx('cast'); }
-            else if (alt === 1) { this.st = 'shardwarn'; this.t = 0.5; this.windT = 0.4; sfx('cast'); }
+            if (alt === 0 || alt === 2) { this.st = 'lancewarn'; this.t = 0.7; this.windT = 0.5; sfx('castice'); }
+            else if (alt === 1) { this.st = 'shardwarn'; this.t = 0.5; this.windT = 0.4; sfx('castice'); }
             else if (alt === 3) { this.st = 'dashwarn'; this.t = 0.55; this.windT = 0.5; sfx('dash'); }
-            else if (!this.orbs || !this.orbs.length) { this.st = 'orbs'; this.t = 1.0; this.windT = 0.5; sfx('cast'); }
+            else if (!this.orbs || !this.orbs.length) { this.st = 'orbs'; this.t = 1.0; this.windT = 0.5; sfx('castice'); }
             // THE PRISON GETS ITS OWN STATE. It used to be cast from inside
             // `idle` — the state was never changed, only `windT` was set — and
             // that makes `idle` itself a wind-up, which the telegraph auditor
@@ -8441,7 +8441,7 @@ class Boss {
             // hovering guardian and know a cage is coming. It only surfaced
             // once her rest beats got short enough to enter idle eighty times
             // a fight, but it was always a lie in the state machine.
-            else { this.st = 'prisonwarn'; this.t = 0.5; this.windT = 0.5; sfx('cast'); }
+            else { this.st = 'prisonwarn'; this.t = 0.5; this.windT = 0.5; sfx('prison'); }
           }
         } else if (this.st === 'lancewarn') {
           // the horn drinks void light — hold, watch, then move OFF the line
@@ -8454,7 +8454,7 @@ class Boss {
                 Math.cos(a) * 185, Math.sin(a) * 185, false, 1, 13, '#d24bff', 0, 4.2);
               pr.glcFx = 'lance'; G.projs.push(pr);
             }
-            sfx('cast'); cam.shake = 4;
+            sfx('lance'); cam.shake = 4;
             this.st = 'idle'; this.t = glcRest(this);
           }
         } else if (this.st === 'shardwarn') {
@@ -8515,7 +8515,7 @@ class Boss {
           }
           if (this.t <= 0) {
             this.prison = { x: px, y: py, t: 0, life: this.phase === 2 ? 3.4 : 2.6, held: 0 };
-            sfx('cast'); this.st = 'idle'; this.t = glcRest(this);
+            sfx('prison'); this.st = 'idle'; this.t = glcRest(this);
           }
         } else if (this.st === 'novawarn') {
           this.t -= dt; this.vx = 0; this.vy = 0;
@@ -8639,7 +8639,7 @@ class Boss {
             // ARC OVERLOAD: once, low health — the turntable overcharges and
             // it vanishes into its own lightning storm
             this.arcUsed = true;
-            this.st = 'arcspin'; this.t = 1.2; this.vx = 0; sfx('cast');
+            this.st = 'arcspin'; this.t = 1.2; this.vx = 0; sfx('castarc');
           } else if (this.lsCD <= 0 && this.t <= 0) {
             // LIGHT SPLIT: a cat's pounce, taken through light — three spots
             // glow; only one holds the real body
@@ -8749,7 +8749,7 @@ class Boss {
               for (let k = 0; k < 8; k++)
                 addPart(s2.x + rnd(-10, 10), gy - k * 55 - rnd(0, 40), rnd(-40, 40), rnd(-20, 20), 0.16, '#dffcff', 3, 0, true);
               burst(s2.x, gy - 8, 14, '#8ff6ff', 260, 0.4, 200, 3, true);
-              cam.shake = Math.max(cam.shake, 6); sfx('cast');
+              cam.shake = Math.max(cam.shake, 6); sfx('icecolumn');
               if (!player.dead && Math.abs(px - s2.x) < 42 && py > gy - 90) player.hurt(DF().edmg, s2.x);
               this.strikes.splice(i, 1);
             }
@@ -8850,7 +8850,7 @@ class Boss {
           // attacks come out of the dark with sound for a tell; the Song
           // buys three seconds of sight
           this.nwT -= dt;
-          if (this.nwT <= 0) { this.nwT = 1.4; sfx('cast'); this.lash = { x: px, y: py, t: 0.5 }; }
+          if (this.nwT <= 0) { this.nwT = 1.4; sfx('lash'); this.lash = { x: px, y: py, t: 0.5 }; }
           if (this.lash) {
             this.lash.t -= dt;
             if (this.lash.t <= 0) {
@@ -8914,7 +8914,7 @@ class Boss {
           this.t = (p2 ? 0.62 : 0.9) * (1 - (this.mPhase || 0) * 0.08);
           if (this.msCD <= 0 && (this.mPhase || 0) >= 1) {
             this.msCD = rnd(18, 24);
-            this.st = 'msong'; this.nwT = 1.6; sfx('cast');
+            this.st = 'msong'; this.nwT = 1.6; sfx('msong');
           } else {
             const which = this.cycle++ % 4;
             if (which === 0 && !this.nwave) { this.st = 'nwcharge'; this.nwT = 1.1; sfx('no'); }
@@ -8924,7 +8924,7 @@ class Boss {
             // is still the last boss — but it exists, and the tell system
             // sounds it automatically because the state name says 'charge'.
             else if (which === 1) { this.st = 'ringcharge'; this.nwT = 0.7; }
-            else if (which === 2 && (this.mPhase || 0) >= 2) { this.st = 'grabwarn'; this.nwT = 0.5; sfx('cast'); }
+            else if (which === 2 && (this.mPhase || 0) >= 2) { this.st = 'grabwarn'; this.nwT = 0.5; sfx('castnull'); }
             else if (which === 2 && G.enemies.filter(e => !e.dead).length < 2) {
               const b = new Enemy('blob', this.cx() - 17, this.y + this.h);
               G.enemies.push(b);
@@ -8938,7 +8938,7 @@ class Boss {
               this.beam = horiz
                 ? { x: 0, y: py - 34, w: G.roomDef.w * TILE, h: 68, t: 0.8, warn: true }
                 : { x: px - 34, y: 0, w: 68, h: G.roomDef.h * TILE, t: 0.8, warn: true };
-              sfx('cast');
+              sfx('beamwarn');
               this.st = 'beamwarn'; this.nwT = 0.8;
             }
           }

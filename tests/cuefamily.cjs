@@ -38,7 +38,16 @@ const check = (name, ok, detail) => {
   await page.evaluate(() => { const sv = newSave(1); sv.time = 99; startGame(sv); });
   await page.waitForTimeout(500);
 
-  const FAM = ['shoot', 'lob', 'cinder', 'quill', 'shard', 'orbshot', 'ringshot', 'lance', 'summon', 'erupt'];
+  // TWO FAMILIES, MEASURED THE SAME WAY. Things that are FIRED, and things
+  // that are GATHERED — 'cast' carried twenty-six sites on its own, and a
+  // wind-up is the most information-dense sound in a fight: it is the only cue
+  // that means "it is about to", and WHICH it is about to decides what the
+  // player does. One hum for all of them says a boss is doing something, which
+  // a boss is always doing.
+  const FIRED = ['shoot', 'lob', 'cinder', 'quill', 'shard', 'orbshot', 'ringshot', 'lance', 'summon', 'erupt'];
+  const GATHERED = ['castfire', 'castice', 'castnull', 'castarc', 'snarecast', 'plume',
+                    'spikeup', 'icecolumn', 'lash', 'prison', 'msong', 'beamwarn'];
+  const FAM = FIRED.concat(GATHERED);
   const r = await page.evaluate(async (FAM) => {
     const SR = 44100, N = SR * 2;
     const out = {};
@@ -97,6 +106,20 @@ const check = (name, ok, detail) => {
 
   // the two that must not be confusable at all: a thing arriving is not a shot
   const sm = r.summon, sh = r.shoot;
+  // the four elemental gathers are the ones the player has to tell apart under
+  // pressure, so they are checked against each other by name rather than only
+  // in the all-pairs sweep
+  const EL = ['castfire', 'castice', 'castnull', 'castarc'];
+  const elSame = [];
+  for (let i = 0; i < EL.length; i++)
+    for (let j = i + 1; j < EL.length; j++) {
+      const a = r[EL[i]], b = r[EL[j]];
+      if (a && b && Math.max(a.bright, b.bright) / Math.max(1, Math.min(a.bright, b.bright)) < 1.4)
+        elSame.push(EL[i] + '/' + EL[j]);
+    }
+  check('the four elements gather differently enough to act on',
+    elSame.length === 0,
+    elSame.length ? elSame.join(', ') : EL.map(e => e.replace('cast', '') + ' ' + r[e].bright).join(', '));
   check('a creature arriving does not sound like a rifle',
     sm && sh && sm.dur > sh.dur * 2.5,
     sm && sh ? 'summon ' + sm.dur + 's vs shoot ' + sh.dur + 's' : 'not measured');
