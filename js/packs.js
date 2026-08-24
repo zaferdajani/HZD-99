@@ -48,6 +48,22 @@ function packApply(def) {
     delete gridCache[id];                       // a re-applied pack re-stamps
     MAPPOS[id] = (def.map && def.map[id]) || [0, 0, 1, 1];
   }
+  // "npcBody": {"keeper": "servo"} — a custom NPC identity wearing an existing
+  // body's art: the atlas entry is cloned under the new id, so the game draws
+  // the borrowed sheet while name and conversation come from the pack's i18n.
+  // A truly new body arrives through tools/bake3d.cjs and its own sheet.
+  if (def && def.npcBody && typeof ATLAS2 !== 'undefined') {
+    for (const id in def.npcBody) {
+      if (ATLAS2.sub[def.npcBody[id]]) ATLAS2.sub[id] = Object.assign({}, ATLAS2.sub[def.npcBody[id]]);
+    }
+  }
+  // "i18n": {"n_keeper": "THE KEEPER", "d_keeper": ["...", "..."]} — pack
+  // dialogue and names, injected as English so every language falls back to
+  // them (t() checks the theme overlay first, so fresh keys always win;
+  // overriding a base key loses only where the theme skin itself defines it)
+  if (def && def.i18n && typeof I18N !== 'undefined') {
+    for (const k in def.i18n) I18N.en[k] = def.i18n[k];
+  }
   if (def && def.start) {
     // "start": "P1" or {"room":"P1","x":96,"y":412} — same shape as a bench
     const st = typeof def.start === 'string' ? { room: def.start } : def.start;

@@ -98,6 +98,7 @@ const SUITE = [
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
   ['packs',     'a campaign pack is a folder of JSON: loads by query, saves apart, base game untouched'],
   ['bake3d',    'any authored GLB bakes to a turnaround the atlas can wear: grounded, rotating, silhouettes apart'],
+  ['forge',     'the Forge: gated to the owner, every op changes the live world, main rooms edit like DLCs'],
 ];
 
 const want = process.argv.slice(2);

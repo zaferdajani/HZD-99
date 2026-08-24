@@ -80,6 +80,35 @@ entry to add, and the crush/lowres/build steps. `tests/bake3d.cjs` proves the
 bake stays honest: cells populated, feet level, silhouettes apart, a rotation
 rather than a mirror.
 
+## THE FORGE — the owner's editor (forge.html / forge-odyssey.html)
+
+The editor is the running game with the owner's chrome on it. It ships as two
+extra pages `build.cjs` emits (never packaged into the app), opened at the
+live link `/forge.html` behind a passphrase. The gate keeps players out; the
+REAL lock is that the Forge can publish nothing — it edits the browser's own
+copy over a pack, autosaves the draft to localStorage, and EXPORTs pack.json.
+Only a git push changes what anyone else plays.
+
+- **The prompt console is the primary interface.** The owner describes the
+  change; Claude (`claude-opus-5`, called with the owner's own API key, pasted
+  once under KEY and kept in that browser only) answers with structured ops
+  the page applies to the live world. The op grammar is in `js/editor.js`
+  (`contract()`): tiles, heaps (the no-right-angles rise), entities, exits,
+  rooms, dialogue, NPCs, start, title.
+- **Direct manipulation covers the rest**: SELECT / PAINT / PLACE modes on the
+  game canvas, an entity list, FREEZE to stop the simulation while editing,
+  F2 hides the chrome.
+- **Main-game rooms edit exactly like DLC rooms**: touching one snapshots it
+  into the working pack, and the pack overrides it by id — so the export is
+  equally a new campaign or a patch to the shipped scenario. Rewriting a main
+  character's conversation is one `dialog` op (pack `i18n` overrides).
+- **Custom characters**: the `npc` op gives an identity a borrowed body
+  (`npcBody` cloning an existing atlas row) with its own name and lines; a
+  truly new body comes from a mesh through `tools/bake3d.cjs`.
+- The Forge plays on its own save key and its pages never carry the editor
+  into `index.html`/`odyssey.html` — `tests/forge.cjs` measures the gate, the
+  ops, the click mapping and the isolation.
+
 ## The DLC loop
 
 1. Owner describes the campaign to a session (rooms, cast, story, twist).

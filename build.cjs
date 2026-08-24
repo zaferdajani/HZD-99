@@ -130,14 +130,21 @@ const loader = fs.readFileSync('loader.html', 'utf8');
 // blocking download from ~12MB to ~1MB.
 // TWO LIBRARIES, one engine: the cat's game and the hero's game ship as
 // separate pages, each hard-locked to its own world — no chooser, no bleed.
-const emit = (fname, lock) => {
+// THE FORGE pages carry one extra file: js/editor.js, appended after the game
+// so its top level can wrap what game.js declared. The game pages never
+// include it — the editor exists only where window.EDITOR says so.
+const editorJs = fs.readFileSync('js/editor.js', 'utf8');
+const emit = (fname, lock, forge) => {
   let shell = html;
   if (lock === 'hero')
     shell = shell.replace(/<title>[^<]*<\/title>/,
       '<title>NOSTOS — an Odyssey metroidvania</title>');
+  if (forge)
+    shell = shell.replace(/<title>[^<]*<\/title>/, '<title>THE FORGE</title>');
   const out = shell.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/, () =>
     loader + '\n' +
     '<script>window.BUILD_ID=' + JSON.stringify(buildId) +
+    (forge ? ';window.EDITOR=1' : '') +
     ';window.GAME_LOCK=' + JSON.stringify(lock) +
     ';window.MUS_FILES=' + JSON.stringify(musFiles) +
     ';window.VID_FILES=' + JSON.stringify(vidFiles) +
@@ -146,9 +153,11 @@ const emit = (fname, lock) => {
     ';window.VOX_FILES=' + JSON.stringify(voxFiles) +
     ';window.ROOM_ASSETS=' + roomAssets +
     ';window.LOWRES=' + lowres + '</script>\n' +
-    '<script>\n' + files.join('\n') + '\n</script>\n</body>');
+    '<script>\n' + files.join('\n') + (forge ? '\n' + editorJs : '') + '\n</script>\n</body>');
   fs.writeFileSync(fname, out);
-  console.log(fname + ' built (' + lock + '):', (fs.statSync(fname).size / 1048576).toFixed(2) + 'MB');
+  console.log(fname + ' built (' + lock + (forge ? '+forge' : '') + '):', (fs.statSync(fname).size / 1048576).toFixed(2) + 'MB');
 };
 emit('index.html', 'robo');    // CLAWBYTE — the machine depths
 emit('odyssey.html', 'hero');  // NOSTOS — the long way home
+emit('forge.html', 'robo', true);          // THE FORGE — the owner's editor
+emit('forge-odyssey.html', 'hero', true);  // ...and the hero's world's
