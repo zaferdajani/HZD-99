@@ -106,6 +106,42 @@ const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A10', 'A3', 'A4'];
           floor: solid(g[H - 2][x]) && solid(g[H - 1][x]) });
       }
     }
+
+    // THE VERTICAL SEAM: every way UP must be open on BOTH sides. A T
+    // crossing keeps her x and arrives at the bottom of the room above — so
+    // the lower room's ceiling opening and the upper room's floor must
+    // answer each other, or the jump arrives EMBEDDED in the upper floor,
+    // hangs on the resolver, and falls back down the shaft (A1|A6 shipped
+    // exactly that). '#' is the fault; a 'B' breakable floor is a designed
+    // secret, not a wall. X1's arrival is scripted onto its bridge and is
+    // excluded on purpose.
+    out.vert = [];
+    for (const [id, def] of Object.entries(ROOMS)) {
+      let up = (def.exits || {}).T, at = null;
+      if (up && typeof up === 'object') { at = up.at != null ? up.at : null; up = up.to; }
+      if (!up || !ROOMS[up] || up === 'X1') continue;
+      const g = buildRoom(id), U = buildRoom(up);
+      const uh = ROOMS[up].h, uw = ROOMS[up].w;
+      if (at != null) {
+        // an arrival-column pair: the answering window is around `at`, and a
+        // 'B' breakable there is the cut she made, not a wall
+        const bad = [];
+        for (let x = Math.floor(at); x <= Math.floor(at) + 1; x++) {
+          if (x < uw && (U[uh - 2][x] === '#' || U[uh - 1][x] === '#')) bad.push(x);
+        }
+        out.vert.push({ id, up, cols: 2, bad });
+        continue;
+      }
+      // the columns she can actually rise through: inside the sky's
+      // remembered gap, or wherever the lid is open — not a first-to-last
+      // span, which reads two separate openings as one wide one
+      const cols = [];
+      if (g.tGap) for (let x = g.tGap[0]; x <= g.tGap[1]; x++) cols.push(x);
+      else for (let x = 1; x < def.w - 1; x++) if (g[0][x] === '.') cols.push(x);
+      if (!cols.length) { out.vert.push({ id, up, err: 'T exit with no ceiling opening' }); continue; }
+      const bad = cols.filter((x) => x < uw && (U[uh - 2][x] === '#' || U[uh - 1][x] === '#'));
+      out.vert.push({ id, up, cols: cols.length, bad });
+    }
     return out;
   });
 
@@ -152,6 +188,12 @@ const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A10', 'A3', 'A4'];
   const noFloor = r.edges.filter(e => !e.floor);
   check('...and never opens the ground under it', noFloor.length === 0,
     noFloor.length ? noFloor.map(e => e.id + '.' + e.side).join(' ') : 'ground unbroken to every edge');
+
+  // ---- 4. every way up is open on both sides ------------------------------
+  const vbad = r.vert.filter(v => v.err || (v.bad && v.bad.length));
+  check('every T opening answers through the floor above it', vbad.length === 0,
+    vbad.length ? vbad.map(v => v.id + '|' + v.up + (v.err ? ': ' + v.err : ' solid at ' + v.bad.join(','))).join('  ')
+                : r.vert.length + ' vertical seams open both ways');
 
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
 

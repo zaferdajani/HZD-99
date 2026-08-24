@@ -133,6 +133,39 @@ const check = (name, ok, detail) => {
   check('she keeps walking through it', walked.every(q => q.moved === 1),
         walked.map(q => q.side + (q.moved ? ' moves' : ' FROZEN')).join('  '));
 
+  // ---- THE CLIMB CANNOT STALL -------------------------------------------
+  // The owner, 2026-08-24: jumping up into the room above, "loading" ate the
+  // jump and she fell back down the shaft. The carry is state-based now
+  // (applyTransition sets tCarry; Player.update re-asserts the rise until
+  // her feet clear the destination floor) — so this run simulates the WORST
+  // frames a first-visit art decode produces: the whole climb stepped at a
+  // janky 1/12s, straight through A1's ceiling opening into the gantries.
+  const climb = await page.evaluate(() => {
+    loadRoom('A1'); G.state = 'PLAY'; G.enemies = []; G.boss = null; G.dialog = null;
+    // near-apex crossing: barely through the opening, almost no speed left —
+    // exactly the jump the old time-based -620 lost to a hitch
+    player.x = 20.5 * TILE; player.y = -70; player.vy = -80; player.vx = 160; player.on = false;
+    // ...holding a direction, the way any player finishing this jump does —
+    // the carry owes her the height and the hang time; the landing beside
+    // the hole is still hers to steer
+    keys['ArrowRight'] = 1;
+    const seen = [];
+    for (let i = 0; i < 60; i++) {
+      update(1 / 12);
+      if (seen.indexOf(G.roomId) < 0) seen.push(G.roomId);
+      G.enemies = [];                    // the gantries' machines are not the question
+      if (G.roomId === 'A6' && player.on
+          && player.y + player.h <= (G.roomDef.h - 2) * TILE + 2 && !G.trans) {
+        return { ok: true, seen, feet: player.y + player.h, floor: (G.roomDef.h - 2) * TILE };
+      }
+    }
+    keys['ArrowRight'] = 0;
+    return { ok: false, seen, room: G.roomId, y: player.y, vy: player.vy, carry: player.tCarry };
+  });
+  check('an upward jump under load-jank still lands the floor above', climb.ok,
+        climb.ok ? 'rooms ' + climb.seen.join(' -> ') + ', standing at its floor'
+                 : JSON.stringify(climb));
+
   if (errs.length) check('no page errors', false, errs[0]);
   await browser.close();
   console.log(fails.length ? '\n' + fails.length + ' FAILED\n' : '\nall good\n');

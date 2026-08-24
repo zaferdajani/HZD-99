@@ -1102,6 +1102,20 @@ class Player {
       if (!this.on && Math.abs(this.vy) < 90) grav *= 0.55;
       if ((G.lowGravT || 0) > 0) grav *= 0.32;   // NULL GRAVITY field
       this.vy = Math.min(this.vy + grav * dt, 1020);
+      // THE T-CROSSING CARRY (set in applyTransition): while her feet are
+      // still below the destination's floor line she is inside the shaft she
+      // jumped up through, and the rise is re-asserted AFTER gravity — a
+      // load-hitch cannot bleed it away frame by frame. The moment she is
+      // clear, normal physics owns the jump again; the timer is only the
+      // failsafe against a shaft this rule cannot understand.
+      if (this.tCarry > 0) {
+        this.tCarry = Math.max(0, this.tCarry - dt);
+        const floorTop = (G.roomDef.h - 2) * TILE;
+        // clear the moment she is out of the shaft (feet above the floor
+        // line) OR standing on anything — never re-launch a landed body
+        if (this.on || this.y + this.h <= floorTop + 2) this.tCarry = 0;
+        else this.vy = Math.min(this.vy, -680);
+      }
       this.wallSlide = 0;
       if (hasMod('wall') && !this.on && this.vy > 0 && dir !== 0 && touchingWall(this, dir)) {
         this.vy = Math.min(this.vy, 150); this.wallSlide = dir;

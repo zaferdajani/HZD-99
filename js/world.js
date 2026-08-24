@@ -548,6 +548,14 @@ const ROOMS = {
       // never get out. The bottom of the shaft was reachable, the room read as
       // finished, and the run was over.
       rect(g, 8, 19, 11, 20, '.');
+      // ...AND THE WAY UP ANSWERS A1'S OPENING. A1's climb tops out at 19-22
+      // (nailed there — a T crossing keeps her x), and this floor used to be
+      // solid over exactly those columns: the jump up arrived EMBEDDED in the
+      // floor, hung frozen while the resolver held her, and fell back down
+      // the shaft — reported as "loading eats the jump" (owner, 2026-08-24).
+      // The drop at 8-11 stays; up and down are two different holes now, and
+      // tests/seam.cjs measures every T pair for exactly this misalignment.
+      rect(g, 19, 19, 22, 20, '.');
       hline(g, 2, 6, 16, '='); hline(g, 13, 17, 13, '='); hline(g, 6, 10, 10, '=');
       hline(g, 15, 19, 8, '='); hline(g, 20, 24, 7, '#');
       hline(g, 11, 14, 18, '^');              // the floor is not safe to fall to
@@ -829,7 +837,7 @@ const ROOMS = {
     // the cable-shrine and she is inside, in a place of her own — the same
     // promotion Ratchet got when the meadow stopped being his shop floor.
     ents: [['bench', 12, 15], ['term', 22, 15, 2], ['trial', 25, 15]],
-    build(g) { frame(g); openL(g); openR(g); rect(g, 4, 15, 6, 16, '.'); } },
+    build(g) { frame(g); openL(g); openR(g); rect(g, 4, 15, 6, 16, '.'); rect(g, 30, 15, 30, 16, '.'); } },  // col 30: C1's chimney up
   // THE ORACLE'S PARLOR (kingdom 2's own interior, the B-side of A0B): a
   // one-room den behind the cable-shrine in B3 where mono actually LIVES —
   // the CRT face on its shroud of dead cables, reading a river of data in the
@@ -869,7 +877,7 @@ const ROOMS = {
   // and cut through the brittle section of it. Until somebody does that, this
   // room does not exist on the map, because the map only ever draws rooms that
   // have actually been stood in.
-  V2: { zone: 'X', w: 32, h: 17, exits: { T: 'B2' },
+  V2: { zone: 'X', w: 32, h: 17, exits: { T: { to: 'B2', at: 44 } },
     ents: [['chest', 11, 15, 'nine'], ['scrap', 4, 15, 80], ['scrap', 17, 15, 80],
            ['scrap', 8, 11, 60], ['bench', 14, 15], ['term', 6, 15, 4]],
     build(g) {
@@ -1247,7 +1255,7 @@ const ROOMS = {
     ents: [['boss', 26, 15, 'chime']],
     build(g) {
       frame(g);
-      rect(g, 12, 15, 15, 16, '.');            // the drop back to A8
+      rect(g, 11, 15, 15, 16, '.');            // the drop back to A8 — col 11 answers A8's opening
       // the arena rule again: the ground the fight happens on is flat and the
       // furniture lives on the shoulders. The drop home stays at 12-15 — it is
       // the only way out of this room and it has to line up with A8's ceiling.
@@ -1374,7 +1382,7 @@ const ROOMS = {
     ents: [['boss', 20, 15, 'carrier']],
     build(g) {
       frame(g);
-      rect(g, 14, 15, 17, 16, '.');
+      rect(g, 13, 15, 17, 16, '.');   // col 13 answers B7's opening below
       hline(g, 3, 9, 10, '='); hline(g, 21, 27, 10, '=');
     } },
 
@@ -1394,7 +1402,7 @@ const ROOMS = {
     ents: [['boss', 20, 16, 'moth']],
     build(g) {
       frame(g);
-      rect(g, 12, 16, 15, 17, '.');
+      rect(g, 11, 16, 15, 17, '.');   // col 11 answers C6's opening below
       hline(g, 3, 9, 11, '='); hline(g, 21, 27, 11, '=');
     } },
 
@@ -1404,7 +1412,7 @@ const ROOMS = {
     build(g) {
       frame(g);
       rect(g, 12, 0, 15, 0, '.');
-      rect(g, 12, 22, 15, 23, '.');
+      rect(g, 12, 22, 16, 23, '.');   // col 16 answers D6's opening below
       // a descent, and the rungs still have to work going UP, because the only
       // way home is back through here
       hline(g, 3, 9, 5, '='); hline(g, 14, 21, 8, '=');

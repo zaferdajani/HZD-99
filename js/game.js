@@ -1103,13 +1103,18 @@ function checkTransitions() {
     if (player.y > H + 40 && !ex.B) { player.hurt(1, player.x); player.x = player.lastSafe.x; player.y = player.lastSafe.y; player.vy = 0; }
     return;
   }
-  let dest = ex[side];
+  let dest = ex[side], at = null;
   if (typeof dest === 'object') {
-    if (!G.save.flags[dest.flag]) return;
+    // {flag, to} gates a door behind a power; {to, at} carries an ARRIVAL
+    // COLUMN for a vertical pair whose rooms cannot align by width — V2's
+    // way up arrives through the hole she cut in B2's floor, not at her
+    // own x in a hall twice as wide as the vault
+    if (dest.flag && !G.save.flags[dest.flag]) return;
+    at = dest.at != null ? dest.at : null;
     dest = dest.to;
   }
   if (demoWall(dest)) { demoStop(side); return; }
-  G.trans = { t: TRANS_DUR, to: dest, side, half: false };
+  G.trans = { t: TRANS_DUR, to: dest, side, at, half: false };
   // HOLD THE PICTURE NOW, not at draw time. The loop runs a fixed step and may
   // call update() several times in one frame (SIM_STEP/SIM_MAX), so the frame
   // that creates a crossing is often the same frame that applies it — by the
@@ -1130,7 +1135,19 @@ function applyTransition() {
   const dAir = (G.roomDef.air | 0) * TILE - fromAir;
   if (tr.side === 'L') { player.x = W - player.w - 10; player.y = from.y + dAir; }
   else if (tr.side === 'R') { player.x = 10; player.y = from.y + dAir; }
-  else if (tr.side === 'T') { player.x = clamp(from.x, 40, W - 60); player.y = H - player.h - 6; player.vy = Math.min(from.vy, -620); }
+  else if (tr.side === 'T') {
+    player.x = clamp(tr.at != null ? tr.at * TILE : from.x, 40, W - 60);
+    player.y = H - player.h - 6;
+    player.vy = Math.min(from.vy, -680);
+    // THE CLIMB CANNOT STALL. She arrives at the bottom of the room above,
+    // still inside the floor shaft she jumped through — and if the room's
+    // first-visit art decode janks the next few frames, a time-based carry
+    // dies in the shaft and she falls straight back down the hole (owner,
+    // 2026-08-24: "loose momentum in jump and fall down"). So the carry is
+    // STATE-based: Player.update re-asserts the rise until her feet have
+    // actually cleared the destination floor, however long the loader takes.
+    player.tCarry = 1.0;
+  }
   else { player.x = clamp(from.x, 40, W - 60); player.y = 4; player.vy = Math.max(from.vy, 80); }
   player.vx = from.vx; player.lastSafe = { x: player.x, y: player.y };
   // THE CACHE MOUTH: she climbs up through the opening, and the hardlight
@@ -1138,6 +1155,7 @@ function applyTransition() {
   // never a pit that spits her straight back down the shaft she came up.
   if (G.roomId === 'X1' && tr.side === 'T' && G.boss && !G.boss.dead) {
     G.x1Bridge = true;
+    player.tCarry = 0;           // the bridge places her; no shaft to climb
     player.y = 15 * TILE - player.h; player.vy = 0;
     player.lastSafe = { x: player.x, y: player.y };
     sfx('cast'); cam.shake = Math.max(cam.shake, 3);
