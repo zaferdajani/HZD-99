@@ -969,6 +969,116 @@ function sfx(n) {
     case 'pick': tone(880, 0.07, 'sine', 0.05, 1370); break;
     case 'heal': tone(520, 0.3, 'sine', 0.05, 1040); break;
     // ===================================================================
+    // THINGS THAT LAND, AND THEY ARE NOT ALL AN EXPLOSION.
+    //
+    // 'boom' was hiss + one falling sawtooth, and it played for seventeen
+    // sites: her charged burst paying off, a machine dying, a mini-boss dying,
+    // a volatile enemy popping, a shockwave going out, a guardian LANDING, a
+    // pounce launching, the ceiling shedding debris across the whole room, a
+    // core cracking, a body falling off a disc, and a beam arriving.
+    //
+    // Impacts are where a fight is legible or is not. The player needs to know
+    // from the sound alone whether that was their hit landing, something dying,
+    // or a ton of machine arriving next to them — and one falling sawtooth
+    // answers none of those.
+    // ===================================================================
+    // HER BURST. The one impact in the game the PLAYER made on purpose, and it
+    // is the payoff of a held note, so it opens bright and rings rather than
+    // thudding. Hers should never be confusable with something happening to
+    // her.
+    case 'burstout':
+      chink(0.055, 0);
+      tone(1046.5, 0.30, 'triangle', 0.075, 1568);
+      tone(1568.0, 0.24, 'sine', 0.045, 2093, 0.02);
+      whoosh(0.34, 700, 3200, 0.070);
+      tone(110, 0.34, 'sine', 0.080, 62, 0.01);
+      bellToll(523.3, 0.070, 0.06);
+      break;
+    // A MACHINE COMING APART. Not an explosion — a failure. The casing goes,
+    // then the parts hit the floor at uneven intervals, and something inside
+    // spins down instead of stopping.
+    case 'wreck':
+      hiss(0.24, 0.090);
+      tone(180, 0.20, 'sawtooth', 0.070, 60);
+      for (let i = 0; i < 5; i++) chink(0.020, 0.06 + Math.random() * 0.26);
+      tone(760, 0.42, 'sawtooth', 0.030, 120, 0.05);   // the spin-down
+      break;
+    // ...AND A BIG ONE. The same failure with more of it: lower, longer, and
+    // the debris keeps arriving after you think it has finished.
+    case 'wreckbig':
+      hiss(0.45, 0.115);
+      tone(104, 0.50, 'sawtooth', 0.100, 36);
+      for (let i = 0; i < 9; i++) chink(0.026, 0.08 + Math.random() * 0.55);
+      tone(430, 0.80, 'sawtooth', 0.038, 70, 0.06);
+      tone(52, 0.60, 'sine', 0.075, 30, 0.03);
+      break;
+    // A VOLATILE THING POPPING. Sharp, wet, and it SPRAYS: the tail is the
+    // stuff it left on the floor, which is the part that still matters.
+    case 'blast':
+      tone(420, 0.05, 'square', 0.090, 90);
+      hiss(0.34, 0.085, 0.01);
+      whoosh(0.30, 1800, 400, 0.060, 0.02);
+      for (let i = 0; i < 7; i++)
+        tone(240 + Math.random() * 300, 0.06, 'triangle', 0.014, 120, 0.08 + Math.random() * 0.22);
+      break;
+    // A RING GOING OUT. The sound has to LEAVE — a sweep that falls in pitch
+    // as it widens, which is the only way a flat screen says "this is moving
+    // away from its centre".
+    case 'shockring':
+      tone(150, 0.60, 'sine', 0.100, 42);
+      whoosh(0.66, 2200, 260, 0.075, 0.01);
+      tone(300, 0.44, 'triangle', 0.040, 96, 0.04);
+      hiss(0.22, 0.045, 0.02);
+      break;
+    // A TON OF MACHINE ARRIVING. The floor takes it: sub first, then the
+    // rattle of everything in the room that was not bolted down.
+    case 'slam':
+      tone(46, 0.44, 'sine', 0.145, 28);
+      tone(92, 0.20, 'triangle', 0.080, 54, 0.005);
+      hiss(0.16, 0.060, 0.01);
+      for (let i = 0; i < 6; i++) chink(0.018, 0.05 + Math.random() * 0.20);
+      break;
+    // THE ROOM ITSELF. Longer than any impact and with no attack worth the
+    // name — a quake is not an event you can point at, it is a condition.
+    case 'quake':
+      tone(31, 1.10, 'sine', 0.150, 22);
+      tone(44, 0.90, 'sine', 0.090, 29, 0.06);
+      hiss(0.85, 0.055, 0.05);
+      for (let i = 0; i < 12; i++) chink(0.014, 0.10 + Math.random() * 0.80);
+      break;
+    // SOMETHING STRUCTURAL FAILING. One report, then the fracture running
+    // through the material — the running is what makes it a crack and not a
+    // hit.
+    case 'crack':
+      chink(0.075, 0);
+      tone(280, 0.09, 'square', 0.075, 130);
+      for (let i = 0; i < 7; i++)
+        tone(1600 + Math.random() * 2200, 0.035, 'triangle', 0.020, 900, 0.03 + i * 0.035);
+      tone(64, 0.40, 'sine', 0.070, 40, 0.01);
+      break;
+    // THE BEAM ARRIVES. It was already pointing at her (see beamwarn); this is
+    // the moment it becomes real, so it is a hard onset into a HELD tone — the
+    // holding is what says it is still there.
+    case 'beamfire':
+      // AND IT DOES NOT MOVE. The sweep in the first pass made it travel, which
+      // is what a plume does; a beam is already everywhere along its line the
+      // instant it exists. Hard onset, then tones that hold their pitch — the
+      // holding is the whole threat, and it is what tells the player the line
+      // is still live.
+      chink(0.060, 0);
+      tone(1760, 0.60, 'square', 0.055, 1760);
+      tone(3520, 0.52, 'square', 0.030, 3520, 0.01);
+      tone(880, 0.58, 'sawtooth', 0.070, 880, 0.005);
+      hiss(0.50, 0.035, 0.03);
+      break;
+    // A POUNCE LEAVING THE FLOOR. Not an impact at all — it is a shove against
+    // the ground, so the low end goes UP and the grit is thrown backwards.
+    case 'launch':
+      tone(70, 0.22, 'sine', 0.100, 190);
+      whoosh(0.26, 260, 1500, 0.075);
+      hiss(0.14, 0.050, 0.01);
+      break;
+    // ===================================================================
     // THINGS THAT ARE GATHERED, AND THE THINGS THAT WERE NEVER CASTS AT ALL.
     //
     // 'cast' carried twenty-six call sites: her claw arming, an EMP, a saw's
@@ -1042,9 +1152,14 @@ function sfx(n) {
     // THE PLUME — heat from BELOW. It arrives at the floor and travels up, so
     // the sweep rises and the body stays under it the whole way.
     case 'plume':
-      tone(64, 0.50, 'sine', 0.080, 46);
-      whoosh(0.62, 180, 900, 0.070, 0.03);
-      hiss(0.44, 0.045, 0.05);
+      // ...and it stays LOW while it does it. Heat rising off a floor is a
+      // body of air moving, not a jet: the broadband hiss in the first pass
+      // put it in the same place as a firing beam, which is the one sound in
+      // the room it should never be mistaken for.
+      tone(58, 0.62, 'sine', 0.095, 42);
+      tone(87, 0.50, 'triangle', 0.055, 132, 0.04);
+      whoosh(0.66, 130, 480, 0.070, 0.03);
+      tone(174, 0.34, 'sine', 0.030, 240, 0.14);
       break;
     // SPIKES OUT OF THE GROUND — three of them, in a row, away from her. Stone
     // splitting and something hard arriving, three times, walking outward.

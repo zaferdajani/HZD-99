@@ -1321,7 +1321,7 @@ class Player {
           G.flash = Math.max(G.flash, 0.5);
           cam.shake = Math.max(cam.shake, 9);
           G.addRing(tx2, ty2);
-          sfx('boom');
+          sfx('burstout');
           burst(tx2, ty2, 22, '#fff6c0', 320, 0.6, 120, 4, true);
           // the bolt itself wounds anything beneath it
           for (const e of G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'dorm' && G.boss.st !== 'intro' ? [G.boss] : [])) {
@@ -1993,7 +1993,7 @@ class Player {
   die() {
     if (this.dead) return;
     this.dead = true;
-    this.deathAnimT = 1.6;   // the destroyed row plays out while the wreck settles sfx('boom');
+    this.deathAnimT = 1.6;   // the destroyed row plays out while the wreck settles sfx('wreck');
     burst(this.x + this.w / 2, this.y + this.h / 2, 40, '#8ff6ff', 340, 0.9, 300, 4, true);
     G.onPlayerDeath();
   }
@@ -4923,7 +4923,7 @@ class Enemy {
         }
         if (this.gatherT > 0) {
           this.gatherT -= dt; this.vx = 0; moveEnt(this, dt);
-          if (this.gatherT <= 0) { this.ringR = 20; sfx('boom'); cam.shake = Math.max(cam.shake, 5); }
+          if (this.gatherT <= 0) { this.ringR = 20; sfx('shockring'); cam.shake = Math.max(cam.shake, 5); }
           break;
         }
         // neutral: hold duel range, decide on the beat
@@ -5294,7 +5294,7 @@ class Enemy {
       G.pools = G.pools || [];
       burst(bx, by, 22, TRAITS.volatile.col, 320, 0.55, 90, 3.2, true);
       cam.shake = Math.max(cam.shake, 5);
-      if (typeof sfx === 'function') sfx('boom');
+      if (typeof sfx === 'function') sfx('blast');
       if (!player.dead && player.iT <= 0
           && Math.hypot(player.x + player.w / 2 - bx, player.y + player.h / 2 - by) < 74)
         player.hurt(DF().edmg, bx, this.kind + '.volatile');
@@ -6354,7 +6354,7 @@ class Wreck {
     if (this.dead) return;
     this.dead = true;
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
-    sfx('boom'); cam.shake = Math.max(cam.shake, 4);
+    sfx('wreckbig'); cam.shake = Math.max(cam.shake, 4);
     burst(cx, cy, 22, PAL[G.roomDef.zone].glow, 300, 0.6, 400, 4, true);
     burst(cx, cy, 10, '#ffd76a', 240, 0.5, 600, 3, true);
     G.addRing(cx, cy);
@@ -7400,7 +7400,7 @@ class Boss {
           burst(this.cx(), this.cy(), 30, PAL[G.roomDef.zone].glow, 320, 1.0, 80, 4, true);
           G.flash = Math.max(G.flash, 0.85); cam.shake = Math.max(cam.shake, 18);
           G.hitStop = Math.max(G.hitStop, 0.18);
-          sfx('boom'); sfx('phase');
+          sfx('quake'); sfx('phase');
           if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
           if (typeof padRumble === 'function') padRumble(1, 0.8, 700);
           // Normally the blast is the VIRUS leaving, not the guardian dying —
@@ -7571,7 +7571,7 @@ class Boss {
         this.face = this.faceVis = player.x + player.w / 2 < this.cx() ? -1 : 1;
         if (k2 >= 1) {
           this.nestLanded = true; this.vy = 0;
-          cam.shake = Math.max(cam.shake, 9); sfx('boom');
+          cam.shake = Math.max(cam.shake, 9); sfx('slam');
           if (typeof padRumble === 'function') padRumble(0.7, 0.5, 300);
           burst(this.cx(), this.y + this.h, 18, '#c8925c', 220, 0.5, 400, 3);
         }
@@ -7811,7 +7811,7 @@ class Boss {
             const lead = dist + (player.vx || 0) * (this.phase === 2 ? 0.26 : 0.18);
             this.vx = clamp(lead * 1.6, -680, 680) * (this.phase === 2 ? 1.15 : 1) * spd;
             this.vy = -(420 + Math.min(260, adist * 0.5));
-            sfx('dash'); sfx('boom');
+            sfx('dash'); sfx('launch');
             cam.shake = Math.max(cam.shake, 9);
             G.flash = Math.max(G.flash || 0, 0.16);
             this.coilK = 0;
@@ -7927,7 +7927,7 @@ class Boss {
           if (chance(0.6)) addPart(this.cx() - this.face * 26, this.cy() + rnd(-16, 16), -this.face * rnd(60, 130), rnd(-60, 30), 0.3, '#b06aff', 2.5, 0, true);
           if (u2 >= 1) {
             this.st = 'recover'; this.t = this.phase === 2 ? 0.34 : 0.45;
-            cam.shake = 10; sfx('boom');
+            cam.shake = 10; sfx('slam');
             for (let i = 0; i < 12; i++)
               addPart(this.cx() + rnd(-this.w * 0.6, this.w * 0.6), this.y + this.h - 4,
                 rnd(-180, 180), rnd(-200, -50), 0.45, '#b9a888', 3, 300, true);
@@ -8000,7 +8000,7 @@ class Boss {
             for (let i = 0; i < 16; i++)
               addPart(rnd(40, G.roomDef.w * TILE - 40), rnd(80, G.roomDef.h * TILE - 80),
                 0, rnd(300, 520), 0.5, '#8a8a96', 3, 600);
-            cam.shake = 9; sfx('boom');
+            cam.shake = 9; sfx('quake');
           }
           this.stagT = Math.max(this.stagT, 0.3);
           if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.6, 1.0); this.nullCrash = false; }
@@ -8237,7 +8237,7 @@ class Boss {
           if (this.y >= 12.9 * TILE) {
             this.y = 12.9 * TILE; this.vy = 0;
             this.st = 'cffloor'; this.t = 1.7; this.coreCracked = true;
-            G.iceT = 7.5; cam.shake = 10; sfx('boom');
+            G.iceT = 7.5; cam.shake = 10; sfx('crack');
             for (let i = 0; i < 22; i++)
               addPart(this.cx() + rnd(-24, 24), this.cy() + rnd(-10, 10),
                 rnd(-280, 280), rnd(-320, -40), 0.7, i % 3 ? '#8fd8ff' : '#e8fbff', 3, 500, true);
@@ -8349,7 +8349,7 @@ class Boss {
           this.vx = 0; this.t -= dt;
           if (this.t <= 0) {
             this.st = 'idle'; this.t = bossRest(this, 1.2);
-            cam.shake = 11; sfx('boom');
+            cam.shake = 11; sfx('slam');
             const gy = this.y + this.h - 8;
             G.projs.push(new Proj(this.cx() - 40, gy, -340, 0, false, 1, 8, PAL.C.glow, 0, 1.6));
             G.projs.push(new Proj(this.cx() + 40, gy, 340, 0, false, 1, 8, PAL.C.glow, 0, 1.6));
@@ -8737,7 +8737,7 @@ class Boss {
             this.stormT = 0;
             this.st = 'rest'; this.t = bossRest(this, 1.4);
             this.stagT = Math.max(this.stagT, 1.5);   // fell off the disc
-            cam.shake = 7; sfx('boom');
+            cam.shake = 7; sfx('slam');
           }
         }
         // the storm's lightning: warn on the floor, then the bolt
@@ -8802,7 +8802,7 @@ class Boss {
         this.t -= dt;
         if (this.beam) {
           this.beam.t -= dt;
-          if (this.beam.warn && this.beam.t <= 0) { this.beam.warn = false; this.beam.t = 0.5; sfx('boom'); cam.shake = 8; }
+          if (this.beam.warn && this.beam.t <= 0) { this.beam.warn = false; this.beam.t = 0.5; sfx('beamfire'); cam.shake = 8; }
           else if (!this.beam.warn) {
             if (!player.dead && aabb(this.beam, player)) player.hurt(DF().edmg, this.beam.x + this.beam.w / 2);
             if (this.beam.t <= 0) this.beam = null;
@@ -8830,7 +8830,7 @@ class Boss {
           if (this.nwT <= 0) {
             this.st = 'idle';
             this.nwave = { r: 10, n: (this.mPhase || 0) >= 1 ? 2 : 1 };
-            cam.shake = 9; sfx('boom'); G.flash = Math.max(G.flash, 0.3);
+            cam.shake = 9; sfx('shockring'); G.flash = Math.max(G.flash, 0.3);
           }
         } else if (this.st === 'msong') {
           // MOTHER'S SONG: the original broadcast — red where hers is cyan
@@ -9100,7 +9100,7 @@ class Boss {
           }
           if (w.t <= 0) {
             burst(w.x, w.y + 8, 18, MAT.molten.lit, 320, 0.55, 200, 3.5, true);
-            cam.shake = Math.max(cam.shake, 6); sfx('boom');
+            cam.shake = Math.max(cam.shake, 6); sfx('blast');
             if (!player.dead && Math.hypot(px - w.x, py - (w.y + 8)) < 54) player.hurt(DF().edmg, w.x);
             this.forge.splice(i, 1);
           }
@@ -9372,7 +9372,7 @@ class Boss {
     this.deathAnimT = Math.max(this.deathAnimT || 0, 1.6);
     burst(this.cx(), this.cy(), 60, '#ffffff', 420, 1.1, 200, 5, true);
     burst(this.cx(), this.cy(), 40, PAL[G.roomDef.zone].glow, 300, 1.4, 100, 4, true);
-    cam.shake = 16; sfx('boom'); sfx('win');
+    cam.shake = 16; sfx('wreckbig'); sfx('win');
     if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
     if (typeof padRumble === 'function') padRumble(1, 0.85, 800);
     G.hitStop = Math.max(G.hitStop, 0.22); G.flash = Math.max(G.flash, 0.7);

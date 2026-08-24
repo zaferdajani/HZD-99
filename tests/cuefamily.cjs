@@ -47,7 +47,13 @@ const check = (name, ok, detail) => {
   const FIRED = ['shoot', 'lob', 'cinder', 'quill', 'shard', 'orbshot', 'ringshot', 'lance', 'summon', 'erupt'];
   const GATHERED = ['castfire', 'castice', 'castnull', 'castarc', 'snarecast', 'plume',
                     'spikeup', 'icecolumn', 'lash', 'prison', 'msong', 'beamwarn'];
-  const FAM = FIRED.concat(GATHERED);
+  // ...and things that LAND. 'boom' was hiss plus one falling sawtooth for
+  // seventeen sites, and impacts are where a fight is legible or is not: the
+  // player has to know from the sound alone whether that was their hit
+  // landing, something dying, or a ton of machine arriving next to them.
+  const LANDED = ['burstout', 'wreck', 'wreckbig', 'blast', 'shockring',
+                  'slam', 'quake', 'crack', 'beamfire', 'launch'];
+  const FAM = FIRED.concat(GATHERED).concat(LANDED);
   const r = await page.evaluate(async (FAM) => {
     const SR = 44100, N = SR * 2;
     const out = {};
@@ -120,6 +126,13 @@ const check = (name, ok, detail) => {
   check('the four elements gather differently enough to act on',
     elSame.length === 0,
     elSame.length ? elSame.join(', ') : EL.map(e => e.replace('cast', '') + ' ' + r[e].bright).join(', '));
+  // the one the player must never mistake: their own burst paying off, against
+  // the same-sized thing happening TO them
+  check('her burst does not sound like a thing dying',
+    r.burstout && r.wreckbig &&
+    Math.max(r.burstout.bright, r.wreckbig.bright) /
+      Math.max(1, Math.min(r.burstout.bright, r.wreckbig.bright)) >= 1.4,
+    r.burstout ? 'burst ' + r.burstout.bright + ' vs wreck ' + r.wreckbig.bright : '');
   check('a creature arriving does not sound like a rifle',
     sm && sh && sm.dur > sh.dur * 2.5,
     sm && sh ? 'summon ' + sm.dur + 's vs shoot ' + sh.dur + 's' : 'not measured');
