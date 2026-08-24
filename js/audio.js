@@ -1348,10 +1348,47 @@ function sfx(n) {
     // rather than merely "something is happening", and pitched above the music
     // bed so it survives a boss theme. Deliberately not a hit sound: this is
     // the only cue in the game that means "it is about to".
+    // ===================================================================
+    // THE WARNING, AT THREE SIZES — AND IT IS ONE SOUND, ON PURPOSE.
+    //
+    // The other three families were split apart because one cue for many
+    // events told the player nothing. This one is the opposite case and it
+    // would have been a mistake to treat it the same way. 'tell' is the only
+    // cue in the game that means "it is about to", and its value is that it is
+    // LEARNED: hear it once, understand it forever, act on it without looking.
+    // Thirteen different tells would destroy exactly the thing that makes it
+    // worth having.
+    //
+    // So it is scaled, not scattered. All three keep the identical gesture —
+    // a short RISING pair, rising because that encodes time REMAINING rather
+    // than merely "something is happening", pitched above the music bed so it
+    // survives a boss theme. What changes with the size of the thing making it
+    // is the WEIGHT underneath: a bat and a guardian are speaking the same
+    // language, and only one of them is large.
+    // ===================================================================
     case 'tell':
       tone(560, 0.09, 'triangle', 0.05, 900);
       tone(840, 0.12, 'triangle', 0.038, 1280, 0.07);
       chink(0.014, 0.03);
+      break;
+    // A HERO-SCALE DUELIST. The same rise, a little lower and a beat longer,
+    // with a body under it — he is her size, so it is a person winding up and
+    // not a machine twitching.
+    case 'tellmid':
+      tone(420, 0.13, 'triangle', 0.058, 680);
+      tone(630, 0.17, 'triangle', 0.044, 960, 0.09);
+      tone(150, 0.16, 'sawtooth', 0.038, 210, 0.01);
+      chink(0.018, 0.04);
+      break;
+    // A GUARDIAN. The identical rise again, lower still, over a sub that
+    // arrives BEFORE the pair — you feel a guardian decide before you hear it,
+    // and that half-beat is the difference between the two fights.
+    case 'tellbig':
+      tone(46, 0.34, 'sine', 0.095, 33);
+      tone(320, 0.16, 'triangle', 0.065, 520, 0.05);
+      tone(480, 0.22, 'triangle', 0.050, 740, 0.15);
+      tone(96, 0.26, 'sawtooth', 0.045, 140, 0.06);
+      chink(0.022, 0.07);
       break;
     case 'grind':
       whoosh(0.16, 5200, 1400, 0.075);

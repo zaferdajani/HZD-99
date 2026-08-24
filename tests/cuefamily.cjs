@@ -53,8 +53,16 @@ const check = (name, ok, detail) => {
   // landing, something dying, or a ton of machine arriving next to them.
   const LANDED = ['burstout', 'wreck', 'wreckbig', 'blast', 'shockring',
                   'slam', 'quake', 'crack', 'beamfire', 'launch'];
+  // THE WARNINGS ARE THE EXCEPTION, and they are measured for the OPPOSITE
+  // property. 'tell' is the only cue in the game that means "it is about to",
+  // and its value is that it is LEARNED — hear it once, act on it forever.
+  // Splitting it thirteen ways would destroy exactly what makes it worth
+  // having. So the three sizes must share one gesture and differ only in
+  // weight, and this harness has to hold BOTH halves of that or the family
+  // drifts apart the first time someone tunes one of them.
+  const WARN = ['tell', 'tellmid', 'tellbig'];
   const FAM = FIRED.concat(GATHERED).concat(LANDED);
-  const r = await page.evaluate(async (FAM) => {
+  const r = await page.evaluate(async ({ FAM, WARN }) => {
     const SR = 44100, N = SR * 2;
     const out = {};
     for (const cue of FAM) {
@@ -80,8 +88,61 @@ const check = (name, ok, detail) => {
       out[cue] = { dur: +dur.toFixed(3), atk: +atk.toFixed(3), pk: +pk.toFixed(3),
                    energy: +tot.toFixed(3), bright: +(zc / Math.max(dur, 0.001)).toFixed(0) };
     }
+    // ...and the warnings, measured for shape rather than for difference: does
+    // the pitch RISE across the cue, and how much weight is under it.
+    out.__warn = {};
+    for (const cue of WARN) {
+      const off = new OfflineAudioContext(1, N, SR);
+      const save = AC; AC = off; MUTED = false;
+      sfx(cue);
+      const d = (await off.startRendering()).getChannelData(0);
+      AC = save;
+      let pk = 0; for (let i = 0; i < N; i++) pk = Math.max(pk, Math.abs(d[i]));
+      let end = 0;
+      for (let i = N - 1; i > 0; i--) if (Math.abs(d[i]) > pk * 0.001) { end = i; break; }
+      // DOES THE STRONGEST PITCH GO UP? Asked directly, with a pitch tracker,
+      // because the two cheap proxies both lied here and it is worth writing
+      // down which and why.
+      //
+      // Zero-crossing rate over the first and last THIRD of elapsed time puts
+      // the back window on a decayed tail with no signal left to count, and a
+      // cue that plainly rises measured as flat. Moving the windows onto the
+      // audible part fixed that and broke something else: the two tones of a
+      // tell OVERLAP by design, so the second window holds their SUM, and the
+      // zero-crossing rate of a sum is not the pitch of either.
+      //
+      // So: scan for the loudest frequency in each half and compare them. That
+      // is the claim the cue is making, measured as the claim.
+      const domIn = (a, b) => {
+        const len = Math.max(64, b - a);
+        let bestF = 0, bestE = 0;
+        for (let f = 220; f <= 3000; f *= 1.06) {
+          const w = 2 * Math.PI * f / SR, coeff = 2 * Math.cos(w);
+          let s1 = 0, s2 = 0, s0;
+          for (let i = 0; i < len && a + i < N; i++) {
+            const win = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / len);
+            s0 = d[a + i] * win + coeff * s1 - s2; s2 = s1; s1 = s0;
+          }
+          const e = Math.sqrt(s1 * s1 + s2 * s2 - coeff * s1 * s2);
+          if (e > bestE) { bestE = e; bestF = f; }
+        }
+        return bestF;
+      };
+      const loud = [];
+      for (let i = 0; i < end; i++) if (Math.abs(d[i]) > pk * 0.05) loud.push(i);
+      const lo0 = loud.length ? loud[0] : 0;
+      const loMid = loud.length ? loud[Math.floor(loud.length / 2)] : Math.floor(end / 2);
+      const loEnd = loud.length ? loud[loud.length - 1] : end;
+      // low-end weight: mean absolute value of a heavily smoothed copy, which
+      // is a cheap stand-in for "how much is happening below a few hundred Hz"
+      let lp = 0, acc = 0, w = 0;
+      for (let i = 0; i < end; i++) { lp += (d[i] - lp) * 0.004; acc += Math.abs(lp); w++; }
+      out.__warn[cue] = { rise: +(domIn(loMid, loEnd) / Math.max(1, domIn(lo0, loMid))).toFixed(2),
+                          weight: +(acc / Math.max(1, w) * 1000).toFixed(2),
+                          dur: +(end / SR).toFixed(3) };
+    }
     return out;
-  }, FAM);
+  }, { FAM, WARN });
 
   for (const c of FAM)
     console.log('    ' + c.padEnd(9) + ' ' + r[c].dur + 's  attack ' + r[c].atk +
@@ -141,6 +202,20 @@ const check = (name, ok, detail) => {
     r.lob ? 'lob reaches half-peak at ' + r.lob.atk + 's, the bolt at ' + r.shoot.atk + 's' : '');
   const clip = FAM.filter(c => r[c] && r[c].pk > 1.0);
   check('nothing in the family clips', clip.length === 0, clip.join(', ') || 'all under 1.0');
+
+  const W = r.__warn || {};
+  console.log('');
+  for (const c of ['tell', 'tellmid', 'tellbig'])
+    if (W[c]) console.log('    ' + c.padEnd(9) + ' ' + W[c].dur + 's  rise x' + W[c].rise + '  weight ' + W[c].weight);
+  console.log('');
+  const notRising = ['tell', 'tellmid', 'tellbig'].filter(c => !W[c] || W[c].rise < 1.15);
+  check('every warning RISES, because that is what encodes time remaining',
+    notRising.length === 0,
+    notRising.length ? notRising.join(', ') : 'all three climb across the cue');
+  check('...and they get heavier with the thing making them, not different',
+    W.tell && W.tellmid && W.tellbig &&
+    W.tellbig.weight > W.tellmid.weight && W.tellmid.weight > W.tell.weight,
+    W.tell ? 'weight ' + W.tell.weight + ' -> ' + W.tellmid.weight + ' -> ' + W.tellbig.weight : '');
 
   if (errs.length) check('no page errors', false, errs[0]);
   await browser.close();

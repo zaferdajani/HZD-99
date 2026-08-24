@@ -4941,8 +4941,8 @@ class Enemy {
           if (!this.duelMus) { this.duelMus = 1; if (typeof setMusic === 'function') setMusic('sage'); }
           this.stepT = 0.9;
           if (this.denied >= 3) { this.windedT = 1.2; this.denied = 0; }
-          else if (Math.abs(dxp) < 190 && chance(0.65)) { this.coilT = TELL_SWIPE; sfx('tell'); }
-          else if (chance(0.5)) { this.gatherT = TELL_HEAVY; sfx('tell'); }
+          else if (Math.abs(dxp) < 190 && chance(0.65)) { this.coilT = TELL_SWIPE; sfx('tellmid'); }
+          else if (chance(0.5)) { this.gatherT = TELL_HEAVY; sfx('tellmid'); }
         }
         break;
       }
@@ -7366,7 +7366,7 @@ class Boss {
     // move that exists or will ever exist.
     if (this.st !== this._tellSt) {
       this._tellSt = this.st;
-      if (TELL_ST.test(this.st || '')) sfx('tell');
+      if (TELL_ST.test(this.st || '')) sfx('tellbig');
     }
     if (this.roarBuzzT > 0) {
       // the roar VIBRATES: a held tremble on the camera and, through the
@@ -7907,7 +7907,7 @@ class Boss {
           // and the cue is fired by hand, at the moment the body flattens.
           if (this.t <= 0.45) {
             this.windT = 0.3;
-            if (!this.perchTold) { this.perchTold = true; sfx('tell'); }
+            if (!this.perchTold) { this.perchTold = true; sfx('tellbig'); }
           }
           if (this.t <= 0) {
             this.st = 'dive'; this.u = 0;
