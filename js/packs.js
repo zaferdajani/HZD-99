@@ -36,13 +36,15 @@ function packApply(def) {
       bad.push(id + ': grid is not ' + r.w + 'x' + r.h);
       continue;
     }
+    const air = r.air | 0;              // THE ROOF LAW: extra rows above the authored space
     ROOMS[id] = {
-      zone: r.zone || 'A', w: r.w, h: r.h,
+      zone: r.zone || 'A', w: r.w, h: r.h + air,
+      air: air || undefined,
       cave: r.cave ? 1 : undefined,
       sky: r.sky ? 1 : undefined,       // open air: no lid, no ceiling plate
       indoor: r.indoor ? 1 : undefined,
       exits: r.exits || {},
-      ents: (r.ents || []).map((e) => e.slice()),
+      ents: (r.ents || []).map((e) => [e[0], e[1], e[2] + air].concat(e.slice(3))),
       pack: def.id,
       // the grid is data, but buildRoom wants a builder — stamp the rows
       build(g) { for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) g[y][x] = rows[y][x]; },

@@ -142,6 +142,26 @@ it global. Consequences:
   This binds both authored terrain plates (task #76 / ART_QUEUE §2) and any
   procedural stand-in.
 
+## THE ROOF LAW (owner's standing order, 2026-08-24)
+
+**"The roof should only exist if there is a continuation as another room on
+top of this one... Not all of them needs a roof directly in the same frame.
+It can be one or two frames above."** The walls order (seams) now binds the
+lid: a ceiling pressed into the same frame with nothing above it is the same
+doorway problem turned sideways. Two instruments in `js/world.js`:
+
+- **`sky: 1`** — outdoors: no lid at all (`skyLid`), no ceiling plate, jumps
+  rise past the frame and gravity is the ceiling. The meadow and the gantries
+  carry it.
+- **`air: N`** — indoors: the roof rises N rows above the authored space; the
+  authored grid keeps its coordinates at the bottom of a taller frame, walls
+  climb, the floor stays level with neighbors (air-aware side crossings in
+  `applyTransition`). B6, the relay gallery, is the exemplar.
+
+A room with a T exit HAS a continuation — its roof is load-bearing and stays.
+Boss arenas resize with their own fights, per kingdom session, not by a
+blanket pass. `tests/seam.cjs` carries the lid's amended law.
+
 ## RULE ZERO: author at full quality, DERIVE everything cheaper
 
 **Never author down. Make the good version once, and let a tool in `tools/`

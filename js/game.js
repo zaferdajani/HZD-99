@@ -1120,10 +1120,16 @@ function checkTransitions() {
 }
 function applyTransition() {
   const tr = G.trans, from = { x: player.x, y: player.y, vx: player.vx, vy: player.vy };
+  const fromAir = (G.roomDef.air | 0) * TILE;
   loadRoom(tr.to);
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
-  if (tr.side === 'L') { player.x = W - player.w - 10; player.y = from.y; }
-  else if (tr.side === 'R') { player.x = 10; player.y = from.y; }
+  // an `air` room (THE ROOF LAW, js/world.js) holds its authored space at the
+  // BOTTOM of a taller frame, so a side crossing shifts by exactly the added
+  // rows and the floor stays under her feet; between two ordinary rooms the
+  // delta is zero and this is the same keep-your-y it has always been
+  const dAir = (G.roomDef.air | 0) * TILE - fromAir;
+  if (tr.side === 'L') { player.x = W - player.w - 10; player.y = from.y + dAir; }
+  else if (tr.side === 'R') { player.x = 10; player.y = from.y + dAir; }
   else if (tr.side === 'T') { player.x = clamp(from.x, 40, W - 60); player.y = H - player.h - 6; player.vy = Math.min(from.vy, -620); }
   else { player.x = clamp(from.x, 40, W - 60); player.y = 4; player.vy = Math.max(from.vy, 80); }
   player.vx = from.vx; player.lastSafe = { x: player.x, y: player.y };

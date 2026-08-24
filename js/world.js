@@ -531,7 +531,7 @@ const ROOMS = {
     } },
   // ---- THE GANTRIES: a wing, not a corridor. Up, across, and back down with
   // the thing somebody asked for. Nothing here is required to finish the game.
-  A6: { zone: 'A', w: 44, h: 21, exits: { B: 'A1' },
+  A6: { zone: 'A', sky: 1, w: 44, h: 21, exits: { B: 'A1' },
     // Same fix as A2, and it matters more here: the gantries are a climb over
     // spikes, so being harassed from two angles while airborne is not a fight
     // you can lose well. One flier to keep you honest in the air, one crawler
@@ -774,7 +774,7 @@ const ROOMS = {
   // Peak 5 in any one screen, under the measured ceiling of 9, and never two
   // disruptors. The solution shape is "kill the turret from cover before you
   // commit to the climb, because you cannot dodge on a ladder."
-  B6: { zone: 'B', w: 32, h: 24, exits: { B: 'B1' },
+  B6: { zone: 'B', air: 12, w: 32, h: 24, exits: { B: 'B1' },
     // the turret moved one column off the mouth it guards: carving the
     // passage through both floor rows put its old footing over the hole
     ents: [['turret', 8, 22], ['hopper', 18, 18], ['flier', 13, 5],
@@ -1557,11 +1557,45 @@ for (const [gid, tid, did, lair, flag, gcell, tcell, dcell] of GROTTOES) {
 ROOMS.GA1T.ents = ROOMS.GA1T.ents.map(e => (e[0] === 'term' ? ['term', e[1], e[2], 6] : e));
 
 const gridCache = {};
+// ---------------------------------------------------------------------------
+// THE ROOF LAW (owner, 2026-08-24): "the roof should only exist if there is a
+// continuation as another room on top of this one... the environment should
+// not be containing a roof until the end of the actual space. Not all of them
+// needs a roof directly in the same frame. It can be one or two frames above."
+//
+// Two instruments carry it. OUTDOORS, `sky: 1` removes the lid entirely
+// (skyLid above). INDOORS, `air: N` raises the roof N rows above the authored
+// space: the def's h is grown at registration (the pass below, which also
+// carries the entity rows down with the floor), and buildRoom builds the
+// authored grid into the BOTTOM of the taller frame — so every coordinate a
+// room was written with still means what it meant, the floor stays level with
+// its neighbors, and the authored lid (T openings and all) moves to the true
+// top with the walls climbing to meet it. The camera already follows tall
+// rooms (A7 is 32); a side crossing into an air room compensates by exactly
+// the added rows (applyTransition), so a seam stays a walk.
+//
+// A room with a T exit HAS a continuation — its roof is load-bearing and this
+// law leaves it alone. Boss arenas resize with their own fights, not here.
+for (const id in ROOMS) {
+  const d = ROOMS[id];
+  if (!d.air) continue;
+  d.h += d.air;
+  d.ents = (d.ents || []).map((e) => [e[0], e[1], e[2] + d.air].concat(e.slice(3)));
+}
+
 function buildRoom(id) {
   if (gridCache[id]) return gridCache[id];
   const def = ROOMS[id];
+  const air = def.air | 0;
   const g = mk(def.w, def.h);
-  def.build(g);
+  if (air) {
+    def.build(g.slice(air));   // the authored space, at the bottom; row refs shared
+    for (let x = 0; x < def.w; x++) {
+      g[0][x] = g[air][x];                                   // the lid rises
+      const wall = (x === 0 || x === def.w - 1) && g[air + 1][x] === '#';
+      for (let y = 1; y <= air; y++) g[y][x] = wall ? '#' : '.';
+    }
+  } else def.build(g);
   // sky rooms lose the lid after everything else is built, so the pass sees
   // the authored ceiling opening before erasing it — pack rooms included
   if (def.sky) skyLid(g);

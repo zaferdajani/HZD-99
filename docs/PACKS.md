@@ -37,6 +37,10 @@ A folder: `packs/<id>/pack.json`. Loading `index.html?pack=<id>` (or
 }
 ```
 
+A room may also carry `"sky": 1` (outdoors: no lid, no ceiling plate — THE
+ROOF LAW) or `"air": N` (indoors: the roof sits N rows above the authored
+grid, which keeps its own coordinates at the bottom of the taller frame).
+
 Rooms are exactly the `ROOMS` shape in `js/world.js` with the grid as data:
 same tile characters (`#` solid, `.` air, `=` shelf, `^` hazard rail), same
 `ents` tuples (`[kind, tileX, tileYFeetOn, extra?, condFlag?]` — enemy kinds
