@@ -106,6 +106,8 @@ const WIND = /(warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summon)/;
       // deleting it.
       let nextFlip = 0.75, nextZ = 0.434, nextX = 0.234;
       let dir = 1, tick = 0, lx = b.x, ly = b.y;
+      const SAMPLE_MS = 1000 / 60;      // one sample of SIM time, load or no load
+      let accD = 0, accT = 0;
       while ((G.simClock || 0) < end && performance.now() < wallStop) {
         // A MOVING TARGET. She runs the width of the arena, jumps at the walls,
         // and swings on the beat — which is what a boss's approach, range and
@@ -141,9 +143,33 @@ const WIND = /(warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summon)/;
         // measured from DISPLACEMENT, not from vx: half the roster hovers by
         // lerping its position straight, so its velocity fields read zero while
         // it crosses the arena. What matters is whether the gap is closing.
-        const sp = Math.hypot(b.x - lx, b.y - ly) / Math.max(0.001, dt / 1000);
+        //
+        // ...AND ON A FIXED SIM-TIME GRID, not per frame. The inputs were moved
+        // onto a clock for this reason and the MEASUREMENT was left on the
+        // frame, so half the load sensitivity stayed: under the full suite the
+        // frames are fewer and longer, a guardian that moves and stops inside
+        // one sample averages under the 30px/s bar, and its motion is scored as
+        // standing still. NULLFANG read 36% idle alone and 41% under load
+        // against a 40% limit — the harness was reporting the machine.
+        // Accumulating to a fixed 1/60s of SIM time makes every sample the same
+        // size whatever the frame rate, with the remainder carried rather than
+        // dropped. Measured against three other harnesses running alongside:
+        // 41% before, 38% after, and the solo reading fell to 33% — the sampler
+        // was inflating idle in both cases, just further under load.
+        //
+        // ONE SOURCE OF LOAD SENSITIVITY IS LEFT and it is worth naming rather
+        // than implying it is gone: the inputs above are set once per FRAME, so
+        // a slow frame holds a press across more sim steps and the fight this
+        // samples is still not quite the same fight. Removing that means
+        // driving update() directly instead of riding rAF, which is a bigger
+        // change to a working harness than the flake justified.
+        accD += Math.hypot(b.x - lx, b.y - ly); accT += dt;
         lx = b.x; ly = b.y;
-        if (sp > 30) moved[st] = (moved[st] || 0) + dt;
+        while (accT >= SAMPLE_MS) {
+          const sp = accD / (accT / 1000);
+          if (sp > 30) moved[st] = (moved[st] || 0) + SAMPLE_MS;
+          accD *= 1 - SAMPLE_MS / accT; accT -= SAMPLE_MS;
+        }
       }
       Math.random = _mrand;
       keys.ArrowRight = keys.ArrowLeft = keys.KeyZ = keys.KeyX = 0;
