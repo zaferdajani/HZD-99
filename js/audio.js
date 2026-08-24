@@ -1134,6 +1134,37 @@ function npcSay(id, idx) {
     el.crossOrigin = 'anonymous';
     NPCNODE = el;
     npcVoiceChain(el, id);
+    // A LINE MUST NOT OUTLIVE ITS OWN SENTENCE.
+    //
+    // The owner: "its lyrics is too long and destracting from reading the
+    // story". The recordings are one length and the text on screen is another,
+    // so a two-word panel could be read, understood and left behind while the
+    // voice was still going — and because the next page restarts the voice, the
+    // effect is a character who never stops talking.
+    //
+    // So the line gets a budget taken from the words it is speaking: roughly
+    // thirteen characters a second, which is unhurried reading, with a floor so
+    // a short line is never clipped and slack on top so a recording that is
+    // merely a little long plays out. Past that it FADES rather than cuts — a
+    // sentence chopped mid-vowel sounds broken, and the point is to get out of
+    // the way, not to be noticed leaving.
+    try {
+      const line = (typeof G !== 'undefined' && G.dialog && G.dialog.lines
+        && G.dialog.lines[idx]) || '';
+      const budget = Math.max(2.2, String(line).length / 13) + 1.2;
+      clearTimeout(npcSay._fade);
+      npcSay._fade = setTimeout(() => {
+        if (NPCNODE !== el) return;
+        const t0 = performance.now();
+        const v0 = el.volume;
+        const step = setInterval(() => {
+          if (NPCNODE !== el) { clearInterval(step); return; }
+          const k = 1 - (performance.now() - t0) / 700;
+          if (k <= 0) { clearInterval(step); try { el.pause(); el.src = ''; } catch (e) {} if (NPCNODE === el) NPCNODE = null; return; }
+          try { el.volume = v0 * k; } catch (e) {}
+        }, 50);
+      }, budget * 1000);
+    } catch (e) {}
     const pr = el.play();
     // autoplay refused, or the file is not really there: the character still
     // has to make a sound, so fall back rather than opening a silent mouth
@@ -1241,6 +1272,7 @@ function npcVoiceChain(el, id) {
   } catch (e) { return false; }   // already routed, or no graph: play it raw
 }
 function npcHush() {
+  try { clearTimeout(npcSay._fade); } catch (e) {}
   try { if (NPCNODE) { NPCNODE.pause(); NPCNODE.src = ''; } } catch (e) {}
   NPCNODE = null;
 }

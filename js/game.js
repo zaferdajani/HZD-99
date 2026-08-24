@@ -1522,17 +1522,39 @@ function fxDecay(dt) {
   if (G.impact) { G.impact.t -= dt; if (G.impact.t <= 0) G.impact = null; }
   if (G.bolt) { G.bolt.t -= dt; if (G.bolt.t <= 0) G.bolt = null; }
 }
+// How loud a machine's voice loop gets when she is standing right beside it.
+const NPC_VOX_CEIL = 0.34;
 function tickNPCVox() {
   // proximity mixing: each NPC's voice swells as she draws near, and blooms
   // while it is actually speaking with her
   if (typeof npcVoxTick !== 'function' || !G.statics) return;
   for (const s of G.statics) {
     if (s.type !== 'npc') continue;
+    // A DARK UNIT MAKES NO SOUND. The owner: "why is my npc talking even while
+    // still deactivated". Every other system in the game knows the difference —
+    // a unit with no cell reads a note instead of speaking, and its dialogue is
+    // HER line rather than its own — but the voice loop was mixed purely by
+    // distance, so a body that has not been woken yet hummed at you as you
+    // walked past it. A machine with its cell pulled is silent; that is the
+    // whole point of the errand.
+    if (typeof npcLive === 'function' && !npcLive(s)) { npcVoxTick(s.extra, 0); continue; }
     const d = Math.hypot(player.x + player.w / 2 - (s.x + s.w / 2),
                          player.y + player.h / 2 - (s.y + s.h / 2));
     const talking = G.state === 'DIALOG' && G.dialog && G.dialog.npc === s.extra;
     const k = clamp(1 - d / 320, 0, 1);
-    npcVoxTick(s.extra, (talking ? 0.85 : k * k) * 0.6);
+    // ...AND IT DUCKS UNDER ITS OWN SPEECH RATHER THAN SWELLING INTO IT. The
+    // loop used to bloom to 0.85 exactly while this character was talking to
+    // her — a drone at full gain under the recorded line AND under the text
+    // she is trying to read. "its lyrics is too long and destracting from
+    // reading the story" is that drone: it is the voice you cannot finish,
+    // because it never ends. A voice belongs to a body standing in a room; the
+    // moment it has something to SAY, the room's sound gets out of the way.
+    //
+    // AND THE CEILING COMES DOWN. A voice loop at 0.6 beside a body is not a
+    // presence, it is a second piece of music — and this game already has one.
+    // A machine you are standing next to should be something you notice when
+    // you stop, not something you have to talk over.
+    npcVoxTick(s.extra, (talking ? 0.12 : k * k) * NPC_VOX_CEIL);
   }
 }
 function update(dt) {
@@ -9035,7 +9057,31 @@ function gateEnter() {
   // the vanishing point: the gap between the doors, in SCREEN space, since the
   // gates are the room's backdrop and the backdrop does not scroll with the
   // tiles (see ROOM_VISTA)
-  G.gateWalk = { t: 0, to: G2.to, x0: player.x + player.w / 2, y0: player.y + player.h, def: G2 };
+  // SHE WALKS TO THE DOOR BEFORE SHE TURNS HER BACK ON IT.
+  //
+  // The owner: "before doing that, it's just taking one step backward and then
+  // goes inside the room... keep adjusting that as if actually the character is
+  // walking instead of just fading." That backward step was real and it was
+  // this: the trigger accepts UP anywhere within 90px of the gap, and the shot
+  // then lerped her from wherever she stood to the vanishing point — with her
+  // back ALREADY turned. Any horizontal correction she owed the doorway got
+  // spent while she was facing away from the direction she was moving, which is
+  // the definition of walking backwards.
+  //
+  // So the shot has two beats now. First she WALKS to the gap, side-on, on her
+  // own legs, at her own walking pace, facing where she is going — the ordinary
+  // body doing the ordinary thing. Only when she is standing in the doorway does
+  // she turn and start down it. If she is already there the beat is zero-length
+  // and nothing changed.
+  const gapX = gateWorldX(G2) - player.w / 2;
+  const need = gapX - player.x;
+  G.gateWalk = {
+    t: 0, to: G2.to, x0: player.x + player.w / 2, y0: player.y + player.h, def: G2,
+    // the align beat: how far, which way, and how long her legs would take
+    ax0: player.x, axTo: gapX,
+    align: Math.abs(need) < 6 ? 1 : 0,
+    alignT: 0, alignDur: Math.min(1.1, Math.abs(need) / GATE_STEP_VX),
+  };
   // ASK FOR HER BACK NOW, not on the frame that draws it. The walk-away shot is
   // the only place in the game she is seen from behind, and the four plates that
   // do it are lazy-loaded like everything else — requested at draw time they
@@ -9095,8 +9141,41 @@ function drawOneGatePrompt(def) {
 // until fading." Steady means near-constant pace — the easing below keeps
 // the speed level instead of rushing the middle.
 const GATE_WALK = 3.4;
+// Her walking pace for the beat that lines her up with the doorway. Not the
+// run: a run into a door is the "dash through a doorway" the shot below was
+// written against, and the owner asked for a careful walk.
+const GATE_STEP_VX = 150;
 function updateGateWalk(dt) {
   const g = G.gateWalk; if (!g) return;
+  // ---- beat one: walk to the doorway, side-on, on her own legs -------------
+  if (g.align < 1) {
+    g.alignT += dt;
+    const k = g.alignDur > 0 ? clamp(g.alignT / g.alignDur, 0, 1) : 1;
+    const dir = g.axTo >= g.ax0 ? 1 : -1;
+    if (player) {
+      player.x = g.ax0 + (g.axTo - g.ax0) * k;
+      // vx is what the pose picker reads, and stridePh is what cycles the
+      // cells — both set here rather than left to her own update, because
+      // there is no input driving her and friction would have her arrive
+      // standing still with her legs in mid-air
+      player.vx = dir * GATE_STEP_VX * (1 - k * 0.35);
+      player.face = player.faceVis = dir;
+      if (typeof heroStepLen === 'function')
+        player.stridePh = (player.stridePh || 0)
+          + dt * clamp(Math.abs(player.vx) / heroStepLen(player.vx), 0, 11);
+    }
+    if (k >= 1) {
+      g.align = 1;
+      if (player) {
+        player.vx = 0;
+        // the recede starts from where she actually ENDED UP, not from where
+        // she was standing when the key was pressed
+        g.x0 = player.x + player.w / 2;
+        g.y0 = player.y + player.h;
+      }
+    }
+    return;
+  }
   // SHE DOES NOT TURN UNTIL THERE IS A BACK TO TURN. Holding the first moments
   // of the shot at the door costs nothing — she is standing there anyway, drawn
   // the way she always is — and it buys the plates the fraction of a second they
@@ -9161,7 +9240,7 @@ function gateBackReady() {
   return !!(gateBackImg(want[0]) && gateBackImg(want[1]));
 }
 function drawGateWalk() {
-  const g = G.gateWalk; if (!g) return;
+  const g = G.gateWalk; if (!g || g.align < 1) return;   // beat one is her own body
   const k = clamp(g.t / GATE_WALK, 0, 1);
   // she walks into the gap and away: position lerps toward the vanishing point
   // in SCREEN space, scale falls off, and the last third fades to black so the
@@ -11433,7 +11512,10 @@ function drawWorldFrame() {
   // from behind, in screen space, shrinking toward the gap; leaving the live
   // body on as well put two of her on screen at once — the one going in, and
   // the one standing where she left.
-  if (player && !G.recharge && !G.gateWalk) {
+  // ...and she is drawn as herself through the align beat: the walk to the
+  // doorway is the ordinary body walking, and only the recede down the doorway
+  // is the special shot (see updateGateWalk)
+  if (player && !G.recharge && !(G.gateWalk && G.gateWalk.align >= 1)) {
     c.save();
     c.translate(-Math.round(camSX()), -Math.round(camSY()));
     player.draw(c);
