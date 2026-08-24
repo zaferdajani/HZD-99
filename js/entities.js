@@ -71,16 +71,107 @@ function contactShadow(c, cx, feetY, w, alpha) {
   c.beginPath(); c.ellipse(cx, feetY, w, w * 0.32, 0, 0, 7); c.fill();
   c.restore();
 }
+// ===========================================================================
+// IRREGULARITY IS NOT ELEVATION (owner, 2026-08-24)
+//
+//   "Since we already created irregular surfaces, these irregular surfaces
+//    should not be considered as all to be elevations. There should be room
+//    for running on irregular surfaces without jumping. So a minimum
+//    irregularity in the surface should not require a jump and certainly
+//    should not stop enemies from moving, because most of the enemies now,
+//    they cannot move on an irregular surface and it's trapped in creases
+//    created by the terrain surface."
+//
+// Two numbers answer it, and they are deliberately different.
+//
+// STEP_DOWN is how far below the feet ground still counts as ground — for the
+// ledge probe above. It is half a tile: enough that a rolling surface is one
+// continuous floor, small enough that a real drop is still a drop.
+//
+// STEP_UP is how high a body climbs without jumping, and it is set PER BODY
+// because the two kinds of body are asking different questions of a step.
+//
+//   THE PLAYER gets 20 px, and the number was measured rather than chosen.
+//
+//     A tile step-up COMPOSES with the heightfield: she does not stand on the
+//     tile top, she stands on the curve above it, so what stops her is never
+//     32 px, it is whatever is left of 32 after the curve has already lifted
+//     her. Measured in CV2, she was stopped dead for 473 frames out of 480 by
+//     TWO POINT NINE PIXELS of tile — the curve had carried her to within
+//     3 px of the step ahead and the square collider still called it a wall.
+//     That is the owner's sentence exactly: irregularity treated as elevation.
+//
+//     So every column of every room was asked what rise it presents to a body
+//     standing on the surface. The answer is a long tail concentrated at the
+//     bottom: 213 rises under 4 px, 201 more under 8, 181 under 12, 126 under
+//     16, 69 under 20 — and then it thins.
+//
+//     It was set to 20 first and tests/terrainrun.cjs found the boundary being
+//     honest rather than theoretical: a TWENTY-ONE PIXEL rise in CV1 still
+//     stopped her dead. Twenty-one pixels against a thirty-six pixel body is
+//     not a ledge by any reading, so the allowance moved to meet it. 24 is the
+//     line, and it is the same number the harness asserts — the contract is
+//     that nothing at or under the allowance stops her, so the test cannot
+//     drift away from the code.
+//
+//     It also cost W2's jump lesson its step, and that turned out to be the
+//     lesson's fault rather than the threshold's: measured, the step she is
+//     taught to jump presented ELEVEN PIXELS of rise. A tutorial demanding a
+//     jump over an 11 px lip was already teaching the wrong thing. The step is
+//     two tiles now (world.js) and reads as 43 — unmistakably a step, to the
+//     collider and to the eye. tests/wake.cjs holds the lesson's order.
+//   AN ENEMY gets a whole tile. Nothing is being taught to a crawler. A patrol
+//     stuck between two floor knobs is never a design decision, it is a bug
+//     with a pulse, so the walkers climb what the terrain generator scatters
+//     in front of them. They still cannot climb onto a '=' gantry from the
+//     side — that is a platform you jump up through, and letting a blob walk
+//     onto one would put enemies on every shelf in the game.
+// ===========================================================================
+const STEP_DOWN = 16;
+const PLAYER_STEP_UP = 24;
+const ENEMY_STEP_UP = TILE + 2;
+// The obstruction's top in this column, if the body can climb onto it: returns
+// the new feet Y, or null. Solid tiles only — never '=' — and it must be able
+// to STAND there, body and headroom, or the step is a wall after all.
+function stepUpTop(e, tx, lift) {
+  const feet = e.y + e.h;
+  const base = Math.floor((feet - 1) / TILE);
+  let top = null;
+  for (let k = 0; k <= 2; k++) {
+    const ty = base - k;
+    if (!solidAt(tx, ty)) { top = (ty + 1) * TILE; break; }
+  }
+  if (top == null) return null;
+  const rise = feet - top;
+  if (rise <= 0.5 || rise > lift) return null;
+  // headroom for the whole body at the new height, in this column and the one
+  // it is stepping out of — otherwise it is a crawlspace, not a step
+  const ny = top - e.h;
+  const b0 = Math.floor(ny / TILE), b1 = Math.floor((top - 1) / TILE);
+  const ox = Math.floor((e.x + e.w / 2) / TILE);
+  for (let ty = b0; ty <= b1; ty++) if (solidAt(tx, ty) || solidAt(ox, ty)) return null;
+  return top;
+}
 function moveEnt(e, dt) {
   const col = { l: 0, r: 0, u: 0, d: 0 };
   e.x += e.vx * dt;
   const t0 = Math.floor(e.y / TILE), t1 = Math.floor((e.y + e.h - 1) / TILE);
+  // ...and a blocked move is a STEP before it is a wall (see the note above).
+  const lift = (e.stepUp || 0);
   if (e.vx > 0) {
     const tx = Math.floor((e.x + e.w) / TILE);
-    for (let ty = t0; ty <= t1; ty++) if (solidAt(tx, ty)) { e.x = tx * TILE - e.w - 0.01; e.vx = 0; col.r = 1; break; }
+    for (let ty = t0; ty <= t1; ty++) if (solidAt(tx, ty)) {
+      const top = lift > 0 && e.vy >= -1 ? stepUpTop(e, tx, lift) : null;
+      if (top != null) { e.y = top - e.h - 0.01; e.vy = 0; col.d = 1; break; }
+      e.x = tx * TILE - e.w - 0.01; e.vx = 0; col.r = 1; break;
+    }
   } else if (e.vx < 0) {
     const tx = Math.floor(e.x / TILE);
-    for (let ty = t0; ty <= t1; ty++) if (solidAt(tx, ty)) { e.x = (tx + 1) * TILE + 0.01; e.vx = 0; col.l = 1; break; }
+    for (let ty = t0; ty <= t1; ty++) if (solidAt(tx, ty)) {
+      const top = lift > 0 && e.vy >= -1 ? stepUpTop(e, tx, lift) : null;
+      if (top != null) { e.y = top - e.h - 0.01; e.vy = 0; col.d = 1; break; }
+      e.x = (tx + 1) * TILE + 0.01; e.vx = 0; col.l = 1; break;
+    }
   }
   const prevB = e.y + e.h;
   e.y += e.vy * dt;
@@ -223,11 +314,59 @@ function onSpike(e) {
   for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) { const c2 = tileAt(tx, ty); if (c2 === '^' || c2 === 'v') return true; }
   return false;
 }
+// IS THERE FLOOR AHEAD? — the ledge probe every patrol turns on, and the
+// single line that stopped the whole roster walking.
+//
+// It used to sample ONE POINT, four pixels below the feet. That was correct
+// for as long as a body's feet sat exactly on a tile top, and it stopped being
+// correct the day the surface curve became a heightfield: a body standing on a
+// mound stands ABOVE the tile that holds the mound up — measured in A1, 9.4 px
+// above it, on ground that is perfectly flat — so the probe landed in the air
+// row and reported a cliff. Every walker in the game then turned round on
+// every frame of every room.
+//
+// Measured before it was believed, over ten seconds of patrol: the A1 crawler
+// covered 44 px and reversed 566 times; the A2 guard 38 px and 583; the C2
+// blob 9 px and 592. Six hundred frames, five hundred and ninety-two turns.
+// They were not trapped by the terrain's creases — they were vibrating in
+// place, and the owner watching them called it exactly right: since the
+// irregular surfaces arrived, the enemies cannot move.
+//
+// So the probe now asks the question the RESOLVER answers, in the two forms
+// ground can take:
+//
+//   THE HEIGHTFIELD, where the curve has added real material above the tile —
+//     the same test moveEnt uses to stand a body on it.
+//   THE TILES, scanned down a STEP rather than sampled at a point, because
+//     ground a few pixels below the feet is ground you walk onto, not a cliff
+//     you fall off. The scan stops at one step: a genuine drop still turns a
+//     patrol round, which is what keeps enemies off the pits.
+// TURN ROUND, OR STAND STILL — but never spin.
+//
+// Every patrol reads `col.d && !groundAhead(...)` and reverses. That is right
+// when the ground runs out ahead and wrong when it has run out BOTH ways: a
+// body on an island then flips on every frame forever, which is a different
+// bug with the same symptom as the probe bug above and survived the fix to it.
+// Measured on the A2 guard: 147 turns in 360 frames, with no ground ahead on
+// 124 of them. It reverses only if the other way is actually better.
+function ledgeTurn(e, dir) {
+  return !groundAhead(e, dir) && groundAhead(e, -dir);
+}
 function groundAhead(e, dir) {
-  const tx = Math.floor((dir > 0 ? e.x + e.w + 3 : e.x - 3) / TILE);
-  const ty = Math.floor((e.y + e.h + 4) / TILE);
-  const c = tileAt(tx, ty);
-  return c === '#' || c === 'B' || c === '=';
+  const ax = dir > 0 ? e.x + e.w + 3 : e.x - 3;
+  const feet = e.y + e.h;
+  if (typeof groundColumnAt === 'function') {
+    const gc = groundColumnAt(ax);
+    // gc[0] < gc[1] is the proof that a solid tile is holding this surface up
+    if (gc && gc[0] < gc[1] && gc[0] - feet <= STEP_DOWN && feet - gc[0] <= TILE) return true;
+  }
+  const tx = Math.floor(ax / TILE);
+  const t0 = Math.floor((feet + 2) / TILE), t1 = Math.floor((feet + STEP_DOWN) / TILE);
+  for (let ty = t0; ty <= t1; ty++) {
+    const c = tileAt(tx, ty);
+    if (c === '#' || c === 'B' || c === '=') return true;
+  }
+  return false;
 }
 function touchingWall(e, dir) {
   const tx = Math.floor((dir > 0 ? e.x + e.w + 2 : e.x - 2) / TILE);
@@ -709,6 +848,7 @@ class Player {
     this.cores = 5; this.volts = 33;
     this.coyote = 0; this.jbuf = 0; this.airJumps = 0;
     this.ccorr = true;   // moveEnt slides her around clipped ceiling corners
+    this.stepUp = PLAYER_STEP_UP;   // ...and walks her up irregularity, not up the jump lesson
     this.dashT = 0; this.dashCD = 0; this.iT = 0; this.atkCD = 0;
     this.swing = null; this.healT = 0; this.castCD = 0;
     this.dead = false; this.wallSlide = 0; this.trail = [];
@@ -4325,6 +4465,9 @@ class Enemy {
     const k = EKIND[kind];
     this.kind = kind; this.x = x; this.y = y; this.w = k.w; this.h = k.h;
     this.hypnoT = 0; this.stagT = 0; this.faceVis = 1;
+    // a walker climbs what the terrain scatters in front of it; a flier has no
+    // feet to put on it and would 'step up' out of its own flight path
+    this.stepUp = (kind === 'flier' || kind === 'bat') ? 0 : ENEMY_STEP_UP;
     // EVERY TIMER STARTS AT A NUMBER. The new wind-ups read `(this.atkCD -= dt)`
     // and `this.crouchT <= 0` — and on an undefined field the first gives NaN
     // (and NaN <= 0 is false, forever) while the second is false immediately.
@@ -4480,7 +4623,7 @@ class Enemy {
         }
         const col = moveEnt(this, dt);
         if (col.l) this.dir = 1; else if (col.r) this.dir = -1;
-        else if (col.d && !groundAhead(this, this.dir) && this.lungeT <= 0) this.dir *= -1;
+        else if (col.d && this.lungeT <= 0 && ledgeTurn(this, this.dir)) this.dir *= -1;
         break;
       }
       // The blob asks: ARE YOU STILL STANDING THERE? It is slow and it does not
@@ -4499,7 +4642,7 @@ class Enemy {
         }
         const col = moveEnt(this, dt);
         if (col.l) this.dir = 1; else if (col.r) this.dir = -1;
-        else if (col.d && !groundAhead(this, this.dir)) this.dir *= -1;
+        else if (col.d && ledgeTurn(this, this.dir)) this.dir *= -1;
         break;
       }
       // The flier asks: CAN YOU MOVE OUT FROM UNDER SOMETHING? It takes station

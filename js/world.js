@@ -343,14 +343,40 @@ const ROOMS = {
       // first the hop is offered, then it is asked for, and the gate stands
       // alone with neither of them on it
       hline(g, 10, 15, 11, '=');
-      // THE STEP — one tile, inside one jump. A chassis lying in the road now
-      // rather than an extruded block: the pothole-at-the-front-door reading
-      // was fixed by moving it, and this fixes what it is made of.
-      hull(g, 18, 23, 1, 5);
+      // THE STEP — TWO tiles now, and the second one is what makes it a step.
+      //
+      // One tile stopped being a step the day the surface curve became a
+      // heightfield. Measured against a body standing on the curve in front of
+      // it, a one-tile rise here presented ELEVEN PIXELS: the curve had already
+      // carried her most of the way up its own face, so the tutorial was asking
+      // for a jump over a kerb. Meanwhile the same eleven pixels, and less —
+      // 2.9 px of tile in CV2 — were stopping her dead everywhere the terrain
+      // merely breathed, which is the owner's report (2026-08-24): irregularity
+      // is not elevation.
+      //
+      // entities.js now walks any body up 20 px without a jump. That frees the
+      // terrain, and it costs this step its authority — so the step earns back
+      // what it can. Two tiles is 43 px of rise: a chassis lying in the road,
+      // one course higher, which still READS as something in her way.
+      //
+      // Being honest about what it is not: hull() lays a heapProfile, so it
+      // ramps a tile at a time by construction and she runs up it rather than
+      // being stopped by it. That is deliberate (the widening made every heap
+      // climbable on purpose) and it is fine, because the jump lesson has never
+      // been taught by a wall — it completes on the player actually pressing
+      // jump (tests/lesson.cjs), and the shelf at row 11 above is what offers
+      // the hop. The step's job is to be the beat where the road stops being
+      // flat, and at two tiles it still is one.
+      hull(g, 18, 23, 2, 5);
       // ...and the THRESHOLD, where the comment always said it should be: the
       // ground rises a step AS SHE REACHES THE GATES, so the approach ends on
       // a made surface rather than on more of the same dirt. Walk-up height —
       // it never asks for a jump she has not been taught yet.
+      //
+      // It stays ONE tile, and it is now walk-up height in the collider as
+      // well as in this comment. That sentence was aspirational for as long as
+      // a tile was a wall; the step-up allowance is what finally makes the two
+      // heights mean the two different things the room always intended.
       hull(g, 26, 34, 1, 9);
       // PAST THE GATE: the spoil the city pushed out against its own wall.
       // Nothing is behind it and nothing needs to be — the gate is at 30 and

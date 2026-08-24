@@ -128,16 +128,32 @@ const check = (name, ok, detail) => {
     // the harness was really reporting the position of her own lamp. The same
     // trick tests/shopread.cjs settled on: pull the fixture out of the room,
     // redraw, and the difference is exactly what it was contributing.
+    // ...and she is PINNED while it happens. Her lamp cancels in a
+    // take-it-away pair only if she has not moved between the halves, and she
+    // does move: with the terrain step-up (entities.js, 2026-08-24) she walks
+    // up rises that used to hold her, so a couple of seconds of settling
+    // carried her toward the pillar and put her own light inside the sample.
+    // The pillar's contribution then measured x1.28 instead of x4.35 — not
+    // because the pillar dimmed, but because the box was already lit. Held
+    // still, the pair differs by the fixture and by nothing else.
+    const hold = async (n) => {
+      const px0 = player.x, py0 = player.y;
+      for (let i = 0; i < n; i++) {
+        player.x = px0; player.y = py0; player.vx = 0; player.vy = 0;
+        await new Promise(k => requestAnimationFrame(k));
+      }
+      player.x = px0; player.y = py0; player.vx = 0; player.vy = 0;
+    };
     const away = async (find, box) => {
       const s2 = G.statics.find(find);
       if (!s2) return null;
       const b = box(s2);
-      await rest(20);
+      await hold(20);
       const on = lum(b[0], b[1], b[2], b[3]);
       const i = G.statics.indexOf(s2);
-      G.statics.splice(i, 1); await rest(20);
+      G.statics.splice(i, 1); await hold(20);
       const off = lum(b[0], b[1], b[2], b[3]);
-      G.statics.splice(i, 0, s2); await rest(8);
+      G.statics.splice(i, 0, s2); await hold(8);
       return { on, off, at: [Math.round(b[0]), Math.round(b[1])] };
     };
     // THE BEACON. She stands thirteen tiles short of it — well outside her own
