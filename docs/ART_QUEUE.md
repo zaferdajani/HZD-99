@@ -178,6 +178,36 @@ written, the code that consumes them is in and tested. **Only the owner can
 clear this.** Everything downstream of it is one `vidstrip` cut and one line in
 `HERO_TRANS` per strip.
 
+## 2ad. FOUR OF THE FIVE ZONE GATES ARE PARKED AGAINST A WALL ✱ MEASURED 2026-08-25 — for the code session
+
+The six repainted gate plates were keyed and the game rebuilt, and in five of
+the six rooms the screen barely changed. The art was not the problem: the plate
+loads, the door exists, the prompt is up.
+
+The doors are at the room edge. `GATE_ROOM` puts B4 at `at: 0.86`, C3 at 0.12,
+D3 at 0.86, E3 at 0.86 and X1 at 0.45, and the gate plate is drawn 591 px wide
+centred on the door. The camera clamps to the room, so at 0.86 of a 1024-wide
+room in a 960-wide view the plate hangs off the side of the screen. Measured, as
+the share of the frame that changes when the plate is withheld:
+
+| room | door at | frame that is plate |
+|---|---|---|
+| X1 | 0.45 | **~15%** |
+| C3 | 0.12 | 0.16% |
+| B4 | 0.86 | 0.09% |
+| D3 | 0.86 | 0.09% |
+| E3 | 0.86 | 0.09% — a 93 px sliver at the border |
+
+X1 is the one door standing in open room, and it is the one whose monument you
+can see. The other four are fired, keyed, shipped art that a player never gets a
+look at.
+
+**This is a placement question, not an art question, so it belongs to the code
+session.** Either the doors move off the wall, or the camera is allowed to lead
+past the clamp when she is at a depth door, or the plate is drawn against the
+room edge instead of centred on the door. Any of the three shows the art; none
+of them is the art session's to choose.
+
 ## 2ac. THE HOUSE STYLE — Hollow Knight staging, Mega Man X energy ✱ PILOT FIRED 2026-08-25
 
 **The owner's brief:** *"I need it more lively, but as a modern Mega Man X
