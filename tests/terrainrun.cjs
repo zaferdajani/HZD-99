@@ -112,6 +112,17 @@ const check = (name, ok, detail) => {
       // and this harness duly reported 0 px in a room that walks fine on its
       // own, naming a different room each run. What the terrain does is a fact
       // about SIM time; the frame rate is a fact about the laptop.
+      // ...AND THE GAME HAS TO BE PLAYING. update() simulates the player only
+      // inside `if (G.state === 'PLAY')`, while the sim CLOCK advances
+      // regardless — so a room that enters holding a toast or a line of
+      // dialogue reads as five full seconds in which she did not take a step,
+      // which is indistinguishable from a floor that stopped her. A1 is the
+      // tutorial floor, with a trader and toasts in it, and A1 is where this
+      // kept landing. Pinned the way tests/grammar.cjs pins it, for the same
+      // reason: the state is not what this harness is asking about.
+      const stDesc = Object.getOwnPropertyDescriptor(G, 'state');
+      Object.defineProperty(G, 'state', { get: () => 'PLAY', set: () => {}, configurable: true });
+      G.dialog = null; G.toasts = [];
       let last = player.x, run = 0, travelled = 0;
       const hits = [];
       const t0 = G.simClock || 0;
@@ -130,6 +141,8 @@ const check = (name, ok, detail) => {
         if (run === 12) hits.push(Math.round(riseAhead()));
       }
       keys.ArrowRight = 0;
+      if (stDesc) Object.defineProperty(G, 'state', stDesc);
+      else { delete G.state; G.state = 'PLAY'; }
       // ...and if the clock never moved, say THAT rather than blaming the floor.
       const simRan = +(((G.simClock || 0) - t0)).toFixed(2);
       out.stalls.push({ room: id, travelled: Math.round(travelled), rises: hits, simRan, frames });
