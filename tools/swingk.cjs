@@ -27,9 +27,9 @@ const CELLMAP = { claw_1: 13, claw_2: 14, finisher: 15, burst: 17 };
 // re-picked whenever the cell count changes.
 const DEF = {
   claw_1: ['assets/characters/hero/swing/claw_1.webp', 0],
-  claw_2: ['assets/characters/hero/swing/claw_2.webp', 4],
+  claw_2: ['assets/characters/hero/swing/claw_2.webp', 3],
   finisher: ['assets/characters/hero/swing/finisher.webp', 0],
-  burst: ['assets/characters/hero/swing/burst.webp', 7],
+  burst: ['assets/characters/hero/swing/burst.webp', 6],
 };
 const args = process.argv.slice(2);
 const STRIPS = args.length ? Object.fromEntries(args.map(a => {

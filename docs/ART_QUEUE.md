@@ -178,6 +178,54 @@ written, the code that consumes them is in and tested. **Only the owner can
 clear this.** Everything downstream of it is one `vidstrip` cut and one line in
 `HERO_TRANS` per strip.
 
+## 2aa. THE TAKES CONTAIN FEWER PICTURES THAN THEY CONTAIN FRAMES ✱ MEASURED 2026-08-24
+
+**The owner, from a contact sheet:** *"the images that Higgsfield is generating
+for the artwork does not always create the correct sequence of the movements of
+the character. Most of them are actually replicated... instead of a sequence of
+images to generate a movement."*
+
+**He is right, and `tools/framedupe.cjs` now puts a number on it.** Measured on
+the strips as shipped, cell against the cell before it:
+
+| strip | cells | DEAD (same drawing twice) |
+|---|---|---|
+| patch | 24 | **19** |
+| mono | 24 | **12** |
+| lumen | 24 | 4 |
+| claw_1 / claw_2 / burst | 13 / 11 / 10 | 1 each |
+| servo, sage, ratchet, finisher | — | 0 |
+
+**Thirty-eight dead cells**, and the cause was mine: sampling on a CLOCK. A
+generated take is not a metronome — the model holds a pose, moves fast, holds
+again — so N evenly spaced samples spend most of their cells inside the holds
+and skip through the part where the body actually moves. Doubling the count
+(§2z) made the two worst takes worse.
+
+**The frames are chosen by CONTENT now** — `tools/vidstrip.cjs auto:N` walks the
+window finely and keeps a frame only when it differs from the last one KEPT. N
+is a ceiling, not a count. Dead cells across the whole game: **38 → 1**, and
+`tests/frames.cjs` fails the build if a strip of repeats is ever cut again.
+
+**WHAT THIS SAYS ABOUT THE GENERATION, which is the owner's real point.** The
+tool reports how much movement each take actually contains, and two of them are
+duds:
+
+- **patch — 10 distinct pictures in five seconds**, and the threshold had to
+  drop to 1.5% to find even those.
+- **mono — 9.**
+- servo, sage and lumen genuinely hold 24 each at full threshold, as do all
+  four attacks.
+
+So it is not the model in general; it is those two takes. **`patch` and `mono`
+need re-firing with the brief pushed toward continuous motion** — bigger travel,
+no held beats — and they go on THE FIRING LIST. Until then they carry their real
+frames and nothing else, which is why `NPC_LOOP_CELLS` is per-body.
+
+**And every future take should be measured before it is keyed.** `framedupe`
+against a fresh cut says in one line whether the generator gave a movement or a
+photograph with a wobble.
+
 ## 2z. THE FILMS WERE BEING PLAYED AT HALF THEIR FRAME RATE ✔ SHIPPED 2026-08-24
 
 **The owner:** *"use the films to actually improve the actual ingame move by

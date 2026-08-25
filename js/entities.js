@@ -759,32 +759,39 @@ const HERO_TRANS = {
 // makes the arc read as one move at any jump height, including the clipped ones
 // a variable-height jump produces. 53 pose changes a minute collapse into it.
 let HERO_AIR_STRIP = null;     // { key: 'transAir', cells: 6, k: 1, up: 770, down: 700 }
-// AND THE CELL COUNT IS THE FILM'S, NOT A ROUND NUMBER (owner: "use the films
-// to actually improve the actual ingame move by maximizing frames for each
-// move"). Six was chosen before any of these clips existed. They are 24 fps and
-// the blows run 0.30 to 0.54 seconds, so each take HELD nine to thirteen
-// distinct frames of the move and the game was showing six of them. Re-cut at
-// the source frame rate, every frame the camera caught is on screen: claw_1
-// went from six drawings to thirteen across the same 240 ms, which is 18 ms a
-// frame instead of 40.
+// THE CELL COUNT IS HOW MANY DIFFERENT PICTURES THE TAKE ACTUALLY HOLDS.
 //
-// Past that there is nothing to gain — a strip longer than the moving part of
-// its clip is duplicate frames wearing a bigger file. Each window is the part
-// of that take where the body is actually moving, and each count is exactly
-// that window times 24.
+// Two owner reports, and the second corrected the first. "Use the films to
+// actually improve the actual ingame move by maximizing frames for each move" —
+// so the strips were re-cut at the source frame rate, six cells becoming
+// thirteen. Then: "the images that Higgsfield is generating does not always
+// create the correct sequence of the movements... a big percentage of what is
+// inside is replicated images."
 //
-// The reference cell each k is measured against MOVED with the recount: it is a
-// moment in the move, not a fixed slot, so tools/swingk.cjs is re-run and its
-// DEF table re-pointed whenever a strip is re-cut.
-//   claw_1   sheet 140/169  strip 257/320 (13 cells, ref 0 — the guard)
-//   claw_2   sheet 140/169  strip 310/320 (11 cells, ref 4 — the arm extended)
+// He was right, and tools/framedupe.cjs put a number on it: across the shipped
+// strips, THIRTY-EIGHT cells were the same drawing as the cell before them —
+// 19 of patch's 24 and 12 of mono's. More cells was the wrong instrument. A
+// generated take is not a metronome: the model holds a pose, moves fast, holds
+// again, so sampling on a CLOCK spends cells inside the holds and skips the
+// part where the body moves.
+//
+// The frames are chosen by CONTENT now (tools/vidstrip.cjs `auto:N`): walk the
+// window finely and keep a frame only when it differs from the last one KEPT.
+// N is a CEILING, not a count — a take with fewer distinct pictures yields a
+// shorter strip, which is both the better animation and the honest report on
+// what the take contains. Dead cells across every strip in the game: 38 -> 1.
+//
+// The reference cell each k is measured against moves with every recount, so
+// tools/swingk.cjs is re-run and its DEF re-pointed whenever a strip is re-cut.
+//   claw_1   sheet 140/169  strip 257/320 (11 cells, ref 0 — the guard)
+//   claw_2   sheet 140/169  strip 310/320 (11 cells, ref 3 — the arm extended)
 //   finisher sheet 131/169  strip 256/320 ( 9 cells, ref 0 — both arms up)
-//   burst    sheet 132/169  strip 247/320 (10 cells, ref 7 — arms flung wide)
+//   burst    sheet 132/169  strip 247/320 ( 9 cells, ref 6 — arms flung wide)
 const SWING_STRIP = {
-  claw_1:   { key: 'swingClaw1',    cells: 13, k: 1.0315 },
+  claw_1:   { key: 'swingClaw1',    cells: 11, k: 1.0315 },
   claw_2:   { key: 'swingClaw2',    cells: 11, k: 0.8551 },
   finisher: { key: 'swingFinisher', cells: 9,  k: 0.9689 },
-  burst:    { key: 'swingBurst',    cells: 10, k: 1.0119 },
+  burst:    { key: 'swingBurst',    cells: 9,  k: 1.0119 },
 };
 // ---- HOW FAR ONE STEP CARRIES HER, OFF THE PLATES THEMSELVES ---------------
 //

@@ -186,6 +186,88 @@ const check = (name, ok, detail) => {
       'declared ' + r.declared + ' cells, the sheet holds ' + (r.actual === null ? 'nothing yet' : r.actual));
   }
 
+  // ---- 1c. EVERY CELL IS A NEW PICTURE -------------------------------------
+  // The owner, looking at a contact sheet of a generated take: "the images that
+  // Higgsfield is generating does not always create the correct sequence of the
+  // movements... a big percentage of what is inside is replicated images."
+  //
+  // He was right, and it was invisible from inside the game: a strip whose
+  // cells repeat has the right count, the right size and the right anchor, and
+  // plays as a move that stutters and then jumps. Measured when he said it,
+  // THIRTY-EIGHT cells across the shipped strips were the same drawing as the
+  // cell before them — 19 of patch's 24 and 12 of mono's.
+  //
+  // The cause was sampling on a clock; the fix is choosing frames by content
+  // (tools/vidstrip.cjs `auto:N`). This is the guard that keeps it fixed, and
+  // it covers every strip in the game rather than the four attacks, because the
+  // defect is a property of how a strip was CUT and every strip is cut the same
+  // way.
+  const dupes = await page.evaluate(async () => {
+    const keys = [];
+    for (const n of Object.keys(SWING_STRIP)) keys.push([n, SWING_STRIP[n].key]);
+    if (typeof NPC_LOOP !== 'undefined')
+      for (const n of Object.keys(NPC_LOOP)) keys.push([n, NPC_LOOP[n]]);
+    const out = [];
+    for (const [name, key] of keys) {
+      mediaFetch(key);
+      const im = await new Promise(ok => {
+        const t0 = Date.now();
+        const tick = () => {
+          const i2 = MEDIA_RAW[key];
+          if (i2 && i2.naturalWidth) return ok(i2);
+          if (Date.now() - t0 > 8000) return ok(null);
+          setTimeout(tick, 30);
+        };
+        tick();
+      });
+      if (!im) { out.push({ name, err: 'not loaded' }); continue; }
+      const H = im.naturalHeight, n = Math.round(im.naturalWidth / H), W = H;
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const cx2 = cv.getContext('2d', { willReadFrequently: true });
+      const S = 40, sig = [];
+      for (let i = 0; i < n; i++) {
+        cx2.clearRect(0, 0, W, H);
+        cx2.drawImage(im, i * W, 0, W, H, 0, 0, W, H);
+        const d = cx2.getImageData(0, 0, W, H).data;
+        const a = new Float32Array(S * S), v = new Float32Array(S * S);
+        const bx = W / S, by = H / S;
+        for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+          let sa = 0, sv = 0, cnt = 0;
+          for (let yy = Math.floor(y * by); yy < Math.floor((y + 1) * by); yy += 3)
+            for (let xx = Math.floor(x * bx); xx < Math.floor((x + 1) * bx); xx += 3) {
+              const j = ((yy * W + xx) << 2);
+              sa += d[j + 3] / 255;
+              sv += (0.2126 * d[j] + 0.7152 * d[j + 1] + 0.0722 * d[j + 2]) / 255 * (d[j + 3] / 255);
+              cnt++;
+            }
+          a[y * S + x] = cnt ? sa / cnt : 0;
+          v[y * S + x] = cnt ? sv / cnt : 0;
+        }
+        sig.push({ a, v });
+      }
+      let dead = 0, worst = 100, at = -1;
+      for (let i = 1; i < n; i++) {
+        let d2 = 0, on = 0;
+        for (let q = 0; q < S * S; q++) {
+          const cov = Math.max(sig[i - 1].a[q], sig[i].a[q]);
+          if (cov < 0.02) continue;
+          d2 += Math.abs(sig[i - 1].a[q] - sig[i].a[q]) * 0.5 + Math.abs(sig[i - 1].v[q] - sig[i].v[q]);
+          on += cov;
+        }
+        const pc = on ? (d2 / on) * 100 : 0;
+        if (pc < worst) { worst = pc; at = i; }
+        if (pc < 2.5) dead++;
+      }
+      out.push({ name, n, dead, worst: +worst.toFixed(1), at });
+    }
+    return out;
+  });
+  const deadTotal = dupes.reduce((a, d) => a + (d.dead || 0), 0);
+  check('every strip in the game is a sequence, not a flip-book of one picture',
+    deadTotal === 0 && !dupes.some(d => d.err),
+    dupes.map(d => d.err ? d.name + ' ' + d.err
+      : d.name + ' ' + d.n + 'c' + (d.dead ? ' DEAD:' + d.dead : '') ).join('  '));
+
   // ---- 2. the transition mechanism ----------------------------------------
   // A synthetic strip, because the point is the WIRING: that the cell drawn is
   // the cell the clock asks for. Six cells that differ only in which sixth of

@@ -28,7 +28,13 @@ const fs = require('fs'), path = require('path');
 (async () => {
   const [inp, out, nArg, cellArg, thrArg, fromArg, toArg] = process.argv.slice(2);
   if (!inp || !out) { console.error('usage: vidstrip.cjs <in.mp4> <out.png> [frames] [cell] [thr]'); process.exit(2); }
-  const N = parseInt(nArg || '12', 10), CELL = parseInt(cellArg || '320', 10);
+  // `auto` picks the frames by content instead of by clock — see the long note
+  // in the sampling loop. The number that follows it is the CEILING, not the
+  // count: a take with fewer distinct pictures in it yields a shorter strip.
+  const AUTO = /^auto/i.test(String(nArg || ''));
+  const N = AUTO ? parseInt(String(nArg).replace(/^auto:?/i, '') || '24', 10)
+                 : parseInt(nArg || '12', 10);
+  const CELL = parseInt(cellArg || '320', 10);
   // A WINDOW, because a swing is not a loop. An idle cycle fills its whole
   // clip and can be sampled end to end; a STRIKE is a fraction of one — the
   // generator is asked for several swings so at least one comes out clean, and
@@ -50,7 +56,8 @@ const fs = require('fs'), path = require('path');
   // error arrives at the read rather than at the load.
   try { await page.goto(new URL(SRC).origin + '/'); } catch (e) {}
 
-  const res = await page.evaluate(async ({ N, CELL, THR, SRC, FROM, TO }) => {
+  const res = await page.evaluate(async ({ N: N0, CELL, THR, SRC, FROM, TO, AUTO }) => {
+    let N = N0, autoThr = null;
     const v = document.createElement('video');
     v.muted = true; v.playsInline = true;
     v.src = SRC;
@@ -75,9 +82,90 @@ const fs = require('fs'), path = require('path');
     // than she is in places. Mass does: a horizon contributes two pixels to a
     // column, a shoulder contributes three hundred.
     const colMass = new Float64Array(W), rowMass = new Float64Array(H);
+    // ---- WHICH MOMENTS TO CUT, and this is the whole difference between a
+    // sequence and a flip-book of the same picture.
+    //
+    // The owner, looking at a contact sheet of a take: "the images that
+    // Higgsfield is generating does not always create the correct sequence of
+    // the movements... a big percentage of what is inside of it is replicated
+    // images." Measured with tools/framedupe.cjs on the shipped strips he was
+    // right and it was worse than one sheet shows: 19 of patch's 24 cells and
+    // 12 of mono's were the same drawing as the cell before them.
+    //
+    // The cause is sampling on a CLOCK. A generated take is not a metronome —
+    // the model holds a pose, moves fast, holds again — so N evenly spaced
+    // samples spend most of their cells inside the holds and skip through the
+    // part where the body actually moves. The cell count comes out right and
+    // the pictures in it are wrong, and on screen that is a move that stutters
+    // and then jumps.
+    //
+    // So the frames are chosen by CONTENT: walk the window finely, and keep a
+    // frame only when it differs from the last one KEPT by more than a
+    // threshold. Every cell is then a picture the player has not seen, which is
+    // what "a sequence of images to generate a movement" means. If the take
+    // does not hold N different pictures, the strip comes out SHORTER rather
+    // than padded — a shorter strip of real frames plays better than a long one
+    // of repeats, and it is also the honest report on what the take contains.
+    const t0w = (FROM === null ? 0 : FROM), t1w = (TO === null ? D : Math.min(TO, D));
+    let times = [];
+    if (AUTO) {
+      // a cheap signature per candidate: coarse alpha+value, on the raw frame.
+      // It only has to rank "same picture" against "different picture".
+      const SG = 40;
+      const sigOf = () => {
+        const im2 = c.getImageData(0, 0, W, H).data;
+        const a = new Float32Array(SG * SG);
+        const bx = W / SG, by = H / SG;
+        for (let y = 0; y < SG; y++) for (let x = 0; x < SG; x++) {
+          let sv = 0, cnt = 0;
+          for (let yy = Math.floor(y * by); yy < Math.floor((y + 1) * by); yy += 3)
+            for (let xx = Math.floor(x * bx); xx < Math.floor((x + 1) * bx); xx += 3) {
+              const j = ((yy * W + xx) << 2);
+              sv += (im2[j] * 2 + im2[j + 1] * 5 + im2[j + 2]) / 8 / 255;
+              cnt++;
+            }
+          a[y * SG + x] = cnt ? sv / cnt : 0;
+        }
+        return a;
+      };
+      const dist = (p, q) => {
+        let d2 = 0, on = 0;
+        for (let i = 0; i < SG * SG; i++) {
+          const cov = Math.max(p[i], q[i]);
+          if (cov < 0.02) continue;         // both empty here: the black field
+          d2 += Math.abs(p[i] - q[i]); on += cov;
+        }
+        return on ? (d2 / on) * 100 : 0;
+      };
+      const STEP = 1 / 48;                  // finer than any source frame rate
+      const cand = [];
+      for (let t = t0w; t <= t1w + 1e-6; t += STEP) {
+        await seek(Math.min(D - 0.02, t));
+        c.clearRect(0, 0, W, H); c.drawImage(v, 0, 0, W, H);
+        cand.push({ t, sig: sigOf() });
+      }
+      // greedy: take the first, then every frame far enough from the last kept.
+      // The threshold is lowered until at least a third of the asked-for cells
+      // survive, so a genuinely still take still yields SOMETHING rather than
+      // one cell — and the report says which threshold it needed.
+      let thr = 4.0;
+      for (; thr >= 0.6; thr -= 0.5) {
+        times = [cand[0].t];
+        let last = cand[0].sig;
+        for (let i = 1; i < cand.length; i++) {
+          if (dist(last, cand[i].sig) >= thr) { times.push(cand[i].t); last = cand[i].sig; }
+          if (times.length >= N) break;
+        }
+        if (times.length >= Math.max(3, Math.ceil(N / 3))) break;
+      }
+      autoThr = thr;
+      N = times.length;
+    } else {
+      for (let i = 0; i < N; i++)
+        times.push(Math.min(D - 0.02, t0w + (i + 0.5) * (t1w - t0w) / N));
+    }
     for (let i = 0; i < N; i++) {
-      const t0w = (FROM === null ? 0 : FROM), t1w = (TO === null ? D : Math.min(TO, D));
-      await seek(Math.min(D - 0.02, t0w + (i + 0.5) * (t1w - t0w) / N));
+      await seek(times[i]);
       c.clearRect(0, 0, W, H);
       c.drawImage(v, 0, 0, W, H);
       const im = c.getImageData(0, 0, W, H), d = im.data;
@@ -239,13 +327,17 @@ const fs = require('fs'), path = require('path');
       sc.drawImage(one, x0, y0, bw, bh,
         i * CELL + (CELL - dw) / 2, CELL - dh, dw, dh);
     }
-    return { png: strip.toDataURL('image/png'), N, CELL, src: W + 'x' + H, dur: +D.toFixed(2), box: bw + 'x' + bh, feet, foot };
-  }, { N, CELL, THR, SRC, FROM, TO });
+    return { png: strip.toDataURL('image/png'), N, CELL, src: W + 'x' + H, dur: +D.toFixed(2),
+             box: bw + 'x' + bh, feet, foot, autoThr,
+             times: times.map(t => +t.toFixed(3)) };
+  }, { N, CELL, THR, SRC, FROM, TO, AUTO });
 
   if (res.err) { console.error('  ' + res.err); process.exit(1); }
   fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
   fs.writeFileSync(out, Buffer.from(res.png.split(',')[1], 'base64'));
   console.log('  ' + out + '  ' + res.N + ' cells of ' + res.CELL
+    + (res.autoThr !== null && res.autoThr !== undefined
+       ? '  [auto, kept at ' + res.autoThr.toFixed(1) + '% apart]' : '')
     + '  (source ' + res.src + ', ' + res.dur + 's, subject ' + res.box
     + ', foot row ' + res.foot + ' of ' + res.feet.join('/') + ')  '
     + (fs.statSync(out).size / 1024 | 0) + ' KB');

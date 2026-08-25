@@ -433,16 +433,28 @@ const NPC_LOOP = {
 // Ratchet's loop was cut in an earlier pass and its clip is not in the
 // scratchpad any more, so he keeps his twelve until he is re-fired — which is
 // exactly why this is a table and not a constant.
-const NPC_LOOP_CELLS = { servo: 24, mono: 24, patch: 24, sage: 24, lumen: 24 };
+// ...and each number is what tools/framedupe.cjs measured that take to CONTAIN,
+// not what was asked for. servo, sage and lumen really do hold 24 different
+// pictures; patch's whole five seconds holds ten and mono's holds nine, and
+// padding them to 24 put the same drawing on screen twice in a row nineteen
+// times and twelve times. Those two takes need re-firing — they are on THE
+// FIRING LIST — and until then they carry their real frames and nothing else.
+const NPC_LOOP_CELLS = { servo: 24, mono: 9, patch: 10, sage: 24, lumen: 24 };
 function npcLoopCells(id) { return NPC_LOOP_CELLS[id] || 12; }
 // ...and the tempo doubles with the cell count, or the same job plays at half
 // speed: fps is COLUMNS a second and run is a burst measured in COLUMNS, so
 // twice as many columns for the same movement needs twice as many of both to
 // take the same time. The holds are seconds and do not move.
+// ...and the tempo scales with each body's OWN cell count, or the same job
+// plays at the wrong speed: fps is columns a second and run is a burst measured
+// in columns, so a strip with twice the columns needs twice the rate to cover
+// the same movement in the same time — and one with three quarters of them
+// needs three quarters. Every pair below is the original twelve-cell number
+// times cells/12. The holds are seconds and do not move.
 const NPC_WORK = {
   servo: { fps: [12, 18], run: [20, 60], hold: [0.30, 0.90] },
-  mono:  { fps: [8, 12],  run: [12, 36], hold: [0.60, 1.60] },
-  patch: { fps: [18, 28], run: [28, 80], hold: [0.18, 0.55] },
+  mono:  { fps: [3, 5],   run: [5, 14],  hold: [0.60, 1.60] },
+  patch: { fps: [8, 12],  run: [12, 33], hold: [0.18, 0.55] },
   sage:  { fps: [6, 10],  run: [10, 28], hold: [1.00, 2.40] },
   lumen: { fps: [8, 14],  run: [16, 40], hold: [0.50, 1.40] },
 };
