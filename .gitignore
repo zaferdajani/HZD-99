@@ -13,3 +13,7 @@ ios/App/Pods/
 .claude/agents-run/
 build/
 reference/movement/
+
+# the art session's working folder: 74 MB of intermediate plates and contact
+# sheets. Anything worth keeping is derived into assets/source/ as jpg first.
+scratchpad/
