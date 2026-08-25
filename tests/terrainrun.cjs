@@ -86,14 +86,41 @@ const check = (name, ok, detail) => {
       if (!ROOMS[id]) continue;
       await enter(id);
       G.enemies = []; G.boss = null; G.projs = [];
-      player.x = 4 * TILE; player.y = (ROOMS[id].h - 4) * TILE;
+      // SHE IS PUT ON THE FLOOR THIS ROOM ACTUALLY HAS, not on a fixed row.
+      //
+      // `h - 4` is the floor in the meadow and it is not the floor everywhere.
+      // In C2 it drops her inside the geometry: she spends the first three
+      // seconds being ejected — the trace reads -19, -27, -31 px before she
+      // ever moves forward — and then has to make the 100 px back before the
+      // measurement counts anything. She came in at 104 px stepped by hand and
+      // at 0 under the frame clock, which is a harness reporting where it threw
+      // her rather than what the terrain does.
+      player.x = 4 * TILE;
+      const col = Math.floor((player.x + player.w / 2) / TILE);
+      let floorTy = null;
+      for (let ty = ROOMS[id].h - 1; ty >= 0; ty--) if (solidAt(col, ty)) { floorTy = ty; break; }
+      player.y = (floorTy == null ? ROOMS[id].h - 4 : floorTy) * TILE - player.h - 1;
       player.vx = 0; player.vy = 0;
       await rest(30);
+      // ...and she has to be STANDING before the run means anything. A body
+      // still settling is a body whose first frames of travel are the fall.
+      for (let g = 0; g < 90 && !player.on; g++) await new Promise(k => requestAnimationFrame(k));
+      // THE RUN IS FIVE SECONDS OF THE GAME'S CLOCK, NOT 300 OF THE MACHINE'S.
+      //
+      // Counting frames measures the machine. Under the full suite the frames
+      // are fewer and longer, so 300 of them can cover a fraction of the walk —
+      // and this harness duly reported 0 px in a room that walks fine on its
+      // own, naming a different room each run. What the terrain does is a fact
+      // about SIM time; the frame rate is a fact about the laptop.
       let last = player.x, run = 0, travelled = 0;
       const hits = [];
-      for (let f = 0; f < 300; f++) {
+      const t0 = G.simClock || 0;
+      const wallStop = performance.now() + 20000;   // backstop: a stalled page ends, never hangs
+      let frames = 0;
+      while ((G.simClock || 0) - t0 < 5 && performance.now() < wallStop) {
         keys.ArrowRight = 1;                        // direction only. Never jump.
         await new Promise(k => requestAnimationFrame(k));
+        frames++;
         if (G.roomId !== id || player.dead) break;  // she walked out; not a stall
         const dx = player.x - last;
         travelled += Math.max(0, dx);
@@ -103,7 +130,9 @@ const check = (name, ok, detail) => {
         if (run === 12) hits.push(Math.round(riseAhead()));
       }
       keys.ArrowRight = 0;
-      out.stalls.push({ room: id, travelled: Math.round(travelled), rises: hits });
+      // ...and if the clock never moved, say THAT rather than blaming the floor.
+      const simRan = +(((G.simClock || 0) - t0)).toFixed(2);
+      out.stalls.push({ room: id, travelled: Math.round(travelled), rises: hits, simRan, frames });
     }
 
     // ---- 2: the walkers walk -------------------------------------------------
@@ -155,6 +184,12 @@ const check = (name, ok, detail) => {
   // already proves every stop is a real one. CV2's is a 58 px cliff four tiles
   // in — she is meant to jump it, and this harness never presses jump. What
   // this catches is the failure that actually happened: 40 px in 480 frames.
+  // a room whose clock never advanced was never measured — that is a stalled
+  // page, and reporting it as terrain would be a lie about the game
+  const unrun = r.stalls.filter(s => s.simRan < 4);
+  check('the clock ran in every room', unrun.length === 0,
+        unrun.length ? unrun.map(s => s.room + ' only ' + s.simRan + 's of sim in ' + s.frames + ' frames').join(', ')
+                     : r.stalls.map(s => s.room + ' ' + s.simRan + 's/' + s.frames + 'f').join('  '));
   const dead = r.stalls.filter(s => s.travelled < 100);
   check('...and she gets moving in every room she was put in', dead.length === 0,
         dead.length ? dead.map(s => s.room + ' ' + s.travelled + 'px').join(', ')
