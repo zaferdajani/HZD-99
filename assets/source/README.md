@@ -22,6 +22,7 @@ look at to answer "did that actually happen".
 | `glaciere/` | GLACIERE, the Frozen Purifier | 11 |
 | `mother/` | MOTHER-V, the Null Core | 16 |
 | `lairs/` | The six boss lairs, as generated | 6 |
+| `takes/` | Generated VIDEO takes the animation strips were cut from | 1 |
 | `hero/` | HZD-99 herself, every plate locked to `ref/hzd99_canon.jpg` | 26 |
 | `crystal/` | The purifier crystal: the weapon, the grips, the four slash light-sheets | 15 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
