@@ -20,6 +20,8 @@
 //   node tools/intake.cjs <clip.mp4|webm> [--from S] [--to S] [--want N]
 //   node tools/intake.cjs <a.png> <b.png> ...        (a set of stills)
 //   node tools/intake.cjs --dir <folder>             (everything in a folder)
+//   ...a set of stills needs --cutout or --bg. A character on a flat field and
+//   a full-frame backdrop fail in opposite ways, and the tool will not guess.
 //
 // Exit 0 = keyable. Exit 1 = refused, with reasons and a re-fire brief.
 const { chromium } = require('playwright');
@@ -52,6 +54,26 @@ const BAR = {
   // The field has to be keyable: a background this uniform can be flood-filled
   // from the border. Higher means the generator painted a scene behind her.
   fieldSd: 26,
+
+  // A BACKDROP FAILS DIFFERENTLY. It is SUPPOSED to fill the frame and touch
+  // every border, so the three cutout checks above are meaningless against one
+  // — the first run of this tool refused five perfectly good wallpapers for
+  // being wallpapers. What a backdrop can actually be is FLAT: no staged
+  // depth, nothing for a character to separate from. That is the owner's
+  // "background is toooooo dark and faded", turned into a measurement.
+  //
+  // These three numbers are set from the plates themselves. Across the six
+  // gates as shipped and the six repainted in the house style:
+  //
+  //   shipped    range 58-152   median 26-80   sat 20-42
+  //   repainted  range 92-205   median 35-76   sat 19-57
+  //
+  // so the bar sits in the gap: it passes every plate painted to the style and
+  // refuses four of the six the owner complained about.
+  bgRange: 90,    // p95 - p5 of luminance. Three value bands clear this easily.
+  bgMedian: 32,   // a plate already this dark has nothing left after the grade.
+  bgSat: 18,      // a floor against grey mush, not a style rule — a deliberately
+                  // cold scene (the conduits gate reads 19) still passes.
 };
 
 // the correction the generator actually responds to. NAMING A THING FORBIDS
@@ -61,8 +83,13 @@ function refireBrief(kind, faults) {
   const L = [];
   L.push('── RE-FIRE BRIEF ' + '─'.repeat(56));
   L.push('');
-  L.push('Keep every word of the original brief that describes WHO she is and');
-  L.push('what the field behind her is. Replace the ACTION sentence with this:');
+  if (kind === 'plates') {
+    L.push('Keep every word of the original brief that names WHAT IS IN the room');
+    L.push('and where each thing sits. Replace the STAGING sentence with this:');
+  } else {
+    L.push('Keep every word of the original brief that describes WHO she is and');
+    L.push('what the field behind her is. Replace the ACTION sentence with this:');
+  }
   L.push('');
   if (faults.includes('distinct') || faults.includes('threshold')) {
     L.push('  "She performs the move ONCE, slowly and completely, filling the');
@@ -85,6 +112,21 @@ function refireBrief(kind, faults) {
     L.push('');
     L.push('  WHY: the key that cuts her out floods in from the border, and it');
     L.push('  cannot cross a drawn horizon or a painted floor.');
+  }
+  if (faults.includes('flat') || faults.includes('dark') || faults.includes('grey')) {
+    L.push('  "...staged in three clear depth bands that a character can stand');
+    L.push('   against: a near-black foreground band along the bottom edge, the');
+    L.push('   subject of the room in a warm mid tone, and a pale hazy far layer');
+    L.push('   behind it. One key light with a bright core, and a cool');
+    L.push('   complementary fill in every shadow so the darks carry colour.');
+    L.push('   Bold poster-clear shapes, high contrast, the whole composition');
+    L.push('   readable at a glance and at thumbnail size."');
+    L.push('');
+    L.push('  WHY: the game grades this plate down and then stands a character');
+    L.push('  on top of it. A plate that is already dark, or already one flat');
+    L.push('  band of value, has nothing left to give — the character sinks into');
+    L.push('  it and the room reads as fog. Depth has to be painted IN, not left');
+    L.push('  for the engine to find.');
   }
   if (faults.includes('edge') || faults.includes('cover')) {
     L.push('  "...framed so her whole body including her ears, her tail, her');
@@ -149,11 +191,14 @@ const pageScript = () => {
 
 (async () => {
   const argv = process.argv.slice(2);
+  let MODE = 'auto', KIND = 'stills';
   let FROM = null, TO = null, WANT = 12, files = [];
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--from') FROM = parseFloat(argv[++i]);
     else if (argv[i] === '--to') TO = parseFloat(argv[++i]);
     else if (argv[i] === '--want') WANT = parseInt(argv[++i], 10);
+    else if (argv[i] === '--bg') MODE = 'bg';
+    else if (argv[i] === '--cutout') MODE = 'cutout';
     else if (argv[i] === '--dir') {
       const d = argv[++i];
       files.push(...fs.readdirSync(d).filter(f => /\.(png|jpe?g|webp|mp4|webm)$/i.test(f))
@@ -300,8 +345,23 @@ const pageScript = () => {
         for (let y = 0; y < H; y += 3) for (let x = 0; x < W; x += 3) if (lit(x, y)) on++;
         for (let x = 0; x < W; x += 3) if (lit(x, 2) || lit(x, H - 3)) edge = true;
         for (let y = 0; y < H; y += 3) if (lit(2, y) || lit(W - 3, y)) edge = true;
+        // ...and the three numbers a BACKDROP is judged on. Sampled on a grid
+        // rather than every pixel: at this resolution the percentiles move by
+        // less than a unit and the whole set measures in under a second.
+        const lum = [];
+        let satSum = 0, satN = 0;
+        for (let y = 0; y < H; y += 4) for (let x = 0; x < W; x += 4) {
+          const j = ((y * W + x) << 2), R = d[j], G = d[j + 1], B = d[j + 2];
+          lum.push(0.299 * R + 0.587 * G + 0.114 * B);
+          const mx = Math.max(R, G, B), mn = Math.min(R, G, B);
+          satSum += mx ? (mx - mn) / mx * 100 : 0; satN++;
+        }
+        lum.sort((a, b) => a - b);
+        const q = t => lum[Math.floor(t * (lum.length - 1))];
         meta.push({ W, H, fieldSd: +sd.toFixed(1), fieldLum: +m.toFixed(1),
-                    cover: +(on / ((W / 3) * (H / 3))).toFixed(3), edge });
+                    cover: +(on / ((W / 3) * (H / 3))).toFixed(3), edge,
+                    range: Math.round(q(0.95) - q(0.05)), median: Math.round(q(0.5)),
+                    sat: Math.round(satSum / satN) });
       }
       const pairs = [];
       for (let i = 0; i < sigs.length; i++)
@@ -311,11 +371,43 @@ const pageScript = () => {
       return { meta, pairs: pairs.slice(0, 6), worst: pairs[0] };
     }, { files: files.map(f => path.resolve(f)), BAR });
 
+    // WHICH KIND OF PICTURE IS THIS, and why the caller has to say.
+    //
+    // A cutout is a subject on a keyable field with clear space around it; a
+    // backdrop fills the frame and has no field at all. They fail in opposite
+    // ways — touching the border is fatal to one and definitional to the other
+    // — so the wrong mode produces a confident wrong verdict, which is the one
+    // thing a gate must never do.
+    //
+    // The first attempt inferred it, and inferred it wrong: these backdrops are
+    // painted dark at the edges, so their borders measure as flat and keyable
+    // (fieldSd 3.4 to 8.9) and every one of them read as a cutout. There is no
+    // measurement here that separates "dark vignette" from "black field"
+    // reliably, so the tool does not pretend there is. It asks, once, in one
+    // word, and then it is certain.
+    if (MODE === 'auto') {
+      console.log('  Say which kind of picture these are — the two are judged on');
+      console.log('  opposite rules and guessing wrong gives a confident wrong answer:');
+      console.log('');
+      console.log('    --cutout   a character or object on a flat field, to be keyed out');
+      console.log('    --bg       a full-frame backdrop or wallpaper');
+      console.log('');
+      await browser.close();
+      process.exit(2);
+    }
+    const bg = MODE === 'bg';
+    console.log('  reading these as ' + (bg
+      ? 'BACKDROPS — they fill the frame, so they are judged on staged depth'
+      : 'CUTOUTS — a subject on a keyable field'));
+    console.log('');
+
     files.forEach((f, i) => {
       const m = r.meta[i];
-      console.log('  ' + path.basename(f).padEnd(28) + m.W + 'x' + m.H
-        + '  field ' + String(m.fieldLum).padStart(5) + '/' + String(m.fieldSd).padStart(5)
-        + '  subject ' + (m.cover * 100).toFixed(1) + '%' + (m.edge ? '  TOUCHES BORDER' : ''));
+      console.log('  ' + path.basename(f).padEnd(28) + m.W + 'x' + m.H + (bg
+        ? '  range ' + String(m.range).padStart(4) + '  median ' + String(m.median).padStart(4)
+          + '  colour ' + String(m.sat).padStart(3) + '%'
+        : '  field ' + String(m.fieldLum).padStart(5) + '/' + String(m.fieldSd).padStart(5)
+          + '  subject ' + (m.cover * 100).toFixed(1) + '%' + (m.edge ? '  TOUCHES BORDER' : '')));
     });
     console.log('');
     console.log('  closest pairs (% different):');
@@ -324,16 +416,34 @@ const pageScript = () => {
     console.log('');
     const dup = r.worst && r.worst.d < BAR.same * 2;
     if (dup) faults.push('distinct');
-    if (r.meta.some(m => m.fieldSd > BAR.fieldSd)) faults.push('field');
-    if (r.meta.some(m => m.edge)) faults.push('edge');
-    if (r.meta.some(m => m.cover < BAR.minCover)) faults.push('cover');
-    verdictLines = [
-      (!dup ? 'ok  ' : 'FAIL') + ' every image differs from every other  (closest '
-        + (r.worst ? r.worst.d : '—') + '%)',
-      (!r.meta.some(m => m.fieldSd > BAR.fieldSd) ? 'ok  ' : 'FAIL') + ' every field is flat enough to key',
-      (!r.meta.some(m => m.edge) ? 'ok  ' : 'FAIL') + ' no silhouette touches the border',
-      (!r.meta.some(m => m.cover < BAR.minCover) ? 'ok  ' : 'FAIL') + ' every subject is big enough in frame',
-    ];
+    const some = (k, f) => r.meta.some(m => f(m[k]));
+    if (bg) {
+      if (some('range', v => v < BAR.bgRange)) faults.push('flat');
+      if (some('median', v => v < BAR.bgMedian)) faults.push('dark');
+      if (some('sat', v => v < BAR.bgSat)) faults.push('grey');
+      verdictLines = [
+        (!dup ? 'ok  ' : 'FAIL') + ' every plate differs from every other  (closest '
+          + (r.worst ? r.worst.d : '—') + '%)',
+        (!some('range', v => v < BAR.bgRange) ? 'ok  ' : 'FAIL')
+          + ' every plate is staged in depth  (needs range ' + BAR.bgRange + ')',
+        (!some('median', v => v < BAR.bgMedian) ? 'ok  ' : 'FAIL')
+          + ' none is already too dark to grade  (needs median ' + BAR.bgMedian + ')',
+        (!some('sat', v => v < BAR.bgSat) ? 'ok  ' : 'FAIL')
+          + ' none has faded to grey  (needs colour ' + BAR.bgSat + '%)',
+      ];
+    } else {
+      if (some('fieldSd', v => v > BAR.fieldSd)) faults.push('field');
+      if (some('edge', v => v)) faults.push('edge');
+      if (some('cover', v => v < BAR.minCover)) faults.push('cover');
+      verdictLines = [
+        (!dup ? 'ok  ' : 'FAIL') + ' every image differs from every other  (closest '
+          + (r.worst ? r.worst.d : '—') + '%)',
+        (!some('fieldSd', v => v > BAR.fieldSd) ? 'ok  ' : 'FAIL') + ' every field is flat enough to key',
+        (!some('edge', v => v) ? 'ok  ' : 'FAIL') + ' no silhouette touches the border',
+        (!some('cover', v => v < BAR.minCover) ? 'ok  ' : 'FAIL') + ' every subject is big enough in frame',
+      ];
+    }
+    KIND = bg ? 'plates' : 'stills';
   }
 
   for (const l of verdictLines) console.log('  ' + l);
@@ -342,7 +452,7 @@ const pageScript = () => {
 
   if (faults.length) {
     console.log('REFUSED — this does not go into the game.\n');
-    console.log(refireBrief(isVid ? 'clip' : 'stills', faults));
+    console.log(refireBrief(isVid ? 'clip' : KIND, faults));
     process.exit(1);
   }
   console.log('ACCEPTED — measured clean. Cut it with tools/vidstrip.cjs auto:N and');

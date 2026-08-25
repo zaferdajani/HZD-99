@@ -208,11 +208,22 @@ Characters add: *clean bevelled armour panels with visible seams, thin cyan
 energy lines running along those seams and around the chest core* — that is the
 Mega Man X half, and it is what the Hollow-Knight-only pilot (A) had none of.
 
-Backgrounds add: *staged depth in three value bands — a near-black foreground,
-the subject in warm mid tone, a pale hazy far layer; cool cyan-teal fill in
-every shadow against saturated rust orange; thin cyan light strips on the
-machinery as the one accent.* The complementary rust-against-teal is what
-carries the Mega Man X feel into a room with no character in it.
+Backgrounds add: *staged depth in three bands SEPARATED BY VALUE — a near-black
+foreground, the subject of the room in mid tone catching the key, and a far
+layer clearly apart from both; cool complementary fill in every shadow so the
+darks carry colour; thin light strips on the machinery as the one accent.* The
+complementary rust-against-teal is what carries the Mega Man X feel into a room
+with no character in it.
+
+**"Pale hazy far layer" is wrong and cost two re-fires.** It is right for an
+outdoor vista and wrong everywhere else: written into a tomb brief it turned the
+far band bone-white and the nest gate stopped reading as a tomb, and into the
+conduits brief it filled a void that should swallow cables with lavender fog.
+What the band actually needs is to be *separated in value*, and for an interior
+that means DARKER — "the darkest thing in the picture, an unlit void". Both
+plates passed the numeric gate while doing this, which is the honest limit of
+the gate: it measures whether depth was painted, not whether it was painted the
+right way round.
 
 And every character brief ends with the intake gate's own requirement, because a
 plate that cannot be cut is not art: *alone on a pure flat black field, the whole
