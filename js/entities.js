@@ -2503,7 +2503,9 @@ class Player {
   }
   draw(c) {
     if (this.dead) return;
-    if (this.iT > 0 && Math.floor(this.iT * 18) % 2 === 0) return;
+    // (the i-frame flicker is applied by the CALLER as an alpha — see the player
+    //  draw block in game.js. It used to `return` here, which is why she
+    //  vanished outright on alternate frames instead of blinking.)
     const P = PAL[G.roomDef.zone];
     for (const tr of this.trail) {
       // dash echoes: each one a whole readable copy of her silhouette that
@@ -3878,7 +3880,23 @@ class Player {
       cg.addColorStop(0, hot);
       cg.addColorStop(0.35, !cok ? 'rgba(125,107,138,0.35)' : 'rgba(255,255,255,0.28)');
       cg.addColorStop(1, 'rgba(0,0,0,0)');
-      c.globalAlpha = cok ? 0.5 + ck * 0.4 : 0.22;
+      // ...AND IT LIGHTS HER RATHER THAN REPLACING HER.
+      //
+      // The owner, on the version with the gathering rings already in: "the
+      // character keeps squishing into elongated character while charging."
+      // The rings were not the problem — the CORE was. Additive, on her chest,
+      // at up to 0.90 alpha over a body 24 px wide, it blew the middle of her
+      // to white and left only the outline: ears, legs, the edge of the cape.
+      // A character reduced to its own silhouette edges does not read as a
+      // character, it reads as a stretched smear, and it did that every time he
+      // held the button. (The blob this replaced peaked at 0.72, so the rewrite
+      // that fixed "slimmer and motionless" made this half worse.)
+      //
+      // Halved. The gather still reads — it is carried by the rings sweeping in,
+      // the sparks riding them and the arcs snapping to her chest, which is
+      // what "power arriving from somewhere" is actually made of. The core is
+      // the glow at the end of that, not a lamp pointed at the player.
+      c.globalAlpha = cok ? 0.26 + ck * 0.22 : 0.14;
       c.fillStyle = cg;
       c.beginPath(); c.arc(cx, cy, coreR * 2.6, 0, 7); c.fill();
 

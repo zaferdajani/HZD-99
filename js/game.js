@@ -11770,6 +11770,26 @@ function drawWorldFrame() {
   // is the special shot (see updateGateWalk)
   if (player && !G.recharge && !(G.gateWalk && G.gateWalk.align >= 1)) {
     c.save();
+    // THE I-FRAME FLICKER DIMS HER, IT DOES NOT DELETE HER.
+    //
+    // The owner: "the character pretty much disappears when it hits. It shows
+    // partial of transparent image." He was photographing a `return` — inside
+    // Player.draw, on alternate frames at 18 Hz, for the whole invulnerability
+    // window, she was not drawn AT ALL. Half of every hit's aftermath had no
+    // character on screen, and a still caught in that half shows the room where
+    // she should be.
+    //
+    // A flicker is meant to say "you cannot be hurt right now", and it says
+    // that perfectly well at reduced opacity. Deleting the body is worse than
+    // saying nothing: the moments just after a hit are exactly the ones where
+    // the player is deciding where to go, and nobody decides that about a
+    // character they cannot see. 0.4 still reads unmistakably as blinking.
+    //
+    // It lives HERE rather than in draw() because this save/restore pair is
+    // balanced by construction — draw() is hundreds of lines with its own
+    // nested transforms, and an alpha set inside it has no single safe place
+    // to be put back.
+    if (player.iT > 0 && Math.floor(player.iT * 18) % 2 === 0) c.globalAlpha = 0.4;
     c.translate(-Math.round(camSX()), -Math.round(camSY()));
     player.draw(c);
     c.restore();
