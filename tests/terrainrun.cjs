@@ -95,10 +95,29 @@ const check = (name, ok, detail) => {
       // measurement counts anything. She came in at 104 px stepped by hand and
       // at 0 under the frame clock, which is a harness reporting where it threw
       // her rather than what the terrain does.
-      player.x = 4 * TILE;
-      const col = Math.floor((player.x + player.w / 2) / TILE);
-      let floorTy = null;
-      for (let ty = ROOMS[id].h - 1; ty >= 0; ty--) if (solidAt(col, ty)) { floorTy = ty; break; }
+      // ...AND ON A STRETCH SHE CAN ACTUALLY WALK. Column 4 is not sacred: in A2
+      // and C2 the floor there puts her nose against a 32 px step — a full tile,
+      // above the 24 px a body may step — so she stands pressing right, entirely
+      // correctly, and travels nothing. That is a legitimate stop and a useless
+      // measurement: this harness is asking what the floor does to a walk, and a
+      // walk needs somewhere to start. She is put at the first column from 4
+      // onward that has four tiles of level ground in front of it.
+      const floorAt = (cx) => {
+        for (let ty = ROOMS[id].h - 1; ty >= 0; ty--) if (solidAt(cx, ty)) return ty;
+        return null;
+      };
+      let startCol = 4, floorTy = floorAt(4);
+      for (let cx = 4; cx <= 4 + 14; cx++) {
+        const f = floorAt(cx);
+        if (f == null) continue;
+        let level = true;
+        for (let d = 1; d <= 4; d++) {
+          const g = floorAt(cx + d);
+          if (g == null || Math.abs(g - f) > 0) { level = false; break; }
+        }
+        if (level) { startCol = cx; floorTy = f; break; }
+      }
+      player.x = startCol * TILE;
       player.y = (floorTy == null ? ROOMS[id].h - 4 : floorTy) * TILE - player.h - 1;
       player.vx = 0; player.vy = 0;
       await rest(30);
@@ -127,7 +146,7 @@ const check = (name, ok, detail) => {
       const hits = [];
       const t0 = G.simClock || 0;
       const wallStop = performance.now() + 20000;   // backstop: a stalled page ends, never hangs
-      let frames = 0;
+      let frames = 0, mid = null;
       while ((G.simClock || 0) - t0 < 5 && performance.now() < wallStop) {
         keys.ArrowRight = 1;                        // direction only. Never jump.
         await new Promise(k => requestAnimationFrame(k));
@@ -139,13 +158,30 @@ const check = (name, ok, detail) => {
         last = player.x;
         // a real halt, not one slow frame: a fifth of a second of no progress
         if (run === 12) hits.push(Math.round(riseAhead()));
+        // ...and one snapshot taken WHILE THE KEY IS HELD. Sampling after the
+        // loop reports vx 0 for every room, including the ones that walked the
+        // whole way, because the input was released a line earlier — a
+        // diagnostic that answers the same for a pass and a failure.
+        if (!mid && frames === 40) mid = {
+          on: !!player.on, vx: Math.round(player.vx), stun: +(player.stunT || 0).toFixed(2),
+          hurt: +(player.hurtT || 0).toFixed(2), swing: !!player.swing,
+          gate: !!G.gateWalk, recharge: !!G.recharge, dialog: !!G.dialog,
+          keyRead: (typeof inD === 'function' ? !!inD('RIGHT') : null),
+          rawKey: !!keys.ArrowRight, room: G.roomId, state: G.state,
+          feet: Math.round(player.y + player.h), riseAhead: Math.round(riseAhead()),
+        };
       }
       keys.ArrowRight = 0;
       if (stDesc) Object.defineProperty(G, 'state', stDesc);
       else { delete G.state; G.state = 'PLAY'; }
       // ...and if the clock never moved, say THAT rather than blaming the floor.
       const simRan = +(((G.simClock || 0) - t0)).toFixed(2);
-      out.stalls.push({ room: id, travelled: Math.round(travelled), rises: hits, simRan, frames });
+      // WHEN A ROOM READS DEAD, SAY WHY. "0 px" is the same string whether the
+      // floor stopped her, the body was stunned, a gate walk took the controls,
+      // or she never landed — and telling those apart by re-running the harness
+      // and squinting is how an evening disappears.
+      const why = mid || { note: 'never sampled' };
+      out.stalls.push({ room: id, travelled: Math.round(travelled), rises: hits, simRan, frames, why });
     }
 
     // ---- 2: the walkers walk -------------------------------------------------
@@ -203,7 +239,28 @@ const check = (name, ok, detail) => {
   check('the clock ran in every room', unrun.length === 0,
         unrun.length ? unrun.map(s => s.room + ' only ' + s.simRan + 's of sim in ' + s.frames + ' frames').join(', ')
                      : r.stalls.map(s => s.room + ' ' + s.simRan + 's/' + s.frames + 'f').join('  '));
-  const dead = r.stalls.filter(s => s.travelled < 100);
+  // A ROOM WHOSE FIRST OBSTACLE IS A REAL STEP IS NOT A DEAD ROOM.
+  //
+  // This is the fault that made the whole check flicker, and it was mine: once
+  // she is placed on the floor the room actually has, column 4 of A2 and C2 puts
+  // her against a 32 px rise — a full tile, above the 24 px the body may step —
+  // and she stands there pressing right, exactly as she should. The snapshot
+  // says so in as many words: keyRead true, rawKey true, on true, state PLAY, no
+  // stun, no gate, and riseAhead 32. Nothing is broken; she is meant to jump it,
+  // and this harness never presses jump.
+  //
+  // The check above already proves every halt is a legitimate step, and the
+  // comment there already said how far she gets is "a fact about where that room
+  // put its first step, not about the collider". So a room that is blocked by a
+  // real step passes, and what remains caught is the failure this was written
+  // for: she is free to walk and does not.
+  const STEP = 24;
+  const dead = r.stalls.filter(s => s.travelled < 100 && !(s.why && s.why.riseAhead >= STEP));
+  const parked = r.stalls.filter(s => s.travelled < 100 && s.why && s.why.riseAhead >= STEP);
+  for (const d of dead) console.log('       ' + d.room + ' dead: ' + JSON.stringify(d.why));
+  for (const q of parked)
+    console.log('       ' + q.room + ': stopped at a real ' + q.why.riseAhead +
+                'px step ' + q.travelled + 'px in — a jump, not a fault');
   check('...and she gets moving in every room she was put in', dead.length === 0,
         dead.length ? dead.map(s => s.room + ' ' + s.travelled + 'px').join(', ')
                     : r.stalls.map(s => s.room + ' ' + s.travelled).join(', '));
