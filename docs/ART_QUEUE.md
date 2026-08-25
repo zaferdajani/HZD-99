@@ -178,6 +178,50 @@ written, the code that consumes them is in and tested. **Only the owner can
 clear this.** Everything downstream of it is one `vidstrip` cut and one line in
 `HERO_TRANS` per strip.
 
+## 2ab. THE INTAKE GATE — nothing is keyed until it has been measured ✔ SHIPPED 2026-08-25
+
+**The owner's instruction:** *"pipeline to check all artwork that lands from
+Higgsfield to make sure they do not have this type of error again. It should
+check all the artwork, make sure every single image is different, create an
+error free prompt to generate such an image and refuse anything less than
+that."*
+
+**`tools/intake.cjs`** is that gate. Everything Higgsfield returns goes through
+it before a single pixel is keyed, and it exits non-zero when the take is not
+good enough — so it can stand in front of the build rather than beside it.
+
+```
+node tools/intake.cjs <clip.webm> [--from S --to S --want N]   # a take
+node tools/intake.cjs a.png b.png c.png                        # a set of plates
+node tools/intake.cjs --dir <folder>
+```
+
+Four measurements, all of them the reasons art has actually failed here:
+
+| check | what it refuses | bar |
+|---|---|---|
+| **distinct** | a take that is a photograph with a wobble | 9 pictures, found without dropping the selector below 3.0% |
+| **field** | a background the key cannot cut cleanly | field sd under 26 |
+| **edge** | a silhouette walking out of frame | 4 px slack on every border |
+| **cover** | a character too small in frame to cut | 4% of the frame |
+
+**The distance is measured against the SUBJECT, not the frame.** That was the
+bug that made the first version disagree with the cutter: normalising by frame
+area lets a big flat field swamp a real change of pose, so a clean take read as
+100% still. It now normalises by coverage — alpha where the plate is keyed,
+value where it is not — and it finds the subject by distance from the *border
+median in either direction*, because one take came back on a white field and a
+dark-field assumption reported a character filling a third of the frame as 0.1%.
+
+**A refusal is not a verdict, it is a brief.** On any fault the tool prints the
+correction to fire, phrased positively — naming a thing forbids nothing, so
+"continuous travel, the body somewhere new in every frame" is written rather
+than "no repeated frames". Faults map to briefs for distinct / threshold, field,
+and edge / cover.
+
+It vetted its own first batch: the three style pilots below measured 14.7%
+apart at worst, every field flat, no silhouette on a border. ACCEPTED.
+
 ## 2aa. THE TAKES CONTAIN FEWER PICTURES THAN THEY CONTAIN FRAMES ✱ MEASURED 2026-08-24
 
 **The owner, from a contact sheet:** *"the images that Higgsfield is generating
