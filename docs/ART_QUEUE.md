@@ -178,6 +178,71 @@ written, the code that consumes them is in and tested. **Only the owner can
 clear this.** Everything downstream of it is one `vidstrip` cut and one line in
 `HERO_TRANS` per strip.
 
+## 2ac. THE HOUSE STYLE — Hollow Knight staging, Mega Man X energy ✱ PILOT FIRED 2026-08-25
+
+**The owner's brief:** *"I need it more lively, but as a modern Mega Man X
+instead of the old one. It doesn't have to be complete 3D, but it is a 3D. So
+it's hand drawn images like Hollow Knight, but with a feeling of Mega Man X."*
+And: *"do it all character by character, wallpaper by wallpaper."*
+
+**What was wrong with the art it replaces.** The shipped hero plates are a 3D
+render — smooth gradient shading, no line, a soft contact shadow. That reads as
+a toy photograph, and at gameplay size it reads as a pale blob: nothing holds
+the edge, so the silhouette dissolves into whatever is behind it. It is the same
+defect the owner reported as *"background is toooooo dark"* seen from the other
+side — the character had no separation of its own, so the only lever left was
+the room.
+
+**The style, as a block to paste into every brief.** Six pilots were fired and
+measured; these are the words that produced them.
+
+> Hand-painted 2D game art. Painted illustration with brush texture in the broad
+> forms, over confident ink linework of varying weight that holds every edge.
+> Dimensional volume built from broad flat planes of light and shadow under one
+> warm key light. A single cool cyan rim light down one edge of the silhouette
+> only, leaving the other edge dark. Small deliberate palette — bone white, warm
+> shadow grey, one red, one gold — with one saturated cyan accent. Poster-clear
+> shapes, readable at thumbnail size.
+
+Characters add: *clean bevelled armour panels with visible seams, thin cyan
+energy lines running along those seams and around the chest core* — that is the
+Mega Man X half, and it is what the Hollow-Knight-only pilot (A) had none of.
+
+Backgrounds add: *staged depth in three value bands — a near-black foreground,
+the subject in warm mid tone, a pale hazy far layer; cool cyan-teal fill in
+every shadow against saturated rust orange; thin cyan light strips on the
+machinery as the one accent.* The complementary rust-against-teal is what
+carries the Mega Man X feel into a room with no character in it.
+
+And every character brief ends with the intake gate's own requirement, because a
+plate that cannot be cut is not art: *alone on a pure flat black field, the whole
+silhouette well inside the frame with generous margin on every side.*
+
+**The four balances, measured 14.7% apart at worst, all ACCEPTED by
+`tools/intake.cjs`:**
+
+| pilot | what it is | verdict |
+|---|---|---|
+| A | Hollow Knight lean — painterly, warm, ink line | no machine in it; the panels are gone |
+| B | Mega Man X lean — panels, seams, cyan lines | reads cold and toy-like; the ink line went thin, the body lost its weight |
+| C | hybrid, rim light only | best separation of the four, but a full neon outline rather than a rim, and no panels |
+| **D** | **hybrid + panels** | **the recommendation** — chubby body kept, brush texture, ink line, panel seams with cyan energy lines, one-sided rim |
+
+`assets/source/style/` holds all six plates including the gameplay frame, which
+is the one that answers the question the owner actually asked: a side-on
+platformer frame in the new style, the character rim-lit hard against a
+three-band rust-and-teal backdrop, on eroded rock with no straight ledge in it.
+
+**The wallpaper took two passes.** The first restyle kept the composition and
+added the ink line, and that was too small a change to be worth forty firings.
+The second pushed the palette to complementary — teal shadow fill against rust
+orange, saturation up, a hot amber core through the gap — and that is the pass
+the campaign runs on.
+
+**THE CAMPAIGN**, once the owner picks the balance: every character plate and
+every wallpaper re-fired through this block, in kingdom order, each batch
+measured by `tools/intake.cjs` and shown to the owner before it is keyed.
+
 ## 2ab. THE INTAKE GATE — nothing is keyed until it has been measured ✔ SHIPPED 2026-08-25
 
 **The owner's instruction:** *"pipeline to check all artwork that lands from
