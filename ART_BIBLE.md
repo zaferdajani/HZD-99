@@ -515,9 +515,17 @@ and they are enforced by `tests/grammar.cjs`.
 
 ✅ **Enforced.** Every frame is three luminance bands, and they never overlap:
 
+*Amended 2026-08-25, on the owner's order ("I need it more lively"). The 25%
+background ceiling and the chroma-12 cap below were written when every backdrop
+was a flat render and global darkness was the only separation the frame had.
+The plates are painted with their own staged depth now (ART_QUEUE §2ac), and
+the separation duty moved to where it belongs: the 10-point clearance between
+the playable plane and the background, which did not move. A ceiling exists so
+a backdrop can never compete with the cast; it is not a mood.*
+
 | plane | luminance | treatment |
 |---|---|---|
-| background | **10–25%** | desaturated, cooled, soft edges, haze layer at 5–10% |
+| background | **10–32%** | quieter than the mid-plane, cooled, soft edges, haze layer at 5–10% |
 | playable mid-plane | **35–60%** | hard edges, full material detail |
 | actors and objectives | **70–95%** | the brightest things in frame, always |
 

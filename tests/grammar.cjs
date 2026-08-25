@@ -510,10 +510,11 @@ const DETECTORS = function () {
     check('the plane probe reported', false, 'no background sample in ' +
           noProbe.map(r => r.room).join(', '));
   } else {
-    // §9.1: the background sits at 10-25% luminance. The full frame, which is
-    // the background plus terrain plus cast, must sit clearly above it.
-    const bgHot = results.filter(r => r.probe.lum > 25);
-    check('§9.1 the background plane sits at or under 25% luminance',
+    // §9.1: the background sits at 10-32% luminance (amended 2026-08-25 with
+    // the painted plates — the bible carries the reasoning). The full frame,
+    // which is the background plus terrain plus cast, must sit clearly above it.
+    const bgHot = results.filter(r => r.probe.lum > 32);
+    check('§9.1 the background plane sits at or under 32% luminance',
           !bgHot.length,
           results.map(r => r.room + ' ' + r.probe.lum.toFixed(0)).join('  '));
 
@@ -526,8 +527,8 @@ const DETECTORS = function () {
 
     // §9.4: the background is the quiet one. This is the check that was
     // backwards before the background pass existed.
-    const loud = results.filter(r => r.probe.sat > 12);
-    check('§9.4 the background plane is desaturated (absolute chroma ≤ 12)',
+    const loud = results.filter(r => r.probe.sat > 16);
+    check('§9.4 the background plane is quieter than the cast (absolute chroma ≤ 16)',
           !loud.length,
           results.map(r => r.room + ' sat ' + r.probe.sat.toFixed(0)).join('  '));
   }

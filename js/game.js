@@ -4436,9 +4436,17 @@ function drawInteriorFloor() {
 // How hard the painting is sat down so the playfield reads in front of it.
 // Named for the same reason the far-plane knobs are: these were guessed, and
 // the guess was measured wrong. See the note inside drawZoneVista.
-let VISTA_SEAT = 0.34;    // was 0.62 — the bottom of the seating gradient
-let VISTA_VEIL = 0.06;    // was 0.14 — a flat black wash over the entire frame
-let VISTA_GAMMA = 0.84;   // the mid-tone lift on the painting itself (1 = none)
+// 2026-08-25, measured with tools/… gradegrid: with every one of these knobs at
+// its old value the city-gate painting lands on screen at chroma 6 against the
+// 44 it carries in the file — the grade was eating 88% of the art's colour and
+// the screen lift was putting grey back on top, which is "dark AND faded" as a
+// mechanism. The plates are painted with their own staged depth now (ART_QUEUE
+// §2ac), so the compensation is double-counting. These are the D values from
+// the five-step grid: the painting nearly raw, the seat kept only where the
+// playfield needs it.
+let VISTA_SEAT = 0.10;    // was 0.34, was 0.62 — the bottom of the seating gradient
+let VISTA_VEIL = 0.0;     // was 0.06, was 0.14 — a flat black wash over the entire frame
+let VISTA_GAMMA = 0.92;   // the mid-tone lift on the painting itself (1 = none)
 let WORLD_VEIL = 0.06;    // was 0.16 — the flat wash over the whole view
 function drawZoneVista(P, zone, px, py) {
   const own = ROOM_VISTA[G.roomId];
@@ -5788,7 +5796,7 @@ function rockBakeReady(zone) {
 // The mid-tone lift on the plane she stands on. See the note at the end of
 // renderTileLayer: the readability law is about the GAP between the playfield
 // and the wall, and this game had been making the gap by darkening the wall.
-let TERRAIN_GAMMA = 0.74;
+let TERRAIN_GAMMA = 0.68;   // 0.74 until the painted-plate grade freed the bg: the playable plane keeps its 10-point clearance by rising, not by re-crushing the painting
 function renderTileLayer(P) {
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
   // THE CANVAS IS MADE FIRST, ALWAYS. The wait below returns without baking,
@@ -12506,9 +12514,12 @@ let BG_TINT = 0.62;    // how much of the zone hue survives the darkening (0 = g
 // while every other room sits comfortably under it. So the strength is per
 // zone rather than one number bent until the worst room passes — which is how
 // every other room lost its colour in the first place.
-let BG_ART_DESAT = 0.40, BG_ART_SIT = 0.92, BG_ART_HAZE = 0.11;
-const BG_ART_DESAT_ZONE = { C: 0.62 };
-const BG_ART_SIT_ZONE = { C: 1.0 };
+// 2026-08-25: dropped from 0.40/0.92 — see the note over VISTA_SEAT. A painted
+// plate arrives already graded by the painter; the pass keeps only enough hold
+// that she still reads in front of it.
+let BG_ART_DESAT = 0.05, BG_ART_SIT = 0.18, BG_ART_HAZE = 0.11;
+const BG_ART_DESAT_ZONE = { C: 0.30 };
+const BG_ART_SIT_ZONE = { C: 0.45 };
 function bgPlanePass() {
   const L = ZONE_LIGHT[G.roomDef.zone];
   if (!L) return;
