@@ -7755,7 +7755,7 @@ function drawRubble(r, cx2, gy, P) {
   }
   c.restore();
 }
-function drawCaveMouth(cx2, gy, P, k) {
+function drawCaveMouth(cx2, gy, P, k, buried) {
   // THE FIRED MOUTH (§2f): one material family per grotto network, standing
   // on the floor at the same anchor. The seeded procedural mouth below stays
   // the fallback while the plate is in flight.
@@ -7767,7 +7767,19 @@ function drawCaveMouth(cx2, gy, P, k) {
     c.drawImage(mim, cx2 - MW2 / 2, gy - MH2, MW2, MH2);
     // the dark inside breathes, and deepens as she walks in — the plate is a
     // still, and the swallow is what makes it a passage
-    const br = 0.35 + Math.sin(performance.now() / 900) * 0.05 + k * 0.45;
+    // A BURIED MOUTH SHOWS NOTHING, and that is the whole reward for breaking
+    // it. The rule was carried only by a LIGHT — one added to the room the
+    // moment the rubble falls — and against the repainted plate that light was
+    // swamped: measured buried 106.6, opened 105.8, so the passage got very
+    // slightly DARKER when she broke it open. Backwards, and the reason is that
+    // the pile of rock was reading brighter than the hole behind it.
+    //
+    // So the throat states it too. Choked, it goes near-opaque — a passage
+    // packed with rock has no interior to see — and breaking it is what lets
+    // the inside, and the light, arrive. The light stays exactly as it was;
+    // this fixes the side that was wrong.
+    const br = buried ? 0.94
+             : 0.35 + Math.sin(performance.now() / 900) * 0.05 + k * 0.45;
     const th = c.createRadialGradient(cx2, gy - MH2 * 0.34, 8, cx2, gy - MH2 * 0.34, MH2 * 0.52);
     th.addColorStop(0, 'rgba(0,0,0,' + Math.min(0.92, br) + ')');
     th.addColorStop(1, 'rgba(0,0,0,0)');
@@ -8859,7 +8871,12 @@ function drawGateDoor(P, def, nearPlane) {
   const k = G._doorK = def._k;
   // cave on EITHER side of the passage: it is a mouth, not a door
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
-  if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) { drawCaveMouth(ds, gy, P, k); structBeacon(ds, gy, 200, 272, k, 1); return; }
+  if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) {
+    // ...and the mouth is told whether it is CHOKED, because a passage packed
+    // with rock does not show its interior (see drawCaveMouth).
+    drawCaveMouth(ds, gy, P, k, !!(typeof rubbleFor === 'function' && rubbleFor(def)));
+    structBeacon(ds, gy, 200, 272, k, 1); return;
+  }
   // a booth is a STALL, not a monument — the trader's kiosk on the meadow
   if (def.style === 'booth') { drawBooth(ds, gy, P, k); return; }
   // ...and the Oracle's shrine is HERS: same depth-door mechanics, its own
