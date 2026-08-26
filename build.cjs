@@ -36,6 +36,8 @@ const EMBED = {
   hz_ready: 'assets/sfx/hz_ready.ogg',
   hz_jump: 'assets/sfx/hz_jump.ogg',
   hz_land: 'assets/sfx/hz_land.ogg',
+  hz_evosting: 'assets/sfx/hz_evosting.ogg',
+  hz_winsting: 'assets/sfx/hz_winsting.ogg',
   hz_step1: 'assets/sfx/hz_step1.ogg',
   hz_step2: 'assets/sfx/hz_step2.ogg',
   hit1: 'assets/sfx/hit_01.ogg',

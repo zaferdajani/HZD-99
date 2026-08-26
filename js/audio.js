@@ -967,6 +967,12 @@ function sfx(n) {
   if (n === 'chargedHit' && playBuf('hz_burst', 0.6)) return;
   if (n === 'jump' && playBuf('hz_jump', 0.4, 0.94 + Math.random() * 0.12)) return; // the Hup already rode above
   if (n === 'land' && playBuf('hz_land', 0.45, 0.92 + Math.random() * 0.12)) return;
+  // HER MOTIF, QUOTED AT HER MOMENTS. Both stings are cut from mus_hero
+  // itself, so they are the same five notes the title plays - a quote, not a
+  // soundalike. They LAYER over the existing fanfares (the caller keeps its
+  // sfx('win') / sfx('chargeReady')), so an undecoded sting costs nothing.
+  if (n === 'evoSting') { playBuf('hz_evosting', 0.55); return; }
+  if (n === 'winSting') { playBuf('hz_winsting', 0.5); return; }
   if (n === 'step') {
     HZST = !HZST;
     if (playBuf(HZST ? 'hz_step1' : 'hz_step2', 0.3, 0.9 + Math.random() * 0.2)) return;

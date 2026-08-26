@@ -230,6 +230,13 @@ and every move she makes was synthesized. Both gaps are closed:
 - **`tests/herofoley.cjs`** decodes every take the way the game does and fails
   on a silent container, because playBuf's fallback makes a corrupt file
   inaudible by construction.
+- **The motif is QUOTED at her moments** (owner, 2026-08-26: "do the motif in
+  evolution and victory too"): two ten-second stings cut from `mus_hero`
+  itself — the same five notes, not a soundalike — layer over the existing
+  fanfares. `sfx('evoSting')` at the evolution tier-up (the full-arrangement
+  statement, 25-35s of the master), `sfx('winSting')` at both guardian-death
+  branches (the motif-and-cello statement, 10-20s). The old fanfares stay
+  underneath as the floor, so an undecoded sting costs nothing.
 
 ## 2ac. THE HOUSE STYLE — Hollow Knight staging, Mega Man X energy ✱ PILOT FIRED 2026-08-25
 

@@ -9,7 +9,8 @@
 const { chromium } = require('playwright');
 
 const KEYS = ['hz_swing1', 'hz_swing2', 'hz_fin', 'hz_burst', 'hz_dash',
-              'hz_charge', 'hz_ready', 'hz_jump', 'hz_land', 'hz_step1', 'hz_step2'];
+              'hz_charge', 'hz_ready', 'hz_jump', 'hz_land', 'hz_step1', 'hz_step2',
+              'hz_evosting', 'hz_winsting'];
 
 (async () => {
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });

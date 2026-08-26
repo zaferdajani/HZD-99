@@ -9585,13 +9585,13 @@ class Boss {
       this.vx = 0; this.vy = 0;
       if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
       G.dropScrap(this.cx(), this.cy(), 30);
-      sfx('win');
+      sfx('win'); sfx('winSting');   // her motif over the trumpet - a guardian fell
       return;
     }
     this.deathAnimT = Math.max(this.deathAnimT || 0, 1.6);
     burst(this.cx(), this.cy(), 60, '#ffffff', 420, 1.1, 200, 5, true);
     burst(this.cx(), this.cy(), 40, PAL[G.roomDef.zone].glow, 300, 1.4, 100, 4, true);
-    cam.shake = 16; sfx('wreckbig'); sfx('win');
+    cam.shake = 16; sfx('wreckbig'); sfx('win'); sfx('winSting');
     if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
     if (typeof padRumble === 'function') padRumble(1, 0.85, 800);
     G.hitStop = Math.max(G.hitStop, 0.22); G.flash = Math.max(G.flash, 0.7);

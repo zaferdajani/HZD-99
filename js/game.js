@@ -722,6 +722,7 @@ function checkEvo() {
   if (tv > G.save.evo) {
     G.save.evo = tv;
     sfx('chargeReady');
+    sfx('evoSting');   // her motif, over the fanfare - she grew
     G.flash = Math.max(G.flash, 0.35);
     G.impact = { t: 0.22, t0: 0.22, x: player.x + player.w / 2, y: player.y + player.h / 2 };
     burst(player.x + player.w / 2, player.y + player.h / 2, 30, '#ffd76a', 280, 0.8, 40, 3, true);
