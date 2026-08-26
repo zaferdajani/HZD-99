@@ -973,9 +973,22 @@ function sfx(n) {
   // sfx('win') / sfx('chargeReady')), so an undecoded sting costs nothing.
   if (n === 'evoSting') { playBuf('hz_evosting', 0.55); return; }
   if (n === 'winSting') { playBuf('hz_winsting', 0.5); return; }
-  if (n === 'step') {
+  // FEET KNOW THE FLOOR. One authored pair per surface, chosen from the room
+  // the way the renderer chooses its materials: ice by the room's own flag,
+  // rock in the caves and the Deep, grass on the meadow's open ground, the
+  // Nest's roots and husks in E, and metal everywhere built. The synth step
+  // below stays the floor under all of them.
+  if (n === 'step' || n === 'stepice') {
+    const rd = (typeof G !== 'undefined' && G.roomDef) || {};
+    const surf = (n === 'stepice' || rd.ice) ? 'ice'
+      : (rd.cave || rd.zone === 'X') ? 'rock'
+      : (rd.zone === 'A' && !rd.indoor) ? 'grass'
+      : rd.zone === 'E' ? 'org' : 'metal';
     HZST = !HZST;
-    if (playBuf(HZST ? 'hz_step1' : 'hz_step2', 0.3, 0.9 + Math.random() * 0.2)) return;
+    const pair = { ice: ['hz_stepice1', 'hz_stepice2'], rock: ['hz_steprock1', 'hz_steprock2'],
+                   grass: ['hz_stepgrass1', 'hz_stepgrass2'], org: ['hz_steporg1', 'hz_steporg2'],
+                   metal: ['hz_step1', 'hz_step2'] }[surf];
+    if (playBuf(pair[HZST ? 0 : 1], 0.3, 0.9 + Math.random() * 0.2)) return;
   }
   // recorded samples first (loaded from the CC0 library), synth fallback below
   if (n === 'hit' && playBuf(Math.random() < 0.5 ? 'hit1' : 'hit2', 0.45, 0.9 + Math.random() * 0.2)) return;

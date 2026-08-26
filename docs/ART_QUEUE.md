@@ -230,6 +230,14 @@ and every move she makes was synthesized. Both gaps are closed:
 - **`tests/herofoley.cjs`** decodes every take the way the game does and fails
   on a silent container, because playBuf's fallback makes a corrupt file
   inaudible by construction.
+- **Her feet know the floor** (owner, 2026-08-26: "now do the footsteps per
+  surface too"): five authored pairs — metal (the original pair), grass for the
+  meadow's open ground, rock for the caves and the Deep, ice for the Archives,
+  roots-and-husks for the Nest — picked in `sfx()` from the room's own flags
+  the same way the renderer picks its materials. Eight fired, every take
+  measured and gain-matched to −6 dB peak before keying (the model returns
+  footsteps as quiet as −32; a step at three different loudnesses per surface
+  reads as a limp). The synth step stays the floor under all ten.
 - **The motif is QUOTED at her moments** (owner, 2026-08-26: "do the motif in
   evolution and victory too"): two ten-second stings cut from `mus_hero`
   itself — the same five notes, not a soundalike — layer over the existing
