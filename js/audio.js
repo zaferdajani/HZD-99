@@ -991,8 +991,8 @@ function sfx(n) {
   // itself, so they are the same five notes the title plays - a quote, not a
   // soundalike. They LAYER over the existing fanfares (the caller keeps its
   // sfx('win') / sfx('chargeReady')), so an undecoded sting costs nothing.
-  if (n === 'evoSting') { playBuf('hz_evosting', 0.55); return; }
-  if (n === 'winSting') { playBuf('hz_winsting', 0.5); return; }
+  if (n === 'evoSting') { stingPlay('hz_evosting', 0.55); return; }
+  if (n === 'winSting') { stingPlay('hz_winsting', 0.5); return; }
   // FEET KNOW THE FLOOR. One authored pair per surface, chosen from the room
   // the way the renderer chooses its materials: ice by the room's own flag,
   // rock in the caves and the Deep, grass on the meadow's open ground, the
@@ -1747,6 +1747,35 @@ function sfxVoice(id) {
     tone(v[0] * (0.9 + Math.random() * 0.25), 0.07, v[1], 0.04, null, i * 0.07);
 }
 // ---------------------------------------------------------------------------
+// HER MOTIF, QUOTED — STREAMED, NOT DECODED.
+//
+// The same ruling the machine folk's spoken lines got, for the same arithmetic:
+// these two stings are ten seconds each, and ten seconds of decoded PCM costs
+// more than a dozen of her foley takes for a quote that plays at a tier-up and
+// at a guardian's death. So they go out through an <audio> element the way the
+// music does, which also means they LAYER over whatever fanfare the caller
+// already started rather than competing for the single music stream.
+//
+// Nothing here can make a moment quieter: the caller keeps its own sfx('win')
+// or sfx('chargeReady'), so a sting that never loads costs the game nothing —
+// which is exactly what the decoded version promised and this one still keeps.
+let STINGNODE = null;
+function stingPlay(key, vol) {
+  if (MUTED) return;
+  const src = (typeof MEDIA_SRC !== 'undefined' && MEDIA_SRC.sting && MEDIA_SRC.sting[key]);
+  if (!src) return;
+  // one sting at a time: the evolution and a guardian's fall can land in the
+  // same second, and two copies of the same five notes is a flam, not a chord
+  try { if (STINGNODE) { STINGNODE.pause(); STINGNODE.src = ''; } } catch (e) {}
+  try {
+    const el = new Audio();
+    el.src = src; el.volume = vol; el.preload = 'auto';
+    STINGNODE = el;
+    el.addEventListener('ended', () => { if (STINGNODE === el) STINGNODE = null; }, { once: true });
+    const pr = el.play();
+    if (pr && pr.catch) pr.catch(() => {});
+  } catch (e) {}
+}
 // THE MACHINE FOLK, SPEAKING. Their lines are recorded per character and per
 // line — servo0, sage2 — and STREAMED rather than decoded: eighteen lines of
 // speech held as raw PCM would cost more memory than every sound effect in the

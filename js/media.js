@@ -403,6 +403,15 @@ const MEDIA_SRC = {
     boss: 'assets/music/epic_combat.ogg',
     ambient: 'assets/music/ambient_observing_the_star.ogg',
   }, (typeof window !== 'undefined' && window.MUS_FILES) || {}),
+  // STREAMED, NEVER DECODED — the same ruling the eighteen spoken lines got.
+  // These two are ten seconds each: as decoded PCM they are a third of every
+  // sound effect in the game put together, for a quote that plays at a tier-up
+  // and at a guardian's death and is never heard twice in a row. They are NOT
+  // in `audio` below on purpose: loadMedia decodes everything in that map.
+  sting: {
+    hz_evosting: 'assets/sfx/hz_evosting.ogg',
+    hz_winsting: 'assets/sfx/hz_winsting.ogg',
+  },
   audio: {
     hz_swing1: 'assets/sfx/hz_swing1.ogg',
     hz_swing2: 'assets/sfx/hz_swing2.ogg',
@@ -413,7 +422,6 @@ const MEDIA_SRC = {
     hz_ready: 'assets/sfx/hz_ready.ogg',
     hz_jump: 'assets/sfx/hz_jump.ogg',
     hz_land: 'assets/sfx/hz_land.ogg',
-    hz_evosting: 'assets/sfx/hz_evosting.ogg',
     hum_servo: 'assets/sfx/hum_servo.ogg',
     hum_ratchet: 'assets/sfx/hum_ratchet.ogg',
     hum_mono: 'assets/sfx/hum_mono.ogg',
@@ -440,7 +448,6 @@ const MEDIA_SRC = {
     fz_roar_zero: 'assets/sfx/fz_roar_zero.ogg',
     fz_roar_prism: 'assets/sfx/fz_roar_prism.ogg',
     fz_roar_mother: 'assets/sfx/fz_roar_mother.ogg',
-    hz_winsting: 'assets/sfx/hz_winsting.ogg',
     hz_step1: 'assets/sfx/hz_step1.ogg',
     hz_step2: 'assets/sfx/hz_step2.ogg',
     hz_stepgrass1: 'assets/sfx/hz_stepgrass1.ogg',

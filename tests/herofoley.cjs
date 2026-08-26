@@ -45,6 +45,20 @@ const KEYS = ['hz_swing1', 'hz_swing2', 'hz_fin', 'hz_burst', 'hz_dash',
     }
     // ...and the music file the title slot now leads with is on disk
     out.mus = await fetch('/assets/music/mus_hero.m4a', { method: 'HEAD' }).then(r => r.ok);
+    // NOTHING LONG IS DECODED. loadMedia holds every key in MEDIA_SRC.audio as
+    // raw PCM for the whole session, so a long clip in that map is the mistake
+    // the spoken lines were moved out of streaming to avoid — and it arrives
+    // looking exactly like a sound effect. Measured here, not trusted: the two
+    // ten-second motif stings live in MEDIA_SRC.sting and are streamed.
+    out.long = [];
+    for (const k in MEDIA_SRC.audio) {
+      try {
+        const b = await (await fetch('/' + MEDIA_SRC.audio[k])).arrayBuffer();
+        const ab = await ac.decodeAudioData(b.slice(0));
+        if (ab.duration > 5) out.long.push(k + ' ' + ab.duration.toFixed(1) + 's');
+      } catch (e) {}
+    }
+    out.streamed = Object.keys((MEDIA_SRC.sting) || {});
     return out;
   }, KEYS);
 
@@ -58,6 +72,10 @@ const KEYS = ['hz_swing1', 'hz_swing2', 'hz_fin', 'hz_burst', 'hz_dash',
   }
   console.log('  ' + (r.mus ? 'ok  ' : 'FAIL') + ' mus_hero.m4a is on disk for the title slot');
   if (!r.mus) bad++;
+  const okLong = r.long.length === 0;
+  console.log('  ' + (okLong ? 'ok  ' : 'FAIL') + ' nothing over 5s is decoded'
+    + (okLong ? ' (' + r.streamed.length + ' streamed instead)' : ': ' + r.long.join(', ')));
+  if (!okLong) bad++;
   if (errs.length) { console.log('  FAIL page errors: ' + errs[0]); bad++; }
   await b.close();
   if (bad) { console.log('\n' + bad + ' foley take(s) unplayable'); process.exit(1); }
