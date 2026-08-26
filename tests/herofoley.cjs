@@ -12,7 +12,12 @@ const KEYS = ['hz_swing1', 'hz_swing2', 'hz_fin', 'hz_burst', 'hz_dash',
               'hz_charge', 'hz_ready', 'hz_jump', 'hz_land', 'hz_step1', 'hz_step2',
               'hz_evosting', 'hz_winsting',
               'hz_stepgrass1', 'hz_stepgrass2', 'hz_steprock1', 'hz_steprock2',
-              'hz_stepice1', 'hz_stepice2', 'hz_steporg1', 'hz_steporg2'];
+              'hz_stepice1', 'hz_stepice2', 'hz_steporg1', 'hz_steporg2',
+              'fz_tell', 'fz_tellmid', 'fz_tellbig', 'fz_slam', 'fz_phase',
+              'fz_wave', 'fz_spikeup', 'fz_summon', 'fz_wreck', 'fz_break',
+              'fz_roar', 'fz_castarc', 'fz_castice', 'fz_castnull',
+              'fz_roar_glitch', 'fz_roar_brood', 'fz_roar_atlas',
+              'fz_roar_zero', 'fz_roar_prism', 'fz_roar_mother'];
 
 (async () => {
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });

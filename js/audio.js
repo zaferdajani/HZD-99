@@ -990,6 +990,27 @@ function sfx(n) {
                    metal: ['hz_step1', 'hz_step2'] }[surf];
     if (playBuf(pair[HZST ? 0 : 1], 0.3, 0.9 + Math.random() * 0.2)) return;
   }
+  // THE FOES' OWN FOLEY (fired 2026-08-26, measured like hers). Shared
+  // vocabulary, because that is how the fights are built: every enemy speaks
+  // tell/slam/phase/cast and the ROAR is the one word that is per-guardian —
+  // picked by who is actually roaring, from the fight the player is in.
+  if (n === 'tell' && playBuf('fz_tell', 0.4, 0.94 + Math.random() * 0.12)) return;
+  if (n === 'tellmid' && playBuf('fz_tellmid', 0.45)) return;
+  if (n === 'tellbig' && playBuf('fz_tellbig', 0.5)) return;
+  if (n === 'slam' && playBuf('fz_slam', 0.55, 0.95 + Math.random() * 0.1)) return;
+  if (n === 'phase' && playBuf('fz_phase', 0.55)) return;
+  if (n === 'wave' && playBuf('fz_wave', 0.42, 0.94 + Math.random() * 0.12)) return;
+  if (n === 'spikeup' && playBuf('fz_spikeup', 0.5, 0.94 + Math.random() * 0.12)) return;
+  if (n === 'summon' && playBuf('fz_summon', 0.45)) return;
+  if (n === 'wreckbig' && playBuf('fz_wreck', 0.6)) return;
+  if (n === 'break' && playBuf('fz_break', 0.5, 0.92 + Math.random() * 0.16)) return;
+  if (n === 'castarc' && playBuf('fz_castarc', 0.42, 0.94 + Math.random() * 0.12)) return;
+  if (n === 'castice' && playBuf('fz_castice', 0.42, 0.94 + Math.random() * 0.12)) return;
+  if (n === 'castnull' && playBuf('fz_castnull', 0.42, 0.94 + Math.random() * 0.12)) return;
+  if (n === 'roar' || n === 'boss') {
+    const kind = (typeof G !== 'undefined' && G.boss && G.boss.kind) || '';
+    if (playBuf('fz_roar_' + kind, 0.55) || playBuf('fz_roar', 0.5, 0.92 + Math.random() * 0.16)) return;
+  }
   // recorded samples first (loaded from the CC0 library), synth fallback below
   if (n === 'hit' && playBuf(Math.random() < 0.5 ? 'hit1' : 'hit2', 0.45, 0.9 + Math.random() * 0.2)) return;
   if (n === 'bosshit' && playBuf('metal', 0.5, 0.85 + Math.random() * 0.15)) return;

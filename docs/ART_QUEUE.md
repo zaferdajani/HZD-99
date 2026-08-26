@@ -238,6 +238,16 @@ and every move she makes was synthesized. Both gaps are closed:
   measured and gain-matched to −6 dB peak before keying (the model returns
   footsteps as quiet as −32; a step at three different loudnesses per surface
   reads as a limp). The synth step stays the floor under all ten.
+- **The foes speak the same language** (owner, 2026-08-26: "do the same rich
+  sounds for all enemies and bosses"): twenty authored takes for the shared
+  combat vocabulary — the three telegraph tiers, slam, phase, wave, spike
+  eruption, summon, the big wreck, the part-break, and the three elemental
+  casts — plus a ROAR PER GUARDIAN, picked in `sfx()` by who is actually
+  roaring (`G.boss.kind`): the lion-machine, the raptor shriek, the furnace
+  bellow, the glacial groan, the crystal scream, and the Mother's layered
+  siren. Twenty-seven firings for twenty keepers; seven near-silent takes
+  refused on measurement and re-fired. Everything gain-matched to −4 dB peak,
+  synth engine under every key as the floor.
 - **The motif is QUOTED at her moments** (owner, 2026-08-26: "do the motif in
   evolution and victory too"): two ten-second stings cut from `mus_hero`
   itself — the same five notes, not a soundalike — layer over the existing
