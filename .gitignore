@@ -17,3 +17,11 @@ reference/movement/
 # the art session's working folder: 74 MB of intermediate plates and contact
 # sheets. Anything worth keeping is derived into assets/source/ as jpg first.
 scratchpad/
+
+# The PCN platform and the investor materials live in the PRIVATE repo
+# zaferdajani/app-mall (branches `main` and `business-archive`). They were once
+# on a branch of THIS repo, which is public, and were moved out deliberately.
+# Ignored here so a stray working copy can never be committed back into a public
+# repo by a well-meaning "commit your changes" prompt.
+platform/
+deck/
