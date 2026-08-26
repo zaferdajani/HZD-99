@@ -101,6 +101,44 @@ tell, far beyond any tap — and ends on release, fading rather than cutting,
 because a voice stopped dead is a click. An **abandoned** charge ends its note
 too, which is the common case, because that is every ordinary attack.
 
+### 2b. AND THEN THE FOLEY WAS FIRED TOO — 2026-08-26
+
+Every cue in the table above is still there and still true: it is now the
+**floor** rather than the ceiling. The art session fired an authored take for
+each of her moves — paired swings, the finisher, the volt burst, dash, the
+charge swell, the ready chime, jump, land — and `sfx()` reaches for the take
+first, falls through to the synth when it has not decoded, and lets her voice
+ride over either. A slow connection loses nothing it used to have.
+
+Two consequences worth stating, because they are laws and not preferences:
+
+- **The third combo beat has its own name.** `atk` used to be all three hits;
+  the finisher now says `finisher`, because a beat that lands harder and
+  sounds identical is the §1 failure with extra steps.
+- **Her feet know the floor.** Five authored pairs — metal, grass, rock, ice,
+  and the Nest's roots — picked from the room's own flags the way the renderer
+  picks its materials. This closes §10.3, which was the largest remaining gap
+  in the vocabulary and the sound the player hears more than any other.
+
+### 2c. HER MOTIF, AND THE RULE ABOUT LENGTH
+
+`mus_hero` is her theme, and two ten-second stings cut from it quote it at the
+two moments she earns it: the evolution tier-up and a guardian's fall. They
+LAYER over the existing fanfares rather than replacing them, so a sting that
+never arrives costs the game nothing.
+
+**They are STREAMED, not decoded**, and that is a law rather than a detail:
+
+> Anything over about five seconds goes out through an `<audio>` element.
+> Everything in `MEDIA_SRC.audio` is held as raw PCM for the whole session, so
+> a ten-second clip in that map costs more than a dozen foley takes. This is
+> the same arithmetic that moved the machine folk's eighteen spoken lines out
+> of the decoder, and it is measured — `tests/herofoley.cjs` decodes every
+> entry in that map and fails on anything longer.
+
+A long clip arrives looking exactly like a sound effect. That is why the check
+is arithmetic and not a habit.
+
 ---
 
 ## 3. THINGS THAT ARE FIRED
@@ -325,6 +363,6 @@ measurement, decides:
    singing, not making an effect — but it means she has a musical identity
    nothing else has. If that should be a whole motif rather than one chord, it
    is a composer brief, not a code change.
-3. **Footsteps.** `step` exists and is thin. A real footfall set — per surface,
-   rock against metal against grass — is the largest remaining gap in the
-   vocabulary, and it is the sound the player hears more than any other.
+3. ~~**Footsteps.**~~ **SHIPPED, 2026-08-26.** Five authored pairs — metal,
+   grass, rock, ice, and the Nest's roots and husks — chosen from the room's
+   own flags, with the synth step still the floor under all of them. See §2b.

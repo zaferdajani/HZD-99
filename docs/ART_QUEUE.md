@@ -269,6 +269,16 @@ and every move she makes was synthesized. Both gaps are closed:
   branches (the motif-and-cello statement, 10-20s). The old fanfares stay
   underneath as the floor, so an undecoded sting costs nothing.
 
+  **Integrator note (code session, 2026-08-26):** the two stings were keyed
+  into `MEDIA_SRC.audio`, which is the decoded map — ten seconds each, twenty
+  of the seventy-two seconds the game now holds as raw PCM. They were moved to
+  `MEDIA_SRC.sting` and go out through an `<audio>` element instead, the same
+  ruling the eighteen spoken lines got. Nothing about the takes changed and
+  nothing got quieter. **Anything fired longer than about five seconds belongs
+  in that streamed map** — `tests/herofoley.cjs` now fails the build on a long
+  clip in the decoded one. Every one of these files is also declared in
+  `assets/CREDITS.md` now, which `tests/credits.cjs` keeps true.
+
 ## 2ac. THE HOUSE STYLE — Hollow Knight staging, Mega Man X energy ✱ PILOT FIRED 2026-08-25
 
 **The owner's brief:** *"I need it more lively, but as a modern Mega Man X
