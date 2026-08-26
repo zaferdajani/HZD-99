@@ -40,6 +40,7 @@ const SUITE = [
   ['overlap',   'never two music streams audible outside a cross-fade'],
   ['cuepitch',  'every written note is the strongest pitch in its own window'],
   ['cues',      'level, onset and length of each melodic cue'],
+  ['herofoley', 'her authored move sounds decode with real signal in them'],
   ['slashsnd',  'the claw: onset, separate passes, heavy third hit'],
   ['voxmeas',   'the NPC voice chain: no clipping, band limit, speech intact'],
   ['speed2',    'movement speed is identical from 12 to 144 fps'],

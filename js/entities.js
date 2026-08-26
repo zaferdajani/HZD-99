@@ -1405,7 +1405,9 @@ class Player {
           burst(this.x + this.w / 2 + ax * 18, this.y + this.h / 2 + ay * 18, 14, '#b06aff', 260, 0.4, 60, 3, true);
         }
       }
-      this.healT = 0; sfx('atk');
+      // the third beat of the chain is the finisher and sounds like one;
+      // the name falls back to the same swing synth if its take is missing
+      this.healT = 0; sfx(this.combo === 2 ? 'finisher' : 'atk');
       }
     }
     // hold attack to charge the volt-burst

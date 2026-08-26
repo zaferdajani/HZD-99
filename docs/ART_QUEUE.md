@@ -208,6 +208,29 @@ past the clamp when she is at a depth door, or the plate is drawn against the
 room edge instead of centred on the door. Any of the three shows the art; none
 of them is the art session's to choose.
 
+## 2ae. HER SOUND — the motif and the foley ✔ SHIPPED 2026-08-26 (art session)
+
+**The owner:** *"did you create rich audio ost and sounds for my hero" → "do it
+all."* The OST had a theme for every place and every guardian and none for HER,
+and every move she makes was synthesized. Both gaps are closed:
+
+- **`mus_hero.m4a`** — her motif: a rising five-note music-box line alone, a
+  cello under it, the arrangement growing and falling away for the loop. Three
+  takes fired, measured, one kept (LRA 14.1 against the flat take's 5.2 — the
+  build is real), mastered to −14 LUFS like the other openers. It LEADS the
+  title slot; `mus_title` stands behind it per the displacement rule.
+- **Eleven foley takes** (`assets/sfx/hz_*.ogg`) — paired swings, the finisher
+  (the third combo beat now announces itself as `sfx('finisher')`), the volt
+  burst, dash, the charge swell under the rising ticks, charge-ready chime,
+  jump, land, paired footsteps. Every take measured before keying: six of the
+  first eleven came back near-silent (peak −38 dB) and were REFUSED and
+  re-fired — the same lottery the intake gate catches in pictures, caught by
+  ffmpeg instead. Her voice still rides where it rode; the synth stays as the
+  floor for a slow connection.
+- **`tests/herofoley.cjs`** decodes every take the way the game does and fails
+  on a silent container, because playBuf's fallback makes a corrupt file
+  inaudible by construction.
+
 ## 2ac. THE HOUSE STYLE — Hollow Knight staging, Mega Man X energy ✱ PILOT FIRED 2026-08-25
 
 **The owner's brief:** *"I need it more lively, but as a modern Mega Man X

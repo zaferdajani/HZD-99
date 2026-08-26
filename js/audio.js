@@ -903,6 +903,7 @@ const VOX = {
   roar_glc: ['vox_roar_glc', 0.75], roar_drg: ['vox_roar_drg', 0.8],
   roar_prism: ['vox_roar_prism', 0.75],
 };
+let HZSW = false, HZST = false;   // stride/swing alternation for her paired takes
 function sfx(n) {
   if (!AC || MUTED) return;
   if (typeof isHero === 'function' && isHero() && heroSfx(n)) return;
@@ -941,10 +942,12 @@ function sfx(n) {
   if (n === 'jump') hzdSay('jump', 200);
   if (n === 'hurt' && hzdSay(player && player.cores <= 1 ? 'hurtbad' : 'hurt', 260)) return;
   if (n === 'die' && hzdSay('die', 0)) return;
-  if (n === 'dash' && hzdSay('dash', 200)) return;
+  if (n === 'dash') { const v = hzdSay('dash', 200);
+    if (playBuf('hz_dash', 0.42, 0.95 + Math.random() * 0.1) || v) return; }
   if (n === 'djump' && hzdSay('djump', 160)) return;
   if (n === 'heal' && hzdSay('heal', 0)) return;
-  if (n === 'chargeReady' && hzdSay('evo', 400)) return;
+  if (n === 'chargeReady') { const v = hzdSay('evo', 400);
+    if (playBuf('hz_ready', 0.5) || v) return; }
   if (n === 'crystalJoin') { crystalJoin(); return; }
   if (n === 'crystalSwirl') { crystalSwirl(); return; }
   // HER LITTLE MELODIES — see the alphabet above. These come before any
@@ -952,6 +955,22 @@ function sfx(n) {
   if (CUE[n]) { CUE[n](); return; }
   const v = VOX[n];
   if (v && playBuf(v[0], v[1], 0.97 + Math.random() * 0.06)) return;
+  // HER OWN FOLEY (fired 2026-08-26, measured before keying — the near-silent
+  // takes were refused and re-fired). Same contract as every sample here: the
+  // authored take plays if it has decoded, her voice still rides where it used
+  // to, and the synth below remains the floor a slow connection stands on.
+  if (n === 'swing' || n === 'atk') {
+    HZSW = !HZSW;
+    if (playBuf(HZSW ? 'hz_swing1' : 'hz_swing2', 0.5, 0.94 + Math.random() * 0.12)) return;
+  }
+  if (n === 'finisher' && playBuf('hz_fin', 0.55, 0.97 + Math.random() * 0.06)) return;
+  if (n === 'chargedHit' && playBuf('hz_burst', 0.6)) return;
+  if (n === 'jump' && playBuf('hz_jump', 0.4, 0.94 + Math.random() * 0.12)) return; // the Hup already rode above
+  if (n === 'land' && playBuf('hz_land', 0.45, 0.92 + Math.random() * 0.12)) return;
+  if (n === 'step') {
+    HZST = !HZST;
+    if (playBuf(HZST ? 'hz_step1' : 'hz_step2', 0.3, 0.9 + Math.random() * 0.2)) return;
+  }
   // recorded samples first (loaded from the CC0 library), synth fallback below
   if (n === 'hit' && playBuf(Math.random() < 0.5 ? 'hit1' : 'hit2', 0.45, 0.9 + Math.random() * 0.2)) return;
   if (n === 'bosshit' && playBuf('metal', 0.5, 0.85 + Math.random() * 0.15)) return;
@@ -963,6 +982,7 @@ function sfx(n) {
     case 'djump': tone(340, 0.13, 'square', 0.05, 700); break;
     case 'dash': whoosh(0.16, 500, 2600, 0.09); tone(620, 0.13, 'sawtooth', 0.035, 190); break;
     case 'swing': case 'atk': whoosh(0.11, 800, 2600, 0.09); tone(520, 0.06, 'sawtooth', 0.03, 260); break;
+    case 'finisher': whoosh(0.14, 700, 2400, 0.11); tone(460, 0.08, 'sawtooth', 0.04, 220); break;
     case 'chargeReady': tone(880, 0.14, 'sine', 0.07, 1760); tone(1320, 0.2, 'sine', 0.05, null, 0.06); break;
     case 'chargedHit':
       hiss(0.5, 0.18); tone(70, 0.45, 'sawtooth', 0.14, 30);
@@ -1621,8 +1641,13 @@ function sfxGate(big) {
 }
 function sfxChargeTick(k) {
   if (!AC || MUTED) return;
+  // the authored swell underneath, started once at the bottom of the ramp;
+  // the ticks stay on top because they are the part that TRACKS the charge
+  if (k < 0.25 && !CHSW) { CHSW = true; playBuf('hz_charge', 0.4); }
+  if (k >= 0.99) CHSW = false;
   tone(280 + k * 520, 0.09, 'sawtooth', 0.03 + k * 0.02);
 }
+let CHSW = false;
 // ECHO GLYPHS: one note per node, so the sequence is a little tune.
 //
 // Every step used to make the same sound, which throws away the whole reason
@@ -2143,7 +2168,10 @@ const MUS = { cur: null, name: null, step: 0, nextT: 0 };
 // — a per-track gain that fights the master is how a library drifts out of
 // balance every time one file is replaced.
 const RECORDED_TRACKS = {
-  title: [['mus_title', 0.55], ['ambient', 0.5]],
+  // HER THEME LEADS. mus_hero is the hero's own motif (fired 2026-08-26,
+  // mastered to -14 LUFS like the other openers); the old title track stands
+  // directly behind it, per the displacement rule this table is built on.
+  title: [['mus_hero', 0.55], ['mus_title', 0.55], ['ambient', 0.5]],
   intro: [['mus_intro', 0.75], ['ambient', 0.5]],
   A: [['mus_meadows', 0.55]], B: [['mus_conduits', 0.55]], C: [['mus_foundry', 0.55]],
   D: [['mus_archives', 0.55]], E: [['mus_nest', 0.55]], X: [['mus_cache', 0.55]],
