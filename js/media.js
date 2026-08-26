@@ -309,6 +309,11 @@ const MEDIA_SRC = {
     // which is the same arrangement NOSTOS's hero already uses (drawHeroSprite
     // first, drawHeroRig as the fallback), pointed at her for the first time.
     heroStates: 'assets/characters/hero/states.webp',
+    // HER FULL 8-YAW TURNAROUND — the sheet the back plates were bred from,
+    // in the manifest at last because the gate walk turns her THROUGH it now:
+    // profile (col 0/4), three-quarter back (col 5/3), full back (col 6).
+    heroYaw: 'assets/characters/hzd_8yaw.webp',
+    heroYawBare: 'assets/characters/hzd_8yaw_bare.webp',
     heroBackA: 'assets/characters/hero/backwalk_a.webp',
     heroBackB: 'assets/characters/hero/backwalk_b.webp',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.webp',

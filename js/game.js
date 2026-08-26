@@ -9338,6 +9338,9 @@ function gateEnter() {
     const armed = !!(G.save && G.save.flags && G.save.flags.crystal);
     for (const k of gateBackPair(armed)) mediaFetch(k, 1);
     for (const k of gateBackPair(!armed)) mediaFetch(k, 1);
+    // ...and the turnaround the turn beat is cut from, her costume first
+    mediaFetch(armed ? 'heroYaw' : 'heroYawBare', 1);
+    mediaFetch(armed ? 'heroYawBare' : 'heroYaw', 1);
   }
   // THE GATE SOUNDS LIKE A GATE. It played sfx('ui') — the same three-frame
   // tick a menu row makes — for the biggest built thing in the opening. The
@@ -9397,6 +9400,16 @@ const GATE_WALK = 3.4;
 // run: a run into a door is the "dash through a doorway" the shot below was
 // written against, and the owner asked for a careful walk.
 const GATE_STEP_VX = 150;
+// SHE TURNS BEFORE SHE WALKS (owner, 2026-08-26: "normal motion of turning...
+// gradually and smoothly to turn it to face the gate, then normal legs and
+// body movement of someone walking away"). The old shot cut from her side view
+// straight to her back — a jump, not a turn. The beat between the align walk
+// and the recede now plays her own 8-yaw turnaround through the half-turn the
+// camera can see: profile, three-quarter back, full back — and only then do
+// her legs start down the hall. 0.55s: three authored angles at a pace a body
+// actually turns at; longer reads as a hesitation, shorter reads as the cut
+// this replaces.
+const GATE_TURN = 0.55;
 function updateGateWalk(dt) {
   const g = G.gateWalk; if (!g) return;
   // ---- beat one: walk to the doorway, side-on, on her own legs -------------
@@ -9436,6 +9449,12 @@ function updateGateWalk(dt) {
   if (typeof gateBackReady === 'function' && !gateBackReady()) {
     g.hold = (g.hold || 0) + dt;
     if (g.hold < 0.75) return;
+  }
+  // ---- beat two: the turn — her clock holds at zero while her body rotates
+  if ((g.turn || 0) < 1) {
+    g.turnT = (g.turnT || 0) + dt;
+    g.turn = clamp(g.turnT / GATE_TURN, 0, 1);
+    if (g.turn < 1) return;
   }
   g.t += dt;
   if (g.t >= GATE_WALK) {
@@ -9491,8 +9510,56 @@ function gateBackReady() {
   const want = gateBackPair(!!(G.save && G.save.flags && G.save.flags.crystal));
   return !!(gateBackImg(want[0]) && gateBackImg(want[1]));
 }
+// The turn beat's frames, cut from her own turnaround. Which three cells make
+// the visible half-turn depends on which way she was facing when she arrived:
+// facing right it is profile 0 -> three-quarter 5 -> back 6; facing left,
+// profile 4 -> three-quarter 3 -> back 6. The sheet is authored, not mirrored,
+// which is why the two paths use different cells rather than a flip.
+function gateTurnCell(dir, tp) {
+  if (tp < 0.34) return dir > 0 ? 0 : 4;
+  if (tp < 0.72) return dir > 0 ? 5 : 3;
+  return 6;
+}
 function drawGateWalk() {
   const g = G.gateWalk; if (!g || g.align < 1) return;   // beat one is her own body
+  // ---- beat two: the turn. She stands in the doorway at full size and her
+  // body comes around through the authored angles. Nothing recedes yet — the
+  // clock (g.t) is still at zero — so the recede below starts exactly where
+  // and exactly as large as the turn leaves her.
+  if ((g.turn || 0) < 1 && g.t <= 0) {
+    const armed = !!(G.save && G.save.flags && G.save.flags.crystal);
+    const yawIm = gateBackImg(armed ? 'heroYaw' : 'heroYawBare')
+      || gateBackImg(armed ? 'heroYawBare' : 'heroYaw');
+    const sx0 = g.x0 - camSX(), sy0 = g.y0 - camSY();
+    const dir = (player && (player.faceVis || player.face)) || 1;
+    const tp = g.turn || 0;
+    if (yawIm && tp >= 0.34) {
+      // the eased middle of the turn: the three-quarter cell leans in a hair
+      // so the rotation reads as motion rather than as two stills
+      const col = gateTurnCell(dir, tp);
+      const CW = yawIm.naturalWidth / 8, CH = yawIm.naturalHeight;
+      const dh = 92, dw = dh * (CW / CH);
+      c.save();
+      c.drawImage(yawIm, col * CW, 0, CW, CH, sx0 - dw / 2, sy0 - dh, dw, dh);
+      c.restore();
+      G.gateBackKey = tp >= 0.72 ? (armed ? 'heroYaw' : 'heroYawBare') : '';
+    } else if (player) {
+      // first third — or no sheet at all: her live body, standing at the door,
+      // facing the way she walked in. The same body the align beat drew, so
+      // the beat boundary is invisible. This function draws in SCREEN space,
+      // and her body draws itself in WORLD space, so it is carried to the
+      // door's screen spot the same way the recede's last-resort path does.
+      const vx0 = player.vx, f0 = player.face, fv0 = player.faceVis;
+      player.vx = 0; player.face = dir; player.faceVis = dir;
+      c.save();
+      c.translate(sx0, sy0);
+      c.translate(-(player.x + player.w / 2), -(player.y + player.h));
+      player.draw(c);
+      c.restore();
+      player.vx = vx0; player.face = f0; player.faceVis = fv0;
+    }
+    return;
+  }
   const k = clamp(g.t / GATE_WALK, 0, 1);
   // she walks into the gap and away: position lerps toward the vanishing point
   // in SCREEN space, scale falls off, and the last third fades to black so the

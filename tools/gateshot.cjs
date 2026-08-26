@@ -46,7 +46,8 @@ const fs = require('fs');
     await new Promise(r => setTimeout(r, 1200));
     if (!gateEnter()) return { err: 'gate refused' };
     window.update = () => {};                      // freeze; the tool drives it
-    return { gx, px: player.x, dur: GATE_WALK, alignDur: G.gateWalk.alignDur };
+    return { gx, px: player.x, dur: GATE_WALK + (typeof GATE_TURN === 'number' ? GATE_TURN : 0),
+             alignDur: G.gateWalk.alignDur };
   }, { ROOM, OFF });
   if (info.err) { console.error('  ' + info.err); process.exit(1); }
 
@@ -58,7 +59,7 @@ const fs = require('fs');
       // the stride phase and the easing land where they would in play
       const g = G.gateWalk;
       if (!g) return { gone: true, png: document.querySelector('canvas').toDataURL('image/png') };
-      const now = (g.align >= 1 ? g.alignDur + g.t : g.alignT);
+      const now = (g.align >= 1 ? g.alignDur + (g.turnT || 0) + g.t : g.alignT);
       let left = Math.max(0, want - now);
       while (left > 0 && G.gateWalk) { const d = Math.min(1 / 60, left); updateGateWalk(d); left -= d; }
       G.impact = null;
