@@ -51,6 +51,7 @@ Larger CC0 tracks reviewed but not stored in the repo (download if wanted):
 |---|---|---|
 | hit_*.ogg, shot_*.ogg, metal_*.ogg, glass_*.ogg, explosion.ogg | rubberduck | https://opengameart.org/content/100-cc0-sfx |
 | laser*.mp3, powerUp*.mp3, zapTwoTone.mp3, phaserUp3.mp3, lowDown.mp3 | Kenney (kenney.nl) | https://opengameart.org/content/63-digital-sound-effects-lasers-phasers-space-etc |
+| kenney/sfx_edie.ogg, kenney/sfx_jump.ogg, kenney/sfx_pick.ogg | Kenney (kenney.nl) | Sci-Fi Sounds 1.0, **CC0** per the pack's own `LICENSE_kenney.txt` shipped alongside them in `sfx/kenney/` — free for commercial use, credit not mandatory and given anyway |
 
 ## Generated art — declared, per Steam's disclosure requirement
 
@@ -92,6 +93,33 @@ plate can be traced back to the generation it came from.
 | `backgrounds/ceil_*.jpg`, `backgrounds/lair_*.png`, `backgrounds/gate_city.jpg` | Higgsfield | ceiling tiers, guardian lairs, the city gate monument |
 | boss parts atlases (per-guardian) | Higgsfield | restyled through `tools/bossparts.cjs`; see ART_BIBLE.md §3 |
 | `video/*.mp4` | Higgsfield | the intro films and cinematics |
+
+### Generated audio — the score, the voices and the foley
+
+Same declaration, same rule: everything below was **generated with Higgsfield**
+and then normalised, trimmed, looped or cut by hand into the shipped file. None
+of it samples a published recording, and nothing here is a performance by a
+person. It is listed separately from the picture table only because it is
+measured differently — a take is refused on peak level and loudness range
+rather than on a contact sheet.
+
+| Files | Generated | Notes |
+|---|---|---|
+| `music/mus_title.m4a`, `mus_intro.m4a`, `mus_meadows.m4a`, `mus_conduits.m4a`, `mus_foundry.m4a`, `mus_archives.m4a`, `mus_nest.m4a`, `mus_cache.m4a`, `mus_eye.m4a`, `mus_ending.m4a` | Higgsfield | the score: title, the comic intro, the six kingdoms and the ending. Every track carries the same four-note falling motif. Normalised to −3 dBFS on encode, 128 kbps AAC so Safari decodes it |
+| `music/mus_boss.m4a`, `mus_nullfang.m4a`, `mus_talonhost.m4a`, `mus_furnace.m4a`, `mus_glaciere.m4a`, `mus_prism.m4a`, `mus_mother.m4a`, `mus_alpha.m4a`, `mus_alphatame.m4a` | Higgsfield | one theme per guardian, plus the alpha duel and the tamed reprise |
+| `music/mus_hero.m4a` | Higgsfield | HER motif (ART_QUEUE §2ae) — the rising five-note music-box line the score never had. Three takes fired, the flat one refused on loudness range (LRA 5.2 against 14.1), the keeper mastered to −14 LUFS. Leads the title slot |
+| `sfx/vox/hzd_*.wav` | Higgsfield | HZD-99's own voice: the kiai that escalates with the combo, hurt, death, dash, jump, land, heal, evolution, the charge release. −17 LUFS, mono, trimmed to game length |
+| `sfx/vox/roar_*.ogg`, `atk*.ogg`, `dash.ogg`, `djump.ogg`, `hurt.ogg`, `land.ogg`, `purr.ogg`, `win.ogg` | Higgsfield | the guardians' roars — each one its own animal — and the first pass of her barks |
+| `vox/*.ogg` | Higgsfield | the machine folk speaking: eighteen lines, six characters, one voice each. Streamed, never decoded |
+| `sfx/hz_*.ogg` | Higgsfield | her foley (§2ae): paired swings, the finisher, the volt burst, dash, the charge swell, the ready chime, jump, land, and five authored footstep pairs — metal, grass, rock, ice, and the Nest's roots. Gain-matched to −6 dB peak; near-silent takes refused on measurement and re-fired |
+| `sfx/hz_evosting.ogg`, `hz_winsting.ogg` | cut from `mus_hero.m4a` | her motif quoted at her moments — the same five notes, not a soundalike |
+| `sfx/fz_*.ogg` | Higgsfield | the foes' shared combat vocabulary (§2ae): three telegraph tiers, slam, phase, wave, spike, summon, wreck, part-break, the three elemental casts — plus a roar per guardian, picked at play time by who is roaring. Gain-matched to −4 dB peak |
+| `sfx/hum_*.ogg` | Higgsfield | the NPC presence loops (§2ae): six ambient beds, each cut to a seamless three seconds with the tail crossfaded into the head. The cave keeps its synth on purpose — its line changes when the beacon is found |
+
+Every one of these has a **synthesised floor underneath it** in `js/audio.js`.
+That is a licensing fact as much as an engineering one: no shipped moment
+depends on a generated file being present, so a take that ever had to be pulled
+could be pulled.
 
 **Rule for adding to this table:** a generated asset is not finished until it
 has a line here and its as-fired original is in `assets/source/`, both in the
