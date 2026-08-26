@@ -183,6 +183,83 @@ const loader = fs.readFileSync('loader.html', 'utf8');
 // so its top level can wrap what game.js declared. The game pages never
 // include it — the editor exists only where window.EDITOR says so.
 const editorJs = fs.readFileSync('js/editor.js', 'utf8');
+// ---------------------------------------------------------------------------
+// SEO — the head the shared shell cannot carry
+// ---------------------------------------------------------------------------
+//
+// dev.html is one shell for four pages, so anything page-specific has to be
+// injected here, exactly as the <title> already is. Until now the built pages
+// shipped a <title> and nothing else: no lang, no description, no Open Graph,
+// no canonical. This is the only part of the project that is actually online,
+// so a link to it rendered as a bare URL with no summary and no picture.
+//
+// The social images are REAL SCREENSHOTS of each game's title screen
+// (assets/social/*.png, 1200x630), not artwork made for the purpose — the same
+// rule the rest of the project follows about not showing something the thing
+// itself is not.
+//
+// The Forge pages are the owner's editor and are marked noindex: they are not
+// a product, and a search result pointing at someone's level editor is noise.
+const SITE = 'https://zaferdajani.github.io/HZD-99';
+
+function seoBlock(fname, lock, forge) {
+  if (forge) {
+    // Nothing to promote, and it must never be indexed.
+    return '<meta name="robots" content="noindex,nofollow">\n'
+      + '<meta name="viewport" content="width=device-width,initial-scale=1">';
+  }
+  const hero = lock === 'hero';
+  const url = SITE + (hero ? '/odyssey.html' : '/');
+  const name = hero ? 'NOSTOS' : 'CLAWBYTE';
+  const tagline = hero
+    ? 'An Odyssey metroidvania — the long way home to Ithaca.'
+    : 'A robo-cat metroidvania in the Machine Depths.';
+  const desc = tagline + ' A hand-built action game that runs in the browser — '
+    + 'no install, no account. Explore, fight guardians, earn skills, and find the way through.';
+  const img = SITE + '/assets/social/' + (hero ? 'nostos' : 'clawbyte') + '.png';
+
+  const ld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'VideoGame',
+    name: name,
+    description: desc,
+    url: url,
+    image: img,
+    genre: ['Action', 'Metroidvania', 'Platformer'],
+    gamePlatform: 'Web browser',
+    applicationCategory: 'Game',
+    operatingSystem: 'Any (modern web browser)',
+    author: { '@type': 'Person', name: 'Zafer Dajani' },
+    inLanguage: ['en', 'ar', 'tr', 'zh', 'ru'],
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD',
+              availability: 'https://schema.org/InStock', url: url },
+  // JSON.stringify does not escape '/', so "</script>" in any value would close
+  // this block and the rest would parse as markup. Nothing here is user input
+  // today, but the escape costs nothing and the rule should not have exceptions.
+  }).replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
+
+  return [
+    '<meta name="description" content="' + desc + '">',
+    '<link rel="canonical" href="' + url + '">',
+    '<meta name="robots" content="index,follow">',
+    '<meta property="og:type" content="website">',
+    '<meta property="og:site_name" content="' + name + '">',
+    '<meta property="og:title" content="' + name + ' — ' + tagline + '">',
+    '<meta property="og:description" content="' + desc + '">',
+    '<meta property="og:url" content="' + url + '">',
+    '<meta property="og:image" content="' + img + '">',
+    '<meta property="og:image:width" content="1200">',
+    '<meta property="og:image:height" content="630">',
+    '<meta property="og:image:alt" content="' + name + ' title screen">',
+    '<meta name="twitter:card" content="summary_large_image">',
+    '<meta name="twitter:title" content="' + name + '">',
+    '<meta name="twitter:description" content="' + tagline + '">',
+    '<meta name="twitter:image" content="' + img + '">',
+    '<meta name="theme-color" content="#04060a">',
+    '<script type="application/ld+json">' + ld + '</script>',
+  ].join('\n');
+}
+
 const emit = (fname, lock, forge) => {
   let shell = html;
   if (lock === 'hero')
@@ -190,6 +267,7 @@ const emit = (fname, lock, forge) => {
       '<title>NOSTOS — an Odyssey metroidvania</title>');
   if (forge)
     shell = shell.replace(/<title>[^<]*<\/title>/, '<title>THE FORGE</title>');
+  shell = shell.replace('<!--PCN-SEO-->', seoBlock(fname, lock, forge));
   const out = shell.replace(/<script src="js\/theme\.js"><\/script>[\s\S]*<\/body>/, () =>
     loader + '\n' +
     '<script>window.BUILD_ID=' + JSON.stringify(buildId) +
