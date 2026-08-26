@@ -931,9 +931,19 @@ function sfx(n) {
     // enough that it is the animal inside the swing rather than a second swing.
     const cb = (typeof player !== 'undefined' && player && player.combo) | 0;
     const w = wielded();
-    if (w === 'crystal2') crystalSlash2(cb);
-    else if (w === 'crystal1') crystalSlash(cb);
-    else clawSlash(cb);
+    // THE AUTHORED SWING lives INSIDE this branch — the first wiring put it
+    // below and it was dead code, because this branch returns. Claw swings
+    // take the fired pair and the fired finisher on the same combo index the
+    // synth escalated on; the crystal blades keep their own slash synths,
+    // which are a different weapon's voice, not a fallback.
+    const swung = (w !== 'crystal1' && w !== 'crystal2')
+      && playBuf(cb >= 2 ? 'hz_fin' : (cb === 1 ? 'hz_swing2' : 'hz_swing1'),
+                 cb >= 2 ? 0.55 : 0.5, 0.94 + Math.random() * 0.12);
+    if (!swung) {
+      if (w === 'crystal2') crystalSlash2(cb);
+      else if (w === 'crystal1') crystalSlash(cb);
+      else clawSlash(cb);
+    }
     // the big open-throat take (hzd_atk3) is OUT of the normal rotation — the
     // owner: "it keeps saying the yaaa! voice with normal hit sequence when it
     // was supposed to be for the supercharged one." Normal hits rotate the two
@@ -966,6 +976,8 @@ function sfx(n) {
   if (n === 'crystalSwirl') { crystalSwirl(); return; }
   // HER LITTLE MELODIES — see the alphabet above. These come before any
   // sample, because the whole point is that they are all the same instrument.
+  if (n === 'jump') playBuf('hz_jump', 0.34, 0.94 + Math.random() * 0.12);
+  if (n === 'land') playBuf('hz_land', 0.4, 0.92 + Math.random() * 0.12);
   if (CUE[n]) { CUE[n](); return; }
   const v = VOX[n];
   if (v && playBuf(v[0], v[1], 0.97 + Math.random() * 0.06)) return;
@@ -973,14 +985,8 @@ function sfx(n) {
   // takes were refused and re-fired). Same contract as every sample here: the
   // authored take plays if it has decoded, her voice still rides where it used
   // to, and the synth below remains the floor a slow connection stands on.
-  if (n === 'swing' || n === 'atk') {
-    HZSW = !HZSW;
-    if (playBuf(HZSW ? 'hz_swing1' : 'hz_swing2', 0.5, 0.94 + Math.random() * 0.12)) return;
-  }
-  if (n === 'finisher' && playBuf('hz_fin', 0.55, 0.97 + Math.random() * 0.06)) return;
   if (n === 'chargedHit' && playBuf('hz_burst', 0.6)) return;
-  if (n === 'jump' && playBuf('hz_jump', 0.4, 0.94 + Math.random() * 0.12)) return; // the Hup already rode above
-  if (n === 'land' && playBuf('hz_land', 0.45, 0.92 + Math.random() * 0.12)) return;
+
   // HER MOTIF, QUOTED AT HER MOMENTS. Both stings are cut from mus_hero
   // itself, so they are the same five notes the title plays - a quote, not a
   // soundalike. They LAYER over the existing fanfares (the caller keeps its
@@ -1036,7 +1042,6 @@ function sfx(n) {
     case 'djump': tone(340, 0.13, 'square', 0.05, 700); break;
     case 'dash': whoosh(0.16, 500, 2600, 0.09); tone(620, 0.13, 'sawtooth', 0.035, 190); break;
     case 'swing': case 'atk': whoosh(0.11, 800, 2600, 0.09); tone(520, 0.06, 'sawtooth', 0.03, 260); break;
-    case 'finisher': whoosh(0.14, 700, 2400, 0.11); tone(460, 0.08, 'sawtooth', 0.04, 220); break;
     case 'chargeReady': tone(880, 0.14, 'sine', 0.07, 1760); tone(1320, 0.2, 'sine', 0.05, null, 0.06); break;
     case 'chargedHit':
       hiss(0.5, 0.18); tone(70, 0.45, 'sawtooth', 0.14, 30);
