@@ -238,6 +238,19 @@ and every move she makes was synthesized. Both gaps are closed:
   measured and gain-matched to −6 dB peak before keying (the model returns
   footsteps as quiet as −32; a step at three different loudnesses per surface
   reads as a limp). The synth step stays the floor under all ten.
+- **The NPCs hum their own presence** (owner, 2026-08-26: "do the same for
+  npcs and sages voices too"): six authored ambient loops — Servo's warm old
+  motor, Ratchet's generator-and-lamp-fizz, Mono's CRT drone, the sage's
+  glass-harmonic chord, Patch's tool-taps-and-arc-snaps, Lumen's wandering
+  shimmer — each cut into a seamless 3s loop (tail crossfaded into head) and
+  gain-matched. The upgrade hook for these was DEAD CODE: npcVoxBuild checked
+  for a recorded `hum_<id>` that nothing ever fetched, and a voice built
+  before its loop landed kept the synth forever. npcVoxTick now kicks the
+  fetch and rebuilds the voice mid-fade when the loop arrives — verified by
+  measurement, synth-then-loop. The CAVE keeps its synth on purpose: its thin
+  searching line changes when the beacon is found, and a recording cannot
+  change its mind. The spoken lines (assets/vox) were already authored; the
+  sage duelists already speak the authored telegraph tiers.
 - **The foes speak the same language** (owner, 2026-08-26: "do the same rich
   sounds for all enemies and bosses"): twenty authored takes for the shared
   combat vocabulary — the three telegraph tiers, slam, phase, wave, spike

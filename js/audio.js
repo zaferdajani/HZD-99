@@ -543,7 +543,7 @@ function npcVoxBuild(id) {
     const s = AC.createBufferSource();
     s.buffer = MBUF['hum_' + id]; s.loop = true;
     s.connect(g); s.start(); nodes.push(s);
-    return { g, nodes };
+    return { g, nodes, synth: false };
   }
   const osc = (f, type, vol, wobF, wobA) => {
     const o = AC.createOscillator(), og = AC.createGain();
@@ -599,11 +599,25 @@ function npcVoxBuild(id) {
     }
     default:        osc(110, 'sine', 0.3);
   }
-  return { g, nodes };
+  return { g, nodes, synth: true };
 }
 function npcVoxTick(id, target) {
   if (!AC || MUTED || !AUD_UNLOCKED) return;
+  // The recorded-loop upgrade was DEAD CODE until 2026-08-26: npcVoxBuild
+  // checks MBUF for 'hum_<id>' but nothing ever FETCHED one, and a voice
+  // built before its loop landed was cached with the synth forever. So the
+  // fetch is kicked here, and a synth voice is torn down and rebuilt the
+  // moment its authored loop arrives — mid-fade, which is the one time a
+  // swap is inaudible. The cave keeps its synth on purpose: its thin
+  // wandering line changes when the beacon is found, and a recorded loop
+  // cannot change its mind.
+  if (id !== 'cave' && typeof mediaAudio === 'function') mediaAudio('hum_' + id);
   let v = NPCVOX[id];
+  if (v && v.synth && MBUF['hum_' + id]) {
+    try { for (const n of v.nodes) n.stop(); } catch (e) {}
+    try { v.g.disconnect(); } catch (e) {}
+    delete NPCVOX[id]; v = null;
+  }
   if (!v) { v = npcVoxBuild(id); if (!v) return; NPCVOX[id] = v; }
   v.g.gain.setTargetAtTime(target, AC.currentTime, 0.18);
 }
