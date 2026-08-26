@@ -244,6 +244,36 @@ function hzdRelease(fade) {
     h.src.stop(t + f + 0.01);
   } catch (e) { try { h.src.stop(); } catch (e2) {} }
 }
+// A TAKE IS NOT A GESTURE, AND THE GESTURE DECIDES THE LENGTH.
+//
+// The authored foley came back about a second long apiece, which is what the
+// model returns and has nothing to do with what the move IS. Played whole:
+//
+//   - a claw swing rang for a full second, so the CLAW out-sang the crystal by
+//     fifty times at 150-400 ms — the crystal's glass ring is the whole point
+//     of the upgrade, and tests/slashsnd.cjs caught the inversion;
+//   - a three-beat chain finishes in about half a second, so all three swings
+//     were audible at once;
+//   - she takes nine steps a second at a run, and a half-second footstep means
+//     five of them overlapping continuously - a mush, on the sound the player
+//     hears more than any other.
+//
+// So the take is the material and the game says how long the gesture lasts.
+// The lengths below are the ones the synth cues have always had (SOUND_BIBLE
+// §2), which is the right authority: the synth is the floor these takes stand
+// on, and a take that outlasts its own fallback is a different sound.
+//
+// This is trimming at PLAY time on purpose. Trimming the files would throw the
+// tails away for good, and some of them are the part a future slower move
+// wants. Anything absent from this table plays whole - roars, tells and slams
+// are as long as they are.
+const TAKE_GATE = {
+  hz_swing1: 0.17, hz_swing2: 0.17, hz_fin: 0.32,
+  hz_jump: 0.22, hz_land: 0.24, hz_dash: 0.26, hz_burst: 0.44,
+  hz_step1: 0.17, hz_step2: 0.17, hz_stepgrass1: 0.17, hz_stepgrass2: 0.17,
+  hz_steprock1: 0.17, hz_steprock2: 0.17, hz_stepice1: 0.17, hz_stepice2: 0.17,
+  hz_steporg1: 0.17, hz_steporg2: 0.17,
+};
 function playBuf(key, vol, rate) {
   if (!AC || MUTED) return false;
   // a sound in the second wave that is asked for early jumps the queue. This
@@ -261,6 +291,16 @@ function playBuf(key, vol, rate) {
     if (m) g.connect(m.in);
   }
   s.start();
+  // the gesture's length, closed with a ramp rather than a stop: a buffer cut
+  // dead mid-cycle is a click, and a click is the one artefact a player hears
+  // every single time
+  const gate = TAKE_GATE[key];
+  if (gate && vol > 0) {
+    const t = AC.currentTime;
+    g.gain.setValueAtTime(vol, t + gate * 0.55);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, vol * 0.001), t + gate);
+    s.stop(t + gate + 0.02);
+  }
   return true;
 }
 // unlock on ANY first interaction, not just canvas/keyboard
