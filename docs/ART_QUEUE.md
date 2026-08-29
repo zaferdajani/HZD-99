@@ -388,6 +388,27 @@ sitting down cross-legged, pulling out a little screen, the Sonic look-at-
 the-camera. The mechanism (HERO_FIDGET, intro+loop) takes a second strip by
 adding an entry, not by new code.
 
+## 2ag. THE MONUMENTS WERE ORPHANED FOR HALF A DAY ✔ REWIRED 2026-08-29
+
+**The owner, holding his own Higgsfield library up: "Why aren't you using any
+of those?!"** He was right for five of the six. The repainted city gate was
+visibly live in W2 — but the morning's door reshuffle (2cf31e7, the fix for
+§2ad) made every guardian grotto a `cave` room, and the cave-mouth branch of
+drawGateDoors runs before the zone-gate branch. All five kingdom monuments
+went from reachable to declared-and-never-drawn in one commit, silently — the
+exact §7 failure, created by a fix for a different visibility failure.
+
+The rewire: a door INTO a guardian grotto, seen from outside, wears its
+kingdom's monument (cable iris, furnace horseshoe, split archive, bone arch,
+flesh iris); from inside the grotto, and at every ordinary rock passage, the
+mouth family keeps the job. Photographed at all six doors; seam, shopread and
+grammar green.
+
+**The lesson for both sessions**: a draw site is not a place, it is a PATH —
+tests/artbible's declared-and-drawn check runs the rooms it knows, and none of
+them was a guardian door. Reachability changed by a commit that never touched
+the plates or their draw code.
+
 ## 2ab. THE INTAKE GATE — nothing is keyed until it has been measured ✔ SHIPPED 2026-08-25
 
 **The owner's instruction:** *"pipeline to check all artwork that lands from

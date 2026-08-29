@@ -8878,8 +8878,37 @@ function drawGateDoor(P, def, nearPlane) {
   const want = walking ? 1 : near ? 0.14 : 0;
   def._k = (def._k == null ? 0 : def._k) + (want - (def._k || 0)) * (walking ? 0.07 : 0.04);
   const k = G._doorK = def._k;
-  // cave on EITHER side of the passage: it is a mouth, not a door
+  // THE GUARDIAN DOORS WEAR THEIR MONUMENTS (owner, 2026-08-29, holding his
+  // own library up: "why aren't you using any of those?!"). The five fired
+  // §2f gates were keyed and REACHABLE, then the morning's door reshuffle
+  // made every guardian grotto a cave room — and the cave branch below runs
+  // first, so all five monuments became declared-and-never-drawn, which is
+  // the exact §7 failure the bible names. A guardian's threshold is a built
+  // MONUMENT — the cable iris, the furnace horseshoe, the bone arch — and
+  // only the ordinary rock passages are mouths. So: standing OUTSIDE, at a
+  // door into a guardian grotto, the kingdom's own gate stands; from inside
+  // the grotto, and at every plain cave, the mouth family keeps the job.
   const dest = typeof ROOMS !== 'undefined' && ROOMS[def.to];
+  const guardDoor = dest && dest.cave && !(G.roomDef && G.roomDef.cave)
+    && def.to && def.to[0] === 'G';
+  const gzp = guardDoor && GATE_PLATE_BY_ZONE[G.roomDef && G.roomDef.zone];
+  const gzim = gzp && scenePlate(gzp);
+  if (gzim) {
+    const GH = 330, GW = GH * (gzim.naturalWidth / gzim.naturalHeight);
+    c.save();
+    c.drawImage(gzim, ds - GW / 2, gy - GH, GW, GH);
+    // the kingdom's own light waking in the opening as she nears
+    c.globalCompositeOperation = 'lighter';
+    const og = c.createRadialGradient(ds, gy - GH * 0.32, 6, ds, gy - GH * 0.32, GH * 0.45);
+    og.addColorStop(0, 'rgba(255,255,255,' + (0.06 + k * 0.22) + ')');
+    og.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = og;
+    c.fillRect(ds - GW / 2, gy - GH, GW, GH);
+    c.restore();
+    structBeacon(ds, gy, 200, 272, k, 1);
+    return;
+  }
+  // cave on EITHER side of the passage: it is a mouth, not a door
   if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) {
     // ...and the mouth is told whether it is CHOKED, because a passage packed
     // with rock does not show its interior (see drawCaveMouth).
