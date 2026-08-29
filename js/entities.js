@@ -759,6 +759,18 @@ const HERO_TRANS = {
 // makes the arc read as one move at any jump height, including the clipped ones
 // a variable-height jump produces. 53 pose changes a minute collapse into it.
 let HERO_AIR_STRIP = null;     // { key: 'transAir', cells: 6, k: 1, up: 770, down: 700 }
+// THE IMPATIENT WAIT (owner, 2026-08-27: "like a cute kid waiting anxiously
+// for something from a grown-up... cross their hands, tapping one leg on the
+// floor, and saying Yalla!"). Not a transition and not a pose: a LOOP that
+// takes over the idle after she has stood untouched for a while — the Sonic
+// foot-tap, hers. Null until the fired strip is cut and keyed; the procedural
+// idle (ear twitches, look-arounds, weight shifts) remains the floor.
+// k 0.78: the fidget figure fills 89% of its cell against the idle cell's 69%,
+// and drawing both at HERO_DH would grow her the moment she got impatient.
+// intro 7: cells 0-6 are the arms crossing — played once — and 7-15 are the
+// bounce-and-tap she holds for as long as she is ignored.
+let HERO_FIDGET = { key: 'heroFidget', cells: 16, k: 0.78, fps: 9, intro: 7 };
+const FIDGET_AFTER = 6;        // seconds of stillness before she runs out of patience
 // THE CELL COUNT IS HOW MANY DIFFERENT PICTURES THE TAKE ACTUALLY HOLDS.
 //
 // Two owner reports, and the second corrected the first. "Use the films to
@@ -1051,7 +1063,18 @@ class Player {
           this.tailFlickIn = rnd(2.4, 6);
           this.tailV[0] += 0.55; this.tailV[1] += 0.35; this.tailV[2] += 0.2;
         }
-      } else { this.idleT = 0; this.lookTgt = 0; this.lookHold = null; }
+        // YALLA — patience breaks audibly. Once when the fidget starts, then
+        // again every eight-or-so seconds of being ignored. Voice only: the
+        // fidget art loops with or without the word, and the word never
+        // repeats often enough to become the room's metronome.
+        if (this.idleT > FIDGET_AFTER) {
+          this.yallaIn = (this.yallaIn == null ? 0.2 : this.yallaIn) - dt;
+          if (this.yallaIn <= 0) {
+            this.yallaIn = rnd(7, 11);
+            if (typeof hzdSay === 'function') hzdSay('yalla', 600);
+          }
+        } else this.yallaIn = null;
+      } else { this.idleT = 0; this.lookTgt = 0; this.lookHold = null; this.yallaIn = null; }
       if (this.lookHold != null) {
         this.lookHold -= dt;
         if (this.lookHold <= 0) { this.lookTgt = 0; this.lookHold = null; }
@@ -2207,6 +2230,15 @@ class Player {
       // cell is anchored at its bottom — so the bottom goes half a cell below
       // the same centre the pose cells use
       return drawStripCell(c, A.key, Math.floor(p * A.cells), A.cells, 0, -18 + h / 2, h, false);
+    }
+    const F = HERO_FIDGET;
+    if (F && st === 'idle' && this.idleT > FIDGET_AFTER) {
+      // intro once, then the loop — the wrap lands bounce-to-bounce instead of
+      // snapping back through the arm-cross (measured seam 15->0 was 30%)
+      const n = Math.floor((this.idleT - FIDGET_AFTER) * (F.fps || 10));
+      const loopN = F.cells - F.intro;
+      const cell = n < F.cells ? n : F.intro + ((n - F.cells) % loopN);
+      if (drawStripCell(c, F.key, cell, F.cells, 0, HERO_FLOOR, HERO_DH * (F.k || 1), this.faceVis < 0)) return true;
     }
     const T = HERO_TRANS[st];
     if (!T) return false;

@@ -935,6 +935,12 @@ const HZDVOX = {
   // held vowel, `release` is what she spends it on.
   charge: [['hzd_charge', 0.42]],
   release: [['hzd_release', 0.55]],
+  // HER FIRST WORD. The voice was built wordless on purpose — the Silksong
+  // register, and five languages. "Yalla" is the owner's own word in his own
+  // language, asked for by name (2026-08-27), and it needs no translating
+  // anywhere on earth — the exception that proves the rule rather than
+  // breaking it.
+  yalla: [['hzd_yalla', 0.5]],
 };
 // One gate for the whole voice: two barks on the same frame is a stutter, and
 // a bark every frame of a held dash is a nuisance. 90 ms is shorter than any

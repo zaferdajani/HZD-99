@@ -314,6 +314,8 @@ const MEDIA_SRC = {
     // profile (col 0/4), three-quarter back (col 5/3), full back (col 6).
     heroYaw: 'assets/characters/hzd_8yaw.webp',
     heroYawBare: 'assets/characters/hzd_8yaw_bare.webp',
+    // THE IMPATIENT WAIT — 16 cells: 0-6 cross the arms, 7-15 bounce and tap.
+    heroFidget: 'assets/characters/hero/fidget.webp',
     heroBackA: 'assets/characters/hero/backwalk_a.webp',
     heroBackB: 'assets/characters/hero/backwalk_b.webp',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.webp',
@@ -486,6 +488,7 @@ const MEDIA_SRC = {
     // with a word in it is a bark that is wrong in four of them.
     // Trimmed to the frame the voice starts by tools/voxtrim.cjs, because the
     // room tone in front of a generated take IS latency on a combat sound.
+    hzd_yalla: 'assets/sfx/vox/hzd_yalla.wav',
     hzd_atk1: 'assets/sfx/vox/hzd_atk1.wav',
     hzd_atk2: 'assets/sfx/vox/hzd_atk2.wav',
     hzd_atk3: 'assets/sfx/vox/hzd_atk3.wav',

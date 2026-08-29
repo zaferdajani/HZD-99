@@ -355,6 +355,39 @@ the campaign runs on.
 every wallpaper re-fired through this block, in kingdom order, each batch
 measured by `tools/intake.cjs` and shown to the owner before it is keyed.
 
+## 2af. THE IMPATIENT WAIT — her first idle act, and her first word ✔ SHIPPED 2026-08-27
+
+**The owner:** *"when Sonic the Hedgehog was left without doing any work, it
+used to stamp its feet acting impatient... like a cute kid waiting anxiously
+for something from a grown-up. They would cross their hands... tapping one leg
+on the floor, and saying the word: Yalla!"*
+
+- **The take**: fired from her idle reference (seedance, locked camera, black
+  field, the continuous-motion brief). The intake gate measured 74 distinct
+  pictures at a 6% selector — the strongest take any brief has returned — and
+  `vidstrip auto:16` kept 16 cells with zero dead ones.
+- **The strip** (`assets/characters/hero/fidget.webp`): cells 0-6 cross the
+  arms, 7-15 bounce and tap. She plays the intro ONCE and holds the loop, so
+  the wrap lands bounce-to-bounce instead of snapping back through the
+  arm-cross (the raw seam measured 30%). Starts after 6s of stillness; any
+  input returns her instantly to the ordinary idle. k 0.78, measured so she
+  stays her own size the moment she gets impatient.
+- **YALLA — her first word.** The voice was built wordless on purpose (the
+  Silksong register, five languages). "Yalla" is the owner's own word asked
+  for by name, needs no translating anywhere, and is the exception that
+  proves the rule. Spoken by her own cloned voice (NYA-9-1), trimmed and
+  normalised through tools/voxtrim.cjs like every bark before it. Once when
+  patience breaks, then every 7-11 seconds of being ignored — never often
+  enough to become the room's metronome.
+- Take archived in `assets/source/takes/fidget.webm`; verified in-game by
+  instrumented playthrough (the strip draws at her size on the floor, the
+  word fires once at the break).
+
+**NEXT IN THE FAMILY, when the owner asks**: more waits to rotate through —
+sitting down cross-legged, pulling out a little screen, the Sonic look-at-
+the-camera. The mechanism (HERO_FIDGET, intro+loop) takes a second strip by
+adding an entry, not by new code.
+
 ## 2ab. THE INTAKE GATE — nothing is keyed until it has been measured ✔ SHIPPED 2026-08-25
 
 **The owner's instruction:** *"pipeline to check all artwork that lands from
