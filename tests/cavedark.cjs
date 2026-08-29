@@ -239,10 +239,20 @@ const check = (name, ok, detail) => {
       await rest(10);
       const a2 = lum(0, 130, 960, 340);
       if (Math.abs(a1 - a2) > 1.2) { await rest(30); continue; }
+      // ...AND SO MUST THE PROBE READ. The stability rule above was written for
+      // the first half of the pair and never applied to the second, so the
+      // comparison could still be made against a frame caught mid-transition:
+      // under a loaded machine this read 73.0 against a settled 77.2 and
+      // reported the cave pass leaking into the meadow, while the same run
+      // alone reads 76.28 against 76.20. Turning the probe on is a state
+      // change like any other and gets the same two-reads-must-agree treatment.
       G.darkProbe = 1; await rest(10);
       const b1 = lum(0, 130, 960, 340);
+      await rest(10);
+      const b2 = lum(0, 130, 960, 340);
       G.darkProbe = 0;
-      out.meadow = a2; out.meadowProbe = b1; out.meadowTries = attempt + 1;
+      if (Math.abs(b1 - b2) > 1.2) { await rest(30); continue; }
+      out.meadow = a2; out.meadowProbe = b2; out.meadowTries = attempt + 1;
       break;
     }
     return out;
