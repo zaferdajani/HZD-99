@@ -179,8 +179,33 @@ function applyScale() {
   // transform has to be re-established — draw() does that per frame via qFrame()
   if (typeof tileDirty !== 'undefined') tileDirty = true;
 }
+// THE LAYOUT CHANGES WITHOUT A RESIZE, AND THE RESOLUTION HAS TO FOLLOW IT.
+//
+// applyScale derives the backbuffer from the canvas's CSS box, and on a phone
+// that box is not set here — the touch controller lays it out, after boot, once
+// it knows the gutters. Nothing told this file. So a phone computed its
+// resolution ONCE, against the pre-controller box, and then rendered at that
+// number forever: measured on a 3x device, a 960x540 backbuffer stretched
+// across 1748x983 device pixels. Every plate in the game upscaled 1.8x, which
+// is exactly what "blurry" looks like, and no tier change could move it.
+//
+// The resize listener could not catch it because enabling the controller is not
+// a resize; and a call added to the controller would only fix the one site that
+// exists today. So the check lives where it cannot be forgotten: one string
+// compare per frame against the box we last derived from. Nothing is recomputed
+// while the box holds still, and any future layout — the pad connecting and the
+// gutters going away, the visual viewport moving, an orientation change — is
+// picked up on the next frame by construction.
+let lastBoxW = '';
+function scaleCheck() {
+  const cv = document.getElementById('cv');
+  if (!cv || cv.style.width === lastBoxW) return;
+  applyScale();
+  lastBoxW = cv.style.width;   // read back AFTER: off touch, fitCanvas writes it
+}
 // called at the top of every frame, before anything draws
 function qFrame(ctx) {
+  scaleCheck();
   ctx.setTransform(RS, 0, 0, RS, 0, 0);
 }
 addEventListener('resize', () => { setTimeout(applyScale, 60); });

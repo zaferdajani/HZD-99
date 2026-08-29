@@ -84,6 +84,7 @@ const SUITE = [
   ['gatecue',   'the first built thing the player finds sounds like one'],
   ['cuefamily', 'the things she is shot at with do not all sound alike'],
   ['shopread',  'a structure she can enter is never the wall behind it'],
+  ['beacon',    'a marker lights the way TO a character, never over one'],
   ['doorway',   'the painted door is where she walks in, not the wall beside it'],
   ['cross',     'a room crossing is a move, not a cut'],
   ['seam',      'a room boundary is a place she walks through, not a door'],

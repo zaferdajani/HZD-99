@@ -10388,22 +10388,55 @@ function drawStatics(P) {
           // now — a light shaft up from the body, a breathing ring around it,
           // and the bolt riding the top. Still conditional on the cell, so it
           // stays an answer and never becomes a quest marker.
-          const px = s.x + s.w / 2, py = s.y - 18 + Math.sin(performance.now() / 320) * 3;
+          // A MARKER OVER HIM, NEVER A WASH ACROSS HIM (owner, 2026-08-29:
+          // "the characters were just blurry and full of light... nothing is
+          // showing"). The beacon was an ADDITIVE column drawn from above his
+          // head down through his entire body, 1.4x his width — and additive
+          // light has no edge (ART_BIBLE §3), so it did not light him, it
+          // dissolved him. Measured in the den: a legible armoured figure with
+          // a helmet, a shoulder line and a lit chest went to a featureless
+          // gold lozenge, and the cat standing beside him went with it.
+          //
+          // The job is unchanged — this unit can be fixed and she is holding
+          // the cell — so it is still a beam, a ring and a bolt, and it still
+          // has to be findable at arm's length on a phone. It simply STOPS AT
+          // HIS HEAD. The beam stands above him, brightest just over the
+          // helmet; the ring is on the floor he is standing on; the bolt rides
+          // the top. Everything that touches the body is gone, and a beacon
+          // over a character anyone can see reads as a marker rather than as a
+          // lighting fault.
+          //
+          // AND IT IS ANCHORED TO THE BODY THAT IS DRAWN, NOT THE BOX THAT
+          // COLLIDES. This is why the wash landed where it did, and it was
+          // never a tuning problem: an NPC's entity box is its FEET, and the
+          // figure is drawn from an atlas cell scaled by that character's own
+          // k. Ratchet's box is 56 px tall and his k is 2.6, so he stands
+          // 146 px high and his head is 66 px ABOVE s.y. Every offset here
+          // was measured down from s.y — so "18 px over his head" was two
+          // thirds of the way down his chest, and a shaft that ran from
+          // s.y - 60 to his feet started at his sternum. Same arithmetic the
+          // rim halo above already does; it is done here too rather than
+          // assumed, because the k differs per character and a marker that is
+          // right for one and wrong for the next is the same bug again.
+          const AK2 = typeof atlasOf === 'function' && atlasOf(s.extra);
+          const kk2 = (AK2 && AK2.sub[s.extra] && AK2.sub[s.extra].k) || 1.4;
+          const headY = s.y + s.h - s.h * kk2;
+          const px = s.x + s.w / 2, py = headY - 22 + Math.sin(performance.now() / 320) * 3;
           const pu2 = 0.5 + Math.sin(performance.now() / 300) * 0.5;
           c.save(); c.globalCompositeOperation = 'lighter';
-          const shaft = c.createLinearGradient(0, s.y - 60, 0, s.y + s.h);
+          const shaft = c.createLinearGradient(0, headY - 78, 0, headY + 2);
           shaft.addColorStop(0, 'rgba(255,210,110,0)');
-          shaft.addColorStop(0.55, 'rgba(255,214,120,' + (0.10 + pu2 * 0.08) + ')');
+          shaft.addColorStop(0.74, 'rgba(255,214,120,' + (0.14 + pu2 * 0.11) + ')');
           shaft.addColorStop(1, 'rgba(255,214,120,0)');
           c.fillStyle = shaft;
-          c.fillRect(px - s.w * 0.7, s.y - 60, s.w * 1.4, s.h + 60);
+          c.fillRect(px - s.w * 0.42, headY - 78, s.w * 0.84, 80);
           c.strokeStyle = 'rgba(255,214,120,' + (0.25 + pu2 * 0.35) + ')';
           c.lineWidth = 2;
           c.beginPath(); c.ellipse(px, s.y + s.h, s.w * 0.9 + pu2 * 6, 7, 0, 0, 7); c.stroke();
-          const gg = c.createRadialGradient(px, py, 0, px, py, 24);
-          gg.addColorStop(0, 'rgba(255,236,168,0.95)');
+          const gg = c.createRadialGradient(px, py, 0, px, py, 21);
+          gg.addColorStop(0, 'rgba(255,236,168,0.82)');
           gg.addColorStop(1, 'rgba(255,180,60,0)');
-          c.fillStyle = gg; c.beginPath(); c.arc(px, py, 24, 0, 7); c.fill();
+          c.fillStyle = gg; c.beginPath(); c.arc(px, py, 21, 0, 7); c.fill();
           c.restore();
           ftxt('⚡', px, py + 5, 15, '#2a1b06');
         }
