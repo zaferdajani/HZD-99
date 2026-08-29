@@ -33,8 +33,16 @@ const { chromium } = require('playwright');
   console.log('── hzdvox — her voice: no dead air in front of it, no clipping, and it holds its gate');
 
   // decode every take in the browser and measure the waveform itself
-  const m = await page.evaluate(async () => {
+  const r = await page.evaluate(async () => {
     const keys = Object.keys(MEDIA_SRC.audio).filter(k => k.indexOf('hzd_') === 0);
+    // WHAT HER VOICE CAN ASK FOR, taken from the table that does the asking.
+    // This used to be the number 16, which meant every legitimate addition to
+    // her voice read as a missing take — "yalla" landed and the harness called
+    // the set incomplete while measuring it as fine on every other law. The
+    // pairing is the real rule and it cannot go stale: every take HZDVOX names
+    // is on disk, and every hzd_ file shipped is one HZDVOX can reach.
+    const wanted = new Set();
+    for (const v of Object.values(HZDVOX)) for (const t of v) wanted.add(t[0]);
     const AC2 = new (window.AudioContext || window.webkitAudioContext)();
     const out = [];
     for (const k of keys) {
@@ -58,11 +66,17 @@ const { chromium } = require('playwright');
                  onsetMs: +(onset / SR * 1000).toFixed(1), rms: +rms.toFixed(4),
                  ch: buf.numberOfChannels, sr: SR });
     }
-    return out;
+    return { takes: out, wanted: [...wanted].sort(), shipped: keys.slice().sort() };
   });
 
+  const pairing = { missing: r.wanted.filter(k => !r.shipped.includes(k)),
+                    orphan: r.shipped.filter(k => !r.wanted.includes(k)) };
+  const m = r.takes;
   check('every take decodes', !m.some(o => o.err), m.filter(o => o.err).map(o => o.k + ' ' + o.err).join(', '));
-  check('the set is complete (16 takes)', m.length === 16, m.length + ' found');
+  check('every voice the code can ask for has a take on disk',
+    pairing.missing.length === 0, pairing.missing.join(', ') || r.wanted.length + ' named, all present');
+  check('and no take ships that her voice can never reach',
+    pairing.orphan.length === 0, pairing.orphan.join(', ') || r.shipped.length + ' shipped, all reachable');
 
   console.log('\n  take            len    peak   onset    rms   ch  sr');
   for (const o of m) {
