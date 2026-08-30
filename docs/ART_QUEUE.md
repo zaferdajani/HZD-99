@@ -261,6 +261,16 @@ and every move she makes was synthesized. Both gaps are closed:
   siren. Twenty-seven firings for twenty keepers; seven near-silent takes
   refused on measurement and re-fired. Everything gain-matched to −4 dB peak,
   synth engine under every key as the floor.
+- **A SOUND ENDS BY DECAYING, NOT BY HITTING THE WALL** (owner, 2026-08-30:
+  "sounds produced are always cut and not smooth or complete" — and he was
+  right about 36 of 39). The generator fills exactly the duration asked, so
+  every decay ran into the end of its window and stopped dead: measured, the
+  worst takes ended 6-15 dB below their own peak where a complete sound ends
+  50+ dB down. Every take now carries a duration-proportioned fade to silence
+  (25% of length, 90-600 ms) and a 5 ms click-guard fade-in. THE RULE FOR ALL
+  FUTURE AUDIO FIRINGS: measure the final 30 ms against the peak before
+  keying; refuse anything hotter than -35 dB, and either fire longer than the
+  sound needs and trim to its natural decay, or fade what cannot be refired.
 - **The motif is QUOTED at her moments** (owner, 2026-08-26: "do the motif in
   evolution and victory too"): two ten-second stings cut from `mus_hero`
   itself — the same five notes, not a soundalike — layer over the existing
