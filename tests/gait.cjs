@@ -254,6 +254,19 @@ const check = (name, ok, detail) => {
   const touch = await page.evaluate(async () => {
     const frame = () => new Promise(r => requestAnimationFrame(r));
     const speeds = {};
+    // AND THE ROOM STOPS TALKING FIRST. update() only simulates the player
+    // inside G.state === 'PLAY', and this measurement runs in A1, where Servo
+    // stands: a dialog opening mid-hold does not slow her down, it stops her
+    // being simulated at all. That is why the same build reported 50/100,
+    // 186/150, 0/340 and 186/0 across four runs today — the reading was not
+    // noisy, she was genuinely not moving for whole legs of it. Sealed the way
+    // shopread, terrainrun and cavedark seal it, so what is measured is the
+    // control and nothing else.
+    try {
+      Object.defineProperty(G, 'dialog', { get: () => null, set: () => {}, configurable: true });
+      Object.defineProperty(G, 'state', { get: () => 'PLAY', set: () => {}, configurable: true });
+    } catch (e) {}
+    G.toasts = [];
     // SHE ACCELERATES IN PLACE. This measures what the STICK asks for, and it
     // used to measure that by letting her run for 45 real frames and reading
     // her speed at the end — which also measured whatever she ran into. The
@@ -265,9 +278,28 @@ const check = (name, ok, detail) => {
     for (const px of [20, 56]) {
       TOUCH.joy = { id: 1, ox: 0, oy: 0, dx: px, dy: 0 };
       tApplyJoy();
-      const x0 = player.x;
-      for (let i = 0; i < 45; i++) { await frame(); player.x = x0; }
-      speeds[px] = Math.round(Math.abs(player.vx));
+      // ...AND THE SPEED IS THE STEADY STATE, NOT ONE FRAME OF IT. This read
+      // player.vx on the single frame the hold ended on, and a single frame is
+      // whatever that instant held: across four runs of unchanged code today
+      // this check reported 50/100, 186/150, 0/340 and 186/0, passing and
+      // failing on the same build. Under a held stick her speed is flat, so
+      // the median of the last dozen frames is the same measurement with the
+      // noise taken out — and a genuine zero is still a zero, because twelve
+      // frames of standing still have a median of zero.
+      const x0 = player.x, tail = [];
+      for (let i = 0; i < 45; i++) {
+        // ...AND THE THUMB STAYS DOWN. The stick was set once and then not
+        // touched for forty-five frames, so what the loop actually measured
+        // was whatever survived friction after a single frame of input — which
+        // is near zero for a light push and anyone's guess for a hard one.
+        // A held stick is held every frame, which is what a thumb does.
+        TOUCH.joy = { id: 1, ox: 0, oy: 0, dx: px, dy: 0 };
+        tApplyJoy();
+        await frame(); player.x = x0;
+        if (i >= 33) tail.push(Math.abs(player.vx));
+      }
+      tail.sort((a, b) => a - b);
+      speeds[px] = Math.round(tail[tail.length >> 1]);
       TOUCH.joy = { id: 1, ox: 0, oy: 0, dx: 0, dy: 0 }; tApplyJoy();
       for (let i = 0; i < 25; i++) { await frame(); player.x = x0; }
     }
