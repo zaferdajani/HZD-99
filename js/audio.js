@@ -2302,52 +2302,50 @@ const MUS = { cur: null, name: null, step: 0, nextT: 0 };
 // — a per-track gain that fights the master is how a library drifts out of
 // balance every time one file is replaced.
 const RECORDED_TRACKS = {
-  // HER THEME LEADS. mus_hero is the hero's own motif (fired 2026-08-26,
-  // mastered to -14 LUFS like the other openers); the old title track stands
-  // directly behind it, per the displacement rule this table is built on.
-  title: [['mus_hero', 0.55], ['mus_title', 0.55], ['ambient', 0.5]],
-  intro: [['mus_intro', 0.75], ['ambient', 0.5]],
+  // NOTHING IN HERE IS FROM THE OLD LIBRARY (owner, 2026-08-30: "audio and
+  // music reverted to old library which should have been deleted!").
+  //
+  // He is right, and it was deliberate: `epic_combat` — a CC0 track the whole
+  // authored score was written to replace — had been moved to the FRONT of
+  // five of the six guardian slots, on the argument that one strong recording
+  // beats six weaker ones. pickRecorded takes the first candidate that plays,
+  // so mus_nullfang, mus_talonhost, mus_furnace, mus_glaciere and mus_prism
+  // stopped being reachable at all: five commissioned themes on disk, in the
+  // manifest, and never heard. That is the declared-and-never-played failure,
+  // and it is not a judgement this session gets to make on his behalf.
+  //
+  // Every guardian leads with its own theme again, and the two CC0 tracks are
+  // gone from the file as well as from this table, so the reach cannot come
+  // back by reordering. mus_boss is the shared fallback behind all of them —
+  // authored, so a fallback is still the score.
+  title: [['mus_hero', 0.55], ['mus_title', 0.55]],
+  intro: [['mus_intro', 0.75], ['mus_title', 0.55]],
   A: [['mus_meadows', 0.55]], B: [['mus_conduits', 0.55]], C: [['mus_foundry', 0.55]],
   D: [['mus_archives', 0.55]], E: [['mus_nest', 0.55]], X: [['mus_cache', 0.55]],
-  // THE FIGHTS GET THE ORCHESTRA.
-  //
-  // `epic_combat` — a real recorded combat track, credited and cleared in
-  // assets/CREDITS.md — was listed LAST in the shared `boss` slot, behind a
-  // generated placeholder that always loads. pickRecorded takes the first
-  // candidate that plays, so the one genuinely epic recording in the library
-  // has never been heard in a boss fight: every guardian was scored by a
-  // generated stand-in, and next to the opening they sound exactly like what
-  // they are.
-  //
-  // It goes first now, for all six. This is a deliberate trade: every fight
-  // shares one theme instead of each carrying its own, and one strong theme
-  // beats six weak ones by a distance. The per-guardian tracks stay directly
-  // behind it as the fallback, so the moment a real score exists for a
-  // specific guardian it only has to move up one line.
-  boss_glitch: [['boss', 0.62], ['mus_nullfang', 0.6], ['mus_boss', 0.6]],
-  boss_brood: [['boss', 0.62], ['mus_talonhost', 0.6], ['mus_boss', 0.6]],
-  boss_atlas: [['boss', 0.62], ['mus_furnace', 0.6], ['mus_boss', 0.6]],
-  boss_zero: [['boss', 0.62], ['mus_glaciere', 0.6], ['mus_boss', 0.6]],
-  boss_prism: [['boss', 0.62], ['mus_prism', 0.6], ['mus_boss', 0.6]],
-  // MOTHER-V keeps her own, and only she does: the last fight is the one place
+  // THE FIGHTS GET THEIR OWN NAMES BACK.
+  boss_glitch: [['mus_nullfang', 0.6], ['mus_boss', 0.6]],
+  boss_brood: [['mus_talonhost', 0.6], ['mus_boss', 0.6]],
+  boss_atlas: [['mus_furnace', 0.6], ['mus_boss', 0.6]],
+  boss_zero: [['mus_glaciere', 0.6], ['mus_boss', 0.6]],
+  boss_prism: [['mus_prism', 0.6], ['mus_boss', 0.6]],
+  // MOTHER-V keeps her own, as she always did: the last fight is the one place
   // a shared theme costs more than it gives.
-  boss_mother: [['mus_mother', 0.64], ['boss', 0.6], ['mus_boss', 0.6]],
-  // the Eye's constructs share the general boss score. They are not
-  // guardians and do not get a name theme; five bespoke cues for five
-  // side fights is a lot of music spent on the part of the game the player
-  // chose to go and find.
-  boss_mini: [['mus_eye', 0.6], ['boss', 0.62], ['mus_boss', 0.6]],
+  boss_mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
+  // the Eye's constructs share the general boss score. They are not guardians
+  // and do not get a name theme; five bespoke cues for five side fights is a
+  // lot of music spent on the part of the game the player chose to go and find.
+  boss_mini: [['mus_eye', 0.6], ['mus_boss', 0.6]],
   // THE PACK ALPHA gets its own theme, and it is the only mini-boss that does.
   // It is the first real boss the player meets and the only one in the game
   // that is TAMED rather than destroyed, so it earns a name cue the way a
   // guardian does — and it earns a second one for the moment it yields, which
   // is not a victory fanfare but a truce: the same hunting-horn call, broken
   // and alone, resolving from C minor into C major as the pack accepts her.
-  boss_alpha: [['mus_alpha', 0.62], ['boss', 0.6], ['mus_boss', 0.6]],
-  alphaTame: [['mus_alphatame', 0.6], ['ambient', 0.45]],
-  boss: [['boss', 0.62], ['mus_boss', 0.6]], mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
+  boss_alpha: [['mus_alpha', 0.62], ['mus_boss', 0.6]],
+  alphaTame: [['mus_alphatame', 0.6]],
+  boss: [['mus_boss', 0.6]], mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
   // the one that plays over the ending, after the last blow has been swung
-  winTheme: [['mus_ending', 0.6], ['ambient', 0.45]],
+  winTheme: [['mus_ending', 0.6]],
 };
 function pickRecorded(name) {
   const cand = RECORDED_TRACKS[name]; if (!cand) return false;
@@ -2357,7 +2355,7 @@ function pickRecorded(name) {
 // when a per-guardian slot has neither a recording nor a synth track of its own
 const MUS_FALL = {
   boss_glitch: 'boss', boss_brood: 'boss', boss_atlas: 'boss',
-  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss', boss_alpha: 'boss', alphaTame: 'ambient',
+  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss', boss_alpha: 'boss',
   // the sage duel has its OWN slot now: drop mus_sage.m4a into assets/music
   // (ART_QUEUE brief) and every chamber picks it up; until then the duels
   // borrow the guardian track through this fallback

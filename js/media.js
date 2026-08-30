@@ -402,8 +402,6 @@ const MEDIA_SRC = {
   // not on disk — a missing stream would start an <audio> that silently never
   // plays instead of falling back to the synth score.
   stream: Object.assign({
-    boss: 'assets/music/epic_combat.ogg',
-    ambient: 'assets/music/ambient_observing_the_star.ogg',
   }, (typeof window !== 'undefined' && window.MUS_FILES) || {}),
   // STREAMED, NEVER DECODED — the same ruling the eighteen spoken lines got.
   // These two are ten seconds each: as decoded PCM they are a third of every

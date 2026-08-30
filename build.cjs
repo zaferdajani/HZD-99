@@ -23,8 +23,6 @@ const EMBED = {
   skull: 'assets/characters/fire-skull.png',
   beast: 'assets/characters/hell-beast-idle.png',
   demon: 'assets/characters/demon-idle.png',
-  boss: 'assets/music/epic_combat.ogg',
-  ambient: 'assets/music/ambient_observing_the_star.ogg',
   // HER OWN FOLEY (ART_QUEUE: the hero sound set, fired 2026-08-26) — every
   // key here has a synth fallback in audio.js, so a missing file costs nothing
   hz_swing1: 'assets/sfx/hz_swing1.ogg',

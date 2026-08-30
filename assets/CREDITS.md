@@ -34,10 +34,16 @@ force the whole game to become share-alike. Never use SA-licensed art here.
 
 | File | Author | Source |
 |---|---|---|
-| epic_combat.ogg | Chester01 | https://opengameart.org/content/epic-combat |
 | battleThemeA.mp3 | cynicmusic (pixelsphere.org) | https://opengameart.org/content/battle-theme-a |
 | boss_encounter.wav | cynicmusic (pixelsphere.org) | https://opengameart.org/content/dramatic-boss-encounter |
-| ambient_observing_the_star.ogg | yd | https://opengameart.org/content/another-space-background-track |
+
+**Removed 2026-08-30.** `epic_combat.ogg` (Chester01) and
+`ambient_observing_the_star.ogg` (yd) were the last two CC0 music files and are
+no longer in the repo. The authored score replaced every slot they filled, and
+leaving them in the fallback chains is how five commissioned guardian themes
+became unreachable — a table edit put `epic_combat` in front of them. Deleting
+the files means the reach cannot come back by reordering. Both remain CC0 and
+freely re-downloadable from OpenGameArt if a slot ever wants them again.
 
 Larger CC0 tracks reviewed but not stored in the repo (download if wanted):
 - "Determined Pursuit" epic orchestra loop by Emma_MA (18 MB WAV) —
