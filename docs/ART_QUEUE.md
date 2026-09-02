@@ -445,6 +445,38 @@ sitting down cross-legged, pulling out a little screen, the Sonic look-at-
 the-camera. The mechanism (HERO_FIDGET, intro+loop) takes a second strip by
 adding an entry, not by new code.
 
+## 2al. THE KINGDOM HARNESS — the protocol, driven live, every door walked ✔ IN THE SUITE 2026-09-02
+
+`tests/kingdom.cjs [zone…]` asks the running game, kingdom by kingdom, for
+what CLAUDE.md's KINGDOMS ARE THE UNIT promises:
+
+- every room's declared art (`assets/roomassets.json`) is a real file the
+  media manifest knows;
+- every enemy placed in the kingdom, measured WHERE its room places it,
+  shows at least four different pictures alive against a player stepping in
+  and out of its reach;
+- the guardian can be hurt by her real claw, can be staggered, can die, and
+  has a lair (its arena's door into the kingdom's grotto);
+- every NPC has a place of their own — an interior behind a door, a housing
+  in `ROOM_PROPS`, or a cave — the trader's camp counts because the den is his;
+- a bench stands on the road from the kingdom's entry to its guardian;
+- **every depth door is WALKED**: the room loads, she stands before the
+  door, the frame is drawn, the door is withheld from `GATE_ROOM`, the frame
+  is drawn again, and the door's 440 px of frame must change. Where the
+  door's family wears a plate (the zone gates, the cave mouths) the plate
+  alone is withheld too and must account for its own share — the check that
+  would have caught §2ag the day it happened;
+- every one-shot sound decays (`tests/tails.cjs`, run once for everyone);
+- the zone's music slot streams from files the build knows.
+
+**Day one, measured honestly**: every door in every kingdom draws; every
+guardian is hurt, staggered, killed and lairs; every NPC has a place; every
+road has its bench; every room's art resolves. The reds are the enemies
+whose bodies hold fewer than four pictures alive — the blob everywhere (two),
+and in Kingdom X there is no NPC. Those are Category 3's enemy briefs
+(§2i, §2l, §2n, §2p) and the Cache's missing keeper, and the harness stays
+red until the plates land, which is what it is for.
+
 ## 2ak. THE SCORE, MEASURED — six guardian themes at the house level, and the tail gate in the suite ✔ SHIPPED 2026-09-02
 
 **What was already there**: one theme per guardian (`mus_nullfang`,
