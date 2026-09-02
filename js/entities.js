@@ -4843,6 +4843,10 @@ function rollTraits(iq) {
 function leadX(px, k) {
   return px + (typeof player !== 'undefined' && player ? player.vx : 0) * k;
 }
+// The blob's drip tell and the rebound after it. 0.34 s sits in TELL_FAST's
+// neighbourhood on purpose: long enough to be a decision, short enough that
+// standing next to a blob is still a bad idea.
+const BLOB_TELL = 0.34, BLOB_REB = 0.26;
 const EKIND = {
   crawler: { w: 28, h: 20, hp: 30, spd: 62 },
   guard: { w: 30, h: 22, hp: 44, spd: 52 },
@@ -4850,6 +4854,9 @@ const EKIND = {
   turret: { w: 28, h: 30, hp: 45, spd: 0 },
   hopper: { w: 26, h: 24, hp: 36, spd: 180 },
   blob: { w: 34, h: 26, hp: 52, spd: 30 },
+  // the blob's drip tell and the rebound after it. 0.34 s is TELL_FAST's
+  // neighbourhood on purpose: long enough to be a decision, short enough
+  // that standing next to a blob is still a bad idea.
   bat: { w: 24, h: 18, hp: 18, spd: 150 },
   // THE BREAKER — the Data Conduits' own machine (kingdom 2). spd is the
   // WAVE's speed, not the body's: the drum is bolted where it stands.
@@ -5040,8 +5047,26 @@ class Enemy {
         this.vx = this.dir * this.spd * (0.6 + Math.sin(this.anim * 4) * 0.4);
         this.vy += 2000 * dt;
         this.dripT = (this.dripT || rnd(0.6, 1.4)) - dt;
+        // THE DRIP HAS A TELL, AND THE TELL IS THE BODY.
+        //
+        // It was the only attack in the game that arrived with no warning at
+        // all: the pool simply existed, under her feet, and the lesson it
+        // taught was "do not stand near a blob", which is not a read. It is
+        // also why the thing showed the same picture for a whole fight —
+        // tests/kingdom.cjs asks every enemy for four silhouettes alive and
+        // the blob managed two, because everything that moved on it was
+        // interior colour and three 2 px legs.
+        //
+        // One change answers both, because in a body made of melt they are the
+        // same change: the mass DISTENDS for the last third of a second, hangs
+        // a pendant of itself under the belly, and lets go — then rebounds
+        // flat, the way a drop leaving a surface pulls the surface after it.
+        // Read the sag, step off the tile.
+        this.drip0 = Math.max(0, Math.min(1, (BLOB_TELL - this.dripT) / BLOB_TELL));
+        this.blobReb = Math.max(0, (this.blobReb || 0) - dt);
         if (this.dripT <= 0 && this.on !== false) {
           this.dripT = rnd(1.1 - this.iq * 0.4, 1.8 - this.iq * 0.6);
+          this.drip0 = 0; this.blobReb = BLOB_REB;
           G.pools = G.pools || [];
           if (G.pools.length < 14) G.pools.push({ x: cx, y: this.y + this.h - 2, t: 4.2, t0: 4.2, r: 0 });
         }
@@ -5892,6 +5917,9 @@ class Enemy {
           t: this.anim, vx: this.vx, vy: this.vy,
           air: this.kind === 'hopper' ? clamp(Math.abs(this.vy) / 400, 0, 1) : 0,
           mode: { crawler: 'walk', guard: 'walk', hopper: 'spring', blob: 'pulse', flier: 'hover', turret: 'breathe' }[this.kind] || 'breathe',
+          // the drip tell, handed to the puppet: the authored sheet has one
+          // pose, so the gathering and the release have to be deformation
+          sag: this.drip0 || 0, reb: (this.blobReb || 0) / BLOB_REB,
           yawScan: enemyYaw(this),
         })) return;
     c.save();
@@ -6077,20 +6105,47 @@ class Enemy {
         // asymmetric mimic: it sags, and it has three stubby legs, not four.
         const ph = this.anim * 5;
         const pulse = 0.55 + Math.sin(ph) * 0.45;
+        // THE TELL IS THE SHAPE. sag rises through the third of a second before
+        // it drips; reb is the flat rebound after the drop lets go. Both move
+        // the OUTLINE — a body of melt has no other way to mean anything, and a
+        // tell drawn in interior colour is a tell nobody sees at speed.
+        const sag = this.drip0 || 0, reb = (this.blobReb || 0) / BLOB_REB;
+        const wide = 1 + reb * 0.16 - sag * 0.07;          // squash-and-stretch
+        const tall = 1 - reb * 0.20 + sag * 0.06;
+        const belly = sag * 5.5;                           // how far the gut hangs
+        c.save(); c.scale(wide, tall);
         c.strokeStyle = MAT.steel.dark; c.lineWidth = 2.4; c.lineCap = 'round';
         for (const [lx, lp] of [[-8, 0], [-1, 2.1], [7.5, 4.2]]) {
           const lift = Math.max(0, Math.sin(ph * 1.6 + lp)) * 1.4;
-          c.beginPath(); c.moveTo(lx, 6); c.lineTo(lx + 0.6, 11 - lift); c.stroke();
+          // the legs SPLAY when it braces to drip and buckle on the rebound —
+          // three 2 px lines that move 1.4 px are why this used to read as a
+          // photograph of an enemy rather than an enemy
+          c.beginPath(); c.moveTo(lx, 6);
+          c.lineTo(lx + 0.6 + Math.sign(lx || 1) * (sag * 3.4 + reb * 1.6), 11 - lift - reb * 2.6 + sag * 1.2);
+          c.stroke();
         }
-        // the mass: wide, low, and deliberately lopsided
+        // the mass: wide, low, and deliberately lopsided — and now its floor
+        // sags with the weight it is about to lose
         plate(() => {
           c.beginPath(); c.moveTo(-16, 6);
           c.bezierCurveTo(-17, -4, -9, -11, 1, -11);
           c.bezierCurveTo(10, -11, 16, -6, 15, 1);
-          c.bezierCurveTo(14.4, 5, 12, 7, 8, 7);
-          c.bezierCurveTo(4, 9, -12, 9, -16, 6);
+          c.bezierCurveTo(14.4, 5, 12, 7, 8, 7 + belly * 0.5);
+          c.bezierCurveTo(4, 9 + belly, -12, 9 + belly * 0.8, -16, 6);
           c.closePath();
         }, -12, 8);
+        // ...and the pendant it hangs before it lets go: a real lobe of the
+        // body, filled with the body's own ramp, so the silhouette grows a
+        // teardrop rather than the crust merely brightening
+        if (sag > 0.05) {
+          const r = 1.4 + sag * 3.6, dy = 7 + belly * 0.9 + sag * 2.2;
+          plate(() => {
+            c.beginPath(); c.moveTo(-2.6 - r * 0.5, 6 + belly * 0.7);
+            c.quadraticCurveTo(-1, dy + r, 0.4, dy + r * 1.35);
+            c.quadraticCurveTo(1.8, dy + r, 2.6 + r * 0.5, 6 + belly * 0.7);
+            c.closePath();
+          }, 4, dy + r * 1.4);
+        }
         // molten underglow first — the heat is INSIDE, the crust sits over it
         c.save(); c.globalAlpha = 0.5 + pulse * 0.3;
         const ug = c.createRadialGradient(-1, 3, 1, -1, 3, 15);
@@ -6117,6 +6172,7 @@ class Enemy {
         c.fillRect(-1.2, 5.4, 2.4, 0.8);
         c.shadowBlur = 0; c.restore();
         eyes(-3, -6, 2.2);
+        c.restore();                                    // the squash transform
         break;
       }
       case 'flier': {

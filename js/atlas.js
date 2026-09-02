@@ -350,7 +350,20 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
       break;
     }
     case 'pulse': {                // molten things breathe slowly
-      ky = 1 + Math.sin(t * 3) * 0.035; kx = 1 / ky;
+      // ...and a molten thing that ONLY breathes is a photograph. 3.5 % of an
+      // eighteen-pixel body is half a pixel, which is why the blob showed two
+      // silhouettes for a whole fight while walk and spring got the cutout leg
+      // rig (tests/kingdom.cjs: four pictures alive). The breath stays as it
+      // was — the mother uses this mode too and she is not being restyled here
+      // — and the DEFORMATION is what the creature is doing: it draws itself
+      // tall and narrow as it gathers a drop, then slumps flat and wide when
+      // the drop lets go. Volume-preserving, anchored at the foot, so the
+      // weight reads as constant and the feet stay on the floor.
+      const sag = clamp(o.sag || 0, 0, 1), reb = clamp(o.reb || 0, 0, 1);
+      ky = 1 + Math.sin(t * 3) * 0.035 + sag * 0.16 - reb * 0.28; kx = 1 / ky;
+      // a mass with no front rolls where it is going, and the roll is the
+      // second silhouette the flat breath never gave it
+      rot = Math.sin(t * 0.9) * 0.045 + clamp(vx / 300, -1, 1) * 0.07;
       break;
     }
     case 'hover': {                // fliers ride a slow wave
