@@ -1525,6 +1525,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  22. §2p    THE NEST SNARE ×3                 ✅ FIRED 2026-08-16 — assets/characters/snare/, needs wiring
  23. §2q    BEAST GAIT REPAIR ×8              (wolf+cheetah walk pairs RE-FIRED + run pairs — see §2q, the leg and identity faults are written there)
  24. §2r    THE FORGE TABLE ×1                (the den bench as a matted object — crop stand-in wired, fire against it)
+ 25. §2aq   THE CUTTER'S SPLIT STONE + KERF ×2 + KERF HERSELF ×3  ✱ NEW 2026-09-02 (kingdom X pass) — wired, procedural stand-ins live, nothing fired
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -2973,6 +2974,171 @@ or square (NO RIGHT ANGLES):
 > the room is a curve of the weave. Clean high-detail 3D render.
 > NEGATIVE: no characters, no text, no watermark, no doors, no windows
 > with daylight.
+
+### 2aq. THE CUTTER'S SPLIT STONE + KERF ✱ NEW (2026-09-02, kingdom X pass)
+
+Kingdom X — THE CRYSTAL CACHE — had no NPC at all, which is the one thing
+every kingdom must have (CLAUDE.md, KINGDOMS ARE THE UNIT), and
+`node tests/kingdom.cjs X` said so out loud. It has one now, and she is the
+answer to "why is there a person at the bottom of the world".
+
+**KERF, THE LAST CUTTER** (hero world: THE LAST TELCHINE). Her receivers were
+stamped dead at the factory, so she has never heard a sound — which is the
+only reason the Song never reached her and the only machine in the game who
+was never switched off (`NPC_AWAKE` in js/game.js; the cell economy is closed
+and exact, and she is outside it by construction rather than by exception).
+The Deaf System quarried this seam and she cut what came out of it. A whole
+purifier is the last thing left that can burn the Song out of anything, so
+she SPLIT IT: one end laid where a clever machine would find it and forge it,
+the other buried at the bottom of the world — and she sat down at the last
+room before it and has not moved since. The Prowler is hers; so is the
+Grounded Vault, because a lock made of live current is the lock a machine
+that cannot be sung to would build.
+
+Her place is **V1B, THE KERF** — a one-room cutting shop inside a split
+boulder in the wall of V1, the Cache's antechamber (GATE_ROOM V1, the
+A0/A0B booth pattern, style `kerf`, at 0.75). It is the sixth of the
+booth/den family and it must not look like the other five.
+
+Everything below is built from the CRYSTAL CACHE's own furniture (the mimic
+rule: plum crystal-veined rock, cut faces, cut spoil, strung signal cable)
+and nothing plumb or square (NO RIGHT ANGLES) — a cut in crystal follows the
+crystal's cleavage, so the kerf wanders the whole way down.
+
+1. **kerfFront** — the structure standing in V1: ONE BOULDER, CUT ONCE. A
+   lumpy plum-rock boulder split top to bottom by a single wandering cut, the
+   two halves settled apart by unequal amounts so the gap is a wedge that
+   changes its mind, the split itself the doorway. A sixth silhouette — not
+   the kiosk's canopy, not the shrine's cable swag, not the quench hood's
+   bell, not the stacks' crevice-arch, not the pod's hanging teardrop: a
+   CLOVEN STONE. Crystal veins wander across both faces and brighten toward
+   the cut; shallow saw-score arcs mark the inner third of each face where
+   the wire went through. The split breathes the PURIFIER'S OWN WHITE
+   (#eaf6ff — NOT lamp amber (Ratchet's), not CRT blue (the Oracle's), not
+   molten orange (the Tinker's), not pale ice (the Archivist's), not
+   leaf-green (Lumen's): she is lit by the stuff she cuts, not by a lamp she
+   lit), with crystal dust hanging in it. A signal line is strung from the
+   left crown down to a peg in the floor, sagging in a real catenary — THE
+   DOORBELL SHE CAN FEEL, because the Deaf System is wired by touch and light
+   and she cannot hear anyone arrive. Her sign, where the others hang a lamp,
+   a monitor, a gear, a reading hood and a lantern-bud: a slack cutting wire
+   in a curved bow-frame. Cut spoil — small crystal chips — scattered at the
+   foot. `drawKerfStone` in js/game.js is the placement reference; same
+   bottom anchor and ~236 px height as boothFront.
+2. **kerfInterior** — a 16:9 backdrop for V1B: the inside of the split
+   boulder. A low rock chamber with a flat CUT wall at the back (the only
+   flat thing in the room, and it is flat because she cut it), the seam's
+   raw crystal breaking out of the rock above it, a heavy stone cutting jig
+   on the floor with a chunk of crystal clamped in it, a bow-saw frame
+   racked on the wall, tailings of crystal chips heaped in one corner,
+   signal cables pegged across the ceiling at different sags, and the whole
+   room lit ONLY by the crystal in the jig — a hard white pool falling off
+   fast into plum darkness. Cold, dry, orderly, and very old: somebody has
+   sat in this room for a very long time. The depth door back out sits at
+   gx 0.12. `ROOM_VISTA.V1B` is already pointed at `kerfInterior`; add the
+   media.js entries in the same commit as the files.
+3. **KERF HERSELF ×3** — standing-NPC class (ART_BIBLE): a turnaround, a
+   dialogue bust, and a work loop, the same three every other machine person
+   has. `drawNPCBody`'s `case 'kerf'` in js/game.js is the placement
+   reference and carries the read: LOW, WIDE and HEAVY — four short splayed
+   legs, a broad settled shell, built to hold still against a cut rather
+   than to travel. **The silhouette's whole job is the absence.** Every
+   other body in the cast has ear-cowls, a dish, an antenna or a listening
+   face; hers is a SMOOTH BLANK CROWN where the receivers would be, and one
+   wide, dim, steady optic band that never darts. Crystal dust worked into
+   every seam. Palette: cold grey-violet chassis, plum shadow, the white of
+   the crystal she works as her only emissive.
+   - **turnaround** (`kerf` row, six columns: right profile → left, plus
+     back). ATLAS2 in js/atlas.js is a 6 × 7 sheet and **all seven rows are
+     taken** — so this needs the npcs sheet grown to eight rows
+     (tools/turnsheet.cjs SUBJECTS, tools/npccut.cjs ROWS, ATLAS2.rows and
+     ATLAS2.sub together) or a sheet of her own. Until then she draws
+     procedurally, which is why she is deliberately NOT in NPC_JOB /
+     NPC_LOOP: a turntable angle with no turntable behind it is the
+     declared-and-never-drawn failure ART_BIBLE §7 exists for. Wiring her
+     into all four tables (NPC_JOB, NPC_LOOP, NPC_LOOP_CELLS, NPC_WORK) is
+     the code session's one-commit job the day the sheet lands.
+   - **bust** (`bustKerf`, 64 × 64, tools/npcbusts.cjs) — the blank crown and
+     the optic band, three-quarter, lit from below by the work.
+   - **work loop** (`kerfLoop`, `assets/characters/npc/kerf/work_loop.webp`,
+     24 cells at 24 fps per §2aa) — THE CUT: a slow one-directional bow
+     stroke with a pause at the far end, and the crystal in the jig
+     answering it with light. A saw cut is a push and a wait; it is never a
+     scrub, and it must not read as a loop played at speed.
+4. **hum_kerf** (audio session, `assets/sfx/hum_kerf.ogg`) — her voice loop.
+   The synth stand-in is live in js/audio.js (`case 'kerf'`): a lapidary
+   wheel turning under a struck crystal that never quite stops ringing, and
+   the one voice in the cast with no pitch movement at all — she cannot hear
+   her own machine, so nothing in it was ever tuned. Drop the file at that
+   path and `npcVoxTick` swaps the synth out mid-fade; add it to MEDIA_SRC
+   and to tests/herofoley.cjs's KEYS in the same commit.
+5. **her spoken lines** (audio session, `assets/vox/kerf0.ogg` … `kerf2.ogg`,
+   the five `d_kerf` lines in js/i18n.js). Her CHASSIS is written and waiting
+   but deliberately NOT in the table: `NPC_CHASSIS` shapes recorded takes and
+   nothing else, so a row with no takes behind it shapes nothing and
+   tests/voxmeas.cjs falls over fetching the file. Add this row to
+   `NPC_CHASSIS` in js/audio.js in the same commit as the takes —
+
+   ```js
+   kerf: { ring: 17, mix: 0.28, lo: 130, hi: 3600, comb: 0.018, rate: 0.82 },
+   ```
+
+   — big, slow and coming out of a narrow old speaker. **Direction for the
+   read:** flat. She has never heard a voice, her own included, so nothing in
+   her delivery was ever corrected by hearing it back — no rise at the end of
+   a question, no softening, a shade too loud throughout, and the pauses in
+   the wrong places. Warm underneath, all the same: she is not cold, she is
+   unmonitored.
+
+**The prompts, verbatim — fire as-is:**
+
+> (kerfFront) A doorway cut into a boulder, seen straight on: one large
+> lumpy boulder of dark plum-purple rock shot through with pale crystal
+> veins, split from top to bottom by a single wandering cut, the two halves
+> settled apart by unequal amounts so the gap between them is an irregular
+> wedge, widest at the ground where it forms a narrow doorway. Brilliant
+> cold white light breathes out of the split with fine crystal dust hanging
+> in it, and the crystal veins in both faces catch that light and brighten
+> toward the cut. Shallow curved saw-score marks on the inner third of each
+> cut face. A thin cable is strung taut from the top of the left half down
+> to an iron peg in the ground on the right, sagging in a natural curve. A
+> small curved bow-frame holding a slack cutting wire hangs from the left
+> half like a shop sign. Chips and shards of pale crystal scattered around
+> the base. Deep plum and violet rock, brilliant white light in the split
+> only. Nothing plumb, nothing square — the cut wanders, the halves lean
+> unequally, no straight edge anywhere. Clean high-detail 3D render, hard
+> white key from inside the split, dark moody lighting. NEGATIVE: no text,
+> no watermark, no characters, no straight rectangular frame, no cast
+> shadow, no ground plane. Photographed in a pitch-dark room, no backdrop,
+> no floor, spotlights pick out the structure and nothing else receives any
+> light.
+
+> (kerfInterior, 16:9 backdrop) The inside of a small workshop hollowed out
+> of a split boulder deep underground, wide interior view: rough plum-purple
+> rock walls curving in overhead, one flat cut wall at the back with raw
+> pale crystal breaking out of the rock above it, a heavy low stone cutting
+> jig on the floor with a chunk of white crystal clamped in it, a curved
+> bow-saw frame racked on the wall, a heaped pile of pale crystal tailings
+> in one corner, thin cables pegged across the ceiling sagging by different
+> amounts, and the whole room lit only by the clamped crystal — a hard white
+> pool on the floor falling off fast into plum darkness. Cold, dry, orderly
+> and very old, as if somebody has sat here alone for a lifetime. No right
+> angles presenting except the one cut wall: every other line is rock. Clean
+> high-detail 3D render. NEGATIVE: no characters, no text, no watermark, no
+> doors, no windows with daylight.
+
+> (Kerf turnaround / bust / work loop) A squat, wide, heavy machine
+> stonecutter standing on four short splayed legs, built to brace against a
+> cut rather than to walk: a broad low grey-violet chassis dusted with pale
+> crystal grit in every seam, and a SMOOTH BLANK DOME for a head with no
+> ears, no antenna, no dish and no listening apparatus of any kind — only
+> one wide, dim, steady horizontal optic band. She holds a small stone jig
+> with a chunk of white crystal clamped in it against her chest, and a
+> curved bow-frame with a fine cutting wire in her other arm. Cold
+> grey-violet metal, plum shadow, and the white glow of the clamped crystal
+> as the only light on her. Weathered, patient, very old. NEGATIVE: no text,
+> no watermark, no ears, no antenna, no dish, no humanoid face.
+
 
 ### 2p. THE NEST SNARE (snare — new zone-E enemy, 2026-08-16) ✱ NEW
 

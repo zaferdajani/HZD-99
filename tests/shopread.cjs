@@ -34,6 +34,7 @@ const SITES = [
   ['C5', 'forge',  "the Tinker's quench hood"],
   ['D1', 'carrel', "the Sage's carrel"],
   ['E1', 'hollow', "the Nymph's hollow"],
+  ['V1', 'kerf',   "the Cutter's split stone"],
   ['A5', 'cave',   'the first cave mouth'],
 ];
 

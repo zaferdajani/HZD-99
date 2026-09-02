@@ -159,7 +159,27 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           const dest = ROOMS[def.to];
           const guard = dest && dest.cave && !G.roomDef.cave && def.to[0] === 'G';
           const key = guard ? GATE_PLATE_BY_ZONE[G.roomDef.zone] : (dest && dest.cave && !def.style) ? MOUTH_PLATE_BY_ZONE[G.roomDef.zone] : null;
-          if (key) { mediaFetch(key, true); const t0 = Date.now(); while (Date.now() - t0 < 15000 && !(MEDIA_IMG[key] && MEDIA_IMG[key].naturalWidth)) await new Promise(r => setTimeout(r, 50)); }
+          // WAIT FOR THE FULL TIER, NOT FOR THE FIRST PICTURE.
+          //
+          // mediaFetch(urgent) asks for TWO images: the quarter-scale stand-in
+          // and the real sheet. MEDIA_IMG[key].naturalWidth goes truthy the
+          // moment the SMALL one lands (MEDIA_LOW 2) while the full one is
+          // still in flight — so the three shots below were taken across a
+          // picture that could change for a reason that is not the door. The
+          // full plate arriving between A and B inflates `drawn`; arriving
+          // after C2 has nulled MEDIA_IMG[key] puts the plate straight back and
+          // reports it as contributing nothing. That is why this one check read
+          // 32% of its frame on one run and 0.1% on the next as soon as the
+          // kingdom grew two more doors ahead of it in the loop.
+          //
+          // MEDIA_LOW 3 is set by the full sheet's own onload, so it means the
+          // real image is in AND nothing is pending: the frame cannot move
+          // under the measurement any more.
+          if (key) {
+            mediaFetch(key, true);
+            const t0 = Date.now();
+            while (Date.now() - t0 < 20000 && MEDIA_LOW[key] !== 3) await new Promise(r => setTimeout(r, 50));
+          }
           const shot = () => { draw(); const sx = Math.round(wx - camSX()); const x0 = Math.max(0, sx - 220), x1 = Math.min(960, sx + 220); return { d: c.getImageData(x0, 0, Math.max(1, x1 - x0), 540).data, x0, x1 }; };
           const A = shot();
           const saved = GATE_ROOM[id]; GATE_ROOM[id] = Array.isArray(saved) ? saved.filter((d, k) => k !== di) : null;

@@ -37,7 +37,14 @@ const { chromium } = require('playwright');
   const econ = await page.evaluate(() => {
     let npcs = 0, minis = 0, bosses = 0;
     for (const id in ROOMS) for (const e of (ROOMS[id].ents || [])) {
-      if (e[0] === 'npc') npcs++;
+      // DEMAND IS DARK UNITS, NOT BODIES. The arithmetic below is "one cell per
+      // machine that was switched off", and NPC_AWAKE (js/game.js) names the
+      // ones that never were — Kerf at the bottom of the world was stamped
+      // deaf, so the Song never reached her and she never went quiet. Counting
+      // her would demand a cell nobody can spend on her, which is the same
+      // stale-list failure this block was written to avoid; the exemption is
+      // read off the game rather than repeated here.
+      if (e[0] === 'npc' && !NPC_AWAKE.has(id + '|' + e[3])) npcs++;
       if (e[0] === 'boss' && MINIS[e[3]]) minis++;
       if (e[0] === 'boss' && !MINIS[e[3]]) bosses++;
     }

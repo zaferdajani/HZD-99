@@ -28,7 +28,7 @@ const { chromium } = require('playwright');
   const r = await page.evaluate(() => {
     const out = {};
     // ---- 1. eighteen standing lines, the death beat and the rematch, in every language
-    const npcs = ['servo', 'ratchet', 'mono', 'lumen', 'patch', 'sage'];
+    const npcs = ['servo', 'ratchet', 'mono', 'lumen', 'patch', 'sage', 'kerf'];
     const keys = [];
     for (const n of npcs) for (let i = 0; i < 3; i++) keys.push('sl_' + n + '_' + i);
     keys.push('death_1', 'death_2', 'death_3', 'sl_back', 'pm_world', 'sl_ratchet_rematch');

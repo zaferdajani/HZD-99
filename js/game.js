@@ -710,8 +710,28 @@ function healUnlocked() {
   if (typeof isHero === 'function' && isHero()) return true;
   return !!(G.save && G.save.flags && G.save.flags.heal);
 }
+// THE ONE MACHINE THAT WAS NEVER SWITCHED OFF.
+//
+// Every machine person in the Depths pulled its cell or had it pulled when the
+// Song went out — that is why they were never infected, why they have been
+// standing in the dark ever since, and why the cell economy is CLOSED: one
+// start cell, one out of NULLFANG, one out of each of the Eye's constructs,
+// and exactly that many dark bodies (tests/battery.cjs counts it off the world
+// and refuses a surplus of more than two).
+//
+// Kerf is outside that arithmetic, and being outside it IS her character. Her
+// receivers were stamped dead at the factory; she has never heard a sound, so
+// the Song never reached her and she never had to go quiet to survive it. She
+// has been awake at the bottom of the world the whole time, which is the only
+// answer to "why is there a person down here" that does not need a cell
+// somebody would have to carry past a guardian to reach her.
+//
+// It is a KEY, not a name: a body is awake because of where it stands and who
+// it is, and another Kerf placed elsewhere would be a different machine.
+const NPC_AWAKE = new Set(['V1B|kerf']);
 function npcLive(s) {
   if (typeof isHero === 'function' && isHero()) return true;
+  if (NPC_AWAKE.has(npcKey(s))) return true;
   return !!G.save.flags['on_' + npcKey(s)];
 }
 function npcCharge(s) {
@@ -2869,6 +2889,9 @@ const ROOM_VISTA = {
   // the Nymph's hollow (§2o): Lumen's den inside the burst cocoon-pod in E1.
   // Unfired — the room borrows the zone-E atlas cell until the plate lands.
   E1B: 'hollowInterior',
+  // the Cutter's kerf (§2aq): the split-stone shop in the wall of the Cache.
+  // Unfired — the room borrows the zone-X atlas cell until the plate lands.
+  V1B: 'kerfInterior',
 };
 
 // ===========================================================================
@@ -3089,6 +3112,7 @@ const INDOOR_ART = {
   C5B: 'floorForge',      // Patch-7's smithy: slag-crusted plate, quench stains
   D1B: 'floorCarrel',     // the Sage's carrel: dry boards, drifted paper dust
   E1B: 'floorHollow',     // Lumen's hollow: grown chitin, soft and shell-like
+  V1B: 'floorKerf',       // the Cutter's kerf: cut rock, crystal grit, saw-scored
 };
 // The interior's palette, in the same three roles the zone palettes use. Named
 // here rather than derived from the zone, because the whole point is that the
@@ -3107,6 +3131,9 @@ const INDOOR_PAL = {
   floorForge:  { base: '#3a2f2a', join: '#211913', lit: '#6b4f38', wash: [255, 150, 70],  k: 0.14 },
   floorCarrel: { base: '#37312a', join: '#201c17', lit: '#645846', wash: [205, 175, 125], k: 0.10 },
   floorHollow: { base: '#2f3a30', join: '#1a221b', lit: '#586b56', wash: [150, 210, 150], k: 0.12 },
+  // the Cache's own rock, cut flat and never swept: cold stone with the
+  // seam's magenta still in it, and the white of the crystal she works
+  floorKerf:   { base: '#33262f', join: '#1c1419', lit: '#6a5464', wash: [225, 220, 235], k: 0.11 },
 };
 function indoorKey() {
   return (G.roomDef && G.roomDef.indoor) ? (INDOOR_ART[G.roomId] || 'floorDen') : null;
@@ -7549,6 +7576,25 @@ const GATE_ROOM = {
   // between the riddle and the way east, lit with her own leaf-green.
   E1:  { at: 0.42, to: 'E1B', ax: 0.12, style: 'hollow' },
   E1B: { at: 0.12, to: 'E1',  ax: 0.42, style: 'hollow' },
+  // THE KERF off V1 — the booth pattern a sixth time, its OWN style again: no
+  // other kingdom's shrine may stand at the bottom of the world, so the split
+  // boulder draws its own stand-in (drawKerfStone) until its plate lands
+  // (ART_QUEUE §2aq).
+  //
+  // WHY V1 AND NOT X1, which is the Cache proper. Two structures cannot share
+  // a room this narrow. X1's grotto door wears the fired zone monument
+  // (gateDeep, 330 tall and ~590 wide) centred at 0.45 of a 1024px room; a
+  // second structure anywhere near it stands INSIDE the monument's painting,
+  // and tests/kingdom.cjs reads exactly that — the door's own measurement
+  // collapsed from 32% of its frame to noise the moment the two overlapped.
+  // A test measuring a picture is measuring what the player sees. So the shop
+  // takes the antechamber, at the far end of the walk in from B5, and the
+  // Cache proper keeps its one monument.
+  //
+  // No `need` gates it: the antechamber pays whoever reaches the antechamber,
+  // the same as the buried half up the shaft does.
+  V1:  { at: 0.75, to: 'V1B', ax: 0.12, style: 'kerf' },
+  V1B: { at: 0.12, to: 'V1',  ax: 0.75, style: 'kerf' },
   // the grottoes — one per guardian, opened by its fall or taming
   A4:  { at: 0.23, to: 'GA1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossGlitch' },
   A10: { at: 0.23, to: 'GA2', gx: 0.50, gy: 0.86, ax: 0.06, need: 'alpha' },
@@ -7617,6 +7663,7 @@ const PLATE_GRADE = {
   forgeInterior:  [1.4, 1.25, 22, 1.08, 1.0, 0.9],
   carrelInterior: [1.3, 1.22, 22, 1.02, 1.0, 1.02],
   hollowInterior: [1.4, 1.24, 22, 1.0, 1.03, 1.0],
+  kerfInterior:   [1.3, 1.3, 26, 1.0, 0.99, 1.05],
 };
 function gradePlate(x, W, H, g) {
   let d;
@@ -8943,6 +8990,215 @@ function drawLumenHollow(cx2, gy, P, k) {
   c.restore();
   c.restore();
 }
+// ---------------------------------------------------------------------------
+// THE KERF (kingdom X): the depth door into the Cutter's shop off X1.
+// Built from the Cache's own furniture per the mimic rule — the backdrop down
+// here is crystal-veined plum rock and cut faces, so the door is a BOULDER
+// SPLIT IN TWO, its halves settled apart, and the split itself is the way in.
+// The sixth shrine keeps a sixth silhouette (kiosk canopy, cable swag, quench
+// hood, leaning stacks, hanging pod... and now a cloven stone), and its own
+// light: nobody else's lamp burns in the Cache, so the split breathes the
+// PURIFIER'S OWN WHITE (#eaf6ff) — the stuff she cuts, not a lamp she lit.
+//
+// Nothing plumb, nothing square (NO RIGHT ANGLES): a cut in crystal follows
+// the crystal's cleavage, so the kerf wanders the whole way down and the two
+// crowns lean apart by different amounts. There is no straight edge in it.
+//
+// AND IT HAS A DOORBELL SHE CAN FEEL. She has never heard a sound. So the
+// stone is strung with a signal line pegged into the floor — the Deaf System
+// is wired by touch and light (docs/DEAF_SYSTEM.md) — and the line QUIVERS
+// harder the nearer the player stands. That is the structure telling her
+// story before she says a word, and it is the door's approach read as well.
+//
+// Procedural STAND-IN awaiting its fired plate (ART_QUEUE §2aq, kerfFront):
+// the mediaFetch hook below goes live the commit the plate and its media.js
+// entry land, exactly like its five siblings'.
+function drawKerfStone(cx2, gy, P, k) {
+  if (typeof mediaFetch === 'function') mediaFetch('kerfFront');
+  const bim = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.kerfFront;
+  if (bim && bim.naturalWidth) {
+    const dh = 236, dw = dh * (bim.naturalWidth / bim.naturalHeight);
+    c.save();
+    // the painted split lands on the STAND SPOT, not the plate's middle — the
+    // same one-source-of-truth rule the other five plates are hung by
+    const dcx = cx2 - dw * (plateDoorFrac(bim, 'kerfFront') - 0.5);
+    c.drawImage(bim, dcx - dw / 2, gy - dh, dw, dh);
+    if (k > 0.02) {
+      c.globalCompositeOperation = 'lighter';
+      const gl = c.createRadialGradient(cx2, gy - dh * 0.4, 6, cx2, gy - dh * 0.4, dw * (0.26 + k * 0.36));
+      gl.addColorStop(0, 'rgba(234,246,255,' + (0.15 * k + 0.06) + ')');
+      gl.addColorStop(1, 'rgba(234,246,255,0)');
+      c.fillStyle = gl;
+      c.beginPath(); c.ellipse(cx2, gy - dh * 0.4, dw * (0.26 + k * 0.36), dh * 0.44, 0, 0, 7); c.fill();
+    }
+    c.restore();
+    return;
+  }
+  const BW = 62, BH = 138;
+  const t = performance.now();
+  c.save();
+  // ---- the ground the stone sits in: a shallow apron of its own spoil, so
+  // the boulder is BEDDED rather than parked on a line
+  c.fillStyle = '#1c1018';
+  c.beginPath();
+  c.moveTo(cx2 - BW - 26, gy + 3);
+  c.quadraticCurveTo(cx2 - BW * 0.5, gy - 9, cx2, gy - 6);
+  c.quadraticCurveTo(cx2 + BW * 0.6, gy - 10, cx2 + BW + 24, gy + 3);
+  c.closePath(); c.fill();
+  // ---- THE TWO HALVES. One boulder, cut once; each half is a closed lumpy
+  // curve and the two inner faces are the kerf. `lean` tilts the crowns apart
+  // by different amounts so the gap is a wedge that changes its mind.
+  const breath = Math.sin(t / 2600) * 1.2;
+  const half = (s, lean, wob) => {
+    // s = -1 left, +1 right. Built outward from the split so the inner face is
+    // authored and the outer silhouette is the lumpy part.
+    c.beginPath();
+    c.moveTo(cx2 + s * 3, gy);                                   // foot, at the split
+    c.quadraticCurveTo(cx2 + s * (BW * 0.62), gy - BH * 0.12, cx2 + s * (BW + wob), gy - BH * 0.34);
+    c.quadraticCurveTo(cx2 + s * (BW * 0.94), gy - BH * 0.66, cx2 + s * (BW * 0.58), gy - BH * 0.88);
+    c.quadraticCurveTo(cx2 + s * (BW * 0.30), gy - BH * 1.02, cx2 + s * (BW * 0.10) + lean, gy - BH);
+    // the INNER face — the cut. It wanders: three eased kinks, never a line.
+    c.quadraticCurveTo(cx2 + s * 13 + lean * 0.7, gy - BH * 0.78, cx2 + s * 6, gy - BH * 0.58);
+    c.quadraticCurveTo(cx2 + s * 15, gy - BH * 0.40, cx2 + s * 8, gy - BH * 0.22);
+    c.quadraticCurveTo(cx2 + s * 13, gy - BH * 0.10, cx2 + s * 3, gy);
+    c.closePath();
+  };
+  for (const s of [-1, 1]) {
+    const lean = s * (s < 0 ? 9 : 15) + breath * s;    // unequal: they settled, they did not open
+    const wob = s < 0 ? 4 : -3;
+    c.save();
+    half(s, lean, wob);
+    c.clip();
+    // the rock: the Cache's plum, lit from the split outward
+    const rg = c.createLinearGradient(cx2, gy - BH, cx2 + s * BW, gy);
+    rg.addColorStop(0, '#4a2440');
+    rg.addColorStop(0.45, '#331a2c');
+    rg.addColorStop(1, '#1d1019');
+    c.fillStyle = rg;
+    c.fillRect(cx2 - BW - 30, gy - BH - 20, (BW + 30) * 2, BH + 24);
+    // CRYSTAL VEINS in the face — the seam this whole kingdom is quarried
+    // for, wandering, brighter the nearer the cut, because that is the side
+    // her light falls on
+    for (let i = 0; i < 4; i++) {
+      const vx = cx2 + s * (10 + i * 15);
+      c.strokeStyle = 'rgba(255,194,234,' + (0.30 - i * 0.055) + ')';
+      c.lineWidth = 1.6 - i * 0.25;
+      c.beginPath(); c.moveTo(vx, gy - 2);
+      for (let y = gy - 18; y > gy - BH; y -= 22)
+        c.lineTo(vx + Math.sin(y / 26 + i * 2.1) * 7 + s * (gy - BH - y) * 0.03, y);
+      c.stroke();
+    }
+    // ...and the SAW SCORE. A cut face keeps the marks of the cut: shallow
+    // arcs following the sweep of the wire, only on the inner third.
+    c.strokeStyle = 'rgba(234,246,255,0.10)'; c.lineWidth = 1;
+    for (let i = 0; i < 5; i++) {
+      const yy = gy - BH * (0.14 + i * 0.17);
+      c.beginPath();
+      c.moveTo(cx2 + s * 4, yy);
+      c.quadraticCurveTo(cx2 + s * 20, yy + 5, cx2 + s * 30, yy + 2);
+      c.stroke();
+    }
+    c.restore();
+    // the outer rim, catching the room: a thin cold edge, never a stroke of
+    // the whole outline (an outlined boulder reads as a sticker)
+    c.save();
+    half(s, lean, wob);
+    c.strokeStyle = 'rgba(255,122,209,0.16)'; c.lineWidth = 1.4; c.stroke();
+    c.restore();
+  }
+  // ---- THE KERF ITSELF: the gap between the halves, breathing the purifier's
+  // white. Widest at the foot (it is a doorway), pinched near the crown.
+  const doorH = BH * 0.86;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const pulse = Math.sin(t / 1700) * 0.05;
+  const kg = c.createLinearGradient(0, gy - doorH, 0, gy);
+  kg.addColorStop(0, 'rgba(234,246,255,' + (0.06 + k * 0.34 + pulse) + ')');
+  kg.addColorStop(0.55, 'rgba(255,255,255,' + (0.12 + k * 0.44 + pulse) + ')');
+  kg.addColorStop(1, 'rgba(234,246,255,' + (0.20 + k * 0.52 + pulse) + ')');
+  c.fillStyle = kg;
+  c.beginPath();
+  c.moveTo(cx2 - 14, gy);
+  c.quadraticCurveTo(cx2 - 7, gy - doorH * 0.24, cx2 - 12, gy - doorH * 0.46);
+  c.quadraticCurveTo(cx2 - 6, gy - doorH * 0.74, cx2 - 3, gy - doorH);
+  c.quadraticCurveTo(cx2 + 4, gy - doorH * 0.72, cx2 + 11, gy - doorH * 0.44);
+  c.quadraticCurveTo(cx2 + 6, gy - doorH * 0.22, cx2 + 15, gy);
+  c.closePath(); c.fill();
+  // the grit hanging in her light — crystal dust, the shop's own air
+  const gn = 3 + Math.round(k * 4);
+  for (let i = 0; i < gn; i++) {
+    const ph = (t / 3100 + i * 0.37) % 1;
+    const dx = cx2 + Math.sin(i * 3.9 + t / 1900) * 10;
+    c.globalAlpha = Math.sin(ph * Math.PI) * (0.26 + k * 0.4);
+    c.fillStyle = '#eaf6ff';
+    c.beginPath(); c.arc(dx, gy - 8 - ph * (doorH - 20), 1.4, 0, 7); c.fill();
+  }
+  c.globalAlpha = 1;
+  c.restore();
+  // the lips of the cut, taking her light on their inner edge
+  c.strokeStyle = 'rgba(234,246,255,0.34)'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(cx2 - 14, gy);
+  c.quadraticCurveTo(cx2 - 7, gy - doorH * 0.34, cx2 - 3, gy - doorH); c.stroke();
+  c.strokeStyle = 'rgba(234,246,255,0.22)'; c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(cx2 + 15, gy);
+  c.quadraticCurveTo(cx2 + 8, gy - doorH * 0.3, cx2 + 11, gy - doorH * 0.44); c.stroke();
+  // ---- THE SIGNAL LINE — her doorbell, and the only one in the game nobody
+  // rings. Strung from the left crown to a peg in the floor on the right, a
+  // real catenary, quivering harder the nearer she stands: this is how a deaf
+  // machine knows the room has somebody in it.
+  const ax2 = cx2 - BW * 0.62, ay = gy - BH * 0.82;
+  const bx2 = cx2 + BW + 16, by = gy - 2;
+  const quiver = Math.sin(t / 58) * (0.6 + k * 3.4);
+  c.strokeStyle = 'rgba(214,190,208,0.5)'; c.lineWidth = 1.2;
+  c.beginPath(); c.moveTo(ax2, ay);
+  c.quadraticCurveTo((ax2 + bx2) / 2 + quiver, (ay + by) / 2 + 30 + quiver * 0.4, bx2, by);
+  c.stroke();
+  // the peg, and the little white tick that runs up the line when she is near
+  c.fillStyle = '#4a2440';
+  c.beginPath(); c.ellipse(bx2, by, 4, 2.6, -0.3, 0, 7); c.fill();
+  if (k > 0.05) {
+    const rp = (t / 900) % 1;
+    c.save(); c.globalCompositeOperation = 'lighter';
+    c.globalAlpha = Math.sin(rp * Math.PI) * k * 0.9;
+    c.fillStyle = '#eaf6ff';
+    c.beginPath();
+    c.arc(bx2 + (ax2 - bx2) * rp, by + (ay - by) * rp + Math.sin(rp * Math.PI) * 26, 2.2, 0, 7);
+    c.fill(); c.restore(); c.globalAlpha = 1;
+  }
+  // ---- HER SIGN. The others hang a lamp, a monitor, a gear, a reading hood
+  // and a lantern-bud; she hangs THE BOW — a slack cutting wire in a curved
+  // frame, turning a little, with the cut still walking along the wire.
+  const sw = Math.sin(t / 1500) * 0.10;
+  c.save();
+  c.translate(cx2 - BW * 0.72, gy - BH * 0.55); c.rotate(sw - 0.22);
+  c.strokeStyle = '#6b4a5e'; c.lineWidth = 2.2; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(-9, -9); c.quadraticCurveTo(-16, 4, -8, 13); c.stroke();
+  c.strokeStyle = 'rgba(234,246,255,0.55)'; c.lineWidth = 0.9;
+  c.beginPath(); c.moveTo(-9, -9); c.quadraticCurveTo(-2, 2, -8, 13); c.stroke();
+  const bead = (t / 1300) % 1;
+  c.fillStyle = 'rgba(255,255,255,' + (0.5 + Math.sin(t / 400) * 0.3) + ')';
+  c.shadowColor = '#eaf6ff'; c.shadowBlur = 7;
+  c.beginPath(); c.arc(-9 + Math.sin(bead * Math.PI) * 6, -9 + bead * 22, 1.9, 0, 7); c.fill();
+  c.shadowBlur = 0;
+  c.restore();
+  // ---- her spoil at the foot, parting as she nears (the booth-flap k, worn
+  // by chips of crystal instead of cloth)
+  const part = k * 14;
+  for (const s of [-1, 1]) {
+    for (let i = 0; i < 4; i++) {
+      const px2 = cx2 + s * (16 + part + i * 7), py2 = gy - 1 - (i % 2) * 2;
+      c.save();
+      c.translate(px2, py2); c.rotate(s * (0.25 + i * 0.24) + Math.sin(i * 5.1) * 0.2);
+      c.fillStyle = i % 2 ? '#3a1f33' : '#4f2b45';
+      c.beginPath(); c.moveTo(-4, 0);
+      c.quadraticCurveTo(-1, -3.2, 3.8, -0.6);
+      c.quadraticCurveTo(0.5, 2.2, -4, 0); c.closePath(); c.fill();
+      c.fillStyle = 'rgba(234,246,255,0.28)';
+      c.beginPath(); c.arc(-0.5, -0.8, 0.9, 0, 7); c.fill();
+      c.restore();
+    }
+  }
+  c.restore();
+}
 // ---------- LEVELS WITHIN LEVELS -------------------------------------------
 // The owner, 2026-08-23: "the game itself should be built in a way that
 // enables me to add levels within levels. so that I can expand whenever I
@@ -9133,6 +9389,9 @@ function drawGateDoor(P, def, nearPlane) {
   // ...and the Nymph's hollow is LUMEN'S — the Nest's own tissue, woven,
   // and the one door in the game lit leaf-green
   if (def.style === 'hollow') { drawLumenHollow(ds, gy, P, k); structBeacon(ds, gy, 200, 236, k); return; }
+  // ...and the Cutter's kerf is KERF'S — the Cache's own rock, split once,
+  // and the only door in the game lit by the purifier's own white
+  if (def.style === 'kerf') { drawKerfStone(ds, gy, P, k); structBeacon(ds, gy, 200, 236, k); return; }
   // THE ZONE GATES (§2f): every kingdom's depth door is its own fired
   // monument — a furnace arch, a parted shelf-stack, a cable iris, a talon
   // arch, an organic iris — and ONLY the city keeps the colossal multilayer
@@ -10583,6 +10842,9 @@ function drawStatics(P) {
       if (id === 'sage' && chance(0.03)) addPart(s.x + s.w / 2 + rnd(-16, 16), s.y + rnd(0, 20), rnd(-8, 8), rnd(-14, -4), 0.9, '#9fe8ff', 1.6, 0, true);
       if (id === 'patch' && chance(0.05)) addPart(s.x + s.w / 2 + rnd(-6, 10), s.y + s.h - 8, rnd(-40, 40), rnd(-70, -20), 0.3, '#ffd08a', 2, 500, true);
       if (id === 'lumen' && chance(0.06)) addPart(s.x + s.w / 2, s.y + 12, rnd(-14, 14), rnd(-20, -6), 0.7, '#7dff9a', 1.8, -18, true);
+      // the Cutter's grit FALLS: everything else in the cast sheds upward
+      // (heat, light, static) and hers is stone dust coming off a cut
+      if (id === 'kerf' && chance(0.06)) addPart(s.x + s.w / 2 - 12, s.y + 13, rnd(-14, 6), rnd(-26, -4), 0.55, '#eaf6ff', 1.5, 110, true);
       if (typeof isHero === 'function' && isHero() && drawHeroNPC(c, id, s)) {
         // the Odyssey has its own people — robed, human, Greek. The machine
         // folk below belong to the Depths and stay there.
@@ -14380,6 +14642,94 @@ function drawNPCBody(c, id, tn, talking) {
       c.restore();
       break;
     }
+    case 'kerf': {    // THE LAST CUTTER — a low, heavy lapidary with no ears
+      // Her silhouette says the whole thing before a line of dialogue does.
+      // Every other machine in this game has ear-cowls, a dish, an antenna or
+      // a listening face; she has NONE — a smooth blank crown where the
+      // receivers would be, because the receivers were stamped dead and that
+      // is why she is alive. Wide, squat, four short legs planted: a machine
+      // built to hold still against a cut, not to travel. She is not idling
+      // when the player finds her, she is WORKING — a slow bow stroke, and
+      // the crystal in her jig answering it with light.
+      const br = Math.sin(tn * 1.5) * 0.6;
+      // the stroke: slow, one-directional, with a pause at the far end — a saw
+      // cut is a push and a wait, never a scrub
+      const ph = (tn * 0.42) % 1;
+      const stroke = ph < 0.72 ? Math.sin(ph / 0.72 * Math.PI) : 0;
+      ao(0, 19, 0.26);
+      // four short legs, splayed, gripping — bowed, never posts
+      c.strokeStyle = '#2f2731'; c.lineWidth = 3.4; c.lineCap = 'round';
+      for (const lx of [-11, -5, 5, 11]) {
+        c.beginPath(); c.moveTo(lx * 0.7, -9);
+        c.quadraticCurveTo(lx * 1.05, -5, lx, -0.5); c.stroke();
+      }
+      // the chassis: a broad low shell, heavier on the left where the jig is
+      const shell = () => {
+        c.beginPath();
+        c.moveTo(-16, -9);
+        c.bezierCurveTo(-18, -18 - br, -11, -24 - br, -1, -24.5 - br);
+        c.bezierCurveTo(9, -25 - br, 16, -19 - br, 16.5, -12 - br);
+        c.quadraticCurveTo(17, -9.6, 14, -8.6);
+        c.quadraticCurveTo(0, -6.6, -16, -9);
+        c.closePath();
+      };
+      c.save(); shell(); c.clip();
+      c.fillStyle = lin(-16, -26, 16, -6, [[0, '#7a6a76'], [0.4, '#4a3f4a'], [0.85, '#2b232c'], [1, '#1b161d']]);
+      c.fillRect(-19, -27, 38, 22);
+      // crystal dust worked into every seam of her — she is the colour of the
+      // stuff she cuts, in the places she cannot reach
+      c.strokeStyle = 'rgba(234,246,255,0.16)'; c.lineWidth = 1;
+      for (let i = 0; i < 3; i++) {
+        c.beginPath(); c.moveTo(-17, -20 + i * 5);
+        c.quadraticCurveTo(0, -22 + i * 5.4, 17, -18 + i * 4.6); c.stroke();
+      }
+      c.restore();
+      // THE BLANK CROWN. No cowls, no dish, no antenna: a smooth dome where
+      // every other body in the cast carries something to hear with.
+      c.fillStyle = '#5b4d59';
+      c.beginPath(); c.ellipse(-1, -24 - br, 11, 5.4, 0, Math.PI, Math.PI * 2); c.fill();
+      c.strokeStyle = 'rgba(255,194,234,0.22)'; c.lineWidth = 1.2;
+      c.beginPath(); c.ellipse(-1, -24 - br, 11, 5.4, 0, Math.PI * 1.05, Math.PI * 1.95); c.stroke();
+      // one wide optic band, dim and steady — she reads by light and by the
+      // floor, so it never darts
+      const op = 0.55 + Math.sin(tn * 0.9) * 0.12;
+      c.fillStyle = 'rgba(234,246,255,' + (blink ? 0.1 : op) + ')';
+      c.shadowColor = '#eaf6ff'; c.shadowBlur = blink ? 0 : 7;
+      rr(c, -8, -21 - br, 15, 2.6, 1.3); c.fill(); c.shadowBlur = 0;
+      // ---- THE WORK. Her left arm holds the jig, her right draws the bow.
+      // the jig: a small chunk of the seam clamped at her chest
+      c.fillStyle = '#3a2f38';
+      c.beginPath(); c.moveTo(-16, -12); c.quadraticCurveTo(-21, -15, -18, -19);
+      c.quadraticCurveTo(-13, -20, -12, -15); c.closePath(); c.fill();
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const cg = 0.3 + stroke * 0.55;
+      c.fillStyle = 'rgba(234,246,255,' + cg + ')';
+      c.beginPath(); c.moveTo(-18.5, -16.5); c.lineTo(-15.5, -19.5); c.lineTo(-13, -15.5);
+      c.lineTo(-16, -13.5); c.closePath(); c.fill();
+      c.restore();
+      // the bow: a curved frame with a slack wire, drawn across the jig
+      const dx = -3 + stroke * 9;
+      c.save(); c.translate(dx, 0);
+      c.strokeStyle = '#6b5a66'; c.lineWidth = 2.6; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(-12, -20); c.quadraticCurveTo(4, -24, 12, -14); c.stroke();
+      c.strokeStyle = 'rgba(234,246,255,0.6)'; c.lineWidth = 0.9;
+      c.beginPath(); c.moveTo(-12, -20); c.quadraticCurveTo(1, -15.5, 12, -14); c.stroke();
+      // her right arm on the bow, bent — the elbow leads the stroke
+      c.strokeStyle = '#4a3f4a'; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(9 - dx, -14); c.quadraticCurveTo(13 - dx * 0.4, -19, 10, -17); c.stroke();
+      c.restore();
+      // the cut throws light and grit, and only while the stroke is moving
+      if (stroke > 0.25) {
+        c.save(); c.globalCompositeOperation = 'lighter';
+        c.globalAlpha = (stroke - 0.25) * 0.7;
+        const sg = c.createRadialGradient(-15, -16, 1, -15, -16, 14);
+        sg.addColorStop(0, 'rgba(255,255,255,0.5)');
+        sg.addColorStop(1, 'rgba(234,246,255,0)');
+        c.fillStyle = sg; c.beginPath(); c.arc(-15, -16, 14, 0, 7); c.fill();
+        c.restore(); c.globalAlpha = 1;
+      }
+      break;
+    }
   }
 }
 // ---- the Odyssey's people ------------------------------------------------
@@ -14472,6 +14822,33 @@ function drawHeroNPC(c, id, s) {
       c.strokeStyle = '#5c5346'; c.lineWidth = 2.2; c.lineCap = 'round';
       c.beginPath(); c.moveTo(9, -16); c.lineTo(15, -22 - sc); c.stroke();
       c.fillStyle = '#8a8ea0'; c.fillRect(13, -26 - sc, 6, 4);     // hammer head
+      return true;
+    }
+    case 'kerf': {    // the Last Telchine — the smiths who cut the gods' weapons
+      const sc = Math.sin(tn * 3.4) * 1.2;               // the chisel taps
+      // the block she is working, bedded in front of her
+      c.fillStyle = '#6e6a60';
+      c.beginPath(); c.moveTo(-20, 0); c.quadraticCurveTo(-22, -11, -14, -13);
+      c.quadraticCurveTo(-6, -14, -7, 0); c.closePath(); c.fill();
+      c.fillStyle = 'rgba(248,246,238,0.5)';
+      c.beginPath(); c.moveTo(-17, -9); c.quadraticCurveTo(-13, -12.5, -9.5, -8);
+      c.quadraticCurveTo(-13, -6, -17, -9); c.closePath(); c.fill();
+      // squat and wide: the Telchines were sea-smiths, low to their work
+      robe(0, 26, 20 + br, '#5e5a52', '#46433c');
+      c.fillStyle = '#7a6a4e'; c.fillRect(-10, -18 - br, 20, 12);   // the stone apron
+      head(2, -24 - br, 6.8, '#c8a882');
+      // NO EAR AND NO CURL BESIDE IT — a bound head-cloth pulled flat over
+      // where the ears would be. She was born without them; that deafness is
+      // the only reason the song never took her, and the silhouette says so.
+      c.fillStyle = '#8a8278';
+      c.beginPath(); c.arc(2, -26 - br, 7.4, Math.PI * 0.96, Math.PI * 0.04); c.fill();
+      c.fillRect(-5.4, -27 - br, 15, 5);
+      c.fillStyle = '#2a2a30'; c.fillRect(3.5, -25 - br, 2, 2); c.fillRect(7, -25 - br, 2, 2);
+      // hammer and chisel: the chisel held to the block, the hammer coming down
+      c.strokeStyle = '#5c5346'; c.lineWidth = 2.2; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(-8, -14); c.lineTo(-13, -10); c.stroke();
+      c.beginPath(); c.moveTo(6, -16); c.lineTo(-2, -20 - sc); c.stroke();
+      c.fillStyle = '#8a8ea0'; c.fillRect(-6, -23 - sc, 6, 4);
       return true;
     }
     // 'lumen' (the Lost Nymph) keeps the shared leaf-sprite — she already

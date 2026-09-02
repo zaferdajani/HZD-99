@@ -613,6 +613,10 @@ function npcVoxBuild(id) {
     case 'sage':    osc(440, 'sine', 0.12); osc(554.4, 'sine', 0.1); osc(659.3, 'sine', 0.08, 0.3, 2); break; // a held chord, almost song
     case 'patch':   nz(0.22, 2400, 0.8); osc(96, 'square', 0.05, 7, 5); break;              // tools and tiny arcs
     case 'lumen':   osc(880, 'sine', 0.1, 1.7, 12); osc(1318.5, 'sine', 0.05, 2.3, 9); break; // wandering shimmer
+    // the Cutter: a lapidary wheel turning under a struck crystal that never
+    // quite stops ringing. The one voice in the cast with no pitch movement
+    // at all — she cannot hear her own machine, so nothing in it is tuned.
+    case 'kerf':    nz(0.2, 520, 1.1); osc(58, 'triangle', 0.08); osc(1760, 'sine', 0.022, 0.4, 3); break;
     // THE LURE (owner, 2026-08-23: "it should emit a sound from within that
     // attracts me to go there"). Not a machine and not a person — a HOLE:
     // a sub-bass the room breathes through, a hollow throat resonance an
@@ -1785,6 +1789,9 @@ function sfxHealTick(k) {
 const NPC_VOICE = {
   servo: [170, 'sawtooth'], ratchet: [330, 'square'], mono: [240, 'sine'],
   sage: [140, 'sine'], patch: [430, 'square'], lumen: [540, 'sine'],
+  // KERF SPEAKS TOO LOUD AND TOO LOW, which is what a machine that has never
+  // heard its own voice sounds like: nothing has ever corrected it.
+  kerf: [110, 'triangle'],
 };
 function sfxVoice(id) {
   if (!AC || MUTED) return;
@@ -1912,6 +1919,16 @@ const NPC_CHASSIS = {
   sage:    { ring: 23, mix: 0.26, lo: 170, hi: 5600, comb: 0.014,  rate: 0.88 },
   patch:   { ring: 88, mix: 0.36, lo: 260, hi: 6000, comb: 0.004,  rate: 1.04 },
   lumen:   { ring: 71, mix: 0.24, lo: 360, hi: 7000, comb: 0.0034, rate: 1.0 },
+  // KERF IS NOT HERE YET, AND THAT IS THE POINT OF THIS TABLE.
+  //
+  // A chassis is the shape given to a RECORDED line — npcChainBuild only ever
+  // runs over assets/vox/<id>N.ogg — so a row for a character with no takes
+  // shapes nothing, and tests/voxmeas.cjs is right to fetch a take for every
+  // row it finds and fall over when one is missing. Her profile is written
+  // down in ART_QUEUE §2aq instead (big, slow, a narrow old speaker:
+  // ring 17, mix 0.28, lo 130, hi 3600, comb 0.018, rate 0.82) and lands in
+  // the same commit as her voice takes. Until then she speaks through the
+  // synthesised loop above and the chirp below, neither of which needs a file.
 };
 // The chain itself, built from any source node in any context — which is what
 // lets it be rendered offline and MEASURED rather than trusted. The first

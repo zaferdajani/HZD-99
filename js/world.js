@@ -880,6 +880,44 @@ const ROOMS = {
   V1: { zone: 'X', w: 32, h: 17, exits: { L: 'B5' },
     ents: [['chest', 12, 15, 'rl:aegis'], ['scrap', 5, 15, 60], ['scrap', 8, 15, 60], ['scrap', 16, 15, 60], ['scrap', 19, 15, 40], ['term', 9, 15, 4]],
     build(g) { frame(g); openL(g); hline(g, 8, 15, 11, '='); } },
+  // THE KERF (kingdom X's own interior, the X-side of A0B/B3B/C5B/D1B/E1B):
+  // a one-room cutting shop inside a split boulder in the wall of V1, the
+  // Cache's antechamber, where the last of the Deaf System's cutters LIVES.
+  // She is the doorkeeper of the deepest secret in the game: the buried half
+  // of the purifier is one room from her own door.
+  //
+  // WHY THERE IS A PERSON AT THE BOTTOM OF THE WORLD. She was stamped with
+  // dead receivers at the factory, so the Song never reached her and she has
+  // never once been switched off (npcLive's NPC_AWAKE in js/game.js — the
+  // cell economy is closed and exact, and she is the one machine that never
+  // needed one). The Deaf System quarried this seam; she cut what came out of
+  // it. A whole purifier is the only thing left that can burn the Song out of
+  // anything, so she split it: one end laid where a clever machine would find
+  // it and forge it, the other buried next door, and she sat down at the last
+  // room before it and has not moved since. The Prowler up the shaft is hers
+  // too, and so is the Grounded Vault below — a lock made of live current is
+  // the lock a machine that cannot be sung to would build.
+  //
+  // Dressing mimics the Cache backdrop per the mimic rule (crystal-veined
+  // rock, cut spoil, strung signal cable); the procedural interior is a
+  // stand-in — the authored plate is queued (ART_QUEUE §2aq, kerfInterior).
+  // The rises are OBJECTS from this room's own backdrop and nothing else: a
+  // mound of her cut spoil, and a sagging cable rack over the workface. No
+  // bare step anywhere (NO RIGHT ANGLES).
+  V1B: { zone: 'X', indoor: 1, w: 30, h: 17, exits: {},
+    ents: [['npc', 15, 15, 'kerf'], ['scrap', 19, 11, 45]],
+    build(g) {
+      frame(g);
+      // the tailings of everything she ever cut, heaped between the door and
+      // her workface — she is standing behind her own spoil, and the walk in
+      // goes OVER it. mound() is one tile per column with feet on the ground
+      // at both ends, so it is a rise she strolls up rather than a step.
+      mound(g, 6, 12, 2, 'kerfSpoil');
+      // the cable rack over the workface: strung, sagging two rows east, so
+      // the low end is a hop off the floor and the crest is the climb. The
+      // scrap is at the high end, which is what the climb pays.
+      gantry(g, 18, 25, 12, 2);
+    } },
   // THE GROUNDED VAULT. There is no door and no key. The only way in is to
   // stand ON a live hazard rail — which is fatal without the Grounding Crest —
   // and cut through the brittle section of it. Until somebody does that, this
@@ -1535,7 +1573,7 @@ const MAPPOS = {
   A5: [-2, 4, 2, 1], A6: [-4, 2, 1, 1], A7: [-2, 5, 1, 2], A8: [-1, 2, 1, 1], A9: [-1, 1, 1, 1],
   A11: [-2, 1, 1, 1], A12: [3, 5, 1, 1], A13: [-5, 2, 1, 1],
   CV1: [0, 4, 2, 1], CV1B: [0, 5, 1, 1], CV2: [2, 4, 2, 1], CV3: [4, 4, 1, 1],
-  B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
+  B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V1B: [9, 1, 1, 1], V2: [5, 5, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],
   X1: [8, 1, 1, 1],
   C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1], C5: [4, 5, 1, 1], C5B: [4, 6, 1, 1],

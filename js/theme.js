@@ -21,6 +21,18 @@ const THEMES = {
         b_zero: 'The Judge of the Dead', b_prism: 'The Marble Lynx', b_mother: 'Charybdis, the Devourer',
         n_servo: 'Old Mentor', n_ratchet: 'Hermion the Trader', n_mono: 'The Oracle',
         n_sage: 'The Sibyl', n_patch: 'The Tinker of Daedalus', n_lumen: 'A Lost Nymph',
+        // KINGDOM X: the Telchines were the smiths who cut the gods' weapons —
+        // Poseidon's trident, Kronos's sickle — and were driven under the world
+        // for it. The last of them is deaf, which is why the Sirens never took
+        // her, and she is the one who split the blade.
+        n_kerf: 'The Last Telchine',
+        d_kerf: [
+          'Do not raise your voice. I was made without hearing, and that deafness is the only reason the singers never took me.',
+          'The Telchines cut the weapons of the gods. I am the last, and this seam is what we came down here for.',
+          'Whole, that blade could burn the song out of anything alive. So I split it. One end I left where a craftsman would find it and forge it; the other I carried to the bottom of the world and sat down beside.',
+          'The pale lynx in the hall is mine as well. I set it to keep the half. It does not remember me, and it will not spare you.',
+          'Take the other end when your hands can hold it. Join what I cut, and do not bring it back to me — I have sat with the pieces long enough.',
+        ],
         d_servo: [
           'By the gods… a living soul on this shore! The sea has given something back at last.',
           'Move with the arrows, leap with Z, and let your blade speak with X.',
@@ -118,6 +130,14 @@ const THEMES = {
         b_zero: 'قاضي الموتى', b_prism: 'وشق الرخام', b_mother: 'كاريبدس المُلتهمة',
         n_servo: 'المرشد العجوز', n_ratchet: 'هرميون التاجر', n_mono: 'العرّافة',
         n_sage: 'الكاهنة', n_patch: 'صانع دايدالوس', n_lumen: 'حورية تائهة',
+        n_kerf: 'آخر التلخينيين',
+        d_kerf: [
+          'لا ترفع صوتك. وُلدتُ بلا سمع، وذلك الصمم وحده سبب أن المُغنّيات لم تأخذني قطّ.',
+          'التلخينيون نحتوا أسلحة الآلهة. أنا آخرهم، وهذا العِرق هو ما نزلنا إلى هنا من أجله.',
+          'ذلك النصل، كاملًا، يقدر أن يحرق الأغنية من أيّ كائن حيّ. فشطرته. طرفًا تركته حيث يجده صانعٌ فيصوغه، والطرف الآخر حملته إلى قاع العالم وجلستُ إلى جانبه.',
+          'الوشق الشاحب في القاعة لي أيضًا. نصبته حارسًا للنصف. لا يذكرني، ولن يرحمك.',
+          'خذ الطرف الآخر حين تقوى يداك على حمله. صِل ما قطعتُه، ولا تُعده إليّ — جلستُ مع الشطرين ما يكفي.',
+        ],
         d_servo: [
           'بحق الآلهة… روحٌ حيّة على هذا الشاطئ! أعاد البحر شيئًا أخيرًا.',
           'تحرّك بالأسهم، واقفز بـ Z، ودع سيفك يتكلم بـ X.',
