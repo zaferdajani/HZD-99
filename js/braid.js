@@ -277,6 +277,13 @@ function brDeath(room) {
   b.fellAt[room] = (b.fellAt[room] || 0) + 1;
   if (!b.worst || b.fellAt[room] > b.fellAt[b.worst]) b.worst = room;
 }
+// story marks beside the ledger — the meeting, the rematch — read by the
+// people who were there; never part of the universe key
+function brMark(what, room) {
+  const b = braid(); if (!b) return;
+  b.marks = b.marks || {};
+  if (!b.marks[what]) b.marks[what] = room || 1;
+}
 function brKill(room) {
   const b = braid(); if (!b) return;
   b.kills++;

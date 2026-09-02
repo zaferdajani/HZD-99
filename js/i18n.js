@@ -13,6 +13,8 @@ function langName(id) { const l = LANGS.find(x => x.id === id); return l ? l.nam
 function isRTL() { const l = LANGS.find(x => x.id === LANG); return !!(l && l.rtl); }
 const I18N = {
 en: {
+  nf_rematch: 'It remembers the corridor.',
+  film_meet: 'The Corridor',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
   // noticing she came back, the world line on the pause screen, the rematch
   death_1: 'The husk is not you. Get up.',
@@ -473,6 +475,8 @@ en: {
   map_ctl: 'Drag or ✥ to pan   ·   wheel / pinch / Z · X to zoom   ·   E fit   ·   Q recentre   ·   M close',
 },
 ar: {
+  nf_rematch: 'إنه يتذكّر الممرّ.',
+  film_meet: 'الممرّ',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
   // noticing she came back, the world line on the pause screen, the rematch
   death_1: 'الهيكل ليس أنتِ. انهضي.',
@@ -899,6 +903,8 @@ ar: {
   map_ctl: 'اسحب للتحريك · عجلة أو تقريب بالإصبعين · E ملء الشاشة · Q توسيط · M إغلاق',
 },
 tr: {
+  nf_rematch: 'Koridoru hatırlıyor.',
+  film_meet: 'Koridor',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
   // noticing she came back, the world line on the pause screen, the rematch
   death_1: 'Kabuk sen değilsin. Kalk.',
@@ -1023,6 +1029,8 @@ tr: {
   vault_hint: 'E — Mühürlü Kasa', door_locked: 'Mühürlü. Daha büyük bir güç onu kapalı tutuyor.',
 },
 zh: {
+  nf_rematch: '它记得那条走廊。',
+  film_meet: '走廊',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
   // noticing she came back, the world line on the pause screen, the rematch
   death_1: '那副空壳不是你。站起来。',
@@ -1147,6 +1155,8 @@ zh: {
   vault_hint: 'E — 封印宝库', door_locked: '已封印。更强大的力量将它锁住。',
 },
 ru: {
+  nf_rematch: 'Оно помнит коридор.',
+  film_meet: 'Коридор',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
   // noticing she came back, the world line on the pause screen, the rematch
   death_1: 'Оболочка — это не ты. Вставай.',

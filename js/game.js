@@ -70,7 +70,8 @@ const G = {
   recharge: null, coreFlash: null, coresFullT: 0, healToasted: false, bolt: null,
   updateReady: null, updateStamp: 0,
   addRing(x, y, r0) { this.rings.push({ x, y, r: r0 || 12, a: 0.85 }); },
-  toast(text) { this.toasts.push({ text, t: 3 }); },
+  // nothing speaks over the first meeting (manga-direction §6: the silence IS the beat)
+  toast(text) { if (this.meet) return; this.toasts.push({ text, t: 3 }); },
   breakTile(tx, ty) {
     this.save.broken[this.roomId + ':' + tx + ',' + ty] = 1;
     // the lesson is learned the first time it works. From here the seam stops
@@ -1034,7 +1035,114 @@ function respawn() {
   if (G.save.pouch) G.toast(t('pouch') + '  (' + t('z_' + ROOMS[G.save.pouch.room].zone) + ')');
   G.state = 'PLAY';
 }
-function bossActive() { return G.boss && !G.boss.dead && G.boss.st !== 'dorm'; }
+function bossActive() { return G.boss && !G.boss.dead && G.boss.st !== 'dorm' && !G.boss.meet; }
+
+// ---------------------------------------------------------------------------
+// THE FIRST MEETING (.claude/skills/underdog-arc §2.1; staged per
+// .claude/skills/manga-direction). She must meet something that swats her
+// aside and walks away, early, and survive it by being outclassed rather than
+// by losing — so the whole game after it is "come back for that". It costs one
+// crest of one room and one flag, and A4 becomes the rematch for free.
+//
+// Staged as an impact triple with a silence on each side, not as text:
+//   fall    it drops out of the sky east of her on the A2 crest — geography
+//   land    the silence: music gone, controls gone, it walks up to her
+//   wind    the paw rises, held a hair too long (beat 1 of the hit)
+//   swipe   the flash — hit-stop, white, the frame stops (beat 2)
+//   watch   the aftermath: she is thrown the length of the mound and it
+//           stands and looks (beat 3 — the frame that carries the information)
+//   coil    it gathers, bored of her
+//   leave   and bounds east out of the room, toward where she will meet it again
+// She keeps at least one core: this is a survival, never a scripted death.
+// ---------------------------------------------------------------------------
+const MEET_ROOM = 'A2', MEET_X = 60 * TILE;
+function meetCheck() {
+  if (G.meet || G.roomId !== MEET_ROOM || !G.save || G.save.flags.nfMeet) return;
+  if (player.dead || G.cut || G.gateWalk || G.bossEntry || G.wake) return;
+  if (player.x + player.w / 2 < MEET_X) return;
+  const W = G.roomDef.w * TILE;
+  const gx = clamp(player.x + player.w / 2 + 7 * TILE, 220, W - 220);
+  const b = new Boss('glitch', gx, -260);      // x is the centre, y the feet
+  b.meet = true; b.st = 'pounce'; b.vx = 0; b.vy = 520; b.face = -1; b.t = 9;
+  G.boss = b;
+  G.meet = { t: 0, ph: 'fall', hit: false };
+  G.save.flags.nfMeet = 1;                    // set as it begins: a reload mid-beat keeps the sentence
+  if (typeof brMark === 'function') brMark('meet', G.roomId);
+  if (typeof filmSee === 'function' && PURIFY_VID.meet) filmSee('meet');
+  persist();
+  stopMusic();
+  player.vx = 0;
+}
+function meetStep(dt) {
+  const M = G.meet, b = G.boss;
+  if (!M || !b || !b.meet) { G.meet = null; return; }
+  M.t += dt;
+  const pcx = player.x + player.w / 2, pcy = player.y + player.h / 2;
+  const W = G.roomDef.w * TILE;
+  const dust = (n, spread) => { for (let i = 0; i < n; i++)
+    addPart(b.cx() + rnd(-spread, spread), b.y + b.h - 4, rnd(-180, 180), rnd(-200, -50), 0.45, '#b9a888', 3, 300, true); };
+  if (M.ph === 'fall') {
+    b.vy += 1700 * dt;
+    const col = moveEnt(b, dt);
+    if (col.d || b.y + b.h >= (G.roomDef.h - 2) * TILE) {
+      b.vy = 0; b.vx = 0; b.st = 'stalk'; M.ph = 'land'; M.t = 0;
+      cam.shake = Math.max(cam.shake, 12); sfx('slam'); dust(14, b.w * 0.6);
+      if (typeof padRumble === 'function') padRumble(0.8, 0.6, 400);
+      G.flash = Math.max(G.flash, 0.12);
+    }
+  } else if (M.ph === 'land') {
+    // it walks up to her. Nothing else happens, which is the point.
+    b.face = pcx < b.cx() ? -1 : 1;
+    const gap = Math.abs(pcx - b.cx());
+    b.vy += 1700 * dt;
+    b.vx = (M.t > 0.7 && gap > 118) ? b.face * 240 : 0;
+    moveEnt(b, dt);
+    if (M.t > 0.7 && (gap <= 118 || M.t > 3.2)) {
+      b.vx = 0; b.st = 'swipewarn'; b.t = 0.5; M.ph = 'wind'; M.t = 0;
+      sfx('tellbig');
+    }
+  } else if (M.ph === 'wind') {
+    b.windT = 0.5; b.t -= dt; b.vx = 0;
+    if (b.t <= 0) { b.st = 'swipe'; b.t = 0.24; M.ph = 'swipe'; }
+  } else if (M.ph === 'swipe') {
+    b.t -= dt;
+    if (!M.hit && b.t <= 0.18) {
+      M.hit = true;
+      // THE IMPACT FRAME: the least readable frame on purpose
+      G.hitStop = Math.max(G.hitStop, 0.2); G.flash = Math.max(G.flash, 0.85);
+      cam.shake = Math.max(cam.shake, 18);
+      G.impact = { t: 0.3, t0: 0.3, x: pcx, y: pcy };
+      if (typeof padRumble === 'function') padRumble(1, 0.9, 600);
+      sfx('atk'); sfx('hit');
+      burst(pcx, pcy, 22, '#b06aff', 320, 0.5, 200, 3, true);
+      burst(pcx, pcy, 12, '#ffffff', 200, 0.4, 0, 2, true);
+      // it costs her something — one core — and never the last one
+      if (player.cores > 1) { player.iT = 0; player.hurt(1, b.cx(), 'nf.meet'); }
+      player.iT = 2.4; player.hurtPoseT = 0.9; player.stunT = 0;
+      player.vx = (pcx < b.cx() ? -1 : 1) * 980; player.vy = -520; player.on = false;   // away from it
+    }
+    if (b.t <= 0) { b.st = 'stalk'; b.vx = 0; M.ph = 'watch'; M.t = 0; }
+  } else if (M.ph === 'watch') {
+    // the aftermath: it stands and looks at where she landed
+    b.face = pcx < b.cx() ? -1 : 1; b.vy += 1700 * dt; b.vx = 0; moveEnt(b, dt);
+    if (M.t > 1.1) { b.st = 'crouch'; b.t = 0.6; b.coilTick = 0; b.coilFlashed = false; M.ph = 'coil'; }
+  } else if (M.ph === 'coil') {
+    b.windT = 0.4; b.t -= dt; b.coilK = 1 - clamp(b.t / 0.6, 0, 1);
+    if (b.t <= 0) {
+      b.st = 'pounce'; b.face = 1; b.vx = 920; b.vy = -720; M.ph = 'leave'; M.t = 0;
+      sfx('dash'); cam.shake = Math.max(cam.shake, 6); dust(10, b.w * 0.5);
+    }
+  } else if (M.ph === 'leave') {
+    // no walls for it on the way out: it is leaving the room, not bouncing off it
+    b.x += b.vx * dt; b.y += b.vy * dt; b.vy += 900 * dt;
+    if (b.x > W + 40 || M.t > 1.6) {
+      G.boss = null; G.meet = null;
+      setMusic(G.roomDef.zone);
+      persist();
+    }
+  }
+}
+
 
 // ===========================================================================
 // THE DEMO BOUNDARY — where the free version stops, and says so properly.
@@ -1648,6 +1756,7 @@ function update(dt) {
     fxDecay(dt);
     rubbleTick(dt);
     if (G.hitStop > 0) { G.hitStop -= dt; updateParts(dt * 0.25); return; }
+    meetCheck(); if (G.meet) meetStep(dt);
     // THE CROSSING IS A MOVE, NOT A CUT (owner, 2026-08-23: "the map... becomes
     // cubicles of rooms connected... instead, it's actual world connected").
     // Every screen edge used to fade the picture to solid black over 0.28s,
@@ -1792,7 +1901,17 @@ function update(dt) {
         else if (inP('PAUSE')) { G.state = 'PAUSE'; G.pauseIdx = 0; sfx('ui'); }
       }
     }
-    updateCam(player.x + player.w / 2, player.y + player.h / 2, G.roomDef.w * TILE, G.roomDef.h * TILE, dt);
+    // THE AFTERMATH IS THE FRAME THAT CARRIES THE INFORMATION (manga-direction
+    // §3): once it has thrown her, the camera holds both of them — where she
+    // landed, and it standing there looking — rather than chasing her off the
+    // crest and leaving the guardian to finish its beat off-screen
+    if (G.meet && G.boss && (G.meet.ph === 'watch' || G.meet.ph === 'coil'))
+      // a third of a screen short of the guardian: it stands at the right of
+      // the frame and she is wherever the throw put her, up to 800 px west of
+      // it (measured 480-600) — a true midpoint put it a hair past the edge
+      updateCam(G.boss.cx() - 330, (player.y + player.h / 2 + G.boss.cy()) / 2, G.roomDef.w * TILE, G.roomDef.h * TILE, dt);
+    else
+      updateCam(player.x + player.w / 2, player.y + player.h / 2, G.roomDef.w * TILE, G.roomDef.h * TILE, dt);
     updateParts(dt);
     for (const tt of G.toasts) tt.t -= dt;
     G.toasts = G.toasts.filter(tt => tt.t > 0);

@@ -1157,7 +1157,7 @@ class Player {
     // ...and the same hold covers the WAKING: the two seconds in which the
     // cradle lets go of her. A release you can walk out of halfway through is
     // a loading screen with a picture on it.
-    const held = !!G.bossEntry || !!G.wake || !!G.gateWalk;
+    const held = !!G.bossEntry || !!G.wake || !!G.gateWalk || !!G.meet;
     // MOTHER'S SONG mirrors your inputs for its few seconds — fight it
     const dirRaw = held ? 0 : (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
     const dir = (G.revT || 0) > 0 ? -dirRaw : dirRaw;
@@ -1176,7 +1176,9 @@ class Player {
       }
     } else {
       // horizontal — crisp starts and stops
-      const acc = (ice ? 1000 : 3000), fric = ice ? 260 : 2900;
+      // ...and the first meeting's swat carries her the length of the mound:
+      // ground friction would stop a 980 px/s throw inside a third of a second
+      const acc = (ice ? 1000 : 3000), fric = G.meet ? 1300 : ice ? 260 : 2900;   // 980²/(2·1300) ≈ 370 px of throw: she lands inside the aftermath frame
       if (dir !== 0 && !healing) {
         // TURN BOOST: reversing bites harder than accelerating. Pressing away
         // from current speed is always a correction the player already wants
@@ -7633,6 +7635,10 @@ class Boss {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    // THE FIRST MEETING drives this body by hand (js/game.js meetStep): no
+    // deck, no cooldowns, no hitboxes of its own — a staged sequence, not a
+    // fight she could have won
+    if (this.meet) return;
     // THE WEIGHT PASS (#93, the code half). Every guardian carries momentum
     // now, from one place, for every boss that exists or will ever exist:
     // a lean INTO acceleration, and a landing squash when a fall dies. The
@@ -7826,6 +7832,12 @@ class Boss {
         // each guardian gets its own theme when one has been scored, and the
         // shared boss score until then
         setMusic('boss_' + this.kind);
+        // THE REMATCH (underdog-arc §2.1): the corridor's sting again — the
+        // slam it arrived on — and the Braid marks that she came back for it
+        if (this.kind === 'glitch' && G.save && G.save.flags && G.save.flags.nfMeet) {
+          sfx('slam'); G.toast(t('nf_rematch'));
+          if (typeof brMark === 'function') brMark('rematch', G.roomId);
+        }
       }
       return;
     }
