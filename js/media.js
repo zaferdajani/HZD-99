@@ -68,6 +68,7 @@ const MEDIA_SRC = {
     alphaRoar: 'assets/characters/beasts/alpha_roar.webp',   // the stunning roar
     alphaHowl: 'assets/characters/beasts/alpha_howl.webp',   // calling the betas
     alphaLeap: 'assets/characters/beasts/alpha_leap.webp',   // the spiral, airborne
+    alphaCoil: 'assets/characters/beasts/alpha_coil.webp',   // the crouch before it: amber in the seams
     alphaClaw: 'assets/characters/beasts/alpha_claw.webp',   // the swipe
     alphaBite: 'assets/characters/beasts/alpha_bite.webp',   // the bite lands
     alphaClinch: 'assets/characters/beasts/alpha_clinch.webp', // ...and worries it

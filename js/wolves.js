@@ -337,7 +337,9 @@ const ALPHA_ART = {
   roar: { img: 'alphaRoar', k: 2.15, foot: 1 },
   broodcall: { img: 'alphaHowl', k: 2.30, foot: 1 },
   howl: { img: 'alphaHowl', k: 2.30, foot: 1 },
-  coil: { img: 'alphaRoar', k: 2.05, foot: 1 },
+  // its own plate since 2026-09-02: it borrowed the roar's, so the fight's two
+  // far-band tells and its mid-band tell were one drawing (ART_BIBLE §3.3)
+  coil: { img: 'alphaCoil', k: 1.95, foot: 1 },
   leap: { img: 'alphaLeap', k: 2.20, foot: 0 },
   clawwarn: { img: 'alphaClaw', k: 2.10, foot: 1 },
   claw: { img: 'alphaClaw', k: 2.10, foot: 1 },
@@ -418,6 +420,9 @@ function alphaStep(b, dt, px, py) {
 
   if (b.st === 'idle' || b.st === 'rest') {
     if (b.t <= 0) {
+      // a rest she was not hit through is an opening she had: the debt clears
+      if (!b.hitSince) b.denied = 0;
+      b.hitSince = false;
       // WHICH SKILL, AND WHY IT IS NOT SIMPLY "WHATEVER THE DISTANCE IS".
       //
       // The first cut read the current gap and picked the matching move. It
@@ -444,11 +449,21 @@ function alphaStep(b, dt, px, py) {
       const inBand = b.band === 0 ? adist <= ALPHA_KIT.close
                    : b.band === 1 ? adist > ALPHA_KIT.close && adist <= ALPHA_KIT.near
                    : adist > ALPHA_KIT.near;
-      if (!inBand && (b.reposN = (b.reposN || 0) + 1) < 3) {
-        b.t = 0.3; b.band = (b.band + 2) % 3;      // hold the band, walk to it
+      // Two beats of 0.2 s, not three of 0.3: the walk is OPEN time (it cannot
+      // hurt her while it paces), and tests/openings.cjs measured the claw's
+      // opening at 1.2 s with the old walk on top of its rest — a gift on the
+      // move that was meant to be the stingy one.
+      if (!inBand && (b.reposN = (b.reposN || 0) + 1) < 2) {
+        b.t = 0.2; b.band = (b.band + 2) % 3;      // hold the band, walk to it
         return alphaMove(b, dt, adist);
       }
       b.reposN = 0;
+      // THE COLD-DICE FLOOR (.claude/skills/boss-openings §4): three moves in
+      // a row that landed on her mean she has not had an opening she could
+      // use — the leap kicked off her, the bite held her, the roar froze her.
+      // The next move is the close pair (the shortest tell, and it always
+      // opens), and it waits an extra beat first so the opening is unmissable.
+      if ((b.denied || 0) >= 3) { b.denied = 0; b.band = 0; b.t = 0.7; return alphaMove(b, dt, adist); }
       b.alphaAlt = !b.alphaAlt;
       if (b.band === 0) { b.st = b.alphaAlt ? 'clawwarn' : 'bitewarn'; b.t = TELL_FAST; }
       else if (b.band === 1) { b.st = 'coil'; b.t = TELL_SWIPE; }
@@ -473,7 +488,7 @@ function alphaStep(b, dt, px, py) {
       const hb = { x: b.cx() + (b.face > 0 ? 0 : -reach), y: b.y + b.h * 0.2,
                    w: reach, h: b.h * 0.7 };
       const hit = !player.dead && player.iT <= 0 && aabb(hb, player);
-      if (hit) player.hurt(DF().edmg, b.cx(), 'alpha.' + b.st);
+      if (hit) { player.hurt(DF().edmg, b.cx(), 'alpha.' + b.st); b.denied = (b.denied || 0) + 1; b.hitSince = true; }
       sfx(b.st === 'claw' ? 'slash' : 'hit');
       cam.shake = Math.max(cam.shake, 3);
       burst(b.cx() + b.face * reach * 0.7, b.cy(), 8, '#ffb15a', 190, 0.4, 120, 2, true);
@@ -488,7 +503,10 @@ function alphaStep(b, dt, px, py) {
         b.vx = 0;
       }
     }
-    if (b.st !== 'clinch' && b.t <= 0) { b.st = 'rest'; b.t = bossRest(b, 0.62); }
+    // 0.45 of the guardian rest: measured (tests/openings.cjs) as ~600-900 ms
+    // of opening with the band walk on top — two hits, not the three a 0.62
+    // rest was handing out
+    if (b.st !== 'clinch' && b.t <= 0) { b.st = 'rest'; b.t = bossRest(b, 0.45); }
   } else if (b.st === 'clinch') {
     // it has her. A beat of stillness first, because a shake that starts on the
     // frame the jaws close reads as a glitch rather than as weight.
@@ -532,7 +550,7 @@ function alphaStep(b, dt, px, py) {
     // front of it is worth reading.
     if (!b.leapHit && !player.dead && player.iT <= 0 && aabb(hurtBoxOf(b), player)) {
       b.leapHit = true;
-      player.hurt(DF().edmg, b.cx(), 'alpha.leap');
+      player.hurt(DF().edmg, b.cx(), 'alpha.leap'); b.denied = (b.denied || 0) + 1; b.hitSince = true;
       // IT GOT WHAT IT CAME FOR, so it takes the space back: a kick off her
       // through the air, backwards, landing on its feet.
       b.st = 'recoil'; b.t = 0.75;
@@ -555,7 +573,7 @@ function alphaStep(b, dt, px, py) {
   } else if (b.st === 'broodcall') {
     b.windT = TELL_HEAVY;
     b.vx *= Math.pow(0.05, dt);
-    if (b.t <= 0) { b.st = 'howl'; b.t = 0.55; b.fired = false; }
+    if (b.t <= 0) { b.st = 'howl'; b.t = 0.45; b.fired = false; }
   } else if (b.st === 'howl') {
     if (!b.fired) {
       b.fired = true;
@@ -564,11 +582,11 @@ function alphaStep(b, dt, px, py) {
       if (typeof padRumble === 'function') padRumble(0.7, 0.5, 380);
       if (typeof roarWave === 'function') roarWave(b.cx(), b.cy() - b.h * 0.3, '#ff8a4a');
     }
-    if (b.t <= 0) { b.st = 'rest'; b.t = bossRest(b, 0.9); }
+    if (b.t <= 0) { b.st = 'rest'; b.t = bossRest(b, 0.6); }
   } else if (b.st === 'roarwarn') {
     b.windT = TELL_HEAVY;
     b.vx *= Math.pow(0.05, dt);
-    if (b.t <= 0) { b.st = 'roar'; b.t = 0.5; b.fired = false; }
+    if (b.t <= 0) { b.st = 'roar'; b.t = 0.4; b.fired = false; }
   } else if (b.st === 'roar') {
     if (!b.fired) {
       b.fired = true;
@@ -577,6 +595,7 @@ function alphaStep(b, dt, px, py) {
       // shockwave ring drawn on the floor. Outside it, nothing happens to you.
       const d = Math.hypot(px - b.cx(), py - b.cy());
       if (!player.dead && d < 260) {
+        b.denied = (b.denied || 0) + 1; b.hitSince = true;
         player.stunT = Math.max(player.stunT || 0, ALPHA_KIT.stun);
         player.vx = 0;
         if (typeof padRumble === 'function') padRumble(0.9, 0.8, 700);
@@ -585,7 +604,9 @@ function alphaStep(b, dt, px, py) {
       if (typeof roarWave === 'function') roarWave(b.cx(), b.cy() - b.h * 0.3, '#ffc24a');
       burst(b.cx(), b.cy(), 18, '#ffe6b8', 300, 0.6, 0, 3, true);
     }
-    if (b.t <= 0) { b.st = 'rest'; b.t = bossRest(b, 1.05); }
+    // THE ONE GIFT IS THE MISSED LEAP, not this: standing outside the ring is
+    // the read, and it pays one clean combo — measured 1.5 s before, 0.9 now
+    if (b.t <= 0) { b.st = 'rest'; b.t = bossRest(b, 0.6); }
   } else {
     b.st = 'rest'; if (b.t <= 0) b.t = bossRest(b, 1);
   }
@@ -631,6 +652,19 @@ function alphaPlate(b) {
 // HOW IT LOOKS. Nine plates composited the way the Eye's constructs are — bob,
 // lean, a swell on the wind-up — because a static plate slid around a room is
 // exactly what the guardians' leap was rebuilt to stop being.
+// one amber copy of each plate, made the first time its tell is drawn
+const ALPHA_TINT = {};
+function alphaTint(key, im) {
+  let cv = ALPHA_TINT[key];
+  if (cv) return cv;
+  if (!im || !im.naturalWidth) return null;
+  cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+  const x = cv.getContext('2d');
+  x.drawImage(im, 0, 0);
+  x.globalCompositeOperation = 'source-in'; x.fillStyle = TELL_COL; x.fillRect(0, 0, cv.width, cv.height);
+  ALPHA_TINT[key] = cv;
+  return cv;
+}
 function drawAlpha(c, b, cx, cy) {
   if (typeof mediaFetch === 'function')
     for (const k in ALPHA_ART) mediaFetch(ALPHA_ART[k].img);
@@ -684,6 +718,24 @@ function drawAlpha(c, b, cx, cy) {
   }
   if (b.hurtT > 0) c.globalAlpha *= 0.85;
   c.drawImage(im, -dw / 2, -dh / 2, dw, dh);
+  // THE RISING AMBER, ON A PLATE. Boss.draw paints the wind-up amber for the
+  // rigs, and the Alpha returns before that line — so four of its five tells
+  // wore no amber at all beyond the roar's floor ring, and the claw's warning
+  // was the claw's own plate held still. The plate is tinted once through a
+  // scratch canvas and laid on with 'lighter', climbing over the tell the way
+  // the rigs' glow does. Suppressed for the art probe's COLD states by the
+  // warn test itself: only a state whose name says a blow is coming gets it.
+  if (warn && !b.dead) {
+    const dur = b.windT > 0 ? b.windT
+      : b.st === 'coil' ? TELL_SWIPE : /roarwarn|broodcall/.test(b.st) ? TELL_HEAVY : TELL_FAST;
+    const kk = clamp(1 - (b.t || 0) / dur, 0, 1);
+    const tint = alphaTint(A.img, im);
+    if (tint) {
+      c.save(); c.globalCompositeOperation = 'lighter';
+      c.globalAlpha = 0.06 + 0.26 * kk;     // photographed at 0.68: a flat gold silhouette with no wolf left in it
+      c.drawImage(tint, -dw / 2, -dh / 2, dw, dh); c.restore();
+    }
+  }
   if (b.hurtT > 0) {
     c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
     c.drawImage(im, -dw / 2, -dh / 2, dw, dh); c.restore();

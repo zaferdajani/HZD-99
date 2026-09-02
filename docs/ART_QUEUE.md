@@ -445,6 +445,66 @@ sitting down cross-legged, pulling out a little screen, the Sonic look-at-
 the-camera. The mechanism (HERO_FIDGET, intro+loop) takes a second strip by
 adding an entry, not by new code.
 
+## 2ah. THE OPENINGS, MEASURED — Nullfang and the Alpha against the ladder ✔ SHIPPED 2026-09-02
+
+**The owner's law** (.claude/skills/boss-openings): *"a minimal opening ...
+obvious, but also still minimal ... there should always be an opening."* In
+this engine `opening_ms = recovery − 33`: under 250 fits nothing, 250–500 is
+the minimal default, 500–900 is generous, over 900 is a gift the fight may
+hand out ONCE, tied to its hardest bait.
+
+**It was never measured, so it was wrong in both directions.** Read off the
+timers, the swipe was "minimal"; driven against a scripted player
+(`tests/openings.cjs`, now in the suite), the swipe's cooldown handed out a
+1.2 s opening three times in four, the pounce 2.1–5.5 s (a quarter-second
+settle, a half-second idle, then 1.4–2.4 s of prowling before the coil was
+allowed to fire), and the dive never came at all — its clock only ran during
+the prowl. The Alpha's "deliberately not generous" claw measured 1.2 s: a 0.62
+rest with three 0.3 s band walks stacked on top.
+
+**The rung of every move, and what it opens for now** (ms, p75 across the
+stand-and-trade and moving scenarios, both phases):
+
+| fight | move | rung | tell | opening now | was |
+|---|---|---|---|---|---|
+| NULLFANG | swipe (×2 in phase 2) | 1 obvious | paw rises, 0.5 s | 367–717 | 400–2533 |
+| NULLFANG | pounce | 2 positional (it leads her) | the coil, 1.0 s | 683–933 | 2100–5483 |
+| NULLFANG | dive (spring→perch→dive) | 4 delayed | the perch flattens, last 0.45 s | 650–833 | never fired |
+| NULLFANG | roar | — damage-free (shove + a crawler) | 0.75 s | open time | |
+| NULLFANG | null crash (3 blind pounces → stunned) | 4 delayed | the field is the tell | **1.7–2.1 s — THE GIFT** | |
+| NULLFANG | daze (a hit-group breaks it) | reward, not a move | | 1.6 s + settle | |
+| THE ALPHA | claw / bite | 1 obvious | 0.35 s step-in | 350–667 | 467–1233 |
+| THE ALPHA | leap → miss → spin | 1 (the spin is the read) | the coil, 0.5 s | **1.6–1.9 s — THE GIFT** | same |
+| THE ALPHA | roar (stun radius) | 1, with a positional reward | 0.7 s + the floor ring | 667–817 | 817–1633 |
+| THE ALPHA | howl (summons) | — damage-free | 0.7 s | open time | |
+
+**What changed to get there** (`js/entities.js`, `js/wolves.js`):
+
+- NULLFANG's prowl is 0.4–0.8 s (was 1.4–2.4); the coil fires straight out of
+  the idle when she is in its band and the last move was not already a pounce
+  (recency debt — a pounce loop is one skill wearing a coat); the swipe
+  cooldown is 0.9–1.3 s (was 1.5–2.4) so the idle, not the cooldown, is the
+  opening; the landing settle after the dive matches the pounce's; the ambush
+  clock runs in the idle too, so the dive exists again.
+- The Alpha's claw and bite rest at 0.45 of the guardian rest (was 0.62), the
+  band walk is two 0.2 s beats (was three of 0.3), the roar is 0.4 s + a 0.6
+  rest (was 0.5 + 1.05), the howl 0.45 s + 0.6.
+- **The cold-dice floor** (§4 of the skill) in both fights: three landed blows
+  in a row (`denied`) buy her an extra 0.7–0.8 s beat of stillness and the
+  rung-1 move next — the swipe path for Nullfang, the close pair for the Alpha.
+  A rest she is not hit through clears the debt.
+
+**The tells that shared a drawing** (ART_BIBLE §3.3 / §3.5): the Alpha's coil
+borrowed the roar's plate, so the mid-band tell and the far-band tell were one
+picture; and drawAlpha returned before Boss.draw's rising amber, so four of its
+five wind-ups wore no amber beyond the roar's floor ring. Fired: `alpha_coil`
+(crouched, loaded, amber in the seams — `assets/source/beasts/alpha_coil.jpg`),
+and an amber wash that climbs over every named wind-up (`alphaTint`). The
+leap plate's amber corkscrew measured 18.5% amber on a strike, which is the
+one thing the hue law forbids, so it was repainted with the wolf's own red.
+`tests/artbible.cjs` now measures THE ALPHA: shapes, amber above rest on
+coil/clawwarn/roarwarn, no amber on rest/leap, feet on the floor.
+
 ## 2ag. THE MONUMENTS WERE ORPHANED FOR HALF A DAY ✔ REWIRED 2026-08-29
 
 **The owner, holding his own Higgsfield library up: "Why aren't you using any

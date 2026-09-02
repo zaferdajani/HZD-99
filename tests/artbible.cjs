@@ -47,6 +47,23 @@ const CAST = [
     grnd: ['stalk', 'crouch', 'swipe', 'daze'],
   },
   {
+    // the first mini-boss, plates not a rig; its tells are the five states
+    // alphaStep names, and the coil has its own plate since 2026-09-02 (it
+    // borrowed the roar's, and two tells that share a drawing are one tell)
+    kind: 'alpha', name: 'THE ALPHA', room: 'A10',
+    states: {
+      rest:     { vx: 0, vy: 0, t: 1 },
+      coil:     { vx: 0, vy: 0, t: 0.08, windT: 0.5 },
+      clawwarn: { vx: 0, vy: 0, t: 0.05, windT: 0.35 },
+      roarwarn: { vx: 0, vy: 0, t: 0.1, windT: 0.7 },
+      leap:     { vx: -480, vy: -300, t: 0.6 },
+    },
+    rest: 'rest',
+    pairs: [['rest', 'coil', 0.88], ['coil', 'roarwarn', 0.88], ['rest', 'leap', 0.85]],
+    tell: ['coil', 'clawwarn', 'roarwarn'], cold: ['rest', 'leap'],
+    grnd: ['rest', 'coil'],
+  },
+  {
     kind: 'brood', name: 'TALONHOST', room: 'B4',
     states: { idle: { vx: 0, vy: 0, t: 1 }, dive: { vx: -400, vy: 420, t: 0 } },
     rest: 'idle', pairs: [['idle', 'dive', 0.90]],
@@ -193,7 +210,9 @@ const TELL_RGB = [0xff, 0xc2, 0x4a];
       // so the literal never appears in the source and a source scan called
       // every one of them a typo. Check those against the kit that names them,
       // which is the game's own data rather than a second list here.
-      const src = (Boss.prototype.update || function () {}).toString();
+      // ...and the Alpha's live in alphaStep (js/wolves.js), not in the switch
+      const src = (Boss.prototype.update || function () {}).toString()
+        + (typeof alphaStep === 'function' ? alphaStep.toString() : '');
       const kit = (typeof MINI_KIT !== 'undefined' && MINI_KIT[S.kind]) || null;
       const built = kit ? [kit.close, kit.far, kit.close + 'warn', kit.far + 'warn'] : [];
       const bogus = Object.keys(S.states).filter(st =>
@@ -208,6 +227,15 @@ const TELL_RGB = [0xff, 0xc2, 0x4a];
         while (Date.now() - t1 < 20000 && !(mediaHas(MA.rest) && mediaHas(MA.warn)))
           await new Promise(r => setTimeout(r, 50));
         if (!mediaHas(MA.rest) || !mediaHas(MA.warn)) return { err: 'eye plates never loaded' };
+      }
+      // the Alpha is nine plates, fetched lazily like the Eye's
+      if (S.kind === 'alpha' && typeof ALPHA_ART !== 'undefined') {
+        const imgs = Object.values(ALPHA_ART).map(a => a.img);
+        imgs.forEach(k => mediaFetch(k, true));
+        const t2 = Date.now();
+        while (Date.now() - t2 < 30000 && !imgs.every(k => mediaHas(k)))
+          await new Promise(r => setTimeout(r, 50));
+        if (!imgs.every(k => mediaHas(k))) return { err: 'alpha plates never loaded' };
       }
       const sheet = BOSS_ART[S.kind];
       if (sheet) {

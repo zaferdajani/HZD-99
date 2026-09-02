@@ -7963,7 +7963,37 @@ class Boss {
         if (this.st === 'idle') {
           this.vx = 0; this.t -= dt;
           this.face = Math.sign(dist) || 1;
-          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(1.4, 2.4); this.roarCD = this.roarCD || rnd(4, 5.5); if (this.ambushCD == null) this.ambushCD = rnd(5, 8); }
+          // the ambush clock runs between moves too: with the prowl cut to
+          // under a second it spent 5% of the fight in stalk and the dive
+          // never came (measured 0 of 90 s in tests/openings.cjs)
+          if (this.ambushCD != null) this.ambushCD -= dt;
+          if (this.t <= 0) {
+            this.roarCD = this.roarCD || rnd(4, 5.5); if (this.ambushCD == null) this.ambushCD = rnd(5, 8);
+            // THE COLD-DICE FLOOR (.claude/skills/boss-openings §4): three
+            // blows in a row that landed mean she has had no opening she could
+            // use. It holds still one more beat — an idle is grounded, still,
+            // and reachable — and then takes the swipe path, never the coil.
+            if (!this.hitSince) this.denied = 0;
+            this.hitSince = false;
+            if ((this.denied || 0) >= 3) { this.denied = 0; this.t = 0.8; this.lastMove = 'pounce'; return; }
+            // THE PROWL IS SHORT NOW. tests/openings.cjs measured the opening
+            // after a pounce at 2.1-5.5 s: a quarter-second landing settle, a
+            // half-second idle, and then 1.4-2.4 s of walking before the coil
+            // was even allowed to fire. The doctrine (.claude/skills/
+            // boss-openings) puts a zone-A opening at one hit, generous at two,
+            // and a gift past 900 ms — one per fight, and this fight's gift is
+            // the null crash. So: the coil may fire straight out of the idle
+            // when she is in its band and the last move was not already a
+            // pounce (recency debt — a pounce loop is one skill wearing a coat),
+            // and the prowl in front of everything else is 0.4-0.8 s.
+            const inBand = adist > 170 && adist < 470;
+            if (inBand && this.lastMove !== 'pounce') {
+              this.st = 'crouch'; this.t = this.phase === 2 ? 0.9 : 1.0;
+              this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = 'pounce';
+            } else {
+              this.st = 'stalk'; this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.4, 0.8);
+            }
+          }
         } else if (this.st === 'stalk') {
           // low prowl toward you, patient, gathering pounce distance
           this.face = Math.sign(dist) || 1;
@@ -7989,16 +8019,19 @@ class Boss {
             if (per.length) {
               per.sort((a2, b2) => Math.abs(a2[0] - this.cx()) - Math.abs(b2[0] - this.cx()));
               this.perch = per[0];
-              this.st = 'springwarn'; this.t = 0.42; this.vx = 0;
+              this.st = 'springwarn'; this.t = 0.42; this.vx = 0; this.lastMove = 'dive';
             }
             this.ambushCD = rnd(this.phase === 2 ? 6 : 9, this.phase === 2 ? 9 : 12);
           } else if (adist < 130 && this.swipeCD <= 0) {
             // the same trap FURNACE's slam was in: gated on range alone, so a
             // player who stays in melee sees one telegraph and nothing else
-            this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0;
-            this.swipeCD = rnd(1.5, 2.4);
+            this.st = 'swipewarn'; this.t = TELL_SWIPE; this.vx = 0; this.lastMove = 'swipe';
+            // 0.9-1.3 s, was 1.5-2.4: measured as a 1.2 s opening after every
+            // swipe (p75), which is a gift on the fight's commonest move. The
+            // idle below is the opening; the cooldown only has to outlast it.
+            this.swipeCD = this.phase === 2 ? rnd(0.7, 1.0) : rnd(0.9, 1.3);
           }
-          else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(5.5, 7); }
+          else if (this.roarCD <= 0) { this.st = 'roar'; this.t = 1.25; this.vx = 0; this.roared = false; this.roarCD = rnd(5.5, 7); this.lastMove = 'roar'; }
           else if (this.t <= 0 && adist > 170 && adist < 470) {
             // THE COIL IS THE FIGHT'S BIGGEST SENTENCE, so it gets a second.
             //
@@ -8016,9 +8049,9 @@ class Boss {
             // beastCoilFx. The difficulty is paid for on the other side: the
             // leap leads her now, and in phase two it lands and goes again.
             this.st = 'crouch'; this.t = this.phase === 2 ? 0.9 : 1.0;
-            this.vx = 0; this.coilTick = 0; this.coilFlashed = false;
+            this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = 'pounce';
           }
-          else if (this.t <= 0) this.t = rnd(1.1, 1.9);
+          else if (this.t <= 0) this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.4, 0.8);
         } else if (this.st === 'swipewarn') {
           // the paw rises — that is your tell
           this.vx = 0; this.t -= dt; this.windT = 0.3;
@@ -8031,7 +8064,7 @@ class Boss {
             const box = { x: this.cx() + (f > 0 ? 6 : -114), y: this.y - 24, w: 108, h: this.h + 28 };
             burst(this.cx() + f * 66, this.cy(), 10, '#b06aff', 260, 0.35, 150, 3, true);
             sfx('atk');
-            if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st);
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
           }
           if (this.t <= 0) {
             // a lion swipes twice when it is angry
@@ -8045,7 +8078,7 @@ class Boss {
             // with a full tell. The pressure comes back as a shorter gap
             // afterwards, which is the lever that does not cost readability.
             if (this.phase === 2 && !this.swiped2) { this.swiped2 = true; this.st = 'swipewarn'; this.t = TELL_SWIPE; }
-            else { this.swiped2 = false; this.st = 'idle'; this.t = this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.5, 0.9); }
+            else { this.swiped2 = false; this.st = 'idle'; this.t = this.phase === 2 ? rnd(0.35, 0.6) : rnd(0.45, 0.7); }
           }
         } else if (this.st === 'crouch') {
           // flat to the ground, trembling with intent — then the pounce
@@ -8141,7 +8174,7 @@ class Boss {
               burst(wx, this.y + this.h - 10, 12, '#b06aff', 220, 0.5, 260, 3, true);
             }
           }
-          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(1.6, 2.6); }
+          if (this.t <= 0) { this.st = 'stalk'; this.t = rnd(0.6, 1.0); }   // was 1.6-2.6: a two-second lull after a shove
         } else if (this.st === 'springwarn') {
           // crouched, eyes up at the perch — dust already rising off its back
           this.vx = 0; this.vy = 0; this.t -= dt; this.windT = 0.3;
@@ -8201,7 +8234,7 @@ class Boss {
           this.vx = (this.tx - this.sx) / 0.42; this.vy = 600;
           if (chance(0.6)) addPart(this.cx() - this.face * 26, this.cy() + rnd(-16, 16), -this.face * rnd(60, 130), rnd(-60, 30), 0.3, '#b06aff', 2.5, 0, true);
           if (u2 >= 1) {
-            this.st = 'recover'; this.t = this.phase === 2 ? 0.34 : 0.45;
+            this.st = 'recover'; this.t = this.phase === 2 ? 0.22 : 0.30;   // measured 1.0 s at 0.45, 917 ms at 0.36 — the ceiling is 900
             cam.shake = 10; sfx('slam');
             for (let i = 0; i < 12; i++)
               addPart(this.cx() + rnd(-this.w * 0.6, this.w * 0.6), this.y + this.h - 4,
@@ -8220,13 +8253,15 @@ class Boss {
               addPart(this.cx() + rnd(-20, 20), this.y + this.h - 6,
                 rnd(-240, 240), rnd(-260, -140), 0.5, '#8a8a96', 2.5, 700, true);
             const box = { x: this.cx() - 92, y: this.y - 8, w: 184, h: this.h + 22 };
-            if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st);
+            if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
             if (this.phase === 2 && typeof G.addRing === 'function') G.addRing(this.cx(), this.y + this.h - 8);
           }
         } else if (this.st === 'recover') {
           // a beat of stillness after the landing — your window
           this.vx *= 0.8; this.t -= dt;
-          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.4, 0.7); }
+          // settle + idle is the window: 0.36 + 0.35..0.55 = the three-hit
+          // combo (0.72 s) and no more — the prowl after it no longer counts
+          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.35, 0.55); }
         } else if (this.st === 'ringcharge') {
           this.vx = 0; this.nwT -= dt;
           const kk = 1 - clamp(this.nwT / 0.7, 0, 1);
@@ -8297,7 +8332,7 @@ class Boss {
             addPart(this.cx() + rnd(-24, 24), this.y + this.h - rnd(4, 12),
               rnd(-30, 30), rnd(-80, -35), rnd(0.55, 0.8), '#8f846f', rnd(3.5, 5.5), 30);
           const box = { x: this.cx() - 80, y: this.y, w: 160, h: this.h + 8 };
-          if (!player.dead && player.iT <= 0 && aabb(box, player)) player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st);
+          if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
           if (this.nullSeq > 0) {
             this.nullSeq--;
             if (this.nullSeq > 0) { this.st = 'nullhop'; this.t = 0.16; }
