@@ -110,7 +110,7 @@ tuck against the sheet's arms-wide release and comes back 27% out. It
 reproduces claw_1's hand-derived constant to four decimals, which is how the
 method was checked before the other three trusted it.
 
-## 2x. THE TRANSITION STRIPS — the rest of the body, in census order ✱ OPEN
+## 2x. THE TRANSITION STRIPS — the rest of the body, in census order ✔ SHIPPED 2026-09-02
 
 **The owner's ask:** *"How can you transform the game into the same quality of
 motion done by the studio of those games? ... So to achieve double pleasure of
@@ -177,6 +177,53 @@ in Private workspace"*. Start frames are prepped and uploaded, the prompts are
 written, the code that consumes them is in and tested. **Only the owner can
 clear this.** Everything downstream of it is one `vidstrip` cut and one line in
 `HERO_TRANS` per strip.
+
+### ✔ ALL FIVE ARE FIRED, KEYED AND DRAWN (2026-09-02)
+
+Every row of the table above has its strip in `assets/characters/hero/` and its
+line in `js/entities.js`, photographed from the live `Player.draw` in all
+fourteen moments (idle, three landings, both skid cells, dash both ways, rise,
+apex, fall, three wall clings both ways) before it was committed:
+
+| strip | cells | k (tools/swingk.cjs, vs sheet cell) | how it was made |
+|---|---|---|---|
+| `trans_land` | 12 | 1.049 vs `land` | video, from her own land plate — recover from the squash to standing |
+| `trans_dash` | 8 | 1.063 vs `dash` | video, the run-lean burst, windowed to its last 2.6 s |
+| `trans_skid` | 2 | 0.766 vs `skid` | two STILLS: the brace, then the front-on whip-round |
+| `trans_air` | 3 | 0.735 vs `apex` | three STILLS: takeoff stretch, tuck, the reach for the ground |
+| `trans_wall` | 3 @ 5 fps | 0.744 vs `wall_cling` | three STILLS: cling, slip (cape up), catch |
+
+Masters: `assets/source/takes/trans_{dash,land}.webm`, `assets/source/hero/trans/*.jpg`.
+
+**What twenty-one video takes taught, so nobody fires them again:**
+
+- **A held or airborne moment is a STILL, not a film.** Every video take of
+  the wall slide (five, three recipes) painted her a POLE to hold — a visible
+  bar at the frame edge, refused by the gate for touching the border and
+  unusable anyway. Every jump take (six) either stood her still for three of
+  its five seconds and jumped in the last half-second, or hovered the apex
+  plate without moving. Starting from her own state plate made the take a
+  slow drift of that plate with the plate's corner artefacts baked in. Three
+  image plates from the canon element, in strict profile, came back right the
+  first time, in one batch, and the keyer cut them through the same
+  `vidstrip` path (a 4 fps concat of the stills) so the strips are built like
+  every other strip.
+- **A grounded continuous move IS a film**: the dash and the landing came out
+  of video clean, because the body travels through the whole take.
+- **The generator paints a floor when she lands.** The land take carried a
+  near-black floor slab that the 26/255 key kept, so the gate refused it for
+  touching the border. It was cut at 64 and the gate grew `--key PCT` so the
+  measurement uses the key that will actually cut the take — never lower the
+  gate, raise the key and say so.
+- **The wall strip is NOT flipped by facing** (the fidget is). She faces the
+  wall, the body transform already mirrors with her facing, and the plate has
+  the wall at her right; cancelling the flip put the wall on the wrong side
+  for every left-hand slide.
+- The turnaround (skid) is two cells over 0.14 s: a brace, then the front-on
+  twist. A third cell would want a `skid0` longer than the physics gives it.
+
+Feel is measured alongside: `tests/feel.cjs` — run answers in 1 frame, jump in
+1, hit-stop 3 frames, camera reversal 1. The strip layer changes none of them.
 
 ## 2ad. FOUR OF THE FIVE ZONE GATES ARE PARKED AGAINST A WALL ✱ MEASURED 2026-08-25 — for the code session
 

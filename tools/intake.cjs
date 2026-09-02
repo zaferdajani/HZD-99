@@ -192,11 +192,16 @@ const pageScript = () => {
 (async () => {
   const argv = process.argv.slice(2);
   let MODE = 'auto', KIND = 'stills';
-  let FROM = null, TO = null, WANT = 12, files = [];
+  let FROM = null, TO = null, WANT = 12, KEY = 12, files = [];
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--from') FROM = parseFloat(argv[++i]);
     else if (argv[i] === '--to') TO = parseFloat(argv[++i]);
     else if (argv[i] === '--want') WANT = parseInt(argv[++i], 10);
+    // --key N: the luminance distance (percent) that separates her from the
+    // field, i.e. the same key tools/vidstrip.cjs will cut with (its thr/2.55).
+    // A generator that paints a near-black floor under her is keyed above it,
+    // and the gate must measure the take with the key that will actually cut it.
+    else if (argv[i] === '--key') KEY = parseFloat(argv[++i]);
     else if (argv[i] === '--bg') MODE = 'bg';
     else if (argv[i] === '--cutout') MODE = 'cutout';
     else if (argv[i] === '--dir') {
@@ -206,7 +211,7 @@ const pageScript = () => {
     } else files.push(argv[i]);
   }
   if (!files.length) {
-    console.error('usage: intake.cjs <clip|images...> [--from S --to S --want N] [--dir folder]');
+    console.error('usage: intake.cjs <clip|images...> [--from S --to S --want N --key PCT] [--dir folder]');
     process.exit(2);
   }
   const isVid = /\.(mp4|webm)$/i.test(files[0]);
@@ -228,7 +233,7 @@ const pageScript = () => {
     const tmp = path.join(process.cwd(), base);
     let copied = false;
     if (!fs.existsSync(tmp)) { fs.copyFileSync(files[0], tmp); copied = true; }
-    const r = await page.evaluate(async ({ src, FROM, TO, WANT, BAR }) => {
+    const r = await page.evaluate(async ({ src, FROM, TO, WANT, BAR, KEY }) => {
       const v = document.createElement('video');
       v.muted = true; v.playsInline = true; v.src = src;
       await new Promise((ok, no) => { v.onloadeddata = ok; v.onerror = () => no(new Error('cannot decode')); });
@@ -266,7 +271,7 @@ const pageScript = () => {
           // of it, and would have refused a good take for the wrong reason.
           let on = 0;
           const lit = (x, y) => { const j = ((y * W + x) << 2);
-            return Math.abs((0.2126 * d[j] + 0.7152 * d[j + 1] + 0.0722 * d[j + 2]) / 2.55 - m) > 12; };
+            return Math.abs((0.2126 * d[j] + 0.7152 * d[j + 1] + 0.0722 * d[j + 2]) / 2.55 - m) > KEY; };
           for (let y = 0; y < H; y += 3) for (let x = 0; x < W; x += 3) if (lit(x, y)) on++;
           cover = on / ((W / 3) * (H / 3));
           for (let x = 0; x < W; x += 3)
@@ -292,14 +297,14 @@ const pageScript = () => {
                distinct: best.n, thr: best.thr,
                stillPct: +(still / (cand.length - 1) * 100).toFixed(0),
                field, cover: +cover.toFixed(3), edge, steps: cand.length };
-    }, { src: 'http://127.0.0.1:8220/' + base, FROM, TO, WANT, BAR });
+    }, { src: 'http://127.0.0.1:8220/' + base, FROM, TO, WANT, BAR, KEY });
     if (copied) fs.unlinkSync(tmp);
 
     console.log('  clip        ' + path.basename(files[0]) + '   ' + r.W + 'x' + r.H + '  ' + r.D + 's');
     console.log('  window      ' + r.window[0] + ' – ' + r.window[1] + 's   (' + r.steps + ' moments looked at)');
     console.log('  DISTINCT    ' + r.distinct + ' different pictures, found at a ' + r.thr + '% selector');
     console.log('  still       ' + r.stillPct + '% of the clip is the same picture as the moment before it');
-    console.log('  field       border luminance ' + r.field.lum + ', variation ' + r.field.sd);
+    console.log('  field       border luminance ' + r.field.lum + ', variation ' + r.field.sd + (KEY !== 12 ? '   (keyed at ' + KEY + '%)' : ''));
     console.log('  subject     ' + (r.cover * 100).toFixed(1) + '% of frame' + (r.edge ? '   TOUCHES THE BORDER' : ''));
     console.log('');
     if (r.distinct < BAR.minDistinct) faults.push('distinct');
@@ -318,7 +323,7 @@ const pageScript = () => {
     // A SET OF STILLS: every one has to differ from every OTHER, not just from
     // its neighbour — a batch that came back with two near-identical poses is
     // the same defect wearing a different hat.
-    const r = await page.evaluate(async ({ files, BAR }) => {
+    const r = await page.evaluate(async ({ files, BAR, KEY }) => {
       const sigs = [], meta = [];
       for (const f of files) {
         const im = new Image();
@@ -341,7 +346,7 @@ const pageScript = () => {
         let on = 0, edge = false;
         // either direction: see the note in the clip branch
         const lit = (x, y) => { const j = ((y * W + x) << 2);
-          return Math.abs((0.2126 * d[j] + 0.7152 * d[j + 1] + 0.0722 * d[j + 2]) / 2.55 - m) > 12; };
+          return Math.abs((0.2126 * d[j] + 0.7152 * d[j + 1] + 0.0722 * d[j + 2]) / 2.55 - m) > KEY; };
         for (let y = 0; y < H; y += 3) for (let x = 0; x < W; x += 3) if (lit(x, y)) on++;
         for (let x = 0; x < W; x += 3) if (lit(x, 2) || lit(x, H - 3)) edge = true;
         for (let y = 0; y < H; y += 3) if (lit(2, y) || lit(W - 3, y)) edge = true;
@@ -369,7 +374,7 @@ const pageScript = () => {
           pairs.push({ i, j, d: +window.__dist(sigs[i], sigs[j]).toFixed(1) });
       pairs.sort((a, b) => a.d - b.d);
       return { meta, pairs: pairs.slice(0, 6), worst: pairs[0] };
-    }, { files: files.map(f => path.resolve(f)), BAR });
+    }, { files: files.map(f => path.resolve(f)), BAR, KEY });
 
     // WHICH KIND OF PICTURE IS THIS, and why the caller has to say.
     //

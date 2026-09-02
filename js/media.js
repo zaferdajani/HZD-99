@@ -316,6 +316,14 @@ const MEDIA_SRC = {
     heroYawBare: 'assets/characters/hzd_8yaw_bare.webp',
     // THE IMPATIENT WAIT — 16 cells: 0-6 cross the arms, 7-15 bounce and tap.
     heroFidget: 'assets/characters/hero/fidget.webp',
+    // THE TRANSITION STRIPS (ART_QUEUE §2x, census order) — the in-betweens
+    // the body was missing: the jump arc, the landing, the skid turn, the
+    // wall slide, the dash. Each is a content-cut strip from a 5s take.
+    transAir: 'assets/characters/hero/trans_air.webp',
+    transLand: 'assets/characters/hero/trans_land.webp',
+    transSkid: 'assets/characters/hero/trans_skid.webp',
+    transWall: 'assets/characters/hero/trans_wall.webp',
+    transDash: 'assets/characters/hero/trans_dash.webp',
     heroBackA: 'assets/characters/hero/backwalk_a.webp',
     heroBackB: 'assets/characters/hero/backwalk_b.webp',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.webp',

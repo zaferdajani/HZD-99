@@ -745,6 +745,14 @@ const HERO_DH = 60, HERO_FLOOR = 6;
 // land before the art does.
 const HERO_TRANS = {
   // st: { key, cells, k, t: p => timer, t0: p => duration }
+  // A cells count of 0 means the strip is not fired yet: drawRoboTrans skips
+  // it and the pose cell draws, which is the contract everything here ships
+  // under. The counts are filled in by the cut (tools/vidstrip.cjs auto:N).
+  // k is measured by tools/swingk.cjs against the sheet cell of the same
+  // moment (land 8, skid 10, dash 9) so she keeps her size across the change.
+  land: { key: 'transLand', cells: 12, k: 1.049, t: p => p.landT, t0: p => p.land0 || 0.12 },
+  skid: { key: 'transSkid', cells: 2, k: 0.766, t: p => p.skidT, t0: p => p.skid0 || 0.14 },
+  dash: { key: 'transDash', cells: 8, k: 1.063, t: p => p.dashT, t0: p => p.dash0 || 0.16 },
   //
   // WAITING ON ART (docs/ART_QUEUE.md §2x), in census order:
   //   land   fall>land>idle|run, the impact — 8/min and the most conspicuous
@@ -758,7 +766,10 @@ const HERO_TRANS = {
 // the middle cells are the hang, the last are the reach for the ground — which
 // makes the arc read as one move at any jump height, including the clipped ones
 // a variable-height jump produces. 53 pose changes a minute collapse into it.
-let HERO_AIR_STRIP = null;     // { key: 'transAir', cells: 6, k: 1, up: 770, down: 700 }
+// Three plates — takeoff stretch, apex tuck, the reach for the ground — fired
+// as stills (2026-09-02) after eleven video takes either started the jump in
+// the last half-second or never left the ground. k against the sheet's apex.
+let HERO_AIR_STRIP = { key: 'transAir', cells: 3, k: 0.735, up: 770, down: 700 };
 // THE IMPATIENT WAIT (owner, 2026-08-27: "like a cute kid waiting anxiously
 // for something from a grown-up... cross their hands, tapping one leg on the
 // floor, and saying Yalla!"). Not a transition and not a pose: a LOOP that
@@ -770,6 +781,9 @@ let HERO_AIR_STRIP = null;     // { key: 'transAir', cells: 6, k: 1, up: 770, do
 // intro 7: cells 0-6 are the arms crossing — played once — and 7-15 are the
 // bounce-and-tap she holds for as long as she is ignored.
 let HERO_FIDGET = { key: 'heroFidget', cells: 16, k: 0.78, fps: 9, intro: 7 };
+// Cling, slip, catch — three stills at 5 fps, because every video take of a
+// wall slide painted her a pole to hold. Authored with the wall at her RIGHT.
+let HERO_WALL_STRIP = { key: 'transWall', cells: 3, k: 0.744, fps: 5 };
 const FIDGET_AFTER = 6;        // seconds of stillness before she runs out of patience
 // THE CELL COUNT IS HOW MANY DIFFERENT PICTURES THE TAKE ACTUALLY HOLDS.
 //
@@ -1045,6 +1059,7 @@ class Player {
       // slow weight shifts — she never stands like a statue
       const idle = this.on && Math.abs(this.vx) < 30 && !this.swingVis && this.dashT <= 0
         && this.healT <= 0 && this.landT <= 0;
+      this.wallT = (this.wallSlide !== 0 && !this.on) ? (this.wallT || 0) + dt : 0;
       if (idle) {
         this.idleT += dt;
         this.earTwitchIn = (this.earTwitchIn == null ? rnd(1.0, 2.6) : this.earTwitchIn) - dt;
@@ -1249,7 +1264,7 @@ class Player {
         const dn = Math.hypot(ddx, ddy) || 1;
         this.dashVX = ddx / dn * 940;
         this.dashVY = ddy / dn * 880;
-        this.dashT = 0.16 * (hasCrest('sprint') ? 1.2 : 1);
+        this.dashT = 0.16 * (hasCrest('sprint') ? 1.2 : 1); this.dash0 = this.dashT;
         this.dashCD = 0.45; this.vx = this.dashVX; this.vy = this.dashVY;
         this.dashTrailT = 0.03;   // first afterimage drops just behind her
         this.healT = 0; sfx('dash');
@@ -1264,7 +1279,7 @@ class Player {
     this.jetT = Math.max(0, this.jetT - dt);
     this.skidT = Math.max(0, this.skidT - dt);
     if (this.on && dir !== 0 && Math.sign(this.vx) === -dir && Math.abs(this.vx) > 200) {
-      this.skidT = 0.14;
+      this.skidT = 0.14; this.skid0 = 0.14;
       if (chance(0.5)) addPart(this.x + this.w / 2 + dir * 10, this.y + this.h, dir * rnd(40, 110), rnd(-80, -20), 0.35, '#9fb8c8', 2.5, 600);
     }
     if (this.on && Math.abs(this.vx) > 280 && chance(0.1))
@@ -2240,8 +2255,19 @@ class Player {
       const cell = n < F.cells ? n : F.intro + ((n - F.cells) % loopN);
       if (drawStripCell(c, F.key, cell, F.cells, 0, HERO_FLOOR, HERO_DH * (F.k || 1), this.faceVis < 0)) return true;
     }
+    // THE WALL SLIDE IS HELD, NOT TIMED: it loops on its own clock for as
+    // long as she clings, the way the fidget does, so it is not in the table.
+    const Wl = HERO_WALL_STRIP;
+    if (Wl && Wl.cells && st === 'wall_cling') {
+      const cell = Math.floor((this.wallT || 0) * (Wl.fps || 10)) % Wl.cells;
+      // NOT flipped here: the body transform already mirrors with her facing,
+      // and on a wall she faces the wall — so the plate's wall-at-right lands
+      // on whichever side the wall is. (The fidget cancels that flip because
+      // it is a front view; this is a profile and must keep it.)
+      if (drawStripCell(c, Wl.key, cell, Wl.cells, 0, HERO_FLOOR, HERO_DH * (Wl.k || 1), false)) return true;
+    }
     const T = HERO_TRANS[st];
-    if (!T) return false;
+    if (!T || !T.cells) return false;
     const t = T.t(this), t0 = T.t0(this);
     if (!(t > 0) || !(t0 > 0)) return false;
     const p = clamp(1 - t / t0, 0, 0.999);

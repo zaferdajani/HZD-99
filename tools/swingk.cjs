@@ -20,7 +20,11 @@
 //   node tools/swingk.cjs [name=strip.png:cell] ...
 //     with no arguments it measures the four shipped strips.
 const { chromium } = require('playwright'); const fs = require('fs');
-const CELLMAP = { claw_1: 13, claw_2: 14, finisher: 15, burst: 17 };
+// ...and the transition strips (js/entities.js HERO_TRANS / HERO_AIR_STRIP /
+// HERO_WALL_STRIP), each measured against the sheet cell of the same moment:
+// the air arc's reference is its APEX cell against the sheet's apex.
+const CELLMAP = { claw_1: 13, claw_2: 14, finisher: 15, burst: 17,
+                  land: 8, dash: 9, skid: 10, wall: 11, air: 6 };
 // [file, which cell shows the SAME pose as the sheet cell it replaces]. The
 // indices moved when the strips were re-cut at the film's own frame rate —
 // a reference cell is a moment in the move, not a fixed slot, so it has to be
