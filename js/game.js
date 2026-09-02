@@ -1884,9 +1884,41 @@ function brightIdx() {
 // Default 3, not the middle. The middle is a compromise between a screen I can
 // see and one I cannot, and the one I cannot is the one being played on.
 let BRIGHT_SET = 3;
+// THE LIFT IS ADAPTIVE NOW (2026-08-30). It was written for frames whose
+// median pixel was zero, and it fixed them. Then the painted plates were freed
+// from the grade and the lit rooms arrived on screen at a mean of 60-70 RAW —
+// and the same constant 46 was still being screened over them, which is the
+// grey film the critic's pass photographed in every room: out = 46 + 0.82*raw
+// turns a warm workshop into milk. So the floor is now a function of how dark
+// the frame actually is: a cave at raw 10 keeps the full lift (cavedark's
+// numbers are unchanged), a lit room at raw 66 gets almost none, and the
+// setting still scales the ceiling. Measured every half second off a 24x14
+// downsample of the world — one small readback, not one per frame — and
+// eased so a room change never pops.
+let LIFT_K = 1, LIFT_NEXT = 0, LIFT_CV = null;
+const LIFT_LIT = 72, LIFT_SPAN = 48;   // raw mean >= 72: no lift; <= 24: full
+function liftProbe() {
+  const now = performance.now();
+  if (now < LIFT_NEXT) return;
+  LIFT_NEXT = now + 500;
+  try {
+    if (!LIFT_CV) { LIFT_CV = document.createElement('canvas'); LIFT_CV.width = 24; LIFT_CV.height = 14; }
+    const x = LIFT_CV.getContext('2d', { willReadFrequently: true });
+    x.drawImage(c.canvas, 0, 0, 24, 14);
+    const d = x.getImageData(0, 0, 24, 14).data;
+    let L = 0;
+    for (let i = 0; i < d.length; i += 4) L += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    L /= 24 * 14;
+    const want = clamp((LIFT_LIT - L) / LIFT_SPAN, 0, 1);
+    LIFT_K += (want - LIFT_K) * 0.35;
+  } catch (e) { LIFT_K = 1; }             // a tainted canvas keeps the old behaviour
+}
 function drawScreenLift() {
-  const g = BRIGHT_STEPS[brightIdx()];
-  if (!g) return;
+  const g0 = BRIGHT_STEPS[brightIdx()];
+  if (!g0) return;
+  liftProbe();
+  const g = Math.round(g0 * LIFT_K);
+  if (g < 2) return;
   c.save();
   c.globalCompositeOperation = 'screen';
   c.fillStyle = 'rgb(' + g + ',' + g + ',' + g + ')';
