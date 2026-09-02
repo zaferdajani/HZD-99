@@ -53,6 +53,7 @@ const chk = (name, ok, detail) => {
 
     // WHERE THE FIGURE ACTUALLY IS. Not the collision box — the drawn cell,
     // scaled by this character's own atlas k, which is the whole point.
+    const out = {};
     const s = (G.statics || []).find(n => n.type === 'npc' && n.extra === 'ratchet');
     if (!s) return { err: 'no ratchet in A0B' };
     const AK = typeof atlasOf === 'function' && atlasOf(s.extra);
@@ -67,8 +68,35 @@ const chk = (name, ok, detail) => {
     const sw = Math.max(8, Math.round(s.w * rs));
     const sh = Math.max(8, Math.round((feet - bodyTop) * 0.44 * rs));
 
+    // THE SCREEN LIFT SETTLES BEFORE ANYTHING IS COMPARED. It is adaptive now
+    // (game.js drawScreenLift): it measures how dark the frame is every half
+    // second and eases the floor toward what that frame needs, starting from
+    // full lift. Two samples taken 2.6s apart therefore sit at different
+    // points on that ramp — measured 0.41, then 0.307, then 0.289 for the same
+    // room — and this harness read the 48 levels between them as the beacon
+    // washing the body out. Same lesson cavedark learned, and the reason to
+    // wait on the VALUE rather than on a duration: the ease takes about eight
+    // seconds, a guess would have to be re-guessed the next time it is tuned,
+    // and this asks the number itself whether it has stopped moving.
+    // Polled SLOWER than the thing being polled, and stable three times over.
+    // A 300 ms poll against a 500 ms probe reads the same number twice for the
+    // simple reason that nothing has run in between, and calls that
+    // convergence — which is how a first attempt at this exited at the top of
+    // the ramp and made the gap worse.
+    const settleLift = async () => {
+      let prev = null, still = 0;
+      for (let i = 0; i < 40; i++) {
+        await settle(700);
+        const k = (typeof LIFT_K === 'number') ? LIFT_K : 1;
+        still = (prev != null && Math.abs(k - prev) < 0.004) ? still + 1 : 0;
+        prev = k;
+        if (still >= 3) return k;
+      }
+      return prev == null ? 1 : prev;
+    };
+    out.liftK = await settleLift();
     const sample = async () => {
-      await settle(2500);
+      await settle(600);
       const d = g.getImageData(sx, sy, sw, sh).data;
       let sum = 0, sq = 0, n = 0;
       for (let i = 0; i < d.length; i += 4) {
@@ -83,7 +111,7 @@ const chk = (name, ok, detail) => {
     const o = invCount; window.invCount = invCount = (k) => k === 'batt' ? 0 : o(k);
     const without = await sample();
     window.invCount = invCount = o;
-    return { kk, bodyTop: +bodyTop.toFixed(1), boxTop: s.y, feet,
+    return { kk, liftK: +(out.liftK || 0).toFixed(3), bodyTop: +bodyTop.toFixed(1), boxTop: s.y, feet,
       headAbove: +(s.y - bodyTop).toFixed(1),
       rect: { sx, sy, sw, sh }, withMarker, without,
       lift: +(withMarker.mean - without.mean).toFixed(1),
