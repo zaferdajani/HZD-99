@@ -140,6 +140,18 @@ const { chromium } = require('playwright');
     out.lairClosed = !gateHere();
     G.save.flags.bossGlitch = 1;
     out.lairOpen = !!gateHere();
+    // THE EVOLUTION CARD IS SPENT BEFORE SHE WALKS, THE WAY PLAY SPENDS IT.
+    // Setting bossGlitch by hand is a shortcut past a whole guardian fight,
+    // and it raises the evolution tier 0 -> 1 as a side effect. In play that
+    // rise is consumed at the kill: onBossDead calls checkEvo with the card
+    // held, the cut plays, the card is shown, and only later does she walk to
+    // the grotto with the tier already banked. Here the rise was still pending
+    // when the walk began, so checkEvo opened the card on the first update,
+    // DIALOG replaced PLAY, and the walk stopped being simulated - 201 frames
+    // and still in A4. Consume it here so the shortcut leaves the same state
+    // the long way round would have.
+    if (typeof checkEvo === 'function') checkEvo();
+    G.item = null; G.dialog = null; G.state = 'PLAY';
     out.caveMarked = !!(ROOMS[dA4.to] && ROOMS[dA4.to].cave);
     out.enterGrotto = gateEnter();
     let n3 = 0;
