@@ -35,16 +35,26 @@ const { chromium } = require('playwright');
     // every room clean, which is exactly what it did.
     //
     // So the arc is integrated the way Player.update integrates it — the same
-    // asymmetric gravity, the same hang under 90 px/s, the same fixed step —
-    // and what comes out is the honest envelope: how high she can be at each
-    // horizontal offset. Run speed is the base 340, no crest, no relic.
-    const V = 770, GU = 2150, GD = 3050, RUN = 340, DT = 1 / 30;
+    // asymmetric gravity, the same soft band around the apex, the same fixed
+    // step — and what comes out is the honest envelope: how high she can be at
+    // each horizontal offset. Run speed is the base 340, no crest, no relic.
+    //
+    // THESE NUMBERS ARE THE GAME'S AND MUST BE KEPT THAT WAY. They were copied
+    // once and then the jump grew underneath them: JUMP_V went 770 -> 920 and
+    // JUMP_FLOAT 90 -> 150 (the owner's 2026-08-24 hang, entities.js:159), and
+    // this model kept simulating the old, weaker jump — 238 px across and three
+    // tiles up against the real 300 and six. A harness that models a body less
+    // able than the shipped one does not report traps, it invents them, and it
+    // invented one in A12: the dash pit the player crosses in both directions
+    // under tests/secrets.cjs was called a soft-lock here. Any change to
+    // JUMP_V / JUMP_FLOAT / gravity in entities.js belongs in this line too.
+    const V = 920, GU = 2150, GD = 3050, RUN = 340, DT = 1 / 30, FLOAT = 150;
     const ARC = [];                                // ARC[dx tiles] = max px above launch
     {
       let vy = -V, y = 0, x = 0;
       for (let i = 0; i < 200 && (y < 0 || i < 4); i++) {
         let g = vy < 0 ? GU : GD;
-        if (Math.abs(vy) < 90) g *= 0.55;
+        if (Math.abs(vy) < FLOAT) g *= 0.55;
         vy = Math.min(vy + g * DT, 1020);
         y += vy * DT; x += RUN * DT;
         const tx = Math.floor(x / 32);
@@ -59,6 +69,13 @@ const { chromium } = require('playwright');
     }
     const ACROSS = ARC.length;
     const UP = Math.floor(Math.max.apply(null, ARC) / 32);
+    // ...and the model is checked against the game rather than trusted. This is
+    // the whole reason the drift above was possible: nothing tied the copy to
+    // the original, so entities.js could be tuned and this file stayed silent
+    // and wrong. Now it says so, out loud, on the run that changes the jump.
+    const drift = [];
+    if (typeof JUMP_V === 'number' && JUMP_V !== V) drift.push('JUMP_V is ' + JUMP_V + ', modelled as ' + V);
+    if (typeof JUMP_FLOAT === 'number' && JUMP_FLOAT !== FLOAT) drift.push('JUMP_FLOAT is ' + JUMP_FLOAT + ', modelled as ' + FLOAT);
     // THE KIT IS THE POINT. "Can she get out" has a different answer in the
     // first room and the fifth kingdom, so the question is asked three times and
     // the report names the weakest kit that frees each area. Anything still
@@ -237,12 +254,13 @@ const { chromium } = require('playwright');
         out.push({ id: id, zone: def.zone, trapped: trapped, gated: gated,
                    gatedCells: gatedCells, total: cells.length });
     }
-    return { rooms: Object.keys(ROOMS).length, UP: UP, ACROSS: ACROSS, out: out };
+    return { rooms: Object.keys(ROOMS).length, UP: UP, ACROSS: ACROSS, out: out, drift: drift };
   });
 
   console.log('one jump clears ' + res.UP + ' tiles up and ' + res.ACROSS + ' across; '
     + res.rooms + ' rooms checked, base kit only');
   let bad = 0, gates = 0;
+  for (const d of (res.drift || [])) { console.log('  STALE MODEL  ' + d); bad++; }
   for (const r of res.out) {
     if (r.err) { console.log('  ERROR ' + r.id + ': ' + r.err); bad++; continue; }
     if (r.trapped.length) {
