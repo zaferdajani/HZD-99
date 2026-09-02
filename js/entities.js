@@ -19,7 +19,19 @@ function evoPts() {
   const bosses = ['Glitch', 'Brood', 'Atlas', 'Zero', 'Prism', 'Mother'].filter(b => s.flags && s.flags['boss' + b]).length;
   return Object.keys(s.abil || {}).length * 2 + (s.skills || []).length * 2 + bosses * 3 + (s.relics || []).length;
 }
-function evoTier() { const p = evoPts(); return p >= 26 ? 3 : p >= 14 ? 2 : p >= 5 ? 1 : 0; }
+// THE SILHOUETTE CHANGES ON A VICTORY (.claude/skills/underdog-arc §2.4).
+// It used to fire at 5/14/26 hidden points — two abilities and a bought skill
+// were tier 1 in a corridor, and a guardian's fall was worth three points of
+// nothing in particular. Now the tier IS the count of guardians she has put
+// down: 1 on the first, 2 on the third, 3 on the fifth. `extra` lets the
+// victory frame count the guardian that is falling this instant, before its
+// flag lands after the cut; and a save that already wore a higher tier keeps
+// it (never author down, even a save).
+function evoTier(extra) {
+  const n = (typeof guardiansFelled === 'function' ? guardiansFelled() : 0) + (extra || 0);
+  const byWar = n >= 5 ? 3 : n >= 3 ? 2 : n >= 1 ? 1 : 0;
+  return Math.max(byWar, (G && G.save && G.save.evo) || 0);
+}
 function relicHas(id) { return G.save.relics && G.save.relics.indexOf(id) >= 0; }
 
 // ---- tile queries against the live room ----
@@ -9677,12 +9689,14 @@ class Boss {
       if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
       G.dropScrap(this.cx(), this.cy(), 30);
       sfx('win'); sfx('winSting');   // her motif over the trumpet - a guardian fell
+      if (typeof checkEvo === 'function') checkEvo(1, true);   // she grows on THIS frame; the card waits for the cut
       return;
     }
     this.deathAnimT = Math.max(this.deathAnimT || 0, 1.6);
     burst(this.cx(), this.cy(), 60, '#ffffff', 420, 1.1, 200, 5, true);
     burst(this.cx(), this.cy(), 40, PAL[G.roomDef.zone].glow, 300, 1.4, 100, 4, true);
     cam.shake = 16; sfx('wreckbig'); sfx('win'); sfx('winSting');
+    if (typeof checkEvo === 'function') checkEvo(1, true);
     if (typeof roarWave === 'function') roarWave(this.cx(), this.cy(), '#ffffff');
     if (typeof padRumble === 'function') padRumble(1, 0.85, 800);
     G.hitStop = Math.max(G.hitStop, 0.22); G.flash = Math.max(G.flash, 0.7);

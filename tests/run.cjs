@@ -62,6 +62,7 @@ const SUITE = [
   ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
   ['daze',      'a group of hits breaks NULLFANG open, pays out, closes, and cannot be held'],
   ['openings',  'every boss move opens for at least one hit, and only the bait pays out three'],
+  ['arc',       'the world notices, she changes on the victory, a death is a beat'],
   ['artbible',  'ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor'],
   // grammar was the ACCEPTANCE TEST for task #76 (terrain depth): it landed
   // before the work it measures and read red on every sampled room, so it ran

@@ -87,6 +87,11 @@ const G = {
   },
   onPlayerDeath() {
     this.save.deaths++;
+    // DEFEAT IS A BEAT, NOT A RELOAD (underdog-arc §2.5): one line under the
+    // toll, rotating with the count, and the Braid keeps where it happened so
+    // the trader can say he passed the husk.
+    this.deathLine = t('death_' + (1 + (this.save.deaths % 3)));
+    if (typeof brDeath === 'function') brDeath(this.roomId);
     if (this.save.diff === 2) this.save.lives++;
     if (this.save.scrap > 0 || player.volts > 8) {
       this.save.pouch = { room: this.roomId, x: clamp(player.x, 40, this.roomDef.w * TILE - 60), y: Math.min(player.y, 13 * TILE), amount: this.save.scrap };
@@ -113,6 +118,7 @@ const G = {
   onBossDead(kind) {
     const cap = kind.charAt(0).toUpperCase() + kind.slice(1);
     this.save.flags['boss' + cap] = 1;
+    if (typeof checkEvo === 'function') checkEvo();   // the card the victory frame held back
     // THE RULE: every guardian resolved — felled or tamed — REVEALS A CAVE.
     // The lair grows a depth door (GATE_ROOM `need` flags), the map grows the
     // cave sign, and the player is told the ground moved so the reveal is an
@@ -716,8 +722,12 @@ function npcCharge(s) {
 }
 // evolution fanfare: when a power milestone pushes the tier up, the character
 // visibly grows and gains gear (drawn in entities.js) — announce it
-function checkEvo() {
-  const tv = evoTier();
+// `extra` counts a guardian falling on this very frame (its flag lands after
+// the cut); `quiet` fires the sting, the flash and the new silhouette but holds
+// the card, which a purify film would otherwise be interrupted by — onBossDead
+// shows it once the cut has handed back.
+function checkEvo(extra, quiet) {
+  const tv = evoTier(extra || 0);
   if (G.save.evo == null) { G.save.evo = tv; return; } // old saves: adopt silently
   if (tv > G.save.evo) {
     G.save.evo = tv;
@@ -727,7 +737,10 @@ function checkEvo() {
     G.impact = { t: 0.22, t0: 0.22, x: player.x + player.w / 2, y: player.y + player.h / 2 };
     burst(player.x + player.w / 2, player.y + player.h / 2, 30, '#ffd76a', 280, 0.8, 40, 3, true);
     burst(player.x + player.w / 2, player.y + player.h / 2, 18, '#ffffff', 160, 0.6, -60, 2, true);
-    showItem(t('evo' + tv), t('evo' + tv + 'd'));
+    if (quiet) G.save.evoCard = tv; else showItem(t('evo' + tv), t('evo' + tv + 'd'));
+  } else if (!quiet && G.save.evoCard) {
+    const cv = G.save.evoCard; G.save.evoCard = 0;
+    showItem(t('evo' + cv), t('evo' + cv + 'd'));
   }
 }
 // THE GEAR HAS A PICTURE OF ITSELF. Two cold plates were fired for the hardware
@@ -1431,9 +1444,23 @@ function doInteract(s) {
       // was made for, and the sage line is the kingdom's ending heard from
       // the mouth of the machine that made it possible.
       let k = 'sl_' + s.extra + '_' + standingTier();
+      let backLine = null;               // "you came back" leads even the standing line
       if (s.extra === 'ratchet') {
         if (G.save.flags['sageTame_GA1D']) k = 'sl_ratchet_sage';
         else if (G.save.flags.crystal) k = 'sl_ratchet_forged';
+        // the corridor where it swatted her: he has seen the dent, and he
+        // says so until she has answered it (nfMeet set by the meeting,
+        // bossGlitch by the rematch)
+        else if (G.save.flags.nfMeet && !G.save.flags.bossGlitch) k = 'sl_ratchet_rematch';
+        // "YOU CAME BACK" — the underdog sentence, said by the one who passed
+        // the husk. Once per death, keyed on the count so it never repeats
+        // for the same fall.
+        const dn = G.save.deaths || 0, seen = G.save.flags.deathsSeen || 0;
+        if (dn > seen) {
+          G.save.flags.deathsSeen = dn;
+          const bl = t('sl_back');
+          if (bl && bl !== 'sl_back') backLine = bl;
+        }
       }
       // ...AND HE SAYS IT ONCE. This line is what the NPC makes of her now, so
       // it leads every conversation — which meant that between two guardians
@@ -1450,6 +1477,7 @@ function doInteract(s) {
         if (typeof persist === 'function') persist();
         lines = [sl].concat(lines);
       }
+      if (backLine) lines = [backLine].concat(lines);
     }
     // THE STORY COMES IN FRAGMENTS (owner: "give us fragments of the story
     // with every advancement"). The memory film is the whole of what happened
@@ -2056,6 +2084,16 @@ function pauseItems() {
 // be written out separately, which is how the touch hit-boxes ended up testing
 // for seven rows at a 40 px pitch against a menu that had ten at a different
 // one: on a phone the pause menu selected the wrong line.
+// one line: WORLD <id> · <lean> · <laws>. A run with no fork yet leans nowhere.
+function pauseWorldLine() {
+  const u = (typeof universe === 'function' && universe()) || null;
+  if (!u) return '';
+  const lean = u.depth === 0 ? '—'
+    : (u.mercy >= u.sever && u.mercy >= u.red) ? t('br_mercy')
+    : (u.sever >= u.red) ? t('br_sever') : t('br_red');
+  const laws = (u.anom || []).map(a => (typeof BR_ANOM !== 'undefined' && BR_ANOM[a]) ? BR_ANOM[a].n : a).join(' · ');
+  return t('pm_world') + ' ' + u.id + '   ·   ' + lean + (laws ? '   ·   ' + laws : '');
+}
 function pauseLayout() {
   const items = pauseItems();
   const step = Math.min(40, Math.floor(322 / items.length));
@@ -13455,9 +13493,18 @@ function draw(tms) {
     c.fillStyle = 'rgba(8,4,8,' + clamp((1.8 - G.deadT) * 1.2, 0, 0.85) + ')';
     c.fillRect(0, 0, 960, 540);
     ftxt(t('death'), 480, 250, 46, '#ff5f6d', 'center', '#ff5f6d');
+    if (G.deathLine) {
+      c.save(); c.globalAlpha = clamp((1.2 - G.deadT) * 1.6, 0, 1);
+      ftxt(G.deathLine, 480, 300, 17, '#c9a0a6', 'center');
+      c.restore();
+    }
   } else if (st === 'PAUSE') {
     c.fillStyle = 'rgba(4,7,12,0.75)'; c.fillRect(0, 0, 960, 540);
     ftxt(t('paused'), 480, 118, 34, '#eef3fa', 'center', '#37ffd0');
+    // THE BRAID, SHOWN (underdog-arc): the world's code, which way it leans,
+    // and the law that is this run's alone — on the screen she opens most,
+    // not only behind its own button
+    ftxt(pauseWorldLine(), 480, 150, 13, '#7d93a8', 'center');
     // THE LIST IS MEASURED, NOT COUNTED OUT IN FORTIES. At a fixed 40 px step
     // from y=190 the last row landed at 510 on desktop and at 550 — off the
     // bottom of a 540 px screen — as soon as the touch row appeared. The way

@@ -267,6 +267,16 @@ function brRecord(pick, kind, room) {
 // an ordinary kill is now recorded and never mentioned: it leaves a mark on the
 // trail, which perturbs the world you are in without pretending you deliberated
 // over it. The question is reserved for the only creatures big enough to ask it.
+// DEATHS ARE RECORDED, NOT PUNISHED (underdog-arc §2.5). They live beside
+// the ledger and never touch the universe key: a world is what you chose,
+// not how often you fell choosing it.
+function brDeath(room) {
+  const b = braid(); if (!b) return;
+  b.fell = (b.fell || 0) + 1;
+  b.fellAt = b.fellAt || {};
+  b.fellAt[room] = (b.fellAt[room] || 0) + 1;
+  if (!b.worst || b.fellAt[room] > b.fellAt[b.worst]) b.worst = room;
+}
 function brKill(room) {
   const b = braid(); if (!b) return;
   b.kills++;
