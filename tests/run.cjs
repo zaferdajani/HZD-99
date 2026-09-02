@@ -65,6 +65,7 @@ const SUITE = [
   ['arc',       'the world notices, she changes on the victory, a death is a beat'],
   ['meet',      'it swats her aside and walks away, and she is still standing'],
   ['secrets',   'two hollow walls, a cellar hatch, and a pit only the dash crosses'],
+  ['tails',     'every authored sound decays to silence instead of stopping'],
   ['artbible',  'ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor'],
   // grammar was the ACCEPTANCE TEST for task #76 (terrain depth): it landed
   // before the work it measures and read red on every sampled room, so it ran

@@ -445,6 +445,47 @@ sitting down cross-legged, pulling out a little screen, the Sonic look-at-
 the-camera. The mechanism (HERO_FIDGET, intro+loop) takes a second strip by
 adding an entry, not by new code.
 
+## 2ak. THE SCORE, MEASURED — six guardian themes at the house level, and the tail gate in the suite ✔ SHIPPED 2026-09-02
+
+**What was already there**: one theme per guardian (`mus_nullfang`,
+`mus_talonhost`, `mus_furnace`, `mus_glaciere`, `mus_prism`, `mus_mother`, and
+the Alpha's), wired ahead of `mus_boss` in `RECORDED_TRACKS`. What nobody had
+done was measure them (composer §4). Measured:
+
+| cue | was | now |
+|---|---|---|
+| nullfang | −9.3 LUFS, peak **+0.2 dBFS**, LRA 14.7 | −14.1 LUFS, −4.3 dBFS, LRA 14.6 |
+| talonhost | −9.2, **+0.5**, 12.5 | −14.1, −4.3, 12.5 |
+| furnace | −9.8, +0.1, 8.8 | −14.1, −4.0, 8.7 |
+| glaciere | −9.1, −0.1, 19.4 | −14.1, −4.3, 19.5 |
+| prism | −9.7, **+0.5**, **5.2** (flat: the build was a lie) | **re-fired** — see below |
+| mother | −9.7, −0.1, 18.3 | −14.0, −4.4, 18.2 |
+| alpha | −10.3, −0.0, 12.9 | −14.0, −3.4, 12.8 |
+| boss / hero / meadows (reference) | −15.3 / −14.1 / −16.3 | unchanged |
+
+Five of seven clipped at or over 0 dBFS and sat 5 dB above every other cue
+in the game at the same 0.6 slot gain. Mastered with a LINEAR loudnorm to
+−14 LUFS / −1 dBTP — a gain change, no compression, so every LRA is what it
+was; the as-fired masters are in `assets/source/music/asfired/` (RULE ZERO).
+The 1–4 kHz gameplay band sits 8–10 dB under full-band on all seven.
+
+**PRISM PROWLER re-fired** (composer §1–§3, two takes, `sonilo_music`):
+*a hunter you cannot tell from its reflection — her five-note motif turned
+upside down on bowed glass, a second voice one beat behind it, struck glass
+and taiko climbing, a drop to one shimmer, both voices together, cut
+mid-phrase.* Take b measured LRA 18.4 with a 17 dB climb across the piece
+(take a: 13.7, a dead 0.9 s at its end); cut to a seamless loop (2 s tail
+crossfaded into 2 s head, seam at 0:02), gained to −14 LUFS. Both takes
+archived.
+
+**THE TAIL GATE** (`tests/tails.cjs`, in the suite): every one-shot under
+`assets/sfx/` must end at least 35 dB under its own peak and not start on a
+click. First run: 27 of 108 failed — the six guardian roars, the landings,
+the purr, two of her voice takes, nine of the swing/foe set. All faded per
+§2ae (25% of length, 90–600 ms, exp), originals in
+`assets/source/sfx/asfired/`. `hz_swing1` had a container start offset that
+made the fade read it as 20 ms; rebuilt from a decoded copy.
+
 ## 2aj. KINGDOM 1's SECRETS — two hollow walls, a cellar, a pit only the dash crosses ✔ WIRED 2026-09-02 — plates on THE FIRING LIST
 
 **The gap** (the review's level-density mark): Kingdom 1 had its side wings
