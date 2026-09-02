@@ -445,6 +445,48 @@ sitting down cross-legged, pulling out a little screen, the Sonic look-at-
 the-camera. The mechanism (HERO_FIDGET, intro+loop) takes a second strip by
 adding an entry, not by new code.
 
+## 2ai. THE UNDERDOG ARC — the loss, the world noticing, the change on the victory ✔ SHIPPED 2026-09-02
+
+**The skill** (.claude/skills/underdog-arc): growth is felt when she was
+genuinely weak and it cost her, the world noticed out loud, each power is
+attached to what taught it, and she LOOKS different — on a victory, not on a
+hidden threshold three rooms later. The machinery was 80% built; what was
+missing was authored. Five things, in the skill's own impact order:
+
+1. **The unwinnable first meeting** (`meetCheck`/`meetStep`, js/game.js;
+   `tests/meet.cjs`). On the A2 crest, before the Alpha and long before A4,
+   NULLFANG drops out of the sky, walks up, swats her the length of the mound
+   and bounds away east. Staged per manga-direction as an impact triple with a
+   silence on each side — music gone, controls gone, hints muted, the paw held
+   a hair too long, the frame stopped white, the aftermath with the camera
+   holding both of them. It costs her one core and never the last: a survival,
+   not a scripted death. A4 wakes as the rematch (the same slam, "It remembers
+   the corridor"), Ratchet names the dent until she has answered it, the Braid
+   marks meeting and rematch, and the gallery keeps THE CORRIDOR — one Seedance
+   film from her canon element and a bossshot of the lion
+   (`assets/source/films/meet_asfired_1280.mp4` → `assets/video/meet.*` and
+   the light tier), unlocked by the meeting itself.
+2. **The world says what it makes of her.** The eighteen standing lines
+   (dismissive → surprised → deferential, six NPCs) existed in English and
+   Arabic and fell back to English in Turkish, Chinese and Russian. All five
+   languages carry them now; `tests/arc.cjs` refuses a language that quietly
+   says the English one.
+3. **The silhouette changes on the victory** (`evoTier`, js/entities.js;
+   `checkEvo`, js/game.js). It fired at 5/14/26 hidden points — tier 1 in a
+   corridor on two abilities. The tier is the count of guardians she has put
+   down (1 / 3 / 5), it lands on the frame the guardian falls, before its flag
+   (which waits for the cut), the card is held until the cut hands back, and
+   a save that already wore a higher tier keeps it.
+4. **A death is a beat** (`onPlayerDeath`, `brDeath`). One rotating line under
+   the toll, the Braid keeps where she fell, and the trader says "You came
+   back" once per fall, ahead of his standing line.
+5. **The Braid, shown** (`pauseWorldLine`). The pause screen carries the
+   world's code, which way it leans and its laws — the screen she opens most,
+   not only behind its own button.
+
+Measured by `tests/arc.cjs` and `tests/meet.cjs`; `kingdom1`, `opening`,
+`cutskip`, `film`, `regress` stay green.
+
 ## 2ah. THE OPENINGS, MEASURED — Nullfang and the Alpha against the ladder ✔ SHIPPED 2026-09-02
 
 **The owner's law** (.claude/skills/boss-openings): *"a minimal opening ...

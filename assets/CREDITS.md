@@ -90,6 +90,7 @@ plate can be traced back to the generation it came from.
 | `backgrounds/gate_*.jpg`, `backgrounds/cave_mouth_[a-e].jpg` | Higgsfield, Seedream 4.5 | the five kingdom gates and five grotto mouths (§2f); the mouths fired against `cave_mouth.jpg` |
 | `backgrounds/oracle_booth.png` / `oracle_interior.jpg`, `characters/breaker/*.png` | Higgsfield, Seedream 4.5 | the Oracle's shrine and parlor (§2h) and the Breaker's three states (§2i) |
 | `video/sword_forge.mp4` / `.webm` | Higgsfield, Seedance 2.5 | the forging cinematic (§1d), animated from a Seedream opening frame |
+| `video/meet.mp4` / `.webm` | Higgsfield, Seedance 2.5 | THE CORRIDOR — the first meeting with NULLFANG, from her canon element and a screenshot of the lion; as fired in `source/films/` |
 | `characters/hero/*`, `characters/hzd_8yaw*.png` | Higgsfield | HZD-99's body and turnarounds (§1), all pinned to the canon reference element |
 | `fx/slash_[h,d,u,dn].png`, `characters/gear/jetpack*.png` | Higgsfield | the crystal slash light-sheets (§1b-i) and the back-jet gear (§1c) |
 | `characters/{kiln,rime,snare}/*.png`, `backgrounds/winch_house.png` | Higgsfield, Seedream 4.5 | the zone C/D/E enemies (§2l, §2n, §2p) and Servo's winch (§2t) |

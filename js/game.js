@@ -3879,6 +3879,11 @@ const PURIFY_VID = {
   // speech bubble, which is the owner's own instruction — 'npc story should
   // be short generated video'.
   memory: 'assets/video/memory.mp4',
+  // THE CORRIDOR — the first meeting (underdog-arc §2.1) as the gallery keeps
+  // it: the crest, the lion dropping in, the swat, her thrown and still alive.
+  // Unlocked by the meeting itself (meetCheck); the live sequence is the beat,
+  // this is the reward view of it.
+  meet: 'assets/video/meet.mp4',
   gift: 'assets/video/sword_forge.mp4',
   glitch: 'assets/video/purify_glitch.mp4', // NULLFANG      - the lion
   brood: 'assets/video/purify_brood.mp4',   // TALONHOST     - the eagle
@@ -4096,7 +4101,7 @@ function purifyPreloadNear(id) {
 // path (G.reel) that hands its ending to the comic or the win screen; putting
 // one behind a menu row would need that path to learn where it came from. They
 // are noted here so the omission is a decision rather than an oversight.
-const FILM_GALLERY = ['memory', 'gift', 'glitch', 'brood', 'zero', 'atlas', 'prism'];
+const FILM_GALLERY = ['memory', 'meet', 'gift', 'glitch', 'brood', 'zero', 'atlas', 'prism'];
 // SEEN IS RECORDED WHERE THE FILM ACTUALLY STARTS, not where it is triggered
 // from — every path into a film goes through startPurifyCut, including the
 // gallery itself, so there is exactly one place this can be missed.
