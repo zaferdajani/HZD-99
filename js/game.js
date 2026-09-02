@@ -74,6 +74,11 @@ const G = {
   toast(text) { if (this.meet) return; this.toasts.push({ text, t: 3 }); },
   breakTile(tx, ty) {
     this.save.broken[this.roomId + ':' + tx + ',' + ty] = 1;
+    // THE GROUND CURVE IS RE-READ. The heightfield she stands on is built
+    // from the grid once per room and cached by room id, so a floor she cut
+    // out still held her up 19 px above the hole (measured, tests/secrets.cjs:
+    // the camp's cellar hatch broke and she stood on the air where it was).
+    if (typeof surfRoom !== 'undefined') surfRoom = null;
     // the lesson is learned the first time it works. From here the seam stops
     // being announced and every remaining one is on the player to spot.
     if (!this.save.flags.taughtBreak) { this.save.flags.taughtBreak = 1; persist(); }
@@ -6162,9 +6167,14 @@ function buildSurfaceCurve() {
   const g = G.grid;
   if (!g || !g.length || !g[0]) return null;
   const Wt = g[0].length, Ht = g.length;
+  // a brittle tile she has cut is air to the curve too — the grid keeps its
+  // 'B', the save keeps the cut, and a curve that read only the grid stood
+  // her on the hole (the camp's cellar hatch, tests/secrets.cjs)
+  const broken = (G.save && G.save.broken) || {};
   const solidAt = (tx, ty) => {
     if (tx < 0 || ty < 0 || tx >= Wt || ty >= Ht) return false;
     const ch = g[ty][tx];
+    if (ch === 'B' && broken[G.roomId + ':' + tx + ',' + ty]) return false;
     return ch === '#' || ch === 'B';
   };
   const platAt = (tx, ty) =>

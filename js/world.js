@@ -531,7 +531,7 @@ const ROOMS = {
     } },
   // ---- THE GANTRIES: a wing, not a corridor. Up, across, and back down with
   // the thing somebody asked for. Nothing here is required to finish the game.
-  A6: { zone: 'A', sky: 1, w: 44, h: 21, exits: { B: 'A1' },
+  A6: { zone: 'A', sky: 1, w: 44, h: 21, exits: { B: 'A1', L: 'A13' },
     // Same fix as A2, and it matters more here: the gantries are a climb over
     // spikes, so being harassed from two angles while airborne is not a fight
     // you can lose well. One flier to keep you honest in the air, one crawler
@@ -556,6 +556,9 @@ const ROOMS = {
       // The drop at 8-11 stays; up and down are two different holes now, and
       // tests/seam.cjs measures every T pair for exactly this misalignment.
       rect(g, 19, 19, 22, 20, '.');
+      // THE SECOND HOLLOW WALL (§2aj): the west seam, plugged. Behind it the
+      // Deaf System kept a pocket under the vent climb — A13.
+      seamL(g); rect(g, 1, 17, 2, 18, 'B');
       hline(g, 2, 6, 16, '='); hline(g, 13, 17, 13, '='); hline(g, 6, 10, 10, '=');
       hline(g, 15, 19, 8, '='); hline(g, 20, 24, 7, '#');
       hline(g, 11, 14, 18, '^');              // the floor is not safe to fall to
@@ -688,7 +691,7 @@ const ROOMS = {
       hull(g, 9, 15, 2, 71);
       hull(g, 39, 45, 2, 73);
     } },
-  A3: { zone: 'A', sky: 1, w: 52, h: 17, exits: { L: 'A10', R: 'A4', T: 'B1' },
+  A3: { zone: 'A', sky: 1, w: 52, h: 17, exits: { L: 'A10', R: 'A4', T: 'B1', B: 'A12' },
     ents: [['bench', 8, 15], ['npc', 14, 15, 'ratchet'], ['scrap', 40, 15, 14]],
     build(g) {
       frame(g); seamL(g); seamR(g);
@@ -697,6 +700,11 @@ const ROOMS = {
       // Ratchet at 14 keep their spots, and a hulk at their backs gives the
       // camp a wall to be beside instead of standing in open ground.
       hull(g, 2, 6, 2, 81);
+      // THE CELLAR (§2aj): a brittle floor between the bench and the trader —
+      // two tiles of the camp's floor that ring hollow. Under it, A12: the
+      // vault she can only cross once NULLFANG has given her the dash. A B
+      // crossing keeps her x, so A12's ceiling opening is these two columns.
+      rect(g, 10, 15, 11, 16, 'B');
       // THE CLIMB TO THE CONDUITS DOES NOT MOVE. B1's shaft comes down at
       // 25-28 and a T crossing keeps her x, so this ceiling opening and that
       // shaft are the same four columns — the frontier light falls through it
@@ -1251,17 +1259,78 @@ const ROOMS = {
       hline(g, 26, 33, 13, '='); hline(g, 30, 37, 9, '=');
       hull(g, 34, 42, 2, 121);
     } },
-  A9: { zone: 'A', w: 44, h: 17, exits: { B: 'A8' },
+  A9: { zone: 'A', w: 44, h: 17, exits: { B: 'A8', L: 'A11' },
     ents: [['boss', 26, 15, 'chime']],
     build(g) {
-      frame(g);
+      frame(g); seamL(g);
       rect(g, 11, 15, 15, 16, '.');            // the drop back to A8 — col 11 answers A8's opening
       // the arena rule again: the ground the fight happens on is flat and the
       // furniture lives on the shoulders. The drop home stays at 12-15 — it is
       // the only way out of this room and it has to line up with A8's ceiling.
       hline(g, 6, 11, 11, '='); hline(g, 31, 36, 11, '=');
-      hull(g, 2, 8, 2, 133);
+      hull(g, 4, 8, 2, 133);                   // was 2-8: the west shoulder now leaves the wall clear
       hull(g, 38, 43, 2, 131);
+      // THE HOLLOW WALL (docs/ART_QUEUE.md §2aj): two columns of brittle
+      // rock plugging the west seam. A claw opens it — the same 'B' the
+      // pogo floors use, cut sideways — and behind it is A11. The seam
+      // column itself stays open (tests/seam.cjs), the plug sits inside it,
+      // laid last so no shoulder overwrites it.
+      rect(g, 1, 13, 2, 14, 'B');
+    } },
+
+  // ==== KINGDOM 1's SECRETS (docs/ART_QUEUE.md §2aj, 2026-09-02) ====
+  // Three rooms the road does not show: two behind hollow walls, one under
+  // the camp that only the dash can cross. Each pays what a dead end owes
+  // (tests/deadend.cjs): a hidden relic, scrap, and in the pocket a terminal.
+  //
+  // shapes:    none — these are rests, not fights (encounter-gen §3: the beat
+  //            after a room is a ROOM)
+  // solution:  A11/A13 — hear the wall, cut it; A12 — come back with the dash
+  // failure:   A12 — the pit; the spikes are the lesson, the ledge is the read
+  // lesson:    the world keeps things behind what you can break, and under
+  //            what you already walked on
+  // budget:    0
+  A11: { zone: 'A', w: 30, h: 17, exits: { R: 'A9' },
+    // behind the mini-boss's wall: the coin, and the scrap the chime's
+    // congregation never spent
+    ents: [['secret', 6, 15, 'coin'], ['scrap', 12, 15, 30], ['scrap', 22, 11, 25]],
+    build(g) {
+      frame(g); seamR(g);
+      // a pocket, not a corridor: the floor rises into a spoil heap at the
+      // back and a fallen housing makes the shelf the scrap sits on
+      mound(g, 3, 10, 2, 141);
+      hull(g, 19, 25, 2, 143);
+      hline(g, 14, 17, 11, '=');
+    } },
+  A12: { zone: 'A', w: 44, h: 17, exits: { T: 'A3' },
+    // THE VAULT UNDER THE CAMP — the reason to come back. Twelve tiles of
+    // spikes: a full run-up jump measures 317 px (tests/secrets.cjs), the pit
+    // is 384, and the dash adds the 150 that makes it. The star sits on the
+    // far shelf; the way home is the same pit the other way.
+    ents: [['secret', 38, 15, 'star'], ['scrap', 34, 15, 30], ['scrap', 40, 11, 40], ['scrap', 4, 15, 20]],
+    build(g) {
+      frame(g);
+      rect(g, 10, 0, 11, 0, '.');             // the hatch from A3 — cols 10-11 answer the brittle floor
+      // the west shelf she lands on, and the climb back to the hatch
+      hline(g, 3, 6, 12, '='); hline(g, 7, 10, 9, '='); hline(g, 9, 12, 6, '='); hline(g, 10, 12, 3, '=');
+      // THE PIT: twelve tiles of spikes on the floor, both floor rows cut so
+      // it is a drop and not a carpet
+      rect(g, 17, 15, 28, 15, '.'); hline(g, 17, 28, 16, '^');
+      // the far shelf: a fallen housing under the star, the scrap up on it
+      hull(g, 36, 42, 2, 145);
+      hline(g, 31, 34, 11, '=');
+    } },
+  A13: { zone: 'A', w: 30, h: 21, exits: { R: 'A6' },
+    // THE DEAF SYSTEM'S POCKET under the vent climb (docs/DEAF_SYSTEM.md): a
+    // terminal that tells the story of the deaf, a coin's worth of their
+    // salvage, and nothing that hunts. A6 is 21 tall and an L crossing keeps
+    // her y, so this is 21 tall too and its floor is A6's floor.
+    ents: [['term', 8, 19, 5], ['secret', 22, 19, 'coin'], ['scrap', 15, 19, 30], ['scrap', 24, 15, 25]],
+    build(g) {
+      frame(g); seamR(g);
+      mound(g, 2, 7, 2, 147);
+      hull(g, 20, 26, 2, 149);
+      hline(g, 12, 16, 15, '='); hline(g, 4, 8, 12, '=');
     } },
 
   // ==== THE CRYSTAL CAVE — quest 1's wing, entered through A5's BACKDROP ====
@@ -1464,6 +1533,7 @@ const MAPPOS = {
   W1: [-9, 3, 1, 1], W2: [-8, 3, 2, 1], A0: [-6, 3, 2, 1], A0B: [-6, 2, 1, 1], A1: [-4, 3, 2, 1],
   A2: [-2, 3, 3, 1], A10: [1, 3, 2, 1], A3: [3, 3, 2, 1], A4: [5, 3, 1, 1],
   A5: [-2, 4, 2, 1], A6: [-4, 2, 1, 1], A7: [-2, 5, 1, 2], A8: [-1, 2, 1, 1], A9: [-1, 1, 1, 1],
+  A11: [-2, 1, 1, 1], A12: [3, 5, 1, 1], A13: [-5, 2, 1, 1],
   CV1: [0, 4, 2, 1], CV1B: [0, 5, 1, 1], CV2: [2, 4, 2, 1], CV3: [4, 4, 1, 1],
   B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V2: [5, 5, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],

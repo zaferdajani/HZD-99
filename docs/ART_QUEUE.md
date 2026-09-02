@@ -445,6 +445,49 @@ sitting down cross-legged, pulling out a little screen, the Sonic look-at-
 the-camera. The mechanism (HERO_FIDGET, intro+loop) takes a second strip by
 adding an entry, not by new code.
 
+## 2aj. KINGDOM 1's SECRETS — two hollow walls, a cellar, a pit only the dash crosses ✔ WIRED 2026-09-02 — plates on THE FIRING LIST
+
+**The gap** (the review's level-density mark): Kingdom 1 had its side wings
+(A5–A9, the sage cave) and nothing hidden behind what she could break, and no
+reason to walk back through it once NULLFANG fell. Three rooms now, each
+paying what a dead end owes (`tests/deadend.cjs`), each measured by
+`tests/secrets.cjs` with the real claw, the real pogo and the real jump:
+
+| room | where | what | pays |
+|---|---|---|---|
+| **A11** | behind A9's west wall (the chime's arena) | two columns of brittle rock, cut sideways with a claw — the same `B` the pogo floors use | the Ancient Coin (`secret`), scrap |
+| **A12** | under the camp: a brittle floor between the bench and the trader in A3 | a twelve-tile spike pit. A full run-up jump measures 312 px, the pit is 384, the dash adds 150 — so it is the reason to come BACK once the lion has given her the dash | the Star Fragment, scrap |
+| **A13** | behind A6's west wall (the vent climb) | the Deaf System's pocket: a terminal with their story (`t5`), nothing that hunts | the second coin, scrap |
+
+The bench before NULLFANG already stands in A3 (col 8); `tests/kingdom1.cjs`
+holds it.
+
+**Stand-ins, and the plates they wait for (ART IS HIGGSFIELD'S — every
+structure is a Higgsfield plate; these are `B`-tile stand-ins until fired):**
+
+- **2aj-1 THE HOLLOW WALL** (×2: A9 west, A6 west). Brief: *"A plug of loose
+  grey-green rubble and cracked concrete filling a rock passage, two tiles wide
+  and three tall, the stones fitted but not mortared, dust in the joints, one
+  hairline of cave-dark showing through near the top — the same spoil and
+  slab language as the meadow's mounds. Side view, pure black field, no
+  ground, no shadow."* Keyed as a `B`-wall plate: drawn over the brittle
+  columns, gone when they are cut. Palette: the meadow's stone (§2ab), no
+  amber.
+- **2aj-2 THE CELLAR HATCH** (A3, cols 10–11). Brief: *"Two floor tiles of the
+  camp's packed earth and plank, sagging, a dark seam between the boards, a
+  ring of worn ground around them where feet have avoided the soft spot."*
+  Drawn in the floor plane over the `B` pair.
+- **2aj-3 THE VAULT** (A12 backdrop). Brief: *"A buried machine cellar under a
+  meadow camp: earth walls held by rusted girders, roots through the ceiling,
+  a twelve-tile trench of rusted spike-rail in the floor, the far shelf a
+  fallen generator housing. Three depth bands, the far band dark (§9)."*
+  `--bg` intake, derived by `tools/bgderive.cjs`.
+- **2aj-4 THE DEAF POCKET** (A13 backdrop + terminal alcove). Brief: *"A low
+  rock pocket wired by touch and light: no speakers, no antennae — braided
+  copper lines along the walls, small lamps at hand height, a terminal set
+  into a niche, everything worn smooth by hands. The Deaf System's make
+  (docs/DEAF_SYSTEM.md)."*
+
 ## 2ai. THE UNDERDOG ARC — the loss, the world noticing, the change on the victory ✔ SHIPPED 2026-09-02
 
 **The skill** (.claude/skills/underdog-arc): growth is felt when she was
