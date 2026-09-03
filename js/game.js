@@ -451,7 +451,7 @@ const NPC_LOOP = {
 // padding them to 24 put the same drawing on screen twice in a row nineteen
 // times and twelve times. Those two takes need re-firing — they are on THE
 // FIRING LIST — and until then they carry their real frames and nothing else.
-const NPC_LOOP_CELLS = { servo: 24, mono: 24, patch: 24, sage: 24, lumen: 10 };
+const NPC_LOOP_CELLS = { servo: 16, mono: 16, patch: 13, sage: 11, lumen: 10 };
 function npcLoopCells(id) { return NPC_LOOP_CELLS[id] || 12; }
 // ...and the tempo doubles with the cell count, or the same job plays at half
 // speed: fps is COLUMNS a second and run is a burst measured in COLUMNS, so
@@ -670,7 +670,7 @@ function drawTinker(c, s, talking) {
     }
     if (!drew) {
       const cell = ((Math.floor(r.ph || 0) % 12) + 12) % 12;
-      drew = drawStripCell(c, 'ratchetLoop', cell, 24, cx, base, s.h * 2.6, face < 0);
+      drew = drawStripCell(c, 'ratchetLoop', cell, 13, cx, base, s.h * 2.6, face < 0);
       // what he actually drew, for tests/tinker.cjs — "it does not repeat" is
       // only a claim if the frames it draws can be read from outside
       if (drew) G.tinkerFrame = r.job + ':' + cell;
