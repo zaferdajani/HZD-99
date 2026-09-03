@@ -39,11 +39,44 @@ const check = (name, ok, detail) => {
     sv.roomId = 'A1';
     G.save = sv; startGame(sv); loadRoom('A1');
     await new Promise(r2 => setTimeout(r2, 1200));
+    // ...and every sheet this room started fetching is IN before the clock is
+    // taken away from it, because once the loop is driven nothing else gets a
+    // turn to finish a download.
+    {
+      const t0 = Date.now();
+      while (Date.now() - t0 < 15000
+             && Object.keys(MEDIA_PEND).some(k => MEDIA_LOW[k] !== 3))
+        await new Promise(r2 => setTimeout(r2, 50));
+    }
     G.wake = null; G.state = 'PLAY'; G.enemies = []; G.boss = null;
     // the room's own furniture is not what is being measured
     Object.defineProperty(G, 'dialog', { get: () => null, set: () => {}, configurable: true });
     G.toasts = [];
-    const frame = () => new Promise(r2 => requestAnimationFrame(r2));
+    // THE HARNESS OWNS THE CLOCK, BECAUSE THIS FILE'S OWN COMPLAINT WAS RIGHT.
+    //
+    // It says, forty lines down, that "a measurement whose answer depends on
+    // the load of the machine measuring it is not a test" — and then waited on
+    // requestAnimationFrame for every sample, which is precisely such a
+    // measurement. mainLoop advances min(raw, SIM_MAX) seconds of world per
+    // frame and runs update() as many times as that takes, so on a busy box one
+    // "frame" here was three simulation steps and "the worst single-frame step"
+    // measured three of them stacked. That is why this harness passed alone and
+    // collapsed inside a full suite, repeatedly.
+    //
+    // So: the game's loop is unhooked (its re-arm becomes a no-op), the wall
+    // clock is stubbed, and the frame is DRIVEN — one call, one synthetic
+    // 60 Hz tick, one update. It is still the real frame path, physics and
+    // drawing and all; it just happens when this file says so. After the stub,
+    // one real frame is let through so the loop's last armed callback lands and
+    // finds a no-op waiting for it.
+    const realNow = performance.now, realRAF = window.requestAnimationFrame;
+    let clk = realNow.call(performance);
+    await new Promise(r2 => realRAF(r2));
+    window.requestAnimationFrame = () => 0;
+    await new Promise(r2 => setTimeout(r2, 40));     // let the armed callback land
+    performance.now = () => clk;
+    const STEP = 1000 / 60;
+    const frame = async () => { clk += STEP; mainLoop(clk); };
     keys.ArrowRight = 1;
     for (let i = 0; i < 40; i++) await frame();      // up to full speed first
     // RUNNING OFF A LEDGE IS NOT THE FAULT. She is only expected to stay on the
@@ -107,6 +140,12 @@ const check = (name, ok, detail) => {
       const anchor = roomFloorAnchor(0) - camSY();
       fore = { top: anchor - h * 0.22, feet: player.y + player.h - camSY() };
     }
+    // Hand the clock back, and RE-ARM THE LOOP. Restoring requestAnimationFrame
+    // is not enough on its own: mainLoop stopped because its own re-arm became
+    // a no-op, and nothing else ever calls it — so the page would sit frozen
+    // and the stick measurement below would read a body that never moved.
+    performance.now = realNow; window.requestAnimationFrame = realRAF;
+    realRAF.call(window, mainLoop);
     return { air, feet, states, vys, over, fore, lifts, bob,
              strideStart, animStart, strideEnd: player.stridePh || 0, animEnd: player.anim,
              stepWalk: HERO_STEP_WALK, stepRun: HERO_STEP_RUN, cells: HERO_CELLS,
@@ -157,10 +196,19 @@ const check = (name, ok, detail) => {
   // The ceiling here is set by the MECHANISM, not by taste: the ground snap
   // reaches 14 px below her feet and the uphill catch can lift her onto a mound,
   // so ~16 px is the largest step the design can produce in a frame and 18 is
-  // that with room. It is not comfortable — a 16 px jump at 30 fps is visible,
-  // and the honest next move is to smooth the DRAWN height toward the ground
-  // rather than teleport it, which is a change to how she is drawn and wants
-  // its own measurement. What this line guards is the regression: a number
+  // that with room.
+  //
+  // THE 15 PX THIS USED TO REPORT WAS NOT A 15 PX STEP. It was three simulation
+  // steps stacked, because a sample was one requestAnimationFrame and mainLoop
+  // runs update() as many times as the frame's elapsed time asks for. The note
+  // that used to sit here called the number uncomfortable and proposed
+  // smoothing the drawn height to fix it — that would have been a change to how
+  // she is drawn, made to satisfy an artefact of how she was measured. Driven
+  // at one update per sample she reads 4.3 px, every run, which is a body
+  // following ground rather than one being thrown by it.
+  //
+  // The ceiling stays where it is: a real step-down can still snap the whole
+  // 14 px in one frame, and what this line guards is the regression — a number
   // above 18 means something is throwing her, not that the floor rolls.
   check('her feet follow the ground rather than bouncing on it',
     worst <= 18, 'worst single-frame step ' + worst.toFixed(1) + ' px');
