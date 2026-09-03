@@ -559,6 +559,19 @@ upscaled; the sheet ships at 2496×2508. Two white-field refires. Plates in
 `assets/source/roster/style_d/`, contact in `_sheets/`. `artbible lowres
 frames` green; A1 / A6 / A7 / A2 photographed.
 
+**NULLFANG, the first guardian, painted** — the bossparts pipeline exactly as
+`.claude/skills/art-prompts` §5 lays it out: `extract` (16 blurred rects),
+the whole figure and the HEAD fired first as the anchor, the other fourteen
+fired against the painted head as IMAGE 2. Three small round joints (hip,
+shoulder, neck) came back as HEADS — the anchor outshouting the blurred
+part, §2's lesson in reverse — and tail1 as a curved chain; all four refired
+against the painted BODY as the anchor with "NOT a head, NO face, NO mane"
+and came back as parts. `rebuild` from 1024-px copies (the 2K plates as data
+URIs crash the page): 16/16, five joints letterboxed for aspect drift
+(neck 29 %, bleg0 −24 %), and `tools/bossshot.cjs A4 idle,walk,roar,atk`
+shows him assembled without a gap the eye finds. `artbible bosspace lowres`
+green. Plates in `assets/source/beast/style_d/`, before-atlas beside them.
+
 **Still in the old 3D look, on THE FIRING LIST in order:** the NPC interiors; the wallpapers via `bgderive`; the guardian parts
 atlases (75 parts); the enemy briefs (§2i, §2l, §2n, §2p); the lairs and gates
 (§2f, §2g); the four §2aj plates.
