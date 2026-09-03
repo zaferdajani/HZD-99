@@ -11,7 +11,7 @@ of respect. License text: https://creativecommons.org/publicdomain/zero/1.0/
 | File | Author | Source |
 |---|---|---|
 | sci_fi_bg1.jpg | hassekf | https://opengameart.org/content/sci-fi-background |
-| ind_far.png / ind_mid.png / ind_fg.png | Luis Zuno (ansimuz) | https://opengameart.org/content/industrial-parallax-background (CC0, verified 2026-07-24) — 3 parallax layers from the Industrial Parallax pack; colourised per zone in-engine |
+| `backgrounds/ind_far.webp` / `ind_mid.webp` / `ind_fg.webp` | Higgsfield | the Scrap Meadows parallax, repainted 2026-09-03 in the corridor look (ART_QUEUE §2am); the near layer's layout follows the CC0 Industrial Parallax pack by Luis Zuno (ansimuz) it replaced; masters in `source/sky/`; colourised per zone in-engine |
 | scifi_platform_BG1.jpg | Eris | https://opengameart.org/content/sci-fi-platform-tiles |
 | scifi_platformTiles_32x32.png | Eris | https://opengameart.org/content/sci-fi-platform-tiles |
 

@@ -536,6 +536,18 @@ the first ten cells keep her under the 15 % pump ceiling; `ratchetLoop` 24 at
 its draw site). Takes in `assets/source/takes/style_d/loops/`, plates in
 `assets/source/ratchet/style_d/`. `npcstrip folk` green.
 
+**The Scrap Meadows skyline** was the last PIXEL ART on the first outdoor
+screen: three 272-pixel CC0 parallax layers (`ind_far/mid/fg`) stair-stepping
+at 168 px tall. Refired as three painted 21:9 plates — the near factories
+from the old layer as a blurred layout reference, the mid ruins and the far
+towers freehand in the anchor's paint — keyed (`--white` for the two that
+came back on white), made to repeat by the new `tools/wraptile.cjs` (the
+last 7 % cross-faded over the first, so the strip wraps without a wall in
+the sky), shipped at 1600 / 1400 / 1200 wide with alpha. `silTint` still
+turns the far and mid layers into zone-gradient silhouettes and washes the
+near one toward the zone, so every zone keeps its colour. Masters in
+`assets/source/sky/`.
+
 **Still in the old 3D look, on THE FIRING LIST in order:** the NPC interiors; the wallpapers via `bgderive`; the guardian parts
 atlases (75 parts); the enemy briefs (§2i, §2l, §2n, §2p); the lairs and gates
 (§2f, §2g); the four §2aj plates.
