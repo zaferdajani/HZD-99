@@ -163,6 +163,19 @@ const WIND = /(warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summon)/;
         // samples is still not quite the same fight. Removing that means
         // driving update() directly instead of riding rAF, which is a bigger
         // change to a working harness than the flake justified.
+        //
+        // ...AND THAT CURE WAS TRIED, 2026-09-03, AND IT IS WORSE. Stepping
+        // update(1/60) directly with performance.now and G.simClock driven
+        // alongside it — the same treatment that fixed kingdom, openings, twin
+        // and tinker — read NULLFANG at 48%, 38%, 40% on three runs against
+        // this build, where riding rAF reads 33-37% across four. The reason is
+        // paceK(): the loop's real step is min(raw, SIM_MAX) x paceK(), so a
+        // fixed 1/60 is not the step the game takes and the fight it samples is
+        // a fight the player never has. Do not re-try it without pacing the
+        // step the way the main loop does. The remaining flake is real but it
+        // is an INFLATION under load — every reading above the line has come
+        // from a busy machine — so a failure here is worth re-running solo
+        // before it is worth believing.
         accD += Math.hypot(b.x - lx, b.y - ly); accT += dt;
         lx = b.x; ly = b.y;
         while (accT >= SAMPLE_MS) {
