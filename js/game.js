@@ -14896,30 +14896,54 @@ function drawHeroNPC(c, id, s) {
       return true;
     }
     case 'kerf': {    // the Last Telchine — the smiths who cut the gods' weapons
-      const sc = Math.sin(tn * 3.4) * 1.2;               // the chisel taps
-      // the block she is working, bedded in front of her
-      c.fillStyle = '#6e6a60';
-      c.beginPath(); c.moveTo(-20, 0); c.quadraticCurveTo(-22, -11, -14, -13);
-      c.quadraticCurveTo(-6, -14, -7, 0); c.closePath(); c.fill();
-      c.fillStyle = 'rgba(248,246,238,0.5)';
-      c.beginPath(); c.moveTo(-17, -9); c.quadraticCurveTo(-13, -12.5, -9.5, -8);
-      c.quadraticCurveTo(-13, -6, -17, -9); c.closePath(); c.fill();
-      // squat and wide: the Telchines were sea-smiths, low to their work
-      robe(0, 26, 20 + br, '#5e5a52', '#46433c');
-      c.fillStyle = '#7a6a4e'; c.fillRect(-10, -18 - br, 20, 12);   // the stone apron
-      head(2, -24 - br, 6.8, '#c8a882');
-      // NO EAR AND NO CURL BESIDE IT — a bound head-cloth pulled flat over
-      // where the ears would be. She was born without them; that deafness is
-      // the only reason the song never took her, and the silhouette says so.
-      c.fillStyle = '#8a8278';
-      c.beginPath(); c.arc(2, -26 - br, 7.4, Math.PI * 0.96, Math.PI * 0.04); c.fill();
-      c.fillRect(-5.4, -27 - br, 15, 5);
-      c.fillStyle = '#2a2a30'; c.fillRect(3.5, -25 - br, 2, 2); c.fillRect(7, -25 - br, 2, 2);
-      // hammer and chisel: the chisel held to the block, the hammer coming down
-      c.strokeStyle = '#5c5346'; c.lineWidth = 2.2; c.lineCap = 'round';
-      c.beginPath(); c.moveTo(-8, -14); c.lineTo(-13, -10); c.stroke();
-      c.beginPath(); c.moveTo(6, -16); c.lineTo(-2, -20 - sc); c.stroke();
-      c.fillStyle = '#8a8ea0'; c.fillRect(-6, -23 - sc, 6, 4);
+      // SHE FACES HER WORK, and her work faces the player. drawHeroNPC is
+      // called already flipped toward the cat, so +x is the way she is
+      // looking: the block goes there. The first pass put it behind her left
+      // shoulder, which drew a smith hammering over her own back.
+      const sc = Math.abs(Math.sin(tn * 3.2)) * 3.4;     // the hammer coming down
+      // the block she is working, bedded on the ground clear of her skirts
+      c.fillStyle = '#6b675e';
+      c.beginPath(); c.moveTo(16, 0); c.quadraticCurveTo(14, -12, 22, -14.5);
+      c.quadraticCurveTo(30, -15, 29, 0); c.closePath(); c.fill();
+      c.fillStyle = '#c9c4b4';                            // the cut face, pale
+      c.beginPath(); c.moveTo(19, -9); c.quadraticCurveTo(23, -13.5, 27, -8.5);
+      c.quadraticCurveTo(23, -6.5, 19, -9); c.closePath(); c.fill();
+      // squat and wide: the Telchines were sea-smiths, low over their work
+      robe(0, 25, 21 + br, '#5e5a52', '#45423b');
+      c.fillStyle = '#7a6a4e';                            // the stone apron
+      c.beginPath(); c.moveTo(-8, -16 - br); c.lineTo(9, -16 - br);
+      c.quadraticCurveTo(8, -5, 0, -4); c.quadraticCurveTo(-7, -5, -8, -16 - br);
+      c.closePath(); c.fill();
+      head(2, -25 - br, 6.8, '#c8a882');
+      // NO EAR, AND NOTHING BESIDE IT. A bound head-cloth pulled flat across
+      // the temples — a low band over the crown, never a hood over the face:
+      // she was born without hearing, that deafness is the only reason the
+      // singers never took her, and the silhouette has to say it while the
+      // face stays a face.
+      c.fillStyle = '#8f8880';
+      c.beginPath(); c.arc(2, -26 - br, 7.2, Math.PI * 0.98, Math.PI * 0.02); c.fill();
+      c.fillRect(-5, -27.6 - br, 14.4, 3.4);
+      c.fillStyle = '#2a2a30';
+      c.fillRect(3.4, -24.6 - br, 2, 2); c.fillRect(7, -24.6 - br, 2, 2);
+      // ---- the work, both hands, kept clear of her face: the chisel held to
+      // the block and the hammer swinging down onto it
+      c.strokeStyle = '#5c5346'; c.lineWidth = 2.4; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(7, -14); c.quadraticCurveTo(13, -13, 17, -10); c.stroke();
+      c.strokeStyle = '#8a8ea0'; c.lineWidth = 1.8;       // the chisel itself
+      c.beginPath(); c.moveTo(17.5, -10); c.lineTo(21, -8.5); c.stroke();
+      c.strokeStyle = '#5c5346'; c.lineWidth = 2.6;       // the hammer arm
+      c.beginPath(); c.moveTo(4, -16); c.quadraticCurveTo(11, -17 - sc, 15, -15 - sc); c.stroke();
+      c.fillStyle = '#8a8ea0';
+      c.beginPath(); c.ellipse(17.5, -15 - sc, 3.6, 2.5, 0.3, 0, 7); c.fill();
+      // chips off the cut, at the moment of the blow
+      if (sc < 0.6) {
+        c.strokeStyle = 'rgba(240,236,222,0.75)'; c.lineWidth = 1;
+        for (let k = 0; k < 3; k++) {
+          const a2 = -1.0 + k * 0.42;
+          c.beginPath(); c.moveTo(21, -9);
+          c.lineTo(21 + Math.cos(a2) * 6.5, -9 + Math.sin(a2) * 6.5); c.stroke();
+        }
+      }
       return true;
     }
     // 'lumen' (the Lost Nymph) keeps the shared leaf-sprite — she already
