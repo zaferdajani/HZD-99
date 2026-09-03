@@ -64,15 +64,31 @@ const check = (name, ok, detail) => {
     // The rise the column ahead presents to a body standing where she is: the
     // top of the solid run it puts in her way, measured from her feet. This is
     // the same question stepUpTop asks, asked out loud.
+    // WHAT IS IN FRONT OF HER — and "in front" is a span, not a sample.
+    //
+    // This read ONE column, two pixels past her front edge, and reported 0 —
+    // "open ground ahead" — whenever she came to rest with that edge a few
+    // pixels short of a tile boundary and the thing stopping her was the NEXT
+    // column. That is how a genuine two-tile cave wall in CV1 was reported as a
+    // halt in front of nothing, failing the room for a bump it does not have.
+    // She is flush against whatever holds her, so the blocker is inside the
+    // first few pixels of her nose; scan those columns and answer with the
+    // tallest thing in them.
     const riseAhead = () => {
       const solid = (tx, ty) => { const c = tileAt(tx, ty); return c === '#' || c === 'B'; };
       const feet = player.y + player.h;
-      const tx = Math.floor((player.x + player.w + 2) / TILE);
       const base = Math.floor((feet - 1) / TILE);
-      for (let k = 0; k <= 4; k++) {
-        if (!solid(tx, base - k)) return k === 0 ? 0 : feet - (base - k + 1) * TILE;
+      const nose = player.x + player.w;
+      let worst = 0;
+      for (let tx = Math.floor(nose / TILE); tx <= Math.floor((nose + 6) / TILE); tx++) {
+        let rise = 0;
+        for (let k = 0; k <= 4; k++) {
+          if (!solid(tx, base - k)) { rise = k === 0 ? 0 : feet - (base - k + 1) * TILE; break; }
+          if (k === 4) rise = 999;                  // five tiles: a wall
+        }
+        worst = Math.max(worst, rise);
       }
-      return 999;                                   // five tiles: a wall
+      return worst;
     };
 
     // ---- 1: what stops her is elevation -------------------------------------
@@ -156,12 +172,23 @@ const check = (name, ok, detail) => {
       // comparable; a page that is genuinely dead still ends here rather than
       // hanging the suite.
       const wallStop = performance.now() + 40000;
-      let frames = 0, mid = null;
+      let frames = 0, mid = null, lastClock = t0;
       while ((G.simClock || 0) - t0 < 5 && performance.now() < wallStop) {
         keys.ArrowRight = 1;                        // direction only. Never jump.
         await new Promise(k => requestAnimationFrame(k));
-        frames++;
         if (G.roomId !== id || player.dead) break;  // she walked out; not a stall
+        // A SAMPLE IS A SIMULATED FRAME, NOT A CALLBACK.
+        //
+        // rAF callbacks are not evenly spaced under load: after a stall the
+        // browser delivers several back to back, and between two of those the
+        // simulation has advanced by nothing at all. Twelve such samples in a
+        // row read as a body that has stopped dead — which is how this reported
+        // "CV1 @0px", a halt in front of no step, on a machine running the rest
+        // of the suite, and passed the same room standing alone. The clock says
+        // whether anything happened; a callback does not.
+        if ((G.simClock || 0) <= lastClock) continue;
+        lastClock = G.simClock || 0;
+        frames++;
         const dx = player.x - last;
         travelled += Math.max(0, dx);
         if (dx < 0.4) run++; else run = 0;
