@@ -67,8 +67,16 @@ const GLOW_LIFT_MIN = 25;      // ...and the lamps are visibly on (mean 0-255 ar
       const n = G.statics.find((s) => s.type === 'npc');
       player.x = (n ? n.x : 12 * TILE) - 200; player.y = (G.roomDef.h - 2) * TILE - player.h;
     }, room);
-    // the plates are lazy; the picture has to be the finished one
-    await page.waitForTimeout(2500);
+    // THE PLATES ARE LAZY, AND THE PICTURE HAS TO BE THE FINISHED ONE. A
+    // fixed wait was enough alone and not enough behind a harness that had
+    // just walked every room: a plate landing between the pin and the read is
+    // a different picture, measured as a different room. So the art is DRAINED
+    // — every fetch this page has started, to its full tier (MEDIA_LOW 3; the
+    // quarter-scale stand-in fills MEDIA_RAW first and does not count) — the
+    // same drain tests/kingdom.cjs uses for the same reason.
+    await page.waitForTimeout(600);
+    await page.waitForFunction(() => Object.keys(MEDIA_PEND).every((k) => MEDIA_LOW[k] === 3), { timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(300);
     const r = await page.evaluate(({ shipped }) => {
       const shot = (add) => {
         // ONE FRAME, DRAWN BY HAND, WITH THE DIAL PINNED. draw() is called
