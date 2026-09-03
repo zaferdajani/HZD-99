@@ -96,9 +96,9 @@ plate can be traced back to the generation it came from.
 | `characters/{kiln,rime,snare}/*.png`, `backgrounds/winch_house.png` | Higgsfield, Seedream 4.5 | the zone C/D/E enemies (§2l, §2n, §2p) and Servo's winch (§2t) |
 | `backgrounds/{forge,carrel,hollow}_front.png` / `_interior.jpg` | Higgsfield, Seedream 4.5 | the Tinker's forge (§2k), the Archivist's carrel (§2m) and Lumen's hollow (§2o) |
 | `characters/npc_6yaw.webp`, `characters/roster_8yaw.png` | Higgsfield | the NPC and creature turnaround sheets; the NPC sheet refired 2026-09-03 into the corridor film's painted look, 42 cells, every plate in `source/npc/style_d/`; the roster's five enemy rows refired the same day, 40 cells, in `source/roster/style_d/` (ART_QUEUE §2am) |
-| `characters/beasts/*`, `characters/flora/*`, `characters/gear/*` | Higgsfield | the animal line, the flora deck, the equipment plates |
+| `characters/beasts/*`, `characters/flora/*`, `characters/gear/*` | Higgsfield | the animal line, the flora deck, the equipment plates; the wolf line (Alpha, wolf, cheetah — 25 plates) refired 2026-09-03 into the corridor film's painted look, in `source/beasts/style_d/` (ART_QUEUE §2am) |
 | `backgrounds/ceil_*.jpg`, `backgrounds/lair_*.png`, `backgrounds/gate_city.jpg` | Higgsfield | ceiling tiers, guardian lairs, the city gate monument |
-| boss parts atlases (per-guardian) | Higgsfield | restyled through `tools/bossparts.cjs`; see ART_BIBLE.md §3 |
+| boss parts atlases (per-guardian) | Higgsfield | restyled through `tools/bossparts.cjs`; see ART_BIBLE.md §3. NULLFANG's atlas refired 2026-09-03 into the corridor film's painted look, 16 parts in `source/beast/style_d/` (ART_QUEUE §2am) |
 | `video/*.mp4` | Higgsfield | the intro films and cinematics |
 
 ### Generated audio — the score, the voices and the foley

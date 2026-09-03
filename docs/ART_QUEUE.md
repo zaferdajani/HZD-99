@@ -572,6 +572,19 @@ URIs crash the page): 16/16, five joints letterboxed for aspect drift
 shows him assembled without a gap the eye finds. `artbible bosspace lowres`
 green. Plates in `assets/source/beast/style_d/`, before-atlas beside them.
 
+**THE WOLF LINE, painted** — the Alpha's eleven states, the wolf's seven,
+the cheetah's seven. The first take was fired from the shipped renders
+themselves and came back as the renders with a rim light: §2 of
+`art-prompts` in reverse — an unblurred reference carries its rendering
+style however loudly the prompt says not to. Refired from copies blurred to
+nothing but shape (sigma 5 at 1280 px) with "NOT a 3D render, NOT photoreal
+metal, no specular highlights" as the loudest line, and the second take is
+paint: brush planes, ink, the cyan rim. `drawBeastPlate` scales the WHOLE
+IMAGE by k, so the new plates were refitted by the new `tools/refit.cjs`
+into each old plate's frame at the old subject's size — every Alpha k and
+foot stays true, and `bossshot A10 rest,coil,roar,leap` shows him his own
+size. `artbible lowres` green. Plates in `assets/source/beasts/style_d/`.
+
 **Still in the old 3D look, on THE FIRING LIST in order:** the NPC interiors; the wallpapers via `bgderive`; the guardian parts
 atlases (75 parts); the enemy briefs (§2i, §2l, §2n, §2p); the lairs and gates
 (§2f, §2g); the four §2aj plates.
