@@ -13,15 +13,25 @@
 // owner saw, and the atlas reads fractions, so the game does not care.
 //
 //   node tools/yawsheet.cjs <platedir> <out.png> row1 row2 ...   (files <row>_<col>.png)
+//   --cols=8 for an eight-yaw sheet (the creature roster); default 6.
+//   --cw=624 --ch=456 cell size; --fill=1 --floor=0 how much of the cell the
+//   tallest figure takes and the gap under the feet (the roster's old rows are
+//   laid TIGHT, fill 1.0, and drawAtlas sizes by the cell, so a looser row
+//   would draw every enemy smaller).
 const { chromium } = require('playwright'); const fs = require('fs'), path = require('path');
 (async () => {
-  const [dir, out, ...rows] = process.argv.slice(2);
-  if (!dir || !out || !rows.length) { console.error('usage: yawsheet.cjs <platedir> <out.png> row...'); process.exit(2); }
-  const CW = 600, CH = 780, COLS = 6;
+  const argv = process.argv.slice(2);
+  const colsArg = argv.find(a => a.startsWith('--cols='));
+  const [dir, out, ...rows] = argv.filter(a => !a.startsWith('--'));
+  if (!dir || !out || !rows.length) { console.error('usage: yawsheet.cjs <platedir> <out.png> row... [--cols=N]'); process.exit(2); }
+  const COLS = colsArg ? parseInt(colsArg.split('=')[1], 10) : 6;
+  const opt = (k, d) => { const a = argv.find(x => x.startsWith('--' + k + '=')); return a ? parseFloat(a.split('=')[1]) : d; };
+  const CW = opt('cw', COLS === 6 ? 600 : 480), CH = opt('ch', COLS === 6 ? 780 : 480);
+  const FILL = opt('fill', 0.96), FLOOR = opt('floor', 0.02);
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
   await p.exposeFunction('bytes', f => fs.existsSync(f) ? fs.readFileSync(f).toString('base64') : '');
-  const res = await p.evaluate(async ({ dir, rows, CW, CH, COLS }) => {
+  const res = await p.evaluate(async ({ dir, rows, CW, CH, COLS, FILL, FLOOR }) => {
     const cv = document.createElement('canvas'); cv.width = CW * COLS; cv.height = CH * rows.length;
     const c = cv.getContext('2d'); c.imageSmoothingQuality = 'high';
     const log = [];
@@ -40,16 +50,16 @@ const { chromium } = require('playwright'); const fs = require('fs'), path = req
         figs.push({ im, x0, y0, w: x1 - x0 + 1, h: y1 - y0 + 1 });
       }
       const have = figs.filter(Boolean);
-      const s = Math.min(...have.map(f => Math.min(CH * 0.96 / f.h, CW * 0.96 / f.w)));
+      const s = Math.min(...have.map(f => Math.min(CH * FILL / f.h, CW * 0.96 / f.w)));
       figs.forEach((f, col) => {
         if (!f) { log.push(rows[r] + '_' + col + ' MISSING'); return; }
         const dw = f.w * s, dh = f.h * s;
-        c.drawImage(f.im, f.x0, f.y0, f.w, f.h, col * CW + (CW - dw) / 2, r * CH + CH * 0.98 - dh, dw, dh);
+        c.drawImage(f.im, f.x0, f.y0, f.w, f.h, col * CW + (CW - dw) / 2, r * CH + CH * (1 - FLOOR) - dh, dw, dh);
       });
       log.push(rows[r] + ' scale ' + s.toFixed(3) + ' heights ' + figs.map(f => f ? Math.round(f.h * s) : '-').join('/'));
     }
     return { png: cv.toDataURL('image/png'), log };
-  }, { dir, rows, CW, CH, COLS });
+  }, { dir, rows, CW, CH, COLS, FILL, FLOOR });
   fs.writeFileSync(out, Buffer.from(res.png.split(',')[1], 'base64'));
   console.log(res.log.join('\n')); console.log(out);
   await b.close();

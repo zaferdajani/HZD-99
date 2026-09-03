@@ -95,7 +95,7 @@ plate can be traced back to the generation it came from.
 | `fx/slash_[h,d,u,dn].png`, `characters/gear/jetpack*.png` | Higgsfield | the crystal slash light-sheets (§1b-i) and the back-jet gear (§1c) |
 | `characters/{kiln,rime,snare}/*.png`, `backgrounds/winch_house.png` | Higgsfield, Seedream 4.5 | the zone C/D/E enemies (§2l, §2n, §2p) and Servo's winch (§2t) |
 | `backgrounds/{forge,carrel,hollow}_front.png` / `_interior.jpg` | Higgsfield, Seedream 4.5 | the Tinker's forge (§2k), the Archivist's carrel (§2m) and Lumen's hollow (§2o) |
-| `characters/npc_6yaw.webp`, `characters/roster_8yaw.png` | Higgsfield | the NPC and creature turnaround sheets; the NPC sheet refired 2026-09-03 into the corridor film's painted look, 42 cells, every plate in `source/npc/style_d/` (ART_QUEUE §2am) |
+| `characters/npc_6yaw.webp`, `characters/roster_8yaw.png` | Higgsfield | the NPC and creature turnaround sheets; the NPC sheet refired 2026-09-03 into the corridor film's painted look, 42 cells, every plate in `source/npc/style_d/`; the roster's five enemy rows refired the same day, 40 cells, in `source/roster/style_d/` (ART_QUEUE §2am) |
 | `characters/beasts/*`, `characters/flora/*`, `characters/gear/*` | Higgsfield | the animal line, the flora deck, the equipment plates |
 | `backgrounds/ceil_*.jpg`, `backgrounds/lair_*.png`, `backgrounds/gate_city.jpg` | Higgsfield | ceiling tiers, guardian lairs, the city gate monument |
 | boss parts atlases (per-guardian) | Higgsfield | restyled through `tools/bossparts.cjs`; see ART_BIBLE.md §3 |

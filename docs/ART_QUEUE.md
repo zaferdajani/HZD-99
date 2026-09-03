@@ -548,6 +548,17 @@ turns the far and mid layers into zone-gradient silhouettes and washes the
 near one toward the zone, so every zone keeps its colour. Masters in
 `assets/source/sky/`.
 
+**The roster's five enemies** (crawler, hopper, blob, flier, turret — the
+five rows Kingdom 1 fights) refired, all 40 cells, each from its own blurred
+156×114 cell with its palette named, laid by `tools/yawsheet.cjs --cols=8`
+at 4× the old cell and — measured off the old sheet — the old rows' TIGHT
+fill (1.0, feet on the cell edge; blob 0.94 / 0.06), because `drawAtlas`
+sizes an enemy by its cell and a looser row would have shrunk every one of
+them. The untouched rows (hzd, brood, atlas, zero, prism, mother) ride along
+upscaled; the sheet ships at 2496×2508. Two white-field refires. Plates in
+`assets/source/roster/style_d/`, contact in `_sheets/`. `artbible lowres
+frames` green; A1 / A6 / A7 / A2 photographed.
+
 **Still in the old 3D look, on THE FIRING LIST in order:** the NPC interiors; the wallpapers via `bgderive`; the guardian parts
 atlases (75 parts); the enemy briefs (§2i, §2l, §2n, §2p); the lairs and gates
 (§2f, §2g); the four §2aj plates.
