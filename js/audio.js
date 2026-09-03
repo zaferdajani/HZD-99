@@ -290,7 +290,36 @@ function playBuf(key, vol, rate) {
     const m = voxMech();
     if (m) g.connect(m.in);
   }
-  s.start();
+  // A TAKE IS PLAYED FROM ITS TRANSIENT, NOT FROM ITS FIRST SAMPLE.
+  //
+  // The takes are generated at about a second and they do not all begin at the
+  // top: several spend a long quiet lead-in before the thing actually happens.
+  // Measured on the shipped files, the loudest moment of hz_swing1 is 393 ms
+  // in, hz_dash's is 260 ms, hz_stepice1's is 301 ms. Two things went wrong
+  // because of it, and they are the same thing.
+  //
+  // The sound arrived LATE — a swing whose crack lands four hundred
+  // milliseconds after the button is a sound the hand does not connect to the
+  // action; and the gate below, which exists to stop a one-second take
+  // out-ringing the 0.17 s gesture, was then cutting the take before its own
+  // peak. Measured through the exact envelope this function schedules,
+  // hz_swing1 reached the player 9.5 dB under its real peak carrying 1% of its
+  // energy, hz_dash 18.6 dB under carrying 8%, hz_steporg1 20.1 dB under
+  // carrying 4%. Half her foley was a whisper of its own run-up.
+  //
+  // Starting at the onset fixes both at once and costs nothing: the gesture
+  // lands on the frame it happens, and the gate's window now covers the body
+  // of the sound instead of the silence in front of it.
+  // ...and eased in over 5 ms, because starting mid-waveform is a step
+  // discontinuity, which is a click — the one artefact a player hears every
+  // single time (the same reason the gate below ramps instead of stopping)
+  const onset = bufOnset(key);
+  if (onset > 0 && vol > 0) {
+    const t0 = AC.currentTime;
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.005);
+  }
+  s.start(0, onset);
   // the gesture's length, closed with a ramp rather than a stop: a buffer cut
   // dead mid-cycle is a click, and a click is the one artefact a player hears
   // every single time
@@ -302,6 +331,43 @@ function playBuf(key, vol, rate) {
     s.stop(t + gate + 0.02);
   }
   return true;
+}
+// Where a take actually starts sounding: the first sample within 20 dB of its
+// own peak, backed off 6 ms so the attack itself is never clipped. Measured
+// once per buffer and remembered — the scan is over a one-second mono buffer,
+// but doing it on every footstep would be a scan per step.
+const ONSET = {};
+function bufOnset(key) {
+  if (ONSET[key] != null) return ONSET[key];
+  const b = MBUF[key];
+  if (!b) return 0;
+  const d = b.getChannelData(0);
+  let peak = 0;
+  for (let i = 0; i < d.length; i++) { const a = Math.abs(d[i]); if (a > peak) peak = a; }
+  let at = 0, peakAt = 0;
+  if (peak > 1e-6) {
+    const fl = peak * 0.1;                       // -20 dB below the take's own peak
+    let found = false;
+    for (let i = 0; i < d.length; i++) {
+      const a = Math.abs(d[i]);
+      if (!found && a > fl) { at = i / b.sampleRate; found = true; }
+      if (a === peak) { peakAt = i / b.sampleRate; break; }
+    }
+  }
+  at = Math.max(0, at - 0.006);
+  // ...and if the take BLOOMS rather than cracks, come in late enough that its
+  // loudest moment still falls inside the gesture. Trimming silence is not
+  // enough for these: hz_swing1 crosses -20 dB at 25 ms and does not peak until
+  // 393 ms, so there is no lead-in to cut — the sound is simply slower than the
+  // move it belongs to. A take like that cannot serve a 0.17 s gesture as
+  // written and its replacement is briefed for the audio session; until then the
+  // engine hands the player the part that carries the meaning. PRE keeps the
+  // last of the run-up so a whoosh is still a whoosh and not just its crack.
+  const gate = TAKE_GATE[key];
+  const PRE = 0.045;
+  if (gate && peakAt > at + PRE) at = Math.max(at, peakAt - PRE);
+  if (gate) at = Math.min(at, Math.max(0, b.duration - gate * 0.9));
+  return (ONSET[key] = at);
 }
 // unlock on ANY first interaction, not just canvas/keyboard
 ['pointerdown', 'touchstart', 'touchend', 'mousedown', 'keydown', 'click'].forEach(ev =>
