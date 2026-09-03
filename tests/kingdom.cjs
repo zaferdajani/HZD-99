@@ -82,28 +82,96 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
       const place = {};
       for (const id of ids) for (const e of (ROOMS[id].ents || [])) if (EKIND[e[0]] && !place[e[0]]) place[e[0]] = { room: id, tx: e[1], ty: e[2] };
       const stage = ids.find(id => !ROOMS[id].cave && !(ROOMS[id].ents || []).some(e => e[0] === 'boss')) || ids[0];
-      const measure = (kind, room, tx, ty) => {
+      // Every fetch this page has started that has not FULLY landed. Not
+      // `!MEDIA_RAW[k]`: mediaFetch(urgent) also pulls the quarter-scale copy,
+      // which fills MEDIA_RAW while the real sheet is still coming, so that
+      // test calls a stand-in "arrived" and the sharp one still lands in the
+      // middle of the measurement. MEDIA_LOW 3 is set by the full sheet's own
+      // onload and means exactly what is needed here: nothing left in flight.
+      const artPending = () => Object.keys(MEDIA_PEND).filter(k => MEDIA_LOW[k] !== 3);
+      const measure = async (kind, room, tx, ty) => {
         boot(room); G.enemies = []; if (G.boss) G.boss.st = 'dorm';
         const ex = tx * TILE, ey = ty * TILE;
-        const e = new Enemy(kind, ex, ey); G.enemies.push(e);
+        let e = new Enemy(kind, ex, ey); G.enemies.push(e);
         // she stands on the FLOOR under it (a bat hangs from a ceiling; a
         // turret sits on a ledge), two tiles off, stepping in and out so the
         // thing has a reason to do everything it does
         let fty = ty; while (fty < G.roomDef.h - 1 && !solidAt(Math.floor((ex + 8) / TILE), fty)) fty++;
         const px0 = ex - 2 * TILE - player.w, py = fty * TILE - player.h;
         const seen = [];
-        for (let f = 0; f < 600; f++) {
-          player.x = px0 + (f % 140 < 70 ? 0 : 56); player.y = py; player.iT = 99; player.vx = 0; player.vy = 0;
-          update(DT);
-          if (f % 6 === 0 && !e.dead) { const m = maskOf(e); if (m && !seen.some(s => iou(s, m) > 0.85)) seen.push(m); }
-        }
+        // ...AND THE ART IS IN BEFORE THE FIRST SAMPLE IS TAKEN. This is the
+        // third and largest source of the same disagreement: these creatures
+        // are drawn from authored sheets when the sheet is there and
+        // procedurally when it is not, and the sheets are fetched lazily by
+        // the first draw that wants one. So a measurement started cold sampled
+        // a hand-drawn guard for its first seconds and an authored one for the
+        // rest — two different animals, counted as one — and how many of each
+        // depended entirely on the network. A few frames kick the fetches; the
+        // drain waits for them.
+        for (let f = 0; f < 6; f++) { update(DT); maskOf(e); }
+        const tArt = Date.now();
+        while (Date.now() - tArt < 15000 && artPending().length) await new Promise(r => setTimeout(r, 50));
+        // THE PICTURES ARE ON THE WALL CLOCK, SO THE WALL CLOCK IS DRIVEN.
+        //
+        // Ten seconds of simulation are stepped here at a fixed DT, which
+        // looks deterministic and is not: these bodies breathe, spin, flicker
+        // and blink off `performance.now()`, not off the sim clock. So how
+        // much of a creature's animation the hundred samples actually catch
+        // depended on how fast this loop happened to run — and under a full
+        // suite sharing four cores, a hundred samples could land inside a
+        // couple of real seconds and see one wingbeat. Measured on an
+        // UNCHANGED build: zone B failed one run in three, and it was a
+        // different creature each time (turret 3, blob 4, sage 3), which is
+        // the signature of a sampling race rather than of missing art.
+        //
+        // The clock now advances one step per step, the way it would if the
+        // game were being played, so the frames sampled are the frames the
+        // player would see and the count is the same on every machine.
+        //
+        // ...AND THE DICE ARE SEEDED, for the other half of the same problem.
+        // A creature's poses are chosen by its own state machine off
+        // Math.random, so ten seconds of it is a different ten seconds every
+        // run: the sage came back with 3 pictures, then 13, then 4 on one
+        // unchanged build. Freezing the dice to a constant (what
+        // tests/shopread.cjs does, correctly, to hold a PICTURE still) would
+        // be wrong here — a creature that always rolls the same number never
+        // changes state and the answer would be 1. So the stream is SEEDED
+        // instead: still varied, still the creature's own behaviour, and the
+        // same stream on every machine and every run. Seeded per kind, so two
+        // creatures measured back to back do not walk the same numbers.
+        const realNow = performance.now, realRand = Math.random;
+        let clk = realNow.call(performance);
+        performance.now = () => clk;
+        let sd = 0; for (let i = 0; i < kind.length; i++) sd = (sd * 131 + kind.charCodeAt(i)) >>> 0;
+        sd = (sd + 0x9e3779b9) >>> 0;
+        Math.random = () => {   // mulberry32
+          sd = (sd + 0x6d2b79f5) >>> 0;
+          let x = sd;
+          x = Math.imul(x ^ (x >>> 15), x | 1);
+          x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+          return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+        };
+        // and the creature is BUILT under the seeded dice, not before them: a
+        // body's phase offsets are rolled in its own constructor, and a
+        // measurement that seeds afterwards starts every run from a different
+        // point in the animation it is about to count.
+        boot(room); G.enemies = []; if (G.boss) G.boss.st = 'dorm';
+        e = new Enemy(kind, ex, ey); G.enemies.push(e);
+        try {
+          for (let f = 0; f < 600; f++) {
+            clk += DT * 1000;
+            player.x = px0 + (f % 140 < 70 ? 0 : 56); player.y = py; player.iT = 99; player.vx = 0; player.vy = 0;
+            update(DT);
+            if (f % 6 === 0 && !e.dead) { const m = maskOf(e); if (m && !seen.some(s => iou(s, m) > 0.85)) seen.push(m); }
+          }
+        } finally { performance.now = realNow; Math.random = realRand; }
         return seen.length;
       };
       for (const kind of kinds) {
         const P = place[kind];
         // where its room puts it, and on the kingdom's open floor: the better of the two
-        const a = measure(kind, P.room, P.tx, P.ty);
-        const b = measure(kind, stage, 11, G.roomDef.h - 2 - (/flier|bat/.test(kind) ? 7 : 0));
+        const a = await measure(kind, P.room, P.tx, P.ty);
+        const b = await measure(kind, stage, 11, G.roomDef.h - 2 - (/flier|bat/.test(kind) ? 7 : 0));
         out.enemies[kind] = Math.max(a, b);
       }
       // ---- 3. the guardian
