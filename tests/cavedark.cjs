@@ -54,7 +54,57 @@ const check = (name, ok, detail) => {
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
     sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
     startGame(sv);
-    const rest = async n => { for (let i = 0; i < n; i++) await new Promise(k => requestAnimationFrame(k)); };
+    // THE HARNESS OWNS THE CLOCK.
+    //
+    // Every number in this file is read off the live backbuffer, and what is on
+    // the backbuffer depends on two things a busy machine changes: how many
+    // simulation steps mainLoop packed into the frames waited for, and where in
+    // its cycle the lighting's own wall-clock animation happens to be. That is
+    // the whole reason this file grew retry loops and two-reads-must-agree
+    // rules — every one of them is a symptom, and the cause is that the
+    // measurement was riding the browser's frame rate. So the game's loop is
+    // unhooked, performance.now is stubbed, and a "frame" here is one call to
+    // mainLoop with one synthetic 60 Hz tick. Same frame path, same drawing,
+    // taken when this file says so. The retry loops stay: they also guard
+    // against a state change that genuinely has not finished, which is a real
+    // thing and not a timing artefact.
+    //
+    // Each driven frame still yields to the event loop, because room entry
+    // starts real downloads and an image that never gets a turn to arrive is a
+    // room drawn by the procedural fallback — a different measurement.
+    // ...AND THE DICE TOO. The clock alone was not enough: motes, sparks and
+    // flicker are rolled off Math.random, so "the ground across the room" came
+    // back 18.15, then 36.95, then 19.84 on three runs of an unchanged build —
+    // a factor of two, decided by dust. Seeded rather than frozen, so the
+    // scene still has its life in it and has the SAME life every run.
+    const realRand = Math.random;
+    let sd = 0x9e3779b9;
+    Math.random = () => {                            // mulberry32
+      sd = (sd + 0x6d2b79f5) >>> 0;
+      let x = sd;
+      x = Math.imul(x ^ (x >>> 15), x | 1);
+      x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
+    const realNow = performance.now, realRAF = window.requestAnimationFrame;
+    let clk = realNow.call(performance);
+    await new Promise(k => realRAF(k));
+    window.requestAnimationFrame = () => 0;
+    await new Promise(k => setTimeout(k, 40));      // let the armed callback land
+    performance.now = () => clk;
+    const STEP = 1000 / 60;
+    const rest = async n => {
+      for (let i = 0; i < n; i++) { clk += STEP; mainLoop(clk); await new Promise(k => setTimeout(k, 0)); }
+    };
+    // ...and art in flight is waited out on the REAL clock, so a room is
+    // measured with its plates in rather than halfway through fetching them
+    const artIn = async (ms) => {
+      const t0 = Date.now();
+      while (Date.now() - t0 < (ms || 8000)
+             && Object.keys(MEDIA_PEND).some(k => MEDIA_LOW[k] !== 3))
+        await new Promise(k => setTimeout(k, 50));
+    };
+    await artIn(15000);
     await rest(40);
     const ctx = cv.getContext('2d', { willReadFrequently: true });
     const out = {};
@@ -85,12 +135,13 @@ const check = (name, ok, detail) => {
     // the loop is prevented from changing its mind mid-measurement.
     const pin = async on => {
       richBG = !!on; richHold = 999; richK = on ? 1 : 0;
-      for (let i = 0; i < 6; i++) await new Promise(k => requestAnimationFrame(k));
+      await rest(6);
     };
     const enter = async (room, at) => {
       loadRoom(room);
       if (at != null) { player.x = at * TILE; player.y = (ROOMS[room].h - 3) * TILE; }
       G.dialog = null; G.trans = null; G.state = 'PLAY';   // NOT G.toast — it is a function
+      await rest(2); await artIn();                        // kick the fetches, then let them land
       await rest(30);
     };
 
@@ -140,7 +191,7 @@ const check = (name, ok, detail) => {
       const px0 = player.x, py0 = player.y;
       for (let i = 0; i < n; i++) {
         player.x = px0; player.y = py0; player.vx = 0; player.vy = 0;
-        await new Promise(k => requestAnimationFrame(k));
+        await rest(1);
       }
       player.x = px0; player.y = py0; player.vx = 0; player.vy = 0;
     };
@@ -255,6 +306,11 @@ const check = (name, ok, detail) => {
       out.meadow = a2; out.meadowProbe = b2; out.meadowTries = attempt + 1;
       break;
     }
+    // hand the clock back and RE-ARM the loop — restoring requestAnimationFrame
+    // alone leaves mainLoop stopped with nothing left to call it
+    performance.now = realNow; window.requestAnimationFrame = realRAF;
+    Math.random = realRand;
+    realRAF.call(window, mainLoop);
     return out;
   });
 
