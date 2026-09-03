@@ -13054,7 +13054,22 @@ function caveLightList() {
 // ...and once the plate itself is graded up, the mask has far less work to do:
 // its job here is shape, not exposure. 0.22 is a room with corners rather than
 // a room with the lights off, and the lamps still carry the reading.
-const INT_K = 0.22, INT_ADD = 0.95;
+//
+// THE LAMPS WERE TUNED WITH THE LAMPS OFF (owner's phone, 2026-09-03: the den
+// under a yellow disc the size of the room, Ratchet a ghost inside it — "it
+// went away then came back"). The additive pass rides richK, and on the
+// software rasteriser every harness runs on, richK is at zero within seconds
+// of any room loading. So every headless look anyone ever took at an interior
+// was the glow-OFF picture — "dull and dark", the very complaint the pass was
+// written to answer — and INT_ADD climbed to 0.95 to brighten lamps that were
+// not being drawn. On a phone the dial sits at one. At 0.95, added over a
+// painting that is already lit, 73% of the pixels around the keeper clipped,
+// in all six interiors; and the on/off he saw was the dial falling under load
+// and recovering, not the chest. 0.25 is the value at which every interior
+// keeps its picture with the dial OPEN — tests/denlight.cjs pins richK at one
+// and measures it — while the keeper's spot still doubles in brightness against
+// the glow-off room. `let`, like the BG_ knobs, so the harness can sweep it.
+let INT_K = 0.22, INT_ADD = 0.25;
 const INT_TINT = 'rgb(30,19,12)';
 // each kingdom's interior takes its own warm accent, so the Foundry's forge and
 // the Archives' carrel are lamplit in their own colour rather than the meadow's
