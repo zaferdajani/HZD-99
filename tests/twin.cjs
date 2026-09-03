@@ -123,6 +123,27 @@ const check = (name, ok, detail) => {
   // whooshes) is broadband and does not favour any one bin, so a narrow DFT at
   // the four frequencies reads through it.
   const snd = await page.evaluate(async () => {
+    // AN OFFLINE RENDER SHOULD BE REPRODUCIBLE, AND THIS ONE WAS NOT.
+    //
+    // It came back `2 1 2 3` on one suite run and `0 1 2 3` on every run
+    // beside it, with nothing changed. There is no wall clock in an
+    // OfflineAudioContext, so the variation had only one place to come from:
+    // the cue's four whooshes are noise, filled from Math.random, and a narrow
+    // DFT reading a tone through broadband noise can lose to a lucky
+    // realisation of it. Seeding the stream makes the render the same render
+    // every time — which is what "the written note is the loudest in its own
+    // window" was always meant to be asserting about the CUE rather than about
+    // the dice that happened to fill its hiss.
+    const realRand = Math.random;
+    let sd = 0x9e3779b9;
+    Math.random = () => {                            // mulberry32
+      sd = (sd + 0x6d2b79f5) >>> 0;
+      let x = sd;
+      x = Math.imul(x ^ (x >>> 15), x | 1);
+      x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
+    try {
     const SR = 44100, NOTE = [784, 988, 1175, 1568];
     const off = new OfflineAudioContext(1, SR, SR);
     const save = AC; AC = off; MUTED = false;
@@ -169,6 +190,7 @@ const check = (name, ok, detail) => {
       return lo / (hi || 1e-9);
     };
     return { loudest, swirlRatio: await ratio('crystalSwirl'), burstRatio: await ratio('chargedHit') };
+    } finally { Math.random = realRand; }
   });
 
   check('the swirl has its OWN cue, on the pass clock', snd.loudest.join('') === '0123',
