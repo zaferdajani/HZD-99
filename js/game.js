@@ -720,16 +720,16 @@ function bankScrap(v) {
   G.save.scrap += v;
   if (G.save.flags.sawScrap) return;
   if (G.state !== 'PLAY' || G.dialog || G.cut || G.bossEntry || (G.boss && !G.boss.dead)) return;
-  // ...and NOT in the middle of the lesson that is asking her to collect it.
-  // The waking floor wants twelve before it moves on; a card on the first
-  // piece stops her four pieces short with the screen taken. It waits until
-  // the errand is satisfied, so the explanation lands on the beat where the
-  // step completes rather than interrupting it. Outside the tutorial there is
-  // nothing to interrupt and it fires on the first piece she touches.
-  const teaching = G.tut && !(G.save.flags && G.save.flags.tut);
-  if (teaching && G.save.scrap < 12) return;
   G.save.flags.sawScrap = 1;
-  showItem(t('i_scrap'), t('i_scrapd'));
+  // A TOAST, NOT A CARD. The first version of this called showItem, which sets
+  // G.state = 'DIALOG' — and a pickup happens while she is WALKING. Measured
+  // on the meadow: she left A1 at 96, touched the first scrap at 323, and the
+  // card took the screen with her still holding right at 340 px/s. update()
+  // simulates the player only in PLAY, so she stopped there; nine harnesses
+  // went red on one line, and every one of them was reporting the same thing
+  // the player would have felt — the game stopping to talk in the middle of a
+  // stride. A currency can introduce itself without taking the controls away.
+  G.toast(t('i_scrap') + ' — ' + t('i_scraph'));
 }
 function healUnlocked() {
   if (typeof isHero === 'function' && isHero()) return true;
