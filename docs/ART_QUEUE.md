@@ -585,7 +585,21 @@ into each old plate's frame at the old subject's size — every Alpha k and
 foot stays true, and `bossshot A10 rest,coil,roar,leap` shows him his own
 size. `artbible lowres` green. Plates in `assets/source/beasts/style_d/`.
 
-**Still in the old 3D look, on THE FIRING LIST in order:** the NPC interiors; the wallpapers via `bgderive`; the guardian parts
+**Reviewed and KEPT** (contact-sheeted, judged against the anchor, left
+alone): the six NPC places (`booth_front`, `forge_front/interior/table`,
+`carrel_front/interior`, `hollow_front/interior`, `den_interior`,
+`oracle_booth/interior`) and Kingdom 1's structures and terrain (`gate_city`,
+the cave mouths, `lair_den`, `lair_nest`, the obelisk, `rock_a`, `ceil_a`,
+`fore_a`, `edge_a`) — all already illustrated plates from §1g's world pass,
+brush and ink, and they sit beside the painted cast without a seam. Kingdom
+1 is one look end to end.
+
+**Still in the old 3D look, on THE FIRING LIST in order** (Kingdoms 2–5, the
+same pipelines): the four guardian atlases — eagle, furnace, glaciere, prism,
+mother (`bossparts extract` → head first → the rest against it → `rebuild`
+from 1024-px copies → `bossshot`); the kingdom enemies outside the roster
+(`characters/{kiln,rime,snare,bat,breaker,sage}` and `beast/`,
+`eye/`) — blurred cells, palette named, `refit.cjs` into the old frames; the wallpapers via `bgderive`; the guardian parts
 atlases (75 parts); the enemy briefs (§2i, §2l, §2n, §2p); the lairs and gates
 (§2f, §2g); the four §2aj plates.
 
