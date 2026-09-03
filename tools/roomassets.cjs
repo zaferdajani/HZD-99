@@ -34,6 +34,30 @@ const fs = require('fs'), path = require('path');
   });
 
   const res = await page.evaluate(async () => {
+    // ...and the dice are seeded, for the other half of the same problem: a
+    // room's art depends on what its enemies and its boss DO, and those pick
+    // their next state off Math.random, so two walks of the same room asked
+    // for different sheets. Seeded rather than frozen — a constant makes a
+    // state machine that never advances, and a room that never wakes its boss
+    // never asks for the boss.
+    // AND THE PREFETCHER IS OFF WHILE THIS MEASURES.
+    //
+    // preloadRoom fetches the art of rooms she can REACH from the one she is
+    // in, using the manifest this tool writes. Leaving it running while the
+    // window is open to settle means the sheets it pulls for the NEIGHBOURS
+    // land in MEDIA_PEND and are billed to the room being measured — the
+    // manifest measuring its own output, and W1 came back owning 6.7 MB
+    // including every plate of the Alpha and the city gate. PRE.on is the
+    // switch preloadRoom already checks.
+    if (typeof PRE === 'object' && PRE) PRE.on = 0;
+    let sd = 0x9e3779b9;
+    Math.random = () => {                            // mulberry32
+      sd = (sd + 0x6d2b79f5) >>> 0;
+      let x = sd;
+      x = Math.imul(x ^ (x >>> 15), x | 1);
+      x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
     const ids = Object.keys(ROOMS);
     const perRoom = {};
     // the lazy map records what it has ALREADY fetched, so the difference
@@ -49,15 +73,65 @@ const fs = require('fs'), path = require('path');
     for (const id of ids) {
       const before = new Set(seen());
       try { loadRoom(id); G.dialog = null; G.state = 'PLAY'; } catch (e) { perRoom[id] = { err: String(e) }; continue; }
-      // draw it a few times: one frame is not enough, because some art is only
-      // asked for once a boss wakes, a tile layer bakes, or the ceiling picks
-      // its weather tier
-      for (let f = 0; f < 8; f++) { try { drawGame(); } catch (e) {} await frame(); }
+      // DRAW UNTIL IT STOPS ASKING, rather than for a fixed eight frames.
+      //
+      // Eight was a guess, and the guess is why this file was different every
+      // time it was regenerated: 58 of its 94 keys landed in a different room
+      // across three consecutive runs of an unchanged tree. Some art is only
+      // requested once a boss wakes, a tile layer bakes or a ceiling picks its
+      // weather tier, and when that takes longer than the window the request
+      // goes out during the NEXT room's window and is billed to it — which is
+      // how V1B, a one-room NPC shop, came to be charged for the Prism's parts
+      // atlas.
+      //
+      // So the window closes when the room has gone quiet: no new key for
+      // QUIET frames running, capped so a room that keeps asking forever
+      // cannot hang the walk.
+      const QUIET = 20, CAP = 200;
+      let quiet = 0, mark = seen().length;
+      for (let f = 0; f < CAP && quiet < QUIET; f++) {
+        try { drawGame(); } catch (e) {}
+        await frame();
+        const n = seen().length;
+        if (n !== mark) { mark = n; quiet = 0; } else quiet++;
+      }
       const now = new Set(seen());
       perRoom[id] = { zone: ROOMS[id].zone, keys: [...now].filter(k => !before.has(k)) };
     }
     // ...and what the game grabs before any room at all: the boot set every
     // room inherits and none of them should be charged for
+    //
+    // TWO GROUPS THE WALK CANNOT OBSERVE RELIABLY, AND DOES NOT HAVE TO.
+    //
+    // A creature's state plates — snareRest / snareTell / snareLimp, and the
+    // same shape for rime, kiln and the rest — are fetched by the draw that
+    // first wants one, so whether a window catches the wind-up depends on
+    // whether the thing happened to wind up. Three consecutive walks disagreed
+    // on exactly those keys and nothing else. They do not have to be observed:
+    // a room holding a snare WILL need every picture a snare has, and both the
+    // enemy list and the key table are right here. So the groups are closed —
+    // see one, take all — which is deterministic AND more correct than the
+    // observation was, because a room whose snare never wound up during the
+    // walk still needs the plate when it does.
+    const kinds = Object.keys(typeof EKIND === 'object' ? EKIND : {});
+    const group = {};
+    for (const k of Object.keys(MEDIA_SRC.images)) {
+      const kind = kinds.find(n => k.length > n.length && k.slice(0, n.length) === n
+        && k[n.length] === k[n.length].toUpperCase());
+      if (kind) (group[kind] = group[kind] || []).push(k);
+    }
+    // ...and the PROTAGONIST is in every room, so her plates are nobody's
+    // room property. heroFidget landed in W2 on one walk and A0 on the next
+    // for no reason but which screen she happened to idle on.
+    const hers = Object.keys(MEDIA_SRC.images).filter(k => /^(hero|swing|trans)/.test(k));
+    for (const id in perRoom) {
+      const r = perRoom[id];
+      if (!r || !r.keys) continue;
+      const set = new Set(r.keys.filter(k => hers.indexOf(k) < 0));
+      for (const kind in group) if (group[kind].some(k => set.has(k))) for (const k of group[kind]) set.add(k);
+      r.keys = [...set].sort();
+    }
+    for (const k of hers) if (bootKeys.indexOf(k) < 0) bootKeys.push(k);
     return { perRoom, ids, boot: bootKeys, src: MEDIA_SRC.images };
   });
 
