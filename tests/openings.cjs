@@ -57,6 +57,39 @@ const FIGHTS = [
     const all = {};                                   // move -> [ms...]
     for (const R of F.runs) {
       const got = await page.evaluate(async ({ F, R }) => {
+        // THE DICE ARE SEEDED AND THE CLOCK IS DRIVEN, so a run is the same run
+        // on every machine.
+        //
+        // This loop steps a fixed DT and therefore LOOKS deterministic, and it
+        // is not: a guardian picks its next move off Math.random, so seventy
+        // seconds of it is a different seventy seconds every time — which is
+        // why pounce>recover came back n=27 med 800 on one run and carried a
+        // single 0 ms sample on the next, on an unchanged build, and failed the
+        // fight on it. A 0 was read as a dropped frame and answered with a
+        // percentile; the real cause was the fight taking a different path.
+        //
+        // Seeded, not frozen: a constant makes a state machine that never
+        // advances, and the answer becomes one move. The seed is per SCENARIO
+        // (fight, distance, phase) so the four runs still walk four different
+        // streams and coverage is unchanged — it is only repeatable now.
+        //
+        // performance.now is driven alongside it because these bodies breathe
+        // and blink on the wall clock, and under a loaded machine seventy
+        // simulated seconds can pass inside two real ones.
+        const realRand = Math.random, realNow = performance.now;
+        let clk = realNow.call(performance);
+        performance.now = () => clk;
+        let sd = 0; const tag = F.name + '|' + R.dist + '|' + R.phase + '|' + R.secs;
+        for (let q = 0; q < tag.length; q++) sd = (sd * 131 + tag.charCodeAt(q)) >>> 0;
+        sd = (sd + 0x9e3779b9) >>> 0;
+        Math.random = () => {                       // mulberry32
+          sd = (sd + 0x6d2b79f5) >>> 0;
+          let x = sd;
+          x = Math.imul(x ^ (x >>> 15), x | 1);
+          x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+          return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+        };
+        try {
         const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
         sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
         startGame(sv); loadRoom(F.room);
@@ -92,6 +125,7 @@ const FIGHTS = [
           player.vx = 0; player.vy = 0; player.iT = 9; player.dead = false; player.hp = player.hpMax || 7;
           player.stunT = 0;
           G.dialog = null; G.state = 'PLAY';
+          clk += DT * 1000;                          // one step of wall clock per step of sim
           update(DT);
           // REACHABLE means the body is on her floor: a perch or the air is
           // not. Horizontal distance is HER choice (a claw thrown at a player
@@ -134,6 +168,7 @@ const FIGHTS = [
         for (const f of frames) share[f.st] = (share[f.st] || 0) + 1;
         for (const k in share) share[k] = +(share[k] / frames.length * 100).toFixed(0);
         return { out, share, trace, tellDx: Object.fromEntries(Object.entries(tellDx).map(([k, v]) => [k, Math.round(v.reduce((a, b) => a + b, 0) / v.length)])) };
+        } finally { Math.random = realRand; performance.now = realNow; }
       }, { F: { ...F, boss: F.boss.toString() }, R });
       if (got.err) { check(F.name + ' boots', false, got.err); continue; }
       console.log('       @' + R.dist + 'px p' + R.phase + '  ' + Object.entries(got.share).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + v + '%').join('  '));
@@ -145,16 +180,21 @@ const FIGHTS = [
     for (const k of rows) {
       const v = all[k].slice().sort((a, b) => a - b);
       const med = v[Math.floor(v.length / 2)], p75 = v[Math.floor(v.length * 0.75)];
-      // THE FLOOR IS THE TENTH PERCENTILE, NOT THE WORST SINGLE SAMPLE.
-      // Measured under a loaded machine: pounce>recover came back n=27, min 0,
-      // med 800, max 917 — twenty-six healthy openings and one frame the
-      // browser never delivered, and the check failed the fight on that one.
-      // A 0 ms reading is not a short opening, it is a missed measurement: the
-      // window could not open because the frame it needed did not run. p10
-      // discards a couple of dropouts out of dozens and still fails honestly
-      // if the move really is too brief, because a genuinely stingy move drags
-      // its median and p75 down with it and those are checked right below.
-      const p10 = v[Math.floor(v.length * 0.1)];
+      // THE FLOOR IS THE WORST SINGLE SAMPLE AGAIN.
+      //
+      // It was a tenth percentile for a while, to survive a pounce>recover that
+      // came back n=27 med 800 with one 0 in it on an unchanged build. That
+      // reading was blamed on a frame the browser never delivered, and the
+      // percentile was a way of discarding it. The diagnosis was wrong: this
+      // loop drops no frames, it steps them. The 0 was the fight taking a
+      // DIFFERENT PATH, because the dice were not seeded — see the block at the
+      // top of the run. They are now, and three consecutive runs under a full
+      // suite return byte-identical tables with a worst sample of 350 ms.
+      //
+      // So the floor can be honest again, which matters: a percentile forgives
+      // one move in ten being unpunishable, and one move in ten is exactly the
+      // move a player will meet.
+      const p10 = v[0];
       const move = k.split('>')[0];
       const isGift = F.gift.includes(k);
       // a chain's middle (swipe>swipewarn) opens nothing by design; the chain's
@@ -165,7 +205,7 @@ const FIGHTS = [
         + (isGift ? '   (the gift)' : chain ? '   (chain middle)' : ''));
       if (chain) continue;
       check(F.name + ': ' + k + ' opens for at least one hit (>= 250 ms)', p10 >= 250,
-            'p10 ' + p10 + ' ms (min ' + v[0] + ')');
+            'worst ' + p10 + ' ms (med ' + med + ')');
       if (!isGift) check(F.name + ': ' + k + ' is not a gift (3 in 4 openings <= 900 ms)', p75 <= 900, 'p75 ' + p75 + ' ms');
       else check(F.name + ': ' + k + ' is the one gift, and pays out (> 900 ms)', med > 900, med + ' ms');
     }
