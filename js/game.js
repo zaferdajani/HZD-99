@@ -9385,6 +9385,14 @@ function drawGateDoor(P, def, nearPlane) {
     && def.to && def.to[0] === 'G';
   const gzp = guardDoor && GATE_PLATE_BY_ZONE[G.roomDef && G.roomDef.zone];
   const gzim = gzp && scenePlate(gzp);
+  // THE MEASUREMENT HOOK. tests/kingdom.cjs asks what share of a door is its
+  // plate by shooting the door with the plate and without it. Without it, a
+  // guardian gate falls back to the procedural cave mouth — which for a dark
+  // rock plate like gateDeep is nearly the same picture, so the difference
+  // read as "3% of the door is the plate" while the plate was drawing whole.
+  // Under G.artProbe a declared-but-missing plate draws nothing, so the
+  // difference is the plate itself, not the plate against its stand-in.
+  if (gzp && !gzim && G.artProbe) return;
   if (gzim) {
     const GH = 330, GW = GH * (gzim.naturalWidth / gzim.naturalHeight);
     c.save();

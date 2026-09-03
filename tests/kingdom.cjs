@@ -52,7 +52,7 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
       for (const id of Object.keys(ROOMS)) if (id.startsWith('G' + Z) && !ids.includes(id)) ids.push(id);
       out.rooms = ids;
       const boot = (room, abil) => {
-        const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.abil = abil || { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
+        const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.sawScrap = 1; sv.abil = abil || { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
         startGame(sv); loadRoom(room); G.dialog = null; G.state = 'PLAY'; G.toasts = [];
         G.bossEntry = null; G.gateWalk = null; G.wake = null;
       };
@@ -259,7 +259,12 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
             const im = MEDIA_IMG[key], sp = SCENE_PLATE[key];
             door.plateLoaded = !!(im && im.naturalWidth);
             MEDIA_IMG[key] = null; SCENE_PLATE[key] = null;
-            const C2 = shot(); MEDIA_IMG[key] = im; SCENE_PLATE[key] = sp;
+            // under the art probe the door draws NOTHING in the plate's place
+            // rather than its procedural stand-in, so the difference is the
+            // plate and not the plate against a look-alike (the deep gate's
+            // dark rock plate against the dark rock cave mouth read as 3%)
+            G.artProbe = 1;
+            const C2 = shot(); G.artProbe = 0; MEDIA_IMG[key] = im; SCENE_PLATE[key] = sp;
             door.plate = diff(A, C2);
           }
           out.doors.push(door);

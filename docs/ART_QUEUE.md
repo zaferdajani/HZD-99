@@ -594,6 +594,17 @@ the cave mouths, `lair_den`, `lair_nest`, the obelisk, `rock_a`, `ceil_a`,
 brush and ink, and they sit beside the painted cast without a seam. Kingdom
 1 is one look end to end.
 
+**The kingdom harness is green again** (owner: "fix all"). The two reds were
+the instrument, not the game: the new first-scrap ACQUIRED card opened under
+the harness's stationary player and froze the room, so every enemy stopped
+mid-measure (the hopper in the Cache read 3 pictures) — the boot now sets
+`sawScrap` the way it sets `tut`; and the plate-share measure shot a gate
+without its plate and got the procedural cave mouth in its place, which for
+`gateDeep`'s dark rock is the same picture (3 %) — under `G.artProbe` a
+declared-but-missing plate now draws nothing, and the deep gate reads 10.0 of
+12.2. Blob and Cache keeper were already fixed by the painted roster and the
+Cutter.
+
 **Still in the old 3D look, on THE FIRING LIST in order** (Kingdoms 2–5, the
 same pipelines): the four guardian atlases — eagle, furnace, glaciere, prism,
 mother (`bossparts extract` → head first → the rest against it → `rebuild`
