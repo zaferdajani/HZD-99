@@ -168,7 +168,6 @@ try {
   }
 } catch (e) { /* no voice directory yet */ }
 const html = fs.readFileSync('dev.html', 'utf8');
-const buildId = Date.now().toString(36);
 // the loading screen paints while the megabytes below it still stream in
 const loader = fs.readFileSync('loader.html', 'utf8');
 // SLIM build: media is NOT embedded — the deployed repo serves assets/ as
@@ -257,6 +256,30 @@ function seoBlock(fname, lock, forge) {
     '<script type="application/ld+json">' + ld + '</script>',
   ].join('\n');
 }
+
+// THE BUILD ID IS A CONTENT HASH, NOT A CLOCK.
+//
+// It was Date.now(), which meant a rebuild on an unchanged tree emitted four
+// pages differing by one string — churn that has to be recognised and thrown
+// away by hand on every merge, and that is exactly what broke tests/platform
+// twice in one night: `npm run app:pack` runs build.cjs before it copies, so
+// discarding the page churn AFTERWARDS left www/ carrying a different stamp
+// than the pages it is supposed to be a copy of. One build, four platforms —
+// and the timestamp was the only thing making them four builds.
+//
+// A hash serves the one job this id has strictly better. js/game.js compares
+// the stamp in the deployed page against its own to decide whether a player is
+// running yesterday's code; a hash changes exactly when the code changes,
+// where a clock changed on every build and never on a merge that produced
+// identical output. Everything that reaches a page goes in: the shell, the
+// loader, every js file in order, the editor, and all the manifests the pages
+// carry. Nothing else does, so the id is reproducible from the tree.
+const buildId = require('crypto').createHash('sha256')
+  .update(html).update(loader).update(editorJs).update(files.join('\n'))
+  .update(JSON.stringify(musFiles)).update(JSON.stringify(vidFiles))
+  .update(JSON.stringify(vidAlt)).update(String(vidLight))
+  .update(JSON.stringify(voxFiles)).update(String(roomAssets)).update(String(lowres))
+  .digest('hex').slice(0, 12);
 
 const emit = (fname, lock, forge) => {
   let shell = html;
