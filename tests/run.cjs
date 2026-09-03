@@ -112,6 +112,7 @@ const SUITE = [
   ['memnote',   'the memory game is audible: phone-register bells, and the music steps aside'],
   ['platform',  'RULE ONE: web, phone, app and desktop shell are the same game'],
   ['packs',     'a campaign pack is a folder of JSON: loads by query, saves apart, base game untouched'],
+  ['warp',      "?room= drops the owner into any room: locked, loud when refused, and never his save"],
   ['bake3d',    'any authored GLB bakes to a turnaround the atlas can wear: grounded, rotating, silhouettes apart'],
   ['forge',     'the Forge: gated to the owner, every op changes the live world, main rooms edit like DLCs'],
 ];

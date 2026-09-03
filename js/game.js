@@ -14670,6 +14670,13 @@ function drawNPCBody(c, id, tn, talking) {
       // an antenna, there is nothing at all. She is not idling when the player
       // finds her, she is WORKING: a slow bow stroke across the crystal
       // clamped in front of her, and the crystal answering it.
+      // SHE IS BUILT AT 1.5, from the feet up. The owner's standing ruling on
+      // the cast — "the npc is too small, it should be double my size" — is
+      // why Ratchet's atlas sits at 2.6, and a body drawn at hitbox scale
+      // stands SHORTER than the cat. Kerf is deliberately low-slung, so she
+      // does not need the trader's height; she needs his WEIGHT, and the
+      // scale is from y=0 so her feet stay on the floor while she gets it.
+      c.save(); c.scale(1.5, 1.5);
       const br = Math.sin(tn * 1.5) * 0.6;
       // the stroke: slow, one-directional, with a pause at the far end — a saw
       // cut is a push and a wait, never a scrub
@@ -14799,6 +14806,7 @@ function drawNPCBody(c, id, tn, talking) {
         }
         c.restore(); c.globalAlpha = 1;
       }
+      c.restore();                                       // her 1.5 build scale
       break;
     }
   }
