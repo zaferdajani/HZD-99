@@ -83,6 +83,16 @@ const { chromium } = require('playwright');
 
   const scrapBefore = await p.evaluate(() => G.save.scrap);
   now = await drive('coin', () => {
+    // ...and the card that explains what scrap IS lands the moment the errand
+    // is satisfied (js/game.js bankScrap), so page it through the way a player
+    // would. Without this the step reads as hung when the game is in fact
+    // waiting to be read.
+    if (G.state === 'DIALOG') {
+      for (let i = 0; i < 60 && G.state === 'DIALOG'; i++) {
+        keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); keys['Enter'] = 0;
+      }
+      return;
+    }
     // A DEAD MACHINE IS NOT SCRAP YET. It leaves a WRECK, and the scrap comes
     // out when the wreck is broken — which is the lesson. This used to rely on
     // a stray swing from the previous step happening to smash it, so the step

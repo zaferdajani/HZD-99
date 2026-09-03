@@ -706,6 +706,31 @@ function drawTinker(c, s, talking) {
 // the theme bleed this codebase has had to fix twice already.
 // HEALING IS EARNED, NOT INNATE (owner's design): Ratchet's first gift for
 // the battery. NOSTOS's hero keeps it from the start — people are people.
+// SCRAP, EXPLAINED THE FIRST TIME SHE HOLDS SOME.
+//
+// The tutorial said "Take the scrap / walk over it", which teaches the verb and
+// not the noun — the owner's report, in full, was "I have no idea what the
+// scrap is". A currency has to introduce itself, and the moment it can is the
+// moment it is first picked up: she has the thing in hand, the number in the
+// HUD has just moved, and the sentence has somewhere to point.
+//
+// Once per save, and never during a cutscene or a fight's own dialogue — the
+// card takes the screen, and taking the screen mid-swing is its own bug.
+function bankScrap(v) {
+  G.save.scrap += v;
+  if (G.save.flags.sawScrap) return;
+  if (G.state !== 'PLAY' || G.dialog || G.cut || G.bossEntry || (G.boss && !G.boss.dead)) return;
+  // ...and NOT in the middle of the lesson that is asking her to collect it.
+  // The waking floor wants twelve before it moves on; a card on the first
+  // piece stops her four pieces short with the screen taken. It waits until
+  // the errand is satisfied, so the explanation lands on the beat where the
+  // step completes rather than interrupting it. Outside the tutorial there is
+  // nothing to interrupt and it fires on the first piece she touches.
+  const teaching = G.tut && !(G.save.flags && G.save.flags.tut);
+  if (teaching && G.save.scrap < 12) return;
+  G.save.flags.sawScrap = 1;
+  showItem(t('i_scrap'), t('i_scrapd'));
+}
 function healUnlocked() {
   if (typeof isHero === 'function' && isHero()) return true;
   return !!(G.save && G.save.flags && G.save.flags.heal);
@@ -11361,7 +11386,18 @@ function updateTutor(dt) {
   const openAt = TUT_STEPS.findIndex(q => q.id === (TUT_DOOR[G.roomId] || 'go'));
   if (openAt >= 0 && T.i < openAt) {
     const lim = (G.roomDef.w - 2.2) * TILE - player.w;
-    if (player.x > lim) { player.x = lim; if (player.vx > 0) player.vx = 0; }
+    if (player.x > lim) {
+      player.x = lim; if (player.vx > 0) player.vx = 0;
+      // AND SHE IS TOLD SHE IS BEING HELD. The clamp used to be silent: walk
+      // right, stop dead against nothing, no curtain, no sound, no reason —
+      // the owner's report was "not clear why I can't go past the shop". A
+      // held door has to answer when you push on it, so pushing lights the
+      // curtain and re-points the objective. T.push decays in drawTutor.
+      if (inD('RIGHT')) {
+        if (!T.push) sfx('phit');
+        T.push = 1;
+      }
+    }
   } else if (T.opened !== G.roomId) {
     T.opened = G.roomId;                       // per ROOM, not once per run
     sfx('cast'); cam.shake = Math.max(cam.shake, 3);
@@ -11437,20 +11473,37 @@ function drawTutor() {
     if (!G.roomDef.exits.R && gr3) mark(gateWorldX(gr3), 13 * TILE, 30, '#ffd76a');
     else mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
   }
-  if (T.i < TUT_LAST && !(typeof GATE_ROOM !== 'undefined' && GATE_ROOM[G.roomId])) {
-    // the held door: a light curtain, not a wall — it reads as "not yet".
-    // Not in W2: its way out is the depth gate, which glimmers for itself,
-    // and the curtain's old berth is inside the massed city wall now.
+  // the push flare decays on the wall clock — this is a draw pass and has no dt
+  {
+    const now2 = performance.now();
+    const el = T.pushT ? Math.min(0.2, (now2 - T.pushT) / 1000) : 0;
+    T.pushT = now2;
+    T.push = Math.max(0, (T.push || 0) - el * 1.6);
+  }
+  const openAt2 = TUT_STEPS.findIndex(q => q.id === (TUT_DOOR[G.roomId] || 'go'));
+  // THE CURTAIN BELONGS TO THE HELD SIDE DOOR, and the question is whether the
+  // room HAS one — not whether it happens to contain a depth door as well.
+  //
+  // The test was `!GATE_ROOM[G.roomId]`, written to keep the curtain out of W2,
+  // whose only way out IS the depth gate. But A0 contains a depth door — the
+  // trader's booth — AND a right-hand exit, and it is the right-hand exit the
+  // tutorial clamps. So in the one room where the player spends the whole
+  // opening, the fence was invisible: she walked right, stopped against
+  // nothing, and the game never said why. A room whose way out is the gate
+  // still skips it; a room with a side door that is being held now shows it.
+  if (T.i < openAt2 && G.roomDef.exits && G.roomDef.exits.R) {
+    // the held door: a light curtain, not a wall — it reads as "not yet",
+    // and it flares when she pushes on it so the answer arrives when asked.
     const bx = (G.roomDef.w - 2.0) * TILE - cam.x;
     c.save();
     c.globalCompositeOperation = 'lighter';
     const bg = c.createLinearGradient(bx - 10, 0, bx + 14, 0);
     bg.addColorStop(0, 'rgba(55,255,208,0)');
-    bg.addColorStop(0.5, 'rgba(55,255,208,' + (0.16 + pu * 0.12).toFixed(3) + ')');
+    bg.addColorStop(0.5, 'rgba(55,255,208,' + (0.16 + pu * 0.12 + (T.push || 0) * 0.34).toFixed(3) + ')');
     bg.addColorStop(1, 'rgba(55,255,208,0)');
     c.fillStyle = bg;
     c.fillRect(bx - 10, 10.4 * TILE - cam.y, 24, 4.6 * TILE);
-    c.strokeStyle = 'rgba(55,255,208,' + (0.3 + pu * 0.3).toFixed(3) + ')';
+    c.strokeStyle = 'rgba(55,255,208,' + (0.3 + pu * 0.3 + (T.push || 0) * 0.4).toFixed(3) + ')';
     c.lineWidth = 1.5;
     for (let i = 0; i < 5; i++) {
       const yy = (10.6 + i * 0.9) * TILE - cam.y + Math.sin(performance.now() / 300 + i) * 3;
@@ -12341,7 +12394,30 @@ function drawWorldFrame() {
   // 2.5-14.7, against 18.8% at luminance 23.8 before, of which nearly half was
   // the blue pips.
   drawDepthPlane('fore');
-  applyBloom();
+  // THE BLOOM RUNS ONCE, AND IT RUNS HERE — on the world, before the grade and
+  // before the accessibility lift.
+  //
+  // It used to run twice: this call, and a second one at the end of lightPass,
+  // which is invoked AFTER drawScreenLift. That second pass is why a lamp-lit
+  // room could turn into a wash you cannot see through. applyBloom isolates
+  // emitters by SQUARING the frame — a highlight at 0.9 survives as 0.81, a
+  // mid at 0.3 collapses to 0.09 — and that only works while the frame still
+  // has real darks in it. drawScreenLift is affine and deliberately destroys
+  // them: out = 46 + 0.82*raw at the default setting. Squaring a frame with no
+  // black left rejects nothing, so the second pass was adding a blurred copy of
+  // the whole room back over itself, warmest where the room was warmest.
+  //
+  // It also explains the timing the owner reported — the glare "goes away for a
+  // second when the shopkeeper gets freed, then comes back". npcCharge sets
+  // G.flash; the white flash raises the frame's mean; liftProbe reads that mean
+  // twice a second and drops LIFT_K, which weakens the lift and with it the
+  // second bloom; the flash decays, the room is dark again, LIFT_K climbs and
+  // the glare returns. A screen-space measurement was feeding a pass that
+  // changed what it measured.
+  //
+  // richK is the quality dial the second call was carrying, so it moves here
+  // rather than being lost with it.
+  applyBloom(typeof richK === 'number' ? richK : 1);
   // ---- cinematic grade: zone-tinted light wash + vignette (the "expensive" look) ----
   {
     const P2 = PAL[G.roomDef.zone];
@@ -13272,7 +13348,8 @@ function lightPass(P) {
     c.restore();
     c.globalAlpha = 1;
   }
-  applyBloom(richK);
+  // (no bloom here — see drawWorldFrame. This pass runs after drawScreenLift,
+  // and a bloom after the lift has no darks left to reject.)
 }
 function dimPanel(x, y, w, h) {
   c.fillStyle = 'rgba(6,10,16,0.88)'; rr(c, x, y, w, h, 12); c.fill();

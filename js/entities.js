@@ -4620,7 +4620,7 @@ class Scrap {
       this.x += dx / d * 300 * dt; this.y += dy / d * 300 * dt;
       this.vx = 0; this.vy = 0;
       if (chance(dt * 8)) addPart(this.x, this.y, 0, -30, 0.4, '#ffd76a', 1.6, 0, true);
-      if (aabb(this, player)) { this.dead = true; G.save.scrap += this.val; sfx('pick'); }
+      if (aabb(this, player)) { this.dead = true; bankScrap(this.val); sfx('pick'); }
       return;
     }
     if (hasCrest('magnet') && !player.dead && dist2(this.x, this.y, player.x, player.y) < 210 * 210) {
@@ -4633,7 +4633,7 @@ class Scrap {
     if (col.l || col.r) this.vx = 0;
     this.rest = (col.d && Math.abs(this.vy) < 30 && Math.abs(this.vx) < 20) ? this.rest + dt : 0;
     if (!player.dead && aabb(this, player)) {
-      this.dead = true; G.save.scrap += this.val; sfx('pick');
+      this.dead = true; bankScrap(this.val); sfx('pick');
       addPart(this.x, this.y, 0, -60, 0.4, '#ffd76a', 3, 0, true);
     }
   }
