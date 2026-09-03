@@ -14162,6 +14162,11 @@ function draw(tms) {
   } else if (st === 'TRIAL') {
     drawTrial();
   }
+  // LAST, OVER EVERYTHING, AND ONLY WHEN THE URL ASKED FOR IT. See js/diag.js:
+  // the panel exists because three faults in a row were reported off a phone
+  // and could not be reproduced here, and a guess about somebody else's device
+  // cost an evening and shipped a regression.
+  if (typeof drawDiag === 'function') drawDiag();
 }
 // ===========================================================================
 // THE BROADCAST FALLS — the opening, shot as film. Eight shots, each carrying
