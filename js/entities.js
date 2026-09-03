@@ -762,9 +762,9 @@ const HERO_TRANS = {
   // under. The counts are filled in by the cut (tools/vidstrip.cjs auto:N).
   // k is measured by tools/swingk.cjs against the sheet cell of the same
   // moment (land 8, skid 10, dash 9) so she keeps her size across the change.
-  land: { key: 'transLand', cells: 12, k: 1.049, t: p => p.landT, t0: p => p.land0 || 0.12 },
-  skid: { key: 'transSkid', cells: 2, k: 0.766, t: p => p.skidT, t0: p => p.skid0 || 0.14 },
-  dash: { key: 'transDash', cells: 8, k: 1.063, t: p => p.dashT, t0: p => p.dash0 || 0.16 },
+  land: { key: 'transLand', cells: 12, k: 0.869, t: p => p.landT, t0: p => p.land0 || 0.12 },
+  skid: { key: 'transSkid', cells: 2, k: 0.849, t: p => p.skidT, t0: p => p.skid0 || 0.14 },
+  dash: { key: 'transDash', cells: 8, k: 0.893, t: p => p.dashT, t0: p => p.dash0 || 0.16 },
   //
   // WAITING ON ART (docs/ART_QUEUE.md §2x), in census order:
   //   land   fall>land>idle|run, the impact — 8/min and the most conspicuous
@@ -781,7 +781,7 @@ const HERO_TRANS = {
 // Three plates — takeoff stretch, apex tuck, the reach for the ground — fired
 // as stills (2026-09-02) after eleven video takes either started the jump in
 // the last half-second or never left the ground. k against the sheet's apex.
-let HERO_AIR_STRIP = { key: 'transAir', cells: 3, k: 0.735, up: 770, down: 700 };
+let HERO_AIR_STRIP = { key: 'transAir', cells: 3, k: 0.819, up: 770, down: 700 };
 // THE IMPATIENT WAIT (owner, 2026-08-27: "like a cute kid waiting anxiously
 // for something from a grown-up... cross their hands, tapping one leg on the
 // floor, and saying Yalla!"). Not a transition and not a pose: a LOOP that
@@ -792,10 +792,10 @@ let HERO_AIR_STRIP = { key: 'transAir', cells: 3, k: 0.735, up: 770, down: 700 }
 // and drawing both at HERO_DH would grow her the moment she got impatient.
 // intro 7: cells 0-6 are the arms crossing — played once — and 7-15 are the
 // bounce-and-tap she holds for as long as she is ignored.
-let HERO_FIDGET = { key: 'heroFidget', cells: 16, k: 0.78, fps: 9, intro: 7 };
+let HERO_FIDGET = { key: 'heroFidget', cells: 16, k: 0.8, fps: 9, intro: 6 };
 // Cling, slip, catch — three stills at 5 fps, because every video take of a
 // wall slide painted her a pole to hold. Authored with the wall at her RIGHT.
-let HERO_WALL_STRIP = { key: 'transWall', cells: 3, k: 0.744, fps: 5 };
+let HERO_WALL_STRIP = { key: 'transWall', cells: 3, k: 0.848, fps: 5 };
 const FIDGET_AFTER = 6;        // seconds of stillness before she runs out of patience
 // THE CELL COUNT IS HOW MANY DIFFERENT PICTURES THE TAKE ACTUALLY HOLDS.
 //
@@ -826,21 +826,23 @@ const FIDGET_AFTER = 6;        // seconds of stillness before she runs out of pa
 //   finisher sheet 131/169  strip 256/320 ( 9 cells, ref 0 — both arms up)
 //   burst    sheet 132/169  strip 247/320 ( 9 cells, ref 6 — arms flung wide)
 const SWING_STRIP = {
-  claw_1:   { key: 'swingClaw1',    cells: 11, k: 1.0315 },
-  claw_2:   { key: 'swingClaw2',    cells: 11, k: 0.8551 },
-  finisher: { key: 'swingFinisher', cells: 9,  k: 0.9689 },
-  burst:    { key: 'swingBurst',    cells: 9,  k: 1.0119 },
+  claw_1:   { key: 'swingClaw1',    cells: 11, k: 0.901 },
+  claw_2:   { key: 'swingClaw2',    cells: 11, k: 1.0749 },
+  finisher: { key: 'swingFinisher', cells: 9,  k: 0.8388 },
+  burst:    { key: 'swingBurst',    cells: 9,  k: 0.9272 },
 };
 // ---- HOW FAR ONE STEP CARRIES HER, OFF THE PLATES THEMSELVES ---------------
 //
 // The step length is the foot-to-foot distance at CONTACT: when the trailing
 // sole leaves the floor it lands where the leading one is, so the body travels
-// exactly that far per step. Measured on the sheet, in the bottom ten rows of
-// each cell: walk_a spans 68 cell-pixels sole to sole and walk_c 64 — call it
-// 66 — and the plate is drawn HERO_DH tall out of a 169px cell, so
-//   66 * (60 / 169) = 23.4 world units.
-// walk_b spans 15px, which is the passing pose with the feet together, and is
-// the check that the other two are really contacts.
+// exactly that far per step. Measured on the sheet, in the ankle band (the
+// bottom 8%) of each cell, sole to sole across both feet — the painted
+// contacts, 2026-09-03: walk_a spans 137 cell-pixels and walk_c 112 — call it
+// 125 — and the plate is drawn HERO_DH tall out of a 300px cell, so
+//   125 * (60 / 300) = 24.9 world units.
+// walk_b's feet are together, which is the passing pose, and is the check that
+// the other two are really contacts. (The 3D plates before them measured 66px
+// sole to sole in a 169px cell: 23.4 — the painted stride is the same step.)
 //
 // THE RUN NUMBER IS NOT MEASURED AND SAYS SO. run_a and run_b span 20 and 18
 // cell-pixels — neither is a contact pose, so the sheet cannot answer it, and
@@ -1135,8 +1137,8 @@ class Player {
     //
     // ...and the DIVISOR IS THE ART'S STEP, measured, not chosen. 88 units a
     // step was a number from before the plates existed; her walk contacts put
-    // her soles 68 and 64 cell-pixels apart (walk_a, walk_c), which at the
-    // plate's draw scale of HERO_DH/169 is HERO_STEP_WALK world units. The body
+    // her soles 137 and 112 cell-pixels apart (walk_a, walk_c), which at the
+    // plate's draw scale of HERO_DH/300 is HERO_STEP_WALK world units. The body
     // was covering three and a half of those for every step the legs claimed,
     // and a leg that claims a step it did not take IS the skating the owner
     // kept reporting. See HERO_STEP_WALK for how the run number is arrived at.

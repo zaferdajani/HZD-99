@@ -91,11 +91,11 @@ plate can be traced back to the generation it came from.
 | `backgrounds/oracle_booth.png` / `oracle_interior.jpg`, `characters/breaker/*.png` | Higgsfield, Seedream 4.5 | the Oracle's shrine and parlor (§2h) and the Breaker's three states (§2i) |
 | `video/sword_forge.mp4` / `.webm` | Higgsfield, Seedance 2.5 | the forging cinematic (§1d), animated from a Seedream opening frame |
 | `video/meet.mp4` / `.webm` | Higgsfield, Seedance 2.5 | THE CORRIDOR — the first meeting with NULLFANG, from her canon element and a screenshot of the lion; as fired in `source/films/` |
-| `characters/hero/*`, `characters/hzd_8yaw*.png` | Higgsfield | HZD-99's body and turnarounds (§1), all pinned to the canon reference element |
+| `characters/hero/*`, `characters/hzd_8yaw*.webp` | Higgsfield | HZD-99's body and turnarounds (§1), all pinned to the canon reference element; restyled 2026-09-03 into the corridor film's painted look (ART_QUEUE §2am), every plate archived in `source/hero/style_d/` |
 | `fx/slash_[h,d,u,dn].png`, `characters/gear/jetpack*.png` | Higgsfield | the crystal slash light-sheets (§1b-i) and the back-jet gear (§1c) |
 | `characters/{kiln,rime,snare}/*.png`, `backgrounds/winch_house.png` | Higgsfield, Seedream 4.5 | the zone C/D/E enemies (§2l, §2n, §2p) and Servo's winch (§2t) |
 | `backgrounds/{forge,carrel,hollow}_front.png` / `_interior.jpg` | Higgsfield, Seedream 4.5 | the Tinker's forge (§2k), the Archivist's carrel (§2m) and Lumen's hollow (§2o) |
-| `characters/npc_6yaw.png`, `characters/roster_8yaw.png` | Higgsfield | the NPC and creature turnaround sheets |
+| `characters/npc_6yaw.webp`, `characters/roster_8yaw.png` | Higgsfield | the NPC and creature turnaround sheets; the NPC sheet refired 2026-09-03 into the corridor film's painted look, 42 cells, every plate in `source/npc/style_d/` (ART_QUEUE §2am) |
 | `characters/beasts/*`, `characters/flora/*`, `characters/gear/*` | Higgsfield | the animal line, the flora deck, the equipment plates |
 | `backgrounds/ceil_*.jpg`, `backgrounds/lair_*.png`, `backgrounds/gate_city.jpg` | Higgsfield | ceiling tiers, guardian lairs, the city gate monument |
 | boss parts atlases (per-guardian) | Higgsfield | restyled through `tools/bossparts.cjs`; see ART_BIBLE.md §3 |

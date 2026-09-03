@@ -2,7 +2,7 @@
 //
 // drawDialog draws HZD-99's face whoever is speaking (owner report, 2026-08-16).
 // Fixing that needs a bust per NPC, and the sheet already has one: column 2 of
-// npc_6yaw.png is the front-facing cell of each row. Cropping the head from it
+// npc_6yaw.webp is the front-facing cell of each row. Cropping the head from it
 // costs nothing and guarantees the bust is the same character the player is
 // standing in front of — which is the whole point of the rule the dialogue
 // code already follows for her.
@@ -12,7 +12,8 @@ const ROWS = ['servo', 'ratchet', 'mono', 'patch', 'sage', 'lumen'];
 (async () => {
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
-  const src = 'data:image/png;base64,' + fs.readFileSync('/home/user/HZD-99/assets/characters/npc_6yaw.png').toString('base64');
+  // the sheet ships as webp (tools/yawsheet.cjs since the painted cast, 2026-09-03)
+  const src = 'data:image/webp;base64,' + fs.readFileSync('/home/user/HZD-99/assets/characters/npc_6yaw.webp').toString('base64');
   const out = await p.evaluate(async ({ src, ROWS }) => {
     const im = new Image(); im.src = src; await im.decode();
     const COLS = 6, N = 7, cw = im.width / COLS, ch = im.height / N;

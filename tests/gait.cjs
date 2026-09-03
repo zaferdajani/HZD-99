@@ -271,7 +271,7 @@ const check = (name, ok, detail) => {
   // ...and the passing pose is the proof the other two are contacts: feet
   // together, or "sole separation" was measuring something else entirely.
   check('walk_b is the passing pose, feet together', stepPx.passSpan < stepPx.soleSpan * 0.4,
-    'walk_b soles ' + stepPx.passSpan + 'px apart vs walk_a ' + stepPx.soleSpan);
+    'walk_b feet ' + stepPx.passSpan + 'px apart, centre to centre, vs the contacts\' soles ' + stepPx.soleSpan);
   // A ceiling, not a band: whatever the numbers are, a footfall rate no body
   // could produce is still the strobe this harness was written for.
   const steps = r.strideEnd - r.strideStart, secs = r.animEnd - r.animStart;
@@ -378,10 +378,20 @@ const check = (name, ok, detail) => {
 })().catch(e => { console.error(e); process.exit(1); });
 
 // HER STRIDE, OFF THE SHEET. Not off the game's constants — the whole point is
-// to compare the two — so this reads the pixels: the widest sole-to-sole span
-// in the bottom ten rows of a contact cell, and the same span in the passing
-// cell, which must be small or the measurement is finding something other than
-// two feet.
+// to compare the two — so this reads the pixels: the two FEET in the ankle band
+// of a contact cell (the bottom 8% of the cell), found as separate blobs of
+// alpha along x, and the sole-to-sole span across both — the definition the
+// constant was calibrated on when the plates were first measured. The passing
+// cell is measured centre to centre and must come out small, or the
+// measurement is finding something other than two feet.
+//
+// Two things a painted plate does that a flat 3D render did not, and that the
+// first version of this (the union of everything in the bottom TEN rows) got
+// wrong: the trailing heel lifts onto its toe, the way a foot actually pushes
+// off, so ten rows found one foot and called the stride half its length; and
+// the cape's edge hangs down into the ankle band, a strip ten pixels wide that
+// is not a foot, and its hem widens above that. Hence the band stops at 8%,
+// under the hem, and blobs narrower than 4.5% of the cell are the cape's edge.
 async function measureWalkStep(page) {
   return await page.evaluate(async () => {
     const im = MEDIA_IMG.heroStates;
@@ -391,16 +401,28 @@ async function measureWalkStep(page) {
     const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
     const D = x.getImageData(0, 0, cv.width, ch).data;
     const A = (ci, xx, yy) => D[(((yy * cv.width) + ci * cw + xx) * 4) + 3];
-    function soles(ci) {
+    function feet(ci) {
       let y1 = -1;
       for (let yy = 0; yy < ch; yy++) for (let xx = 0; xx < cw; xx++) if (A(ci, xx, yy) > 40) y1 = yy;
-      let a = 1e9, b = -1;
-      for (let yy = y1 - 9; yy <= y1; yy++) for (let xx = 0; xx < cw; xx++)
-        if (A(ci, xx, yy) > 40) { if (xx < a) a = xx; if (xx > b) b = xx; }
-      return b - a;
+      // column occupancy in the ankle band, then runs of occupied columns
+      // separated by a real gap are the blobs; the two outermost wide enough
+      // to be feet are the feet
+      const band = Math.round(ch * 0.08), occ = new Array(Math.floor(cw)).fill(0);
+      for (let yy = y1 - band; yy <= y1; yy++) for (let xx = 0; xx < cw; xx++) if (A(ci, xx, yy) > 40) occ[xx]++;
+      const runs = []; let a = -1, gap = 0;
+      for (let xx = 0; xx <= occ.length; xx++) {
+        const on = xx < occ.length && occ[xx] > 0;
+        if (on) { if (a < 0) a = xx; gap = 0; }
+        else if (a >= 0 && ++gap > 3) { runs.push([a, xx - gap]); a = -1; }
+      }
+      if (a >= 0) runs.push([a, occ.length - 1]);
+      const ft = runs.filter(r => r[1] - r[0] + 1 >= cw * 0.045);
+      if (ft.length < 2) return { span: 0, centres: 0 };   // one blob: feet together
+      const L = ft[0], R = ft[ft.length - 1];
+      return { span: R[1] - L[0], centres: Math.round((R[0] + R[1]) / 2 - (L[0] + L[1]) / 2) };
     }
     // the two contacts, averaged — they are the same step seen on each leg
-    const ca = soles(HERO_CELL.walk_a), cc = soles(HERO_CELL.walk_c);
-    return { soleSpan: Math.round((ca + cc) / 2), passSpan: soles(HERO_CELL.walk_b), cellH: ch };
+    const ca = feet(HERO_CELL.walk_a).span, cc = feet(HERO_CELL.walk_c).span;
+    return { soleSpan: Math.round((ca + cc) / 2), passSpan: feet(HERO_CELL.walk_b).centres, cellH: ch };
   });
 }

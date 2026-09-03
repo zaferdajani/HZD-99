@@ -445,6 +445,101 @@ sitting down cross-legged, pulling out a little screen, the Sonic look-at-
 the-camera. The mechanism (HERO_FIDGET, intro+loop) takes a second strip by
 adding an entry, not by new code.
 
+## 2am. ONE LOOK — HER RESTYLE, the corridor film's paint on every cell she has ✔ SHIPPED 2026-09-03 (art session)
+
+**The owner's question:** *"How can we transform the whole game to this type of
+art?"* — the corridor film's frames: hand-painted 2D, brush texture in the
+panels, confident ink line, one warm key and a cyan rim, bone white / warm grey
+/ one red / one gold / one cyan. That frame is now THE STYLE ANCHOR
+(`assets/source/style/anchor_corridor_frame.png`, media
+`ed1a56ad-39b1-4460-908c-935e7ed49117`, with pilot D `33152abd-…` beside it),
+and the campaign runs character by character, wallpaper by wallpaper, her
+first.
+
+**What shipped for her:**
+
+- `assets/characters/hzd_8yaw.webp` (armed) and `hzd_8yaw_bare.webp` — both
+  turnarounds refired from the old 3D front/back plates as geometry only, the
+  anchor as style, cut into the 8-yaw sheet by `tools/herosheet.cjs`.
+- `assets/characters/hero/states.webp` — all 24 state cells (22 poses plus
+  walk_c / run_c), each fired from its own 3D plate as IMAGE 1 (shape only)
+  against the two anchors (style only), keyed with `tools/blackkey.cjs`, laid
+  by `tools/herostates.cjs` at one global scale, and the fitted cells by
+  `tools/herocell.cjs`. The recipe is `.claude/skills/art-prompts` §1; what it
+  taught this time: state the stride, the mouthlessness and the empty hands
+  explicitly, because the model closes strides, zooms and adds a mouth; and a
+  faithful take of a source plate that carries a bowl, a beam or a rod is
+  CORRECT — the plate is the brief.
+- Two refires after the harness spoke: walk_a came back with the stride closed
+  (62 px of sole in a 300 px cell) and was refired wide; walk_b came back as
+  an early swing with the rear foot trailing 98 px behind and was refired as
+  the passing pose it is supposed to be — feet together under the hips.
+- `assets/source/hero/style_d/` — every plate, both turnarounds, and the
+  before-sheets (`*_before.webp`) so the change can be diffed, not believed.
+  `assets/lowres/` regenerated (heroYaw, heroStates).
+
+**What the harnesses had to learn:** a painted contact pose lifts the trailing
+heel onto its toe and hangs the cape's edge into the ankle band, so
+`tests/gait.cjs` now finds the two FEET as blobs (bottom 8 % of the cell, blobs
+narrower than 4.5 % of it are the cape) and measures sole to sole across them —
+25.0 units against HERO_STEP_WALK 23, the same step the 3D plates measured,
+with the passing pose at 0. `tests/hero.cjs` reads her mood from the visor band
+alone, because cyan seams across the whole body diluted the eye-colour test.
+`hero artbible gait frames feel` green.
+
+**Her strips followed the same afternoon** — eight stills refired as plates
+(rise / apex / fall → `trans_air`, brace / whip-round → `trans_skid`, cling /
+slip / catch → `trans_wall`, laid by the new `tools/stillstrip.cjs` at one scale
+per strip, feet on the floor) and six Seedance takes started FROM her painted
+plates (`trans_land` 12 cells over the 2.6 s recovery, `trans_dash` 8, and the
+four swings — claw_1 11, claw_2 11, finisher 9, burst 9 — each windowed to one
+strike; the auto selector hits its ceiling inside a slow wind-up, so the burst
+and the finisher are sampled evenly across the strike instead). The four
+back-walk plates (armed and bare) refired as stills. Every k re-measured by
+`tools/swingk.cjs` against the sheet cell of the same moment and written into
+`HERO_TRANS` / `HERO_AIR_STRIP` / `HERO_WALL_STRIP` / `SWING_STRIP`. Takes in
+`assets/source/takes/style_d/`, stills in `assets/source/hero/style_d/{trans,
+backwalk}/`. `frames feel hero artbible gait` green with the new strips.
+
+The fidget too: the first painted take folded her arms and then barely
+moved, so it was refired with the stomp written large — arms cross over six
+cells, then ten cells of the foot lifted high and slapped down with the body
+bouncing (`intro: 6`, k 0.8).
+
+**THE CAST FOLLOWED (same day).** The owner's phone showed him why the old
+NPC sheet had to go before anything else: *"Why are they all pixeled and not
+blended"* — 150×195-pixel cells keyed with a hard cut, and Ratchet drawn at
+2.6× that. All 42 cells (six machine folk and the gate guard, six yaws each)
+refired from their own blurred cell as the shape reference, each one's OWN
+palette named in words and the corridor anchors as the rendering only, and
+laid by the new `tools/yawsheet.cjs` — one scale per row so the turntable does
+not pump, feet on the cell floor, 4× the old cell — shipped at 1800×2730.
+Four refires: one welder cell that timed out, one tinker cell that came back
+dark and mossy (the palette line now says "NOT dark, NOT green" and it
+obeyed), and the two guard cells that came back on WHITE despite the black
+line (§4's old lesson; a louder black line fixed both). The six dialogue
+busts re-cut from the new sheet by `tools/npcbusts.cjs` (now reading the
+webp). Plates in `assets/source/npc/style_d/`, before-sheet beside them,
+contact in `_sheets/npc_6yaw_style_d_contact.png`. `artbible lowres folk
+npcstrip` green; the six NPC rooms photographed by `tools/roomshot.cjs`.
+
+**Ratchet's eight act plates and the six work loops, same sitting.** His
+notice / talk_1 / talk_2 / tic / vent / work_1 / work_2 / resting plates were
+refired with the OLD plate as pose only and the NEW painted front cell of his
+row as the character — so the booth's Ratchet and the walking Ratchet are one
+copper machine for the first time (the old act plates were a pale bone-white
+body the sheet never had). The five machine-folk loops and his bench loop are
+Seedance takes started from each body's painted three-quarter cell, cut by
+`vidstrip auto:24` (`NPC_LOOP_CELLS` re-counted: servo 24, mono 24, patch 24,
+sage 24, lumen 10 — the nymph's take grows slowly through the clip, so only
+the first ten cells keep her under the 15 % pump ceiling; `ratchetLoop` 24 at
+its draw site). Takes in `assets/source/takes/style_d/loops/`, plates in
+`assets/source/ratchet/style_d/`. `npcstrip folk` green.
+
+**Still in the old 3D look, on THE FIRING LIST in order:** the NPC interiors; the wallpapers via `bgderive`; the guardian parts
+atlases (75 parts); the enemy briefs (§2i, §2l, §2n, §2p); the lairs and gates
+(§2f, §2g); the four §2aj plates.
+
 ## 2al. THE KINGDOM HARNESS — the protocol, driven live, every door walked ✔ IN THE SUITE 2026-09-02
 
 `tests/kingdom.cjs [zone…]` asks the running game, kingdom by kingdom, for

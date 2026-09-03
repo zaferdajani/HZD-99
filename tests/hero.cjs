@@ -255,7 +255,17 @@ const { chromium } = require('playwright');
       if (m === 'calm') continue;
       const d = shot(m);
       let diff = 0, lit = 0;
+      // ...AND ONLY THE HEAD. The restyled plates (2026-09-03) carry thin cyan
+      // seam lines over her whole body, which put the body back in the
+      // denominator by another route — the eyes fell to 6% of the cyan set.
+      // The visor lives in the upper half of the figure; the seams mostly do not.
+      // the figure is drawn with its feet on row 58 (in units), so its head
+      // half runs from (58 - h) down to (58 - h/2), scaled by S
+      const visorTop = Math.floor((58 - player.h * 0.88) * S), visorBot = Math.floor((58 - player.h * 0.5) * S);
       for (let i = 0; i < d.length; i += 4) {
+        const row = (i >> 2) / W | 0;
+        if (row < visorTop) continue;
+        if (row > visorBot) break;
         // ONLY THE CYAN. The first version of this counted every bright pixel
         // as "lit", which meant her entire ivory body — identical in every mood
         // — was in the denominator, and a total change of expression scored 5%.
