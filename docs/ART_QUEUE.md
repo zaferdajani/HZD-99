@@ -4312,6 +4312,27 @@ Wiring is one line each: add the key to `TINKER_STRIP` and the stage to
 `TINKER_JOB` / `TINKER_NEXT` in js/game.js. The machine already varies tempo,
 bursts and order, so a new action inherits all of that for free.
 
+**MEASURED 2026-09-03, and it is the art session's call.** `tests/tinker.cjs`
+was sampling ONE cell six times and reporting that the loop does not move —
+it set `_tk.ph` and then called drawTinker, which runs `tinkerTask` first and
+recomputes `ph` from its own clock; hand-setting `job` alongside it left the
+burst state (`play`/`fps`) uninitialised, so `ph` went NaN and every cell
+resolved to 0. That is fixed (the harness drives the clock and keeps the first
+six DISTINCT cells the game reports in `G.tinkerFrame`), and with an honest
+measurement the current strip reads:
+
+- closest pair of six drawn cells: **0.867–0.890 IoU**, against the 0.86
+  ceiling the check inherits from ART_BIBLE §3.3
+- drawn size spread across the loop: 6–7 % (well inside the 15 % pump ceiling)
+
+So the loop moves, but only just, and the check is red by a hair. Two honest
+readings and the art session owns the choice between them: either the twelve
+cells need more travel between neighbours — §3.3's margin was written for
+distinct STATES (idle vs leap), and adjacent frames of one continuous animation
+are legitimately similar — or the check needs a law written for animation
+rather than for states. The code session will not move that threshold on art it
+did not make.
+
 ---
 
 ### 2w. THE BURIED MOUTH — the first tunnel's rubble ✱ FIRE ON REBIND (2026-08-23)

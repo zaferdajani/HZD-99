@@ -114,14 +114,40 @@ const IOU_MAX = 0.86;
       const pkeep = player.x; player.x = s.x + 4000;
       const shim = { x: 0, y: 0, w: s.w, h: s.h, extra: 'ratchet', room: 'A0B', t: 0, _tk: null };
       tinkerRig(shim);
-      for (let f = 0; f < 6; f++) {
+      // THE CLOCK IS DRIVEN, BECAUSE THE JOB MACHINE OWNS THE PHASE.
+      //
+      // Setting shim._tk.ph and then calling drawTinker does nothing: drawTinker
+      // runs tinkerTask(r, dt) FIRST, which recomputes ph from its own clock and
+      // overwrites whatever was assigned. Six draws in a tight loop are six draws
+      // at dt≈0, so this was sampling ONE cell six times and then reporting that
+      // the loop does not move. Measured straight off the sheet, the twelve cells
+      // are strongly distinct — adjacent slices sit at 0.57-0.65 IoU and cell 0
+      // against cell 6 at 0.135 — so the art was never the problem.
+      //
+      // performance.now advances 100 ms a sample, one cell at the strip's own
+      // 10 fps, and the loop actually plays under the measurement.
+      const realNow2 = performance.now;
+      let clk2 = realNow2.call(performance);
+      performance.now = () => clk2;
+      shim._tk.last = clk2 / 1000;
+      // ...and the frames kept are the ones the game says it DREW. drawTinker
+      // records what it put on screen in G.tinkerFrame (`job:cell`), which is
+      // the only honest way to ask "did the loop move" — hand-setting ph and
+      // trusting it is what produced the six identical samples, and hand-
+      // setting job left the rig's burst state (play/fps) uninitialised, so
+      // ph went NaN and every cell resolved to 0. Drive the clock, let the job
+      // machine run itself, and take the first six DISTINCT cells it shows.
+      const seenCell = {};
+      for (let f = 0; f < 400 && loop.length < 6; f++) {
         q.clearRect(0, 0, W, H);
-        // `ph` counts CELLS now, not seconds — the job machine owns the tempo
-        // and it varies it, so there is no fps to multiply by any more
-        shim._tk.pose = 'work1'; shim._tk.t = 9; shim._tk.job = 'shape'; shim._tk.ph = f * 2;
+        clk2 += 33;                                  // a frame of wall clock
+        shim._tk.pose = 'work1'; shim._tk.t = 9;
         q.save(); q.translate(W / 2, BASE); q.scale(Z, Z); q.translate(-shim.w / 2, -shim.h);
         drawTinker(q, shim, false);
         q.restore();
+        const shown = G.tinkerFrame || '';
+        if (!/^\w+:\d+$/.test(shown) || seenCell[shown]) continue;   // a plate beat, or a cell already taken
+        seenCell[shown] = 1;
         const d2 = q.getImageData(0, 0, W, H).data;
         const m2 = new Uint8Array(W * H);
         let n2 = 0, low = -1;
@@ -130,6 +156,7 @@ const IOU_MAX = 0.86;
         }
         loop.push({ mask: m2, px: n2, foot: low - BASE });
       }
+      performance.now = realNow2;
       player.x = pkeep;
     }
     let loopWorst = 0, loopPairs = 0;
