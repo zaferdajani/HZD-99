@@ -25,3 +25,6 @@ scratchpad/
 # repo by a well-meaning "commit your changes" prompt.
 platform/
 deck/
+# the cast reel's working folder (tools/castreel.cjs): 26k frames and a
+# 160 MB film, regenerated from the game rather than kept — ledger §2at
+restyle/
