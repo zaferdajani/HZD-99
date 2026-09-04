@@ -63,6 +63,10 @@ function drawDiag() {
   const worst = diagMs.length ? Math.max.apply(null, diagMs) : 0;
   const lo = diagLum.length ? Math.min.apply(null, diagLum) : 0;
   const hi = diagLum.length ? Math.max.apply(null, diagLum) : 0;
+  const recent = diagLum.slice(-8);
+  const nowSpan = recent.length ? Math.max.apply(null, recent) - Math.min.apply(null, recent) : 0;
+  let jumps = 0;
+  for (let i = 1; i < diagLum.length; i++) if (Math.abs(diagLum[i] - diagLum[i - 1]) > 8) jumps++;
   const rows = [
     'BUILD ' + ((typeof window !== 'undefined' && window.BUILD_ID) || '?') + '   ' + G.roomId,
     'tier ' + ((typeof QUAL !== 'undefined' && QUAL.name) || '?')
@@ -73,10 +77,21 @@ function drawDiag() {
       + '  box ' + (cvEl && cvEl.style.width ? cvEl.style.width : 'auto')
       + '  dpr ' + (window.devicePixelRatio || 1),
     'frame ' + ms.toFixed(1) + 'ms avg, ' + worst.toFixed(0) + 'ms worst',
-    // THE FLICKER LINE. A picture that "flips like a movie" is a luminance
-    // SPAN over time, so the span is what is printed — a steady room reads
-    // under 2 and the shop measured 1.3 here.
+    // THE FLICKER LINE, AND IT HAD TO LEARN THE DIFFERENCE BETWEEN A FLICKER
+    // AND A DOOR. The first version printed the span over the whole twelve
+    // second window, and a window that contains a room crossing or a fade
+    // contains a legitimate near-black frame: the owner's meadow read 3-76 and
+    // sent me hunting a fault that a transition explains perfectly well. A
+    // span is a range; a flicker is a RATE.
+    //
+    // So three numbers instead of one. The range is still printed because it
+    // is what an eye reports. `now` is the span over the last two seconds,
+    // which a crossing has left by the time anyone reads the panel. `jumps` is
+    // how many times consecutive samples moved more than 8 levels across the
+    // whole window: a steady room is 0, a single door is 1 or 2, and a picture
+    // flipping like a movie is many. Read `jumps` first.
     'frame light ' + lo.toFixed(0) + '-' + hi.toFixed(0) + '  span ' + (hi - lo).toFixed(1)
+      + '  now ' + nowSpan.toFixed(1) + '  jumps ' + jumps
       + '   LIFT_K ' + ((typeof LIFT_K === 'number') ? LIFT_K.toFixed(2) : '?')
       + '  bright ' + ((typeof BRIGHT_SET === 'number') ? BRIGHT_SET : '?'),
   ];
@@ -109,8 +124,10 @@ function drawDiag() {
     // the two lines a reader is looking for are coloured: a stand-in still on
     // screen, and a frame whose light is moving
     const r = rows[i];
+    // amber for a stand-in still on screen; hot for a picture that is actually
+    // moving, which is `jumps`, not the range
     c.fillStyle = /LOW|MISSING|still small: [1-9]/.test(r) ? '#ffd76a'
-      : /span ([2-9]|\d\d)/.test(r) ? '#ff8a5c' : '#cfe3ef';
+      : /jumps ([3-9]|\d\d)/.test(r) ? '#ff8a5c' : '#cfe3ef';
     c.fillText(r, 14, 12 + i * 14);
   }
   c.restore();
