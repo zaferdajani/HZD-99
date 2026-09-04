@@ -180,11 +180,63 @@ const { chromium } = require('playwright');
   });
   await record(now);
 
-  now = await drive('node', () => { G.save.iq = 10; });
+  // SHE HAS TO COME BACK OUT OF THE BOOTH FOR THIS ONE, and that is the point
+  // of it: the node stands in A0, thirteen tiles behind where the buy step
+  // left her, and the lesson no longer completes from inside the shop (the
+  // step carries `room` now). Walking out is what a player does — the game
+  // rings the way out while the step is active — so the harness does it too.
+  now = await drive('node', () => {
+    if (G.roomId !== 'A0') { loadRoom('A0'); G.state = 'PLAY'; G.dialog = null; return; }
+    G.save.iq = 10;
+  });
   await record(now);
   now = await drive('skill', () => { G.save.skills = ['mind']; });
   await record(now);
 
+  // ---- THE WALK CANNOT BE SKIPPED BY LEAVING THE ROOM --------------------
+  //
+  // The owner walked past the machine into the shop and the guide let him:
+  // "the walk through allows the player to pass the first enemy that needs to
+  // be attacked, keep going to the shop, pass the shop without even attacking
+  // it... and if I press attack inside the shop, the system considers it as if
+  // I attacked the enemy anyway." Two holes, both from a step reading global
+  // state: `no live enemies` is true in every room that never had one, and a
+  // swing is a swing wherever it happens.
+  //
+  // So this drives the escape he actually found: stand at the kill step, go
+  // into the booth, swing there, and check the ladder has not moved. And it
+  // checks the booth is not even reachable that early — a door is a control,
+  // and an untaught control does not exist.
+  const skip = await p.evaluate(() => {
+    const sv = newSave(1); sv.time = 99;
+    startGame(sv); loadRoom('A0');
+    G.dialog = null; G.state = 'PLAY'; G.toasts = [];
+    const at = (id) => TUT_STEPS.findIndex(q => q.id === id);
+    G.tut.i = at('kill'); G.tut.t = 1; G.tut.hold = 0;
+    const boothEarly = gateDoors('A0').length;          // must be 0: not built yet
+    // ...and if she gets in anyway, the lessons must not complete in there
+    loadRoom('A0B'); G.state = 'PLAY'; G.dialog = null;
+    const iKill = G.tut.i;
+    for (let k = 0; k < 60; k++) updateTutor(1 / 60);
+    const killHeld = G.tut.i === iKill && !G.tut.hold;
+    G.tut.i = at('atk'); G.tut.t = 1; G.tut.hold = 0;
+    player.swing = { t: 0.2, t0: 0.2, combo: 1 };        // a real swing, in the shop
+    const iAtk = G.tut.i;
+    for (let k = 0; k < 60; k++) updateTutor(1 / 60);
+    const atkHeld = G.tut.i === iAtk && !G.tut.hold;
+    player.swing = null;
+    // ...and the same swing in the room that teaches it DOES count
+    loadRoom('A0'); G.state = 'PLAY'; G.dialog = null;
+    G.tut.i = at('atk'); G.tut.t = 1; G.tut.hold = 0;
+    player.swing = { t: 0.2, t0: 0.2, combo: 1 };
+    for (let k = 0; k < 60; k++) updateTutor(1 / 60);
+    const atkCounts = G.tut.i > at('atk') || G.tut.hold > 0;
+    player.swing = null;
+    // ...and the booth opens once the lesson that sends her in begins
+    G.tut.i = at('buy'); G.tut.t = 1; G.tut.hold = 0;
+    const boothLater = gateDoors('A0').length;
+    return { boothEarly, killHeld, atkHeld, atkCounts, boothLater };
+  });
   // and the door: held shut until the last lesson, open after it
   const door = await p.evaluate(() => {
     const before = G.tut.opened;
@@ -200,6 +252,7 @@ const { chromium } = require('playwright');
   console.log('after buying the cell: ' + JSON.stringify(bought));
   console.log('the scripted first hit left: ' + hurtTo.cores + ' / ' + hurtTo.max + ' cores');
   console.log('door: ' + JSON.stringify(door));
+  console.log('skipping the walk: ' + JSON.stringify(skip));
 
   const want = ['move', 'jump', 'atk', 'kill', 'coin', 'buy', 'heal', 'node', 'skill', 'go'];
   const fails = [];
@@ -209,6 +262,12 @@ const { chromium } = require('playwright');
   if (bought.scrap !== scrapAfter - 12) fails.push('the cell did not cost 12 scrap');
   if (hurtTo.cores >= hurtTo.max) fails.push('the repair lesson opened at full health, so it teaches nothing');
   if (!door.opened) fails.push('the way out never opened');
+  // the escape the owner actually found — see the block that measures it
+  if (skip.boothEarly !== 0) fails.push('the booth is open ' + skip.boothEarly + ' door(s) before the lesson that sends her in');
+  if (!skip.killHeld) fails.push('the kill lesson completed inside the shop');
+  if (!skip.atkHeld) fails.push('a swing inside the shop finished the attack lesson');
+  if (!skip.atkCounts) fails.push('a swing on the waking floor did NOT finish the attack lesson');
+  if (!(skip.boothLater > 0)) fails.push('the booth never opens for the lesson that sends her in');
   if (errs.length) fails.push('page errors: ' + errs.slice(0, 3).join(' | '));
   if (fails.length) { console.log('\nFAIL\n - ' + fails.join('\n - ')); process.exit(1); }
   console.log('\nOK');

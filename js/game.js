@@ -9256,8 +9256,29 @@ function gateDoors(id) {
   const out = [];
   for (const d of gateDoorsAll(id))
     if (!d.need || (G.save && G.save.flags && G.save.flags[d.need])) out.push(d);
+  // ...AND THE WAKING FLOOR'S BOOTH IS NOT BUILT UNTIL SHE IS SENT TO IT.
+  //
+  // The tutorial fences the room's SIDE door and left the depth door wide
+  // open, so the way past every lesson was to walk into the shop: the kill
+  // step completed itself in there (no enemies in a booth), a swing in there
+  // completed the attack step, and the trader opened his stall to a player
+  // holding nothing. That is the owner's "there is no enforcement for the
+  // guide of the game", and it is the same bug the sequential-controls note
+  // above already describes for buttons — a door is a control too.
+  //
+  // Held only while the walk is actually running, only in its own room, and
+  // only until the step that says to go in. Nothing outside the tutorial, and
+  // nothing after it, changes at all.
+  if (out.length && typeof TUT_STEPS !== 'undefined' && G.tut
+      && !(G.save && G.save.flags && G.save.flags.tut) && TUT_BOOTH_ROOM[id]) {
+    const openAt = TUT_STEPS.findIndex(q => q.id === TUT_BOOTH_ROOM[id]);
+    if (openAt >= 0 && G.tut.i < openAt) return [];
+  }
   return out;
 }
+// which step opens each waking-floor depth door — the booth exists once the
+// lesson that sends her inside it begins
+const TUT_BOOTH_ROOM = { A0: 'buy' };
 // WHICH PLANE A DOOR STANDS IN, and it is the whole of the owner's complaint
 // about the first shop: "the colors are still in dull faded three d instead of
 // drawings like the characters... the player might actually miss it. It's not
@@ -11233,7 +11254,20 @@ const TUT_STEPS = [
   { id: 'gate', label: 'tut_gate', hint: 'tut_gate_h',
     keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
     done: () => (TUT_ROOMS[G.roomId] || 0) >= 2 },
-  { id: 'atk', label: 'tut_atk', hint: 'tut_atk_h',
+  // ...AND A LESSON IS ONLY LEARNED IN THE ROOM THAT TEACHES IT.
+  //
+  // Both of the next two read GLOBAL state, and global state changes when she
+  // changes rooms — which is the whole of the owner's report: "the walk through
+  // allows the player to pass the first enemy that needs to be attacked, keep
+  // going to the shop, pass the shop without even attacking it... and if I
+  // press attack inside the shop, the system considers it as if I attacked the
+  // enemy anyway." A swing is a swing wherever it happens, and `no live
+  // enemies` is TRUE in every room that never had one — so stepping into the
+  // booth completed the kill lesson by walking away from the machine.
+  //
+  // `room` names where the lesson lives. tutTick will not complete a step
+  // whose room she is not standing in.
+  { id: 'atk', label: 'tut_atk', hint: 'tut_atk_h', room: 'A0',
     keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
     done: () => !!player.swing || player.comboT > 0 },
   // ---- and now the LOOP, which is the part a verb tutorial never teaches ----
@@ -11243,7 +11277,7 @@ const TUT_STEPS = [
   // buys the abilities everything above runs on. Each of these steps is one
   // link, taught in the order the circuit runs, on the floor where nothing can
   // kill you for getting it wrong.
-  { id: 'kill', label: 'tut_kill', hint: 'tut_kill_h',
+  { id: 'kill', label: 'tut_kill', hint: 'tut_kill_h', room: 'A0',
     keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
     done: () => !G.enemies.some(e => e && !e.dead) },
   { id: 'coin', label: 'tut_coin', hint: 'tut_coin_h',
@@ -11255,7 +11289,7 @@ const TUT_STEPS = [
   { id: 'heal', label: 'tut_heal', hint: 'tut_heal_h',
     keys: 'F', pad: 'Y', touch: 'HEAL', vb: 'VHEAL',
     done: () => player.cores >= player.maxCores() },
-  { id: 'node', label: 'tut_node', hint: 'tut_node_h',
+  { id: 'node', label: 'tut_node', hint: 'tut_node_h', room: 'A0',
     keys: 'E', pad: 'B', touch: 'INT', vb: 'VINT',
     done: () => (G.save.iq | 0) >= 10 },
   { id: 'skill', label: 'tut_skill', hint: 'tut_skill_h',
@@ -11418,6 +11452,8 @@ function updateTutor(dt) {
   if (T.hold > 0) { T.hold -= dt; if (T.hold <= 0) { T.i++; T.t = 0; tutEnter(TUT_STEPS[T.i]); } return; }
   let ok = false;
   try { ok = st.done(); } catch (e) { ok = false; }
+  // the lesson is only learned where it is taught (see `room` above)
+  if (st.room && G.roomId !== st.room) ok = false;
   if (ok && T.t > 0.25) {
     T.hold = 0.7;
     sfx('pick');
@@ -11470,6 +11506,44 @@ function drawTutor() {
       const gr2 = (typeof gateDoors === 'function' ? gateDoors() : []).find(d => d.style === 'booth');
       if (gr2) mark(gateWorldX(gr2), 13 * TILE, 34, '#ffd76a');
     }
+  }
+  // EVERY LESSON WITH A THING IN IT RINGS THAT THING.
+  //
+  // The owner, on the node step: "finding the shards, which, by the way, even
+  // me as the game developer, I have no idea where the shards are or how to
+  // find it. It is unclear. It is as if you are just putting in all the
+  // information regardless of whether the user can understand it or not."
+  //
+  // He is right, and the fault is not the wording. The card names a VERB and
+  // the room never says which object it means: the node sits at tile 11 of a
+  // 64-wide room, thirteen tiles BEHIND where she is standing when the step
+  // opens, off the left of the screen. "Solve the node" is unanswerable when
+  // you cannot see a node. Two steps already ring their target — heal rings
+  // her own body, go rings the door — and the rest were left to be guessed.
+  //
+  // So: the machine while she is being told to scratch it and finish it, the
+  // scrap on the floor while she is being told to take it, the booth while she
+  // is being told to spend, and the node while she is being told to think. And
+  // if the thing is in another room, the way out of this one is rung instead,
+  // because "it is not here" is the answer she actually needs.
+  const ringOut = () => {
+    const gr = (typeof gateDoors === 'function' ? gateDoors() : [])[0];
+    if (!G.roomDef.exits.R && gr) mark(gateWorldX(gr), 13 * TILE, 30, '#ffd76a');
+    else mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
+  };
+  if (st.room && G.roomId !== st.room) ringOut();
+  else if (st.id === 'atk' || st.id === 'kill') {
+    const e = (G.enemies || []).find(q => q && !q.dead);
+    if (e) mark(e.x + e.w / 2, e.y + e.h / 2, 30, '#ff8a5c');
+  } else if (st.id === 'coin') {
+    const sc = (G.pickups || []).find(q => q && !q.dead);
+    if (sc) mark(sc.x + (sc.w || 12) / 2, sc.y + (sc.h || 12) / 2, 24, '#ffd76a');
+  } else if (st.id === 'buy') {
+    const gr2 = (typeof gateDoors === 'function' ? gateDoors() : [])[0];
+    if (gr2) mark(gateWorldX(gr2), 13 * TILE, 30, '#ffd76a');
+  } else if (st.id === 'node') {
+    const nd = (G.statics || []).find(q => q && q.type === 'riddle' && !q.opened);
+    if (nd) mark(nd.x + nd.w / 2, nd.y + nd.h / 2, 30, '#c9a6ff');
   }
   if (st.id === 'heal') mark(player.x + player.w / 2, player.y + player.h / 2, 32, '#aef7d8');
   if (st.id === 'go') {
