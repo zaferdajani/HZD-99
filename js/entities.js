@@ -1112,10 +1112,21 @@ class Player {
         // again every eight-or-so seconds of being ignored. Voice only: the
         // fidget art loops with or without the word, and the word never
         // repeats often enough to become the room's metronome.
+        // ...AND SHE FIDGETS FOR A WHILE BEFORE SHE SAYS ANYTHING.
+        //
+        // The first word used to land 0.2 s after the fidget began, so the
+        // animation change and the voice arrived together and it read as a bark
+        // on cue rather than patience running out — the owner: "the sound it
+        // makes while still standing and waiting should not happen instantly.
+        // You need to give it, like, five seconds maybe of waiting." Five
+        // seconds of visible fidgeting first, which puts the first word eleven
+        // seconds into standing still; and the repeats are far rarer, because
+        // a line every eight seconds is a character nagging the player rather
+        // than one waiting for them.
         if (this.idleT > FIDGET_AFTER) {
-          this.yallaIn = (this.yallaIn == null ? 0.2 : this.yallaIn) - dt;
+          this.yallaIn = (this.yallaIn == null ? 5 : this.yallaIn) - dt;
           if (this.yallaIn <= 0) {
-            this.yallaIn = rnd(7, 11);
+            this.yallaIn = rnd(14, 22);
             if (typeof hzdSay === 'function') hzdSay('yalla', 600);
           }
         } else this.yallaIn = null;

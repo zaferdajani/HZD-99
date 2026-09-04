@@ -4346,6 +4346,41 @@ did not make.
 
 ---
 
+### 2as. TWO OF HER WORDS ARE IN SOMEBODY ELSE'S VOICE ✱ RE-FIRE (2026-09-04)
+
+**The owner, on the idle line:** *"the sound itself, it's grown up more than
+childish now, which is not derived from the audio I gave you."*
+
+He is right, and it is measurable off her own voice — no reference take needed,
+because the rest of the set IS the reference. Strongest partial below 1200 Hz,
+measured on the shipped files:
+
+| in her register | | out of it |
+|---|---|---|
+| atk1 364 · atk3 386 · release 434 · jump 460 | | **yalla 216** |
+| hurtbad 517 · evo 581 · die 653 · win 653 | | **atk2 95** |
+| heal 875 · hurt 928 · djump 984 · dash 1172 | | |
+
+Her spoken takes cluster 364–1172 Hz — bright, young, a kitten. `hzd_yalla`
+sits at 216 and `hzd_atk2` at **95**, which is a bass grunt in the middle of a
+three-hit string whose first and third hits are 364 and 386. A different
+character is speaking inside her own combo.
+
+**Re-fire both against her own set** — same speaker, same room, same distance
+as `hzd_atk1` and `hzd_atk3`, which are the two takes closest to what the owner
+supplied. `atk2` is the MIDDLE hit and should sit between them in effort, not
+below both in pitch. Body sounds are exempt and stay as they are: `hzd_purr`,
+`hzd_land` and `hzd_charge` are not words and have no register to keep.
+
+`tests/hzdvox.cjs` holds the floor at 300 Hz (her lowest passing word is 364)
+and names any take that falls under it, so this cannot land quietly again.
+
+The idle line's TIMING is fixed in code and is not part of this brief: she
+fidgets for five seconds before the first word now, and repeats are 14–22 s
+apart rather than 7–11.
+
+---
+
 ### 2ar. HZD-99's `run_a` CELL IS FACING THE WRONG WAY ✱ RE-FIRE (2026-09-04)
 
 `assets/characters/.../hero_states` cell 3 (`run_a`) was fired facing the

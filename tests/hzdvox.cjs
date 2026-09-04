@@ -210,6 +210,56 @@ const { chromium } = require('playwright');
     hold.broke.holds + ' note(s) on ' + hold.broke.reached + 's with 5 volts');
 
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
+  // ---- SHE IS A KITTEN, AND HER WORDS HAVE TO SOUND LIKE ONE ---------------
+  //
+  // The owner on the idle line: "the sound itself, it's grown up more than
+  // childish now, which is not derived from the audio I gave you." He is right
+  // and it is measurable off her own voice — no reference needed, because the
+  // rest of the set IS the reference.
+  //
+  // Her SPOKEN takes cluster in a bright young register: atk1 364 Hz, atk3 386,
+  // release 434, jump 460, hurtbad 517, evo 581, die 653, win 653, heal 875,
+  // hurt 928, djump 984, dash 1172 — measured as the strongest partial below
+  // 1200 Hz. Two words sit far under that cluster and read as somebody older:
+  // yalla at 216 Hz and atk2 at 95, the middle hit of a three-hit string whose
+  // first and third are 364 and 386. That is a different character speaking in
+  // the middle of her own combo.
+  //
+  // BODY SOUNDS ARE EXEMPT and named, not guessed at: a purr, a landing grunt
+  // and a held charge note are not words and have no register to keep.
+  const SPOKEN_FLOOR = 300;                 // her lowest passing word is 364
+  const BODY = ['hzd_purr', 'hzd_land', 'hzd_charge'];
+  const reg = await page.evaluate(async (BODY) => {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const out = {};
+    for (const k of Object.keys(MEDIA_SRC.audio)) {
+      if (k.indexOf('hzd_') !== 0 || BODY.indexOf(k) >= 0) continue;
+      try {
+        const bb = await ac.decodeAudioData((await (await fetch(MEDIA_SRC.audio[k])).arrayBuffer()).slice(0));
+        const d = bb.getChannelData(0), sr = bb.sampleRate;
+        const N = Math.min(d.length, Math.round(1.2 * sr));
+        let bestF = 0, bestM = 0;
+        for (let f = 80; f <= 1200; f = Math.round(f * 1.06)) {
+          let re = 0, im = 0;
+          for (let i = 0; i < N; i++) { const a = 2 * Math.PI * f * i / sr; re += d[i] * Math.cos(a); im += d[i] * Math.sin(a); }
+          const m = Math.hypot(re, im) / N;
+          if (m > bestM) { bestM = m; bestF = f; }
+        }
+        out[k] = bestF;
+      } catch (e) { out[k] = -1; }
+    }
+    return out;
+  }, BODY);
+  const low = [];
+  for (const k of Object.keys(reg).sort((a, b) => reg[a] - reg[b])) {
+    const f = reg[k];
+    const bad = f >= 0 && f < SPOKEN_FLOOR;
+    console.log('      ' + k.padEnd(14) + String(f).padStart(5) + ' Hz'
+      + (bad ? '   <-- BELOW HER REGISTER (floor ' + SPOKEN_FLOOR + ')' : ''));
+    if (bad) low.push(k + ' ' + f + 'Hz');
+  }
+  check('every word she says is in her own register', !low.length, low.join(', '));
+
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
   console.log('\nOK — she sounds on the frame she moves, and never twice at once');
