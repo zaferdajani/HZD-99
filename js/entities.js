@@ -7791,8 +7791,13 @@ class Boss {
           // quietly reverses two seconds later is not a choice.
           if (this.kind !== 'mother' && !this.purified && !this.forceKill) {
             this.purified = true; this.pureT = 0;
-            G.toast(t({ glitch: 'pure_beast', brood: 'pure_brood', atlas: 'pure_atlas',
-                        zero: 'pure_zero', prism: 'pure_prism' }[this.kind]));
+            // only the five guardians have a purification line. The Alpha and
+            // the Eye's constructs came through here too and toasted the word
+            // "undefined" over the next room — t() of a missing key — which
+            // tools/castreel.cjs caught the first time every boss fell on film.
+            const pk = { glitch: 'pure_beast', brood: 'pure_brood', atlas: 'pure_atlas',
+                         zero: 'pure_zero', prism: 'pure_prism' }[this.kind];
+            if (pk) G.toast(t(pk));
           }
           if (this.rewardPend) { this.rewardPend = false; G.onBossDead(this.kind); }
         }

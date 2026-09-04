@@ -1086,6 +1086,19 @@ function respawn() {
   G.state = 'PLAY';
 }
 function bossActive() { return G.boss && !G.boss.dead && G.boss.st !== 'dorm' && !G.boss.meet; }
+// THE NAME OVER THE BAR. The six guardians have a `b_<kind>` line; the Alpha
+// and the Eye's five constructs never did, and t() hands back the key when it
+// has nothing — so the bar over the Alpha read "b_alpha" and the one over the
+// chime read "b_chime". Found by tools/castreel.cjs, the first time every boss
+// was filmed in one sitting. The Alpha has its own name line; a construct's
+// name is the head of its meeting toast ("CHIME — it is singing at you").
+function bossBarName(b) {
+  const k = 'b_' + b.kind, s = t(k);
+  if (s !== k) return s;
+  if (b.kind === 'alpha') return t('alpha_name');
+  const mk = 'mini_' + b.kind, m = t(mk);
+  return m !== mk ? m.split(' — ')[0] : b.kind.toUpperCase();
+}
 
 // ---------------------------------------------------------------------------
 // THE FIRST MEETING (.claude/skills/underdog-arc §2.1; staged per
@@ -11961,7 +11974,7 @@ function drawHUD() {
     c.fillStyle = P.glow; c.globalAlpha = 0.9;
     c.fillRect(480 - w / 2 + 4, 498, (w - 8) * clamp(b.hp / b.hpMax, 0, 1), 8);
     c.globalAlpha = 1;
-    ftxt(t('b_' + b.kind), 480, 481, 14, '#eef3fa', 'center', P.glow);
+    ftxt(bossBarName(b), 480, 481, 14, '#eef3fa', 'center', P.glow);
     // plating chain status: what shorts this boss's armor, and the open window
     if (BOSS_GATE[b.kind]) {
       const key = armDef(BOSS_GATE[b.kind]);

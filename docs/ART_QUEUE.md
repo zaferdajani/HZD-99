@@ -4346,6 +4346,58 @@ did not make.
 
 ---
 
+### 2at. THE CAST REEL — every character, every move, its own sound (2026-09-04)
+
+**The owner:** *"generate one video showing all characters in the game using
+their artwork to do all movements alongside its voices or audio that it
+generates when it does the movement, if there is any."*
+
+Not a Higgsfield job — it is the GAME filmed, so what the reel shows is what
+ships. `tools/castreel.cjs` boots the built page in a real browser, drives the
+real `update()` one fixed step at a time, paints every frame with the real
+`draw()` and crops the camera to whoever is on set. Every sound the game asks
+for while the film runs — `sfx()`, a foley take through `playBuf()`, a
+machine-person's recorded line through `npcSay()` — is rendered through an
+OfflineAudioContext at the moment it is asked for, with the game's state as it
+was at that moment, and laid on the reel's own clock at the frame it fired.
+The wall clock is replaced by the simulated clock for the length of the film,
+so wall-timed animation (the tinker's tics, her fidget) runs at the reel's
+speed. Caption bar: name, the state the renderer is in, and a ticker of what
+fired.
+
+```
+npx http-server -p 8220 -s &
+node tools/castreel.cjs restyle/reel/cast_reel.mp4 [--only=hero,npc,enemy,boss] [--max=N]
+```
+
+The programme, top to bottom: HZD-99 (idle → fidget, run, turn, jump, double
+jump, dash, wall cling, wall jump, the claw string, the charged burst, the cast,
+hurt, destroyed) · the seven machine folk (at work on the turntable, noticing
+her, the conversation on their busts with their recorded lines) · every enemy
+kind in its own room, wolves in A/B and cheetahs in C–E (as found, wound up,
+struck, destroyed) · every guardian and construct (dormant, the wake, a thirty
+second fight, a tour of the states the fight did not reach, the fall).
+
+**What the first showing found — and what it fixed, same commit:**
+
+- **The wolf's rest plate was on a WHITE FIELD.** `wolf.webp` shipped 81%
+  opaque, 55% pure white: the restyle came back on white and was keyed as if
+  black. Every resting wolf in Kingdom 1 stood in a white card. Re-keyed from
+  `assets/source/beasts/style_d/wolf.jpg` with `blackkey --white`, refit into
+  the old plate's frame (`tools/refit.cjs`, so `k: 2.35` still holds).
+- **The bar over the Alpha read `b_alpha`, and over the constructs `b_chime`,
+  `b_lattice`…** — `t()` hands back the key when it has nothing, and only the
+  six guardians had a `b_` line. `bossBarName()` in game.js: the Alpha takes
+  `alpha_name`, a construct the head of its meeting toast.
+- **Every construct's fall toasted the word "undefined"** over the next room:
+  the purification line table only knows the five guardians. Guarded.
+
+The tool joins the harness family: a claim like "the guardian was restyled" can
+now be checked by watching it, and the film is regenerated from the game rather
+than kept.
+
+---
+
 ### 2as. TWO OF HER WORDS ARE IN SOMEBODY ELSE'S VOICE ✱ RE-FIRE (2026-09-04)
 
 **The owner, on the idle line:** *"the sound itself, it's grown up more than
