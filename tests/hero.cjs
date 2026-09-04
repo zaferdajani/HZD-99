@@ -298,6 +298,73 @@ const { chromium } = require('playwright');
     check('every mood puts a different face on her', !dull.length, dull.join(', '));
   }
 
+  // ---- EVERY CELL FACES THE SAME WAY -------------------------------------
+  //
+  // The renderer draws one right-facing body and mirrors it for left, so a cell
+  // fired facing the other way makes her spin on the spot: her run steps
+  // run_a -> run_b -> run_c, and cell 3 arrived backwards, so one frame in
+  // three had her facing away and then forwards again. The owner saw it before
+  // any test did — "its shape is moving forward while it's flipping... back
+  // and front simultaneously" — because nothing here was asking.
+  //
+  // The question is answerable without knowing which way is "right": a cell
+  // that faces the same way as its neighbours overlaps them better AS-IS than
+  // MIRRORED. So every locomotion cell is compared with every other, both
+  // ways, and any cell that prefers the mirror against the majority is facing
+  // backwards. HERO_CELL_MIRROR is applied first, so this measures what the
+  // player is actually shown and stays green when the plate is re-fired and
+  // that entry is removed.
+  const facing = await page.evaluate(async () => {
+    const im = new Image(); im.src = MEDIA_SRC.images.heroStates;
+    await new Promise(k => { im.onload = k; im.onerror = k; });
+    if (!im.naturalWidth) return { err: 'sheet did not load' };
+    const N = HERO_CELLS, cw = im.naturalWidth / N, ch = im.naturalHeight;
+    const W = Math.round(cw), H = ch;
+    const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
+    const q = cvs.getContext('2d', { willReadFrequently: true });
+    const grab = (nm, flip) => {
+      const i = HERO_CELL[nm];
+      // what the GAME shows: the correction table is part of the picture
+      const mir = !!(typeof HERO_CELL_MIRROR !== 'undefined' && HERO_CELL_MIRROR[nm]) !== !!flip;
+      q.clearRect(0, 0, W, H); q.save();
+      if (mir) { q.translate(W, 0); q.scale(-1, 1); }
+      q.drawImage(im, i * cw, 0, cw, ch, 0, 0, W, H); q.restore();
+      const d = q.getImageData(0, 0, W, H).data; const m = new Uint8Array(W * H);
+      for (let k = 0; k < W * H; k++) if (d[k * 4 + 3] > 60) m[k] = 1;
+      return m;
+    };
+    const iou = (A, B) => { let i = 0, u = 0; for (let k = 0; k < A.length; k++) { if (A[k] || B[k]) u++; if (A[k] && B[k]) i++; } return u ? i / u : 1; };
+    const names = ['idle', 'walk_a', 'walk_b', 'walk_c', 'run_a', 'run_b', 'run_c'];
+    const plain = {}, mirror = {};
+    for (const n of names) { plain[n] = grab(n, false); mirror[n] = grab(n, true); }
+    const out = {};
+    for (const a of names) {
+      let votes = 0, tested = 0, worst = 0;
+      for (const b2 of names) {
+        if (a === b2) continue;
+        const same = iou(plain[a], plain[b2]), mir = iou(plain[a], mirror[b2]);
+        tested++;
+        if (mir > same + 0.06) { votes++; worst = Math.max(worst, mir - same); }
+      }
+      out[a] = { votes, tested, worst: +worst.toFixed(3) };
+    }
+    return { out, names };
+  });
+  if (facing.err) { check('the state sheet loads for the facing check', false, facing.err); }
+  else {
+    const backwards = [];
+    for (const n of facing.names) {
+      const v = facing.out[n];
+      // a cell facing the wrong way loses to the mirror against MOST of the
+      // others; one disagreement is a pose, not a direction
+      const bad = v.votes > v.tested / 2;
+      console.log('      ' + n.padEnd(9) + v.votes + '/' + v.tested + ' pairs prefer its mirror'
+        + (bad ? '   <-- FACING BACKWARDS (by ' + v.worst + ')' : ''));
+      if (bad) backwards.push(n + ' (' + v.votes + '/' + v.tested + ')');
+    }
+    check('every locomotion cell faces the same way', !backwards.length, backwards.join(', '));
+  }
+
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }

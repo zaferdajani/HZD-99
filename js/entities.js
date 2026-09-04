@@ -701,6 +701,22 @@ const HERO_CELL = {
   heal: 19, song: 20, slump: 21, walk_c: 22, run_c: 23,
 };
 const HERO_CELLS = 24;
+// A CELL FIRED FACING THE WRONG WAY, CORRECTED AT THE DRAW.
+//
+// Every cell of heroStates is a right-facing body that the renderer mirrors for
+// left. Cell 3 — run_a — is not: it was fired facing the other way. Measured
+// off the sheet, every comparison involving it prefers the MIRROR (run_a vs
+// walk_a 0.500 as-is against 0.678 mirrored, vs walk_c 0.417 against 0.558, vs
+// run_b 0.364 against 0.437) while every pair that does not involve it prefers
+// as-is. Her run cycle steps run_a -> run_b -> run_c, so one cell in three had
+// her facing backwards and then forwards again: the owner's "its shape is
+// moving forward while it's flipping... back and front simultaneously".
+//
+// This is a wiring correction, not a repaint — the plate is turned round where
+// it is blitted. The brief to re-fire that cell the right way round is on the
+// firing list; when it lands, this entry comes out and nothing else changes.
+// tests/hero.cjs holds the law so a repaint cannot land one backwards again.
+const HERO_CELL_MIRROR = { run_a: 1 };
 // Per-pose size corrections, measured off the sheet with tools/cellmeas.cjs —
 // the figure's height inside its cell, against the idle she is supposed to
 // still be the same size as. 117/131 for the charge; nothing else in the sheet
@@ -2365,7 +2381,11 @@ class Player {
       const ease = clamp((Math.abs(this.vx) - 12) / 48, 0, 1);
       c.translate((0.5 - ((this.stridePh || 0) % 1)) * 2 * lockPx * ease, 0);
     }
+    // the wrong-way cell is turned round about its own centre, so the
+    // registration and foot-plant corrections above still apply to it
+    if (HERO_CELL_MIRROR[st]) { c.scale(-1, 1); }
     c.drawImage(im, col * cw, 0, cw, ch, -dw / 2, dy, dw, dh);
+    if (HERO_CELL_MIRROR[st]) { c.scale(-1, 1); }
     this.drawHeroEyes(c, st, dw, dh, dy);
     c.restore();
     return true;

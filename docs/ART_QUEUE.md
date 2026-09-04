@@ -4346,6 +4346,37 @@ did not make.
 
 ---
 
+### 2ar. HZD-99's `run_a` CELL IS FACING THE WRONG WAY ✱ RE-FIRE (2026-09-04)
+
+`assets/characters/.../hero_states` cell 3 (`run_a`) was fired facing the
+opposite direction from every other cell on the sheet. Every cell there is a
+RIGHT-facing body that the renderer mirrors for left; this one is not.
+
+Measured off the sheet, every comparison involving it prefers the MIRROR while
+every pair that does not involve it prefers as-is:
+
+| pair | as-is | mirrored |
+|---|---|---|
+| run_a vs walk_a | 0.500 | **0.678** |
+| run_a vs walk_c | 0.417 | **0.558** |
+| run_a vs run_b | 0.364 | **0.437** |
+| walk_a vs walk_c | 0.676 | 0.398 |
+
+Her run cycle steps `run_a → run_b → run_c`, so one frame in three had her
+facing away and then forwards again — the owner's report was "its shape is
+moving forward while it's flipping... back and front simultaneously".
+
+**It is corrected in code meanwhile** (`HERO_CELL_MIRROR` in js/entities.js
+turns that one cell round where it is blitted), so the game is right now and
+this is not urgent. But the SHEET is still wrong, and the correction should not
+outlive it: re-fire cell 3 facing the same way as `run_b` and `run_c` — same
+body, same camera, same distance, same light, right-facing — and delete the
+`HERO_CELL_MIRROR` entry in the same commit. `tests/hero.cjs` measures the
+facing of every locomotion cell through that table, so it stays green across
+the swap and fails the moment another cell lands backwards.
+
+---
+
 ### 2w. THE BURIED MOUTH — the first tunnel's rubble ✱ FIRE ON REBIND (2026-08-23)
 
 **The owner:** *"The first cave or tunnel that I face needs to be covered with
