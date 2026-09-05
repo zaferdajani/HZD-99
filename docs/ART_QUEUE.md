@@ -4642,6 +4642,35 @@ ledger; the code session fills `HERO_GAIT` / `SWING_STRIP` and runs hero,
 gait and artbible. Nullfang's strips are wired by the code session in the same
 commit as this note.
 
+**STEPS 2–4 RUN, AND THE RIG IS RETIRED AS A DRIVER (art session, 2026-09-05).**
+Eight clips rigged and archived (`assets/source/hero/rig/clip_*.glb`, 8
+credits each; the library's run 16/14 and hook 193/197 fail on this model
+every time, 509 and 195 took). `tools/bake3d.cjs` gained a skinned-mesh
+bounding box (`Box3.setFromObject` on a Meshy rig measured the 1 cm bind
+box) and the driving videos re-timed to a true 24 fps (`setpts=N/24/TB`;
+the recorder wrote 7.5 fps wall-clock). Kling motion control REFUSED the
+driver twice — a round-bodied cat is not a human performance — refunded.
+Seedance 2.5 with the driver as `video_references` and her plate as
+`image_references` works (the walk is a keeper), with a floor of about 2 s
+on the reference clip (shorter ones 422; loop them).
+
+**The owner, on the rig sheet: "there are so many defects in here."** He is
+right and they are the rig's: the humanoid auto-skeleton twists her round
+body through the punches so cells face away, the cape and sword clip the
+torso, the mesh carries seams the paint has not — and the video model copied
+the mannequin. Of eight painted takes (260 credits) one is clean (walk), four
+are compromised (idle/hit/jump front-facing, idle turns away), three not
+shippable (jab/hook/uppercut spin; run came back chrome). Her claw string
+and transition strips, and Nullfang's ten takes, were made WITHOUT a rig,
+from a painted plate with the motion in words, and came back clean.
+
+**Ruling ("fix it"): the rig drives nothing.** The walk take is kept
+(`assets/source/hero/rig/takes/walk.mp4`). Run, jump, hit, idle, jab, hook,
+uppercut refired as plain takes from her own painted plates (`run_a`,
+`rise`, `hurt`, `idle`, `claw_1` as start frames), the §2ax camera lock, the
+facing named (three-quarter, screen-right; idle front). Rig GLBs and the
+eight rig-driven takes stay archived under `rig/` for the record.
+
 **After her:** the wolves and the cheetah (§2q) go the same way — a rigged
 quadruped may rig poorly, so preview before paying for clips.
 
