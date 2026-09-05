@@ -125,7 +125,31 @@ const ROOT = path.join(__dirname, '..');
     // frame ONCE for all yaws: the widest the model gets while spinning is its
     // XZ diagonal, so a bounding sphere around the box gives one scale that
     // holds every column — same subject, same scale, same camera, per §4
-    const box = new THREE.Box3().setFromObject(model);
+    // A RIGGED MESH IS NOT WHERE ITS GEOMETRY SAYS. Meshy's rigged GLBs keep
+    // the mesh in metres under an Armature scaled 0.01 with the bones in
+    // centimetres: the geometry's own box is a centimetre tall, the skinned
+    // body it renders is a metre. Box3.setFromObject reads the geometry, so
+    // the first clip bake framed a 1 cm box and every cell was a close-up of
+    // a cape. For skinned meshes the box is taken from the SKINNED vertices
+    // (boneTransform, then the mesh's world matrix), posed as they stand now.
+    const box = new THREE.Box3();
+    let skinned = 0;
+    model.traverse((o) => {
+      if (!o.isSkinnedMesh) return;
+      skinned++;
+      o.skeleton.update();
+      const pos = o.geometry.attributes.position, n = pos.count;
+      const step = Math.max(1, Math.floor(n / 6000)), v = new THREE.Vector3();
+      const xf = o.applyBoneTransform ? 'applyBoneTransform' : 'boneTransform';
+      for (let i = 0; i < n; i += step) {
+        // boneTransform takes the vertex IN the vector and skins it in place
+        v.fromBufferAttribute(pos, i);
+        o[xf](i, v);                                  // skinned, in the mesh's local space
+        v.applyMatrix4(o.matrixWorld);
+        box.expandByPoint(v);
+      }
+    });
+    if (!skinned) box.setFromObject(model);
     const c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
     model.position.sub(c);                       // spin about the volume center
     const spinR = Math.hypot(sz.x, sz.z) / 2;    // worst-case half-width in yaw

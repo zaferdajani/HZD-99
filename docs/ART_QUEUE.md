@@ -4573,6 +4573,28 @@ the skeleton arrives with each clip job, which is why `3d_rigging` takes the
 model URL). Preview sheet shown to the owner; clip previews shown, picks
 pending. Each clip preflighted at 8 credits on this model's URL.
 
+**FIRED — step 2, the owner said "choose for me" (art session, 2026-09-05,
+64 credits net).** Eight clips rigged onto the model via `3d_rigging`:
+walk 30 Casual_Walk (e5ef78ba) · run 509 Lean_Forward_Sprint (9d62654a) ·
+jab 191 (7c8dafbd) · hook 195 Right_Upper_Hook (68be8f5f) · uppercut 194
+(0cccb96f) · jump 466 Regular_Jump (f85f6ed6) · hit 174 Face_Punch_Reaction
+(cef0aabb) · idle 0 (1066f979). GLBs in `assets/source/hero/rig/clip_*.glb`.
+Two library clips FAIL on this rig every time and were refunded each time:
+the runs 16 RunFast and 14 Run_02, and the hooks 193 Left_Hook and 197
+Left_Short_Hook — 509 and 195 took in their place. Submitting eight at once
+also lost five to a transient failure (refunded); resubmitted in twos and
+they landed.
+
+**bake3d learned skinned meshes.** Meshy's rigged GLB keeps the mesh in
+metres under an Armature scaled 0.01 with bones in centimetres, so
+`Box3.setFromObject` framed a one-centimetre box and the first clip bake was
+twelve close-ups of a cape. The bake now takes the box from the SKINNED
+vertices (`boneTransform` over the posed skeleton, then the mesh's world
+matrix). The driving webm it records is real-time and lands at 7.5 fps on
+a headless render; re-timed with ffmpeg (`setpts=N/24/TB -r 24`) to the
+24 fps clip it is, before motion control. All eight baked to 12-cell strips
+and driving videos (scratch `restyle/rig/clips/`).
+
 **After her:** the wolves and the cheetah (§2q) go the same way — a rigged
 quadruped may rig poorly, so preview before paying for clips.
 
