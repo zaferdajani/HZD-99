@@ -365,6 +365,120 @@ const { chromium } = require('playwright');
     check('every locomotion cell faces the same way', !backwards.length, backwards.join(', '));
   }
 
+  // ---- SHE HITS WHAT SHE IS FACING, NOT THE CAMERA -------------------------
+  //
+  // The owner, on the swing strips: "when the character hits, it should be
+  // looking at whatever it's heading, not looking at the screen... all of them
+  // looking at me instead of turning to enemy and hit." He is right, and it is
+  // measurable without an opinion about art: a head turned to the camera shows
+  // its two eye-lights far apart; a head in the walk's three-quarter profile
+  // shows them close together, the far eye foreshortened toward the near one.
+  // So the eye pair is found in every cell (the same cyan-pair method
+  // tools/heroeyes.cjs uses), its gap is taken over the figure's height so a
+  // strip cell and a sheet cell can be compared, and every attack strip is
+  // held to the widest gap her locomotion cells show (walk_b, the passing
+  // pose, is the widest at 0.099 — five percent over it is the line). A strip whose median
+  // cell is wider-eyed than any walk or run cell is facing the screen.
+  //
+  // Red until docs/ART_QUEUE.md §2av is fired; it turns green on the re-fire
+  // without another edit here, which is the point of measuring it.
+  const face2 = await page.evaluate(async () => {
+    const load = (src) => new Promise(k => { const im = new Image(); im.onload = () => k(im); im.onerror = () => k(null); im.src = src; });
+    const eyeGap = (im, i, cells) => {
+      const cw = im.naturalWidth / cells, H = im.naturalHeight, w = Math.round(cw);
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = H;
+      const x = cv.getContext('2d', { willReadFrequently: true });
+      x.drawImage(im, i * cw, 0, cw, H, 0, 0, w, H);
+      const p = x.getImageData(0, 0, w, H).data;
+      let top = H, bot = 0;
+      const isC = new Uint8Array(w * H), px = [];
+      for (let q = 0; q < w * H; q++) {
+        const a = p[q * 4 + 3];
+        if (a < 60) continue;
+        const y = (q / w) | 0; if (y < top) top = y; if (y > bot) bot = y;
+        if (a < 120) continue;
+        const r = p[q * 4], g = p[q * 4 + 1], b = p[q * 4 + 2];
+        if ((g + b) / 2 - r > 45 && g > 120 && b > 110) { isC[q] = 1; px.push(q); }
+      }
+      const figH = Math.max(1, bot - top);
+      const seen = new Uint8Array(w * H), blobs = [];
+      for (const q of px) {
+        if (seen[q]) continue;
+        const st = [q]; seen[q] = 1;
+        let n = 0, sx = 0, sy = 0, x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+        while (st.length) {
+          const k = st.pop(), kx = k % w, ky = (k / w) | 0;
+          n++; sx += kx; sy += ky;
+          if (kx < x0) x0 = kx; if (kx > x1) x1 = kx; if (ky < y0) y0 = ky; if (ky > y1) y1 = ky;
+          for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+            const nx = kx + dx, ny = ky + dy;
+            if (nx < 0 || ny < 0 || nx >= w || ny >= H) continue;
+            const nk = ny * w + nx;
+            if (isC[nk] && !seen[nk]) { seen[nk] = 1; st.push(nk); }
+          }
+        }
+        if (n < 12) continue;
+        let surN = 0, surL = 0;
+        const pad = Math.max(2, Math.round((x1 - x0 + 1) * 0.6));
+        for (let ry = y0 - pad; ry <= y1 + pad; ry++) for (let rx = x0 - pad; rx <= x1 + pad; rx++) {
+          if (rx < 0 || ry < 0 || rx >= w || ry >= H) continue;
+          if (rx >= x0 && rx <= x1 && ry >= y0 && ry <= y1) continue;
+          const k = ry * w + rx;
+          if (isC[k] || p[k * 4 + 3] < 120) continue;
+          surL += p[k * 4] * 0.3 + p[k * 4 + 1] * 0.59 + p[k * 4 + 2] * 0.11; surN++;
+        }
+        const dark = surN ? 1 - Math.min(1, (surL / surN) / 150) : 0;
+        blobs.push({ n, cx: sx / n, cy: sy / n, w: x1 - x0 + 1, dark });
+      }
+      let best = null;
+      for (let a = 0; a < blobs.length; a++) for (let b2 = a + 1; b2 < blobs.length; b2++) {
+        const A = blobs[a], B = blobs[b2];
+        const dx = Math.abs(A.cx - B.cx), dy = Math.abs(A.cy - B.cy);
+        if (dx < 2 || Math.max(A.w, B.w) / w > 0.14) continue;
+        const score = (Math.min(A.n, B.n) / Math.max(A.n, B.n)) * 2.2
+          + (1 - Math.min(1, dy / (H * 0.06))) * 1.8 + (1 - Math.min(1, dx / (w * 0.55))) * 1.0
+          + ((A.dark + B.dark) / 2) * 3.0;
+        if (!best || score > best.score) best = { score, gap: dx };
+      }
+      return best ? +(best.gap / figH).toFixed(3) : null;
+    };
+    const sheet = await load(MEDIA_SRC.images.heroStates);
+    if (!sheet) return { err: 'sheet did not load' };
+    const loco = {};
+    for (const nm of ['walk_a', 'walk_b', 'walk_c', 'run_a', 'run_b']) loco[nm] = eyeGap(sheet, HERO_CELL[nm], HERO_CELLS);
+    const cells = {};
+    for (const nm of ['claw_1', 'claw_2', 'finisher', 'burst']) cells[nm] = eyeGap(sheet, HERO_CELL[nm], HERO_CELLS);
+    const strips = {};
+    for (const nm of Object.keys(SWING_STRIP)) {
+      const S = SWING_STRIP[nm];
+      const im = await load(MEDIA_SRC.images[S.key]);
+      if (!im) { strips[nm] = { err: 'no strip' }; continue; }
+      const gaps = [];
+      for (let i = 0; i < S.cells; i++) { const g = eyeGap(im, i, S.cells); if (g != null) gaps.push(g); }
+      gaps.sort((a, b) => a - b);
+      strips[nm] = { n: gaps.length, median: gaps.length ? gaps[gaps.length >> 1] : null };
+    }
+    return { loco, cells, strips };
+  });
+  if (face2.err) { check('the sheet loads for the attack-facing check', false, face2.err); }
+  else {
+    const locoMax = Math.max.apply(null, Object.values(face2.loco).filter(v => v != null));
+    console.log('      eye gap / figure height — walk & run cells: '
+      + Object.entries(face2.loco).map(([k, v]) => k + ' ' + v).join('  ') + '   (widest ' + locoMax + ')');
+    console.log('      attack cells on the sheet: '
+      + Object.entries(face2.cells).map(([k, v]) => k + ' ' + v).join('  '));
+    const facingCamera = [];
+    for (const [nm, s] of Object.entries(face2.strips)) {
+      if (s.err) { console.log('      ' + nm.padEnd(9) + s.err); continue; }
+      const bad = s.median != null && s.median > locoMax * 1.05;
+      console.log('      ' + nm.padEnd(9) + 'strip median ' + s.median + ' over ' + s.n + ' cells'
+        + (bad ? '   <-- FACING THE CAMERA' : ''));
+      if (bad) facingCamera.push(nm + ' (' + s.median + ')');
+    }
+    check('every attack strip faces where she is heading, not the screen',
+      !facingCamera.length, facingCamera.join(', ') + ' vs the walk\'s widest ' + locoMax + ' — ART_QUEUE §2av');
+  }
+
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }

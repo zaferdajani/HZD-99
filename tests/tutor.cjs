@@ -245,8 +245,29 @@ const { chromium } = require('playwright');
     return { opened: !!G.tut.opened, before: !!before, i: G.tut.i, last: TUT_LAST };
   });
 
+  // THE LESSON SURVIVES A RELOAD, AND ONLY EVER MOVES FORWARD. The owner
+  // picked his save up at the booth and was taught MOVE, OUT and JUMP again
+  // inside the shop he had just bought from: G.tut lived in memory and a
+  // reload started it at zero. The step index is in the save now.
+  const resume = await p.evaluate(() => {
+    const at = (id) => TUT_STEPS.findIndex(q => q.id === id);
+    loadRoom('A0'); G.state = 'PLAY'; G.dialog = null;
+    G.tut.i = at('heal'); G.tut.t = 1; G.tut.hold = 0;
+    tutSave(G.save, G.tut);
+    let stored = -1;
+    try { stored = JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))).flags.tutI; } catch (e) {}
+    // a reload: the in-memory walk is gone, the save is what is left
+    G.tut = null; updateTutor(1 / 60);
+    const resumed = TUT_STEPS[G.tut.i].id;
+    // ...and a save can never be written backwards
+    G.tut.i = at('atk'); tutSave(G.save, G.tut);
+    const back = G.save.flags.tutI;
+    return { stored, resumed, back, heal: at('heal') };
+  });
+
   await b.close();
 
+  console.log('reload mid-walk: ' + JSON.stringify(resume));
   console.log('steps reached: ' + seen.join(' -> '));
   console.log('scrap from the waking floor\'s machine: ' + scrapBefore + ' -> ' + scrapAfter);
   console.log('after buying the cell: ' + JSON.stringify(bought));
@@ -268,6 +289,9 @@ const { chromium } = require('playwright');
   if (!skip.atkHeld) fails.push('a swing inside the shop finished the attack lesson');
   if (!skip.atkCounts) fails.push('a swing on the waking floor did NOT finish the attack lesson');
   if (!(skip.boothLater > 0)) fails.push('the booth never opens for the lesson that sends her in');
+  if (resume.stored !== resume.heal) fails.push('the step index is not in the save (' + resume.stored + ')');
+  if (resume.resumed !== 'heal') fails.push('a reload restarted the lesson at "' + resume.resumed + '"');
+  if (resume.back !== resume.heal) fails.push('the saved step moved backwards (' + resume.back + ')');
   if (errs.length) fails.push('page errors: ' + errs.slice(0, 3).join(' | '));
   if (fails.length) { console.log('\nFAIL\n - ' + fails.join('\n - ')); process.exit(1); }
   console.log('\nOK');

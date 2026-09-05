@@ -88,6 +88,44 @@ const PAD = (over) => Object.assign({
   s = await step([null, PAD({ index: 1, connected: false, timestamp: 2000 })]);
   check('corpse on another slot -> pad mode off', s.padOn, false);
 
+  // 7. THE STICK WALKS, THE CLICK RUNS (owner, 2026-09-05). A live pad pushing
+  //    right must cap her at the walk; clicking L3 while she is moving lifts
+  //    the cap; letting the stick go drops it again, so the next push starts
+  //    at a walk. Driven through the real poll and the real physics step.
+  const speeds = await page.evaluate(async () => {
+    loadRoom('A0'); G.state = 'PLAY'; G.dialog = null; G.wake = null; G.cut = null;
+    player.x = 4 * TILE; player.y = 13 * TILE; player.vx = 0; player.on = true;
+    const live = (over) => Object.assign({
+      index: 0, id: 'Test Pad (STANDARD GAMEPAD)', connected: true, timestamp: 3000,
+      axes: [0, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ pressed: false, value: 0 })),
+    }, over || {});
+    const sim = (rack, n) => {
+      window.__rack = rack;
+      for (let i = 0; i < n; i++) {
+        pollGamepad(); G.enemies = []; player.iT = 1; player.cores = 5;
+        if (player.x > 30 * TILE) player.x = 4 * TILE;      // stay on the open floor
+        update(1 / 60); clearP();
+      }
+      return Math.round(Math.abs(player.vx));
+    };
+    const push = live({ axes: [1, 0, 0, 0] });
+    const walk = sim([push], 60);
+    const click = live({ axes: [1, 0, 0, 0] });
+    click.buttons[PAD.map.RUN] = { pressed: true, value: 1 };
+    sim([click], 2);
+    const run = sim([push], 60);                             // click released, stick still held
+    sim([live()], 30);                                       // stick let go
+    const again = sim([push], 60);
+    const runBtn = PAD.map.RUN;
+    return { walk, run, again, runBtn, top: Math.round(player.speed()), walkCap: PAD_WALK_VX };
+  });
+  console.log('  stick only ' + speeds.walk + '  click ' + speeds.run + '  released+pushed ' + speeds.again
+    + '  (walk cap ' + speeds.walkCap + ', top ' + speeds.top + ', RUN on button ' + speeds.runBtn + ')');
+  check('stick alone walks', speeds.walk <= speeds.walkCap + 2 && speeds.walk >= speeds.walkCap - 30, true);
+  check('L3 while moving runs', speeds.run >= speeds.top - 10, true);
+  check('stick released, next push walks again', speeds.again <= speeds.walkCap + 2, true);
+  check('RUN defaults to L3', speeds.runBtn, 10);
+
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }

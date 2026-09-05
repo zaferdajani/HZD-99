@@ -1695,6 +1695,8 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  23. §2q    BEAST GAIT REPAIR ×8              (wolf+cheetah walk pairs RE-FIRED + run pairs — see §2q, the leg and identity faults are written there)
  24. §2r    THE FORGE TABLE ×1                (the den bench as a matted object — crop stand-in wired, fire against it)
  25. §2aq   THE CUTTER'S SPLIT STONE + KERF ×2 + KERF HERSELF ×3  ✱ NEW 2026-09-02 (kingdom X pass) — wired, procedural stand-ins live, nothing fired
+ 26. §2av   THE FOUR SWING STRIPS + 4 SHEET CELLS, IN PROFILE  ✱ RE-FIRE 2026-09-05 — every attack faces the camera; tests/hero.cjs red on the facing law until it lands
+ 27. §2au   THE WALK CYCLE + THE RUN CYCLE ×2 takes            ✱ FIRE 2026-09-05 — HERO_GAIT slot wired, zero cells; docs/GAIT.md is the brief's study
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -4395,6 +4397,115 @@ second fight, a tour of the states the fight did not reach, the fall).
 The tool joins the harness family: a claim like "the guardian was restyled" can
 now be checked by watching it, and the film is regenerated from the game rather
 than kept.
+
+---
+
+### 2au. HER WALK AND RUN ARE POSES, NOT MOVES — the two gait cycles ✱ FIRE (2026-09-05)
+
+**The owner, reading the state sheet:** *"These are multiple moves instead of
+single one like walking and running."* And before it: *"the dynamics of
+movement is so bad. How can I make you study how a character should move?"*
+
+He read the sheet correctly. Her walk is three stills (contact, passing,
+opposite contact) and her run two (contact, passing; the third benched
+off-model, §1i) — each fired on its own as a POSE. A gait is ONE move: a loop
+of a whole stride, keyed at contact / down / passing / up on each leg, eight
+keys and the in-betweens between them. The frames that make a walk read as
+weight (the recoil after the heel lands, the rise over the planted foot) do
+not exist on the sheet, and no code can invent them. `docs/GAIT.md` is the
+study — what a cycle is, the numbers for her body, and what the code now
+holds (the cadence bands in `tests/gait.cjs`) versus what only the plates can
+fix (this brief).
+
+**What the code already provides:** a slot, `HERO_GAIT` in js/entities.js —
+`{ walk: { key: 'gaitWalk', cells: 0 }, run: { key: 'gaitRun', cells: 0 } }` —
+drawn by `drawRoboTrans` and indexed by `stridePh % 4` across the strip, so
+the feet keep agreeing with the floor. Zero cells = not fired = the pose cells
+draw as now. Fill `cells` and `k`, add the two keys to js/media.js, done.
+
+**TWO TAKES, video, cut by content.** Her body (canon element, ART_BIBLE §2),
+the walk's three-quarter profile FACING RIGHT (match `walk_a`, cell 1 of
+`assets/characters/hero/states.webp` — same camera height, same distance,
+same light), treadmill: she stays centred, the ground scrolls, the camera is
+locked. Plain black field, no ground plate, no cast shadow, no text.
+One full stride per take — left contact back round to left contact.
+
+1. **`gaitWalk`** — an upright walk. Contact (front heel down, back toe still
+   touching), DOWN (knee bends, the body at its lowest, arms at their widest
+   counter-swing), PASSING (feet cross under the hips, body rising), UP (pushed
+   off the back toe, body at its highest, the free leg swinging through) — on
+   each leg. Head level; a bob of a few percent of her height, no more. Two
+   steps a second.
+2. **`gaitRun`** — the same four keys with an AIRBORNE moment after each
+   push-off (both feet off the floor), the whole spine leaned 10–15° forward,
+   arms driving rather than swinging, the scarf trailing straight back. The
+   stride is LONG: feet spread at least her body height at contact. This is
+   the drawing that hides the ground slip a game speed forces (GAIT.md §2) —
+   a short-stride run reads as jogging on the spot at 340 px/s. Three steps a
+   second.
+
+**Cut** with `tools/vidstrip.cjs auto:12` (a ceiling, not a count — keep what
+differs), **measure k** with `tools/swingk.cjs` against `walk_a` / `run_a`
+so she stays her size crossing into and out of the loop, **archive** the takes
+and the strips under `assets/source/hero/gait/`, and **wire** the two keys.
+`tests/gait.cjs` holds the cadence bands either way; `tests/hero.cjs` holds
+the facing (every cell must face the same way as the sheet — a cycle that
+turns her round mid-stride fails the mirror vote).
+
+---
+
+### 2av. EVERY ATTACK LOOKS AT THE CAMERA — the four swing strips, in profile ✱ RE-FIRE (2026-09-05)
+
+**The owner:** *"When the character hits, it should be looking at whatever
+it's heading, not looking at the screen like what you're doing right now."*
+Then, with `claw_1.webp` open: *"All of them looking at me instead of turning
+to enemy and hit."*
+
+Measured (`tests/hero.cjs`, the attack-facing law): the eye-lights' gap over
+the figure's height, which a head turned to the camera makes wide and a head
+in the walk's three-quarter profile makes narrow.
+
+| plate | eye gap / height | reads as |
+|---|---|---|
+| walk_a / walk_c / run_a / run_b | 0.067 – 0.085 | profile, the house facing |
+| walk_b (passing, the widest locomotion cell) | 0.099 | the line: ×1.05 = 0.104 |
+| **claw_1 strip** (11 cells, median) | **0.113** | the camera |
+| **claw_2 strip** (11 cells, median) | **0.131** | the camera |
+| **finisher strip** (9 cells, median) | **0.139** | the camera |
+| **burst strip** (9 cells, median) | **0.116** | the camera |
+| sheet cells claw_1 / claw_2 / finisher / burst | 0.107 – 0.25 | the camera too |
+
+Every strip fails; so do the four pose cells they fall back to. This is not a
+wiring fault — a frontal figure cannot be turned into a profile at the blit —
+so `tests/hero.cjs` is RED on this law until the re-fire lands, and goes green
+on its own when it does.
+
+**RE-FIRE ALL FOUR STRIPS AND THE FOUR SHEET CELLS.** Her body (canon element,
+ART_BIBLE §2), the SAME three-quarter profile FACING RIGHT as `walk_a` (cell 1
+of `states.webp`) — same camera height, distance and light — and the blow
+travels RIGHT, along the direction she faces: the arm and the claw extend
+toward the right edge of the frame, the head turned to the target, never to
+the viewer. The eyes must read as the profile pair (the far eye foreshortened
+toward the near one). Plain black field, no ground, no cast shadow, no text.
+
+- **`swingClaw1`** — guard, wind-up behind the shoulder, the rake forward and
+  across, the recovery: the first hit of the combo, six to eleven distinct
+  pictures.
+- **`swingClaw2`** — the return rake from the other side, arm fully extended
+  at the contact frame.
+- **`swingFinisher`** — both arms, the overhead double rake that ends the
+  combo, the body leaning INTO the target.
+- **`swingBurst`** — the charged release: the crouch, the explosive extension,
+  the arms flung forward-and-wide rather than wide-to-camera.
+- **Sheet cells 13, 14, 15, 17** (`claw_1`, `claw_2`, `finisher`, `burst`) —
+  one still each, the contact frame of its strip, so the fallback matches.
+
+Cut by content (`tools/vidstrip.cjs auto:N`), `k` re-measured by
+`tools/swingk.cjs` (the `SWING_STRIP` table names its reference cell for each
+strip), archived under `assets/source/hero/swing/`, `tools/heroeyes.cjs` re-run
+for the four sheet cells so `HERO_EYE` repaints the right pair. The law's
+threshold is in the harness, not in this text: a strip whose median cell keeps
+its eyes within 0.104 of her height passes.
 
 ---
 

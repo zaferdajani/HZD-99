@@ -11399,6 +11399,19 @@ function tutAllows(act) {
   const idx = TUT_STEPS.findIndex(q => q.id === need);
   return idx < 0 || G.tut.i >= idx;
 }
+// the step index, in and out of the save — clamped, because a save written by
+// a build with more steps than this one must not index past the list
+function tutRestore(sv) {
+  const i = (sv && sv.flags && sv.flags.tutI) | 0;
+  return Math.max(0, Math.min(TUT_LAST, i));
+}
+function tutSave(sv, T) {
+  if (!sv || !T) return;
+  if (!sv.flags) sv.flags = {};
+  if ((sv.flags.tutI | 0) >= T.i) return;      // one way: never written backwards
+  sv.flags.tutI = T.i;
+  if (typeof persist === 'function') persist();
+}
 function updateTutor(dt) {
   const sv = G.save;
   if (!sv || !player || player.dead) return;
@@ -11408,7 +11421,18 @@ function updateTutor(dt) {
     G.tut = null; if (typeof TOUCH !== 'undefined' && TOUCH) TOUCH.hi = null;
     return;
   }
-  if (!G.tut) G.tut = { i: 0, t: 0, hold: 0, doneT: 0 };
+  // THE LESSON IS ONE WAY, AND IT USED TO FORGET THAT ON EVERY RELOAD.
+  //
+  // G.tut lived only in memory. The save carried `flags.tut` for "the whole
+  // walk is behind her" and nothing for "she is on step seven of twelve" — so
+  // a page reload, a phone that dropped the tab, or a save picked up at the
+  // booth started a fresh `{ i: 0 }` and taught MOVE again, then OUT, then
+  // JUMP, in the shop she had already bought from. The owner: "When I start
+  // at the shop, I'm starting the loop of teaching all over again... It's a
+  // one time thing." The step index is in the save now (flags.tutI), written
+  // on every advance, and a run resumes on the lesson it was on. There is no
+  // way back down the list: the index only ever grows.
+  if (!G.tut) G.tut = { i: tutRestore(sv), t: 0, hold: 0, doneT: 0 };
   const T = G.tut;
   const st = TUT_STEPS[T.i];
   // THE DUMMY. Calm, so it can never take a core off her, and stopped short of
@@ -11462,7 +11486,7 @@ function updateTutor(dt) {
   }
   if (!st) return;
   T.t += dt;
-  if (T.hold > 0) { T.hold -= dt; if (T.hold <= 0) { T.i++; T.t = 0; tutEnter(TUT_STEPS[T.i]); } return; }
+  if (T.hold > 0) { T.hold -= dt; if (T.hold <= 0) { T.i++; T.t = 0; tutEnter(TUT_STEPS[T.i]); tutSave(sv, T); } return; }
   let ok = false;
   try { ok = st.done(); } catch (e) { ok = false; }
   // the lesson is only learned where it is taught (see `room` above)
@@ -11486,11 +11510,35 @@ function drawTutor() {
   // the player cannot see what it is about — so the step gets a ring while the
   // jump is being taught and the machine gets one while the claw is.
   const mark = (wx, wy, r, col) => {
+    const sx = wx - cam.x, sy = wy - cam.y;
     c.save();
     c.strokeStyle = col; c.lineWidth = 2.5; c.globalAlpha = 0.35 + pu * 0.5;
     c.setLineDash([6, 6]); c.lineDashOffset = -performance.now() / 70;
-    c.beginPath(); c.arc(wx - cam.x, wy - cam.y, r + pu * 3, 0, 7); c.stroke();
-    c.setLineDash([]); c.restore(); c.globalAlpha = 1;
+    c.beginPath(); c.arc(sx, sy, r + pu * 3, 0, 7); c.stroke();
+    c.setLineDash([]);
+    // A RING OFF THE EDGE OF THE SCREEN RINGS NOTHING. The node the 'think'
+    // step points at sits thirteen tiles behind where she stands when the step
+    // opens — the ring was drawn faithfully, four hundred pixels to the left
+    // of the picture. The owner, twice: "you just show the prompt on top of
+    // the cat, which is very confusing even for me". So when the target is out
+    // of frame the ring's colour becomes a chevron pinned to the nearest edge,
+    // pointing the way, with the distance under it. It is the one-way sign a
+    // walk needs: there is only ever one thing rung, and it is always in view
+    // or pointed at.
+    const M = 26;
+    if (sx < -r || sx > 960 + r || sy < -r || sy > 540 + r) {
+      const ex = Math.max(M, Math.min(960 - M, sx)), ey = Math.max(M + 40, Math.min(540 - M - 60, sy));
+      const ang = Math.atan2(sy - ey, sx - ex);
+      c.globalAlpha = 0.55 + pu * 0.45;
+      c.translate(ex, ey); c.rotate(ang);
+      c.fillStyle = col;
+      c.beginPath(); c.moveTo(14 + pu * 4, 0); c.lineTo(-8, -11); c.lineTo(-3, 0); c.lineTo(-8, 11); c.closePath(); c.fill();
+      c.rotate(-ang);
+      const dist = Math.round(Math.hypot(sx - ex, sy - ey) / TILE);
+      c.font = '700 11px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'top';
+      c.fillStyle = col; c.fillText(dist + 'm', 0, 16);
+    }
+    c.restore(); c.globalAlpha = 1;
   };
   // the thing being taught, ringed — and WHICH thing depends on the room now
   if (st.id === 'jump')
@@ -15289,20 +15337,20 @@ function drawPadCfg() {
   for (let i = 0; i < n; i++) {
     const a = PAD_ACTIONS[i];
     const col = i < colH ? 0 : 1, row = i % colH;
-    const x = 140 + col * 372, y = 142 + row * 40;
+    const x = 140 + col * 372, y = 142 + row * 34;   // 15 rows now (RUN joined): 34 px pitch keeps row 8 clear of the footer text
     const sel = i === G.padIdx;
     const btn = PAD.map[a];
     const live = btn >= 0 && PAD.down[btn];
     if (sel) {
-      c.fillStyle = 'rgba(55,255,208,0.10)'; rr(c, x - 16, y - 17, 344, 34, 8); c.fill();
-      c.strokeStyle = '#37ffd0'; c.lineWidth = 1.6; rr(c, x - 16, y - 17, 344, 34, 8); c.stroke();
+      c.fillStyle = 'rgba(55,255,208,0.10)'; rr(c, x - 16, y - 15, 344, 30, 8); c.fill();
+      c.strokeStyle = '#37ffd0'; c.lineWidth = 1.6; rr(c, x - 16, y - 15, 344, 30, 8); c.stroke();
     }
     ftxt(t('pa_' + a), x, y, 15, sel ? '#eef3fa' : '#9fb8c8', 'left');
     const bx = x + 246, listening = PAD.listen === a;
     c.fillStyle = listening ? 'rgba(255,215,106,0.22)' : live ? 'rgba(55,255,208,0.30)' : 'rgba(20,32,44,0.9)';
-    rr(c, bx, y - 14, 88, 28, 7); c.fill();
+    rr(c, bx, y - 13, 88, 26, 7); c.fill();
     c.strokeStyle = listening ? '#ffd76a' : live ? '#37ffd0' : 'rgba(120,150,170,0.5)';
-    c.lineWidth = live || listening ? 2 : 1.2; rr(c, bx, y - 14, 88, 28, 7); c.stroke();
+    c.lineWidth = live || listening ? 2 : 1.2; rr(c, bx, y - 13, 88, 26, 7); c.stroke();
     ftxt(listening ? t('pad_press') : padLabel(btn), bx + 44, y, listening ? 12 : 14,
          listening ? '#ffd76a' : live ? '#eafff9' : '#cfe3ef');
   }

@@ -878,6 +878,28 @@ const HERO_STEP_WALK = 23, HERO_STEP_RUN = 38;
 // walk, a committed push is a run, and the keyboard — which has no analogue and
 // always asks for everything — stays a run, as it should.
 const HERO_RUN_VX = 210;
+// WHAT A PAD'S STICK ASKS FOR WITHOUT THE CLICK. Under the walk/run split, so
+// the walk cells draw; over the touch stick's dead-zone floor (116), so a pad
+// walk is not slower than a light thumb. The click (RUN, L3 by default) lifts
+// the cap to speed() for as long as the stick stays pushed.
+const PAD_WALK_VX = 185;
+// BEATS PER SECOND, BY GAIT — a beat is one cell change, half a step. A human
+// walk is about two steps a second (four beats), a run three to three and a
+// half (six to seven); these are the soft ceilings the stride phase saturates
+// toward, not the rates it runs at. See the cadence paragraph in Player.update.
+const HERO_CADENCE = { walk: 5, run: 7 };
+// THE CYCLES, WHEN THEY ARE FIRED. Her walk is three stills and her run two,
+// and the owner read the sheet correctly: "these are multiple moves instead of
+// a single one like walking and running." A gait is ONE move drawn as a loop —
+// contact, recoil, passing, high point, on both legs — and the slot for that
+// loop is here, indexed by the stride phase so the feet still agree with the
+// floor. Zero cells means not fired: the pose cells draw, as they do now.
+// The brief is docs/ART_QUEUE.md §2au; cut with tools/vidstrip.cjs auto:N and
+// measure k with tools/swingk.cjs against walk_a / run_a.
+let HERO_GAIT = {
+  walk: { key: 'gaitWalk', cells: 0, k: 1 },
+  run:  { key: 'gaitRun',  cells: 0, k: 1 },
+};
 function heroStepLen(vx) { return Math.abs(vx) > HERO_RUN_VX ? HERO_STEP_RUN : HERO_STEP_WALK; }
 // Airborne cells are CENTRED in their cell rather than stood on its floor (the
 // tool does this, because a flying pose has no contact point to align). They
@@ -1169,8 +1191,26 @@ class Player {
     // was covering three and a half of those for every step the legs claimed,
     // and a leg that claims a step it did not take IS the skating the owner
     // kept reporting. See HERO_STEP_WALK for how the run number is arrived at.
-    this.stridePh = (this.stridePh || 0)
-      + dt * (this.on ? clamp(Math.abs(this.vx) / heroStepLen(this.vx), 0, 11) : 0);
+    // ...AND THE CADENCE HAS A CEILING A BODY CAN ACTUALLY PRODUCE. The
+    // quotient above is honest about distance and impossible about time: at
+    // the pad's walk (185 px/s over a 23-unit step) it asked for 8 beats a
+    // second, and at the full run (340 over 38) for 8.9 — the same rate, for
+    // both gaits, and both faster than a sprinter's legs turn over. So the
+    // walk did not read as a walk; it read as the run's strobe at a lower
+    // speed, which is the owner's "the dynamics of movement is so bad" once
+    // the skating and the facing were gone. docs/GAIT.md has the arithmetic.
+    //
+    // Animation practice picks the CADENCE first and lets the ground slip:
+    // every kit the eye accepts runs its cycle at two to three and a half
+    // strides a second whatever the speed, and hides the slip in a long drawn
+    // stride. The ceiling is soft (tanh), so the rate still rises with speed
+    // inside each gait instead of pinning to a flat number the moment she
+    // moves. tests/gait.cjs holds both bands.
+    {
+      const raw = this.on ? clamp(Math.abs(this.vx) / heroStepLen(this.vx), 0, 11) : 0;
+      const cap = Math.abs(this.vx) > HERO_RUN_VX ? HERO_CADENCE.run : HERO_CADENCE.walk;
+      this.stridePh = (this.stridePh || 0) + dt * cap * Math.tanh(raw / cap);
+    }
     this.dashCD -= dt; this.atkCD -= dt; this.iT -= dt; this.castCD -= dt;
     this.jbuf -= dt; this.landT -= dt; this.comboT -= dt;
     if (this.slowT > 0) {
@@ -1223,10 +1263,20 @@ class Player {
         // Keyboard and pad are untouched — a key has no magnitude to read, and
         // TOUCH.axis is 0 unless a thumb is actually on the stick.
         const push = (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.axis) || 1;
-        const cap = this.speed() * (this.slowT > 0 ? 0.5 : 1) * push;
+        // ...AND THE PAD WALKS UNTIL THE STICK IS CLICKED (owner, 2026-09-05).
+        // Read off the raw GP codes rather than PAD.on: a pad left plugged in
+        // beside a keyboard must not slow the keyboard down. The run is armed
+        // by the click while she is already moving and disarmed the moment the
+        // stick comes back to centre — the next push starts at a walk again,
+        // which is what makes the click a decision rather than a toggle.
+        const padMove = !!(keys.GP_L || keys.GP_R);
+        if (padMove && inP('RUN')) this.padRun = 1;
+        const padCap = padMove && !this.padRun ? Math.min(1, PAD_WALK_VX / this.speed()) : 1;
+        const cap = this.speed() * (this.slowT > 0 ? 0.5 : 1) * push * padCap;
         this.vx = clamp(this.vx, -cap, cap);
         this.face = dir;
       } else {
+        this.padRun = 0;                        // stick let go: the run is over
         const s = Math.sign(this.vx);
         this.vx -= s * fric * dt;
         if (Math.sign(this.vx) !== s) this.vx = 0;
@@ -2288,6 +2338,16 @@ class Player {
       // cell is anchored at its bottom — so the bottom goes half a cell below
       // the same centre the pose cells use
       return drawStripCell(c, A.key, Math.floor(p * A.cells), A.cells, 0, -18 + h / 2, h, false);
+    }
+    // the gait loops: one full stride is the four beats the pose cycle steps
+    // through ([0,1,2,1] in heroState), so the strip wraps on stridePh % 4
+    if (this.on && (st === 'walk_a' || st === 'walk_b' || st === 'walk_c'
+                    || st === 'run_a' || st === 'run_b' || st === 'run_c')) {
+      const Gt = HERO_GAIT && (Math.abs(this.vx) > HERO_RUN_VX ? HERO_GAIT.run : HERO_GAIT.walk);
+      if (Gt && Gt.cells) {
+        const cell = Math.floor((((this.stridePh || 0) % 4) / 4) * Gt.cells) % Gt.cells;
+        if (drawStripCell(c, Gt.key, cell, Gt.cells, 0, HERO_FLOOR, HERO_DH * (Gt.k || 1), false)) return true;
+      }
     }
     const F = HERO_FIDGET;
     if (F && st === 'idle' && this.idleT > FIDGET_AFTER) {

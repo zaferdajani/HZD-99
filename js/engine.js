@@ -11,6 +11,11 @@ const KEYB = {
   MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], BRAID: ['KeyY', 'VBRAID', 'GP_BRAID'], CREST: ['KeyI', 'VCREST', 'GP_CREST'], SKILL: ['KeyT', 'VSKILL', 'GP_SKILL'],
   PAUSE: ['Escape', 'KeyP', 'VPAUSE', 'GP_PAUSE'],
   OK: ['Enter', 'KeyZ', 'Space', 'VOK', 'GP_OK'], BACK: ['Escape', 'VBACK', 'GP_BACK'],
+  // RUN is a pad verb only. A key has no magnitude and always asks for
+  // everything, and the touch stick's push IS its speed; the pad is the one
+  // control where "moving" and "running" are different decisions — see the
+  // walk cap in Player.update.
+  RUN: ['GP_RUN'],
 };
 const keys = {}, keysP = {};
 // ---------------------------------------------------------------------------
@@ -18,7 +23,7 @@ const keys = {}, keysP = {};
 // touch gutters disappear, the picture grows to fill the screen, and every
 // action moves onto a real button. Detection is automatic on first input.
 // ---------------------------------------------------------------------------
-const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST', 'GP_STAR',
+const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST', 'GP_STAR', 'GP_RUN',
   // the d-pad alone, edge-detected like everything else — see pollGamepad
   'GP_PL', 'GP_PR', 'GP_PU', 'GP_PD'];
 const GP_PREV = {};
@@ -37,7 +42,7 @@ const PAD_BTN_XB = {
 };
 // every action that lives on a face/shoulder button, in the order the config
 // screen lists them. Movement stays on the stick + d-pad and is not remappable.
-const PAD_ACTIONS = ['JUMP', 'ATK', 'STAR', 'DASH', 'CAST', 'ARM', 'SONG', 'CLAW', 'HEAL', 'INT', 'MAP', 'SKILL', 'CREST', 'PAUSE'];
+const PAD_ACTIONS = ['JUMP', 'ATK', 'RUN', 'STAR', 'DASH', 'CAST', 'ARM', 'SONG', 'CLAW', 'HEAL', 'INT', 'MAP', 'SKILL', 'CREST', 'PAUSE'];
 const PAD_DEFAULT = {
   JUMP: 0, ATK: 2, INT: 1, HEAL: 3,
   DASH: 5,        // R1
@@ -45,8 +50,17 @@ const PAD_DEFAULT = {
   ARM: 4,         // L1 — change suit
   SONG: 6,        // L2 — the Song
   STAR: 11,       // R3 — throw a shuriken
-  CLAW: 10,       // L3
-  MAP: 8,         // Share
+  // RUN ON THE STICK CLICK (owner, 2026-09-05: "running on a controller
+  // should happen when I press the L3 while moving instead of just moving").
+  // The stick walks; clicking it in while she is walking breaks into the run,
+  // and the run holds until the stick is let go. That is the console idiom
+  // (every third-person kit since the DualShock had a click), and it is the
+  // one thing a pad can do that a keyboard cannot: two speeds on one thumb.
+  RUN: 10,        // L3
+  // The claws moved to View/Share to make room. The map lost its button: it
+  // has always been one row inside the pause menu, which is the route the
+  // config screen already prints for anything without a button of its own.
+  CLAW: 8,        // Share / View
   // THE NEURAL TREE WAS ON THE GUIDE BUTTON, WHICH IS NOT OURS TO USE.
   //
   // Button 16 is the PS / Xbox Guide button. Windows, Steam and the Game Bar
@@ -120,7 +134,19 @@ function padSave() {
 function padLoad() {
   try {
     const v = JSON.parse(localStorage.getItem('cb_padmap') || 'null');
-    if (v && typeof v === 'object') PAD.map = Object.assign({}, PAD_DEFAULT, v);
+    if (v && typeof v === 'object') {
+      PAD.map = Object.assign({}, PAD_DEFAULT, v);
+      // A MAP SAVED BEFORE RUN EXISTED STILL HAS THE CLAWS ON L3, and merging
+      // the new default over it puts two verbs on one click. The newcomer
+      // keeps the button it was given; whatever the old map had there goes to
+      // its own current default, or to no button if that one is taken too.
+      if (v.RUN == null) for (const a of PAD_ACTIONS) {
+        if (a === 'RUN' || PAD.map[a] !== PAD.map.RUN) continue;
+        const d = PAD_DEFAULT[a];
+        const free = d != null && !PAD_ACTIONS.some(b2 => b2 !== a && PAD.map[b2] === d);
+        PAD.map[a] = free ? d : -1;
+      }
+    }
   } catch (e) {}
 }
 padLoad();

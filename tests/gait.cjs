@@ -125,6 +125,22 @@ const check = (name, ok, detail) => {
         if ((player.stridePh || 0) - ph0 >= 2.2) break;
       }
     }
+    // THE WALK'S CADENCE, measured the same way at the pad's walk speed: the
+    // instance's speed() is overridden for the sample and restored after, so
+    // the walk band is read off the same body on the same floor.
+    // the run's numbers are taken HERE, before the walk sample moves the phase
+    const strideEnd = player.stridePh || 0, animEnd = player.anim, vxRun = Math.round(player.vx);
+    let walkCad = 0, walkVx = 0;
+    {
+      player.speed = () => 185;
+      for (let i = 0; i < 40; i++) { await frame(); player.iT = Math.max(player.iT, 1); player.cores = 5; G.enemies = []; }
+      const ph0 = player.stridePh || 0, a0 = player.anim;
+      for (let i = 0; i < 40; i++) { await frame(); player.iT = Math.max(player.iT, 1); player.cores = 5; G.enemies = []; }
+      const secs = player.anim - a0;
+      walkCad = secs > 0 ? ((player.stridePh || 0) - ph0) / secs : 0;
+      walkVx = Math.round(player.vx);
+      delete player.speed;
+    }
     keys.ArrowRight = 0;
     // AND WHERE DOES THE FOREGROUND SIT? The near depth plate exists to cross in
     // FRONT of her; if its top edge is at or below her soles it is a black band
@@ -146,10 +162,10 @@ const check = (name, ok, detail) => {
     // and the stick measurement below would read a body that never moved.
     performance.now = realNow; window.requestAnimationFrame = realRAF;
     realRAF.call(window, mainLoop);
-    return { air, feet, states, vys, over, fore, lifts, bob,
-             strideStart, animStart, strideEnd: player.stridePh || 0, animEnd: player.anim,
+    return { air, feet, states, vys, over, fore, lifts, bob, walkCad, walkVx,
+             strideStart, animStart, strideEnd, animEnd,
              stepWalk: HERO_STEP_WALK, stepRun: HERO_STEP_RUN, cells: HERO_CELLS,
-             vx: Math.round(player.vx) };
+             vx: vxRun };
   });
 
   // only the frames with ground under her
@@ -272,13 +288,26 @@ const check = (name, ok, detail) => {
   // together, or "sole separation" was measuring something else entirely.
   check('walk_b is the passing pose, feet together', stepPx.passSpan < stepPx.soleSpan * 0.4,
     'walk_b feet ' + stepPx.passSpan + 'px apart, centre to centre, vs the contacts\' soles ' + stepPx.soleSpan);
-  // A ceiling, not a band: whatever the numbers are, a footfall rate no body
-  // could produce is still the strobe this harness was written for.
+  // A BAND PER GAIT, and the reason it is a band now and not a ceiling. The
+  // ceiling was 11, and under it the quotient of speed over the art's step
+  // produced 8.9 beats a second at the run and 8.0 at the walk: the same
+  // rate for both gaits, and both past what any legs can do (a sprinter turns
+  // over about seven beats — three and a half steps — a second; a walker four).
+  // The walk read as the run's strobe at a lower speed. The phase now
+  // saturates toward a per-gait cadence (HERO_CADENCE, entities.js), so the
+  // two gaits are told apart by their RATE as well as by their cells, and a
+  // footfall rate no body could produce fails here whatever the speed.
+  // docs/GAIT.md is the study behind the numbers.
   const steps = r.strideEnd - r.strideStart, secs = r.animEnd - r.animStart;
   const cadence = secs > 0 ? steps / secs : 0;
-  check('...and the resulting footfall rate is not a strobe',
-    cadence > 0 && cadence <= 11,
-    cadence.toFixed(2) + ' steps/sec at vx ' + r.vx);
+  check('the run turns its legs over like a runner (4-7.5 beats/s)',
+    cadence >= 4 && cadence <= 7.5,
+    cadence.toFixed(2) + ' beats/sec at vx ' + r.vx);
+  check('the walk turns its legs over like a walker (3-5.5 beats/s)',
+    r.walkCad >= 3 && r.walkCad <= 5.5,
+    r.walkCad.toFixed(2) + ' beats/sec at vx ' + r.walkVx);
+  check('...and the walk is slower-footed than the run', r.walkCad < cadence,
+    r.walkCad.toFixed(2) + ' vs ' + cadence.toFixed(2));
 
   if (r.fore) {
     const above = r.fore.feet - r.fore.top;
