@@ -4389,6 +4389,51 @@ in `assets/source/beast/takes/`, strips in `assets/characters/beast/`. The
 finished fight goes in front of the owner as a reel section
 (`tools/castreel.cjs --only=boss`) before any other guardian is fired.
 
+**FIRED — the Nullfang pilot, all eight moves (art session, 2026-09-05,
+325 credits: ten Seedance takes, two of them camera refires).** Owner saw
+every take as a twelve-frame sheet. Camera lesson, learned on the first two:
+"camera locked" is not enough — the model pushed in on the stalk (paws cut
+off) and pulled out during the swipe (body changed size). The wording that
+held: *"WIDE LOCKED SHOT … THE CAMERA DOES NOT MOVE, DOES NOT ZOOM, DOES NOT
+FOLLOW: the framing of the first frame is the framing of every frame, the
+lion is SMALL in the frame with empty dark space all around it, the whole
+body stays visible and the same size in every frame."* Every take after that
+came back one size. The takes' field is dark grey, not black, so `vidstrip`
+keys at threshold 56 (26 kept the whole frame as subject).
+
+Takes archived `assets/source/beast/takes/*.mp4` (h264 as delivered;
+transcode to VP9 before `vidstrip`, Chromium will not decode the h264).
+Strips shipped `assets/characters/beast/*.webp`, 320-px cells, feet on the
+cell floor, one scale per strip:
+
+| strip | cells | from the take | plays the state(s) |
+|---|---|---|---|
+| `stalk` | 16, auto | stalk.mp4 whole | `stalk` (loop; the walk cycle) |
+| `roar` | 12 | roar.mp4 whole | `roar`, `intro` |
+| `swipe` | 12 | swipe.mp4 whole | `swipewarn` (cells 0–5, the raised paw HOLDS) → `swipe` (6–8) → recover (9–11) |
+| `leap` | 12 | leap.mp4 whole | `crouch`/`springwarn` (0–5) → `spring`/`pounce` (6–8) → land/`recover` (9–11) |
+| `springup` | 8 | diveperch.mp4 0.0–1.25 s | the bound up out of frame before `dive` |
+| `dive` | 5 | diveperch.mp4 3.6–4.1 s | `dive` (drops in from above, lands) |
+| `perch` | 8, auto | diveperch.mp4 4.1–6.0 s | `perch` (crouched hold, tail lashing) |
+| `daze` | 12, auto | daze.mp4 whole | `daze` (loop) |
+| `nullcharge` | 12 | nullcharge.mp4 whole | `nullcharge` (0–3) → `nullhop` (4–8, it floats) → `nullend` (9–11) |
+| `fall` | 12 | fall.mp4 whole | the death (`dead`, plays once, holds the last cell) |
+
+Jobs: stalk 2ff211c6 · roar 3c582e46 · swipe 1020f2ed · leap 789fa77f ·
+diveperch fb131c7f · daze fd5cb506 · nullcharge e2e27a06 · fall 669594db
+(first-take stalk 8261d50d and swipe 1fbd8ade declined for camera, not
+shipped).
+
+**WIRING (code session).** `drawBeast` in js/beast.js draws the parts rig
+per state; each state above becomes a `drawStripCell(c, key, cell, cells,
+cx, footY, h*k, flip)` over the state's own timer (`b.t / dur` for one-shot
+states, `b.anim * fps` for the loops), the way `HERO_TRANS` and the NPC loops
+already do, with the rig kept as the fallback while a strip has not landed.
+`k` per strip measured by `tools/swingk.cjs` against the rig's plate of the
+same moment so the lion does not change size between a strip and the rig.
+The takes face LEFT; mirror for `face > 0`. Then `bosspace artbible frames`
+and a `castreel --only=boss` section in front of the owner.
+
 **GAMEPLAY (code session)** — the half no plate can supply, against the
 repo's own `boss-patterns`, `boss-openings` and `boss-scale` skills:
 - hit-stop and a camera shake on every boss impact, hers and its;
