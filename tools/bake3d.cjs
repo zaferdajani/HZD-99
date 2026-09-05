@@ -39,6 +39,32 @@ if (!glbPath || !subject || !/^[a-z0-9_]+$/.test(subject)) {
 const cls = flag('class', 'atlas');
 const CELL = parseInt(flag('cell', '512'), 10);
 const PITCH = parseFloat(flag('pitch', '0'));       // camera tilt in degrees, if the subject wants one
+// ---- CLIP MODE: a rigged model's animation becomes a strip and a driving video
+//
+//   node tools/bake3d.cjs <rigged.glb> <subject> --clip=<name|index> [--frames=12] [--yaw=30] [--fps=24] [--out=dir]
+//
+// The owner's ruling (2026-09-05) after the movement study: her walk, run and
+// attacks are fired one still at a time, so the frames between poses never
+// existed and every plate chose its own camera. Higgsfield's generate_3d
+// rigs a model and applies a clip from its 678-action library, and this mode
+// is the other half — the clip is played here, from the HOUSE camera (the
+// three-quarter profile of walk_a, facing screen-right), and cut two ways:
+//
+//   - a strip of N even samples, ready for HERO_GAIT / SWING_STRIP / HERO_TRANS
+//   - a driving video of the whole clip at --fps, for motion-control video
+//     generation with her canon plate as the subject: the rig supplies the
+//     exact motion and camera, the video model supplies the painted look
+//
+// ROOT MOTION IS STRIPPED. A walk clip carries the body forward; a game plate
+// runs on the spot and the physics moves it. Every node an animation track
+// translates is pinned to its frame-0 X and Z, so the body treadmills while
+// its VERTICAL travel — the bob of a walk, the flight of a run — is kept,
+// because that is the part the stills never had.
+const CLIP = flag('clip', null);
+const FRAMES = parseInt(flag('frames', '12'), 10);
+const YAW = parseFloat(flag('yaw', '30'));          // degrees from profile toward the camera
+const FPS = parseInt(flag('fps', '24'), 10);
+const MARGIN = parseFloat(flag('margin', '1.12'));   // frame headroom over the rest pose; raise it for a jump clip
 const COLS = cls === 'npc' ? 6 : 8;
 const ROOT = path.join(__dirname, '..');
 
@@ -53,17 +79,38 @@ const ROOT = path.join(__dirname, '..');
     // antialiasing — swiftshader is fine, but ask for GL explicitly
     args: ['--use-gl=angle', '--enable-unsafe-swiftshader'],
   });
-  const p = await br.newPage({ viewport: { width: CELL * COLS, height: CELL } });
+  const NCOL = CLIP != null ? FRAMES : COLS;
+  const p = await br.newPage({ viewport: { width: CELL * NCOL, height: CELL } });
   p.on('pageerror', (e) => { console.error('page: ' + e); });
-  await p.setContent('<canvas id="out" width="' + (CELL * COLS) + '" height="' + CELL + '"></canvas>');
+  await p.setContent('<canvas id="out" width="' + (CELL * NCOL) + '" height="' + CELL + '"></canvas>');
   await p.addScriptTag({ content: three });
   await p.addScriptTag({ content: gltf });
 
-  const dataURL = await p.evaluate(async ({ glbB64, COLS, CELL, PITCH }) => {
+  const dataURL = await p.evaluate(async ({ glbB64, COLS, CELL, PITCH, CLIP, FRAMES, YAW, FPS, MARGIN }) => {
     const bin = Uint8Array.from(atob(glbB64), (c) => c.charCodeAt(0)).buffer;
     const gltf = await new Promise((res, rej) =>
       new THREE.GLTFLoader().parse(bin, '', res, rej));
     const model = gltf.scene;
+    // the clip, by name or index, before anything is framed: framing is done
+    // at rest so the whole loop shares one scale and one floor line
+    let clip = null, mixer = null, pinned = [];
+    if (CLIP != null) {
+      const clips = gltf.animations || [];
+      clip = clips.find((k) => k.name === CLIP) || clips[parseInt(CLIP, 10)];
+      if (!clip) throw new Error('no clip "' + CLIP + '" — the file has: ' + (clips.map((k) => k.name).join(', ') || 'none'));
+      mixer = new THREE.AnimationMixer(model);
+      mixer.clipAction(clip).play();
+      mixer.setTime(0);
+      model.updateMatrixWorld(true);
+      // every node a track TRANSLATES is a root-motion candidate: remember
+      // where it stands at t=0 and hold it there in X and Z for every frame
+      for (const tr of clip.tracks) {
+        if (!/\.position$/.test(tr.name)) continue;
+        const nm = tr.name.replace(/\.position$/, '').replace(/^.*[\/]/, '');
+        const node = model.getObjectByName(nm) || model.getObjectByProperty('uuid', nm);
+        if (node) pinned.push({ node, x: node.position.x, z: node.position.z });
+      }
+    }
 
     const scene = new THREE.Scene();
     scene.add(model);
@@ -82,7 +129,7 @@ const ROOT = path.join(__dirname, '..');
     const c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
     model.position.sub(c);                       // spin about the volume center
     const spinR = Math.hypot(sz.x, sz.z) / 2;    // worst-case half-width in yaw
-    const margin = 1.12;
+    const margin = MARGIN;                     // --margin: a jump clip leaves the rest-pose box
     const halfH = Math.max(sz.y / 2, spinR * 0.6) * margin;
     const halfW = Math.max(spinR, sz.y / 2 * 0.6) * margin;
     const half = Math.max(halfH, halfW);
@@ -104,6 +151,52 @@ const ROOT = path.join(__dirname, '..');
 
     const sheet = document.getElementById('out');
     const x2d = sheet.getContext('2d');
+    if (clip) {
+      // the house camera: profile faces screen-right at rotY 90° (atlas col
+      // 0), and the three-quarter turns it YAW degrees toward the lens
+      model.rotation.y = THREE.MathUtils.degToRad(90 - YAW);
+      const pose = (t) => {
+        mixer.setTime(t);
+        for (const q of pinned) { q.node.position.x = q.x; q.node.position.z = q.z; }
+        model.updateMatrixWorld(true);
+      };
+      // the strip: N even samples over the loop, the last one short of the
+      // wrap so a loop's first and last cells are not the same picture
+      for (let i = 0; i < FRAMES; i++) {
+        pose((i / FRAMES) * clip.duration);
+        r.render(scene, cam);
+        x2d.drawImage(r.domElement, i * CELL, 0, CELL, CELL);
+      }
+      const strip = sheet.toDataURL('image/png');
+      // the driving video: the whole clip at FPS, recorded off a canvas the
+      // renderer draws into frame by frame (no encoder on the box; the page
+      // has one). webm/vp8 — Higgsfield's media import takes it as video.
+      let video = null, vidErr = null;
+      try {
+        const vc = document.createElement('canvas'); vc.width = CELL; vc.height = CELL;
+        const vx = vc.getContext('2d');
+        const stream = vc.captureStream(0);
+        const track = stream.getVideoTracks()[0];
+        const rec = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 6e6 });
+        const chunks = [];
+        rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+        const done = new Promise((res) => { rec.onstop = res; });
+        rec.start();
+        const n = Math.max(2, Math.round(clip.duration * FPS));
+        for (let i = 0; i <= n; i++) {
+          pose(Math.min(clip.duration, i / FPS));
+          r.render(scene, cam);
+          vx.fillStyle = '#000'; vx.fillRect(0, 0, CELL, CELL);   // black field: the keyer's norm
+          vx.drawImage(r.domElement, 0, 0);
+          if (track.requestFrame) track.requestFrame();
+          await new Promise((k) => setTimeout(k, 1000 / FPS));
+        }
+        rec.stop(); await done;
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        video = await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
+      } catch (e) { vidErr = String(e); }
+      return { strip, video, vidErr, clipName: clip.name, duration: clip.duration, tracks: clip.tracks.length, pinned: pinned.length };
+    }
     for (let col = 0; col < COLS; col++) {
       // atlas convention (js/atlas.js): column angle = col*45°, where 0° faces
       // screen-right and 90° faces the camera. glTF models author forward as
@@ -114,9 +207,28 @@ const ROOT = path.join(__dirname, '..');
       x2d.drawImage(r.domElement, col * CELL, 0, CELL, CELL);
     }
     return sheet.toDataURL('image/png');
-  }, { glbB64: glb.toString('base64'), COLS, CELL, PITCH });
+  }, { glbB64: glb.toString('base64'), COLS, CELL, PITCH, CLIP, FRAMES, YAW, FPS, MARGIN });
 
   await br.close();
+
+  if (CLIP != null) {
+    const R = dataURL;
+    const outDir = flag('out', null) || path.join(ROOT, 'assets', 'source', subject, 'clips');
+    fs.mkdirSync(outDir, { recursive: true });
+    const tag = subject + '_' + String(R.clipName || CLIP).replace(/[^a-z0-9]+/gi, '_').toLowerCase();
+    const stripPath = path.join(outDir, tag + '_' + FRAMES + '.png');
+    fs.writeFileSync(stripPath, Buffer.from(R.strip.split(',')[1], 'base64'));
+    console.log(stripPath + '  ' + FRAMES + ' cells @ ' + CELL + 'px   clip "' + R.clipName + '" ' + R.duration.toFixed(2) + 's, '
+      + R.tracks + ' tracks, ' + R.pinned + ' node(s) pinned against root motion, yaw ' + YAW + '°');
+    if (R.video) {
+      const vp = path.join(outDir, tag + '_' + FPS + 'fps.webm');
+      fs.writeFileSync(vp, Buffer.from(R.video.split(',')[1], 'base64'));
+      console.log(vp + '  driving video for motion control');
+    } else console.log('no driving video: ' + R.vidErr);
+    console.log('\nnext: the art session fires motion control with her canon plate over the driving video,');
+    console.log('      then tools/vidstrip.cjs auto:N cuts the take and tools/swingk.cjs measures k.');
+    return;
+  }
 
   const png = Buffer.from(dataURL.split(',')[1], 'base64');
   // --out=<dir> bakes somewhere else (the test harness uses it) and then the

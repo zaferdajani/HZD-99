@@ -100,3 +100,14 @@ right, one full stride each, cut by content (`tools/vidstrip.cjs auto:12`):
 Keyed as `gaitWalk` / `gaitRun`, `k` measured by `tools/swingk.cjs` against
 `walk_a` / `run_a`, cells filled in `HERO_GAIT`. When they land, the walk and
 run stop being poses and become the moves the owner asked for.
+
+## 5. The route the owner approved (2026-09-05) — `docs/ART_QUEUE.md` §2aw
+
+Rather than asking a video model to invent a cycle, the cycle comes from a
+RIG: one rigged model of her from Higgsfield's `generate_3d`, a library clip
+applied to it (Casual_Walk, RunFast, Left_Jab_from_Guard…), and
+`tools/bake3d.cjs --clip` playing that clip from the house camera with root
+motion stripped. The bake writes the strip and a driving video; motion
+control puts her painted look over the driving video; `vidstrip` cuts it.
+The rig makes the motion continuous and the camera fixed by construction,
+which is the whole of what the stills could not do.

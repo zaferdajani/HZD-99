@@ -1695,8 +1695,8 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  23. §2q    BEAST GAIT REPAIR ×8              (wolf+cheetah walk pairs RE-FIRED + run pairs — see §2q, the leg and identity faults are written there)
  24. §2r    THE FORGE TABLE ×1                (the den bench as a matted object — crop stand-in wired, fire against it)
  25. §2aq   THE CUTTER'S SPLIT STONE + KERF ×2 + KERF HERSELF ×3  ✱ NEW 2026-09-02 (kingdom X pass) — wired, procedural stand-ins live, nothing fired
- 26. §2av   THE FOUR SWING STRIPS + 4 SHEET CELLS, IN PROFILE  ✱ RE-FIRE 2026-09-05 — every attack faces the camera; tests/hero.cjs red on the facing law until it lands
- 27. §2au   THE WALK CYCLE + THE RUN CYCLE ×2 takes            ✱ FIRE 2026-09-05 — HERO_GAIT slot wired, zero cells; docs/GAIT.md is the brief's study
+ 26. §2aw   THE RIG ROUTE — her rigged model + clips + motion control   ✱ APPROVED 2026-09-05 — makes §2av (attacks in profile) and §2au (gait cycles); bake3d --clip is built; tests/hero.cjs red until it lands
+ 27. §2au/§2av  (folded into 26 — the briefs remain as the acceptance laws; docs/GAIT.md is the study)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -4397,6 +4397,70 @@ second fight, a tour of the states the fight did not reach, the fall).
 The tool joins the harness family: a claim like "the guardian was restyled" can
 now be checked by watching it, and the film is regenerated from the game rather
 than kept.
+
+---
+
+### 2aw. THE RIG ROUTE — one rigged model of her, clips from the library, the look from motion control ✱ APPROVED BY THE OWNER 2026-09-05 — the art session's next job
+
+**The ruling.** Asked what on Futurepedia could improve the game, the answer
+was that the one tool that fits is already in the Higgsfield binding:
+`generate_3d` rigs a model and applies any of 678 library clips (walks, runs,
+sprints, guard punches, jumps, hit reactions, idles). The owner approved the
+route. It replaces §2au (the gait cycles) and §2av (the attacks in profile) as
+the WAY those get made — the laws in `tests/gait.cjs` and `tests/hero.cjs`
+still judge the result.
+
+**Why.** Every movement fault reported this month has one cause: each plate
+was fired on its own, so the frames between poses never existed and every
+firing chose its own camera. A rig plays one continuous motion from one
+locked camera, and it turns toward the target because the clip does.
+
+**Costs, preflighted (no job submitted):** textured + rigged model 35 credits;
+38 with the first clip attached; each further clip on the same model 8.
+
+**The pipeline, in order — the owner approves at steps 1 and 2.**
+
+1. **One rigged model of her.** `multi_image_to_3d`, 2–4 views cut from
+   `assets/characters/hzd_8yaw.webp` (front, three-quarter, profile, back —
+   the canon body), `should_texture: true`, `enable_rigging: true`,
+   `pose_mode: 'a-pose'`, `rigging_height_meters: 1.0` (she is a small
+   biped; the humanoid rig is right for her). Show the owner the preview.
+   Archive the GLB under `assets/source/hero/rig/`.
+2. **Clips, chosen from previews.** `animation_actions` is a read-only
+   catalogue with a GIF per clip. Show the owner the candidates and let him
+   pick, then `3d_rigging` on the model's URL with `enable_animation` and the
+   chosen `animation_action_id` — one job per clip, 8 credits each. Start with:
+   - walk: Casual_Walk (30) or Quick_Walk (115)
+   - run: Run_02 (14), RunFast (16) or Lean_Forward_Sprint (509)
+   - the combo: Left_Jab_from_Guard (191), Right_Hook (193/195), Right_Uppercut_from_Guard (194)
+   - jump: Regular_Jump (466) / Jump_Run (13); hit: Face_Punch_Reaction (174); idle: 0
+   Archive each animated GLB beside the model.
+3. **The driving video and the strip, by code — already built.**
+   `node tools/bake3d.cjs <clip.glb> hero --clip=0 --frames=12 --yaw=30`
+   plays the clip from the house camera (walk_a's three-quarter, facing
+   screen-right), pins every translated node against root motion so she runs
+   on the spot while her bob and flight are kept, and writes
+   `assets/source/hero/clips/hero_<clip>_12.png` (the strip) and
+   `hero_<clip>_24fps.webm` (the driving video). `--margin=1.4` for a jump.
+   `tests/bake3d.cjs` proves all of this on a fixture with a real track.
+4. **Her painted look.** `generate_video` with `hf_mult_motion_control`: the
+   driving video from step 3 as the motion, her canon plate (element
+   `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`) as the subject, black field,
+   locked camera. The rig supplies the exact motion; the model supplies the
+   look. This is the step the eleven failed jump takes never had.
+5. **Cut and measure with what exists.** `tools/vidstrip.cjs auto:N`,
+   `tools/swingk.cjs` for k, then wire: `HERO_GAIT` (walk/run),
+   `SWING_STRIP` (the three hits + burst), `HERO_TRANS` / `HERO_AIR_STRIP`.
+   `node tests/run.cjs hero gait artbible` judges it.
+
+**Fallback.** If motion control cannot hold her look over the driving video,
+the bake's own render is a legitimate SHAPE reference for a per-cell restyle
+(`tools/bossparts.cjs` restyle, the two-reference prompt in
+`.claude/skills/art-prompts`). Only if both fail is a second art tool worth
+the owner's time.
+
+**After her:** the wolves and the cheetah (§2q) go the same way — a rigged
+quadruped may rig poorly, so preview before paying for clips.
 
 ---
 

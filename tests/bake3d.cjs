@@ -44,9 +44,15 @@ function fixtureGLB(out) {
   }
   const pad4z = (b) => Buffer.concat([b, Buffer.alloc((4 - b.length % 4) % 4)]);
   const bufPos = Buffer.from(posArr.buffer), bufNrm = Buffer.from(nrmArr.buffer), bufIdx = pad4z(Buffer.from(idxArr.buffer));
-  const bin = Buffer.concat([bufPos, bufNrm, bufIdx]);
+  // ...AND ONE ANIMATION, so the clip mode has something to measure: over one
+  // second the creature travels two units in X (root motion, which the bake
+  // must strip) and bobs 0.3 up and back (vertical, which it must keep)
+  const tArr = new Float32Array([0, 0.5, 1.0]);
+  const vArr = new Float32Array([0, 0, 0, 1, 0.3, 0, 2, 0, 0]);
+  const bufT = Buffer.from(tArr.buffer), bufV = Buffer.from(vArr.buffer);
+  const bin = Buffer.concat([bufPos, bufNrm, bufIdx, bufT, bufV]);
   const json = {
-    asset: { version: '2.0' }, scene: 0, scenes: [{ nodes: [0] }], nodes: [{ mesh: 0 }],
+    asset: { version: '2.0' }, scene: 0, scenes: [{ nodes: [0] }], nodes: [{ mesh: 0, name: 'root' }],
     meshes: [{ primitives: [{ attributes: { POSITION: 0, NORMAL: 1 }, indices: 2, material: 0 }] }],
     materials: [{ pbrMetallicRoughness: { baseColorFactor: [0.75, 0.45, 0.2, 1], metallicFactor: 0.3, roughnessFactor: 0.55 } }],
     buffers: [{ byteLength: bin.length }],
@@ -54,12 +60,21 @@ function fixtureGLB(out) {
       { buffer: 0, byteOffset: 0, byteLength: bufPos.length },
       { buffer: 0, byteOffset: bufPos.length, byteLength: bufNrm.length },
       { buffer: 0, byteOffset: bufPos.length + bufNrm.length, byteLength: bufIdx.length },
+      { buffer: 0, byteOffset: bufPos.length + bufNrm.length + bufIdx.length, byteLength: bufT.length },
+      { buffer: 0, byteOffset: bufPos.length + bufNrm.length + bufIdx.length + bufT.length, byteLength: bufV.length },
     ],
     accessors: [
       { bufferView: 0, componentType: 5126, count: posArr.length / 3, type: 'VEC3', min: mn, max: mx },
       { bufferView: 1, componentType: 5126, count: nrmArr.length / 3, type: 'VEC3' },
       { bufferView: 2, componentType: 5123, count: idxArr.length, type: 'SCALAR' },
+      { bufferView: 3, componentType: 5126, count: 3, type: 'SCALAR', min: [0], max: [1.0] },
+      { bufferView: 4, componentType: 5126, count: 3, type: 'VEC3' },
     ],
+    animations: [{
+      name: 'bob_and_travel',
+      samplers: [{ input: 3, output: 4, interpolation: 'LINEAR' }],
+      channels: [{ sampler: 0, target: { node: 0, path: 'translation' } }],
+    }],
   };
   const jraw = Buffer.from(JSON.stringify(json));
   // the glTF spec pads the JSON chunk with SPACES; zero bytes break parsers
@@ -104,6 +119,35 @@ function fixtureGLB(out) {
       iou04: iou(cells[0].mask, cells[4].mask),
     };
   }, sheet.toString('base64'));
+  // ---- CLIP MODE: the animation becomes a strip, on the spot, with its bob ----
+  // The fixture's clip walks two units sideways and bobs 0.3 up. What comes
+  // out must hold its horizontal centre (root motion stripped), move its feet
+  // (vertical kept), and be a sequence rather than one picture repeated.
+  execFileSync('node', [path.join(__dirname, '..', 'tools', 'bake3d.cjs'),
+    glb, 'fixture', '--clip=bob_and_travel', '--frames=6', '--cell=192', '--fps=12', '--out=' + dir],
+    { stdio: 'inherit', timeout: 240000 });
+  const strip = fs.readFileSync(path.join(dir, 'fixture_bob_and_travel_6.png'));
+  const hasVideo = fs.existsSync(path.join(dir, 'fixture_bob_and_travel_12fps.webm'))
+    && fs.statSync(path.join(dir, 'fixture_bob_and_travel_12fps.webm')).size > 2000;
+  const s = await p.evaluate(async (b64) => {
+    const im = new Image(); im.src = 'data:image/png;base64,' + b64; await im.decode();
+    const W = im.naturalWidth, H = im.naturalHeight, cw = W / 6;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
+    const cells = [];
+    for (let c = 0; c < 6; c++) {
+      const d = x.getImageData(c * cw, 0, cw, H).data;
+      let n = 0, foot = -1, sx = 0;
+      const mask = new Uint8Array(cw * H);
+      for (let y = 0; y < H; y++) for (let px = 0; px < cw; px++) {
+        if (d[(y * cw + px) * 4 + 3] > 40) { n++; sx += px; mask[y * cw + px] = 1; if (y > foot) foot = y; }
+      }
+      cells.push({ n, foot, cx: n ? sx / n : -1, mask });
+    }
+    const iou = (a, b) => { let i = 0, u = 0; for (let k = 0; k < a.length; k++) { if (a[k] && b[k]) i++; if (a[k] || b[k]) u++; } return i / u; };
+    return { px: cells.map((c) => c.n), feet: cells.map((c) => c.foot), cx: cells.map((c) => +c.cx.toFixed(1)),
+             iou03: iou(cells[0].mask, cells[3].mask), cellW: cw };
+  }, strip.toString('base64'));
   await br.close();
   fs.rmSync(dir, { recursive: true, force: true });
 
@@ -113,6 +157,13 @@ function fixtureGLB(out) {
   ok(m.feet.every((f) => f === m.feet[0]), 'feet on one row in every cell  [' + m.feet.join(' ') + ']');
   ok(m.iou02 <= 0.86, 'profile vs front is a different silhouette  IoU ' + m.iou02.toFixed(3) + ' <= 0.86');
   ok(m.iou04 < 0.98, 'col 0 vs col 4 is a rotation, not a mirror  IoU ' + m.iou04.toFixed(3));
+  const cxSpread = Math.max(...s.cx) - Math.min(...s.cx);
+  const feetSpread = Math.max(...s.feet) - Math.min(...s.feet);
+  ok(s.px.every((n) => n > 300), 'clip: all 6 cells populated  [' + s.px.join(' ') + ']');
+  ok(cxSpread <= s.cellW * 0.02, 'clip: root motion stripped — horizontal centre holds  spread ' + cxSpread.toFixed(1) + ' px  [' + s.cx.join(' ') + ']');
+  ok(feetSpread >= 4, 'clip: the vertical bob is kept — the feet move  spread ' + feetSpread + ' px  [' + s.feet.join(' ') + ']');
+  ok(s.iou03 < 0.98, 'clip: cell 0 vs cell 3 is a different picture  IoU ' + s.iou03.toFixed(3));
+  ok(hasVideo, 'clip: a driving video was written');
   if (fails.length) { console.log('FAILED: ' + fails.join(' | ')); process.exit(1); }
   console.log('bake3d: a mesh goes in, a game-legal turnaround comes out, measured');
 })();
