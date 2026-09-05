@@ -4459,6 +4459,15 @@ the bake's own render is a legitimate SHAPE reference for a per-cell restyle
 `.claude/skills/art-prompts`). Only if both fail is a second art tool worth
 the owner's time.
 
+**FIRED — step 1 (art session, 2026-09-05).** `multi_image_to_3d`, four
+views cut from `hzd_8yaw.webp` at 3× (front, three-quarter, profile, back),
+textured, rigging on, a-pose, 1.0 m. 35 credits, job
+`164e4284-b8c9-4001-bc61-6a6b9543d73a`. The GLB is
+`assets/source/hero/rig/hzd_rig_apose.glb` (4.9 MB, one mesh, one texture —
+the skeleton arrives with each clip job, which is why `3d_rigging` takes the
+model URL). Preview sheet shown to the owner; clip previews shown, picks
+pending. Each clip preflighted at 8 credits on this model's URL.
+
 **After her:** the wolves and the cheetah (§2q) go the same way — a rigged
 quadruped may rig poorly, so preview before paying for clips.
 
