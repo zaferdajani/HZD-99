@@ -4740,6 +4740,13 @@ call (the code session's step-5 note above asked for a replacement — it is
 one rename away if that is the decision). `trans_air` likewise keeps its
 still-strip; `jump.webp` is the filmed alternative.
 
+**WALK RE-CUT (art session, 2026-09-05 21:50).** The stride was measured, not
+eyed: ankle-band spread per frame at 24 fps autocorrelates at lag 33 (1.375 s
+a stride; the cycle restarts at frames 42, 73, 106). `gait/walk.webp` is now
+16 cells sampled EVENLY over 1.75–3.08 s of `rig/takes/walk.mp4` — left
+contact to left contact, one stride. Same file name, so `HERO_GAIT.walk`
+takes its cell count and k from the sheet as before.
+
 **✔ WIRED (code session, 2026-09-05 21:20) — six of the eight, and the walk
 sent back.** Measured before wiring, strip by strip:
 
