@@ -4484,6 +4484,33 @@ came back a straight punch with a cyan trail on both fires — this body does
 not throw a hook; `hero/swing/hook.webp` ships as that straight punch and the
 string reads jab / cross / uppercut.
 
+**✔ WIRED — THE ALPHA AND CHIME (code session, 2026-09-05 23:40).**
+`ALPHA_STRIP` in js/wolves.js maps seventeen of the Alpha's states onto the
+nine strips over the state machine's own timers (the constants it sets:
+TELL_HEAVY, TELL_SWIPE, TELL_FAST, the 1.1 s leap, the 0.26 s blows, the
+0.18 s clinch), the prowl on ground covered like the wolf's walk, the rest
+and the shake on `anim`, the yield once from first sight holding its last
+cell. Drawn in the plate's frame (foot on the hitbox floor, the same mirror,
+bob and lean) without the plate's choreography — the corkscrew, the shake
+and the howl's rise are IN the takes. The wind-up amber tints the strip cell
+itself through a scratch canvas. Scale: the rest plate is all wolf at 2.05
+hitbox heights and the rest take's wolf is 227 of 320, so cells draw at
+2.05 * 320/227 heights; k per take from resting body length against the rest
+take's 304 px (roar 1.17, leap 1.6, claw 1.19, clinch 1.25, yield 1.04).
+
+`MINI_STRIP.chime` in js/entities.js maps the hover loop, ring, note and the
+death onto Chime's four; drawn about its centre like its plate at
+1.9 * 320/310 heights (ring k 1.95, note 1.46, fall 0.97). Two things had to
+open for the fall to play: Boss.draw dropped every dead construct at its
+first line, and its per-guardian death block never knew the constructs —
+a construct with a filmed death now goes to its own renderer, which fades it
+only in the last third of a second.
+
+`tests/motion.cjs` measures all of it: the take draws (>2000 px from the
+plate) in every state, mirrors with the facing (the harness now flips the
+velocity with the facing, since a moving body leans into its motion), and
+the grounded Alpha's feet sit on the plate's bottom within 8 px.
+
 **WIRING (code session):** `drawAlpha` in js/wolves.js draws `ALPHA_ART`
 plates per state — each becomes a `drawStripCell` over the state's timer with
 the plate as fallback; the constructs draw from `MINI_ART` in entities.js, same
@@ -4787,6 +4814,17 @@ sent back.** Measured before wiring, strip by strip:
   and on the burst until a take turns the head with the body: "the head
   turns to the target, the far eye foreshortened toward the near one". That
   sentence is what the next hook / uppercut / burst take needs.
+- **the cross and the uppercut, refired, WIRED (code session, 2026-09-05 23:20).**
+  Both pass the facing law now (eye gap over height 0.083 and 0.092 against
+  the walk's widest 0.099) and both move. They take the second and third hit;
+  the jab was not refired and the claw strip keeps the first. One law left on
+  the cross: `tests/frames.cjs` reads it as held — cells 3–7 are the fist at
+  full extension, five near-identical cells of ten, because the strip was
+  sampled EVENLY across 1.6–3.6 s and the take holds the punch out for a
+  second. **Re-cut `takes2/hook.mp4` by content** (`auto:10` inside the same
+  window): the hold collapses to one cell and the wind-up, snap, contact and
+  return get the cells instead. No credits; the take is right, the sampling
+  is not. The uppercut passes as cut.
 - **jump**: left on `trans_air` — the take is front-three-quarter and the
   house facing is the profile; the three stills are in profile.
 

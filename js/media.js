@@ -51,6 +51,24 @@ const MEDIA_SRC = {
     // THE EYE'S CONSTRUCTS. Two plates each — at rest, and wound up — so the
     // wind-up is a different DRAWING and not the same drawing tinted, which is
     // the silhouette law applied to a class that has no rig to pose.
+    // THE ALPHA'S MOVES, FILMED (ART_QUEUE §2ax, Kingdom 1): one take per
+    // move, 320-px cells, feet on the cell floor, facing LEFT like the plates.
+    // Drawn by alphaStrip in js/wolves.js over the state's own clock; the
+    // plate draws whenever a strip is not here.
+    alRest: 'assets/characters/alpha/rest.webp',
+    alProwl: 'assets/characters/alpha/prowl.webp',
+    alRoar: 'assets/characters/alpha/roar.webp',
+    alHowl: 'assets/characters/alpha/howl.webp',
+    alLeap: 'assets/characters/alpha/leap.webp',
+    alClaw: 'assets/characters/alpha/claw.webp',
+    alBite: 'assets/characters/alpha/bite.webp',
+    alClinch: 'assets/characters/alpha/clinch.webp',
+    alYield: 'assets/characters/alpha/yield.webp',
+    // ...and CHIME's four (same batch): the hover, the ring, the note, the fall
+    chRest: 'assets/characters/chime/rest.webp',
+    chRing: 'assets/characters/chime/ring.webp',
+    chNote: 'assets/characters/chime/note.webp',
+    chFall: 'assets/characters/chime/fall.webp',
     eyeChime: 'assets/characters/eye/chime.webp',
     eyeChimeW: 'assets/characters/eye/chime_w.webp',
     eyeCarrier: 'assets/characters/eye/carrier.webp',

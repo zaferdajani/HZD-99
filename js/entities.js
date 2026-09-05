@@ -871,10 +871,20 @@ const FIDGET_AFTER = 6;        // seconds of stillness before she runs out of pa
 // the claws drive the string until a take has both — the brief in
 // ART_QUEUE §2aw says exactly what that take needs. The punch strips stay on
 // disk, unwired; the facing law stays red on the claws.
+//
+// THE CROSS AND THE UPPERCUT, REFIRED (art session, 2026-09-05 22:40) and
+// measured again: the cross moves 8–39% of its silhouette between every cell
+// and the uppercut 3–35%, so both pass the blow-is-a-move law now, and both
+// were fired in the three-quarter facing the target. They take the second
+// and third hits. The jab was not refired (two dead cells in six) so the
+// first hit stays on the claw strip: she opens toward the lens and turns
+// into the target for the cross and the uppercut, which reads as turning to
+// it. k against the sheet's guard (261 of 300): cross 283 -> 0.92, uppercut
+// 273 -> 0.956.
 const SWING_STRIP = {
   claw_1:   { key: 'swingClaw1',    cells: 11, k: 0.901 },
-  claw_2:   { key: 'swingClaw2',    cells: 11, k: 1.0749 },
-  finisher: { key: 'swingFinisher', cells: 9,  k: 0.8388 },
+  claw_2:   { key: 'swingHook',     cells: 10, k: 0.92 },
+  finisher: { key: 'swingUppercut', cells: 10, k: 0.956 },
   burst:    { key: 'swingBurst',    cells: 9,  k: 0.9272 },
 };
 // ---- HOW FAR ONE STEP CARRIES HER, OFF THE PLATES THEMSELVES ---------------
@@ -939,8 +949,13 @@ const HERO_CADENCE = { walk: 5, run: 7 };
 // inside the first moments of a five-second take, before a stride happened.
 // Zero cells here until it is re-cut evenly across ONE stride (ART_QUEUE
 // §2aw); the three walk plates keep drawing meanwhile.
+// ...AND RE-CUT (art session, 2026-09-05 21:50): sixteen cells sampled evenly
+// over one measured stride (1.75–3.08 s of the take, left contact to left
+// contact). Measured here before wiring: silhouette IoU falls to its minimum
+// at lag 7–8 (the opposite contact) and climbs back to 0.89 at lag 15 — one
+// cycle across the strip, 3–10% of silhouette moving between every cell.
 let HERO_GAIT = {
-  walk: { key: 'gaitWalk', cells: 0, k: 0.85 },
+  walk: { key: 'gaitWalk', cells: 16, k: 0.845 },
   run:  { key: 'gaitRun',  cells: 16, k: 0.92, from: 0, to: 8 },
 };
 // THE STANDING LOOP: breath, a weight shift, one blink — a front view like
@@ -6973,11 +6988,80 @@ const MINI_ART = {
 // They are procedural on purpose (ART_BIBLE.md §1, class E): every one of them
 // is geometry and light rather than a creature with anatomy, and a generator
 // asked for "a beautiful lethal machine" returns a beautiful lethal ANIMAL.
+// CHIME'S MOVES, FILMED (ART_QUEUE §2ax, Kingdom 1). Four takes over the
+// construct's own grammar: the hover loop, the ring (wind-up cells 0–4, the
+// ring 5–7, settle), the note (wind-up 0–3, the strike 4–6, settle) and the
+// fall for the death. The rest plate is all mobile (630 of 630 px) and draws
+// at 1.9 hitbox heights; the rest take's chime hangs 310 of its 320-px cell,
+// so the cell draws at 1.9 * 320/310 heights. k per take against the rest
+// take's 310: ring 159 -> 1.95, note 212 -> 1.46, fall 320 -> 0.97. A
+// hovering thing is drawn about its centre, like its plate.
+const CHIME_STRIP_H = 1.9 * 320 / 310;
+const MINI_STRIP = {
+  chime: {
+    rest:     { key: 'chRest', cells: 9,  k: 1,    loop: 8 },
+    ringwarn: { key: 'chRing', cells: 12, k: 1.95, from: 0, to: 4,  t0: 0.35 },
+    ring:     { key: 'chRing', cells: 12, k: 1.95, from: 5, to: 11, t0: 0.5 },
+    notewarn: { key: 'chNote', cells: 12, k: 1.46, from: 0, to: 3,  t0: 0.35 },
+    note:     { key: 'chNote', cells: 12, k: 1.46, from: 4, to: 11, t0: 0.5 },
+    dead:     { key: 'chFall', cells: 12, k: 0.97, death: 1 },
+  },
+};
+function miniStripCell(b) {
+  if (typeof G !== 'undefined' && (G.bossRig || G.miniRig)) return null;
+  const T = MINI_STRIP[b.kind]; if (!T) return null;
+  let st = b.dead ? 'dead' : b.st;
+  if (st === 'idle') st = 'rest';
+  const S = T[st]; if (!S) return null;
+  const from = S.from || 0, to = S.to == null ? S.cells - 1 : S.to, n = to - from + 1;
+  let cell;
+  if (S.loop) cell = from + (Math.floor((b.anim || 0) * S.loop) % n);
+  else if (S.death) {
+    const T2 = 1.6 - Math.max(0, Math.min(1.6, b.deathAnimT == null ? 0 : b.deathAnimT));
+    cell = from + Math.min(n - 1, Math.floor((T2 / 1.6) * n));
+  } else {
+    const p = Math.max(0, Math.min(0.999, 1 - (b.t || 0) / (S.t0 || 1)));
+    cell = from + Math.floor(p * n);
+  }
+  return { S, cell };
+}
 function drawMini(c, b, cx, cy) {
   const M = MINIS[b.kind], A = MINI_ART[b.kind], t = b.anim || 0;
   const warn = /warn$/.test(b.st || '');
   c.save();
   c.translate(cx, cy);
+  // the filmed move, when its strip is here: the death take holds its last
+  // cell, so the plate's long fade becomes a short one at the very end
+  const pick = miniStripCell(b);
+  const sim = pick && MEDIA_RAW[pick.S.key];
+  if (pick && sim && sim.naturalWidth) {
+    if (b.dead) c.globalAlpha *= clamp((b.deathAnimT || 0) / 0.35, 0, 1);
+    {
+      const R = Math.max(b.w, b.h) * 1.7;
+      const g = c.createRadialGradient(0, 0, 0, 0, 0, R);
+      g.addColorStop(0, M.col); g.addColorStop(1, 'rgba(0,0,0,0)');
+      c.save(); c.globalCompositeOperation = 'lighter';
+      c.globalAlpha *= (warn ? 0.26 : 0.14) * (0.85 + 0.15 * Math.sin(t * 6));
+      c.fillStyle = g; c.beginPath(); c.arc(0, 0, R, 0, 7); c.fill(); c.restore();
+    }
+    const S = pick.S, H = b.h * CHIME_STRIP_H * S.k;
+    const bob = Math.sin(t * (A.fly ? 3.1 : 1.6)) * (A.fly ? 4 : 1.6);
+    const lean = clamp((b.vx || 0) / 900, -0.22, 0.22) * (A.fly ? 1 : 0.4);
+    const pop = warn ? 1 + 0.06 * Math.sin(t * 22) : 1;
+    c.save();
+    c.translate(0, bob);
+    c.rotate(lean);
+    c.scale(pop * (b.face > 0 ? -1 : 1), pop);
+    if (b.hurtT > 0) c.globalAlpha *= 0.85;
+    drawStripCell(c, S.key, pick.cell, S.cells, 0, H / 2, H, false);
+    if (b.hurtT > 0) {
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
+      drawStripCell(c, S.key, pick.cell, S.cells, 0, H / 2, H, false); c.restore();
+    }
+    c.restore();
+    c.restore();
+    return;
+  }
   if (b.dead) c.globalAlpha *= Math.max(0, 1 - (1.6 - (b.deathAnimT || 0)) / 1.6);
   // the wash behind it, which is what the wind-up is read from at a glance
   {
@@ -9947,8 +10031,12 @@ class Boss {
     // The old test ORed the art keys across bosses, so NULLFANG counted as
     // "has a body" whenever the EAGLE's sheet happened to be loaded. Per-kind,
     // from one table, is the only version of this that cannot be wrong.
+    // ...and a construct with a filmed death (MINI_STRIP) plays it out, as
+    // the guardians do — this guard used to drop every dead construct before
+    // drawMini's own fade could run, which is why that fade never showed
     if (this.dead && !heroWorld && !BOSS_ART[this.kind] && this.kind !== 'mother'
-        && this.kind !== 'alpha') return;
+        && this.kind !== 'alpha'
+        && !(typeof MINI_STRIP !== 'undefined' && MINI_STRIP[this.kind] && MINI_STRIP[this.kind].dead)) return;
     const P = PAL[G.roomDef.zone];
     // The intro used to fade the boss up from nothing, which made sense when it
     // arrived out of empty air. Now every guardian is already lying there in a
@@ -10043,6 +10131,12 @@ class Boss {
     }
     const cx = this.cx(), cy = this.cy();
     if (this.dead) {
+      // a construct with a filmed death (MINI_STRIP) plays it in its own
+      // renderer — the per-guardian collapses below never knew the constructs
+      if (!heroWorld && isMini(this) && typeof MINI_STRIP !== 'undefined'
+          && MINI_STRIP[this.kind] && MINI_STRIP[this.kind].dead) {
+        drawMini(c, this, cx, cy); c.restore(); return;
+      }
       if (heroWorld) {
         // the Odyssey's creatures die as THEMSELVES: the same sheet they
         // fought with, keeling over and fading — never the lion

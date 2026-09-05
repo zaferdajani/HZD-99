@@ -193,8 +193,82 @@ const check = (name, ok, detail) => {
         G.artProbe = 0; G.beastRig = false; bo.dead = false;
       }
     }
+    // ---- THE ALPHA AND CHIME (§2ax, Kingdom 1): the same three laws ----------
+    // The strip draws (differs from the plate), mirrors with the facing, and
+    // — for the grounded Alpha — stands where the plate stands. Chime hovers
+    // about its centre, so its footing is not a law.
+    out.k1 = {};
+    const K1 = [
+      { kind: 'alpha', room: 'A10', flag: 'alphaRig', table: 'ALPHA_STRIP', strips: 'ALPHA_STRIPS',
+        pose: { rest: { t: 0.5, vx: 0 }, prowl: { st: 'rest', t: 0.5, vx: 120 }, roarwarn: { t: 0.35 }, roar: { t: 0.2 },
+                broodcall: { t: 0.35 }, howl: { t: 0.2 }, coil: { t: 0.25 }, leap: { t: 0.5 }, recoil: { t: 0.3 }, turn: { t: 0.2 },
+                clawwarn: { t: 0.15 }, claw: { t: 0.1 }, bitewarn: { t: 0.15 }, bite: { t: 0.1 }, clinch: { t: 0.1 }, shake: { t: 0.3 },
+                free: { tamed: true } }, grounded: 1 },
+      { kind: 'chime', room: 'A9', flag: 'miniRig', table: null, strips: null,
+        pose: { rest: { t: 0.5 }, ringwarn: { t: 0.15 }, ring: { t: 0.25 }, notewarn: { t: 0.15 }, note: { t: 0.25 },
+                dead: { dead: true, deathAnimT: 0.8 } }, grounded: 0 },
+    ];
+    for (const Q of K1) {
+      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
+      startGame(sv); loadRoom(Q.room);
+      await new Promise(r2 => requestAnimationFrame(r2));
+      const bo = G.boss && G.boss.kind === Q.kind ? G.boss : (G.enemies || []).find(e => e && e.kind === Q.kind);
+      if (!bo) { out.k1[Q.kind + ':missing'] = { drew: 0 }; continue; }
+      const keys = Q.kind === 'alpha' ? ALPHA_STRIPS : Object.values(MINI_STRIP.chime).map(s => s.key);
+      for (const k of keys) mediaFetch(k, 1);
+      if (Q.kind === 'alpha') for (const k in ALPHA_ART) mediaFetch(ALPHA_ART[k].img, 1);
+      else for (const k of [MINI_ART.chime.rest, MINI_ART.chime.warn]) mediaFetch(k, 1);
+      for (let i = 0; i < 400 && !keys.every(k => MEDIA_RAW[k] && MEDIA_RAW[k].naturalWidth); i++)
+        await new Promise(r2 => requestAnimationFrame(r2));
+      const W = 480, H = 480;
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const x = cv.getContext('2d', { willReadFrequently: true });
+      G.artProbe = 1;
+      const snap3 = (st, strip, fv) => {
+        G[Q.flag] = !strip;
+        x.clearRect(0, 0, W, H);
+        bo.dead = false; bo.hurtT = 0; bo.stagT = 0; bo.purified = false; bo.tamed = false; bo.vx = 0; bo.vy = 0;
+        bo.anim = 1.2; bo.t = 0.5; bo._onceSt = null; bo._px = null; bo._pd = 0;
+        bo.st = st; Object.assign(bo, Q.pose[st] || {});
+        bo.face = bo.faceVis = fv;
+        // a moving body leans INTO its motion, so the mirror of a right-facing
+        // prowl is a left-facing prowl moving left — the velocity flips with
+        // the facing or the lean breaks the mirror on its own
+        if (bo.vx) bo.vx = Math.abs(bo.vx) * fv;
+        x.save();
+        x.translate(W / 2 - (bo.x + bo.w / 2), H - 80 - (bo.y + bo.h));
+        try { bo.draw(x); } catch (e) {}
+        x.restore();
+        return x.getImageData(0, 0, W, H);
+      };
+      const bottom = (img) => { let bot = -1; for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) if (img.data[(yy * W + xx) * 4 + 3] >= 60) { if (yy > bot) bot = yy; } return bot; };
+      for (const st of Object.keys(Q.pose)) {
+        const rig = snap3(st, false, -1), sp = snap3(st, true, -1), fl = snap3(st, true, 1);
+        let diff = 0;
+        for (let i = 0; i < rig.data.length; i += 4)
+          if (Math.abs(rig.data[i] - sp.data[i]) + Math.abs(rig.data[i + 1] - sp.data[i + 1])
+            + Math.abs(rig.data[i + 2] - sp.data[i + 2]) > 30) diff++;
+        let mirror = 0, opaque = 0;
+        for (let yy = 0; yy < H; yy += 2) for (let xx = 0; xx < W; xx += 2) {
+          const a = sp.data[(yy * W + xx) * 4 + 3], bq = fl.data[(yy * W + (W - 1 - xx)) * 4 + 3];
+          if (a > 60 || bq > 60) { opaque++; if ((a > 60) === (bq > 60)) mirror++; }
+        }
+        out.k1[Q.kind + ':' + st] = { drew: diff, faced: opaque ? +(mirror / opaque).toFixed(2) : -1,
+                                      footed: Q.grounded ? bottom(sp) - bottom(rig) : 0 };
+      }
+      G.artProbe = 0; G[Q.flag] = false; bo.dead = false; bo.tamed = false;
+    }
     return out;
   });
+
+  const K1_AIR = ['alpha:leap', 'alpha:recoil', 'alpha:turn', 'alpha:coil', 'alpha:free', 'alpha:clinch', 'alpha:shake'];
+  for (const k of Object.keys(r.k1 || {})) {
+    const v = r.k1[k];
+    check('the filmed take is what draws ' + k + ', not the plate', v.drew > 2000, v.drew + ' px differ');
+    if (v.drew > 2000) check('...and it turns with the body in ' + k, v.faced >= 0.9, 'mirror agreement ' + v.faced);
+    if (v.drew > 2000 && k.startsWith('alpha:') && !K1_AIR.includes(k))
+      check('...and its feet are where the plate\'s are in ' + k, Math.abs(v.footed) <= 14, v.footed + ' px off the plate\'s bottom');
+  }
 
   check('no still plates remain wired for the guardians (the coil went to the filmed leap)',
     r.wired.length === 0, r.wired.join(' '));

@@ -351,6 +351,73 @@ const ALPHA_ART = {
   turn: { img: 'alphaTurn', k: 2.05, foot: 1 },
   free: { img: 'alphaFree', k: 2.05, foot: 1 },
 };
+// ---------------------------------------------------------------------------
+// THE ALPHA'S MOVES, FILMED (ART_QUEUE §2ax, 2026-09-05). Nine takes cut to
+// strips, one per move, mapped onto the states over each state's own clock —
+// the same table Nullfang has (BEAST_STRIP in js/beast.js) for the same
+// reason: a plate slid around a room is a picture, a take is the move. The
+// plates stay as the fallback for any state without a strip or with its
+// strip not yet over the wire.
+//
+// THE SCALE, MEASURED. The rest plate is all wolf (467 of 468 px) and draws
+// at 2.05 hitbox heights; the rest take's wolf stands 227 of its 320-px cell,
+// so the cell draws at 2.05 * 320/227 heights and the wolf comes out the size
+// the plate was. Each take was cropped to its own widest frame, so k puts the
+// resting body length back on the rest take's 304 px: roar 259 -> 1.17, leap
+// (crouch, framed for the whole arc) 188 -> 1.6, claw 255 -> 1.19, clinch
+// 243 -> 1.25, yield 291 -> 1.04, the rest at ~305 -> 1.
+//
+// THE CLOCKS: `b.t` counts down from what the transition set — known
+// constants here (TELL_HEAVY, TELL_SWIPE, TELL_FAST, the 1.1 s leap, 0.26 s
+// blows, the 0.18 s clinch) so `t0` is written in; the prowl runs on ground
+// covered (like wolfPose), the rest and the shake loop on `anim`, and the
+// yield plays once from the frame it is first seen and holds its last cell.
+const ALPHA_STRIP_H = 2.05 * 320 / 227;
+const ALPHA_STRIP = {
+  rest:      { key: 'alRest',   cells: 9,  k: 1,    loop: 8 },
+  prowl:     { key: 'alProwl',  cells: 16, k: 1,    to: 12, dist: 9 },
+  roarwarn:  { key: 'alRoar',   cells: 12, k: 1.17, from: 0, to: 3,  t0: 0.7 },
+  roar:      { key: 'alRoar',   cells: 12, k: 1.17, from: 4, to: 11, t0: 0.4 },
+  broodcall: { key: 'alHowl',   cells: 12, k: 1,    from: 0, to: 5,  t0: 0.7 },
+  howl:      { key: 'alHowl',   cells: 12, k: 1,    from: 6, to: 11, t0: 0.45 },
+  coil:      { key: 'alLeap',   cells: 12, k: 1.6,  from: 0, to: 4,  t0: 0.5 },
+  leap:      { key: 'alLeap',   cells: 12, k: 1.6,  from: 5, to: 8,  t0: 1.1 },
+  recoil:    { key: 'alLeap',   cells: 12, k: 1.6,  from: 9, to: 11, t0: 0.75 },
+  turn:      { key: 'alLeap',   cells: 12, k: 1.6,  from: 9, to: 11, t0: 0.5 },
+  clawwarn:  { key: 'alClaw',   cells: 12, k: 1.19, from: 0, to: 5,  t0: 0.35 },
+  claw:      { key: 'alClaw',   cells: 12, k: 1.19, from: 6, to: 11, t0: 0.26 },
+  bitewarn:  { key: 'alBite',   cells: 12, k: 1,    from: 0, to: 4,  t0: 0.35 },
+  bite:      { key: 'alBite',   cells: 12, k: 1,    from: 5, to: 11, t0: 0.26 },
+  clinch:    { key: 'alClinch', cells: 12, k: 1.25, from: 0, to: 3,  t0: 0.18 },
+  shake:     { key: 'alClinch', cells: 12, k: 1.25, from: 4, to: 8,  loop: 12 },
+  free:      { key: 'alYield',  cells: 12, k: 1.04, once: 10 },
+};
+const ALPHA_STRIPS = Object.values(ALPHA_STRIP).map((s) => s.key).filter((k, i, a) => a.indexOf(k) === i);
+// which strip, and which cell of it, for the state the Alpha is in — or null
+function alphaStripCell(b) {
+  if (typeof G !== 'undefined' && (G.bossRig || G.alphaRig)) return null;
+  let st = (b.purified || b.tamed || (b.dead && !b.forceKill)) ? 'free' : b.st;
+  if (st === 'idle') st = 'rest';
+  // the prowl is the rest state on the move: ground covered picks the cell
+  if (st === 'rest' && Math.abs(b.vx || 0) > 25) st = 'prowl';
+  const S = ALPHA_STRIP[st];
+  if (!S) return null;
+  const from = S.from || 0, to = S.to == null ? S.cells - 1 : S.to, n = to - from + 1;
+  let cell;
+  if (S.loop) cell = from + (Math.floor((b.anim || 0) * S.loop) % n);
+  else if (S.dist) {
+    b._pd = (b._pd || 0) + Math.abs(b.x - (b._px == null ? b.x : b._px)); b._px = b.x;
+    cell = from + (Math.floor(b._pd / S.dist) % n);
+  } else if (S.once) {
+    if (b._onceSt !== st) { b._onceSt = st; b._onceAt = b.anim || 0; }
+    cell = from + Math.min(n - 1, Math.floor(((b.anim || 0) - b._onceAt) * S.once));
+  } else {
+    const p = Math.max(0, Math.min(0.999, 1 - (b.t || 0) / (S.t0 || 1)));
+    cell = from + Math.floor(p * n);
+  }
+  if (b._px == null || st !== 'prowl') b._px = b.x;
+  return { S, cell };
+}
 const ALPHA_KIT = {
   spd: 132,          // it prowls; the leap is where the speed is
   close: 128,        // inside this it claws or bites
@@ -665,15 +732,76 @@ function alphaTint(key, im) {
   ALPHA_TINT[key] = cv;
   return cv;
 }
+// one amber copy of a strip CELL, for the tell on a filmed move — the plate's
+// tint would be the wrong picture over it
+const ALPHA_CELL_TINT = { cv: null, key: '', cell: -1 };
+function alphaStripTint(key, cell, cells) {
+  const im = MEDIA_RAW[key]; if (!im || !im.naturalWidth) return null;
+  const T = ALPHA_CELL_TINT;
+  const cw = im.naturalWidth / cells, ch = im.naturalHeight;
+  if (!T.cv) T.cv = document.createElement('canvas');
+  if (T.key !== key || T.cell !== cell) {
+    T.cv.width = Math.round(cw); T.cv.height = ch;
+    const x = T.cv.getContext('2d');
+    x.clearRect(0, 0, T.cv.width, ch);
+    x.drawImage(im, cell * cw, 0, cw, ch, 0, 0, T.cv.width, ch);
+    x.globalCompositeOperation = 'source-in'; x.fillStyle = TELL_COL; x.fillRect(0, 0, T.cv.width, ch);
+    T.key = key; T.cell = cell;
+  }
+  return T.cv;
+}
 function drawAlpha(c, b, cx, cy) {
-  if (typeof mediaFetch === 'function')
+  if (typeof mediaFetch === 'function') {
     for (const k in ALPHA_ART) mediaFetch(ALPHA_ART[k].img);
+    for (const k of ALPHA_STRIPS) mediaFetch(k);
+  }
   const A = alphaPlate(b);
   const im0 = MEDIA_IMG[A.img];
   if (!im0 || !im0.naturalWidth) { drawBossHold(c, b); return; }
   const im = (typeof popArt === 'function' && popArt(A.img)) || im0;
   const t2 = b.anim || 0;
   const warn = !!(b.st && TELL_ST.test(b.st));
+  // THE FILMED MOVE, when its strip is here: drawn in the plate's own frame
+  // (foot on the hitbox floor, the same mirror, the same bob and lean) but
+  // without the plate's choreography — the corkscrew, the head-shake and the
+  // howl's rise are IN the takes, and rotating a take that already turns
+  // would turn it twice.
+  {
+    const pick = alphaStripCell(b);
+    const sim = pick && MEDIA_RAW[pick.S.key];
+    if (pick && sim && sim.naturalWidth) {
+      const S = pick.S, H = b.h * ALPHA_STRIP_H * S.k;
+      c.save();
+      c.translate(cx, b.y + b.h);
+      const bob = Math.sin(t2 * 1.7) * 1.8;
+      const lean = clamp((b.vx || 0) / 900, -0.2, 0.2);
+      const pop = warn ? 1 + 0.05 * Math.sin(t2 * 20) : 1;
+      c.translate(0, bob);
+      c.rotate(lean);
+      c.scale(pop * ((b.face || -1) > 0 ? -1 : 1), pop);
+      if (b.hurtT > 0) c.globalAlpha *= 0.85;
+      drawStripCell(c, S.key, pick.cell, S.cells, 0, 0, H, false);
+      const cw = sim.naturalWidth / S.cells, dw = H * (cw / sim.naturalHeight);
+      if (warn && !b.dead) {
+        const dur = b.windT > 0 ? b.windT
+          : b.st === 'coil' ? TELL_SWIPE : /roarwarn|broodcall/.test(b.st) ? TELL_HEAVY : TELL_FAST;
+        const kk = clamp(1 - (b.t || 0) / dur, 0, 1);
+        const tint = alphaStripTint(S.key, pick.cell, S.cells);
+        if (tint) {
+          c.save(); c.globalCompositeOperation = 'lighter';
+          c.globalAlpha = 0.06 + 0.26 * kk;
+          c.drawImage(tint, -dw / 2, -H, dw, H); c.restore();
+        }
+      }
+      if (b.hurtT > 0) {
+        c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
+        drawStripCell(c, S.key, pick.cell, S.cells, 0, 0, H, false); c.restore();
+      }
+      c.restore();
+      if (!G.artProbe && (b.st === 'roarwarn' || b.st === 'roar')) alphaRoarRing(c, b, cx);
+      return;
+    }
+  }
   // Scaled to the hitbox by HEIGHT. The nine plates have wildly different
   // aspect ratios — the howl is nearly square, the leap is a long diagonal —
   // so the GROUNDED ones are anchored by their feet and the airborne ones by
@@ -747,15 +875,16 @@ function drawAlpha(c, b, cx, cy) {
   // decides it is on the floor, growing over the wind-up and flashing at the
   // moment it lands. Suppressed for the art probe like every other
   // ground-anchored effect (§3.4), since it is lit pixels below the foot line.
-  if (!G.artProbe && (b.st === 'roarwarn' || b.st === 'roar')) {
-    const grow = b.st === 'roarwarn'
-      ? Math.pow(clamp(1 - (b.t || 0) / TELL_HEAVY, 0, 1), 0.62) : 1;
-    const R = 260 * grow;
-    c.save();
-    c.globalCompositeOperation = 'lighter';
-    c.globalAlpha = (b.st === 'roar' ? 0.55 : 0.22 + grow * 0.2);
-    c.strokeStyle = TELL_COL; c.lineWidth = b.st === 'roar' ? 4 : 2;
-    c.beginPath(); c.ellipse(cx, b.y + b.h - 3, R, R * 0.22, 0, 0, 7); c.stroke();
-    c.restore();
-  }
+  if (!G.artProbe && (b.st === 'roarwarn' || b.st === 'roar')) alphaRoarRing(c, b, cx);
+}
+function alphaRoarRing(c, b, cx) {
+  const grow = b.st === 'roarwarn'
+    ? Math.pow(clamp(1 - (b.t || 0) / TELL_HEAVY, 0, 1), 0.62) : 1;
+  const R = 260 * grow;
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  c.globalAlpha = (b.st === 'roar' ? 0.55 : 0.22 + grow * 0.2);
+  c.strokeStyle = TELL_COL; c.lineWidth = b.st === 'roar' ? 4 : 2;
+  c.beginPath(); c.ellipse(cx, b.y + b.h - 3, R, R * 0.22, 0, 0, 7); c.stroke();
+  c.restore();
 }
