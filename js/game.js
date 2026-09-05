@@ -814,9 +814,20 @@ function grantMod(id) {
   showItem(t('m_' + id), t('m_' + id + 'd'), MOD_ART[id], id);
   lessonStart(id);                                  // and then teach it
 }
+// THE FIRST CREST EXPLAINS ITSELF. The owner, on the crest button: "I have no
+// idea what's the point of crest so far. Nobody does. So why was it created?
+// How would it work? And what is the background story of it?" The system
+// existed — sockets, seals, a shop that sells port width — and the story did
+// not, so a player met a screen of nouns. docs/CRESTS.md is the story; the
+// first seal she seats tells it, once, in the card that hands it over.
 function grantCrest(id) {
   if (G.save.crests.indexOf(id) < 0) G.save.crests.push(id);
   showItem(t('c_' + id), t('c_' + id + 'd'));
+  if (G.dialog && !(G.save.flags && G.save.flags.crestTold)) {
+    if (!G.save.flags) G.save.flags = {};
+    G.save.flags.crestTold = 1;
+    G.dialog.lines.push(t('crest_first'), t('crest_first2'));
+  }
 }
 function showItem(name, desc, art, demo) {
   sfx('win');
@@ -2446,7 +2457,7 @@ function updateShop() {
       persist();
       return;
     }
-    if (it.type === 'crest') { G.save.crests.push(it.id); showItem(t('c_' + it.id), t('c_' + it.id + 'd')); }
+    if (it.type === 'crest') grantCrest(it.id);
     else if (it.type === 'slot') { G.save.slots++; G.save.shop[it.id] = 1; showItem(t('s_slot'), t('s_slotd')); }
     else { G.save.coresMax++; player.cores++; G.save.shop[it.id] = 1; showItem(t('s_core'), t('s_cored')); }
   }
@@ -15484,36 +15495,60 @@ function drawMap() {
   c.beginPath(); c.rect(0, 58, 960, 440); c.clip();
   c.translate(mapView.x, mapView.y); c.scale(mapView.z, mapView.z);
   const cell = 62, ox = 0, oy = 0;
+  // THE MAP IS ONE PIECE OF GROUND (owner, 2026-09-05: "the map should
+  // actually show the terrain... continuous with a minor separation that
+  // differentiates rooms from each other, because the concept is it's an open
+  // world where you can move from one room to another. It's not separated by
+  // a wall anymore.")
+  //
+  // It used to draw each room as a framed card — inset 3 px, rounded, the
+  // terrain letterboxed inside it with a route line between the cards — which
+  // is a chart of BOXES, and boxes say "separate places" whatever is painted
+  // in them. Now the rooms tile edge to edge, the terrain is stretched to fill
+  // its cells so a floor at row 15 of 18 meets the same floor next door, and
+  // the only thing between two rooms is a hairline seam. The route lines stay
+  // only for the pairs that do NOT touch on the board — a depth door into a
+  // cave network, a gate — because there the line is the information.
   const rectFor = id => {
     const [gx, gy, w, h] = MAPPOS[id];
-    return { x: ox + gx * cell + 3, y: oy + gy * cell + 3, w: w * cell - 6, h: h * cell - 6 };
+    return { x: ox + gx * cell, y: oy + gy * cell, w: w * cell, h: h * cell };
   };
-  // travel routes between explored rooms
+  const touching = (a, b) =>
+    (Math.abs(a.x + a.w - b.x) < 1 || Math.abs(b.x + b.w - a.x) < 1) && a.y < b.y + b.h && b.y < a.y + a.h
+    || (Math.abs(a.y + a.h - b.y) < 1 || Math.abs(b.y + b.h - a.y) < 1) && a.x < b.x + b.w && b.x < a.x + a.w;
+  // the ground first, every visited room's terrain filling its own cells
+  for (const id in MAPPOS) {
+    if (!G.save.visited[id]) continue;
+    const rc = rectFor(id);
+    c.fillStyle = '#0a1016'; c.fillRect(rc.x, rc.y, rc.w, rc.h);
+    const mc = roomMini(id);
+    c.imageSmoothingEnabled = false;
+    c.drawImage(mc, rc.x, rc.y, rc.w, rc.h);
+    c.imageSmoothingEnabled = true;
+  }
+  // routes only where the board leaves a gap between two connected rooms
   c.strokeStyle = 'rgba(140,200,230,0.35)'; c.lineWidth = 3;
   for (const id in MAPPOS) {
     if (!G.save.visited[id]) continue;
     const ex = ROOMS[id].exits || {};
     for (const side in ex) {
       let d = ex[side]; if (typeof d === 'object') d = d.to;
-      if (!G.save.visited[d] || d < id) continue;
+      if (!G.save.visited[d] || d < id || !MAPPOS[d]) continue;
       const a = rectFor(id), b = rectFor(d);
+      if (touching(a, b)) continue;
       c.beginPath(); c.moveTo(a.x + a.w / 2, a.y + a.h / 2); c.lineTo(b.x + b.w / 2, b.y + b.h / 2); c.stroke();
     }
   }
-  // room miniatures with real terrain
+  // the seams and the signs
   for (const id in MAPPOS) {
     if (!G.save.visited[id]) continue;
     const P = PAL[ROOMS[id].zone], rc = rectFor(id);
-    c.fillStyle = '#0a1016'; rr(c, rc.x, rc.y, rc.w, rc.h, 5); c.fill();
-    const mc = roomMini(id);
-    const fit = Math.min((rc.w - 6) / mc.width, (rc.h - 6) / mc.height);
-    const mw = mc.width * fit, mh = mc.height * fit;
-    const mx = rc.x + (rc.w - mw) / 2, my = rc.y + (rc.h - mh) / 2;
-    c.save(); rr(c, rc.x, rc.y, rc.w, rc.h, 5); c.clip();
-    c.imageSmoothingEnabled = false;
-    c.drawImage(mc, mx, my, mw, mh);
-    c.restore(); c.imageSmoothingEnabled = true;
-    c.strokeStyle = P.edge; c.lineWidth = 1.5; rr(c, rc.x, rc.y, rc.w, rc.h, 5); c.stroke();
+    const mx = rc.x, my = rc.y, mw = rc.w, mh = rc.h;
+    // a hairline in the zone's own edge colour: enough to count rooms by,
+    // never enough to read as a wall
+    c.strokeStyle = P.edge; c.globalAlpha = 0.45; c.lineWidth = 1;
+    c.strokeRect(rc.x + 0.5, rc.y + 0.5, rc.w - 1, rc.h - 1);
+    c.globalAlpha = 1;
     if (BENCH_ROOMS.indexOf(id) >= 0 || (ROOMS[id].cave && ROOMS[id].ents.some(e => e[0] === 'bench')))
       ftxt('◆', rc.x + 10, rc.y + 11, 11, '#aef7d8');
     if (id === 'A3') ftxt('⚙', rc.x + 10, rc.y + rc.h - 11, 11, '#ffd76a');
@@ -15538,7 +15573,7 @@ function drawMap() {
       c.fillStyle = 'rgba(255,255,255,' + pu + ')'; c.shadowColor = '#ffffff'; c.shadowBlur = 8;
       c.beginPath(); c.arc(relx, rely, 3.5, 0, 7); c.fill(); c.shadowBlur = 0;
       c.strokeStyle = 'rgba(255,255,255,0.75)'; c.lineWidth = 2;
-      rr(c, rc.x - 2, rc.y - 2, rc.w + 4, rc.h + 4, 6); c.stroke();
+      c.strokeRect(rc.x + 1, rc.y + 1, rc.w - 2, rc.h - 2);
     }
   }
   c.restore();
@@ -15595,7 +15630,15 @@ function drawCrest() {
   }
   ftxt(t('crest_slots') + '  ' + used + ' / ' + effSlots(), 480, 124, 14, '#8aa2b5');
   const list = G.save.crests;
-  if (!list.length) { ftxt(t('crest_none'), 480, 280, 17, '#7d93a8'); return; }
+  if (!list.length) {
+    // an empty screen is where the question gets asked, so it is where the
+    // answer lives: what a crest is, and where the seals are
+    wrapText(t('crest_lore'), 640, 15).forEach((ln, i) => ftxt(ln, 480, 210 + i * 22, 15, '#9fb8c8'));
+    wrapText(t('crest_none'), 640, 15).forEach((ln, i) => ftxt(ln, 480, 330 + i * 22, 15, '#7d93a8'));
+    return;
+  }
+  // ...and one line of it stays under the port for the players who skipped the card
+  ftxt(t('crest_port'), 480, 146, 12, '#5f7488');
   list.forEach((id, i) => {
     const sel = i === G.crestIdx, eq = G.save.equip.indexOf(id) >= 0;
     const y = 170 + i * 40;

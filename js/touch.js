@@ -226,11 +226,19 @@ function tLayout() {
         show: () => !!G.near && tAllow('INT') },
     ],
     // menu buttons live in the LEFT column, actions in the right — no clutter
+    // THE MAP BUTTON KEPT LOSING TO THE CREST BUTTON (owner, 2026-09-05:
+    // "pressing on the map button is a huge pain... it keeps pressing crest").
+    // Four glyphs 42 units apart with a 27-unit hit radius each overlap by a
+    // third, and a thumb's contact lands below the thing it aims at, so a tap
+    // on the map went to the row under it. Three changes: the crest button is
+    // gone from the column (crests live one row inside Pause, where the
+    // config screen already sends anything without a button), the map is the
+    // biggest control in the column because it is the one used every minute,
+    // and the rows are far enough apart that no two hit circles meet.
     corners: [
       { code: 'VPAUSE', x: lgx, y: 26 * u + 4, r: 16 * u + 2, icon: '▐▌', show: () => true },
-      { code: 'VMAP', x: lgx, y: 68 * u + 4, r: 16 * u + 2, icon: '▦', show: () => true },
-      { code: 'VCREST', x: lgx, y: 110 * u + 4, r: 16 * u + 2, icon: '◇', show: () => tAllow('CREST') },
-      { code: 'VSKILL', x: lgx, y: 152 * u + 4, r: 16 * u + 2, icon: '◈', show: () => tAllow('SKILL') },
+      { code: 'VMAP', x: lgx, y: 92 * u + 4, r: 22 * u + 2, icon: '▦', show: () => true },
+      { code: 'VSKILL', x: lgx, y: 156 * u + 4, r: 16 * u + 2, icon: '◈', show: () => tAllow('SKILL') },
     ],
   };
   // the player's own arrangement wins over every default
@@ -427,7 +435,16 @@ function tStart(e) {
         continue;
       }
       let hit = null;
-      for (const b of L.corners) if (b.show() && Math.hypot(x - b.x, y - b.y) < b.r + 9) { hit = b; break; }
+      // the NEAREST corner control, not the first one whose circle the touch
+      // fell in — a thumb between two buttons meant the higher one always won
+      {
+        let best = 1e9;
+        for (const b of L.corners) {
+          if (!b.show()) continue;
+          const d = Math.hypot(x - b.x, y - b.y);
+          if (d < b.r + 9 && d < best) { best = d; hit = b; }
+        }
+      }
       if (!hit) for (const b of L.btns) if (b.show() && Math.hypot(x - b.x, y - b.y) < b.r + 9) { hit = b; break; }
       if (hit && hit.code === 'VWHEEL') {
         TOUCH.wheel = { id: t.identifier, sel: null, moved: false, open: false };

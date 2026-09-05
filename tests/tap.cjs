@@ -138,6 +138,26 @@ const { chromium } = require('playwright');
     said.map(o => o.first === o.want ? o.tier : 'tier ' + o.tier + ' got "' + o.first.slice(0, 40) + '"'),
     [0, 1, 2]);
 
+  // THE CORNER COLUMN: NO TWO HIT CIRCLES MAY MEET, AND THE MAP IS THE BIGGEST.
+  // The owner could not press the map without pressing the crest under it:
+  // the column's hit circles overlapped by a third and the first match won.
+  // Measured off the layout the game actually builds, with the tolerance the
+  // hit test adds (9 px) counted on both sides.
+  const col = await page.evaluate(() => {
+    const L = tLayout();
+    const vis = L.corners.filter(b => b.show());
+    const pairs = [];
+    for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) {
+      const a = vis[i], b = vis[j];
+      pairs.push({ a: a.code, b: b.code, gap: +(Math.hypot(a.x - b.x, a.y - b.y) - (a.r + 9) - (b.r + 9)).toFixed(1) });
+    }
+    const map = vis.find(b => b.code === 'VMAP');
+    return { pairs, mapBiggest: !!map && vis.every(b => b.r <= map.r), codes: vis.map(b => b.code) };
+  });
+  check('no two corner buttons share a touch', col.pairs.filter(p => p.gap < 0).map(p => p.a + '/' + p.b + ' ' + p.gap), []);
+  check('the map is the biggest corner button', col.mapBiggest, true);
+  check('the crest button is off the HUD column (it lives under Pause)', col.codes.includes('VCREST'), false);
+
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
