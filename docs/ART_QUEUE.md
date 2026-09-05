@@ -4348,6 +4348,66 @@ did not make.
 
 ---
 
+### 2ax. THE GUARDIANS MOVE — filmed takes per move, Nullfang first ✱ FIRING (owner "Ok", 2026-09-05)
+
+**The owner, on part 2 of the cast reel:** *"the boss fight and boss
+characters, movements, and attacks are bad, like, super bad. How can we
+improve that?"*
+
+The reel shows the cause. Part 1 and part 2 were filmed by the same camera;
+the difference is the art. HER moves are filmed motion — every strip 9–16
+frames from a Seedance take, so a swing has a wind-up, a snap and a
+follow-through. THE GUARDIANS are stills cut together: Nullfang has 16 states
+and 16 pictures, one drawing per state held until the next, and a pounce is
+one picture slid across the floor. The telegraph is a ring on the ground and
+the hit is a white flash; nothing in the body coils, commits or recovers. The
+plates translate but the feet never stride. And a 56-px guardian in a 540-px
+arena under a static camera never gets to be big.
+
+**Two halves.**
+
+**ART (this session, Higgsfield).** The route that fixed her: one
+continuous-motion take per move (Seedance 2.5 omni_reference, started FROM
+the assembled painted body, `generate_audio:false`), cut to a 12–24 cell strip
+by `tools/vidstrip.cjs`, the strip driving the state instead of a still. The
+§2aw rig route cannot serve this: the library auto-rig is humanoid only and
+every guardian is a lion, a wolf, an eagle, a unicorn or a dragon. Cost is
+known from her strips — 32.5 credits a take.
+
+| | takes | credits |
+|---|---|---|
+| Nullfang, every move | ~10 | ~325 |
+| Kingdom 1 (Nullfang, Alpha, Chime) | ~28 | ~900 |
+| all twelve | ~110 | ~3,600 |
+
+**The pilot is Nullfang alone**, owner reviewing every take before it is
+keyed: stalk (walk cycle) · roar · swipe (wind-up → strike → recover) ·
+spring → pounce → land · daze · dive → perch · the null charge → hop → end ·
+the fall. Reference still: the rig's own `stalk` frame (`tools/bossshot.cjs
+A4`), so the take starts from the body the game already draws. Takes archived
+in `assets/source/beast/takes/`, strips in `assets/characters/beast/`. The
+finished fight goes in front of the owner as a reel section
+(`tools/castreel.cjs --only=boss`) before any other guardian is fired.
+
+**GAMEPLAY (code session)** — the half no plate can supply, against the
+repo's own `boss-patterns`, `boss-openings` and `boss-scale` skills:
+- hit-stop and a camera shake on every boss impact, hers and its;
+- a HELD anticipation frame before each attack (the strip's wind-up cells
+  hold, then release) and a visible recovery the player can punish;
+- feet-driven locomotion — the body's x moves with the stride cells, never a
+  glide under a still;
+- a camera that pushes in for the arena (boss-scale: the guardian should own
+  a third of the frame, not a tenth);
+- fewer repeats per minute: the deck weights so the same move does not come
+  three times running.
+
+Wiring of the strips is the code session's: each state's plate call becomes
+a `drawStripCell` over the state's own timer, `k` measured by
+`tools/swingk.cjs` against the plate it replaces, `bosspace artbible frames`
+green.
+
+---
+
 ### 2at. THE CAST REEL — every character, every move, its own sound (2026-09-04)
 
 **The owner:** *"generate one video showing all characters in the game using
