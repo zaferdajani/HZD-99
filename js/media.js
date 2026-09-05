@@ -17,6 +17,20 @@ const MEDIA_SRC = {
     ghost: 'assets/characters/ghost-idle.webp',
     skull: 'assets/characters/fire-skull.png',
     beast: 'assets/characters/hell-beast-idle.png',
+    // NULLFANG'S MOVES, FILMED (ART_QUEUE §2ax): one continuous take per
+    // move, cut to a strip, 320-px cells, feet on the cell floor, facing
+    // LEFT like the rig. Drawn by beastStrip in js/beast.js over the state's
+    // own clock; the parts rig draws whenever a strip is not here.
+    beastStalk: 'assets/characters/beast/stalk.webp',
+    beastRoar: 'assets/characters/beast/roar.webp',
+    beastSwipe: 'assets/characters/beast/swipe.webp',
+    beastLeap: 'assets/characters/beast/leap.webp',
+    beastSpringup: 'assets/characters/beast/springup.webp',
+    beastDive: 'assets/characters/beast/dive.webp',
+    beastPerch: 'assets/characters/beast/perch.webp',
+    beastDaze: 'assets/characters/beast/daze.webp',
+    beastNullcharge: 'assets/characters/beast/nullcharge.webp',
+    beastFall: 'assets/characters/beast/fall.webp',
     demon: 'assets/characters/demon-idle.png',
     // pre-rendered 3D turnaround atlas: 11 subjects x 8 yaw angles
     roster: 'assets/characters/roster_8yaw.webp',

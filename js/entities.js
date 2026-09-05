@@ -7706,16 +7706,14 @@ function bossRest(b, k) {
 // with itself (nullfang_walk faces left, nullfang_coil faces right), and the
 // engine's convention is that a guardian faces left at face = -1.
 const BOSS_MOTION = {
-  // NULLFANG — the coil, and only the coil.
-  //
-  // Not the stalk: the brief asked for walk_a AND walk_b so travel is a CYCLE,
-  // and one stride pose came back. A held stride slid along the floor is the
-  // skating that took three passes to get out of the wolves and out of her, so
-  // nullfang_walk waits for its partner. A tell is a held pose by definition —
-  // that is what makes it readable — so the coil has no such problem.
-  glitch: { h: 2.5, anchor: 'foot', lift: 0.03,
-            states: { crouch: { k: 'nullfangCoil', faceRight: 1 },
-                      springwarn: { k: 'nullfangCoil', faceRight: 1 } } },
+  // NULLFANG'S COIL PLATE IS RETIRED (2026-09-05). It was the one still that
+  // survived the §3m identity audit — a held wind-up, which a still can be —
+  // and it is superseded by the FILMED coil: the leap take's first six cells
+  // (js/beast.js BEAST_STRIP, ART_QUEUE §2ax) show the same crouch as a
+  // motion instead of a picture, and the whole leap after it. A plate here
+  // draws BEFORE drawBeast and returns, so leaving it wired would have kept
+  // the strip from ever playing those two states. The table stays for the
+  // guardians whose moves are still stills.
 };
 class Boss {
   // WHICH OF THE THREE WARNINGS THIS GUARDIAN MAKES.

@@ -1125,6 +1125,87 @@ function beastDraw(c, b, P) {
   c.restore();
 }
 
+// ---------------------------------------------------------------------------
+// THE FILMED MOVES (ART_QUEUE §2ax, fired 2026-09-05).
+//
+// The owner on the cast reel: "the boss fight and boss characters, movements,
+// and attacks are bad, like, super bad." The reel showed why — her moves are
+// filmed motion, the guardians were stills cut together: sixteen states,
+// sixteen pictures, a pounce one drawing slid across the floor. So each of
+// Nullfang's moves is one continuous take now, cut to a strip, and this table
+// says which strip plays which state and over which clock. The parts rig
+// stays underneath: it draws for any state without a strip, for any strip not
+// yet over the wire, mid-turn (the strips are one yaw; the rig's constructed
+// front carries the turn), and while staggered by the Song.
+//
+// THE SCALE IS ONE NUMBER PER STRIP, MEASURED. The strips were cropped by
+// content per take, so a take whose widest frame is a fully extended paw
+// holds the lion smaller in its cells than a take where nothing extends. k
+// puts them back on one size: the lion's resting body length in each take's
+// resting cell against the stalk's (291 px) — swipe 205 -> 1.42, leap 216 ->
+// 1.35, springup 256 -> 1.14, the rest at or near 300 -> 1. BEAST_STRIP_PX is
+// the stalk's own scale: 280 rig px of standing lion for 210 strip px.
+//
+// THE CLOCKS ARE THE STATE MACHINE'S OWN. `b.t` counts DOWN from whatever the
+// transition set it to, and the transition does not record that number, so the
+// first frame seen in a state is taken as its length (`_st0`), the way the
+// hero's land0 works. Loops run on b.anim; the arc of a pounce is indexed by
+// its own vertical speed (up / hang / down); the spring and the dive carry
+// their own 0..1 (`b.u`); the death counts deathAnimT from 1.6 to 0.
+const BEAST_STRIP_PX = 280 / 210;
+const BEAST_STRIP = {
+  stalk:      { key: 'beastStalk',      cells: 16, k: 1,    loop: 14 },
+  idle:       { key: 'beastStalk',      cells: 16, k: 1,    from: 0, to: 0, loop: 1 },
+  roar:       { key: 'beastRoar',       cells: 12, k: 1,    t0: 1.25 },
+  intro:      { key: 'beastRoar',       cells: 12, k: 1,    t0: 1.0, when: (b) => (b.t || 0) <= 1.0 },
+  swipewarn:  { key: 'beastSwipe',      cells: 12, k: 1.42, from: 0, to: 5 },   // the raised paw HOLDS on 5
+  swipe:      { key: 'beastSwipe',      cells: 12, k: 1.42, from: 6, to: 11 },  // the rake, then the recovery
+  crouch:     { key: 'beastLeap',       cells: 12, k: 1.35, from: 0, to: 5 },
+  springwarn: { key: 'beastLeap',       cells: 12, k: 1.35, from: 0, to: 5 },
+  pounce:     { key: 'beastLeap',       cells: 12, k: 1.35, from: 6, to: 8, air: 1 },
+  recover:    { key: 'beastLeap',       cells: 12, k: 1.35, from: 9, to: 11 },
+  spring:     { key: 'beastSpringup',   cells: 8,  k: 1.14, u: 1 },
+  dive:       { key: 'beastDive',       cells: 5,  k: 1,    u: 1 },
+  perch:      { key: 'beastPerch',      cells: 8,  k: 1,    loop: 10 },
+  daze:       { key: 'beastDaze',       cells: 12, k: 1,    loop: 12 },
+  nullcharge: { key: 'beastNullcharge', cells: 12, k: 1,    from: 0, to: 3 },
+  nullhop:    { key: 'beastNullcharge', cells: 12, k: 1,    from: 4, to: 8, loop: 10 },
+  nullend:    { key: 'beastNullcharge', cells: 12, k: 1,    from: 9, to: 11 },
+  dead:       { key: 'beastFall',       cells: 12, k: 1,    death: 1 },
+};
+// every key above, once — prefetched the moment the fight is entered
+const BEAST_STRIPS = Object.values(BEAST_STRIP).map((s) => s.key).filter((k, i, a) => a.indexOf(k) === i);
+// Draws the strip cell for the boss's current state in RIG SPACE (origin at
+// the feet, the body transform already applied by drawBeast), or returns
+// false so the caller draws the rig instead. G.beastRig forces the rig, which
+// is how the harness diffs the two.
+function beastStrip(c, b) {
+  if (typeof G !== 'undefined' && (G.bossRig || G.beastRig)) return false;
+  let st = b.dead ? 'dead' : b.st;
+  // the null sequence's pounces float rather than leap: the field's own cells
+  if (st === 'pounce' && (b.nullSeq || 0) > 0) st = 'nullhop';
+  const S = BEAST_STRIP[st];
+  if (!S || (S.when && !S.when(b))) return false;
+  if (b._sst !== st) { b._sst = st; b._st0 = Math.max(0.05, b.t || 0); }
+  else if ((b.t || 0) > (b._st0 || 0)) b._st0 = b.t;
+  const from = S.from || 0, to = S.to == null ? S.cells - 1 : S.to, n = to - from + 1;
+  let cell;
+  if (S.loop) cell = from + (Math.floor((b.anim || 0) * S.loop) % n);
+  else if (S.air) { const vy = b.vy || 0; cell = from + (vy < -120 ? 0 : vy < 120 ? 1 : 2); }
+  else if (S.u) cell = from + Math.min(n - 1, Math.floor(Math.max(0, Math.min(0.999, b.u || 0)) * n));
+  else if (S.death) {
+    const T = 1.6 - Math.max(0, Math.min(1.6, b.deathAnimT == null ? 0 : b.deathAnimT));
+    cell = from + Math.min(n - 1, Math.floor((T / 1.6) * n));
+  } else {
+    const t0 = S.t0 || b._st0 || 1;
+    const p = Math.max(0, Math.min(0.999, 1 - (b.t || 0) / t0));
+    cell = from + Math.floor(p * n);
+  }
+  const im = (typeof MEDIA_RAW !== 'undefined') && MEDIA_RAW[S.key];
+  const cellH = im && im.naturalHeight ? im.naturalHeight : 320;
+  return drawStripCell(c, S.key, cell, S.cells, 0, 0, cellH * BEAST_STRIP_PX * S.k, false);
+}
+
 // boss entry point. Returns false so the old chain can catch a missing image.
 function drawBeast(c, b) {
   const im = beastImg(); if (!im || !im.naturalWidth) return false;
@@ -1216,7 +1297,7 @@ function drawBeast(c, b) {
       // cheapest, largest-area part of the surge, so holding it back until the
       // wind-up is half over throws away the half that matters most
       BEAST_LIVE.charge = 0.32 + 0.68 * k;
-      beastDraw(c, b, beastPose(b));
+      if (!beastStrip(c, b)) beastDraw(c, b, beastPose(b));
       if (!G.artProbe) beastCoilFx(c, b, k);   // see G.artProbe in entities.js
       // THE FLASH. The last beat before it goes: one white pop over the whole
       // animal, so the cue to move is a single unmissable event rather than a
@@ -1245,7 +1326,7 @@ function drawBeast(c, b) {
       const up = Math.max(0, Math.min(0.55, -(b.vy || 0) / 1000));
       const dn = Math.max(0, Math.min(0.5, (b.vy || 0) / 1000));
       c.scale(1 - up * 0.10 + dn * 0.05, 1 + up * 0.16 - dn * 0.04);
-      beastDraw(c, b, beastPose(b));
+      if (!beastStrip(c, b)) beastDraw(c, b, beastPose(b));
     } else if ((b.st === 'swipe' || b.st === 'swipewarn') && !b.dead) {
       // THE CLAW, which is the whole point of a lion's swipe and which this
       // fight did not previously show. The pose rotated a foreleg and the game
@@ -1254,21 +1335,25 @@ function drawBeast(c, b) {
       // claws unsheathed on the wind-up, an arc that follows where they have
       // actually been, and four separate trails, because one wide swoosh is a
       // sword and four is a hand.
-      const P = beastPose(b);
-      beastDraw(c, b, P);
-      beastClawFx(c, b, P);
+      // ...unless the filmed swipe is here, which carries its own claws: the
+      // trails are fitted to the rig's paw and would hang off the take's
+      if (!beastStrip(c, b)) {
+        const P = beastPose(b);
+        beastDraw(c, b, P);
+        beastClawFx(c, b, P);
+      }
     } else if (b.st === 'daze' && !b.dead) {
       // broken open: the head shakes itself, the veins gutter, and it does not
       // defend. See the entities-side state — this branch only draws it.
-      beastDraw(c, b, beastPose(b));
+      if (!beastStrip(c, b)) beastDraw(c, b, beastPose(b));
       if (!G.artProbe) beastDazeFx(c, b);      // see G.artProbe in entities.js
     } else if (b.st === 'nullend' && !b.dead) {
       // the field's collapse dropped it flat — sprawled and spent
       BEAST_LIVE.glow = 0.5;
-      bFig(c, 'aAtk', 0.12, 0.6, 1.06, 0.96);
+      if (!beastStrip(c, b)) bFig(c, 'aAtk', 0.12, 0.6, 1.06, 0.96);
     } else if (b.st === 'nullcharge' && !b.dead) {
       // stands dead still while gravity is unplugged; virus light climbs the coat
-      beastDraw(c, b, beastPose(b));
+      if (!beastStrip(c, b)) beastDraw(c, b, beastPose(b));
       c.save(); c.globalCompositeOperation = 'lighter';
       const ng = c.createRadialGradient(0, -120, 10, 0, -120, 190);
       ng.addColorStop(0, 'rgba(176,106,255,' + (0.24 + Math.sin(b.anim * 9) * 0.12) + ')');
@@ -1289,13 +1374,13 @@ function drawBeast(c, b) {
       // the wake's climax: up onto his feet and straight into the authored
       // open-jaw howl, holding it while the roar plays out
       BEAST_LIVE.glow = 1.4;
-      bFig(c, 'aRoar', 0, 2 + Math.max(0, (b.t || 0) - 0.35) * 5);
+      if (!beastStrip(c, b)) bFig(c, 'aRoar', 0, 2 + Math.max(0, (b.t || 0) - 0.35) * 5);
     } else if (b.st === 'roar' && (b.t || 0) > 0.25 && (b.t || 0) <= 1.07 && !b.dead) {
       // THE ROAR — the sheet's own open-jaw howl, shaking harder as it
       // peaks. (The first ~0.18s stays on the rig: the chest swells up into
       // this figure instead of snapping to it.)
       BEAST_LIVE.glow = 1.5;
-      bFig(c, 'aRoar', 0, 1 + Math.max(0, 1.25 - (b.t || 0)) * 6);
+      if (!beastStrip(c, b)) bFig(c, 'aRoar', 0, 1 + Math.max(0, 1.25 - (b.t || 0)) * 6);
       // the virus orb GATHERS in the throat through the inhale (the tell),
       // pulsing brighter each beat, then floods out as the roar breaks
       const inh = Math.max(0, Math.min(1, (1.25 - (b.t || 0)) / 0.5));
@@ -1309,7 +1394,7 @@ function drawBeast(c, b) {
       c.fillStyle = mg; c.beginPath(); c.arc(-150, -215, orbR, 0, 7); c.fill();
       c.restore();
     } else {
-      beastDraw(c, b, beastPose(b));
+      if (!beastStrip(c, b)) beastDraw(c, b, beastPose(b));
     }
     c.restore();
     return true;

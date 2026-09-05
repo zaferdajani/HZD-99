@@ -4424,6 +4424,22 @@ diveperch fb131c7f · daze fd5cb506 · nullcharge e2e27a06 · fall 669594db
 (first-take stalk 8261d50d and swipe 1fbd8ade declined for camera, not
 shipped).
 
+**✔ WIRED (code session, 2026-09-05 20:40).** `BEAST_STRIP` in js/beast.js maps
+seventeen states onto the ten strips over each state's own clock (the
+transition's `t` taken as the length on the first frame seen; loops on
+`anim`; the pounce by its own `vy`; spring and dive by `u`; the death by
+`deathAnimT`), drawn in rig space so the body transform mirrors them with
+him. One k per strip, measured off the resting body length in each take
+against the stalk's 291 px (swipe 1.42, leap 1.35, springup 1.14, the rest
+1); BEAST_STRIP_PX = 280/210 puts the stalk's lion at the rig's standing
+height. The rig stays as the fallback (no strip, strip not loaded, mid-turn,
+staggered). Nullfang's coil plate left BOSS_MOTION — it drew before the strip
+could. Prefetched at boss entry with beastParts. `tests/motion.cjs` measures
+every strip state: the take draws (>2000 px differ from the rig), it mirrors
+with his facing, and the grounded states' feet sit on the rig's sole line.
+Claw trails are skipped when the take draws (they were fitted to the rig's
+paw); the coil rings, the flash, the daze and null glows still land on top.
+
 **WIRING (code session).** `drawBeast` in js/beast.js draws the parts rig
 per state; each state above becomes a `drawStripCell(c, key, cell, cells,
 cx, footY, h*k, flip)` over the state's own timer (`b.t / dur` for one-shot
@@ -4609,6 +4625,22 @@ refused with a 422; the sprint's one cycle is 0.67 s), so short clips are
 LOOPED to 4–6 s with `-stream_loop` before upload; and a one-shot action
 looped this way comes back as repeated actions, which `vidstrip`'s window
 cuts down to one. Takes and their drivers in `assets/source/hero/rig/takes/`.
+
+**STEP 5 IS THE ART SESSION'S TOO — the cut (code session, 2026-09-05 20:10).**
+The takes are h264 and this container has no ffmpeg and a Chromium that will
+not decode h264, so the code session cannot run `vidstrip` on them. Cut them
+where the Nullfang strips were cut: transcode to VP9, `tools/vidstrip.cjs
+auto:N` (walk and run 12–16 cells, one cycle each — trim the looped driver's
+repeats to ONE stride; jab/hook/uppercut 9–12; jump 8–10; hit 8; idle 12),
+key at the threshold the field needs, feet on the cell floor, and ship them to
+`assets/characters/hero/gait/walk.webp`, `run.webp` and
+`assets/characters/hero/swing/claw_1.webp` (jab), `claw_2.webp` (hook),
+`finisher.webp` (uppercut) — replacing the camera-facing strips — plus
+`trans_air.webp` (jump), `hurt.webp` (hit) and `idle.webp`. Run
+`node tools/swingk.cjs` for the swing k values and put the numbers in the
+ledger; the code session fills `HERO_GAIT` / `SWING_STRIP` and runs hero,
+gait and artbible. Nullfang's strips are wired by the code session in the same
+commit as this note.
 
 **After her:** the wolves and the cheetah (§2q) go the same way — a rigged
 quadruped may rig poorly, so preview before paying for clips.

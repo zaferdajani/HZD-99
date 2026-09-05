@@ -1,5 +1,13 @@
 {
  "indFg": "assets/lowres/indFg.webp",
+ "beastStalk": "assets/lowres/beastStalk.webp",
+ "beastRoar": "assets/lowres/beastRoar.webp",
+ "beastSwipe": "assets/lowres/beastSwipe.webp",
+ "beastLeap": "assets/lowres/beastLeap.webp",
+ "beastPerch": "assets/lowres/beastPerch.webp",
+ "beastDaze": "assets/lowres/beastDaze.webp",
+ "beastNullcharge": "assets/lowres/beastNullcharge.webp",
+ "beastFall": "assets/lowres/beastFall.webp",
  "roster": "assets/lowres/roster.webp",
  "npcs": "assets/lowres/npcs.webp",
  "zones": "assets/lowres/zones.webp",

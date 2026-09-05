@@ -872,6 +872,10 @@ function loadRoom(id) {
   setTimeout(() => {
     if (G.boss && typeof BOSS_ART !== 'undefined' && BOSS_ART[G.boss.kind]
         && typeof mediaFetch === 'function') mediaFetch(BOSS_ART[G.boss.kind]);
+    // ...and the lion's filmed moves, so the first swipe is the take and not
+    // the rig popping into the take a second later
+    if (G.boss && G.boss.kind === 'glitch' && typeof BEAST_STRIPS !== 'undefined'
+        && typeof mediaFetch === 'function') for (const k of BEAST_STRIPS) mediaFetch(k);
   }, 0);
   parts.length = 0;
   const def = ROOMS[id];
