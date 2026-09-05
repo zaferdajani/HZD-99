@@ -781,6 +781,11 @@ const HERO_TRANS = {
   land: { key: 'transLand', cells: 12, k: 0.869, t: p => p.landT, t0: p => p.land0 || 0.12 },
   skid: { key: 'transSkid', cells: 2, k: 0.849, t: p => p.skidT, t0: p => p.skid0 || 0.14 },
   dash: { key: 'transDash', cells: 8, k: 0.893, t: p => p.dashT, t0: p => p.dash0 || 0.16 },
+  // the knockback (§2aw, 2026-09-05): flung back with the impact sparks,
+  // lands, straightens — six cells over the 0.3 s the pose timer holds.
+  // k 0.90: the sheet's hurt cell stands 204 (airborne) against the strip's
+  // flung cell at 257 measured to the idle's 231.
+  hurt: { key: 'hzdHurt', cells: 6, k: 0.90, t: p => p.hurtPoseT, t0: () => 0.3 },
   //
   // WAITING ON ART (docs/ART_QUEUE.md §2x), in census order:
   //   land   fall>land>idle|run, the impact — 8/min and the most conspicuous
@@ -841,6 +846,31 @@ const FIDGET_AFTER = 6;        // seconds of stillness before she runs out of pa
 //   claw_2   sheet 140/169  strip 310/320 (11 cells, ref 3 — the arm extended)
 //   finisher sheet 131/169  strip 256/320 ( 9 cells, ref 0 — both arms up)
 //   burst    sheet 132/169  strip 247/320 ( 9 cells, ref 6 — arms flung wide)
+// THE HIT STRING FACES WHERE SHE HITS (§2aw, 2026-09-05). The claw strips
+// were fired looking at the camera — the owner: "all of them looking at me
+// instead of turning to enemy and hit" — and tests/hero.cjs measures it (eye
+// gap over height 0.113–0.139 against the walk's widest 0.099). The three
+// punches were fired from her own plates in the house three-quarter facing
+// screen-right, so they drive the string now: jab, hook, uppercut for the
+// first, second and third hit. The claw strips stay on disk, unwired. The
+// jab is a 0.3 s snap held for the rest of its take, so its six cells are
+// the snap alone and the strip plays BACK for the return (pingpong). k per
+// strip against the sheet's guard (claw_1, 261 of 300): jab's guard stands
+// 291, hook's 270, uppercut's 270.
+//
+// ...AND THEN MEASURED, AND PUT BACK (2026-09-05, an hour later). Wired, the
+// punches failed the OTHER law — tests/frames.cjs, the owner's earlier and
+// more specific ruling: "it should transition in milliseconds from one frame
+// to another... three kind of hits with three moves that changes from still
+// to hit without transitions in between." The hook is two guard cells, six
+// near-identical extended cells (0.3% silhouette change between them) and
+// two guard cells: a pose held for the whole blow, in profile. The jab's six
+// cells hold two dead duplicates. The claw strips are the wrong facing with
+// a real motion; the punches are the right facing with none. A motion the
+// player reads as the blow beats a facing the player reads as a still, so
+// the claws drive the string until a take has both — the brief in
+// ART_QUEUE §2aw says exactly what that take needs. The punch strips stay on
+// disk, unwired; the facing law stays red on the claws.
 const SWING_STRIP = {
   claw_1:   { key: 'swingClaw1',    cells: 11, k: 0.901 },
   claw_2:   { key: 'swingClaw2',    cells: 11, k: 1.0749 },
@@ -896,10 +926,28 @@ const HERO_CADENCE = { walk: 5, run: 7 };
 // floor. Zero cells means not fired: the pose cells draw, as they do now.
 // The brief is docs/ART_QUEUE.md §2au; cut with tools/vidstrip.cjs auto:N and
 // measure k with tools/swingk.cjs against walk_a / run_a.
+// THE RUN IS FIRED AND CUT (§2aw, 2026-09-05): sixteen cells of which the
+// first NINE are one stride — measured, not read off the ledger: the cells'
+// silhouettes repeat at a lag of nine (IoU 0.935 against ~0.7 at every other
+// lag) and the ankle spread peaks at cells 4 and 13. So the loop runs cells
+// 0–8 and the rest of the strip is the same stride again. k 0.92: run_a on
+// the sheet stands 269 px in a 300 cell, the strip's contact cell 291.
+//
+// THE WALK IS FIRED AND NOT USABLE AS CUT: its sixteen cells are one slow
+// drift (IoU falls monotonically 0.97 -> 0.81 across the strip, the ankle
+// spread shrinks 182 -> 166 with no return) — the auto cut filled its sixteen
+// inside the first moments of a five-second take, before a stride happened.
+// Zero cells here until it is re-cut evenly across ONE stride (ART_QUEUE
+// §2aw); the three walk plates keep drawing meanwhile.
 let HERO_GAIT = {
-  walk: { key: 'gaitWalk', cells: 0, k: 1 },
-  run:  { key: 'gaitRun',  cells: 0, k: 1 },
+  walk: { key: 'gaitWalk', cells: 0, k: 0.85 },
+  run:  { key: 'gaitRun',  cells: 16, k: 0.92, from: 0, to: 8 },
 };
+// THE STANDING LOOP: breath, a weight shift, one blink — a front view like
+// the fidget, so it cancels the body mirror the same way. Eleven cells at
+// nine a second is the take's own pace; after FIDGET_AFTER the fidget owns
+// the idle as before. k 0.79: idle on the sheet stands 231 of 300, the loop 291.
+let HERO_IDLE = { key: 'hzdIdle', cells: 11, k: 0.79, fps: 9 };
 function heroStepLen(vx) { return Math.abs(vx) > HERO_RUN_VX ? HERO_STEP_RUN : HERO_STEP_WALK; }
 // Airborne cells are CENTRED in their cell rather than stood on its floor (the
 // tool does this, because a flying pose has no contact point to align). They
@@ -2319,7 +2367,11 @@ class Player {
     // strip carries its own measured k, because drawing them all at HERO_DH
     // makes her shrink or swell the instant she attacks.
     const h = HERO_DH * S.k;
-    return drawStripCell(c, S.key, Math.floor(p * S.cells), S.cells,
+    // a pingpong strip is the strike alone: out through the cells, then back
+    const cell = S.pingpong
+      ? (p < 0.5 ? Math.floor(p * 2 * S.cells) : Math.floor((1 - p) * 2 * S.cells))
+      : Math.floor(p * S.cells);
+    return drawStripCell(c, S.key, Math.min(S.cells - 1, cell), S.cells,
                          0, HERO_FLOOR, h, false);
   }
   // ONE TRANSITION CLIP, indexed by the clock that made the transition happen.
@@ -2345,9 +2397,22 @@ class Player {
                     || st === 'run_a' || st === 'run_b' || st === 'run_c')) {
       const Gt = HERO_GAIT && (Math.abs(this.vx) > HERO_RUN_VX ? HERO_GAIT.run : HERO_GAIT.walk);
       if (Gt && Gt.cells) {
-        const cell = Math.floor((((this.stridePh || 0) % 4) / 4) * Gt.cells) % Gt.cells;
+        // the loop may be a RANGE of the strip (a take cut longer than one stride)
+        const from = Gt.from || 0, to = Gt.to == null ? Gt.cells - 1 : Gt.to, n = to - from + 1;
+        const cell = from + Math.floor((((this.stridePh || 0) % 4) / 4) * n) % n;
         if (drawStripCell(c, Gt.key, cell, Gt.cells, 0, HERO_FLOOR, HERO_DH * (Gt.k || 1), false)) return true;
       }
+    }
+    // the standing loop, until the impatience takes over
+    // ...and only while she is CALM: her eyes are the only part of her that
+    // acts (drawHeroEyes repaints them per mood over the plate), and a strip
+    // draws its own baked pair, so a mood on the strip is a mood nobody sees.
+    // tests/hero.cjs caught it — every mood measured 0.000 apart. Any mood
+    // but calm falls back to the plate and the repaint.
+    const I = HERO_IDLE;
+    if (I && I.cells && st === 'idle' && this.on && this.idleT <= FIDGET_AFTER && this.heroMood(st) === 'calm') {
+      const cell = Math.floor((this.anim || 0) * (I.fps || 9)) % I.cells;
+      if (drawStripCell(c, I.key, cell, I.cells, 0, HERO_FLOOR, HERO_DH * (I.k || 1), this.faceVis < 0)) return true;
     }
     const F = HERO_FIDGET;
     if (F && st === 'idle' && this.idleT > FIDGET_AFTER) {

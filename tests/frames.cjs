@@ -320,9 +320,14 @@ const check = (name, ok, detail) => {
 
     // and with nothing fired — the state of the table as it ships — every
     // state falls through, which is what lets the art land one piece at a time
+    // ...the gait loops and the standing loop are fired now (§2aw), so they
+    // are unplugged for this question the way the air strip is above
+    const gaitSave = HERO_GAIT, idleSave = HERO_IDLE;
+    HERO_GAIT = null; HERO_IDLE = null;
     let fellThrough = true;
     for (const st of ['idle', 'run_a', 'rise', 'apex', 'fall', 'land', 'skid', 'dash'])
       if (player.drawRoboTrans(document.querySelector('canvas').getContext('2d'), st)) fellThrough = false;
+    HERO_GAIT = gaitSave; HERO_IDLE = idleSave;
 
     window.drawStripCell = real;
     delete MEDIA_RAW.__testStrip;

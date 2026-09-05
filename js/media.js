@@ -324,6 +324,18 @@ const MEDIA_SRC = {
     // which is the same arrangement NOSTOS's hero already uses (drawHeroSprite
     // first, drawHeroRig as the fallback), pointed at her for the first time.
     heroStates: 'assets/characters/hero/states.webp',
+    // HER MOVES AS FILMED TAKES (ART_QUEUE §2aw, shipped 2026-09-05): the
+    // walk and run cycles (HERO_GAIT), the standing idle loop (HERO_IDLE),
+    // the knockback (HERO_TRANS.hurt), and the three punches that drive the
+    // hit string (SWING_STRIP) — all facing the house three-quarter,
+    // screen-right, except the idle which is a front view like the fidget.
+    gaitWalk: 'assets/characters/hero/gait/walk.webp',
+    gaitRun: 'assets/characters/hero/gait/run.webp',
+    hzdIdle: 'assets/characters/hero/idle.webp',
+    hzdHurt: 'assets/characters/hero/hurt.webp',
+    swingJab: 'assets/characters/hero/swing/jab.webp',
+    swingHook: 'assets/characters/hero/swing/hook.webp',
+    swingUppercut: 'assets/characters/hero/swing/uppercut.webp',
     // HER FULL 8-YAW TURNAROUND — the sheet the back plates were bred from,
     // in the manifest at last because the gate walk turns her THROUGH it now:
     // profile (col 0/4), three-quarter back (col 5/3), full back (col 6).

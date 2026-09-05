@@ -4700,6 +4700,49 @@ call (the code session's step-5 note above asked for a replacement — it is
 one rename away if that is the decision). `trans_air` likewise keeps its
 still-strip; `jump.webp` is the filmed alternative.
 
+**✔ WIRED (code session, 2026-09-05 21:20) — six of the eight, and the walk
+sent back.** Measured before wiring, strip by strip:
+
+- **run**: one stride in its first NINE cells — silhouettes repeat at lag 9
+  (IoU 0.935 against ~0.7 at every other lag), ankle spread peaks at cells 4
+  and 13. `HERO_GAIT.run` loops cells 0–8 on the stride phase, k 0.92.
+- **walk: NOT A CYCLE AS CUT.** IoU falls monotonically 0.97 → 0.81 across
+  the sixteen cells and the ankle spread shrinks 182 → 166 with no return:
+  `auto:16` filled its sixteen inside the first moments of the five-second
+  take, before a stride happened (the same trap the punches' held guard set,
+  noted above). The take may well be the keeper it was called; the CUT is a
+  still. **Re-cut `rig/takes/walk.mp4` evenly across ONE stride** — find the
+  window by eye (left contact to left contact, ~0.5 s at a walk), 12–16 cells
+  sampled evenly inside it, then ship `gait/walk.webp` again. `HERO_GAIT.walk`
+  sits at zero cells until then and the three plates keep drawing.
+- **idle**: `HERO_IDLE`, 11 cells at 9 fps, front view (cancels the body
+  mirror like the fidget), k 0.79; the fidget still takes over after six seconds.
+- **hurt**: `HERO_TRANS.hurt` over the 0.3 s pose timer, k 0.90.
+- **jab / hook / uppercut: WIRED, MEASURED, PUT BACK.** They drove the string
+  for an hour and failed `tests/frames.cjs` — the owner's earlier ruling that
+  a blow is a MOVE, not a pose held for the whole swing: the hook is two guard
+  cells, six extended cells 0.3% apart, two guard cells; the jab holds two
+  dead duplicates in six. The claw strips are the wrong facing with a real
+  motion; the punches are the right facing with none, and a still in profile
+  reads worse than a motion toward the lens. The claws drive the string again,
+  the punches stay on disk unwired, and the facing law stays red on the claws.
+  The take that closes both: her guard in the three-quarter, the HEAD turned
+  to the target with the far eye foreshortened, and the strike sampled by
+  content with the held guard trimmed to one cell — wind-up, contact, recoil,
+  return, each a different picture.
+- **the facing law on the punches** (`tests/hero.cjs`): the JAB passes
+  (eye gap over height 0.090, under the walk's widest 0.099). The HOOK
+  (0.113) and the UPPERCUT (0.116) do not: looking at the strips, the BODY
+  turns three-quarter to the target from cell 2 / cell 4 on and the arm
+  drives screen-right — which is what the claw strips never did — but the
+  HEAD stays on the camera, visor square to the lens, both eyes wide. They
+  are wired because they are the better strips; the law stays red on them
+  and on the burst until a take turns the head with the body: "the head
+  turns to the target, the far eye foreshortened toward the near one". That
+  sentence is what the next hook / uppercut / burst take needs.
+- **jump**: left on `trans_air` — the take is front-three-quarter and the
+  house facing is the profile; the three stills are in profile.
+
 **WIRING (code session):** `HERO_GAIT` walk/run over `HERO_STEP_WALK/RUN`
 distance-phase like the plates; `idle` as the standing loop (the fidget
 strip still plays after `FIDGET_AFTER`); `hurt` over `hurtT`; `jump` over the
