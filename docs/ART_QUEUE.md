@@ -4595,6 +4595,21 @@ a headless render; re-timed with ffmpeg (`setpts=N/24/TB -r 24`) to the
 24 fps clip it is, before motion control. All eight baked to 12-cell strips
 and driving videos (scratch `restyle/rig/clips/`).
 
+**STEP 4 — MOTION CONTROL REFUSES THE RIG; SEEDANCE TAKES THE DRIVER
+(art session, 2026-09-05).** Kling motion control failed twice on the walk
+(512 px and 1280×720 drivers alike, both refunded): its driver has to be a
+detectable HUMAN performance, and a grey robot cat is not one. The route
+that works is Seedance 2.5 omni_reference with the rig's driving video as
+`video_references` and her painted `states/idle.jpg` as `image_references`,
+prompted "copy its MOTION exactly, nothing of its grey look" — 32.5 credits
+a take, and the walk came back in her paint, at the house three-quarter
+camera, FACING SCREEN-RIGHT, striding in place. Two rules the API taught:
+the reference video must run at least ~2 s (every driver under that was
+refused with a 422; the sprint's one cycle is 0.67 s), so short clips are
+LOOPED to 4–6 s with `-stream_loop` before upload; and a one-shot action
+looped this way comes back as repeated actions, which `vidstrip`'s window
+cuts down to one. Takes and their drivers in `assets/source/hero/rig/takes/`.
+
 **After her:** the wolves and the cheetah (§2q) go the same way — a rigged
 quadruped may rig poorly, so preview before paying for clips.
 
