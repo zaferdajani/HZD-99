@@ -4450,6 +4450,46 @@ same moment so the lion does not change size between a strip and the rig.
 The takes face LEFT; mirror for `face > 0`. Then `bosspace artbible frames`
 and a `castreel --only=boss` section in front of the owner.
 
+**FIRED — THE ALPHA and CHIME, Kingdom 1 complete (art session, 2026-09-05,
+13 takes, 422.5 credits; owner: "do them").** Same recipe as Nullfang:
+reference still from the rig's own `rest` frame (`tools/bossshot.cjs A10` /
+`A9`), §2ax camera lock, one take per move. Takes archived
+`assets/source/alpha/takes/*.mp4`, `assets/source/chime/takes/*.mp4`; strips
+`assets/characters/alpha/*.webp`, `assets/characters/chime/*.webp`, 320-px
+cells, feet on the cell floor. **Keying lesson:** the Alpha is gunmetal on a
+dark field — `vidstrip` at threshold 56 (Nullfang's) ate the body and left a
+skeleton; 30 keeps it whole. Chime cut at 36. The Chime's own glow lights the
+field around it, so a soft dark halo survives the key on the `note` and `ring`
+cells — invisible in its dark room, note it if it ever hovers over light.
+
+| strip | cells | plays the state(s) |
+|---|---|---|
+| `alpha/prowl` | 16 auto | movement (`alphaMove`) |
+| `alpha/roar` | 12 | `roarwarn` (0–3, head back) → `roar` (4–9) → recover |
+| `alpha/howl` | 12 | `broodcall` → `howl` (sits, muzzle up, spines pulse) |
+| `alpha/leap` | 12 | `coil` (0–4) → `leap` (5–8) → land (9–11) |
+| `alpha/claw` | 12 | `clawwarn` (0–5, paw raised) → `claw` (6–8) → recover |
+| `alpha/bite` | 12 | `bitewarn` (0–4, jaw wide) → `bite` (5–7) → recover |
+| `alpha/clinch` | 12 | `clinch` (0–3) → `shake` (4–8) → `recoil` (9–11) |
+| `alpha/rest` | 9 auto | `rest` (loop) |
+| `alpha/yield` | 12 | `free` (plays once, holds the last cell — light cooled to blue) |
+| `chime/rest` | 9 auto | `rest` / hover (loop) |
+| `chime/ring` | 12 | `ringwarn` (0–4, lens brightens, pendants draw in) → `ring` (5–7) → settle |
+| `chime/note` | 12 | `notewarn` (0–3) → `note` (4–6, the strike and the bolt) → settle |
+| `chime/fall` | 12 | the death (plays once, holds the last cell) |
+
+**Her punches, refired (65 credits):** `hero/swing/uppercut.webp` is now a
+true uppercut (dip → fist rises above the head, 10 cells 1.0–3.6 s). The hook
+came back a straight punch with a cyan trail on both fires — this body does
+not throw a hook; `hero/swing/hook.webp` ships as that straight punch and the
+string reads jab / cross / uppercut.
+
+**WIRING (code session):** `drawAlpha` in js/wolves.js draws `ALPHA_ART`
+plates per state — each becomes a `drawStripCell` over the state's timer with
+the plate as fallback; the constructs draw from `MINI_ART` in entities.js, same
+swap. Faces LEFT as fired; mirror for `face > 0`. Then `bosspace minis
+artbible frames` and a `castreel --only=boss` section for the owner.
+
 **GAMEPLAY (code session)** — the half no plate can supply, against the
 repo's own `boss-patterns`, `boss-openings` and `boss-scale` skills:
 - hit-stop and a camera shake on every boss impact, hers and its;
