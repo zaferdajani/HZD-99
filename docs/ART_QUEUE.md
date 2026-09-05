@@ -4671,6 +4671,42 @@ uppercut refired as plain takes from her own painted plates (`run_a`,
 facing named (three-quarter, screen-right; idle front). Rig GLBs and the
 eight rig-driven takes stay archived under `rig/` for the record.
 
+**SHIPPED — her eight moves as plain painted takes (art session, 2026-09-05,
+7 × 32.5 = 227.5 credits + the kept walk).** Every take started from her own
+painted plate (`assets/source/hero/style_d/states/*.jpg`) with the §2ax
+camera lock; takes archived `assets/source/hero/takes2/*.mp4` (the walk under
+`rig/takes/walk.mp4`). Strips 300-px cells, feet on the cell floor, black =
+alpha, cut at `vidstrip` threshold 26. Two cutting lessons: the `auto:N`
+selector fills its N inside a held guard before the strike (known from her
+first swings) — the punches are sampled EVENLY across the strike window
+instead; and the jab was a 0.3 s snap held for three seconds, so its strip is
+the snap alone (6 cells, 0.0–0.9 s) and the return is the strip played back.
+
+| strip | cells | window | facing | notes |
+|---|---|---|---|---|
+| `hero/gait/walk.webp` | 16 auto | whole 5 s | ¾ screen-right | the one rig-driven keeper |
+| `hero/gait/run.webp` | 16 auto | whole 5 s | ¾ screen-right | flight phase present |
+| `hero/idle.webp` | 11 auto | whole 5 s | front | breath, weight shift, one blink |
+| `hero/jump.webp` | 8 | 0.9–3.4 s | front-¾ | crouch → launch → apex → drop; the standing crouch cells touch the frame floor |
+| `hero/hurt.webp` | 6 | 0.0–1.8 s | ¾ → front | flung back with impact sparks, lands, straightens |
+| `hero/swing/jab.webp` | 6 | 0.0–0.9 s | ¾ screen-right | guard → snap, cyan trail; play back for the return |
+| `hero/swing/hook.webp` | 10 | 1.6–3.6 s | ¾ screen-right | reads as a cross more than a hook; cape whip |
+| `hero/swing/uppercut.webp` | 10 | 1.0–3.6 s | ¾ screen-right | dip → straight punch → return; not a true uppercut |
+
+**Not overwritten:** `swing/claw_1 / claw_2 / finisher` (the owner-approved
+claw string) stay as they are; the punches ship BESIDE them as `jab / hook /
+uppercut`, and which set drives the three-hit string is the code session's
+call (the code session's step-5 note above asked for a replacement — it is
+one rename away if that is the decision). `trans_air` likewise keeps its
+still-strip; `jump.webp` is the filmed alternative.
+
+**WIRING (code session):** `HERO_GAIT` walk/run over `HERO_STEP_WALK/RUN`
+distance-phase like the plates; `idle` as the standing loop (the fidget
+strip still plays after `FIDGET_AFTER`); `hurt` over `hurtT`; `jump` over the
+air arc if chosen over `trans_air`; the punches over `swingVis` like
+`SWING_STRIP`. `k` per strip by `tools/swingk.cjs`. Then `hero gait artbible
+frames feel`.
+
 **After her:** the wolves and the cheetah (§2q) go the same way — a rigged
 quadruped may rig poorly, so preview before paying for clips.
 
