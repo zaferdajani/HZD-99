@@ -10,19 +10,15 @@
 // a built-in room's id overrides it. Publishing is still git: the Forge
 // exports pack.json, and only a push changes what anyone else plays.
 //
-// The PRIMARY interface is the prompt console. The owner describes — "put a
-// bench by the gate", "give this machine a patrol partner", "the keeper
-// speaks about the flood" — and Claude returns structured ops this file
-// applies. Direct manipulation (paint, place, drag) covers the rest.
-//
-// ACCESS. Two locks, one real. The passphrase gate keeps players from
-// wandering in (the page is public statically, so a determined reader of the
-// source can pass it — it is a door, not a vault). The real lock is that the
-// Forge can publish nothing: it edits this browser's copy and exports JSON.
-// The API key for the console is the owner's own, pasted once, kept in
-// localStorage, sent only to api.anthropic.com.
+// Direct manipulation and a local JSON operation console edit this browser's
+// draft. Export the room brief to an assistant, then paste reviewed JSON ops.
+// The public editor does not collect credentials or call external AI APIs.
+// Publishing remains a git operation; the passphrase is only a casual gate.
 (function () {
   if (typeof window === 'undefined' || !window.EDITOR) return;
+
+  // Remove credentials retained by older versions without reading them.
+  try { localStorage.removeItem('cb_forge_key'); } catch (e) {}
 
   const HASH = 'b094c73df45f79dd62879ff8c7a4816be4c785a842e784caa37c8fa3dfc875c4';
   const sha = async (s) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))]
@@ -175,32 +171,6 @@
     ].join('\n');
   }
 
-  async function consult(text) {
-    const key = localStorage.getItem('cb_forge_key');
-    if (!key) throw new Error('no API key — paste yours under KEY');
-    const rsp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-5',
-        max_tokens: 8000,
-        system: contract(),
-        messages: [{ role: 'user', content: text }],
-      }),
-    });
-    if (!rsp.ok) throw new Error('API ' + rsp.status + ': ' + (await rsp.text()).slice(0, 200));
-    const msg = await rsp.json();
-    const t = (msg.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
-    const a = t.indexOf('['), b = t.lastIndexOf(']');
-    if (a < 0 || b < a) throw new Error('no ops in reply: ' + t.slice(0, 160));
-    return JSON.parse(t.slice(a, b + 1));
-  }
-
   // ---- chrome ---------------------------------------------------------------
   const css = (el, s) => { el.style.cssText = s; return el; };
   const mk = (tag, parent, style) => { const e = document.createElement(tag); if (style) css(e, style); (parent || document.body).appendChild(e); return e; };
@@ -246,17 +216,17 @@
     const h = mk('div', panel, 'color:#ffb347;font-weight:bold;margin-bottom:6px;');
     h.textContent = 'THE FORGE — ' + (window.GAME_LOCK === 'hero' ? 'NOSTOS' : 'CLAWBYTE');
 
-    // prompt console first: it is the primary interface
+    // Local operation console; no network request or credential input.
     const ta = css(mk('textarea', panel), INP + 'width:100%;height:64px;');
-    ta.placeholder = 'describe the change… (Ctrl+Enter)';
-    const send = mk('button', panel, BTN); send.textContent = 'FORGE IT';
+    ta.placeholder = 'paste reviewed JSON operations… (Ctrl+Enter)';
+    const send = mk('button', panel, BTN); send.textContent = 'APPLY OPS';
     const busy = mk('span', panel, 'color:#ffb347;margin-left:6px;');
     const go = async () => {
       const text = ta.value.trim();
       if (!text) return;
-      busy.textContent = '…thinking'; send.disabled = true;
+      busy.textContent = '…applying'; send.disabled = true;
       logLine('> ' + text);
-      try { const ops = await consult(text); apply(ops).forEach((s) => logLine('· ' + s)); ta.value = ''; }
+      try { const ops = JSON.parse(text); if (!Array.isArray(ops)) throw new Error('Expected a JSON array of operations'); apply(ops).forEach((s) => logLine('· ' + s)); ta.value = ''; }
       catch (e) { logLine('! ' + e.message, true); }
       busy.textContent = ''; send.disabled = false;
     };
@@ -308,10 +278,13 @@
       a.download = 'pack.json'; a.click();
       logLine('· exported pack.json — commit as packs/<id>/pack.json, or hand it to a session');
     };
-    const keyB = mk('button', frow, BTN); keyB.textContent = 'KEY';
-    keyB.onclick = () => {
-      const k = prompt('Anthropic API key (kept in this browser only):', localStorage.getItem('cb_forge_key') || '');
-      if (k != null) { localStorage.setItem('cb_forge_key', k.trim()); logLine('· key ' + (k.trim() ? 'saved' : 'cleared')); }
+    const briefB = mk('button', frow, BTN); briefB.textContent = 'EXPORT BRIEF';
+    briefB.onclick = () => {
+      const a = mk('a', panel, 'display:none;');
+      const url = URL.createObjectURL(new Blob([contract()], { type: 'text/plain' }));
+      a.href = url; a.download = 'forge-room-brief.txt'; a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      logLine('· exported room brief — ask your assistant for JSON ops, review them, then paste above');
     };
     const hideB = mk('button', frow, BTN); hideB.textContent = 'HIDE';
     hideB.onclick = () => { panel.style.display = 'none'; F.open = false; };

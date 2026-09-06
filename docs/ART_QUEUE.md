@@ -5284,3 +5284,14 @@ Crest presentation is replaced by physical equipment for CLAWBYTE. See
 inspection cards alongside the character preview. Future wearable art must
 match installed hardware and preserve the unarmed sword-story start; never
 paste boot or jet art across the character without reviewed attachment poses.
+
+
+### Scratch take 2 rejected; unarmed endpoints — 2026-09-06
+
+Take 2 (24a75599-3590-4edd-addf-0b80ccc65b60) is archived but NOT wired:
+sword on back and hovering feet violate the opening story. Take 3
+(1b300d11-a054-4a5e-8b29-066de26e3644) uses the reviewed, existing unarmed
+idle_side.jpg for both start/end frames. Keep camera fixed, feet grounded,
+right profile, bare paws and back. Review before extraction or wiring.
+
+Take 3 completed and was inspected: unarmed, returns to idle, prolonged extended-paw hold. Contact sheet archived as `assets/source/hero/scratch-review/take3-contact.jpg`. Candidate only; not wired.

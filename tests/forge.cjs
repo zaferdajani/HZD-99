@@ -9,7 +9,7 @@
 //   5. A MAIN room edits the same way (snapshot -> pack override).
 //   6. The Forge plays on its own save key.
 //   7. A synthetic click paints the tile it points at.
-//   8. The console without a key fails loudly, not silently.
+//   8. Local JSON operations apply without credential storage or API calls.
 const { chromium } = require('playwright');
 const PASS = 'claw-forge-9921';
 (async () => {
@@ -26,6 +26,8 @@ const PASS = 'claw-forge-9921';
 
   // — 2..8: the forge —
   p = await br.newPage({ viewport: { width: 960, height: 540 } });
+  await p.addInitScript(() => localStorage.setItem('cb_forge_key', 'test-placeholder'));
+  const externalAI = []; p.on('request', r => { if (r.url().includes('api.anthropic.com')) externalAI.push(r.url()); });
   const errs = []; p.on('pageerror', (e) => errs.push(String(e)));
   p.on('dialog', (d) => d.dismiss());
   await p.goto('http://127.0.0.1:8220/forge.html');
@@ -96,12 +98,19 @@ const PASS = 'claw-forge-9921';
   await p.waitForTimeout(300);
   ok(await p.evaluate((q) => FORGE.pack.rooms.F1.grid[q.ty][q.tx] === '=', pt), 'a click paints the pointed tile');
 
-  // — 8: the console without a key fails loudly —
+  // — 8: reviewed local operations, no API credential path —
+  ok(await p.evaluate(() => localStorage.getItem('cb_forge_key') === null), 'legacy key removed without transmission');
   await p.locator('textarea').fill('add a bench');
-  await p.locator('button', { hasText: 'FORGE IT' }).click();
-  await p.waitForTimeout(500);
-  ok(await p.evaluate(() => [...document.querySelectorAll('div')].some((d) => d.textContent.includes('no API key'))),
-    'the console names the missing key');
+  await p.getByRole('button', { name: 'APPLY OPS', exact: true }).click();
+  ok(await p.evaluate(() => !document.querySelector('textarea').value.includes('[')), 'invalid JSON stays available for correction');
+  await p.locator('textarea').fill(JSON.stringify([{ op: 'set_title', title: 'LOCAL OPS TEST' }]));
+  await p.getByRole('button', { name: 'APPLY OPS', exact: true }).click();
+  ok(await p.evaluate(() => FORGE.pack.title === 'LOCAL OPS TEST'), 'JSON console applies reviewed operations');
+  ok(externalAI.length === 0, 'editor never calls the external AI API');
+  ok(await p.getByRole('button', { name: 'KEY', exact: true }).count() === 0, 'no API key input');
+  const download = p.waitForEvent('download');
+  await p.getByRole('button', { name: 'EXPORT BRIEF', exact: true }).click();
+  ok((await download).suggestedFilename() === 'forge-room-brief.txt', 'room brief exports for use in an assistant');
 
   ok(errs.length === 0, 'no page errors' + (errs.length ? ': ' + errs[0] : ''));
   await p.close(); await br.close();

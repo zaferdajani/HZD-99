@@ -3,7 +3,7 @@ const cv = document.getElementById('cv');
 let c = cv.getContext('2d');
 const mainCtx = c;
 const SAVE_KEY = 'clawbyte_save', META_KEY = 'clawbyte_meta';
-const GAME_VERSION = 'CLAWBYTE v4.3';
+const GAME_VERSION = 'CLAWBYTE v4.4';
 // ---- update checker ----
 // The page re-fetches its own source bypassing the cache and compares the
 // build stamp, so a stale home-screen copy is told a newer one exists.

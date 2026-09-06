@@ -1,4 +1,4 @@
-# Claw scratch — take 1 reviewed; correction submitted
+# Claw scratch — three takes reviewed
 
 The owner requested a claw scratch on 2026-09-06. Use the canonical
 `hzd99-canon` reference. Seedance 2.5, 1080p, 4 seconds, square, no audio.
@@ -10,8 +10,14 @@ turned away from its starting orientation. It does not meet full recovery
 acceptance and is not integrated. Raw source and contact sheet are archived
 in `assets/source/hero/scratch-review/`.
 
-Correction job `24a75599-3590-4edd-addf-0b80ccc65b60` was submitted: earlier
-strike, full recovery by 2.5 seconds, matching first/last pose. Awaiting result.
+Correction job `24a75599-3590-4edd-addf-0b80ccc65b60` completed. The contact
+sheet shows improved return but an added sword on the back and floating feet.
+Rejected for the unarmed opening; source and contact sheet are archived.
+
+Take 3 `1b300d11-a054-4a5e-8b29-066de26e3644` uses the existing unarmed
+`assets/source/hero/idle_side.jpg` as BOTH start and end frames. The brief
+requires grounded feet, fixed right profile, no sword or jets and one complete
+scratch. Completed and inspected as a 16-frame contact sheet: unarmed side profile and full return are improved, but the extended-paw hold remains too long. Candidate only; owner art review and motion acceptance are required before wiring. No new scratch is wired into the game.
 
 Game animation motion study of the EXACT robot cat in the reference, preserving its ivory ceramic body, compact proportions, red scarf and cyan visor. Full body always in frame against solid pure black. Locked orthographic three-quarter SIDE camera. Character faces SCREEN RIGHT throughout; muzzle aimed right and far cyan eye foreshortened, never looking at the viewer. ONE CLAW SCRATCH with the near paw, OPEN PAW and three clearly visible short metallic claws. The claws sweep in a descending diagonal ARC through the space in front of the cat, toward an imaginary target on SCREEN RIGHT. This is feline slashing motion with wrist and shoulder rotation. Four-second slow-motion performance with continuous articulated body movement throughout, designed for chronological frame extraction. 0.0-0.9s: knees flex and weight shifts to rear foot while the open clawed paw draws up and back beside the near shoulder; 0.9-2.0s: hips rotate then shoulder drives the paw diagonally forward and downward, claws leading the curved scratch; 2.0-2.7s: paw continues through the arc below shoulder level with natural torso follow-through; 2.7-4.0s: arm folds and torso unwinds smoothly back to the original ready stance. Every interval contains distinct arm, shoulder, torso and knee positions. Exactly two arms and two legs, one-piece tapered arms, no added elbow hardware, no weapons. Feet grounded with heel roll, no sliding root. Scarf follows body inertia gently. Clean body animation without trails, particles, energy flashes or an opponent. No frozen extended pose, copied stills, slide-show cuts, crossfades, camera motion or spinning toward the viewer. Preserve the same anatomy, scale and facing in every frame.
 
