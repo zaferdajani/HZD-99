@@ -94,6 +94,13 @@ function drawDiag() {
       + '  now ' + nowSpan.toFixed(1) + '  jumps ' + jumps
       + '   LIFT_K ' + ((typeof LIFT_K === 'number') ? LIFT_K.toFixed(2) : '?')
       + '  bright ' + ((typeof BRIGHT_SET === 'number') ? BRIGHT_SET : '?'),
+    // WHAT DREW HER BODY THIS FRAME. "I do not feel like you did any changes
+    // ... the way the character is running" is settled by this line, not by
+    // an argument: a filmed run reads `gaitRun:5`; the old stills read
+    // `sheet:run_a`. Below it, whether the filmed strips are here at all —
+    // `wait` is a phone still downloading, `none` is a build without them.
+    'body ' + (G.heroDrawn || '?') + '   vx ' + ((typeof player !== 'undefined' && player) ? Math.round(player.vx) : '?')
+      + '   run ' + diagTier('gaitRun') + '  walk ' + diagTier('gaitWalk') + '  idle ' + diagTier('hzdIdle'),
   ];
   // the room's own art, and whether any of it is still the stand-in
   const M = (typeof window !== 'undefined' && window.ROOM_ASSETS) || null;

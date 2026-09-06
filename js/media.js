@@ -1008,9 +1008,17 @@ function plateFoot(key) {
 // measurement would wander by a pixel or two per frame, and an idle loop that
 // wanders is worse than one that does not move at all.
 function drawStripCell(c, key, cell, cells, cx, base, h, flip) {
-  mediaFetch(key);
+  // URGENT: a strip is asked for the frame it is needed, and a body that
+  // waits a quarter-megabyte for its run cycle on a phone connection draws
+  // its pose cells for a second first. The quarter-scale copy lands in a
+  // fraction of that and the full sheet sharpens it from behind, which is
+  // what the low tier exists for.
+  mediaFetch(key, 1);
   const im = MEDIA_RAW[key];
   if (!im || !im.naturalWidth) return false;
+  // what drew the body, for the diag panel: the owner's "nothing changed"
+  // is answered by a screenshot that names the strip and the cell
+  if (typeof G !== 'undefined') G.lastStrip = key + ':' + (((cell % cells) + cells) % cells);
   const cw = im.naturalWidth / cells, ch = im.naturalHeight;
   const i = ((cell % cells) + cells) % cells;
   const dw = h * (cw / ch);

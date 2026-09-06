@@ -2461,13 +2461,14 @@ class Player {
     if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG.heroStates) return false;
     // the swing plays its own strip when one is fired for that attack; it
     // returns false until the art lands and the pose cell covers it meanwhile
-    if (this.swingVis && this.drawRoboSwing(c)) return true;
+    if (typeof G !== 'undefined') G.lastStrip = null;
+    if (this.swingVis && this.drawRoboSwing(c)) { if (typeof G !== 'undefined') G.heroDrawn = G.lastStrip; return true; }
     const im = MEDIA_IMG.heroStates;
     const cw = im.width / HERO_CELLS, ch = im.height;
     const st = this.heroState(run);
     // ...and every other moment the body is mid-change plays its clip the same
     // way, for the same reason, with the same fallback
-    if (this.drawRoboTrans(c, st)) return true;
+    if (this.drawRoboTrans(c, st)) { if (typeof G !== 'undefined') G.heroDrawn = G.lastStrip; return true; }
     // SHE IS THE SAME CAT IN EVERY POSE. Every cell is drawn at HERO_DH, which
     // is the CELL's height and not hers — so a pose whose figure fills more of
     // its cell arrives on screen as a bigger character. Measured across the
@@ -2478,6 +2479,9 @@ class Player {
     // a crouch is legitimately shorter and a jump stretch legitimately longer,
     // and normalising those would flatten the animation rather than fix it.
     const col = HERO_CELL[st] || 0;
+    // the pose cell drew her: say so, so the diag panel can tell a strip
+    // that has not arrived from a strip that is not wired
+    if (typeof G !== 'undefined') G.heroDrawn = 'sheet:' + st;
     const dh = HERO_DH * (HERO_POSE_K[st] || 1), dw = dh * (cw / ch);
     // grounded cells stand on the cell's floor line; airborne cells are centred
     const dy = HERO_AIR[st] ? -dh * 0.5 - 18 : -dh + HERO_FLOOR;
