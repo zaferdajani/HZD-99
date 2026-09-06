@@ -15,7 +15,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   const [out, cellArg, ...plates] = process.argv.slice(2);
   if (!out || !cellArg || !plates.length) { console.error('usage: stillstrip.cjs <out.png> <cell> <plate.png>...'); process.exit(2); }
   const CELL = parseInt(cellArg, 10);
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
   await p.exposeFunction('bytes', f => fs.readFileSync(f).toString('base64'));
   const res = await p.evaluate(async ({ plates, CELL }) => {

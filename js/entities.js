@@ -887,6 +887,13 @@ const SWING_STRIP = {
   finisher: { key: 'swingUppercut', cells: 10, k: 0.956 },
   burst:    { key: 'swingBurst',    cells: 9,  k: 0.9272 },
 };
+// Gameplay stores the ordinary combo as 0, 1, 2. Keep both the pose fallback
+// and the strip renderer on that same numbering: treating it as 1, 2, 3
+// repeated the jab and made the authored uppercut unreachable from input.
+function heroSwingState(swing) {
+  return swing.charged ? 'burst' : swing.combo === 2 ? 'finisher'
+    : swing.combo === 1 ? 'claw_2' : 'claw_1';
+}
 // ---- HOW FAR ONE STEP CARRIES HER, OFF THE PLATES THEMSELVES ---------------
 //
 // The step length is the foot-to-foot distance at CONTACT: when the trailing
@@ -2275,8 +2282,7 @@ class Player {
     if (this.swingVis) {
       // releaseCharged() flags its own swing: the charged blow is a BURST, a
       // different drawing from the third hit of an ordinary combo.
-      if (this.swingVis.charged) return 'burst';
-      return this.swingVis.combo >= 3 ? 'finisher' : this.swingVis.combo === 2 ? 'claw_2' : 'claw_1';
+      return heroSwingState(this.swingVis);
     }
     // THE WOLVERINE CROSS (owner report #2). The charge pose is arms crossed at
     // the chest, body UPRIGHT, feet neutral — verified against cell 16 of the
@@ -2374,8 +2380,7 @@ class Player {
   drawRoboSwing(c) {
     const sv = this.swingVis;
     if (!sv || sv.swirl) return false;          // the swirl has its own drawing
-    const S = SWING_STRIP[sv.charged ? 'burst' : sv.combo >= 3 ? 'finisher'
-                          : sv.combo === 2 ? 'claw_2' : 'claw_1'];
+    const S = SWING_STRIP[heroSwingState(sv)];
     if (!S) return false;
     const p = clamp(1 - sv.t / sv.t0, 0, 0.999);
     // THE CELL IS SIZED TO THE SHEET, NOT TO ITSELF — see SWING_STRIP: each
@@ -2631,8 +2636,10 @@ class Player {
       key = 'heroJump'; n = 5; cw = 61; ch = 77;
       fr = this.vy < -220 ? 1 : this.vy < 60 ? 2 : this.vy < 420 ? 3 : 4;
     } else if (run) {
-      key = 'heroRun'; n = 12; cw = 66; ch = 48; fps = 16;
-      fr = Math.floor(this.anim * fps) % n;
+      key = 'heroRun'; n = 12; cw = 66; ch = 48;
+      // Use the same distance-driven stride as CLAWBYTE. A fixed 16 fps
+      // played a sprint at walking speed and kept cycling against a wall.
+      fr = Math.floor((((this.stridePh || 0) % 4 + 4) % 4) / 4 * n);
     } else {
       key = 'heroIdle'; n = 4; cw = 38; ch = 48; fps = 7;
       fr = Math.floor(this.anim * fps) % n;
@@ -7923,8 +7930,8 @@ class Boss {
   }
   cx() { return this.x + this.w / 2; }
   cy() { return this.y + this.h / 2; }
-  shoot(vx, vy, r, grav, life) {
-    G.projs.push(new Proj(this.cx(), this.cy(), vx, vy, false, 1, r || 7, PAL[G.roomDef.zone].glow, grav || 0, life || 4));
+  shoot(vx, vy, r, grav, life, origin) {
+    G.projs.push(new Proj(origin ? origin.x : this.cx(), origin ? origin.y : this.cy(), vx, vy, false, 1, r || 7, PAL[G.roomDef.zone].glow, grav || 0, life || 4));
   }
   ring(n, speed, off) {
     for (let i = 0; i < n; i++) {
@@ -8214,7 +8221,9 @@ class Boss {
     const spd = DF().espd * (BOSS_AGGRO[this.kind] || 1);
     this.windT -= dt; this.overdriveT -= dt;
     // every boss looks where it is going, even the ones that do not walk
-    if (this.kind === 'zero' || this.kind === 'brood' || this.kind === 'prism' || this.kind === 'mother')
+    // GLACIERE owns facing in her state handler: a committed charge keeps
+    // facing along its velocity even after the player crosses behind it.
+    if (this.kind === 'brood' || this.kind === 'prism' || this.kind === 'mother')
       this.face = Math.sign(px - this.cx()) || this.face || 1;
     const turn = dt * 5.5;
     const pvSign = Math.sign(this.faceVis) || 1;
@@ -9080,7 +9089,8 @@ class Boss {
             // hovering guardian and know a cage is coming. It only surfaced
             // once her rest beats got short enough to enter idle eighty times
             // a fight, but it was always a lie in the state machine.
-            else { this.st = 'prisonwarn'; this.t = 0.5; this.windT = 0.5; sfx('prison'); }
+            else { this.st = 'prisonwarn'; this.t = 0.5; this.windT = 0.5;
+              this.prisonAim = { x: px, y: py }; sfx('prison'); }
           }
         } else if (this.st === 'lancewarn') {
           // the horn drinks void light — hold, watch, then move OFF the line
@@ -9117,7 +9127,10 @@ class Boss {
         } else if (this.st === 'dashwarn') {
           // she squares up and coils; the charge line is drawn in the air
           this.t -= dt; this.vx = 0; this.vy = 0;
-          this.dashAng = Math.atan2(py - this.cy(), px - this.cx());
+          // The line commits for the final 300 ms. Tracking until the launch
+          // frame made a correct sidestep move the advertised line with her.
+          if (this.t > 0.3 || !Number.isFinite(this.dashAng))
+            this.dashAng = Math.atan2(py - this.cy(), px - this.cx());
           this.face = Math.abs(Math.cos(this.dashAng)) > 0.05 ? (Math.cos(this.dashAng) > 0 ? 1 : -1) : this.face;
           if (this.t <= 0) {
             this.st = 'dash'; this.t = 0.62;
@@ -9147,13 +9160,15 @@ class Boss {
         } else if (this.st === 'prisonwarn') {
           // the void gathers around where she is looking, then closes
           this.t -= dt; this.vx = 0; this.vy = 0;
+          const aim = this.prisonAim || (this.prisonAim = { x: px, y: py });
           if (chance(0.7)) {
             const aa = rnd(0, 6.28), rr2 = 44 + rnd(-8, 8);
-            addPart(px + Math.cos(aa) * rr2, py + Math.sin(aa) * rr2,
+            addPart(aim.x + Math.cos(aa) * rr2, aim.y + Math.sin(aa) * rr2,
               -Math.cos(aa) * 90, -Math.sin(aa) * 90, 0.3, '#c88cff', 2.2, 0, true);
           }
           if (this.t <= 0) {
-            this.prison = { x: px, y: py, t: 0, life: this.phase === 2 ? 3.4 : 2.6, held: 0 };
+            this.prison = { x: aim.x, y: aim.y, t: 0, life: this.phase === 2 ? 3.4 : 2.6, held: 0 };
+            this.prisonAim = null;
             sfx('prison'); this.st = 'idle'; this.t = glcRest(this);
           }
         } else if (this.st === 'novawarn') {
@@ -9332,7 +9347,7 @@ class Boss {
             this.lsSpots.forEach((s2, i) => {
               if (i === this.lsReal) return;
               const a = Math.atan2(py - (s2.y - 20), px - s2.x);
-              this.shoot(Math.cos(a) * 340, Math.sin(a) * 340, 5, 0);
+              this.shoot(Math.cos(a) * 340, Math.sin(a) * 340, 5, 0, 4, { x: s2.x, y: s2.y - 20 });
               burst(s2.x, s2.y - 20, 10, '#e0e0ff', 200, 0.4, 0, 2.5, true);
             });
             this.lsSpots = null;

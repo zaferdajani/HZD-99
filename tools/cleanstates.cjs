@@ -20,7 +20,7 @@ const fs = require('fs');
   const [file, cellsArg] = process.argv.slice(2);
   const CELLS = parseInt(cellsArg, 10);
   if (!file || !CELLS) { console.error('usage: cleanstates <sheet.png> <cells>'); process.exit(1); }
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const b64 = fs.readFileSync(file).toString('base64');
   const out = await page.evaluate(async ({ b64, CELLS }) => {

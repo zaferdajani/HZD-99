@@ -29,6 +29,9 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['gear', 'physical equipment progression, saved loadout and input geometry', { noBrowser: true }],
+  ['motion-sampling', 'static clips rejected and full action windows retained', { noBrowser: true }],
+  ['combo-routing', 'real player inputs select jab, cross, uppercut and the charged burst', { noBrowser: true }],
   ['regress',   'boots both builds, walks every room in ROOMS, watches for page errors'],
   ['wake',      'the opening: film, waking floor, move -> jump -> scratch -> out'],
   ['lesson',    'every power teaches itself and completes on real use'],
@@ -47,6 +50,7 @@ const SUITE = [
   ['voxmeas',   'the NPC voice chain: no clipping, band limit, speech intact'],
   ['speed2',    'movement speed is identical from 12 to 144 fps'],
   ['saw',       'the chainsaw rig: sparks, impacts, contact damage'],
+  ['boss-counters', 'committed targets and visible decoy projectile origins in both phases'],
   ['combat',    'every enemy telegraphs, does something different, and scales by zone'],
   ['pace',      'the game-speed dial slows the simulation and nothing else'],
   ['ceiling',   'every kingdom has a roof that sheds its own weather, at every quality tier'],
@@ -125,7 +129,7 @@ for (const [name, what, opt] of run) {
   const file = path.join(__dirname, name + '.cjs');
   if (!fs.existsSync(file)) { console.log('· ' + name + ' — missing'); continue; }
   console.log('\n── ' + name + '  — ' + what);
-  ensureServer();
+  if (!(opt && opt.noBrowser)) ensureServer();
   try {
     console.log(execFileSync('node', [file], { encoding: 'utf8', timeout: 300000 }).trim());
   } catch (e) {

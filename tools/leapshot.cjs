@@ -37,7 +37,7 @@ const BEATS = [
   const scale = parseFloat(scaleArg || '1.15');
   const beats = filt ? BEATS.filter(b => new RegExp(filt, 'i').test(b[0])) : BEATS;
   if (!beats.length) { console.log('no beat matches /' + filt + '/'); process.exit(1); }
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 1400, height: 700 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.goto('http://127.0.0.1:8220/index.html');

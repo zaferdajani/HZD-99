@@ -34,7 +34,7 @@ const check = (name, ok, detail) => {
 
 (async () => {
   console.log('── gatecue — the first built thing the player finds sounds like one\n');
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.addInitScript(() => localStorage.setItem('cb_intro_seen', '1'));

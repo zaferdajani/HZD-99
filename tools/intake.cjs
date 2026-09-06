@@ -216,7 +216,7 @@ const pageScript = () => {
   }
   const isVid = /\.(mp4|webm)$/i.test(files[0]);
 
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('bytes', f => fs.readFileSync(f).toString('base64'));
   await page.addInitScript(`const SIG=${SIG};(${pageScript})()`);

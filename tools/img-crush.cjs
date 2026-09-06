@@ -27,7 +27,7 @@ async function main() {
   }
   if (!jobs.length || !jobs[0].inp) { console.log('usage: img-crush.cjs <in> <out> [width] [quality]'); process.exit(1); }
 
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   for (const j of jobs) {
     const buf = fs.readFileSync(j.inp);

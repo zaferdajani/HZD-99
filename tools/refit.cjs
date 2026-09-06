@@ -12,7 +12,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
 (async () => {
   const [oldF, newF, out] = process.argv.slice(2);
   if (!oldF || !newF || !out) { console.error('usage: refit.cjs <old> <new_keyed.png> <out.png>'); process.exit(2); }
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' }); const p = await b.newPage();
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' }); const p = await b.newPage();
   await p.exposeFunction('bytes', f => fs.readFileSync(f).toString('base64'));
   const res = await p.evaluate(async ({ oldF, newF }) => {
     const load = async (f) => { const im = new Image(); im.src = 'data:image/' + (f.endsWith('webp') ? 'webp' : 'png') + ';base64,' + await window.bytes(f); await im.decode(); return im; };

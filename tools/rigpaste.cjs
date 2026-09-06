@@ -62,7 +62,7 @@ const fs = require('fs'), path = require('path');
     .filter(n => fs.existsSync(path.join(keyedDir, n + '.png')));
   if (derived.length)
     console.log('  derived from their parent rect, not fired: ' + derived.join(', '));
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('atlasBytes', () => fs.readFileSync(atlas).toString('base64'));
   await page.exposeFunction('partBytes', n =>

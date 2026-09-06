@@ -1,6 +1,6 @@
 const { chromium } = require('playwright');
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage({ viewport: { width: 1200, height: 800 } });
   p.on('pageerror', e => console.log('ERR', String(e).slice(0, 200)));
   await p.goto('http://127.0.0.1:8220/index.html');

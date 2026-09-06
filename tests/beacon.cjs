@@ -31,7 +31,7 @@ const chk = (name, ok, detail) => {
 
 (async () => {
   console.log('── beacon — a marker lights the way TO a character, never over one\n');
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
 
   // ---- 1. the marker, measured on the body it marks --------------------------
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });

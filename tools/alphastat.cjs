@@ -6,7 +6,7 @@
 const { chromium } = require('playwright'); const fs = require('fs');
 (async () => {
   const b64 = fs.readFileSync(process.argv[2]).toString('base64');
-  const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const br = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await br.newPage();
   console.log(JSON.stringify(await p.evaluate(async b64 => {
     const im = new Image(); im.src = 'data:image/png;base64,' + b64; await im.decode();

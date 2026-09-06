@@ -34,7 +34,7 @@ const NAMES = Object.keys(EYE);
   const PAD = pi >= 0 ? parseFloat(rest[pi + 1]) : 1.35;
   if (!inp || !out) { console.log('usage: heroeyeclean.cjs <sheet.png> <out.png> [--pad 1.35]'); process.exit(1); }
 
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const b64 = fs.readFileSync(inp).toString('base64');
 

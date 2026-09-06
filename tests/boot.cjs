@@ -23,7 +23,7 @@ const check = (name, ok, detail) => {
 const MB = (n) => (n / 1048576).toFixed(2) + ' MB';
 
 async function boot(withSave) {
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const req = [];
   page.on('response', async (r) => {

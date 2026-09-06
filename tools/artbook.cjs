@@ -45,7 +45,7 @@ const SETS = [
     }
   }
 
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   // one plate at a time over the bridge: handing 90 MB of base64 to a single
   // evaluate() kills the page outright

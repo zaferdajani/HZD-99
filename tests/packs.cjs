@@ -9,7 +9,7 @@
 //   5. The pack's save lives under its own key (rule 2 in js/packs.js).
 const { chromium } = require('playwright');
 (async () => {
-  const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const br = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const fails = [];
   const ok = (cond, what) => { console.log((cond ? '  ok  ' : '  FAIL ') + what); if (!cond) fails.push(what); };
 

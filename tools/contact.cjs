@@ -28,7 +28,7 @@ const fs = require('fs'), path = require('path');
   const cols = +(colsArg || 6);
   const items = names.map(f => ({ label: path.parse(f).name, file: path.join(dir, f) }));
 
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   // The plates are multi-megabyte PNGs and there can be dozens. Handing them
   // all to evaluate() as one base64 blob killed the page at 78 MB of files —

@@ -1,6 +1,6 @@
 const { chromium } = require('playwright');
 (async () => {
-  const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const br = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   for (const file of ['index.html', 'odyssey.html']) {
     const p = await br.newPage({ viewport: { width: 960, height: 540 } });
     const errs = []; p.on('pageerror', e => errs.push(String(e)));

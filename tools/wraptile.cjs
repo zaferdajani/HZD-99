@@ -13,7 +13,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
 (async () => {
   const [inp, out, ovArg] = process.argv.slice(2);
   const OV = parseFloat(ovArg || '0.08');
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' }); const p = await b.newPage();
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' }); const p = await b.newPage();
   await p.exposeFunction('bytes', f => fs.readFileSync(f).toString('base64'));
   const res = await p.evaluate(async ({ inp, OV }) => {
     const im = new Image(); im.src = 'data:image/png;base64,' + await window.bytes(inp); await im.decode();

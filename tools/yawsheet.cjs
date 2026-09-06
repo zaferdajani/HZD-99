@@ -28,7 +28,7 @@ const { chromium } = require('playwright'); const fs = require('fs'), path = req
   const opt = (k, d) => { const a = argv.find(x => x.startsWith('--' + k + '=')); return a ? parseFloat(a.split('=')[1]) : d; };
   const CW = opt('cw', COLS === 6 ? 600 : 480), CH = opt('ch', COLS === 6 ? 780 : 480);
   const FILL = opt('fill', 0.96), FLOOR = opt('floor', 0.02);
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
   await p.exposeFunction('bytes', f => fs.existsSync(f) ? fs.readFileSync(f).toString('base64') : '');
   const res = await p.evaluate(async ({ dir, rows, CW, CH, COLS, FILL, FLOOR }) => {

@@ -74,7 +74,7 @@ const ROOT = path.join(__dirname, '..');
   const gltf = fs.readFileSync(path.join(ROOT, 'tools', 'vendor-gltf.js'), 'utf8');
 
   const br = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium',
+    executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium',
     // the bake must not silently fall back to a software rasterizer with no
     // antialiasing — swiftshader is fine, but ask for GL explicitly
     args: ['--use-gl=angle', '--enable-unsafe-swiftshader'],

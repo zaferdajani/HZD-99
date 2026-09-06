@@ -29,7 +29,7 @@ const fs = require('fs');
   const MAXFRAC = mi >= 0 ? parseFloat(rest[mi + 1]) : 0.22;
   if (!inp || !out) { console.log('usage: herobase.cjs <sheet.png> <out.png> [--ratio 1.55] [--max 0.22]'); process.exit(1); }
 
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const b64 = fs.readFileSync(inp).toString('base64');
 

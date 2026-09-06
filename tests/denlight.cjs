@@ -50,7 +50,7 @@ const GLOW_LIFT_MIN = 25;      // ...and the lamps are visibly on (mean 0-255 ar
 
 (async () => {
   console.log('── denlight — the interiors at full glow, the way a strong phone shows them\n');
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', (e) => errs.push(String(e)));
   await page.goto('http://127.0.0.1:8220/index.html');

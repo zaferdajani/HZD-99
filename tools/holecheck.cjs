@@ -45,7 +45,7 @@ function walk(d, out) {
 }
 (async () => {
   const files = walk(ROOT, []);
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
   const rows = [];
   for (const f of files) {

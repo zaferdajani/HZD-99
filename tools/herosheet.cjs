@@ -21,7 +21,7 @@ const CW = 200, CH = 260;
 (async () => {
   const [front, back, out] = process.argv.slice(2);
   if (!front || !back || !out) { console.log('usage: herosheet.cjs <front> <back> <out>'); process.exit(1); }
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const res = await page.evaluate(async ({ f, b, CW, CH }) => {
     const cut = async (dataUrl) => {

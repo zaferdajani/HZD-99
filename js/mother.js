@@ -1,5 +1,7 @@
 // ===========================================================================
-// MOTHER-V, THE NULL CORE — the broadcast source. Fully procedural.
+// MOTHER-V, THE NULL CORE — authored parts animated by a procedural rig.
+// mvArtBody draws motherParts when loaded; the geometric body below it is
+// the loading fallback. The heartbeat and effects remain procedural.
 //
 // She is not a machine and not a creature: she is a transmission that grew
 // mass. The composition is built cold-around-warm — everything (void aura,

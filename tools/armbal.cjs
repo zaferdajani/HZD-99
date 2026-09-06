@@ -20,7 +20,7 @@ const fs = require('fs');
 const NAMES = ['idle','walk_a','walk_b','run_a','run_b','rise','apex','fall','land','dash','skid',
   'wall_cling','djump_jet','claw_1','claw_2','finisher','charge','burst','hurt','heal','song','slump'];
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
   const src = 'data:image/png;base64,' + fs.readFileSync('/home/user/HZD-99/assets/characters/hero/states.png').toString('base64');
   const r = await p.evaluate(async (src) => {

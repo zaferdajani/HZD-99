@@ -1,0 +1,22 @@
+# Single prompt for Claude
+
+Act as the senior gameplay engineer, combat designer and character animation director for HZD-99 / CLAWBYTE. Inspect the actual repository and current playable build at https://zaferdajani.github.io/HZD-99/, using HZD99_HANDOVER.md as a historical lead, not unquestioned truth. Read CLAUDE.md, ART_BIBLE.md, HERO_ANSWERS.md, the current registry and the animation/combat update documents before making changes. Distinguish implemented behavior, documented intent, your proposals and unanswered questions; cite exact source files and functions. Do not invent character lore or claim to have tested anything you have not run.
+
+Explain how the game is constructed: engine and build process, simulation timing, rendering, input, collision, character state machines, asset loading, audio, saves and deployment. Trace an actual input from key/touch event through movement, attack, hit detection and animation. Explain the complete player journey from opening scene and tutorial through progression, upgrades, checkpoints, each region and boss, final confrontation, ending, and post-victory/retry behavior. Identify disconnected or unfinished transitions.
+
+For every playable character, ally, enemy and boss, provide a sourced dossier: identity and background story; narrative purpose and relationships; silhouette, palette and construction of its artwork; asset provenance and animation method; states and transitions; abilities; counters and weaknesses; rewards and progression role. Mark absent information explicitly. For each boss, map every move in every phase: trigger, anticipation, tracking cutoff, active damage, hitbox, recovery, residual hazards, readable cue, safe response, practical punish window and combinations that may remove all safe choices. Include arena geometry, camera behavior, death/retry and victory cleanup. Measure reachability from realistic player positions and commitments; recovery time alone does not prove fairness.
+
+Prioritize the owner's reported problems: awkward walking/running, repeated or frozen body poses, and boss fights lacking smooth, learnable counterplay. Use Hollow Knight and Prince of Persia as references for responsiveness and readable combat, while preserving this game's own art and mechanics. Diagnose source artwork separately from runtime selection, sampling, animation cadence and gameplay timing. Inspect limb regions: moving scarves or particles do not demonstrate body animation. Never manufacture continuity by duplicating stills, lowering rejection thresholds or using unapproved retired rigs. Record raw sources and extraction times; review complete wind-up, contact, follow-through and recovery at gameplay size, in both facings.
+
+The owner's requested attack is now an open-paw diagonal CLAW SCRATCH, with visible claws and continuous shoulder, wrist and torso articulation. Follow docs/CLAW_SCRATCH_BRIEF.md. The scratch generation was rejected for insufficient Higgsfield credits and no scratch job was created; the earlier jab study is superseded. Do not claim a scratch exists or substitute that punch. Preserve canonical artwork and obtain the project's required review before wiring new art.
+
+Review the existing local patch before duplicating work: zero-based combo routing, real strip preloading, strict full-window motion sampling with optional body ROI and provenance, Glaciere's fixed cage warning and committed charge, Prism decoy projectile origins, and distance-driven NOSTOS stride. Verify these against production behavior. Then implement remaining confirmed defects in focused changes, respecting project release gates. Do not weaken tests to disguise art or audio failures. Deliver the construction explanation, sourced character dossiers, complete flow, enemy/boss counter tables, prioritized defect list, concrete patches and an honest validation report separating reproduced failures, fixes, regressions, blocked work and remaining design proposals. Clearly state whether the live game changed.
+
+
+## Governing sword progression
+
+Read `docs/SWORD_STORY.md`. Claw scratches belong primarily to the unarmed
+opening. First forge one sword from gathered material; later acquire a second
+for permanent dual swords and a charged hurricane swirl; only after finding a
+separate connector may the pair become a double-bladed weapon with a charged
+returning throw. Never depict equipped sword combat using the unarmed scratch.

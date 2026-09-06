@@ -26,7 +26,7 @@ const check = (name, ok, detail) => {
 
 (async () => {
   console.log('── frames — a verb is a move, not a pose held for a quarter of a second\n');
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.goto('http://127.0.0.1:8220/index.html');
@@ -56,14 +56,16 @@ const check = (name, ok, detail) => {
     // loop frozen and six frames drawn in the same tick, nothing ever arrives
     // — so the first run of this measured the POSE CELL, reported 0.7% change
     // across claw_1, and would have been read as the fix having failed.
-    await Promise.all(['swingClaw1', 'swingClaw2', 'swingFinisher', 'swingBurst'].map(k => {
+    await Promise.all(Object.values(SWING_STRIP).map(s => s.key).map(k => {
       mediaFetch(k);
-      return new Promise(ok => {
+      return new Promise((ok, no) => {
         const t = setInterval(() => {
           const im = MEDIA_RAW[k];
-          if (im && im.naturalWidth) { clearInterval(t); ok(); }
+          if (im && im.naturalWidth) { clearInterval(t); clearTimeout(limit); ok(); }
         }, 30);
-        setTimeout(() => { clearInterval(t); ok(); }, 8000);
+        const limit = setTimeout(() => {
+          clearInterval(t); no(new Error('attack strip did not load: ' + k));
+        }, 8000);
       });
     }));
     // THE LOOP IS FROZEN FIRST. A blow lasts 240 ms and the page's own rAF
@@ -101,7 +103,7 @@ const check = (name, ok, detail) => {
       // from a single press (a chain, a held charge) and a cooldown sits
       // between them, and what is under test is the drawing, not the input
       const t0 = atk === 'burst' ? 0.32 : 0.24;
-      player.swingVis = { t: t0, t0, combo: atk === 'finisher' ? 3 : atk === 'claw_2' ? 2 : 1,
+      player.swingVis = { t: t0, t0, combo: atk === 'finisher' ? 2 : atk === 'claw_2' ? 1 : 0,
                           charged: atk === 'burst' };
       const masks = [];
       for (let i = 0; i < 6; i++) {

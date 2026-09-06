@@ -19,7 +19,7 @@ const check = (name, ok, detail) => {
 (async () => {
   console.log('── memnote — the memory game is audible: register, reply, and the duck');
   const browser = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium',
+    executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium',
     args: ['--autoplay-policy=no-user-gesture-required'],
   });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });

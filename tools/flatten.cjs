@@ -20,7 +20,7 @@ const fs = require('fs');
 (async () => {
   const [inp, out, wArg, hArg, bgArg, darkArg, cropArg] = process.argv.slice(2);
   if (!inp || !out) { console.error('usage: flatten.cjs <in.png> <out> [w] [h] [bg] [darken]'); process.exit(2); }
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('plateBytes', () => fs.readFileSync(inp).toString('base64'));
   const jpg = /\.jpe?g$/i.test(out);

@@ -5234,3 +5234,53 @@ fixture in a cave room already casts — the terminal warm, the pillar cold and
 further, the bench warm and small, the sage in his own light, and every animal
 a pair of dim red embers before it is an animal. A plate that arrives with a
 baked glow gets it twice and the pool goes white.
+
+### 2026-09-06 — continuous motion correction and claw-scratch direction
+
+Owner: replicated body artwork is not continuous motion; change the new jab
+study to a CLAW SCRATCH. Canonical Higgsfield references were resolved.
+Jab study `813782b0-4a2f-4ad8-bf8f-f966501cf718` was submitted, then superseded
+by that direction. The scratch submission was rejected: Private workspace
+out of credits. Exact replacement brief: `docs/CLAW_SCRATCH_BRIEF.md`.
+No new scratch art has been wired. Do not re-fire the superseded jab.
+
+The content sampler now scans the full action, retains recovery and rejects
+weak/replicated sources rather than lowering its threshold. Body/limb ROI
+sampling and an unreviewed source-time sidecar accompany each cut.
+The existing hook re-cut failed this screen and was not installed.
+See `docs/ANIMATION_COMBAT_UPDATE.md` for the code changes and validation.
+
+
+### Claw scratch retry accepted — 2026-09-06
+
+Owner requested retry. Higgsfield accepted Seedance 2.5, 1080p, 4s, square,
+canonical reference, no audio. Job `b936deda-09b2-468c-9a28-5162acaf8fe5`
+was pending at submission. Follow `CLAW_SCRATCH_BRIEF.md`; review raw limb
+motion, identity, facing and recovery before extraction or integration.
+This supersedes the previous credit blocker for this job only.
+
+### Scratch take 1 inspection and correction — 2026-09-06
+
+`b936deda-09b2-468c-9a28-5162acaf8fe5` completed. Raw video and contact
+sheet archived under assets/source/hero/scratch-review. Real claw motion,
+but raised-paw hold and missing complete return: not integrated. Correction
+`24a75599-3590-4edd-addf-0b80ccc65b60` requests contact by 0.9s and a full
+return by 2.5s. Owner-facing preview must precede wiring per CLAUDE.md.
+
+
+### Owner sword storyline correction — 2026-09-06
+
+`docs/SWORD_STORY.md` governs all hero artwork and progression. Scratch takes
+are UNARMED opening moves. Armed sets must separately cover single sword,
+dual swords with hurricane charge, and connector-joined weapon with returning
+throw. The second sword does not automatically grant the connector. Existing
+code gaps and acceptance scenarios are recorded in the governing document.
+
+
+### Gear interface — 2026-09-06
+
+Crest presentation is replaced by physical equipment for CLAWBYTE. See
+`GEAR_UPDATE.md`. Existing boot and jetpack assets appear as acquired item
+inspection cards alongside the character preview. Future wearable art must
+match installed hardware and preserve the unarmed sword-story start; never
+paste boot or jet art across the character without reviewed attachment poses.

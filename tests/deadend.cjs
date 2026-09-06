@@ -19,7 +19,7 @@ const PAYLOAD = new Set(['relic', 'chest', 'crest', 'shop', 'boss', 'riddle',
   'node', 'save', 'cache', 'vault', 'item', 'pouch', 'scrap']);
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const errs = [];
   page.on('pageerror', e => errs.push(String(e)));

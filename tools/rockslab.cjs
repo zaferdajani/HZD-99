@@ -33,7 +33,7 @@ const fs = require('fs');
   if (!inp || !out) { console.error('usage: rockslab.cjs <in.png> <out.png> [w] [h]'); process.exit(2); }
   const W = parseInt(wArg || '512', 10), H = parseInt(hArg || '256', 10);
   const DARK = process.argv[6] == null ? 0.22 : +process.argv[6];
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('plateBytes', () => fs.readFileSync(inp).toString('base64'));
 

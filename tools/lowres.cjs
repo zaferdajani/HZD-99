@@ -63,7 +63,7 @@ function manifest() {
   const check = process.argv.includes('--check');
   const IM = manifest();
   if (!check) fs.mkdirSync(OUT, { recursive: true });
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const index = {};
   let full = 0, low = 0, skipped = 0, small = 0;

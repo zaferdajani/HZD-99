@@ -216,7 +216,7 @@ window.pasteCell = async (dataUrl, box, col, row, CW, CH, flip) => {
 async function main() {
   const [indir, out] = process.argv.slice(2);
   if (!indir || !out) { console.log('usage: turnsheet.cjs <indir> <out.png>'); process.exit(1); }
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.addScriptTag({ content: PAGE });
   await page.evaluate(({ w, h }) => {

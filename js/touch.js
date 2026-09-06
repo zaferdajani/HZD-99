@@ -374,6 +374,7 @@ function tapMenu(x, y) {
     if (i >= 0 && i < L.rows.length && Math.abs(y - (L.y0 + i * L.step)) <= L.h / 2
         && Math.abs(x - 480) <= L.w / 2) { G.moreIdx = i; tPress('VOK'); }
   } else if (st === 'CREST') {
+    if (!isHero()) { gearTouch(x, y); return; }
     const i = Math.round((y - 170) / 40);
     if (G.save.crests.length && i >= 0 && i < G.save.crests.length && Math.abs(y - (170 + i * 40)) <= 20) { G.crestIdx = i; tPress('VOK'); }
   } else if (st === 'SHOP') {

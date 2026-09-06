@@ -54,7 +54,7 @@ const WWW = path.join(ROOT, 'www');
   // ---- 2. EVERY ASSET THE GAME NAMES IS IN THE PACKAGE --------------------
   // Read from the running game's own manifest rather than from a list here: a
   // list here would be the very thing that goes stale.
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.goto('http://127.0.0.1:8220/index.html');

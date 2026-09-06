@@ -173,7 +173,7 @@ window.mark = async (dataUrl, N, eyes) => {
   const [sheet, nArg] = rest;
   const N = parseInt(nArg || String(STATES.length), 10);
   const b64 = fs.readFileSync(sheet).toString('base64');
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.addScriptTag({ content: PAGE });
   const res = await page.evaluate(({ b64, N }) => window.eyes('data:image/png;base64,' + b64, N),

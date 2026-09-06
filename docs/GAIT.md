@@ -10,6 +10,25 @@ This is that study, written so its conclusions are numbers the harness holds
 fix (the cycle itself), because the second half of the owner's sentence is the
 diagnosis: a gait is ONE move, and she has never had one.
 
+## Current implementation (2026-09-06)
+
+The historical diagnosis below describes the retired still-pose gaits.
+`HERO_GAIT.walk` now has 16 cells sampled across one measured stride;
+`HERO_GAIT.run` loops cells 0–8 of a 16-cell strip. Browser tests confirm
+these strips draw and follow the floor. This does not certify every limb's
+motion quality. Replacing them with more independently generated poses
+would regress the implementation.
+
+Content sampling is now screened by `tools/motion-sampling.cjs`: no automatic
+threshold relaxation, no repeated-pose padding, and the complete action window
+must survive. A limb/body `MOTION_ROI=x,y,width,height` can exclude moving cloth
+or effects from that measurement. Loops should still be sampled evenly across
+one complete, reviewed stride. Missing movement requires a better source.
+
+The NOSTOS sprite uses the shared distance-driven stride phase, but keeps its
+own existing human artwork. Asset parity is not claimed: robot-cat frames are
+not an appropriate replacement for the human character.
+
 ## 1. What a gait is
 
 A walk or a run is a LOOP of one stride — both legs, back to the start — and

@@ -43,7 +43,7 @@ const STRIPS = args.length ? Object.fromEntries(args.map(a => {
 })) : DEF;
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
   await p.exposeFunction('bytes', f => fs.readFileSync(f).toString('base64'));
   const out = await p.evaluate(async ({ CELLMAP, STRIPS }) => {

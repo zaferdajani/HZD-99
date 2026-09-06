@@ -10,7 +10,7 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const ROWS = ['servo', 'ratchet', 'mono', 'patch', 'sage', 'lumen'];
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
   // the sheet ships as webp (tools/yawsheet.cjs since the painted cast, 2026-09-03)
   const src = 'data:image/webp;base64,' + fs.readFileSync('/home/user/HZD-99/assets/characters/npc_6yaw.webp').toString('base64');

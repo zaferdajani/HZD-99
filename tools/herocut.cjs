@@ -18,7 +18,7 @@ const STATES = ['idle','walk_a','walk_b','run_a','run_b','rise','apex','fall','l
   const [sheet, outdir, want] = process.argv.slice(2);
   const names = (want || STATES.join(',')).split(',').map(s => s.trim()).filter(Boolean);
   fs.mkdirSync(outdir, { recursive: true });
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const b64 = fs.readFileSync(sheet).toString('base64');
   for (const n of names) {

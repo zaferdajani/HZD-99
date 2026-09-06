@@ -165,7 +165,7 @@ async function main() {
   console.log('verified ' + Object.keys(B.parts).length + ' rects against ' + B.src);
   if (mode === 'verify') return;
 
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const atlasUrl = 'data:image/png;base64,' + fs.readFileSync(B.atlas).toString('base64');
 

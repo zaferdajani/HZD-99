@@ -20,7 +20,7 @@ const fs = require('fs');
   const [out, nArg, atkArg] = process.argv.slice(2);
   const N = parseInt(nArg || '6', 10);
   const ATK = atkArg || 'claw_1';
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.goto('http://127.0.0.1:8220/index.html');
@@ -49,7 +49,7 @@ const fs = require('fs');
     update(1 / 120);                       // one step to open the swing
     if (player.swingVis) {
       player.swingVis.charged = ATK === 'burst';
-      player.swingVis.combo = ATK === 'finisher' ? 3 : ATK === 'claw_2' ? 2 : 1;
+      player.swingVis.combo = ATK === 'finisher' ? 2 : ATK === 'claw_2' ? 1 : 0;
     }
     // ...AND THEN FREEZE THE LOOP. The page's own rAF keeps running between
     // screenshots and drains swingVis.t to zero long before the next capture,

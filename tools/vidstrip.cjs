@@ -24,6 +24,7 @@
 //   node tools/vidstrip.cjs <in.mp4> <out.png> [frames=12] [cell=320] [thr=26] [from] [to]
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
+const { selectMotionFrames } = require('./motion-sampling.cjs');
 
 (async () => {
   const [inp, out, nArg, cellArg, thrArg, fromArg, toArg] = process.argv.slice(2);
@@ -44,19 +45,27 @@ const fs = require('fs'), path = require('path');
   const FROM = fromArg === undefined ? null : parseFloat(fromArg);
   const TO = toArg === undefined ? null : parseFloat(toArg);
   const THR = parseInt(thrArg || '26', 10);
+  // Normalized source rectangle around the MOVING BODY PART. Exclude cape,
+  // sparks and background when they would masquerade as an animated body.
+  // This changes only the measurement, never the delivered image crop.
+  const ROI = (process.env.MOTION_ROI || '0,0,1,1').split(',').map(Number);
+  if (ROI.length !== 4 || ROI.some(v => !Number.isFinite(v)) || ROI[0] < 0 || ROI[1] < 0
+      || ROI[2] <= 0 || ROI[3] <= 0 || ROI[0] + ROI[2] > 1 || ROI[1] + ROI[3] > 1)
+    throw new Error('MOTION_ROI must be normalized x,y,width,height within the source');
 
   // OVER HTTP, NOT AS A DATA URI. A 2 MB base64 video URL is refused outright,
   // and the failure looks exactly like a codec failure, which cost a detour.
   // The clip is served from the same local server the harnesses use.
   const SRC = process.env.CLIP_URL || ('http://127.0.0.1:8220/' + path.basename(inp));
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   // SAME ORIGIN, or getImageData refuses to read the frame: a video served
   // from the local server into an about:blank page taints the canvas, and the
   // error arrives at the read rather than at the load.
   try { await page.goto(new URL(SRC).origin + '/'); } catch (e) {}
+  await page.addScriptTag({ content: selectMotionFrames.toString() });
 
-  const res = await page.evaluate(async ({ N: N0, CELL, THR, SRC, FROM, TO, AUTO }) => {
+  const res = await page.evaluate(async ({ N: N0, CELL, THR, SRC, FROM, TO, AUTO, ROI }) => {
     let N = N0, autoThr = null;
     const v = document.createElement('video');
     v.muted = true; v.playsInline = true;
@@ -115,12 +124,13 @@ const fs = require('fs'), path = require('path');
       const sigOf = () => {
         const im2 = c.getImageData(0, 0, W, H).data;
         const a = new Float32Array(SG * SG);
-        const bx = W / SG, by = H / SG;
+        const ox = Math.floor(W * ROI[0]), oy = Math.floor(H * ROI[1]);
+        const bx = W * ROI[2] / SG, by = H * ROI[3] / SG;
         for (let y = 0; y < SG; y++) for (let x = 0; x < SG; x++) {
           let sv = 0, cnt = 0;
           for (let yy = Math.floor(y * by); yy < Math.floor((y + 1) * by); yy += 3)
             for (let xx = Math.floor(x * bx); xx < Math.floor((x + 1) * bx); xx += 3) {
-              const j = ((yy * W + xx) << 2);
+              const j = (((oy + yy) * W + ox + xx) << 2);
               sv += (im2[j] * 2 + im2[j + 1] * 5 + im2[j + 2]) / 8 / 255;
               cnt++;
             }
@@ -144,21 +154,12 @@ const fs = require('fs'), path = require('path');
         c.clearRect(0, 0, W, H); c.drawImage(v, 0, 0, W, H);
         cand.push({ t, sig: sigOf() });
       }
-      // greedy: take the first, then every frame far enough from the last kept.
-      // The threshold is lowered until at least a third of the asked-for cells
-      // survive, so a genuinely still take still yields SOMETHING rather than
-      // one cell — and the report says which threshold it needed.
-      let thr = 4.0;
-      for (; thr >= 0.6; thr -= 0.5) {
-        times = [cand[0].t];
-        let last = cand[0].sig;
-        for (let i = 1; i < cand.length; i++) {
-          if (dist(last, cand[i].sig) >= thr) { times.push(cand[i].t); last = cand[i].sig; }
-          if (times.length >= N) break;
-        }
-        if (times.length >= Math.max(3, Math.ceil(N / 3))) break;
-      }
-      autoThr = thr;
+      // Scan the WHOLE window, retain the return, never relax the quality
+      // floor to manufacture a cell count. This is retiming only: the source
+      // must still be reviewed for actual limb motion, facing and continuity.
+      const selected = selectMotionFrames(cand, N, dist);
+      times = selected.indices.map(i => cand[i].t);
+      autoThr = selected.threshold;
       N = times.length;
     } else {
       for (let i = 0; i < N; i++)
@@ -330,11 +331,12 @@ const fs = require('fs'), path = require('path');
     return { png: strip.toDataURL('image/png'), N, CELL, src: W + 'x' + H, dur: +D.toFixed(2),
              box: bw + 'x' + bh, feet, foot, autoThr,
              times: times.map(t => +t.toFixed(3)) };
-  }, { N, CELL, THR, SRC, FROM, TO, AUTO });
+  }, { N, CELL, THR, SRC, FROM, TO, AUTO, ROI });
 
   if (res.err) { console.error('  ' + res.err); process.exit(1); }
   fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
   fs.writeFileSync(out, Buffer.from(res.png.split(',')[1], 'base64'));
+  fs.writeFileSync(out + '.motion.json', JSON.stringify({ source: inp, mode: AUTO ? 'content-retime' : 'even-time', roi: ROI, frames: res.N, times: res.times, threshold: res.autoThr, reviewed: false }, null, 2) + '\n');
   console.log('  ' + out + '  ' + res.N + ' cells of ' + res.CELL
     + (res.autoThr !== null && res.autoThr !== undefined
        ? '  [auto, kept at ' + res.autoThr.toFixed(1) + '% apart]' : '')

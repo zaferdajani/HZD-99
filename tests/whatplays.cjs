@@ -27,7 +27,7 @@ const chk = (name, ok, detail) => {
 
 (async () => {
   console.log('── whatplays — every slot leads with the score we commissioned\n');
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.addInitScript(() => localStorage.setItem('cb_intro_seen', '1'));

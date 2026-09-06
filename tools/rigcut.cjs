@@ -17,7 +17,7 @@ const fs = require('fs'), path = require('path');
   const [atlas, rectsFile, outdir] = process.argv.slice(2);
   const rects = JSON.parse(fs.readFileSync(rectsFile, 'utf8'));
   fs.mkdirSync(outdir, { recursive: true });
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('atlasBytes', () => fs.readFileSync(atlas).toString('base64'));
   const alphaSheet = await page.evaluate(async () => {

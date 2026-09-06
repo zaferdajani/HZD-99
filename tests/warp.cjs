@@ -31,7 +31,7 @@ const check = (name, ok, detail) => {
 
 (async () => {
   console.log('── warp — one person\'s door into any room, and it stays one person\'s\n');
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
 
   // a fresh context per case: localStorage is the lock, so it cannot be shared
   const run = async (query, { unlock } = {}) => {

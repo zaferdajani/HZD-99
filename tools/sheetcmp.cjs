@@ -17,7 +17,7 @@ const path = require('path');
   const CW = 620, CH = 620, PAD = 18, HEAD = 52;
   const W = PAD + cols.length * (CW + PAD), H = HEAD + CH + PAD;
 
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage({ viewport: { width: W, height: H } });
   await p.goto('http://127.0.0.1:8220/');
   const buf = await p.evaluate(async ({ cols, CW, CH, PAD, HEAD, W, H }) => {

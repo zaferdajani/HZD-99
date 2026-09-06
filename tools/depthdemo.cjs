@@ -16,7 +16,7 @@ const fs = require('fs'), path = require('path');
     midC: b64(path.join(S, 't_mid_C.png')),  foreC: b64(path.join(S, 't_fore_C.png')),
     hero: b64(path.join(__dirname, '..', 'assets/characters/hero/states.webp')),
   };
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const url = await page.evaluate(async (imgs) => {
     const load = async (b) => { const im = new Image(); im.src = 'data:image/png;base64,' + b; await im.decode(); return im; };

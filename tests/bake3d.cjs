@@ -95,7 +95,7 @@ function fixtureGLB(out) {
     glb, 'fixture', '--cell=256', '--out=' + dir], { stdio: 'inherit', timeout: 240000 });
 
   const sheet = fs.readFileSync(path.join(dir, 'fixture_8yaw.png'));
-  const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const br = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await br.newPage();
   const m = await p.evaluate(async (b64) => {
     const im = new Image(); im.src = 'data:image/png;base64,' + b64; await im.decode();

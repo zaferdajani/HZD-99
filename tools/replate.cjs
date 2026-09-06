@@ -35,7 +35,7 @@ const fs = require('fs'), path = require('path');
     console.error('usage: replate.cjs <orig.png> <restyled.png> <out.png>');
     process.exit(2);
   }
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('bytes', f => fs.readFileSync(f).toString('base64'));
 

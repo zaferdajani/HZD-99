@@ -22,7 +22,7 @@ const POSES = ['idle', 'run', 'air'];
 (async () => {
   const [out, scaleArg] = process.argv.slice(2);
   const scale = parseFloat(scaleArg || '4');
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.goto('http://127.0.0.1:8220/index.html');

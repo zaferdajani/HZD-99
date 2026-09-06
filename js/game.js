@@ -2426,6 +2426,7 @@ function drawBag() {
   ftxt(t('rl_close'), 480, 516, 12, '#7d93a8');
 }
 function updateCrest() {
+  if (!isHero()) return updateGear();
   const list = G.save.crests;
   if (inP('CREST') || inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
   if (!list.length) return;
@@ -15621,6 +15622,7 @@ function mapTap(sx, sy) {
   return false;
 }
 function drawCrest() {
+  if (!isHero()) return drawGear();
   c.fillStyle = 'rgba(4,7,12,0.85)'; c.fillRect(0, 0, 960, 540);
   ftxt(t('crest_title'), 480, 50, 28, '#eef3fa', 'center', '#37ffd0');
   const used = G.save.equip.reduce((s, x) => s + CRESTS[x], 0);

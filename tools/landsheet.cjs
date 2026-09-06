@@ -13,7 +13,7 @@ const ROOMS = [
   const imgs = ROOMS.map(([id, name]) => ({
     name, b64: fs.readFileSync(path.join(S, 'land_' + id + '.png')).toString('base64'),
   }));
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const url = await page.evaluate(async (imgs) => {
     const CW = 700, CH = 394, PAD = 14, HEAD = 84;

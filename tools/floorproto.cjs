@@ -21,7 +21,7 @@ const TILE = 32, STEP = 4;          // STEP: horizontal sampling, well under a t
 (async () => {
   const [inp, out] = process.argv.slice(2);
   const room = JSON.parse(fs.readFileSync(inp, 'utf8'));
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const url = await page.evaluate(({ room, TILE, STEP }) => {
     const grid = room.grid, Wt = room.w, Ht = room.h;

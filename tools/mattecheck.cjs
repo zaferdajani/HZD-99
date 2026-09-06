@@ -12,7 +12,7 @@ const path = require('path');
 (async () => {
   const dir = path.join(__dirname, '..', 'assets', 'characters', 'guardians');
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.png'));
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   for (const f of files) {
     const b64 = fs.readFileSync(path.join(dir, f)).toString('base64');

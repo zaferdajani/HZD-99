@@ -32,7 +32,7 @@ const fs = require('fs');
   if (!inp || !out) { console.log('usage: blackkey.cjs <in> <out> [thr] [feather]'); process.exit(1); }
   const thr = parseInt(thrArg || '38', 10), feather = parseFloat(fArg || '2');
   const b64 = fs.readFileSync(inp).toString('base64');
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const url = await page.evaluate(async ({ b64, thr, feather, white }) => {
     const im = new Image();

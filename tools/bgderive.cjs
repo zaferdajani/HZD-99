@@ -30,7 +30,7 @@ const ASPECT_SLACK = 0.02;   // 2%: enough for a 2752x1536 to replace a 1920x108
     console.error('  node tools/bgderive.cjs <master> <assets/backgrounds/name.jpg> [width]');
     process.exit(2);
   }
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.goto('http://127.0.0.1:8220/');
 

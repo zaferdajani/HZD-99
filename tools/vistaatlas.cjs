@@ -17,7 +17,7 @@ const W = 1920, H = 1080, COLS = 2, ROWS = 3;
   if (!out || files.length !== 6) {
     console.error('usage: vistaatlas.cjs <out.jpg> <A> <B> <C> <D> <E> <X>'); process.exit(2);
   }
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('cellBytes', i => fs.readFileSync(files[i]).toString('base64'));
   const url = await page.evaluate(async ({ W, H, COLS, ROWS, n }) => {

@@ -326,7 +326,7 @@ const DETECTORS = function () {
 (async () => {
   console.log('── grammar — ART_BIBLE §9/§10: the frame is the unit, not the asset');
 
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = [];
   page.on('pageerror', e => errs.push(String(e)));

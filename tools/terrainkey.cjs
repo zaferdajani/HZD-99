@@ -12,7 +12,7 @@ const fs = require('fs');
 (async () => {
   const [inp, out, wArg] = process.argv.slice(2);
   const OW = parseInt(wArg || '1920', 10);
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const b64 = fs.readFileSync(inp).toString('base64');
   const res = await page.evaluate(async ({ b64, OW }) => {

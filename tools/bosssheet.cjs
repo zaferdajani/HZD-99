@@ -28,7 +28,7 @@ const ROWS = [
   const load = f => fs.readFileSync(path.join(dir, f)).toString('base64');
   const rows = ROWS.map(r => ({ name: r[0], sub: r[1], a: load(r[2]), b: load(r[3]) }));
 
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const url = await page.evaluate(async (rows) => {
     const CELL = 460, LABEL = 300, PAD = 26, HEAD = 92;

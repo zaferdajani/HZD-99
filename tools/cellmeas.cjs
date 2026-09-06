@@ -18,7 +18,7 @@ const { chromium } = require('playwright'); const fs=require('fs');
 const NAMES = ['idle','walk_a','walk_b','run_a','run_b','rise','apex','fall','land','dash','skid',
   'wall_cling','djump_jet','claw_1','claw_2','finisher','charge','burst','hurt','heal','song','slump','walk_c','run_c'];
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
   await p.exposeFunction('bytes', f => fs.readFileSync(f).toString('base64'));
   const r = await p.evaluate(async () => {

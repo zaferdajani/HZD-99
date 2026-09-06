@@ -77,7 +77,7 @@ window.bbox = (ctx, x0, y0, w, h) => {
     return { name, file, grounded: mode !== 'air' };
   });
 
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.addScriptTag({ content: PAGE });
 

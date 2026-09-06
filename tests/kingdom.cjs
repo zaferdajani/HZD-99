@@ -24,7 +24,7 @@ const ZONES = process.argv.slice(2).length ? process.argv.slice(2).map(z => z.to
 const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.goto('http://127.0.0.1:8220/index.html');

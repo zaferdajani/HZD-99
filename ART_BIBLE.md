@@ -52,9 +52,9 @@ say it, and after this he does not.
 The three exceptions are exhaustive, and each is a decision on the record with
 its reason in this file:
 
-1. **HZD-99 / the hero** (§2) — procedural because her arms are IK-solved, her
-   scarf is simulated and her double jump is a real rotation. A sprite cannot do
-   any of that. She gets her volume from committed lighting instead.
+1. **HZD-99's secondary effects** (§2) — simulated scarf, eye overlays and
+   action effects may be procedural. The procedural BODY exception was revoked
+   on 2026-08-14: authored plates and motion strips supply the character.
 2. **Pure additive glow** (§6) — halos, lava rings, lit cores. The renderer
    treats them as light, not as objects, and a model returns a beautifully lit
    solid instead.
@@ -145,7 +145,7 @@ Every character is exactly one of these, and the class decides everything else.
 
 | Class | Rendering | Examples | Authored art? |
 |---|---|---|---|
-| **A. Live-drawn protagonist** | procedural Canvas 2D, IK limbs, simulated cloth | HZD-99 / the hero | **No** — see §2 |
+| **A. Authored protagonist** | authored states and motion strips, simulated secondary effects; geometric loading fallback | HZD-99 / the hero | **Yes** — see §2 |
 | **B. Parts-rig guardian** | authored parts, posed live by a rig | NULLFANG, TALONHOST, FURNACE CHOIR, GLACIERE, MOTHER-V, PRISM PROWLER | **Yes** — §3 |
 | **C. Atlas creature** | one 8-yaw turnaround, cell-selected | crawler, hopper, blob, flier, turret | **Yes** — §4 |
 | **D. Standing NPC** | one 6-yaw sheet, no combat poses | merchants, sages, wardens | **Yes** — §5 |

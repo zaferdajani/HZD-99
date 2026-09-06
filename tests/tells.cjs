@@ -58,7 +58,7 @@ const BOSSES = ['glitch', 'brood', 'atlas', 'zero', 'prism', 'mother'];
 const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1', mother: 'E3' };
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage({ viewport: { width: 960, height: 540 } });
   const errs = [];
   p.on('pageerror', e => errs.push(String(e)));

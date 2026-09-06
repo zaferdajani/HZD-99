@@ -120,7 +120,7 @@ window.compose = async (cells, CW, CH, scale) => {
 (async () => {
   const [dir, out] = process.argv.slice(2);
   if (!dir || !out) { console.log('usage: herostates.cjs <indir> <out.png>'); process.exit(1); }
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.addScriptTag({ content: PAGE });
 

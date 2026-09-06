@@ -53,7 +53,7 @@ const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A10', 'A3', 'A4'];
 
 (async () => {
   console.log('── seam — a room boundary is a place she walks through\n');
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.goto('http://127.0.0.1:8220/index.html');

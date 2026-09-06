@@ -22,7 +22,7 @@ const fs = require('fs'), path = require('path');
 (async () => {
   const [outdir, ...files] = process.argv.slice(2);
   fs.mkdirSync(outdir, { recursive: true });
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('plateBytes', f => fs.readFileSync(f).toString('base64'));
   for (const f of files) {

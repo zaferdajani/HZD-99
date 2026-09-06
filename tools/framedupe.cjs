@@ -40,7 +40,7 @@ const SHIPPED = [
   const list = (args[0] === '--all' || !args.length)
     ? SHIPPED
     : [[path.basename(args[0]), args[0]]];
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.exposeFunction('bytes', f => fs.readFileSync(f).toString('base64'));
 

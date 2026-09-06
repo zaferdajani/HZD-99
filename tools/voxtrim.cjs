@@ -25,7 +25,7 @@ const fs = require('fs');
   if (!inp || !out) { console.log('usage: voxtrim.cjs <in> <out.wav> [peak] [maxSec]'); process.exit(1); }
   const peak = parseFloat(peakArg || '0.85'), maxSec = parseFloat(maxArg || '1.6');
   const b64 = fs.readFileSync(inp).toString('base64');
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   const res = await page.evaluate(async ({ b64, peak, maxSec }) => {
     const bin = atob(b64);

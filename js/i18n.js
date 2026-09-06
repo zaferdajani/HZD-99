@@ -1373,6 +1373,8 @@ ru: {
 },
 };
 function t(k) {
+  if (typeof GEAR_TEXT !== 'undefined' && typeof themeId === 'function' && themeId() === 'robo' && GEAR_TEXT.en[k] != null)
+    return (GEAR_TEXT[LANG] && GEAR_TEXT[LANG][k]) || GEAR_TEXT.en[k];
   // theme overlay first (hero/robo world skins), then base language, then English
   if (typeof THEMES !== 'undefined' && typeof themeId === 'function') {
     const th = THEMES[themeId()];

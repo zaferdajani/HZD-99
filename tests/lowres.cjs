@@ -80,7 +80,7 @@ const check = (name, ok, detail) => {
         bad.slice(0, 3).join('; ') || guard.length + ' guardian files checked');
 
   // ---- 3. IT ACTUALLY STANDS IN, AND IT ACTUALLY GETS REPLACED -------------
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   const got = [];

@@ -13,7 +13,7 @@
 const { chromium } = require('playwright');
 const PASS = 'claw-forge-9921';
 (async () => {
-  const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const br = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const fails = [];
   const ok = (cond, what) => { console.log((cond ? '  ok  ' : '  FAIL ') + what); if (!cond) fails.push(what); };
 

@@ -9,7 +9,7 @@ const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 (async () => {
   const pairs = process.argv.slice(2);
-  const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const br = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const pg = await br.newPage();
   await pg.exposeFunction('bytes', f => fs.readFileSync(f).toString('base64'));
   for (const pr of pairs) {
