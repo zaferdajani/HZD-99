@@ -29,6 +29,9 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['cave-passage', 'real cave traversal and reciprocal gate walks'],
+  ['cave-ground', 'overhead pockets never become cave floor', { noBrowser: true }],
+  ['seam-route', 'Seam onward route, quest order and anchored doors', { noBrowser: true }],
   ['shadow-ground', 'contact shadows follow real terrain and platforms', { noBrowser: true }],
   ['visual-depth', 'alpha-safe scenery tint, fixed architecture and low-tier light'],
   ['dialogue-audio', 'story voice priority, text-matched NPC lines and asynchronous cancellation', { noBrowser: true }],

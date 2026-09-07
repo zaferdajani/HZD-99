@@ -6300,6 +6300,20 @@ function buildSurfaceCurve() {
   // drawPlatformRuns, which owns its own crest and skirt; the ground curve
   // walks underneath it and never sees it.
   const surfaceOf = (tx) => {
+    // A cave's hidden pocket is a ceiling object, not a hill. Scanning from
+    // above chose the pocket's bottom after entering its hollow centre and
+    // extruded a floor ramp up to it, sealing the passage underneath. Only
+    // the bottom-connected rock owns the cave heightfield; suspended rock
+    // and its breakable hatch retain their ordinary tile collision.
+    if (G.roomDef && G.roomDef.cave) {
+      let ty = Ht - 1;
+      if (!solidAt(tx, ty)) return null;
+      while (ty > 0 && solidAt(tx, ty - 1)) ty--;
+      if (ty === 0) return null; // a closed boundary is a wall, not ground
+      if (platAt(tx, ty - 1)) return { ty: ty - 1, soft: 1 };
+      if (ty > 1 && platAt(tx, ty - 2)) return { ty: ty - 2, soft: 1 };
+      return { ty, soft: 0 };
+    }
     let ty = 0;
     while (ty < Ht && solidAt(tx, ty)) ty++;              // skip the ceiling
     while (ty < Ht) {
@@ -7636,7 +7650,13 @@ const GATE_ROOM = {
     { at: 0.10, to: 'A5',  gx: 0.516, gy: 0.563, ax: 0.72 },
     { at: 0.62, to: 'CV1B', ax: 0.12, rubble: 'rubbleCV1B' },
   ],
-  CV1B: { at: 0.12, to: 'CV1', ax: 0.62 },
+  CV1B: [
+    { at: 0.12, to: 'CV1', ax: 0.62 },
+    // A rest along the journey: the east mouth continues BEFORE CV2's
+    // beacon, preserving the signal-to-material quest order.
+    { at: 0.875, to: 'CV2', ax: 0.1875 },
+  ],
+  CV2: { at: 0.1875, to: 'CV1B', ax: 0.875 },
   // the Oracle's parlor off B3 — the booth pattern again, but its OWN style:
   // Ratchet's fired kiosk plate must never stand in the Conduits, so the
   // Oracle's shrine draws its own stand-in (drawOracleBooth) until its plate
@@ -9847,7 +9867,7 @@ function rubbleTick(dt) {
 const CAVE_BEACON = {
   A5:   { room: 'CV2', far: 0.16 },   // through the rubble, from the meadow
   CV1:  { room: 'CV2', far: 0.34 },   // the entry hall — one room off
-  CV1B: { room: 'CV2', far: 0.26 },   // the Seam is a pocket, not the way down
+  CV1B: { room: 'CV2', far: 0.34 },   // the Seam's onward mouth reaches the beacon hall
   CV3:  { room: 'CV2', far: 0.34 },   // past it, and behind her now
   CV2:  { room: 'CV2', far: 0 },      // here. the distance below does the work
 };

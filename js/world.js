@@ -1403,19 +1403,22 @@ const ROOMS = {
   // to be. It is buried like the mouth that led here, so the rubble the
   // entrance taught her about is the rubble that pays her for remembering.
   //
-  // What is in it is the tunnel's SAVE POINT. The bench audit found the last
+  // The SAVE POINT is a stop on an alternate route, not its destination:
+  // the eastern depth mouth rejoins CV2 before the beacon. Keep the original
+  // CV1 return as well, so entering the rubble gate never demands backtracking.
+  // The bench audit found the last
   // rest before the pillar was A3, four rooms and a cave back; the run to the
   // crystal is the longest unbenched stretch in kingdom 1.
   // 32 wide, not 28: a room narrower than the 960x540 window shows void at its
   // edge, and tests/deadend.cjs measures exactly that (it caught this one).
   CV1B: { zone: 'X', cave: 1, w: 40, h: 17, exits: {},
     ents: [['bench', 20, 15], ['bat', 27, 6],
-           ['scrap', 30, 15, 35], ['scrap', 9, 7, 25], ['scrap', 36, 15, 20]],
+           ['scrap', 30, 15, 35], ['scrap', 9, 7, 25], ['scrap', 24, 15, 20]],
     build(g) {
       caveCarve(g, 'CV1B', {
         open: [], ledges: 3,
         anchor: [{ x: 4, y: 15, w2: 2 }, { x: 20, y: 15, w2: 2 },
-                 { x: 30, y: 15 }, { x: 36, y: 15 }],
+                 { x: 24, y: 15 }, { x: 30, y: 15 }, { x: 35, y: 15, w2: 2, h2: 4 }],
         pocket: [{ x: 9, y: 6 }],
       });
     } },
@@ -1448,7 +1451,8 @@ const ROOMS = {
     build(g) {
       caveCarve(g, 'CV2', {
         mouth: 1, open: ['L', 'R'], ledges: 5,
-        anchor: [{ x: 14, y: 15 }, { x: 26, y: 15, w2: 2 }, { x: 33, y: 15 },
+        anchor: [{ x: 12, y: 15, w2: 2, h2: 4 }, { x: 14, y: 15 },
+                 { x: 26, y: 15, w2: 2 }, { x: 33, y: 15 },
                  { x: 56, y: 15 }, { x: 8, y: 15 }],
         pocket: [{ x: 22, y: 6 }, { x: 48, y: 6 }],
       });
