@@ -7,6 +7,7 @@ const ctx = vm.createContext({
   player: { cores: 5, maxCores: () => 5 }, persist: () => saved++, sfx() {},
   t: k => k, inP: k => pressed.has(k), tPress: () => taps++
 });
+vm.runInContext(fs.readFileSync(path.join(__dirname, '../js/weapons.js'), 'utf8'), ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../js/gear.js'), 'utf8'), ctx);
 const rows = () => ctx.gearRows(ctx.G.save);
 const select = id => { ctx.G.crestIdx = rows().findIndex(r => r.id === id); assert(ctx.G.crestIdx >= 0); };
@@ -33,4 +34,13 @@ ctx.gearTouch(l.x - 1, l.y); assert.equal(taps, 0, 'preview cannot activate equi
 ctx.gearTouch(l.x + 20, l.y); assert.equal(taps, 1); assert.equal(ctx.G.crestIdx, l.start, 'touch resolves scrolled rows');
 pressed.add('UP'); ctx.G.crestIdx = 0; ctx.updateGear(); pressed.clear();
 assert.equal(ctx.G.crestIdx, rows().length - 1, 'keyboard/pad navigation wraps');
+ctx.grantWeapon('single'); ctx.grantWeapon('dual');
+select('weapon:single'); ctx.G.boomer = {}; ctx.gearActivate();
+assert.equal(ctx.weaponMode(), 'dual', 'cannot switch while weapon is in flight');
+ctx.G.boomer = null; ctx.gearActivate();
+assert.equal(ctx.weaponMode(), 'single', 'Gear selects owned sword form');
+select('weapon:joined'); ctx.gearActivate();
+assert.equal(ctx.weaponMode(), 'single', 'Gear cannot equip locked connector form');
+select('weapon:claws'); ctx.gearActivate();
+assert.equal(ctx.weaponMode(), 'claws', 'Gear puts swords away for claw combat');
 console.log('PASS: base boots, staged jets/air jump, equipment capacity, save reload, permanent traversal and scrolled touch');

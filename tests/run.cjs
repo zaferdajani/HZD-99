@@ -29,6 +29,10 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['shadow-ground', 'contact shadows follow real terrain and platforms', { noBrowser: true }],
+  ['visual-depth', 'alpha-safe scenery tint, fixed architecture and low-tier light'],
+  ['dialogue-audio', 'story voice priority, text-matched NPC lines and asynchronous cancellation', { noBrowser: true }],
+  ['weapons', 'sword ownership, migration, permanent dual mode and real charged input', { noBrowser: true }],
   ['gear', 'physical equipment progression, saved loadout and input geometry', { noBrowser: true }],
   ['motion-sampling', 'static clips rejected and full action windows retained', { noBrowser: true }],
   ['combo-routing', 'real player inputs select jab, cross, uppercut and the charged burst', { noBrowser: true }],

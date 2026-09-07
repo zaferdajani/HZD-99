@@ -89,13 +89,13 @@ const { chromium } = require('playwright');
     // the harness had been measuring a voiceless claw by accident.
     HZDT = 1e18;
     player.combo = 0;
-    G.save.flags.crystal = 0; G.save.flags.crystal2 = 0;
+    G.save.flags.crystal = 0; G.save.flags.crystal2 = 0; G.save.weaponMode = 'claws';
     out.wClaw = await finger(() => sfx('atk'));
-    G.save.flags.crystal = 1;
+    G.save.flags.crystal = 1; equipWeapon('single');
     out.wCrystal = await finger(() => sfx('atk'));
-    G.save.flags.crystal2 = 1;
+    G.save.flags.crystal2 = 1; G.save.flags.connector = 1; equipWeapon('joined');
     out.wDouble = await finger(() => sfx('atk'));
-    G.save.flags.crystal = 0; G.save.flags.crystal2 = 0;
+    G.save.flags.crystal = 0; G.save.flags.crystal2 = 0; G.save.weaponMode = 'claws';
     out.join = await finger(() => sfx('crystalJoin'));
     return out;
   });

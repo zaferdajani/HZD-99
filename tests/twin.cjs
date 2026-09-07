@@ -1,13 +1,4 @@
-// THE SWIRL, and the two-blade window it opens.
-//
-// With both halves in her paws the charged blow stops being a shove and becomes
-// a dance: she turns on one toe and the two crystals cut a ring around her, four
-// passes over 640 ms. Then the blade stays SPLIT for six seconds and her combo
-// swings both.
-//
-// Every one of those sentences is a number, so every one of them is checked
-// here. The failure this exists to catch is the one that makes a "new move" not
-// a move at all: a burst with different particles, one hit, same reach, no cost.
+// Permanent dual swords: four timed hurricane passes and a wider paired swing.
 const { chromium } = require('playwright');
 
 const fails = [];
@@ -17,7 +8,7 @@ const check = (name, ok, detail) => {
 };
 
 (async () => {
-  console.log('── twin — the swirl, and the two blades it leaves her holding');
+  console.log('── twin — permanent dual swords and the hurricane');
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
@@ -34,6 +25,7 @@ const check = (name, ok, detail) => {
     const arm = (both) => {
       G.save.flags.crystal = 1;
       G.save.flags.crystal2 = both ? 1 : 0;
+      G.save.weaponVersion = 1; G.save.weaponMode = both ? 'dual' : 'single';
       G.boomer = null;
     };
     // a punchbag that cannot fight back and cannot die, so the passes can be
@@ -57,7 +49,7 @@ const check = (name, ok, detail) => {
     player.releaseCharged();
     out.bothIsSwirl = player.swirlT > 0 && !!player.swingVis && player.swingVis.swirl === true;
     out.swirlT = +player.swirlT.toFixed(3);
-    out.twinT = +player.twinT.toFixed(3);
+    out.dualMode = weaponMode();
     out.rose = player.vy <= -100;           // she leaves the floor for it
 
     // ---- 3. IT LANDS ITS PASSES -------------------------------------------
@@ -87,12 +79,14 @@ const check = (name, ok, detail) => {
     player.releaseCharged();
     step(30);
     out.hitBehind = bhp - back.hp;
+    step(240);
+    out.dualPersists = weaponMode() === 'dual';
 
-    // ---- 5. THE WINDOW WIDENS HER SWING -----------------------------------
+    // ---- 5. THE SECOND SWORD WIDENS HER SWING -----------------------------
     const box = (twin) => {
-      player.twinT = twin ? 5 : 0;
+      equipWeapon(twin ? 'dual' : 'single');
       player.swing = { t: 0.15, ax: 1, ay: 0, ang: 0, combo: 0, set: new Set(),
-                       wield: 2, pure: true, twin: twin };
+                       wield: 1, pure: true, twin: twin };
       const b = player.hitbox();
       // ax0 is the swing's ANCHOR, not the box's centre. The twin's law is
       // "half grows, R does not", and centre-of-box only witnessed that while
@@ -205,7 +199,7 @@ const check = (name, ok, detail) => {
   check('it lands four passes, not one', m.passes === 4, m.passes + ' passes, ' + m.dealt + ' damage');
   check('it costs her real recovery afterwards', m.recovery >= 0.30, m.recovery + 's');
   check('it is a RING — it hits what is behind her too', m.hitBehind > 0, m.hitBehind + ' damage behind');
-  check('the twin window opens after it', m.twinT >= 5, m.twinT + 's');
+  check('dual swords remain equipped beyond the old six-second window', m.dualMode === 'dual' && m.dualPersists);
   check('...and the twin swing is WIDER', m.twinW > m.plainW, m.plainW + ' -> ' + m.twinW + ' px');
   check('...but reaches no further', m.sameReach, 'anchor unchanged');
   // the widening is SYMMETRIC about that anchor: whatever the far edge gained,
@@ -216,5 +210,5 @@ const check = (name, ok, detail) => {
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
-  console.log('\nOK — she dances, it hurts, and she holds two blades for a while afterwards');
+  console.log('\nOK — she dances, it hurts, and she keeps her two swords afterwards');
 })().catch(e => { console.error(e); process.exit(1); });

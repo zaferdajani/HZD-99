@@ -1,18 +1,5 @@
-// THE PURIFIER, MEASURED. The crystal arc is a chain of promises — the first
-// NPC hands it over, the tree grows a branch, the up-slash launches, the
-// joined blade flies and COMES BACK — and every link is the kind of thing
-// that reads fine in code and fails on screen. So each one is driven live:
-//
-//   - the gift: the first NPC's gift closure grants the flag and the card
-//   - the tree: nodes EXIST only when their weapon does (7 -> 10 -> 11)
-//   - the reach: a crystal swing's hitbox is measurably longer than a claw's
-//   - the grammar: the grounded finisher rises (diagonal), up/down aim works
-//   - the launcher: risecut throws an enemy upward off an up-slash
-//   - the throw: with both ends and the skill, the finisher releases the
-//     blade, it goes OUT, turns, returns, and is CAUGHT — and while it is
-//     out the audio router says 'claw', because her paw is empty
-//
-//   node tests/crystal.cjs
+// The earned first forge, cave route, weapon skill tree, reach and rising cuts.
+// Joined weapons throw only on held-attack release, then return to the paw.
 const { chromium } = require('playwright');
 
 (async () => {
@@ -60,12 +47,12 @@ const { chromium } = require('playwright');
     if (G.cut) { try { G.cut.v.pause(); } catch (e) {} G.cut = null; }
     G.dialog = null; G.state = 'PLAY';
     out.pool1 = skillPool().length;
-    G.save.flags.crystal2 = 1;
+    G.save.flags.crystal2 = 1; G.save.flags.connector = 1; equipWeapon('joined');
     out.pool2 = skillPool().length;
-    G.save.flags.crystal2 = 0;
+    G.save.flags.crystal2 = 0; G.save.flags.connector = 0; equipWeapon('single');
 
     // ---- the quarry: the pillar ignores claws, shatters for the burst --
-    G.save.flags.crystal = 0; delete G.save.bag;   // back to a pre-forge save
+    G.save.flags.crystal = 0; equipWeapon('claws'); delete G.save.bag;   // back to a pre-forge save
     loadRoom('CV3');
     await new Promise(r => setTimeout(r, 400));
     G.wake = null; G.state = 'PLAY'; G.hitStop = 0;
@@ -169,14 +156,14 @@ const { chromium } = require('playwright');
     // its allegiances (quiet halos). Counted from the light pass itself, on
     // real rendered frames: her + the room's machines while the sense is on,
     // and NOTHING once she carries no crystal light at all.
-    G.save.flags.crystal = 1;
+    G.save.flags.crystal = 1; equipWeapon('single');
     loadRoom('A1');                              // a crawler, a guard, a dark NPC
     await new Promise(r => setTimeout(r, 500));
     G.wake = null; G.state = 'PLAY';
     await new Promise(r => setTimeout(r, 350));
     out.auraOn = (G._auraCount || 0) >= 3;
     out.auraOnCount = G._auraCount || 0;
-    G.save.flags.crystal = 0; delete G.save.bag;
+    G.save.flags.crystal = 0; equipWeapon('claws'); delete G.save.bag;
     await new Promise(r => setTimeout(r, 350));
     out.auraOff = (G._auraCount || 0) === 0;
 
@@ -206,11 +193,11 @@ const { chromium } = require('playwright');
       return s;
     };
     // claw: flat finisher stays flat
-    G.save.flags.crystal = 0;
+    G.save.flags.crystal = 0; equipWeapon('claws');
     let s1 = await swingOf(() => { player.combo = 1; player.comboT = 0.5; });
     out.clawFin = s1 && { ay: s1.ay, wield: s1.wield };
     // crystal: the grounded finisher RISES
-    G.save.flags.crystal = 1;
+    G.save.flags.crystal = 1; equipWeapon('single');
     s1 = await swingOf(() => { player.combo = 1; player.comboT = 0.5; });
     out.cryFin = s1 && { ay: s1.ay, combo: s1.combo, wield: s1.wield };
     // up-aim still aims up, first hit unchanged and flat
@@ -236,7 +223,7 @@ const { chromium } = require('playwright');
     player.swing = null; player.swingVis = null;
 
     // ---- the throw, out and back --------------------------------------
-    G.save.flags.crystal2 = 1;
+    grantWeapon('dual'); grantWeapon('joined');
     G.save.skills.push('boomer');
     G.boomer = null;
     player.x = 300; player.y = 300; player.combo = 1; player.comboT = 0.5;
@@ -247,7 +234,11 @@ const { chromium } = require('playwright');
     // testing the throw, not the freeze.
     G.hitStop = 0;
     press('KeyJ'); step();
-    out.threwOnFinisher = !!G.boomer;
+    out.noAutomaticThrow = !G.boomer && !!player.swing;
+    player.volts = 99; player.chargeT = 0;
+    for (let i = 0; i < 22; i++) step();
+    keys.KeyJ = false; step();
+    out.threwOnCharge = !!G.boomer;
     out.audioWhileOut = (typeof wielded === 'function') ? wielded() : null;
     let maxDx = 0, returned = false, frames = 0;
     while (G.boomer && frames < 90) {                 // 3 seconds of sim
@@ -263,6 +254,17 @@ const { chromium } = require('playwright');
     press('KeyJ'); step();
     out.noThrowOnOpener = !G.boomer && !!player.swing;
     player.swing = null; player.swingVis = null;
+    player.chargeT = 1; player.releaseCharged();
+    out.thrownBeforeRoom = !!G.boomer;
+    loadRoom('A1');
+    out.roomRecoversBlade = !G.boomer && weaponMode() === 'joined';
+    grantWeapon('dual'); player.releaseCharged();
+    out.swirlBeforeRoom = player.swirlT > 0;
+    player.chargeT = 0.4; player.atkBuf = 0.2;
+    loadRoom('A0');
+    out.roomClearsCombat = player.swirlT === 0 && player.swirlTick === 0
+      && player.chargeT === 0 && player.atkBuf === 0
+      && !player.swing && !player.swingVis && !player.chargeVoxed;
     return out;
   });
 
@@ -316,12 +318,15 @@ const { chromium } = require('playwright');
   // the launcher
   check('risecut launches the target upward', m.launchVy < -300, 'vy ' + m.launchVy);
   // the throw
-  check('the joined finisher releases the blade', m.threwOnFinisher);
+  check('ordinary joined finisher remains melee', m.noAutomaticThrow);
+  check('holding and releasing attack throws the joined blade', m.threwOnCharge);
   check('...and her paw sounds EMPTY while it flies', m.audioWhileOut === 'claw', m.audioWhileOut);
   check('it flies out a real distance', m.flightRange > 120, m.flightRange + 'px');
   check('and she catches it', m.caught && m.audioAfterCatch === 'crystal2',
     'caught ' + m.caught + ', audio ' + m.audioAfterCatch);
   check('the opener never throws', m.noThrowOnOpener);
+  check('room transition returns the thrown blade without losing equipment', m.thrownBeforeRoom && m.roomRecoversBlade);
+  check('room transition cancels hurricane, partial charge and buffered melee', m.swirlBeforeRoom && m.roomClearsCombat);
 
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();

@@ -26,7 +26,7 @@ const SKILLS = [
   { id: 'purity', cost: 30, tier: 1, need: 'crystal' },    // slashes cleanse the infected
   { id: 'risecut', cost: 45, tier: 1, need: 'crystal' },   // the up-slash becomes a launcher
   { id: 'plunge', cost: 60, tier: 2, need: 'crystal' },    // the down-slash lands a shockwave
-  { id: 'boomer', cost: 90, tier: 2, need: 'crystal2' },   // the joined blade flies and returns
+  { id: 'boomer', cost: 90, tier: 2, need: 'connector' },  // strengthens the connector's returning throw
 ];
 // The tree as SHE sees it: only nodes whose weapon she holds. Every reader of
 // SKILLS — the screen, the HUD nudge, the affordable/next pair — goes through

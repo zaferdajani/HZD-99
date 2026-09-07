@@ -200,6 +200,33 @@ function voxMech() {
   VOXMECH = { ac: AC, in: f };
   return VOXMECH;
 }
+// Story scenes own the voice channel. Text without a matching recording is
+// deliberately unvoiced; an unrelated bark is not a substitute for dialogue.
+const HZDPLAY = new Set();
+let NARRATIVE_AUDIO_ACTIVE = false;
+function narrativeAudioActive() {
+  return typeof G !== 'undefined' && !!(G.wake || G.cut || ['DIALOG', 'INTRO', 'CUT'].includes(G.state));
+}
+function hzdQuiet() {
+  hzdRelease(0.025);
+  if (!AC) return;
+  for (const h of HZDPLAY) {
+    try {
+      const now = AC.currentTime;
+      h.gain.gain.cancelScheduledValues(now);
+      h.gain.gain.setValueAtTime(h.gain.gain.value, now);
+      h.gain.gain.linearRampToValueAtTime(0.0001, now + 0.025);
+      h.src.stop(now + 0.035);
+    } catch (e) {}
+  }
+  HZDPLAY.clear();
+}
+function narrativeAudioTick() {
+  const active = narrativeAudioActive();
+  if (active && !NARRATIVE_AUDIO_ACTIVE) { hzdQuiet(); npcVoxQuietAll(); }
+  if (active && typeof G !== 'undefined' && G.state !== 'DIALOG' && NPCNODE) npcHush();
+  NARRATIVE_AUDIO_ACTIVE = active;
+}
 // A HELD NOTE HAS TO BE ABLE TO STOP.
 //
 // The charge vocal is the one sound in the game that is a STATE rather than an
@@ -217,7 +244,7 @@ let HZDHOLD = null;
 function hzdHold(key) {
   hzdRelease(0.02);
   const set = HZDVOX[key];
-  if (!set || !AC || MUTED) return false;
+  if (!set || !AC || MUTED || narrativeAudioActive()) return false;
   const pick = set[(Math.random() * set.length) | 0];
   if (!MBUF[pick[0]]) { if (typeof mediaAudio === 'function') mediaAudio(pick[0]); return false; }
   const src = AC.createBufferSource(), g = AC.createGain();
@@ -276,6 +303,7 @@ const TAKE_GATE = {
 };
 function playBuf(key, vol, rate) {
   if (!AC || MUTED) return false;
+  if (key.indexOf('hzd_') === 0 && narrativeAudioActive()) return false;
   // a sound in the second wave that is asked for early jumps the queue. This
   // call misses once — sfx() falls through to the synthesised version, which is
   // what it does for a sound that has not arrived for any other reason — and
@@ -289,6 +317,9 @@ function playBuf(key, vol, rate) {
   if (key.indexOf('hzd_') === 0) {
     const m = voxMech();
     if (m) g.connect(m.in);
+    const handle = { src: s, gain: g };
+    HZDPLAY.add(handle);
+    s.onended = () => HZDPLAY.delete(handle);
   }
   // A TAKE IS PLAYED FROM ITS TRANSIENT, NOT FROM ITS FIRST SAMPLE.
   //
@@ -481,8 +512,8 @@ function wielded() {
   // while the thrown blade is out she fights bare-clawed, and the sound
   // agrees with the hand: claw whoosh until the catch
   if (typeof G !== 'undefined' && G.boomer) return 'claw';
-  const f = (typeof G !== 'undefined' && G.save && G.save.flags) || {};
-  return f.crystal2 ? 'crystal2' : (f.crystal ? 'crystal1' : 'claw');
+  const mode = typeof weaponMode === 'function' ? weaponMode(G.save) : 'claws';
+  return mode === 'claws' ? 'claw' : mode === 'single' ? 'crystal1' : 'crystal2';
 }
 function crystalSlash(beat) {
   if (!AC || MUTED) return;
@@ -713,6 +744,8 @@ function npcVoxBuild(id) {
 }
 function npcVoxTick(id, target) {
   if (!AC || MUTED || !AUD_UNLOCKED) return;
+  if (narrativeAudioActive()) target = 0;
+  if (target <= 0 && !NPCVOX[id]) return;
   // The recorded-loop upgrade was DEAD CODE until 2026-08-26: npcVoxBuild
   // checks MBUF for 'hum_<id>' but nothing ever FETCHED one, and a voice
   // built before its loop landed was cached with the synth forever. So the
@@ -1017,6 +1050,7 @@ const HZDVOX = {
 // take and longer than any single input.
 let HZDT = 0;
 function hzdSay(key, gapMs) {
+  if (narrativeAudioActive()) return false;
   const set = HZDVOX[key];
   if (!set || !AC) return false;
   const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
@@ -1036,6 +1070,7 @@ const VOX = {
 let HZSW = false, HZST = false;   // stride/swing alternation for her paired takes
 function sfx(n) {
   if (!AC || MUTED) return;
+  if (narrativeAudioActive() && ['ui', 'ok', 'no', 'purr'].includes(n)) return;
   if (typeof isHero === 'function' && isHero() && heroSfx(n)) return;
   // HER KIAI, ON THE RIGHT BEAT. The three-hit string escalates, so the shout
   // does too: the combo index the player is actually on picks the take, and the
@@ -1068,7 +1103,7 @@ function sfx(n) {
     const seq = [0, 1, 0][Math.min(2, cb)];
     const take = HZDVOX.atk[seq] &&
       [HZDVOX.atk[seq][0], HZDVOX.atk[seq][1] + (cb >= 2 ? 0.06 : 0)];
-    if (take && AC) {
+    if (take && AC && !narrativeAudioActive()) {
       const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
       if (now - HZDT >= 90 && playBuf(take[0], take[1], 0.96 + Math.random() * 0.08)) HZDT = now;
     }
@@ -1899,61 +1934,50 @@ function stingPlay(key, vol) {
 // line — servo0, sage2 — and STREAMED rather than decoded: eighteen lines of
 // speech held as raw PCM would cost more memory than every sound effect in the
 // game put together, for audio that plays once and is never heard again in that
-// room. A line with no recording, or a language the cast was never recorded in,
-// falls back to the character's synthesized voice, which is what every line
-// used to be.
+// room. Only text matching an authored recording is voiced. Notes, new quest
+// lines and unsupported languages remain readable without unrelated speech.
 // ---------------------------------------------------------------------------
 let NPCNODE = null;
 function npcSay(id, idx) {
+  // Page changes always stop the previous line, including pages with no take.
+  npcHush(); hzdQuiet(); npcVoxQuietAll();
+  if (MUTED) return false;
+  const dialog = typeof G !== 'undefined' && G.dialog;
+  const base = typeof I18N !== 'undefined' && I18N.en && I18N.en['d_' + id];
+  const line = dialog && dialog.npc === id && dialog.lines && dialog.lines[idx];
+  // id+index alone was wrong for sleeping-NPC notes, quests and tutorials:
+  // all reused index zero, and consequently all played the same unrelated line.
+  const match = Array.isArray(base) && typeof line === 'string' ? base.indexOf(line) : -1;
   const files = (typeof window !== 'undefined' && window.VOX_FILES) || null;
-  const src = files && LANG === 'en' && files[id + idx];
-  if (!src || MUTED) { sfxVoice(id); return; }
-  try {
-    if (NPCNODE) { NPCNODE.pause(); NPCNODE.src = ''; }
-  } catch (e) {}
+  const src = files && LANG === 'en' && match >= 0 && files[id + match];
+  if (!src) return false;
   try {
     const el = new Audio();
     el.src = src; el.volume = 0.85; el.preload = 'auto';
     el.crossOrigin = 'anonymous';
     NPCNODE = el;
     npcVoiceChain(el, id);
-    // A LINE MUST NOT OUTLIVE ITS OWN SENTENCE.
-    //
-    // The owner: "its lyrics is too long and destracting from reading the
-    // story". The recordings are one length and the text on screen is another,
-    // so a two-word panel could be read, understood and left behind while the
-    // voice was still going — and because the next page restarts the voice, the
-    // effect is a character who never stops talking.
-    //
-    // So the line gets a budget taken from the words it is speaking: roughly
-    // thirteen characters a second, which is unhurried reading, with a floor so
-    // a short line is never clipped and slack on top so a recording that is
-    // merely a little long plays out. Past that it FADES rather than cuts — a
-    // sentence chopped mid-vowel sounds broken, and the point is to get out of
-    // the way, not to be noticed leaving.
-    try {
-      const line = (typeof G !== 'undefined' && G.dialog && G.dialog.lines
-        && G.dialog.lines[idx]) || '';
-      const budget = Math.max(2.2, String(line).length / 13) + 1.2;
-      clearTimeout(npcSay._fade);
-      npcSay._fade = setTimeout(() => {
-        if (NPCNODE !== el) return;
-        const t0 = performance.now();
-        const v0 = el.volume;
-        const step = setInterval(() => {
-          if (NPCNODE !== el) { clearInterval(step); return; }
-          const k = 1 - (performance.now() - t0) / 700;
-          if (k <= 0) { clearInterval(step); try { el.pause(); el.src = ''; } catch (e) {} if (NPCNODE === el) NPCNODE = null; return; }
-          try { el.volume = v0 * k; } catch (e) {}
-        }, 50);
-      }, budget * 1000);
-    } catch (e) {}
+    const finish = () => { if (NPCNODE === el) npcHush(); };
+    el.addEventListener('ended', finish, { once: true });
+    el.addEventListener('error', finish, { once: true });
+    // The reading window bounds the take. A stale timer or rejected play
+    // promise must never restart a voice after its page has been dismissed.
+    const budget = Math.max(2.2, line.length / 13) + 1.2;
+    npcSay._fade = setTimeout(() => {
+      if (NPCNODE !== el) return;
+      const t0 = performance.now(), v0 = el.volume;
+      const ramp = setInterval(() => {
+        if (NPCNODE !== el) { clearInterval(ramp); return; }
+        const k = 1 - (performance.now() - t0) / 700;
+        if (k <= 0) { finish(); return; }
+        el.volume = v0 * k;
+      }, 50);
+      npcSay._ramp = ramp;
+    }, budget * 1000);
     const pr = el.play();
-    // autoplay refused, or the file is not really there: the character still
-    // has to make a sound, so fall back rather than opening a silent mouth
-    if (pr && pr.catch) pr.catch(() => sfxVoice(id));
-    el.addEventListener('error', () => sfxVoice(id), { once: true });
-  } catch (e) { sfxVoice(id); }
+    if (pr && pr.catch) pr.catch(finish);
+    return true;
+  } catch (e) { npcHush(); return false; }
 }
 // ---------------------------------------------------------------------------
 // THE MACHINE IN THEIR VOICES. The lines were recorded straight and played
@@ -2060,13 +2084,14 @@ function npcVoiceChain(el, id) {
     const src = AC.createMediaElementSource(el);
     const ch = npcChainBuild(AC, src, id);
     ch.out.connect(AC.destination);
-    el.addEventListener('ended', () => { try { ch.osc.stop(); } catch (e) {} }, { once: true });
+    el._voiceStop = () => { try { ch.osc.stop(); src.disconnect(); ch.out.disconnect(); } catch (e) {} };
+    el.addEventListener('ended', el._voiceStop, { once: true });
     return true;
   } catch (e) { return false; }   // already routed, or no graph: play it raw
 }
 function npcHush() {
-  try { clearTimeout(npcSay._fade); } catch (e) {}
-  try { if (NPCNODE) { NPCNODE.pause(); NPCNODE.src = ''; } } catch (e) {}
+  try { clearTimeout(npcSay._fade); clearInterval(npcSay._ramp); } catch (e) {}
+  try { if (NPCNODE) { NPCNODE.pause(); if (NPCNODE._voiceStop) NPCNODE._voiceStop(); NPCNODE.src = ''; } } catch (e) {}
   NPCNODE = null;
 }
 

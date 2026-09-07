@@ -1,0 +1,86 @@
+{
+  "date": "2026-09-07",
+  "notes": [
+    "Single clip has a visible strike and recovery but changes view angle and holds the follow-through.",
+    "Dual clip faces camera and has a long starting hold.",
+    "Joined clip loses the second blade; unsuitable.",
+    "Hurricane adds a tail and ends at a different facing.",
+    "Scratch retains an extended-paw hold.",
+    "Revised dual reference is cropped and left-facing; revised joined reference has four blade ends. Neither approved."
+  ],
+  "referenceImages": [
+    {
+      "index": 1,
+      "job_id": "aac0e798-9366-495b-b58b-12923242ec66",
+      "model": "seedream_v4_5",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/hf_20260907_073801_aac0e798-9366-495b-b58b-12923242ec66.png",
+      "status": "completed",
+      "type": "image"
+    },
+    {
+      "index": 2,
+      "job_id": "1ac741c7-0785-44e2-b962-6bb23f828201",
+      "model": "seedream_v4_5",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/hf_20260907_073801_1ac741c7-0785-44e2-b962-6bb23f828201.png",
+      "status": "completed",
+      "type": "image"
+    }
+  ],
+  "videos": [
+    {
+      "accepted": false,
+      "index": 1,
+      "job_id": "d274710b-b09d-4f63-bf3d-200d8898d7c4",
+      "mode": "single",
+      "model": "seedance_2_5",
+      "ownerReviewed": false,
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/hf_20260907_072049_d274710b-b09d-4f63-bf3d-200d8898d7c4.mp4",
+      "status": "completed",
+      "type": "video"
+    },
+    {
+      "accepted": false,
+      "index": 2,
+      "job_id": "2a4f24f7-05dc-4c0d-93e6-40301cd34867",
+      "mode": "dual",
+      "model": "seedance_2_5",
+      "ownerReviewed": false,
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/hf_20260907_072048_2a4f24f7-05dc-4c0d-93e6-40301cd34867.mp4",
+      "status": "completed",
+      "type": "video"
+    },
+    {
+      "accepted": false,
+      "index": 3,
+      "job_id": "c49982ae-1128-4dac-b0d0-388bb57fdc60",
+      "mode": "joined",
+      "model": "seedance_2_5",
+      "ownerReviewed": false,
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/hf_20260907_072049_c49982ae-1128-4dac-b0d0-388bb57fdc60.mp4",
+      "status": "completed",
+      "type": "video"
+    },
+    {
+      "accepted": false,
+      "index": 4,
+      "job_id": "10b2034d-4820-4425-a04d-1045a4ec8ca2",
+      "mode": "hurricane",
+      "model": "seedance_2_5",
+      "ownerReviewed": false,
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/hf_20260907_072048_10b2034d-4820-4425-a04d-1045a4ec8ca2.mp4",
+      "status": "completed",
+      "type": "video"
+    },
+    {
+      "accepted": false,
+      "index": 5,
+      "job_id": "782f7aae-91e7-44e6-a725-54c87303c7eb",
+      "mode": "scratch",
+      "model": "seedance_2_5",
+      "ownerReviewed": false,
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/hf_20260907_072049_782f7aae-91e7-44e6-a725-54c87303c7eb.mp4",
+      "status": "completed",
+      "type": "video"
+    }
+  ]
+}

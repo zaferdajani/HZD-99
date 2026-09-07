@@ -400,6 +400,24 @@ function groundAhead(e, dir) {
   }
   return false;
 }
+// Resolve the same support used by collision, including raised ground and platforms.
+// null means open space: never print a shadow on an imaginary floor over a pit.
+function shadowGroundY(body, maxDrop = 240) {
+  const cx = body.x + body.w / 2, feet = body.y + body.h;
+  let support = Infinity;
+  const accept = y => { if (Number.isFinite(y) && y >= feet - 2 && y - feet <= maxDrop) support = Math.min(support, y); };
+  if (typeof groundColumnAt === 'function') {
+    const gc = groundColumnAt(cx);
+    if (gc) accept(Math.min(gc[0], gc[1]));
+  }
+  const tx = Math.floor(cx / TILE);
+  for (let ty = Math.floor((feet - 2) / TILE); ty * TILE <= feet + maxDrop; ty++) {
+    if (solidAt(tx, ty) || tileAt(tx, ty) === '=') { accept(ty * TILE); if (support < Infinity) break; }
+  }
+  for (const p of G.plats || []) if (cx >= p.x && cx <= p.x + p.w) accept(p.y);
+  return support < Infinity ? support : null;
+}
+
 function touchingWall(e, dir) {
   const tx = Math.floor((dir > 0 ? e.x + e.w + 2 : e.x - 2) / TILE);
   const t0 = Math.floor((e.y + 4) / TILE), t1 = Math.floor((e.y + e.h - 4) / TILE);
@@ -440,7 +458,7 @@ const FLIP_DUR = 0.62;   // the double-jump pirouette, start to finish
 // Her own recovery is the risk she is buying the ring with. 300 ms is longer
 // than any of her combo beats (0.23–0.33) and is meant to be felt: the swirl is
 // a decision, not a better button.
-const SWIRL_T = 0.64, SWIRL_STEP = 0.16, SWIRL_R = 62, SWIRL_TWIN = 6;
+const SWIRL_T = 0.64, SWIRL_STEP = 0.16, SWIRL_R = 62;
 const SLASH = [
   { hand: 'F', a0: -0.95, a1: 0.42, r0: 11.5, r1: 21 },   // beat 1 — right paw, steep down-rake
   { hand: 'B', a0: -0.45, a1: 0.92, r0: 11, r1: 20 },     // beat 2 — left paw, shallower, crosses under
@@ -1492,7 +1510,7 @@ class Player {
     // almost entirely this one buffer.
     if (inP('ATK') && !G.bossEntry) this.atkBuf = 0.2;
     else this.atkBuf = (this.atkBuf || 0) - dt;
-    if (this.atkBuf > 0 && this.atkCD <= 0) {
+    if (this.atkBuf > 0 && this.atkCD <= 0 && this.swirlT <= 0) {
       this.atkBuf = 0;
       // The combo ACCELERATES. Three identical beats read as one slow beat
       // repeated; opening fast and landing heavy on the finisher is what makes
@@ -1519,32 +1537,10 @@ class Player {
       }
       if (!ax && !ay) ax = this.face;
       if (ax) this.face = ax;
-      // WHAT IS IN HER PAW. 0 = her own claws, 1 = the single purifier
-      // crystal, 2 = the joined two-ended blade. The flag IS the weapon —
-      // the same switch audio.js reads, so the hand and the whoosh can
-      // never disagree. While the thrown blade is out she is bare-clawed
-      // (see G.boomer below), which the audio router also honours.
-      const wield = (G.boomer ? 0
-        : (G.save.flags && G.save.flags.crystal2) ? 2
-        : (G.save.flags && G.save.flags.crystal) ? 1 : 0);
-      let threw = false;
-      if (wield === 2 && typeof hasSkill === 'function' && hasSkill('boomer')
-          && (this.comboT > 0 ? (this.combo + 1) % 3 : 0) === 2 && !ay) {
-        // THE THROW. With both ends joined, the big slash IS the throw
-        // (owner: "instead of a big slash, you will throw the sword at the
-        // enemy that will come back to you"). The chain's finisher slot
-        // spends the blade: it flies flat, bites on the way out and the way
-        // back, and until her paw closes on it again she fights with claws.
-        this.combo = 0; this.comboT = 0; this.atkCD = 0.5;
-        G.boomer = { x: this.x + this.w / 2, y: this.y + this.h / 2 - 4,
-          vx: (ax || this.face) * 640, vy: 0, t: 0, out: true, spin: 0, set: new Set() };
-        cam.shake = Math.max(cam.shake, 3);
-        this.vx -= (ax || this.face) * 90;   // the release pushes back on her
-        if (typeof padRumble === 'function') padRumble(0.3, 0.4, 90);
-        this.healT = 0; sfx('atk');
-        threw = true;
-      }
-      if (!threw) {
+      // Ownership and equipment are separate; an airborne weapon leaves empty paws.
+      const mode = G.boomer ? 'claws' : weaponMode(G.save);
+      const wield = mode === 'joined' ? 2 : mode === 'claws' ? 0 : 1;
+      {
       this.combo = this.comboT > 0 ? (this.combo + 1) % 3 : 0;
       this.comboT = 0.9;
       // THE CRYSTAL'S FINISHER RISES. Lost Crown grammar: the third beat of a
@@ -1556,15 +1552,11 @@ class Player {
       if (wield >= 1 && this.combo === 2 && !ay && this.on) aay = -0.55;
       const ang = Math.atan2(aay, ax);
       // active a touch longer, so a swing that looks like it should connect does
-      // TWIN: the swirl leaves the blade in two for a few seconds, and while it
-      // is she swings BOTH. Not a damage buff with a new name — the second
-      // blade opens the arc, so a chain that used to catch one thing in front of
-      // her sweeps a wedge either side. Reach is the single blade's; what she
-      // buys is COVERAGE, which is what a second sword is actually for.
-      const twin = this.twinT > 0 && wield >= 1;
+      // Dual swords widen the arc with a second independently held blade.
+      const twin = mode === 'dual';
       this.swing = { t: 0.15, ax, ay: aay, ang, combo: this.combo, set: new Set(), wield,
-                     pure: wield >= 1, twin };
-      this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo, wield, twin };
+                     pure: wield >= 1, twin, weaponMode: mode };
+      this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo, wield, twin, weaponMode: mode };
       if (hasSkill('wave')) {
         const wn = Math.hypot(ax, ay) || 1;
         G.projs.push(new Proj(this.x + this.w / 2 + ax / wn * 22, this.y + this.h / 2 - 2 + ay / wn * 22,
@@ -1610,7 +1602,7 @@ class Player {
       }
     }
     // hold attack to charge the volt-burst
-    if (inD('ATK') && this.dashT <= 0) {
+    if (inD('ATK') && this.dashT <= 0 && this.swirlT <= 0 && !G.boomer) {
       this.chargeT += dt;
       // CAN SHE ACTUALLY PAY FOR IT?
       //
@@ -1670,7 +1662,7 @@ class Player {
       // finding it ended the melee game rather than deepening it. It is a
       // resource decision now, and it is in the controls screen where it can
       // be found on purpose instead of by accident.
-      if (this.chargeT >= 0.6) {
+      if (this.chargeT >= 0.6 && this.swirlT <= 0 && !G.boomer) {
         if (this.volts >= BURST_VOLTS) {
           this.volts -= BURST_VOLTS;
           // the held note ends in a shout — the one place her voice is allowed
@@ -1716,12 +1708,8 @@ class Player {
       }
       if (this.swirlT <= 0) { this.swirlTick = 0; this.atkCD = Math.max(this.atkCD, 0.30); }
     }
-    if (this.twinT > 0) {
-      this.twinT -= dt;
-      // they lock again with a chime, so the window's end is audible and she is
-      // never quietly weaker than the player thinks she is
-      if (this.twinT <= 0) { this.twinT = 0; try { sfx('crystalJoin'); } catch (e) {} }
-    }
+    // Dual swords are equipment, never a timed buff that auto-joins.
+    this.twinT = 0;
     // shuriken — hers from the start, aimed with UP or DOWN
     if (inP('STAR') && this.starCD <= 0) throwStar(this);
     // cycle the suit wheel (slot 0 is the plain bolt, so EMP is never lost)
@@ -1965,7 +1953,7 @@ class Player {
       const dx = tx - b.x, dy = ty - b.y, d = Math.hypot(dx, dy) || 1;
       const sp = Math.min(980, 560 + b.t * 500);
       b.vx = dx / d * sp; b.vy = dy / d * sp;
-      if (d < 26) {                          // the catch
+      if (d < Math.max(26, sp * dt)) {                          // the catch
         G.boomer = null;
         this.atkCD = Math.min(this.atkCD, 0.08);
         sfx('chargeReady');
@@ -1983,7 +1971,7 @@ class Player {
       if (typeof isPet === 'function' && isPet(e)) continue;
       if (aabb(bb, hurtBoxOf(e))) {
         b.set.add(e);
-        const dm = dealDmg(e, Math.round(this.dmg() * 1.15), armEl(), b.x, b.y, true);
+        const dm = dealDmg(e, Math.round(this.dmg() * (hasSkill('boomer') ? 1.45 : 1.15)), armEl(), b.x, b.y, true);
         sfx(e instanceof Boss ? 'bosshit' : 'hit');
         G.hitStop = Math.max(G.hitStop, 0.05);
         burst(b.x, b.y, 10, '#ffffff', 240, 0.3, 120, 2.6, true);
@@ -2008,16 +1996,15 @@ class Player {
   // approaching — and it is the greedy axis from the combat skill: the window
   // fits three passes comfortably and tempts you to stand there for the fourth.
   //
-  // AND IT LEAVES HER SPLIT. For SWIRL_TWIN seconds afterwards the blade stays
-  // in two, and her combo swings BOTH — which is the two-hand technique itself
-  // rather than a one-off flourish. They lock again with a chime. So the fantasy
-  // arrives in the right order: she finds the second half and can fight with the
-  // pair, and joining them is the thing she grows into.
+  // Ownership persists after the spin. Joining requires the later connector
+  // and an explicit equipped-mode choice; time never changes equipment.
   swirl() {
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     this.chargeT = 0;
     this.swirlT = SWIRL_T; this.swirlTick = 0; this.swirlHits = 0;
-    this.twinT = SWIRL_TWIN;
+    this.twinT = 0;
+    this.swing = null; this.atkBuf = 0;
+    this.atkCD = Math.max(this.atkCD, SWIRL_T + 0.3);
     // she rises and turns: light, buoyant, off the floor for the whole move
     this.vy = Math.min(this.vy, -110);
     // its OWN cue, on the pass clock — not the burst's thud. See crystalSwirl()
@@ -2027,7 +2014,7 @@ class Player {
     // this move is that you watch it. The flash and the ring carry the weight.
     G.flash = Math.max(G.flash, 0.4);
     G.addRing(cx, cy, 30);
-    this.swingVis = { t: SWIRL_T, t0: SWIRL_T, ang: 0, combo: 3, charged: true, swirl: true };
+    this.swingVis = { t: SWIRL_T, t0: SWIRL_T, ang: 0, combo: 3, charged: true, swirl: true, wield: 1, twin: true, weaponMode: 'dual' };
     burst(cx, cy, 22, '#ffffff', 260, 0.7, 90, 3, true);
   }
   // one damage pass of the swirl, called on its own clock from update()
@@ -2037,7 +2024,7 @@ class Player {
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     let hit = 0;
     for (const e of targets) {
-      if (e.dead) continue;
+      if (e.dead || (typeof isPet === 'function' && isPet(e))) continue;
       const ex = e.x + e.w / 2 - cx, ey = e.y + e.h / 2 - cy;
       const d = Math.hypot(ex, ey);
       if (d > R + Math.max(e.w, e.h) / 2) continue;
@@ -2056,9 +2043,25 @@ class Player {
     this.swirlHits += hit;
     burst(cx, cy, 8, '#eafffb', 210, 0.35, 60, 2, true);
   }
+  throwJoined() {
+    if (G.boomer || weaponMode(G.save) !== 'joined') return false;
+    const dir = this.face || 1;
+    this.chargeT = 0; this.comboT = 0; this.combo = 0;
+    this.swing = null; this.swingVis = null; this.atkBuf = 0;
+    this.atkCD = 0.5;
+    G.boomer = { x: this.x + this.w / 2, y: this.y + this.h / 2 - 4,
+      vx: dir * 640, vy: 0, t: 0, out: true, spin: 0, set: new Set() };
+    this.vx -= dir * 90;
+    this.healT = 0;
+    sfx('crystalJoin');
+    if (typeof padRumble === 'function') padRumble(0.3, 0.4, 90);
+    return true;
+  }
   releaseCharged() {
-    // both halves in her paws: the charged blow is the dance instead
-    if ((G.save.flags && G.save.flags.crystal2) && !G.boomer) return this.swirl();
+    if (G.boomer || this.swirlT > 0) { this.chargeT = 0; return false; }
+    const mode = weaponMode(G.save);
+    if (mode === 'dual') return this.swirl();
+    if (mode === 'joined') return this.throwJoined();
     this.chargeT = 0;
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     sfx('chargedHit');
@@ -2068,13 +2071,13 @@ class Player {
     G.addRing(cx, cy); G.addRing(cx, cy, 55);
     // flagged so the body can draw the BURST plate rather than the ordinary
     // third-hit finisher — same combo number, different blow
-    this.swingVis = { t: 0.32, t0: 0.32, ang: 0, combo: 3, charged: true };
+    this.swingVis = { t: 0.32, t0: 0.32, ang: 0, combo: 3, charged: true, weaponMode: mode, wield: mode === 'single' ? 1 : 0 };
     burst(cx, cy, 34, '#ffffff', 400, 0.6, 200, 4, true);
     burst(cx, cy, 20, PAL[G.roomDef.zone].glow, 300, 0.8, 100, 4, true);
     const R = 128, dm = Math.round(this.dmg() * 2.6);
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     for (const e of targets) {
-      if (e.dead) continue;
+      if (e.dead || (typeof isPet === 'function' && isPet(e))) continue;
       const ex = e.x + e.w / 2 - cx, ey = e.y + e.h / 2 - cy;
       const d = Math.hypot(ex, ey);
       if (d > R + Math.max(e.w, e.h) / 2) continue;
@@ -2262,6 +2265,9 @@ class Player {
   die() {
     if (this.dead) return;
     this.dead = true;
+    G.boomer = null; this.swirlT = 0; this.chargeT = 0;
+    this.swing = null; this.swingVis = null;
+    if (typeof hzdRelease === 'function') hzdRelease();
     this.deathAnimT = 1.6;   // the destroyed row plays out while the wreck settles sfx('wreck');
     burst(this.x + this.w / 2, this.y + this.h / 2, 40, '#8ff6ff', 340, 0.9, 300, 4, true);
     G.onPlayerDeath();
@@ -2788,12 +2794,13 @@ class Player {
     // the opposite direction, slightly longer the harder it is pushed — a
     // shadow that answers the scene instead of a disc printed under her
     {
-      let gy = this.y + this.h, probe = 0;
-      while (probe < 240 && !solidAt(Math.floor((this.x + this.w / 2) / TILE), Math.floor((gy + probe) / TILE))) probe += 8;
-      const air = clamp(probe / 200, 0, 1);
-      const throwX = (G._shadX || 0) * 9;
-      contactShadow(c, this.x + this.w / 2 + throwX, gy + probe,
-        this.w * (0.6 - air * 0.25) * (1 + Math.abs(throwX) * 0.03), 0.45 * (1 - air * 0.7));
+      const gy = shadowGroundY(this);
+      if (gy !== null) {
+        const air = clamp((gy - this.y - this.h) / 200, 0, 1);
+        const throwX = (G._shadX || 0) * 9;
+        contactShadow(c, this.x + this.w / 2 + throwX, gy,
+          this.w * (0.6 - air * 0.25) * (1 + Math.abs(throwX) * 0.03), 0.45 * (1 - air * 0.7));
+      }
     }
     // where the paws finish this frame, recorded as they are drawn and read back
     // once the body's transform has been popped (see rakeMark / the swing block)

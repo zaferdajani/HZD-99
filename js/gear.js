@@ -19,6 +19,15 @@ const GEAR_TEXT = {
     gear_djumplock: 'A later boot upgrade adds a second jump in the air.',
     gear_phase: 'Phase Coil', gear_phaselock: 'Requires dash jets. Install this coil to phase during a dash.',
     gear_bootslot: 'Boots', gear_jetslot: 'Jets', gear_handslot: 'Hands', gear_coreslot: 'Core',
+    weapon_secondlock: 'Forge your first sword and defeat the Crystal Prowler to recover this blade.',
+    weapon_connectorlock: 'Bring both swords after defeating the Foundry guardian to recover this connector.',
+    i_crystal2: 'Second Purifier Sword', i_crystal2d: 'A second blade, still separate. Dual swords are equipped. Hold attack to charge, then release for a hurricane swirl. Change weapons in Gear.',
+    i_connector: 'Purifier Connector', i_connectord: 'The connector joins your two swords into a double-bladed weapon. Hold attack to charge, then release to throw it. It returns to your hands. Choose dual swords again in Gear.',
+    gear_dual: 'Dual purifier swords', gear_weaponbusy: 'Finish your attack and recover the weapon before changing equipment.',
+    gear_clawsd: 'Put weapons away and attack with bare claws. Owned swords remain in your inventory.',
+    gear_swordd: 'Bring raw crystal back to Ratchet to forge your first sword. Equip it for sword cuts.',
+    gear_duald: 'Recover the second sword in the Crystal Cache. Hold attack and release to perform a hurricane swirl.',
+    gear_joinedd: 'Recover the connector in the Foundry after earning both swords. Hold attack and release for a returning throw.',
     gear_claws: 'Bare claws', gear_sword: 'Purifier sword', gear_joined: 'Joined purifier',
     gear_fixed: 'This story upgrade stays installed.', gear_requiresjets: 'Acquire dash jets first.',
     gear_loading: 'Loading character…', gear_more: '↑ / ↓ Browse parts',
@@ -40,6 +49,15 @@ const GEAR_TEXT = {
     gear_dashlock: 'احصل على النفاثات بعد هزيمة نولفانغ.', gear_djumplock: 'تطوير لاحق للحذاء يضيف قفزة ثانية في الهواء.',
     gear_phase: 'ملف الطور', gear_phaselock: 'يتطلب نفاثات الاندفاع. يتيح المرور أثناء الاندفاع.',
     gear_bootslot: 'الحذاء', gear_jetslot: 'النفاثات', gear_handslot: 'اليدان', gear_coreslot: 'النواة',
+    weapon_secondlock: 'اصنع سيفك الأول واهزم حارس البلورات لاستعادة هذا السيف.',
+    weapon_connectorlock: 'أحضر السيفين بعد هزيمة حارس المسبك لاستعادة الوصلة.',
+    i_crystal2: 'سيف المطهّر الثاني', i_crystal2d: 'سيف ثانٍ مستقل. السيفان مجهّزان الآن. اضغط مطولاً على الهجوم ثم اتركه لتنفيذ دوامة إعصار. بدّل الأسلحة من التجهيزات.',
+    i_connector: 'وصلة المطهّر', i_connectord: 'تصل السيفين بسلاح واحد ذي نصلين. اضغط مطولاً على الهجوم ثم اتركه لرميه؛ سيعود إلى يديك. يمكنك اختيار السيفين مجدداً من التجهيزات.',
+    gear_dual: 'سيفا المطهّر', gear_weaponbusy: 'أكمل هجومك واستعد السلاح قبل تبديل التجهيزات.',
+    gear_clawsd: 'ضع الأسلحة جانباً وهاجم بالمخالب. تبقى السيوف في مخزونك.',
+    gear_swordd: 'أعد البلورة الخام إلى راتشيت لصنع سيفك الأول. جهّزه للهجوم بالسيف.',
+    gear_duald: 'استعد السيف الثاني من مخبأ البلورات. اضغط مطولاً ثم اترك الهجوم لتنفيذ دوامة إعصار.',
+    gear_joinedd: 'استعد الوصلة من المسبك بعد جمع السيفين. اضغط مطولاً ثم اترك الهجوم لرمي السلاح واستعادته.',
     gear_claws: 'مخالب فقط', gear_sword: 'سيف المطهّر', gear_joined: 'المطهّر الموصول',
     gear_fixed: 'هذا التطوير القصصي يبقى مركّباً.', gear_requiresjets: 'احصل على نفاثات الاندفاع أولاً.',
     gear_loading: 'تحميل الشخصية…', gear_more: '↑ / ↓ تصفّح القطع'
@@ -57,6 +75,10 @@ function gearRows(save) {
   for (const id of ids) rows.push(row(id, id === 'phantom' ? 'gear_phase' : 'c_' + id,
     id === 'phantom' ? 'gear_phaselock' : 'c_' + id + 'd', owned.includes(id), false, eq.includes(id),
     ['phantom', 'sprint'].includes(id) ? 'gear_jetslot' : id === 'ground' ? 'gear_bootslot' : id === 'claws' ? 'gear_handslot' : 'gear_coreslot'));
+  for (const mode of ['claws', 'single', 'dual', 'joined']) {
+    const name = mode === 'single' ? 'gear_sword' : 'gear_' + mode;
+    rows.push(row('weapon:' + mode, name, name + 'd', weaponOwned(mode, save), false, weaponMode(save) === mode, 'gear_handslot'));
+  }
   return rows;
 }
 function gearLayout() {
@@ -67,6 +89,13 @@ function gearLayout() {
 function gearActivate() {
   const r = gearLayout().rows[gearLayout().index];
   if (!r.acquired) { G.toast(t('gear_locked')); sfx('no'); return; }
+  if (r.id.startsWith('weapon:')) {
+    if (G.boomer || player && (player.swing || player.swingVis || player.chargeT > 0 || player.swirlT > 0)) {
+      G.toast(t('gear_weaponbusy')); sfx('no'); return;
+    }
+    if (equipWeapon(r.id.slice(7))) { persist(); sfx('ok'); }
+    return;
+  }
   if (r.fixed) { G.toast(t('gear_fixed')); sfx('ui'); return; }
   const eq = G.save.equip, at = eq.indexOf(r.id);
   if (at >= 0) eq.splice(at, 1);
@@ -121,7 +150,7 @@ function drawGear() {
     c.drawImage(part, x + (78 - part.width * scale) / 2, y, part.width * scale, part.height * scale);
   }
   const labels = [
-    ['gear_handslot', f.crystal2 ? 'gear_joined' : f.crystal ? 'gear_sword' : 'gear_claws', 116],
+    ['gear_handslot', ({claws:'gear_claws',single:'gear_sword',dual:'gear_dual',joined:'gear_joined'})[weaponMode()], 116],
     ['gear_jetslot', a.dash ? 'm_dash' : 'gear_empty', 374],
     ['gear_bootslot', a.djump ? 'm_djump' : 'gear_boots', 406]
   ];

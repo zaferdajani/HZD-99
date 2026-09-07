@@ -3,7 +3,7 @@ const cv = document.getElementById('cv');
 let c = cv.getContext('2d');
 const mainCtx = c;
 const SAVE_KEY = 'clawbyte_save', META_KEY = 'clawbyte_meta';
-const GAME_VERSION = 'CLAWBYTE v4.4';
+const GAME_VERSION = 'CLAWBYTE v4.5';
 // ---- update checker ----
 // The page re-fetches its own source bypassing the cache and compares the
 // build stamp, so a stale home-screen copy is told a newer one exists.
@@ -233,7 +233,7 @@ function loadMeta() {
 }
 function newSave(diff) {
   return {
-    v: 1, diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [], arms: [], armIdx: 0, stars: 6,
+    v: 1, weaponVersion: 1, weaponMode: 'claws', diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [], arms: [], armIdx: 0, stars: 6,
     slots: 3, iq: 0, skills: [], relics: [], flags: {}, broken: {}, visited: {}, shop: {},
     // SHE STARTS IN THE CRADLE, not on the meadow floor. W1 is the room the
     // opening film hands her to; A0 is where the game's economy starts, two
@@ -861,6 +861,14 @@ function loadRoom(id) {
   if (typeof preloadRoom === 'function') { try { preloadRoom(id); } catch (e) {} }
   G.enemies = []; G.projs = []; G.pickups = []; G.statics = []; G.boss = null;
   G.boomer = null;   // a thrown blade never crosses a room line — it is back in her paw
+  // An attack belongs to the room where it began. Do not carry a damaging
+  // hurricane, buffered strike or half-charged release through a doorway.
+  if (typeof player !== 'undefined' && player) {
+    player.swirlT = 0; player.swirlTick = 0; player.chargeT = 0;
+    player.chargeVoxed = false; player.swing = null; player.swingVis = null;
+    player.atkBuf = 0;
+    if (typeof hzdRelease === 'function') hzdRelease(0.025);
+  }
   G.wrecks = []; G.recharge = null; G.plats = []; G.saws = []; G.pools = []; G.x1Bridge = false; G.x1T = 0;
   ceilReset();                       // the roof of the last room does not follow you
   fringeMark();                      // and neither does what grew on its edges
@@ -938,7 +946,7 @@ function loadRoom(id) {
     } else if (kind === 'riddle') {
       spawnStatic('riddle', tx, ty, extra, nodeKey(extra));
     } else if (kind === 'secret') {
-      if (!G.save.flags['sr_' + extra]) spawnStatic('secret', tx, ty, extra);
+      if (!(extra === 'connector' && isHero()) && !G.save.flags['sr_' + extra]) spawnStatic('secret', tx, ty, extra);
     } else if (kind === 'pillar') {
       // the crystal pillar is quarried once per save — the shard in the bag
       // IS the pillar now, and a pillar that regrew would un-tell the story
@@ -1073,6 +1081,7 @@ function applyTheme() {
   tileDirty = true;
 }
 function startGame(save) {
+  migrateWeapons(save);
   save.iq = save.iq || 0; save.skills = save.skills || []; save.relics = save.relics || [];
   G.save = save;
   if (typeof qualRestore === 'function') qualRestore();  // the player's own call outranks the guess
@@ -1471,7 +1480,7 @@ const NPC_GIFT = {
 // then the moment is the flash, the sting and the card. The grant itself
 // never waits on the art.
 function forgeCrystal() {
-  G.save.flags.crystal = 1;
+  if (!grantWeapon('single')) return;
   persist();
   sfx('chargeReady');
   G.flash = Math.max(G.flash, 0.6);
@@ -1739,19 +1748,26 @@ function doInteract(s) {
     // a MIND NODE is one interactive puzzle now — see NODES in trials.js
     triStartNode(s.extra | 0, s);
   } else if (s.type === 'secret') {
+    // Story rewards remain in the world until prerequisites are earned.
+    // Visiting the Cache or Foundry early must never consume a locked item.
+    if (!isHero() && s.extra === 'crystal2' && (!G.save.flags.crystal || !G.save.flags.bossPrism)) {
+      G.toast(t('weapon_secondlock')); sfx('no'); return;
+    }
+    if (s.extra === 'connector' && (!weaponOwned('dual') || !G.save.flags.bossAtlas)) {
+      G.toast(t('weapon_connectorlock')); sfx('no'); return;
+    }
     G.save.flags['sr_' + s.extra] = 1;
     G.statics.splice(G.statics.indexOf(s), 1);
     burst(s.x + 12, s.y + 12, 26, '#ffd76a', 280, 0.8, 100, 4, true);
-    // THE OTHER END. Buried in the Crystal Cache — the one secret that is not
-    // a relic. The two halves were made for each other and the join says so
-    // out loud: the reunion sting (audio.js crystalJoin) fires here and
-    // nowhere else in the game.
-    if (s.extra === 'crystal2') {
-      G.save.flags.crystal2 = 1; persist();
-      sfx('crystalJoin');
+    if (s.extra === 'crystal2' || s.extra === 'connector') {
+      const joined = s.extra === 'connector';
+      if (isHero() && !joined) { G.save.flags.crystal = 1; G.save.flags.crystal2 = 1; grantWeapon('joined'); }
+      else grantWeapon(joined ? 'joined' : 'dual');
+      persist();
+      sfx(joined || isHero() ? 'crystalJoin' : 'chargeReady');
       G.flash = Math.max(G.flash, 0.5);
       burst(s.x + 12, s.y + 12, 34, '#ffffff', 320, 1.0, 40, 4, true);
-      showItem(t('i_crystal2'), t('i_crystal2d'));
+      showItem(t(joined ? 'i_connector' : 'i_crystal2'), t(joined ? 'i_connectord' : 'i_crystal2d'));
       return;
     }
     G.grantRelic(s.extra);
@@ -1827,6 +1843,7 @@ function tickNPCVox() {
   }
 }
 function update(dt) {
+  narrativeAudioTick();
   if (G.state === 'PLAY' || G.state === 'DIALOG') { tickNPCVox(); tickCaveLure(); }
   else if (typeof npcVoxQuietAll === 'function') npcVoxQuietAll();
   if (G.state === 'PLAY') {
@@ -4729,6 +4746,13 @@ let VISTA_SEAT = 0.10;    // was 0.34, was 0.62 — the bottom of the seating gr
 let VISTA_VEIL = 0.0;     // was 0.06, was 0.14 — a flat black wash over the entire frame
 let VISTA_GAMMA = 0.92;   // the mid-tone lift on the painting itself (1 = none)
 let WORLD_VEIL = 0.06;    // was 0.16 — the flat wash over the whole view
+// Architecture stays rigid. Only progress through the room and camera height
+// move a vista; ambient animation belongs to motes, foliage and light.
+function vistaPlacement(CW, CH, scale, progress, travel, cameraY, vertical, yOffset) {
+  const w = CW * scale, h = CH * scale;
+  return { x: -(w - 960) * (0.5 + (progress - 0.5) * travel),
+    y: -(h - 540) * 0.6 - cameraY * vertical - (yOffset || 0), w, h };
+}
 function drawZoneVista(P, zone, px, py) {
   const own = ROOM_VISTA[G.roomId];
   if (own && typeof mediaFetch === 'function') mediaFetch(own);
@@ -4832,12 +4856,9 @@ function drawZoneVista(P, zone, px, py) {
   // but the bottom of the frame now moves past faster than the top, which is
   // the whole of what the eye uses to judge distance.
   const t3 = performance.now() / 1000;
-  const breathe = 1 + Math.sin(t3 * 0.21) * 0.011;         // a live camera, never still
-  const plate = (x2, mul, travel, vert, sway, yOff) => {
-    const s2 = sc * mul * breathe;
-    const w2 = CW * s2, h2 = CH * s2;
-    const cx2 = -(w2 - 960) * (0.5 + (fx - 0.5) * travel) + Math.sin(t3 * 0.17 + sway) * 3.5 * travel;
-    const cy2 = -(h2 - 540) * 0.6 - py * vert - (yOff || 0);
+  const plate = (x2, mul, travel, vert, yOff) => {
+    const rect = vistaPlacement(CW, CH, sc * mul, fx, travel, py, vert, yOff);
+    const { x: cx2, y: cy2, w: w2, h: h2 } = rect;
     // WHERE THE PAINTING ACTUALLY LANDED ON SCREEN. Anything that has to line
     // up with something IN the backdrop — the gap between the city gates, for
     // one — cannot guess: the plate is scaled to overfill and panned by the
@@ -4859,7 +4880,7 @@ function drawZoneVista(P, zone, px, py) {
   if (near) {
     // no clear: the plate is opaque and covers the band edge to edge, so the
     // previous frame is fully overwritten by the draw that follows
-    plate(near, 1.13, 1, 0.115, 2.1, VNEAR_Y);
+    plate(near, 1.13, 1, 0.115, VNEAR_Y);
     near.globalCompositeOperation = 'destination-in';
     near.fillStyle = vistaMask(near);
     near.fillRect(0, 0, 960, VNEAR_H);
@@ -7269,6 +7290,26 @@ const LAIR = {
   prism:  { key: 'lairVault',  w: 210, ax: 0.46, ay: 0.70, par: 0.88, dim: 0.36 },
   mother: { key: 'lairCradle', w: 230, ax: 0.50, ay: 0.60, par: 0.88, dim: 0.36 },
 };
+// Tint on an isolated transparent surface. source-atop on the world canvas
+// would tint the opaque background too, leaving a box around every plant.
+// Image identity invalidates the cache automatically when a higher tier loads.
+const SCENERY_TINT_CACHE = new WeakMap();
+function sceneryTint(im, color, amount) {
+  if (!im || amount <= 0) return im;
+  let variants = SCENERY_TINT_CACHE.get(im);
+  if (!variants) { variants = new Map(); SCENERY_TINT_CACHE.set(im, variants); }
+  const key = color + '|' + amount;
+  if (variants.has(key)) return variants.get(key);
+  const cv = document.createElement('canvas');
+  cv.width = im.naturalWidth || im.width; cv.height = im.naturalHeight || im.height;
+  const ctx = cv.getContext('2d');
+  ctx.drawImage(im, 0, 0);
+  ctx.globalCompositeOperation = 'source-atop';
+  ctx.globalAlpha = clamp(amount, 0, 1); ctx.fillStyle = color;
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  variants.set(key, cv);
+  return cv;
+}
 function drawLair() {
   const b = G.boss;
   if (!b || (typeof isHero === 'function' && isHero())) return;
@@ -7287,14 +7328,8 @@ function drawLair() {
   // -cam, so shifting by (1 - par) x the camera offset slides it back
   c.translate(camSX() * (1 - L.par), camSY() * (1 - L.par));
   c.globalAlpha = 1 - L.dim;
-  c.drawImage(im, x0, y0, w, h);
-  // ...and a veil of the room's own colour over it, so it sits IN the air
-  // rather than behind a sheet of grey. Multiply-ish via the zone glow at low
-  // alpha keeps it the room's picture and not a decal.
-  c.globalAlpha = L.dim * 0.5;
-  c.globalCompositeOperation = 'source-atop';
-  c.fillStyle = (PAL[G.roomDef.zone] || {}).far || '#0b0d11';
-  c.fillRect(x0 - 4, y0 - 4, w + 8, h + 8);
+  const tinted = sceneryTint(im, (PAL[G.roomDef.zone] || {}).far || '#0b0d11', L.dim * 0.5);
+  c.drawImage(tinted, x0, y0, w, h);
   c.restore();
 }
 // ===========================================================================
@@ -9936,7 +9971,6 @@ function gateEnter() {
   // and the room answers with its own mass
   cam.shake = Math.max(cam.shake, cityFirst ? 5 : 2.5);
   if (typeof padRumble === 'function') padRumble(cityFirst ? 0.55 : 0.3, 0.5, cityFirst ? 340 : 160);
-  if (typeof hzdSay === 'function') hzdSay('purr', 0);
   return true;
 }
 // Every depth door advertises itself: a soft glimmer where it stands, and an
@@ -10267,6 +10301,7 @@ function drawGateWalk() {
 function wakeStart() {
   if (!G.save || (G.save.flags && G.save.flags.woke)) return;
   G.wake = { t: 2.0 };
+  narrativeAudioTick();
   if (typeof sfx === 'function') sfx('powerUp');
   if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 4);
   if (typeof padRumble === 'function') padRumble(0.5, 0.4, 700);
@@ -10281,7 +10316,6 @@ function updateWake(dt) {
     G.wake = null;
     if (G.save.flags) G.save.flags.woke = 1;
     if (typeof persist === 'function') persist();
-    if (typeof hzdSay === 'function') hzdSay('purr', 0);
   }
 }
 function drawFlora() {
@@ -10322,11 +10356,7 @@ function drawFlora() {
     c.rotate((p.lean || 0) + Math.sin(now * 0.5 + p.ph) * 0.02);
     if (p.flip) c.scale(-1, 1);
     c.globalAlpha = 1 - p.s.dim;
-    c.drawImage(im, -w / 2, -h, w, h);
-    c.globalAlpha = p.s.dim * 0.38;
-    c.globalCompositeOperation = 'source-atop';
-    c.fillStyle = far;
-    c.fillRect(-w / 2 - 2, -h - 2, w + 4, h + 4);
+    c.drawImage(sceneryTint(im, far, p.s.dim * 0.38), -w / 2, -h, w, h);
     c.restore();
   }
 }
@@ -13497,34 +13527,35 @@ function bgPlanePass() {
   c.globalAlpha = 1;
 }
 
-function lightPass(P) {
-  // The whole pass is a luxury: it makes the picture better and does nothing
-  // for how the game plays, so it rides the same frame budget as the
-  // background's depth plate and is the first thing dropped when the rate
-  // slips. It was costing ten milliseconds a frame while the budget had
-  // ALREADY given up on the depth plate, which is the wrong way round.
-  if (richK <= 0) return;
-  const L = ZONE_LIGHT[G.roomDef.zone];
-  if (L) {
-    // the wash: a gradient from the room's light toward its shadow
-    const g = c.createLinearGradient(0, 540 * L.from - 220, 0, 540);
-    const [r2, g2, b2] = L.wash;
-    // The wash multiplies toward a LIGHT version of the kingdom's colour, not
-    // the colour itself. Multiplying by a saturated tint only darkens, and a
-    // second additive pass to undo that is two full-frame composites for one
-    // effect — this tints in one.
-    const lift = (v) => Math.round(255 - (255 - v) * L.k * richK);
-    g.addColorStop(0, 'rgb(255,255,255)');
-    g.addColorStop(1, 'rgb(' + lift(r2) + ',' + lift(g2) + ',' + lift(b2) + ')');
-    c.save();
-    c.globalCompositeOperation = 'multiply';
-    c.fillStyle = g; c.fillRect(0, 0, 960, 540);
-    c.restore();
-    c.globalAlpha = 1;
-  }
-  // (no bloom here — see drawWorldFrame. This pass runs after drawScreenLift,
-  // and a bloom after the lift has no darks left to reject.)
+// A one-pixel-wide cached grade keeps scene lighting coherent even when
+// bloom and the extra background copy are dropped by the performance budget.
+const ZONE_GRADE_CACHE = new Map();
+function zoneLightGrade(L, quality) {
+  const strength = 0.35 + 0.65 * (Math.round(clamp(quality, 0, 1) * 32) / 32);
+  const key = JSON.stringify([L.from, L.wash, L.k, strength]);
+  if (ZONE_GRADE_CACHE.has(key)) return ZONE_GRADE_CACHE.get(key);
+  const cv = document.createElement('canvas'); cv.width = 1; cv.height = 540;
+  const ctx = cv.getContext('2d');
+  const g = ctx.createLinearGradient(0, 540 * L.from - 220, 0, 540);
+  const lift = v => Math.round(255 - (255 - v) * L.k * strength);
+  g.addColorStop(0, 'rgb(255,255,255)');
+  g.addColorStop(1, 'rgb(' + L.wash.map(lift).join(',') + ')');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 1, 540);
+  if (ZONE_GRADE_CACHE.size >= 256) ZONE_GRADE_CACHE.clear();
+  ZONE_GRADE_CACHE.set(key, cv);
+  return cv;
 }
+function lightPass(P) {
+  const L = ZONE_LIGHT[G.roomDef.zone];
+  if (!L) return;
+  c.save();
+  c.globalCompositeOperation = 'multiply';
+  c.drawImage(zoneLightGrade(L, richK), 0, 0, 960, 540);
+  c.restore();
+  c.globalAlpha = 1;
+  // Bloom remains in drawWorldFrame, before the accessibility lift.
+}
+
 function dimPanel(x, y, w, h) {
   c.fillStyle = 'rgba(6,10,16,0.88)'; rr(c, x, y, w, h, 12); c.fill();
   c.strokeStyle = 'rgba(120,200,255,0.35)'; c.lineWidth = 1.5; rr(c, x, y, w, h, 12); c.stroke();

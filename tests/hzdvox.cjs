@@ -116,6 +116,9 @@ const { chromium } = require('playwright');
   // ---- THE GATE, and the routing ----------------------------------------
   const gate = await page.evaluate(async () => {
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+    // This block tests combat vocal routing; the scripted wake owns a silent
+    // player voice channel and is exercised separately in dialogue-audio.
+    sv.flags.woke = 1;
     startGame(sv);
     // The buffers are decoded by loadMedia(), which is gated on AC existing —
     // and AC only exists after a user gesture in a real session. A harness gets

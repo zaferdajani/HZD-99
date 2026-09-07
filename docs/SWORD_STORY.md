@@ -38,7 +38,7 @@ ownership persists when weapons are put away.
   equipment. Never infer new-story connector ownership from a second-sword flag
   in new saves; old and new progression versions must be distinguished.
 
-## Verified implementation gaps
+## Historical implementation gaps (before v4.5)
 
 On base 9425f4ee99480a81c428c2d7295e2e9a2bd4a145 plus the local repair patch:
 
@@ -59,3 +59,11 @@ Acceptance must exercise a fresh save through all four stages, a reload at each
 stage, putting weapons away, both facings, charged input by keyboard/touch/pad,
 and return/cleanup of the thrown weapon. New art requires the owner's review
 under CLAUDE.md before integration. No changes are deployed by this document.
+
+## v4.5 implementation status
+
+The four-stage ownership and equipped-mode code is implemented in `js/weapons.js`. The existing first forge is retained; X1 now grants dual mode after the first forge and Prism. A separate C4 connector requires both swords and the Foundry guardian. Gear switches between earned modes and claws, with switching blocked during combat. Versioned migration preserves the joined form earned under the old rules.
+
+Ordinary joined combos remain melee. Dual charge triggers the hurricane; joined charge triggers a returning throw. Room changes and death recover the weapon and cancel active charge/spin. The Returning Blade skill now strengthens the throw rather than unlocking a third-hit throw.
+
+Weapon-specific body-animation integration is NOT complete. The current body renderer still lacks accepted single/dual/joined continuous strips. Five new videos and two revised reference images were reviewed in `assets/source/hero/weapon-review/review.json`; defects include framing, facing, holds and lost/extra blade geometry. None is installed. Do not call the storyline fully finished while armed combat can still display the old unarmed body animation.

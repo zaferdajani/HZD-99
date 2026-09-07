@@ -5295,3 +5295,7 @@ idle_side.jpg for both start/end frames. Keep camera fixed, feet grounded,
 right profile, bare paws and back. Review before extraction or wiring.
 
 Take 3 completed and was inspected: unarmed, returns to idle, prolonged extended-paw hold. Contact sheet archived as `assets/source/hero/scratch-review/take3-contact.jpg`. Candidate only; not wired.
+
+## 2026-09-07 weapon motion review
+
+Five generated motion studies (single, dual, joined, hurricane, scratch) and two revised weapon-reference images completed. Job IDs and permanent source URLs: `assets/source/hero/weapon-review/review.json`. Contact sheets archived beside it. None accepted or wired: long holds, camera-facing dual, missing second joined blade, added tail and incorrect replacement reference geometry remain. No repeated-frame fallback has been installed. Continuous weapon-body animation and owner art review remain required.
