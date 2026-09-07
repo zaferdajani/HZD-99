@@ -1,110 +1,84 @@
-// Build the desktop app — a real .exe you can double-click.
-//
-//   node tools/pack-desktop.cjs win32      Windows x64  (default)
-//   node tools/pack-desktop.cjs linux      Linux x64
-//   node tools/pack-desktop.cjs darwin     macOS
-//
-// CROSS-BUILDING WINDOWS FROM LINUX, without Wine. @electron/packager does not
-// compile anything: it downloads the prebuilt Electron runtime for the target
-// platform and lays your files beside it. That is why a Windows .exe can be
-// produced from this container at all. The one thing it cannot do without Wine
-// is rewrite the .exe's embedded icon and version resource — those need
-// `rcedit`, which is a Windows binary — so on a non-Windows host we skip them
-// and the app ships with Electron's default icon. It runs identically; it just
-// wears the wrong hat until it is built on Windows or with Wine present.
-//
-// The app is assembled into a staging directory rather than packaged from the
-// repo, because the repo contains the whole toolchain — node_modules, the test
-// harnesses, six thousand lines of source — and none of that belongs in a
-// player's download.
-const { packager } = require('@electron/packager');
-const { execFileSync } = require('child_process');
-const fs = require('fs'), path = require('path');
-
-const ROOT = path.join(__dirname, '..');
+// npm ci --prefix desktop --ignore-scripts
+// node tools/pack-desktop.cjs win32
+// A portable folder containing CLAWBYTE.exe and required runtime/resources.
+const { execFileSync } = require('node:child_process');
+const { createRequire } = require('node:module');
+const { pathToFileURL } = require('node:url');
+const { createHash } = require('node:crypto');
+const fs = require('node:fs'), path = require('node:path');
+const ROOT = path.resolve(__dirname, '..');
 const STAGE = path.join(ROOT, 'build', 'app');
 const OUT = path.join(ROOT, 'build', 'dist');
-const platform = (process.argv[2] || 'win32').replace('windows', 'win32');
-
+const desktopRequire = createRequire(path.join(ROOT, 'desktop', 'package.json'));
+const platform = process.argv[2] || 'win32';
+if (!['win32', 'linux', 'darwin'].includes(platform)) throw new Error('Expected win32, linux or darwin');
+const sha256 = f => createHash('sha256').update(fs.readFileSync(f)).digest('hex');
+function files(dir, prefix = '') {
+  return fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name, 'en')).flatMap(e => {
+    const name = prefix + e.name;
+    return e.isDirectory() ? files(path.join(dir, e.name), name + '/') : [name];
+  });
+}
 function copyDir(from, to) {
   fs.mkdirSync(to, { recursive: true });
-  let n = 0, bytes = 0;
-  for (const e of fs.readdirSync(from, { withFileTypes: true })) {
-    const a = path.join(from, e.name), b = path.join(to, e.name);
-    if (e.isDirectory()) { const r = copyDir(a, b); n += r.n; bytes += r.bytes; }
-    else { fs.copyFileSync(a, b); n++; bytes += fs.statSync(a).size; }
+  for (const name of files(from)) {
+    const target = path.join(to, name);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(path.join(from, name), target);
   }
-  return { n, bytes };
 }
-
 (async () => {
-  // 1. the game itself, exactly what the web gets
-  console.log('building…');
-  execFileSync('node', [path.join(ROOT, 'build.cjs')], { stdio: 'inherit' });
-  execFileSync('node', [path.join(__dirname, 'pack-www.cjs')], { stdio: 'inherit' });
-
-  // 2. stage: the shell, the game, and a package.json with NO dependencies —
-  //    main.js uses only Node built-ins and electron itself, so the packaged
-  //    app carries no node_modules at all
+  const toolchain = desktopRequire('./package.json');
+  const elecVer = desktopRequire('electron/package.json').version;
+  const packagerVer = JSON.parse(fs.readFileSync(path.join(ROOT, 'desktop/node_modules/@electron/packager/package.json'), 'utf8')).version;
+  if (elecVer !== toolchain.devDependencies.electron || packagerVer !== toolchain.devDependencies['@electron/packager']) {
+    throw new Error('Desktop toolchain differs from pins. Run npm ci --prefix desktop --ignore-scripts');
+  }
+  const { packager } = await import(pathToFileURL(desktopRequire.resolve('@electron/packager')).href);
+  execFileSync(process.execPath, [path.join(ROOT, 'build.cjs')], { cwd: ROOT, stdio: 'inherit' });
+  execFileSync(process.execPath, [path.join(__dirname, 'pack-www.cjs')], { cwd: ROOT, stdio: 'inherit' });
+  // Only this generated staging tree is cleared. Never package the repository,
+  // generation archive, or developer dependencies.
   fs.rmSync(STAGE, { recursive: true, force: true });
   fs.mkdirSync(STAGE, { recursive: true });
-  fs.copyFileSync(path.join(ROOT, 'desktop', 'main.js'), path.join(STAGE, 'main.js'));
-  const ver = (JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version) || '1.0.0';
+  for (const name of fs.readdirSync(path.join(ROOT, 'desktop')).filter(n => /\.(?:js|cjs)$/.test(n))) {
+    fs.copyFileSync(path.join(ROOT, 'desktop', name), path.join(STAGE, name));
+  }
+  const ver = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
   fs.writeFileSync(path.join(STAGE, 'package.json'), JSON.stringify({
     name: 'clawbyte', productName: 'CLAWBYTE', version: ver,
-    description: 'CLAWBYTE — a robo-cat metroidvania',
-    main: 'main.js', author: 'Zafer Dajani', license: 'UNLICENSED',
-  }, null, 2));
-  const r = copyDir(path.join(ROOT, 'www'), path.join(STAGE, 'www'));
-  console.log('staged ' + r.n + ' files, ' + (r.bytes / 1048576).toFixed(1) + ' MB of game');
-
-  // 3. package
-  fs.mkdirSync(OUT, { recursive: true });
-  // The staged package.json deliberately has no dependencies, so the packager
-  // cannot infer which Electron to fetch from it. Told explicitly, from the one
-  // installed in this repo — the shell and the runtime stay in step.
-  const elecVer = JSON.parse(fs.readFileSync(
-    path.join(ROOT, 'node_modules', 'electron', 'package.json'), 'utf8')).version;
-  console.log('electron ' + elecVer + ' -> ' + platform + ' x64');
-  // PRE-FETCHED RUNTIMES. The packager will download the target platform's
-  // Electron itself, and through this container's proxy that download arrives
-  // truncated and dies inside undici with an assertion that says nothing about
-  // what went wrong. curl handles the proxy correctly, so the zip is fetched
-  // beside the build and handed over — which also makes the build repeatable
-  // offline, and makes it obvious what is being shipped.
-  //
-  //   curl -L -o build/zips/electron-v<ver>-<platform>-x64.zip \
-  //     https://github.com/electron/electron/releases/download/v<ver>/electron-v<ver>-<platform>-x64.zip
-  const zipDir = path.join(ROOT, 'build', 'zips');
-  const zip = path.join(zipDir, `electron-v${elecVer}-${platform}-x64.zip`);
-  const haveZip = fs.existsSync(zip);
-  if (haveZip) console.log('using pre-fetched runtime: ' + path.basename(zip));
-  const opts = {
-    dir: STAGE, out: OUT, platform, arch: 'x64',
-    electronVersion: elecVer,
-    ...(haveZip ? { electronZipDir: zipDir } : {}),
-    name: 'CLAWBYTE', appVersion: ver,
-    overwrite: true, prune: false, asar: true,
-    appCopyright: 'Copyright (c) ' + new Date(2026, 0, 1).getFullYear() + ' Zafer Dajani',
+    description: 'CLAWBYTE — a robo-cat metroidvania', main: 'main.js',
+    author: 'Zafer Dajani', license: 'UNLICENSED'
+  }, null, 2) + '\n');
+  copyDir(path.join(ROOT, 'www'), path.join(STAGE, 'www'));
+  let commit = 'unknown', dirty = true;
+  try {
+    commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim();
+    dirty = !!execFileSync('git', ['status', '--porcelain', '--untracked-files=no'], { cwd: ROOT, encoding: 'utf8' }).trim();
+  } catch { /* source archives can build, but cannot claim a commit */ }
+  const manifest = {
+    game: 'CLAWBYTE', packageVersion: ver, commit, dirty,
+    platform, arch: 'x64', electron: elecVer, packager: packagerVer,
+    node: process.version, signed: false,
+    gameFiles: Object.fromEntries(files(path.join(STAGE, 'www')).map(n => [n, sha256(path.join(STAGE, 'www', n))]))
   };
-  // win32 metadata is written by rcedit, a Windows executable. Asking for it on
-  // Linux without Wine fails the whole build, so it is simply not asked for.
-  if (platform === 'win32' && process.platform !== 'win32') {
-    console.log('note: building win32 from ' + process.platform +
-      ' — skipping icon/version resources (they need rcedit, a Windows binary)');
-    opts.win32metadata = undefined;
+  fs.writeFileSync(path.join(STAGE, 'build-info.json'), JSON.stringify(manifest, null, 2) + '\n');
+  if (process.argv.includes('--stage-only')) {
+    console.log('Desktop staging verified: ' + Object.keys(manifest.gameFiles).length + ' game files');
+    return;
   }
+  const opts = {
+    dir: STAGE, out: OUT, platform, arch: 'x64', electronVersion: elecVer,
+    name: 'CLAWBYTE', executableName: 'CLAWBYTE',
+    overwrite: true, prune: false, asar: true,
+    appVersion: ver, appCopyright: 'Copyright (c) 2026 Zafer Dajani'
+  };
   const paths = await packager(opts);
-  for (const p of paths) {
-    let n = 0, bytes = 0;
-    const walk = d => { for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-      const f = path.join(d, e.name);
-      if (e.isDirectory()) walk(f); else { n++; bytes += fs.statSync(f).size; }
-    } };
-    walk(p);
-    console.log('\n' + p);
-    console.log('  ' + n + ' files, ' + (bytes / 1048576).toFixed(1) + ' MB');
-    const exe = fs.readdirSync(p).filter(f => /\.exe$/i.test(f));
-    if (exe.length) console.log('  run: ' + exe.join(', '));
+  for (const dir of paths) {
+    fs.copyFileSync(path.join(STAGE, 'build-info.json'), path.join(dir, 'build-info.json'));
+    fs.copyFileSync(path.join(ROOT, 'desktop', 'PLAYER_README.txt'), path.join(dir, 'PLAYER_README.txt'));
+    const checksums = files(dir).filter(n => n !== 'SHA256SUMS.txt').map(n => sha256(path.join(dir, n)) + '  ' + n).join('\n');
+    fs.writeFileSync(path.join(dir, 'SHA256SUMS.txt'), checksums + '\n');
+    console.log('Portable desktop build: ' + dir);
   }
-})().catch(e => { console.error(e); process.exit(1); });
+})().catch(e => { console.error(e); process.exitCode = 1; });

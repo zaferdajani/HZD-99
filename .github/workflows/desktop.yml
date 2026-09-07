@@ -1,0 +1,79 @@
+name: Build Windows desktop
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - name: Preserve committed line endings
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - name: Install locked packaging tools
+        run: npm ci --prefix desktop --ignore-scripts --no-audit --no-fund
+      - name: Check local asset protocol
+        run: node tests/desktop-protocol.cjs
+      - name: Package the offline Windows game
+        run: node tools/pack-desktop.cjs win32
+      - name: Verify executable and packaged payload
+        shell: pwsh
+        run: |
+          $game = 'build/dist/CLAWBYTE-win32-x64'
+          foreach ($file in @('CLAWBYTE.exe', 'resources/app.asar', 'build-info.json', 'PLAYER_README.txt', 'SHA256SUMS.txt', 'LICENSE', 'LICENSES.chromium.html')) {
+            if (!(Test-Path "$game/$file")) { throw "Missing desktop file: $file" }
+          }
+          $info = Get-Content "$game/build-info.json" -Raw | ConvertFrom-Json
+          if ($info.commit -ne $env:GITHUB_SHA) { throw 'Packaged commit does not match workflow commit' }
+          if ($info.dirty) { throw 'Rebuild changed tracked content; commit generated game pages first' }
+          $bytes = [System.IO.File]::ReadAllBytes((Resolve-Path "$game/CLAWBYTE.exe"))
+          if ($bytes[0] -ne 77 -or $bytes[1] -ne 90) { throw 'Not a Windows executable' }
+      - name: Launch offline and verify saves across restarts
+        shell: pwsh
+        run: |
+          $exe = (Resolve-Path 'build/dist/CLAWBYTE-win32-x64/CLAWBYTE.exe').Path
+          $profile = Join-Path $env:RUNNER_TEMP 'clawbyte-smoke-profile'
+          foreach ($phase in @('write', 'read')) {
+            $report = Join-Path $env:RUNNER_TEMP "clawbyte-smoke-$phase.json"
+            $args = @("--smoke-test=`"$report`"", "--smoke-phase=$phase", "--smoke-profile=`"$profile`"")
+            $process = Start-Process -FilePath $exe -ArgumentList $args -PassThru
+            if (!$process.WaitForExit(120000)) {
+              Stop-Process -Id $process.Id -Force
+              throw "Desktop $phase smoke test timed out"
+            }
+            if ($process.ExitCode -ne 0 -or !(Test-Path $report)) { throw "Desktop $phase smoke test failed" }
+            $result = Get-Content $report -Raw | ConvertFrom-Json
+            if (!$result.ok -or !$result.offline -or !$result.movement -or !$result.mediaRange) { throw 'Desktop runtime checks failed' }
+            if ($phase -eq 'read' -and !$result.saveRecovered) { throw 'Desktop save was not recovered' }
+            Get-Content $report
+          }
+      - name: Save desktop smoke diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CLAWBYTE-Windows-smoke-${{ github.sha }}
+          path: ${{ runner.temp }}/clawbyte-smoke-*.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CLAWBYTE-Windows-x64-${{ github.sha }}
+          path: build/dist/CLAWBYTE-win32-x64/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

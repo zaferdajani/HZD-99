@@ -77,7 +77,7 @@ const PRE = {
 function preloadPolicy() {
   // Capacitor / desktop shell: assets are local, there is no data plan to spend
   const packaged = (typeof window !== 'undefined') &&
-    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:');
+    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:' || location.protocol === 'app:');
   if (packaged) return { depth: 99, far: true, max: 4, lowAll: false };  // no race to win locally
   const c = (typeof navigator !== 'undefined') &&
     (navigator.connection || navigator.mozConnection || navigator.webkitConnection);

@@ -29,6 +29,7 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['desktop-protocol', 'desktop local origin, media streaming and path confinement', { noBrowser: true }],
   ['cave-passage', 'real cave traversal and reciprocal gate walks'],
   ['cave-ground', 'overhead pockets never become cave floor', { noBrowser: true }],
   ['seam-route', 'Seam onward route, quest order and anchored doors', { noBrowser: true }],

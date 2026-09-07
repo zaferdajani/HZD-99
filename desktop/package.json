@@ -1,0 +1,9 @@
+{
+  "name": "clawbyte-desktop-toolchain",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Isolated, pinned desktop packaging tools; not shipped with the game",
+  "engines": { "node": ">=22.12.0" },
+  "scripts": { "pack:win": "node ../tools/pack-desktop.cjs win32" },
+  "devDependencies": { "@electron/packager": "20.3.0", "electron": "44.2.0" }
+}

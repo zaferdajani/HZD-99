@@ -1270,7 +1270,7 @@ const DEMO_URL = '';
 function demoOn() {
   if (!DEMO_OFFER) return false;
   const packaged = (typeof window !== 'undefined') &&
-    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:');
+    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:' || location.protocol === 'app:');
   if (packaged) return false;
   if (G.save && G.save.full) return false;
   return true;
@@ -4074,7 +4074,7 @@ const PURIFY_LIGHT = (typeof window !== 'undefined' && window.VID_LIGHT) || {};
 function videoLight() {
   if (!PURIFY_LIGHT || !Object.keys(PURIFY_LIGHT).length) return false;
   const packaged = (typeof window !== 'undefined') &&
-    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:');
+    (!!window.Capacitor || location.protocol === 'file:' || location.protocol === 'capacitor:' || location.protocol === 'app:');
   if (packaged) return false;
   const c = (typeof navigator !== 'undefined') &&
     (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
