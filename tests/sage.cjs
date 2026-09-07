@@ -63,7 +63,7 @@ const { chromium } = require('playwright');
     out.clawGlances = sg.hp >= hpBefore && !sg.tame;
 
     // ---- crystal: purity fills, full purity tames -----------------------
-    G.save.flags.crystal = 1;
+    grantWeapon('single', G.save);
     const battBefore = invCount('batt');
     let hits = 0;
     while (!sg.tame && hits++ < 10) dealDmg(sg, 20, null, sg.x, sg.y, true);
