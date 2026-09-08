@@ -49,10 +49,16 @@ const check = (name, ok, detail) => {
       const tNow = realNow.call(performance);
       performance.now = () => tNow; Math.random = () => 0.5;
       const w0 = cv.width, h0 = cv.height;
-      for (let f = 0; f < 4; f++) await new Promise(k => requestAnimationFrame(k));
+      // Render the same simulation state synchronously. Freezing performance.now
+      // does not freeze requestAnimationFrame's timestamp or the game's G.time:
+      // four intervening updates moved particles, the cat and the camera, whose
+      // changed pixels were incorrectly counted as blue-green grass.
+      draw(tNow);
+      const control = grab();
+      draw(tNow);
       const A = grab();
       G.fringeProbe = 1;
-      for (let f = 0; f < 4; f++) await new Promise(k => requestAnimationFrame(k));
+      draw(tNow);
       const B = grab();
       G.fringeProbe = 0;
       performance.now = realNow; Math.random = realRand;
@@ -60,6 +66,13 @@ const check = (name, ok, detail) => {
       // tier when the frame rate slips) — compare the BUFFERS, not the sizes
       if (cv.width !== w0 || cv.height !== h0 || A.length !== B.length) continue;
       const n = A.length / 4;
+      let unrelated = 0;
+      for (let i = 0; i < n; i++) {
+        if (Math.abs(A[i * 4] - control[i * 4]) +
+            Math.abs(A[i * 4 + 1] - control[i * 4 + 1]) +
+            Math.abs(A[i * 4 + 2] - control[i * 4 + 2]) >= 24) unrelated++;
+      }
+      out.unrelated = unrelated;
       let s = 0, v = 0, hu = 0, c = 0, sB = 0, vB = 0;
       for (let i = 0; i < n; i++) {
         const d0 = Math.abs(A[i * 4] - B[i * 4]) + Math.abs(A[i * 4 + 1] - B[i * 4 + 1]) +
@@ -85,6 +98,8 @@ const check = (name, ok, detail) => {
     return out;
   });
 
+  check('the frame comparison isolates the grass', r.unrelated === 0,
+        r.unrelated + ' unrelated changed pixels in the unchanged control');
   check('the meadow actually grows something', (r.px || 0) > 3000, (r.px || 0) + ' px of grass');
   if (r.grass) {
     // 34 is the floor, and the number is chosen from what the composite can

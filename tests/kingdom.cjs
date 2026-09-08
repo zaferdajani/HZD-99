@@ -227,6 +227,13 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           const dest = ROOMS[def.to];
           const guard = dest && dest.cave && !G.roomDef.cave && def.to[0] === 'G';
           const key = guard ? GATE_PLATE_BY_ZONE[G.roomDef.zone] : (dest && dest.cave && !def.style) ? MOUTH_PLATE_BY_ZONE[G.roomDef.zone] : null;
+          // Meadow guardian doors use the cave-mouth fallback; named NPC
+          // structures have their own plates. They need the same load barrier
+          // as the other guardian plates before their visibility is measured.
+          const waitKey = key || ((G.roomDef.cave || (dest && dest.cave))
+            ? MOUTH_PLATE_BY_ZONE[G.roomDef.zone]
+            : ({ booth: 'boothFront', oracle: 'oracleBooth', forge: 'forgeFront',
+                carrel: 'carrelFront', hollow: 'hollowFront', kerf: 'kerfFront' })[def.style]);
           // WAIT FOR THE FULL TIER, NOT FOR THE FIRST PICTURE.
           //
           // mediaFetch(urgent) asks for TWO images: the quarter-scale stand-in
@@ -243,12 +250,24 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           // MEDIA_LOW 3 is set by the full sheet's own onload, so it means the
           // real image is in AND nothing is pending: the frame cannot move
           // under the measurement any more.
-          if (key) {
-            mediaFetch(key, true);
+          if (waitKey && MEDIA_SRC.images[waitKey]) {
+            mediaFetch(waitKey, true);
             const t0 = Date.now();
-            while (Date.now() - t0 < 20000 && MEDIA_LOW[key] !== 3) await new Promise(r => setTimeout(r, 50));
+            while (Date.now() - t0 < 20000 && MEDIA_LOW[waitKey] !== 3) await new Promise(r => setTimeout(r, 50));
+            if (MEDIA_LOW[waitKey] !== 3) throw new Error('Door plate did not load: ' + waitKey);
           }
-          const shot = () => { draw(); const sx = Math.round(wx - camSX()); const x0 = Math.max(0, sx - 220), x1 = Math.min(960, sx + 220); return { d: c.getImageData(x0, 0, Math.max(1, x1 - x0), 540).data, x0, x1 }; };
+          // Async loading can let the room's arrival dialogue open. Measure
+          // the structure itself, not a dimmed frame under its story panel.
+          G.dialog = null; G.state = 'PLAY'; G.toasts = []; G.zoneToast = null;
+          const shot = () => {
+            draw();
+            const sx = Math.round(wx - camSX()), scale = cv.width / 960;
+            const x0 = Math.max(0, Math.round((sx - 220) * scale));
+            const x1 = Math.min(cv.width, Math.round((sx + 220) * scale));
+            // getImageData uses physical buffer pixels, unlike draw's scaled
+            // coordinates. At low quality a 960x540 crop samples empty space.
+            return { d: c.getImageData(x0, 0, Math.max(1, x1 - x0), cv.height).data, x0, x1 };
+          };
           const A = shot();
           const saved = GATE_ROOM[id]; GATE_ROOM[id] = Array.isArray(saved) ? saved.filter((d, k) => k !== di) : null;
           if (Array.isArray(GATE_ROOM[id]) && !GATE_ROOM[id].length) GATE_ROOM[id] = null;

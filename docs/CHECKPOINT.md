@@ -7,6 +7,47 @@ resolving that approval boundary, regardless of older standing instructions.
 
 ## Owner story and tutorial continuation
 
+### Follow-up: charged combat and connected chapter validation
+
+- Fixed `Player.releaseCharged` and `swirlPass` bypassing `dealDmg`. Before
+  the fix a charged attack drove a sage below zero HP instead of respecting
+  the 30% song-lock floor. Specials now obey purification, protected allies,
+  guarding and elemental counter rules; protected hits cannot farm volts.
+- `tests/sage-specials.cjs` reproduced that failure before the patch and now
+  checks both specials, cleansing, once-only gifts, protected targets and
+  ordinary enemy damage. `tests/chapter-one.cjs` carries one actual save from
+  battery rescue through held-input quarrying, return/forge and real swing
+  cleansing, with reloads before the forge and after the sage. It grants no
+  quest items, weapons or boss flags. Rooms/positions are staged, so this is
+  connected gameplay integration, not a human campaign playthrough.
+- Separately audited actual cave collision/movement from A5 through CV1/CV2
+  to the CV3 pillar and back, plus the optional CV1B bench route. Ordinary
+  claws clear rubble and basic jumps suffice; no abilities or sword granted,
+  no repositioning after initial A5 placement. Enemies were removed for this
+  collision audit; combat and stone collection are tested separately.
+- Corrected the meadow measurement: old frame pairs advanced the simulation
+  and counted unrelated pixels. Same-state rendering yields hue 103 degrees,
+  saturation 45.1 and zero unrelated control pixels. Original limits remain;
+  an in-memory faded-grass mutation fails them. No art/rendering colour change.
+- Focused chapter-one, sage-specials, meadow, twin, crystal and sage passed.
+  All 97 harnesses were exercised across the initial run and a resumed run
+  from `wolves` after execution was interrupted. Four remain failing:
+  `kingdom`, `hzdvox`, `tinker`, and `hero`; this is not a green release gate.
+- Kingdom sampling now waits for declared fallback artwork, clears arrival
+  dialogue and uses canvas-scaled crops. Isolated A4/B3 door samples pass,
+  but sequential kingdom runs still measure 1.2%/1.3% against the unchanged
+  1.5% minimum. That sequence-dependent visibility failure is unresolved.
+  Voice register (95/216 Hz), Ratchet silhouette (IoU 0.880), and hero frontal
+  claw/burst motion remain art/audio review failures; thresholds are unchanged.
+- Windows x64 packaging succeeded with the pinned checked runtime. Native
+  Windows execution remains unverified for this revision; building its EXE
+  does not substitute for the Windows workflow's two-launch smoke test.
+
+The current art ledger supersedes older jab requests with the owner's claw
+scratch brief. Archived scratch/weapon-motion candidates are not approved.
+No approved unused replacement was found for the remaining hzdvox/tinker/hero
+failures; do not silently wire a rejected take or weaken an art threshold.
+
 Read `docs/STORY_CANON.md` first. It permanently records the owner's latest
 account: the evil robot hijacked Mother's song; the sleeping cat escaped;
 Ratchet's necklace protected him; restoring his battery leads to the cave,

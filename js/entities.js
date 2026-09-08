@@ -2028,8 +2028,11 @@ class Player {
       const ex = e.x + e.w / 2 - cx, ey = e.y + e.h / 2 - cy;
       const d = Math.hypot(ex, ey);
       if (d > R + Math.max(e.w, e.h) / 2) continue;
+      // Specials obey the same purification, ally and guardian defenses as
+      // ordinary strikes. A blocked/purifying hit earns no launch or volts.
+      if (dealDmg(e, dm, armEl(), e.x + e.w / 2, e.y + e.h / 2, true) <= 0) continue;
       hit++;
-      e.hp -= dm; e.hurtT = 0.18;
+      e.hurtT = 0.18;
       const n = d || 1;
       // it LIFTS rather than throws: a thing juggled inside the ring stays in
       // it for the next pass, which is what makes standing your ground pay
@@ -2081,7 +2084,10 @@ class Player {
       const ex = e.x + e.w / 2 - cx, ey = e.y + e.h / 2 - cy;
       const d = Math.hypot(ex, ey);
       if (d > R + Math.max(e.w, e.h) / 2) continue;
-      e.hp -= dm; e.hurtT = 0.2;
+      // In particular, a charged claw must stop at a sage's song-lock and
+      // a crystal burst must cleanse it, never bypass the shared harm rule.
+      if (dealDmg(e, dm, armEl(), e.x + e.w / 2, e.y + e.h / 2, true) <= 0) continue;
+      e.hurtT = 0.2;
       const n = d || 1;
       if (!(e instanceof Boss) && e.kind !== 'turret') {
         e.kbT = 0.3; e.vx += ex / n * 420; e.vy = Math.min(e.vy, 0) + ey / n * 200 - 180;

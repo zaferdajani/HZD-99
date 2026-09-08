@@ -29,6 +29,8 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['chapter-one', 'one earned rescue, quarry, forge and sage save chain'],
+  ['sage-specials', 'charged attacks obey purification and protected-target rules', { noBrowser: true }],
   ['tutorial-clarity', 'one contextual action, one marker and saved lesson continuity', { noBrowser: true }],
   ['story-progression', 'battery, earned forge and sage/weapon story ordering', { noBrowser: true }],
   ['input-focus', 'focus loss clears input and cancelled touches cannot fire', { noBrowser: true }],
