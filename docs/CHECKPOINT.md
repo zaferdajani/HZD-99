@@ -30,7 +30,7 @@ resolving that approval boundary, regardless of older standing instructions.
   saturation 45.1 and zero unrelated control pixels. Original limits remain;
   an in-memory faded-grass mutation fails them. No art/rendering colour change.
 - Focused chapter-one, sage-specials, meadow, twin, crystal and sage passed.
-  All 97 harnesses were exercised across the initial run and a resumed run
+  All 98 harnesses were exercised across the initial run and a resumed run
   from `wolves` after execution was interrupted. Four remain failing:
   `kingdom`, `hzdvox`, `tinker`, and `hero`; this is not a green release gate.
 - Kingdom sampling now waits for declared fallback artwork, clears arrival
