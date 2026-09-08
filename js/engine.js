@@ -18,6 +18,7 @@ const KEYB = {
   RUN: ['GP_RUN'],
 };
 const keys = {}, keysP = {};
+let inputSuspended = false, padNeedsNeutral = false;
 // ---------------------------------------------------------------------------
 // Gamepad. A Bluetooth pad on a phone should turn the game into a console: the
 // touch gutters disappear, the picture grows to fill the screen, and every
@@ -240,7 +241,7 @@ addEventListener('touchstart', () => {
   padConnected(false, null);
 }, { passive: true, capture: true });
 function pollGamepad() {
-  if (!navigator.getGamepads) return;
+  if (inputSuspended || !navigator.getGamepads) return;
   let gp = null;
   const rack = navigator.getGamepads();
   PAD_DIAG.slots = rack.length; PAD_DIAG.live = 0;
@@ -254,6 +255,14 @@ function pollGamepad() {
   if (gp && gp.id && PAD.id !== gp.id) { PAD.id = gp.id; PAD.kind = padKindOf(gp.id); }
   PAD.gp = gp;                       // live handle for rumble
   const st = {};
+  // Returning to the window must not turn a held controller button into a
+  // new attack, menu confirmation or film skip. Release the pad first.
+  if (padNeedsNeutral) {
+    const active = gp && ((gp.buttons || []).some(b => b && (b.pressed || b.value > 0.4))
+      || (gp.axes || []).some(a => Math.abs(a) > 0.4));
+    if (active) return;
+    padNeedsNeutral = false;
+  }
   if (gp) {
     const b = gp.buttons, ax = gp.axes || [];
     const P = i => i >= 0 && b[i] && (b[i].pressed || b[i].value > 0.4);
@@ -307,13 +316,28 @@ function pollGamepad() {
   if (fresh && typeof audioOn === 'function') audioOn();
 }
 addEventListener('keydown', e => {
+  if (inputSuspended) return;
   if (['Tab', 'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (!e.repeat) { keys[e.code] = 1; keysP[e.code] = 1; }
   audioOn();
   try { purifyGesture(); } catch (er) {}
 });
 addEventListener('keyup', e => { keys[e.code] = 0; });
-addEventListener('blur', () => { for (const k in keys) keys[k] = 0; });
+function releaseInput() {
+  for (const k in keys) keys[k] = 0;
+  for (const k in keysP) keysP[k] = 0;
+  for (const k in GP_PREV) GP_PREV[k] = false;
+  PAD.down = {}; PAD.lastPress = -1;
+  padNeedsNeutral = true;
+  if (typeof tCancelAll === 'function') tCancelAll();
+}
+function suspendInput() { inputSuspended = true; releaseInput(); }
+addEventListener('blur', suspendInput);
+addEventListener('focus', () => { inputSuspended = !!document.hidden; });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) suspendInput();
+  else inputSuspended = !document.hasFocus();
+});
 // THE ANDROID BACK BUTTON. In an app it is a real button on the device, and
 // its default behaviour is to close the app — which, mid-boss, is not a back
 // button, it is a quit button. It now means what BACK means everywhere else in

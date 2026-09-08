@@ -209,6 +209,11 @@ function narrativeAudioActive() {
 }
 function hzdQuiet() {
   hzdRelease(0.025);
+  hzdBarksQuiet();
+}
+// The repeat gate limits requests, not duration: an 800 ms bark can still
+// overlap several later actions. Hand off the foreground with a short fade.
+function hzdBarksQuiet() {
   if (!AC) return;
   for (const h of HZDPLAY) {
     try {
@@ -247,6 +252,7 @@ function hzdHold(key) {
   if (!set || !AC || MUTED || narrativeAudioActive()) return false;
   const pick = set[(Math.random() * set.length) | 0];
   if (!MBUF[pick[0]]) { if (typeof mediaAudio === 'function') mediaAudio(pick[0]); return false; }
+  hzdBarksQuiet();
   const src = AC.createBufferSource(), g = AC.createGain();
   src.buffer = MBUF[pick[0]];
   src.playbackRate.value = 0.96 + Math.random() * 0.08;
@@ -304,11 +310,16 @@ const TAKE_GATE = {
 function playBuf(key, vol, rate) {
   if (!AC || MUTED) return false;
   if (key.indexOf('hzd_') === 0 && narrativeAudioActive()) return false;
+  // Readiness/jump chatter must not spend the held charge note. Damage and
+  // the deliberate release can interrupt it; their event ends that gesture.
+  if (key.indexOf('hzd_') === 0 && HZDHOLD &&
+      !['hzd_hurt', 'hzd_hurtbad', 'hzd_die', 'hzd_release'].includes(key)) return false;
   // a sound in the second wave that is asked for early jumps the queue. This
   // call misses once — sfx() falls through to the synthesised version, which is
   // what it does for a sound that has not arrived for any other reason — and
   // every call after it is the real take.
   if (!MBUF[key]) { if (typeof mediaAudio === 'function') mediaAudio(key); return false; }
+  if (key.indexOf('hzd_') === 0) hzdQuiet();
   const s = AC.createBufferSource(), g = AC.createGain();
   s.buffer = MBUF[key];
   if (rate) s.playbackRate.value = rate;
@@ -1054,7 +1065,9 @@ function hzdSay(key, gapMs) {
   const set = HZDVOX[key];
   if (!set || !AC) return false;
   const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-  if (now - HZDT < (gapMs == null ? 90 : gapMs)) return false;
+  const interruptsHold = HZDHOLD && ['hurt', 'hurtbad', 'die', 'release'].includes(key);
+  if (interruptsHold) hzdRelease(0.025);
+  if (!interruptsHold && now - HZDT < (gapMs == null ? 90 : gapMs)) return false;
   const pick = set[(Math.random() * set.length) | 0];
   if (!playBuf(pick[0], pick[1], 0.96 + Math.random() * 0.08)) return false;
   HZDT = now;

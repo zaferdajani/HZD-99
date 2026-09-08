@@ -72,7 +72,7 @@ function tcSetup() {
   tc.addEventListener('touchstart', tStart, { passive: false });
   tc.addEventListener('touchmove', tMove, { passive: false });
   tc.addEventListener('touchend', tEnd, { passive: false });
-  tc.addEventListener('touchcancel', tEnd, { passive: false });
+  tc.addEventListener('touchcancel', tCancel, { passive: false });
 }
 function tcResize() {
   // no touch layer (desktop): nothing to lay out — without this guard a
@@ -410,6 +410,7 @@ function tapMenu(x, y) {
 }
 function tStart(e) {
   e.preventDefault();
+  if (inputSuspended) return;
   audioOn();
   try { purifyGesture(); } catch (e) {}
   if (!TOUCH.fsTried) {
@@ -589,6 +590,15 @@ function tMove(e) {
     }
   }
 }
+// OS interruptions cancel ownership; they never select a wheel action.
+function tCancelAll() {
+  for (const k in keys) if (k[0] === 'V') { keys[k] = 0; keysP[k] = 0; }
+  TOUCH.held = {}; TOUCH.joy = null; TOUCH.editDrag = null;
+  TOUCH.mapT = null; TOUCH.mapPinch = 0;
+  TOUCH.wheel = null; TOUCH.wheelFire = null;
+  TOUCH.tapRel = [];
+}
+function tCancel(e) { e.preventDefault(); tCancelAll(); }
 function tEnd(e) {
   if (TOUCH.mapT) {
     for (const t of e.changedTouches) delete TOUCH.mapT[t.identifier];

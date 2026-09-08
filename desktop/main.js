@@ -97,9 +97,9 @@ async function makeWindow() {
     if(input.type==='keyDown'&&input.key==='F11'){event.preventDefault();win.setFullScreen(!win.isFullScreen());}
   });
   win.on('blur',()=>win.webContents.executeJavaScript(`
-    if(typeof keys!=='undefined')for(const k in keys)delete keys[k];
-    if(typeof keysP!=='undefined')for(const k in keysP)delete keysP[k];
-    if(typeof G!=='undefined'&&G.state==='PLAY'){G.state='PAUSE';G.sel=0;}
+    if(typeof suspendInput==='function')suspendInput();
+    if(typeof hzdQuiet==='function')hzdQuiet();
+    if(typeof G!=='undefined'&&G.state==='PLAY'){G.state='PAUSE';G.pauseIdx=0;}
   `).catch(()=>{}));
   win.webContents.on('render-process-gone',(_event,details)=>fail('Renderer exited: '+details.reason));
   win.webContents.on('did-fail-load',(_event,code,description)=>{if(code!==-3)fail(description);});

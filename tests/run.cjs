@@ -29,6 +29,8 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['input-focus', 'focus loss clears input and cancelled touches cannot fire', { noBrowser: true }],
+  ['voice-handoff', 'foreground voice ownership across actions and charge', { noBrowser: true }],
   ['desktop-protocol', 'desktop local origin, media streaming and path confinement', { noBrowser: true }],
   ['cave-passage', 'real cave traversal and reciprocal gate walks'],
   ['cave-ground', 'overhead pockets never become cave floor', { noBrowser: true }],
