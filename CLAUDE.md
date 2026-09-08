@@ -1,5 +1,11 @@
 # CLAWBYTE / NOSTOS — working notes
 
+## Story authority
+
+Read `docs/STORY_CANON.md` for the owner's robot-cat narrative, first NPC,
+cave-before-sage quest and one-control-at-a-time tutorial. It takes precedence
+over conflicting older story descriptions.
+
 ## Finish the complete task (owner-authorized, 2026-09-07)
 
 Treat every requested feature and accepted correction as part of the completion criteria. Continue autonomously through implementation, integration, testing, fixes, and any authorized deployment. A completed phase, commit, plan, or queued generation is not completion of the task.

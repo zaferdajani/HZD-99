@@ -29,6 +29,8 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['tutorial-clarity', 'one contextual action, one marker and saved lesson continuity', { noBrowser: true }],
+  ['story-progression', 'battery, earned forge and sage/weapon story ordering', { noBrowser: true }],
   ['input-focus', 'focus loss clears input and cancelled touches cannot fire', { noBrowser: true }],
   ['voice-handoff', 'foreground voice ownership across actions and charge', { noBrowser: true }],
   ['desktop-protocol', 'desktop local origin, media streaming and path confinement', { noBrowser: true }],

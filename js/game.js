@@ -1358,6 +1358,17 @@ function checkTransitions() {
     at = dest.at != null ? dest.at : null;
     dest = dest.to;
   }
+  // The cleansing material and Ratchet's forge are the first sage's story
+  // prerequisites. Keep the tunnel/return route open, not an invisible edge
+  // that lets the player drift offscreen while missing the quest.
+  if (!isHero() && dest === 'GA1D' && !weaponOwned('single')) {
+    player.x = clamp(player.x, 2, W - player.w - 2);
+    player.vx = 0;
+    if (!G.sageForgeHintAt || G.time - G.sageForgeHintAt > 4) {
+      G.toast(t('sage_need_forge')); G.sageForgeHintAt = G.time || 0.001;
+    }
+    return;
+  }
   if (demoWall(dest)) { demoStop(side); return; }
   G.trans = { t: TRANS_DUR, to: dest, side, at, half: false };
   // HOLD THE PICTURE NOW, not at draw time. The loop runs a fixed step and may
@@ -11250,7 +11261,7 @@ function braidBtnRect() { return { x: 846, y: 56, w: 92, h: 28 }; }
 function drawMapButton() {
   if (!mapUnlocked() || (TOUCH && TOUCH.enabled)) return;
   // announce it once, the first time it is worth having
-  if (!G.save.flags.mapSeen) {
+  if (!G.save.flags.mapSeen && !G.tut && !G.lesson && G.state === 'PLAY') {
     G.save.flags.mapSeen = 1; G.mapBtnNew = 6; persist();
     if (typeof G.toast === 'function') G.toast(t('map_new'));
   }
@@ -11325,7 +11336,7 @@ const TUT_STEPS = [
     keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
     done: () => (TUT_ROOMS[G.roomId] || 0) >= 1 },
   { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h',
-    keys: 'Z / Space', pad: 'A', touch: 'JUMP', vb: 'VJUMP',
+    keys: 'Space', pad: 'A', touch: 'JUMP', vb: 'VJUMP',
     done: () => !player.on && player.vy < -60 },
   // THE GATES. The second half of the walk, and the reason the walk exists: a
   // tutorial that ends at a door you can see from where you started gives the
@@ -11407,10 +11418,95 @@ function tutEnter(st) {
 // does not need naming, it needs POINTING. Direction steps show the arrow.
 const TUT_DIR = { move: '\u2190 \u2192', out: '\u2192', gate: '\u2191', coin: '\u2190 \u2192', go: '\u2192' };
 function tutHand(st) {
+  if (st.control) return st.control;
   if (TUT_DIR[st.id]) return TUT_DIR[st.id];
-  if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled) return st.touch;
-  if (typeof PAD !== 'undefined' && PAD && PAD.on) return st.pad;
+  if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled)
+    return st.vb === 'VSKILL' ? '☰ ▸ ' + t('pm_skills') : st.touch;
+  if (typeof PAD !== 'undefined' && PAD && PAD.on) {
+    const action = st.vb && st.vb.slice(1);
+    if (action && typeof howToOpen === 'function')
+      return howToOpen(action, t('pa_' + action));
+    return st.pad;
+  }
   return st.keys;
+}
+// The next action, not a list of everything the player will eventually do.
+// A shop lesson outside the workshop teaches UP at its door, then E beside
+// the robot inside. Keeping the saved lesson index unchanged preserves runs.
+function tutPrompt(st) {
+  const view = { ...st, target: null };
+  const pc = player.x + player.w / 2;
+  const doors = typeof gateDoors === 'function' ? gateDoors() : [];
+  const point = (x, y, color, radius = 30) => { view.target = { x, y, color, radius }; };
+  const doorPrompt = (door, returning) => {
+    const x = gateWorldX(door);
+    point(x, 13 * TILE, '#ffd76a');
+    view.vb = null;
+    view.label = returning ? 'tut_return' : 'tut_enter';
+    view.hint = 'tut_enter_h';
+    view.control = '\u2191';
+    if (Math.abs(pc - x) > 80) {
+      view.control = pc < x ? '\u2192' : '\u2190';
+      view.hint = returning ? 'tut_return_h' : 'tut_workshop_h';
+      if (!returning) view.label = 'tut_approach';
+    }
+  };
+  // Backtracking never rewinds a lesson, but its directions must lead back
+  // to the room where that lesson can actually be completed.
+  const roomRequired = st.room || (st.id === 'jump' || st.id === 'gate' ? 'W2' : null);
+  if (roomRequired && G.roomId !== roomRequired && G.roomId === 'A0B' && doors[0]) {
+    doorPrompt(doors[0], true);
+    return view;
+  }
+  const stage = st.id === 'move' || st.id === 'out' ? 0 : st.id === 'jump' || st.id === 'gate' ? 1 : 2;
+  if (TUT_ROOMS[G.roomId] < stage) {
+    if (!G.roomDef.exits.R && doors[0]) doorPrompt(doors[0], false);
+    else {
+      point((G.roomDef.w - 1.5) * TILE, 13 * TILE, '#ffd76a');
+      view.control = '\u2192'; view.vb = null;
+      view.label = 'tut_approach'; view.hint = 'tut_workshop_h';
+    }
+    return view;
+  }
+  if (st.id === 'buy') {
+    const npc = (G.statics || []).find(q => q.type === 'npc' && q.extra === 'ratchet');
+    if (npc) {
+      point(npc.x + npc.w / 2, npc.y + npc.h / 2, '#ffd76a');
+      if (typeof npcLive === 'function' && !npcLive(npc)) {
+        view.label = 'tut_note'; view.hint = 'tut_note_h';
+      }
+      if (G.near !== npc) {
+        view.control = pc < view.target.x ? '\u2192' : '\u2190';
+        view.label = 'tut_approach'; view.hint = 'tut_workshop_h'; view.vb = null;
+      }
+    } else {
+      const booth = doors.find(d => d.style === 'booth');
+      if (booth) doorPrompt(booth, false);
+    }
+  } else if (st.id === 'out' || st.id === 'gate' || st.id === 'go') {
+    if (!G.roomDef.exits.R && doors[0]) doorPrompt(doors[0], G.roomId === 'A0B');
+    else point((G.roomDef.w - 1.5) * TILE, 13 * TILE, '#ffd76a');
+  } else if (st.id === 'jump') {
+    point(G.roomId === 'W2' ? 13 * TILE : 17 * TILE + 12, 14 * TILE + 12, '#37ffd0', 34);
+  } else if (st.id === 'atk' || st.id === 'kill') {
+    const enemy = (G.enemies || []).find(q => q && !q.dead);
+    if (enemy) point(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ff8a6a');
+  } else if (st.id === 'coin') {
+    let scrap = null;
+    for (const q of G.pickups || [])
+      if (q && !q.dead && (!scrap || Math.abs(q.x - pc) < Math.abs(scrap.x - pc))) scrap = q;
+    if (scrap) point(scrap.x + 6, scrap.y + 6, '#ffd76a', 24);
+  } else if (st.id === 'node') {
+    const node = (G.statics || []).find(q => q.type === 'riddle' && !q.opened);
+    if (node) {
+      point(node.x + node.w / 2, node.y + node.h / 2, '#c9a6ff');
+      if (G.near !== node) {
+        view.control = pc < view.target.x ? '\u2192' : '\u2190';
+        view.label = 'tut_approach'; view.vb = null;
+      }
+    }
+  } else if (st.id === 'heal') point(pc, player.y + player.h / 2, '#aef7d8', 32);
+  return view;
 }
 // The lessons are STAGED IN THE ROOM: open ground for the first, the step for
 // the second, and a machine walking at her for the third — held just short of
@@ -11512,7 +11608,10 @@ function updateTutor(dt) {
     // but never let loose: the kill step wants a target, not a fight
     if (T.i < 2 || Math.abs(gap) < 96) { dum.vx = 0; dum.stagT = Math.max(dum.stagT || 0, 0.12); }
   }
-  if (typeof TOUCH !== 'undefined' && TOUCH) TOUCH.hi = (st && st.vb && TOUCH.enabled) ? st.vb : null;
+  if (typeof TOUCH !== 'undefined' && TOUCH) {
+    const prompt = st && tutPrompt(st);
+    TOUCH.hi = (prompt && prompt.vb && TOUCH.enabled) ? prompt.vb : null;
+  }
   // THE DOOR WAITS. Nothing here can hurt her and nothing here can trap her —
   // but a teaching room she can walk straight out of teaches only the first
   // verb, which is what happened: she strolled past the machine she was being
@@ -11565,7 +11664,7 @@ function updateTutor(dt) {
 }
 function drawTutor() {
   const sv = G.save;
-  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player || TUT_ROOMS[G.roomId] === undefined) return;
+  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player || G.state !== 'PLAY' || G.gateWalk || TUT_ROOMS[G.roomId] === undefined) return;
   const T = G.tut;
   const st = TUT_STEPS[T.i];
   if (!st) return;
@@ -11606,82 +11705,9 @@ function drawTutor() {
     }
     c.restore(); c.globalAlpha = 1;
   };
-  // the thing being taught, ringed — and WHICH thing depends on the room now
-  if (st.id === 'jump')
-    mark(G.roomId === 'W2' ? 13 * TILE : 17 * TILE + 12, 14 * TILE + 12, 34, '#37ffd0');
-  if (st.id === 'out' || st.id === 'gate') {
-    // the gate step points at the GATE, not at the wall: W2's way out is the
-    // depth door at the stand spot, and the massed city wall now owns the
-    // last three tiles where the old mark used to hover
-    const gr = (typeof gateDoors === 'function' ? gateDoors() : [])[0];
-    mark(gr ? gr.at * G.roomDef.w * TILE : (G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
-  }
-  if (st.id === 'atk' || st.id === 'kill') {
-    const dum = G.enemies && G.enemies.find(e => e && !e.dead);
-    if (dum) mark(dum.x + dum.w / 2, dum.y + dum.h / 2, 30, '#ff8a6a');
-  }
-  // ring the THING, not just the button: a card that names a verb teaches
-  // nothing if the player cannot see what it is about
-  if (st.id === 'coin') for (const p2 of G.pickups || [])
-    if (!p2.dead) mark(p2.x + 6, p2.y + 6, 18, '#ffd76a');
-  if (st.id === 'buy' || st.id === 'node') {
-    const want = st.id === 'buy' ? 'npc' : 'riddle';
-    const s2 = (G.statics || []).find(q => q.type === want && !q.opened);
-    if (s2) mark(s2.x + s2.w / 2, s2.y + s2.h / 2, 30, st.id === 'buy' ? '#ffd76a' : '#b48cff');
-    else if (st.id === 'buy') {
-      // the trader is inside his booth now: the lesson rings the booth door
-      const gr2 = (typeof gateDoors === 'function' ? gateDoors() : []).find(d => d.style === 'booth');
-      if (gr2) mark(gateWorldX(gr2), 13 * TILE, 34, '#ffd76a');
-    }
-  }
-  // EVERY LESSON WITH A THING IN IT RINGS THAT THING.
-  //
-  // The owner, on the node step: "finding the shards, which, by the way, even
-  // me as the game developer, I have no idea where the shards are or how to
-  // find it. It is unclear. It is as if you are just putting in all the
-  // information regardless of whether the user can understand it or not."
-  //
-  // He is right, and the fault is not the wording. The card names a VERB and
-  // the room never says which object it means: the node sits at tile 11 of a
-  // 64-wide room, thirteen tiles BEHIND where she is standing when the step
-  // opens, off the left of the screen. "Solve the node" is unanswerable when
-  // you cannot see a node. Two steps already ring their target — heal rings
-  // her own body, go rings the door — and the rest were left to be guessed.
-  //
-  // So: the machine while she is being told to scratch it and finish it, the
-  // scrap on the floor while she is being told to take it, the booth while she
-  // is being told to spend, and the node while she is being told to think. And
-  // if the thing is in another room, the way out of this one is rung instead,
-  // because "it is not here" is the answer she actually needs.
-  const ringOut = () => {
-    const gr = (typeof gateDoors === 'function' ? gateDoors() : [])[0];
-    if (!G.roomDef.exits.R && gr) mark(gateWorldX(gr), 13 * TILE, 30, '#ffd76a');
-    else mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
-  };
-  if (st.room && G.roomId !== st.room) ringOut();
-  else if (st.id === 'atk' || st.id === 'kill') {
-    const e = (G.enemies || []).find(q => q && !q.dead);
-    if (e) mark(e.x + e.w / 2, e.y + e.h / 2, 30, '#ff8a5c');
-  } else if (st.id === 'coin') {
-    const sc = (G.pickups || []).find(q => q && !q.dead);
-    if (sc) mark(sc.x + (sc.w || 12) / 2, sc.y + (sc.h || 12) / 2, 24, '#ffd76a');
-  } else if (st.id === 'buy') {
-    const gr2 = (typeof gateDoors === 'function' ? gateDoors() : [])[0];
-    if (gr2) mark(gateWorldX(gr2), 13 * TILE, 30, '#ffd76a');
-  } else if (st.id === 'node') {
-    const nd = (G.statics || []).find(q => q && q.type === 'riddle' && !q.opened);
-    if (nd) mark(nd.x + nd.w / 2, nd.y + nd.h / 2, 30, '#c9a6ff');
-  }
-  if (st.id === 'heal') mark(player.x + player.w / 2, player.y + player.h / 2, 32, '#aef7d8');
-  if (st.id === 'go') {
-    // "go right" is a lie inside the booth: the den's only way out is the
-    // door she came in by. The five-player validation caught a six-year-old
-    // holding right into the den wall for six minutes. In a room with no
-    // right-hand exit, the mark rings the depth door instead.
-    const gr3 = (typeof gateDoors === 'function' ? gateDoors() : [])[0];
-    if (!G.roomDef.exits.R && gr3) mark(gateWorldX(gr3), 13 * TILE, 30, '#ffd76a');
-    else mark((G.roomDef.w - 1.5) * TILE, 13 * TILE, 30, '#ffd76a');
-  }
+  // One marker agrees with the one action card, including inside the booth.
+  const target = tutPrompt(st).target;
+  if (target) mark(target.x, target.y, target.radius, target.color);
   // the push flare decays on the wall clock — this is a draw pass and has no dt
   {
     const now2 = performance.now();
@@ -11720,7 +11746,8 @@ function drawTutor() {
     }
     c.restore();
   }
-  tutCard(px, py, tutHand(st), t(st.label), t(st.hint), learned, Math.max(0, T.hold / 0.7));
+  const prompt = tutPrompt(st);
+  tutCard(px, py, tutHand(prompt), t(prompt.label), t(prompt.hint), learned, Math.max(0, T.hold / 0.7));
 }
 // one card, used by the waking floor and by every power she is handed after it
 function tutCard(px, py, key, label, hint, learned, fade) {

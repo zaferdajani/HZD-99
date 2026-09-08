@@ -15,9 +15,9 @@
 //   CULL    deal with a number of a particular machine, in this kingdom
 //   REACH   stand somewhere that is not on the way to anything
 //
-// None of them is required to finish the game, and none of them is a fetch
-// quest wearing a hat: each one exists to send you into a wing of the kingdom
-// you would otherwise never open.
+// Most are optional side errands. ratchet_forge is the main-story exception:
+// it earns the cleansing sword required before meeting the first sage.
+// See docs/STORY_CANON.md for the owner's narrative contract.
 // ===========================================================================
 const QUESTS = [
   {

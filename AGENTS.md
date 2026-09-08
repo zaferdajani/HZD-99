@@ -1,5 +1,12 @@
 # Repository instructions
 
+## Authoritative robot-cat story
+
+Read `docs/STORY_CANON.md` before narrative, tutorial, quest, room, music or
+weapon changes. It records the owner's story so future sessions must not ask
+for it again. It supersedes conflicting older lore; distinguish narrative
+intent from verified implementation.
+
 ## Finish the complete task (owner-authorized, 2026-09-07)
 
 Treat every requested feature and accepted correction as part of the completion criteria. Continue autonomously through implementation, integration, testing, fixes, and any authorized deployment. A completed phase, commit, plan, or queued generation is not completion of the task.

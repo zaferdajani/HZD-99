@@ -1,5 +1,10 @@
 # Sword storyline — owner direction, 2026-09-06
 
+Read `STORY_CANON.md` first for the owner's 2026-09-08 clarification: Mother's
+hijacked song, Ratchet's protective necklace and battery restoration, and the
+material cave/first forge BEFORE the first sage. Later sword acquisition and
+the separate connector must preserve that causal order.
+
 This is the governing progression for CLAWBYTE. It supersedes older descriptions
 in which obtaining the second sword automatically joins the weapons or dual
 swords exist only briefly after a charged move. This document specifies intent;

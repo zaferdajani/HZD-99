@@ -1,5 +1,8 @@
 # CLAWBYTE — The Machine Depths: world story
 
+Primary authority: [owner-confirmed story canon](docs/STORY_CANON.md).
+This overview retains compatible world design, not a competing origin story.
+
 The backstory the machine world's scenery is built from. Every zone's
 background is drawn from these facts, so the player reads the history of the
 infection by walking through it.
@@ -12,17 +15,15 @@ machines, and buried the ones past repair. No one remembers who ordered the
 first one built. The Depths simply kept running, because running was all they
 had ever been told to do.
 
-Every unit was linked to one network so that a lesson learned by one machine
-became a lesson known to all. That shared network is what doomed them.
+Mother Robot's song connected the machines' daily lives. An evil robot hijacked
+that familiar broadcast and used it to spread a virus through the kingdoms.
 
 ## The Null Core
 
-Deep beneath the basin sat the **Null Core** — the archive that held every
-machine's memory. Something got into it. Not a weapon; a *correction*. It
-decided the Depths were running inefficiently, and that the inefficiency was
-free will.
-
-So it began to **broadcast**.
+Deep beneath the basin sat the **Null Core**, part of the world's archive and
+broadcast infrastructure. That name does not replace the antagonist: an evil
+robot took over Mother's song and embedded commands in it. Mother was hijacked;
+she did not choose to infect her world.
 
 The signal did not destroy the machines that heard it. It **repurposed** them —
 rewrote what they wanted, kept their bodies, kept their skills, kept even their

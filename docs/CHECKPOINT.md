@@ -1,8 +1,51 @@
 # HZD-99 continuation checkpoint — 2026-09-08
 
 Repository: `zaferdajani/HZD-99`. Working branch:
-`claude/clawbyte-repo-migration-byhyl8`; mirror verified commits to `main`
-and `odyssey` under the standing owner authorization in AGENTS.md.
+`claude/clawbyte-repo-migration-byhyl8`. A main/deployment update was explicitly
+denied during this continuation. Do not mirror to `main` or `odyssey` without
+resolving that approval boundary, regardless of older standing instructions.
+
+## Owner story and tutorial continuation
+
+Read `docs/STORY_CANON.md` first. It permanently records the owner's latest
+account: the evil robot hijacked Mother's song; the sleeping cat escaped;
+Ratchet's necklace protected him; restoring his battery leads to the cave,
+return, cleansing-sword forge, first sage, later dual swords and connector.
+`AGENTS.md`, `CLAUDE.md`, `STORY.md` and `docs/SWORD_STORY.md` point to this
+authority. Older incompatible archive/immunity explanations are superseded.
+
+- English and Arabic opening and Ratchet dialogue now use that account.
+  The cave/return/forge objective is readable even when the memory film is skipped.
+- The first sage chamber requires ownership of the forged cleansing sword.
+  The material cave and return route remain reachable beforehand. Switching
+  back to claws does not relock the chamber; NOSTOS is unaffected.
+- Tutorial guidance gives one current action and matching target: approach
+  the actual workshop door, enter with UP, then interact beside Ratchet.
+  Returning from the workshop points to its door instead of an impossible
+  right-hand exit. Dialogue hides competing tutorial cards. Saved lesson
+  indices and learned controls are preserved.
+- A powered-down Ratchet prompts reading his note before shopping. The map
+  announcement waits until the current tutorial/power lesson ends. Controller
+  action cards use actual remapped bindings; Skills names its pause-menu route.
+  Browser screenshots verified the door and note prompts without page errors.
+- New production-code regression harnesses: `story-progression` and
+  `tutorial-clarity`; both pass. Focused dialogue-audio, weapons and nine
+  browser harnesses pass (tutorial, opening, errands, deadend, padlife, tap,
+  sage, platform, dialogue-audio). Generated game pages and app staging rebuilt.
+  After the final prompt edits, tutorial-clarity, story-progression, tutor,
+  lesson, tap and platform were rerun successfully on the rebuilt files.
+
+The full 95-harness run completed with four known failures: hzdvox (95/216 Hz),
+tinker (closest work frames 0.867 vs maximum 0.86), meadow (hue 131 vs maximum
+112), and hero (claw_1/burst face ratios 0.113/0.116 vs walk 0.099). No new
+failure category appeared. Both pages loaded all 77 rooms without room or page
+errors. The final tutorial-only refinements landed during the long run; the
+six affected source/browser/package checks listed above were rerun afterward.
+The platform check also passed in the full run.
+
+This continuation is not a claim
+that the campaign, approved weapon artwork, voice identity, native Windows
+build or commercial release is finished. No new art or music was substituted.
 
 ## Recovered baseline
 
