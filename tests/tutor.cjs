@@ -211,6 +211,7 @@ const { chromium } = require('playwright');
     const sv = newSave(1); sv.time = 99;
     startGame(sv); loadRoom('A0');
     G.dialog = null; G.state = 'PLAY'; G.toasts = [];
+    updateTutor(1 / 60);   // startGame resets G.tut to null; give it its lazy init
     const at = (id) => TUT_STEPS.findIndex(q => q.id === id);
     G.tut.i = at('kill'); G.tut.t = 1; G.tut.hold = 0;
     const boothEarly = gateDoors('A0').length;          // must be 0: not built yet
@@ -239,6 +240,10 @@ const { chromium } = require('playwright');
   });
   // and the door: held shut until the last lesson, open after it
   const door = await p.evaluate(() => {
+    // The skip-block above leaves G.tut mid-walk on its own errand; drive
+    // this check on the last lesson explicitly rather than on whatever step
+    // a prior block happened to leave behind.
+    G.tut.i = TUT_LAST; G.tut.t = 1; G.tut.hold = 0;
     const before = G.tut.opened;
     player.x = (G.roomDef.w - 1) * 32;
     updateTutor(0.016);
