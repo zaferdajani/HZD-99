@@ -903,7 +903,9 @@ const SWING_STRIP = {
   claw_1:   { key: 'swingClaw1',    cells: 11, k: 0.901 },
   claw_2:   { key: 'swingHook',     cells: 10, k: 0.92 },
   finisher: { key: 'swingUppercut', cells: 10, k: 0.956 },
-  burst:    { key: 'swingBurst',    cells: 9,  k: 0.9272 },
+  // 2026-09-08: complete side-facing charged claw action with recovery.
+  // Neutral frame matches idle: (231/300)/(281/320) = 0.8769.
+  burst:    { key: 'swingBurst',    cells: 24, k: 0.8769 },
 };
 // Gameplay stores the ordinary combo as 0, 1, 2. Keep both the pose fallback
 // and the strip renderer on that same numbering: treating it as 1, 2, 3

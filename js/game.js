@@ -850,10 +850,13 @@ function spawnStatic(type, tx, ty, extra, flagKey) {
   // that depends on when you ask it is not a key.
   G.statics.push({ type, room: G.roomId, x: tx * TILE + (TILE - w) / 2, y: ty * TILE - h, w, h, extra, flagKey, opened: !!(flagKey && G.save.flags[flagKey]), t: rnd(0, 9) });
 }
-function loadRoom(id) {
+function settlePendingBossReward() {
   if (G.boss && G.boss.dead && G.boss.rewardPend) {
     G.boss.rewardPend = false; G.onBossDead(G.boss.kind);
   }
+}
+function loadRoom(id) {
+  settlePendingBossReward();
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   surfCurve = null; surfRoom = null;   // the surface curve belongs to the room
@@ -1081,6 +1084,20 @@ function applyTheme() {
   tileDirty = true;
 }
 function startGame(save) {
+  // A run's pending reward belongs to THAT save, never the next one. Keep
+  // same-object resumes legitimate; menu Quit settles before its saved copy
+  // is reloaded. Ordinary room changes retain loadRoom's reward safety net.
+  if (save === G.save) settlePendingBossReward();
+  G.boss = null;
+  // Reset before loadRoom so its NEW arrival wake/tutorial is not erased.
+  // Previously a paused reward's impact panel and dash lesson followed a
+  // restart into the cradle, even though the new cat owned no dash.
+  G.impact = null; G.flash = 0; G.hitStop = 0; G.rings = [];
+  G.lesson = null; G.brDelta = null; G.elemPop = null; G.songWave = null;
+  G.dialog = null; G.toasts = []; G.zoneToast = null; G.lastZone = '';
+  G.tut = null; G.wake = null; G.meet = null; G.trans = null; G.gateWalk = null;
+  G.coreFlash = null; G.coresFullT = 0; G.bolt = null;
+  cam.shake = 0;
   migrateWeapons(save);
   save.iq = save.iq || 0; save.skills = save.skills || []; save.relics = save.relics || [];
   G.save = save;
@@ -2359,10 +2376,16 @@ function updatePause() {
     else if (cur.id === 'touch') G.state = 'TCFG';
     else if (cur.id === 'restart') {
       // same difficulty, same world, nothing carried — the run starts over
-      const d = (G.save && G.save.diff) || 1;
-      startGame(newSave(d));
+      const d = G.save && G.save.diff != null ? G.save.diff : 1;
+      const fresh = newSave(d);
+      fresh.theme = gameLock() || (G.save && G.save.theme) || 'robo';
+      startGame(fresh);
     }
-    else if (cur.id === 'quit') { persist(); setMusic('title'); G.state = 'MENU'; G.menuIdx = 0; }
+    else if (cur.id === 'quit') {
+      // Continue reloads a stored object. Preserve a finishing guardian's
+      // earned reward in that object before leaving this run behind.
+      settlePendingBossReward(); persist(); setMusic('title'); G.state = 'MENU'; G.menuIdx = 0;
+    }
   }
 }
 function updateTouchCfg() {
