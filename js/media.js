@@ -670,6 +670,10 @@ function mediaFetch(k, urgent) {
     }
     if (wasLow) mediaDirty(k);
   };
+  im.onerror = () => {
+    // A failed request must not permanently lock a visible image out.
+    setTimeout(() => { delete MEDIA_PEND[k]; }, 3000);
+  };
   im.src = MEDIA_SRC.images[k];
 }
 const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {

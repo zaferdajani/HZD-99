@@ -4125,6 +4125,10 @@ function purifyPreload(kind) {
   v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
   v.setAttribute('webkit-playsinline', '');
   v.crossOrigin = 'anonymous';
+  // Mobile WebKit needs a connected inline media element. Canvas presents it.
+  v.setAttribute('aria-hidden', 'true');
+  v.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0.01;pointer-events:none';
+  document.body.appendChild(v);
   // sources rather than a src: the browser picks the first one it can decode,
   // and only reports an error once it has failed at ALL of them
   const add = (url, type) => {
@@ -4466,7 +4470,7 @@ function updateCut(dt) {
         return;                                  // still seeking — hold the black
       }
       const pr = v.play();
-      if (pr && pr.catch) pr.catch(() => { if (G.cut) G.cut.failed = true; });
+      if (pr && pr.catch) pr.catch(() => { if (G.cut === ct) ct.failed = true; });
       ct.ph = 'play'; ct.t = 0;
     }
     return;
@@ -14476,6 +14480,7 @@ function startIntroFilm() {
 // arrive, and audio is allowed to start with it.
 // ---------------------------------------------------------------------------
 function startCine() {
+  mediaFetch('introS1', true);
   // the first two shots, not all eight — startIntroFilm keeps the window
   // topped up from there. See filmAhead().
   try { filmAhead(INTRO_FILM.map(s => s[0])); } catch (e) {}

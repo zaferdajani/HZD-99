@@ -2921,7 +2921,9 @@ class Player {
     const usePlate = !(typeof isHero === 'function' && isHero())
       && typeof MEDIA_IMG !== 'undefined' && !!MEDIA_IMG.heroStates;
     let stepLift = 0;
-    if (usePlate && this.on && Math.abs(this.vx) > 12 && this.dashT <= 0
+    const authoredGait = usePlate && this.on && Math.abs(this.vx) > 12
+      && !!MEDIA_RAW[(run ? HERO_GAIT.run : HERO_GAIT.walk).key];
+    if (usePlate && !authoredGait && this.on && Math.abs(this.vx) > 12 && this.dashT <= 0
         && !this.swingVis && this.landT <= 0 && this.skidT <= 0
         && this.hurtPoseT <= 0 && !(typeof G !== 'undefined' && G.artProbe)) {
       const sp = this.stridePh || 0;
@@ -2959,8 +2961,9 @@ class Player {
     if (stepLift) c.translate(0, stepLift);                         // the step's own rise and fall
     if (this.wallSlide !== 0) c.translate(2.5, 0);                  // body pressed INTO the wall
     if (kick > 0) c.translate(-2.6 * kick, 0);                      // rocked off the firing line
-    c.rotate(this.lean + (this.skidT > 0 ? -0.14 : 0) + (this.wallSlide !== 0 ? 0.1 : 0)
-             + (run ? sprintK * 0.3 : 0)                            // pitched forward, chasing the ground
+    // The authored stride already contains its recoil and posture.
+    c.rotate((authoredGait ? 0 : this.lean) + (this.skidT > 0 ? -0.14 : 0) + (this.wallSlide !== 0 ? 0.1 : 0)
+             + (run && !authoredGait ? sprintK * 0.3 : 0)
              + (this.hurtPoseT > 0 ? -0.3 * (this.hurtPoseT / 0.3) : 0)  // thrown back, off balance
              + airRot                                       // the leap's own pitch
              - songK * 0.13                                        // head and chest thrown back to sing
