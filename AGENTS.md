@@ -17,6 +17,20 @@ Stop only when the complete task is verified or a concrete blocker requires the 
 
 Never claim completion without verification, silently reduce scope, or weaken tests to obtain a pass. These instructions do not override security controls or required approvals.
 
+## Continuation rule (owner-authorized, 2026-09-09)
+
+Keep the owner's complete game objective active across implementation,
+testing, commits and deployments. Completing or publishing one improvement
+does not end the task while other authorized, actionable work remains.
+After each verified milestone, select and execute the next unresolved item
+without asking the owner to say "continue". Give progress updates while working.
+An approval block applies only to the blocked action: continue independent
+work and never bypass the block. End an active turn only when the agreed work
+is verified, the owner asks to stop, or a concrete external/runtime constraint
+prevents further useful progress. State that constraint precisely and preserve
+a recoverable checkpoint. Never claim background work continues after a turn
+ends, promise perfection, or treat weakened tests as completion.
+
 ## Standing deployment authorization (owner-authorized, 2026-09-07)
 
 For `zaferdajani/HZD-99`, the owner authorizes publishing completed, verified updates to `main` and mirroring them to `odyssey`, including deployment to GitHub Pages. Do not force-push or bypass branch protections.
