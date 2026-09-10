@@ -46,6 +46,33 @@ try {
 } catch (e) {}
 
 // ---------------------------------------------------------------------------
+// WEB UPDATE LOOP GUARD — 2026-09-10
+// GitHub Pages/CDN can serve an older cached index for a few seconds while a
+// deployment propagates. The old checker interpreted any different BUILD_ID as
+// "newer", so a v4.5 client could be offered v4.3 and repeatedly reload itself.
+// On github.io there is nothing to install: a normal navigation already loads
+// the deployed site. Disable the in-game updater there and clear stale banners.
+// Desktop/offline builds keep their existing update behavior.
+// ---------------------------------------------------------------------------
+try {
+  if (typeof location !== 'undefined' && /(^|\.)github\.io$/i.test(location.hostname)) {
+    if (typeof G !== 'undefined') G.updateReady = null;
+    if (typeof checkForUpdate === 'function') checkForUpdate = function() {
+      if (typeof G !== 'undefined') G.updateReady = null;
+    };
+    if (typeof applyUpdate === 'function') applyUpdate = function() {
+      if (typeof G !== 'undefined') G.updateReady = null;
+      // Remove every legacy cache-buster instead of adding another one.
+      try {
+        const u = new URL(location.href);
+        u.searchParams.delete('_v');
+        location.replace(u.toString());
+      } catch (e) { location.reload(); }
+    };
+  }
+} catch (e) {}
+
+// ---------------------------------------------------------------------------
 // CONTEXTUAL TUTORIAL ACTION LOCKS — owner ruling 2026-09-10
 // A new verb is announced only at the exact place it is usable. At that moment
 // the scene pauses around the player, every unrelated gameplay input is rejected,
@@ -68,21 +95,21 @@ function tutEnemyInClawRange() {
   const e = tutLiveEnemy(); if (!e) return false;
   const pc = player.x + player.w/2, ec = e.x + e.w/2;
   const py = player.y + player.h/2, ey = e.y + e.h/2;
-  // Close enough that the normal claw hitbox can connect immediately: about two
-  // body widths horizontally, with both bodies on the same fighting level.
   return Math.abs(ec-pc) <= 68 && Math.abs(ey-py) <= 54;
 }
 function tutJumpAtObstacle() {
   if (G.roomId !== 'W2' || !player || !player.on) return false;
   try {
-    const dir = player.face < 0 ? -1 : 1;
+    // The original trigger only looked for blocks one or TWO tiles above the
+    // player's feet. W2's first teaching obstacle is a one-tile terrain rise,
+    // so the hero could simply walk/step across it and the detector never saw
+    // anything. Detect the actual floor rise at FEET height too.
+    const dir = player.vx < -8 ? -1 : (player.vx > 8 ? 1 : (player.face < 0 ? -1 : 1));
     const feetTy = Math.floor((player.y + player.h - 2) / TILE);
     const edge = dir > 0 ? player.x + player.w : player.x;
-    for (let px=10; px<=58; px+=8) {
+    for (let px=8; px<=72; px+=6) {
       const tx = Math.floor((edge + dir*px) / TILE);
-      // A real obstacle is body-height solid in front, not merely the rolling
-      // ground irregularities that the step-up system already absorbs.
-      if (solidAt(tx, feetTy-1) || solidAt(tx, feetTy-2)) return true;
+      if (solidAt(tx, feetTy) || solidAt(tx, feetTy-1) || solidAt(tx, feetTy-2)) return true;
     }
   } catch (e) {}
   return false;
@@ -136,26 +163,24 @@ function tutLockTick() {
   if (!action) { tutReleaseLock(); return; }
   if (G.tutHardLock && G.tutHardLock.id !== s.id) tutReleaseLock();
   if (!G.tutHardLock && tutShouldLock(s.id)) {
-    G.tutHardLock = { active:true, id:s.id, action:action };
+    G.tutHardLock = { active:true, id:s.id, action:action, x:player.x };
     player.vx = 0;
     if (player.on) player.vy = 0;
     tutFreezeEnemies(true);
-    // Clear held movement from the frame that crossed the trigger so the player
-    // cannot coast through the teaching position before seeing the card.
     for (const k of ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS','VL','VR','VU','VD','GP_L','GP_R','GP_U','GP_D']) {
       if (typeof keys !== 'undefined') keys[k]=0;
       if (typeof keysP !== 'undefined') keysP[k]=0;
     }
   }
   if (G.tutHardLock && G.tutHardLock.active) {
+    // A hard lock means hard: no residual velocity, step-up or held-stick frame
+    // is allowed to carry the hero past the teaching marker while the card is up.
+    if (Number.isFinite(G.tutHardLock.x)) player.x = G.tutHardLock.x;
     player.vx = 0;
     tutFreezeEnemies(true);
   }
 }
 
-// Input gate: before the contextual lock triggers, retain the original tutorial
-// progression rules. During the lock, accept only the requested verb. PAUSE/BACK
-// stay available so the player can always leave a session; they do not move her.
 try {
   if (typeof tutAllows === 'function') {
     _tutOldAllows = tutAllows;
@@ -168,8 +193,6 @@ try {
   }
 } catch (e) {}
 
-// Prompt timing: contextual verb cards are hidden while the player is still
-// approaching the teaching position. They appear on the exact frozen frame.
 try {
   if (typeof drawTutor === 'function') {
     _tutOldDraw = drawTutor;
@@ -182,9 +205,6 @@ try {
   }
 } catch (e) {}
 
-// clearP runs once per game frame, making this independent of keyboard/touch/pad
-// polling. It also releases frozen enemies immediately after a successful verb
-// advances the tutorial index.
 try {
   if (typeof clearP === 'function') {
     const _clearP = clearP;
