@@ -13,28 +13,65 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Rebuild the game from the current source tree
-        run: node build.cjs
-      - name: Stage the freshly compiled site
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Rebuild and verify the exact source tree before publication
+        run: |
+          echo "CHROMIUM_PATH=$(node -e "console.log(require('playwright').chromium.executablePath())")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -e "console.log(require('playwright').chromium.executablePath())")" /opt/pw-browsers/chromium
+          node build.cjs
+          git diff --exit-code -- index.html odyssey.html forge.html forge-odyssey.html
+          node tests/build-integrity.cjs
+          mkdir -p release-evidence tests/out
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Release-blocking gameplay checks
+        run: |
+          set -o pipefail
+          node tests/run.cjs release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 2>&1 | tee release-evidence/predeploy.log
+      - name: Stage only release content and stamp its identity
         run: |
           mkdir -p _site
-          rsync -a --exclude '.git' --exclude '_site' ./ _site/
-          # build.cjs now compiles every production repair into index.html.
-          # Do NOT append those scripts a second time here: duplicate wrappers
-          # were another way runtime state could disagree with source.
+          rsync -a --exclude '.git' --exclude '.github' --exclude '.claude' --exclude '.codex' --exclude '_site' --exclude 'node_modules' --exclude 'tests' --exclude 'tools' --exclude 'release-evidence' --exclude 'www' --exclude 'build' --exclude 'desktop' --exclude 'android' --exclude 'ios' --exclude 'assets/source' ./ _site/
           touch _site/.nojekyll
-      - name: Enable + configure Pages
+          node tools/stamp-pages.cjs _site
+      - name: Enable and configure Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
-      - name: Deploy
+      - name: Deploy tested artifact
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Confirm exact rebuilt release is live
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: node tools/verify-pages.cjs
+      - name: Exercise the live deployed game
+        env:
+          GAME_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -o pipefail
+          node tests/release-polish.cjs 2>&1 | tee release-evidence/live-gameplay.log
+          node tests/wake.cjs 2>&1 | tee release-evidence/live-opening.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CLAWBYTE-live-verification-${{ github.sha }}
+          path: |
+            release-evidence/
+            tests/out/
+            _site/release.json
+          retention-days: 14
