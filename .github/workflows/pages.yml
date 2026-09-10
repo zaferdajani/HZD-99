@@ -18,48 +18,16 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Rebuild the game from the current source tree
-        run: |
-          # Do not deploy the historical committed index.html. Source files are
-          # the authority; build.cjs compiles them into the page players run.
-          node build.cjs
-
-      - name: Stage the freshly built site and runtime repairs
+        run: node build.cjs
+      - name: Stage the freshly compiled site
         run: |
           mkdir -p _site
           rsync -a --exclude '.git' --exclude '_site' ./ _site/
-          python3 - <<'PY'
-          from pathlib import Path
-          import os, re
-          sha = os.environ['GITHUB_SHA'][:12]
-          p = Path('_site/index.html')
-          s = p.read_text()
-
-          # The normal BUILD_ID is a source hash, but several emergency repair
-          # layers intentionally live as separate scripts. Stamp the deployed
-          # commit so an already-open browser can detect this exact release.
-          s = re.sub(r'window\.BUILD_ID=["\'][^"\']+["\']',
-                     'window.BUILD_ID=' + repr(sha), s, count=1)
-
-          # Load repair layers after the compiled engine. Cache-bust them by the
-          # deploy commit; otherwise a browser can keep an older external repair
-          # script even while receiving the new HTML.
-          tags = [
-              'js/tutorial_enforce.js',
-              'js/mobility_fix.js',
-              'js/data_conduits_npc_fix.js',
-              'js/boss_aaa_fix.js',
-              'js/npc_shop_exit_fix.js',
-          ]
-          for src in tags:
-              tag = f'<script src="{src}?v={sha}"></script>'
-              if tag not in s:
-                  s = s.replace('</body>', tag + '\n</body>')
-          p.write_text(s)
-          PY
+          # build.cjs now compiles every production repair into index.html.
+          # Do NOT append those scripts a second time here: duplicate wrappers
+          # were another way runtime state could disagree with source.
           touch _site/.nojekyll
-
       - name: Enable + configure Pages
         uses: actions/configure-pages@v5
         with:
