@@ -18,10 +18,15 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Stage repo root as the site (index.html is the prebuilt game)
+      - name: Rebuild the game from the current source tree
+        run: node build.cjs
+      - name: Stage the freshly compiled site
         run: |
           mkdir -p _site
           rsync -a --exclude '.git' --exclude '_site' ./ _site/
+          # build.cjs now compiles every production repair into index.html.
+          # Do NOT append those scripts a second time here: duplicate wrappers
+          # were another way runtime state could disagree with source.
           touch _site/.nojekyll
       - name: Enable + configure Pages
         uses: actions/configure-pages@v5
