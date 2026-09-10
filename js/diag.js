@@ -21,8 +21,6 @@
 // `&diag=2` for the per-key art list, which is long.
 let DIAG = 0;
 try { DIAG = +(new URLSearchParams(location.search).get('diag') || 0) | 0; } catch (e) { DIAG = 0; }
-// a rolling window of frame times and frame luminance: "is it flickering" is a
-// question about a SEQUENCE, and a single number cannot answer it
 const DIAG_N = 120;
 const diagMs = [], diagLum = [];
 let diagCv = null, diagLast = 0, diagNext = 0;
@@ -30,8 +28,6 @@ function diagSample() {
   const now = performance.now();
   if (diagLast) { diagMs.push(now - diagLast); if (diagMs.length > DIAG_N) diagMs.shift(); }
   diagLast = now;
-  // the luminance probe is the same trick liftProbe uses and costs the same:
-  // one small readback, four times a second, never once per frame
   if (now < diagNext) return;
   diagNext = now + 250;
   try {
@@ -43,14 +39,12 @@ function diagSample() {
     for (let i = 0; i < d.length; i += 4) L += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
     diagLum.push(L / (32 * 18));
     if (diagLum.length > 48) diagLum.shift();
-  } catch (e) { /* a tainted canvas: the rest of the panel still reports */ }
+  } catch (e) { }
 }
-// what the lazy map has for a key, in the words the reader needs: a plate that
-// is still the small copy is the whole of the "blurry" complaint
 function diagTier(k) {
   const low = (typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[k]) | 0;
   if (low === 3) return 'full';
-  if (low === 2) return 'LOW';                 // the quarter-scale stand-in is on screen
+  if (low === 2) return 'LOW';
   if (typeof MEDIA_PEND !== 'undefined' && MEDIA_PEND[k]) return 'wait';
   if (typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[k]) return 'full';
   return 'none';
@@ -77,32 +71,13 @@ function drawDiag() {
       + '  box ' + (cvEl && cvEl.style.width ? cvEl.style.width : 'auto')
       + '  dpr ' + (window.devicePixelRatio || 1),
     'frame ' + ms.toFixed(1) + 'ms avg, ' + worst.toFixed(0) + 'ms worst',
-    // THE FLICKER LINE, AND IT HAD TO LEARN THE DIFFERENCE BETWEEN A FLICKER
-    // AND A DOOR. The first version printed the span over the whole twelve
-    // second window, and a window that contains a room crossing or a fade
-    // contains a legitimate near-black frame: the owner's meadow read 3-76 and
-    // sent me hunting a fault that a transition explains perfectly well. A
-    // span is a range; a flicker is a RATE.
-    //
-    // So three numbers instead of one. The range is still printed because it
-    // is what an eye reports. `now` is the span over the last two seconds,
-    // which a crossing has left by the time anyone reads the panel. `jumps` is
-    // how many times consecutive samples moved more than 8 levels across the
-    // whole window: a steady room is 0, a single door is 1 or 2, and a picture
-    // flipping like a movie is many. Read `jumps` first.
     'frame light ' + lo.toFixed(0) + '-' + hi.toFixed(0) + '  span ' + (hi - lo).toFixed(1)
       + '  now ' + nowSpan.toFixed(1) + '  jumps ' + jumps
       + '   LIFT_K ' + ((typeof LIFT_K === 'number') ? LIFT_K.toFixed(2) : '?')
       + '  bright ' + ((typeof BRIGHT_SET === 'number') ? BRIGHT_SET : '?'),
-    // WHAT DREW HER BODY THIS FRAME. "I do not feel like you did any changes
-    // ... the way the character is running" is settled by this line, not by
-    // an argument: a filmed run reads `gaitRun:5`; the old stills read
-    // `sheet:run_a`. Below it, whether the filmed strips are here at all —
-    // `wait` is a phone still downloading, `none` is a build without them.
     'body ' + (G.heroDrawn || '?') + '   vx ' + ((typeof player !== 'undefined' && player) ? Math.round(player.vx) : '?')
       + '   run ' + diagTier('gaitRun') + '  walk ' + diagTier('gaitWalk') + '  idle ' + diagTier('hzdIdle'),
   ];
-  // the room's own art, and whether any of it is still the stand-in
   const M = (typeof window !== 'undefined' && window.ROOM_ASSETS) || null;
   const keys = (M && M.rooms && M.rooms[G.roomId] && M.rooms[G.roomId].keys) || [];
   if (keys.length) {
@@ -128,14 +103,42 @@ function drawDiag() {
   c.strokeRect(6.5, 6.5, w + 15, H - 1);
   c.textAlign = 'left'; c.textBaseline = 'top';
   for (let i = 0; i < rows.length; i++) {
-    // the two lines a reader is looking for are coloured: a stand-in still on
-    // screen, and a frame whose light is moving
     const r = rows[i];
-    // amber for a stand-in still on screen; hot for a picture that is actually
-    // moving, which is `jumps`, not the range
     c.fillStyle = /LOW|MISSING|still small: [1-9]/.test(r) ? '#ffd76a'
       : /jumps ([3-9]|\d\d)/.test(r) ? '#ff8a5c' : '#cfe3ef';
     c.fillText(r, 14, 12 + i * 14);
   }
   c.restore();
 }
+
+// ---------------------------------------------------------------------------
+// 2026-09-09 playback/locomotion repair
+// ---------------------------------------------------------------------------
+// The authored run strip is a complete 16-cell stride. The previous range
+// ended at cell 8 (the opposite foot contact) and then wrapped directly to 0,
+// making the torso snap forward/backward on every half stride. Play the entire
+// measured cycle so the second half returns continuously to the first contact.
+try {
+  if (typeof HERO_GAIT !== 'undefined' && HERO_GAIT.run) {
+    HERO_GAIT.run.from = 0;
+    HERO_GAIT.run.to = HERO_GAIT.run.cells - 1;
+  }
+} catch (e) { }
+
+// Opening-film resilience. Built pages inject VID_FILES/VID_ALT, but source/dev
+// pages do not; and the intro registration in game.js runs before this file.
+// Ensure all eight shipped clips are addressable, then register them into the
+// same PURIFY_VID table used by every cinematic. Existing build-selected paths
+// (including light/mobile variants) always win.
+try {
+  if (typeof window !== 'undefined') {
+    window.VID_FILES = window.VID_FILES || {};
+    window.VID_ALT = window.VID_ALT || {};
+    for (let i = 1; i <= 8; i++) {
+      const k = 'intro' + i;
+      if (!window.VID_FILES[k]) window.VID_FILES[k] = 'assets/video/' + k + '.mp4';
+      if (!window.VID_ALT[k]) window.VID_ALT[k] = 'assets/video/' + k + '.webm';
+      if (typeof PURIFY_VID !== 'undefined' && !PURIFY_VID[k]) PURIFY_VID[k] = window.VID_FILES[k];
+    }
+  }
+} catch (e) { }
