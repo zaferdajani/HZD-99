@@ -217,7 +217,18 @@ let player = null;
 // ---------- persistence ----------
 // one save slot PER character, so the robo-cat and the hero playthroughs coexist
 function saveKeyFor(theme) { return SAVE_KEY + '_' + (theme || 'robo'); }
-function persist() { try { localStorage.setItem(saveKeyFor(G.save.theme), JSON.stringify(G.save)); } catch (e) {} }
+function persist() {
+  if (!G.save) return false;
+  try {
+    localStorage.setItem(saveKeyFor(G.save.theme), JSON.stringify(G.save));
+    G.saveFeedback = { ok:true, until:Date.now()+1700 };
+    return true;
+  } catch (e) {
+    G.saveFeedback = { ok:false, until:Date.now()+12000 };
+    console.warn('CLAWBYTE: progress could not be saved', e && e.name);
+    return false;
+  }
+}
 function loadStored(theme) {
   try {
     const v = localStorage.getItem(saveKeyFor(theme));
@@ -1034,7 +1045,7 @@ function loadRoom(id) {
     setMusic(def.zone);
   }
   if (def.zone !== G.lastZone) { G.zoneToast = { text: t('z_' + def.zone), t: 2.6 }; G.lastZone = def.zone; }
-  cam.x = 0; cam.y = 0;
+  cam.x = 0; cam.y = 0; cam.room = null;
   persist();
 }
 // ---------------------------------------------------------------------------
@@ -1831,6 +1842,9 @@ function doInteract(s) {
 
 // ---------- update ----------
 function fxDecay(dt) {
+  for (const key of ['songWave','elemPop']) if (G[key]) {
+    G[key].t-=dt; if (G[key].t<=0) G[key]=null;
+  }
   G.flash = Math.max(0, G.flash - dt * 2.4);
   G.lowGravT = Math.max(0, (G.lowGravT || 0) - dt);   // NULL GRAVITY field
   G.iceT = Math.max(0, (G.iceT || 0) - dt);           // COOLANT FREEZE floor
@@ -1847,7 +1861,7 @@ function fxDecay(dt) {
   if (G.bolt) { G.bolt.t -= dt; if (G.bolt.t <= 0) G.bolt = null; }
 }
 // How loud a machine's voice loop gets when she is standing right beside it.
-const NPC_VOX_CEIL = 0.34;
+const NPC_VOX_CEIL = 0.20;
 function tickNPCVox() {
   // proximity mixing: each NPC's voice swells as she draws near, and blooms
   // while it is actually speaking with her
@@ -1882,6 +1896,7 @@ function tickNPCVox() {
   }
 }
 function update(dt) {
+  if (typeof tutorialTick === 'function') tutorialTick();
   narrativeAudioTick();
   if (G.state === 'PLAY' || G.state === 'DIALOG') { tickNPCVox(); tickCaveLure(); }
   else if (typeof npcVoxQuietAll === 'function') npcVoxQuietAll();
@@ -1889,7 +1904,12 @@ function update(dt) {
     G.save.time += dt;
     fxDecay(dt);
     rubbleTick(dt);
-    if (G.hitStop > 0) { G.hitStop -= dt; updateParts(dt * 0.25); return; }
+    if (G.hitStop > 0) {
+      if (inP('ATK') && player) player.atkBuf = Math.max(player.atkBuf || 0, 0.2);
+      if (inP('JUMP') && player) player.jbuf = Math.max(player.jbuf || 0, 0.12);
+      if (inP('PAUSE') || inP('BACK')) { G.state = 'PAUSE'; G.pauseIdx = 0; sfx('ui'); }
+      G.hitStop = Math.max(0, G.hitStop - dt); updateParts(dt * 0.25); return;
+    }
     meetCheck(); if (G.meet) meetStep(dt);
     // THE CROSSING IS A MOVE, NOT A CUT (owner, 2026-08-23: "the map... becomes
     // cubicles of rooms connected... instead, it's actual world connected").
@@ -11255,7 +11275,7 @@ function drawSeals(P) {
 // Element feedback and the Song's wave. Drawn in screen space, so world points
 // are converted through the camera.
 function drawFX() {
-  const dt = 1 / 60;
+  const dt = 0; // read-only draw: fxDecay owns the simulation clock
   if (G.songWave) {
     const w = G.songWave; w.t -= dt;
     if (w.t <= 0) G.songWave = null;
@@ -11379,9 +11399,9 @@ const TUT_STEPS = [
   { id: 'out', label: 'tut_out', hint: 'tut_out_h',
     keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
     done: () => (TUT_ROOMS[G.roomId] || 0) >= 1 },
-  { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h',
+  { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h', room: 'W2',
     keys: 'Space', pad: 'A', touch: 'JUMP', vb: 'VJUMP',
-    done: () => !player.on && player.vy < -60 },
+    done: () => !player.on && player.vy < -60 && (typeof window === 'undefined' || !window.__tutorialEnforcement || !!G.tut.jumpShown) },
   // THE GATES. The second half of the walk, and the reason the walk exists: a
   // tutorial that ends at a door you can see from where you started gives the
   // verbs somewhere to have been going.
@@ -11478,7 +11498,7 @@ function tutHand(st) {
 // A shop lesson outside the workshop teaches UP at its door, then E beside
 // the robot inside. Keeping the saved lesson index unchanged preserves runs.
 function tutPrompt(st) {
-  const view = { ...st, target: null };
+  const view = { ...st, target: null, action: ({ jump:'JUMP', atk:'ATK', kill:'ATK', buy:'INT', node:'INT', heal:'HEAL', skill:'SKILL' })[st.id] || 'MOVE' };
   const pc = player.x + player.w / 2;
   const doors = typeof gateDoors === 'function' ? gateDoors() : [];
   const point = (x, y, color, radius = 30) => { view.target = { x, y, color, radius }; };
@@ -11488,9 +11508,9 @@ function tutPrompt(st) {
     view.vb = null;
     view.label = returning ? 'tut_return' : 'tut_enter';
     view.hint = 'tut_enter_h';
-    view.control = '\u2191';
+    view.control = '\u2191'; view.action = 'UP';
     if (Math.abs(pc - x) > 80) {
-      view.control = pc < x ? '\u2192' : '\u2190';
+      view.control = pc < x ? '\u2192' : '\u2190'; view.action = 'MOVE';
       view.hint = returning ? 'tut_return_h' : 'tut_workshop_h';
       if (!returning) view.label = 'tut_approach';
     }
@@ -11507,7 +11527,7 @@ function tutPrompt(st) {
     if (!G.roomDef.exits.R && doors[0]) doorPrompt(doors[0], false);
     else {
       point((G.roomDef.w - 1.5) * TILE, 13 * TILE, '#ffd76a');
-      view.control = '\u2192'; view.vb = null;
+      view.control = '\u2192'; view.vb = null; view.action = 'MOVE';
       view.label = 'tut_approach'; view.hint = 'tut_workshop_h';
     }
     return view;
@@ -11520,7 +11540,7 @@ function tutPrompt(st) {
         view.label = 'tut_note'; view.hint = 'tut_note_h';
       }
       if (G.near !== npc) {
-        view.control = pc < view.target.x ? '\u2192' : '\u2190';
+        view.control = pc < view.target.x ? '\u2192' : '\u2190'; view.action = 'MOVE';
         view.label = 'tut_approach'; view.hint = 'tut_workshop_h'; view.vb = null;
       }
     } else {
@@ -11545,11 +11565,16 @@ function tutPrompt(st) {
     if (node) {
       point(node.x + node.w / 2, node.y + node.h / 2, '#c9a6ff');
       if (G.near !== node) {
-        view.control = pc < view.target.x ? '\u2192' : '\u2190';
+        view.control = pc < view.target.x ? '\u2192' : '\u2190'; view.action = 'MOVE';
         view.label = 'tut_approach'; view.vb = null;
       }
     }
   } else if (st.id === 'heal') point(pc, player.y + player.h / 2, '#aef7d8', 32);
+  if (['JUMP','ATK'].includes(view.action) && typeof tutorialReady === 'function'
+      && !tutorialReady(view) && view.target && !(G.tut && G.tut.hold > 0)) {
+    view.action = 'MOVE'; view.control = pc < view.target.x ? '\u2192' : '\u2190';
+    view.label = 'tut_approach'; view.hint = 'tut_workshop_h'; view.vb = null;
+  }
   return view;
 }
 // The lessons are STAGED IN THE ROOM: open ground for the first, the step for
@@ -11597,6 +11622,7 @@ const TUT_DOOR = { W1: 'out', W2: 'gate', A0: 'go', A0B: 'go' };
 // that pressing jump before that point does what it looks like it should.
 const TUT_UNLOCK = { ATK: 'atk', INT: 'buy', HEAL: 'heal', SKILL: 'skill', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
 function tutAllows(act) {
+  if (typeof tutorialAllows === 'function') return tutorialAllows(act);
   const need = TUT_UNLOCK[act];
   if (!need) return true;
   if (!G || !G.save || !G.tut) return true;
@@ -11708,22 +11734,28 @@ function updateTutor(dt) {
 }
 function drawTutor() {
   const sv = G.save;
-  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player || G.state !== 'PLAY' || G.gateWalk || TUT_ROOMS[G.roomId] === undefined) return;
+  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player || G.state !== 'PLAY' || G.gateWalk || G.dialog || G.cut || G.wake || G.bossEntry || TUT_ROOMS[G.roomId] === undefined) return;
   const T = G.tut;
   const st = TUT_STEPS[T.i];
   if (!st) return;
-  const px = player.x + player.w / 2 - cam.x, py = player.y - cam.y;
+  const projectX = x => typeof worldScreenX === 'function' ? worldScreenX(x) : x-cam.x;
+  const projectY = y => typeof worldScreenY === 'function' ? worldScreenY(y) : y-cam.y;
+  const px = projectX(player.x+player.w/2), py = projectY(player.y-12);
   const learned = T.hold > 0;
   const pu = 0.5 + Math.sin(performance.now() / 260) * 0.5;
   // THE THING BEING TAUGHT, RINGED. A card that names a verb teaches nothing if
   // the player cannot see what it is about — so the step gets a ring while the
   // jump is being taught and the machine gets one while the claw is.
   const mark = (wx, wy, r, col) => {
-    const sx = wx - cam.x, sy = wy - cam.y;
+    const sx = projectX(wx), sy = projectY(wy);
     c.save();
     c.strokeStyle = col; c.lineWidth = 2.5; c.globalAlpha = 0.35 + pu * 0.5;
     c.setLineDash([6, 6]); c.lineDashOffset = -performance.now() / 70;
-    c.beginPath(); c.arc(sx, sy, r + pu * 3, 0, 7); c.stroke();
+    if (typeof drawMechanicalTutorialArrow === 'function' && sx >= 26 && sx <= 934 && sy >= 90 && sy <= 580) {
+      c.setLineDash([]); drawMechanicalTutorialArrow({x:wx,y:wy,radius:r});
+    } else if (typeof drawMechanicalTutorialArrow !== 'function') {
+      c.beginPath(); c.arc(sx,sy,r+pu*3,0,7); c.stroke();
+    }
     c.setLineDash([]);
     // A RING OFF THE EDGE OF THE SCREEN RINGS NOTHING. The node the 'think'
     // step points at sits thirteen tiles behind where she stands when the step
@@ -11773,7 +11805,7 @@ function drawTutor() {
   if (T.i < openAt2 && G.roomDef.exits && G.roomDef.exits.R) {
     // the held door: a light curtain, not a wall — it reads as "not yet",
     // and it flares when she pushes on it so the answer arrives when asked.
-    const bx = (G.roomDef.w - 2.0) * TILE - cam.x;
+    const bx = projectX((G.roomDef.w - 2.0) * TILE);
     c.save();
     c.globalCompositeOperation = 'lighter';
     const bg = c.createLinearGradient(bx - 10, 0, bx + 14, 0);
@@ -11781,11 +11813,11 @@ function drawTutor() {
     bg.addColorStop(0.5, 'rgba(55,255,208,' + (0.16 + pu * 0.12 + (T.push || 0) * 0.34).toFixed(3) + ')');
     bg.addColorStop(1, 'rgba(55,255,208,0)');
     c.fillStyle = bg;
-    c.fillRect(bx - 10, 10.4 * TILE - cam.y, 24, 4.6 * TILE);
+    c.fillRect(bx - 10, projectY(10.4 * TILE), 24, 4.6 * TILE);
     c.strokeStyle = 'rgba(55,255,208,' + (0.3 + pu * 0.3 + (T.push || 0) * 0.4).toFixed(3) + ')';
     c.lineWidth = 1.5;
     for (let i = 0; i < 5; i++) {
-      const yy = (10.6 + i * 0.9) * TILE - cam.y + Math.sin(performance.now() / 300 + i) * 3;
+      const yy = projectY((10.6+i*.9)*TILE) + Math.sin(performance.now() / 300 + i) * 3;
       c.beginPath(); c.moveTo(bx - 7, yy); c.lineTo(bx + 7, yy); c.stroke();
     }
     c.restore();
@@ -11872,7 +11904,7 @@ function drawLesson() {
   if (!L || !player || G.state !== 'PLAY') return;
   const M = MOD_LESSON[L.id];
   if (!M) return;
-  tutCard(player.x + player.w / 2 - cam.x, player.y - cam.y, tutHand(M),
+  tutCard(typeof worldScreenX==='function'?worldScreenX(player.x+player.w/2):player.x+player.w/2-cam.x, typeof worldScreenY==='function'?worldScreenY(player.y-12):player.y-cam.y, tutHand(M),
     t('m_' + L.id), t('les_' + L.id), L.hold > 0, L.hold / 1.1);
 }
 // ---------------------------------------------------------------------------
@@ -12867,13 +12899,14 @@ function drawWorldFrame() {
   // film, so a player whose audio never unlocked — anyone on a controller —
   // reached the game and found it silent, with nothing on screen explaining
   // why or what to do. It draws itself only while sound is actually locked.
-  if (typeof drawSoundChip === 'function') drawSoundChip(performance.now() / 1000);
+
   lightPass(P);
   if (G.flash > 0) {
     c.fillStyle = 'rgba(255,255,255,' + (G.flash * 0.32) + ')';
     c.fillRect(0, 0, 960, 540);
   }
   scanOverlay();
+  if (typeof presentWorld === 'function') presentWorld();
 }
 // ===========================================================================
 // THE LIGHT IN THE ROOM.
@@ -14197,7 +14230,7 @@ function draw(tms) {
   }
   // in-world states render the world behind
   drawWorldFrame();
-  drawFX();
+  if (typeof withWorldProjection === 'function') withWorldProjection(c,drawFX); else drawFX();
   // THE LIGHTS COMING UP on a guardian's chamber. Over the world and under the
   // HUD, so the room is what darkens — a black frame with the player's own
   // readouts sitting on top of it would just look like a broken screen. It
@@ -14228,10 +14261,12 @@ function draw(tms) {
   holdFrameNearExit();
   if (typeof drawBrDelta === 'function') drawBrDelta();
   drawTutor();
-  if (typeof drawGateWalk === 'function') drawGateWalk();
+  if (typeof drawGateWalk === 'function') { if (typeof withWorldProjection === 'function') withWorldProjection(c,drawGateWalk); else drawGateWalk(); }
   drawLesson();
   drawHUD();
   drawMapButton();
+  if (typeof drawSoundChip === 'function') drawSoundChip(tsec);
+  if (typeof drawSaveFeedback === 'function') drawSaveFeedback();
   // THE PUSH. The frame she left is held and slid off the edge she left by, so
   // the two rooms read as one continuous space travelled through rather than
   // two pictures swapped. Drawn in RAW DEVICE PIXELS — the quality dial scales
@@ -15841,7 +15876,7 @@ setInterval(checkForUpdate, 240000);
 addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate(); });
 // instant repeat loads + offline: cache-first assets, network-first code
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  try { navigator.serviceWorker.register('sw.js'); } catch (e) {}
+  try { navigator.serviceWorker.register('sw.js?v=' + encodeURIComponent(window.BUILD_ID || 'dev'), {updateViaCache:'none'}).catch(() => {}); } catch (e) {}
 }
 let lastT = 0;
 // ---------------------------------------------------------------------------
@@ -15900,6 +15935,7 @@ function mainLoop(tms) {
   }
   lastT = tms;
   if (typeof pollGamepad === 'function') pollGamepad();
+  const artReady = typeof heroArtBootTick !== 'function' || heroArtBootTick();
   // one step on a healthy frame; two or three when the machine is struggling
   let acc = Math.min(raw, SIM_MAX) * (G.state === 'PLAY' ? paceK() : 1);
   if (!(acc > 0)) acc = dt;
@@ -15911,7 +15947,14 @@ function mainLoop(tms) {
   // time it never got. tests/bosspace.cjs did exactly that and carried a
   // documented flake for it. One addition per frame, no branch, no allocation.
   G.simClock = (G.simClock || 0) + acc;
-  while (acc > 1e-4) { const st = Math.min(acc, SIM_STEP); update(st); acc -= st; }
+  while (acc > 1e-4) {
+    const st = Math.min(acc, SIM_STEP);
+    if (artReady || G.state !== 'PLAY') update(st);
+    // Held controls survive. A pressed edge belongs to one simulation step,
+    // including a frame that catches up two or three physics steps.
+    for (const key in keysP) keysP[key] = 0;
+    acc -= st;
+  }
   // ONE PREFETCH SLOT PER FRAME, IN EVERY STATE. This used to live inside the
   // PLAY branch of update(), which meant the title screen, the map, a shop and
   // the whole two-minute opening fetched nothing at all — the quietest moments
@@ -15925,11 +15968,11 @@ function mainLoop(tms) {
   draw(tms);
   drawTouchUI();
   clearP();
-  if (!mainLoop.ldGone) {
+  if (!mainLoop.ldGone && artReady) {
     mainLoop.ldGone = true;
     const ld = document.getElementById('cbload');
     if (ld) { ld.style.opacity = '0'; setTimeout(() => { try { ld.remove(); } catch (e) {} }, 500); }
   }
   requestAnimationFrame(mainLoop);
 }
-requestAnimationFrame(mainLoop);
+// Initial scheduling is in boot.js, after all production modules have loaded.

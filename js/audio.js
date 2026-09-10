@@ -1069,7 +1069,8 @@ function hzdSay(key, gapMs) {
   if (interruptsHold) hzdRelease(0.025);
   if (!interruptsHold && now - HZDT < (gapMs == null ? 90 : gapMs)) return false;
   const pick = set[(Math.random() * set.length) | 0];
-  if (!playBuf(pick[0], pick[1], 0.96 + Math.random() * 0.08)) return false;
+  const rate = key === 'yalla' ? 1.45 : 0.98 + Math.random() * 0.04;
+  if (!playBuf(pick[0], pick[1], rate)) return false;
   HZDT = now;
   return true;
 }
@@ -1140,8 +1141,8 @@ function sfx(n) {
   if (n === 'crystalSwirl') { crystalSwirl(); return; }
   // HER LITTLE MELODIES — see the alphabet above. These come before any
   // sample, because the whole point is that they are all the same instrument.
-  if (n === 'jump') playBuf('hz_jump', 0.34, 0.94 + Math.random() * 0.12);
-  if (n === 'land') playBuf('hz_land', 0.4, 0.92 + Math.random() * 0.12);
+  if (n === 'jump' && playBuf('hz_jump', 0.28, 0.98 + Math.random() * 0.04)) return;
+  if (n === 'land' && playBuf('hz_land', 0.32, 0.97 + Math.random() * 0.06)) return;
   if (CUE[n]) { CUE[n](); return; }
   const v = VOX[n];
   if (v && playBuf(v[0], v[1], 0.97 + Math.random() * 0.06)) return;

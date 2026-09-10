@@ -835,7 +835,7 @@ let HERO_FIDGET = { key: 'heroFidget', cells: 16, k: 0.8, fps: 9, intro: 6 };
 // Cling, slip, catch — three stills at 5 fps, because every video take of a
 // wall slide painted her a pole to hold. Authored with the wall at her RIGHT.
 let HERO_WALL_STRIP = { key: 'transWall', cells: 3, k: 0.848, fps: 5 };
-const FIDGET_AFTER = 6;        // seconds of stillness before she runs out of patience
+const FIDGET_AFTER = 5;        // seconds of stillness before she runs out of patience
 // THE CELL COUNT IS HOW MANY DIFFERENT PICTURES THE TAKE ACTUALLY HOLDS.
 //
 // Two owner reports, and the second corrected the first. "Use the films to
@@ -1200,7 +1200,9 @@ class Player {
       // idle micro-life: randomized ear twitches, tail flicks, look-arounds and
       // slow weight shifts — she never stands like a statue
       const idle = this.on && Math.abs(this.vx) < 30 && !this.swingVis && this.dashT <= 0
-        && this.healT <= 0 && this.landT <= 0;
+        && this.healT <= 0 && this.landT <= 0 && this.chargeT <= 0 && this.swirlT <= 0
+        && G.state === 'PLAY' && !G.dialog && !G.cut && !G.gateWalk && !G.wake && !G.bossEntry
+        && !['LEFT','RIGHT','UP','DOWN','JUMP','ATK','INT','HEAL','DASH'].some(a => IN_D(a));
       this.wallT = (this.wallSlide !== 0 && !this.on) ? (this.wallT || 0) + dt : 0;
       if (idle) {
         this.idleT += dt;
@@ -1220,29 +1222,13 @@ class Player {
           this.tailFlickIn = rnd(2.4, 6);
           this.tailV[0] += 0.55; this.tailV[1] += 0.35; this.tailV[2] += 0.2;
         }
-        // YALLA — patience breaks audibly. Once when the fidget starts, then
-        // again every eight-or-so seconds of being ignored. Voice only: the
-        // fidget art loops with or without the word, and the word never
-        // repeats often enough to become the room's metronome.
-        // ...AND SHE FIDGETS FOR A WHILE BEFORE SHE SAYS ANYTHING.
-        //
-        // The first word used to land 0.2 s after the fidget began, so the
-        // animation change and the voice arrived together and it read as a bark
-        // on cue rather than patience running out — the owner: "the sound it
-        // makes while still standing and waiting should not happen instantly.
-        // You need to give it, like, five seconds maybe of waiting." Five
-        // seconds of visible fidgeting first, which puts the first word eleven
-        // seconds into standing still; and the repeats are far rarer, because
-        // a line every eight seconds is a character nagging the player rather
-        // than one waiting for them.
-        if (this.idleT > FIDGET_AFTER) {
-          this.yallaIn = (this.yallaIn == null ? 5 : this.yallaIn) - dt;
-          if (this.yallaIn <= 0) {
-            this.yallaIn = rnd(14, 22);
-            if (typeof hzdSay === 'function') hzdSay('yalla', 600);
-          }
-        } else this.yallaIn = null;
-      } else { this.idleT = 0; this.lookTgt = 0; this.lookHold = null; this.yallaIn = null; }
+        // Once per uninterrupted idle, at five seconds. Narrative audio and
+        // the character voice arbiter retain priority; there is no bypass.
+        if (this.idleT >= FIDGET_AFTER && !this.idleSpoke) {
+          this.idleSpoke = true;
+          if (typeof hzdSay === 'function') hzdSay('yalla', 600);
+        }
+      } else { this.idleT = 0; this.idleSpoke = false; this.lookTgt = 0; this.lookHold = null; this.yallaIn = null; }
       if (this.lookHold != null) {
         this.lookHold -= dt;
         if (this.lookHold <= 0) { this.lookTgt = 0; this.lookHold = null; }
@@ -1754,13 +1740,12 @@ class Player {
       this.on = true; this.coyote = 0.1;
       this.airJumps = hasMod('djump') ? (hasSkill('triple') ? 2 : 1) : 0;
     } else { this.on = false; this.coyote -= dt; }
-    if (this.on && Math.abs(this.vx) > 150 && this.dashT <= 0) {
-      this.stepT = (this.stepT || 0) - dt;
-      if (this.stepT <= 0) {
-        this.stepT = 0.27;
+    const contact = Math.floor((this.stridePh || 0) / 2);
+    if (this.on && Math.abs(this.vx) > 70 && this.dashT <= 0 && !this.swingVis) {
+      if (this.stepContact != null && this.stepContact !== contact)
         sfx((G.roomDef.ice || (G.iceT || 0) > 0) ? 'stepice' : 'step');
-      }
-    } else this.stepT = 0.1;
+      this.stepContact = contact;
+    } else this.stepContact = null;
     // hazard tiles. The GROUNDING CREST is the one piece of kit that lets her
     // stand on a live rail — and standing on one is the only way to reach what
     // is under the brittle stretch of it.
@@ -2305,7 +2290,7 @@ class Player {
     // mid-air, and a character crouching while airborne reads as a bug, which
     // is what "can't stay crouching and jump and charged at the same time"
     // was describing. No code change is needed for it — the plate is the pose.
-    if (this.chargeT > 0.05) return 'charge';
+    if (this.chargeT > 0.05 && this.on && Math.abs(this.vx) <= 34) return 'charge';
     if (this.dashT > 0) return 'dash';
     if (this.wallSlide !== 0 && !this.on) return 'wall_cling';
     if (!this.on) {
@@ -2327,7 +2312,7 @@ class Player {
       }
     }
     if (this.skidT > 0) return 'skid';
-    if (this.landT > 0) return 'land';
+    if (this.landT > 0 && Math.abs(this.vx) <= 34) return 'land';
     // one core left and standing still: the carriage sags. Moving cancels it —
     // a limp that survives a sprint reads as a bug, not as damage.
     if (this.cores <= 1 && Math.abs(this.vx) < 20) return 'slump';
@@ -2477,17 +2462,25 @@ class Player {
                          0, HERO_FLOOR, HERO_DH * T.k, false);
   }
   drawRoboPlate(c, run) {
-    if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG.heroStates) return false;
+    if (typeof MEDIA_IMG === 'undefined') return false;
     // the swing plays its own strip when one is fired for that attack; it
     // returns false until the art lands and the pose cell covers it meanwhile
     if (typeof G !== 'undefined') G.lastStrip = null;
     if (this.swingVis && this.drawRoboSwing(c)) { if (typeof G !== 'undefined') G.heroDrawn = G.lastStrip; return true; }
-    const im = MEDIA_IMG.heroStates;
-    const cw = im.width / HERO_CELLS, ch = im.height;
     const st = this.heroState(run);
     // ...and every other moment the body is mid-change plays its clip the same
     // way, for the same reason, with the same fallback
     if (this.drawRoboTrans(c, st)) { if (typeof G !== 'undefined') G.heroDrawn = G.lastStrip; return true; }
+    if (/^(walk|run)_/.test(st) && HERO_GAIT) {
+      // A missing essential sheet is a loading state, never a different run.
+      // Normal gameplay is gated until these exact assets are decoded.
+      if (typeof requestHeroArt === 'function') requestHeroArt();
+      if (typeof G !== 'undefined') G.heroDrawn = 'loading:gait';
+      return true;
+    }
+    const im = MEDIA_IMG.heroStates;
+    if (!im) return false;
+    const cw = im.width / HERO_CELLS, ch = im.height;
     // SHE IS THE SAME CAT IN EVERY POSE. Every cell is drawn at HERO_DH, which
     // is the CELL's height and not hers — so a pose whose figure fills more of
     // its cell arrives on screen as a bigger character. Measured across the
@@ -2833,7 +2826,7 @@ class Player {
     const bob = run ? Math.sin(ph * 2) * (1.4 - sprintK * 0.9) : Math.sin(this.anim * 2.4) * 0.9;
     // --- squash & stretch: one signed, volume-conserving deformation ---
     let sy = 1, sx = 1;
-    if (this.landT > 0) {
+    if (this.landT > 0 && Math.abs(this.vx) <= 34) {
       // landing: deep squash -> overshoot stretch -> settle (damped bounce,
       // pinned at the feet so the dome dips and rebounds)
       const l0 = this.land0 || 0.12, lk = 1 - this.landT / l0;

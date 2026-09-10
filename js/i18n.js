@@ -13,6 +13,7 @@ function langName(id) { const l = LANGS.find(x => x.id === id); return l ? l.nam
 function isRTL() { const l = LANGS.find(x => x.id === LANG); return !!(l && l.rtl); }
 const I18N = {
 en: {
+  save_ok: 'Progress saved', save_failed: 'Progress could not be saved. Check browser storage before closing.',
   nf_rematch: 'It remembers the corridor.',
   film_meet: 'The Corridor',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
@@ -504,6 +505,7 @@ en: {
   map_ctl: 'Drag or ✥ to pan   ·   wheel / pinch / Z · X to zoom   ·   E fit   ·   Q recentre   ·   M close',
 },
 ar: {
+  save_ok: 'تم حفظ التقدم', save_failed: 'تعذر حفظ التقدم. تحقق من مساحة المتصفح قبل الإغلاق.',
   nf_rematch: 'إنه يتذكّر الممرّ.',
   film_meet: 'الممرّ',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader

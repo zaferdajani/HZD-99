@@ -29,6 +29,9 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['tutorial-controller', 'complete production tutorial, contextual locks and transition recovery', { noBrowser: true }],
+  ['offline-release', 'scoped version cache, media seeking and storage-denied fallback', { noBrowser: true }],
+  ['release-polish', 'cold artwork, actual screen scale, camera, input edges, workshop and movies'],
   ['chapter-one', 'one earned rescue, quarry, forge and sage save chain'],
   ['sage-specials', 'charged attacks obey purification and protected-target rules', { noBrowser: true }],
   ['tutorial-clarity', 'one contextual action, one marker and saved lesson continuity', { noBrowser: true }],
