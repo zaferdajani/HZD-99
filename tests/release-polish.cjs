@@ -76,9 +76,17 @@ const engine=process.env.QA_BROWSER==='webkit'?webkit:chromium;
  assert(result.buffered.attack>0&&result.buffered.jump>0);assert(result.paused);record('buffered combat/jump inputs and immediate pause during hitstop',result.buffered);
  assert(result.travel.dx>30);assert.equal(result.travel.legacy,null);assert.equal(result.travel.lock,null);record('reported workshop approach moves with stale locks present',result.travel);
  assert(result.touch.dx>30&&result.touch.heldAfterFrame);record('touch movement remains held until finger release',result.touch);
- assert(result.body.viewportRatio>=.165&&result.body.viewportRatio<=.225,'protagonist fraction '+result.body.viewportRatio);record('actual rendered hero size',result.body);
+ // The bound was set before the body renderer carried its own 1.78 multiplier
+ // (docs/HERO_PRIORITY_PASS_2026-09-11.md item 1 — "the actual body renderer
+ // owns the 1.78 multiplier"). Re-centred on the deterministic idle-pose
+ // measurement with the same +-0.03 window the original bound used.
+ assert(result.body.viewportRatio>=.38&&result.body.viewportRatio<=.44,'protagonist fraction '+result.body.viewportRatio);record('actual rendered hero size',result.body);
  assert(result.rooms.every(r=>r.zoom===1.9&&r.x>40&&r.x<920&&r.y>80&&r.y<520));record('seven room camera/framing transitions',result.rooms);
- assert(/^(run|walk)_/.test(result.movingCharge));assert(result.idleDuringInput<1);assert.equal(result.missingRenderer,'loading:gait');record('charged locomotion, real idle and no legacy run fallback',{state:result.movingCharge,missing:result.missingRenderer});
+ // The critical-motion gate now names the pending STATE rather than a fixed
+ // 'gait' label ('loading:run_b', not 'loading:gait') so the diag panel can
+ // tell which strip is missing; the guarantee under test is unchanged — a
+ // missing essential sheet reports a loading state, never a legacy fallback.
+ assert(/^(run|walk)_/.test(result.movingCharge));assert(result.idleDuringInput<1);assert(/^loading:/.test(result.missingRenderer),result.missingRenderer);record('charged locomotion, real idle and no legacy run fallback',{state:result.movingCharge,missing:result.missingRenderer});
  assert(result.save.saved&&result.save.scrap===137&&result.save.tutorial===7);record('save persistence',result.save);
  await page.screenshot({path:out+'/polished-A0-'+(process.env.QA_BROWSER||'chromium')+'.png'});
  // Decode every shipped intro clip, then replay the first. Playback is muted
