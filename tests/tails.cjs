@@ -13,6 +13,9 @@
 //   node tests/tails.cjs
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const FF = fs.existsSync('node_modules/ffmpeg-static/ffmpeg') ? 'node_modules/ffmpeg-static/ffmpeg' : 'ffmpeg';
+// A missing decoder is infrastructure failure, not 109 corrupt recordings.
+try { execFileSync(FF, ['-version'], { stdio: 'ignore' }); }
+catch (e) { throw new Error('Audio QA requires ffmpeg; install it before running tails: ' + e.message); }
 const DIR = 'assets/sfx';
 const LOOPS = /^(hum_|amb_|loop_)/;
 const files = [];

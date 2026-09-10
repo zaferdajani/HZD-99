@@ -48,7 +48,7 @@ function copyDir(from, to) {
   fs.writeFileSync(path.join(STAGE, 'package.json'), JSON.stringify({
     name: 'clawbyte', productName: 'CLAWBYTE', version: ver,
     description: 'CLAWBYTE — a robo-cat metroidvania', main: 'main.js',
-    author: 'Zafer Dajani', license: 'UNLICENSED'
+    author: 'VibeSolutions', license: 'UNLICENSED'
   }, null, 2) + '\n');
   copyDir(path.join(ROOT, 'www'), path.join(STAGE, 'www'));
   let commit = 'unknown', dirty = true;

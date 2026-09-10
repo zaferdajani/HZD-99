@@ -46,6 +46,13 @@ const chk = (name, ok, detail) => {
     startGame(sv); loadRoom('A0B');
     G.wake = null; G.hitStop = 0; G.toasts = [];
     player.x = 19 * TILE; player.y = (G.roomDef.h - 3) * TILE;
+    // PIN THE QUALITY DIAL (same lesson as tests/cavedark.cjs and
+    // tests/denlight.cjs): the interior's additive relight rides richK, which
+    // eases toward 0 whenever a frame runs long. A headless rasteriser under
+    // real load can trip that on ANY frame, and Ratchet's booth read a
+    // genuinely darker torso on the unlucky runs — not a positioning bug, a
+    // quality dial the harness never held still.
+    if (typeof richK !== 'undefined') { richBG = true; richHold = 999; richK = 1; }
     try {
       Object.defineProperty(G, 'dialog', { get: () => null, set: () => {}, configurable: true });
       Object.defineProperty(G, 'state', { get: () => 'PLAY', set: () => {}, configurable: true });

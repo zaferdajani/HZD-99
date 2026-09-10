@@ -10,18 +10,26 @@ const OUT = require('path').join(__dirname, 'out/');
   await p.goto('http://127.0.0.1:8220/index.html');
   await p.waitForTimeout(3000);
   await p.mouse.move(480, 300);
+  // Boot now correctly waits at the title screen. Start the reel explicitly
+  // after a real gesture; silently watching MENU used to report 0/8 as a pass.
+  await p.mouse.click(8, 8);
+  await p.evaluate(() => { G.afterCine = null; startCine(); });
   const seen = new Set(); let shots = 0, everFallback = false;
-  for (let i = 0; i < 130; i++) {
+  const reelDeadline=Date.now()+180000;
+  for (let i=0; Date.now()<reelDeadline; i++) {
     const s = await p.evaluate(() => ({
       st: G.state, kind: G.cut && G.cut.kind, ph: G.cut && G.cut.ph,
       ran: G.cut && !!G.cut.ran, ct: G.cut && +G.cut.v.currentTime.toFixed(1),
       err: G.cut && G.cut.v.error && G.cut.v.error.code,
     }));
     if (s.st === 'CINE') everFallback = true;
-    if (s.kind && s.ran && !seen.has(s.kind)) { seen.add(s.kind); shots++; console.log('  playing', s.kind, 'at', s.ct + 's'); }
+    if(i%20===0) console.log('reel progress',JSON.stringify(s));
+    if (s.kind && s.ran && s.ct >= 0.1 && !seen.has(s.kind)) { seen.add(s.kind); shots++; console.log('  playing', s.kind, 'at', s.ct + 's'); }
     if (i === 6) await p.screenshot({ path: OUT + 'film_shot.png' });
     if (s.st === 'MENU' && i > 10) break;
-    await p.waitForTimeout(500);
+    // Let each clip end naturally. Seeking on an HTTP server without byte-
+    // range support can stall the test even when ordinary playback is healthy.
+    await p.waitForTimeout(150);
   }
   // ---- NEW GAME, TWICE ---------------------------------------------------
   // The reported bug: pressing New Game showed a glimpse of the film and then
@@ -73,8 +81,8 @@ const OUT = require('path').join(__dirname, 'out/');
   console.log('final state              :', await p.evaluate(() => G.state));
   console.log('pageerrors               :', errs.length ? errs.slice(0, 2) : 'none');
   await b.close();
-  if (!newGameOk) {
-    console.log('\nFAILED: New Game shows a glimpse of the film and skips to the difficulty screen');
+  if (!newGameOk || shots !== 8 || everFallback || errs.length) {
+    console.log('\nFAILED: intro must play all eight clips, transition normally, replay twice and have no page errors');
     process.exit(1);
   }
 })();

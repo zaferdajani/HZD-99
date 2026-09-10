@@ -435,50 +435,58 @@ function padRumble(strong, weak, ms) {
     } else if (act.pulse) act.pulse(clamp(Math.max(strong, weak), 0, 1), Math.min(1000, ms || 100));
   } catch (e) {}
 }
-const cam = { x: 0, y: 0, shake: 0 };
+const cam = { x:0, y:0, shake:0, zoom:1, lead:0, shakeX:0, shakeY:0, room:null };
 let prevShake = 0;
 function updateCam(px, py, rw, rh, dt) {
-  const p = typeof player !== 'undefined' && player;
-  const playable = p && !p.dead && typeof G !== 'undefined' && G.state === 'PLAY'
-    && !(typeof isHero === 'function' && isHero())
-    && !G.meet && !G.bossEntry && !G.gateWalk && !G.trans;
-  let tx, ty;
-  if (playable) {
-    const snap = cam.motionRoom !== G.roomId || dt >= 0.5;
-    const speed = Math.abs(p.vx || 0);
-    const direction = speed > 20 ? Math.sign(p.vx) : p.face;
-    const wantLead = direction * (86 + Math.min(54, speed * 0.16));
-    cam.lookAhead = snap ? wantLead : lerp(cam.lookAhead || 0, wantLead, 1 - Math.exp(-dt * 5));
-    tx = clamp(px - 480 + cam.lookAhead, 0, Math.max(0, rw - 960));
-    const feet = py + p.h / 2;
-    if (snap || !Number.isFinite(cam.groundFocus)) cam.groundFocus = feet;
-    if (p.on) cam.groundFocus = lerp(cam.groundFocus, feet, 1 - Math.exp(-dt * 10));
-    ty = cam.groundFocus - 372;
-    // Keep the larger head clear of the HUD, and show floor before a long fall.
-    if (feet - ty < 218) ty = feet - 218;
-    if (feet - ty > 444) ty = feet - 444;
-    ty = clamp(ty, 0, Math.max(0, rh - 540));
-    cam.motionRoom = G.roomId;
-    cam.x = snap ? tx : lerp(cam.x, tx, 1 - Math.exp(-dt * 9));
-    cam.y = snap ? ty : lerp(cam.y, ty, 1 - Math.exp(-dt * (p.vy > 500 ? 12 : 8)));
-  } else {
-    const lead = p && !p.dead ? p.face * 65 : 0;
-    tx = clamp(px - 480 + lead, 0, Math.max(0, rw - 960));
-    ty = clamp(py - 300, 0, Math.max(0, rh - 540));
-    cam.x = lerp(cam.x, tx, 1 - Math.pow(0.0002, dt));
-    cam.y = lerp(cam.y, ty, 1 - Math.pow(0.0035, dt));
-    cam.motionRoom = null;
+  const robo = !(typeof isHero === 'function' && isHero()) && !(typeof window !== 'undefined' && window.EDITOR);
+  const baseZoom = robo && typeof PRESENTATION !== 'undefined' ? PRESENTATION.explorationZoom : 1;
+  let wantZoom = baseZoom;
+  const p = typeof player !== 'undefined' && player && !player.dead ? player : null;
+  const boss = typeof G !== 'undefined' && G.boss && !G.boss.dead && !['dorm','intro'].includes(G.boss.st) ? G.boss : null;
+  // A close exploration camera must not crop the tell of a much larger foe.
+  // Fit both bodies during real encounters, and settle back after the fight.
+  if (robo && p && boss && typeof boss.cx === 'function') {
+    const dx=Math.abs(boss.cx()-px), dy=Math.abs(boss.cy()-py);
+    wantZoom=Math.max(1.05,Math.min(baseZoom,760/(dx+boss.w/2+100),400/(dy+boss.h/2+90)));
+    if (!(G.meet && (G.meet.ph==='watch'||G.meet.ph==='coil'))) {
+      px = px*.65 + boss.cx()*.35;
+      py = py*.75 + boss.cy()*.25;
+    }
   }
-  // every screen shake is also felt in the hands: boss slams, roars,
-  // explosions and heavy landings all raise cam.shake, so one hook here
-  // turns the whole game's impact language into haptics
-  if (cam.shake > prevShake + 2.5)
-    padRumble(clamp(cam.shake / 13, 0.15, 1), clamp(cam.shake / 9, 0.2, 1), 60 + cam.shake * 16);
-  prevShake = cam.shake;
-  cam.shake = Math.max(0, cam.shake - dt * 22);
+  const snap=dt>=.5 || cam.room!==(typeof G!=='undefined'?G.roomId:null);
+  const step=Math.max(0,Math.min(dt,.1));
+  cam.zoom = snap ? wantZoom : lerp(cam.zoom||wantZoom,wantZoom,1-Math.exp(-step*4));
+  cam.room = typeof G!=='undefined'?G.roomId:null;
+  const z=cam.zoom, ox=480*(1-1/z), oy=270*(1-1/z);
+  const facing=p ? p.face : 0, speed=p ? Math.abs(p.vx) : 0;
+  const lead=facing*(robo ? 25+23*Math.min(1,speed/340) : 65);
+  cam.lead=snap?lead:lerp(cam.lead||0,lead,1-Math.exp(-step*18));
+  const boundX=v=>rw<960/z?(rw-960)/2:clamp(v,-ox,rw-960+ox);
+  const boundY=v=>rh<540/z?(rh-540)/2:clamp(v,-oy,rh-540+oy);
+  const fall=p ? clamp(p.vy/980,-1,1)*20 : 0;
+  const tx=boundX(px-480+cam.lead);
+  const ty=boundY(py-(robo?270+112/z:300)+fall);
+  cam.x=snap?tx:lerp(cam.x,tx,1-Math.exp(-step*11));
+  cam.y=snap?ty:lerp(cam.y,ty,1-Math.exp(-step*9));
+  // Keep the character within a safe vertical band even during a fast drop.
+  // Room bounds win at the roof/floor; they are never exchanged for black void.
+  if (p && robo && !boss) {
+    const centre=p.y+p.h/2;
+    cam.y=boundY(clamp(cam.y,centre-270-155/z,centre-270+120/z));
+  }
+  if (cam.shake > prevShake+2.5)
+    padRumble(clamp(cam.shake/13,.15,1),clamp(cam.shake/9,.2,1),60+cam.shake*16);
+  prevShake=cam.shake;
+  cam.shake=Math.max(0,cam.shake-step*22);
+  cam.shakeTime=(cam.shakeTime||0)+step;
+  const amplitude=Math.min(8,cam.shake)/z;
+  // Every layer samples the SAME shake in a frame. Independent random
+  // offsets for the tile plane, character and fringe used to tear the scene.
+  cam.shakeX=Math.sin(cam.shakeTime*91)*amplitude;
+  cam.shakeY=Math.sin(cam.shakeTime*113+.8)*amplitude*.6;
 }
-function camSX() { return cam.x + (cam.shake > 0 ? rnd(-cam.shake, cam.shake) : 0); }
-function camSY() { return cam.y + (cam.shake > 0 ? rnd(-cam.shake, cam.shake) : 0); }
+function camSX() { return cam.x+(cam.shakeX||0); }
+function camSY() { return cam.y+(cam.shakeY||0); }
 
 let parts = [];
 function addPart(x, y, vx, vy, life, color, size, grav, glow) {

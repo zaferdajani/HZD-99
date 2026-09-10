@@ -38,217 +38,34 @@
 <body>
 <canvas id="cv" width="960" height="540"></canvas>
 <canvas id="tc" style="position:fixed;inset:0;z-index:5;display:none;pointer-events:none"></canvas>
-<div id="cbload">
-  <canvas id="cbloadc" width="520" height="340" style="width:260px;height:170px"></canvas>
-  <div id="cbloadn"></div>
+<script>window.GAME_LOCK="hero"</script>
+<div id="cbload" role="status" aria-live="polite">
   <div id="cbloadt">CLAWBYTE</div>
-  <div id="cbloadb"><i></i></div>
+  <div id="cbloadn">Preparing your journey</div>
+  <div id="cbloadb"><i id="cbloadbar"></i></div>
+  <button id="cbloadretry" type="button" hidden>Retry loading</button>
+  <small>VibeSolutions</small>
 </div>
 <style>
-#cbload{position:fixed;inset:0;background:#05080d;z-index:99;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:10px;transition:opacity .45s}
-#cbloadt{font:700 21px system-ui,sans-serif;color:#37ffd0;letter-spacing:6px;text-shadow:0 0 18px rgba(55,255,208,.5)}
-#cbloadn{font:600 12px system-ui,sans-serif;color:#7d93a8;letter-spacing:3px;min-height:14px}
-#cbloadb{width:190px;height:4px;background:#101c28;border-radius:2px;overflow:hidden}
-#cbloadb i{display:block;height:100%;width:38%;background:linear-gradient(90deg,rgba(55,255,208,0),#37ffd0,rgba(55,255,208,0));
-  border-radius:2px;animation:cblsh 1.15s linear infinite}
-@keyframes cblsh{0%{margin-left:-38%}100%{margin-left:100%}}
+#cbload{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 46%,#112732,#05080d 65%);z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .35s;color:#accbd5}
+#cbloadt{font:700 clamp(26px,5vw,42px) system-ui,sans-serif;letter-spacing:.22em;color:#afffe9;text-shadow:0 0 26px #37ffd044}
+#cbloadn{font:500 13px system-ui,sans-serif;min-height:18px;text-align:center;max-width:90vw}
+#cbloadb{width:min(280px,70vw);height:4px;background:#1d3543;border-radius:3px;overflow:hidden}
+#cbloadbar{display:block;height:100%;width:0;background:#72e9c5;transition:width .2s ease}
+#cbloadretry{border:1px solid #65cdb2;border-radius:7px;background:#112b34;color:#d4fff4;padding:12px 22px;font:600 14px system-ui;cursor:pointer}
+#cbload small{font:500 11px system-ui,sans-serif;letter-spacing:.15em;opacity:.55}
 </style>
 <script>
-(function () {
-  var cv = document.getElementById('cbloadc'); if (!cv) return;
-  var x = cv.getContext('2d');
-  // the Odyssey release flips its own cast in; a saved hero-theme run counts
-  var LTHEME = 'clawbyte';
-  try {
-    if (localStorage.getItem('clawbyte_save_hero') && !localStorage.getItem('clawbyte_save_robo'))
-      LTHEME = 'odyssey';
-  } catch (e) {}
-  var cast = LTHEME === 'odyssey' ? ['hero', 'hero', 'beast', 'eagle']
-                                  : ['cat', 'cat', 'beast', 'eagle', 'hero'];
-  var who = cast[(Math.random() * cast.length) | 0];
-  var qp = /[?&]lchar=(\w+)/.exec(location.search); if (qp) who = qp[1];
-  var names = { cat: 'HZD-99', beast: 'NULLFANG', eagle: 'TALONHOST', hero: 'THE WANDERER' };
-  var nm = document.getElementById('cbloadn'); if (nm) nm.textContent = names[who] || '';
-
-  function ground(t) {
-    x.strokeStyle = 'rgba(85,120,150,.5)'; x.lineWidth = 1.5;
-    x.beginPath(); x.moveTo(-120, 8); x.lineTo(120, 8); x.stroke();
-    x.fillStyle = 'rgba(120,200,240,.5)';
-    for (var i = 0; i < 6; i++) {
-      var dx = ((-t * 160 + i * 48) % 240 + 240) % 240 - 120;
-      x.fillRect(dx, 11, 14, 2);
-    }
-  }
-  function cap(px, py, qx, qy, w, col) {
-    x.strokeStyle = col; x.lineWidth = w; x.lineCap = 'round';
-    x.beginPath(); x.moveTo(px, py); x.lineTo(qx, qy); x.stroke();
-  }
-  function glowDot(px, py, r, col) {
-    var g = x.createRadialGradient(px, py, 0, px, py, r);
-    g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)');
-    x.fillStyle = g; x.beginPath(); x.arc(px, py, r, 0, 7); x.fill();
-  }
-
-  // HZD-99 sprinting, claws out on a beat
-  function cat(t) {
-    var ph = t * 11, sl = (t % 1.5) / 1.5, slashing = sl < 0.24;
-    var lunge = slashing ? 6 * (1 - sl / 0.24) : 0;
-    var bob = Math.abs(Math.sin(ph)) * -2.5;
-    x.save(); x.translate(lunge - 4, bob);
-    // speed lines
-    if (!slashing) {
-      x.strokeStyle = 'rgba(140,220,255,.35)'; x.lineWidth = 2;
-      for (var i = 0; i < 3; i++) {
-        x.beginPath(); x.moveTo(-30 - i * 9, -12 - i * 8); x.lineTo(-48 - i * 12, -12 - i * 8); x.stroke();
-      }
-    }
-    // scarf trailing
-    x.fillStyle = '#e0403c';
-    x.beginPath(); x.moveTo(2, -26);
-    x.quadraticCurveTo(-16, -30 + Math.sin(t * 13) * 4, -30, -22 + Math.sin(t * 11) * 5);
-    x.lineTo(-27, -17 + Math.sin(t * 11) * 5); x.quadraticCurveTo(-13, -23, 3, -21); x.fill();
-    // legs, counterphase
-    for (var l = 0; l < 4; l++) {
-      var p2 = ph + (l % 2 ? Math.PI : 0) + (l > 1 ? 0.6 : 0);
-      cap((l > 1 ? 8 : -6), -10, (l > 1 ? 8 : -6) + Math.sin(p2) * 9, 4 + Math.cos(p2) * 2, 5, l % 2 ? '#9fb2c6' : '#e8eef6');
-    }
-    // body + tail
-    x.fillStyle = '#e8eef6';
-    x.beginPath(); x.ellipse(0, -15, 15, 11, -0.08, 0, 7); x.fill();
-    x.strokeStyle = '#cdd9e6'; x.lineWidth = 4; x.lineCap = 'round';
-    x.beginPath(); x.moveTo(-13, -18); x.quadraticCurveTo(-24, -26, -21, -36 + Math.sin(t * 9) * 3); x.stroke();
-    // head + ears + visor
-    x.beginPath(); x.arc(15, -30, 10, 0, 7); x.fillStyle = '#eef4fb'; x.fill();
-    x.beginPath(); x.moveTo(8, -37); x.lineTo(10, -46); x.lineTo(15, -39);
-    x.moveTo(18, -39); x.lineTo(23, -45); x.lineTo(23, -37); x.fill();
-    x.fillStyle = '#22e0c0';
-    x.fillRect(12, -33, 12, 5);
-    glowDot(20, -30, 9, 'rgba(55,255,208,.35)');
-    // claw slash
-    if (slashing) {
-      var k = sl / 0.24;
-      x.globalAlpha = 1 - k;
-      x.strokeStyle = '#7df3ff'; x.lineWidth = 3; x.lineCap = 'round';
-      for (var s2 = -1; s2 <= 1; s2++) {
-        x.beginPath();
-        x.arc(34, -22 + s2 * 7, 13 + k * 10, -1.1, 0.9);
-        x.stroke();
-      }
-      x.globalAlpha = 1;
-    }
-    x.restore();
-  }
-
-  // NULLFANG galloping, mane and virus-light
-  function beast(t) {
-    var ph = t * 9, bob = Math.sin(ph * 2) * 2;
-    x.save(); x.translate(0, bob);
-    for (var l = 0; l < 4; l++) {
-      var p2 = ph + (l % 2 ? Math.PI * 0.8 : 0) + (l > 1 ? Math.PI : 0);
-      cap((l > 1 ? 14 : -14), -14, (l > 1 ? 14 : -14) + Math.sin(p2) * 10, 4, 6, l % 2 ? '#4a4752' : '#615d6a');
-    }
-    x.fillStyle = '#5b5763';
-    x.beginPath(); x.ellipse(0, -22, 24, 12, 0, 0, 7); x.fill();
-    x.strokeStyle = '#4a4752'; x.lineWidth = 5; x.lineCap = 'round';
-    x.beginPath(); x.moveTo(22, -28); x.quadraticCurveTo(34, -36, 40, -30 + Math.sin(t * 7) * 4); x.stroke();
-    // mane: jagged ring
-    x.fillStyle = '#3a3742';
-    x.beginPath();
-    for (var i = 0; i <= 12; i++) {
-      var a = i / 12 * Math.PI * 2, r = 13 + (i % 2 ? 5 : 0);
-      var px = -20 + Math.cos(a) * r, py = -28 + Math.sin(a) * r;
-      i ? x.lineTo(px, py) : x.moveTo(px, py);
-    }
-    x.fill();
-    x.fillStyle = '#55515e';
-    x.beginPath(); x.ellipse(-22, -27, 9, 8, 0, 0, 7); x.fill();
-    glowDot(-26, -28, 7, 'rgba(190,110,255,.9)');
-    // virus motes
-    x.fillStyle = 'rgba(176,106,255,.7)';
-    for (var m = 0; m < 3; m++) {
-      var mt = (t * 0.7 + m * 0.33) % 1;
-      x.globalAlpha = 1 - mt;
-      x.fillRect(-8 + m * 10, -34 - mt * 22, 2.5, 2.5);
-    }
-    x.globalAlpha = 1;
-    x.restore();
-  }
-
-  // TALONHOST flapping on its cable
-  function eagle(t) {
-    var bob = Math.sin(t * 5) * 3, flap = Math.sin(t * 7) * 0.55;
-    x.save(); x.translate(0, -6 + bob);
-    x.strokeStyle = '#39404a'; x.lineWidth = 2;
-    x.beginPath(); x.moveTo(0, -95); x.lineTo(0, -44); x.stroke();
-    x.fillStyle = '#39404a'; x.fillRect(-8, -48, 16, 5);
-    for (var s2 = -1; s2 <= 1; s2 += 2) {
-      x.save(); x.translate(s2 * 7, -26); x.rotate(-s2 * flap);
-      x.fillStyle = '#4a515c';
-      x.beginPath(); x.moveTo(0, 0);
-      x.lineTo(s2 * 36, -12); x.lineTo(s2 * 40, -4); x.lineTo(s2 * 30, 4);
-      x.lineTo(s2 * 14, 8); x.closePath(); x.fill();
-      x.strokeStyle = '#39404a'; x.lineWidth = 1.5;
-      for (var f = 1; f <= 3; f++) {
-        x.beginPath(); x.moveTo(s2 * 9 * f, 6 - f); x.lineTo(s2 * (9 * f + 6), 12 - f * 2); x.stroke();
-      }
-      x.restore();
-    }
-    x.fillStyle = '#575e69';
-    x.beginPath(); x.ellipse(0, -20, 9, 14, 0, 0, 7); x.fill();
-    x.beginPath(); x.arc(0, -38, 7, 0, 7); x.fill();
-    x.fillStyle = '#c8873a';
-    x.beginPath(); x.moveTo(-3, -34); x.lineTo(3, -34); x.lineTo(0, -27); x.fill();
-    for (var tl = -1; tl <= 1; tl += 2)
-      cap(tl * 4, -7, tl * 6, 2, 3, '#c8873a');
-    glowDot(0, -20, 8, 'rgba(255,80,95,' + (0.55 + Math.sin(t * 6) * 0.3) + ')');
-    x.restore();
-  }
-
-  // the Odyssey wanderer, sword drills
-  function hero(t) {
-    var sl = (t % 1.4) / 1.4, swing = sl < 0.3 ? (sl / 0.3) : 1;
-    var arm = -1.4 + swing * 2.1;
-    x.save(); x.translate(-4, 0);
-    cap(-4, -12, -7, 3, 5, '#8a7448'); cap(4, -12, 7, 3, 5, '#a58a54');
-    x.fillStyle = '#b08c4a';
-    x.beginPath(); x.ellipse(0, -20, 10, 12, 0, 0, 7); x.fill();
-    x.fillStyle = '#c8a25e';
-    x.beginPath(); x.arc(2, -37, 8, 0, 7); x.fill();
-    x.fillStyle = '#8a2f2c';
-    x.beginPath(); x.moveTo(-2, -44); x.quadraticCurveTo(-14, -50, -20, -42 + Math.sin(t * 8) * 3);
-    x.quadraticCurveTo(-12, -42, -3, -40); x.fill();
-    x.fillStyle = '#22e0c0'; x.fillRect(0, -39, 9, 4);
-    x.save(); x.translate(8, -24); x.rotate(arm);
-    cap(0, 0, 10, 0, 4, '#c8a25e');
-    x.strokeStyle = '#eef4fb'; x.lineWidth = 3; x.lineCap = 'round';
-    x.beginPath(); x.moveTo(10, 0); x.lineTo(30, 0); x.stroke();
-    x.restore();
-    if (sl < 0.3) {
-      x.globalAlpha = 1 - sl / 0.3;
-      x.strokeStyle = '#ffd76a'; x.lineWidth = 3;
-      x.beginPath(); x.arc(10, -24, 26, -1.5 + swing, -1.1 + swing); x.stroke();
-      x.globalAlpha = 1;
-    }
-    x.restore();
-  }
-
-  var DRAW = { cat: cat, beast: beast, eagle: eagle, hero: hero };
-  function frame(ts) {
-    if (!document.getElementById('cbload')) return;
-    var t = ts / 1000;
-    x.clearRect(0, 0, 520, 340);
-    x.save(); x.translate(260, 200); x.scale(2, 2);
-    if (who !== 'eagle') ground(t);
-    (DRAW[who] || cat)(t);
-    x.restore();
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
+(() => {
+  const title=document.getElementById('cbloadt');
+  if (window.GAME_LOCK === 'hero') title.textContent='NOSTOS';
+  document.getElementById('cbloadretry').addEventListener('click',()=>{
+    if (typeof requestHeroArt==='function') requestHeroArt();
+  });
 })();
 </script>
 
-<script>window.BUILD_ID="2b08763331a2";window.GAME_LOCK="hero";window.MUS_FILES={"mus_alpha":"assets/music/mus_alpha.m4a","mus_alphatame":"assets/music/mus_alphatame.m4a","mus_archives":"assets/music/mus_archives.m4a","mus_boss":"assets/music/mus_boss.m4a","mus_cache":"assets/music/mus_cache.m4a","mus_conduits":"assets/music/mus_conduits.m4a","mus_ending":"assets/music/mus_ending.m4a","mus_eye":"assets/music/mus_eye.m4a","mus_foundry":"assets/music/mus_foundry.m4a","mus_furnace":"assets/music/mus_furnace.m4a","mus_glaciere":"assets/music/mus_glaciere.m4a","mus_hero":"assets/music/mus_hero.m4a","mus_intro":"assets/music/mus_intro.m4a","mus_meadows":"assets/music/mus_meadows.m4a","mus_mother":"assets/music/mus_mother.m4a","mus_nest":"assets/music/mus_nest.m4a","mus_nullfang":"assets/music/mus_nullfang.m4a","mus_prism":"assets/music/mus_prism.m4a","mus_talonhost":"assets/music/mus_talonhost.m4a","mus_title":"assets/music/mus_title.m4a"};window.VID_FILES={"end_atlas":"assets/video/end_atlas.mp4","end_brood":"assets/video/end_brood.mp4","end_close":"assets/video/end_close.mp4","end_folk":"assets/video/end_folk.mp4","end_glitch":"assets/video/end_glitch.mp4","end_mother":"assets/video/end_mother.mp4","end_open":"assets/video/end_open.mp4","end_prism":"assets/video/end_prism.mp4","end_zero":"assets/video/end_zero.mp4","intro1":"assets/video/intro1.mp4","intro2":"assets/video/intro2.mp4","intro3":"assets/video/intro3.mp4","intro4":"assets/video/intro4.mp4","intro5":"assets/video/intro5.mp4","intro6":"assets/video/intro6.mp4","intro7":"assets/video/intro7.mp4","intro8":"assets/video/intro8.mp4","meet":"assets/video/meet.mp4","memory":"assets/video/memory.mp4","purify_atlas":"assets/video/purify_atlas.mp4","purify_brood":"assets/video/purify_brood.mp4","purify_glitch":"assets/video/purify_glitch.mp4","purify_prism":"assets/video/purify_prism.mp4","purify_zero":"assets/video/purify_zero.mp4","sword_forge":"assets/video/sword_forge.mp4","sword_gift":"assets/video/sword_gift.mp4"};window.VID_ALT={"end_atlas":"assets/video/end_atlas.webm","end_brood":"assets/video/end_brood.webm","end_close":"assets/video/end_close.webm","end_folk":"assets/video/end_folk.webm","end_glitch":"assets/video/end_glitch.webm","end_mother":"assets/video/end_mother.webm","end_open":"assets/video/end_open.webm","end_prism":"assets/video/end_prism.webm","end_zero":"assets/video/end_zero.webm","intro1":"assets/video/intro1.webm","intro2":"assets/video/intro2.webm","intro3":"assets/video/intro3.webm","intro4":"assets/video/intro4.webm","intro5":"assets/video/intro5.webm","intro6":"assets/video/intro6.webm","intro7":"assets/video/intro7.webm","intro8":"assets/video/intro8.webm","meet":"assets/video/meet.webm","memory":"assets/video/memory.webm","purify_atlas":"assets/video/purify_atlas.webm","purify_brood":"assets/video/purify_brood.webm","purify_glitch":"assets/video/purify_glitch.webm","purify_prism":"assets/video/purify_prism.webm","purify_zero":"assets/video/purify_zero.webm","sword_forge":"assets/video/sword_forge.webm","sword_gift":"assets/video/sword_gift.webm"};window.VID_LIGHT={
+<script>window.BUILD_ID="c123f3e06273";window.EMBEDDED_MEDIA={};window.GAME_LOCK="hero";window.MUS_FILES={"mus_alpha":"assets/music/mus_alpha.m4a","mus_alphatame":"assets/music/mus_alphatame.m4a","mus_archives":"assets/music/mus_archives.m4a","mus_boss":"assets/music/mus_boss.m4a","mus_cache":"assets/music/mus_cache.m4a","mus_conduits":"assets/music/mus_conduits.m4a","mus_ending":"assets/music/mus_ending.m4a","mus_eye":"assets/music/mus_eye.m4a","mus_foundry":"assets/music/mus_foundry.m4a","mus_furnace":"assets/music/mus_furnace.m4a","mus_glaciere":"assets/music/mus_glaciere.m4a","mus_hero":"assets/music/mus_hero.m4a","mus_intro":"assets/music/mus_intro.m4a","mus_meadows":"assets/music/mus_meadows.m4a","mus_mother":"assets/music/mus_mother.m4a","mus_nest":"assets/music/mus_nest.m4a","mus_nullfang":"assets/music/mus_nullfang.m4a","mus_prism":"assets/music/mus_prism.m4a","mus_talonhost":"assets/music/mus_talonhost.m4a","mus_title":"assets/music/mus_title.m4a"};window.VID_FILES={"end_atlas":"assets/video/end_atlas.mp4","end_brood":"assets/video/end_brood.mp4","end_close":"assets/video/end_close.mp4","end_folk":"assets/video/end_folk.mp4","end_glitch":"assets/video/end_glitch.mp4","end_mother":"assets/video/end_mother.mp4","end_open":"assets/video/end_open.mp4","end_prism":"assets/video/end_prism.mp4","end_zero":"assets/video/end_zero.mp4","intro1":"assets/video/intro1.mp4","intro2":"assets/video/intro2.mp4","intro3":"assets/video/intro3.mp4","intro4":"assets/video/intro4.mp4","intro5":"assets/video/intro5.mp4","intro6":"assets/video/intro6.mp4","intro7":"assets/video/intro7.mp4","intro8":"assets/video/intro8.mp4","meet":"assets/video/meet.mp4","memory":"assets/video/memory.mp4","purify_atlas":"assets/video/purify_atlas.mp4","purify_brood":"assets/video/purify_brood.mp4","purify_glitch":"assets/video/purify_glitch.mp4","purify_prism":"assets/video/purify_prism.mp4","purify_zero":"assets/video/purify_zero.mp4","sword_forge":"assets/video/sword_forge.mp4","sword_gift":"assets/video/sword_gift.mp4"};window.VID_ALT={"end_atlas":"assets/video/end_atlas.webm","end_brood":"assets/video/end_brood.webm","end_close":"assets/video/end_close.webm","end_folk":"assets/video/end_folk.webm","end_glitch":"assets/video/end_glitch.webm","end_mother":"assets/video/end_mother.webm","end_open":"assets/video/end_open.webm","end_prism":"assets/video/end_prism.webm","end_zero":"assets/video/end_zero.webm","intro1":"assets/video/intro1.webm","intro2":"assets/video/intro2.webm","intro3":"assets/video/intro3.webm","intro4":"assets/video/intro4.webm","intro5":"assets/video/intro5.webm","intro6":"assets/video/intro6.webm","intro7":"assets/video/intro7.webm","intro8":"assets/video/intro8.webm","meet":"assets/video/meet.webm","memory":"assets/video/memory.webm","purify_atlas":"assets/video/purify_atlas.webm","purify_brood":"assets/video/purify_brood.webm","purify_glitch":"assets/video/purify_glitch.webm","purify_prism":"assets/video/purify_prism.webm","purify_zero":"assets/video/purify_zero.webm","sword_forge":"assets/video/sword_forge.webm","sword_gift":"assets/video/sword_gift.webm"};window.VID_LIGHT={
  "end_atlas": "assets/video/light/end_atlas.mp4",
  "end_brood": "assets/video/light/end_brood.mp4",
  "end_close": "assets/video/light/end_close.mp4",
@@ -5729,6 +5546,7 @@ function langName(id) { const l = LANGS.find(x => x.id === id); return l ? l.nam
 function isRTL() { const l = LANGS.find(x => x.id === LANG); return !!(l && l.rtl); }
 const I18N = {
 en: {
+  save_ok: 'Progress saved', save_failed: 'Progress could not be saved. Check browser storage before closing.',
   nf_rematch: 'It remembers the corridor.',
   film_meet: 'The Corridor',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
@@ -6220,6 +6038,7 @@ en: {
   map_ctl: 'Drag or ✥ to pan   ·   wheel / pinch / Z · X to zoom   ·   E fit   ·   Q recentre   ·   M close',
 },
 ar: {
+  save_ok: 'تم حفظ التقدم', save_failed: 'تعذر حفظ التقدم. تحقق من مساحة المتصفح قبل الإغلاق.',
   nf_rematch: 'إنه يتذكّر الممرّ.',
   film_meet: 'الممرّ',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
@@ -10230,7 +10049,8 @@ function hzdSay(key, gapMs) {
   if (interruptsHold) hzdRelease(0.025);
   if (!interruptsHold && now - HZDT < (gapMs == null ? 90 : gapMs)) return false;
   const pick = set[(Math.random() * set.length) | 0];
-  if (!playBuf(pick[0], pick[1], 0.96 + Math.random() * 0.08)) return false;
+  const rate = key === 'yalla' ? 1.45 : 0.98 + Math.random() * 0.04;
+  if (!playBuf(pick[0], pick[1], rate)) return false;
   HZDT = now;
   return true;
 }
@@ -10301,8 +10121,8 @@ function sfx(n) {
   if (n === 'crystalSwirl') { crystalSwirl(); return; }
   // HER LITTLE MELODIES — see the alphabet above. These come before any
   // sample, because the whole point is that they are all the same instrument.
-  if (n === 'jump') playBuf('hz_jump', 0.34, 0.94 + Math.random() * 0.12);
-  if (n === 'land') playBuf('hz_land', 0.4, 0.92 + Math.random() * 0.12);
+  if (n === 'jump' && playBuf('hz_jump', 0.28, 0.98 + Math.random() * 0.04)) return;
+  if (n === 'land' && playBuf('hz_land', 0.32, 0.97 + Math.random() * 0.06)) return;
   if (CUE[n]) { CUE[n](); return; }
   const v = VOX[n];
   if (v && playBuf(v[0], v[1], 0.97 + Math.random() * 0.06)) return;
@@ -12151,50 +11971,58 @@ function padRumble(strong, weak, ms) {
     } else if (act.pulse) act.pulse(clamp(Math.max(strong, weak), 0, 1), Math.min(1000, ms || 100));
   } catch (e) {}
 }
-const cam = { x: 0, y: 0, shake: 0 };
+const cam = { x:0, y:0, shake:0, zoom:1, lead:0, shakeX:0, shakeY:0, room:null };
 let prevShake = 0;
 function updateCam(px, py, rw, rh, dt) {
-  const p = typeof player !== 'undefined' && player;
-  const playable = p && !p.dead && typeof G !== 'undefined' && G.state === 'PLAY'
-    && !(typeof isHero === 'function' && isHero())
-    && !G.meet && !G.bossEntry && !G.gateWalk && !G.trans;
-  let tx, ty;
-  if (playable) {
-    const snap = cam.motionRoom !== G.roomId || dt >= 0.5;
-    const speed = Math.abs(p.vx || 0);
-    const direction = speed > 20 ? Math.sign(p.vx) : p.face;
-    const wantLead = direction * (86 + Math.min(54, speed * 0.16));
-    cam.lookAhead = snap ? wantLead : lerp(cam.lookAhead || 0, wantLead, 1 - Math.exp(-dt * 5));
-    tx = clamp(px - 480 + cam.lookAhead, 0, Math.max(0, rw - 960));
-    const feet = py + p.h / 2;
-    if (snap || !Number.isFinite(cam.groundFocus)) cam.groundFocus = feet;
-    if (p.on) cam.groundFocus = lerp(cam.groundFocus, feet, 1 - Math.exp(-dt * 10));
-    ty = cam.groundFocus - 372;
-    // Keep the larger head clear of the HUD, and show floor before a long fall.
-    if (feet - ty < 218) ty = feet - 218;
-    if (feet - ty > 444) ty = feet - 444;
-    ty = clamp(ty, 0, Math.max(0, rh - 540));
-    cam.motionRoom = G.roomId;
-    cam.x = snap ? tx : lerp(cam.x, tx, 1 - Math.exp(-dt * 9));
-    cam.y = snap ? ty : lerp(cam.y, ty, 1 - Math.exp(-dt * (p.vy > 500 ? 12 : 8)));
-  } else {
-    const lead = p && !p.dead ? p.face * 65 : 0;
-    tx = clamp(px - 480 + lead, 0, Math.max(0, rw - 960));
-    ty = clamp(py - 300, 0, Math.max(0, rh - 540));
-    cam.x = lerp(cam.x, tx, 1 - Math.pow(0.0002, dt));
-    cam.y = lerp(cam.y, ty, 1 - Math.pow(0.0035, dt));
-    cam.motionRoom = null;
+  const robo = !(typeof isHero === 'function' && isHero()) && !(typeof window !== 'undefined' && window.EDITOR);
+  const baseZoom = robo && typeof PRESENTATION !== 'undefined' ? PRESENTATION.explorationZoom : 1;
+  let wantZoom = baseZoom;
+  const p = typeof player !== 'undefined' && player && !player.dead ? player : null;
+  const boss = typeof G !== 'undefined' && G.boss && !G.boss.dead && !['dorm','intro'].includes(G.boss.st) ? G.boss : null;
+  // A close exploration camera must not crop the tell of a much larger foe.
+  // Fit both bodies during real encounters, and settle back after the fight.
+  if (robo && p && boss && typeof boss.cx === 'function') {
+    const dx=Math.abs(boss.cx()-px), dy=Math.abs(boss.cy()-py);
+    wantZoom=Math.max(1.05,Math.min(baseZoom,760/(dx+boss.w/2+100),400/(dy+boss.h/2+90)));
+    if (!(G.meet && (G.meet.ph==='watch'||G.meet.ph==='coil'))) {
+      px = px*.65 + boss.cx()*.35;
+      py = py*.75 + boss.cy()*.25;
+    }
   }
-  // every screen shake is also felt in the hands: boss slams, roars,
-  // explosions and heavy landings all raise cam.shake, so one hook here
-  // turns the whole game's impact language into haptics
-  if (cam.shake > prevShake + 2.5)
-    padRumble(clamp(cam.shake / 13, 0.15, 1), clamp(cam.shake / 9, 0.2, 1), 60 + cam.shake * 16);
-  prevShake = cam.shake;
-  cam.shake = Math.max(0, cam.shake - dt * 22);
+  const snap=dt>=.5 || cam.room!==(typeof G!=='undefined'?G.roomId:null);
+  const step=Math.max(0,Math.min(dt,.1));
+  cam.zoom = snap ? wantZoom : lerp(cam.zoom||wantZoom,wantZoom,1-Math.exp(-step*4));
+  cam.room = typeof G!=='undefined'?G.roomId:null;
+  const z=cam.zoom, ox=480*(1-1/z), oy=270*(1-1/z);
+  const facing=p ? p.face : 0, speed=p ? Math.abs(p.vx) : 0;
+  const lead=facing*(robo ? 25+23*Math.min(1,speed/340) : 65);
+  cam.lead=snap?lead:lerp(cam.lead||0,lead,1-Math.exp(-step*18));
+  const boundX=v=>rw<960/z?(rw-960)/2:clamp(v,-ox,rw-960+ox);
+  const boundY=v=>rh<540/z?(rh-540)/2:clamp(v,-oy,rh-540+oy);
+  const fall=p ? clamp(p.vy/980,-1,1)*20 : 0;
+  const tx=boundX(px-480+cam.lead);
+  const ty=boundY(py-(robo?270+112/z:300)+fall);
+  cam.x=snap?tx:lerp(cam.x,tx,1-Math.exp(-step*11));
+  cam.y=snap?ty:lerp(cam.y,ty,1-Math.exp(-step*9));
+  // Keep the character within a safe vertical band even during a fast drop.
+  // Room bounds win at the roof/floor; they are never exchanged for black void.
+  if (p && robo && !boss) {
+    const centre=p.y+p.h/2;
+    cam.y=boundY(clamp(cam.y,centre-270-155/z,centre-270+120/z));
+  }
+  if (cam.shake > prevShake+2.5)
+    padRumble(clamp(cam.shake/13,.15,1),clamp(cam.shake/9,.2,1),60+cam.shake*16);
+  prevShake=cam.shake;
+  cam.shake=Math.max(0,cam.shake-step*22);
+  cam.shakeTime=(cam.shakeTime||0)+step;
+  const amplitude=Math.min(8,cam.shake)/z;
+  // Every layer samples the SAME shake in a frame. Independent random
+  // offsets for the tile plane, character and fringe used to tear the scene.
+  cam.shakeX=Math.sin(cam.shakeTime*91)*amplitude;
+  cam.shakeY=Math.sin(cam.shakeTime*113+.8)*amplitude*.6;
 }
-function camSX() { return cam.x + (cam.shake > 0 ? rnd(-cam.shake, cam.shake) : 0); }
-function camSY() { return cam.y + (cam.shake > 0 ? rnd(-cam.shake, cam.shake) : 0); }
+function camSX() { return cam.x+(cam.shakeX||0); }
+function camSY() { return cam.y+(cam.shakeY||0); }
 
 let parts = [];
 function addPart(x, y, vx, vy, life, color, size, grav, glow) {
@@ -15141,7 +14969,9 @@ function preloadRoom(roomId) {
 // arrived falls back to its pose cell, which is exactly the held still the
 // strips exist to replace. So the first blow of a session was the defect, every
 // session. They are 0.27 MB together.
-const BODY_KEYS = ['swingClaw1', 'swingClaw2', 'swingFinisher', 'swingBurst'];
+const BODY_KEYS = ['heroStates', 'gaitWalk', 'gaitRun', 'hzdIdle', 'transAir',
+  'transLand', 'transSkid', 'transDash', 'hzdHurt', 'heroFidget', 'transWall',
+  'swingClaw1', 'swingHook', 'swingUppercut', 'swingBurst'];
 
 function preloadBoot() {
   if (!PRE.on) return;
@@ -15218,6 +15048,71 @@ function preloadTick() {
     // queue emptying itself into the network in one frame.
     setTimeout(() => { PRE.inflight = Math.max(0, PRE.inflight - 1); }, 220);
   }
+}
+
+// Shared world framing and startup readiness. UI remains in 960x540 logical
+// pixels; camera zoom scales the WORLD, including effects and interactions.
+// It does not silently enlarge only the artwork around a smaller hit shape.
+const PRESENTATION = { explorationZoom:1.90, minEncounterZoom:1.05, buffer:null };
+const HERO_CORE_KEYS = ['heroStates', 'gaitWalk', 'gaitRun', 'hzdIdle'];
+let heroArtAttempt = 0;
+function requestHeroArt() {
+  if (typeof isHero === 'function' && isHero()) return;
+  if (typeof mediaFetch !== 'function') return;
+  for (const k of HERO_CORE_KEYS) mediaFetch(k, 1);
+}
+function heroArtReady() {
+  if (typeof isHero === 'function' && isHero()) return true;
+  if (typeof MEDIA_RAW === 'undefined') return false;
+  return HERO_CORE_KEYS.every(k => MEDIA_RAW[k] && MEDIA_RAW[k].width > 0);
+}
+function heroArtBootTick() {
+  const now = performance.now();
+  if (now - heroArtAttempt > 1000 || !heroArtAttempt) { requestHeroArt(); heroArtAttempt = now; }
+  const ready = heroArtReady();
+  const root = document.getElementById('cbload');
+  if (root) {
+    const n = document.getElementById('cbloadn'), bar = document.getElementById('cbloadbar');
+    const count = typeof MEDIA_RAW === 'undefined' ? 0 : HERO_CORE_KEYS.filter(k => MEDIA_RAW[k]).length;
+    if (n) n.textContent = ready ? 'Ready' : 'Preparing character animation ' + count + '/' + HERO_CORE_KEYS.length;
+    if (bar) bar.style.width = (100 * count / HERO_CORE_KEYS.length) + '%';
+    if (!ready && now > 12000) {
+      if (n) n.textContent = 'Animation could not load. Retrying safely…';
+      const retry = document.getElementById('cbloadretry'); if (retry) retry.hidden = false;
+    }
+  }
+  return ready;
+}
+function worldZoom() {
+  if ((typeof isHero === 'function' && isHero()) || (typeof window !== 'undefined' && window.EDITOR)) return 1;
+  return Number.isFinite(cam.zoom) && cam.zoom > 0 ? cam.zoom : PRESENTATION.explorationZoom;
+}
+function worldScreenX(x) { return 480 + (x - cam.x - 480) * worldZoom(); }
+function worldScreenY(y) { return 270 + (y - cam.y - 270) * worldZoom(); }
+function withWorldProjection(ctx, fn) {
+  const z = worldZoom();
+  ctx.save(); ctx.translate(480,270); ctx.scale(z,z); ctx.translate(-480,-270);
+  try { return fn(); } finally { ctx.restore(); }
+}
+function presentWorld() {
+  const z = worldZoom();
+  if (z <= 1.001) return;
+  const b = PRESENTATION.buffer || (PRESENTATION.buffer = document.createElement('canvas'));
+  if (b.width !== cv.width || b.height !== cv.height) { b.width = cv.width; b.height = cv.height; }
+  const x = b.getContext('2d', {alpha:false});
+  x.setTransform(1,0,0,1,0,0); x.drawImage(cv,0,0);
+  c.save(); c.setTransform(1,0,0,1,0,0); c.imageSmoothingEnabled = true;
+  c.drawImage(b, (b.width-b.width/z)/2, (b.height-b.height/z)/2, b.width/z,b.height/z, 0,0,cv.width,cv.height);
+  c.restore();
+}
+function drawSaveFeedback() {
+  const f = G.saveFeedback;
+  if (!f || Date.now() > f.until || G.state !== 'PLAY' || G.dialog || G.tut || G.gateWalk) return;
+  const text = f.ok ? t('save_ok') : t('save_failed');
+  c.save(); c.font='600 12px system-ui'; c.textAlign='right';
+  const w=Math.min(600,c.measureText(text).width+28);
+  c.fillStyle='rgba(5,12,18,.85)'; rr(c,944-w,507,w,25,7); c.fill();
+  c.fillStyle=f.ok?'#aef7d8':'#ffd76a'; c.fillText(text,930,524); c.restore();
 }
 
 // CLAWBYTE — player, enemies, bosses, projectiles, pickups
@@ -16058,7 +15953,7 @@ let HERO_FIDGET = { key: 'heroFidget', cells: 16, k: 0.8, fps: 9, intro: 6 };
 // Cling, slip, catch — three stills at 5 fps, because every video take of a
 // wall slide painted her a pole to hold. Authored with the wall at her RIGHT.
 let HERO_WALL_STRIP = { key: 'transWall', cells: 3, k: 0.848, fps: 5 };
-const FIDGET_AFTER = 6;        // seconds of stillness before she runs out of patience
+const FIDGET_AFTER = 5;        // seconds of stillness before she runs out of patience
 // THE CELL COUNT IS HOW MANY DIFFERENT PICTURES THE TAKE ACTUALLY HOLDS.
 //
 // Two owner reports, and the second corrected the first. "Use the films to
@@ -16423,7 +16318,9 @@ class Player {
       // idle micro-life: randomized ear twitches, tail flicks, look-arounds and
       // slow weight shifts — she never stands like a statue
       const idle = this.on && Math.abs(this.vx) < 30 && !this.swingVis && this.dashT <= 0
-        && this.healT <= 0 && this.landT <= 0;
+        && this.healT <= 0 && this.landT <= 0 && this.chargeT <= 0 && this.swirlT <= 0
+        && G.state === 'PLAY' && !G.dialog && !G.cut && !G.gateWalk && !G.wake && !G.bossEntry
+        && !['LEFT','RIGHT','UP','DOWN','JUMP','ATK','INT','HEAL','DASH'].some(a => IN_D(a));
       this.wallT = (this.wallSlide !== 0 && !this.on) ? (this.wallT || 0) + dt : 0;
       if (idle) {
         this.idleT += dt;
@@ -16443,29 +16340,13 @@ class Player {
           this.tailFlickIn = rnd(2.4, 6);
           this.tailV[0] += 0.55; this.tailV[1] += 0.35; this.tailV[2] += 0.2;
         }
-        // YALLA — patience breaks audibly. Once when the fidget starts, then
-        // again every eight-or-so seconds of being ignored. Voice only: the
-        // fidget art loops with or without the word, and the word never
-        // repeats often enough to become the room's metronome.
-        // ...AND SHE FIDGETS FOR A WHILE BEFORE SHE SAYS ANYTHING.
-        //
-        // The first word used to land 0.2 s after the fidget began, so the
-        // animation change and the voice arrived together and it read as a bark
-        // on cue rather than patience running out — the owner: "the sound it
-        // makes while still standing and waiting should not happen instantly.
-        // You need to give it, like, five seconds maybe of waiting." Five
-        // seconds of visible fidgeting first, which puts the first word eleven
-        // seconds into standing still; and the repeats are far rarer, because
-        // a line every eight seconds is a character nagging the player rather
-        // than one waiting for them.
-        if (this.idleT > FIDGET_AFTER) {
-          this.yallaIn = (this.yallaIn == null ? 5 : this.yallaIn) - dt;
-          if (this.yallaIn <= 0) {
-            this.yallaIn = rnd(14, 22);
-            if (typeof hzdSay === 'function') hzdSay('yalla', 600);
-          }
-        } else this.yallaIn = null;
-      } else { this.idleT = 0; this.lookTgt = 0; this.lookHold = null; this.yallaIn = null; }
+        // Once per uninterrupted idle, at five seconds. Narrative audio and
+        // the character voice arbiter retain priority; there is no bypass.
+        if (this.idleT >= FIDGET_AFTER && !this.idleSpoke) {
+          this.idleSpoke = true;
+          if (typeof hzdSay === 'function') hzdSay('yalla', 600);
+        }
+      } else { this.idleT = 0; this.idleSpoke = false; this.lookTgt = 0; this.lookHold = null; this.yallaIn = null; }
       if (this.lookHold != null) {
         this.lookHold -= dt;
         if (this.lookHold <= 0) { this.lookTgt = 0; this.lookHold = null; }
@@ -16977,13 +16858,12 @@ class Player {
       this.on = true; this.coyote = 0.1;
       this.airJumps = hasMod('djump') ? (hasSkill('triple') ? 2 : 1) : 0;
     } else { this.on = false; this.coyote -= dt; }
-    if (this.on && Math.abs(this.vx) > 150 && this.dashT <= 0) {
-      this.stepT = (this.stepT || 0) - dt;
-      if (this.stepT <= 0) {
-        this.stepT = 0.27;
+    const contact = Math.floor((this.stridePh || 0) / 2);
+    if (this.on && Math.abs(this.vx) > 70 && this.dashT <= 0 && !this.swingVis) {
+      if (this.stepContact != null && this.stepContact !== contact)
         sfx((G.roomDef.ice || (G.iceT || 0) > 0) ? 'stepice' : 'step');
-      }
-    } else this.stepT = 0.1;
+      this.stepContact = contact;
+    } else this.stepContact = null;
     // hazard tiles. The GROUNDING CREST is the one piece of kit that lets her
     // stand on a live rail — and standing on one is the only way to reach what
     // is under the brittle stretch of it.
@@ -17528,6 +17408,7 @@ class Player {
     // mid-air, and a character crouching while airborne reads as a bug, which
     // is what "can't stay crouching and jump and charged at the same time"
     // was describing. No code change is needed for it — the plate is the pose.
+    if (this.chargeT > 0.05 && this.on && Math.abs(this.vx) <= 34) return 'charge';
     if (this.dashT > 0) return 'dash';
     if (this.wallSlide !== 0 && !this.on) return 'wall_cling';
     if (!this.on) {
@@ -17548,9 +17429,8 @@ class Player {
         return 'fall';
       }
     }
-    if (this.skidT > 0 && this.chargeT <= 0.05) return 'skid';
-    if (this.landT > 0 && Math.abs(this.vx) <= 12) return 'land';
-    if (this.chargeT > 0.05 && Math.abs(this.vx) <= 12) return 'charge';
+    if (this.skidT > 0) return 'skid';
+    if (this.landT > 0 && Math.abs(this.vx) <= 34) return 'land';
     // one core left and standing still: the carriage sags. Moving cancels it —
     // a limp that survives a sprint reads as a bug, not as damage.
     if (this.cores <= 1 && Math.abs(this.vx) < 20) return 'slump';
@@ -17721,9 +17601,13 @@ class Player {
     // to her idle height. Only the poses that were measured wrong are listed —
     // a crouch is legitimately shorter and a jump stretch legitimately longer,
     // and normalising those would flatten the animation rather than fix it.
-    // Critical motion never falls through to retired pose sheets.
+    // Critical motion never falls through to retired pose sheets. A missing
+    // essential gait sheet also actively re-requests the asset rather than
+    // waiting on the passive lazy fetch.
     if (/^(walk_|run_)/.test(st) || ['rise','apex','fall','land','dash','skid','wall_cling'].includes(st)) {
-      G.heroDrawn = 'loading:' + st; return true;
+      if (/^(walk_|run_)/.test(st) && typeof requestHeroArt === 'function') requestHeroArt();
+      if (typeof G !== 'undefined') G.heroDrawn = 'loading:' + st;
+      return true;
     }
     const im = MEDIA_IMG.heroStates;
     if (!im) return false;
@@ -18066,7 +17950,7 @@ class Player {
     const bob = run ? Math.sin(ph * 2) * (1.4 - sprintK * 0.9) : Math.sin(this.anim * 2.4) * 0.9;
     // --- squash & stretch: one signed, volume-conserving deformation ---
     let sy = 1, sx = 1;
-    if (this.landT > 0) {
+    if (this.landT > 0 && Math.abs(this.vx) <= 34) {
       // landing: deep squash -> overshoot stretch -> settle (damped bounce,
       // pinned at the feet so the dome dips and rebounds)
       const l0 = this.land0 || 0.12, lk = 1 - this.landT / l0;
@@ -28153,7 +28037,18 @@ let player = null;
 // ---------- persistence ----------
 // one save slot PER character, so the robo-cat and the hero playthroughs coexist
 function saveKeyFor(theme) { return SAVE_KEY + '_' + (theme || 'robo'); }
-function persist() { try { localStorage.setItem(saveKeyFor(G.save.theme), JSON.stringify(G.save)); } catch (e) {} }
+function persist() {
+  if (!G.save) return false;
+  try {
+    localStorage.setItem(saveKeyFor(G.save.theme), JSON.stringify(G.save));
+    G.saveFeedback = { ok:true, until:Date.now()+1700 };
+    return true;
+  } catch (e) {
+    G.saveFeedback = { ok:false, until:Date.now()+12000 };
+    console.warn('CLAWBYTE: progress could not be saved', e && e.name);
+    return false;
+  }
+}
 function loadStored(theme) {
   try {
     const v = localStorage.getItem(saveKeyFor(theme));
@@ -28970,7 +28865,7 @@ function loadRoom(id) {
     setMusic(def.zone);
   }
   if (def.zone !== G.lastZone) { G.zoneToast = { text: t('z_' + def.zone), t: 2.6 }; G.lastZone = def.zone; }
-  cam.x = 0; cam.y = 0;
+  cam.x = 0; cam.y = 0; cam.room = null;
   persist();
 }
 // ---------------------------------------------------------------------------
@@ -29767,6 +29662,9 @@ function doInteract(s) {
 
 // ---------- update ----------
 function fxDecay(dt) {
+  for (const key of ['songWave','elemPop']) if (G[key]) {
+    G[key].t-=dt; if (G[key].t<=0) G[key]=null;
+  }
   G.flash = Math.max(0, G.flash - dt * 2.4);
   G.lowGravT = Math.max(0, (G.lowGravT || 0) - dt);   // NULL GRAVITY field
   G.iceT = Math.max(0, (G.iceT || 0) - dt);           // COOLANT FREEZE floor
@@ -29783,7 +29681,7 @@ function fxDecay(dt) {
   if (G.bolt) { G.bolt.t -= dt; if (G.bolt.t <= 0) G.bolt = null; }
 }
 // How loud a machine's voice loop gets when she is standing right beside it.
-const NPC_VOX_CEIL = 0.34;
+const NPC_VOX_CEIL = 0.20;
 function tickNPCVox() {
   // proximity mixing: each NPC's voice swells as she draws near, and blooms
   // while it is actually speaking with her
@@ -29819,6 +29717,7 @@ function tickNPCVox() {
 }
 function update(dt) {
   if (typeof heroMotionGate === 'function' && heroMotionGate(dt)) return;
+  if (typeof tutorialTick === 'function') tutorialTick();
   narrativeAudioTick();
   if (G.state === 'PLAY' || G.state === 'DIALOG') { tickNPCVox(); tickCaveLure(); }
   else if (typeof npcVoxQuietAll === 'function') npcVoxQuietAll();
@@ -29826,7 +29725,12 @@ function update(dt) {
     G.save.time += dt;
     fxDecay(dt);
     rubbleTick(dt);
-    if (G.hitStop > 0) { G.hitStop -= dt; updateParts(dt * 0.25); return; }
+    if (G.hitStop > 0) {
+      if (inP('ATK') && player) player.atkBuf = Math.max(player.atkBuf || 0, 0.2);
+      if (inP('JUMP') && player) player.jbuf = Math.max(player.jbuf || 0, 0.12);
+      if (inP('PAUSE') || inP('BACK')) { G.state = 'PAUSE'; G.pauseIdx = 0; sfx('ui'); }
+      G.hitStop = Math.max(0, G.hitStop - dt); updateParts(dt * 0.25); return;
+    }
     meetCheck(); if (G.meet) meetStep(dt);
     // THE CROSSING IS A MOVE, NOT A CUT (owner, 2026-08-23: "the map... becomes
     // cubicles of rooms connected... instead, it's actual world connected").
@@ -39192,7 +39096,7 @@ function drawSeals(P) {
 // Element feedback and the Song's wave. Drawn in screen space, so world points
 // are converted through the camera.
 function drawFX() {
-  const dt = 1 / 60;
+  const dt = 0; // read-only draw: fxDecay owns the simulation clock
   if (G.songWave) {
     const w = G.songWave; w.t -= dt;
     if (w.t <= 0) G.songWave = null;
@@ -39316,9 +39220,9 @@ const TUT_STEPS = [
   { id: 'out', label: 'tut_out', hint: 'tut_out_h',
     keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
     done: () => (TUT_ROOMS[G.roomId] || 0) >= 1 },
-  { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h',
+  { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h', room: 'W2',
     keys: 'Space', pad: 'A', touch: 'JUMP', vb: 'VJUMP',
-    done: () => !player.on && player.vy < -60 },
+    done: () => !player.on && player.vy < -60 && (typeof window === 'undefined' || !window.__tutorialEnforcement || !!G.tut.jumpShown) },
   // THE GATES. The second half of the walk, and the reason the walk exists: a
   // tutorial that ends at a door you can see from where you started gives the
   // verbs somewhere to have been going.
@@ -39415,7 +39319,7 @@ function tutHand(st) {
 // A shop lesson outside the workshop teaches UP at its door, then E beside
 // the robot inside. Keeping the saved lesson index unchanged preserves runs.
 function tutPrompt(st) {
-  const view = { ...st, target: null };
+  const view = { ...st, target: null, action: ({ jump:'JUMP', atk:'ATK', kill:'ATK', buy:'INT', node:'INT', heal:'HEAL', skill:'SKILL' })[st.id] || 'MOVE' };
   const pc = player.x + player.w / 2;
   const doors = typeof gateDoors === 'function' ? gateDoors() : [];
   const point = (x, y, color, radius = 30) => { view.target = { x, y, color, radius }; };
@@ -39425,9 +39329,9 @@ function tutPrompt(st) {
     view.vb = null;
     view.label = returning ? 'tut_return' : 'tut_enter';
     view.hint = 'tut_enter_h';
-    view.control = '\u2191';
+    view.control = '\u2191'; view.action = 'UP';
     if (Math.abs(pc - x) > 80) {
-      view.control = pc < x ? '\u2192' : '\u2190';
+      view.control = pc < x ? '\u2192' : '\u2190'; view.action = 'MOVE';
       view.hint = returning ? 'tut_return_h' : 'tut_workshop_h';
       if (!returning) view.label = 'tut_approach';
     }
@@ -39444,7 +39348,7 @@ function tutPrompt(st) {
     if (!G.roomDef.exits.R && doors[0]) doorPrompt(doors[0], false);
     else {
       point((G.roomDef.w - 1.5) * TILE, 13 * TILE, '#ffd76a');
-      view.control = '\u2192'; view.vb = null;
+      view.control = '\u2192'; view.vb = null; view.action = 'MOVE';
       view.label = 'tut_approach'; view.hint = 'tut_workshop_h';
     }
     return view;
@@ -39457,7 +39361,7 @@ function tutPrompt(st) {
         view.label = 'tut_note'; view.hint = 'tut_note_h';
       }
       if (G.near !== npc) {
-        view.control = pc < view.target.x ? '\u2192' : '\u2190';
+        view.control = pc < view.target.x ? '\u2192' : '\u2190'; view.action = 'MOVE';
         view.label = 'tut_approach'; view.hint = 'tut_workshop_h'; view.vb = null;
       }
     } else {
@@ -39468,7 +39372,7 @@ function tutPrompt(st) {
     if (!G.roomDef.exits.R && doors[0]) doorPrompt(doors[0], G.roomId === 'A0B');
     else point((G.roomDef.w - 1.5) * TILE, 13 * TILE, '#ffd76a');
   } else if (st.id === 'jump') {
-    point(G.roomId === 'W2' ? 13 * TILE : 17 * TILE + 12, 14 * TILE + 12, '#37ffd0', 34);
+    point(G.roomId === 'W2' ? 13 * TILE : 17 * TILE + 12, G.roomId === 'W2' ? 11 * TILE : 14 * TILE + 12, '#37ffd0', 34);
   } else if (st.id === 'atk' || st.id === 'kill') {
     const enemy = (G.enemies || []).find(q => q && !q.dead);
     if (enemy) point(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ff8a6a');
@@ -39482,11 +39386,16 @@ function tutPrompt(st) {
     if (node) {
       point(node.x + node.w / 2, node.y + node.h / 2, '#c9a6ff');
       if (G.near !== node) {
-        view.control = pc < view.target.x ? '\u2192' : '\u2190';
+        view.control = pc < view.target.x ? '\u2192' : '\u2190'; view.action = 'MOVE';
         view.label = 'tut_approach'; view.vb = null;
       }
     }
   } else if (st.id === 'heal') point(pc, player.y + player.h / 2, '#aef7d8', 32);
+  if (['JUMP','ATK'].includes(view.action) && typeof tutorialReady === 'function'
+      && !tutorialReady(view) && view.target && !(G.tut && G.tut.hold > 0)) {
+    view.action = 'MOVE'; view.control = pc < view.target.x ? '\u2192' : '\u2190';
+    view.label = 'tut_approach'; view.hint = 'tut_workshop_h'; view.vb = null;
+  }
   return view;
 }
 // The lessons are STAGED IN THE ROOM: open ground for the first, the step for
@@ -39534,6 +39443,7 @@ const TUT_DOOR = { W1: 'out', W2: 'gate', A0: 'go', A0B: 'go' };
 // that pressing jump before that point does what it looks like it should.
 const TUT_UNLOCK = { ATK: 'atk', INT: 'buy', HEAL: 'heal', SKILL: 'skill', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
 function tutAllows(act) {
+  if (typeof tutorialAllows === 'function') return tutorialAllows(act);
   const need = TUT_UNLOCK[act];
   if (!need) return true;
   if (!G || !G.save || !G.tut) return true;
@@ -39645,22 +39555,28 @@ function updateTutor(dt) {
 }
 function drawTutor() {
   const sv = G.save;
-  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player || G.state !== 'PLAY' || G.gateWalk || TUT_ROOMS[G.roomId] === undefined) return;
+  if (!sv || !G.tut || (sv.flags && sv.flags.tut) || !player || G.state !== 'PLAY' || G.gateWalk || G.dialog || G.cut || G.wake || G.bossEntry || TUT_ROOMS[G.roomId] === undefined) return;
   const T = G.tut;
   const st = TUT_STEPS[T.i];
   if (!st) return;
-  const px = player.x + player.w / 2 - cam.x, py = player.y - cam.y;
+  const projectX = x => typeof worldScreenX === 'function' ? worldScreenX(x) : x-cam.x;
+  const projectY = y => typeof worldScreenY === 'function' ? worldScreenY(y) : y-cam.y;
+  const px = projectX(player.x+player.w/2), py = projectY(player.y-12);
   const learned = T.hold > 0;
   const pu = 0.5 + Math.sin(performance.now() / 260) * 0.5;
   // THE THING BEING TAUGHT, RINGED. A card that names a verb teaches nothing if
   // the player cannot see what it is about — so the step gets a ring while the
   // jump is being taught and the machine gets one while the claw is.
   const mark = (wx, wy, r, col) => {
-    const sx = wx - cam.x, sy = wy - cam.y;
+    const sx = projectX(wx), sy = projectY(wy);
     c.save();
     c.strokeStyle = col; c.lineWidth = 2.5; c.globalAlpha = 0.35 + pu * 0.5;
     c.setLineDash([6, 6]); c.lineDashOffset = -performance.now() / 70;
-    c.beginPath(); c.arc(sx, sy, r + pu * 3, 0, 7); c.stroke();
+    if (typeof drawMechanicalTutorialArrow === 'function' && sx >= 26 && sx <= 934 && sy >= 90 && sy <= 580) {
+      c.setLineDash([]); drawMechanicalTutorialArrow({x:wx,y:wy,radius:r});
+    } else if (typeof drawMechanicalTutorialArrow !== 'function') {
+      c.beginPath(); c.arc(sx,sy,r+pu*3,0,7); c.stroke();
+    }
     c.setLineDash([]);
     // A RING OFF THE EDGE OF THE SCREEN RINGS NOTHING. The node the 'think'
     // step points at sits thirteen tiles behind where she stands when the step
@@ -39710,7 +39626,7 @@ function drawTutor() {
   if (T.i < openAt2 && G.roomDef.exits && G.roomDef.exits.R) {
     // the held door: a light curtain, not a wall — it reads as "not yet",
     // and it flares when she pushes on it so the answer arrives when asked.
-    const bx = (G.roomDef.w - 2.0) * TILE - cam.x;
+    const bx = projectX((G.roomDef.w - 2.0) * TILE);
     c.save();
     c.globalCompositeOperation = 'lighter';
     const bg = c.createLinearGradient(bx - 10, 0, bx + 14, 0);
@@ -39718,11 +39634,11 @@ function drawTutor() {
     bg.addColorStop(0.5, 'rgba(55,255,208,' + (0.16 + pu * 0.12 + (T.push || 0) * 0.34).toFixed(3) + ')');
     bg.addColorStop(1, 'rgba(55,255,208,0)');
     c.fillStyle = bg;
-    c.fillRect(bx - 10, 10.4 * TILE - cam.y, 24, 4.6 * TILE);
+    c.fillRect(bx - 10, projectY(10.4 * TILE), 24, 4.6 * TILE);
     c.strokeStyle = 'rgba(55,255,208,' + (0.3 + pu * 0.3 + (T.push || 0) * 0.4).toFixed(3) + ')';
     c.lineWidth = 1.5;
     for (let i = 0; i < 5; i++) {
-      const yy = (10.6 + i * 0.9) * TILE - cam.y + Math.sin(performance.now() / 300 + i) * 3;
+      const yy = projectY((10.6+i*.9)*TILE) + Math.sin(performance.now() / 300 + i) * 3;
       c.beginPath(); c.moveTo(bx - 7, yy); c.lineTo(bx + 7, yy); c.stroke();
     }
     c.restore();
@@ -39809,7 +39725,7 @@ function drawLesson() {
   if (!L || !player || G.state !== 'PLAY') return;
   const M = MOD_LESSON[L.id];
   if (!M) return;
-  tutCard(player.x + player.w / 2 - cam.x, player.y - cam.y, tutHand(M),
+  tutCard(typeof worldScreenX==='function'?worldScreenX(player.x+player.w/2):player.x+player.w/2-cam.x, typeof worldScreenY==='function'?worldScreenY(player.y-12):player.y-cam.y, tutHand(M),
     t('m_' + L.id), t('les_' + L.id), L.hold > 0, L.hold / 1.1);
 }
 // ---------------------------------------------------------------------------
@@ -40804,13 +40720,14 @@ function drawWorldFrame() {
   // film, so a player whose audio never unlocked — anyone on a controller —
   // reached the game and found it silent, with nothing on screen explaining
   // why or what to do. It draws itself only while sound is actually locked.
-  if (typeof drawSoundChip === 'function') drawSoundChip(performance.now() / 1000);
+
   lightPass(P);
   if (G.flash > 0) {
     c.fillStyle = 'rgba(255,255,255,' + (G.flash * 0.32) + ')';
     c.fillRect(0, 0, 960, 540);
   }
   scanOverlay();
+  if (typeof presentWorld === 'function') presentWorld();
 }
 // ===========================================================================
 // THE LIGHT IN THE ROOM.
@@ -42135,7 +42052,7 @@ function draw(tms) {
   }
   // in-world states render the world behind
   drawWorldFrame();
-  drawFX();
+  if (typeof withWorldProjection === 'function') withWorldProjection(c,drawFX); else drawFX();
   // THE LIGHTS COMING UP on a guardian's chamber. Over the world and under the
   // HUD, so the room is what darkens — a black frame with the player's own
   // readouts sitting on top of it would just look like a broken screen. It
@@ -42166,10 +42083,12 @@ function draw(tms) {
   holdFrameNearExit();
   if (typeof drawBrDelta === 'function') drawBrDelta();
   drawTutor();
-  if (typeof drawGateWalk === 'function') drawGateWalk();
+  if (typeof drawGateWalk === 'function') { if (typeof withWorldProjection === 'function') withWorldProjection(c,drawGateWalk); else drawGateWalk(); }
   drawLesson();
   drawHUD();
   drawMapButton();
+  if (typeof drawSoundChip === 'function') drawSoundChip(tsec);
+  if (typeof drawSaveFeedback === 'function') drawSaveFeedback();
   // THE PUSH. The frame she left is held and slid off the edge she left by, so
   // the two rooms read as one continuous space travelled through rather than
   // two pictures swapped. Drawn in RAW DEVICE PIXELS — the quality dial scales
@@ -43779,7 +43698,7 @@ setInterval(checkForUpdate, 240000);
 addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate(); });
 // instant repeat loads + offline: cache-first assets, network-first code
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  try { navigator.serviceWorker.register('sw.js'); } catch (e) {}
+  try { navigator.serviceWorker.register('sw.js?v=' + encodeURIComponent(window.BUILD_ID || 'dev'), {updateViaCache:'none'}).catch(() => {}); } catch (e) {}
 }
 let lastT = 0;
 // ---------------------------------------------------------------------------
@@ -43838,6 +43757,7 @@ function mainLoop(tms) {
   }
   lastT = tms;
   if (typeof pollGamepad === 'function') pollGamepad();
+  const artReady = typeof heroArtBootTick !== 'function' || heroArtBootTick();
   // one step on a healthy frame; two or three when the machine is struggling
   let acc = Math.min(raw, SIM_MAX) * (G.state === 'PLAY' ? paceK() : 1);
   if (!(acc > 0)) acc = dt;
@@ -43849,7 +43769,14 @@ function mainLoop(tms) {
   // time it never got. tests/bosspace.cjs did exactly that and carried a
   // documented flake for it. One addition per frame, no branch, no allocation.
   G.simClock = (G.simClock || 0) + acc;
-  while (acc > 1e-4) { const st = Math.min(acc, SIM_STEP); update(st); acc -= st; }
+  while (acc > 1e-4) {
+    const st = Math.min(acc, SIM_STEP);
+    if (artReady || G.state !== 'PLAY') update(st);
+    // Held controls survive. A pressed edge belongs to one simulation step,
+    // including a frame that catches up two or three physics steps.
+    for (const key in keysP) keysP[key] = 0;
+    acc -= st;
+  }
   // ONE PREFETCH SLOT PER FRAME, IN EVERY STATE. This used to live inside the
   // PLAY branch of update(), which meant the title screen, the map, a shop and
   // the whole two-minute opening fetched nothing at all — the quietest moments
@@ -43863,14 +43790,14 @@ function mainLoop(tms) {
   draw(tms);
   drawTouchUI();
   clearP();
-  if (!mainLoop.ldGone) {
+  if (!mainLoop.ldGone && artReady) {
     mainLoop.ldGone = true;
     const ld = document.getElementById('cbload');
     if (ld) { ld.style.opacity = '0'; setTimeout(() => { try { ld.remove(); } catch (e) {} }, 500); }
   }
   requestAnimationFrame(mainLoop);
 }
-requestAnimationFrame(mainLoop);
+// Initial scheduling is in boot.js, after all production modules have loaded.
 
 // ===========================================================================
 // WHAT MACHINE IS THIS, AND WHAT CAN IT AFFORD
@@ -45212,7 +45139,7 @@ function drawDiag() {
     'BUILD ' + ((typeof window !== 'undefined' && window.BUILD_ID) || '?') + '   ' + (G.roomId || '?'),
     'body ' + (G.heroDrawn || '?') + '   vx ' + ((typeof player !== 'undefined' && player) ? Math.round(player.vx) : '?'),
     'run ' + diagTier('gaitRun') + '  walk ' + diagTier('gaitWalk') + '  idle ' + diagTier('hzdIdle'),
-    'tutorial ' + (G.tutHardLock && G.tutHardLock.active ? ('LOCK ' + G.tutHardLock.id + ' → ' + G.tutHardLock.action) : 'free'),
+    'tutorial ' + (G.tutorialLock ? ('LOCK ' + G.tutorialLock.id + ' → ' + G.tutorialLock.action) : 'free'),
   ];
   c.save(); c.setTransform(1,0,0,1,0,0); c.font = '600 11px monospace';
   c.fillStyle = 'rgba(4,8,14,.86)'; c.fillRect(6,6,370,rows.length*15+12);
@@ -45247,95 +45174,12 @@ try {
   }
 } catch (e) {}
 
-const TUT_LOCK_ACTION = { jump:'JUMP', gate:'UP', atk:'ATK', heal:'HEAL', skill:'SKILL' };
-let _tutOldAllows = null, _tutOldDraw = null;
-function tutLockStep() {
-  try { if (!G || !G.tut || !TUT_STEPS || !TUT_STEPS[G.tut.i]) return null; return TUT_STEPS[G.tut.i]; }
-  catch (e) { return null; }
-}
-function tutLiveEnemy() { return (G.enemies || []).find(e => e && !e.dead && e.hp > 0) || null; }
-function tutEnemyInClawRange() {
-  if (G.roomId !== 'A0' || !player) return false;
-  const e = tutLiveEnemy(); if (!e) return false;
-  const pc = player.x + player.w/2, ec = e.x + e.w/2;
-  const py = player.y + player.h/2, ey = e.y + e.h/2;
-  return Math.abs(ec-pc) <= 68 && Math.abs(ey-py) <= 54;
-}
-function tutJumpAtObstacle() {
-  if (G.roomId !== 'W2' || !player || !player.on) return false;
-  try {
-    const dir = player.vx < -8 ? -1 : (player.vx > 8 ? 1 : (player.face < 0 ? -1 : 1));
-    const feetTy = Math.floor((player.y + player.h - 2) / TILE);
-    const edge = dir > 0 ? player.x + player.w : player.x;
-    for (let px=8; px<=72; px+=6) {
-      const tx = Math.floor((edge + dir*px) / TILE);
-      if (solidAt(tx, feetTy) || solidAt(tx, feetTy-1) || solidAt(tx, feetTy-2)) return true;
-    }
-  } catch (e) {}
-  return false;
-}
-function tutGateReady() { if (!player || !player.on) return false; try { return typeof gateHere === 'function' && !!gateHere(); } catch(e) { return false; } }
-function tutHealReady() { return !!(player && typeof player.maxCores === 'function' && player.cores < player.maxCores()); }
-function tutSkillReady() { return !!(G.save && G.save.iq > 0 && G.state === 'PLAY'); }
-function tutShouldLock(id) {
-  if (G.state !== 'PLAY' || G.dialog || G.cut || G.gateWalk) return false;
-  if (!TUT_LOCK_ACTION[id]) return false;
-  if (id === 'atk') return tutEnemyInClawRange();
-  if (id === 'jump') return tutJumpAtObstacle();
-  if (id === 'gate') return tutGateReady();
-  if (id === 'heal') return tutHealReady();
-  if (id === 'skill') return tutSkillReady();
-  return false;
-}
-function tutFreezeEnemies(on) {
-  for (const e of (G.enemies || [])) {
-    if (!e || e.dead) continue;
-    if (on) {
-      if (!e.__tutFrozen) { e.__tutFrozen = { update:e.update, vx:e.vx, vy:e.vy }; if (typeof e.update === 'function') e.update = function(){}; }
-      e.vx = 0; e.vy = 0;
-    } else if (e.__tutFrozen) {
-      if (e.__tutFrozen.update) e.update = e.__tutFrozen.update;
-      e.vx = e.__tutFrozen.vx || 0; e.vy = e.__tutFrozen.vy || 0; delete e.__tutFrozen;
-    }
-  }
-}
-function tutReleaseLock() { if (!G || !G.tutHardLock) return; tutFreezeEnemies(false); G.tutHardLock = null; }
-function tutLockTick() {
-  if (!G || !player) return;
-  const s = tutLockStep();
-  if (!s || !G.save || !G.save.flags || G.save.flags.tut) { tutReleaseLock(); return; }
-  const action = TUT_LOCK_ACTION[s.id];
-  if (!action) { tutReleaseLock(); return; }
-  if (G.tutHardLock && G.tutHardLock.id !== s.id) tutReleaseLock();
-  if (!G.tutHardLock && tutShouldLock(s.id)) {
-    G.tutHardLock = { active:true, id:s.id, action:action };
-    player.vx = 0;
-    if (player.on) player.vy = 0;
-    tutFreezeEnemies(true);
-    for (const k of ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS','VL','VR','VU','VD','GP_L','GP_R','GP_U','GP_D']) {
-      if (typeof keys !== 'undefined') keys[k]=0;
-      if (typeof keysP !== 'undefined') keysP[k]=0;
-    }
-  }
-  if (G.tutHardLock && G.tutHardLock.active) { player.vx = 0; tutFreezeEnemies(true); }
-}
-try {
-  if (typeof tutAllows === 'function') {
-    _tutOldAllows = tutAllows;
-    tutAllows = function(a) {
-      tutLockTick();
-      const L = G && G.tutHardLock;
-      if (L && L.active) return a === L.action || a === 'PAUSE' || a === 'BACK';
-      return _tutOldAllows(a);
-    };
-  }
-} catch (e) {}
 
 function drawMechanicalTutorialArrow(target) {
   if (!target || typeof c === 'undefined' || typeof cam === 'undefined') return;
   const bob = Math.sin(performance.now() / 260) * 4;
-  const x = target.x - cam.x;
-  const y = target.y - cam.y - Math.max(112, (target.radius || 30) + 82) + bob;
+  const x = typeof worldScreenX === 'function' ? worldScreenX(target.x) : target.x - cam.x;
+  const y = (typeof worldScreenY === 'function' ? worldScreenY(target.y) : target.y - cam.y) - 82 + bob;
   const col='#37ffd0', dark='#14242b', steel='#35505a', hi='#9fffea';
   c.save(); c.translate(x,y); c.shadowColor=col; c.shadowBlur=13; c.globalAlpha=.96;
   c.strokeStyle=steel; c.lineWidth=4; c.lineCap='round';
@@ -45351,259 +45195,139 @@ function drawMechanicalTutorialArrow(target) {
   c.fillStyle='rgba(55,255,208,.30)'; c.beginPath(); c.moveTo(-4,19); c.lineTo(4,19); c.lineTo(4,33); c.lineTo(10,33); c.lineTo(0,43); c.lineTo(-10,33); c.lineTo(-4,33); c.closePath(); c.fill();
   c.strokeStyle=hi; c.lineWidth=1; c.globalAlpha=.75; c.beginPath(); c.moveTo(-11,31); c.lineTo(0,44); c.lineTo(11,31); c.stroke(); c.restore();
 }
-function isFirstShopApproachPrompt(s) {
-  if (!s || typeof tutPrompt !== 'function' || !G || G.state !== 'PLAY') return null;
-  try { const p=tutPrompt(s); if (!p || !p.target) return null; if (p.label==='tut_approach' && p.hint==='tut_workshop_h') return p; } catch(e) {}
-  return null;
+
+// One tutorial controller. The semantic CURRENT PROMPT owns input policy;
+// saved step IDs never override an approach/return prompt in another room.
+const TUTORIAL_NAV = new Set(['LEFT', 'RIGHT', 'JUMP', 'UP', 'DOWN', 'PAUSE', 'BACK']);
+const TUTORIAL_DISCRETE = new Set(['JUMP', 'UP', 'ATK', 'INT', 'HEAL', 'SKILL']);
+const tutorialFrozen = new Map();
+
+function tutorialStep() {
+  if (!G || !G.save || !G.tut || !player || player.dead || G.save.flags.tut
+      || TUT_ROOMS[G.roomId] === undefined) return null;
+  return TUT_STEPS[G.tut.i] || null;
 }
-try {
-  if (typeof drawTutor === 'function') {
-    _tutOldDraw = drawTutor;
-    drawTutor = function() {
-      tutLockTick();
-      const s=tutLockStep();
-      if (s && TUT_LOCK_ACTION[s.id] && !(G.tutHardLock && G.tutHardLock.id===s.id)) return;
-      const shopPrompt=isFirstShopApproachPrompt(s);
-      if (!shopPrompt) return _tutOldDraw();
-      const oldSetDash=c.setLineDash.bind(c), oldStroke=c.stroke.bind(c); let dashed=false;
-      c.setLineDash=function(v){ dashed=!!(v&&v.length); return oldSetDash(v); };
-      c.stroke=function(){ if(dashed) return; return oldStroke(); };
-      try { _tutOldDraw(); }
-      finally { c.setLineDash=oldSetDash; c.stroke=oldStroke; try{oldSetDash([]);}catch(e){} }
-      drawMechanicalTutorialArrow(shopPrompt.target);
-    };
-  }
-} catch(e) {}
-try {
-  if (typeof clearP === 'function') {
-    const _clearP=clearP;
-    clearP=function(){ tutLockTick(); return _clearP(); };
-  }
-} catch(e) {}
-// CLAWBYTE — complete first-time tutorial enforcement
-// Owner ruling 2026-09-10: no first-use instruction is allowed to become a
-// vague suggestion. Approach cards point at the exact target; action cards
-// freeze at the usable moment; unrelated gameplay input is rejected; the
-// required action releases the lock and progression continues.
-(() => {
-  if (typeof G === 'undefined') return;
-
-  const ACTIONS = new Set(['LEFT','RIGHT','UP','DOWN','JUMP','ATK','INT','HEAL','SKILL','MAP','PAUSE','BACK']);
-  const MOVE_ACTIONS = new Set(['LEFT','RIGHT','JUMP','PAUSE','BACK']);
-  let lastStepId = null;
-
-  function step() {
-    try { return G.tut && typeof TUT_STEPS !== 'undefined' ? TUT_STEPS[G.tut.i] : null; }
-    catch (e) { return null; }
-  }
-  function promptFor(s) {
-    try { return s && typeof tutPrompt === 'function' ? tutPrompt(s) : null; }
-    catch (e) { return null; }
-  }
-  function pcx() { return player ? player.x + player.w / 2 : 0; }
-  function pcy() { return player ? player.y + player.h / 2 : 0; }
-  function targetNear(p, xPad = 78, yPad = 78) {
-    if (!p || !p.target || !player) return false;
-    return Math.abs(pcx() - p.target.x) <= xPad && Math.abs(pcy() - p.target.y) <= yPad;
-  }
-  function liveEnemy() {
-    return (G.enemies || []).find(e => e && !e.dead && e.hp > 0) || null;
-  }
-  function enemyInRange() {
-    const e = liveEnemy(); if (!e || !player) return false;
-    return Math.abs((e.x + e.w/2) - pcx()) <= 68 && Math.abs((e.y + e.h/2) - pcy()) <= 58;
-  }
-  function injured() {
-    return !!(player && typeof player.maxCores === 'function' && player.cores < player.maxCores());
-  }
-  function hasIQ() { return !!(G.save && G.save.iq > 0); }
-
-  function actionFromPrompt(s, p) {
-    if (!s) return null;
-    // Strong semantic mapping first: these are the tutorial's actual verbs.
-    if (s.id === 'jump') return 'JUMP';
-    if (s.id === 'atk' || s.id === 'kill') return 'ATK';
-    if (s.id === 'heal') return 'HEAL';
-    if (s.id === 'skill') return 'SKILL';
-
-    const ctl = p && String(p.control || p.keys || '').toUpperCase();
-    if (ctl) {
-      if (ctl.includes('↑') || /(^|\s)(UP|W)(\s|$)/.test(ctl)) return 'UP';
-      if (ctl.includes('E') || ctl.includes('ENTER') || ctl.includes('INTERACT')) return 'INT';
-      if (ctl.includes('X') || ctl.includes('ATK') || ctl.includes('ATTACK')) return 'ATK';
-      if (ctl.includes('F') || ctl.includes('HEAL')) return 'HEAL';
-      if (ctl.includes('T') || ctl.includes('SKILL')) return 'SKILL';
-    }
-
-    // Gate is an UP action even when its card is currently in approach mode.
-    if (s.id === 'gate') return 'UP';
-    return null;
-  }
-
-  function actionReady(s, p, action) {
-    if (!s || G.state !== 'PLAY' || G.dialog || G.cut || G.gateWalk || !player) return false;
-    if (s.id === 'jump') {
-      try { if (typeof tutJumpAtObstacle === 'function') return tutJumpAtObstacle(); } catch(e) {}
-      return false;
-    }
-    if (s.id === 'atk' || s.id === 'kill') return enemyInRange();
-    if (s.id === 'heal') return injured();
-    if (s.id === 'skill') return hasIQ();
-    if (action === 'UP') {
-      try { if (typeof gateHere === 'function' && gateHere()) return true; } catch(e) {}
-      return targetNear(p, 72, 100);
-    }
-    if (action === 'INT') return !!G.near || targetNear(p, 72, 96);
-    return false;
-  }
-
-  function freezeEnemies(on) {
-    for (const e of (G.enemies || [])) {
-      if (!e || e.dead) continue;
-      if (on) {
-        if (!e.__walkthroughFrozen) {
-          e.__walkthroughFrozen = { update:e.update, vx:e.vx, vy:e.vy };
-          if (typeof e.update === 'function') e.update = function(){};
-        }
-        e.vx = 0; e.vy = 0;
-      } else if (e.__walkthroughFrozen) {
-        if (e.__walkthroughFrozen.update) e.update = e.__walkthroughFrozen.update;
-        e.vx = e.__walkthroughFrozen.vx || 0;
-        e.vy = e.__walkthroughFrozen.vy || 0;
-        delete e.__walkthroughFrozen;
+function tutJumpAtObstacle() {
+  if (!player || !player.on || G.roomId !== 'W2') return false;
+  const dir = player.vx < -8 ? -1 : player.vx > 8 ? 1 : player.face || 1;
+  const feet = player.y + player.h, row = Math.floor((feet - 1) / TILE);
+  const edge = dir > 0 ? player.x + player.w : player.x;
+  // Reachable one-way shelves are jump opportunities, not collision walls.
+  // W2's authored lesson is the row-11 shelf; its later hull is a walkable
+  // ramp. Requiring a >24px solid face could never announce the actual lesson.
+  if (typeof tileAt === 'function') {
+    const pc = player.x + player.w / 2;
+    const reach = typeof JUMP_V === 'number' ? Math.min(200, JUMP_V * JUMP_V / 4400) : 190;
+    for (let tx = Math.floor((pc-40)/TILE); tx <= Math.floor((pc+40)/TILE); tx++) {
+      for (let ty = Math.floor((feet-reach)/TILE); ty <= Math.floor((feet-48)/TILE); ty++) {
+        if (tileAt(tx,ty) !== '=') continue;
+        // A platform behind a solid ceiling is not reachable from this side.
+        let clear = true;
+        for (let y=ty+1; y<=row; y++) if (solidAt(tx,y)) { clear=false; break; }
+        if (clear) return true;
       }
     }
   }
-
-  function clearMovement() {
-    const names = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS','VL','VR','VU','VD','GP_L','GP_R','GP_U','GP_D'];
-    for (const k of names) {
-      try { if (typeof keys !== 'undefined') keys[k] = 0; } catch(e) {}
-      try { if (typeof keysP !== 'undefined') keysP[k] = 0; } catch(e) {}
-    }
+  for (let dx = 6; dx <= 60; dx += 6) {
+    const tx = Math.floor((edge + dir * dx) / TILE);
+    if (!solidAt(tx, row)) continue;
+    let top = row;
+    while (top > 0 && solidAt(tx, top - 1)) top--;
+    // Small surface irregularities are step-ups, not jump lessons. A ceiling
+    // somewhere ahead is not a floor obstacle either.
+    const rise = feet - top * TILE;
+    if (rise > PLAYER_STEP_UP && rise < 120) return true;
   }
-
-  function release() {
-    freezeEnemies(false);
-    if (G.walkthroughLock) G.walkthroughLock = null;
-    // Also release the older lock layer so two systems never fight over x.
-    if (G.tutHardLock && (!step() || G.tutHardLock.id !== step().id)) {
-      try { if (typeof tutReleaseLock === 'function') tutReleaseLock(); else G.tutHardLock = null; } catch(e) { G.tutHardLock = null; }
-    }
+  return false;
+}
+function tutorialReady(p) {
+  if (!p || !player || !TUTORIAL_DISCRETE.has(p.action)) return false;
+  if (p.action === 'JUMP') return tutJumpAtObstacle();
+  if (p.action === 'ATK') {
+    const e = (G.enemies || []).find(q => q && !q.dead && q.hp > 0);
+    return !!e && Math.abs(e.x + e.w/2 - player.x - player.w/2) <= 68
+      && Math.abs(e.y + e.h/2 - player.y - player.h/2) <= 58;
   }
-
-  function engage(s, action) {
-    if (!s || !player || !action) return;
-    if (G.walkthroughLock && G.walkthroughLock.id === s.id && G.walkthroughLock.action === action) return;
-    release();
-    G.walkthroughLock = { id:s.id, action, x:player.x, y:player.y, on:!!player.on };
-    player.vx = 0;
-    if (player.on) player.vy = 0;
-    clearMovement();
-    freezeEnemies(true);
+  if (p.action === 'UP') {
+    const d = typeof gateHere === 'function' && player.on && gateHere();
+    return !!d && !!p.target && Math.abs(gateWorldX(d) - p.target.x) < 2;
   }
-
-  function tick() {
-    const s = step();
-    if (!s || !G.save || (G.save.flags && G.save.flags.tut)) { release(); lastStepId = null; return; }
-    if (lastStepId !== s.id) { release(); lastStepId = s.id; }
-    if (G.state !== 'PLAY') { freezeEnemies(false); return; }
-
-    const p = promptFor(s);
-    const action = actionFromPrompt(s, p);
-    if (!G.walkthroughLock && action && actionReady(s, p, action)) engage(s, action);
-
-    const L = G.walkthroughLock;
-    if (L) {
-      // A tutorial freeze is positional, not just velocity=0. This prevents a
-      // held stick, step-up correction or previous-frame motion from slipping
-      // the player past the teaching point while the card is visible.
-      if (Number.isFinite(L.x)) player.x = L.x;
-      player.vx = 0;
-      if (L.on && player.on) player.vy = 0;
-      freezeEnemies(true);
-    }
+  if (p.action === 'INT') {
+    // An unrelated nearby object must not freeze travel to the actual target.
+    const n = G.near;
+    return !!n && !!p.target && Math.abs(n.x+n.w/2-p.target.x) < 2
+      && Math.abs(n.y+n.h/2-p.target.y) < 2;
   }
-
-  // Dynamic input policy. While approaching a target, only navigation verbs
-  // already learned are accepted. At an action point, only that exact action
-  // (plus Pause/Back) is accepted. No attack-in-the-shop, early interaction,
-  // heal mashing, skill mashing or gate skipping can satisfy another lesson.
-  if (typeof tutAllows === 'function') {
-    const baseAllows = tutAllows;
-    tutAllows = function(a) {
-      tick();
-      const s = step();
-      if (!s || !G.save || (G.save.flags && G.save.flags.tut)) return baseAllows(a);
-      if (!ACTIONS.has(a)) return baseAllows(a);
-      if (a === 'PAUSE' || a === 'BACK') return true;
-
-      const L = G.walkthroughLock || G.tutHardLock;
-      if (L && L.active !== false) return a === L.action;
-
-      // MOVE is the first lesson: nothing except actual movement exists yet.
-      if (s.id === 'move') return a === 'LEFT' || a === 'RIGHT';
-
-      // Pure travel/collection/approach steps. Jump remains available only
-      // because it was already taught and may be required by terrain.
-      if (['out','coin','buy','node'].includes(s.id)) {
-        const p = promptFor(s), action = actionFromPrompt(s, p);
-        if (action && actionReady(s, p, action)) return a === action;
-        return MOVE_ACTIONS.has(a);
-      }
-
-      // Before an action trigger, let the player approach but do not let them
-      // fire the new verb early. Once ready, tick() has already hard-locked it.
-      if (['jump','gate','atk','kill','heal','skill'].includes(s.id)) {
-        if (s.id === 'heal' || s.id === 'skill') return false;
-        return MOVE_ACTIONS.has(a);
-      }
-      return baseAllows(a);
-    };
+  if (p.action === 'HEAL') return player.cores < player.maxCores() && player.volts >= 33;
+  if (p.action === 'SKILL') return (G.save.iq || 0) > 0;
+  return false;
+}
+function tutorialContext() {
+  const s = tutorialStep();
+  const suspended = G.state !== 'PLAY' || G.dialog || G.cut || G.gateWalk || G.wake
+    || G.bossEntry || (typeof inputSuspended !== 'undefined' && inputSuspended);
+  if (!s || suspended || G.tut.hold > 0) return { step:s, prompt:null, ready:false };
+  const p = tutPrompt(s);
+  return { step:s, prompt:p, ready:tutorialReady(p) };
+}
+function tutorialRelease() {
+  for (const [e, saved] of tutorialFrozen) {
+    if (e.update === saved.frozenUpdate) e.update = saved.update;
+    // Do not erase knockback that an accepted strike has just applied.
+    if (e.vx === 0) e.vx = saved.vx;
+    if (e.vy === 0) e.vy = saved.vy;
   }
-
-  // Replace tutorial target circles with the game's mechanical arrow language.
-  // The existing shop-specific arrow renderer is reused so all first-time
-  // targets look like one coherent guidance system rather than mixed symbols.
-  if (typeof drawTutor === 'function') {
-    const baseDraw = drawTutor;
-    drawTutor = function() {
-      tick();
-      const s = step();
-      if (!s) return baseDraw();
-      const p = promptFor(s);
-      const oldSetDash = c.setLineDash.bind(c);
-      const oldStroke = c.stroke.bind(c);
-      let dashed = false;
-      c.setLineDash = function(v) { dashed = !!(v && v.length); return oldSetDash(v); };
-      c.stroke = function() { if (dashed) return; return oldStroke(); };
-      try { baseDraw(); }
-      finally { c.setLineDash = oldSetDash; c.stroke = oldStroke; try { oldSetDash([]); } catch(e) {} }
-
-      if (p && p.target && typeof drawMechanicalTutorialArrow === 'function') {
-        // The previous layer already draws the shop arrow. Avoid doubling it.
-        let shop = false;
-        try { shop = !!(typeof isFirstShopApproachPrompt === 'function' && isFirstShopApproachPrompt(s)); } catch(e) {}
-        if (!shop) drawMechanicalTutorialArrow(p.target);
-      }
-    };
+  tutorialFrozen.clear();
+  G.tutorialLock = null;
+  G.walkthroughLock = null; G.tutHardLock = null; // retire old transient state
+}
+function tutorialTick() {
+  const ctx = tutorialContext(), p = ctx.prompt, s = ctx.step;
+  if (!s || !p || !ctx.ready || p.action === 'MOVE') { tutorialRelease(); return; }
+  const L = G.tutorialLock;
+  if (!L || L.id !== s.id || L.room !== G.roomId || L.action !== p.action) {
+    tutorialRelease();
+    G.tutorialLock = { id:s.id, room:G.roomId, action:p.action, active:true };
   }
-
-  // Run once per frame even if no input is being polled. This catches a player
-  // coasting into a trigger with a held key and guarantees immediate release
-  // after the lesson advances.
-  if (typeof clearP === 'function') {
-    const baseClearP = clearP;
-    clearP = function() { tick(); return baseClearP(); };
+  // No player.x pin and no input-array clearing. The instruction filters
+  // unrelated controls, not the physical input edge it is trying to teach.
+  player.vx = 0;
+  if (s.id === 'jump') G.tut.jumpShown = true;
+  for (const e of (G.enemies || [])) {
+    if (!e || e.dead || tutorialFrozen.has(e)) continue;
+    const frozenUpdate = function() {};
+    tutorialFrozen.set(e, { update:e.update, frozenUpdate, vx:e.vx, vy:e.vy });
+    e.update = frozenUpdate; e.vx = 0; e.vy = 0;
   }
-
-  // Expose a tiny diagnostic for ?diag=1 and automated checks.
-  window.__tutorialEnforcement = {
-    step: () => { const s = step(); return s && s.id; },
-    lock: () => G.walkthroughLock ? { ...G.walkthroughLock } : null,
-    prompt: () => { const s = step(), p = promptFor(s); return p ? { label:p.label, hint:p.hint, control:p.control, target:p.target } : null; }
-  };
-})();
+}
+function tutorialAllows(action) {
+  // Menus/dialogue own their controls. A gameplay lesson cannot block buying,
+  // choosing a skill, leaving a shop, pausing, or skipping a story film.
+  if (action === 'PAUSE' || action === 'BACK' || G.state !== 'PLAY' || G.dialog
+      || G.cut || G.gateWalk || G.wake) return true;
+  const ctx = tutorialContext();
+  if (!ctx.step) return true;
+  if (ctx.ready && ctx.prompt) return action === ctx.prompt.action;
+  // The acknowledgement beat releases navigation immediately. A jump that
+  // just succeeded must be steerable in the air, not pinned for 0.7 seconds.
+  if (TUTORIAL_NAV.has(action)) {
+    if (ctx.step.id === 'move') return action === 'LEFT' || action === 'RIGHT';
+    if (action === 'UP' || action === 'DOWN') return false;
+    return true;
+  }
+  // Travel never grants untaught powers. UI navigation outside PLAY is above.
+  const need = TUT_UNLOCK[action];
+  if (need) return G.tut.i >= TUT_STEPS.findIndex(q => q.id === need)
+    && !(ctx.prompt && ctx.prompt.action === 'MOVE' && ['ATK','INT','HEAL','SKILL'].includes(action));
+  return action === 'MAP' || action === 'OK';
+}
+// Retain the public diagnostic interface used by release tools, without
+// patching draw(), input getters or clearP() a second time.
+if (typeof window !== 'undefined') window.__tutorialEnforcement = {
+  step: () => { const s = tutorialStep(); return s && s.id; },
+  lock: () => G.tutorialLock ? { ...G.tutorialLock } : null,
+  prompt: () => { const s=tutorialStep(); return s ? tutPrompt(s) : null; }
+};
 
 // CLAWBYTE hero motion services. State selection lives in entities.js.
 // No timer impersonation, prototype wrappers, legacy gait fallback or voice swap.
@@ -45717,6 +45441,56 @@ function drawHeroMotionCell(p, ctx, key, frame, cells, cx, base, height, flip) {
   return true;
 }
 heroMotionWarm();
+
+// Charged locomotion VFX. State selection and idle timing live in Player,
+// not in monkey patches that temporarily rewrite simulation state.
+(() => {
+  if (typeof Player === 'undefined' || Player.prototype.__chargeEffectsInstalled) return;
+  Player.prototype.__chargeEffectsInstalled = true;
+  const draw = Player.prototype.draw;
+  Player.prototype.draw = function(ctx) {
+    const out = draw.call(this, ctx);
+        if (this.chargeT > 0.25 && ctx && typeof ctx.save === 'function' && typeof G !== 'undefined' && G.state === 'PLAY') {
+          const k = Math.min(1, (this.chargeT - 0.25) / 0.35);
+          const t = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
+          const cx = this.x + this.w / 2, cy = this.y + this.h * 0.48;
+          const dir = this.face || 1;
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.lineCap = 'round';
+          const glow = (G.roomDef && typeof PAL !== 'undefined' && PAL[G.roomDef.zone] && PAL[G.roomDef.zone].glow) || '#37ffd0';
+          ctx.shadowColor = glow; ctx.shadowBlur = 10 + 10 * k;
+          ctx.strokeStyle = glow; ctx.lineWidth = 1.5 + 1.2 * k;
+          ctx.globalAlpha = 0.38 + 0.34 * k;
+          for (let i = 0; i < 3; i++) {
+            const a = t * (3.2 + i * .55) + i * 2.1;
+            const rx = 17 + i * 5 + k * 5, ry = 10 + i * 3 + k * 3;
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, ry, a * .18, a, a + 1.65);
+            ctx.stroke();
+          }
+          // The charge is held FORWARD even while the legs run underneath it.
+          const hx = cx + dir * (18 + 8 * k), hy = cy - 4 + Math.sin(t * 8) * 1.5;
+          const g = ctx.createRadialGradient(hx, hy, 1, hx, hy, 9 + 6 * k);
+          g.addColorStop(0, 'rgba(255,255,255,.95)');
+          g.addColorStop(.28, glow);
+          g.addColorStop(1, 'rgba(55,255,208,0)');
+          ctx.fillStyle = g; ctx.globalAlpha = .78;
+          ctx.beginPath(); ctx.arc(hx, hy, 9 + 6 * k, 0, Math.PI * 2); ctx.fill();
+          // Motion ribbon makes a charged run/jump read as a charged MOVE, not
+          // a normal gait with an unrelated circle pasted on top.
+          if (Math.abs(this.vx || 0) > 34 || !this.on) {
+            ctx.strokeStyle = glow; ctx.lineWidth = 2 + k; ctx.globalAlpha = .28 + .25 * k;
+            ctx.beginPath();
+            ctx.moveTo(cx - dir * 7, cy + 7);
+            ctx.quadraticCurveTo(cx - dir * 23, cy + Math.sin(t * 7) * 5, cx - dir * (35 + Math.min(20, Math.abs(this.vx || 0) * .04)), cy + 2);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+    return out;
+  };
+})();
 
 // CLAWBYTE — Data Conduits NPC visibility + interaction repair
 // Owner report 2026-09-10: Mono is hard to see and cannot be interacted with.
@@ -46169,6 +45943,9 @@ heroMotionWarm();
     tutorialPurchaseAutoExit: true
   };
 })();
+
+// Schedule only after the same ordered module list has loaded in every build.
+requestAnimationFrame(mainLoop);
 
 </script>
 </body>

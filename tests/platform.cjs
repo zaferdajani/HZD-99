@@ -43,12 +43,12 @@ const WWW = path.join(ROOT, 'www');
   for (const f of ['index.html', 'odyssey.html']) {
     const web = fs.readFileSync(path.join(ROOT, f), 'utf8');
     const app = fs.readFileSync(path.join(WWW, f), 'utf8');
-    const norm = (s) => s.replace(/navigator\.serviceWorker\.register\('sw\.js'\)/g, 'void 0');
+    const norm = require('../tools/package-html.cjs');
     check(f + ': the packaged page is the web page',
       norm(web) === app,
       norm(web).length === app.length ? '' : 'differs by ' + Math.abs(norm(web).length - app.length) + ' chars');
     check(f + ': and the app does not register a worker',
-      !/serviceWorker\.register\('sw\.js'\)/.test(app));
+      !/navigator\.serviceWorker\.register\s*\(/.test(app));
   }
 
   // ---- 2. EVERY ASSET THE GAME NAMES IS IN THE PACKAGE --------------------

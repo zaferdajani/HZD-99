@@ -1,224 +1,132 @@
-// CLAWBYTE — complete first-time tutorial enforcement
-// Owner ruling 2026-09-10: no first-use instruction is allowed to become a
-// vague suggestion. Approach cards point at the exact target; action cards
-// freeze at the usable moment; unrelated gameplay input is rejected; the
-// required action releases the lock and progression continues.
-(() => {
-  if (typeof G === 'undefined') return;
+// One tutorial controller. The semantic CURRENT PROMPT owns input policy;
+// saved step IDs never override an approach/return prompt in another room.
+const TUTORIAL_NAV = new Set(['LEFT', 'RIGHT', 'JUMP', 'UP', 'DOWN', 'PAUSE', 'BACK']);
+const TUTORIAL_DISCRETE = new Set(['JUMP', 'UP', 'ATK', 'INT', 'HEAL', 'SKILL']);
+const tutorialFrozen = new Map();
 
-  const ACTIONS = new Set(['LEFT','RIGHT','UP','DOWN','JUMP','ATK','INT','HEAL','SKILL','MAP','PAUSE','BACK']);
-  const MOVE_ACTIONS = new Set(['LEFT','RIGHT','JUMP','PAUSE','BACK']);
-  let lastStepId = null;
-
-  function step() {
-    try { return G.tut && typeof TUT_STEPS !== 'undefined' ? TUT_STEPS[G.tut.i] : null; }
-    catch (e) { return null; }
-  }
-  function promptFor(s) {
-    try { return s && typeof tutPrompt === 'function' ? tutPrompt(s) : null; }
-    catch (e) { return null; }
-  }
-  function pcx() { return player ? player.x + player.w / 2 : 0; }
-  function pcy() { return player ? player.y + player.h / 2 : 0; }
-  function targetNear(p, xPad = 78, yPad = 78) {
-    if (!p || !p.target || !player) return false;
-    return Math.abs(pcx() - p.target.x) <= xPad && Math.abs(pcy() - p.target.y) <= yPad;
-  }
-  function liveEnemy() {
-    return (G.enemies || []).find(e => e && !e.dead && e.hp > 0) || null;
-  }
-  function enemyInRange() {
-    const e = liveEnemy(); if (!e || !player) return false;
-    return Math.abs((e.x + e.w/2) - pcx()) <= 68 && Math.abs((e.y + e.h/2) - pcy()) <= 58;
-  }
-  function injured() {
-    return !!(player && typeof player.maxCores === 'function' && player.cores < player.maxCores());
-  }
-  function hasIQ() { return !!(G.save && G.save.iq > 0); }
-
-  function actionFromPrompt(s, p) {
-    if (!s) return null;
-    // Strong semantic mapping first: these are the tutorial's actual verbs.
-    if (s.id === 'jump') return 'JUMP';
-    if (s.id === 'atk' || s.id === 'kill') return 'ATK';
-    if (s.id === 'heal') return 'HEAL';
-    if (s.id === 'skill') return 'SKILL';
-
-    const ctl = p && String(p.control || p.keys || '').toUpperCase();
-    if (ctl) {
-      if (ctl.includes('↑') || /(^|\s)(UP|W)(\s|$)/.test(ctl)) return 'UP';
-      if (ctl.includes('E') || ctl.includes('ENTER') || ctl.includes('INTERACT')) return 'INT';
-      if (ctl.includes('X') || ctl.includes('ATK') || ctl.includes('ATTACK')) return 'ATK';
-      if (ctl.includes('F') || ctl.includes('HEAL')) return 'HEAL';
-      if (ctl.includes('T') || ctl.includes('SKILL')) return 'SKILL';
-    }
-
-    // Gate is an UP action even when its card is currently in approach mode.
-    if (s.id === 'gate') return 'UP';
-    return null;
-  }
-
-  function actionReady(s, p, action) {
-    if (!s || G.state !== 'PLAY' || G.dialog || G.cut || G.gateWalk || !player) return false;
-    if (s.id === 'jump') {
-      try { if (typeof tutJumpAtObstacle === 'function') return tutJumpAtObstacle(); } catch(e) {}
-      return false;
-    }
-    if (s.id === 'atk' || s.id === 'kill') return enemyInRange();
-    if (s.id === 'heal') return injured();
-    if (s.id === 'skill') return hasIQ();
-    if (action === 'UP') {
-      try { if (typeof gateHere === 'function' && gateHere()) return true; } catch(e) {}
-      return targetNear(p, 72, 100);
-    }
-    if (action === 'INT') return !!G.near || targetNear(p, 72, 96);
-    return false;
-  }
-
-  function freezeEnemies(on) {
-    for (const e of (G.enemies || [])) {
-      if (!e || e.dead) continue;
-      if (on) {
-        if (!e.__walkthroughFrozen) {
-          e.__walkthroughFrozen = { update:e.update, vx:e.vx, vy:e.vy };
-          if (typeof e.update === 'function') e.update = function(){};
-        }
-        e.vx = 0; e.vy = 0;
-      } else if (e.__walkthroughFrozen) {
-        if (e.__walkthroughFrozen.update) e.update = e.__walkthroughFrozen.update;
-        e.vx = e.__walkthroughFrozen.vx || 0;
-        e.vy = e.__walkthroughFrozen.vy || 0;
-        delete e.__walkthroughFrozen;
+function tutorialStep() {
+  if (!G || !G.save || !G.tut || !player || player.dead || G.save.flags.tut
+      || TUT_ROOMS[G.roomId] === undefined) return null;
+  return TUT_STEPS[G.tut.i] || null;
+}
+function tutJumpAtObstacle() {
+  if (!player || !player.on || G.roomId !== 'W2') return false;
+  const dir = player.vx < -8 ? -1 : player.vx > 8 ? 1 : player.face || 1;
+  const feet = player.y + player.h, row = Math.floor((feet - 1) / TILE);
+  const edge = dir > 0 ? player.x + player.w : player.x;
+  // Reachable one-way shelves are jump opportunities, not collision walls.
+  // W2's authored lesson is the row-11 shelf; its later hull is a walkable
+  // ramp. Requiring a >24px solid face could never announce the actual lesson.
+  if (typeof tileAt === 'function') {
+    const pc = player.x + player.w / 2;
+    const reach = typeof JUMP_V === 'number' ? Math.min(200, JUMP_V * JUMP_V / 4400) : 190;
+    for (let tx = Math.floor((pc-40)/TILE); tx <= Math.floor((pc+40)/TILE); tx++) {
+      for (let ty = Math.floor((feet-reach)/TILE); ty <= Math.floor((feet-48)/TILE); ty++) {
+        if (tileAt(tx,ty) !== '=') continue;
+        // A platform behind a solid ceiling is not reachable from this side.
+        let clear = true;
+        for (let y=ty+1; y<=row; y++) if (solidAt(tx,y)) { clear=false; break; }
+        if (clear) return true;
       }
     }
   }
-
-  function clearMovement() {
-    const names = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS','VL','VR','VU','VD','GP_L','GP_R','GP_U','GP_D'];
-    for (const k of names) {
-      try { if (typeof keys !== 'undefined') keys[k] = 0; } catch(e) {}
-      try { if (typeof keysP !== 'undefined') keysP[k] = 0; } catch(e) {}
-    }
+  for (let dx = 6; dx <= 60; dx += 6) {
+    const tx = Math.floor((edge + dir * dx) / TILE);
+    if (!solidAt(tx, row)) continue;
+    let top = row;
+    while (top > 0 && solidAt(tx, top - 1)) top--;
+    // Small surface irregularities are step-ups, not jump lessons. A ceiling
+    // somewhere ahead is not a floor obstacle either.
+    const rise = feet - top * TILE;
+    if (rise > PLAYER_STEP_UP && rise < 120) return true;
   }
-
-  function release() {
-    freezeEnemies(false);
-    if (G.walkthroughLock) G.walkthroughLock = null;
-    // Also release the older lock layer so two systems never fight over x.
-    if (G.tutHardLock && (!step() || G.tutHardLock.id !== step().id)) {
-      try { if (typeof tutReleaseLock === 'function') tutReleaseLock(); else G.tutHardLock = null; } catch(e) { G.tutHardLock = null; }
-    }
+  return false;
+}
+function tutorialReady(p) {
+  if (!p || !player || !TUTORIAL_DISCRETE.has(p.action)) return false;
+  if (p.action === 'JUMP') return tutJumpAtObstacle();
+  if (p.action === 'ATK') {
+    const e = (G.enemies || []).find(q => q && !q.dead && q.hp > 0);
+    return !!e && Math.abs(e.x + e.w/2 - player.x - player.w/2) <= 68
+      && Math.abs(e.y + e.h/2 - player.y - player.h/2) <= 58;
   }
-
-  function engage(s, action) {
-    if (!s || !player || !action) return;
-    if (G.walkthroughLock && G.walkthroughLock.id === s.id && G.walkthroughLock.action === action) return;
-    release();
-    G.walkthroughLock = { id:s.id, action, x:player.x, y:player.y, on:!!player.on };
-    player.vx = 0;
-    if (player.on) player.vy = 0;
-    clearMovement();
-    freezeEnemies(true);
+  if (p.action === 'UP') {
+    const d = typeof gateHere === 'function' && player.on && gateHere();
+    return !!d && !!p.target && Math.abs(gateWorldX(d) - p.target.x) < 2;
   }
-
-  function tick() {
-    const s = step();
-    if (!s || !G.save || (G.save.flags && G.save.flags.tut)) { release(); lastStepId = null; return; }
-    if (lastStepId !== s.id) { release(); lastStepId = s.id; }
-    if (G.state !== 'PLAY') { freezeEnemies(false); return; }
-
-    const p = promptFor(s);
-    const action = actionFromPrompt(s, p);
-    if (!G.walkthroughLock && action && actionReady(s, p, action)) engage(s, action);
-
-    const L = G.walkthroughLock;
-    if (L) {
-      // A tutorial freeze is positional, not just velocity=0. This prevents a
-      // held stick, step-up correction or previous-frame motion from slipping
-      // the player past the teaching point while the card is visible.
-      if (Number.isFinite(L.x)) player.x = L.x;
-      player.vx = 0;
-      if (L.on && player.on) player.vy = 0;
-      freezeEnemies(true);
-    }
+  if (p.action === 'INT') {
+    // An unrelated nearby object must not freeze travel to the actual target.
+    const n = G.near;
+    return !!n && !!p.target && Math.abs(n.x+n.w/2-p.target.x) < 2
+      && Math.abs(n.y+n.h/2-p.target.y) < 2;
   }
-
-  // Dynamic input policy. While approaching a target, only navigation verbs
-  // already learned are accepted. At an action point, only that exact action
-  // (plus Pause/Back) is accepted. No attack-in-the-shop, early interaction,
-  // heal mashing, skill mashing or gate skipping can satisfy another lesson.
-  if (typeof tutAllows === 'function') {
-    const baseAllows = tutAllows;
-    tutAllows = function(a) {
-      tick();
-      const s = step();
-      if (!s || !G.save || (G.save.flags && G.save.flags.tut)) return baseAllows(a);
-      if (!ACTIONS.has(a)) return baseAllows(a);
-      if (a === 'PAUSE' || a === 'BACK') return true;
-
-      const L = G.walkthroughLock || G.tutHardLock;
-      if (L && L.active !== false) return a === L.action;
-
-      // MOVE is the first lesson: nothing except actual movement exists yet.
-      if (s.id === 'move') return a === 'LEFT' || a === 'RIGHT';
-
-      // Pure travel/collection/approach steps. Jump remains available only
-      // because it was already taught and may be required by terrain.
-      if (['out','coin','buy','node'].includes(s.id)) {
-        const p = promptFor(s), action = actionFromPrompt(s, p);
-        if (action && actionReady(s, p, action)) return a === action;
-        return MOVE_ACTIONS.has(a);
-      }
-
-      // Before an action trigger, let the player approach but do not let them
-      // fire the new verb early. Once ready, tick() has already hard-locked it.
-      if (['jump','gate','atk','kill','heal','skill'].includes(s.id)) {
-        if (s.id === 'heal' || s.id === 'skill') return false;
-        return MOVE_ACTIONS.has(a);
-      }
-      return baseAllows(a);
-    };
+  if (p.action === 'HEAL') return player.cores < player.maxCores() && player.volts >= 33;
+  if (p.action === 'SKILL') return (G.save.iq || 0) > 0;
+  return false;
+}
+function tutorialContext() {
+  const s = tutorialStep();
+  const suspended = G.state !== 'PLAY' || G.dialog || G.cut || G.gateWalk || G.wake
+    || G.bossEntry || (typeof inputSuspended !== 'undefined' && inputSuspended);
+  if (!s || suspended || G.tut.hold > 0) return { step:s, prompt:null, ready:false };
+  const p = tutPrompt(s);
+  return { step:s, prompt:p, ready:tutorialReady(p) };
+}
+function tutorialRelease() {
+  for (const [e, saved] of tutorialFrozen) {
+    if (e.update === saved.frozenUpdate) e.update = saved.update;
+    // Do not erase knockback that an accepted strike has just applied.
+    if (e.vx === 0) e.vx = saved.vx;
+    if (e.vy === 0) e.vy = saved.vy;
   }
-
-  // Replace tutorial target circles with the game's mechanical arrow language.
-  // The existing shop-specific arrow renderer is reused so all first-time
-  // targets look like one coherent guidance system rather than mixed symbols.
-  if (typeof drawTutor === 'function') {
-    const baseDraw = drawTutor;
-    drawTutor = function() {
-      tick();
-      const s = step();
-      if (!s) return baseDraw();
-      const p = promptFor(s);
-      const oldSetDash = c.setLineDash.bind(c);
-      const oldStroke = c.stroke.bind(c);
-      let dashed = false;
-      c.setLineDash = function(v) { dashed = !!(v && v.length); return oldSetDash(v); };
-      c.stroke = function() { if (dashed) return; return oldStroke(); };
-      try { baseDraw(); }
-      finally { c.setLineDash = oldSetDash; c.stroke = oldStroke; try { oldSetDash([]); } catch(e) {} }
-
-      if (p && p.target && typeof drawMechanicalTutorialArrow === 'function') {
-        // The previous layer already draws the shop arrow. Avoid doubling it.
-        let shop = false;
-        try { shop = !!(typeof isFirstShopApproachPrompt === 'function' && isFirstShopApproachPrompt(s)); } catch(e) {}
-        if (!shop) drawMechanicalTutorialArrow(p.target);
-      }
-    };
+  tutorialFrozen.clear();
+  G.tutorialLock = null;
+  G.walkthroughLock = null; G.tutHardLock = null; // retire old transient state
+}
+function tutorialTick() {
+  const ctx = tutorialContext(), p = ctx.prompt, s = ctx.step;
+  if (!s || !p || !ctx.ready || p.action === 'MOVE') { tutorialRelease(); return; }
+  const L = G.tutorialLock;
+  if (!L || L.id !== s.id || L.room !== G.roomId || L.action !== p.action) {
+    tutorialRelease();
+    G.tutorialLock = { id:s.id, room:G.roomId, action:p.action, active:true };
   }
-
-  // Run once per frame even if no input is being polled. This catches a player
-  // coasting into a trigger with a held key and guarantees immediate release
-  // after the lesson advances.
-  if (typeof clearP === 'function') {
-    const baseClearP = clearP;
-    clearP = function() { tick(); return baseClearP(); };
+  // No player.x pin and no input-array clearing. The instruction filters
+  // unrelated controls, not the physical input edge it is trying to teach.
+  player.vx = 0;
+  if (s.id === 'jump') G.tut.jumpShown = true;
+  for (const e of (G.enemies || [])) {
+    if (!e || e.dead || tutorialFrozen.has(e)) continue;
+    const frozenUpdate = function() {};
+    tutorialFrozen.set(e, { update:e.update, frozenUpdate, vx:e.vx, vy:e.vy });
+    e.update = frozenUpdate; e.vx = 0; e.vy = 0;
   }
-
-  // Expose a tiny diagnostic for ?diag=1 and automated checks.
-  window.__tutorialEnforcement = {
-    step: () => { const s = step(); return s && s.id; },
-    lock: () => G.walkthroughLock ? { ...G.walkthroughLock } : null,
-    prompt: () => { const s = step(), p = promptFor(s); return p ? { label:p.label, hint:p.hint, control:p.control, target:p.target } : null; }
-  };
-})();
+}
+function tutorialAllows(action) {
+  // Menus/dialogue own their controls. A gameplay lesson cannot block buying,
+  // choosing a skill, leaving a shop, pausing, or skipping a story film.
+  if (action === 'PAUSE' || action === 'BACK' || G.state !== 'PLAY' || G.dialog
+      || G.cut || G.gateWalk || G.wake) return true;
+  const ctx = tutorialContext();
+  if (!ctx.step) return true;
+  if (ctx.ready && ctx.prompt) return action === ctx.prompt.action;
+  // The acknowledgement beat releases navigation immediately. A jump that
+  // just succeeded must be steerable in the air, not pinned for 0.7 seconds.
+  if (TUTORIAL_NAV.has(action)) {
+    if (ctx.step.id === 'move') return action === 'LEFT' || action === 'RIGHT';
+    if (action === 'UP' || action === 'DOWN') return false;
+    return true;
+  }
+  // Travel never grants untaught powers. UI navigation outside PLAY is above.
+  const need = TUT_UNLOCK[action];
+  if (need) return G.tut.i >= TUT_STEPS.findIndex(q => q.id === need)
+    && !(ctx.prompt && ctx.prompt.action === 'MOVE' && ['ATK','INT','HEAL','SKILL'].includes(action));
+  return action === 'MAP' || action === 'OK';
+}
+// Retain the public diagnostic interface used by release tools, without
+// patching draw(), input getters or clearP() a second time.
+if (typeof window !== 'undefined') window.__tutorialEnforcement = {
+  step: () => { const s = tutorialStep(); return s && s.id; },
+  lock: () => G.tutorialLock ? { ...G.tutorialLock } : null,
+  prompt: () => { const s=tutorialStep(); return s ? tutPrompt(s) : null; }
+};

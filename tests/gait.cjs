@@ -164,7 +164,26 @@ const check = (name, ok, detail) => {
     // and the stick measurement below would read a body that never moved.
     performance.now = realNow; window.requestAnimationFrame = realRAF;
     realRAF.call(window, mainLoop);
-    return { air, feet, states, vys, over, fore, lifts, bob, walkCad, walkVx, authoredGait,
+    // Measure the filmed soles, not the retired procedural bob. All nine
+    // selected frames must exist and the clip must contain a genuine flight.
+    const clip = HERO_GAIT.run, image = MEDIA_RAW[clip.key];
+    const cellWidth = image.width / clip.cells;
+    const probe = document.createElement('canvas'); probe.width=cellWidth; probe.height=image.height;
+    const pc=probe.getContext('2d'), bottoms=[], signatures=[];
+    for(let f=clip.from||0;f<=(clip.to==null?clip.cells-1:clip.to);f++) {
+      pc.clearRect(0,0,probe.width,probe.height);
+      pc.drawImage(image,f*cellWidth,0,cellWidth,image.height,0,0,probe.width,probe.height);
+      const pixels=pc.getImageData(0,0,probe.width,probe.height).data;
+      let bottom=-1,hash=2166136261;
+      for(let i=3;i<pixels.length;i+=4) {
+        if(pixels[i]>96) bottom=Math.max(bottom,Math.floor((i>>2)/probe.width));
+        hash=Math.imul(hash^pixels[i],16777619)>>>0;
+      }
+      bottoms.push(bottom); signatures.push(hash);
+    }
+    const actualFootLift=(Math.max(...bottoms)-Math.min(...bottoms))*HERO_DH*clip.k/image.height;
+    return { authoredGait, actualFootLift, uniqueStrideFrames:new Set(signatures).size,
+             air, feet, states, vys, over, fore, lifts, bob, walkCad, walkVx,
              strideStart, animStart, strideEnd, animEnd,
              stepWalk: HERO_STEP_WALK, stepRun: HERO_STEP_RUN, cells: HERO_CELLS,
              vx: vxRun };
@@ -242,23 +261,17 @@ const check = (name, ok, detail) => {
   check('she leaves the ground once and deliberately, not over and over',
     episodes <= 2, episodes + ' separate departure(s) from solid floor');
 
-  // THE STRIDE HAS A VERTICAL, AND IT IS ON THE RIGHT FOOT.
-  //
-  // The body's rise and fall was computed for years and handed only to the
-  // procedural fallback; the authored plate — the thing players see — held one
-  // height while two pictures alternated. Two things are checked, because the
-  // first without the second is worse than nothing: that the body MOVES
-  // vertically at all, and that it is LOWEST at the footfall, which is the
-  // frame the cell swaps on. A bob on the wrong foot reads as a limp.
+  // The authored run already includes its vertical movement. Adding a second
+  // synthetic body bob creates the headbutt reported by the owner. Measure
+  // actual opaque soles across the selected take and guard against double-bob.
   const lifts = (r.bob && r.bob.length > 8) ? r.bob : r.lifts;
   const range = Math.max(...lifts) - Math.min(...lifts);
-  // js/entities.js now skips this procedural compensation once a real filmed
-  // gait strip is driving the body (its own footage carries the rise and
-  // fall) — _stepLift is legitimately flat there by design, not a regression
-  // in the fallback this check exists for. See "THE STRIDE HAS A VERTICAL"
-  // in entities.js.
-  check('her body rises and falls as she strides', r.authoredGait || range >= 1.5,
-    'vertical travel ' + range.toFixed(2) + ' px over the run' + (r.authoredGait ? ' (authored strip active)' : ''));
+  check('authored stride has genuine foot lift', r.actualFootLift >= 1.5,
+    'filmed foot travel ' + r.actualFootLift.toFixed(2) + ' world units');
+  check('run uses at least eight distinct recorded frames', r.uniqueStrideFrames >= 8,
+    'distinct frames ' + r.uniqueStrideFrames);
+  check('recorded gait is not given a second procedural bob', range < 0.1,
+    'extra synthetic travel ' + range.toFixed(2));
   // THE CADENCE IS THE THING TO GUARD, and the phase is not measurable here.
   //
   // Three attempts went into checking that the body is lowest ON the footfall.

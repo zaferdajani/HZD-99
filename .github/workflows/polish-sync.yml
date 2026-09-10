@@ -1,0 +1,27 @@
+name: Inspect concurrent main changes
+on:
+  push:
+    branches: [release/polish-20260910]
+    paths: [.github/workflows/polish-sync.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Capture exact concurrent source changes
+        run: |
+          mkdir -p sync-evidence
+          git rev-parse origin/main > sync-evidence/main-commit.txt
+          git diff 944775d4c5eae75f9082ccd35eb99528e605ae62..origin/main -- build.cjs js tests docs > sync-evidence/main-changes.diff
+          git diff 944775d4c5eae75f9082ccd35eb99528e605ae62..HEAD -- tests/gait.cjs build.cjs > sync-evidence/staging-overlap.diff
+          git archive origin/main build.cjs js/boss_aaa_fix.js js/entities.js tests/gait.cjs tests/artbible.cjs tests/minis.cjs tests/tutor.cjs docs/ART_QUEUE.md | gzip > sync-evidence/main-source.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: concurrent-main-source
+          path: sync-evidence/
+          retention-days: 7

@@ -43,7 +43,7 @@ for (const f of ['index.html', 'odyssey.html']) {
   if (!fs.existsSync(path.join(ROOT, f))) throw new Error('run `node build.cjs` first: ' + f + ' is missing');
   // strip the service-worker registration out of the packaged copy
   let html = fs.readFileSync(path.join(ROOT, f), 'utf8');
-  html = html.replace(/navigator\.serviceWorker\.register\('sw\.js'\)/g, 'void 0');
+  html = require('./package-html.cjs')(html);
   fs.writeFileSync(path.join(WWW, f), html);
 }
 const a = copyDir(path.join(ROOT, 'assets'), path.join(WWW, 'assets'), true);

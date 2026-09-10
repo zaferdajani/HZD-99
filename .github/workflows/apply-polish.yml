@@ -1,0 +1,111 @@
+name: Apply and validate systematic polish release
+on:
+  push:
+    branches: [release/polish-20260910]
+    paths: [.github/workflows/apply-polish.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: clawbyte-polish-validation
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    outputs:
+      source_commit: ${{ steps.commit.outputs.source_commit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/polish-20260910
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fix real jump-shelf readiness and rebuild integrated source
+        run: |
+          node tools/merge-polish-main.cjs
+          node tools/fix-jump-lesson.cjs
+          node tools/fix-qa-output.cjs
+          for file in js/*.js tests/release-polish.cjs tests/speed2.cjs tests/wake.cjs tests/film.cjs tools/stamp-pages.cjs tools/verify-pages.cjs; do node --check "$file"; done
+          node tests/tutorial-controller.cjs
+          node build.cjs
+          node tests/build-integrity.cjs
+      - name: Preserve final integrated staging commit
+        id: commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add build.cjs js tools/pack-www.cjs tools/pack-desktop.cjs tests index.html odyssey.html forge.html forge-odyssey.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Fix real jump-shelf tutorial readiness and marker; preserve complete regression evidence"
+          fi
+          git push origin HEAD:release/polish-20260910
+          echo "source_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+  regressions:
+    needs: apply
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [critical, presentation, combat-audio, routes, webkit]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.apply.outputs.source_commit }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
+      - run: npx playwright install --with-deps chromium
+      - if: matrix.group == 'webkit'
+        run: npx playwright install --with-deps webkit
+      - name: Rebuild and start local game server
+        run: |
+          echo "CHROMIUM_PATH=$(node -e "console.log(require('playwright').chromium.executablePath())")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -e "console.log(require('playwright').chromium.executablePath())")" /opt/pw-browsers/chromium
+          node build.cjs
+          git diff --exit-code -- index.html odyssey.html forge.html forge-odyssey.html
+          node tests/build-integrity.cjs
+          node tools/pack-www.cjs
+          mkdir -p tests/out release-evidence
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Run ${{ matrix.group }} acceptance checks
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          set -o pipefail
+          case "$GROUP" in
+            critical) checks="release-polish tutorial-controller offline-release tutorial-clarity story-progression input-focus voice-handoff desktop-protocol dialogue-audio weapons gear motion-sampling combo-routing feel gait frames chapter-one speed2" ;;
+            presentation) checks="regress wake film cutskip opening lesson tap padlife platform preload boot lowres brand visual-depth" ;;
+            combat-audio) checks="reach combat tells herofoley whatplays overlap slashsnd hzdvox voxmeas cues tails boss-counters sage-specials credits" ;;
+            routes) checks="deadend cave-passage cave-ground seam-route shadow-ground terrainrun climbout mapgrid cross seam doorway shopread battery kingdom1" ;;
+            webkit) QA_BROWSER=webkit node tests/release-polish.cjs 2>&1 | tee release-evidence/webkit.log; exit $? ;;
+          esac
+          node tests/run.cjs $checks 2>&1 | tee release-evidence/$GROUP.log
+      - name: Capture seven rendered rooms
+        if: always() && matrix.group == 'critical'
+        run: node tests/release-capture.cjs 2>&1 | tee release-evidence/capture.log
+      - name: Check deployment stamping on an isolated copy
+        if: matrix.group == 'critical'
+        run: |
+          mkdir -p _site/assets/sfx/vox
+          cp index.html odyssey.html forge.html forge-odyssey.html loader.html sw.js _site/
+          cp assets/sfx/vox/hzd_atk2.wav assets/sfx/vox/hzd_yalla.wav _site/assets/sfx/vox/
+          node tools/stamp-pages.cjs _site
+          cp _site/release.json release-evidence/stamp-check.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: polish-${{ matrix.group }}-${{ needs.apply.outputs.source_commit }}
+          path: |
+            release-evidence/
+            tests/out/
+          retention-days: 7

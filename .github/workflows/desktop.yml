@@ -3,7 +3,14 @@ name: Build Windows desktop
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, release/polish-20260910]
+    paths:
+      - .github/workflows/desktop.yml
+      - desktop/**
+      - tools/pack-desktop.cjs
+      - index.html
+      - odyssey.html
+      - js/**
 
 permissions:
   contents: read
