@@ -14,6 +14,22 @@ function tutJumpAtObstacle() {
   const dir = player.vx < -8 ? -1 : player.vx > 8 ? 1 : player.face || 1;
   const feet = player.y + player.h, row = Math.floor((feet - 1) / TILE);
   const edge = dir > 0 ? player.x + player.w : player.x;
+  // Reachable one-way shelves are jump opportunities, not collision walls.
+  // W2's authored lesson is the row-11 shelf; its later hull is a walkable
+  // ramp. Requiring a >24px solid face could never announce the actual lesson.
+  if (typeof tileAt === 'function') {
+    const pc = player.x + player.w / 2;
+    const reach = typeof JUMP_V === 'number' ? Math.min(200, JUMP_V * JUMP_V / 4400) : 190;
+    for (let tx = Math.floor((pc-40)/TILE); tx <= Math.floor((pc+40)/TILE); tx++) {
+      for (let ty = Math.floor((feet-reach)/TILE); ty <= Math.floor((feet-48)/TILE); ty++) {
+        if (tileAt(tx,ty) !== '=') continue;
+        // A platform behind a solid ceiling is not reachable from this side.
+        let clear = true;
+        for (let y=ty+1; y<=row; y++) if (solidAt(tx,y)) { clear=false; break; }
+        if (clear) return true;
+      }
+    }
+  }
   for (let dx = 6; dx <= 60; dx += 6) {
     const tx = Math.floor((edge + dir * dx) / TILE);
     if (!solidAt(tx, row)) continue;

@@ -58,6 +58,16 @@ c.player.on=false;c.player.vy=-800;c.tutorialTick();assert.equal(c.G.tutorialLoc
 assert(c.tutAllows('RIGHT'));assert(run('TUT_STEPS[G.tut.i].done()'));
 // A 12px lip is a walkable irregularity, never a jump lock.
 c.player.on=true;c.player.y=360;c.player.vy=0;c.tutorialTick();assert.equal(c.G.tutorialLock,null);
+// The actual W2 one-way shelf is usable even without a solid floor wall.
+c.G.save.flags.tut=0;step('jump');c.player.x=360;c.player.y=400;c.player.on=true;
+c.solidAt=()=>false;c.tileAt=(tx,ty)=>tx>=10&&tx<=15&&ty===11?'=':'.';
+assert(c.tutJumpAtObstacle(),'actual W2 one-way shelf must announce jump');
+c.tutorialTick();assert.equal(c.G.tutorialLock.action,'JUMP');
+assert.equal(prompt().target.y,11*32,'marker points to the shelf rather than empty ground');
+c.solidAt=(tx,ty)=>ty===12;
+assert(!c.tutJumpAtObstacle(),'a ceiling makes the shelf unreachable');
+c.solidAt=()=>false;c.player.x=20;
+assert(!c.tutJumpAtObstacle(),'shelf must be within horizontal jumping reach');
 // Completed or dead/paused players never retain enemy wrappers.
 c.G.save.flags.tut=1;c.tutorialTick();assert(c.tutAllows('RIGHT'));assert.equal(c.G.tutorialLock,null);
 console.log('PASS: complete tutorial controller — workshop travel, exact usable verbs, saved steps, menus, jump readiness, enemy restoration and input edges');

@@ -149,7 +149,7 @@ for (const [name, what, opt] of run) {
   console.log('\n── ' + name + '  — ' + what);
   if (!(opt && opt.noBrowser)) ensureServer();
   try {
-    console.log(execFileSync('node', [file], { encoding: 'utf8', timeout: 300000 }).trim());
+    console.log(execFileSync('node', [file], { encoding: 'utf8', timeout: 300000, maxBuffer: 10 * 1024 * 1024 }).trim());
   } catch (e) {
     if (opt && opt.pending) {
       pending++;
@@ -162,4 +162,4 @@ for (const [name, what, opt] of run) {
 }
 console.log('\n' + (failed ? failed + ' harness(es) failed' : 'all ' + run.length + ' harnesses ran')
   + (pending ? ' (' + pending + ' pending, see suite notes)' : ''));
-process.exit(failed ? 1 : 0);
+process.exitCode = failed ? 1 : 0;

@@ -11551,7 +11551,7 @@ function tutPrompt(st) {
     if (!G.roomDef.exits.R && doors[0]) doorPrompt(doors[0], G.roomId === 'A0B');
     else point((G.roomDef.w - 1.5) * TILE, 13 * TILE, '#ffd76a');
   } else if (st.id === 'jump') {
-    point(G.roomId === 'W2' ? 13 * TILE : 17 * TILE + 12, 14 * TILE + 12, '#37ffd0', 34);
+    point(G.roomId === 'W2' ? 13 * TILE : 17 * TILE + 12, G.roomId === 'W2' ? 11 * TILE : 14 * TILE + 12, '#37ffd0', 34);
   } else if (st.id === 'atk' || st.id === 'kill') {
     const enemy = (G.enemies || []).find(q => q && !q.dead);
     if (enemy) point(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ff8a6a');
