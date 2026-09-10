@@ -13,6 +13,9 @@ ios/App/Pods/
 .claude/agents-run/
 build/
 reference/movement/
+# tests/release-polish.cjs / release-capture.cjs / apply-polish.yml artifacts —
+# screenshots and per-run logs, regenerated every run, never source
+release-evidence/
 
 # the art session's working folder: 74 MB of intermediate plates and contact
 # sheets. Anything worth keeping is derived into assets/source/ as jpg first.
