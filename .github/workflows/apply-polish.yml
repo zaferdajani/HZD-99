@@ -23,23 +23,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Apply exact source and probe corrections
+      - name: Integrate reviewed main work and rebuild
         run: |
-          node tools/finalize-build.cjs
-          node tools/finalize-probes.cjs
-          for file in js/*.js tests/release-polish.cjs tests/speed2.cjs tests/wake.cjs tests/film.cjs; do node --check "$file"; done
+          node tools/merge-polish-main.cjs
+          for file in js/*.js tests/release-polish.cjs tests/speed2.cjs tests/wake.cjs tests/film.cjs tools/stamp-pages.cjs tools/verify-pages.cjs; do node --check "$file"; done
           node build.cjs
           node tests/build-integrity.cjs
-      - name: Commit rebuilt source on staging only
+      - name: Preserve final integrated staging commit
         id: commit
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add build.cjs tools/pack-www.cjs tools/pack-desktop.cjs tests index.html odyssey.html forge.html forge-odyssey.html
           if ! git diff --cached --quiet; then
-            git commit -m "Release integrity: runtime asset hashes, native offline payload, production codec probes and actual room traversal"
-            git push origin HEAD:release/polish-20260910
+            git commit -m "Rebuild integrated polish release from current source and assets"
           fi
+          git push origin HEAD:release/polish-20260910
           echo "source_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
   regressions:
     needs: apply
@@ -91,6 +90,14 @@ jobs:
       - name: Capture seven rendered rooms
         if: always() && matrix.group == 'critical'
         run: node tests/release-capture.cjs 2>&1 | tee release-evidence/capture.log
+      - name: Check deployment stamping on an isolated copy
+        if: matrix.group == 'critical'
+        run: |
+          mkdir -p _site/assets/sfx/vox
+          cp index.html odyssey.html forge.html forge-odyssey.html loader.html sw.js _site/
+          cp assets/sfx/vox/hzd_atk2.wav assets/sfx/vox/hzd_yalla.wav _site/assets/sfx/vox/
+          node tools/stamp-pages.cjs _site
+          cp _site/release.json release-evidence/stamp-check.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
