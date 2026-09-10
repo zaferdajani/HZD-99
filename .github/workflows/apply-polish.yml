@@ -1,0 +1,120 @@
+name: Apply and validate systematic polish release
+on:
+  push:
+    branches: [release/polish-20260910]
+    paths: [.github/workflows/apply-polish.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: clawbyte-polish-validation
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      source_commit: ${{ steps.commit.outputs.source_commit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/polish-20260910
+          fetch-depth: 0
+      - name: Validate every original and resulting file before writing
+        run: |
+          python3 - <<'PY'
+          import pathlib,base64,lzma,json,hashlib
+          payload=''.join(pathlib.Path('tools/release-edits/part-'+str(i)+'.b64').read_text().strip() for i in range(3))
+          data=lzma.decompress(base64.b64decode(payload,validate=True))
+          assert hashlib.sha256(data).hexdigest()=='ac84d10d666d9fa77451997bc1cdb4f8af8428939853a34a3451315e1af9d27b','Payload checksum mismatch'
+          spec=json.loads(data); assert spec['format']==1
+          changes=[]
+          for f in spec['files']:
+            p=pathlib.Path(f['path'])
+            assert not p.is_absolute() and '..' not in p.parts and '.git' not in p.parts
+            old=p.read_bytes() if p.exists() else b''
+            digest=hashlib.sha256(old).hexdigest()
+            if p.exists() and digest==f['after']: continue
+            assert (digest==f['before']) if f['before'] else not p.exists(), 'Changed baseline: '+str(p)
+            lines=old.decode('utf-8').splitlines(keepends=True)
+            for i,j,text in reversed(f['ops']):
+              assert 0<=i<=j<=len(lines)
+              lines[i:j]=text.splitlines(keepends=True)
+            new=''.join(lines).encode('utf-8')
+            assert hashlib.sha256(new).hexdigest()==f['after'],'Result mismatch: '+str(p)
+            changes.append((p,new))
+          for p,data in changes:
+            p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data)
+          print('Applied',len(changes),'verified source/test files')
+          PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check and rebuild every target from full current assets
+        run: |
+          for file in js/*.js tests/release-polish.cjs tests/tutorial-controller.cjs tests/offline-release.cjs; do node --check "$file"; done
+          node build.cjs
+      - name: Commit rebuilt source and all four compiled pages on staging only
+        id: commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add build.cjs dev.html js source-files.json loader.html sw.js tests index.html odyssey.html forge.html forge-odyssey.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Polish release: unified tutorials, canonical startup art, coherent camera, input buffering, audio and offline reliability"
+            git push origin HEAD:release/polish-20260910
+          fi
+          echo "source_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          git status --short
+  regressions:
+    needs: apply
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [critical, presentation, combat-audio, routes]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.apply.outputs.source_commit }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Start reproducible game server
+        run: |
+          echo "CHROMIUM_PATH=$(node -e "console.log(require('playwright').chromium.executablePath())")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -e "console.log(require('playwright').chromium.executablePath())")" /opt/pw-browsers/chromium
+          node build.cjs
+          git diff --exit-code -- index.html odyssey.html forge.html forge-odyssey.html
+          mkdir -p tests/out release-evidence
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Run ${{ matrix.group }} acceptance checks
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          set -o pipefail
+          case "$GROUP" in
+            critical) checks="release-polish tutorial-controller offline-release tutorial-clarity story-progression input-focus voice-handoff desktop-protocol dialogue-audio weapons gear motion-sampling combo-routing feel gait frames chapter-one" ;;
+            presentation) checks="regress wake film cutskip opening lesson tap padlife platform preload boot lowres brand visual-depth" ;;
+            combat-audio) checks="reach combat tells herofoley whatplays overlap slashsnd hzdvox voxmeas cues tails boss-counters sage-specials" ;;
+            routes) checks="deadend cave-passage cave-ground seam-route shadow-ground terrainrun climbout mapgrid cross seam doorway shopread battery kingdom1" ;;
+          esac
+          node tests/run.cjs $checks 2>&1 | tee release-evidence/$GROUP.log
+      - name: Capture seven rendered rooms
+        if: always() && matrix.group == 'critical'
+        run: node tests/release-capture.cjs 2>&1 | tee release-evidence/capture.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: polish-${{ matrix.group }}-${{ needs.apply.outputs.source_commit }}
+          path: |
+            release-evidence/
+            tests/out/
+          retention-days: 7
