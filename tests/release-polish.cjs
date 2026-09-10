@@ -14,7 +14,7 @@ const engine=process.env.QA_BROWSER==='webkit'?webkit:chromium;
  await page.goto(origin);
  await page.waitForFunction(()=>typeof heroArtReady==='function'&&heroArtReady(),{timeout:30000});
  const core=await page.evaluate(()=>({build:window.BUILD_ID,core:HERO_CORE_KEYS.map(k=>({key:k,embedded:MEDIA_SRC.images[k].startsWith('data:image/webp'),width:MEDIA_RAW[k].width})),run:HERO_GAIT.run}));
- assert(core.core.every(a=>a.embedded&&a.width>0));assert.equal(core.run.from,0);assert.equal(core.run.to,8);record('cold-start canonical art without external gait downloads',core);
+ assert(core.core.every(a=>a.embedded&&a.width>0));assert.equal(core.run.from,0);assert.equal(core.run.to,15);record('cold-start canonical art without external gait downloads',core);
  const result=await page.evaluate(async()=>{
    const wait=ms=>new Promise(r=>setTimeout(r,ms));
    const sv=newSave(1);sv.time=99;sv.flags.tut=1;sv.flags.woke=1;G.save=sv;startGame(sv);loadRoom('A1');
