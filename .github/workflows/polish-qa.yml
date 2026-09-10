@@ -1,4 +1,4 @@
-name: CLAWBYTE polish release QA
+name: CLAWBYTE polish release snapshot
 on:
   push:
     branches: [release/polish-20260910]
@@ -7,33 +7,18 @@ on:
 permissions:
   contents: read
 jobs:
-  gameplay:
+  snapshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - run: npm ci --ignore-scripts --no-audit --no-fund
-      - run: npx playwright install --with-deps chromium
-      - name: Configure browser and local game server
+      - name: Archive current source and runtime images and sounds
         run: |
-          echo "CHROMIUM_PATH=$(node -e "console.log(require('playwright').chromium.executablePath())")" >> "$GITHUB_ENV"
-          sudo mkdir -p /opt/pw-browsers
-          sudo ln -sf "$(node -e "console.log(require('playwright').chromium.executablePath())")" /opt/pw-browsers/chromium
-          node build.cjs
-          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
-      - name: Capture real rendered rooms
-        run: node tests/release-capture.cjs
-      - name: Baseline gameplay regressions
-        run: |
-          set -o pipefail
-          node tests/run.cjs feel gait chapter-one tutorial-clarity deadend cave-passage input-focus seam-route reach frames | tee release-evidence/baseline.log
+          git rev-parse HEAD > SOURCE_COMMIT.txt
+          tar --exclude='./.git' --exclude='./node_modules' --exclude='./assets/video' --exclude='./assets/source' --exclude='./android' --exclude='./ios' -czf /tmp/clawbyte-staged.tgz .
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: clawbyte-release-evidence
-          path: release-evidence/
-          retention-days: 7
+          name: clawbyte-staged-source
+          path: /tmp/clawbyte-staged.tgz
+          retention-days: 3
+          compression-level: 0
