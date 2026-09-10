@@ -7,20 +7,33 @@ on:
 permissions:
   contents: read
 jobs:
-  snapshot:
+  gameplay:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-      - name: Package source and runtime artwork for local regression testing
-        run: |
-          du -sh assets/* || true
-          git rev-parse HEAD > SOURCE_COMMIT.txt
-          tar --exclude='./.git' --exclude='./node_modules' --exclude='./assets/video' --exclude='./assets/audio' --exclude='./assets/source' --exclude='./android' --exclude='./ios' -czf /tmp/clawbyte-source.tgz .
-          ls -lh /tmp/clawbyte-source.tgz
-      - uses: actions/upload-artifact@v4
+      - uses: actions/setup-node@v4
         with:
-          name: clawbyte-source
-          path: /tmp/clawbyte-source.tgz
-          retention-days: 3
-          compression-level: 0
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Configure browser and local game server
+        run: |
+          echo "CHROMIUM_PATH=$(node -e "console.log(require('playwright').chromium.executablePath())")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -e "console.log(require('playwright').chromium.executablePath())")" /opt/pw-browsers/chromium
+          node build.cjs
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Capture real rendered rooms
+        run: node tests/release-capture.cjs
+      - name: Baseline gameplay regressions
+        run: |
+          set -o pipefail
+          node tests/run.cjs feel gait chapter-one tutorial-clarity deadend cave-passage input-focus seam-route reach frames | tee release-evidence/baseline.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: clawbyte-release-evidence
+          path: release-evidence/
+          retention-days: 7
