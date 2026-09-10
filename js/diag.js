@@ -37,8 +37,6 @@ try {
   }
 } catch (e) {}
 
-// Keep requesting the proper gait during the intro/loading phase. This is
-// deliberately bounded; it is a preload assist, not a permanent polling loop.
 try {
   let _gaitWarmFrames = 0;
   const warmGait = () => {
@@ -52,6 +50,25 @@ try {
     if (++_gaitWarmFrames < 180 && typeof requestAnimationFrame === 'function') requestAnimationFrame(warmGait);
   };
   if (typeof requestAnimationFrame === 'function') requestAnimationFrame(warmGait);
+} catch (e) {}
+
+// Hornet-like protagonist screen presence. The reference screenshot measures
+// Hornet at about 20% of gameplay viewport height; CLAWBYTE in the owner's
+// screenshot was about 11%. Scale authored hero art by 1.78x around the local
+// foot origin, leaving physics/collision unchanged.
+const HERO_SCREEN_SCALE = 1.78;
+try {
+  if (typeof Player !== 'undefined' && Player.prototype && typeof Player.prototype.drawRoboPlate === 'function' && !Player.prototype.__hornetScalePatched) {
+    const _drawRoboPlate = Player.prototype.drawRoboPlate;
+    Player.prototype.drawRoboPlate = function(ctx, run) {
+      if (!ctx || typeof ctx.save !== 'function') return _drawRoboPlate.call(this, ctx, run);
+      ctx.save();
+      ctx.scale(HERO_SCREEN_SCALE, HERO_SCREEN_SCALE);
+      try { return _drawRoboPlate.call(this, ctx, run); }
+      finally { ctx.restore(); }
+    };
+    Player.prototype.__hornetScalePatched = true;
+  }
 } catch (e) {}
 
 // Opening-film resilience for browsers choosing either codec.
@@ -75,18 +92,12 @@ try {
     if (typeof checkForUpdate === 'function') checkForUpdate = function() { if (typeof G !== 'undefined') G.updateReady = null; };
     if (typeof applyUpdate === 'function') applyUpdate = function() {
       if (typeof G !== 'undefined') G.updateReady = null;
-      try {
-        const u = new URL(location.href); u.searchParams.delete('_v'); location.replace(u.toString());
-      } catch (e) { location.reload(); }
+      try { const u = new URL(location.href); u.searchParams.delete('_v'); location.replace(u.toString()); }
+      catch (e) { location.reload(); }
     };
   }
 } catch (e) {}
 
-// ---------------------------------------------------------------------------
-// CONTEXTUAL TUTORIAL ACTION LOCKS
-// Movement/guidance steps are NEVER hard-locked. Only discrete one-button
-// teaching moments can lock, and even those no longer pin player.x.
-// ---------------------------------------------------------------------------
 const TUT_LOCK_ACTION = { jump:'JUMP', gate:'UP', atk:'ATK', heal:'HEAL', skill:'SKILL' };
 let _tutOldAllows = null, _tutOldDraw = null;
 function tutLockStep() {
@@ -157,10 +168,7 @@ function tutLockTick() {
       if (typeof keysP !== 'undefined') keysP[k]=0;
     }
   }
-  if (G.tutHardLock && G.tutHardLock.active) {
-    player.vx = 0;
-    tutFreezeEnemies(true);
-  }
+  if (G.tutHardLock && G.tutHardLock.active) { player.vx = 0; tutFreezeEnemies(true); }
 }
 try {
   if (typeof tutAllows === 'function') {
