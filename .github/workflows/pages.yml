@@ -22,6 +22,18 @@ jobs:
         run: |
           mkdir -p _site
           rsync -a --exclude '.git' --exclude '_site' ./ _site/
+          # Runtime hotfixes that deliberately live outside the historical
+          # prebuilt index are injected here. This keeps the deployed game on
+          # the exact source file in js/ and makes the change cache-visible.
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('_site/index.html')
+          s = p.read_text()
+          tag = '<script src="js/mobility_fix.js"></script>'
+          if tag not in s:
+              s = s.replace('</body>', tag + '\n</body>')
+          p.write_text(s)
+          PY
           touch _site/.nojekyll
       - name: Enable + configure Pages
         uses: actions/configure-pages@v5
