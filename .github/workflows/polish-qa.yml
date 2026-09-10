@@ -1,0 +1,26 @@
+name: CLAWBYTE polish release QA
+on:
+  push:
+    branches: [release/polish-20260910]
+    paths: [.github/workflows/polish-qa.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package source and runtime artwork for local regression testing
+        run: |
+          du -sh assets/* || true
+          git rev-parse HEAD > SOURCE_COMMIT.txt
+          tar --exclude='./.git' --exclude='./node_modules' --exclude='./assets/video' --exclude='./assets/audio' --exclude='./assets/source' --exclude='./android' --exclude='./ios' -czf /tmp/clawbyte-source.tgz .
+          ls -lh /tmp/clawbyte-source.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clawbyte-source
+          path: /tmp/clawbyte-source.tgz
+          retention-days: 3
+          compression-level: 0
