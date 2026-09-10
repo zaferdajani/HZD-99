@@ -94,6 +94,7 @@ const check = (name, ok, detail) => {
       return false;
     };
     const air = [], feet = [], states = [], vys = [], over = [], lifts = [];
+    let authoredGait = false;
     const strideStart = player.stridePh || 0, animStart = player.anim;
     for (let i = 0; i < 48; i++) {
       await frame();
@@ -106,6 +107,7 @@ const check = (name, ok, detail) => {
       vys.push(Math.abs(player.vy));
       states.push(player.heroState(Math.abs(player.vx) > 140));
       lifts.push(player._stepLift || 0);
+      if (player._authoredGait) authoredGait = true;
     }
     // THE BOB IS SAMPLED OVER A STRIDE, NOT OVER A NUMBER OF FRAMES. The rise
     // and fall is a function of stridePh, and 48 real frames cover however much
@@ -162,7 +164,7 @@ const check = (name, ok, detail) => {
     // and the stick measurement below would read a body that never moved.
     performance.now = realNow; window.requestAnimationFrame = realRAF;
     realRAF.call(window, mainLoop);
-    return { air, feet, states, vys, over, fore, lifts, bob, walkCad, walkVx,
+    return { air, feet, states, vys, over, fore, lifts, bob, walkCad, walkVx, authoredGait,
              strideStart, animStart, strideEnd, animEnd,
              stepWalk: HERO_STEP_WALK, stepRun: HERO_STEP_RUN, cells: HERO_CELLS,
              vx: vxRun };
@@ -250,8 +252,13 @@ const check = (name, ok, detail) => {
   // frame the cell swaps on. A bob on the wrong foot reads as a limp.
   const lifts = (r.bob && r.bob.length > 8) ? r.bob : r.lifts;
   const range = Math.max(...lifts) - Math.min(...lifts);
-  check('her body rises and falls as she strides', range >= 1.5,
-    'vertical travel ' + range.toFixed(2) + ' px over the run');
+  // js/entities.js now skips this procedural compensation once a real filmed
+  // gait strip is driving the body (its own footage carries the rise and
+  // fall) — _stepLift is legitimately flat there by design, not a regression
+  // in the fallback this check exists for. See "THE STRIDE HAS A VERTICAL"
+  // in entities.js.
+  check('her body rises and falls as she strides', r.authoredGait || range >= 1.5,
+    'vertical travel ' + range.toFixed(2) + ' px over the run' + (r.authoredGait ? ' (authored strip active)' : ''));
   // THE CADENCE IS THE THING TO GUARD, and the phase is not measurable here.
   //
   // Three attempts went into checking that the body is lowest ON the footfall.

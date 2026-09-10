@@ -163,6 +163,11 @@
 
     const oldUpdate = Boss.prototype.update;
     const oldDraw = Boss.prototype.draw;
+    // Wrapping replaces what Boss.prototype.update.toString() shows, which is
+    // exactly what tests/artbible.cjs reads to confirm a state name is real
+    // rather than a typo. Keep the pre-wrap source reachable so that check
+    // still sees the states this wrapper doesn't itself declare.
+    Boss.prototype.__aaaOriginalUpdate = oldUpdate;
 
     Boss.prototype.update = function(dt) {
       if (MINI.has(this.kind) && this.st === '__aaa_pressure') {

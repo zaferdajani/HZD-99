@@ -211,8 +211,12 @@ const TELL_RGB = [0xff, 0xc2, 0x4a];
       // every one of them a typo. Check those against the kit that names them,
       // which is the game's own data rather than a second list here.
       // ...and the Alpha's live in alphaStep (js/wolves.js), not in the switch
+      // ...and a production repair layer (js/boss_aaa_fix.js) wraps
+      // Boss.prototype.update, which replaces what .toString() shows here —
+      // it stashes the pre-wrap function so those states stay checkable too.
       const src = (Boss.prototype.update || function () {}).toString()
-        + (typeof alphaStep === 'function' ? alphaStep.toString() : '');
+        + (typeof alphaStep === 'function' ? alphaStep.toString() : '')
+        + (Boss.prototype.__aaaOriginalUpdate ? Boss.prototype.__aaaOriginalUpdate.toString() : '');
       const kit = (typeof MINI_KIT !== 'undefined' && MINI_KIT[S.kind]) || null;
       const built = kit ? [kit.close, kit.far, kit.close + 'warn', kit.far + 'warn'] : [];
       const bogus = Object.keys(S.states).filter(st =>

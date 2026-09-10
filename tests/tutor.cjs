@@ -70,7 +70,17 @@ const { chromium } = require('playwright');
   await record(now);
   now = await drive('gate', () => { loadRoom('A0'); });
   await record(now);
-  now = await drive('atk', () => { keysP['KeyX'] = 1; keys['KeyX'] = 1; });
+  // The new tutorial lock requires the dummy in real claw range before ATK is
+  // even allowed (it used to accept the key regardless of distance), so drive
+  // this step the way a player actually does: walk toward it, then swing.
+  now = await drive('atk', () => {
+    const e = G.enemies.find(x => x && !x.dead);
+    if (e && Math.abs((e.x + e.w / 2) - (player.x + player.w / 2)) > 50) {
+      player.vx = e.x > player.x ? 160 : -160;
+      player.x += Math.sign(e.x - player.x) * 4;
+    }
+    keysP['KeyX'] = 1; keys['KeyX'] = 1;
+  });
   await record(now);
 
   // the kill: hit the dummy until it breaks
@@ -147,6 +157,11 @@ const { chromium } = require('playwright');
       }
       return;
     }
+    // Once the purchase has registered, the lesson advances on its own hold
+    // timer (updateTutor: 0.25s seen + 0.7s held) — a real player just stops
+    // shopping. Re-interacting here reopens Ratchet's dialogue every try and
+    // never lets that timer see an uninterrupted PLAY frame to complete on.
+    if (G.save.flags && G.save.flags.tutBuy) return;
     if (G.state === 'PLAY') { doInteract(npc); return; }
     if (G.state === 'DIALOG') {
       // PAGE IT THROUGH IN ONE TRY, for the same reason the walk is done in
