@@ -23,54 +23,6 @@ function drawDiag() {
   rows.forEach((r,i)=>c.fillText(r,14,12+i*15)); c.restore();
 }
 
-// Authoritative locomotion. Start fetching the authored gait immediately so
-// the first controllable room never begins on the retired dash/pose fallback.
-try {
-  if (typeof HERO_GAIT !== 'undefined' && HERO_GAIT) {
-    if (HERO_GAIT.run) { HERO_GAIT.run.from = 0; HERO_GAIT.run.to = HERO_GAIT.run.cells - 1; }
-    if (HERO_GAIT.walk) { HERO_GAIT.walk.from = 0; HERO_GAIT.walk.to = HERO_GAIT.walk.cells - 1; }
-  }
-  if (typeof mediaFetch === 'function') {
-    mediaFetch('gaitWalk', 1);
-    mediaFetch('gaitRun', 1);
-    mediaFetch('hzdIdle', 1);
-  }
-} catch (e) {}
-
-try {
-  let _gaitWarmFrames = 0;
-  const warmGait = () => {
-    try {
-      if (typeof mediaFetch === 'function') {
-        if (!(typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.gaitWalk)) mediaFetch('gaitWalk', 1);
-        if (!(typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.gaitRun)) mediaFetch('gaitRun', 1);
-        if (!(typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG.hzdIdle)) mediaFetch('hzdIdle', 1);
-      }
-    } catch (e) {}
-    if (++_gaitWarmFrames < 180 && typeof requestAnimationFrame === 'function') requestAnimationFrame(warmGait);
-  };
-  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(warmGait);
-} catch (e) {}
-
-// Hornet-like protagonist screen presence. The reference screenshot measures
-// Hornet at about 20% of gameplay viewport height; CLAWBYTE in the owner's
-// screenshot was about 11%. Scale authored hero art by 1.78x around the local
-// foot origin, leaving physics/collision unchanged.
-const HERO_SCREEN_SCALE = 1.78;
-try {
-  if (typeof Player !== 'undefined' && Player.prototype && typeof Player.prototype.drawRoboPlate === 'function' && !Player.prototype.__hornetScalePatched) {
-    const _drawRoboPlate = Player.prototype.drawRoboPlate;
-    Player.prototype.drawRoboPlate = function(ctx, run) {
-      if (!ctx || typeof ctx.save !== 'function') return _drawRoboPlate.call(this, ctx, run);
-      ctx.save();
-      ctx.scale(HERO_SCREEN_SCALE, HERO_SCREEN_SCALE);
-      try { return _drawRoboPlate.call(this, ctx, run); }
-      finally { ctx.restore(); }
-    };
-    Player.prototype.__hornetScalePatched = true;
-  }
-} catch (e) {}
-
 // Opening-film resilience for browsers choosing either codec.
 try {
   if (typeof window !== 'undefined') {

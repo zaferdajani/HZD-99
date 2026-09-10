@@ -1,162 +1,112 @@
-// CLAWBYTE — mobility continuity + impatient idle repair
-// Owner ruling 2026-09-10:
-// 1) a planted/crouched pose may never slide across the floor;
-// 2) charging must preserve real locomotion while moving/jumping/falling;
-// 3) the impatient stomp/Yalla beat starts only after five continuous seconds
-//    of genuine inactivity, and any player action resets that patience clock.
-(() => {
-  const install = () => {
-    if (typeof Player === 'undefined' || !Player.prototype || Player.prototype.__mobilityContinuityInstalled) return false;
-    const P = Player.prototype;
-    P.__mobilityContinuityInstalled = true;
-
-    const baseState = P.heroState;
-    if (typeof baseState === 'function') {
-      P.heroState = function(run) {
-        const moving = Math.abs(this.vx || 0) > 34;
-        const airborne = !this.on;
-
-        // A landing compression is an IMPACT, not a locomotion state. The old
-        // priority kept returning `land` while horizontal physics continued,
-        // so a crouched body visibly skated along the floor. The instant the
-        // player is still holding movement, ask the normal state machine what
-        // it would draw without the stale landing timer: rise into the gait.
-        if (this.landT > 0 && moving && this.dashT <= 0 && !this.swingVis) {
-          const keep = this.landT;
-          this.landT = 0;
-          const s = baseState.call(this, run);
-          this.landT = keep;
-          return s;
-        }
-
-        // Charge is an upper-body/combat intention, not a crouch that replaces
-        // the legs. While travelling, use the already-authored locomotion art
-        // (walk/run/rise/apex/fall) and let the charge energy layer below carry
-        // the special-move read. Stationary charging keeps its dedicated brace.
-        if (this.chargeT > 0 && (moving || airborne) && this.dashT <= 0 && !this.swingVis && this.swirlT <= 0) {
-          const keep = this.chargeT;
-          this.chargeT = 0;
-          const s = baseState.call(this, run);
-          this.chargeT = keep;
-          return s;
-        }
-        return baseState.call(this, run);
-      };
-    }
-
-    // The charge needs to remain visually unmistakable after its legs are
-    // routed through locomotion art. This layer moves WITH the body: orbiting
-    // machine arcs, a forward-held core and a trailing energy ribbon. No pose
-    // translation, no fake crouch skating, and it works on ground and in air.
-    const baseDraw = P.draw;
-    if (typeof baseDraw === 'function') {
-      P.draw = function(...args) {
-        // Force the authored impatient fidget to own the body from five seconds
-        // onward. We alter the timer only for drawing, never for simulation.
-        const realIdle = this.idleT || 0;
-        if (realIdle >= 5 && this.on && Math.abs(this.vx || 0) < 30 && !this.swingVis && this.dashT <= 0 && this.healT <= 0 && this.chargeT <= 0) {
-          this.idleT = Math.max(realIdle, 999);
-        }
-        let out;
-        try { out = baseDraw.apply(this, args); }
-        finally { this.idleT = realIdle; }
-
-        if (this.chargeT > 0.25 && typeof c !== 'undefined' && typeof G !== 'undefined' && G.state === 'PLAY') {
-          const k = Math.min(1, (this.chargeT - 0.25) / 0.35);
-          const t = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
-          const cx = this.x + this.w / 2, cy = this.y + this.h * 0.48;
-          const dir = this.face || 1;
-          c.save();
-          c.globalCompositeOperation = 'lighter';
-          c.lineCap = 'round';
-          const glow = (G.roomDef && typeof PAL !== 'undefined' && PAL[G.roomDef.zone] && PAL[G.roomDef.zone].glow) || '#37ffd0';
-          c.shadowColor = glow; c.shadowBlur = 10 + 10 * k;
-          c.strokeStyle = glow; c.lineWidth = 1.5 + 1.2 * k;
-          c.globalAlpha = 0.38 + 0.34 * k;
-          for (let i = 0; i < 3; i++) {
-            const a = t * (3.2 + i * .55) + i * 2.1;
-            const rx = 17 + i * 5 + k * 5, ry = 10 + i * 3 + k * 3;
-            c.beginPath();
-            c.ellipse(cx, cy, rx, ry, a * .18, a, a + 1.65);
-            c.stroke();
-          }
-          // The charge is held FORWARD even while the legs run underneath it.
-          const hx = cx + dir * (18 + 8 * k), hy = cy - 4 + Math.sin(t * 8) * 1.5;
-          const g = c.createRadialGradient(hx, hy, 1, hx, hy, 9 + 6 * k);
-          g.addColorStop(0, 'rgba(255,255,255,.95)');
-          g.addColorStop(.28, glow);
-          g.addColorStop(1, 'rgba(55,255,208,0)');
-          c.fillStyle = g; c.globalAlpha = .78;
-          c.beginPath(); c.arc(hx, hy, 9 + 6 * k, 0, Math.PI * 2); c.fill();
-          // Motion ribbon makes a charged run/jump read as a charged MOVE, not
-          // a normal gait with an unrelated circle pasted on top.
-          if (Math.abs(this.vx || 0) > 34 || !this.on) {
-            c.strokeStyle = glow; c.lineWidth = 2 + k; c.globalAlpha = .28 + .25 * k;
-            c.beginPath();
-            c.moveTo(cx - dir * 7, cy + 7);
-            c.quadraticCurveTo(cx - dir * 23, cy + Math.sin(t * 7) * 5, cx - dir * (35 + Math.min(20, Math.abs(this.vx || 0) * .04)), cy + 2);
-            c.stroke();
-          }
-          c.restore();
-        }
-        return out;
-      };
-    }
-
-    const baseUpdate = P.update;
-    if (typeof baseUpdate === 'function') {
-      P.update = function(dt) {
-        const out = baseUpdate.call(this, dt);
-        const genuineIdle = G && G.state === 'PLAY' && this.on && Math.abs(this.vx || 0) < 30
-          && Math.abs(this.vy || 0) < 1 && !this.swing && !this.swingVis && this.dashT <= 0
-          && this.healT <= 0 && this.chargeT <= 0 && this.swirlT <= 0 && !G.dialog
-          && !G.cut && !G.gateWalk && !G.bossEntry && !G.wake;
-
-        if (!genuineIdle) {
-          this.__yallaFiveDone = false;
-        } else if ((this.idleT || 0) >= 5 && !this.__yallaFiveDone) {
-          this.__yallaFiveDone = true;
-          // Stop the older eleven-second scheduler from adding a second Yalla
-          // immediately after this authored five-second impatience beat.
-          this.yallaIn = 999;
-          if (typeof hzdSay === 'function') hzdSay('yalla', 600);
-        } else if (genuineIdle && this.__yallaFiveDone) {
-          this.yallaIn = Math.max(this.yallaIn || 0, 998);
-        }
-        return out;
-      };
-    }
-
-    // The repository's current hzd_yalla take is measurably below the rest of
-    // her voice register (documented by hzdvox). Until the approved replacement
-    // recording itself is present in the repo, lift ONLY this one playback into
-    // the bottom of her established register instead of continuing to emit the
-    // known-old bass take unchanged. This is deliberately isolated so dropping
-    // the approved replacement asset later needs no state-machine change.
-    if (typeof hzdSay === 'function' && typeof playBuf === 'function' && !window.__yallaRegisterGuard) {
-      window.__yallaRegisterGuard = true;
-      const oldSay = hzdSay;
-      hzdSay = function(key, gapMs) {
-        if (key !== 'yalla') return oldSay.apply(this, arguments);
-        try {
-          if (typeof narrativeAudioActive === 'function' && narrativeAudioActive()) return false;
-          const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-          if (typeof HZDT !== 'undefined' && now < HZDT) return false;
-          if (typeof HZDT !== 'undefined') HZDT = now + Math.max(90, gapMs == null ? 90 : gapMs);
-          // 216 Hz * 1.45 ~= 313 Hz: clears the project's 300 Hz register floor
-          // without the chipmunk jump a full octave correction would create.
-          return playBuf('hzd_yalla', 0.5, 1.45);
-        } catch (e) { return oldSay.apply(this, arguments); }
-      };
-    }
-
-    return true;
-  };
-
-  if (!install()) {
-    let tries = 0;
-    const timer = setInterval(() => {
-      if (install() || ++tries > 300) clearInterval(timer);
-    }, 20);
+// CLAWBYTE hero motion services. State selection lives in entities.js.
+// No timer impersonation, prototype wrappers, legacy gait fallback or voice swap.
+const HERO_MOTION_REVISION = 'hero-motion-2026-09-11-r1';
+const HERO_MOTION_KEYS = Object.freeze([
+  'heroStates', 'hzdIdle', 'gaitWalk', 'gaitRun', 'transAir', 'transLand',
+  'transDash', 'transSkid', 'transWall', 'heroFidget', 'hzdHurt'
+]);
+const heroMotionLoad = { active: false, started: 0, retryAt: 0, failures: 0 };
+function heroMotionMissing() {
+  return HERO_MOTION_KEYS.filter(k => {
+    const im = MEDIA_RAW[k];
+    return !im || !im.complete || !im.naturalWidth || MEDIA_LOW[k] === 2;
+  });
+}
+function heroMotionWarm() {
+  for (const k of HERO_MOTION_KEYS) mediaFetch(k, true);
+}
+function heroMotionGate(dt) {
+  if (!G || !player || G.state !== 'PLAY' || (typeof isHero === 'function' && isHero())) {
+    heroMotionLoad.active = false;
+    return false;
   }
-})();
+  const missing = heroMotionMissing();
+  if (!missing.length) { heroMotionLoad.active = false; heroMotionLoad.started = 0; return false; }
+  const now = performance.now();
+  heroMotionLoad.active = true;
+  if (!heroMotionLoad.started) heroMotionLoad.started = now;
+  if (now >= heroMotionLoad.retryAt) { heroMotionWarm(); heroMotionLoad.retryAt = now + 1000; }
+  const raw = action => (KEYB[action] || []).some(k => keysP[k]);
+  // Loading is escapable, including on a pad; never borrow tutorial input locks.
+  if (raw('BACK') || raw('PAUSE')) {
+    G.state = 'PAUSE'; G.pauseIdx = 0; heroMotionLoad.active = false;
+    clearP(); return true;
+  }
+  if (raw('OK') && now - heroMotionLoad.started >= 12000) {
+    for (const k of missing) delete MEDIA_PEND[k];
+    heroMotionLoad.started = now; heroMotionLoad.failures++; heroMotionWarm();
+  }
+  return true;
+}
+function drawHeroMotionLoading(ctx) {
+  if (!heroMotionLoad.active || G.state !== 'PLAY') return false;
+  const missing = heroMotionMissing(), done = HERO_MOTION_KEYS.length - missing.length;
+  ctx.save();
+  ctx.fillStyle = '#070f19'; ctx.fillRect(0, 0, 960, 540);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#e4fff8'; ctx.font = 'bold 25px sans-serif';
+  ctx.fillText('Loading character animations', 480, 238);
+  ctx.fillStyle = '#18483f'; ctx.fillRect(280, 282, 400, 8);
+  ctx.fillStyle = '#37ffd0'; ctx.fillRect(280, 282, 400 * done / HERO_MOTION_KEYS.length, 8);
+  ctx.font = '16px sans-serif'; ctx.fillStyle = '#a6c9c2';
+  ctx.fillText(done + ' / ' + HERO_MOTION_KEYS.length + '   ·   ' + howToOpen('BACK') + ' — Pause', 480, 322);
+  if (performance.now() - heroMotionLoad.started >= 12000)
+    ctx.fillText((typeof TOUCH !== 'undefined' && TOUCH.enabled) ? 'Reconnecting automatically. Use Pause to leave.' : 'Animation download stalled. ' + howToOpen('OK') + ' — Retry', 480, 358);
+  ctx.restore();
+  return true;
+}
+// Interpolate adjoining authored frames and short cross-clip handovers in the
+// same local foot coordinates. This adds no invented animation assets.
+function drawHeroMotionCell(p, ctx, key, frame, cells, cx, base, height, flip) {
+  const im = MEDIA_RAW[key];
+  if (!im || !im.complete || !im.naturalWidth) { mediaFetch(key, true); return false; }
+  const cyclic = key === HERO_GAIT.walk.key || key === HERO_GAIT.run.key || key === HERO_IDLE.key;
+  const f = cyclic ? ((frame % cells) + cells) % cells : clamp(frame, 0, cells - 1);
+  const target = { key, f, cells, cx, base, height, flip: !!flip, cyclic };
+  const now = p.anim || 0;
+  const old = p._motionPose;
+  if (old && old.key !== key) {
+    p._motionBlend = { from: old, started: now, duration: key === 'transLand' ? 0.055 : 0.09 };
+  }
+  // Add the premultiplied layers in an offscreen buffer. Drawing two half-
+  // alpha sprites directly with source-over made the hero fade at every blend.
+  if (!p._motionCanvas) {
+    p._motionCanvas = document.createElement('canvas');
+    p._motionCanvas.width = 512; p._motionCanvas.height = 512;
+  }
+  const out = p._motionCanvas.getContext('2d');
+  out.setTransform(1,0,0,1,0,0); out.clearRect(0,0,512,512);
+  out.setTransform(3,0,0,3,256,384);
+  out.globalCompositeOperation = 'lighter'; out.globalAlpha = 1;
+  function paint(pose, alpha) {
+    const image = MEDIA_RAW[pose.key];
+    if (!image || alpha <= 0.001) return;
+    const cw = image.naturalWidth / pose.cells, h = pose.height, w = h * cw / image.naturalHeight;
+    const first = Math.floor(pose.f), mix = pose.f - first;
+    const next = pose.cyclic ? (first + 1) % pose.cells : Math.min(first + 1, pose.cells - 1);
+    out.save(); out.translate(pose.cx, pose.base);
+    if (pose.flip) out.scale(-1, 1);
+    const inherited = out.globalAlpha;
+    out.globalAlpha = inherited * alpha * (1 - mix);
+    out.drawImage(image, first * cw, 0, cw, image.naturalHeight, -w / 2, -h, w, h);
+    if (mix > 0.001) {
+      out.globalAlpha = inherited * alpha * mix;
+      out.drawImage(image, next * cw, 0, cw, image.naturalHeight, -w / 2, -h, w, h);
+    }
+    out.restore();
+  }
+  let mix = 1;
+  if (p._motionBlend) {
+    const t = clamp((now - p._motionBlend.started) / p._motionBlend.duration, 0, 1);
+    mix = t * t * (3 - 2 * t);
+    if (t >= 1) p._motionBlend = null;
+  }
+  if (p._motionBlend) paint(p._motionBlend.from, 1 - mix);
+  paint(target, mix);
+  ctx.drawImage(p._motionCanvas, -256 / 3, -128, 512 / 3, 512 / 3);
+  p._motionPose = target;
+  G.lastStrip = key + ':' + Math.floor(f);
+  G.heroMotion = { revision: HERO_MOTION_REVISION, key, frame: f, blend: mix, scale: HERO_SCREEN_SCALE };
+  return true;
+}
+heroMotionWarm();

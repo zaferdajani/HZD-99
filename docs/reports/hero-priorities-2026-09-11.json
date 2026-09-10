@@ -1,0 +1,396 @@
+{
+  "revision": "hero-motion-2026-09-11-r1",
+  "build": "2b08763331a2",
+  "scale": 1.78,
+  "checks": [
+    {
+      "name": "walk uses authored locomotion",
+      "ok": true,
+      "detail": "gaitWalk:0"
+    },
+    {
+      "name": "run uses authored locomotion",
+      "ok": true,
+      "detail": "gaitRun:0"
+    },
+    {
+      "name": "charge-run uses authored locomotion",
+      "ok": true,
+      "detail": "gaitRun:0"
+    },
+    {
+      "name": "charge-landing-run uses authored locomotion",
+      "ok": true,
+      "detail": "gaitRun:0"
+    },
+    {
+      "name": "landing-run uses authored locomotion",
+      "ok": true,
+      "detail": "gaitRun:0"
+    },
+    {
+      "name": "coyote-run uses authored locomotion",
+      "ok": true,
+      "detail": "gaitRun:0"
+    },
+    {
+      "name": "charge-rise uses authored locomotion",
+      "ok": true,
+      "detail": "transAir:0"
+    },
+    {
+      "name": "charge-apex uses authored locomotion",
+      "ok": true,
+      "detail": "transAir:1"
+    },
+    {
+      "name": "charge-fall uses authored locomotion",
+      "ok": true,
+      "detail": "transAir:1"
+    },
+    {
+      "name": "fractional gait frame is sampled",
+      "ok": true,
+      "detail": {
+        "revision": "hero-motion-2026-09-11-r1",
+        "key": "gaitRun",
+        "frame": 0.5,
+        "blend": 0,
+        "scale": 1.78
+      }
+    },
+    {
+      "name": "1.78 scale reaches rendered body",
+      "ok": true,
+      "detail": 1.7799999713897705
+    },
+    {
+      "name": "real held-charge movement makes progress",
+      "ok": true,
+      "detail": 803.8233333333319
+    },
+    {
+      "name": "real jump reaches landing",
+      "ok": true,
+      "detail": 15
+    },
+    {
+      "name": "no planted-pose sliding during actual input",
+      "ok": true,
+      "detail": {
+        "moving": 71,
+        "bad": 0
+      }
+    },
+    {
+      "name": "controller aliases can charge, jump, land and keep moving",
+      "ok": true,
+      "detail": {
+        "travelled": 71,
+        "air": 50,
+        "invalid": 0,
+        "distance": 384.9066666666678
+      }
+    },
+    {
+      "name": "touch aliases can charge, jump, land and keep moving",
+      "ok": true,
+      "detail": {
+        "travelled": 56,
+        "air": 65,
+        "invalid": 0,
+        "distance": 718.8233333333308
+      }
+    },
+    {
+      "name": "camera reversal is smooth",
+      "ok": true,
+      "detail": {
+        "first": {
+          "x": 671,
+          "y": 564
+        },
+        "next": 667.8815909209278,
+        "shift": 3.118409079072194
+      }
+    },
+    {
+      "name": "camera remains within room bounds",
+      "ok": true
+    },
+    {
+      "name": "logical viewport remains 960 by 540",
+      "ok": true,
+      "detail": {
+        "canvas": [
+          960,
+          540
+        ],
+        "worldView": [
+          960,
+          540
+        ]
+      }
+    },
+    {
+      "name": "slow/missing art visibly waits instead of legacy fallback",
+      "ok": true,
+      "detail": {
+        "stopped": true,
+        "escapable": true,
+        "state": "PAUSE"
+      }
+    },
+    {
+      "name": "asset wait remains escapable",
+      "ok": true
+    },
+    {
+      "name": "no browser runtime errors",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "poses": [
+    {
+      "name": "walk",
+      "st": "walk_a",
+      "drawn": "gaitWalk:0"
+    },
+    {
+      "name": "run",
+      "st": "run_a",
+      "drawn": "gaitRun:0"
+    },
+    {
+      "name": "charge-run",
+      "st": "run_a",
+      "drawn": "gaitRun:0"
+    },
+    {
+      "name": "charge-landing-run",
+      "st": "run_a",
+      "drawn": "gaitRun:0"
+    },
+    {
+      "name": "landing-run",
+      "st": "run_a",
+      "drawn": "gaitRun:0"
+    },
+    {
+      "name": "coyote-run",
+      "st": "run_a",
+      "drawn": "gaitRun:0"
+    },
+    {
+      "name": "charge-rise",
+      "st": "rise",
+      "drawn": "transAir:0"
+    },
+    {
+      "name": "charge-apex",
+      "st": "apex",
+      "drawn": "transAir:1"
+    },
+    {
+      "name": "charge-fall",
+      "st": "fall",
+      "drawn": "transAir:1"
+    }
+  ],
+  "trace": [
+    {
+      "i": 0,
+      "x": 295.99,
+      "vy": 0,
+      "landT": -0.016666666666666666,
+      "charge": 0.016666666666666666,
+      "drawn": "sheet:claw_1"
+    },
+    {
+      "i": 10,
+      "x": 336.16,
+      "vy": 0,
+      "landT": -0.18333333333333332,
+      "charge": 0.18333333333333332,
+      "drawn": "sheet:claw_1"
+    },
+    {
+      "i": 20,
+      "x": 392.82,
+      "vy": 0,
+      "landT": -0.35,
+      "charge": 0.35,
+      "drawn": "gaitRun:7"
+    },
+    {
+      "i": 30,
+      "x": 449.49,
+      "vy": 134.71,
+      "landT": -0.5166666666666666,
+      "charge": 0.5166666666666666,
+      "drawn": "gaitRun:10"
+    },
+    {
+      "i": 40,
+      "x": 506.16,
+      "vy": -920,
+      "landT": 0.10333333333333333,
+      "charge": 0.6833333333333338,
+      "drawn": "transAir:0"
+    },
+    {
+      "i": 50,
+      "x": 562.82,
+      "vy": -561.67,
+      "landT": -0.06333333333333331,
+      "charge": 0.850000000000001,
+      "drawn": "transAir:0"
+    },
+    {
+      "i": 60,
+      "x": 619.49,
+      "vy": -203.33,
+      "landT": -0.22999999999999995,
+      "charge": 1.016666666666668,
+      "drawn": "transAir:0"
+    },
+    {
+      "i": 70,
+      "x": 676.16,
+      "vy": 34.25,
+      "landT": -0.3966666666666666,
+      "charge": 1.183333333333334,
+      "drawn": "transAir:1"
+    },
+    {
+      "i": 80,
+      "x": 732.82,
+      "vy": 428.21,
+      "landT": -0.5633333333333335,
+      "charge": 1.35,
+      "drawn": "transAir:1"
+    },
+    {
+      "i": 90,
+      "x": 789.49,
+      "vy": 936.54,
+      "landT": -0.7300000000000006,
+      "charge": 1.5166666666666662,
+      "drawn": "transAir:2"
+    },
+    {
+      "i": 100,
+      "x": 846.16,
+      "vy": 0,
+      "landT": 0.10333333333333336,
+      "charge": 1.6833333333333322,
+      "drawn": "gaitRun:13"
+    },
+    {
+      "i": 110,
+      "x": 902.82,
+      "vy": 0,
+      "landT": -0.06333333333333328,
+      "charge": 1.8499999999999983,
+      "drawn": "gaitRun:1"
+    },
+    {
+      "i": 120,
+      "x": 959.49,
+      "vy": 0,
+      "landT": -0.22999999999999993,
+      "charge": 2.0166666666666644,
+      "drawn": "gaitRun:5"
+    },
+    {
+      "i": 130,
+      "x": 1016.16,
+      "vy": 0,
+      "landT": -0.39666666666666656,
+      "charge": 2.1833333333333305,
+      "drawn": "gaitRun:9"
+    },
+    {
+      "i": 140,
+      "x": 1072.82,
+      "vy": 0,
+      "landT": -0.5633333333333334,
+      "charge": 2.3499999999999965,
+      "drawn": "gaitRun:13"
+    }
+  ],
+  "rooms": [
+    {
+      "room": "W2",
+      "hero": [
+        864,
+        444,
+        24,
+        36
+      ],
+      "camera": [
+        310,
+        4
+      ],
+      "npcCount": 0
+    },
+    {
+      "room": "A0",
+      "hero": [
+        921.6,
+        444,
+        24,
+        36
+      ],
+      "camera": [
+        367.6,
+        4
+      ],
+      "npcCount": 0
+    },
+    {
+      "room": "A0B",
+      "hero": [
+        432,
+        444,
+        24,
+        36
+      ],
+      "camera": [
+        0,
+        4
+      ],
+      "npcCount": 1
+    },
+    {
+      "room": "A10",
+      "hero": [
+        662.4,
+        444,
+        24,
+        36
+      ],
+      "camera": [
+        108.39999999999998,
+        4
+      ],
+      "npcCount": 0
+    },
+    {
+      "room": "D3",
+      "hero": [
+        460.8,
+        444,
+        24,
+        36
+      ],
+      "camera": [
+        0,
+        4
+      ],
+      "npcCount": 0
+    }
+  ],
+  "errors": []
+}

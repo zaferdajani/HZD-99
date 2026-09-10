@@ -752,6 +752,7 @@ const HERO_POSE_K = { charge: 0.893 };
 // the dirt and the front grass blades brush her ankles, which is what
 // standing IN a meadow looks like.
 const HERO_DH = 60, HERO_FLOOR = 6;
+const HERO_SCREEN_SCALE = 1.78; // visual only; collision and attack reach are unchanged
 // Six frames of the real blow per attack (js/media.js swingClaw1 and friends).
 // All four are fired: combo 1, combo 2, the combo-3 finisher and the charged
 // burst. Anything not here still falls through to its pose cell, which is the
@@ -983,7 +984,7 @@ const HERO_CADENCE = { walk: 5, run: 7 };
 // cycle across the strip, 3–10% of silhouette moving between every cell.
 let HERO_GAIT = {
   walk: { key: 'gaitWalk', cells: 16, k: 0.845 },
-  run:  { key: 'gaitRun',  cells: 16, k: 0.92, from: 0, to: 8 },
+  run:  { key: 'gaitRun',  cells: 16, k: 0.92, from: 0, to: 15 },
 };
 // THE STANDING LOOP: breath, a weight shift, one blink — a front view like
 // the fidget, so it cancels the body mirror the same way. Eleven cells at
@@ -2305,7 +2306,6 @@ class Player {
     // mid-air, and a character crouching while airborne reads as a bug, which
     // is what "can't stay crouching and jump and charged at the same time"
     // was describing. No code change is needed for it — the plate is the pose.
-    if (this.chargeT > 0.05) return 'charge';
     if (this.dashT > 0) return 'dash';
     if (this.wallSlide !== 0 && !this.on) return 'wall_cling';
     if (!this.on) {
@@ -2326,8 +2326,9 @@ class Player {
         return 'fall';
       }
     }
-    if (this.skidT > 0) return 'skid';
-    if (this.landT > 0) return 'land';
+    if (this.skidT > 0 && this.chargeT <= 0.05) return 'skid';
+    if (this.landT > 0 && Math.abs(this.vx) <= 12) return 'land';
+    if (this.chargeT > 0.05 && Math.abs(this.vx) <= 12) return 'charge';
     // one core left and standing still: the carriage sags. Moving cancels it —
     // a limp that survives a sprint reads as a bug, not as damage.
     if (this.cores <= 1 && Math.abs(this.vx) < 20) return 'slump';
@@ -2418,23 +2419,23 @@ class Player {
     const A = HERO_AIR_STRIP;
     if (A && (st === 'rise' || st === 'apex' || st === 'fall')) {
       // her own vertical speed is the position in the arc
-      const p = clamp((this.vy + A.up) / (A.up + A.down), 0, 0.999);
+      const p = clamp((this.vy + A.up) / (A.up + A.down), 0, 1);
       const h = HERO_DH * A.k;
       // airborne cells are centred rather than stood on the floor, and a strip
       // cell is anchored at its bottom — so the bottom goes half a cell below
       // the same centre the pose cells use
-      return drawStripCell(c, A.key, Math.floor(p * A.cells), A.cells, 0, -18 + h / 2, h, false);
+      return drawHeroMotionCell(this, c, A.key, p * (A.cells - 1), A.cells, 0, -18 + h / 2, h, false);
     }
     // the gait loops: one full stride is the four beats the pose cycle steps
     // through ([0,1,2,1] in heroState), so the strip wraps on stridePh % 4
-    if (this.on && (st === 'walk_a' || st === 'walk_b' || st === 'walk_c'
-                    || st === 'run_a' || st === 'run_b' || st === 'run_c')) {
+    if (st === 'walk_a' || st === 'walk_b' || st === 'walk_c'
+        || st === 'run_a' || st === 'run_b' || st === 'run_c') {
       const Gt = HERO_GAIT && (Math.abs(this.vx) > HERO_RUN_VX ? HERO_GAIT.run : HERO_GAIT.walk);
       if (Gt && Gt.cells) {
         // the loop may be a RANGE of the strip (a take cut longer than one stride)
         const from = Gt.from || 0, to = Gt.to == null ? Gt.cells - 1 : Gt.to, n = to - from + 1;
-        const cell = from + Math.floor((((this.stridePh || 0) % 4) / 4) * n) % n;
-        if (drawStripCell(c, Gt.key, cell, Gt.cells, 0, HERO_FLOOR, HERO_DH * (Gt.k || 1), false)) return true;
+        const cell = from + (((this.stridePh || 0) % 4 + 4) % 4) / 4 * n;
+        if (drawHeroMotionCell(this, c, Gt.key, cell, Gt.cells, 0, HERO_FLOOR, HERO_DH * (Gt.k || 1), false)) return true;
       }
     }
     // the standing loop, until the impatience takes over
@@ -2445,8 +2446,8 @@ class Player {
     // but calm falls back to the plate and the repaint.
     const I = HERO_IDLE;
     if (I && I.cells && st === 'idle' && this.on && this.idleT <= FIDGET_AFTER && this.heroMood(st) === 'calm') {
-      const cell = Math.floor((this.anim || 0) * (I.fps || 9)) % I.cells;
-      if (drawStripCell(c, I.key, cell, I.cells, 0, HERO_FLOOR, HERO_DH * (I.k || 1), this.faceVis < 0)) return true;
+      const cell = ((this.anim || 0) * (I.fps || 9)) % I.cells;
+      if (drawHeroMotionCell(this, c, I.key, cell, I.cells, 0, HERO_FLOOR, HERO_DH * (I.k || 1), this.faceVis < 0)) return true;
     }
     const F = HERO_FIDGET;
     if (F && st === 'idle' && this.idleT > FIDGET_AFTER) {
@@ -2455,7 +2456,7 @@ class Player {
       const n = Math.floor((this.idleT - FIDGET_AFTER) * (F.fps || 10));
       const loopN = F.cells - F.intro;
       const cell = n < F.cells ? n : F.intro + ((n - F.cells) % loopN);
-      if (drawStripCell(c, F.key, cell, F.cells, 0, HERO_FLOOR, HERO_DH * (F.k || 1), this.faceVis < 0)) return true;
+      if (drawHeroMotionCell(this, c, F.key, cell, F.cells, 0, HERO_FLOOR, HERO_DH * (F.k || 1), this.faceVis < 0)) return true;
     }
     // THE WALL SLIDE IS HELD, NOT TIMED: it loops on its own clock for as
     // long as she clings, the way the fidget does, so it is not in the table.
@@ -2466,24 +2467,25 @@ class Player {
       // and on a wall she faces the wall — so the plate's wall-at-right lands
       // on whichever side the wall is. (The fidget cancels that flip because
       // it is a front view; this is a profile and must keep it.)
-      if (drawStripCell(c, Wl.key, cell, Wl.cells, 0, HERO_FLOOR, HERO_DH * (Wl.k || 1), false)) return true;
+      if (drawHeroMotionCell(this, c, Wl.key, cell, Wl.cells, 0, HERO_FLOOR, HERO_DH * (Wl.k || 1), false)) return true;
     }
     const T = HERO_TRANS[st];
     if (!T || !T.cells) return false;
     const t = T.t(this), t0 = T.t0(this);
     if (!(t > 0) || !(t0 > 0)) return false;
     const p = clamp(1 - t / t0, 0, 0.999);
-    return drawStripCell(c, T.key, Math.floor(p * T.cells), T.cells,
+    return drawHeroMotionCell(this, c, T.key, p * (T.cells - 1), T.cells,
                          0, HERO_FLOOR, HERO_DH * T.k, false);
   }
   drawRoboPlate(c, run) {
-    if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG.heroStates) return false;
+    c.save();
+    c.scale(HERO_SCREEN_SCALE, HERO_SCREEN_SCALE);
+    try {
+    if (typeof MEDIA_IMG === 'undefined') return false;
     // the swing plays its own strip when one is fired for that attack; it
     // returns false until the art lands and the pose cell covers it meanwhile
     if (typeof G !== 'undefined') G.lastStrip = null;
-    if (this.swingVis && this.drawRoboSwing(c)) { if (typeof G !== 'undefined') G.heroDrawn = G.lastStrip; return true; }
-    const im = MEDIA_IMG.heroStates;
-    const cw = im.width / HERO_CELLS, ch = im.height;
+    if (this.swingVis && this.drawRoboSwing(c)) { this._motionPose = null; this._motionBlend = null; if (typeof G !== 'undefined') G.heroDrawn = G.lastStrip; return true; }
     const st = this.heroState(run);
     // ...and every other moment the body is mid-change plays its clip the same
     // way, for the same reason, with the same fallback
@@ -2497,6 +2499,14 @@ class Player {
     // to her idle height. Only the poses that were measured wrong are listed —
     // a crouch is legitimately shorter and a jump stretch legitimately longer,
     // and normalising those would flatten the animation rather than fix it.
+    // Critical motion never falls through to retired pose sheets.
+    if (/^(walk_|run_)/.test(st) || ['rise','apex','fall','land','dash','skid','wall_cling'].includes(st)) {
+      G.heroDrawn = 'loading:' + st; return true;
+    }
+    const im = MEDIA_IMG.heroStates;
+    if (!im) return false;
+    const cw = im.width / HERO_CELLS, ch = im.height;
+    this._motionPose = null; this._motionBlend = null;
     const col = HERO_CELL[st] || 0;
     // the pose cell drew her: say so, so the diag panel can tell a strip
     // that has not arrived from a strip that is not wired
@@ -2563,6 +2573,7 @@ class Player {
     this.drawHeroEyes(c, st, dw, dh, dy);
     c.restore();
     return true;
+    } finally { c.restore(); }
   }
   // What she is FEELING, which is a different question from what she is doing.
   //
@@ -2837,7 +2848,7 @@ class Player {
       // landing: deep squash -> overshoot stretch -> settle (damped bounce,
       // pinned at the feet so the dome dips and rebounds)
       const l0 = this.land0 || 0.12, lk = 1 - this.landT / l0;
-      const A = l0 > 0.15 ? 0.3 : 0.17;
+      const A = Math.abs(this.vx) > 12 ? 0.045 : (l0 > 0.15 ? 0.3 : 0.17);
       // cos crosses zero exactly at lk=1, so the settle never pops
       const w = A * Math.cos(lk * Math.PI * 1.5) * (1 - lk * 0.5);
       sy -= w; sx += w * 0.72;
@@ -2922,7 +2933,7 @@ class Player {
       && typeof MEDIA_IMG !== 'undefined' && !!MEDIA_IMG.heroStates;
     let stepLift = 0;
     const authoredGait = usePlate && this.on && Math.abs(this.vx) > 12
-      && !!MEDIA_RAW[(run ? HERO_GAIT.run : HERO_GAIT.walk).key];
+      && !!MEDIA_RAW[(Math.abs(this.vx) > HERO_RUN_VX ? HERO_GAIT.run : HERO_GAIT.walk).key];
     if (usePlate && !authoredGait && this.on && Math.abs(this.vx) > 12 && this.dashT <= 0
         && !this.swingVis && this.landT <= 0 && this.skidT <= 0
         && this.hurtPoseT <= 0 && !(typeof G !== 'undefined' && G.artProbe)) {
@@ -2937,7 +2948,7 @@ class Player {
       sy -= hit; sx += hit * 0.7;
     }
     const cr = (this.skidT > 0 ? 0.2 : (this.wallSlide !== 0 ? 0.1 : 0))
-             + (run ? sprintK * 0.12 : 0)                           // low, coiled sprint carriage
+             + (run && !authoredGait ? sprintK * 0.12 : 0)                           // low, coiled sprint carriage
              - songK * 0.08                                        // the Song: drawn UP, not down
              + lowK * 0.11;                                        // one core: sagging carriage
     // recorded so tests/gait.cjs can check the PHASE rather than trust it: a

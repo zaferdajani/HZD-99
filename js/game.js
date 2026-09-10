@@ -1882,6 +1882,7 @@ function tickNPCVox() {
   }
 }
 function update(dt) {
+  if (typeof heroMotionGate === 'function' && heroMotionGate(dt)) return;
   narrativeAudioTick();
   if (G.state === 'PLAY' || G.state === 'DIALOG') { tickNPCVox(); tickCaveLure(); }
   else if (typeof npcVoxQuietAll === 'function') npcVoxQuietAll();
@@ -14026,6 +14027,7 @@ function draw(tms) {
   if (typeof qFrame === 'function') qFrame(c);
   c.clearRect(0, 0, 960, 540);
   const st = G.state;
+  if (typeof drawHeroMotionLoading === 'function' && drawHeroMotionLoading(c)) return;
   if (st === 'CINE') { drawCine(); return; }
   if (st === 'CUT') { drawCut(); return; }
   if (st === 'MENU' || st === 'LANGSEL' || st === 'DIFF' || st === 'WHO' || (st === 'CTRL' && G.ctrlBack === 'MENU') || st === 'GAMEOVER') {

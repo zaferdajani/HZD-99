@@ -438,12 +438,37 @@ function padRumble(strong, weak, ms) {
 const cam = { x: 0, y: 0, shake: 0 };
 let prevShake = 0;
 function updateCam(px, py, rw, rh, dt) {
-  // look-ahead in the facing direction; snappier horizontally than vertically
-  const lead = (typeof player !== 'undefined' && player && !player.dead) ? player.face * 65 : 0;
-  const tx = clamp(px - 480 + lead, 0, Math.max(0, rw - 960));
-  const ty = clamp(py - 300, 0, Math.max(0, rh - 540));
-  cam.x = lerp(cam.x, tx, 1 - Math.pow(0.0002, dt));
-  cam.y = lerp(cam.y, ty, 1 - Math.pow(0.0035, dt));
+  const p = typeof player !== 'undefined' && player;
+  const playable = p && !p.dead && typeof G !== 'undefined' && G.state === 'PLAY'
+    && !(typeof isHero === 'function' && isHero())
+    && !G.meet && !G.bossEntry && !G.gateWalk && !G.trans;
+  let tx, ty;
+  if (playable) {
+    const snap = cam.motionRoom !== G.roomId || dt >= 0.5;
+    const speed = Math.abs(p.vx || 0);
+    const direction = speed > 20 ? Math.sign(p.vx) : p.face;
+    const wantLead = direction * (86 + Math.min(54, speed * 0.16));
+    cam.lookAhead = snap ? wantLead : lerp(cam.lookAhead || 0, wantLead, 1 - Math.exp(-dt * 5));
+    tx = clamp(px - 480 + cam.lookAhead, 0, Math.max(0, rw - 960));
+    const feet = py + p.h / 2;
+    if (snap || !Number.isFinite(cam.groundFocus)) cam.groundFocus = feet;
+    if (p.on) cam.groundFocus = lerp(cam.groundFocus, feet, 1 - Math.exp(-dt * 10));
+    ty = cam.groundFocus - 372;
+    // Keep the larger head clear of the HUD, and show floor before a long fall.
+    if (feet - ty < 218) ty = feet - 218;
+    if (feet - ty > 444) ty = feet - 444;
+    ty = clamp(ty, 0, Math.max(0, rh - 540));
+    cam.motionRoom = G.roomId;
+    cam.x = snap ? tx : lerp(cam.x, tx, 1 - Math.exp(-dt * 9));
+    cam.y = snap ? ty : lerp(cam.y, ty, 1 - Math.exp(-dt * (p.vy > 500 ? 12 : 8)));
+  } else {
+    const lead = p && !p.dead ? p.face * 65 : 0;
+    tx = clamp(px - 480 + lead, 0, Math.max(0, rw - 960));
+    ty = clamp(py - 300, 0, Math.max(0, rh - 540));
+    cam.x = lerp(cam.x, tx, 1 - Math.pow(0.0002, dt));
+    cam.y = lerp(cam.y, ty, 1 - Math.pow(0.0035, dt));
+    cam.motionRoom = null;
+  }
   // every screen shake is also felt in the hands: boss slams, roars,
   // explosions and heavy landings all raise cam.shake, so one hook here
   // turns the whole game's impact language into haptics
