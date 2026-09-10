@@ -3,6 +3,11 @@
 Written from the state of the repo, not from a template. Where something is
 already done it says so; where something is a real obstacle it says that too.
 
+**The store entry publishes as VibeSolutions** (owner, 2026-09-10) — the
+Steamworks "Developer" and "Publisher" fields, and the same name in the app's
+copyright line. Steamworks lets one account carry many apps under one publisher,
+which is the point of naming the company once rather than per title.
+
 ---
 
 ## 1. The gate is low. The visibility is the hard part.

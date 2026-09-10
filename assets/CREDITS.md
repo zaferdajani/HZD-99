@@ -1,5 +1,9 @@
 # CLAWBYTE — Third-Party Asset Credits & Licenses
 
+**Published by VibeSolutions.** Every release out of this repository — the web
+build, the native app and the desktop shell — carries that name, and it is the
+entity the licence obligations below are met by.
+
 Every asset in this folder was downloaded from OpenGameArt.org and is published
 under **CC0 1.0 (public domain dedication)** — verified on each source page at
 the time of download (2026-07-19). CC0 permits commercial use, modification and
