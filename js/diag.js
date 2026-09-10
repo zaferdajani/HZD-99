@@ -1,46 +1,6 @@
-// THE INSTRUMENT FOR A SCREEN I CANNOT SEE — `?diag=1`
-//
-// This exists because three faults in a row were reported off a phone and
-// could not be reproduced here: a shop washed out in light that measures
-// rock-steady in this container (mean luminance span 1.3 over 900 frames), a
-// picture "flipping like a movie" on a build whose LIFT_K does not move, and a
-// figure that appeared twice on a body whose drawn left edge does not shift by
-// a pixel across its whole work loop. Every one of those was answered with a
-// guess about a device, and guessing cost an evening and shipped a regression.
-//
-// So: the game says what it is doing, on the machine it is doing it on. One
-// screenshot of this overlay answers in ten seconds what a day of emulation
-// could not — which quality tier the phone actually chose, how big the
-// backbuffer really is, where the adaptive lift has settled, and, for the room
-// on screen, whether every plate is the full sheet or still the quarter-scale
-// stand-in that reads as "blurry and full of light".
-//
-// It is OFF unless the URL says otherwise, it draws after everything else, it
-// allocates nothing per frame beyond the strings it prints, and it is never
-// reachable by a player who did not type it. `?diag=1` for the panel; add
-// `&diag=2` for the per-key art list, which is long.
+// CLAWBYTE — lightweight diagnostics + live repair hooks
 let DIAG = 0;
 try { DIAG = +(new URLSearchParams(location.search).get('diag') || 0) | 0; } catch (e) { DIAG = 0; }
-const DIAG_N = 120;
-const diagMs = [], diagLum = [];
-let diagCv = null, diagLast = 0, diagNext = 0;
-function diagSample() {
-  const now = performance.now();
-  if (diagLast) { diagMs.push(now - diagLast); if (diagMs.length > DIAG_N) diagMs.shift(); }
-  diagLast = now;
-  if (now < diagNext) return;
-  diagNext = now + 250;
-  try {
-    if (!diagCv) { diagCv = document.createElement('canvas'); diagCv.width = 32; diagCv.height = 18; }
-    const x = diagCv.getContext('2d', { willReadFrequently: true });
-    x.drawImage(c.canvas, 0, 0, 32, 18);
-    const d = x.getImageData(0, 0, 32, 18).data;
-    let L = 0;
-    for (let i = 0; i < d.length; i += 4) L += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-    diagLum.push(L / (32 * 18));
-    if (diagLum.length > 48) diagLum.shift();
-  } catch (e) { }
-}
 function diagTier(k) {
   const low = (typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[k]) | 0;
   if (low === 3) return 'full';
@@ -50,95 +10,184 @@ function diagTier(k) {
   return 'none';
 }
 function drawDiag() {
-  if (!DIAG) return;
-  diagSample();
-  const cvEl = document.getElementById('cv');
-  const ms = diagMs.length ? diagMs.reduce((a, b) => a + b, 0) / diagMs.length : 0;
-  const worst = diagMs.length ? Math.max.apply(null, diagMs) : 0;
-  const lo = diagLum.length ? Math.min.apply(null, diagLum) : 0;
-  const hi = diagLum.length ? Math.max.apply(null, diagLum) : 0;
-  const recent = diagLum.slice(-8);
-  const nowSpan = recent.length ? Math.max.apply(null, recent) - Math.min.apply(null, recent) : 0;
-  let jumps = 0;
-  for (let i = 1; i < diagLum.length; i++) if (Math.abs(diagLum[i] - diagLum[i - 1]) > 8) jumps++;
+  if (!DIAG || typeof c === 'undefined' || typeof G === 'undefined') return;
   const rows = [
-    'BUILD ' + ((typeof window !== 'undefined' && window.BUILD_ID) || '?') + '   ' + G.roomId,
-    'tier ' + ((typeof QUAL !== 'undefined' && QUAL.name) || '?')
-      + '  bloom ' + ((typeof QUAL !== 'undefined' && QUAL.bloom) ? 'on' : 'off')
-      + '  glow ' + ((typeof QUAL !== 'undefined' && QUAL.glow) ? 'on' : 'off')
-      + '  RS ' + ((typeof RS === 'number') ? RS.toFixed(2) : '?'),
-    'backbuffer ' + (cvEl ? cvEl.width + 'x' + cvEl.height : '?')
-      + '  box ' + (cvEl && cvEl.style.width ? cvEl.style.width : 'auto')
-      + '  dpr ' + (window.devicePixelRatio || 1),
-    'frame ' + ms.toFixed(1) + 'ms avg, ' + worst.toFixed(0) + 'ms worst',
-    'frame light ' + lo.toFixed(0) + '-' + hi.toFixed(0) + '  span ' + (hi - lo).toFixed(1)
-      + '  now ' + nowSpan.toFixed(1) + '  jumps ' + jumps
-      + '   LIFT_K ' + ((typeof LIFT_K === 'number') ? LIFT_K.toFixed(2) : '?')
-      + '  bright ' + ((typeof BRIGHT_SET === 'number') ? BRIGHT_SET : '?'),
-    'body ' + (G.heroDrawn || '?') + '   vx ' + ((typeof player !== 'undefined' && player) ? Math.round(player.vx) : '?')
-      + '   run ' + diagTier('gaitRun') + '  walk ' + diagTier('gaitWalk') + '  idle ' + diagTier('hzdIdle'),
+    'BUILD ' + ((typeof window !== 'undefined' && window.BUILD_ID) || '?') + '   ' + (G.roomId || '?'),
+    'body ' + (G.heroDrawn || '?') + '   vx ' + ((typeof player !== 'undefined' && player) ? Math.round(player.vx) : '?'),
+    'run ' + diagTier('gaitRun') + '  walk ' + diagTier('gaitWalk') + '  idle ' + diagTier('hzdIdle'),
+    'tutorial ' + (G.tutHardLock && G.tutHardLock.active ? ('LOCK ' + G.tutHardLock.id + ' → ' + G.tutHardLock.action) : 'free'),
   ];
-  const M = (typeof window !== 'undefined' && window.ROOM_ASSETS) || null;
-  const keys = (M && M.rooms && M.rooms[G.roomId] && M.rooms[G.roomId].keys) || [];
-  if (keys.length) {
-    const lowOnes = keys.filter(k => diagTier(k) === 'LOW');
-    const waiting = keys.filter(k => diagTier(k) === 'wait' || diagTier(k) === 'none');
-    rows.push('room art ' + keys.length + ' keys   still small: ' + (lowOnes.length || 'none')
-      + '   not here: ' + (waiting.length || 'none'));
-    if (lowOnes.length) rows.push('  LOW: ' + lowOnes.slice(0, 6).join(' '));
-    if (waiting.length) rows.push('  MISSING: ' + waiting.slice(0, 6).join(' '));
-    if (DIAG > 1) for (const k of keys.slice(0, 18)) rows.push('  ' + diagTier(k).padEnd(5) + k);
-  } else {
-    rows.push('room art: manifest has no entry for this room');
-  }
-  c.save();
-  c.setTransform(1, 0, 0, 1, 0, 0);
-  c.font = '600 11px ui-monospace, Menlo, Consolas, monospace';
-  let w = 0;
-  for (const r of rows) w = Math.max(w, c.measureText(r).width);
-  const H = rows.length * 14 + 12;
-  c.fillStyle = 'rgba(4,8,14,0.86)';
-  c.fillRect(6, 6, w + 16, H);
-  c.strokeStyle = 'rgba(120,200,255,0.5)'; c.lineWidth = 1;
-  c.strokeRect(6.5, 6.5, w + 15, H - 1);
-  c.textAlign = 'left'; c.textBaseline = 'top';
-  for (let i = 0; i < rows.length; i++) {
-    const r = rows[i];
-    c.fillStyle = /LOW|MISSING|still small: [1-9]/.test(r) ? '#ffd76a'
-      : /jumps ([3-9]|\d\d)/.test(r) ? '#ff8a5c' : '#cfe3ef';
-    c.fillText(r, 14, 12 + i * 14);
-  }
-  c.restore();
+  c.save(); c.setTransform(1,0,0,1,0,0); c.font = '600 11px monospace';
+  c.fillStyle = 'rgba(4,8,14,.86)'; c.fillRect(6,6,370,rows.length*15+12);
+  c.fillStyle = '#cfe3ef'; c.textAlign='left'; c.textBaseline='top';
+  rows.forEach((r,i)=>c.fillText(r,14,12+i*15)); c.restore();
 }
 
-// ---------------------------------------------------------------------------
-// 2026-09-09 playback/locomotion repair
-// ---------------------------------------------------------------------------
-// The authored run strip is a complete 16-cell stride. The previous range
-// ended at cell 8 (the opposite foot contact) and then wrapped directly to 0,
-// making the torso snap forward/backward on every half stride. Play the entire
-// measured cycle so the second half returns continuously to the first contact.
+// Full authored running stride: never wrap at the opposite-foot contact.
 try {
   if (typeof HERO_GAIT !== 'undefined' && HERO_GAIT.run) {
     HERO_GAIT.run.from = 0;
     HERO_GAIT.run.to = HERO_GAIT.run.cells - 1;
   }
-} catch (e) { }
+} catch (e) {}
 
-// Opening-film resilience. Built pages inject VID_FILES/VID_ALT, but source/dev
-// pages do not; and the intro registration in game.js runs before this file.
-// Ensure all eight shipped clips are addressable, then register them into the
-// same PURIFY_VID table used by every cinematic. Existing build-selected paths
-// (including light/mobile variants) always win.
+// Opening-film resilience for dev/source pages and browsers choosing either codec.
 try {
   if (typeof window !== 'undefined') {
     window.VID_FILES = window.VID_FILES || {};
     window.VID_ALT = window.VID_ALT || {};
-    for (let i = 1; i <= 8; i++) {
-      const k = 'intro' + i;
-      if (!window.VID_FILES[k]) window.VID_FILES[k] = 'assets/video/' + k + '.mp4';
-      if (!window.VID_ALT[k]) window.VID_ALT[k] = 'assets/video/' + k + '.webm';
-      if (typeof PURIFY_VID !== 'undefined' && !PURIFY_VID[k]) PURIFY_VID[k] = window.VID_FILES[k];
+    for (let i=1;i<=8;i++) {
+      const k='intro'+i;
+      if (!window.VID_FILES[k]) window.VID_FILES[k]='assets/video/'+k+'.mp4';
+      if (!window.VID_ALT[k]) window.VID_ALT[k]='assets/video/'+k+'.webm';
+      if (typeof PURIFY_VID !== 'undefined' && !PURIFY_VID[k]) PURIFY_VID[k]=window.VID_FILES[k];
     }
   }
-} catch (e) { }
+} catch (e) {}
+
+// ---------------------------------------------------------------------------
+// CONTEXTUAL TUTORIAL ACTION LOCKS — owner ruling 2026-09-10
+// A new verb is announced only at the exact place it is usable. At that moment
+// the scene pauses around the player, every unrelated gameplay input is rejected,
+// and the requested verb is the only action that advances the lesson.
+// ---------------------------------------------------------------------------
+const TUT_LOCK_ACTION = { jump:'JUMP', gate:'UP', atk:'ATK', heal:'HEAL', skill:'SKILL' };
+let _tutOldAllows = null, _tutOldDraw = null;
+
+function tutLockStep() {
+  try {
+    if (!G || !G.tut || !TUT_STEPS || !TUT_STEPS[G.tut.i]) return null;
+    return TUT_STEPS[G.tut.i];
+  } catch (e) { return null; }
+}
+function tutLiveEnemy() {
+  return (G.enemies || []).find(e => e && !e.dead && e.hp > 0) || null;
+}
+function tutEnemyInClawRange() {
+  if (G.roomId !== 'A0' || !player) return false;
+  const e = tutLiveEnemy(); if (!e) return false;
+  const pc = player.x + player.w/2, ec = e.x + e.w/2;
+  const py = player.y + player.h/2, ey = e.y + e.h/2;
+  // Close enough that the normal claw hitbox can connect immediately: about two
+  // body widths horizontally, with both bodies on the same fighting level.
+  return Math.abs(ec-pc) <= 68 && Math.abs(ey-py) <= 54;
+}
+function tutJumpAtObstacle() {
+  if (G.roomId !== 'W2' || !player || !player.on) return false;
+  try {
+    const dir = player.face < 0 ? -1 : 1;
+    const feetTy = Math.floor((player.y + player.h - 2) / TILE);
+    const edge = dir > 0 ? player.x + player.w : player.x;
+    for (let px=10; px<=58; px+=8) {
+      const tx = Math.floor((edge + dir*px) / TILE);
+      // A real obstacle is body-height solid in front, not merely the rolling
+      // ground irregularities that the step-up system already absorbs.
+      if (solidAt(tx, feetTy-1) || solidAt(tx, feetTy-2)) return true;
+    }
+  } catch (e) {}
+  return false;
+}
+function tutGateReady() {
+  if (!player || !player.on) return false;
+  try { return typeof gateHere === 'function' && !!gateHere(); } catch(e) { return false; }
+}
+function tutHealReady() {
+  if (!player || typeof player.maxCores !== 'function') return false;
+  return player.cores < player.maxCores();
+}
+function tutSkillReady() {
+  return !!(G.save && G.save.iq > 0 && G.state === 'PLAY');
+}
+function tutShouldLock(id) {
+  if (G.state !== 'PLAY' || G.dialog || G.cut || G.gateWalk) return false;
+  if (id === 'atk') return tutEnemyInClawRange();
+  if (id === 'jump') return tutJumpAtObstacle();
+  if (id === 'gate') return tutGateReady();
+  if (id === 'heal') return tutHealReady();
+  if (id === 'skill') return tutSkillReady();
+  return false;
+}
+function tutFreezeEnemies(on) {
+  for (const e of (G.enemies || [])) {
+    if (!e || e.dead) continue;
+    if (on) {
+      if (!e.__tutFrozen) {
+        e.__tutFrozen = { update: e.update, vx:e.vx, vy:e.vy };
+        if (typeof e.update === 'function') e.update = function(){};
+      }
+      e.vx = 0; e.vy = 0;
+    } else if (e.__tutFrozen) {
+      if (e.__tutFrozen.update) e.update = e.__tutFrozen.update;
+      e.vx = e.__tutFrozen.vx || 0; e.vy = e.__tutFrozen.vy || 0;
+      delete e.__tutFrozen;
+    }
+  }
+}
+function tutReleaseLock() {
+  if (!G || !G.tutHardLock) return;
+  tutFreezeEnemies(false);
+  G.tutHardLock = null;
+}
+function tutLockTick() {
+  if (!G || !player) return;
+  const s = tutLockStep();
+  if (!s || G.save.flags.tut) { tutReleaseLock(); return; }
+  const action = TUT_LOCK_ACTION[s.id];
+  if (!action) { tutReleaseLock(); return; }
+  if (G.tutHardLock && G.tutHardLock.id !== s.id) tutReleaseLock();
+  if (!G.tutHardLock && tutShouldLock(s.id)) {
+    G.tutHardLock = { active:true, id:s.id, action:action };
+    player.vx = 0;
+    if (player.on) player.vy = 0;
+    tutFreezeEnemies(true);
+    // Clear held movement from the frame that crossed the trigger so the player
+    // cannot coast through the teaching position before seeing the card.
+    for (const k of ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS','VL','VR','VU','VD','GP_L','GP_R','GP_U','GP_D']) {
+      if (typeof keys !== 'undefined') keys[k]=0;
+      if (typeof keysP !== 'undefined') keysP[k]=0;
+    }
+  }
+  if (G.tutHardLock && G.tutHardLock.active) {
+    player.vx = 0;
+    tutFreezeEnemies(true);
+  }
+}
+
+// Input gate: before the contextual lock triggers, retain the original tutorial
+// progression rules. During the lock, accept only the requested verb. PAUSE/BACK
+// stay available so the player can always leave a session; they do not move her.
+try {
+  if (typeof tutAllows === 'function') {
+    _tutOldAllows = tutAllows;
+    tutAllows = function(a) {
+      tutLockTick();
+      const L = G && G.tutHardLock;
+      if (L && L.active) return a === L.action || a === 'PAUSE' || a === 'BACK';
+      return _tutOldAllows(a);
+    };
+  }
+} catch (e) {}
+
+// Prompt timing: contextual verb cards are hidden while the player is still
+// approaching the teaching position. They appear on the exact frozen frame.
+try {
+  if (typeof drawTutor === 'function') {
+    _tutOldDraw = drawTutor;
+    drawTutor = function() {
+      tutLockTick();
+      const s = tutLockStep();
+      if (s && TUT_LOCK_ACTION[s.id] && !(G.tutHardLock && G.tutHardLock.id === s.id)) return;
+      return _tutOldDraw();
+    };
+  }
+} catch (e) {}
+
+// clearP runs once per game frame, making this independent of keyboard/touch/pad
+// polling. It also releases frozen enemies immediately after a successful verb
+// advances the tutorial index.
+try {
+  if (typeof clearP === 'function') {
+    const _clearP = clearP;
+    clearP = function() { tutLockTick(); return _clearP(); };
+  }
+} catch (e) {}
