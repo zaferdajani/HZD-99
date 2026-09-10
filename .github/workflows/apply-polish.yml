@@ -23,10 +23,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Integrate reviewed main work and rebuild
+      - name: Fix real jump-shelf readiness and rebuild integrated source
         run: |
           node tools/merge-polish-main.cjs
+          node tools/fix-jump-lesson.cjs
+          node tools/fix-qa-output.cjs
           for file in js/*.js tests/release-polish.cjs tests/speed2.cjs tests/wake.cjs tests/film.cjs tools/stamp-pages.cjs tools/verify-pages.cjs; do node --check "$file"; done
+          node tests/tutorial-controller.cjs
           node build.cjs
           node tests/build-integrity.cjs
       - name: Preserve final integrated staging commit
@@ -34,9 +37,9 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add build.cjs tools/pack-www.cjs tools/pack-desktop.cjs tests index.html odyssey.html forge.html forge-odyssey.html
+          git add build.cjs js tools/pack-www.cjs tools/pack-desktop.cjs tests index.html odyssey.html forge.html forge-odyssey.html
           if ! git diff --cached --quiet; then
-            git commit -m "Rebuild integrated polish release from current source and assets"
+            git commit -m "Fix real jump-shelf tutorial readiness and marker; preserve complete regression evidence"
           fi
           git push origin HEAD:release/polish-20260910
           echo "source_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
