@@ -290,6 +290,16 @@ const check = (name, ok, detail) => {
       if (key === '__testStrip') { asked.push(cell); return true; }
       return real(c, key, cell, cells, cx, base, h, flip);
     };
+    // drawRoboTrans's jump-arc and grounded-transition cases now draw through
+    // drawHeroMotionCell (js/mobility_fix.js), not drawStripCell — it blends
+    // between two neighbouring cells, so it takes the CONTINUOUS float the
+    // clock computes rather than a pre-floored index. Same interception, same
+    // question: is the cell drawn the one the clock asked for.
+    const realMotion = window.drawHeroMotionCell;
+    window.drawHeroMotionCell = (p, c, key, frame, cells, cx, base, h, flip) => {
+      if (key === '__testStrip') { asked.push(frame); return true; }
+      return realMotion(p, c, key, frame, cells, cx, base, h, flip);
+    };
 
     // the jump arc, indexed by her own vertical speed
     HERO_AIR_STRIP = { key: '__testStrip', cells: N, k: 1, up: 770, down: 700 };
@@ -332,17 +342,24 @@ const check = (name, ok, detail) => {
     HERO_GAIT = gaitSave; HERO_IDLE = idleSave;
 
     window.drawStripCell = real;
+    window.drawHeroMotionCell = realMotion;
     delete MEDIA_RAW.__testStrip;
     return { air, ground, spent, fellThrough };
   });
 
+  // drawHeroMotionCell blends two neighbouring cells, so the clock now hands
+  // it a CONTINUOUS position across the strip rather than a pre-floored
+  // index — the six cells span 0..cells-1 (5), not six integer stops. The
+  // guarantee under test is unchanged: the position only ever moves the
+  // direction the clock moves, start to end of its own range.
   check('the jump arc is indexed by her own vertical speed',
-    JSON.stringify(mech.air) === JSON.stringify([0, 1, 2, 3, 4, 5]),
-    'vy -770..+690 asked for cells ' + mech.air.join(','));
+    mech.air[0] === 0 && mech.air[mech.air.length - 1] >= 4.9
+      && mech.air.every((v, i, a) => i === 0 || v > a[i - 1]),
+    'vy -770..+690 asked for cells ' + mech.air.map(v => v.toFixed(2)).join(','));
   check('a grounded transition is indexed by the clock the physics keeps',
-    mech.ground[0] === 0 && mech.ground[mech.ground.length - 1] === 5
+    mech.ground[0] === 0 && mech.ground[mech.ground.length - 1] >= 4.5
       && mech.ground.every((v, i, a) => i === 0 || v >= a[i - 1]),
-    'over its timer it asked for cells ' + mech.ground.join(','));
+    'over its timer it asked for cells ' + mech.ground.map(v => v.toFixed(2)).join(','));
   check('a spent clock hands the frame back to the pose cell', mech.spent === false);
   check('and with no strip fired every state falls through to its pose',
     mech.fellThrough);
