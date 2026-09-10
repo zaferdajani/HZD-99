@@ -1,0 +1,22 @@
+{
+  "hzd_atk2": {
+    "source_sha256": "8c374578054c3907e64c2d1ceae64496e4d2149f7dee65932f0745f742dd2c58",
+    "result_sha256": "be7ea38cb21c4ae85292f83a7d2307b3f93bc9dcfc4e8cf4f1bb76b8ec1358c3",
+    "filters": "highpass=f=280:p=2",
+    "peak_target": 0.78,
+    "head_fade_ms": 5,
+    "tail_fade_ms": 100,
+    "seconds": 0.8,
+    "source": "Existing project recording, filtered; not a newly generated performance"
+  },
+  "hzd_yalla": {
+    "source_sha256": "ff92abd23c6e9770f26721988737cc4dc4d0ef4f06a4c542cca3bb9dab56f10a",
+    "result_sha256": "7eb1d2ba0ea67fa0548ee98677293390c1bd804d03ce332a7abedb0a174511ca",
+    "filters": "rubberband=pitch=1.55,highpass=f=190:p=2",
+    "peak_target": 0.78,
+    "head_fade_ms": 5,
+    "tail_fade_ms": 100,
+    "seconds": 1.08615625,
+    "source": "Existing project recording, filtered; not a newly generated performance"
+  }
+}

@@ -150,3 +150,7 @@ same commit as the asset itself.
 - Rule for any future additions to this folder: only CC0 or CC-BY (with the
   credit recorded here BEFORE committing); never "free for personal use",
   never ripped game assets.
+
+## Hero voice cleanup — 2026-09-11
+
+The existing hzd_atk2 recording has low-frequency rumble removed; hzd_yalla is pitch-shifted with preserved duration. Both keep mono output, a 0.78 peak ceiling, and smooth attack/tail fades. No new source recording or license was introduced. Original and result SHA-256 values and exact filters are in docs/AUDIO_POLISH.json.

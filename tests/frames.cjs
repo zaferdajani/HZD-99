@@ -77,11 +77,16 @@ const check = (name, ok, detail) => {
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const cx2 = cv.getContext('2d', { willReadFrequently: true });
     const shot = () => {
-      const cvs = document.querySelector('canvas');
+      // Measure the production player renderer directly. The former crop used
+      // an unzoomed world coordinate after presentWorld had projected the scene,
+      // so a camera change made this sample scenery instead of the character.
+      cx2.setTransform(1, 0, 0, 1, 0, 0);
       cx2.clearRect(0, 0, W, H);
-      const sx = (player.x + player.w / 2 - cam.x) * (cvs.width / 960);
-      const sy = (player.y + player.h - cam.y) * (cvs.height / 540);
-      cx2.drawImage(cvs, Math.round(sx - W / 2), Math.round(sy - H + 24), W, H, 0, 0, W, H);
+      cx2.fillStyle = '#000'; cx2.fillRect(0, 0, W, H);
+      cx2.save();
+      cx2.translate(W / 2 - player.x - player.w / 2, H - 24 - player.y - player.h);
+      const probe = G.artProbe; G.artProbe = 1;
+      try { player.draw(cx2); } finally { G.artProbe = probe; cx2.restore(); }
       return cx2.getImageData(0, 0, W, H).data;
     };
     // a mask of "there is something bright here", which is what a silhouette is
