@@ -94,6 +94,29 @@ The fleet is organised BY KINGDOM, and the kingdom has a shape:
   Only the art session is owner-opened, because connector bindings and
   art approval are his.
 
+## THE STUDIO IS VIBESOLUTIONS (owner's standing order, 2026-09-10)
+
+**"VibeSolutions ... is the name using to become my creating company name. I
+will add all the projects all the released and published projects to be from
+this name so all the projects I created here or other platforms will be
+registered under VibeSolutions."**
+
+Everything this repository releases publishes under that name. It is ONE
+constant in two places that must stay in step — `STUDIO` in `js/game.js` (the
+in-game footer, drawn by `drawFooter` on the title screen and the pause card)
+and `STUDIO` in `build.cjs` (the `author`/`publisher` meta and the structured
+data in every built page). `package.json`, `assets/CREDITS.md`, `README.md` and
+`docs/STEAM.md` carry it in prose.
+
+- **It is not an i18n key.** A company name is a proper noun and is the same in
+  every language the game speaks; routing it through `t()` invites a translated
+  trademark.
+- **The person is not erased.** The structured data publishes as the
+  Organization and keeps `creator` as the person who made it.
+- `tests/brand.cjs` measures it — the meta in both shipped pages, and the two
+  screens actually drawing the name — because a footer is the kind of thing
+  that disappears in a refactor and nobody looks twice at the bottom-left.
+
 ## NO BACKLOG RECITALS (owner's standing order, 2026-08-16)
 
 **"Never tell me 'still not done' at all. You are not a kid that I need to

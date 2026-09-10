@@ -198,6 +198,12 @@ const editorJs = fs.readFileSync('js/editor.js', 'utf8');
 // The Forge pages are the owner's editor and are marked noindex: they are not
 // a product, and a search result pointing at someone's level editor is noise.
 const SITE = 'https://zaferdajani.github.io/HZD-99';
+// THE STUDIO (owner, 2026-09-10). Everything released from this repo is
+// published under VibeSolutions, so the name belongs in the page's own
+// identity — the author meta a browser and a scraper read, and the structured
+// data a search result is built from — not only on the screens. js/game.js
+// holds the same constant for the in-game footer; keep the two in step.
+const STUDIO = 'VibeSolutions';
 
 function seoBlock(fname, lock, forge) {
   if (forge) {
@@ -226,7 +232,10 @@ function seoBlock(fname, lock, forge) {
     gamePlatform: 'Web browser',
     applicationCategory: 'Game',
     operatingSystem: 'Any (modern web browser)',
-    author: { '@type': 'Person', name: 'Zafer Dajani' },
+    // the company publishes it; the person still made it
+    author: { '@type': 'Organization', name: STUDIO, url: SITE },
+    publisher: { '@type': 'Organization', name: STUDIO, url: SITE },
+    creator: { '@type': 'Person', name: 'Zafer Dajani' },
     inLanguage: ['en', 'ar', 'tr', 'zh', 'ru'],
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD',
               availability: 'https://schema.org/InStock', url: url },
@@ -237,6 +246,8 @@ function seoBlock(fname, lock, forge) {
 
   return [
     '<meta name="description" content="' + desc + '">',
+    '<meta name="author" content="' + STUDIO + '">',
+    '<meta name="publisher" content="' + STUDIO + '">',
     '<link rel="canonical" href="' + url + '">',
     '<meta name="robots" content="index,follow">',
     '<meta property="og:type" content="website">',

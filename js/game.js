@@ -4,6 +4,17 @@ let c = cv.getContext('2d');
 const mainCtx = c;
 const SAVE_KEY = 'clawbyte_save', META_KEY = 'clawbyte_meta';
 const GAME_VERSION = 'CLAWBYTE v4.5';
+// THE STUDIO (owner, 2026-09-10): "VibeSolutions ... the name using to become
+// my creating company name. I will add all the projects all the released and
+// published projects to be from this name."
+//
+// ONE CONSTANT, EVERY SURFACE. The name goes on the screens the player can
+// stop and read — the title and the pause card — and on the pages themselves
+// (build.cjs puts it in the author meta and the structured data). It is a
+// proper noun, so it is NOT an i18n key: the company is called the same thing
+// in Arabic as it is in English, and routing it through t() would invite a
+// translation of a trademark.
+const STUDIO = 'VibeSolutions';
 // ---- update checker ----
 // The page re-fetches its own source bypassing the cache and compares the
 // build stamp, so a stale home-screen copy is told a newer one exists.
@@ -2626,6 +2637,12 @@ function scanOverlay() {
 // characters land, so full stops, dashes and digits were being placed at the
 // wrong end of the sentence. The language knows which way it reads; the canvas
 // simply was never told.
+// THE FOOTER. Studio on the left, build stamp on the right, drawn by one
+// function so a screen can never carry the version and lose the name.
+function drawFooter(y, dim) {
+  ftxt(STUDIO, 30, y, dim ? 12 : 13, dim ? '#44586b' : '#6c8296', 'left');
+  ftxt(GAME_VERSION, 930, y, dim ? 12 : 13, dim ? '#44586b' : '#6c8296', 'right');
+}
 function ftxt(str, x, y, size, color, align, glow, weight) {
   c.font = (weight || '700') + ' ' + size + 'px "Segoe UI", Tahoma, sans-serif';
   c.textAlign = align || 'center'; c.textBaseline = 'middle';
@@ -14062,8 +14079,8 @@ function draw(tms) {
         const sel = i === G.menuIdx;
         ftxt((sel ? '▸ ' : '') + labels[o], 340, 250 + i * 40, 22, sel ? '#eef3fa' : '#7d93a8', 'center', sel ? '#37ffd0' : null);
       });
-      // build stamp — so you can always tell which version you are running
-      ftxt(GAME_VERSION, 930, 520, 13, '#6c8296', 'right');
+      // the studio and the build stamp — who made it, and which one you are running
+      drawFooter(520, false);
       // a newer build exists — offer it right on the title screen
       if (G.updateReady) {
         const pu = 0.6 + Math.sin(tsec * 4) * 0.4;
@@ -14288,7 +14305,7 @@ function draw(tms) {
       if (sel && G.pauseConfirm === it.id) ftxt(t('pm_confirm'), 480, sy, 12, '#ffd76a');
       else if (sel && it.hint) ftxt(it.hint, 480, sy, 12, '#7d93a8');
     });
-    ftxt(GAME_VERSION, 930, 522, 12, '#44586b', 'right');
+    drawFooter(522, true);
   } else if (st === 'TCFG') {
     c.fillStyle = 'rgba(4,7,12,0.82)'; c.fillRect(0, 0, 960, 540);
     ftxt(t('tl_title'), 480, 150, 32, '#eef3fa', 'center', '#37ffd0');

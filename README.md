@@ -1,5 +1,7 @@
 # CLAWBYTE
 
+*A VibeSolutions project.*
+
 A dual-world metroidvania. At "Who are you?" you choose your game:
 
 - **A robo-cat ninja** — HZD-99, a maintenance unit who slept through the fall of

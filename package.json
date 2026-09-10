@@ -2,6 +2,7 @@
   "name": "clawbyte",
   "version": "1.0.0",
   "private": true,
+  "author": "VibeSolutions",
   "description": "CLAWBYTE / NOSTOS — a zero-dependency canvas metroidvania, on the web and in a native shell",
   "scripts": {
     "build": "node build.cjs",

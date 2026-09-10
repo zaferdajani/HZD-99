@@ -60,6 +60,7 @@ const SUITE = [
   ['herofoley', 'her authored move sounds decode with real signal in them'],
   ['feel',      'input latency, hit-stop and camera lead, as frames'],
   ['credits',   'every shipped sound traces to a line in assets/CREDITS.md'],
+  ['brand',     'every release surface carries the studio name'],
   ['slashsnd',  'the claw: onset, separate passes, heavy third hit'],
   ['voxmeas',   'the NPC voice chain: no clipping, band limit, speech intact'],
   ['speed2',    'movement speed is identical from 12 to 144 fps'],
