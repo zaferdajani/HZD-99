@@ -2944,6 +2944,7 @@ class Player {
     // ever observed ON a cell change. Zero is right; anything near the
     // amplitude means the two clocks have drifted apart.
     this._stepLift = stepLift;
+    this._authoredGait = authoredGait;
     if (usePlate) {
       const gc = this.heroState(run);
       if (gc !== this._gaitCell) {

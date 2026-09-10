@@ -83,7 +83,10 @@ const { chromium } = require('playwright');
       // ---- the alternation: strip out warns and rests, and look at the
       // sequence of committed moves. Two moves that never repeat back to back
       // more than twice is a pattern; a coin flip is not.
-      const moves = order.filter(s => !/warn$/.test(s) && s !== 'idle' && s !== 'rest' && s !== 'dorm');
+      // __-prefixed states (js/boss_aaa_fix.js's brief closing beat between two
+      // far attacks) are a repositioning beat, not a committed move — they deal
+      // no damage and carry no warn of their own by design.
+      const moves = order.filter(s => !/warn$/.test(s) && s !== 'idle' && s !== 'rest' && s !== 'dorm' && !s.startsWith('__'));
       // ---- and it must die, and pay
       const battBefore = invCount('batt');
       b.hp = 1;

@@ -94,6 +94,7 @@ const check = (name, ok, detail) => {
       return false;
     };
     const air = [], feet = [], states = [], vys = [], over = [], lifts = [];
+    let authoredGait = false;
     const strideStart = player.stridePh || 0, animStart = player.anim;
     for (let i = 0; i < 48; i++) {
       await frame();
@@ -106,6 +107,7 @@ const check = (name, ok, detail) => {
       vys.push(Math.abs(player.vy));
       states.push(player.heroState(Math.abs(player.vx) > 140));
       lifts.push(player._stepLift || 0);
+      if (player._authoredGait) authoredGait = true;
     }
     // THE BOB IS SAMPLED OVER A STRIDE, NOT OVER A NUMBER OF FRAMES. The rise
     // and fall is a function of stridePh, and 48 real frames cover however much
@@ -180,7 +182,7 @@ const check = (name, ok, detail) => {
       bottoms.push(bottom); signatures.push(hash);
     }
     const actualFootLift=(Math.max(...bottoms)-Math.min(...bottoms))*HERO_DH*clip.k/image.height;
-    return { actualFootLift, uniqueStrideFrames:new Set(signatures).size,
+    return { authoredGait, actualFootLift, uniqueStrideFrames:new Set(signatures).size,
              air, feet, states, vys, over, fore, lifts, bob, walkCad, walkVx,
              strideStart, animStart, strideEnd, animEnd,
              stepWalk: HERO_STEP_WALK, stepRun: HERO_STEP_RUN, cells: HERO_CELLS,

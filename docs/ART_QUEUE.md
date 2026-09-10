@@ -5299,3 +5299,41 @@ Take 3 completed and was inspected: unarmed, returns to idle, prolonged extended
 ## 2026-09-07 weapon motion review
 
 Five generated motion studies (single, dual, joined, hurricane, scratch) and two revised weapon-reference images completed. Job IDs and permanent source URLs: `assets/source/hero/weapon-review/review.json`. Contact sheets archived beside it. None accepted or wired: long holds, camera-facing dual, missing second joined blade, added tail and incorrect replacement reference geometry remain. No repeated-frame fallback has been installed. Continuous weapon-body animation and owner art review remain required.
+
+### PRIORITY — 2av is half-fixed and the owner is seeing the broken half (2026-09-10)
+
+Owner, unprompted, on the live build: *"I still have the same old cat and the
+same old bad move with headbutting even though we pushed new ones... I still
+have the old ones."* Checked: not a caching issue — the live page's bytes
+match `HEAD` exactly (md5 compared directly). This is §2av's original defect,
+still shipping, on the two strips nobody has re-fired successfully yet.
+
+Of the four strips §2av asked for: **`swingClaw2` and `swingFinisher` were
+re-fired and now pass** `tests/hero.cjs`'s facing law. `swingClaw1` was never
+replaced — the five weapon-review takes above target the sword combo, not the
+bare-claw first hit, so it is still the original camera-facing footage.
+`swingBurst` WAS re-cut since (`6e642bc`, 24 cells) but the new take **still
+fails, and reads worse than before**:
+
+| strip | eye gap / height (median) | vs 0.104 line |
+|---|---|---|
+| claw_1 (unchanged since 2av) | 0.113 | facing camera |
+| burst (re-cut in 6e642bc) | 0.406 | facing camera, badly |
+
+A figure thrusting toward the lens on the charged release is almost certainly
+the "headbutting" the owner is describing — it is a claw game with a move that
+currently reads as a head-first lunge at the viewer.
+
+**What's actually needed, concretely:**
+- `swingClaw1` — the brief in §2av above is unchanged and unfired: guard,
+  wind-up behind the shoulder, the rake forward and across, recovery, three-
+  quarter profile facing right, blow travels right. Nothing has been generated
+  against this brief specifically; the weapon-review takes don't cover it.
+- `swingBurst` — the 6e642bc take needs to be looked at directly
+  (`assets/source/hero/swing/burst.webp` is the archived source) before
+  re-firing again: whatever brief produced it drifted back to camera-facing,
+  so re-reading §2av's exact wording ("the arms flung forward-and-wide rather
+  than wide-to-camera") before the next generation matters more than another
+  blind retry.
+- Confirm both with `node tests/hero.cjs` before calling either done — the
+  0.104 line is the pass/fail, not a judgment call.
