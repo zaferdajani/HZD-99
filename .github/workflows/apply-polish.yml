@@ -23,21 +23,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
-      - name: Apply hash-checked tests and source-audio corrections
-        run: python3 tools/finalize-polish.py
-      - name: Syntax check and rebuild all four outputs from full assets
+      - name: Apply exact source and probe corrections
         run: |
-          for file in js/*.js tests/frames.cjs tests/wake.cjs tests/film.cjs tests/tails.cjs; do node --check "$file"; done
+          node tools/finalize-build.cjs
+          node tools/finalize-probes.cjs
+          for file in js/*.js tests/release-polish.cjs tests/speed2.cjs tests/wake.cjs tests/film.cjs; do node --check "$file"; done
           node build.cjs
-      - name: Commit verified transformation on staging only
+          node tests/build-integrity.cjs
+      - name: Commit rebuilt source on staging only
         id: commit
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add tests assets/sfx/vox/hzd_atk2.wav assets/sfx/vox/hzd_yalla.wav assets/CREDITS.md docs/AUDIO_POLISH.json index.html odyssey.html forge.html forge-odyssey.html
+          git add build.cjs tools/pack-www.cjs tools/pack-desktop.cjs tests index.html odyssey.html forge.html forge-odyssey.html
           if ! git diff --cached --quiet; then
-            git commit -m "Release QA: correct projected-motion probes, enforce fresh tutorial and complete reel, clean voice register"
+            git commit -m "Release integrity: runtime asset hashes, native offline payload, production codec probes and actual room traversal"
             git push origin HEAD:release/polish-20260910
           fi
           echo "source_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -64,13 +64,14 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - if: matrix.group == 'webkit'
         run: npx playwright install --with-deps webkit
-      - name: Start reproducible game server and assemble native app payload
+      - name: Rebuild and start local game server
         run: |
           echo "CHROMIUM_PATH=$(node -e "console.log(require('playwright').chromium.executablePath())")" >> "$GITHUB_ENV"
           sudo mkdir -p /opt/pw-browsers
           sudo ln -sf "$(node -e "console.log(require('playwright').chromium.executablePath())")" /opt/pw-browsers/chromium
           node build.cjs
           git diff --exit-code -- index.html odyssey.html forge.html forge-odyssey.html
+          node tests/build-integrity.cjs
           node tools/pack-www.cjs
           mkdir -p tests/out release-evidence
           python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
