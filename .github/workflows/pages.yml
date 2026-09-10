@@ -31,7 +31,8 @@ jobs:
           s = p.read_text()
           for tag in [
               '<script src="js/mobility_fix.js"></script>',
-              '<script src="js/data_conduits_npc_fix.js"></script>'
+              '<script src="js/data_conduits_npc_fix.js"></script>',
+              '<script src="js/boss_aaa_fix.js"></script>'
           ]:
               if tag not in s:
                   s = s.replace('</body>', tag + '\n</body>')
