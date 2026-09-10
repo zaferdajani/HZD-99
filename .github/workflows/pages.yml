@@ -29,9 +29,12 @@ jobs:
           from pathlib import Path
           p = Path('_site/index.html')
           s = p.read_text()
-          tag = '<script src="js/mobility_fix.js"></script>'
-          if tag not in s:
-              s = s.replace('</body>', tag + '\n</body>')
+          for tag in [
+              '<script src="js/mobility_fix.js"></script>',
+              '<script src="js/data_conduits_npc_fix.js"></script>'
+          ]:
+              if tag not in s:
+                  s = s.replace('</body>', tag + '\n</body>')
           p.write_text(s)
           PY
           touch _site/.nojekyll
