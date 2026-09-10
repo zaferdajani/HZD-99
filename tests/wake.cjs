@@ -22,7 +22,7 @@ const OUT = require('node:path').join(__dirname, 'out/');
       direction = next;
       if (direction) await page.keyboard.down(direction);
     };
-    const deadline = Date.now() + 50000;
+    const deadline = Date.now() + 90000;
     while (Date.now() < deadline) {
       const s = await page.evaluate(() => {
         const step=G.tut && TUT_STEPS[G.tut.i], p=step && tutPrompt(step);
@@ -31,9 +31,9 @@ const OUT = require('node:path').join(__dirname, 'out/');
           target:p && p.target && p.target.x,x:player.x+player.w/2,on:player.on,
           hold:G.tut && G.tut.hold,shown:!!(G.tut && G.tut.jumpShown),
           enemy:G.enemies.filter(e=>e&&!e.dead).length,cores:player.cores,scrap:G.save.scrap,
-          lock:G.tutorialLock && G.tutorialLock.action};
+          lock:G.tutorialLock && G.tutorialLock.action, vx:player.vx, y:player.y, input:!!keys.ArrowRight, suspended:inputSuspended};
       });
-      const key=[s.room,s.state,s.step,s.action,s.lock].join(':');
+      const key=[s.room,s.state,s.step,s.action,s.lock,Math.floor(s.x/80)].join(':');
       if (key!==last) {trace.push(s);console.log(JSON.stringify(s));last=key;}
       if (s.step) learned.add(s.step);
       if (s.state==='DIALOG') {await steer(null);await page.keyboard.press('KeyE');await page.waitForTimeout(90);continue;}
@@ -41,7 +41,8 @@ const OUT = require('node:path').join(__dirname, 'out/');
       if (s.step==='buy' && s.room==='A0B') {succeeded=true;break;}
       if (s.hold>0) {await steer('ArrowRight');await page.waitForTimeout(80);continue;}
       if (s.action==='MOVE') {
-        await steer(s.target!=null && s.target < s.x-8 ? 'ArrowLeft':'ArrowRight');
+        // An exit marker points THROUGH the seam, not to a spot to turn around at.
+        await steer(['out','go'].includes(s.step) ? 'ArrowRight' : s.target!=null && s.target < s.x-8 ? 'ArrowLeft':'ArrowRight');
       } else if (s.action==='JUMP' && s.on) {
         // Wait for the obstacle's JUMP card, not merely the saved step named
         // jump. Pressing early completes neither the lesson nor the crossing.

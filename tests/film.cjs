@@ -15,23 +15,20 @@ const OUT = require('path').join(__dirname, 'out/');
   await p.mouse.click(8, 8);
   await p.evaluate(() => { G.afterCine = null; startCine(); });
   const seen = new Set(); let shots = 0, everFallback = false;
-  for (let i = 0; i < 130; i++) {
+  const reelDeadline=Date.now()+180000;
+  for (let i=0; Date.now()<reelDeadline; i++) {
     const s = await p.evaluate(() => ({
       st: G.state, kind: G.cut && G.cut.kind, ph: G.cut && G.cut.ph,
       ran: G.cut && !!G.cut.ran, ct: G.cut && +G.cut.v.currentTime.toFixed(1),
       err: G.cut && G.cut.v.error && G.cut.v.error.code,
     }));
     if (s.st === 'CINE') everFallback = true;
+    if(i%20===0) console.log('reel progress',JSON.stringify(s));
     if (s.kind && s.ran && s.ct >= 0.1 && !seen.has(s.kind)) { seen.add(s.kind); shots++; console.log('  playing', s.kind, 'at', s.ct + 's'); }
     if (i === 6) await p.screenshot({ path: OUT + 'film_shot.png' });
     if (s.st === 'MENU' && i > 10) break;
-    // After witnessing decoded, advancing footage, exercise the real end-of-
-    // clip callback. This shortens QA without bypassing any reel transition.
-    if (seen.has(s.kind)) await p.evaluate(() => {
-      const v=G.cut && G.cut.v;
-      if (v && Number.isFinite(v.duration) && v.duration > 0.2 && v.currentTime < v.duration - 0.1)
-        v.currentTime=v.duration-0.04;
-    });
+    // Let each clip end naturally. Seeking on an HTTP server without byte-
+    // range support can stall the test even when ordinary playback is healthy.
     await p.waitForTimeout(150);
   }
   // ---- NEW GAME, TWICE ---------------------------------------------------

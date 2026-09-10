@@ -84,14 +84,27 @@ const engine=process.env.QA_BROWSER==='webkit'?webkit:chromium;
  // Decode every shipped intro clip, then replay the first. Playback is muted
  // here because autoplay gating is separate from whether the footage exists.
  if(!process.env.QA_SKIP_FILM){
+ // Use the game's connected inline video and its actual codec ordering. The
+ // previous probe forced WebM into a display:none element, unlike gameplay.
+ await page.mouse.click(8,8);
  const clips=await page.evaluate(async()=>{
-   const r=[];for(let i=1;i<=8;i++){
-    const key='intro'+i,video=document.createElement('video');video.muted=true;video.playsInline=true;video.src=VID_ALT[key]||VID_FILES[key];
-    document.body.appendChild(video);video.style.display='none';
-    const stop=Date.now()+12000;let error=null;try{await video.play();while(video.currentTime<.08&&Date.now()<stop)await new Promise(x=>setTimeout(x,30));}catch(e){error=String(e);}
-    r.push({key,time:video.currentTime,width:video.videoWidth,error});video.pause();video.removeAttribute('src');video.load();video.remove();
+   const r=[];G.reel=null;G.reelEnd=null;G.cutEnd=null;
+   for(let i=1;i<=8;i++){
+     const key='intro'+i;G.state='PLAY';
+     const started=startPurifyCut(key);const ct=G.cut;
+     const stop=Date.now()+16000;
+     while(ct && G.cut===ct && !(ct.ran && ct.v.currentTime>=.08) && Date.now()<stop)
+       await new Promise(resolve=>setTimeout(resolve,30));
+     const v=ct && ct.v;
+     r.push({key,started,time:v?v.currentTime:0,width:v?v.videoWidth:0,ran:!!(ct&&ct.ran),
+       src:v&&v.currentSrc,phase:ct&&ct.ph,error:v&&v.error?{code:v.error.code,message:v.error.message}:null});
+     if(G.cut===ct)endPurifyCut();
    }return r;
- });assert(clips.every(c=>c.width>0&&c.time>=.08&&!c.error));record('all eight intro clips really decode and advance',clips);
+ });
+ fs.writeFileSync(out+'/clips-'+(process.env.QA_BROWSER||'chromium')+'.json',JSON.stringify(clips,null,2));
+ console.log('Production clip playback',JSON.stringify(clips));
+ assert(clips.every(c=>c.started&&c.ran&&c.width>0&&c.time>=.08&&!c.error),'Production movie playback: '+JSON.stringify(clips));
+ record('all eight intro clips really decode and advance',clips);
  }
  assert.deepEqual(errors,[]);fs.writeFileSync(out+'/polish-'+(process.env.QA_BROWSER||'chromium')+'.json',JSON.stringify({checks,result,errors},null,2));
  await browser.close();
