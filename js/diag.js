@@ -193,6 +193,67 @@ try {
   }
 } catch (e) {}
 
+// ---------------------------------------------------------------------------
+// FIRST SHOP GUIDANCE MARKER — owner ruling 2026-09-10
+// The old dotted ground ring was easy to mistake for touch UI and made the
+// player look at the floor instead of the actual destination. During the first
+// workshop/shop approach, replace ONLY that ring with a mechanical hanging
+// arrow: dark steel housing, cyan core, rivets, articulated fins and a bright
+// downward pointer. Other tutorial targets keep their existing markers.
+// ---------------------------------------------------------------------------
+function drawMechanicalTutorialArrow(target) {
+  if (!target || typeof c === 'undefined' || typeof cam === 'undefined') return;
+  const bob = Math.sin(performance.now() / 260) * 4;
+  const x = target.x - cam.x;
+  // The tutorial target is usually on the ground/door threshold. Lift the
+  // marker high enough to read as hanging OVER the booth/worker, with its tip
+  // pointing down to the destination rather than circling empty floor.
+  const y = target.y - cam.y - Math.max(112, (target.radius || 30) + 82) + bob;
+  const col = '#37ffd0', dark = '#14242b', steel = '#35505a', hi = '#9fffea';
+  c.save();
+  c.translate(x, y);
+  c.shadowColor = col; c.shadowBlur = 13; c.globalAlpha = 0.96;
+
+  // suspension stem + side braces
+  c.strokeStyle = steel; c.lineWidth = 4; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(0,-28); c.lineTo(0,-13); c.moveTo(-14,-20); c.lineTo(-8,-8); c.moveTo(14,-20); c.lineTo(8,-8); c.stroke();
+  c.strokeStyle = '#0b1419'; c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(0,-28); c.lineTo(0,-13); c.stroke();
+
+  // circular machine core
+  c.fillStyle = dark; c.strokeStyle = steel; c.lineWidth = 3;
+  c.beginPath(); c.arc(0,0,17,0,Math.PI*2); c.fill(); c.stroke();
+  c.fillStyle = '#0a1216'; c.strokeStyle = col; c.lineWidth = 2;
+  c.beginPath(); c.arc(0,0,8,0,Math.PI*2); c.fill(); c.stroke();
+  c.fillStyle = hi; c.beginPath(); c.arc(0,0,3.2,0,Math.PI*2); c.fill();
+
+  // rivets
+  c.shadowBlur = 0; c.fillStyle = '#8aa4ad';
+  for (const a of [-2.45,-0.7,0.7,2.45]) { c.beginPath(); c.arc(Math.cos(a)*13,Math.sin(a)*13,1.7,0,Math.PI*2); c.fill(); }
+
+  // mechanical neck and arrow body
+  c.shadowColor = col; c.shadowBlur = 10;
+  c.fillStyle = dark; c.strokeStyle = col; c.lineWidth = 2.5;
+  c.beginPath(); c.moveTo(-8,15); c.lineTo(8,15); c.lineTo(8,30); c.lineTo(18,30); c.lineTo(0,50); c.lineTo(-18,30); c.lineTo(-8,30); c.closePath(); c.fill(); c.stroke();
+  c.fillStyle = 'rgba(55,255,208,.30)';
+  c.beginPath(); c.moveTo(-4,19); c.lineTo(4,19); c.lineTo(4,33); c.lineTo(10,33); c.lineTo(0,43); c.lineTo(-10,33); c.lineTo(-4,33); c.closePath(); c.fill();
+  c.strokeStyle = hi; c.lineWidth = 1; c.globalAlpha = 0.75;
+  c.beginPath(); c.moveTo(-11,31); c.lineTo(0,44); c.lineTo(11,31); c.stroke();
+  c.restore();
+}
+
+function isFirstShopApproachPrompt(s) {
+  if (!s || typeof tutPrompt !== 'function' || !G || G.state !== 'PLAY') return null;
+  try {
+    const p = tutPrompt(s);
+    if (!p || !p.target) return null;
+    // This is the exact card shown in the owner's screenshot: "Walk to the
+    // marker / Follow the gold marker" on the first approach to Ratchet's booth.
+    if (p.label === 'tut_approach' && p.hint === 'tut_workshop_h') return p;
+  } catch (e) {}
+  return null;
+}
+
 try {
   if (typeof drawTutor === 'function') {
     _tutOldDraw = drawTutor;
@@ -200,7 +261,21 @@ try {
       tutLockTick();
       const s = tutLockStep();
       if (s && TUT_LOCK_ACTION[s.id] && !(G.tutHardLock && G.tutHardLock.id === s.id)) return;
-      return _tutOldDraw();
+
+      const shopPrompt = isFirstShopApproachPrompt(s);
+      if (!shopPrompt) return _tutOldDraw();
+
+      // Suppress the legacy dashed ring while the original tutorial draws its
+      // card. We key off its dashed stroke state so no normal solid UI stroke
+      // is touched. Then add the mechanical arrow over the destination.
+      const oldSetDash = c.setLineDash.bind(c);
+      const oldStroke = c.stroke.bind(c);
+      let dashed = false;
+      c.setLineDash = function(v) { dashed = !!(v && v.length); return oldSetDash(v); };
+      c.stroke = function() { if (dashed) return; return oldStroke(); };
+      try { _tutOldDraw(); }
+      finally { c.setLineDash = oldSetDash; c.stroke = oldStroke; try { oldSetDash([]); } catch(e) {} }
+      drawMechanicalTutorialArrow(shopPrompt.target);
     };
   }
 } catch (e) {}
