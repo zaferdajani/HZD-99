@@ -1,3 +1,6 @@
+> Historical snapshot, not current release authority. See `DEVELOPMENT_AUTHORITY.md`.
+> Keep the original evidence below; do not use old scale values or workflow status as current facts.
+
 # CLAWBYTE priority pass — hero, camera and animation
 
 ## Scope and evidence

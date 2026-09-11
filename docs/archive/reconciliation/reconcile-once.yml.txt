@@ -1,0 +1,109 @@
+name: CLAWBYTE reconciliation backup and retirement
+on:
+  push:
+    branches: [claude/clawbyte-repo-migration-byhyl8]
+    paths: [.github/workflows/reconcile-once.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: clawbyte-reconciliation
+  cancel-in-progress: false
+jobs:
+  backup:
+    if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      artifact: ${{ steps.backup.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Preserve every remote branch and complete reachable history
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p reconciliation-backup
+          git fetch --tags origin '+refs/heads/*:refs/remotes/origin/*'
+          git for-each-ref --format='%(refname) %(objectname)' > reconciliation-backup/refs.txt
+          git status --porcelain=v1 --untracked-files=all > reconciliation-backup/runner-status.txt
+          git bundle create reconciliation-backup/HZD-99-all-history.bundle --all
+          git bundle verify reconciliation-backup/HZD-99-all-history.bundle 2>&1 | tee reconciliation-backup/bundle-verify.txt
+          gh api repos/$GITHUB_REPOSITORY/actions/workflows --paginate > reconciliation-backup/workflows-before.json
+          gh api repos/$GITHUB_REPOSITORY/branches?per_page=100 > reconciliation-backup/branches-before.json
+          curl --fail --location --retry 3 https://zaferdajani.github.io/HZD-99/release.json -o reconciliation-backup/live-release-before.json
+          curl --fail --location --retry 3 https://zaferdajani.github.io/HZD-99/ -o reconciliation-backup/live-index-before.html
+          git log -40 --format='%H %cI %s' > reconciliation-backup/recent-commits.txt
+          sha256sum reconciliation-backup/HZD-99-all-history.bundle reconciliation-backup/live-index-before.html > reconciliation-backup/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        id: backup
+        with:
+          name: CLAWBYTE-before-reconciliation-${{ github.sha }}
+          path: reconciliation-backup/
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
+  retire:
+    needs: backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: write
+      pages: write
+    steps:
+      - name: Disable only the approved one-off workflows and legacy publisher
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BACKUP_ARTIFACT: ${{ needs.backup.outputs.artifact }}
+        run: |
+          python3 - <<'PY'
+          import os,json,urllib.request,urllib.error,pathlib,datetime
+          root='https://api.github.com/repos/'+os.environ['REPO']
+          headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}
+          def call(method,path,data=None):
+              req=urllib.request.Request(root+path,method=method,headers=headers,data=None if data is None else json.dumps(data).encode())
+              try:
+                  with urllib.request.urlopen(req,timeout=40) as r:
+                      b=r.read();return r.status,json.loads(b) if b else None
+              except urllib.error.HTTPError as e:
+                  b=e.read()
+                  try:j=json.loads(b)
+                  except Exception:j={'message':b.decode()[:200]}
+                  return e.code,{'message':j.get('message'),'documentation_url':j.get('documentation_url')}
+          ids=[355266638,355291664,355240573,355298635,355315058,322793737]
+          report={'backup_artifact':os.environ['BACKUP_ARTIFACT'],'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'workflows':[],'cancelled':[],'pages':{}}
+          for wid in ids:
+              before_code,before=call('GET','/actions/workflows/'+str(wid))
+              status,body=call('PUT','/actions/workflows/'+str(wid)+'/disable')
+              _,after=call('GET','/actions/workflows/'+str(wid))
+              report['workflows'].append({'id':wid,'path':before.get('path') if isinstance(before,dict) else None,'before':before.get('state') if isinstance(before,dict) else None,'disable_http':status,'after':after.get('state') if isinstance(after,dict) else None,'error':body})
+              for state in ['queued','in_progress','waiting','pending','requested']:
+                  _,runs=call('GET','/actions/workflows/'+str(wid)+'/runs?status='+state+'&per_page=100')
+                  for run in (runs or {}).get('workflow_runs',[]):
+                      code,out=call('POST','/actions/runs/'+str(run['id'])+'/cancel')
+                      report['cancelled'].append({'run':run['id'],'workflow':wid,'http':code})
+          code,settings=call('GET','/pages')
+          report['pages']['read_http']=code
+          if code==200:
+              report['pages']['before']={k:settings.get(k) for k in ['build_type','source','html_url']}
+              if settings.get('build_type')!='workflow':
+                  status,error=call('PUT','/pages',{'build_type':'workflow'})
+                  report['pages']['update_http']=status;report['pages']['update_error']=error
+              code,settings=call('GET','/pages')
+              report['pages']['after']={k:settings.get(k) for k in ['build_type','source','html_url']}
+          # Missing administration scope is a recorded boundary, never bypassed.
+          pathlib.Path('retirement-result.json').write_text(json.dumps(report,indent=2))
+          print(json.dumps(report,indent=2))
+          assert all(w['after']=='disabled_manually' for w in report['workflows']), 'At least one workflow was not disabled; inspect the recorded permission boundary.'
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CLAWBYTE-retirement-result-${{ github.sha }}
+          path: retirement-result.json
+          retention-days: 90
+          if-no-files-found: error

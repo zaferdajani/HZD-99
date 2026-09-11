@@ -1,3 +1,6 @@
+> Historical snapshot, not current release authority. See `DEVELOPMENT_AUTHORITY.md`.
+> Keep the original evidence below; do not use old scale values or workflow status as current facts.
+
 # HZD-99 continuation checkpoint — 2026-09-08
 
 Repository: `zaferdajani/HZD-99`. Working branch:

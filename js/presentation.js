@@ -1,7 +1,10 @@
 // Shared world framing and startup readiness. UI remains in 960x540 logical
 // pixels; camera zoom scales the WORLD, including effects and interactions.
 // It does not silently enlarge only the artwork around a smaller hit shape.
-const PRESENTATION = { explorationZoom:1.90, minEncounterZoom:1.05, buffer:null };
+// The latest accepted sizing is 25% smaller than the 1.78 actor at 1.90 zoom.
+// World zoom changes the view; actor scale changes the hero/NPC proportion.
+// They are deliberately separate, applied once each, and tested as a pair.
+const PRESENTATION = { heroVisualScale:1.335, explorationZoom:1.90, minEncounterZoom:1.05, buffer:null };
 const HERO_CORE_KEYS = ['heroStates', 'gaitWalk', 'gaitRun', 'hzdIdle'];
 let heroArtAttempt = 0;
 function requestHeroArt() {

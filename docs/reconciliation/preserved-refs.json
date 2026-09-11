@@ -1,0 +1,13 @@
+{
+  "policy": "preservation-only, no deletion or force-push",
+  "refs": {
+    "release/polish-20260910": "55b3761b6a105d7b8be74c8ebef85201860f9462",
+    "fix/hero-priorities-20260911": "944775d4c5eae75f9082ccd35eb99528e605ae62",
+    "claude/art-queue-section-1-fire-yqlyc0": "ee9b007c790369a7a0c15db3a03d4ddf3c4d775f",
+    "claude/clawbyte-drawn-cast": "70e499d28c657d195f6138c8747ac57bd24bcd7e",
+    "claude/custom-game-creation-3d-229ecl": "71987ae7ed847b43e12165a314a60ef64ca66792",
+    "claude/gaming-movement-library-57mjvt": "7a083cb039cd66c36a7b97441d92776a762570f6"
+  },
+  "backup_run": 34580105496,
+  "backup_artifact": 10191247757
+}

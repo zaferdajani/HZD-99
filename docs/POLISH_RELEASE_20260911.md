@@ -1,3 +1,6 @@
+> Historical snapshot, not current release authority. See `DEVELOPMENT_AUTHORITY.md`.
+> Keep the original evidence below; do not use old scale values or workflow status as current facts.
+
 # CLAWBYTE engineering polish release — 2026-09-11
 
 ## Scope and evidence

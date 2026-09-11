@@ -1474,7 +1474,7 @@ function findNear() {
       if (d < bestD) { bestD = d; best = s; }
     }
   }
-  return best;
+  return best || (typeof monoNearTarget === 'function' ? monoNearTarget() : null);
 }
 // ---------------------------------------------------------------------------
 // HOW THE WORLD SEES HER, AND WHETHER IT SAYS SO.
@@ -1549,6 +1549,8 @@ function forgeCrystal() {
   showItem(t('i_crystal'), t('i_crystald'));
 }
 function doInteract(s) {
+  if (!s && typeof monoNearTarget === 'function') s = monoNearTarget();
+  if (!s) return;
   if (s.type === 'npc') {
     // THEY WANT SOMETHING NOW. Talking twice used to give you the same three
     // lines forever; a character who cannot ask you for anything is scenery
@@ -10890,6 +10892,7 @@ function drawStatics(P) {
         c.shadowBlur = 0; c.globalAlpha = 1;
       }
     } else if (s.type === 'npc') {
+      if (typeof drawMonoWorldAccent === 'function') drawMonoWorldAccent(c, s);
       const talking = G.state === 'DIALOG' && G.dialog && G.dialog.npc === s.extra;
       // A DARK UNIT DOES NOT BREATHE. No bob, no ambient sparks, no turn to
       // face her — it is a body standing where it was standing when the power

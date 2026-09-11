@@ -1,7 +1,3 @@
-> **Current authority (2026-09-11):** Read `docs/DEVELOPMENT_AUTHORITY.md` first.
-> This HZD-99 Project thread is the sole development/publishing authority.
-> Conflicting historical session, branching or autonomous-deployment directions below are superseded.
-
 # CLAWBYTE / NOSTOS — working notes
 
 ## Story authority

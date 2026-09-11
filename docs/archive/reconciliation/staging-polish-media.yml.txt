@@ -1,0 +1,28 @@
+name: CLAWBYTE release diagnostic media
+on:
+  push:
+    branches: [release/polish-20260910]
+    paths: [.github/workflows/polish-media.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package exact release source and audio
+        run: |
+          du -sh assets/audio assets/video
+          mkdir -p /tmp/clawbyte-diagnostics
+          tar -czf /tmp/clawbyte-diagnostics/audio.tgz assets/audio
+          tar -czf /tmp/clawbyte-diagnostics/source.tgz js tests build.cjs dev.html source-files.json loader.html sw.js tools/pack-www.cjs desktop .github/workflows
+          git rev-parse HEAD > /tmp/clawbyte-diagnostics/commit.txt
+          ls -lh /tmp/clawbyte-diagnostics/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clawbyte-diagnostic-source-audio
+          path: /tmp/clawbyte-diagnostics/
+          retention-days: 3
+          compression-level: 0
