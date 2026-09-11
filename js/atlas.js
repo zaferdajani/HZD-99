@@ -16,12 +16,13 @@
 //   column 3 = 135°
 //   column 4 = 180° facing screen-left
 //   columns 5-7 = 225/270/315, the back, kept for scripted moments
-// k-values below are ×1.335 of their original tuning (owner, 2026-09-11:
-// the hero read oversized at HERO_SCREEN_SCALE 1.78, corrected to 1.335 —
-// see js/entities.js). These rows were set Sep 2, eight days before that
-// constant existed, against an effectively unscaled hero; scaling them by
-// the same factor she now carries restores the proportion they were
-// authored at rather than leaving them fixed while she shrinks around them.
+// k-values are these subjects' own original Sep-2 tuning. They briefly
+// carried a ×1.335 correction while HERO_SCREEN_SCALE sat at 1.335 (owner,
+// 2026-09-11), restoring the proportion they were authored at against an
+// effectively unscaled hero; a same-day follow-up cut the hero to her
+// original 1.0, so that correction factor is back to 1 and these are back
+// to their own plain values — no longer scaled BY anything, just what they
+// always were.
 // crawler/hopper/blob/flier/turret draw through here every frame; brood/
 // atlas/zero/prism/mother/glitch have their own dedicated rigs (beast.js,
 // eagle.js, glaciere.js, furnace.js, prism.js, mother.js) and only fall
@@ -32,17 +33,17 @@ const ATLAS = {
   // k    = how many hitbox-heights the CELL should occupy on screen
   // yOff = nudge in hitbox-heights; hovering things do not stand on the cell floor
   sub: {
-    hzd:     { row: 0,  k: 2.34, yOff: 0.00 },
-    crawler: { row: 1,  k: 4.14, yOff: 0.06 },
-    hopper:  { row: 2,  k: 3.60, yOff: 0.04 },
-    blob:    { row: 3,  k: 3.80, yOff: 0.06 },
-    flier:   { row: 4,  k: 3.47, yOff: -0.10 },
-    turret:  { row: 5,  k: 2.94, yOff: 0.04 },
-    brood:   { row: 6,  k: 2.07, yOff: -0.06, ins: { top: 0.10, bottom: 0.20 } },
-    atlas:   { row: 7,  k: 1.87, yOff: 0.03, ins: { top: 0.10, bottom: 0.19 } },
-    zero:    { row: 8,  k: 2.11, yOff: 0.00, ins: { top: 0.09, bottom: 0.20 } },
-    prism:   { row: 9,  k: 2.60, yOff: -0.08, ins: { top: 0.10, bottom: 0.26 } },
-    mother:  { row: 10, k: 1.40, yOff: 0.02, ins: { top: 0.10, bottom: 0.06 } },
+    hzd:     { row: 0,  k: 1.75, yOff: 0.00 },
+    crawler: { row: 1,  k: 3.10, yOff: 0.06 },
+    hopper:  { row: 2,  k: 2.70, yOff: 0.04 },
+    blob:    { row: 3,  k: 2.85, yOff: 0.06 },
+    flier:   { row: 4,  k: 2.60, yOff: -0.10 },
+    turret:  { row: 5,  k: 2.20, yOff: 0.04 },
+    brood:   { row: 6,  k: 1.55, yOff: -0.06, ins: { top: 0.10, bottom: 0.20 } },
+    atlas:   { row: 7,  k: 1.40, yOff: 0.03, ins: { top: 0.10, bottom: 0.19 } },
+    zero:    { row: 8,  k: 1.58, yOff: 0.00, ins: { top: 0.09, bottom: 0.20 } },
+    prism:   { row: 9,  k: 1.95, yOff: -0.08, ins: { top: 0.10, bottom: 0.26 } },
+    mother:  { row: 10, k: 1.05, yOff: 0.02, ins: { top: 0.10, bottom: 0.06 } },
   },
 };
 
@@ -236,18 +237,17 @@ const ATLAS2 = {
   // this sheet was keyed and laid out by tools/turnsheet.cjs, so the cells are
   // already isolated and already have a real alpha ramp — no inset needed
   ins: { top: 0.01, bottom: 0.01, side: 0.01 },
-  // k-values ×1.335 for the same reason as ATLAS above: set Sep 2, before
-  // HERO_SCREEN_SCALE existed, so ratchet's "double my size" (and the rest,
-  // tuned alongside it) meant double the hero as she stood then, not as she
-  // stands now.
+  // k-values are back to their original Sep-2 tuning — see ATLAS above for
+  // why. Ratchet's "double my size" was always double the hero at her
+  // original 1.0; that is what she's back to.
   sub: {
-    servo:   { row: 0, k: 1.74, yOff: 0.02 },
-    ratchet: { row: 1, k: 3.47, yOff: 0.02 },  // owner: 'the npc is too small, it should be double my size'
-    mono:    { row: 2, k: 2.00, yOff: 0.02 },
-    patch:   { row: 3, k: 1.87, yOff: 0.02 },
-    sage:    { row: 4, k: 2.07, yOff: 0.02 },
-    lumen:   { row: 5, k: 1.67, yOff: 0.02 },
-    guard:   { row: 6, k: 3.07, yOff: 0.05 },
+    servo:   { row: 0, k: 1.30, yOff: 0.02 },
+    ratchet: { row: 1, k: 2.60, yOff: 0.02 },  // owner: 'the npc is too small, it should be double my size'
+    mono:    { row: 2, k: 1.50, yOff: 0.02 },
+    patch:   { row: 3, k: 1.40, yOff: 0.02 },
+    sage:    { row: 4, k: 1.55, yOff: 0.02 },
+    lumen:   { row: 5, k: 1.25, yOff: 0.02 },
+    guard:   { row: 6, k: 2.30, yOff: 0.05 },
   },
 };
 // which sheet owns a subject. The roster is asked first, so a name that exists

@@ -11,7 +11,7 @@ assert(!read('js/mobility_fix.js').includes('Player.prototype.draw ='),'duplicat
 assert(!/\b(draw|findNear|clearP|doInteract)\s*=\s*function/.test(read('js/data_conduits_npc_fix.js')),'Mono uses named integration hooks');
 const order=JSON.parse(read('source-files.json'));assert.equal(new Set(order).size,order.length,'every runtime module is compiled once');
 (async()=>{
- const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true,args:['--no-sandbox']});
+ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/opt/pw-browsers/chromium',headless:true,args:['--no-sandbox']});
  const p=await browser.newPage({viewport:{width:960,height:540}}),errors=[];
  p.on('pageerror',e=>errors.push(e.message));
  await p.goto(process.env.GAME_URL||'http://127.0.0.1:8220/index.html',{waitUntil:'domcontentloaded'});
@@ -33,12 +33,17 @@ const order=JSON.parse(read('source-files.json'));assert.equal(new Set(order).si
    try {draw(5000);}finally{drawMonoWorldAccent=savedDraw;presentWorld=savedPresent;c.clearRect=savedClear;G.statics=statics;}
    check('Mono light is drawn after clear, before one world projection',calls===1&&projection===1&&order.indexOf('clear')<order.indexOf('accent')&&order.indexOf('accent')<order.indexOf('projection'),order);
    check('charge drawing no longer has a second runtime installer',!Player.prototype.__chargeEffectsInstalled);
-   check('latest smaller sizing is preserved, not inferred from test constants',HERO_SCREEN_SCALE===1.335&&PRESENTATION.explorationZoom===1.9&&PRESENTATION.heroVisualScale===1.335,{actor:HERO_SCREEN_SCALE,zoom:PRESENTATION.explorationZoom});
+   // Checked against the live constant, not a hardcoded value: it was 1.78,
+   // then 1.335, then 1.0 (owner, 2026-09-11, twice in one day — both cuts
+   // read oversized). The actual guarantee is that the two copies of the
+   // number (js/entities.js's constant, js/presentation.js's startup
+   // default) agree, not that either one holds a specific literal forever.
+   check('latest smaller sizing is preserved, not inferred from test constants',PRESENTATION.explorationZoom===1.9&&PRESENTATION.heroVisualScale===HERO_SCREEN_SCALE,{actor:HERO_SCREEN_SCALE,presentation:PRESENTATION.heroVisualScale,zoom:PRESENTATION.explorationZoom});
    const cv2=document.createElement('canvas');cv2.width=300;cv2.height=300;const cx=cv2.getContext('2d');let scale;
    const di=cx.drawImage;cx.drawImage=function(...args){scale=this.getTransform().a;return di.apply(this,args);};cx.translate(150,230);
    Object.assign(player,{vx:340,vy:0,on:true,chargeT:1,landT:.2,skidT:0,hurtPoseT:0,healT:0,songT:0,swingVis:null,swirlT:0,dashT:0,wallSlide:0,flipT:0,boostT:0});
    player.drawRoboPlate(cx,true);
-   check('one actor multiplier is actually applied',Math.abs(scale-1.335)<1e-5,scale);
+   check('one actor multiplier is actually applied',Math.abs(scale-HERO_SCREEN_SCALE)<1e-5,scale);
    check('combined charge and landing renders the running strip',/^gaitRun:/.test(G.heroDrawn),G.heroDrawn);
    // The staging script proposed protecting a held jump. Verify that the
    // current single controller already preserves it, rather than applying an

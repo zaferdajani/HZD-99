@@ -76,10 +76,11 @@ const engine=process.env.QA_BROWSER==='webkit'?webkit:chromium;
  assert(result.buffered.attack>0&&result.buffered.jump>0);assert(result.paused);record('buffered combat/jump inputs and immediate pause during hitstop',result.buffered);
  assert(result.travel.dx>30);assert.equal(result.travel.legacy,null);assert.equal(result.travel.lock,null);record('reported workshop approach moves with stale locks present',result.travel);
  assert(result.touch.dx>30&&result.touch.heldAfterFrame);record('touch movement remains held until finger release',result.touch);
- // HERO_SCREEN_SCALE was 1.78, corrected to 1.335 when it read oversized
- // against NPCs and enemies (owner, 2026-09-11) — re-centred again on the
- // deterministic idle-pose measurement, same +-0.03 window.
- assert(result.body.viewportRatio>=.28&&result.body.viewportRatio<=.34,'protagonist fraction '+result.body.viewportRatio);record('actual rendered hero size',result.body);
+ // HERO_SCREEN_SCALE went 1.78 -> 1.335 -> 1.0, each cut for reading
+ // oversized against NPCs and enemies (owner, 2026-09-11) — re-centred a
+ // second time on the deterministic idle-pose measurement, same +-0.03
+ // window.
+ assert(result.body.viewportRatio>=.20&&result.body.viewportRatio<=.26,'protagonist fraction '+result.body.viewportRatio);record('actual rendered hero size',result.body);
  assert(result.rooms.every(r=>r.zoom===1.9&&r.x>40&&r.x<920&&r.y>80&&r.y<520));record('seven room camera/framing transitions',result.rooms);
  // The critical-motion gate now names the pending STATE rather than a fixed
  // 'gait' label ('loading:run_b', not 'loading:gait') so the diag panel can
