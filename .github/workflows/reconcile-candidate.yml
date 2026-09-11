@@ -26,8 +26,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release-evidence
-          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/5a2c2b06-3add-47cb-8bb9-b2fb84821e2b.zip' -o "$RUNNER_TEMP/reconciliation.zip"
-          echo "9b6f080aaed00cf9cf562f75cc079ef56c24f95b73439bc54752af34444f9c3d  $RUNNER_TEMP/reconciliation.zip" | sha256sum --check
+          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/ba1374a3-37b6-42ac-bcf9-3f58a3b95947.zip' -o "$RUNNER_TEMP/reconciliation.zip"
+          echo "328ed031c2a9e3eba7ae42e39db6cbcc3759995f9a02daca178bbbc6a009e74b  $RUNNER_TEMP/reconciliation.zip" | sha256sum --check
           python3 - <<'PY'
           import pathlib,zipfile,os,json,hashlib
           h=lambda b:hashlib.sha256(b).hexdigest()
@@ -45,20 +45,21 @@ jobs:
               pathlib.Path('release-evidence/applied-manifest.json').write_text(json.dumps(m,indent=2))
           PY
           node build.cjs
-          for f in js/*.js tests/reconciliation.cjs; do node --check "$f"; done
+          for f in js/*.js tests/reconciliation.cjs tests/beacon.cjs; do node --check "$f"; done
           git config user.name 'CLAWBYTE integration'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add js AGENTS.md CLAUDE.md docs tests/reconciliation.cjs index.html odyssey.html forge.html forge-odyssey.html
+          git add js AGENTS.md CLAUDE.md docs tests/reconciliation.cjs tests/beacon.cjs index.html odyssey.html forge.html forge-odyssey.html
           git commit -m 'Consolidate preserved runtime, authority and rendering fixes; no production promotion'
           git rev-parse HEAD > release-evidence/candidate-commit.txt
           git bundle create release-evidence/candidate.bundle HEAD ^${{ github.sha }}
-      - name: Install the locked test runtime
+      - name: Install the locked test runtime and assemble the actual app payload
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npx playwright install --with-deps chromium
           echo "CHROMIUM_PATH=$(node -p "require('playwright').chromium.executablePath()")" >> "$GITHUB_ENV"
           sudo mkdir -p /opt/pw-browsers
           sudo ln -sf "$(node -p "require('playwright').chromium.executablePath()")" /opt/pw-browsers/chromium
+          node tools/pack-www.cjs
           mkdir -p tests/out
           python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
       - name: Test the exact local candidate commit before pushing it
@@ -68,7 +69,7 @@ jobs:
           node tests/reconciliation.cjs | tee release-evidence/reconciliation.log
           node tests/hero-priorities.cjs | tee release-evidence/hero-priorities.log
           node tests/run.cjs release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 weapons gear combo-routing voice-handoff dialogue-audio cave-passage tutorial-clarity story-progression beacon platform | tee release-evidence/reconciled-regressions.log
-          git diff --exit-code -- js index.html odyssey.html forge.html forge-odyssey.html
+          git diff --exit-code -- js tests AGENTS.md CLAUDE.md docs index.html odyssey.html forge.html forge-odyssey.html
       - name: Push verified integration only, without overriding concurrent work
         env:
           GH_TOKEN: ${{ github.token }}
