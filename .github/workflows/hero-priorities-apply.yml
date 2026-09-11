@@ -1,87 +1,11 @@
 name: Validate hero priorities and regenerate pages
+# Retired by owner-approved reconciliation. Never reapply the old source payload.
 on:
-  push:
-    branches: [claude/clawbyte-repo-migration-byhyl8]
-    paths: [.github/workflows/hero-priorities-apply.yml]
   workflow_dispatch:
-permissions:
-  contents: write
-concurrency:
-  group: hero-priorities-integration
-  cancel-in-progress: false
+permissions: {}
 jobs:
-  integrate:
+  retired:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: claude/clawbyte-repo-migration-byhyl8
-          fetch-depth: 60
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Apply the hash-pinned, locally tested source bundle
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/039ed5f2-b438-411d-a9ca-7e730a4e1ee4.zip' -o "$RUNNER_TEMP/hero-source.zip"
-          echo "7cba828ee2b6a873fdb1eefbdfa6503497d63aa35206d606f2ed8d1c59564eff  $RUNNER_TEMP/hero-source.zip" | sha256sum --check
-          python3 - <<'PY'
-          import json, os, pathlib, subprocess, zipfile
-          permitted = {'js/diag.js', 'js/engine.js', 'js/entities.js', 'js/game.js', 'js/mobility_fix.js', 'tests/hero-priorities.cjs', 'docs/HERO_PRIORITY_PASS_2026-09-11.md'}
-          with zipfile.ZipFile(os.environ['RUNNER_TEMP'] + '/hero-source.zip') as z:
-              assert set(z.namelist()) == permitted | {'hero-apply-manifest.json'}, 'Unexpected archive paths'
-              m = json.loads(z.read('hero-apply-manifest.json'))
-              assert set(m['files']) == permitted
-              for path, expected in m['base_blobs'].items():
-                  actual = subprocess.check_output(['git', 'hash-object', path], text=True).strip()
-                  assert actual == expected, 'Concurrent source change: ' + path
-              for path in permitted - set(m['base_blobs']):
-                  assert not pathlib.Path(path).exists(), 'New file already exists: ' + path
-              for path in m['files']:
-                  p = pathlib.Path(path)
-                  p.parent.mkdir(parents=True, exist_ok=True)
-                  p.write_bytes(z.read(path))
-          PY
-          node --check js/entities.js
-          node --check js/engine.js
-          node --check js/game.js
-          node --check js/mobility_fix.js
-          node build.cjs
-      - name: Install pinned browser test tools
-        shell: bash
-        run: |
-          npm install --prefix "$RUNNER_TEMP/hero-deps" --ignore-scripts --no-audit --no-fund playwright@1.63.0
-          ln -s "$RUNNER_TEMP/hero-deps/node_modules" node_modules
-          "$RUNNER_TEMP/hero-deps/node_modules/.bin/playwright" install --with-deps chromium
-      - name: Test the compiled game, not a mocked renderer
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p build/hero-evidence
-          python3 -m http.server 8220 --bind 127.0.0.1 > build/hero-evidence/server.log 2>&1 &
-          export CHROMIUM_PATH="$(node -p "require('playwright').chromium.executablePath()")"
-          for test in hero-priorities weapons combo-routing input-focus tutorial-clarity gear shadow-ground gait feel speed2; do
-            timeout 120s node "tests/$test.cjs" 2>&1 | tee "build/hero-evidence/$test.log"
-          done
-          sha256sum index.html odyssey.html forge.html forge-odyssey.html > build/hero-evidence/page-hashes.txt
-      - name: Commit tested source and regenerated pages to the integration branch
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p docs/reports
-          cp build/hero-evidence/results.json docs/reports/hero-priorities-2026-09-11.json
-          git add js/diag.js js/engine.js js/entities.js js/game.js js/mobility_fix.js tests/hero-priorities.cjs docs/HERO_PRIORITY_PASS_2026-09-11.md docs/reports/hero-priorities-2026-09-11.json index.html odyssey.html forge.html forge-odyssey.html
-          git config user.name 'CLAWBYTE integration'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Fix hero motion state continuity and camera; commit tested game pages'
-          # A concurrent author wins: this must fail rather than force-push.
-          git push origin HEAD:claude/clawbyte-repo-migration-byhyl8
-          git rev-parse HEAD | tee build/hero-evidence/commit.txt
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: hero-priorities-evidence
-          path: build/hero-evidence
-          retention-days: 14
+      - run: echo 'Retired; use the authoritative integration branch.'

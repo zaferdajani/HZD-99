@@ -1,0 +1,21 @@
+{
+  "authority": "HZD-99 Project conversation, owner-approved consolidation 2026-09-11",
+  "integration_branch": "claude/clawbyte-repo-migration-byhyl8",
+  "production_branch": "main",
+  "mirror_branch": "odyssey",
+  "production_promotion": "blocked until Pages build_type is workflow; do not race the legacy publisher",
+  "retained_base": "e12a91dc4e0b0fdaf54eef8d38e52549c44683b6",
+  "retained_latest_sizing": "086f62a4b9aa4a96fef9359585572b44cb6f082c",
+  "merged_heads": [
+    "55b3761b6a105d7b8be74c8ebef85201860f9462",
+    "70e499d28c657d195f6138c8747ac57bd24bcd7e",
+    "7a083cb039cd66c36a7b97441d92776a762570f6"
+  ],
+  "resolution": {
+    "runtime": "Retain the current integration source and all assets. No wholesale restoration of historical generated pages.",
+    "staging": "Unique script/export workflow are preserved byte-for-byte under docs/archive/branch-tips, not executed; obsolete assets/audio/vox paths are not current source paths.",
+    "drawn_cast": "Retain current generated pages and expanded documentation; archive unique branch document. No new artwork in branch-only merge delta.",
+    "movement_library": "Fetching tool is already byte-identical in current integration; keep expanded corrected current guide and archive original guide/gitignore.",
+    "history": "All refs, original assets and reachable history retained. Backup Actions run 34580105496, artifact 10191247757. No force push or branch deletion."
+  }
+}

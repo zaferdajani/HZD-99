@@ -1,24 +1,11 @@
 name: CLAWBYTE polish release snapshot
+# Retired after the complete all-ref history backup.
 on:
-  push:
-    branches: [release/polish-20260910]
-    paths: [.github/workflows/polish-qa.yml]
   workflow_dispatch:
-permissions:
-  contents: read
+permissions: {}
 jobs:
-  snapshot:
+  retired:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - name: Archive current source and runtime images and sounds
-        run: |
-          git rev-parse HEAD > SOURCE_COMMIT.txt
-          tar --exclude='./.git' --exclude='./node_modules' --exclude='./assets/video' --exclude='./assets/source' --exclude='./android' --exclude='./ios' -czf /tmp/clawbyte-staged.tgz .
-      - uses: actions/upload-artifact@v4
-        with:
-          name: clawbyte-staged-source
-          path: /tmp/clawbyte-staged.tgz
-          retention-days: 3
-          compression-level: 0
+      - run: echo 'Retired; preserved in reconciliation backup.'

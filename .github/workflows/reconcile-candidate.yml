@@ -1,0 +1,98 @@
+name: Validate and commit reconciled CLAWBYTE candidate
+on:
+  push:
+    branches: [claude/clawbyte-repo-migration-byhyl8]
+    paths: [.github/workflows/reconcile-candidate.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: clawbyte-reconciliation-candidate
+  cancel-in-progress: false
+jobs:
+  integrate:
+    if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply only the reviewed hash-pinned reconciliation payload
+        run: |
+          set -euo pipefail
+          mkdir -p release-evidence
+          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/5a2c2b06-3add-47cb-8bb9-b2fb84821e2b.zip' -o "$RUNNER_TEMP/reconciliation.zip"
+          echo "9b6f080aaed00cf9cf562f75cc079ef56c24f95b73439bc54752af34444f9c3d  $RUNNER_TEMP/reconciliation.zip" | sha256sum --check
+          python3 - <<'PY'
+          import pathlib,zipfile,os,json,hashlib
+          h=lambda b:hashlib.sha256(b).hexdigest()
+          with zipfile.ZipFile(os.environ['RUNNER_TEMP']+'/reconciliation.zip') as z:
+              m=json.loads(z.read('manifest.json'))
+              assert set(z.namelist())==set(m['files'])|{'manifest.json'}
+              for name,hashes in m['files'].items():
+                  p=pathlib.Path(name)
+                  assert not p.is_absolute() and '..' not in p.parts and not name.startswith('.github/'), name
+                  before=h(p.read_bytes()) if p.exists() else None
+                  assert before==hashes['before'], 'Concurrent/unexpected source edit: '+name
+                  assert h(z.read(name))==hashes['after'], 'Payload content mismatch: '+name
+              for name in m['files']:
+                  p=pathlib.Path(name);p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(z.read(name))
+              pathlib.Path('release-evidence/applied-manifest.json').write_text(json.dumps(m,indent=2))
+          PY
+          node build.cjs
+          for f in js/*.js tests/reconciliation.cjs; do node --check "$f"; done
+          git config user.name 'CLAWBYTE integration'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js AGENTS.md CLAUDE.md docs tests/reconciliation.cjs index.html odyssey.html forge.html forge-odyssey.html
+          git commit -m 'Consolidate preserved runtime, authority and rendering fixes; no production promotion'
+          git rev-parse HEAD > release-evidence/candidate-commit.txt
+          git bundle create release-evidence/candidate.bundle HEAD ^${{ github.sha }}
+      - name: Install the locked test runtime
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -p "require('playwright').chromium.executablePath()")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -p "require('playwright').chromium.executablePath()")" /opt/pw-browsers/chromium
+          mkdir -p tests/out
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Test the exact local candidate commit before pushing it
+        run: |
+          set -euo pipefail
+          node tests/build-integrity.cjs | tee release-evidence/build-integrity.log
+          node tests/reconciliation.cjs | tee release-evidence/reconciliation.log
+          node tests/hero-priorities.cjs | tee release-evidence/hero-priorities.log
+          node tests/run.cjs release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 weapons gear combo-routing voice-handoff dialogue-audio cave-passage tutorial-clarity story-progression beacon platform | tee release-evidence/reconciled-regressions.log
+          git diff --exit-code -- js index.html odyssey.html forge.html forge-odyssey.html
+      - name: Push verified integration only, without overriding concurrent work
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          expected=${{ github.sha }}
+          remote=$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/claude/clawbyte-repo-migration-byhyl8 --jq .object.sha)
+          test "$remote" = "$expected" || { echo 'Concurrent author advanced integration. Candidate preserved; not overwriting.'; exit 1; }
+          git push origin HEAD:claude/clawbyte-repo-migration-byhyl8
+          # Native candidate validation is permitted; no Pages or main/odyssey writes.
+          gh api --method POST repos/$GITHUB_REPOSITORY/actions/workflows/desktop.yml/dispatches -f ref=claude/clawbyte-repo-migration-byhyl8
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CLAWBYTE-reconciled-candidate-${{ github.sha }}
+          path: |
+            release-evidence/
+            build/hero-evidence/
+            tests/out/
+          retention-days: 90
+      - name: Retire the completed one-time consolidation launchers
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method PUT repos/$GITHUB_REPOSITORY/actions/workflows/reconcile-once.yml/disable
+          gh api --method PUT repos/$GITHUB_REPOSITORY/actions/workflows/reconcile-candidate.yml/disable

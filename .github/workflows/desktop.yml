@@ -1,9 +1,8 @@
 name: Build Windows desktop
-
 on:
   workflow_dispatch:
   push:
-    branches: [main, release/polish-20260910]
+    branches: [main]
     paths:
       - .github/workflows/desktop.yml
       - desktop/**
@@ -11,16 +10,14 @@ on:
       - index.html
       - odyssey.html
       - js/**
-
 permissions:
   contents: read
-
 concurrency:
   group: desktop-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   windows:
+    if: github.repository == 'zaferdajani/HZD-99' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8')
     runs-on: windows-2022
     timeout-minutes: 30
     steps:
@@ -59,10 +56,7 @@ jobs:
             $report = Join-Path $env:RUNNER_TEMP "clawbyte-smoke-$phase.json"
             $args = @("--smoke-test=`"$report`"", "--smoke-phase=$phase", "--smoke-profile=`"$profile`"")
             $process = Start-Process -FilePath $exe -ArgumentList $args -PassThru
-            if (!$process.WaitForExit(120000)) {
-              Stop-Process -Id $process.Id -Force
-              throw "Desktop $phase smoke test timed out"
-            }
+            if (!$process.WaitForExit(120000)) { Stop-Process -Id $process.Id -Force; throw "Desktop $phase smoke test timed out" }
             if ($process.ExitCode -ne 0 -or !(Test-Path $report)) { throw "Desktop $phase smoke test failed" }
             $result = Get-Content $report -Raw | ConvertFrom-Json
             if (!$result.ok -or !$result.offline -or !$result.movement -or !$result.mediaRange) { throw 'Desktop runtime checks failed' }
@@ -76,7 +70,7 @@ jobs:
           name: CLAWBYTE-Windows-smoke-${{ github.sha }}
           path: ${{ runner.temp }}/clawbyte-smoke-*.json
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 30
       - uses: actions/upload-artifact@v4
         with:
           name: CLAWBYTE-Windows-x64-${{ github.sha }}

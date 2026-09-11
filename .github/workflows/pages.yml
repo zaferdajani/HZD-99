@@ -12,12 +12,22 @@ concurrency:
   cancel-in-progress: false
 jobs:
   deploy:
+    if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Refuse competing publishers and stale source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mode=$(gh api repos/$GITHUB_REPOSITORY/pages --jq .build_type)
+          test "$mode" = workflow || { echo 'BLOCKED: set Settings > Pages > Source to GitHub Actions. Legacy publishing must be retired first.'; exit 1; }
+          current=$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/main --jq .object.sha)
+          test "$current" = "$GITHUB_SHA" || { echo 'BLOCKED: main advanced; this run is stale.'; exit 1; }
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -38,13 +48,18 @@ jobs:
       - name: Release-blocking gameplay checks
         run: |
           set -o pipefail
+          node tests/reconciliation.cjs 2>&1 | tee release-evidence/reconciliation.log
           node tests/run.cjs release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 2>&1 | tee release-evidence/predeploy.log
       - name: Stage only release content and stamp its identity
         run: |
           mkdir -p _site
-          rsync -a --exclude '.git' --exclude '.github' --exclude '.claude' --exclude '.codex' --exclude '_site' --exclude 'node_modules' --exclude 'tests' --exclude 'tools' --exclude 'release-evidence' --exclude 'www' --exclude 'build' --exclude 'desktop' --exclude 'android' --exclude 'ios' --exclude 'assets/source' ./ _site/
+          rsync -a --exclude '.git' --exclude '.github' --exclude '.claude' --exclude '.codex' --exclude '_site' --exclude 'node_modules' --exclude 'tests' --exclude 'tools' --exclude 'release-evidence' --exclude 'www' --exclude 'build' --exclude 'desktop' --exclude 'android' --exclude 'ios' --exclude 'assets/source' --exclude 'docs/archive' ./ _site/
           touch _site/.nojekyll
           node tools/stamp-pages.cjs _site
+      - name: Recheck main immediately before publishing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: test "$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/main --jq .object.sha)" = "$GITHUB_SHA"
       - name: Enable and configure Pages
         uses: actions/configure-pages@v5
         with:
@@ -64,6 +79,7 @@ jobs:
           GAME_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           set -o pipefail
+          node tests/reconciliation.cjs 2>&1 | tee release-evidence/live-reconciliation.log
           node tests/release-polish.cjs 2>&1 | tee release-evidence/live-gameplay.log
           node tests/wake.cjs 2>&1 | tee release-evidence/live-opening.log
       - uses: actions/upload-artifact@v4
@@ -74,4 +90,4 @@ jobs:
             release-evidence/
             tests/out/
             _site/release.json
-          retention-days: 14
+          retention-days: 30
