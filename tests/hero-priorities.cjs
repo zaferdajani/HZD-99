@@ -5,7 +5,7 @@ const base=process.env.TEST_URL || 'http://127.0.0.1:8220/index.html';
 const output=process.env.EVIDENCE_DIR || 'build/hero-evidence';
 fs.mkdirSync(output,{recursive:true});
 (async()=>{
- const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH || undefined,headless:true,args:['--no-sandbox']});
+ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium',headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:960,height:540}}), errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  await page.goto(base,{waitUntil:'domcontentloaded'});
@@ -38,8 +38,10 @@ fs.mkdirSync(output,{recursive:true});
    const ctx=canvas.getContext('2d');let effective=null;const drawImage=ctx.drawImage.bind(ctx);
    ctx.drawImage=function(...args){effective=this.getTransform().a;return drawImage(...args);};
    ctx.translate(160,240);player._motionBlend=null;player.drawRoboPlate(ctx,true);
-   // Canvas matrix components round to float32.
-   record('1.78 scale reaches rendered body',Math.abs(effective-1.78)<1e-6,effective);
+   // Canvas matrix components round to float32. Checked against the live
+   // constant, not a hardcoded value — it was 1.78, corrected to 1.335 when
+   // it read oversized against NPCs and enemies (owner, 2026-09-11).
+   record('HERO_SCREEN_SCALE reaches rendered body',Math.abs(effective-HERO_SCREEN_SCALE)<1e-6,{effective,expected:HERO_SCREEN_SCALE});
    // Drive actual input and physics through a jump while holding charge.
    reset();player.x=320;player.y=(G.roomDef.h-2)*TILE-player.h;player.volts=99;player.chargeT=0;
    let landingFrames=0, bad=0, moving=0;const begin=player.x, trace=[];

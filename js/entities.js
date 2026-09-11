@@ -752,7 +752,14 @@ const HERO_POSE_K = { charge: 0.893 };
 // the dirt and the front grass blades brush her ankles, which is what
 // standing IN a meadow looks like.
 const HERO_DH = 60, HERO_FLOOR = 6;
-const HERO_SCREEN_SCALE = 1.78; // visual only; collision and attack reach are unchanged
+// 1.78 read as oversized against NPCs and enemies (owner, 2026-09-11) — 25%
+// smaller. Still visual only; collision and attack reach are unchanged.
+// NPC/enemy art scale (js/atlas.js ATLAS/ATLAS2) is corrected the same
+// direction: their k-values were tuned before this constant existed (git
+// history: Sep 2, eight days before the hero's own scale-up), against an
+// effectively unscaled hero, so restoring their intended proportion means
+// scaling them by THIS number, not holding them fixed while she shrinks.
+const HERO_SCREEN_SCALE = 1.335; // 1.78 * 0.75
 // Six frames of the real blow per attack (js/media.js swingClaw1 and friends).
 // All four are fired: combo 1, combo 2, the combo-3 finisher and the charged
 // burst. Anything not here still falls through to its pose cell, which is the
