@@ -1,6 +1,11 @@
 # THE GENERATION QUEUE
 
 Briefs that are **written and ready to fire** but whose plates do not exist yet.
+Still images and 3D only — as of 2026-09-11 the fleet split into separate
+ART / AUDIO / VIDEO sessions (CLAUDE.md, THE SESSION FLEET); music and voice
+briefs now queue in `docs/AUDIO_QUEUE.md`, motion/cinematic briefs in
+`docs/VIDEO_QUEUE.md`. Older entries below that read as video or audio work
+predate that split and are historical record, not misfiled.
 
 This file exists because of a specific waste: when the art connector is not
 bound to a session, the work does not have to stop — the expensive part of
