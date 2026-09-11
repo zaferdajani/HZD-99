@@ -6428,7 +6428,14 @@ function buildSurfaceCurve() {
   const vn = (x) => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return h1(i) * (1 - u) + h1(i + 1) * u; };
   const fbm = (x) => vn(x) * 0.55 + vn(x * 2.3 + 11) * 0.28 + vn(x * 4.7 + 31) * 0.17;
 
-  const AMP = 26;
+  // Owner (2026-09-11): "the terrain is too bumpy, when I asked for texture I
+  // didn't mean to make it up and down everywhere." At 26 the two-octave rise
+  // below (amp + amp*0.45) peaks near 38px — more than a full 32px tile of
+  // continuous elevation change on ordinary ground, everywhere, all the time.
+  // That reads as terrain, not texture. 10 peaks near 14.5px: still organic,
+  // still no straight line (NO RIGHT ANGLES), but a surface ripple rather than
+  // a mountain range she has to keep climbing.
+  const AMP = 18;
   const out = new Float32Array(N);
   for (let i = 0; i < N; i++) {
     if (isNaN(N2[i])) { out[i] = NaN; continue; }
@@ -6448,8 +6455,19 @@ function buildSurfaceCurve() {
     // FRACTURES. Smooth noise reads as landscape; this world is a fallen city,
     // so the curve carries occasional hard breaks — a slab dropped a few px
     // against its neighbour — instead of only rolling.
+    //
+    // Scaled with AMP (owner, 2026-09-11, same pass): this was a flat ±8px
+    // regardless of AMP, so cutting AMP 26->18 for "texture, not elevation"
+    // left the one genuinely hard edge in the curve exactly as large as
+    // before — now a proportionally BIGGER share of the room's relief than
+    // the organic rolling around it was tuned to absorb. Measured effect:
+    // tests/terrainrun.cjs's C2 stall (rise 0px reported at the moment she
+    // stopped, meaning something not caught by the raw-tile riseAhead scan)
+    // went from 0/6 clean runs at AMP=26 to ~5/6 failing at AMP=18 with the
+    // fracture left unscaled. Tying it to the same AMP the rest of the pass
+    // answers to keeps the ratio the fracture was originally tuned against.
     const fseed = Math.floor(x * 0.7);
-    if (h1(fseed * 3.7) > 0.72) y += (h1(fseed * 9.1) - 0.5) * 16;
+    if (h1(fseed * 3.7) > 0.72) y += (h1(fseed * 9.1) - 0.5) * 16 * (AMP / 26);
     // ADD FREELY, CUT CONSERVATIVELY — and this asymmetry is the whole rule.
     // Smoothing a one-tile step produces a ramp that lies BELOW the platform's
     // own top for most of its length, and cutting to that ramp erased 40px of

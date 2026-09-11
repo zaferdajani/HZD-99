@@ -267,8 +267,9 @@ function caveCarve(g, seedStr, o) {
   // NO PIT DEEPER THAN A JUMP. Anchors dig flat bowls into a rolling floor,
   // and where the roll was high the bowl's wall could pass the three tiles a
   // jump clears (tests/climbout.cjs measured it: CV2 trapped three cells this
-  // way). Walk the floor profile and shave any step taller than three down
-  // to three, on both sides, until it settles. Mounds survive; traps do not.
+  // way). Walk the floor profile and shave any step taller than STEP_CAP down
+  // to STEP_CAP, on both sides, until it settles. Mounds survive; traps do not.
+  const STEP_CAP = 3;
   const ground = [];
   const groundAt = (x) => {
     for (let y = H - 2; y >= 1; y--)
@@ -279,8 +280,8 @@ function caveCarve(g, seedStr, o) {
   for (let pass = 0; pass < 4; pass++)
     for (let x = 2; x < W - 2; x++)
       for (const nx of [x - 1, x + 1])
-        if (ground[x] - ground[nx] > 3) {
-          const ny = ground[x] - 3;
+        if (ground[x] - ground[nx] > STEP_CAP) {
+          const ny = ground[x] - STEP_CAP;
           for (let y = ground[nx] + 1; y <= ny; y++) g[y][nx] = '.';
           ground[nx] = ny;
         }
@@ -1451,7 +1452,14 @@ const ROOMS = {
     build(g) {
       caveCarve(g, 'CV2', {
         mouth: 1, open: ['L', 'R'], ledges: 5,
-        anchor: [{ x: 12, y: 15, w2: 2, h2: 4 }, { x: 14, y: 15 },
+        // x:23 added (owner, 2026-09-11, terrain-bumpiness pass): the carved
+        // floor drops a genuine 3-tile cliff between the x:14 and x:26
+        // anchors, right under the west pocket, that the rolling-floor noise
+        // (js/game.js buildSurfaceCurve) used to round into a walk before its
+        // own amplitude was cut for reading as elevation rather than texture.
+        // A bare anchor here gives that stretch a real flat landing instead
+        // of asking the noise pass to keep disguising an authored cliff.
+        anchor: [{ x: 12, y: 15, w2: 2, h2: 4 }, { x: 14, y: 15 }, { x: 23, y: 15 },
                  { x: 26, y: 15, w2: 2 }, { x: 33, y: 15 },
                  { x: 56, y: 15 }, { x: 8, y: 15 }],
         pocket: [{ x: 22, y: 6 }, { x: 48, y: 6 }],

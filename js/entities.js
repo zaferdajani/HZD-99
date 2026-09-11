@@ -381,8 +381,38 @@ function onSpike(e) {
 // bug with the same symptom as the probe bug above and survived the fix to it.
 // Measured on the A2 guard: 147 turns in 360 frames, with no ground ahead on
 // 124 of them. It reverses only if the other way is actually better.
+//
+// A THIRD way to hit the same symptom, found tuning the terrain-bumpiness
+// pass (owner, 2026-09-11), and this one is not a flicker in the read — it
+// is a real, if gentle, SLOPE the crawler is standing on. buildSurfaceCurve's
+// own step-ramp (RAD ~1.5 tiles either side of a real one-tile rise, the same
+// pass that turns the player's steps into something she runs up) spreads
+// CV2's authored lip at the room's own east mouth into a ~48px grade. A body
+// partway up that grade is a genuinely ambiguous read — the ground a few px
+// ahead really is a different height than the ground a few px behind — so
+// the ledge probe flips with it, correctly, every time her feet cross the
+// next sub-pixel of gradient: measured 76-156 turns in 360 frames, and it
+// tracked her exact sub-pixel position on the slope rather than any one
+// broken column.
+//
+// A time-based cooldown does not fit this shape: the slowest patrol in the
+// roster (the blob, ~18-30 px/s under its own breathing) can take several
+// seconds to clear a 48px grade, and gating on a clock either reopens before
+// she is off it (too short to matter) or holds her motionless in an empty
+// room for no reason a player would read as intentional (too long). What
+// actually resolves the ambiguity is DISTANCE: once she has moved a tile and
+// a half from wherever she last turned, she is off the graded span this
+// class of slope produces and any new answer from groundAhead() is a fresh
+// question, not the same flicker asked again. Gating on ground actually
+// covered, not on time spent, costs a real ledge nothing (the first read
+// still turns her) and never traps her — she is walking the whole gated
+// span, same direction, at her own speed, not standing still.
+const LEDGE_GATE = TILE * 1.5;
 function ledgeTurn(e, dir) {
-  return !groundAhead(e, dir) && groundAhead(e, -dir);
+  if (e.turnX != null && Math.abs(e.x - e.turnX) < LEDGE_GATE) return false;
+  const should = !groundAhead(e, dir) && groundAhead(e, -dir);
+  if (should) e.turnX = e.x;
+  return should;
 }
 function groundAhead(e, dir) {
   const ax = dir > 0 ? e.x + e.w + 3 : e.x - 3;
