@@ -880,6 +880,22 @@ function settlePendingBossReward() {
 function loadRoom(id) {
   settlePendingBossReward();
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
+  // A ROOM CROSSING EATS A STILL-HELD "UP". Touch's stick and a gamepad's
+  // button/axis both derive their edge from ONE poll of "was this already
+  // down" (touch.js tSetK checks keys[code]; pollGamepad checks GP_PREV) —
+  // so a player who never lets the stick re-centre between walking INTO a
+  // booth and walking back OUT of it gets exactly one edge, spent entering,
+  // and pressing UP at the very same door a moment later does nothing: not
+  // because the door is broken, but because the game still thinks that
+  // thumb never came up. Reported 2026-09-12 ("when I get out of shop I
+  // can't get back in, pressing up doesn't work") on a phone, where holding
+  // a direction through a whole walk is the ordinary way to move, not an
+  // edge case. Keyboard does not need this: engine.js's keydown handler
+  // filters e.repeat, so a real key release always sits between two presses
+  // there. Clearing the two continuously-DERIVED tracking values forces the
+  // very next poll of each to read the current physical state as fresh,
+  // without asking the player to actually let go first.
+  keys.VU = 0; GP_PREV.GP_U = false;
   G.roomId = id; G.roomDef = ROOMS[id]; G.grid = buildRoom(id);
   surfCurve = null; surfRoom = null;   // the surface curve belongs to the room
   // re-aim the prefetcher: the art for the rooms she can now REACH
