@@ -351,6 +351,11 @@ const MEDIA_SRC = {
     gaitRun: 'assets/characters/hero/gait/run.webp',
     hzdIdle: 'assets/characters/hero/idle.webp',
     hzdHurt: 'assets/characters/hero/hurt.webp',
+    // THE DEATH SEQUENCE (owner brief, 2026-09-14): three fired stills, same
+    // treatment as HERO_AIR_STRIP's jump arc — stagger, buckle, and down.
+    // The only state in her whole roster that shipped with zero art; see
+    // HERO_DEATH_STRIP in entities.js for how G.deadT indexes into it.
+    hzdDeath: 'assets/characters/hero/death.webp',
     swingJab: 'assets/characters/hero/swing/jab.webp',
     swingHook: 'assets/characters/hero/swing/hook.webp',
     swingUppercut: 'assets/characters/hero/swing/uppercut.webp',

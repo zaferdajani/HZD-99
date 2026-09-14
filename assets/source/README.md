@@ -167,6 +167,36 @@ set is tasks #79/#80/#81. Until then the procedural body remains what ships.
 
 ---
 
+## `hero/death/` — the state that shipped with zero art
+
+Owner brief, 2026-09-14: "dying... is something you have been failing at." He
+was exactly right — `draw()` returned on its very first line the instant
+`this.dead` flipped true, so from the moment she died the only thing left
+onscreen was `die()`'s particle burst fading out. No art, procedural or
+authored, had ever covered this state.
+
+Three stills, all generated with the `hzd99-canon` element embedded exactly
+per the rule above — `stagger.jpg` (the hit that kills her), `collapse.jpg`
+(buckling), `down.jpg` (offline) — composited into `assets/characters/hero/
+death.webp` (300px cells, matching `idle.webp`'s convention) and WIRED:
+`HERO_DEATH_STRIP` in `entities.js`, drawn by the new `Player.drawDeath()`,
+indexed by `G.deadT` (the timer `G.onPlayerDeath()` already owned and counted
+down before this). This is the one action-plate case that shipped past the
+review-but-not-wired line above, because the gap it closes is a state with
+no fallback at all rather than a procedural body still standing in.
+
+An owner-supplied reference sheet (a flat 2D pixel-art "combat animation
+sprite sheet", ChatGPT-sourced per its own accompanying doc) was reviewed and
+explicitly NOT used as art: wrong render class entirely (§0.0 is every
+character is 3D; this was flat), wrong palette (blue eyes, plain scarf, no
+cape) against the canon's cyan eye-lights and scarf-into-cape. It was used
+only for which STATES to cover — the brief's own words, "using all the moves
+in it... change whatever you need... to make the character matching with my
+character." The actual plates are canon-element generations, not derivatives
+of that sheet.
+
+---
+
 ## Rule going forward
 
 Any generated asset is committed here **in the same commit that uses it**. If it

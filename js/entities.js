@@ -869,6 +869,20 @@ const HERO_TRANS = {
 // as stills (2026-09-02) after eleven video takes either started the jump in
 // the last half-second or never left the ground. k against the sheet's apex.
 let HERO_AIR_STRIP = { key: 'transAir', cells: 3, k: 0.819, up: 770, down: 700 };
+// THE DEATH SEQUENCE (owner brief, 2026-09-14: "dying... is something you
+// have been failing at"). He was right in a specific way: draw() returned
+// on the very first line whenever this.dead was true, so from the moment
+// she died the only thing onscreen was die()'s particle burst fading out —
+// no body, authored or procedural, ever drew again. The one state in her
+// whole roster that shipped with zero art.
+// Three fired stills, same treatment as HERO_AIR_STRIP's jump arc: a
+// stagger (the hit that kills her), a buckle, and down. Indexed by
+// G.deadT — the timer G.onPlayerDeath() itself owns and counts to zero
+// before respawn() fires — rather than a clock this class would have to
+// invent and keep in step with it. `hold` is how much of deadT's own
+// 1.8 s the three-frame slide spends moving; the remainder holds on the
+// last cell so she is not still visibly settling the instant she respawns.
+let HERO_DEATH_STRIP = { key: 'hzdDeath', cells: 3, k: 1.0, total: 1.8, hold: 1.2 };
 // THE IMPATIENT WAIT (owner, 2026-08-27: "like a cute kid waiting anxiously
 // for something from a grown-up... cross their hands, tapping one leg on the
 // floor, and saying Yalla!"). Not a transition and not a pose: a LOOP that
@@ -2818,8 +2832,27 @@ class Player {
     c.beginPath(); c.moveTo(-0.4, -4); c.lineTo(0, -bl + 3); c.stroke();
     c.restore();
   }
+  // Self-contained on purpose: the live rig's transform stack (turning,
+  // squash-and-stretch, evolution scale) is built for a body still being
+  // simulated, and death is a still frame in whatever facing she died
+  // facing. Same anchor convention as the rest of draw() — feet-centre —
+  // without the machinery that has nothing left to animate.
+  drawDeath(c) {
+    c.save();
+    c.scale(HERO_SCREEN_SCALE, HERO_SCREEN_SCALE);
+    c.translate(this.x + this.w / 2, this.y + this.h);
+    const tfv = this.faceVis == null ? this.face : this.faceVis;
+    c.scale(Math.sign(tfv) || this.face || 1, 1);
+    const D = HERO_DEATH_STRIP;
+    const deadT = (typeof G !== 'undefined' && G.deadT != null) ? G.deadT : 0;
+    const elapsed = (D.total || 1.8) - deadT;
+    const p = clamp(elapsed / (D.hold || 1.2), 0, 1) * (D.cells - 1);
+    drawHeroMotionCell(this, c, D.key, p, D.cells, 0, 0, HERO_DH * (D.k || 1), false);
+    if (typeof G !== 'undefined') G.heroDrawn = G.lastStrip;
+    c.restore();
+  }
   draw(c) {
-    if (this.dead) return;
+    if (this.dead) { this.drawDeath(c); return; }
     // (the i-frame flicker is applied by the CALLER as an alpha — see the player
     //  draw block in game.js. It used to `return` here, which is why she
     //  vanished outright on alternate frames instead of blinking.)
