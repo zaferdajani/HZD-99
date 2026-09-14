@@ -1,0 +1,33 @@
+name: Review owner-linked hero artwork
+on:
+  push:
+    branches: [claude/clawbyte-repo-migration-byhyl8]
+    paths: [.github/workflows/hero-sheet-review.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: clawbyte-hero-sheet-review
+  cancel-in-progress: false
+jobs:
+  inspect:
+    if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve original owner-linked image and current animation references
+        run: |
+          set -euo pipefail
+          mkdir -p artwork-review
+          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/7fa11a4a-e91b-49d1-b4df-f70e8bb74d2a.png' -o artwork-review/approved-sheet.png
+          echo 'd1bb15f7b09a2f728f70266b47acb414b13579e1d66b39e3a06fc8c091603c97  artwork-review/approved-sheet.png' | sha256sum --check
+          git rev-parse HEAD > artwork-review/source-commit.txt
+          sha256sum assets/characters/hero/gait/walk.webp assets/characters/hero/gait/run.webp > artwork-review/protected-gait-hashes.txt
+          tar -czf artwork-review/current-reference.tar.gz js tests assets/characters/hero docs/ART_QUEUE.md docs/STORY_CANON.md docs/DEVELOPMENT_AUTHORITY.md source-files.json build.cjs dev.html loader.html .github/workflows/pages.yml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CLAWBYTE-owner-sheet-review-${{ github.sha }}
+          path: artwork-review/
+          retention-days: 30
+          if-no-files-found: error
