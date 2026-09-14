@@ -2,32 +2,125 @@ name: Review owner-linked hero artwork
 on:
   push:
     branches: [claude/clawbyte-repo-migration-byhyl8]
-    paths: [.github/workflows/hero-sheet-review.yml]
+    paths:
+      - .github/workflows/hero-sheet-review.yml
+      - tools/extract-owner-hero.py
+      - tools/owner-hero-runtime.js
+      - tools/apply-owner-hero.cjs
+      - tests/owner-artwork.cjs
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
+  actions: write
+  pages: read
 concurrency:
   group: clawbyte-hero-sheet-review
   cancel-in-progress: false
 jobs:
-  inspect:
+  integrate:
     if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-      - name: Retrieve original owner-linked image and current animation references
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked test tools and preserve baseline identity
         run: |
           set -euo pipefail
-          mkdir -p artwork-review
-          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/7fa11a4a-e91b-49d1-b4df-f70e8bb74d2a.png' -o artwork-review/approved-sheet.png
-          echo 'd1bb15f7b09a2f728f70266b47acb414b13579e1d66b39e3a06fc8c091603c97  artwork-review/approved-sheet.png' | sha256sum --check
-          git rev-parse HEAD > artwork-review/source-commit.txt
-          sha256sum assets/characters/hero/gait/walk.webp assets/characters/hero/gait/run.webp > artwork-review/protected-gait-hashes.txt
-          tar -czf artwork-review/current-reference.tar.gz js tests assets/characters/hero docs/ART_QUEUE.md docs/STORY_CANON.md docs/DEVELOPMENT_AUTHORITY.md source-files.json build.cjs dev.html loader.html .github/workflows/pages.yml
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          python3 -m pip install Pillow==11.3.0 numpy==2.3.2
+          echo "CHROMIUM_PATH=$(node -p "require('playwright').chromium.executablePath()")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -p "require('playwright').chromium.executablePath()")" /opt/pw-browsers/chromium
+          mkdir -p release-evidence/owner-artwork tests/out
+          git rev-parse HEAD > release-evidence/owner-artwork/baseline-commit.txt
+          git for-each-ref --format='%(refname) %(objectname)' > release-evidence/owner-artwork/refs-before.txt
+          node build.cjs
+          git diff --exit-code -- index.html odyssey.html forge.html forge-odyssey.html
+          # JSON comparison must not confuse undefined array entries with null.
+          # The per-frame trace exercises the actual hero renderer; full-world
+          # screenshots and ordinary scene tests are collected separately.
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tests/owner-artwork.cjs');s=p.read_text()
+          s=s.replace("const r=n=>typeof n==='number'?Math.round(n*100000)/100000:n;", "const r=n=>n==null?null:typeof n==='number'?Math.round(n*100000)/100000:n;")
+          s=s.replace('update(1/60);draw(i*1000/60);clearP();','update(1/60);player.draw(c);clearP();')
+          p.write_text(s)
+          PY
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Record the existing working gait and gameplay before any art change
+        run: node tests/owner-artwork.cjs --record | tee release-evidence/owner-artwork/baseline.log
+      - name: Import only the exact owner-linked source and apply the guarded renderer
+        run: |
+          set -euo pipefail
+          mkdir -p assets/source/hero/owner-20260914
+          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/7fa11a4a-e91b-49d1-b4df-f70e8bb74d2a.png' -o assets/source/hero/owner-20260914/original.png
+          echo 'd1bb15f7b09a2f728f70266b47acb414b13579e1d66b39e3a06fc8c091603c97  assets/source/hero/owner-20260914/original.png' | sha256sum --check
+          node tools/apply-owner-hero.cjs | tee release-evidence/owner-artwork/extraction.log
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tests/hero-priorities.cjs');s=p.read_text()
+          s=s.replace('/^(gaitWalk|gaitRun|transAir):/', '/^(gaitWalk|gaitRun|transAir|owner:jump):/')
+          p.write_text(s)
+          p=Path('docs/ART_QUEUE.md')
+          p.write_text(p.read_text()+'''\n\n## 2026-09-14 — Owner-linked hero/combat sheet integration\n\nSource: https://chatgpt.com/s/m_6aa84bf00514819189f0346b47f8e176 . Original\n1536x1024 RGBA retained in assets/source/hero/owner-20260914/original.png.\nExact source hash, hand-inspected rectangles, registration, excluded FX-only\ncells and tight-atlas metadata are in assets/characters/hero/owner-20260914/.\n\nThe existing walk/run assets and their stride configuration remain unchanged\nunder the owner's explicit motion-preservation condition. Their appearance\nhas not been reskinned. The new source panels are retained as reference, not\nclaimed to improve the existing authored cycles. New available clips cover\nidle, jump/fall, landing recovery, dash, hurt/death and unarmed claw combat.\nThe source does not provide swords, dual/joined weapon animations, wall-cling,\nhealing/Song or the Yalla foot-tap; those existing sequences are preserved.\nNo new guard mechanic, voice recording or weapon upgrade is invented.\n\nRuntime uses direct rendering hooks, a startup-embedded atlas and one facing\ntransform. Existing simulation methods are compared byte-for-byte, 32 gait\nrender samples are compared, and 960 input frames are compared before/after.\nThe source's explosion/dust-only cells cannot replace the character body.\nThe legacy claw-rake overlay is suppressed only when the new baked claw art\nactually drew; impact particles, gameplay hitstop and weapon effects remain.\nSee docs/artwork/owner-sheet-20260914.json and this run's evidence for scope.\n''')
+          PY
+          node build.cjs
+          node tools/pack-www.cjs
+          for f in js/hero_artwork.js js/owner_hero_frames.js js/entities.js tests/owner-artwork.cjs; do node --check "$f"; done
+      - name: Validate the new artwork and prove movement was not changed
+        run: |
+          set -euo pipefail
+          node tests/owner-artwork.cjs | tee release-evidence/owner-artwork/verified.log
+          node tests/build-integrity.cjs | tee release-evidence/owner-artwork/build-integrity.log
+          node tests/hero-priorities.cjs | tee release-evidence/owner-artwork/hero-priorities.log
+          node tests/reconciliation.cjs | tee release-evidence/owner-artwork/reconciliation.log
+          node tests/run.cjs release-polish gait feel speed2 weapons gear combo-routing input-focus tutorial-controller voice-handoff dialogue-audio offline-release frames wake chapter-one | tee release-evidence/owner-artwork/regressions.log
+      - name: Record publishing mode without bypassing administration
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/$GITHUB_REPOSITORY/pages --jq '{build_type,source,html_url}' > release-evidence/owner-artwork/pages-settings.json
+          cat release-evidence/owner-artwork/pages-settings.json
+      - name: Commit the verified candidate to integration only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          current=$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/claude/clawbyte-repo-migration-byhyl8 --jq .object.sha)
+          test "$current" = "$GITHUB_SHA" || { echo 'Concurrent source advanced. Preserve evidence; do not overwrite.'; exit 1; }
+          git config user.name 'CLAWBYTE integration'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js build.cjs dev.html source-files.json tests/owner-artwork.cjs tests/hero-priorities.cjs docs/ART_QUEUE.md docs/artwork/owner-sheet-20260914.json assets/characters/hero/owner-20260914
+          git add -f assets/source/hero/owner-20260914/original.png
+          git add index.html odyssey.html forge.html forge-odyssey.html
+          git commit -m 'Apply owner hero and claw artwork with protected gait and unchanged gameplay'
+          git rev-parse HEAD > release-evidence/owner-artwork/candidate-commit.txt
+          git bundle create release-evidence/owner-artwork/candidate.bundle HEAD ^${{ github.sha }}
+          git push origin HEAD:claude/clawbyte-repo-migration-byhyl8
+          # This prepares a native test artifact; it does not deploy Pages.
+          gh api --method POST repos/$GITHUB_REPOSITORY/actions/workflows/desktop.yml/dispatches -f ref=claude/clawbyte-repo-migration-byhyl8
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: CLAWBYTE-owner-sheet-review-${{ github.sha }}
-          path: artwork-review/
-          retention-days: 30
+          name: CLAWBYTE-owner-artwork-${{ github.sha }}
+          path: |
+            release-evidence/
+            build/hero-evidence/
+            tests/out/
+            assets/characters/hero/owner-20260914/
+            assets/source/hero/owner-20260914/original.png
+            docs/artwork/owner-sheet-20260914.json
+          retention-days: 60
           if-no-files-found: error
+      - name: Retire this completed one-off integrator
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method PUT repos/$GITHUB_REPOSITORY/actions/workflows/hero-sheet-review.yml/disable
