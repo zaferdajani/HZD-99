@@ -2425,6 +2425,7 @@ class Player {
   // the pose cell whenever the strip is not here yet, which is the same
   // contract every other authored renderer in this file keeps.
   drawRoboSwing(c) {
+    if (typeof ownerHeroDrawSwing === 'function' && ownerHeroDrawSwing(this, c)) return true;
     const sv = this.swingVis;
     if (!sv || sv.swirl) return false;          // the swirl has its own drawing
     const S = SWING_STRIP[heroSwingState(sv)];
@@ -2448,6 +2449,7 @@ class Player {
   // only decides what is on screen while a state the game already entered
   // plays out.
   drawRoboTrans(c, st) {
+    if (typeof ownerHeroDrawMovement === 'function' && ownerHeroDrawMovement(this, c, st)) return true;
     const A = HERO_AIR_STRIP;
     if (A && (st === 'rise' || st === 'apex' || st === 'fall')) {
       // her own vertical speed is the position in the arc
@@ -2819,7 +2821,11 @@ class Player {
     c.restore();
   }
   draw(c) {
-    if (this.dead) return;
+    this.ownerSheetSwingDrawn = false;
+    if (this.dead) {
+      if (typeof ownerHeroDrawDeath === 'function') ownerHeroDrawDeath(this, c);
+      return;
+    }
     // (the i-frame flicker is applied by the CALLER as an alpha — see the player
     //  draw block in game.js. It used to `return` here, which is why she
     //  vanished outright on alternate frames instead of blinking.)
@@ -3930,8 +3936,9 @@ class Player {
       }
       c.shadowBlur = 0; c.restore(); c.globalAlpha = 1;
     }
+    // Owner claw frames already contain their arcs; other weapon effects remain.
     // volt-blade slashes — sharp tapered anime CUTS through space, not rings
-    if (this.swingVis) {
+    if (this.swingVis && !this.ownerSheetSwingDrawn) {
       const sv = this.swingVis;
       const p = 1 - sv.t / sv.t0;
       // ---- THE SWIRL draws its own thing and nothing else ------------------

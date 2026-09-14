@@ -16,7 +16,7 @@ for(const [p,h] of Object.entries(protectedGait))assert.equal(hash(fs.readFileSy
  await page.waitForFunction(()=>typeof heroMotionMissing==='function'&&heroMotionMissing().length===0,null,{timeout:45000});
  await page.evaluate(()=>{window.requestAnimationFrame=()=>0;});await page.waitForTimeout(80);
  const evidence=await page.evaluate(record=>{
-   const r=n=>typeof n==='number'?Math.round(n*100000)/100000:n;
+   const r=n=>n==null?null:typeof n==='number'?Math.round(n*100000)/100000:n;
    const methods={update:Player.prototype.update.toString(),state:Player.prototype.heroState.toString(),collision:moveEnt.toString(),camera:updateCam.toString(),charge:Player.prototype.releaseCharged.toString()};
    const gait={config:JSON.stringify(HERO_GAIT),walkStep:HERO_STEP_WALK,runStep:HERO_STEP_RUN,threshold:HERO_RUN_VX};
    Math.random=()=>.5;
@@ -43,7 +43,7 @@ for(const [p,h] of Object.entries(protectedGait))assert.equal(hash(fs.readFileSy
        if(test.dash&&i===30){keys[test.dash]=1;keysP[test.dash]=1;}
        if(test.dash&&i===31)keys[test.dash]=0;
        if(test.dash&&i>=75){keys[test.right]=0;keys.KeyA=1;}
-       update(1/60);draw(i*1000/60);clearP();
+       update(1/60);player.draw(c);clearP();
        samples.push([G.state,player.x,player.y,player.vx,player.vy,player.w,player.h,player.on,
          player.stridePh,player.landT,player.dashT,player.chargeT,player.atkCD,player.combo,
          player.volts,player.swing&&player.swing.t,player.swingVis&&player.swingVis.t,player.swingVis&&player.swingVis.charged,

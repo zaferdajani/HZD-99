@@ -22,13 +22,15 @@ function ownerHeroFrame(p, ctx, clip, ordinal, options = {}) {
   const airborne = options.center === true || (options.center !== false && f.anchor === 'center');
   const anchorY = airborne ? f.body_center_y : OWNER_HERO_SHEET.ground_anchor_y;
   const base = airborne ? -18 : HERO_FLOOR;
+  const trim = f.trim_offset || [0,0];
   ctx.save();
   try {
     // Front-facing idle does not get mirrored twice. Other clips inherit facing.
     if (options.front && p.faceVis < 0) ctx.scale(-1, 1);
     ctx.drawImage(im, a[0], a[1], a[2], a[3],
-      -OWNER_HERO_SHEET.anchor_x * s, base - anchorY * s, a[2] * s, a[3] * s);
+      (trim[0]-OWNER_HERO_SHEET.anchor_x) * s, base + (trim[1]-anchorY) * s, a[2] * s, a[3] * s);
   } finally { ctx.restore(); }
+  p._motionPose = null; p._motionBlend = null; // do not resume a stale gait blend after another action
   G.lastStrip = 'owner:' + clip + ':' + n;
   G.heroDrawn = G.lastStrip;
   G.ownerHeroArt = { revision:OWNER_HERO_ART_REVISION, clip, frame:n,

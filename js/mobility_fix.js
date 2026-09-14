@@ -2,7 +2,7 @@
 // No timer impersonation, prototype wrappers, legacy gait fallback or voice swap.
 const HERO_MOTION_REVISION = 'hero-motion-2026-09-11-r1';
 const HERO_MOTION_KEYS = Object.freeze([
-  'heroStates', 'hzdIdle', 'gaitWalk', 'gaitRun', 'transAir', 'transLand',
+  'heroOwnerAtlas', 'heroStates', 'hzdIdle', 'gaitWalk', 'gaitRun', 'transAir', 'transLand',
   'transDash', 'transSkid', 'transWall', 'heroFidget', 'hzdHurt'
 ]);
 const heroMotionLoad = { active: false, started: 0, retryAt: 0, failures: 0 };

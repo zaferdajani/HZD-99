@@ -37,5 +37,7 @@
   "data_conduits_npc_fix",
   "boss_aaa_fix",
   "npc_shop_exit_fix",
+  "owner_hero_frames",
+  "hero_artwork",
   "boot"
 ]
