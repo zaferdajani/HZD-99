@@ -1052,7 +1052,7 @@ const HERO_CADENCE = { walk: 5, run: 7 };
 // every cut of the film failed to have. Eight cells, no from/to window, because
 // a drawn cycle IS the cycle and has no surplus to trim.
 let HERO_GAIT = {
-  walk: { key: 'gaitWalk', cells: 8, k: 0.954 },
+  walk: { key: 'gaitWalk', cells: 8, k: 0.9503 },
   run:  { key: 'gaitRun',  cells: 16, k: 0.92, from: 0, to: 15 },
 };
 // THE STANDING LOOP: breath, a weight shift, one blink — a front view like
@@ -1063,7 +1063,7 @@ let HERO_GAIT = {
 // dead constant). fps drops 9 -> 6.5 to hold the BREATH at the length it had:
 // the loop is what reads as calm, not the frame rate, and 11/9 s of breath
 // played over 8 cells at 9 fps would pant.
-let HERO_IDLE = { key: 'hzdIdle', cells: 8, k: 0.893, fps: 6.5 };
+let HERO_IDLE = { key: 'hzdIdle', cells: 8, k: 0.896, fps: 6.5 };
 function heroStepLen(vx) { return Math.abs(vx) > HERO_RUN_VX ? HERO_STEP_RUN : HERO_STEP_WALK; }
 // Airborne cells are CENTRED in their cell rather than stood on its floor (the
 // tool does this, because a flying pose has no contact point to align). They
