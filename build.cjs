@@ -53,7 +53,7 @@ const EMBED = {
 const MIME = { webp: 'image/webp', jpg: 'image/jpeg', png: 'image/png', ogg: 'audio/ogg', mp3: 'audio/mpeg', wav: 'audio/wav' };
 const media = {};
 const heroCore = {};
-for (const [key,file] of Object.entries({heroOwnerAtlas:'owner-20260914/atlas.webp', heroStates:'states.webp', gaitWalk:'gait/walk.webp', gaitRun:'gait/run.webp', hzdIdle:'idle.webp'})) {
+for (const [key,file] of Object.entries({heroStates:'states.webp', gaitWalk:'gait/walk.webp', gaitRun:'gait/run.webp', hzdIdle:'idle.webp'})) {
   heroCore[key] = 'data:image/webp;base64,' + fs.readFileSync('assets/characters/hero/' + file).toString('base64');
 }
 for (const k in EMBED) { const f=EMBED[k], ext=f.split('.').pop().toLowerCase(); media[k]='data:'+MIME[ext]+';base64,'+fs.readFileSync(f).toString('base64'); }

@@ -29,7 +29,7 @@ fs.mkdirSync(output,{recursive:true});
      {name:'charge-rise',vx:300,vy:-500,on:false,chargeT:1},
      {name:'charge-apex',vx:300,vy:0,on:false,chargeT:1},
      {name:'charge-fall',vx:300,vy:600,on:false,chargeT:1}
-   ]) {reset();Object.assign(player,q);player.anim+=.2;draw(player.anim*1000); const st=player.heroState(Math.abs(player.vx)>40);poses.push({name:q.name,st,drawn:G.heroDrawn});record(q.name+' uses authored locomotion',/^(gaitWalk|gaitRun|transAir|owner:jump):/.test(G.heroDrawn),G.heroDrawn);}
+   ]) {reset();Object.assign(player,q);player.anim+=.2;draw(player.anim*1000); const st=player.heroState(Math.abs(player.vx)>40);poses.push({name:q.name,st,drawn:G.heroDrawn});record(q.name+' uses authored locomotion',/^(gaitWalk|gaitRun|transAir):/.test(G.heroDrawn),G.heroDrawn);}
    // Observe the production draw method at fractional gait phases.
    reset();player.vx=340;player.stridePh=.125;player.anim+=1;draw(player.anim*1000);
    record('fractional gait frame is sampled',G.heroMotion && G.heroMotion.frame%1!==0,G.heroMotion);

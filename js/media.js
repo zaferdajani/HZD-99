@@ -347,7 +347,6 @@ const MEDIA_SRC = {
     // the knockback (HERO_TRANS.hurt), and the three punches that drive the
     // hit string (SWING_STRIP) — all facing the house three-quarter,
     // screen-right, except the idle which is a front view like the fidget.
-    heroOwnerAtlas: 'assets/characters/hero/owner-20260914/atlas.webp',
     gaitWalk: 'assets/characters/hero/gait/walk.webp',
     gaitRun: 'assets/characters/hero/gait/run.webp',
     hzdIdle: 'assets/characters/hero/idle.webp',

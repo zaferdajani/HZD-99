@@ -5342,28 +5342,3 @@ currently reads as a head-first lunge at the viewer.
   blind retry.
 - Confirm both with `node tests/hero.cjs` before calling either done — the
   0.104 line is the pass/fail, not a judgment call.
-
-
-## 2026-09-14 — Owner-linked hero/combat artwork
-
-Source https://chatgpt.com/s/m_6aa84bf00514819189f0346b47f8e176 . The original
-1536x1024 image, registration and exact source hash are preserved under
-assets/source/hero/owner-20260914 and assets/characters/hero/owner-20260914.
-
-The existing 16-frame walk/run assets and timing are protected unchanged.
-New available clips cover idle, jump/fall, stationary landing, dash, hurt/death
-and unarmed claw combat. The source does not supply weapon-specific swords,
-dual/joined weapons, wall-cling, heal/Song or the Yalla foot-tap. Those existing
-sequences are kept, not claimed to have new artwork. No new mechanic or voice
-recording is introduced. FX-only cells cannot replace the character body.
-
-The first CI attempt (34892486063) failed four legacy transition checks.
-The new atlas was bypassing the injected legacy strip fixture. The old
-assertions are retained and isolated, with separate real-atlas tests for
-velocity-driven frames, timed landing, expired timers, opaque body presence
-and missing-art behavior. Missing expired-timer guards in the new renderer
-were corrected; no physics or test threshold was relaxed.
-
-Before/after verification compares 32 gait pixel samples, 960 input frames
-and the simulation methods. See docs/artwork/owner-sheet-20260914.json and
-the workflow evidence. These are integration checks, not Steam certification.
