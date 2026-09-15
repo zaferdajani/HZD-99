@@ -1043,15 +1043,27 @@ const HERO_CADENCE = { walk: 5, run: 7 };
 // contact). Measured here before wiring: silhouette IoU falls to its minimum
 // at lag 7–8 (the opposite contact) and climbs back to 0.89 at lag 15 — one
 // cycle across the strip, 3–10% of silhouette moving between every cell.
+// ...AND REPLACED BY DRAWN KEYFRAMES (2026-09-15). Both re-cuts above were
+// windowing a FILM, and the whole difficulty — finding the stride inside a take,
+// the auto cut spending cells in the holds — is a difficulty of that route, not
+// of the animation. The walk now comes in as eight authored frames of one cycle:
+// tools/sheetslice.cjs measures them at 335px tall with a 1% spread and a foot
+// line that holds to within a pixel across all eight, which is the property
+// every cut of the film failed to have. Eight cells, no from/to window, because
+// a drawn cycle IS the cycle and has no surplus to trim.
 let HERO_GAIT = {
-  walk: { key: 'gaitWalk', cells: 16, k: 0.845 },
+  walk: { key: 'gaitWalk', cells: 8, k: 0.954 },
   run:  { key: 'gaitRun',  cells: 16, k: 0.92, from: 0, to: 15 },
 };
 // THE STANDING LOOP: breath, a weight shift, one blink — a front view like
 // the fidget, so it cancels the body mirror the same way. Eleven cells at
 // nine a second is the take's own pace; after FIDGET_AFTER the fidget owns
 // the idle as before. k 0.79: idle on the sheet stands 231 of 300, the loop 291.
-let HERO_IDLE = { key: 'hzdIdle', cells: 11, k: 0.79, fps: 9 };
+// Re-authored 2026-09-15 as eight drawn frames (2% height spread, foot line
+// dead constant). fps drops 9 -> 6.5 to hold the BREATH at the length it had:
+// the loop is what reads as calm, not the frame rate, and 11/9 s of breath
+// played over 8 cells at 9 fps would pant.
+let HERO_IDLE = { key: 'hzdIdle', cells: 8, k: 0.893, fps: 6.5 };
 function heroStepLen(vx) { return Math.abs(vx) > HERO_RUN_VX ? HERO_STEP_RUN : HERO_STEP_WALK; }
 // Airborne cells are CENTRED in their cell rather than stood on its floor (the
 // tool does this, because a flying pose has no contact point to align). They
