@@ -896,7 +896,12 @@ let HERO_DEATH_STRIP = { key: 'hzdDeath', cells: 3, k: 1.0, total: 1.8, hold: 1.
 // and drawing both at HERO_DH would grow her the moment she got impatient.
 // intro 7: cells 0-6 are the arms crossing — played once — and 7-15 are the
 // bounce-and-tap she holds for as long as she is ignored.
-let HERO_FIDGET = { key: 'heroFidget', cells: 16, k: 0.8, fps: 9, intro: 6 };
+// DRAWN (2026-09-15): eight front-on cells, her visor doing the acting while her
+// feet stay planted. intro drops to 0 — the filmed take had a six-cell run-in
+// before its loop, and a drawn cycle has no run-in to skip. fps 6.5 matches the
+// idle it takes over from, so the handover does not change tempo.
+// k 0.8895 against the sheet's idle (231 of 300) on cell 0 (277 of 320).
+let HERO_FIDGET = { key: 'heroFidget', cells: 8, k: 0.8895, fps: 6.5, intro: 0 };
 // Cling, slip, catch — three stills at 5 fps, because every video take of a
 // wall slide painted her a pole to hold. Authored with the wall at her RIGHT.
 let HERO_WALL_STRIP = { key: 'transWall', cells: 3, k: 0.848, fps: 5 };

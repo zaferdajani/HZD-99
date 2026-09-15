@@ -10088,6 +10088,11 @@ function gateEnter() {
     const armed = !!(G.save && G.save.flags && G.save.flags.crystal);
     mediaFetch(GATE_CLIP.key, 1);          // the authored walk-away, first
     mediaFetch(GATE_CLIP_RUN.key, 1);      // ...and the run, for cave mouths
+    // ...and HER tier, whichever it is. The others can wait for their own gate.
+    {
+      const wm = typeof weaponMode === 'function' ? weaponMode(G.save) : 'claws';
+      if (GATE_CLIP_ARMED[wm]) mediaFetch(GATE_CLIP_ARMED[wm].key, 1);
+    }
     for (const k of gateBackPair(armed)) mediaFetch(k, 1);
     for (const k of gateBackPair(!armed)) mediaFetch(k, 1);
     // ...and the turnaround the turn beat is cut from, her costume first
@@ -10168,6 +10173,16 @@ const GATE_CLIP = { key: 'heroGateWalk', cells: 8, turn: 4, turnFrac: 0.2 };
 // it is a faster one, and she goes into it at a RUN. Same eight-cell shape: the
 // turn, then the stride.
 const GATE_CLIP_RUN = { key: 'heroGateRun', cells: 8, turn: 4, turnFrac: 0.18 };
+// SHE LEAVES CARRYING WHAT SHE EARNED. The unarmed clip is drawn with nothing on
+// her back, which made it right for the opening and wrong from the crystal
+// onward — armed, drawGateWalk fell back to the two old plates. There is now one
+// clip per weapon tier, keyed by the names weaponMode() already returns, so the
+// blade on her back through the gate is the blade she is actually holding.
+const GATE_CLIP_ARMED = {
+  single: { key: 'heroGateSingle', cells: 8, turn: 4, turnFrac: 0.2 },
+  dual:   { key: 'heroGateDual',   cells: 8, turn: 4, turnFrac: 0.2 },
+  joined: { key: 'heroGateJoined', cells: 8, turn: 4, turnFrac: 0.2 },
+};
 // Her walking pace for the beat that lines her up with the doorway. Not the
 // run: a run into a door is the "dash through a doorway" the shot below was
 // written against, and the owner asked for a careful walk.
@@ -10285,6 +10300,7 @@ function gateBackReady() {
   // stands in for the run if the run has not landed, and the reverse never
   // happens because the walk is fetched first.
   if (gateBackImg(GATE_CLIP.key) || gateBackImg(GATE_CLIP_RUN.key)) return true;
+  for (const k in GATE_CLIP_ARMED) if (gateBackImg(GATE_CLIP_ARMED[k].key)) return true;
   const want = gateBackPair(!!(G.save && G.save.flags && G.save.flags.crystal));
   return !!(gateBackImg(want[0]) && gateBackImg(want[1]));
 }
@@ -10424,11 +10440,17 @@ function drawGateWalk() {
   // costume flicker the pair logic below was written to stop. An armed clip is
   // on the list in docs/ART_HANDOFF.md §9; until it exists, armed keeps the
   // plates.
-  const CLIP = intoCave ? GATE_CLIP_RUN : GATE_CLIP;
-  // fall back to the walk if the run has not decoded — a cave entered at a walk
-  // is a smaller wrong than her side view sliding into a rock face
-  const clipIm = armed ? null : (gateBackImg(CLIP.key) || gateBackImg(GATE_CLIP.key));
-  const CLIPU = (armed || gateBackImg(CLIP.key)) ? CLIP : GATE_CLIP;
+  // Her weapon picks the clip first, the destination second: an armed tier has
+  // one clip and it is a walk, because only the unarmed set has a run drawn for
+  // it. Unarmed, the cave takes her at a run and the gate at a walk.
+  const wmode = typeof weaponMode === 'function' ? weaponMode(G.save) : 'claws';
+  const armedClip = GATE_CLIP_ARMED[wmode] || null;
+  const CLIP = armedClip || (intoCave ? GATE_CLIP_RUN : GATE_CLIP);
+  // fall back to the unarmed walk if this tier's clip has not decoded — a cave
+  // entered at a walk is a smaller wrong than her side view sliding into rock,
+  // and a missing sword is a smaller wrong than no character at all
+  const clipIm = gateBackImg(CLIP.key) || gateBackImg(GATE_CLIP.key);
+  const CLIPU = gateBackImg(CLIP.key) ? CLIP : GATE_CLIP;
   const want = g.pair ? g.pair[b] : '';
   const im = clipIm ? null : (want ? gateBackImg(want) : null);
   if (clipIm) {

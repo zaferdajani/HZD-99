@@ -381,6 +381,11 @@ const MEDIA_SRC = {
     heroGateWalk: 'assets/characters/hero/gate_walk.webp',
     // ...and the RUN-AWAY, for cave mouths. See GATE_CLIP in js/game.js.
     heroGateRun: 'assets/characters/hero/gate_run.webp',
+    // ARMED, one per weapon tier — weaponMode() returns exactly these names, so
+    // the clip she leaves the world in carries the blade she actually earned.
+    heroGateSingle: 'assets/characters/hero/gate_walk_single.webp',
+    heroGateDual:   'assets/characters/hero/gate_walk_dual.webp',
+    heroGateJoined: 'assets/characters/hero/gate_walk_joined.webp',
     heroBackA: 'assets/characters/hero/backwalk_a.webp',
     heroBackB: 'assets/characters/hero/backwalk_b.webp',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.webp',
