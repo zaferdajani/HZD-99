@@ -117,6 +117,26 @@ through *posture alone*.
 
 ---
 
+## 4a. Two rules learned from the first real delivery (2026-09-15)
+
+**One size across a strip.** Every frame of an animation must draw her at the
+same height. `tools/movestrip.cjs` applies a single scale for the whole strip, so
+a frame authored larger is not "fixed" — it plays as a different-sized cat. The
+first delivery ran 1% spread on the walk (perfect) and 15–79% on others.
+
+The exception is deliberate and the game asks for it: a **walk-away** — she turns
+her back and recedes into a door or cave mouth. Send those at constant size too.
+The receding is `drawGateWalk`'s job, and it has to stay there because the engine
+shrinks her 84% into a lit gateway and only 16% into a cave, where darkness takes
+her instead. A baked-in shrink would be right for one and wrong for the other.
+
+**Effects must not bridge the gutters.** Frames are found by the transparent
+columns between them, so a slash arc that reaches into the next frame welds two
+frames into one. In the first delivery the jab's "frame 1" measured 916px wide
+because a single arc spanned three frames. Either leave a wide clear gutter, or
+— better — deliver the FX as their own strip, aligned frame for frame with the
+body. The engine composites them anyway.
+
 ## 5. Delivery contract
 
 - **Format** PNG, RGB, on the black field described above. No alpha needed —
@@ -221,3 +241,54 @@ Eight plates, `burst_00.png` … `burst_07.png`:
 Frames 01–06 must all read as **the same weight of cat**. That is what §6's
 `mass` and `waist` columns exist to enforce, and it is what the last attempt
 failed: its brace frame came in 20% heavier and 46% wider than its neighbours.
+
+---
+
+## 9. The list — what the game still needs (2026-09-15)
+
+Wired and done: **walk**, **idle**.
+
+Ranked by how much of the game each unblocks, not by how hard it is.
+
+### Priority 1 — locomotion, which is on screen constantly
+
+| animation | frames | state |
+|---|---|---|
+| **run** | 8 | delivered at 15% height spread — re-render at constant size |
+| **jump start** | 4 | not delivered |
+| **air rise** | 4 | not delivered |
+| **air fall** | 4 | not delivered |
+| **land** | 4 | not delivered |
+| **skid** (the turn-and-stop) | 4 | not delivered, and the game has no art for it at all |
+| **dash** | 6 | delivered at 24% spread — re-render at constant size |
+| **wall slide** | 4 | not delivered |
+
+### Priority 2 — combat, replacing art the owner rejected
+
+| animation | frames | state |
+|---|---|---|
+| **supercharged scratch** | 12 | delivered at 188px — half the height of every other strip. Re-render at ~330px with the FX on their own layer. This one replaces the rejected `burst`. |
+| **claw jab** | 5 | bodies are clean (3% spread); only the gutters need widening |
+| **double slash** | 6 | 19% spread — re-render at constant size |
+| **uppercut** | 6 | 78% spread, and its frames weld together — re-render at constant size with clear gutters |
+| **air attack** | 6 | not delivered as a strip |
+| **down attack / plunge** | 6 | not delivered as a strip |
+
+### Priority 3 — reactions and flavour
+
+| animation | frames | state |
+|---|---|---|
+| **hurt / hit react** | 4 | not delivered |
+| **death** | 6 | not delivered |
+| **heal** | 4–6 | not delivered, no art in the game |
+| **fidget** (the impatient idle, after 5s standing) | 6–8 | not delivered |
+| **walk-away / gate entry** | 8 | **delivered and wanted** — replaces the two static back plates `gateEnter()` flips between today |
+| **run-away / gate entry** | 8 | delivered, same use |
+
+### The effects layer
+
+The very first sheet's section 23 had this right: arcs, impacts, dust and sparks
+as their own frames. Deliver them that way — one FX strip per attack, aligned
+frame for frame with the body strip — and both problems go away at once: the
+gutters stay clean, and the engine can tint, scale and time the FX independently,
+which is what it already does for every procedural effect it draws.
