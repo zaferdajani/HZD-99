@@ -21,14 +21,18 @@
 //                  rather than the slash arc's, which is three times taller and
 //                  would swamp every number here.
 //
-//   node tools/sheetslice.cjs <strip.png> [--cut <outdir>]
+//   node tools/sheetslice.cjs <strip.png> [--cut <outdir>] [--frames N]
+//
+// --frames N is for sheets the runs cannot answer: frames that touch end to end
+// (one run, no median to measure against) and effects sheets that are loose
+// blobs (many runs, none of them a frame). Give it the count from the brief.
 //
 // With --cut it writes <outdir>/0.png, 1.png ... ready for tools/movestrip.cjs.
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 
 const PAGE = `
-window.slice = async (dataUrl) => {
+window.slice = async (dataUrl, forceN) => {
   const img = new Image(); img.src = dataUrl; await img.decode();
   const W = img.naturalWidth, H = img.naturalHeight;
   const c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -74,6 +78,31 @@ window.slice = async (dataUrl) => {
   // ought to hold, and cut each boundary at the column carrying the least ink
   // within a window around where it should fall.
   const splits = [];
+  // FORCED COUNT. Two failures defeat inference from the runs alone, and the
+  // supercharge sheet arrived with both: its twelve body frames TOUCH end to end,
+  // so there is one run and no median to compare it against; and its effects
+  // sheet is loose blobs of energy, so there are twenty-three runs for twelve
+  // frames. Neither is a defect in the art — an effect has no obligation to be
+  // one connected shape — so when the count is known it is given, and the runs
+  // are ignored entirely: divide the inked span into N and slide each boundary
+  // to the thinnest column near where it falls.
+  if (forceN && forceN > 1 && keep.length) {
+    const a = keep[0][0], b = keep[keep.length - 1][1], w = b - a + 1;
+    const out = [];
+    let prev = a;
+    for (let j = 1; j <= forceN; j++) {
+      if (j === forceN) { out.push([prev, b]); break; }
+      const target = a + Math.round(w * j / forceN);
+      const half = Math.max(6, Math.round(w / forceN * 0.3));
+      let best = target, bestInk = Infinity;
+      for (let px = Math.max(prev + 4, target - half); px <= Math.min(b - 4, target + half); px++)
+        if (ink[px] < bestInk) { bestInk = ink[px]; best = px; }
+      out.push([prev, best]);
+      splits.push({ at: best, ink: bestInk });
+      prev = best + 1;
+    }
+    keep = out;
+  } else
   {
     const widths = keep.map(r => r[1] - r[0] + 1).sort((a, b) => a - b);
     const medW = widths[widths.length >> 1];
@@ -142,13 +171,19 @@ const med = a => { const s = a.slice().sort((p, q) => p - q); return s[s.length 
   const strip = argv[0];
   const cutIdx = argv.indexOf('--cut');
   const outdir = cutIdx >= 0 ? argv[cutIdx + 1] : null;
-  if (!strip) { console.log('usage: sheetslice.cjs <strip.png> [--cut <outdir>]'); process.exit(1); }
+  const fIdx = argv.indexOf('--frames');
+  const forceN = fIdx >= 0 ? +argv[fIdx + 1] : 0;
+  // An EFFECTS sheet has no body, so every body measurement below is meaningless
+  // on it: an arc three times her height is not a size defect, and energy that
+  // floats has no foot line to hold. --fx keeps the cutting and drops the flags.
+  const fx = argv.includes('--fx');
+  if (!strip) { console.log('usage: sheetslice.cjs <strip.png> [--cut <outdir>] [--frames N]'); process.exit(1); }
 
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.addScriptTag({ content: PAGE });
   const url = 'data:image/png;base64,' + fs.readFileSync(strip).toString('base64');
-  const { W, H, frames, splits } = await page.evaluate((u) => window.slice(u), url);
+  const { W, H, frames, splits } = await page.evaluate(([u, n]) => window.slice(u, n), [url, forceN]);
 
   const name = path.basename(strip);
   console.log(name + '  ' + W + 'x' + H + '  ->  ' + frames.length + ' frames');
@@ -166,10 +201,10 @@ const med = a => { const s = a.slice().sort((p, q) => p - q); return s[s.length 
   for (const f of frames) {
     const fl = [];
     const dh = (f.bodyH - mh) / mh, df = f.foot - mf;
-    if (Math.abs(dh) > 0.12) fl.push((dh > 0 ? '+' : '') + (dh * 100).toFixed(0) + '% SIZE');
-    if (Math.abs(df) > H * 0.05) fl.push((df > 0 ? '+' : '') + df + 'px FOOT');
+    if (!fx && Math.abs(dh) > 0.12) fl.push((dh > 0 ? '+' : '') + (dh * 100).toFixed(0) + '% SIZE');
+    if (!fx && Math.abs(df) > H * 0.05) fl.push((df > 0 ? '+' : '') + df + 'px FOOT');
     if (f.gutter != null && f.gutter < 4 && !f.wasSplit) fl.push('TOUCHING(' + f.gutter + 'px)');
-    if (!f.bodyH) fl.push('NO BODY');
+    if (!fx && !f.bodyH) fl.push('NO BODY');
     console.log('  ' + String(f.i).padEnd(3) + String(f.x0).padStart(5) + String(f.x1).padStart(6)
       + String(f.bodyH).padStart(8) + String(f.bodyW).padStart(8) + String(f.foot).padStart(8)
       + String(f.fullH).padStart(8) + String(f.gutter == null ? '-' : f.gutter).padStart(8)

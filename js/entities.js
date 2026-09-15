@@ -987,7 +987,18 @@ const SWING_STRIP = {
   finisher: { key: 'swingUppercut', cells: 6,  k: 1.1172 },
   // 2026-09-08: complete side-facing charged claw action with recovery.
   // Neutral frame matches idle: (231/300)/(281/320) = 0.8769.
-  burst:    { key: 'swingBurst',    cells: 24, k: 0.8769 },
+  // DRAWN (2026-09-15), and this is the one the owner rejected the filmed version
+  // of. Twelve cells: ready, sink, brace, hold, release, extend, follow through.
+  // Its frames TOUCH end to end in the delivered sheet, so sheetslice was given
+  // the count (--frames 12) rather than inferring it from runs that do not exist.
+  //
+  // k 0.9503, and the reference is not a pose match because it cannot be: the
+  // sheet's burst cell is the OLD design's release with both arms flung wide
+  // (aspect 1.00) and the drawn release simply is not that shape (0.81 at its
+  // widest). So the reference is the strip's own release cell and the check is
+  // external — it lands on the same 0.9503 the walk measured independently,
+  // which is what agreement between two unrelated measurements is worth.
+  burst:    { key: 'swingBurst',    cells: 12, k: 0.9503 },
 };
 // Gameplay stores the ordinary combo as 0, 1, 2. Keep both the pose fallback
 // and the strip renderer on that same numbering: treating it as 1, 2, 3
