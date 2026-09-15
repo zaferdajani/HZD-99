@@ -236,6 +236,53 @@ follow-up balance work this change does not claim to have done.
 
 ---
 
+## `hero/swing/claw_1`, `hero/swing/burst`, `hero/hurt` — the owner's "what about hit/supercharge" check
+
+Owner, 2026-09-15: after the Block/Guard fix, asked directly what was still
+wrong with "hit" and "supercharge" (the charged burst) from the sheet review.
+Rather than answer from the earlier claim that these were "already covered",
+pulled the actual shipped strips apart and looked, which is what should have
+happened the first time:
+
+- **`swingClaw1`** was still the ORIGINAL camera-facing footage documented in
+  ART_QUEUE §2av and never replaced — she opens toward the lens on the first
+  hit of every combo.
+- **`swingBurst`** was worse: the 6e642bc re-cut (ART_QUEUE, "2av is half-
+  fixed") turned out to be a cropped close-up on her head and shoulders with
+  no legs in frame at all, a completely different scale from every other
+  strip — the "headbutting" the owner had already reported and that nobody
+  had actually gone and looked at.
+- **`hurt`** had never been flagged by any test (the facing law does not
+  cover it) but five of its six cells carried a sword hilt slung on her back
+  — an object that belongs to no established pose of hers — and the flung
+  cell's eyes rendered green instead of her canon cyan.
+
+All three re-fired: four stills each for claw_1 and burst (guard/wind-
+up/contact/recovery; crouch/wind-up/release/recovery), six for hurt (flung/
+curl/land/stagger/steady/recover), hzd99-canon embedded, three-quarter
+profile matching the already-passing claw_2/finisher strips, full body in
+frame every time.
+
+**The canon element itself is a landmine worth naming.** `hzd99-canon`'s own
+reference photo shows her flying with a glowing sword and jet-boot flames —
+which is NOT how she is drawn anywhere else in the shipped game (bare-clawed
+fighter, feet on the ground). Every prompt in this batch had to fight that
+image with an explicit "her paws are bare, no sword, no blade, no held
+weapon, no jet flames" negative; the first batch of all 8 claw_1/burst
+generations, fired without that negative, came back with every single one
+holding a lightsaber-like blade. The element should probably be replaced
+with a bare-pawed, grounded reference photo so future generations stop
+needing to fight their own identity anchor — flagged here rather than fixed,
+since replacing a shared reference element is a bigger, riskier change than
+this brief needs to make.
+
+Fit to idle.webp's convention (crop to bbox, scale into a 300px cell, bottom-
+anchored), so all three land on k: 1.0 like HERO_DEATH_STRIP and
+HERO_TRANS.guard before them. `tests/hero.cjs`'s attack-facing law passes on
+both claw_1 and burst for the first time.
+
+---
+
 ## Rule going forward
 
 Any generated asset is committed here **in the same commit that uses it**. If it

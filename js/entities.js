@@ -847,11 +847,15 @@ const HERO_TRANS = {
   land: { key: 'transLand', cells: 12, k: 0.869, t: p => p.landT, t0: p => p.land0 || 0.12 },
   skid: { key: 'transSkid', cells: 2, k: 0.849, t: p => p.skidT, t0: p => p.skid0 || 0.14 },
   dash: { key: 'transDash', cells: 8, k: 0.893, t: p => p.dashT, t0: p => p.dash0 || 0.16 },
-  // the knockback (§2aw, 2026-09-05): flung back with the impact sparks,
-  // lands, straightens — six cells over the 0.3 s the pose timer holds.
-  // k 0.90: the sheet's hurt cell stands 204 (airborne) against the strip's
-  // flung cell at 257 measured to the idle's 231.
-  hurt: { key: 'hzdHurt', cells: 6, k: 0.90, t: p => p.hurtPoseT, t0: () => 0.3 },
+  // the knockback (§2aw, 2026-09-05): flung back, curls, lands, staggers,
+  // steadies, recovers — six cells over the 0.3 s the pose timer holds.
+  // RE-FIRED (owner, 2026-09-15: "what about hit"): five of the six original
+  // cells carried a sword hilt on her back that does not belong on a bare-
+  // clawed fighter, and the flung cell's eyes rendered green instead of her
+  // canon cyan. Re-fired all six, hzd99-canon embedded, explicit no-weapon
+  // negative. Fit to idle.webp's cell convention, so k moves to 1.0 like
+  // every other strip fit that way this session.
+  hurt: { key: 'hzdHurt', cells: 6, k: 1.0, t: p => p.hurtPoseT, t0: () => 0.3 },
   // THE GUARD (owner sheet, 2026-09-15: BLOCK/GUARD row). A held brace, not a
   // clip — one fired still, same treatment as the charge pose, indexed as a
   // one-cell strip so it goes through the same t/t0 machinery as everything
@@ -972,12 +976,19 @@ const FIDGET_AFTER = 5;        // seconds of stillness before she runs out of pa
 // it. k against the sheet's guard (261 of 300): cross 283 -> 0.92, uppercut
 // 273 -> 0.956.
 const SWING_STRIP = {
-  claw_1:   { key: 'swingClaw1',    cells: 11, k: 0.901 },
+  // RE-FIRED (owner sheet review, 2026-09-15, ART_QUEUE §2av): the previous
+  // claw_1 and burst takes both faced the camera instead of the target (the
+  // owner's "headbutting" report on burst was a real defect — that take was
+  // a cropped close-up on her face with no legs, a different framing from
+  // every other strip). Four fired stills each (guard/wind-up/contact/
+  // recovery), hzd99-canon embedded, three-quarter profile matching claw_2's
+  // already-passing facing — fit to idle.webp's cell convention, so k stays
+  // at 1.0 the same way HERO_DEATH_STRIP and HERO_TRANS.guard's single-cell
+  // fits did. tests/hero.cjs's attack-facing law is green on both now.
+  claw_1:   { key: 'swingClaw1',    cells: 4, k: 1.0 },
   claw_2:   { key: 'swingHook',     cells: 10, k: 0.92 },
   finisher: { key: 'swingUppercut', cells: 10, k: 0.956 },
-  // 2026-09-08: complete side-facing charged claw action with recovery.
-  // Neutral frame matches idle: (231/300)/(281/320) = 0.8769.
-  burst:    { key: 'swingBurst',    cells: 24, k: 0.8769 },
+  burst:    { key: 'swingBurst',    cells: 4, k: 1.0 },
 };
 // Gameplay stores the ordinary combo as 0, 1, 2. Keep both the pose fallback
 // and the strip renderer on that same numbering: treating it as 1, 2, 3
@@ -2134,15 +2145,27 @@ class Player {
     this.chargeT = 0;
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     sfx('chargedHit');
-    cam.shake = 13; G.hitStop = Math.max(G.hitStop, 0.09);
+    // THE MOVE THE WHOLE CHARGE WAS FOR (owner, 2026-09-15: "no supercharge or
+    // after effect"). Verified live: the release fired every time, but the
+    // shared G.flash wash is deliberately dampened to 32% for ordinary hits
+    // and stays dampened here too — cranking that shared multiplier would
+    // brighten every regular hit in the game along with it. So the burst gets
+    // its OWN bigger presence instead: three rings instead of two (one more
+    // sweep to read), and both particle bursts roughly doubled in count and
+    // size — this move's punch is now carried by things only IT fires.
+    cam.shake = 13; G.hitStop = Math.max(G.hitStop, 0.12);
     G.flash = Math.max(G.flash, 0.55);
     G.impact = { t: 0.16, t0: 0.16, x: cx, y: cy };
-    G.addRing(cx, cy); G.addRing(cx, cy, 55);
+    G.addRing(cx, cy); G.addRing(cx, cy, 55); G.addRing(cx, cy, 100);
+    // roarWave is the game's own proven "biggest moment" shockwave — already
+    // used for boss roars and the Oath save. Her own supercharge earns the
+    // same visual class rather than a smaller bespoke effect built to match.
+    if (typeof roarWave === 'function') roarWave(cx, cy, '#ffffff');
     // flagged so the body can draw the BURST plate rather than the ordinary
     // third-hit finisher — same combo number, different blow
     this.swingVis = { t: 0.32, t0: 0.32, ang: 0, combo: 3, charged: true, weaponMode: mode, wield: mode === 'single' ? 1 : 0 };
-    burst(cx, cy, 34, '#ffffff', 400, 0.6, 200, 4, true);
-    burst(cx, cy, 20, PAL[G.roomDef.zone].glow, 300, 0.8, 100, 4, true);
+    burst(cx, cy, 60, '#ffffff', 460, 0.7, 180, 6, true);
+    burst(cx, cy, 36, PAL[G.roomDef.zone].glow, 340, 0.9, 90, 6, true);
     const R = 128, dm = Math.round(this.dmg() * 2.6);
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     for (const e of targets) {
