@@ -844,8 +844,15 @@ const HERO_TRANS = {
   // under. The counts are filled in by the cut (tools/vidstrip.cjs auto:N).
   // k is measured by tools/swingk.cjs against the sheet cell of the same
   // moment (land 8, skid 10, dash 9) so she keeps her size across the change.
-  land: { key: 'transLand', cells: 12, k: 0.869, t: p => p.landT, t0: p => p.land0 || 0.12 },
-  skid: { key: 'transSkid', cells: 2, k: 0.849, t: p => p.skidT, t0: p => p.skid0 || 0.14 },
+  // DRAWN (2026-09-15). Four cells: touch, absorb, rise, stand — the compression
+  // the census called the most conspicuous thing missing, because a drop that
+  // ends with no squash is the clearest "this body has no weight" tell there is.
+  // k against the sheet's land cell 8 (211 of 300) using cell 1, the absorb.
+  land: { key: 'transLand', cells: 4, k: 0.9701, t: p => p.landT, t0: p => p.land0 || 0.12 },
+  // DRAWN (2026-09-15), replacing a two-cell filmed stand-in with the real
+  // turnaround: plant, lean against the momentum, whip round, settle. k against
+  // the sheet's skid cell 10 (210 of 300) using cell 1, the braced lean.
+  skid: { key: 'transSkid', cells: 4, k: 0.8145, t: p => p.skidT, t0: p => p.skid0 || 0.14 },
   // DRAWN (2026-09-15): six cells, stand -> drop -> drive -> recover. k against
   // the sheet's dash cell 9 (240 of 300) using the strip's cell 2, which holds
   // that same low driving pose — cell 0 is her standing and would read 15% out.
@@ -854,7 +861,10 @@ const HERO_TRANS = {
   // lands, straightens — six cells over the 0.3 s the pose timer holds.
   // k 0.90: the sheet's hurt cell stands 204 (airborne) against the strip's
   // flung cell at 257 measured to the idle's 231.
-  hurt: { key: 'hzdHurt', cells: 6, k: 0.90, t: p => p.hurtPoseT, t0: () => 0.3 },
+  // DRAWN (2026-09-15): struck, head snapped back, recoiling, recovering — and
+  // her visor does the acting, going to a pained squint in the middle cells.
+  // k against the sheet's hurt cell 18 (204 of 300) using cell 1, the impact.
+  hurt: { key: 'hzdHurt', cells: 4, k: 0.80, t: p => p.hurtPoseT, t0: () => 0.3 },
   //
   // WAITING ON ART (docs/ART_QUEUE.md §2x), in census order:
   //   land   fall>land>idle|run, the impact — 8/min and the most conspicuous
@@ -871,7 +881,12 @@ const HERO_TRANS = {
 // Three plates — takeoff stretch, apex tuck, the reach for the ground — fired
 // as stills (2026-09-02) after eleven video takes either started the jump in
 // the last half-second or never left the ground. k against the sheet's apex.
-let HERO_AIR_STRIP = { key: 'transAir', cells: 3, k: 0.819, up: 770, down: 700 };
+// DRAWN (2026-09-15) and now EIGHT cells, not three: the rise sheet's four
+// frames are 0-3 and the fall sheet's four are 4-7, which is exactly the shape
+// this lookup already wanted — it indexes by her own vertical speed from full
+// climb to full drop, so a concatenated rise-then-fall IS the arc it samples.
+// k 0.8341 against the sheet's apex cell 6 (208 of 300) using cell 2.
+let HERO_AIR_STRIP = { key: 'transAir', cells: 8, k: 0.8341, up: 770, down: 700 };
 // THE DEATH SEQUENCE (owner brief, 2026-09-14: "dying... is something you
 // have been failing at"). He was right in a specific way: draw() returned
 // on the very first line whenever this.dead was true, so from the moment
@@ -885,7 +900,10 @@ let HERO_AIR_STRIP = { key: 'transAir', cells: 3, k: 0.819, up: 770, down: 700 }
 // invent and keep in step with it. `hold` is how much of deadT's own
 // 1.8 s the three-frame slide spends moving; the remainder holds on the
 // last cell so she is not still visibly settling the instant she respawns.
-let HERO_DEATH_STRIP = { key: 'hzdDeath', cells: 3, k: 1.0, total: 1.8, hold: 1.2 };
+// DRAWN (2026-09-15): six cells — struck, reeling with the eye spiralling,
+// down to her knees, forward onto the ground, still, and the eye-lights dimming
+// out. k 0.8705 against the sheet's slump (253 of 300) using cell 0.
+let HERO_DEATH_STRIP = { key: 'hzdDeath', cells: 6, k: 0.8705, total: 1.8, hold: 1.2 };
 // THE IMPATIENT WAIT (owner, 2026-08-27: "like a cute kid waiting anxiously
 // for something from a grown-up... cross their hands, tapping one leg on the
 // floor, and saying Yalla!"). Not a transition and not a pose: a LOOP that
@@ -904,7 +922,9 @@ let HERO_DEATH_STRIP = { key: 'hzdDeath', cells: 3, k: 1.0, total: 1.8, hold: 1.
 let HERO_FIDGET = { key: 'heroFidget', cells: 8, k: 0.8895, fps: 6.5, intro: 0 };
 // Cling, slip, catch — three stills at 5 fps, because every video take of a
 // wall slide painted her a pole to hold. Authored with the wall at her RIGHT.
-let HERO_WALL_STRIP = { key: 'transWall', cells: 3, k: 0.848, fps: 5 };
+// DRAWN (2026-09-15): four cells of the cling — braced, slipping, catching,
+// braced again. k 0.9065 against the sheet's wall_cling cell 11 (232 of 300).
+let HERO_WALL_STRIP = { key: 'transWall', cells: 4, k: 0.9065, fps: 5 };
 const FIDGET_AFTER = 5;        // seconds of stillness before she runs out of patience
 // THE CELL COUNT IS HOW MANY DIFFERENT PICTURES THE TAKE ACTUALLY HOLDS.
 //
