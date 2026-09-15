@@ -18,7 +18,20 @@
 // Input is <indir>/0.png, 1.png, ... in PLAY ORDER, each a full-body plate on a
 // black field. Output is a horizontal strip of CELL x CELL cells, keyed.
 //
-//   node tools/movestrip.cjs <indir> <out.png> [cell=320]
+//   node tools/movestrip.cjs <indir> <out.png> [cell=320] [--uniform]
+//
+// ONE scale for the whole strip is the default, and right almost always: the
+// plates are authored at one size, so a single factor preserves the real size
+// differences the poses have (a lunge IS lower than a stand).
+//
+// --uniform rescales EACH cell to the median body height instead, and exists for
+// one case: art drawn with a depth ramp already baked in. The walk-away into a
+// gate is drawn receding, and the engine recedes her too — drawGateWalk shrinks
+// her 84% into a lit gateway but only 16% into a cave mouth, where darkness
+// takes her instead. Two shrinks multiply, and a baked one makes the cave wrong.
+// So the ramp comes out here and the engine keeps its own. Do not reach for this
+// to paper over a strip that merely drifts: that is a re-render, and
+// tools/stripcheck.cjs will say so.
 //
 // Then: node tools/towebp.cjs <out.png> <out.webp> 0.9
 const { chromium } = require('playwright');
@@ -58,13 +71,15 @@ window.compose = async (cells, CW, CH, scale) => {
   for (let i = 0; i < cells.length; i++) {
     const cell = cells[i];
     const im = new Image(); im.src = cell.url; await im.decode();
-    const bw = (cell.x1 - cell.x0 + 1) * scale, bh = (cell.y1 - cell.y0 + 1) * scale;
+    // per-cell scale under --uniform, the strip's single scale otherwise
+    const s = cell.scale || scale;
+    const bw = (cell.x1 - cell.x0 + 1) * s, bh = (cell.y1 - cell.y0 + 1) * s;
     // THE HORIZONTAL ANCHOR IS HER FEET, NOT HER BOUNDING BOX. Centring the box
     // slides her sideways the moment an arm shoots out: the box grows to the
     // right, so its centre moves right, so her BODY slides LEFT — she moonwalks
     // backwards through her own punch. The footprint stays put through a swing,
     // so that is what the cells are registered on.
-    const dx = i * CW + CW / 2 - (cell.footX - cell.x0) * scale;
+    const dx = i * CW + CW / 2 - (cell.footX - cell.x0) * s;
     const dy = (CH - 4) - bh;             // every cell of a move is grounded
     x.drawImage(im, cell.x0, cell.y0, cell.x1 - cell.x0 + 1, cell.y1 - cell.y0 + 1,
                 dx, dy, bw, bh);
@@ -106,8 +121,10 @@ window.footX = async (dataUrl, x0, y0, x1, y1) => {
 `;
 
 (async () => {
-  const [dir, out, cellArg] = process.argv.slice(2);
-  if (!dir || !out) { console.log('usage: movestrip.cjs <indir> <out.png> [cell=320]'); process.exit(1); }
+  const argv = process.argv.slice(2);
+  const uniform = argv.includes('--uniform');
+  const [dir, out, cellArg] = argv.filter(a => a !== '--uniform');
+  if (!dir || !out) { console.log('usage: movestrip.cjs <indir> <out.png> [cell=320] [--uniform]'); process.exit(1); }
   const CELL = +(cellArg || 320);
 
   const files = fs.readdirSync(dir).filter(f => /^\d+\.png$/.test(f))
@@ -140,6 +157,22 @@ window.footX = async (dataUrl, x0, y0, x1, y1) => {
   // strip cell has no neighbour-bleed margin: the next cell IS the next frame.
   const widest = Math.max(...cells.map(c => c.w)), tallest = Math.max(...cells.map(c => c.h));
   scale = Math.min(scale, (CELL * 0.97) / widest, (CELL * 0.97) / tallest);
+
+  if (uniform) {
+    // Every cell drawn to the SAME body height. The cap is re-checked per cell
+    // because normalising makes the small ones bigger, and a frame drawn tiny in
+    // the source can have a wide silhouette once it is brought up to size.
+    for (const c of cells) {
+      let s = scale * (med / c.h);
+      s = Math.min(s, (CELL * 0.97) / c.w, (CELL * 0.97) / c.h);
+      c.scale = s;
+    }
+    const up = cells.filter(c => c.scale > scale * 1.02).length;
+    console.log('  --uniform: per-cell scale, ' + up + ' cell(s) scaled UP'
+      + ' (max ' + (Math.max(...cells.map(c => c.scale)) / scale).toFixed(2) + 'x)'
+      + ' — upscaled cells are softer, which is acceptable only where the engine'
+      + ' draws them small');
+  }
 
   const url = await page.evaluate(({ cells, CW, CH, scale }) => window.compose(cells, CW, CH, scale),
                                   { cells, CW: CELL, CH: CELL, scale });

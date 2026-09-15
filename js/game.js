@@ -10086,6 +10086,7 @@ function gateEnter() {
   // the order has to be given here.
   if (typeof mediaFetch === 'function') {
     const armed = !!(G.save && G.save.flags && G.save.flags.crystal);
+    mediaFetch(GATE_CLIP.key, 1);          // the authored walk-away, first
     for (const k of gateBackPair(armed)) mediaFetch(k, 1);
     for (const k of gateBackPair(!armed)) mediaFetch(k, 1);
     // ...and the turnaround the turn beat is cut from, her costume first
@@ -10145,6 +10146,20 @@ function drawOneGatePrompt(def) {
 // until fading." Steady means near-constant pace — the easing below keeps
 // the speed level instead of rushing the middle.
 const GATE_WALK = 3.4;
+// THE WALK-AWAY IS ONE AUTHORED CLIP (2026-09-15), not two plates flipped.
+//
+// The strip is 0-3 the TURN — front-on, three-quarter, nearly behind, behind —
+// and 4-7 the back-view stride. It cannot simply loop: run all eight on the
+// stride counter and she pirouettes every second step, turning to face the
+// camera again on her way out of the world.
+//
+// So the turn plays ONCE, on the walk's own clock, over its first fifth; the
+// back stride loops on TRAVEL after that, the same counter the two plates used,
+// so the cadence still answers to how far she has actually gone rather than to
+// wall time. And the procedural bob goes away with them: an authored cycle
+// carries its own vertical, and adding a synthetic one on top is the second bob
+// tests/gait.cjs already forbids for the run.
+const GATE_CLIP = { key: 'heroGateWalk', cells: 8, turn: 4, turnFrac: 0.2 };
 // Her walking pace for the beat that lines her up with the doorway. Not the
 // run: a run into a door is the "dash through a doorway" the shot below was
 // written against, and the owner asked for a careful walk.
@@ -10256,6 +10271,10 @@ function gateBackPair(armed) {
 // it counted as ready here, the hold would release the moment the WRONG pair
 // landed and she would walk out wearing a sword she does not own.
 function gateBackReady() {
+  // The authored clip is a whole walk on its own, so it satisfies the hold by
+  // itself — the pair rule below exists because ONE of two plates is half a
+  // stride, and a clip is never half of anything.
+  if (gateBackImg(GATE_CLIP.key)) return true;
   const want = gateBackPair(!!(G.save && G.save.flags && G.save.flags.crystal));
   return !!(gateBackImg(want[0]) && gateBackImg(want[1]));
 }
@@ -10385,18 +10404,40 @@ function drawGateWalk() {
     if (gateBackImg(want[0]) && gateBackImg(want[1])) g.pair = want;
     else if (gateBackImg(altp[0]) && gateBackImg(altp[1])) g.pair = altp;
   }
+  // The authored clip first; the plate pair is what runs when it is not here.
+  //
+  // ...AND ONLY WHEN SHE IS UNARMED. The clip is drawn with nothing on her back,
+  // so it IS the bare costume and is right for the opening, where she has not
+  // been given the crystal yet. Playing it armed would take her sword off her
+  // back for the length of the walk — the same class of error as the per-frame
+  // costume flicker the pair logic below was written to stop. An armed clip is
+  // on the list in docs/ART_HANDOFF.md §9; until it exists, armed keeps the
+  // plates.
+  const clipIm = armed ? null : gateBackImg(GATE_CLIP.key);
   const want = g.pair ? g.pair[b] : '';
-  const im = want ? gateBackImg(want) : null;
+  const im = clipIm ? null : (want ? gateBackImg(want) : null);
+  if (clipIm) {
+    const nBack = GATE_CLIP.cells - GATE_CLIP.turn;
+    const cell = k < GATE_CLIP.turnFrac
+      ? Math.min(GATE_CLIP.turn - 1, Math.floor(k / GATE_CLIP.turnFrac * GATE_CLIP.turn))
+      : GATE_CLIP.turn + (Math.floor(trav / 26) % nBack);
+    const cw = clipIm.naturalWidth / GATE_CLIP.cells;
+    const dh = 92 * sc, dw = dh * (cw / clipIm.naturalHeight);
+    c.drawImage(clipIm, cell * cw, 0, cw, clipIm.naturalHeight, x - dw / 2, y - dh, dw, dh);
+    G.gateBackKey = GATE_CLIP.key;
+  }
   // what the shot actually drew her as, for tests/opening.cjs — "she turned her
   // back" is the whole point of this function and it is not readable from the
   // outside otherwise
-  G.gateBackKey = im ? want : '';
+  if (!clipIm) G.gateBackKey = im ? want : '';
   if (im) {
     const dh = 92 * sc, dw = dh * (im.naturalWidth / im.naturalHeight);
-    // the gait's vertical, off the same stride counter as the frames
+    // the gait's vertical, off the same stride counter as the frames. The clip
+    // does NOT get this: it carries its own vertical, and a second synthetic bob
+    // over an authored cycle is the thing tests/gait.cjs forbids for the run.
     const rise = -Math.abs(Math.sin((trav / 26) * Math.PI)) * 2.2 * sc;
     c.drawImage(im, x - dw / 2, y - dh + rise, dw, dh);
-  } else if (player) {
+  } else if (!clipIm && player) {
     // Neither back plate decoded. Her live body is all that is left — but it is
     // driven at WALK speed, not the old 210, so that at worst the shot reads as
     // someone walking off rather than sprinting sideways into a wall.

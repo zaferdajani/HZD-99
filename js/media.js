@@ -374,6 +374,11 @@ const MEDIA_SRC = {
     transSkid: 'assets/characters/hero/trans_skid.webp',
     transWall: 'assets/characters/hero/trans_wall.webp',
     transDash: 'assets/characters/hero/trans_dash.webp',
+    // THE WALK-AWAY, AUTHORED (2026-09-15). Eight drawn cells: 0-3 are the TURN
+    // from front-on to fully behind, 4-7 the back-view stride. The four back
+    // plates below stay as the fallback — they are what drew this for months and
+    // a browser that has them and not this should still see her back.
+    heroGateWalk: 'assets/characters/hero/gate_walk.webp',
     heroBackA: 'assets/characters/hero/backwalk_a.webp',
     heroBackB: 'assets/characters/hero/backwalk_b.webp',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.webp',

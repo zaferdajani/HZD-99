@@ -252,8 +252,13 @@ const { chromium } = require('playwright');
   check('she walks away with her BACK to us, never her side view',
     doorway.sideFrames === 0 && doorway.keys.length > 0,
     doorway.keys.join(',') + ' / ' + doorway.sideFrames + ' side frames');
+  // heroGateWalk is the authored walk-away and is drawn with nothing on her
+  // back, so it is a bare costume by construction; drawGateWalk only reaches for
+  // it when she is unarmed. The plate pair remains the armed path and the
+  // fallback, so both spellings of "bare" have to pass here.
   check('...and unarmed she wears the BARE back pair, not the sword she lacks',
-    doorway.keys.length > 0 && doorway.keys.every(k => k.indexOf('BareBack') > 0),
+    doorway.keys.length > 0
+      && doorway.keys.every(k => k.indexOf('BareBack') > 0 || k === 'heroGateWalk'),
     doorway.keys.join(','));
 
   // ---- 7. NOTHING GLIDES -------------------------------------------------
