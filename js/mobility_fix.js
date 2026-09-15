@@ -5,7 +5,9 @@ const HERO_MOTION_KEYS = Object.freeze([
   'heroStates', 'hzdIdle', 'gaitWalk', 'gaitRun', 'transAir', 'transLand',
   'transDash', 'transSkid', 'transWall', 'heroFidget', 'hzdHurt'
 ]);
-const heroMotionLoad = { active: false, started: 0, retryAt: 0, failures: 0 };
+// `done` is SAMPLED IN UPDATE, never recomputed in draw — see the loading screen
+// below for why that distinction is load-bearing.
+const heroMotionLoad = { active: false, started: 0, retryAt: 0, failures: 0, done: 0 };
 function heroMotionMissing() {
   return HERO_MOTION_KEYS.filter(k => {
     const im = MEDIA_RAW[k];
@@ -21,6 +23,7 @@ function heroMotionGate(dt) {
     return false;
   }
   const missing = heroMotionMissing();
+  heroMotionLoad.done = HERO_MOTION_KEYS.length - missing.length;
   if (!missing.length) { heroMotionLoad.active = false; heroMotionLoad.started = 0; return false; }
   const now = performance.now();
   heroMotionLoad.active = true;
@@ -38,9 +41,25 @@ function heroMotionGate(dt) {
   }
   return true;
 }
+// DRAW MUST NOT POLL THE DECODER. This read its own progress by calling
+// heroMotionMissing() — which asks every image whether it is `.complete` — from
+// inside draw(). Decoding finishes on another thread, so that answer can change
+// between two draws of the SAME frame, and the progress bar then renders two
+// different widths from one game state.
+//
+// tests/meadow.cjs is the harness that caught it: it draws one frame twice with
+// performance.now and Math.random frozen and requires the two to be identical,
+// and it went from four clean runs to failing two in three the moment six hero
+// strips were replaced at once — five of them in HERO_MOTION_KEYS, so the
+// loading gate was open during the measurement where it had previously closed
+// before the test looked. The bug was always here; more art to decode only
+// widened the window onto it.
+//
+// So the count comes from heroMotionGate, which runs in UPDATE where sampling
+// mutable state is what you are supposed to do.
 function drawHeroMotionLoading(ctx) {
   if (!heroMotionLoad.active || G.state !== 'PLAY') return false;
-  const missing = heroMotionMissing(), done = HERO_MOTION_KEYS.length - missing.length;
+  const done = heroMotionLoad.done;
   ctx.save();
   ctx.fillStyle = '#070f19'; ctx.fillRect(0, 0, 960, 540);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
