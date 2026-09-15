@@ -134,7 +134,12 @@ the format are already established.
 
 ### Priority two — combat
 
-> **SUPERCHARGED SCRATCH — 12 frames.** The charged claw attack, side view facing
+> **SUPERCHARGED SCRATCH — 12 frames. THIS IS A RE-RENDER — the previous one
+> came back at half the size of every other sheet and with its frames welded
+> together by the energy, so two things matter more than the poses: draw her the
+> SAME SIZE as she is in the walk and idle sheets (about 330px tall, ear-tips to
+> soles, in every frame), and put NO energy on this sheet at all — the blue
+> charge and the slash go on a separate effects sheet, frame for frame.** The charged claw attack, side view facing
 > right. She stays low, braced and bipedal throughout — she never leaps and never
 > drops to all fours. Frames 1–2 standing ready. Frames 3–4 sinking into a deep
 > wide fighting stance, both arms drawn back behind her hips, steel claws extended.

@@ -267,51 +267,48 @@ failed: its brace frame came in 20% heavier and 46% wider than its neighbours.
 
 ---
 
-## 9. The list — what the game still needs (2026-09-15)
+## 9. The list — status 2026-09-15 (evening)
 
-Wired and done: **walk**, **idle**.
+**Wired and live, all measured clean:** walk · idle · walk-away (gate entry) ·
+run-away (cave entry) · claw jab · double slash · uppercut · dash.
 
-Ranked by how much of the game each unblocks, not by how hard it is.
+That is eight of the nine sheets in the second delivery. Every one went
+sheetslice -> movestrip -> stripcheck without a real flag, and the combo is now
+one character end to end instead of a drawn opener into filmed follow-ups.
 
-### Priority 1 — locomotion, which is on screen constantly
+### The one that needs re-rendering
 
-| animation | frames | state |
+**SUPERCHARGED SCRATCH.** It is drawn at **230px** where every other sheet is
+355-475px — roughly half scale — and its twelve frames arrive welded into seven
+because the energy crosses the gutters. `tools/sheetslice.cjs` now splits bridged
+frames automatically and recovered three of them, but it cannot invent
+resolution. This is the sheet that replaces the strip the owner rejected, and
+`tests/hero.cjs` fails on that strip alone: **burst at 0.406 against the walk's
+widest 0.099.** It is the last red thing in the hero harness.
+
+Ask for: twelve frames, her figure ~330px like the others, body only, with the
+blue energy on its own frame-aligned sheet.
+
+### Still never delivered
+
+| animation | frames | why it matters |
 |---|---|---|
-| **run** | 8 | delivered at 15% height spread — re-render at constant size |
-| **jump start** | 4 | not delivered |
-| **air rise** | 4 | not delivered |
-| **air fall** | 4 | not delivered |
-| **land** | 4 | not delivered |
-| **skid** (the turn-and-stop) | 4 | not delivered, and the game has no art for it at all |
-| **dash** | 6 | delivered at 24% spread — re-render at constant size |
-| **wall slide** | 4 | not delivered |
-
-### Priority 2 — combat, replacing art the owner rejected
-
-| animation | frames | state |
-|---|---|---|
-| **supercharged scratch** | 12 | delivered at 188px — half the height of every other strip. Re-render at ~330px with the FX on their own layer. This one replaces the rejected `burst`. |
-| **claw jab** | 5 | bodies are clean (3% spread); only the gutters need widening |
-| **double slash** | 6 | 19% spread — re-render at constant size |
-| **uppercut** | 6 | 78% spread, and its frames weld together — re-render at constant size with clear gutters |
-| **air attack** | 6 | not delivered as a strip |
-| **down attack / plunge** | 6 | not delivered as a strip |
-
-### Priority 3 — reactions and flavour
-
-| animation | frames | state |
-|---|---|---|
-| **hurt / hit react** | 4 | not delivered |
-| **death** | 6 | not delivered |
-| **heal** | 4–6 | not delivered, no art in the game |
-| **fidget** (the impatient idle, after 5s standing) | 6–8 | not delivered |
-| **walk-away / gate entry** | 8 | **delivered and wanted** — replaces the two static back plates `gateEnter()` flips between today |
-| **run-away / gate entry** | 8 | delivered, same use |
+| jump start | 4 | no art at all; the pose cell draws |
+| air rise | 4 | " |
+| air fall | 4 | " |
+| land | 4 | a filmed strip exists, 12 cells |
+| skid | 4 | the game has only a 2-cell filmed strip |
+| wall slide | 4 | 3-cell filmed strip |
+| hurt | 4 | 6-cell filmed strip |
+| death | 6 | filmed |
+| heal | 5 | no art |
+| fidget | 8 | the impatient idle after 5s standing |
+| **armed walk-away** | 8 | the delivered one has nothing on her back, so it is right unarmed and wrong once she carries the crystal — `drawGateWalk` falls back to the old plates when armed |
+| air attack / down attack | 6 each | no strips |
 
 ### The effects layer
 
-The very first sheet's section 23 had this right: arcs, impacts, dust and sparks
-as their own frames. Deliver them that way — one FX strip per attack, aligned
-frame for frame with the body strip — and both problems go away at once: the
-gutters stay clean, and the engine can tint, scale and time the FX independently,
-which is what it already does for every procedural effect it draws.
+Still the outstanding format ask, and it now has a second reason. Beyond keeping
+the gutters clean, the engine composites and times effects itself — and the
+supercharge proves the cost of not doing it: its energy is what welded its frames
+together and what will keep doing so at any resolution.
