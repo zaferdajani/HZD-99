@@ -846,7 +846,10 @@ const HERO_TRANS = {
   // moment (land 8, skid 10, dash 9) so she keeps her size across the change.
   land: { key: 'transLand', cells: 12, k: 0.869, t: p => p.landT, t0: p => p.land0 || 0.12 },
   skid: { key: 'transSkid', cells: 2, k: 0.849, t: p => p.skidT, t0: p => p.skid0 || 0.14 },
-  dash: { key: 'transDash', cells: 8, k: 0.893, t: p => p.dashT, t0: p => p.dash0 || 0.16 },
+  // DRAWN (2026-09-15): six cells, stand -> drop -> drive -> recover. k against
+  // the sheet's dash cell 9 (240 of 300) using the strip's cell 2, which holds
+  // that same low driving pose — cell 0 is her standing and would read 15% out.
+  dash: { key: 'transDash', cells: 6, k: 1.0039, t: p => p.dashT, t0: p => p.dash0 || 0.16 },
   // the knockback (§2aw, 2026-09-05): flung back with the impact sparks,
   // lands, straightens — six cells over the 0.3 s the pose timer holds.
   // k 0.90: the sheet's hurt cell stands 204 (airborne) against the strip's
@@ -975,7 +978,13 @@ const SWING_STRIP = {
   // the key moves to swingClaw2: hook.webp stays on disk as the filmed record.
   // k against the sheet's claw_2 (260 of 300) using cell 0's guard (276 of 320).
   claw_2:   { key: 'swingClaw2',    cells: 5,  k: 1.0048 },
-  finisher: { key: 'swingUppercut', cells: 10, k: 0.956 },
+  // DRAWN (2026-09-15) — the third hit joins the other two, so the whole combo
+  // is one character instead of a drawn opener into filmed follow-ups.
+  // k against the sheet's finisher (243 of 300) using cell 0's ready pose
+  // (232 of 320). Cell 3 is the arm overhead and stands 528 in the source: the
+  // strip is DELIBERATELY not uniform in height, and movestrip's single scale
+  // preserves that, because an uppercut that does not get taller is not one.
+  finisher: { key: 'swingUppercut', cells: 6,  k: 1.1172 },
   // 2026-09-08: complete side-facing charged claw action with recovery.
   // Neutral frame matches idle: (231/300)/(281/320) = 0.8769.
   burst:    { key: 'swingBurst',    cells: 24, k: 0.8769 },

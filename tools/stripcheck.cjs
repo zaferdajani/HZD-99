@@ -57,11 +57,27 @@ window.measure = async (dataUrl, cells) => {
     }
     if (x1 < x0) { out.push(null); continue; }
     const h = y1 - y0 + 1, w = x1 - x0 + 1;
-    // waist: opaque run at 55% down the figure
-    const wy = Math.round(y0 + h * 0.55);
-    let wlo = cx1, whi = cx0, wany = false;
-    for (let px = cx0; px <= cx1; px++)
-      if (d[at(px, wy) + 3] > 140) { if (px < wlo) wlo = px; if (px > whi) whi = px; wany = true; }
+    // WAIST IS THE LONGEST CONTIGUOUS RUN, NOT THE SPAN.
+    //
+    // Measured min-to-max this reads torso PLUS any arm out to the side plus the
+    // empty air between them, so it fired on every extended-arm cell in the game
+    // and reported a slash as a wide body. The torso is the widest solid thing
+    // crossing the middle of her; an arm is a separate, narrower run. So take the
+    // longest unbroken run and the arms stop counting.
+    //
+    // Sampled over a BAND rather than one row, because a single row can land on a
+    // belt seam or between two plates and read narrow by accident.
+    let waistPx = 0, wany = false;
+    for (let f2 = 0.45; f2 <= 0.68; f2 += 0.023) {
+      const wy = Math.round(y0 + h * f2);
+      if (wy < 0 || wy >= H) continue;
+      let run = 0, best = 0;
+      for (let px = cx0; px <= cx1; px++) {
+        if (d[at(px, wy) + 3] > 140) { run++; if (run > best) best = run; }
+        else run = 0;
+      }
+      if (best > waistPx) { waistPx = best; wany = true; }
+    }
     // eye pair: brightest cyan blobs in the top 45% of the figure
     const cyan = [];
     for (let py = y0; py < y0 + h * 0.45; py++) for (let px = cx0; px <= cx1; px++) {
@@ -81,8 +97,7 @@ window.measure = async (dataUrl, cells) => {
     }
     out.push({
       h, w, area,
-      mass: +(area / (h * h)).toFixed(4),
-      waist: wany ? +((whi - wlo + 1) / h).toFixed(4) : null,
+      waist: wany ? +(waistPx / h).toFixed(4) : null,
       eyes: eyes != null ? +(eyes / h).toFixed(4) : null,
       dark: +(dark / area).toFixed(4),
     });
@@ -110,8 +125,21 @@ const med = a => { const s = a.slice().sort((x, y) => x - y); return s[s.length 
   await browser.close();
 
   const ok = m.filter(Boolean);
+  // MASS IS NORMALISED BY THE STRIP'S TYPICAL HEIGHT, NOT BY EACH CELL'S OWN.
+  //
+  // It used to be area / h^2 per cell, and that is only a fat-cat detector while
+  // the height is constant. Give it a move with real vertical range and the
+  // metric measures the POSE: a crouch keeps its area over a smaller h and reads
+  // as 30% heavier, an uppercut at full stretch reads as thin. The uppercut
+  // flagged its own crouch and its own extension, which is the animation working.
+  //
+  // The defect being hunted is MORE CAT, and movestrip already draws every cell
+  // at one scale — so area against the strip's median height answers it directly
+  // and a change of pose no longer moves the number.
+  const medH = med(ok.map(c => c.h));
+  for (const c of ok) c.mass = +(c.area / (medH * medH)).toFixed(4);
   const M = {
-    h: med(ok.map(c => c.h)), mass: med(ok.map(c => c.mass)),
+    h: medH, mass: med(ok.map(c => c.mass)),
     waist: med(ok.filter(c => c.waist != null).map(c => c.waist)),
     dark: med(ok.map(c => c.dark)),
     eyes: med(ok.filter(c => c.eyes != null).map(c => c.eyes)),
@@ -134,7 +162,17 @@ const med = a => { const s = a.slice().sort((x, y) => x - y); return s[s.length 
     // unchanged mass is a limb moving; width plus changed mass is a different
     // character, and only the second is a defect. `mass` already catches that
     // directly, so waist's job is to say WHERE the drift shows, not to raise it.
-    if (massOff && c.waist != null && Math.abs(c.waist - M.waist) / M.waist > 0.22)
+    // WAIST FLAGS ONLY ON GROSS DEVIATION, and the band is calibrated rather
+    // than chosen. A torso's apparent width is a function of POSE as much as of
+    // build: seen edge-on mid-turn it is genuinely narrow, at full extension the
+    // shoulders square up and it is genuinely wide. Across the strips known good
+    // those move it by up to about a quarter; the drawing the owner rejected on
+    // sight moves it by 46%. So the line sits between: a third.
+    //
+    // This is the limit of what a width number can separate on its own, and it
+    // is stated rather than hidden — the check is here to catch a cell that is a
+    // DIFFERENT CAT, not to adjudicate posture.
+    if (c.waist != null && Math.abs(c.waist - M.waist) / M.waist > 0.33)
       f.push(c.waist > M.waist ? 'WIDE-BODY' : 'NARROW-BODY');
     // Claws: half the median dark fraction means the metal is not there. The
     // first and last cells are exempt — a move opens and closes on a guard, and
