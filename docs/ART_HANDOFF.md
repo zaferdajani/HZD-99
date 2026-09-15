@@ -58,12 +58,13 @@ three short dark vertical vent slots on the belly · small cyan lights at should
 hip and knee · ball-jointed segmented arms and legs with visible joint rings ·
 white mitten hands · short rounded boots with darker soles. No mouth. **No tail.**
 
-**THE RICHER VARIANT IS CANON.** The delivered strips carry two versions of her:
-`b5_interact` and `c1_walkramp` have the gold shoulder disc, the belly vents and
-the whiskers; `b1_walk` and `b4_idle` have none of them. The richer one is canon —
-it matches the design the game already shipped and it is the more finished
-drawing — so walk and idle are the two strips that want re-rendering to match, not
-the other way round.
+**THE RICHER VARIANT IS CANON — and is now the only one.** The first delivery
+carried two versions of her: `b5_interact` and `c1_walkramp` had the gold shoulder
+disc, the belly vents and the whiskers, while `b1_walk` and `b4_idle` had none of
+them. The richer one was ruled canon because it matches the design the game
+already shipped and is the more finished drawing; the second delivery re-rendered
+walk and idle to match, and everything wired is the richer variant. The plainer
+sheets survive only in `assets/source/hero/delivered/` as the record.
 
 **Retractable steel claws.** Dark-steel blades that extend from each hand. Out or
 in is a per-pose decision the brief states explicitly, and it must be obeyed: a
@@ -98,8 +99,11 @@ the picture, so it gets copied. Upscale the anchor before using it.
 - **Three-quarter view from her front-left**, so she faces the **right** side of
   the frame, where her target is.
 - **Both eye-lights visible**, with the far one foreshortened close to the near
-  one. Not full profile (loses the two-eye visor read). Not front-on (the game
-  measures this and fails it — see §6).
+  one. Not full profile (loses the two-eye visor read). Not front-on for anything
+  she does facing a target — `tests/hero.cjs` measures the eye gap and fails a
+  strip wider than her walk's widest, 0.099. The IDLE and the FIDGET are the
+  deliberate exceptions: those face the camera, and the renderer cancels the body
+  mirror for them so they never flip with her facing.
 - Whole body, head to feet, with clear margin all round. Never cropped at the
   legs, never a bust, never a close-up.
 - Feet on an invisible ground line near the bottom of the frame.
