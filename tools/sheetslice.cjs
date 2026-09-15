@@ -45,10 +45,16 @@ window.slice = async (dataUrl) => {
     return true;
   };
 
-  // columns that hold anything at all -> frames are the runs between gaps
+  // columns that hold anything at all -> frames are the runs between gaps,
+  // and HOW MUCH each column holds, which is what splits a bridged pair
   const col = new Array(W).fill(false);
-  for (let px = 0; px < W; px++)
-    for (let py = 0; py < H; py++) if (A(px, py) > 30) { col[px] = true; break; }
+  const ink = new Array(W).fill(0);
+  for (let px = 0; px < W; px++) {
+    let n = 0;
+    for (let py = 0; py < H; py++) if (A(px, py) > 30) n++;
+    ink[px] = n;
+    col[px] = n > 0;
+  }
 
   const runs = [];
   let s = -1;
@@ -58,7 +64,39 @@ window.slice = async (dataUrl) => {
   }
   if (s >= 0) runs.push([s, W - 1]);
   // drop specks: anything under 1.5% of the strip width is not a frame
-  const keep = runs.filter(r => r[1] - r[0] + 1 > W * 0.015);
+  let keep = runs.filter(r => r[1] - r[0] + 1 > W * 0.015);
+
+  // SPLIT THE BRIDGED ONES. An effect that reaches across a gutter — a claw at
+  // full extension, a slash arc — welds two frames into one run, and the merged
+  // run then measures as a single frame twice as wide as its neighbours. The
+  // bridge is THIN (it is an arm, not a body), so the split is found rather than
+  // guessed: take runs far wider than the median, work out how many frames they
+  // ought to hold, and cut each boundary at the column carrying the least ink
+  // within a window around where it should fall.
+  const splits = [];
+  {
+    const widths = keep.map(r => r[1] - r[0] + 1).sort((a, b) => a - b);
+    const medW = widths[widths.length >> 1];
+    const out = [];
+    for (const [a, b] of keep) {
+      const w = b - a + 1, n = Math.round(w / medW);
+      if (w < medW * 1.55 || n < 2) { out.push([a, b]); continue; }
+      const bounds = [a];
+      for (let j = 1; j < n; j++) {
+        const target = a + Math.round(w * j / n);
+        const half = Math.max(8, Math.round(medW * 0.22));
+        let best = target, bestInk = Infinity;
+        for (let px = Math.max(a + 4, target - half); px <= Math.min(b - 4, target + half); px++)
+          if (ink[px] < bestInk) { bestInk = ink[px]; best = px; }
+        bounds.push(best);
+        splits.push({ at: best, ink: bestInk });
+      }
+      bounds.push(b + 1);
+      for (let j = 0; j < bounds.length - 1; j++)
+        out.push([bounds[j] + (j ? 1 : 0), bounds[j + 1] - 1]);
+    }
+    keep = out;
+  }
 
   const frames = keep.map(([x0, x1], i) => {
     let by0 = H, by1 = 0, bx0 = x1, bx1 = x0, area = 0;
@@ -70,17 +108,22 @@ window.slice = async (dataUrl) => {
       if (px < bx0) bx0 = px; if (px > bx1) bx1 = px;
       if (py < by0) by0 = py; if (py > by1) by1 = py;
     }
+    // A boundary this tool CREATED abuts by construction, so reporting it as
+    // "touching" is the tool complaining about its own decision. The split is
+    // already announced on its own line; flagging it twice trains the reader to
+    // ignore the flag, which is the one thing a measurement tool must not do.
     const gutter = i < keep.length - 1 ? keep[i + 1][0] - x1 - 1 : null;
+    const wasSplit = splits.some(s2 => Math.abs(s2.at - x1) <= 1);
     return {
       i, x0, x1,
       bodyH: by1 >= by0 ? by1 - by0 + 1 : 0,
       bodyW: bx1 >= bx0 ? bx1 - bx0 + 1 : 0,
-      foot: by1, area,
+      foot: by1, area, wasSplit,
       fullH: ay1 >= ay0 ? ay1 - ay0 + 1 : 0,
       gutter,
     };
   });
-  return { W, H, frames };
+  return { W, H, frames, splits };
 };
 window.cutFrame = async (dataUrl, x0, x1, H) => {
   const img = new Image(); img.src = dataUrl; await img.decode();
@@ -105,10 +148,16 @@ const med = a => { const s = a.slice().sort((p, q) => p - q); return s[s.length 
   const page = await browser.newPage();
   await page.addScriptTag({ content: PAGE });
   const url = 'data:image/png;base64,' + fs.readFileSync(strip).toString('base64');
-  const { W, H, frames } = await page.evaluate((u) => window.slice(u), url);
+  const { W, H, frames, splits } = await page.evaluate((u) => window.slice(u), url);
 
   const name = path.basename(strip);
   console.log(name + '  ' + W + 'x' + H + '  ->  ' + frames.length + ' frames');
+  if (splits && splits.length) {
+    // never silent: a split is the tool deciding where a frame boundary is, and
+    // that decision has to be visible enough to argue with
+    console.log('  split ' + splits.length + ' bridged frame(s) at x='
+      + splits.map(s2 => s2.at + ' (' + s2.ink + 'px of ink)').join(', '));
+  }
   if (!frames.length) { console.log('  no frames found'); await browser.close(); process.exit(1); }
 
   const mh = med(frames.map(f => f.bodyH)), mf = med(frames.map(f => f.foot));
@@ -119,7 +168,7 @@ const med = a => { const s = a.slice().sort((p, q) => p - q); return s[s.length 
     const dh = (f.bodyH - mh) / mh, df = f.foot - mf;
     if (Math.abs(dh) > 0.12) fl.push((dh > 0 ? '+' : '') + (dh * 100).toFixed(0) + '% SIZE');
     if (Math.abs(df) > H * 0.05) fl.push((df > 0 ? '+' : '') + df + 'px FOOT');
-    if (f.gutter != null && f.gutter < 4) fl.push('TOUCHING(' + f.gutter + 'px)');
+    if (f.gutter != null && f.gutter < 4 && !f.wasSplit) fl.push('TOUCHING(' + f.gutter + 'px)');
     if (!f.bodyH) fl.push('NO BODY');
     console.log('  ' + String(f.i).padEnd(3) + String(f.x0).padStart(5) + String(f.x1).padStart(6)
       + String(f.bodyH).padStart(8) + String(f.bodyW).padStart(8) + String(f.foot).padStart(8)

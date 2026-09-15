@@ -124,10 +124,23 @@ const med = a => { const s = a.slice().sort((x, y) => x - y); return s[s.length 
     const f = [];
     // ±18% of the strip's own median is the band. Body mass does change through
     // a swing (a lunge is longer and thinner) but not by a fifth.
-    if (Math.abs(c.mass - M.mass) / M.mass > 0.18) f.push(c.mass > M.mass ? 'BULKY' : 'THIN');
-    if (c.waist != null && Math.abs(c.waist - M.waist) / M.waist > 0.22) f.push(c.waist > M.waist ? 'WIDE-BODY' : 'NARROW-BODY');
-    // claws: half the median dark fraction means the metal is simply not there
-    if (c.dark < M.dark * 0.55) f.push('NO-CLAWS?');
+    const massOff = Math.abs(c.mass - M.mass) / M.mass > 0.18;
+    if (massOff) f.push(c.mass > M.mass ? 'BULKY' : 'THIN');
+    // WAIST ONLY COUNTS ALONGSIDE MASS, and that is a correction, not a
+    // loosening. On its own this fired on four separate clean strips — the
+    // passing pose of a walk, the extended-arm cells of two different slashes,
+    // a breath in an idle — because every one of them legitimately changes the
+    // silhouette's width without changing how much cat there is. Width plus
+    // unchanged mass is a limb moving; width plus changed mass is a different
+    // character, and only the second is a defect. `mass` already catches that
+    // directly, so waist's job is to say WHERE the drift shows, not to raise it.
+    if (massOff && c.waist != null && Math.abs(c.waist - M.waist) / M.waist > 0.22)
+      f.push(c.waist > M.waist ? 'WIDE-BODY' : 'NARROW-BODY');
+    // Claws: half the median dark fraction means the metal is not there. The
+    // first and last cells are exempt — a move opens and closes on a guard, and
+    // a guard with the claws in is the correct drawing, not a flicker.
+    const edge = i === 0 || i === m.length - 1;
+    if (!edge && c.dark < M.dark * 0.55) f.push('NO-CLAWS?');
     if (c.eyes == null) f.push('NO-EYES');
     else if (c.eyes > M.eyes * 1.35) f.push('FACING-CAMERA?');
     console.log(String(i).padEnd(5) + String(c.h).padStart(5) + String(c.mass).padStart(8)

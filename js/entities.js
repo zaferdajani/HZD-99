@@ -968,7 +968,13 @@ const SWING_STRIP = {
   // k against the sheet's claw_1 guard (260 of 300) using the strip's own cell 0,
   // which holds that same guard: 274 of 320.
   claw_1:   { key: 'swingClaw1',    cells: 6,  k: 1.0122 },
-  claw_2:   { key: 'swingHook',     cells: 10, k: 0.92 },
+  // DRAWN (2026-09-15). The owner's claw jab, five cells, side-on. It replaces
+  // the filmed hook — which PASSED the facing law at 0.083 and was swapped
+  // anyway, because claw_1 is now the drawn design and a combo whose first hit
+  // is one character and whose second is another reads worse than either. Note
+  // the key moves to swingClaw2: hook.webp stays on disk as the filmed record.
+  // k against the sheet's claw_2 (260 of 300) using cell 0's guard (276 of 320).
+  claw_2:   { key: 'swingClaw2',    cells: 5,  k: 1.0048 },
   finisher: { key: 'swingUppercut', cells: 10, k: 0.956 },
   // 2026-09-08: complete side-facing charged claw action with recovery.
   // Neutral frame matches idle: (231/300)/(281/320) = 0.8769.
