@@ -26,37 +26,49 @@ prowling, never crouched like a real cat, never stretching like one. When a pose
 brief says "crouch" or "low", it means a *fighter's* stance — knees bent, feet
 planted, spine hinged forward — not an animal's.
 
-### Palette, sampled off the shipped master (not described from memory)
+### Palette, measured off the OWNER'S DELIVERED ARTWORK (2026-09-15)
+
+Sampled across `b1_walk`, `b4_idle`, `b5_interact` and `c1_walkramp` in
+`assets/source/hero/delivered/`. These supersede the values this table held
+before: the delivered design is brighter and cleaner, its visor is near-black
+rather than slate, its cape is a bright crimson rather than a dark brick, and its
+ear interiors are ice BLUE where the old sheet had mint green.
 
 | part | hex |
 |---|---|
-| ceramic body, lit | `#e4daca` |
-| ceramic body, mid shadow | `#c9b8a9` |
-| ceramic body, core shadow | `#96847a` |
-| highlight / rim | `#fce7c8` |
-| visor band | `#393543` |
-| eye-lights | `#84fdf3` |
-| ear interiors, seam hairlines, chest core | `#8bccaa` |
-| cape and scarf, lit | `#823235` |
-| cape and scarf, shadow | `#591d25` |
-| cape deep fold | `#69232c` |
-| shoulder discs, brass | `#a47c42` |
-
-The cape is **deep crimson**. Several rejected plates came back with a bright
-orange underside — that is wrong.
+| ceramic body, lit | `#faead7` |
+| ceramic body, highlight | `#fcf4e6` |
+| ceramic body, mid | `#ead7c7` |
+| ceramic body, shadow | `#d7b9a7` |
+| visor band / outline | `#040304` — with `#030918` and `#051429` in the cooler falloff |
+| eye-lights | `#8cfafd` |
+| ear interiors | pale ice blue, not green |
+| cape, lit | `#c42b32` |
+| cape, shadow | `#8c1c2d` |
+| gold trim | `#eca433` |
 
 ### Parts checklist
 
-Tall pointed ears, mint interiors · charcoal visor band across the face with two
-bright cyan eye-lights · four thin steel whiskers · crimson scarf at the neck
-running into a long crimson cape · two brass shoulder discs · a small cyan core
-light centred on the chest · three dark vertical vent slots on the belly · white
-mitten hands with steel wrist cuffs · short legs · one thin tail.
+Chibi proportions — her head is about as large as her torso. Smooth bone-white
+ceramic armour · tall pointed ears with pale ice-blue interiors · a wide
+near-black visor band across the face carrying two bright cyan rounded-rectangle
+eye-lights · a small round cyan light at each temple · four thin whiskers · a deep
+crimson cape from the shoulders with a red collar · one brass-gold shoulder disc ·
+three short dark vertical vent slots on the belly · small cyan lights at shoulder,
+hip and knee · ball-jointed segmented arms and legs with visible joint rings ·
+white mitten hands · short rounded boots with darker soles. No mouth. **No tail.**
 
-**Retractable steel claws.** Four dark-steel blades that extend from each hand.
-Out or in is a *per-pose decision that the brief states explicitly*, and it must
-be obeyed — a sheet where the claws flicker in and out between frames is the
-single most visible defect. §6 measures this.
+**THE RICHER VARIANT IS CANON.** The delivered strips carry two versions of her:
+`b5_interact` and `c1_walkramp` have the gold shoulder disc, the belly vents and
+the whiskers; `b1_walk` and `b4_idle` have none of them. The richer one is canon —
+it matches the design the game already shipped and it is the more finished
+drawing — so walk and idle are the two strips that want re-rendering to match, not
+the other way round.
+
+**Retractable steel claws.** Dark-steel blades that extend from each hand. Out or
+in is a per-pose decision the brief states explicitly, and it must be obeyed: a
+sheet where the claws flicker between frames is the most visible defect there is.
+§6 measures it.
 
 ### Never
 
@@ -69,10 +81,9 @@ the part to ignore.** Every prompt must negate it explicitly or it comes back.
 
 ## 2. Rendering
 
-**Painted 2D game-sprite illustration.** Soft cel shading with visible painterly
-brush texture on the armour, a thin dark warm-grey edge line around the forms,
-pale mint hairline seams between panels, one committed warm key light from the
-upper left.
+**Painted 2D game-sprite illustration.** Smooth cel shading with a soft painterly
+finish, a thin dark outline around the forms, one committed warm key light from
+the upper left.
 
 Not a 3D render. Not glossy plastic. Not flat vector. **Not pixel art** — no
 staircase edges, no dithering, no 8/16-bit look.
@@ -81,8 +92,6 @@ A note that cost real money here: if the tool starts producing pixel art, the
 cause is usually the *reference*, not the prompt. A style anchor under about
 600px has a visible pixel grid, and the grid is the most confident feature in
 the picture, so it gets copied. Upscale the anchor before using it.
-
----
 
 ## 3. Camera and framing — identical in every plate of a set
 
@@ -103,17 +112,24 @@ the picture, so it gets copied. Upscale the anchor before using it.
 
 ## 4. Background
 
-**Pure flat black, edge to edge.** Nothing else: no ground, no floor line, no
-cast shadow, no vignette, no corner glow, no gradient, no text, no watermark.
+**Transparent.** PNG with a real alpha channel, nothing behind her: no ground, no
+floor line, no cast shadow, no vignette, no gradient, no text, no watermark.
 
-Black because she is near-white and keys cleanly off it. A white background is a
-rejection — roughly one plate in ten came back that way and each one is wasted.
+This changed with the first real delivery (2026-09-15) and it is a straight win.
+The spec used to ask for a flat black field because the pipeline keyed her off it
+by luminance — which cost a dark fringe on her outline, roughly one plate in ten
+coming back on white and being wasted, and a whole class of "the key ate her
+gunmetal" failures. Delivered with alpha, none of that exists: `sheetslice` and
+`movestrip` read the alpha directly and the keyer never runs.
 
-**No energy effects in the plate.** No aura, no sparks, no lightning, no glow
-trails, no slash arcs, no motion streaks. The game draws all of that
-procedurally over the sprite (`Player.releaseCharged` in `js/entities.js`).
-Painting light into the plate doubles it up in-game. The body carries the charge
-through *posture alone*.
+A black field is still *accepted* — the luminance key is still in `movestrip` and
+still works — but it is the fallback, not the ask.
+
+**No energy effects on the body plate.** No aura, no sparks, no lightning, no glow
+trails, no slash arcs, no motion streaks. They belong on their own sheet (§4a), and
+the game also draws its own procedurally over the sprite
+(`Player.releaseCharged` in `js/entities.js`). Painting light into the body plate
+doubles it up in-game. The body carries the charge through *posture alone*.
 
 ---
 
@@ -139,11 +155,18 @@ body. The engine composites them anyway.
 
 ## 5. Delivery contract
 
-- **Format** PNG, RGB, on the black field described above. No alpha needed —
-  keying happens here.
-- **Size** 1024×1024 or larger, square. Bigger is fine.
-- **Naming** `<move>_<NN>.png`, zero-padded, numbered in **play order** from 00.
-- One folder per move.
+- **Format** PNG with a real alpha channel, transparent background.
+- **Layout** one PNG per animation, frames left to right in play order, with a
+  clear transparent gutter of 20px or more between them that nothing crosses.
+- **Size** her figure about **330px** from ear-tips to soles, identical in every
+  frame of every animation. A 2172×724 sheet carrying eight frames is the shape
+  the first good delivery arrived in and it is ideal.
+- **Naming** `<move>.png`, and `<move>_fx.png` for the matching effects sheet.
+
+Single plates (one pose per file) are still accepted as `<move>_<NN>.png`
+numbered from 00 in play order, one folder per move — that is the route
+`tools/movestrip.cjs` was built for and it is right when a pose needs re-rolling
+on its own.
 
 What happens to them here:
 
