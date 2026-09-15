@@ -852,6 +852,13 @@ const HERO_TRANS = {
   // k 0.90: the sheet's hurt cell stands 204 (airborne) against the strip's
   // flung cell at 257 measured to the idle's 231.
   hurt: { key: 'hzdHurt', cells: 6, k: 0.90, t: p => p.hurtPoseT, t0: () => 0.3 },
+  // THE GUARD (owner sheet, 2026-09-15: BLOCK/GUARD row). A held brace, not a
+  // clip — one fired still, same treatment as the charge pose, indexed as a
+  // one-cell strip so it goes through the same t/t0 machinery as everything
+  // else in this table rather than a special case. t0 is a constant so the
+  // "progress" fraction is always 0 and cell 0 (the only cell) always draws,
+  // for as long as guardT is held >0 by the input in Player.update.
+  guard: { key: 'hzdGuard', cells: 1, k: 1.0, t: p => p.guardT, t0: () => 1 },
   //
   // WAITING ON ART (docs/ART_QUEUE.md §2x), in census order:
   //   land   fall>land>idle|run, the impact — 8/min and the most conspicuous
@@ -859,6 +866,9 @@ const HERO_TRANS = {
   //          single clearest "this body has no weight" tell
   //   skid   the run-turnaround — plant, lean against the momentum, whip round
 };
+// How much of an incoming blow the brace cuts. A first pass, not a tuned
+// final number — see the note in Player.hurt().
+const GUARD_REDUCTION = 0.65;
 // THE JUMP IS AN ARC, NOT A CLOCK, so it is indexed differently: rise, apex and
 // fall are three stills of ONE continuous movement, and the thing that says
 // where in it she is, is her own vertical speed. Cell 0 is the takeoff stretch,
@@ -1170,7 +1180,7 @@ class Player {
     this.coyote = 0; this.jbuf = 0; this.airJumps = 0;
     this.ccorr = true;   // moveEnt slides her around clipped ceiling corners
     this.stepUp = PLAYER_STEP_UP;   // ...and walks her up irregularity, not up the jump lesson
-    this.dashT = 0; this.dashCD = 0; this.iT = 0; this.atkCD = 0;
+    this.dashT = 0; this.dashCD = 0; this.iT = 0; this.atkCD = 0; this.guardT = 0;
     this.swing = null; this.healT = 0; this.castCD = 0;
     this.dead = false; this.wallSlide = 0; this.trail = [];
     this.lastSafe = { x, y }; this.anim = 0; this.landT = 0;
@@ -1651,6 +1661,13 @@ class Player {
       this.healT = 0; sfx('atk');
       }
     }
+    // HOLD TO GUARD (owner sheet, 2026-09-15: BLOCK/GUARD row). A defensive
+    // brace, not a move: while held and grounded with nothing else claiming
+    // her hands, hurt() below cuts incoming damage and drops the knockback.
+    // Cancelled by attacking, dashing, charging or healing — the same
+    // mutual exclusion every other held verb in this file already respects.
+    this.guardT = (inD('GUARD') && this.on && !this.swingVis && this.dashT <= 0
+      && this.chargeT <= 0.05 && this.healT <= 0) ? 1 : 0;
     // hold attack to charge the volt-burst
     if (inD('ATK') && this.dashT <= 0 && this.swirlT <= 0 && !G.boomer) {
       this.chargeT += dt;
@@ -2264,6 +2281,14 @@ class Player {
       G.dmgLog[key] = (G.dmgLog[key] | 0) + 1;
     } catch (e) {}
     if (this.dashT > 0 && hasCrest('phantom')) return;
+    // THE GUARD (owner sheet, 2026-09-15: BLOCK/GUARD). Bracing CUTS the blow,
+    // it does not stop it — a repeatable defensive option has to still cost
+    // something or it trivializes every fight already tuned around dodging,
+    // which a one-shot relic/the Oath above are not. GUARD_REDUCTION is a
+    // first pass, not a tuned final number, and no boss tell is unblockable
+    // yet — that is real follow-up work, not shipped by this change.
+    const guarded = this.guardT > 0;
+    if (guarded) d = Math.max(1, Math.round(d * (1 - GUARD_REDUCTION)));
     if (relicHas('aegis') && !G.save.usedAegis) {
       G.save.usedAegis = true;
       this.iT = 1.2;
@@ -2301,13 +2326,15 @@ class Player {
       return;
     }
     this.cores -= d; this.iT = hasSkill('reflex') ? 1.65 : 1.3; this.healT = 0;
-    this.hurtPoseT = 0.3;   // limbs flail for a beat while the knockback carries her
-    cam.shake = 9; sfx('hurt');
-    if (typeof padRumble === 'function') padRumble(0.85, 0.5, 240);
-    G.flash = Math.max(G.flash, 0.4); G.addRing(this.x + this.w / 2, this.y + this.h / 2);
+    this.hurtPoseT = guarded ? 0.15 : 0.3;   // limbs flail for a beat while the knockback carries her
+    cam.shake = guarded ? 4 : 9; sfx(guarded ? 'block' : 'hurt');
+    if (typeof padRumble === 'function') padRumble(guarded ? 0.5 : 0.85, guarded ? 0.3 : 0.5, guarded ? 140 : 240);
+    G.flash = Math.max(G.flash, guarded ? 0.2 : 0.4); G.addRing(this.x + this.w / 2, this.y + this.h / 2);
     G.impact = { t: 0.09, t0: 0.09, x: this.x + this.w / 2, y: this.y + this.h / 2 };
     burst(this.x + this.w / 2, this.y + this.h / 2, 14, '#ff5f6d', 260, 0.5, 500, 3, true);
-    const kbm = relicHas('ember') ? 0.5 : 1;
+    // a braced hit still shoves her, just far less — she stood her ground,
+    // she was not thrown by it
+    const kbm = (relicHas('ember') ? 0.5 : 1) * (guarded ? 0.35 : 1);
     this.vx = (Math.sign(this.x + this.w / 2 - fromX) * 250 || 250) * kbm; this.vy = -240 * kbm;
     if (this.cores <= 0 && hasCrest('nine') && !G.save.usedNine) {
       G.save.usedNine = true; this.cores = 3; this.iT = 2.2;
@@ -2353,6 +2380,7 @@ class Player {
     // is what "can't stay crouching and jump and charged at the same time"
     // was describing. No code change is needed for it — the plate is the pose.
     if (this.chargeT > 0.05 && this.on && Math.abs(this.vx) <= 34) return 'charge';
+    if (this.guardT > 0) return 'guard';
     if (this.dashT > 0) return 'dash';
     if (this.wallSlide !== 0 && !this.on) return 'wall_cling';
     if (!this.on) {

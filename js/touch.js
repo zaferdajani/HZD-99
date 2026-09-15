@@ -224,6 +224,12 @@ function tLayout() {
       // column, between the attack and heal rows, clear of everything.
       { code: 'VINT', x: rgx - 84 * u, y: H - 196 * u, r: 26 * u, icon: 'E',
         show: () => !!G.near && tAllow('INT') },
+      // GUARD (owner sheet, 2026-09-15). Inner column, between heal and the
+      // wheel — the only clear diagonal left, measured against every other
+      // seat here so it cannot land inside another circle's reach.
+      { code: 'VGUARD', x: rgx - 86 * u, y: H - 268 * u, r: 26 * u, sym: 'shield',
+        tint: { fill: 'rgba(150,210,255,0.95)', ring: 'rgba(120,190,255,0.7)' },
+        show: () => tAllow('GUARD') },
     ],
     // menu buttons live in the LEFT column, actions in the right — no clutter
     // THE MAP BUTTON KEPT LOSING TO THE CREST BUTTON (owner, 2026-09-05:
@@ -648,6 +654,18 @@ const TSYM = {
       tcx.closePath();
       tcx.fill();
     }
+    tcx.restore();
+  },
+  // a heater shield: flat top, curved sides tapering to a point — bracing
+  shield(x, y, s) {
+    tcx.save(); tcx.translate(x, y);
+    tcx.beginPath();
+    tcx.moveTo(-s * 0.62, -s * 0.6);
+    tcx.lineTo(s * 0.62, -s * 0.6);
+    tcx.quadraticCurveTo(s * 0.66, s * 0.28, 0, s * 0.82);
+    tcx.quadraticCurveTo(-s * 0.66, s * 0.28, -s * 0.62, -s * 0.6);
+    tcx.closePath();
+    tcx.fill();
     tcx.restore();
   },
   // a four-bladed shuriken: concave edges between the points, hollow centre

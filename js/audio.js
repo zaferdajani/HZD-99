@@ -856,6 +856,9 @@ function heroSfx(n) {
       tone(115, 0.22, 'sawtooth', 0.09, 55);
       tone(520, 0.11, 'square', 0.05, 240); chink(0.035, 0.03);
       return true;
+    case 'block':     // a braced hit — bright metallic clang, no grunt
+      tone(760, 0.09, 'triangle', 0.07, 520); chink(0.03, 0.04);
+      return true;
     case 'ui':        // parchment rustle + quill scratch
       hiss(0.055, 0.03); tone(2300, 0.03, 'triangle', 0.014, 1600);
       return true;
@@ -1217,6 +1220,7 @@ function sfx(n) {
     case 'hit': hiss(0.06, 0.09); tone(170, 0.08, 'square', 0.06, 90); break;
     case 'bosshit': hiss(0.09, 0.11); tone(92, 0.13, 'square', 0.1, 44); break;
     case 'hurt': tone(120, 0.28, 'sawtooth', 0.12, 50); hiss(0.2, 0.08); break;
+    case 'block': tone(700, 0.09, 'square', 0.07, 1400); hiss(0.03, 0.05); break;
     case 'pick': tone(880, 0.07, 'sine', 0.05, 1370); break;
     case 'heal': tone(520, 0.3, 'sine', 0.05, 1040); break;
     // ===================================================================

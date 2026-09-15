@@ -143,7 +143,7 @@ const WWW = path.join(ROOT, 'www');
     // be on a button, and the pause menu must actually contain a row for it
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; startGame(sv);
     const rows = pauseItems().map(i => i.id);
-    const VIA = { SKILL: 'skills', CREST: 'crests', MAP: 'map' };
+    const VIA = { SKILL: 'skills', CREST: 'crests', MAP: 'map', GUARD: 'ctrl' };
     const stranded = unbound.filter(k => !(map.PAUSE >= 0 && VIA[k] && rows.includes(VIA[k])));
     // ...and the game must SAY so rather than naming a control that is not there
     PAD.on = true;

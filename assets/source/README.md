@@ -197,6 +197,45 @@ of that sheet.
 
 ---
 
+## `hero/guard/` — the row with no mechanic behind it
+
+Owner sheet, 2026-09-15: a second "CLAWBYTE combat animation sprite sheet"
+(same flat pixel-art render class as the one reviewed above, same "not used
+as art" verdict — §0.0 is 3D-only), with a BLOCK/GUARD row this repo's combat
+code had no equivalent for at all: no block, parry, shield or guard mechanic
+existed anywhere in `entities.js` before this.
+
+Cross-checked the rest of that sheet against the shipped game first, state by
+state, rather than assuming it needed new art: IDLE, RUN, WALK, JUMP,
+FALL/LAND, DASH, the three light attacks, the charged heavy attack, the 3-hit
+combo, air attack, down-attack/plunge, hit/hurt and idle variations were ALL
+already covered by real, wired, canon-element Higgsfield art (gait strips,
+`HERO_TRANS`, `SWING_STRIP.burst`, `hzdHurt`, `HERO_FIDGET`) — none of that
+needed regenerating. BLOCK/GUARD was the one true gap, on both counts: no
+art and no game verb.
+
+`guard.jpg` reuses a still already generated earlier this session for exactly
+this purpose (a defensive brace, crossed forearms catching an impact spark,
+`hzd99-canon` embedded) rather than spending a fresh generation on a pose
+already on file and already reviewed as on-model. Composited into
+`assets/characters/hero/guard.webp` (one 300px cell, `idle.webp`'s
+convention) and wired as `HERO_TRANS.guard` in `entities.js`, drawn through
+the same `drawRoboTrans` machinery as `hurt`/`land`/`dash` rather than a
+special case.
+
+The mechanic itself is new, minimal, and said so in code: a new `GUARD`
+input (hold), keyboard `L` / touch shield button / gamepad unbound-by-default
+(every real button already has a home — same honest-unbound treatment as
+`SKILL`/`CREST`, routed to Options ▸ Controls). Held and grounded, it cuts
+incoming damage by `GUARD_REDUCTION` (0.65, a first pass, not a tuned final
+number) and drops knockback to 35%, in `Player.hurt()`. It does not stop a
+hit outright — a repeatable, free, full-invincibility block would undercut
+every fight already balanced around dodging, which the one-shot Aegis relic
+and the Oath save are not. No boss tell is unblockable yet; that is real
+follow-up balance work this change does not claim to have done.
+
+---
+
 ## Rule going forward
 
 Any generated asset is committed here **in the same commit that uses it**. If it
