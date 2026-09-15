@@ -962,7 +962,12 @@ const FIDGET_AFTER = 5;        // seconds of stillness before she runs out of pa
 // it. k against the sheet's guard (261 of 300): cross 283 -> 0.92, uppercut
 // 273 -> 0.956.
 const SWING_STRIP = {
-  claw_1:   { key: 'swingClaw1',    cells: 11, k: 0.901 },
+  // DRAWN, NOT FILMED (2026-09-15). The filmed claw_1 was the strip failing the
+  // facing law at 0.113 — fired looking at the camera. This is the owner's drawn
+  // double-slash: six cells, side-on to her target, measured 10% height spread.
+  // k against the sheet's claw_1 guard (260 of 300) using the strip's own cell 0,
+  // which holds that same guard: 274 of 320.
+  claw_1:   { key: 'swingClaw1',    cells: 6,  k: 1.0122 },
   claw_2:   { key: 'swingHook',     cells: 10, k: 0.92 },
   finisher: { key: 'swingUppercut', cells: 10, k: 0.956 },
   // 2026-09-08: complete side-facing charged claw action with recovery.

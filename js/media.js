@@ -379,6 +379,8 @@ const MEDIA_SRC = {
     // plates below stay as the fallback — they are what drew this for months and
     // a browser that has them and not this should still see her back.
     heroGateWalk: 'assets/characters/hero/gate_walk.webp',
+    // ...and the RUN-AWAY, for cave mouths. See GATE_CLIP in js/game.js.
+    heroGateRun: 'assets/characters/hero/gate_run.webp',
     heroBackA: 'assets/characters/hero/backwalk_a.webp',
     heroBackB: 'assets/characters/hero/backwalk_b.webp',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.webp',

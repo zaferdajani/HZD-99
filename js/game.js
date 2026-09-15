@@ -10087,6 +10087,7 @@ function gateEnter() {
   if (typeof mediaFetch === 'function') {
     const armed = !!(G.save && G.save.flags && G.save.flags.crystal);
     mediaFetch(GATE_CLIP.key, 1);          // the authored walk-away, first
+    mediaFetch(GATE_CLIP_RUN.key, 1);      // ...and the run, for cave mouths
     for (const k of gateBackPair(armed)) mediaFetch(k, 1);
     for (const k of gateBackPair(!armed)) mediaFetch(k, 1);
     // ...and the turnaround the turn beat is cut from, her costume first
@@ -10160,6 +10161,13 @@ const GATE_WALK = 3.4;
 // carries its own vertical, and adding a synthetic one on top is the second bob
 // tests/gait.cjs already forbids for the run.
 const GATE_CLIP = { key: 'heroGateWalk', cells: 8, turn: 4, turnFrac: 0.2 };
+// TWO WAYS TO LEAVE, TWO CLIPS. The code below already tells a gate from a cave
+// and treats them differently — a gateway is a lit hall she recedes DOWN, 84% of
+// her size across the walk, while a cave mouth has no hall and only takes 16%
+// before the darkness has her. So the cave is not a smaller version of the gate,
+// it is a faster one, and she goes into it at a RUN. Same eight-cell shape: the
+// turn, then the stride.
+const GATE_CLIP_RUN = { key: 'heroGateRun', cells: 8, turn: 4, turnFrac: 0.18 };
 // Her walking pace for the beat that lines her up with the doorway. Not the
 // run: a run into a door is the "dash through a doorway" the shot below was
 // written against, and the owner asked for a careful walk.
@@ -10273,8 +10281,10 @@ function gateBackPair(armed) {
 function gateBackReady() {
   // The authored clip is a whole walk on its own, so it satisfies the hold by
   // itself — the pair rule below exists because ONE of two plates is half a
-  // stride, and a clip is never half of anything.
-  if (gateBackImg(GATE_CLIP.key)) return true;
+  // stride, and a clip is never half of anything. Either clip will do: the walk
+  // stands in for the run if the run has not landed, and the reverse never
+  // happens because the walk is fetched first.
+  if (gateBackImg(GATE_CLIP.key) || gateBackImg(GATE_CLIP_RUN.key)) return true;
   const want = gateBackPair(!!(G.save && G.save.flags && G.save.flags.crystal));
   return !!(gateBackImg(want[0]) && gateBackImg(want[1]));
 }
@@ -10405,6 +10415,7 @@ function drawGateWalk() {
     else if (gateBackImg(altp[0]) && gateBackImg(altp[1])) g.pair = altp;
   }
   // The authored clip first; the plate pair is what runs when it is not here.
+  // Which clip is the destination's question, not hers: a cave takes her at a run.
   //
   // ...AND ONLY WHEN SHE IS UNARMED. The clip is drawn with nothing on her back,
   // so it IS the bare costume and is right for the opening, where she has not
@@ -10413,18 +10424,24 @@ function drawGateWalk() {
   // costume flicker the pair logic below was written to stop. An armed clip is
   // on the list in docs/ART_HANDOFF.md §9; until it exists, armed keeps the
   // plates.
-  const clipIm = armed ? null : gateBackImg(GATE_CLIP.key);
+  const CLIP = intoCave ? GATE_CLIP_RUN : GATE_CLIP;
+  // fall back to the walk if the run has not decoded — a cave entered at a walk
+  // is a smaller wrong than her side view sliding into a rock face
+  const clipIm = armed ? null : (gateBackImg(CLIP.key) || gateBackImg(GATE_CLIP.key));
+  const CLIPU = (armed || gateBackImg(CLIP.key)) ? CLIP : GATE_CLIP;
   const want = g.pair ? g.pair[b] : '';
   const im = clipIm ? null : (want ? gateBackImg(want) : null);
   if (clipIm) {
-    const nBack = GATE_CLIP.cells - GATE_CLIP.turn;
-    const cell = k < GATE_CLIP.turnFrac
-      ? Math.min(GATE_CLIP.turn - 1, Math.floor(k / GATE_CLIP.turnFrac * GATE_CLIP.turn))
-      : GATE_CLIP.turn + (Math.floor(trav / 26) % nBack);
-    const cw = clipIm.naturalWidth / GATE_CLIP.cells;
+    const nBack = CLIPU.cells - CLIPU.turn;
+    // the run turns its legs over faster, so its stride counter is shorter
+    const step = CLIPU === GATE_CLIP_RUN ? 19 : 26;
+    const cell = k < CLIPU.turnFrac
+      ? Math.min(CLIPU.turn - 1, Math.floor(k / CLIPU.turnFrac * CLIPU.turn))
+      : CLIPU.turn + (Math.floor(trav / step) % nBack);
+    const cw = clipIm.naturalWidth / CLIPU.cells;
     const dh = 92 * sc, dw = dh * (cw / clipIm.naturalHeight);
     c.drawImage(clipIm, cell * cw, 0, cw, clipIm.naturalHeight, x - dw / 2, y - dh, dw, dh);
-    G.gateBackKey = GATE_CLIP.key;
+    G.gateBackKey = CLIPU.key;
   }
   // what the shot actually drew her as, for tests/opening.cjs — "she turned her
   // back" is the whole point of this function and it is not readable from the
