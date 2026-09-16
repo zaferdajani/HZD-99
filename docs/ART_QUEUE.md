@@ -5342,3 +5342,57 @@ currently reads as a head-first lunge at the viewer.
   blind retry.
 - Confirm both with `node tests/hero.cjs` before calling either done — the
   0.104 line is the pass/fail, not a judgment call.
+
+### §2bx. WEAPON-MODE COMBAT ART — single / dual / joined, normal + supercharge — FIRED, AWAITING OWNER REVIEW (2026-09-16)
+
+`SWORD_STORY.md`'s v4.5 status flags this directly: "Weapon-specific
+body-animation integration is NOT complete... Five new videos and two
+revised reference images were reviewed... defects include framing,
+facing, holds and lost/extra blade geometry. None is installed." This
+brief re-attempts it as stills (the recipe that actually shipped
+claw_1/claw_2/finisher/burst), not video, and pulls beats from the
+owner's second reference batch — ChatGPT-generated, archived at
+`assets/source/hero/weapon-mode-ref-chatgpt/`, explicitly NOT usable as
+art (flat 2D, violates ART_BIBLE §0.0) and used ONLY for pose/beat
+composition per the `art-prompts` skill.
+
+**The weapon is not a generic sword.** The identity lock (§ above,
+2026-08-14) already settled this: her weapon is the white purifier
+crystal, registered as two elements — `purifier-crystal` =
+`d0a03e79-2887-4bcd-a209-11732c6754ef` (the single blade) and
+`purifier-double` = `bf160a06-9e42-46d0-a9f1-bc7c5dd1fcb5`, which turns
+out to already BE the joined double-bladed form (one shaft, a crystal
+blade at each end) — so "joined weapon" needed no new prop design, only
+her wielding it. "Dual swords" has no dedicated element; those stills
+embed `purifier-crystal` once and describe two identical copies, one
+per paw, since the established shape is one blade and dual mode is two
+of them independently held (not the joined form).
+
+Five stills each, six sequences, 30 total, one Higgsfield batch per
+sequence:
+- **single-sword normal** (guard/windup/slash1/slash2/recovery) and
+  **single-sword supercharge dash** (charge/peak/dash-release/
+  dash-contact/recovery)
+- **dual-sword normal swirl** (guard/windup/spin-mid/spin-peak/recovery)
+  and **dual-sword supercharge cross** (charge/peak/cross-windup/
+  cross-release/recovery)
+- **joined-weapon normal spin** (guard/windup/spin/release/recovery) and
+  **joined-weapon supercharge throw** (charge/peak/throw-release/
+  weapon-in-flight-alone/catch-recovery)
+
+Every prompt embeds `hzd99-canon` (body identity) plus the relevant
+crystal element, explicitly instructs the generator to IGNORE the
+weapon shown in the canon reference photo (its own sword-and-jets
+landmine, same as every unarmed brief above) and use only the crystal
+element's blade design, and carries "no jet-boot flames" throughout.
+Same three-quarter profile facing right as the established swing
+strips. Verified before archiving: black background on all 30, no
+duplicate poses within any sequence, weapon geometry consistent with
+the established crystal design in all three modes.
+
+Contact sheets sent to the owner for review. **Not yet archived, keyed,
+composited or wired** — this needs its own routing work first
+(`drawRoboSwing` currently selects claw strips without distinguishing
+equipped weapon, per `SWORD_STORY.md`'s implementation-gap list), which
+is a code-session task once the art itself is approved. Do not key or
+commit any of the 30 stills until the owner has signed off.
