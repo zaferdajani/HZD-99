@@ -22,7 +22,7 @@
 //                  would swamp every number here.
 //
 //   node tools/sheetslice.cjs <strip.png> [--cut <outdir>] [--frames N]
-//                              [--fx] [--nosplit]
+//                              [--fx] [--nosplit] [--cc <gap=12>]
 //
 // --frames N is for sheets the runs cannot answer: frames that touch end to end
 // (one run, no median to measure against) and effects sheets that are loose
@@ -33,7 +33,7 @@ const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 
 const PAGE = `
-window.slice = async (dataUrl, forceN, noSplit, inkMin) => {
+window.slice = async (dataUrl, forceN, noSplit, inkMin, ccGap) => {
   const img = new Image(); img.src = dataUrl; await img.decode();
   const W = img.naturalWidth, H = img.naturalHeight;
   const c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -79,6 +79,67 @@ window.slice = async (dataUrl, forceN, noSplit, inkMin) => {
   // drop specks: anything under 1.5% of the strip width is not a frame
   let keep = runs.filter(r => r[1] - r[0] + 1 > W * 0.015);
 
+  // FRAMES AS SHAPES, NOT AS COLUMNS (--cc). A column scan can only separate
+  // frames that are separated IN X, and the supercharge effects sheet is the
+  // case that breaks: its release arcs are drawn overlapping each other's
+  // columns, so every gutter method — runs, forced division, the splitter —
+  // reads four or five arcs as one frame 726px wide. They are still four or
+  // five separate SHAPES, though, and connected components find them where a
+  // projection cannot. Components are then grouped back into frames by the gaps
+  // between them, so a frame that legitimately holds two pieces (a spark beside
+  // its arc) stays one frame.
+  if (ccGap > 0) {
+    // The components are found on the SOLID CORE, never on inkMin. --fx sets
+    // inkMin to 2 so a glow's falloff is not clipped, and at 2 every bloom on
+    // the sheet fuses into one component through the halos, which is the same
+    // welding this pass exists to undo. Cores separate; halos do not.
+    const CORE = 60;
+    const on = new Uint8Array(W * H);
+    for (let q = 0; q < W * H; q++) on[q] = d[q * 4 + 3] > CORE ? 1 : 0;
+    const lab = new Int32Array(W * H).fill(-1);
+    const boxes = [];
+    const stack = [];
+    for (let s2 = 0; s2 < W * H; s2++) {
+      if (!on[s2] || lab[s2] >= 0) continue;
+      const id = boxes.length;
+      let bx0 = W, bx1 = 0, area = 0;
+      stack.push(s2); lab[s2] = id;
+      while (stack.length) {
+        const q = stack.pop(), qx = q % W, qy = (q / W) | 0;
+        area++;
+        if (qx < bx0) bx0 = qx; if (qx > bx1) bx1 = qx;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const nx = qx + dx, ny = qy + dy;
+          if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+          const n = ny * W + nx;
+          if (on[n] && lab[n] < 0) { lab[n] = id; stack.push(n); }
+        }
+      }
+      boxes.push({ x0: bx0, x1: bx1, area });
+    }
+    // specks are not shapes: an effect sheds single-pixel sparkle that would
+    // otherwise become a frame of its own
+    const solid = boxes.filter(k => k.area > 150).sort((a, b) => a.x0 - b.x0);
+    const core = [];
+    for (const k of solid) {
+      const last = core[core.length - 1];
+      if (last && k.x0 - last[1] - 1 <= ccGap) { if (k.x1 > last[1]) last[1] = k.x1; }
+      else core.push([k.x0, k.x1]);
+    }
+    // ...then CUT AT THE MIDPOINTS between neighbouring cores, not at the cores
+    // themselves. The core is where the shape is solid; the light keeps going
+    // past it, and a cut on the core boundary shears that falloff off exactly
+    // the way the column threshold did. Halfway to the next frame gives each
+    // one its own fade and splits any overlap evenly, which is the best that
+    // can be done when two arcs genuinely share columns.
+    keep = core.map(([a, b], i) => [
+      i === 0 ? Math.max(0, a - Math.round((b - a) * 0.5))
+              : Math.floor((core[i - 1][1] + a) / 2) + 1,
+      i === core.length - 1 ? Math.min(W - 1, b + Math.round((b - a) * 0.5))
+              : Math.floor((b + core[i + 1][0]) / 2),
+    ]);
+  }
+
   // SPLIT THE BRIDGED ONES. An effect that reaches across a gutter — a claw at
   // full extension, a slash arc — welds two frames into one run, and the merged
   // run then measures as a single frame twice as wide as its neighbours. The
@@ -101,6 +162,7 @@ window.slice = async (dataUrl, forceN, noSplit, inkMin) => {
   // best frame in half — which is what put a flat vertical edge through the
   // heal burst and a 4px sliver next to it. When the real gutters are obvious,
   // say so and let the runs stand.
+  if (ccGap > 0) { /* frames already found as shapes */ } else
   if (noSplit) { /* runs stand as found */ } else
   if (forceN && forceN > 1 && keep.length) {
     const a = keep[0][0], b = keep[keep.length - 1][1], w = b - a + 1;
@@ -194,14 +256,16 @@ const med = a => { const s = a.slice().sort((p, q) => p - q); return s[s.length 
   // floats has no foot line to hold. --fx keeps the cutting and drops the flags.
   const fx = argv.includes('--fx');
   const noSplit = argv.includes('--nosplit');
+  const ccIdx = argv.indexOf('--cc');
+  const ccGap = ccIdx >= 0 ? (+argv[ccIdx + 1] || 12) : 0;
   if (!strip) { console.log('usage: sheetslice.cjs <strip.png> [--cut <outdir>] [--frames N] [--fx] [--nosplit]'); process.exit(1); }
 
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.addScriptTag({ content: PAGE });
   const url = 'data:image/png;base64,' + fs.readFileSync(strip).toString('base64');
-  const { W, H, frames, splits } = await page.evaluate(([u, n, ns, im]) => window.slice(u, n, ns, im),
-                                                      [url, forceN, noSplit, fx ? 2 : 30]);
+  const { W, H, frames, splits } = await page.evaluate(([u, n, ns, im, cg]) => window.slice(u, n, ns, im, cg),
+                                                      [url, forceN, noSplit, fx ? 2 : 30, ccGap]);
 
   const name = path.basename(strip);
   console.log(name + '  ' + W + 'x' + H + '  ->  ' + frames.length + ' frames');

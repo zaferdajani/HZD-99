@@ -21,30 +21,42 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
-## 2az. SUPERCHARGE EFFECTS — the sheet cannot be cut into frames ✱ MEASURED 2026-09-16 (art session)
+## 2az. SUPERCHARGE EFFECTS — LANDED 2026-09-16 (art session)
 
-The body sheet for the supercharge is wired and green (`SWING_STRIP.burst`, 12
-cells). Its **effects** sheet — `assets/source/hero/delivered/v3/supercharge_fx.png`
-— is the one delivered asset that could not be used, and the reason is layout,
-not drawing. The arcs in it are good.
+`assets/source/hero/delivered/v3/supercharge_fx.png` →
+`assets/characters/hero/swing/burst_fx.webp`, 19 cells, wired as `HERO_BURST_FX`.
 
-Measured with `tools/sheetslice.cjs --fx`:
+**It was declared unusable earlier the same day and that was wrong** — worth
+recording, because the mistake was in the tool, not the sheet. Every method
+tried read frames as COLUMNS: runs, forced division into 12, the bridged-frame
+splitter. The sheet's release arcs are drawn overlapping each other's columns,
+so all three read four arcs as one frame 726 px wide, and the conclusion drawn
+from that ("12 frames are not in it") was a fact about projection, not about the
+art. `tools/sheetslice.cjs --cc` finds frames as SHAPES instead — connected
+components on the solid core, grouped back into frames by the gaps between them,
+cut at the midpoints so no falloff is clipped. It finds 22, of which 19 are
+frames and three are tail fragments (one is a 2 px speck between two wisps;
+playing it blinks the effect out).
 
-| how it was read | what came out |
-|---|---|
-| runs, no splitting | **13** islands for 12 frames — the first four are dots a few px across, and one run is **726 px wide** holding four or five slash arcs welded together |
-| runs, splitter on | **28** pieces, two of them empty |
-| forced to 12 | boundaries land mid-arc; frames ship with a straight vertical cut through the light |
+**Nineteen cells over a twelve-cell body strip, deliberately.** An effect has no
+obligation to share the body's cell count — both are sampled by progress. Tying
+them together would have meant discarding two thirds of what was drawn.
 
-There is no setting that reads 12 frames out of it, because 12 frames are not
-what is in it. The re-fire prompt is written and ready in
-`docs/ART_PROMPTS_GPT.md` §4 ("Supercharge effects — RE-FIRE"); it names the
-12 beats and the one rule the last sheet broke — every frame its own island with
-40 px of clear space on both sides, ruled into 12 equal columns.
+The sheet is two animations and is wired as two:
 
-**The heal FX sheet is the counter-example and the standard to fire against:**
-five separate blooms, wide gaps, real alpha, each a complete self-contained
-glow. It went in unaltered and now draws the mend (`HERO_HEAL_FX`).
+| range | clock | what it is |
+|---|---|---|
+| cells 0–13 | `chargeT / 0.6`, holding on 13 | the crackle that grows while she holds the charge |
+| cells 14–18 | the swing's own progress | compression, crescent, two arcs, break-up |
+
+Playing all 19 over the swing was the first attempt and it failed for a reason
+worth keeping: the burst's own procedural flash whites the screen out for the
+first frames, so the entire build played where nothing could be seen. The build
+belongs to `chargeT`, which is the timer that IS the build.
+
+Measured on screen by nulling the layer and differencing: the charge contributes
+91 → 250 → 434 px as it fills and then holds; the release 367 → 2167 → 7225 →
+4032 px, peaking mid-swing.
 
 ## 2ay. THE HEAL'S LIGHT — LANDED 2026-09-16 (art session)
 

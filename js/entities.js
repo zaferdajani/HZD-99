@@ -939,6 +939,40 @@ let HERO_DEATH_STRIP = { key: 'hzdDeath', cells: 6, k: 0.8705, total: 1.8, hold:
 // alpha 0.85 rather than 1: the plates were drawn on black, so at full strength
 // the core blows out to white against a lit room and eats her chest.
 let HERO_HEAL_FX = { key: 'hzdHealFx', cells: 5, size: 58, alpha: 0.85 };
+// THE SUPERCHARGE'S ENERGY — 19 cells over a 12-cell body strip, and the
+// mismatch is deliberate rather than tolerated: both are sampled by the swing's
+// own normalised progress, so the energy keeps its own cadence (a long crackling
+// build, a one-frame compression, then three frames of release) across the same
+// window the body moves in. Tying an effect's cell count to the body's would
+// have meant throwing away two thirds of what was drawn.
+//
+// The sheet could not be cut by gutters at all — its release arcs are drawn
+// overlapping each other's columns, so every projection method read four of them
+// as one frame 726px wide. tools/sheetslice.cjs --cc finds them as SHAPES
+// instead. The three tail fragments it also finds are dropped: a 2px speck
+// between two wisps is not a frame, and playing it blinks the effect out.
+//
+// `dx` puts it ahead of her claw rather than on her chest, where the heal sits.
+// Forward is +x here: drawRoboSwing runs inside drawRoboPlate's transform and
+// facing is applied further out, which is why the body cell passes flip=false.
+let HERO_BURST_FX = {
+  key: 'swingBurstFx', cells: 19,
+  // TWO RANGES, TWO CLOCKS, because the sheet is drawn as two things. Fourteen
+  // cells of crackle that grows, then five of strike: a compression, a crescent,
+  // two arcs and the break-up. Playing all nineteen over the swing put the whole
+  // build inside a window that is already white with the procedural flash — the
+  // art was on screen and could not be seen. The build belongs to chargeT, which
+  // is the timer that IS the build.
+  charge:  { from: 0,  to: 13 },   // chargeT / CHARGE_READY, holds on 13
+  release: { from: 14, to: 18 },   // the swing's own progress
+  // two sets of placement numbers for the two spaces — `size/dx/dy` are the
+  // strip cell's, `wsize/wdx/wdy` are world pixels off her own box
+  size: 92, dx: 15, dy: -7,
+  wsize: 46, wdx: 11, wdy: -3,
+  alpha: 0.9,
+};
+// where chargeT is considered charged — the same 0.6 the update loop uses
+const CHARGE_READY = 0.6;
 // THE IMPATIENT WAIT (owner, 2026-08-27: "like a cute kid waiting anxiously
 // for something from a grown-up... cross their hands, tapping one leg on the
 // floor, and saying Yalla!"). Not a transition and not a pose: a LOOP that
@@ -1058,7 +1092,12 @@ const SWING_STRIP = {
   // widest). So the reference is the strip's own release cell and the check is
   // external — it lands on the same 0.9503 the walk measured independently,
   // which is what agreement between two unrelated measurements is worth.
-  burst:    { key: 'swingBurst',    cells: 12, k: 0.9503 },
+  // fx is the energy strip that plays over this attack; only the burst has one
+  // fired so far, and an attack without one simply draws its body. The table
+  // holds the OBJECT, which is safe only because HERO_BURST_FX is declared
+  // above this one — top-level let does not hoist its value, so a strip table
+  // that pointed DOWN the file would read undefined here and never draw.
+  burst:    { key: 'swingBurst',    cells: 12, k: 0.9503, fx: HERO_BURST_FX },
 };
 // Gameplay stores the ordinary combo as 0, 1, 2. Keep both the pose fallback
 // and the strip renderer on that same numbering: treating it as 1, 2, 3
@@ -2555,8 +2594,46 @@ class Player {
     const cell = S.pingpong
       ? (p < 0.5 ? Math.floor(p * 2 * S.cells) : Math.floor((1 - p) * 2 * S.cells))
       : Math.floor(p * S.cells);
-    return drawStripCell(c, S.key, Math.min(S.cells - 1, cell), S.cells,
-                         0, HERO_FLOOR, h, false);
+    const drew = drawStripCell(c, S.key, Math.min(S.cells - 1, cell), S.cells,
+                               0, HERO_FLOOR, h, false);
+    // ...and the energy over the top of it, on the same clock. Only if the BODY
+    // drew: an effect hanging in the air beside the procedural fallback pose is
+    // worse than no effect, and this is the one strip whose art is optional.
+    if (drew && S.fx) this.drawSwingFx(c, S.fx, S.fx.release, p,
+                                      S.fx.dx, HERO_FLOOR - HERO_DH / 2 + S.fx.dy, S.fx.size);
+    return drew;
+  }
+  // ADDED AS LIGHT, NOT COMPOSITED AS AN OBJECT. The plates are energy on
+  // transparency, so 'lighter' is what they are: the dark of the sheet adds
+  // nothing and the core blows out to white the way a real arc would. Centred
+  // rather than foot-anchored — an arc does not stand on the floor.
+  // THE CENTRE IS PASSED IN, because the two callers are in different spaces and
+  // that is not obvious from either of them. The swing draws inside
+  // drawRoboPlate's transform, where the units are the strip cell's and facing
+  // is already applied outside; the charge draws from draw() in WORLD units,
+  // where it is not. Baking either one in here put the crackle at a plausible
+  // but wrong size in whichever caller did not own the constants.
+  drawSwingFx(c, FX, range, p, cx, cy, size) {
+    // The globals are REACHED FOR, not assumed. drawRoboPlate already guards
+    // MEDIA_IMG this way and for the same reason: the combat harnesses run this
+    // file in a bare VM with drawStripCell stubbed and no media layer at all, so
+    // an unguarded MEDIA_RAW here is a crash rather than a missing effect — and
+    // an effect that cannot be drawn is always allowed to simply not draw.
+    if (typeof MEDIA_RAW === 'undefined') return;
+    const im = MEDIA_RAW[FX.key];
+    if (!im || !im.complete || !im.naturalWidth) {
+      if (typeof mediaFetch === 'function') mediaFetch(FX.key, 1);
+      return;
+    }
+    const cw = im.naturalWidth / FX.cells;
+    const n = range.to - range.from + 1;
+    const i = range.from + clamp(Math.floor(p * n), 0, n - 1);
+    c.save();
+    c.globalCompositeOperation = 'lighter';
+    c.globalAlpha = FX.alpha;
+    c.drawImage(im, i * cw, 0, cw, im.naturalHeight,
+                cx - size / 2, cy - size / 2, size, size);
+    c.restore();
   }
   // ONE TRANSITION CLIP, indexed by the clock that made the transition happen.
   // Returns false whenever the art for this moment is not fired, which is most
@@ -4494,6 +4571,20 @@ class Player {
         c.beginPath(); c.arc(bx, by, 9, 0, 7); c.fill();
       }
       c.restore(); c.globalAlpha = 1;
+    }
+    // THE CHARGE'S CRACKLE — the first fourteen cells of the supercharge effects
+    // sheet, on chargeT rather than on the swing. Only while the charge is
+    // ALLOWED: the update loop already greys its particles when it is not
+    // (`!this.chargeOk`), and answering a refused charge with bright energy
+    // would promise a strike that is not coming.
+    if (this.chargeT > 0 && this.chargeOk && this.swirlT <= 0) {
+      const FX = HERO_BURST_FX;
+      const p = clamp(this.chargeT / CHARGE_READY, 0, 1);
+      // world units, and facing applies here — she charges at the claw she is
+      // pointing with, so a fixed +x would put it behind her half the time
+      this.drawSwingFx(c, FX, FX.charge, p,
+                       this.x + this.w / 2 + this.faceVis * FX.wdx,
+                       this.y + this.h / 2 + FX.wdy, FX.wsize);
     }
     // THE MEND'S LIGHT. Five drawn plates (assets/source/hero/delivered/v4/
     // heal_fx.png) instead of the stroked circle that stood in for them: a spark

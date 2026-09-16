@@ -95,7 +95,7 @@ what the game needs first and adds the ones it was missing.
 Paste any of these after §1 and §2. They are short on purpose — the character and
 the format are already established.
 
-**Three of these are still worth firing. Everything else here has landed and is
+**Two of these are still worth firing. Everything else here has landed and is
 in the game — do not re-fire it.** The blocks stay as the record of what was
 asked for, which is why the list rather than the blocks carries the status:
 
@@ -103,11 +103,10 @@ asked for, which is why the list rather than the blocks carries the status:
 |---|---|
 | **AIR ATTACK** | never delivered; the game has no airborne strike pose |
 | **DOWN ATTACK** | never delivered; the plunge is drawn procedurally |
-| **SUPERCHARGE EFFECTS** | delivered, unusable — see the RE-FIRE block below for the one layout rule it broke |
 
 Everything from the walk and idle through the four attack strips, the six
-transitions, the death, the fidget, the five gate walk-aways and the heal is
-wired and measured.
+transitions, the death, the fidget, the five gate walk-aways, the heal and both
+effects sheets is wired and measured.
 
 ### Priority one — locomotion, on screen constantly
 
@@ -227,42 +226,20 @@ five separate glows, wide clear gaps between them, real alpha, each one a
 complete self-contained bloom. It went into the game unaltered. The supercharge
 FX sheet is the one that did not, and rule 5 above is exactly what it broke.
 
-### Supercharge effects — RE-FIRE
+### Supercharge effects — LANDED, do not re-fire
 
-The sheet delivered for this cannot be cut into frames. Measured rather than
-judged: the engine's slicer finds **13 runs of energy where it needs 12 frames**,
-and they are the wrong 13 — the first four are single dots a handful of pixels
-across, and then a single run **726 pixels wide** holds four or five separate
-slash arcs welded together with no gap between them. Loosening the slicer to
-find those arcs individually gives 28 pieces, two of which are empty. There is no
-setting that reads 12 frames out of it, because 12 frames are not what is in it.
-Nothing is wrong with the drawing — the arcs are good. The layout is what failed.
+This sheet is in the game as of 2026-09-16 (`HERO_BURST_FX`, 19 cells). An
+earlier note here asked for it to be re-fired because the engine could not cut
+it into frames. That was a defect in the cutter, not in the sheet: it read
+frames as COLUMNS, and this sheet's release arcs are drawn overlapping each
+other's columns, so four arcs came back as one frame 726 px wide. Cutting by
+connected SHAPES finds them, and all 19 usable frames went in unaltered.
 
-> **EFFECTS for the SUPERCHARGE — exactly 12 frames, to match the 12-frame body
-> sheet.** Only the energy: no character anywhere in the image. Transparent
-> background, real alpha, frames left to right in play order.
->
-> The critical part, and the reason I am asking again: **each of the 12 frames
-> must be one separate island of energy with at least 40 transparent pixels of
-> clear space on both sides of it, and nothing may cross that gap.** The last
-> sheet drew the big arcs overlapping into each other in a continuous band, and
-> the game cannot tell where one frame ends and the next begins — it reads the
-> whole band as a single frame 726 pixels wide.
->
-> **Give every frame the same width and the same spacing**, as if the image were
-> ruled into 12 equal columns and each frame were drawn inside its own column
-> without ever touching the column's edge. A frame with only a small spark in it
-> still gets its own full column.
->
-> The 12 beats, in order: a single spark at her claw; the spark doubling; three
-> sparks orbiting; a thin arc forming; the arc brightening; energy gathering back
-> along her forearm; the charge at full hold, crackling; the wind-up flare; the
-> first slash arc thrown; the second slash crossing it; the pair blowing out at
-> peak brightness; the energy tearing apart into fading embers.
->
-> Bright cyan-white, the same energy as the arcs in the sheet you already made.
-
----
+The one thing worth carrying to future effects sheets: **frames that overlap in
+x are much harder to cut than frames that do not.** Rule 5 in §2 — a clear
+transparent gap between frames, with nothing crossing it — still makes a sheet
+trivially sliceable, and is still what to aim for. This one is proof that
+breaking it is recoverable, not that it does not matter.
 
 ## 5. When a sheet comes back
 

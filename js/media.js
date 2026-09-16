@@ -324,6 +324,11 @@ const MEDIA_SRC = {
     // Light stays in code, the body stays in the plate (ART_BIBLE §0).
     swingClaw1: 'assets/characters/hero/swing/claw_1.webp',
     swingClaw2: 'assets/characters/hero/swing/claw_2.webp',
+    // THE SUPERCHARGE'S ENERGY, as 19 drawn plates over the 12-cell body strip.
+    // The two counts do not match and do not need to: both are sampled by the
+    // swing's own progress, so the energy has its own cadence over the same
+    // window. See HERO_BURST_FX in js/entities.js.
+    swingBurstFx: 'assets/characters/hero/swing/burst_fx.webp',
     swingFinisher: 'assets/characters/hero/swing/finisher.webp',
     swingBurst: 'assets/characters/hero/swing/burst.webp',
     servoLoop: 'assets/characters/npc/servo/work_loop.webp',
