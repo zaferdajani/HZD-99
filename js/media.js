@@ -380,6 +380,13 @@ const MEDIA_SRC = {
     // bar for. Both fall through to the pose cell until they arrive.
     transTakeoff: 'assets/characters/hero/trans_takeoff.webp',
     hzdHeal: 'assets/characters/hero/heal.webp',
+    // The heal's LIGHT, as five drawn plates rather than a stroked circle. It is
+    // the one delivered sheet that is pure additive glow, which the art-prompts
+    // skill flags as the thing generation gets wrong — but it got this one
+    // right, and a bloom composites as light perfectly well when it is blended
+    // as light. Drawn with 'lighter' over the body; the ring it replaces stays
+    // as the fallback.
+    hzdHealFx: 'assets/characters/hero/heal_fx.webp',
     // THE WALK-AWAY, AUTHORED (2026-09-15). Eight drawn cells: 0-3 are the TURN
     // from front-on to fully behind, 4-7 the back-view stride. The four back
     // plates below stay as the fallback — they are what drew this for months and

@@ -22,6 +22,7 @@
 //                  would swamp every number here.
 //
 //   node tools/sheetslice.cjs <strip.png> [--cut <outdir>] [--frames N]
+//                              [--fx] [--nosplit]
 //
 // --frames N is for sheets the runs cannot answer: frames that touch end to end
 // (one run, no median to measure against) and effects sheets that are loose
@@ -32,7 +33,7 @@ const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 
 const PAGE = `
-window.slice = async (dataUrl, forceN) => {
+window.slice = async (dataUrl, forceN, noSplit, inkMin) => {
   const img = new Image(); img.src = dataUrl; await img.decode();
   const W = img.naturalWidth, H = img.naturalHeight;
   const c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -51,11 +52,19 @@ window.slice = async (dataUrl, forceN) => {
 
   // columns that hold anything at all -> frames are the runs between gaps,
   // and HOW MUCH each column holds, which is what splits a bridged pair
+  // WHERE A FRAME ENDS DEPENDS ON WHAT IT IS. A body's edge is its plating, so
+  // an occupancy threshold of 30 finds it and ignores the halo generation puts
+  // around everything. A GLOW has no such edge: its alpha ramps 1, 2, 3, 5, 8,
+  // 13 ... out to the core, so cutting at 30 slices the falloff off both sides
+  // and every frame ships with a straight vertical edge where the light was
+  // still fading. --fx drops the threshold to the noise floor and lets the
+  // gutters — which on an effects sheet are hundreds of px wide — do the
+  // separating.
   const col = new Array(W).fill(false);
   const ink = new Array(W).fill(0);
   for (let px = 0; px < W; px++) {
     let n = 0;
-    for (let py = 0; py < H; py++) if (A(px, py) > 30) n++;
+    for (let py = 0; py < H; py++) if (A(px, py) > inkMin) n++;
     ink[px] = n;
     col[px] = n > 0;
   }
@@ -86,6 +95,13 @@ window.slice = async (dataUrl, forceN) => {
   // one connected shape — so when the count is known it is given, and the runs
   // are ignored entirely: divide the inked span into N and slide each boundary
   // to the thinnest column near where it falls.
+  // --nosplit: the splitter is a heuristic and an EFFECTS sheet defeats it. A
+  // bloom is one blob whose width has nothing to do with any other blob's, so
+  // "far wider than the median" fires on the peak of the effect and cuts the
+  // best frame in half — which is what put a flat vertical edge through the
+  // heal burst and a 4px sliver next to it. When the real gutters are obvious,
+  // say so and let the runs stand.
+  if (noSplit) { /* runs stand as found */ } else
   if (forceN && forceN > 1 && keep.length) {
     const a = keep[0][0], b = keep[keep.length - 1][1], w = b - a + 1;
     const out = [];
@@ -177,13 +193,15 @@ const med = a => { const s = a.slice().sort((p, q) => p - q); return s[s.length 
   // on it: an arc three times her height is not a size defect, and energy that
   // floats has no foot line to hold. --fx keeps the cutting and drops the flags.
   const fx = argv.includes('--fx');
-  if (!strip) { console.log('usage: sheetslice.cjs <strip.png> [--cut <outdir>] [--frames N]'); process.exit(1); }
+  const noSplit = argv.includes('--nosplit');
+  if (!strip) { console.log('usage: sheetslice.cjs <strip.png> [--cut <outdir>] [--frames N] [--fx] [--nosplit]'); process.exit(1); }
 
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
   await page.addScriptTag({ content: PAGE });
   const url = 'data:image/png;base64,' + fs.readFileSync(strip).toString('base64');
-  const { W, H, frames, splits } = await page.evaluate(([u, n]) => window.slice(u, n), [url, forceN]);
+  const { W, H, frames, splits } = await page.evaluate(([u, n, ns, im]) => window.slice(u, n, ns, im),
+                                                      [url, forceN, noSplit, fx ? 2 : 30]);
 
   const name = path.basename(strip);
   console.log(name + '  ' + W + 'x' + H + '  ->  ' + frames.length + ' frames');

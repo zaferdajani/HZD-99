@@ -21,6 +21,48 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2az. SUPERCHARGE EFFECTS — the sheet cannot be cut into frames ✱ MEASURED 2026-09-16 (art session)
+
+The body sheet for the supercharge is wired and green (`SWING_STRIP.burst`, 12
+cells). Its **effects** sheet — `assets/source/hero/delivered/v3/supercharge_fx.png`
+— is the one delivered asset that could not be used, and the reason is layout,
+not drawing. The arcs in it are good.
+
+Measured with `tools/sheetslice.cjs --fx`:
+
+| how it was read | what came out |
+|---|---|
+| runs, no splitting | **13** islands for 12 frames — the first four are dots a few px across, and one run is **726 px wide** holding four or five slash arcs welded together |
+| runs, splitter on | **28** pieces, two of them empty |
+| forced to 12 | boundaries land mid-arc; frames ship with a straight vertical cut through the light |
+
+There is no setting that reads 12 frames out of it, because 12 frames are not
+what is in it. The re-fire prompt is written and ready in
+`docs/ART_PROMPTS_GPT.md` §4 ("Supercharge effects — RE-FIRE"); it names the
+12 beats and the one rule the last sheet broke — every frame its own island with
+40 px of clear space on both sides, ruled into 12 equal columns.
+
+**The heal FX sheet is the counter-example and the standard to fire against:**
+five separate blooms, wide gaps, real alpha, each a complete self-contained
+glow. It went in unaltered and now draws the mend (`HERO_HEAL_FX`).
+
+## 2ay. THE HEAL'S LIGHT — LANDED 2026-09-16 (art session)
+
+`assets/source/hero/delivered/v4/heal_fx.png` → `assets/characters/hero/heal_fx.webp`,
+five cells, drawn with `'lighter'` over her chest through the whole 0.85 s mend.
+It replaces a 2 px stroked mint circle, which stays as the fallback because the
+engine never assumes it has the good version.
+
+This is the first EFFECTS sheet in the game, and it needed its own pipeline —
+`tools/fxstrip.cjs`, plus `--fx`/`--nosplit` on the slicer. The body tools are
+actively wrong on a glow: `movestrip` anchors on her feet (a bloom has none) and
+normalises every cell to the median height (on an effect the growth IS the
+animation), and the slicer's body-edge threshold cuts a glow's falloff off both
+sides, leaving a straight vertical edge where the light was still fading. All
+three of those shipped as visible defects before they were measured and fixed.
+
+---
+
 ## 2w. THE SWING IS A POSE, NOT A MOVE — every attack snaps still-to-hit ✱ DIAGNOSED 2026-08-23 (art session)
 
 **The owner's words:** *"The act of scratching and hitting with a sword need to

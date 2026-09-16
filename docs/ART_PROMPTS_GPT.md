@@ -204,6 +204,46 @@ the format are already established.
 > frame for frame. No character in this image at all. Bright cyan-white energy,
 > matching the arcs in the sheet you already made.
 
+**The heal FX sheet is the one that came back right, and it is worth knowing why:**
+five separate glows, wide clear gaps between them, real alpha, each one a
+complete self-contained bloom. It went into the game unaltered. The supercharge
+FX sheet is the one that did not, and rule 5 above is exactly what it broke.
+
+### Supercharge effects — RE-FIRE
+
+The sheet delivered for this cannot be cut into frames. Measured rather than
+judged: the engine's slicer finds **13 runs of energy where it needs 12 frames**,
+and they are the wrong 13 — the first four are single dots a handful of pixels
+across, and then a single run **726 pixels wide** holds four or five separate
+slash arcs welded together with no gap between them. Loosening the slicer to
+find those arcs individually gives 28 pieces, two of which are empty. There is no
+setting that reads 12 frames out of it, because 12 frames are not what is in it.
+Nothing is wrong with the drawing — the arcs are good. The layout is what failed.
+
+> **EFFECTS for the SUPERCHARGE — exactly 12 frames, to match the 12-frame body
+> sheet.** Only the energy: no character anywhere in the image. Transparent
+> background, real alpha, frames left to right in play order.
+>
+> The critical part, and the reason I am asking again: **each of the 12 frames
+> must be one separate island of energy with at least 40 transparent pixels of
+> clear space on both sides of it, and nothing may cross that gap.** The last
+> sheet drew the big arcs overlapping into each other in a continuous band, and
+> the game cannot tell where one frame ends and the next begins — it reads the
+> whole band as a single frame 726 pixels wide.
+>
+> **Give every frame the same width and the same spacing**, as if the image were
+> ruled into 12 equal columns and each frame were drawn inside its own column
+> without ever touching the column's edge. A frame with only a small spark in it
+> still gets its own full column.
+>
+> The 12 beats, in order: a single spark at her claw; the spark doubling; three
+> sparks orbiting; a thin arc forming; the arc brightening; energy gathering back
+> along her forearm; the charge at full hold, crackling; the wind-up flare; the
+> first slash arc thrown; the second slash crossing it; the pair blowing out at
+> peak brightness; the energy tearing apart into fading embers.
+>
+> Bright cyan-white, the same energy as the arcs in the sheet you already made.
+
 ---
 
 ## 5. When a sheet comes back
@@ -215,6 +255,24 @@ node tools/sheetslice.cjs <sheet.png>              # finds frames, measures drif
 node tools/movestrip.cjs  <cut> <strip.png> 320    # one scale, foot-aligned
 node tools/stripcheck.cjs <strip.png> <cells>      # body mass, claws, facing
 ```
+
+An EFFECTS sheet takes the other route, because none of the body measurements
+mean anything on a glow and two of them actively damage it:
+
+```bash
+node tools/sheetslice.cjs <sheet.png> --fx --nosplit --cut <dir>
+node tools/fxstrip.cjs    <dir> <strip.png> 256
+node tools/towebp.cjs     <strip.png> assets/characters/hero/<name>.webp 0.9
+```
+
+`--fx` drops the frame-finding threshold to the noise floor: a body's edge is its
+plating, but a glow fades out through alpha 1, 2, 3, 5, 8, and cutting at the
+body threshold slices that falloff off both sides, so every frame ships with a
+straight vertical edge where the light was still fading. `--nosplit` turns off
+the bridged-frame splitter, whose "far wider than the median" test fires on the
+PEAK of an effect and cuts the best frame in half. And `fxstrip` — rather than
+`movestrip` — anchors on the light's centroid instead of her feet, and keeps each
+plate's real size, because on an effect the growth IS the animation.
 
 If a frame is flagged, only that frame needs redoing — ask GPT for that one frame
 again rather than the whole sheet.

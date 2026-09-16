@@ -929,6 +929,16 @@ let HERO_AIR_STRIP = { key: 'transAir', cells: 8, k: 0.8341, up: 770, down: 700 
 // down to her knees, forward onto the ground, still, and the eye-lights dimming
 // out. k 0.8705 against the sheet's slump (253 of 300) using cell 0.
 let HERO_DEATH_STRIP = { key: 'hzdDeath', cells: 6, k: 0.8705, total: 1.8, hold: 1.2 };
+// THE MEND'S LIGHT — an EFFECT strip, not a pose strip, so it carries none of
+// the k/floor machinery above. Nothing here is anchored to her feet or measured
+// against the reference sheet's subject height, because the thing being drawn is
+// light rather than a body: it is square, centred on her chest, sized in world
+// units and added rather than composited. Five plates assembled by
+// tools/fxstrip.cjs, which anchors on the light's centroid and keeps each
+// plate's real size, because the growth IS the animation.
+// alpha 0.85 rather than 1: the plates were drawn on black, so at full strength
+// the core blows out to white against a lit room and eats her chest.
+let HERO_HEAL_FX = { key: 'hzdHealFx', cells: 5, size: 58, alpha: 0.85 };
 // THE IMPATIENT WAIT (owner, 2026-08-27: "like a cute kid waiting anxiously
 // for something from a grown-up... cross their hands, tapping one leg on the
 // floor, and saying Yalla!"). Not a transition and not a pose: a LOOP that
@@ -4485,11 +4495,36 @@ class Player {
       }
       c.restore(); c.globalAlpha = 1;
     }
-    // heal ring
+    // THE MEND'S LIGHT. Five drawn plates (assets/source/hero/delivered/v4/
+    // heal_fx.png) instead of the stroked circle that stood in for them: a spark
+    // that swells to a sparkle burst, turns over once, and falls away. Blended
+    // with 'lighter' because that is what it IS — the plates carry their own
+    // soft matte and a bloom added as light needs no cutout, which is also why
+    // this one generated sheet escapes the art-prompts rule against generating
+    // pure glow.
+    //
+    // The ring stays as the fallback rather than being deleted. The engine never
+    // assumes it has the good version, and a heal with no feedback at all while
+    // a 76 KB sheet decodes is worse than the circle ever was.
     if (this.healT > 0) {
-      c.strokeStyle = '#aef7d8'; c.globalAlpha = 0.7; c.lineWidth = 2;
-      c.beginPath(); c.arc(this.x + this.w / 2, this.y + this.h / 2, 26 - this.healT * 18, 0, 7); c.stroke();
-      c.globalAlpha = 1;
+      const FX = HERO_HEAL_FX;
+      const im = MEDIA_RAW[FX.key];
+      const mx = this.x + this.w / 2, my = this.y + this.h / 2;
+      if (im && im.complete && im.naturalWidth) {
+        const cw = im.naturalWidth / FX.cells;
+        const f = clamp(Math.floor(this.healT / 0.85 * FX.cells), 0, FX.cells - 1);
+        c.save();
+        c.globalCompositeOperation = 'lighter';
+        c.globalAlpha = FX.alpha;
+        c.drawImage(im, f * cw, 0, cw, im.naturalHeight,
+                    mx - FX.size / 2, my - FX.size / 2, FX.size, FX.size);
+        c.restore();
+      } else {
+        mediaFetch(FX.key, true);
+        c.strokeStyle = '#aef7d8'; c.globalAlpha = 0.7; c.lineWidth = 2;
+        c.beginPath(); c.arc(mx, my, 26 - this.healT * 18, 0, 7); c.stroke();
+        c.globalAlpha = 1;
+      }
     }
   }
 }
