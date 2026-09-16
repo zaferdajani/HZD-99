@@ -361,6 +361,9 @@ const MEDIA_SRC = {
     // The only state in her whole roster that shipped with zero art; see
     // HERO_DEATH_STRIP in entities.js for how G.deadT indexes into it.
     hzdDeath: 'assets/characters/hero/death.webp',
+    // THE GUARD (owner sheet, 2026-09-15: BLOCK/GUARD row). One fired still,
+    // same treatment as the charge pose; see HERO_TRANS.guard in entities.js.
+    hzdGuard: 'assets/characters/hero/guard.webp',
     swingJab: 'assets/characters/hero/swing/jab.webp',
     swingHook: 'assets/characters/hero/swing/hook.webp',
     swingUppercut: 'assets/characters/hero/swing/uppercut.webp',

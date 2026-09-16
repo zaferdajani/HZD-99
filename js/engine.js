@@ -5,6 +5,11 @@ const KEYB = {
   JUMP: ['KeyZ', 'Space', 'VJUMP', 'GP_JUMP'], ATK: ['KeyX', 'KeyJ', 'VATK', 'GP_ATK'],
   DASH: ['KeyC', 'ShiftLeft', 'ShiftRight', 'VDASH', 'GP_DASH'], CAST: ['KeyV', 'KeyK', 'VCAST', 'GP_CAST'],
   HEAL: ['KeyF', 'KeyH', 'VHEAL', 'GP_HEAL'], INT: ['KeyE', 'VINT', 'GP_INT'],
+  // GUARD (owner sheet, 2026-09-15: BLOCK/GUARD row). Every real gamepad
+  // button (0-11) already has a home — see PAD_DEFAULT — so like SKILL and
+  // CREST before it, it ships unbound (-1) and remappable rather than
+  // stealing someone else's slot.
+  GUARD: ['KeyL', 'VGUARD', 'GP_GUARD'],
   CLAW: ['KeyQ', 'VCLAW', 'GP_CLAW'],
   ARM: ['KeyG', 'Digit1', 'VARM', 'GP_ARM'], SONG: ['KeyB', 'KeyN', 'VSONG', 'GP_SONG'],
   STAR: ['KeyR', 'Digit2', 'VSTAR', 'GP_STAR'],
@@ -24,7 +29,7 @@ let inputSuspended = false, padNeedsNeutral = false;
 // touch gutters disappear, the picture grows to fill the screen, and every
 // action moves onto a real button. Detection is automatic on first input.
 // ---------------------------------------------------------------------------
-const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST', 'GP_STAR', 'GP_RUN',
+const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST', 'GP_STAR', 'GP_RUN', 'GP_GUARD',
   // the d-pad alone, edge-detected like everything else — see pollGamepad
   'GP_PL', 'GP_PR', 'GP_PU', 'GP_PD'];
 const GP_PREV = {};
@@ -43,7 +48,7 @@ const PAD_BTN_XB = {
 };
 // every action that lives on a face/shoulder button, in the order the config
 // screen lists them. Movement stays on the stick + d-pad and is not remappable.
-const PAD_ACTIONS = ['JUMP', 'ATK', 'RUN', 'STAR', 'DASH', 'CAST', 'ARM', 'SONG', 'CLAW', 'HEAL', 'INT', 'MAP', 'SKILL', 'CREST', 'PAUSE'];
+const PAD_ACTIONS = ['JUMP', 'ATK', 'RUN', 'STAR', 'DASH', 'CAST', 'ARM', 'SONG', 'CLAW', 'HEAL', 'INT', 'MAP', 'SKILL', 'CREST', 'PAUSE', 'GUARD'];
 const PAD_DEFAULT = {
   JUMP: 0, ATK: 2, INT: 1, HEAL: 3,
   DASH: 5,        // R1
@@ -77,6 +82,10 @@ const PAD_DEFAULT = {
   // padHowTo() below makes sure the game says the right thing either way.
   SKILL: -1,
   CREST: -1,      // unbound by default; remap it if you want it on the pad
+  // GUARD: every real button is ALSO spoken for by the time this shipped —
+  // same honest-unbound treatment as SKILL above, routed to Options ▸
+  // Controls (tests/platform.cjs VIA.GUARD) instead of stealing a slot.
+  GUARD: -1,
   PAUSE: 9,       // Options
 };
 const PAD = {

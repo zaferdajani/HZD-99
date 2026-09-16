@@ -197,6 +197,128 @@ of that sheet.
 
 ---
 
+## `hero/guard/` — the row with no mechanic behind it
+
+Owner sheet, 2026-09-15: a second "CLAWBYTE combat animation sprite sheet"
+(same flat pixel-art render class as the one reviewed above, same "not used
+as art" verdict — §0.0 is 3D-only), with a BLOCK/GUARD row this repo's combat
+code had no equivalent for at all: no block, parry, shield or guard mechanic
+existed anywhere in `entities.js` before this.
+
+Cross-checked the rest of that sheet against the shipped game first, state by
+state, rather than assuming it needed new art: IDLE, RUN, WALK, JUMP,
+FALL/LAND, DASH, the three light attacks, the charged heavy attack, the 3-hit
+combo, air attack, down-attack/plunge, hit/hurt and idle variations were ALL
+already covered by real, wired, canon-element Higgsfield art (gait strips,
+`HERO_TRANS`, `SWING_STRIP.burst`, `hzdHurt`, `HERO_FIDGET`) — none of that
+needed regenerating. BLOCK/GUARD was the one true gap, on both counts: no
+art and no game verb.
+
+`guard.jpg` reuses a still already generated earlier this session for exactly
+this purpose (a defensive brace, crossed forearms catching an impact spark,
+`hzd99-canon` embedded) rather than spending a fresh generation on a pose
+already on file and already reviewed as on-model. Composited into
+`assets/characters/hero/guard.webp` (one 300px cell, `idle.webp`'s
+convention) and wired as `HERO_TRANS.guard` in `entities.js`, drawn through
+the same `drawRoboTrans` machinery as `hurt`/`land`/`dash` rather than a
+special case.
+
+The mechanic itself is new, minimal, and said so in code: a new `GUARD`
+input (hold), keyboard `L` / touch shield button / gamepad unbound-by-default
+(every real button already has a home — same honest-unbound treatment as
+`SKILL`/`CREST`, routed to Options ▸ Controls). Held and grounded, it cuts
+incoming damage by `GUARD_REDUCTION` (0.65, a first pass, not a tuned final
+number) and drops knockback to 35%, in `Player.hurt()`. It does not stop a
+hit outright — a repeatable, free, full-invincibility block would undercut
+every fight already balanced around dodging, which the one-shot Aegis relic
+and the Oath save are not. No boss tell is unblockable yet; that is real
+follow-up balance work this change does not claim to have done.
+
+---
+
+## `hero/swing/claw_1`, `hero/swing/burst`, `hero/hurt` — the owner's "what about hit/supercharge" check
+
+Owner, 2026-09-15: after the Block/Guard fix, asked directly what was still
+wrong with "hit" and "supercharge" (the charged burst) from the sheet review.
+Rather than answer from the earlier claim that these were "already covered",
+pulled the actual shipped strips apart and looked, which is what should have
+happened the first time:
+
+- **`swingClaw1`** was still the ORIGINAL camera-facing footage documented in
+  ART_QUEUE §2av and never replaced — she opens toward the lens on the first
+  hit of every combo.
+- **`swingBurst`** was worse: the 6e642bc re-cut (ART_QUEUE, "2av is half-
+  fixed") turned out to be a cropped close-up on her head and shoulders with
+  no legs in frame at all, a completely different scale from every other
+  strip — the "headbutting" the owner had already reported and that nobody
+  had actually gone and looked at.
+- **`hurt`** had never been flagged by any test (the facing law does not
+  cover it) but five of its six cells carried a sword hilt slung on her back
+  — an object that belongs to no established pose of hers — and the flung
+  cell's eyes rendered green instead of her canon cyan.
+
+All three re-fired: four stills each for claw_1 and burst (guard/wind-
+up/contact/recovery; crouch/wind-up/release/recovery), six for hurt (flung/
+curl/land/stagger/steady/recover), hzd99-canon embedded, three-quarter
+profile matching the already-passing claw_2/finisher strips, full body in
+frame every time.
+
+**The canon element itself is a landmine worth naming.** `hzd99-canon`'s own
+reference photo shows her flying with a glowing sword and jet-boot flames —
+which is NOT how she is drawn anywhere else in the shipped game (bare-clawed
+fighter, feet on the ground). Every prompt in this batch had to fight that
+image with an explicit "her paws are bare, no sword, no blade, no held
+weapon, no jet flames" negative; the first batch of all 8 claw_1/burst
+generations, fired without that negative, came back with every single one
+holding a lightsaber-like blade. The element should probably be replaced
+with a bare-pawed, grounded reference photo so future generations stop
+needing to fight their own identity anchor — flagged here rather than fixed,
+since replacing a shared reference element is a bigger, riskier change than
+this brief needs to make.
+
+Fit to idle.webp's convention (crop to bbox, scale into a 300px cell, bottom-
+anchored), so all three land on k: 1.0 like HERO_DEATH_STRIP and
+HERO_TRANS.guard before them. `tests/hero.cjs`'s attack-facing law passes on
+both claw_1 and burst for the first time.
+
+---
+
+## `hero/swing/burst` — the ART session re-fire, ten frames instead of four (2026-09-16)
+
+The four-still `burst` above (crouch/wind-up/release/recovery) was always a
+stopgap composited during the 2026-09-15 emergency facing fix, and the owner
+asked the ART session to redo it properly: as many frames as possible, no
+duplicate frames, covering the full charge build-up through the explosive
+release his own reference sheet's HEAVY ATTACK row describes — rising energy
+glow at the paws through the wind-up, then a flash-and-shockwave release.
+
+Ten stills, one Higgsfield batch: `ready` (settling into the low crouch, no
+glow) → `crouch` (deep coil, first spark) → `charge1` (glow wraps the
+forearms) → `charge2` (crackling arcs, harder tension) → `peak` (both paws
+blazing, maximum coil) → `ignite` (the release flash, launching forward) →
+`midlunge` (claws flung forward-and-wide, trailing streaks) → `extension`
+(full reach, a radiating shockwave ring at the point of impact) → `follow`
+(decelerating, glow scattering) → `recovery` (ready stance, residual
+shimmer). Same `hzd99-canon` embed and the same "bare paws, no sword, no
+blade, no held weapon, no jet flames" negative in every prompt as the batch
+above — still needed, still fights the element's own sword-and-jets
+reference photo. Same three-quarter profile facing right as `claw_2`/
+`finisher`; the "headbutting" facing defect does not reproduce in any of the
+ten. Verified before compositing: pure black background on all ten (no
+polarity flip), no duplicate poses, and the glow genuinely rises frame over
+frame rather than jump-cutting from dark to full brightness.
+
+Keyed with `tools/blackkey.cjs`, laid into a 10-cell strip with
+`tools/stillstrip.cjs` at the idle.webp convention (300 px cell, bottom-
+anchored, one shared scale), encoded with `tools/towebp.cjs`. `k` stays 1.0
+by construction, same as the four-frame take it replaces. `burst_windup.jpg`
+and `burst_release.jpg` from the four-frame take are removed — nothing in
+the new strip corresponds to those beats; `burst_crouch.jpg` and
+`burst_recovery.jpg` are overwritten with the new take's frames of the same
+name.
+
+---
+
 ## Rule going forward
 
 Any generated asset is committed here **in the same commit that uses it**. If it
