@@ -865,6 +865,17 @@ const HERO_TRANS = {
   // her visor does the acting, going to a pained squint in the middle cells.
   // k against the sheet's hurt cell 18 (204 of 300) using cell 1, the impact.
   hurt: { key: 'hzdHurt', cells: 4, k: 0.80, t: p => p.hurtPoseT, t0: () => 0.3 },
+  // THE MEND (2026-09-16). Five drawn cells: she stands, brings both hands to
+  // the core light, bows her head, straightens as it takes.
+  //
+  // healT is the one timer here that counts UP — 0 to 0.85, because it is
+  // charging something rather than running out. The table's progress is
+  // 1 - t/t0, so the count is inverted at the accessor rather than by teaching
+  // every other entry about a direction it does not have. The last instant
+  // (t exactly 0) falls through to the pose cell, which is correct: healT is
+  // reset the same frame the heal lands.
+  // k 0.8217 against the sheet's heal cell 19 (208 of 300) using cell 0.
+  heal: { key: 'hzdHeal', cells: 5, k: 0.8217, t: p => 0.85 - p.healT, t0: () => 0.85 },
   //
   // WAITING ON ART (docs/ART_QUEUE.md §2x), in census order:
   //   land   fall>land>idle|run, the impact — 8/min and the most conspicuous
@@ -881,6 +892,20 @@ const HERO_TRANS = {
 // Three plates — takeoff stretch, apex tuck, the reach for the ground — fired
 // as stills (2026-09-02) after eleven video takes either started the jump in
 // the last half-second or never left the ground. k against the sheet's apex.
+// THE PUSH, which the air arc never covered. HERO_AIR_STRIP begins after her
+// feet have left; the coil and the launch stretch happen before that and were
+// drawn procedurally — a squash-and-stretch on the plate, in drawRoboPlate.
+//
+// It rides `takeoffT`, a countdown that has existed since long before the art
+// did and was described in the source as "jump coil + launch stretch": exactly
+// this. Nothing new is timed; the drawing catches up with the clock.
+//
+// The procedural squash needs no suppressing. Player.draw returns the moment
+// drawRoboTrans draws anything, so the plate stage — and the stretch inside it —
+// never runs on a frame this strip owns.
+// k 0.9121 against the sheet's rise cell 5 (236 of 300) using the strip's cell
+// 3, the launch stretch, which is the pose that cell holds.
+let HERO_TAKEOFF = { key: 'transTakeoff', cells: 4, k: 0.9121 };
 // DRAWN (2026-09-15) and now EIGHT cells, not three: the rise sheet's four
 // frames are 0-3 and the fall sheet's four are 4-7, which is exactly the shape
 // this lookup already wanted — it indexes by her own vertical speed from full
@@ -2530,6 +2555,19 @@ class Player {
   // only decides what is on screen while a state the game already entered
   // plays out.
   drawRoboTrans(c, st) {
+    // THE PUSH COMES FIRST, because by the time takeoffT is running she is
+    // already airborne and `st` already says 'rise' — the air arc would take the
+    // frame and the launch would never be seen. Foot-anchored, not centred like
+    // the air cells: movestrip stands every cell on the cell floor, and the coil
+    // reads as a push off the ground rather than a pose in mid-air.
+    const TK = HERO_TAKEOFF;
+    if (TK && TK.cells && this.takeoffT > 0 && this.landT <= 0
+        && (st === 'rise' || st === 'apex' || st === 'fall')) {
+      const t0 = this.takeoff0 || 0.12;
+      const p = clamp(1 - this.takeoffT / t0, 0, 0.999);
+      if (drawHeroMotionCell(this, c, TK.key, p * (TK.cells - 1), TK.cells,
+                             0, HERO_FLOOR, HERO_DH * TK.k, false)) return true;
+    }
     const A = HERO_AIR_STRIP;
     if (A && (st === 'rise' || st === 'apex' || st === 'fall')) {
       // her own vertical speed is the position in the arc

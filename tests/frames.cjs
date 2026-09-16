@@ -306,6 +306,13 @@ const check = (name, ok, detail) => {
       return realMotion(p, c, key, frame, cells, cx, base, h, flip);
     };
 
+    // The mechanism checks REPLACE two real entries with a synthetic strip. They
+    // are put back at the end: this evaluate used to leave HERO_AIR_STRIP null
+    // and HERO_TRANS.land deleted for the rest of the page's life, which is
+    // invisible while nothing looks at them afterwards and a false failure the
+    // moment something does. (The reachability check below is what looked.)
+    const keepAir = HERO_AIR_STRIP, keepLand = HERO_TRANS.land;
+
     // the jump arc, indexed by her own vertical speed
     HERO_AIR_STRIP = { key: '__testStrip', cells: N, k: 1, up: 770, down: 700 };
     const air = [];
@@ -345,6 +352,12 @@ const check = (name, ok, detail) => {
     for (const st of ['idle', 'run_a', 'rise', 'apex', 'fall', 'land', 'skid', 'dash'])
       if (player.drawRoboTrans(document.querySelector('canvas').getContext('2d'), st)) fellThrough = false;
     HERO_GAIT = gaitSave; HERO_IDLE = idleSave;
+    // ...and the two the mechanism checks borrowed. They stay unplugged through
+    // the fall-through question above, which is the whole point of it, and come
+    // back the moment it is answered — this used to leave them gone for the rest
+    // of the page, which is invisible until something later looks at them.
+    HERO_AIR_STRIP = keepAir;
+    if (keepLand) HERO_TRANS.land = keepLand;
 
     window.drawStripCell = real;
     window.drawHeroMotionCell = realMotion;
@@ -368,6 +381,63 @@ const check = (name, ok, detail) => {
   check('a spent clock hands the frame back to the pose cell', mech.spent === false);
   check('and with no strip fired every state falls through to its pose',
     mech.fellThrough);
+
+  // ---- EVERY WIRED STRIP IS REACHABLE IN THE STATE THAT OWNS IT ----------
+  //
+  // The checks above prove the MECHANISM: a clock is read, a cell is asked for.
+  // They cannot notice a strip that is declared, loaded, correct — and never
+  // reached, because something earlier in drawRoboTrans claimed the frame first.
+  //
+  // That is not hypothetical. The takeoff push runs while `st` already says
+  // 'rise', so the jump arc's branch sat in front of it and would have eaten
+  // every frame of it. Ordering fixed that; this is what keeps it fixed.
+  const reach = await page.evaluate(async () => {
+    const want = {
+      hzdIdle:      p => { p.on = 1; p.idleT = 1; p.vx = 0; },
+      heroFidget:   p => { p.on = 1; p.idleT = 99; p.vx = 0; },
+      transTakeoff: p => { p.on = 0; p.landT = 0; p.takeoff0 = 0.12; p.takeoffT = 0.08; p.vy = -300; },
+      transAir:     p => { p.on = 0; p.landT = 0; p.takeoffT = 0; p.vy = -300; },
+      transLand:    p => { p.on = 1; p.land0 = 0.12; p.landT = 0.06; },
+      transSkid:    p => { p.on = 1; p.skid0 = 0.14; p.skidT = 0.07; },
+      transDash:    p => { p.dash0 = 0.16; p.dashT = 0.08; },
+      transWall:    p => { p.wallT = 0.2; },
+      hzdHurt:      p => { p.hurtPoseT = 0.15; },
+      hzdHeal:      p => { p.on = 1; p.healT = 0.4; },
+    };
+    const st = { hzdIdle: 'idle', heroFidget: 'idle', transTakeoff: 'rise',
+                 transAir: 'rise', transLand: 'land', transSkid: 'skid',
+                 transDash: 'dash', transWall: 'wall_cling', hzdHurt: 'hurt',
+                 hzdHeal: 'heal' };
+    for (const k of Object.keys(want)) mediaFetch(k, true);
+    // a strip that has not decoded falls through by design, so give them time
+    for (let i = 0; i < 120; i++) await new Promise(r => requestAnimationFrame(r));
+    const ctx = document.querySelector('canvas').getContext('2d');
+    const out = { missing: [], wrong: [], undecoded: [] };
+    for (const key of Object.keys(want)) {
+      const im = MEDIA_RAW[key];
+      if (!im || !im.complete || !im.naturalWidth) { out.undecoded.push(key); continue; }
+      const save = { on: player.on, idleT: player.idleT, vx: player.vx, vy: player.vy,
+                     takeoffT: player.takeoffT, landT: player.landT, skidT: player.skidT,
+                     dashT: player.dashT, wallT: player.wallT, hurtPoseT: player.hurtPoseT,
+                     healT: player.healT };
+      player.on = 1; player.idleT = 1; player.vx = 0; player.vy = 0;
+      player.takeoffT = 0; player.landT = 0; player.skidT = 0; player.dashT = 0;
+      player.wallT = 0; player.hurtPoseT = 0; player.healT = 0;
+      want[key](player);
+      G.lastStrip = null;
+      player.drawRoboTrans(ctx, st[key]);
+      const drew = G.lastStrip ? G.lastStrip.split(':')[0] : null;
+      if (!drew) out.missing.push(key);
+      else if (drew !== key) out.wrong.push(key + ' -> ' + drew);
+      Object.assign(player, save);
+    }
+    return out;
+  });
+  check('every wired strip is reachable in the state that owns it',
+    reach.missing.length === 0 && reach.wrong.length === 0,
+    (reach.missing.length ? 'never drew: ' + reach.missing.join(', ') : '')
+    + (reach.wrong.length ? '  claimed by another: ' + reach.wrong.join(', ') : '')
+    + (reach.undecoded.length ? '  (skipped, not decoded: ' + reach.undecoded.join(', ') + ')' : ''));
 
   check('no page errors', errs.length === 0, errs[0] || '');
 

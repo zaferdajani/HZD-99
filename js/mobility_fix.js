@@ -79,7 +79,13 @@ function drawHeroMotionLoading(ctx) {
 function drawHeroMotionCell(p, ctx, key, frame, cells, cx, base, height, flip) {
   const im = MEDIA_RAW[key];
   if (!im || !im.complete || !im.naturalWidth) { mediaFetch(key, true); return false; }
-  const cyclic = key === HERO_GAIT.walk.key || key === HERO_GAIT.run.key || key === HERO_IDLE.key;
+  // A LOOPING STRIP WRAPS; A ONE-SHOT CLAMPS. The tables are read defensively
+  // because an unfired one is a supported state — `cells: 0` means "art has not
+  // landed yet" all through this file, and a null table is the same situation
+  // written differently. Reading it blind crashed the renderer the first time a
+  // harness unplugged the gait to ask what falls through.
+  const cyclic = (HERO_GAIT && (key === HERO_GAIT.walk.key || key === HERO_GAIT.run.key))
+              || (HERO_IDLE && key === HERO_IDLE.key);
   const f = cyclic ? ((frame % cells) + cells) % cells : clamp(frame, 0, cells - 1);
   const target = { key, f, cells, cx, base, height, flip: !!flip, cyclic };
   const now = p.anim || 0;

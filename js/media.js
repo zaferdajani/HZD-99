@@ -374,6 +374,12 @@ const MEDIA_SRC = {
     transSkid: 'assets/characters/hero/trans_skid.webp',
     transWall: 'assets/characters/hero/trans_wall.webp',
     transDash: 'assets/characters/hero/trans_dash.webp',
+    // The push off the ground, and the mend. Deliberately NOT in
+    // HERO_MOTION_KEYS: that list gates PLAY on its contents having decoded, and
+    // neither of these is on screen often enough to hold the game at a loading
+    // bar for. Both fall through to the pose cell until they arrive.
+    transTakeoff: 'assets/characters/hero/trans_takeoff.webp',
+    hzdHeal: 'assets/characters/hero/heal.webp',
     // THE WALK-AWAY, AUTHORED (2026-09-15). Eight drawn cells: 0-3 are the TURN
     // from front-on to fully behind, 4-7 the back-view stride. The four back
     // plates below stay as the fallback — they are what drew this for months and
