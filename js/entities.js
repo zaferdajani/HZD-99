@@ -988,7 +988,19 @@ const SWING_STRIP = {
   claw_1:   { key: 'swingClaw1',    cells: 4, k: 1.0 },
   claw_2:   { key: 'swingHook',     cells: 10, k: 0.92 },
   finisher: { key: 'swingUppercut', cells: 10, k: 0.956 },
-  burst:    { key: 'swingBurst',    cells: 4, k: 1.0 },
+  // RE-FIRED AGAIN (owner brief, 2026-09-16): the 4-frame burst above was a
+  // stopgap composited during the 2026-09-15 emergency facing fix. Ten stills
+  // now cover the whole heavy attack instead of four beats: ready / crouch /
+  // two rising charge stages / peak coil / release ignite / mid-lunge / full
+  // extension with its own radiating shockwave / follow-through / recovery —
+  // the glow visibly builds frame over frame rather than jump-cutting from
+  // dark to blazing. Same hzd99-canon embed, same three-quarter profile
+  // facing right as claw_2/finisher, with an explicit "bare paws, no sword,
+  // no blade, no held weapon, no jet flames" negative on every prompt (the
+  // canon element's own reference photo shows her holding a glowing sword
+  // with jet-boot flames — ART_BIBLE §2's landmine). Same idle.webp-convention
+  // fit as before, so k stays 1.0.
+  burst:    { key: 'swingBurst',    cells: 10, k: 1.0 },
 };
 // Gameplay stores the ordinary combo as 0, 1, 2. Keep both the pose fallback
 // and the strip renderer on that same numbering: treating it as 1, 2, 3

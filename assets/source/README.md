@@ -283,6 +283,42 @@ both claw_1 and burst for the first time.
 
 ---
 
+## `hero/swing/burst` — the ART session re-fire, ten frames instead of four (2026-09-16)
+
+The four-still `burst` above (crouch/wind-up/release/recovery) was always a
+stopgap composited during the 2026-09-15 emergency facing fix, and the owner
+asked the ART session to redo it properly: as many frames as possible, no
+duplicate frames, covering the full charge build-up through the explosive
+release his own reference sheet's HEAVY ATTACK row describes — rising energy
+glow at the paws through the wind-up, then a flash-and-shockwave release.
+
+Ten stills, one Higgsfield batch: `ready` (settling into the low crouch, no
+glow) → `crouch` (deep coil, first spark) → `charge1` (glow wraps the
+forearms) → `charge2` (crackling arcs, harder tension) → `peak` (both paws
+blazing, maximum coil) → `ignite` (the release flash, launching forward) →
+`midlunge` (claws flung forward-and-wide, trailing streaks) → `extension`
+(full reach, a radiating shockwave ring at the point of impact) → `follow`
+(decelerating, glow scattering) → `recovery` (ready stance, residual
+shimmer). Same `hzd99-canon` embed and the same "bare paws, no sword, no
+blade, no held weapon, no jet flames" negative in every prompt as the batch
+above — still needed, still fights the element's own sword-and-jets
+reference photo. Same three-quarter profile facing right as `claw_2`/
+`finisher`; the "headbutting" facing defect does not reproduce in any of the
+ten. Verified before compositing: pure black background on all ten (no
+polarity flip), no duplicate poses, and the glow genuinely rises frame over
+frame rather than jump-cutting from dark to full brightness.
+
+Keyed with `tools/blackkey.cjs`, laid into a 10-cell strip with
+`tools/stillstrip.cjs` at the idle.webp convention (300 px cell, bottom-
+anchored, one shared scale), encoded with `tools/towebp.cjs`. `k` stays 1.0
+by construction, same as the four-frame take it replaces. `burst_windup.jpg`
+and `burst_release.jpg` from the four-frame take are removed — nothing in
+the new strip corresponds to those beats; `burst_crouch.jpg` and
+`burst_recovery.jpg` are overwritten with the new take's frames of the same
+name.
+
+---
+
 ## Rule going forward
 
 Any generated asset is committed here **in the same commit that uses it**. If it
