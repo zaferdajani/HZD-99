@@ -95,6 +95,20 @@ what the game needs first and adds the ones it was missing.
 Paste any of these after §1 and §2. They are short on purpose — the character and
 the format are already established.
 
+**Three of these are still worth firing. Everything else here has landed and is
+in the game — do not re-fire it.** The blocks stay as the record of what was
+asked for, which is why the list rather than the blocks carries the status:
+
+| still to fire | why |
+|---|---|
+| **AIR ATTACK** | never delivered; the game has no airborne strike pose |
+| **DOWN ATTACK** | never delivered; the plunge is drawn procedurally |
+| **SUPERCHARGE EFFECTS** | delivered, unusable — see the RE-FIRE block below for the one layout rule it broke |
+
+Everything from the walk and idle through the four attack strips, the six
+transitions, the death, the fidget, the five gate walk-aways and the heal is
+wired and measured.
+
 ### Priority one — locomotion, on screen constantly
 
 > **RUN — 8 frames.** A full run cycle, side view facing right. Contact, down,
@@ -134,12 +148,16 @@ the format are already established.
 
 ### Priority two — combat
 
-> **SUPERCHARGED SCRATCH — 12 frames. THIS IS A RE-RENDER — the previous one
-> came back at half the size of every other sheet and with its frames welded
-> together by the energy, so two things matter more than the poses: draw her the
+**LANDED 2026-09-15 — do not re-fire this one.** The body sheet came back right
+on the second pass and is wired (`SWING_STRIP.burst`, 12 cells); it passes the
+facing law at 0.103 against the walk's widest 0.099. Its *effects* sheet is the
+one still outstanding — see "Supercharge effects — RE-FIRE" below. The brief is
+kept here as the record of what was asked for.
+
+> **SUPERCHARGED SCRATCH — 12 frames.** Draw her the
 > SAME SIZE as she is in the walk and idle sheets (about 330px tall, ear-tips to
 > soles, in every frame), and put NO energy on this sheet at all — the blue
-> charge and the slash go on a separate effects sheet, frame for frame.** The charged claw attack, side view facing
+> charge and the slash go on a separate effects sheet, frame for frame. The charged claw attack, side view facing
 > right. She stays low, braced and bipedal throughout — she never leaps and never
 > drops to all fours. Frames 1–2 standing ready. Frames 3–4 sinking into a deep
 > wide fighting stance, both arms drawn back behind her hips, steel claws extended.
