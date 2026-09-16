@@ -1548,9 +1548,16 @@ const ROOMS = {
       rect(g, 12, 22, 16, 23, '.');   // col 16 answers D6's opening below
       // a descent, and the rungs still have to work going UP, because the only
       // way home is back through here
-      hline(g, 3, 9, 5, '='); hline(g, 14, 21, 8, '=');
-      hline(g, 4, 10, 11, '='); hline(g, 15, 22, 14, '=');
-      hline(g, 3, 9, 17, '='); hline(g, 14, 21, 20, '=');
+      // THE SAME STAIR B6 WAS BUILT TO AVOID: six rungs, every gap 3 rows,
+      // alternating an identical left span and an identical right span — the
+      // "stack" B6's own build comment names and staggers away from. D5 and
+      // E5 shipped as the one template neither kingdom session varied.
+      // Gaps and spans now uneven (4,3,3,3,2 instead of 3,3,3,3,3); the top
+      // and bottom rungs keep their x so the door above and the floor below
+      // still meet them where they always did.
+      hline(g, 3, 9, 5, '='); hline(g, 15, 20, 9, '=');
+      hline(g, 4, 11, 12, '='); hline(g, 16, 22, 15, '=');
+      hline(g, 3, 8, 18, '='); hline(g, 14, 21, 20, '=');
     } },
   D6: { zone: 'D', w: 32, h: 17, exits: { T: 'D5' }, ice: true,
     ents: [['boss', 20, 15, 'lattice']],
@@ -1568,9 +1575,13 @@ const ROOMS = {
       frame(g);
       rect(g, 13, 0, 16, 0, '.');
       rect(g, 13, 22, 16, 23, '.');
-      hline(g, 3, 9, 5, '='); hline(g, 15, 22, 8, '=');
-      hline(g, 4, 10, 11, '='); hline(g, 16, 23, 14, '=');
-      hline(g, 3, 9, 17, '='); hline(g, 15, 22, 20, '=');
+      // THE SAME STAIR D5 SHIPPED WITH (see its own note): six rungs at a
+      // uniform 3-row gap, alternating identical spans — the copy-pasted
+      // template, not a climb. Same uneven fix (4,3,3,3,2), top and bottom
+      // rungs unmoved so the door above and E6's opening below still meet.
+      hline(g, 3, 9, 5, '='); hline(g, 16, 21, 9, '=');
+      hline(g, 4, 11, 12, '='); hline(g, 17, 23, 15, '=');
+      hline(g, 3, 8, 18, '='); hline(g, 15, 22, 20, '=');
       hline(g, 20, 27, 21, '^');
     } },
   E6: { zone: 'E', w: 32, h: 17, exits: { T: 'E5' },
