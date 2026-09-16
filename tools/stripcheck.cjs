@@ -6,27 +6,34 @@
 // seconds and found a fat cell and inconsistent claws. Eyeballing a contact
 // sheet is not validation; this is.
 //
-// Per cell it reports, all normalised to that cell's own figure height so the
-// numbers are comparable across a strip that is deliberately scaled uniformly:
+// What it reports per cell. Each definition below was arrived at by the metric
+// FIRST getting it wrong on art that was fine — the reasoning is kept at the
+// point of measurement, not summarised here, so it cannot drift from the code.
 //
 //   h        figure height in px — the scale check. movestrip.cjs already
 //            applies ONE scale, so a tall outlier here means the PLATE is off
-//            model, not the assembly.
-//   mass     opaque pixels / h^2. THE FAT-CAT DETECTOR. A generated set drifts
-//            in body mass between plates and the eye reads it instantly as a
-//            different character; this is the number that catches it before the
-//            owner does.
-//   waist    opaque width at 55% height / h — body bulk at the belly, the place
-//            the drift actually shows.
-//   eyes     cyan eye-pair gap / h — the facing law from tests/hero.cjs. Wide
-//            means she is facing the camera instead of her target.
-//   dark     fraction of opaque pixels that are dark steel — a PROXY FOR CLAWS.
-//            Her claws are the only dark-metal mass on a near-white body, so a
-//            cell where this collapses is a cell where the claws are retracted
-//            while its neighbours have them out.
+//            model, not the assembly. A move with real vertical range (an
+//            uppercut, a crouch) is SUPPOSED to vary: read it, do not fear it.
+//   mass     opaque pixels over the STRIP's median height squared — "how much
+//            cat is in this cell". The fat-cat detector. Normalising by each
+//            cell's own height instead makes it measure the pose.
+//   waist    the longest CONTIGUOUS opaque run across a band at her middle, over
+//            her height. The torso. Measured as a min-to-max span it counts an
+//            outstretched arm and the air beside it, and calls every slash a
+//            wide body.
+//   eyes     cyan eye-pair gap / h — a smell for the facing law. The
+//            authoritative test is tests/hero.cjs; this is the cheap early read.
+//   dark     dark-steel fraction — a PROXY FOR CLAWS, since they are the only
+//            dark-metal mass on a near-white body. Exempt on the first and last
+//            cell, where a guard with the claws in is the correct drawing.
 //
 // Everything is flagged against the strip's own MEDIAN, not an absolute, since
 // a move legitimately changes shape frame to frame. Outliers are the finding.
+//
+// Calibration is checked in BOTH directions after any change to a band: the
+// strip the owner rejected on sight must still fail, and the strips known good
+// must stay clean. A tool that cries wolf gets ignored, and a tool that has been
+// quietened until it never fires is worse than not having one.
 //
 //   node tools/stripcheck.cjs <strip.png> [cells]
 const { chromium } = require('playwright');
