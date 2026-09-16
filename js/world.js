@@ -161,6 +161,19 @@ function gantry(g, x0, x1, y, drop) {
   for (let x = x0; x <= x1; x++)
     put(g, x, y + Math.round(((x - x0) / span) * (drop || 0)), '=');
 }
+// A CHIPPED SHELF — a one-tile-thick wall-mounted ledge (grate flange, slag
+// crust) whose walkable run is a flat hline like any other, because a NO
+// RIGHT ANGLES fix here cannot touch the row she lands and fights on: the
+// room's vent timing and jump distances are tuned to that exact y. What
+// gets fixed is only what the flat rule never asked to be exact — the FREE
+// end, where solid used to stop dead and present a lip. `wall` names which
+// side is bolted to the room wall; the opposite end gets a broken tile one
+// column further out and one row lower, so the edge reads as debris that
+// sheared off rather than a ruled bar someone placed.
+function chip(g, x0, x1, y, wall) {
+  hline(g, x0, x1, y, '#');
+  put(g, wall === 'L' ? x1 + 1 : x0 - 1, y + 1, '#');
+}
 // ---------------------------------------------------------------------------
 // THE CAVE SHAPE RULE (owner, 2026-08-15): "you can never find caves as
 // spheres or squares or perpendicular. It's always caves." So no cave room
@@ -767,8 +780,10 @@ const ROOMS = {
     ents: [['flier', 15, 6], ['surge', 5, 12], ['scrap', 22, 12, 10]],
     build(g) {
       frame(g);
-      rect(g, 1, 12, 10, 14, '#');          // left tower
-      rect(g, 19, 12, 28, 14, '#');         // right tower
+      hull(g, 1, 10, 3, 161);               // left tower — was a flat rect,
+      hull(g, 19, 28, 3, 163);              // right tower — same shape hull
+                                            // gives everywhere else: a hulk
+                                            // bitten at both ends, not a box
       hline(g, 11, 18, 15, '^');            // spike gap (needs dash)
       rect(g, 25, 12, 28, 16, '.');         // shaft down to A3
       hline(g, 25, 28, 12, '=');
@@ -822,7 +837,7 @@ const ROOMS = {
     build(g) {
       frame(g); openR(g);
       rect(g, 0, 8, 0, 11, '.');            // entry from B1 (upper left)
-      rect(g, 1, 12, 8, 14, '#');           // left ledge
+      hull(g, 1, 8, 3, 165);                // left ledge — was a flat rect
       hline(g, 28, 31, 15, '^');            // spike strip
       // THE BRITTLE RAIL. Stand on it and cut down. Without the Grounding
       // Crest that is simply death, which is exactly why nobody finds this
@@ -966,9 +981,12 @@ const ROOMS = {
       hline(g, 0, 29, 0, '#'); rect(g, 0, 32, 29, 33, '#');
       vline(g, 0, 0, 33, '#'); vline(g, 29, 0, 33, '#');
       rect(g, 4, 0, 6, 0, '.');             // top opening from B3
-      hline(g, 1, 10, 5, '#'); hline(g, 18, 28, 9, '#');
-      hline(g, 1, 12, 13, '#'); hline(g, 16, 28, 18, '#');
-      hline(g, 1, 10, 23, '#'); hline(g, 14, 24, 27, '#');
+      // the rungs: same landing rows as always (the vent's timing is tuned
+      // to them), only the free end changes — chip() breaks its squared lip
+      // into a fallen tile instead of leaving it a ruled bar
+      chip(g, 1, 10, 5, 'L'); chip(g, 18, 28, 9, 'R');
+      chip(g, 1, 12, 13, 'L'); chip(g, 16, 28, 18, 'R');
+      chip(g, 1, 10, 23, 'L'); chip(g, 14, 24, 27, 'R');
       hline(g, 8, 14, 31, '^');
       rect(g, 22, 32, 25, 33, '.');         // bottom opening to C2
     } },
