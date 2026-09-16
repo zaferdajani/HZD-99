@@ -64,7 +64,8 @@ function presentWorld() {
 }
 function drawSaveFeedback() {
   const f = G.saveFeedback;
-  if (!f || Date.now() > f.until || G.state !== 'PLAY' || G.dialog || G.tut || G.gateWalk) return;
+  const nowMs = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  if (!f || nowMs > f.until || G.state !== 'PLAY' || G.dialog || G.tut || G.gateWalk) return;
   const text = f.ok ? t('save_ok') : t('save_failed');
   c.save(); c.font='600 12px system-ui'; c.textAlign='right';
   const w=Math.min(600,c.measureText(text).width+28);

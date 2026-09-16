@@ -219,12 +219,20 @@ let player = null;
 function saveKeyFor(theme) { return SAVE_KEY + '_' + (theme || 'robo'); }
 function persist() {
   if (!G.save) return false;
+  // The toast's deadline is on the SAME clock the frame is drawn on. It used to
+  // be Date.now(), which draw then sampled directly — so a frame boundary that
+  // happened to fall on the 1.7s expiry rendered the toast once and not the
+  // next time, and the meadow harness (which freezes performance.now and draws
+  // one frame twice expecting them identical) failed a couple of runs in four
+  // on a 2629px box in the corner where the toast lives. Draw must not read a
+  // clock nothing can freeze.
+  const nowMs = (typeof performance !== 'undefined' ? performance.now() : Date.now());
   try {
     localStorage.setItem(saveKeyFor(G.save.theme), JSON.stringify(G.save));
-    G.saveFeedback = { ok:true, until:Date.now()+1700 };
+    G.saveFeedback = { ok:true, until:nowMs+1700 };
     return true;
   } catch (e) {
-    G.saveFeedback = { ok:false, until:Date.now()+12000 };
+    G.saveFeedback = { ok:false, until:nowMs+12000 };
     console.warn('CLAWBYTE: progress could not be saved', e && e.name);
     return false;
   }
