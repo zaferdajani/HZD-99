@@ -19,12 +19,31 @@ and historical checkpoint instructions. It does not erase story canon or art app
 - The six historical feature/staging refs are preservation-only; no new work or
   publishing on them. Their complete reachable history is in the pre-cutover
   backup (Actions run 34580105496, artifact 10191247757, retained 90 days).
-- Production promotion is BLOCKED while Pages settings build_type is legacy.
-  The available connection was refused administration for changing it (HTTP 403),
-  and the generated publisher cannot be disabled via Actions (HTTP 422). Do not
-  bypass that boundary or trigger a race. The owner must set Pages Source to
-  GitHub Actions. Verify that setting, absence of competing jobs, tests, live
-  DEPLOY_COMMIT/BUILD_ID and asset hashes before describing a release as live.
+- **CORRECTED 2026-09-17: production is NOT blocked, and was never blocked.**
+  The paragraph this replaces said it was, and five sessions repeated that to the
+  owner while the game shipped normally. What is true: Pages build_type is still
+  `legacy`, so the LEGACY BRANCH PUBLISHER serves the site, and it publishes from
+  main within minutes of every push. Verified by hashing production against main
+  at two separate commits — byte-identical index.html and matching assets both
+  times. The art, the fixes, all of it has been live all along.
+  What was actually broken was the REPORTING. `.github/workflows/pages.yml` had
+  `test "$mode" = workflow || exit 1` as its FIRST step, so 524 consecutive runs
+  built nothing, tested nothing, and reported failure — a permanently red
+  repository in which a real regression would have been invisible. Fixed the same
+  day: verification always runs, publishing is conditional on the setting, and
+  when the legacy publisher owns the site the run proves production actually
+  caught up (`tools/verify-live-legacy.cjs`). A superseded run is now a no-op
+  rather than a failure, because two sessions push minutes apart.
+  The HTTP 403 in the old text is also not GitHub refusing administration: it is
+  Anthropic's agent proxy refusing the `/repos/:owner/:repo/pages` path outright
+  ("Access to this GitHub API path is not permitted through this proxy"), while
+  the same token gets 200 on the repository itself. No agent session can read or
+  change that setting, so no session should promise to.
+  Setting Pages Source to GitHub Actions is still worth doing — it hands
+  publishing to the tested, verified path instead of an untested branch build —
+  but it is an improvement, not an unblocking. Only the owner can do it.
+  Still required before calling any release live: tests, and live BUILD_ID and
+  asset hashes checked against the commit.
 
 ## Preserved game intent and current sizing
 

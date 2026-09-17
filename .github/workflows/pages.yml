@@ -19,23 +19,80 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Refuse competing publishers and stale source
+      # WHICH PUBLISHER IS LIVE — a fact to branch on, not a reason to stop.
+      #
+      # This step used to exit 1 whenever Pages was still in legacy branch mode,
+      # and it was the FIRST step, so 524 consecutive pushes ran no build, no
+      # integrity check and no gameplay test, and every one of them reported
+      # failure. Two things went wrong at once. The repository showed red
+      # permanently, so a red run stopped meaning anything and a genuine
+      # regression would have gone straight through. And every status report
+      # written in that window said production was blocked, while the legacy
+      # publisher was in fact shipping the game from main within minutes of each
+      # push — verified against the live site at two separate commits.
+      #
+      # Which publisher is configured is the owner's setting and cannot be read,
+      # let alone changed, from an agent sandbox: GET /repos/.../pages is refused
+      # at the proxy, not by GitHub. So the workflow adapts to it instead of
+      # demanding it. Everything that VERIFIES the build runs unconditionally;
+      # only the publishing steps are conditional; and when Actions is not the
+      # publisher, the run still proves production actually caught up.
+      #
+      # Deploying through Actions while legacy is still enabled is what the
+      # original guard existed to prevent, and that is still refused — nothing
+      # here publishes twice.
+      - name: Which publisher is live
+        id: pub
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          mode=$(gh api repos/$GITHUB_REPOSITORY/pages --jq .build_type)
-          test "$mode" = workflow || { echo 'BLOCKED: set Settings > Pages > Source to GitHub Actions. Legacy publishing must be retired first.'; exit 1; }
-          current=$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/main --jq .object.sha)
-          test "$current" = "$GITHUB_SHA" || { echo 'BLOCKED: main advanced; this run is stale.'; exit 1; }
+          set -uo pipefail
+          mode=$(gh api repos/$GITHUB_REPOSITORY/pages --jq .build_type 2>/dev/null || echo unknown)
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          if [ "$mode" = workflow ]; then
+            echo "can_deploy=true" >> "$GITHUB_OUTPUT"
+            echo "Pages source is GitHub Actions — this run publishes." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "can_deploy=false" >> "$GITHUB_OUTPUT"
+            echo "Pages source is **$mode**, not GitHub Actions." >> "$GITHUB_STEP_SUMMARY"
+            echo "The legacy branch publisher serves the site; this run verifies it instead of publishing," >> "$GITHUB_STEP_SUMMARY"
+            echo "so nothing publishes twice. Set Settings > Pages > Source to GitHub Actions to hand over." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      # A SUPERSEDED RUN IS A NO-OP, NOT A FAILURE. Two sessions push this
+      # repository minutes apart, so a run regularly finds that main has moved
+      # past the commit it was started for. Such a run must not publish — it
+      # would put a superseded tree into production — and it cannot meaningfully
+      # check production either, because the live site is entitled to be the
+      # NEWER commit. Failing it says something is broken when nothing is; the
+      # newer run is authoritative and is already doing the work. So it stops,
+      # says why, and passes. Actions has no neutral conclusion for this.
+      - name: Is this run still current
+        id: fresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          current=$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/main --jq .object.sha 2>/dev/null || echo unknown)
+          if [ "$current" = "$GITHUB_SHA" ]; then
+            echo "fresh=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "fresh=false" >> "$GITHUB_OUTPUT"
+            echo "Superseded: main is now \`${current:0:12}\`, this run is for \`${GITHUB_SHA:0:12}\`." >> "$GITHUB_STEP_SUMMARY"
+            echo "Stopping without publishing or verifying; the run for the newer commit owns this." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - uses: actions/checkout@v4
+        if: steps.fresh.outputs.fresh == 'true'
       - uses: actions/setup-node@v4
+        if: steps.fresh.outputs.fresh == 'true'
         with:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
+        if: steps.fresh.outputs.fresh == 'true'
       - run: npx playwright install --with-deps chromium
+        if: steps.fresh.outputs.fresh == 'true'
       - name: Rebuild and verify the exact source tree before publication
+        if: steps.fresh.outputs.fresh == 'true'
         run: |
           echo "CHROMIUM_PATH=$(node -e "console.log(require('playwright').chromium.executablePath())")" >> "$GITHUB_ENV"
           sudo mkdir -p /opt/pw-browsers
@@ -46,37 +103,58 @@ jobs:
           mkdir -p release-evidence tests/out
           python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
       - name: Release-blocking gameplay checks
+        if: steps.fresh.outputs.fresh == 'true'
         run: |
           set -o pipefail
           node tests/reconciliation.cjs 2>&1 | tee release-evidence/reconciliation.log
           node tests/run.cjs release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 2>&1 | tee release-evidence/predeploy.log
       - name: Stage only release content and stamp its identity
+        if: steps.fresh.outputs.fresh == 'true'
         run: |
           mkdir -p _site
           rsync -a --exclude '.git' --exclude '.github' --exclude '.claude' --exclude '.codex' --exclude '_site' --exclude 'node_modules' --exclude 'tests' --exclude 'tools' --exclude 'release-evidence' --exclude 'www' --exclude 'build' --exclude 'desktop' --exclude 'android' --exclude 'ios' --exclude 'assets/source' --exclude 'docs/archive' ./ _site/
           touch _site/.nojekyll
           node tools/stamp-pages.cjs _site
+      # Re-read main right before publishing: the tests above take minutes and
+      # main can move inside that window. Publishing is the one step where a
+      # superseded tree does real damage, so this one still refuses outright.
       - name: Recheck main immediately before publishing
+        if: steps.fresh.outputs.fresh == 'true' && steps.pub.outputs.can_deploy == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: test "$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/main --jq .object.sha)" = "$GITHUB_SHA"
       - name: Enable and configure Pages
+        if: steps.fresh.outputs.fresh == 'true' && steps.pub.outputs.can_deploy == 'true'
         uses: actions/configure-pages@v5
         with:
           enablement: true
       - uses: actions/upload-pages-artifact@v3
+        if: steps.fresh.outputs.fresh == 'true' && steps.pub.outputs.can_deploy == 'true'
         with:
           path: _site
       - name: Deploy tested artifact
         id: deployment
+        if: steps.fresh.outputs.fresh == 'true' && steps.pub.outputs.can_deploy == 'true'
         uses: actions/deploy-pages@v4
       - name: Confirm exact rebuilt release is live
+        if: steps.fresh.outputs.fresh == 'true' && steps.pub.outputs.can_deploy == 'true'
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: node tools/verify-pages.cjs
-      - name: Exercise the live deployed game
+      # ...and when the legacy publisher owns the site, production still gets
+      # checked. This is the step whose absence let "the deploy is blocked" stand
+      # unchallenged for 524 runs while the game was live the whole time.
+      - name: Confirm the legacy publisher shipped this commit
+        if: steps.fresh.outputs.fresh == 'true' && steps.pub.outputs.can_deploy != 'true'
         env:
-          GAME_URL: ${{ steps.deployment.outputs.page_url }}
+          LIVE_URL: https://zaferdajani.github.io/HZD-99/
+        run: node tools/verify-live-legacy.cjs
+      - name: Exercise the live game
+        if: steps.fresh.outputs.fresh == 'true'
+        env:
+          # the same SHAPE the harnesses default to — they treat this as a page,
+          # not a directory, and release-polish builds URLs relative to it
+          GAME_URL: ${{ steps.deployment.outputs.page_url && format('{0}index.html', steps.deployment.outputs.page_url) || 'https://zaferdajani.github.io/HZD-99/index.html' }}
         run: |
           set -o pipefail
           node tests/reconciliation.cjs 2>&1 | tee release-evidence/live-reconciliation.log
