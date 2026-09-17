@@ -4778,6 +4778,18 @@ function interiorVista() {
 // line), per NO RIGHT ANGLES. Built once per room into an offscreen layer.
 // ===========================================================================
 let INT_FLOOR = null;                       // { key, cv, top[] }
+// WHICH PART OF AN INTERIOR PLATE IS ACTUALLY ITS FLOOR. Per plate, because it
+// is a fact about a painting and not a rule: these are paintings of rooms, and
+// where the bare ground is depends entirely on where the artist put the
+// furniture. x0/x1 bound the window horizontally, y/h the band. The default is
+// the old full-width bottom strip, which is right for any plate whose floor
+// really does run edge to edge.
+const INTERIOR_FLOOR_SRC = {
+  default:     { x0: 0,    x1: 1,    y: 0.86, h: 0.14 },
+  // the den: crates and the cabinet own both edges at every height, and the
+  // swept boards in front of the work table are the only real ground in it
+  denInterior: { x0: 0.32, x1: 0.68, y: 0.80, h: 0.14 },
+};
 function interiorFloorCv() {
   const own = interiorVista();
   if (!own) return null;
@@ -4801,10 +4813,23 @@ function interiorFloorCv() {
   const cv = document.createElement('canvas');
   cv.width = W; cv.height = (H - floorY) + UP;
   const x = cv.getContext('2d');
-  // the painting's own floor: its bottom strip, stretched across the room.
-  // Texture, not geometry — a stretch reads as ground where a tile never will.
-  const sy = im.naturalHeight * 0.86, sh = im.naturalHeight * 0.14;
-  x.drawImage(im, 0, sy, im.naturalWidth, sh, 0, UP, W, cv.height - UP);
+  // THE PAINTING'S OWN FLOOR — and the word that matters is FLOOR.
+  //
+  // This took the plate's full-width bottom strip and stretched it across the
+  // room. On den_interior that strip is not ground: it is the crates, the
+  // cabinet and the coil rack standing at the FRONT of the picture, and
+  // stretching them over a thirty-tile room laid a row of black towers across
+  // the workshop. The owner drew a line round them and asked what the point of
+  // them was; there was none. They were furniture, smeared.
+  //
+  // No height fixes it, which is the part worth recording: sampled at 0.60,
+  // 0.66, 0.72, 0.78 or 0.86 this plate has furniture down BOTH SIDES every
+  // time. Its floor exists only in the middle. So the sample is a WINDOW, not
+  // a band — a horizontal slice of real floor, per plate, stretched from there.
+  const F = INTERIOR_FLOOR_SRC[own] || INTERIOR_FLOOR_SRC.default;
+  const sx = im.naturalWidth * F.x0, sw = im.naturalWidth * (F.x1 - F.x0);
+  const sy = im.naturalHeight * F.y, sh = im.naturalHeight * F.h;
+  x.drawImage(im, sx, sy, sw, sh, 0, UP, W, cv.height - UP);
   // settle it into the room's dark: a touch of shade toward the bottom
   const shade = x.createLinearGradient(0, UP, 0, cv.height);
   shade.addColorStop(0, 'rgba(3,6,8,0)'); shade.addColorStop(1, 'rgba(3,6,8,0.55)');
@@ -12696,7 +12721,20 @@ function drawWorldFrame() {
   // from it: 29-51% of each plate now survives the key at mean luminance
   // 2.5-14.7, against 18.8% at luminance 23.8 before, of which nearly half was
   // the blue pips.
-  drawDepthPlane('fore');
+  // NOT INDOORS. fore_a.webp is two pictures in one file: a black CITY SKYLINE
+  // across its upper half and the rubble-and-pipes foreground across its lower.
+  // Drawn at 1.16 parallax it lands in front of everything — and in the trader's
+  // den that put a row of tower silhouettes across the inside of a workshop.
+  // The owner drew a line round them and asked what the point of them was. There
+  // is none: they are an outdoor skyline, indoors.
+  //
+  // This is the same ruling the ceiling already follows twenty lines up — the
+  // kingdom's gantry roof is skipped in a room that has its own rafters painted
+  // in, because "the background does not blend with the items in it". That note
+  // calls itself HALF of the problem. This is the other half: a room that is a
+  // painting of an enclosed space has no far city and no near rubble, and both
+  // of its planes belong to the world outside it.
+  if (!(G.roomDef && G.roomDef.indoor)) drawDepthPlane('fore');
   // THE BLOOM RUNS ONCE, AND IT RUNS HERE — on the world, before the grade and
   // before the accessibility lift.
   //
