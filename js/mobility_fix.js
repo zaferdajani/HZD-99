@@ -7,7 +7,7 @@ const HERO_MOTION_KEYS = Object.freeze([
 ]);
 // `done` is SAMPLED IN UPDATE, never recomputed in draw — see the loading screen
 // below for why that distinction is load-bearing.
-const heroMotionLoad = { active: false, started: 0, retryAt: 0, failures: 0, done: 0 };
+const heroMotionLoad = { active: false, started: 0, retryAt: 0, failures: 0, done: 0, t: 0 };
 function heroMotionMissing() {
   return HERO_MOTION_KEYS.filter(k => {
     const im = MEDIA_RAW[k];
@@ -27,6 +27,9 @@ function heroMotionGate(dt) {
   if (!missing.length) { heroMotionLoad.active = false; heroMotionLoad.started = 0; return false; }
   const now = performance.now();
   heroMotionLoad.active = true;
+  // the loading screen's own clock, advanced HERE because draw may not keep
+  // state — see the note on the draw function below
+  heroMotionLoad.t += dt;
   if (!heroMotionLoad.started) heroMotionLoad.started = now;
   if (now >= heroMotionLoad.retryAt) { heroMotionWarm(); heroMotionLoad.retryAt = now + 1000; }
   const raw = action => (KEYB[action] || []).some(k => keysP[k]);
@@ -57,20 +60,59 @@ function heroMotionGate(dt) {
 //
 // So the count comes from heroMotionGate, which runs in UPDATE where sampling
 // mutable state is what you are supposed to do.
+// SHE IS ALREADY IN THE PAGE, SO SHE MAY AS WELL RUN.
+//
+// This screen used to be a title, a bar and a fraction, and the owner asked the
+// obvious question: why is the loading screen not showing anything? The answer
+// was that nothing had loaded yet — which is false, and provably so. build.cjs
+// embeds heroStates, hzdIdle, gaitWalk and gaitRun into the page as data URIs,
+// so they cost no request and are decoded before this screen can appear. They
+// are also four of the eleven keys in HERO_MOTION_KEYS, which is why the count
+// starts at 4 and not 0: this screen waits on the SEVEN it does not have while
+// sitting on a sixteen-frame run cycle it never drew.
+//
+// So the bar becomes ground and she runs along it, at the real stride, from the
+// real sheet. No new asset, no extra byte, nothing to download.
 function drawHeroMotionLoading(ctx) {
   if (!heroMotionLoad.active || G.state !== 'PLAY') return false;
   const done = heroMotionLoad.done;
+  const frac = done / HERO_MOTION_KEYS.length;
   ctx.save();
   ctx.fillStyle = '#070f19'; ctx.fillRect(0, 0, 960, 540);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillStyle = '#e4fff8'; ctx.font = 'bold 25px sans-serif';
-  ctx.fillText('Loading character animations', 480, 238);
-  ctx.fillStyle = '#18483f'; ctx.fillRect(280, 282, 400, 8);
-  ctx.fillStyle = '#37ffd0'; ctx.fillRect(280, 282, 400 * done / HERO_MOTION_KEYS.length, 8);
+  ctx.fillText('Loading character animations', 480, 196);
+  ctx.fillStyle = '#18483f'; ctx.fillRect(280, 312, 400, 8);
+  ctx.fillStyle = '#37ffd0'; ctx.fillRect(280, 312, 400 * frac, 8);
+  // ...and the runner on top of it. Degrades to the bar alone if the sheet is
+  // somehow absent: a loading screen is the last place to risk throwing.
+  {
+    const G2 = typeof HERO_GAIT !== 'undefined' && HERO_GAIT && HERO_GAIT.run;
+    const im = G2 && typeof MEDIA_RAW !== 'undefined' ? MEDIA_RAW[G2.key] : null;
+    if (im && im.complete && im.naturalWidth) {
+      const cells = G2.cells || 16;
+      const cw = im.naturalWidth / cells, ch = im.naturalHeight;
+      // 84 tall, standing ON the bar: her head then clears the title by a
+      // comfortable margin. The first cut drew her 96 tall on a bar at 282 and
+      // she ran straight through the words, which a screenshot showed at once
+      // and no measurement would have.
+      const h = 84, w = h * cw / ch;
+      // 13 cells/s is the run's own pace; she rides the filled end of the bar
+      const f = Math.floor(heroMotionLoad.t * 13) % cells;
+      const x = 280 + 400 * frac, y = 312;
+      ctx.save();
+      // a soft contact shadow so she is standing on the bar, not floating over it
+      ctx.globalAlpha = 0.33; ctx.fillStyle = '#04121a';
+      ctx.beginPath(); ctx.ellipse(x, y + 1, 16, 4, 0, 0, 7); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.drawImage(im, f * cw, 0, cw, ch, x - w / 2, y - h + 2, w, h);
+      ctx.restore();
+    }
+  }
   ctx.font = '16px sans-serif'; ctx.fillStyle = '#a6c9c2';
-  ctx.fillText(done + ' / ' + HERO_MOTION_KEYS.length + '   ·   ' + howToOpen('BACK') + ' — Pause', 480, 322);
+  ctx.fillText(done + ' / ' + HERO_MOTION_KEYS.length + '   ·   ' + howToOpen('BACK') + ' — Pause', 480, 348);
   if (performance.now() - heroMotionLoad.started >= 12000)
-    ctx.fillText((typeof TOUCH !== 'undefined' && TOUCH.enabled) ? 'Reconnecting automatically. Use Pause to leave.' : 'Animation download stalled. ' + howToOpen('OK') + ' — Retry', 480, 358);
+    ctx.fillText((typeof TOUCH !== 'undefined' && TOUCH.enabled) ? 'Reconnecting automatically. Use Pause to leave.' : 'Animation download stalled. ' + howToOpen('OK') + ' — Retry', 480, 382);
   ctx.restore();
   return true;
 }
