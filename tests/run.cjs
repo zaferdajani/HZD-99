@@ -122,6 +122,7 @@ const SUITE = [
   ['meadow',    'the greenery keeps its colour all the way to the screen'],
   ['drawclock', 'a frozen clock freezes the frame: draw never reads the wall clock'],
   ['guard',     'she braces, and bracing costs the hit its push'],
+  ['airattack', 'a strike in the air is its own move, once it has one'],
   ['npcstrip',  'the five work strips are twelve frames of work, foot-aligned and steady'],
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],

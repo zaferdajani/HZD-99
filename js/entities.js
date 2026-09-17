@@ -1113,8 +1113,27 @@ const SWING_STRIP = {
 // and the strip renderer on that same numbering: treating it as 1, 2, 3
 // repeated the jab and made the authored uppercut unreachable from input.
 function heroSwingState(swing) {
-  return swing.charged ? 'burst' : swing.combo === 2 ? 'finisher'
+  if (swing.charged) return 'burst';
+  const ground = swing.combo === 2 ? 'finisher'
     : swing.combo === 1 ? 'claw_2' : 'claw_1';
+  // AN ATTACK IN THE AIR IS A DIFFERENT MOVE, and until now the renderer could
+  // not tell that it was one: swingVis carried the angle but never whether her
+  // feet were on the ground, so a plunge onto an enemy's head drew the standing
+  // jab. The mechanics have always distinguished them — swing.ay > 0 while
+  // airborne IS the pogo, and the `plunge` skill hangs a shockwave off exactly
+  // that — so this is the drawing catching up with the game.
+  //
+  // THE FALLBACK IS THE POINT. Routing to a strip that has not been fired would
+  // return a name SWING_STRIP has no entry for, drawRoboSwing would return
+  // false, and an animated combo swing would be replaced by ONE HELD POSE.
+  // That is worse than showing the wrong animation, so the new states are only
+  // selected once their sheets actually exist. The day air.webp lands, adding
+  // its entry is the whole change; nothing here needs touching.
+  if (swing.air) {
+    const want = swing.ay > 0 ? 'down' : 'air';
+    if (SWING_STRIP[want] && SWING_STRIP[want].cells) return want;
+  }
+  return ground;
 }
 // ---- HOW FAR ONE STEP CARRIES HER, OFF THE PLATES THEMSELVES ---------------
 //
@@ -1758,7 +1777,13 @@ class Player {
       const twin = mode === 'dual';
       this.swing = { t: 0.15, ax, ay: aay, ang, combo: this.combo, set: new Set(), wield,
                      pure: wield >= 1, twin, weaponMode: mode };
-      this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo, wield, twin, weaponMode: mode };
+      // ay and air ride along so the RENDERER can tell an airborne or downward
+      // strike from a standing one — see heroSwingState. They are the swing's
+      // own aim and stance at the moment it started, not the body's current
+      // state: she may land mid-swing, and the move she began is the move she
+      // is playing.
+      this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo, wield, twin, weaponMode: mode,
+                        ay: aay, air: !this.on };
       if (hasSkill('wave')) {
         const wn = Math.hypot(ax, ay) || 1;
         G.projs.push(new Proj(this.x + this.w / 2 + ax / wn * 22, this.y + this.h / 2 - 2 + ay / wn * 22,
@@ -1989,6 +2014,9 @@ class Player {
       // 60ms the swing is still re-aimable.
       if (this.swing.t > 0.06 && this.swing.ay <= 0 && !this.on && inD('DOWN')) {
         this.swing.ax = 0; this.swing.ay = 1; this.swing.ang = Math.PI / 2;
+        // the swing is re-aimable for 60ms and the DRAWING has to follow it,
+        // or a strike re-aimed into a plunge goes on playing the one it was
+        if (this.swingVis) { this.swingVis.ay = 1; this.swingVis.ang = Math.PI / 2; }
       }
       this.swing.t -= dt;
       const hb = this.hitbox();
@@ -2624,7 +2652,7 @@ class Player {
     const sv = this.swingVis;
     if (!sv || sv.swirl) return false;          // the swirl has its own drawing
     const S = SWING_STRIP[heroSwingState(sv)];
-    if (!S) return false;
+    if (!S || !S.cells) return false;      // unfired: the pose cell covers it
     const p = clamp(1 - sv.t / sv.t0, 0, 0.999);
     // THE CELL IS SIZED TO THE SHEET, NOT TO ITSELF — see SWING_STRIP: each
     // strip carries its own measured k, because drawing them all at HERO_DH
