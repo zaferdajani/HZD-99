@@ -14,8 +14,8 @@ function heroMotionMissing() {
     return !im || !im.complete || !im.naturalWidth || MEDIA_LOW[k] === 2;
   });
 }
-function heroMotionWarm() {
-  for (const k of HERO_MOTION_KEYS) mediaFetch(k, true);
+function heroMotionWarm(bust) {
+  for (const k of HERO_MOTION_KEYS) mediaFetch(k, true, bust);
 }
 function heroMotionGate(dt) {
   if (!G || !player || G.state !== 'PLAY' || (typeof isHero === 'function' && isHero())) {
@@ -40,7 +40,10 @@ function heroMotionGate(dt) {
   }
   if (raw('OK') && now - heroMotionLoad.started >= 12000) {
     for (const k of missing) delete MEDIA_PEND[k];
-    heroMotionLoad.started = now; heroMotionLoad.failures++; heroMotionWarm();
+    heroMotionLoad.started = now; heroMotionLoad.failures++;
+    // bust: a stuck retry must reach the network, not the same cached miss
+    // sw.js will hand back forever — see mediaFetch's `bust` param.
+    heroMotionWarm(true);
   }
   return true;
 }

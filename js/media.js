@@ -685,7 +685,21 @@ function mediaLow(k) {
 // `urgent` means SOMETHING IS DRAWING THIS RIGHT NOW — the lazy map's own
 // accessor sets it. Only then is the small copy worth a second request; the
 // prefetcher has time and asks for full size directly.
-function mediaFetch(k, urgent) {
+//
+// `bust` exists because sw.js serves an image request cache-first with no
+// network fallback (`if (hit && !code) return hit;` — images are never
+// `code`). A response cached from a single bad transfer — a dropped VPN hop,
+// a corrupted intermediary, anything that finishes as a valid 200 with wrong
+// bytes — is then served identically FOREVER: every retry re-requests the
+// same URL, the worker matches the same cache entry, and the player is
+// stranded with no recourse except manually clearing site storage, which the
+// loading screen's own "Retry" prompt cannot ask them to do. A cache-busting
+// query string makes the retry a genuinely different request, so it can
+// actually reach the network past a poisoned entry. Only the user-triggered
+// "it has been stuck for 12 seconds, try again" path uses this — the quiet
+// per-second poll while still within the normal window must not spam fresh
+// cache entries for a merely-slow connection.
+function mediaFetch(k, urgent, bust) {
   if (urgent) mediaLow(k);
   if (MEDIA_RAW[k] && MEDIA_LOW[k] !== 2) return;   // a stand-in still wants the real one
   if (MEDIA_PEND[k] || !MEDIA_SRC.images[k]) return;
@@ -712,7 +726,8 @@ function mediaFetch(k, urgent) {
     // A failed request must not permanently lock a visible image out.
     setTimeout(() => { delete MEDIA_PEND[k]; }, 3000);
   };
-  im.src = MEDIA_SRC.images[k];
+  im.src = bust ? MEDIA_SRC.images[k] + (MEDIA_SRC.images[k].indexOf('?') < 0 ? '?' : '&') + 'r=' + Date.now()
+                : MEDIA_SRC.images[k];
 }
 const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
   get(t, k) {
