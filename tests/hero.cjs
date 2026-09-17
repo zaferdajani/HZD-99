@@ -84,6 +84,21 @@ const { chromium } = require('playwright');
         // alone: a flake that was really an incomplete reset.
         player.landT = 0; player.land0 = 0; player.flipT = 0; player.boostT = 0; player.takeoffT = 0;
         player.pogoT = 0; player.jetT = 0; player.iT = 0; player.idleT = 0;
+        // ...and the cross-fade cache drawHeroMotionCell keeps ON THE PLAYER
+        // OBJECT between draws. It blends the old strip into the new one over
+        // 90ms of `anim` — real gameplay advances `anim` every frame, so the
+        // blend finishes and is never seen, but this harness pins `anim` at a
+        // fixed 1.2 for every pose so it can capture a clean snapshot. Left
+        // unreset, the SECOND pose drawn through this path (run, right after
+        // idle) starts a blend at t=(anim-started)=0 and never advances past
+        // it: `run` rendered as a frozen, mirrored copy of whichever pose and
+        // face came immediately before it, not as running at all. The 0.827
+        // "idle vs run" IoU that used to pass here was really "idle vs a
+        // mirrored idle" — bounded well under 1.0 only by the asymmetric
+        // pixels a mirror moves to the other side, and a rounder, more
+        // symmetric visor patch pushes that number up for a reason that has
+        // nothing to do with how different running actually looks.
+        player._motionPose = null; player._motionBlend = null;
         // ...and the STRIDE PHASE, for the same reason and one more. It picks
         // which cell of the cycle is drawn, so left unreset this samples a
         // random frame; and it now also drives the foot-plant lock's sideways
