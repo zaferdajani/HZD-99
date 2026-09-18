@@ -7388,11 +7388,18 @@ const EDRAW = { blob: 0.56 };
 // Odyssey build measures its own hero at 61px with crawler/turret/hopper ALREADY
 // at 1.15/1.18/1.11 of her — that world's sheets are their own, and a shared
 // multiplier would push things that are already too big further past its hero.
-// guard, turret and hopper are absent here because they measured 0.80-0.95
-// already; a number that changes nothing is a number that will drift.
+// guard and hopper are absent because they measured in her band already; a
+// number that changes nothing is a number that will drift.
+//
+// The TURRET goes the other way, and it is the one thing here that got SMALLER.
+// Measured against a pinned, fully-decoded idle it reads 1.01x of her — a
+// minion standing fractionally taller than the protagonist, which is the SCALE
+// LAW broken rather than merely approached. It has been that way for a while
+// and nothing caught it, because nothing measured it. 0.87 puts it at 0.88x:
+// still the biggest machine in the roster, still clearly under her.
 const EDRAW_ROBO = {
   crawler: 1.18, flier: 0.96, blob: 0.77, bat: 2.0,
-  surge: 1.7, kiln: 1.7, rime: 1.6, snare: 1.65, sage: 1.22,
+  surge: 1.7, kiln: 1.7, rime: 1.6, snare: 1.65, sage: 1.22, turret: 0.87,
 };
 const _enemyDrawRaw = Enemy.prototype.draw;
 Enemy.prototype.draw = function (c) {

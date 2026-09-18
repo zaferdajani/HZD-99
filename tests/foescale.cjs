@@ -35,6 +35,12 @@ const FLOOR = 0.5, CEIL = 1.0;
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
     startGame(sv); loadRoom('A1');
     G.wake = null; G.state = 'PLAY'; G.boss = null;
+    // HER ART HAS TO BE HERE BEFORE SHE IS THE RULER. Measured against a
+    // half-decoded hero this test reads 71px one run and 76px the next, and
+    // every ratio in it moves together — which looked like a flaky turret and
+    // was actually a flaky yardstick.
+    for (let i = 0; i < 240 && !heroArtReady(); i++)
+      await new Promise(k => requestAnimationFrame(k));
     for (let i = 0; i < 60; i++) await new Promise(k => requestAnimationFrame(k));
     // Each body is rendered ALONE onto a scratch canvas and measured by its own
     // pixels: what the player sees, not what a table claims.
@@ -50,24 +56,44 @@ const FLOOR = 0.5, CEIL = 1.0;
     const out = { drawn: {} };
     const ocx = cam.x, ocy = cam.y;
     cam.x = 0; cam.y = 0; cam.shakeX = 0; cam.shakeY = 0;
+    // The player stays PUT for the whole measurement, not just her own frame.
+    // A turret with a lock draws a line all the way to her (drawTurretLock), and
+    // that line lands in the bounding box — so where she stands decided how tall
+    // the turret measured. It read 0.95x run alone and 1.01x inside the suite,
+    // which is the same body and two different answers.
     const px = player.x, py = player.y;
-    player.x = 180; player.y = 180; player.vx = 0; player.on = true;
+    player.x = 180; player.y = 180; player.on = true;
+    // ONE POSE, CHOSEN, NOT WHICHEVER ONE THE CLOCK LANDED ON. Her strips are
+    // cross-faded through _motionPose/_motionBlend and picked by vx, the swing
+    // and the idle timer, so an unpinned capture measures a different drawing
+    // each run. Same reset tests/hero.cjs makes for the same reason.
+    player.vx = 0; player.vy = 0; player.anim = 1.2;
+    player.swing = null; player.swingVis = null;
+    player.hurtT = 0; player.dashT = 0; player.guardT = 0; player.idleT = 0;
+    player._motionPose = null; player._motionBlend = null;
     cx2.clearRect(0, 0, 400, 300);
     player.draw(cx2);
     out.hero = height();
-    player.x = px; player.y = py;
+    out.heroRenderer = typeof G !== 'undefined' ? G.heroDrawn : null;
     for (const kind of Object.keys(EKIND)) {
       const e = new Enemy(kind, 180, 180);
-      e.anim = 1.2; e.hurtT = 0; e.t = 1;
+      // BODY ONLY. anim/t pin the cycle; lockT and hurtT suppress the aim line
+      // and the hit flash. This test asks how big the MACHINE is, and a line
+      // pointing at the player is neither its body nor a constant.
+      e.anim = 1.2; e.hurtT = 0; e.t = 1; e.lockT = 0;
       cx2.clearRect(0, 0, 400, 300);
       e.draw(cx2);
       out.drawn[kind] = height();
     }
+    player.x = px; player.y = py;
     cam.x = ocx; cam.y = ocy;
     return out;
   });
 
-  check('the hero measures at all', r.hero > 40, r.hero + 'px');
+  // The yardstick names itself: a ratio is only meaningful if the thing it
+  // divides by is the same drawing every run.
+  check('the hero measures at all, from her real art', r.hero > 40,
+    r.hero + 'px via ' + r.heroRenderer);
   const ratios = {};
   for (const kind of Object.keys(r.drawn)) ratios[kind] = +(r.drawn[kind] / r.hero).toFixed(2);
   const small = Object.entries(ratios).filter(([, v]) => v < FLOOR);
