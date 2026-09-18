@@ -79,9 +79,12 @@ const engine=process.env.QA_BROWSER==='webkit'?webkit:chromium;
  // HERO_SCREEN_SCALE went 1.78 -> 1.335 -> 1.0, each cut for reading
  // oversized against NPCs and enemies (owner, 2026-09-11) — re-centred a
  // second time on the deterministic idle-pose measurement, same +-0.03
- // window.
- assert(result.body.viewportRatio>=.20&&result.body.viewportRatio<=.26,'protagonist fraction '+result.body.viewportRatio);record('actual rendered hero size',result.body);
- assert(result.rooms.every(r=>r.zoom===1.9&&r.x>40&&r.x<920&&r.y>80&&r.y<520));record('seven room camera/framing transitions',result.rooms);
+ // window. Re-centred a THIRD time (2026-09-18) when the owner asked for 15%
+ // more room on screen: she is unchanged in the world, but the camera pulled
+ // back, so her share of the frame moves with it — 0.253 * 0.85 = 0.215. The
+ // window is the same +-0.03; only its centre followed the zoom.
+ assert(result.body.viewportRatio>=.185&&result.body.viewportRatio<=.245,'protagonist fraction '+result.body.viewportRatio);record('actual rendered hero size',result.body);
+ assert(result.rooms.every(r=>r.zoom===1.615&&r.x>40&&r.x<920&&r.y>80&&r.y<520));record('seven room camera/framing transitions',result.rooms);
  // The critical-motion gate now names the pending STATE rather than a fixed
  // 'gait' label ('loading:run_b', not 'loading:gait') so the diag panel can
  // tell which strip is missing; the guarantee under test is unchanged — a

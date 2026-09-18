@@ -1378,7 +1378,10 @@ class Player {
   }
   maxCores() { return G.save.coresMax + (hasCrest('plate') ? 1 : 0) + (relicHas('silent') ? 1 : 0); }
   speed() { return 340 * (hasCrest('sprint') ? 1.15 : 1) * (relicHas('shard') ? 1.04 : 1); }
-  dmg() { return Math.round(12 * (hasCrest('claws') ? 1.25 : 1) * (G.save.flags && G.save.flags.resolve ? 1.18 : 1) * (1 + (relicHas('fang') ? 0.08 : 0) + (relicHas('whisker') ? 0.06 : 0)) * DF().pdmg); }
+  // weaponAtk is the tier she is HOLDING (js/weapons.js): the one multiplier
+  // that makes an earned sword worth earning. Every other move reads dmg(), so
+  // the combo, finisher, burst, hurricane and throw all inherit it from here.
+  dmg() { return Math.round(12 * weaponAtk() * (hasCrest('claws') ? 1.25 : 1) * (G.save.flags && G.save.flags.resolve ? 1.18 : 1) * (1 + (relicHas('fang') ? 0.08 : 0) + (relicHas('whisker') ? 0.06 : 0)) * DF().pdmg); }
   voltMax() { return relicHas('collar') ? 110 : 99; }
   healCost() { return relicHas('coolant') ? 28 : 33; }
   gainVolts(n) { this.volts = clamp(this.volts + Math.round(n * (hasCrest('siphon') ? 1.5 : 1)) + (relicHas('silk') ? 2 : 0), 0, this.voltMax()); }
@@ -5422,11 +5425,33 @@ function drawTurretLock(c, e, cx) {
   c.restore();
   c.globalAlpha = 1;
 }
-// Rising, but gently: at the deepest point a machine has 1.7x the plating and
-// about a fifth more pace. Difficulty is meant to arrive mostly through what
-// they DO and how they are combined — this is the floor under that, not the
-// mechanism itself.
-const ZONE_K = { A: 1.0, B: 1.15, C: 1.32, D: 1.5, E: 1.7, X: 1.6 };
+// Rising, and no longer gently (owner, 2026-09-18: "enemies should get stronger
+// and tougher"). At the deepest point a machine now carries 2.1x the plating and
+// about a quarter more pace. Difficulty still arrives mostly through what they DO
+// and how they are combined — this is the floor under that, not the mechanism
+// itself — but the floor was low enough that the back half of the game escalated
+// by terrain alone. The curve is steeper because the player's side of it now
+// grows too: WEAPON_ATK (js/weapons.js) hands her up to 1.95x for questing her
+// swords, and these numbers are chosen against that so an upgraded player holds
+// roughly her time-to-kill while an un-upgraded one feels every border she
+// crosses. Raising the two together is the point; raising either alone is not.
+const ZONE_K = { A: 1.0, B: 1.25, C: 1.5, D: 1.8, E: 2.1, X: 2.0 };
+// ...and the same machine is tougher everywhere, including the first meadow,
+// where there is no zone escalation to do it. One multiplier over EKIND rather
+// than twelve edited rows: the table stays a description of what each machine
+// IS, and this stays a dial on how hard the game is.
+const FOE_HP = 1.15;
+// WHICH WEAPON EACH FIGHT IS TUNED AGAINST.
+//
+// A guardian's HP is authored flat (BSTAT) with no zone escalation, so raising
+// the player's attack would have made every guardian FASTER to kill — the exact
+// opposite of the instruction. They cannot take one shared multiplier either:
+// the largest (1.95, the joined blade) would make NULLFANG half again as long
+// as the fight its own note asks for ("losable, not long"), and the smallest
+// would hand MOTHER-V over. So each fight is tuned against the weapon she is
+// expected to be HOLDING when she arrives, which is a property of the kingdom
+// it stands in — the one thing about a guardian that cannot drift.
+const ZONE_ATK = { A: 1.3, B: 1.45, C: 1.6, D: 1.6, E: 1.95, X: 1.95 };
 // ===========================================================================
 // THE MACHINES LEARN. Zone scaling makes them tougher the deeper you go; this
 // makes them CLEVERER the stronger you get, which is a different axis and the
@@ -5470,16 +5495,84 @@ const TRAITS = {
   volatile: { spd: 1.06, hp: 0.9,  col: '#ff9a5a' },
 };
 const TRAIT_KEYS = ['swift', 'tough', 'volatile'];
-function rollTraits(iq) {
-  // nothing at all early; one somewhere past the second power; a second one
-  // only once the player is genuinely equipped
+// ===========================================================================
+// THE MACHINE HAS A LEVEL, AND THE LEVEL IS WHAT IT SPENDS (owner, 2026-09-18:
+// "improve enemy level and skills point with more moves that need to be created
+// for them with every kingdom").
+//
+// Two dials already existed and neither was a level: foeIQ() reads the RUN's
+// progress, and ZONE_K reads the KINGDOM's depth. Nothing combined them, which
+// is why traits — the one thing that made two crawlers play differently — were
+// rolled off progress ALONE: a Virus Nest machine on a fresh save reinforced
+// exactly like the first crawler in the meadow, because the table never asked
+// where it was standing.
+//
+// The level asks both. A kingdom sets the floor (the Nest builds better
+// machines than the meadow, always) and the run raises it (the virus has more
+// of the city to work with the further she gets).
+const FOE_ZONE_LV = { A: 1, B: 2, C: 3, D: 4, E: 5, X: 5 };
+function foeLevel(zone) {
+  const z = zone || (typeof G !== 'undefined' && G.roomDef && G.roomDef.zone) || 'A';
+  // the run is worth up to two levels on top of whatever the kingdom is worth
+  return clamp((FOE_ZONE_LV[z] || 1) + Math.round(foeIQ() * 2), 1, 7);
+}
+// ...AND THE POINTS ARE WHAT IT BUYS THEM WITH. One per level after the first,
+// so the opening meadow on a fresh save spends nothing and is exactly the game
+// it always was.
+function foeSkillPts(lv) { return Math.max(0, (lv | 0) - 1); }
+// WHERE A KINGDOM'S NEW MOVES GO.
+//
+// This is a registry, and it is deliberately empty in this commit: the moves
+// themselves are per-kingdom content and belong to the kingdom sessions (see
+// CLAUDE.md, KINGDOMS ARE THE UNIT), which are briefed to add rows here and
+// implement the behaviour behind hasMove(). It exists now so that five sessions
+// working in parallel extend ONE mechanism instead of inventing five, which is
+// the whole reason the integrator owns the framework and not the content.
+//
+// TWO KINDS OF KEY, AND THE SECOND ONE IS WHY THIS IS SAFE TO WORK ON IN
+// PARALLEL. Most machines are shared — a crawler walks in all five kingdoms —
+// so five sessions all editing `crawler` would collide on one row and quietly
+// overwrite each other's moves. So a row may be scoped to a kingdom:
+//
+//   crawler:    [{ id: 'burrow', cost: 1 }]   // a crawler ANYWHERE
+//   'crawler@C': [{ id: 'slag', cost: 2 }]    // ...and only in the Foundry
+//
+// A kingdom session writes `@<its own zone>` keys and nothing else, so no two
+// sessions ever touch the same row. The unscoped row is the integrator's.
+//
+// Cheapest first, scoped moves after shared ones. A move is affordable when the
+// machine's remaining points cover it, and EVERY move needs its own telegraph —
+// the law above TRAITS is not relaxed by this: an enemy is never harder because
+// it warned you less.
+const FOE_MOVES = {};
+function foeMovesFor(kind, lv, zone) {
+  const z = zone || (typeof G !== 'undefined' && G.roomDef && G.roomDef.zone) || 'A';
+  const list = (FOE_MOVES[kind] || []).concat(FOE_MOVES[kind + '@' + z] || []);
+  if (!list.length) return [];
+  let pts = foeSkillPts(lv);
   const out = [];
-  if (iq < 0.2) return out;
-  const chance1 = 0.18 + iq * 0.42;
-  if (Math.random() < chance1) out.push(TRAIT_KEYS[Math.floor(Math.random() * 3)]);
-  if (iq > 0.62 && Math.random() < (iq - 0.62) * 1.1) {
-    const t2 = TRAIT_KEYS[Math.floor(Math.random() * 3)];
-    if (out.indexOf(t2) < 0) out.push(t2);
+  for (const m of list) {
+    const cost = m.cost || 1;
+    if (cost > pts) continue;
+    pts -= cost; out.push(m.id);
+  }
+  return out;
+}
+// TRAITS ARE THE FIRST THING THE POINTS BUY, and they are still SPARSE on
+// purpose. Handing a deep-kingdom machine every trait it can afford would undo
+// the reason traits exist ("a flat multiplier makes every enemy the same enemy
+// with bigger numbers") — so the cap is two however rich it gets, and each one
+// still has to win a roll. A Nest room is LIKELY to be reinforced; it is never
+// uniformly reinforced.
+function rollTraits(lv) {
+  const pts = foeSkillPts(lv), out = [];
+  if (pts <= 0) return out;
+  const max = Math.min(2, Math.ceil(pts / 2));
+  const chance = 0.25 + pts * 0.09;
+  for (let i = 0; i < max; i++) {
+    if (Math.random() >= chance) continue;
+    const t = TRAIT_KEYS[Math.floor(Math.random() * TRAIT_KEYS.length)];
+    if (out.indexOf(t) < 0) out.push(t);
   }
   return out;
 }
@@ -5542,20 +5635,31 @@ class Enemy {
     // NEW enemy type appears at the midpoint, which left the back half of the
     // game escalating by terrain alone. The frames are the same machines; the
     // deeper you go, the more the virus has done to them.
-    const zk = ZONE_K[(G.roomDef && G.roomDef.zone) || 'A'] || 1;
+    const zone = (G.roomDef && G.roomDef.zone) || 'A';
+    const zk = ZONE_K[zone] || 1;
     this.zoneK = zk;
-    const iq0 = foeIQ();
-    this.traits = rollTraits(iq0);
+    // its LEVEL, and what that level bought: traits now, plus whatever moves
+    // its kingdom has authored into FOE_MOVES. Both are fixed at spawn, so a
+    // machine does not change what it is while she is fighting it.
+    this.level = foeLevel(zone);
+    this.traits = rollTraits(this.level);
+    this.moves = foeMovesFor(kind, this.level, zone);
     let th = 1, ts = 1;
     for (const tr of this.traits) { th *= TRAITS[tr].hp; ts *= TRAITS[tr].spd; }
     const pw = foePow();
-    this.hp = Math.round(k.hp * DF().ehp * zk * pw * th);
+    this.hp = Math.round(k.hp * FOE_HP * DF().ehp * zk * pw * th);
     this.hpMax0 = this.hp;
     this.spd = k.spd * DF().espd * (0.88 + zk * 0.12) * (0.94 + pw * 0.06) * ts;
     this.vx = 0; this.vy = 0; this.dir = chance(0.5) ? 1 : -1;
     this.t = rnd(0.5, 2); this.sx = x; this.sy = y; this.hurtT = 0; this.dead = false; this.anim = rnd(0, 9);
     this.kbT = 0; this.tr = [];
   }
+  // THE HOOK A KINGDOM SESSION WRITES AGAINST. Its kind's row in FOE_MOVES says
+  // what the move costs; this says whether THIS machine could afford it when it
+  // spawned. Safe on an enemy built before the field existed (a save loaded
+  // mid-flight, a harness that hand-rolls one), which is why it is a method and
+  // not a bare array read at the call site.
+  hasMove(id) { return !!this.moves && this.moves.indexOf(id) >= 0; }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
     // cheap, and it means a machine that was in the room before you took a
@@ -7272,11 +7376,31 @@ class Enemy {
 // already sits correctly under that hero, so trimming it there would shrink it
 // to nothing.
 const EDRAW = { blob: 0.56 };
-const EDRAW_ROBO = { flier: 0.64 };
+// COMPARABLE WITH THE HERO (owner, 2026-09-18: "make their size comparable with
+// my hero"). Measured rather than guessed — she draws 76px in CLAWBYTE, and the
+// machines came in from 0.28x of that (the bat) to 0.95x (the turret), so the
+// kingdom emitters and the small fliers were reading as props beside her. These
+// bring the low end up to roughly 0.56-0.82x: unmistakably her weight class,
+// still under her, which keeps the SCALE LAW above intact (minions read smaller,
+// guardians read larger).
+//
+// CLAWBYTE ONLY, and that is not an oversight. The same probe against the
+// Odyssey build measures its own hero at 61px with crawler/turret/hopper ALREADY
+// at 1.15/1.18/1.11 of her — that world's sheets are their own, and a shared
+// multiplier would push things that are already too big further past its hero.
+// guard, turret and hopper are absent here because they measured 0.80-0.95
+// already; a number that changes nothing is a number that will drift.
+const EDRAW_ROBO = {
+  crawler: 1.18, flier: 0.96, blob: 0.77, bat: 2.0,
+  surge: 1.7, kiln: 1.7, rime: 1.6, snare: 1.65, sage: 1.22,
+};
 const _enemyDrawRaw = Enemy.prototype.draw;
 Enemy.prototype.draw = function (c) {
   const hero = typeof isHero === 'function' && isHero();
-  const k = EDRAW[this.kind] || (hero ? 0 : EDRAW_ROBO[this.kind]);
+  // the robo table is an OVERRIDE, not a fallback: the blob carries a shared
+  // trim for the Odyssey and its own larger number here, and the old precedence
+  // (shared first) made a robo entry for it unreachable.
+  const k = (hero ? 0 : EDRAW_ROBO[this.kind]) || EDRAW[this.kind];
   if (!k) return _enemyDrawRaw.call(this, c);
   const px = this.x + this.w / 2, py = this.y + this.h;
   c.save();
@@ -7679,25 +7803,29 @@ function bossFork(b) {
 // whose whole read is "a big cat you can out-time", so it is the right place
 // to teach the mechanic; the others are deliberately left off until this one
 // has been played enough to know the number is right.
+// `zone` is the kingdom the guardian stands in, and it is load-bearing now: it
+// picks the weapon tier the fight is balanced against (ZONE_ATK). The minis
+// already carried one; the guardians say it here rather than having it inferred
+// from a lair id that a kingdom session is free to move.
 const BSTAT = Object.assign({
-  glitch: { w: 84, h: 56, hp: 220, dazeAt: 5 },
-  brood: { w: 96, h: 64, hp: 320 },
+  glitch: { w: 84, h: 56, hp: 220, dazeAt: 5, zone: 'A' },
+  brood: { w: 96, h: 64, hp: 320, zone: 'B' },
   // `tell` overrides the warning size footprint would derive (see
   // Boss.tellCue). FURNACE CHOIR is tall and narrow, so its footprint reads
   // small, but it is a foundry that warns with bells and a hymn — the light
   // tell under that is the wrong instrument for the thing arriving.
-  atlas: { w: 62, h: 74, hp: 460, tell: 'tellmid' },
-  zero: { w: 112, h: 62, hp: 500 },   // GLACIERE: a long floating quadruped
+  atlas: { w: 62, h: 74, hp: 460, tell: 'tellmid', zone: 'C' },
+  zero: { w: 112, h: 62, hp: 500, zone: 'D' },   // GLACIERE: a long floating quadruped
   // PRISM is the nimble rival, so it stays the smallest guardian — but a boss
   // still has to stand over HZD-99 (36), and at 34 it stood under her.
-  prism: { w: 62, h: 46, hp: 520 },
-  mother: { w: 120, h: 120, hp: 750 },
+  prism: { w: 62, h: 46, hp: 520, zone: 'X' },
+  mother: { w: 120, h: 120, hp: 750, zone: 'E' },
   // THE ALPHA. The first mini-boss in the run, and the only one that is TAMED
   // rather than destroyed — see js/wolves.js. Wider than NULLFANG and shorter:
   // it is a quadruped that fights along the floor, and its reach is the length
   // of it. 300 HP puts it just above the first guardian's 220 while she still
   // has no dash, which is where the fight wants to sit — losable, not long.
-  alpha: { w: 104, h: 58, hp: 300 },
+  alpha: { w: 104, h: 58, hp: 300, zone: 'A' },
 // ...and the Eye's constructs join the same table, so every piece of machinery
 // that already works on a boss — the hurt flash, the health bar, the telegraph
 // wash, the artbible harness — works on them without a second code path. They
@@ -8383,7 +8511,12 @@ class Boss {
     const s = BSTAT[kind];
     this.kind = kind; this.w = s.w; this.h = s.h;
     this.x = x - s.w / 2; this.y = y - s.h;
-    this.hpMax = Math.round(s.hp * DF().ehp); this.hp = this.hpMax;
+    // FOE_HP is the same toughness raise every machine took; ZONE_ATK is the
+    // weapon this fight is tuned against, so an earned blade shortens it back
+    // to where it was rather than trivialising it. A guardian with no zone
+    // falls to the middle of the weapon curve rather than to 1, which would
+    // silently make it the easiest thing in its own kingdom.
+    this.hpMax = Math.round(s.hp * FOE_HP * (ZONE_ATK[s.zone] || 1.6) * DF().ehp); this.hp = this.hpMax;
     this.vx = 0; this.vy = 0; this.st = 'dorm'; this.t = 1.4; this.phase = 1;
     this.hurtT = 0; this.dead = false; this.anim = 0; this.face = -1;
     this.cycle = 0; this.marks = []; this.beam = null;

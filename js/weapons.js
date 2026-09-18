@@ -29,6 +29,29 @@ function weaponMode(save = G.save) {
   // Read-only: callers rendering a frame must not mutate or migrate a save.
   return weaponOwned(save.weaponMode, save) ? save.weaponMode : bestWeaponMode(save);
 }
+// THE NEXT WEAPON IS AN ANSWER, NOT A COSTUME (owner, 2026-09-18: "enemies
+// should get stronger and tougher and getting next weapon for character should
+// improve atk points to compensate").
+//
+// Until now a weapon tier changed the MOVESET and nothing else: the same 12
+// points of damage came out of a bare paw and out of the joined purifier, so
+// every sword she earned was an animation change and the deeper kingdoms got
+// slower to chew through rather than harder to survive. That is the wrong kind
+// of difficulty — the fight does not get more dangerous, it gets longer.
+//
+// So the tier carries the damage curve, and ZONE_K's escalation is raised to
+// meet it (see entities.js). A player who quests for her weapons keeps roughly
+// the same time-to-kill all the way down; a player who skips them feels every
+// kingdom she walks into. It multiplies dmg(), so it reaches the combo, the
+// finisher, the burst, the hurricane and the throw at once rather than being
+// re-applied at six call sites that would drift apart.
+//
+// Equipped, not owned: she can carry the joined blade and choose to fight with
+// one, and the number follows what is actually in her paws.
+const WEAPON_ATK = { claws: 1, single: 1.3, dual: 1.6, joined: 1.95 };
+function weaponAtk(save = G.save) {
+  return WEAPON_ATK[weaponMode(save)] || 1;
+}
 function equipWeapon(mode, save = G.save) {
   if (!save || !weaponOwned(mode, save)) return false;
   save.weaponMode = mode;

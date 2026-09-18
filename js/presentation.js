@@ -2,15 +2,21 @@
 // pixels; camera zoom scales the WORLD, including effects and interactions.
 // It does not silently enlarge only the artwork around a smaller hit shape.
 // The actor started at 1.78, read oversized twice over (owner, 2026-09-11)
-// and is back to her original 1.0 at 1.90 zoom. World zoom changes the
-// view; actor scale changes the hero/NPC proportion. They are deliberately
+// and is back to her original 1.0; the world zoom sat at 1.90 until the owner
+// asked for 15% more screen (2026-09-18) and is now 1.615. World zoom changes
+// the view; actor scale changes the hero/NPC proportion. They are deliberately
 // separate, applied once each, and tested as a pair.
 // heroVisualScale here is a startup default only — js/entities.js overwrites
 // it with the live HERO_SCREEN_SCALE constant once that file loads (this
 // file loads first; see source-files.json), so THAT constant is the one
 // value to change. Keeping this literal in sync anyway is what
 // tests/reconciliation.cjs checks for.
-const PRESENTATION = { heroVisualScale:1.0, explorationZoom:1.90, minEncounterZoom:1.05, buffer:null };
+// 1.90 -> 1.615: the owner asked for 15% more room on screen (2026-09-18, "you
+// need to zoom out 15% in game to show more of the screen"). It is the ZOOM that
+// moved, not the actor: heroVisualScale stays 1.0, so she is the same size
+// relative to the world she stands in and every enemy, NPC and structure pulls
+// back with her. 1.90 * 0.85 = 1.615.
+const PRESENTATION = { heroVisualScale:1.0, explorationZoom:1.615, minEncounterZoom:1.05, buffer:null };
 const HERO_CORE_KEYS = ['heroStates', 'gaitWalk', 'gaitRun', 'hzdIdle'];
 let heroArtAttempt = 0;
 function requestHeroArt() {

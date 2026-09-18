@@ -38,7 +38,11 @@ const order=JSON.parse(read('source-files.json'));assert.equal(new Set(order).si
    // read oversized). The actual guarantee is that the two copies of the
    // number (js/entities.js's constant, js/presentation.js's startup
    // default) agree, not that either one holds a specific literal forever.
-   check('latest smaller sizing is preserved, not inferred from test constants',PRESENTATION.explorationZoom===1.9&&PRESENTATION.heroVisualScale===HERO_SCREEN_SCALE,{actor:HERO_SCREEN_SCALE,presentation:PRESENTATION.heroVisualScale,zoom:PRESENTATION.explorationZoom});
+   // 1.90 -> 1.615 on the owner's 2026-09-18 instruction to show 15% more of
+   // the screen. The pairing this guards is unchanged: the ACTOR scale and the
+   // WORLD zoom are separate dials and the literal here must stay the shipped
+   // one rather than be inferred from whatever a test happens to want.
+   check('latest smaller sizing is preserved, not inferred from test constants',PRESENTATION.explorationZoom===1.615&&PRESENTATION.heroVisualScale===HERO_SCREEN_SCALE,{actor:HERO_SCREEN_SCALE,presentation:PRESENTATION.heroVisualScale,zoom:PRESENTATION.explorationZoom});
    const cv2=document.createElement('canvas');cv2.width=300;cv2.height=300;const cx=cv2.getContext('2d');let scale;
    const di=cx.drawImage;cx.drawImage=function(...args){scale=this.getTransform().a;return di.apply(this,args);};cx.translate(150,230);
    Object.assign(player,{vx:340,vy:0,on:true,chargeT:1,landT:.2,skidT:0,hurtPoseT:0,healT:0,songT:0,swingVis:null,swirlT:0,dashT:0,wallSlide:0,flipT:0,boostT:0});
