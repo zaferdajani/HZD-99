@@ -430,18 +430,27 @@ function drawRoarFX(c) {
   }
 }
 
+let lastFeedbackPulse = -Infinity;
+let lastFeedbackStrength = 0;
 function padRumble(strong, weak, ms) {
-  if (!PAD.on || !PAD.gp) return;
+  const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  // A hit and its camera kick can arrive together. Do not restart the motors.
+  const strength = clamp(Math.max(strong, weak), 0, 1);
+  if (now - lastFeedbackPulse < 40 && strength <= lastFeedbackStrength) return;
+  lastFeedbackPulse = now;
+  lastFeedbackStrength = strength;
+  const duration = Math.min(1000, Math.max(1, ms || 100));
+  const settle = result => { if (result && typeof result.catch === 'function') result.catch(() => {}); };
   try {
-    const act = PAD.gp.vibrationActuator || (PAD.gp.hapticActuators && PAD.gp.hapticActuators[0]);
-    if (!act) return;
-    if (act.playEffect) {
-      act.playEffect('dual-rumble', {
-        duration: Math.min(1000, ms || 100),
-        strongMagnitude: clamp(strong, 0, 1),
-        weakMagnitude: clamp(weak, 0, 1),
-      });
-    } else if (act.pulse) act.pulse(clamp(Math.max(strong, weak), 0, 1), Math.min(1000, ms || 100));
+    const act = PAD.on && PAD.gp && (PAD.gp.vibrationActuator || (PAD.gp.hapticActuators && PAD.gp.hapticActuators[0]));
+    if (act && act.playEffect) {
+      settle(act.playEffect('dual-rumble', { duration,
+        strongMagnitude: clamp(strong, 0, 1), weakMagnitude: clamp(weak, 0, 1) }));
+      return;
+    }
+    if (act && act.pulse) { settle(act.pulse(clamp(Math.max(strong, weak), 0, 1), duration)); return; }
+    // Use the existing native/mobile adapter for gameplay events as well as taps.
+    if (typeof TOUCH !== 'undefined' && TOUCH.enabled && typeof tBuzz === 'function') tBuzz(duration);
   } catch (e) {}
 }
 const cam = { x:0, y:0, shake:0, zoom:1, lead:0, shakeX:0, shakeY:0, room:null };

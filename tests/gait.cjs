@@ -298,7 +298,7 @@ const check = (name, ok, detail) => {
   // re-fires the walk plates without re-measuring, or edits the constant
   // without the plates — the two ways the legs and the floor come apart.
   const stepPx = await measureWalkStep(page);
-  const stepUnits = stepPx.soleSpan * (60 / stepPx.cellH);      // HERO_DH / cell height
+  const stepUnits = stepPx.soleSpan * (stepPx.drawHeight / stepPx.cellH);      // HERO_DH / cell height
   check('the stride length in the code is the stride length in the ART',
     Math.abs(stepUnits - r.stepWalk) <= 2.5,
     'plates say ' + stepUnits.toFixed(1) + ' world units per step (soles '
@@ -472,6 +472,6 @@ async function measureWalkStep(page) {
     }
     // the two contacts, averaged — they are the same step seen on each leg
     const ca = feet(HERO_CELL.walk_a).span, cc = feet(HERO_CELL.walk_c).span;
-    return { soleSpan: Math.round((ca + cc) / 2), passSpan: feet(HERO_CELL.walk_b).centres, cellH: ch };
+    return { soleSpan: Math.round((ca + cc) / 2), passSpan: feet(HERO_CELL.walk_b).centres, cellH: ch, drawHeight: HERO_DH * (HERO_POSE_K.walk_a || HERO_DELIVERY_K) };
   });
 }

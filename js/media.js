@@ -322,8 +322,22 @@ const MEDIA_SRC = {
     // with black halos around it; and the game already draws its own slash
     // sheets, which can react to the hit in a way a baked streak never will.
     // Light stays in code, the body stays in the plate (ART_BIBLE §0).
+    swingDual: 'assets/characters/hero/swing/dual.webp',
+    swingDualCharge: 'assets/characters/hero/swing/dual_charge.webp',
+    swingDualFx: 'assets/characters/hero/swing/dual_fx.webp',
+    swingJoined: 'assets/characters/hero/swing/joined.webp',
+    heroJoinedProjectile: 'assets/characters/hero/swing/joined_projectile.webp',
+    heroJoinedThrow: 'assets/characters/hero/swing/joined_throw.webp',
+    swingSingle: 'assets/characters/hero/swing/single.webp',
+    swingSingleCharge: 'assets/characters/hero/swing/single_charge.webp',
+    swingSingleFx: 'assets/characters/hero/swing/single_fx.webp',
     swingClaw1: 'assets/characters/hero/swing/claw_1.webp',
     swingClaw2: 'assets/characters/hero/swing/claw_2.webp',
+    swingClawJab: 'assets/characters/hero/swing/claw_jab.webp',
+    swingAir: 'assets/characters/hero/swing/air.webp',
+    swingDown: 'assets/characters/hero/swing/down.webp',
+    swingClawChargeAlt: 'assets/characters/hero/swing/claw_charge_alt.webp',
+    swingClawCharge: 'assets/characters/hero/swing/claw_charge.webp',
     // THE SUPERCHARGE'S ENERGY, as 19 drawn plates over the 12-cell body strip.
     // The two counts do not match and do not need to: both are sampled by the
     // swing's own progress, so the energy has its own cadence over the same
@@ -364,6 +378,8 @@ const MEDIA_SRC = {
     // THE GUARD (owner sheet, 2026-09-15: BLOCK/GUARD row). One fired still,
     // same treatment as the charge pose; see HERO_TRANS.guard in entities.js.
     hzdGuard: 'assets/characters/hero/guard.webp',
+    heroRecharge: 'assets/characters/hero/swing/recharge.webp',
+    heroDeparture: 'assets/characters/hero/swing/departure.webp',
     swingJab: 'assets/characters/hero/swing/jab.webp',
     swingHook: 'assets/characters/hero/swing/hook.webp',
     swingUppercut: 'assets/characters/hero/swing/uppercut.webp',

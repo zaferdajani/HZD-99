@@ -1,6 +1,6 @@
 // CLAWBYTE hero motion services. State selection lives in entities.js.
 // No timer impersonation, prototype wrappers, legacy gait fallback or voice swap.
-const HERO_MOTION_REVISION = 'hero-motion-2026-09-11-r1';
+const HERO_MOTION_REVISION = 'hero-motion-2026-09-18-sprites';
 const HERO_MOTION_KEYS = Object.freeze([
   'heroStates', 'hzdIdle', 'gaitWalk', 'gaitRun', 'transAir', 'transLand',
   'transDash', 'transSkid', 'transWall', 'heroFidget', 'hzdHurt'
@@ -17,11 +17,14 @@ function heroMotionMissing() {
 function heroMotionWarm(bust) {
   for (const k of HERO_MOTION_KEYS) mediaFetch(k, true, bust);
 }
+let heroWeaponWarmMode = null;
 function heroMotionGate(dt) {
   if (!G || !player || G.state !== 'PLAY' || (typeof isHero === 'function' && isHero())) {
     heroMotionLoad.active = false;
     return false;
   }
+  const equipped=weaponMode(G.save);
+  if(equipped!==heroWeaponWarmMode){warmHeroWeaponArt(equipped);heroWeaponWarmMode=equipped;}
   const missing = heroMotionMissing();
   heroMotionLoad.done = HERO_MOTION_KEYS.length - missing.length;
   if (!missing.length) { heroMotionLoad.active = false; heroMotionLoad.started = 0; return false; }
@@ -119,64 +122,20 @@ function drawHeroMotionLoading(ctx) {
   ctx.restore();
   return true;
 }
-// Interpolate adjoining authored frames and short cross-clip handovers in the
-// same local foot coordinates. This adds no invented animation assets.
+// Authored sprite frames are complete drawings. Cross-fading their silhouettes
+// creates doubled heads and paws; select one frame and preserve its alpha.
 function drawHeroMotionCell(p, ctx, key, frame, cells, cx, base, height, flip) {
   const im = MEDIA_RAW[key];
   if (!im || !im.complete || !im.naturalWidth) { mediaFetch(key, true); return false; }
-  // A LOOPING STRIP WRAPS; A ONE-SHOT CLAMPS. The tables are read defensively
-  // because an unfired one is a supported state — `cells: 0` means "art has not
-  // landed yet" all through this file, and a null table is the same situation
-  // written differently. Reading it blind crashed the renderer the first time a
-  // harness unplugged the gait to ask what falls through.
   const cyclic = (HERO_GAIT && (key === HERO_GAIT.walk.key || key === HERO_GAIT.run.key))
               || (HERO_IDLE && key === HERO_IDLE.key);
-  const f = cyclic ? ((frame % cells) + cells) % cells : clamp(frame, 0, cells - 1);
-  const target = { key, f, cells, cx, base, height, flip: !!flip, cyclic };
-  const now = p.anim || 0;
-  const old = p._motionPose;
-  if (old && old.key !== key) {
-    p._motionBlend = { from: old, started: now, duration: key === 'transLand' ? 0.055 : 0.09 };
-  }
-  // Add the premultiplied layers in an offscreen buffer. Drawing two half-
-  // alpha sprites directly with source-over made the hero fade at every blend.
-  if (!p._motionCanvas) {
-    p._motionCanvas = document.createElement('canvas');
-    p._motionCanvas.width = 512; p._motionCanvas.height = 512;
-  }
-  const out = p._motionCanvas.getContext('2d');
-  out.setTransform(1,0,0,1,0,0); out.clearRect(0,0,512,512);
-  out.setTransform(3,0,0,3,256,384);
-  out.globalCompositeOperation = 'lighter'; out.globalAlpha = 1;
-  function paint(pose, alpha) {
-    const image = MEDIA_RAW[pose.key];
-    if (!image || alpha <= 0.001) return;
-    const cw = image.naturalWidth / pose.cells, h = pose.height, w = h * cw / image.naturalHeight;
-    const first = Math.floor(pose.f), mix = pose.f - first;
-    const next = pose.cyclic ? (first + 1) % pose.cells : Math.min(first + 1, pose.cells - 1);
-    out.save(); out.translate(pose.cx, pose.base);
-    if (pose.flip) out.scale(-1, 1);
-    const inherited = out.globalAlpha;
-    out.globalAlpha = inherited * alpha * (1 - mix);
-    out.drawImage(image, first * cw, 0, cw, image.naturalHeight, -w / 2, -h, w, h);
-    if (mix > 0.001) {
-      out.globalAlpha = inherited * alpha * mix;
-      out.drawImage(image, next * cw, 0, cw, image.naturalHeight, -w / 2, -h, w, h);
-    }
-    out.restore();
-  }
-  let mix = 1;
-  if (p._motionBlend) {
-    const t = clamp((now - p._motionBlend.started) / p._motionBlend.duration, 0, 1);
-    mix = t * t * (3 - 2 * t);
-    if (t >= 1) p._motionBlend = null;
-  }
-  if (p._motionBlend) paint(p._motionBlend.from, 1 - mix);
-  paint(target, mix);
-  ctx.drawImage(p._motionCanvas, -256 / 3, -128, 512 / 3, 512 / 3);
-  p._motionPose = target;
-  G.lastStrip = key + ':' + Math.floor(f);
-  G.heroMotion = { revision: HERO_MOTION_REVISION, key, frame: f, blend: mix, scale: HERO_SCREEN_SCALE };
+  const f = Math.floor(cyclic ? ((frame % cells) + cells) % cells : clamp(frame, 0, cells - 1));
+  const drew = drawStripCell(ctx, key, f, cells, cx, base, height, flip);
+  if (!drew) return false;
+  p._motionPose = { key, f, cells, cx, base, height, flip: !!flip, cyclic };
+  p._motionBlend = null;
+  G.heroMotion = { revision: HERO_MOTION_REVISION, key, frame: f, blend: 1, scale: HERO_SCREEN_SCALE };
   return true;
 }
+
 heroMotionWarm();

@@ -155,3 +155,10 @@ same commit as the asset itself.
 ## Hero voice cleanup — 2026-09-11
 
 The existing hzd_atk2 recording has low-frequency rumble removed; hzd_yalla is pitch-shifted with preserved duration. Both keep mono output, a 0.78 peak ceiling, and smooth attack/tail fades. No new source recording or license was introduced. Original and result SHA-256 values and exact filters are in docs/AUDIO_POLISH.json.
+
+
+### HZD-99 source-preserving delivery (2026-09-18)
+
+The owner supplied the ChatGPT-generated hero PNGs inventoried in `source/hero/delivery-2026-09-18/supplied-inventory.json`. Sixteen new run frames were generated with OpenAI ChatGPT image generation using the approved guard as reference (`source/hero/delivery-2026-09-18/run{A,B,C,D}.png`). These hero assets are not Higgsfield generations. Source hashes and transformations are in the delivery manifest; see `docs/ART_IMPORT_2026-09-18.md`.
+
+Recovered single/dual/joined weapon actions, claw variants, recharge and aerial actions, and the two additional effect sheets were generated with OpenAI ChatGPT image generation from the owner-supplied references. The unmodified inputs, recovered outputs and source-to-runtime mapping are archived under `source/hero/delivery-2026-09-18/`. Existing Higgsfield child-voice recordings are preserved; this delivery generates no new vocals.

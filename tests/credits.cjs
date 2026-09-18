@@ -50,7 +50,7 @@ for (const d of DIRS) {
     for (const f of fs.readdirSync(dir)) {
       const p = path.join(dir, f);
       if (fs.statSync(p).isDirectory()) walk(p);
-      else if (AUDIO.test(f)) files.push(p.replace(/^assets\//, ''));
+      else if (AUDIO.test(f)) files.push(p.split(path.sep).join('/').replace(/^assets\//, ''));
     }
   })(d);
 }

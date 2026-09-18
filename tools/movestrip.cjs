@@ -46,13 +46,20 @@ window.cut = async (dataUrl) => {
   const d = x.getImageData(0, 0, W, H), p = d.data;
   // Same luminance ramp herostates.cjs uses: her plating is bright, the field is
   // deep black, so a wide window keys the halo off without biting the subject.
+  // Delivered PNGs already contain the artist's matte. Re-keying their
+  // dark visor and outlines destroys opaque artwork. Only legacy opaque
+  // plates need the black-field key.
+  const hasAlpha = p.some((v, i) => i % 4 === 3 && v < 255);
   const LO = 22, HI = 58;
   let x0 = W, y0 = H, x1 = 0, y1 = 0;
   for (let i = 0, q = 0; i < p.length; i += 4, q++) {
     const lum = p[i] * 0.30 + p[i + 1] * 0.59 + p[i + 2] * 0.11;
-    let a = 0;
-    if (lum > HI) a = 255; else if (lum > LO) a = Math.round((lum - LO) / (HI - LO) * 255);
-    p[i + 3] = a;
+    let a = p[i + 3];
+    if (!hasAlpha) {
+      a = 0;
+      if (lum > HI) a = 255; else if (lum > LO) a = Math.round((lum - LO) / (HI - LO) * 255);
+      p[i + 3] = a;
+    }
     if (a > 140) {                        // bbox off SOLID pixels, not the bloom
       const px = q % W, py = (q / W) | 0;
       if (px < x0) x0 = px; if (px > x1) x1 = px;
@@ -61,7 +68,7 @@ window.cut = async (dataUrl) => {
   }
   x.putImageData(d, 0, 0);
   if (x1 < x0 || y1 < y0) return null;
-  return { url: c.toDataURL('image/png'), x0, y0, x1, y1 };
+  return { url: c.toDataURL('image/png'), x0, y0, x1, y1, hasAlpha };
 };
 window.compose = async (cells, CW, CH, scale) => {
   const c = document.createElement('canvas');
@@ -92,6 +99,7 @@ window.compose = async (cells, CW, CH, scale) => {
     const W = c.width;
     for (let y = c.height - 18; y < c.height; y++) {
       for (let px = 0; px < W; px++) {
+        if (cells[Math.floor(px / CW)].hasAlpha) continue;
         const i = (y * W + px) * 4;
         if (!(d[i+3] > 8 && d[i] > 165 && d[i+1] > 160 && d[i+2] > 150)) continue;
         let leg = false;

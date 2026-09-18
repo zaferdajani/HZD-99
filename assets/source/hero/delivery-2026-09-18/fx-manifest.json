@@ -1,0 +1,20 @@
+{
+  "sheets": [
+    {
+      "source": "assets/source/hero/delivery-2026-09-18/single-sword-fx.png",
+      "sha256": "16a24beaf3b70f3612d3dab306be3ef12270f962e702c5884400072e0ce076ac",
+      "path": "assets/characters/hero/swing/single_fx.webp",
+      "frames": 6,
+      "columns": 3,
+      "rows": 2
+    },
+    {
+      "source": "assets/source/hero/delivery-2026-09-18/dual-fx.png",
+      "sha256": "fcb0156133ff3a9e8891bc6439aa9151a2714843fd800fb35029be7d0c17e037",
+      "path": "assets/characters/hero/swing/dual_fx.webp",
+      "frames": 8,
+      "columns": 4,
+      "rows": 2
+    }
+  ]
+}

@@ -1,0 +1,5884 @@
+{
+  "version": 1,
+  "approval": "Guard approved by owner in Codex task; preserve original palette and alpha.",
+  "drawK": 1.441025641025641,
+  "sourceScaleMethod": "Median ceramic-head component area per source cohort, calibrated to approved guard; one scale per cohort, never per pose.",
+  "sources": {
+    "assets/source/hero/delivered/v3/jump_start.png": "026cceb63c18bdb5af3e720469ebad8642bece955be049ea06bedf4c2e877899",
+    "assets/source/hero/delivered/v2/walk.png": "21f1723e45ab9494990bef4c060294643137c3b8e42039c549be08e0252845b6",
+    "assets/source/hero/delivery-2026-09-18/runA.png": "5f2980ec61f3745971e014dbadeac768d9f1ac1f91eb6614c8d1e586efe94030",
+    "assets/source/hero/delivered/v3/air_rise.png": "3dcb0a2ee05418f1d5d723c1303328af1311178bbf8dca0728e63d8ab1ed08de",
+    "assets/source/hero/delivered/v3/air_fall.png": "b1ed07c84cbafe76149a6d1277aaa35aee4962ec1605b5ddb9de6d0092b95292",
+    "assets/source/hero/delivered/v3/land.png": "8e493275f9e09403bca513ee28fa5a6ca3ba6497f82515d13d767396977d211c",
+    "assets/source/hero/delivered/v2/dash.png": "86f28b20ec828a6759c27ae77bbe2b2194c4a28d725db8a644239b02cfd57e8d",
+    "assets/source/hero/delivered/v3/skid.png": "529dce850c9f063de80d88b7c39576f27c396807aa4a6e4a731e51e1d37ca0c9",
+    "assets/source/hero/delivered/v3/wall_slide.png": "45389e9f567e5eb898acde7d8a82376b55ea7d146a0908e7649ad61b7421e243",
+    "assets/source/hero/delivered/v2/double_slash.png": "873908478830a1128f75342d28a9b00acb602565ee1eee41a5b0f1c155f3d9b1",
+    "assets/source/hero/delivered/v2/jab.png": "aba719df3cf3024c85208b7cf1d71eed971cc254c044a2d989f3ae665e9ee925",
+    "assets/source/hero/delivered/v2/uppercut.png": "2debf14062c438a5230be6bafb9fe3b2766d05403bfd1c17b4d018be6a2db95c",
+    "assets/source/hero/delivered/v3/supercharge.png": "54837a25b119ee28f18b2a6fe583bc90cadb6fa44b010503c2a4bb0614ad4b88",
+    "assets/source/hero/delivered/v3/hurt.png": "56d85f6e8293b312025ea7edf56f0b0404130a388cb08ba4939db8e34a492a96",
+    "assets/source/hero/delivered/v4/heal.png": "f5bcb1bce74eb1332393c47fe553f4958e94c12656e636dcabc8ac4b7ba8742c",
+    "assets/source/hero/delivered/v3/death.png": "357ab3974a2b432c0186020f7e43febe9db02ff72d2db68e2998ed95eaf613ac",
+    "assets/source/hero/delivery-2026-09-18/runB.png": "4c01b86f59ed61a0cd5acc54e1f0b23636e84ed20304e21591fc1d4c3e890ee2",
+    "assets/source/hero/delivered/v4/walk_away_armed_single.png": "1ac5efd1288e3037342e67544a0017ca5c3503acc0b93789bbbbd13ef55549b3",
+    "assets/source/hero/delivered/v2/walk_away.png": "225ae25fd71c718b04c65322489c7bd35f31e4653ebfb96c03aeb472880a1c37",
+    "assets/source/hero/delivery-2026-09-18/approved-guard.png": "03263d174c1bc5be04cdc9d16e8f985fa347037a547527bbbcd3d4b94bb501c6",
+    "assets/source/hero/delivered/v2/idle.png": "65c1d7aaec7a22624376330436cbbbea4b9727ee5b55f0bae03fcff5e6b124e7",
+    "assets/source/hero/delivered/v4/fidget.png": "fe993b150b15739d789d9001fd222d4f542155411e0a15c85c278361f2cd3d98",
+    "assets/source/hero/delivered/v2/run_away.png": "854fd990d1176a96aee779243f87ba727262ca10514c71b26a83d6558d0cb530",
+    "assets/source/hero/delivered/v4/walk_away_armed_dual.png": "374a64cf3a80f2a24e3c7dcc714ab2839e598d2101a4257287117ac2ec9373e2",
+    "assets/source/hero/delivered/v4/walk_away_armed_joined.png": "28ac4d9fba9e562ae55a4e475de28790776c51acb537e4ba2a57f2015485ffc2",
+    "assets/source/hero/delivery-2026-09-18/runC.png": "48173ad62dac06888e76fff5b067e41e460d807586bcfed2836b67cd2329755a",
+    "assets/source/hero/delivery-2026-09-18/runD.png": "b1ccc614f19a4d89b914091fa59fc182f4d1d4bc123a54b9c2c392a24661ec15",
+    "assets/source/hero/delivery-2026-09-18/dual-clean.png": "287f6253c4f2cdae76bead6cc04731deccf2043ec01b5098985951e48a10262b",
+    "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png": "ea722624231b96ad4f6429073143de154b9ca87567ce11f6fb444ecb52d3bb0b",
+    "assets/source/hero/delivery-2026-09-18/joined_throw-clean.png": "e2e16aa14aa03d02369eae860022b84298c23fc8077f42cedad2494380113deb",
+    "assets/source/hero/delivery-2026-09-18/joined-clean.png": "1de52fa0bf43b4ee420846a9defc80ebc8492db52cda0b1df3aaf373ac10d1bc",
+    "assets/source/hero/delivery-2026-09-18/joined-projectile.png": "855a296cd5667681b91faadaa742903509c886642027ed35ebb3c3348f0d899d",
+    "assets/source/hero/delivery-2026-09-18/single_charge-clean.png": "2e473f4b42bf8186577da1be65b1b78c0bf5e2e043c23d53feb19c3d4be788d3",
+    "assets/source/hero/delivery-2026-09-18/single-clean.png": "1f22380834ae86afb8347c174e361b464f4f311f57111aa21742b55701d5a845",
+    "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png": "3cb4cdacc33a5429a89542e212d357c48fa6a87869c472b92f8134894245496d",
+    "assets/source/hero/delivery-2026-09-18/claw_jab-clean.png": "0a91ba6c88b86fc95618b9627f9be075145045e97db79d219282e4b9f903d3ac",
+    "assets/source/hero/delivery-2026-09-18/recharge-clean.png": "7b2e38cbe0bab8bcfbe91b1977745c41f10189efb77acc5a2e27bf1ccba69004",
+    "assets/source/hero/delivery-2026-09-18/departure-clean.png": "3f5ed144900c23d5e7174290559f0bd24fb3a6b04e8d980a2d81bfe45c3e32a1",
+    "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png": "a85b6289950f686339eac93eb2e56fa4cb0d754c8eefb177174403a5de79291f",
+    "assets/source/hero/delivery-2026-09-18/aerial-clean.png": "a18b0b46bca2ed04805dbe34ca71ac2e7dbdecdcfc81a82933c8e9b6db38a9c1"
+  },
+  "sheets": [
+    {
+      "path": "assets/characters/hero/states.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            15,
+            0,
+            363,
+            724
+          ],
+          "name": "idle",
+          "source": "assets/source/hero/delivered/v3/jump_start.png",
+          "rect": [
+            16,
+            171,
+            361,
+            496
+          ],
+          "foot": 228.5,
+          "scale": 0.3931030488836234,
+          "air": false
+        },
+        {
+          "cut": [
+            8,
+            0,
+            260,
+            724
+          ],
+          "name": "walk_a",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            9,
+            207,
+            257,
+            356
+          ],
+          "foot": 163.51277615640083,
+          "scale": 0.6110391463743334,
+          "air": false
+        },
+        {
+          "cut": [
+            268,
+            0,
+            253,
+            724
+          ],
+          "name": "walk_b",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            275,
+            207,
+            244,
+            356
+          ],
+          "foot": 425.8894751381546,
+          "scale": 0.6110391463743334,
+          "air": false
+        },
+        {
+          "cut": [
+            0,
+            0,
+            627,
+            627
+          ],
+          "name": "run_a",
+          "source": "assets/source/hero/delivery-2026-09-18/runA.png",
+          "rect": [
+            47,
+            43,
+            527,
+            559
+          ],
+          "foot": 390.2285785198875,
+          "scale": 0.36297049887744326,
+          "air": false
+        },
+        {
+          "cut": [
+            627,
+            627,
+            627,
+            627
+          ],
+          "name": "run_b",
+          "source": "assets/source/hero/delivery-2026-09-18/runA.png",
+          "rect": [
+            655,
+            647,
+            556,
+            552
+          ],
+          "foot": 1010.903600810052,
+          "scale": 0.36297049887744326,
+          "air": false
+        },
+        {
+          "cut": [
+            1514,
+            0,
+            600,
+            724
+          ],
+          "name": "rise",
+          "source": "assets/source/hero/delivered/v3/air_rise.png",
+          "rect": [
+            1655,
+            28,
+            458,
+            562
+          ],
+          "foot": 1796.0,
+          "scale": 0.45601238510329495,
+          "air": true
+        },
+        {
+          "cut": [
+            64,
+            0,
+            360,
+            724
+          ],
+          "name": "apex",
+          "source": "assets/source/hero/delivered/v3/air_rise.png",
+          "rect": [
+            65,
+            179,
+            354,
+            434
+          ],
+          "foot": 238.5,
+          "scale": 0.45601238510329495,
+          "air": true
+        },
+        {
+          "cut": [
+            1565,
+            0,
+            544,
+            724
+          ],
+          "name": "fall",
+          "source": "assets/source/hero/delivered/v3/air_fall.png",
+          "rect": [
+            1728,
+            130,
+            380,
+            560
+          ],
+          "foot": 1919.0,
+          "scale": 0.4313244036626633,
+          "air": true
+        },
+        {
+          "cut": [
+            483,
+            0,
+            554,
+            724
+          ],
+          "name": "land",
+          "source": "assets/source/hero/delivered/v3/land.png",
+          "rect": [
+            610,
+            218,
+            425,
+            438
+          ],
+          "foot": 816.5,
+          "scale": 0.3984848364333589,
+          "air": false
+        },
+        {
+          "cut": [
+            664,
+            0,
+            423,
+            724
+          ],
+          "name": "dash",
+          "source": "assets/source/hero/delivered/v2/dash.png",
+          "rect": [
+            712,
+            251,
+            374,
+            325
+          ],
+          "foot": 813.5,
+          "scale": 0.5272144735322419,
+          "air": true
+        },
+        {
+          "cut": [
+            460,
+            0,
+            525,
+            724
+          ],
+          "name": "skid",
+          "source": "assets/source/hero/delivered/v3/skid.png",
+          "rect": [
+            561,
+            174,
+            422,
+            461
+          ],
+          "foot": 911.0,
+          "scale": 0.4499277404921672,
+          "air": false
+        },
+        {
+          "cut": [
+            493,
+            0,
+            515,
+            724
+          ],
+          "name": "wall_cling",
+          "source": "assets/source/hero/delivered/v3/wall_slide.png",
+          "rect": [
+            660,
+            91,
+            346,
+            535
+          ],
+          "foot": 857.0,
+          "scale": 0.4433167796548159,
+          "air": true
+        },
+        {
+          "cut": [
+            979,
+            0,
+            535,
+            724
+          ],
+          "name": "djump_jet",
+          "source": "assets/source/hero/delivered/v3/air_rise.png",
+          "rect": [
+            1114,
+            62,
+            398,
+            551
+          ],
+          "foot": 1277.0,
+          "scale": 0.45601238510329495,
+          "air": true
+        },
+        {
+          "cut": [
+            323,
+            0,
+            370,
+            724
+          ],
+          "name": "claw_1",
+          "source": "assets/source/hero/delivered/v2/double_slash.png",
+          "rect": [
+            386,
+            232,
+            306,
+            353
+          ],
+          "foot": 524.5,
+          "scale": 0.5625375011010477,
+          "air": false
+        },
+        {
+          "cut": [
+            823,
+            0,
+            516,
+            724
+          ],
+          "name": "claw_2",
+          "source": "assets/source/hero/delivered/v2/jab.png",
+          "rect": [
+            878,
+            142,
+            461,
+            468
+          ],
+          "foot": 1068.0,
+          "scale": 0.4380236695197325,
+          "air": false
+        },
+        {
+          "cut": [
+            705,
+            0,
+            372,
+            724
+          ],
+          "name": "finisher",
+          "source": "assets/source/hero/delivered/v2/uppercut.png",
+          "rect": [
+            751,
+            247,
+            324,
+            414
+          ],
+          "foot": 909.0,
+          "scale": 0.5340456642218164,
+          "air": false
+        },
+        {
+          "cut": [
+            521,
+            0,
+            190,
+            724
+          ],
+          "name": "charge",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            521,
+            265,
+            188,
+            237
+          ],
+          "foot": 609.5,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            1249,
+            0,
+            170,
+            724
+          ],
+          "name": "burst",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            1249,
+            250,
+            170,
+            253
+          ],
+          "foot": 1339.0,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            1624,
+            0,
+            490,
+            724
+          ],
+          "name": "hurt",
+          "source": "assets/source/hero/delivered/v3/hurt.png",
+          "rect": [
+            1665,
+            136,
+            448,
+            512
+          ],
+          "foot": 1917.0,
+          "scale": 0.3638399362386406,
+          "air": true
+        },
+        {
+          "cut": [
+            411,
+            0,
+            419,
+            724
+          ],
+          "name": "heal",
+          "source": "assets/source/hero/delivered/v4/heal.png",
+          "rect": [
+            460,
+            99,
+            368,
+            551
+          ],
+          "foot": 673.5,
+          "scale": 0.3892298429152062,
+          "air": false
+        },
+        {
+          "cut": [
+            1259,
+            0,
+            404,
+            724
+          ],
+          "name": "song",
+          "source": "assets/source/hero/delivered/v4/heal.png",
+          "rect": [
+            1297,
+            100,
+            365,
+            550
+          ],
+          "foot": 1514.0,
+          "scale": 0.3892298429152062,
+          "air": false
+        },
+        {
+          "cut": [
+            638,
+            0,
+            339,
+            724
+          ],
+          "name": "slump",
+          "source": "assets/source/hero/delivered/v3/death.png",
+          "rect": [
+            651,
+            299,
+            286,
+            306
+          ],
+          "foot": 778.5,
+          "scale": 0.5698155349882854,
+          "air": false
+        },
+        {
+          "cut": [
+            807,
+            0,
+            259,
+            724
+          ],
+          "name": "walk_c",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            815,
+            208,
+            249,
+            355
+          ],
+          "foot": 971.4537371887008,
+          "scale": 0.6110391463743334,
+          "air": false
+        },
+        {
+          "cut": [
+            627,
+            627,
+            627,
+            627
+          ],
+          "name": "run_c",
+          "source": "assets/source/hero/delivery-2026-09-18/runB.png",
+          "rect": [
+            653,
+            667,
+            554,
+            547
+          ],
+          "foot": 1018.5476357697573,
+          "scale": 0.3649269929509341,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/backwalk_a.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            1059,
+            0,
+            281,
+            724
+          ],
+          "name": "backSingle_4",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+          "rect": [
+            1097,
+            200,
+            241,
+            370
+          ],
+          "foot": 1220.5,
+          "scale": 0.4849963057838152,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/backwalk_b.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            1604,
+            0,
+            270,
+            724
+          ],
+          "name": "backSingle_6",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+          "rect": [
+            1633,
+            198,
+            239,
+            380
+          ],
+          "foot": 1763.0,
+          "scale": 0.4849963057838152,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/bare_bwalk_a.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            1028,
+            0,
+            280,
+            724
+          ],
+          "name": "back_4",
+          "source": "assets/source/hero/delivered/v2/walk_away.png",
+          "rect": [
+            1059,
+            219,
+            247,
+            363
+          ],
+          "foot": 1206.5,
+          "scale": 0.5299438679970624,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/bare_bwalk_b.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            1579,
+            0,
+            274,
+            724
+          ],
+          "name": "back_6",
+          "source": "assets/source/hero/delivered/v2/walk_away.png",
+          "rect": [
+            1609,
+            219,
+            243,
+            364
+          ],
+          "foot": 1748.5,
+          "scale": 0.5299438679970624,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/guard.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "source": "assets/source/hero/delivery-2026-09-18/approved-guard.png",
+          "rect": [
+            7,
+            101,
+            360,
+            473
+          ],
+          "foot": 213.5,
+          "scale": 0.4397463002114165,
+          "name": "guard"
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/gait/walk.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            8,
+            0,
+            260,
+            724
+          ],
+          "name": "walk_0",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            9,
+            207,
+            257,
+            356
+          ],
+          "foot": 163.51277615640083,
+          "scale": 0.6110391463743334,
+          "air": false
+        },
+        {
+          "cut": [
+            268,
+            0,
+            253,
+            724
+          ],
+          "name": "walk_1",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            275,
+            207,
+            244,
+            356
+          ],
+          "foot": 425.8894751381546,
+          "scale": 0.6110391463743334,
+          "air": false
+        },
+        {
+          "cut": [
+            521,
+            0,
+            286,
+            724
+          ],
+          "name": "walk_2",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            542,
+            206,
+            263,
+            351
+          ],
+          "foot": 700.5068397502309,
+          "scale": 0.6110391463743334,
+          "air": false
+        },
+        {
+          "cut": [
+            807,
+            0,
+            259,
+            724
+          ],
+          "name": "walk_3",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            815,
+            208,
+            249,
+            355
+          ],
+          "foot": 971.4537371887008,
+          "scale": 0.6110391463743334,
+          "air": false
+        },
+        {
+          "cut": [
+            1066,
+            0,
+            269,
+            724
+          ],
+          "name": "walk_4",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            1088,
+            206,
+            245,
+            356
+          ],
+          "foot": 1239.9468831833708,
+          "scale": 0.6110391463743334,
+          "air": false
+        },
+        {
+          "cut": [
+            1335,
+            0,
+            275,
+            724
+          ],
+          "name": "walk_5",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            1358,
+            206,
+            250,
+            357
+          ],
+          "foot": 1515.3906337793533,
+          "scale": 0.6110391463743334,
+          "air": false
+        },
+        {
+          "cut": [
+            1610,
+            0,
+            282,
+            724
+          ],
+          "name": "walk_6",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            1625,
+            207,
+            265,
+            356
+          ],
+          "foot": 1786.1761413426848,
+          "scale": 0.6110391463743334,
+          "air": false
+        },
+        {
+          "cut": [
+            1892,
+            0,
+            259,
+            724
+          ],
+          "name": "walk_7",
+          "source": "assets/source/hero/delivered/v2/walk.png",
+          "rect": [
+            1902,
+            206,
+            249,
+            356
+          ],
+          "foot": 2057.5441450018498,
+          "scale": 0.6110391463743334,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/claw_1.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            23,
+            0,
+            300,
+            724
+          ],
+          "name": "slash_0",
+          "source": "assets/source/hero/delivered/v2/double_slash.png",
+          "rect": [
+            24,
+            204,
+            298,
+            381
+          ],
+          "foot": 176.5,
+          "scale": 0.5625375011010477,
+          "air": false
+        },
+        {
+          "cut": [
+            323,
+            0,
+            370,
+            724
+          ],
+          "name": "slash_1",
+          "source": "assets/source/hero/delivered/v2/double_slash.png",
+          "rect": [
+            386,
+            232,
+            306,
+            353
+          ],
+          "foot": 524.5,
+          "scale": 0.5625375011010477,
+          "air": false
+        },
+        {
+          "cut": [
+            693,
+            0,
+            397,
+            724
+          ],
+          "name": "slash_2",
+          "source": "assets/source/hero/delivered/v2/double_slash.png",
+          "rect": [
+            741,
+            203,
+            347,
+            382
+          ],
+          "foot": 896.0,
+          "scale": 0.5625375011010477,
+          "air": false
+        },
+        {
+          "cut": [
+            1090,
+            0,
+            306,
+            724
+          ],
+          "name": "slash_3",
+          "source": "assets/source/hero/delivered/v2/double_slash.png",
+          "rect": [
+            1102,
+            239,
+            292,
+            347
+          ],
+          "foot": 1254.0,
+          "scale": 0.5625375011010477,
+          "air": false
+        },
+        {
+          "cut": [
+            1396,
+            0,
+            416,
+            724
+          ],
+          "name": "slash_4",
+          "source": "assets/source/hero/delivered/v2/double_slash.png",
+          "rect": [
+            1477,
+            232,
+            334,
+            355
+          ],
+          "foot": 1620.5,
+          "scale": 0.5625375011010477,
+          "air": false
+        },
+        {
+          "cut": [
+            1812,
+            0,
+            322,
+            724
+          ],
+          "name": "slash_5",
+          "source": "assets/source/hero/delivered/v2/double_slash.png",
+          "rect": [
+            1839,
+            203,
+            294,
+            384
+          ],
+          "foot": 1987.0,
+          "scale": 0.5625375011010477,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/claw_2.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            7,
+            0,
+            362,
+            724
+          ],
+          "name": "jab_0",
+          "source": "assets/source/hero/delivered/v2/jab.png",
+          "rect": [
+            7,
+            136,
+            360,
+            473
+          ],
+          "foot": 213.5,
+          "scale": 0.4380236695197325,
+          "air": false
+        },
+        {
+          "cut": [
+            369,
+            0,
+            454,
+            724
+          ],
+          "name": "jab_1",
+          "source": "assets/source/hero/delivered/v2/jab.png",
+          "rect": [
+            460,
+            141,
+            361,
+            469
+          ],
+          "foot": 652.5,
+          "scale": 0.4380236695197325,
+          "air": false
+        },
+        {
+          "cut": [
+            823,
+            0,
+            516,
+            724
+          ],
+          "name": "jab_2",
+          "source": "assets/source/hero/delivered/v2/jab.png",
+          "rect": [
+            878,
+            142,
+            461,
+            468
+          ],
+          "foot": 1068.0,
+          "scale": 0.4380236695197325,
+          "air": false
+        },
+        {
+          "cut": [
+            1339,
+            0,
+            342,
+            724
+          ],
+          "name": "jab_3",
+          "source": "assets/source/hero/delivered/v2/jab.png",
+          "rect": [
+            1339,
+            137,
+            341,
+            472
+          ],
+          "foot": 1526.0,
+          "scale": 0.4380236695197325,
+          "air": false
+        },
+        {
+          "cut": [
+            1681,
+            0,
+            447,
+            724
+          ],
+          "name": "jab_4",
+          "source": "assets/source/hero/delivered/v2/jab.png",
+          "rect": [
+            1770,
+            136,
+            358,
+            474
+          ],
+          "foot": 1974.5,
+          "scale": 0.4380236695197325,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/uppercut.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            17,
+            0,
+            309,
+            724
+          ],
+          "name": "uppercut_0",
+          "source": "assets/source/hero/delivered/v2/uppercut.png",
+          "rect": [
+            18,
+            270,
+            307,
+            389
+          ],
+          "foot": 186.0,
+          "scale": 0.5340456642218164,
+          "air": false
+        },
+        {
+          "cut": [
+            326,
+            0,
+            379,
+            724
+          ],
+          "name": "uppercut_1",
+          "source": "assets/source/hero/delivered/v2/uppercut.png",
+          "rect": [
+            384,
+            306,
+            319,
+            353
+          ],
+          "foot": 548.0,
+          "scale": 0.5340456642218164,
+          "air": false
+        },
+        {
+          "cut": [
+            705,
+            0,
+            372,
+            724
+          ],
+          "name": "uppercut_2",
+          "source": "assets/source/hero/delivered/v2/uppercut.png",
+          "rect": [
+            751,
+            247,
+            324,
+            414
+          ],
+          "foot": 909.0,
+          "scale": 0.5340456642218164,
+          "air": false
+        },
+        {
+          "cut": [
+            1077,
+            0,
+            342,
+            724
+          ],
+          "name": "uppercut_3",
+          "source": "assets/source/hero/delivered/v2/uppercut.png",
+          "rect": [
+            1104,
+            140,
+            314,
+            522
+          ],
+          "foot": 1295.5,
+          "scale": 0.5340456642218164,
+          "air": false
+        },
+        {
+          "cut": [
+            1419,
+            0,
+            373,
+            724
+          ],
+          "name": "uppercut_4",
+          "source": "assets/source/hero/delivered/v2/uppercut.png",
+          "rect": [
+            1461,
+            223,
+            330,
+            438
+          ],
+          "foot": 1643.5,
+          "scale": 0.5340456642218164,
+          "air": false
+        },
+        {
+          "cut": [
+            1792,
+            0,
+            331,
+            724
+          ],
+          "name": "uppercut_5",
+          "source": "assets/source/hero/delivered/v2/uppercut.png",
+          "rect": [
+            1803,
+            264,
+            319,
+            395
+          ],
+          "foot": 2001.5,
+          "scale": 0.5340456642218164,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/burst.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            0,
+            0,
+            166,
+            724
+          ],
+          "name": "charge_0",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            0,
+            246,
+            166,
+            256
+          ],
+          "foot": 91.0,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            166,
+            0,
+            165,
+            724
+          ],
+          "name": "charge_1",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            166,
+            247,
+            165,
+            255
+          ],
+          "foot": 252.0,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            331,
+            0,
+            190,
+            724
+          ],
+          "name": "charge_2",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            331,
+            260,
+            189,
+            241
+          ],
+          "foot": 424.0,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            521,
+            0,
+            190,
+            724
+          ],
+          "name": "charge_3",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            521,
+            265,
+            188,
+            237
+          ],
+          "foot": 609.5,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            711,
+            0,
+            178,
+            724
+          ],
+          "name": "charge_4",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            711,
+            273,
+            177,
+            229
+          ],
+          "foot": 798.0,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            889,
+            0,
+            182,
+            724
+          ],
+          "name": "charge_5",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            889,
+            275,
+            182,
+            228
+          ],
+          "foot": 993.0,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            1071,
+            0,
+            178,
+            724
+          ],
+          "name": "charge_6",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            1072,
+            266,
+            176,
+            237
+          ],
+          "foot": 1176.5,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            1249,
+            0,
+            170,
+            724
+          ],
+          "name": "charge_7",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            1249,
+            250,
+            170,
+            253
+          ],
+          "foot": 1339.0,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            1419,
+            0,
+            166,
+            724
+          ],
+          "name": "charge_8",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            1419,
+            249,
+            166,
+            254
+          ],
+          "foot": 1509.0,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            1585,
+            0,
+            206,
+            724
+          ],
+          "name": "charge_9",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            1585,
+            256,
+            206,
+            247
+          ],
+          "foot": 1684.5,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            1791,
+            0,
+            201,
+            724
+          ],
+          "name": "charge_10",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            1791,
+            258,
+            201,
+            245
+          ],
+          "foot": 1897.0,
+          "scale": 0.7941593846299454,
+          "air": false
+        },
+        {
+          "cut": [
+            1992,
+            0,
+            164,
+            724
+          ],
+          "name": "charge_11",
+          "source": "assets/source/hero/delivered/v3/supercharge.png",
+          "rect": [
+            1992,
+            248,
+            163,
+            255
+          ],
+          "foot": 2078.0,
+          "scale": 0.7941593846299454,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/trans_takeoff.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            15,
+            0,
+            363,
+            724
+          ],
+          "name": "jump_0",
+          "source": "assets/source/hero/delivered/v3/jump_start.png",
+          "rect": [
+            16,
+            171,
+            361,
+            496
+          ],
+          "foot": 228.5,
+          "scale": 0.3931030488836234,
+          "air": false
+        },
+        {
+          "cut": [
+            378,
+            0,
+            598,
+            724
+          ],
+          "name": "jump_1",
+          "source": "assets/source/hero/delivered/v3/jump_start.png",
+          "rect": [
+            526,
+            240,
+            448,
+            427
+          ],
+          "foot": 760.0,
+          "scale": 0.3931030488836234,
+          "air": false
+        },
+        {
+          "cut": [
+            976,
+            0,
+            516,
+            724
+          ],
+          "name": "jump_2",
+          "source": "assets/source/hero/delivered/v3/jump_start.png",
+          "rect": [
+            1073,
+            129,
+            417,
+            531
+          ],
+          "foot": 1228.0,
+          "scale": 0.3931030488836234,
+          "air": false
+        },
+        {
+          "cut": [
+            1492,
+            0,
+            582,
+            724
+          ],
+          "name": "jump_3",
+          "source": "assets/source/hero/delivered/v3/jump_start.png",
+          "rect": [
+            1640,
+            64,
+            433,
+            538
+          ],
+          "foot": 1823.5,
+          "scale": 0.3931030488836234,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/trans_land.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            83,
+            0,
+            400,
+            724
+          ],
+          "name": "land_0",
+          "source": "assets/source/hero/delivered/v3/land.png",
+          "rect": [
+            84,
+            133,
+            397,
+            523
+          ],
+          "foot": 313.0,
+          "scale": 0.3984848364333589,
+          "air": false
+        },
+        {
+          "cut": [
+            483,
+            0,
+            554,
+            724
+          ],
+          "name": "land_1",
+          "source": "assets/source/hero/delivered/v3/land.png",
+          "rect": [
+            610,
+            218,
+            425,
+            438
+          ],
+          "foot": 816.5,
+          "scale": 0.3984848364333589,
+          "air": false
+        },
+        {
+          "cut": [
+            1037,
+            0,
+            522,
+            724
+          ],
+          "name": "land_2",
+          "source": "assets/source/hero/delivered/v3/land.png",
+          "rect": [
+            1141,
+            171,
+            417,
+            485
+          ],
+          "foot": 1352.5,
+          "scale": 0.3984848364333589,
+          "air": false
+        },
+        {
+          "cut": [
+            1559,
+            0,
+            526,
+            724
+          ],
+          "name": "land_3",
+          "source": "assets/source/hero/delivered/v3/land.png",
+          "rect": [
+            1682,
+            133,
+            402,
+            523
+          ],
+          "foot": 1922.0,
+          "scale": 0.3984848364333589,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/trans_dash.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            17,
+            0,
+            272,
+            724
+          ],
+          "name": "dash_0",
+          "source": "assets/source/hero/delivered/v2/dash.png",
+          "rect": [
+            18,
+            184,
+            270,
+            392
+          ],
+          "foot": 171.0,
+          "scale": 0.5272144735322419,
+          "air": false
+        },
+        {
+          "cut": [
+            289,
+            0,
+            375,
+            724
+          ],
+          "name": "dash_1",
+          "source": "assets/source/hero/delivered/v2/dash.png",
+          "rect": [
+            330,
+            237,
+            333,
+            339
+          ],
+          "foot": 493.0,
+          "scale": 0.5272144735322419,
+          "air": false
+        },
+        {
+          "cut": [
+            664,
+            0,
+            423,
+            724
+          ],
+          "name": "dash_2",
+          "source": "assets/source/hero/delivered/v2/dash.png",
+          "rect": [
+            712,
+            251,
+            374,
+            325
+          ],
+          "foot": 813.5,
+          "scale": 0.5272144735322419,
+          "air": false
+        },
+        {
+          "cut": [
+            1087,
+            0,
+            394,
+            724
+          ],
+          "name": "dash_3",
+          "source": "assets/source/hero/delivered/v2/dash.png",
+          "rect": [
+            1123,
+            237,
+            356,
+            331
+          ],
+          "foot": 1384.0,
+          "scale": 0.5272144735322419,
+          "air": false
+        },
+        {
+          "cut": [
+            1481,
+            0,
+            372,
+            724
+          ],
+          "name": "dash_4",
+          "source": "assets/source/hero/delivered/v2/dash.png",
+          "rect": [
+            1529,
+            225,
+            322,
+            352
+          ],
+          "foot": 1675.5,
+          "scale": 0.5272144735322419,
+          "air": false
+        },
+        {
+          "cut": [
+            1853,
+            0,
+            277,
+            724
+          ],
+          "name": "dash_5",
+          "source": "assets/source/hero/delivered/v2/dash.png",
+          "rect": [
+            1868,
+            182,
+            261,
+            396
+          ],
+          "foot": 2012.0,
+          "scale": 0.5272144735322419,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/trans_skid.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            42,
+            0,
+            418,
+            724
+          ],
+          "name": "skid_0",
+          "source": "assets/source/hero/delivered/v3/skid.png",
+          "rect": [
+            43,
+            172,
+            415,
+            464
+          ],
+          "foot": 338.0,
+          "scale": 0.4499277404921672,
+          "air": false
+        },
+        {
+          "cut": [
+            460,
+            0,
+            525,
+            724
+          ],
+          "name": "skid_1",
+          "source": "assets/source/hero/delivered/v3/skid.png",
+          "rect": [
+            561,
+            174,
+            422,
+            461
+          ],
+          "foot": 911.0,
+          "scale": 0.4499277404921672,
+          "air": false
+        },
+        {
+          "cut": [
+            985,
+            0,
+            605,
+            724
+          ],
+          "name": "skid_2",
+          "source": "assets/source/hero/delivered/v3/skid.png",
+          "rect": [
+            1131,
+            176,
+            457,
+            451
+          ],
+          "foot": 1446.5,
+          "scale": 0.4499277404921672,
+          "air": false
+        },
+        {
+          "cut": [
+            1590,
+            0,
+            519,
+            724
+          ],
+          "name": "skid_3",
+          "source": "assets/source/hero/delivered/v3/skid.png",
+          "rect": [
+            1687,
+            175,
+            421,
+            462
+          ],
+          "foot": 2038.5,
+          "scale": 0.4499277404921672,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/trans_wall.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            138,
+            0,
+            355,
+            724
+          ],
+          "name": "wall_0",
+          "source": "assets/source/hero/delivered/v3/wall_slide.png",
+          "rect": [
+            139,
+            40,
+            352,
+            533
+          ],
+          "foot": 363.5,
+          "scale": 0.4433167796548159,
+          "air": false
+        },
+        {
+          "cut": [
+            493,
+            0,
+            515,
+            724
+          ],
+          "name": "wall_1",
+          "source": "assets/source/hero/delivered/v3/wall_slide.png",
+          "rect": [
+            660,
+            91,
+            346,
+            535
+          ],
+          "foot": 857.0,
+          "scale": 0.4433167796548159,
+          "air": false
+        },
+        {
+          "cut": [
+            1008,
+            0,
+            532,
+            724
+          ],
+          "name": "wall_2",
+          "source": "assets/source/hero/delivered/v3/wall_slide.png",
+          "rect": [
+            1189,
+            163,
+            349,
+            535
+          ],
+          "foot": 1387.5,
+          "scale": 0.4433167796548159,
+          "air": false
+        },
+        {
+          "cut": [
+            1540,
+            0,
+            552,
+            724
+          ],
+          "name": "wall_3",
+          "source": "assets/source/hero/delivered/v3/wall_slide.png",
+          "rect": [
+            1751,
+            239,
+            340,
+            470
+          ],
+          "foot": 1917.5,
+          "scale": 0.4433167796548159,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/hurt.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            30,
+            0,
+            422,
+            724
+          ],
+          "name": "hurt_0",
+          "source": "assets/source/hero/delivered/v3/hurt.png",
+          "rect": [
+            31,
+            90,
+            419,
+            559
+          ],
+          "foot": 296.0,
+          "scale": 0.3638399362386406,
+          "air": false
+        },
+        {
+          "cut": [
+            452,
+            0,
+            612,
+            724
+          ],
+          "name": "hurt_1",
+          "source": "assets/source/hero/delivered/v3/hurt.png",
+          "rect": [
+            558,
+            93,
+            504,
+            563
+          ],
+          "foot": 919.5,
+          "scale": 0.3638399362386406,
+          "air": false
+        },
+        {
+          "cut": [
+            1064,
+            0,
+            560,
+            724
+          ],
+          "name": "hurt_2",
+          "source": "assets/source/hero/delivered/v3/hurt.png",
+          "rect": [
+            1110,
+            135,
+            512,
+            517
+          ],
+          "foot": 1454.0,
+          "scale": 0.3638399362386406,
+          "air": false
+        },
+        {
+          "cut": [
+            1624,
+            0,
+            490,
+            724
+          ],
+          "name": "hurt_3",
+          "source": "assets/source/hero/delivered/v3/hurt.png",
+          "rect": [
+            1665,
+            136,
+            448,
+            512
+          ],
+          "foot": 1917.0,
+          "scale": 0.3638399362386406,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/death.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            12,
+            0,
+            305,
+            724
+          ],
+          "name": "death_0",
+          "source": "assets/source/hero/delivered/v3/death.png",
+          "rect": [
+            13,
+            219,
+            304,
+            386
+          ],
+          "foot": 205.0,
+          "scale": 0.5698155349882854,
+          "air": false
+        },
+        {
+          "cut": [
+            317,
+            0,
+            321,
+            724
+          ],
+          "name": "death_1",
+          "source": "assets/source/hero/delivered/v3/death.png",
+          "rect": [
+            317,
+            256,
+            319,
+            350
+          ],
+          "foot": 469.0,
+          "scale": 0.5698155349882854,
+          "air": false
+        },
+        {
+          "cut": [
+            638,
+            0,
+            339,
+            724
+          ],
+          "name": "death_2",
+          "source": "assets/source/hero/delivered/v3/death.png",
+          "rect": [
+            651,
+            299,
+            286,
+            306
+          ],
+          "foot": 778.5,
+          "scale": 0.5698155349882854,
+          "air": false
+        },
+        {
+          "cut": [
+            977,
+            0,
+            373,
+            724
+          ],
+          "name": "death_3",
+          "source": "assets/source/hero/delivered/v3/death.png",
+          "rect": [
+            977,
+            373,
+            349,
+            237
+          ],
+          "foot": 1146.0,
+          "scale": 0.5698155349882854,
+          "air": false
+        },
+        {
+          "cut": [
+            1350,
+            0,
+            400,
+            724
+          ],
+          "name": "death_4",
+          "source": "assets/source/hero/delivered/v3/death.png",
+          "rect": [
+            1370,
+            448,
+            378,
+            170
+          ],
+          "foot": 1582.0,
+          "scale": 0.5698155349882854,
+          "air": false
+        },
+        {
+          "cut": [
+            1750,
+            0,
+            403,
+            724
+          ],
+          "name": "death_5",
+          "source": "assets/source/hero/delivered/v3/death.png",
+          "rect": [
+            1775,
+            446,
+            378,
+            172
+          ],
+          "foot": 1989.0,
+          "scale": 0.5698155349882854,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/heal.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            45,
+            0,
+            366,
+            724
+          ],
+          "name": "heal_0",
+          "source": "assets/source/hero/delivered/v4/heal.png",
+          "rect": [
+            46,
+            97,
+            363,
+            552
+          ],
+          "foot": 269.0,
+          "scale": 0.3892298429152062,
+          "air": false
+        },
+        {
+          "cut": [
+            411,
+            0,
+            419,
+            724
+          ],
+          "name": "heal_1",
+          "source": "assets/source/hero/delivered/v4/heal.png",
+          "rect": [
+            460,
+            99,
+            368,
+            551
+          ],
+          "foot": 673.5,
+          "scale": 0.3892298429152062,
+          "air": false
+        },
+        {
+          "cut": [
+            830,
+            0,
+            429,
+            724
+          ],
+          "name": "heal_2",
+          "source": "assets/source/hero/delivered/v4/heal.png",
+          "rect": [
+            880,
+            144,
+            377,
+            506
+          ],
+          "foot": 1092.5,
+          "scale": 0.3892298429152062,
+          "air": false
+        },
+        {
+          "cut": [
+            1259,
+            0,
+            404,
+            724
+          ],
+          "name": "heal_3",
+          "source": "assets/source/hero/delivered/v4/heal.png",
+          "rect": [
+            1297,
+            100,
+            365,
+            550
+          ],
+          "foot": 1514.0,
+          "scale": 0.3892298429152062,
+          "air": false
+        },
+        {
+          "cut": [
+            1663,
+            0,
+            428,
+            724
+          ],
+          "name": "heal_4",
+          "source": "assets/source/hero/delivered/v4/heal.png",
+          "rect": [
+            1736,
+            97,
+            355,
+            554
+          ],
+          "foot": 1954.0,
+          "scale": 0.3892298429152062,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/idle.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            20,
+            0,
+            258,
+            724
+          ],
+          "name": "idle_0",
+          "source": "assets/source/hero/delivered/v2/idle.png",
+          "rect": [
+            21,
+            195,
+            255,
+            370
+          ],
+          "foot": 160.8509921303463,
+          "scale": 0.5661953236204955,
+          "air": false
+        },
+        {
+          "cut": [
+            278,
+            0,
+            259,
+            724
+          ],
+          "name": "idle_1",
+          "source": "assets/source/hero/delivered/v2/idle.png",
+          "rect": [
+            283,
+            192,
+            253,
+            373
+          ],
+          "foot": 417.34149817414004,
+          "scale": 0.5661953236204955,
+          "air": false
+        },
+        {
+          "cut": [
+            537,
+            0,
+            266,
+            724
+          ],
+          "name": "idle_2",
+          "source": "assets/source/hero/delivered/v2/idle.png",
+          "rect": [
+            548,
+            193,
+            253,
+            372
+          ],
+          "foot": 681.2626649830237,
+          "scale": 0.5661953236204955,
+          "air": false
+        },
+        {
+          "cut": [
+            803,
+            0,
+            268,
+            724
+          ],
+          "name": "idle_3",
+          "source": "assets/source/hero/delivered/v2/idle.png",
+          "rect": [
+            813,
+            199,
+            257,
+            366
+          ],
+          "foot": 951.8549772009112,
+          "scale": 0.5661953236204955,
+          "air": false
+        },
+        {
+          "cut": [
+            1071,
+            0,
+            272,
+            724
+          ],
+          "name": "idle_4",
+          "source": "assets/source/hero/delivered/v2/idle.png",
+          "rect": [
+            1086,
+            194,
+            255,
+            370
+          ],
+          "foot": 1206.8559695524061,
+          "scale": 0.5661953236204955,
+          "air": false
+        },
+        {
+          "cut": [
+            1343,
+            0,
+            267,
+            724
+          ],
+          "name": "idle_5",
+          "source": "assets/source/hero/delivered/v2/idle.png",
+          "rect": [
+            1354,
+            169,
+            255,
+            395
+          ],
+          "foot": 1494.717396681722,
+          "scale": 0.5661953236204955,
+          "air": false
+        },
+        {
+          "cut": [
+            1610,
+            0,
+            269,
+            724
+          ],
+          "name": "idle_6",
+          "source": "assets/source/hero/delivered/v2/idle.png",
+          "rect": [
+            1622,
+            201,
+            256,
+            364
+          ],
+          "foot": 1754.1526023285926,
+          "scale": 0.5661953236204955,
+          "air": false
+        },
+        {
+          "cut": [
+            1879,
+            0,
+            269,
+            724
+          ],
+          "name": "idle_7",
+          "source": "assets/source/hero/delivered/v2/idle.png",
+          "rect": [
+            1888,
+            195,
+            259,
+            369
+          ],
+          "foot": 2024.1159606189415,
+          "scale": 0.5661953236204955,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/fidget.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            10,
+            0,
+            264,
+            724
+          ],
+          "name": "fidget_0",
+          "source": "assets/source/hero/delivered/v4/fidget.png",
+          "rect": [
+            11,
+            184,
+            262,
+            376
+          ],
+          "foot": 141.0,
+          "scale": 0.5409901968699916,
+          "air": false
+        },
+        {
+          "cut": [
+            274,
+            0,
+            266,
+            724
+          ],
+          "name": "fidget_1",
+          "source": "assets/source/hero/delivered/v4/fidget.png",
+          "rect": [
+            279,
+            184,
+            260,
+            376
+          ],
+          "foot": 415.5,
+          "scale": 0.5409901968699916,
+          "air": false
+        },
+        {
+          "cut": [
+            540,
+            0,
+            274,
+            724
+          ],
+          "name": "fidget_2",
+          "source": "assets/source/hero/delivered/v4/fidget.png",
+          "rect": [
+            548,
+            185,
+            264,
+            375
+          ],
+          "foot": 680.0,
+          "scale": 0.5409901968699916,
+          "air": false
+        },
+        {
+          "cut": [
+            814,
+            0,
+            267,
+            724
+          ],
+          "name": "fidget_3",
+          "source": "assets/source/hero/delivered/v4/fidget.png",
+          "rect": [
+            823,
+            186,
+            256,
+            374
+          ],
+          "foot": 939.0,
+          "scale": 0.5409901968699916,
+          "air": false
+        },
+        {
+          "cut": [
+            1081,
+            0,
+            271,
+            724
+          ],
+          "name": "fidget_4",
+          "source": "assets/source/hero/delivered/v4/fidget.png",
+          "rect": [
+            1093,
+            173,
+            257,
+            387
+          ],
+          "foot": 1221.5,
+          "scale": 0.5409901968699916,
+          "air": false
+        },
+        {
+          "cut": [
+            1352,
+            0,
+            271,
+            724
+          ],
+          "name": "fidget_5",
+          "source": "assets/source/hero/delivered/v4/fidget.png",
+          "rect": [
+            1362,
+            187,
+            259,
+            373
+          ],
+          "foot": 1490.5,
+          "scale": 0.5409901968699916,
+          "air": false
+        },
+        {
+          "cut": [
+            1623,
+            0,
+            269,
+            724
+          ],
+          "name": "fidget_6",
+          "source": "assets/source/hero/delivered/v4/fidget.png",
+          "rect": [
+            1629,
+            186,
+            261,
+            374
+          ],
+          "foot": 1759.5,
+          "scale": 0.5409901968699916,
+          "air": false
+        },
+        {
+          "cut": [
+            1892,
+            0,
+            269,
+            724
+          ],
+          "name": "fidget_7",
+          "source": "assets/source/hero/delivered/v4/fidget.png",
+          "rect": [
+            1897,
+            185,
+            263,
+            375
+          ],
+          "foot": 2028.0,
+          "scale": 0.5409901968699916,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/gate_walk.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            7,
+            0,
+            237,
+            724
+          ],
+          "name": "back_0",
+          "source": "assets/source/hero/delivered/v2/walk_away.png",
+          "rect": [
+            8,
+            219,
+            234,
+            351
+          ],
+          "foot": 137.5,
+          "scale": 0.5299438679970624,
+          "air": false
+        },
+        {
+          "cut": [
+            244,
+            0,
+            257,
+            724
+          ],
+          "name": "back_1",
+          "source": "assets/source/hero/delivered/v2/walk_away.png",
+          "rect": [
+            253,
+            215,
+            246,
+            360
+          ],
+          "foot": 401.0,
+          "scale": 0.5299438679970624,
+          "air": false
+        },
+        {
+          "cut": [
+            501,
+            0,
+            257,
+            724
+          ],
+          "name": "back_2",
+          "source": "assets/source/hero/delivered/v2/walk_away.png",
+          "rect": [
+            511,
+            215,
+            245,
+            360
+          ],
+          "foot": 663.5,
+          "scale": 0.5299438679970624,
+          "air": false
+        },
+        {
+          "cut": [
+            758,
+            0,
+            270,
+            724
+          ],
+          "name": "back_3",
+          "source": "assets/source/hero/delivered/v2/walk_away.png",
+          "rect": [
+            783,
+            215,
+            244,
+            364
+          ],
+          "foot": 931.0,
+          "scale": 0.5299438679970624,
+          "air": false
+        },
+        {
+          "cut": [
+            1028,
+            0,
+            280,
+            724
+          ],
+          "name": "back_4",
+          "source": "assets/source/hero/delivered/v2/walk_away.png",
+          "rect": [
+            1059,
+            219,
+            247,
+            363
+          ],
+          "foot": 1206.5,
+          "scale": 0.5299438679970624,
+          "air": false
+        },
+        {
+          "cut": [
+            1308,
+            0,
+            271,
+            724
+          ],
+          "name": "back_5",
+          "source": "assets/source/hero/delivered/v2/walk_away.png",
+          "rect": [
+            1336,
+            219,
+            241,
+            364
+          ],
+          "foot": 1484.5,
+          "scale": 0.5299438679970624,
+          "air": false
+        },
+        {
+          "cut": [
+            1579,
+            0,
+            274,
+            724
+          ],
+          "name": "back_6",
+          "source": "assets/source/hero/delivered/v2/walk_away.png",
+          "rect": [
+            1609,
+            219,
+            243,
+            364
+          ],
+          "foot": 1748.5,
+          "scale": 0.5299438679970624,
+          "air": false
+        },
+        {
+          "cut": [
+            1853,
+            0,
+            266,
+            724
+          ],
+          "name": "back_7",
+          "source": "assets/source/hero/delivered/v2/walk_away.png",
+          "rect": [
+            1881,
+            219,
+            237,
+            357
+          ],
+          "foot": 2010.5,
+          "scale": 0.5299438679970624,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/gate_run.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            12,
+            0,
+            251,
+            724
+          ],
+          "name": "backRun_0",
+          "source": "assets/source/hero/delivered/v2/run_away.png",
+          "rect": [
+            12,
+            186,
+            249,
+            368
+          ],
+          "foot": 72.5,
+          "scale": 0.5225880473245563,
+          "air": false
+        },
+        {
+          "cut": [
+            263,
+            0,
+            265,
+            724
+          ],
+          "name": "backRun_1",
+          "source": "assets/source/hero/delivered/v2/run_away.png",
+          "rect": [
+            270,
+            186,
+            256,
+            367
+          ],
+          "foot": 363.5,
+          "scale": 0.5225880473245563,
+          "air": false
+        },
+        {
+          "cut": [
+            528,
+            0,
+            274,
+            724
+          ],
+          "name": "backRun_2",
+          "source": "assets/source/hero/delivered/v2/run_away.png",
+          "rect": [
+            544,
+            186,
+            256,
+            368
+          ],
+          "foot": 669.0,
+          "scale": 0.5225880473245563,
+          "air": false
+        },
+        {
+          "cut": [
+            802,
+            0,
+            266,
+            724
+          ],
+          "name": "backRun_3",
+          "source": "assets/source/hero/delivered/v2/run_away.png",
+          "rect": [
+            825,
+            198,
+            241,
+            356
+          ],
+          "foot": 956.0,
+          "scale": 0.5225880473245563,
+          "air": false
+        },
+        {
+          "cut": [
+            1068,
+            0,
+            269,
+            724
+          ],
+          "name": "backRun_4",
+          "source": "assets/source/hero/delivered/v2/run_away.png",
+          "rect": [
+            1094,
+            200,
+            241,
+            352
+          ],
+          "foot": 1229.0,
+          "scale": 0.5225880473245563,
+          "air": false
+        },
+        {
+          "cut": [
+            1337,
+            0,
+            271,
+            724
+          ],
+          "name": "backRun_5",
+          "source": "assets/source/hero/delivered/v2/run_away.png",
+          "rect": [
+            1368,
+            195,
+            239,
+            359
+          ],
+          "foot": 1498.5,
+          "scale": 0.5225880473245563,
+          "air": false
+        },
+        {
+          "cut": [
+            1608,
+            0,
+            275,
+            724
+          ],
+          "name": "backRun_6",
+          "source": "assets/source/hero/delivered/v2/run_away.png",
+          "rect": [
+            1638,
+            198,
+            243,
+            352
+          ],
+          "foot": 1753.5,
+          "scale": 0.5225880473245563,
+          "air": false
+        },
+        {
+          "cut": [
+            1883,
+            0,
+            265,
+            724
+          ],
+          "name": "backRun_7",
+          "source": "assets/source/hero/delivered/v2/run_away.png",
+          "rect": [
+            1909,
+            199,
+            238,
+            355
+          ],
+          "foot": 2035.5,
+          "scale": 0.5225880473245563,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/gate_walk_single.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            17,
+            0,
+            259,
+            724
+          ],
+          "name": "backSingle_0",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+          "rect": [
+            18,
+            193,
+            256,
+            376
+          ],
+          "foot": 150.0,
+          "scale": 0.4849963057838152,
+          "air": false
+        },
+        {
+          "cut": [
+            276,
+            0,
+            234,
+            724
+          ],
+          "name": "backSingle_1",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+          "rect": [
+            283,
+            191,
+            225,
+            380
+          ],
+          "foot": 418.0,
+          "scale": 0.4849963057838152,
+          "air": false
+        },
+        {
+          "cut": [
+            510,
+            0,
+            270,
+            724
+          ],
+          "name": "backSingle_2",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+          "rect": [
+            553,
+            190,
+            225,
+            381
+          ],
+          "foot": 681.0,
+          "scale": 0.4849963057838152,
+          "air": false
+        },
+        {
+          "cut": [
+            780,
+            0,
+            279,
+            724
+          ],
+          "name": "backSingle_3",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+          "rect": [
+            817,
+            206,
+            240,
+            370
+          ],
+          "foot": 950.5,
+          "scale": 0.4849963057838152,
+          "air": false
+        },
+        {
+          "cut": [
+            1059,
+            0,
+            281,
+            724
+          ],
+          "name": "backSingle_4",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+          "rect": [
+            1097,
+            200,
+            241,
+            370
+          ],
+          "foot": 1220.5,
+          "scale": 0.4849963057838152,
+          "air": false
+        },
+        {
+          "cut": [
+            1340,
+            0,
+            264,
+            724
+          ],
+          "name": "backSingle_5",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+          "rect": [
+            1366,
+            200,
+            236,
+            377
+          ],
+          "foot": 1495.5,
+          "scale": 0.4849963057838152,
+          "air": false
+        },
+        {
+          "cut": [
+            1604,
+            0,
+            270,
+            724
+          ],
+          "name": "backSingle_6",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+          "rect": [
+            1633,
+            198,
+            239,
+            380
+          ],
+          "foot": 1763.0,
+          "scale": 0.4849963057838152,
+          "air": false
+        },
+        {
+          "cut": [
+            1874,
+            0,
+            268,
+            724
+          ],
+          "name": "backSingle_7",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_single.png",
+          "rect": [
+            1902,
+            196,
+            239,
+            381
+          ],
+          "foot": 2037.0,
+          "scale": 0.4849963057838152,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/gate_walk_dual.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            7,
+            0,
+            272,
+            724
+          ],
+          "name": "backDual_0",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_dual.png",
+          "rect": [
+            8,
+            188,
+            269,
+            367
+          ],
+          "foot": 146.0,
+          "scale": 0.48712563977055073,
+          "air": false
+        },
+        {
+          "cut": [
+            279,
+            0,
+            258,
+            724
+          ],
+          "name": "backDual_1",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_dual.png",
+          "rect": [
+            286,
+            184,
+            250,
+            375
+          ],
+          "foot": 428.0,
+          "scale": 0.48712563977055073,
+          "air": false
+        },
+        {
+          "cut": [
+            537,
+            0,
+            250,
+            724
+          ],
+          "name": "backDual_2",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_dual.png",
+          "rect": [
+            546,
+            184,
+            239,
+            374
+          ],
+          "foot": 679.5,
+          "scale": 0.48712563977055073,
+          "air": false
+        },
+        {
+          "cut": [
+            787,
+            0,
+            294,
+            724
+          ],
+          "name": "backDual_3",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_dual.png",
+          "rect": [
+            834,
+            186,
+            245,
+            373
+          ],
+          "foot": 946.5,
+          "scale": 0.48712563977055073,
+          "air": false
+        },
+        {
+          "cut": [
+            1081,
+            0,
+            272,
+            724
+          ],
+          "name": "backDual_4",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_dual.png",
+          "rect": [
+            1092,
+            193,
+            259,
+            368
+          ],
+          "foot": 1213.5,
+          "scale": 0.48712563977055073,
+          "air": false
+        },
+        {
+          "cut": [
+            1353,
+            0,
+            271,
+            724
+          ],
+          "name": "backDual_5",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_dual.png",
+          "rect": [
+            1364,
+            192,
+            259,
+            370
+          ],
+          "foot": 1495.5,
+          "scale": 0.48712563977055073,
+          "air": false
+        },
+        {
+          "cut": [
+            1624,
+            0,
+            271,
+            724
+          ],
+          "name": "backDual_6",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_dual.png",
+          "rect": [
+            1632,
+            195,
+            261,
+            370
+          ],
+          "foot": 1765.5,
+          "scale": 0.48712563977055073,
+          "air": false
+        },
+        {
+          "cut": [
+            1895,
+            0,
+            270,
+            724
+          ],
+          "name": "backDual_7",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_dual.png",
+          "rect": [
+            1902,
+            194,
+            263,
+            368
+          ],
+          "foot": 2028.5,
+          "scale": 0.48712563977055073,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/gate_walk_joined.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            8,
+            0,
+            264,
+            724
+          ],
+          "name": "backJoined_0",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_joined.png",
+          "rect": [
+            9,
+            206,
+            263,
+            362
+          ],
+          "foot": 152.5,
+          "scale": 0.542496270164769,
+          "air": false
+        },
+        {
+          "cut": [
+            272,
+            0,
+            262,
+            724
+          ],
+          "name": "backJoined_1",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_joined.png",
+          "rect": [
+            274,
+            206,
+            260,
+            364
+          ],
+          "foot": 418.0,
+          "scale": 0.542496270164769,
+          "air": false
+        },
+        {
+          "cut": [
+            534,
+            0,
+            261,
+            724
+          ],
+          "name": "backJoined_2",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_joined.png",
+          "rect": [
+            535,
+            209,
+            258,
+            361
+          ],
+          "foot": 666.5,
+          "scale": 0.542496270164769,
+          "air": false
+        },
+        {
+          "cut": [
+            795,
+            0,
+            249,
+            724
+          ],
+          "name": "backJoined_3",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_joined.png",
+          "rect": [
+            802,
+            209,
+            241,
+            366
+          ],
+          "foot": 931.5,
+          "scale": 0.542496270164769,
+          "air": false
+        },
+        {
+          "cut": [
+            1044,
+            0,
+            279,
+            724
+          ],
+          "name": "backJoined_4",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_joined.png",
+          "rect": [
+            1078,
+            206,
+            243,
+            370
+          ],
+          "foot": 1197.5,
+          "scale": 0.542496270164769,
+          "air": false
+        },
+        {
+          "cut": [
+            1323,
+            0,
+            274,
+            724
+          ],
+          "name": "backJoined_5",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_joined.png",
+          "rect": [
+            1352,
+            205,
+            244,
+            373
+          ],
+          "foot": 1481.5,
+          "scale": 0.542496270164769,
+          "air": false
+        },
+        {
+          "cut": [
+            1597,
+            0,
+            268,
+            724
+          ],
+          "name": "backJoined_6",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_joined.png",
+          "rect": [
+            1627,
+            205,
+            237,
+            375
+          ],
+          "foot": 1746.5,
+          "scale": 0.542496270164769,
+          "air": false
+        },
+        {
+          "cut": [
+            1865,
+            0,
+            266,
+            724
+          ],
+          "name": "backJoined_7",
+          "source": "assets/source/hero/delivered/v4/walk_away_armed_joined.png",
+          "rect": [
+            1898,
+            205,
+            232,
+            376
+          ],
+          "foot": 2014.0,
+          "scale": 0.542496270164769,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/trans_air.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            64,
+            0,
+            360,
+            724
+          ],
+          "name": "rise_0",
+          "source": "assets/source/hero/delivered/v3/air_rise.png",
+          "rect": [
+            65,
+            179,
+            354,
+            434
+          ],
+          "foot": 238.5,
+          "scale": 0.45601238510329495,
+          "air": true
+        },
+        {
+          "cut": [
+            424,
+            0,
+            555,
+            724
+          ],
+          "name": "rise_1",
+          "source": "assets/source/hero/delivered/v3/air_rise.png",
+          "rect": [
+            578,
+            117,
+            399,
+            475
+          ],
+          "foot": 793.0,
+          "scale": 0.45601238510329495,
+          "air": true
+        },
+        {
+          "cut": [
+            979,
+            0,
+            535,
+            724
+          ],
+          "name": "rise_2",
+          "source": "assets/source/hero/delivered/v3/air_rise.png",
+          "rect": [
+            1114,
+            62,
+            398,
+            551
+          ],
+          "foot": 1277.0,
+          "scale": 0.45601238510329495,
+          "air": true
+        },
+        {
+          "cut": [
+            1514,
+            0,
+            600,
+            724
+          ],
+          "name": "rise_3",
+          "source": "assets/source/hero/delivered/v3/air_rise.png",
+          "rect": [
+            1655,
+            28,
+            458,
+            562
+          ],
+          "foot": 1796.0,
+          "scale": 0.45601238510329495,
+          "air": true
+        },
+        {
+          "cut": [
+            33,
+            0,
+            471,
+            724
+          ],
+          "name": "fall_0",
+          "source": "assets/source/hero/delivered/v3/air_fall.png",
+          "rect": [
+            33,
+            37,
+            469,
+            492
+          ],
+          "foot": 215.0,
+          "scale": 0.4313244036626633,
+          "air": true
+        },
+        {
+          "cut": [
+            504,
+            0,
+            553,
+            724
+          ],
+          "name": "fall_1",
+          "source": "assets/source/hero/delivered/v3/air_fall.png",
+          "rect": [
+            592,
+            52,
+            463,
+            563
+          ],
+          "foot": 899.0,
+          "scale": 0.4313244036626633,
+          "air": true
+        },
+        {
+          "cut": [
+            1057,
+            0,
+            508,
+            724
+          ],
+          "name": "fall_2",
+          "source": "assets/source/hero/delivered/v3/air_fall.png",
+          "rect": [
+            1188,
+            89,
+            375,
+            590
+          ],
+          "foot": 1393.0,
+          "scale": 0.4313244036626633,
+          "air": true
+        },
+        {
+          "cut": [
+            1565,
+            0,
+            544,
+            724
+          ],
+          "name": "fall_3",
+          "source": "assets/source/hero/delivered/v3/air_fall.png",
+          "rect": [
+            1728,
+            130,
+            380,
+            560
+          ],
+          "foot": 1919.0,
+          "scale": 0.4313244036626633,
+          "air": true
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/gait/run.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "cut": [
+            0,
+            0,
+            627,
+            627
+          ],
+          "name": "runA_0",
+          "source": "assets/source/hero/delivery-2026-09-18/runA.png",
+          "rect": [
+            47,
+            43,
+            527,
+            559
+          ],
+          "foot": 390.2285785198875,
+          "scale": 0.36297049887744326,
+          "air": false,
+          "lift": 6,
+          "flight": true
+        },
+        {
+          "cut": [
+            627,
+            0,
+            627,
+            627
+          ],
+          "name": "runA_1",
+          "source": "assets/source/hero/delivery-2026-09-18/runA.png",
+          "rect": [
+            649,
+            51,
+            510,
+            559
+          ],
+          "foot": 1001.6238049338906,
+          "scale": 0.36297049887744326,
+          "air": false,
+          "lift": 0,
+          "flight": false
+        },
+        {
+          "cut": [
+            0,
+            627,
+            627,
+            627
+          ],
+          "name": "runA_2",
+          "source": "assets/source/hero/delivery-2026-09-18/runA.png",
+          "rect": [
+            39,
+            644,
+            518,
+            569
+          ],
+          "foot": 397.66109392721876,
+          "scale": 0.36297049887744326,
+          "air": false,
+          "lift": 0,
+          "flight": false
+        },
+        {
+          "cut": [
+            627,
+            627,
+            627,
+            627
+          ],
+          "name": "runA_3",
+          "source": "assets/source/hero/delivery-2026-09-18/runA.png",
+          "rect": [
+            655,
+            647,
+            556,
+            552
+          ],
+          "foot": 1010.903600810052,
+          "scale": 0.36297049887744326,
+          "air": false,
+          "lift": 12,
+          "flight": true
+        },
+        {
+          "cut": [
+            0,
+            0,
+            627,
+            627
+          ],
+          "name": "runB_0",
+          "source": "assets/source/hero/delivery-2026-09-18/runB.png",
+          "rect": [
+            38,
+            56,
+            559,
+            567
+          ],
+          "foot": 417.21835940365054,
+          "scale": 0.3649269929509341,
+          "air": false,
+          "lift": 10,
+          "flight": true
+        },
+        {
+          "cut": [
+            627,
+            0,
+            627,
+            627
+          ],
+          "name": "runB_1",
+          "source": "assets/source/hero/delivery-2026-09-18/runB.png",
+          "rect": [
+            648,
+            56,
+            531,
+            551
+          ],
+          "foot": 1003.1103464531212,
+          "scale": 0.3649269929509341,
+          "air": false,
+          "lift": 8,
+          "flight": true
+        },
+        {
+          "cut": [
+            0,
+            627,
+            627,
+            627
+          ],
+          "name": "runB_2",
+          "source": "assets/source/hero/delivery-2026-09-18/runB.png",
+          "rect": [
+            38,
+            657,
+            546,
+            563
+          ],
+          "foot": 404.4759282052781,
+          "scale": 0.3649269929509341,
+          "air": false,
+          "lift": 6,
+          "flight": true
+        },
+        {
+          "cut": [
+            627,
+            627,
+            627,
+            627
+          ],
+          "name": "runB_3",
+          "source": "assets/source/hero/delivery-2026-09-18/runB.png",
+          "rect": [
+            653,
+            667,
+            554,
+            547
+          ],
+          "foot": 1018.5476357697573,
+          "scale": 0.3649269929509341,
+          "air": false,
+          "lift": 0,
+          "flight": false
+        },
+        {
+          "cut": [
+            0,
+            0,
+            619,
+            635
+          ],
+          "name": "runC_0",
+          "source": "assets/source/hero/delivery-2026-09-18/runC.png",
+          "rect": [
+            29,
+            18,
+            551,
+            608
+          ],
+          "foot": 408.7898453720401,
+          "scale": 0.33695136713615004,
+          "air": false,
+          "lift": 0,
+          "flight": false
+        },
+        {
+          "cut": [
+            619,
+            0,
+            620,
+            635
+          ],
+          "name": "runC_1",
+          "source": "assets/source/hero/delivery-2026-09-18/runC.png",
+          "rect": [
+            624,
+            22,
+            557,
+            609
+          ],
+          "foot": 978.2907130088038,
+          "scale": 0.33695136713615004,
+          "air": false,
+          "lift": 0,
+          "flight": false
+        },
+        {
+          "cut": [
+            0,
+            635,
+            619,
+            635
+          ],
+          "name": "runC_2",
+          "source": "assets/source/hero/delivery-2026-09-18/runC.png",
+          "rect": [
+            23,
+            641,
+            559,
+            596
+          ],
+          "foot": 411.80157441461233,
+          "scale": 0.33695136713615004,
+          "air": false,
+          "lift": 12,
+          "flight": true
+        },
+        {
+          "cut": [
+            619,
+            635,
+            620,
+            635
+          ],
+          "name": "runC_3",
+          "source": "assets/source/hero/delivery-2026-09-18/runC.png",
+          "rect": [
+            645,
+            644,
+            561,
+            544
+          ],
+          "foot": 1033.0285415867531,
+          "scale": 0.33695136713615004,
+          "air": false,
+          "lift": 16,
+          "flight": true
+        },
+        {
+          "cut": [
+            0,
+            0,
+            627,
+            627
+          ],
+          "name": "runD_0",
+          "source": "assets/source/hero/delivery-2026-09-18/runD.png",
+          "rect": [
+            45,
+            61,
+            561,
+            549
+          ],
+          "foot": 422.1907501088637,
+          "scale": 0.35304234946587193,
+          "air": false,
+          "lift": 8,
+          "flight": true
+        },
+        {
+          "cut": [
+            627,
+            0,
+            627,
+            627
+          ],
+          "name": "runD_1",
+          "source": "assets/source/hero/delivery-2026-09-18/runD.png",
+          "rect": [
+            661,
+            61,
+            535,
+            486
+          ],
+          "foot": 1021.150501506724,
+          "scale": 0.35304234946587193,
+          "air": false,
+          "lift": 32,
+          "flight": true
+        },
+        {
+          "cut": [
+            0,
+            627,
+            627,
+            627
+          ],
+          "name": "runD_2",
+          "source": "assets/source/hero/delivery-2026-09-18/runD.png",
+          "rect": [
+            38,
+            663,
+            553,
+            528
+          ],
+          "foot": 420.7008174226132,
+          "scale": 0.35304234946587193,
+          "air": false,
+          "lift": 16,
+          "flight": true
+        },
+        {
+          "cut": [
+            627,
+            627,
+            627,
+            627
+          ],
+          "name": "runD_3",
+          "source": "assets/source/hero/delivery-2026-09-18/runD.png",
+          "rect": [
+            650,
+            663,
+            572,
+            565
+          ],
+          "foot": 1027.7053591546933,
+          "scale": 0.35304234946587193,
+          "air": false,
+          "lift": 6,
+          "flight": true
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/single_charge.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "single_0",
+          "source": "assets/source/hero/delivery-2026-09-18/single_charge-clean.png",
+          "rect": [
+            15,
+            163,
+            271,
+            310
+          ],
+          "cut": [
+            15,
+            163,
+            271,
+            310
+          ],
+          "scale": 0.6709677419354839,
+          "foot": 149
+        },
+        {
+          "name": "single_1",
+          "source": "assets/source/hero/delivery-2026-09-18/single_charge-clean.png",
+          "rect": [
+            316,
+            163,
+            251,
+            310
+          ],
+          "cut": [
+            316,
+            163,
+            251,
+            310
+          ],
+          "scale": 0.6709677419354839,
+          "foot": 451
+        },
+        {
+          "name": "single_2",
+          "source": "assets/source/hero/delivery-2026-09-18/single_charge-clean.png",
+          "rect": [
+            608,
+            63,
+            253,
+            410
+          ],
+          "cut": [
+            608,
+            63,
+            253,
+            410
+          ],
+          "scale": 0.6709677419354839,
+          "foot": 750
+        },
+        {
+          "name": "single_3",
+          "source": "assets/source/hero/delivery-2026-09-18/single_charge-clean.png",
+          "rect": [
+            929,
+            174,
+            276,
+            301
+          ],
+          "cut": [
+            929,
+            174,
+            276,
+            301
+          ],
+          "scale": 0.6709677419354839,
+          "foot": 1080
+        },
+        {
+          "name": "single_4",
+          "source": "assets/source/hero/delivery-2026-09-18/single_charge-clean.png",
+          "rect": [
+            1203,
+            285,
+            314,
+            242
+          ],
+          "cut": [
+            1203,
+            285,
+            314,
+            242
+          ],
+          "scale": 0.6709677419354839,
+          "foot": 1300
+        },
+        {
+          "name": "single_5",
+          "source": "assets/source/hero/delivery-2026-09-18/single_charge-clean.png",
+          "rect": [
+            19,
+            606,
+            253,
+            340
+          ],
+          "cut": [
+            19,
+            606,
+            253,
+            340
+          ],
+          "scale": 0.6709677419354839,
+          "foot": 147
+        },
+        {
+          "name": "single_6",
+          "source": "assets/source/hero/delivery-2026-09-18/single_charge-clean.png",
+          "rect": [
+            308,
+            657,
+            316,
+            289
+          ],
+          "cut": [
+            308,
+            657,
+            316,
+            289
+          ],
+          "scale": 0.6709677419354839,
+          "foot": 421
+        },
+        {
+          "name": "single_7",
+          "source": "assets/source/hero/delivery-2026-09-18/single_charge-clean.png",
+          "rect": [
+            622,
+            672,
+            356,
+            273
+          ],
+          "cut": [
+            622,
+            672,
+            356,
+            273
+          ],
+          "scale": 0.6709677419354839,
+          "foot": 750
+        },
+        {
+          "name": "single_8",
+          "source": "assets/source/hero/delivery-2026-09-18/single_charge-clean.png",
+          "rect": [
+            948,
+            665,
+            280,
+            284
+          ],
+          "cut": [
+            948,
+            665,
+            280,
+            284
+          ],
+          "scale": 0.6709677419354839,
+          "foot": 1087
+        },
+        {
+          "name": "single_9",
+          "source": "assets/source/hero/delivery-2026-09-18/single_charge-clean.png",
+          "rect": [
+            1241,
+            659,
+            274,
+            290
+          ],
+          "cut": [
+            1241,
+            659,
+            274,
+            290
+          ],
+          "scale": 0.6709677419354839,
+          "foot": 1370
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/dual.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "dual_0",
+          "source": "assets/source/hero/delivery-2026-09-18/dual-clean.png",
+          "rect": [
+            44,
+            127,
+            319,
+            334
+          ],
+          "cut": [
+            44,
+            127,
+            319,
+            334
+          ],
+          "scale": 0.67011430771868,
+          "foot": 227.5,
+          "air": false
+        },
+        {
+          "name": "dual_1",
+          "source": "assets/source/hero/delivery-2026-09-18/dual-clean.png",
+          "rect": [
+            412,
+            134,
+            327,
+            327
+          ],
+          "cut": [
+            412,
+            134,
+            327,
+            327
+          ],
+          "scale": 0.67011430771868,
+          "foot": 571.0,
+          "air": false
+        },
+        {
+          "name": "dual_2",
+          "source": "assets/source/hero/delivery-2026-09-18/dual-clean.png",
+          "rect": [
+            798,
+            140,
+            399,
+            321
+          ],
+          "cut": [
+            798,
+            140,
+            399,
+            321
+          ],
+          "scale": 0.67011430771868,
+          "foot": 976.1421578449094,
+          "air": false
+        },
+        {
+          "name": "dual_3",
+          "source": "assets/source/hero/delivery-2026-09-18/dual-clean.png",
+          "rect": [
+            1193,
+            148,
+            321,
+            313
+          ],
+          "cut": [
+            1193,
+            148,
+            321,
+            313
+          ],
+          "scale": 0.67011430771868,
+          "foot": 1323.0,
+          "air": false
+        },
+        {
+          "name": "dual_4",
+          "source": "assets/source/hero/delivery-2026-09-18/dual-clean.png",
+          "rect": [
+            51,
+            571,
+            327,
+            342
+          ],
+          "cut": [
+            51,
+            571,
+            327,
+            342
+          ],
+          "scale": 0.67011430771868,
+          "foot": 167.5,
+          "air": true
+        },
+        {
+          "name": "dual_5",
+          "source": "assets/source/hero/delivery-2026-09-18/dual-clean.png",
+          "rect": [
+            422,
+            624,
+            386,
+            311
+          ],
+          "cut": [
+            422,
+            624,
+            386,
+            311
+          ],
+          "scale": 0.67011430771868,
+          "foot": 587.1421578449094,
+          "air": false
+        },
+        {
+          "name": "dual_6",
+          "source": "assets/source/hero/delivery-2026-09-18/dual-clean.png",
+          "rect": [
+            810,
+            619,
+            370,
+            317
+          ],
+          "cut": [
+            810,
+            619,
+            370,
+            317
+          ],
+          "scale": 0.67011430771868,
+          "foot": 959.1421578449094,
+          "air": false
+        },
+        {
+          "name": "dual_7",
+          "source": "assets/source/hero/delivery-2026-09-18/dual-clean.png",
+          "rect": [
+            1203,
+            603,
+            314,
+            333
+          ],
+          "cut": [
+            1203,
+            603,
+            314,
+            333
+          ],
+          "scale": 0.67011430771868,
+          "foot": 1385.0,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/dual_charge.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "dual_charge_0",
+          "source": "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png",
+          "rect": [
+            24,
+            208,
+            271,
+            269
+          ],
+          "cut": [
+            24,
+            208,
+            271,
+            269
+          ],
+          "scale": 0.8652482282872318,
+          "foot": 160.5,
+          "air": false
+        },
+        {
+          "name": "dual_charge_1",
+          "source": "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png",
+          "rect": [
+            335,
+            262,
+            280,
+            212
+          ],
+          "cut": [
+            335,
+            262,
+            280,
+            212
+          ],
+          "scale": 0.8652482282872318,
+          "foot": 475.0,
+          "air": false
+        },
+        {
+          "name": "dual_charge_2",
+          "source": "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png",
+          "rect": [
+            638,
+            207,
+            261,
+            270
+          ],
+          "cut": [
+            638,
+            207,
+            261,
+            270
+          ],
+          "scale": 0.8652482282872318,
+          "foot": 767.0,
+          "air": false
+        },
+        {
+          "name": "dual_charge_3",
+          "source": "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png",
+          "rect": [
+            937,
+            213,
+            265,
+            239
+          ],
+          "cut": [
+            937,
+            213,
+            265,
+            239
+          ],
+          "scale": 0.8652482282872318,
+          "foot": 1042.5,
+          "air": true
+        },
+        {
+          "name": "dual_charge_4",
+          "source": "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png",
+          "rect": [
+            1249,
+            229,
+            266,
+            232
+          ],
+          "cut": [
+            1249,
+            229,
+            266,
+            232
+          ],
+          "scale": 0.8652482282872318,
+          "foot": 1374.5,
+          "air": true
+        },
+        {
+          "name": "dual_charge_5",
+          "source": "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png",
+          "rect": [
+            37,
+            663,
+            245,
+            253
+          ],
+          "cut": [
+            37,
+            663,
+            245,
+            253
+          ],
+          "scale": 0.8652482282872318,
+          "foot": 143.0,
+          "air": true
+        },
+        {
+          "name": "dual_charge_6",
+          "source": "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png",
+          "rect": [
+            337,
+            588,
+            246,
+            309
+          ],
+          "cut": [
+            337,
+            588,
+            246,
+            309
+          ],
+          "scale": 0.8652482282872318,
+          "foot": 445.5,
+          "air": true
+        },
+        {
+          "name": "dual_charge_7",
+          "source": "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png",
+          "rect": [
+            600,
+            591,
+            331,
+            312
+          ],
+          "cut": [
+            600,
+            591,
+            331,
+            312
+          ],
+          "scale": 0.8652482282872318,
+          "foot": 771.0491800635843,
+          "air": true
+        },
+        {
+          "name": "dual_charge_8",
+          "source": "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png",
+          "rect": [
+            920,
+            713,
+            337,
+            225
+          ],
+          "cut": [
+            920,
+            713,
+            337,
+            225
+          ],
+          "scale": 0.8652482282872318,
+          "foot": 1085.9508199364157,
+          "air": false
+        },
+        {
+          "name": "dual_charge_9",
+          "source": "assets/source/hero/delivery-2026-09-18/dual_charge-clean.png",
+          "rect": [
+            1263,
+            662,
+            257,
+            282
+          ],
+          "cut": [
+            1263,
+            662,
+            257,
+            282
+          ],
+          "scale": 0.8652482282872318,
+          "foot": 1396.5,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/joined_throw.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "joined_throw_0",
+          "source": "assets/source/hero/delivery-2026-09-18/joined_throw-clean.png",
+          "rect": [
+            82,
+            147,
+            356,
+            379
+          ],
+          "cut": [
+            82,
+            147,
+            356,
+            379
+          ],
+          "scale": 0.5728078447819125,
+          "foot": 297.0,
+          "air": false
+        },
+        {
+          "name": "joined_throw_1",
+          "source": "assets/source/hero/delivery-2026-09-18/joined_throw-clean.png",
+          "rect": [
+            590,
+            120,
+            367,
+            414
+          ],
+          "cut": [
+            590,
+            120,
+            367,
+            414
+          ],
+          "scale": 0.5728078447819125,
+          "foot": 763.0,
+          "air": false
+        },
+        {
+          "name": "joined_throw_2",
+          "source": "assets/source/hero/delivery-2026-09-18/joined_throw-clean.png",
+          "rect": [
+            1132,
+            69,
+            302,
+            464
+          ],
+          "cut": [
+            1132,
+            69,
+            302,
+            464
+          ],
+          "scale": 0.5728078447819125,
+          "foot": 1297.5,
+          "air": false
+        },
+        {
+          "name": "joined_throw_3",
+          "source": "assets/source/hero/delivery-2026-09-18/joined_throw-clean.png",
+          "rect": [
+            66,
+            595,
+            357,
+            372
+          ],
+          "cut": [
+            66,
+            595,
+            357,
+            372
+          ],
+          "scale": 0.5728078447819125,
+          "foot": 237.0,
+          "air": false
+        },
+        {
+          "name": "joined_throw_4",
+          "source": "assets/source/hero/delivery-2026-09-18/joined_throw-clean.png",
+          "rect": [
+            582,
+            602,
+            398,
+            363
+          ],
+          "cut": [
+            582,
+            602,
+            398,
+            363
+          ],
+          "scale": 0.5728078447819125,
+          "foot": 738.5,
+          "air": false
+        },
+        {
+          "name": "joined_throw_5",
+          "source": "assets/source/hero/delivery-2026-09-18/joined_throw-clean.png",
+          "rect": [
+            1104,
+            594,
+            388,
+            377
+          ],
+          "cut": [
+            1104,
+            594,
+            388,
+            377
+          ],
+          "scale": 0.5728078447819125,
+          "foot": 1276.5,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/joined.webp",
+      "cell": 384,
+      "floor": 376,
+      "frames": [
+        {
+          "name": "joined_0",
+          "source": "assets/source/hero/delivery-2026-09-18/joined-clean.png",
+          "rect": [
+            19,
+            197,
+            387,
+            321
+          ],
+          "cut": [
+            19,
+            197,
+            387,
+            321
+          ],
+          "scale": 0.7163903939964155,
+          "foot": 195.5,
+          "air": false
+        },
+        {
+          "name": "joined_1",
+          "source": "assets/source/hero/delivery-2026-09-18/joined-clean.png",
+          "rect": [
+            432,
+            75,
+            265,
+            444
+          ],
+          "cut": [
+            432,
+            75,
+            265,
+            444
+          ],
+          "scale": 0.7163903939964155,
+          "foot": 560.5,
+          "air": false
+        },
+        {
+          "name": "joined_2",
+          "source": "assets/source/hero/delivery-2026-09-18/joined-clean.png",
+          "rect": [
+            809,
+            221,
+            406,
+            297
+          ],
+          "cut": [
+            809,
+            221,
+            406,
+            297
+          ],
+          "scale": 0.7163903939964155,
+          "foot": 963.740349523865,
+          "air": false
+        },
+        {
+          "name": "joined_3",
+          "source": "assets/source/hero/delivery-2026-09-18/joined-clean.png",
+          "rect": [
+            1230,
+            27,
+            292,
+            491
+          ],
+          "cut": [
+            1230,
+            27,
+            292,
+            491
+          ],
+          "scale": 0.7163903939964155,
+          "foot": 1358.0,
+          "air": false
+        },
+        {
+          "name": "joined_4",
+          "source": "assets/source/hero/delivery-2026-09-18/joined-clean.png",
+          "rect": [
+            19,
+            640,
+            403,
+            340
+          ],
+          "cut": [
+            19,
+            640,
+            403,
+            340
+          ],
+          "scale": 0.7163903939964155,
+          "foot": 202.5,
+          "air": false
+        },
+        {
+          "name": "joined_5",
+          "source": "assets/source/hero/delivery-2026-09-18/joined-clean.png",
+          "rect": [
+            399,
+            682,
+            440,
+            298
+          ],
+          "cut": [
+            399,
+            682,
+            440,
+            298
+          ],
+          "scale": 0.7163903939964155,
+          "foot": 587.740349523865,
+          "air": false
+        },
+        {
+          "name": "joined_6",
+          "source": "assets/source/hero/delivery-2026-09-18/joined-clean.png",
+          "rect": [
+            839,
+            675,
+            355,
+            305
+          ],
+          "cut": [
+            839,
+            675,
+            355,
+            305
+          ],
+          "scale": 0.7163903939964155,
+          "foot": 966.5,
+          "air": false
+        },
+        {
+          "name": "joined_7",
+          "source": "assets/source/hero/delivery-2026-09-18/joined-clean.png",
+          "rect": [
+            1190,
+            669,
+            339,
+            311
+          ],
+          "cut": [
+            1190,
+            669,
+            339,
+            311
+          ],
+          "scale": 0.7163903939964155,
+          "foot": 1350.5,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/joined_projectile.webp",
+      "kind": "projectile",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "joined_projectile",
+          "source": "assets/source/hero/delivery-2026-09-18/joined-projectile.png",
+          "rect": [
+            391,
+            300,
+            1390,
+            138
+          ],
+          "scale": 0.2014388489208633,
+          "foot": 1086,
+          "air": true
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/single.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "single_0",
+          "source": "assets/source/hero/delivery-2026-09-18/single-clean.png",
+          "rect": [
+            21,
+            154,
+            330,
+            327
+          ],
+          "cut": [
+            21,
+            154,
+            330,
+            327
+          ],
+          "scale": 0.6344059112784722,
+          "foot": 157.5,
+          "air": false
+        },
+        {
+          "name": "single_1",
+          "source": "assets/source/hero/delivery-2026-09-18/single-clean.png",
+          "rect": [
+            388,
+            164,
+            322,
+            318
+          ],
+          "cut": [
+            388,
+            164,
+            322,
+            318
+          ],
+          "scale": 0.6344059112784722,
+          "foot": 570.5,
+          "air": false
+        },
+        {
+          "name": "single_2",
+          "source": "assets/source/hero/delivery-2026-09-18/single-clean.png",
+          "rect": [
+            807,
+            185,
+            380,
+            296
+          ],
+          "cut": [
+            807,
+            185,
+            380,
+            296
+          ],
+          "scale": 0.6344059112784722,
+          "foot": 964.0,
+          "air": false
+        },
+        {
+          "name": "single_3",
+          "source": "assets/source/hero/delivery-2026-09-18/single-clean.png",
+          "rect": [
+            1242,
+            110,
+            233,
+            349
+          ],
+          "cut": [
+            1242,
+            110,
+            233,
+            349
+          ],
+          "scale": 0.6344059112784722,
+          "foot": 1358.5,
+          "air": true
+        },
+        {
+          "name": "single_4",
+          "source": "assets/source/hero/delivery-2026-09-18/single-clean.png",
+          "rect": [
+            43,
+            582,
+            279,
+            390
+          ],
+          "cut": [
+            43,
+            582,
+            279,
+            390
+          ],
+          "scale": 0.6344059112784722,
+          "foot": 211.5,
+          "air": false
+        },
+        {
+          "name": "single_5",
+          "source": "assets/source/hero/delivery-2026-09-18/single-clean.png",
+          "rect": [
+            428,
+            658,
+            366,
+            313
+          ],
+          "cut": [
+            428,
+            658,
+            366,
+            313
+          ],
+          "scale": 0.6344059112784722,
+          "foot": 560.7108749006668,
+          "air": false
+        },
+        {
+          "name": "single_6",
+          "source": "assets/source/hero/delivery-2026-09-18/single-clean.png",
+          "rect": [
+            813,
+            644,
+            348,
+            329
+          ],
+          "cut": [
+            813,
+            644,
+            348,
+            329
+          ],
+          "scale": 0.6344059112784722,
+          "foot": 964.0,
+          "air": false
+        },
+        {
+          "name": "single_7",
+          "source": "assets/source/hero/delivery-2026-09-18/single-clean.png",
+          "rect": [
+            1199,
+            649,
+            308,
+            324
+          ],
+          "cut": [
+            1199,
+            649,
+            308,
+            324
+          ],
+          "scale": 0.6344059112784722,
+          "foot": 1341.0,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/claw_charge.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "claw_charge_0",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            40,
+            40,
+            229,
+            313
+          ],
+          "cut": [
+            40,
+            40,
+            229,
+            313
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 170.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_1",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            367,
+            50,
+            301,
+            303
+          ],
+          "cut": [
+            367,
+            50,
+            301,
+            303
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 524.5,
+          "air": false
+        },
+        {
+          "name": "claw_charge_2",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            778,
+            63,
+            315,
+            291
+          ],
+          "cut": [
+            778,
+            63,
+            315,
+            291
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 933.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_3",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            1177,
+            47,
+            276,
+            307
+          ],
+          "cut": [
+            1177,
+            47,
+            276,
+            307
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 1322.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_4",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            24,
+            391,
+            262,
+            296
+          ],
+          "cut": [
+            24,
+            391,
+            262,
+            296
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 161.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_5",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            398,
+            395,
+            273,
+            291
+          ],
+          "cut": [
+            398,
+            395,
+            273,
+            291
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 546.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_6",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            776,
+            403,
+            315,
+            283
+          ],
+          "cut": [
+            776,
+            403,
+            315,
+            283
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 925.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_7",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            1168,
+            403,
+            344,
+            284
+          ],
+          "cut": [
+            1168,
+            403,
+            344,
+            284
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 1321.5,
+          "air": false
+        },
+        {
+          "name": "claw_charge_8",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            42,
+            728,
+            313,
+            276
+          ],
+          "cut": [
+            42,
+            728,
+            313,
+            276
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 177.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_9",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            423,
+            730,
+            306,
+            274
+          ],
+          "cut": [
+            423,
+            730,
+            306,
+            274
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 556.5,
+          "air": false
+        },
+        {
+          "name": "claw_charge_10",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            800,
+            729,
+            306,
+            275
+          ],
+          "cut": [
+            800,
+            729,
+            306,
+            275
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 961.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_11",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge-clean.png",
+          "rect": [
+            1229,
+            708,
+            229,
+            296
+          ],
+          "cut": [
+            1229,
+            708,
+            229,
+            296
+          ],
+          "scale": 0.6924622640604033,
+          "foot": 1361.0,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/claw_jab.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "claw_jab_0",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_jab-clean.png",
+          "rect": [
+            7,
+            171,
+            335,
+            432
+          ],
+          "cut": [
+            7,
+            171,
+            335,
+            432
+          ],
+          "scale": 0.4787828786627121,
+          "foot": 191.0,
+          "air": false
+        },
+        {
+          "name": "claw_jab_1",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_jab-clean.png",
+          "rect": [
+            390,
+            175,
+            375,
+            428
+          ],
+          "cut": [
+            390,
+            175,
+            375,
+            428
+          ],
+          "scale": 0.4787828786627121,
+          "foot": 601.5,
+          "air": false
+        },
+        {
+          "name": "claw_jab_2",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_jab-clean.png",
+          "rect": [
+            808,
+            176,
+            512,
+            426
+          ],
+          "cut": [
+            808,
+            176,
+            512,
+            426
+          ],
+          "scale": 0.4787828786627121,
+          "foot": 1010.8828477463968,
+          "air": false
+        },
+        {
+          "name": "claw_jab_3",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_jab-clean.png",
+          "rect": [
+            1359,
+            176,
+            370,
+            427
+          ],
+          "cut": [
+            1359,
+            176,
+            370,
+            427
+          ],
+          "scale": 0.4787828786627121,
+          "foot": 1551.0,
+          "air": false
+        },
+        {
+          "name": "claw_jab_4",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_jab-clean.png",
+          "rect": [
+            1783,
+            172,
+            345,
+            431
+          ],
+          "cut": [
+            1783,
+            172,
+            345,
+            431
+          ],
+          "scale": 0.4787828786627121,
+          "foot": 1974.5,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/recharge.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "recharge_0",
+          "source": "assets/source/hero/delivery-2026-09-18/recharge-clean.png",
+          "rect": [
+            24,
+            122,
+            279,
+            386
+          ],
+          "cut": [
+            24,
+            122,
+            279,
+            386
+          ],
+          "scale": 0.5356130935197267,
+          "foot": 192.5,
+          "air": false
+        },
+        {
+          "name": "recharge_1",
+          "source": "assets/source/hero/delivery-2026-09-18/recharge-clean.png",
+          "rect": [
+            404,
+            113,
+            281,
+            395
+          ],
+          "cut": [
+            404,
+            113,
+            281,
+            395
+          ],
+          "scale": 0.5356130935197267,
+          "foot": 550.5,
+          "air": false
+        },
+        {
+          "name": "recharge_2",
+          "source": "assets/source/hero/delivery-2026-09-18/recharge-clean.png",
+          "rect": [
+            758,
+            117,
+            306,
+            391
+          ],
+          "cut": [
+            758,
+            117,
+            306,
+            391
+          ],
+          "scale": 0.5356130935197267,
+          "foot": 891.5,
+          "air": false
+        },
+        {
+          "name": "recharge_3",
+          "source": "assets/source/hero/delivery-2026-09-18/recharge-clean.png",
+          "rect": [
+            1158,
+            116,
+            357,
+            393
+          ],
+          "cut": [
+            1158,
+            116,
+            357,
+            393
+          ],
+          "scale": 0.5356130935197267,
+          "foot": 1291.5,
+          "air": false
+        },
+        {
+          "name": "recharge_4",
+          "source": "assets/source/hero/delivery-2026-09-18/recharge-clean.png",
+          "rect": [
+            28,
+            565,
+            350,
+            388
+          ],
+          "cut": [
+            28,
+            565,
+            350,
+            388
+          ],
+          "scale": 0.5356130935197267,
+          "foot": 152.0,
+          "air": false
+        },
+        {
+          "name": "recharge_5",
+          "source": "assets/source/hero/delivery-2026-09-18/recharge-clean.png",
+          "rect": [
+            393,
+            565,
+            362,
+            388
+          ],
+          "cut": [
+            393,
+            565,
+            362,
+            388
+          ],
+          "scale": 0.5356130935197267,
+          "foot": 565.0,
+          "air": false
+        },
+        {
+          "name": "recharge_6",
+          "source": "assets/source/hero/delivery-2026-09-18/recharge-clean.png",
+          "rect": [
+            786,
+            564,
+            335,
+            388
+          ],
+          "cut": [
+            786,
+            564,
+            335,
+            388
+          ],
+          "scale": 0.5356130935197267,
+          "foot": 944.0,
+          "air": false
+        },
+        {
+          "name": "recharge_7",
+          "source": "assets/source/hero/delivery-2026-09-18/recharge-clean.png",
+          "rect": [
+            1145,
+            564,
+            371,
+            388
+          ],
+          "cut": [
+            1145,
+            564,
+            371,
+            388
+          ],
+          "scale": 0.5356130935197267,
+          "foot": 1298.5,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/departure.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "departure_0",
+          "source": "assets/source/hero/delivery-2026-09-18/departure-clean.png",
+          "rect": [
+            13,
+            182,
+            286,
+            408
+          ],
+          "cut": [
+            13,
+            182,
+            286,
+            408
+          ],
+          "scale": 0.5358338931481749,
+          "foot": 183.0,
+          "air": false
+        },
+        {
+          "name": "departure_1",
+          "source": "assets/source/hero/delivery-2026-09-18/departure-clean.png",
+          "rect": [
+            306,
+            201,
+            292,
+            394
+          ],
+          "cut": [
+            306,
+            201,
+            292,
+            394
+          ],
+          "scale": 0.5358338931481749,
+          "foot": 479.5,
+          "air": false
+        },
+        {
+          "name": "departure_2",
+          "source": "assets/source/hero/delivery-2026-09-18/departure-clean.png",
+          "rect": [
+            613,
+            215,
+            277,
+            373
+          ],
+          "cut": [
+            613,
+            215,
+            277,
+            373
+          ],
+          "scale": 0.5358338931481749,
+          "foot": 767.0,
+          "air": false
+        },
+        {
+          "name": "departure_3",
+          "source": "assets/source/hero/delivery-2026-09-18/departure-clean.png",
+          "rect": [
+            903,
+            233,
+            261,
+            359
+          ],
+          "cut": [
+            903,
+            233,
+            261,
+            359
+          ],
+          "scale": 0.5358338931481749,
+          "foot": 1050.5,
+          "air": false
+        },
+        {
+          "name": "departure_4",
+          "source": "assets/source/hero/delivery-2026-09-18/departure-clean.png",
+          "rect": [
+            1192,
+            256,
+            235,
+            334
+          ],
+          "cut": [
+            1192,
+            256,
+            235,
+            334
+          ],
+          "scale": 0.5358338931481749,
+          "foot": 1322.5,
+          "air": false
+        },
+        {
+          "name": "departure_5",
+          "source": "assets/source/hero/delivery-2026-09-18/departure-clean.png",
+          "rect": [
+            1472,
+            288,
+            205,
+            290
+          ],
+          "cut": [
+            1472,
+            288,
+            205,
+            290
+          ],
+          "scale": 0.5358338931481749,
+          "foot": 1591.5,
+          "air": false
+        },
+        {
+          "name": "departure_6",
+          "source": "assets/source/hero/delivery-2026-09-18/departure-clean.png",
+          "rect": [
+            1729,
+            327,
+            169,
+            240
+          ],
+          "cut": [
+            1729,
+            327,
+            169,
+            240
+          ],
+          "scale": 0.5358338931481749,
+          "foot": 1827.0,
+          "air": false
+        },
+        {
+          "name": "departure_7",
+          "source": "assets/source/hero/delivery-2026-09-18/departure-clean.png",
+          "rect": [
+            1960,
+            366,
+            132,
+            190
+          ],
+          "cut": [
+            1960,
+            366,
+            132,
+            190
+          ],
+          "scale": 0.5358338931481749,
+          "foot": 2036.0,
+          "air": false
+        }
+      ],
+      "perspective": "Intentional source depth recession; runtime compensates before applying continuous gate perspective."
+    },
+    {
+      "path": "assets/characters/hero/swing/claw_charge_alt.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "claw_charge_alt_0",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            49,
+            37,
+            239,
+            319
+          ],
+          "cut": [
+            49,
+            37,
+            239,
+            319
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 185.5,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_1",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            370,
+            33,
+            245,
+            323
+          ],
+          "cut": [
+            370,
+            33,
+            245,
+            323
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 512.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_2",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            707,
+            51,
+            273,
+            305
+          ],
+          "cut": [
+            707,
+            51,
+            273,
+            305
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 865.5,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_3",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            1082,
+            39,
+            277,
+            317
+          ],
+          "cut": [
+            1082,
+            39,
+            277,
+            317
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 1238.5,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_4",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            39,
+            394,
+            270,
+            308
+          ],
+          "cut": [
+            39,
+            394,
+            270,
+            308
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 187.5,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_5",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            365,
+            403,
+            277,
+            298
+          ],
+          "cut": [
+            365,
+            403,
+            277,
+            298
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 524.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_6",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            701,
+            391,
+            357,
+            311
+          ],
+          "cut": [
+            701,
+            391,
+            357,
+            311
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 843.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_7",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            1079,
+            392,
+            349,
+            309
+          ],
+          "cut": [
+            1079,
+            392,
+            349,
+            309
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 1214.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_8",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            43,
+            732,
+            351,
+            320
+          ],
+          "cut": [
+            43,
+            732,
+            351,
+            320
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 173.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_9",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            406,
+            735,
+            301,
+            317
+          ],
+          "cut": [
+            406,
+            735,
+            301,
+            317
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 535.5,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_10",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            750,
+            731,
+            259,
+            322
+          ],
+          "cut": [
+            750,
+            731,
+            259,
+            322
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 900.0,
+          "air": false
+        },
+        {
+          "name": "claw_charge_alt_11",
+          "source": "assets/source/hero/delivery-2026-09-18/claw_charge_alt-clean.png",
+          "rect": [
+            1114,
+            728,
+            241,
+            326
+          ],
+          "cut": [
+            1114,
+            728,
+            241,
+            326
+          ],
+          "scale": 0.6378809787431065,
+          "foot": 1249.0,
+          "air": false
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/air.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "aerial_0",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            20,
+            60,
+            255,
+            260
+          ],
+          "cut": [
+            20,
+            60,
+            255,
+            260
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 128.5,
+          "air": true
+        },
+        {
+          "name": "aerial_1",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            374,
+            20,
+            313,
+            323
+          ],
+          "cut": [
+            374,
+            20,
+            313,
+            323
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 513.5,
+          "air": true
+        },
+        {
+          "name": "aerial_2",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            729,
+            67,
+            348,
+            274
+          ],
+          "cut": [
+            729,
+            67,
+            348,
+            274
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 864.1176495557471,
+          "air": true
+        },
+        {
+          "name": "aerial_3",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            1109,
+            64,
+            321,
+            277
+          ],
+          "cut": [
+            1109,
+            64,
+            321,
+            277
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 1217.1176495557472,
+          "air": true
+        },
+        {
+          "name": "aerial_4",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            23,
+            392,
+            283,
+            286
+          ],
+          "cut": [
+            23,
+            392,
+            283,
+            286
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 149.5,
+          "air": true
+        },
+        {
+          "name": "aerial_5",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            384,
+            396,
+            281,
+            293
+          ],
+          "cut": [
+            384,
+            396,
+            281,
+            293
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 471.0,
+          "air": true
+        }
+      ]
+    },
+    {
+      "path": "assets/characters/hero/swing/down.webp",
+      "cell": 320,
+      "floor": 312,
+      "frames": [
+        {
+          "name": "aerial_6",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            754,
+            415,
+            252,
+            275
+          ],
+          "cut": [
+            754,
+            415,
+            252,
+            275
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 862.5,
+          "air": true
+        },
+        {
+          "name": "aerial_7",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            1095,
+            418,
+            293,
+            286
+          ],
+          "cut": [
+            1095,
+            418,
+            293,
+            286
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 1296.0,
+          "air": true
+        },
+        {
+          "name": "aerial_8",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            32,
+            731,
+            272,
+            330
+          ],
+          "cut": [
+            32,
+            731,
+            272,
+            330
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 244.88235044425286,
+          "air": true
+        },
+        {
+          "name": "aerial_9",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            420,
+            720,
+            230,
+            344
+          ],
+          "cut": [
+            420,
+            720,
+            230,
+            344
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 572.0,
+          "air": true
+        },
+        {
+          "name": "aerial_10",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            727,
+            810,
+            282,
+            254
+          ],
+          "cut": [
+            727,
+            810,
+            282,
+            254
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 861.5,
+          "air": false
+        },
+        {
+          "name": "aerial_11",
+          "source": "assets/source/hero/delivery-2026-09-18/aerial-clean.png",
+          "rect": [
+            1094,
+            810,
+            328,
+            243
+          ],
+          "cut": [
+            1094,
+            810,
+            328,
+            243
+          ],
+          "scale": 0.6952196820973964,
+          "foot": 1288.0,
+          "air": false
+        }
+      ]
+    }
+  ]
+}

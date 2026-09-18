@@ -19,7 +19,7 @@ const fs = require('fs'), path = require('path');
 // line of code.
 function ensureServer() {
   try {
-    execSync('curl -s -o /dev/null -m 2 http://127.0.0.1:8220/index.html', { stdio: 'ignore' });
+    execFileSync('curl', ['-s', '-o', require('os').devNull, '-m', '2', 'http://127.0.0.1:8220/index.html'], { stdio: 'ignore' });
     return;
   } catch (e) { /* dead or never started */ }
   const child = spawn('npx', ['http-server', '-p', '8220', '-s'],
@@ -29,6 +29,11 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['hero-move-coverage', 'actual renderer coverage for movement, aerial attacks, reactions and departure'],
+  ['hero-feedback', 'haptic device routing and duplicate pulse suppression', { noBrowser: true }],
+  ['hero-delivery', 'source provenance, frame gutters, scale and floor registration', { noBrowser: true }],
+  ['hero-frame-alpha', 'discrete sprites never blend into doubled silhouettes', { noBrowser: true }],
+  ['hero-alpha', 'original transparent artwork retains its dark visor', { noBrowser: true }],
   ['tutorial-controller', 'complete production tutorial, contextual locks and transition recovery', { noBrowser: true }],
   ['offline-release', 'scoped version cache, media seeking and storage-denied fallback', { noBrowser: true }],
   ['release-polish', 'cold artwork, actual screen scale, camera, input edges, workshop and movies'],

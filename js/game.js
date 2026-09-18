@@ -1796,6 +1796,7 @@ function doInteract(s) {
       t: dur, dur: dur, tick: 0.4, x: s.x + s.w / 2, y: s.y + 14,
       podTop: s.y, podH: s.h, phase: 'dock', dockT: dock, dock0: dock,
     };
+    if(typeof mediaFetch==='function')mediaFetch('heroRecharge',1);
     player.rechargeT = dur + dock;
     player.face = 1;
     player.volts = 99;
@@ -9984,6 +9985,7 @@ function gateEnter() {
   // the order has to be given here.
   if (typeof mediaFetch === 'function') {
     const armed = !!(G.save && G.save.flags && G.save.flags.crystal);
+    mediaFetch('heroDeparture', 1);
     mediaFetch(GATE_CLIP.key, 1);          // the authored walk-away, first
     mediaFetch(GATE_CLIP_RUN.key, 1);      // ...and the run, for cave mouths
     // ...and HER tier, whichever it is. The others can wait for their own gate.
@@ -10225,7 +10227,15 @@ function drawGateWalk() {
     const sx0 = g.x0 - camSX(), sy0 = g.y0 - camSY();
     const dir = (player && (player.faceVis || player.face)) || 1;
     const tp = g.turn || 0;
-    if (yawIm && tp >= 0.34) {
+    const departure=!armed && gateBackImg('heroDeparture');
+    if(departure) {
+      const col=Math.min(3,Math.floor(tp*4)),cw=departure.naturalWidth/8;
+      const ratios=[1,394/408,373/408,359/408];
+      const dh=92/ratios[col];
+      c.save();c.translate(sx0,sy0);if(dir<0&&col<3)c.scale(-1,1);
+      c.drawImage(departure,col*cw,0,cw,departure.naturalHeight,-dh/2,-dh,dh,dh);c.restore();
+      G.gateBackKey='heroDeparture';
+    } else if (yawIm && tp >= 0.34) {
       // the eased middle of the turn: the three-quarter cell leans in a hair
       // so the rotation reads as motion rather than as two stills
       const col = gateTurnCell(dir, tp);
@@ -10351,7 +10361,16 @@ function drawGateWalk() {
   const CLIPU = gateBackImg(CLIP.key) ? CLIP : GATE_CLIP;
   const want = g.pair ? g.pair[b] : '';
   const im = clipIm ? null : (want ? gateBackImg(want) : null);
-  if (clipIm) {
+  const departure=!armed && !intoCave && gateBackImg('heroDeparture');
+  if(departure) {
+    const col=3+Math.min(4,Math.floor(k*5)),cw=departure.naturalWidth/8;
+    // Source already recedes. Compensate its perspective before applying the
+    // existing continuous world-depth scale, so it never shrinks twice.
+    const ratio=[408,394,373,359,334,290,240,190][col]/408;
+    const dh=92*sc/ratio;
+    c.drawImage(departure,col*cw,0,cw,departure.naturalHeight,x-dh/2,y-dh,dh,dh);
+    G.gateBackKey='heroDeparture';
+  } else if (clipIm) {
     const nBack = CLIPU.cells - CLIPU.turn;
     // the run turns its legs over faster, so its stride counter is shorter
     const step = CLIPU === GATE_CLIP_RUN ? 19 : 26;
@@ -10366,15 +10385,15 @@ function drawGateWalk() {
   // what the shot actually drew her as, for tests/opening.cjs — "she turned her
   // back" is the whole point of this function and it is not readable from the
   // outside otherwise
-  if (!clipIm) G.gateBackKey = im ? want : '';
-  if (im) {
+  if (!clipIm && !departure) G.gateBackKey = im ? want : '';
+  if (im && !departure) {
     const dh = 92 * sc, dw = dh * (im.naturalWidth / im.naturalHeight);
     // the gait's vertical, off the same stride counter as the frames. The clip
     // does NOT get this: it carries its own vertical, and a second synthetic bob
     // over an authored cycle is the thing tests/gait.cjs forbids for the run.
     const rise = -Math.abs(Math.sin((trav / 26) * Math.PI)) * 2.2 * sc;
     c.drawImage(im, x - dw / 2, y - dh + rise, dw, dh);
-  } else if (!clipIm && player) {
+  } else if (!clipIm && !departure && player) {
     // Neither back plate decoded. Her live body is all that is left — but it is
     // driven at WALK speed, not the old 210, so that at worst the shot reads as
     // someone walking off rather than sprinting sideways into a wall.

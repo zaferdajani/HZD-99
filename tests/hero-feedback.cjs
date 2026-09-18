@@ -1,0 +1,16 @@
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
+const src=fs.readFileSync(path.join(__dirname,'../js/engine.js'),'utf8');
+const fragment=src.slice(src.indexOf('let lastFeedbackPulse ='),src.indexOf('\nconst cam =',src.indexOf('let lastFeedbackPulse =')));
+let time=100, calls=[], mobile=[];
+const ctx={performance:{now:()=>time},PAD:{on:true,gp:{vibrationActuator:{playEffect:(kind,args)=>{calls.push({kind,...args});return Promise.resolve();}}}},TOUCH:{enabled:true},tBuzz:ms=>mobile.push(ms),clamp:(v,a,b)=>Math.max(a,Math.min(b,v))};
+vm.createContext(ctx);vm.runInContext(fragment,ctx);
+vm.runInContext('padRumble(2,-1,2000);padRumble(.3,.3,80)',ctx);
+assert.equal(calls.length,1,'contact plus camera kick must not restart motors');
+assert.equal(calls[0].duration,1000);assert.equal(calls[0].strongMagnitude,1);assert.equal(calls[0].weakMagnitude,0);assert.equal(mobile.length,0);
+time+=50;ctx.PAD.on=false;vm.runInContext('padRumble(.3,.4,90)',ctx);assert.deepEqual(mobile,[90]);
+time+=50;ctx.TOUCH.enabled=false;vm.runInContext('padRumble(.3,.4,90)',ctx);assert.equal(mobile.length,1);
+time+=50;ctx.PAD.on=true;vm.runInContext('padRumble(.04,.10,22);padRumble(.42,.60,110)',ctx);
+assert.equal(calls.at(-1).strongMagnitude,.42,'confirmed contact overrides a same-frame light swing cue');
+time+=50;ctx.PAD.on=true;ctx.PAD.gp.vibrationActuator.playEffect=()=>Promise.reject(Error('unsupported'));
+vm.runInContext('padRumble(.3,.4,90)',ctx);
+setImmediate(()=>console.log('PASS haptic routing, bounded strength/duration, duplicate suppression and unsupported-device rejection'));

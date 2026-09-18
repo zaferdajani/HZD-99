@@ -1,0 +1,366 @@
+[
+  {
+    "id": "B1-01",
+    "sourceSha256": "2debf14062c438a5230be6bafb9fe3b2766d05403bfd1c17b4d018be6a2db95c",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/swing/uppercut.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B1-02",
+    "sourceSha256": "21f1723e45ab9494990bef4c060294643137c3b8e42039c549be08e0252845b6",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/gait/walk.webp",
+      "assets/characters/hero/states.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B1-03",
+    "sourceSha256": "873908478830a1128f75342d28a9b00acb602565ee1eee41a5b0f1c155f3d9b1",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/swing/claw_1.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B1-04",
+    "sourceSha256": "225ae25fd71c718b04c65322489c7bd35f31e4653ebfb96c03aeb472880a1c37",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/bare_bwalk_a.webp",
+      "assets/characters/hero/bare_bwalk_b.webp",
+      "assets/characters/hero/gate_walk.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B1-05",
+    "sourceSha256": "854fd990d1176a96aee779243f87ba727262ca10514c71b26a83d6558d0cb530",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/gate_run.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B1-06",
+    "sourceSha256": "86f28b20ec828a6759c27ae77bbe2b2194c4a28d725db8a644239b02cfd57e8d",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/trans_dash.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B1-07",
+    "sourceSha256": "3f5ed144900c23d5e7174290559f0bd24fb3a6b04e8d980a2d81bfe45c3e32a1",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/departure.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B1-08",
+    "sourceSha256": "4d14a710751f6ee3156fa4c9ed8b2fc8928fd75a1ddf2e3b0cc7891d2d3a7642",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/claw_charge_alt.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B1-09",
+    "sourceSha256": "be5df7828430e0b26ee8eeb8596201a75bd8056e67ffe8872d7fe934beb0b7a5",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/recharge.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B1-10",
+    "sourceSha256": "65c1d7aaec7a22624376330436cbbbea4b9727ee5b55f0bae03fcff5e6b124e7",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/idle.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B1-11",
+    "sourceSha256": "aba719df3cf3024c85208b7cf1d71eed971cc254c044a2d989f3ae665e9ee925",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/swing/claw_2.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B2-01",
+    "sourceSha256": "67e34ab675182756bb634bbd933a5e503f15d5df455d7705ecbce7b8afcd37c5",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/single_charge.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B2-02",
+    "sourceSha256": "324a709882aabb604d76d7c4bff4880223c1a1742c29302f01c33081e213471c",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/dual.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B2-03",
+    "sourceSha256": "7fc894a621ca72e7f8cbc25cd7a105cb0914223d09f9889701acf7641eacfb0b",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/dual_charge.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B2-04",
+    "sourceSha256": "e7affd75c08cd6d7c0cee884104529132270544a5ffe0df957086c45363458de",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/joined.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B2-05",
+    "sourceSha256": "4306a43337f2085820e39a52c0a96bdb56670b1ef9915496d8a93684d9e0bb22",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/joined_projectile.webp",
+      "assets/characters/hero/swing/joined_throw.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B2-06",
+    "sourceSha256": "be1124930a53e8ebb38599f0a2d7821f1b13cc8f702618a5ad671d82eefdcabe",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/claw_jab.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B2-07",
+    "sourceSha256": "a28b4ed9a810d165f1a2ae82cfb0219dcc52ececc0e0ac9db3754336fe5fdde2",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/claw_charge.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B2-08",
+    "sourceSha256": "77c737c5e65a4d8fa295b6b0e603553601f79b2c259042e325606f025b7f2a9a",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/single.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B3-01",
+    "sourceSha256": "45389e9f567e5eb898acde7d8a82376b55ea7d146a0908e7649ad61b7421e243",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/trans_wall.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B3-02",
+    "sourceSha256": "529dce850c9f063de80d88b7c39576f27c396807aa4a6e4a731e51e1d37ca0c9",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/trans_skid.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B3-03",
+    "sourceSha256": "026cceb63c18bdb5af3e720469ebad8642bece955be049ea06bedf4c2e877899",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/trans_takeoff.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B3-04",
+    "sourceSha256": "3dcb0a2ee05418f1d5d723c1303328af1311178bbf8dca0728e63d8ab1ed08de",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/trans_air.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B3-05",
+    "sourceSha256": "54837a25b119ee28f18b2a6fe583bc90cadb6fa44b010503c2a4bb0614ad4b88",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/swing/burst.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B3-06",
+    "sourceSha256": "357ab3974a2b432c0186020f7e43febe9db02ff72d2db68e2998ed95eaf613ac",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/death.webp",
+      "assets/characters/hero/states.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B3-07",
+    "sourceSha256": "2f9f1c010fb7453c0505136ef64b58f298fde1bb257f0fb4a4f42fdae5fca7e5",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/swing/burst_fx.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B3-08",
+    "sourceSha256": "56d85f6e8293b312025ea7edf56f0b0404130a388cb08ba4939db8e34a492a96",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/hurt.webp",
+      "assets/characters/hero/states.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B3-09",
+    "sourceSha256": "b1ed07c84cbafe76149a6d1277aaa35aee4962ec1605b5ddb9de6d0092b95292",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/trans_air.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B3-10",
+    "sourceSha256": "8e493275f9e09403bca513ee28fa5a6ca3ba6497f82515d13d767396977d211c",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/trans_land.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B4-01",
+    "sourceSha256": "fe993b150b15739d789d9001fd222d4f542155411e0a15c85c278361f2cd3d98",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/fidget.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B4-02",
+    "sourceSha256": "f5bcb1bce74eb1332393c47fe553f4958e94c12656e636dcabc8ac4b7ba8742c",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/heal.webp",
+      "assets/characters/hero/states.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B4-03",
+    "sourceSha256": "f5bcb1bce74eb1332393c47fe553f4958e94c12656e636dcabc8ac4b7ba8742c",
+    "duplicateOf": "B4-02",
+    "runtime": [
+      "assets/characters/hero/heal.webp",
+      "assets/characters/hero/states.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B4-04",
+    "sourceSha256": "28ac4d9fba9e562ae55a4e475de28790776c51acb537e4ba2a57f2015485ffc2",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/gate_walk_joined.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B4-05",
+    "sourceSha256": "374a64cf3a80f2a24e3c7dcc714ab2839e598d2101a4257287117ac2ec9373e2",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/gate_walk_dual.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B4-06",
+    "sourceSha256": "b1ed07c84cbafe76149a6d1277aaa35aee4962ec1605b5ddb9de6d0092b95292",
+    "duplicateOf": "B3-09",
+    "runtime": [
+      "assets/characters/hero/states.webp",
+      "assets/characters/hero/trans_air.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B4-07",
+    "sourceSha256": "1ac5efd1288e3037342e67544a0017ca5c3503acc0b93789bbbbd13ef55549b3",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/backwalk_a.webp",
+      "assets/characters/hero/backwalk_b.webp",
+      "assets/characters/hero/gate_walk_single.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "B4-08",
+    "sourceSha256": "26f0aa9041bf330292193b538c7164b5cd9fb9fd28771286040dbd0b9b3743df",
+    "duplicateOf": null,
+    "runtime": [
+      "assets/characters/hero/heal_fx.webp"
+    ],
+    "status": "integrated locally"
+  },
+  {
+    "id": "combat-overview-2026-09-18",
+    "sourceSha256": "d1bb15f7b09a2f728f70266b47acb414b13579e1d66b39e3a06fc8c091603c97",
+    "runtime": [
+      "assets/characters/hero/swing/air.webp",
+      "assets/characters/hero/swing/down.webp"
+    ],
+    "status": "motion reference; other move rows covered by the supplied individual sheets"
+  }
+]

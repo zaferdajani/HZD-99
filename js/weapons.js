@@ -32,6 +32,7 @@ function weaponMode(save = G.save) {
 function equipWeapon(mode, save = G.save) {
   if (!save || !weaponOwned(mode, save)) return false;
   save.weaponMode = mode;
+  if(typeof warmHeroWeaponArt==='function')warmHeroWeaponArt(mode);
   return true;
 }
 function grantWeapon(stage, save = G.save) {
@@ -43,5 +44,6 @@ function grantWeapon(stage, save = G.save) {
   else if (stage === 'joined' && f.crystal && f.crystal2) f.connector = 1;
   else return false;
   save.weaponMode = stage;
+  if(typeof warmHeroWeaponArt==='function')warmHeroWeaponArt(stage);
   return true;
 }

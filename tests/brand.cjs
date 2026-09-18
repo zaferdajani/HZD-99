@@ -27,7 +27,7 @@ const chk = (c, name, detail) => (c ? ok : bad).push(name + (detail ? '  ' + det
   }
 
   // ---- and the screens a player can stop and read --------------------------
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.goto('http://127.0.0.1:8220/index.html');

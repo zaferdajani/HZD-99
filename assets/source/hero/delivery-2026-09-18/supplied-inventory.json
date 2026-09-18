@@ -1,0 +1,615 @@
+[
+  {
+    "id": "B1-01",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "2debf14062c438a5230be6bafb9fe3b2766d05403bfd1c17b4d018be6a2db95c",
+    "git_blob": "a04b2f769b1b652a6270ddfe434996a975d4d33f",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v2/uppercut.png"
+    ]
+  },
+  {
+    "id": "B1-02",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "ChatGPT Image Sep 15, 2026, 11_00_54 PM (2).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "21f1723e45ab9494990bef4c060294643137c3b8e42039c549be08e0252845b6",
+    "git_blob": "818f734723952cb82dece92a6bb8c983499a0a49",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v2/walk.png"
+    ]
+  },
+  {
+    "id": "B1-03",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (5).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "873908478830a1128f75342d28a9b00acb602565ee1eee41a5b0f1c155f3d9b1",
+    "git_blob": "b5710913b2d9b6168c7775ad5176464321b8b276",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v2/double_slash.png"
+    ]
+  },
+  {
+    "id": "B1-04",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "ChatGPT Image Sep 15, 2026, 11_00_56 PM (8).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "225ae25fd71c718b04c65322489c7bd35f31e4653ebfb96c03aeb472880a1c37",
+    "git_blob": "63c9429c2c604b0c2b96064a5f853f8990c5c7d5",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v2/walk_away.png"
+    ]
+  },
+  {
+    "id": "B1-05",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "ChatGPT Image Sep 15, 2026, 11_00_56 PM (9).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "854fd990d1176a96aee779243f87ba727262ca10514c71b26a83d6558d0cb530",
+    "git_blob": "0c6c285c5d1addef319dd3443081dc059a6040da",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v2/run_away.png"
+    ]
+  },
+  {
+    "id": "B1-06",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "ChatGPT Image Sep 15, 2026, 11_00_54 PM (3).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "86f28b20ec828a6759c27ae77bbe2b2194c4a28d725db8a644239b02cfd57e8d",
+    "git_blob": "b4c44ad75176351a9ba9ddda74a5d600df30f679",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v2/dash.png"
+    ]
+  },
+  {
+    "id": "B1-07",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "c1_walkramp.png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "3f5ed144900c23d5e7174290559f0bd24fb3a6b04e8d980a2d81bfe45c3e32a1",
+    "git_blob": "f0f08f8d70254f6a0b85a1abb92117188798f756",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/c1_walkramp.png"
+    ]
+  },
+  {
+    "id": "B1-08",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "ChatGPT Image Sep 15, 2026, 11_00_56 PM (7).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "4d14a710751f6ee3156fa4c9ed8b2fc8928fd75a1ddf2e3b0cc7891d2d3a7642",
+    "git_blob": "6381b4f1c2054dac43aada8d4070dee15c28c99e",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v2/supercharge.png"
+    ]
+  },
+  {
+    "id": "B1-09",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "b5_interact.png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "be5df7828430e0b26ee8eeb8596201a75bd8056e67ffe8872d7fe934beb0b7a5",
+    "git_blob": "8987e4072013b29d22e8783cb24ba6c5662c70a8",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/b5_interact.png"
+    ]
+  },
+  {
+    "id": "B1-10",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "ChatGPT Image Sep 15, 2026, 11_00_54 PM (1).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "65c1d7aaec7a22624376330436cbbbea4b9727ee5b55f0bae03fcff5e6b124e7",
+    "git_blob": "82df24ae7e0062a9d415e28ee360b3125fb48231",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v2/idle.png"
+    ]
+  },
+  {
+    "id": "B1-11",
+    "archive": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (6).zip",
+    "original": "ChatGPT Image Sep 15, 2026, 11_00_55 PM (4).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "aba719df3cf3024c85208b7cf1d71eed971cc254c044a2d989f3ae665e9ee925",
+    "git_blob": "8dfbd577fcb0c108a2ce7c0c313560a1b6621d9c",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v2/jab.png"
+    ]
+  },
+  {
+    "id": "B2-01",
+    "archive": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (4).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (4).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "67e34ab675182756bb634bbd933a5e503f15d5df455d7705ecbce7b8afcd37c5",
+    "git_blob": "9b4b7dc0f398a5255e55cab87f095858df540e0e",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": []
+  },
+  {
+    "id": "B2-02",
+    "archive": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (4).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (5).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "324a709882aabb604d76d7c4bff4880223c1a1742c29302f01c33081e213471c",
+    "git_blob": "5707dcf856c7e21f7d80f6accd5cf50f339e82de",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": []
+  },
+  {
+    "id": "B2-03",
+    "archive": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (4).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (6).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "7fc894a621ca72e7f8cbc25cd7a105cb0914223d09f9889701acf7641eacfb0b",
+    "git_blob": "c639f66b25ab199b6b11a920e1508f5a8cc518d2",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": []
+  },
+  {
+    "id": "B2-04",
+    "archive": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (4).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 11_35_29 AM (7).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "e7affd75c08cd6d7c0cee884104529132270544a5ffe0df957086c45363458de",
+    "git_blob": "4d57493f1e292ced0b9ee4581be9848b7a27775f",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": []
+  },
+  {
+    "id": "B2-05",
+    "archive": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (4).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 11_35_29 AM (8).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "4306a43337f2085820e39a52c0a96bdb56670b1ef9915496d8a93684d9e0bb22",
+    "git_blob": "05ec4ae34012797c9c77b916f03030083e148669",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": []
+  },
+  {
+    "id": "B2-06",
+    "archive": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (4).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (1).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "be1124930a53e8ebb38599f0a2d7821f1b13cc8f702618a5ad671d82eefdcabe",
+    "git_blob": "e7ab1ccec559c852d22e19f68480c9df20528423",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": []
+  },
+  {
+    "id": "B2-07",
+    "archive": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (4).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (2).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "a28b4ed9a810d165f1a2ae82cfb0219dcc52ececc0e0ac9db3754336fe5fdde2",
+    "git_blob": "bec3c7540887a54baf12e49d56e3ab32f32b2b8a",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": []
+  },
+  {
+    "id": "B2-08",
+    "archive": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (4).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 11_35_28 AM (3).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "77c737c5e65a4d8fa295b6b0e603553601f79b2c259042e325606f025b7f2a9a",
+    "git_blob": "527c1ea3738816af572ff75984243aadb3f1383f",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": []
+  },
+  {
+    "id": "B3-01",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "45389e9f567e5eb898acde7d8a82376b55ea7d146a0908e7649ad61b7421e243",
+    "git_blob": "d14240149e00151a5b4144c22ab01659cf53c375",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/wall_slide.png"
+    ]
+  },
+  {
+    "id": "B3-02",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (7).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "529dce850c9f063de80d88b7c39576f27c396807aa4a6e4a731e51e1d37ca0c9",
+    "git_blob": "52867d1dfed0cc6b5e04e415b0fa8ecf5f6cce82",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/skid.png"
+    ]
+  },
+  {
+    "id": "B3-03",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_01 AM (3).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "026cceb63c18bdb5af3e720469ebad8642bece955be049ea06bedf4c2e877899",
+    "git_blob": "d2d9dd4604ca885f4e3eaa6469eef1e9861f118a",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/jump_start.png"
+    ]
+  },
+  {
+    "id": "B3-04",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_01 AM (4).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "3dcb0a2ee05418f1d5d723c1303328af1311178bbf8dca0728e63d8ab1ed08de",
+    "git_blob": "a7e1be4b4f4448230b9587eea0e9631a5436c396",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/air_rise.png"
+    ]
+  },
+  {
+    "id": "B3-05",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_01 AM (1).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "54837a25b119ee28f18b2a6fe583bc90cadb6fa44b010503c2a4bb0614ad4b88",
+    "git_blob": "e5f4b7ab34d374a94d64335d8086912cc3ec7f5c",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/supercharge.png"
+    ]
+  },
+  {
+    "id": "B3-06",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_04 AM (10).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "357ab3974a2b432c0186020f7e43febe9db02ff72d2db68e2998ed95eaf613ac",
+    "git_blob": "e54d35853138f8f4e2f6b1434d86fe85ec2db318",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/death.png"
+    ]
+  },
+  {
+    "id": "B3-07",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_01 AM (2).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "2f9f1c010fb7453c0505136ef64b58f298fde1bb257f0fb4a4f42fdae5fca7e5",
+    "git_blob": "b1d385f8033e0c7a21e600e891d252499a5646a8",
+    "alpha_extrema": [
+      0,
+      253
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/supercharge_fx.png"
+    ]
+  },
+  {
+    "id": "B3-08",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (9).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "56d85f6e8293b312025ea7edf56f0b0404130a388cb08ba4939db8e34a492a96",
+    "git_blob": "556b9057463b3bf5df3bf404c4472f3c983b64a7",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/hurt.png"
+    ]
+  },
+  {
+    "id": "B3-09",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_02 AM (5).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "b1ed07c84cbafe76149a6d1277aaa35aee4962ec1605b5ddb9de6d0092b95292",
+    "git_blob": "5304e2d32720f080b53a0bc53041754d751f41cf",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/air_fall.png"
+    ]
+  },
+  {
+    "id": "B3-10",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_00_03 AM (8).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_02 AM (6).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "8e493275f9e09403bca513ee28fa5a6ca3ba6497f82515d13d767396977d211c",
+    "git_blob": "788769c217bbdf0db4a1288fe82496ddc2b1466b",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/land.png"
+    ]
+  },
+  {
+    "id": "B4-01",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (3).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (3).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "fe993b150b15739d789d9001fd222d4f542155411e0a15c85c278361f2cd3d98",
+    "git_blob": "0b0c20932b253dde7955a6014662d5f345978730",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v4/fidget.png"
+    ]
+  },
+  {
+    "id": "B4-02",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (3).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_04_05 AM.png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "f5bcb1bce74eb1332393c47fe553f4958e94c12656e636dcabc8ac4b7ba8742c",
+    "git_blob": "e111bdded8dbcf732bd693bf22267f2c2ec6a517",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v4/heal.png"
+    ]
+  },
+  {
+    "id": "B4-03",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (3).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_04_08 AM (1).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "f5bcb1bce74eb1332393c47fe553f4958e94c12656e636dcabc8ac4b7ba8742c",
+    "git_blob": "e111bdded8dbcf732bd693bf22267f2c2ec6a517",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": "B4-02",
+    "repository_matches": [
+      "assets/source/hero/delivered/v4/heal.png"
+    ]
+  },
+  {
+    "id": "B4-04",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (3).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_04_10 AM (6).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "28ac4d9fba9e562ae55a4e475de28790776c51acb537e4ba2a57f2015485ffc2",
+    "git_blob": "d1fb05c02ba6c6155c8b855ddd0f5971b0621b23",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v4/walk_away_armed_joined.png"
+    ]
+  },
+  {
+    "id": "B4-05",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (3).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_04_10 AM (5).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "374a64cf3a80f2a24e3c7dcc714ab2839e598d2101a4257287117ac2ec9373e2",
+    "git_blob": "1842cf70eb797b668588e196c458a9cbba86cc70",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v4/walk_away_armed_dual.png"
+    ]
+  },
+  {
+    "id": "B4-06",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (3).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_00_02 AM (5).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "b1ed07c84cbafe76149a6d1277aaa35aee4962ec1605b5ddb9de6d0092b95292",
+    "git_blob": "5304e2d32720f080b53a0bc53041754d751f41cf",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": "B3-09",
+    "repository_matches": [
+      "assets/source/hero/delivered/v3/air_fall.png"
+    ]
+  },
+  {
+    "id": "B4-07",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (3).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (4).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "1ac5efd1288e3037342e67544a0017ca5c3503acc0b93789bbbbd13ef55549b3",
+    "git_blob": "bff21b2495022b9dbddce594db38e05803871b97",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v4/walk_away_armed_single.png"
+    ]
+  },
+  {
+    "id": "B4-08",
+    "archive": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (3).zip",
+    "original": "ChatGPT Image Sep 16, 2026, 12_04_09 AM (2).png",
+    "width": 2172,
+    "height": 724,
+    "sha256": "26f0aa9041bf330292193b538c7164b5cd9fb9fd28771286040dbd0b9b3743df",
+    "git_blob": "ffdf35d6a6afc6bbef6ffa10dd95341e1a5b97a3",
+    "alpha_extrema": [
+      0,
+      253
+    ],
+    "duplicate_of": null,
+    "repository_matches": [
+      "assets/source/hero/delivered/v4/heal_fx.png"
+    ]
+  }
+]

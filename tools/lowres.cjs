@@ -61,14 +61,19 @@ function manifest() {
 
 (async () => {
   const check = process.argv.includes('--check');
+  const onlyArg = process.argv.find(arg => arg.startsWith('--only='));
+  const only = onlyArg ? new Set(onlyArg.slice(7).split(',')) : null;
   const IM = manifest();
   if (!check) fs.mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
-  const index = {};
+  const index = only && fs.existsSync(path.join(OUT,'index.json'))
+    ? JSON.parse(fs.readFileSync(path.join(OUT,'index.json'),'utf8')) : {};
   let full = 0, low = 0, skipped = 0, small = 0;
 
   for (const key of Object.keys(IM)) {
+    if (only && !only.has(key)) continue;
+    if (only) delete index[key];
     const rel = IM[key];
     const abs = path.join(ROOT, rel);
     if (!fs.existsSync(abs)) continue;

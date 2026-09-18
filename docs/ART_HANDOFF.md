@@ -1,3 +1,5 @@
+> **2026-09-18 correction:** [Approved source-preserving delivery](ART_IMPORT_2026-09-18.md) defines this delivery's palette, alpha, scale and tail decisions. Do not force its original dark visor into the obsolete 3–7% ink target.
+
 # HZD-99 — external art handoff
 
 **Who this is for:** any image tool or artist producing HZD-99's plates outside
