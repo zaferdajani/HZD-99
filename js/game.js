@@ -11333,7 +11333,6 @@ function drawBreakHint() {
 // frame; and the art probe hides it like every other ground effect, so a
 // harness measuring a body never measures the wave under it.
 function drawRings(c) {
-  const glow = typeof QUAL === 'undefined' || QUAL.glow;
   const zone = (typeof PAL !== 'undefined' && PAL[G.roomDef && G.roomDef.zone]) || (typeof PAL !== 'undefined' && PAL.A);
   const zoneGlow = zone ? zone.glow : '#7de8ff';
   for (const r of G.rings) {
@@ -11367,13 +11366,12 @@ function drawRings(c) {
     }
     c.stroke();
     c.restore();
-    // the hot edge: crisp and source-over, with real glow where the tier can pay for it
+    // the hot edge: crisp and source-over. No shadowBlur — see drawRoarFX for
+    // the measurement; the halo strokes above are what shine.
     c.globalAlpha = Math.min(1, 0.95 * Math.sqrt(k));
     c.lineWidth = 3.5 * (0.7 + 0.5 * k);
     c.strokeStyle = '#ffffff';
-    if (glow) { c.shadowColor = col; c.shadowBlur = 14; }
     c.beginPath(); c.arc(r.x, r.y, R, 0, 7); c.stroke();
-    c.shadowBlur = 0;
     c.globalAlpha = 1;
   }
 }

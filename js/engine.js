@@ -429,7 +429,6 @@ function drawRoarFX(c) {
       // ring inflated at one speed like a hoop. Same 0.9s, same reach.
       const k = r.t / 0.9, e = 1 - (1 - k) * (1 - k), rad = 26 + e * 640, fade = Math.pow(1 - k, 1.3);
       const sq = 0.8, halo = r.halo || r.col, seed = r.seed | 0;
-      const glow = typeof QUAL === 'undefined' || QUAL.glow;
       // 1. halo
       c.strokeStyle = halo;
       c.globalAlpha = 0.22 * fade; c.lineWidth = 22 * (0.5 + 0.5 * fade);
@@ -463,12 +462,17 @@ function drawRoarFX(c) {
         c.lineTo(r.x + ca * (rad + 3), r.y + sa * (rad + 3) * sq);
       }
       c.stroke();
-      // 4. the hot edge
-      c.globalAlpha = Math.min(1, 0.9 * Math.sqrt(fade)); c.strokeStyle = r.col;
-      c.lineWidth = 2 + fade * 6;
-      if (glow) { c.shadowColor = halo; c.shadowBlur = 16; }
+      // 4. the hot edge. NO shadowBlur here, and that is measured, not taste:
+      // with it the roar cost +12.4 ms/frame on the harness machine and
+      // without it +2.4 — the blur was 80% of the wave and pushed NULLFANG's
+      // bosspace idle read from 36% over the 40% bar, because a boss that
+      // roars is a boss drawing three of these at once. The shine comes from
+      // one more additive pass in the halo colour, which costs a stroke.
+      c.globalAlpha = 0.5 * fade; c.strokeStyle = halo; c.lineWidth = 5 + fade * 6;
       c.beginPath(); c.ellipse(r.x, r.y, rad, rad * sq, 0, 0, 7); c.stroke();
-      c.shadowBlur = 0;
+      c.globalAlpha = Math.min(1, 0.9 * Math.sqrt(fade)); c.strokeStyle = r.col;
+      c.lineWidth = 2 + fade * 5;
+      c.beginPath(); c.ellipse(r.x, r.y, rad, rad * sq, 0, 0, 7); c.stroke();
     }
     c.restore();
   }
