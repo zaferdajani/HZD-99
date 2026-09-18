@@ -5545,6 +5545,35 @@ function foeSkillPts(lv) { return Math.max(0, (lv | 0) - 1); }
 // the law above TRAITS is not relaxed by this: an enemy is never harder because
 // it warned you less.
 const FOE_MOVES = {};
+// ---------------------------------------------------------------------------
+// KINGDOM D — THE ARCHIVES. Three moves, and the kingdom's own sentence runs
+// through all of them: THE ARCHIVES DO NOT CHASE YOU, THEY KEEP A RECORD OF
+// YOU. Zone D is the floor you cannot stop on, so every one of these attacks
+// the ground rather than the body — and each attacks a DIFFERENT ground.
+//
+// They are deliberately not three flavours of cold, because the kingdom
+// already has a guardian made of cold. GLACIERE projects: her ABSOLUTE ZERO
+// is one aura centred on HER, expanding NOW. Nothing here is centred on the
+// machine that casts it and nothing here resolves when it is cast:
+//
+//   recall   (rime)   — a second circle on a place she has ALREADY LEFT
+//   redact   (turret) — a strip of floor struck out where she is GOING
+//   crossref (guard)  — the room is told, and the room's REST closes up
+//
+// Scoped '@D' per the parallel-session rule above: the Archives' crawler is
+// still the integrator's crawler, and no unscoped row is touched here.
+//
+// COSTS. Zone D's floor is level 4, so an Archives machine lands with 3 to 5
+// points. At 1, `redact` is on every turret in the kingdom; at 2, `recall`
+// and `crossref` are on every rime and guard — which is correct, because a
+// kingdom's own machine should be the kingdom's own question, taught at its
+// door. What the points still buy is the SECOND move on a body: the rime's
+// `erasure` at 3 needs a machine deep enough to hold both, so an early
+// Archives coil files one record and a late one files a record it then
+// strikes out.
+FOE_MOVES['rime@D'] = [{ id: 'recall', cost: 2 }, { id: 'erasure', cost: 3 }];
+FOE_MOVES['turret@D'] = [{ id: 'redact', cost: 1 }];
+FOE_MOVES['guard@D'] = [{ id: 'crossref', cost: 2 }];
 function foeMovesFor(kind, lv, zone) {
   const z = zone || (typeof G !== 'undefined' && G.roomDef && G.roomDef.zone) || 'A';
   const list = (FOE_MOVES[kind] || []).concat(FOE_MOVES[kind + '@' + z] || []);
@@ -5585,6 +5614,240 @@ function leadX(px, k) {
 // neighbourhood on purpose: long enough to be a decision, short enough that
 // standing next to a blob is still a bad idea.
 const BLOB_TELL = 0.34, BLOB_REB = 0.26;
+// ===========================================================================
+// THE ARCHIVES' TWO INSTRUMENTS — shared by kingdom D's moves so that the
+// kingdom reads as ONE institution rather than as three unrelated gadgets.
+//
+// THE CARD. What `recall` files: the ground she was standing on when a coil
+// began to charge, planted as a hoarfrost index card and left standing there,
+// visible, for the whole of the coil's charge. Only when the coil's own
+// circle has already snapped does the card ARM and grow a circle of its own,
+// over a second full TELL_HEAVY. So the second circle is warned for the sum
+// of both — 1.4 s of something drawn on the floor — which is the only way a
+// delayed attack is allowed to exist under this file's law: a move that
+// resolves later must warn longer, not less.
+//
+// The two numbers are written out rather than read off TELL_HEAVY/TELL_SWIPE
+// because the build CONCATENATES these files into one scope and those two are
+// declared several thousand lines below this point: a top-level `const` is in
+// the temporal dead zone until its own line runs, so reading them here throws
+// on load and takes the whole page with it (CLAUDE.md, "Name collisions are
+// silent until they aren't"). tests/archives.cjs asserts the copies still
+// equal the originals, which is the part a comment cannot do.
+const CARD_TELL = 0.7;               // === TELL_HEAVY: the card's own growth
+const CARD_R = 0.62;                 // ...to 62% of the coil's told radius
+// THE REDACTION BAR. What `redact` and `erasure` leave: a strip of floor
+// struck out of the record. It lands PALE and HARMLESS and crystallises in
+// place for its own TELL_SWIPE — its telegraph is the thing itself, arriving
+// early — and only then does standing on it cost a core. Grounded-only, like
+// the blob's pool, because a floor hazard that also owns the air is not a
+// floor hazard; jumping it is the answer and the answer has to work.
+const BLOT_SETTLE = 0.5, BLOT_LIVE = 1.4;   // BLOT_SETTLE === TELL_SWIPE
+// one blot per machine, replaced rather than stacked — an Archives room can
+// never carpet itself, however long the fight runs
+function blotLay(owner, x, y, r, src) {
+  owner.blot = { x: x, y: y, r: r, t: BLOT_SETTLE + BLOT_LIVE, src: src };
+}
+// stepped from the owner's case BEFORE any state branch, so a machine that is
+// mid-charge or dark still owes the floor it struck out. Returns nothing; it
+// bites on its own.
+function blotStep(owner, dt) {
+  const b = owner.blot; if (!b) return;
+  b.t -= dt;
+  if (b.t <= 0) { owner.blot = null; return; }
+  if (b.t > BLOT_LIVE) return;                    // still settling: harmless
+  if (player.dead || player.iT > 0 || !player.on) return;
+  const fx = player.x + player.w / 2, fy = player.y + player.h;
+  if (Math.abs(fx - b.x) < b.r && Math.abs(fy - b.y) < 18)
+    player.hurt(DF().edmg, b.x, b.src || 'archives.redact');
+}
+// RECALL, stepped. Two lives in one object: DORMANT while the coil charges
+// (planted, drawn, harmless — it is only a mark on the floor), then ARMED by
+// the snap, growing a circle of its own and snapping in turn. `erasure` hangs
+// off the end of the second life: the deep coil does not only fetch the place
+// she was, it strikes it out and leaves the floor unusable.
+function rimeCardStep(owner, dt) {
+  if ((owner.cardSnapT || 0) > 0) owner.cardSnapT -= dt;   // the flash decays on its own
+  const k = owner.card; if (!k) return;
+  if (!k.armed) return;                    // dormant: the coil's own tell owns it
+  k.t -= dt;
+  k.r = Math.min(k.max, k.r + owner.spd * CARD_R * dt);
+  if (k.t > 0) return;
+  // THE CARD SNAPS. Same shape as the coil's own circle and tested the same
+  // way — a circle on a point, grounded and airborne alike — because the
+  // whole lesson of this kingdom is that a radius is answered with distance
+  // and it would be a lie to teach it twice with two different rules.
+  const ddx = player.x + player.w / 2 - k.x, ddy = player.y + player.h / 2 - k.y;
+  if (!player.dead && player.iT <= 0 && ddx * ddx + ddy * ddy < k.r * k.r)
+    player.hurt(DF().edmg, k.x, 'rime.recall');
+  owner.cardSnapR = k.r; owner.cardSnapX = k.x; owner.cardSnapY = k.y;
+  owner.cardSnapT = 0.22;
+  for (let i = 0; i < 12; i++) {
+    const a = i / 12 * 6.283 + rnd(-0.12, 0.12);
+    addPart(k.x + Math.cos(a) * k.r, k.y + Math.sin(a) * k.r,
+      Math.cos(a) * rnd(16, 48), -rnd(16, 70), 0.34, i % 3 ? '#a8e4f4' : '#e6fbff', 2, 150, true);
+  }
+  // ERASURE: the fetched record is struck out, and the floor under it goes
+  // with it. It lands pale and takes its own BLOT_SETTLE to crystallise, so
+  // a circle she has watched for 1.4 s becomes a strip she gets another half
+  // second to leave. The cost of being deep is never a shorter warning. And
+  // there is nothing to strike out if she was airborne when the record was
+  // taken: you cannot redact a place nobody was standing.
+  if (owner.hasMove('erasure') && k.on) {
+    blotLay(owner, k.x, k.fy, Math.max(26, k.r * 0.8), 'rime.erasure');
+    sfx('crack');
+  } else sfx('icecolumn');
+  owner.card = null;
+}
+// CROSSREF, stepped. THE ARCHIVES CROSS-REFERENCE: one machine sees her and
+// the room is told. It is the only move in this kingdom that attacks nothing
+// — it spends itself on the OTHER machines, pulling their REST in, which is
+// the one thing this file has always said cunning is allowed to buy ("a wider
+// circle and a shorter rest, never a shorter warning"). Not one telegraph in
+// the room gets shorter; what closes is the quiet between them.
+//
+// It runs as its own timer, beside the guard's state machine rather than
+// inside it, so a guard without the move is byte-for-byte the guard that
+// shipped: the lunge, the plate and the window are untouched either way.
+const CROSSREF_TELL = 0.5;      // === TELL_SWIPE — the sweep, before it lands
+const CROSSREF_FLOOR = 0.55;    // no machine is ever pulled closer than this
+const CROSSREF_R = 380;         // earshot
+const CROSSREF_T_KINDS = ['turret', 'hopper'];   // ...whose `t` IS the attack clock
+function crossrefStep(owner, dt, px, cx) {
+  if (!owner.hasMove('crossref')) return;
+  // a room does not file her the instant she walks in: the first sweep waits
+  if (owner.refCD == null) owner.refCD = rnd(1.2, 2.6);
+  owner.refCD -= dt;
+  if ((owner.refT || 0) > 0) {
+    owner.refT -= dt;
+    if (owner.refT > 0) return;
+    // THE CALL LANDS. Every machine still at rest inside earshot has its
+    // waiting cut short — never a machine that is already winding up or
+    // already committed, because pulling a timer that is mid-telegraph is
+    // exactly the thing the law forbids, and never below the floor, so a
+    // called room still arrives one readable tell at a time.
+    for (const e of G.enemies) {
+      if (e === owner || e.dead || e.calm || e.hypnoT > 0) continue;
+      if (Math.abs(e.x - owner.x) > CROSSREF_R) continue;
+      if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0 || (e.lockT || 0) > 0) continue;
+      if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0 || (e.reelT || 0) > 0) continue;
+      let pulled = false;
+      if ((e.atkCD || 0) > CROSSREF_FLOOR) { e.atkCD = CROSSREF_FLOOR; pulled = true; }
+      // `t` is only an attack clock on two kinds. On a crawler it is the
+      // patrol-turn timer and pulling it would make a called room pirouette
+      // instead of attack — a called machine must do its OWN job sooner, not
+      // a different one.
+      if (CROSSREF_T_KINDS.indexOf(e.kind) >= 0 && (e.t || 0) > CROSSREF_FLOOR) {
+        e.t = CROSSREF_FLOOR; pulled = true;
+      }
+      // WHO WAS TOLD IS DRAWN ON THEM. A move that changes machines across
+      // the room and shows nothing on those machines is a one-channel tell
+      // wearing a costume: she has to be able to look at the room and see
+      // which of it just woke up.
+      if (pulled) e.refd = 0.9;
+    }
+    sfx('chirp');
+    owner.refCD = rnd(5.5, 7.5);
+    return;
+  }
+  // it files the sighting on the beat it NOTICES her — the same beat the turn
+  // already warns on — and only from rest, never out of a wind-up
+  if (owner.refCD > 0 || player.dead) return;
+  if ((owner.coilT || 0) > 0 || (owner.lungeT || 0) > 0 || (owner.windedT || 0) > 0) return;
+  if (Math.abs(px - cx) > CROSSREF_R * 0.6) return;
+  owner.refT = CROSSREF_TELL;
+  sfx('tellmid');
+}
+// THE FILED CARD, DRAWN. Dormant it is a small hoarfrost card standing on the
+// floor with an amber tick — a mark, not a threat, and deliberately quiet so
+// the coil's own growing circle stays the loud thing during the charge. Armed
+// it grows the same honest boundary the coil draws: frost line, amber dashed
+// rim, and danger red only for the one beat the circle is real. The shapes
+// match on purpose. It is the same institution filing and the same institution
+// collecting, and she should recognise the second from having survived the
+// first.
+function drawRimeCard(c, e) {
+  const k = e.card;
+  if (k) {
+    c.save();
+    if (!k.armed) {
+      // planted: the card itself, leaning, ticking
+      const bob = Math.sin(e.anim * 3) * 0.8;
+      c.globalAlpha = 0.8;
+      c.fillStyle = 'rgba(230,251,255,0.75)';
+      c.strokeStyle = TELL_COL; c.lineWidth = 1.2;
+      c.beginPath();
+      c.moveTo(k.x - 6, k.fy); c.lineTo(k.x - 5, k.fy - 11 + bob);
+      c.lineTo(k.x + 6, k.fy - 12 + bob); c.lineTo(k.x + 5, k.fy);
+      c.closePath(); c.fill(); c.stroke();
+      c.globalAlpha = 0.4 + Math.sin(e.anim * 9) * 0.3;
+      c.strokeStyle = TELL_COL; c.lineWidth = 1.4;
+      c.beginPath(); c.moveTo(k.x - 3, k.fy - 7 + bob); c.lineTo(k.x + 3, k.fy - 7.5 + bob); c.stroke();
+      // the frost crust it stands in, so it reads as planted and not floating
+      c.globalAlpha = 0.3;
+      c.fillStyle = '#a8e4f4';
+      c.beginPath(); c.ellipse(k.x, k.fy, 9, 2.6, 0, 0, 7); c.fill();
+    } else if (k.r > 2) {
+      const held = k.r >= k.max - 1;
+      c.globalCompositeOperation = 'lighter';
+      const fg = c.createRadialGradient(k.x, k.y, k.r * 0.3, k.x, k.y, k.r);
+      fg.addColorStop(0, 'rgba(168,228,244,0)');
+      fg.addColorStop(1, 'rgba(168,228,244,0.16)');
+      c.fillStyle = fg;
+      c.beginPath(); c.arc(k.x, k.y, k.r, 0, 7); c.fill();
+      c.strokeStyle = 'rgba(230,251,255,0.5)'; c.lineWidth = 1.8;
+      c.beginPath(); c.arc(k.x, k.y, k.r, 0, 7); c.stroke();
+      c.strokeStyle = TELL_COL; c.lineWidth = held ? 2.4 : 1.6;
+      c.globalAlpha = held ? 0.8 + Math.sin(e.anim * 26) * 0.2 : 0.55;
+      c.setLineDash([6, 6]); c.lineDashOffset = -performance.now() / 40;
+      c.beginPath(); c.arc(k.x, k.y, k.r, 0, 7); c.stroke(); c.setLineDash([]);
+    }
+    c.restore(); c.globalAlpha = 1;
+  }
+  if ((e.cardSnapT || 0) > 0) {
+    const a = clamp(e.cardSnapT / 0.22, 0, 1), r = e.cardSnapR || 0;
+    c.save(); c.globalCompositeOperation = 'lighter';
+    const sg = c.createRadialGradient(e.cardSnapX, e.cardSnapY, 2, e.cardSnapX, e.cardSnapY, r);
+    sg.addColorStop(0, 'rgba(230,251,255,' + 0.5 * a + ')');
+    sg.addColorStop(0.75, 'rgba(255,95,109,' + 0.3 * a + ')');
+    sg.addColorStop(1, 'rgba(255,95,109,' + 0.45 * a + ')');
+    c.fillStyle = sg;
+    c.beginPath(); c.arc(e.cardSnapX, e.cardSnapY, r, 0, 7); c.fill();
+    c.strokeStyle = '#ff5f6d'; c.globalAlpha = a; c.lineWidth = 2.4;
+    c.beginPath(); c.arc(e.cardSnapX, e.cardSnapY, r, 0, 7); c.stroke();
+    c.restore(); c.globalAlpha = 1;
+  }
+}
+// THE REDACTION BAR, DRAWN — and the whole point of the drawing is that its
+// two lives do not look alike. Settling it is pale frost with the amber tick
+// every warning in this game wears, and the strike-through is still being
+// ruled across it. Live it is the registry's danger red, because that is what
+// this game's red means and it is worn only while the floor is actually
+// hostile. Gone, it fades rather than blinks out.
+function drawBlot(c, e) {
+  const b = e.blot; if (!b) return;
+  const settling = b.t > BLOT_LIVE;
+  const k = settling ? 1 - clamp((b.t - BLOT_LIVE) / BLOT_SETTLE, 0, 1) : 1;
+  const fade = settling ? 1 : Math.min(1, b.t / 0.5);
+  c.save();
+  c.globalAlpha = (settling ? 0.35 + k * 0.25 : 0.55) * fade;
+  const g = c.createLinearGradient(0, b.y - 9, 0, b.y + 3);
+  if (settling) { g.addColorStop(0, 'rgba(214,244,255,0.5)'); g.addColorStop(1, 'rgba(140,200,225,0.12)'); }
+  else { g.addColorStop(0, 'rgba(255,95,109,0.45)'); g.addColorStop(1, 'rgba(160,40,60,0.15)'); }
+  c.fillStyle = g;
+  c.beginPath(); c.ellipse(b.x, b.y, b.r, 5.5, 0, 0, 7); c.fill();
+  c.strokeStyle = settling ? TELL_COL : '#ff5f6d';
+  c.lineWidth = settling ? 1.4 : 2;
+  c.beginPath(); c.ellipse(b.x, b.y, b.r, 5.5, 0, 0, 7); c.stroke();
+  // the strike-through: ruled across the bar as it settles, complete when it
+  // is real — the one element that says ERASED rather than merely COLD
+  c.globalAlpha = (settling ? 0.5 * k : 0.85) * fade;
+  c.strokeStyle = settling ? TELL_COL : '#ff9aa6'; c.lineWidth = 1.6; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(b.x - b.r * 0.85, b.y - 1); c.lineTo(b.x - b.r * 0.85 + b.r * 1.7 * k, b.y - 1); c.stroke();
+  c.restore(); c.globalAlpha = 1;
+  if (!settling && chance(0.22 * fade))
+    addPart(b.x + rnd(-b.r, b.r), b.y - 2, rnd(-8, 8), rnd(-34, -10), 0.4, '#cfe9ff', 1.7, 40, true);
+}
 const EKIND = {
   crawler: { w: 28, h: 20, hp: 30, spd: 62 },
   guard: { w: 30, h: 22, hp: 44, spd: 52 },
@@ -5662,6 +5925,9 @@ class Enemy {
   hasMove(id) { return !!this.moves && this.moves.indexOf(id) >= 0; }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    // the mark CROSSREF leaves on whoever it told, fading on its own so it
+    // reads as a moment and not as a permanent badge
+    if ((this.refd || 0) > 0) this.refd -= dt;
     // cheap, and it means a machine that was in the room before you took a
     // power is as sharp as one spawned after it
     if ((this.iqT = (this.iqT || 0) - dt) <= 0) { this.iqT = 2.5; this.iq = foeIQ(); }
@@ -5742,6 +6008,7 @@ class Enemy {
       case 'guard':
       case 'crawler': {
         this.vy += 2000 * dt;
+        crossrefStep(this, dt, px, cx);   // the Archives guard's filing sweep
         this.guard = this.kind === 'guard' && this.windedT <= 0 && this.lungeT <= 0;
         if (this.lungeT > 0) {                              // committed
           this.lungeT -= dt;
@@ -5980,6 +6247,7 @@ class Enemy {
       case 'turret': {
         // sweep → LOCK (the red light is the tell) → fire
         this.t -= dt;
+        blotStep(this, dt);                // REDACT's struck-out floor
         if ((this.lockT || 0) > 0) {
           this.lockT -= dt;
           if (this.lockT <= 0) {
@@ -5998,7 +6266,26 @@ class Enemy {
             this.burst = (this.burst | 0) + 1;
             const far = dist2(cx, cy, px, py) > 240 * 240;
             if (far && this.burst < 2 + Math.round(this.iq * 2)) { this.t = 0.16; this.lockT = 0.0001; }
-            else { this.burst = 0; this.t = 2.0 / DF().espd; }
+            else {
+              // REDACT (Archives only). The Foundry's turret shoots at you;
+              // this one STRIKES THE RECORD OUT. One bar per volley, laid on
+              // the floor beneath the LED aim — the ground she is going to,
+              // not the ground she is on — so the bolt she reads correctly
+              // and steps out of is the bolt that takes the step away. It
+              // lands pale and crystallises for its own BLOT_SETTLE before it
+              // bites, and it is grounded-only: jumping it is the answer, and
+              // on a floor she cannot stop on, deciding to jump early is the
+              // whole read. Never on the shots INSIDE a burst — a volley
+              // leaves one bar, so a long fight cannot pave the room.
+              if (this.hasMove('redact') && !player.dead) {
+                // a bar lies on a floor: hers when she is on one, the
+                // turret's own otherwise — the bolt carries on down
+                blotLay(this, aimX, player.on ? player.y + player.h : this.y + this.h,
+                  30, 'turret.redact');
+                sfx('patch');
+              }
+              this.burst = 0; this.t = 2.0 / DF().espd;
+            }
           }
         } else if (this.t <= 0 && !player.dead && dist2(cx, cy, px, py) < 440 * 440) {
           this.lockT = 0.55; sfx('ui');
@@ -6185,6 +6472,15 @@ class Enemy {
         moveEnt(this, dt);
         this.dir = 0;                 // omnidirectional: no misleading tell wedge
         if ((this.snapT || 0) > 0) this.snapT -= dt;   // the flash decays on its own
+        // RECALL and ERASURE are stepped HERE, above every state branch, and
+        // that placement is the design. A filed record is not the coil's
+        // attack — it is a record — so it keeps its own clock while the coil
+        // charges, while the coil is DARK, and while she is hitting the coil
+        // in the window the dark core opens. Punishing the machine and
+        // answering what the machine already filed are two decisions now, and
+        // on a floor she cannot stop on they are made with her feet.
+        blotStep(this, dt);                            // ERASURE's struck-out floor
+        rimeCardStep(this, dt);                        // RECALL's filed card
         if (this.windedT > 0) {            // DARK — the punish window (1.0 s)
           this.windedT -= dt;
           break;
@@ -6209,6 +6505,11 @@ class Enemy {
             this.ringR = 0;
             this.windedT = 1.0;            // opening_ms = 1000 − 33: two hits, tempts three
             sfx('castice');
+            // RECALL. The card has been standing on the floor for the whole
+            // charge; the snap is what ARMS it. From here it grows its own
+            // circle over a second full CARD_TELL, so the ground she just
+            // left is told twice before it is ever real.
+            if (this.card) { this.card.t = CARD_TELL; this.card.armed = 1; sfx('shard'); }
           }
           break;
         }
@@ -6222,6 +6523,17 @@ class Enemy {
           this.ringMax = 104 + this.iq * 48;
           this.atkCD = rnd(2.6 - this.iq * 0.8, 3.8 - this.iq * 1.2);
           sfx('tell');
+          // RECALL FILES THE GROUND SHE IS STANDING ON, at the instant the
+          // coil begins to charge — not at the snap. The card is planted and
+          // visible from this frame, so it is never information she is
+          // denied: the circle says LEAVE and the card says WHERE YOU LEAVE
+          // FROM IS ON RECORD. One card at a time; a coil interrupted before
+          // its snap simply keeps the one it filed.
+          if (this.hasMove('recall') && !this.card && !player.dead) {
+            this.card = { x: px, y: py, fy: player.y + player.h, on: !!player.on,
+                          r: 0, max: this.ringMax * CARD_R, t: 0, armed: 0 };
+            sfx('ui');
+          }
         }
         break;
       }
@@ -6576,6 +6888,39 @@ class Enemy {
         c.strokeStyle = '#ff5f6d'; c.globalAlpha = a; c.lineWidth = 2.6;
         c.beginPath(); c.arc(cx, ry, r, 0, 7); c.stroke();
       }
+      c.restore(); c.globalAlpha = 1;
+    }
+    // KINGDOM D'S TWO INSTRUMENTS, drawn in world space for the same reason
+    // the coil's circle is: they are not on the machine, they are on the
+    // FLOOR, and the floor is the thing she has to answer. Both are drawn
+    // even while their owner is dark or staggered — a record does not stop
+    // being a record because the machine that filed it is down.
+    if (!this.dead) { drawRimeCard(c, this); drawBlot(c, this); }
+    // CROSSREF: the sweep going out, and the mark it leaves on whoever it
+    // reached. Two channels, because a move that changes the room and shows
+    // nothing is a move she cannot read.
+    if (!this.dead && (this.refT || 0) > 0) {
+      const k = 1 - clamp(this.refT / CROSSREF_TELL, 0, 1);
+      c.save();
+      c.globalAlpha = 0.5 * (1 - k * 0.5);
+      c.strokeStyle = TELL_COL; c.lineWidth = 2 - k;
+      c.setLineDash([3, 9]); c.lineDashOffset = -performance.now() / 30;
+      c.beginPath(); c.arc(cx, this.y + this.h * 0.4, 18 + k * (CROSSREF_R * 0.6), 0, 7); c.stroke();
+      c.setLineDash([]);
+      // the drawer edge lifting on the body: the sweep has a source
+      c.globalAlpha = 0.6 + Math.sin(this.anim * 24) * 0.3;
+      c.strokeStyle = TELL_COL; c.lineWidth = 2; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(cx - 8, this.y - 3 - k * 4); c.lineTo(cx + 8, this.y - 3 - k * 4); c.stroke();
+      c.restore(); c.globalAlpha = 1;
+    }
+    if (!this.dead && (this.refd || 0) > 0) {
+      // FILED: a pale index tick over a machine the sweep just woke
+      const a = clamp(this.refd / 0.9, 0, 1);
+      c.save();
+      c.globalAlpha = 0.85 * a;
+      c.strokeStyle = '#cfe9ff'; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(cx - 4, this.y - 11); c.lineTo(cx + 4, this.y - 11);
+      c.moveTo(cx - 4, this.y - 8); c.lineTo(cx + 2, this.y - 8); c.stroke();
       c.restore(); c.globalAlpha = 1;
     }
     // the snare's tendril is the READ, drawn in world space because the line

@@ -58,35 +58,53 @@ const check = (name, ok, detail) => {
     out.traitsLv7Varied = new Set(hi.map(t => t.slice().sort().join('+'))).size;
     out.traitsNoDupes = hi.every(t => new Set(t).size === t.length);
 
-    // ---- the registry: empty today, and its contract is the point ----------
-    out.registryEmpty = Object.keys(FOE_MOVES).length === 0;
-    out.noMovesWhenEmpty = foeMovesFor('crawler', 7).length === 0;
+    // ---- the registry, and its contract ------------------------------------
+    // THIS SECTION USED TO ASSERT THE REGISTRY WAS EMPTY, and that assertion
+    // could only ever be true for one commit: it was written the day the
+    // framework landed, to pin the contract down before five kingdom sessions
+    // started writing rows against it in parallel. They have. The contract is
+    // what survives, so it is what is measured — plus the one thing an empty
+    // check was really buying, which is that the harness leaves the registry
+    // exactly as it found it.
+    //
+    // The fixture moved onto a kind NO KIND TABLE HAS, for the same reason the
+    // rows are kingdom-scoped: injecting onto `crawler` meant this harness and
+    // five sessions' content were writing the same row, and whichever kingdom
+    // shipped a `crawler@<zone>` first would have turned these checks red
+    // without touching anything they measure. `fixture` belongs to nobody.
+    const keys0 = Object.keys(FOE_MOVES).sort().join(',');
+    out.registryWellFormed = Object.keys(FOE_MOVES).every(k =>
+      Array.isArray(FOE_MOVES[k]) && FOE_MOVES[k].length > 0 && FOE_MOVES[k].every(m =>
+        m && typeof m.id === 'string' && m.id.length > 0 && (m.cost | 0) >= 1));
+    out.registryKeysScoped = Object.keys(FOE_MOVES).every(k =>
+      k.indexOf('@') < 0 || /^[a-z]+@[A-EX]$/.test(k));
+    out.noMovesWhenEmpty = foeMovesFor('fixture', 7).length === 0;
     // a kingdom session's row, injected exactly as one would be written, then
     // taken back out — the same delete-then-restore the air-attack test uses
     // `call` is priced past the ceiling on purpose: the top level is 7, which is
     // 6 points, so nothing can ever afford it. A registry entry nobody can buy
     // must be skipped rather than handed out or allowed to overdraw.
-    FOE_MOVES.crawler = [{ id: 'burrow', cost: 1 }, { id: 'spit', cost: 2 }, { id: 'call', cost: 9 }];
-    out.lv1Buys = foeMovesFor('crawler', 1, 'A');     // 0 points
-    out.lv2Buys = foeMovesFor('crawler', 2, 'A');     // 1 point  -> burrow
-    out.lv4Buys = foeMovesFor('crawler', 4, 'A');     // 3 points -> burrow + spit
-    out.lv7Buys = foeMovesFor('crawler', 7, 'A');     // 6 points -> still no `call`
+    FOE_MOVES.fixture = [{ id: 'burrow', cost: 1 }, { id: 'spit', cost: 2 }, { id: 'call', cost: 9 }];
+    out.lv1Buys = foeMovesFor('fixture', 1, 'A');     // 0 points
+    out.lv2Buys = foeMovesFor('fixture', 2, 'A');     // 1 point  -> burrow
+    out.lv4Buys = foeMovesFor('fixture', 4, 'A');     // 3 points -> burrow + spit
+    out.lv7Buys = foeMovesFor('fixture', 7, 'A');     // 6 points -> still no `call`
 
     // ---- the kingdom-scoped row: the thing that lets five sessions work at
     // once without overwriting one another's moves
-    FOE_MOVES['crawler@C'] = [{ id: 'slag', cost: 1 }];
-    out.scopedInC = foeMovesFor('crawler', 7, 'C');
-    out.scopedNotInA = foeMovesFor('crawler', 7, 'A');
-    out.scopedAloneInD = (delete FOE_MOVES.crawler, foeMovesFor('crawler', 7, 'D'));
-    out.scopedOnlyItsOwn = foeMovesFor('crawler', 7, 'C');
-    delete FOE_MOVES['crawler@C'];
+    FOE_MOVES['fixture@C'] = [{ id: 'slag', cost: 1 }];
+    out.scopedInC = foeMovesFor('fixture', 7, 'C');
+    out.scopedNotInA = foeMovesFor('fixture', 7, 'A');
+    out.scopedAloneInD = (delete FOE_MOVES.fixture, foeMovesFor('fixture', 7, 'D'));
+    out.scopedOnlyItsOwn = foeMovesFor('fixture', 7, 'C');
+    delete FOE_MOVES['fixture@C'];
     // ...and an enemy built now actually carries them
     const e = new Enemy('crawler', 100, 100);
     out.spawnLevel = e.level;
     out.spawnHasArray = Array.isArray(e.moves);
     out.spawnHasMove = e.hasMove(e.moves[0] || 'burrow') || e.moves.length === 0;
     out.spawnDeniesUnknown = !e.hasMove('nothing_like_this');
-    out.registryRestored = Object.keys(FOE_MOVES).length === 0;
+    out.registryRestored = Object.keys(FOE_MOVES).sort().join(',') === keys0;
     return out;
   });
 
@@ -108,8 +126,11 @@ const check = (name, ok, detail) => {
   check('...and never the same trait twice on one body', r.traitsNoDupes);
   check('...and the same level still produces different machines',
     r.traitsLv7Varied >= 3, r.traitsLv7Varied + ' distinct loadouts');
-  check('the move registry is empty until a kingdom fills it', r.registryEmpty);
-  check('...and an empty row buys nothing', r.noMovesWhenEmpty);
+  check('every row in the registry keeps the contract it was written against',
+    r.registryWellFormed);
+  check('...and every scoped key names one real kingdom, so no two sessions collide',
+    r.registryKeysScoped);
+  check('...and a kind with no row at all buys nothing', r.noMovesWhenEmpty);
   check('a row is bought cheapest-first, within its points',
     r.lv1Buys.length === 0 && r.lv2Buys.join() === 'burrow'
     && r.lv4Buys.join() === 'burrow,spit',

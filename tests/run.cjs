@@ -131,6 +131,7 @@ const SUITE = [
   ['shopscale', 'a shop door has no depth, a gate and a cave do'],
   ['foescale',  'every machine reads in the hero\'s weight class'],
   ['foelevel',  'a machine\'s level is its kingdom plus the run, and it spends it'],
+  ['archives',  'kingdom D files, strikes out and cross-references — and warns before each'],
   ['npcstrip',  'the five work strips are twelve frames of work, foot-aligned and steady'],
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],

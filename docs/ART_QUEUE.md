@@ -21,6 +21,89 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2ba. THE ARCHIVES' INSTRUMENTS — the filed card, the redaction bar, the index sweep ✱ NEW 2026-09-18 (kingdom D session) — wired, procedural stand-ins live, nothing fired
+
+Kingdom D's three new enemy moves (`recall`, `erasure`, `redact`, `crossref`
+in `js/entities.js`; measured by `tests/archives.cjs`) put three things on
+screen that the Archives did not previously own. All three are drawn
+procedurally today and all three are STAND-INS under the standing order —
+"all arts, images, STRUCTURES should be created through Higgsfield" — so the
+briefs are written here rather than generated, and the code session is not
+waiting on them: the moves ship and play correctly without a single plate.
+
+They are effect plates, not character plates, so ART_BIBLE's four-class rule
+does not bind them; §3.2's rules do (pure black background, subject only, no
+ground plane, no cast shadow, palette in words, negatives stated).
+
+**The one thing that must survive whatever comes back:** every one of these
+wears AMBER while it is a warning and the registry's DANGER RED only while it
+is real, and the two states must be unmistakable across a room. That is not a
+style note — it is the law the fights are tuned against ("an enemy is never
+harder because it warned you less"), and a plate that blurs the two makes an
+honest move dishonest. Fire each as a PAIR: settling, then live.
+
+### 2ba-i. THE FILED INDEX CARD ×2 — `recall`
+
+What it is: the Rime Coil records the ground she was standing on when it began
+to charge, and plants the record there. A single hoarfrost index card, about a
+head high, standing upright in a small crust of frost as though it had been
+pushed into the floor — a card from a frozen card-index, not a sign and not a
+tombstone. Bone-white paper gone translucent with cold, one ruled line of
+illegible script across it, a hairline amber tick at its top edge.
+
+- Plate A `rime_card_filed` — the card standing, quiet, amber tick unlit-warm.
+- Plate B `rime_card_armed` — the same card at the instant it is collecting:
+  paper curling back, the ruled line burning through, frost throwing out along
+  the floor from its base in a low ring. Same object, unmistakably a later
+  moment of it.
+- Palette: bone white, glacier blue-white, pale steel; amber only on the tick.
+- Negatives: no gravestone silhouette, no rectangle standing perfectly square
+  to the floor (NO RIGHT ANGLES — it leans and its edges are eroded), no text
+  that resolves into readable letters, no red in plate A.
+
+### 2ba-ii. THE REDACTION BAR ×2 — `redact` / `erasure`
+
+What it is: a strip of the floor struck out of the record. Not a puddle and
+not ice: a low, wide bar of frozen crust with a single ruled strike-through
+drawn along its length, as though someone had put a pen through a line in a
+ledger and the floor had taken it.
+
+- Plate A `blot_settling` — pale, frost-blue, the strike-through only half
+  ruled across it, edges still crystallising outward.
+- Plate B `blot_live` — the same bar with the strike-through complete and the
+  whole crust gone red-hot-cold: the registry's danger red, the hue this game
+  reserves for "the floor is hostile now".
+- Palette: A — glacier white, pale steel blue, amber rule. B — infection red
+  over the same crust, darker at the edges.
+- Negatives: no organic puddle (that is the blob's, and the two must never be
+  confused at a glance), no square edge, no depth — it lies ON the floor.
+
+### 2ba-iii. THE GUARD'S CARD DRAWER + INDEX SWEEP ×2 — `crossref`
+
+What it is: the Archives guard's plate is a card drawer, and when it files a
+sighting the drawer edge lifts and a pale sweep goes out across the room.
+
+- Plate A `guard_drawer_D` — an Archives-liveried variant of the guard's
+  plate: the same defensive slab, but faced as a shallow card drawer with a
+  pull, a label window and a frost rime along its lower lip. This one IS a
+  character-adjacent plate; match the guard rig's existing scale and the
+  cold-steel palette the kingdom's other machines wear.
+- Plate B `index_sweep` — the sweep itself as a ring effect: a thin, fast,
+  pale-amber expanding ring of ruled tick-marks (not a smooth circle — a ring
+  made of short index ticks, which is what makes it read as cataloguing rather
+  than as a shockwave).
+- Negatives: no shockwave dust, no impact, nothing that suggests force — this
+  move hits nobody and must not look as though it does.
+
+### WIRING NOTES (for whoever keys these)
+
+`drawRimeCard`, `drawBlot` and the `refT`/`refd` block in `Enemy.draw`
+(js/entities.js) are the three draw sites. Each already separates its settling
+state from its live state, so a plate drops into an existing branch rather
+than needing new logic; follow the `drawPlateAnchored` pattern the rime body
+already uses, and keep the procedural drawing as the loading fallback exactly
+as the breaker and the coil do.
+
 ## 2az. SUPERCHARGE EFFECTS — LANDED 2026-09-16 (art session)
 
 `assets/source/hero/delivered/v3/supercharge_fx.png` →
@@ -1755,7 +1838,8 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  24. §2r    THE FORGE TABLE ×1                (the den bench as a matted object — crop stand-in wired, fire against it)
  25. §2aq   THE CUTTER'S SPLIT STONE + KERF ×2 + KERF HERSELF ×3  ✱ NEW 2026-09-02 (kingdom X pass) — wired, procedural stand-ins live, nothing fired
  26. §2aw   THE RIG ROUTE — her rigged model + clips + motion control   ✱ APPROVED 2026-09-05 — makes §2av (attacks in profile) and §2au (gait cycles); bake3d --clip is built; tests/hero.cjs red until it lands
- 27. §2au/§2av  (folded into 26 — the briefs remain as the acceptance laws; docs/GAIT.md is the study)
+ 27. §2ba   THE ARCHIVES' INSTRUMENTS ×6   ✦ NEW 2026-09-18 (kingdom D) — card ×2, redaction bar ×2, drawer + index sweep; wired, stand-ins live, nothing fired
+ 28. §2au/§2av  (folded into 26 — the briefs remain as the acceptance laws; docs/GAIT.md is the study)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
