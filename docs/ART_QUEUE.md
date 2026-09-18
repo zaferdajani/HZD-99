@@ -103,6 +103,70 @@ state from its live state, so a plate drops into an existing branch rather
 than needing new logic; follow the `drawPlateAnchored` pattern the rime body
 already uses, and keep the procedural drawing as the loading fallback exactly
 as the breaker and the coil do.
+## 2bc. KINGDOM 5'S THREE NEW MOVES — the Nest's own biology, procedural stand-ins in the game now ✱ QUEUED 2026-09-18 (kingdom E session)
+
+Owner, 2026-09-18: *"Improve enemy level and skills point with more moves that
+need to be created for them with every kingdom."* Kingdom E's answer is three
+moves on the shared roster plus its own machine — `thornbed` (blob@E),
+`shed` (guard@E) and `infest` (snare@E) in `FOE_MOVES`, behaviour and
+telegraphs shipped, measured by `tests/nestmoves.cjs`.
+
+**All four reads below are drawn procedurally today, as wiring stand-ins**, the
+same arrangement every structure in this game is under (CLAUDE.md, ART IS
+HIGGSFIELD'S: anything that reads as a built or natural THING is a Higgsfield
+plate). The Nest's whole idea is *machinery that has stopped being machinery* —
+which is exactly the register procedural paths are worst at and a painted plate
+is best at. Nothing here blocks the moves; each plate replaces a drawing.
+
+Same rules as every entry in this file: pure black background, subject only, no
+ground plane, no cast shadow, palette in words, negatives stated. Zone-E
+palette reference — infection red `#ff4d4d`/`#c4384a`, spore green `#9fffa8`,
+dead-cable violet-grey shell, telegraph amber `#ffc24a` (the game's one warning
+hue, and the plate must carry it in the warning state and NOT in the live one).
+
+**`nestThorn` — 2 cells, the stalk that grows out of a Nest blob's pool.**
+A single barbed thorn of wet red tissue, roughly 36 px tall at the game's
+scale, rooted in a spreading pool of the same matter.
+- cell 0 **growing**: half height, translucent, sheathed in telegraph amber —
+  it is a *warning*, not yet a thing that can cut. Soft edges, unfinished barbs.
+- cell 1 **live**: full height, opaque, infection red with a burning tip, two
+  hooked barbs low on the shaft. Hard edges.
+The two cells must read as the same organism at two moments, and cell 0 must be
+unmistakably harmless. Negatives: no metal, no machined edges, no spikes-as-
+geometry, no ground plane.
+
+**`nestCreep` — 1 cell, the torn plate crawling.**
+The guard's plate after the grown tissue that held it tears loose: a low, wide
+mat of red thorn-tissue about 30 px across and 12 px tall, three feeler thorns
+raised at one end (they are the only part that says which way it is going),
+half-machined plate still embedded in it and being digested. Must NOT read as a
+thin fast line — that shape belongs to the Conduits' charge wave and these two
+hazards are answered differently. Negatives: no energy glow, no lightning, no
+clean edges, no ground plane.
+
+**`nestSac` — 2 cells, the spore sac on a limp snare's maw.**
+- cell 0 **swelling**: a translucent membrane sac the size of a fist, amber-lit
+  from inside, veins visible through it, hanging off a slack thorned maw.
+- cell 1 **ripe**: the same sac at twice the size, spore-green, taut, the veins
+  gone bright, about to let go.
+The sac is the longest tell any minion in this game wears, so cell 0 must be
+legible at a glance across a room. Negatives: no eye, no face, no mechanism.
+
+**`nestCarrier` — 1 cell, the overlay that marks an infested machine.**
+Not a body: a transparent OVERLAY sheet of spore-green veins and a broken
+containment ring, meant to composite over any of the shared roster (crawler,
+guard, flier, turret, hopper, blob, bat) whatever its size. Must be readable at
+a glance and must not hide the machine's own silhouette, because the whole
+mechanic is a decision about kill order and the player has to be able to read
+which machine is carrying *before* choosing. Negatives: no solid fill, no
+opaque shapes over the body, no text, no icons.
+
+**MOTHER-V IS NOT THE REFERENCE.** She is this kingdom's guardian and her
+tendrils, her null ring and her black halo are hers. These four are minion
+biology — smaller, wetter, uglier, and nothing on them is a shrunken copy of a
+plate in `assets/characters/motherParts`.
+
+---
 
 ## 2bb. THE FOUNDRY POURS — kingdom C's three new moves need two plates ✱ QUEUED 2026-09-18 (kingdom C session)
 

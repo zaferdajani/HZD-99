@@ -5605,6 +5605,192 @@ function rollTraits(lv) {
   }
   return out;
 }
+// ===========================================================================
+// KINGDOM 5 — THE VIRUS NEST'S OWN MOVES (`@E` rows only; the unscoped rows
+// are the integrator's, and the four other kingdom sessions own their own
+// letters — see the registry note above).
+//
+// The Nest is the last kingdom before the end, and what it has that no other
+// kingdom has is that the machinery HAS STOPPED BEING MACHINERY. The other
+// four buy behaviour; these three buy biology. Each is the kingdom's own idea
+// rather than a bigger number:
+//
+//   thornbed  (blob,  cost 1) the drip TAKES ROOT, and the air over the pool
+//                             stops being free — the answer she learned to a
+//                             blob ("go over it") is the one that is argued.
+//   shed      (guard, cost 2) the plate is grown tissue: deny it enough hits
+//                             and it TEARS LOOSE and crawls at her, and the
+//                             guard is bare for good. The one move in the
+//                             game where SHE opens the window and pays for it.
+//   infest    (snare, cost 3) the Nest does not kill the machine, it RECRUITS
+//                             it. The snare spends its own punish window
+//                             calling a spore into another machine in the
+//                             room, and a carrier bursts into a spore bed
+//                             where it dies. Kill order becomes a decision.
+//
+// WHY A 3 LANDS HERE AND NOWHERE ELSE: a cost-3 row needs four skill points,
+// which is level 5, which is the Nest's floor alone (FOE_ZONE_LV.E === 5) —
+// every other kingdom would have to finish the run to afford one. And all
+// three fit: a Nest machine has 4 points before the run adds anything.
+//
+// AND EVERY ONE OF THEM WARNS FIRST, which matters more here than anywhere
+// because a player in this kingdom is already handling the hardest machines
+// in the game. thornbed grows for THORN_RISE in amber before it can touch
+// her; shed gathers for TELL_SWIPE and can be interrupted; infest swells a
+// sac across the WHOLE limp window and pops if the snare is struck. Cunning
+// buys reach, count and persistence in all three. It never buys silence.
+FOE_MOVES['blob@E'] = [{ id: 'thornbed', cost: 1 }];
+FOE_MOVES['guard@E'] = [{ id: 'shed', cost: 2 }];
+FOE_MOVES['snare@E'] = [{ id: 'infest', cost: 3 }];
+// THORNBED. The rise is the telegraph and it is longer than TELL_FAST on
+// purpose: the pool it grows out of is already under her feet by then, so the
+// warning has to pay for the ground it costs. Live for 1.6 s, and it dies with
+// the blob that grew it — kill the blob and the bed goes with it.
+const THORN_RISE = 0.5, THORN_LIVE = 1.6, THORN_H = 36, THORN_HALF = 13;
+// SHED. Three denied hits tear the tissue loose. Three because two is a slip
+// and four is a chore — it is the number of swings a player who has decided
+// the plate is the answer will land before looking for another one.
+const SHED_HITS = 3, CREEP_LIFE = 2.4;
+// INFEST. Two carriers per snare, ever: a cascade would turn the room into one
+// event instead of a decision, and the whole point is the CHOICE of what to
+// kill. The bed a carrier leaves behind uses the blob's own pool, because the
+// floor going hostile already has a vocabulary in this game and inventing a
+// second one for the same meaning is how a room stops being readable.
+const INFEST_MAX = 2, INFEST_REACH = 420;
+// ---------------------------------------------------------------------------
+// thornbed: the stalk that grows out of a Nest blob's pool. Kept on the BLOB
+// rather than on the pool because the pool is the shared blob's, in the shared
+// layer, and a kingdom's move may not reach into it — and because "kill the
+// blob, the bed dies" is a better rule than a hazard that outlives its cause.
+function thornStep(e, dt) {
+  if ((e.thornRise || 0) > 0) {
+    e.thornRise -= dt;
+    if (e.thornRise <= 0) { e.thornRise = 0; e.thornT = THORN_LIVE; sfx('spikeup'); }
+    return;
+  }
+  if ((e.thornT || 0) <= 0) return;
+  e.thornT -= dt;
+  if (chance(dt * 16)) addPart(e.thornX + rnd(-4, 4), e.thornY - rnd(4, THORN_H),
+    rnd(-16, 16), rnd(-40, -10), 0.4, '#ff6b7a', 1.8, 60, true);
+  if (player.dead || player.iT > 0) return;
+  const fx = player.x + player.w / 2;
+  if (Math.abs(fx - e.thornX) < THORN_HALF + player.w * 0.4
+      && player.y + player.h > e.thornY - THORN_H && player.y < e.thornY)
+    player.hurt(DF().edmg, e.thornX, 'blob.thornbed');
+}
+// ---------------------------------------------------------------------------
+// shed: the denied hit is counted off hurtT's RISING EDGE. js/types.js's
+// dealDmg sets hurtT = 0.12 on the branch that denies a hit to a raised plate
+// and nothing else in the frame raises it while the plate is up, so the edge is
+// the signal — and reading it here means the move never touches the shared
+// damage path, which four other sessions are also standing in.
+function shedStep(e, dt) {
+  const prev = e._shedHurt || 0;
+  if (e.hurtT > prev + 1e-4 && e._shedGuard && !e.plateShed) {
+    e.shedN = (e.shedN || 0) + 1;
+    burst(e.x + e.w / 2 + e.dir * e.w * 0.52, e.y + e.h * 0.5, 5, '#ff8a8a', 150, 0.3, 40, 2, true);
+  }
+  e._shedHurt = Math.max(0, e.hurtT);
+  e._shedGuard = !!e.guard;
+  // THE TEAR WAITS FOR A CLEAN BEAT, and it is checked every frame rather than
+  // on the frame of the hit. Firing it the instant the third blow lands could
+  // drop it on top of a coil the player is already reading, and two amber
+  // wind-ups at once is one wind-up nobody can read. The count keeps until the
+  // machine is between actions, which is never more than one lunge away.
+  if ((e.shedN || 0) >= SHED_HITS && !e.plateShed && (e.crouchT || 0) <= 0
+      && (e.coilT || 0) <= 0 && (e.lungeT || 0) <= 0 && (e.windedT || 0) <= 0) {
+    e.shedN = 0; e.crouchT = TELL_SWIPE; e.vx = 0; sfx('tell');
+  }
+  // the torn tissue, once it is loose: SLOW and it HOMES, which is the whole
+  // difference between it and the Conduits' charge wave. That one asks "can
+  // you be airborne on a beat"; this one cannot be jumped, only walked away
+  // from or out-lived — and it is the price of an opening she chose to open.
+  const cr = e.creep;
+  if (!cr) return;
+  cr.life -= dt; cr.ph += dt * 9;
+  const want = Math.sign((player.x + player.w / 2) - cr.x) || cr.dir;
+  cr.dir = want;
+  cr.x += cr.dir * cr.spd * dt;
+  // THE FLOOR IS NOT THE TILE TOP. Terrain here is a HEIGHTFIELD (the NO RIGHT
+  // ANGLES order: `groundColumnAt`, applied in the vertical resolver), so a body
+  // resting on organic ground stands ABOVE the tile it stands on — measured at
+  // 18 px on A0's own floor. Probing the single tile at the creep's foot finds
+  // air and kills it on the frame it is born, which is exactly what it did. So
+  // it probes DOWN one tile: enough to find ground under any lift the curve can
+  // add, never enough to walk on air over a real gap. And it rides the curve
+  // rather than the grid, so it crawls over the mounds instead of through them.
+  const ctx2 = Math.floor(cr.x / TILE);
+  let railOn = false;
+  for (let d = 2; d <= TILE + 2 && !railOn; d += 8)
+    railOn = (tt => tt === '#' || tt === 'B' || tt === '=')(tileAt(ctx2, Math.floor((cr.y + d) / TILE)));
+  if (railOn && typeof groundColumnAt === 'function') {
+    const gc = groundColumnAt(cr.x);
+    if (gc && Math.abs(gc[0] - cr.y) < TILE) cr.y = gc[0];
+  }
+  if (cr.life <= 0 || !railOn) {
+    burst(cr.x, cr.y - 4, 7, '#7a5a6a', 140, 0.35, 120, 2, true);
+    e.creep = null; return;
+  }
+  if (chance(dt * 26)) addPart(cr.x + rnd(-7, 7), cr.y - rnd(1, 9), rnd(-24, 24), rnd(-60, -14), 0.3, '#ff5f6d', 1.9, 240, true);
+  if (!player.dead && player.iT <= 0 && player.on
+      && Math.abs(player.x + player.w / 2 - cr.x) < 16
+      && player.y + player.h > cr.y - 22 && player.y + player.h < cr.y + 10)
+    player.hurt(DF().edmg, cr.x, 'guard.shed');
+}
+// ---------------------------------------------------------------------------
+// infest: what the snare does with the punish window SHE earned. The sac
+// swells across the whole limp beat — the countdown IS the telegraph, and it is
+// the longest tell any minion in the game wears — and a single hit on the
+// snare pops it. So the window still pays exactly what it always paid; it has
+// simply stopped being a window you can spend walking away.
+function infestStep(e, dt) {
+  if (e.sacT == null) {                 // the limp beat just began: pick a host
+    e.sacT = 0; e.host = null;
+    // seed the strike-detector from the CURRENT hurt, or a hit she landed
+    // during the tell would pop a sac that had not been grown yet
+    e._sacHurt = Math.max(0, e.hurtT);
+    if ((e.infestN || 0) >= INFEST_MAX) return;
+    let best = null, bd = INFEST_REACH * INFEST_REACH;
+    for (const o of G.enemies) {
+      // never a sage (its own law of harm owns it), never something she has
+      // already won over — a cured machine or a tamed wolf is hers, and the
+      // Nest taking it back would punish the mercy the whole left-hand path
+      // is built on
+      if (o === e || o.dead || o.calm || o.tame || o.infested || o.kind === 'sage') continue;
+      const d = dist2(o.x + o.w / 2, o.y + o.h / 2, e.x + e.w / 2, e.y + e.h / 2);
+      if (d < bd) { bd = d; best = o; }
+    }
+    if (!best) return;
+    e.host = best; e.sacT = Math.max(0.35, e.windedT); e.sac0 = e.sacT;
+    sfx('castnull');
+    return;
+  }
+  if (e.sacT <= 0) return;
+  // STRUCK: the sac is a soft thing on a limp body and it bursts. Same edge
+  // read the guard's plate uses, and the same reason — no shared damage hook.
+  if (e.hurtT > (e._sacHurt || 0) + 1e-4) {
+    e.sacT = 0; e.host = null;
+    burst(e.x + e.w / 2, e.y + e.h * 0.3, 14, '#9fffa8', 220, 0.45, 40, 2.6, true);
+    sfx('no');
+    e._sacHurt = Math.max(0, e.hurtT);
+    return;
+  }
+  e._sacHurt = Math.max(0, e.hurtT);
+  e.sacT -= dt;
+  const sx = e.x + e.w / 2, sy = e.y + e.h * 0.24;
+  if (chance(dt * 12)) addPart(sx + rnd(-5, 5), sy + rnd(-3, 3), rnd(-14, 14), rnd(-26, -6), 0.4,
+    e.sacT < (e.sac0 || 1) * 0.4 ? '#9fffa8' : TELL_COL, 2, -30, true);
+  if (e.sacT > 0) return;
+  const h = e.host; e.host = null;
+  if (!h || h.dead || h.calm || h.infested) return;
+  h.infested = 1;
+  e.infestN = (e.infestN || 0) + 1;
+  const hx = h.x + h.w / 2, hy = h.y + h.h / 2;
+  for (let i = 0; i < 9; i++) addPart(lerp(sx, hx, i / 9), lerp(sy, hy, i / 9),
+    rnd(-30, 30), rnd(-30, 30), 0.5, '#9fffa8', 2.4, 0, true);
+  burst(hx, hy, 16, '#9fffa8', 260, 0.5, 60, 3, true);
+  sfx('phase');
+}
 // where she will BE, not where she is — the single most human-feeling thing a
 // simple enemy can do, and it costs one line
 function leadX(px, k) {
@@ -6078,8 +6264,29 @@ class Enemy {
       case 'crawler': {
         this.vy += 2000 * dt;
         crossrefStep(this, dt, px, cx);   // the Archives guard's filing sweep
-        this.guard = this.kind === 'guard' && this.windedT <= 0 && this.lungeT <= 0;
-        if (this.lungeT > 0) {                              // committed
+        this.guard = this.kind === 'guard' && !this.plateShed
+          && this.windedT <= 0 && this.lungeT <= 0;
+        // THE NEST GUARD'S PLATE IS NOT BOLTED ON (move `shed`, guard@E). It
+        // is grown tissue, and tissue tears: every hit the plate denies splits
+        // it further — visibly, the plate reddens a step per hit — and at
+        // SHED_HITS it gathers for TELL_SWIPE and the tissue comes loose,
+        // crawling off at her while the guard is left bare FOR GOOD. The guard
+        // asks "can you wait?"; the Nest guard asks the sharper version of it,
+        // which is "will you pay for the window if you refuse to?" Nothing
+        // here runs for a guard that did not buy the move, so a guard in any
+        // other kingdom is the machine it always was.
+        if (this.kind === 'guard' && this.hasMove('shed')) shedStep(this, dt);
+        if (this.kind === 'guard' && (this.crouchT || 0) > 0) {   // THE TEAR
+          this.crouchT -= dt; this.vx *= Math.pow(0.02, dt);
+          if (this.crouchT <= 0) {
+            this.plateShed = 1; this.guard = false;
+            const cd = Math.sign(px - cx) || this.dir || 1;
+            this.creep = { x: cx + cd * (this.w / 2 + 6), y: this.y + this.h,
+              dir: cd, spd: this.spd * 1.9, life: CREEP_LIFE + this.iq * 0.6, ph: 0 };
+            burst(cx + this.dir * this.w * 0.52, this.y + this.h * 0.5, 18, '#ff6b7a', 260, 0.5, 90, 3, true);
+            cam.shake = Math.max(cam.shake, 3); sfx('snarecast');
+          }
+        } else if (this.lungeT > 0) {                        // committed
           this.lungeT -= dt;
           this.vx = this.dir * this.spd * 4.2;
           // CINDER (kingdom C, cost 1). A Foundry crawler runs with its belly
@@ -6182,7 +6389,17 @@ class Enemy {
           this.drip0 = 0; this.blobReb = BLOB_REB;
           G.pools = G.pools || [];
           if (G.pools.length < 14) G.pools.push({ x: cx, y: this.y + this.h - 2, t: 4.2, t0: 4.2, r: 0 });
+          // THE NEST BLOB'S DRIP TAKES ROOT (move `thornbed`, blob@E). One
+          // stalk at a time, seeded where the pool landed, and only if the
+          // last one has finished — so the floor is never a forest.
+          if (this.hasMove('thornbed') && (this.thornRise || 0) <= 0 && (this.thornT || 0) <= 0) {
+            this.thornX = cx; this.thornY = this.y + this.h - 2;
+            this.thornRise = THORN_RISE; this.thornT = 0;
+          }
         }
+        // grows, lives, withers — every frame, so the stalk keeps its clock
+        // whether or not the body is still dripping
+        if (this.hasMove('thornbed')) thornStep(this, dt);
         const col = moveEnt(this, dt);
         if (col.l) this.dir = 1; else if (col.r) this.dir = -1;
         else if (col.d && ledgeTurn(this, this.dir)) this.dir *= -1;
@@ -6741,6 +6958,17 @@ class Enemy {
         this.dir = 0;                 // omnidirectional: no misleading tell wedge
         if (this.windedT > 0) {            // LIMP — the punish window (1.0 s)
           this.windedT -= dt;
+          // THE NEST DOES NOT KILL THE MACHINE, IT RECRUITS IT (move `infest`,
+          // snare@E). The limp beat she earned is the beat the polyp spends
+          // CALLING: a spore sac swells on the slack maw for the whole window
+          // and, if it is allowed to finish, seeds another machine in the room
+          // — and a carrier bursts into a spore bed where it dies. One hit on
+          // the snare pops the sac, so the window pays exactly what it always
+          // paid; it has only stopped being a window she can spend walking
+          // away. The most demanding move in the game and the reason a cost-3
+          // row exists: it turns KILL ORDER into a decision, in the one
+          // kingdom where every other decision has already been asked.
+          if (this.hasMove('infest')) infestStep(this, dt);
           break;
         }
         if ((this.reelT || 0) > 0) {       // LATCHED — the line is closing
@@ -6761,7 +6989,7 @@ class Enemy {
             if (chance(0.5)) addPart(lerp(cx, px, rnd(0.2, 0.9)), lerp(cy, py, rnd(0.2, 0.9)),
               rnd(-24, 24), rnd(-24, 24), 0.2, '#ff4d4d', 1.8, 0, true);
           }
-          if (this.reelT <= 0) { this.windedT = 1.0; sfx('snarecast'); }
+          if (this.reelT <= 0) { this.windedT = 1.0; this.sacT = null; sfx('snarecast'); }
           break;
         }
         if (this.crouchT > 0) {            // the reach — tendril out, hovering
@@ -6774,7 +7002,7 @@ class Enemy {
             } else {
               // the whiff teaches as well as the hit: the tendril closes on
               // nothing and the polyp pays the full limp window for it
-              this.windedT = 1.0; sfx('snarecast');
+              this.windedT = 1.0; this.sacT = null; sfx('snarecast');
             }
           }
           break;
@@ -6806,6 +7034,23 @@ class Enemy {
   // body and by a beat of warning light, so it is a thing you step away from
   // rather than a thing that happens to you.
   die(kx, ky) {
+    // A CARRIER DOES NOT DIE QUIETLY (move `infest`, snare@E). What the Nest
+    // put in it comes back out as a spore bed on the ground it fell on — the
+    // blob's own pool, because "the floor is hostile here" already has a
+    // vocabulary in this game and a second one for the same meaning is how a
+    // room stops being readable. The pool opens from a radius of ZERO and
+    // spreads, which is the telegraph: the burst announces it and the ground
+    // is not dangerous yet when it does. Killing the carrier is still right —
+    // it just decides WHERE she cannot stand next, which is the whole reason
+    // the marking is painted on the body from the moment it is seeded.
+    if (this.infested && !this.dead && !this.sporeBurst) {
+      this.sporeBurst = 1;
+      const sx = this.x + this.w / 2, sy = this.y + this.h - 2;
+      G.pools = G.pools || [];
+      if (G.pools.length < 14) G.pools.push({ x: sx, y: sy, t: 4.2, t0: 4.2, r: 0 });
+      burst(sx, sy - 6, 20, '#9fffa8', 280, 0.55, 40, 3, true);
+      if (typeof sfx === 'function') sfx('snarecast');
+    }
     if (this.traits && this.traits.indexOf('volatile') >= 0 && !this.dead && !this.popped) {
       this.popped = true;
       const bx = this.x + this.w / 2, by = this.y + this.h / 2;
@@ -7088,6 +7333,179 @@ class Enemy {
         c.beginPath(); c.ellipse(g.x, g.y - 6, 3.4, 7, 0, 0, 7); c.fill();
       }
       c.restore(); c.globalAlpha = 1;
+    }
+    // =====================================================================
+    // KINGDOM 5'S THREE READS, drawn in world space because all three
+    // threaten ground or a body that is not this one. Every one of them is
+    // amber while it is only a warning and infection-red or spore-green
+    // once it is real — the house rule, unchanged: an enemy is never harder
+    // because it warned you less. The two that are anchored to the FLOOR are
+    // suppressed under G.artProbe with every other ground FX, so the bible
+    // harness measures feet rather than what is growing under them.
+    // ---------------------------------------------------------------------
+    // THORNBED: the stalk growing out of a Nest blob's pool. The rise is the
+    // whole telegraph — it is drawn at its true height from the first frame
+    // of growth, amber and translucent, so the column it will own is legible
+    // before it can touch her. Red and solid only once it is live.
+    if (this.kind === 'blob' && !this.dead && !G.artProbe
+        && ((this.thornRise || 0) > 0 || (this.thornT || 0) > 0)) {
+      const rising = (this.thornRise || 0) > 0;
+      const k = rising ? 1 - clamp(this.thornRise / THORN_RISE, 0, 1) : 1;
+      const bx = this.thornX, by = this.thornY;
+      const h = THORN_H * (rising ? 0.25 + k * 0.75 : 1);
+      const fade = rising ? 1 : clamp(this.thornT / 0.4, 0, 1);
+      c.save();
+      // the column it claims — dashed amber over the whole told height, so
+      // the read is "this air is about to be taken", not "a spike appeared"
+      if (rising) {
+        c.globalAlpha = 0.18 + k * 0.34;
+        c.strokeStyle = TELL_COL; c.lineWidth = 1.4;
+        c.setLineDash([4, 6]); c.lineDashOffset = -performance.now() / 45;
+        c.beginPath();
+        c.rect(bx - THORN_HALF, by - THORN_H, THORN_HALF * 2, THORN_H);
+        c.stroke(); c.setLineDash([]);
+      }
+      // the stalk: a tapered thorn with two barbs, leaning on its own pulse
+      const lean = Math.sin(this.anim * (rising ? 3 : 9)) * (rising ? 1.4 : 2.6);
+      c.globalAlpha = (rising ? 0.45 + k * 0.4 : 0.92) * fade;
+      c.fillStyle = rising ? TELL_COL : '#c4384a';
+      c.beginPath();
+      c.moveTo(bx - THORN_HALF * 0.62, by);
+      c.quadraticCurveTo(bx - 2.4, by - h * 0.55, bx + lean, by - h);
+      c.quadraticCurveTo(bx + 3.2, by - h * 0.55, bx + THORN_HALF * 0.62, by);
+      c.closePath(); c.fill();
+      c.strokeStyle = rising ? TELL_COL : '#ff8a96'; c.lineWidth = 1.2;
+      c.stroke();
+      for (const s of [-1, 1]) {                       // the barbs
+        c.beginPath();
+        c.moveTo(bx + s * 2.4, by - h * 0.52);
+        c.lineTo(bx + s * (THORN_HALF * 0.95), by - h * 0.38);
+        c.lineTo(bx + s * 2.4, by - h * 0.34);
+        c.closePath(); c.fill();
+      }
+      // live: the tip burns, and the burn is on the body's own beat
+      if (!rising) {
+        c.globalCompositeOperation = 'lighter';
+        c.globalAlpha = (0.4 + Math.sin(this.anim * 13) * 0.28) * fade;
+        c.fillStyle = '#ff5f6d'; c.shadowColor = '#ff5f6d'; c.shadowBlur = 8;
+        c.beginPath(); c.arc(bx + lean, by - h, 2.6, 0, 7); c.fill();
+        c.shadowBlur = 0;
+      }
+      c.restore(); c.globalAlpha = 1;
+    }
+    // ---------------------------------------------------------------------
+    // SHED: the tissue the plate became, crawling. Danger red on the floor —
+    // the registry's area-denial hue, worn because the floor is denied — and
+    // it is drawn low, wide and slow-pulsing so it never reads as the
+    // Conduits' charge wave, which is a thin fast line.
+    if (this.creep && !G.artProbe) {
+      const cr = this.creep;
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      const a = clamp(cr.life * 1.6, 0, 1);
+      const bob = Math.sin(cr.ph) * 1.6;
+      const g = c.createRadialGradient(cr.x, cr.y - 3, 1, cr.x, cr.y - 3, 20);
+      g.addColorStop(0, 'rgba(255,120,130,' + (0.5 * a).toFixed(2) + ')');
+      g.addColorStop(1, 'rgba(180,40,60,0)');
+      c.fillStyle = g;
+      c.beginPath(); c.ellipse(cr.x, cr.y - 3, 19, 9, 0, 0, 7); c.fill();
+      c.globalCompositeOperation = 'source-over';
+      c.globalAlpha = 0.9 * a;
+      c.fillStyle = '#b8364a';
+      c.beginPath();
+      c.moveTo(cr.x - 15, cr.y + 2);
+      c.quadraticCurveTo(cr.x - 6, cr.y - 11 - bob, cr.x + 2, cr.y - 3 + bob);
+      c.quadraticCurveTo(cr.x + 9, cr.y - 12 + bob, cr.x + 15, cr.y + 2);
+      c.closePath(); c.fill();
+      c.strokeStyle = '#ff96a2'; c.lineWidth = 1.1; c.stroke();
+      // three feeler thorns, the only part that says which way it is going
+      c.strokeStyle = '#ff5f6d'; c.lineWidth = 1.4; c.lineCap = 'round';
+      for (let i = -1; i <= 1; i++) {
+        c.beginPath(); c.moveTo(cr.x + i * 5, cr.y - 2);
+        c.lineTo(cr.x + i * 5 + cr.dir * 7, cr.y - 9 - Math.sin(cr.ph + i) * 2.4);
+        c.stroke();
+      }
+      c.restore(); c.globalAlpha = 1;
+    }
+    // ...and the plate that is gone stays gone, visibly: a torn socket where
+    // it hung, so a bare Nest guard is never mistaken for one still holding.
+    if (this.kind === 'guard' && this.plateShed && !this.dead) {
+      c.save();
+      c.globalAlpha = 0.75;
+      c.strokeStyle = '#7d4b58'; c.lineWidth = 1.6; c.lineCap = 'round';
+      const ox = cx + this.dir * (this.w * 0.5);
+      c.beginPath();
+      c.moveTo(ox, this.y + this.h * 0.24);
+      c.lineTo(ox + this.dir * 4, this.y + this.h * 0.42);
+      c.lineTo(ox, this.y + this.h * 0.62);
+      c.stroke();
+      c.restore(); c.globalAlpha = 1;
+    }
+    // ---------------------------------------------------------------------
+    // INFEST, the snare's half: the sac, swelling on the slack maw for the
+    // whole limp beat, with a filament reaching toward the machine it has
+    // chosen. Amber for the first stretch — it is still only a warning, and
+    // one hit ends it — then spore-green for the last, which is the beat
+    // where she has run out of window. The filament is the read that makes
+    // the move fair: the room tells her WHICH machine, in time to choose.
+    if (this.kind === 'snare' && !this.dead && (this.sacT || 0) > 0) {
+      const k = 1 - clamp(this.sacT / (this.sac0 || 1), 0, 1);
+      const hot = k > 0.6;
+      const sx = cx, sy = this.y + this.h * 0.24;
+      const col = hot ? '#9fffa8' : TELL_COL;
+      c.save();
+      if (this.host && !this.host.dead) {
+        const hx = this.host.x + this.host.w / 2, hy = this.host.y + this.host.h / 2;
+        c.globalAlpha = 0.2 + k * 0.4;
+        c.strokeStyle = col; c.lineWidth = 1.5; c.lineCap = 'round';
+        c.setLineDash([3, 8]); c.lineDashOffset = -performance.now() / 38;
+        c.beginPath(); c.moveTo(sx, sy);
+        c.quadraticCurveTo(lerp(sx, hx, 0.5), Math.min(sy, hy) - 34, lerp(sx, hx, k * 0.92), lerp(sy, hy, k * 0.92));
+        c.stroke(); c.setLineDash([]);
+        // a ring closing on the chosen machine — the honest boundary, like
+        // the reel's own dashed reach
+        c.globalAlpha = 0.25 + k * 0.45;
+        c.lineWidth = 1.8;
+        c.beginPath(); c.arc(hx, hy, this.host.w * 1.3 - k * this.host.w * 0.5, 0, 7); c.stroke();
+      }
+      // the sac itself, on the body: it grows, and the growth is the clock
+      c.globalAlpha = 0.55 + k * 0.4;
+      c.fillStyle = col;
+      c.beginPath(); c.ellipse(sx, sy, 3.4 + k * 5.4, 3 + k * 6.2, 0, 0, 7); c.fill();
+      c.globalCompositeOperation = 'lighter';
+      c.globalAlpha = 0.3 + Math.sin(this.anim * (10 + k * 26)) * 0.25;
+      c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 10;
+      c.beginPath(); c.arc(sx, sy, 2.4 + k * 3.4, 0, 7); c.fill();
+      c.shadowBlur = 0;
+      c.restore(); c.globalAlpha = 1;
+    }
+    // ...and INFEST's other half: the carrier, marked from the moment it is
+    // seeded. Read before it is discovered — the same law the traits wear,
+    // and the reason the spore bed a carrier leaves is a decision about kill
+    // order rather than an ambush.
+    if (this.infested && !this.dead) {
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      const pl = 0.45 + Math.sin(this.anim * 4.4) * 0.22;
+      c.globalAlpha = pl * 0.55;
+      c.strokeStyle = '#9fffa8'; c.lineWidth = 1.6;
+      c.setLineDash([3, 5]); c.lineDashOffset = performance.now() / 60;
+      c.beginPath(); c.ellipse(cx, this.y + this.h / 2, this.w * 0.72, this.h * 0.78, 0, 0, 7);
+      c.stroke(); c.setLineDash([]);
+      // three veins crawling on the shell, on their own slow clock
+      c.globalAlpha = pl * 0.8;
+      c.strokeStyle = '#7dffa0'; c.lineWidth = 1.2; c.lineCap = 'round';
+      for (let i = 0; i < 3; i++) {
+        const ph = this.anim * 1.7 + i * 2.1;
+        const vx0 = cx + Math.cos(ph) * this.w * 0.3;
+        const vy0 = this.y + this.h * (0.25 + i * 0.25);
+        c.beginPath(); c.moveTo(vx0, vy0);
+        c.quadraticCurveTo(vx0 + Math.sin(ph) * 6, vy0 + 4, vx0 + Math.cos(ph * 1.3) * 9, vy0 + 7);
+        c.stroke();
+      }
+      c.restore(); c.globalAlpha = 1;
+      if (chance(0.07)) addPart(cx + rnd(-this.w * 0.5, this.w * 0.5), this.y + rnd(0, this.h),
+        rnd(-10, 10), rnd(-30, -8), 0.5, '#9fffa8', 1.7, -20, true);
     }
     // the rime's circle is the READ, drawn in world space as the TRUE hit
     // shape — a circle on the body's centre, because the snap tests exactly

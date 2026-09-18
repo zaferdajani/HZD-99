@@ -55,10 +55,19 @@ const check = (name, ok, detail) => {
     out.rimeDdeep = foeMovesFor('rime', 6, 'D');
     out.turretD = foeMovesFor('turret', 4, 'D');
     out.guardD = foeMovesFor('guard', 4, 'D');
-    // ...and nothing of kingdom D's reaches anybody else's kingdom
+    // ...and nothing of kingdom D's reaches anybody else's kingdom.
+    //
+    // FILTERED TO D'S OWN IDS, and it has to be. This collected every move
+    // those three kinds get ANYWHERE outside D and asserted the list was
+    // empty, which measured the other four sessions rather than this one: the
+    // moment kingdom E shipped `shed` on guard@E — its own kingdom, its own
+    // row, nothing to do with the Archives — this check went red and named a
+    // move no Archives machine has ever carried. What belongs to kingdom D is
+    // whether kingdom D's ids escape kingdom D, so that is what it reads now.
+    const D_IDS = ['recall', 'erasure', 'redact', 'crossref'];
     out.leak = ['A', 'B', 'C', 'E', 'X'].map(z =>
       foeMovesFor('rime', 7, z).concat(foeMovesFor('turret', 7, z), foeMovesFor('guard', 7, z))
-    ).reduce((a, b) => a.concat(b), []);
+    ).reduce((a, b) => a.concat(b), []).filter(id => D_IDS.indexOf(id) >= 0);
     // the unscoped rows belong to the integrator and this session wrote none
     out.unscopedUntouched = !FOE_MOVES.rime && !FOE_MOVES.turret
       && !FOE_MOVES.guard && !FOE_MOVES.crawler;
