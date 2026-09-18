@@ -80,7 +80,11 @@ const G = {
   hitStop: 0, flash: 0, rings: [], wrecks: [],
   recharge: null, coreFlash: null, coresFullT: 0, healToasted: false, bolt: null,
   updateReady: null, updateStamp: 0,
-  addRing(x, y, r0) { this.rings.push({ x, y, r: r0 || 12, a: 0.85 }); },
+  // a0 is the birth alpha drawRings normalises against; col is an optional tint
+  // for the halo (default: the room's own glow); seed salts the rim sparks so
+  // two rings born in one frame do not spin in lockstep. Position-derived, so
+  // it costs no randomness and a replayed frame draws the same ring.
+  addRing(x, y, r0, col) { this.rings.push({ x, y, r: r0 || 12, a: 0.85, a0: 0.85, col: col || null, seed: ((x * 7 + y * 13) | 0) & 0x7fffffff }); },
   // nothing speaks over the first meeting (manga-direction §6: the silence IS the beat)
   toast(text) { if (this.meet) return; this.toasts.push({ text, t: 3 }); },
   breakTile(tx, ty) {
@@ -1880,7 +1884,10 @@ function fxDecay(dt) {
   G.songLockT = Math.max(0, (G.songLockT || 0) - dt); // Song jammed
   G.darkT = Math.max(0, (G.darkT || 0) - dt);         // TOTAL NULL darkness
   G.revealT = Math.max(0, (G.revealT || 0) - dt);     // Song reveal in the dark
-  for (const r of G.rings) { r.r += 560 * dt; r.a -= dt * 2; }
+  // the wave leaves fast and slows as it dies — an ease-out reads as a blast,
+  // a constant speed reads as a hoop being inflated. Same ~250px reach as the
+  // old flat 560/s, spent differently.
+  for (const r of G.rings) { r.r += (260 + 700 * clamp(r.a / (r.a0 || 0.85), 0, 1)) * dt; r.a -= dt * 2; }
   G.rings = G.rings.filter(r => r.a > 0);
   if (G.coreFlash) { G.coreFlash.t -= dt; if (G.coreFlash.t <= 0) G.coreFlash = null; }
   G.coresFullT = Math.max(0, G.coresFullT - dt);
@@ -11313,6 +11320,63 @@ function drawBreakHint() {
   c.restore();
   ftxt(msg, bx, by, 12, '#eef3fa', 'center', 'rgba(120,220,255,0.85)');
 }
+// THE SHOCKWAVE (owner, 2026-09-18, from a screenshot of the supercharge:
+// "these surrounding effect circles needs to be more vfx and animated in more
+// details and shine"). It was one 3.5px white stroke. It is now a wave with a
+// body: an additive halo in the kingdom's own light, a segmented inner wave a
+// beat behind it that turns as it expands, sparks riding the rim, and a hot
+// crisp edge on top. Rings like this are ours to draw and never Higgsfield's —
+// pure additive glow handed to a model comes back as a lit solid object.
+//
+// Three rules it keeps: everything is driven by r and a, which update() owns,
+// so draw never reads a clock (tests/drawclock.cjs); nothing is allocated per
+// frame; and the art probe hides it like every other ground effect, so a
+// harness measuring a body never measures the wave under it.
+function drawRings(c) {
+  const glow = typeof QUAL === 'undefined' || QUAL.glow;
+  const zone = (typeof PAL !== 'undefined' && PAL[G.roomDef && G.roomDef.zone]) || (typeof PAL !== 'undefined' && PAL.A);
+  const zoneGlow = zone ? zone.glow : '#7de8ff';
+  for (const r of G.rings) {
+    const k = clamp(r.a / (r.a0 || 0.85), 0, 1);       // 1 at birth -> 0 at death
+    const born = 1 - k, R = r.r, col = r.col || zoneGlow, seed = r.seed | 0;
+    c.save();
+    c.globalCompositeOperation = 'lighter';
+    // the halo: wide and soft, in the room's light, brightest the instant it fires
+    c.strokeStyle = col;
+    c.globalAlpha = 0.26 * k; c.lineWidth = 18 * (0.6 + 0.4 * k);
+    c.beginPath(); c.arc(r.x, r.y, R, 0, 7); c.stroke();
+    c.globalAlpha = 0.42 * k; c.lineWidth = 7;
+    c.beginPath(); c.arc(r.x, r.y, R, 0, 7); c.stroke();
+    // the inner wave: segmented energy a beat behind the edge, rotating with the
+    // expansion — the dash offset is a function of R, so it turns as it grows
+    const Ri = Math.max(2, R - 14 - 28 * born);
+    c.setLineDash([9, 13]); c.lineDashOffset = -R * 1.6;
+    c.globalAlpha = 0.5 * k; c.lineWidth = 2.6;
+    c.beginPath(); c.arc(r.x, r.y, Ri, 0, 7); c.stroke();
+    c.setLineDash([]);
+    // sparks riding the rim, spun by the expansion and salted by the ring's seed
+    const n = 14, spin = R * 0.012 + (seed % 7) * 0.5;
+    c.strokeStyle = '#ffffff'; c.globalAlpha = 0.9 * k; c.lineWidth = 1.6;
+    c.beginPath();
+    for (let i = 0; i < n; i++) {
+      const a = spin + i * (Math.PI * 2 / n) + ((seed >> (i % 13)) & 1) * 0.12;
+      const len = 5 + 9 * k * ((((seed + 1) * (i + 3)) % 5) / 4);
+      const ca = Math.cos(a), sa = Math.sin(a);
+      c.moveTo(r.x + ca * (R - 2), r.y + sa * (R - 2));
+      c.lineTo(r.x + ca * (R + len), r.y + sa * (R + len));
+    }
+    c.stroke();
+    c.restore();
+    // the hot edge: crisp and source-over, with real glow where the tier can pay for it
+    c.globalAlpha = Math.min(1, 0.95 * Math.sqrt(k));
+    c.lineWidth = 3.5 * (0.7 + 0.5 * k);
+    c.strokeStyle = '#ffffff';
+    if (glow) { c.shadowColor = col; c.shadowBlur = 14; }
+    c.beginPath(); c.arc(r.x, r.y, R, 0, 7); c.stroke();
+    c.shadowBlur = 0;
+    c.globalAlpha = 1;
+  }
+}
 function drawSeals(P) {
   if (!bossActive()) return;
   const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
@@ -12753,11 +12817,7 @@ function drawWorldFrame() {
   }
   drawParts(c);
   drawLights(P);
-  for (const r of G.rings) {
-    c.globalAlpha = r.a; c.lineWidth = 3.5; c.strokeStyle = '#ffffff';
-    c.beginPath(); c.arc(r.x, r.y, r.r, 0, 7); c.stroke();
-    c.globalAlpha = 1;
-  }
+  if (G.rings.length && !G.artProbe) drawRings(c);
   drawSeals(P);
   c.restore();
   // THE NEAR PLATE IS OFF UNTIL IT IS RE-FIRED, and the reason is a mistake in

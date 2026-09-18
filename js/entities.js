@@ -2326,7 +2326,8 @@ class Player {
     // roarWave is the game's own proven "biggest moment" shockwave — already
     // used for boss roars and the Oath save. Her own supercharge earns the
     // same visual class rather than a smaller bespoke effect built to match.
-    if (typeof roarWave === 'function') roarWave(cx, cy, '#ffffff');
+    // a white edge over the kingdom's own light, so the wave is hers in every zone
+    if (typeof roarWave === 'function') roarWave(cx, cy, '#ffffff', PAL[G.roomDef.zone].glow);
     // flagged so the body can draw the BURST plate rather than the ordinary
     // third-hit finisher — same combo number, different blow
     this.swingVis = { t: 0.32, t0: 0.32, ang: 0, combo: 3, charged: true, chargeArtAlt:mode==='claws' && this._chargeArtCount>0 && this._chargeArtCount%2===0, weaponMode: mode, wield: mode === 'single' ? 1 : 0 };

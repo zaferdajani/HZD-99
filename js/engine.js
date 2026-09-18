@@ -386,9 +386,13 @@ function clearP() {
 // The caller sustains the tremble (cam.shake + rumble) while these fly.
 // ---------------------------------------------------------------------------
 const ROARFX = [];
-function roarWave(x, y, col) {
-  for (let i = 0; i < 3; i++) ROARFX.push({ x, y, t: -i * 0.12, col });
-  ROARFX.push({ x, y, t: 0, col, flash: true });
+// `halo` is the colour the wave GLOWS in; `col` stays the colour of its edge.
+// A roar passes one colour and gets a halo of the same; the supercharge passes
+// a white edge over the kingdom's own light, so the same wave reads as hers in
+// every zone without the callers each inventing a palette.
+function roarWave(x, y, col, halo) {
+  for (let i = 0; i < 3; i++) ROARFX.push({ x, y, t: -i * 0.12, col, halo: halo || col, seed: (i * 5 + 3) });
+  ROARFX.push({ x, y, t: 0, col, halo: halo || col, flash: true });
 }
 function updateRoarFX(dt) {
   for (let i = ROARFX.length - 1; i >= 0; i--) {
@@ -410,21 +414,61 @@ function drawRoarFX(c) {
       c.fillStyle = g;
       c.beginPath(); c.arc(r.x, r.y, 26 + k * 110, 0, 7); c.fill();
     } else {
-      // a pressure ring: grounded ellipse, thick when young, with short
-      // sound-ticks riding its rim
-      const k = r.t / 0.9, rad = 26 + k * 640;
-      c.globalAlpha = (1 - k) * 0.65;
-      c.strokeStyle = r.col; c.lineWidth = 2 + (1 - k) * 8;
-      c.beginPath(); c.ellipse(r.x, r.y, rad, rad * 0.8, 0, 0, 7); c.stroke();
-      c.lineWidth = 2;
+      // A PRESSURE RING (owner, 2026-09-18, from a screenshot of the
+      // supercharge: "these surrounding effect circles needs to be more vfx and
+      // animated in more details and shine"). It was one flat stroke and twelve
+      // equal ticks. It is now a wave with a body, in four layers, all driven
+      // by r.t so a frozen clock freezes it and nothing is allocated per frame:
+      //   1. a wide soft halo in the wave's own light, brightest at birth
+      //   2. a segmented inner wave a beat behind, whose dash offset is a
+      //      function of the radius, so it turns as the wave expands
+      //   3. sparks on the rim — two rings of them, uneven in length, spinning
+      //      against each other — instead of twelve identical ticks
+      //   4. a hot crisp edge on top, with real glow where the tier can pay
+      // The radius eases out — a blast leaves fast and slows — where the old
+      // ring inflated at one speed like a hoop. Same 0.9s, same reach.
+      const k = r.t / 0.9, e = 1 - (1 - k) * (1 - k), rad = 26 + e * 640, fade = Math.pow(1 - k, 1.3);
+      const sq = 0.8, halo = r.halo || r.col, seed = r.seed | 0;
+      const glow = typeof QUAL === 'undefined' || QUAL.glow;
+      // 1. halo
+      c.strokeStyle = halo;
+      c.globalAlpha = 0.22 * fade; c.lineWidth = 22 * (0.5 + 0.5 * fade);
+      c.beginPath(); c.ellipse(r.x, r.y, rad, rad * sq, 0, 0, 7); c.stroke();
+      c.globalAlpha = 0.38 * fade; c.lineWidth = 8;
+      c.beginPath(); c.ellipse(r.x, r.y, rad, rad * sq, 0, 0, 7); c.stroke();
+      // 2. the segmented wave behind the edge
+      const ri = Math.max(4, rad - 18 - 40 * e);
+      c.setLineDash([12, 16]); c.lineDashOffset = -rad * 1.4;
+      c.globalAlpha = 0.55 * fade; c.lineWidth = 2.4;
+      c.beginPath(); c.ellipse(r.x, r.y, ri, ri * sq, 0, 0, 7); c.stroke();
+      c.setLineDash([]);
+      // 3. sparks: a coarse ring spinning one way, a fine ring the other
+      c.strokeStyle = '#ffffff';
+      c.globalAlpha = 0.95 * fade; c.lineWidth = 1.8;
+      c.beginPath();
       for (let i = 0; i < 12; i++) {
-        const a = i / 12 * Math.PI * 2 + k * 1.6;
-        const cx2 = r.x + Math.cos(a) * rad, cy2 = r.y + Math.sin(a) * rad * 0.8;
-        c.beginPath();
-        c.moveTo(cx2, cy2);
-        c.lineTo(cx2 + Math.cos(a) * 11, cy2 + Math.sin(a) * 9);
-        c.stroke();
+        const a = i / 12 * Math.PI * 2 + e * 1.6 + ((seed >> (i % 5)) & 1) * 0.1;
+        const len = (7 + 12 * fade) * (0.55 + 0.45 * (((seed + 2) * (i + 1)) % 4) / 3);
+        const ca = Math.cos(a), sa = Math.sin(a);
+        c.moveTo(r.x + ca * (rad - 2), r.y + sa * (rad - 2) * sq);
+        c.lineTo(r.x + ca * (rad + len), r.y + sa * (rad + len) * sq);
       }
+      c.stroke();
+      c.globalAlpha = 0.6 * fade; c.lineWidth = 1;
+      c.beginPath();
+      for (let i = 0; i < 24; i++) {
+        const a = i / 24 * Math.PI * 2 - e * 2.4;
+        const ca = Math.cos(a), sa = Math.sin(a);
+        c.moveTo(r.x + ca * (rad - 6), r.y + sa * (rad - 6) * sq);
+        c.lineTo(r.x + ca * (rad + 3), r.y + sa * (rad + 3) * sq);
+      }
+      c.stroke();
+      // 4. the hot edge
+      c.globalAlpha = Math.min(1, 0.9 * Math.sqrt(fade)); c.strokeStyle = r.col;
+      c.lineWidth = 2 + fade * 6;
+      if (glow) { c.shadowColor = halo; c.shadowBlur = 16; }
+      c.beginPath(); c.ellipse(r.x, r.y, rad, rad * sq, 0, 0, 7); c.stroke();
+      c.shadowBlur = 0;
     }
     c.restore();
   }
