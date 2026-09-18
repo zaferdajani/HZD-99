@@ -4,7 +4,7 @@ const {chromium}=require('playwright');
 async function build(){
  const root=path.resolve(__dirname,'..');
  const m=JSON.parse(fs.readFileSync(path.join(root,'assets/source/hero/delivery-2026-09-18/fx-manifest.json'),'utf8'));
- const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH});
+ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/opt/pw-browsers/chromium'});
  try {const page=await browser.newPage();for(const s of m.sheets){
   const raw=fs.readFileSync(path.join(root,s.source));
   if(crypto.createHash('sha256').update(raw).digest('hex')!==s.sha256)throw Error('FX source changed: '+s.source);

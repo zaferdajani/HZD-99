@@ -6,16 +6,16 @@
 // feet were on the ground — so a plunge onto an enemy's head drew the standing
 // jab, and had done since the strips were first wired.
 //
-// The air and down sheets have not been delivered. That makes the interesting
-// case the FALLBACK, and it is the one a careless fix gets wrong: routing an
+// The air and down sheets have now been delivered (2026-09-18, swingAir /
+// swingDown, six cells each) and SWING_STRIP.air/.down are permanent entries.
+// But the FALLBACK this test exists to guard is not retired by that: the next
+// strip that has not shipped yet hits the exact same code path, and routing an
 // airborne swing to a strip that does not exist makes drawRoboSwing return
-// false, and an animated combo swing is replaced by one held pose. Worse than
-// the wrong animation, and invisible in a screenshot.
-//
-// So both directions are measured here. Today, airborne attacks must still play
-// the grounded combo strips. With a sheet present — faked by pointing an `air`
-// entry at an existing strip — the same input must select it instead. The day
-// the real sheets land, that second half stops being a simulation.
+// false, replacing an animated combo swing with one held pose — worse than the
+// wrong animation, and invisible in a screenshot. So the fallback is still
+// measured, by temporarily DELETING the now-real entries rather than assuming
+// their absence, and restored before the "sheet present" half runs against the
+// genuine shipped strips — no more borrowing claw_2's cells to fake it.
 //
 //   node tests/airattack.cjs      (needs the repo served on :8220)
 const { chromium } = require('playwright');
@@ -48,18 +48,19 @@ const check = (name, ok, detail) => {
     out.groundFin   = heroSwingState(vis(false, 0, 2));
     out.charged     = heroSwingState({ air: true, ay: 1, combo: 0, charged: true });
 
-    // unfired: airborne must still play the grounded combo, never fall to a pose
+    // unfired: simulate the day before delivery by removing the now-real
+    // entries, and confirm the fallback still plays the grounded combo rather
+    // than falling to a held pose.
+    const realAir = SWING_STRIP.air, realDown = SWING_STRIP.down;
+    delete SWING_STRIP.air; delete SWING_STRIP.down;
     out.airNoArt  = heroSwingState(vis(true, 0, 0));
     out.downNoArt = heroSwingState(vis(true, 1, 0));
 
-    // ...and with a sheet present the same inputs route to it. Borrow claw_2's
-    // real strip so the entry is indistinguishable from a fired one.
-    const borrowed = { key: SWING_STRIP.claw_2.key, cells: SWING_STRIP.claw_2.cells, k: SWING_STRIP.claw_2.k };
-    SWING_STRIP.air = borrowed; SWING_STRIP.down = borrowed;
+    // ...and restored, the same inputs route to the genuine shipped strips.
+    SWING_STRIP.air = realAir; SWING_STRIP.down = realDown;
     out.airArt  = heroSwingState(vis(true, 0, 0));
     out.downArt = heroSwingState(vis(true, 1, 0));
     out.airStillGround = heroSwingState(vis(false, 0, 1));   // grounded unaffected
-    delete SWING_STRIP.air; delete SWING_STRIP.down;
 
     // AND THE REAL THING: jump for real, then strike inside the air window.
     // Her hop lasts about five frames at harness frame rates, so the press has
