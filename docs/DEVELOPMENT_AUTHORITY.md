@@ -58,8 +58,9 @@ applied once, not through duplicate body wrappers. Do not silently return to
 1.78, widen acceptance thresholds to hide a regression, or change hitboxes to
 match a visual experiment without measuring combat and passage consequences.
 
-Superseded in part (owner, 2026-09-18): the WORLD ZOOM is now 1.615 — "you need
-to zoom out 15% in game to show more of the screen" — and the actor scale is
+Superseded in part (owner, 2026-09-18): the WORLD ZOOM is now 1.52 — "you need
+to zoom out 15% in game to show more of the screen", then "zoom out 20%", both
+measured from the original 1.90 — and the actor scale is
 1.0, reached by two further cuts on 2026-09-11. The rule the paragraph above
 exists to protect is unchanged and still binds: they remain two separate dials,
 each applied once, and neither is moved by widening a threshold.

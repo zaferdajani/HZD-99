@@ -11,12 +11,16 @@
 // file loads first; see source-files.json), so THAT constant is the one
 // value to change. Keeping this literal in sync anyway is what
 // tests/reconciliation.cjs checks for.
-// 1.90 -> 1.615: the owner asked for 15% more room on screen (2026-09-18, "you
-// need to zoom out 15% in game to show more of the screen"). It is the ZOOM that
-// moved, not the actor: heroVisualScale stays 1.0, so she is the same size
-// relative to the world she stands in and every enemy, NPC and structure pulls
-// back with her. 1.90 * 0.85 = 1.615.
-const PRESENTATION = { heroVisualScale:1.0, explorationZoom:1.615, minEncounterZoom:1.05, buffer:null };
+// 1.90 -> 1.615 -> 1.52: the owner asked for 15% more room on screen
+// (2026-09-18, "you need to zoom out 15% in game to show more of the screen")
+// and then for 20% ("zoom out 20%"). Both are measured from the ORIGINAL 1.90,
+// so this is 1.90 * 0.80 = 1.52, not a further 20% off the 15%.
+//
+// It is the ZOOM that moves, not the actor: heroVisualScale stays 1.0, so she
+// is the same size relative to the world she stands in and every enemy, NPC and
+// structure pulls back with her. At 1.52 the visible world is 632x355 against
+// the original 505x284 — 25% wider, 56% more area.
+const PRESENTATION = { heroVisualScale:1.0, explorationZoom:1.52, minEncounterZoom:1.05, buffer:null };
 const HERO_CORE_KEYS = ['heroStates', 'gaitWalk', 'gaitRun', 'hzdIdle'];
 let heroArtAttempt = 0;
 function requestHeroArt() {
