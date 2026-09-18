@@ -59,7 +59,37 @@ const check = (name, ok, detail) => {
     const out = { stalls: [], walkers: [] };
     const enter = async (id) => {
       loadRoom(id); G.dialog = null; G.trans = null; G.state = 'PLAY';
+      // ...AND SHE ARRIVES ALIVE. This harness walks her right and never presses
+      // attack, so across five rooms of machines she sometimes simply dies — and
+      // a death CARRIES: loadRoom does not revive her, so every room after it
+      // broke out of the walk on its first frame and reported 0 frames sampled.
+      // Three rooms reading "never sampled" is a dead player, not dead floors.
+      // The subject here is the terrain, so she is put back on her feet the same
+      // way the dialog and transition state above are cleared.
+      player.dead = false; player.hurtT = 0; player.iT = 0; player.stunT = 0;
+      if (player.cores != null) player.cores = Math.max(player.cores, 3);
+      // LET THE ROOM FINISH ARRIVING BEFORE THE CLOCK STARTS.
+      //
+      // 24 frames is enough for a room whose art is already warm, and not for
+      // C2. Every other room in this list reaches its full 5s of sim; C2 has
+      // been coming in between 3.1s and 5.0s across every recorded run of this
+      // harness — including runs that predate the Foundry's moves and the
+      // balance pass, so it is NOT something either of those did. It is simply
+      // the heaviest room here, and it has been sitting near this check's floor
+      // for a long time; when the machine is loaded it dips under and the
+      // harness reports a stall that is really a slow room.
+      //
+      // What this rest fixes is only the part that is the harness's fault:
+      // decode landing INSIDE the 5s budget. The room is now rested until it is
+      // DELIVERING frames at a sane cadence rather than for a fixed count, so
+      // the wait scales with how heavy the room and the machine actually are.
+      // C2's underlying cost is real and is its own piece of work.
       await rest(24);
+      for (let tries = 0; tries < 8; tries++) {
+        const t = performance.now();
+        await rest(12);
+        if ((performance.now() - t) / 12 < 22) break;   // ~45fps or better
+      }
     };
     // The rise the column ahead presents to a body standing where she is: the
     // top of the solid run it puts in her way, measured from her feet. This is
@@ -277,10 +307,31 @@ const check = (name, ok, detail) => {
   // number stops meaning anything either way. Every room's actual figure is
   // printed on the pass line, so a room that starts creeping toward the floor
   // is visible before it becomes a failure.
-  const unrun = r.stalls.filter(s => s.simRan < 3);
+  // A STALLED PAGE AND A SLOW ROOM ARE NOT THE SAME FAULT, and the total above
+  // could not tell them apart. It asked for 5s of sim inside a 40s wall budget,
+  // so a room that simulates correctly but SLOWLY failed exactly like a page
+  // that had died — and C2 (the heaviest room here, and heaviest long before
+  // the Foundry's moves or the balance pass: 3.1s-5.0s across every recorded
+  // run of this harness) tripped it about one run in four on a loaded machine.
+  //
+  // What a stall actually looks like is the clock not moving BETWEEN FRAMES.
+  // The loop already counts only frames on which simClock advanced, so the
+  // honest measure is how far it advanced per such frame: a live page steps its
+  // fixed ~16.7ms, a dead one steps nothing. That still catches the failure
+  // this was written for — "40 px in 480 frames" — while a slow room simply
+  // takes more wall time to gather the same simulation, which is not a bug in
+  // the floor she is walking on.
+  //
+  // The absolute floor stays as a backstop, dropped to the level that only a
+  // genuinely dead room reaches: enough frames to have measured anything at all.
+  const STEP_MIN = 0.010;                       // 10 ms of sim per advancing frame
+  const unrun = r.stalls.filter(s => s.frames < 30
+    || (s.simRan / Math.max(1, s.frames)) < STEP_MIN);
   check('the clock ran in every room', unrun.length === 0,
-        unrun.length ? unrun.map(s => s.room + ' only ' + s.simRan + 's of sim in ' + s.frames + ' frames').join(', ')
-                     : r.stalls.map(s => s.room + ' ' + s.simRan + 's/' + s.frames + 'f').join('  '));
+        unrun.length ? unrun.map(s => s.room + ' only ' + s.simRan + 's of sim in ' + s.frames
+              + ' frames (' + Math.round(s.simRan / Math.max(1, s.frames) * 1000) + 'ms/frame)').join(', ')
+                     : r.stalls.map(s => s.room + ' ' + s.simRan + 's/' + s.frames + 'f@'
+              + Math.round(s.simRan / Math.max(1, s.frames) * 1000) + 'ms').join('  '));
   // A ROOM WHOSE FIRST OBSTACLE IS A REAL STEP IS NOT A DEAD ROOM.
   //
   // This is the fault that made the whole check flicker, and it was mine: once
