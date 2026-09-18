@@ -158,9 +158,17 @@ const check = (name, ok, detail) => {
     const shed = (stage, zone) => {
       setRun(stage);
       const e = spawn('guard', zone, 240);
+      // ...AND IT STAYS WHERE IT WAS PUT. `dir` is a coin flip in the Enemy
+      // constructor, and across the ~1300 hand-stepped frames below a guard that
+      // happened to start walking LEFT strolled clean out of the room — the
+      // plate still tore, but the creep was born at x=-950 and expired on its
+      // first frame, so this read 144 hits or 0 depending on nothing but that
+      // coin. The subject of the measurement is the shed, not the patrol.
+      const holdX = e.x;
       let tellFrames = 0, plateUpAt = [], denied = 0, creepHits = 0;
       let shedAt = null, creepSeen = false, guardWhileTell = null;
       for (let i = 0; i < 900; i++) {
+        e.x = holdX; e.vx = 0;
         park(e.x + 420, floorY - player.h);      // far away: it never lunges
         e.atkCD = 9;                             // ...and never decides to
         hits = [];
@@ -180,6 +188,7 @@ const check = (name, ok, detail) => {
         // a fresh tear, so the creep is measured at full life
         e2.shedN = 0; e2.plateShed = 0; e2.creep = null; e2.crouchT = 0;
         for (let i = 0; i < 400 && !e2.creep; i++) {
+          e2.x = holdX; e2.vx = 0;
           park(e2.x + 420, floorY - player.h);
           e2.atkCD = 9; e2.update(DT);
           if (e2.guard && i % 20 === 0) dealDmg(e2, 8, null, e2.x + e2.w / 2, e2.y + e2.h / 2);
