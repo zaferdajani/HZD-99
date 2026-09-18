@@ -5848,6 +5848,70 @@ function drawBlot(c, e) {
   if (!settling && chance(0.22 * fade))
     addPart(b.x + rnd(-b.r, b.r), b.y - 2, rnd(-8, 8), rnd(-34, -10), 0.4, '#cfe9ff', 1.7, 40, true);
 }
+// ===========================================================================
+// KINGDOM C — THE FOUNDRY'S MOVES (owner, 2026-09-18: "improve enemy level and
+// skills point with more moves that need to be created for them with every
+// kingdom"). Three rows, all scoped `@C` so they reach the Foundry and nowhere
+// else — the unscoped rows belong to the integrator and the other four kingdom
+// sessions are writing their own keys at the same time.
+//
+// THE KINGDOM HAS ONE ANSWER AND THESE ARE THREE WAYS OF SAYING IT: the floor
+// here is not yours. The Foundry already owns the LANE (the kiln's plume goes
+// straight up) and the Archives own the RADIUS; what a level buys a Foundry
+// machine is the ability to leave MELT on the ground behind whatever it just
+// did, so the room after the attack is a different room from the room before
+// it. Each one denies a place, never a moment — which is also why none of them
+// costs the player a frame of warning:
+//
+//   cinder      a Foundry crawler's lunge BURNS ITS LANE. Answer: punish it
+//               from off the line it just ran, not from on it.
+//   slagsplash  a Foundry hopper lands in the crust and THROWS TWO GOBS in
+//               visible arcs. Answer: watch the arcs, be where they are not.
+//   pour        a Foundry kiln TIPS after the blow and lays melt on one told
+//               side. Answer: take the spent window from the other side.
+//
+// Priced so the kingdom's own floor (level 3 = 2 points) buys the common one
+// outright, the uncommon one exactly, and the deep one not at all: `pour`
+// costs 3 and needs a run that has already taken powers and guardians, so the
+// first kiln she is TAUGHT on in C1 is the kiln the kingdom introduced and the
+// one that pours is a later, dearer machine.
+//
+// TELEGRAPHS. The law above TRAITS binds every one of these and was the first
+// thing designed, not the last: an enemy is never harder because it warned you
+// less. Every tell below is the machine's EXISTING full-length wind-up with a
+// SECOND readable channel added on top — embers dripping from a crawler's
+// vents, a hopper's feet running white, a bead of melt hanging off the lip the
+// kiln has chosen and a marked patch of floor under it — and the arcs and the
+// patch are warnings of PLACE, which is the only kind of warning a positional
+// attack can honestly give. Not one of these shortens a timer.
+FOE_MOVES['crawler@C'] = [{ id: 'cinder', cost: 1 }];
+FOE_MOVES['hopper@C'] = [{ id: 'slagsplash', cost: 2 }];
+FOE_MOVES['kiln@C'] = [{ id: 'pour', cost: 3 }];
+// WHAT THE FOUNDRY LEAVES BEHIND. It is the blob's pool — same list, same
+// lifetime clock, same grounded-only hit — with `hot` set, because building a
+// second hazard list would mean a second cap, a second cleanup on room load
+// and a second thing to forget. `hot` is what the renderer and the hurt label
+// read (js/game.js); `rMax` is how far this particular spill runs, since a
+// poured runnel is not the size of a drip. Returns the pool so a caller can
+// mark it further, or null when the shared cap is already full.
+const SLAG_SPREAD = 90;          // melt runs, then sets: fast to rMax, then still
+function slagPool(x, y, rMax, life) {
+  G.pools = G.pools || [];
+  if (G.pools.length >= 14) return null;
+  const q = { x: x, y: y, t: life, t0: life, r: 0, rMax: rMax, hot: 1 };
+  G.pools.push(q);
+  return q;
+}
+// THE SECOND TELL CHANNEL, IN ONE PLACE. Every Foundry move spends its whole
+// wind-up shedding sparks from the part of the machine that is about to pour,
+// so the move is read off the BODY before it is read off the floor. Rate is
+// per second and does not scale with anything — a tell that thins out as the
+// machine gets cleverer is the shortened warning wearing a different hat.
+function emberTell(x, y, rate, dt) {
+  if (!chance(dt * rate)) return;
+  addPart(x + rnd(-5, 5), y + rnd(-2, 2), rnd(-18, 18), rnd(10, 60), 0.34,
+    chance(0.45) ? '#ffe2a8' : '#ff9430', 2, 260, true);
+}
 const EKIND = {
   crawler: { w: 28, h: 20, hp: 30, spd: 62 },
   guard: { w: 30, h: 22, hp: 44, spd: 52 },
@@ -5893,6 +5957,11 @@ class Enemy {
     this.holdT = 0; this.diveT = 0; this.riseT = 0;
     this.crouchT = 0; this.gathered = false; this.wasAir = false; this.burst = 0;
     this.gatherT = 0; this.stepT = 0; this.denied = 0; this.pureM = 0;
+    // ...and the same rule for what a KINGDOM's moves add. cindT is read as
+    // `(this.cindT || 0) - dt` at its call site and would survive undefined,
+    // but the law above is that a timer starts at a number and is declared
+    // where the fields are, not wherever it first happens to be safe.
+    this.cindT = 0; this.gobs = null; this.pourSide = 0;
     // THE WORLD USED TO BE FLAT. EKIND is one global table, so a crawler in the
     // last kingdom was byte-identical to the one in the first — and the last
     // NEW enemy type appears at the midpoint, which left the back half of the
@@ -6013,6 +6082,22 @@ class Enemy {
         if (this.lungeT > 0) {                              // committed
           this.lungeT -= dt;
           this.vx = this.dir * this.spd * 4.2;
+          // CINDER (kingdom C, cost 1). A Foundry crawler runs with its belly
+          // vents open and a crust of slag on them, and the lunge BURNS THE
+          // LANE IT RAN: melt drops off it at a fixed cadence along the whole
+          // commit, so the line the machine just crossed is briefly not a
+          // place to stand. It changes WHERE the punish window is taken, never
+          // whether there is one — the winded 0.55 s is untouched, and it is
+          // spent standing OFF the lane instead of on it. Everywhere else in
+          // the game a crawler is exactly the crawler it always was: the row
+          // is scoped `crawler@C`, so hasMove is false outside the Foundry.
+          if (this.hasMove('cinder')) {
+            this.cindT = (this.cindT || 0) - dt;
+            if (this.cindT <= 0) {
+              this.cindT = 0.075;
+              slagPool(cx, this.y + this.h - 2, 13, 1.15);
+            }
+          }
           // the punish window shrinks with cunning but never closes: even at
           // full sharpness there is a third of a second where it is yours
           if (this.lungeT <= 0) { this.windedT = 0.55 - this.iq * 0.22; this.vx = 0; }
@@ -6020,6 +6105,12 @@ class Enemy {
           this.windedT -= dt; this.vx *= Math.pow(0.02, dt);
         } else if (this.coilT > 0) {                        // the tell
           this.coilT -= dt; this.vx = 0;
+          // ...and the SECOND CHANNEL of that tell, for the whole of it. The
+          // coil is TELL_FAST whether or not the machine bought cinder; what
+          // the move adds is a shower of melt off the underside through every
+          // frame of it, so the lane is announced before it is laid rather
+          // than discovered by standing in it.
+          if (this.hasMove('cinder')) emberTell(cx, this.y + this.h - 3, 34, dt);
           // a clever one keeps its nose on her while it gathers, so stepping
           // around it stops being a free answer
           if (this.iq > 0.55) this.dir = Math.sign(px - cx) || this.dir;
@@ -6046,6 +6137,12 @@ class Enemy {
               this.coilT = TELL_FAST;                       // the tell never shortens
               this.atkCD = rnd(2.2 - this.iq * 1.1, 3.4 - this.iq * 1.6);
               this.vx = 0; sfx('tell');
+              // BOTH CHANNELS, the law the bosses are held to (tests/tells).
+              // A cinder crawler's wind-up looks different AND sounds
+              // different: the vent hiss lays under the ordinary tell blip, so
+              // the one that burns the floor is told apart from the one that
+              // does not without having to see its belly.
+              if (this.hasMove('cinder')) sfx('vent');
             }
           }
         }
@@ -6294,6 +6391,40 @@ class Enemy {
       }
       case 'hopper': {
         this.vy += 2000 * dt;
+        // SLAGSPLASH (kingdom C, cost 2) — the gobs, first, because they keep
+        // flying while the machine that threw them is mid-leap or crouched for
+        // the next one. Same shape as the breaker's waves: a small list on the
+        // body, ticked at the top of its own case, drawn in world space — and
+        // like the waves they go with the body, so killing the hopper in the
+        // air takes its melt out of the sky with it.
+        //
+        // THE ARC IS THE WARNING. A thrown hazard cannot warn you with a timer
+        // — by the time a timer would fire, the melt is already where it is
+        // going — so it warns you with PLACE: two gobs leave the feet on a
+        // readable parabola, and a marked patch of floor lights under each one
+        // the whole way down. Nothing about them damages her in the air. The
+        // question is only "are you standing where that is about to land", and
+        // she is given the whole flight to answer it.
+        if (this.gobs && this.gobs.length) {
+          for (let i = this.gobs.length - 1; i >= 0; i--) {
+            const g = this.gobs[i];
+            g.vy += 1400 * dt;
+            g.x += g.vx * dt; g.y += g.vy * dt; g.life -= dt;
+            // where it is GOING, recomputed each step so the mark is honest
+            // about a gob that clips a ledge instead of the floor it left
+            let ty = g.y, vy2 = g.vy;
+            for (let k = 0; k < 40 && !solidAt(Math.floor(g.x / TILE), Math.floor(ty / TILE)); k++) {
+              vy2 += 1400 * 0.03; ty += vy2 * 0.03;
+            }
+            g.mark = ty;
+            const landed = g.vy > 0 && solidAt(Math.floor(g.x / TILE), Math.floor((g.y + 4) / TILE));
+            if (landed || g.life <= 0) {
+              if (landed) { slagPool(g.x, g.y + 4, 20, 2.6); sfx('lob'); }
+              this.gobs.splice(i, 1); continue;
+            }
+            if (chance(dt * 30)) addPart(g.x + rnd(-3, 3), g.y, rnd(-16, 16), rnd(-20, 20), 0.3, '#ff9430', 2, 200, true);
+          }
+        }
         const col = moveEnt(this, dt);
         if (col.d) {
           // it LANDS HARD. The shock is a moment of danger on the ground next
@@ -6305,10 +6436,27 @@ class Enemy {
             cam.shake = Math.max(cam.shake, 2);
             for (let i = 0; i < 7; i++)
               addPart(cx + rnd(-16, 16), this.y + this.h, rnd(-90, 90), rnd(-120, -20), 0.35, '#b9c6d4', 2.2, 700);
+            // ...and a Foundry hopper lands in the crust, so the landing
+            // THROWS. Two gobs, one each way, symmetric on purpose: the move
+            // does not aim, it displaces — which is what keeps the answer
+            // positional ("be off both arcs") instead of a coin flip on which
+            // side it picked. The landing shock itself is unchanged.
+            if (this.hasMove('slagsplash')) {
+              this.gobs = this.gobs || [];
+              for (const sgn of [-1, 1])
+                this.gobs.push({ x: cx + sgn * 8, y: this.y + this.h - 6, vx: sgn * 165, vy: -250, life: 2.2, mark: this.y + this.h });
+              sfx('vent');
+            }
           }
           this.wasAir = false;
           this.vx = 0;
-          if (this.crouchT > 0) { this.crouchT -= dt; if (this.crouchT > 0) break; }
+          if (this.crouchT > 0) {
+            this.crouchT -= dt;
+            // the crouch is TELL_FAST with or without the move; the move adds
+            // the shower, for every frame of it
+            if (this.hasMove('slagsplash')) emberTell(cx, this.y + this.h - 2, 40, dt);
+            if (this.crouchT > 0) break;
+          }
           this.t -= dt;
           // it faces its prey while gathering — so the leap goes nose-first
           this.dir = Math.sign(px - cx) || this.dir || 1;
@@ -6319,6 +6467,9 @@ class Enemy {
             // saw coming.
             if (this.crouchT <= 0 && !this.gathered) {
               this.crouchT = TELL_FAST; this.gathered = true; sfx('tell');
+              // both channels again: a splash hopper crouches with its feet
+              // pooling white and shedding melt, and hisses under the tell
+              if (this.hasMove('slagsplash')) sfx('vent');
               this.dir = Math.sign(px - cx) || 1;
               this.t = 0.01;
               break;
@@ -6421,6 +6572,20 @@ class Enemy {
             player.hurt(DF().edmg, cx, 'kiln.plume');
           if (chance(dt * 26)) addPart(cx + rnd(-8, 8), my - rnd(0, this.plumeH),
             rnd(-24, 24), rnd(-160, -60), 0.3, chance(0.4) ? '#ffd08a' : '#ff5f6d', 2.2, -80, true);
+          // POUR (kingdom C, cost 3) — the deep pot. A kiln that has been fed
+          // this long does not simply stop: when the column dies the crucible
+          // TIPS, and a runnel of melt runs out over one lip and sets on the
+          // floor beside it. The spent window is untouched — still 0.95 s,
+          // still two hits and the temptation of three — but it now has a
+          // SIDE, and the side is the one she was standing on when the charge
+          // began. The pot cannot make her stop punishing it; it can make her
+          // cross first, which is the Foundry's whole lesson about spending
+          // the quiet, charged for real money.
+          if (this.plumeT <= 0 && this.hasMove('pour')) {
+            const side = this.pourSide || 1;
+            slagPool(cx + side * 30, this.y + this.h - 2, 22, 3.0);
+            sfx('vent');
+          }
           if (this.plumeT <= 0) { this.plumeH = 0; this.windedT = 0.95; }
           break;
         }
@@ -6430,6 +6595,13 @@ class Enemy {
         }
         if (this.crouchT > 0) {            // the charge — petals up, amber on
           this.crouchT -= dt;
+          // THE SIDE IS TOLD FROM THE FIRST FRAME OF THE CHARGE and never
+          // revised, so the read is a shape on the floor for the whole of
+          // TELL_SWIPE plus the whole 0.8 s of the blow — 1.3 s of warning for
+          // a hazard that arrives after all of it. Choosing it once is also
+          // what makes it fair: a pot that re-aimed while she crossed would be
+          // a homing hazard with a wind-up, which is not a read at all.
+          if (this.hasMove('pour')) emberTell(cx + (this.pourSide || 1) * 9, this.y + 4, 30, dt);
           if (this.crouchT <= 0) {
             this.plumeT = 0.8; this.plumeH = 0;
             // cunning buys REACH: a taller column each iq step, never less warning
@@ -6445,6 +6617,9 @@ class Enemy {
           this.crouchT = TELL_SWIPE;       // the kingdom floor: the tell never shortens
           this.atkCD = rnd(2.2 - this.iq * 0.7, 3.4 - this.iq * 1.1);
           sfx('tell');
+          // it tips toward the side she is on — the cunning is that it denies
+          // the ground she already chose, not that it arrives unannounced
+          if (this.hasMove('pour')) { this.pourSide = Math.sign(px - cx) || 1; sfx('vent'); }
         }
         break;
       }
@@ -6845,6 +7020,73 @@ class Enemy {
       cg.addColorStop(0, '#ff5f6d'); cg.addColorStop(1, 'rgba(255,95,109,0)');
       c.fillStyle = cg;
       c.beginPath(); c.ellipse(cx, my - ph, 20, 9, 0, 0, 7); c.fill();
+      c.restore(); c.globalAlpha = 1;
+    }
+    // KINGDOM C'S TELLS, IN WORLD SPACE — drawn here rather than on the body
+    // for the same reason the plume and the waves are: they are statements
+    // about the FLOOR, and a hazard's warning has to be where the hazard will
+    // be. It also keeps them independent of whether a machine's authored plate
+    // has landed yet (ART_QUEUE §2l), which a body-space tell would not be.
+    //
+    // The pour: a bead of melt swells on the lip the pot has chosen and a
+    // patch brightens on the ground under it, through the charge AND the blow,
+    // so the spill is a place she has been looking at for 1.3 s before it is
+    // a place she can be burned by. Amber while it is a warning — the game's
+    // one meaning for that hue — never the danger red the live column wears.
+    if (this.kind === 'kiln' && !this.dead && this.hasMove('pour')
+        && ((this.crouchT || 0) > 0 || (this.plumeT || 0) > 0)) {
+      const side = this.pourSide || 1;
+      // 0 at the first frame of the charge, 1 as the melt lets go
+      const k = (this.crouchT || 0) > 0
+        ? clamp(1 - this.crouchT / TELL_SWIPE, 0, 1) * 0.45
+        : 0.45 + clamp(1 - this.plumeT / 0.8, 0, 1) * 0.55;
+      const lx = cx + side * 9.5, ly = this.y + 3;
+      const fy = this.y + this.h - 2;
+      c.save(); c.globalCompositeOperation = 'lighter';
+      // the patch: where it is going to run, marked as a shape on the ground.
+      // Ground-anchored, so it is exactly the decoration G.artProbe exists to
+      // switch off — tests/artbible.cjs measures where a machine's feet are,
+      // and a lit ellipse under them is a light it would measure instead.
+      if (!G.artProbe) {
+        c.globalAlpha = 0.16 + k * 0.4;
+        const pg = c.createRadialGradient(cx + side * 30, fy, 1, cx + side * 30, fy, 24);
+        pg.addColorStop(0, '#ffb04a'); pg.addColorStop(1, 'rgba(255,176,74,0)');
+        c.fillStyle = pg;
+        c.beginPath(); c.ellipse(cx + side * 30, fy, 22, 7, 0, 0, 7); c.fill();
+      }
+      // the bead: hanging off the lip, heavier as it is about to let go
+      c.globalAlpha = 0.5 + k * 0.5;
+      c.fillStyle = '#ffd08a';
+      const bl = 2 + k * 7;
+      c.beginPath();
+      c.moveTo(lx - 2.4, ly);
+      c.quadraticCurveTo(lx - 3.2, ly + bl * 0.7, lx, ly + bl);
+      c.quadraticCurveTo(lx + 3.2, ly + bl * 0.7, lx + 2.4, ly);
+      c.closePath(); c.fill();
+      c.restore(); c.globalAlpha = 1;
+    }
+    // The splash gobs: the arc IS the warning, so both the gob and the square
+    // it is falling toward are drawn, and neither of them can hurt her — the
+    // melt only bites once it has set. The mark is recomputed every step in
+    // update(), so it tells the truth about a gob that is going to clip a
+    // ledge instead of reaching the floor the hopper jumped from.
+    if (this.kind === 'hopper' && this.gobs && this.gobs.length && !this.dead) {
+      c.save(); c.globalCompositeOperation = 'lighter';
+      for (const g of this.gobs) {
+        if (!G.artProbe) {                       // ground-anchored, same rule
+          c.globalAlpha = 0.42;
+          const mg = c.createRadialGradient(g.x, g.mark, 1, g.x, g.mark, 20);
+          mg.addColorStop(0, '#ffb04a'); mg.addColorStop(1, 'rgba(255,176,74,0)');
+          c.fillStyle = mg;
+          c.beginPath(); c.ellipse(g.x, g.mark, 18, 6, 0, 0, 7); c.fill();
+        }
+        c.globalAlpha = 0.9;
+        c.fillStyle = '#ffe2a8';
+        c.beginPath(); c.ellipse(g.x, g.y, 5, 6.5 - clamp(g.vy / 400, -1, 1) * 1.5, 0, 0, 7); c.fill();
+        c.globalAlpha = 0.45;
+        c.fillStyle = '#ff9430';
+        c.beginPath(); c.ellipse(g.x, g.y - 6, 3.4, 7, 0, 0, 7); c.fill();
+      }
       c.restore(); c.globalAlpha = 1;
     }
     // the rime's circle is the READ, drawn in world space as the TRUE hit

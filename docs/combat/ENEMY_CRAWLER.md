@@ -34,6 +34,24 @@ walk past. It only becomes an encounter next to something that stops you walking
 | `e.cr.lunge` | `coilT` | **350** (`TELL_FAST`, never scales) | 220 + iq×60 ms at spd×4.2 | **550 − iq×220 ms** (`windedT`) | body | `coilT` | **350** | amber dashed ring + directional wedge + `sfx('tell')` + it stops dead | 1 core | **move** perpendicular, or **bait-and-punish** | **517 → 297** | the punish window shrinks with cunning but never closes |
 | `e.cr.contact` | — | — | continuous | — | 28×20 body | none | — | — | 1 core | **out-range** | n/a | see audit |
 
+### B1k. Kingdom moves — what a level buys it, and where
+
+A machine's level is its kingdom's depth plus the run's progress (`foeLevel`),
+and the points it leaves over buy rows out of `FOE_MOVES`. Rows scoped `@<zone>`
+reach one kingdom only, so the crawler below is the crawler in the Foundry and
+NOT the crawler anywhere else — the table above is still the whole machine in
+zones A, B, D and E.
+
+| id | kingdom | cost | state | startup (tell) | active | recovery | hitbox | channels | dmg | intended_counter | opening_ms | notes |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `e.cr.cinder` | **C — the Foundry** | 1 (every Foundry crawler, from the kingdom's own floor) | rides `lungeT` | **350** — the SAME `coilT` as `e.cr.lunge`, unchanged | melt laid every **75 ms** across the whole commit; each pool r 13, **1150 ms** | unchanged (`windedT` 550 − iq×220) | pools, **grounded targets only** | the ordinary tell **plus** melt showering off the underside for every frame of the coil **plus** `sfx('vent')` under `sfx('tell')` | 1 core per pool | **move** perpendicular as before, then **punish from off the lane** | **517 → 297**, unchanged | it does not add a move, it adds a PLACE to the one that was there. Measured by `tests/foundry.cjs` |
+
+**Audit.** `opening_ms` is untouched and measured as untouched; the wind-up is
+measured against the same machine with the move stripped and has to be the same
+number of frames. The new damage source (`foundry.slag`) is telegraphed by the
+coil it is laid during, which is the roster's normal standard — unlike
+`e.ho.landing`, it is not a new untelegraphed source.
+
 ### B1 audits
 
 **Empty or ambiguous `intended_counter`:** `e.cr.contact` — body contact damage

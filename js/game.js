@@ -1983,10 +1983,17 @@ function update(dt) {
           const q = G.pools[i];
           q.t -= dt;
           if (q.t <= 0) { G.pools.splice(i, 1); continue; }
-          q.r = Math.min(26, q.r + 34 * dt);
+          // ...and what the FOUNDRY leaves behind uses the same list (kingdom
+          // C's moves, js/entities.js: cinder / slagsplash / pour). A poured
+          // runnel is not a drip: it RUNS, fast, to the width its own spill
+          // had and no further — so the spread rate and the ceiling are per
+          // pool now instead of one pair of constants for the only thing that
+          // ever made one. An old-style pool passes neither and is unchanged.
+          q.r = Math.min(q.rMax || 26, q.r + (q.hot ? SLAG_SPREAD : 34) * dt);
           if (!player.dead && player.iT <= 0 && player.on
               && Math.abs(player.x + player.w / 2 - q.x) < q.r
-              && Math.abs(player.y + player.h - q.y) < 16) player.hurt(DF().edmg, q.x, 'blob.pool');
+              && Math.abs(player.y + player.h - q.y) < 16)
+            player.hurt(DF().edmg, q.x, q.hot ? 'foundry.slag' : 'blob.pool');
         }
       }
       if (G.plats) for (const pl of G.plats) pl.update(dt);
@@ -12568,14 +12575,29 @@ function drawWorldFrame() {
     const a = Math.min(1, q.t / 0.8) * 0.55;
     c.save();
     c.globalAlpha = a;
+    // MELT COOLS; ACID DOES NOT. The Foundry's spill is the same pool object
+    // with `hot` set, and it is drawn as the thing it is: white at the middle
+    // where it is newest, darkening to danger red at the rim, and losing its
+    // light across its life so a player can see the floor giving her the tile
+    // back. `t/t0` is the whole animation — no second timer, no second list.
+    const heat = q.hot ? Math.max(0, q.t / (q.t0 || 1)) : 0;
     const g3 = c.createLinearGradient(0, q.y - 8, 0, q.y + 3);
-    g3.addColorStop(0, 'rgba(180,255,120,0.5)'); g3.addColorStop(1, 'rgba(90,190,60,0.15)');
+    if (q.hot) {
+      g3.addColorStop(0, 'rgba(255,242,221,' + (0.25 + 0.4 * heat).toFixed(2) + ')');
+      g3.addColorStop(1, 'rgba(255,95,109,' + (0.1 + 0.25 * heat).toFixed(2) + ')');
+    } else {
+      g3.addColorStop(0, 'rgba(180,255,120,0.5)'); g3.addColorStop(1, 'rgba(90,190,60,0.15)');
+    }
     c.fillStyle = g3;
     c.beginPath(); c.ellipse(q.x, q.y, q.r, 5.5, 0, 0, 7); c.fill();
-    c.strokeStyle = 'rgba(200,255,150,' + (0.5 * a).toFixed(2) + ')'; c.lineWidth = 1.4;
+    c.strokeStyle = q.hot
+      ? 'rgba(255,148,48,' + ((0.3 + 0.5 * heat) * a).toFixed(2) + ')'
+      : 'rgba(200,255,150,' + (0.5 * a).toFixed(2) + ')';
+    c.lineWidth = 1.4;
     c.beginPath(); c.ellipse(q.x, q.y, q.r, 5.5, 0, 0, 7); c.stroke();
     // it bubbles, so it reads as active rather than as a decal
-    if (chance(0.25 * a)) addPart(q.x + rnd(-q.r, q.r), q.y - 2, rnd(-10, 10), rnd(-40, -12), 0.4, '#c8ff96', 1.8, 60, true);
+    if (chance(0.25 * a)) addPart(q.x + rnd(-q.r, q.r), q.y - 2, rnd(-10, 10), rnd(-40, -12), 0.4,
+      q.hot ? (chance(0.5) ? '#ffd08a' : '#ff9430') : '#c8ff96', 1.8, 60, true);
     c.restore(); c.globalAlpha = 1;
   }
   // THE PILE IS AN OBJECT, NOT SCENERY. It was briefly drawn with the cave

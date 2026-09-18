@@ -195,6 +195,32 @@ targeting rings that spin faster, as a machine climbs from idle through alert an
 locked to overdrive. A boss in overdrive also grows crimson tendrils. So the eye
 tells you *what* it is and *how close* it is to acting, without a health bar.
 
+## 4c. What a kingdom teaches its machines
+
+A mimic has a LEVEL — its kingdom's depth plus how far the run has got
+(`foeLevel`, js/entities.js) — and the level is points it spends. The first
+thing the points buy is traits. The rest buy MOVES, and the moves are the
+kingdom's, not the frame's: the same `crawler` chassis learns a different
+trick in each kingdom it walks in, because the thing teaching it is the room.
+
+**Kingdom C, the Foundry, teaches all three of its machines the same sentence
+— *the floor is not yours* — in three different grammars.** It is the kingdom
+of melt, and what a Foundry machine buys with its level is the ability to leave
+some behind. Every one of these denies a PLACE and never a moment; every one of
+them is announced by the machine's own existing wind-up, at its existing full
+length, with a second channel of warning laid over it, because an enemy in this
+game is never harder because it warned you less.
+
+| Move | Frame | Costs | What it does | How you are told |
+|---|---|---|---|---|
+| `cinder` | Drakk (`crawler`) | 1 — every Foundry crawler | The lunge burns the lane it ran: melt drops off the belly along the whole commit and sets there for a beat. | Melt showers off the underside through every frame of the coil, and it hisses under the tell. |
+| `slagsplash` | Nikk (`hopper`) | 2 | The hard landing throws two gobs of melt in arcs, one each way; they set where they come down. | Its feet run white through the crouch — then the arcs themselves, in the air, with a lit patch under each one. Nothing in flight can touch you. |
+| `pour` | the Kiln Vent (`kiln`) | 3 — a pot only a long run builds | When the plume dies the crucible tips and lays a runnel of melt on ONE side of itself. | The side is chosen at the first frame of the charge and never revised: a bead swells on that lip and a patch lights on that floor for the whole charge and the whole blow — 1.3 s before anything is hot. |
+
+The spent windows are untouched. The kiln is still open for 0.95 s, the crawler
+still winded for its half second; what changed is that the punish now has a
+side, and the Foundry charges you for taking the obvious one.
+
 ## 5. The Song — the player's own element
 
 **MURR** — *murr*, music. The one element no enemy carries and no enemy resists.

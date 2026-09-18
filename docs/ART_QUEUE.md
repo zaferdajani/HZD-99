@@ -104,6 +104,48 @@ than needing new logic; follow the `drawPlateAnchored` pattern the rime body
 already uses, and keep the procedural drawing as the loading fallback exactly
 as the breaker and the coil do.
 
+## 2bb. THE FOUNDRY POURS — kingdom C's three new moves need two plates ✱ QUEUED 2026-09-18 (kingdom C session)
+
+Owner, 2026-09-18: *"Improve enemy level and skills point with more moves that
+need to be created for them with every kingdom."* Kingdom C's answer shipped in
+code — `cinder`, `slagsplash` and `pour` in `FOE_MOVES` (js/entities.js), all
+scoped `@C`, all measured by `tests/foundry.cjs`. The move FX are procedural and
+stay procedural (melt is light, not a structure). Two things in them are NOT
+effects, and those are queued here rather than drawn, per ART IS HIGGSFIELD'S:
+
+1. **`kilnPour`** — a FOURTH state plate for the kiln, joining `kilnRest` /
+   `kilnTell` / `kilnSpent` from §2l, drawn at the same anchor, same scale,
+   same atlas-creature family. The pot has TIPPED: the whole crucible canted
+   maybe 20° onto one lip (the plate is drawn tipping to the LEFT — the engine
+   already mirrors per `pourSide`), the bronze mouth collar rolled low on that
+   side, the three ceramic damper petals hanging wide and asymmetric with the
+   downhill one flooded, a rope of melt breaking off the low lip, the feed
+   pipes on the high side pulled taut against the lean, and the cooled slag
+   skirt at the base broken open on the downhill side where the runnel has cut
+   a channel through it. Silhouette must differ from all three existing states
+   (ART_BIBLE §3.3) — the lean IS the read, and it is what tells the player
+   which side of the pot is about to stop being hers. NEGATIVE: no legs, no
+   horizontal drum (never the breaker), no barrel (never the turret), no
+   second character, no text, no watermark, dark-room phrasing, subject only.
+
+2. **`slagCrust` ×4** — a small decal sheet of COOLED spill shapes for the
+   Foundry floor: four irregular puddle silhouettes, 96 px wide each, every one
+   a different outline, none of them circular and none of them with a straight
+   edge anywhere (NO RIGHT ANGLES — and per the mimic rule these ARE the
+   Foundry's own furniture, the same crust the kiln's skirt and the room's
+   backdrop are made of). Rim blistered and lumpy, surface crazed into plates
+   with dark seams between them. Painted COLD — dead grey-brown with a faint
+   iridescent bloom. The HEAT is code: `js/game.js` grades a hot pool from
+   white at the middle to danger red at the rim across its life, and the plate
+   is what the grade is painted onto, so a cold sheet is the correct sheet and
+   a glowing one would fight the fade. NEGATIVE: no glow, no embers, no
+   perspective, no ground plane beyond the puddle itself, no text.
+
+Until both land the engine draws its own — `js/game.js`'s pool renderer for the
+spill, `case 'kiln'` in Enemy.draw plus the world-space pour tell in
+js/entities.js for the pot — exactly as §2l's fallback works. Nothing is
+blocked; these make it look like the Foundry instead of like a gradient.
+
 ## 2az. SUPERCHARGE EFFECTS — LANDED 2026-09-16 (art session)
 
 `assets/source/hero/delivered/v3/supercharge_fx.png` →

@@ -34,6 +34,21 @@ contact: the landing shock.
 | `e.ho.landing` | — | **0 — none** | on the frame it touches down | — | ±62 px horizontal, ±40 px vertical, **grounded targets only** | **none** | **0** | camera shake 2 + a 7-particle dust burst, **on the frame it lands** | 1 core | **do not be standing beside it when it lands** | n/a | see the audit |
 | `e.ho.contact` | — | — | continuous | — | 26×24 | none | — | — | 1 core | out-range | n/a | roster-wide |
 
+### B1k. Kingdom moves — what a level buys it, and where
+
+Same mechanism as the crawler's (`foeLevel` → points → `FOE_MOVES`, `@<zone>`
+rows reaching one kingdom only). The row below is the hopper in the Foundry; in
+A, B and E the table above is still the whole machine.
+
+| id | kingdom | cost | state | startup (tell) | active | recovery | hitbox | channels | dmg | intended_counter | opening_ms | notes |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `e.ho.slagsplash` | **C — the Foundry** | 2 (needs the kingdom's own floor, level 3) | fires on the landing frame, rides `gobs[]` | **350** — the SAME `crouchT` as `e.ho.leap`, unchanged — **plus** the gob flight itself, ~360 ms of visible arc | two gobs, ±165 px/s, launched at −250 px/s under 1400 px/s²; **harmless in the air**; each sets into a pool r 20, **2600 ms** | unchanged | pools only, **grounded targets only** | feet running white and shedding melt through every frame of the crouch, `sfx('vent')` under `sfx('tell')`, then **the arcs**, each with a lit patch on the floor it is falling toward | 1 core per pool | **watch the arcs** — it does not aim, it displaces, so the answer is to be off both | **1067 → 267**, unchanged | the only Foundry move whose warning is mostly AFTER the wind-up, because a thrown hazard can only warn by place. Measured by `tests/foundry.cjs` |
+
+**Audit.** The landing shock (`e.ho.landing`) is unchanged and remains the
+roster's one untelegraphed non-contact source; the splash is a separate hitbox
+with its own warning and does not inherit that exemption. The crouch is measured
+against a stripped machine and is the same length.
+
 ### B1 audits
 
 **Moves with `opening_ms ≤ 0`:** none.

@@ -37,6 +37,32 @@ punishes the answer to the other:
   standing still.
 - **turret + blob**: the same shape, harder — the *ground* is the punishment.
 
+### 1b. ...and the matrix is per-kingdom now, in one kingdom
+
+The table above reads roles off `GLOBAL_REGISTRY.md §4`, which assumes a frame
+is the same frame everywhere. Since kingdom moves landed (`FOE_MOVES`,
+js/entities.js) that holds in four kingdoms out of five and not in the Foundry:
+
+- **In zone C a crawler and a hopper both carry a DENIAL component** — `cinder`
+  lays melt along the lunge's lane, `slagsplash` throws two gobs on the landing.
+  Their roles do not change (both are still pressure, threat 1, and neither adds
+  a body to the screen, which is what `tests/threat.cjs` counts), but the floor
+  next to them is briefly hostile the way it is next to a blob.
+- **So in zone C only, read `crawler + guard` and `hopper + guard` under the
+  `guard + blob` condition**: an anchor's punish window needs somewhere to stand
+  that is not on fire. C2 is the room this bears on, and it passes — the guard
+  stands 4 tiles clear of the hopper with open floor between them, and the
+  Foundry's melt is narrow (r 13–20) and short (1.15–2.6 s), which is the reason
+  those numbers are what they are.
+- **`kiln + anything` is unchanged.** `pour` denies ONE told side of the pot and
+  nothing else in the room; it makes the kiln's own punish window a decision
+  rather than a free hit, which is the same greed axis the Foundry's guardian
+  tests, and it does not reach far enough to fall on a neighbour's answer.
+
+Nothing above is a new rule, and none of it moves a threat number. It is written
+down because the next session to read this table in the Foundry would otherwise
+read it as if a crawler there were the crawler in the meadow.
+
 ---
 
 ## 2. Every room
