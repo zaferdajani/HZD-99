@@ -210,6 +210,64 @@ spill, `case 'kiln'` in Enemy.draw plus the world-space pour tell in
 js/entities.js for the pot — exactly as §2l's fallback works. Nothing is
 blocked; these make it look like the Foundry instead of like a gradient.
 
+## 2bd. THE MEADOW'S OWN AMMUNITION — three scrap props kingdom A's machines now carry ✱ BRIEF QUEUED 2026-09-18 (kingdom 1 session)
+
+Kingdom A's enemy moves landed today (`FOE_MOVES['crawler@A' | 'hopper@A' |
+'blob@A']` in `js/entities.js`, measured by `tests/scrapmoves.cjs`). All three
+are the same idea — the Scrap Meadows are made of scrap, and a machine that has
+been standing in them long enough learns to PICK THE SCRAP UP — and all three
+therefore put a THING on screen that the player has to read before it is thrown
+at her. Under ART IS HIGGSFIELD'S (CLAUDE.md), a thing is a structure and a
+structure is Higgsfield's, so what ships today is a **procedural stand-in** and
+this brief is the plate that replaces it. Nothing was generated here.
+
+Each of these is a telegraph before it is anything else. It appears during the
+wind-up, at a size that grows with the wind-up, and its SIZE is what tells her
+the reach — so legibility at 24-34 px tall, against the meadow's green-gold
+backdrop, beats detail every time.
+
+**1. THE DRAGGED PLATE** (`crawler@A / scrapdrag`) — one buckled panel of hull
+plating the crawler hooks off the meadow floor with its tow-coupling and shoves
+ahead of its lunge. Roughly 16 x 5 px in play. Wants a 5-cell strip: flat on
+the ground, edge-on coming up, half-raised, presented flat in front of the nose,
+and SHEARED (the broken version, for the frame it is knocked off by a wall or by
+the lunge ending). Rusted steel, torn edge bright where it has just been
+scraped, the rest oxidised deep orange-brown. Currently drawn in
+`js/entities.js` as a rotating rounded rect with a rust top edge.
+
+**2. THE RAKED HEAP** (`hopper@A / scrapkick`) — the low mound of loose scrap
+the hopper scrapes in under its springs while it crouches, then kicks out along
+the floor when it lands. Wants **two** pieces: (a) a 4-cell heap strip, small to
+large, roughly 20-52 px wide and 6 px tall, silhouette irregular per NO RIGHT
+ANGLES — bolts, bar ends, a wheel rim, never a pile of triangles; and (b) a
+**floor wash** effect strip, 6 cells, the heap coming apart into a low skimming
+spray that reaches 96 px either side and dies flat. The wash must read as
+GROUNDED — she jumps it — so it stays under 10 px tall for its whole life.
+Currently a drawn ellipse plus two quadratic arcs.
+
+**3. THE BLOOM MARKS** (`blob@A / rustbloom`) — the two patches of ground the
+blob is about to throw its rust-water onto, 30 px either side of it. These are
+the fairest telegraph in the set and the one most worth authoring: a ring that
+fills in over 0.62 s, on the exact tile the hazard will land on. Wants a 6-cell
+fill strip, ~26 x 9 px, in the reserved wind-up amber `#ffc24a` ONLY — this is
+the one hue the game has reserved for "something is about to happen here" and
+nothing else may use it. The rust-water pool it becomes is already drawn
+(`G.pools`, `js/game.js`); this is only the warning.
+
+**Negatives, all three**: no ground plane, no cast shadow, no green — the meadow
+behind them is already green and a green prop vanishes into it. Pure black
+background, subject only, per ART_BIBLE §3.2.
+
+**Wiring site**: `js/entities.js`, the `KINGDOM A — WHAT THE MEADOW PICKED UP,
+DRAWN` block, immediately before the `drawAtlas` call in `Enemy.draw`. The three
+stand-ins hang off `drag0`/`plate`, `rake0`/`washT`/`washR`, and
+`bloom`/`drip0` respectively; a fired plate swaps into the same four branches
+with no logic change. `tests/scrapmoves.cjs` measures the behaviour, not the
+picture, so it stays green across the swap — but `tests/artbible.cjs` will start
+measuring the plates once they are declared.
+
+---
+
 ## 2az. SUPERCHARGE EFFECTS — LANDED 2026-09-16 (art session)
 
 `assets/source/hero/delivered/v3/supercharge_fx.png` →

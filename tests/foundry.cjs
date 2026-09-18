@@ -178,10 +178,21 @@ const check = (name, ok, detail) => {
   check('...but the pot that POURS is a deep machine, not the one she is taught on',
     r.bought['C:fresh'].kiln.length === 0 && r.bought['C:deep'].kiln.includes('pour'),
     'fresh ' + j(r.bought['C:fresh'].kiln) + ' -> deep ' + j(r.bought['C:deep'].kiln));
+  // THE MEADOW HAS ITS OWN MOVES NOW — kingdom A landed scrapdrag/scrapkick/
+  // rustbloom on exactly the frames this kingdom borrows — so "zone A comes
+  // back empty" stopped being a statement about the @C scope and became a
+  // statement about whether kingdom 1 had shipped yet. What this check is
+  // actually for is that NOTHING THE FOUNDRY WROTE is affordable outside the
+  // Foundry, so that is what it now reads: its own three ids, by name,
+  // anywhere in the meadow, fresh save or finished run.
+  const FOUNDRY = ['cinder', 'slagsplash', 'pour'];
+  const leaked = [];
+  for (const when of ['A:fresh', 'A:deep'])
+    for (const kind in r.bought[when])
+      for (const id of r.bought[when][kind])
+        if (FOUNDRY.includes(id)) leaked.push(when + ' ' + kind + ': ' + id);
   check('NONE of it reaches the meadow — the @C scope holds',
-    r.bought['A:fresh'].crawler.length === 0 && r.bought['A:deep'].crawler.length === 0
-    && r.bought['A:deep'].hopper.length === 0 && r.bought['A:deep'].kiln.length === 0,
-    j(r.bought['A:deep']));
+    leaked.length === 0, leaked.join(', ') || j(r.bought['A:deep']));
 
   // ---- cinder ---------------------------------------------------------------
   console.log('\nCINDER — the crawler\'s lane');
