@@ -132,6 +132,7 @@ const SUITE = [
   ['foescale',  'every machine reads in the hero\'s weight class'],
   ['foelevel',  'a machine\'s level is its kingdom plus the run, and it spends it'],
   ['scrapmoves','kingdom A picks the floor up — and never on a fresh save'],
+  ['conduits',  'kingdom B\'s three moves fire, stay optional, and warn first'],
   ['foundry',   'kingdom C\'s machines learn to leave melt behind, and warn first'],
   ['archives',  'kingdom D files, strikes out and cross-references — and warns before each'],
   ['nestmoves', 'the Virus Nest\'s own three moves fire, warn first, and stay in kingdom E'],

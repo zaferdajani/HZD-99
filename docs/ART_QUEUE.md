@@ -2003,7 +2003,8 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  25. §2aq   THE CUTTER'S SPLIT STONE + KERF ×2 + KERF HERSELF ×3  ✱ NEW 2026-09-02 (kingdom X pass) — wired, procedural stand-ins live, nothing fired
  26. §2aw   THE RIG ROUTE — her rigged model + clips + motion control   ✱ APPROVED 2026-09-05 — makes §2av (attacks in profile) and §2au (gait cycles); bake3d --clip is built; tests/hero.cjs red until it lands
  27. §2ba   THE ARCHIVES' INSTRUMENTS ×6   ✦ NEW 2026-09-18 (kingdom D) — card ×2, redaction bar ×2, drawer + index sweep; wired, stand-ins live, nothing fired
- 28. §2au/§2av  (folded into 26 — the briefs remain as the acceptance laws; docs/GAIT.md is the study)
+ 28. §2by   KINGDOM B MOVE STATES ×5       ✱ NEW 2026-09-18 (kingdom B) — repeater charge, wall latch, courier packet + spill, gun pips; wired, engine-drawn warnings live, nothing fired
+ 29. §2au/§2av  (folded into 26 — the briefs remain as the acceptance laws; docs/GAIT.md is the study)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
@@ -5698,3 +5699,51 @@ composited or wired** — this needs its own routing work first
 equipped weapon, per `SWORD_STORY.md`'s implementation-gap list), which
 is a code-session task once the art itself is approved. Do not key or
 commit any of the 30 stills until the owner has signed off.
+
+### §2by. KINGDOM B MOVE STATES — the three conduit moves' art (2026-09-18, kingdom B session)
+
+**Queued, not fired. Art is the ART session's job and Higgsfield's alone**
+(CLAUDE.md, ART IS HIGGSFIELD'S) — this brief exists because the moves
+shipped in the same commit, per the standing rule that no new thing may be
+added without its brief going on the list beside it.
+
+**What shipped without art.** Kingdom B's machines gained three moves
+(`FOE_MOVES['surge@B' | 'flier@B' | 'turret@B']` in `js/entities.js`): the
+breaker's wave RELAYS off a wall, the survey lens delivers a PACKET to the
+floor, the turret spends a metered TRAIN of three. Every one of them warns
+first, and every warning is currently **engine-drawn** by `drawConduitFX` —
+rings, chevrons, a dashed drop lane, pips. Those are wiring stand-ins and they
+are honest ones: `tests/conduits.cjs` renders each of them to an offscreen
+canvas and counts the pixels, so a plate that replaces one has a number to
+beat, not an opinion.
+
+**The five plates, and what each has to READ as.** Same four-class rules as
+§2i (the breaker's own three states), same cut-out discipline, same "no floor,
+no ground, no backdrop, no gradient, no vignette" void phrasing that §2j's
+failures wrote.
+
+1. **`breakerRepeat`** — the breaker (§2i's machine, `assets/characters/breaker/`)
+   in its charge, but as a REPEATER: the three ceramic fins upright and spread
+   as in `breakerTell`, PLUS a second insulator ring standing proud around the
+   drum, arcing. It must be distinguishable from `breakerTell` at a glance and
+   across a room — that difference is the whole warning that this wave comes
+   back. Silhouette difference, not colour difference.
+2. **`surgeLatch`** — an effect plate, not a machine: the charge wave stopped
+   dead against a conduit wall, arcs climbing the wall face, a hard amber core
+   at the contact point. Read: *held, about to let go the other way.*
+3. **`courierPacket`** — a small braced data cube, maybe 16 px on the drawn
+   side: dark shell, corner braces, one amber lamp. It is a THING that falls,
+   so it needs weight and a top/bottom; it must not read as a particle or a
+   projectile bolt.
+4. **`packetSpill`** — what the cube leaves on the floor when it lands: a low
+   charge patch, danger red (the hue this game reserves for the floor going
+   hostile — the breaker's wave wears it), arcs rather than liquid. It must NOT
+   look like the blob's green pool; they are different lessons.
+5. **`gunPips`** — the conduit turret's declared count: a three-pip meter that
+   fills. This one is the least likely to need a plate at all, and it is listed
+   so the ART session can decide that rather than have it decided for them.
+
+**Sizes.** Per the owner's 2026-09-18 note that enemies must read in the hero's
+weight class (`EDRAW_ROBO`, `tests/foescale.cjs`), plate 1 is fired to the
+breaker's existing scale and nothing here changes a body size.
+
