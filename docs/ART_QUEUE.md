@@ -5747,3 +5747,55 @@ failures wrote.
 weight class (`EDRAW_ROBO`, `tests/foescale.cjs`), plate 1 is fired to the
 breaker's existing scale and nothing here changes a body size.
 
+
+### §2bz. KINGDOM X MOVE STATES — the Crystal Cache's three moves' art (2026-09-18, kingdom X session)
+
+**Why this is queued and not drawn.** ART IS HIGGSFIELD'S: the three moves
+kingdom X filed this session (`facet` / crawler@X, `refract` / hopper@X,
+`glint` / bat@X — `FOE_MOVES` in `js/entities.js`) ship with procedural
+telegraphs only. Every one of them is a shape drawn with paths — a dashed
+amber strip on the floor, a caustic ellipse with a cross in it, a hollow ring
+that tightens into a six-point splinter. Those are wiring stand-ins and they
+are honest ones: `tests/cachemoves.cjs` drives each state and measures that
+the warning fires, that it is harmless while it is only a warning, and that
+the thing it promised lands where it was drawn — so a plate that replaces one
+has a number to beat rather than an opinion.
+
+**The kingdom's one sentence, because every plate has to carry it.** THE
+CRYSTAL CACHE REFRACTS THE ANSWER. Not fire, not frost, not rot: seam crystal
+grown THROUGH a machine, bending the line its attack travels. The palette the
+code uses is `#8fe8ff` (seam blue, the thing itself) over the reserved amber
+`TELL_COL` (the warning). Whatever comes back must keep that split — amber
+while it is a promise, seam blue once it is real — because that is the rule
+every other kingdom's art is already held to.
+
+**The four plates, and what each has to READ as.** Same four-class rules as
+§2i, same cut-out discipline, same "no floor, no ground, no backdrop, no
+gradient, no vignette" void phrasing that §2j's failures wrote.
+
+1. **`crawlerFacet`** — the cave crawler (`crawler` body, Cache dressing) in
+   its coil, with a SPLIT CRYSTAL FACET grown along the spine and lit. It must
+   differ from a plain crawler's coil in SILHOUETTE, not just in colour — the
+   growth stands proud of the shell and is the reason this one owns the ground
+   behind it. Read: *gathering, and about to throw a second edge backwards.*
+2. **`facetLance`** — an effect plate, not a machine: a flat pane of split
+   light lying ON the floor, 34 px long, brightest at the ground line and
+   fading upward, with two or three hard refraction lines through it. Read:
+   *the floor it just left is a blade for a moment.* It must not read as the
+   Conduits' charge wave (a thin fast line) or as the Foundry's melt.
+3. **`refractMark`** — the painted landing spot: a caustic pool of bent light
+   on the ground, an ellipse about 32 px wide with the crystal's own cross
+   through it, amber and pulsing. This is the single most important plate on
+   this list, because the whole move is the claim that THE FLOOR DOES NOT LIE.
+   It has to read as a PLACE at a glance, from across a room, over cave rock.
+4. **`glintMote`** — one suspended splinter, ~22 px across, six-pointed and
+   sharp-edged, for the airborne hazard a Cache bat sheds down its dive. Two
+   states in one sheet if possible: HOLLOW AND AMBER while it arms (it cannot
+   touch her yet) and SOLID SEAM-BLUE once it bites. The two states must be
+   different SHAPES, not two brightnesses of the same shape — the read has to
+   survive being glanced at mid-dive.
+
+**Sizes.** Nothing here changes a body size: per the owner's 2026-09-18 note
+that enemies must read in the hero's weight class (`EDRAW_ROBO`,
+`tests/foescale.cjs`), plate 1 is fired to the existing crawler scale, and
+plates 2-4 are effects measured in the pixel sizes above.

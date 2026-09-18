@@ -138,6 +138,7 @@ const SUITE = [
   ['foundry',   'kingdom C\'s machines learn to leave melt behind, and warn first'],
   ['archives',  'kingdom D files, strikes out and cross-references — and warns before each'],
   ['nestmoves', 'the Virus Nest\'s own three moves fire, warn first, and stay in kingdom E'],
+  ['cachemoves','the Crystal Cache bends the answer — behind, off the arc and in the air'],
   ['npcstrip',  'the five work strips are twelve frames of work, foot-aligned and steady'],
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],
