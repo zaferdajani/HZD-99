@@ -36,6 +36,7 @@ run(fn(entities, 'sageTame'));
 run('class SpecialPlayer { ' + ['swirlPass', 'releaseCharged'].map(method).join('\n') + ' }\nthis.SpecialPlayer = SpecialPlayer;');
 const p = new ctx.SpecialPlayer();
 Object.assign(p, { x: 0, y: 0, w: 28, h: 36, swirlT: 0, swirlHits: 0,
+  startScratchWake: noop, // Visual effect; real-player coverage lives in scratch-reach.cjs.
   volts: 0, dmg: () => 10, gainVolts(n) { this.volts += n; } });
 function enemy(overrides = {}) {
   return { x: 35, y: 0, w: 28, h: 36, hp: 100, hpMax0: 100, vx: 0, vy: 0,

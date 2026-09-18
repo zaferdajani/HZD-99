@@ -1037,25 +1037,9 @@ const FIDGET_AFTER = 5;        // seconds of stillness before she runs out of pa
 const SWING_STRIP = {
   air:{key:'swingAir',cells:6,k:HERO_DELIVERY_K},
   down:{key:'swingDown',cells:6,k:HERO_DELIVERY_K,order:[0,1,2,3]},
-  // DRAWN, NOT FILMED (2026-09-15). The filmed claw_1 was the strip failing the
-  // facing law at 0.113 — fired looking at the camera. This is the owner's drawn
-  // double-slash: six cells, side-on to her target, measured 10% height spread.
-  // k against the sheet's claw_1 guard (260 of 300) using the strip's own cell 0,
-  // which holds that same guard: 274 of 320.
-  claw_1:   { key: 'swingClaw1',    cells: 6,  k: HERO_DELIVERY_K },
-  // DRAWN (2026-09-15). The owner's claw jab, five cells, side-on. It replaces
-  // the filmed hook — which PASSED the facing law at 0.083 and was swapped
-  // anyway, because claw_1 is now the drawn design and a combo whose first hit
-  // is one character and whose second is another reads worse than either. Note
-  // the key moves to swingClaw2: hook.webp stays on disk as the filmed record.
-  // k against the sheet's claw_2 (260 of 300) using cell 0's guard (276 of 320).
-  claw_2:   { key: 'swingClawJab',    cells: 5,  k: HERO_DELIVERY_K },
-  // DRAWN (2026-09-15) — the third hit joins the other two, so the whole combo
-  // is one character instead of a drawn opener into filmed follow-ups.
-  // k against the sheet's finisher (243 of 300) using cell 0's ready pose
-  // (232 of 320). Cell 3 is the arm overhead and stands 528 in the source: the
-  // strip is DELIBERATELY not uniform in height, and movestrip's single scale
-  // preserves that, because an uppercut that does not get taller is not one.
+  // Poster order: short jab, two sweeping scratches, rising uppercut.
+  claw_1: {key:'swingClawJab',cells:5,k:HERO_DELIVERY_K},
+  claw_2: {key:'swingClaw1',cells:6,k:HERO_DELIVERY_K},
   finisher: { key: 'swingUppercut', cells: 6,  k: HERO_DELIVERY_K },
   // 2026-09-08: complete side-facing charged claw action with recovery.
   // Neutral frame matches idle: (231/300)/(281/320) = 0.8769.
@@ -1124,6 +1108,7 @@ function warmHeroWeaponArt(mode) {
   const strips=mode==='claws'?Object.values(SWING_STRIP):
     [...(HERO_WEAPON_SWINGS[mode]||[]),HERO_WEAPON_CHARGES[mode]].filter(Boolean);
   const keys=new Set();for(const s of strips){keys.add(s.key);if(s.fx)keys.add(s.fx.key);}
+  if(mode==='claws')keys.add('swingSingleFx');
   if(mode==='joined'){keys.add('heroJoinedThrow');keys.add('heroJoinedProjectile');}
   for(const key of keys)mediaFetch(key,1);
 }
@@ -1794,6 +1779,7 @@ class Player {
       // is playing.
       this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo, wield, twin, weaponMode: mode,
                         ay: aay, air: !this.on };
+      this.startScratchWake(this.swingVis);
       if (hasSkill('wave')) {
         const wn = Math.hypot(ax, ay) || 1;
         G.projs.push(new Proj(this.x + this.w / 2 + ax / wn * 22, this.y + this.h / 2 - 2 + ay / wn * 22,
@@ -1926,6 +1912,10 @@ class Player {
       // straining through a fight she is winning in single hits.
       if (this.chargeVoxed && typeof hzdRelease === 'function') hzdRelease();
       this.chargeT = 0; this.chargeVoxed = false;
+    }
+    if (this.scratchWake) {
+      this.scratchWake.t -= dt;
+      if (this.scratchWake.t <= 0 || this.dead) this.scratchWake = null;
     }
     if (this.swingVis) { this.swingVis.t -= dt; if (this.swingVis.t <= 0) { this.swingVis = null; this._rake = null; } }
     // heal
@@ -2340,6 +2330,7 @@ class Player {
     // flagged so the body can draw the BURST plate rather than the ordinary
     // third-hit finisher — same combo number, different blow
     this.swingVis = { t: 0.32, t0: 0.32, ang: 0, combo: 3, charged: true, chargeArtAlt:mode==='claws' && this._chargeArtCount>0 && this._chargeArtCount%2===0, weaponMode: mode, wield: mode === 'single' ? 1 : 0 };
+    this.startScratchWake(this.swingVis);
     burst(cx, cy, 60, '#ffffff', 460, 0.7, 180, 6, true);
     burst(cx, cy, 36, PAL[G.roomDef.zone].glow, 340, 0.9, 90, 6, true);
     // BIGGER HIT, FARTHER REACH (owner, 2026-09-18: "supercharge attack should
@@ -2422,8 +2413,11 @@ class Player {
     // either side of the first, so `half` grows and `R` does not — she is not
     // reaching further, she is filling more of what she can already reach.
     const tw = s.twin ? 1.45 : 1;
-    const R = (down ? 46 : (s.combo === 2 ? (rk ? 68 : 50) : 44)) * wm;
-    const half = (down ? 32 : (s.combo === 2 ? (rk ? 46 : 35) : 30)) * wm * tw;
+    // Ground claws now clear the body by 86px (jab/double) or 100px
+    // (uppercut). Swords retain their longer ranges. The wake uses this box.
+    const claw = !s.wield && !down && !(typeof isHero==='function' && isHero());
+    const R = (down ? 46 : (s.combo === 2 ? (rk ? (claw ? 76 : 68) : (claw ? 58 : 50)) : (claw ? 50 : 44))) * wm;
+    const half = (down ? 32 : (s.combo === 2 ? (rk ? (claw ? 50 : 46) : (claw ? 42 : 35)) : (claw ? 36 : 30))) * wm * tw;
     const cx = this.x + this.w / 2 + s.ax / n * R;
     const cy = this.y + this.h / 2 + s.ay / n * R;
     // ax0/ay0 is the swing's ANCHOR — where R put the box before any edge rule
@@ -2694,7 +2688,9 @@ class Player {
     // ...and the energy over the top of it, on the same clock. Only if the BODY
     // drew: an effect hanging in the air beside the procedural fallback pose is
     // worse than no effect, and this is the one strip whose art is optional.
-    if (drew && S.fx) {
+    const worldScratch = !sv.wield && !sv.air && !sv.swirl &&
+      typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW.swingSingleFx?.naturalWidth;
+    if (drew && S.fx && !worldScratch) {
       const cue = S.fxPoses ? S.fxPoses[cell] : undefined;
       if (cue) this.drawSwingFx(c,S.fx,{from:cue[0],to:cue[0]},0,cue[1],HERO_FLOOR-HERO_DH/2+cue[2],cue[3]);
       else if (cue !== null) this.drawSwingFx(c, S.fx, S.fx.release, p,
@@ -2702,6 +2698,61 @@ class Player {
       if (typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[S.fx.key]?.naturalWidth) this._authoredSwingFx = sv;
     }
     return drew;
+  }
+  // A scratch leaves light in the air after her paw has returned. This is
+  // visual only; damage remains in the existing swing/contact code.
+  startScratchWake(sv) {
+    if ((typeof isHero==='function' && isHero()) || !sv || sv.wield || sv.air || sv.swirl ||
+        (sv.weaponMode && sv.weaponMode !== 'claws')) return;
+    const angle=sv.charged?(this.face<0?Math.PI:0):(sv.ang||0);
+    const ax=Math.cos(angle), ay=Math.sin(angle);
+    let reach=165;
+    if (!sv.charged) {
+      const old=this.swing;
+      this.swing={ax,ay,combo:sv.combo,wield:0};
+      const box=this.hitbox();this.swing=old;
+      // Rectangular contact geometry projected onto the direction of the cut.
+      const cx=this.x+this.w/2,cy=this.y+this.h/2;
+      reach=Math.max(...[[box.x,box.y],[box.x+box.w,box.y],
+        [box.x,box.y+box.h],[box.x+box.w,box.y+box.h]].map(([x,y])=>(x-cx)*ax+(y-cy)*ay));
+    }
+    const duration=sv.t0+.18;
+    this.scratchWake={t:duration,t0:duration,attackT:sv.t0,combo:sv.combo,
+      charged:!!sv.charged,ang:angle,reach,x:this.x+this.w/2,y:this.y+this.h/2};
+    if(typeof mediaFetch==='function')mediaFetch('swingSingleFx',1);
+  }
+  drawScratchWake(c) {
+    const w=this.scratchWake,im=typeof MEDIA_RAW!=='undefined'&&MEDIA_RAW.swingSingleFx;
+    if(!w||!im?.complete||!im.naturalWidth)return false;
+    const age=w.t0-w.t,p=clamp(age/w.attackT,0,1);
+    const gate=w.charged?1:clamp((age-.025)/.035,0,1);
+    const fade=age>w.attackT?Math.pow(clamp(w.t/.18,0,1),1.5):1;
+    // Follow the active paw, then leave the recovery wake at the strike site.
+    if(age<w.attackT*.7){w.x=this.x+this.w/2;w.y=this.y+this.h/2;}
+    c.save();c.translate(w.x,w.y);
+    // Mirroring leaves the rising crescent rising for either facing.
+    const left=Math.cos(w.ang)<0;c.rotate(left?Math.PI-w.ang:w.ang);c.scale(left?-1:1,1);
+    const cw=im.naturalWidth/6;
+    c.globalCompositeOperation='lighter';
+    const paint=(frame,near,far,height,y,alpha)=>{
+      c.globalAlpha=gate*fade*alpha;
+      // The authored FX occupies the centre 88% of its padded cell.
+      c.drawImage(im,frame*cw+cw*.06,im.naturalHeight*.06,cw*.88,im.naturalHeight*.88,
+        near,y-height/2,far-near,height);
+    };
+    const tip=w.reach,near=12;
+    if(w.charged){
+      paint(4,near,tip,145,0,.85);
+      paint(2,near+16,tip-8,124,-10,.34*(1-p*.6));
+      // releaseCharged already emits the radial rings and contact particles.
+    }else if(w.combo===2){
+      paint(0,near,tip,132,-30,.9);
+      paint(4,near+8,tip,86,-4,.48);
+    }else if(w.combo===1){
+      paint(2,near,tip,74,-8,.85*(1-p*.45));
+      if(p>.25)paint(4,near+8,tip,66,7,.85*clamp((p-.25)*4,0,1));
+    }else paint(4,near,tip,48,0,.82);
+    c.restore();return true;
   }
   // ADDED AS LIGHT, NOT COMPOSITED AS AN OBJECT. The plates are energy on
   // transparency, so 'lighter' is what they are: the dark of the sheet adds
@@ -4290,7 +4341,8 @@ class Player {
     }
     // Authored effects replace the procedural slash only when both images loaded.
     // Impact particles and sounds still come from confirmed gameplay contacts.
-    if (this.swingVis && this._authoredSwingFx !== this.swingVis) {
+    const scratchDrawn = this.drawScratchWake(c);
+    if (this.swingVis && !scratchDrawn && this._authoredSwingFx !== this.swingVis) {
       const sv = this.swingVis;
       const p = 1 - sv.t / sv.t0;
       // ---- THE SWIRL draws its own thing and nothing else ------------------

@@ -36,13 +36,8 @@ function attack() {
 }
 function advance(seconds) { for (let t = 0; t < seconds; t += 1 / 60) tick(); }
 const expected = [
-  [0, 'claw_1', 'swingClaw1'],
-  // swingClaw2, not swingHook: the second hit was rewired to the owner's drawn
-  // claw jab on 2026-09-15 (see SWING_STRIP in js/entities.js). hook.webp is
-  // still on disk as the filmed record, so nothing here would have failed to
-  // load — the key simply stopped being the one the combo routes to, and this
-  // line went on asserting the old one.
-  [1, 'claw_2', 'swingClawJab'],
+  [0, 'claw_1', 'swingClawJab'],
+  [1, 'claw_2', 'swingClaw1'],
   [2, 'finisher', 'swingUppercut'],
 ];
 for (const [combo, pose, key] of expected) {

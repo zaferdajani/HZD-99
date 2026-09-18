@@ -29,6 +29,8 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['scratch-visual', 'pixel-measured cyan scratch reach, mirroring and fading recovery'],
+  ['scratch-reach', 'scratch contact boundary, facing and non-damaging recovery wake', { noBrowser: true }],
   ['hero-move-coverage', 'actual renderer coverage for movement, aerial attacks, reactions and departure'],
   ['hero-feedback', 'haptic device routing and duplicate pulse suppression', { noBrowser: true }],
   ['hero-delivery', 'source provenance, frame gutters, scale and floor registration', { noBrowser: true }],
