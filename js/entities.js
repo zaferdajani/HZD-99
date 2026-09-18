@@ -2329,7 +2329,7 @@ class Player {
     cam.shake = 13; G.hitStop = Math.max(G.hitStop, 0.12);
     G.flash = Math.max(G.flash, 0.55);
     G.impact = { t: 0.16, t0: 0.16, x: cx, y: cy };
-    G.addRing(cx, cy); G.addRing(cx, cy, 55); G.addRing(cx, cy, 100);
+    G.addRing(cx, cy); G.addRing(cx, cy, 60); G.addRing(cx, cy, 130);
     // roarWave is the game's own proven "biggest moment" shockwave — already
     // used for boss roars and the Oath save. Her own supercharge earns the
     // same visual class rather than a smaller bespoke effect built to match.
@@ -2339,7 +2339,11 @@ class Player {
     this.swingVis = { t: 0.32, t0: 0.32, ang: 0, combo: 3, charged: true, chargeArtAlt:mode==='claws' && this._chargeArtCount>0 && this._chargeArtCount%2===0, weaponMode: mode, wield: mode === 'single' ? 1 : 0 };
     burst(cx, cy, 60, '#ffffff', 460, 0.7, 180, 6, true);
     burst(cx, cy, 36, PAL[G.roomDef.zone].glow, 340, 0.9, 90, 6, true);
-    const R = 128, dm = Math.round(this.dmg() * 2.6);
+    // BIGGER HIT, FARTHER REACH (owner, 2026-09-18: "supercharge attack should
+    // reduce more lives from enemies and have more reach"). 2.6 -> 3.2 on the
+    // damage; 128 -> 165 on the radius, with the ring FX scaled to match so the
+    // visible burst never undersells what it actually touches.
+    const R = 165, dm = Math.round(this.dmg() * 3.2);
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     for (const e of targets) {
       if (e.dead || (typeof isPet === 'function' && isPet(e))) continue;

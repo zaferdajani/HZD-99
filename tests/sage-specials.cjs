@@ -71,7 +71,9 @@ for (const special of ['releaseCharged', 'swirlPass']) {
   }
   const guarded = enemy({ kind: 'drone', guard: true }), before = p.volts;
   hit(guarded, special, 'single');
-  const damage = special === 'releaseCharged' ? 26 : 10;
+  // 2026-09-18: the burst's own multiplier went 2.6 -> 3.2 (owner: more reach,
+  // more damage), so its derived damage against dmg()=>10 moved 26 -> 32.
+  const damage = special === 'releaseCharged' ? 32 : 10;
   assert.equal(guarded.hp, 100 - Math.max(1, Math.round(damage * .12)), 'guard absorbs special');
   assert.deepEqual([guarded.vx, guarded.vy, p.volts], [0, 0, before], 'guard denies launch/energy');
   const shielded = enemy({ kind: 'guardian', hpMax: 100 });

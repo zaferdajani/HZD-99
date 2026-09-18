@@ -7746,6 +7746,22 @@ function gateWorldX(G2) { return G.roomDef.w * TILE * G2.at; }
 function gateTarget(G2) {
   return { x: gateWorldX(G2) - camSX(), y: (G.roomDef.h - 2) * TILE - camSY() - 46 };
 }
+// THREE WAYS TO LEAVE THE WORLD (owner): through a GATE she recedes — the
+// doorway has depth and she gets smaller down its length, fading only at the
+// end. Into a CAVE she is SWALLOWED — a cave mouth has no lit hall to shrink
+// down; she keeps her size and the darkness takes her a little more with
+// every step. Into a SHOP she just WALKS IN (owner, 2026-09-18: "big gates
+// and caves are deep... but small shops are not"): the booth-pattern NPC
+// doors (`style` is set only on those six rows, never on a real gate or cave)
+// shared this same GATE_ROOM table and were falling into the gate's own 84%
+// recede, vanishing a trader's doorway into the same distance as a kingdom
+// monument. A shallow step in, not a march down a hall. Pulled out as its own
+// function — three plain inputs, one number — so it can be measured directly
+// without decoding a single plate or running the cutscene's clock.
+function gateWalkScale(def, intoCave, e) {
+  const intoShop = !intoCave && !!(def && def.style);
+  return intoCave ? 1 - 0.16 * e : intoShop ? 1 - 0.12 * e : 1 - 0.84 * e;
+}
 // ---------------------------------------------------------------------------
 // THE DOOR HAS A BODY NOW (owner: "create 3D structures looking like a huge
 // door on top of the background door, but still in the background —
@@ -10279,14 +10295,9 @@ function drawGateWalk() {
   // travel is a step or two — DEPTH does the work: the scale falls away
   // steadily with every step, with a slight rise into the gap.
   const x = sx0 + (tx - sx0) * e, y = sy0 + (ty - sy0) * (e * e);
-  // TWO WAYS TO LEAVE THE WORLD (owner): through a GATE she recedes — the
-  // doorway has depth and she gets smaller down its length, fading only at
-  // the end. Into a CAVE she is SWALLOWED — a cave mouth has no lit hall to
-  // shrink down; she keeps her size and the darkness takes her a little
-  // more with every step.
   const dest2 = typeof ROOMS !== 'undefined' && ROOMS[g.to];
   const intoCave = (G.roomDef && G.roomDef.cave) || (dest2 && dest2.cave);
-  const sc = intoCave ? 1 - 0.16 * e : 1 - 0.84 * e;
+  const sc = gateWalkScale(g.def, intoCave, e);
   c.save();
   // SWALLOWED BY DARK, NOT DISSOLVED. The old fade dropped globalAlpha, which
   // shows the room THROUGH her — a ghost, not a shadow, and the same wrong read
