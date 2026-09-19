@@ -2742,17 +2742,33 @@ class Player {
         near,y-height/2,far-near,height);
     };
     const tip=w.reach,near=12;
+    // PLAY THE STRIP (owner, 2026-09-19: "animate the blue after effect that
+    // comes when attacking"). single_fx.webp is an authored six-cell SEQUENCE —
+    // gather, twist, sweep, cut, burst, wisp — and this was holding cell 4, the
+    // burst, as a still for the whole wake, with one more still stacked under
+    // it per combo. Reach-accurate, and frozen. Now the frame follows the cut:
+    // 0..5 across the attack (about 40 ms a cell at the jab's tempo), the wisp
+    // held through the recovery and fading with it, and the previous cell left
+    // underneath at lower alpha so consecutive frames read as one motion rather
+    // than six pictures. The geometry the tests measure is untouched: the tip
+    // lands at contact reach, the cut faces the target, mirroring is as before.
+    const seq=6, f=age<w.attackT?Math.min(seq-1,Math.floor(p*seq)):seq-1;
+    const prev=Math.max(0,f-1), trail=f>0?.42:0;
     if(w.charged){
-      paint(4,near,tip,145,0,.85);
-      paint(2,near+16,tip-8,124,-10,.34*(1-p*.6));
+      paint(prev,near+16,tip-8,124,-10,trail);
+      paint(f,near,tip,145,0,.9);
       // releaseCharged already emits the radial rings and contact particles.
     }else if(w.combo===2){
-      paint(0,near,tip,132,-30,.9);
-      paint(4,near+8,tip,86,-4,.48);
+      // the uppercut rises: the cell is lifted and tall, the trail hangs below it
+      paint(prev,near+8,tip,86,-4,trail);
+      paint(f,near,tip,132,-30,.9);
     }else if(w.combo===1){
-      paint(2,near,tip,74,-8,.85*(1-p*.45));
-      if(p>.25)paint(4,near+8,tip,66,7,.85*clamp((p-.25)*4,0,1));
-    }else paint(4,near,tip,48,0,.82);
+      paint(prev,near+8,tip,66,7,trail);
+      paint(f,near,tip,74,-8,.88);
+    }else{
+      paint(prev,near+6,tip-4,44,2,trail);
+      paint(f,near,tip,48,0,.85);
+    }
     c.restore();return true;
   }
   // ADDED AS LIGHT, NOT COMPOSITED AS AN OBJECT. The plates are energy on

@@ -222,6 +222,14 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           if (def.need) G.save.flags[def.need] = 1;
           const wx = G.roomDef.w * TILE * def.at;
           player.x = wx - player.w / 2 - 140; player.y = (G.roomDef.h - 2) * TILE - player.h; player.vx = 0;
+          // ...BUT NOT ON A HAZARD. C5's forge door stands past the pour hall's
+          // spike strip, and 140 px short of it is ON the strip: thirty frames
+          // there sent her back to lastSafe at the room's left edge, the door
+          // left the frame, and the check read 0.0% for weeks — a harness
+          // parking her on spikes and reporting the door absent. Step toward
+          // the door until the footing is safe; the door column itself always is.
+          while (typeof onSpike === 'function' && onSpike(player) && player.x < wx) player.x += TILE;
+          player.lastSafe = { x: player.x, y: player.y };
           for (let i = 0; i < 30; i++) update(DT);
           // the plate this door would wear, if its family has one
           const dest = ROOMS[def.to];
