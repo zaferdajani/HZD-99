@@ -96,7 +96,10 @@ read it as if a crawler there were the crawler in the meadow.
 | E2 | E | 8 | turret, guard, blob, hopper, flier, saw ×2 | *Clear the middle before you commit to the bench.* |
 | E3 | E | boss | MOTHER-V | — |
 | E4 | E | 5 | blob ×2, turret, crawler | *The blobs are the room — go over them, not through.* |
-| V1 V2 X1 | X | **rest** / boss | vault, PRISM PROWLER | — |
+| V1 | X | 1 (bat unpriced) | bat, hopper | *Step out of the bat's line, not along it; read the paint, stand off it, take the hopper where the floor said.* — station 2 for `glint` and `refract`, ten tiles apart on two planes |
+| V1B | X | **rest** | the Kerf | — the kingdom's NPC home, enemy-free |
+| V2 | X | 2 | hopper, crawler | *Hold the left under the ledge; punish the painted landing; take the crawler head-on — its lance owns the floor behind it.* — the Cache's mixed exam (`refract` + `facet`) |
+| X1 | X | boss | PRISM PROWLER | — the arena stays the guardian's; B5 below it is the rest beat |
 
 ---
 

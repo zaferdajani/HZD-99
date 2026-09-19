@@ -2004,6 +2004,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  26. §2aw   THE RIG ROUTE — her rigged model + clips + motion control   ✱ APPROVED 2026-09-05 — makes §2av (attacks in profile) and §2au (gait cycles); bake3d --clip is built; tests/hero.cjs red until it lands
  27. §2ba   THE ARCHIVES' INSTRUMENTS ×6   ✦ NEW 2026-09-18 (kingdom D) — card ×2, redaction bar ×2, drawer + index sweep; wired, stand-ins live, nothing fired
  28. §2by   KINGDOM B MOVE STATES ×5       ✱ NEW 2026-09-18 (kingdom B) — repeater charge, wall latch, courier packet + spill, gun pips; wired, engine-drawn warnings live, nothing fired
+ 29. §2ca   THE CACHE SPAR ×1              ✱ NEW 2026-09-19 (kingdom X) — seam-crystal growth hung from V1's roof, the bat's perch; wired, procedural stand-in live, nothing fired
  29. §2au/§2av  (folded into 26 — the briefs remain as the acceptance laws; docs/GAIT.md is the study)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
@@ -5799,3 +5800,39 @@ gradient, no vignette" void phrasing that §2j's failures wrote.
 that enemies must read in the hero's weight class (`EDRAW_ROBO`,
 `tests/foescale.cjs`), plate 1 is fired to the existing crawler scale, and
 plates 2-4 are effects measured in the pixel sizes above.
+
+
+### §2ca. THE CACHE SPAR — the bat's perch in V1, a growth not a lintel (2026-09-19, kingdom X session)
+
+**Why it exists.** Kingdom X's three moves (§2bz) were filed against a roster the
+Cache did not have: V1, V1B, V2 and X1 declared no machines, so `glint` /
+`facet` / `refract` could never be met. The Cache now has them — a bat and a
+hopper in V1, a hopper and a crawler in V2, V1B (the Kerf's home) and X1
+(PRISM's arena) untouched; `tests/cacheroster.cjs` measures the wiring on
+machines the rooms actually spawn. The bat is the reason for this plate: a bat
+dives from where it hangs, the crystal cave hangs its bats at row 6 under
+carved rock, and a 17-row frame room's roof is nine rows too high for a dive
+to ever reach the floor. So V1 grows a SPAR of seam crystal down from its roof
+over the ledge (`spar()` in `js/world.js`, columns 6..14, four rows deep at
+the crest, thinning to nothing at both shoulders) and the bat hangs under it.
+
+**What it has to READ as.** NO RIGHT ANGLES and the mimic rule both bind: the
+spar is an OBJECT of the Cache's own backdrop — the same seam crystal the
+Kerf cuts (§2aq's split stone), the same `#8fe8ff` seam blue the moves use —
+grown through the rock of the roof and hanging as one cluster. Not a
+stalactite of plain stone, not a chandelier of separate needles: one growth,
+faceted, heaviest in the middle, with its underside a broken profile a bat can
+hang under. Cut-out, void phrasing per §2j: no ceiling, no backdrop, no
+gradient, no vignette. Read at a glance: *the roof is grown through here, and
+something is hanging under it.*
+
+**Size and fit.** The procedural stand-in is 9 tiles wide and 4 deep (288 ×
+128 px at TILE 32), contiguous with the roof row so the surface curve reads it
+as ceiling. A plate is fired to that footprint and hung from row 1; nothing
+about it changes the collision profile, which stays `spar()`'s heap. If the
+plate wants to be taller or wider the tile profile is changed to match it,
+never the other way round — the bat's hang is measured against the tiles.
+
+**Wiring note.** `spar()` returns its per-column profile the same way `mound()`
+does, so the plate is keyed to the room the way the meadow's mounds are. One
+plate, one room; if a second Cache room ever needs a perch it reuses this one.

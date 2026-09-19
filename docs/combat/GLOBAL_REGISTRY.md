@@ -164,7 +164,7 @@ median peak 6      90th percentile 9      max 10 (D2)
 | C | 6 → 6 | |
 | D | 10 | the game's spike, in its hardest non-final zone |
 | E | 5 → 9 | |
-| X | 0 | the Prowler's approach is deliberately empty |
+| X | 1 → 2 | V1 rehearses the Cache's reads, V2 pairs them (2026-09-19); B5, the Prowler's approach, stays empty, as does X1 |
 
 **Ceiling: 9 per screen** (the measured 90th percentile), with D2's 10 accepted
 as the deliberate spike. A room proposing more than 9 needs an argument, not a

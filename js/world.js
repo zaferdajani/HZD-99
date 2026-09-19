@@ -153,6 +153,25 @@ function hull(g, x0, x1, top, seed) {
   for (let i = 0; i < n; i++) for (let y = base - p[i]; y < base; y++) put(g, x0 + i, y, '#');
   return p;
 }
+// A SPAR — the Crystal Cache's own rise, hung the other way up: seam crystal
+// grown DOWN from the roof in one cluster, crest in the middle, shoulders that
+// thin to nothing at both ends so the growth meets the roof it grew from
+// rather than ending in a face. Same heap profile as a mound (one tile per
+// column, never a picket fence), which is what keeps it an OBJECT under the
+// NO RIGHT ANGLES order and not an extruded lintel. What it is FOR: a bat
+// hangs from rock and dives from where it hangs, and a 17-row frame room's
+// roof is nine rows too high for a dive to ever reach the floor — the crystal
+// cave hangs its bats at row 6 under carved rock, and this is the same perch
+// grown in a room that has no carve. Contiguous with row 0, so the surface
+// curve reads it as ceiling and the ground under it stays the ground.
+function spar(g, x0, x1, peak, seed) {
+  const n = x1 - x0 + 1, span = Math.max(1, x1 - x0);
+  const wob = Math.min(1.9, peak * 0.5);
+  const p = heapProfile(n, i => Math.min(peak, peak * Math.sin(Math.PI * (i / span))
+    + (tnoise(x0 + i, seed) - 0.5) * wob));
+  for (let i = 0; i < n; i++) for (let y = 1; y <= p[i]; y++) put(g, x0 + i, y, '#');
+  return p;
+}
 // A FALLEN GANTRY — the scrapyard's walkways and signage do not lie level any
 // more. `drop` is how many rows it sags across its length, a row at a time, so
 // the deck art slices into separate leaning spans instead of one ruled bar.
@@ -893,9 +912,50 @@ const ROOMS = {
       rect(g, 6, 0, 8, 0, '.'); rect(g, 6, 1, 8, 1, 'B');
       hline(g, 3, 6, 11, '='); hline(g, 5, 8, 7, '='); hline(g, 4, 7, 4, '=');
     } },
+  // THE CACHE'S ANTECHAMBER — and the first room that is the kingdom's OWN.
+  // Kingdom X's three moves (FOE_MOVES 'bat@X' / 'crawler@X' / 'hopper@X' in
+  // js/entities.js) were filed against a roster this room did not have: the
+  // four X rooms declared no machines at all, so glint / facet / refract were
+  // declared and never met — the anti-pattern tests/artbible.cjs exists to
+  // catch for art. The Cache's floor is level 5 (FOE_ZONE_LV.X), so anything
+  // standing here lands with four points and buys its move on a fresh save.
+  //
+  // shapes:    the AIR LANE (glint — the bat's dive leaves splinters hanging
+  //            where it passed) and the TOLD DESTINATION (refract — the
+  //            hopper paints its landing spot on the floor before it leaves)
+  // solution:  let the bat dive at the door and step OUT of its line, not
+  //            along it; then read the paint, stand off it, and take the
+  //            hopper the frame it comes down where the floor said it would
+  // failure:   running the lane the bat just cut, or standing on the honest
+  //            arc's landing because that is where a hopper has always come
+  //            down — down here the floor is the read, not the body
+  // lesson:    station 2 for both (combat-education §1): each shape live, in
+  //            isolation, on its own PLANE — the bat owns the air over the
+  //            ledge, the hopper the floor past it, ten tiles apart so the
+  //            hopper+flier "both vertical" caution (ENEMY_MATRIX §1) never
+  //            stacks them in one lane. This is the rehearsal of what PRISM
+  //            examines: its slot is mixup / identification (GLOBAL_REGISTRY
+  //            §4) and LIGHT SPLIT tells its destination in three glowing
+  //            spots — refract is that read on a machine she already knows,
+  //            with the same TELL_SWIPE crouch a plain hopper wears, so the
+  //            identification is made off the paint and nothing else.
+  // budget:    3 per screen in encounter-gen points (pressure 2 + the bat,
+  //            which tests/threat.cjs does not price); registry value 1.
+  //            Rest beat follows either way: V1B is the Kerf's home and
+  //            stays enemy-free, and B5 behind her is PRISM's approach.
+  //
+  // The bat needs rock at dive height — a bat dives from where it hangs, and
+  // from this room's roof a dive stops nine rows short of the floor — so it
+  // hangs under a SPAR of seam crystal grown down from the roof over the
+  // ledge (spar(): an object of the room's own backdrop, per the mimic rule,
+  // never a bare step). Procedural stand-in; the plate is queued as
+  // ART_QUEUE §2ca (cacheSpar). The hopper stands between the ledge's end
+  // and the Kerf's door (at 0.75 → tile 24), so the door is past it and the
+  // ledge behind her is the perch to read the paint from.
   V1: { zone: 'X', w: 32, h: 17, exits: { L: 'B5' },
-    ents: [['chest', 12, 15, 'rl:aegis'], ['scrap', 5, 15, 60], ['scrap', 8, 15, 60], ['scrap', 16, 15, 60], ['scrap', 19, 15, 40], ['term', 9, 15, 4]],
-    build(g) { frame(g); openL(g); hline(g, 8, 15, 11, '='); } },
+    ents: [['chest', 12, 15, 'rl:aegis'], ['scrap', 5, 15, 60], ['scrap', 8, 15, 60], ['scrap', 16, 15, 60], ['scrap', 19, 15, 40], ['term', 9, 15, 4],
+           ['bat', 10, 6], ['hopper', 20, 15]],
+    build(g) { frame(g); openL(g); hline(g, 8, 15, 11, '='); spar(g, 6, 14, 5, 'cacheSpar'); } },
   // THE KERF (kingdom X's own interior, the X-side of A0B/B3B/C5B/D1B/E1B):
   // a one-room cutting shop inside a split boulder in the wall of V1, the
   // Cache's antechamber, where the last of the Deaf System's cutters LIVES.
@@ -939,9 +999,32 @@ const ROOMS = {
   // and cut through the brittle section of it. Until somebody does that, this
   // room does not exist on the map, because the map only ever draws rooms that
   // have actually been stood in.
+  //
+  // ...AND THE VAULT IS THE KINGDOM'S MIXED EXAM (encounter-gen §2): the two
+  // GROUND shapes the Cache owns, paired, with the room's own furniture as the
+  // perch to read them from. She drops in through the hole at 9..12 onto the
+  // ledge or the floor beside the bench; the machines hold the empty right
+  // half and come to her.
+  //
+  // shapes:    the TOLD DESTINATION (refract — the hopper's painted landing)
+  //            and the FLOOR BEHIND IT (facet — the crawler's lunge sweeps a
+  //            lance across the floor it just left)
+  // solution:  hold the left under the ledge; read the paint and stand off
+  //            it, punish the hopper's landing; the crawler arrives second
+  //            and is taken HEAD-ON off the ledge — its lance owns the floor
+  //            behind it, so the old step-behind is the one answer not to give
+  // failure:   chasing the hopper right, into the crawler's lane: she lands
+  //            between the lance and the next painted spot, and both are
+  //            places she was told about
+  // lesson:    station 3 (graded use) for refract after V1's rehearsal, and
+  //            the Cache's only pairing of its two ground reads — one room,
+  //            once, the way every zone gets exactly one mixed exam
+  // budget:    4 in encounter-gen points (two pressure); registry value 2 per
+  //            screen. The bench is the rest beat, in the room, as CV2 has it.
   V2: { zone: 'X', w: 32, h: 17, exits: { T: { to: 'B2', at: 44 } },
     ents: [['chest', 11, 15, 'nine'], ['scrap', 4, 15, 80], ['scrap', 17, 15, 80],
-           ['scrap', 8, 11, 60], ['bench', 14, 15], ['term', 6, 15, 4]],
+           ['scrap', 8, 11, 60], ['bench', 14, 15], ['term', 6, 15, 4],
+           ['hopper', 26, 15], ['crawler', 22, 15]],
     build(g) {
       frame(g);
       rect(g, 9, 0, 12, 0, '.');            // the hole she cut, overhead
