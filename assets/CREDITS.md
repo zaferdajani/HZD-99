@@ -130,6 +130,7 @@ rather than on a contact sheet.
 | `sfx/hz_evosting.ogg`, `hz_winsting.ogg` | cut from `mus_hero.m4a` | her motif quoted at her moments — the same five notes, not a soundalike |
 | `sfx/fz_*.ogg` | Higgsfield | the foes' shared combat vocabulary (§2ae): three telegraph tiers, slam, phase, wave, spike, summon, wreck, part-break, the three elemental casts — plus a roar per guardian, picked at play time by who is roaring. Gain-matched to −4 dB peak |
 | `sfx/hum_*.ogg` | Higgsfield | the NPC presence loops (§2ae): six ambient beds, each cut to a seamless three seconds with the tail crossfaded into the head. The cave keeps its synth on purpose — its line changes when the beacon is found |
+| `manhua/ch1/p01.webp` … `p27.webp` | Higgsfield | THE MANHUA, chapter one (docs/MANHUA.md): 27 full-colour pages drawn from `docs/STORY_SCRIPT.md` §1–2 to the letter, every text box the game's own line, characters anchored to the canon elements (HZD-99, Ratchet, the crawler, NULLFANG) made from the game's plates; as-fired masters in `source/manhua/ch1/`, exact prompts in `source/manhua/ch1/prompts.json`; **generated with Higgsfield** |
 
 Every one of these has a **synthesised floor underneath it** in `js/audio.js`.
 That is a licensing fact as much as an engineering one: no shipped moment

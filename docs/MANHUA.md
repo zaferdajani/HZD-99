@@ -64,33 +64,35 @@ compared to it in review, and a page whose lettering drifted is refired.
 
 | Page | Scene | Fired (job) | Reviewed | Keyed | Committed |
 |---|---|---|---|---|---|
-| p01 | Cover | `3d9a6a42-d2a4-4aa5-a703-eeb55f0c6a92` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p02 | §1 Prologue, shots 1–4 | `2267281d-16d1-4d53-9634-b677d49b0124` 2026-09-19 (take 2) | session-checked, awaiting owner | — | — |
-| p03 | §1 Prologue, shots 5–8 | `f31c40ec-4033-4665-a58e-79b25ce55f93` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p04 | §2.1 The cradle — W1 | `0bdc0526-6949-4621-8f85-69a6d307354e` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p05 | §2.2 The road and the gates — W2 | `b9e7251e-34be-47dd-b968-4babd50f2d33` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p06 | §2.3 The waking floor — A0 | `667bdb9e-f455-4de0-8e7b-76f9a3d10017` 2026-09-19 (take 2) | session-checked, awaiting owner | — | — |
-| p07 | §2.4 Ratchet's den — the note and the cell | `ebd6267f-1905-4573-ace7-4b7f040a45d7` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p08 | §2.4 Ratchet's den — the kit, the cradle, the pack | `aef1b1d1-7e18-4390-ac6b-1f6772442097` 2026-09-19 (take 5 of 6) | session-checked, awaiting owner — the Repair Kit line is drawn twice on this take | — | — |
-| p09 | §2.4 Ratchet's den — the errand | `d7495a82-3017-44e0-93bd-f29d8c6829b9` 2026-09-19 (take 2) | session-checked, awaiting owner | — | — |
-| p10 | §2.5 The volt pack — the shop and the two verbs | `dafdc179-e6ca-4197-83f1-da7e2303f468` 2026-09-19 (take 2) | session-checked, awaiting owner | — | — |
-| p11 | §2.5 tail, §2.6 The meadow — arrival | `80955cf7-a76f-4491-83d3-95340b57939f` 2026-09-19 (take 3) | session-checked, awaiting owner | — | — |
-| p12 | §2.6 The meadow — Old Servo, the first fight | `b78a5ba9-a3cd-4709-9fe2-accfce11abbc` 2026-09-19 (take 2) | session-checked, awaiting owner | — | — |
-| p13 | §2.7 The hub — NULLFANG: fall, land, wind | `1f5e3e13-4f26-4ef2-9cac-725e8f2b4de3` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p14 | §2.7 The hub — the swipe, the watch, the leaving | `b67f496a-6726-4cb8-997a-40f0124c754b` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p15 | §2.8 Under the meadow — the buried mouth | `c2e8f6c1-99b5-4995-93c3-9c7f4ecfd9bc` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p16 | §2.9 The crystal cave — the beacon and the log | `8954c102-3002-4351-aed8-81fcb2636235` 2026-09-19 (take 3) | session-checked, awaiting owner | — | — |
-| p17 | §2.9 The crystal cave — the pillar and the shard | `1b9e2680-0728-405a-8b5d-1a77c50b077e` 2026-09-19 (take 2) | session-checked, awaiting owner | — | — |
-| p18 | §2.10 The forging | `05e7438a-2d20-46bf-9936-7a665fc42e86` 2026-09-19 (take 4) | session-checked, awaiting owner | — | — |
-| p19 | §2.11 The wings of the meadow | `dd54796f-18f0-4139-a64c-c6a2d612a31e` 2026-09-19 (take 2) | session-checked, awaiting owner | — | — |
-| p20 | §2.12 The Chime | `dc932f54-1284-40c6-8907-79309f4e256d` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p21 | §2.13 The Alpha's den | `c0dfa310-4477-452d-95b9-7a1d2ccb1256` 2026-09-19 (take 2) | session-checked, awaiting owner | — | — |
-| p22 | §2.14 The camp | `a87757dc-ef8d-4d5b-b77c-be292c3b5ca4` 2026-09-19 (take 2) | session-checked, awaiting owner | — | — |
-| p23 | §2.15 NULLFANG — the fight | `d0cba4f8-0b83-4b14-bdc7-17ccfab41d9c` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p24 | §2.15 NULLFANG — the fork, both branches | `dd91d640-29a3-46df-a4e6-ecdd9f50cde4` 2026-09-19 | session-checked, awaiting owner | — | — |
-| p25 | §2.16 The grotto, the tunnel, the sage kneeling | `f6b2a00c-7271-4007-b3b9-afe8dcc6aa2e` 2026-09-19 (take 4) | session-checked, awaiting owner | — | — |
-| p26 | §2.16 The first sage, purified | `ad555638-6158-4414-8d61-279237790f7f` 2026-09-19 (take 2) | session-checked, awaiting owner | — | — |
-| p27 | §2.17 End of the free chapter | `cf63541d-d526-495e-811c-36951e9ca8d1` 2026-09-19 | session-checked, awaiting owner | — | — |
+| p01 | Cover | `3d9a6a42-d2a4-4aa5-a703-eeb55f0c6a92` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p02 | §1 Prologue, shots 1–4 | `2267281d-16d1-4d53-9634-b677d49b0124` 2026-09-19 (take 2) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p03 | §1 Prologue, shots 5–8 | `f31c40ec-4033-4665-a58e-79b25ce55f93` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p04 | §2.1 The cradle — W1 | `0bdc0526-6949-4621-8f85-69a6d307354e` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p05 | §2.2 The road and the gates — W2 | `b9e7251e-34be-47dd-b968-4babd50f2d33` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p06 | §2.3 The waking floor — A0 | `667bdb9e-f455-4de0-8e7b-76f9a3d10017` 2026-09-19 (take 2) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p07 | §2.4 Ratchet's den — the note and the cell | `ebd6267f-1905-4573-ace7-4b7f040a45d7` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p08 | §2.4 Ratchet's den — the kit, the cradle, the pack | `aef1b1d1-7e18-4390-ac6b-1f6772442097` 2026-09-19 (take 5 of 6) | shown to the owner in the thread; live for his refusal — the Repair Kit line is drawn twice on this take | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p09 | §2.4 Ratchet's den — the errand | `d7495a82-3017-44e0-93bd-f29d8c6829b9` 2026-09-19 (take 2) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p10 | §2.5 The volt pack — the shop and the two verbs | `dafdc179-e6ca-4197-83f1-da7e2303f468` 2026-09-19 (take 2) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p11 | §2.5 tail, §2.6 The meadow — arrival | `80955cf7-a76f-4491-83d3-95340b57939f` 2026-09-19 (take 3) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p12 | §2.6 The meadow — Old Servo, the first fight | `b78a5ba9-a3cd-4709-9fe2-accfce11abbc` 2026-09-19 (take 2) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p13 | §2.7 The hub — NULLFANG: fall, land, wind | `1f5e3e13-4f26-4ef2-9cac-725e8f2b4de3` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p14 | §2.7 The hub — the swipe, the watch, the leaving | `b67f496a-6726-4cb8-997a-40f0124c754b` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p15 | §2.8 Under the meadow — the buried mouth | `c2e8f6c1-99b5-4995-93c3-9c7f4ecfd9bc` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p16 | §2.9 The crystal cave — the beacon and the log | `8954c102-3002-4351-aed8-81fcb2636235` 2026-09-19 (take 3) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p17 | §2.9 The crystal cave — the pillar and the shard | `1b9e2680-0728-405a-8b5d-1a77c50b077e` 2026-09-19 (take 2) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p18 | §2.10 The forging | `05e7438a-2d20-46bf-9936-7a665fc42e86` 2026-09-19 (take 4) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p19 | §2.11 The wings of the meadow | `dd54796f-18f0-4139-a64c-c6a2d612a31e` 2026-09-19 (take 2) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p20 | §2.12 The Chime | `dc932f54-1284-40c6-8907-79309f4e256d` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p21 | §2.13 The Alpha's den | `c0dfa310-4477-452d-95b9-7a1d2ccb1256` 2026-09-19 (take 2) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p22 | §2.14 The camp | `a87757dc-ef8d-4d5b-b77c-be292c3b5ca4` 2026-09-19 (take 2) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p23 | §2.15 NULLFANG — the fight | `d0cba4f8-0b83-4b14-bdc7-17ccfab41d9c` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p24 | §2.15 NULLFANG — the fork, both branches | `dd91d640-29a3-46df-a4e6-ecdd9f50cde4` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p25 | §2.16 The grotto, the tunnel, the sage kneeling | `f6b2a00c-7271-4007-b3b9-afe8dcc6aa2e` 2026-09-19 (take 4) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p26 | §2.16 The first sage, purified | `ad555638-6158-4414-8d61-279237790f7f` 2026-09-19 (take 2) | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+| p27 | §2.17 End of the free chapter | `cf63541d-d526-495e-811c-36951e9ca8d1` 2026-09-19 | shown to the owner in the thread; live for his refusal | `assets/manhua/ch1/` 2026-09-19 | 2026-09-19 |
+
+**Keyed 2026-09-19.** The owner opened the live reader and found it empty (every page had been held back for his yes), so all 27 standing takes were keyed and committed the same day. Review now happens on the live page: a page he refuses goes back to FIRED here and is refired; nothing else changes.
 
 **How the takes went (2026-09-19).** All 27 pages fired the same day; 15 needed a second take, four a third or fourth, and page 8 six (the fifth stands). The failures were always the same three kinds, and the archive's `refired` field names each one: lettering drift (an invented caption, a dropped or doubled word, a split balloon), Ratchet losing his round body whenever he stood or gestured, and HZD-99 turning into a tall humanoid on pages where she carries the sword. The fixes that held: naming the count of text boxes per panel, describing Ratchet's body in words beside his element, and the `cast_sword_v2` block that calls her a small round cat with a head as big as her body. The `Fired` column shows the take now standing for review; every earlier take's job id and fault is in the archive.
 
