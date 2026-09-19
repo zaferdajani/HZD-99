@@ -33,6 +33,18 @@ shape decides the answer.
 
 ## 2. The hero's verbs, as actually implemented
 
+> **GUARD (owner sheet 2026-09-15; made real 2026-09-19).** Hold GUARD (KeyL /
+> pad / the shield button) while grounded and idle. A blow arriving from the
+> side she FACES is STOPPED: no core, a short shove, `sfx('block')`, 0.32 s of
+> contact immunity. A blow from BEHIND is cut by `GUARD_REDUCTION` (0.65,
+> floor 1 core). It heats: each held blow adds 0.8, it cools 1/s, and at 2.2
+> (the third inside ~2 s) the brace BREAKS — that blow lands cut and the brace
+> is down for 0.6 s (`guardBreakT`). So the matrix below gains a column: any
+> shape that arrives from her front at body height has **brace** as an
+> answer, once or twice, never as a wall. The doctrine's "no block" line in
+> `combat-design` predates the sheet; this note supersedes it. Measured by
+> `tests/shield.cjs`.
+
 | # | Verb | Cost | Where |
 |---|---|---|---|
 | A | **Spatial evasion** — run, jump, double jump, wall cling, glide | free | movement |

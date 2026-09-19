@@ -35,8 +35,8 @@ demands it.
 
 | id | state | startup (tell) | active | recovery | hitbox | tell | tell ms | channels | dmg | intended_counter | opening_ms | notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `e.gd.plate` | passive, whenever `windedT ≤ 0 && lungeT ≤ 0` | — | continuous | — | — | **the plate is visible in the silhouette at all times** | — | silhouette + `sfx('bosshit')` clink on every blocked hit + amber-white spark burst | — | **wait** | n/a | `dealDmg` returns 0 and applies `max(1, round(dm × 0.12))` |
-| `e.gd.lunge` | `coilT` | **350** (`TELL_FAST`) | 220 + iq×60 ms at spd×4.2 | **550 − iq×220 ms** (`windedT`) | body | `coilT` | **350** | amber ring + wedge + `sfx('tell')` + stops dead | 1 core | **move** perpendicular | **517 → 297** | **and the plate is DOWN for exactly this window** |
+| `e.gd.plate` | passive, whenever `windedT ≤ 0 && lungeT ≤ 0` | — | continuous | — | **its `dir` side, body height** | **the plate is visible in the silhouette at all times, on ONE side** | — | silhouette + `sfx('bosshit')` clink on every blocked hit + amber-white spark burst | — | **wait / jump over it and strike its back / strike from above** | n/a | `dealDmg` returns 0 and applies `max(1, round(dm × 0.12))` **only for a hit from the front at body height** (js/types.js). Behind or above (y < top + 0.3h) lands whole. **Changed 2026-09-19:** it denied from every side; the owner hit it "from up, below, left and right" and it did not die. |
+| `e.gd.lunge` | `coilT` | **350** (`TELL_FAST`) | 220 + iq×60 ms at spd×4.2 | **max(500, 750 − iq×220) ms** (`windedT`) | body | `coilT` | **350** | amber ring + wedge + `sfx('tell')` + stops dead | 1 core | **move** perpendicular | **717 → 497** | **and the plate is DOWN for exactly this window.** Changed 2026-09-19: was 550 − iq×220 (297 ms at full cunning — under her own 230 ms recovery twice over, one hit then the plate is back). Floored at 500 ms: two hits, always. |
 | `e.gd.contact` | — | — | continuous | — | 30×22 | none | — | — | 1 core | out-range | n/a | roster-wide, see Stage C |
 
 ### B1 audits

@@ -858,7 +858,10 @@ const HERO_TRANS = {
 };
 // How much of an incoming blow the brace cuts. A first pass, not a tuned
 // final number — see the note in Player.hurt().
-const GUARD_REDUCTION = 0.65;
+const GUARD_REDUCTION = 0.65;          // a blow from behind the brace, or the one that breaks it
+const GUARD_HEAT_PER_HIT = 0.8;        // heat per held blow; cools 1/s (Player.update)
+const GUARD_BREAK_HEAT = 2.2;          // the third held blow inside ~2 s breaks the brace
+const GUARD_BREAK_T = 0.6;             // ...and it stays down this long
 // THE JUMP IS AN ARC, NOT A CLOCK, so it is indexed differently: rise, apex and
 // fall are three stills of ONE continuous movement, and the thing that says
 // where in it she is, is her own vertical speed. Cell 0 is the takeoff stretch,
@@ -1830,8 +1833,13 @@ class Player {
     // her hands, hurt() below cuts incoming damage and drops the knockback.
     // Cancelled by attacking, dashing, charging or healing — the same
     // mutual exclusion every other held verb in this file already respects.
+    // ...and a BROKEN brace cannot be raised until it recovers (see hurt():
+    // three braced hits inside two seconds break it). The heat it is measured
+    // by cools here, so a block she takes now is forgotten two seconds on.
+    this.guardBreakT = Math.max(0, (this.guardBreakT || 0) - dt);
+    this.guardHeat = Math.max(0, (this.guardHeat || 0) - dt);
     this.guardT = (inD('GUARD') && this.on && !this.swingVis && this.dashT <= 0
-      && this.chargeT <= 0.05 && this.healT <= 0) ? 1 : 0;
+      && this.chargeT <= 0.05 && this.healT <= 0 && this.guardBreakT <= 0) ? 1 : 0;
     // hold attack to charge the volt-burst
     // ...ONLY ONCE THE PACK IS WIRED (burstUnlocked, game.js): before the first
     // volt cell is bought, a held ATTACK is an attack, and nothing builds.
@@ -2499,6 +2507,40 @@ class Player {
     // first pass, not a tuned final number, and no boss tell is unblockable
     // yet — that is real follow-up work, not shipped by this change.
     const guarded = this.guardT > 0;
+    // A BRACE SHE IS FACING INTO HOLDS. The cut above floored at ONE core —
+    // and nearly everything in this game hits for one core — so a block was a
+    // hit with a different sound. The owner: "blocking is not actually
+    // blocking. Enemies were able to hit me when I'm blocking." Now a hit
+    // that arrives from the side she faces is STOPPED: no core, a short shove,
+    // sparks off the plate. What keeps it from replacing the dodge: it heats.
+    // Three held blows inside two seconds BREAK the brace (guardBreakT) — the
+    // third lands cut, and she cannot raise it again for 0.6 s. A blow from
+    // BEHIND is cut, not stopped, as before. So against one machine the brace
+    // is an answer; against a room of them, or a guardian's chain, it is a
+    // beat she has to move out of. before → after: min 1 core → 0 core from
+    // the front, cut from behind; break at GUARD_BREAK_HEAT.
+    const pcx = this.x + this.w / 2, faceDir = this.faceVis || this.face || 1;
+    const facing = guarded && (Math.sign(fromX - pcx) || faceDir) === faceDir;
+    if (facing) {
+      this.guardHeat = (this.guardHeat || 0) + GUARD_HEAT_PER_HIT;
+      if (this.guardHeat < GUARD_BREAK_HEAT) {
+        this.iT = 0.32;                       // contact cannot chain through a held plate
+        this.hurtPoseT = 0.12; this.healT = 0;
+        cam.shake = Math.max(cam.shake, 3); sfx('block');
+        if (typeof padRumble === 'function') padRumble(0.4, 0.2, 110);
+        G.flash = Math.max(G.flash, 0.12);
+        burst(pcx + faceDir * 12, this.y + this.h * 0.45, 10, '#cfe0f0', 220, 0.35, 120, 2.2, true);
+        const kb = 0.22;
+        // ...and no hop: the brace needs her feet on the ground, so a block
+        // that lifted her would drop the brace for the next blow of a chain
+        this.vx = (Math.sign(pcx - fromX) || -faceDir) * 250 * kb;
+        return;
+      }
+      // the third: the plate gives. This blow lands cut, and the brace is down
+      this.guardBreakT = GUARD_BREAK_T; this.guardHeat = 0;
+      sfx('break'); cam.shake = Math.max(cam.shake, 6);
+      burst(pcx + faceDir * 12, this.y + this.h * 0.45, 16, '#ffd76a', 260, 0.45, 160, 2.6, true);
+    }
     if (guarded) d = Math.max(1, Math.round(d * (1 - GUARD_REDUCTION)));
     if (relicHas('aegis') && !G.save.usedAegis) {
       G.save.usedAegis = true;
@@ -7005,10 +7047,17 @@ class Enemy {
               addPart(pb.x + rnd(0, DRAG_REACH), pb.y + rnd(0, pb.h), rnd(-40, 40), rnd(-70, -10),
                 0.3, '#b4702f', 1.8, 480);
           }
-          // the punish window shrinks with cunning but never closes: even at
-          // full sharpness there is a third of a second where it is yours
+          // the punish window shrinks with cunning but never closes — and never
+          // below HALF A SECOND. It used to bottom out at a third (0.55 −
+          // 0.22·iq), which is under her own 230 ms recovery twice over: one
+          // hit, then the plate is back. docs/combat: an opening under ~250 ms
+          // fits no attack cycle; 500 ms fits two. The kingdom levels raised
+          // iq for everything, and this was the line that turned the meadow's
+          // first shielded machine into "practically invincible" (owner,
+          // 2026-09-19). before → after: 0.55−0.22·iq (min 0.33) → max(0.5,
+          // 0.75−0.22·iq).
           if (this.lungeT <= 0) {
-            this.windedT = 0.55 - this.iq * 0.22; this.vx = 0;
+            this.windedT = Math.max(0.5, 0.75 - this.iq * 0.22); this.vx = 0;
             this.shear();
           }
         } else if (this.windedT > 0) {                      // the punish window
@@ -11750,6 +11799,7 @@ class Boss {
         // did: 38% of the encounter was one telegraph on repeat, and the bell,
         // the hymn and the forge never got a turn.
         this.slamCD = this.slamCD == null ? 0 : this.slamCD - dt;
+        this.hymnCD = Math.max(0, (this.hymnCD || 0) - dt);
         if (this.st === 'idle') {
           this.vx = this.face * 62 * spd * (this.slag ? 0.55 : 1);
           this.t -= dt;
@@ -11776,8 +11826,13 @@ class Boss {
             this.slamCD = rnd(2.6, 4.0);
           }
           else if (this.t <= 0) {
-            if (this.cycle++ % 3 === 2) {
-              this.st = 'hymn'; this.t = 1.0;
+            // THE HYMN IS ON A COOLDOWN NOW. One idle in three fired it and idle
+            // rests 1.5 s, so it came round every few seconds — "it happens a
+            // lot" (owner, 2026-09-19). before → after: every 3rd idle → every
+            // 3rd idle AND 6.5–8.5 s since the last. When the cadence says hymn
+            // and the cooldown says no, it lobs instead.
+            if (this.cycle++ % 3 === 2 && (this.hymnCD || 0) <= 0) {
+              this.st = 'hymn'; this.t = 1.0; this.hymnCD = rnd(6.5, 8.5);
               this.roarBuzzT = 0.7;
               if (typeof padRumble === 'function') padRumble(0.7, 0.6, 550);
               if (typeof roarWave === 'function')
@@ -11829,6 +11884,9 @@ class Boss {
           if (this.t <= 0) {
             this.hymn = { r: 10, t: 0, n: this.phase === 2 ? 3 : 2 };
             sfx('roar'); cam.shake = 7;
+            // said once, the first time the heat comes for her: what it is and
+            // what answers it — the same courtesy MOTHER'S SONG gets
+            if (G.save && G.save.flags && !G.save.flags.hymnTold) { G.save.flags.hymnTold = 1; G.toast(t('hymn_warn')); }
             this.st = 'idle'; this.t = bossRest(this, 1.5);
           }
         } else if (this.st === 'slamwarn') {
@@ -12566,8 +12624,18 @@ class Boss {
         burst(this.cx(), this.cy(), 30, ELEM.murr.glow, 380, 0.8, 0, 4, true);
         cam.shake = 9; sfx('powerUp');
       } else {
+        // THE HEAT ROLLS ALONG THE FLOOR. The ring used to hit her anywhere on
+        // its circumference, in the air or on the ground — a 520 px circle at
+        // 260 px/s in a 1024 px room, two or three times a cast, with the Song
+        // as its only answer. docs/combat calls that a toll: an expanding area
+        // with one answer. Owner: "when it roars it's nearly impossible to
+        // escape... every move for a sage should have a counter." So the ring
+        // takes only a GROUNDED body — JUMP it as it passes — and, since a
+        // facing brace holds now, GUARD facing the bell stops it too. Three
+        // answers: jump, brace, sing. before → after: any body on the ring →
+        // grounded bodies only.
         const d = Math.hypot(px - this.cx(), py - this.cy());
-        if (Math.abs(d - h.r) < 16 && !player.dead) player.hurt(DF().edmg, this.cx());
+        if (Math.abs(d - h.r) < 16 && !player.dead && player.on) player.hurt(DF().edmg, this.cx(), 'atlas.hymn');
         if (h.r > 520) { h.n--; if (h.n > 0) { h.r = 10; } else this.hymn = null; }
       }
     }

@@ -131,6 +131,7 @@ const SUITE = [
   ['meadow',    'the greenery keeps its colour all the way to the screen'],
   ['drawclock', 'a frozen clock freezes the frame: draw never reads the wall clock'],
   ['guard',     'she braces, and bracing costs the hit its push'],
+  ['shield',    'the brace holds, the plate has a side, the hymn can be jumped'],
   ['airattack', 'a strike in the air is its own move, once it has one'],
   ['shopscale', 'a shop door has no depth, a gate and a cave do'],
   ['foescale',  'every machine reads in the hero\'s weight class'],

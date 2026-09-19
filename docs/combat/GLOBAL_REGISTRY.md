@@ -204,3 +204,16 @@ Binding on every room in every zone.
 - Write to `COMBAT_BIBLE.md`, `ENEMY_MATRIX.md` or `ASSET_LEDGER.md` — those are
   assembled in Stage C. **One agent, one file, exclusive write access.**
 - Resolve a registry ambiguity. Flag it in `INTERFACES` instead.
+
+
+## Changelog — 2026-09-19 (owner: block, the shielded machine, the hymn)
+
+| value | before | after | why |
+|---|---|---|---|
+| `Player.hurt` braced blow, facing | `max(1, round(d × 0.35))` — every block still cost a core | **0 cores**, shove ×0.22, `iT` 0.32 | "blocking is not actually blocking" |
+| `GUARD_HEAT_PER_HIT` / `GUARD_BREAK_HEAT` / `GUARD_BREAK_T` | — | **0.8 / 2.2 / 0.6 s** | a block that never breaks replaces the dodge; three inside two seconds is the limit |
+| guard machine plate (`dealDmg`, js/types.js) | denies from every side | **front, body height only**; behind and above land whole | "practically invincible... from up, below, left and right" |
+| guard machine `windedT` | `0.55 − 0.22·iq` (min 0.33 s) | **`max(0.5, 0.75 − 0.22·iq)`** | an opening under 250 ms fits no attack cycle; 500 fits two |
+| Furnace `hymn` hit test | any body on the ring | **grounded bodies only** (`player.on`) | an expanding area with one answer is a toll; JUMP is the second, GUARD the third |
+| Furnace `hymn` cadence | every 3rd idle (~every few seconds) | every 3rd idle **and `hymnCD` 6.5–8.5 s** | "it happens a lot" |
+| `hymn_warn` | — | toast once per save | the same courtesy MOTHER'S SONG gets |
