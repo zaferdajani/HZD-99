@@ -102,6 +102,8 @@ compared to it in review, and a page whose lettering drifted is refired.
 
 **How the second edition went (2026-09-19).** All 27 pages fired in one batch; 18 stood on the first take, 10 needed more, and two (p17, p26) took four. Every take and its fault is in the archive's `takes` list. The faults were the same three kinds as the first edition — lettering drift (a split caption, a doubled or dropped balloon, a strip name drawn as a label, one sound-effect word), the wrong body (Ratchet standing where Servo should, HZD-99 drawn tall or with a plush face) and, twice, a sword on her back before the forging — and each was answered by naming the exact box and the exact body in the SHAPE paragraph rather than the CAST block. p17's standing take has her visor drifted to bare cyan eyes; its text is exact, so it is keyed and flagged for the owner's refusal rather than fired a fifth time. p21's first take was correct but came back at 848 px, so it was resubmitted unchanged for resolution.
 
+**The PDF (2026-09-19).** `manhua/clawbyte-chapter-one.pdf` is chapter one as one file — 27 pages at 6×9 in, one standing take per page, built from the same masters the reader shows and linked from the reader's header. It is regenerated whenever a page is refired and rekeyed; it is not the review surface (the live reader is), only the copy to send or print.
+
 **Owner rulings the pages wait on** (script §8) — none of these blocks chapter 1
 as drawn: p24 draws BOTH branches of the fork as the script instructs; p12 keeps
 Servo's *"since the Null Core began broadcasting"* because that is the game's
