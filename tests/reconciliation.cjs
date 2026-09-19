@@ -4,7 +4,10 @@ const {chromium}=require('playwright');
 const root=path.join(__dirname,'..'),read=f=>fs.readFileSync(path.join(root,f),'utf8');
 const expected={
  'assets/sfx/vox/hzd_atk2.wav':'be7ea38cb21c4ae85292f83a7d2307b3f93bc9dcfc4e8cf4f1bb76b8ec1358c3',
- 'assets/sfx/vox/hzd_yalla.wav':'7eb1d2ba0ea67fa0548ee98677293390c1bd804d03ce332a7abedb0a174511ca'
+ // Owner approved the regenerated pronunciation; retain its exact processed take.
+ 'assets/sfx/vox/hzd_yalla.wav':'eec30e2cf0d307c6d56846bdd4c41a4a57d7ba3f42bb2cd17b1f431404c54630',
+ // Requested excited, wordless NYA-9-1 completion; see AUDIO_POLISH provenance.
+ 'assets/sfx/vox/hzd_win2.wav':'034edb7371c82ef086494245ec17315a638593f6d556ca2c019e4cbc073ae524'
 };
 for(const [f,h] of Object.entries(expected))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,f))).digest('hex'),h,'preserve reviewed sound cleanup: '+f);
 assert(!read('js/mobility_fix.js').includes('Player.prototype.draw ='),'duplicate charge renderer retired');
@@ -62,3 +65,4 @@ const order=JSON.parse(read('source-files.json'));assert.equal(new Set(order).si
  fs.mkdirSync(path.join(root,'release-evidence'),{recursive:true});fs.writeFileSync(path.join(root,'release-evidence/reconciliation.json'),JSON.stringify({...evidence,errors},null,2));
  await browser.close();assert(evidence.checks.every(c=>c.pass),'reconciliation checks failed');
 })().catch(e=>{console.error(e);process.exitCode=1;});
+
