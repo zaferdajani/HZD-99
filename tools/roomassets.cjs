@@ -28,6 +28,18 @@ const fs = require('fs'), path = require('path');
   await page.goto('http://127.0.0.1:8220/index.html');
   await page.waitForFunction(() => typeof startGame === 'function', { timeout: 20000 });
   await page.evaluate(() => {
+    // THE PREFETCHER IS OFF BEFORE THE GAME STARTS, not after. The switch below
+    // used to be thrown in the next evaluate, and two things run in the gap:
+    // startGame -> loadRoom -> preloadRoom enqueues W1's neighbourhood, and
+    // preloadBoot() fires from game.js on a 400 ms setTimeout regardless of
+    // anything. Whether that timer beat the switch was a wall-clock race, so
+    // some runs dispatched W1's neighbours before it flipped and those fetches
+    // kept landing after it — W1 came back owning gateCity and denInterior
+    // (W2's and A0B's plates) in one run and not the next, and the boot set
+    // differed by whatever had drained. Two back-to-back runs of an unchanged
+    // tree disagreed on order, membership and three rooms' contents. Off first,
+    // queue cleared, then start: preloadTick dispatches nothing with PRE.on 0.
+    if (typeof PRE === 'object' && PRE) { PRE.on = 0; PRE.q.length = 0; }
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
     // every skill, so gates open and nothing is skipped for being locked
     sv.skills = ['dash', 'wall', 'glide', 'pulse', 'song', 'claw']; startGame(sv);
@@ -48,8 +60,10 @@ const fs = require('fs'), path = require('path');
     // land in MEDIA_PEND and are billed to the room being measured — the
     // manifest measuring its own output, and W1 came back owning 6.7 MB
     // including every plate of the Alpha and the city gate. PRE.on is the
-    // switch preloadRoom already checks.
-    if (typeof PRE === 'object' && PRE) PRE.on = 0;
+    // switch preloadRoom already checks. It is thrown BEFORE startGame now (see
+    // above) — this is belt and braces against anything the 400 ms boot seed
+    // managed to enqueue in between.
+    if (typeof PRE === 'object' && PRE) { PRE.on = 0; PRE.q.length = 0; }
     let sd = 0x9e3779b9;
     Math.random = () => {                            // mulberry32
       sd = (sd + 0x6d2b79f5) >>> 0;
@@ -69,6 +83,13 @@ const fs = require('fs'), path = require('path');
     // It has to be captured HERE. Taking it from the first room measured instead
     // charges that room's own art to everybody and reports an empty boot set,
     // which is what the first version of this did.
+    //
+    // ...AND IT IS CAPTURED SETTLED. "Resident" has to mean resident: the eager
+    // set media.js fetches at load is still in flight when this evaluate begins,
+    // and sampling mid-flight put a different subset of it in the boot list on
+    // every run. Wait for the pending map to drain, bounded so a sheet that
+    // never arrives cannot hang the tool.
+    for (let f = 0; f < 600 && Object.keys(MEDIA_PEND).length; f++) await frame();
     const bootKeys = seen();
     for (const id of ids) {
       const before = new Set(seen());
@@ -123,7 +144,14 @@ const fs = require('fs'), path = require('path');
     // ...and the PROTAGONIST is in every room, so her plates are nobody's
     // room property. heroFidget landed in W2 on one walk and A0 on the next
     // for no reason but which screen she happened to idle on.
-    const hers = Object.keys(MEDIA_SRC.images).filter(k => /^(hero|swing|trans)/.test(k));
+    // ...INCLUDING THE hzd* SHEETS. The filter predates that naming and missed
+    // all six of her own plates (hzdIdle, hzdHurt, hzdHeal, hzdHealFx, hzdGuard,
+    // hzdDeath). Death, heal and guard are fetched by the draw that first wants
+    // them, so they belong to whichever room she happened to die, mend or
+    // block in — which is the "whether the thing happened" class this whole
+    // block exists to keep out of the per-room lists. Measured: three runs of
+    // the fixed tool agreed on every key in every room except D6 +/- hzdDeath.
+    const hers = Object.keys(MEDIA_SRC.images).filter(k => /^(hero|swing|trans|hzd)/.test(k));
     for (const id in perRoom) {
       const r = perRoom[id];
       if (!r || !r.keys) continue;
@@ -153,7 +181,13 @@ const fs = require('fs'), path = require('path');
     if (!r || r.err) { console.log('  ! ' + id + ' ' + (r && r.err)); continue; }
     rooms[id] = { zone: r.zone, keys: r.keys };
   }
-  const man = { boot: res.boot, rooms, bytes };
+  // The boot list is emitted SORTED. Nothing reads its order — preload.js builds
+  // its queue from the per-room lists and a fixed body set, never from `boot` —
+  // so arrival order was carrying no meaning and all of the churn: a committed
+  // file that rewrote itself in a new sequence on every regeneration.
+  // Deduped too: seen() concatenates the resident and pending maps, and a key
+  // mid-transition sits in both, so the old list carried the same sheet twice.
+  const man = { boot: [...new Set(res.boot)].sort(), rooms, bytes };
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, JSON.stringify(man));
   const tot = Object.keys(rooms).reduce((s, id) => s + rooms[id].keys.reduce((a, k) => a + (bytes[k] || 0), 0), 0);
