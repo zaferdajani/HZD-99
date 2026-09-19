@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12">
+<meta name="description" content="CLAWBYTE, the manhua. The story of the game drawn to the letter, one kingdom per chapter, read top to bottom.">
+<title>CLAWBYTE — the manhua</title>
+<!--
+  THE MANHUA READER.
+
+  Plain HTML, no build step, phone-first, read top to bottom. It serves the
+  pages under ../assets/manhua/ch<N>/p<NN>.webp and nothing else; the pages
+  themselves are drawn through Higgsfield by the STORY session from
+  docs/STORY_SCRIPT.md, one kingdom per chapter, and every page is reviewed
+  by the owner before it is committed (docs/MANHUA_SESSION.md).
+
+  The manifest below is the only thing this file knows about the book: which
+  chapters exist, how many pages each has, and which scene of the script each
+  page draws. A page that is listed here but not yet on disk renders as an
+  "undrawn" card, so the reader always shows the whole shape of the book and
+  exactly where the drawing has reached. The transcript under every page is
+  the script's own text for that page, verbatim, so the drawn text boxes can
+  be checked against it — the manhua exists to validate the game's story and
+  a caption that drifted would defeat that.
+-->
+<style>
+  :root {
+    --bg: #0b0d12; --panel: #141821; --ink: #e8e6df; --dim: #8b90a0;
+    --line: #232838; --cyan: #5fe6ff; --red: #ff4a4a; --gold: #e2b455;
+    --w: 720px;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; color: var(--ink); background: var(--bg);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header {
+    position: sticky; top: 0; z-index: 5;
+    background: rgba(11,13,18,.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    max-width: var(--w); margin: 0 auto; padding: 10px 16px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .brand { font-weight: 800; letter-spacing: .12em; font-size: 14px; }
+  .brand small { color: var(--dim); letter-spacing: 0; font-weight: 400; margin-left: 8px; }
+  nav { display: flex; gap: 6px; overflow-x: auto; flex: 1; min-width: 0; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav a {
+    white-space: nowrap; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--dim); font-size: 13px;
+  }
+  nav a.on { color: var(--ink); border-color: var(--cyan); }
+  nav a .n { color: var(--cyan); margin-right: 4px; }
+  nav a.empty { opacity: .55; }
+  .home { color: var(--dim); font-size: 13px; white-space: nowrap; }
+
+  main { max-width: var(--w); margin: 0 auto; padding: 0 16px 64px; }
+  .intro { color: var(--dim); font-size: 14px; margin: 20px 0 8px; }
+  .intro b { color: var(--ink); }
+
+  section.chapter { margin-top: 40px; scroll-margin-top: 64px; }
+  .chapter h2 {
+    margin: 0 0 4px; font-size: 22px; letter-spacing: .04em; line-height: 1.2;
+  }
+  .chapter h2 .k { color: var(--cyan); font-size: 13px; letter-spacing: .2em; display: block; margin-bottom: 6px; }
+  .chapter .meta { color: var(--dim); font-size: 13px; margin-bottom: 18px; }
+  .chapter .meta .drawn { color: var(--gold); }
+
+  figure.page { margin: 0 0 28px; }
+  .frame {
+    position: relative; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 6px; overflow: hidden;
+    aspect-ratio: 2 / 3;
+  }
+  .frame img {
+    display: block; width: 100%; height: 100%; object-fit: contain;
+    background: #000; opacity: 0; transition: opacity .35s;
+  }
+  .frame.ok { aspect-ratio: auto; }
+  .frame.ok img { opacity: 1; height: auto; }
+  .undrawn {
+    position: absolute; inset: 0; display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 24px; color: var(--dim);
+    background:
+      repeating-linear-gradient(135deg, transparent 0 14px, rgba(255,255,255,.025) 14px 16px),
+      var(--panel);
+  }
+  .frame.missing .undrawn { display: flex; }
+  .undrawn .num { font-size: 40px; font-weight: 800; color: var(--line); line-height: 1; }
+  .undrawn .lbl { margin-top: 10px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+  .undrawn .scn { margin-top: 6px; font-size: 14px; color: var(--ink); }
+  figcaption { margin-top: 8px; font-size: 13px; color: var(--dim); }
+  figcaption .pg { color: var(--ink); font-weight: 600; }
+  figcaption .scene { margin-left: 8px; }
+  details.script { margin-top: 6px; font-size: 13px; color: var(--dim); }
+  details.script summary { cursor: pointer; color: var(--dim); user-select: none; }
+  details.script summary:hover { color: var(--ink); }
+  details.script .t { margin: 8px 0 0; padding-left: 12px; border-left: 2px solid var(--line); white-space: pre-wrap; color: var(--ink); }
+  .lines { color: var(--dim); }
+
+  footer { max-width: var(--w); margin: 0 auto; padding: 24px 16px 40px; color: var(--dim); font-size: 13px; border-top: 1px solid var(--line); }
+
+  @media (prefers-reduced-motion: reduce) { .frame img { transition: none; } }
+  @media (max-width: 480px) {
+    .bar { gap: 8px; padding: 8px 12px; }
+    .brand small { display: none; }
+    .home { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">CLAWBYTE<small>the manhua</small></div>
+    <nav id="nav" aria-label="Chapters"></nav>
+    <a class="home" href="../">← the game</a>
+  </div>
+</header>
+
+<main>
+  <p class="intro">The story of the game, drawn to the letter from the script, one kingdom per chapter. Read top to bottom. Every text box is the game's own line; open <b>the script for this page</b> under any page to check it. A page that is not drawn yet says so.</p>
+  <div id="book"></div>
+</main>
+
+<footer>
+  Drawn through Higgsfield from <code>docs/STORY_SCRIPT.md</code>; every page reviewed by the owner before it is committed. Published by VibeSolutions.
+</footer>
+
+<script>
+// THE MANIFEST — the only thing this page knows about the book.
+//
+// One entry per chapter; one entry per page with the scene(s) of
+// docs/STORY_SCRIPT.md it draws and the script text it carries, verbatim.
+// The STORY session appends pages here as they are planned, not as they are
+// drawn: a listed page missing from disk is the "undrawn" state, which is
+// the point — the book's shape is visible before its pages are.
+const CHAPTERS = [
+  {
+    n: 1, title: 'The Scrap Meadows', sub: 'Prologue and the free chapter — script §1–2',
+    pages: [
+      { scene: 'Cover', text: 'CLAWBYTE — A robo-cat metroidvania in the Machine Depths.\nCHAPTER ONE — THE SCRAP MEADOWS' },
+      { scene: '§1 Prologue, shots 1–4', text: 'KERNEL DEPTHS. A city of machines, run on one broadcast — the Mother\'s Song.\nMOTHER-V, the broadcast heart. While she sang, the Depths were kind.\nUntil an evil robot hijacked her Song.\nHidden in the melody, a virus spread from machine to machine.' },
+      { scene: '§1 Prologue, shots 5–8', text: 'The Song became a command: OBEY.\nEven the protectors of the kingdoms fell under its command.\nForgotten in a service cradle, a small maintenance cat slept through the broadcast.\nHZD-99 woke to a silent city — and went to give the Song back.' },
+      { scene: '§2.1 The cradle — W1', text: 'Move — Walk right toward the light.\nLeave — the door has been open a long time.' },
+      { scene: '§2.2 The road and the gates — W2', text: 'Jump — Press once to jump over the obstacle.\nThe gates — stand beneath them and press UP.' },
+      { scene: '§2.3 The waking floor — A0', text: 'Scratch — Strike the marked machine.\nFinish it — keep going — it breaks.\nTake the scrap — walk over it — scrap is what you pay with.\nScrap — What a broken machine leaves behind, and the only money down here. The trader takes it for repairs, parts and upgrades — so a machine you break is a machine you spend.\nRead Ratchet\'s note — Interact with the sleeping robot.' },
+      { scene: '§2.4 Ratchet\'s den — the note and the cell', text: 'A tag hangs from his chest plate, written in a steady hand:\n\'The broadcast takes every machine that listens. I will not listen — and I will not wait around to change my mind. I have taken out my own cell and hidden it where the rats forget to look.\'\n\'If you are reading this, the city fell. When it is safe out there — truly safe — put the cell back in. I will do the rest. — R.\'\nOne Power Cell would bring it back. You are carrying one.\nRatchet is awake.' },
+      { scene: '§2.4 Ratchet\'s den — the kit, the cradle, the pack', text: 'Repair Kit — Patches two cores. Use it from here.\nSee that cradle in the corner? Built it into the wall myself. Step in and it remembers you — everything you are, kept safe — and it patches your plating while you stand there. Use it. That is what it is for.\nAnd when you have scrap, come to my counter. I keep a volt pack — my own charger, cut down to your size. It wires that ring at the top of you to something useful.\nHits you land charge the ring. With the pack in you, you can SPEND it: hold HEAL to mend a core, or hold ATTACK and let go for a burst from your claws. The ring is empty now — go earn some.' },
+      { scene: '§2.4 Ratchet\'s den — the errand', text: 'You restored my battery. Thank you. The stone in my necklace protected me when the infection reached me.\nAn evil robot hid a virus in Mother\'s song. I was afraid and alone, so I disconnected my battery and waited for help.\nThere is more of this stone in the Scrap Meadows cave. Find the rock opening and press UP beside it. Follow the caves to the crystal pillar.\nBeside the pillar, hold ATTACK to charge your claws, then release. Collect the shard that falls.\nBring that shard back to my workshop. I will forge a cleansing sword. Take it to the first sage to free them from the virus.' },
+      { scene: '§2.5 The volt pack — the shop and the two verbs', text: 'Ratchet\'s Emporium\nVolt Cell — 12 scrap — Refills your volts. The first one wires the Repair Protocol and the Volt Burst into you.\nVolt Pack — Ratchet\'s charger, wired into you. The shards you knock out of machines are VOLTS now — hold HEAL to spend them mending a core, hold ATTACK to spend them on a Volt Burst.\nRepair — hold it — volts become a core.\nVolt Burst — hold ATTACK until she crackles, then let go.' },
+      { scene: '§2.5 tail, §2.6 The meadow — arrival', text: 'Solve the puzzle — Use the marked node and solve its puzzle.\nBuy a skill — Open Skills and buy your first skill.\nGo on — the way out is right.' },
+      { scene: '§2.6 The meadow — Old Servo, the first fight', text: 'Mrrow… a working unit! I haven\'t seen one since the Null Core began broadcasting.\nMove with the arrows, leap with Z, and swipe those claws with X.\nClaw the corrupted to harvest volts. Then stand still, hold F — the ✚ pad on a phone — and your frame will mend a core.\nThe virus corrupts every machine it touches. Purge it, little paw — or rust with the rest of us.\nSee the winding house behind me? I raised every gantry over this meadow off that drum, cable by cable. The drum still turns. My climbing days are what rusted.' },
+      { scene: '§2.7 The hub — NULLFANG\'s first meeting (fall, land, wind)', text: '(no words are spoken)' },
+      { scene: '§2.7 The hub — the swipe, the watch, the leaving', text: 'It threw you once. The corridor still has the dent. Go and put one in it.' },
+      { scene: '§2.8 Under the meadow — the buried mouth', text: 'Something is calling from behind the fallen rock. STRIKE it.\nThe pile shifts. The sound behind it comes closer.\nThe rock gives way — the tunnel is open, and it is breathing.\nMAINTENANCE LOG 0x2F: sub-hatch sealed after an anomalous signal. If found — do not answer it.' },
+      { scene: '§2.9 The crystal cave — the beacon', text: 'THE SOUND HAD A SOURCE. It has been calling into the rock for a long time, and nothing was ever listening.\nLOG // THE DEAF SYSTEM\nWhen the song came, the broken were the lucky ones. Cracked receivers, stripped antennae, factory rejects — every unit whose ears were dead heard NOTHING. And nothing is what saved them.\nThey went under. Into the rock, where the signal dies. They rebuilt down here — a system of the deaf, wired by touch and light. No radio. No song.\nThe caves do not connect to each other. That is not a flaw. A tunnel the song cannot walk is a tunnel worth keeping short.' },
+      { scene: '§2.9 The crystal cave — the pillar', text: 'Claws glance off the pure crystal. Hold ATTACK to supercharge, then release beside it.\nPure Crystal Shard — Quarried from the pillar with the supercharged claw. Ratchet can forge this into something the song will fear.' },
+      { scene: '§2.10 The forging', text: 'The pillar shard! Hold still — sparks now — and let the song learn what fear is. The PURIFIER is yours.\nTHE PURIFIER — A white crystal shaped like a sword. It hums against the Eye\'s static — and its handle was made to CONNECT to something.\nThat blade on your back is the best work these hands ever did. Something under this kingdom is still singing — go and let it meet my crystal.' },
+      { scene: '§2.11 The wings of the meadow', text: 'A coil shook loose in the gantries above us. I cannot climb any more.\nThat is the one. Take this — I have no use for it and you will.\nThere is a shaft under the meadow nobody has stood in since the fall. See it for me.\nYou stood in it. Nobody has, in a long time. Here.' },
+      { scene: '§2.12 The Chime', text: 'CHIME — it is singing at you.\nDestroyed. There was nobody in it.' },
+      { scene: '§2.13 The Alpha\'s den', text: 'THE ALPHA — the pack answers to this.\nTHE PACK IS YOURS — It yielded. Every wolf in the machine world knows it now — they will not raise a tooth to you again.' },
+      { scene: '§2.14 The camp', text: 'The trader is open for business.\nCat-frame. Cute. Don\'t touch the stock with those claws.\nHeard the Meadows went quiet. Heard it was you. Prices stand, mind.\nTake what you need. I salvage from the dead, and you keep making fewer of them.\nYou came back. Your husk was still warm when I passed it.' },
+      { scene: '§2.15 NULLFANG — the fight', text: 'NULLFANG, THE VIRUS BEAST.\nIt remembers the corridor.\n⚡ NULLFANG is reeling — hit it NOW.\nNULLFANG is down. It is still looking at you.' },
+      { scene: '§2.15 NULLFANG — the fork', text: '◀ TAME — Cut the virus out. It lives, and it owes you.\n▶ FINISH — End it. Take its strength for your own.\nThe virus is destroyed — NULLFANG is free. He seems to like you.\nNULLFANG\'S OATH — Once each room, the blow that would break you is answered instead — it comes out of the dark and roars them off you.\nRESOLVE — You took what it had. Every strike you land from here hits 18% harder, forever.\nThe ground shifted — a CAVE MOUTH has opened in the lair.' },
+      { scene: '§2.16 The grotto, the tunnel, and the sage kneeling', text: 'One of the wise ones counted our dead from the meadow above. We carried it under when the counting stopped making sense — but its ears were too good, and the song found it even in the rock.\nWe could not silence it and we would not end it. We sealed it in the deep chamber. It kneels there still, counting the other way.\nIf you carry clean light, go in to it. It kept one cell charged through everything. It always said somebody would come.\nThe sage kneels — the song holds its body together. Broken, but not CLEAN.\nClaws cannot cleanse the song. The PURIFIER can.' },
+      { scene: '§2.16 The first sage, purified', text: 'A SAGE, PURIFIED — The song lets go. The sage remembers everything — and gives what it kept for whoever would come with clean light.\nTHE MEADOW SAGE — It counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light.\nWord crawls up even from the deaf places: a sage knelt down there and STOOD UP clean. My forge did that. You did that. Prices still stand, mind.' },
+      { scene: '§2.17 End of the free chapter', text: 'END OF THE FREE CHAPTER — The Scrap Meadows are behind her. The Data Conduits are not. — Five kingdoms, five more guardians and the Null Core are waiting in the full game.' },
+    ],
+  },
+  { n: 2, title: 'The Data Conduits', sub: 'and the Crystal Cache — script §3', pages: [] },
+  { n: 3, title: 'The Foundry', sub: 'script §4', pages: [] },
+  { n: 4, title: 'The Frozen Archives', sub: 'script §5', pages: [] },
+  { n: 5, title: 'The Virus Nest', sub: 'and the ending — script §6–7', pages: [] },
+];
+
+const pad = n => String(n).padStart(2, '0');
+const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+const nav = document.getElementById('nav');
+const book = document.getElementById('book');
+
+for (const ch of CHAPTERS) {
+  const a = document.createElement('a');
+  a.href = '#ch' + ch.n;
+  a.innerHTML = '<span class="n">' + ch.n + '</span>' + esc(ch.title);
+  if (!ch.pages.length) a.className = 'empty';
+  nav.appendChild(a);
+
+  const sec = document.createElement('section');
+  sec.className = 'chapter'; sec.id = 'ch' + ch.n;
+  sec.innerHTML =
+    '<h2><span class="k">CHAPTER ' + ch.n + '</span>' + esc(ch.title) + '</h2>' +
+    '<div class="meta">' + esc(ch.sub) + ' · <span class="count"></span></div>';
+  book.appendChild(sec);
+
+  if (!ch.pages.length) {
+    const p = document.createElement('p');
+    p.className = 'lines';
+    p.textContent = 'Not begun. A chapter is not started until the one before it is complete and the owner has seen it.';
+    sec.appendChild(p);
+    sec.querySelector('.count').textContent = 'no pages planned yet';
+    continue;
+  }
+
+  let drawn = 0;
+  const count = sec.querySelector('.count');
+  const setCount = () => {
+    count.innerHTML = '<span class="drawn">' + drawn + '</span> of ' + ch.pages.length + ' pages drawn';
+  };
+  setCount();
+
+  ch.pages.forEach((pg, i) => {
+    const n = i + 1;
+    const src = '../assets/manhua/ch' + ch.n + '/p' + pad(n) + '.webp';
+    const fig = document.createElement('figure');
+    fig.className = 'page'; fig.id = 'ch' + ch.n + 'p' + pad(n);
+    fig.innerHTML =
+      '<div class="frame">' +
+        '<img loading="lazy" decoding="async" alt="Chapter ' + ch.n + ', page ' + n + ' — ' + esc(pg.scene) + '">' +
+        '<div class="undrawn"><div class="num">' + pad(n) + '</div><div class="lbl">not yet drawn</div><div class="scn">' + esc(pg.scene) + '</div></div>' +
+      '</div>' +
+      '<figcaption><span class="pg">Page ' + n + '</span><span class="scene">' + esc(pg.scene) + '</span>' +
+        '<details class="script"><summary>the script for this page</summary><div class="t">' + esc(pg.text) + '</div></details>' +
+      '</figcaption>';
+    const frame = fig.querySelector('.frame');
+    const img = fig.querySelector('img');
+    img.addEventListener('load', () => { frame.classList.add('ok'); drawn++; setCount(); });
+    img.addEventListener('error', () => { frame.classList.add('missing'); img.removeAttribute('alt'); });
+    img.src = src;
+    sec.appendChild(fig);
+  });
+}
+
+// The chapter chip follows the reader down the page.
+const chips = [...nav.querySelectorAll('a')];
+const secs = [...document.querySelectorAll('section.chapter')];
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver(es => {
+    for (const e of es) if (e.isIntersecting) {
+      const i = secs.indexOf(e.target);
+      chips.forEach((c, j) => c.classList.toggle('on', i === j));
+    }
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  secs.forEach(s => io.observe(s));
+}
+</script>
+</body>
+</html>
