@@ -23,7 +23,11 @@ const ROOT = path.join(__dirname, '..'), WWW = path.join(ROOT, 'www');
 // allowlist is a list somebody has to remember to add to, and forgetting it
 // means a new asset silently missing on Android while the web build is fine.
 // Excluding is safe by default; including is not.
-const SKIP = new Set(['source']);
+// ...and neither is assets/manhua/: the coloured manhua the STORY session
+// draws (docs/MANHUA_SESSION.md) is read on the web at /manhua/, and nothing
+// in js/ loads a page of it. 7 MB for chapter one alone, and five chapters
+// coming; inside the app it would be weight with no door to it.
+const SKIP = new Set(['source', 'manhua']);
 function copyDir(from, to, top) {
   fs.mkdirSync(to, { recursive: true });
   let n = 0, bytes = 0;
