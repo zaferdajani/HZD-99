@@ -185,8 +185,19 @@ const { chromium } = require('playwright');
       // she is being taught on — so a tapping harness walks into a one-tile
       // block forever and reports the room as broken when it is not. A player
       // presses for a tenth of a second; so does this.
+      //
+      // ...BUT NOT ACROSS THE GATES. Pressing UP needs her on the ground inside
+      // ~90px of the gap, and a jump arc is far longer than this 26-frame
+      // cadence — so whether she was GROUNDED during the thirty-odd frames she
+      // spends in that window came down to phase alignment, which drifts with
+      // how much the one rAF above let settle. Instrumented under load: she ran
+      // clean past the gap and stood at x=1800 against W2's far wall for the
+      // remaining forty seconds, 840px beyond a gate at 960. A player stops
+      // hopping when she reaches the doors; so does this.
+      const gateNear = G.roomId === 'W2' && typeof gateWorldX === 'function'
+        && Math.abs(player.x + player.w / 2 - gateWorldX(gateDoorsAll('W2')[0])) < 160;
       const phase = f % 26;
-      if (phase < 10) { keys.KeyZ = 1; if (phase === 0) keysP.KeyZ = 1; }
+      if (!gateNear && phase < 10) { keys.KeyZ = 1; if (phase === 0) keysP.KeyZ = 1; }
       else { keys.KeyZ = 0; keysP.KeyZ = 0; }
       update(1 / 60);
       if (seen[seen.length - 1] !== G.roomId) seen.push(G.roomId);
