@@ -1,0 +1,17 @@
+{
+  "job": "37007143-3fb3-43b8-b4fb-6cd09b33351f",
+  "model": "seed_audio",
+  "voice_name": "NYA-9-1",
+  "voice_id": "ad57f3f2-2372-4c21-8578-a6cb52612979",
+  "voice_type": "element",
+  "prompt": "Yalla!",
+  "pitch_rate": 0,
+  "speech_rate": 0,
+  "owner_approval": "Yes, this pronunciation is correct",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/hf_20260918_205826_37007143-3fb3-43b8-b4fb-6cd09b33351f.wav",
+  "sha256": "bba7c1a485630465df1ee606acc276ec814eb64925d355989ba10e3f9fb6484a",
+  "rejected_jobs": [
+    "d7faa790-bc77-41ee-b60e-d353a904f72a",
+    "60c0a884-10aa-4701-bc2c-73c8dd32c15b"
+  ]
+}

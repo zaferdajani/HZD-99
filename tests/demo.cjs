@@ -233,6 +233,8 @@ const check = (name, ok, detail) => {
     updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
     const x = cv.getContext('2d');
     const rd = (sx, sy) => {
+      // The scene is projected after drawing; probe the beam's screen position.
+      sx = worldScreenX(sx + camSX()); sy = worldScreenY(sy + camSY());
       const d = x.getImageData(Math.round(sx * cv.width / 960), Math.round(sy * cv.height / 540), 1, 1).data;
       return [d[0], d[1], d[2]];
     };
@@ -241,7 +243,8 @@ const check = (name, ok, detail) => {
     // where the beam actually lands, read from the same expression that draws
     // it rather than eyeballed off a screenshot — the first version of this
     // sampled 46 px above the pool and reported it missing
-    const landY = G.roomDef.h * TILE * 0.86 - camSY();
+    const support = groundColumnAt((F.tx0 + F.tx1) / 2 * TILE);
+    const landY = (support ? support[0] : G.roomDef.h * TILE * 0.86) - camSY();
     const shot = () => {
       draw(performance.now());
       return { in: rd(cxr, 150), out: rd(cxr - 300, 150), land: rd(cxr, landY) };

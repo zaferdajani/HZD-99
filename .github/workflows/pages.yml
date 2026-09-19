@@ -107,7 +107,7 @@ jobs:
         run: |
           set -o pipefail
           node tests/reconciliation.cjs 2>&1 | tee release-evidence/reconciliation.log
-          node tests/run.cjs release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 2>&1 | tee release-evidence/predeploy.log
+          node tests/run.cjs entrance-integration hero-cache-regression voice-handoff scratch-reach scratch-visual release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 2>&1 | tee release-evidence/predeploy.log
       - name: Stage only release content and stamp its identity
         if: steps.fresh.outputs.fresh == 'true'
         run: |

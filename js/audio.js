@@ -203,6 +203,11 @@ function voxMech() {
 // Story scenes own the voice channel. Text without a matching recording is
 // deliberately unvoiced; an unrelated bark is not a substitute for dialogue.
 const HZDPLAY = new Set();
+// Completion is a short phrase, not an interruptible combat grunt. Incidental
+// jump/attack/readiness requests must not cut it halfway through a word.
+function hzdCompletionPlaying() {
+  return [...HZDPLAY].some(h => h.key === 'hzd_win');
+}
 let NARRATIVE_AUDIO_ACTIVE = false;
 function narrativeAudioActive() {
   return typeof G !== 'undefined' && !!(G.wake || G.cut || ['DIALOG', 'INTRO', 'CUT'].includes(G.state));
@@ -247,6 +252,7 @@ function narrativeAudioTick() {
 // short fade rather than a cut, because a voice stopped dead is a click.
 let HZDHOLD = null;
 function hzdHold(key) {
+  if (hzdCompletionPlaying()) return false;
   hzdRelease(0.02);
   const set = HZDVOX[key];
   if (!set || !AC || MUTED || narrativeAudioActive()) return false;
@@ -310,6 +316,8 @@ const TAKE_GATE = {
 function playBuf(key, vol, rate) {
   if (!AC || MUTED) return false;
   if (key.indexOf('hzd_') === 0 && narrativeAudioActive()) return false;
+  if (key.indexOf('hzd_') === 0 && hzdCompletionPlaying() &&
+      !['hzd_hurt','hzd_hurtbad','hzd_die'].includes(key)) return false;
   // Readiness/jump chatter must not spend the held charge note. Damage and
   // the deliberate release can interrupt it; their event ends that gesture.
   if (key.indexOf('hzd_') === 0 && HZDHOLD &&
@@ -328,7 +336,7 @@ function playBuf(key, vol, rate) {
   if (key.indexOf('hzd_') === 0) {
     const m = voxMech();
     if (m) g.connect(m.in);
-    const handle = { src: s, gain: g };
+    const handle = { src: s, gain: g, key };
     HZDPLAY.add(handle);
     s.onended = () => HZDPLAY.delete(handle);
   }
@@ -1072,7 +1080,8 @@ function hzdSay(key, gapMs) {
   if (interruptsHold) hzdRelease(0.025);
   if (!interruptsHold && now - HZDT < (gapMs == null ? 90 : gapMs)) return false;
   const pick = set[(Math.random() * set.length) | 0];
-  const rate = key === 'yalla' ? 1.45 : 0.98 + Math.random() * 0.04;
+  // The regenerated NYA-9-1 take carries her own pitch and pronunciation.
+  const rate = key === 'yalla' || key === 'win' ? 1 : 0.98 + Math.random() * 0.04;
   if (!playBuf(pick[0], pick[1], rate)) return false;
   HZDT = now;
   return true;
@@ -1148,7 +1157,7 @@ function sfx(n) {
   if (n === 'land' && playBuf('hz_land', 0.32, 0.97 + Math.random() * 0.06)) return;
   if (CUE[n]) { CUE[n](); return; }
   const v = VOX[n];
-  if (v && playBuf(v[0], v[1], 0.97 + Math.random() * 0.06)) return;
+  if (v && playBuf(v[0], v[1], n === 'win' ? 1 : 0.97 + Math.random() * 0.06)) return;
   // HER OWN FOLEY (fired 2026-08-26, measured before keying — the near-silent
   // takes were refused and re-fired). Same contract as every sample here: the
   // authored take plays if it has decoded, her voice still rides where it used

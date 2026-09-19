@@ -626,6 +626,23 @@ const MEDIA_SRC = {
     // the samples they used to use are no longer fetched or decoded here.
   },
 };
+// Sheet layouts changed when the owner's art was integrated. A new page can
+// still be controlled briefly by the previous service worker, whose image
+// cache is cache-first. Never combine this renderer with that cached sheet.
+function mediaRevisionUrl(src) {
+  if (!src || /^(data:|blob:)/.test(src) || typeof BUILD_ID === 'undefined') return src;
+  return src + (src.includes('?') ? '&' : '?') + 'v=' + encodeURIComponent(BUILD_ID);
+}
+function heroSheetCompatible(key, im) {
+  const cells = {hzdIdle:8, swingUppercut:6, swingClawJab:5, swingClaw1:6}[key];
+  return !cells || (im.naturalWidth === cells * im.naturalHeight);
+}
+for (const key in MEDIA_SRC.images) {
+  if (MEDIA_SRC.images[key].startsWith('assets/characters/hero/'))
+    MEDIA_SRC.images[key] = mediaRevisionUrl(MEDIA_SRC.images[key]);
+}
+MEDIA_SRC.audio.hzd_yalla = mediaRevisionUrl(MEDIA_SRC.audio.hzd_yalla);
+MEDIA_SRC.audio.hzd_win = mediaRevisionUrl(MEDIA_SRC.audio.hzd_win);
 if (typeof window !== 'undefined' && window.EMBEDDED_MEDIA) {
   for (const k in window.EMBEDDED_MEDIA) {
     if (MEDIA_SRC.images[k]) MEDIA_SRC.images[k] = window.EMBEDDED_MEDIA[k];
@@ -692,11 +709,12 @@ function mediaLow(k) {
   const im = new Image();
   im.onload = () => {
     if (MEDIA_RAW[k]) return;              // the full one won the race
+    if (!heroSheetCompatible(k, im)) { MEDIA_LOW[k] = 0; return; }
     MEDIA_RAW[k] = im; MEDIA_LOW[k] = 2;
     mediaDirty(k);
   };
   im.onerror = () => { MEDIA_LOW[k] = 0; };  // no webp on this browser: no loss
-  im.src = L[k];
+  im.src = mediaRevisionUrl(L[k]);
 }
 // `urgent` means SOMETHING IS DRAWING THIS RIGHT NOW — the lazy map's own
 // accessor sets it. Only then is the small copy worth a second request; the
@@ -722,6 +740,11 @@ function mediaFetch(k, urgent, bust) {
   MEDIA_PEND[k] = 1;
   const im = new Image();
   im.onload = () => {
+    if (!heroSheetCompatible(k, im)) {
+      delete MEDIA_PEND[k];
+      if (!bust) mediaFetch(k, urgent, true);
+      return;
+    }
     const wasLow = MEDIA_LOW[k] === 2;
     MEDIA_RAW[k] = im; MEDIA_LOW[k] = 3;
     // the tile layer is BAKED, so a sheet that lands after the bake changes
@@ -1088,7 +1111,7 @@ function drawStripCell(c, key, cell, cells, cx, base, h, flip) {
   // what the low tier exists for.
   mediaFetch(key, 1);
   const im = MEDIA_RAW[key];
-  if (!im || !im.naturalWidth) return false;
+  if (!im || !im.naturalWidth || !heroSheetCompatible(key, im)) return false;
   // what drew the body, for the diag panel: the owner's "nothing changed"
   // is answered by a screenshot that names the strip and the cell
   if (typeof G !== 'undefined') G.lastStrip = key + ':' + (((cell % cells) + cells) % cells);

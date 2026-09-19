@@ -186,7 +186,12 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           };
           swing();
           g.hurtT = b.hp < b.hpMax; g.hpAfter = b.hp;
-          g.stagger = /stagT/.test(Boss.prototype.update.toString());
+          // Wrappers hide the underlying method's source. Exercise the timer
+          // through the real update instead of searching a function string.
+          b.stagT = 0.2; b.st = 'stalk'; b.t = 9;
+          b.update(0.05);
+          g.stagger = b.stagT > 0 && b.stagT < 0.2 && b.st === 'stalk';
+          b.stagT = 0;
           g.daze = !!BSTAT[bossKind].dazeAt;
           b.hp = 1; swing();
           for (let i = 0; i < 20; i++) update(DT);
@@ -234,7 +239,8 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           // the plate this door would wear, if its family has one
           const dest = ROOMS[def.to];
           const guard = dest && dest.cave && !G.roomDef.cave && def.to[0] === 'G';
-          const key = guard ? GATE_PLATE_BY_ZONE[G.roomDef.zone] : (dest && dest.cave && !def.style) ? MOUTH_PLATE_BY_ZONE[G.roomDef.zone] : null;
+          const integrated = def.gx != null && ROOM_VISTA[id] && !INTERIOR_FIT[ROOM_VISTA[id]] && (G.roomDef.cave || (dest && dest.cave));
+          const key = integrated ? ROOM_VISTA[id] : guard ? GATE_PLATE_BY_ZONE[G.roomDef.zone] : (dest && dest.cave && !def.style) ? MOUTH_PLATE_BY_ZONE[G.roomDef.zone] : null;
           // Meadow guardian doors use the cave-mouth fallback; named NPC
           // structures have their own plates. They need the same load barrier
           // as the other guardian plates before their visibility is measured.

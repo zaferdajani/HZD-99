@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['index.html', 'js/**', 'assets/**', 'native/**']
+    paths: ['index.html', 'js/**', 'assets/**', 'android/**', 'package*.json', 'capacitor.config.json', 'tools/pack-www.cjs', '.github/workflows/android.yml']
 
 jobs:
   apk:
@@ -19,29 +19,37 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '17'
 
       - uses: android-actions/setup-android@v3
-
-      - name: Build the single-file game
-        run: node build.cjs
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
       - name: Prepare the Capacitor app
-        working-directory: native
         run: |
-          mkdir -p www
-          cp ../index.html www/index.html
-          npm install --no-audit --no-fund
-          npx cap add android || true
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run app:pack
           npx cap sync android
 
       - name: Assemble debug APK
-        working-directory: native/android
+        working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
 
+      - name: Verify packaged art, voice and haptics
+        run: |
+          python3 - <<'PY'
+          import pathlib, zipfile
+          apk = next(pathlib.Path('android/app/build/outputs/apk/debug').glob('*.apk'))
+          with zipfile.ZipFile(apk) as z:
+              for asset in ['index.html', 'assets/characters/hero/idle.webp', 'assets/characters/hero/swing/uppercut.webp', 'assets/sfx/vox/hzd_yalla.wav', 'assets/sfx/vox/hzd_win2.wav']:
+                  assert z.read('assets/public/' + asset) == pathlib.Path('www', asset).read_bytes(), asset
+              assert b'HapticsPlugin' in z.read('assets/capacitor.plugins.json'), 'Missing native haptics plugin'
+          print('APK contains the verified game, supplied art, replacement voice and haptics plugin')
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: clawbyte-android-debug
-          path: native/android/app/build/outputs/apk/debug/*.apk
+          path: android/app/build/outputs/apk/debug/*.apk

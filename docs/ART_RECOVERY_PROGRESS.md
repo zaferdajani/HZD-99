@@ -9,7 +9,7 @@ The owner expanded the scope to every supplied artwork, including all eight late
 | B2-03 | Charged dual-sword spin | Ten body poses: three held-charge poses and seven release/recovery poses; separate timed FX |
 | B2-04 | Joined-blade combo | Eight body poses routed through three combos; 384px cells preserve overhead weapon extension |
 | B2-05 | Joined-blade throw/return | Six body poses tied to hold/release/catch clocks; separate physical projectile image |
-| B2-06 | Claw jab | Five body poses routed to the second unarmed combo hit |
+| B2-06 | Claw jab | Five body poses routed to the first unarmed combo hit |
 | B2-07 | Charged claw burst | Twelve body poses split six held-charge / six release; existing separate burst FX retained |
 | B2-08 | Single-sword normal combo | Eight body poses routed through three combos; separate timed FX |
 
@@ -21,6 +21,6 @@ For each move, verify body selection, facing, scale, frame timing, separate VFX,
 
 Gameplay haptics now use the existing native/mobile adapter when no controller actuator is available. A 40ms duplicate guard avoids retriggering the same event from camera shake. Light attack/dash cues are distinct from confirmed contact. Haptic adapter tests pass; physical controller/phone vibration has not been tested here.
 
-Voice constraint from the owner: any additional protagonist vocal must use the established Higgsfield audio character/source pipeline. Preserve the supplied recordings. Do not substitute a preset, another provider, or an invented voice identifier. The exact saved voice identifier has not yet been resolved in this task; no new vocal recording has been generated.
+Voice constraint from the owner: any additional protagonist vocal must use the established Higgsfield audio character/source pipeline. Preserve the supplied recordings. Do not substitute a preset, another provider, or an invented voice identifier. The saved character is NYA-9-1, element ad57f3f2-2372-4c21-8578-a6cb52612979. The owner approved the pronunciation of regenerated Yalla take 37007143-3fb3-43b8-b4fb-6cd09b33351f on September 19. That take replaces the rejected pitch-shifted recording at playback rate 1. Two rejected Arabic-text attempts are excluded.
 
 Release status is recorded separately after GitHub and live asset verification. This document describes the prepared implementation, not proof of deployment.

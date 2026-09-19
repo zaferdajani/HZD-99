@@ -252,11 +252,15 @@ const { chromium } = require('playwright');
     if (typeof HERO_MOOD === 'undefined') return { skip: true };
     if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG.heroStates) return { skip: true };
     const names = Object.keys(HERO_MOOD);
-    const S = 6, W = 46 * S, H = 46 * S;
+    // The preceding pose sweep ends in healing. Use a fresh idle player so
+    // this check measures eyes, not an unchanged recovery strip or cross-fade.
+    const savedPlayer = player;
+    player = new Player(0, 0);
+    const S = 3, W = 128 * S, H = 128 * S;
     const shot = (m) => {
       const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
       const x = cv.getContext('2d');
-      x.setTransform(S, 0, 0, S, 0, 0); x.translate(23, 58);
+      x.setTransform(S, 0, 0, S, 0, 0); x.translate(64, 110);
       player.mood = m; player.moodT = 99; player.anim = 1.0;
       const sx = player.x, sy = player.y;
       player.x = 0; player.y = 0; player.on = true; player.vx = 0;
@@ -265,6 +269,8 @@ const { chromium } = require('playwright');
       return x.getImageData(0, 0, W, H).data;
     };
     const base = shot('calm');
+    let headTop=H, bodyBottom=0;
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(base[(y*W+x)*4+3]>40){headTop=Math.min(headTop,y);bodyBottom=Math.max(bodyBottom,y);}
     const out = {};
     for (const m of names) {
       if (m === 'calm') continue;
@@ -276,7 +282,7 @@ const { chromium } = require('playwright');
       // The visor lives in the upper half of the figure; the seams mostly do not.
       // the figure is drawn with its feet on row 58 (in units), so its head
       // half runs from (58 - h) down to (58 - h/2), scaled by S
-      const visorTop = Math.floor((58 - player.h * 0.88) * S), visorBot = Math.floor((58 - player.h * 0.5) * S);
+      const visorTop = headTop, visorBot = Math.floor(headTop+(bodyBottom-headTop)*0.6);
       for (let i = 0; i < d.length; i += 4) {
         const row = (i >> 2) / W | 0;
         if (row < visorTop) continue;
@@ -296,7 +302,7 @@ const { chromium } = require('playwright');
       }
       out[m] = lit ? diff / lit : 0;
     }
-    player.mood = null; player.moodT = 0;
+    player = savedPlayer;
     return { skip: false, out };
   });
   if (moods.skip) {

@@ -2859,16 +2859,25 @@ class Player {
         if (drawHeroMotionCell(this, c, Gt.key, cell, Gt.cells, 0, HERO_FLOOR, HERO_DH * (Gt.k || 1), false)) return true;
       }
     }
-    // the standing loop, until the impatience takes over
-    // ...and only while she is CALM: her eyes are the only part of her that
-    // acts (drawHeroEyes repaints them per mood over the plate), and a strip
-    // draws its own baked pair, so a mood on the strip is a mood nobody sees.
-    // tests/hero.cjs caught it — every mood measured 0.000 apart. Any mood
-    // but calm falls back to the plate and the repaint.
+    // Keep the supplied expressive idle in every idle mood. A mood changes
+    // only the eye lights; it must not swap the entire body for an old still.
     const I = HERO_IDLE;
-    if (I && I.cells && st === 'idle' && this.on && this.idleT <= FIDGET_AFTER && this.heroMood(st) === 'calm') {
-      const cell = ((this.anim || 0) * (I.fps || 9)) % I.cells;
-      if (drawHeroMotionCell(this, c, I.key, cell, I.cells, 0, HERO_FLOOR, HERO_DH * (I.k || 1), this.faceVis < 0)) return true;
+    if (I && I.cells && st === 'idle' && this.on && this.idleT <= FIDGET_AFTER) {
+      const cell = ((this.idleT || 0) * (I.fps || 9)) % I.cells;
+      const h = HERO_DH * (I.k || 1), flip = this.faceVis < 0;
+      if (drawHeroMotionCell(this, c, I.key, cell, I.cells, 0, HERO_FLOOR, h, flip)) {
+        if (this.heroMood(st) !== 'calm') {
+          // Measured light centres in each supplied 320px cell.
+          const e = [[141,170,173,170],[146,169,180,170],[147,172,178,170],
+            [140,175,175,175],[178,173,205,172],[140,171,171,171],
+            [151,172,183,170],[143,171,173,171]][Math.floor(cell)];
+          c.save(); if (flip) c.scale(-1,1);
+          this.drawHeroEyes(c,st,h,h,HERO_FLOOR-h,
+            {lx:e[0]/320,ly:e[1]/320,rx:e[2]/320,ry:e[3]/320,ew:18/320,eh:20/320});
+          c.restore();
+        }
+        return true;
+      }
     }
     const F = HERO_FIDGET;
     if (F && st === 'idle' && this.idleT > FIDGET_AFTER) {
@@ -3053,8 +3062,8 @@ class Player {
   // Set a mood for a moment, over the top of everything: moodSet('happy', 1.2)
   moodSet(m, t) { this.mood = m; this.moodT = Math.max(this.moodT || 0, t || 1); }
   // Repaint her eye-lights over the plate's baked pair.
-  drawHeroEyes(c, st, dw, dh, dy) {
-    const E = HERO_EYE[st]; if (!E) return;
+  drawHeroEyes(c, st, dw, dh, dy, eyeMap) {
+    const E = eyeMap || HERO_EYE[st]; if (!E) return;
     const M = HERO_MOOD[this.heroMood(st)] || HERO_MOOD.calm;
     const t = this.anim;
     // THE BLINK IS THE CUTENESS. Two lights that never close are a sensor; two

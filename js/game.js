@@ -5029,8 +5029,14 @@ function drawZoneVista(P, zone, px, py) {
   // but the bottom of the frame now moves past faster than the top, which is
   // the whole of what the eye uses to judge distance.
   const t3 = performance.now() / 1000;
+  // An opening painted into this room is architecture, not a distant vista.
+  // Lock its painted threshold to the same world anchor as its interaction.
+  const entrance = own && !INTERIOR_FIT[own] && gateDoors().find(d => d.gx != null && d.gy != null);
   const plate = (x2, mul, travel, vert, yOff) => {
-    const rect = vistaPlacement(CW, CH, sc * mul, fx, travel, py, vert, yOff);
+    const rect = entrance
+      ? {x:gateWorldX(entrance)-camSX()-dw*entrance.gx,
+         y:(G.roomDef.h-2)*TILE-camSY()-dh*entrance.gy,w:dw,h:dh}
+      : vistaPlacement(CW, CH, sc * mul, fx, travel, py, vert, yOff);
     const { x: cx2, y: cy2, w: w2, h: h2 } = rect;
     // WHERE THE PAINTING ACTUALLY LANDED ON SCREEN. Anything that has to line
     // up with something IN the backdrop — the gap between the city gates, for
@@ -5039,12 +5045,19 @@ function drawZoneVista(P, zone, px, py) {
     // which is the one the architecture belongs to. Stamped with the room, so
     // a stale rect from the previous room can never place this room's door.
     if (mul <= 1.001) { G._vista = { x: cx2, y: cy2, w: w2, h: h2 }; G._vistaRoom = G.roomId; }
+    if (entrance) {
+      // Continue edge material beyond the painting without repeating its door.
+      if(cx2>0)x2.drawImage(im,0,0,1,CH,0,cy2,cx2,h2);
+      if(cx2+w2<960)x2.drawImage(im,CW-1,0,1,CH,cx2+w2,cy2,960-cx2-w2,h2);
+      if(cy2>0)x2.drawImage(im,0,0,CW,1,cx2,0,w2,cy2);
+      if(cy2+h2<540)x2.drawImage(im,0,CH-1,CW,1,cx2,cy2+h2,w2,540-cy2-h2);
+    }
     x2.drawImage(im, cell[0] * CW, cell[1] * CH, CW, CH, cx2, cy2, w2, h2);
   };
   // when the far plate is the only one, it carries the full travel — the
   // depth pass must not cost the scene its pan
   // ...and only when the frame budget can carry it (see mainLoop)
-  const wide = roomW > 980 && richBG;
+  const wide = !entrance && roomW > 980 && richBG;
   plate(c, 1, wide ? 0.62 : 1, 0.035, 0);                   // far: the horizon barely moves
   // The near copy, masked into the lower frame. A room exactly one screen wide
   // cannot pan at all, so there is no parallax to separate and the second plate
@@ -6763,7 +6776,7 @@ function surfaceCurvePass(x) {
   const ik2 = (typeof indoorKey === 'function') && indoorKey();
   const IP = ik2 && (INDOOR_PAL[ik2] || INDOOR_PAL.floorDen);
   strokeCurve(IP ? IP.join : P.dark, 7, 6, IP ? 0.26 : 0.34);   // the shadow step
-  strokeCurve(IP ? IP.lit  : P.edge, 2, 1, IP ? 0.40 : 0.8);    // the lit crest
+  strokeCurve(IP ? IP.lit : G.roomDef.cave ? '#c5bcb0' : P.edge, 2, 1, IP ? 0.40 : 0.8);
 }
 
 function organicSilhouettePass(x) {
@@ -7529,7 +7542,8 @@ function drawFrontier() {
   const col = ((typeof PAL !== 'undefined' && PAL[F.zone]) || {}).glow || '#5fc8e8';
   const x0 = F.tx0 * TILE, x1 = F.tx1 * TILE, w = x1 - x0, cx = (x0 + x1) / 2;
   const H = G.roomDef.h * TILE;
-  const drop = H * 0.86;                       // how far the light reaches down
+  const support = groundColumnAt(cx);
+  const drop = support ? support[0] : H * 0.86; // light lands on the actual terrain
   const spread = 1.7;                          // and how much it opens out
   const t = performance.now() / 1000;
   // a live shaft, not a decal: the intensity breathes and the edges waver, the
@@ -7556,8 +7570,8 @@ function drawFrontier() {
     c.lineTo(cx + w * widen / 2, drop); c.lineTo(cx - w * widen / 2, drop);
     c.closePath(); c.fill();
   };
-  shaft(spread, 0.30, col);                    // the body of the beam
-  shaft(spread * 0.5, 0.34, '#ffffff');        // and the hot core inside it
+  shaft(spread, 0.40, col);                    // the body of the beam
+  shaft(spread * 0.5, 0.44, '#ffffff');        // and the hot core inside it
   // 2. THE HALO — light does not stop at the edge of the hole it came through
   const g0 = c.createRadialGradient(cx, TILE * 0.4, 0, cx, TILE * 0.4, w * 1.5);
   g0.addColorStop(0, col); g0.addColorStop(1, 'rgba(0,0,0,0)');
@@ -8059,6 +8073,8 @@ function rubbleOutline(pts) {
 function drawRubble(r, cx2, gy, P) {
   if (!r || (r.hp <= 0 && r.fall == null)) return;
   const list = rubbleShape(r);
+  const zone=G.roomDef.zone, own=ROOM_VISTA[G.roomId];
+  const material=(own && MEDIA_RAW[own]) || rockPlate(zone);
   // FRONT-LOADED on purpose. Linear removal took three small stones off the
   // crown for the first blow — a 94% silhouette match, which is a wall that
   // ate a hit. The curve makes the first blow the one that visibly opens it,
@@ -8074,6 +8090,10 @@ function drawRubble(r, cx2, gy, P) {
   const jy = r.shake > 0 ? (Math.random() - 0.5) * r.shake * 6 : 0;
   c.save();
   c.translate(cx2 + jx, gy + jy);
+  c.save();c.scale(1,.18);
+  const contact=c.createRadialGradient(0,0,8,0,0,108);
+  contact.addColorStop(0,'rgba(4,6,8,.55)');contact.addColorStop(1,'rgba(4,6,8,0)');
+  c.fillStyle=contact;c.fillRect(-108,-108,216,216);c.restore();
   // IT SETTLES. Removing stones alone was not enough to change the silhouette
   // every blow — the ones that went were often behind ones that stayed, and two
   // states measured 89% identical. A heap that loses a course also SLUMPS, and
@@ -8124,6 +8144,13 @@ function drawRubble(r, cx2, gy, P) {
     c.fillStyle = g2; c.fill();
     c.save();
     c.clip();
+    if(material && material.naturalWidth){
+      const mw=material.naturalWidth,mh=material.naturalHeight;
+      const size=Math.min(mw,mh,Math.max(48,b.r*3));
+      const tx=(.08+((i*37)%100)/100*.17)*(mw-size);
+      const ty=(.18+((i*53)%100)/100*.35)*(mh-size);
+      c.drawImage(material,tx,ty,size,size,-b.r*1.35,-b.r*1.35,b.r*2.7,b.r*2.7);
+    }
     // the light on top: a soft pool, not a rim. A stroked rim gave every stone
     // the same drawn edge and the pile came back looking like beans on a plate.
     const tp = c.createRadialGradient(-b.r * 0.2, -b.r * b.asp * 0.66, 1,
@@ -8148,10 +8175,10 @@ function drawRubble(r, cx2, gy, P) {
     // the fractures
     c.lineWidth = 1.2;
     c.strokeStyle = 'rgba(10,10,11,0.5)';
-    for (const f of b.fr) { c.beginPath(); c.moveTo(f[0], f[1]); c.lineTo(f[2], f[3]); c.stroke(); }
+    if(!material)for (const f of b.fr) { c.beginPath(); c.moveTo(f[0], f[1]); c.lineTo(f[2], f[3]); c.stroke(); }
     c.lineWidth = 1;
     c.strokeStyle = 'rgba(180,176,164,0.13)';
-    for (const f of b.fr) { c.beginPath(); c.moveTo(f[0], f[1] - 1.2); c.lineTo(f[2], f[3] - 1.2); c.stroke(); }
+    if(!material)for (const f of b.fr) { c.beginPath(); c.moveTo(f[0], f[1] - 1.2); c.lineTo(f[2], f[3] - 1.2); c.stroke(); }
     c.restore();
     c.restore();
   }
@@ -9587,6 +9614,11 @@ function drawGateDoor(P, def, nearPlane) {
   }
   // cave on EITHER side of the passage: it is a mouth, not a door
   if ((G.roomDef && G.roomDef.cave) || (dest && dest.cave)) {
+    // The dedicated room painting already contains this exact opening.
+    // Drawing a second mouth over it creates the pasted-on layer reported by
+    // the owner. Rubble and the interaction remain at its shared world anchor.
+    const own=ROOM_VISTA[G.roomId];
+    if(def.gx!=null && own && G._vistaRoom===G.roomId && MEDIA_RAW[own]) return;
     // ...and the mouth is told whether it is CHOKED, because a passage packed
     // with rock does not show its interior (see drawCaveMouth).
     drawCaveMouth(ds, gy, P, k, !!(typeof rubbleFor === 'function' && rubbleFor(def)));
@@ -12603,7 +12635,10 @@ function drawWorldFrame() {
   // mostly backdrop, and reported a negative delta for a frame that had just
   // been correctly separated. The terrain is a canvas of its own; measure it.
   if (G.planeProbe && !G.planeProbe.mid) G.planeProbe.mid = layerStats(tileCv);
+  c.save();
+  if(G.roomDef.cave){c.shadowColor='rgba(4,5,10,0.8)';c.shadowBlur=9;c.shadowOffsetY=4;}
   c.drawImage(tileCv, 0, 0);
+  c.restore();
   drawInteriorFloor();              // a painting-room walks on the painting's floor
   drawFrontier();                   // the next kingdom, seen from the last room
   // X1 hardlight bridge: alive while the Prowler stands, red and flickering
@@ -13760,8 +13795,8 @@ function bgPlanePass() {
   const zn = G.roomDef.zone;
   const artDesat = (BG_ART_DESAT_ZONE && BG_ART_DESAT_ZONE[zn]) || BG_ART_DESAT;
   const artSit = (BG_ART_SIT_ZONE && BG_ART_SIT_ZONE[zn]) || BG_ART_SIT;
-  const DESAT = inr ? 0.24 : painted ? artDesat : BG_DESAT;
-  const SIT = inr ? 0.08 : painted ? artSit : BG_SIT;
+  const DESAT = inr ? 0.24 : painted ? (G.roomDef.cave ? Math.max(.30,artDesat) : artDesat) : BG_DESAT;
+  const SIT = inr ? 0.08 : painted ? (G.roomDef.cave ? Math.max(.25,artSit) : artSit) : BG_SIT;
   const HAZE = inr ? 0.04 : painted ? BG_ART_HAZE : BG_HAZE;
   c.save();
   // 1 — pull the chroma out

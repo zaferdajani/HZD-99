@@ -67,7 +67,8 @@ const WWW = path.join(ROOT, 'www');
     // first time a slot was added; reading the game's own set cannot.
     const opt = (typeof MEDIA_OPTIONAL !== 'undefined') ? MEDIA_OPTIONAL : new Set();
     const push = (k, v) => {
-      if (typeof v === 'string' && v.startsWith('assets/') && !opt.has(k)) out.push(v);
+      if (typeof v === 'string' && v.startsWith('assets/') && !opt.has(k))
+        out.push(decodeURIComponent(new URL(v,'https://package.invalid/').pathname.slice(1)));
     };
     for (const k in (MEDIA_SRC.images || {})) push(k, MEDIA_SRC.images[k]);
     for (const k in (MEDIA_SRC.audio || {})) push(k, MEDIA_SRC.audio[k]);

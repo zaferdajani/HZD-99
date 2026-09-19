@@ -1,17 +1,9 @@
-> **Current authority (2026-09-11):** Read `docs/DEVELOPMENT_AUTHORITY.md` first.
-> This HZD-99 Project thread is the sole development/publishing authority.
-> Conflicting historical session, branching or autonomous-deployment directions below are superseded.
+---
+description: Own the agreed HZD-99 task through verified live integration
+alwaysApply: true
+---
 
-# Repository instructions
-
-## Authoritative robot-cat story
-
-Read `docs/STORY_CANON.md` before narrative, tutorial, quest, room, music or
-weapon changes. It records the owner's story so future sessions must not ask
-for it again. It supersedes conflicting older lore; distinguish narrative
-intent from verified implementation.
-
-## End-to-end ownership — owner instruction, 2026-09-18
+# End-to-end ownership — owner instruction, 2026-09-18
 
 **Own this task end to end.** Treat every requirement and accepted correction in this conversation as part of completion. Keep a checklist of completed and outstanding work.
 
@@ -28,9 +20,3 @@ Stop only when:
 Never silently drop requirements, weaken tests, or claim completion without evidence. If a system limit interrupts you, save a precise continuation checkpoint and disclose what remains. Never imply you are continuing in the background after ending your response.
 
 **For HZD-99, this includes the requested artwork, moves, VFX, sound, haptics, flashes, integration, release checks, and authorized live deployment—not just the latest individual fix.**
-
-## Standing deployment authorization (owner-authorized, 2026-09-07)
-
-For `zaferdajani/HZD-99`, the owner authorizes publishing completed, verified updates to `main` and mirroring them to `odyssey`, including deployment to GitHub Pages. Do not force-push or bypass branch protections.
-
-Read `CLAUDE.md` for the existing project workflow and technical instructions.

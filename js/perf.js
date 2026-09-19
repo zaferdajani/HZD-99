@@ -196,7 +196,9 @@ function applyScale() {
 // while the box holds still, and any future layout — the pad connecting and the
 // gutters going away, the visual viewport moving, an orientation change — is
 // picked up on the next frame by construction.
-let lastBoxW = '';
+// The first frame must fit too: an empty inline width is the initial DOM state,
+// not evidence that layout has already run.
+let lastBoxW = null;
 function scaleCheck() {
   const cv = document.getElementById('cv');
   if (!cv || cv.style.width === lastBoxW) return;

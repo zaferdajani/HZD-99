@@ -1,0 +1,13 @@
+{
+  "job": "45196860-88d3-425b-a90f-fcdd973bf4c0",
+  "model": "seed_audio",
+  "voice_name": "NYA-9-1",
+  "voice_id": "ad57f3f2-2372-4c21-8578-a6cb52612979",
+  "voice_type": "element",
+  "prompt": "Nya-ha! Nyaa!",
+  "pitch_rate": 0,
+  "speech_rate": 15,
+  "status": "Excited wordless completion replacement requested by owner",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/hf_20260918_211712_45196860-88d3-425b-a90f-fcdd973bf4c0.wav",
+  "sha256": "034f6dc9a3dcce923815e342a841299d64512a2de5f1109d464e4a9b03381868"
+}

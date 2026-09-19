@@ -19,4 +19,17 @@ assert(!c.playBuf('hzd_evo',.5));assert(!held.stopped,'readiness cue cannot inte
 assert(c.hzdSay('hurt',260));assert(held.stopped,'damage interrupts held note even inside the repeat gate');
 const hurt=nodes.at(-1);c.G.state='DIALOG';c.narrativeAudioTick();assert(hurt.stopped,'dialogue silences existing vocal');
 assert(!c.playBuf('hzd_atk1',.5));
+c.G.state='PLAY';c.MBUF.hzd_yalla={sampleRate:100,length:10,getChannelData:()=>new Float32Array(10).fill(.4)};
+vm.runInContext('HZDT=0',c);
+assert(c.hzdSay('yalla',0));
+assert.equal(nodes.at(-1).playbackRate.value,1,'approved Yalla must retain its pronunciation and natural pitch');
+c.MBUF.hzd_win=c.MBUF.hzd_yalla;
+assert(c.playBuf('hzd_win',.6,1));const completion=nodes.at(-1);
+assert(!c.playBuf('hzd_atk1',.5),'ordinary bark waits until completion phrase ends');
+assert(!c.hzdHold('charge'),'held charge cannot truncate a completion word');
+assert(!completion.stopped,'completion phrase is allowed to finish');
+assert(c.playBuf('hz_swing1',.5),'mechanical action feedback remains immediate');
+completion.onended();assert(c.playBuf('hzd_atk1',.5),'normal voice resumes after natural end');
+assert(c.playBuf('hzd_win',.6,1));const urgentCompletion=nodes.at(-1);
+assert(c.playBuf('hzd_hurt',.55));assert(urgentCompletion.stopped,'urgent damage retains priority');
 console.log('PASS: vocal handoffs, uninterrupted foley, missing takes, charge ownership, damage and dialogue priority');

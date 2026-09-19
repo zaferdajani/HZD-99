@@ -65,9 +65,11 @@ measured from the original 1.90 — and the actor scale is
 exists to protect is unchanged and still binds: they remain two separate dials,
 each applied once, and neither is moved by widening a threshold.
 
-The cleaned hzd_atk2 and hzd_yalla files remain byte-identical to the verified
-polish release. They are processed existing recordings, NOT the owner's approved
-replacement Yalla performance. Preserve that distinction in every progress report.
+The cleaned hzd_atk2 is preserved. The owner approved the pronunciation of the
+new Higgsfield NYA-9-1 Yalla performance on September 19 (job
+37007143-3fb3-43b8-b4fb-6cd09b33351f). It replaces the old processed recording;
+no artificial pitch shift or playback acceleration is permitted. Provenance is
+in assets/source/takes/yalla-approved-2026-09-19.json.
 
 ## Source integration decisions
 

@@ -174,7 +174,7 @@ function preloadRoom(roomId) {
 // session. They are 0.27 MB together.
 const BODY_KEYS = ['heroStates', 'gaitWalk', 'gaitRun', 'hzdIdle', 'transAir',
   'transLand', 'transSkid', 'transDash', 'hzdHurt', 'heroFidget', 'transWall',
-  'swingClaw1', 'swingHook', 'swingUppercut', 'swingBurst'];
+  'swingClawJab', 'swingClaw1', 'swingUppercut', 'swingClawCharge', 'swingSingleFx'];
 
 function preloadBoot() {
   if (!PRE.on) return;

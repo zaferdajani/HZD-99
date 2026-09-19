@@ -1,0 +1,13 @@
+{
+  "job": "0e5908f7-2257-4888-90c1-f2f83a1523da",
+  "model": "seed_audio",
+  "voice_name": "NYA-9-1",
+  "voice_id": "ad57f3f2-2372-4c21-8578-a6cb52612979",
+  "voice_type": "element",
+  "prompt": "Nya-ha! Nyaa!",
+  "pitch_rate": 0,
+  "speech_rate": 15,
+  "status": "Generated at owner request; pending runtime validation",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/hf_20260919_085139_0e5908f7-2257-4888-90c1-f2f83a1523da.wav",
+  "sha256": "cb4ceac11c626e982f38741e447fb1347dcf056d082a63b8a7fb73e803bf740f"
+}

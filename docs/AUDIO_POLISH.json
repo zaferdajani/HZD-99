@@ -10,13 +10,32 @@
     "source": "Existing project recording, filtered; not a newly generated performance"
   },
   "hzd_yalla": {
-    "source_sha256": "ff92abd23c6e9770f26721988737cc4dc4d0ef4f06a4c542cca3bb9dab56f10a",
-    "result_sha256": "7eb1d2ba0ea67fa0548ee98677293390c1bd804d03ce332a7abedb0a174511ca",
-    "filters": "rubberband=pitch=1.55,highpass=f=190:p=2",
+    "source_sha256": "bba7c1a485630465df1ee606acc276ec814eb64925d355989ba10e3f9fb6484a",
+    "result_sha256": "eec30e2cf0d307c6d56846bdd4c41a4a57d7ba3f42bb2cd17b1f431404c54630",
+    "filters": "tools/voxtrim.cjs: trim silence, mono 32000 Hz, normalize; no pitch shift",
     "peak_target": 0.78,
-    "head_fade_ms": 5,
-    "tail_fade_ms": 100,
-    "seconds": 1.08615625,
-    "source": "Existing project recording, filtered; not a newly generated performance"
+    "head_fade_ms": 6,
+    "tail_fade_ms": 25,
+    "seconds": 0.583,
+    "playback_rate": 1,
+    "source": "Owner-approved Higgsfield NYA-9-1 regeneration 37007143-3fb3-43b8-b4fb-6cd09b33351f; prompt Yalla!",
+    "voice_id": "ad57f3f2-2372-4c21-8578-a6cb52612979"
+  },
+  "hzd_win": {
+    "source_sha256": "cb4ceac11c626e982f38741e447fb1347dcf056d082a63b8a7fb73e803bf740f",
+    "result_sha256": "034edb7371c82ef086494245ec17315a638593f6d556ca2c019e4cbc073ae524",
+    "seconds": 2.129875,
+    "playback_rate": 1,
+    "voice_name": "NYA-9-1",
+    "voice_id": "ad57f3f2-2372-4c21-8578-a6cb52612979",
+    "voice_type": "element",
+    "job": "0e5908f7-2257-4888-90c1-f2f83a1523da",
+    "prompt": "Nya-ha! Nyaa!",
+    "speech_rate": 15,
+    "pitch_rate": 0,
+    "processing": "Silence trim, mono 32kHz, peak .78, 6ms head fade and quadratic 25ms tail decay; no pitch shift or hard duration cut",
+    "soft_take_preserved": "assets/source/takes/soft-reaction-2026-09-19.wav",
+    "playback": "Ordinary action barks cannot interrupt completion; damage and dialogue retain priority",
+    "status": "Locally validated; not yet deployed"
   }
 }

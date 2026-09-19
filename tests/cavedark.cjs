@@ -199,11 +199,22 @@ const check = (name, ok, detail) => {
       const s2 = G.statics.find(find);
       if (!s2) return null;
       const b = box(s2);
+      // The measurement boxes are in camera-relative world coordinates.
+      // Centre the same world patch in both captures, then apply shipping zoom.
+      const wx = b[0] + camSX(), wy = b[1] + camSY();
+      const sample = () => {
+        cam.x = wx + b[2] / 2 - 480;
+        cam.y = wy + b[3] / 2 - 270;
+        cam.shake = 0;
+        draw(clk);
+        const z = worldZoom();
+        return lum(worldScreenX(wx), worldScreenY(wy), b[2] * z, b[3] * z);
+      };
       await hold(20);
-      const on = lum(b[0], b[1], b[2], b[3]);
+      const on = sample();
       const i = G.statics.indexOf(s2);
       G.statics.splice(i, 1); await hold(20);
-      const off = lum(b[0], b[1], b[2], b[3]);
+      const off = sample();
       G.statics.splice(i, 0, s2); await hold(8);
       return { on, off, at: [Math.round(b[0]), Math.round(b[1])] };
     };

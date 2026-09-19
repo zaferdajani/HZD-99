@@ -29,6 +29,8 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['entrance-integration', 'painted entrances share world anchors without duplicate mouth overlays'],
+  ['hero-cache-regression', 'third-hit cached sheet geometry and supplied idle in every mood'],
   ['scratch-visual', 'pixel-measured cyan scratch reach, mirroring and fading recovery'],
   ['scratch-reach', 'scratch contact boundary, facing and non-damaging recovery wake', { noBrowser: true }],
   ['hero-move-coverage', 'actual renderer coverage for movement, aerial attacks, reactions and departure'],
