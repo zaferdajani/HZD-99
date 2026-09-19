@@ -5,6 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0d12">
 <meta name="description" content="CLAWBYTE, the manhua. The story of the game drawn to the letter, one kingdom per chapter, read top to bottom.">
+<!-- A SHARED LINK SHOWS THE COVER. Without these a pasted link is a bare URL in
+     a chat; with them it is the cover, the title and a line. The image is a
+     1200x630 JPEG cut from chapter one's cover (assets/social/manhua.jpg —
+     JPEG, not the page's own webp, because the previewers do not all read webp),
+     and every URL is absolute because previewers fetch it from nowhere. -->
+<meta property="og:type" content="book">
+<meta property="og:site_name" content="CLAWBYTE">
+<meta property="og:title" content="CLAWBYTE — the manhua">
+<meta property="og:description" content="The story of the game, drawn to the letter, one kingdom per chapter. Read top to bottom.">
+<meta property="og:url" content="https://zaferdajani.github.io/HZD-99/manhua/">
+<meta property="og:image" content="https://zaferdajani.github.io/HZD-99/assets/social/manhua.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CLAWBYTE — the manhua">
+<meta name="twitter:description" content="The story of the game, drawn to the letter, one kingdom per chapter.">
+<meta name="twitter:image" content="https://zaferdajani.github.io/HZD-99/assets/social/manhua.jpg">
+<link rel="icon" href="../assets/social/clawbyte.png">
+<link rel="apple-touch-icon" href="../assets/social/clawbyte.png">
 <title>CLAWBYTE — the manhua</title>
 <!--
   THE MANHUA READER.
@@ -217,6 +236,14 @@ for (const ch of CHAPTERS) {
     count.innerHTML = '<span class="drawn">' + drawn + '</span> of ' + ch.pages.length + ' pages drawn';
   };
   setCount();
+  // COUNT WHAT IS ON DISK, NOT WHAT HAS SCROLLED INTO VIEW. The images below
+  // are lazy, so counting their loads told anyone who opened the link and had
+  // not scrolled yet that 3 of 27 pages were drawn, with all 27 on the server.
+  // A HEAD per page costs nothing and answers the question the header asks.
+  ch.pages.forEach((pg, i) => {
+    fetch('../assets/manhua/ch' + ch.n + '/p' + pad(i + 1) + '.webp', { method: 'HEAD' })
+      .then(r => { if (r.ok) { drawn++; setCount(); } }).catch(() => {});
+  });
 
   ch.pages.forEach((pg, i) => {
     const n = i + 1;
@@ -233,7 +260,7 @@ for (const ch of CHAPTERS) {
       '</figcaption>';
     const frame = fig.querySelector('.frame');
     const img = fig.querySelector('img');
-    img.addEventListener('load', () => { frame.classList.add('ok'); drawn++; setCount(); });
+    img.addEventListener('load', () => { frame.classList.add('ok'); });
     img.addEventListener('error', () => { frame.classList.add('missing'); img.removeAttribute('alt'); });
     img.src = src;
     sec.appendChild(fig);
