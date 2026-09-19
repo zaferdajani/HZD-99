@@ -1,6 +1,6 @@
 # Supplied art recovery and move feedback
 
-The owner expanded the scope to every supplied artwork, including all eight later effect composites. All eight now have recovered bodies packed and routed locally. A generated draft or an archived source is not a completed game asset. Full release review remains outstanding.
+The owner expanded the scope to every supplied artwork, including all eight later effect composites. All eight now have recovered bodies packed and routed locally. A generated draft or an archived source is not a completed game asset. The supplied-hero integration is published and verified; see RELEASE_INTEGRATION_2026-09-19.md.
 
 | Supplied sheet | Move | Current state |
 |---|---|---|
@@ -23,4 +23,5 @@ Gameplay haptics now use the existing native/mobile adapter when no controller a
 
 Voice constraint from the owner: any additional protagonist vocal must use the established Higgsfield audio character/source pipeline. Preserve the supplied recordings. Do not substitute a preset, another provider, or an invented voice identifier. The saved character is NYA-9-1, element ad57f3f2-2372-4c21-8578-a6cb52612979. The owner approved the pronunciation of regenerated Yalla take 37007143-3fb3-43b8-b4fb-6cd09b33351f on September 19. That take replaces the rejected pitch-shifted recording at playback rate 1. Two rejected Arabic-text attempts are excluded.
 
-Release status is recorded separately after GitHub and live asset verification. This document describes the prepared implementation, not proof of deployment.
+Release evidence is recorded in RELEASE_INTEGRATION_2026-09-19.md: live build c40f96f4bdbf, 49 matching page/art/voice hashes, successful web verification and native packaging.
+

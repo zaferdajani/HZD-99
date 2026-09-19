@@ -3,7 +3,9 @@ const {chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/opt/pw-browsers/chromium'});
  try{
-  const page=await browser.newPage(),requests=[];
+  // Network interception must own the simulated stale response on the live
+  // site too; a service worker otherwise bypasses Playwright's route handler.
+  const page=await browser.newPage({serviceWorkers:'block'}),requests=[];
   // Model a returning player's old cache: the unversioned URL carries a
   // different frame layout. The new page must never consume that response.
   await page.route('**/assets/characters/hero/swing/uppercut.webp*',r=>{
@@ -47,3 +49,4 @@ const {chromium}=require('playwright');
   console.log('PASS third-hit gameplay renders six complete cells; incompatible cached sheet rejected; all 64 idle frame/mood/facing cases keep supplied art; voice and art URLs match build');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});
+
