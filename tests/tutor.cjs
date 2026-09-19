@@ -66,7 +66,29 @@ const { chromium } = require('playwright');
   // steps that carry her between them are completed by GOING, not by pressing.
   now = await drive('out', () => { loadRoom('W2'); });
   await record(now);
-  now = await drive('jump', () => { player.on = false; player.vy = -300; });
+  // THE JUMP IS TAUGHT AT THE SHELF, NOT IN THE AIR. Since the enforcement
+  // layer (js/tutorial_enforce.js, 2026-09-10) the lesson only counts once
+  // its prompt has been READY — her on the ground in W2 within reach of the
+  // row-11 shelf (tutJumpAtObstacle) — which sets G.tut.jumpShown. Tossing
+  // her upward from wherever she stood never got there, and this harness
+  // sat at "jump, jump, jump" for nine days while the lessons behind it went
+  // unmeasured. Walk her under the shelf, let a frame see it, then jump.
+  now = await drive('jump', () => {
+    if (G.roomId !== 'W2') { loadRoom('W2'); return; }
+    if (!G.tut || !G.tut.jumpShown) {
+      let spot = null;
+      for (let ty = 2; ty < G.roomDef.h - 2 && !spot; ty++) for (let tx = 2; tx < G.roomDef.w - 2 && !spot; tx++) {
+        if (tileAt(tx, ty) !== '=') continue;
+        let fy = ty + 1; while (fy < G.roomDef.h - 1 && !solidAt(tx, fy)) fy++;
+        const rise = (fy - ty) * TILE;
+        if (rise >= 64 && rise <= 180) spot = { tx, feet: fy * TILE };
+      }
+      if (spot) { player.x = spot.tx * TILE + 16 - player.w / 2; player.y = spot.feet - player.h; }
+      player.on = true; player.vx = 0; player.vy = 0;
+      return;
+    }
+    player.on = false; player.vy = -300;
+  });
   await record(now);
   now = await drive('gate', () => { loadRoom('A0'); });
   await record(now);
@@ -161,7 +183,13 @@ const { chromium } = require('playwright');
     // timer (updateTutor: 0.25s seen + 0.7s held) — a real player just stops
     // shopping. Re-interacting here reopens Ratchet's dialogue every try and
     // never lets that timer see an uninterrupted PLAY frame to complete on.
-    if (G.save.flags && G.save.flags.tutBuy) return;
+    if (G.save.flags && G.save.flags.tutBuy) {
+      // ...and the first cell is THE PACK: its card takes the screen and the
+      // walk waits on it, the way it waits on any card. A player reads it and
+      // closes it; so does the harness.
+      if (G.state === 'DIALOG') for (let i = 0; i < 60 && G.state === 'DIALOG'; i++) { keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); keys['Enter'] = 0; }
+      return;
+    }
     if (G.state === 'PLAY') { doInteract(npc); return; }
     if (G.state === 'DIALOG') {
       // PAGE IT THROUGH IN ONE TRY, for the same reason the walk is done in
@@ -192,6 +220,34 @@ const { chromium } = require('playwright');
     // only advances while the game is actually being played
     if (G.state !== 'PLAY') G.state = 'PLAY';
     player.cores = player.maxCores();
+  });
+  await record(now);
+  // THE OTHER THING THE PACK BOUGHT: hold the claw until it crackles, let go.
+  // Driven through the real held-input path, so this also proves the pack
+  // actually unlocked the hold (burstUnlocked) — before the buy, holding X
+  // is an ordinary attack and this step could never complete.
+  const burstLock = await p.evaluate(() => {
+    const had = G.save.flags.heal; G.save.flags.heal = 0; const tut = G.save.flags.tut; G.save.flags.tut = 0;
+    if (G.state !== 'PLAY') G.state = 'PLAY';
+    player.volts = 99; player.chargeT = 0;
+    keys.KeyX = 1; keysP.KeyX = 1;
+    for (let i = 0; i < 30; i++) player.update(1 / 60);
+    const locked = player.chargeT;
+    keys.KeyX = 0; keysP.KeyX = 0; player.update(1 / 60);
+    G.save.flags.heal = had; G.save.flags.tut = tut;
+    return { locked, had: !!had };
+  });
+  now = await drive('burst', () => {
+    if (G.state !== 'PLAY') G.state = 'PLAY';
+    // ONE burst, then wait. The lesson advances on its own clock (0.25 s
+    // seen, 0.7 s held) and a burst every try kept resetting the frame it
+    // needed to see — under the full suite this read "burst, burst".
+    if (G.save.flags && G.save.flags.burstDone) return;
+    player.volts = 99; player.on = true;
+    keys.KeyX = 1; keysP.KeyX = 1;
+    for (let i = 0; i < 45; i++) player.update(1 / 60);
+    keys.KeyX = 0; keysP.KeyX = 0;
+    for (let i = 0; i < 3; i++) player.update(1 / 60);
   });
   await record(now);
 
@@ -291,15 +347,18 @@ const { chromium } = require('playwright');
   console.log('steps reached: ' + seen.join(' -> '));
   console.log('scrap from the waking floor\'s machine: ' + scrapBefore + ' -> ' + scrapAfter);
   console.log('after buying the cell: ' + JSON.stringify(bought));
+  console.log('the hold before the pack: ' + JSON.stringify(burstLock));
   console.log('the scripted first hit left: ' + hurtTo.cores + ' / ' + hurtTo.max + ' cores');
   console.log('door: ' + JSON.stringify(door));
   console.log('skipping the walk: ' + JSON.stringify(skip));
 
-  const want = ['move', 'jump', 'atk', 'kill', 'coin', 'buy', 'heal', 'node', 'skill', 'go'];
+  const want = ['move', 'jump', 'atk', 'kill', 'coin', 'buy', 'heal', 'burst', 'node', 'skill', 'go'];
   const fails = [];
   for (const w of want) if (!seen.includes(w)) fails.push('never reached the "' + w + '" step (got ' + seen.join(',') + ')');
   if (scrapAfter < 12) fails.push('the first kill cannot pay for the cheapest thing in the shop (' + scrapAfter + ')');
   if (!bought.flag) fails.push('buying the volt cell did not register');
+  if (!burstLock.had) fails.push('the first cell did not wire the pack (flags.heal)');
+  if (burstLock.locked > 0) fails.push('the claw charges before the pack is bought (chargeT ' + burstLock.locked + ')');
   if (bought.scrap !== scrapAfter - 12) fails.push('the cell did not cost 12 scrap');
   if (hurtTo.cores >= hurtTo.max) fails.push('the repair lesson opened at full health, so it teaches nothing');
   if (!door.opened) fails.push('the way out never opened');

@@ -769,6 +769,25 @@ function healUnlocked() {
   if (typeof isHero === 'function' && isHero()) return true;
   return !!(G.save && G.save.flags && G.save.flags.heal);
 }
+// THE VOLT BURST IS BOUGHT, NOT INNATE (owner, 2026-09-19): "supercharge
+// should be gained when the character purchases the battery pack from the
+// shop — the first item the character purchases is what gives it the charging
+// power, a means to use the shards it finds after hitting enemies... this
+// would give it two things: the ability to heal using the charges, or using
+// the charges to do a super attack." So the pack is ONE purchase that wires
+// BOTH verbs: the same flag gates them (`flags.heal`, historical name), set
+// by the first volt cell bought in updateShop and nowhere else. Before it,
+// holding ATTACK is an ordinary attack: no build, no ticks, no storm.
+//
+// A save whose walk is behind her (`flags.tut`) has bought the pack — the
+// walk cannot complete without the buy step — so the flag is read too; that
+// is also what every harness that skips the walk sets, and none of them
+// should have to know the pack exists to hold the claw.
+function burstUnlocked() {
+  if (typeof isHero === 'function' && isHero()) return true;
+  const f = G.save && G.save.flags;
+  return !!(f && (f.heal || f.tut));
+}
 // THE ONE MACHINE THAT WAS NEVER SWITCHED OFF.
 //
 // Every machine person in the Depths pulled its cell or had it pulled when the
@@ -1537,13 +1556,16 @@ const NPC_GIFT = {
   // it out of him — too small, so it faded, and he pulled his own plug before
   // the song could creep back. Her cell is what woke him. All of that is the
   // errand's ASK text, delivered in dialogue where lore belongs.
-  // THE FIRST WAKING PAYS TWICE (owner's design): the repair kit, and the
-  // HEAL PROTOCOL itself — healing is not a button she was born with, it is
-  // Ratchet's first gift for the battery, with his pod lesson around it.
+  // THE FIRST WAKING PAYS WITH THE KIT AND HIS STORY. Healing used to be
+  // granted here too — "Ratchet's first gift for the battery" — and it moved
+  // (owner, 2026-09-19): the HEAL PROTOCOL and the VOLT BURST are both wired
+  // by the first pack she BUYS from him, one purchase, two verbs (see
+  // burstUnlocked and the cell branch of updateShop). He wakes, he hands her
+  // the kit, he opens the shop; the shop is where she becomes a machine that
+  // can spend what she knocks out of other machines.
   'A0B|ratchet': () => {
     invAdd('kit');
-    if (G.save && G.save.flags) { G.save.flags.heal = 1; persist(); }
-    showItem(t('i_heal'), t('i_heald'));
+    showItem(t('i_kit'), t('i_kitd'));
   },
   // and the trader at the camp by NULLFANG's door — this is the shop, and it
   // does not exist until the lion's cell has paid for it
@@ -2581,8 +2603,17 @@ function updateShop() {
       // consumable, so it never leaves the list and never stops being useful
       player.volts = player.voltMax();
       G.save.flags.tutBuy = 1;
-      G.toast(t('s_cell') + '  ⚡ ' + player.volts);
       burst(player.x + player.w / 2, player.y + 6, 16, '#ffd76a', 200, 0.6, 120, 3, true);
+      // THE FIRST ONE IS THE PACK. It wires the HEAL PROTOCOL and the VOLT
+      // BURST into her — the two things the volts are FOR — and says so once,
+      // on the card, because a verb nobody announced is a verb nobody finds
+      // (see burstUnlocked). Every cell after it is a refill.
+      if (!G.save.flags.heal) {
+        G.save.flags.heal = 1; G.save.flags.pack = 1;
+        showItem(t('i_pack'), t('i_packd'));
+        return;
+      }
+      G.toast(t('s_cell') + '  ⚡ ' + player.volts);
       persist();
       return;
     }
@@ -11558,6 +11589,13 @@ const TUT_STEPS = [
   { id: 'heal', label: 'tut_heal', hint: 'tut_heal_h',
     keys: 'F', pad: 'Y', touch: 'HEAL', vb: 'VHEAL',
     done: () => player.cores >= player.maxCores() },
+  // ...and the OTHER thing the pack bought (owner, 2026-09-19): the same
+  // volts, held into the claw instead of the core. Taught here, on the safe
+  // floor, because the quarry pillar in the stone cave only breaks to a burst
+  // and a player who never learned the hold is stuck in front of a rock.
+  { id: 'burst', label: 'tut_burst', hint: 'tut_burst_h',
+    keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
+    done: () => !!(G.save.flags && G.save.flags.burstDone) },
   { id: 'node', label: 'tut_node', hint: 'tut_node_h', room: 'A0',
     keys: 'E', pad: 'B', touch: 'INT', vb: 'VINT',
     done: () => (G.save.iq | 0) >= 10 },
@@ -11613,7 +11651,7 @@ function tutHand(st) {
 // A shop lesson outside the workshop teaches UP at its door, then E beside
 // the robot inside. Keeping the saved lesson index unchanged preserves runs.
 function tutPrompt(st) {
-  const view = { ...st, target: null, action: ({ jump:'JUMP', atk:'ATK', kill:'ATK', buy:'INT', node:'INT', heal:'HEAL', skill:'SKILL' })[st.id] || 'MOVE' };
+  const view = { ...st, target: null, action: ({ jump:'JUMP', atk:'ATK', kill:'ATK', buy:'INT', node:'INT', heal:'HEAL', burst:'ATK', skill:'SKILL' })[st.id] || 'MOVE' };
   const pc = player.x + player.w / 2;
   const doors = typeof gateDoors === 'function' ? gateDoors() : [];
   const point = (x, y, color, radius = 30) => { view.target = { x, y, color, radius }; };

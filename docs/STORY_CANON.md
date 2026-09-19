@@ -99,3 +99,21 @@ Never change this canon merely to make incomplete implementation appear finished
 A Null Core/archive may remain as infrastructure or a runtime identifier. The
 old claim that an archive independently decided to remove free will is superseded
 by the evil robot hijacking Mother's song.
+
+## The volt pack (owner, 2026-09-19)
+
+Healing and the supercharge are not innate. The first item HZD-99 buys from
+Ratchet's shop — the volt pack (the first Volt Cell in the list) — wires both:
+the ability to spend her charge mending a core, and the ability to spend it on
+the Volt Burst. Until it is bought, the ring of charge at the top fills from
+hits and cannot be spent, and holding ATTACK is an ordinary attack. The card at
+purchase tells the player both things. Ratchet's waking speech points her to
+the pack; it no longer hands the repair protocol over as his gift.
+
+## The manhua is the reference (owner, 2026-09-19)
+
+`docs/STORY_SCRIPT.md` is the play-through of this canon, scene by scene, and
+the STORY session draws a coloured manhua from it — one chapter per kingdom —
+that follows it to the letter. The manhua is the owner's living reference and
+will be used to validate the game's storyline; a beat that changes in the game
+changes in the script and in the pages, in that order.

@@ -1833,7 +1833,10 @@ class Player {
     this.guardT = (inD('GUARD') && this.on && !this.swingVis && this.dashT <= 0
       && this.chargeT <= 0.05 && this.healT <= 0) ? 1 : 0;
     // hold attack to charge the volt-burst
-    if (inD('ATK') && this.dashT <= 0 && this.swirlT <= 0 && !G.boomer) {
+    // ...ONLY ONCE THE PACK IS WIRED (burstUnlocked, game.js): before the first
+    // volt cell is bought, a held ATTACK is an attack, and nothing builds.
+    if (inD('ATK') && this.dashT <= 0 && this.swirlT <= 0 && !G.boomer
+        && (typeof burstUnlocked !== 'function' || burstUnlocked())) {
       if(this.chargeT<=0)this._chargeArtCount=(this._chargeArtCount||0)+1;
       this.chargeT += dt;
       // CAN SHE ACTUALLY PAY FOR IT?
@@ -1876,8 +1879,15 @@ class Player {
           this.chargeTick = 0.11;
           if (this.chargeOk) sfxChargeTick(Math.min(1, this.chargeT / 0.6));
         }
-        if (chance(this.chargeOk ? 0.55 : 0.16)) addPart(this.x + rnd(-16, 40), this.y + rnd(-12, 48), 0, 0, 0.25,
-          !this.chargeOk ? '#7d6b8a' : this.chargeT >= 0.6 ? '#ffffff' : PAL[G.roomDef.zone].glow, 2.5, -170, true);
+        // sparks thrown OFF the chassis: born on her outline, flung outward,
+        // short-lived. The drawn storm (drawChargeStorm below) is the current
+        // IN her; these are what did not make it into the frame.
+        if (chance(this.chargeOk ? 0.55 : 0.16)) {
+          const a = rnd(0, Math.PI * 2), sp = rnd(40, 110);
+          addPart(this.x + this.w / 2 + Math.cos(a) * 13, this.y + this.h * 0.45 + Math.sin(a) * 22,
+            Math.cos(a) * sp, Math.sin(a) * sp, 0.2,
+            !this.chargeOk ? '#7d6b8a' : this.chargeT >= 0.6 ? '#ffffff' : PAL[G.roomDef.zone].glow, 2, 0, true);
+        }
         if (this.chargeT >= 0.6 && this.chargeT - dt < 0.6) {
           sfx(this.chargeOk ? 'chargeReady' : 'no');
           // said once, at the exact moment the player is asking the question
@@ -2305,6 +2315,9 @@ class Player {
   }
   releaseCharged() {
     if (G.boomer || this.swirlT > 0) { this.chargeT = 0; return false; }
+    // the tutorial's burst lesson (TUT_STEPS 'burst') completes on a real
+    // release, whichever weapon shaped it
+    if (G.save && G.save.flags && !G.save.flags.burstDone) { G.save.flags.burstDone = 1; }
     const mode = weaponMode(G.save);
     if (mode === 'dual') return this.swirl();
     if (mode === 'joined') return this.throwJoined();
@@ -4599,123 +4612,189 @@ class Player {
       c.globalAlpha = 1;
       }
     }
-    // THE CHARGE IS A SURGE GATHERING, NOT A LAMP SWITCHED ON.
+    // THE CHARGE IS THE AIR IONISING AND THE CURRENT RUNNING THROUGH HER.
     //
-    // The owner: "why does my hero become slimmer and motionless instead of
-    // aura gathering or electrical surge charging with animated sparks coming
-    // from it". Both halves were true. This used to be one soft blob offset to
-    // the side of her — on the blade, not on her — that faded up and sat there,
-    // and it did not start until a quarter second in, so the beginning of the
-    // hold looked like nothing was happening at all.
-    //
-    // What a charge looks like is POWER ARRIVING FROM SOMEWHERE. So: rings that
-    // sweep IN toward her core rather than a glow that swells out, sparks
-    // riding those rings and being pulled in with them, arcs that snap from the
-    // sparks to her chest, and the whole thing tightening and quickening as it
-    // fills. It is all additive light, which is the one part of this game's look
-    // that is ours to draw rather than Higgsfield's (ART_BIBLE §0.0).
+    // Owner, 2026-09-19: "instead of looking like circles coming to the
+    // character can you animate the supercharge to make it like electricity
+    // surge coming from ionization of the air around it surging through its
+    // body up and down... this is a robot so all supercharge should be
+    // considered as robotic." The previous pass drew power ARRIVING — rings
+    // sweeping in to her chest — and rings sweeping in read as circles around
+    // a cat, not as a machine taking charge. A robot charging is a circuit:
+    // the air around the chassis ionises into a haze, the haze bleeds current
+    // into the frame, and the current runs the frame end to end. In depth order:
+    //   1. the ION HAZE — a soft field the shape of her, breathing, with motes
+    //      of ionised air drawn out of it into the body (the "from somewhere"
+    //      is the air itself now, not a ring)
+    //   2. the SURGE — one bright band running her length, up and down, faster
+    //      as the charge fills, with a jagged arc across the chassis at the band
+    //   3. SPINE BOLTS — vertical arcs foot-to-ear inside her outline, struck per
+    //      50 ms slot so they flicker rather than animate, some branching out
+    //   4. SPARKS thrown OFF the body, outward — current that missed the frame
+    //   5. at full charge the chassis is SHEATHED: white bolts and a corona the
+    //      shape of her pulsing on the outline. No circle anywhere.
+    // All additive light, the one part of the look that is ours to draw
+    // (ART_BIBLE §0.0); no shadowBlur (measured +10 ms/frame elsewhere); no
+    // allocation in the draw path — every random is hash2 of a time slot, so a
+    // replayed frame draws the same storm (tests/drawclock.cjs).
     if (this.chargeT > 0.02 && !(typeof G !== 'undefined' && G.artProbe)) {
       const ck = clamp(this.chargeT / 0.6, 0, 1);
       const cok = this.chargeOk !== false;
       const now = performance.now() / 1000;
-      const cx = this.x + this.w / 2, cy = this.y + this.h * 0.42;   // her chest, not her blade
-      const hot = !cok ? '#7d6b8a' : ck >= 1 ? '#ffffff' : PAL[G.roomDef.zone].glow;
+      const bot = this.y + this.h, top = bot - CHARGE_BODY_H, bh = bot - top;   // feet to ear-tips
+      const cx = this.x + this.w / 2, cy = bot - bh * 0.55;                      // her chest
+      const hw = this.w * 0.5 + 4;                                                // half the chassis
+      const col = !cok ? '#7d6b8a' : PAL[G.roomDef.zone].glow;             // the wide passes keep the colour
+      const hot = !cok ? '#7d6b8a' : ck >= 1 ? '#ffffff' : col;              // the thin ones go white at full
+      const tint = !cok ? 'rgba(125,107,138,' : ck >= 1 ? 'rgba(255,255,255,' : 'rgba(150,235,255,';
       c.save();
       c.globalCompositeOperation = 'lighter';
 
-      // --- the core: small, and it grows only a little. A core that balloons
-      //     is what made her read as a different size while charging.
-      const coreR = 7 + ck * 7 + Math.sin(now * 14) * (cok ? 1.4 : 0.4);
-      const cg = c.createRadialGradient(cx, cy, 1, cx, cy, coreR * 2.6);
-      cg.addColorStop(0, hot);
-      cg.addColorStop(0.35, !cok ? 'rgba(125,107,138,0.35)' : 'rgba(255,255,255,0.28)');
-      cg.addColorStop(1, 'rgba(0,0,0,0)');
-      // ...AND IT LIGHTS HER RATHER THAN REPLACING HER.
-      //
-      // The owner, on the version with the gathering rings already in: "the
-      // character keeps squishing into elongated character while charging."
-      // The rings were not the problem — the CORE was. Additive, on her chest,
-      // at up to 0.90 alpha over a body 24 px wide, it blew the middle of her
-      // to white and left only the outline: ears, legs, the edge of the cape.
-      // A character reduced to its own silhouette edges does not read as a
-      // character, it reads as a stretched smear, and it did that every time he
-      // held the button. (The blob this replaced peaked at 0.72, so the rewrite
-      // that fixed "slimmer and motionless" made this half worse.)
-      //
-      // Halved. The gather still reads — it is carried by the rings sweeping in,
-      // the sparks riding them and the arcs snapping to her chest, which is
-      // what "power arriving from somewhere" is actually made of. The core is
-      // the glow at the end of that, not a lamp pointed at the player.
-      c.globalAlpha = cok ? 0.26 + ck * 0.22 : 0.14;
-      c.fillStyle = cg;
-      c.beginPath(); c.arc(cx, cy, coreR * 2.6, 0, 7); c.fill();
-
-      // --- gathering rings: each one sweeps from far out to the core and
-      //     dies there. Three of them, evenly staggered, so there is always
-      //     one arriving — that is what makes it read as GATHERING.
-      const period = 0.62 - ck * 0.26;                 // quickens as it fills
-      for (let i = 0; i < 3; i++) {
-        const ph = ((now / period) + i / 3) % 1;
-        const r = 12 + (1 - ph) * (54 + ck * 14);
-        c.globalAlpha = (cok ? 0.34 : 0.13) * ph * (0.5 + ck * 0.5);
-        c.strokeStyle = hot;
-        c.lineWidth = 1 + ph * 1.8;
-        c.beginPath(); c.arc(cx, cy, r, 0, 7); c.stroke();
-
-        // --- sparks riding the ring in. They are ON the ring, so they arrive
-        //     with it; the count rises with the charge.
-        const n = 3 + Math.round(ck * 4);
-        for (let k2 = 0; k2 < n; k2++) {
-          const a = (k2 / n) * Math.PI * 2 + now * (1.6 + i * 0.4) + i;
-          const sx = cx + Math.cos(a) * r, sy = cy + Math.sin(a) * r * 0.82;
-          const sr = (cok ? 1.5 : 0.9) + ph * 1.2;
-          c.globalAlpha = (cok ? 0.85 : 0.3) * ph;
-          c.fillStyle = hot;
-          c.beginPath(); c.arc(sx, sy, sr, 0, 7); c.fill();
-          // its trail, pointing back along the ring's travel (outward)
-          c.globalAlpha *= 0.45;
-          c.lineWidth = sr * 0.9;
-          c.strokeStyle = hot;
-          c.beginPath();
-          c.moveTo(sx, sy);
-          c.lineTo(cx + Math.cos(a) * (r + 9), cy + Math.sin(a) * (r + 9) * 0.82);
-          c.stroke();
-        }
+      // --- 1. the ion haze: a field the shape of her, not a circle
+      const breathe = 1 + Math.sin(now * (5 + ck * 6)) * 0.06;
+      const hrx = (hw + 28 + ck * 10) * breathe, hry = (bh * 0.64 + 14) * breathe;   // the drawn plate is wider than the collider
+      // rim-lit: the field is brightest a little OUTSIDE her outline and
+      // near-dark on her, so the ionised air reads as a corona and she stays
+      // the colour she was drawn (the fill version washed her to white)
+      // SHE IS WHITE. Additive light on a white plate is blow-out, not
+      // light — every fill that lands on her body erases her — so the field
+      // is a RIM: zero over her, brightest just outside her outline.
+      const hz = c.createRadialGradient(cx, cy, 2, cx, cy, hrx);
+      hz.addColorStop(0, tint + '0)');
+      hz.addColorStop(0.6, tint + '0)');
+      hz.addColorStop(0.78, tint + (cok ? 0.12 + ck * 0.14 : 0.04) + ')');
+      hz.addColorStop(1, tint + '0)');
+      c.fillStyle = hz; c.globalAlpha = 1;
+      c.beginPath(); c.ellipse(cx, cy, hrx, hry, 0, 0, 7); c.fill();
+      // motes of ionised air pulled from the haze's rim INTO the chassis, each
+      // falling in along its own radius; more of them, faster, as it fills
+      const motes = 6 + Math.round(ck * 8), mlife = 0.55 - ck * 0.2;
+      for (let i = 0; i < motes; i++) {
+        const ph = ((now / mlife) + hash2(i, 41)) % 1;                 // 0 rim -> 1 body
+        const gen = Math.floor(now / mlife + hash2(i, 41));
+        const a = hash2(gen, 43 + i) * Math.PI * 2;
+        const rx = (hw + 18 + ck * 12) * (1 - ph) + hw * 0.6 * ph;
+        const ry = (bh * 0.6 + 12) * (1 - ph) + bh * 0.4 * ph;
+        c.globalAlpha = (cok ? 0.85 : 0.25) * Math.sin(ph * Math.PI);
+        c.fillStyle = ph > 0.7 ? '#ffffff' : hot;
+        c.beginPath(); c.arc(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry, 1 + ph * 1.6, 0, 7); c.fill();
       }
 
-      // --- and it CRACKLES. Jagged arcs from the gathering radius to the
-      //     core, struck on their own clock so they flicker rather than
-      //     animate, which is what electricity does.
-      if (cok) {
-        const strikes = 1 + Math.round(ck * 3);
-        for (let i = 0; i < strikes; i++) {
-          // a stable pseudo-random per strike per 60ms slot: no allocation, no
-          // Math.random in the draw path, and it reads as a new arc each time
-          const slot = Math.floor(now / 0.06) + i * 37;
-          const a = hash2(slot, 11) * Math.PI * 2;
-          const r = 20 + hash2(slot, 13) * (26 + ck * 16);
-          if (hash2(slot, 17) > 0.35 + ck * 0.35) continue;      // not every slot
-          c.globalAlpha = 0.5 + ck * 0.5;
-          c.strokeStyle = ck >= 1 ? '#ffffff' : hot;
-          c.lineWidth = 1.1;
+      // --- 2. the surge: TWO bands running her length, one rising while the
+      //       other falls ("up and down"), each with a jagged arc across the
+      //       chassis where it is — a wide coloured stroke under a thin white one
+      const sslot = Math.floor(now / 0.05);
+      for (let band = 0; band < 2; band++) {
+        const w0 = now * (4.5 + ck * 7) + band * Math.PI;
+        const sy = top + (0.5 + 0.5 * Math.sin(w0)) * bh;
+        const lead = band === 0 ? 1 : 0.7;                        // the second is the echo
+        // its glow sits where the arc LEAVES the chassis, one lobe a side —
+        // a glow across her would whiten her (see the haze)
+        c.globalCompositeOperation = 'lighter';
+        for (const side of [-1, 1]) {
+          const lx = cx + side * (hw + 5);
+          const sg = c.createRadialGradient(lx, sy, 1, lx, sy, 11 + ck * 4);
+          sg.addColorStop(0, tint + ((cok ? 0.45 + ck * 0.3 : 0.12) * lead) + ')');
+          sg.addColorStop(1, tint + '0)');
+          c.fillStyle = sg; c.globalAlpha = 1;
+          c.beginPath(); c.arc(lx, sy, 11 + ck * 4, 0, 7); c.fill();
+        }
+        // the arc itself is drawn NORMALLY: the zone colour under a white
+        // core — the colour shows on her white body, the white on the dark
+        // room behind her, and neither erases her
+        c.globalCompositeOperation = 'source-over';
+        for (let pass = 0; pass < 2; pass++) {
+          c.globalAlpha = (pass ? (cok ? 0.95 : 0.35) : (cok ? 0.55 : 0.15)) * lead;
+          c.strokeStyle = pass ? (cok ? '#ffffff' : hot) : col;
+          c.lineWidth = pass ? 1.3 : 3.2;
           c.beginPath();
-          let px2 = cx + Math.cos(a) * r, py2 = cy + Math.sin(a) * r * 0.82;
-          c.moveTo(px2, py2);
-          for (let seg = 1; seg <= 3; seg++) {
-            const f = 1 - seg / 3;
-            const jx = (hash2(slot, 19 + seg) - 0.5) * 12 * f;
-            const jy = (hash2(slot, 23 + seg) - 0.5) * 12 * f;
-            c.lineTo(cx + (px2 - cx) * f + jx, cy + (py2 - cy) * f + jy);
+          c.moveTo(cx - hw - 6, sy);
+          for (let seg = 1; seg <= 6; seg++) {
+            const jy = seg === 6 ? 0 : (hash2(sslot + band * 977, 61 + seg) - 0.5) * (7 + ck * 7);
+            c.lineTo(cx - hw - 6 + (seg / 6) * (hw * 2 + 12), sy + jy);
           }
           c.stroke();
         }
       }
 
-      // --- full: a held halo so "ready" is unmistakable without another sound
+      // --- 3. spine bolts: current running the frame end to end, inside her
+      //       outline. Struck on their own clock; not every slot fires.
+      //       Normal blending, for the reason the arcs are.
+      c.globalCompositeOperation = 'source-over';
+      const bolts = 2 + Math.round(ck * 3);
+      for (let i = 0; i < bolts; i++) {
+        const slot = Math.floor(now / 0.05) + i * 53;
+        if (hash2(slot, 71) > (cok ? 0.6 + ck * 0.35 : 0.3)) continue;
+        const x0 = cx + (hash2(slot, 73) - 0.5) * hw * 1.5;
+        const x1 = cx + (hash2(slot, 79) - 0.5) * hw * 1.5;
+        const y0 = top + hash2(slot, 83) * bh * 0.25, y1 = bot - hash2(slot, 89) * bh * 0.25;
+        // the bolt is drawn twice: a wide coloured stroke, then a thin white
+        // core over it — additive light has no edge and a bolt is all edge
+        for (let pass = 0; pass < 2; pass++) {
+          c.globalAlpha = (pass ? 0.95 : 0.5) * ((cok ? 0.6 : 0.25) + ck * 0.4);
+          c.strokeStyle = pass ? (cok ? '#ffffff' : hot) : col;
+          c.lineWidth = pass ? (cok ? 1.2 : 0.8) : (cok ? 2.8 : 1.6);
+          c.beginPath(); c.moveTo(x0, y0);
+          for (let seg = 1; seg <= 6; seg++) {
+            const jx = seg === 6 ? 0 : (hash2(slot, 97 + seg) - 0.5) * (10 + ck * 10);
+            c.lineTo(x0 + (x1 - x0) * (seg / 6) + jx, y0 + (y1 - y0) * (seg / 6));
+          }
+          c.stroke();
+        }
+        // a branch off the lower third, out past the outline
+        if (hash2(slot, 101) < 0.6) {
+          const bxx = x0 + (x1 - x0) * 0.6, byy = y0 + (y1 - y0) * 0.6;
+          const dir = hash2(slot, 103) < 0.5 ? -1 : 1;
+          c.globalAlpha = (cok ? 0.5 : 0.2) + ck * 0.3; c.lineWidth = 1.1; c.strokeStyle = hot;
+          c.beginPath(); c.moveTo(bxx, byy);
+          c.lineTo(bxx + dir * hw * 0.9, byy + (hash2(slot, 107) - 0.5) * 12);
+          c.lineTo(bxx + dir * (hw * 1.7 + ck * 10), byy + (hash2(slot, 109) - 0.5) * 20);
+          c.stroke();
+        }
+      }
+
+      // --- 4. sparks thrown off the chassis: short radial streaks born on the
+      //       outline and dying a few pixels out (additive: they are off her)
+      c.globalCompositeOperation = 'lighter';
+      const sparks = cok ? 3 + Math.round(ck * 5) : 2, slife = 0.18;
+      for (let i = 0; i < sparks; i++) {
+        const ph = ((now / slife) + hash2(i, 113)) % 1;
+        const gen = Math.floor(now / slife + hash2(i, 113));
+        const a = hash2(gen, 127 + i) * Math.PI * 2;
+        const ex = cx + Math.cos(a) * hw, ey = cy + Math.sin(a) * bh * 0.5;
+        const len = (4 + ck * 8) * ph;
+        c.globalAlpha = (cok ? 0.8 : 0.3) * (1 - ph);
+        c.strokeStyle = hot; c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(ex + Math.cos(a) * len * 0.4, ey + Math.sin(a) * len * 0.4);
+        c.lineTo(ex + Math.cos(a) * (len + 3), ey + Math.sin(a) * (len + 3));
+        c.stroke();
+      }
+
+      // (no chest core. Twice now a glow on her chest has been the thing that
+      // blew her middle to white; the current in her is the bolts, and the
+      // light of it is the rim, the lobes and the sparks — all off her body.)
+
+      // --- 5. full: the chassis sheathed. A corona the SHAPE OF HER pulsing on
+      //     her outline — "ready" without a sound, and without a circle.
       if (ck >= 1 && cok) {
-        c.globalAlpha = 0.22 + Math.sin(now * 18) * 0.1;
-        c.strokeStyle = '#ffffff'; c.lineWidth = 2;
-        c.beginPath(); c.arc(cx, cy, 26 + Math.sin(now * 18) * 2, 0, 7); c.stroke();
+        c.globalCompositeOperation = 'source-over';
+        const pulse = Math.sin(now * 18), rslot = Math.floor(now / 0.06);
+        const rx0 = hw + 7 + pulse * 1.5, ry0 = bh * 0.56 + 5 + pulse * 1.5;
+        // the sheath is a jittered outline: 22 points around her, each thrown
+        // in or out per 60 ms slot, so it crackles instead of orbiting
+        for (let pass = 0; pass < 2; pass++) {
+          c.globalAlpha = pass ? 0.5 + pulse * 0.15 : 0.22 + pulse * 0.06;
+          c.strokeStyle = pass ? '#ffffff' : col; c.lineWidth = pass ? 1.2 : 3.4;
+          c.beginPath();
+          for (let k2 = 0; k2 <= 22; k2++) {
+            const a = (k2 % 22) / 22 * Math.PI * 2;
+            const j = 1 + (hash2(rslot, 131 + (k2 % 22)) - 0.5) * 0.22;
+            const px2 = cx + Math.cos(a) * rx0 * j, py2 = cy + Math.sin(a) * ry0 * j;
+            if (k2 === 0) c.moveTo(px2, py2); else c.lineTo(px2, py2);
+          }
+          c.stroke();
+        }
       }
       c.restore(); c.globalAlpha = 1;
     }
@@ -10554,6 +10633,9 @@ const TELL_ST = /warn|charge|crouch|coil|lock|prep|spin|gather|roar|volley|brood
 // and sound in every use, because roughly one man in twelve cannot rely on hue.
 const TELL_COL = '#ffc24a';
 const BURST_VOLTS = 25;
+// how tall the charge storm stands, feet to ear-tips, in world px: the drawn
+// plate, not the 36 px collider (measured against the idle plate in A1)
+const CHARGE_BODY_H = 58;
 // GLACIERE'S REST BEAT, in one place because it was wrong in five.
 //
 // Measured over twenty-five seconds of a real fight: SIXTY-TWO PER CENT of her

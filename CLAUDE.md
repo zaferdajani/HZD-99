@@ -97,6 +97,12 @@ hierarchy... as filters to give orders to the appropriate session."*
   work. A kingdom session that needs a room's structural skeleton built or
   fixed delegates that piece to TERRAIN and keeps the enemies/NPC/story for
   itself.
+- **The STORY session** (owner-ordered, 2026-09-19): holds a Higgsfield binding
+  and draws the coloured manhua of the game from `docs/STORY_SCRIPT.md`, to the
+  letter, one kingdom per chapter, owner reviewing every page. Its protocol is
+  `docs/MANHUA_SESSION.md`; its ledger is `docs/MANHUA.md`; its link rule is
+  https://zaferdajani.github.io/HZD-99/manhua/ at the end of every report. The
+  script it draws from is the code session's and is revised with the game.
 - Any further specialist session follows the same shape: one job, named at
   open, same branch, coordinated through its own ledger.
 
