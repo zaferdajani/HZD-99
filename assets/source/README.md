@@ -30,7 +30,7 @@ look at to answer "did that actually happen".
 | `flora/` | Alien plant life, two species per kingdom | 12 |
 | `gear/` | Thrust boots and the save pod, dormant + active | 4 |
 | `_sheets/` | Contact sheets and before/after comparisons | 17 |
-| `manhua/ch1/` | THE MANHUA, chapter one — the 27 as-fired pages (1024/q90) and `prompts.json`, the exact prompt of every take; ledger in `docs/MANHUA.md` | 27 |
+| `manhua/ch1/` | THE MANHUA, chapter one — the 27 as-fired pages of the second edition (`*_asfired.jpg`, 1024/q90), the refused first edition kept beside them (`*_ed1_asfired.jpg`), and `prompts.json`, the exact prompt and every take of every page; ledger in `docs/MANHUA.md` | 55 |
 
 `beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the
 same lion in the poses the rig has to hit: the open-jaw roar in profile, the

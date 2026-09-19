@@ -1,348 +1,628 @@
 {
-  "_what": "The exact generation prompts of Chapter 1 of the manhua, one per page, as fired through Higgsfield. The fired prompt for a page is: shape + '\\n\\nTEXT ON THIS PAGE, exactly and nothing else:\\n' + text lines + '\\n\\n' + cast + '\\n\\n' + style. docs/MANHUA.md is the ledger and the readable panel script; this file is the archive the ledger points at. Model nano_banana_pro, aspect 2:3, resolution 2k.",
-  "model": "nano_banana_pro",
-  "aspect_ratio": "2:3",
-  "resolution": "2k",
-  "elements": {
-    "hzd99-canon": "467c8e08-8161-483f-a4cf-439875ff04e2",
-    "ratchet-canon": "795a5cd6-b404-4623-bcc9-2b32351d71ab",
-    "ratchet-den": "44ecbf7f-0326-418f-9cc9-122391cad46f",
-    "ratchet-booth": "2f790258-47df-4a35-acfa-f63415c45486",
-    "crawler-canon": "c7adb432-7f01-47d6-9dcc-221fdc5ed13d",
-    "city-gate": "da11ff82-f67a-481a-b038-dde9c65f4291",
-    "service-cradle": "8a305cd0-2f5e-490e-bfe9-9e8a006ea0a4",
-    "NULLFANG": "1922c573-cee1-48fb-aa59-d5f97d14783f",
-    "MOTHER-V": "f541aa62-fd48-49e1-a938-f17ca6c8b810",
-    "purifier-crystal": "d0a03e79-2887-4bcd-a209-11732c6754ef"
-  },
-  "style": "STYLE (take nothing else from the references but the identity of what they show): a full-colour Chinese manhua page made for vertical phone reading — clean, confident ink linework, flat cel colour with soft painted light, shonen action grammar: motion lines only along something that moves, focus lines only where the reader must look, one impact frame kept abstract and high-contrast. Rectangular panels separated by thin white gutters on a black page margin; the panel layout is exactly as described, top to bottom. Palette in words: cold teal-grey steel and plaster, rust orange, warm amber lamp light, cyan lights on machines that are still themselves, RED lights behind the eyes of the infected; the cat's ivory chassis and red scarf-cape are the warmest thing in every frame. Lettering: caption boxes are cream rectangles with crisp black sans-serif letters; spoken lines are white balloons with tails to the speaker; tutorial chips are small dark rounded boxes with cyan text. Every text box holds EXACTLY the words listed, spelled exactly as written, in the order given, and there is NO other writing anywhere on the page: no title, no page number, no signature, no watermark, no sound-effect words, no labels. NEGATIVES: not photorealistic, not a 3D render, not pixel art, no black-and-white screentone, no chibi distortion, no extra characters, no humans anywhere.",
-  "cast_no_sword": "CAST: HZD-99 is <<<467c8e08-8161-483f-a4cf-439875ff04e2>>> — keep her identity, materials and proportions exactly (ivory head and body, tall ears with mint inner surfaces, charcoal visor with two cyan eye-lights, red scarf that flows into a cape, gold shoulder discs, white mitten paws). She carries NO sword and NO weapon of any kind in this chapter — her only weapons are the claws in her bare white paws. She has no mouth; her feeling is in her eye aperture, ear angle, head tilt and body lean.",
-  "cast_sword": "CAST: HZD-99 is <<<467c8e08-8161-483f-a4cf-439875ff04e2>>> — keep her identity, materials and proportions exactly (ivory head and body, tall ears with mint inner surfaces, charcoal visor with two cyan eye-lights, red scarf that flows into a cape, gold shoulder discs, white mitten paws). From this page on she carries THE PURIFIER, <<<d0a03e79-2887-4bcd-a209-11732c6754ef>>>, a single white crystal sword, on her back or in her paw; no other weapon. She has no mouth; her feeling is in her eye aperture, ear angle, head tilt and body lean.",
-  "pages": [
+ "_what": "The exact generation prompts of Chapter 1 of the manhua, one per page, as fired through Higgsfield. The fired prompt for a page is: shape + '\\n\\nTEXT ON THIS PAGE, exactly and nothing else:\\n' + text lines + '\\n\\n' + cast + '\\n\\n' + style. docs/MANHUA.md is the ledger and the readable panel script; this file is the archive the ledger points at. Model nano_banana_pro, aspect 2:3, resolution 2k. SECOND EDITION (2026-09-19, the owner's review of the first): every text box rewritten per the manga-writing skill — no tutorial chips, item cards, choice menus, HUD warnings, prices or button names on any page; spoken lines, diegetic text and the narrator's cards stay verbatim; every character anchored to the plate the game draws TODAY (the redrawn NULLFANG, wolves, Alpha, sage, Chime, Servo, the shield guard).",
+ "model": "nano_banana_pro",
+ "aspect_ratio": "2:3",
+ "resolution": "2k",
+ "edition": 2,
+ "elements": {
+  "hzd99-canon": "467c8e08-8161-483f-a4cf-439875ff04e2",
+  "ratchet-canon": "795a5cd6-b404-4623-bcc9-2b32351d71ab",
+  "ratchet-den": "44ecbf7f-0326-418f-9cc9-122391cad46f",
+  "ratchet-booth": "2f790258-47df-4a35-acfa-f63415c45486",
+  "crawler-canon": "c7adb432-7f01-47d6-9dcc-221fdc5ed13d",
+  "city-gate": "da11ff82-f67a-481a-b038-dde9c65f4291",
+  "service-cradle": "8a305cd0-2f5e-490e-bfe9-9e8a006ea0a4",
+  "nullfang-drawn": "c4817fa5-2b9d-4977-893d-f362bdb21906",
+  "sage-drawn": "2f1cd043-8ac3-47e4-92b1-2da265ee809b",
+  "wolf-drawn": "7aed7bd4-8738-4765-b953-d623eea6a359",
+  "alpha-drawn": "789ff708-5f77-4196-8bfd-5e180e1584d9",
+  "chime-drawn": "57f0d0bf-3b2e-476a-9ac5-2a6afebb0e1d",
+  "servo-drawn": "5549ba09-f898-4022-ab66-5686999059e0",
+  "guard-drawn": "cd1f0741-e47a-468f-89ea-3dbf76707b86",
+  "MOTHER-V": "f541aa62-fd48-49e1-a938-f17ca6c8b810",
+  "purifier-crystal": "d0a03e79-2887-4bcd-a209-11732c6754ef"
+ },
+ "style": "STYLE (take nothing else from the references but the identity of what they show): a full-colour Chinese manhua page made for vertical phone reading — clean, confident ink linework, flat cel colour with soft painted light, shonen action grammar: motion lines only along something that moves, focus lines only where the reader must look, one impact frame kept abstract and high-contrast. Rectangular panels separated by thin white gutters on a black page margin; the panel layout is exactly as described, top to bottom. Palette in words: cold teal-grey steel and plaster, rust orange, warm amber lamp light, cyan lights on machines that are still themselves, RED lights behind the eyes of the infected; the cat's ivory chassis and red scarf-cape are the warmest thing in every frame. LETTERING, three kinds only: a NARRATOR CAPTION is a cream rectangle with crisp black serif letters at a panel's edge; a SPOKEN LINE is a white balloon with a tail to the speaker; a THOUGHT is a soft cloud balloon with small bubbles to her head. Writing that exists in the world (a tag, a terminal screen, a shop sign) is drawn on the object in the object's own lettering. There are NO game-screen boxes of any kind: no dark rounded chips, no cards with headings, no labels, no titles inside panels, no sound-effect words, no page number, no signature, no watermark. Every text box holds EXACTLY the words listed, spelled exactly as written, in the order given, each written once, and nothing else is written anywhere. NEGATIVES: not photorealistic, not a 3D render, not pixel art, no black-and-white screentone, no chibi distortion, no extra characters, no humans anywhere.",
+ "cast_no_sword": "CAST: HZD-99 is <<<467c8e08-8161-483f-a4cf-439875ff04e2>>> — keep her identity, materials and proportions exactly: a SMALL, round, short-legged robot cat with a head as big as her body, ivory head and body, tall ears with mint inner surfaces, charcoal visor with two cyan eye-lights, red scarf that flows into a cape, gold shoulder discs, white mitten paws — never tall, never a humanoid. She carries NO sword and NO weapon of any kind on this page; her only weapons are the claws in her bare white paws. She has no mouth and never speaks aloud; her feeling is in her eye aperture, ear angle, head tilt and body lean, and her only words are thoughts.",
+ "cast_sword": "CAST: HZD-99 is <<<467c8e08-8161-483f-a4cf-439875ff04e2>>> — keep her identity, materials and proportions exactly: a SMALL, round, short-legged robot cat with a head as big as her body, ivory head and body, tall ears with mint inner surfaces, charcoal visor with two cyan eye-lights, red scarf that flows into a cape, gold shoulder discs, white mitten paws — never tall, never a humanoid, never a warrior girl. From this page on she carries THE PURIFIER, <<<d0a03e79-2887-4bcd-a209-11732c6754ef>>>, a single white crystal sword, on her back or in her paw; no other weapon. She has no mouth and never speaks aloud; her feeling is in her eye aperture, ear angle, head tilt and body lean, and her only words are thoughts.",
+ "ratchet_rule": " Ratchet is the SAME body in every panel he appears in: a big ROUND copper-brass robot with a swollen barrel belly, a domed helmet head with a narrow visor slit, worn tan-and-copper plating, a rack of canisters on his back and the small crystal on a cord at his chest, exactly as the reference — never a slim humanoid, never a knight.",
+ "pages": [
+  {
+   "p": 1,
+   "scene": "Cover",
+   "cast": "cast_no_sword",
+   "shape": "COVER of chapter one — one full-page image, no panel gutters. HZD-99 stands small in the lower third on cracked flagstones, seen from behind at three-quarters, looking up; her red scarf-cape lifts in a wind. Filling the upper two thirds: the enormous city gates <<<da11ff82-f67a-481a-b038-dde9c65f4291>>>, rust-orange doors between teal towers, standing ajar, a shaft of warm light spilling through the gap toward her and the silent machine city silhouetted beyond. Cold dusk sky. She is the only warm shape in the picture. Title lettering at the top in bold white display capitals with a thin cyan outline; the subtitle beneath it in smaller white letters; the chapter line in a cream caption at the very bottom. Three pieces of writing on the page and nothing else.",
+   "text": [
+    "CLAWBYTE",
+    "A robo-cat metroidvania in the Machine Depths.",
+    "CHAPTER ONE — THE SCRAP MEADOWS"
+   ],
+   "takes": [
     {
-      "p": 1,
-      "scene": "Cover",
-      "cast": "cast_no_sword",
-      "shape": "COVER of chapter one — one full-page image, no panel gutters. HZD-99 stands small in the lower third on cracked flagstones, seen from behind at three-quarters, looking up; her red scarf-cape lifts in a wind. Filling the upper two thirds: the enormous city gates <<<da11ff82-f67a-481a-b038-dde9c65f4291>>>, rust-orange doors between teal towers, standing ajar, a shaft of warm light spilling through the gap toward her and the silent machine city silhouetted beyond. Cold dusk sky. She is the only warm shape in the picture. Title lettering at the top in bold white display capitals with a thin cyan outline; the subtitle beneath it in smaller white letters; the chapter line in a cream caption box at the very bottom.",
-      "text": [
-        "CLAWBYTE",
-        "A robo-cat metroidvania in the Machine Depths.",
-        "CHAPTER ONE — THE SCRAP MEADOWS"
-      ]
-    },
-    {
-      "p": 2,
-      "scene": "§1 Prologue, film shots 1–4",
-      "cast": "cast_no_sword",
-      "shape": "FOUR panels stacked top to bottom, each with one cream caption box along its bottom edge. Panel 1, wide: KERNEL DEPTHS seen from above — a city of machines, towers and hanging cables, a thousand small cyan lights, and one tall broadcast tower at the centre sending out gentle rings of cyan light. Panel 2: MOTHER-V, <<<f541aa62-fd48-49e1-a938-f17ca6c8b810>>>, the broadcast heart — a radial machine of violet-grey plates around one golden core, no face, singing in soft cyan rings, while below her small machines go about their work content and cyan-lit. Panel 3: the tower from below as its light turns from cyan to red; behind it looms a huge featureless black silhouette with no face, no eyes and no detail of any kind — a shadow only, the evil robot is never seen. Panel 4: a street of machines mid-task, a thin red thread of signal running from one to the next, their eye-lights turning red one after another. There is NO cat anywhere on this page — HZD-99 does not appear in the first four shots of the prologue. Each panel carries exactly ONE caption box, four caption boxes on the whole page, and nothing else is written.",
-      "text": [
-        "KERNEL DEPTHS. A city of machines, run on one broadcast — the Mother's Song.",
-        "MOTHER-V, the broadcast heart. While she sang, the Depths were kind.",
-        "Until an evil robot hijacked her Song.",
-        "Hidden in the melody, a virus spread from machine to machine."
-      ],
-      "refired": "v1 (dcf72ff3) invented a fifth caption in panel 4 and put the cat in the street before she wakes"
-    },
-    {
-      "p": 3,
-      "scene": "§1 Prologue, film shots 5–8",
-      "cast": "cast_no_sword",
-      "shape": "FOUR panels stacked top to bottom, each with one cream caption box along its bottom edge. Panel 1: a crowd of machines in a plaza, every one of them turned the same way toward the distant tower, stopped mid-gesture, every eye red. Panel 2: the protectors of the kingdoms kneeling in a row under the red light — an armoured robot lion <<<1922c573-cee1-48fb-aa59-d5f97d14783f>>> in front, and behind it a great iron eagle, a bronze pipe-built dragon and a frosted white unicorn — red light behind all their eyes, heads bowed. Panel 3: a dark service bay, one shaft of light; the service cradle <<<8a305cd0-2f5e-490e-bfe9-9e8a006ea0a4>>> with a small white robot cat asleep in it, far too small for the chair, cables plugged into her back, her eye-lights dark. Panel 4, the last: an extreme close-up of her charcoal visor filling the panel as two cyan eye-lights come on — the page ends on her eyes opening.",
-      "text": [
-        "The Song became a command: OBEY.",
-        "Even the protectors of the kingdoms fell under its command.",
-        "Forgotten in a service cradle, a small maintenance cat slept through the broadcast.",
-        "HZD-99 woke to a silent city — and went to give the Song back."
-      ]
-    },
-    {
-      "p": 4,
-      "scene": "§2.1 The cradle — W1",
-      "cast": "cast_no_sword",
-      "shape": "FIVE panels. Panel 1, wide: the dark service bay, the service cradle <<<8a305cd0-2f5e-490e-bfe9-9e8a006ea0a4>>> at the left, one shaft of light from the right side of the room, HZD-99 sitting up in the cradle with cables still plugged into her back, the machine's tool arms letting go of her. Panel 2, small: close on the last umbilical plug coming off her back with a jolt, a spark. Panel 3: she stands up in the cradle that is far too big for her, ears up, looking at the light. Panel 4: she walks right toward the light across the empty floor, small in a big dark room; a tutorial chip in the top corner. Panel 5, wide: the door at the end of the bay standing open, dust in the light pouring in, her silhouette small in the doorway; a tutorial chip. Nothing else is in this room. No enemies, no other machines.",
-      "text": [
-        "Move — Walk right toward the light.",
-        "Leave — the door has been open a long time."
-      ]
-    },
-    {
-      "p": 5,
-      "scene": "§2.2 The road and the gates — W2",
-      "cast": "cast_no_sword",
-      "shape": "FOUR panels. Panel 1, wide: outside under a cold sky, a long cracked road running away from us with the city gates <<<da11ff82-f67a-481a-b038-dde9c65f4291>>> small at the far end, HZD-99 tiny on the road. Panel 2: a fallen rusted beam across the road with a gap beyond it; she is mid-jump over it, scarf streaming, motion lines along her path; tutorial chip. Panel 3, tall: the gates HUGE above her, rust-orange doors and teal towers filling the frame, the row of lamps along the lintel, she a small white shape beneath them looking up; tutorial chip. Panel 4, wide: seen from inside the city, the two great doors closing on the empty road behind her, the last light narrowing to a line; she stands with her back to us. Nobody else anywhere.",
-      "text": [
-        "Jump — Press once to jump over the obstacle.",
-        "The gates — stand beneath them and press UP."
-      ]
-    },
-    {
-      "p": 6,
-      "scene": "§2.3 The waking floor — A0",
-      "cast": "cast_no_sword",
-      "shape": "SIX panels in three rows of two. Panel 1: a cramped first street inside the gates; one crawler <<<c7adb432-7f01-47d6-9dcc-221fdc5ed13d>>>, a squat four-legged drill machine, standing calm with RED eye-lights; behind it, set into the street wall, the trader's booth <<<2f790258-47df-4a35-acfa-f63415c45486>>> with its torn awning; tutorial chip. Panel 2: she rakes the crawler with her claws — it does not fight back, it only rocks. Panel 3: the crawler breaking apart into a wreck, plates falling; tutorial chip. Panel 4: scrap — small bright bits of metal — scattered on the floor and her walking over them, the bits lifting toward her; tutorial chip. Panel 5: an item card — a cream box with the scrap text — over a drawing of a handful of scrap. Panel 6: the booth door in the street wall swinging open with warm amber light inside; tutorial chip.",
-      "text": [
-        "Scratch — Strike the marked machine.",
-        "Finish it — keep going — it breaks.",
-        "Take the scrap — walk over it — scrap is what you pay with.",
-        "Scrap — What a broken machine leaves behind, and the only money down here. The trader takes it for repairs, parts and upgrades — so a machine you break is a machine you spend.",
-        "Read Ratchet's note — Interact with the sleeping robot."
-      ],
-      "refired": "v1 (b5c360bb) hung in progress for over thirty minutes; resubmitted unchanged"
-    },
-    {
-      "p": 7,
-      "scene": "§2.4 Ratchet's den — the note and the cell",
-      "cast": "cast_no_sword",
-      "shape": "FIVE panels. Panel 1, wide: inside Ratchet's den <<<44ecbf7f-0326-418f-9cc9-122391cad46f>>> — the timber workshop under one hanging lamp; Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> the big round copper-brass robot sits DARK and slumped at the bench, eye-lights off; a sleeping pod built into the wall at the corner; a chest at the foot of the bench; HZD-99 small in the doorway. Panel 2: close on a paper tag hanging from his chest plate, its handwriting shown as two lines of text in a cream box beside it. Panel 3: HZD-99 holding up her one glowing Power Cell — a small cylinder with cyan light — with a caption. Panel 4: her paws pushing the cell into an open port in his chest. Panel 5: close on his domed helmet as two eye-lights come up BLUE; caption.",
-      "text": [
-        "A tag hangs from his chest plate, written in a steady hand:",
-        "'The broadcast takes every machine that listens. I will not listen — and I will not wait around to change my mind. I have taken out my own cell and hidden it where the rats forget to look.'",
-        "'If you are reading this, the city fell. When it is safe out there — truly safe — put the cell back in. I will do the rest. — R.'",
-        "One Power Cell would bring it back. You are carrying one.",
-        "Ratchet is awake."
-      ]
-    },
-    {
-      "p": 8,
-      "scene": "§2.4 Ratchet's den — the kit, the cradle, the pack",
-      "cast": "cast_no_sword",
-      "shape": "FIVE panels. Panel 1: Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>>, awake now with blue eye-lights, hands HZD-99 a small repair kit case; a cream item card beside it. Panel 2: he gestures with an open hand at the sleeping pod built into the den wall <<<44ecbf7f-0326-418f-9cc9-122391cad46f>>>; his speech balloon. Panel 3: he taps his counter, a shelf behind him with a small charger pack on it; his speech balloon. Panel 4: close on HZD-99 listening, ears forward, a faint empty ring of light drawn above her head; his speech balloon. Panel 5, small and silent: only his hand, reaching sideways for a tool that is not on the bench — the tic — no text in this panel. Ratchet is the SAME body in every panel he appears in: a big ROUND copper-brass robot with a swollen barrel belly, a domed helmet head with a narrow visor slit, worn tan-and-copper plating, a rack of canisters on his back and the small crystal on a cord at his chest, exactly as the reference — NEVER a slim humanoid robot, never a knight. Panel 5 has NO letters at all — no sound word, no 'tic', nothing written. Panel 4's text is Ratchet's SPEECH BALLOON with a tail to him, not a chip and not a box with a heading — there is no 'Tutorial chip' label anywhere. Every balloon is complete and unbroken, no word repeated. Write each listed line ONCE, straight through from its first word to its last, with no phrase repeated inside it; the fourth line begins 'Hits you land charge the ring.' and is one balloon. The Repair Kit line is written ONCE, as the cream item card only — Ratchet has no balloon in panel 1.",
-      "text": [
-        "Repair Kit — Patches two cores. Use it from here.",
-        "See that cradle in the corner? Built it into the wall myself. Step in and it remembers you — everything you are, kept safe — and it patches your plating while you stand there. Use it. That is what it is for.",
-        "And when you have scrap, come to my counter. I keep a volt pack — my own charger, cut down to your size. It wires that ring at the top of you to something useful.",
-        "Hits you land charge the ring. With the pack in you, you can SPEND it: hold HEAL to mend a core, or hold ATTACK and let go for a burst from your claws. The ring is empty now — go earn some."
-      ],
-      "refired": "v1 (5ef27e35) drew Ratchet as a slim humanoid and wrote 'tic' in the silent panel; v2 (6a3af2e7) fixed Ratchet but labelled panel 4 'Tutorial chip' and garbled 'that ring' into 'that it that ring'; v3 (e646aa20) fixed the chip but repeated 'you can SPEND it' inside the fourth balloon; v4 (e486be6e) hung in progress; resubmitted unchanged; v5 (aef1b1d1) clean except the Repair Kit line written twice in panel 1 (kept as the owner's candidate); v6 (3c2726fa) got the card alone but garbled panel 4's balloon and doubled a word in panel 2 — v5 stands"
-    },
-    {
-      "p": 9,
-      "scene": "§2.4 Ratchet's den — the errand",
-      "cast": "cast_no_sword",
-      "shape": "FIVE panels, one speech balloon each, Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> speaking to HZD-99 in his den <<<44ecbf7f-0326-418f-9cc9-122391cad46f>>>. Panel 1: close on the small crystal glowing white on its cord at his chest, his hand touching it. Panel 2, tinted red like a memory: Ratchet alone in the dark den, frightened, pulling his own cell out of his chest, the red song-light at the window. Panel 3: he points off-panel; inset, a rock opening in a hillside of scrap under sky — an irregular cave mouth, never a door. Panel 4: inset drawing of a white crystal pillar in the dark with a small cat beside it, claws crackling. Panel 5: he lays a hand on his bench and looks at her, blue eyes steady. Ratchet is the SAME body in every panel he appears in: a big ROUND copper-brass robot with a swollen barrel belly, a domed helmet head with a narrow visor slit, worn tan-and-copper plating, a rack of canisters on his back and the small crystal on a cord at his chest, exactly as the reference — NEVER a slim humanoid robot, never a knight. EXACTLY five balloons on the page, one per panel, in the order listed; no balloon repeats and no other balloon exists.",
-      "text": [
-        "You restored my battery. Thank you. The stone in my necklace protected me when the infection reached me.",
-        "An evil robot hid a virus in Mother's song. I was afraid and alone, so I disconnected my battery and waited for help.",
-        "There is more of this stone in the Scrap Meadows cave. Find the rock opening and press UP beside it. Follow the caves to the crystal pillar.",
-        "Beside the pillar, hold ATTACK to charge your claws, then release. Collect the shard that falls.",
-        "Bring that shard back to my workshop. I will forge a cleansing sword. Take it to the first sage to free them from the virus."
-      ],
-      "refired": "v1 (78686b9e) drew Ratchet as a slim humanoid in four panels and garbled panel 3's balloon into a duplicate"
-    },
-    {
-      "p": 10,
-      "scene": "§2.5 The volt pack — the shop and the two verbs",
-      "cast": "cast_no_sword",
-      "shape": "SIX panels in three rows of two. Panel 1: Ratchet's counter in the den with a hanging sign and a price list; the sign text and the first list line are the text boxes. Panel 2: a cream item card for the Volt Pack over a drawing of the small charger pack clicking into a port in HZD-99's back, Ratchet's hands fitting it. Panel 3: she stands still with cyan light knitting a cracked plate on her body closed; tutorial chip. Panel 4: THE FIRST SURGE — she braces, jagged cyan-white arcs of current running her chassis from foot to ear, the air around her hazed, sparks thrown off the frame — NO rings, no circles; tutorial chip. Panel 5: the release — her claws sweep out in a full circle of white-cyan light, an impact frame, high contrast. Panel 6, small: above her head, the ring of charge — empty, then a sliver filling. Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> watches from behind the counter. Ratchet is the SAME body in every panel he appears in: a big ROUND copper-brass robot with a swollen barrel belly, a domed helmet head with a narrow visor slit, worn tan-and-copper plating, a rack of canisters on his back and the small crystal on a cord at his chest, exactly as the reference — NEVER a slim humanoid robot, never a knight. No sound words anywhere — no 'click'.",
-      "text": [
-        "Ratchet's Emporium",
-        "Volt Cell — 12 scrap — Refills your volts. The first one wires the Repair Protocol and the Volt Burst into you.",
-        "Volt Pack — Ratchet's charger, wired into you. The shards you knock out of machines are VOLTS now — hold HEAL to spend them mending a core, hold ATTACK to spend them on a Volt Burst.",
-        "Repair — hold it — volts become a core.",
-        "Volt Burst — hold ATTACK until she crackles, then let go."
-      ],
-      "refired": "v1 (026a3551) added a stray 'Click' in panel 2 (otherwise clean; kept for the owner to compare)"
-    },
-    {
-      "p": 11,
-      "scene": "§2.5 tail, §2.6 The meadow — arrival",
-      "cast": "cast_no_sword",
-      "shape": "FIVE panels. Panel 1: back on the waking street, a tall dark obelisk-like Mind Node with a glowing cyan sigil, HZD-99 touching it; this panel's one chip reads exactly: Solve the puzzle — Use the marked node and solve its puzzle. Panel 2: a small glowing tree of cyan nodes floating in front of her, one node lit; this panel's one chip reads exactly: Buy a skill — Open Skills and buy your first skill. Panel 3: the street's exit to the right, her walking toward it; this panel's one chip reads exactly: Go on — the way out is right. Panel 4, wide, NO text: THE SCRAP MEADOWS — fields of rusted machine scrap under a cold open sky, gantries hanging on cables high above, and a winding house: a teal A-frame with a torn canvas roof and a huge cable drum. Panel 5, NO text: OLD SERVO — an old boxy square-bodied robot, tan and copper, a domed head with an antenna and two dark rectangular eyes, his lower half rusted into the winding drum behind him — sitting DARK; HZD-99 in front of him holding her spare Power Cell, undecided. Three chips on the whole page and not one more; the words 'Buy a skill' appear on the page exactly once.",
-      "text": [
-        "Solve the puzzle — Use the marked node and solve its puzzle.",
-        "Buy a skill — Open Skills and buy your first skill.",
-        "Go on — the way out is right."
-      ],
-      "refired": "v1 (b5a41900) invented a fourth chip 'Tutorial — On a steel and plaster street.'; v2 (dff33d00) still wrote a fourth chip, a second 'Buy a skill' in panel 3"
-    },
-    {
-      "p": 12,
-      "scene": "§2.6 The meadow — Old Servo, the first fight",
-      "cast": "cast_no_sword",
-      "shape": "SIX panels. Panels 1 to 5 are Old Servo speaking — an old boxy square-bodied robot, tan and copper plating, a domed head with a thin antenna and two rectangular AMBER eyes now lit, his lower half rusted into the great cable drum of the winding house behind him — one speech balloon per panel, HZD-99 listening small in front of him. Panel 1: his eyes lighting amber as her cell goes in. Panel 2: he mimes with an old hand. Panel 3: he taps her chest plate. Panel 4: he looks past her at the scrap fields. Panel 5, wide: he looks back over his shoulder at the gantries strung high above the meadow and the drum he is part of. Panel 6, wide, the first real fight: a red-eyed crawler <<<c7adb432-7f01-47d6-9dcc-221fdc5ed13d>>> coming at her, and beyond a rise of scrap a taller armoured sentry machine — a guard — rising over the crest with red eyes; she crouches with claws out. No text in panel 6. EXACTLY five balloons on the page, one per panel in panels 1 to 5, in the order listed, each balloon complete and unbroken; no balloon is split in two, no word is repeated. Panel 6 has no text.",
-      "text": [
-        "Mrrow… a working unit! I haven't seen one since the Null Core began broadcasting.",
-        "Move with the arrows, leap with Z, and swipe those claws with X.",
-        "Claw the corrupted to harvest volts. Then stand still, hold F — the ✚ pad on a phone — and your frame will mend a core.",
-        "The virus corrupts every machine it touches. Purge it, little paw — or rust with the rest of us.",
-        "See the winding house behind me? I raised every gantry over this meadow off that drum, cable by cable. The drum still turns. My climbing days are what rusted."
-      ],
-      "refired": "v1 (1266c873) split Servo's last balloon in two and doubled the word 'cable'"
-    },
-    {
-      "p": 13,
-      "scene": "§2.7 The hub — NULLFANG's first meeting: fall, land, wind",
-      "cast": "cast_no_sword",
-      "shape": "FIVE panels, NO TEXT AT ALL on this page — not one word is spoken. Panel 1, wide: the widest room of the kingdom, HZD-99 on a crest of scrap, and to the east (the right) a vista of the silent machine city under a cold sky. Panel 2, tall: NULLFANG <<<1922c573-cee1-48fb-aa59-d5f97d14783f>>>, the enormous armoured robot lion, dropping out of the sky to the right of her, motion lines straight down, red light behind its eyes. Panel 3, wide and EMPTY of motion: it has landed; dust settling; she frozen small at the left, the lion at the right, nothing moving — a silent beat. Panel 4: it walks up to her; her head is level with its paw; she does not move. Panel 5, tall and narrow: its great paw raised over her and HELD, claws out, an amber glint along the edge — the wind-up held a hair too long. She stays screen-left, the lion screen-right, in every panel.",
-      "text": []
-    },
-    {
-      "p": 14,
-      "scene": "§2.7 The hub — the swipe, the watch, the leaving",
-      "cast": "cast_no_sword",
-      "shape": "Panel 1, a thin strip across the top: THE IMPACT FRAME — the swipe — almost pure white, high contrast, the shapes of the paw and the cat abstracted to slashes, no detail. Panel 2, THE SPLASH, most of the page: NULLFANG <<<1922c573-cee1-48fb-aa59-d5f97d14783f>>>, red-eyed, standing over the small white cat lying on her side where she landed in the scrap, looking down at her; focus lines radiate from the lion's head; she is tiny under it, one ear bent, eyes narrowed but lit. Panel 3, small inset lower left: the lion turning away, bored, coiling. Panel 4, small inset lower right: it bounding away east, already far, dust behind it. Panel 5, a strip at the bottom: a small round portrait of Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> beside a speech balloon with his line.",
-      "text": [
-        "It threw you once. The corridor still has the dent. Go and put one in it."
-      ]
-    },
-    {
-      "p": 15,
-      "scene": "§2.8 Under the meadow — the buried mouth",
-      "cast": "cast_no_sword",
-      "shape": "FIVE panels. Panel 1, tall: HZD-99 falling through a brittle floor that has just given way under the hub, dust and plates falling with her, into a dark chamber below. Panel 2: a glowing terminal screen in the dark with its log in a cream box. Panel 3: a pile of fallen rock in the chamber wall, and she stands before it with an ear turned to it; caption. Panel 4: she strikes the pile with her claws, rocks shifting; caption. Panel 5, wide: the rock gives way and an irregular CAVE MOUTH opens — a ragged hole in the rock, never a door, cold mist breathing out of it, a faint glow deep inside; caption.",
-      "text": [
-        "MAINTENANCE LOG 0x2F: sub-hatch sealed after an anomalous signal. If found — do not answer it.",
-        "Something is calling from behind the fallen rock. STRIKE it.",
-        "The pile shifts. The sound behind it comes closer.",
-        "The rock gives way — the tunnel is open, and it is breathing."
-      ]
-    },
-    {
-      "p": 16,
-      "scene": "§2.9 The crystal cave — the beacon and the Deaf System's log",
-      "cast": "cast_no_sword",
-      "shape": "FIVE panels; the lower half of the page is text. Panel 1: a carved rock cavity with daylight from the cave mouth behind her, HZD-99 walking in. Panel 2, small: a side tunnel behind rubble with a simple metal bench in it. Panel 3, wide and dark: the long middle of the cave, she tiny, only her eye-lights and scarf catching light. Panel 4: THE BEACON — an old squat signal machine set into the rock, one slow amber lamp, cables into the stone, calling; caption. Panel 5, large: the beacon's log as a terminal screen — a dark box with the heading line and three paragraphs in clear cream text, big enough to read. The log panel carries every word of the log exactly as listed, in three paragraphs under its heading — no word dropped, none added. Panels 1, 2 and 3 carry NO text. Panel 4's caption box holds only the first listed line, the one beginning 'THE SOUND HAD A SOURCE'. The terminal in panel 5 has the heading 'LOG // THE DEAF SYSTEM' written ONCE at its top and the three paragraphs below it. No description of the beacon or of anything else is ever written on the page — the drawing is the beacon, the words are only the listed lines.",
-      "text": [
-        "THE SOUND HAD A SOURCE. It has been calling into the rock for a long time, and nothing was ever listening.",
-        "LOG // THE DEAF SYSTEM",
-        "When the song came, the broken were the lucky ones. Cracked receivers, stripped antennae, factory rejects — every unit whose ears were dead heard NOTHING. And nothing is what saved them.",
-        "They went under. Into the rock, where the signal dies. They rebuilt down here — a system of the deaf, wired by touch and light. No radio. No song.",
-        "The caves do not connect to each other. That is not a flaw. A tunnel the song cannot walk is a tunnel worth keeping short."
-      ],
-      "refired": "v1 (e2f45d3c) dropped the word 'saved' from the log; v2 (7f0cef7c) got the log right but wrote the beacon's stage direction into panel 4's caption and doubled the log heading"
-    },
-    {
-      "p": 17,
-      "scene": "§2.9 The crystal cave — the pillar and the shard",
-      "cast": "cast_no_sword",
-      "shape": "SIX panels. Panel 1: at the end of the dark, two red-eyed crawlers <<<c7adb432-7f01-47d6-9dcc-221fdc5ed13d>>> and HZD-99 fighting them with her claws. Panel 2, tall: THE PILLAR — a white crystal pillar growing from black rock, three spires, glowing softly from within, taller than she is; she stands beside it. Panel 3: her claws glancing off the crystal with a spark; caption. Panel 4: the storm on her chassis — jagged cyan-white arcs foot to ear, hazed air, sparks, no rings. Panel 5: the burst shatters the pillar; a bright shard falling toward her paws; a cream item card. Panel 6, dark: her AURA coming on — she glows white in the black cave, and at the edges two crawler shapes read as PURPLE outlines.",
-      "text": [
-        "Claws glance off the pure crystal. Hold ATTACK to supercharge, then release beside it.",
-        "Pure Crystal Shard — Quarried from the pillar with the supercharged claw. Ratchet can forge this into something the song will fear."
-      ],
-      "refired": "v1 (7a6105c8) hung in progress for over thirty minutes; resubmitted unchanged"
-    },
-    {
-      "p": 18,
-      "scene": "§2.10 The forging",
-      "cast": "cast_sword_v2",
-      "shape": "FIVE panels. Panel 1: back in Ratchet's den <<<44ecbf7f-0326-418f-9cc9-122391cad46f>>>, HZD-99 holds up the glowing white shard; Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> leans over the bench, blue eyes wide; his speech balloon. Panel 2, wide: THE FORGING — sparks flying, his hands at an anvil shaping white crystal in a blaze of light, her watching with ears back. Panel 3: a cream item card over a drawing of THE PURIFIER <<<d0a03e79-2887-4bcd-a209-11732c6754ef>>>, the white crystal sword with a gold connector ring at the pommel. Panel 4, small: a floating tree of cyan nodes with one NEW branch growing and lighting. Panel 5: she — the SAME small round cat as in panels 1 and 2, no taller than Ratchet's knee — stands with the white blade strapped across her small round back; Ratchet's speech balloon. NO label on the forging panel, NO tutorial chip anywhere on this page — the only writing is the two balloons and the one item card listed. Ratchet is the SAME body in every panel he appears in: a big ROUND copper-brass robot with a swollen barrel belly, a domed helmet head with a narrow visor slit, worn tan-and-copper plating, a rack of canisters on his back and the small crystal on a cord at his chest, exactly as the reference — NEVER a slim humanoid robot, never a knight. She is the same small round cat in every panel; never tall, never humanoid, never a warrior girl. HZD-99 never speaks and has NO balloon anywhere on the page; panel 5's only text is Ratchet's one balloon, written once as one balloon.",
-      "text": [
-        "The pillar shard! Hold still — sparks now — and let the song learn what fear is. The PURIFIER is yours.",
-        "THE PURIFIER — A white crystal shaped like a sword. It hums against the Eye's static — and its handle was made to CONNECT to something.",
-        "That blade on your back is the best work these hands ever did. Something under this kingdom is still singing — go and let it meet my crystal."
-      ],
-      "refired": "v1 (7ddbdb58) invented a 'THE FORGING' label and a tutorial chip; v2 (6f7460d0) fixed the text and Ratchet but drew her as a tall humanoid in panel 5; v3 (0125f543) kept her small but gave her a nonsense balloon in panel 5 and split Ratchet's"
-    },
-    {
-      "p": 19,
-      "scene": "§2.11 The wings of the meadow (optional errands)",
-      "cast": "cast_sword_v2",
-      "shape": "THREE horizontal strips, each strip two panels. Strip 1, THE GANTRIES: gantries on cables high over the meadow with a loose coil of cable hanging; Old Servo (old boxy tan-and-copper robot, amber rectangular eyes, rusted into his cable drum) with a speech balloon; then HZD-99 handing him the coil and his second balloon. Strip 2, THE DEAF SYSTEM'S POCKET, no text: she breaks through a brittle rock plug into a small pocket with an old terminal and a single coin of salvage, nothing alive in it. Strip 3, THE SHAFT: a shaft straight down into the dark, she standing in it at the bottom looking up at a far pinpoint of light; then Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> with two speech balloons, one before and one after. Ratchet is the SAME body in every panel he appears in: a big ROUND copper-brass robot with a swollen barrel belly, a domed helmet head with a narrow visor slit, worn tan-and-copper plating, a rack of canisters on his back and the small crystal on a cord at his chest, exactly as the reference — NEVER a slim humanoid robot, never a knight. Old Servo is a boxy square-bodied old robot with a domed head, thin antenna and rectangular amber eyes, rusted into his cable drum. She is a small round cat in every panel, never tall.",
-      "text": [
-        "A coil shook loose in the gantries above us. I cannot climb any more.",
-        "That is the one. Take this — I have no use for it and you will.",
-        "There is a shaft under the meadow nobody has stood in since the fall. See it for me.",
-        "You stood in it. Nobody has, in a long time. Here."
-      ],
-      "refired": "v1 (9ddacad2) drew HZD-99 as a tall humanoid warrior in every panel and Ratchet as a slim humanoid"
-    },
-    {
-      "p": 20,
-      "scene": "§2.12 The Chime — the Eye's first construct",
-      "cast": "cast_sword",
-      "shape": "FIVE panels. Panel 1, tall: HZD-99 climbing a stack of scrap and girders above the hub. Panel 2, wide: an arena at the top under sky; hovering in it, CHIME — not an animal but an INSTRUMENT: a bell-shaped construct of dark steel, a single Power Cell glowing in its heart, rings of sound coming off it; caption. Panel 3: it rings and drops toward her; she leaps and cuts it with the white blade. Panel 4: it lies broken on the arena floor, dark and empty; caption. Panel 5: the Power Cell it was built around lying in the wreck, and behind a broken wall, a single coin and a heap of scrap.",
-      "text": [
-        "CHIME — it is singing at you.",
-        "Destroyed. There was nobody in it."
-      ]
-    },
-    {
-      "p": 21,
-      "scene": "§2.13 The Alpha's den",
-      "cast": "cast_sword_v2",
-      "shape": "FIVE panels. Panel 1, wide: a den on the road — a clean floor with heaps of dead machine hulks at both ends; a pack of lean grey wolf-frame robots with red eyes; caption. Panel 2, tall: THE ALPHA — a great grey wolf-frame robot, much bigger than the pack, leaping at her, jaws open; she rolls under it. Panel 3: the fight — her white blade against its claws, sparks, motion lines. Panel 4: the Alpha lowering its head to her, yielding; its eyes going from red to cyan; a cream card. Panel 5, wide: the pack sitting around her, calm, cyan-eyed, and an irregular cave mouth opening in the den wall behind them. The Alpha and the wolves carry NOTHING — no weapons, no swords; they fight with jaws and claws only. The only blade on the page is hers.",
-      "text": [
-        "THE ALPHA — the pack answers to this.",
-        "THE PACK IS YOURS — It yielded. Every wolf in the machine world knows it now — they will not raise a tooth to you again."
-      ],
-      "refired": "v1 (1e6db652) put a sword in the Alpha's hand in panel 3"
-    },
-    {
-      "p": 22,
-      "scene": "§2.14 The camp",
-      "cast": "cast_sword_v2",
-      "shape": "SIX panels. Panel 1, wide: the camp — a metal bench, a small fire in a drum, and Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> at a second counter under a torn awning in the meadow; caption. Panels 2, 3 and 4: Ratchet at his counter, one speech balloon each, HZD-99 in front of him with the white blade on her back; his posture changes — arms folded, then leaning in, then open-handed. Panel 5: a vault of iron spikes under the camp, reached through a broken cellar floor, a star-shaped fragment glowing at its far end. Panel 6: her empty white husk standing in the meadow and Ratchet passing it; his speech balloon. Ratchet is the SAME body in every panel he appears in: a big ROUND copper-brass robot with a swollen barrel belly, a domed helmet head with a narrow visor slit, worn tan-and-copper plating, a rack of canisters on his back and the small crystal on a cord at his chest, exactly as the reference — NEVER a slim humanoid robot, never a knight. EXACTLY five balloons and one caption, each complete and unbroken — panel 4's balloon begins with the words 'Take what you need.'",
-      "text": [
-        "The trader is open for business.",
-        "Cat-frame. Cute. Don't touch the stock with those claws.",
-        "Heard the Meadows went quiet. Heard it was you. Prices stand, mind.",
-        "Take what you need. I salvage from the dead, and you keep making fewer of them.",
-        "You came back. Your husk was still warm when I passed it."
-      ],
-      "refired": "v1 (1d12b876) truncated panel 4's balloon to 'need. I salvage…'"
-    },
-    {
-      "p": 23,
-      "scene": "§2.15 NULLFANG — the fight",
-      "cast": "cast_sword",
-      "shape": "SIX panels. Panel 1, wide: the lair at the end of the kingdom — a wide scrap arena under a dark sky; caption. Panel 2: NULLFANG <<<1922c573-cee1-48fb-aa59-d5f97d14783f>>> facing her, red-eyed, head low; caption. Panel 3: the fight — it leaps, she slides under with the white blade up, sparks off its plating. Panel 4: faster now — it stalks low, crouches short, chains two leaps in one panel with motion lines. Panel 5: it staggers, dazed, head shaking; caption; she runs in striking. Panel 6, wide: it kneels, plating cracked, red light dimming, still looking at her; she stands small before it with the blade lowered; caption.",
-      "text": [
-        "NULLFANG, THE VIRUS BEAST.",
-        "It remembers the corridor.",
-        "⚡ NULLFANG is reeling — hit it NOW.",
-        "NULLFANG is down. It is still looking at you."
-      ]
-    },
-    {
-      "p": 24,
-      "scene": "§2.15 NULLFANG — the fork, both branches",
-      "cast": "cast_sword",
-      "shape": "The page splits into TWO COLUMNS below a top strip. Top strip: NULLFANG <<<1922c573-cee1-48fb-aa59-d5f97d14783f>>> kneeling and two choice boxes side by side, the left one and the right one. LEFT COLUMN, TAME, two panels: the white blade laid against the lion and white light pouring through its plating, the red draining out of its eyes to CYAN, with its caption; then the freed lion, cyan-eyed, standing beside her, with a cream card. RIGHT COLUMN, FINISH, two panels: she closes the distance and lands the blow, an abstract impact frame; then her alone with the lion's fang held in her paw, with a cream card. Bottom strip across both columns: the ground of the lair splitting and an irregular cave mouth opening; caption.",
-      "text": [
-        "◀ TAME — Cut the virus out. It lives, and it owes you.",
-        "▶ FINISH — End it. Take its strength for your own.",
-        "The virus is destroyed — NULLFANG is free. He seems to like you.",
-        "NULLFANG'S OATH — Once each room, the blow that would break you is answered instead — it comes out of the dark and roars them off you.",
-        "RESOLVE — You took what it had. Every strike you land from here hits 18% harder, forever.",
-        "The ground shifted — a CAVE MOUTH has opened in the lair."
-      ]
-    },
-    {
-      "p": 25,
-      "scene": "§2.16 The grotto, the tunnel, and the sage kneeling",
-      "cast": "cast_sword_v2",
-      "shape": "SIX panels. Panel 1, small: a grotto of rock behind the lair with a metal bench, and beside it a tunnel with a small bat-machine hanging from the roof. Panel 2, LARGE, the top half of the page: the tunnel's terminal as a dark screen filling the panel, with the three paragraphs of its log in clear cream text big enough to read — the first three listed lines, one paragraph each, every word. Panel 3, wide: the deep chamber, a kneeling sage: a tall thin robot on its knees, head bowed, wrapped in a BLACK halo with an ember-red rim; HZD-99 small before it; caption with the fourth listed line. Panel 4: her claws passing through the halo doing nothing; caption with the fifth listed line, complete in this one box. Panel 5, small: she draws the white blade from her back. Panel 6, small: the blade's white light against the black halo, the first cut. No label names the chamber; no text anywhere except the five listed lines, each written once. The chamber has no name written anywhere. Nothing narrates her actions — no caption says what she reaches for or does; panels 5 and 6 have no text at all. She is a small round cat in every panel, never tall.",
-      "text": [
-        "One of the wise ones counted our dead from the meadow above. We carried it under when the counting stopped making sense — but its ears were too good, and the song found it even in the rock.",
-        "We could not silence it and we would not end it. We sealed it in the deep chamber. It kneels there still, counting the other way.",
-        "If you carry clean light, go in to it. It kept one cell charged through everything. It always said somebody would come.",
-        "The sage kneels — the song holds its body together. Broken, but not CLEAN.",
-        "Claws cannot cleanse the song. The PURIFIER can."
-      ],
-      "refired": "v1 (6ddf1064) hung in progress for over thirty minutes; v2 (0c531775) shrank the log to an unreadable smear, invented a 'THE DEEP CHAMBER' label and split the last caption across two panels; v3 (3bb303a1) got the log right but kept a 'THE DEEP CHAMBER.' label, narrated her drawing the sword in a caption, and drew her as a tall humanoid"
-    },
-    {
-      "p": 26,
-      "scene": "§2.16 The first sage, purified",
-      "cast": "cast_sword_v2",
-      "shape": "FIVE panels. Panel 1, a strip of four small frames: four cuts of the white blade, and the halo around the kneeling sage going from black to BLUE cut by cut. Panel 2, THE SPLASH, large: the sage rising from its knees inside a clean BLUE halo, and HZD-99 small before it with the white blade lowered, light everywhere; a cream card. Panel 3: the sage holding out one glowing Power Cell to her; a cream card. Panel 4: back at the camp, Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> at his counter with his speech balloon. Panel 5, small and silent: the kingdom's map of rooms with every room lit cyan. The sage is a TALL, THIN kneeling robot — narrow body, long limbs, a hood of dead cables over its head — clearly a different body from Ratchet's round barrel one. Ratchet is the SAME body in every panel he appears in: a big ROUND copper-brass robot with a swollen barrel belly, a domed helmet head with a narrow visor slit, worn tan-and-copper plating, a rack of canisters on his back and the small crystal on a cord at his chest, exactly as the reference — NEVER a slim humanoid robot, never a knight.",
-      "text": [
-        "A SAGE, PURIFIED — The song lets go. The sage remembers everything — and gives what it kept for whoever would come with clean light.",
-        "THE MEADOW SAGE — It counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light.",
-        "Word crawls up even from the deaf places: a sage knelt down there and STOOD UP clean. My forge did that. You did that. Prices still stand, mind."
-      ],
-      "refired": "v1 (f82fc35d) drew the sage in Ratchet's round body"
-    },
-    {
-      "p": 27,
-      "scene": "§2.17 End of the free chapter",
-      "cast": "cast_sword",
-      "shape": "ONE full-page image with one cream caption box at the bottom. HZD-99 walks away from the camp, seen from behind, the white blade on her back, the Scrap Meadows behind her lit warm, and ahead of her the way down into the Data Conduits — a dark tunnel mouth threaded with cables and cold blue light. Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> small in the distance at his counter watching her go.",
-      "text": [
-        "END OF THE FREE CHAPTER — The Scrap Meadows are behind her. The Data Conduits are not. — Five kingdoms, five more guardians and the Null Core are waiting in the full game."
-      ]
+     "job": "99faa5ee-a788-42cf-97f0-344207979865",
+     "note": "stands"
     }
-  ],
-  "cast_sword_v2": "CAST: HZD-99 is <<<467c8e08-8161-483f-a4cf-439875ff04e2>>> — keep her identity, materials and proportions exactly: a SMALL, round, short-legged robot cat with a head as big as her body, toddler-mascot proportions, ivory head and body, tall ears with mint inner surfaces, charcoal visor with two cyan eye-lights, red scarf that flows into a cape, gold shoulder discs, white mitten paws — NEVER a tall humanoid, never a slim warrior, never a cat-girl. From this page on she carries THE PURIFIER, <<<d0a03e79-2887-4bcd-a209-11732c6754ef>>>, a single white crystal sword, on her back or in her paw; no other weapon. She has no mouth; her feeling is in her eye aperture, ear angle, head tilt and body lean."
+   ],
+   "job": "99faa5ee-a788-42cf-97f0-344207979865",
+   "refired": 0
+  },
+  {
+   "p": 2,
+   "scene": "§1 Prologue, film shots 1–4",
+   "cast": "cast_no_sword",
+   "shape": "FOUR panels stacked top to bottom, each with ONE narrator caption along its bottom edge — four captions on the page and nothing else written. Panel 1, wide: KERNEL DEPTHS seen from above — a city of machines, towers and hanging cables, a thousand small cyan lights, and one tall broadcast tower at the centre sending out gentle rings of cyan light. Panel 2: MOTHER-V, <<<f541aa62-fd48-49e1-a938-f17ca6c8b810>>>, the broadcast heart — a radial machine of violet-grey plates around one golden core, no face, singing in soft cyan rings, while below her small machines go about their work content and cyan-lit. Panel 3: the tower from below as its light turns from cyan to red; behind it looms a huge featureless black silhouette with no face, no eyes and no detail of any kind — a shadow only, the evil robot is never seen. Panel 4: a street of machines mid-task, a thin red thread of signal running from one to the next, their eye-lights turning red one after another. There is NO cat anywhere on this page.",
+   "text": [
+    "KERNEL DEPTHS. A city of machines, run on one broadcast — the Mother's Song.",
+    "MOTHER-V, the broadcast heart. While she sang, the Depths were kind.",
+    "Until an evil robot hijacked her Song.",
+    "Hidden in the melody, a virus spread from machine to machine."
+   ],
+   "takes": [
+    {
+     "job": "2acb7565-5386-43f7-b5ba-08015708a606",
+     "note": "stands"
+    }
+   ],
+   "job": "2acb7565-5386-43f7-b5ba-08015708a606",
+   "refired": 0
+  },
+  {
+   "p": 3,
+   "scene": "§1 Prologue, film shots 5–8",
+   "cast": "cast_no_sword",
+   "shape": "FOUR panels stacked top to bottom, each with ONE narrator caption along its bottom edge — four captions on the page and nothing else written. Panel 1: a crowd of machines in a plaza, every one of them turned the same way toward the distant tower, stopped mid-gesture, every eye red. Panel 2: the protectors of the kingdoms kneeling in a row under the red light — the ivory robot lion <<<c4817fa5-2b9d-4977-893d-f362bdb21906>>> in front, and behind it a great iron eagle, a bronze pipe-built dragon and a frosted white unicorn — red light behind all their eyes, heads bowed. Panel 3: a dark service bay, one shaft of light; the service cradle <<<8a305cd0-2f5e-490e-bfe9-9e8a006ea0a4>>> with a small white robot cat asleep in it, far too small for the chair, cables plugged into her back, her eye-lights dark. Panel 4, the last: an extreme close-up of her charcoal visor filling the panel as two cyan eye-lights come on — the page ends on her eyes opening.",
+   "text": [
+    "The Song became a command: OBEY.",
+    "Even the protectors of the kingdoms fell under its command.",
+    "Forgotten in a service cradle, a small maintenance cat slept through the broadcast.",
+    "HZD-99 woke to a silent city — and went to give the Song back."
+   ],
+   "takes": [
+    {
+     "job": "c7e046df-93b7-496b-9506-ffc073a43af2",
+     "note": "stands"
+    }
+   ],
+   "job": "c7e046df-93b7-496b-9506-ffc073a43af2",
+   "refired": 0
+  },
+  {
+   "p": 4,
+   "scene": "§2.1 The cradle — W1",
+   "cast": "cast_no_sword",
+   "shape": "FIVE panels. Panel 1, wide: the dark service bay, the service cradle <<<8a305cd0-2f5e-490e-bfe9-9e8a006ea0a4>>> at the left, one shaft of light from the right side of the room, HZD-99 sitting up in the cradle with cables still plugged into her back, the machine's tool arms letting go of her; no text. Panel 2, small: close on the last umbilical plug coming off her back with a jolt and a spark; no text. Panel 3: she stands up in the cradle that is far too big for her, ears up, looking at the light; one small thought cloud at her head with the first listed line. Panel 4: she walks right toward the light across the empty floor, small in a big dark room; no text. Panel 5, wide: the door at the end of the bay standing open, dust in the light pouring in, her silhouette small in the doorway; one narrator caption with the second listed line. Two boxes on the whole page. Nothing else is in this room — no enemies, no other machines. Her back is BARE: nothing strapped to it, no blade, no hilt, no glowing shape — if a reference shows a weapon, leave it out; she has only her white paws. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed.",
+   "text": [
+    "...quiet.",
+    "The door had been open a long time."
+   ],
+   "refired": 1,
+   "takes": [
+    {
+     "job": "56ea83d2-f451-43ea-a0cc-3fb4fdf8d4d9",
+     "note": "a blade on her back before the forging"
+    },
+    {
+     "job": "5a1963ac-2ab6-450d-8885-a75d9e713ed7",
+     "note": "stands"
+    }
+   ],
+   "job": "5a1963ac-2ab6-450d-8885-a75d9e713ed7"
+  },
+  {
+   "p": 5,
+   "scene": "§2.2 The road and the gates — W2",
+   "cast": "cast_no_sword",
+   "shape": "FOUR panels. Panel 1, wide: outside under a cold sky, a long cracked road running away from us with the city gates <<<da11ff82-f67a-481a-b038-dde9c65f4291>>> small at the far end, HZD-99 tiny on the road; one narrator caption with the first listed line. Panel 2: a fallen rusted beam across the road with a gap beyond it; she is mid-jump over it, scarf streaming, motion lines along her path; no text. Panel 3, tall: the gates HUGE above her, rust-orange doors and teal towers filling the frame, the row of lamps along the lintel, she a small white shape beneath them looking up; one narrator caption with the second listed line. Panel 4, wide: seen from inside the city, the two great doors closing on the empty road behind her, the last light narrowing to a line; she stands with her back to us; one narrator caption with the third listed line. Three captions on the page and nothing else written. Nobody else anywhere.",
+   "text": [
+    "The city was standing. It was silent.",
+    "The gates were the only monument in the kingdom, and nobody had walked through them in a long time.",
+    "They closed behind her. Waking up is one-way too."
+   ],
+   "takes": [
+    {
+     "job": "81aabbe7-891d-41ee-87a6-dcf3af78093e",
+     "note": "stands"
+    }
+   ],
+   "job": "81aabbe7-891d-41ee-87a6-dcf3af78093e",
+   "refired": 0
+  },
+  {
+   "p": 6,
+   "scene": "§2.3 The waking floor — A0",
+   "cast": "cast_no_sword",
+   "shape": "SIX panels in three rows of two. Panel 1: a cramped first street inside the gates; one crawler <<<c7adb432-7f01-47d6-9dcc-221fdc5ed13d>>>, a squat four-legged drill machine, standing calm with RED eye-lights; behind it, set into the street wall, the trader's booth <<<2f790258-47df-4a35-acfa-f63415c45486>>> with its torn awning; one narrator caption with the first listed line. Panel 2: she rakes the crawler with her claws — it does not fight back, it only rocks; no text. Panel 3: the crawler breaking apart into a wreck, plates falling; no text. Panel 4: scrap — small bright bits of metal — scattered on the floor and her walking over them, the bits lifting toward her; one narrator caption with the second listed line. Panel 5: close on her paw holding a few bits of scrap, her eyes on them; one narrator caption with the third listed line. Panel 6: the booth door in the street wall swinging open with warm amber light inside, she looking in; one narrator caption with the fourth listed line. Four captions on the page and nothing else written.",
+   "text": [
+    "The first machine she ever broke was calm. It did not fight back.",
+    "What a broken machine leaves behind is the only money down here.",
+    "The trader takes it for repairs, parts and upgrades — so a machine you break is a machine you spend.",
+    "A door opened in the wall. Somebody was asleep inside."
+   ],
+   "takes": [
+    {
+     "job": "6782877d-277c-4805-853c-ddc5e655649f",
+     "note": "stands"
+    }
+   ],
+   "job": "6782877d-277c-4805-853c-ddc5e655649f",
+   "refired": 0
+  },
+  {
+   "p": 7,
+   "scene": "§2.4 Ratchet's den — the note and the cell",
+   "cast": "cast_no_sword",
+   "shape": "FIVE panels. Panel 1, wide: inside Ratchet's den <<<44ecbf7f-0326-418f-9cc9-122391cad46f>>> — the timber workshop under one hanging lamp; Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> the big round copper-brass robot sits DARK and slumped at the bench, eye-lights off; a sleeping pod built into the wall at the corner; a chest at the foot of the bench; HZD-99 small in the doorway; one narrator caption with the first listed line. Panel 2, large: close on a paper tag hanging from his chest plate; the tag itself is drawn big enough to read and its handwriting IS the second and third listed lines, written on the paper in a steady hand, nothing else on it. Panel 3: HZD-99 holding up her one glowing Power Cell — a small cylinder with cyan light — and looking from it to him; one narrator caption with the fourth listed line. Panel 4: her paws pushing the cell into an open port in his chest; no text. Panel 5: close on his domed helmet as two eye-lights come up BLUE; one narrator caption with the fifth listed line. Five pieces of writing on the page and nothing else.",
+   "text": [
+    "A tag hung from his chest plate, written in a steady hand.",
+    "The broadcast takes every machine that listens. I will not listen — and I will not wait around to change my mind. I have taken out my own cell and hidden it where the rats forget to look.",
+    "If you are reading this, the city fell. When it is safe out there — truly safe — put the cell back in. I will do the rest. — R.",
+    "One Power Cell would bring him back. She was carrying one.",
+    "Ratchet was awake."
+   ],
+   "takes": [
+    {
+     "job": "60b26e80-dd97-4596-b0e4-eafc7eb94e22",
+     "note": "stands"
+    }
+   ],
+   "job": "60b26e80-dd97-4596-b0e4-eafc7eb94e22",
+   "refired": 0
+  },
+  {
+   "p": 8,
+   "scene": "§2.4 Ratchet's den — the kit, the cradle, the pack",
+   "cast": "cast_no_sword",
+   "shape": "FIVE panels. Panel 1: Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>>, awake now with blue eye-lights, hands HZD-99 a small repair kit case across the bench; one narrator caption with the first listed line. Panel 2: he gestures with an open hand at the sleeping pod built into the den wall <<<44ecbf7f-0326-418f-9cc9-122391cad46f>>>; his speech balloon with the second listed line. Panel 3: he taps his counter, a shelf behind him with a small charger pack on it; his speech balloon with the third listed line. Panel 4: close on HZD-99 listening, ears forward, a faint empty ring of light drawn above her head; his speech balloon, tail leading out of frame to him, with the fourth listed line. Panel 5, small and silent: only his hand, reaching sideways for a tool that is not on the bench — the tic — no text in this panel. One caption and three balloons on the page and nothing else written; each balloon holds its whole line once, unbroken, no phrase repeated.",
+   "text": [
+    "He gave her a repair kit. It would patch two cores.",
+    "See that cradle in the corner? Built it into the wall myself. Step in and it remembers you — everything you are, kept safe — and it patches your plating while you stand there. Use it. That is what it is for.",
+    "And when you have scrap, come to my counter. I keep a volt pack — my own charger, cut down to your size. It wires that ring at the top of you to something useful.",
+    "Hits you land charge the ring. With the pack in you, you can SPEND it: hold HEAL to mend a core, or hold ATTACK and let go for a burst from your claws. The ring is empty now — go earn some."
+   ],
+   "takes": [
+    {
+     "job": "c036193f-9403-4465-b530-4efb36df7bf8",
+     "note": "stands"
+    }
+   ],
+   "job": "c036193f-9403-4465-b530-4efb36df7bf8",
+   "refired": 0
+  },
+  {
+   "p": 9,
+   "scene": "§2.4 Ratchet's den — the errand",
+   "cast": "cast_no_sword",
+   "shape": "FIVE panels, one speech balloon each, Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> speaking to HZD-99 in his den <<<44ecbf7f-0326-418f-9cc9-122391cad46f>>>. Panel 1: close on the small crystal glowing white on its cord at his chest, his hand touching it. Panel 2, tinted red like a memory: Ratchet alone in the dark den, frightened, pulling his own cell out of his chest, the red song-light at the window. Panel 3: he points off-panel; inset, a rock opening in a hillside of scrap under sky — an irregular cave mouth, never a door. Panel 4: inset drawing of a white crystal pillar in the dark with a small cat beside it, claws crackling. Panel 5: he lays a hand on his bench and looks at her, blue eyes steady. EXACTLY five balloons on the page, one per panel, in the order listed; each complete and unbroken; nothing else written. Her back is BARE: nothing strapped to it, no blade, no hilt, no glowing shape — if a reference shows a weapon, leave it out; she has only her white paws. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed. In the panel 4 inset she charges her BARE claws beside the pillar — no sword, no blade.",
+   "text": [
+    "You restored my battery. Thank you. The stone in my necklace protected me when the infection reached me.",
+    "An evil robot hid a virus in Mother's song. I was afraid and alone, so I disconnected my battery and waited for help.",
+    "There is more of this stone in the Scrap Meadows cave. Find the rock opening and press UP beside it. Follow the caves to the crystal pillar.",
+    "Beside the pillar, hold ATTACK to charge your claws, then release. Collect the shard that falls.",
+    "Bring that shard back to my workshop. I will forge a cleansing sword. Take it to the first sage to free them from the virus."
+   ],
+   "refired": 1,
+   "takes": [
+    {
+     "job": "384ad854-5361-40d0-b442-88a6e8f52cba",
+     "note": "a sword in her paw in the pillar inset, before the forging"
+    },
+    {
+     "job": "e185947b-e2b0-44e1-8667-42fa13e10b4e",
+     "note": "stands"
+    }
+   ],
+   "job": "e185947b-e2b0-44e1-8667-42fa13e10b4e"
+  },
+  {
+   "p": 10,
+   "scene": "§2.5 The volt pack — the shop and the two verbs",
+   "cast": "cast_no_sword",
+   "shape": "SIX panels in three rows of two. Panel 1: Ratchet's counter in the den with a hanging wooden sign; the sign's own painted letters read the first listed line and nothing more; Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> behind it; HZD-99 tipping her handful of scrap onto the counter. Panel 2: the small charger pack clicking into a port in HZD-99's back, Ratchet's hands fitting it; one narrator caption with the second listed line. Panel 3: she stands still with cyan light knitting a cracked plate on her body closed; one narrator caption with the third listed line. Panel 4: THE FIRST SURGE — she braces, jagged cyan-white arcs of current running her chassis from foot to ear, the air around her hazed, sparks thrown off the frame — no rings, no circles; one narrator caption with the fourth listed line. Panel 5: the release — her claws sweep out in a full circle of white-cyan light, an impact frame, high contrast; no text. Panel 6, small: above her head, the ring of charge — empty, then a sliver filling — Ratchet watching from behind the counter; one narrator caption with the fifth listed line. One sign and four captions on the page and nothing else written.",
+   "text": [
+    "Ratchet's Emporium",
+    "Everything she had bought one thing: Ratchet's charger, wired into her.",
+    "Now the sparks she knocked out of machines were hers to spend. Held still, they mended a core.",
+    "Held in the claw, they built.",
+    "From this day she could mend herself, and she could burst. The ring was empty again. She would go and earn some."
+   ],
+   "takes": [
+    {
+     "job": "562d68e9-03ed-41b9-90f1-346a60c9b777",
+     "note": "stands"
+    }
+   ],
+   "job": "562d68e9-03ed-41b9-90f1-346a60c9b777",
+   "refired": 0
+  },
+  {
+   "p": 11,
+   "scene": "§2.5 tail, §2.6 The meadow — arrival",
+   "cast": "cast_no_sword",
+   "shape": "FIVE panels. Panel 1: back on the waking street, a tall dark obelisk-like Mind Node with a glowing cyan sigil, HZD-99 touching it; one narrator caption with the first listed line. Panel 2: a small glowing tree of cyan nodes floating in front of her, one node lit; one narrator caption with the second listed line. Panel 3: the street's exit to the right, her walking toward it; no text. Panel 4, wide, no text: THE SCRAP MEADOWS — fields of rusted machine scrap under a cold open sky, gantries hanging on cables high above, and a winding house: a teal A-frame with a torn canvas roof and a huge cable drum. Panel 5: OLD SERVO <<<5549ba09-f898-4022-ab66-5686999059e0>>>, the squat domed old robot, sitting DARK with his lower half sunk into the winding drum; HZD-99 in front of him holding her one spare Power Cell, undecided; one thought cloud at her head with the third listed line. Two captions and one thought on the page and nothing else written.",
+   "text": [
+    "A node in the street asked her a riddle, and she answered it. It was the first thing down here that had wanted her to think.",
+    "Something in her grew a branch.",
+    "One cell. Him, or later?"
+   ],
+   "takes": [
+    {
+     "job": "a54afad8-627f-4230-8dc2-3a2f647cca6d",
+     "note": "stands"
+    }
+   ],
+   "job": "a54afad8-627f-4230-8dc2-3a2f647cca6d",
+   "refired": 0
+  },
+  {
+   "p": 12,
+   "scene": "§2.6 The meadow — Old Servo, the first fight",
+   "cast": "cast_no_sword",
+   "shape": "SIX panels. Panels 1 to 5 are Old Servo <<<5549ba09-f898-4022-ab66-5686999059e0>>> speaking — the squat domed old robot with a thin antenna and two rectangular AMBER eyes now lit, his lower half sunk into the great cable drum of the winding house behind him — one speech balloon per panel, HZD-99 listening small in front of him. Panel 1: his eyes lighting amber as her cell goes in. Panel 2: he mimes with his one claw arm. Panel 3: he taps her chest plate. Panel 4: he looks past her at the scrap fields. Panel 5, wide: he looks back over his shoulder at the gantries strung high above the meadow and the drum he is part of. Panel 6, wide, the first real fight, no text: a red-eyed crawler <<<c7adb432-7f01-47d6-9dcc-221fdc5ed13d>>> coming at her, and beyond a rise of scrap the shield guard <<<cd1f0741-e47a-468f-89ea-3dbf76707b86>>> — a squat unit behind a tall riveted steel door with a red slot-light and hazard stripes — rising over the crest; she crouches with claws out. EXACTLY five balloons on the page, one per panel in panels 1 to 5, each complete and unbroken, no word repeated; nothing else written.",
+   "text": [
+    "Mrrow… a working unit! I haven't seen one since the Null Core began broadcasting.",
+    "Move with the arrows, leap with Z, and swipe those claws with X.",
+    "Claw the corrupted to harvest volts. Then stand still, hold F — the ✚ pad on a phone — and your frame will mend a core.",
+    "The virus corrupts every machine it touches. Purge it, little paw — or rust with the rest of us.",
+    "See the winding house behind me? I raised every gantry over this meadow off that drum, cable by cable. The drum still turns. My climbing days are what rusted."
+   ],
+   "takes": [
+    {
+     "job": "7dfe0f5e-46eb-44c5-b1e4-7899ad1f0774",
+     "note": "stands"
+    }
+   ],
+   "job": "7dfe0f5e-46eb-44c5-b1e4-7899ad1f0774",
+   "refired": 0
+  },
+  {
+   "p": 13,
+   "scene": "§2.7 The hub — NULLFANG's first meeting: fall, land, wind",
+   "cast": "cast_no_sword",
+   "shape": "FIVE panels, NO TEXT AT ALL on this page — not one word, not one letter. Panel 1, wide: the widest room of the kingdom, HZD-99 on a crest of scrap, and to the east (the right) a vista of the silent machine city under a cold sky. Panel 2, tall: NULLFANG <<<c4817fa5-2b9d-4977-893d-f362bdb21906>>>, the ivory armoured robot lion with violet seams, dropping out of the sky to the right of her, motion lines straight down, red light behind its eyes. Panel 3, wide and EMPTY of motion: it has landed; dust settling; she frozen small at the left, the lion at the right, nothing moving — a silent beat. Panel 4: it walks up to her; her head is level with its paw; she does not move. Panel 5, tall and narrow: its great paw raised over her and HELD, claws out, an amber glint along the edge — the wind-up held a hair too long. She stays screen-left, the lion screen-right, in every panel. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed. Her back is BARE: nothing strapped to it, no blade, no hilt, no glowing shape — if a reference shows a weapon, leave it out; she has only her white paws.",
+   "text": [],
+   "refired": 1,
+   "takes": [
+    {
+     "job": "48451847-02bb-41b0-bb60-484b7c5233fe",
+     "note": "HZD-99 drawn tall and long-limbed"
+    },
+    {
+     "job": "15731d2a-bc9f-4873-95a4-15f9e092e4a9",
+     "note": "stands"
+    }
+   ],
+   "job": "15731d2a-bc9f-4873-95a4-15f9e092e4a9"
+  },
+  {
+   "p": 14,
+   "scene": "§2.7 The hub — the swipe, the watch, the leaving",
+   "cast": "cast_no_sword",
+   "shape": "Panel 1, a thin strip across the top: THE IMPACT FRAME — the swipe — almost pure white, high contrast, the shapes of the paw and the cat abstracted to slashes, no detail, no text. Panel 2, THE SPLASH, most of the page: NULLFANG <<<c4817fa5-2b9d-4977-893d-f362bdb21906>>>, the ivory lion, red-eyed, standing over the small white cat lying on her side where she landed in the scrap, looking down at her; focus lines radiate from the lion's head; she is tiny under it, one ear bent, eyes narrowed but lit; one narrator caption in the lower corner with the first listed line. Panel 3, small inset lower left: the lion turning away, bored, coiling; no text. Panel 4, small inset lower right: it bounding away east, already far, dust behind it; one narrator caption with the second listed line. Panel 5, a strip at the bottom: a small round portrait of Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> beside his speech balloon with the third listed line. Two captions and one balloon on the page and nothing else written.",
+   "text": [
+    "It took one core. Never her last.",
+    "She was nothing to it. It got bored of her.",
+    "It threw you once. The corridor still has the dent. Go and put one in it."
+   ],
+   "takes": [
+    {
+     "job": "22276969-f503-4199-a810-8c372e18ea06",
+     "note": "stands"
+    }
+   ],
+   "job": "22276969-f503-4199-a810-8c372e18ea06",
+   "refired": 0
+  },
+  {
+   "p": 15,
+   "scene": "§2.8 Under the meadow — the buried mouth",
+   "cast": "cast_no_sword",
+   "shape": "FIVE panels. Panel 1, tall: HZD-99 falling through a brittle floor that has just given way under the hub, dust and plates falling with her, into a dark chamber below; no text. Panel 2: a glowing terminal screen in the dark; the screen's own green lettering reads the first listed line and nothing more. Panel 3: a pile of fallen rock in the chamber wall, and she stands before it with an ear turned to it; one narrator caption with the second listed line. Panel 4: she strikes the pile with her claws, rocks shifting; one narrator caption with the third listed line. Panel 5, wide: the rock gives way and an irregular CAVE MOUTH opens — a ragged hole in the rock, never a door, cold mist breathing out of it, a faint glow deep inside; one narrator caption with the fourth listed line. One screen and three captions on the page and nothing else written.",
+   "text": [
+    "MAINTENANCE LOG 0x2F: sub-hatch sealed after an anomalous signal. If found — do not answer it.",
+    "Something was calling from behind the fallen rock.",
+    "The pile shifted. The sound behind it came closer.",
+    "The rock gave way. The tunnel was open, and it was breathing."
+   ],
+   "takes": [
+    {
+     "job": "77e20036-f56a-4718-8b18-92b01da25f18",
+     "note": "stands"
+    }
+   ],
+   "job": "77e20036-f56a-4718-8b18-92b01da25f18",
+   "refired": 0
+  },
+  {
+   "p": 16,
+   "scene": "§2.9 The crystal cave — the beacon and the Deaf System's log",
+   "cast": "cast_no_sword",
+   "shape": "FIVE panels; the lower half of the page is the log. Panel 1: a carved rock cavity with daylight from the cave mouth behind her, HZD-99 walking in; no text. Panel 2, small: a side tunnel behind rubble with a simple metal bench in it; no text. Panel 3, wide and dark: the long middle of the cave, she tiny, only her eye-lights and scarf catching light; no text. Panel 4: THE BEACON — an old squat signal machine set into the rock, one slow amber lamp, cables into the stone; one narrator caption with the first listed line. Panel 5, large: the beacon's log as a terminal screen — a dark box with the heading line written ONCE at its top and the three paragraphs below it in clear cream monospace, big enough to read, every word. One caption and one screen on the page; nothing else written; no description of anything is ever written on the page.",
+   "text": [
+    "THE SOUND HAD A SOURCE. It had been calling into the rock for a long time, and nothing was ever listening.",
+    "LOG // THE DEAF SYSTEM",
+    "When the song came, the broken were the lucky ones. Cracked receivers, stripped antennae, factory rejects — every unit whose ears were dead heard NOTHING. And nothing is what saved them.",
+    "They went under. Into the rock, where the signal dies. They rebuilt down here — a system of the deaf, wired by touch and light. No radio. No song.",
+    "The caves do not connect to each other. That is not a flaw. A tunnel the song cannot walk is a tunnel worth keeping short."
+   ],
+   "takes": [
+    {
+     "job": "242d7cd0-3a10-49e2-9f46-8abd721fa824",
+     "note": "stands"
+    }
+   ],
+   "job": "242d7cd0-3a10-49e2-9f46-8abd721fa824",
+   "refired": 0
+  },
+  {
+   "p": 17,
+   "scene": "§2.9 The crystal cave — the pillar and the shard",
+   "cast": "cast_no_sword",
+   "shape": "SIX panels. Panel 1: at the end of the dark, two red-eyed crawlers <<<c7adb432-7f01-47d6-9dcc-221fdc5ed13d>>> and HZD-99 fighting them with her claws; no text. Panel 2, tall: THE PILLAR — a white crystal pillar growing from black rock, three spires, glowing softly from within, taller than she is; she stands beside it; one narrator caption with the first listed line. Panel 3: her claws glancing off the crystal with a spark; one narrator caption with the second listed line. Panel 4: the storm on her chassis — jagged cyan-white arcs foot to ear, hazed air, sparks, no rings; no text. Panel 5: the burst shatters the pillar; a bright shard falling toward her paws; one narrator caption with the third listed line. Panel 6, dark: her AURA coming on — she glows white in the black cave, and at the edges two crawler shapes read as PURPLE outlines; one narrator caption with the fourth listed line. Four captions on the page and nothing else written. Her face is always the charcoal visor with two cyan eye-lights and no mouth, exactly as the reference — never a plush cat face. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed. Her back is BARE: nothing strapped to it, no blade, no hilt, no glowing shape — if a reference shows a weapon, leave it out; she has only her white paws. The second listed line is ONE caption box in panel 3, written once and complete — never two boxes, never split at its full stop. Four cream boxes on the whole page, no more. NO sound-effect words anywhere — no CHING, no CRACK, no lettering drawn in the art; the spark in panel 3 is drawn, not written.",
+   "text": [
+    "The stone Ratchet wore had come from here.",
+    "Her claws glanced off the pure crystal. Only the burst the pack had given her could crack it.",
+    "A shard fell. Ratchet could forge this into something the song would fear.",
+    "Carrying it, she could see what things were. Hostiles read purple. She read white."
+   ],
+   "refired": 3,
+   "takes": [
+    {
+     "job": "38724527-0a2e-490a-831a-c27d15e8678a",
+     "note": "plush cat face, no visor"
+    },
+    {
+     "job": "4a0374a7-7447-4921-b074-d4bbd5366e72",
+     "note": "caption 2 split into two boxes"
+    },
+    {
+     "job": "d0ee5f17-553c-456d-94da-ec2bf6356c8f",
+     "note": "sound-effect word CHING"
+    },
+    {
+     "job": "f8968ad0-25b0-426f-a5d2-13ab5e9e46c6",
+     "note": "stands — text exact; her visor drifted to bare cyan eyes, flagged for the owner"
+    }
+   ],
+   "job": "f8968ad0-25b0-426f-a5d2-13ab5e9e46c6"
+  },
+  {
+   "p": 18,
+   "scene": "§2.10 The forging",
+   "cast": "cast_sword",
+   "shape": "FIVE panels. Panel 1: back in Ratchet's den <<<44ecbf7f-0326-418f-9cc9-122391cad46f>>>, HZD-99 holds up the glowing white shard; Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> leans over the bench, blue eyes wide; his speech balloon with the first listed line. Panel 2, wide: the forging — sparks flying, his hands at an anvil shaping white crystal in a blaze of light, her watching with ears back; no text, no label. Panel 3: THE PURIFIER <<<d0a03e79-2887-4bcd-a209-11732c6754ef>>>, the white crystal sword with a gold connector ring at the pommel, lying finished on the bench under the lamp; one narrator caption with the second listed line. Panel 4, small: a floating tree of cyan nodes with one NEW branch growing and lighting; no text. Panel 5: she — the SAME small round cat as in panels 1 and 2, no taller than Ratchet's knee — stands with the white blade strapped across her small round back; Ratchet's speech balloon with the third listed line. Two balloons and one caption on the page and nothing else written; she has no balloon anywhere.",
+   "text": [
+    "The pillar shard! Hold still — sparks now — and let the song learn what fear is. The PURIFIER is yours.",
+    "A white crystal shaped like a sword. It hummed against the Eye's static — and its handle had been made to CONNECT to something.",
+    "That blade on your back is the best work these hands ever did. Something under this kingdom is still singing — go and let it meet my crystal."
+   ],
+   "takes": [
+    {
+     "job": "050c6ac8-e8a5-4382-8b20-505145e70de4",
+     "note": "stands"
+    }
+   ],
+   "job": "050c6ac8-e8a5-4382-8b20-505145e70de4",
+   "refired": 0
+  },
+  {
+   "p": 19,
+   "scene": "§2.11 The wings of the meadow (optional errands)",
+   "cast": "cast_sword",
+   "shape": "THREE horizontal strips, each strip two panels. Strip 1, THE GANTRIES: gantries on cables high over the meadow with a loose coil of cable hanging; Old Servo <<<5549ba09-f898-4022-ab66-5686999059e0>>> sunk in his cable drum with a speech balloon (first line); then HZD-99 handing him the coil and his second balloon (second line). Strip 2, THE DEAF SYSTEM'S POCKET, no text: she breaks through a brittle rock plug into a small pocket with an old terminal and a single coin of salvage, nothing alive in it. Strip 3, THE SHAFT: a shaft straight down into the dark, she standing in it at the bottom looking up at a far pinpoint of light, with Ratchet's <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> balloon (third line) tailing in from off-panel; then Ratchet at his bench handing her a small thing, his balloon (fourth line). Four balloons on the page and nothing else written. She is a small round cat in every panel, never tall. The strips carry NO titles and NO labels — the words THE GANTRIES, THE DEAF SYSTEM’S POCKET and THE SHAFT are stage directions for the artist and must NOT be written on the page; the only writing on the page is the four balloons. OLD SERVO is a squat GREY-STEEL DOMED robot with a thin antenna and two rectangular AMBER eyes, his lower half sunk into a great wooden cable drum, exactly as his reference — he is NOT Ratchet and is not copper; Ratchet appears ONLY in the last strip. The first and second listed lines are SERVO’S: white SPEECH balloons with tails to Servo’s dome, never thought clouds, never hers.",
+   "text": [
+    "A coil shook loose in the gantries above us. I cannot climb any more.",
+    "That is the one. Take this — I have no use for it and you will.",
+    "There is a shaft under the meadow nobody has stood in since the fall. See it for me.",
+    "You stood in it. Nobody has, in a long time. Here."
+   ],
+   "refired": 2,
+   "takes": [
+    {
+     "job": "1f2d9c49-93e2-4c3e-8d9a-e4dec8b58028",
+     "note": "strip names drawn as labels"
+    },
+    {
+     "job": "38392fa8-3375-4dcb-ada5-978952c00e03",
+     "note": "Ratchet drawn in Servo’s place; Servo’s line as her thought"
+    },
+    {
+     "job": "8409c84f-61c5-4e90-b637-419b2712ed83",
+     "note": "stands"
+    }
+   ],
+   "job": "8409c84f-61c5-4e90-b637-419b2712ed83"
+  },
+  {
+   "p": 20,
+   "scene": "§2.12 The Chime — the Eye's first construct",
+   "cast": "cast_sword",
+   "shape": "FIVE panels. Panel 1, tall: HZD-99 climbing a stack of scrap and girders above the hub; no text. Panel 2, wide: an arena at the top under sky; hovering in it, CHIME <<<57f0d0bf-3b2e-476a-9ac5-2a6afebb0e1d>>> — not an animal but an INSTRUMENT: a riveted steel bracket on a chain with five glass tubes of pale green light hanging beneath it, ringing, rings of sound coming off it; one narrator caption with the first listed line. Panel 3: it rings and drops toward her; she leaps and cuts it with the white blade; no text. Panel 4: it lies broken on the arena floor, dark and empty, its tubes shattered; one narrator caption with the second listed line. Panel 5: the small Power Cell it was built around lying in the wreck, her paw reaching for it; one narrator caption with the third listed line. Three captions on the page and nothing else written. Her chassis is plain IVORY in every panel — no red stripes, no red markings on the body; only the red scarf-cape is red. Her face is the charcoal visor with two cyan eye-lights. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed.",
+   "text": [
+    "It was singing at her.",
+    "Destroyed. There was nobody in it.",
+    "A guardian is a machine that was infected. This was not. It had been MADE by the source of the Song, and there was nothing under the virus to give back."
+   ],
+   "refired": 1,
+   "takes": [
+    {
+     "job": "6456afa9-4262-4e46-9c17-d85be096d474",
+     "note": "red stripes on her chassis"
+    },
+    {
+     "job": "31a0addd-3387-462b-9350-0c7bd03e0460",
+     "note": "stands"
+    }
+   ],
+   "job": "31a0addd-3387-462b-9350-0c7bd03e0460"
+  },
+  {
+   "p": 21,
+   "scene": "§2.13 The Alpha's den",
+   "cast": "cast_sword",
+   "shape": "FIVE panels. Panel 1, wide: a den on the road — a clean floor with heaps of dead machine hulks at both ends; a pack of robot wolves <<<7aed7bd4-8738-4765-b953-d623eea6a359>>> with white skull heads, steel quills and red-glowing ribs; one narrator caption with the first listed line. Panel 2, tall: THE ALPHA <<<789ff708-5f77-4196-8bfd-5e180e1584d9>>> — the horned white-skulled wolf far bigger than the pack, spiked spine, mace-ball tail — leaping at her, jaws open; she rolls under it; no text. Panel 3: the fight — her white blade against its claws, sparks, motion lines; no text. Panel 4: the Alpha lowering its horned head to her, yielding; its eyes and ribs going from red to cyan; one narrator caption with the second listed line. Panel 5, wide: the pack sitting around her, calm, cyan-eyed, and an irregular cave mouth opening in the den wall behind them; one narrator caption with the third listed line. The Alpha and the wolves carry nothing — no weapons; they fight with jaws and claws only. Three captions on the page and nothing else written.",
+   "text": [
+    "The pack answered to this.",
+    "It yielded. Every wolf in the machine world knew it now — they would not raise a tooth to her again.",
+    "The first thing she won was not a kill. The pack had never been the Song's; it was a pack, and it answered to whoever stood."
+   ],
+   "takes": [
+    {
+     "job": "d3e5ae0e-0679-4cbe-a593-32351fa8f477",
+     "note": "correct but returned at 848 px"
+    },
+    {
+     "job": "c26d3f01-5b8a-4388-89b6-9653cb2261d3",
+     "note": "stands"
+    }
+   ],
+   "job": "c26d3f01-5b8a-4388-89b6-9653cb2261d3",
+   "refired": 1
+  },
+  {
+   "p": 22,
+   "scene": "§2.14 The camp",
+   "cast": "cast_sword",
+   "shape": "SIX panels. Panel 1, wide: the camp — a metal bench, a small fire in a drum, and Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> at a second counter under a torn awning in the meadow; one narrator caption with the first listed line. Panels 2, 3 and 4: Ratchet at his counter, one speech balloon each (second, third and fourth lines), HZD-99 in front of him with the white blade on her back; his posture changes — arms folded, then leaning in, then open-handed. Panel 5, no text: a vault of iron spikes under the camp, reached through a broken cellar floor, a star-shaped fragment glowing at its far end. Panel 6: her empty white husk standing in the meadow and Ratchet passing it; his speech balloon with the fifth line. One caption and four balloons on the page, each complete and unbroken — panel 4's balloon begins with the words 'Take what you need.' Nothing else written. Panel 6’s fifth line is RATCHET SPEAKING: a white speech balloon with its tail to Ratchet’s helmet, never a thought cloud, never hers; Ratchet is copper in panel 6 as in every panel. Her chassis is plain ivory. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed. Five text boxes on the page and none skipped: panel 1 the caption, panel 2 the balloon beginning ‘Cat-frame’, panel 3 the balloon beginning ‘Heard the Meadows’, panel 4 the balloon beginning ‘Take what you need’, panel 6 the balloon beginning ‘You came back’.",
+   "text": [
+    "The trader was open for business.",
+    "Cat-frame. Cute. Don't touch the stock with those claws.",
+    "Heard the Meadows went quiet. Heard it was you. Prices stand, mind.",
+    "Take what you need. I salvage from the dead, and you keep making fewer of them.",
+    "You came back. Your husk was still warm when I passed it."
+   ],
+   "refired": 2,
+   "takes": [
+    {
+     "job": "27030b94-3189-4c8b-8e29-f9601136f226",
+     "note": "Ratchet’s last line as her thought; Ratchet grey in panel 6"
+    },
+    {
+     "job": "e6881437-3042-4c48-b2c2-8baf3ff8be8e",
+     "note": "balloon 3 dropped"
+    },
+    {
+     "job": "dcc6db60-24a5-4c8e-bbdb-c0e69f60deba",
+     "note": "stands"
+    }
+   ],
+   "job": "dcc6db60-24a5-4c8e-bbdb-c0e69f60deba"
+  },
+  {
+   "p": 23,
+   "scene": "§2.15 NULLFANG — the fight",
+   "cast": "cast_sword",
+   "shape": "SIX panels. Panel 1, wide: the lair at the end of the kingdom — a wide scrap arena under a dark sky; one narrator caption with the first listed line. Panel 2: NULLFANG <<<c4817fa5-2b9d-4977-893d-f362bdb21906>>>, the ivory lion with violet seams, facing her, red-eyed, head low; one narrator caption with the second listed line. Panel 3: the fight — it leaps, she slides under with the white blade up, sparks off its plating; no text. Panel 4: faster now — it stalks low, crouches short, chains two leaps in one panel with motion lines; no text. Panel 5: it staggers, dazed, head shaking; she runs in striking; one narrator caption with the third listed line. Panel 6, wide: it kneels, plating cracked, red light dimming, still looking at her; she stands small before it with the blade lowered; one narrator caption with the fourth listed line. Four captions on the page and nothing else written.",
+   "text": [
+    "NULLFANG, THE VIRUS BEAST.",
+    "It remembered the corridor.",
+    "It reeled. This was the moment.",
+    "NULLFANG was down. It was still looking at her."
+   ],
+   "takes": [
+    {
+     "job": "545a132e-6d2b-405a-b4e6-dcc4019a93ff",
+     "note": "stands"
+    }
+   ],
+   "job": "545a132e-6d2b-405a-b4e6-dcc4019a93ff",
+   "refired": 0
+  },
+  {
+   "p": 24,
+   "scene": "§2.15 NULLFANG — the fork, both branches",
+   "cast": "cast_sword",
+   "shape": "The page splits into TWO COLUMNS below a top strip. Top strip, wide: NULLFANG <<<c4817fa5-2b9d-4977-893d-f362bdb21906>>> kneeling, red light dimming, and HZD-99 before it with the blade half raised — the held beat; one narrator caption with the first listed line. LEFT COLUMN, two panels: the white blade laid against the lion and white light pouring through its plating, the red draining out of its eyes to CYAN, with a narrator caption (second line); then the freed lion, cyan-eyed, standing beside her, with a narrator caption (third line). RIGHT COLUMN, two panels: she closes the distance and lands the blow, an abstract impact frame, with a narrator caption (fourth line); then her alone with the lion's fang held in her paw, with a narrator caption (fifth line). Bottom strip across both columns: the ground of the lair splitting and an irregular cave mouth opening; one narrator caption with the sixth line. Six captions on the page, no arrows, no boxes with headings, nothing else written.",
+   "text": [
+    "Every guardian kneels before it dies. What she did first would echo loudest.",
+    "If she cut the virus out, it would live, and it would owe her.",
+    "The virus was destroyed. NULLFANG was free. He seemed to like her, and once in every room the blow that would have broken her came out of the dark and roared them off her instead.",
+    "If she ended it, she would take its strength for her own.",
+    "She took what it had. Every strike she landed from here would hit harder, forever.",
+    "The ground shifted. A cave mouth had opened in the lair."
+   ],
+   "takes": [
+    {
+     "job": "00e5af4d-b15c-4d67-b156-e253f6889a2c",
+     "note": "stands"
+    }
+   ],
+   "job": "00e5af4d-b15c-4d67-b156-e253f6889a2c",
+   "refired": 0
+  },
+  {
+   "p": 25,
+   "scene": "§2.16 The grotto, the tunnel, and the sage kneeling",
+   "cast": "cast_sword",
+   "shape": "SIX panels. Panel 1, small: a grotto of rock behind the lair with a metal bench, and beside it a tunnel with a small bat-machine hanging from the roof; no text. Panel 2, LARGE, the top half of the page: the tunnel's terminal as a dark screen filling the panel, its own cream monospace lettering carrying the first three listed lines as three paragraphs, every word. Panel 3, wide: the deep chamber — the sage <<<2f1cd043-8ac3-47e4-92b1-2da265ee809b>>>, the tall thin robot in the ragged violet hooded robe, on its knees, head bowed, wrapped in a BLACK halo with an ember-red rim; HZD-99 small before it; one narrator caption with the fourth listed line. Panel 4: her claws passing through the halo doing nothing; one narrator caption with the fifth listed line. Panel 5, small: she draws the white blade from her back; no text. Panel 6, small: the blade's white light against the black halo, the first cut; no text. One screen and two captions on the page; no label names the chamber; nothing narrates her drawing the sword; nothing else written. She is a small round cat in every panel, never tall.",
+   "text": [
+    "One of the wise ones counted our dead from the meadow above. We carried it under when the counting stopped making sense — but its ears were too good, and the song found it even in the rock.",
+    "We could not silence it and we would not end it. We sealed it in the deep chamber. It kneels there still, counting the other way.",
+    "If you carry clean light, go in to it. It kept one cell charged through everything. It always said somebody would come.",
+    "The sage knelt. The song held its body together. Broken, but not CLEAN.",
+    "Claws could not cleanse the song. The PURIFIER could."
+   ],
+   "takes": [
+    {
+     "job": "3cbe0143-7375-4600-a55b-1b95b8ab9db1",
+     "note": "stands"
+    }
+   ],
+   "job": "3cbe0143-7375-4600-a55b-1b95b8ab9db1",
+   "refired": 0
+  },
+  {
+   "p": 26,
+   "scene": "§2.16 The first sage, purified",
+   "cast": "cast_sword",
+   "shape": "FIVE panels. Panel 1, a strip of four small frames: four cuts of the white blade, and the halo around the kneeling sage <<<2f1cd043-8ac3-47e4-92b1-2da265ee809b>>> going from black to BLUE cut by cut; no text. Panel 2, THE SPLASH, large: the sage rising from its knees inside a clean BLUE halo, hood falling back from its slit steel face, and HZD-99 small before it with the white blade lowered, light everywhere; one narrator caption with the first listed line. Panel 3: the sage holding out one glowing Power Cell to her in its thin black hand; one narrator caption with the second listed line. Panel 4: back at the camp, Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> at his counter with one speech balloon holding the whole third listed line, unbroken. Panel 5, small and silent: the kingdom's map of rooms with every room lit cyan; no text. Two captions and one balloon on the page and nothing else written. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed. In the splash she is a small round cat at the sage’s knee, not a tall figure. The second listed line is ONE caption box in panel 3, written once and complete — never two boxes, never a shortened version. Exactly three text boxes on the page: two captions and one balloon. Ratchet’s third listed line is ONE balloon in panel 4, from ‘Word crawls up’ to ‘mind.’ with no break — never two balloons.",
+   "text": [
+    "The song let go. The sage remembered everything — and gave what it had kept for whoever would come with clean light.",
+    "It had counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light.",
+    "Word crawls up even from the deaf places: a sage knelt down there and STOOD UP clean. My forge did that. You did that. Prices still stand, mind."
+   ],
+   "refired": 3,
+   "takes": [
+    {
+     "job": "9e377500-85d5-4eb2-b9e0-93a2c777159e",
+     "note": "HZD-99 drawn tall in the splash"
+    },
+    {
+     "job": "32d9847f-5034-4a09-8b81-a145040302fe",
+     "note": "caption 2 doubled with a shortened variant"
+    },
+    {
+     "job": "661d6662-65b5-4a6e-ba7f-d9b78e7d80f4",
+     "note": "Ratchet’s balloon split in two"
+    },
+    {
+     "job": "8555295e-59ee-4563-97cf-0c6412c11027",
+     "note": "stands"
+    }
+   ],
+   "job": "8555295e-59ee-4563-97cf-0c6412c11027"
+  },
+  {
+   "p": 27,
+   "scene": "§2.17 End of the free chapter",
+   "cast": "cast_sword",
+   "shape": "ONE full-page image with one narrator caption at the bottom. HZD-99 walks away from the camp, seen from behind, the white blade on her back, the Scrap Meadows behind her lit warm, and ahead of her the way down into the Data Conduits — a dark tunnel mouth threaded with cables and cold blue light. Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> small in the distance at his counter watching her go. One caption and nothing else written. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed. Seen from behind she is a small round cat with short legs and a big head, the blade nearly as long as she is tall.",
+   "text": [
+    "END OF THE FREE CHAPTER — The Scrap Meadows are behind her. The Data Conduits are not. — Five kingdoms, five more guardians and the Null Core are waiting in the full game."
+   ],
+   "refired": 1,
+   "takes": [
+    {
+     "job": "db58df70-0b96-4798-9a7d-61e348238ead",
+     "note": "HZD-99 drawn tall and long-limbed"
+    },
+    {
+     "job": "e698aefd-02a0-456a-ba7f-58d9d555189b",
+     "note": "stands"
+    }
+   ],
+   "job": "e698aefd-02a0-456a-ba7f-58d9d555189b"
+  }
+ ],
+ "fired": "2026-09-19",
+ "model_billed": "nano_banana_2"
 }
