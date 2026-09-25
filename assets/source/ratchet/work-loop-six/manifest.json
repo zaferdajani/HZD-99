@@ -1,0 +1,28 @@
+{
+  "source_archive": "character-artwork-20260924-212948.zip",
+  "source_member": "character-artwork/ratchet-ready/work-loop.webp",
+  "sha256": "ea82e6334a2e4882f11fc868495684e1511d213bb5426cdbe9d6091930a021ea",
+  "cells": 6,
+  "cell": [
+    360,
+    360
+  ],
+  "foot_pivot": [
+    180,
+    355.5
+  ],
+  "render_height_multiplier": 3.3,
+  "render_floor_offset": 2,
+  "lowres_sha256": "cfc191460c32b47b66425e264a34db2f57266d411caa30523ebfe79ca739b7f7",
+  "lowres_dimensions": [
+    480,
+    80
+  ],
+  "gameplay": "Existing scheduler, interaction, shop, quest, sound and input unchanged",
+  "original_runtime_preserved": "assets/characters/npc/ratchet/work_loop.webp",
+  "status": "Integrated candidate, subject to tests below; owner visual approval is not fabricated",
+  "source_hashes_before": {
+    "js/game.js": "e6121cf704dd60dfba023af533b33849a9d2f5bb9a81b3981658e6da1055567a",
+    "js/media.js": "0bed583d0b2523d56c98f61e56bd13e928d0898141624d36f7f5ac052ef61ad6"
+  }
+}

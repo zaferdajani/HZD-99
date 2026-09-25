@@ -703,8 +703,8 @@ function drawTinker(c, s, talking) {
       if (drew) G.tinkerFrame = 'check';
     }
     if (!drew) {
-      const cell = ((Math.floor(r.ph || 0) % 12) + 12) % 12;
-      drew = drawStripCell(c, 'ratchetLoop', cell, 13, cx, base, s.h * 2.6, face < 0);
+      const cell = ((Math.floor(r.ph || 0) % 6) + 6) % 6;
+      drew = drawStripCell(c, 'ratchetLoop', cell, 6, cx, base + 2, s.h * 3.3, face < 0);
       // what he actually drew, for tests/tinker.cjs — "it does not repeat" is
       // only a claim if the frames it draws can be read from outside
       if (drew) G.tinkerFrame = r.job + ':' + cell;

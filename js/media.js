@@ -292,7 +292,7 @@ const MEDIA_SRC = {
     // second each is 1 fps. These twelve are frames of a generated clip of
     // this same body working, cut and keyed by tools/vidstrip.cjs — one
     // image, bottom-aligned, so the feet never move between cells.
-    ratchetLoop: 'assets/characters/npc/ratchet/work_loop.webp',
+    ratchetLoop: 'assets/characters/npc/ratchet/work_loop_six.webp',
     // ...AND THE SAME TREATMENT FOR EVERYONE ELSE STANDING IN A ROOM. The
     // trader was the first NPC the owner met and the first he called a slide
     // show; the other five were WORSE, because they were not a slide show at
