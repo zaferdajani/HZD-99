@@ -88,6 +88,8 @@ plate can be traced back to the generation it came from.
 | `characters/npc/ratchet/talk_1.png` | Higgsfield, Nano Banana Pro | Ratchet talking, hand on his own helmet (§2t) |
 | `characters/npc/ratchet/talk_2.png` | Higgsfield, Nano Banana Pro | Ratchet talking, presenting the part (§2t) |
 | `characters/npc/ratchet/vent.png` | Higgsfield, Nano Banana Pro | Ratchet braced, blowing off heat (§2t) |
+| `characters/npc/ratchet/work_loop.webp` | Higgsfield (video) | Ratchet's first work loop: frames of a generated clip of the same body working, cut and keyed by `tools/vidstrip.cjs`; kept on disk, no longer drawn |
+| `characters/npc/ratchet/work_loop_six.webp` | Higgsfield | Ratchet's six-frame work cycle, the owner's 2026-09-24 upload (`character-artwork-20260924-212948.zip`, fetched from the Higgsfield CDN), wired as `ratchetLoop`; sha256 and pivot in `source/ratchet/work-loop-six/manifest.json` |
 | `characters/sage/*.png` | Higgsfield, Seedream 4.5 | the sage's six states (§2e); five matted with `remove_background`, all six one identity |
 | `characters/bat/*.png` | Higgsfield, Seedream 4.5 | the robot bat's five states (§2d); one plate anchored the design, four fired against it |
 | `backgrounds/cave_mouth.jpg` / `cave_exit.jpg`, `characters/gear/pillar.png` | Higgsfield, Seedream 4.5 | the crystal cave (§2c); the exit fired against the mouth so both sides are one rock |
