@@ -1,0 +1,105 @@
+name: Integrate supplied Ratchet artwork
+on:
+  push:
+    branches: [claude/clawbyte-repo-migration-byhyl8]
+    paths: [.github/workflows/deliver-ratchet-upload.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: clawbyte-art-delivery
+  cancel-in-progress: false
+jobs:
+  integrate:
+    if: github.repository == 'zaferdajani/HZD-99' && github.ref == 'refs/heads/claude/clawbyte-repo-migration-byhyl8'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install test tools and preserve source identity
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          python3 -m pip install Pillow==11.3.0
+          echo "CHROMIUM_PATH=$(node -p "require('playwright').chromium.executablePath()")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -p "require('playwright').chromium.executablePath()")" /opt/pw-browsers/chromium
+          mkdir -p release-evidence/ratchet tests/out
+          git rev-parse HEAD > release-evidence/ratchet/baseline-commit.txt
+          git for-each-ref --format='%(refname) %(objectname)' > release-evidence/ratchet/refs-before.txt
+          node build.cjs
+          git diff --exit-code -- index.html odyssey.html forge.html forge-odyssey.html
+      - name: Import the supplied six-frame strip and fix both image-quality layouts
+        run: |
+          set -euo pipefail
+          mkdir -p assets/characters/npc/ratchet assets/source/ratchet/work-loop-six docs/artwork
+          curl --fail --location --retry 3 'https://d2ol7oe51mr4n9.cloudfront.net/user_3BjvcrADoxYuH58IuugwsdUfAHK/ad013929-e75f-4940-85c5-cd6e29d65db7.webp' -o assets/characters/npc/ratchet/work_loop_six.webp
+          echo 'ea82e6334a2e4882f11fc868495684e1511d213bb5426cdbe9d6091930a021ea  assets/characters/npc/ratchet/work_loop_six.webp' | sha256sum --check
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib,json
+          hash=lambda b:hashlib.sha256(b).hexdigest()
+          before={'js/game.js':'e6121cf704dd60dfba023af533b33849a9d2f5bb9a81b3981658e6da1055567a','js/media.js':'0bed583d0b2523d56c98f61e56bd13e928d0898141624d36f7f5ac052ef61ad6'}
+          for p,h in before.items(): assert hash(Path(p).read_bytes())==h,'Concurrent source change: '+p
+          p=Path('js/media.js');s=p.read_text();old="ratchetLoop: 'assets/characters/npc/ratchet/work_loop.webp',";new="ratchetLoop: 'assets/characters/npc/ratchet/work_loop_six.webp',";assert s.count(old)==1;p.write_text(s.replace(old,new))
+          p=Path('js/game.js');s=p.read_text();old='const cell = ((Math.floor(r.ph || 0) % 12) + 12) % 12;';new='const cell = ((Math.floor(r.ph || 0) % 6) + 6) % 6;';assert s.count(old)==1;s=s.replace(old,new)
+          old="drawStripCell(c, 'ratchetLoop', cell, 13, cx, base, s.h * 2.6, face < 0)";new="drawStripCell(c, 'ratchetLoop', cell, 6, cx, base + 2, s.h * 3.3, face < 0)";assert s.count(old)==1;p.write_text(s.replace(old,new))
+          # The lazy low-res image has its own file and is NOT automatically
+          # regenerated when the full-size media mapping changes.
+          p=Path('assets/lowres/ratchetLoop.webp');old=Image.open(p);h=old.height
+          im=Image.open('assets/characters/npc/ratchet/work_loop_six.webp').convert('RGBA');assert im.size==(2160,360)
+          im.resize((6*h,h),Image.Resampling.LANCZOS).save(p,'WEBP',lossless=True,method=6)
+          manifest={'source_archive':'character-artwork-20260924-212948.zip','source_member':'character-artwork/ratchet-ready/work-loop.webp','sha256':'ea82e6334a2e4882f11fc868495684e1511d213bb5426cdbe9d6091930a021ea','cells':6,'cell':[360,360],'foot_pivot':[180,355.5],'render_height_multiplier':3.3,'render_floor_offset':2,'lowres_sha256':hash(p.read_bytes()),'lowres_dimensions':[6*h,h],'gameplay':'Existing scheduler, interaction, shop, quest, sound and input unchanged','original_runtime_preserved':'assets/characters/npc/ratchet/work_loop.webp','status':'Integrated candidate, subject to tests below; owner visual approval is not fabricated','source_hashes_before':before}
+          Path('assets/source/ratchet/work-loop-six/manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          Path('docs/artwork/september24-delivery.md').write_text('''# September 24 upload integration\n\nThis pass imports the usable six-frame Ratchet work cycle into the playable\nworkshop, not a gallery. It keeps the job scheduler and the original strip.\nThe current source actually wrapped 12 frames while slicing 13; both now use\n6, as supplied. The low-resolution stand-in is regenerated to the same layout\nso a cold load cannot briefly slice old artwork with a new count.\n\nTests must demonstrate actual draw selection for every cell, negative-phase\nwrapping, the slow-load path, planted feet and existing varied job behavior.\nThe hero's current walk/run art, movement and attacks, approved September19\nYalla, current blocking and boss fixes must remain unchanged.\n\n## Not silently treated as finished\n\n- Alpha claw-v2 was user-rejected; guard-v2 is quarantined; lunge-rake-v3 is\n  explicitly unapproved. None is published as an accepted replacement.\n- Alpha pounce-v2 is a miss-landing candidate. It lacks the hit-recoil branch\n  and needs phase/anchor/impact alignment, not a global sprite-file swap.\n- Ratchet wrist release needs a two-actor scene and exact hand alignment.\n- Winch parts need the story encounter and belt-cut state; the handoff says\n  the intact belt is baked into the base. No new encounter is invented here.\n- The manhwa upload contains a 40-page Draft3 screenplay but only32 illustrated\n  candidates, and a separate Draft4 requiring scene adaptation and review. It\n  is not substituted for completed playable story scenes or silently published\n  as a final book. Original uploaded archives remain unchanged.\n\nThis release does not claim to finish every character's library, all artwork,\nor full game quality. Its acceptance is the supplied Ratchet motion appearing\nin the actual live game with verified bytes and existing controls intact.\n''')
+          PY
+          node build.cjs
+          node tools/pack-www.cjs
+          python3 -m http.server 8220 --bind 127.0.0.1 > /tmp/clawbyte-http.log 2>&1 &
+      - name: Test actual rendering and the existing release requirements
+        run: |
+          set -euo pipefail
+          node tests/ratchet-delivery.cjs | tee release-evidence/ratchet/delivery.log
+          node tests/tinker.cjs | tee release-evidence/ratchet/tinker.log
+          node tests/build-integrity.cjs | tee release-evidence/ratchet/build.log
+          node tests/reconciliation.cjs | tee release-evidence/ratchet/reconciliation.log
+          node tests/run.cjs entrance-integration hero-cache-regression voice-handoff scratch-reach scratch-visual release-polish tutorial-controller offline-release chapter-one input-focus frames feel gait wake speed2 story-progression hero-move-coverage shield wolves combat foescale sage-specials | tee release-evidence/ratchet/regressions.log
+      - name: Commit the verified integration without overwriting another author
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          current=$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/claude/clawbyte-repo-migration-byhyl8 --jq .object.sha)
+          test "$current" = "$GITHUB_SHA" || { echo 'Concurrent change: candidate preserved, not overwritten.'; exit 1; }
+          git config user.name 'CLAWBYTE integration'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js/game.js js/media.js assets/characters/npc/ratchet/work_loop_six.webp assets/lowres/ratchetLoop.webp docs/artwork/september24-delivery.md index.html odyssey.html forge.html forge-odyssey.html
+          git add -f assets/source/ratchet/work-loop-six/manifest.json
+          git commit -m 'Integrate supplied Ratchet six-frame work motion, including safe cold loading'
+          git rev-parse HEAD > release-evidence/ratchet/candidate-commit.txt
+          git bundle create release-evidence/ratchet/candidate.bundle HEAD ^${{ github.sha }}
+          git push origin HEAD:claude/clawbyte-repo-migration-byhyl8
+          # A separate verified promotion will trigger the existing main publisher.
+          # This importer never changes Pages settings or launches a second publisher.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CLAWBYTE-Ratchet-delivery-${{ github.sha }}
+          path: |
+            release-evidence/
+            tests/out/
+          retention-days: 90
+      - name: Disable the completed one-time importer
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method PUT repos/$GITHUB_REPOSITORY/actions/workflows/deliver-ratchet-upload.yml/disable
