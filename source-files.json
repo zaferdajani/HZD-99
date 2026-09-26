@@ -23,6 +23,7 @@
   "preload",
   "presentation",
   "entities",
+  "winch",
   "wolves",
   "pets",
   "braid",
@@ -37,5 +38,7 @@
   "data_conduits_npc_fix",
   "boss_aaa_fix",
   "npc_shop_exit_fix",
+  "story-opening",
+  "comics",
   "boot"
 ]

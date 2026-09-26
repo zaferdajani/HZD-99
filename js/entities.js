@@ -1532,7 +1532,7 @@ class Player {
     // ...and the same hold covers the WAKING: the two seconds in which the
     // cradle lets go of her. A release you can walk out of halfway through is
     // a loading screen with a picture on it.
-    const held = !!G.bossEntry || !!G.wake || !!G.gateWalk || !!G.meet;
+    const held = !!G.bossEntry || !!G.wake || !!G.gateWalk || !!(G.meet && !G.meet.interactive);
     // MOTHER'S SONG mirrors your inputs for its few seconds — fight it
     const dirRaw = held ? 0 : (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
     const dir = (G.revT || 0) > 0 ? -dirRaw : dirRaw;
@@ -1808,7 +1808,7 @@ class Player {
           burst(tx2, ty2, 22, '#fff6c0', 320, 0.6, 120, 4, true);
           // the bolt itself wounds anything beneath it
           for (const e of G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'dorm' && G.boss.st !== 'intro' ? [G.boss] : [])) {
-            if (e.dead) continue;
+            if (e.dead || e.disabled || e.rescued) continue;
             if (Math.abs((e.x + e.w / 2) - tx2) < 46 && Math.abs((e.y + e.h / 2) - ty2) < 120) {
               e.hp -= Math.round(this.dmg() * 1.6); e.hurtT = 0.15;
               if (!(e instanceof Boss) && e.kind !== 'turret') { e.kbT = 0.3; e.vy -= 180; }
@@ -2054,7 +2054,7 @@ class Player {
       const n0 = Math.hypot(this.swing.ax, this.swing.ay) || 1;
       const kx = this.swing.ax / n0 || this.face, ky = this.swing.ay / n0;
       for (const e of targets) {
-        if (e.dead || this.swing.set.has(e)) continue;
+        if (e.dead || e.disabled || e.rescued || this.swing.set.has(e)) continue;
         if (aabb(hb, hurtBoxOf(e))) {
           this.swing.set.add(e);
           let dm = Math.round(this.dmg() * (this.swing.combo === 2 ? (hasSkill('calc') ? 1.55 : 1.35) : 1)
@@ -2225,7 +2225,7 @@ class Player {
     const bb = { x: b.x - 16, y: b.y - 16, w: 32, h: 32 };
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     for (const e of targets) {
-      if (e.dead || b.set.has(e)) continue;
+      if (e.dead || e.disabled || e.rescued || b.set.has(e)) continue;
       if (typeof isPet === 'function' && isPet(e)) continue;
       if (aabb(bb, hurtBoxOf(e))) {
         b.set.add(e);
@@ -2282,7 +2282,7 @@ class Player {
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     let hit = 0;
     for (const e of targets) {
-      if (e.dead || (typeof isPet === 'function' && isPet(e))) continue;
+      if (e.dead || e.disabled || e.rescued || (typeof isPet === 'function' && isPet(e))) continue;
       const ex = e.x + e.w / 2 - cx, ey = e.y + e.h / 2 - cy;
       const d = Math.hypot(ex, ey);
       if (d > R + Math.max(e.w, e.h) / 2) continue;
@@ -2362,7 +2362,7 @@ class Player {
     const R = 165, dm = Math.round(this.dmg() * 3.2);
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     for (const e of targets) {
-      if (e.dead || (typeof isPet === 'function' && isPet(e))) continue;
+      if (e.dead || e.disabled || e.rescued || (typeof isPet === 'function' && isPet(e))) continue;
       const ex = e.x + e.w / 2 - cx, ey = e.y + e.h / 2 - cy;
       const d = Math.hypot(ex, ey);
       if (d > R + Math.max(e.w, e.h) / 2) continue;
@@ -2565,7 +2565,7 @@ class Player {
       G.hitStop = Math.max(G.hitStop, 0.12);
       if (typeof padRumble === 'function') padRumble(0.7, 0.9, 320);
       for (const e of G.enemies) {
-        if (e.dead) continue;
+        if (e.dead || e.disabled || e.rescued) continue;
         const dx0 = e.x + e.w / 2 - cx0, dy0 = e.y + e.h / 2 - cy0;
         const dd = Math.hypot(dx0, dy0);
         if (dd > 250) continue;
@@ -4973,7 +4973,7 @@ class Proj {
     if (this.friendly) {
       const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
       for (const e of targets) {
-        if (e.dead) continue;
+        if (e.dead || e.disabled || e.rescued) continue;
         if (aabb(this.box(), hurtBoxOf(e))) {
           dealDmg(e, this.dmg, this.el || armEl(), this.x, this.y); this.dead = true;
           if (this.freeze) {                       // HALT: holds a target still
@@ -6811,6 +6811,15 @@ const EKIND = {
   snare: { w: 28, h: 26, hp: 46, spd: 720 },
   sage: { w: 26, h: 42, hp: 150, spd: 170 },
 };
+// Authored roles, never inferred from the sprite colour. Sages keep their
+// dedicated rescue encounter; industrial hazards contain no captive person.
+const STORY_ACTOR_ROLES = Object.freeze({
+  crawler: 'infected-person', guard: 'infected-person', flier: 'infected-person',
+  hopper: 'infected-person', bat: 'infected-person', sage: 'sage',
+  turret: 'empty-construct', blob: 'empty-construct', surge: 'empty-construct',
+  kiln: 'empty-construct', rime: 'empty-construct', snare: 'empty-construct'
+});
+function storyProtected(e) { return !!(e && (e.disabled || e.rescued)); }
 class Enemy {
   constructor(kind, x, y) {
     const k = EKIND[kind];
@@ -6901,6 +6910,19 @@ class Enemy {
     if (typeof sfx === 'function') sfx('break');
   }
   update(dt) {
+    if (this.disabled) {
+      this.vx = 0; this.vy += 900 * dt; moveEnt(this, dt);
+      if (this.cleanseT > 0) {
+        const near = player && Math.abs(player.x + player.w / 2 - this.x - this.w / 2) < 46
+          && Math.abs(player.y + player.h / 2 - this.y - this.h / 2) < 60;
+        if (!near || player.dead || player.cores !== this.cleanseHP || G.state !== 'PLAY') this.cleanseT = 0;
+        else {
+          this.cleanseT -= dt;
+          if (this.cleanseT <= 0) this.finishCleanse();
+        }
+      }
+      return;
+    }
     this.anim += dt; this.hurtT -= dt;
     // the mark CROSSREF leaves on whoever it told, fading on its own so it
     // reads as a moment and not as a permanent badge
@@ -8070,6 +8092,14 @@ class Enemy {
   // body and by a beat of warning light, so it is a thing you step away from
   // rather than a thing that happens to you.
   die(kx, ky) {
+    if (storyProtected(this)) return;
+    if (this.storyKey && this.actorRole === 'infected-person') {
+      this.disabled = true; this.hp = 1; this.vx = this.vy = 0;
+      this.cleanseT = 0; this.tr.length = 0;
+      (G.save.rescues || (G.save.rescues = {}))[this.storyKey] = 'disabled';
+      persist();
+      return;
+    }
     // A CARRIER DOES NOT DIE QUIETLY (move `infest`, snare@E). What the Nest
     // put in it comes back out as a spore bed on the ground it fell on — the
     // blob's own pool, because "the floor is hostile here" already has a
@@ -8099,6 +8129,18 @@ class Enemy {
         player.hurt(DF().edmg, bx, this.kind + '.volatile');
     }
     return this._die0(kx, ky);
+  }
+  finishCleanse() {
+    if (!this.disabled || !this.storyKey || !G.save.flags.crystal) return;
+    const states = G.save.rescues || (G.save.rescues = {});
+    if (states[this.storyKey] === 'rescued') return;
+    states[this.storyKey] = 'rescued';
+    this.disabled = false; this.rescued = true; this.calm = true;
+    this.hp = EKIND[this.kind].hp; this.hypnoT = 1e9; this.cleanseT = 0;
+    if (typeof questKill === 'function') questKill(this.kind);
+    bankScrap(8); player.gainVolts(12);
+    burst(this.x + this.w / 2, this.y, 8, '#9fefff', 70, 0.5, -15, 2, true);
+    sfx('pick'); G.toast(t('story_rescued')); persist();
   }
   _die0(kx, ky) {
     if (this.dead) return;
@@ -8130,6 +8172,17 @@ class Enemy {
   draw(c) {
     const P = PAL[G.roomDef.zone];
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
+    if (this.disabled || this.rescued) {
+      // A broken square is an exposed binding; a complete circle is a cure.
+      // Shape as well as colour makes the state legible without audio.
+      c.save(); c.strokeStyle = this.rescued ? '#b9f3ff' : '#ffd685'; c.lineWidth = 2;
+      c.beginPath();
+      if (this.rescued) c.arc(cx, this.y - 12, 5, 0, Math.PI * 2);
+      else { c.moveTo(cx - 5, this.y - 9); c.lineTo(cx - 5, this.y - 17); c.lineTo(cx + 5, this.y - 17); c.lineTo(cx + 5, this.y - 9); }
+      c.stroke();
+      if (this.cleanseT > 0) { c.fillStyle = '#b9f3ff'; c.fillRect(cx - 12, this.y - 24, 24 * (1 - this.cleanseT / 0.65), 3); }
+      c.restore();
+    }
     // light trail — glowing red smear behind the moving machine
     if (this.tr.length > 2) {
       c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
@@ -10416,6 +10469,7 @@ function sageTame(e) {
     sfx('chargeReady');
     break;
   }
+  if (typeof firstSageRevelation === 'function') firstSageRevelation();
   persist();
 }
 // THE SAGE, DRAWN — a robed machine monk, hooded, kneeling half-inside the

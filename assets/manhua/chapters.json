@@ -1,0 +1,296 @@
+{
+  "version": 1,
+  "chapters": [
+    {
+      "id": "chapter-one-morning",
+      "title": "The morning that broke",
+      "revision": 1,
+      "status": "published",
+      "unlock": [
+        "awakened"
+      ],
+      "note": "Illustrated draft. Expanded story scenes and game staging are still being revised.",
+      "slides": [
+        {
+          "src": "assets/manhua/revised-2026-09/page-01.webp",
+          "alt": "Chapter one, page 1: The last answer",
+          "caption": "A light for you…\ntik-tik\nwhrr\ndum.\n…a light for me.",
+          "motion": "push-in",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-02.webp",
+          "alt": "Chapter one, page 2: The useful little thing",
+          "caption": "LEGACY UNITS — SLEEP STORAGE",
+          "motion": "drift-left",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-03.webp",
+          "alt": "Chapter one, page 3: No date",
+          "caption": "Just until an old system needs you again.\nRETAIN FOR LEGACY MAINTENANCE\nNEXT WAKE:",
+          "motion": "drift-right",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-04.webp",
+          "alt": "Chapter one, page 4: The same hands",
+          "caption": "OBEY",
+          "motion": "push-in",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-05.webp",
+          "alt": "Chapter one, page 5: Nobody asked",
+          "caption": "LEGACY MAINTENANCE / RESERVE WAKE\nclick.",
+          "motion": "drift-left",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-06.webp",
+          "alt": "Chapter one, page 6: An answer would be nice",
+          "caption": "Prrip?",
+          "motion": "drift-right",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-07.webp",
+          "alt": "Chapter one, page 7: Still at work",
+          "caption": "RATCHET — REPAIRS",
+          "motion": "push-in",
+          "seconds": 14
+        }
+      ]
+    },
+    {
+      "id": "chapter-one-ratchet",
+      "title": "A voice of his own",
+      "revision": 1,
+      "status": "published",
+      "unlock": [
+        "ratchet-restored"
+      ],
+      "note": "Illustrated draft. Expanded story scenes and game staging are still being revised.",
+      "slides": [
+        {
+          "src": "assets/manhua/revised-2026-09/page-09.webp",
+          "alt": "Chapter one, page 9: If the song is safe",
+          "caption": "IF THE SONG IS SAFE, PUT MY CELL BACK. — R.\nIF IT ISN'T, PLEASE BE CAREFUL.",
+          "motion": "push-in",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-10.webp",
+          "alt": "Chapter one, page 10: A voice of his own",
+          "caption": "Is it still singing?\nEasy. Easy… Sorry.\nHow long?\nOh.",
+          "motion": "drift-left",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-11.webp",
+          "alt": "Chapter one, page 11: Don't answer",
+          "caption": "Don't answer.\nYou can hear it. Don't let it in.\nI pulled my own cell. Before my hands stopped being mine.\nThis gave me enough time.",
+          "motion": "drift-right",
+          "seconds": 14
+        }
+      ]
+    },
+    {
+      "id": "chapter-one-workshop",
+      "title": "Spend it once",
+      "revision": 1,
+      "status": "published",
+      "unlock": [
+        "ratchet-restored",
+        "volt-pack"
+      ],
+      "note": "Illustrated draft. Expanded story scenes and game staging are still being revised.",
+      "slides": [
+        {
+          "src": "assets/manhua/revised-2026-09/page-12.webp",
+          "alt": "Chapter one, page 12: Twelve",
+          "caption": "Twelve.\nWaking fee is waived.\nSlowly.\nSame charge. Mending or breaking.\nSpend it once.",
+          "motion": "push-in",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-13.webp",
+          "alt": "Chapter one, page 13: He cannot go",
+          "caption": "A thank-you. Someone in my family fixed a lift.\nThe Sage is under the lion's enclosure. That used to mean safe.\nI can shape a larger marble into a cleansing blade.\nNot this one.\nServo has the gantries. If he wakes… tell him I should have come.\nThe invoice will be here.",
+          "motion": "drift-left",
+          "seconds": 14
+        }
+      ]
+    },
+    {
+      "id": "chapter-one-quarry",
+      "title": "A path without speakers",
+      "revision": 1,
+      "status": "published",
+      "unlock": [
+        "servo-restored",
+        "raw-marble"
+      ],
+      "note": "Illustrated draft. Expanded story scenes and game staging are still being revised.",
+      "slides": [
+        {
+          "src": "assets/manhua/revised-2026-09/page-14.webp",
+          "alt": "Chapter one, page 14: Cargo",
+          "caption": "Cargo weight?\nIs the cargo coming later?\nLast lift was full. I held it until the motor stopped.\nTop pulley. I can't—",
+          "motion": "push-in",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-15.webp",
+          "alt": "Chapter one, page 15: The shelter mark",
+          "caption": "",
+          "motion": "drift-left",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-17.webp",
+          "alt": "Chapter one, page 17: A path without speakers",
+          "caption": "",
+          "motion": "drift-right",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-18.webp",
+          "alt": "Chapter one, page 18: Someone's chair",
+          "caption": "KNOCK. DO NOT SING.\ntik-tik\ntik.",
+          "motion": "push-in",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-19.webp",
+          "alt": "Chapter one, page 19: Spend it once",
+          "caption": "",
+          "motion": "drift-left",
+          "seconds": 14
+        }
+      ]
+    },
+    {
+      "id": "chapter-one-forge",
+      "title": "What to cut",
+      "revision": 1,
+      "status": "published",
+      "unlock": [
+        "first-sword"
+      ],
+      "note": "Illustrated draft. Expanded story scenes and game staging are still being revised.",
+      "slides": [
+        {
+          "src": "assets/manhua/revised-2026-09/page-21.webp",
+          "alt": "Chapter one, page 21: Come here",
+          "caption": "You took—\nCome here.\nHe held it?\nThen he heard you.",
+          "motion": "push-in",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-22.webp",
+          "alt": "Chapter one, page 22: What to cut",
+          "caption": "His armor isn't the thing holding him.\nFind that.",
+          "motion": "drift-left",
+          "seconds": 14
+        }
+      ]
+    },
+    {
+      "id": "chapter-one-sage",
+      "title": "The missing voice",
+      "revision": 1,
+      "status": "published",
+      "unlock": [
+        "first-sage"
+      ],
+      "note": "Illustrated draft. Expanded story scenes and game staging are still being revised.",
+      "slides": [
+        {
+          "src": "assets/manhua/revised-2026-09/page-23.webp",
+          "alt": "Chapter one, page 23: The reaching arm",
+          "caption": "",
+          "motion": "push-in",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-24.webp",
+          "alt": "Chapter one, page 24: One missing",
+          "caption": "We shut the door. The counting didn't stop.\nOne missing.\nYou weren't in the count.\nBegin again.",
+          "motion": "drift-left",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-25.webp",
+          "alt": "Chapter one, page 25: The pause",
+          "caption": "Don't make me start again.\nI was calling the ones who hadn't answered.\nIt kept making me call louder.",
+          "motion": "drift-right",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-26.webp",
+          "alt": "Chapter one, page 26: What answered",
+          "caption": "Every time someone answered, it found them.\nCut his binding. That bell writes it back.\nI can close our end.\nUnauthorized voice.\nCorrect the fault.",
+          "motion": "push-in",
+          "seconds": 14
+        }
+      ]
+    },
+    {
+      "id": "chapter-one-guardian",
+      "title": "One ring",
+      "revision": 1,
+      "status": "published",
+      "unlock": [
+        "first-sage",
+        "chime-silenced",
+        "nullfang-freed"
+      ],
+      "note": "Illustrated draft. Expanded story scenes and game staging are still being revised.",
+      "slides": [
+        {
+          "src": "assets/manhua/revised-2026-09/page-27.webp",
+          "alt": "Chapter one, page 27: Two hands",
+          "caption": "You can't hold a cable and cut it.\nI'll hold.\nOne ring. I can buy you one ring.",
+          "motion": "push-in",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-28.webp",
+          "alt": "Chapter one, page 28: One ring",
+          "caption": "",
+          "motion": "drift-left",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-29.webp",
+          "alt": "Chapter one, page 29: A moment is enough",
+          "caption": "There you are.",
+          "motion": "drift-right",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-30.webp",
+          "alt": "Chapter one, page 30: The way through",
+          "caption": "Cargo received.",
+          "motion": "push-in",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-31.webp",
+          "alt": "Chapter one, page 31: The closed case",
+          "caption": "tik-tik",
+          "motion": "drift-left",
+          "seconds": 14
+        },
+        {
+          "src": "assets/manhua/revised-2026-09/page-32.webp",
+          "alt": "Chapter one, page 32: Catch",
+          "caption": "",
+          "motion": "drift-right",
+          "seconds": 14
+        }
+      ]
+    }
+  ]
+}

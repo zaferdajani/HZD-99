@@ -1400,7 +1400,57 @@ ru: {
   vault_hint: 'E — Запечатанное хранилище', door_locked: 'Запечатано. Большая сила держит это закрытым.',
 },
 };
+// Draft 2 story text. Control bindings belong to contextual prompts, not speech.
+const STORY_DRAFT2_TEXT = {
+  en: {
+    tut_kill: 'Stop the winch', tut_kill_h: 'Dodge the arm, then strike during recovery',
+    story_pack_first: 'Buy the volt pack first. It powers repair and the quarry burst.',
+    sl_ratchet_forged: 'The maintenance passage beside the marble quarry leads to the first Sage. Clear their binding before you face the guardian.',
+
+    story_cleanse: 'Cleanse binding', story_binding: 'Recoverable — blade needed',
+    story_need_blade: 'Still alive. Return with the cleansing sword.', story_rescued: 'Binding cleared. A neighbour is free.',
+    story_winch_clean: 'Control cleared. The yard winch is safe.',
+    i_ratchetCell: "Ratchet's battery", i_ratchetCelld: 'His own battery, hidden in the workshop drawer. Return it to his empty socket.',
+    tut_cell: 'Find the battery', tut_cell_h: 'Open the workshop drawer',
+    sl_note2: 'I hid my battery in the drawer beside this chair. The marble kept my mind mine. I chose to switch off.',
+    sl_note3: 'Put my battery back. If the song is still wrong, please be careful. — R.',
+    it_cshard: 'raw cave marble',
+    q_ask_ratchet_forge: [
+      'Mother used to sing us home. Someone put an order inside her voice.',
+      'This marble was a gift to my ancestor. It came down with the workshop. It kept my mind mine.',
+      'Bring me raw marble from the caves beneath the meadow. I can shape it into a sword that clears the virus.',
+      'I left a spare cell for Servo in your pouch. He knows the gantries. Come back for the invoice.'
+    ],
+    q_thanks_ratchet_forge: 'You brought the marble. Steady the clamp. I will shape the edge, then fit the grip. Cut what is holding them—not what is left of them.',
+    i_cshard: 'Raw marble', i_cshardd: 'A rounded nodule freed from the host rock. Bring the material to Ratchet; it is not yet a blade.',
+  },
+  ar: {
+    tut_kill: 'أوقف الرافعة', tut_kill_h: 'تفادَ الذراع واضرب أثناء توقفها',
+    story_pack_first: 'اشترِ حزمة الطاقة أولاً. إنها تشغّل الإصلاح ودفعة المحجر.',
+    sl_ratchet_forged: 'ممرّ الصيانة بجانب محجر الرخام يقود إلى الحكيم الأول. حرّره من القيد قبل مواجهة الحارس.',
+
+    story_cleanse: 'طهّر القيد', story_binding: 'يمكن إنقاذه — تحتاج إلى السيف',
+    story_need_blade: 'ما زال حيّاً. عُد بسيف التطهير.', story_rescued: 'انكسر القيد. صار الجار حرّاً.',
+    story_winch_clean: 'تم تطهير وحدة التحكم. رافعة الساحة آمنة.',
+    i_ratchetCell: 'بطارية راتشيت', i_ratchetCelld: 'بطاريته التي أخفاها في درج الورشة. أعدها إلى موضعها الفارغ.',
+    tut_cell: 'اعثر على البطارية', tut_cell_h: 'افتح درج الورشة',
+    sl_note2: 'خبأت بطاريتي في الدرج بجانب هذا الكرسي. حفظت قطعة الرخام عقلي، واخترت أن أطفئ نفسي.',
+    sl_note3: 'أعد بطاريتي. إن كانت الأغنية ما زالت فاسدة، فاحذر. — ر.',
+    it_cshard: 'رخام خام من الكهف',
+    q_ask_ratchet_forge: [
+      'كانت أغنية الأم تعيدنا إلى بيوتنا. دسّ أحدهم أمرًا داخل صوتها.',
+      'كانت هذه القطعة هدية لأحد أسلافي، وورثتها مع الورشة. حفظت عقلي من الفيروس.',
+      'أحضر لي رخامًا خامًا من الكهوف تحت المرج. سأشكّله سيفًا يزيل الفيروس.',
+      'وضعت خلية احتياطية لسيرفو في حقيبتك. إنه يعرف الجسور. عد من أجل الفاتورة.'
+    ],
+    q_thanks_ratchet_forge: 'أحضرت الرخام. ثبّت المشبك؛ سأشكّل النصل ثم أركّب المقبض. اقطع ما يقيّدهم، لا ما بقي منهم.',
+    i_cshard: 'رخام خام', i_cshardd: 'كتلة مستديرة حُرّرت من الصخر المحيط بها. أحضر المادة إلى راتشيت؛ لم تصبح نصلًا بعد.',
+  }
+};
 function t(k) {
+  if (typeof isHero === 'function' && !isHero() && typeof G !== 'undefined'
+      && G.save && G.save.storyVersion === 2 && STORY_DRAFT2_TEXT.en[k] != null)
+    return (STORY_DRAFT2_TEXT[LANG] || STORY_DRAFT2_TEXT.en)[k] || STORY_DRAFT2_TEXT.en[k];
   if (typeof GEAR_TEXT !== 'undefined' && typeof themeId === 'function' && themeId() === 'robo' && GEAR_TEXT.en[k] != null)
     return (GEAR_TEXT[LANG] && GEAR_TEXT[LANG][k]) || GEAR_TEXT.en[k];
   // theme overlay first (hero/robo world skins), then base language, then English

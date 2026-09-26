@@ -29,9 +29,23 @@ const { chromium } = require('playwright');
       stage('A0B');
       const ratchet = () => G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet');
       need(!npcLive(ratchet()), 'Ratchet begins asleep');
-      const batteries = invCount('batt'); doInteract(ratchet()); dialog();
-      need(npcLive(ratchet()) && invCount('batt') === batteries - 1, 'rescue spends one battery');
+      doInteract(ratchet()); dialog();
+      need(!npcLive(ratchet()), 'Ratchet waits for his hidden battery');
+      doInteract(G.statics.find(s => s.type === 'chest' && s.extra === 'it:batt')); dialog();
+      need(invCount('ratchetCell') === 1, 'recover his battery from the workshop');
+      doInteract(ratchet()); dialog();
+      need(npcLive(ratchet()) && invCount('ratchetCell') === 0 && invCount('batt') === 1,
+        'restore his own battery and receive the distinct Servo spare');
       need(qState('ratchet_forge') === 'active' && !weaponOwned('single'), 'rescue activates stone quest without a sword');
+      need(!healUnlocked() && !burstUnlocked(), 'rescue does not grant bought abilities: '+JSON.stringify(G.save.flags));
+      // Traversal/salvage acquisition is tested separately; buy through the real shop.
+      bankScrap(200); G.state='SHOP'; G.shopIdx=SHOP.findIndex(s=>s.type!=='cell');
+      const budget = G.save.scrap;
+      keysP.Enter=true; updateShop(); delete keysP.Enter;
+      need(G.save.scrap === budget && !healUnlocked(), 'other purchases cannot consume the required pack budget');
+      G.shopIdx=SHOP.findIndex(s=>s.type==='cell');
+      keysP.Enter=true; updateShop(); delete keysP.Enter; dialog();
+      need(healUnlocked() && burstUnlocked(), 'purchase enables both pack abilities');
       G.state = 'PLAY';
       doInteract(G.statics.find(s => s.type === 'bench'));
       for (let i = 0; i < 180; i++) tick();

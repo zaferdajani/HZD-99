@@ -29,6 +29,14 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
+  ['comic-rewards', 'saved milestone slideshows, updates, accessibility and failure recovery'],
+  ['story-battery', 'unique workshop battery and legacy save compatibility'],
+  ['story-rescue', 'recoverable machines and persistent cleansing'],
+  ['story-meeting', 'interactive guardian warning and real contact'],
+  ['first-sage-route', 'pre-guardian route through quarry maintenance passage'],
+  ['winch-integration', 'modular yard machine and persistent cleansing'],
+  ['manhwa-reader', 'revised illustrated edition and complete written opening'],
   ['entrance-integration', 'painted entrances share world anchors without duplicate mouth overlays'],
   ['hero-cache-regression', 'third-hit cached sheet geometry and supplied idle in every mood'],
   ['scratch-visual', 'pixel-measured cyan scratch reach, mirroring and fading recovery'],

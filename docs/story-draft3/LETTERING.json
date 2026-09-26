@@ -1,0 +1,546 @@
+{
+  "edition": "Draft 3 screenplay",
+  "note": "Only text fields are printed. Labels specify speaker/placement; silent pages have empty arrays.",
+  "pages": [
+    {
+      "page": 1,
+      "entries": [
+        {
+          "label": "MOTHER, panel 2, sung",
+          "text": "A light for you…"
+        },
+        {
+          "label": "Small, different mechanical sounds in panel 3",
+          "text": "tik-tik"
+        },
+        {
+          "label": "Small, different mechanical sounds in panel 3",
+          "text": "whrr"
+        },
+        {
+          "label": "Small, different mechanical sounds in panel 3",
+          "text": "dum."
+        },
+        {
+          "label": "MOTHER, panel 5, sung",
+          "text": "…a light for me."
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "entries": [
+        {
+          "label": "Ticket",
+          "text": "LEGACY UNITS — SLEEP STORAGE"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "entries": [
+        {
+          "label": "KEEPER, panel 2",
+          "text": "Just until an old system needs you again."
+        },
+        {
+          "label": "Ticket, panel 4",
+          "text": "RETAIN FOR LEGACY MAINTENANCE"
+        },
+        {
+          "label": "Field underneath",
+          "text": "NEXT WAKE:"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "entries": [
+        {
+          "label": "Very small transmission mark, repeated only where imposed",
+          "text": "OBEY"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "entries": [
+        {
+          "label": "Gauge plates",
+          "text": "LEGACY MAINTENANCE / RESERVE WAKE"
+        },
+        {
+          "label": "Lamp, twice, small",
+          "text": "click."
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "entries": [
+        {
+          "label": "HZD-99, panel 4, a small sound without a speech balloon",
+          "text": "Prrip?"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "entries": [
+        {
+          "label": "Sign only",
+          "text": "RATCHET — REPAIRS"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "entries": []
+    },
+    {
+      "page": 9,
+      "entries": [
+        {
+          "label": "Note",
+          "text": "IF THE SONG IS SAFE, PUT MY CELL BACK. — R."
+        },
+        {
+          "label": "Smaller line",
+          "text": "IF IT ISN'T, PLEASE BE CAREFUL."
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "entries": [
+        {
+          "label": "RATCHET, panel 1",
+          "text": "Is it still singing?"
+        },
+        {
+          "label": "RATCHET, panel 2",
+          "text": "Easy. Easy… Sorry."
+        },
+        {
+          "label": "RATCHET, panel 3",
+          "text": "How long?"
+        },
+        {
+          "label": "RATCHET, panel 5",
+          "text": "Oh."
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "entries": [
+        {
+          "label": "RATCHET, panel 3",
+          "text": "Don't answer."
+        },
+        {
+          "label": "RATCHET, panel 4",
+          "text": "You can hear it. Don't let it in."
+        },
+        {
+          "label": "RATCHET, panel 5",
+          "text": "I pulled my own cell. Before my hands stopped being mine."
+        },
+        {
+          "label": "RATCHET, panel 6",
+          "text": "This gave me enough time."
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "entries": [
+        {
+          "label": "RATCHET, panel 1",
+          "text": "Twelve."
+        },
+        {
+          "label": "RATCHET, panel 2",
+          "text": "Waking fee is waived."
+        },
+        {
+          "label": "RATCHET, panel 4",
+          "text": "Slowly."
+        },
+        {
+          "label": "RATCHET, panel 6",
+          "text": "Same charge. Mending or breaking."
+        },
+        {
+          "label": "RATCHET, after a beat",
+          "text": "Spend it once."
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "entries": [
+        {
+          "label": "RATCHET, panel 1",
+          "text": "A thank-you. Someone in my family fixed a lift."
+        },
+        {
+          "label": "RATCHET, panel 2",
+          "text": "The Sage is under the lion's enclosure. That used to mean safe."
+        },
+        {
+          "label": "RATCHET, panel 3",
+          "text": "I can shape a larger marble into a cleansing blade."
+        },
+        {
+          "label": "RATCHET, panel 4, quieter",
+          "text": "Not this one."
+        },
+        {
+          "label": "RATCHET, panel 5",
+          "text": "Servo has the gantries. If he wakes… tell him I should have come."
+        },
+        {
+          "label": "RATCHET, panel 6",
+          "text": "The invoice will be here."
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "entries": [
+        {
+          "label": "SERVO, panel 2",
+          "text": "Cargo weight?"
+        },
+        {
+          "label": "SERVO, panel 3",
+          "text": "Is the cargo coming later?"
+        },
+        {
+          "label": "SERVO, panel 4",
+          "text": "Last lift was full. I held it until the motor stopped."
+        },
+        {
+          "label": "SERVO, panel 5",
+          "text": "Top pulley. I can't—"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "entries": []
+    },
+    {
+      "page": 16,
+      "entries": [
+        {
+          "label": "SERVO, panel 6",
+          "text": "He used to catch the falling ones."
+        }
+      ]
+    },
+    {
+      "page": 17,
+      "entries": []
+    },
+    {
+      "page": 18,
+      "entries": [
+        {
+          "label": "Door",
+          "text": "KNOCK. DO NOT SING."
+        },
+        {
+          "label": "SFX",
+          "text": "tik-tik"
+        },
+        {
+          "label": "SFX",
+          "text": "tik."
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "entries": []
+    },
+    {
+      "page": 20,
+      "entries": []
+    },
+    {
+      "page": 21,
+      "entries": [
+        {
+          "label": "RATCHET, panel 1",
+          "text": "You took—"
+        },
+        {
+          "label": "RATCHET, panel 3",
+          "text": "Come here."
+        },
+        {
+          "label": "RATCHET, panel 5",
+          "text": "He held it?"
+        },
+        {
+          "label": "RATCHET, panel 6",
+          "text": "Then he heard you."
+        }
+      ]
+    },
+    {
+      "page": 22,
+      "entries": [
+        {
+          "label": "RATCHET, panel 5",
+          "text": "His armor isn't the thing holding him."
+        },
+        {
+          "label": "RATCHET, panel 6",
+          "text": "Find that."
+        }
+      ]
+    },
+    {
+      "page": 23,
+      "entries": []
+    },
+    {
+      "page": 24,
+      "entries": [
+        {
+          "label": "SERVO, panel 1",
+          "text": "We shut the door. The counting didn't stop."
+        },
+        {
+          "label": "SAGE, panel 3",
+          "text": "One missing."
+        },
+        {
+          "label": "SAGE, panel 4, unexpectedly lucid",
+          "text": "You weren't in the count."
+        },
+        {
+          "label": "SAGE, panel 6",
+          "text": "Begin again."
+        }
+      ]
+    },
+    {
+      "page": 25,
+      "entries": [
+        {
+          "label": "SAGE, panel 4",
+          "text": "Don't make me start again."
+        },
+        {
+          "label": "SAGE, panel 5",
+          "text": "I was calling the ones who hadn't answered."
+        },
+        {
+          "label": "SAGE, panel 6",
+          "text": "It kept making me call louder."
+        }
+      ]
+    },
+    {
+      "page": 26,
+      "entries": [
+        {
+          "label": "SAGE, panel 1",
+          "text": "Every time someone answered, it found them."
+        },
+        {
+          "label": "SAGE, panel 3",
+          "text": "Cut his binding. That bell writes it back."
+        },
+        {
+          "label": "SAGE, panel 4",
+          "text": "I can close our end."
+        },
+        {
+          "label": "EYE, separate mechanical lettering, panel 5",
+          "text": "Unauthorized voice."
+        },
+        {
+          "label": "EYE, panel 6",
+          "text": "Correct the fault."
+        }
+      ]
+    },
+    {
+      "page": 27,
+      "entries": [
+        {
+          "label": "SAGE, panel 1",
+          "text": "You can't hold a cable and cut it."
+        },
+        {
+          "label": "SERVO, panel 3",
+          "text": "I'll hold."
+        },
+        {
+          "label": "RATCHET, panel 5",
+          "text": "One ring. I can buy you one ring."
+        }
+      ]
+    },
+    {
+      "page": 28,
+      "entries": []
+    },
+    {
+      "page": 29,
+      "entries": [
+        {
+          "label": "SERVO, panel 3, small and directed to the lion",
+          "text": "There you are."
+        }
+      ]
+    },
+    {
+      "page": 30,
+      "entries": [
+        {
+          "label": "SERVO, panel 6",
+          "text": "Cargo received."
+        }
+      ]
+    },
+    {
+      "page": 31,
+      "entries": [
+        {
+          "label": "SFX",
+          "text": "tik-tik"
+        }
+      ]
+    },
+    {
+      "page": 32,
+      "entries": []
+    },
+    {
+      "page": 33,
+      "entries": [
+        {
+          "label": "EYE, panel 1",
+          "text": "Release the fault."
+        }
+      ]
+    },
+    {
+      "page": 34,
+      "entries": [
+        {
+          "label": "RATCHET, panel 5, to his own shaking hand",
+          "text": "Steady."
+        },
+        {
+          "label": "Stone, panel 6, very small",
+          "text": "tik."
+        }
+      ]
+    },
+    {
+      "page": 35,
+      "entries": [
+        {
+          "label": "SAGE, panel 4",
+          "text": "Slowly. I can hear you."
+        },
+        {
+          "label": "HZD-99, panel 5, sound only",
+          "text": "Prrip?"
+        },
+        {
+          "label": "ANSWER · drum",
+          "text": "dum."
+        },
+        {
+          "label": "ANSWER · wheel",
+          "text": "kwee"
+        },
+        {
+          "label": "ANSWER · motor",
+          "text": "wrrip."
+        }
+      ]
+    },
+    {
+      "page": 36,
+      "entries": [
+        {
+          "label": "RATCHET, panel 5",
+          "text": "Keep it."
+        },
+        {
+          "label": "RATCHET, panel 6",
+          "text": "I know where you'll bring it when it breaks."
+        }
+      ]
+    },
+    {
+      "page": 37,
+      "entries": [
+        {
+          "label": "RATCHET, panel 5",
+          "text": "Outside."
+        }
+      ]
+    },
+    {
+      "page": 38,
+      "entries": [
+        {
+          "label": "MOTHER, panel 2, fragmented",
+          "text": "…still… here…"
+        },
+        {
+          "label": "SAGE, panel 3",
+          "text": "She made that gap."
+        },
+        {
+          "label": "SAGE, panel 5",
+          "text": "Mono kept the routes. One of them must reach her."
+        }
+      ]
+    },
+    {
+      "page": 39,
+      "entries": [
+        {
+          "label": "Invoice",
+          "text": "RETURN IN ONE PIECE."
+        }
+      ]
+    },
+    {
+      "page": 40,
+      "entries": [
+        {
+          "label": "Service record",
+          "text": "HZD-99 / LEGACY MAINTENANCE / SLEEP STORAGE"
+        },
+        {
+          "label": "Second record",
+          "text": "CENTRAL AUTHORITY RETIRED"
+        },
+        {
+          "label": "EYE, panel 3, almost recognition rather than anger",
+          "text": "They put you away too."
+        },
+        {
+          "label": "EYE, panel 5",
+          "text": "Leave the last carriage lit."
+        },
+        {
+          "label": "After the final image",
+          "text": "END OF CHAPTER ONE"
+        }
+      ]
+    }
+  ]
+}

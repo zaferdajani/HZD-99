@@ -274,11 +274,10 @@ function newSave(diff) {
     // rooms and two learned verbs later.
     bench: { room: 'W1', x: 96, y: 412 }, deaths: 0, lives: 0, time: 0,
     pouch: null, usedNine: false, won: false, evo: 0, pace: 0, quests: {}, culls: {}, bag: {},
-    // SHE STARTS WITH ONE CELL, AND ONLY ONE. See INV/npcCharge below: the
-    // machine folk were offline when the Song went out, so nothing infected
-    // them — and nothing charged them either. That single cell is the first
-    // decision in the game and the reason the second NPC matters.
-    items: { batt: 1 },
+    // Draft 2: Ratchet's own battery must be found in his workshop.
+    // Existing saves keep their inventory; NOSTOS retains its separate rules.
+    storyVersion: 2,
+    items: isHero() ? { batt: 1 } : {},
   };
 }
 // ===========================================================================
@@ -297,12 +296,17 @@ function newSave(diff) {
 // `bag` already existed for quest fetch-items and is boolean; this is counted,
 // and the inventory screen shows both.
 const INV = {
+  ratchetCell: { icon: '⚡', col: '#ffd76a' },
   batt: { icon: '⚡', col: '#ffd76a' },
   kit:  { icon: '✚', col: '#7dff9a' },
   coil: { icon: '◎', col: '#57a8ff' },
   cshard: { icon: '◆', col: '#dff2ff' },
 };
 function invCount(id) { return (G.save.items && G.save.items[id]) || 0; }
+function npcCellItem(s) {
+  return !isHero() && G.save.storyVersion >= 2 && npcKey(s) === 'A0B|ratchet'
+    ? 'ratchetCell' : 'batt';
+}
 function invAdd(id, n) {
   G.save.items = G.save.items || {};
   G.save.items[id] = invCount(id) + (n == null ? 1 : n);
@@ -779,14 +783,12 @@ function healUnlocked() {
 // by the first volt cell bought in updateShop and nowhere else. Before it,
 // holding ATTACK is an ordinary attack: no build, no ticks, no storm.
 //
-// A save whose walk is behind her (`flags.tut`) has bought the pack — the
-// walk cannot complete without the buy step — so the flag is read too; that
-// is also what every harness that skips the walk sets, and none of them
-// should have to know the pack exists to hold the claw.
+// Legacy saves used tutorial completion as evidence of the purchase. Draft 2
+// records the actual purchase, so skipping a lesson never grants equipment.
 function burstUnlocked() {
   if (typeof isHero === 'function' && isHero()) return true;
   const f = G.save && G.save.flags;
-  return !!(f && (f.heal || f.tut));
+  return !!(f && (f.heal || (G.save.storyVersion !== 2 && f.tut)));
 }
 // THE ONE MACHINE THAT WAS NEVER SWITCHED OFF.
 //
@@ -960,10 +962,14 @@ function loadRoom(id) {
   parts.length = 0;
   const def = ROOMS[id];
   def.ents.forEach((d, i) => {
-    const [kind, tx, ty, extra, cond] = d;
+    let [kind, tx, ty, extra, cond] = d;
+    // The first target is an automatic scrap-yard defence, not a person.
+    if (!isHero() && G.save.storyVersion === 2 && id === 'A0' && kind === 'crawler') kind = 'turret';
     if (cond && !G.save.flags[cond]) return;
     if (EKIND[kind]) {
       const k = EKIND[kind];
+      const storyKey = !isHero() && G.save.storyVersion === 2 ? id + ':' + i + ':' + kind : null;
+      const rescueState = storyKey && G.save.rescues && G.save.rescues[storyKey];
       // THE BRAID decides who is even here. A kingdom you have cured wakes fewer
       // machines and wakes some of them calm; a HOLLOW world barely wakes at all.
       const U = typeof universe === 'function' ? universe() : null;
@@ -974,9 +980,14 @@ function loadRoom(id) {
         // still there; it has simply stopped wanting to kill her.
         const keep = clamp((0.66 + zi * 0.34) * U.foeK, 0.2, 1.6);
         // a SAGE is never culled by the Braid — it is a story, not population
-        if (kind !== 'sage' && keep < 1 && ((i * 2654435761) % 1000) / 1000 > keep) return;
+        if (!rescueState && kind !== 'sage' && keep < 1 && ((i * 2654435761) % 1000) / 1000 > keep) return;
       }
-      const en = new Enemy(kind, tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h);
+      const en = !isHero() && G.save.storyVersion === 2 && id === 'A0' && kind === 'turret'
+        ? new YardWinch(tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h)
+        : new Enemy(kind, tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h);
+      en.actorRole = STORY_ACTOR_ROLES[kind]; en.storyKey = storyKey;
+      if (rescueState === 'disabled') { en.disabled = true; en.hp = 1; }
+      if (rescueState === 'rescued') { en.rescued = true; en.calm = true; en.hypnoT = 1e9; }
       // a purified sage STAYS purified: the tame is a save fact, re-applied
       // at spawn, so leaving the chamber never re-infects it
       if (kind === 'sage' && G.save.flags['sageTame_' + id]) { en.tame = 1; en.calm = true; en.pureM = 1; }
@@ -1238,7 +1249,7 @@ function meetCheck() {
   const b = new Boss('glitch', gx, -260);      // x is the centre, y the feet
   b.meet = true; b.st = 'pounce'; b.vx = 0; b.vy = 520; b.face = -1; b.t = 9;
   G.boss = b;
-  G.meet = { t: 0, ph: 'fall', hit: false };
+  G.meet = { t: 0, ph: 'fall', hit: false, interactive: !isHero() && G.save.storyVersion === 2 };
   G.save.flags.nfMeet = 1;                    // set as it begins: a reload mid-beat keeps the sentence
   if (typeof brMark === 'function') brMark('meet', G.roomId);
   if (typeof filmSee === 'function' && PURIFY_VID.meet) filmSee('meet');
@@ -1271,16 +1282,24 @@ function meetStep(dt) {
     b.vx = (M.t > 0.7 && gap > 118) ? b.face * 240 : 0;
     moveEnt(b, dt);
     if (M.t > 0.7 && (gap <= 118 || M.t > 3.2)) {
-      b.vx = 0; b.st = 'swipewarn'; b.t = 0.5; M.ph = 'wind'; M.t = 0;
+      b.vx = 0; b.st = 'swipewarn'; b.t = M.interactive ? 0.85 : 0.5; M.ph = 'wind'; M.t = 0;
       sfx('tellbig');
     }
   } else if (M.ph === 'wind') {
-    b.windT = 0.5; b.t -= dt; b.vx = 0;
+    b.windT = M.interactive ? 0.85 : 0.5; b.t -= dt; b.vx = 0;
     if (b.t <= 0) { b.st = 'swipe'; b.t = 0.24; M.ph = 'swipe'; }
   } else if (M.ph === 'swipe') {
     b.t -= dt;
     if (!M.hit && b.t <= 0.18) {
       M.hit = true;
+      if (M.interactive) {
+        // The tell commits the paw's direction. Running away or jumping is
+        // a real escape, and no cutscene removes a core from outside its reach.
+        const hit = { x: b.face < 0 ? b.x - 110 : b.x + b.w, y: b.y + b.h - 82, w: 110, h: 82 };
+        sfx('atk'); cam.shake = Math.max(cam.shake, 3);
+        burst(hit.x + hit.w / 2, hit.y + hit.h / 2, 8, '#b06aff', 120, 0.35, 80, 2, true);
+        if (aabb(hit, player)) player.hurt(1, b.cx(), 'nf.meet');
+      } else {
       // THE IMPACT FRAME: the least readable frame on purpose
       G.hitStop = Math.max(G.hitStop, 0.2); G.flash = Math.max(G.flash, 0.85);
       cam.shake = Math.max(cam.shake, 18);
@@ -1293,6 +1312,7 @@ function meetStep(dt) {
       if (player.cores > 1) { player.iT = 0; player.hurt(1, b.cx(), 'nf.meet'); }
       player.iT = 2.4; player.hurtPoseT = 0.9; player.stunT = 0;
       player.vx = (pcx < b.cx() ? -1 : 1) * 980; player.vy = -520; player.on = false;   // away from it
+      }
     }
     if (b.t <= 0) { b.st = 'stalk'; b.vx = 0; M.ph = 'watch'; M.t = 0; }
   } else if (M.ph === 'watch') {
@@ -1455,6 +1475,12 @@ function checkTransitions() {
     }
     return;
   }
+  const storyHint = typeof openingGateHint === 'function' ? openingGateHint(dest) : '';
+  if (storyHint) {
+    player.x = clamp(player.x, 2, W - player.w - 2); player.vx = 0;
+    if (!G.storyGateAt || G.time - G.storyGateAt > 4) {G.toast(storyHint);G.storyGateAt=G.time||0.001;}
+    return;
+  }
   if (demoWall(dest)) { demoStop(side); return; }
   G.trans = { t: TRANS_DUR, to: dest, side, at, half: false };
   // HOLD THE PICTURE NOW, not at draw time. The loop runs a fixed step and may
@@ -1521,6 +1547,15 @@ function findNear() {
       if (d < bestD) { bestD = d; best = s; }
     }
   }
+  for (const e of G.enemies) {
+    if (!e.disabled || !e.storyKey) continue;
+    const dx = player.x + player.w / 2 - e.x - e.w / 2;
+    const dy = player.y + player.h / 2 - e.y - e.h / 2;
+    const d = dx * dx + dy * dy;
+    if (Math.abs(dx) < 46 && Math.abs(dy) < 60 && d < bestD) {
+      bestD = d; best = { type: 'rescue', target: e, x: e.x, y: e.y, w: e.w, h: e.h };
+    }
+  }
   return best || (typeof monoNearTarget === 'function' ? monoNearTarget() : null);
 }
 // ---------------------------------------------------------------------------
@@ -1565,6 +1600,11 @@ const NPC_GIFT = {
   // can spend what she knocks out of other machines.
   'A0B|ratchet': () => {
     invAdd('kit');
+    // His own cell stays installed. This separately stored spare is for Servo.
+    if (!isHero() && G.save.storyVersion >= 2 && !G.save.flags.ratchetSpareGiven) {
+      G.save.flags.ratchetSpareGiven = 1;
+      invAdd('batt');
+    }
     showItem(t('i_kit'), t('i_kitd'));
   },
   // and the trader at the camp by NULLFANG's door — this is the shop, and it
@@ -1601,6 +1641,13 @@ function forgeCrystal() {
 function doInteract(s) {
   if (!s && typeof monoNearTarget === 'function') s = monoNearTarget();
   if (!s) return;
+  if (s.type === 'rescue') {
+    const e = s.target;
+    if (!e || !e.disabled || e.cleanseT > 0) return;
+    if (!G.save.flags.crystal) { G.toast(t('story_need_blade')); return; }
+    e.cleanseT = 0.65; e.cleanseHP = player.cores;
+    return;
+  }
   if (s.type === 'npc') {
     // THEY WANT SOMETHING NOW. Talking twice used to give you the same three
     // lines forever; a character who cannot ask you for anything is scenery
@@ -1622,7 +1669,7 @@ function doInteract(s) {
       // even tells her where he hid it — the chest across the room.)
       const note = key === 'A0B|ratchet'
         ? [t('sl_note1'), t('sl_note2'), t('sl_note3')] : null;
-      if (invCount('batt') <= 0) {
+      if (invCount(npcCellItem(s)) <= 0) {
         // no cell: it says nothing, because it cannot. The line is HERS —
         // unless there is a note, in which case the note speaks for him.
         G.dialog = {
@@ -1638,7 +1685,7 @@ function doInteract(s) {
         lines: note ? note.concat([t('npc_give')]) : [t('npc_dark'), t('npc_give')],
         i: 0, npc: s.extra,
         onEnd: () => {
-          if (!invTake('batt')) return;
+          if (!invTake(npcCellItem(s))) return;
           npcCharge(s);
           G.toast(t('npc_woke').replace('%s', t('n_' + s.extra)));
           // WHAT IT GIVES BACK. Every unit repays the cell, because a hand-off
@@ -1793,6 +1840,7 @@ function doInteract(s) {
         }
       }
     }
+    if (typeof survivorStory === 'function') lines = survivorStory(s, lines);
     G.dialog = { name: t('n_' + s.extra), lines, i: 0, npc: s.extra, onEnd: after };
     G.state = 'DIALOG'; npcSay(s.extra, 0);
   } else if (s.type === 'term') {
@@ -1828,6 +1876,7 @@ function doInteract(s) {
     player.volts = 99;
     burst(s.x + s.w / 2, s.y + 8, 14, '#8ff6ff', 180, 0.6, 100, 3, true);
   } else if (s.type === 'chest') {
+    if (s.opened) return;
     s.opened = true;
     if (s.flagKey) G.save.flags[s.flagKey] = 1;
     sfx('chest');
@@ -1835,7 +1884,8 @@ function doInteract(s) {
     else if (s.extra.indexOf('rl:') === 0) G.grantRelic(s.extra.slice(3));
     else if (s.extra.indexOf('it:') === 0) {
       // an inventory item kept in a chest — the booth's spare power cell
-      const it = s.extra.slice(3);
+      const it = !isHero() && G.save.storyVersion >= 2 && G.roomId === 'A0B' && s.extra === 'it:batt'
+        ? 'ratchetCell' : s.extra.slice(3);
       invAdd(it);
       showItem(t('i_' + it), t('i_' + it + 'd'));
     }
@@ -1952,6 +2002,7 @@ function tickNPCVox() {
   }
 }
 function update(dt) {
+  if (typeof ComicRewards !== 'undefined' && ComicRewards.tick(dt)) return;
   if (typeof heroMotionGate === 'function' && heroMotionGate(dt)) return;
   if (typeof tutorialTick === 'function') tutorialTick();
   narrativeAudioTick();
@@ -2123,7 +2174,7 @@ function update(dt) {
     // §3): once it has thrown her, the camera holds both of them — where she
     // landed, and it standing there looking — rather than chasing her off the
     // crest and leaving the guardian to finish its beat off-screen
-    if (G.meet && G.boss && (G.meet.ph === 'watch' || G.meet.ph === 'coil'))
+    if (G.meet && !G.meet.interactive && G.boss && (G.meet.ph === 'watch' || G.meet.ph === 'coil'))
       // a third of a screen short of the guardian: it stands at the right of
       // the frame and she is wherever the throw put her, up to 800 px west of
       // it (measured 480-600) — a true midpoint put it a hair past the edge
@@ -2412,6 +2463,7 @@ function pauseItems() {
     { id: 'qual', label: t('qual') + ':  ' + qualLabel() + '   ◂ ▸', arrows: 1, hint: t('qual_d').replace('%s', DEVICE.form) },
   ];
   it.push({ id: 'films', label: t('film_title') });
+  if (!isHero()) it.push({ id: 'comics', label: LANG === 'ar' ? 'ذكريات المانهوا' : 'Manhwa memories' });
   if (pauseHasTouch()) it.push({ id: 'touch', label: t('tl_title') });
   it.push({ id: 'restart', label: t('pm_restart'), icon: '↻', warn: 1, hint: t('pm_restart_d') });
   it.push({ id: 'quit', label: t('to_menu'), icon: '⏻', warn: 1, out: 1 });
@@ -2468,6 +2520,7 @@ function updatePause() {
     }
     else if (cur.id === 'qual') { qualCycle(); G.toast(t('qual') + '  ' + qualLabel()); }
     else if (cur.id === 'films') { G.state = 'FILMS'; G.filmIdx = 0; }
+    else if (cur.id === 'comics') ComicRewards.library();
     else if (cur.id === 'touch') G.state = 'TCFG';
     else if (cur.id === 'restart') {
       // same difficulty, same world, nothing carried — the run starts over
@@ -2595,6 +2648,9 @@ function updateShop() {
   if (inP('UP')) { G.shopIdx = (G.shopIdx + SHOP.length - 1) % SHOP.length; sfx('ui'); }
   if (inP('OK')) {
     const it = SHOP[G.shopIdx];
+    if (!isHero() && G.save.storyVersion === 2 && !G.save.flags.heal && it.type !== 'cell') {
+      G.toast(t('story_pack_first')); sfx('no'); return;
+    }
     if (shopSold(it)) { sfx('no'); return; }
     const cost = Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1));
     if (G.save.scrap < cost) { G.toast(t('poor')); sfx('no'); return; }
@@ -9429,8 +9485,16 @@ function drawKerfStone(cx2, gy, P, k) {
 // Existing rows are untouched: one door is still one object, and every field
 // on it means what it meant. Adding a second is adding a comma.
 function gateDoorsAll(id) {
-  const g = GATE_ROOM[id == null ? G.roomId : id];
-  return !g ? [] : (Array.isArray(g) ? g : [g]);
+  const room = id == null ? G.roomId : id;
+  const g = GATE_ROOM[room];
+  const doors = !g ? [] : (Array.isArray(g) ? g.slice() : [g]);
+  // An existing floor anchor in the quarry connects to the tunnel's central
+  // maintenance landing. The guardian's reward is never a prerequisite.
+  if (!isHero() && G.save && G.save.storyVersion === 2) {
+    if (room === 'CV3') doors.push({ at: 36 / 56, to: 'GA1T', ax: 0.5, need: 'crystal' });
+    if (room === 'GA1T') doors.push({ at: 0.5, to: 'CV3', ax: 36 / 56, need: 'crystal' });
+  }
+  return doors;
 }
 // ...and this is the one the game uses: the doors that EXIST right now. A door
 // with an unmet `need` is not hidden, it has not been built yet — no prompt,
@@ -10026,6 +10090,8 @@ function gateHere() {
 function gateEnter() {
   const G2 = gateHere();
   if (!G2 || G.gateWalk) return false;
+  const storyHint = typeof openingGateHint === 'function' ? openingGateHint(G2.to) : '';
+  if (storyHint) {G.toast(storyHint);return false;}
   // BURIED: the mouth is there, she can hear through it, and it will not take
   // her. Refusing LOUDLY matters — a door that silently ignores UP is a dead
   // input, and she has to learn that this one is opened with the blade.
@@ -10959,6 +11025,16 @@ function drawStatics(P) {
       // below draw the same landmark. The breathing halo rides both versions:
       // the plate is a still, and the pulse is what makes it alive.
       const pu = 0.5 + Math.sin(performance.now() / 700 + s.t) * 0.5;
+      if (!isHero() && G.save.storyVersion === 2) {
+        // Rounded raw material, shared with the comic's quarry reference.
+        // Loading must never flash the legacy pointed crystal into this scene.
+        if (!drawPlateAnchored(c, 'rawMarble', s.x + s.w / 2, s.y + s.h, s.h * 1.18, false)) {
+          c.save(); c.fillStyle = '#b9c8cb';
+          c.beginPath(); c.ellipse(s.x + s.w/2, s.y + s.h*.57, s.w*.66, s.h*.43, 0, 0, Math.PI*2); c.fill();
+          c.restore();
+        }
+        continue;
+      }
       if (typeof drawPlateAnchored === 'function' &&
           drawPlateAnchored(c, 'pillarPlate', s.x + s.w / 2, s.y + s.h, s.h * 1.18, false)) {
         c.save(); c.globalCompositeOperation = 'lighter';
@@ -11215,7 +11291,7 @@ function drawStatics(P) {
         // and the prompt that this one can be fixed — an amber pip over the
         // head, only while she actually has a cell to spend. Without the
         // condition it is a quest marker; with it, it is an answer.
-        if (invCount('batt') > 0) {
+        if (invCount(npcCellItem(s)) > 0) {
           // the owner walked straight past this at 15px. A dark unit she can
           // fix is the most important thing in the room: the pip is a BEACON
           // now — a light shaft up from the body, a breathing ring around it,
@@ -11309,7 +11385,7 @@ function drawStatics(P) {
   // interact hint
   if (G.near && G.state === 'PLAY' && !G.recharge) {
     const s = G.near;
-    const label = s.type === 'npc' ? t('talk') : s.type === 'bench' ? t('rest') : s.type === 'term' ? t('read') : s.type === 'riddle' ? t('rd_hint') : s.type === 'secret' ? t('secret_hint') : s.type === 'trial' ? t('tt_open') : s.type === 'vault' ? t('vault_hint') : t('open');
+    const label = s.type === 'rescue' ? t(G.save.flags.crystal ? 'story_cleanse' : 'story_binding') : s.type === 'npc' ? t('talk') : s.type === 'bench' ? t('rest') : s.type === 'term' ? t('read') : s.type === 'riddle' ? t('rd_hint') : s.type === 'secret' ? t('secret_hint') : s.type === 'trial' ? t('tt_open') : s.type === 'vault' ? t('vault_hint') : t('open');
     ftxt(label, s.x + s.w / 2, s.y - 18, 13, '#eef3fa', 'center', 'rgba(120,220,255,0.8)');
   }
 }
@@ -11611,7 +11687,7 @@ const TUT_STEPS = [
   // kill you for getting it wrong.
   { id: 'kill', label: 'tut_kill', hint: 'tut_kill_h', room: 'A0',
     keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
-    done: () => !G.enemies.some(e => e && !e.dead) },
+    done: () => !G.enemies.some(e => e && !e.dead && !e.disabled && !e.rescued) },
   { id: 'coin', label: 'tut_coin', hint: 'tut_coin_h',
     keys: '\u2190 \u2192', pad: 'D-pad', touch: 'stick', vb: null,
     done: () => G.save.scrap >= 12 },
@@ -11723,6 +11799,17 @@ function tutPrompt(st) {
       point(npc.x + npc.w / 2, npc.y + npc.h / 2, '#ffd76a');
       if (typeof npcLive === 'function' && !npcLive(npc)) {
         view.label = 'tut_note'; view.hint = 'tut_note_h';
+        if (npcCellItem(npc) === 'ratchetCell' && !invCount('ratchetCell')) {
+          const drawer = (G.statics || []).find(q => q.type === 'chest' && q.extra === 'it:batt' && !q.opened);
+          if (drawer) {
+            point(drawer.x + drawer.w / 2, drawer.y + drawer.h / 2, '#ffd76a');
+            view.label = 'tut_cell'; view.hint = 'tut_cell_h';
+            if (G.near !== drawer) {
+              view.control = pc < view.target.x ? '\u2192' : '\u2190'; view.action = 'MOVE'; view.vb = null;
+            }
+            return view;
+          }
+        }
       }
       if (G.near !== npc) {
         view.control = pc < view.target.x ? '\u2192' : '\u2190'; view.action = 'MOVE';
@@ -11856,12 +11943,14 @@ function updateTutor(dt) {
   // arm's length until the claw has been taught — then it walks in and is held
   // there, close enough to be frightening and too far to touch.
   const dum = G.enemies && G.enemies.find(e => e && !e.dead);
-  if (dum) {
+  if (dum && (sv.storyVersion !== 2 || st.id !== 'kill')) {
     dum.calm = true; dum.hypnoT = 1e9;
     const gap = (dum.x + dum.w / 2) - (player.x + player.w / 2);
     // held at arm's length until the claw has been taught, then let close —
     // but never let loose: the kill step wants a target, not a fight
     if (T.i < 2 || Math.abs(gap) < 96) { dum.vx = 0; dum.stagT = Math.max(dum.stagT || 0, 0.12); }
+  } else if (dum && !dum.disabled && !dum.rescued) {
+    dum.calm = false; dum.hypnoT = 0;
   }
   if (typeof TOUCH !== 'undefined' && TOUCH) {
     const prompt = st && tutPrompt(st);
@@ -12012,29 +12101,33 @@ function drawTutor() {
 }
 // one card, used by the waking floor and by every power she is handed after it
 function tutCard(px, py, key, label, hint, learned, fade) {
-  const pu = 0.5 + Math.sin(performance.now() / 260) * 0.5;
-  c.font = '700 15px "Segoe UI", Tahoma, sans-serif';
-  const kw = c.measureText(key).width + 26;
-  c.font = '600 15px "Segoe UI", Tahoma, sans-serif';
-  const lw = Math.max(c.measureText(label).width, c.measureText(hint).width * 0.8);
-  const w = Math.max(160, kw + lw + 34), x = clamp(px - w / 2, 12, 948 - w), y = clamp(py - 78, 8, 430);
+  const touch = typeof TOUCH !== 'undefined' && TOUCH.enabled;
+  const keySize = touch ? 26 : 20, titleSize = touch ? 27 : 22, helpSize = touch ? 22 : 16;
+  const height = touch ? 88 : 70;
   c.save();
+  c.font = '700 ' + keySize + 'px "Segoe UI", Tahoma, sans-serif';
+  const kw = Math.min(240, c.measureText(key).width + 28);
+  c.font = '600 ' + titleSize + 'px "Segoe UI", Tahoma, sans-serif';
+  const titleWidth = c.measureText(label).width;
+  c.font = '400 ' + helpSize + 'px "Segoe UI", Tahoma, sans-serif';
+  const lw = Math.max(titleWidth, c.measureText(hint).width);
+  const w = Math.min(780, Math.max(260, kw + lw + 50));
+  const x = (960 - w) / 2, y = touch ? 100 : 436, rtl = LANG === 'ar';
   c.globalAlpha = learned ? Math.max(0, fade) : 1;
-  c.fillStyle = 'rgba(6,14,20,0.86)'; rr(c, x, y, w, 46, 10); c.fill();
-  c.strokeStyle = learned ? '#7de8a0' : 'rgba(55,255,208,' + (0.35 + pu * 0.45) + ')';
-  c.lineWidth = 2; rr(c, x, y, w, 46, 10); c.stroke();
-  c.fillStyle = learned ? 'rgba(125,232,160,0.22)' : 'rgba(55,255,208,0.16)';
-  rr(c, x + 10, y + 10, kw, 26, 6); c.fill();
-  ftxt(key, x + 10 + kw / 2, y + 24, 15, learned ? '#bff5d2' : '#8ff0d4', 'center', null, '700');
-  ftxt(learned ? '\u2713 ' + label : label, x + kw + 22, y + 20, 15,
-    learned ? '#bff5d2' : '#eef3fa', 'left', null, '600');
-  ftxt(hint, x + kw + 22, y + 36, 12, '#7d93a8', 'left');
-  c.fillStyle = learned ? '#7de8a0' : '#37ffd0';
-  c.globalAlpha = (learned ? Math.max(0, fade) : 1) * 0.8;
-  c.beginPath();
-  c.moveTo(px - 6, y + 48); c.lineTo(px + 6, y + 48); c.lineTo(px, y + 56);
-  c.closePath(); c.fill();
-  c.restore(); c.globalAlpha = 1;
+  c.fillStyle = 'rgba(6,14,20,0.92)'; rr(c, x, y, w, height, 8); c.fill();
+  const keyX = rtl ? x + w - kw - 14 : x + 14;
+  c.fillStyle = '#e7edef'; rr(c, keyX, y + 16, kw, height - 32, 5); c.fill();
+  ftxt(key, keyX + kw/2, y + height/2 + keySize*.32, keySize, '#17262d', 'center', null, '700');
+  const textX = rtl ? keyX - 14 : keyX + kw + 14, align = rtl ? 'right' : 'left';
+  const maxText = w - kw - 44;
+  c.font = '600 ' + titleSize + 'px "Segoe UI", Tahoma, sans-serif';
+  const labelSize = Math.min(titleSize, titleSize * maxText / Math.max(1,c.measureText(label).width));
+  ftxt(learned ? '\u2713 ' + label : label, textX, y + (touch ? 35 : 29), labelSize,
+    learned ? '#bff5d2' : '#f3f5f6', align, null, '600');
+  c.font = '400 ' + helpSize + 'px "Segoe UI", Tahoma, sans-serif';
+  const hintSize = Math.min(helpSize, helpSize * maxText / Math.max(1,c.measureText(hint).width));
+  ftxt(hint, textX, y + (touch ? 65 : 53), hintSize, '#c8d5db', align);
+  c.restore();
 }
 // ===========================================================================
 // A POWER YOU CANNOT WORK IS NOT A POWER. Every guardian hands over something
@@ -12162,6 +12255,7 @@ function heartIcon(heroHud, full, glowCol) {
 }
 function drawHUD() {
   const P = PAL[G.roomDef.zone];
+  const teaching = !!(G.tut && !G.save.flags.tut);
   // DATA CORRUPTION: the whole HUD jitters, tears and lies for its 8 seconds
   const glitched = (G.hudGlitchT || 0) > 0;
   if (glitched) {
@@ -12219,8 +12313,9 @@ function drawHUD() {
     c.restore();
   }
   // volt gauge — the heal bar (charges from slashes and kills)
+  if (!teaching || healUnlocked() || player.volts > 0) {
   const vx = 38, vy = 66;
-  const canHeal = player.volts >= player.healCost() && player.cores < player.maxCores();
+  const canHeal = healUnlocked() && player.volts >= player.healCost() && player.cores < player.maxCores();
   const hpu = 0.6 + Math.sin(performance.now() / 280) * 0.4;
   if (canHeal) {
     const g = c.createRadialGradient(vx, vy, 2, vx, vy, 21);
@@ -12238,6 +12333,7 @@ function drawHUD() {
   if (canHeal) {
     ftxt(TOUCH && TOUCH.enabled ? '✚' : '✚ F', vx + 28, vy, 15, 'rgba(174,247,216,' + hpu + ')', 'left');
     if (!G.healToasted) { G.healToasted = true; G.toast(t('heal_hint')); }
+  }
   }
   // ---- suit wheel: what you are wearing, and what else you could wear
   const slots = armSlots();
@@ -12260,6 +12356,7 @@ function drawHUD() {
   // world, which reads as collectibles, not as a counter. A single dim plate
   // ties the corner together: UI lives on glass, the world does not. Drawn
   // first so everything in the cluster sits on it.
+  if (!teaching) {
   const smP = starMax();
   {
     const px0 = 906 - (smP - 1) * 15 - 22;
@@ -12307,6 +12404,7 @@ function drawHUD() {
     c.closePath(); c.fill(); c.shadowBlur = 0; c.restore();
   }
   if (!(TOUCH && TOUCH.enabled)) ftxt('R', 934, 186, 11, sc ? '#8fd8c8' : '#546b7d', 'right');
+  }
 
   // scrap + knowledge
   // A NUT, NOT A GEAR. ⚙ reads as SETTINGS to every player alive, and this
@@ -12314,8 +12412,10 @@ function drawHUD() {
   // shop sign and the map legend), never the wallet. ⬢ and not the 🔩 emoji:
   // measured in a canvas, the bolt renders as a COLOUR emoji that ignores
   // fillStyle, so the money counter came out sky blue in an all-amber HUD.
-  ftxt('⬢ ' + G.save.scrap, 76, 66, 17, '#ffd76a', 'left', null, '700');
-  ftxt('◈ ' + (G.save.iq || 0) + ' ' + t('sk_iq'), 76, 88, 13, '#b48cff', 'left');
+  if (!teaching || G.save.flags.sawScrap || G.save.scrap > 0)
+    ftxt('⬢ ' + G.save.scrap, 76, 66, 17, '#ffd76a', 'left', null, '700');
+  if (!teaching || G.save.iq > 0)
+    ftxt('◈ ' + (G.save.iq || 0) + ' ' + t('sk_iq'), 76, 88, 13, '#b48cff', 'left');
   // AND FROM THE FIRST POINT EARNED, SAY WHERE IT GOES — BY NAME.
   //
   // This has been wrong twice. First it was a toast, which scrolled away in two
@@ -12425,7 +12525,7 @@ function drawHUD() {
   }
   // the zone banner is a PLAY-state flourish; over the pause menu it was just a
   // second title crossing the first
-  if (G.zoneToast && G.state === 'PLAY') {
+  if (G.zoneToast && G.state === 'PLAY' && !(G.tut && !G.save.flags.tut)) {
     c.globalAlpha = clamp(G.zoneToast.t, 0, 1);
     ftxt(G.zoneToast.text, 480, 90, 34, '#eef3fa', 'center', PAL[G.roomDef.zone].glow);
     c.globalAlpha = 1;

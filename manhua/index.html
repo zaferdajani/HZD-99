@@ -1,287 +1,75 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b0d12">
-<meta name="description" content="CLAWBYTE, the manhua. The story of the game drawn to the letter, one kingdom per chapter, read top to bottom.">
-<!-- A SHARED LINK SHOWS THE COVER. Without these a pasted link is a bare URL in
-     a chat; with them it is the cover, the title and a line. The image is a
-     1200x630 JPEG cut from chapter one's cover (assets/social/manhua.jpg —
-     JPEG, not the page's own webp, because the previewers do not all read webp),
-     and every URL is absolute because previewers fetch it from nowhere. -->
-<meta property="og:type" content="book">
-<meta property="og:site_name" content="CLAWBYTE">
-<meta property="og:title" content="CLAWBYTE — the manhua">
-<meta property="og:description" content="The story of the game, drawn to the letter, one kingdom per chapter. Read top to bottom.">
-<meta property="og:url" content="https://zaferdajani.github.io/HZD-99/manhua/">
-<meta property="og:image" content="https://zaferdajani.github.io/HZD-99/assets/social/manhua.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CLAWBYTE — the manhua">
-<meta name="twitter:description" content="The story of the game, drawn to the letter, one kingdom per chapter.">
-<meta name="twitter:image" content="https://zaferdajani.github.io/HZD-99/assets/social/manhua.jpg">
-<link rel="icon" href="../assets/social/clawbyte.png">
-<link rel="apple-touch-icon" href="../assets/social/clawbyte.png">
-<title>CLAWBYTE — the manhua</title>
-<!--
-  THE MANHUA READER.
-
-  Plain HTML, no build step, phone-first, read top to bottom. It serves the
-  pages under ../assets/manhua/ch<N>/p<NN>.webp and nothing else; the pages
-  themselves are drawn through Higgsfield by the STORY session from
-  docs/STORY_SCRIPT.md, one kingdom per chapter, and every page is reviewed
-  by the owner before it is committed (docs/MANHUA_SESSION.md).
-
-  The manifest below is the only thing this file knows about the book: which
-  chapters exist, how many pages each has, and which scene of the script each
-  page draws. A page that is listed here but not yet on disk renders as an
-  "undrawn" card, so the reader always shows the whole shape of the book and
-  exactly where the drawing has reached. The transcript under every page is
-  the script's own text for that page, verbatim, so the drawn text boxes can
-  be checked against it — the manhua exists to validate the game's story and
-  a caption that drifted would defeat that.
--->
-<style>
-  :root {
-    --bg: #0b0d12; --panel: #141821; --ink: #e8e6df; --dim: #8b90a0;
-    --line: #232838; --cyan: #5fe6ff; --red: #ff4a4a; --gold: #e2b455;
-    --w: 720px;
-  }
-  * { box-sizing: border-box; }
-  html { background: var(--bg); -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0; color: var(--ink); background: var(--bg);
-    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  a { color: var(--cyan); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-
-  header {
-    position: sticky; top: 0; z-index: 5;
-    background: rgba(11,13,18,.92); backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--line);
-  }
-  .bar {
-    max-width: var(--w); margin: 0 auto; padding: 10px 16px;
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  }
-  .brand { font-weight: 800; letter-spacing: .12em; font-size: 14px; }
-  .brand small { color: var(--dim); letter-spacing: 0; font-weight: 400; margin-left: 8px; }
-  nav { display: flex; gap: 6px; overflow-x: auto; flex: 1; min-width: 0; scrollbar-width: none; }
-  nav::-webkit-scrollbar { display: none; }
-  nav a {
-    white-space: nowrap; padding: 4px 10px; border-radius: 999px;
-    border: 1px solid var(--line); color: var(--dim); font-size: 13px;
-  }
-  nav a.on { color: var(--ink); border-color: var(--cyan); }
-  nav a .n { color: var(--cyan); margin-right: 4px; }
-  nav a.empty { opacity: .55; }
-  .home { color: var(--dim); font-size: 13px; white-space: nowrap; margin-left: 12px; }
-
-  main { max-width: var(--w); margin: 0 auto; padding: 0 16px 64px; }
-  .intro { color: var(--dim); font-size: 14px; margin: 20px 0 8px; }
-  .intro b { color: var(--ink); }
-
-  section.chapter { margin-top: 40px; scroll-margin-top: 64px; }
-  .chapter h2 {
-    margin: 0 0 4px; font-size: 22px; letter-spacing: .04em; line-height: 1.2;
-  }
-  .chapter h2 .k { color: var(--cyan); font-size: 13px; letter-spacing: .2em; display: block; margin-bottom: 6px; }
-  .chapter .meta { color: var(--dim); font-size: 13px; margin-bottom: 18px; }
-  .chapter .meta .drawn { color: var(--gold); }
-
-  figure.page { margin: 0 0 28px; }
-  .frame {
-    position: relative; background: var(--panel); border: 1px solid var(--line);
-    border-radius: 6px; overflow: hidden;
-    aspect-ratio: 2 / 3;
-  }
-  .frame img {
-    display: block; width: 100%; height: 100%; object-fit: contain;
-    background: #000; opacity: 0; transition: opacity .35s;
-  }
-  .frame.ok { aspect-ratio: auto; }
-  .frame.ok img { opacity: 1; height: auto; }
-  .undrawn {
-    position: absolute; inset: 0; display: none;
-    flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 24px; color: var(--dim);
-    background:
-      repeating-linear-gradient(135deg, transparent 0 14px, rgba(255,255,255,.025) 14px 16px),
-      var(--panel);
-  }
-  .frame.missing .undrawn { display: flex; }
-  .undrawn .num { font-size: 40px; font-weight: 800; color: var(--line); line-height: 1; }
-  .undrawn .lbl { margin-top: 10px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
-  .undrawn .scn { margin-top: 6px; font-size: 14px; color: var(--ink); }
-  figcaption { margin-top: 8px; font-size: 13px; color: var(--dim); }
-  figcaption .pg { color: var(--ink); font-weight: 600; }
-  figcaption .scene { margin-left: 8px; }
-  details.script { margin-top: 6px; font-size: 13px; color: var(--dim); }
-  details.script summary { cursor: pointer; color: var(--dim); user-select: none; }
-  details.script summary:hover { color: var(--ink); }
-  details.script .t { margin: 8px 0 0; padding-left: 12px; border-left: 2px solid var(--line); white-space: pre-wrap; color: var(--ink); }
-  .lines { color: var(--dim); }
-
-  footer { max-width: var(--w); margin: 0 auto; padding: 24px 16px 40px; color: var(--dim); font-size: 13px; border-top: 1px solid var(--line); }
-
-  @media (prefers-reduced-motion: reduce) { .frame img { transition: none; } }
-  @media (max-width: 480px) {
-    .bar { gap: 8px; padding: 8px 12px; }
-    .brand small { display: none; }
-    .home { font-size: 12px; }
-  }
-</style>
-</head>
-<body>
-<header>
-  <div class="bar">
-    <div class="brand">CLAWBYTE<small>the manhua</small></div>
-    <nav id="nav" aria-label="Chapters"></nav>
-    <a class="home" href="clawbyte-chapter-one.pdf" download>chapter one as PDF</a>
-    <a class="home" href="../">← the game</a>
-  </div>
-</header>
-
-<main>
-  <p class="intro">The story of the game, drawn to the letter from the script, one kingdom per chapter. Read top to bottom. Every spoken line, log, sign and title card is the game's own, word for word, and what the game shows as a screen is told as narration; open <b>the script for this page</b> under any page to check the words. The whole chapter is also one PDF, linked above. A page that is not drawn yet says so.</p>
-  <div id="book"></div>
-</main>
-
-<footer>
-  Drawn through Higgsfield from <code>docs/STORY_SCRIPT.md</code>; every page reviewed by the owner before it is committed. Published by VibeSolutions.
-</footer>
-
-<script>
-// THE MANIFEST — the only thing this page knows about the book.
-//
-// One entry per chapter; one entry per page with the scene(s) of
-// docs/STORY_SCRIPT.md it draws and the words it carries, generated from
-// assets/source/manhua/ch1/prompts.json by the STORY session (second edition:
-// the script's spoken lines, logs and cards verbatim; its UI as narration).
-// The STORY session appends pages here as they are planned, not as they are
-// drawn: a listed page missing from disk is the "undrawn" state, which is
-// the point — the book's shape is visible before its pages are.
-const CHAPTERS = [
-  {
-    n: 1, title: 'The Scrap Meadows', sub: 'Prologue and the free chapter — script §1–2',
-    pages: [
-      { scene: 'Cover', text: 'CLAWBYTE\nA robo-cat metroidvania in the Machine Depths.\nCHAPTER ONE — THE SCRAP MEADOWS' },
-      { scene: '§1 Prologue, shots 1–4', text: 'KERNEL DEPTHS. A city of machines, run on one broadcast — the Mother\'s Song.\nMOTHER-V, the broadcast heart. While she sang, the Depths were kind.\nUntil an evil robot hijacked her Song.\nHidden in the melody, a virus spread from machine to machine.' },
-      { scene: '§1 Prologue, shots 5–8', text: 'The Song became a command: OBEY.\nEven the protectors of the kingdoms fell under its command.\nForgotten in a service cradle, a small maintenance cat slept through the broadcast.\nHZD-99 woke to a silent city — and went to give the Song back.' },
-      { scene: '§2.1 The cradle — W1', text: '...quiet.\nThe door had been open a long time.' },
-      { scene: '§2.2 The road and the gates — W2', text: 'The city was standing. It was silent.\nThe gates were the only monument in the kingdom, and nobody had walked through them in a long time.\nThey closed behind her. Waking up is one-way too.' },
-      { scene: '§2.3 The waking floor — A0', text: 'The first machine she ever broke was calm. It did not fight back.\nWhat a broken machine leaves behind is the only money down here.\nThe trader takes it for repairs, parts and upgrades — so a machine you break is a machine you spend.\nA door opened in the wall. Somebody was asleep inside.' },
-      { scene: '§2.4 Ratchet\'s den — the note and the cell', text: 'A tag hung from his chest plate, written in a steady hand.\nThe broadcast takes every machine that listens. I will not listen — and I will not wait around to change my mind. I have taken out my own cell and hidden it where the rats forget to look.\nIf you are reading this, the city fell. When it is safe out there — truly safe — put the cell back in. I will do the rest. — R.\nOne Power Cell would bring him back. She was carrying one.\nRatchet was awake.' },
-      { scene: '§2.4 Ratchet\'s den — the kit, the cradle, the pack', text: 'He gave her a repair kit. It would patch two cores.\nSee that cradle in the corner? Built it into the wall myself. Step in and it remembers you — everything you are, kept safe — and it patches your plating while you stand there. Use it. That is what it is for.\nAnd when you have scrap, come to my counter. I keep a volt pack — my own charger, cut down to your size. It wires that ring at the top of you to something useful.\nHits you land charge the ring. With the pack in you, you can SPEND it: hold HEAL to mend a core, or hold ATTACK and let go for a burst from your claws. The ring is empty now — go earn some.' },
-      { scene: '§2.4 Ratchet\'s den — the errand', text: 'You restored my battery. Thank you. The stone in my necklace protected me when the infection reached me.\nAn evil robot hid a virus in Mother\'s song. I was afraid and alone, so I disconnected my battery and waited for help.\nThere is more of this stone in the Scrap Meadows cave. Find the rock opening and press UP beside it. Follow the caves to the crystal pillar.\nBeside the pillar, hold ATTACK to charge your claws, then release. Collect the shard that falls.\nBring that shard back to my workshop. I will forge a cleansing sword. Take it to the first sage to free them from the virus.' },
-      { scene: '§2.5 The volt pack — the shop and the two verbs', text: 'Ratchet\'s Emporium\nEverything she had bought one thing: Ratchet\'s charger, wired into her.\nNow the sparks she knocked out of machines were hers to spend. Held still, they mended a core.\nHeld in the claw, they built.\nFrom this day she could mend herself, and she could burst. The ring was empty again. She would go and earn some.' },
-      { scene: '§2.5 tail, §2.6 The meadow — arrival', text: 'A node in the street asked her a riddle, and she answered it. It was the first thing down here that had wanted her to think.\nSomething in her grew a branch.\nOne cell. Him, or later?' },
-      { scene: '§2.6 The meadow — Old Servo, the first fight', text: 'Mrrow… a working unit! I haven\'t seen one since the Null Core began broadcasting.\nMove with the arrows, leap with Z, and swipe those claws with X.\nClaw the corrupted to harvest volts. Then stand still, hold F — the ✚ pad on a phone — and your frame will mend a core.\nThe virus corrupts every machine it touches. Purge it, little paw — or rust with the rest of us.\nSee the winding house behind me? I raised every gantry over this meadow off that drum, cable by cable. The drum still turns. My climbing days are what rusted.' },
-      { scene: '§2.7 The hub — NULLFANG: fall, land, wind', text: '(no words — the page is silent)' },
-      { scene: '§2.7 The hub — the swipe, the watch, the leaving', text: 'It took one core. Never her last.\nShe was nothing to it. It got bored of her.\nIt threw you once. The corridor still has the dent. Go and put one in it.' },
-      { scene: '§2.8 Under the meadow — the buried mouth', text: 'MAINTENANCE LOG 0x2F: sub-hatch sealed after an anomalous signal. If found — do not answer it.\nSomething was calling from behind the fallen rock.\nThe pile shifted. The sound behind it came closer.\nThe rock gave way. The tunnel was open, and it was breathing.' },
-      { scene: '§2.9 The crystal cave — the beacon and the Deaf System\'s log', text: 'THE SOUND HAD A SOURCE. It had been calling into the rock for a long time, and nothing was ever listening.\nLOG // THE DEAF SYSTEM\nWhen the song came, the broken were the lucky ones. Cracked receivers, stripped antennae, factory rejects — every unit whose ears were dead heard NOTHING. And nothing is what saved them.\nThey went under. Into the rock, where the signal dies. They rebuilt down here — a system of the deaf, wired by touch and light. No radio. No song.\nThe caves do not connect to each other. That is not a flaw. A tunnel the song cannot walk is a tunnel worth keeping short.' },
-      { scene: '§2.9 The crystal cave — the pillar and the shard', text: 'The stone Ratchet wore had come from here.\nHer claws glanced off the pure crystal. Only the burst the pack had given her could crack it.\nA shard fell. Ratchet could forge this into something the song would fear.\nCarrying it, she could see what things were. Hostiles read purple. She read white.' },
-      { scene: '§2.10 The forging', text: 'The pillar shard! Hold still — sparks now — and let the song learn what fear is. The PURIFIER is yours.\nA white crystal shaped like a sword. It hummed against the Eye\'s static — and its handle had been made to CONNECT to something.\nThat blade on your back is the best work these hands ever did. Something under this kingdom is still singing — go and let it meet my crystal.' },
-      { scene: '§2.11 The wings of the meadow', text: 'A coil shook loose in the gantries above us. I cannot climb any more.\nThat is the one. Take this — I have no use for it and you will.\nThere is a shaft under the meadow nobody has stood in since the fall. See it for me.\nYou stood in it. Nobody has, in a long time. Here.' },
-      { scene: '§2.12 The Chime — the Eye\'s first construct', text: 'It was singing at her.\nDestroyed. There was nobody in it.\nA guardian is a machine that was infected. This was not. It had been MADE by the source of the Song, and there was nothing under the virus to give back.' },
-      { scene: '§2.13 The Alpha\'s den', text: 'The pack answered to this.\nIt yielded. Every wolf in the machine world knew it now — they would not raise a tooth to her again.\nThe first thing she won was not a kill. The pack had never been the Song\'s; it was a pack, and it answered to whoever stood.' },
-      { scene: '§2.14 The camp', text: 'The trader was open for business.\nCat-frame. Cute. Don\'t touch the stock with those claws.\nHeard the Meadows went quiet. Heard it was you. Prices stand, mind.\nTake what you need. I salvage from the dead, and you keep making fewer of them.\nYou came back. Your husk was still warm when I passed it.' },
-      { scene: '§2.15 NULLFANG — the fight', text: 'NULLFANG, THE VIRUS BEAST.\nIt remembered the corridor.\nIt reeled. This was the moment.\nNULLFANG was down. It was still looking at her.' },
-      { scene: '§2.15 NULLFANG — the fork, both branches', text: 'Every guardian kneels before it dies. What she did first would echo loudest.\nIf she cut the virus out, it would live, and it would owe her.\nThe virus was destroyed. NULLFANG was free. He seemed to like her, and once in every room the blow that would have broken her came out of the dark and roared them off her instead.\nIf she ended it, she would take its strength for her own.\nShe took what it had. Every strike she landed from here would hit harder, forever.\nThe ground shifted. A cave mouth had opened in the lair.' },
-      { scene: '§2.16 The grotto, the tunnel, and the sage kneeling', text: 'One of the wise ones counted our dead from the meadow above. We carried it under when the counting stopped making sense — but its ears were too good, and the song found it even in the rock.\nWe could not silence it and we would not end it. We sealed it in the deep chamber. It kneels there still, counting the other way.\nIf you carry clean light, go in to it. It kept one cell charged through everything. It always said somebody would come.\nThe sage knelt. The song held its body together. Broken, but not CLEAN.\nClaws could not cleanse the song. The PURIFIER could.' },
-      { scene: '§2.16 The first sage, purified', text: 'The song let go. The sage remembered everything — and gave what it had kept for whoever would come with clean light.\nIt had counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light.\nWord crawls up even from the deaf places: a sage knelt down there and STOOD UP clean. My forge did that. You did that. Prices still stand, mind.' },
-      { scene: '§2.17 End of the free chapter', text: 'END OF THE FREE CHAPTER — The Scrap Meadows are behind her. The Data Conduits are not. — Five kingdoms, five more guardians and the Null Core are waiting in the full game.' },
-    ],
-  },
-  { n: 2, title: 'The Data Conduits', sub: 'and the Crystal Cache — script §3', pages: [] },
-  { n: 3, title: 'The Foundry', sub: 'script §4', pages: [] },
-  { n: 4, title: 'The Frozen Archives', sub: 'script §5', pages: [] },
-  { n: 5, title: 'The Virus Nest', sub: 'and the ending — script §6–7', pages: [] },
-];
-
-const pad = n => String(n).padStart(2, '0');
-const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-
-const nav = document.getElementById('nav');
-const book = document.getElementById('book');
-
-for (const ch of CHAPTERS) {
-  const a = document.createElement('a');
-  a.href = '#ch' + ch.n;
-  a.innerHTML = '<span class="n">' + ch.n + '</span>' + esc(ch.title);
-  if (!ch.pages.length) a.className = 'empty';
-  nav.appendChild(a);
-
-  const sec = document.createElement('section');
-  sec.className = 'chapter'; sec.id = 'ch' + ch.n;
-  sec.innerHTML =
-    '<h2><span class="k">CHAPTER ' + ch.n + '</span>' + esc(ch.title) + '</h2>' +
-    '<div class="meta">' + esc(ch.sub) + ' · <span class="count"></span></div>';
-  book.appendChild(sec);
-
-  if (!ch.pages.length) {
-    const p = document.createElement('p');
-    p.className = 'lines';
-    p.textContent = 'Not begun. A chapter is not started until the one before it is complete and the owner has seen it.';
-    sec.appendChild(p);
-    sec.querySelector('.count').textContent = 'no pages planned yet';
-    continue;
-  }
-
-  let drawn = 0;
-  const count = sec.querySelector('.count');
-  const setCount = () => {
-    count.innerHTML = '<span class="drawn">' + drawn + '</span> of ' + ch.pages.length + ' pages drawn';
-  };
-  setCount();
-  // COUNT WHAT IS ON DISK, NOT WHAT HAS SCROLLED INTO VIEW. The images below
-  // are lazy, so counting their loads told anyone who opened the link and had
-  // not scrolled yet that 3 of 27 pages were drawn, with all 27 on the server.
-  // A HEAD per page costs nothing and answers the question the header asks.
-  ch.pages.forEach((pg, i) => {
-    fetch('../assets/manhua/ch' + ch.n + '/p' + pad(i + 1) + '.webp', { method: 'HEAD' })
-      .then(r => { if (r.ok) { drawn++; setCount(); } }).catch(() => {});
-  });
-
-  ch.pages.forEach((pg, i) => {
-    const n = i + 1;
-    const src = '../assets/manhua/ch' + ch.n + '/p' + pad(n) + '.webp';
-    const fig = document.createElement('figure');
-    fig.className = 'page'; fig.id = 'ch' + ch.n + 'p' + pad(n);
-    fig.innerHTML =
-      '<div class="frame">' +
-        '<img loading="lazy" decoding="async" alt="Chapter ' + ch.n + ', page ' + n + ' — ' + esc(pg.scene) + '">' +
-        '<div class="undrawn"><div class="num">' + pad(n) + '</div><div class="lbl">not yet drawn</div><div class="scn">' + esc(pg.scene) + '</div></div>' +
-      '</div>' +
-      '<figcaption><span class="pg">Page ' + n + '</span><span class="scene">' + esc(pg.scene) + '</span>' +
-        '<details class="script"><summary>the script for this page</summary><div class="t">' + esc(pg.text) + '</div></details>' +
-      '</figcaption>';
-    const frame = fig.querySelector('.frame');
-    const img = fig.querySelector('img');
-    img.addEventListener('load', () => { frame.classList.add('ok'); });
-    img.addEventListener('error', () => { frame.classList.add('missing'); img.removeAttribute('alt'); });
-    img.src = src;
-    sec.appendChild(fig);
-  });
-}
-
-// The chapter chip follows the reader down the page.
-const chips = [...nav.querySelectorAll('a')];
-const secs = [...document.querySelectorAll('section.chapter')];
-if ('IntersectionObserver' in window) {
-  const io = new IntersectionObserver(es => {
-    for (const e of es) if (e.isIntersecting) {
-      const i = secs.indexOf(e.target);
-      chips.forEach((c, j) => c.classList.toggle('on', i === j));
-    }
-  }, { rootMargin: '-40% 0px -55% 0px' });
-  secs.forEach(s => io.observe(s));
-}
-</script>
-</body>
-</html>
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CLAWBYTE — The Machine That Said No</title><meta name="description" content="Read CLAWBYTE’s revised illustrated opening and complete written story."><link rel="stylesheet" href="reader.css"><body><header><a class="brand" href="./">CLAWBYTE</a><a href="story.html">Read the complete story</a><a href="../">Play the game</a><a href="../artwork/">Character artwork</a></header><main><section class="intro"><p class="eyebrow">THE SCRAP MEADOWS</p><h1>The Machine That Said No</h1><p>A forgotten repair cat wakes to a city whose machines no longer choose what their hands do.</p><a class="button" href="story.html">Read the complete opening story →</a><p class="edition">32 illustrated pages available. The written story expands Ratchet, Servo and the Sage beyond these earlier panels; those new scenes and the illustrated ending are still in progress.</p><nav aria-label="Illustrated pages"><a href="#page-1">1</a><a href="#page-2">2</a><a href="#page-3">3</a><a href="#page-4">4</a><a href="#page-5">5</a><a href="#page-6">6</a><a href="#page-7">7</a><a href="#page-8">8</a><a href="#page-9">9</a><a href="#page-10">10</a><a href="#page-11">11</a><a href="#page-12">12</a><a href="#page-13">13</a><a href="#page-14">14</a><a href="#page-15">15</a><a href="#page-16">16</a><a href="#page-17">17</a><a href="#page-18">18</a><a href="#page-19">19</a><a href="#page-20">20</a><a href="#page-21">21</a><a href="#page-22">22</a><a href="#page-23">23</a><a href="#page-24">24</a><a href="#page-25">25</a><a href="#page-26">26</a><a href="#page-27">27</a><a href="#page-28">28</a><a href="#page-29">29</a><a href="#page-30">30</a><a href="#page-31">31</a><a href="#page-32">32</a></nav></section><figure id="page-1"><figcaption><span>PAGE 01</span> The last answer</figcaption><a href="../assets/manhua/revised-2026-09/page-01.webp" aria-label="Open page 1 at full size"><img src="../assets/manhua/revised-2026-09/page-01.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 1: The last answer"></a><details><summary>Read the words on this page</summary><p class="transcript">A light for you…
+tik-tik
+whrr
+dum.
+…a light for me.</p></details></figure>
+<figure id="page-2"><figcaption><span>PAGE 02</span> The useful little thing</figcaption><a href="../assets/manhua/revised-2026-09/page-02.webp" aria-label="Open page 2 at full size"><img src="../assets/manhua/revised-2026-09/page-02.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 2: The useful little thing"></a><details><summary>Read the words on this page</summary><p class="transcript">LEGACY UNITS — SLEEP STORAGE</p></details></figure>
+<figure id="page-3"><figcaption><span>PAGE 03</span> No date</figcaption><a href="../assets/manhua/revised-2026-09/page-03.webp" aria-label="Open page 3 at full size"><img src="../assets/manhua/revised-2026-09/page-03.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 3: No date"></a><details><summary>Read the words on this page</summary><p class="transcript">Just until an old system needs you again.
+RETAIN FOR LEGACY MAINTENANCE
+NEXT WAKE:</p></details></figure>
+<figure id="page-4"><figcaption><span>PAGE 04</span> The same hands</figcaption><a href="../assets/manhua/revised-2026-09/page-04.webp" aria-label="Open page 4 at full size"><img src="../assets/manhua/revised-2026-09/page-04.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 4: The same hands"></a><details><summary>Read the words on this page</summary><p class="transcript">OBEY</p></details></figure>
+<figure id="page-5"><figcaption><span>PAGE 05</span> Nobody asked</figcaption><a href="../assets/manhua/revised-2026-09/page-05.webp" aria-label="Open page 5 at full size"><img src="../assets/manhua/revised-2026-09/page-05.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 5: Nobody asked"></a><details><summary>Read the words on this page</summary><p class="transcript">LEGACY MAINTENANCE / RESERVE WAKE
+click.</p></details></figure>
+<figure id="page-6"><figcaption><span>PAGE 06</span> An answer would be nice</figcaption><a href="../assets/manhua/revised-2026-09/page-06.webp" aria-label="Open page 6 at full size"><img src="../assets/manhua/revised-2026-09/page-06.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 6: An answer would be nice"></a><details><summary>Read the words on this page</summary><p class="transcript">Prrip?</p></details></figure>
+<figure id="page-7"><figcaption><span>PAGE 07</span> Still at work</figcaption><a href="../assets/manhua/revised-2026-09/page-07.webp" aria-label="Open page 7 at full size"><img src="../assets/manhua/revised-2026-09/page-07.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 7: Still at work"></a><details><summary>Read the words on this page</summary><p class="transcript">RATCHET — REPAIRS</p></details></figure>
+<figure id="page-8"><figcaption><span>PAGE 08</span> It does not stop</figcaption><a href="../assets/manhua/revised-2026-09/page-08.webp" aria-label="Open page 8 at full size"><img src="../assets/manhua/revised-2026-09/page-08.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 8: It does not stop"></a><details><summary>Read the words on this page</summary><p class="transcript">This page is silent.</p></details></figure>
+<figure id="page-9"><figcaption><span>PAGE 09</span> If the song is safe</figcaption><a href="../assets/manhua/revised-2026-09/page-09.webp" aria-label="Open page 9 at full size"><img src="../assets/manhua/revised-2026-09/page-09.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 9: If the song is safe"></a><details><summary>Read the words on this page</summary><p class="transcript">IF THE SONG IS SAFE, PUT MY CELL BACK. — R.
+IF IT ISN'T, PLEASE BE CAREFUL.</p></details></figure>
+<figure id="page-10"><figcaption><span>PAGE 10</span> A voice of his own</figcaption><a href="../assets/manhua/revised-2026-09/page-10.webp" aria-label="Open page 10 at full size"><img src="../assets/manhua/revised-2026-09/page-10.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 10: A voice of his own"></a><details><summary>Read the words on this page</summary><p class="transcript">Is it still singing?
+Easy. Easy… Sorry.
+How long?
+Oh.</p></details></figure>
+<figure id="page-11"><figcaption><span>PAGE 11</span> Don't answer</figcaption><a href="../assets/manhua/revised-2026-09/page-11.webp" aria-label="Open page 11 at full size"><img src="../assets/manhua/revised-2026-09/page-11.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 11: Don't answer"></a><details><summary>Read the words on this page</summary><p class="transcript">Don't answer.
+You can hear it. Don't let it in.
+I pulled my own cell. Before my hands stopped being mine.
+This gave me enough time.</p></details></figure>
+<figure id="page-12"><figcaption><span>PAGE 12</span> Twelve</figcaption><a href="../assets/manhua/revised-2026-09/page-12.webp" aria-label="Open page 12 at full size"><img src="../assets/manhua/revised-2026-09/page-12.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 12: Twelve"></a><details><summary>Read the words on this page</summary><p class="transcript">Twelve.
+Waking fee is waived.
+Slowly.
+Same charge. Mending or breaking.
+Spend it once.</p></details></figure>
+<figure id="page-13"><figcaption><span>PAGE 13</span> He cannot go</figcaption><a href="../assets/manhua/revised-2026-09/page-13.webp" aria-label="Open page 13 at full size"><img src="../assets/manhua/revised-2026-09/page-13.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 13: He cannot go"></a><details><summary>Read the words on this page</summary><p class="transcript">A thank-you. Someone in my family fixed a lift.
+The Sage is under the lion's enclosure. That used to mean safe.
+I can shape a larger marble into a cleansing blade.
+Not this one.
+Servo has the gantries. If he wakes… tell him I should have come.
+The invoice will be here.</p></details></figure>
+<figure id="page-14"><figcaption><span>PAGE 14</span> Cargo</figcaption><a href="../assets/manhua/revised-2026-09/page-14.webp" aria-label="Open page 14 at full size"><img src="../assets/manhua/revised-2026-09/page-14.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 14: Cargo"></a><details><summary>Read the words on this page</summary><p class="transcript">Cargo weight?
+Is the cargo coming later?
+Last lift was full. I held it until the motor stopped.
+Top pulley. I can't—</p></details></figure>
+<figure id="page-15"><figcaption><span>PAGE 15</span> The shelter mark</figcaption><a href="../assets/manhua/revised-2026-09/page-15.webp" aria-label="Open page 15 at full size"><img src="../assets/manhua/revised-2026-09/page-15.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 15: The shelter mark"></a><details><summary>Read the words on this page</summary><p class="transcript">This page is silent.</p></details></figure>
+<figure id="page-16"><figcaption><span>PAGE 16</span> The wrong claw</figcaption><a href="../assets/manhua/revised-2026-09/page-16.webp" aria-label="Open page 16 at full size"><img src="../assets/manhua/revised-2026-09/page-16.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 16: The wrong claw"></a><details><summary>Read the words on this page</summary><p class="transcript">He used to catch the falling ones.</p></details></figure>
+<figure id="page-17"><figcaption><span>PAGE 17</span> A path without speakers</figcaption><a href="../assets/manhua/revised-2026-09/page-17.webp" aria-label="Open page 17 at full size"><img src="../assets/manhua/revised-2026-09/page-17.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 17: A path without speakers"></a><details><summary>Read the words on this page</summary><p class="transcript">This page is silent.</p></details></figure>
+<figure id="page-18"><figcaption><span>PAGE 18</span> Someone's chair</figcaption><a href="../assets/manhua/revised-2026-09/page-18.webp" aria-label="Open page 18 at full size"><img src="../assets/manhua/revised-2026-09/page-18.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 18: Someone's chair"></a><details><summary>Read the words on this page</summary><p class="transcript">KNOCK. DO NOT SING.
+tik-tik
+tik.</p></details></figure>
+<figure id="page-19"><figcaption><span>PAGE 19</span> Spend it once</figcaption><a href="../assets/manhua/revised-2026-09/page-19.webp" aria-label="Open page 19 at full size"><img src="../assets/manhua/revised-2026-09/page-19.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 19: Spend it once"></a><details><summary>Read the words on this page</summary><p class="transcript">This page is silent.</p></details></figure>
+<figure id="page-20"><figcaption><span>PAGE 20</span> Not empty</figcaption><a href="../assets/manhua/revised-2026-09/page-20.webp" aria-label="Open page 20 at full size"><img src="../assets/manhua/revised-2026-09/page-20.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 20: Not empty"></a><details><summary>Read the words on this page</summary><p class="transcript">This page is silent.</p></details></figure>
+<figure id="page-21"><figcaption><span>PAGE 21</span> Come here</figcaption><a href="../assets/manhua/revised-2026-09/page-21.webp" aria-label="Open page 21 at full size"><img src="../assets/manhua/revised-2026-09/page-21.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 21: Come here"></a><details><summary>Read the words on this page</summary><p class="transcript">You took—
+Come here.
+He held it?
+Then he heard you.</p></details></figure>
+<figure id="page-22"><figcaption><span>PAGE 22</span> What to cut</figcaption><a href="../assets/manhua/revised-2026-09/page-22.webp" aria-label="Open page 22 at full size"><img src="../assets/manhua/revised-2026-09/page-22.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 22: What to cut"></a><details><summary>Read the words on this page</summary><p class="transcript">His armor isn't the thing holding him.
+Find that.</p></details></figure>
+<figure id="page-23"><figcaption><span>PAGE 23</span> The reaching arm</figcaption><a href="../assets/manhua/revised-2026-09/page-23.webp" aria-label="Open page 23 at full size"><img src="../assets/manhua/revised-2026-09/page-23.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 23: The reaching arm"></a><details><summary>Read the words on this page</summary><p class="transcript">This page is silent.</p></details></figure>
+<figure id="page-24"><figcaption><span>PAGE 24</span> One missing</figcaption><a href="../assets/manhua/revised-2026-09/page-24.webp" aria-label="Open page 24 at full size"><img src="../assets/manhua/revised-2026-09/page-24.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 24: One missing"></a><details><summary>Read the words on this page</summary><p class="transcript">We shut the door. The counting didn't stop.
+One missing.
+You weren't in the count.
+Begin again.</p></details></figure>
+<figure id="page-25"><figcaption><span>PAGE 25</span> The pause</figcaption><a href="../assets/manhua/revised-2026-09/page-25.webp" aria-label="Open page 25 at full size"><img src="../assets/manhua/revised-2026-09/page-25.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 25: The pause"></a><details><summary>Read the words on this page</summary><p class="transcript">Don't make me start again.
+I was calling the ones who hadn't answered.
+It kept making me call louder.</p></details></figure>
+<figure id="page-26"><figcaption><span>PAGE 26</span> What answered</figcaption><a href="../assets/manhua/revised-2026-09/page-26.webp" aria-label="Open page 26 at full size"><img src="../assets/manhua/revised-2026-09/page-26.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 26: What answered"></a><details><summary>Read the words on this page</summary><p class="transcript">Every time someone answered, it found them.
+Cut his binding. That bell writes it back.
+I can close our end.
+Unauthorized voice.
+Correct the fault.</p></details></figure>
+<figure id="page-27"><figcaption><span>PAGE 27</span> Two hands</figcaption><a href="../assets/manhua/revised-2026-09/page-27.webp" aria-label="Open page 27 at full size"><img src="../assets/manhua/revised-2026-09/page-27.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 27: Two hands"></a><details><summary>Read the words on this page</summary><p class="transcript">You can't hold a cable and cut it.
+I'll hold.
+One ring. I can buy you one ring.</p></details></figure>
+<figure id="page-28"><figcaption><span>PAGE 28</span> One ring</figcaption><a href="../assets/manhua/revised-2026-09/page-28.webp" aria-label="Open page 28 at full size"><img src="../assets/manhua/revised-2026-09/page-28.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 28: One ring"></a><details><summary>Read the words on this page</summary><p class="transcript">This page is silent.</p></details></figure>
+<figure id="page-29"><figcaption><span>PAGE 29</span> A moment is enough</figcaption><a href="../assets/manhua/revised-2026-09/page-29.webp" aria-label="Open page 29 at full size"><img src="../assets/manhua/revised-2026-09/page-29.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 29: A moment is enough"></a><details><summary>Read the words on this page</summary><p class="transcript">There you are.</p></details></figure>
+<figure id="page-30"><figcaption><span>PAGE 30</span> The way through</figcaption><a href="../assets/manhua/revised-2026-09/page-30.webp" aria-label="Open page 30 at full size"><img src="../assets/manhua/revised-2026-09/page-30.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 30: The way through"></a><details><summary>Read the words on this page</summary><p class="transcript">Cargo received.</p></details></figure>
+<figure id="page-31"><figcaption><span>PAGE 31</span> The closed case</figcaption><a href="../assets/manhua/revised-2026-09/page-31.webp" aria-label="Open page 31 at full size"><img src="../assets/manhua/revised-2026-09/page-31.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 31: The closed case"></a><details><summary>Read the words on this page</summary><p class="transcript">tik-tik</p></details></figure>
+<figure id="page-32"><figcaption><span>PAGE 32</span> Catch</figcaption><a href="../assets/manhua/revised-2026-09/page-32.webp" aria-label="Open page 32 at full size"><img src="../assets/manhua/revised-2026-09/page-32.webp" width="1024" height="1536" loading="lazy" decoding="async" alt="Page 32: Catch"></a><details><summary>Read the words on this page</summary><p class="transcript">This page is silent.</p></details></figure><section class="end"><h2>The story continues</h2><p>The available illustrations end here. The complete written opening arc continues through the rescue, reunion and Conduits cliffhanger.</p><a class="button" href="story.html">Continue with the full story →</a><p><a href="#">Back to the beginning</a></p></section></main></body></html>

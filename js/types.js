@@ -161,6 +161,7 @@ function hurtBoxOf(e) {
 const DAZE_WINDOW = 1.1, DAZE_MUL = 1.6;
 
 function dealDmg(e, dm, atkEl, x, y, noPenalty) {
+  if (typeof storyProtected === 'function' && storyProtected(e)) return 0;
   // THE SAGE IS NEVER KILLED. Every strike on one routes through its own
   // law (js/entities.js sageStruck): claws break it down to the floor and
   // no further; the crystal purifies. docs/combat/SAGE.md.
@@ -287,7 +288,7 @@ function playSong() {
     .concat(G.pickups.filter(o => o && o.kind === 'husk'))
     .concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
   for (const e of targets) {
-    if (e.dead) continue;
+    if (e.dead || e.disabled || e.rescued) continue;
     if (Math.hypot(e.x + e.w / 2 - px, e.y + e.h / 2 - py) > SONG_RANGE) continue;
     if (typeof Boss !== 'undefined' && e instanceof Boss) {
       e.stagT = Math.max(e.stagT || 0, 0.85);   // too large to charm — but it can miss
@@ -434,7 +435,7 @@ class Star {
     }
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     for (const e of targets) {
-      if (e.dead || (this.seen && this.seen.has(e))) continue;
+      if (e.dead || e.disabled || e.rescued || (this.seen && this.seen.has(e))) continue;
       if (!aabb(this.box(), hurtBoxOf(e))) continue;
       if (!this.seen) this.seen = new Set();
       this.seen.add(e);

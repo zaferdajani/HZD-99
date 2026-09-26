@@ -142,6 +142,7 @@ const MEDIA_SRC = {
     caveMouth: 'assets/backgrounds/cave_mouth.jpg',
     caveExit: 'assets/backgrounds/cave_exit.jpg',
     pillarPlate: 'assets/characters/gear/pillar.webp',
+    rawMarble: 'assets/characters/gear/raw_marble.png',
     // GATE SHAPES (§2f) — one monumental doorway per kingdom, no two the
     // same shape, and none of them a rectangle. The CITY gate is gate_city
     // above: the one epic multilayer monument, deliberately not re-fired.
@@ -293,6 +294,8 @@ const MEDIA_SRC = {
     // this same body working, cut and keyed by tools/vidstrip.cjs — one
     // image, bottom-aligned, so the feet never move between cells.
     ratchetLoop: 'assets/characters/npc/ratchet/work_loop_six.webp',
+    yardWinchBase: 'assets/characters/props/winch/base.png',
+    yardWinchArm: 'assets/characters/props/winch/arm.png',
     // ...AND THE SAME TREATMENT FOR EVERYONE ELSE STANDING IN A ROOM. The
     // trader was the first NPC the owner met and the first he called a slide
     // show; the other five were WORSE, because they were not a slide show at

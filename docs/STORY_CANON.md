@@ -1,5 +1,57 @@
 # HZD-99 / CLAWBYTE — owner-confirmed story canon
 
+## Current storytelling revision — September 19, Draft 3
+
+The owner accepted the improved character fidelity of the new comic proofs but
+rejected their storytelling and text as lacking suspense and manga quality.
+The complete new production script is `story-draft3/CHAPTER-ONE.md`, with its
+editorial review in `story-draft3/EDITORIAL-REVIEW.md`. It preserves the fixed
+foundation below while revising dialogue, information timing, page turns and
+character choices. In particular, the Eye's motive is withheld until the end,
+and the temporary guardian cut knowingly saves Servo instead of forgetting the
+CHIME reinforcement rule. These are writing changes, not evidence of shipped
+gameplay or approval of final drawn/lettered pages. Do not continue lettering
+new pages from Draft 2 by accident. Previously generated art needs the listed
+Draft 3 staging and lettering changes before it can represent this rewrite.
+
+## Current production direction — September 19, Draft 2
+
+### Manhwa/game parity — owner requirement, September 19
+
+Every image in the manhwa must be reproducible in the game. Characters, props,
+equipment, environments, effects and depicted actions require corresponding
+game assets and behavior. A comic illustration or a flattened comic panel
+shown inside the game is not evidence that its gameplay scene is implemented.
+Keep a per-page parity manifest with runtime asset keys, rooms, state/animation
+requirements and captured in-game evidence. Unmapped elements are production
+gaps, not approved exceptions. Implement the missing element or revise the
+illustration to match supported game behavior before release. Cinematic camera
+framing may differ, but identities, physical objects, equipment timing and
+causal actions must agree. Never add unearned equipment to make a picture work.
+
+Current proofs are not parity-certified; see `docs/story-draft2/GAME_ART_PARITY.md`.
+
+The owner approved adapting the game and producing the new illustrated manhwa
+using Draft 2 after the story handover. Read `story-draft2/CLAWBYTE-00-story-foundation.md`,
+then the Chapter One script and game-adaptation document. Their corrected
+foundation and approved direction supersede conflicting older prose below.
+Approval to implement does not establish that a mechanic or comic page has shipped.
+
+In particular: show peaceful robot kingdoms and the approved everyday cast before
+Mother's song is hijacked. HZD-99 is an older model deliberately placed in sleep
+storage; sleep, not innate immunity, explains her survival. Ratchet's inherited
+marble was an ancient gift to his ancestor and protected his sanity. Find his own
+hidden battery and restore it. Retrieve raw rounded marble, never a found blade;
+Ratchet shapes that material into the first cleansing sword. Each survivor has a
+distinct credible escape. Preserve purchase-before-heal/Burst, two separate
+swords and a separately acquired connector. The sword can cure any infected
+robot; reaching bindings and interrupting relays supply encounter difficulty.
+
+The accepted draft supplies the Eye's motive, survivor histories, pre-guardian
+sage, linked CHIME encounter and campaign resolution as implementation direction.
+Track actual completion separately. The old instruction to transcribe the previous
+game script literally into the comic is superseded by this approved adaptation.
+
 Authority: the owner's explicit story clarification in this project, 2026-09-08.
 Read this before changing narrative, tutorials, quests, rooms, music or weapons.
 This overrides conflicting older lore. It specifies intent, not completion.

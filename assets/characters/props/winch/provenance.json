@@ -1,0 +1,144 @@
+{
+  "status": "Prepared modular artwork; integration behavior and final scene acceptance remain with main task",
+  "parts": {
+    "base": {
+      "file": "base.png",
+      "width": 1254,
+      "height": 1254,
+      "alphaBounds": [
+        35,
+        20,
+        1191,
+        1200
+      ],
+      "fullyTransparentPixels": 1116645,
+      "sha256": "d39ed6d405de47e29ae11ceeab3c7aefc879537bd3fa27f2acf5627af5704148",
+      "source": "C:/Users/Drzaf/Documents/Codex/2026-09-18/c-github-plugin-github-openai-curated/outputs/story-draft2/winch-base.png",
+      "processing": "Byte-identical copy; no repaint, recoloring, keying or scaling",
+      "visibleAlphaBoundsAt32": [
+        42,
+        364,
+        1178,
+        516
+      ]
+    },
+    "arm": {
+      "file": "arm.png",
+      "width": 1254,
+      "height": 1254,
+      "alphaBounds": [
+        53,
+        53,
+        1151,
+        1113
+      ],
+      "fullyTransparentPixels": 1398787,
+      "sha256": "e7191ad43d066aea4ef8b57126e0b06b18fa56afa5d2227fe52890a3fe1b134a",
+      "source": "C:/Users/Drzaf/Documents/Codex/2026-09-18/c-github-plugin-github-openai-curated/outputs/story-draft2/winch-arm.png",
+      "processing": "Byte-identical copy; no repaint, recoloring, keying or scaling",
+      "visibleAlphaBoundsAt32": [
+        60,
+        491,
+        1138,
+        269
+      ]
+    }
+  },
+  "reference": {
+    "file": "C:/Users/Drzaf/Documents/Codex/2026-09-18/c-github-plugin-github-openai-curated/outputs/manhwa-remake/draft3-page-08.png",
+    "review": "Base silhouette, belt drive, red rectangular receiver, cable drum, rusted steel and clawless hinged arm match comic. Arm is a rigid bent segment; independent elbow articulation is not supplied."
+  },
+  "coordinates": "All part coordinates are pixels in original1254-square image. World anchors obtained by applying common sourceScale.",
+  "anchors": {
+    "baseFloor": [
+      630,
+      879
+    ],
+    "armMountOnBase": [
+      575,
+      385
+    ],
+    "armPivot": [
+      1140,
+      648
+    ],
+    "armTip": [
+      84,
+      703
+    ],
+    "armElbow": [
+      529,
+      571
+    ],
+    "cableExitOnBase": [
+      1140,
+      544
+    ],
+    "beltCutOnBase": [
+      322,
+      664
+    ],
+    "controlQuad": [
+      [
+        663,
+        442
+      ],
+      [
+        742,
+        451
+      ],
+      [
+        742,
+        503
+      ],
+      [
+        663,
+        494
+      ]
+    ]
+  },
+  "assembly": {
+    "armScaleRelativeToBase": 0.62,
+    "mirrorArmX": true,
+    "layerOrder": [
+      "procedural cable",
+      "arm behind housing",
+      "base",
+      "procedural control lens",
+      "cosmetic particles"
+    ],
+    "defaultWorldBaseWidth": 256,
+    "worldScale": 0.21494542401343408,
+    "referenceZoom": 1.52
+  },
+  "states": {
+    "infected": {
+      "control": "red pulse",
+      "arm": "tell then committed sweep",
+      "cable": "taut"
+    },
+    "disabled": {
+      "control": "red steady",
+      "arm": "freeze at current joint angle",
+      "cable": "slack; no collision damage"
+    },
+    "cleansed": {
+      "control": "cyan steady",
+      "arm": "slow deliberate return or pouch handoff",
+      "cable": "slack then controlled spool"
+    }
+  },
+  "hooks": {
+    "armAngle": "radians, pivot local; use same transform for armTip collision/interaction anchor",
+    "motorEnabled": "false freezes mechanism independently from infection; red stays after belt-disable",
+    "cleansed": "switches only control lens color; does not repaint whole housing",
+    "cableEnd": "world point; cable cubic sag changes with tension",
+    "cableSag": "world units; cosmetic until integration supplies physical rope/collision",
+    "beltBroken": "base has intact belt baked in. A visible severed-belt state requires additional approved art or an explicitly staged runtime belt layer; this delivery does not pretend the baked belt is severed.",
+    "pouch": "separate existing prop attached to armTip only when actual story event begins"
+  },
+  "provenance": {
+    "originalGeneration": "Prior main-workspace source; original generation prompt/job not found beside supplied files. No new artwork generated in this delivery.",
+    "referenceAndSourcesPreserved": true
+  }
+}

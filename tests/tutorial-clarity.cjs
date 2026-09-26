@@ -23,6 +23,11 @@ const ctx = vm.createContext({
   persist: () => writes++, inD: () => false, rnd: () => 0,
   rr() {}, ftxt() {}, t: key => key, clamp: (n, lo, hi) => Math.max(lo, Math.min(hi, n)),
 });
+ctx.isHero = () => false; ctx.LANG = 'en';
+for (const name of ['npcKey','npcCellItem','invCount']) {
+  const pos=source.indexOf('function '+name+'('), line=source.slice(pos,source.indexOf('\n',pos));
+  vm.runInContext(line.endsWith('}')?line:source.slice(pos,source.indexOf('\n}',pos)+2),ctx);
+}
 vm.runInContext('function gateDoors() { return doors; }\n' + source.slice(start, end), ctx);
 const run = code => vm.runInContext(code, ctx);
 const step = id => run(`TUT_STEPS.find(s => s.id === '${id}')`);
@@ -47,6 +52,16 @@ assert.equal(hand('buy'), 'E');
 assert.equal(prompt('buy').target.x, 316);
 ctx.npcLive = () => false;
 assert.equal(prompt('buy').label, 'tut_note', 'read the sleeping robot note before shopping');
+ctx.G.save.storyVersion=2;ctx.G.save.items={};
+const drawer={type:'chest',extra:'it:batt',x:400,y:400,w:32,h:32,opened:false};
+ctx.G.statics.push(drawer);ctx.G.near=null;
+assert.equal(prompt('buy').label,'tut_cell','new opening points to hidden battery');
+assert.equal(prompt('buy').action,'MOVE');
+ctx.G.save.items.ratchetCell=1;
+assert.equal(prompt('buy').label,'tut_approach','carry the found battery back to Ratchet');
+ctx.G.near=ratchet;
+assert.equal(prompt('buy').label,'tut_note','found battery points back to Ratchet');
+delete ctx.G.save.storyVersion;ctx.G.statics=[ratchet];ctx.G.near=ratchet;
 ctx.npcLive = () => true;
 assert.equal(prompt('buy').label, 'tut_buy');
 ctx.PAD.on = true; assert.equal(hand('buy'), 'B');
