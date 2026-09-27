@@ -8,7 +8,7 @@
 //
 // A local server must be serving the repo root on :8220 —
 //   npx http-server -p 8220 -s &
-const { execFileSync, execSync, spawn } = require('child_process');
+const { execFileSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
 
 // THE SERVER DIES. Not sometimes — regularly, mid-suite, and every time it
@@ -19,13 +19,20 @@ const fs = require('fs'), path = require('path');
 // line of code.
 function ensureServer() {
   try {
-    execFileSync('curl', ['-s', '-o', require('os').devNull, '-m', '2', 'http://127.0.0.1:8220/index.html'], { stdio: 'ignore' });
+    execFileSync('curl', ['--noproxy', '*', '-fs', '-o', require('os').devNull, '-m', '2', 'http://127.0.0.1:8220/index.html'], { stdio: 'ignore' });
     return;
   } catch (e) { /* dead or never started */ }
-  const child = spawn('npx', ['http-server', '-p', '8220', '-s'],
-    { cwd: path.join(__dirname, '..'), detached: true, stdio: 'ignore' });
+  const child = spawn(process.execPath, [path.join(__dirname, 'serve.cjs')],
+    { cwd: path.join(__dirname, '..'), detached: true, windowsHide: true, stdio: 'ignore' });
   child.unref();
-  execSync('sleep 4');
+  for (let attempt = 0; attempt < 20; attempt++) {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 250);
+    try {
+      execFileSync('curl', ['--noproxy', '*', '-fs', '-o', require('os').devNull, '-m', '2', 'http://127.0.0.1:8220/index.html'], { stdio: 'ignore' });
+      return;
+    } catch (_) { /* wait for the local server */ }
+  }
+  throw new Error('Local test server failed to start on 127.0.0.1:8220');
 }
 
 const SUITE = [
