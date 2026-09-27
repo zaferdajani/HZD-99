@@ -39,6 +39,12 @@ const check = (name, ok, detail) => {
   const r = await page.evaluate(async () => {
     const out = { runs: [] };
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
+    // THE MANHWA REWARDS ARE A MODAL (js/comics.js): 'awakened' is earned, so
+    // the first chapter opens the moment she stands still — mid-harness, under
+    // the G.state = 'PLAY' each trip forces. A save that has already been
+    // offered them is the save this test is about: crossings, not memories.
+    sv.comics = {};
+    for (const ch of ((window.COMIC_MANIFEST || {}).chapters || [])) sv.comics[ch.id] = { offered: true, revision: ch.revision };
     startGame(sv);
     // one of each direction the world actually offers
     const TRIPS = [['A1', 'R'], ['A2', 'L'], ['A2', 'B'], ['A5', 'T']];
@@ -95,12 +101,20 @@ const check = (name, ok, detail) => {
             // draws it every frame; the held WORLD frame must not have it.
             const tc = transSnap.getContext('2d');
             const sc = cv.width / 960, sy = cv.height / 540;
-            const x = Math.round(838 * sc), y = Math.round(16 * sy);
-            const w = Math.max(4, Math.round(100 * sc)), h = Math.max(4, Math.round(30 * sy));
+            // mapBtnRect() is the button; its label is near-white (#bcd6e6 /
+            // #eaffff). Count only BRIGHT AND PALE pixels: the room's own lit
+            // grass scrolls through this corner and is bright but saturated
+            // green, which read as 48 "HUD" pixels on some camera offsets.
+            const mb = mapBtnRect();
+            const x = Math.round(mb.x * sc), y = Math.round(mb.y * sy);
+            const w = Math.max(4, Math.round(mb.w * sc)), h = Math.max(4, Math.round(mb.h * sy));
             const d = tc.getImageData(x, y, w, h).data;
             let bright = 0;
-            for (let q = 0; q < w * h; q++)
-              if (Math.max(d[q * 4], d[q * 4 + 1], d[q * 4 + 2]) > 150) bright++;
+            for (let q = 0; q < w * h; q++) {
+              const hi = Math.max(d[q * 4], d[q * 4 + 1], d[q * 4 + 2]);
+              const lo = Math.min(d[q * 4], d[q * 4 + 1], d[q * 4 + 2]);
+              if (hi > 150 && hi - lo < 70) bright++;
+            }
             hudLeak = bright;
           }
         } else if (sawTrans) { landed = G.roomId; break; }

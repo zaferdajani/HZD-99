@@ -164,7 +164,7 @@ const { chromium } = require('playwright');
   // to the output, so it means the same thing on a machine with no audio
   // device: the harness owns hzdHold/hzdRelease for the length of the test.
   const hold = await page.evaluate(async () => {
-    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.heal = 1; // charge is earned at the shop (burstUnlocked)
     sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
     startGame(sv); loadRoom('A1');
     G.dialog = null; G.trans = null; G.state = 'PLAY'; G.enemies = []; G.boss = null;

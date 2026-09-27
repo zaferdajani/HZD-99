@@ -27,7 +27,7 @@ const ctx = vm.createContext({ console, Math, Set,
 });
 const run = s => vm.runInContext(s, ctx);
 for (const name of ['world', 'weapons', 'quests']) run(read(name));
-for (const name of ['invCount', 'invAdd', 'invTake', 'npcKey', 'npcLive', 'npcCharge', 'forgeCrystal', 'doInteract', 'checkTransitions', 'gateDoorsAll', 'gateDoors']) run(fn(name));
+for (const name of ['invCount', 'invAdd', 'invTake', 'npcKey', 'npcCellItem', 'npcLive', 'npcCharge', 'forgeCrystal', 'doInteract', 'checkTransitions', 'gateDoorsAll', 'gateDoors']) run(fn(name));
 run(game.slice(game.indexOf('const NPC_GIFT ='), game.indexOf('\n};', game.indexOf('const NPC_GIFT =')) + 3));
 run(game.slice(game.indexOf('const GATE_ROOM ='), game.indexOf('\n};', game.indexOf('const GATE_ROOM =')) + 3));
 ctx.showItem = (name, desc) => { ctx.G.state = 'DIALOG'; ctx.G.dialog = { name, lines: [desc], onEnd: null }; };

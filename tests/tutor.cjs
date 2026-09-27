@@ -190,6 +190,13 @@ const { chromium } = require('playwright');
       if (G.state === 'DIALOG') for (let i = 0; i < 60 && G.state === 'DIALOG'; i++) { keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); keys['Enter'] = 0; }
       return;
     }
+    // STORY v2 (owner, Draft 2): she starts with no cell. Ratchet's own battery
+    // is hidden in his workshop drawer and only it can wake him, so a real
+    // player opens the drawer before the trader can open his shop.
+    if (G.state === 'PLAY' && !npcLive(npc) && !invCount(npcCellItem(npc))) {
+      const drawer = G.statics.find(s => s.type === 'chest' && s.extra === 'it:batt' && !s.opened);
+      if (drawer) { doInteract(drawer); return; }
+    }
     if (G.state === 'PLAY') { doInteract(npc); return; }
     if (G.state === 'DIALOG') {
       // PAGE IT THROUGH IN ONE TRY, for the same reason the walk is done in

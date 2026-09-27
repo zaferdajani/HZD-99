@@ -125,6 +125,9 @@ const { chromium } = require('playwright');
       // about what a LIVE one leads with, so charge it first — which is also
       // the honest shape of the feature, and it is checked on its own below.
       G.save.flags['on_' + npcKey(sp)] = 1;
+      // ...and a survivor tells their history once, on the FIRST conversation
+      // (story-opening.js); the standing line leads every one after it.
+      G.save.flags['survivor_' + sp.extra] = 1;
       player.x = sp.x; player.y = sp.y - 6; player.vx = 0; player.vy = 0;
       await new Promise(r => requestAnimationFrame(r));
       G.near = findNear(); if (G.near) doInteract(G.near);

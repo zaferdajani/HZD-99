@@ -29,6 +29,10 @@ const { chromium } = require('playwright');
 
   const run = (cores) => page.evaluate(async ({ cores }) => {
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.abil = { dash: 1 };
+    // THE SCRIPTED MEETING IS THE LEGACY PATH: saves from before story v2 still
+    // play it. A v2 save gets the interactive warning instead, which
+    // tests/story-meeting.cjs drives (escapable, contact costs one core).
+    delete sv.storyVersion;
     startGame(sv); loadRoom('A2');
     G.dialog = null; G.state = 'PLAY'; G.toasts = []; G.enemies = [];
     const DT = 1 / 60;

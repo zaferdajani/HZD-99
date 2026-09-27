@@ -18,7 +18,7 @@ const { chromium } = require('playwright');
 
   const m = await page.evaluate(async () => {
     const out = {};
-    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1; sv.flags.heal = 1; // charge is earned at the shop (burstUnlocked)
     startGame(sv); loadRoom('A0B');   // the trader lives in his booth den now
     await new Promise(r => setTimeout(r, 600));
     G.wake = null; G.state = 'PLAY';

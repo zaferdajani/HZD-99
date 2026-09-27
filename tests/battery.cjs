@@ -49,12 +49,15 @@ const { chromium } = require('playwright');
       if (e[0] === 'boss' && !MINIS[e[3]]) bosses++;
     }
     const sv = newSave(1);
-    return { npcs, minis, bosses, start: (sv.items && sv.items.batt) || 0 };
+    return { npcs, minis, bosses, start: (sv.items && sv.items.batt) || 0, v2: sv.storyVersion === 2 };
   });
-  const supply = econ.start + econ.minis + 1;      // +1: NULLFANG's own cell
+  // Story v2 (owner, Draft 2): she starts with no cell. Ratchet's OWN battery
+  // is hidden in his workshop and can only wake him, and on waking he hands
+  // her a separately stored spare (NPC_GIFT 'A0B|ratchet'). Both are supply.
+  const supply = econ.start + econ.minis + 1 + (econ.v2 ? 2 : 0);  // +1: NULLFANG's own cell
   check('a cell exists for every dark unit (' + econ.npcs + ' units)',
     supply >= econ.npcs,
-    econ.start + ' start + ' + econ.minis + ' constructs + 1 lion = ' + supply);
+    econ.start + ' start + ' + (econ.v2 ? '2 Ratchet (his own + spare) + ' : '') + econ.minis + ' constructs + 1 lion = ' + supply);
   check('and no more than two spare, or the choice is not one',
     supply - econ.npcs <= 2, 'surplus ' + (supply - econ.npcs));
 
@@ -65,7 +68,11 @@ const { chromium } = require('playwright');
     await new Promise(r => requestAnimationFrame(r));
     const sp = G.statics.find(s => s.type === 'npc');
     const key = npcKey(sp);
-    const before = { live: npcLive(sp), batt: invCount('batt') };
+    // she arrives holding the one cell this unit takes: a v2 save has found
+    // Ratchet's own battery (story-battery.cjs walks the finding itself)
+    const cell = npcCellItem(sp);
+    if (!invCount(cell)) invAdd(cell);
+    const before = { live: npcLive(sp), batt: invCount(cell) };
     // the shop must NOT open from a dark trader — that is the whole gate
     doInteract(sp);
     const askedState = G.state;
@@ -73,7 +80,7 @@ const { chromium } = require('playwright');
     // walking the dialog to its end is the player's implicit yes
     const end = G.dialog && G.dialog.onEnd;
     if (end) end();
-    const after = { live: npcLive(sp), batt: invCount('batt'), kit: invCount('kit') };
+    const after = { live: npcLive(sp), batt: invCount(cell), kit: invCount('kit') };
     G.dialog = null; G.state = 'PLAY';
     // ...and a second hand-off must not be possible: it is live now
     doInteract(sp);
