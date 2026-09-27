@@ -1,3 +1,5 @@
+// LEGACY SAVE FIRST MEETING. New saves use the dodgeable encounter tested in
+// story-meeting.cjs; preserve this older sequence for existing saved games.
 // THE FIRST MEETING, MEASURED — the beat the underdog arc hangs on
 // (.claude/skills/underdog-arc §2.1): early in zone A something swats her
 // aside and walks away, and she survives it by being outclassed, not by dying.

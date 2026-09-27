@@ -32,12 +32,15 @@ const BOSSES = [
   { room: 'E3', kind: 'mother', name: 'MOTHER-V' },
 ];
 // every state name in the game, sorted by what it costs the player
-const IDLE = /^(idle|rest|restlow|recover|wait|dorm|stun|crouch|nullend|cffloor|hurt)/;
+const IDLE = /^(idle|rest|restlow|recover|wait|dorm|stun|nullend|cffloor|hurt)/;
 const MOVE = /^(walk|run|chase|stalk|prowl|step|hover|drift|reposition|turn|fly|glide|circle|swim|climb|rise|swoop|dive|dash|pounce|spring|nullhop)/;
 // a telegraph is anything whose NAME says "this is coming" — including the
 // warn/tell suffixes, which the first cut of this classifier missed and so
 // filed NULLFANG's entire wind-up under "attack"
-const WIND = /(warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summon)/;
+// NULLFANG's crouch is the one-second pounce telegraph: increasing charge
+// ticks, coilK, a final flash and haptics before launching. It is not recovery.
+// Preserve the idle threshold; count this authored warning as a warning.
+const WIND = /(^crouch$|warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summon)/;
 
 (async () => {
   const secs = parseFloat(process.argv[2] || '20');

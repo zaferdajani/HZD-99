@@ -1,6 +1,10 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const {chromium}=require('playwright');
-const manifest=require('../tools/validate-comics.cjs')();
+const shippingManifest=require('../tools/validate-comics.cjs')();
+// Exercise publication with an explicit test edition, without falsely
+// publishing unfinished production art merely to make playback testable.
+const manifest=structuredClone(shippingManifest);
+for(const ch of manifest.chapters)ch.status='published';
 const context=vm.createContext({});
 vm.runInContext(fs.readFileSync('js/comics.js','utf8')+'\nthis.api=ComicRewards;',context);
 const save={theme:'robo',flags:{},items:{},bag:{}};
@@ -8,6 +12,8 @@ assert.equal(context.api.available(save,manifest).length,0);
 save.flags.woke=1;assert.equal(context.api.available(save,manifest).length,1);
 save.flags['on_A0B|ratchet']=1;assert.equal(context.api.available(save,manifest).length,2);
 save.flags.heal=1;assert.equal(context.api.available(save,manifest).length,3);
+const drafts=structuredClone(manifest);for(const ch of drafts.chapters)ch.status='draft';
+assert.equal(context.api.available(save,drafts).length,0,'draft chapters never unlock');
 assert.equal(context.api.available({...save,theme:'hero'},manifest).length,0);
 for(const bad of ['https://evil.example/page.png','../secret.png','assets/manhua/../../secret.png','assets/manhua/x.svg']) {
  const copy=structuredClone(manifest);copy.chapters[0].slides[0].src=bad;assert.throws(()=>context.api.validate(copy));
@@ -19,6 +25,7 @@ const duplicate=structuredClone(manifest);duplicate.chapters.push(duplicate.chap
  try {
   const p=await b.newPage({viewport:{width:1280,height:800}}),errors=[];
   p.on('pageerror',e=>errors.push(e.message));
+  await p.route('**/assets/manhua/chapters.json',r=>r.fulfill({json:manifest}));
   await p.goto(process.env.GAME_URL||'http://127.0.0.1:8220/index.html');
   await p.waitForFunction(()=>typeof ComicRewards!=='undefined'&&typeof startGame==='function');
   await p.evaluate(async()=>{
@@ -84,9 +91,18 @@ const duplicate=structuredClone(manifest);duplicate.chapters.push(duplicate.chap
   assert.equal(await p.getByRole('button',{name:'Finish chapter',exact:true}).isDisabled(),true);
   await p.getByRole('button',{name:'Return to game',exact:true}).click();
   assert.equal(await p.evaluate(()=>G.state),'PAUSE');
-  // Offline manifest fetch uses the embedded copy and doesn't disable the game.
+  // An unavailable update preserves the last validated in-session edition.
   await p.route('**/assets/manhua/chapters.json',r=>r.abort());
   await p.evaluate(async()=>{await ComicRewards.refresh(true);if(!ComicRewards.manifest.chapters.length)throw Error('lost offline edition');});
+  // A fresh session with no successful manifest request uses the actual
+  // embedded shipping edition, including its draft publication boundaries.
+  const cold=await b.newPage();
+  await cold.route('**/assets/manhua/chapters.json',r=>r.abort());
+  await cold.goto(process.env.GAME_URL||'http://127.0.0.1:8220/index.html');
+  await cold.waitForFunction(()=>typeof ComicRewards!=='undefined');
+  const fallback=await cold.evaluate(async()=>{await ComicRewards.refresh(true);return ComicRewards.manifest;});
+  assert.deepEqual(fallback,shippingManifest,'fresh offline startup uses bundled publication status');
+  await cold.close();
   assert.deepEqual(errors,[]);
   console.log('PASS comics: milestone locks, safe auto reward, frozen game, once-only offer, saved resume, live content update, phone zoom, reduced motion, missing-art retry and offline manifest fallback');
  } finally {await b.close();}

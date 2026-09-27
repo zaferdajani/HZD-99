@@ -1,6 +1,8 @@
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
 module.exports = function validateComics(root = path.join(__dirname, '..')) {
-  const manifest = JSON.parse(fs.readFileSync(path.join(root,'assets/manhua/chapters.json'),'utf8'));
+  const text = fs.readFileSync(path.join(root,'assets/manhua/chapters.json'),'utf8');
+  if(text.length>1000000)throw Error('Comic manifest exceeds the runtime update limit of 1,000,000 characters');
+  const manifest = JSON.parse(text);
   const context = vm.createContext({console});
   vm.runInContext(fs.readFileSync(path.join(root,'js/comics.js'),'utf8')+'\nthis.validate = ComicRewards.validate;',context);
   context.validate(manifest);

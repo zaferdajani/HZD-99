@@ -10,6 +10,10 @@ flexibility without inventing a different world or unearned capabilities.
 
 ## Opening proof audit — not release-ready
 
+September 27 update: see `../COMIC_PARITY_AUDIT.md` for the current 32-page
+review. The table below preserves the earlier audit; several gameplay items
+have since been implemented, but no complete page has been certified.
+
 | Page | Shared elements | Current gaps that prevent certification |
 |---|---|---|
 | 5 | HZD-99 unarmed, maintenance cradle, reserve wake, failing lamp | Exact cradle/lamp geometry, visible reserve indicator and reaching action need asset-to-runtime comparison |
@@ -48,6 +52,10 @@ chapter is identity-approved merely because one representative panel passes.
 - Capture from the actual game, plus behavioral check for interactive beats.
 - Reviewer result, unresolved differences and release status.
 
-The raw rounded marble source has been generated with real alpha but is not
-yet wired into the quarry. The older pointed-crystal asset must not serve as
-the new story's fallback once the rounded material is integrated.
+The raw rounded marble is now wired into the quarry through `js/media.js` and
+`js/game.js`; its runtime asset is `assets/characters/gear/raw_marble.png`.
+The real workshop cell, separate spare, modular winch, pre-guardian Sage route,
+and cleansing are covered by the story and winch integration tests. The winch
+belt remains baked into its base image, and the comic's hand-carrying and
+cooperative cable scenes remain unsupported. These partial implementations do
+not certify a complete page.

@@ -26,12 +26,14 @@ async function boot(withSave) {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const req = [];
+  const requestOrder=new WeakMap();let nextRequest=0;
+  page.on('request',r=>requestOrder.set(r,nextRequest++));
   page.on('response', async (r) => {
     const u = r.url();
     if (!/\/assets\//.test(u)) return;
     let size = 0;
     try { size = Number((await r.headerValue('content-length')) || 0); } catch (e) {}
-    req.push({ url: u.replace(/^.*\/assets\//, ''), status: r.status(), size });
+    req.push({ url: u.replace(/^.*\/assets\//, ''), status: r.status(), size, order:requestOrder.get(r.request()) });
   });
   if (withSave) {
     await page.addInitScript(() => {
@@ -67,6 +69,9 @@ async function boot(withSave) {
     };
   });
   await browser.close();
+  // Scheduling is measured by request start, not by response/header arrival:
+  // a small later file can finish before a larger priority sheet.
+  req.sort((a,b)=>a.order-b.order);
   return { req, q, errs };
 }
 

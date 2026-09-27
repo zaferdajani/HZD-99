@@ -231,6 +231,9 @@ const check = (name, ok, detail) => {
     const F = FRONTIER.A3;
     player.x = 26 * TILE; player.y = 14 * TILE; player.vx = 0; player.vy = 0;
     updateCam(player.x, player.y, G.roomDef.w * TILE, G.roomDef.h * TILE, 1);
+    // Measure the frontier, not a foreground actor covering its landing point.
+    // Keep the camera framed at the beam while moving the cast out of the probe.
+    player.x=18*TILE;G.enemies=[];G.statics=[];G.parts=[];G.projs=[];
     const x = cv.getContext('2d');
     const rd = (sx, sy) => {
       // The scene is projected after drawing; probe the beam's screen position.
@@ -249,6 +252,9 @@ const check = (name, ok, detail) => {
       draw(performance.now());
       return { in: rd(cxr, 150), out: rd(cxr - 300, 150), land: rd(cxr, landY) };
     };
+    // Compare the same breathing-light instant and deterministic particles.
+    const realNow=performance.now,realRand=Math.random;
+    performance.now=()=>0;Math.random=()=>0.5;
     const on = shot();
     const keep = FRONTIER.A3; delete FRONTIER.A3;
     const off = shot();
@@ -256,7 +262,14 @@ const check = (name, ok, detail) => {
     G.artProbe = 1;
     const probed = shot();
     G.artProbe = 0;
-    return { on, off, probed, cxr: Math.round(cxr) };
+    let minimumGain=Infinity;
+    for(const ms of [0,2000,4000,8000,12000,16000,24000]) {
+      performance.now=()=>ms;
+      const a=shot();delete FRONTIER.A3;const b=shot();FRONTIER.A3=keep;
+      minimumGain=Math.min(minimumGain,a.in.reduce((n,v,i)=>n+v-b.in[i],0)/3);
+    }
+    performance.now=realNow;Math.random=realRand;
+    return { on, off, probed, minimumGain, cxr: Math.round(cxr) };
   });
   const lum = (p) => (p[0] + p[1] + p[2]) / 3;
   const gain = lum(lit.on.in) - lum(lit.off.in);
@@ -264,6 +277,8 @@ const check = (name, ok, detail) => {
   check('the light is actually visible in the frame', gain > 30,
         'shaft adds ' + Math.round(gain) + ' brightness (' + lit.off.in.join(',')
         + ' -> ' + lit.on.in.join(',') + ')');
+  check('the frontier stays readable through its breathing cycle',lit.minimumGain>30,
+        'minimum gain '+lit.minimumGain.toFixed(1)+' across seven light phases');
   check('...and it is the NEXT kingdom\'s colour, not this one\'s', blueGain > 12,
         'blue gains ' + Math.round(blueGain) + ' more than red');
   // A SHAFT IS A LOCAL THING. Comparing absolute brightness inside the beam

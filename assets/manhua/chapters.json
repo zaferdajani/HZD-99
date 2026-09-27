@@ -5,7 +5,7 @@
       "id": "chapter-one-morning",
       "title": "The morning that broke",
       "revision": 1,
-      "status": "published",
+      "status": "draft",
       "unlock": [
         "awakened"
       ],
@@ -66,7 +66,7 @@
       "id": "chapter-one-ratchet",
       "title": "A voice of his own",
       "revision": 1,
-      "status": "published",
+      "status": "draft",
       "unlock": [
         "ratchet-restored"
       ],
@@ -99,7 +99,7 @@
       "id": "chapter-one-workshop",
       "title": "Spend it once",
       "revision": 1,
-      "status": "published",
+      "status": "draft",
       "unlock": [
         "ratchet-restored",
         "volt-pack"
@@ -126,7 +126,7 @@
       "id": "chapter-one-quarry",
       "title": "A path without speakers",
       "revision": 1,
-      "status": "published",
+      "status": "draft",
       "unlock": [
         "servo-restored",
         "raw-marble"
@@ -174,7 +174,7 @@
       "id": "chapter-one-forge",
       "title": "What to cut",
       "revision": 1,
-      "status": "published",
+      "status": "draft",
       "unlock": [
         "first-sword"
       ],
@@ -200,7 +200,7 @@
       "id": "chapter-one-sage",
       "title": "The missing voice",
       "revision": 1,
-      "status": "published",
+      "status": "draft",
       "unlock": [
         "first-sage"
       ],
@@ -240,7 +240,7 @@
       "id": "chapter-one-guardian",
       "title": "One ring",
       "revision": 1,
-      "status": "published",
+      "status": "draft",
       "unlock": [
         "first-sage",
         "chime-silenced",

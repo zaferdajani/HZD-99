@@ -10,8 +10,8 @@ ctx.G.save.flags.bossGlitch=1;assert.equal(ctx.openingGateHint('A4'),'','complet
 delete ctx.G.save.storyVersion;assert.equal(ctx.openingGateHint('A4'),'','legacy saves keep their route');
 ctx.G.save.storyVersion=2;ctx.G.save.flags={};
 for(const npc of ['servo','mono','patch','sage','lumen','kerf']) {
- const lines=ctx.survivorStory({extra:npc},['existing quest']);
- assert(lines.length>1);assert.equal(lines.at(-1),'existing quest');
+ const lines=ctx.survivorStory({extra:npc},['progress greeting','existing quest']);
+ assert(lines.length>2);assert.equal(lines[0],'progress greeting');assert.equal(lines.at(-1),'existing quest');
  assert.equal(ctx.survivorStory({extra:npc},['existing quest']).length,1,'survival story only once per save');
 }
 let oldCallback=0;ctx.G.dialog={onEnd:()=>oldCallback++};ctx.firstSageRevelation();

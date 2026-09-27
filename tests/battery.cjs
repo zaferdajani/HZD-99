@@ -1,10 +1,8 @@
 // THE BATTERY ARC, END TO END.
 //
-// The story: every machine person in the Depths was POWERED DOWN when the Song
-// went out. That is why they were never infected, and it is why they have been
-// standing in the dark ever since. She starts with one Power Cell. NULLFANG
-// carries one. Each of the Eye's constructs is sitting on another. The supply
-// is exactly the demand.
+// The revised opening starts with no cell. Ratchet's cell is recovered from
+// his workshop; restoring him grants a separate spare. NULLFANG and the Eye's
+// constructs supply the later cells. Survivors have distinct escape stories.
 //
 // Which means the whole arc rests on arithmetic that is invisible from the
 // code: is there a cell for every dark unit, does the shop actually stay shut
@@ -49,15 +47,14 @@ const { chromium } = require('playwright');
       if (e[0] === 'boss' && !MINIS[e[3]]) bosses++;
     }
     const sv = newSave(1);
-    return { npcs, minis, bosses, start: (sv.items && sv.items.batt) || 0, v2: sv.storyVersion === 2 };
+    const workshop=(ROOMS.A0B.ents||[]).filter(e=>e[0]==='chest'&&e[3]==='it:batt').length;
+    return { npcs, minis, bosses, workshop, start: (sv.items && sv.items.batt) || 0 };
   });
-  // Story v2 (owner, Draft 2): she starts with no cell. Ratchet's OWN battery
-  // is hidden in his workshop and can only wake him, and on waking he hands
-  // her a separately stored spare (NPC_GIFT 'A0B|ratchet'). Both are supply.
-  const supply = econ.start + econ.minis + 1 + (econ.v2 ? 2 : 0);  // +1: NULLFANG's own cell
+  // Ratchet's once-only spare is also exercised by story-battery.cjs.
+  const supply = econ.start + econ.workshop + 1 + econ.minis + 1;
   check('a cell exists for every dark unit (' + econ.npcs + ' units)',
     supply >= econ.npcs,
-    econ.start + ' start + ' + (econ.v2 ? '2 Ratchet (his own + spare) + ' : '') + econ.minis + ' constructs + 1 lion = ' + supply);
+    econ.start + ' start + ' + econ.workshop + ' workshop + 1 spare + ' + econ.minis + ' constructs + 1 lion = ' + supply);
   check('and no more than two spare, or the choice is not one',
     supply - econ.npcs <= 2, 'surplus ' + (supply - econ.npcs));
 
@@ -68,10 +65,10 @@ const { chromium } = require('playwright');
     await new Promise(r => requestAnimationFrame(r));
     const sp = G.statics.find(s => s.type === 'npc');
     const key = npcKey(sp);
-    // she arrives holding the one cell this unit takes: a v2 save has found
-    // Ratchet's own battery (story-battery.cjs walks the finding itself)
-    const cell = npcCellItem(sp);
-    if (!invCount(cell)) invAdd(cell);
+    // Recover the unique cell through the actual chest before installing it.
+    doInteract(G.statics.find(s=>s.type==='chest'&&s.extra==='it:batt'));
+    G.dialog=null;G.state='PLAY';
+    const cell=npcCellItem(sp);
     const before = { live: npcLive(sp), batt: invCount(cell) };
     // the shop must NOT open from a dark trader — that is the whole gate
     doInteract(sp);

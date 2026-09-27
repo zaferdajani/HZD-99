@@ -18,7 +18,10 @@ const { chromium } = require('playwright');
 
   const m = await page.evaluate(async () => {
     const out = {};
-    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1; sv.flags.heal = 1; // charge is earned at the shop (burstUnlocked)
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
+    // A completed opening has bought the pack; held attacks require it even
+    // when a test grants late-game blades directly. chapter-one tests earning it.
+    sv.flags.heal = 1;
     startGame(sv); loadRoom('A0B');   // the trader lives in his booth den now
     await new Promise(r => setTimeout(r, 600));
     G.wake = null; G.state = 'PLAY';

@@ -38,13 +38,15 @@ function survivorStory(s, lines) {
   const id='survivor_'+s.extra;
   if (G.save.flags[id]) return lines;
   G.save.flags[id]=1;persist();
-  return SURVIVOR_STORIES[s.extra].concat(lines);
+  // The world's response to the player's progress still leads the encounter.
+  // Place the once-only history after that greeting and before the quest.
+  return lines.slice(0,1).concat(SURVIVOR_STORIES[s.extra],lines.slice(1));
 }
 function openingGateHint(destination) {
   if (!revisedStory() || destination !== 'A4' || G.save.flags.bossGlitch) return '';
   if (!G.save.flags.crystal) return 'Bring raw marble from the cave beneath the meadow to Ratchet. You need his cleansing blade.';
   if (!G.save.flags.sageTame_GA1D) return 'The Sage knows the binding. Take the maintenance door beside the marble quarry and free them first.';
-  if (!G.save.flags.bossChime) return 'CHIME keeps restoring the order. Climb above the meadow through A2 and silence the bell before returning to NULLFANG.';
+  if (!G.save.flags.bossChime) return 'CHIME keeps restoring the order. Take the climb above the meadow and silence the bell before returning to NULLFANG.';
   return '';
 }
 function firstSageRevelation() {

@@ -55,6 +55,9 @@ The reader never executes scripts supplied in a chapter and never grants weapons
 ```
 
 Add the entry inside the top-level `chapters` array; keep `version: 1`.
+Keep the manifest below 1,000,000 characters; the build validator and online
+reader enforce the same limit. Images are separate files and do not count
+toward that limit.
 
 ## Milestones
 
@@ -104,7 +107,12 @@ offline startup and protects against an unavailable or malformed content update.
 
 ## Current edition boundary
 
-Seven reward episodes use 29 of the existing revised illustrations. Pages 8, 16
+Seven draft reward episodes reference 29 of the existing revised illustrations.
+Their status is `draft`, so they do not automatically unlock or appear in the
+game library until their art and scene checks are complete. The 32-page draft
+reader remains available under `manhua/`. Playback tests use a separately
+published test edition; passing those tests is not approval of these pages.
+Pages 8, 16
 and 20 are excluded from automatic rewards because their machine/hero continuity
 needs correction. These are explicitly labelled illustrated drafts, not newly
 generated or fully parity-certified artwork. The expanded written opening and

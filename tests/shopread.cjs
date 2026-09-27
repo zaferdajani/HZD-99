@@ -132,11 +132,19 @@ const SITES = [
         // already in flight — with the structure still in it.
         for (let f = 0; f < 4; f++) await new Promise(k => requestAnimationFrame(k));
         const w0 = cv.width, h0 = cv.height;
-        const A = grab();
+        // Capture all sides in this same JS turn. Waiting for animation
+        // frames between them allows simulation/camera movement to enter the
+        // mask even with performance.now frozen. A third render verifies that
+        // restoring the probe restores the exact original frame.
+        draw(); const A = grab();
         G.structProbe = 1;
-        for (let f = 0; f < 4; f++) await new Promise(k => requestAnimationFrame(k));
+        draw();
         const B = grab();
-        G.structProbe = 0;
+        G.structProbe = 0; draw();
+        const control=grab();let unstable=0;
+        for(let i=0;i<A.length;i+=4)
+          if(Math.abs(A[i]-control[i])+Math.abs(A[i+1]-control[i+1])+Math.abs(A[i+2]-control[i+2])>=24)unstable++;
+        res[room].controlPixels=unstable;
         // THE BACKBUFFER CAN RESIZE UNDER YOU. js/perf.js drops the resolution
         // tier when the frame rate slips, and under the full suite it does —
         // mid-measurement. The two frames are then different sizes, the diff
@@ -194,6 +202,8 @@ const SITES = [
     const r = out[room] || {};
     if (r.err) { check(what + ' stands in ' + room, false, r.err); continue; }
     check(what + ' is drawn with the cast, not the painting', r.near === true, room);
+    check('...and restoring the probe restores the same frame',r.controlPixels===0,
+          room+' '+r.controlPixels+' unrelated changed pixels');
     check('...and the measurement is of the structure and nothing else',
           (r.attempts || 9) <= 3 && (r.here.px || 0) < 160000,
           room + ' ' + (r.here.px || 0) + ' px in ' + (r.attempts || '?') + ' attempt(s)' +

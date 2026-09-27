@@ -7626,8 +7626,9 @@ function drawFrontier() {
     c.lineTo(cx + w * widen / 2, drop); c.lineTo(cx - w * widen / 2, drop);
     c.closePath(); c.fill();
   };
-  shaft(spread, 0.40, col);                    // the body of the beam
-  shaft(spread * 0.5, 0.44, '#ffffff');        // and the hot core inside it
+  // Keep the frontier readable even at the dim phase of its breathing cycle.
+  shaft(spread, 0.55, col);                    // the body of the beam
+  shaft(spread * 0.5, 0.60, '#ffffff');        // and the hot core inside it
   // 2. THE HALO — light does not stop at the edge of the hole it came through
   const g0 = c.createRadialGradient(cx, TILE * 0.4, 0, cx, TILE * 0.4, w * 1.5);
   g0.addColorStop(0, col); g0.addColorStop(1, 'rgba(0,0,0,0)');
