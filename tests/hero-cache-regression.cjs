@@ -33,7 +33,7 @@ const {chromium}=require('playwright');
    for(const mood of ['calm','happy','determined','angry'])for(const face of [-1,1]){
     player.mood=mood;player.moodT=1;player.face=player.faceVis=face;
     for(let frame=0;frame<8;frame++){
-     player.idleT=(frame+.1)/HERO_IDLE.fps;player.drawRoboPlate(c,false);idle.push({mood,face,frame,draw:G.heroDrawn});
+     player.idleT=heroIdleTimeFor(frame,false);player.drawRoboPlate(c,false);idle.push({mood,face,frame,draw:G.heroDrawn});
     }
    }
    const real=MEDIA_RAW.swingUppercut;MEDIA_RAW.swingUppercut=MEDIA_RAW.hzdIdle;

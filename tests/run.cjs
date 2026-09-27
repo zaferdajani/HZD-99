@@ -140,6 +140,7 @@ const SUITE = [
   ['beacon',    'a marker lights the way TO a character, never over one'],
   ['doorway',   'the painted door is where she walks in, not the wall beside it'],
   ['cross',     'a room crossing is a move, not a cut'],
+  ['look',      'hold up or down standing still and the frame pans that way; taps, walks and jumps never do'],
   ['seam',      'a room boundary is a place she walks through, not a door'],
   ['mapgrid',   'two rooms cannot stand on the same square of the map'],
   ['glowcost',  'the most expensive thing the renderer does, counted'],

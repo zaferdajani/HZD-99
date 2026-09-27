@@ -212,7 +212,9 @@ function moveEnt(e, dt) {
     const ty = Math.floor((e.y + e.h) / TILE);
     for (let tx = x0; tx <= x1; tx++) {
       const c = tileAt(tx, ty);
-      if (c === '#' || c === 'B' || (c === '=' && prevB <= ty * TILE + 1)) { e.y = ty * TILE - e.h - 0.01; e.vy = 0; col.d = 1; break; }
+      // e.thruPlat: a body falling past one-way ledges on purpose (NULLFANG's
+      // pounce at a player on the floor below them)
+      if (c === '#' || c === 'B' || (c === '=' && !e.thruPlat && prevB <= ty * TILE + 1)) { e.y = ty * TILE - e.h - 0.01; e.vy = 0; col.d = 1; break; }
     }
   } else {
     const ty = Math.floor(e.y / TILE);
@@ -974,6 +976,51 @@ let HERO_FIDGET = { key: 'heroFidget', cells: 8, k: HERO_DELIVERY_K, fps: 6.5, i
 // braced again. k 0.9065 against the sheet's wall_cling cell 11 (232 of 300).
 let HERO_WALL_STRIP = { key: 'transWall', cells: 4, k: HERO_DELIVERY_K, fps: 5 };
 const FIDGET_AFTER = 5;        // seconds of stillness before she runs out of patience
+// SHE STANDS STILL, AND ACTS ONE THING AT A TIME (owner, 2026-09-27: "the
+// idle makes the character move very fast, impatiently glitching all around,
+// instead of smoothly — like Sonic left idle: he taps his foot on the ground").
+// The idle and fidget strips are not in-betweens of one motion; each cell is a
+// different expression (blink, smile, glance, the '!' twitch, a foot tap with
+// dust). Cycled at 6.5 fps her whole face changed six times a second. Now each
+// strip is a SCRIPT of held beats: a calm pose held for seconds, one gesture,
+// back to calm. Every supplied cell still appears. Past FIDGET_AFTER the
+// impatience comes in bouts — the foot-tap rhythm on the two dust cells, a
+// twitch, a glance — with the calm idle resting between them.
+// [cell, seconds held]
+const HERO_IDLE_BEATS = [[0, 2.2], [3, 0.14], [0, 1.6], [4, 1.0], [7, 0.45], [0, 1.3], [1, 0.9],
+  [0, 1.7], [3, 0.12], [2, 0.25], [3, 0.12], [0, 1.1], [5, 0.5], [6, 0.9], [0, 0.7]];
+const HERO_FIDGET_BEATS = [[5, 0.7], [7, 0.35], [3, 0.2], [7, 0.32], [3, 0.2], [7, 0.32], [3, 0.2],
+  [7, 0.45], [4, 0.55], [0, 0.3], [6, 0.22], [1, 0.5], [2, 0.3]];
+const beatsLength = b => b.reduce((n, x) => n + x[1], 0);
+const FIDGET_BOUT = beatsLength(HERO_FIDGET_BEATS), IDLE_REST = 6.5;
+function beatCell(beats, t) {
+  let k = ((t % beatsLength(beats)) + beatsLength(beats)) % beatsLength(beats);
+  for (const [cell, d] of beats) { if (k < d) return cell; k -= d; }
+  return beats[beats.length - 1][0];
+}
+// the first moment a script shows a cell (harnesses drive frames by time)
+function beatTime(beats, cell) {
+  let t = 0;
+  for (const [c0, d] of beats) { if (c0 === cell) return t + d / 2; t += d; }
+  return -1;
+}
+// the first idleT at which the combined schedule shows `cell` of one strip
+function heroIdleTimeFor(cell, fidget) {
+  for (let t = 0; t < 120; t += 0.01) {
+    const q = heroIdleClip(t);
+    if (q.fidget === !!fidget && q.cell === cell) return t + 0.005;
+  }
+  return -1;
+}
+// What a still body is doing at idleT: {fidget, cell}. Before FIDGET_AFTER it
+// is the idle script; after it, fidget bouts of FIDGET_BOUT with IDLE_REST of
+// the idle script (continuing where it left off) between them.
+function heroIdleClip(t) {
+  if (t <= FIDGET_AFTER) return { fidget: false, cell: beatCell(HERO_IDLE_BEATS, t) };
+  const u = t - FIDGET_AFTER, P = FIDGET_BOUT + IDLE_REST, n = Math.floor(u / P), k = u - n * P;
+  if (k < FIDGET_BOUT) return { fidget: true, cell: beatCell(HERO_FIDGET_BEATS, k) };
+  return { fidget: false, cell: beatCell(HERO_IDLE_BEATS, FIDGET_AFTER + n * IDLE_REST + (k - FIDGET_BOUT)) };
+}
 // THE CELL COUNT IS HOW MANY DIFFERENT PICTURES THE TAKE ACTUALLY HOLDS.
 //
 // Two owner reports, and the second corrected the first. "Use the films to
@@ -2904,8 +2951,9 @@ class Player {
     // Keep the supplied expressive idle in every idle mood. A mood changes
     // only the eye lights; it must not swap the entire body for an old still.
     const I = HERO_IDLE;
-    if (I && I.cells && st === 'idle' && this.on && this.idleT <= FIDGET_AFTER) {
-      const cell = ((this.idleT || 0) * (I.fps || 9)) % I.cells;
+    const clip = heroIdleClip(this.idleT || 0);
+    if (I && I.cells && st === 'idle' && this.on && !clip.fidget) {
+      const cell = clip.cell;
       const h = HERO_DH * (I.k || 1), flip = this.faceVis < 0;
       if (drawHeroMotionCell(this, c, I.key, cell, I.cells, 0, HERO_FLOOR, h, flip)) {
         if (this.heroMood(st) !== 'calm') {
@@ -2922,12 +2970,9 @@ class Player {
       }
     }
     const F = HERO_FIDGET;
-    if (F && st === 'idle' && this.idleT > FIDGET_AFTER) {
-      // intro once, then the loop — the wrap lands bounce-to-bounce instead of
-      // snapping back through the arm-cross (measured seam 15->0 was 30%)
-      const n = Math.floor((this.idleT - FIDGET_AFTER) * (F.fps || 10));
-      const loopN = F.cells - F.intro;
-      const cell = n < F.cells ? n : F.intro + ((n - F.cells) % loopN);
+    if (F && st === 'idle' && clip.fidget) {
+      // the scripted bout (HERO_FIDGET_BEATS), not the strip run end to end
+      const cell = clip.cell;
       if (drawHeroMotionCell(this, c, F.key, cell, F.cells, 0, HERO_FLOOR, HERO_DH * (F.k || 1), this.faceVis < 0)) return true;
     }
     // THE WALL SLIDE IS HELD, NOT TIMED: it loops on its own clock for as
@@ -11345,6 +11390,10 @@ class Boss {
             sfx('atk');
             if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
           }
+          // FOLLOW-THROUGH: the blow carries the body a step after it, the way
+          // a big cat's weight goes into a strike. After the hit check only,
+          // so the swipe's reach (and its answer, out-range) is unchanged.
+          if (this.swiped) this.vx = (this.face || 1) * 150 * Math.max(0, this.t / 0.18);
           if (this.t <= 0) {
             // a lion swipes twice when it is angry
             // A LION SWIPES TWICE WHEN IT IS ANGRY — but it used to do so on a
@@ -11396,8 +11445,25 @@ class Boss {
             // dodge has to be a real change of direction, which is the fight
             // this move was always supposed to be.
             const lead = dist + (player.vx || 0) * (this.phase === 2 ? 0.26 : 0.18);
-            this.vx = clamp(lead * 1.6, -680, 680) * (this.phase === 2 ? 1.15 : 1) * spd;
-            this.vy = -(420 + Math.min(260, adist * 0.5));
+            // A LION'S LEAP, NOT A HOP (owner, 2026-09-27: move like the Lion
+            // King's grown Simba). It used to leave at 420-680 px/s up under
+            // 2100 gravity — a 42-110 px skip, 0.4-0.65 s long, flat across the
+            // floor. It is solved as a real arc now: a set flight time, the
+            // launch speed that time needs, and the run that lands it on the
+            // led spot. Apex 129-176 px, 0.70-0.82 s in the air (0.62-0.74 in
+            // phase two). Damage is still the LANDING box only, so the answer
+            // is unchanged — do not be where it comes down — and the longer
+            // flight gives the eye the arc to read the landing from.
+            const air = (this.phase === 2 ? 0.62 : 0.70) + Math.min(0.12, adist / 4000);
+            this.vx = clamp(lead / air, -760, 760) * spd;
+            this.vy = -2100 * air / 2;
+            this.leapT0 = this.anim || 0;
+            // ...and it comes down where SHE is. A 150 px apex clears the
+            // arena's one-way ledges, so on the way down it would land on one
+            // and sit out of her reach (tests/openings.cjs: reach 0 of 53
+            // frames). Aimed at a player who is not above it, it falls through
+            // them to her floor; aimed at a player ON a ledge, it lands there.
+            this.thruPlat = (player.y + player.h) >= (this.y + this.h) - 40;
             sfx('dash'); sfx('launch');
             cam.shake = Math.max(cam.shake, 9);
             G.flash = Math.max(G.flash || 0, 0.16);
@@ -11594,6 +11660,7 @@ class Boss {
           this.stagT = Math.max(this.stagT, 0.3);
           if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.6, 1.0); this.nullCrash = false; }
         }
+        if (this.st !== 'pounce') this.thruPlat = false;
         if (this.st === 'pounce' && this.nullSeq > 0) G.lowGravT = Math.max(G.lowGravT || 0, 1.2);
         const col = (this.st === 'spring' || this.st === 'dive') ? {} : moveEnt(this, dt);
         if (this.st === 'pounce' && col.d) {
@@ -11620,6 +11687,7 @@ class Boss {
             // the punish window: long enough for the three-hit combo, not for
             // three of them
             this.st = 'recover'; this.t = this.phase === 2 ? 0.26 : 0.36;
+            this.landAt = this.anim || 0;      // drawBeast's touchdown squash
           }
         }
         if (this.st === 'stalk' && (col.l || col.r)) this.face *= -1;

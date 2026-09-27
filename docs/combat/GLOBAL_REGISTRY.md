@@ -217,3 +217,15 @@ Binding on every room in every zone.
 | Furnace `hymn` hit test | any body on the ring | **grounded bodies only** (`player.on`) | an expanding area with one answer is a toll; JUMP is the second, GUARD the third |
 | Furnace `hymn` cadence | every 3rd idle (~every few seconds) | every 3rd idle **and `hymnCD` 6.5–8.5 s** | "it happens a lot" |
 | `hymn_warn` | — | toast once per save | the same courtesy MOTHER'S SONG gets |
+
+## Changelog — 2026-09-27 (owner: "the lion — get inspired from the Lion King game, the motion, jump, hit, especially when Simba got bigger")
+
+| value | before | after | why |
+|---|---|---|---|
+| `nf.pounce` launch (`Boss` glitch, crouch→pounce) | `vx = clamp(lead×1.6, ±680)`, `vy = −(420 + min(260, dist×0.5))` — apex 42–110 px, 0.4–0.65 s | **flight time `air` = 0.70 s (p2 0.62) + min(0.12, dist/4000)**, `vy = −2100·air/2`, `vx = clamp(lead/air, ±760)` — apex 129–176 px, 0.62–0.88 s measured | a leap, not a skip: the weight is in the arc. Damage is still the landing box only, so the answer (don't be where it lands) is unchanged and the arc gives the eye the landing to read |
+| `nf.pounce` vs one-way ledges | landed on `=` when the arc cleared one | **`thruPlat`**: falls through `=` when she is not above it | the higher arc put it on A4's ledges out of her reach — `openings` pounce>recover worst 0 ms; after: **650 ms (med 833, p75 883)** |
+| `nf.swipe` follow-through | body still through the strike | **vx = face·150·(t/0.18) after the hit check** (~14 px) | a big cat's weight goes into a strike; after the check, so reach and its answer (out-range) are unchanged. swipe>idle worst 383 ms (med 550) |
+| stalk cycle rate | fixed 14 cells/s | **paced by ground covered**, `BEAST_STRIDE` = 188.6 px per 16-cell stride (p1's own ratio) | phase two's 210 px/s prowl slid its paws |
+| drawn weight (js/beast.js) | — | leap pitches along the arc (±0.26–0.30 rad), touchdown squash 0.22 s, breathing idle | a picture sliding along a curve is not an animal going over the top |
+
+bosspace NULLFANG after: idle 24% (was 28–35%). openings, daze, artbible, motion, tells, combat green.

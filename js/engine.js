@@ -501,7 +501,10 @@ function padRumble(strong, weak, ms) {
     if (typeof TOUCH !== 'undefined' && TOUCH.enabled && typeof tBuzz === 'function') tBuzz(duration);
   } catch (e) {}
 }
-const cam = { x:0, y:0, shake:0, zoom:1, lead:0, shakeX:0, shakeY:0, room:null };
+const cam = { x:0, y:0, shake:0, zoom:1, lead:0, shakeX:0, shakeY:0, room:null, look:0, lookHold:0, lookDir:0 };
+// the look: seconds of standing still on UP/DOWN before the frame pans, and
+// how far it pans as a fraction of the visible height
+const LOOK_HOLD = 0.35, LOOK_SPAN = 0.32;
 let prevShake = 0;
 function updateCam(px, py, rw, rh, dt) {
   const robo = !(typeof isHero === 'function' && isHero()) && !(typeof window !== 'undefined' && window.EDITOR);
@@ -530,15 +533,30 @@ function updateCam(px, py, rw, rh, dt) {
   const boundX=v=>rw<960/z?(rw-960)/2:clamp(v,-ox,rw-960+ox);
   const boundY=v=>rh<540/z?(rh-540)/2:clamp(v,-oy,rh-540+oy);
   const fall=p ? clamp(p.vy/980,-1,1)*20 : 0;
+  // LOOKING UP AND DOWN (owner, 2026-09-27: "looking down should move the
+  // screen down or show me part of the down area; looking up does the same").
+  // Hold UP or DOWN while standing still and, after a beat, the frame pans a
+  // third of a screen that way; let go and it comes back. The beat is what
+  // keeps it off every other use of the stick: a tap, an up-attack, a door,
+  // a drop through a ledge or a walk never lasts that long standing still.
+  const vdir=(typeof inD==='function'&&p&&p.on&&!boss&&typeof G!=='undefined'&&G.state==='PLAY'
+    &&Math.abs(p.vx)<40&&!p.swing&&!(p.dashT>0)&&!inD('LEFT')&&!inD('RIGHT'))
+    ? (inD('DOWN')?1:0)-(inD('UP')?1:0) : 0;
+  cam.lookHold=vdir&&vdir===cam.lookDir?(cam.lookHold||0)+step:0;
+  cam.lookDir=vdir;
+  const lookWant=snap?0:(cam.lookHold>=LOOK_HOLD?vdir*LOOK_SPAN*540/z:0);
+  cam.look=snap?0:lerp(cam.look||0,lookWant,1-Math.exp(-step*(lookWant?4.5:7)));
   const tx=boundX(px-480+cam.lead);
-  const ty=boundY(py-(robo?270+112/z:300)+fall);
+  const ty=boundY(py-(robo?270+112/z:300)+fall+cam.look);
   cam.x=snap?tx:lerp(cam.x,tx,1-Math.exp(-step*11));
   cam.y=snap?ty:lerp(cam.y,ty,1-Math.exp(-step*9));
   // Keep the character within a safe vertical band even during a fast drop.
   // Room bounds win at the roof/floor; they are never exchanged for black void.
   if (p && robo && !boss) {
     const centre=p.y+p.h/2;
-    cam.y=boundY(clamp(cam.y,centre-270-155/z,centre-270+120/z));
+    // ...a band that travels with the look, or the look is clamped straight off
+    const lk=cam.look||0;
+    cam.y=boundY(clamp(cam.y,centre-270-155/z+Math.min(0,lk),centre-270+120/z+Math.max(0,lk)));
   }
   if (cam.shake > prevShake+2.5)
     padRumble(clamp(cam.shake/13,.15,1),clamp(cam.shake/9,.2,1),60+cam.shake*16);

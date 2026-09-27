@@ -2005,6 +2005,7 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
  27. §2ba   THE ARCHIVES' INSTRUMENTS ×6   ✦ NEW 2026-09-18 (kingdom D) — card ×2, redaction bar ×2, drawer + index sweep; wired, stand-ins live, nothing fired
  28. §2by   KINGDOM B MOVE STATES ×5       ✱ NEW 2026-09-18 (kingdom B) — repeater charge, wall latch, courier packet + spill, gun pips; wired, engine-drawn warnings live, nothing fired
  29. §2ca   THE CACHE SPAR ×1              ✱ NEW 2026-09-19 (kingdom X) — seam-crystal growth hung from V1's roof, the bat's perch; wired, procedural stand-in live, nothing fired
+ 30. §2cb   NULLFANG, A LION THAT MOVES LIKE ONE ×4 STRIPS  ✱ NEW 2026-09-27 (owner) — gallop, full-stretch leap, rear-up double swipe, hit recoil; slots named, code-side weight shipped, nothing fired
  29. §2au/§2av  (folded into 26 — the briefs remain as the acceptance laws; docs/GAIT.md is the study)
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
@@ -5836,3 +5837,44 @@ never the other way round — the bat's hang is measured against the tiles.
 **Wiring note.** `spar()` returns its per-column profile the same way `mound()`
 does, so the plate is keyed to the room the way the meadow's mounds are. One
 plate, one room; if a second Cache room ever needs a perch it reuses this one.
+
+## 2cb. NULLFANG, A LION THAT MOVES LIKE ONE — four strips ✱ NEW 2026-09-27
+
+**Owner, 2026-09-27:** "for the first stage the lion I need you to get inspired
+from the Lion King game — the lion motion, movement, jump, hit etc, especially
+when Simba got bigger."
+
+What that asks for is WEIGHT AND CONTINUITY: a grown lion that is always
+moving, whose leap is a committed arc with the whole body extended, whose
+strikes carry the shoulders into them, and who visibly takes a hit. **Take the
+motion principles only.** Do NOT reproduce, trace or evoke any Disney
+character, design, colour scheme or frame — NULLFANG is our ivory-and-violet
+machine lion (assets/characters/beast/, the parts atlas) and stays exactly that.
+Every prompt anchors to his existing strips as the SHAPE/STYLE reference
+(art-prompts skill §1–§2), side view facing LEFT, same scale as `beastStalk`.
+
+Code already shipped the weight it can (2026-09-27, GLOBAL_REGISTRY changelog):
+a real ballistic leap (apex 129–176 px, 0.62–0.88 s), the body pitching along
+the arc, a touchdown squash, a breathing idle, a prowl paced to ground speed,
+a follow-through lurch on the swipe. What code cannot do is draw poses the
+current strips do not contain. These four strips are those poses:
+
+| # | strip key (slot) | cells | the beats | replaces / adds |
+|---|---|---|---|---|
+| 1 | `beastGallop` | 12 | a true run cycle — gather, full extension, both forepaws reaching, hind legs driving; the spine flexes | new: a `run` state between prowl and pounce |
+| 2 | `beastLeap` v2 | 12 | coil (0–3), launch with hind legs straightening (4), **full-body extension mid-air, forepaws reaching forward, tail streaming** (5–7), forepaws down (8), landing absorb (9–11) | the pounce's 3 airborne cells become 3 real ones |
+| 3 | `beastRearSwipe` | 12 | rise onto the hind legs (0–4, the tell), a two-paw downward rake (5–8), drop back to all fours (9–11) | a phase-two variant of `swipe`, silhouette distinct from the one-paw swipe |
+| 4 | `beastHurt` | 6 | a recoil: head snapped back, forequarters lifting, one paw off the ground, back to stance | draws when a hit lands (today the body only flashes) |
+
+Each cell: pure black background, whole body in frame, feet on the cell
+floor at the same line in every cell, no ground plane, no cast shadow, no
+dust, no effects (the engine draws those), no text. Palette named in every
+prompt: ivory armour plates, graphite joints, violet virus light in the seams,
+amber only where the existing strips put it. Negatives: no pixel grid, no
+outline, no cel shading, no Disney likeness, no cartoon face.
+
+Wiring (code session, when fired and approved): `BEAST_STRIP` in js/beast.js
+takes each key; #2 replaces `pounce` `from/to` with the air cells indexed by
+arc progress (`b.leapT0`); #1 needs a `run` state in the glitch step logic;
+#3 and #4 need their states. `tests/artbible.cjs` measures silhouettes and
+feet; `tests/openings.cjs` must stay green for every move touched.

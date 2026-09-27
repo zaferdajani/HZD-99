@@ -394,7 +394,7 @@ const check = (name, ok, detail) => {
   const reach = await page.evaluate(async () => {
     const want = {
       hzdIdle:      p => { p.on = 1; p.idleT = 1; p.vx = 0; },
-      heroFidget:   p => { p.on = 1; p.idleT = 99; p.vx = 0; },
+      heroFidget:   p => { p.on = 1; p.idleT = FIDGET_AFTER + 1; p.vx = 0; },   // inside the first bout
       transTakeoff: p => { p.on = 0; p.landT = 0; p.takeoff0 = 0.12; p.takeoffT = 0.08; p.vy = -300; },
       transAir:     p => { p.on = 0; p.landT = 0; p.takeoffT = 0; p.vy = -300; },
       transLand:    p => { p.on = 1; p.land0 = 0.12; p.landT = 0.06; },

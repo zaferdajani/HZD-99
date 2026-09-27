@@ -1153,6 +1153,7 @@ function beastDraw(c, b, P) {
 // its own vertical speed (up / hang / down); the spring and the dive carry
 // their own 0..1 (`b.u`); the death counts deathAnimT from 1.6 to 0.
 const BEAST_STRIP_PX = 280 / 210;
+const BEAST_STRIDE = 165 * 16 / 14;   // px of prowl per full 16-cell stride (see beastStrip)
 const BEAST_STRIP = {
   stalk:      { key: 'beastStalk',      cells: 16, k: 1,    loop: 14 },
   idle:       { key: 'beastStalk',      cells: 16, k: 1,    from: 0, to: 0, loop: 1 },
@@ -1190,7 +1191,17 @@ function beastStrip(c, b) {
   else if ((b.t || 0) > (b._st0 || 0)) b._st0 = b.t;
   const from = S.from || 0, to = S.to == null ? S.cells - 1 : S.to, n = to - from + 1;
   let cell;
-  if (S.loop) cell = from + (Math.floor((b.anim || 0) * S.loop) % n);
+  if (st === 'stalk') {
+    // THE PAWS DO NOT SKATE. The prowl used to cycle at a fixed 14 cells/s
+    // whatever the body's speed; it is paced by ground covered now, one full
+    // 16-cell stride per BEAST_STRIDE px — the phase-one prowl's own ratio
+    // (165 px/s at 14 cells/s), so phase two's faster prowl turns its legs
+    // over faster instead of sliding them.
+    const da = Math.max(0, Math.min(0.1, (b.anim || 0) - (b._gaitA == null ? (b.anim || 0) : b._gaitA)));
+    b._gaitA = b.anim || 0;
+    b._gaitPh = ((b._gaitPh || 0) + Math.abs(b.vx || 0) * da / BEAST_STRIDE) % 1;
+    cell = from + Math.floor(b._gaitPh * n) % n;
+  } else if (S.loop) cell = from + (Math.floor((b.anim || 0) * S.loop) % n);
   else if (S.air) { const vy = b.vy || 0; cell = from + (vy < -120 ? 0 : vy < 120 ? 1 : 2); }
   else if (S.u) cell = from + Math.min(n - 1, Math.floor(Math.max(0, Math.min(0.999, b.u || 0)) * n));
   else if (S.death) {
@@ -1325,6 +1336,15 @@ function drawBeast(c, b) {
     } else if ((b.st === 'pounce' || b.st === 'spring' || b.st === 'dive') && !b.dead) {
       const up = Math.max(0, Math.min(0.55, -(b.vy || 0) / 1000));
       const dn = Math.max(0, Math.min(0.5, (b.vy || 0) / 1000));
+      // THE BODY FOLLOWS THE ARC. Nose up off the launch, level at the apex,
+      // nose down into the landing — the one thing that makes a leap read as
+      // a heavy animal going over the top rather than a picture sliding on a
+      // curve. Pivot at the body's middle. The rig faces LEFT, so a positive
+      // rotation drops the nose.
+      if (b.st === 'pounce') {
+        const pitch = Math.max(-0.26, Math.min(0.3, (b.vy || 0) / 2600));
+        c.translate(0, -135); c.rotate(pitch); c.translate(0, 135);
+      }
       c.scale(1 - up * 0.10 + dn * 0.05, 1 + up * 0.16 - dn * 0.04);
       if (!beastStrip(c, b)) beastDraw(c, b, beastPose(b));
     } else if ((b.st === 'swipe' || b.st === 'swipewarn') && !b.dead) {
@@ -1394,6 +1414,17 @@ function drawBeast(c, b) {
       c.fillStyle = mg; c.beginPath(); c.arc(-150, -215, orbR, 0, 7); c.fill();
       c.restore();
     } else {
+      // WEIGHT ON THE GROUND. A touchdown squashes the body into its legs and
+      // lets it back up over a fifth of a second; standing, it breathes. Both
+      // anchored at the feet (the origin), so the paws never leave the floor.
+      const since = (b.anim || 0) - (b.landAt == null ? -9 : b.landAt);
+      if (b.st === 'recover' && since < 0.22) {
+        const k = 1 - since / 0.22;
+        c.scale(1 + 0.08 * k, 1 - 0.12 * k);
+      } else if (b.st === 'idle') {
+        const br = Math.sin((b.anim || 0) * 2.4);
+        c.scale(1 - 0.006 * br, 1 + 0.016 * br);
+      }
       if (!beastStrip(c, b)) beastDraw(c, b, beastPose(b));
     }
     c.restore();
