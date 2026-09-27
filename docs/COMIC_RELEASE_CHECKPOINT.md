@@ -39,6 +39,20 @@ Expected file hashes after publishing:
 
 Publication and live verification remain separate from these local passes.
 
+### Integrator verification of 47240d4 — 2026-09-27
+
+- Clean rebuild reproduces all four committed pages byte for byte.
+- Full suite on Linux (tests/run.cjs): **all 133 harnesses ran**, none failed.
+- Publication did NOT happen. pages.yml detected the legacy branch publisher,
+  skipped its own deploy, and waited for that publisher to ship 47240d4 — but
+  GitHub never queued a `pages build and deployment` run for this push (every
+  earlier push to main got one; last was 44425e9). Production stayed on the
+  44425e9 page, so the job failed at "Confirm the legacy publisher shipped this
+  commit" after 20 polls. This commit is pushed to main to queue that build.
+- Published tree is 884 MB of the 1 GB Pages limit (808 MB at 44425e9); the
+  revised manhwa pages added about 76 MB. The next few chapters will not fit
+  unless images move to a lighter tier or out of the published branch.
+
 ## Earlier checkpoint (superseded by the candidate above)
 
 User pushed integration commit 2eedaf8 successfully. Production main and odyssey were still at 44425e967b51870591d96b0967342b0cf177337c when checked this turn. No production publication is claimed here.
