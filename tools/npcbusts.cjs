@@ -8,7 +8,12 @@
 // code already follows for her.
 const { chromium } = require('playwright');
 const fs = require('fs');
-const ROWS = ['servo', 'ratchet', 'mono', 'patch', 'sage', 'lumen'];
+// NAME -> ROW, not a positional list. The list skipped `guard` at row 6, so
+// every entry after it would have read the wrong row the moment one was added —
+// and one was (kerf, row 7). The sheet's row count is likewise a FACT ABOUT THE
+// FILE rather than a constant: it was 7 until Kerf's row landed, and the literal
+// 7 below was true for exactly as long.
+const ROWS = { servo: 0, ratchet: 1, mono: 2, patch: 3, sage: 4, lumen: 5, kerf: 7 };
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const p = await b.newPage();
@@ -16,9 +21,13 @@ const ROWS = ['servo', 'ratchet', 'mono', 'patch', 'sage', 'lumen'];
   const src = 'data:image/webp;base64,' + fs.readFileSync('/home/user/HZD-99/assets/characters/npc_6yaw.webp').toString('base64');
   const out = await p.evaluate(async ({ src, ROWS }) => {
     const im = new Image(); im.src = src; await im.decode();
-    const COLS = 6, N = 7, cw = im.width / COLS, ch = im.height / N;
+    const COLS = 6, cw = im.width / COLS;
+    // rows are square-ish cells of a known width: derive, never assume
+    const N = Math.round(im.height / (cw * 1.3)), ch = im.height / N;
     const res = [];
-    for (let r = 0; r < ROWS.length; r++) {
+    const names = Object.keys(ROWS);
+    for (const nm of names) {
+      const r = ROWS[nm];
       const t = document.createElement('canvas');
       t.width = Math.round(cw); t.height = Math.round(ch);
       const tc = t.getContext('2d');
@@ -41,9 +50,10 @@ const ROWS = ['servo', 'ratchet', 'mono', 'patch', 'sage', 'lumen'];
     return res;
   }, { src, ROWS });
   out.forEach((u, i) => {
-    if (!u) { console.log('EMPTY', ROWS[i]); return; }
-    fs.writeFileSync('busts/' + ROWS[i] + '.png', Buffer.from(u.split(',')[1], 'base64'));
-    console.log('bust', ROWS[i]);
+    const nm = Object.keys(ROWS)[i];
+    if (!u) { console.log('EMPTY', nm); return; }
+    fs.writeFileSync('busts/' + nm + '.png', Buffer.from(u.split(',')[1], 'base64'));
+    console.log('bust', nm);
   });
   await b.close();
 })();

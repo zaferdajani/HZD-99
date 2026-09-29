@@ -260,6 +260,7 @@ const MEDIA_SRC = {
     bustPatch: 'assets/characters/npc/bust/patch.webp',
     bustSage: 'assets/characters/npc/bust/sage.webp',
     bustLumen: 'assets/characters/npc/bust/lumen.webp',
+    bustKerf: 'assets/characters/npc/bust/kerf.webp',
     // ===================================================================
     // §2s TERRAIN DEPTH PLANES — the authored answer to a floor that reads as a
     // bar. edge_ is the band she stands on and draws behind the cast; fore_
