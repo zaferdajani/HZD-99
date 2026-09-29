@@ -79,6 +79,7 @@ plate can be traced back to the generation it came from.
 | Files | Generated | Notes |
 |---|---|---|
 | `backgrounds/booth_front.png` | Higgsfield, Seedream 4.5 | Ratchet's kiosk (ART_QUEUE §2g); matted with Higgsfield `remove_background` |
+| `backgrounds/kerf_front.webp`, `source/kingdomX/kerf_front.png` | Higgsfield, GPT Image 2.5 | THE KERF — the Cutter's cloven stone, kingdom X's structure (ART_QUEUE §2aq); fired 2026-09-29 to the written brief, keyed with `tools/blackkey.cjs` |
 | `backgrounds/den_interior.jpg` | Higgsfield | the A0B workshop backdrop (§2g) |
 | `characters/npc/ratchet_resting.png` | Higgsfield, Seedream 4.5 | Ratchet powered down (§2g); fired against his own atlas row as reference |
 | `characters/npc/ratchet/work_1.png` | Higgsfield, Nano Banana Pro | Ratchet at work: hammering (§2t) |

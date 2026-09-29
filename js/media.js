@@ -270,6 +270,10 @@ const MEDIA_SRC = {
     edgeC: 'assets/backgrounds/edge_c.webp',
     foreC: 'assets/backgrounds/fore_c.webp',
     boothFront: 'assets/backgrounds/booth_front.webp',
+    // THE KERF — kingdom X's structure, fired 2026-09-29 to ART_QUEUE §2aq's
+    // brief. drawKerfStone has carried the mediaFetch hook and the procedural
+    // fallback since the room was built; this is the plate it was waiting for.
+    kerfFront: 'assets/backgrounds/kerf_front.webp',
     denInterior: 'assets/backgrounds/den_interior.jpg',
     ratchetResting: 'assets/characters/npc/ratchet_resting.webp',
     // THE TINKER AT WORK (owner, 2026-08-21: "give it a character... keep it
