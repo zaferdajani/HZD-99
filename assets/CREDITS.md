@@ -82,6 +82,7 @@ plate can be traced back to the generation it came from.
 | `backgrounds/kerf_front.webp`, `source/kingdomX/kerf_front.png` | Higgsfield, GPT Image 2.5 | THE KERF — the Cutter's cloven stone, kingdom X's structure (ART_QUEUE §2aq); fired 2026-09-29 to the written brief, keyed with `tools/blackkey.cjs` |
 | `backgrounds/kerf_interior.jpg`, `source/kingdomX/kerf_interior.png` | Higgsfield, GPT Image 2.5 | V1B, the inside of the Kerf (ART_QUEUE §2aq): the cutting jig, the sawn back wall and the crystal that is the room's only light |
 | `characters/npc_6yaw.webp` row 8, `source/kingdomX/kerf_turn.png` | Higgsfield, GPT Image 2.5 | KERF's six-view turnaround (ART_QUEUE §2aq), appended to the shared NPC sheet by `tools/npcrow.cjs`; rows 1-7 are unchanged |
+| `characters/npc/kerf/work_loop.webp`, `source/kingdomX/kerf_work.png` | Higgsfield, GPT Image 2.5 | KERF's work loop — THE CUT (ART_QUEUE §2aq), eight cells, fired against her own turnaround as the identity reference |
 | `backgrounds/den_interior.jpg` | Higgsfield | the A0B workshop backdrop (§2g) |
 | `characters/npc/ratchet_resting.png` | Higgsfield, Seedream 4.5 | Ratchet powered down (§2g); fired against his own atlas row as reference |
 | `characters/npc/ratchet/work_1.png` | Higgsfield, Nano Banana Pro | Ratchet at work: hammering (§2t) |

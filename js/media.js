@@ -278,6 +278,8 @@ const MEDIA_SRC = {
     // ROOM_VISTA.V1B, INDOOR_ART's floorKerf and INTERIOR_FIT have all pointed
     // here since the room was built.
     kerfInterior: 'assets/backgrounds/kerf_interior.jpg',
+    // her work loop — THE CUT (§2aq), eight cells
+    kerfLoop: 'assets/characters/npc/kerf/work_loop.webp',
     denInterior: 'assets/backgrounds/den_interior.jpg',
     ratchetResting: 'assets/characters/npc/ratchet_resting.webp',
     // THE TINKER AT WORK (owner, 2026-08-21: "give it a character... keep it

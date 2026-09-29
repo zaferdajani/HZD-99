@@ -437,6 +437,26 @@ const NPC_JOB = {
   // shopkeeper turns to his stock and back to the road.
   ratchet: [{ col: 0, t: [2.0, 3.6] }, { col: 5, t: [2.4, 4.2] },
             { col: 1, t: [1.6, 3.0] }],
+  // THE CUTTER BARELY LOOKS UP. Every other body here has beats that alternate
+  // work and attention; hers are almost all work, because the story is that she
+  // sat down at the bottom of the world and has not moved since. The one
+  // non-work beat is long and small — she checks the cut, not the room. She
+  // also cannot hear anyone arrive, so nothing in her rhythm is a reaction to
+  // company: the visitor rings a wire she can feel, and until then the saw is
+  // the only thing happening.
+  //
+  // SHE STILL HAS TO TURN, THOUGH, and the first cut of these beats did not:
+  // two of the three were the same column and the third was the only angle the
+  // ATLAS ever drew, because a work beat plays the side-on strip instead. She
+  // measured at 1.0 angles in tests/folk.cjs — the exact failure the Sage's own
+  // note two entries up warns about, that stillness has to be AUTHORED or it
+  // reads as a frozen picture. So: three non-work angles now, long and
+  // unhurried, one of them further round than the others so the shift is
+  // occasionally visible. She is still the least mobile body in the cast; she
+  // is no longer a statue.
+  kerf:  [{ col: 1, t: [7.0, 12.0], work: 1 }, { col: 2, t: [2.5, 4.5] },
+          { col: 1, t: [6.0, 11.0], work: 1 }, { col: 4, t: [1.6, 3.2] },
+          { col: 3, t: [2.2, 4.0] }],
 };
 // She is standing over them: the same radius the tinker uses, so the whole cast
 // reacts to being approached on one rule rather than five.
@@ -462,6 +482,10 @@ function npcDt(s) {
 const NPC_LOOP = {
   servo: 'servoLoop', mono: 'monoLoop', patch: 'patchLoop',
   sage: 'sageLoop', lumen: 'lumenLoop',
+  // KERF (§2aq, 2026-09-29). Eight drawn cells rather than the five filmed
+  // clips' twenty-four: THE CUT is a push and a wait, and a held pause does not
+  // want in-between frames — it wants to be held.
+  kerf: 'kerfLoop',
 };
 // how long a work beat plays for and how fast, per body — the same shape as
 // the tinker's TINKER_JOB, and per-character for the same reason: the warden
@@ -489,7 +513,7 @@ const NPC_LOOP = {
 // padding them to 24 put the same drawing on screen twice in a row nineteen
 // times and twelve times. Those two takes need re-firing — they are on THE
 // FIRING LIST — and until then they carry their real frames and nothing else.
-const NPC_LOOP_CELLS = { servo: 16, mono: 16, patch: 13, sage: 11, lumen: 10 };
+const NPC_LOOP_CELLS = { servo: 16, mono: 16, patch: 13, sage: 11, lumen: 10, kerf: 8 };
 function npcLoopCells(id) { return NPC_LOOP_CELLS[id] || 12; }
 // ...and the tempo doubles with the cell count, or the same job plays at half
 // speed: fps is COLUMNS a second and run is a burst measured in COLUMNS, so
@@ -507,6 +531,11 @@ const NPC_WORK = {
   patch: { fps: [8, 12],  run: [12, 33], hold: [0.18, 0.55] },
   sage:  { fps: [6, 10],  run: [10, 28], hold: [1.00, 2.40] },
   lumen: { fps: [8, 14],  run: [16, 40], hold: [0.50, 1.40] },
+  // THE SLOWEST HAND IN THE CAST, and deliberately. A wire saw through
+  // crystal is one push and a long wait; the strip's own last three cells
+  // are the pause, so the clip is played slowly and then held for longer
+  // than anyone else's. She has sat in that room a very long time.
+  kerf:  { fps: [4, 7],   run: [8, 22],  hold: [1.40, 3.20] },
 };
 // how fast a body turns, in authored columns per second. Slow enough to be a
 // turn and not a cut; the cross-fade in drawAtlas does the rest.
