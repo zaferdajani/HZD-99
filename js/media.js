@@ -274,6 +274,10 @@ const MEDIA_SRC = {
     // brief. drawKerfStone has carried the mediaFetch hook and the procedural
     // fallback since the room was built; this is the plate it was waiting for.
     kerfFront: 'assets/backgrounds/kerf_front.webp',
+    // ...and the inside of it: V1B, the one-room cutting shop (§2aq).
+    // ROOM_VISTA.V1B, INDOOR_ART's floorKerf and INTERIOR_FIT have all pointed
+    // here since the room was built.
+    kerfInterior: 'assets/backgrounds/kerf_interior.jpg',
     denInterior: 'assets/backgrounds/den_interior.jpg',
     ratchetResting: 'assets/characters/npc/ratchet_resting.webp',
     // THE TINKER AT WORK (owner, 2026-08-21: "give it a character... keep it
