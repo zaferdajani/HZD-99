@@ -233,7 +233,7 @@ function sheetOf(key, cols, rows, clean) {
 // six is what two honest half-turns cover. Columns 0-4 are the facing range
 // yawColF() addresses, right profile through to left; column 5 is the back.
 const ATLAS2 = {
-  key: 'npcs', cols: 6, rows: 7, clean: false,
+  key: 'npcs', cols: 6, rows: 8, clean: false,
   // this sheet was keyed and laid out by tools/turnsheet.cjs, so the cells are
   // already isolated and already have a real alpha ramp — no inset needed
   ins: { top: 0.01, bottom: 0.01, side: 0.01 },
@@ -248,6 +248,13 @@ const ATLAS2 = {
     sage:    { row: 4, k: 1.55, yOff: 0.02 },
     lumen:   { row: 5, k: 1.25, yOff: 0.02 },
     guard:   { row: 6, k: 2.30, yOff: 0.05 },
+    // KERF (ART_QUEUE §2aq, fired 2026-09-29). Her row is the eighth, added by
+    // tools/npcrow.cjs rather than by rebuilding the sheet — the seven rows
+    // above it are approved, shipped art and are not re-fired to make room.
+    // k 1.45 against her own read: she is LOW, WIDE and HEAVY, so she wants
+    // more width than a standing body at the same height, and her figure fills
+    // barely half her cell vertically by design.
+    kerf:    { row: 7, k: 1.45, yOff: 0.02 },
   },
 };
 // which sheet owns a subject. The roster is asked first, so a name that exists

@@ -14,7 +14,7 @@
 //   S=<outdir> [COL=1] node tools/npccut.cjs
 const { chromium } = require('playwright');
 const fs = require('fs');
-const ROWS = { servo:0, ratchet:1, mono:2, patch:3, sage:4, lumen:5, guard:6 };
+const ROWS = { servo:0, ratchet:1, mono:2, patch:3, sage:4, lumen:5, guard:6, kerf:7 };
 (async () => {
   const S = process.env.S, COL = +(process.env.COL || 1);
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
@@ -22,7 +22,7 @@ const ROWS = { servo:0, ratchet:1, mono:2, patch:3, sage:4, lumen:5, guard:6 };
   await p.exposeFunction('by', () => fs.readFileSync('assets/characters/npc_6yaw.webp').toString('base64'));
   const out = await p.evaluate(async ({ ROWS, COL }) => {
     const im = new Image(); im.src = 'data:image/png;base64,' + await window.by(); await im.decode();
-    const CW = im.width / 6, CH = im.height / 7;
+    const CW = im.width / 6, CH = im.height / 8;
     const res = { size: im.width + 'x' + im.height, cells: {} };
     for (const name in ROWS) {
       const cv = document.createElement('canvas');

@@ -43,7 +43,7 @@ const COLS = ['R1', 'R0', 'L2', 'L1', 'L0', 'L-1'];
 const COL_OVERRIDE = {
   guard: ['~L0', '~L1', 'L2', 'L1', 'L0', 'L-1'],
 };
-const SUBJECTS = ['servo', 'ratchet', 'mono', 'patch', 'sage', 'lumen', 'guard'];
+const SUBJECTS = ['servo', 'ratchet', 'mono', 'patch', 'sage', 'lumen', 'guard', 'kerf'];
 const CW = 200, CH = 260;                              // cell size in the sheet
 
 const PAGE = `
