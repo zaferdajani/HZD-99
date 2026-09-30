@@ -89,14 +89,54 @@ compared to it in review, and a page whose lettering drifted is refired.
 | p17 | §2.9 The crystal cave — the pillar and the shard | ed.2 `f8968ad0` (take 4; text exact; her visor drifted to bare cyan eyes, flagged for the owner) | box by box against the text list — passes | `assets/manhua/ch1/p17.webp` | ed.2 |
 | p18 | §2.10 The forging | ed.2 `050c6ac8` (take 1) | box by box against the text list — passes | `assets/manhua/ch1/p18.webp` | ed.2 |
 | p19 | §2.11 The wings of the meadow | ed.2 `8409c84f` (take 3) | box by box against the text list — passes | `assets/manhua/ch1/p19.webp` | ed.2 |
-| p20 | §2.12 The Chime — the Eye's first construct | ed.2 `31a0addd` (take 2) | box by box against the text list — passes | `assets/manhua/ch1/p20.webp` | ed.2 |
-| p21 | §2.13 The Alpha's den | ed.2 `c26d3f01` (take 2) | box by box against the text list — passes | `assets/manhua/ch1/p21.webp` | ed.2 |
-| p22 | §2.14 The camp | ed.2 `dcc6db60` (take 3) | box by box against the text list — passes | `assets/manhua/ch1/p22.webp` | ed.2 |
-| p23 | §2.15 NULLFANG — the fight | ed.2 `545a132e` (take 1) | box by box against the text list — passes | `assets/manhua/ch1/p23.webp` | ed.2 |
-| p24 | §2.15 NULLFANG — the fork, both branches | ed.2 `00e5af4d` (take 1) | box by box against the text list — passes | `assets/manhua/ch1/p24.webp` | ed.2 |
-| p25 | §2.16 The grotto, the tunnel, and the sage kneeling | ed.2 `3cbe0143` (take 1) | box by box against the text list — passes | `assets/manhua/ch1/p25.webp` | ed.2 |
-| p26 | §2.16 The first sage, purified | ed.2 `8555295e` (take 4) | box by box against the text list — passes | `assets/manhua/ch1/p26.webp` | ed.2 |
+| p20 | **STALE — now §2.13 The Chime.** Draws the bell BEFORE the sage; the script now sends her to it BECAUSE the sage did. Refire in the new sequence (see THE ROUTE RULING). | ed.2 `31a0addd` (take 2) | box by box against the text list — passes | `assets/manhua/ch1/p20.webp` | ed.2 |
+| p21 | **STALE — now §2.14 The Alpha's den.** Art stands; its page order moves. Refire only if the resequence changes its neighbours' panels. | ed.2 `c26d3f01` (take 2) | box by box against the text list — passes | `assets/manhua/ch1/p21.webp` | ed.2 |
+| p22 | **STALE — now §2.15 The camp.** Same: the art stands, the slot moves. | ed.2 `dcc6db60` (take 3) | box by box against the text list — passes | `assets/manhua/ch1/p22.webp` | ed.2 |
+| p23 | **STALE — now §2.16 NULLFANG — the fight.** She arrives with the bell already silent; the page must not read as the kingdom's first clean win. | ed.2 `545a132e` (take 1) | box by box against the text list — passes | `assets/manhua/ch1/p23.webp` | ed.2 |
+| p24 | **STALE — now §2.16 NULLFANG — the fork, both branches.** Both branches still drawn; the cave it opens is now the grotto at the far end of a tunnel she has already walked. | ed.2 `00e5af4d` (take 1) | box by box against the text list — passes | `assets/manhua/ch1/p24.webp` | ed.2 |
+| p25 | **STALE — now §2.12, and it moves ahead of p20.** The sage is reached through the MAINTENANCE DOOR in the quarry wall, not through a grotto behind the lair. Refire: the door in the rock, the tunnel log, the black halo. | ed.2 `3cbe0143` (take 1) | box by box against the text list — passes | `assets/manhua/ch1/p25.webp` | ed.2 |
+| p26 | **STALE — now §2.12, ahead of p20.** Add the revelation the game fires on standing up: *NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it.* That line is what sends her to p20. | ed.2 `8555295e` (take 4) | box by box against the text list — passes | `assets/manhua/ch1/p26.webp` | ed.2 |
 | p27 | §2.17 End of the free chapter | ed.2 `e698aefd` (take 2) | box by box against the text list — passes | `assets/manhua/ch1/p27.webp` | ed.2 |
+
+### THE ROUTE RULING (2026-09-30) — the sage comes before the bell
+
+`docs/STORY_SCRIPT.md` §2.12–§2.16 were rewritten this day because they did not
+describe the game. The script ran *CHIME → Alpha → camp → NULLFANG → the sage behind
+the lair*. The build has never done that. Measured against the running game:
+
+```
+gateDoors('CV3')  with no blade → []          the maintenance door is not there
+gateDoors('CV3')  with crystal  → ['GA1T']    it opens on the BLADE alone
+openingGateHint('A4'):
+  no blade → "Bring raw marble from the cave beneath the meadow to Ratchet..."
+  blade    → "The Sage knows the binding. Take the maintenance door beside the
+              marble quarry and free them first."
+  + sage   → "CHIME keeps restoring the order. Take the climb above the meadow and
+              silence the bell before returning to NULLFANG."
+  + chime  → ""   (the lair opens)
+```
+
+So the canonical order, in the script and in every page drawn from it, is
+
+> **blade → the Sage (through the quarry's maintenance door) → CHIME → NULLFANG**
+
+and the reasons are the story's, not the level graph's: the sage is the informant who
+explains why NULLFANG cannot stay free (*CHIME writes the command back whenever he
+breaks it*), so silencing the bell is an errand she is *sent* on rather than the next
+room along. The guardian's fall then opens the grotto (GA1) at the **far end of the
+same tunnel** she already walked from the quarry — the kingdom's map closes on itself.
+
+**What this costs chapter one as drawn.** Pages p20–p26 are marked STALE above. p25
+and p26 move ahead of p20–p24, p25's grotto becomes the maintenance door in the quarry
+wall, and p26 gains the revelation the game actually fires when the sage stands up.
+The pages are not deleted and not refired here: refiring is the STORY session's, with
+the owner reviewing each page, per `docs/MANHUA_SESSION.md`.
+
+**The reward set is already right.** `assets/manhua/revised-2026-09/` (the 32 pages the
+reader and `assets/manhua/chapters.json` ship) draws the Sage at p23–p26 *before* CHIME
+at p30–p32, and `chapter-one-guardian` unlocks only on `first-sage` + `chime-silenced` +
+`nullfang-freed`. Nothing in the shipped reward contradicts the route; it was the script
+and the ch1 redraw that were out of step.
 
 **Keyed 2026-09-19 (second edition).** The first edition was keyed the same morning when the owner found the live reader empty; he refused it on the live page and the second edition replaced every page that afternoon. Review still happens on the live page: a page he refuses goes back to FIRED here and is refired; nothing else changes.
 
@@ -403,7 +443,7 @@ Rewritten to the `manga-writing` skill after the owner's review: no game UI on a
 
 *Cast block:* `cast_sword`
 
-### p20 — §2.12 The Chime — the Eye's first construct
+### p20 — §2.13 The Chime — the Eye's first construct  ⚠ STALE (see THE ROUTE RULING)
 
 **Shape.** FIVE panels. Panel 1, tall: HZD-99 climbing a stack of scrap and girders above the hub; no text. Panel 2, wide: an arena at the top under sky; hovering in it, CHIME <<<57f0d0bf-3b2e-476a-9ac5-2a6afebb0e1d>>> — not an animal but an INSTRUMENT: a riveted steel bracket on a chain with five glass tubes of pale green light hanging beneath it, ringing, rings of sound coming off it; one narrator caption with the first listed line. Panel 3: it rings and drops toward her; she leaps and cuts it with the white blade; no text. Panel 4: it lies broken on the arena floor, dark and empty, its tubes shattered; one narrator caption with the second listed line. Panel 5: the small Power Cell it was built around lying in the wreck, her paw reaching for it; one narrator caption with the third listed line. Three captions on the page and nothing else written. Her chassis is plain IVORY in every panel — no red stripes, no red markings on the body; only the red scarf-cape is red. Her face is the charcoal visor with two cyan eye-lights. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed.
 
@@ -416,7 +456,7 @@ Rewritten to the `manga-writing` skill after the owner's review: no game UI on a
 
 *Cast block:* `cast_sword`
 
-### p21 — §2.13 The Alpha's den
+### p21 — §2.14 The Alpha's den  ⚠ STALE (see THE ROUTE RULING)
 
 **Shape.** FIVE panels. Panel 1, wide: a den on the road — a clean floor with heaps of dead machine hulks at both ends; a pack of robot wolves <<<7aed7bd4-8738-4765-b953-d623eea6a359>>> with white skull heads, steel quills and red-glowing ribs; one narrator caption with the first listed line. Panel 2, tall: THE ALPHA <<<789ff708-5f77-4196-8bfd-5e180e1584d9>>> — the horned white-skulled wolf far bigger than the pack, spiked spine, mace-ball tail — leaping at her, jaws open; she rolls under it; no text. Panel 3: the fight — her white blade against its claws, sparks, motion lines; no text. Panel 4: the Alpha lowering its horned head to her, yielding; its eyes and ribs going from red to cyan; one narrator caption with the second listed line. Panel 5, wide: the pack sitting around her, calm, cyan-eyed, and an irregular cave mouth opening in the den wall behind them; one narrator caption with the third listed line. The Alpha and the wolves carry nothing — no weapons; they fight with jaws and claws only. Three captions on the page and nothing else written.
 
@@ -429,7 +469,7 @@ Rewritten to the `manga-writing` skill after the owner's review: no game UI on a
 
 *Cast block:* `cast_sword`
 
-### p22 — §2.14 The camp
+### p22 — §2.15 The camp  ⚠ STALE (see THE ROUTE RULING)
 
 **Shape.** SIX panels. Panel 1, wide: the camp — a metal bench, a small fire in a drum, and Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> at a second counter under a torn awning in the meadow; one narrator caption with the first listed line. Panels 2, 3 and 4: Ratchet at his counter, one speech balloon each (second, third and fourth lines), HZD-99 in front of him with the white blade on her back; his posture changes — arms folded, then leaning in, then open-handed. Panel 5, no text: a vault of iron spikes under the camp, reached through a broken cellar floor, a star-shaped fragment glowing at its far end. Panel 6: her empty white husk standing in the meadow and Ratchet passing it; his speech balloon with the fifth line. One caption and four balloons on the page, each complete and unbroken — panel 4's balloon begins with the words 'Take what you need.' Nothing else written. Panel 6’s fifth line is RATCHET SPEAKING: a white speech balloon with its tail to Ratchet’s helmet, never a thought cloud, never hers; Ratchet is copper in panel 6 as in every panel. Her chassis is plain ivory. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed. Five text boxes on the page and none skipped: panel 1 the caption, panel 2 the balloon beginning ‘Cat-frame’, panel 3 the balloon beginning ‘Heard the Meadows’, panel 4 the balloon beginning ‘Take what you need’, panel 6 the balloon beginning ‘You came back’.
 
@@ -446,7 +486,7 @@ Rewritten to the `manga-writing` skill after the owner's review: no game UI on a
 
 *Cast block:* `cast_sword`
 
-### p23 — §2.15 NULLFANG — the fight
+### p23 — §2.16 NULLFANG — the fight  ⚠ STALE (see THE ROUTE RULING)
 
 **Shape.** SIX panels. Panel 1, wide: the lair at the end of the kingdom — a wide scrap arena under a dark sky; one narrator caption with the first listed line. Panel 2: NULLFANG <<<c4817fa5-2b9d-4977-893d-f362bdb21906>>>, the ivory lion with violet seams, facing her, red-eyed, head low; one narrator caption with the second listed line. Panel 3: the fight — it leaps, she slides under with the white blade up, sparks off its plating; no text. Panel 4: faster now — it stalks low, crouches short, chains two leaps in one panel with motion lines; no text. Panel 5: it staggers, dazed, head shaking; she runs in striking; one narrator caption with the third listed line. Panel 6, wide: it kneels, plating cracked, red light dimming, still looking at her; she stands small before it with the blade lowered; one narrator caption with the fourth listed line. Four captions on the page and nothing else written.
 
@@ -461,7 +501,7 @@ Rewritten to the `manga-writing` skill after the owner's review: no game UI on a
 
 *Cast block:* `cast_sword`
 
-### p24 — §2.15 NULLFANG — the fork, both branches
+### p24 — §2.16 NULLFANG — the fork, both branches  ⚠ STALE (see THE ROUTE RULING)
 
 **Shape.** The page splits into TWO COLUMNS below a top strip. Top strip, wide: NULLFANG <<<c4817fa5-2b9d-4977-893d-f362bdb21906>>> kneeling, red light dimming, and HZD-99 before it with the blade half raised — the held beat; one narrator caption with the first listed line. LEFT COLUMN, two panels: the white blade laid against the lion and white light pouring through its plating, the red draining out of its eyes to CYAN, with a narrator caption (second line); then the freed lion, cyan-eyed, standing beside her, with a narrator caption (third line). RIGHT COLUMN, two panels: she closes the distance and lands the blow, an abstract impact frame, with a narrator caption (fourth line); then her alone with the lion's fang held in her paw, with a narrator caption (fifth line). Bottom strip across both columns: the ground of the lair splitting and an irregular cave mouth opening; one narrator caption with the sixth line. Six captions on the page, no arrows, no boxes with headings, nothing else written.
 
@@ -480,7 +520,7 @@ Rewritten to the `manga-writing` skill after the owner's review: no game UI on a
 
 *Cast block:* `cast_sword`
 
-### p25 — §2.16 The grotto, the tunnel, and the sage kneeling
+### p25 — §2.12 The maintenance door, the tunnel, and the sage kneeling  ⚠ STALE (see THE ROUTE RULING)
 
 **Shape.** SIX panels. Panel 1, small: a grotto of rock behind the lair with a metal bench, and beside it a tunnel with a small bat-machine hanging from the roof; no text. Panel 2, LARGE, the top half of the page: the tunnel's terminal as a dark screen filling the panel, its own cream monospace lettering carrying the first three listed lines as three paragraphs, every word. Panel 3, wide: the deep chamber — the sage <<<2f1cd043-8ac3-47e4-92b1-2da265ee809b>>>, the tall thin robot in the ragged violet hooded robe, on its knees, head bowed, wrapped in a BLACK halo with an ember-red rim; HZD-99 small before it; one narrator caption with the fourth listed line. Panel 4: her claws passing through the halo doing nothing; one narrator caption with the fifth listed line. Panel 5, small: she draws the white blade from her back; no text. Panel 6, small: the blade's white light against the black halo, the first cut; no text. One screen and two captions on the page; no label names the chamber; nothing narrates her drawing the sword; nothing else written. She is a small round cat in every panel, never tall.
 
@@ -497,7 +537,7 @@ Rewritten to the `manga-writing` skill after the owner's review: no game UI on a
 
 *Cast block:* `cast_sword`
 
-### p26 — §2.16 The first sage, purified
+### p26 — §2.12 The first sage, purified — and what it tells her  ⚠ STALE (see THE ROUTE RULING)
 
 **Shape.** FIVE panels. Panel 1, a strip of four small frames: four cuts of the white blade, and the halo around the kneeling sage <<<2f1cd043-8ac3-47e4-92b1-2da265ee809b>>> going from black to BLUE cut by cut; no text. Panel 2, THE SPLASH, large: the sage rising from its knees inside a clean BLUE halo, hood falling back from its slit steel face, and HZD-99 small before it with the white blade lowered, light everywhere; one narrator caption with the first listed line. Panel 3: the sage holding out one glowing Power Cell to her in its thin black hand; one narrator caption with the second listed line. Panel 4: back at the camp, Ratchet <<<795a5cd6-b404-4623-bcc9-2b32351d71ab>>> at his counter with one speech balloon holding the whole third listed line, unbroken. Panel 5, small and silent: the kingdom's map of rooms with every room lit cyan; no text. Two captions and one balloon on the page and nothing else written. She is drawn SMALL and ROUND in every panel — stubby legs, head as big as her body, a toy-sized robot cat, never tall, never slim, never long-limbed. In the splash she is a small round cat at the sage’s knee, not a tall figure. The second listed line is ONE caption box in panel 3, written once and complete — never two boxes, never a shortened version. Exactly three text boxes on the page: two captions and one balloon. Ratchet’s third listed line is ONE balloon in panel 4, from ‘Word crawls up’ to ‘mind.’ with no break — never two balloons.
 

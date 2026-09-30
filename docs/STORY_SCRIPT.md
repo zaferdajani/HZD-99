@@ -285,9 +285,44 @@ why, three kingdoms from now.
   forge, Ratchet: *There is a shaft under the meadow nobody has stood in since the
   fall. See it for me.* → *You stood in it. Nobody has, in a long time. Here.*
 
-### 2.12 The Chime — A8, A9, A11 (the Eye's first construct)
+### 2.12 The maintenance door and the first sage — GA1T, GA1D (the blade's first work)
 
-**Where.** The climb above the hub, and an arena at the top.
+**Where.** Not behind the lair. **Beside the quarry.** The moment she carries the
+forged blade, a maintenance door opens in the wall of CV3, one room from the pillar she
+cut it out of — a tunnel with a terminal and a bat, and past it a deep chamber where a
+sage kneels. It needs the blade and nothing else: the guardian's reward is never a
+prerequisite for the thing that makes the guardian winnable.
+**What happens.** The tunnel's log is the sage's own prologue:
+> *One of the wise ones counted our dead from the meadow above. We carried it under when the counting stopped making sense — but its ears were too good, and the song found it even in the rock.*
+> *We could not silence it and we would not end it. We sealed it in the deep chamber. It kneels there still, counting the other way.*
+> *If you carry clean light, go in to it. It kept one cell charged through everything. It always said somebody would come.*
+
+In the chamber: *The sage kneels — the song holds its body together. Broken, but not
+CLEAN.* Claws do nothing: *Claws cannot cleanse the song. The PURIFIER can.* Four cuts
+of the white blade and the halo goes from black to blue:
+> **A SAGE, PURIFIED** — *The song lets go. The sage remembers everything — and gives what it kept for whoever would come with clean light.*
+> **THE MEADOW SAGE** — *It counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light.* (+1 Power Cell)
+
+**And then it tells her why she keeps losing.** The revelation is the kingdom's hinge
+and it fires the moment she stands up in that chamber:
+> *I called for the ones who had not answered. The order made me call louder.*
+> *Every answer told it where another survivor was hiding.*
+> *NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it.*
+> *Take the climb above the meadow. Silence that bell, then return to his enclosure. I will keep this end quiet.*
+
+Ratchet, after: *Word crawls up even from the deaf places: a sage knelt down there
+and STOOD UP clean. My forge did that. You did that. Prices still stand, mind.*
+**Story.** The sword's first work is a rescue, not a kill — and the rescue is what
+hands her the plan. The sage is not a trophy behind a boss; it is the informant that
+makes the boss beatable. It also names the enemy properly for the first time: NULLFANG
+is fighting the order, and something else keeps rewriting it into him.
+**Panels.** The door in the quarry wall; the tunnel log; the black halo; four cuts;
+the halo turning blue; the sage's hand pointing up at the climb.
+
+### 2.13 The Chime — A8, A9, A11 (the Eye's first construct)
+
+**Where.** The climb above the hub, and an arena at the top. She goes because the sage
+sent her, not because the map ran out of rooms.
 **What happens.** *CHIME — it is singing at you.* It hovers, rings, sings a note,
 falls. It is destroyed, not tamed: *Destroyed. There was nobody in it.* It leaves the
 Power Cell it was built around. Behind its wall: a secret coin and the scrap its
@@ -295,8 +330,10 @@ congregation never spent.
 **Story.** A guardian is a machine that was infected. This was not. It was MADE by the
 source of the Song — the Eye — and there is nothing under the virus to give back. The
 Eye does not build monsters; it builds instruments. Five of them, one per kingdom.
+And this one is a repeater: while it rings, NULLFANG's binding is rewritten as fast as
+he breaks it. Silence is the first thing she ever takes away from the Eye.
 
-### 2.13 The Alpha's den — A10
+### 2.14 The Alpha's den — A10
 
 **Where.** On the road, not off it: the first fight you can lose. Hulk middens at both
 ends of a clean floor.
@@ -304,24 +341,38 @@ ends of a clean floor.
 There is no fork here; taming is the only ending. *THE PACK IS YOURS — It yielded.
 Every wolf in the machine world knows it now — they will not raise a tooth to you
 again.* A Power Cell, sixty scrap, and every wolf in every room turns friendly. A cave
-mouth opens in the den: the Pack Sage's grotto (§2.16).
+mouth opens in the den: the Pack Sage's grotto (*It ran with the wolves before the
+song. It gives what a pack values: mending, and something for the road.*)
 **Story.** The first thing she wins is not a kill. The pack was never the Song's; it
 was a pack, and it answers to whoever stands.
 
-### 2.14 The camp — A3, A12
+### 2.15 The camp — A3, A12
 
-**Where.** The meadow's breath after the pack: a bench, and Ratchet at a second
+**Where.** The meadow's breath before the lair: a bench, and Ratchet at a second
 counter. *The trader is open for business.* Under the camp, through a brittle cellar
 floor, a vault of spikes that needs the dash (a Star Fragment at the end).
+**And once, in the window between the sage and the bell, the lair opens on its own.**
+Walking east toward the enclosure with the Sage freed and CHIME still ringing, NULLFANG
+comes OUT. He stops well outside his own reach and the purple goes out of him — the
+same authored veins running clean that the purifier will one day make permanent. He
+looks at her and nothing is driving it. Then a bell answers from above the meadow, the
+order is written back into him, and he turns and goes home. He does not speak; he never
+has. Nothing is taken from her and nothing holds her controls — she may simply keep
+walking. It happens once.
+**Why it is here.** This is the sage's sentence happening in front of her instead of
+being quoted at her: he is resisting, and something else keeps winning. It is also why the
+climb above the meadow stops being an errand. (Comic p29; `flags.nfBreak`.)
+
 **Story.** Ratchet's standing lines change with what she has done: *Cat-frame. Cute.
 Don't touch the stock with those claws.* → *Heard the Meadows went quiet. Heard it
 was you. Prices stand, mind.* → *Take what you need. I salvage from the dead, and you
 keep making fewer of them.* And once, after her first death: *You came back. Your husk
 was still warm when I passed it.*
 
-### 2.15 NULLFANG — A4 (the first guardian, and the fork)
+### 2.16 NULLFANG — A4 (the first guardian, the fork, and the cave that closes the loop)
 
-**Where.** The end of the kingdom.
+**Where.** The end of the kingdom — and the last thing she does in it, with the bell
+already silent and the sage already standing.
 **What happens.** *NULLFANG, THE VIRUS BEAST.* *It remembers the corridor.* Two
 phases — at half health it stalks faster, crouches shorter, chains its leaps. It is
 the one guardian that can be dazed: *⚡ NULLFANG is reeling — hit it NOW.* When it is
@@ -339,30 +390,16 @@ down it kneels, still looking at her, and the game asks:
 
 Either way: **FireDash**, a Power Cell, the **SCRAPPLATE** suit (Shard Volley), the
 fang relic. *The ground shifted — a CAVE MOUTH has opened in the lair.*
+
+**And the cave behind the lair is a room she has already been in the far end of.** The
+grotto GA1 — scrap, a pocket, a bench — opens onto the same tunnel the maintenance door
+let her into from the quarry (GA1T). The kingdom's map closes on itself: the way she
+sneaked in to free the sage becomes the front door once the guardian is no longer
+standing in it.
 **Story.** Every guardian kneels before it dies, and what she does first echoes
 loudest — the ending reel is built from these answers (§7). The comic should draw both
-branches; the reader's version is whichever the owner chooses for the book.
-
-### 2.16 The grotto, the tunnel, and the first sage — GA1, GA1T, GA1D
-
-**Where.** Behind the lair: a grotto with a bench; a tunnel with a terminal and a bat;
-a deep chamber where a sage kneels.
-**What happens.** The tunnel's log is the sage's own prologue:
-> *One of the wise ones counted our dead from the meadow above. We carried it under when the counting stopped making sense — but its ears were too good, and the song found it even in the rock.*
-> *We could not silence it and we would not end it. We sealed it in the deep chamber. It kneels there still, counting the other way.*
-> *If you carry clean light, go in to it. It kept one cell charged through everything. It always said somebody would come.*
-
-In the chamber: *The sage kneels — the song holds its body together. Broken, but not
-CLEAN.* Claws do nothing: *Claws cannot cleanse the song. The PURIFIER can.* Four cuts
-of the white blade and the halo goes from black to blue:
-> **A SAGE, PURIFIED** — *The song lets go. The sage remembers everything — and gives what it kept for whoever would come with clean light.*
-> **THE MEADOW SAGE** — *It counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light.* (+1 Power Cell)
-
-Ratchet, after: *Word crawls up even from the deaf places: a sage knelt down there
-and STOOD UP clean. My forge did that. You did that. Prices still stand, mind.*
-**Story.** The first kingdom is restored. The sword works. The road to the other five
-is open. (The Pack Sage, behind the Alpha: *It ran with the wolves before the song. It
-gives what a pack values: mending, and something for the road.*)
+branches; the reader's version is whichever the owner chooses for the book. The first
+kingdom is restored, the sword works, and the road to the other five is open.
 
 ### 2.17 End of the free chapter
 
@@ -569,11 +606,18 @@ These are not fixed by this document. Each needs a ruling, and the game will fol
    The game still has Old Servo say *since the Null Core began broadcasting*, calls
    MOTHER-V *the Null Core*, and ends on *The Null Core dissolves*. Proposal: keep the
    name as MOTHER-V's housing and change Servo's line to *since the Song went wrong*.
-4. **Sages after guardians.** Canon says each kingdom is protected by its sage and the
-   first sage comes right after the forge. In play, every sage kneels behind its
-   guardian's lair, so the first sage is reached only after NULLFANG falls (cave and
-   forge do come first, as canon requires). Ruling needed: is the guardian the sage's
-   jailer (as built), or must the Meadow Sage be reachable before the lion?
+4. **Sages after guardians — SETTLED, 2026-09-30, by what is built.** The old
+   disagreement was that every sage knelt behind its guardian's lair, so the Meadow
+   Sage could only be reached after NULLFANG fell. That is no longer what the game
+   does. A maintenance door opens in the quarry wall (CV3 ⟷ GA1T) the moment she
+   carries the forged blade — `gateDoorsAll` gates it on `crystal` alone, and the
+   guardian's own reward is never a prerequisite. The route is therefore
+   **blade → Sage → CHIME → NULLFANG**, and `openingGateHint('A4')` says so in three
+   lines, in that order, at the lair's door. The sage is the informant who makes the
+   guardian winnable, not a trophy for having beaten it; the guardian's fall opens the
+   grotto at the *other* end of the same tunnel, closing the loop (§2.12, §2.16).
+   The comic set in `assets/manhua/revised-2026-09/` already draws this order; the
+   superseded `assets/manhua/ch1/` set does not, and is not what ships.
 5. **Freeing the infected.** Canon: the mission includes freeing infected robots. In
    play, only guardians (TAME) and sages (the purifier) are freed; every other machine
    is broken for scrap. If rank-and-file machines are to be freed, that is a mechanic

@@ -1204,7 +1204,7 @@ function startGame(save) {
   G.impact = null; G.flash = 0; G.hitStop = 0; G.rings = [];
   G.lesson = null; G.brDelta = null; G.elemPop = null; G.songWave = null;
   G.dialog = null; G.toasts = []; G.zoneToast = null; G.lastZone = '';
-  G.tut = null; G.wake = null; G.meet = null; G.trans = null; G.gateWalk = null;
+  G.tut = null; G.wake = null; G.meet = null; G.break = null; G.trans = null; G.gateWalk = null;
   G.coreFlash = null; G.coresFullT = 0; G.bolt = null;
   cam.shake = 0;
   migrateWeapons(save);
@@ -2048,6 +2048,10 @@ function update(dt) {
       G.hitStop = Math.max(0, G.hitStop - dt); updateParts(dt * 0.25); return;
     }
     meetCheck(); if (G.meet) meetStep(dt);
+    // THE BREAK (js/story-opening.js): the one moment NULLFANG lets go of the
+    // order, staged between the sage and the bell. Same shape as the meeting —
+    // a check that may open it, a step that drives the body by hand.
+    if (typeof breakCheck === 'function') { breakCheck(); if (G.break) breakStep(dt); }
     // THE CROSSING IS A MOVE, NOT A CUT (owner, 2026-08-23: "the map... becomes
     // cubicles of rooms connected... instead, it's actual world connected").
     // Every screen edge used to fade the picture to solid black over 0.28s,

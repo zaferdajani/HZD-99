@@ -42,6 +42,8 @@ const SUITE = [
   ['story-rescue', 'recoverable machines and persistent cleansing'],
   ['story-meeting', 'interactive guardian warning and real contact'],
   ['first-sage-route', 'pre-guardian route through quarry maintenance passage'],
+  ['script-route', 'the story script draws the route the game plays', {noBrowser:true}],
+  ['guardian-break', "comic page 29: NULLFANG lets go, and the bell writes the order back"],
   ['winch-integration', 'modular yard machine and persistent cleansing'],
   ['manhwa-reader', 'revised illustrated edition and complete written opening'],
   ['entrance-integration', 'painted entrances share world anchors without duplicate mouth overlays'],

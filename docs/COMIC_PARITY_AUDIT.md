@@ -16,7 +16,9 @@ has a telegraphed attack and persistent disabled/cleansed states. The first
 guardian encounter is dodgeable on new saves. The maintenance passage reaches
 the Sage before the guardian, and the current final route requires CHIME first.
 Survivor histories now preserve the progress-sensitive greeting at the start
-of the conversation. Tests cover these behaviors; drawings alone do not.
+of the conversation. NULLFANG now visibly breaks the order once, between the Sage
+and CHIME, and the bell visibly restores it. Tests cover these behaviors;
+drawings alone do not.
 
 ## Page changes still needed
 
@@ -50,18 +52,55 @@ of the conversation. Tests cover these behaviors; drawings alone do not.
 | 26 | Trace the command | Reveal exists; coordinated shutdown and enemy reaction need staging. |
 | 27 | Plan the cable rescue | Servo holding a cable and Ratchet buying one ring are not implemented. Restage the plan or implement it. |
 | 28 | Cross the guardian's reach | Cooperative cable movement is not implemented. |
-| 29 | A brief break in control | Current guardian resolution does not stage this temporary release. |
-| 30 | Reach CHIME | Comic order differs: the game currently requires CHIME before the final guardian resolution. |
+| 29 | A brief break in control | **Implemented.** He walks out of the enclosure in A3 between the sage and the bell, the authored virus veins run clean, a bell answers from above the meadow and the order is written back. Costs no core, holds no input, fires once (`flags.nfBreak`). `tests/guardian-break.cjs`. Remaining: match the page's framing and her distance to the staged scene. |
+| 30 | Reach CHIME | Order is settled and this page is on the right side of it: the Sage (23–26) sends her to the bell, and the bell is silenced before the guardian is resolved. Remaining work is staging, not sequence — match the climb and the arena to A8/A9/A11. |
 | 31 | Open CHIME's case | Literal case-opening and climbing interaction are not implemented. |
 | 32 | Catch and cliffhanger | Guardian catch/cable action is not implemented; illustrated arc still lacks its completed ending. |
+
+## THE ROUTE RULING — September 30
+
+The audit asked for one causal order for the Sage, CHIME and guardian encounters.
+It is now chosen, and it is the one the build has always played:
+
+> **blade → the Sage (through the quarry's maintenance door) → CHIME → NULLFANG**
+
+Measured against the running game rather than read off the source:
+
+```
+gateDoors('CV3')  with no blade → []          the maintenance door is not there
+gateDoors('CV3')  with crystal  → ['GA1T']    it opens on the BLADE alone
+gateDoors('GA1T') with crystal  → ['CV3']     and back
+openingGateHint('A4'):  no blade → fetch the marble, forge the blade
+                        blade    → free the Sage through the maintenance door
+                        + sage   → silence CHIME before returning to NULLFANG
+                        + chime  → ""  (the lair opens)
+```
+
+The guardian's own reward is never a prerequisite for the thing that makes the
+guardian winnable: the Sage is the informant (*CHIME writes the command back whenever
+he breaks it*), so the bell is an errand she is sent on. NULLFANG's fall then opens
+the grotto at the far end of the tunnel she already walked from the quarry.
+
+**What changed to match it.** `docs/STORY_SCRIPT.md` §2.12–§2.16 were rewritten into
+this order — the script had the Sage behind the lair and CHIME before it, and was the
+document out of step. `docs/MANHUA.md` marks the ch1 redraw's pages p20–p26 STALE with
+their new section mapping; refiring them is the STORY session's, with owner review.
+
+**The shipped reward set already obeys it.** In `assets/manhua/revised-2026-09/` the
+Sage is pages 23–26 and CHIME is pages 30–32, and `chapter-one-guardian` unlocks only
+on `first-sage` + `chime-silenced` + `nullfang-freed`. No slide order changes here.
+The remaining work on pages 27–32 is staging, not sequence — which is why they stay
+`draft`. Page 29's staging landed with this ruling: NULLFANG's brief lucidity is
+implemented and tested. Cooperative cable movement (27, 28, 32) and the literal
+case-opening (31) still have no game behind them.
 
 ## Production rules for the replacements
 
 Use the approved current game references, never these proofs as anatomy masters.
 Keep the visor, pointed ears, single-piece arms, mitten paws, scarf/cape and
 equipment stage consistent in every panel. Preserve a silent hero's agency.
-Choose one causal order for the Sage, CHIME and guardian encounters and match
-both the script and playable route; captions cannot repair contradictory actions.
+The causal order is settled (see THE ROUTE RULING, above): **blade → Sage → CHIME →
+NULLFANG**. Draw that order; captions cannot repair contradictory actions.
 Do not use a found sword in the quarry. Do not grant innate viral immunity.
 
 After each replacement: record the image hash, exact reference assets, runtime

@@ -140,6 +140,10 @@ en: {
   tut_approach: 'Walk to the marker', tut_enter: 'Enter', tut_enter_h: 'At the marker, press up',
   tut_return: 'Return to the meadow', tut_return_h: 'Use the marked doorway', tut_workshop_h: 'Follow the gold marker',
   sage_need_forge: 'First bring the cave stone to Ratchet in his workshop and forge the cleansing sword.',
+  // THE BREAK (js/story-opening.js) — comic page 29 made playable. The
+  // narrator carries it; he is never given a word.
+  nf_break1: 'NULLFANG walks out of the enclosure and stops. The purple goes out of him. He is looking at you, and nothing is driving it.',
+  nf_break2: 'A bell answers from above the meadow. The order is written back into him, and he turns away.',
   tut_kill: 'Finish it', tut_kill_h: 'keep going — it breaks',
   tut_coin: 'Take the scrap', tut_coin_h: 'walk over it — scrap is what you pay with',
   i_scrap: 'Scrap', i_scrapd: 'What a broken machine leaves behind, and the only money down here. The trader takes it for repairs, parts and upgrades — so a machine you break is a machine you spend.',
@@ -634,6 +638,8 @@ ar: {
   tut_approach: 'امشِ نحو العلامة', tut_enter: 'ادخل', tut_enter_h: 'عند العلامة اضغط للأعلى',
   tut_return: 'عُد إلى المروج', tut_return_h: 'استخدم المدخل المحدد', tut_workshop_h: 'اتبع العلامة الذهبية',
   sage_need_forge: 'أحضر حجر الكهف إلى راتشيت في ورشته أولًا ليصنع سيف التطهير.',
+  nf_break1: 'يخرج نالفانغ من الحظيرة ويتوقف. ينطفئ البنفسجي فيه. ينظر إليك، ولا شيء يقوده.',
+  nf_break2: 'يردّ جرسٌ من فوق المرج. يُعاد كتابة الأمر فيه، فيستدير ويمضي.',
   tut_kill: 'أجهِز عليه', tut_kill_h: 'واصل — سينكسر',
   tut_coin: 'اجمع الخردة', tut_coin_h: 'امشِ فوقها — الخردة هي ما تدفع به',
   i_scrap: 'خردة', i_scrapd: 'ما تخلّفه آلة محطّمة، وهي النقد الوحيد هنا في الأسفل. يقبلها التاجر مقابل الإصلاح وقطع الغيار والترقيات — فكل آلة تكسرها هي آلة تنفقها.',
