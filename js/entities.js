@@ -10514,6 +10514,17 @@ function sageTame(e) {
     sfx('chargeReady');
     break;
   }
+  // "I CAN CLOSE OUR END" — the promise kept in the room she is standing in,
+  // not only in the rooms she walks into next (comic p26: the audit asked for
+  // the coordinated shutdown and the machines' reaction, and had only the
+  // reveal). Everything still hunting her in the chamber stands down at the
+  // moment the halo turns, which is the only frame where the player can see
+  // that the sage did it rather than that the room happened to be empty.
+  for (const o of (G.enemies || [])) {
+    if (!o || o === e || o.dead || o.calm || o.kind === 'sage') continue;
+    o.calm = true; o.hypnoT = 1e9; o.stagT = 0;
+    burst(o.x + o.w / 2, o.y + o.h / 2, 9, '#37ffd0', 110, 0.7, -12, 2.2, true);
+  }
   if (typeof firstSageRevelation === 'function') firstSageRevelation();
   persist();
 }

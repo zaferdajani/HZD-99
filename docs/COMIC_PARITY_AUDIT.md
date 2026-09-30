@@ -17,7 +17,8 @@ guardian encounter is dodgeable on new saves. The maintenance passage reaches
 the Sage before the guardian, and the current final route requires CHIME first.
 Survivor histories now preserve the progress-sensitive greeting at the start
 of the conversation. NULLFANG now visibly breaks the order once, between the Sage
-and CHIME, and the bell visibly restores it. Tests cover these behaviors;
+and CHIME, and the bell visibly restores it. A purified sage's promise to keep
+its end quiet is kept: its network's machines stand down and stay down. Tests cover these behaviors;
 drawings alone do not.
 
 ## Page changes still needed
@@ -49,7 +50,7 @@ drawings alone do not.
 | 23 | Cleanse the winch | Cleansing is implemented; the literal strand cut and arm-assisted lift differ. |
 | 24 | Reach the Sage | Route exists; map climb, contact and attack staging to actual room. |
 | 25 | Break the Sage's control | Cleansing and survivor-call reveal exist; match combat/strand geometry. |
-| 26 | Trace the command | Reveal exists; coordinated shutdown and enemy reaction need staging. |
+| 26 | Trace the command | **Implemented.** The reveal already existed; the shutdown does now. Everything still hunting her in the chamber stands down as the halo turns, and all three rooms of that sage's network wake calm from the save fact afterwards — one sage does not quiet another cave or the surface. `tests/sage-quiet.cjs`. Remaining: match the drawn machines and their poses to the ones actually standing there. |
 | 27 | Plan the cable rescue | Servo holding a cable and Ratchet buying one ring are not implemented. Restage the plan or implement it. |
 | 28 | Cross the guardian's reach | Cooperative cable movement is not implemented. |
 | 29 | A brief break in control | **Implemented.** He walks out of the enclosure in A3 between the sage and the bell, the authored virus veins run clean, a bell answers from above the meadow and the order is written back. Costs no core, holds no input, fires once (`flags.nfBreak`). `tests/guardian-break.cjs`. Remaining: match the page's framing and her distance to the staged scene. |

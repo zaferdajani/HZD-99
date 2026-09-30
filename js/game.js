@@ -1020,6 +1020,16 @@ function loadRoom(id) {
       // a purified sage STAYS purified: the tame is a save fact, re-applied
       // at spawn, so leaving the chamber never re-infects it
       if (kind === 'sage' && G.save.flags['sageTame_' + id]) { en.tame = 1; en.calm = true; en.pureM = 1; }
+      // ...and so does the quiet it promised. "I will keep this end quiet" was a
+      // line with nothing behind it: the tunnel she walked back out through was
+      // as hostile as the one she walked in through, which is the audit's note
+      // against comic page 26. A purified sage's own network wakes calm — they
+      // potter, their sensors burn cyan, and they will not touch her. Re-applied
+      // at spawn from the save fact, exactly like the sage's own tame, so it
+      // survives leaving the cave and loading it again a week later.
+      if (kind !== 'sage' && typeof sageQuietHere === 'function' && sageQuietHere(id)) {
+        en.calm = true; en.hypnoT = 1e9;
+      }
       if (U) {
         const zi = U.inf[def.zone] != null ? U.inf[def.zone] : 1;
         en.spd *= U.spdK * (0.82 + zi * 0.32);

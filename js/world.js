@@ -1783,6 +1783,21 @@ for (const [gid, tid, did, lair, flag, gcell, tcell, dcell] of GROTTOES) {
   MAPPOS[did] = [dcell[0], dcell[1], 1, 1];
 }
 
+// WHOSE SAGE ANSWERS FOR THIS ROOM'S QUIET.
+//
+// The Meadow Sage's last line is a promise — "I will keep this end quiet" — and
+// for as long as it was only a line, the tunnel she walked back out through was
+// exactly as hostile as the one she walked in through. The parity audit had the
+// same note against comic page 26: the reveal exists, the coordinated shutdown
+// does not. A network is three rooms; this says which sage speaks for them, so
+// the promise can be kept in all three and kept after a reload.
+const SAGE_NET = {};
+for (const [gid, tid, did] of GROTTOES) { SAGE_NET[gid] = did; SAGE_NET[tid] = did; SAGE_NET[did] = did; }
+function sageQuietHere(roomId) {
+  const did = SAGE_NET[roomId];
+  return !!(did && G.save && G.save.flags && G.save.flags['sageTame_' + did]);
+}
+
 // KINGDOM 1 ENDS AT THIS SAGE, so its tunnel carries the ledger's own page
 // rather than the generic Deaf System log: the meadow refuge log (t6) tells
 // how the counting sage was carried under, sealed in the deep chamber, and

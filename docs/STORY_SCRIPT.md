@@ -310,6 +310,12 @@ and it fires the moment she stands up in that chamber:
 > *NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it.*
 > *Take the climb above the meadow. Silence that bell, then return to his enclosure. I will keep this end quiet.*
 
+**And the promise is kept as it is made.** Whatever is still hunting her in the
+chamber stands down at the moment the halo turns — cyan sensors, no more contact —
+and the whole of that sage's network stays quiet from then on: the tunnel she walked
+in through is not the tunnel she walks back out of. One sage closes one end; the next
+cave and the meadow above are exactly as they were. (Comic p26.)
+
 Ratchet, after: *Word crawls up even from the deaf places: a sage knelt down there
 and STOOD UP clean. My forge did that. You did that. Prices still stand, mind.*
 **Story.** The sword's first work is a rescue, not a kill — and the rescue is what

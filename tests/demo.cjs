@@ -248,9 +248,26 @@ const check = (name, ok, detail) => {
     // sampled 46 px above the pool and reported it missing
     const support = groundColumnAt((F.tx0 + F.tx1) / 2 * TILE);
     const landY = (support ? support[0] : G.roomDef.h * TILE * 0.86) - camSY();
+    // THE POOL IS READ AS A PATCH, NOT A PIXEL. One sample at the landing point
+    // is a coin toss: the pool is an ellipse about a tile tall whose alpha
+    // breathes, the camera settles a few pixels differently per run, and the
+    // backdrop under it is lazily fetched art. All three move the one pixel in
+    // and out of the glow, which is why this check passed and failed on the same
+    // build within a minute of itself. Averaging the patch the pool actually
+    // covers measures the pool instead of the luck.
+    const rdBox = (sx, sy, w, h) => {
+      sx = worldScreenX(sx + camSX()); sy = worldScreenY(sy + camSY());
+      const kx = cv.width / 960, ky = cv.height / 540;
+      const x0 = Math.max(0, Math.round((sx - w / 2) * kx)), y0 = Math.max(0, Math.round((sy - h / 2) * ky));
+      const ww = Math.max(1, Math.round(w * kx)), hh = Math.max(1, Math.round(h * ky));
+      const d = x.getImageData(x0, y0, ww, hh).data;
+      let r = 0, g = 0, bl = 0;
+      for (let q = 0; q < ww * hh; q++) { r += d[q * 4]; g += d[q * 4 + 1]; bl += d[q * 4 + 2]; }
+      return [r / (ww * hh), g / (ww * hh), bl / (ww * hh)];
+    };
     const shot = () => {
       draw(performance.now());
-      return { in: rd(cxr, 150), out: rd(cxr - 300, 150), land: rd(cxr, landY) };
+      return { in: rd(cxr, 150), out: rd(cxr - 300, 150), land: rdBox(cxr, landY, 120, 28) };
     };
     // Compare the same breathing-light instant and deterministic particles.
     const realNow=performance.now,realRand=Math.random;
@@ -262,14 +279,21 @@ const check = (name, ok, detail) => {
     G.artProbe = 1;
     const probed = shot();
     G.artProbe = 0;
-    let minimumGain=Infinity;
+    // ...and the probe is judged over the whole breathing cycle, at the phase
+    // where the pool is strongest. Frozen at one instant the light can be at the
+    // bottom of its breath, where there is nothing for the probe to remove and
+    // "the probe did not dim it" is indistinguishable from "it was not lit".
+    let minimumGain=Infinity, poolBest=0;
     for(const ms of [0,2000,4000,8000,12000,16000,24000]) {
       performance.now=()=>ms;
       const a=shot();delete FRONTIER.A3;const b=shot();FRONTIER.A3=keep;
       minimumGain=Math.min(minimumGain,a.in.reduce((n,v,i)=>n+v-b.in[i],0)/3);
+      G.artProbe = 1; const pr = shot(); G.artProbe = 0;
+      const drop = (a.land[0]+a.land[1]+a.land[2])/3 - (pr.land[0]+pr.land[1]+pr.land[2])/3;
+      if (drop > poolBest) poolBest = drop;
     }
     performance.now=realNow;Math.random=realRand;
-    return { on, off, probed, minimumGain, cxr: Math.round(cxr) };
+    return { on, off, probed, minimumGain, poolBest, cxr: Math.round(cxr) };
   });
   const lum = (p) => (p[0] + p[1] + p[2]) / 3;
   const gain = lum(lit.on.in) - lum(lit.off.in);
@@ -291,8 +315,10 @@ const check = (name, ok, detail) => {
         gain > gainOut * 3 + 10,
         'adds ' + Math.round(gain) + ' inside the beam, ' + Math.round(gainOut) + ' beside it');
   check('the pool on the floor obeys the art probe',
-        lum(lit.probed.land) < lum(lit.on.land),
-        'probe ' + Math.round(lum(lit.probed.land)) + ' vs normal ' + Math.round(lum(lit.on.land)));
+        lit.poolBest > 1,
+        'the probe takes ' + lit.poolBest.toFixed(2) + ' luminance off the landing patch at the '
+        + 'brightest phase of the breath (one-instant reading: probe '
+        + lum(lit.probed.land).toFixed(1) + ' vs normal ' + lum(lit.on.land).toFixed(1) + ')');
 
   if (errs.length) { console.log('  PAGE ERRORS: ' + errs.slice(0, 3).join(' | ')); fails.push('page errors'); }
   await browser.close();

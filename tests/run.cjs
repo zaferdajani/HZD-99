@@ -44,6 +44,7 @@ const SUITE = [
   ['first-sage-route', 'pre-guardian route through quarry maintenance passage'],
   ['script-route', 'the story script draws the route the game plays', {noBrowser:true}],
   ['guardian-break', "comic page 29: NULLFANG lets go, and the bell writes the order back"],
+  ['sage-quiet', "comic page 26: the sage's promise closes its end of the network"],
   ['winch-integration', 'modular yard machine and persistent cleansing'],
   ['manhwa-reader', 'revised illustrated edition and complete written opening'],
   ['entrance-integration', 'painted entrances share world anchors without duplicate mouth overlays'],
