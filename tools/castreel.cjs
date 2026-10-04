@@ -18,7 +18,7 @@
 // at the speed frames happen to be captured.
 //
 //   node tools/castreel.cjs <out.mp4> [--only=hero,npc,enemy,boss] [--max=N]
-//                                     [--frames=<dir>] [--keep]
+//                                     [--frames=<dir>] [--keep] [--boss=glitch]
 //
 // Serve the repo on 8220 first (the harnesses' port). ffmpeg is the static
 // one in node_modules.
@@ -37,7 +37,7 @@ function installReel(cfg) {
   const { FPS, SR, MAXF } = cfg;
   const DT = 1 / FPS;
   const R = window.REEL = {
-    t: 0, queue: [], done: false, resume: null, pend: [], sec: null,
+    bossFilter: cfg.bossFilter, t: 0, queue: [], done: false, resume: null, pend: [], sec: null,
     audioOut: [], log: [], ticker: [], seen: {}, errors: [], nfr: 0, secFrames: 0,
   };
   window.addEventListener('error', e => R.errors.push(String(e.message)));
@@ -154,6 +154,7 @@ function installReel(cfg) {
     return { frames, audio, done: R.done, log: R.log.splice(0), errors: R.errors.splice(0), nfr: R.nfr };
   };
   R.camOn = (x, y) => {
+    if (R.bossFilter) return; // keep the shipped fight camera, including its zoom
     const rw = G.roomDef.w * TILE, rh = G.roomDef.h * TILE;
     cam.x = clampN(x - 480, 0, Math.max(0, rw - 960));
     cam.y = clampN(y - 300, 0, Math.max(0, rh - 540));
@@ -457,8 +458,9 @@ async function sectionBosses() {
   const rooms = R.rooms().boss;
   const order = ['glitch', 'alpha', 'chime', 'brood', 'carrier', 'atlas', 'moth', 'zero', 'lattice', 'mother', 'lens', 'prism'];
   for (const kind of order.concat(Object.keys(rooms).filter(k => order.indexOf(k) < 0))) {
+    if (R.bossFilter && kind !== R.bossFilter) continue;
     const room = rooms[kind]; if (!room) continue;
-    R.zoom = 2;
+    R.zoom = R.bossFilter ? 1 : 2;
     R.secStart(kind.toUpperCase() + ' — ' + room, 90);
     await R.loadRoom(room);
     const b = G.boss;
@@ -480,6 +482,7 @@ async function sectionBosses() {
     const inv = () => {
       player.iT = 5; if (player.dead) { player.dead = false; G.state = 'PLAY'; }
       if (!b.dead && b.hp < 1) b.hp = 1;
+      if (R.bossFilter && !b.dead) b.hp = Math.max(b.hp, b.hpMax * .30);
       // a construct's arrival card is a dialog, and a dialog stops the world
       if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; }
     };
@@ -495,6 +498,8 @@ async function sectionBosses() {
     };
     await R.run(30, cap('the fight'), (i) => {
       inv();
+      // A focused review includes both phases; only the capture changes HP.
+      if (R.bossFilter && i === 450) b.hp = b.hpMax * .45;
       const beat = Math.floor(i / 90) % 3;          // 3 s beats: close, strike, back off
       if (beat === 0) toward(120);
       else if (beat === 1) { toward(60); if (i % 14 === 0) R.press('ATK'); else if (i % 14 === 5) R.release('ATK'); }
@@ -504,7 +509,9 @@ async function sectionBosses() {
     });
     R.clearKeys();
     // the states the fight never reached, each held long enough to read
-    const tour = (BOSS_STATES[kind] || []).filter(s => !seen[s]);
+    // A focused review records live transitions only; forced states omit
+    // required trajectory data (perch/target) and are not real gameplay.
+    const tour = R.bossFilter ? [] : (BOSS_STATES[kind] || []).filter(s => !seen[s]);
     for (const st of tour) {
       if (b.dead) break;
       b.st = st; b.t = 0.9; b.fc = null; b.stagT = 0;
@@ -547,7 +554,7 @@ async function program(opts) {
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.goto('http://127.0.0.1:8220/index.html');
   await page.waitForFunction(() => typeof startGame === 'function', { timeout: 20000 });
-  await page.evaluate(installReel, { FPS, SR, MAXF });
+  await page.evaluate(installReel, { FPS, SR, MAXF, bossFilter: opt('boss', '') });
   const takes = await page.evaluate(() => REEL.boot());
   console.log('booted; foley takes decoded:', takes);
   // the programme lives in the page as source, so the sections can call the

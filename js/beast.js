@@ -927,7 +927,7 @@ function beastPose(b) {
     P.tailUp = -1 + 0.35 * tailK;
     P.glow = Math.max(0, 0.6 * (1 - T / 1.6)) * (0.5 + Math.sin(t * 30) * 0.5);
     P.legs = [fN, hN, fF, hF].map(k2 => ({ a1: 0.9 * k2, a2: -1.5 * k2 }));
-  } else if (st === 'stalk') {
+  } else if (st === 'stalk' || st === 'run') {
     // the prowl: slow gait, head carried LOW, eyes locked on prey. The head
     // bobs half a beat behind the shoulders and the whole stride softens
     // and gathers on a slow settle wave — patience, not a metronome.
@@ -1147,35 +1147,108 @@ function beastDraw(c, b, P) {
 // the stalk's own scale: 280 rig px of standing lion for 210 strip px.
 //
 // THE CLOCKS ARE THE STATE MACHINE'S OWN. `b.t` counts DOWN from whatever the
-// transition set it to, and the transition does not record that number, so the
-// first frame seen in a state is taken as its length (`_st0`), the way the
-// hero's land0 works. Loops run on b.anim; the arc of a pounce is indexed by
-// its own vertical speed (up / hang / down); the spring and the dive carry
-// their own 0..1 (`b.u`); the death counts deathAnimT from 1.6 to 0.
+// transition set it to; the
+// simulation records that duration on entry. Draw never changes the clock.
+// Gait follows resolved travel, pounce follows flight time, and spring/dive
+// follow their existing path parameter. Death counts deathAnimT from 1.6 to 0.
 const BEAST_STRIP_PX = 280 / 210;
 const BEAST_STRIDE = 165 * 16 / 14;   // px of prowl per full 16-cell stride (see beastStrip)
+// Animation is simulation state. Rendering may be skipped, repeated for a
+// capture, or run twice between fixed steps; none may advance a paw or a tell.
+function beastMotionBegin(b) {
+  if (b._motionState !== b.st) {
+    b._motionState = b.st;
+    b._motionDuration = Math.max(0.05, b.t || 0);
+    b._motionElapsed = 0;
+  }
+  b._motionX = b.x;
+  b._motionBefore = b.st;
+}
+function beastMotionEnd(b, dt) {
+  b._slashT = Math.max(0, (b._slashT || 0) - dt);
+  b._recoilT = Math.max(0, (b._recoilT || 0) - dt);
+  if (b._lastMotionHP != null && b.hp < b._lastMotionHP && !b.dead) {
+    b._recoilT = .3;
+    beastSound('hurt');
+  }
+  b._lastMotionHP = b.hp;
+  if (!b.dead && (b.st === 'idle' || b.st === 'stalk')) {
+    b._breathT = (b._breathT || 0) - dt;
+    if (b._breathT <= 0) { b._breathT = 4.5; beastSound('breath'); }
+  }
+  if (b._motionState !== b.st) {
+    b._motionState = b.st;
+    b._motionDuration = Math.max(0.05, b.t || 0);
+    b._motionElapsed = 0;
+    if (b.st === 'crouch') beastSound('coil');
+    if (b.st === 'intro') beastSound('awake');
+  } else b._motionElapsed = (b._motionElapsed || 0) + dt;
+  if ((b._motionBefore === 'stalk' || b._motionBefore === 'run') && !b.dead && b.stagT <= 0) {
+    const distance = Math.abs(b.x - b._motionX);
+    // A watchdog/room relocation is not a step. Collision-resolved travel is.
+    if (distance < 100) {
+      const old = b._gaitPh || 0;
+      const phase = old + distance / (b._motionBefore === 'run' ? 260 : BEAST_STRIDE);
+      b._gaitPh = phase % 1;
+      if (Math.floor(old * 4) !== Math.floor(phase * 4) && distance > 0.1)
+        beastSound('step');
+    }
+  }
+}
+// The creature must never enter sfx('atk'/'dash'/'land'), which also voices
+// HZD-99. Each cue is an original generated take, with non-vocal fallbacks.
+function beastSound(cue) {
+  const volumes = { step: .22, breath: .18, coil: .28, leap: .44,
+    swipe: .48, land: .52, hurt: .38, roar: .62, arrive: .58, awake: .42 };
+  if (typeof playBuf === 'function' && playBuf('nf_' + cue, volumes[cue] || .4, 1)) return;
+  if (cue === 'breath') return; // silent until loaded, never a warning
+  if (typeof sfx === 'function') sfx(cue === 'roar' ? 'roar_beast'
+    : cue === 'land' || cue === 'arrive' ? 'slam'
+    : cue === 'swipe' ? 'whiff'
+    : cue === 'leap' ? 'launch'
+    : cue === 'step' || cue === 'hurt' ? 'bosshit' : 'tellbig');
+}
+function beastContactFx(c, b) {
+  if (G.artProbe || b.dead || !(b._slashT > 0)) return;
+  const p = 1 - b._slashT / .18, f = b.face || 1;
+  // Four light traces mark the committed contact volume. They fade out in
+  // recovery and never extend the damage box or become another damaging wave.
+  const x = b.cx() + f * 60, y = b.cy();
+  c.save(); c.globalCompositeOperation = 'lighter';
+  c.globalAlpha *= (1 - p) * .72;
+  for (let lane = 0; lane < 4; lane++) {
+    const dy = (lane - 1.5) * 8;
+    c.strokeStyle = lane % 2 ? '#e5c8ff' : '#b984ef';
+    c.lineWidth = 1.5 + (1 - p) * 1.5;
+    c.beginPath(); c.moveTo(x - f * 34, y - 26 + dy);
+    c.quadraticCurveTo(x + f * 25, y - 16 + dy, x + f * 42, y + 27 + dy);
+    c.stroke();
+  }
+  c.restore();
+}
 const BEAST_STRIP = {
-  stalk:      { key: 'beastStalk',      cells: 16, k: 1,    loop: 14 },
-  idle:       { key: 'beastStalk',      cells: 16, k: 1,    from: 0, to: 0, loop: 1 },
-  roar:       { key: 'beastRoar',       cells: 12, k: 1,    t0: 1.25 },
-  intro:      { key: 'beastRoar',       cells: 12, k: 1,    t0: 1.0, when: (b) => (b.t || 0) <= 1.0 },
-  swipewarn:  { key: 'beastSwipe',      cells: 12, k: 1.42, from: 0, to: 5 },   // the raised paw HOLDS on 5
-  swipe:      { key: 'beastSwipe',      cells: 12, k: 1.42, from: 6, to: 11 },  // the rake, then the recovery
-  crouch:     { key: 'beastLeap',       cells: 12, k: 1.35, from: 0, to: 5 },
-  springwarn: { key: 'beastLeap',       cells: 12, k: 1.35, from: 0, to: 5 },
-  pounce:     { key: 'beastLeap',       cells: 12, k: 1.35, from: 6, to: 8, air: 1 },
-  recover:    { key: 'beastLeap',       cells: 12, k: 1.35, from: 9, to: 11 },
-  spring:     { key: 'beastSpringup',   cells: 8,  k: 1.14, u: 1 },
-  dive:       { key: 'beastDive',       cells: 5,  k: 1,    u: 1 },
-  perch:      { key: 'beastPerch',      cells: 8,  k: 1,    loop: 10 },
-  daze:       { key: 'beastDaze',       cells: 12, k: 1,    loop: 12 },
-  nullcharge: { key: 'beastNullcharge', cells: 12, k: 1,    from: 0, to: 3 },
-  nullhop:    { key: 'beastNullcharge', cells: 12, k: 1,    from: 4, to: 8, loop: 10 },
-  nullend:    { key: 'beastNullcharge', cells: 12, k: 1,    from: 9, to: 11 },
+  stalk:      { key: 'beastStudioStalk', cells: 24, k: 1,   loop: 24 },
+  run:        { key: 'beastGallop',     cells: 24, k: 1,    loop: 24 },
+  idle:       { key: 'beastStudioLeap', cells: 30, k: 1,    from: 0, to: 0, loop: 1 },
+  roar:       { key: 'beastStudioRoar', cells: 30, k: 1,    t0: 1.25 },
+  intro:      { key: 'beastStudioRoar', cells: 30, k: 1, from: 6, t0: 1.0, when: (b) => (b.t || 0) <= 1.0 },
+  swipewarn:  { key: 'beastStudioSwipe', cells: 24, k: 1, from: 0, to: 14 }, // load shoulder, raise paw
+  swipe:      { key: 'beastStudioSwipe', cells: 24, k: 1, from: 15, to: 23 }, // contact, follow-through, settle
+  crouch:     { key: 'beastStudioLeap', cells: 30, k: 1, from: 0, to: 10 },
+  springwarn: { key: 'beastStudioLeap', cells: 30, k: 1, from: 0, to: 10 },
+  pounce:     { key: 'beastStudioLeap', cells: 30, k: 1, from: 11, to: 23, air: 1 },
+  recover:    { key: 'beastStudioLeap', cells: 30, k: 1, from: 24, to: 29 },
+  spring:     { key: 'beastStudioLeap', cells: 30, k: 1, from: 11, to: 18, u: 1 },
+  dive:       { key: 'beastStudioLeap', cells: 30, k: 1, from: 18, to: 23, u: 1 },
+  perch:      { key: 'beastStudioLeap', cells: 30, k: 1, from: 10, to: 10, loop: 1 },
+  daze:       { key: 'beastHurt',       cells: 12, k: 1 },
+  nullcharge: { key: 'beastStudioRoar', cells: 30, k: 1, from: 0, to: 7 },
+  nullhop:    { key: 'beastStudioLeap', cells: 30, k: 1, from: 8, to: 10 },
+  nullend:    { key: 'beastStudioLeap', cells: 30, k: 1, from: 24, to: 27 },
   dead:       { key: 'beastFall',       cells: 12, k: 1,    death: 1 },
 };
 // every key above, once — prefetched the moment the fight is entered
-const BEAST_STRIPS = Object.values(BEAST_STRIP).map((s) => s.key).filter((k, i, a) => a.indexOf(k) === i);
+const BEAST_STRIPS = [...new Set([...Object.values(BEAST_STRIP).map(s => s.key), 'beastRearSwipe', 'beastHurt'])];
 // Draws the strip cell for the boss's current state in RIG SPACE (origin at
 // the feet, the body transform already applied by drawBeast), or returns
 // false so the caller draws the rig instead. G.beastRig forces the rig, which
@@ -1183,38 +1256,54 @@ const BEAST_STRIPS = Object.values(BEAST_STRIP).map((s) => s.key).filter((k, i, 
 function beastStrip(c, b) {
   if (typeof G !== 'undefined' && (G.bossRig || G.beastRig)) return false;
   let st = b.dead ? 'dead' : b.st;
-  // the null sequence's pounces float rather than leap: the field's own cells
-  if (st === 'pounce' && (b.nullSeq || 0) > 0) st = 'nullhop';
-  const S = BEAST_STRIP[st];
+  // Field pounces still use the flight sequence; their slower gravity is
+  // represented by the duration recorded from their launch velocity.
+  let S = BEAST_STRIP[st];
+  if ((st === 'swipewarn' || st === 'swipe') && b.swiped2)
+    S = { key: 'beastRearSwipe', cells: 30, k: 1,
+      from: st === 'swipewarn' ? 0 : 11, to: st === 'swipewarn' ? 10 : 29 };
+  if (!b.dead && b.stagT <= 0 && (b._recoilT || 0) > 0 && /^(idle|stalk|run|recover)$/.test(st))
+    S = { key: 'beastHurt', cells: 12, k: 1, recoil: true };
   if (!S || (S.when && !S.when(b))) return false;
-  if (b._sst !== st) { b._sst = st; b._st0 = Math.max(0.05, b.t || 0); }
-  else if ((b.t || 0) > (b._st0 || 0)) b._st0 = b.t;
   const from = S.from || 0, to = S.to == null ? S.cells - 1 : S.to, n = to - from + 1;
   let cell;
-  if (st === 'stalk') {
+  if (S.recoil) cell = Math.min(11, Math.floor((1 - b._recoilT / .3) * 12));
+  else if (st === 'roar') {
+    const e = clamp(1.25 - (b.t || 0), 0, 1.25);
+    // The jaw opens on the same fixed-step event that emits the roar.
+    cell = e < .5 ? Math.floor(e / .5 * 8)
+      : e < .9 ? 8 + Math.floor((e - .5) / .4 * 11)
+      : Math.min(29, 19 + Math.floor((e - .9) / .35 * 11));
+  }
+  else if (st === 'stalk' || st === 'run') {
     // THE PAWS DO NOT SKATE. The prowl used to cycle at a fixed 14 cells/s
     // whatever the body's speed; it is paced by ground covered now, one full
     // 16-cell stride per BEAST_STRIDE px — the phase-one prowl's own ratio
     // (165 px/s at 14 cells/s), so phase two's faster prowl turns its legs
     // over faster instead of sliding them.
-    const da = Math.max(0, Math.min(0.1, (b.anim || 0) - (b._gaitA == null ? (b.anim || 0) : b._gaitA)));
-    b._gaitA = b.anim || 0;
-    b._gaitPh = ((b._gaitPh || 0) + Math.abs(b.vx || 0) * da / BEAST_STRIDE) % 1;
-    cell = from + Math.floor(b._gaitPh * n) % n;
+    cell = from + Math.floor((b._gaitPh || 0) * n) % n;
   } else if (S.loop) cell = from + (Math.floor((b.anim || 0) * S.loop) % n);
-  else if (S.air) { const vy = b.vy || 0; cell = from + (vy < -120 ? 0 : vy < 120 ? 1 : 2); }
+  else if (S.air) {
+    const duration = b.leapDuration || .76;
+    const elapsed = b.leapT0 == null ? duration * clamp(((b.vy || 0) + 800) / 1600, 0, 1) : (b.anim || 0) - b.leapT0;
+    cell = from + Math.min(n - 1, Math.floor(clamp(elapsed / duration, 0, .999) * n));
+  }
   else if (S.u) cell = from + Math.min(n - 1, Math.floor(Math.max(0, Math.min(0.999, b.u || 0)) * n));
   else if (S.death) {
     const T = 1.6 - Math.max(0, Math.min(1.6, b.deathAnimT == null ? 0 : b.deathAnimT));
     cell = from + Math.min(n - 1, Math.floor((T / 1.6) * n));
   } else {
-    const t0 = S.t0 || b._st0 || 1;
+    const t0 = S.t0 || (b._motionState === b.st && b._motionDuration) || b._st0 || 1;
     const p = Math.max(0, Math.min(0.999, 1 - (b.t || 0) / t0));
     cell = from + Math.floor(p * n);
   }
   const im = (typeof MEDIA_RAW !== 'undefined') && MEDIA_RAW[S.key];
-  const cellH = im && im.naturalHeight ? im.naturalHeight : 320;
-  return drawStripCell(c, S.key, cell, S.cells, 0, 0, cellH * BEAST_STRIP_PX * S.k, false);
+  const cellH = im && im.naturalHeight ? im.naturalHeight
+    : /^(beastStudio|beastGallop|beastRearSwipe|beastHurt)/.test(S.key) ? 256 : 320;
+  const height = cellH * BEAST_STRIP_PX * S.k;
+  const drew = drawStripCell(c, S.key, cell, S.cells, 0, 0, height, false);
+  b._stripPose = drew ? {key:S.key, cell, cells:S.cells, height} : null;
+  return drew;
 }
 
 // boss entry point. Returns false so the old chain can catch a missing image.
@@ -1234,10 +1323,10 @@ function drawBeast(c, b) {
       const tr = b._smear || (b._smear = []);
       const last = tr[tr.length - 1];
       const rot = b.st === 'pounce'
-        ? Math.max(-0.3, Math.min(0.45, (b.vy || 0) / 1400))
+        ? Math.max(-0.3, Math.min(0.26, -(b.vy || 0) / 2600))
         : (b.st === 'dive' ? 0.3 : -0.22);
       if (!last || Math.hypot(cx - last.x, footY - last.y) > 30) {
-        tr.push({ x: cx, y: footY, t: b.anim, sgn: fv < 0 ? 1 : -1, rot });
+        tr.push({ x: cx, y: footY, t: b.anim, sgn: fv < 0 ? 1 : -1, rot, pose: b._stripPose });
         if (tr.length > 3) tr.shift();
       }
     }
@@ -1254,7 +1343,12 @@ function drawBeast(c, b) {
         c.translate(sm.x, sm.y);
         c.scale(sm.sgn * S, S);
         if (sm.rot) { c.translate(0, -gh * 0.4); c.rotate(sm.rot); c.translate(0, gh * 0.4); }
-        c.drawImage(vim, sA[0], sA[1], sA[2], sA[3], -gw / 2, -gh, gw, gh);
+        const pose = sm.pose, frame = pose && MEDIA_RAW[pose.key];
+        if (frame && frame.naturalWidth) {
+          const cw = frame.naturalWidth / pose.cells, dw = pose.height * cw / frame.naturalHeight;
+          c.drawImage(frame, pose.cell * cw, 0, cw, frame.naturalHeight,
+            -dw / 2, -pose.height, dw, pose.height);
+        } else c.drawImage(vim, sA[0], sA[1], sA[2], sA[3], -gw / 2, -gh, gw, gh);
         c.restore();
       }
     }
@@ -1292,7 +1386,8 @@ function drawBeast(c, b) {
     if (b.stagT > 0 && !b.dead) {
       // staggered by the Song: cowering low, trembling
       BEAST_LIVE.glow = 0.35;
-      bFig(c, 'aAtk', 0, 2.2);
+      if (!drawStripCell(c, 'beastHurt', 7, 12, 0, 0, 256 * BEAST_STRIP_PX, false))
+        bFig(c, 'aAtk', 0, 2.2);
     // THE WHOLE LEAP USED TO BE INTERCEPTED HERE and handed to `aAtk` — the
     // authored standing side view — squashed on the coil, stretched in the air.
     // Six different beats, one drawing. It is the rig's job now (beastLeap /
@@ -1320,7 +1415,7 @@ function drawBeast(c, b) {
       // does and what makes the eye call this an event instead of weather.
       if (k > 0.80) {
         const f = Math.min(1, (k - 0.80) / 0.14);
-        const pulse = 0.68 + 0.32 * Math.sin(b.anim * 40);
+        const pulse = Math.sin(Math.PI * Math.min(1, (k - .8) / .2));
         c.save();
         c.globalCompositeOperation = 'lighter';
         const R = 150 + f * 105;
@@ -1340,9 +1435,9 @@ function drawBeast(c, b) {
       // nose down into the landing — the one thing that makes a leap read as
       // a heavy animal going over the top rather than a picture sliding on a
       // curve. Pivot at the body's middle. The rig faces LEFT, so a positive
-      // rotation drops the nose.
+      // rotation lifts the nose.
       if (b.st === 'pounce') {
-        const pitch = Math.max(-0.26, Math.min(0.3, (b.vy || 0) / 2600));
+        const pitch = Math.max(-0.3, Math.min(0.26, -(b.vy || 0) / 2600));
         c.translate(0, -135); c.rotate(pitch); c.translate(0, 135);
       }
       c.scale(1 - up * 0.10 + dn * 0.05, 1 + up * 0.16 - dn * 0.04);

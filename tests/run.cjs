@@ -36,6 +36,7 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
   ['comic-rewards', 'saved milestone slideshows, updates, accessibility and failure recovery'],
   ['story-battery', 'unique workshop battery and legacy save compatibility'],

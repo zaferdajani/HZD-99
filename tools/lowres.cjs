@@ -38,7 +38,9 @@ const fs = require('fs');
 const path = require('path');
 
 const SCALE = 0.25;
-const QUALITY = 0.62;
+const qualityArg = process.argv.find(arg => arg.startsWith('--quality='));
+const QUALITY = qualityArg ? Number(qualityArg.slice(10)) : 0.62;
+if (!(QUALITY > 0 && QUALITY <= 1)) throw new Error('--quality must be in (0, 1]');
 // below this there is nothing to save and a second request costs more than the
 // bytes it avoids
 const MIN_BYTES = 120 * 1024;

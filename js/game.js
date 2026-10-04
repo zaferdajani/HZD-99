@@ -1299,6 +1299,7 @@ function meetCheck() {
 function meetStep(dt) {
   const M = G.meet, b = G.boss;
   if (!M || !b || !b.meet) { G.meet = null; return; }
+  beastMotionBegin(b);
   M.t += dt;
   const pcx = player.x + player.w / 2, pcy = player.y + player.h / 2;
   const W = G.roomDef.w * TILE;
@@ -1309,7 +1310,7 @@ function meetStep(dt) {
     const col = moveEnt(b, dt);
     if (col.d || b.y + b.h >= (G.roomDef.h - 2) * TILE) {
       b.vy = 0; b.vx = 0; b.st = 'stalk'; M.ph = 'land'; M.t = 0;
-      cam.shake = Math.max(cam.shake, 12); sfx('slam'); dust(14, b.w * 0.6);
+      cam.shake = Math.max(cam.shake, 12); beastSound('arrive'); dust(14, b.w * 0.6);
       if (typeof padRumble === 'function') padRumble(0.8, 0.6, 400);
       G.flash = Math.max(G.flash, 0.12);
     }
@@ -1331,11 +1332,12 @@ function meetStep(dt) {
     b.t -= dt;
     if (!M.hit && b.t <= 0.18) {
       M.hit = true;
+      b._slashT = .18;
       if (M.interactive) {
         // The tell commits the paw's direction. Running away or jumping is
         // a real escape, and no cutscene removes a core from outside its reach.
         const hit = { x: b.face < 0 ? b.x - 110 : b.x + b.w, y: b.y + b.h - 82, w: 110, h: 82 };
-        sfx('atk'); cam.shake = Math.max(cam.shake, 3);
+        beastSound('swipe'); cam.shake = Math.max(cam.shake, 3);
         burst(hit.x + hit.w / 2, hit.y + hit.h / 2, 8, '#b06aff', 120, 0.35, 80, 2, true);
         if (aabb(hit, player)) player.hurt(1, b.cx(), 'nf.meet');
       } else {
@@ -1344,7 +1346,7 @@ function meetStep(dt) {
       cam.shake = Math.max(cam.shake, 18);
       G.impact = { t: 0.3, t0: 0.3, x: pcx, y: pcy };
       if (typeof padRumble === 'function') padRumble(1, 0.9, 600);
-      sfx('atk'); sfx('hit');
+      beastSound('swipe'); sfx('hit');
       burst(pcx, pcy, 22, '#b06aff', 320, 0.5, 200, 3, true);
       burst(pcx, pcy, 12, '#ffffff', 200, 0.4, 0, 2, true);
       // it costs her something — one core — and never the last one
@@ -1362,7 +1364,8 @@ function meetStep(dt) {
     b.windT = 0.4; b.t -= dt; b.coilK = 1 - clamp(b.t / 0.6, 0, 1);
     if (b.t <= 0) {
       b.st = 'pounce'; b.face = 1; b.vx = 920; b.vy = -720; M.ph = 'leave'; M.t = 0;
-      sfx('dash'); cam.shake = Math.max(cam.shake, 6); dust(10, b.w * 0.5);
+      b.leapT0 = b.anim; b.leapDuration = 1.6;
+      beastSound('leap'); cam.shake = Math.max(cam.shake, 6); dust(10, b.w * 0.5);
     }
   } else if (M.ph === 'leave') {
     // no walls for it on the way out: it is leaving the room, not bouncing off it
@@ -1373,6 +1376,7 @@ function meetStep(dt) {
       persist();
     }
   }
+  beastMotionEnd(b, dt);
 }
 
 

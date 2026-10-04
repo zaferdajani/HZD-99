@@ -1,0 +1,141 @@
+
+── lion-studio  — Nullfang motion clocks, planted gait, attack cadence and creature cue ownership
+PASS: loaded strips, render-independent clocks, planted gait, 13 airborne poses, fair phase-two chain, distinct sound and acceleration
+
+── meet  — it swats her aside and walks away, and she is still standing
+── meet — it swats her aside and walks away, and she is still standing
+  ok   it happens on the crest of A2  fall@2.43 land@2.97 wind@4.12 swipe@4.63 watch@5.10 coil@6.20 leave@6.80
+  ok   every beat plays: fall, land, wind, swipe, watch, coil, leave
+  ok   ...and it is over inside ten seconds  7.7 s
+  ok   the music drops out for it and comes back  stop,set:A
+  ok   arrival, tell, creature swipe, impact and departure each have a cue  nf_arrive,nf_breath,nf_step,bosshit,nf_step,bosshit,tellbig,nf_swipe,hit,nf_coil,tellbig,nf_leap
+  ok   it costs her exactly one core  4
+  ok   she is thrown the length of the mound (> 200 px west)  345 px
+  ok   her controls are held while it walks up  69 frames
+  ok   it leaves, and the sequence ends
+  ok   ...and gives her controls back  328 px in a second
+  ok   the flag holds and the Braid marks it
+  ok   it never happens twice
+  ok   at one core it never kills: a survival, not a scripted death  1
+  ok   A4 wakes as the rematch: one distinct awakening  ui,nf_awake,tellbig
+  ok   ...says it remembers  It remembers the corridor.
+  ok   ...and the Braid marks the rematch
+  ok   no page errors
+
+OK — she met it, it cost her, she is still standing, and the arena knows her
+
+── motion  — the fired guardian plates are on screen, not just in the manifest
+── motion — the fired guardian plates are on screen, not in the manifest
+
+  ok   the filmed take is what draws alpha:rest, not the plate  7431 px differ
+  ok   ...and it turns with the body in alpha:rest  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:rest  1 px off the plate's bottom
+  ok   the filmed take is what draws alpha:prowl, not the plate  9002 px differ
+  ok   ...and it turns with the body in alpha:prowl  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:prowl  2 px off the plate's bottom
+  ok   the filmed take is what draws alpha:roarwarn, not the plate  9863 px differ
+  ok   ...and it turns with the body in alpha:roarwarn  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:roarwarn  4 px off the plate's bottom
+  ok   the filmed take is what draws alpha:roar, not the plate  10623 px differ
+  ok   ...and it turns with the body in alpha:roar  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:roar  4 px off the plate's bottom
+  ok   the filmed take is what draws alpha:broodcall, not the plate  10311 px differ
+  ok   ...and it turns with the body in alpha:broodcall  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:broodcall  4 px off the plate's bottom
+  ok   the filmed take is what draws alpha:howl, not the plate  11959 px differ
+  ok   ...and it turns with the body in alpha:howl  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:howl  0 px off the plate's bottom
+  ok   the filmed take is what draws alpha:coil, not the plate  8442 px differ
+  ok   ...and it turns with the body in alpha:coil  mirror agreement 1
+  ok   the filmed take is what draws alpha:leap, not the plate  21332 px differ
+  ok   ...and it turns with the body in alpha:leap  mirror agreement 1
+  ok   the filmed take is what draws alpha:recoil, not the plate  12907 px differ
+  ok   ...and it turns with the body in alpha:recoil  mirror agreement 1
+  ok   the filmed take is what draws alpha:turn, not the plate  14702 px differ
+  ok   ...and it turns with the body in alpha:turn  mirror agreement 1
+  ok   the filmed take is what draws alpha:clawwarn, not the plate  11036 px differ
+  ok   ...and it turns with the body in alpha:clawwarn  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:clawwarn  -8 px off the plate's bottom
+  ok   the filmed take is what draws alpha:claw, not the plate  9649 px differ
+  ok   ...and it turns with the body in alpha:claw  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:claw  2 px off the plate's bottom
+  ok   the filmed take is what draws alpha:bitewarn, not the plate  7911 px differ
+  ok   ...and it turns with the body in alpha:bitewarn  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:bitewarn  4 px off the plate's bottom
+  ok   the filmed take is what draws alpha:bite, not the plate  7534 px differ
+  ok   ...and it turns with the body in alpha:bite  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:bite  0 px off the plate's bottom
+  ok   the filmed take is what draws alpha:clinch, not the plate  10436 px differ
+  ok   ...and it turns with the body in alpha:clinch  mirror agreement 1
+  ok   the filmed take is what draws alpha:shake, not the plate  9573 px differ
+  ok   ...and it turns with the body in alpha:shake  mirror agreement 1
+  ok   the filmed take is what draws alpha:free, not the plate  10705 px differ
+  ok   ...and it turns with the body in alpha:free  mirror agreement 1
+  ok   the filmed take is what draws chime:rest, not the plate  5384 px differ
+  ok   ...and it turns with the body in chime:rest  mirror agreement 1
+  ok   the filmed take is what draws chime:ringwarn, not the plate  10416 px differ
+  ok   ...and it turns with the body in chime:ringwarn  mirror agreement 1
+  ok   the filmed take is what draws chime:ring, not the plate  26746 px differ
+  ok   ...and it turns with the body in chime:ring  mirror agreement 1
+  ok   the filmed take is what draws chime:notewarn, not the plate  10091 px differ
+  ok   ...and it turns with the body in chime:notewarn  mirror agreement 1
+  ok   the filmed take is what draws chime:note, not the plate  7047 px differ
+  ok   ...and it turns with the body in chime:note  mirror agreement 1
+  ok   the filmed take is what draws chime:dead, not the plate  6306 px differ
+  ok   ...and it turns with the body in chime:dead  mirror agreement 1
+  ok   no still plates remain wired for the guardians (the coil went to the filmed leap)
+  ok   the filmed take is what draws NULLFANG's stalk, not the rig  14436 px differ
+  ok   ...and it turns with him in stalk  mirror agreement 1
+  ok   ...and its feet are where the rig's are in stalk  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's run, not the rig  14802 px differ
+  ok   ...and it turns with him in run  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's idle, not the rig  14002 px differ
+  ok   ...and it turns with him in idle  mirror agreement 1
+  ok   ...and its feet are where the rig's are in idle  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's roar, not the rig  13174 px differ
+  ok   ...and it turns with him in roar  mirror agreement 1
+  ok   ...and its feet are where the rig's are in roar  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's intro, not the rig  13530 px differ
+  ok   ...and it turns with him in intro  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's swipewarn, not the rig  14720 px differ
+  ok   ...and it turns with him in swipewarn  mirror agreement 1
+  ok   ...and its feet are where the rig's are in swipewarn  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's swipe, not the rig  14742 px differ
+  ok   ...and it turns with him in swipe  mirror agreement 1
+  ok   ...and its feet are where the rig's are in swipe  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's crouch, not the rig  13937 px differ
+  ok   ...and it turns with him in crouch  mirror agreement 1
+  ok   ...and its feet are where the rig's are in crouch  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's springwarn, not the rig  13911 px differ
+  ok   ...and it turns with him in springwarn  mirror agreement 1
+  ok   ...and its feet are where the rig's are in springwarn  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's pounce, not the rig  15909 px differ
+  ok   ...and it turns with him in pounce  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's recover, not the rig  14445 px differ
+  ok   ...and it turns with him in recover  mirror agreement 1
+  ok   ...and its feet are where the rig's are in recover  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's spring, not the rig  13814 px differ
+  ok   ...and it turns with him in spring  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's dive, not the rig  16672 px differ
+  ok   ...and it turns with him in dive  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's perch, not the rig  14788 px differ
+  ok   ...and it turns with him in perch  mirror agreement 1
+  ok   ...and its feet are where the rig's are in perch  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's daze, not the rig  13543 px differ
+  ok   ...and it turns with him in daze  mirror agreement 1
+  ok   ...and its feet are where the rig's are in daze  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's nullcharge, not the rig  14321 px differ
+  ok   ...and it turns with him in nullcharge  mirror agreement 1
+  ok   ...and its feet are where the rig's are in nullcharge  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's nullhop, not the rig  12650 px differ
+  ok   ...and it turns with him in nullhop  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's nullend, not the rig  12114 px differ
+  ok   ...and it turns with him in nullend  mirror agreement 1
+  ok   ...and its feet are where the rig's are in nullend  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's dead, not the rig  13052 px differ
+  ok   ...and it turns with him in dead  mirror agreement 1
+  ok   no page errors while drawing them
+
+OK — the fired coil is on screen, facing the right way, standing on the floor
+
+all 3 harnesses ran
