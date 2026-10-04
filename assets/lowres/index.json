@@ -1,12 +1,5 @@
 {
  "indFg": "assets/lowres/indFg.webp",
- "beastStalk": "assets/lowres/beastStalk.webp",
- "beastRoar": "assets/lowres/beastRoar.webp",
- "beastSwipe": "assets/lowres/beastSwipe.webp",
- "beastLeap": "assets/lowres/beastLeap.webp",
- "beastPerch": "assets/lowres/beastPerch.webp",
- "beastDaze": "assets/lowres/beastDaze.webp",
- "beastNullcharge": "assets/lowres/beastNullcharge.webp",
  "beastFall": "assets/lowres/beastFall.webp",
  "roster": "assets/lowres/roster.webp",
  "npcs": "assets/lowres/npcs.webp",
@@ -97,5 +90,12 @@
  "rockA": "assets/lowres/rockA.webp",
  "rockC": "assets/lowres/rockC.webp",
  "rockD": "assets/lowres/rockD.webp",
- "rockE": "assets/lowres/rockE.webp"
+ "rockE": "assets/lowres/rockE.webp",
+ "beastGallop": "assets/lowres/beastGallop.webp",
+ "beastStudioSwipe": "assets/lowres/beastStudioSwipe.webp",
+ "beastStudioStalk": "assets/lowres/beastStudioStalk.webp",
+ "beastStudioLeap": "assets/lowres/beastStudioLeap.webp",
+ "beastStudioRoar": "assets/lowres/beastStudioRoar.webp",
+ "beastRearSwipe": "assets/lowres/beastRearSwipe.webp",
+ "beastHurt": "assets/lowres/beastHurt.webp"
 }

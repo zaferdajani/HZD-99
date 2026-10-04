@@ -1,0 +1,39 @@
+{
+  "source": "assets/source/beast/studio-2026-10-04/gallop.mp4",
+  "frames": 24,
+  "cell": [
+    448,
+    256
+  ],
+  "times": [
+    1.72,
+    1.7987,
+    1.8774,
+    1.9561,
+    2.0348,
+    2.1135,
+    2.1922,
+    2.2709,
+    2.3496,
+    2.4283,
+    2.507,
+    2.5857,
+    2.6643,
+    2.743,
+    2.8217,
+    2.9004,
+    2.9791,
+    3.0578,
+    3.1365,
+    3.2152,
+    3.2939,
+    3.3726,
+    3.4513,
+    3.53
+  ],
+  "scale": 0.32753326509723646,
+  "rootMotion": "vertical removed; simulation supplies trajectory",
+  "reference": "standing envelope: 320x210px",
+  "reviewed": true,
+  "review": "Assistant inspected source motion and runtime-alpha contacts; not owner art approval."
+}

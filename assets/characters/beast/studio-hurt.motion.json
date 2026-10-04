@@ -1,0 +1,29 @@
+{
+  "source": "assets/source/beast/studio-2026-10-04/hurt.mp4",
+  "frames": 12,
+  "cell": [
+    448,
+    256
+  ],
+  "times": [
+    1.82,
+    1.9891,
+    2.1582,
+    2.3273,
+    2.4964,
+    2.6655,
+    2.8345,
+    3.0036,
+    3.1727,
+    3.3418,
+    3.5109,
+    3.68
+  ],
+  "scale": 0.29906542056074764,
+  "threshold": 48,
+  "strictBorders": false,
+  "rootMotion": "vertical removed; simulation supplies trajectory",
+  "reference": "standing envelope: 320x210px",
+  "reviewed": true,
+  "review": "Assistant inspected source motion and runtime-alpha contacts; not owner art approval."
+}

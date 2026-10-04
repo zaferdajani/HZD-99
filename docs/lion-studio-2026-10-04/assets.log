@@ -1,0 +1,42 @@
+
+── lion-studio  — Nullfang motion clocks, planted gait, attack cadence and creature cue ownership
+PASS: loaded strips, render-independent clocks, planted gait, 13 airborne poses, fair phase-two chain, distinct sound and acceleration
+
+── meet  — it swats her aside and walks away, and she is still standing
+── meet — it swats her aside and walks away, and she is still standing
+  ok   it happens on the crest of A2  fall@2.43 land@2.97 wind@4.12 swipe@4.63 watch@5.10 coil@6.20 leave@6.80
+  ok   every beat plays: fall, land, wind, swipe, watch, coil, leave
+  ok   ...and it is over inside ten seconds  7.7 s
+  ok   the music drops out for it and comes back  stop,set:A
+  ok   arrival, tell, creature swipe, impact and departure each have a cue  nf_arrive,nf_breath,nf_step,nf_step,tellbig,nf_swipe,hit,nf_coil,tellbig,nf_leap,tellbig
+  ok   it costs her exactly one core  4
+  ok   she is thrown the length of the mound (> 200 px west)  345 px
+  ok   her controls are held while it walks up  69 frames
+  ok   it leaves, and the sequence ends
+  ok   ...and gives her controls back  328 px in a second
+  ok   the flag holds and the Braid marks it
+  ok   it never happens twice
+  ok   at one core it never kills: a survival, not a scripted death  1
+  ok   A4 wakes as the rematch: one distinct awakening  ui,nf_awake,tellbig
+  ok   ...says it remembers  It remembers the corridor.
+  ok   ...and the Braid marks the rematch
+  ok   no page errors
+
+OK — she met it, it cost her, she is still standing, and the arena knows her
+
+── lowres  — the whole world at quarter size, and nothing sliced by pixel gets one
+── lowres — the whole world, roughly, for half a megabyte
+  ok   every small copy the manifest names is on disk  99 entries
+  ok   ...and every one of them is at most a quarter of its full sheet  all under
+  ok   the whole tier is small enough to front-load  1.99 MB for 29.6 MB of art (6.7%)
+  ok   no sheet addressed by absolute pixel rect has a small copy  6 guardian files checked
+  ok   the page carries the manifest  99 keys in window.LOWRES
+  ok   ...and the prefetcher is told to front-load it
+  ok   a small copy stands in for a sheet that has not arrived  400 px wide
+  ok   ...and the full sheet replaces it  400 -> 1600 px
+  ok   ...and every cached derivative of the soft one is thrown away  on stand-in: true, on upgrade: true
+  ok   the tier is fetched ahead of the full-size art  46 small copies fetched in the first six seconds
+
+OK — the room is right immediately and sharp a moment later
+
+all 3 harnesses ran

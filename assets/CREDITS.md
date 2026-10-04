@@ -170,3 +170,9 @@ The existing hzd_atk2 recording has low-frequency rumble removed; hzd_yalla is p
 The owner supplied the ChatGPT-generated hero PNGs inventoried in `source/hero/delivery-2026-09-18/supplied-inventory.json`. Sixteen new run frames were generated with OpenAI ChatGPT image generation using the approved guard as reference (`source/hero/delivery-2026-09-18/run{A,B,C,D}.png`). These hero assets are not Higgsfield generations. Source hashes and transformations are in the delivery manifest; see `docs/ART_IMPORT_2026-09-18.md`.
 
 Recovered single/dual/joined weapon actions, claw variants, recharge and aerial actions, and the two additional effect sheets were generated with OpenAI ChatGPT image generation from the owner-supplied references. The unmodified inputs, recovered outputs and source-to-runtime mapping are archived under `source/hero/delivery-2026-09-18/`. Existing Higgsfield child-voice recordings are preserved; this delivery generates no new vocals.
+
+## Nullfang motion and creature foley — 2026-10-04
+
+`characters/beast/studio-*.webp` are frames from original Higgsfield Seedance 2.5 performances, anchored to this repository's Nullfang reference. No third-party game frames or recordings were used. Original takes and job IDs are retained under `assets/source/beast/studio-2026-10-04/`.
+
+`sfx/nullfang/{step,coil,leap,swipe,land,hurt,roar,arrive,awake,breath}.ogg` are generated creature sound and foley from those same Higgsfield performances, trimmed to event timing, peak-normalized, and faded with `tools/lion-audio.py`. `audio-cuts.json` records exact source windows and timing. These are generated audio, not field recordings or a licensed Disney soundtrack.
