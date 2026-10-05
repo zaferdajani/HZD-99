@@ -655,7 +655,7 @@ const ROOMS = {
       hline(g, 24, 29, 27, '=');
       hull(g, 30, 38, 2, 141);
     } },
-  A2: { zone: 'A', sky: 1, w: 88, h: 17, exits: { L: 'A1', R: 'A10', B: 'A5', T: 'A8' },
+  A2: { zone: 'A', sky: 1, w: 88, h: 17, exits: { L: 'A1', R: 'A3', B: 'A5', T: 'A8' },
     // TWO DISRUPTORS ON ONE SCREEN WAS THE GAME'S SECOND FIGHT. Fliers dive and
     // withdraw; two of them harassing from opposite angles leaves nothing to do
     // about either, which is agency removal rather than difficulty. The second
@@ -703,10 +703,10 @@ const ROOMS = {
   // It sits between the meadow and the save point on purpose — you meet the
   // Alpha, you take the pack, and THEN you walk into the room with the bench
   // and the trader in it, which is where the run's first breath is.
-  A10: { zone: 'A', sky: 1, w: 46, h: 17, exits: { L: 'A2', R: 'A3' },
+  A10: { zone: 'A', sky: 1, w: 46, h: 17, exits: {},
     ents: [['boss', 27, 15, 'alpha']],
     build(g) {
-      frame(g); seamL(g); seamR(g);
+      frame(g);
       // THE ARENA STAYS CLEAN, AND THAT IS THE WHOLE CONSTRAINT HERE. The
       // Alpha's leap is the move this room is built around, and a room full of
       // geometry is a room where a committed pounce lands on a corner instead
@@ -724,7 +724,7 @@ const ROOMS = {
       hull(g, 9, 15, 2, 71);
       hull(g, 39, 45, 2, 73);
     } },
-  A3: { zone: 'A', sky: 1, w: 52, h: 17, exits: { L: 'A10', R: 'A4', T: 'B1', B: 'A12' },
+  A3: { zone: 'A', sky: 1, w: 52, h: 17, exits: { L: 'A2', R: 'A4', T: 'B1', B: 'A12' },
     ents: [['bench', 8, 15], ['npc', 14, 15, 'ratchet'], ['scrap', 40, 15, 14]],
     build(g) {
       frame(g); seamL(g); seamR(g);
@@ -1689,7 +1689,7 @@ const MAPPOS = {
   // has to end before col 6, where the Foundry begins. tests/mapgrid.cjs holds
   // the whole board against overlap.
   W1: [-9, 3, 1, 1], W2: [-8, 3, 2, 1], A0: [-6, 3, 2, 1], A0B: [-6, 2, 1, 1], A1: [-4, 3, 2, 1],
-  A2: [-2, 3, 3, 1], A10: [1, 3, 2, 1], A3: [3, 3, 2, 1], A4: [5, 3, 1, 1],
+  A2: [-2, 3, 3, 1], A10: [1, 0, 2, 1], A3: [3, 3, 2, 1], A4: [5, 3, 1, 1],
   A5: [-2, 4, 2, 1], A6: [-4, 2, 1, 1], A7: [-2, 5, 1, 2], A8: [-1, 2, 1, 1], A9: [-1, 1, 1, 1],
   A11: [-2, 1, 1, 1], A12: [3, 5, 1, 1], A13: [-5, 2, 1, 1],
   CV1: [0, 4, 2, 1], CV1B: [0, 5, 1, 1], CV2: [2, 4, 2, 1], CV3: [4, 4, 1, 1],

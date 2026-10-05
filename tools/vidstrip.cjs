@@ -62,7 +62,9 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
   // SAME ORIGIN, or getImageData refuses to read the frame: a video served
   // from the local server into an about:blank page taints the canvas, and the
   // error arrives at the read rather than at the load.
-  try { await page.goto(new URL(SRC).origin + '/'); } catch (e) {}
+  const captureURL = new URL(SRC).origin + '/__strip_capture';
+  await page.route(captureURL, route => route.fulfill({contentType:'text/html', body:'<!doctype html><title>Strip capture</title>'}));
+  await page.goto(captureURL);
   await page.addScriptTag({ content: selectMotionFrames.toString() });
 
   const res = await page.evaluate(async ({ N: N0, CELL, THR, SRC, FROM, TO, AUTO, ROI }) => {

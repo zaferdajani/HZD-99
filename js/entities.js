@@ -10941,6 +10941,7 @@ class Boss {
     this.anim += dt; this.hurtT -= dt;
     const lionMotion = this.kind === 'glitch' && !this.meet;
     if (lionMotion) beastMotionBegin(this);
+    if (this.kind === 'alpha') alphaMotionBegin(this);
     try {
     // THE FIRST MEETING drives this body by hand (js/game.js meetStep): no
     // deck, no cooldowns, no hitboxes of its own — a staged sequence, not a
@@ -11035,12 +11036,18 @@ class Boss {
           addPart(this.cx() + rnd(-14, 14), this.y - 6, rnd(-6, 6), rnd(-42, -22),
             rnd(0.7, 1.1), chance(0.5) ? '#ff8fb3' : '#ffc2d4', 2.6, -14, true);
         const floorY2 = 15 * TILE - this.h;
-        if (this.kind === 'glitch' || this.kind === 'atlas') {
+        if (this.kind === 'glitch' || this.kind === 'atlas' || this.kind === 'alpha') {
           if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
           let mv = 0;
           if (settled && Math.abs(pd) > 96) { mv = clamp(pd, -70, 70); this.x += mv * dt; }
           this.petWalk = mv !== 0;
-          this.vx = this.kind === 'atlas' ? mv : 0;   // drives the dragon's step rig
+          this.vx = mv;
+          if (this.kind === 'glitch' || this.kind === 'alpha') {
+            this.st = mv ? (this.kind === 'glitch' ? 'stalk' : 'rest') : 'idle';
+            this.vy = 0;
+            const ground = groundColumnAt(this.cx());
+            if (ground && ground.length) this.y = Math.min(...ground) - this.h;
+          }
           if (this.kind === 'atlas') { this.st = 'idle'; this.t = 5; this.vy = 0; }
         } else if (this.kind === 'zero') {
           this.st = 'idle';
@@ -11161,7 +11168,7 @@ class Boss {
         this.roared = true;
         if (this.kind === 'glitch') beastSound('roar');
         else sfx({ glitch: 'roar_beast', brood: 'roar_eagle', zero: 'roar_glc',
-              atlas: 'roar_drg', prism: 'roar_prism', alpha: 'roar_beast' }[this.kind] || 'roar');
+              atlas: 'roar_drg', prism: 'roar_prism', alpha: 'alpha_howl' }[this.kind] || 'roar');
         cam.shake = Math.max(cam.shake, 11);
         this.roarBuzzT = 0.8;
         if (typeof padRumble === 'function') padRumble(0.9, 0.7, 650);
@@ -12738,6 +12745,7 @@ class Boss {
       && this.st !== 'lsvanish' && this.st !== 'arcstorm') player.hurt(DF().edmg, this.cx());
     } finally {
       if (lionMotion) beastMotionEnd(this, dt);
+      if (this.kind === 'alpha') alphaMotionEnd(this, dt);
     }
   }
   // ---- the three signature systems -----------------------------------------

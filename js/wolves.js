@@ -374,49 +374,59 @@ const ALPHA_ART = {
 // yield plays once from the frame it is first seen and holds its last cell.
 const ALPHA_STRIP_H = 2.05 * 320 / 227;
 const ALPHA_STRIP = {
-  rest:      { key: 'alRest',   cells: 9,  k: 1,    loop: 8 },
-  prowl:     { key: 'alProwl',  cells: 16, k: 1,    to: 12, dist: 9 },
-  roarwarn:  { key: 'alRoar',   cells: 12, k: 1.17, from: 0, to: 3,  t0: 0.7 },
-  roar:      { key: 'alRoar',   cells: 12, k: 1.17, from: 4, to: 11, t0: 0.4 },
-  broodcall: { key: 'alHowl',   cells: 12, k: 1,    from: 0, to: 5,  t0: 0.7 },
-  howl:      { key: 'alHowl',   cells: 12, k: 1,    from: 6, to: 11, t0: 0.45 },
-  coil:      { key: 'alLeap',   cells: 12, k: 1.6,  from: 0, to: 4,  t0: 0.5 },
-  leap:      { key: 'alLeap',   cells: 12, k: 1.6,  from: 5, to: 8,  t0: 1.1 },
-  recoil:    { key: 'alLeap',   cells: 12, k: 1.6,  from: 9, to: 11, t0: 0.75 },
-  turn:      { key: 'alLeap',   cells: 12, k: 1.6,  from: 9, to: 11, t0: 0.5 },
-  clawwarn:  { key: 'alClaw',   cells: 12, k: 1.19, from: 0, to: 5,  t0: 0.35 },
-  claw:      { key: 'alClaw',   cells: 12, k: 1.19, from: 6, to: 11, t0: 0.26 },
-  bitewarn:  { key: 'alBite',   cells: 12, k: 1,    from: 0, to: 4,  t0: 0.35 },
-  bite:      { key: 'alBite',   cells: 12, k: 1,    from: 5, to: 11, t0: 0.26 },
-  clinch:    { key: 'alClinch', cells: 12, k: 1.25, from: 0, to: 3,  t0: 0.18 },
-  shake:     { key: 'alClinch', cells: 12, k: 1.25, from: 4, to: 8,  loop: 12 },
-  free:      { key: 'alYield',  cells: 12, k: 1.04, once: 10 },
+  rest:{key:'alRest',cells:24,k:1,loop:5},
+  prowl:{key:'alProwl',cells:32,k:1,from:0,to:23,dist:5},
+  roarwarn:{key:'alRoar',cells:24,k:1.17,from:0,to:7},
+  roar:{key:'alRoar',cells:24,k:1.17,from:8,to:23},
+  broodcall:{key:'alHowl',cells:24,k:1,from:0,to:11},
+  howl:{key:'alHowl',cells:24,k:1,from:12,to:23},
+  coil:{key:'alLeap',cells:24,k:1.6,from:0,to:10},
+  leap:{key:'alLeap',cells:24,k:1.6,from:11,to:18},
+  recoil:{key:'alLeap',cells:24,k:1.6,from:19,to:23},
+  turn:{key:'alLeap',cells:24,k:1.6,from:19,to:23},
+  clawwarn:{key:'alClaw',cells:24,k:1.19,from:0,to:11},
+  claw:{key:'alClaw',cells:24,k:1.19,from:12,to:23},
+  bitewarn:{key:'alBite',cells:24,k:1,from:0,to:9},
+  bite:{key:'alBite',cells:24,k:1,from:10,to:23},
+  clinch:{key:'alClinch',cells:24,k:1.25,from:0,to:7},
+  shake:{key:'alClinch',cells:24,k:1.25,from:8,to:17,loop:18},
+  free:{key:'alYield',cells:24,k:1.04,once:12},
 };
-const ALPHA_STRIPS = Object.values(ALPHA_STRIP).map((s) => s.key).filter((k, i, a) => a.indexOf(k) === i);
-// which strip, and which cell of it, for the state the Alpha is in — or null
-function alphaStripCell(b) {
-  if (typeof G !== 'undefined' && (G.bossRig || G.alphaRig)) return null;
-  let st = (b.purified || b.tamed || (b.dead && !b.forceKill)) ? 'free' : b.st;
-  if (st === 'idle') st = 'rest';
-  // the prowl is the rest state on the move: ground covered picks the cell
-  if (st === 'rest' && Math.abs(b.vx || 0) > 25) st = 'prowl';
-  const S = ALPHA_STRIP[st];
-  if (!S) return null;
-  const from = S.from || 0, to = S.to == null ? S.cells - 1 : S.to, n = to - from + 1;
-  let cell;
-  if (S.loop) cell = from + (Math.floor((b.anim || 0) * S.loop) % n);
-  else if (S.dist) {
-    b._pd = (b._pd || 0) + Math.abs(b.x - (b._px == null ? b.x : b._px)); b._px = b.x;
-    cell = from + (Math.floor(b._pd / S.dist) % n);
-  } else if (S.once) {
-    if (b._onceSt !== st) { b._onceSt = st; b._onceAt = b.anim || 0; }
-    cell = from + Math.min(n - 1, Math.floor(((b.anim || 0) - b._onceAt) * S.once));
-  } else {
-    const p = Math.max(0, Math.min(0.999, 1 - (b.t || 0) / (S.t0 || 1)));
-    cell = from + Math.floor(p * n);
+const ALPHA_STRIPS = [...new Set(Object.values(ALPHA_STRIP).map(s=>s.key))];
+// Simulation owns time and resolved distance. Drawing is a pure lookup.
+function alphaMotionBegin(b) {
+  if (b._alphaState !== b.st) { b._alphaState=b.st; b._alphaElapsed=0; b._alphaDuration=Math.max(.05,b.t||0); }
+  b._alphaX=b.x;
+}
+function alphaMotionEnd(b,dt) {
+  if (b._alphaState !== b.st) {
+    b._alphaState=b.st; b._alphaElapsed=0;
+    b._alphaDuration=b.st==='leap'?ALPHA_KIT.leapUp/1000:Math.max(.05,b.t||0);
+  } else b._alphaElapsed=(b._alphaElapsed||0)+dt;
+  const d=Math.abs(b.x-b._alphaX);
+  if (d<100 && (b.st==='rest'||b.st==='idle'||b.petWalk)) {
+    const old=b._alphaDistance||0;b._alphaDistance=old+d;
+    if(d>.1&&Math.floor(old/30)!==Math.floor(b._alphaDistance/30))sfx('alpha_step');
   }
-  if (b._px == null || st !== 'prowl') b._px = b.x;
-  return { S, cell };
+}
+function alphaStripCell(b) {
+  if (typeof G!=='undefined'&&(G.bossRig||G.alphaRig))return null;
+  let st=(b.purified||b.tamed)?(b.petWalk?'prowl':'rest'):(b.dead&&!b.forceKill)?'free':b.st;
+  if(st==='idle')st='rest';
+  if(st==='intro'||st==='dorm')st='roarwarn';
+  if(st==='rest'&&Math.abs(b.vx||0)>25)st='prowl';
+  const S=ALPHA_STRIP[st];if(!S)return null;
+  const from=S.from||0,to=S.to==null?S.cells-1:S.to,n=to-from+1;
+  let cell;
+  if(S.loop)cell=from+Math.floor((b.anim||0)*S.loop)%n;
+  else if(S.dist){let step=Math.floor((b._alphaDistance||0)/S.dist)%n;if((b.vx||0)*b.face<0)step=n-1-step;cell=from+step;}
+  else {const p=S.once?clamp(1-(b.deathAnimT||0)/1.6,0,.999):clamp((b._alphaElapsed||0)/(b._alphaDuration||1),0,.999);cell=from+Math.floor(p*n);}
+  return {S,cell};
+}
+function alphaQuestOffer() {
+  if(isHero()||!G.save.flags.crystal||G.save.flags.alphaLead||G.save.flags.alpha)return;
+  G.save.flags.alphaLead=1;qSet('alpha_pack','active');persist();
+  G.dialog={name:t('n_ratchet'),lines:t('q_ask_alpha_pack'),i:0,npc:'ratchet'};G.state='DIALOG';
 }
 const ALPHA_KIT = {
   spd: 132,          // it prowls; the leap is where the speed is
@@ -425,7 +435,7 @@ const ALPHA_KIT = {
   leapV: 480,        // horizontal launch
   leapUp: 430,       // ...and it leaves the ground, because a wolf does
   kickV: 300,        // how hard it kicks off you when the leap connects
-  stun: 1.05,        // seconds of the roar. Tuned against its own wind-up:
+  stun: 0.45,        // seconds of the roar. Tuned against its own wind-up:
                      // TELL_HEAVY is 0.7s of warning for 1.05s of cost.
   packMax: 3,        // never more than this many betas alive at once
 };
@@ -452,7 +462,7 @@ function alphaHold(b, dt) {
   if (typeof IN_P === 'function' && (IN_P('ATK') || IN_P('JUMP') || IN_P('DASH'))) {
     b.mash = (b.mash || 0) + 1;
     burst(player.x + player.w / 2, player.y, 3, '#9ffcff', 200, 0.3, 0, 2, true);
-    if (b.mash >= 12) b.t = Math.min(b.t, 0.06);
+    if (b.mash >= 4) { b.st='rest'; b.t=bossRest(b,.8); player.stunT=0; player.vx=-b.face*220; player.vy=-180; player.iT=Math.max(player.iT,.35); }
   }
 }
 
@@ -461,7 +471,8 @@ function alphaSummon(b) {
   const want = Math.min(2, ALPHA_KIT.packMax - live);
   for (let i = 0; i < want; i++) {
     const side = i % 2 ? 1 : -1;
-    const x = clamp(b.cx() + side * rnd(90, 190), 40, G.roomDef.w * TILE - 60);
+    let x = side < 0 ? 3*TILE : (G.roomDef.w-4)*TILE;
+    if (Math.abs(x-player.x)<260) x = side < 0 ? (G.roomDef.w-4)*TILE : 3*TILE;
     const w = new Enemy('crawler', x, b.y + b.h - 26);
     w.dir = Math.sign(b.cx() - x) || 1;
     G.enemies.push(w);
@@ -483,7 +494,7 @@ function alphaStep(b, dt, px, py) {
   const dist = px - b.cx(), adist = Math.abs(dist);
   b.t -= dt;
   const airborne = b.st === 'leap';
-  if (!airborne) b.face = Math.sign(dist) || b.face;
+  if (b.st === 'rest' || b.st === 'idle') b.face = Math.sign(dist) || b.face;
 
   if (b.st === 'idle' || b.st === 'rest') {
     if (b.t <= 0) {
@@ -532,7 +543,7 @@ function alphaStep(b, dt, px, py) {
       // opens), and it waits an extra beat first so the opening is unmissable.
       if ((b.denied || 0) >= 3) { b.denied = 0; b.band = 0; b.t = 0.7; return alphaMove(b, dt, adist); }
       b.alphaAlt = !b.alphaAlt;
-      if (b.band === 0) { b.st = b.alphaAlt ? 'clawwarn' : 'bitewarn'; b.t = TELL_FAST; }
+      if (b.band === 0) { b.st = b.alphaAlt ? 'clawwarn' : 'bitewarn'; b.t = Math.max(.42,TELL_FAST); }
       else if (b.band === 1) { b.st = 'coil'; b.t = TELL_SWIPE; }
       else if (b.alphaAlt && packRoom) { b.st = 'broodcall'; b.t = TELL_HEAVY; }
       else { b.st = 'roarwarn'; b.t = TELL_HEAVY; }
@@ -541,7 +552,7 @@ function alphaStep(b, dt, px, py) {
     // it STEPS INTO the swing rather than planting and swinging at air — which
     // is both how an animal does it and what makes a claw thrown from the edge
     // of its reach still worth respecting
-    b.windT = TELL_FAST;
+    b.windT = Math.max(.42,TELL_FAST);
     b.vx += (b.face * ALPHA_KIT.spd * 1.6 - b.vx) * Math.min(1, dt * 5);
     if (b.t <= 0) { b.st = b.st.replace('warn', ''); b.t = 0.26; b.fired = false; }
   } else if (b.st === 'claw' || b.st === 'bite') {
@@ -549,7 +560,7 @@ function alphaStep(b, dt, px, py) {
     // openings if the player is closing off to it" — so the recovery after a
     // claw or a bite is barely half the one after a leap. Standing next to this
     // thing is meant to be the wrong place to be.
-    if (!b.fired) {
+    if (!b.fired && b.t <= .19) {
       b.fired = true;
       const reach = b.st === 'claw' ? b.w * 0.95 : b.w * 0.6;
       const hb = { x: b.cx() + (b.face > 0 ? 0 : -reach), y: b.y + b.h * 0.2,
@@ -565,7 +576,7 @@ function alphaStep(b, dt, px, py) {
       // throw. The claw stays a single clean swipe; that contrast is the whole
       // reason the two moves are worth having next to each other.
       if (hit && b.st === 'bite') {
-        b.st = 'clinch'; b.t = 0.18;
+        b.st = 'clinch'; b.t = 0.18; G.toast(t('alpha_escape'));
         b.shakeN = 0; b.shakeT = 0; b.mash = 0;
         b.vx = 0;
       }
@@ -579,6 +590,7 @@ function alphaStep(b, dt, px, py) {
     // frame the jaws close reads as a glitch rather than as weight.
     b.vx = 0;
     alphaHold(b, dt);
+    if (b.st !== 'clinch') return alphaMove(b,dt,adist);
     if (b.t <= 0) { b.st = 'shake'; b.t = 0.66; b.shakeN = 0; }
   } else if (b.st === 'shake') {
     // THE WORRY: three whips of the head, left-right-left, each one a hit. The
@@ -586,6 +598,7 @@ function alphaStep(b, dt, px, py) {
     // breaking out early actually saves you something.
     b.vx = 0;
     alphaHold(b, dt);
+    if (b.st !== 'shake') return alphaMove(b,dt,adist);
     const want = Math.floor((0.66 - b.t) / 0.2);
     if (want > b.shakeN) {
       b.shakeN = want;
@@ -610,7 +623,7 @@ function alphaStep(b, dt, px, py) {
     if (b.t <= 0) {
       b.st = 'leap'; b.t = 1.1; b.leapHit = false;
       b.vx = b.face * ALPHA_KIT.leapV; b.vy = -ALPHA_KIT.leapUp;
-      sfx('dash'); cam.shake = Math.max(cam.shake, 4);
+      sfx('alpha_leap'); cam.shake = Math.max(cam.shake, 4);
     }
   } else if (b.st === 'leap') {
     // COMMITTED. No steering in the air — that is the whole reason the coil in
@@ -645,7 +658,7 @@ function alphaStep(b, dt, px, py) {
     if (!b.fired) {
       b.fired = true;
       alphaSummon(b);
-      sfx('roar_beast'); cam.shake = Math.max(cam.shake, 7);
+      sfx('alpha_howl'); cam.shake = Math.max(cam.shake, 7);
       if (typeof padRumble === 'function') padRumble(0.7, 0.5, 380);
       if (typeof roarWave === 'function') roarWave(b.cx(), b.cy() - b.h * 0.3, '#ff8a4a');
     }
@@ -667,7 +680,7 @@ function alphaStep(b, dt, px, py) {
         player.vx = 0;
         if (typeof padRumble === 'function') padRumble(0.9, 0.8, 700);
       }
-      sfx('roar_beast'); cam.shake = Math.max(cam.shake, 11);
+      sfx('alpha_bark'); cam.shake = Math.max(cam.shake, 11);
       if (typeof roarWave === 'function') roarWave(b.cx(), b.cy() - b.h * 0.3, '#ffc24a');
       burst(b.cx(), b.cy(), 18, '#ffe6b8', 300, 0.6, 0, 3, true);
     }
@@ -773,9 +786,7 @@ function drawAlpha(c, b, cx, cy) {
       const S = pick.S, H = b.h * ALPHA_STRIP_H * S.k;
       c.save();
       c.translate(cx, b.y + b.h);
-      const bob = Math.sin(t2 * 1.7) * 1.8;
-      const lean = clamp((b.vx || 0) / 900, -0.2, 0.2);
-      const pop = warn ? 1 + 0.05 * Math.sin(t2 * 20) : 1;
+      const bob = 0, lean = 0, pop = 1; // authored paws already carry weight
       c.translate(0, bob);
       c.rotate(lean);
       c.scale(pop * ((b.face || -1) > 0 ? -1 : 1), pop);

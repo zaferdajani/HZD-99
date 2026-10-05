@@ -1183,7 +1183,7 @@ function beastMotionEnd(b, dt) {
     if (b.st === 'crouch') beastSound('coil');
     if (b.st === 'intro') beastSound('awake');
   } else b._motionElapsed = (b._motionElapsed || 0) + dt;
-  if ((b._motionBefore === 'stalk' || b._motionBefore === 'run') && !b.dead && b.stagT <= 0) {
+  if (((b._motionBefore === 'stalk' || b._motionBefore === 'run') && !b.dead && b.stagT <= 0) || (b.purified && b.petWalk)) {
     const distance = Math.abs(b.x - b._motionX);
     // A watchdog/room relocation is not a step. Collision-resolved travel is.
     if (distance < 100) {
@@ -1255,7 +1255,7 @@ const BEAST_STRIPS = [...new Set([...Object.values(BEAST_STRIP).map(s => s.key),
 // is how the harness diffs the two.
 function beastStrip(c, b) {
   if (typeof G !== 'undefined' && (G.bossRig || G.beastRig)) return false;
-  let st = b.dead ? 'dead' : b.st;
+  let st = b.purified ? (b.petWalk ? 'stalk' : 'idle') : b.dead ? 'dead' : b.st;
   // Field pounces still use the flight sequence; their slower gravity is
   // represented by the duration recorded from their launch velocity.
   let S = BEAST_STRIP[st];

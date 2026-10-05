@@ -287,6 +287,7 @@ function tSetK(code, on) {
 }
 function tStateKind() {
   const s = G.state;
+  if (s === 'REPAIR') return 'none';
   if (s === 'PLAY') return 'play';
   if (s === 'TCFG') return 'tcfg';
   if (s === 'MAP') return 'map';

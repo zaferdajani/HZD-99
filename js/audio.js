@@ -210,7 +210,7 @@ function hzdCompletionPlaying() {
 }
 let NARRATIVE_AUDIO_ACTIVE = false;
 function narrativeAudioActive() {
-  return typeof G !== 'undefined' && !!(G.wake || G.cut || ['DIALOG', 'INTRO', 'CUT'].includes(G.state));
+  return typeof G !== 'undefined' && !!(G.wake || G.cut || ['DIALOG', 'INTRO', 'CUT', 'REPAIR'].includes(G.state));
 }
 function hzdQuiet() {
   hzdRelease(0.025);
@@ -1777,6 +1777,11 @@ function sfx(n) {
     case 'roar_beast':   // NULLFANG: a ripping sub-growl that ends in teeth
       tone(46, 1.2, 'sawtooth', 0.17, 26); tone(92, 0.9, 'square', 0.07, 38);
       tone(23, 1.2, 'sine', 0.1, 20); hiss(0.9, 0.09); break;
+    case 'short': hiss(.12,.04); tone(82,.09,'sawtooth',.025,29); break;
+    case 'alpha_step': tone(72,.07,'sine',.025,38); chink(.012,.012); break;
+    case 'alpha_leap': whoosh(.23,800,2600,.06); tone(110,.18,'sawtooth',.035,58); break;
+    case 'alpha_bark': tone(170,.18,'sawtooth',.06,70); hiss(.12,.04); tone(260,.12,'triangle',.035,90,.12); break;
+    case 'alpha_howl': tone(185,.65,'sawtooth',.035,360); tone(370,.85,'sine',.055,410,.16); tone(555,.75,'triangle',.025,615,.2); tone(410,.5,'sine',.035,165,.72); break;
     case 'roar_eagle':   // TALONHOST: a metal screech climbing off the cable
       tone(950, 0.55, 'square', 0.07, 2300); tone(1900, 0.45, 'sawtooth', 0.05, 700, 0.1);
       tone(140, 0.5, 'square', 0.05, 90, 0.05); hiss(0.5, 0.07); break;

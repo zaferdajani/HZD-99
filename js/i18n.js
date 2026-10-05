@@ -1453,7 +1453,110 @@ const STORY_DRAFT2_TEXT = {
     i_cshard: 'رخام خام', i_cshardd: 'كتلة مستديرة حُرّرت من الصخر المحيط بها. أحضر المادة إلى راتشيت؛ لم تصبح نصلًا بعد.',
   }
 };
+const STORY_OCT4_TEXT = {
+  "en": {
+    "repair_kicker": "WORKSHOP · RATCHET",
+    "repair_title": "Bring him back",
+    "repair_close": "Close · saved",
+    "repair_help": "Drag a part to its socket, or tap each in turn. Keyboard: arrows and Enter.",
+    "repair_safe": "No timer. Wrong connections can always be retried.",
+    "repair_power": "Restore power",
+    "repair_cell": "Battery",
+    "repair_socket": "Battery socket",
+    "repair_positive": "+ wire",
+    "repair_negative": "− wire",
+    "repair_bridge": "Bridge",
+    "repair_plus": "+ terminal",
+    "repair_minus": "− terminal",
+    "repair_relay": "Relay",
+    "repair_step0": "Place Ratchet’s own battery in the empty socket.",
+    "repair_step1": "Connect the amber positive wire to the + terminal.",
+    "repair_step2": "Connect the blue ground wire to the − terminal.",
+    "repair_step3": "Place the bridge across the relay.",
+    "repair_step4": "Circuit complete. Restore power when you are ready.",
+    "repair_retry": "That socket does not match. Try the highlighted part again.",
+    "repair_boot": "Restoring power…",
+    "wake_fault": "POWER FAULT → SYSTEM RESTART",
+    "sl_note1": "A handwritten letter is tucked against his empty battery socket:",
+    "sl_note2": "“Mother’s song has been infected. My marble slowed the virus, but cannot stop it. I removed my battery before it could take me. It is in the drawer beside this chair.”",
+    "sl_note3": "“Seat my battery in its socket. Connect the positive wire, then the ground, and bridge the relay. Restore power. If you are reading this, perhaps there is still hope. — R.”",
+    "sl_rfrag1": "Mother’s song kept the robots of every kingdom in harmony. Someone unknown hacked its frequency and hid a virus inside it.",
+    "sl_rfrag2": "The infected song turned our neighbours against each other. You were already asleep for recharging. You missed that broadcast; you were not made immune to it.",
+    "sl_rfrag4": "The marble in my necklace was an old gift to my ancestor. It slowed the virus long enough for me to think. It could not stop the infection.",
+    "sl_rfrag5": "Everyone around me was infected. Before I lost myself, I removed my own battery and left that letter. You brought me back.",
+    "q_ask_ratchet_forge": [
+      "Mother’s song kept the kingdoms at peace. An unknown intruder infected its frequency. Our neighbours turned on one another.",
+      "This marble came to me through my family. It slowed the virus, but it was not enough to stop it.",
+      "I removed my own battery before the infection took me. You were asleep for recharging, long before this happened. That is how you missed the broadcast.",
+      "There is a large deposit of raw marble in the caves beneath the meadow. Bring a piece back to my workshop.",
+      "I can forge it into a glowing white sword that neutralizes the virus. The sages and our neighbours can become our friends again.",
+      "I left a spare cell for Servo in your pouch. His gantries overlook the meadow; the marble lies below."
+    ],
+    "i_crystald": "Ratchet forged this glowing white sword from the cave marble. It neutralizes the virus and frees infected robots. Its handle can later connect to another weapon.",
+    "alpha_den": "ALPHA DEN · OPTIONAL",
+    "alpha_escape": "Break free: tap Jump or Attack four times!",
+    "q_name_alpha_pack": "The lost wardens",
+    "q_goal_alpha_pack": "Optional: follow the howl to the Meadow den. Restore the Alpha to free its pack.",
+    "q_ask_alpha_pack": [
+      "Before the song broke, the wolves escorted lost workers home. Their Alpha kept watch over the Meadow den.",
+      "Now its corrupted howl drives the pack to attack the people it protected. They are still following their guardian.",
+      "If you choose, find the marked den entrance in the Meadow. Your white blade can release the Alpha, and its pack will become our allies. The old supply cache beyond the den will be yours.",
+      "This is a detour. The marble came from the cave; your path to the sages remains open."
+    ]
+  },
+  "ar": {
+    "repair_kicker": "الورشة · راتشيت",
+    "repair_title": "أعِد إليه الحياة",
+    "repair_close": "إغلاق · محفوظ",
+    "repair_help": "اسحب القطعة إلى موضعها أو المسهما بالتتابع. للوحة المفاتيح: الأسهم وEnter.",
+    "repair_safe": "بلا مؤقّت. يمكنك إعادة المحاولة عند توصيل خاطئ.",
+    "repair_power": "تشغيل الطاقة",
+    "repair_cell": "البطارية",
+    "repair_socket": "موضع البطارية",
+    "repair_positive": "السلك الموجب +",
+    "repair_negative": "السلك السالب −",
+    "repair_bridge": "الجسر",
+    "repair_plus": "القطب الموجب +",
+    "repair_minus": "القطب السالب −",
+    "repair_relay": "المرحل",
+    "repair_step0": "ضع بطارية راتشيت في موضعها الفارغ.",
+    "repair_step1": "صِل السلك الكهرماني بالقطب الموجب +.",
+    "repair_step2": "صِل سلك التأريض الأزرق بالقطب السالب −.",
+    "repair_step3": "ضع الجسر على طرفي المرحل.",
+    "repair_step4": "اكتملت الدائرة. شغّل الطاقة حين تكون مستعدًا.",
+    "repair_retry": "هذا الموضع لا يطابق القطعة. حاول مجددًا.",
+    "repair_boot": "جارٍ استعادة الطاقة…",
+    "wake_fault": "عطل كهربائي ← إعادة تشغيل النظام",
+    "sl_note1": "رسالة بخط اليد موضوعة بجوار موضع بطاريته الفارغ:",
+    "sl_note2": "«أُصيبت أغنية الأم بالفيروس. أبطأت قطعة الرخام انتشاره، لكنها لا تستطيع إيقافه. نزعت بطاريتي قبل أن يسيطر عليّ. إنها في الدرج بجانب هذا الكرسي.»",
+    "sl_note3": "«ضع بطاريتي في مكانها. صِل السلك الموجب ثم سلك التأريض، وضع الجسر على المرحل. شغّل الطاقة. إن كنت تقرأ هذا، فربما بقي أمل. — ر.»",
+    "sl_rfrag1": "كانت أغنية الأم تحفظ الوئام بين روبوتات الممالك. اخترق مجهول ترددها ودسّ فيروسًا فيها.",
+    "sl_rfrag2": "قلبت الأغنية المصابة جيراننا بعضهم على بعض. كنت نائمة لإعادة الشحن قبل ذلك؛ لم تسمعي البث المصاب. لست محصّنة بالفطرة.",
+    "sl_rfrag4": "قطعة الرخام في قلادتي هدية قديمة لأحد أسلافي. أبطأت الفيروس ومنحتني وقتًا للتفكير، لكنها لم تستطع إيقاف العدوى.",
+    "sl_rfrag5": "أُصيب كل من حولي. نزعت بطاريتي وتركت الرسالة قبل أن أفقد نفسي. وأنت أعدتني.",
+    "q_ask_ratchet_forge": [
+      "كانت أغنية الأم تحفظ السلام بين الممالك. اخترق مجهول ترددها، فصار الجيران يهاجمون بعضهم.",
+      "ورثت قطعة الرخام هذه عن عائلتي. أبطأت الفيروس، لكنها لم تكن كافية لإيقافه.",
+      "نزعت بطاريتي قبل أن تسيطر العدوى عليّ. كنت نائمة لإعادة الشحن منذ ما قبل الكارثة، ولهذا فاتك البث.",
+      "يوجد مخزون كبير من الرخام الخام في الكهوف تحت المرج. أحضري قطعة إلى ورشتي.",
+      "سأصنع منها سيفًا أبيض متوهجًا يحيّد الفيروس. يمكن للحكماء وجيراننا أن يعودوا أصدقاءنا.",
+      "وضعت خلية احتياطية لسيرفو في حقيبتك. جسوره تطل على المرج، والرخام تحته."
+    ],
+    "i_crystald": "صنع راتشيت هذا السيف الأبيض المتوهج من رخام الكهف. يحيّد الفيروس ويحرّر الروبوتات المصابة. يمكن ربط مقبضه بسلاح آخر لاحقًا.",
+    "alpha_den": "وكر الألفا · اختياري",
+    "alpha_escape": "تحرّر: اضغط القفز أو الهجوم أربع مرات!",
+    "q_name_alpha_pack": "الحراس الضائعون",
+    "q_goal_alpha_pack": "اختياري: اتبع العواء إلى وكر المرج. حرّر الألفا لإنقاذ قطيعه.",
+    "q_ask_alpha_pack": [
+      "قبل فساد الأغنية، كانت الذئاب تعيد العمال التائهين إلى بيوتهم. وكان الألفا يحرس وكر المرج.",
+      "الآن يدفع عواؤه المصاب القطيع لمهاجمة من كان يحميهم. ما زالوا يتبعون حارسهم.",
+      "إن شئت، ابحث عن مدخل الوكر المعلّم في المرج. يمكن لسيفك الأبيض تحرير الألفا، فيصبح قطيعه حليفنا. وسيُفتح لك مخزن المؤن خلف الوكر.",
+      "هذه رحلة اختيارية. أخذت الرخام من الكهف، وطريق الحكماء ما زال مفتوحًا."
+    ]
+  }
+};
 function t(k) {
+  if (typeof isHero === 'function' && !isHero() && STORY_OCT4_TEXT.en[k] != null) return (STORY_OCT4_TEXT[LANG] || STORY_OCT4_TEXT.en)[k] || STORY_OCT4_TEXT.en[k];
   if (typeof isHero === 'function' && !isHero() && typeof G !== 'undefined'
       && G.save && G.save.storyVersion === 2 && STORY_DRAFT2_TEXT.en[k] != null)
     return (STORY_DRAFT2_TEXT[LANG] || STORY_DRAFT2_TEXT.en)[k] || STORY_DRAFT2_TEXT.en[k];

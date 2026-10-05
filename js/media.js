@@ -62,15 +62,18 @@ const MEDIA_SRC = {
     // move, 320-px cells, feet on the cell floor, facing LEFT like the plates.
     // Drawn by alphaStrip in js/wolves.js over the state's own clock; the
     // plate draws whenever a strip is not here.
-    alRest: 'assets/characters/alpha/rest.webp',
-    alProwl: 'assets/characters/alpha/prowl.webp',
-    alRoar: 'assets/characters/alpha/roar.webp',
-    alHowl: 'assets/characters/alpha/howl.webp',
-    alLeap: 'assets/characters/alpha/leap.webp',
-    alClaw: 'assets/characters/alpha/claw.webp',
-    alBite: 'assets/characters/alpha/bite.webp',
-    alClinch: 'assets/characters/alpha/clinch.webp',
-    alYield: 'assets/characters/alpha/yield.webp',
+    repairPanel: 'assets/characters/gear/repair_panel.webp',
+    repairBattery: 'assets/characters/gear/repair_battery.webp',
+    wakeLamp: 'assets/characters/gear/wake_lamp.webp',
+    alRest: 'assets/characters/alpha/studio/rest.webp',
+    alProwl: 'assets/characters/alpha/studio/prowl.webp',
+    alRoar: 'assets/characters/alpha/studio/roar.webp',
+    alHowl: 'assets/characters/alpha/studio/howl.webp',
+    alLeap: 'assets/characters/alpha/studio/leap.webp',
+    alClaw: 'assets/characters/alpha/studio/claw.webp',
+    alBite: 'assets/characters/alpha/studio/bite.webp',
+    alClinch: 'assets/characters/alpha/studio/clinch.webp',
+    alYield: 'assets/characters/alpha/studio/yield.webp',
     // ...and CHIME's four (same batch): the hover, the ring, the note, the fall
     chRest: 'assets/characters/chime/rest.webp',
     chRing: 'assets/characters/chime/ring.webp',

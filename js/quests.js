@@ -20,6 +20,7 @@
 // See docs/STORY_CANON.md for the owner's narrative contract.
 // ===========================================================================
 const QUESTS = [
+  {id:'alpha_pack', npc:'ratchet', zone:'A', after:'ratchet_forge', kind:'flag', flag:'alpha', reward:{}},
   {
     // THE GAME'S FIRST QUEST — the sword is EARNED, not handed over.
     // Ratchet's story (the ask text): the corrupted song took every unit
@@ -103,7 +104,7 @@ function questFor(npc) {
   // kingdom; his story cannot.
   if (G.save && G.save.flags && !G.save.flags.tut && npc !== 'ratchet') return null;
   for (const q of QUESTS) {
-    if (q.npc !== npc) continue;
+    if (q.id === 'alpha_pack' || q.npc !== npc) continue;
     if (qState(q.id) === 'done') continue;
     if (q.after && qState(q.after) !== 'done') continue;
     return q;
@@ -111,6 +112,7 @@ function questFor(npc) {
   return null;
 }
 function qProgress(q) {
+  if (q.kind === 'flag') return G.save.flags[q.flag] ? 1 : 0;
   if (q.kind === 'fetch') return (G.save.bag && G.save.bag[q.item]) ? 1 : 0;
   if (q.kind === 'cull') return Math.min(q.count, (G.save.culls && G.save.culls[q.foe]) | 0);
   if (q.kind === 'reach') return (G.save.visited && G.save.visited[q.room]) ? 1 : 0;
@@ -120,6 +122,7 @@ function qGoal(q) { return q.kind === 'cull' ? q.count : 1; }
 function qDone(q) { return qProgress(q) >= qGoal(q); }
 // one line, in the player's language, describing what is being asked
 function qText(q) {
+  if (q.kind === 'flag') return t('q_goal_' + q.id);
   if (q.kind === 'fetch') return t('q_fetch').replace('%s', t('it_' + q.item));
   if (q.kind === 'cull') return t('q_cull').replace('%n', q.count).replace('%s', t('e_' + q.foe));
   return t('q_reach');
