@@ -81,6 +81,18 @@ const check = (name, ok, detail) => {
           if ((solid(ch) || ch === '=') && g[y - 1][x] === '.' && (y < 2 || g[y - 2][x] === '.')) feet.push([x, y]);
         }
       window.checkTransitions = () => {};          // measure the rise, do not take the door
+      // THE HATCH SHE CAME DOWN THROUGH IS OPEN. A drop through a brittle floor
+      // ('B'/'v' over the hole) is made by breaking it, and the save keeps it
+      // broken — so the way back up is the hole she made. Since the shaft is
+      // one place (js/game.js VERTICAL LINKS) the room above is real rock to
+      // her body, and an uncut hatch would be measured as a lid she never met.
+      let upId = (ROOMS[id].exits || {}).T; if (upId && typeof upId === 'object') upId = upId.to;
+      const brokeKeep = Object.assign({}, G.save.broken);
+      if (upId && ROOMS[upId]) {
+        const U = buildRoom(upId);
+        for (let ty = Math.max(0, U.length - 3); ty < U.length; ty++) for (let tx = 0; tx < U[0].length; tx++)
+          if (U[ty][tx] === 'B' || U[ty][tx] === 'v') G.save.broken[upId + ':' + tx + ',' + ty] = 1;
+      }
       try {
         for (const [fx, fy] of feet) for (const steer of [0, 1]) for (const delay of [0, 6]) {
           loadRoom(id); G.dialog = null; G.state = 'PLAY'; G.enemies = []; G.boss = null;
@@ -102,7 +114,7 @@ const check = (name, ok, detail) => {
           keys.ArrowRight = 0; keys.ArrowLeft = 0; keys.KeyZ = 0;
           if (out) return (climb[id] = { ok: true, at: fx + ',' + fy });
         }
-      } finally { window.checkTransitions = realCheck; }
+      } finally { window.checkTransitions = realCheck; G.save.broken = brokeKeep; }
       return (climb[id] = { ok: false, why: feet.length ? 'no jump from ' + feet.length + ' footings clears the lid' : 'no footing near the opening' });
     };
     // the body's graph
