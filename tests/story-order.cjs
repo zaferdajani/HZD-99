@@ -94,19 +94,47 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       const def = ROOMS[id], out = [];
       G.roomId = id; G.roomDef = def; G.grid = buildRoom(id); G.boss = null; G.trans = null;
       G.statics = []; G.rubbles = []; G.gateWalk = null; G.tut = null; G.toasts = [];
+      // THE SHAFT IS ONE PLACE now (js/game.js VERTICAL LINKS): an open up/down
+      // pair is crossed by a silent handover, not a G.trans cut, and the way up
+      // needs a ledge in the room above. Mirror what loadRoom sets (the links),
+      // record a handover as the crossing it is instead of performing it, and
+      // cut the hatches over each way up — like rubble, a hatch is physics the
+      // player clears with a strike, not story. Production's gate decision
+      // (exitOpen inside checkTransitions / vlinkSeamless) is untouched.
+      G.vlink = vlinkFor(id);
+      const realHand = window.vlinkHandover;
+      window.vlinkHandover = (sd, dest) => { G.trans = { to: dest, side: sd, seam: true }; };
+      const brokeKeep = Object.assign({}, G.save.broken);
+      for (const sd of ['T', 'B']) {
+        let up = (def.exits || {})[sd]; if (up && typeof up === 'object') up = up.to;
+        if (!up || !ROOMS[up]) continue;
+        const U = buildRoom(up), rows = sd === 'T' ? [U.length - 3, U.length - 2, U.length - 1] : [0, 1, 2];
+        for (const ty of rows) for (let tx = 0; tx < U[0].length; tx++)
+          if (U[ty] && (U[ty][tx] === 'B' || U[ty][tx] === 'v')) G.save.broken[up + ':' + tx + ',' + ty] = 1;
+      }
       const W = def.w * TILE, H = def.h * TILE;
       for (const side of Object.keys(def.exits || {})) {
         G.trans = null; player.vx = 0; player.vy = 0; player.lastSafe = { x: 40, y: 40 };
         if (side === 'L') { player.x = -player.w - 4; player.y = (def.h - 4) * TILE; }
         else if (side === 'R') { player.x = W + 4; player.y = (def.h - 4) * TILE; }
         else if (side === 'T') {
-          const gap = G.grid.tGap;
+          // under the OPENING, the only place a body can rise through: the way
+          // up now ends on a ledge or not at all (checkTransitions/topLedge),
+          // so a probe at mid-room in a roofed room is a probe inside rock
+          let gap = G.grid.tGap;
+          if (!gap) {
+            const row = G.grid[0]; let a = -1, b2 = -1;
+            for (let x = 0; x < row.length; x++) if (row[x] === '.') { if (a < 0) a = x; b2 = x; } else if (a >= 0) break;
+            if (a >= 0) gap = [a, b2];
+          }
           player.x = gap ? ((gap[0] + gap[1] + 1) / 2) * TILE - player.w / 2 : W / 2;
           player.y = -player.h - 4;
         } else { player.x = W / 2; player.y = H + 50; }
         checkTransitions();
         if (G.trans) out.push(G.trans.to);
       }
+      window.vlinkHandover = realHand;
+      G.save.broken = brokeKeep;
       G.trans = null;
       for (const d of gateDoorsAll(id)) {
         G.gateWalk = null;
@@ -255,7 +283,9 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
         player.x = ((gap[0] + gap[1] + 1) / 2) * TILE - player.w / 2; player.y = -player.h - 6; player.vy = -300;
         G.trans = null; checkTransitions();
         const said = (G.toasts || []).map(x => x.text).join(' | ');
-        return { to: G.trans && G.trans.to, said };
+        // an open shaft is crossed by the silent handover (VERTICAL LINKS): the
+        // room really changes, with no G.trans cut — count either as crossing
+        return { to: (G.trans && G.trans.to) || (G.roomId !== 'A3' ? G.roomId : null), said };
       };
       const a = up({ crystal: 1, sageTame_GA1D: 1, bossChime: 1 });
       check('the climb to the Conduits refuses before NULLFANG is free', !a.to, a.to);

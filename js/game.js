@@ -1768,9 +1768,9 @@ function atShift(lowerId, upperId, at) {
 function vlinkFor(id) {
   const def = ROOMS[id], ex = (def && def.exits) || {}, out = { T: null, B: null };
   for (const side of ['T', 'B']) {
-    let to = ex[side], at = null, flag = null;
+    let to = ex[side], at = null, flag = null, gate = null;
     if (!to) continue;
-    if (typeof to === 'object') { at = to.at != null ? to.at : null; flag = to.flag || null; to = to.to; }
+    if (typeof to === 'object') { at = to.at != null ? to.at : null; flag = to.flag || null; gate = to; to = to.to; }
     if (!to || !ROOMS[to]) continue;
     let otx = 0, oty;
     if (side === 'T') {
@@ -1785,7 +1785,7 @@ function vlinkFor(id) {
         otx = -atShift(to, id, back.at);
     }
     out[side] = { id: to, grid: buildRoom(to), otx, oty, ox: otx * TILE, oy: oty * TILE,
-      w: ROOMS[to].w, h: ROOMS[to].h, flag };
+      w: ROOMS[to].w, h: ROOMS[to].h, flag, gate };
   }
   return out;
 }
@@ -1794,6 +1794,12 @@ function vlinkTile(tx, ty) {
   const V = G.vlink;
   const L = V && (ty < 0 ? V.T : V.B);
   if (!L) return '.';
+  // A CLOSED GATE HAS NO FLOOR BEYOND IT. The story gates (exitOpen: the
+  // Conduits wait on NULLFANG and the blade) are enforced at the old cut
+  // crossing; if the room above stayed solid to her here she could rise
+  // through the hole and stand on its floor while still officially below —
+  // outside both rooms. Closed, it is open air, as it always was.
+  if (L.gate && !exitOpen(L.gate)) return '.';
   const nx = tx - L.otx, ny = ty - L.oty, g = L.grid;
   if (ny < 0 || ny >= g.length || nx < 0 || nx >= g[0].length) return '.';
   if (L.id === 'D3' && !G.save.flags.bossZero && ny >= 15 && nx >= 15 && nx <= 17) return '#';
@@ -1816,6 +1822,9 @@ function vlinkSeamless(side) {
   const L = G.vlink && G.vlink[side];
   if (!L) return null;
   if (L.flag && !G.save.flags[L.flag]) return null;
+  // every rule exitOpen knows (blade, hero exemption, a door already walked)
+  // — a gate the cut crossing refuses must not be walked through seamlessly
+  if (L.gate && !exitOpen(L.gate)) return null;
   if (roomHasLiveBoss(L.id)) return null;
   return L;
 }

@@ -52,6 +52,10 @@ const check = (name, ok, detail) => {
     // over E1 is open once ZERO is down, and every guardian's chamber is
     // walked into as a room rather than staged as an entrance
     for (const b of ['Glitch', 'Brood', 'Atlas', 'Zero', 'Prism', 'Mother', 'Alpha', 'Chime', 'Carrier', 'Moth', 'Lattice', 'Lens']) sv.flags['boss' + b] = 1;
+    // ...and carrying the blade: A3's climb to the Conduits is a story gate
+    // (NULLFANG down AND the blade forged), and a save that has beaten every
+    // guardian has forged it — blade-only taming says so
+    sv.flags.crystal = 1;
     startGame(sv);
     const out = { table: [], up: [], down: [], blocked: null };
     const ups = [];
@@ -190,6 +194,31 @@ const check = (name, ok, detail) => {
       keys[KEYB.JUMP[0]] = 0;
       out.blocked = { room: G.roomId, minCentre: Math.round(minY) };
     }
+    // ---- 4b. a CLOSED story gate is not a seamless shaft ----------------------
+    // A3 -> B1 waits on NULLFANG and the blade. With the gate shut, the room
+    // above must be neither a handover nor a floor: rising through the hole
+    // ends back in A3, never standing on B1's floor outside both rooms.
+    {
+      const keep = { g: G.save.flags.bossGlitch, c: G.save.flags.crystal, v: G.save.visited && G.save.visited.B1 };
+      G.save.flags.bossGlitch = 0; G.save.flags.crystal = 0; if (G.save.visited) delete G.save.visited.B1;
+      loadRoom('A3'); G.state = 'PLAY'; G.enemies = []; G.boss = null;
+      const L = G.vlink && G.vlink.T;
+      const seam = !!vlinkSeamless('T');
+      let solidAbove = 0;
+      if (L) for (let x = 0; x < ROOMS.A3.w; x++) for (let y = -6; y < 0; y++) { const ch = vlinkTile(x, y); if (ch === '#' || ch === 'B') solidAbove++; }
+      const g = G.grid; let cx = -1;
+      for (let x = 1; x < ROOMS.A3.w - 1; x++) if (g[0][x] === '.') { cx = x; break; }
+      let room = 'A3', minY = 1e9, stood = false;
+      if (cx >= 0) {
+        player.x = cx * TILE + 4; player.y = TILE + 2; player.vy = -1100; player.on = false; player.iT = 99;
+        step(90, () => { G.enemies = []; minY = Math.min(minY, player.y); if (player.on && player.y < 0) stood = true; return false; });
+        room = G.roomId;
+      }
+      out.gate = { link: !!L, seam, solidAbove, room, stood, opening: cx };
+      G.save.flags.bossGlitch = keep.g; G.save.flags.crystal = keep.c; if (keep.v && G.save.visited) G.save.visited.B1 = keep.v;
+      loadRoom('A3');
+      out.gate.openSeam = !!vlinkSeamless('T');
+    }
     // ---- 5. the room above is drawn -------------------------------------------
     {
       breakHatch('B7');
@@ -247,6 +276,10 @@ const check = (name, ok, detail) => {
   }
   check('an uncut hatch overhead is a ceiling, not a door', r.blocked.room === 'A7' && r.blocked.minCentre >= -2,
     'still in ' + r.blocked.room + ', centre never above ' + r.blocked.minCentre);
+  check('a closed story gate (A3 -> B1) is no seamless shaft and no floor above',
+    r.gate && r.gate.link && !r.gate.seam && r.gate.solidAbove === 0 && r.gate.room === 'A3' && !r.gate.stood && r.gate.openSeam,
+    r.gate ? ('seamless ' + r.gate.seam + ', solid tiles above ' + r.gate.solidAbove + ', ended in ' + r.gate.room +
+      (r.gate.stood ? ', STOOD ABOVE THE FRAME' : '') + ', seamless once open ' + r.gate.openSeam) : 'not run');
   check('the room above is drawn above the room', r.drawn.differs && r.drawn.camY < 0,
     'camera at y ' + r.drawn.camY + ' (extension ' + r.drawn.ext + ' px), top strip ' + (r.drawn.differs ? 'painted by B7' : 'unchanged'));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
