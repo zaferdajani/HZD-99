@@ -1,0 +1,39 @@
+{
+  "source": "assets/source/beast/studio-2026-10-04/stalk.mp4",
+  "frames": 24,
+  "cell": [
+    448,
+    256
+  ],
+  "times": [
+    0.42,
+    0.503,
+    0.5861,
+    0.6691,
+    0.7522,
+    0.8352,
+    0.9183,
+    1.0013,
+    1.0843,
+    1.1674,
+    1.2504,
+    1.3335,
+    1.4165,
+    1.4996,
+    1.5826,
+    1.6657,
+    1.7487,
+    1.8317,
+    1.9148,
+    1.9978,
+    2.0809,
+    2.1639,
+    2.247,
+    2.33
+  ],
+  "scale": 0.31037827352085356,
+  "rootMotion": "vertical removed; simulation supplies trajectory",
+  "reference": "standing envelope: 320x210px",
+  "reviewed": true,
+  "review": "Assistant inspected source motion and runtime-alpha contacts; not owner art approval."
+}

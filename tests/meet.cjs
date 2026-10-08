@@ -12,7 +12,7 @@
 //   it comes, it hits ONCE, it costs her exactly one core and never the last;
 //   she is thrown the length of the mound; her controls are held and returned;
 //   it leaves; the flag holds; it never happens twice;
-//   and A4 knows: the same slam on the guardian's wake, the rematch toast.
+//   and A4 knows: a distinct awakening cue on the rematch, plus its toast.
 //
 //   node tests/meet.cjs
 const { chromium } = require('playwright');
@@ -42,6 +42,7 @@ const { chromium } = require('playwright');
     player.cores = cores;
     const out = { phases: [], sounds: [], music: [] };
     const sfx0 = window.sfx; window.sfx = (k) => { out.sounds.push(k); return sfx0(k); };
+    const creature0 = window.beastSound; window.beastSound = k => { out.sounds.push('nf_' + k); return creature0(k); };
     const sm0 = window.setMusic; window.setMusic = (k) => { out.music.push('set:' + k); return sm0(k); };
     const st0 = window.stopMusic; window.stopMusic = () => { out.music.push('stop'); return st0(); };
     let f = 0, held = 0, xAtHit = null, minX = 1e9, lastPh = null, coresAtHit = null;
@@ -58,7 +59,7 @@ const { chromium } = require('playwright');
       if (out.phases.length && !G.meet && !G.boss) { out.endF = f; break; }
     }
     keys.ArrowRight = 0;
-    window.sfx = sfx0; window.setMusic = sm0; window.stopMusic = st0;
+    window.beastSound = creature0; window.sfx = sfx0; window.setMusic = sm0; window.stopMusic = st0;
     out.thrown = xAtHit != null ? xAtHit - minX : 0;
     out.held = held; out.cores = player.cores; out.dead = player.dead; out.flag = !!G.save.flags.nfMeet;
     out.bossGone = !G.boss; out.meetGone = !G.meet; out.room = G.roomId;
@@ -81,7 +82,7 @@ const { chromium } = require('playwright');
     ['fall', 'land', 'wind', 'swipe', 'watch', 'coil', 'leave'].every(p => r.phases.some(q => q.startsWith(p + '@'))));
   check('...and it is over inside ten seconds', r.endF && r.endF < 60 * 10, r.endF ? (r.endF / 60).toFixed(1) + ' s' : 'never ended');
   check('the music drops out for it and comes back', r.music[0] === 'stop' && r.music.some(m => m.startsWith('set:')), r.music.join(','));
-  check('it announces itself: the slam, the tell, the hit', ['slam', 'tellbig', 'hit'].every(k => r.sounds.includes(k)), r.sounds.filter(k => /slam|tellbig|hit|dash/.test(k)).join(','));
+  check('arrival, tell, creature swipe, impact and departure each have a cue', ['nf_arrive', 'tellbig', 'nf_swipe', 'hit', 'nf_leap'].every(k => r.sounds.includes(k)), r.sounds.filter(k => /nf_|tellbig|hit/.test(k)).join(','));
   check('it costs her exactly one core', r.cores === 4 && !r.dead, r.cores + (r.dead ? ' dead' : ''));
   check('she is thrown the length of the mound (> 200 px west)', r.thrown > 200, Math.round(r.thrown) + ' px');
   check('her controls are held while it walks up', r.held > 20, r.held + ' frames');
@@ -97,15 +98,16 @@ const { chromium } = require('playwright');
     G.save.flags.nfMeet = 1; loadRoom('A4'); G.dialog = null; G.state = 'PLAY'; G.toasts = [];
     const b = G.boss; const out = { sounds: [], toast: null };
     const sfx0 = window.sfx; window.sfx = (k) => { out.sounds.push(k); return sfx0(k); };
+    const creature0 = window.beastSound; window.beastSound = k => { out.sounds.push('nf_' + k); return creature0(k); };
     player.x = b.cx() - 200; player.y = b.y;
     for (let i = 0; i < 30; i++) update(1 / 60);
-    window.sfx = sfx0;
+    window.beastSound = creature0; window.sfx = sfx0;
     out.intro = b.st === 'intro';
     out.toast = (G.toasts || []).map(t => t.text || t.msg || JSON.stringify(t)).join('|');
     out.marks = braid().marks || {};
     return out;
   });
-  check('A4 wakes as the rematch: the same slam', a4.intro && a4.sounds.includes('slam'), a4.sounds.join(','));
+  check('A4 wakes as the rematch: one distinct awakening', a4.intro && a4.sounds.filter(k => k === 'nf_awake').length === 1 && !a4.sounds.includes('nf_arrive'), a4.sounds.join(','));
   check('...says it remembers', /remembers|corridor|الممرّ/i.test(a4.toast), a4.toast);
   check('...and the Braid marks the rematch', a4.marks.rematch === 'A4');
   check('no page errors', errs.length === 0, errs.join(' | '));

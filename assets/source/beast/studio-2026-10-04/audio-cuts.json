@@ -1,0 +1,92 @@
+{
+  "coil": {
+    "source": "assets/source/beast/studio-2026-10-04/pounce.mp4",
+    "start": 0.8,
+    "end": 1.6,
+    "tempo": 1,
+    "duration": 0.8,
+    "peak": 0.800000011920929,
+    "rms": 0.12792551517486572
+  },
+  "leap": {
+    "source": "assets/source/beast/studio-2026-10-04/pounce.mp4",
+    "start": 2.22,
+    "end": 2.95,
+    "tempo": 1.4,
+    "duration": 0.54346875,
+    "peak": 0.800000011920929,
+    "rms": 0.1698695719242096
+  },
+  "land": {
+    "source": "assets/source/beast/studio-2026-10-04/pounce.mp4",
+    "start": 4.76,
+    "end": 5.46,
+    "tempo": 1,
+    "duration": 0.70003125,
+    "peak": 0.800000011920929,
+    "rms": 0.1946670264005661
+  },
+  "step": {
+    "source": "assets/source/beast/studio-2026-10-04/pounce.mp4",
+    "start": 4.79,
+    "end": 5.06,
+    "tempo": 1.2,
+    "duration": 0.2384375,
+    "peak": 0.7999999523162842,
+    "rms": 0.21850721538066864
+  },
+  "swipe": {
+    "source": "assets/source/beast/studio-2026-10-04/rake.mp4",
+    "start": 2.78,
+    "end": 3.5,
+    "tempo": 2,
+    "duration": 0.364625,
+    "peak": 0.7999999523162842,
+    "rms": 0.20215922594070435
+  },
+  "hurt": {
+    "source": "assets/source/beast/studio-2026-10-04/hurt.mp4",
+    "start": 1.76,
+    "end": 2.28,
+    "tempo": 1.5,
+    "duration": 0.3595625,
+    "peak": 0.800000011920929,
+    "rms": 0.18430036306381226
+  },
+  "roar": {
+    "source": "assets/source/beast/studio-2026-10-04/roar.mp4",
+    "start": 2.75,
+    "end": 4.45,
+    "tempo": 2,
+    "duration": 0.85203125,
+    "peak": 0.800000011920929,
+    "rms": 0.18710315227508545
+  },
+  "awake": {
+    "source": "assets/source/beast/studio-2026-10-04/roar.mp4",
+    "start": 1.5,
+    "end": 2.65,
+    "tempo": 1.2,
+    "duration": 0.97484375,
+    "peak": 0.800000011920929,
+    "rms": 0.18755021691322327
+  },
+  "breath": {
+    "source": "assets/source/beast/studio-2026-10-04/roar.mp4",
+    "start": 4.8,
+    "end": 5.7,
+    "tempo": 1,
+    "duration": 0.9,
+    "peak": 0.800000011920929,
+    "rms": 0.21045666933059692
+  },
+  "arrive": {
+    "source": "assets/source/beast/studio-2026-10-04/pounce.mp4",
+    "start": 4.76,
+    "end": 5.9,
+    "tempo": 1,
+    "duration": 1.13990625,
+    "peak": 0.800000011920929,
+    "rms": 0.16104747354984283
+  }
+}

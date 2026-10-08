@@ -1,0 +1,332 @@
+
+── lion-studio  — Nullfang motion clocks, planted gait, attack cadence and creature cue ownership
+PASS: loaded strips, render-independent clocks, planted gait, 13 airborne poses, fair phase-two chain, distinct sound and acceleration
+
+── story-meeting  — interactive guardian warning and real contact
+PASS readable and escapable first guardian {
+  phases: [
+    'fall',  'land',
+    'wind',  'swipe',
+    'watch', 'coil',
+    'leave'
+  ],
+  escapedWithoutDamage: true,
+  movement: 346.16666666667106,
+  contactDamage: 1
+}
+
+── openings  — every boss move opens for at least one hit, and only the bait pays out three
+── openings — every move opens for at least one hit, and only the bait pays out three
+  ── NULLFANG
+       @70px p1  idle 40%  swipewarn 34%  swipe 16%  perch 4%  spring 2%  stalk 1%  springwarn 1%  dive 1%  recover 1%
+         tells began at (px): swipewarn 14  springwarn 3  perch 234
+         swipe>idle: idle 517, stalk 17 -> swipewarn  (reach 32/32)
+         swipe>idle: idle 467, stalk 67 -> swipewarn  (reach 32/32)
+         dive>recover: recover 317, idle 417, stalk 17 -> swipewarn  (reach 45/45)
+         dive>recover: recover 317, idle 317, stalk 17 -> swipewarn  (reach 39/39)
+       @320px p1  crouch 26%  pounce 20%  idle 19%  recover 10%  stalk 8%  swipewarn 7%  swipe 4%  perch 3%  springwarn 1%  spring 1%  dive 1%  roar 1%
+         tells began at (px): crouch 279  swipewarn 32  springwarn 92  perch 56
+         pounce>recover: recover 367, idle 417, stalk 17 -> swipewarn  (reach 48/48)
+         pounce>recover: recover 367, idle 383, stalk 17 -> swipewarn  (reach 46/46)
+         swipe>idle: idle 483 -> crouch  (reach 29/29)
+         swipe>idle: idle 667 -> crouch  (reach 40/40)
+         dive>recover: recover 317, idle 317, stalk 17 -> swipewarn  (reach 39/39)
+         dive>recover: recover 317, idle 400, stalk 17 -> swipewarn  (reach 44/44)
+       @70px p2  swipewarn 44%  swipe 30%  idle 22%  stalk 1%  springwarn 1%  spring 1%  perch 1%  dive 1%  recover 0%
+         tells began at (px): swipewarn 19  springwarn 30  perch 234
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>idle: idle 583, stalk 17 -> swipewarn  (reach 36/36)
+         swipe>idle: idle 583, stalk 17 -> swipewarn  (reach 36/36)
+         dive>recover: recover 233, idle 333, stalk 17 -> swipewarn  (reach 35/35)
+       @320px p2  crouch 23%  pounce 18%  idle 17%  swipewarn 14%  swipe 10%  recover 7%  stalk 5%  perch 2%  springwarn 1%  spring 1%  dive 1%  roar 1%
+         tells began at (px): crouch 276  swipewarn 127  springwarn 188  perch 89
+         pounce>recover: recover 267, idle 350, stalk 17 -> swipewarn  (reach 38/38)
+         pounce>recover: recover 267, idle 383, stalk 17 -> swipewarn  (reach 40/40)
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>idle: idle 467 -> crouch  (reach 28/28)
+         swipe>idle: idle 517 -> crouch  (reach 31/31)
+         dive>recover: recover 233, idle 350 -> crouch  (reach 35/35)
+       dive>recover         n= 6  min   583  med   650  max   750
+  ok   NULLFANG: dive>recover opens for at least one hit (>= 250 ms)  worst 583 ms (med 650)
+  ok   NULLFANG: dive>recover is not a gift (3 in 4 openings <= 900 ms)  p75 733 ms
+       pounce>recover       n=27  min   617  med   717  max  1100
+  ok   NULLFANG: pounce>recover opens for at least one hit (>= 250 ms)  worst 617 ms (med 717)
+  ok   NULLFANG: pounce>recover is not a gift (3 in 4 openings <= 900 ms)  p75 767 ms
+       swipe>idle           n=97  min   383  med   567  max   717
+  ok   NULLFANG: swipe>idle opens for at least one hit (>= 250 ms)  worst 383 ms (med 567)
+  ok   NULLFANG: swipe>idle is not a gift (3 in 4 openings <= 900 ms)  p75 633 ms
+       swipe>swipewarn      n=41  min     0  med     0  max     0   (chain middle)
+  ok   NULLFANG: every damaging move was seen  all
+  ── THE ALPHA
+       @60px p1  rest 44%  roarwarn 10%  coil 9%  turn 9%  leap 7%  roar 6%  clawwarn 4%  claw 3%  bitewarn 3%  broodcall 2%  bite 2%  howl 1%
+         tells began at (px): clawwarn 244  coil 128  broodcall 217  howl 222  bitewarn 296  roarwarn 203
+         claw>rest: rest 600 -> coil  (reach 36/36)
+         claw>rest: rest 567 -> coil  (reach 34/34)
+         leap>turn: turn 517, rest 1233 -> broodcall  (reach 105/105)
+         leap>turn: turn 517, rest 1233 -> roarwarn  (reach 105/105)
+         bite>rest: rest 400 -> coil  (reach 24/24)
+         bite>rest: rest 433 -> coil  (reach 26/26)
+         roar>rest: rest 750 -> clawwarn  (reach 45/45)
+         roar>rest: rest 750 -> clawwarn  (reach 45/45)
+       @200px p1  rest 44%  roarwarn 10%  coil 9%  turn 9%  leap 7%  roar 6%  clawwarn 4%  claw 3%  bitewarn 3%  broodcall 2%  bite 2%  howl 1%
+         tells began at (px): clawwarn 285  coil 106  broodcall 132  howl 132  bitewarn 132  roarwarn 183
+         claw>rest: rest 650 -> coil  (reach 39/39)
+         claw>rest: rest 417 -> coil  (reach 25/25)
+         leap>turn: turn 517, rest 1283 -> broodcall  (reach 108/108)
+         leap>turn: turn 517, rest 1267 -> roarwarn  (reach 107/107)
+         bite>rest: rest 567 -> coil  (reach 34/34)
+         bite>rest: rest 567 -> coil  (reach 34/34)
+         roar>rest: rest 733 -> clawwarn  (reach 44/44)
+         roar>rest: rest 717 -> clawwarn  (reach 43/43)
+       @420px p1  rest 43%  coil 10%  turn 10%  roarwarn 10%  leap 7%  roar 6%  clawwarn 4%  claw 3%  bitewarn 3%  broodcall 2%  bite 2%  howl 1%
+         tells began at (px): clawwarn 311  coil 182  broodcall 180  howl 217  bitewarn 306  roarwarn 188
+         claw>rest: rest 350 -> coil  (reach 21/21)
+         claw>rest: rest 400 -> coil  (reach 24/24)
+         leap>turn: turn 517, rest 1183 -> broodcall  (reach 102/102)
+         leap>turn: turn 517, rest 1233 -> roarwarn  (reach 105/105)
+         bite>rest: rest 367 -> coil  (reach 22/22)
+         bite>rest: rest 350 -> coil  (reach 21/21)
+         roar>rest: rest 750 -> clawwarn  (reach 45/45)
+         roar>rest: rest 733 -> clawwarn  (reach 44/44)
+       bite>rest            n=18  min   350  med   433  max   650
+  ok   THE ALPHA: bite>rest opens for at least one hit (>= 250 ms)  worst 350 ms (med 433)
+  ok   THE ALPHA: bite>rest is not a gift (3 in 4 openings <= 900 ms)  p75 567 ms
+       claw>rest            n=20  min   350  med   433  max   650
+  ok   THE ALPHA: claw>rest opens for at least one hit (>= 250 ms)  worst 350 ms (med 433)
+  ok   THE ALPHA: claw>rest is not a gift (3 in 4 openings <= 900 ms)  p75 583 ms
+       leap>turn            n=37  min  1600  med  1750  max  1867   (the gift)
+  ok   THE ALPHA: leap>turn opens for at least one hit (>= 250 ms)  worst 1600 ms (med 1750)
+  ok   THE ALPHA: leap>turn is the one gift, and pays out (> 900 ms)  1750 ms
+       roar>rest            n=30  min   667  med   750  max   817
+  ok   THE ALPHA: roar>rest opens for at least one hit (>= 250 ms)  worst 667 ms (med 750)
+  ok   THE ALPHA: roar>rest is not a gift (3 in 4 openings <= 900 ms)  p75 767 ms
+  ok   THE ALPHA: every damaging move was seen  all
+  ok   no page errors
+
+OK — every move opens, and the fight hands out its gift exactly where it means to
+
+── meet  — it swats her aside and walks away, and she is still standing
+── meet — it swats her aside and walks away, and she is still standing
+  ok   it happens on the crest of A2  fall@2.43 land@2.97 wind@4.12 swipe@4.63 watch@5.10 coil@6.20 leave@6.80
+  ok   every beat plays: fall, land, wind, swipe, watch, coil, leave
+  ok   ...and it is over inside ten seconds  7.7 s
+  ok   the music drops out for it and comes back  stop,set:A
+  ok   arrival, tell, creature swipe, impact and departure each have a cue  nf_arrive,nf_breath,nf_step,nf_step,tellbig,nf_swipe,hit,nf_coil,tellbig,nf_leap,tellbig
+  ok   it costs her exactly one core  4
+  ok   she is thrown the length of the mound (> 200 px west)  345 px
+  ok   her controls are held while it walks up  69 frames
+  ok   it leaves, and the sequence ends
+  ok   ...and gives her controls back  328 px in a second
+  ok   the flag holds and the Braid marks it
+  ok   it never happens twice
+  ok   at one core it never kills: a survival, not a scripted death  1
+  ok   A4 wakes as the rematch: one distinct awakening  ui,nf_awake,tellbig
+  ok   ...says it remembers  It remembers the corridor.
+  ok   ...and the Braid marks the rematch
+  ok   no page errors
+
+OK — she met it, it cost her, she is still standing, and the arena knows her
+
+── artbible  — ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor
+── artbible — the rules in ART_BIBLE.md, measured rather than asserted
+  ok   no atlas subject is declared and never drawn  known: hzd
+  ── NULLFANG
+  ok   NULLFANG: stalk vs crouch is a different SHAPE (IoU <= 0.86)  IoU 0.424
+  ok   NULLFANG: stalk vs pounce is a different SHAPE (IoU <= 0.8)  IoU 0.403
+  ok   NULLFANG: crouch vs pounce is a different SHAPE (IoU <= 0.8)  IoU 0.411
+  ok   NULLFANG: stalk vs swipe is a different SHAPE (IoU <= 0.9)  IoU 0.637
+  ok   NULLFANG: stalk vs daze is a different SHAPE (IoU <= 0.88)  IoU 0.653
+  ok   NULLFANG: crouch raises the amber above its own rest  61.0% vs rest 0.0%
+  ok   NULLFANG: stalk does not pass for a wind-up  0.0% of lit pixels
+  ok   NULLFANG: pounce does not pass for a wind-up  0.0% of lit pixels
+  ok   NULLFANG: stalk still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+  ok   NULLFANG: stalk has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: crouch has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: swipe has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: daze has its feet on the floor (±10 px)  -4 px
+  ── THE ALPHA
+  ok   THE ALPHA: rest vs coil is a different SHAPE (IoU <= 0.88)  IoU 0.275
+  ok   THE ALPHA: coil vs roarwarn is a different SHAPE (IoU <= 0.88)  IoU 0.828
+  ok   THE ALPHA: rest vs leap is a different SHAPE (IoU <= 0.85)  IoU 0.458
+  ok   THE ALPHA: coil raises the amber above its own rest  81.3% vs rest 3.1%
+  ok   THE ALPHA: clawwarn raises the amber above its own rest  84.6% vs rest 3.1%
+  ok   THE ALPHA: roarwarn raises the amber above its own rest  76.2% vs rest 3.1%
+  ok   THE ALPHA: rest does not pass for a wind-up  3.1% of lit pixels
+  ok   THE ALPHA: leap does not pass for a wind-up  3.1% of lit pixels
+  ok   THE ALPHA: rest still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ok   THE ALPHA: rest has its feet on the floor (±10 px)  -1 px
+  ok   THE ALPHA: coil has its feet on the floor (±10 px)  -1 px
+  ── TALONHOST
+  ok   TALONHOST: idle vs dive is a different SHAPE (IoU <= 0.9)  IoU 0.254
+  ok   TALONHOST: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   TALONHOST: idle still reads as PARTS, not one flat tone (>= 3 value bands)  8 of 8 bands carry area
+  ── FURNACE CHOIR
+  ok   FURNACE CHOIR: idle vs lobwarn is a different SHAPE (IoU <= 0.94)  IoU 0.582
+  ok   FURNACE CHOIR: lobwarn raises the amber above its own rest  24.4% vs rest 10.6%
+  ok   FURNACE CHOIR: idle does not pass for a wind-up  10.6% of lit pixels
+  ok   FURNACE CHOIR: idle still reads as PARTS, not one flat tone (>= 3 value bands)  7 of 8 bands carry area
+  ok   FURNACE CHOIR: idle has its feet on the floor (±10 px)  -5 px
+  ok   FURNACE CHOIR: lobwarn has its feet on the floor (±10 px)  -1 px
+  ── GLACIERE
+  ok   GLACIERE: idle vs lancewarn is a different SHAPE (IoU <= 0.94)  IoU 0.705
+  ok   GLACIERE: idle vs dashwarn is a different SHAPE (IoU <= 0.94)  IoU 0.791
+  ok   GLACIERE: lancewarn raises the amber above its own rest  13.2% vs rest 0.0%
+  ok   GLACIERE: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   GLACIERE: idle still reads as PARTS, not one flat tone (>= 3 value bands)  8 of 8 bands carry area
+  ── CHIME
+  ok   CHIME: ringwarn raises the amber above its own rest  65.5% vs rest 0.0%
+  ok   CHIME: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   CHIME: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── CARRIER
+  ok   CARRIER: tosswarn raises the amber above its own rest  69.6% vs rest 0.0%
+  ok   CARRIER: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   CARRIER: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── KILN-MOTH
+  ok   KILN-MOTH: cinderwarn raises the amber above its own rest  81.2% vs rest 21.6%
+  ok   KILN-MOTH: idle does not pass for a wind-up  21.6% of lit pixels
+  ok   KILN-MOTH: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── LATTICE
+  ok   LATTICE: growwarn raises the amber above its own rest  62.1% vs rest 0.0%
+  ok   LATTICE: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   LATTICE: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ok   LATTICE: idle has its feet on the floor (±10 px)  -3 px
+  ok   LATTICE: growwarn has its feet on the floor (±10 px)  -4 px
+  ── THE LENS
+  ok   THE LENS: beamwarn raises the amber above its own rest  67.1% vs rest 2.5%
+  ok   THE LENS: idle does not pass for a wind-up  2.5% of lit pixels
+  ok   THE LENS: idle still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+
+OK — the bible was followed, and this is how you know without looking
+
+── motion  — the fired guardian plates are on screen, not just in the manifest
+── motion — the fired guardian plates are on screen, not in the manifest
+
+  ok   the filmed take is what draws alpha:rest, not the plate  7431 px differ
+  ok   ...and it turns with the body in alpha:rest  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:rest  1 px off the plate's bottom
+  ok   the filmed take is what draws alpha:prowl, not the plate  9002 px differ
+  ok   ...and it turns with the body in alpha:prowl  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:prowl  2 px off the plate's bottom
+  ok   the filmed take is what draws alpha:roarwarn, not the plate  9863 px differ
+  ok   ...and it turns with the body in alpha:roarwarn  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:roarwarn  4 px off the plate's bottom
+  ok   the filmed take is what draws alpha:roar, not the plate  10623 px differ
+  ok   ...and it turns with the body in alpha:roar  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:roar  4 px off the plate's bottom
+  ok   the filmed take is what draws alpha:broodcall, not the plate  10311 px differ
+  ok   ...and it turns with the body in alpha:broodcall  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:broodcall  4 px off the plate's bottom
+  ok   the filmed take is what draws alpha:howl, not the plate  11959 px differ
+  ok   ...and it turns with the body in alpha:howl  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:howl  0 px off the plate's bottom
+  ok   the filmed take is what draws alpha:coil, not the plate  8442 px differ
+  ok   ...and it turns with the body in alpha:coil  mirror agreement 1
+  ok   the filmed take is what draws alpha:leap, not the plate  21332 px differ
+  ok   ...and it turns with the body in alpha:leap  mirror agreement 1
+  ok   the filmed take is what draws alpha:recoil, not the plate  12907 px differ
+  ok   ...and it turns with the body in alpha:recoil  mirror agreement 1
+  ok   the filmed take is what draws alpha:turn, not the plate  14702 px differ
+  ok   ...and it turns with the body in alpha:turn  mirror agreement 1
+  ok   the filmed take is what draws alpha:clawwarn, not the plate  11036 px differ
+  ok   ...and it turns with the body in alpha:clawwarn  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:clawwarn  -8 px off the plate's bottom
+  ok   the filmed take is what draws alpha:claw, not the plate  9649 px differ
+  ok   ...and it turns with the body in alpha:claw  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:claw  2 px off the plate's bottom
+  ok   the filmed take is what draws alpha:bitewarn, not the plate  7911 px differ
+  ok   ...and it turns with the body in alpha:bitewarn  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:bitewarn  4 px off the plate's bottom
+  ok   the filmed take is what draws alpha:bite, not the plate  7534 px differ
+  ok   ...and it turns with the body in alpha:bite  mirror agreement 1
+  ok   ...and its feet are where the plate's are in alpha:bite  0 px off the plate's bottom
+  ok   the filmed take is what draws alpha:clinch, not the plate  10436 px differ
+  ok   ...and it turns with the body in alpha:clinch  mirror agreement 1
+  ok   the filmed take is what draws alpha:shake, not the plate  9573 px differ
+  ok   ...and it turns with the body in alpha:shake  mirror agreement 1
+  ok   the filmed take is what draws alpha:free, not the plate  10705 px differ
+  ok   ...and it turns with the body in alpha:free  mirror agreement 1
+  ok   the filmed take is what draws chime:rest, not the plate  5384 px differ
+  ok   ...and it turns with the body in chime:rest  mirror agreement 1
+  ok   the filmed take is what draws chime:ringwarn, not the plate  10416 px differ
+  ok   ...and it turns with the body in chime:ringwarn  mirror agreement 1
+  ok   the filmed take is what draws chime:ring, not the plate  26746 px differ
+  ok   ...and it turns with the body in chime:ring  mirror agreement 1
+  ok   the filmed take is what draws chime:notewarn, not the plate  10091 px differ
+  ok   ...and it turns with the body in chime:notewarn  mirror agreement 1
+  ok   the filmed take is what draws chime:note, not the plate  7047 px differ
+  ok   ...and it turns with the body in chime:note  mirror agreement 1
+  ok   the filmed take is what draws chime:dead, not the plate  6306 px differ
+  ok   ...and it turns with the body in chime:dead  mirror agreement 1
+  ok   no still plates remain wired for the guardians (the coil went to the filmed leap)
+  ok   the filmed take is what draws NULLFANG's stalk, not the rig  14436 px differ
+  ok   ...and it turns with him in stalk  mirror agreement 1
+  ok   ...and its feet are where the rig's are in stalk  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's run, not the rig  14802 px differ
+  ok   ...and it turns with him in run  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's idle, not the rig  14002 px differ
+  ok   ...and it turns with him in idle  mirror agreement 1
+  ok   ...and its feet are where the rig's are in idle  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's roar, not the rig  13409 px differ
+  ok   ...and it turns with him in roar  mirror agreement 1
+  ok   ...and its feet are where the rig's are in roar  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's intro, not the rig  13543 px differ
+  ok   ...and it turns with him in intro  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's swipewarn, not the rig  14720 px differ
+  ok   ...and it turns with him in swipewarn  mirror agreement 1
+  ok   ...and its feet are where the rig's are in swipewarn  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's swipe, not the rig  14742 px differ
+  ok   ...and it turns with him in swipe  mirror agreement 1
+  ok   ...and its feet are where the rig's are in swipe  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's crouch, not the rig  13937 px differ
+  ok   ...and it turns with him in crouch  mirror agreement 1
+  ok   ...and its feet are where the rig's are in crouch  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's springwarn, not the rig  13911 px differ
+  ok   ...and it turns with him in springwarn  mirror agreement 1
+  ok   ...and its feet are where the rig's are in springwarn  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's pounce, not the rig  15909 px differ
+  ok   ...and it turns with him in pounce  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's recover, not the rig  14445 px differ
+  ok   ...and it turns with him in recover  mirror agreement 1
+  ok   ...and its feet are where the rig's are in recover  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's spring, not the rig  13814 px differ
+  ok   ...and it turns with him in spring  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's dive, not the rig  16672 px differ
+  ok   ...and it turns with him in dive  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's perch, not the rig  14788 px differ
+  ok   ...and it turns with him in perch  mirror agreement 1
+  ok   ...and its feet are where the rig's are in perch  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's daze, not the rig  13543 px differ
+  ok   ...and it turns with him in daze  mirror agreement 1
+  ok   ...and its feet are where the rig's are in daze  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's nullcharge, not the rig  14321 px differ
+  ok   ...and it turns with him in nullcharge  mirror agreement 1
+  ok   ...and its feet are where the rig's are in nullcharge  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's nullhop, not the rig  12650 px differ
+  ok   ...and it turns with him in nullhop  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's nullend, not the rig  12110 px differ
+  ok   ...and it turns with him in nullend  mirror agreement 1
+  ok   ...and its feet are where the rig's are in nullend  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's dead, not the rig  13052 px differ
+  ok   ...and it turns with him in dead  mirror agreement 1
+  ok   no page errors while drawing them
+
+OK — the fired coil is on screen, facing the right way, standing on the floor
+
+── lowres  — the whole world at quarter size, and nothing sliced by pixel gets one
+── lowres — the whole world, roughly, for half a megabyte
+  ok   every small copy the manifest names is on disk  99 entries
+  ok   ...and every one of them is at most a quarter of its full sheet  all under
+  ok   the whole tier is small enough to front-load  1.99 MB for 29.6 MB of art (6.7%)
+  ok   no sheet addressed by absolute pixel rect has a small copy  6 guardian files checked
+  ok   the page carries the manifest  99 keys in window.LOWRES
+  ok   ...and the prefetcher is told to front-load it
+  ok   a small copy stands in for a sheet that has not arrived  400 px wide
+  ok   ...and the full sheet replaces it  400 -> 1600 px
+  ok   ...and every cached derivative of the soft one is thrown away  on stand-in: true, on upgrade: true
+  ok   the tier is fetched ahead of the full-size art  46 small copies fetched in the first six seconds
+
+OK — the room is right immediately and sharp a moment later
+
+all 7 harnesses ran

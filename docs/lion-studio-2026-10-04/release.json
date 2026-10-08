@@ -1,0 +1,25 @@
+{
+  "build": "e0a2836b2825",
+  "harnesses": 138,
+  "validation": "Full run plus passing affected reruns; see README and logs",
+  "assets": {
+    "assets/characters/beast/studio-rake.webp": "bef0177ebf5d521b4afe9865681a23895c499b46876e82253eadbe1ccb605a71",
+    "assets/characters/beast/studio-swipe.webp": "8d3de4d67c0d9c1c3b0946f22090367aeafe94ccb351e0471ab9aee7b5a0b97c",
+    "assets/characters/beast/studio-pounce.webp": "2d7e5b134215cdff7821abac02429313073e5e60552c2c17df8db8adb430cdfe",
+    "assets/characters/beast/studio-stalk.webp": "d6fd78fce0e05ec558d3a594fb3bf62cf3d0edb8692b029c97cb5844ac602ac2",
+    "assets/characters/beast/studio-gallop.webp": "6f30853dc1e1a650ec5220d376af11f1fe4b30898eb5877377ce1f11fe65d369",
+    "assets/characters/beast/studio-roar.webp": "8251583d2c1e3065dcfab1017291efa098da07228668ddbed559f33e5db984bb",
+    "assets/characters/beast/studio-hurt.webp": "0eafe746c2b96a5ece341ab7c11230ca45836456acb1952fc50da1836ad98b56",
+    "assets/sfx/nullfang/coil.ogg": "dc5182e2eb23737f98d0db3c64a5908c4542b38bf84989d9ade259fc1773c8a9",
+    "assets/sfx/nullfang/leap.ogg": "0252d71173cad6ac2cc201449e8b9b469474352e47e496e4fc541e0938be9d29",
+    "assets/sfx/nullfang/land.ogg": "ca30362a0c0cbe5a068cbdcc81a96c0fcbe842eddc8e58c8b086a10953c07b78",
+    "assets/sfx/nullfang/step.ogg": "ccb3c16e82d58ecab73d6c93b84054c64d6462dfec15ba5bf206de1765dec66d",
+    "assets/sfx/nullfang/swipe.ogg": "86ae37bc555280ac440c7a24178c6f24f147b16df8f4f352f9619addbc966923",
+    "assets/sfx/nullfang/hurt.ogg": "be3cf174e9a7beae1faede00d12ca5bf9a98e07f66d79f6f545976021468e291",
+    "assets/sfx/nullfang/roar.ogg": "a3a345198bf7d5520daa26445fff41166eb7851643a3b4679a0e759f25c43fb9",
+    "assets/sfx/nullfang/awake.ogg": "eba85df97c2b5d92e01b7f390924518e3072d654e668af21e5dbf18bffbcace5",
+    "assets/sfx/nullfang/breath.ogg": "bbb4ff0d245fc1f1c95bad96f618b58e1e872114dfb327e5d0d9914a2670d673",
+    "assets/sfx/nullfang/arrive.ogg": "044b90519004b41962bdfdbfdeb61f47b6d640590ce5aa225123c3df3719c281"
+  },
+  "physicalDeviceReview": false
+}

@@ -21,6 +21,13 @@ const MEDIA_SRC = {
     // move, cut to a strip, 320-px cells, feet on the cell floor, facing
     // LEFT like the rig. Drawn by beastStrip in js/beast.js over the state's
     // own clock; the parts rig draws whenever a strip is not here.
+    beastGallop: 'assets/characters/beast/studio-gallop.webp',
+    beastStudioSwipe: 'assets/characters/beast/studio-swipe.webp',
+    beastStudioStalk: 'assets/characters/beast/studio-stalk.webp',
+    beastStudioLeap: 'assets/characters/beast/studio-pounce.webp',
+    beastStudioRoar: 'assets/characters/beast/studio-roar.webp',
+    beastRearSwipe: 'assets/characters/beast/studio-rake.webp',
+    beastHurt: 'assets/characters/beast/studio-hurt.webp',
     beastStalk: 'assets/characters/beast/stalk.webp',
     beastRoar: 'assets/characters/beast/roar.webp',
     beastSwipe: 'assets/characters/beast/swipe.webp',
@@ -534,6 +541,17 @@ const MEDIA_SRC = {
     hz_winsting: 'assets/sfx/hz_winsting.ogg',
   },
   audio: {
+    nf_step: 'assets/sfx/nullfang/step.ogg',
+    nf_coil: 'assets/sfx/nullfang/coil.ogg',
+    nf_leap: 'assets/sfx/nullfang/leap.ogg',
+    nf_swipe: 'assets/sfx/nullfang/swipe.ogg',
+    nf_land: 'assets/sfx/nullfang/land.ogg',
+    nf_hurt: 'assets/sfx/nullfang/hurt.ogg',
+    nf_roar: 'assets/sfx/nullfang/roar.ogg',
+    nf_arrive: 'assets/sfx/nullfang/arrive.ogg',
+    nf_awake: 'assets/sfx/nullfang/awake.ogg',
+    nf_breath: 'assets/sfx/nullfang/breath.ogg',
+
     hz_swing1: 'assets/sfx/hz_swing1.ogg',
     hz_swing2: 'assets/sfx/hz_swing2.ogg',
     hz_fin: 'assets/sfx/hz_fin.ogg',

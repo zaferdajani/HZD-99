@@ -1,0 +1,52 @@
+{
+  "provider": "Higgsfield",
+  "model": "seedance_2_5",
+  "reference": "assets/source/beast/aIdle.jpg",
+  "reference_media_id": "35204582-bc59-455e-84a4-2c1a418f39f4",
+  "jobs": [
+    {
+      "index": 0,
+      "job_id": "05e85fb3-256b-41d3-8e15-1264d27cdaff",
+      "name": "pounce"
+    },
+    {
+      "index": 1,
+      "job_id": "40a7c949-5194-4d44-9df6-3e7486624a19",
+      "name": "gallop"
+    },
+    {
+      "index": 2,
+      "job_id": "df52e670-e04f-4759-be97-41f2848ecbe2",
+      "name": "rake"
+    },
+    {
+      "index": 3,
+      "job_id": "ee24d2c6-84e7-4a38-a776-1bc51acf44eb",
+      "name": "hurt"
+    },
+    {
+      "index": 4,
+      "job_id": "2db8bc9d-6bde-433a-afb0-f56535a06728",
+      "name": "roar"
+    },
+    {
+      "index": 5,
+      "job_id": "e4516a80-1948-4812-ac74-6f2109fb8251",
+      "name": "gallop-retry"
+    },
+    {
+      "index": 6,
+      "job_id": "da5653f8-f1e7-43d4-96cd-51eea267c805",
+      "name": "stalk"
+    },
+    {
+      "index": 7,
+      "job_id": "f1b94694-fafc-43aa-b804-a499205a9cdc",
+      "name": "swipe"
+    }
+  ],
+  "failed_jobs": [
+    "40a7c949-5194-4d44-9df6-3e7486624a19"
+  ],
+  "note": "Asset review and game integration are recorded separately; submission is not evidence of delivery."
+}

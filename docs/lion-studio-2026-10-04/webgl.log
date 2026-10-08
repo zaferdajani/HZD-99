@@ -1,0 +1,25 @@
+
+── bake3d  — any authored GLB bakes to a turnaround the atlas can wear: grounded, rotating, silhouettes apart
+/tmp/bake3d-phBvPn/fixture_8yaw.png  8 x 1 @ 256px  12 KB
+
+wiring (the integrator adds, per ART_BIBLE §4):
+  1. add the row to the roster sheet, or register the sheet in js/media.js and declare it in ATLAS with sub: { fixture: { row: 0, k: <hitbox-heights>, yOff: 0 } }
+  2. node tools/img-crush.cjs on the source copy; node tools/lowres.cjs && node build.cjs
+  3. node tests/run.cjs artbible lowres — declared art must be drawn, and sliced-by-pixel sheets get no small copy
+/tmp/bake3d-phBvPn/fixture_bob_and_travel_6.png  6 cells @ 192px   clip "bob_and_travel" 1.00s, 1 tracks, 1 node(s) pinned against root motion, yaw 30°
+/tmp/bake3d-phBvPn/fixture_bob_and_travel_12fps.webm  driving video for motion control
+
+next: the art session fires motion control with her canon plate over the driving video,
+      then tools/vidstrip.cjs auto:N cuts the take and tools/swingk.cjs measures k.
+  ok  all 8 yaw cells populated  [19445 20091 8987 20085 19445 20085 8987 20091]
+  ok  feet on one row in every cell  [248 248 248 248 248 248 248 248]
+  ok  profile vs front is a different silhouette  IoU 0.278 <= 0.86
+  ok  col 0 vs col 4 is a rotation, not a mirror  IoU 0.728
+  ok  clip: all 6 cells populated  [12017 12016 12017 11959 12017 12016]
+  ok  clip: root motion stripped — horizontal centre holds  spread 0.2 px  [108.5 108.5 108.5 108.3 108.5 108.5]
+  ok  clip: the vertical bob is kept — the feet move  spread 26 px  [186 177 169 160 169 177]
+  ok  clip: cell 0 vs cell 3 is a different picture  IoU 0.473
+  ok  clip: a driving video was written
+bake3d: a mesh goes in, a game-legal turnaround comes out, measured
+
+all 1 harnesses ran

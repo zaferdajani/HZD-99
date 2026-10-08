@@ -1,0 +1,42 @@
+{
+  "source": "assets/source/beast/studio-2026-10-04/swipe.mp4",
+  "frames": 24,
+  "cell": [
+    448,
+    256
+  ],
+  "times": [
+    0.02,
+    0.1922,
+    0.3643,
+    0.5365,
+    0.7087,
+    0.8809,
+    1.053,
+    1.2252,
+    1.3974,
+    1.5696,
+    1.7417,
+    1.9139,
+    2.0861,
+    2.2583,
+    2.4304,
+    2.6026,
+    2.7748,
+    2.947,
+    3.1191,
+    3.2913,
+    3.4635,
+    3.6357,
+    3.8078,
+    3.98
+  ],
+  "scale": 0.3707995365005794,
+  "threshold": 48,
+  "strictBorders": false,
+  "footRight": true,
+  "rootMotion": "vertical removed; simulation supplies trajectory",
+  "reference": "standing envelope: 320x210px",
+  "reviewed": true,
+  "review": "Assistant inspected source motion and runtime-alpha contacts; not owner art approval."
+}

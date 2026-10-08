@@ -10939,6 +10939,9 @@ class Boss {
   }
   update(dt) {
     this.anim += dt; this.hurtT -= dt;
+    const lionMotion = this.kind === 'glitch' && !this.meet;
+    if (lionMotion) beastMotionBegin(this);
+    try {
     // THE FIRST MEETING drives this body by hand (js/game.js meetStep): no
     // deck, no cooldowns, no hitboxes of its own — a staged sequence, not a
     // fight she could have won
@@ -11144,7 +11147,7 @@ class Boss {
         // THE REMATCH (underdog-arc §2.1): the corridor's sting again — the
         // slam it arrived on — and the Braid marks that she came back for it
         if (this.kind === 'glitch' && G.save && G.save.flags && G.save.flags.nfMeet) {
-          sfx('slam'); G.toast(t('nf_rematch'));
+          G.toast(t('nf_rematch'));
           if (typeof brMark === 'function') brMark('rematch', G.roomId);
         }
       }
@@ -11156,7 +11159,8 @@ class Boss {
         // THE ROAR — each guardian announces itself in its own voice, and
         // the room answers: shake, rumble, a burst off the body
         this.roared = true;
-        sfx({ glitch: 'roar_beast', brood: 'roar_eagle', zero: 'roar_glc',
+        if (this.kind === 'glitch') beastSound('roar');
+        else sfx({ glitch: 'roar_beast', brood: 'roar_eagle', zero: 'roar_glc',
               atlas: 'roar_drg', prism: 'roar_prism', alpha: 'roar_beast' }[this.kind] || 'roar');
         cam.shake = Math.max(cam.shake, 11);
         this.roarBuzzT = 0.8;
@@ -11326,13 +11330,17 @@ class Boss {
               this.st = 'crouch'; this.t = this.phase === 2 ? 0.9 : 1.0;
               this.vx = 0; this.coilTick = 0; this.coilFlashed = false; this.lastMove = 'pounce';
             } else {
-              this.st = 'stalk'; this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.4, 0.8);
+              this.st = adist > 520 ? 'run' : 'stalk'; this.t = this.phase === 2 ? rnd(0.3, 0.6) : rnd(0.4, 0.8);
             }
           }
-        } else if (this.st === 'stalk') {
+        } else if (this.st === 'stalk' || this.st === 'run') {
           // low prowl toward you, patient, gathering pounce distance
           this.face = Math.sign(dist) || 1;
-          this.vx = this.face * (this.phase === 2 ? 210 : 165) * spd;
+          if (adist > 520) this.st = 'run';
+          else if (adist < 370) this.st = 'stalk';
+          const pace = this.st === 'run' ? 285 : (this.phase === 2 ? 210 : 165);
+          const desired = this.face * pace * spd;
+          this.vx += clamp(desired - this.vx, -1050 * dt, 1050 * dt);
           this.t -= dt; this.roarCD -= dt; this.ambushCD -= dt;
           if (!this.nullUsed && this.hp <= this.hpMax * 0.5) {
             // NULL GRAVITY: once per fight, below half health, the virus
@@ -11390,21 +11398,22 @@ class Boss {
         } else if (this.st === 'swipewarn') {
           // the paw rises — that is your tell
           this.vx = 0; this.t -= dt; this.windT = 0.3;
-          if (this.t <= 0) { this.st = 'swipe'; this.t = 0.24; this.swiped = false; }
+          if (this.t <= 0) { this.st = 'swipe'; this.t = this.swiped2 ? 0.48 : 0.24; this.swiped = false; }
         } else if (this.st === 'swipe') {
           this.vx = 0; this.t -= dt;
-          if (!this.swiped && this.t <= 0.18) {
+          if (!this.swiped && this.t <= (this.swiped2 ? 0.36 : 0.18)) {
             this.swiped = true;
+            this._slashT = .18;
             const f = this.face || 1;
             const box = { x: this.cx() + (f > 0 ? 6 : -114), y: this.y - 24, w: 108, h: this.h + 28 };
             burst(this.cx() + f * 66, this.cy(), 10, '#b06aff', 260, 0.35, 150, 3, true);
-            sfx('atk');
+            beastSound('swipe');
             if (!player.dead && player.iT <= 0 && aabb(box, player)) { player.hurt(DF().edmg, this.cx(), this.kind + '.' + this.st); this.denied = (this.denied || 0) + 1; this.hitSince = true; }
           }
           // FOLLOW-THROUGH: the blow carries the body a step after it, the way
           // a big cat's weight goes into a strike. After the hit check only,
           // so the swipe's reach (and its answer, out-range) is unchanged.
-          if (this.swiped) this.vx = (this.face || 1) * 150 * Math.max(0, this.t / 0.18);
+          if (this.swiped) this.vx = (this.face || 1) * 150 * clamp(this.t / (this.swiped2 ? .36 : .18), 0, 1);
           if (this.t <= 0) {
             // a lion swipes twice when it is angry
             // A LION SWIPES TWICE WHEN IT IS ANGRY — but it used to do so on a
@@ -11469,13 +11478,14 @@ class Boss {
             this.vx = clamp(lead / air, -760, 760) * spd;
             this.vy = -2100 * air / 2;
             this.leapT0 = this.anim || 0;
+            this.leapDuration = air;
             // ...and it comes down where SHE is. A 150 px apex clears the
             // arena's one-way ledges, so on the way down it would land on one
             // and sit out of her reach (tests/openings.cjs: reach 0 of 53
             // frames). Aimed at a player who is not above it, it falls through
             // them to her floor; aimed at a player ON a ledge, it lands there.
             this.thruPlat = (player.y + player.h) >= (this.y + this.h) - 40;
-            sfx('dash'); sfx('launch');
+            beastSound('leap');
             cam.shake = Math.max(cam.shake, 9);
             G.flash = Math.max(G.flash || 0, 0.16);
             this.coilK = 0;
@@ -11512,7 +11522,7 @@ class Boss {
           }
           if (!this.roared && this.t <= 0.75) {
             this.roared = true;
-            cam.shake = 11; sfx('roar_beast'); G.flash = Math.max(G.flash, 0.18);
+            cam.shake = 11; beastSound('roar'); G.flash = Math.max(G.flash, 0.18);
             this.roarBuzzT = 0.6;
             if (typeof padRumble === 'function') padRumble(0.85, 0.65, 500);
             if (typeof roarWave === 'function') roarWave(this.cx() + this.face * 30, this.cy() - 10, '#b48cff');
@@ -11541,7 +11551,7 @@ class Boss {
             this.tx = clamp(this.perch[0] - this.w / 2, 40, G.roomDef.w * TILE - this.w - 40);
             this.ty = this.perch[1] - this.h;
             this.face = Math.sign(this.tx - this.x) || 1;
-            sfx('dash');
+            beastSound('leap');
           }
         } else if (this.st === 'spring') {
           // one clean leap onto the platform
@@ -11553,7 +11563,7 @@ class Boss {
           if (u2 >= 1) {
             this.x = this.tx; this.y = this.ty; this.vx = 0;
             this.st = 'perch'; this.t = this.phase === 2 ? 1.0 : 1.4; this.perchTold = false;
-            cam.shake = 5; sfx('land');
+            cam.shake = 5; beastSound('land');
             // grit puffs off the ledge where the paws bite down
             for (let i = 0; i < 6; i++)
               addPart(this.cx() + rnd(-34, 34), this.y + this.h - 2,
@@ -11579,7 +11589,7 @@ class Boss {
             this.tx = clamp(px - this.w / 2, 20, G.roomDef.w * TILE - this.w - 20);
             this.ty = player.y + player.h - this.h;
             this.face = Math.sign(this.tx - this.x) || 1;
-            sfx('dash');
+            beastSound('leap');
           }
         } else if (this.st === 'dive') {
           // claws-first drop onto the prey
@@ -11591,7 +11601,7 @@ class Boss {
           if (chance(0.6)) addPart(this.cx() - this.face * 26, this.cy() + rnd(-16, 16), -this.face * rnd(60, 130), rnd(-60, 30), 0.3, '#b06aff', 2.5, 0, true);
           if (u2 >= 1) {
             this.st = 'recover'; this.t = this.phase === 2 ? 0.22 : 0.30;   // measured 1.0 s at 0.45, 917 ms at 0.36 — the ceiling is 900
-            cam.shake = 10; sfx('slam');
+            cam.shake = 10; beastSound('land');
             for (let i = 0; i < 12; i++)
               addPart(this.cx() + rnd(-this.w * 0.6, this.w * 0.6), this.y + this.h - 4,
                 rnd(-180, 180), rnd(-200, -50), 0.45, '#b9a888', 3, 300, true);
@@ -11617,7 +11627,7 @@ class Boss {
           this.vx *= 0.8; this.t -= dt;
           // settle + idle is the window: 0.36 + 0.35..0.55 = the three-hit
           // combo (0.72 s) and no more — the prowl after it no longer counts
-          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.35, 0.55); }
+          if (this.t <= 0) { this.st = 'idle'; this.t = rnd(0.30, 0.45); }
         } else if (this.st === 'ringcharge') {
           this.vx = 0; this.nwT -= dt;
           const kk = 1 - clamp(this.nwT / 0.7, 0, 1);
@@ -11640,7 +11650,7 @@ class Boss {
           if (this.t <= 0) {
             this.nullSeq = 3;
             this.st = 'nullhop'; this.t = 0.12;
-            G.flash = Math.max(G.flash, 0.25); cam.shake = 6; sfx('roar');
+            G.flash = Math.max(G.flash, 0.25); cam.shake = 6; beastSound('roar');
           }
         } else if (this.st === 'nullhop') {
           // between the field pounces: an instant coil, then launch — the
@@ -11654,7 +11664,9 @@ class Boss {
             this.face = Math.sign(d2) || 1;
             this.vx = clamp(d2 * 1.9, -720, 720) * spd;
             this.vy = -(380 + Math.min(240, Math.abs(d2) * 0.45));
-            this.st = 'pounce'; sfx('dash');
+            this.leapT0 = this.anim || 0;
+            this.leapDuration = -2 * this.vy / 2100;
+            this.st = 'pounce'; beastSound('leap');
           }
         } else if (this.st === 'nullend') {
           // the field collapses: everything slams back down and NULLFANG
@@ -11675,7 +11687,8 @@ class Boss {
         if (this.st === 'pounce' && this.nullSeq > 0) G.lowGravT = Math.max(G.lowGravT || 0, 1.2);
         const col = (this.st === 'spring' || this.st === 'dive') ? {} : moveEnt(this, dt);
         if (this.st === 'pounce' && col.d) {
-          cam.shake = 8; sfx('land');
+          cam.shake = 8; beastSound('land');
+          if (typeof padRumble === 'function') padRumble(.65, .35, 160);
           for (let i = 0; i < 10; i++)
             addPart(this.cx() + rnd(-this.w * 0.5, this.w * 0.5), this.y + this.h - 4,
               rnd(-160, 160), rnd(-180, -40), 0.4, '#b9a888', 3, 300, true);
@@ -11701,14 +11714,14 @@ class Boss {
             this.landAt = this.anim || 0;      // drawBeast's touchdown squash
           }
         }
-        if (this.st === 'stalk' && (col.l || col.r)) this.face *= -1;
+        if ((this.st === 'stalk' || this.st === 'run') && (col.l || col.r)) this.face *= -1;
         // ANTI-WEDGE WATCHDOG: a dive can end beneath a ledge and jam the
         // hunter in place. If it stops registering movement for 2.6s in an
         // active state it WRENCHES itself free toward open floor — and if
         // that fails twice more, it re-enters clean from its spawn point.
         {
           if (this.wdX == null) { this.wdX = this.x; this.wdT = 0; }
-          const activeSt = this.st === 'stalk' || this.st === 'recover'
+          const activeSt = this.st === 'stalk' || this.st === 'run' || this.st === 'recover'
             || this.st === 'pounce' || this.st === 'crouch' || this.st === 'nullend';
           if (Math.abs(this.x - this.wdX) > 10 || !activeSt || this.stagT > 0) {
             this.wdX = this.x; this.wdT = 0;
@@ -12723,6 +12736,9 @@ class Boss {
     }
     if (!player.dead && aabb(this, player) && this.st !== 'intro'
       && this.st !== 'lsvanish' && this.st !== 'arcstorm') player.hurt(DF().edmg, this.cx());
+    } finally {
+      if (lionMotion) beastMotionEnd(this, dt);
+    }
   }
   // ---- the three signature systems -----------------------------------------
   plantBore(x) {
@@ -13103,6 +13119,7 @@ class Boss {
     let a = 1;
     if (this.purified && (this.pureT || 0) < 0.7) a *= clamp((this.pureT || 0) / 0.7 + 0.15, 0.15, 1);
     c.save(); c.globalAlpha = a * (this.hurtT > 0 ? 0.6 : 1);
+    if (!heroWorld && this.kind === 'glitch') beastContactFx(c, this);
     // THE TELEGRAPH WASH, and it lives HERE rather than in each guardian's own
     // file on purpose. TELL_ST has fired the warning SOUND for every boss since
     // it was written; the matching visual was left to each guardian to
