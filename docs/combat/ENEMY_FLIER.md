@@ -126,3 +126,40 @@ table needs to key on something finer than kind.
 |---|---|---|---|
 | A2 flier #2 | present | → hopper | registry §6.1 |
 | A6 flier #2 | present | → crawler | registry §6.1, over spikes |
+
+**Motion pass (2026-10-08, plan §1 fix 3).** Tell (350 ms), dive (750 ms at
+vy 430), withdrawal (900 − iq×350 ms) and the firing cone are untouched. What
+changed is that the same flier now flies the same path on every screen.
+
+Every smoothing line was `lerp(v, target, f)` once per update — a fraction PER
+FRAME — and update runs at the display's rate (SIM_STEP only caps the step), so
+a 120 Hz screen closed four times as fast as a 30 Hz phone. Each is now
+`lerp(v, target, 1 − e^(−k·dt))` with k chosen to equal the old fraction at
+60 Hz (`k = −ln(1 − f)·60`, `FLY_K` in js/entities.js):
+
+| Line | Before (per frame) | After (per second) |
+|---|---|---|
+| courier packet tell, stop | 0.25 | `FLY_K.pkt` 17.3 |
+| dive steering | 0.12 | `FLY_K.dive` 7.67 |
+| withdrawal, sideways | 0.03 | `FLY_K.riseX` 1.83 |
+| withdrawal, climb | 0.10 | `FLY_K.riseY` 6.32 |
+| the held tell, stop | 0.20 | `FLY_K.hold` 13.4 |
+| bat dive x / y | 0.10 / 0.12 | 6.32 / 7.67 |
+| bat climb home x / y | 0.08 / 0.10 | 5.0 / 6.32 |
+
+| Value | Before | After | Reason |
+|---|---|---|---|
+| Station-keeping (`near`) | undamped spring `vx += Δx·1.6·dt`, `vy += Δy·2.2·dt` under the speed cap — it swung through her head-line and back for as long as she stood there, by an amount that depended on the step | steered: wanted velocity `Δ·FLY_KP` (2.4 /s) capped at `spd`, real velocity eased toward it at `FLY_K.steer` 3.5 /s — it arrives and holds | frame-rate proof, and a hover that holds reads as a hover |
+| Idle | sine drift ±40 px about its spawn, sine bob ±30 px — never still, never anywhere | **patrol and perch** (`flierPatrol`): a beat `FLY_PATROL_R` 3 tiles either side of its post (stopping short of walls) at `FLY_CRUISE` 0.5× speed; at each end it drops onto a ledge within `FLY_PERCH_DROP` 3 tiles if there is one and SITS for `FLY_PERCH_T` 2.2 s (wings folded, `on` the floor), or holds still `FLY_HOVER_T` 1.0 s where there is nothing to sit on; up first, then along — never a corner cut into rock; a leg that has not arrived in 6 s is abandoned. Deterministic. She comes within 340 px and it is off the perch | plan §1 fix 3 |
+| Facing | `sign(vx)` every frame — any wobble through zero flipped it | the way it travels, held through a dead band (|vx| ≤ 14 px/s keeps the last heading) | plan §1 fix 3 |
+| Wind-up picture (authored mini) | its flap — the tell was the stop and the sound only; the amber ring and downward wedge were drawn only by the fallback, because the authored flier returned from `draw` before them | **kCharge** (wings thrown wide, core lit) + the shared ring and downward wedge (`drawEnemyTell`) | plan §1 fix 5; B5 above is now true of the shipped art |
+| Withdrawal picture | its flap | **kRecover** (wings drooped, banked) | the opening has a picture |
+| Perched | — | **pRest** (folded) | new state |
+| Travel | front-on, upright | banked toward travel (±0.22 rad) | it faces where it goes |
+
+Measured by `tests/enemygait.cjs` (the 30/60/120 fps paths within 4 px of each
+other, through the production `mainLoop`; perch reached; it faces its travel)
+and `tests/artbible.cjs` (rest/tell 0.40, rest/withdrawal 0.41, tell/withdrawal
+0.64; tell amber 19 % vs rest 0.3 %). The cave BAT took the same per-second
+smoothing (table above), and its shiver now wears the shared ring and wedge too
+(it also returned from `draw` before them) and shivers on the simulation clock.

@@ -141,3 +141,22 @@ scale, and the boss's is accompanied by a paw above the head line.
 ### Changelog
 No crawler values changed this pass. Two rooms changed composition — see
 `BOSS_NULLFANG.md`.
+
+**Motion pass (2026-10-08, plan §1).** No combat number moved: tell, commit,
+punish window, reach and damage are all as tabled above. What changed is how
+the body gets from one of them to the next, and what it looks like while it
+does. Shared by every walker (crawler, guard, blob, hopper on the ground,
+the tamed pack); the guard, blob and hopper docs point here.
+
+| Value | Before | After | Reason |
+|---|---|---|---|
+| Walker speed | `vx = dir × spd`, written outright every frame | **`enemyGait`**: standstill → patrol speed in **`WALK_ACC_T` 0.16 s**, patrol speed → standstill in **`WALK_BRAKE_T` 0.09 s** (≤ 4 px of floor at the fastest patrol in the roster, a swift crawler, so the ledge probe's look-ahead still covers it) | plan §1 fix 2: no acceleration made every start and stop a cut |
+| Turning (patrol, ledge, wall, noticing her) | velocity flipped on the decision frame; the picture eased round afterwards at `FACE_RATE` 5.5/s, so the body slid backwards under the old facing for ~0.18 s — **the moonwalk** | **brake → turn → accelerate**: while moving, the picture holds the side it is moving to; only at a standstill does it turn (same 5.5/s); acceleration the new way waits until the picture has crossed to that side. `tests/enemygait.cjs`: 0 frames of vx against the facing outside a brake, in eight rooms over 30 000 walker-frames (329 on the old build) | plan §1 fix 2 |
+| The lunge's facing | eased after the velocity, like a turn | **`faceCommit`**: the frame the lunge writes its velocity, the picture is brought just across (±0.2) to that side and eases the rest of the way | a commit is one frame; its picture has to be too |
+| Grounded flag `on` | never set on any enemy — the downhill ground snap in `moveEnt` read it as undefined and never ran | set by every `moveEnt` (opt-in `groundTrack`), with `airT` (time off the floor) and `walkD` (floor covered) beside it | plan §1 fix 1: walkers skipped down every curve |
+| Walk bob / stride phase (atlas fallback) | `t × (6 + |vx|/30)` — the wall clock | **floor covered**: `walkD / ATLAS_STRIDE (24 px) × π`, amplitude × `clamp(|vx|/40)`; standing still stands still | plan §1 fix 4 |
+| Head-scan | ±0.22 yaw sweep for ever, cross-fading two authored angles (a permanent double exposure) | **gone** on every walker; the atlas draws ONE authored angle (the nearest) for walkers and anything still scanning | plan §1 fix 4 |
+| Recovery read (`windedT`) | the standing plate — the punish window had no picture | **WINDED**: the rest plate re-posed head-down and sunk (`BEAST_RECOVER.winded`: pitch −0.12 rad about the feet, ×1.10 / ×0.80, flanks heaving); measured apart from rest (IoU 0.47 wolf / 0.40 cheetah) and from the coil by `tests/artbible.cjs` | plan §1 fix 5; its own plate is briefed in ART_QUEUE §2cc |
+
+B5's "recovery read" is now true on screen as well as in the timer.
+

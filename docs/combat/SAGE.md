@@ -57,6 +57,14 @@ hooded, ember eyes; kneeling chant pose; the purified variant re-lit blue.
 `drawSage` in js/entities.js is the engine-drawn first pass and the
 placement reference.
 
+## The exhale has a body (2026-10-08, plan §1 fix 5)
+
+The exhale (`windedT`, the duel's opening) drew the standing plate, so the
+window the duel is built round looked like the sage waiting to strike. It now
+BOWS over the spent breath — pitched 0.2 rad toward her about its feet, ×1.08 /
+×0.80 — until an authored exhale plate is fired (ART_QUEUE §2cc). Timings
+unchanged. `tests/artbible.cjs`: rest/exhale IoU 0.60, coil/exhale 0.57.
+
 ## Measured by
 
 `tests/sage.cjs`: tells fire on both channels; claws stop at the floor and
