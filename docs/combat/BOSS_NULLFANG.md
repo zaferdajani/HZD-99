@@ -179,6 +179,38 @@ lives, and its tell must remain distinct from the boss's own.
 | 2 | `nf.dive` recovery | Same. |
 | ~~3~~ | ~~Whether `nf.dive` is reachable in A4~~ | **RESOLVED this pass.** `nf.spring`/`nf.dive` need a `=` run ≥ 3 tiles. A4 builds `hline(g, 4, 7, 11, '=')` and `hline(g, 22, 25, 11, '=')` — two four-tile perches at y=11, one either side of the arena. The move fires, and the boss can reach a perch from anywhere in the room. |
 
+## B7. The template pass (2026-10-08, the Hollow Knight study, plan §3)
+
+NULLFANG already was the template — a recovery after every move, a range-read
+deck (swipe < 130 px, coil 170–470 px, perch/roar on clocks) and the hit-group
+break — so it is where the other five were measured against. Two defects in its
+openings were found and fixed, both by `tests/openings.cjs`
+(`pounce>recover`, worst **0 ms** on the base) and pinned by
+`tests/guardians.cjs` ("NULLFANG, the landing"):
+
+1. **It landed on the furniture.** The leap led to a player standing at the
+   foot of A4's hulk (tiles 36–42), and an 84 px body centred on her came down
+   ON the hulk — 70 px over her floor, out of a grounded strike's reach for
+   the whole settle. `bossLandClear` now slides the led landing spot back
+   along the leap, half a tile at a time, until the body's footprint is clear
+   of solid tile over the two rows above her floor.
+2. **The anti-wedge watchdog took the window.** It watched x only, so a coil,
+   a leap that went straight up (she was standing where it left) and its
+   landing settle read as 2.6 s of "no movement" and it wrenched a pounce out
+   of the recovery 67 ms in. A vertical move over 24 px now counts as motion.
+
+Across 24 extra seeds (the openings scenarios at 200 and 320 px, both phases)
+the worst `pounce>recover` is **600 ms**, median 733.
+
+The break: unchanged (`dazeAt 5`, 1.1 s window, 1.7 / 1.25 s), except that a
+Song cast into an already-broken NULLFANG no longer freezes the break's own
+clock (`BOSS_SELF_STAG.daze`) — the two used to stack into one long stun.
+
+**Reward check (plan §3.6).** FireDash (`dash`) — the only power the climb
+audit (`tests/climbout.cjs`) finds a room gated on (A12), and the crossing for
+the dash pit in `tests/secrets.cjs` — plus the **shard** arm, which is the key
+to TALONHOST's plating (`BOSS_GATE.brood`). Both matter next; unchanged.
+
 ### Changelog
 
 | Value | Before | After | Reason |
@@ -190,3 +222,6 @@ lives, and its tell must remain distinct from the boss's own.
 | `nf.stalk` gait (a7c2bb7, 2026-10-04) | one prowl state, `vx` set instantly to 165 (p2 210) | new `run` state at `adist > 520` (back to `stalk` below 370), pace 285; `vx` eases toward the pace at ≤ 1050 px/s² | The lion-studio gallop strip needs a gait to play on, and an instant speed change read as a sprite sliding rather than a body accelerating. Release note: `docs/lion-studio-2026-10-04/README.md`. |
 | `nf.swipe` phase-2 follow-up (a7c2bb7) | 0.24 s, contact at `t ≤ 0.18` (0.06 s in) | 0.48 s, contact at `t ≤ 0.36` (0.12 s in); the first swipe is unchanged | The second blow is the authored heavy rake: a longer, heavier strike than the first. Damage and hitbox unchanged. |
 | `nf.recover` → `idle` delay (a7c2bb7) | `rnd(0.35, 0.55)` | `rnd(0.30, 0.45)` | The sibling's release note says it was trimmed so the new eased acceleration stays inside the punish-window limits. It shortens the post-landing window by 0.05–0.10 s; `tests/openings.cjs` is the measure that it still fits. |
+| `nf.pounce` landing spot (2026-10-08) | the led point, whatever is there | slid back along the leap until the body clears solid tile over her floor (`bossLandClear`) | landed on A4's hulk, 70 px over her: `tests/openings.cjs` pounce>recover worst 0 ms |
+| anti-wedge watchdog (2026-10-08) | "moved" = \|Δx\| > 10 px | \|Δx\| > 10 px **or** \|Δy\| > 24 px | a straight-up leap + settle read as a 2.6 s wedge and stole the window (67 ms) |
+| Song stagger during `daze` (2026-10-08) | froze the break's clock (stacked) | the break keeps counting (`BOSS_SELF_STAG.daze`) | no stunlock by stacking two windows |

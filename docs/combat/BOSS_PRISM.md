@@ -127,5 +127,34 @@ in the game and wants a ruling.
    the camera's clamped positions in X1.
 2. `stormT`'s exact duration was not read.
 
+## B7. The template pass (2026-10-08, the Hollow Knight study, plan §3)
+
+PRISM already ended every move in `rest` on the floor, so the windows were
+there (measured worst ≥ 500 ms after every move, `tests/guardians.cjs`). What
+changed is what it chooses, and the one move that fired without a tell:
+
+- **The deck** (was `cycle++ % 3`: dash, pounce, spread at any distance — a
+  spread at point blank, a pounce from across the room). A cat pounces on
+  what is close, slashes across the middle distance, and spits light at what
+  it cannot reach yet. Bands < 160 / < 380 / ≥ 380 px: pounce 3 / 1 / 0.5,
+  dash 1 / 3 / 2, spread 0.5 / 1 / 3; recency debt ×0.5. Measured: near draws
+  ~58–65 % pounce, far draws ~51–53 % spread.
+- **`spreadwarn`** — the spread gathers for `TELL_FAST` (350 ms) like the dash
+  and the pounce, amber sparks off the muzzle, cue automatic (the state name
+  says *warn*). The AAA audit's "SPREAD fires from idle with no dedicated
+  tell" is closed.
+- **The break:** `dazeAt 6`, `dazeSpan 2.4 s`, **1.5 s (p1) / 1.2 s (p2)** in
+  the sprawled stagger body (`i_hurt` cell on the sheet), ×1.6 damage,
+  plating open, cooldown 5.5 / 7 s; the dash-slash, pounce, light split and
+  arc storm are committed. It gets up into `rest`.
+
+**Reward check (plan §3.6).** The **arc** arm is the key to MOTHER-V's
+plating (`BOSS_GATE.mother`) — the finale's — plus the first sigil and the
+chest that frees the second sword. Unchanged.
+
 ### Changelog
-No PRISM values changed this pass.
+| Value | Before | After | Reason |
+|---|---|---|---|
+| move selection (2026-10-08) | `cycle++ % 3` → dash, pounce, spread | range deck (§B7) | the same three at every distance |
+| spread tell | none — fired from `idle` | `spreadwarn` 350 ms (`TELL_FAST`), amber, automatic cue | a damage source with no wind-up (AAA audit) |
+| hit-group break | none | `dazeAt 6`, span 2.4 s, 1.5 / 1.2 s, cooldown 5.5 / 7 s | plan §3.6 |

@@ -34,9 +34,15 @@ the defensive verbs are: move, jump, dash, out-range.
 | **NULLFANG** | A | reaction test | 450 | **317** (p2 swipe) | proves the telegraph contract is real |
 | **TALONHOST** | B | arena / positional | 500 | **1067** | the cycle's fourth beat brings it into claw range |
 | **FURNACE CHOIR** | C | greed test | **300** | 1567 | windows too big to take all of |
-| **GLACIERE** | D | pattern memory | 500 | **667** | five named powers on an explicit five-beat cycle |
+| **GLACIERE** | D | pattern memory | 500 | **733** (every power, measured 2026-10-08) | every power ends with her sinking to you; the deck reads your distance |
 | **PRISM PROWLER** | X | mixup | 300 | **467** | two moves, one pose, opposite answers |
 | **MOTHER-V** | E | resource management | 500 | 467 | attacks the economy, not the body |
+
+**2026-10-08 — the template pass** (the Hollow Knight study, plan §3): every
+guardian now has a reachable window after every move, a hit-group break, and a
+move deck read from where the player stands. Per-boss numbers are in each
+`BOSS_*.md` §B7; `tests/guardians.cjs` measures all three. The "smallest
+opening" column above is the pre-pass reading except GLACIERE's.
 
 **Six distinct fights.** The homogeneity audit (§5) is the evidence, and the
 difficulty slots being assigned *before* any per-subject work is the reason.
