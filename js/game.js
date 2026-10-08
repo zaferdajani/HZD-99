@@ -94,14 +94,46 @@ const G = {
     // out still held her up 19 px above the hole (measured, tests/secrets.cjs:
     // the camp's cellar hatch broke and she stood on the air where it was).
     if (typeof surfRoom !== 'undefined') surfRoom = null;
-    // the lesson is learned the first time it works. From here the seam stops
-    // being announced and every remaining one is on the player to spot.
-    if (!this.save.flags.taughtBreak) { this.save.flags.taughtBreak = 1; persist(); }
+    looseCutSet = null;                      // a fracture world's '#' may be the cut
+    // THE LESSON IS LEARNED THE FIRST TIME IT WORKS — and there are two of
+    // them. A wall gives to an ordinary swing; a floor only to a strike from
+    // above, which is the one players do not find on their own. One shared
+    // flag let the first hollow WALL she opened (A6's, off the critical path)
+    // silence the floor's hint for good, and the floor is the way to the first
+    // cave. So each kind of hint has its own 'seen': taughtWall, taughtFloor.
+    // taughtBreak stays the any-break flag the loose-rock drawing reads.
+    const fl = this.save.flags, wasFloor = player && ty * TILE >= player.y + player.h - 6;
+    const lesson = wasFloor ? 'taughtFloor' : 'taughtWall';
+    if (!fl.taughtBreak || !fl[lesson]) { fl.taughtBreak = 1; fl[lesson] = 1; persist(); }
     tileDirty = true;
     sfx('break'); cam.shake = Math.max(cam.shake, 4);
     burst(tx * TILE + 16, ty * TILE + 16, 14, PAL[this.roomDef.zone].solid, 220, 0.6, 600, 4);
     burst(tx * TILE + 16, ty * TILE + 16, 6, PAL[this.roomDef.zone].glow, 160, 0.4, 300, 3, true);
   },
+  // A BLOW THAT DOES NOT BREAK IT. The secret's tell is a SOUND as much as a
+  // crack: a hollow knock, grit puffing out of the seam, the crack opening
+  // wider (drawKnocks) — so a wall that looks like every other wall can be
+  // tested by hitting it, and the first time it answers, she is told what the
+  // answer means (the hint_secret line, once per save). `crack` counts the
+  // blow toward breaking (side and ceiling secrets take two); a floor struck
+  // from the side only rings. Returns the blows this tile has taken.
+  knockTile(tx, ty, crack) {
+    // a crack belongs to the run it was struck in; a new game starts uncracked
+    if (this.knockSave !== this.save) { this.knocks = {}; this.knockSave = this.save; }
+    const room = this.knocks[this.roomId] || (this.knocks[this.roomId] = {}), k = tx + ty * 4096;
+    const n = crack ? (room[k] = (room[k] | 0) + 1) : (room[k] | 0);
+    // one note per swing, however many tiles of the plug the blade crossed
+    if (this.knockAt !== this.save.time) { this.knockAt = this.save.time; sfx('hollow'); cam.shake = Math.max(cam.shake, 2); }
+    const P = PAL[this.roomDef.zone];
+    burst(tx * TILE + 16, ty * TILE + 16, 5, P.solid, 90, 0.45, 260, 2);
+    burst(tx * TILE + 16, ty * TILE + 22, 3, P.edge, 60, 0.35, 120, 1.6);
+    // the first time each kind answers, say what the answer means — a wall
+    // that rings will give to another blow; a floor that rings wants one from above
+    const heard = crack ? 'heardHollow' : 'heardHollowFloor';
+    if (!this.save.flags[heard]) { this.save.flags[heard] = 1; this.toast(t(crack ? 'hint_secret' : 'hint_hollow_floor')); persist(); }
+    return n;
+  },
+  knocks: {}, knockAt: -1, knockSave: null,
   dropScrap(x, y, total) {
     let left = total;
     while (left > 0) { const v = Math.min(left, irnd(2, 5)); left -= v; this.pickups.push(new Scrap(x, y, v)); }
@@ -5532,8 +5564,14 @@ const TRAP_SKIN = {
 function drawTiles(P) {
   const g = G.grid, W = g[0].length, H = g.length;
   const x0 = 0, x1 = W - 1, y0 = 0, y1 = H - 1;
+  // A FRACTURE world's loose rock wears the loose rock's face. It was cut from
+  // the same '#' as every wall and drawn as one, so the modifier's whole
+  // promise — "more of it is loose than looks it" — had no tell at all. One
+  // tell everywhere: the misaligned grain and the hairline round the mass.
+  const fracture = typeof brHas === 'function' && !isHero() && brHas('fracture');
   for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
-    const ch = tileAt(tx, ty), X = tx * TILE, Y = ty * TILE;
+    const raw = tileAt(tx, ty), X = tx * TILE, Y = ty * TILE;
+    const ch = (fracture && raw === '#' && brLoose(tx, ty)) ? 'B' : raw;
     if (ch === '#') {
       const up = tileAt(tx, ty - 1);
       const exposed = up !== '#' && up !== 'B';
@@ -6093,7 +6131,10 @@ function drawTiles(P) {
       // boxes. Any edge facing another breakable is skipped, and edges that
       // meet one run out to the full tile bound so the line stays unbroken
       // across the cluster.
-      const nbB = (dx, dy) => tileAt(tx + dx, ty + dy) === 'B';
+      const nbB = (dx, dy) => {
+        const q = tileAt(tx + dx, ty + dy);
+        return q === 'B' || (fracture && q === '#' && brLoose(tx + dx, ty + dy));
+      };
       const l = nbB(-1, 0), r = nbB(1, 0), u = nbB(0, -1), d = nbB(0, 1);
       const x0 = l ? X : X + IN, x1 = r ? X + TILE : X + TILE - IN;
       const y0 = u ? Y : Y + IN, y1 = d ? Y + TILE : Y + TILE - IN;
@@ -6522,6 +6563,7 @@ function buildSurfaceCurve() {
     if (tx < 0 || ty < 0 || tx >= Wt || ty >= Ht) return false;
     const ch = g[ty][tx];
     if (ch === 'B' && broken[G.roomId + ':' + tx + ',' + ty]) return false;
+    if (ch === '#' && typeof looseCut === 'function' && looseCut(tx, ty)) return false;   // a fracture world's cut
     return ch === '#' || ch === 'B';
   };
   const platAt = (tx, ty) =>
@@ -11578,22 +11620,36 @@ function drawSpikeMenace() {
 }
 function drawBreakHint() {
   if (!player || player.dead || !G.grid) return;
-  if (G.save && G.save.flags && G.save.flags.taughtBreak) return;
+  drawKnocks();
+  // TWO LESSONS, TWO 'SEEN' FLAGS (see breakTile): the wall's prompt retires
+  // when she has opened a wall, the floor's when she has cut a floor — so a
+  // hollow wall found first can no longer silence the one prompt the way to
+  // the first cave depends on.
+  const fl = (G.save && G.save.flags) || {};
+  if (fl.taughtWall && fl.taughtFloor) return;
+  const fracture = typeof brHas === 'function' && brHas('fracture');
+  const brittle = (tx, ty) => {
+    const q = tileAt(tx, ty);
+    return q === 'B' || (fracture && q === '#' && brLoose(tx, ty));
+  };
   const pcx = player.x + player.w / 2, pcy = player.y + player.h / 2;
   const t0 = Math.floor(pcx / TILE), t1 = Math.floor(pcy / TILE);
-  let best = null, bd = 1e9;
+  let best = null, bd = 1e9, bestTop = 0, bestBelow = false;
   for (let ty = t1 - 3; ty <= t1 + 3; ty++) for (let tx = t0 - 4; tx <= t0 + 4; tx++) {
-    if (tileAt(tx, ty) !== 'B') continue;
+    if (!brittle(tx, ty)) continue;
     const d = Math.hypot(tx * TILE + 16 - pcx, ty * TILE + 16 - pcy);
-    if (d < bd) { bd = d; best = { tx, ty }; }
+    if (d >= bd) continue;
+    // find the top of this block so the prompt sits above the whole cluster
+    let top = ty;
+    while (brittle(tx, top - 1)) top--;
+    // a block at or below her feet has to be hit from above; anything beside or
+    // over her head takes an ordinary swing
+    const below = top * TILE >= player.y + player.h - 6;
+    if (below ? fl.taughtFloor : fl.taughtWall) continue;
+    bd = d; best = { tx, ty }; bestTop = top; bestBelow = below;
   }
   if (!best || bd > 132) return;
-  // find the top of this block so the prompt sits above the whole cluster
-  let top = best.ty;
-  while (tileAt(best.tx, top - 1) === 'B') top--;
-  // a block at or below her feet has to be hit from above; anything beside or
-  // over her head takes an ordinary swing
-  const below = top * TILE >= player.y + player.h - 6;
+  const top = bestTop, below = bestBelow;
   const msg = t(below ? 'break_down' : 'break_hit');
   // a floor block sits at her feet, so the line has to clear her head
   const bx = best.tx * TILE + 16, by = top * TILE - (below ? 46 : 16);
@@ -11606,6 +11662,39 @@ function drawBreakHint() {
   c.fillStyle = gr; c.beginPath(); c.arc(bx, top * TILE + 16, 34, 0, 7); c.fill();
   c.restore();
   ftxt(msg, bx, by, 12, '#eef3fa', 'center', 'rgba(120,220,255,0.85)');
+}
+// THE CRACK A KNOCK LEAVES. The baked tile layer draws the hairline every
+// secret wears; a blow that did not break it opens that hairline into a real
+// split across the stone, drawn live over the bake (a handful of tiles at
+// most, so no re-bake is spent on it). Deterministic in the tile, so the same
+// crack is there every frame and a frozen clock draws a frozen picture.
+function drawKnocks() {
+  const room = G.knockSave === G.save && G.knocks[G.roomId];
+  if (!room) return;
+  const P = PAL[G.roomDef.zone];
+  c.save();
+  for (const key in room) {
+    const k = +key, tx = k % 4096, ty = (k - tx) / 4096;
+    const q = tileAt(tx, ty);
+    if (q === '.') continue;                       // already broken
+    const X = tx * TILE, Y = ty * TILE;
+    c.lineCap = 'round';
+    for (let pass = 0; pass < 2; pass++) {
+      c.strokeStyle = pass ? P.edge : '#000';
+      c.globalAlpha = pass ? 0.4 : 0.9;
+      c.lineWidth = pass ? 1 : 2.4;
+      c.beginPath();
+      let px = X + 4 + hash2(tx, ty * 3) * 8, py = Y + 3;
+      c.moveTo(px + (pass ? 1 : 0), py);
+      for (let i = 1; i <= 4; i++) {
+        px = X + 6 + hash2(tx * 5 + i, ty) * 20;
+        py = Y + 3 + i * 6.5;
+        c.lineTo(px + (pass ? 1 : 0), py - (pass ? 1 : 0));
+      }
+      c.stroke();
+    }
+  }
+  c.restore();
 }
 // THE SHOCKWAVE (owner, 2026-09-18, from a screenshot of the supercharge:
 // "these surrounding effect circles needs to be more vfx and animated in more

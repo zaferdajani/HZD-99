@@ -525,10 +525,29 @@ const ROOMS = {
     // tutorial fences her into A0 with nothing left to solve. Moving it out of
     // the room means extending the tutorial into A1, whose crawler and guard
     // are the game's first real fight; that is a design call, not a wiring one.
-    ents: [['crawler', 24, 15], ['riddle', 11, 15, 8]],
+    // ...and the two TEACHING SECRETS (plan §5 fix 1), one at each end of the
+    // floor she cannot leave until she has learned it: the scrap in the wall
+    // pocket over her head where she walks in, and the scrap under the brittle
+    // crown of the last heap before the way out. Both are visible from the
+    // ground before she can reach them — the reward is what asks the question.
+    ents: [['crawler', 24, 15], ['riddle', 11, 15, 8], ['scrap', 2, 12, 20], ['scrap', 57, 15, 20]],
     build(g) {
       frame(g); seamR(g);
       hline(g, 4, 7, 12, '=');            // a lit shelf, for looking at
+      // THE FIRST HOLLOW WALL. The shelf's west end runs into a pocket in the
+      // city wall's inner face: two tiles of air with scrap in it, a roof over
+      // it and a brittle plug where it meets the shelf. Standing on the shelf
+      // she faces the plug at body height; the first blow KNOCKS (hollow note,
+      // grit, the crack opening), the second opens it. The roof's outer corner
+      // is chipped so the wall's face is a lump, not a box.
+      //   row  9  ###.        the roof, its corner broken off
+      //   row 10  #..B        the pocket and the plug
+      //   row 11  #..B
+      //   row 12  ####====    its floor, running into the shelf
+      // Clear of the gate arrival (x=40, on the floor two rows below it).
+      hline(g, 0, 2, 9, '#');
+      rect(g, 1, 10, 2, 11, '.'); rect(g, 3, 10, 3, 11, 'B');
+      hline(g, 0, 3, 12, '#');
       // the step she has to jump — a half-sunk chassis rather than a block:
       // the first thing in the game she climbs, and it is one of the dead
       // machines the backdrop is already full of
@@ -553,6 +572,16 @@ const ROOMS = {
       gantry(g, 36, 43, 9, 1);
       // ...and the yard runs on past the booth rather than stopping at it
       mound(g, 54, 62, 2, 37);
+      // THE FIRST HOLLOW FLOOR, in the last heap she crosses on the way out:
+      // its crown is a brittle crust over a one-tile hold with scrap in it.
+      // She walks over it either way (it is solid until cut); standing on it
+      // she is told how — jump, hold DOWN, strike — which is the exact move
+      // A2's floor asks of her one room later on the way to the first cave.
+      // The crown is widened a tile each way (56-59) so the crust is FLUSH with
+      // the ground she stands on — a crust one course above her feet is a wall
+      // at body height and a side swing would take it. Still one tile per column.
+      hline(g, 56, 59, 13, '#');
+      rect(g, 57, 13, 58, 13, 'B'); rect(g, 57, 14, 58, 14, '.');
     } },
   // THE TRADER'S BOOTH (owner's design): she finds the booth on the meadow,
   // walks INTO it through the depth door, and inside is a den — a crafting
@@ -719,7 +748,7 @@ const ROOMS = {
     // question the guard beside it asks — can you wait for the right moment —
     // instead of asking the player to be in two places at once.
     ents: [['crawler', 20, 15], ['flier', 30, 7], ['guard', 46, 15], ['hopper', 52, 15], ['scrap', 8, 15, 8], ['scrap', 35, 11, 12],
-           ['scrap', 65, 10, 15]],
+           ['scrap', 65, 10, 15], ['scrap', 80, 15, 20]],
     build(g) {
       frame(g); seamL(g); seamR(g);
       // ---- THE WEST THIRD IS THE JUNCTION, AND IT DOES NOT MOVE -----------
@@ -750,8 +779,23 @@ const ROOMS = {
       mound(g, 58, 72, 4, 53);
       gantry(g, 63, 71, 8, 2);
       // and a hulk lying across the last of it, so the room ends on something
-      // rather than running out
-      hull(g, 76, 85, 2, 57);
+      // rather than running out.
+      //
+      // THE DOWN-STRIKE AS A TOOL, not a trick (plan §5 fix 1): the hulk's
+      // back is a crust TWO courses deep over a hold with scrap in it. The
+      // strike from above reaches both courses — the downward claw is deep —
+      // and the same blow REBOUNDS her (the pogo), so the lesson is the whole
+      // verb: it cuts, it throws her up, and she comes down into what it
+      // opened. A0's crust taught that floors give; this one teaches that the
+      // down-strike digs, one room before the floor that leads to the first
+      // cave. Laid out by hand so its back is flat for a tile either side of
+      // the crust (a crust one course above her feet is a wall at body height,
+      // and a side swing would take it), still rising one tile per column;
+      // nothing hangs over it, so the strike has clear air.
+      [0, 1, 2, 3, 3, 3, 3, 3, 2, 1, 0].forEach((h, i) => {
+        for (let y = 15 - h; y < 15; y++) put(g, 75 + i, y, '#');
+      });
+      rect(g, 80, 12, 81, 13, 'B'); rect(g, 80, 14, 81, 14, '.');
     } },
   // ---- THE DEN. The first fight in the game you can lose, and it is on the
   // way rather than off it: the pack has been in the meadow since the first
@@ -1720,6 +1764,15 @@ const ROOMS = {
       hline(g, 3, 9, 5, '='); hline(g, 15, 20, 9, '=');
       hline(g, 4, 11, 12, '='); hline(g, 16, 22, 15, '=');
       hline(g, 3, 8, 18, '='); hline(g, 14, 21, 20, '=');
+      // ...AND THE LAST RUNG IS UNDER THE DOOR. "The rungs still have to work
+      // going UP" was the promise, and they did not: the top rung ends three
+      // columns short of the opening, so the jump from it meets the lid at
+      // col 9 and she falls back — measured, not guessed (tests/benchloop.cjs
+      // jumps the real body from every footing near the hole). With the boss
+      // room below and no bench in either, a drop into D5 was a one-way trip
+      // with nowhere to rest. A short rung straight under the opening, five
+      // rows over the rung at 15-20, closes the loop.
+      hline(g, 11, 15, 4, '=');
     } },
   D6: { zone: 'D', w: 32, h: 17, exits: { T: 'D5' }, ice: true,
     ents: [['boss', 20, 15, 'lattice']],
@@ -1745,6 +1798,9 @@ const ROOMS = {
       hline(g, 4, 11, 12, '='); hline(g, 17, 23, 15, '=');
       hline(g, 3, 8, 18, '='); hline(g, 15, 22, 20, '=');
       hline(g, 20, 27, 21, '^');
+      // the same broken promise as D5 (see its note) and the same repair: the
+      // way home meets the lid unless there is a rung under the door
+      hline(g, 12, 16, 4, '=');
     } },
   E6: { zone: 'E', w: 32, h: 17, exits: { T: 'E5' },
     ents: [['boss', 22, 15, 'lens']],

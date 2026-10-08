@@ -1606,6 +1606,17 @@ function sfx(n) {
     case 'boom': hiss(0.45, 0.16); tone(90, 0.4, 'sawtooth', 0.12, 34); break;
     case 'edie': hiss(0.22, 0.11); tone(150, 0.2, 'sawtooth', 0.08, 42); tone(500, 0.12, 'square', 0.04, 120); break;
     case 'break': hiss(0.2, 0.12); tone(200, 0.15, 'square', 0.07, 70); break;
+    // THE HOLLOW KNOCK — a blow that does not break the secret it landed on.
+    // Solid rock answers with nothing; a shell over a void answers TWICE: the
+    // knuckle on the stone, then the cavity behind it ringing back a beat
+    // later and further away. That echo is the whole tell, so it is pitched
+    // clear of the claw's own swing and kept short enough to sit under it.
+    case 'hollow':
+      tone(150, 0.16, 'sine', 0.13, 92);                  // the knuckle on stone
+      tone(310, 0.22, 'triangle', 0.05, 280);              // the cavity rings
+      tone(305, 0.2, 'triangle', 0.026, 270, 0.075);       // ...and again, from inside
+      hiss(0.05, 0.045);                                   // grit off the seam
+      break;
     // steel meeting steel and not liking it: a bright scrape that falls away,
     // a bite of low thud under it, and one ringing partial off the housing
     // THE WARNING. A short rising pair — rising, so it encodes time REMAINING

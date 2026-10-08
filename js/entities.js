@@ -47,7 +47,29 @@ function tileAt(tx, ty) {
       && ty >= 15 && tx >= 6 && tx <= 8) return '#';
   const c = g[ty][tx];
   if ((c === 'B' || c === 'v') && G.save.broken[G.roomId + ':' + tx + ',' + ty]) return '.';
+  // a FRACTURE world's loose rock is authored '#', so the broken check above
+  // never saw it: the claw "broke" it, the save recorded it, and the wall
+  // stood there. Checked through a per-room set so that every other solid
+  // tile — the hot path of all collision — costs one property read.
+  if (c === '#' && looseCut(tx, ty)) return '.';
   return c;
+}
+// THE LOOSE ROCK SHE HAS ALREADY CUT, for this room. Rebuilt only when the
+// room or the save changes, or a tile breaks (breakTile drops it); empty —
+// the common case, any world without the fracture — answers in one read.
+let looseCutSet = null;
+function looseCut(tx, ty) {
+  let s = looseCutSet;
+  if (!s || s.room !== G.roomId || s.save !== G.save || s.grid !== G.grid) {
+    s = looseCutSet = { room: G.roomId, save: G.save, grid: G.grid, keys: null };
+    const pre = G.roomId + ':', g = G.grid;
+    for (const k in G.save.broken) {
+      if (k.indexOf(pre) !== 0) continue;
+      const [x, y] = k.slice(pre.length).split(',').map(Number);
+      if (g[y] && g[y][x] === '#') (s.keys || (s.keys = new Set())).add(x + y * 4096);
+    }
+  }
+  return !!(s.keys && s.keys.has(tx + ty * 4096));
 }
 function solidAt(tx, ty) { const c = tileAt(tx, ty); return c === '#' || c === 'B'; }
 // FRACTURE worlds: a deterministic scatter of ordinary wall is secretly loose.
@@ -2281,12 +2303,25 @@ class Player {
         const c = (raw === '#' && brLoose(tx, ty)) ? 'B' : raw;
         if (c === 'B') {
           // floor blocks (at/below the feet) only break with a DOWN-attack
-          // (jump, hold down, hit); side/ceiling secret walls break normally
+          // (jump, hold down, hit), and a down-attack still cuts anything
+          // brittle in ONE — every pogo route in the game is a single strike.
+          //
+          // A SIDE OR CEILING SECRET TAKES TWO BLOWS, and that is the tell
+          // (docs/plan §5 fix 3). One blow used to open it, so the only thing
+          // that ever said "hollow" was the rock vanishing. Now the first blow
+          // KNOCKS: a hollow note, a puff of grit out of the seam, the crack
+          // opening wider — and the second one breaks it. A floor struck from
+          // the side knocks too and stays put, which is the room telling her
+          // this is hollow and the hit came from the wrong direction.
+          // One swing is several frames long; a tile counts once per swing.
           const floorBlock = ty * TILE >= this.y + this.h - 6;
-          if (this.swing.ay > 0 || !floorBlock) {
-            G.breakTile(tx, ty);
-            if (this.swing.ay > 0) pogo = true;
-          }
+          const struck = this.swing.struck || (this.swing.struck = new Set());
+          const key = tx + ty * 4096;
+          if (struck.has(key)) continue;
+          struck.add(key);
+          if (this.swing.ay > 0) { G.breakTile(tx, ty); pogo = true; }
+          else if (!floorBlock) { if (G.knockTile(tx, ty, true) >= 2) G.breakTile(tx, ty); }
+          else G.knockTile(tx, ty, false);
         } else if (c === '^' && this.swing.ay > 0) pogo = true;
       }
       if (pogo && this.swing.ay > 0) {
@@ -5583,6 +5618,16 @@ function platRide(p) {
 }
 
 // ================= PICKUPS =================
+// open air from a pickup to her, sampled every 12 px through the tile grid
+function scrapSees(o) {
+  const x0 = o.x + o.w / 2, y0 = o.y + o.h / 2;
+  const dx = player.x + player.w / 2 - x0, dy = player.y + player.h / 2 - y0;
+  const n = Math.ceil(Math.hypot(dx, dy) / 12);
+  for (let i = 1; i < n; i++) {
+    if (solidAt(Math.floor((x0 + dx * i / n) / TILE), Math.floor((y0 + dy * i / n) / TILE))) return false;
+  }
+  return true;
+}
 class Scrap {
   constructor(x, y, val) {
     this.x = x; this.y = y; this.w = 10; this.h = 10; this.val = val;
@@ -5595,7 +5640,12 @@ class Scrap {
     // A shard that lands in spikes, or on a ledge you cannot stand on, used to be
     // gone for good. After a moment at rest it drifts to you instead.
     const settled = this.rest > 1.2;
-    if (settled && !player.dead && dist2(this.x, this.y, player.x, player.y) < 320 * 320) {
+    // ...but never THROUGH rock. Scrap left in a sealed pocket — behind a
+    // hollow wall, under a brittle crust, in a cave's hidden hold — used to
+    // fly straight out through the stone the moment she came near, so the
+    // secret paid before it was found. It drifts only along open air now;
+    // cut the seal and the line opens.
+    if (settled && !player.dead && dist2(this.x, this.y, player.x, player.y) < 320 * 320 && scrapSees(this)) {
       const dx = player.x + 12 - this.x, dy = player.y + 18 - this.y, d = Math.hypot(dx, dy) || 1;
       this.x += dx / d * 300 * dt; this.y += dy / d * 300 * dt;
       this.vx = 0; this.vy = 0;
