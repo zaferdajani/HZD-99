@@ -186,6 +186,9 @@ const G = {
     }
     const grants = { glitch: 'dash', brood: 'djump', atlas: 'emp', zero: 'key' };
     if (grants[kind]) grantMod(grants[kind]);
+    // WHO POINTS HER ON. The lion was the Meadows' gate (world.js A3's climb):
+    // the moment it is free, the world says where the road now goes.
+    if (kind === 'glitch' && typeof revisedStory === 'function' && revisedStory()) G.toast(t('conduits_open'));
     // THE CELL. Every guardian was built around one, and it comes out when the
     // guardian stops. NULLFANG's is the one that opens the shop — which is why
     // the trader is standing in the room next door and why he has been dark
@@ -246,7 +249,8 @@ function persist() {
 function loadStored(theme) {
   try {
     const v = localStorage.getItem(saveKeyFor(theme));
-    if (v) return JSON.parse(v);
+    // every save read from disk is brought onto the current story first
+    if (v) { const sv = JSON.parse(v); return typeof migrateStory === 'function' ? migrateStory(sv) : sv; }
   } catch (e) {}
   return null;
 }
@@ -267,6 +271,10 @@ function loadMeta() {
   } catch (e) {}
   return false;
 }
+// THE STORY VERSION. 2 was Draft 2 (new games only); 3 is Draft 2 for EVERY
+// save — migrateStory (js/story-opening.js) brings an older save onto it once,
+// on load, so nobody testing on an old save plays the old storyline.
+const STORY_VERSION = 3;
 function newSave(diff) {
   return {
     v: 1, weaponVersion: 1, weaponMode: 'claws', diff, scrap: 0, coresMax: DIFFS[diff].cores, abil: {}, crests: [], equip: [], arms: [], armIdx: 0, stars: 6,
@@ -277,8 +285,8 @@ function newSave(diff) {
     bench: { room: 'W1', x: 96, y: 412 }, deaths: 0, lives: 0, time: 0,
     pouch: null, usedNine: false, won: false, evo: 0, pace: 0, quests: {}, culls: {}, bag: {},
     // Draft 2: Ratchet's own battery must be found in his workshop.
-    // Existing saves keep their inventory; NOSTOS retains its separate rules.
-    storyVersion: 2,
+    // Existing saves are migrated (migrateStory); NOSTOS keeps its own rules.
+    storyVersion: STORY_VERSION,
     items: isHero() ? { batt: 1 } : {},
   };
 }
@@ -327,7 +335,14 @@ function invTake(id, n) {
 // the same trader. Keying the charge on the subject alone would wake both at
 // once and hand you the shop before you had earned it, so the key is the room
 // as well.
-function npcKey(s) { return (s.room || G.roomId) + '|' + s.extra; }
+//
+// ...EXCEPT RATCHET, who is one machine (js/story-opening.js npcPlaced): he
+// stands in his den or at the camp, never both, and one waking is his flag
+// wherever he stands — so his key is always his home.
+function npcKey(s) {
+  if (s.extra === 'ratchet' && typeof revisedStory === 'function' && revisedStory()) return 'A0B|ratchet';
+  return (s.room || G.roomId) + '|' + s.extra;
+}
 
 // ---------------------------------------------------------------------------
 // RATCHET, THE ONE WHO NEVER FINISHED (owner, 2026-08-21: "give it a
@@ -819,7 +834,7 @@ function healUnlocked() {
 function burstUnlocked() {
   if (typeof isHero === 'function' && isHero()) return true;
   const f = G.save && G.save.flags;
-  return !!(f && (f.heal || (G.save.storyVersion !== 2 && f.tut)));
+  return !!(f && (f.heal || (!(G.save.storyVersion >= 2) && f.tut)));
 }
 // THE ONE MACHINE THAT WAS NEVER SWITCHED OFF.
 //
@@ -996,11 +1011,13 @@ function loadRoom(id) {
   def.ents.forEach((d, i) => {
     let [kind, tx, ty, extra, cond] = d;
     // The first target is an automatic scrap-yard defence, not a person.
-    if (!isHero() && G.save.storyVersion === 2 && id === 'A0' && kind === 'crawler') kind = 'turret';
+    if (!isHero() && G.save.storyVersion >= 2 && id === 'A0' && kind === 'crawler') kind = 'turret';
     if (cond && !G.save.flags[cond]) return;
+    // one Ratchet: he stands in his den until the blade is forged, then at the camp
+    if (kind === 'npc' && typeof npcPlaced === 'function' && !npcPlaced(id, extra)) return;
     if (EKIND[kind]) {
       const k = EKIND[kind];
-      const storyKey = !isHero() && G.save.storyVersion === 2 ? id + ':' + i + ':' + kind : null;
+      const storyKey = !isHero() && G.save.storyVersion >= 2 ? id + ':' + i + ':' + kind : null;
       const rescueState = storyKey && G.save.rescues && G.save.rescues[storyKey];
       // THE BRAID decides who is even here. A kingdom you have cured wakes fewer
       // machines and wakes some of them calm; a HOLLOW world barely wakes at all.
@@ -1014,7 +1031,7 @@ function loadRoom(id) {
         // a SAGE is never culled by the Braid — it is a story, not population
         if (!rescueState && kind !== 'sage' && keep < 1 && ((i * 2654435761) % 1000) / 1000 > keep) return;
       }
-      const en = !isHero() && G.save.storyVersion === 2 && id === 'A0' && kind === 'turret'
+      const en = !isHero() && G.save.storyVersion >= 2 && id === 'A0' && kind === 'turret'
         ? new YardWinch(tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h)
         : new Enemy(kind, tx * TILE + (TILE - k.w) / 2, ty * TILE - k.h);
       en.actorRole = STORY_ACTOR_ROLES[kind]; en.storyKey = storyKey;
@@ -1067,7 +1084,9 @@ function loadRoom(id) {
     } else if (kind === 'item') {
       // an errand's object. It exists in exactly one place in the world, and
       // once it is in the bag it does not come back.
-      if (!(G.save.bag && G.save.bag[extra])) spawnStatic('item', tx, ty, extra, null);
+      // ...and only while an errand is waiting for it (questItemLive)
+      if (typeof questItemLive === 'function' ? questItemLive(extra) : !(G.save.bag && G.save.bag[extra]))
+        spawnStatic('item', tx, ty, extra, null);
     } else if (kind === 'riddle') {
       spawnStatic('riddle', tx, ty, extra, nodeKey(extra));
     } else if (kind === 'secret') {
@@ -1128,6 +1147,7 @@ function loadRoom(id) {
   if (id === 'W1' && typeof wakeStart === 'function') wakeStart();
   if (player) player.oathUsed = false;      // the lion owes her once per room
   G.save.visited[id] = 1;
+  if (typeof questVisit === 'function') questVisit(id);
   rubbleInit();          // the buried mouth, if this room has one
   tileDirty = true;
   // ---- WALKING INTO A GUARDIAN'S CHAMBER --------------------------------
@@ -1292,7 +1312,7 @@ function meetCheck() {
   const b = new Boss('glitch', gx, -260);      // x is the centre, y the feet
   b.meet = true; b.st = 'pounce'; b.vx = 0; b.vy = 520; b.face = -1; b.t = 9;
   G.boss = b;
-  G.meet = { t: 0, ph: 'fall', hit: false, interactive: !isHero() && G.save.storyVersion === 2 };
+  G.meet = { t: 0, ph: 'fall', hit: false, interactive: !isHero() && G.save.storyVersion >= 2 };
   G.save.flags.nfMeet = 1;                    // set as it begins: a reload mid-beat keeps the sentence
   if (typeof brMark === 'function') brMark('meet', G.roomId);
   if (typeof filmSee === 'function' && PURIFY_VID.meet) filmSee('meet');
@@ -1507,7 +1527,7 @@ function checkTransitions() {
     // COLUMN for a vertical pair whose rooms cannot align by width — V2's
     // way up arrives through the hole she cut in B2's floor, not at her
     // own x in a hall twice as wide as the vault
-    if (dest.flag && !G.save.flags[dest.flag]) return;
+    if (!exitOpen(dest)) { refuseCrossing(side, dest.why); return; }
     at = dest.at != null ? dest.at : null;
     dest = dest.to;
   }
@@ -1537,6 +1557,27 @@ function checkTransitions() {
   // nothing to slide. The canvas still holds the last frame drawn, and the
   // last frame drawn is the room she is leaving.
   transSnap = transHeld ? transCv : null;
+}
+// A GATED CROSSING. `flag` names what opens it, `blade` asks for the forged
+// sword as well, `robo` keeps it to the robot story (NOSTOS has its own
+// route), and `why` is the line she is told when it refuses — a door that
+// silently ignores her is a dead input. A gate she has already been through
+// stays open: the only way into the room beyond was this door, so a save that
+// has stood there earned it (an older save that crossed before the gate
+// existed keeps its road home).
+function exitOpen(d) {
+  if (d.robo && isHero()) return true;
+  if (G.save.visited && G.save.visited[d.to]) return true;
+  if (d.flag && !G.save.flags[d.flag]) return false;
+  if (d.blade && !isHero() && !weaponOwned('single')) return false;
+  return true;
+}
+function refuseCrossing(side, why) {
+  const W = G.roomDef.w * TILE;
+  if (side === 'L' || side === 'R') { player.x = clamp(player.x, 2, W - player.w - 2); player.vx = 0; }
+  else if (side === 'B') { player.x = player.lastSafe.x; player.y = player.lastSafe.y; player.vy = 0; }
+  // a refused climb needs nothing: she is above the frame and gravity returns her
+  if (why && (!G.gateWhyAt || G.time - G.gateWhyAt > 4)) { G.toast(t(why)); G.gateWhyAt = G.time || 0.001; }
 }
 function applyTransition() {
   const tr = G.trans, from = { x: player.x, y: player.y, vx: player.vx, vy: player.vy };
@@ -1668,6 +1709,10 @@ const NPC_GIFT = {
 // never waits on the art.
 function forgeCrystal() {
   if (!grantWeapon('single')) return;
+  // ...and the trader packs his tools for the camp by the lion's door: the
+  // next time a room is loaded he stands there, not here (npcPlaced). He says
+  // so as he hands the job over (sl_ratchet_moving), never silently.
+  if (typeof revisedStory === 'function' && revisedStory()) G.save.flags.ratchetCamp = 1;
   persist();
   sfx('chargeReady');
   G.flash = Math.max(G.flash, 0.6);
@@ -1807,18 +1852,26 @@ function doInteract(s) {
     if (q) {
       const st = qState(q.id);
       let qAct = null;
+      // WHO POINTS YOU THERE (docs/STORY_SHEET.md). An errand may carry the
+      // way to its goal; it is said with the ask and again while she is still
+      // looking, because a direction heard once and forgotten is no direction.
+      const wk = 'q_where_' + q.id, wl = t(wk);
+      const where = wl && wl !== wk ? [wl] : [];
       if (st === 'none') {
         // AN ASK MAY BE SEVERAL SHORT BEATS. It used to be one string, so the
         // only way to tell a story here was to write a paragraph into a speech
         // bubble — and the owner read one: 'npc words are long and repeated'.
         // concat takes either, so a line stays a line and a story is a list.
-        lines = [].concat(t('q_ask_' + q.id) || t('q_ask'), qText(q));
+        lines = [].concat(t('q_ask_' + q.id) || t('q_ask'), qText(q), where);
         qAct = () => { qSet(q.id, 'active'); G.toast(t('q_taken')); sfx('ok'); };
       } else if (qDone(q)) {
         lines = [t('q_thanks_' + q.id) || t('q_thanks')];
+        // the forge is also where he leaves for the camp, and he says so
+        if (q.id === 'ratchet_forge' && typeof revisedStory === 'function' && revisedStory())
+          lines.push(t('sl_ratchet_moving'));
         qAct = () => questPay(q);
       } else {
-        lines = [qText(q), t('q_wait')];
+        lines = [qText(q)].concat(where, t('q_wait'));
       }
       after = () => {
         if (qAct) qAct();
@@ -1846,12 +1899,10 @@ function doInteract(s) {
       let k = 'sl_' + s.extra + '_' + standingTier();
       let backLine = null;               // "you came back" leads even the standing line
       if (s.extra === 'ratchet') {
-        if (G.save.flags['sageTame_GA1D']) k = 'sl_ratchet_sage';
-        else if (G.save.flags.crystal) k = 'sl_ratchet_forged';
-        // the corridor where it swatted her: he has seen the dent, and he
-        // says so until she has answered it (nfMeet set by the meeting,
-        // bossGlitch by the rematch)
-        else if (G.save.flags.nfMeet && !G.save.flags.bossGlitch) k = 'sl_ratchet_rematch';
+        // forged → sage → bell → lion, in the story's order (and the corridor's
+        // dent only becomes "go and put one in it" once the lion is winnable):
+        // ratchetStandingKey in js/story-opening.js
+        if (typeof ratchetStandingKey === 'function') k = ratchetStandingKey(G.save.flags, k);
         // "YOU CAME BACK" — the underdog sentence, said by the one who passed
         // the husk. Once per death, keyed on the count so it never repeats
         // for the same fall.
@@ -1897,6 +1948,7 @@ function doInteract(s) {
       }
     }
     if (typeof survivorStory === 'function') lines = survivorStory(s, lines);
+    if (typeof ctlFill === 'function') lines = lines.map(ctlFill);   // {JUMP} -> her own bound control
     G.dialog = { name: t('n_' + s.extra), lines, i: 0, npc: s.extra, onEnd: after };
     G.state = 'DIALOG'; npcSay(s.extra, 0);
   } else if (s.type === 'term') {
@@ -1940,8 +1992,10 @@ function doInteract(s) {
     else if (s.extra.indexOf('rl:') === 0) G.grantRelic(s.extra.slice(3));
     else if (s.extra.indexOf('it:') === 0) {
       // an inventory item kept in a chest — the booth's spare power cell
+      // ...his own cell while he is dark; once he is awake (an older save
+      // woke him with another cell) the drawer holds an ordinary spare
       const it = !isHero() && G.save.storyVersion >= 2 && G.roomId === 'A0B' && s.extra === 'it:batt'
-        ? 'ratchetCell' : s.extra.slice(3);
+        && !G.save.flags['on_A0B|ratchet'] ? 'ratchetCell' : s.extra.slice(3);
       invAdd(it);
       showItem(t('i_' + it), t('i_' + it + 'd'));
     }
@@ -2709,7 +2763,7 @@ function updateShop() {
   if (inP('UP')) { G.shopIdx = (G.shopIdx + SHOP.length - 1) % SHOP.length; sfx('ui'); }
   if (inP('OK')) {
     const it = SHOP[G.shopIdx];
-    if (!isHero() && G.save.storyVersion === 2 && !G.save.flags.heal && it.type !== 'cell') {
+    if (!isHero() && G.save.storyVersion >= 2 && !G.save.flags.heal && it.type !== 'cell') {
       G.toast(t('story_pack_first')); sfx('no'); return;
     }
     if (shopSold(it)) { sfx('no'); return; }
@@ -9554,7 +9608,7 @@ function gateDoorsAll(id) {
   const doors = !g ? [] : (Array.isArray(g) ? g.slice() : [g]);
   // An existing floor anchor in the quarry connects to the tunnel's central
   // maintenance landing. The guardian's reward is never a prerequisite.
-  if (!isHero() && G.save && G.save.storyVersion === 2) {
+  if (!isHero() && G.save && G.save.storyVersion >= 2) {
     if (room === 'CV3') doors.push({ at: 36 / 56, to: 'GA1T', ax: 0.5, need: 'crystal' });
     if (room === 'GA1T') doors.push({ at: 0.5, to: 'CV3', ax: 36 / 56, need: 'crystal' });
   }
@@ -11096,7 +11150,7 @@ function drawStatics(P) {
       // below draw the same landmark. The breathing halo rides both versions:
       // the plate is a still, and the pulse is what makes it alive.
       const pu = 0.5 + Math.sin(performance.now() / 700 + s.t) * 0.5;
-      if (!isHero() && G.save.storyVersion === 2) {
+      if (!isHero() && G.save.storyVersion >= 2) {
         // Rounded raw material, shared with the comic's quarry reference.
         // Loading must never flash the legacy pointed crystal into this scene.
         if (!drawPlateAnchored(c, 'rawMarble', s.x + s.w / 2, s.y + s.h, s.h * 1.18, false)) {
@@ -12014,7 +12068,7 @@ function updateTutor(dt) {
   // arm's length until the claw has been taught — then it walks in and is held
   // there, close enough to be frightening and too far to touch.
   const dum = G.enemies && G.enemies.find(e => e && !e.dead);
-  if (dum && (sv.storyVersion !== 2 || st.id !== 'kill')) {
+  if (dum && (!(sv.storyVersion >= 2) || st.id !== 'kill')) {
     dum.calm = true; dum.hypnoT = 1e9;
     const gap = (dum.x + dum.w / 2) - (player.x + player.w / 2);
     // held at arm's length until the claw has been taught, then let close —
@@ -14593,6 +14647,9 @@ function draw(tms) {
     drawMenuBG(tsec);
     ftxt(t('win1'), 480, 120, 52, '#aef7d8', 'center', '#37ffd0');
     ftxt(t('win2'), 480, 185, 17, '#cfe3ef');
+    // ...and what is left after her (docs/STORY_SCRIPT.md: the Eye has no
+    // fight yet, so the ending says only what is true — it is exposed, not beaten)
+    { const w2 = t('win2b'); if (w2 !== 'win2b') ftxt(w2, 480, 212, 15, '#9db3c4'); }
     const s = G.save;
     const mins = Math.floor(s.time / 60), secs = Math.floor(s.time % 60);
     const bosses = ['Glitch', 'Brood', 'Atlas', 'Zero', 'Prism', 'Mother'].filter(b => s.flags['boss' + b]).length;

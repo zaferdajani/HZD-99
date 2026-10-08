@@ -198,6 +198,24 @@ const { chromium } = require('playwright');
       else doInteract(npc);
       return;
     }
+    if (G.state === 'REPAIR') {
+      // RATCHET'S REPAIR (js/story-repair.js) is a real puzzle now, and the
+      // waking it gates is the next link of this lesson: the trader cannot
+      // open a shop until he has power. The old driver only paged dialogue, so
+      // it sat in front of the repair board forever and reported "buy, buy,
+      // buy". Solve it with its own buttons, the way a player does (the same
+      // clicks tests/battery.cjs makes), then let the boot run out.
+      for (const [piece, target] of [['cell', 'socket'], ['positive', 'plus'], ['negative', 'minus'], ['bridge', 'relay']]) {
+        const a = document.querySelector('[data-piece="' + piece + '"]');
+        const b = document.querySelector('[data-target="' + target + '"]');
+        if (a && !a.disabled && !a.hidden) a.click();
+        if (b) b.click();
+      }
+      const pw = document.querySelector('.repair-power');
+      if (pw && !pw.disabled) pw.click();
+      for (let i = 0; i < 120 && G.state === 'REPAIR'; i++) update(1 / 60);
+      return;
+    }
     if (G.state === 'DIALOG') {
       // PAGE IT THROUGH IN ONE TRY, for the same reason the walk is done in
       // one: Ratchet's first talk is a long story, one page per try spent the

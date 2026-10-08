@@ -177,6 +177,10 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
       // ---- 3. the guardian
       if (bossRoom) {
         boot(bossRoom); const b = G.boss; const g = {};
+        // a guardian is only ever freed by the forged blade (brNeedsBlade,
+        // js/braid.js); the gates make sure she owns it before she can stand
+        // here, so the save that stands here owns it — she still swings claws
+        G.save.flags.crystal = 1;
         if (b) {
           b.st = 'stalk'; b.t = 9; b.dead = false; b.hp = b.hpMax;
           // her own claw is the only way a guardian is hurt: stand at it, swing

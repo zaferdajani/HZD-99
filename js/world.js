@@ -724,7 +724,12 @@ const ROOMS = {
       hull(g, 9, 15, 2, 71);
       hull(g, 39, 45, 2, 73);
     } },
-  A3: { zone: 'A', sky: 1, w: 52, h: 17, exits: { L: 'A2', R: 'A4', T: 'B1', B: 'A12' },
+  // THE FIRST KINGDOM'S ONLY WAY OUT is the climb above the camp, and it is
+  // the story's gate (plan §4.2): the Conduits open once NULLFANG is free —
+  // which needs the forged blade, the Meadow Sage and the silenced bell — so
+  // nobody leaves the Meadows having skipped its chapter. Robot story only.
+  A3: { zone: 'A', sky: 1, w: 52, h: 17,
+    exits: { L: 'A2', R: 'A4', T: { to: 'B1', flag: 'bossGlitch', blade: 1, robo: 1, why: 'gate_conduits' }, B: 'A12' },
     ents: [['bench', 8, 15], ['npc', 14, 15, 'ratchet'], ['scrap', 40, 15, 14]],
     build(g) {
       frame(g); seamL(g); seamR(g);
@@ -903,7 +908,9 @@ const ROOMS = {
                                             // breaking the wall used to reveal
                                             // two more columns of solid frame
     } },
-  B5: { zone: 'B', w: 32, h: 17, exits: { L: 'B4', T: 'X1', R: 'V1' },
+  // The east side leads where the three-sigil vault leads (V1), so it opens on
+  // the vault's own condition: an open side door was the way around the lock.
+  B5: { zone: 'B', w: 32, h: 17, exits: { L: 'B4', T: 'X1', R: { to: 'V1', flag: 'vaultOpen', why: 'gate_vault_side' } },
     ents: [['chest', 12, 15, 'phantom'], ['scrap', 16, 15, 25], ['riddle', 19, 15, 2], ['vault', 21, 15]],
     build(g) {
       frame(g); openL(g); openR(g); hline(g, 8, 15, 12, '=');

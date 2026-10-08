@@ -1,5 +1,9 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const ctx=vm.createContext({G:{save:{storyVersion:2,flags:{}},roomId:'GA1D',state:'PLAY'},isHero:()=>false,persist(){},t:k=>k});
+// The lines live in js/i18n.js now (every language), so the real lookup is
+// loaded rather than a key-echo stub: the assertions read the words shipped.
+const ctx=vm.createContext({G:{save:{storyVersion:2,flags:{}},roomId:'GA1D',state:'PLAY'},isHero:()=>false,persist(){}});
+ctx.window=ctx;
+vm.runInContext(fs.readFileSync('js/i18n.js','utf8'),ctx);
 vm.runInContext(fs.readFileSync('js/story-opening.js','utf8'),ctx);
 assert.match(ctx.openingGateHint('A4'),/raw marble/);
 ctx.G.save.flags.crystal=1;assert.match(ctx.openingGateHint('A4'),/Sage/);

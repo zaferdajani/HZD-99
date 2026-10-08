@@ -10520,6 +10520,8 @@ function bossFork(b) {
   if (typeof brOffer !== 'function' || typeof G === 'undefined') return false;
   if (typeof player === 'undefined' || !player || player.dead) return false;
   if (typeof isHero === 'function' && isHero()) return false;
+  // no blade, no freeing: the song holds it together (brNeedsBlade, braid.js)
+  if (typeof brNeedsBlade === 'function' && brNeedsBlade(b)) return true;
   b.forkAsked = true;
   b.hp = 0; b.vx = 0; b.vy = 0; b.stagT = 0;
   // G.forkBoss FIRST, and that ordering is now load-bearing. It used to be set
@@ -13447,6 +13449,9 @@ class Boss {
     // to kneel here, or it never kneels at all.
     if (!this.forceKill && bossFork(this)) return;
     this.dead = true;
+    // MOTHER IS NOT KILLED (docs/STORY_CANON.md: the hijacked singer, not the
+    // author). The blast below is the command leaving her, and the game says so.
+    if (this.kind === 'mother' && typeof revisedStory === 'function' && revisedStory()) G.toast(t('pure_mother'));
     // A guardian with an authored purification film does not detonate. The
     // film shows the last blow and the virus leaving; we skip straight past
     // the wreck so nothing of him is ever seen destroyed.
