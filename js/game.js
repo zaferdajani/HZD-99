@@ -6949,6 +6949,18 @@ function tileArtState(k) {
   const low = (typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[k]) | 0;
   return raw + '' + low;
 }
+// The grid itself, by identity: buildRoom caches one array per room, and the
+// only things that replace it — a campaign pack applied, an edit in the Forge
+// (js/packs.js deletes gridCache) — are exactly the things that make an old
+// bake of that room wrong.
+const tileGridIds = new WeakMap();
+let tileGridN = 0;
+function tileGridId(id) {
+  const g = buildRoom(id);
+  let n = tileGridIds.get(g);
+  if (!n) { n = ++tileGridN; tileGridIds.set(g, n); }
+  return n;
+}
 function tileSig(id) {
   const def = ROOMS[id];
   if (!def) return '';
@@ -6960,7 +6972,7 @@ function tileSig(id) {
   // the fracture modifier re-faces loose '#' as 'B' inside the bake, so a run
   // that gains or loses it must not reuse a bake made without it
   const frac = typeof brHas === 'function' && !isHero() && brHas('fracture') ? 1 : 0;
-  return [typeof themeId === 'function' ? themeId() : '', br, f.taughtBreak ? 1 : 0, frac,
+  return [tileGridId(id), typeof themeId === 'function' ? themeId() : '', br, f.taughtBreak ? 1 : 0, frac,
     id === 'D3' ? (f.bossZero ? 1 : 0) : '', id === 'X1' && G.roomId === 'X1' && G.x1Bridge ? 1 : 0,
     tileArtState(ROCK_ART[def.zone]), tileArtState('platforms'), tileArtState('strataRubble'),
     tileArtState('strataIceB'), tileArtState('strataLava'), tileArtState(ik)].join('|');

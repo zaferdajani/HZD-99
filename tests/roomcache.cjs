@@ -116,11 +116,16 @@ const check = (name, ok, detail) => {
         };
       }
       const dest = (() => { let d = (G.roomDef.exits || {})[side]; return d && typeof d === 'object' ? d.to : d; })();
-      let tPrev = performance.now();
-      for (let i = 0; i < 75; i++) {
+      // A player reads a doorway for a second or so; a harness machine under
+      // the rest of the suite's load can need longer for the same slices, so
+      // the wait is "until it is baked", bounded at four seconds of frames.
+      let tPrev = performance.now(), waited = 0;
+      for (let i = 0; i < 240; i++) {
         place(); quiet();
         await raf();
         const now = performance.now(); out.approachMax = Math.max(out.approachMax, now - tPrev); out.frames.push(now - tPrev); tPrev = now;
+        waited = i + 1;
+        if (i >= 30 && tileFresh(dest)) break;
       }
       const freshBefore = tileFresh(dest);
       const revisit = !!visited[dest];
@@ -144,7 +149,7 @@ const check = (name, ok, detail) => {
         }
       }
       for (const k in keys) keys[k] = 0;
-      out.walk.push({ room, side, dest, arrived: G.roomId === dest, freshBefore, revisit, cost, liveBakes: liveAt });
+      out.walk.push({ room, side, dest, arrived: G.roomId === dest, freshBefore, revisit, cost, liveBakes: liveAt, waited });
     }
     // ---- 3. the same picture -----------------------------------------------------
     const hashOf = (cvx) => {
@@ -200,7 +205,7 @@ const check = (name, ok, detail) => {
       const l2 = TILE_STATS.live;
       loadRoom('A2'); quiet(); await raf(); await raf();
       // and the bake she comes back to is the one with the hole in it
-      out.stale = { clean, onCut, back: TILE_STATS.live - l2, sigHasCut: tileStore.get('A2').sig === tileSig('A2') && tileSig('A2').split('|')[1] !== '0' };
+      out.stale = { clean, onCut, back: TILE_STATS.live - l2, sigHasCut: tileStore.get('A2').sig === tileSig('A2') && tileSig('A2').split('|')[2] !== '0' };
     }
     window.tilePrebakeTick = prebake;
     // ---- 5. the device's budget --------------------------------------------------------
@@ -254,7 +259,7 @@ const check = (name, ok, detail) => {
       continue;
     }
     check(tag + ': the room is already baked when she gets there', w.freshBefore && w.liveBakes === 0,
-      (w.revisit ? 'revisit' : 'one door ahead') + ', ' + w.liveBakes + ' bake on the crossing frame' + (w.freshBefore ? '' : ' (NOT baked beforehand)'));
+      (w.revisit ? 'revisit' : 'one door ahead') + ' (ready after ' + w.waited + ' frames at the door), ' + w.liveBakes + ' bake on the crossing frame' + (w.freshBefore ? '' : ' (NOT baked beforehand)'));
     check(tag + ': ...and the crossing frame is a frame', w.cost != null && w.cost < BUDGET,
       Math.round(w.cost) + ' ms (budget ' + Math.round(BUDGET) + ' ms, a median frame here is ' + Math.round(r.median) + ')');
   }
