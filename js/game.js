@@ -3811,20 +3811,40 @@ function drawCeiling(zone) {
   const P = PAL[zone];
   const tier = typeof QUAL !== 'undefined' ? QUAL.ceil : 2;
   if (tier <= 0) return;
-  // FAR: slow, dark, and wide — the thickness of the roof
+  // THE PLATE IS NAILED TO THE ROOM. Both layers used to ride their own
+  // parallax — the far one at 0.35 across and 0.22 down, the near one at 0.92
+  // — so in any room taller or wider than the screen the roof slid against the
+  // rock it hangs from: 8% of a 34-row shaft's scroll is 64 px of plate
+  // drifting down into the room, and it could never meet the floor art of the
+  // room stacked above, which IS world-locked. A roof is part of the building,
+  // so both layers now move exactly with the grid: the near plate hangs from
+  // world y -8 (just over row 0's top edge, where the room above's floor ends)
+  // and the far plate behind it from -26, offset half a plate across so the two
+  // never print the same stamp in the same place. The depth the far layer was
+  // for comes from its darkness and its offset, not from sliding.
+  // the same rounded offset the tile layer is translated by, so plate and
+  // rock never shimmer half a pixel apart
+  const sx = Math.round(camSX()), sy = Math.round(camSY());
+  const wrapX = (v) => -(((v % CEIL_TW) + CEIL_TW) % CEIL_TW);
+  // FAR: dark, wide — the thickness of the roof
   if (tier >= 2) {
-    c.save();
-    c.globalAlpha = 0.55;
-    const fx = -((cam.x * 0.35) % CEIL_TW), fy = -cam.y * 0.22 - 26;
-    for (let x0 = fx - CEIL_TW; x0 < 960 + CEIL_TW; x0 += CEIL_TW)
-      c.drawImage(tex, x0, fy, CEIL_TW, CEIL_TH * 1.18);
-    c.fillStyle = 'rgba(0,0,0,0.45)'; c.fillRect(0, 0, 960, CEIL_TH * 1.18 + fy);
-    c.restore();
+    const fy = -sy - 26, fh = CEIL_TH * 1.18;
+    if (fy + fh > 0) {
+      c.save();
+      c.globalAlpha = 0.55;
+      const fx = wrapX(sx + CEIL_TW / 2);
+      for (let x0 = fx; x0 < 960 + CEIL_TW; x0 += CEIL_TW)
+        c.drawImage(tex, x0, fy, CEIL_TW, fh);
+      c.fillStyle = 'rgba(0,0,0,0.45)'; c.fillRect(0, 0, 960, fh + fy);
+      c.restore();
+    }
   }
-  // NEAR: on the room's own parallax, so it belongs to the geometry
+  // NEAR: on the room's own grid, so it belongs to the geometry
+  const ny = -sy - 8;
+  if (ny + CEIL_TH + 40 <= 0) return;           // scrolled out of sight above
   c.save();
-  const nx = -((cam.x * 0.92) % CEIL_TW), ny = -cam.y * 0.92 - 8;
-  for (let x0 = nx - CEIL_TW; x0 < 960 + CEIL_TW; x0 += CEIL_TW)
+  const nx = wrapX(sx);
+  for (let x0 = nx; x0 < 960 + CEIL_TW; x0 += CEIL_TW)
     c.drawImage(tex, x0, ny, CEIL_TW, CEIL_TH);
   // the kingdom's own light spilling down off it
   c.globalCompositeOperation = 'lighter';
@@ -3866,10 +3886,13 @@ function ceilWeather(dt, zone) {
   } else if (zone === 'A' && chance(dt * 1.5)) {
     // the Meadows drip condensation off the vines — and where the sky is open
     // there is no vine overhead to hang from, so the same water arrives the
-    // way meadow water does: already falling
-    push(G.roomDef.sky
-      ? { k: 'drip', x: spawnX(), y: -10, vy: rnd(70, 120), t: 0, hang: 0, r: rnd(1.4, 2.2) }
-      : { k: 'drip', x: spawnX(), y: 0, vy: 0, t: 0, hang: rnd(0.4, 1.6), r: rnd(1.6, 2.6) });
+    // way meadow water does: already falling. Under a sky room's derived lid
+    // (js/world.js skyUnder) there IS rock overhead, and water beads on it.
+    const dx = spawnX(), lidRow = G.grid && G.grid[0];
+    const open = G.roomDef.sky && !(lidRow && lidRow[Math.floor(dx / TILE)] === '#');
+    push(open
+      ? { k: 'drip', x: dx, y: -10, vy: rnd(70, 120), t: 0, hang: 0, r: rnd(1.4, 2.2) }
+      : { k: 'drip', x: dx, y: 0, vy: 0, t: 0, hang: rnd(0.4, 1.6), r: rnd(1.6, 2.6) });
   } else if (zone === 'E' && chance(dt * 2.6)) {
     // the Nest breathes
     push({ k: 'spore', x: spawnX(), y: rnd(20, 70), vy: rnd(-6, 16), vx: rnd(-10, 10), t: 0, r: rnd(1.6, 3.4) });

@@ -103,6 +103,7 @@ const SUITE = [
   ['combat',    'every enemy telegraphs, does something different, and scales by zone'],
   ['pace',      'the game-speed dial slows the simulation and nothing else'],
   ['ceiling',   'every kingdom has a roof that sheds its own weather, at every quality tier'],
+  ['ceillock',  'the roof plate is nailed to the room grid: it never slides against the rock it hangs from'],
   ['tutor',     'the waking floor teaches the whole loop: kill, take, spend, repair, think, spend'],
   ['tells',     'every boss wind-up carries BOTH channels — no silently one-channel telegraphs'],
   ['threat',    'threat concentration per screen, and the forbidden compositions'],
