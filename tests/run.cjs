@@ -151,6 +151,7 @@ const SUITE = [
   ['look',      'hold up or down standing still and the frame pans that way; taps, walks and jumps never do'],
   ['seam',      'a room boundary is a place she walks through, not a door'],
   ['mapgrid',   'two rooms cannot stand on the same square of the map'],
+  ['shaftfit',  'a shaft is one hole through two rooms, and no sky hangs under another room\'s floor'],
   ['glowcost',  'the most expensive thing the renderer does, counted'],
   ['meadow',    'the greenery keeps its colour all the way to the screen'],
   ['drawclock', 'a frozen clock freezes the frame: draw never reads the wall clock'],

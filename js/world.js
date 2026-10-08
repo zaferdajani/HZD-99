@@ -77,6 +77,62 @@ function skyLid(g) {
   for (let x = 0; x < w; x++) if (g[1][x] !== '#') g[0][x] = '.';
 }
 // ---------------------------------------------------------------------------
+// THE SKY ENDS WHERE THE ROOM ABOVE BEGINS.
+//
+// skyLid opens the whole lid, and that was right for a sky room with nothing
+// over it. But A1, A2 and A3 each have a room STACKED on them — A6, A8, B1 —
+// and a T crossing keeps her x, so that room's floor sits directly over the
+// lower room's first columns. From below she saw open sky there; climbing up,
+// she arrived inside a rock slab that the sky had promised was not there.
+// THE ROOF LAW says it outright: a room with a continuation above it has a
+// load-bearing roof — "it can be one or two frames above", but it exists.
+//
+// So the lid is DERIVED, never authored: wherever the room above has solid
+// floor, this room has rock overhead, and wherever that floor is open (its
+// way down, its drop shaft) this lid is open too — so a drop from above never
+// lands her inside the lid, and the climb up goes through a hole she can see
+// from below. Beyond the upper room's width the sky stays open, exactly as
+// before. The authored way up (g.tGap, remembered by skyLid) is untouched.
+//
+// NO RIGHT ANGLES: a one-row band would be a ruled line across the top of
+// the meadow. Its underside hangs in lumps — the bottom of a slab, not the
+// edge of a ruler — and the lumps stay clear of every opening, of the span's
+// ends (the slab thins out instead of stopping in a face) and of anything
+// built within three rows under them, so no climb or platform loses headroom.
+function skyUnder(g, def, id) {
+  let up = def.exits && def.exits.T;
+  if (!up) return;
+  if (typeof up === 'object') { if (up.at != null) return; up = up.to; }
+  if (!ROOMS[up]) return;
+  const ug = buildRoom(up), ub = ug.length - 1;
+  const w = g[0].length, span = Math.min(w, ug[0].length);
+  // only rock all the way through counts: the floor's bottom row is what is
+  // over her head, and a 'B' there is a hatch she can cut — once cut she
+  // falls through it, so the lid under it has to be open air, not rock
+  const shut = (x) => ug[ub][x] === '#';
+  for (let x = 0; x < span; x++) if (shut(x)) g[0][x] = '#';
+  let seed = 0; for (const ch of id) seed = (seed * 31 + ch.charCodeAt(0)) | 0;
+  // where a lump may hang: solid lid two columns either side, not on the
+  // room's seam columns (tests/seam.cjs holds both sides of a join equal from
+  // row 1 down), and nothing built in the three rows under it
+  const ok = (x) => {
+    if (x < 2 || x > w - 3) return false;
+    for (let k = -2; k <= 2; k++) if (x + k >= span || g[0][x + k] !== '#') return false;
+    for (let y = 2; y <= 4; y++) if (g[y][x] !== '.') return false;
+    return true;
+  };
+  // lumps of two to four columns with gaps of two to five between them —
+  // irregular, deterministic in the room id, never one long flat underside
+  for (let x = 2 + Math.floor(tnoise(1, seed) * 3); x < span;) {
+    const len = 2 + Math.floor(tnoise(x, seed + 7) * 3);
+    for (let k = 0; k < len; k++) if (ok(x + k)) g[1][x + k] = '#';
+    x += len + 2 + Math.floor(tnoise(x, seed + 13) * 4);
+  }
+  // a lone hanging column is a tooth, not a lump — drop it
+  for (let x = 1; x < span - 1; x++)
+    if (g[1][x] === '#' && g[1][x - 1] !== '#' && g[1][x + 1] !== '#' && g[0][x] === '#') g[1][x] = '.';
+}
+// ---------------------------------------------------------------------------
 // THE MEADOW'S OWN FURNITURE.
 //
 // NO RIGHT ANGLES is global, and its second clause is what binds room
@@ -885,7 +941,13 @@ const ROOMS = {
     // the cable-shrine and she is inside, in a place of her own — the same
     // promotion Ratchet got when the meadow stopped being his shop floor.
     ents: [['bench', 12, 15], ['term', 22, 15, 2], ['trial', 25, 15]],
-    build(g) { frame(g); openL(g); openR(g); rect(g, 4, 15, 6, 16, '.'); rect(g, 30, 15, 30, 16, '.'); } },  // col 30: C1's chimney up
+    // One way down, at 4-6, into C1's ceiling. There used to be a second hole
+    // at col 30, cut so the seam check found the floor open over C1's two dead
+    // columns — C1 was declared 32 wide and built 30, so its lid read open at
+    // 30-31 and this floor was punched to "answer" it. Falling through it
+    // dropped her down a void strip behind C1's east wall. C1 is 30 wide now,
+    // the strip does not exist, and neither does the hole.
+    build(g) { frame(g); openL(g); openR(g); rect(g, 4, 15, 6, 16, '.'); } },
   // THE ORACLE'S PARLOR (kingdom 2's own interior, the B-side of A0B): a
   // one-room den behind the cable-shrine in B3 where mono actually LIVES —
   // the CRT face on its shroud of dead cables, reading a river of data in the
@@ -1049,7 +1111,12 @@ const ROOMS = {
       hline(g, 12, 17, 11, '='); hline(g, 20, 24, 8, '=');
     } },
   // ============ ZONE C — The Foundry ============
-  C1: { zone: 'C', w: 32, h: 34, exits: { T: 'B3', B: 'C2' },
+  // 30 WIDE, AS BUILT. The def said 32 while the walls stood at 0 and 29, so
+  // columns 30-31 were a two-tile void strip behind the east wall that the
+  // camera scrolled into and the lid and floor were open over. The room is the
+  // width of its walls now; both vertical exits keep her x, and both openings
+  // (4-6 up, 22-25 down) sit well inside it.
+  C1: { zone: 'C', w: 30, h: 34, exits: { T: 'B3', B: 'C2' },
     // The shaft's two fliers sat ten tiles apart in Y — one screen — and the
     // audit missed it because it only slid a window sideways, which in a room
     // 30 wide and 34 tall is the whole room. Descending past two disruptors
@@ -1406,10 +1473,15 @@ const ROOMS = {
     ents: [['boss', 26, 15, 'chime']],
     build(g) {
       frame(g); seamL(g);
-      rect(g, 11, 15, 15, 16, '.');            // the drop back to A8 — col 11 answers A8's opening
+      // THE DROP BACK TO A8 IS A8'S OWN OPENING, COLUMN FOR COLUMN: 11-14.
+      // It was 11-15, one wider than the hole it falls into, and a vertical
+      // crossing keeps her x — so dropping down column 15 put her inside
+      // A8's roof. A shaft is one hole cut through two rooms; both ends are
+      // the same width or one of them is a trap (tests/shaftfit.cjs).
+      rect(g, 11, 15, 14, 16, '.');
       // the arena rule again: the ground the fight happens on is flat and the
-      // furniture lives on the shoulders. The drop home stays at 12-15 — it is
-      // the only way out of this room and it has to line up with A8's ceiling.
+      // furniture lives on the shoulders. The drop home is the only way out of
+      // this room and it has to line up with A8's ceiling.
       hline(g, 6, 11, 11, '='); hline(g, 31, 36, 11, '=');
       hull(g, 4, 8, 2, 133);                   // was 2-8: the west shoulder now leaves the wall clear
       hull(g, 38, 43, 2, 131);
@@ -1605,7 +1677,7 @@ const ROOMS = {
     ents: [['boss', 20, 15, 'carrier']],
     build(g) {
       frame(g);
-      rect(g, 13, 15, 17, 16, '.');   // col 13 answers B7's opening below
+      rect(g, 13, 15, 16, 16, '.');   // B7's ceiling opening, exactly (13-16)
       hline(g, 3, 9, 10, '='); hline(g, 21, 27, 10, '=');
     } },
 
@@ -1625,7 +1697,7 @@ const ROOMS = {
     ents: [['boss', 20, 16, 'moth']],
     build(g) {
       frame(g);
-      rect(g, 11, 16, 15, 17, '.');   // col 11 answers C6's opening below
+      rect(g, 11, 16, 14, 17, '.');   // C6's ceiling opening, exactly (11-14)
       hline(g, 3, 9, 11, '='); hline(g, 21, 27, 11, '=');
     } },
 
@@ -1635,7 +1707,7 @@ const ROOMS = {
     build(g) {
       frame(g);
       rect(g, 12, 0, 15, 0, '.');
-      rect(g, 12, 22, 16, 23, '.');   // col 16 answers D6's opening below
+      rect(g, 13, 22, 16, 23, '.');   // D6's ceiling opening, exactly (13-16)
       // a descent, and the rungs still have to work going UP, because the only
       // way home is back through here
       // THE SAME STAIR B6 WAS BUILT TO AVOID: six rungs, every gap 3 rows,
@@ -1856,7 +1928,7 @@ function buildRoom(id) {
   } else def.build(g);
   // sky rooms lose the lid after everything else is built, so the pass sees
   // the authored ceiling opening before erasing it — pack rooms included
-  if (def.sky) skyLid(g);
+  if (def.sky) { skyLid(g); skyUnder(g, def, id); }
   gridCache[id] = g;
   return g;
 }
