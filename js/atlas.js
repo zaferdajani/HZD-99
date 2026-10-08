@@ -348,18 +348,35 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   // be asked for a specific angle is a turntable renderer with a hole in it.
   if (o.col != null) fy = o.col;
   else if (o.yawSpin) fy = ((t * o.yawSpin) % 8 + 8) % 8;
-  else if (o.yawScan) fy = o.yawScan.c + Math.sin(t * o.yawScan.r) * o.yawScan.a;
+  else if (o.yawScan) fy = o.yawScan.c + Math.sin(t * o.yawScan.r) * (o.yawScan.a || 0);
   else fy = yawColF(faceVis);
   fy = ((fy % A.cols) + A.cols) % A.cols;
+  // ONE ANGLE AT A TIME where it would otherwise be a double exposure. The
+  // cross-fade lays the next authored angle over this one at alpha colF, and
+  // a head-scan kept colF wandering forever — two pictures of the same
+  // machine, a few degrees apart, both on screen all the time (plan §1: "looks
+  // like a double exposure"). Walkers and anything scanning now show the
+  // NEAREST authored angle and only that: a turn steps through the five
+  // front-hemisphere angles, which is what a turntable of stills honestly is.
+  // A body only easing its facing (no scan, not a walker) keeps the fade,
+  // because there it is brief and it is a turn.
+  const single = !!o.yawScan || o.mode === 'walk' || o.mode === 'spring';
+  if (single) fy = Math.round(fy) % A.cols;
   const col0 = Math.floor(fy) % A.cols, col1 = (col0 + 1) % A.cols;
-  const colF = fy - Math.floor(fy);
+  const colF = single ? 0 : fy - Math.floor(fy);
   let bob = 0, rot = 0, kx = 1, ky = 1, pivTop = false;
+  // the gait's phase. A walker's bob and stride are clocked by FLOOR COVERED
+  // (o.dist, px) — never by the wall clock — so the feet cannot run at one
+  // rate while the body moves at another, and a machine standing still stands
+  // still. Callers that do not pass a distance keep the old clock.
+  const gPh = o.dist != null ? o.dist / ATLAS_STRIDE * Math.PI : t * (6 + Math.abs(vx) / 30);
+  const mv = o.dist != null ? clamp(Math.abs(vx) / 40, 0, 1) : 1;
   switch (o.mode) {
     case 'walk': {                 // gait: quick bob, lean into the run
-      const g = t * (6 + Math.abs(vx) / 30);
-      bob = Math.abs(Math.sin(g)) * dh * 0.05;
-      rot = clamp(vx / 420, -1, 1) * 0.075 + Math.sin(g * 2) * 0.022;
-      ky = 1 + Math.sin(g * 2) * 0.02; kx = 1 / ky;
+      const g = gPh;
+      bob = Math.abs(Math.sin(g)) * dh * 0.05 * mv;
+      rot = clamp(vx / 420, -1, 1) * 0.075 + Math.sin(g * 2) * 0.022 * mv;
+      ky = 1 + Math.sin(g * 2) * 0.02 * mv; kx = 1 / ky;
       break;
     }
     case 'spring': {               // hopper: stretch in flight, squash on landing
@@ -408,6 +425,20 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
       break;
     }
   }
+  // ---- THE STATE POSE ------------------------------------------------------
+  // An atlas creature has one authored picture per angle and no per-state art
+  // (ART_BIBLE §4) — so a wind-up and a recovery have to be POSED out of it,
+  // or the punish window has no picture at all (plan §1 fix 5). `o.pose`
+  // names the state; ATLAS_POSE says what it does to the body: for the cut-
+  // out rig below, real articulation (legs fold under a sinking body, splay,
+  // or trail behind it; the body pitches about the hips), and for everything
+  // else a whole-body lean and squash pivoted on the feet. `fwd` is the side
+  // it faces, so "lean forward" is forward whichever way it is looking.
+  const PZ = (o.pose && ATLAS_POSE[o.pose]) || null;
+  const fwd = (faceVis == null ? 1 : faceVis) >= 0 ? 1 : -1;
+  if (PZ && !(o.mode === 'walk' || o.mode === 'spring')) {
+    rot += PZ.lean * fwd; ky *= PZ.ky; kx *= PZ.kx;
+  }
   c.translate(cx, footY);
   const topY = dy - footY;                     // sprite top, relative to the foot
   if (pivTop) { c.translate(0, topY); c.rotate(rot); c.translate(0, -topY); }
@@ -428,32 +459,44 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
     // body is a third part that rides above them and bobs. Three parts of the
     // SAME rendered art, articulated — not one picture sliding.
     const hipF = 0.64;                                  // hips at 64% of the cell
-    const g2 = t * (6 + Math.abs(vx) / 30);
-    const swing = (o.mode === 'walk' ? 0.20 : 0.08) * clamp(Math.abs(vx) / 120 + 0.35, 0.35, 1);
+    const g2 = gPh;
+    const swing = (o.mode === 'walk' ? 0.20 : 0.08)
+      * (o.dist != null ? mv : clamp(Math.abs(vx) / 120 + 0.35, 0.35, 1));
     const legSy = sy + sh2 * hipF, legH = sh2 * (1 - hipF);
-    const legDy = topY + dh * hipF;                     // legs stay planted (no bob)
     const legDh = dh * (1 - hipF);
-    // One authored angle, rigged. Run it twice and the second angle fades in
-    // over the first: this branch used to draw col0 only, so the walkers — the
-    // crawler and the hopper, the two machines the player meets most — STEPPED
-    // between authored angles while everything else on the turntable swept
-    // through them. They turn like the rest of the roster now.
+    // the pose: how far the hips sink (the legs fold to pay for it, so the
+    // feet never leave the floor), how the body pitches about them, and how
+    // the two leg groups are set — splayed (front out, rear back) or trailing
+    const sink = PZ ? PZ.sink : 0;
+    const legDy = topY + dh * hipF + legDh * sink;      // hips, after the sink
+    const legDh2 = legDh * (1 - sink);                  // ...and the folded legs
+    const front = fwd > 0 ? 1 : 0;                      // which half leads
+    // One authored angle, rigged — the NEAREST one (see `single` above). The
+    // second pass that faded the next angle in over the first is gone: on a
+    // walker it was always on, because the head-scan never let colF settle.
     const limbPass = (cc) => {
       for (const [half, ph] of [[0, 1], [1, -1]]) {     // rear group, front group
         c.save();
         c.translate(ddx + dw * (half ? 0.5 : 0), legDy);
         // shear about the hip line: the top edge never leaves the body, so the
         // stride can never tear a gap open the way rotation did
-        c.transform(1, 0, Math.sin(g2) * swing * ph, 1, 0, 0);
+        const set = PZ ? (PZ.splay * (half === front ? 1 : -1) - PZ.drag) * fwd : 0;
+        c.transform(1, 0, Math.sin(g2) * swing * ph + set, 1, 0, 0);
         c.drawImage(im, sxOf(cc) + half * sw2 / 2, legSy, sw2 / 2, legH,
-                    half ? -dw * 0.015 : 0, -legDh * 0.04, dw / 2 + dw * 0.015, legDh * 1.04);
+                    half ? -dw * 0.015 : 0, -legDh2 * 0.04, dw / 2 + dw * 0.015, legDh2 * 1.04);
         c.restore();
       }
-      // the body overlaps the hip line so the seam never shows
+      // the body overlaps the hip line so the seam never shows; it rides the
+      // sink down and pitches about the hip centre
+      c.save();
+      if (PZ) {
+        c.translate(0, legDy); c.rotate(PZ.lean * fwd); c.translate(0, -legDy);
+        c.translate(0, legDh * sink);
+      }
       c.drawImage(im, sxOf(cc), sy, sw2, sh2 * (hipF + 0.05), ddx, ddy, dw, dh * (hipF + 0.05));
+      c.restore();
     };
     limbPass(col0);
-    if (colF > 0.03) { c.save(); c.globalAlpha *= colF; limbPass(col1); c.restore(); }
   } else {
     c.drawImage(im, sxOf(col0), sy, sw2, sh2, ddx, ddy, dw, dh);
     if (colF > 0.03) {                       // the next angle fades in over it
@@ -466,6 +509,30 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   return true;
 }
 
+// the walk's stride, in px of floor per half-cycle of the bob: at the crawler's
+// patrol speed this is the cadence the old clock gave it (6 + 62/30 rad/s), so
+// the same machine walks at the same rhythm — it just cannot slip any more
+const ATLAS_STRIDE = 24;
+// THE STATE POSES (see drawAtlas). Rig fields — sink: fraction of leg height
+// the hips drop; lean: body pitch about the hips (+ is forward, rad); splay:
+// leg shear, front group forward and rear group back; drag: both groups
+// trailing behind. Whole-body fields for the unrigged modes — lean, kx, ky.
+//   coil   — the wind-up: hips down on folded legs, weight rocked BACK
+//   lunge  — the commit: body pitched hard forward, legs left behind it
+//   winded — the recovery: spent, head and shoulders dropped, legs splayed
+//   land   — a landing absorbed: deep fold, body level
+//   kick   — a recoil: rocked back off the shot and stretched up
+//   perch  — a flier sat down: compact, wings in
+// tests/artbible.cjs (the ENEMY cast) measures each against rest and against
+// the others; a re-tune that makes two of them one shape fails the build.
+const ATLAS_POSE = {
+  coil:   { sink: 0.42, lean: -0.16, splay: 0.30, drag: 0, kx: 1.12, ky: 0.82 },
+  lunge:  { sink: 0.10, lean: 0.30, splay: 0, drag: 0.55, kx: 1.10, ky: 0.92 },
+  winded: { sink: 0.30, lean: 0.34, splay: 0.45, drag: 0, kx: 1.08, ky: 0.86 },
+  land:   { sink: 0.50, lean: 0.06, splay: 0.50, drag: 0, kx: 1.16, ky: 0.76 },
+  kick:   { sink: 0, lean: -0.20, splay: 0, drag: 0, kx: 0.92, ky: 1.08 },
+  perch:  { sink: 0.30, lean: 0, splay: 0, drag: 0, kx: 1.10, ky: 0.80 },
+};
 // shared scratch canvas for tinted sprite draws
 let _tintCv = null;
 function tintedSprite(im, sx, sy, sw2, sh2, dw, dh, col, c, dx, dy) {

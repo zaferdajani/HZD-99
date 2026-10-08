@@ -141,20 +141,55 @@ const WOLF_ART = {
 // fewer poses, longer reach, a suspension beat where every paw is off the
 // ground). Patrol speed is 62; anything faster than 95 is running. The run
 // stride is half again the walk's, which is where the reach comes from.
+// THE RECOVERIES, re-posed from the rest plate until their own plates land
+// (ART_QUEUE §2cc). Plate space: the animal faces LEFT, +rot turns the nose UP
+// (canvas rotation is clockwise and the nose is on the -x side), and the pivot
+// is the middle of the feet line.
+//   winded — after the crawler's lunge: head and shoulders DOWN, the whole
+//            body sunk and stretched long, the flanks heaving. Spent.
+//   land   — after the hopper's leap: legs folded under the drop, chest low,
+//            the body compressed. Absorbing it.
+// Both are measured against rest and against the coil by tests/artbible.cjs
+// (the ENEMY cast), so a re-tune that makes them read alike fails the build.
+const BEAST_RECOVER = {
+  winded: { rot: -0.12, kx: 1.10, ky: 0.80, dx: 0.04, heave: 9 },
+  land:   { rot: -0.07, kx: 1.16, ky: 0.70, dx: 0, heave: 0 },
+};
 const STRIDE = 30;                          // px of floor per half-step, walking
 const STRIDE_RUN = 46;                      // ...and running (the cheetah adds more)
+// AIRBORNE MEANS OFF THE GROUND FOR REAL. Enemies carry `on` now (moveEnt),
+// and a hopper in flight used to run its walk frames through the whole arc
+// because nothing ever told the pose it had left the floor. One frame of air
+// over a fracture in the surface curve is not a leap, though, so a body only
+// reads as airborne once it has been up for a few hundredths of a second —
+// or at once, if it is going UP, which only a jump does.
+const AIR_POSE_T = 0.06;
+function beastAirborne(e) {
+  return e.on === false && ((e.airT || 0) > AIR_POSE_T || (e.vy || 0) < -60);
+}
 function wolfPose(e) {
-  if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0 || e.on === false) return 'lunge';
-  if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0) return 'coil';
   // how far it has really moved since the last frame, whatever moved it —
   // accumulated in HALF-STEPS of the current stride, so a wolf that breaks
-  // into a run keeps its phase instead of snapping to a new foot
+  // into a run keeps its phase instead of snapping to a new foot. Counted
+  // BEFORE any early return, so the frame after a lunge does not bank the
+  // whole lunge as one giant stride; and only on the ground, because feet in
+  // the air are not taking steps.
   const px = e._lastX == null ? e.x : e._lastX;
   const run = Math.abs(e.vx || 0) > 95;
   e._runG = run;
   const stride = run ? STRIDE_RUN * (e._strideMul || 1) : STRIDE;
-  e._ph = (e._ph || 0) + Math.abs(e.x - px) / stride;
+  if (e.on !== false) e._ph = (e._ph || 0) + Math.abs(e.x - px) / stride;
   e._lastX = e.x;
+  if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0 || beastAirborne(e)) return 'lunge';
+  if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0) return 'coil';
+  // THE RECOVERIES — each attack's opening wears its own picture now, so the
+  // punish window is something she SEES rather than a gap she has to know is
+  // there: the crawler's lunge leaves it WINDED (head down, flanks heaving),
+  // the hopper's landing leaves it ABSORBING the drop (legs folded, chest
+  // low). Both are the rest plate re-posed (BEAST_RECOVER) until their own
+  // plates come off THE FIRING LIST (ART_QUEUE §2cc).
+  if ((e.windedT || 0) > 0) return 'winded';
+  if ((e.landT || 0) > 0) return 'land';
   if (Math.abs(e.vx || 0) < 6) return 'rest';       // standing still stands still
   // contact, passing, contact (mirrored by the other pair), passing — four
   // beats off two drawings, which is what a two-frame cycle is. The run wants
@@ -229,8 +264,12 @@ function drawBeastPlate(c, e, ART, tame) {
   // drawing already burns amber where the rest drawing burns red — but a wolf
   // is twenty-six pixels tall in a busy room, so the wind-up also gets the
   // wash the guardians get, behind the body, growing over the tell.
-  if ((e.coilT || 0) > 0 && !G.artProbe && !tame) {
-    const k = clamp(1 - e.coilT / TELL_FAST, 0, 1);
+  // ...and the HOPPER's crouch is the same tell and wears the same wash: it
+  // returned before the shared ring ever drew, so a cheetah — gold all over —
+  // gathered for its leap without the amber rising at all (tests/artbible).
+  const wT = (e.coilT || 0) > 0 ? e.coilT : (e.crouchT || 0);
+  if (wT > 0 && !G.artProbe && !tame) {
+    const k = clamp(1 - wT / TELL_FAST, 0, 1);
     const g2 = Math.pow(k, 0.62);                        // §3.6 — lit from frame one
     const R = Math.max(72, dh * 0.9);
     c.save(); c.globalCompositeOperation = 'lighter';
@@ -251,6 +290,16 @@ function drawBeastPlate(c, e, ART, tame) {
   // the back flexes in plate space (after the mirror), so the flexion reads
   // the same whichever way it is running
   if (pitch) c.rotate(pitch);
+  // THE RECOVERY POSES, in plate space and pivoted on the FEET so the paws
+  // stay on the floor (ART_BIBLE §3.4) whatever the body does above them.
+  const R = BEAST_RECOVER[pose];
+  if (R) {
+    const heave = R.heave ? Math.sin((e.anim || 0) * R.heave) * 0.025 : 0;
+    c.translate(0, dh / 2);
+    c.rotate(R.rot);
+    c.scale(R.kx, R.ky + heave);
+    c.translate(R.dx * dw, -dh / 2);
+  }
   if (e.hurtT > 0) c.globalAlpha *= 0.85;
   c.drawImage(im, -dw / 2, -dh / 2, dw, dh);
   if (e.hurtT > 0) {
@@ -296,9 +345,21 @@ function wolfTameStep(e, dt) {
   // an escort, not a shadow: it closes to a comfortable distance and then
   // mills about, so a room of them reads as a pack milling rather than a
   // conga line stapled to the player's back
-  if (ad > 150) { e.dir = Math.sign(d) || e.dir; e.vx = e.dir * e.spd * 0.9; }
-  else if (ad > 70) { e.dir = Math.sign(d) || e.dir; e.vx = e.dir * e.spd * 0.45; }
-  else e.vx = Math.sin((e.anim || 0) * 1.3) * e.spd * 0.3;
+  //
+  // It walks like the hostile ones do (enemyGait): up to speed, down from it,
+  // and round on its feet. The milling used to be vx = sin(t)·spd with the
+  // facing left wherever it was — a friendly wolf drifting backwards and
+  // forwards under a picture that never turned, the moonwalk at its purest.
+  // Now the drift has a direction and the picture follows it, with a beat of
+  // standing still at each end where the sine passes through zero.
+  let want = 0;
+  if (ad > 150) { e.dir = Math.sign(d) || e.dir; want = e.dir * e.spd * 0.9; }
+  else if (ad > 70) { e.dir = Math.sign(d) || e.dir; want = e.dir * e.spd * 0.45; }
+  else {
+    const m = Math.sin((e.anim || 0) * 1.3);
+    if (Math.abs(m) > 0.25) { e.dir = Math.sign(m); want = m * e.spd * 0.3; }
+  }
+  enemyGait(e, want, dt);
   const col = moveEnt(e, dt);
   if (col.l) e.dir = 1; else if (col.r) e.dir = -1;
   else if (col.d && !groundAhead(e, e.dir)) e.dir *= -1;

@@ -186,6 +186,7 @@ function stepUpTop(e, tx, lift) {
 }
 function moveEnt(e, dt) {
   const col = { l: 0, r: 0, u: 0, d: 0 };
+  const xStart = e.x;
   e.x += e.vx * dt;
   const t0 = Math.floor(e.y / TILE), t1 = Math.floor((e.y + e.h - 1) / TILE);
   // ...and a blocked move is a STEP before it is a wall (see the note above).
@@ -308,6 +309,24 @@ function moveEnt(e, dt) {
         e.y = gy - e.h - 0.01; e.vy = 0; col.d = 1;
       }
     }
+  }
+  // MACHINES KNOW WHEN THEY ARE STANDING. Only the hero ever set `on`, so for
+  // every enemy the downhill branch just above read `e.on` as undefined and
+  // never ran: a walker going down a curve left the surface each column and
+  // fell back onto the next one — the same skip that branch was written to
+  // cure in her — and the hopper-wolf's airborne plate (wolfPose reads
+  // `on === false`) could never be chosen, so it ran its walk frames in mid-
+  // air. Opt-in (`groundTrack`, set by the Enemy constructor) because the hero
+  // and the guardians keep their own flag with their own rules, and a body that
+  // does not ask must not have a field written onto it behind its back.
+  //
+  // `airT` is how long it has been off the ground — the pose reads it so one
+  // frame of daylight over a fracture is not drawn as a leap — and `walkD` is
+  // floor actually covered, which is what a gait is clocked by (atlas 'walk').
+  if (e.groundTrack) {
+    e.on = !!col.d;
+    e.airT = col.d ? 0 : (e.airT || 0) + dt;
+    if (col.d) e.walkD = (e.walkD || 0) + Math.abs(e.x - xStart);
   }
   return col;
 }
@@ -432,6 +451,75 @@ function groundAhead(e, dir) {
   }
   return false;
 }
+// ===========================================================================
+// THE WALKERS' GAIT — it starts, it stops, and a turn is a TURN.
+//
+// Every walker used to write vx = dir * spd outright: full speed on the first
+// frame, full speed the other way on the frame it decided to turn round. The
+// picture eased round over ~0.18 s (faceVis, dt*5.5) but the velocity had
+// already flipped, so for that long every turn slid the body backwards under
+// an image still pointing the old way — the moonwalk in the owner's study
+// (plan §1). The order is now the order an animal does it in:
+//
+//   1. BRAKE to a stop, still facing where it was going;
+//   2. TURN — the picture comes round while the body stands (and the wolves'
+//      plate mirrors on the crossing, which is now a standing flip);
+//   3. ACCELERATE the new way, and never before the picture shows that way.
+//
+// What that buys, measured by tests/enemygait.cjs: outside a brake, sign(vx)
+// never disagrees with the side the picture faces. Ledge and wall turns go
+// through the same three steps; the brake is short enough (≤ 4 px at the
+// fastest patrol in the roster, a swift crawler) that the ledge probe's own
+// look-ahead still covers it, so nothing walks off a ledge it used to turn at.
+// Tuning lives in docs/combat/ENEMY_CRAWLER.md.
+// ===========================================================================
+const WALK_ACC_T = 0.16;     // s: standstill -> its own patrol speed
+const WALK_BRAKE_T = 0.09;   // s: patrol speed -> standstill
+const FACE_RATE = 5.5;       // faceVis units per second, the rate it always turned at
+// RECOVERY POSES' CLOCKS — visual only, nothing in the rules reads them. The
+// hopper holds its landing crouch for the first third of a second of the gap
+// after touchdown; a turret's barrel kicks back for this long after a shot.
+const HOP_LAND_T = 0.32;
+const TURRET_KICK_T = 0.3;
+// the kinds that walk on the floor and therefore turn with their feet. The
+// sage is a duelist that BACKS AWAY while facing her on purpose, which is a
+// step, not a moonwalk, and keeps its own footwork.
+const WALKERS = { crawler: 1, guard: 1, blob: 1, hopper: 1 };
+// which side the picture shows: the sign of the eased facing
+function faceSide(e) { return (e.faceVis == null ? (e.dir || 1) : e.faceVis) >= 0 ? 1 : -1; }
+// where a walker's picture is heading: wherever it is moving, and only once it
+// has stopped, wherever it has decided to go
+function walkerFaceTarget(e) { return e.vx ? Math.sign(e.vx) : (e.dir || faceSide(e)); }
+// drive vx toward `want` (signed px/s) under the three rules above
+function enemyGait(e, want, dt) {
+  const ref = Math.max(24, e.spd || 24);
+  const ws = Math.sign(want), vs = Math.sign(e.vx);
+  if (vs && vs !== ws) {                       // 1. braking, never through zero
+    const dv = ref / WALK_BRAKE_T * dt;
+    e.vx = Math.abs(e.vx) <= dv ? 0 : e.vx - vs * dv;
+    return;
+  }
+  if (!ws) return;
+  if (faceSide(e) !== ws) { e.vx = 0; return; } // 2. standing while it turns
+  const a = ref / (Math.abs(e.vx) > Math.abs(want) ? WALK_BRAKE_T : WALK_ACC_T) * dt;
+  const d = want - e.vx;                        // 3. accelerating (or easing off)
+  e.vx = Math.abs(d) <= a ? want : e.vx + Math.sign(d) * a;
+}
+// AN ATTACK COMMITS THE FACING. A lunge or a leap writes its velocity in one
+// frame — that IS the move — so the picture is brought across to that side
+// in the same frame rather than eased after it. It only has to cross the
+// middle (0.2 past it): the rest of the turn eases on as usual, so the atlas
+// still sweeps rather than popping to profile. A no-op when it already faces.
+function faceCommit(e, s) {
+  if (s && faceSide(e) !== s) e.faceVis = s * 0.2;
+}
+// FRAME-RATE-PROOF SMOOTHING. `lerp(a, b, 0.1)` once per update is a rate per
+// FRAME, and update runs at the display's rate (1/30 s steps on a slow phone,
+// 1/144 on a fast monitor), so a flier on a 120 Hz screen closed four times
+// faster than on a 30 Hz one. 1 - exp(-k·dt) is the same approach expressed
+// per second: k is chosen so that at 60 Hz it equals the old per-frame
+// fraction, which keeps the tuning everyone has been looking at.
+function smoothK(k, dt) { return 1 - Math.exp(-k * dt); }
 // Resolve the same support used by collision, including raised ground and platforms.
 // null means open space: never print a shadow on an imaginary floor over a pit.
 function shadowGroundY(body, maxDrop = 240) {
@@ -5658,12 +5746,16 @@ function drawTurretLock(c, e, cx) {
   const k = 1 - clamp(e.lockT / (e.lock0 || 0.55), 0, 1);            // 0 -> 1 across the lock
   const px = player ? player.x + player.w / 2 : cx, py = player ? player.y + player.h / 2 : cy;
   c.save();
-  // the beam finds you: faint and wide at first, thin and bright at the end
+  // the beam finds you: faint and wide at first, thin and bright at the end.
+  // It runs off to wherever she is, so it is decoration to the bible's
+  // measurements (G.artProbe), never to the player.
+  if (!G.artProbe) {
   c.globalAlpha = 0.10 + k * 0.5;
   c.strokeStyle = TELL_COL; c.lineWidth = 3.5 - k * 2.2;
   c.setLineDash([9, 7]); c.lineDashOffset = -performance.now() / 45;
   c.beginPath(); c.moveTo(cx, cy); c.lineTo(px, py); c.stroke();
   c.setLineDash([]);
+  }
   // and the eye itself, quickening
   c.globalAlpha = 0.55 + Math.sin(e.anim * (16 + k * 26)) * 0.35;
   c.fillStyle = TELL_COL; c.shadowColor = TELL_COL; c.shadowBlur = 12;
@@ -6865,6 +6957,112 @@ const STORY_ACTOR_ROLES = Object.freeze({
   kiln: 'empty-construct', rime: 'empty-construct', snare: 'empty-construct'
 });
 function storyProtected(e) { return !!(e && (e.disabled || e.rescued)); }
+// ===========================================================================
+// THE FLIER'S BODY — flown per second, not per frame.
+//
+// Every smoothing line in the flier and the bat was `lerp(v, target, 0.1)`
+// once per update, and update runs once per DISPLAY frame (SIM_STEP only caps
+// the step), so the same machine closed four times faster on a 120 Hz screen
+// than on a 30 Hz phone. Each fraction is now a per-second rate through
+// smoothK, chosen so that at 60 Hz it is the fraction it always was:
+// k = -ln(1 - f) · 60. tests/enemygait.cjs flies one through the production
+// mainLoop at 30, 60 and 120 fps and holds the three paths together.
+// ===========================================================================
+const FLY_K = {
+  pkt: 17.3,     // was 0.25/frame: the courier's packet tell stops it dead
+  dive: 7.67,    // was 0.12: steering into the dive
+  riseX: 1.83,   // was 0.03: drifting back over her while it withdraws
+  riseY: 6.32,   // was 0.10: the climb out
+  hold: 13.4,    // was 0.20: the stop in the air that IS its tell
+  steer: 3.5,    // station-keeping and patrol: how fast it takes up a heading
+};
+const FLY_KP = 2.4;            // 1/s: wanted speed per pixel off station
+// its rounds (flierPatrol): a beat either side of its post, a ledge at each end
+const FLY_PATROL_R = 3 * TILE; // how far either side of where it was placed
+const FLY_PERCH_DROP = 3;      // tiles below the beat it will look for somewhere to sit
+const FLY_PERCH_T = 2.2;       // s sat on a perch
+const FLY_HOVER_T = 1.0;       // s holding still where there is nothing to sit on
+const FLY_CRUISE = 0.5;        // of its speed, on its rounds — it hunts at full
+const FLY_LEG_MAX = 6;         // s: a leg that has not arrived by now is abandoned
+// Steer toward (tx, ty) as a CENTRE point: a wanted velocity proportional to
+// the distance, capped at `cap`, which the real velocity eases toward.
+function flySteer(e, tx, ty, cap, dt) {
+  let wx = (tx - (e.x + e.w / 2)) * FLY_KP, wy = (ty - (e.y + e.h / 2)) * FLY_KP;
+  const m = Math.hypot(wx, wy);
+  if (m > cap) { wx *= cap / m; wy *= cap / m; }
+  const k = smoothK(FLY_K.steer, dt);
+  e.vx = lerp(e.vx, wx, k); e.vy = lerp(e.vy, wy, k);
+}
+// WHERE ITS ROUNDS GO, worked out once from the room around where it was put:
+// the clear air along its own altitude either side (stopping short of any
+// wall), and under each end, the first floor or ledge within FLY_PERCH_DROP
+// tiles that its whole body can sit on with clear air above. No ledge in
+// reach means that end is a hover, not a landing far below its beat — the
+// rooms were composed with it at that height and its rounds keep it there.
+function flierPlan(e) {
+  const r0 = Math.floor(e.sy / TILE), r1 = Math.floor((e.sy + e.h - 1) / TILE);
+  const colClear = (tx, a, b) => { for (let ty = a; ty <= b; ty++) if (solidAt(tx, ty)) return false; return true; };
+  const home = e.sx + e.w / 2;
+  const end = (s) => {
+    let d = 0;
+    while (d + 4 <= FLY_PATROL_R && colClear(Math.floor((home + s * (d + 4 + e.w / 2)) / TILE), r0, r1)) d += 4;
+    return home + s * d;
+  };
+  const perch = (x) => {
+    const a = Math.floor((x - e.w / 2 + 2) / TILE), b = Math.floor((x + e.w / 2 - 2) / TILE);
+    for (let ty = r1 + 1; ty <= r1 + FLY_PERCH_DROP; ty++) {
+      let floor = true, air = true;
+      for (let tx = a; tx <= b; tx++) {
+        const c = tileAt(tx, ty);
+        if (!(c === '#' || c === 'B' || c === '=')) floor = false;
+        if (!colClear(tx, r0, ty - 1)) air = false;
+      }
+      if (!air) return null;
+      if (floor) return ty * TILE - e.h;          // body y, sat on that top
+    }
+    return null;
+  };
+  const xs = [end(-1), end(1)];
+  return { xs, perch: [perch(xs[0]), perch(xs[1])] };
+}
+// ITS ROUNDS, one step. Out along its beat at half speed, facing the way it
+// goes (the facing reads its travel), down onto the ledge at the end if there
+// is one, sit — wings folded, `on` the floor like anything else standing —
+// then up to its altitude and back the other way. Deterministic on purpose:
+// nothing here rolls a die, so the same room at a different frame rate flies
+// the same rounds.
+function flierPatrol(e, dt, cx, cy) {
+  if (!e.pat) e.pat = flierPlan(e);
+  const P = e.pat, leg = e.patLeg;
+  if (e.perchT > 0) {
+    e.perchT -= dt;
+    if (e.perched) { e.vx = 0; e.vy = 60; }   // its weight on the ledge
+    else { const k = smoothK(FLY_K.hold, dt); e.vx = lerp(e.vx, 0, k); e.vy = lerp(e.vy, 0, k); }
+    if (e.perchT <= 0) {
+      if (e.perched) e.vy = -70;              // the hop off
+      e.perched = false; e.patLeg = 1 - leg; e.legT = 0;
+    }
+    return;
+  }
+  e.legT = (e.legT || 0) + dt;
+  const alt = e.sy + e.h / 2, px0 = P.xs[leg], pk = P.perch[leg];
+  let tx = px0, ty = alt;
+  // over the end of the beat: straight down onto the ledge
+  if (pk != null && Math.abs(cx - px0) < 6) ty = pk + e.h / 2;
+  // below its altitude and not yet there (it just left a ledge, or came back
+  // from a dive): straight up first, so it never cuts a corner into the rock
+  else if (cy > alt + 6 && e.legT < FLY_LEG_MAX * 0.5) tx = cx;
+  flySteer(e, tx, ty, e.spd * FLY_CRUISE, dt);
+  // ...and it has arrived when it is there, or — for a ledge — when it is
+  // standing on it: the surface curve can hold it a few px above the tile top
+  // the plan was read from, and that is still sitting on the ledge
+  const sit = pk != null && ty !== alt && (e.on || Math.abs(cy - ty) < 3);
+  const arrived = tx === px0 && Math.abs(cx - tx) < 3 && (sit || Math.abs(cy - ty) < 3);
+  if (arrived || e.legT > FLY_LEG_MAX) {
+    e.perched = arrived && sit;
+    e.perchT = e.perched ? FLY_PERCH_T : FLY_HOVER_T;
+  }
+}
 class Enemy {
   constructor(kind, x, y) {
     const k = EKIND[kind];
@@ -6936,6 +7134,20 @@ class Enemy {
     this.vx = 0; this.vy = 0; this.dir = chance(0.5) ? 1 : -1;
     this.t = rnd(0.5, 2); this.sx = x; this.sy = y; this.hurtT = 0; this.dead = false; this.anim = rnd(0, 9);
     this.kbT = 0; this.tr = [];
+    // GROUNDED, LIKE THE HERO (see moveEnt). Born with the answer the floor
+    // gives at its spawn rather than a guess, so a turret bolted to a ledge —
+    // which never moves and so never asks again — still knows it is standing,
+    // and a flier spawned in the air knows it is not. The picture starts on
+    // the side it is walking, so the first step is not a turn.
+    this.groundTrack = true; this.airT = 0; this.walkD = 0;
+    this.on = kind !== 'flier' && kind !== 'bat' && typeof solidAt === 'function' && !!G.grid
+      && solidAt(Math.floor((x + this.w / 2) / TILE), Math.floor((y + this.h + 1) / TILE));
+    this.faceVis = this.dir;
+    // the recovery beats the pose reads (purely visual clocks: no rule reads
+    // them) — the hopper's landing and the turret's recoil — and the flier's
+    // patrol-and-perch, declared here for the same reason as every timer above
+    this.landT = 0; this.kickT = 0;
+    this.pat = null; this.patLeg = 0; this.legT = 0; this.perchT = 0; this.perched = false; this.faceT = this.dir;
   }
   // THE HOOK A KINGDOM SESSION WRITES AGAINST. Its kind's row in FOE_MOVES says
   // what the move costs; this says whether THIS machine could afford it when it
@@ -6969,6 +7181,8 @@ class Enemy {
       return;
     }
     this.anim += dt; this.hurtT -= dt;
+    if (this.landT > 0) this.landT -= dt;
+    if (this.kickT > 0) this.kickT -= dt;
     // the mark CROSSREF leaves on whoever it told, fading on its own so it
     // reads as a moment and not as a permanent badge
     if ((this.refd || 0) > 0) this.refd -= dt;
@@ -6980,9 +7194,17 @@ class Enemy {
       this.expireT -= dt;
       if (this.expireT <= 0) { this.die(0, -0.5); return; }
     }
-    // turn toward where we are going, in time rather than in frames drawn
-    const wantF = (this.kind === 'flier' ? Math.sign(this.vx) || 1 : this.dir) || 1;
-    this.faceVis += clamp(wantF - this.faceVis, -dt * 5.5, dt * 5.5);
+    // turn toward where we are going, in time rather than in frames drawn.
+    // A walker turns only once it has stopped (enemyGait); a flier faces the
+    // way it is TRAVELLING, held through a near-hover by a dead band so a body
+    // hanging over her does not flip its picture on every wobble.
+    let wantF;
+    if (WALKERS[this.kind]) wantF = walkerFaceTarget(this);
+    else if (this.kind === 'flier') {
+      if (Math.abs(this.vx) > 14) this.faceT = Math.sign(this.vx);
+      wantF = this.faceT || this.dir || 1;
+    } else wantF = this.dir || 1;
+    this.faceVis += clamp(wantF - this.faceVis, -dt * FACE_RATE, dt * FACE_RATE);
     // CURED. On ground the player's mercy has bought back, machines wake up as
     // what they were built to be. They potter about, they will not touch her,
     // and their sensor burns cyan instead of red. This is the whole reward for
@@ -6991,7 +7213,9 @@ class Enemy {
       this.stagT = 0; this.hypnoT = 1e9;
       this.t -= dt;
       if (this.t <= 0) { this.dir = -this.dir || 1; this.t = rnd(1.6, 4.2); }
-      this.vx = this.dir * this.spd * 0.26;
+      // pottering is still walking: it stops, turns and sets off (enemyGait)
+      if (WALKERS[this.kind]) enemyGait(this, this.dir * this.spd * 0.26, dt);
+      else this.vx = this.dir * this.spd * 0.26;
       this.vy += 900 * dt;
       const col = moveEnt(this, dt);
       if (col.l || col.r) this.dir = -this.dir;
@@ -7085,6 +7309,10 @@ class Enemy {
         } else if (this.lungeT > 0) {                        // committed
           this.lungeT -= dt;
           this.vx = this.dir * this.spd * 4.2;
+          // the lunge is written in one frame, so the picture commits with it
+          // (a clever one tracks her through the coil, and a wall it hits
+          // mid-commit sends it back the other way)
+          faceCommit(this, this.dir);
           // CINDER (kingdom C, cost 1). A Foundry crawler runs with its belly
           // vents open and a crust of slag on them, and the lunge BURNS THE
           // LANE IT RAN: melt drops off it at a fixed cadence along the whole
@@ -7173,7 +7401,8 @@ class Enemy {
             sfx('dash');
           }
         } else {
-          this.vx = this.dir * this.spd;
+          // the patrol walks: up to speed, and down from it before a turn
+          enemyGait(this, this.dir * this.spd, dt);
           // IT NOTICES HER. Requiring it to already be facing the right way
           // meant it ignored anyone who walked up behind it — which is most of
           // the time, since she moves five times faster than it patrols. It
@@ -7230,7 +7459,9 @@ class Enemy {
       // exactly the question the roster was missing, and it pairs with the
       // turret (which punishes approaching) to make a room out of two enemies.
       case 'blob': {
-        this.vx = this.dir * this.spd * (0.6 + Math.sin(this.anim * 4) * 0.4);
+        // the breath still sets the pace; the gait decides how it gets there,
+        // so a ledge or a wall is a stop and a roll the other way, not a slide
+        enemyGait(this, this.dir * this.spd * (0.6 + Math.sin(this.anim * 4) * 0.4), dt);
         this.vy += 2000 * dt;
         this.dripT = (this.dripT || rnd(0.6, 1.4)) - dt;
         // THE DRIP HAS A TELL, AND THE TELL IS THE BODY.
@@ -7306,9 +7537,16 @@ class Enemy {
         if (this.packetCD == null) this.packetCD = rnd(1.2, 2.6);
         else if (this.packetCD > 0) this.packetCD -= dt;
         const near = dist2(cx, cy, px, py) < 340 * 340 && !player.dead;
+        // she came close: whatever it was doing on its rounds, it is off the
+        // perch and hunting now
+        if (near && (this.perchT > 0 || this.perched)) {
+          if (this.perched) this.vy = Math.min(this.vy, -90);
+          this.perchT = 0; this.perched = false;
+        }
         if ((this.packetT || 0) > 0) {                        // the delivery's tell
           this.packetT -= dt;
-          this.vx = lerp(this.vx, 0, 0.25); this.vy = lerp(this.vy, 0, 0.25);
+          const kp = smoothK(FLY_K.pkt, dt);
+          this.vx = lerp(this.vx, 0, kp); this.vy = lerp(this.vy, 0, kp);
           if (this.packetT <= 0) {
             this.drops = this.drops || [];
             if (this.drops.length < CONDUIT_PACK_MAX)
@@ -7321,23 +7559,29 @@ class Enemy {
         if (this.diveT > 0) {
           this.diveT -= dt;
           // it aims where she is GOING once it has learned to
-          this.vx = lerp(this.vx, (leadX(px, this.iq * 0.36) - cx) * 1.2, 0.12);
+          this.vx = lerp(this.vx, (leadX(px, this.iq * 0.36) - cx) * 1.2, smoothK(FLY_K.dive, dt));
           this.vy = 430;
           if (this.diveT <= 0 || moveEnt(this, dt).d) { this.diveT = 0; this.riseT = 0.9 - this.iq * 0.35; }
           else break;
         } else if (this.riseT > 0) {                        // withdrawing
           this.riseT -= dt;
-          this.vx = lerp(this.vx, (px - cx) * 0.5, 0.03);
-          this.vy = lerp(this.vy, -180, 0.1);
+          this.vx = lerp(this.vx, (px - cx) * 0.5, smoothK(FLY_K.riseX, dt));
+          this.vy = lerp(this.vy, -180, smoothK(FLY_K.riseY, dt));
         } else if (this.holdT > 0) {                        // the tell
           this.holdT -= dt;
-          this.vx = lerp(this.vx, 0, 0.2); this.vy = lerp(this.vy, -20, 0.2);
+          const kh = smoothK(FLY_K.hold, dt);
+          this.vx = lerp(this.vx, 0, kh); this.vy = lerp(this.vy, -20, kh);
           if (this.holdT <= 0) this.diveT = 0.75;
         } else if (near) {
-          const tx = px, ty = py - 120;                     // station above you
-          this.vx += (tx - cx) * 1.6 * dt; this.vy += (ty - cy) * 2.2 * dt;
-          const sp = Math.hypot(this.vx, this.vy);
-          if (sp > this.spd) { this.vx *= this.spd / sp; this.vy *= this.spd / sp; }
+          // STATION ABOVE YOU — steered, not sprung. It used to be an undamped
+          // spring (vx += Δ·1.6·dt) under a speed cap, which never settles: it
+          // swung through her head-height line and back for as long as she
+          // stood there, and how far it swung depended on the step size. Now
+          // it wants a velocity proportional to how far off station it is
+          // (capped at its speed) and eases its real velocity toward that at a
+          // per-second rate, so it arrives, holds, and does the same thing at
+          // 30 Hz as at 144.
+          flySteer(this, px, py - 120, this.spd, dt);
           // THE DELIVERY IS CHECKED FIRST, so the two attacks can never open in
           // the same frame — a courier that dived and dropped at once would be
           // two telegraphs overlapping, which reads as neither.
@@ -7349,8 +7593,10 @@ class Enemy {
             this.atkCD = rnd(2.4 - this.iq * 1.1, 3.6 - this.iq * 1.5); sfx('tell');
           }
         } else {
-          this.vx = lerp(this.vx, Math.sin(this.anim * 1.3) * 40, 0.05);
-          this.vy = lerp(this.vy, (this.sy - this.y) * 1.2 + Math.cos(this.anim * 1.7) * 30, 0.05);
+          // ITS ROUNDS. Not a sine wave about its spawn — a beat between two
+          // posts, and a ledge to sit on at each end when there is one
+          // (flierPatrol, above the class).
+          flierPatrol(this, dt, cx, cy);
         }
         moveEnt(this, dt);
         break;
@@ -7404,15 +7650,16 @@ class Enemy {
                 this.motes.push({ x: cx, y: cy, arm: GLINT_ARM, life: GLINT_LIVE });
             }
           }
-          this.vx = lerp(this.vx, (leadX(px, this.iq * 0.3) - cx) * 1.7, 0.1);
-          this.vy = lerp(this.vy, 300 + Math.sin(this.anim * 9) * 90, 0.12);
+          // per second, not per frame (FLY_K): 0.10 and 0.12 at 60 Hz
+          this.vx = lerp(this.vx, (leadX(px, this.iq * 0.3) - cx) * 1.7, smoothK(6.32, dt));
+          this.vy = lerp(this.vy, 300 + Math.sin(this.anim * 9) * 90, smoothK(7.67, dt));
           if (moveEnt(this, dt).d || this.diveT <= 0) { this.diveT = 0; this.riseT = 1.2; }
           break;
         }
         if (this.riseT > 0) {                       // climbing home, harmless-slow
           this.riseT -= dt;
-          this.vx = lerp(this.vx, Math.sin(this.anim * 5) * 60, 0.08);
-          this.vy = lerp(this.vy, -230, 0.1);
+          this.vx = lerp(this.vx, Math.sin(this.anim * 5) * 60, smoothK(5.0, dt));
+          this.vy = lerp(this.vy, -230, smoothK(6.32, dt));
           const m = moveEnt(this, dt);
           if (m.u) { this.hang = 1; this.riseT = 0; this.vx = 0; this.vy = 0; }
           else if (this.riseT <= 0) this.riseT = 0.6;   // keep climbing till rock
@@ -7511,7 +7758,7 @@ class Enemy {
         if ((this.trainT || 0) > 0) {
           this.trainT -= dt;
           if (this.trainT <= 0) {
-            turretShot(this, cx, cy, px, py);
+            turretShot(this, cx, cy, px, py); this.kickT = TURRET_KICK_T;
             this.burst = (this.burst | 0) + 1;
             if (this.burst < CONDUIT_TRAIN_N) this.trainT = CONDUIT_TRAIN_GAP;
             else { this.burst = 0; this.t = 2.2 / DF().espd; }
@@ -7527,6 +7774,7 @@ class Enemy {
             // you the line — what changes is that standing still stops being
             // safe just because you were moving when it locked.
             const aimX = turretShot(this, cx, cy, px, py);
+            this.kickT = TURRET_KICK_T;    // the recoil pose: barrel back, body rocked
             // FAR AWAY IT FIRES A BURST, close up a single shot. The question
             // it asks is "can you cross this ground?", and a burst is what
             // makes crossing a decision instead of a stroll.
@@ -7642,6 +7890,7 @@ class Enemy {
             const want = (this.markX - cx) / Math.max(0.1, tf);
             this.vx = clamp(want, this.vx - REFRACT_TURN, this.vx + REFRACT_TURN);
             this.dir = Math.sign(this.vx) || this.dir;
+            faceCommit(this, Math.sign(this.vx));   // the bend swings the body round with it
             burst(cx, cy, 11, '#8fe8ff', 200, 0.4, 0, 2.2, true);
             sfx('lumen');
           }
@@ -7654,6 +7903,11 @@ class Enemy {
           if (this.wasAir && Math.abs(px - cx) < 62 && Math.abs(py - cy) < 40 && !player.dead
               && player.iT <= 0 && player.on) player.hurt(DF().edmg, cx, 'hopper.landing');
           if (this.wasAir) {
+            // THE RECOVERY POSE'S CLOCK: it absorbs the landing, legs folded
+            // and chest down, for the first part of the decision gap that
+            // follows — the opening the doc names (ENEMY_HOPPER B5), now with
+            // a picture of its own instead of the standing plate
+            this.landT = HOP_LAND_T;
             cam.shake = Math.max(cam.shake, 2);
             for (let i = 0; i < 7; i++)
               addPart(cx + rnd(-16, 16), this.y + this.h, rnd(-90, 90), rnd(-120, -20), 0.35, '#b9c6d4', 2.2, 700);
@@ -7763,6 +8017,7 @@ class Enemy {
               ? (this.bendDir || this.dir || 1)
               : (Math.sign(leadX(px, this.iq * 0.5) - cx) || 1);
             this.vy = -560; this.vx = this.dir * this.spd * (1 + this.iq * 0.18); this.wasAir = true;
+            faceCommit(this, this.dir);           // it leaves nose-first, never tail-first
             // the arc leaves HONEST — same take-off, same nose, same speed —
             // and the clock that will bend it starts now
             this.bendAt = this.markX != null ? REFRACT_APEX : 0;
@@ -8259,7 +8514,9 @@ class Enemy {
     // the cave bat is its own machine, hanging or flying; authored plates are
     // queued (ART_QUEUE) — this is the engine-drawn first pass, same standing
     // as the other minion fallbacks
-    if (this.kind === 'bat') { drawBat(c, this); return; }
+    // ...and its shiver wears the ring and the downward wedge every other
+    // wind-up does: drawBat returns before the shared block ever ran
+    if (this.kind === 'bat') { drawEnemyTell(c, this, cx); drawBat(c, this); return; }
     if (this.kind === 'sage') { drawSage(c, this); return; }
     // ---- hero world: real hand-animated creatures ----
     if (typeof isHero === 'function' && isHero()) {
@@ -8299,7 +8556,7 @@ class Enemy {
     if (!heroEn && G.roomDef && G.roomDef.zone === 'A' && (this.kind === 'crawler' || this.kind === 'hopper')
         && typeof drawBeastMini === 'function' && drawBeastMini(c, this)) return;
     // every flying minion is a small TALONHOST — talons only, no feathers
-    if (!heroEn && this.kind === 'flier' && typeof drawEagleMini === 'function' && drawEagleMini(c, this)) return;
+    if (!heroEn && this.kind === 'flier' && typeof drawEagleMini === 'function' && drawFlierMini(c, this)) return;
     // THE TURRET'S HALF-SECOND, PUT BACK ON SCREEN. There has always been a red
     // targeting light for the 0.55 s lock — drawn seven hundred lines below,
     // inside the procedural fallback, which stopped executing the day the
@@ -8336,9 +8593,15 @@ class Enemy {
       rr(c, -3, -this.h * 0.5, 6, this.h, 2); c.fill();
       c.strokeStyle = up ? '#dfeaf6' : 'rgba(190,210,230,0.4)'; c.lineWidth = 1.2;
       rr(c, -3, -this.h * 0.5, 6, this.h, 2); c.stroke();
-      if (!up) {                                    // the window, made obvious
-        c.globalAlpha = 0.5 + Math.sin(performance.now() / 90) * 0.3;
-        c.strokeStyle = TELL_COL; c.lineWidth = 2;
+      if (!up && !G.artProbe) {                     // the window, made obvious
+        // (a ring of decoration round the body, so off under G.artProbe like
+        // the wind-up ring; and on the simulation clock, not the wall's)
+        c.globalAlpha = 0.5 + Math.sin((this.anim || 0) * 11.1) * 0.3;
+        // NOT the telegraph amber. Registry §2's first hard rule: #ffc24a is on
+        // screen only while something is winding up — and this ring is the
+        // OPPOSITE message, "it is open, hit it now". Drawn in the plate's own
+        // pale steel, so it reads as the plate's absence, not as a warning.
+        c.strokeStyle = '#e4f0fb'; c.lineWidth = 2;
         c.beginPath(); c.arc(-this.dir * this.w * 0.52, 0, this.w * 0.75, 0, 7); c.stroke();
       }
       c.restore(); c.globalAlpha = 1;
@@ -8998,32 +9261,8 @@ class Enemy {
       }
       c.restore(); c.globalAlpha = 1;
     }
-    // EVERY WIND-UP WEARS THE SAME COLOUR. One hue, one meaning, used by
-    // nothing else in the game — and always with motion and sound beside it,
-    // because roughly one man in twelve cannot rely on hue alone.
-    if (!this.dead && ((this.coilT || 0) > 0 || (this.holdT || 0) > 0 || (this.crouchT || 0) > 0)) {
-      const w = Math.max(this.coilT || 0, this.holdT || 0, this.crouchT || 0);
-      const k = 1 - clamp(w / TELL_FAST, 0, 1);
-      c.save();
-      c.globalAlpha = 0.30 + k * 0.5;
-      c.strokeStyle = TELL_COL; c.lineWidth = 2 + k * 1.4;
-      c.setLineDash([5, 5]); c.lineDashOffset = -performance.now() / 55;
-      c.beginPath();
-      c.arc(cx, this.y + this.h / 2, this.w * 0.72 + 10 - k * 6, 0, 7);
-      c.stroke(); c.setLineDash([]);
-      // a wedge pointing where it is about to go — motion, not just colour
-      const dx = (this.coilT || this.crouchT) ? this.dir : 0, dy = this.holdT ? 1 : 0;
-      if (dx || dy) {
-        c.globalAlpha = 0.5 + k * 0.5; c.fillStyle = TELL_COL;
-        const ox = cx + dx * (this.w * 0.9 + k * 10), oy = this.y + this.h / 2 + dy * (this.h * 0.9 + k * 10);
-        c.beginPath();
-        c.moveTo(ox + dy * 7 + dx * 7, oy + dx * 7 + dy * 7);
-        c.lineTo(ox - dy * 7 - dx * 0, oy - dx * 7 - dy * 0);
-        c.lineTo(ox + dx * 13 + dy * 0, oy + dy * 13 + dx * 0);
-        c.closePath(); c.fill();
-      }
-      c.restore(); c.globalAlpha = 1;
-    }
+    // EVERY WIND-UP WEARS THE SAME COLOUR (drawEnemyTell, below the class)
+    drawEnemyTell(c, this, cx);
     // Pre-rendered 3D turnaround. Selected by angle, never mirrored, so the baked
     // key light stays on the correct side as the machine turns.
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
@@ -9037,6 +9276,10 @@ class Enemy {
           // pose, so the gathering and the release have to be deformation
           sag: this.drip0 || 0, reb: (this.blobReb || 0) / BLOB_REB,
           yawScan: enemyYaw(this),
+          // the gait's clock is the floor it has covered (moveEnt's walkD),
+          // and the state it is in has a pose of its own (enemyAtlasPose)
+          dist: this.walkD || 0,
+          pose: enemyAtlasPose(this),
         })) return;
     c.save();
     if (this.hurtT > 0) { c.globalAlpha = 0.6; }
@@ -9835,6 +10078,85 @@ class Wreck {
   }
 }
 
+// EVERY WIND-UP WEARS THE SAME COLOUR. One hue, one meaning, used by nothing
+// else in the game — and always with motion and sound beside it, because
+// roughly one man in twelve cannot rely on hue alone. A function now rather
+// than a block inside Enemy.draw, because the authored fliers return from
+// draw long before that block and so wound up for their dive with no ring and
+// no wedge at all — the doc's "amber ring + downward wedge" (ENEMY_FLIER B5)
+// was only ever true of the fallback. Decoration, not body: off under
+// G.artProbe like the guardians' wash, so the bible measures the silhouette.
+// The dash crawls on the SIMULATION clock (anim), never the wall clock.
+function drawEnemyTell(c, e, cx) {
+  if (e.dead || G.artProbe) return;
+  // the turret's LOCK is a wind-up like any other and wears the same ring —
+  // its beam says where, the ring says it is coming, as everywhere else. The
+  // hair-trigger re-locks between a burst's shots (0.0001 s) are not a tell.
+  const lock = (e.lockT || 0) > 0.05 ? e.lockT : 0;
+  if (!((e.coilT || 0) > 0 || (e.holdT || 0) > 0 || (e.crouchT || 0) > 0 || lock)) return;
+  const w = Math.max(e.coilT || 0, e.holdT || 0, e.crouchT || 0, lock);
+  const k = 1 - clamp(w / TELL_FAST, 0, 1);
+  c.save();
+  c.globalAlpha = 0.30 + k * 0.5;
+  c.strokeStyle = TELL_COL; c.lineWidth = 2 + k * 1.4;
+  c.setLineDash([5, 5]); c.lineDashOffset = -(e.anim || 0) * 1000 / 55;
+  c.beginPath();
+  c.arc(cx, e.y + e.h / 2, e.w * 0.72 + 10 - k * 6, 0, 7);
+  c.stroke(); c.setLineDash([]);
+  // a wedge pointing where it is about to go — motion, not just colour
+  const dx = (e.coilT || e.crouchT) ? e.dir : 0, dy = e.holdT ? 1 : 0;
+  if (dx || dy) {
+    c.globalAlpha = 0.5 + k * 0.5; c.fillStyle = TELL_COL;
+    const ox = cx + dx * (e.w * 0.9 + k * 10), oy = e.y + e.h / 2 + dy * (e.h * 0.9 + k * 10);
+    c.beginPath();
+    c.moveTo(ox + dy * 7 + dx * 7, oy + dx * 7 + dy * 7);
+    c.lineTo(ox - dy * 7 - dx * 0, oy - dx * 7 - dy * 0);
+    c.lineTo(ox + dx * 13 + dy * 0, oy + dy * 13 + dx * 0);
+    c.closePath(); c.fill();
+  }
+  c.restore(); c.globalAlpha = 1;
+}
+// THE FLYING MINION'S STATES. The small TALONHOST (drawEagleMini, eagle.js)
+// flaps or stoops and nothing else, so its wind-up, its withdrawal and its
+// rest on a ledge were all the same flapping picture. The guardian's own sheet
+// already holds the poses those states want, so they are taken from it, one
+// whole figure each, at the mini's scale:
+//   holdT / packetT  — kCharge: wings thrown wide, the core lit. The STOP in
+//                      the air that is its tell, now a shape as well as a stop.
+//   riseT            — kRecover: wings drooped, climbing out spent. The opening.
+//   perched          — pRest: folded, sat on the ledge at the end of its beat.
+// Everything else is the mini's own flight, BANKED toward where it is going —
+// it is drawn front-on, so leaning into its travel is how it faces it.
+function drawFlierMini(c, e) {
+  const fig = ((e.holdT || 0) > 0 || (e.packetT || 0) > 0) ? 'kCharge'
+    : (e.riseT || 0) > 0 ? 'kRecover' : e.perched ? 'pRest' : null;
+  const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
+  if (!fig) {
+    const bank = clamp((e.vx || 0) / Math.max(60, e.spd || 60), -1, 1) * 0.22;
+    c.save();
+    c.translate(cx, cy); c.rotate(bank); c.translate(-cx, -cy);
+    let ok = false;
+    try { ok = drawEagleMini(c, e); } finally { c.restore(); }
+    return ok;
+  }
+  if (typeof egFigA !== 'function' || typeof eagleImg !== 'function') return false;
+  EG_PURE = false;
+  const im = eagleImg(); if (!im || !im.naturalWidth) return false;
+  drawEnemyTell(c, e, cx);
+  c.save();
+  try {
+    const S = (e.w * 3.2) / 532;
+    // a perched bird's weight is on its feet: sat on the ledge, not hung
+    // over it at its flying height
+    c.translate(cx, e.perched ? e.y + e.h * 0.62 : cy);
+    c.scale(S, S);
+    if (e.hurtT > 0) c.globalAlpha = 0.72;
+    if (e.hypnoT > 0) c.globalAlpha = 0.85;
+    egFigA(c, fig, 1, fig === 'kRecover' ? 0.12 * faceSide(e) : 0);
+  } catch (e2) { c.restore(); return false; }
+  c.restore();
+  return true;
+}
 // ================= BOSSES =================
 // ---------------------------------------------------------------------------
 // USING THE WHOLE TURNTABLE.
@@ -9856,25 +10178,65 @@ function enemyYaw(e) {
   // whole sweep inside the front hemisphere 0..4 — measured, because the first
   // version of this happily rotated a crawler around to face away from camera.
   const S = (c, a) => ({ c: clamp(c, a, 4 - a), r: 0, a });
+  // NO MORE HEAD-SCAN ON ANYTHING THAT WALKS. The crawler swept its yaw ±0.22
+  // forever and every other walker fell through to a ±0.25 default, and the
+  // renderer cross-faded the two angles either side of wherever the sweep had
+  // got to — a permanent double exposure (plan §1). A walker now faces where
+  // its feet are going and nothing else. Where an offset survives (the
+  // hopper's twist in the air, the blob's roll, the flier's bank) it moves the
+  // angle the body is SHOWN at, one authored angle at a time (drawAtlas
+  // `single`), never two pictures at once.
   switch (e.kind) {
     case 'turret':
-      // a sentry sweeping its arc — it does not walk, so the sweep IS its motion
+      // a sentry sweeping its arc — it does not walk, so the sweep IS its
+      // motion. While it LOCKS, and through the kick after the shot, it stops
+      // sweeping and turns its barrel square onto her: the stop and the turn
+      // are part of the tell, and the beam leaves the muzzle it is drawn from.
+      if ((e.lockT || 0) > 0 || (e.kickT || 0) > 0 || (e.trainT || 0) > 0) {
+        const pd = (typeof player !== 'undefined' && player)
+          ? (Math.sign(player.x + player.w / 2 - (e.x + e.w / 2)) || 1) : 1;
+        return S(yawColF(pd), 0);
+      }
       return Object.assign(S(2, 1.6), { r: 0.55 });
     case 'flier':
-      // BANKS into its own movement, the way anything that flies has to, and
-      // drifts a little while hovering so it is never perfectly still
-      return Object.assign(S(base + clamp(e.vx / 150, -1, 1) * 1.15, 0.30), { r: 0.9 });
-    case 'crawler':
-      // a slow head-scan while it walks: it is looking for her
-      return Object.assign(S(base, Math.abs(e.vx) > 12 ? 0.22 : 0.45), { r: 0.7 });
+      // BANKS into its own movement, the way anything that flies has to
+      return S(base + clamp(e.vx / 150, -1, 1) * 1.15, 0);
     case 'blob':
       // a mass that has no front rolls where it is going
-      return Object.assign(S(base + clamp(e.vx / 120, -1, 1) * 0.8, 0.35), { r: 0.5 });
+      return S(base + clamp(e.vx / 120, -1, 1) * 0.8, 0);
     case 'hopper':
       // twists in the air and squares up as it lands
-      return Object.assign(S(base + clamp(-e.vy / 500, -1, 1) * 0.9, e.on ? 0.12 : 0.3), { r: 1.4 });
+      return e.on ? null : S(base + clamp(-e.vy / 500, -1, 1) * 0.9, 0);
     default:
-      return Object.assign(S(base, 0.25), { r: 0.6 });
+      return null;
+  }
+}
+// WHICH POSE THE STATE WEARS (drawAtlas ATLAS_POSE). Every attack has a wind-
+// up and a recovery, and each of them now changes the SILHOUETTE rather than
+// only the colour: tests/artbible.cjs's ENEMY cast measures it.
+function enemyAtlasPose(e) {
+  switch (e.kind) {
+    case 'crawler': case 'guard':
+      if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0) return 'coil';
+      if ((e.lungeT || 0) > 0) return 'lunge';
+      if ((e.windedT || 0) > 0) return 'winded';
+      return null;
+    case 'hopper':
+      if ((e.crouchT || 0) > 0) return 'coil';
+      if ((e.landT || 0) > 0) return 'land';
+      return null;
+    case 'flier':
+      if ((e.holdT || 0) > 0 || (e.packetT || 0) > 0) return 'coil';
+      if ((e.diveT || 0) > 0) return 'lunge';
+      if ((e.riseT || 0) > 0) return 'winded';
+      if (e.perched) return 'perch';
+      return null;
+    case 'turret':
+      if ((e.lockT || 0) > 0) return 'coil';
+      if ((e.kickT || 0) > 0) return 'kick';
+      return null;
+    default:
+      return null;
   }
 }
 // the states that own their stagger rather than being interrupted by one
@@ -10568,8 +10930,22 @@ function drawSage(c, e) {
   // maps its own opaque-box height to the body rather than one shared number
   const sageH = { sagePure: 0.72, sageLock: 0.66, sageLunge: 0.62 }[sagePlate] || 1.12;
   const sageFlip = !!(typeof player !== 'undefined' && player && player.x + player.w / 2 < cx);
-  if (typeof drawPlateAnchored === 'function' &&
-      drawPlateAnchored(c, sagePlate, cx, base + bob, e.h * sageH, sageFlip, true)) {
+  // THE EXHALE HAS A BODY. The sage's opening (windedT, docs/combat/SAGE.md)
+  // drew the plain standing plate, so the one window the duel is built round
+  // looked exactly like the sage waiting to strike. It now BOWS over the spent
+  // breath — doubled forward toward her, shoulders sunk — pivoted on its feet,
+  // until an authored exhale plate comes off THE FIRING LIST (ART_QUEUE §2cc).
+  const exhale = !kneel && (e.windedT || 0) > 0;
+  if (exhale) {
+    c.save();
+    c.translate(cx, base); c.rotate((sageFlip ? -1 : 1) * 0.2); c.scale(1.08, 0.8); c.translate(-cx, -base);
+  }
+  let sageDrew = false;
+  try {
+    sageDrew = typeof drawPlateAnchored === 'function' &&
+      drawPlateAnchored(c, sagePlate, cx, base + bob, e.h * sageH, sageFlip, true);
+  } finally { if (exhale) c.restore(); }
+  if (sageDrew) {
     // the plate carries the body; the ring, purity bar and halo still ride it
   } else {
   c.save();
@@ -10661,7 +11037,7 @@ function drawSage(c, e) {
 function drawBat(c, e) {
   const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
   const hang = !!e.hang;
-  const shiver = hang && e.holdT > 0 ? Math.sin(performance.now() / 24) * 1.6 : 0;
+  const shiver = hang && e.holdT > 0 ? Math.sin((e.anim || 0) * 42) * 1.6 : 0;   // sim clock, never the wall's
   const flap = Math.sin(e.anim * 18) * (e.diveT > 0 ? 0.9 : 0.6);
   // THE AUTHORED BAT (§2d): five plates on the same reads the fallback uses.
   // hang is the only one with its optic dark; shiver rattles amber out of the
