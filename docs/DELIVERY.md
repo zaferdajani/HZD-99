@@ -218,6 +218,40 @@ the same bytes bought twice.
 set — including the low tier — survives. `CACHE_MAX_STREAM` is 6, about 24 MB of
 the most recently heard.
 
+### 5.1 The baked floor is cached per room, and baked one door ahead
+
+Fetching is half of arriving. The other half is what the game BUILDS from the
+art once it is here, and one build dominated every doorway: the room's baked
+tile layer (`renderTileLayer` — erosion, silhouettes, the surface curve, the
+edge grammar and a per-pixel gamma lift), 30–400 ms per room, into a single
+shared canvas. Every crossing threw the last room away and baked the next one
+on the crossing frame, including the room she had just left.
+
+- **`tileStore`** (`js/game.js`, TILE CACHE) keeps one baked canvas per room,
+  least-recently-used, inside a count AND a byte budget per tier
+  (`tileCap()`): 3 rooms / 18 MB on the low tier, phones and ≤2 GB devices; 4
+  rooms / 28 MB mid; 4 / 40 MB high and ultra. The room she is in, and the
+  rooms nearer than the one being baked, are never evicted.
+- **A bake is a generator** (`tileBakeSteps`): the same passes in the same
+  order, yielding at rows and regions. The live room drains it in one go;
+  the rooms one door away are baked a slice at a time, nearest door first,
+  in the browser's idle callback after a frame has finished, and only in a
+  small fixed slice inside the loop on a machine that never goes idle. It
+  waits for the kingdom's rock slab exactly as the live bake does.
+- **A signature** (`tileSig`) says when a cached bake is stale: the art it
+  was made from (a stand-in replaced by the full sheet), tiles broken in that
+  room, the learned crack tell, the kernel seal, the theme. Same signature,
+  no rebake.
+- **The save is off the crossing frame** (`persistSoon`): written in the next
+  idle moment, and flushed at once on `pagehide`, `beforeunload` and a hidden
+  `visibilitychange`, so it is never lost.
+
+`tests/roomcache.cjs` measures it: a walk of real crossings with no bake on
+any crossing frame after the first, a prebaked floor pixel-identical to the
+live one, staleness noticed, the budget held, and the save deferred but never
+dropped. The up/down pairs reuse the same cache to draw the room above or
+below where it really is (`tests/vlink.cjs`).
+
 ---
 
 ## 6. Changelog
@@ -237,6 +271,8 @@ the most recently heard.
 | `CACHE_MAX_ART` | 130 | **220** | 68 new files; 130 would have started evicting art again |
 | Films | one weight (mp4 33 MB / webm 13.4 MB) | **plus a light mp4 tier, 33 → 13.6 MB** | webm browsers already had a cheap option; iOS takes mp4 and had none |
 | `tests/platform.cjs` coverage | 138 assets | **275** | the low tier and the films in all three forms were never checked |
+| Baked tile layer | one shared canvas, rebaked on every crossing | **per-room LRU cache, 3–4 rooms by tier; neighbours baked ahead in idle slices** | the bake was the doorway hitch, 30–400 ms, paid again even walking back |
+| Save on a crossing | synchronous `persist()` in `loadRoom` | **`persistSoon()`: next idle moment; flushed on pagehide / hidden** | a full save write in the one frame meant to feel continuous |
 
 ---
 

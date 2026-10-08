@@ -35,9 +35,20 @@ function evoTier(extra) {
 function relicHas(id) { return G.save.relics && G.save.relics.indexOf(id) >= 0; }
 
 // ---- tile queries against the live room ----
+// THE ROOM ABOVE AND THE ROOM BELOW ARE SOLID TOO — for her body, and only
+// while it is being moved. A vertical pair is one shaft drawn as two rooms
+// (js/game.js, VERTICAL LINKS): the jump up through a hole is real physics into
+// the floor of the room above, and a fall lands on what is really under it.
+// It is a flag rather than a rule for every query because everything else that
+// asks about tiles — the bake, the enemies, the blade breaking a hatch — is
+// about THIS room and must keep reading air past its edge.
+let tileLinkOn = false;
 function tileAt(tx, ty) {
   const g = G.grid;
-  if (ty < 0 || ty >= g.length || tx < 0 || tx >= g[0].length) return '.';
+  if (ty < 0 || ty >= g.length || tx < 0 || tx >= g[0].length) {
+    if (tileLinkOn && (ty < 0 || ty >= g.length) && typeof vlinkTile === 'function') return vlinkTile(tx, ty);
+    return '.';
+  }
   if (G.roomId === 'D3' && !G.save.flags.bossZero && ty >= 15 && tx >= 15 && tx <= 17) return '#';
   // X1: a hardlight bridge seals the floor entrance for the length of the
   // Prowler fight — but ONLY once she is inside and standing clear of it.
@@ -207,6 +218,8 @@ function stepUpTop(e, tx, lift) {
   return top;
 }
 function moveEnt(e, dt) {
+  // her body, and only hers, collides on past the room's top and bottom
+  tileLinkOn = e === player;
   const col = { l: 0, r: 0, u: 0, d: 0 };
   const xStart = e.x;
   e.x += e.vx * dt;
@@ -350,6 +363,7 @@ function moveEnt(e, dt) {
     e.airT = col.d ? 0 : (e.airT || 0) + dt;
     if (col.d) e.walkD = (e.walkD || 0) + Math.abs(e.x - xStart);
   }
+  tileLinkOn = false;
   return col;
 }
 // WHAT STOPS A SHOT — which is not the same question as what stops a BODY.
@@ -563,8 +577,12 @@ function shadowGroundY(body, maxDrop = 240) {
 function touchingWall(e, dir) {
   const tx = Math.floor((dir > 0 ? e.x + e.w + 2 : e.x - 2) / TILE);
   const t0 = Math.floor((e.y + 4) / TILE), t1 = Math.floor((e.y + e.h - 4) / TILE);
-  for (let ty = t0; ty <= t1; ty++) if (solidAt(tx, ty)) return true;
-  return false;
+  // a shaft wall that belongs to the room above is still a wall she can slide
+  tileLinkOn = e === player;
+  let hit = false;
+  for (let ty = t0; ty <= t1; ty++) if (solidAt(tx, ty)) { hit = true; break; }
+  tileLinkOn = false;
+  return hit;
 }
 
 const FLIP_DUR = 0.62;   // the double-jump pirouette, start to finish

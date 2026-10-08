@@ -501,7 +501,7 @@ function padRumble(strong, weak, ms) {
     if (typeof TOUCH !== 'undefined' && TOUCH.enabled && typeof tBuzz === 'function') tBuzz(duration);
   } catch (e) {}
 }
-const cam = { x:0, y:0, shake:0, zoom:1, lead:0, shakeX:0, shakeY:0, room:null, look:0, lookHold:0, lookDir:0 };
+const cam = { x:0, y:0, shake:0, zoom:1, lead:0, shakeX:0, shakeY:0, room:null, look:0, lookHold:0, lookDir:0, extUp:0, extDn:0, soft:0 };
 // the look: seconds of standing still on UP/DOWN before the frame pans, and
 // how far it pans as a fraction of the visible height
 const LOOK_HOLD = 0.35, LOOK_SPAN = 0.32;
@@ -531,7 +531,10 @@ function updateCam(px, py, rw, rh, dt) {
   const lead=facing*(robo ? 25+23*Math.min(1,speed/340) : 65);
   cam.lead=snap?lead:lerp(cam.lead||0,lead,1-Math.exp(-step*18));
   const boundX=v=>rw<960/z?(rw-960)/2:clamp(v,-ox,rw-960+ox);
-  const boundY=v=>rh<540/z?(rh-540)/2:clamp(v,-oy,rh-540+oy);
+  // past the top or bottom only toward a room drawn there (game.js vlinkCam):
+  // a vertical pair is one shaft, and the frame follows her through it
+  const eu=cam.extUp||0, ed=cam.extDn||0;
+  const boundY=v=>rh<540/z?(rh-540)/2:clamp(v,-oy-eu,rh-540+oy+ed);
   const fall=p ? clamp(p.vy/980,-1,1)*20 : 0;
   // LOOKING UP AND DOWN (owner, 2026-09-27: "looking down should move the
   // screen down or show me part of the down area; looking up does the same").
@@ -556,7 +559,13 @@ function updateCam(px, py, rw, rh, dt) {
     const centre=p.y+p.h/2;
     // ...a band that travels with the look, or the look is clamped straight off
     const lk=cam.look||0;
-    cam.y=boundY(clamp(cam.y,centre-270-155/z+Math.min(0,lk),centre-270+120/z+Math.max(0,lk)));
+    const banded=boundY(clamp(cam.y,centre-270-155/z+Math.min(0,lk),centre-270+120/z+Math.max(0,lk)));
+    // A SILENT ROOM CHANGE (game.js vlinkHandover) can leave her outside the
+    // band for a moment — the old room's floor held the frame while she fell
+    // past it. Snapping to the band there would be the very cut the handover
+    // exists to remove, so for a beat the band is approached, not imposed.
+    if((cam.soft||0)>0){cam.soft=Math.max(0,cam.soft-step);cam.y=lerp(cam.y,banded,1-Math.exp(-step*10));}
+    else cam.y=banded;
   }
   if (cam.shake > prevShake+2.5)
     padRumble(clamp(cam.shake/13,.15,1),clamp(cam.shake/9,.2,1),60+cam.shake*16);

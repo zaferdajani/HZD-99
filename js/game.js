@@ -260,6 +260,7 @@ let player = null;
 function saveKeyFor(theme) { return SAVE_KEY + '_' + (theme || 'robo'); }
 function persist() {
   if (!G.save) return false;
+  persistPending = false;          // whatever was waiting is written by this one
   // The toast's deadline is on the SAME clock the frame is drawn on. It used to
   // be Date.now(), which draw then sampled directly — so a frame boundary that
   // happened to fall on the 1.7s expiry rendered the toast once and not the
@@ -277,6 +278,34 @@ function persist() {
     console.warn('CLAWBYTE: progress could not be saved', e && e.name);
     return false;
   }
+}
+// THE CROSSING DOES NOT WAIT FOR THE DISK. loadRoom used to persist() on the
+// frame of every room change — a JSON.stringify of the whole save and a
+// synchronous localStorage write, in the one frame the game is asking to feel
+// continuous. Nothing about a doorway needs the write to happen THEN: the save
+// object in memory is already the truth, and the disk only has to catch up
+// before anything could lose it. So the crossing asks for a write and the next
+// quiet moment does it — and the moments that could lose it (the tab hidden,
+// the page torn down, the app backgrounded) flush whatever is still waiting.
+// Any ordinary persist() in between satisfies the request as well.
+let persistPending = false, persistTimer = 0;
+function persistSoon() {
+  if (!G.save) return;
+  persistPending = true;
+  if (persistTimer) return;
+  const go = () => { persistTimer = 0; if (persistPending) persist(); };
+  try {
+    if (typeof requestIdleCallback === 'function') { persistTimer = requestIdleCallback(go, { timeout: 900 }); return; }
+  } catch (e) {}
+  persistTimer = setTimeout(go, 250);
+}
+function persistFlush() { if (persistPending) persist(); }
+if (typeof window !== 'undefined' && window.addEventListener) {
+  window.addEventListener('pagehide', persistFlush);
+  window.addEventListener('beforeunload', persistFlush);
+  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') persistFlush();
+  });
 }
 function loadStored(theme) {
   try {
@@ -1181,7 +1210,12 @@ function loadRoom(id) {
   G.save.visited[id] = 1;
   if (typeof questVisit === 'function') questVisit(id);
   rubbleInit();          // the buried mouth, if this room has one
-  tileDirty = true;
+  // THE BAKED FLOOR COMES FROM THE ROOM'S OWN CACHE. Rebuilding it on every
+  // crossing — even into the room she just left — was most of the hitch at a
+  // doorway (see TILE CACHE below); a room baked ahead of her arrives baked.
+  tileUse(id);
+  G.vlink = vlinkFor(id);  // the rooms directly above and below, as solid ground
+  G.climb = null;          // a ledge arc belongs to the room it was planned in
   // ---- WALKING INTO A GUARDIAN'S CHAMBER --------------------------------
   // It used to be a doorway like any other: full brightness, the kingdom's
   // theme still playing, and a boss-sized shape asleep in the corner. The room
@@ -1197,8 +1231,8 @@ function loadRoom(id) {
     setMusic(def.zone);
   }
   if (def.zone !== G.lastZone) { G.zoneToast = { text: t('z_' + def.zone), t: 2.6 }; G.lastZone = def.zone; }
-  cam.x = 0; cam.y = 0; cam.room = null;
-  persist();
+  cam.x = 0; cam.y = 0; cam.room = null; cam.extUp = 0; cam.extDn = 0; cam.soft = 0;
+  persistSoon();           // the next quiet moment writes it; see persistSoon
 }
 // ---------------------------------------------------------------------------
 // WHAT THE POINTS ARE FOR. IQ is earned in the Trials and spent on skills, and
@@ -1531,7 +1565,16 @@ function checkTransitions() {
     return;
   }
   let side = null;
-  if (player.x + player.w < -2 && ex.L) side = 'L';
+  // THE SHAFT IS ONE PLACE (VERTICAL LINKS, below): where the room above or
+  // below can take her without a cut, the line is crossed when her CENTRE
+  // crosses it — she is already standing in the neighbour's geometry by then —
+  // and the room changes underneath an unbroken camera.
+  const cyc = player.y + player.h / 2;
+  let seam = null;
+  if (cyc < 0 && ex.T && vlinkSeamless('T') && vlinkOpenAt('T', player.x + player.w / 2, cyc)) seam = 'T';
+  else if (cyc > H && ex.B && vlinkSeamless('B')) seam = 'B';
+  if (seam) side = seam;
+  else if (player.x + player.w < -2 && ex.L) side = 'L';
   else if (player.x > W + 2 && ex.R) side = 'R';
   else if (player.y + player.h < -2 && ex.T) side = 'T';
   else if (player.y > H + 40 && ex.B) side = 'B';
@@ -1581,6 +1624,21 @@ function checkTransitions() {
     return;
   }
   if (demoWall(dest)) { demoStop(side); return; }
+  // THE WAY UP ENDS ON A LEDGE OR IT DOES NOT HAPPEN (owner's rule). Rising
+  // into the room above, she is carried onto the nearest floor she can stand
+  // on beside the hole; if the room above offers none — an unbroken hatch, a
+  // sealed kernel — the opening is a ceiling, not a door that drops her back.
+  // X1's live Prowler places her on its own bridge and keeps that staging.
+  if (side === 'T' && !(dest === 'X1' && roomHasLiveBoss('X1'))) {
+    const arr = seam ? vlinkArrival('T', player.x, player.y)
+                     : topArrival(dest, at, player.x);
+    if (!topLedge(dest, arr.x, arr.y, Math.sign(player.vx) || player.face)) {
+      player.y = Math.max(player.y, -player.h / 2 + 1);
+      if (player.vy < 0) player.vy = 0;
+      return;
+    }
+  }
+  if (seam) { vlinkHandover(seam, dest); return; }
   G.trans = { t: TRANS_DUR, to: dest, side, at, half: false };
   // HOLD THE PICTURE NOW, not at draw time. The loop runs a fixed step and may
   // call update() several times in one frame (SIM_STEP/SIM_MAX), so the frame
@@ -1624,8 +1682,9 @@ function applyTransition() {
   if (tr.side === 'L') { player.x = W - player.w - 10; player.y = from.y + dAir; }
   else if (tr.side === 'R') { player.x = 10; player.y = from.y + dAir; }
   else if (tr.side === 'T') {
-    player.x = clamp(tr.at != null ? tr.at * TILE : from.x, 40, W - 60);
-    player.y = H - player.h - 6;
+    const arr = topArrival(G.roomId, tr.at, from.x);
+    player.x = arr.x;
+    player.y = arr.y;
     player.vy = Math.min(from.vy, -680);
     // THE CLIMB CANNOT STALL. She arrives at the bottom of the room above,
     // still inside the floor shaft she jumped through — and if the room's
@@ -1638,11 +1697,19 @@ function applyTransition() {
   }
   else { player.x = clamp(from.x, 40, W - 60); player.y = 4; player.vy = Math.max(from.vy, 80); }
   player.vx = from.vx; player.lastSafe = { x: player.x, y: player.y };
+  // ...and the carry is now the FALLBACK: where the room above has a ledge
+  // beside the hole she is lifted onto it (climbStart), the way the owner
+  // asked for, and the state-based carry only runs where it does not.
+  if (tr.side === 'T') {
+    const led = topLedge(G.roomId, player.x, player.y, Math.sign(from.vx) || player.face);
+    if (led) climbStart(led);
+  }
   // THE CACHE MOUTH: she climbs up through the opening, and the hardlight
   // bridge closes beneath her the instant she is through — so the way in is
   // never a pit that spits her straight back down the shaft she came up.
   if (G.roomId === 'X1' && tr.side === 'T' && G.boss && !G.boss.dead) {
     G.x1Bridge = true;
+    G.climb = null;              // the bridge places her, not a ledge arc
     player.tCarry = 0;           // the bridge places her; no shaft to climb
     player.y = 15 * TILE - player.h; player.vy = 0;
     player.lastSafe = { x: player.x, y: player.y };
@@ -1654,6 +1721,316 @@ function applyTransition() {
   updateCam(player.x, player.y, W, H, 1);
 }
 
+// ===========================================================================
+// VERTICAL LINKS — the 24 up/down pairs as one continuous shaft.
+//
+// A side crossing keeps her height and slides the old picture off; that reads
+// as travel because the eye follows her sideways. Vertically it never did: the
+// camera snapped, the room above appeared as a still being pushed away, and she
+// was dropped into a hole in its floor with a forced upward shove (plan §2).
+// Hollow Knight's answer is a scripted lift onto the ledge; ours is that plus
+// letting the two rooms be one place while she is between them:
+//
+//   COLLISION continues into the neighbour (tileAt's tileLinkOn, for her body
+//     only), so the jump up through the hole is real physics against the real
+//     floor above, and a fall lands on what is really below.
+//   THE PICTURE continues: the neighbour's baked floor (the tile cache) is
+//     drawn directly above or below, and the camera is allowed past the room's
+//     edge toward it, so it keeps going across the line.
+//   THE HANDOVER is silent: when her centre crosses the line the room changes,
+//     her position and the camera are translated by exactly the offset between
+//     the two rooms, and nothing on screen moves.
+//
+// The offsets come from the exits themselves — a pair keeps her x, and an
+// `at` arrival column (V2 -> B2) shifts the room above so its column sits over
+// the opening she rose through. Whatever the shaft columns are, the two grids
+// are simply laid one over the other: a mismatch shows up as rock she bumps,
+// never as a body teleported inside a roof.
+// ===========================================================================
+function ceilingOpenStart(id) {
+  const g = buildRoom(id), w = ROOMS[id].w;
+  if (g.tGap) return g.tGap[0];
+  for (let x = 1; x < w - 1; x++) if (g[0][x] === '.') return x;
+  return 0;
+}
+// An `at` exit names the column she arrives at in the room above, not how the
+// two openings line up. The hole she rises into is the run of not-rock in the
+// upper room's floor that holds that column (V2's way up is B2's cut vent,
+// 43-46, named by its column 44), so the lower opening is laid under the START
+// of that run: the hole over the hole, column for column.
+function atShift(lowerId, upperId, at) {
+  const U = buildRoom(upperId), row = U[U.length - 1], w = row.length;
+  let a = Math.max(0, Math.min(w - 1, at | 0));
+  if (row[a] === '#') return ceilingOpenStart(lowerId) - at;
+  while (a > 0 && row[a - 1] !== '#') a--;
+  return ceilingOpenStart(lowerId) - a;
+}
+function vlinkFor(id) {
+  const def = ROOMS[id], ex = (def && def.exits) || {}, out = { T: null, B: null };
+  for (const side of ['T', 'B']) {
+    let to = ex[side], at = null, flag = null;
+    if (!to) continue;
+    if (typeof to === 'object') { at = to.at != null ? to.at : null; flag = to.flag || null; to = to.to; }
+    if (!to || !ROOMS[to]) continue;
+    let otx = 0, oty;
+    if (side === 'T') {
+      oty = -ROOMS[to].h;
+      if (at != null) otx = atShift(id, to, at);
+    } else {
+      oty = def.h;
+      // the room below may arrive through an `at` column of THIS room: lay it
+      // under that column, the inverse of its own way up
+      let back = (ROOMS[to].exits || {}).T;
+      if (back && typeof back === 'object' && back.to === id && back.at != null)
+        otx = -atShift(to, id, back.at);
+    }
+    out[side] = { id: to, grid: buildRoom(to), otx, oty, ox: otx * TILE, oy: oty * TILE,
+      w: ROOMS[to].w, h: ROOMS[to].h, flag };
+  }
+  return out;
+}
+// tileAt's view past the top or bottom edge, for her body (see tileLinkOn)
+function vlinkTile(tx, ty) {
+  const V = G.vlink;
+  const L = V && (ty < 0 ? V.T : V.B);
+  if (!L) return '.';
+  const nx = tx - L.otx, ny = ty - L.oty, g = L.grid;
+  if (ny < 0 || ny >= g.length || nx < 0 || nx >= g[0].length) return '.';
+  if (L.id === 'D3' && !G.save.flags.bossZero && ny >= 15 && nx >= 15 && nx <= 17) return '#';
+  const ch = g[ny][nx];
+  if ((ch === 'B' || ch === 'v') && G.save.broken[L.id + ':' + nx + ',' + ny]) return '.';
+  return ch;
+}
+function roomHasLiveBoss(id) {
+  const d = ROOMS[id];
+  for (const e of (d && d.ents) || []) {
+    if (e[0] !== 'boss' || !e[3]) continue;
+    if (!G.save.flags['boss' + e[3].charAt(0).toUpperCase() + e[3].slice(1)]) return true;
+  }
+  return false;
+}
+// Can this edge be crossed without a cut? A gated exit, and a guardian's
+// chamber (it stages its own entrance: the dark hold, X1's bridge), keep the
+// old crossing.
+function vlinkSeamless(side) {
+  const L = G.vlink && G.vlink[side];
+  if (!L) return null;
+  if (L.flag && !G.save.flags[L.flag]) return null;
+  if (roomHasLiveBoss(L.id)) return null;
+  return L;
+}
+// she can only be handed up where the room above is open at her centre — in a
+// sky room the lid is gone and the body can rise anywhere, but the way up is
+// still the hole in the floor above, never its underside
+function vlinkOpenAt(side, cx, cy) {
+  const L = G.vlink && G.vlink[side];
+  if (!L) return false;
+  const nx = Math.floor(cx / TILE) - L.otx, ny = Math.floor(cy / TILE) - L.oty;
+  if (nx < 0 || nx >= L.w || ny < 0 || ny >= L.h) return false;
+  if (G.roomDef.sky && side === 'T' && G.grid.tGap) {
+    if (cx < G.grid.tGap[0] * TILE - 8 || cx > (G.grid.tGap[1] + 1) * TILE + 8) return false;
+  }
+  const prev = tileLinkOn; tileLinkOn = true;
+  const ch = tileAt(Math.floor(cx / TILE), Math.floor(cy / TILE));
+  tileLinkOn = prev;
+  return ch !== '#' && ch !== 'B';
+}
+function vlinkArrival(side, x, y) {
+  const L = G.vlink[side];
+  return { x: x - L.ox, y: y - L.oy };
+}
+// where the old crossing puts her in the room above (kept for the cut path)
+function topArrival(id, at, fromX) {
+  const W = ROOMS[id].w * TILE, H = ROOMS[id].h * TILE;
+  return { x: clamp(at != null ? at * TILE : fromX, 40, W - 60), y: H - (player ? player.h : 36) - 6 };
+}
+// THE SILENT HANDOVER. Same room change as ever (loadRoom), then every
+// coordinate that was in the old room's space is moved into the new one's by
+// the offset between them — her body and the camera together — so the frame
+// after looks exactly like the frame before.
+function vlinkHandover(side, dest) {
+  const L = G.vlink[side];
+  const ox = L.ox, oy = L.oy;
+  const px = player.x, py = player.y, cx = cam.x, cy = cam.y, look = cam.look || 0, lead = cam.lead || 0;
+  const zoom = cam.zoom, ld = cam.lookDir, lh = cam.lookHold;
+  loadRoom(dest);
+  player.x = px - ox; player.y = py - oy;
+  player.lastSafe = { x: player.x, y: Math.max(0, Math.min(player.y, G.roomDef.h * TILE - player.h - 4)) };
+  cam.x = cx - ox; cam.y = cy - oy; cam.look = look; cam.lead = lead; cam.zoom = zoom;
+  cam.lookDir = ld; cam.lookHold = lh;
+  cam.room = G.roomId;                              // no snap: updateCam keeps lerping
+  // the camera is past the new room's edge, looking back at the one she left;
+  // let it stay there and come home at its own pace (vlinkCam)
+  const z = cam.zoom || 1, oyz = 270 * (1 - 1 / z), H = G.roomDef.h * TILE;
+  cam.extUp = Math.max(0, -oyz - cam.y);
+  cam.extDn = Math.max(0, cam.y - (H - 540 + oyz));
+  cam.soft = 0.4;
+  G.vlinkLast = { side, from: L, at: G.time || 0 };
+  if (side === 'T') {
+    const led = topLedge(G.roomId, player.x, player.y, Math.sign(player.vx) || player.face);
+    if (led) climbStart(led); else player.tCarry = 1.0;
+  }
+}
+// How far past its top and bottom the camera may look. Only toward a link
+// whose neighbour is baked (there is a picture to show), and only while she is
+// near that edge — away from it the room's own bounds come back, eased so the
+// frame is drawn home rather than snapped.
+function vlinkCam(dt) {
+  const V = G.vlink, H = G.roomDef.h * TILE;
+  const cyp = player.y + player.h / 2;
+  const reach = 540;
+  const near = (side) => {
+    const L = V && V[side];
+    if (!L || !vlinkSeamless(side)) return false;
+    const e = tileStore.get(L.id);
+    if (!e || !e.ready) return false;
+    if (side === 'T' ? cyp > 7 * TILE : cyp < H - 7 * TILE) return false;
+    // ...and horizontally over the neighbour, not beside it
+    const cx = player.x + player.w / 2;
+    return cx > L.ox - 2 * TILE && cx < L.ox + L.w * TILE + 2 * TILE;
+  };
+  const k = 1 - Math.exp(-Math.min(dt, 0.1) * 3.5);
+  const ease = (cur, want) => (want >= cur ? want : cur + (want - cur) * k);
+  cam.extUp = ease(cam.extUp || 0, near('T') ? reach : 0);
+  cam.extDn = ease(cam.extDn || 0, near('B') ? reach : 0);
+  if (cam.extUp < 0.5) cam.extUp = 0;
+  if (cam.extDn < 0.5) cam.extDn = 0;
+}
+// The neighbour's baked floor, drawn where it really is. Only the slice the
+// camera can see is copied, so a tall room above costs a strip, not a room.
+function drawVLinkArt() {
+  const V = G.vlink;
+  if (!V) return;
+  const z = cam.zoom || 1, ozx = 480 * (1 - 1 / z), ozy = 270 * (1 - 1 / z);
+  const vx0 = camSX() + ozx, vy0 = camSY() + ozy, vx1 = camSX() + 960 - ozx, vy1 = camSY() + 540 - ozy;
+  for (const side of ['T', 'B']) {
+    const L = V[side];
+    if (!L) continue;
+    if (side === 'T' ? vy0 >= 0 : vy1 <= G.roomDef.h * TILE) continue;
+    const e = tileStore.get(L.id);
+    if (!e || !e.ready || !vlinkSeamless(side)) continue;
+    const sx0 = Math.max(0, Math.floor(vx0 - L.ox) - 2), sy0 = Math.max(0, Math.floor(vy0 - L.oy) - 2);
+    const sx1 = Math.min(e.cv.width, Math.ceil(vx1 - L.ox) + 2), sy1 = Math.min(e.cv.height, Math.ceil(vy1 - L.oy) + 2);
+    if (sx1 <= sx0 || sy1 <= sy0) continue;
+    c.drawImage(e.cv, sx0, sy0, sx1 - sx0, sy1 - sy0, L.ox + sx0, L.oy + sy0, sx1 - sx0, sy1 - sy0);
+  }
+}
+// ---------------------------------------------------------------------------
+// THE LEDGE — the owner's rule for the way up: "jump up and you are carried
+// onto the floor beside the hole", in a short scripted arc with the controls
+// held, instead of arriving inside a shaft and being shoved. Pure geometry
+// against the destination's grid, so the harness asks exactly the question the
+// game does (tests/vlink.cjs walks all 24 ways up through it).
+//
+// A ledge is a tile top she can stand on: solid or a deck, open above for her
+// whole body, no hazard on it, within seven tiles of where she arrives, and
+// reachable on an arc that never passes through rock. Nearest wins, and a
+// floor beside the hole beats a deck far overhead — height costs more than
+// width, because a lift reads as a hop and a hoist reads as a cutscene.
+// `assumeBroken` reads breakable tiles as open (a hatch is a designed way
+// through once it has been cut; the harness asks about the route, the game
+// asks about this save).
+// ---------------------------------------------------------------------------
+function topLedge(id, x0, y0, pref, assumeBroken) {
+  const def = ROOMS[id];
+  if (!def) return null;
+  const g = buildRoom(id), Ht = g.length, Wt = g[0].length;
+  const PW = player ? player.w : 24, PH = player ? player.h : 36;
+  const br = (G.save && G.save.broken) || {};
+  const plug = id === 'D3' && !(G.save && G.save.flags && G.save.flags.bossZero);
+  const cell = (tx, ty) => {
+    if (tx < 0 || tx >= Wt) return '#';            // the room's sides are walls
+    if (ty < 0 || ty >= Ht) return '.';            // under it is the shaft she came up
+    if (plug && ty >= 15 && tx >= 15 && tx <= 17) return '#';
+    const ch = g[ty][tx];
+    if ((ch === 'B' || ch === 'v') && (assumeBroken || br[id + ':' + tx + ',' + ty])) return '.';
+    return ch;
+  };
+  const blocks = (ch) => ch === '#' || ch === 'B' || ch === '^' || ch === 'v';
+  const boxFree = (x, y) => {
+    const a0 = Math.floor(x / TILE), a1 = Math.floor((x + PW - 1) / TILE);
+    const b0 = Math.floor(y / TILE), b1 = Math.floor((y + PH - 1) / TILE);
+    for (let b = b0; b <= b1; b++) for (let a = a0; a <= a1; a++) if (blocks(cell(a, b))) return false;
+    return true;
+  };
+  if (!boxFree(x0, y0)) return null;               // she would arrive inside rock
+  const feet0 = y0 + PH, c0 = Math.floor((x0 + PW / 2) / TILE);
+  const cands = [];
+  for (let tx = c0 - 7; tx <= c0 + 7; tx++) {
+    if (tx < 0 || tx >= Wt) continue;
+    for (let ty = Ht - 1; ty >= 1; ty--) {
+      const top = ty * TILE, rise = feet0 - top;
+      if (rise < TILE * 0.5) continue;
+      if (rise > 7 * TILE) break;
+      const ch = cell(tx, ty);
+      if (!(ch === '#' || ch === 'B' || ch === '=')) continue;
+      const up = cell(tx, ty - 1);
+      if (up === '#' || up === 'B' || up === '=') continue;   // buried: not a top
+      const x1 = tx * TILE + (TILE - PW) / 2, y1 = top - PH;
+      if (!boxFree(x1, y1)) continue;
+      const dx = x1 - x0;
+      cands.push({ x: x1, y: y1, tx, ty, score: Math.abs(dx) + rise * 1.5 - (Math.sign(dx) === pref ? 10 : 0) });
+    }
+  }
+  cands.sort((a, b) => a.score - b.score);
+  for (const cd of cands.slice(0, 12)) {
+    for (const bump of [12, 28, 48, 72, 100]) {
+      const k = { x0, y0, x1: cd.x, y1: cd.y, bump };
+      let ok = true;
+      for (let i = 1; i <= 24 && ok; i++) {
+        const p = climbPos(k, i / 24);
+        if (!boxFree(p[0], p[1])) ok = false;
+      }
+      if (ok) {
+        const dist = Math.hypot(cd.x - x0, cd.y - y0);
+        return { x0, y0, x1: cd.x, y1: cd.y, bump, tx: cd.tx, ty: cd.ty, dur: clamp(0.35 * dist / 150, 0.35, 0.5) };
+      }
+    }
+  }
+  return null;
+}
+// Up first, then over: the body clears the lip before it travels across it,
+// and the sideways ease starts late enough that it never scrapes the shaft.
+function climbPos(k, u) {
+  const ux = u < 0.3 ? 0 : (u - 0.3) / 0.7, ex = ux * ux * (3 - 2 * ux);
+  const ey = 1 - (1 - u) * (1 - u);
+  return [k.x0 + (k.x1 - k.x0) * ex, k.y0 + (k.y1 - k.y0) * ey - k.bump * Math.sin(Math.PI * u)];
+}
+function climbStart(led) {
+  // the grid says where the tile top is; the heightfield may have built the
+  // ground a few px above it there, and she lands on the ground, not the grid
+  let y1 = led.y1;
+  const PH = player.h, gc = (typeof groundColumnAt === 'function') ? groundColumnAt(led.x1 + player.w / 2) : null;
+  if (gc && gc[0] < gc[1] && Math.abs(gc[1] - (led.y1 + PH)) < 2) y1 = gc[0] - PH;
+  G.climb = { x0: led.x0, y0: led.y0, x1: led.x1, y1, bump: led.bump, t: 0, dur: led.dur || 0.35 };
+  player.tCarry = 0;
+  player.on = false;
+  if (led.x1 !== led.x0) player.face = Math.sign(led.x1 - led.x0);
+}
+// The arc, driven: the controls are held for its length (update() runs this
+// INSTEAD of Player.update, the same arrangement as a finishing blow), and her
+// velocity is the arc's own derivative so every pose that reads vy — the rise,
+// the hang, the landing — reads a real jump.
+function climbStep(dt) {
+  const k = G.climb;
+  if (!k || !player) { G.climb = null; return; }
+  k.t += dt;
+  const u = clamp(k.t / k.dur, 0, 1);
+  const p = climbPos(k, u);
+  const ddt = Math.max(dt, 1e-3);
+  player.vx = (p[0] - player.x) / ddt; player.vy = (p[1] - player.y) / ddt;
+  player.x = p[0]; player.y = p[1];
+  player.on = false; player.tCarry = 0;
+  if (k.x1 !== k.x0) { player.face = Math.sign(k.x1 - k.x0); }
+  if (u >= 1) {
+    // set down a hair above the ledge, falling: the next physics step LANDS
+    // her, so the landing squash, dust and sound are the ordinary ones
+    player.x = k.x1; player.y = k.y1 - 0.5;
+    player.vy = 90; player.vx *= 0.25;
+    player.lastSafe = { x: player.x, y: k.y1 };
+    G.climb = null;
+  }
+}
 // ---------- interaction ----------
 function findNear() {
   if (!player || player.dead) return null;
@@ -2231,6 +2608,7 @@ function update(dt) {
       // during a finishing blow she is driven, not steered — the choice was the
       // input, and nothing the player does now can fumble it
       if (G.finish && typeof updateFinisher === 'function') updateFinisher(dt);
+      else if (G.climb) climbStep(dt);          // the ledge arc: driven, controls held
       else player.update(dt);
       if (typeof platRide === 'function') platRide(player);
       checkEvo();
@@ -2326,8 +2704,10 @@ function update(dt) {
       // the frame and she is wherever the throw put her, up to 800 px west of
       // it (measured 480-600) — a true midpoint put it a hair past the edge
       updateCam(G.boss.cx() - 330, (player.y + player.h / 2 + G.boss.cy()) / 2, G.roomDef.w * TILE, G.roomDef.h * TILE, dt);
-    else
+    else {
+      if (player && G.roomDef) vlinkCam(dt);
       updateCam(player.x + player.w / 2, player.y + player.h / 2, G.roomDef.w * TILE, G.roomDef.h * TILE, dt);
+    }
     updateParts(dt);
     for (const tt of G.toasts) tt.t -= dt;
     G.toasts = G.toasts.filter(tt => tt.t > 0);
@@ -5561,7 +5941,7 @@ const TRAP_SKIN = {
   E: { dark: '#141c14', mid: '#4a5c46', lit: '#9fb894', hazA: '#b6e84a', hazB: '#16201a', dress: 'growth' },
   X: { dark: '#1a1226', mid: '#544070', lit: '#b49ad8', hazA: '#d24bff', hazB: '#1e1430', dress: 'crystal' },
 };
-function drawTiles(P) {
+function* drawTilesSteps(P) {
   const g = G.grid, W = g[0].length, H = g.length;
   const x0 = 0, x1 = W - 1, y0 = 0, y1 = H - 1;
   // A FRACTURE world's loose rock wears the loose rock's face. It was cut from
@@ -5570,6 +5950,7 @@ function drawTiles(P) {
   // tell everywhere: the misaligned grain and the hairline round the mass.
   const fracture = typeof brHas === 'function' && !isHero() && brHas('fracture');
   for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
+    if (tx === x0 && ty > y0) yield;            // a row at a time when baked ahead (tileBakeSteps)
     const raw = tileAt(tx, ty), X = tx * TILE, Y = ty * TILE;
     const ch = (fracture && raw === '#' && brLoose(tx, ty)) ? 'B' : raw;
     if (ch === '#') {
@@ -6181,6 +6562,8 @@ function drawTiles(P) {
   }
   drawPlatformRuns();
 }
+// the one-shot form, for anything that wants the tiles drawn now
+function drawTiles(P) { for (const _ of drawTilesSteps(P)) { /* drain */ } }
 // ---------------------------------------------------------------------------
 // AUTHORED STRATA DECKS. The one-way platforms used to be flat two-tone bars —
 // a straight line across every kingdom. They are now the owner's painted decks,
@@ -6335,8 +6718,9 @@ function holdFrameNearExit() {
   if (G.state !== 'PLAY' || G.trans || !player || !G.roomDef) return;
   const ex = G.roomDef.exits || {}, W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
   const px = player.x + player.w / 2, py = player.y + player.h / 2;
+  // a vertical edge that hands over silently has no picture to slide
   const near = (ex.L && px < 260) || (ex.R && px > W - 260) ||
-               (ex.T && py < 240) || (ex.B && py > H - 240);
+               (ex.T && py < 240 && !vlinkSeamless('T')) || (ex.B && py > H - 240 && !vlinkSeamless('B'));
   if (!near) return;
   grabFrame();
   transHeld = true;
@@ -6391,16 +6775,45 @@ function renderTileLayer(P) {
   // and the draw path composites this layer unconditionally — returning before
   // the canvas existed handed drawImage a null and threw once per frame, which
   // is not "a frame or two with no tile layer", it is a dead game.
-  if (!tileCv || tileCv.width !== W || tileCv.height !== H) {
-    tileCv = document.createElement('canvas'); tileCv.width = W; tileCv.height = H;
-  }
+  // ...and it is THIS ROOM'S canvas, out of the per-room cache, so a bake can
+  // never overwrite a neighbour that was baked ahead of her.
+  const ent = tileEntry(G.roomId, W, H);
+  tileCv = ent.cv;
   // tileDirty is deliberately left set: this is "not yet", not "done"
   if (!rockBakeReady(G.roomDef.zone)) return;
+  // A LIVE BAKE OWNS THE SCRATCH CANVASES (erodeSrc, erodeMask, surfSnapCv).
+  // A prebake paused halfway through one of its passes is holding pictures in
+  // them across frames, so it starts over rather than finish on clobbered data.
+  if (tileJob) tileJobDrop();
+  const sig = tileSig(G.roomId);
+  const t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  // drawTiles paints into the global `c`, so for the bake `c` IS the layer
+  const main = c;
+  c = tileCv.getContext('2d');
+  try { for (const _ of tileBakeSteps(P)) { /* the live room cannot wait: all of it, now */ } }
+  finally { c = main; }
+  ent.ready = true; ent.sig = sig; ent.curve = (surfRoom === G.roomId) ? surfCurve : null;
+  TILE_STATS.bakes++; TILE_STATS.live++;
+  TILE_STATS.lastMs = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0;
+  tileDirty = false;
+}
+// THE BAKE, AS STEPS. Every pass below used to be one call that ran to the end,
+// which is fine for the room she is standing in (it has to be ready before the
+// frame) and useless for the room she is walking toward: a 100-400 ms bake run
+// in one piece is the crossing hitch moved, not removed. As a generator the same
+// code yields at row and region boundaries, so the prebake can run it a few
+// milliseconds per frame (tileJobSlice) and the live room drains it in one go.
+// Nothing about the picture changes — the passes, their order and their
+// arithmetic are exactly what renderTileLayer always ran.
+//
+// It draws into whatever tileCv is when it is RESUMED, and drawTiles paints into
+// the global `c`: whoever drives it sets both (renderTileLayer for the live
+// room, tileJobSlice for a neighbour).
+function* tileBakeSteps(P) {
   const tctx = tileCv.getContext('2d');
-  tctx.clearRect(0, 0, W, H);
-  const main = c; c = tctx;
-  drawTiles(P);
-  c = main;
+  tctx.clearRect(0, 0, tileCv.width, tileCv.height);
+  TILE_STATS.pass = 'tiles';
+  yield* drawTilesSteps(P);
   // THE CAVE SHAPE RULE, AT THE PIXEL. The carve killed the straight lines
   // in the tile GRID; this kills them in the tile FACES — the owner's
   // report after the carve shipped was "still seeing straight lines walls
@@ -6415,17 +6828,22 @@ function renderTileLayer(P) {
   // every room's exposed tile faces get the erosion: scallops bitten into
   // tops, undersides and verticals, texture lumps pushed past the line. The
   // collision grid stays square; the SILHOUETTE never is.
-  if (G.roomDef) erodeCaveEdges(tctx);
+  TILE_STATS.pass = 'erode';
+  if (G.roomDef) yield* erodeCaveEdgesSteps(tctx);
   // ART_BIBLE §10.3 — THE THREE-PART EDGE, after the erosion and for a
   // different reason. Erosion answers "is the silhouette straight"; this
   // answers "is the edge BARE", which is the thing the reference actually
   // never ships. tests/grammar.cjs measured 12 of 12 long edges in this game
   // with neither a lit crest nor a broken underside — a flat top and a flat
   // bottom, which is a rectangle however wobbly you make its outline.
-  if (G.roomDef) organicSilhouettePass(tctx);
-  if (G.roomDef) slabSilhouettePass(tctx);  // §10.3 — the other three sides
-  if (G.roomDef) surfaceCurvePass(tctx);   // §10.1 — the surface stops being cells
-  if (G.roomDef) edgeGrammarPass(tctx);
+  TILE_STATS.pass = 'organic';
+  if (G.roomDef) yield* organicSilhouetteSteps(tctx);
+  TILE_STATS.pass = 'slab';
+  if (G.roomDef) yield* slabSilhouetteSteps(tctx);  // §10.3 — the other three sides
+  TILE_STATS.pass = 'curve';
+  if (G.roomDef) yield* surfaceCurveSteps(tctx);    // §10.1 — the surface stops being cells
+  TILE_STATS.pass = 'edge';
+  if (G.roomDef) yield* edgeGrammarSteps(tctx);
   // §9.1 — and lift the whole plane. Pushing the background down is only half
   // of aerial perspective; measured after the background pass alone, B4's
   // terrain still sat 9 points off its backdrop where the law asks for 10.
@@ -6448,6 +6866,7 @@ function renderTileLayer(P) {
       tctx.restore();
     }
   }
+  yield;
   // THE PLAYABLE PLANE IS LIT, NOT THE BACKGROUND CRUSHED.
   //
   // §9.1 asks for ten points of luminance between the ground she stands on and
@@ -6463,20 +6882,283 @@ function renderTileLayer(P) {
   // the plane the player reads and lets the background come up with it. The
   // separation is preserved because both move; the picture gets brighter
   // because both move UP.
+  // In bands of rows, so a prebake can stop between them: a whole-room
+  // readback of a wide room is several megabytes in one call.
+  TILE_STATS.pass = 'gamma';
   if (TERRAIN_GAMMA < 1) {
-    try {
-      const tx2 = tileCv.getContext('2d', { willReadFrequently: true });
-      const lut = new Uint8ClampedArray(256);
-      for (let i = 0; i < 256; i++) lut[i] = 255 * Math.pow(i / 255, TERRAIN_GAMMA);
-      const id = tx2.getImageData(0, 0, tileCv.width, tileCv.height), d = id.data;
-      for (let i = 0; i < d.length; i += 4) {
-        if (!d[i + 3]) continue;                       // holes stay holes
-        d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
-      }
-      tx2.putImageData(id, 0, 0);
-    } catch (e) {}
+    const cvG = tileCv, Wc = cvG.width, Hc = cvG.height, BAND = 96;
+    const lut = new Uint8ClampedArray(256);
+    for (let i = 0; i < 256; i++) lut[i] = 255 * Math.pow(i / 255, TERRAIN_GAMMA);
+    for (let y0 = 0; y0 < Hc; y0 += BAND) {
+      try {
+        const tx2 = cvG.getContext('2d', { willReadFrequently: true });
+        const bh = Math.min(BAND, Hc - y0);
+        const id = tx2.getImageData(0, y0, Wc, bh), d = id.data;
+        for (let i = 0; i < d.length; i += 4) {
+          if (!d[i + 3]) continue;                       // holes stay holes
+          d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
+        }
+        tx2.putImageData(id, 0, y0);
+      } catch (e) {}
+      yield;
+    }
   }
-  tileDirty = false;
+}
+// ===========================================================================
+// THE TILE CACHE — one baked floor per room, not one for the whole game.
+//
+// THE PROBLEM, measured (tests/roomcache.cjs, tools/bakecost.cjs): the baked
+// tile layer costs 30-400 ms per room, and there was ONE canvas for it. Every
+// crossing threw the last room's bake away and paid for the next — including
+// walking back into the room she had just left, which is the commonest
+// crossing in a metroidvania. The "slide" at the doorway was hiding a frozen
+// frame, not covering a load.
+//
+// THE SHAPE OF THE FIX is three parts:
+//   1. KEEP the last few rooms' bakes (LRU), sized to the device: a 32x17 room
+//      is 2.2 MB of canvas and the widest is 6 MB, so a phone keeps three and a
+//      desk keeps four, inside a byte budget as well as a count.
+//   2. BAKE AHEAD: the rooms one door away are baked a few milliseconds per
+//      frame (tileBakeSteps as a generator), nearest door first, so the room
+//      behind the door she is walking to is usually finished before she gets
+//      there. The budget is per frame and per tier; a bake that is not done in
+//      time simply finishes on the crossing frame, which is no worse than before.
+//   3. KNOW WHEN A BAKE IS STALE: a signature of everything the bake reads that
+//      can change between visits — the art that has arrived (a stand-in becomes
+//      the full slab), tiles she has broken, the crack tell once it is learned,
+//      the kernel seal, the theme. Same signature, same picture: no rebake.
+// ===========================================================================
+const tileStore = new Map();            // roomId -> { cv, sig, ready, bytes, used, curve }
+const TILE_STATS = { bakes: 0, live: 0, pre: 0, hits: 0, misses: 0, evicted: 0, sliceMax: 0, lastMs: 0,
+  stepMax: 0, stepPass: '', pass: '' };
+let tileUseTick = 0, tileJob = null, tilePickT = 0, tilePickId = null;
+// What the device can hold. Count AND bytes: four of the widest rooms is 24 MB,
+// four ordinary ones under 9.
+function tileCap() {
+  const q = (typeof QNAME !== 'undefined') ? QNAME : 'high';
+  const phone = typeof DEVICE !== 'undefined' && DEVICE && DEVICE.form === 'phone';
+  const lowMem = typeof DEVICE !== 'undefined' && DEVICE && DEVICE.mem && DEVICE.mem <= 2;
+  if (q === 'low' || phone || lowMem) return { n: 3, bytes: 18e6, ms: 2.5 };
+  if (q === 'mid') return { n: 4, bytes: 28e6, ms: 3.5 };
+  return { n: 4, bytes: 40e6, ms: 4.5 };
+}
+// Everything a bake reads that can differ between two visits to the same room.
+function tileArtState(k) {
+  if (!k) return '';
+  const raw = (typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[k]) ? 1 : 0;
+  const low = (typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[k]) | 0;
+  return raw + '' + low;
+}
+function tileSig(id) {
+  const def = ROOMS[id];
+  if (!def) return '';
+  const f = (G.save && G.save.flags) || {}, B = (G.save && G.save.broken) || {};
+  let br = 0;
+  const pre = id + ':';
+  for (const k in B) if (B[k] && k.lastIndexOf(pre, 0) === 0) br++;
+  const ik = def.indoor ? (INDOOR_ART[id] || 'floorDen') : '';
+  // the fracture modifier re-faces loose '#' as 'B' inside the bake, so a run
+  // that gains or loses it must not reuse a bake made without it
+  const frac = typeof brHas === 'function' && !isHero() && brHas('fracture') ? 1 : 0;
+  return [typeof themeId === 'function' ? themeId() : '', br, f.taughtBreak ? 1 : 0, frac,
+    id === 'D3' ? (f.bossZero ? 1 : 0) : '', id === 'X1' && G.roomId === 'X1' && G.x1Bridge ? 1 : 0,
+    tileArtState(ROCK_ART[def.zone]), tileArtState('platforms'), tileArtState('strataRubble'),
+    tileArtState('strataIceB'), tileArtState('strataLava'), tileArtState(ik)].join('|');
+}
+function tileBytes() { let n = 0; for (const e of tileStore.values()) n += e.bytes; return n; }
+// Throw out the least recently used bakes until the device's budget holds,
+// never the room she is in, the one being baked, or one the caller is keeping.
+function tileEvict(keep) {
+  const cap = tileCap();
+  for (;;) {
+    if (tileStore.size <= cap.n && tileBytes() <= cap.bytes) return true;
+    let victim = null;
+    for (const [id, e] of tileStore) {
+      if (id === G.roomId || (tileJob && tileJob.id === id) || (keep && keep.indexOf(id) >= 0)) continue;
+      if (!victim || e.used < tileStore.get(victim).used) victim = id;
+    }
+    if (!victim) return false;
+    const e = tileStore.get(victim);
+    // a canvas holds its backing store until it is resized — dropping the
+    // reference alone leaves megabytes waiting on a collector
+    try { e.cv.width = 0; e.cv.height = 0; } catch (err) {}
+    tileStore.delete(victim);
+    TILE_STATS.evicted++;
+  }
+}
+function tileEntry(id, W, H) {
+  let e = tileStore.get(id);
+  if (!e || e.cv.width !== W || e.cv.height !== H) {
+    if (e) { try { e.cv.width = 0; e.cv.height = 0; } catch (err) {} }
+    const cv2 = document.createElement('canvas'); cv2.width = W; cv2.height = H;
+    e = { cv: cv2, sig: '', ready: false, bytes: W * H * 4, used: 0, curve: null };
+    tileStore.set(id, e);
+  }
+  e.used = ++tileUseTick;
+  return e;
+}
+function tileFresh(id) {
+  const e = tileStore.get(id);
+  return !!(e && e.ready && e.sig === tileSig(id));
+}
+// loadRoom's half: the room she has just entered takes its own canvas, and if
+// it is already baked and nothing it depends on has changed, nothing is baked.
+function tileUse(id) {
+  const def = ROOMS[id];
+  // a prebake that has nearly finished this very room finishes now — cheaper
+  // than starting it again from the top on the first frame
+  if (tileJob && tileJob.id === id) tileJobSlice(Infinity);
+  const ent = tileEntry(id, def.w * TILE, def.h * TILE);
+  tileCv = ent.cv;
+  if (ent.ready && ent.sig === tileSig(id)) {
+    tileDirty = false;
+    TILE_STATS.hits++;
+    if (ent.curve) { surfCurve = ent.curve; surfRoom = id; }
+  } else {
+    tileDirty = true;
+    TILE_STATS.misses++;
+  }
+  tileEvict(null);
+}
+function tileJobDrop() {
+  if (!tileJob) return;
+  const e = tileStore.get(tileJob.id);
+  if (e && e !== tileStore.get(G.roomId)) e.ready = false;
+  tileJob = null;
+}
+// Run the paused bake for up to `ms`, in its own room's clothes. The bake reads
+// the room through the globals (G.roomId, G.roomDef, G.grid, the surface curve,
+// tileCv, and `c` for drawTiles), so for the length of a slice they are the
+// neighbour's — and every one of them is put back before the frame continues,
+// whatever happens inside.
+function tileJobSlice(ms) {
+  const j = tileJob;
+  if (!j) return;
+  const sv = { id: G.roomId, def: G.roomDef, grid: G.grid, cv: tileCv, sc: surfCurve, sr: surfRoom, c };
+  const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  const t0 = now();
+  let done = false, failed = false;
+  G.roomId = j.id; G.roomDef = ROOMS[j.id]; G.grid = j.grid; tileCv = j.cv;
+  surfCurve = j.curve; surfRoom = j.curve ? j.id : null; c = j.ctx;
+  try {
+    do {
+      const ts = now();
+      if (j.it.next().done) { done = true; break; }
+      // the longest single step is the floor on how finely a bake can be
+      // spread; kept (with its pass) so a harness can see which one it is
+      const st = now() - ts;
+      if (st > TILE_STATS.stepMax) { TILE_STATS.stepMax = st; TILE_STATS.stepPass = TILE_STATS.pass + '@' + j.id; }
+    } while (now() - t0 < ms);
+  } catch (e) {
+    failed = true;
+  } finally {
+    if (surfRoom === j.id && surfCurve) j.curve = surfCurve;
+    G.roomId = sv.id; G.roomDef = sv.def; G.grid = sv.grid; tileCv = sv.cv;
+    surfCurve = sv.sc; surfRoom = sv.sr; c = sv.c;
+  }
+  const spent = now() - t0;
+  if (ms !== Infinity && spent > TILE_STATS.sliceMax) TILE_STATS.sliceMax = spent;
+  if (failed) { tileJobDrop(); return; }
+  if (done) {
+    const e = tileStore.get(j.id);
+    if (e && e.cv === j.cv) { e.ready = true; e.sig = j.sig; e.curve = j.curve; }
+    TILE_STATS.bakes++; TILE_STATS.pre++;
+    tileJob = null;
+  }
+}
+// The rooms one door away, nearest door first — the order she is likely to
+// need them in. Distance is to the edge she would leave by.
+function tileNeighbours() {
+  const ex = (G.roomDef && G.roomDef.exits) || {};
+  const W = G.roomDef.w * TILE, H = G.roomDef.h * TILE;
+  const px = player ? player.x + player.w / 2 : W / 2, py = player ? player.y + player.h / 2 : H / 2;
+  const out = [];
+  for (const side in ex) {
+    let to = ex[side];
+    if (to && typeof to === 'object') to = to.to;
+    if (!to || !ROOMS[to] || to === G.roomId) continue;
+    const d = side === 'L' ? px : side === 'R' ? W - px : side === 'T' ? py : H - py;
+    const had = out.find(q => q[0] === to);
+    if (had) had[1] = Math.min(had[1], d); else out.push([to, d]);
+  }
+  out.sort((a, b) => a[1] - b[1]);
+  return out.map(q => q[0]);
+}
+// BAKING AHEAD, IN THE GAPS. The work goes where the frame is not: the
+// browser's idle callback runs after a frame has finished and says how long
+// remains before the next one, so a slice there costs the game nothing it was
+// using. Only a machine that never goes idle — every frame spent — falls back
+// to a small fixed slice inside the loop, because a neighbour that never gets
+// baked is a hitch postponed to the doorway.
+//
+// It stands aside for everything that owns the frame more than a room she has
+// not reached: a crossing in progress, a guardian fight, the live room's own
+// bake, and the screens with no room behind them.
+function tilePrebakeOk() {
+  if (!G.roomDef || !G.grid || !player || G.trans || tileDirty) return false;
+  if (G.state === 'CUT' || G.state === 'CINE' || G.state === 'MENU' || G.state === 'LANGSEL') return false;
+  if (typeof bossActive === 'function' && bossActive()) return false;
+  return true;
+}
+let tileIdleArmed = false, tileIdleSeen = 0;
+function tileIdle(dl) {
+  tileIdleArmed = false;
+  tileIdleSeen = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  if (!tileJob || !tilePrebakeOk()) return;
+  const left = dl && typeof dl.timeRemaining === 'function' ? dl.timeRemaining() : 0;
+  if (left > 3) tileJobSlice(Math.min(left - 2, 12));
+  tileIdleArm();
+}
+function tileIdleArm() {
+  if (tileIdleArmed || !tileJob || typeof requestIdleCallback !== 'function') return;
+  tileIdleArmed = true;
+  try { requestIdleCallback(tileIdle); } catch (e) { tileIdleArmed = false; }
+}
+// Called once per frame from the main loop: choose what to bake, and slice it
+// here only when the idle callback has been starved.
+function tilePrebakeTick() {
+  if (!tilePrebakeOk()) return;
+  const cap = tileCap();
+  const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  // which room to bake is a small question asked a few times a second, not
+  // every frame — the answer changes when she walks, not when a frame passes
+  if (!tileJob && now - tilePickT > 200) {
+    tilePickT = now;
+    const want = tileNeighbours().slice(0, cap.n - 1);
+    tilePickId = null;
+    for (const id of want) {
+      if (tileFresh(id)) continue;
+      // the slab first: a bake made without it is thrown away the moment it
+      // lands (rockBakeReady's lesson) — ask for it and come back
+      const rk = !(typeof isHero === 'function' && isHero()) && ROCK_ART[ROOMS[id].zone];
+      if (rk && typeof MEDIA_SRC !== 'undefined' && MEDIA_SRC.images[rk] && !(typeof MEDIA_LOW !== 'undefined' && MEDIA_LOW[rk] === 3)) {
+        if (typeof mediaFetch === 'function') mediaFetch(rk);
+        continue;
+      }
+      tilePickId = id; break;
+    }
+    if (tilePickId) {
+      const id = tilePickId, def = ROOMS[id];
+      // room for it, without ever throwing out the room she is in or the
+      // rooms she is nearer to than this one
+      const keep = want.slice(0, want.indexOf(id) + 1);
+      const fresh = !tileStore.has(id);
+      const ent = tileEntry(id, def.w * TILE, def.h * TILE);
+      if (!tileEvict(keep)) {
+        if (fresh) { try { ent.cv.width = 0; ent.cv.height = 0; } catch (e) {} tileStore.delete(id); }
+        return;
+      }
+      ent.ready = false;
+      // the generator is created here and first RUN inside tileJobSlice, in
+      // the neighbour's clothes, so its very first reads are the neighbour's
+      tileJob = { id, cv: ent.cv, ctx: ent.cv.getContext('2d'), grid: buildRoom(id), curve: null,
+        sig: tileSig(id), it: tileBakeSteps(PAL[def.zone]), born: now };
+    }
+  }
+  if (!tileJob) return;
+  tileIdleArm();
+  const idleOk = typeof requestIdleCallback === 'function' && now - Math.max(tileIdleSeen, tileJob.born) < 400;
+  if (!idleOk) tileJobSlice(cap.ms);
 }
 // 1D fractal value noise (fBm) on the hash2 lattice: three octaves of
 // smoothly interpolated values. This exists because of a measured lesson —
@@ -6770,7 +7452,7 @@ function groundColumnAt(worldX) {
   return [y, t];
 }
 
-function slabSilhouettePass(x) {
+function* slabSilhouetteSteps(x) {
   const g = G.grid;
   if (!g || !g.length || !g[0]) return;
   const Wt = g[0].length, Ht = g.length;
@@ -6786,6 +7468,7 @@ function slabSilhouettePass(x) {
 
   // ---- UNDERSIDES: hang material off every exposed bottom ------------------
   for (let ty = 0; ty < Ht; ty++) {
+    yield;
     let tx = 0;
     while (tx < Wt) {
       if (!(sol(tx, ty) && !sol(tx, ty + 1))) { tx++; continue; }
@@ -6813,6 +7496,7 @@ function slabSilhouettePass(x) {
 
   // ---- VERTICAL FACES: add an irregular skin so the wall is not a ruler ----
   for (let tx = 0; tx < Wt; tx++) {
+    yield;
     for (const dir of [-1, 1]) {
       let ty = 0;
       while (ty < Ht) {
@@ -6838,8 +7522,9 @@ function slabSilhouettePass(x) {
     }
   }
 }
+function slabSilhouettePass(x) { for (const _ of slabSilhouetteSteps(x)) { /* drain */ } }
 
-function surfaceCurvePass(x) {
+function* surfaceCurveSteps(x) {
   const cur = surfaceCurve();
   if (!cur) return;
   const g = G.grid, Wt = g[0].length, Ht = g.length;
@@ -6906,6 +7591,7 @@ function surfaceCurvePass(x) {
   const OVER = 16;
 
   for (const r of regions) {
+    yield;
     if (r.sg > 0) {
       // EXTEND THE REAL MATERIAL UPWARD, do not repaint a lookalike. Filling
       // the added band with P.solid + P.dark + a rock overlay produced a tone
@@ -7014,8 +7700,9 @@ function surfaceCurvePass(x) {
   strokeCurve(IP ? IP.join : P.dark, 7, 6, IP ? 0.26 : 0.34);   // the shadow step
   strokeCurve(IP ? IP.lit : G.roomDef.cave ? '#c5bcb0' : P.edge, 2, 1, IP ? 0.40 : 0.8);
 }
+function surfaceCurvePass(x) { for (const _ of surfaceCurveSteps(x)) { /* drain */ } }
 
-function organicSilhouettePass(x) {
+function* organicSilhouetteSteps(x) {
   const g = G.grid;
   if (!g || !g.length || !g[0]) return;
   const Ht = g.length, Wt = g[0].length;
@@ -7041,6 +7728,7 @@ function organicSilhouettePass(x) {
   const mid = (a, b) => hash2(a * 1.9 + 71, b * 1.9 + 13) * R;
 
   for (let ty = 0; ty < Ht; ty++) {
+    yield;
     for (let tx = 0; tx < Wt; tx++) {
       if (!sol(tx, ty)) continue;
       const up = !sol(tx, ty - 1), dn = !sol(tx, ty + 1);
@@ -7073,7 +7761,8 @@ function organicSilhouettePass(x) {
     }
   }
 }
-function edgeGrammarPass(x) {
+function organicSilhouettePass(x) { for (const _ of organicSilhouetteSteps(x)) { /* drain */ } }
+function* edgeGrammarSteps(x) {
   const g = buildRoom(G.roomId);
   const TH = typeof terrainTheme === 'function' ? terrainTheme() : { rough: 10, lip: 4, skirt: 16, crack: 0.3, edge: 'glow', hang: 'plates' };
   const Wt = G.roomDef.w, Ht = G.roomDef.h;
@@ -7088,6 +7777,7 @@ function edgeGrammarPass(x) {
 
   // ---- 1. THE LIP: a bright, irregular crest on every top face -------------
   for (let ty = 0; ty < Ht; ty++) {
+    yield;
     for (let tx = 0; tx < Wt; tx++) {
       if (!solid(tx, ty) || solid(tx, ty - 1)) continue;
       const y0 = ty * TILE;
@@ -7217,6 +7907,7 @@ function edgeGrammarPass(x) {
   // hanging in mid-air needs something holding it. A skirt that drips and
   // trails reads as structure; a flat underside reads as a floating slab.
   for (let ty = 0; ty < Ht; ty++) {
+    yield;
     for (let tx = 0; tx < Wt; tx++) {
       if (!solid(tx, ty) || solid(tx, ty + 1)) continue;
       const yb = (ty + 1) * TILE;
@@ -7281,6 +7972,7 @@ function edgeGrammarPass(x) {
   // reads as dirt rather than as material — the target is to break the
   // correlation, not to decorate.
   for (let ty = 0; ty < Ht; ty++) {
+    yield;
     for (let tx = 0; tx < Wt; tx++) {
       if (!solid(tx, ty)) continue;
       // one variant per tile, four of them, plus a per-tile value offset
@@ -7351,6 +8043,7 @@ function edgeGrammarPass(x) {
   // straight. Left faces are lit, right faces get the dark version — one
   // world light direction, per the sacred-ground-plane law.
   for (let ty = 0; ty < Ht; ty++) {
+    yield;
     for (let tx = 0; tx < Wt; tx++) {
       if (!solid(tx, ty)) continue;
       for (const [side, lit] of [[-1, true], [1, false]]) {
@@ -7385,7 +8078,8 @@ function edgeGrammarPass(x) {
   }
   x.putImageData(img, 0, 0);
 }
-function erodeCaveEdges(x) {
+function edgeGrammarPass(x) { for (const _ of edgeGrammarSteps(x)) { /* drain */ } }
+function* erodeCaveEdgesSteps(x) {
   const g = buildRoom(G.roomId);
   const Wt = G.roomDef.w, Ht = G.roomDef.h;
   // NEVER READ THE CANVAS YOU ARE DRAWING ON. The outward lumps below copy a
@@ -7413,6 +8107,7 @@ function erodeCaveEdges(x) {
   };
   // outward lumps (they copy clean face pixels), erosion second
   for (let ty = 0; ty < Ht; ty++) for (let tx = 0; tx < Wt; tx++) {
+    if (!tx) yield;
     if (!solid(tx, ty)) continue;
     const X = tx * TILE, Y = ty * TILE;
     // [edge, air-check, lump src rect + dst offset]
@@ -7456,6 +8151,7 @@ function erodeCaveEdges(x) {
   x.globalCompositeOperation = 'source-over';
   x.fillStyle = '#000';
   for (let ty = 0; ty < Ht; ty++) for (let tx = 0; tx < Wt; tx++) {
+    if (!tx) yield;
     if (!solid(tx, ty)) continue;
     const X = tx * TILE, Y = ty * TILE;
     const bite = (ex, ey, big) => {
@@ -7545,6 +8241,7 @@ function erodeCaveEdges(x) {
   // safe for gameplay, and it is why no collider changes.
   const THr = (typeof terrainTheme === 'function' ? terrainTheme() : { rough: 8 }).rough;
   for (let ty = 0; ty < Ht; ty++) for (let tx = 0; tx < Wt; tx++) {
+    if (!tx) yield;
     if (!solid(tx, ty) || solid(tx, ty - 1)) continue;
     const X = tx * TILE, Y = ty * TILE;
     for (let sx = 0; sx < TILE; sx += 2) {
@@ -7567,6 +8264,7 @@ function erodeCaveEdges(x) {
     }
   }
 }
+function erodeCaveEdges(x) { for (const _ of erodeCaveEdgesSteps(x)) { /* drain */ } }
 // ===========================================================================
 // THE LAIR. Every guardian was already asleep when you walked in — `dorm` poses
 // and per-boss wake roars — but it was asleep on the FLOOR, in an empty room,
@@ -12975,6 +13673,7 @@ function drawWorldFrame() {
   c.save();
   if(G.roomDef.cave){c.shadowColor='rgba(4,5,10,0.8)';c.shadowBlur=9;c.shadowOffsetY=4;}
   c.drawImage(tileCv, 0, 0);
+  drawVLinkArt();                   // the room above / below, where it really is
   c.restore();
   drawInteriorFloor();              // a painting-room walks on the painting's floor
   drawFrontier();                   // the next kingdom, seen from the last room
@@ -16515,6 +17214,8 @@ function mainLoop(tms) {
   // owns the decision now, and it still refuses during a transition, a boss
   // fight, and a film that is not playing cleanly.
   if (typeof preloadTick === 'function') { try { preloadTick(); } catch (e) {} }
+  // ...and one slice of baking the next room's floor ahead of her (TILE CACHE)
+  if (typeof tilePrebakeTick === 'function') { try { tilePrebakeTick(); } catch (e) {} }
   // the music steps back while a trial is open: the trial's notes are the
   // interface, and they lose to a stream at full volume (audio.js MUS_DUCK)
   if (typeof MUS_DUCK !== 'undefined') MUS_DUCK = G.state === 'TRIAL' ? 0.3 : 1;
