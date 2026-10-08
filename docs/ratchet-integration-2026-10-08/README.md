@@ -43,3 +43,12 @@ no room or page errors. The connected chapter test completed rescue, quarry,
 forge, first Sage and saved reward recovery. Extracted job evidence is retained
 in actions-37744414667.log; the full workflow artifact is linked from that run.
 A separate real-pointer/page-reload repair harness is added for the final check.
+
+## Browser-discovered cancellation fix
+
+Run 37744890462 caught loss of keyboard focus during power-up: disabling the
+focused power button could move focus outside the dialog and prevent Escape
+cancellation. Keep Close enabled, focus it when power-up starts, and process
+controller Back/Pause before advancing the boot timer. The browser test now
+asserts PLAY immediately after Escape, and the lifecycle test checks boot
+focus and controller cancellation. This fix is subject to the final CI run.

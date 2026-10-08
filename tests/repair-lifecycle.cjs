@@ -89,4 +89,8 @@ assert.equal(manifest.filter(n=>n==='story-repair').length,1);assert(manifest.in
 const dev=fs.readFileSync('dev.html','utf8');assert(dev.indexOf('js/story-repair.js')<dev.indexOf('js/game.js'));
 assert.match(fn('update'),/updateRepair\(dt\)/);assert.match(fn('loadRoom'),/repairClose\(false\)/);
 reset();open();ctx.repairClose(false);assert.equal(ctx.G.state,'PLAY','room/restart close cannot strand REPAIR');
+reset();open();for(let i=0;i<4;i++)place(i);ctx.repairPower();
+assert.equal(document.activeElement,run("repairSession.root.querySelector('[data-repair-close]')"),'boot retains keyboard focus on enabled Close');
+ctx.inP=k=>k==='BACK';ctx.updateRepair(.2);ctx.inP=()=>false;
+assert.equal(ctx.G.state,'PLAY');assert(!ctx.npcLive(npc),'controller Back cancels boot without rewarding');
 console.log('PASS repair lifecycle: ordered puzzle, wrong inputs, prefix reload, boot interruption, once-only NPC rewards, forge quest, stale room/save events, lost cell, menu preservation, visibility cleanup, orphan recovery, legacy save and both loading paths');

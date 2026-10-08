@@ -134,6 +134,9 @@ function repairPower() {
   if(!repairValid(s)){repairClose();return;}
   if(s.step!==4 || s.boot)return;
   s.boot=.001;sfx('powerUp');repairRender(t('repair_boot'));
+  // Disabling the focused power button can move keyboard focus to <body>.
+  // Keep Escape inside the modal and make every input's cancellation agree.
+  s.root.querySelector('[data-repair-close]').focus();
 }
 function repairRender(message) {
   const s=repairSession;if(!s)return;
@@ -146,7 +149,7 @@ function repairRender(message) {
     if(i===0&&s.step>0&&!q.querySelector('img')){const im=b.querySelector('img').cloneNode();q.prepend(im);}
   }
   s.root.querySelector('.repair-power').disabled=s.step!==4||!!s.boot;
-  s.root.querySelector('[data-repair-close]').disabled=!!s.boot;
+  s.root.querySelector('[data-repair-close]').disabled=false;
   const svg=s.root.querySelector('svg');
   svg.innerHTML=`<path d="M380 172 L470 172 L470 92 L570 92 M380 172 L470 172 L470 292 L570 292 M840 92 L910 92 L910 192 L720 192 M840 292 L910 292 L910 192" fill="none" stroke="#465957" stroke-width="8"/>`+
     (s.step>1?'<path d="M570 92 C650 42 730 42 840 92" fill="none" stroke="#f3b166" stroke-width="9"/>':'')+
@@ -157,6 +160,7 @@ function updateRepair(dt) {
   const s=repairSession;
   if(!s){if(G.state==='REPAIR')G.state='PLAY';return;}
   if(!repairValid(s)){repairClose();return;}
+  if(inP('BACK')||inP('PAUSE')){repairClose();return;}
   s.t+=dt;
   if(s.boot){
     s.boot+=dt;
@@ -164,8 +168,7 @@ function updateRepair(dt) {
     if(s.boot>=1.3){const done=s.onComplete;repairClose();done();}
     return;
   }
-  if(inP('BACK')||inP('PAUSE'))repairClose();
-  else if(inP('RIGHT')||inP('DOWN'))repairFocus(1);
+  if(inP('RIGHT')||inP('DOWN'))repairFocus(1);
   else if(inP('LEFT')||inP('UP'))repairFocus(-1);
   else if(inP('OK')||inP('INT'))document.activeElement?.click();
 }

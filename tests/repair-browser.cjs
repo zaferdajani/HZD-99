@@ -39,6 +39,7 @@ const {chromium}=require('playwright');
   await connect('negative','minus');await connect('bridge','relay');
   await p.locator('.repair-power').click();await p.evaluate(()=>update(.5));await p.keyboard.press('Escape');
   assert.equal((await state()).live,false);assert.equal((await state()).cell,1);
+  assert.equal((await state()).state,'PLAY','Escape cancels power-up and releases gameplay');
   await open();assert.equal((await state()).step,4);await p.locator('.repair-power').click();
   await p.evaluate(()=>{for(let i=0;i<90&&G.state==='REPAIR';i++)update(1/60);});
   let s=await state();assert.equal(s.live,true);assert.equal(s.cell,0);assert.equal(s.spare,1);assert.equal(s.kit,1);assert.equal(s.state,'DIALOG');
