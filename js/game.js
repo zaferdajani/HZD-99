@@ -7125,13 +7125,15 @@ let tileIdleArmed = false, tileIdleSeen = 0;
 function tileIdle(dl) {
   tileIdleArmed = false;
   tileIdleSeen = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-  if (!tileJob || !tilePrebakeOk()) return;
+  if (!(tileJob || artJob) || !tilePrebakeOk()) return;
   const left = dl && typeof dl.timeRemaining === 'function' ? dl.timeRemaining() : 0;
-  if (left > 3) tileJobSlice(Math.min(left - 2, 12));
+  // the floor first (the room cannot be drawn without it), then the creatures'
+  // art (js/atlas.js artWarm) — the same gaps serve both
+  if (left > 3) { if (tileJob) tileJobSlice(Math.min(left - 2, 12)); else artWarmSlice(Math.min(left - 2, 12)); }
   tileIdleArm();
 }
 function tileIdleArm() {
-  if (tileIdleArmed || !tileJob || typeof requestIdleCallback !== 'function') return;
+  if (tileIdleArmed || !(tileJob || artJob) || typeof requestIdleCallback !== 'function') return;
   tileIdleArmed = true;
   try { requestIdleCallback(tileIdle); } catch (e) { tileIdleArmed = false; }
 }
@@ -7176,11 +7178,19 @@ function tilePrebakeTick() {
         sig: tileSig(id), it: tileBakeSteps(PAL[def.zone]), born: now };
     }
   }
-  if (!tileJob) return;
+  // ...and when no floor needs baking, the art of the creatures behind the
+  // nearest doors (then this room's, for anything not yet on screen)
+  if (!tileJob && !artJob && now - artPickT > 200) {
+    artPickT = now;
+    if (artWarmPick(tileNeighbours().slice(0, cap.n - 1).concat([G.roomId]))) artJob.born = now;
+  }
+  if (!tileJob && !artJob) return;
   tileIdleArm();
-  const idleOk = typeof requestIdleCallback === 'function' && now - Math.max(tileIdleSeen, tileJob.born) < 400;
-  if (!idleOk) tileJobSlice(cap.ms);
+  const born = tileJob ? tileJob.born : artJob.born;
+  const idleOk = typeof requestIdleCallback === 'function' && now - Math.max(tileIdleSeen, born || 0) < 400;
+  if (!idleOk) { if (tileJob) tileJobSlice(cap.ms); else artWarmSlice(cap.ms); }
 }
+let artPickT = 0;
 // 1D fractal value noise (fBm) on the hash2 lattice: three octaves of
 // smoothly interpolated values. This exists because of a measured lesson —
 // the crest below first varied its height with PER-PIXEL hash noise, and the

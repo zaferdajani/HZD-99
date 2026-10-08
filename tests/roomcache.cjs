@@ -22,6 +22,13 @@
 //      allows, the phone tier included.
 //   6. THE SAVE IS NOT ON THE CROSSING FRAME, and it is never lost: written in
 //      the next quiet moment, and at once when the page is being hidden.
+//   7. MEETING A MACHINE COSTS NOTHING AT THE DOOR. The first creature drawn
+//      from a sheet used to pay for the sheet's one-off pixel pass (the
+//      roster's is ~0.9 s here) on that frame — usually the crossing frame.
+//      With the art of the room one door away readied in the idle prebake
+//      (js/atlas.js artWarm), crossing into a room whose machines have never
+//      been drawn spends no time in that pass on the crossing frame, and the
+//      sheet readied in slices is pixel-identical to the on-demand one.
 //
 //   node tests/roomcache.cjs      (needs the repo served on :8220)
 const { chromium } = require('playwright');
@@ -50,8 +57,14 @@ const check = (name, ok, detail) => {
     startGame(sv);
     // the slabs are art, and art arriving is its own (separately tested)
     // story: have the two kingdoms walked here before the walk starts
-    for (const z of ['A', 'B']) mediaFetch(ROCK_ART[z], true);
-    for (let i = 0; i < 80 && !(MEDIA_LOW[ROCK_ART.A] === 3 && MEDIA_LOW[ROCK_ART.B] === 3); i++) await wait(100);
+    // ...and the other sheets a bake is made of: any of them landing mid-walk
+    // rightly repaints the room she is in (media.js), which is the art's
+    // story, not the doorway's
+    const bakeArt = [ROCK_ART.A, ROCK_ART.B, 'platforms', 'strataRubble', 'strataIceB', 'strataLava']
+      .filter(k => MEDIA_SRC.images[k]);
+    for (const k of bakeArt) mediaFetch(k, true);
+    const landed = (k) => MEDIA_RAW[k] && MEDIA_LOW[k] !== 1 && MEDIA_LOW[k] !== 2;
+    for (let i = 0; i < 100 && !bakeArt.every(landed); i++) await wait(100);
     const quiet = () => {
       if (G.state !== 'PLAY') { G.dialog = null; G.state = 'PLAY'; }
       G.impact = null; G.meet = null; G.lesson = null; G.wake = null; G.bossEntry = null;
@@ -244,6 +257,73 @@ const check = (name, ok, detail) => {
         out.save = { sync, later, after, onHide, room: stored && stored.visited && stored.visited.A2 ? 'A2 recorded' : 'A2 missing' };
       } finally { ls.setItem = orig; }
     }
+    // ---- 7. meeting a machine ------------------------------------------------------
+    {
+      const sheetHash = (cvx) => {
+        const w = cvx.width, h = cvx.height, x = cvx.getContext('2d');
+        let hh = 2166136261;
+        for (let y0 = 0; y0 < h; y0 += 512) {
+          const d = x.getImageData(0, y0, w, Math.min(512, h - y0)).data;
+          for (let i = 0; i < d.length; i += 13) hh = Math.imul(hh ^ d[i], 16777619) >>> 0;
+        }
+        return hh;
+      };
+      const forget = () => {
+        delete ATLAS_PROC.roster; delete POP_ART['sheet:roster']; delete POP_ART['sheet:npcs'];
+        for (const k in ATLAS_RUN) delete ATLAS_RUN[k];
+        for (const k in POP_RUN) delete POP_RUN[k];
+        artJob = null;
+      };
+      for (const k of ['roster', 'npcs']) mediaFetch(k);
+      for (let i = 0; i < 80 && !(MEDIA_RAW.roster && MEDIA_LOW.roster !== 2 && MEDIA_RAW.npcs && MEDIA_LOW.npcs !== 2); i++) await wait(100);
+      // (a) the same picture, on demand and in slices
+      const prebake2 = window.tilePrebakeTick; window.tilePrebakeTick = () => {};
+      forget();
+      const onDemand = { roster: sheetHash(sheetOf('roster', 8, 11, true)), npcs: sheetHash(sheetOf('npcs', 6, 8, false)),
+        proc: sheetHash(ATLAS_PROC.roster) };
+      forget();
+      let slices = 0;
+      for (const u of [{ k: 'sheet:roster', A: ATLAS }, { k: 'sheet:npcs', A: ATLAS2 }]) {
+        artJob = { u, it: artWarmSteps(u) };
+        while (artJob && slices < 20000) { artWarmSlice(1); slices++; }
+      }
+      // read back through the same accessor the draw uses — now from the caches
+      const ahead = { roster: sheetHash(sheetOf('roster', 8, 11, true)), npcs: sheetHash(sheetOf('npcs', 6, 8, false)),
+        proc: sheetHash(ATLAS_PROC.roster) };
+      out.meetSame = { slices, same: onDemand.roster === ahead.roster && onDemand.npcs === ahead.npcs && onDemand.proc === ahead.proc };
+      window.tilePrebakeTick = prebake2;
+      // (b) the crossing: B2's own machines are kept off screen so the roster
+      // is NOT drawn there; B7's turret, flier and blob are drawn the frame
+      // she arrives — the first roster creatures of the session
+      forget();
+      loadRoom('B2'); quiet();
+      const g = G.grid; let cx = 0;
+      for (let x = 1; x < G.roomDef.w - 1; x++) if (g[0][x] === '.') { cx = x + 1; break; }
+      const place = () => { player.x = cx * TILE + 4; player.y = 2 * TILE + 8; player.vx = 0; player.vy = 0; player.on = false; };
+      let waited = 0;
+      for (let i = 0; i < 300; i++) {
+        place(); quiet(); await raf(); waited = i + 1;
+        if (i > 20 && tileFresh('B7') && artWarmUnits('B7').every(artWarmDone)) break;
+      }
+      const readyBefore = artWarmUnits('B7').every(artWarmDone);
+      const t = { proc: 0, pop: 0 };
+      const wrapT = (n, slot) => { const f = window[n]; window[n] = function (...a) { const t0 = performance.now(); try { return f.apply(this, a); } finally { t[slot] += performance.now() - t0; } }; return f; };
+      const oProc = wrapT('processSheet', 'proc'), oPop = wrapT('popArt', 'pop');
+      player.vy = -760; keys[KEYB.JUMP[0]] = 1;
+      let cost = null, procT = null, drawn = 0, tPrev = performance.now();
+      for (let i = 0; i < 120; i++) {
+        if (G.state !== 'PLAY') { G.dialog = null; G.state = 'PLAY'; }
+        G.impact = null; G.meet = null; G.lesson = null; player.iT = 99;
+        if (G.roomId === 'B2') { G.enemies = []; }
+        t.proc = 0; t.pop = 0;
+        await raf();
+        const now = performance.now(), d = now - tPrev; tPrev = now;
+        if (G.roomId === 'B7') { cost = d; procT = t.proc + t.pop; drawn = G.enemies.length; break; }
+      }
+      keys[KEYB.JUMP[0]] = 0;
+      window.processSheet = oProc; window.popArt = oPop;
+      out.meet = { waited, readyBefore, cost, procT, drawn, stats: JSON.stringify(ART_STATS) };
+    }
     out.stats = JSON.stringify(TILE_STATS);
     out.median = out.frames.slice().sort((a, b) => a - b)[Math.floor(out.frames.length / 2)];
     return out;
@@ -280,6 +360,14 @@ const check = (name, ok, detail) => {
   check('...it is written in the next quiet moment', r.save.later >= 1 && r.save.after < 2500, r.save.later + ' write(s) after ' + r.save.after + ' ms');
   check('...and at once when the page is hidden', r.save.onHide >= 1 && r.save.room === 'A2 recorded', r.save.onHide + ' write on pagehide, ' + r.save.room);
   console.log('  ..   ' + r.stats);
+  check('a sheet readied in slices is the sheet drawn on demand', r.meetSame.same,
+    r.meetSame.slices + ' slices for the roster and the npcs sheet, ' + (r.meetSame.same ? 'identical' : 'DIFFERENT pixels'));
+  check('the creatures one door away are readied before she gets there', r.meet.readyBefore,
+    'ready after ' + r.meet.waited + ' frames at the door');
+  check('...and meeting them costs the crossing frame no sheet processing', r.meet.procT != null && r.meet.procT < 5 && r.meet.drawn > 0,
+    (r.meet.procT == null ? 'never crossed' : r.meet.procT.toFixed(1) + ' ms in the sheet passes on the crossing frame, '
+      + r.meet.drawn + ' machines there, frame ' + Math.round(r.meet.cost) + ' ms'));
+  console.log('  ..   ' + r.meet.stats);
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
 
   await browser.close();

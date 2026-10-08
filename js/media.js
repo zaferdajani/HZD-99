@@ -990,7 +990,19 @@ function bgLift(key, src, gamma) {
   return out;
 }
 
+// ...as steps too (see processSheetSteps in atlas.js): the lifted sheets read
+// back and rewrite every pixel, so the idle prebake runs them in bands, and an
+// on-demand call finishes a paused one instead of starting over.
+const POP_RUN = {};
 function popArt(key, src, lift) {
+  if (POP_ART[key] !== undefined) return POP_ART[key];
+  const run = POP_RUN[key];
+  delete POP_RUN[key];
+  const it = run || popArtSteps(key, src, lift);
+  let r; do { r = it.next(); } while (!r.done);
+  return POP_ART[key] !== undefined ? POP_ART[key] : (r.value || null);
+}
+function* popArtSteps(key, src, lift) {
   if (POP_ART[key] !== undefined) return POP_ART[key];
   const im = src || MEDIA_RAW[key];
   if (!im || !im.naturalWidth) return null;               // not here yet; ask again
@@ -1011,16 +1023,22 @@ function popArt(key, src, lift) {
     if (lift) {
       const lut = new Uint8ClampedArray(256);
       for (let i = 0; i < 256; i++) lut[i] = 255 * Math.pow(i / 255, lift);
-      const id = x.getImageData(0, 0, cv.width, cv.height), d = id.data;
-      for (let i = 0; i < d.length; i += 4) {
-        if (!d[i + 3]) continue;
-        d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
+      // a per-pixel LUT is the same answer in bands as in one piece
+      for (let y0 = 0; y0 < cv.height; y0 += 256) {
+        yield;
+        const bh = Math.min(256, cv.height - y0);
+        const id = x.getImageData(0, y0, cv.width, bh), d = id.data;
+        for (let i = 0; i < d.length; i += 4) {
+          if (!d[i + 3]) continue;
+          d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
+        }
+        x.putImageData(id, 0, y0);
       }
-      x.putImageData(id, 0, 0);
     }
     cv.naturalWidth = cv.width; cv.naturalHeight = cv.height;
     out = cv;
   } catch (e) {}                                           // tainted: ship it raw
+  if (!src && MEDIA_RAW[key] !== im) return null;          // replaced while it ran
   POP_ART[key] = out;
   return out;
 }
