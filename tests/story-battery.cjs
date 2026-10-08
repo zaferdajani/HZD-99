@@ -26,6 +26,16 @@ const {chromium}=require('playwright');
    stage('A1');const servo=G.statics.find(s=>s.extra==='servo');doInteract(servo);finish();
    check('Ratchet battery cannot be spent on Servo',!npcLive(servo)&&invCount('ratchetCell')===1);
    stage('A0B');ratchet=G.statics.find(s=>s.extra==='ratchet');doInteract(ratchet);finish();
+
+      // Complete the actual repair controls; dialogue alone must not wake him.
+      if (G.state !== 'REPAIR') throw new Error('Ratchet repair did not open');
+      for (const [piece,target] of [['cell','socket'],['positive','plus'],['negative','minus'],['bridge','relay']]) {
+        document.querySelector('[data-piece="'+piece+'"]').click();
+        document.querySelector('[data-target="'+target+'"]').click();
+      }
+      document.querySelector('.repair-power').click();
+      for (let i=0;i<90 && G.state==='REPAIR';i++) update(1/60);
+   finish();
    check('Ratchet cell installed, distinct spare granted',npcLive(ratchet)&&invCount('ratchetCell')===0&&invCount('batt')===1);
    G.state='PLAY';doInteract(ratchet);finish();check('spare not duplicated',invCount('batt')===1);
    stage('A1');doInteract(G.statics.find(s=>s.extra==='servo'));finish();
@@ -38,3 +48,4 @@ const {chromium}=require('playwright');
   assert.deepEqual(errors,[]);console.log('PASS',result);
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});
+

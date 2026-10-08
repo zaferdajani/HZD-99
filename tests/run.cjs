@@ -36,6 +36,7 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
   ['comic-rewards', 'saved milestone slideshows, updates, accessibility and failure recovery'],
@@ -206,3 +207,4 @@ for (const [name, what, opt] of run) {
 console.log('\n' + (failed ? failed + ' harness(es) failed' : 'all ' + run.length + ' harnesses ran')
   + (pending ? ' (' + pending + ' pending, see suite notes)' : ''));
 process.exitCode = failed ? 1 : 0;
+

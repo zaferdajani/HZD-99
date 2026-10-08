@@ -77,6 +77,15 @@ const { chromium } = require('playwright');
     // walking the dialog to its end is the player's implicit yes
     const end = G.dialog && G.dialog.onEnd;
     if (end) end();
+
+      // Complete the actual repair controls; dialogue alone must not wake him.
+      if (G.state !== 'REPAIR') throw new Error('Ratchet repair did not open');
+      for (const [piece,target] of [['cell','socket'],['positive','plus'],['negative','minus'],['bridge','relay']]) {
+        document.querySelector('[data-piece="'+piece+'"]').click();
+        document.querySelector('[data-target="'+target+'"]').click();
+      }
+      document.querySelector('.repair-power').click();
+      for (let i=0;i<90 && G.state==='REPAIR';i++) update(1/60);
     const after = { live: npcLive(sp), batt: invCount(cell), kit: invCount('kit') };
     G.dialog = null; G.state = 'PLAY';
     // ...and a second hand-off must not be possible: it is live now
@@ -248,3 +257,4 @@ const { chromium } = require('playwright');
   if (fails.length) { console.log('\nFAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
   console.log('\nOK — one cell, one machine, and the shop waits for the lion');
 })().catch(e => { console.error(e); process.exit(1); });
+
