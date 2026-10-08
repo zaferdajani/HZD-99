@@ -26,7 +26,7 @@
 //
 // Three defects were found and fixed before it was committed, each by running
 // it rather than reading it; tests/mobile-platform.cjs holds all three as
-// regressions. See tools/mobile-platform/CHANGES.md.
+// regressions. See docs/MOBILE_PLATFORM.md.
 // ===========================================================================
 "use strict";
 var MobilePlatform = (() => {
