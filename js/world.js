@@ -693,7 +693,7 @@ const ROOMS = {
   // ---- THE SHAFT: straight down, in the dark, for the errand nobody takes.
   A7: { zone: 'A', w: 40, h: 32, exits: { T: 'A5' },
     ents: [['blob', 6, 30, 0], ['blob', 15, 30, 0], ['turret', 19, 24],
-           ['scrap', 10, 30, 45], ['secret', 3, 30, 'sigil3'], ['scrap', 34, 28, 30]],
+           ['scrap', 10, 30, 45], ['scrap', 3, 30, 40], ['scrap', 34, 28, 30]],
     build(g) {
       frame(g);
       rect(g, 9, 0, 12, 0, '.');              // the drop in from A5

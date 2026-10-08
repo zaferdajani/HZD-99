@@ -1586,7 +1586,8 @@ const STORY_OCT4_TEXT = {
 const STORY_ORDER_TEXT = {
   en: {
     nf_break1_road: 'NULLFANG comes along the road from his enclosure and stops. The purple goes out of him. He is looking at you, and nothing is driving it.',
-    rl_sigil3d: 'Hidden on a ledge where nobody climbs. The last seal of the old vault.',
+    rl_sigil3d: 'Hidden on a ledge in the Foundry tower. The last seal of the old vault.',
+    vault_where3: 'The third seal was carried down into the Foundry tower.',
     gate_conduits: "The conduit hatch above the camp is jammed by NULLFANG's binding. Free the lion before you climb.",
     gate_vault_side: 'This passage belongs to the sealed vault. Three sigils open it.',
     conduits_open: 'Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open.',
@@ -1674,7 +1675,8 @@ const STORY_ORDER_TEXT = {
   },
   ar: {
     nf_break1_road: 'يأتي ناب العدم على الطريق من حظيرته ويتوقف. ينطفئ البنفسجي فيه. ينظر إليك، ولا شيء يقوده.',
-    rl_sigil3d: 'مخبّأ على حافّة لا يتسلّقها أحد. آخر أختام القبو القديم.',
+    rl_sigil3d: 'مخبّأ على حافّة في برج المسبك. آخر أختام القبو القديم.',
+    vault_where3: 'حُمل الختم الثالث نزولاً إلى برج المسبك.',
     gate_conduits: 'فتحة القناة فوق المخيّم عالقة بقيد ناب العدم. حرّري الأسد قبل أن تتسلّقي.',
     gate_vault_side: 'هذا الممرّ جزء من القبو المختوم. تفتحه ثلاثة أختام.',
     conduits_open: 'فوق المخيّم انفكّت فتحة القناة. صار التسلّق إلى قنوات البيانات مفتوحًا.',
@@ -1762,7 +1764,8 @@ const STORY_ORDER_TEXT = {
   },
   tr: {
     nf_break1_road: 'NULLFANG ağılından yol boyunca gelir ve durur. Mor ondan çekilir. Sana bakıyor ve onu hiçbir şey sürmüyor.',
-    rl_sigil3d: 'Kimsenin tırmanmadığı bir çıkıntıda saklı. Eski kasanın son mührü.',
+    rl_sigil3d: 'Dökümhane kulesinde bir çıkıntıda saklı. Eski kasanın son mührü.',
+    vault_where3: 'Üçüncü mühür aşağıya, Dökümhane kulesine taşındı.',
     gate_conduits: "Kampın üstündeki kanal kapağı NULLFANG'in bağıyla sıkışmış. Tırmanmadan önce aslanı özgür bırak.",
     gate_vault_side: 'Bu geçit mühürlü kasaya ait. Üç mühür onu açar.',
     conduits_open: 'Kampın üstünde kanal kapağı açıldı. Veri Kanalları’na tırmanış artık açık.',
@@ -1850,7 +1853,8 @@ const STORY_ORDER_TEXT = {
   },
   zh: {
     nf_break1_road: 'NULLFANG沿着道路从围栏那边走来，停下了。他身上的紫光褪去。他看着你，没有任何东西在驱使他。',
-    rl_sigil3d: '藏在一处没人攀爬的岩架上。旧金库的最后一枚封印。',
+    rl_sigil3d: '藏在铸造厂高塔的一处岩架上。旧金库的最后一枚封印。',
+    vault_where3: '第三枚封印被带进了铸造厂的高塔。',
     gate_conduits: '营地上方的导管舱门被NULLFANG的束缚卡死了。先解放那头狮子，再往上爬。',
     gate_vault_side: '这条通道属于封印的金库。三枚印记才能打开它。',
     conduits_open: '营地上方的导管舱门松开了。通往数据导管的攀登之路已经打开。',
@@ -1938,7 +1942,8 @@ const STORY_ORDER_TEXT = {
   },
   ru: {
     nf_break1_road: 'NULLFANG выходит на дорогу от своего загона и останавливается. Фиолетовое уходит из него. Он смотрит на тебя, и ничто им не управляет.',
-    rl_sigil3d: 'Спрятана на уступе, куда никто не лазает. Последняя печать старого хранилища.',
+    rl_sigil3d: 'Спрятана на уступе в башне Литейной. Последняя печать старого хранилища.',
+    vault_where3: 'Третью печать унесли вниз, в башню Литейной.',
     gate_conduits: 'Люк канала над лагерем заклинило путами NULLFANG. Освободи льва, прежде чем лезть наверх.',
     gate_vault_side: 'Этот проход принадлежит запечатанному хранилищу. Его открывают три печати.',
     conduits_open: 'Над лагерем люк канала освободился. Подъём к Каналам Данных открыт.',

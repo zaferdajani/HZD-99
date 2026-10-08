@@ -377,6 +377,25 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       const a = side({ bossGlitch: 1 }), b = side({ bossGlitch: 1, vaultOpen: 1 });
       check('B5\'s east side does not walk around the three-sigil vault', !a.to && a.inside, JSON.stringify(a));
       check('...and opens with the vault', b.to === 'V1', b.to);
+      // VAULT SIGIL III lives in ONE place, the Foundry tower (owner, 2026-10-08)
+      const at3 = [];
+      for (const [id, def] of Object.entries(ROOMS))
+        for (const e of def.ents || []) if (e[0] === 'secret' && e[3] === 'sigil3') at3.push(id);
+      check('Vault Sigil III is placed once, in the Foundry tower (C1)', at3.length === 1 && at3[0] === 'C1', at3.join(','));
+      // ...and the door says where it lies to a player who walked past it
+      const knock = (relics) => {
+        fresh({ bossGlitch: 1, bossPrism: 1 }); G.save.relics = relics.slice();
+        loadRoom('B5'); G.state = 'PLAY'; G.toasts = []; G.trans = null;
+        const v = (G.statics || []).find(s => s.type === 'vault');
+        if (!v) return null;
+        doInteract(v);
+        return (G.toasts || []).map(x => x.text).join(' | ');
+      };
+      const where = t('vault_where3');
+      const miss = knock(['sigil1', 'sigil2']), held = knock(['sigil1', 'sigil3']);
+      check('the locked vault points a player missing Sigil III to the Foundry tower',
+        miss != null && miss.indexOf(where) >= 0 && held != null && held.indexOf(where) < 0,
+        'without: ' + miss + ' / with: ' + held);
     }
 
     // 4.7 ERRANDS START WHEN THEY ARE GIVEN

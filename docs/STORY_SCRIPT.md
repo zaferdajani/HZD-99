@@ -535,6 +535,10 @@ rest.
 Errand: *The gun emplacements never stood down. Quiet them and I can work.* → *Listen
 to that. Nothing. Thank you.*
 
+**Vault Sigil III** lies on a ledge in the tower (C1) — the last of the vault's three
+seals and the only one no fight or puzzle hands over. The vault in B5, refused without
+it, says so: *The third seal was carried down into the Foundry tower.*
+
 ### 4.2 The hall and the Kiln-Moth — C2, C6, C7
 The main hall (a breakable floor down to the Archives). Up: *KILN-MOTH — it came for
 the heat.* Destroyed; a Power Cell.
@@ -693,9 +697,10 @@ These are not fixed by this document. Each needs a ruling, and the game will fol
    play, only guardians (TAME) and sages (the purifier) are freed; every other machine
    is broken for scrap. If rank-and-file machines are to be freed, that is a mechanic
    that does not exist yet.
-6. **Vault Sigil III is placed twice** (`js/world.js`: A7, the meadow shaft, and C1, the
-   Foundry tower). Its card no longer names a kingdom, so the text is true either way;
-   which placement stays is a world decision.
+6. ~~**Vault Sigil III is placed twice**~~ — **resolved (owner, 2026-10-08): it stays in
+   C1, the Foundry tower.** A7's copy is gone (the shaft keeps a scrap cache for the
+   errand), the card names the Foundry tower again, and the locked vault tells a player
+   missing it where it lies (`vault_where3`).
 7. **Two captions are written and never shown** in the film: *Every unit woke to it,
    worked to it, slept to it.* and *While she slept, the world changed. She had escaped
    the infection.* The comic may use them; the game does not.

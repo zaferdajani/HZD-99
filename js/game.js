@@ -2465,7 +2465,9 @@ function doInteract(s) {
       G.trans = { t: TRANS_DUR, to: 'V1', side: 'R', half: false };
       transSnap = transHeld ? transCv : null;
     } else {
-      G.toast(t('vault_locked') + '  ' + have + '/3');
+      // the third seal is the one a player can walk past — it is the only one
+      // not handed over by a fight or a puzzle — so the door says where it lies
+      G.toast(t('vault_locked') + '  ' + have + '/3' + (relicHas('sigil3') ? '' : '  ' + t('vault_where3')));
       sfx('no');
     }
   }

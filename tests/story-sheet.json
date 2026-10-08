@@ -515,16 +515,19 @@
       ]
     },
     {
-      "id": "sigil_shaft",
-      "room": "A7",
-      "requires": [],
+      "id": "sigil_foundry",
+      "room": "C1",
+      "requires": [
+        "bossGlitch",
+        "crystal"
+      ],
       "sets": [],
       "relics": [
         "sigil3"
       ],
       "speaker": "none (a hidden seal)",
-      "knows": "A seal of the old vault lies where nobody climbs.",
-      "pointer": "Ratchet's second errand: 'There is a shaft under the meadow nobody has stood in since the fall. See it for me.' (q_ask_ratchet_deep)",
+      "knows": "The last seal of the old vault lies on a ledge in the Foundry tower.",
+      "pointer": "Patch-7 in the pour gallery: 'The walls hum near the old vault...'; the sealed vault itself, refused without it: 'The third seal was carried down into the Foundry tower.' (vault_where3)",
       "lines": [
         "rl_sigil3d"
       ]
@@ -561,7 +564,8 @@
       "pointer": "Vault Sigil I: 'One of three seals of an old vault in the Conduits' (rl_sigil1d); vault_locked counts what is missing; gate_vault_side at the east side",
       "lines": [
         "vault_open",
-        "gate_vault_side"
+        "gate_vault_side",
+        "vault_where3"
       ]
     },
     {
