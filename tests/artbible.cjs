@@ -112,6 +112,88 @@ const CAST = [
 // the game's one reserved "this is coming" amber, from js/entities.js
 const TELL_RGB = [0xff, 0xc2, 0x4a];
 
+// ---------------------------------------------------------------------------
+// THE ENEMY CAST — every machine that attacks, in each state of its attack.
+// The guardians above were held to the silhouette law for months while the
+// roster they share rooms with was not held to anything: a wolf's punish
+// window was the standing plate, the flier's wind-up was its flap, the
+// sage's exhale was the sage waiting. Plan §1 fix 5 gives every attacking
+// enemy a wind-up pose and a recovery pose, and this is where that is true
+// or false.
+//   set     — fields written onto a freshly built Enemy for that state
+//   pairs   — [a, b, ceiling], as above; the BODY's silhouette (G.artProbe on,
+//             so the shared amber ring is not counted as shape)
+//   tell    — must raise the amber over rest (the ring, the wash, the plate)
+//   cold    — must not pass for a wind-up
+//   grnd    — feet on the floor (±10 px)
+// The four kingdom machines carry AUTHORED plates per state (ART_QUEUE §2i,
+// §2l, §2n, §2p); their spent plates are the art's own shapes and sit close to
+// rest, so their rest/recovery ceiling is the authored-plate one the furnace
+// and GLACIERE are held to (0.95) — the re-fire that would tighten it is
+// briefed in ART_QUEUE §2cc. The blob's hazard is danger RED by registry, not
+// amber, so it answers to the silhouette law only.
+const W_ST = {
+  rest:     { vx: 0 },
+  windup:   { coilT: 0.15 },
+  active:   { lungeT: 0.12, vxK: -4 },
+  recovery: { windedT: 0.4 },
+};
+const ENEMY_CAST = [
+  { kind: 'crawler', name: 'WOLF', room: 'A1', st: W_ST,
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.86], ['windup', 'recovery', 0.86], ['rest', 'active', 0.86], ['active', 'recovery', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: ['rest', 'windup', 'recovery'] },
+  { kind: 'crawler', name: 'CHEETAH', room: 'C2', st: W_ST,
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.86], ['windup', 'recovery', 0.86], ['rest', 'active', 0.86], ['active', 'recovery', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: ['rest', 'windup', 'recovery'] },
+  { kind: 'hopper', name: 'HOPPER-WOLF', room: 'A2',
+    st: { rest: { vx: 0 }, windup: { crouchT: 0.15 }, active: { on: false, airT: 0.2, vy: -420, vxK: 1.1 }, recovery: { landT: 0.2 } },
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.86], ['windup', 'recovery', 0.86], ['rest', 'active', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: ['rest', 'windup', 'recovery'] },
+  { kind: 'hopper', name: 'HOPPER-CHEETAH', room: 'C2',
+    st: { rest: { vx: 0 }, windup: { crouchT: 0.15 }, active: { on: false, airT: 0.2, vy: -420, vxK: 1.1 }, recovery: { landT: 0.2 } },
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.86], ['windup', 'recovery', 0.86], ['rest', 'active', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: ['rest', 'windup', 'recovery'] },
+  { kind: 'guard', name: 'GUARD', room: 'A1', st: W_ST,
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.86], ['windup', 'recovery', 0.86], ['rest', 'active', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: ['rest', 'windup', 'recovery'] },
+  { kind: 'flier', name: 'FLIER', room: 'A2',
+    st: { rest: { vx: 0 }, windup: { holdT: 0.15 }, active: { diveT: 0.4, vy: 430 }, recovery: { riseT: 0.5, vy: -180 } },
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.86], ['windup', 'recovery', 0.86], ['rest', 'active', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: [] },
+  { kind: 'blob', name: 'BLOB', room: 'C2',
+    st: { rest: { vx: 0 }, windup: { drip0: 0.9, dripT: 0.03 }, recovery: { blobReb: 0.2 } },
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.86], ['windup', 'recovery', 0.86]],
+    tell: [], cold: [], grnd: ['rest', 'windup', 'recovery'] },
+  { kind: 'turret', name: 'TURRET', room: 'B1',
+    st: { rest: { vx: 0 }, windup: { lockT: 0.2, lock0: 0.55 }, recovery: { kickT: 0.2 } },
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.86], ['windup', 'recovery', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: ['rest', 'windup', 'recovery'] },
+  { kind: 'bat', name: 'BAT', room: 'A1',
+    st: { rest: { hang: 1 }, windup: { hang: 1, holdT: 0.15 }, active: { hang: 0, diveT: 0.4, vy: 300 }, recovery: { hang: 0, riseT: 0.5, vy: -230 } },
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.86], ['windup', 'recovery', 0.86], ['rest', 'active', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: [] },
+  { kind: 'surge', name: 'BREAKER', room: 'B2',
+    st: { rest: { vx: 0 }, windup: { crouchT: 0.3 }, recovery: { windedT: 0.5 } },
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.95], ['windup', 'recovery', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: [] },
+  { kind: 'kiln', name: 'KILN VENT', room: 'C2',
+    st: { rest: { vx: 0 }, windup: { crouchT: 0.3 }, recovery: { windedT: 0.5 } },
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.95], ['windup', 'recovery', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: [] },
+  { kind: 'rime', name: 'RIME COIL', room: 'D1',
+    st: { rest: { vx: 0 }, windup: { crouchT: 0.3 }, recovery: { windedT: 0.5 } },
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.95], ['windup', 'recovery', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: [] },
+  { kind: 'snare', name: 'NEST SNARE', room: 'E1',
+    st: { rest: { vx: 0 }, windup: { crouchT: 0.3 }, recovery: { windedT: 0.5 } },
+    pairs: [['rest', 'windup', 0.86], ['rest', 'recovery', 0.95], ['windup', 'recovery', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: [] },
+  { kind: 'sage', name: 'SAGE', room: 'A1',
+    st: { rest: { vx: 0 }, windup: { coilT: 0.3 }, active: { lungeT: 0.15 }, recovery: { windedT: 0.5 } },
+    pairs: [['rest', 'windup', 0.90], ['rest', 'recovery', 0.86], ['windup', 'recovery', 0.86], ['rest', 'active', 0.86]],
+    tell: ['windup'], cold: ['rest', 'recovery'], grnd: ['rest', 'recovery'] },
+];
+
 (async () => {
   const fails = [];
   const check = (name, ok, detail) => {
@@ -391,6 +473,108 @@ const TELL_RGB = [0xff, 0xc2, 0x4a];
       const off = m.lowestLit - m.GY;
       check(S.name + ': ' + st + ' has its feet on the floor (±10 px)',
         Math.abs(off) <= 10, (off >= 0 ? '+' : '') + off + ' px');
+    }
+  }
+
+  // =========================================================================
+  // THE ENEMY CAST. Same three laws, held to the machines in the rooms.
+  // =========================================================================
+  for (const S of ENEMY_CAST) {
+    const shot = await page.evaluate(async ({ S, TELL_RGB }) => {
+      const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+      startGame(sv); loadRoom(S.room); G.boss = null; G.enemies = [];
+      // a pack that has been tamed draws a cyan eye on the wolf — this is the
+      // hostile animal, measured as she first meets it
+      if (G.save.flags) G.save.flags.alpha = 0;
+      const W = 320, H = 260, GY = 200;
+      const build = (st) => {
+        const e = new Enemy(S.kind, 0, 0);
+        e.traits = []; e.tr = []; e.anim = 1.7; e.faceVis = -1; e.dir = -1; e.on = true; e.hang = 0;
+        e.x = W / 2 - e.w / 2; e.y = GY - e.h;
+        // the guard's plate is up whenever it is not committed or winded —
+        // what its own update would say, written here because nothing runs it
+        e.guard = S.kind === 'guard' && !(S.st[st].lungeT || S.st[st].windedT);
+        // she stands on the same floor, 120 px in front of it, for every
+        // machine — so a beam or a tendril aimed at her lands in the frame
+        player.x = W / 2 - 120 - player.w / 2; player.y = GY - player.h; player.dead = false;
+        const set = S.st[st];
+        for (const k in set) if (k !== 'vxK') e[k] = set[k];
+        if (set.vxK) e.vx = e.dir * e.spd * Math.abs(set.vxK);   // moving the way it faces
+        return e;
+      };
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const c = cv.getContext('2d', { willReadFrequently: true });
+      const paint = (e, probe) => {
+        G.artProbe = probe ? 1 : 0;
+        c.clearRect(0, 0, W, H); c.save();
+        try { e.draw(c); } catch (er) { /* an empty mask reports it */ }
+        c.restore(); G.artProbe = 0;
+        return c.getImageData(0, 0, W, H).data;
+      };
+      // ART ON DEMAND: every state is drawn once to start its own fetches,
+      // then nothing is measured until every one of them has fully landed
+      for (const st in S.st) paint(build(st), false);
+      const pend = () => Object.keys(MEDIA_PEND).filter(k => MEDIA_LOW[k] !== 3);
+      const t0 = Date.now();
+      while (Date.now() - t0 < 25000 && pend().length) await new Promise(r => setTimeout(r, 60));
+      for (const st in S.st) paint(build(st), false);
+      while (Date.now() - t0 < 30000 && pend().length) await new Promise(r => setTimeout(r, 60));
+      const out = {};
+      for (const st in S.st) {
+        const e = build(st);
+        const d = paint(e, false), dp = paint(e, true);
+        const mask = new Uint8Array(W * H);
+        let n = 0, amber = 0, lit = 0, lowestLit = -1;
+        for (let i = 0, q = 0; i < dp.length; i += 4, q++) {
+          if (dp[i + 3] < 40) continue;
+          mask[q] = 1; n++;
+          if (dp[i] + dp[i + 1] + dp[i + 2] < 150) continue;   // the contact shadow
+          const y = (q / W) | 0; if (y > lowestLit) lowestLit = y;
+        }
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i + 3] < 40) continue;
+          const r = d[i], g = d[i + 1], bl = d[i + 2];
+          if (r + g + bl < 150) continue;
+          lit++;
+          const dr = r - TELL_RGB[0], dg = g - TELL_RGB[1], db = bl - TELL_RGB[2];
+          if (r > 150 && r > bl + 55 && g > bl + 20 && g < r - 10
+              && dr * dr + dg * dg + db * db < 150 * 150) amber++;
+        }
+        out[st] = { mask: Array.from(mask), n, amber, lit, lowestLit, GY };
+      }
+      return { out, pending: pend() };
+    }, { S, TELL_RGB });
+    const M = shot.out;
+    console.log('  ── ' + S.name + ' (' + S.kind + '@' + S.room + ')' + (shot.pending.length ? '  still loading: ' + shot.pending.join(',') : ''));
+    for (const [a, b2, ceil] of S.pairs) {
+      const A = M[a], B = M[b2];
+      if (!A || !B || !A.n || !B.n) { check(S.name + ' ' + a + '/' + b2 + ': both states draw', false, 'empty mask'); continue; }
+      let inter = 0, uni = 0;
+      for (let i = 0; i < A.mask.length; i++) {
+        const x = A.mask[i], y = B.mask[i];
+        if (x || y) uni++;
+        if (x && y) inter++;
+      }
+      const iou = uni ? inter / uni : 1;
+      check(S.name + ': ' + a + ' vs ' + b2 + ' is a different SHAPE (IoU <= ' + ceil + ')',
+        iou <= ceil, 'IoU ' + iou.toFixed(3));
+    }
+    const restPct = M.rest && M.rest.lit ? M.rest.amber / M.rest.lit : 0;
+    for (const st of S.tell) {
+      const m = M[st]; const pct = m && m.lit ? m.amber / m.lit : 0;
+      check(S.name + ': ' + st + ' raises the amber above its own rest', pct >= restPct + 0.08 && pct > 0.05,
+        (pct * 100).toFixed(1) + '% vs rest ' + (restPct * 100).toFixed(1) + '%');
+    }
+    for (const st of S.cold) {
+      const m = M[st]; const pct = m && m.lit ? m.amber / m.lit : 0;
+      check(S.name + ': ' + st + ' does not pass for a wind-up', pct < restPct + 0.08,
+        (pct * 100).toFixed(1) + '% of lit pixels');
+    }
+    for (const st of S.grnd) {
+      const m = M[st];
+      if (!m || !m.n) { check(S.name + ': ' + st + ' draws', false, 'empty'); continue; }
+      const off = m.lowestLit - m.GY;
+      check(S.name + ': ' + st + ' has its feet on the floor (±10 px)', Math.abs(off) <= 10, (off >= 0 ? '+' : '') + off + ' px');
     }
   }
 
