@@ -1,0 +1,46 @@
+2026-10-08T07:46:24.9279918Z index.html built (robo): 3.93MB
+2026-10-08T07:46:24.9355362Z odyssey.html built (hero): 2.71MB
+2026-10-08T07:46:24.9500577Z forge.html built (robo+forge): 3.95MB
+2026-10-08T07:46:24.9571518Z forge-odyssey.html built (hero+forge): 2.73MB
+2026-10-08T07:46:25.0103134Z ── repair-browser  — Ratchet drag controls, page reload and interrupted boot in the assembled game
+2026-10-08T07:46:29.2565227Z PASS browser repair: actual drag/click controls, wrong target, Escape, page reload, interrupted boot, once-only rewards, forge continuation and room exit
+2026-10-08T07:46:29.3344980Z ── repair-lifecycle  — Ratchet puzzle, interrupted visits, saved placements and story reward handoff
+2026-10-08T07:46:29.3348030Z PASS repair lifecycle: ordered puzzle, wrong inputs, prefix reload, boot interruption, once-only NPC rewards, forge quest, stale room/save events, lost cell, menu preservation, visibility cleanup, orphan recovery, legacy save and both loading paths
+2026-10-08T07:46:29.3350335Z ── story-opening  — survivor histories and earned Sage/CHIME route
+2026-10-08T07:46:29.3695104Z PASS opening: earned marble/sword/sage/CHIME order, legacy routes, six distinct survivor histories, once-only reveal preserving reward callback
+2026-10-08T07:46:29.3696959Z ── story-battery  — unique workshop battery and legacy save compatibility
+2026-10-08T07:46:30.4149762Z PASS [
+2026-10-08T07:46:30.4160589Z ── first-sage-route  — pre-guardian route through quarry maintenance passage
+2026-10-08T07:46:31.4673598Z PASS first-sage maintenance route before guardian [
+2026-10-08T07:46:31.4676631Z ── chapter-one  — one earned rescue, quarry, forge and sage save chain
+2026-10-08T07:46:32.5588318Z PASS connected first-chapter quest and reloads { quest: 'done', sword: 'single', sage: true }
+2026-10-08T07:46:32.5594596Z ── tutorial-clarity  — one contextual action, one marker and saved lesson continuity
+2026-10-08T07:46:32.5952117Z PASS tutorial-clarity: contextual controls, one target, dialogue priority, save continuity, progression
+2026-10-08T07:46:32.5954708Z ── story-progression  — battery, earned forge and sage/weapon story ordering
+2026-10-08T07:46:32.6357481Z PASS: battery waking, automatic quest, earned forge, distinct sword/connector pickups and first sage story gate
+2026-10-08T07:46:32.6358644Z ── input-focus  — focus loss clears input and cancelled touches cannot fire
+2026-10-08T07:46:32.6681966Z ── regress  — boots both builds, walks every room in ROOMS, watches for page errors
+2026-10-08T07:47:41.9570302Z index.html | boot PLAY | rooms 77 | roomErrs none | prismStress ok | pageerrors none
+2026-10-08T07:47:41.9571374Z odyssey.html | boot PLAY | rooms 77 | roomErrs none | prismStress ok | pageerrors none
+2026-10-08T07:47:41.9572882Z ── battery  — one cell, one machine, and the shop waits for the lion
+2026-10-08T07:47:52.4929858Z ── battery — the cells, the dark units, and the shop that waits for the lion
+2026-10-08T07:47:52.4930546Z   ok   a cell exists for every dark unit (7 units)  0 start + 1 workshop + 1 spare + 5 constructs + 1 lion = 8
+2026-10-08T07:47:52.4931131Z   ok   and no more than two spare, or the choice is not one  surplus 1
+2026-10-08T07:47:52.4931515Z   ok   an NPC starts dark  A0B|ratchet
+2026-10-08T07:47:52.4931858Z   ok   a dark trader does NOT open the shop  state DIALOG
+2026-10-08T07:47:52.4932442Z   ok   the hand-off spends exactly one cell  1 -> 0
+2026-10-08T07:47:52.4932770Z   ok   and it wakes
+2026-10-08T07:47:52.4933131Z   ok   the first unit repays with a repair kit  kit ×1
+2026-10-08T07:47:52.4933666Z   ok   the powered-down filter was found in the build  grayscale(0.8) brightness(0.8) contrast(1.25)
+2026-10-08T07:47:52.4934470Z   ok   an uncharged NPC is not a smudge — it keeps the form the lit one has  range 111.4 vs charged 111
+2026-10-08T07:47:52.4935173Z   ok   ...and it carries a real highlight, not flat middle grey  white 187.73 (charged 220.23)
+2026-10-08T07:47:52.4936004Z   ok   ...and it still reads as powered DOWN — drained of colour, not of form  sat 0.08 vs 0.27, mid 119.85 vs 152.76
+2026-10-08T07:47:52.4936584Z   ok   a woken unit talks instead of asking again
+2026-10-08T07:47:52.4936954Z   ok   with no cell there is nothing to press
+2026-10-08T07:47:52.4937264Z   ok   and it stays dark
+2026-10-08T07:47:52.4937575Z   ok   NULLFANG leaves a cell behind  0 -> 1
+2026-10-08T07:47:52.4937979Z   ok   the Eye's constructs are never offered the fork  none
+2026-10-08T07:47:52.4938385Z   ok   NOSTOS's people are never dark  live=true
+2026-10-08T07:47:52.4939294Z all 11 harnesses ran
+2026-10-08T07:47:53.5702324Z Artifact download URL: https://github.com/zaferdajani/HZD-99/actions/runs/37745405458/artifacts/11534779762
+

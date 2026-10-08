@@ -52,3 +52,23 @@ cancellation. Keep Close enabled, focus it when power-up starts, and process
 controller Back/Pause before advancing the boot timer. The browser test now
 asserts PLAY immediately after Escape, and the lifecycle test checks boot
 focus and controller cancellation. This fix is subject to the final CI run.
+
+## Final verified result
+
+**PASS:** https://github.com/zaferdajani/HZD-99/actions/runs/37745405458
+
+Tested runtime commit: `ffdab9e16699ec8cdc2d807098e0055c6bcdbe0c`.
+All 11 selected harnesses passed, including actual mouse dragging, wrong-terminal
+retry, partial-progress page reload, Escape during boot, durable once-only reward,
+forge-quest continuation and direct room-transition recovery. Both assembled games
+loaded all 77 rooms with no room errors or JavaScript page errors. All four build
+outputs were generated successfully. No thresholds were weakened.
+
+The missing optional repair image files did not prevent these gameplay tests from
+passing; the board uses its existing background and text labels as fallback. This
+is not an artwork-completion or physical-device-certification claim.
+
+Changes are on the existing integration branch only. Alpha/world/combat/story-route
+sources were not modified by these integration commits. No production promotion
+or deployment was performed. Full job logs and the verification artifact are
+available from the run; selected result lines are retained in actions-37745405458.log.
