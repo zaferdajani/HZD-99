@@ -246,6 +246,14 @@ on the crossing frame, including the room she had just left.
   idle moment, and flushed at once on `pagehide`, `beforeunload` and a hidden
   `visibilitychange`, so it is never lost.
 
+- **The creatures' art is readied the same way** (`artWarm`, `js/atlas.js`):
+  the first creature drawn from a sheet used to pay for the sheet's one-off
+  pass (the roster's cleanup-and-grade, ~0.9 s on a slow machine) on the
+  frame it appeared — usually the crossing. The sheets and plates the rooms
+  one door away will draw are processed in the same idle slices, after the
+  floor, byte-identical to the on-demand result, with the scratch cut from
+  ~75 MB to ~1 MB per sheet.
+
 `tests/roomcache.cjs` measures it: a walk of real crossings with no bake on
 any crossing frame after the first, a prebaked floor pixel-identical to the
 live one, staleness noticed, the budget held, and the save deferred but never
