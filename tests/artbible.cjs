@@ -82,10 +82,16 @@ const CAST = [
     // lancewarn / shardwarn / dashwarn; the state list is the boss's, not a
     // guess, and a name that does not exist must be caught by the harness
     // rather than quietly scoring a pass.
+    // `recover` and `daze` joined with the punish-window pass (2026-10-08):
+    // the recovery must not wear the amber (an opening that looks like a
+    // wind-up teaches the player to back off from it), and the hit-group break
+    // is the one time she is on the ground — so it is a different SHAPE from
+    // her flight and its hooves are on the floor.
     states: { idle: { vx: 40, vy: 0, t: 1 }, lancewarn: { vx: 0, vy: 0, t: 0.3 },
-              dashwarn: { vx: 0, vy: 0, t: 0.2 } },
-    rest: 'idle', pairs: [['idle', 'lancewarn', 0.94], ['idle', 'dashwarn', 0.94]],
-    tell: ['lancewarn'], cold: ['idle'], grnd: [],
+              dashwarn: { vx: 0, vy: 0, t: 0.2 }, recover: { vx: 0, vy: 0, t: 0.5 },
+              daze: { vx: 0, vy: 0, t: 1.2, dazeDur: 1.8 } },
+    rest: 'idle', pairs: [['idle', 'lancewarn', 0.94], ['idle', 'dashwarn', 0.94], ['idle', 'daze', 0.90]],
+    tell: ['lancewarn'], cold: ['idle', 'recover', 'daze'], grnd: ['daze'],
   },
   // ---- CLASS E: the Eye's constructs ------------------------------------
   // They are procedural geometry and light rather than authored creatures

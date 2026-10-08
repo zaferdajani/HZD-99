@@ -117,6 +117,7 @@ const SUITE = [
   ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
   ['daze',      'a group of hits breaks NULLFANG open, pays out, closes, and cannot be held'],
   ['openings',  'every boss move opens for at least one hit, and only the bait pays out three'],
+  ['guardians', 'every guardian opens after every move, breaks on a group of hits, and draws its moves by range'],
   ['arc',       'the world notices, she changes on the victory, a death is a beat'],
   ['meet',      'it swats her aside and walks away, and she is still standing'],
   ['secrets',   'two hollow walls, a cellar hatch, and a pit only the dash crosses'],

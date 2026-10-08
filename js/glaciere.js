@@ -306,7 +306,7 @@ function drawGlaciere(c, b) {
     const swell = Math.sin(b.anim * 0.9);      // the slow body swell, breathing
     c.scale(1 + swell * 0.008, 1 - swell * 0.009);
     const heroFig = !(b.st === 'novawarn' || b.st === 'orbs' || b.st === 'azhush'
-      || b.st === 'dorm' || (b.st === 'intro' && wakeK < 0.5)
+      || b.st === 'dorm' || b.st === 'daze' || (b.st === 'intro' && wakeK < 0.5)
       || ((b.glcStamp || 0) > 0 && b.st === 'idle'));
     if (b.st === 'dorm') {
       // ASLEEP ON HER HOOVES: head bowed, one ember alive in the horn.
@@ -352,6 +352,21 @@ function drawGlaciere(c, b) {
           c.restore();
         }
       }
+    } else if (b.st === 'daze') {
+      // BROKEN OPEN (the hit-group break): out of the air and down on her
+      // hooves on the ice — the standing assembly, grounded, head bowed. The
+      // hover lift above is cancelled so the hooves meet the floor she fell
+      // to; the jolt of the fall shakes out in the first third of a second.
+      c.translate(0, 14 - bob);
+      const into = Math.max(0, (b.dazeDur || 1.8) - (b.t || 0));
+      glcFig(c, 'asm', 0.06, Math.max(0, 0.3 - into) * 8);
+    } else if (b.st === 'recover') {
+      // SPENT: she has sunk to your height and it shows — nose down, legs
+      // hanging out of the gallop, the body heaving on a slow breath. The
+      // opening has to LOOK open or nobody learns to take it.
+      const br = Math.sin(b.anim * 4.2);
+      c.translate(0, 5 + br * 1.6);
+      glcHeroRig(c, -0.1 + br * 0.012 + roll * 0.5, 0, gait, 0, 0.14);
     } else if (b.st === 'novawarn' || b.st === 'orbs' || b.st === 'azhush') {
       // gathered: the standing assembly, trembling as power collects
       glcFig(c, 'asm', 0, b.st === 'novawarn' ? 2 : 0.8);

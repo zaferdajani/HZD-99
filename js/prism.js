@@ -80,7 +80,7 @@ function przClip(b) {
     return seq(R.p_idle, 1.3);
   }
   if (b.dead) return R.i_death[0];
-  if ((b.stagT || 0) > 0) return R.i_hurt[0];
+  if ((b.stagT || 0) > 0 || st === 'daze') return R.i_hurt[0];   // the break wears the hurt plate
   if (st === 'dorm') return seq(R.i_dorm, 0.42);
   if (st === 'intro') return seq(R.i_roar, 5.5);
   if (st === 'arcspin') return R.i_spin[0];
@@ -203,7 +203,7 @@ function przPose(b) {
     discSpin: 0.9, rings: 0, coil: 0.12, sprawl: 0,
   };
   if (b.dead) return P;
-  if (b.stagT > 0) {
+  if (b.stagT > 0 || st === 'daze') {          // a stagger and the hit-group break share one body
     // fell off the disc after the storm: flat on its side, light guttering
     P.sprawl = 1; P.crouch = 13; P.stretchY = 0.72; P.pitch = 0.05;
     P.headA = 0.35; P.eyeK = 0.15; P.facetK = 0.5; P.glow = 0.25;
