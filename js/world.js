@@ -1767,20 +1767,37 @@ const MAPPOS = {
   // which is also why the row starts at -9: the spine needs fifteen cells and it
   // has to end before col 6, where the Foundry begins. tests/mapgrid.cjs holds
   // the whole board against overlap.
-  W1: [-9, 3, 1, 1], W2: [-8, 3, 2, 1], A0: [-6, 3, 2, 1], A0B: [-6, 2, 1, 1], A1: [-4, 3, 2, 1],
-  A2: [-2, 3, 3, 1], A10: [1, 0, 2, 1], A3: [3, 3, 2, 1], A4: [5, 3, 1, 1],
-  A5: [-2, 4, 2, 1], A6: [-4, 2, 1, 1], A7: [-2, 5, 1, 2], A8: [-1, 2, 1, 1], A9: [-1, 1, 1, 1],
-  A11: [-2, 1, 1, 1], A12: [3, 5, 1, 1], A13: [-5, 2, 1, 1],
-  CV1: [0, 4, 2, 1], CV1B: [0, 5, 1, 1], CV2: [2, 4, 2, 1], CV3: [4, 4, 1, 1],
-  B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V1B: [9, 1, 1, 1], V2: [5, 5, 1, 1],
+  //
+  // AND THE BOARD IS WHERE THE ROOMS REALLY ARE (tests/mapexits.cjs). A
+  // vertical crossing keeps her x and a side crossing keeps her y, so every
+  // exit fixes where its neighbour sits — the upper room of a shaft is drawn
+  // so its hole and the lower room's hole are the same place on the chart,
+  // and a side neighbour starts where its room ends. Positions are derived
+  // from those two rules, walked out from B1; fractions of a cell are what
+  // the shaft arithmetic actually gives (A2's hole lands 0.85 of a cell from
+  // A8's when both are drawn on whole cells). The spine runs edge to edge to
+  // A3 again — A10 left it for a depth door off A2, and its old cells were
+  // a two-cell hole in the middle of the meadow.
+  //
+  // TWO ROOMS THE WORLD ITSELF CANNOT PLACE: V2 hangs under B2's floor at
+  // tile 44, which is where A4 already stands, and D4 rises from D2 into the
+  // span C2 occupies. Those are overlaps in the geometry, not in the drawing;
+  // they keep a route line to the room they hang from, and the harness proves
+  // each one still has no free aligned square before it lets it pass.
+  W1: [-7.25, 3, 1, 1], W2: [-6.25, 3, 2, 1], A0: [-4.25, 3, 2, 1], A0B: [-4.25, 2, 1, 1], A1: [-2.25, 3, 2, 1],
+  A2: [-0.25, 3, 3, 1], A10: [1, 0, 2, 1], A3: [2.75, 3, 2, 1], A4: [4.75, 3, 1, 1],
+  A5: [-0.25, 4, 2, 1], A6: [-2, 2, 1, 1], A7: [0, 5, 1, 2], A8: [0, 2, 1, 1], A9: [0, 1, 1, 1],
+  A11: [-1, 1, 1, 1], A12: [3, 4, 1, 1], A13: [-3, 2, 1, 1],
+  CV1: [-6, 5, 2, 1], CV1B: [-6, 6, 1, 1], CV2: [-4, 5, 2, 1], CV3: [-2, 5, 1, 1],
+  B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V1B: [10, 2, 1, 1], V2: [5, 4, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],
   X1: [8, 1, 1, 1],
-  C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1], C5: [4, 5, 1, 1], C5B: [4, 6, 1, 1],
-  C6: [7, 4, 1, 1], C7: [7, 3, 1, 1],
-  D1: [5, 6, 1, 1], D1B: [5, 7, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1], D4: [6, 5, 1, 1],
-  D5: [6, 7, 1, 1], D6: [6, 8, 1, 1],
-  E1: [8, 7, 1, 1], E1B: [8, 8, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1], E4: [9, 6, 1, 1],
-  E5: [9, 8, 1, 1], E6: [9, 9, 1, 1],
+  C1: [6, 3, 1, 2], C2: [6, 5, 2, 1], C3: [8, 5, 1, 1], C4: [9, 5, 1, 1], C5: [5, 5, 1, 1], C5B: [4, 6, 1, 1],
+  C6: [8, 4, 1, 1], C7: [8, 3, 1, 1],
+  D1: [6, 6, 1, 1], D1B: [5, 7, 1, 1], D2: [7, 6, 2, 1], D3: [9, 6, 1, 1], D4: [7, 4, 1, 1],
+  D5: [7, 7, 1, 1], D6: [7, 8, 1, 1],
+  E1: [9, 7, 1, 1], E1B: [8, 8, 1, 1], E2: [10, 7, 2, 1], E3: [12, 7, 1, 1], E4: [10, 6, 1, 1],
+  E5: [10, 8, 1, 1], E6: [10, 9, 1, 1],
 };
 
 // ==== THE GUARDIAN GROTTOES — every fall or taming REVEALS A CAVE ==========
@@ -1806,14 +1823,15 @@ const MAPPOS = {
 // cave, each its own story.
 const GROTTOES = [
   // [grotto, tunnel, deep chamber, lair, flag, grotto/tunnel/deep map cells]
-  ['GA1', 'GA1T', 'GA1D', 'A4', 'bossGlitch', [5, 4], [6, 4], [10, 4]],
-  ['GA2', 'GA2T', 'GA2D', 'A10', 'alpha', [2, 2], [2, 1], [1, 1]],
-  // GB1's tunnel/deep cells moved up a row: [6,1] is the Oracle's parlor now
-  ['GB1', 'GB1T', 'GB1D', 'B4', 'bossBrood', [7, 1], [7, 0], [6, 0]],
-  ['GC1', 'GC1T', 'GC1D', 'C3', 'bossAtlas', [8, 4], [9, 4], [9, 5]],
-  ['GD1', 'GD1T', 'GD1D', 'D3', 'bossZero', [10, 6], [10, 5], [11, 5]],
+  // each network's three cells in a row: grotto R tunnel R deep chamber are
+  // side exits, so they sit edge to edge (tests/mapexits.cjs)
+  ['GA1', 'GA1T', 'GA1D', 'A4', 'bossGlitch', [1, 5], [2, 5], [3, 5]],
+  ['GA2', 'GA2T', 'GA2D', 'A10', 'alpha', [-2, 0], [-1, 0], [0, 0]],
+  ['GB1', 'GB1T', 'GB1D', 'B4', 'bossBrood', [5, 0], [6, 0], [7, 0]],
+  ['GC1', 'GC1T', 'GC1D', 'C3', 'bossAtlas', [10, 4], [11, 4], [12, 4]],
+  ['GD1', 'GD1T', 'GD1D', 'D3', 'bossZero', [11, 5], [12, 5], [13, 5]],
   ['GX1', 'GX1T', 'GX1D', 'X1', 'bossPrism', [9, 1], [10, 1], [11, 1]],
-  ['GE1', 'GE1T', 'GE1D', 'E3', 'bossMother', [11, 6], [12, 6], [13, 6]],
+  ['GE1', 'GE1T', 'GE1D', 'E3', 'bossMother', [13, 6], [14, 6], [15, 6]],
 ];
 for (const [gid, tid, did, lair, flag, gcell, tcell, dcell] of GROTTOES) {
   ROOMS[gid] = {
