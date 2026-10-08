@@ -36,6 +36,7 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['repair-browser', 'Ratchet drag controls, page reload and interrupted boot in the assembled game'],
   ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],

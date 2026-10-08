@@ -33,3 +33,13 @@ assets and complete candidate release validation remain explicit checks.
 No main/odyssey update, built-page publication, or production deployment is claimed.
 The integration branch contains other unfinished story/Alpha/media changes and must
 not be blindly promoted as a Ratchet-only release.
+
+## Confirmed assembled-game result
+
+Actions run https://github.com/zaferdajani/HZD-99/actions/runs/37744414667
+passed all 10 selected harnesses on commit `8ab3340e1497f3e3ddd7ed6c679236d14f92309a`.
+All four generated pages built. Both index and odyssey loaded all 77 rooms with
+no room or page errors. The connected chapter test completed rescue, quarry,
+forge, first Sage and saved reward recovery. Extracted job evidence is retained
+in actions-37744414667.log; the full workflow artifact is linked from that run.
+A separate real-pointer/page-reload repair harness is added for the final check.

@@ -6,6 +6,7 @@ on:
       - .github/workflows/ratchet-repair-check.yml
       - js/story-repair.js
       - tests/repair-lifecycle.cjs
+      - tests/repair-browser.cjs
       - tests/story-battery.cjs
       - tests/chapter-one.cjs
       - tests/battery.cjs
@@ -40,7 +41,7 @@ jobs:
       - name: Game, story and persistence regressions
         run: |
           set -o pipefail
-          node tests/run.cjs repair-lifecycle story-opening story-progression tutorial-clarity input-focus story-battery chapter-one first-sage-route battery regress 2>&1 | tee release-evidence/ratchet-repair/regression.log
+          node tests/run.cjs repair-browser repair-lifecycle story-opening story-progression tutorial-clarity input-focus story-battery chapter-one first-sage-route battery regress 2>&1 | tee release-evidence/ratchet-repair/regression.log
       - name: Preserve verification evidence
         if: always()
         uses: actions/upload-artifact@v4
