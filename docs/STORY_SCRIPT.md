@@ -12,6 +12,14 @@ changes here in the same commit.
 file is the *play-through* of that canon. When they conflict, the canon wins and
 this file is wrong — say so in §8 and fix the game.
 
+**Re-synced 2026-10-08 with the story-order pass.** Every save now plays this story
+(old saves are migrated on load — `migrateStory`, js/story-opening.js); the order of
+chapter one is enforced by the game and walked by `tests/story-order.cjs` against
+`docs/STORY_SHEET.md`, which lists every beat with its room, required flags, speaker,
+what they know and who points the player there. Lines quoted here are the English
+of what the robot world actually shows (`t()` resolves `STORY_ORDER_TEXT`, then the
+Oct-4 and Draft-2 tables, then `I18N`).
+
 **Owner's direction folded in (2026-09-19):** the volt pack. HZD-99 cannot heal or
 supercharge when she wakes. The first thing she ever buys, Ratchet's volt pack,
 wires both. Until then the ring of charge at the top of the screen fills and
@@ -24,22 +32,22 @@ cannot be spent. §2.5 is that scene.
 | Who | Role | Look (for the pencils) | Where they stand |
 |---|---|---|---|
 | **HZD-99** | The hero. A small maintenance robo-cat, the last uninfected unit awake. | White chassis, black visor face with two cyan eyes, red scarf-cape, claws. Head-and-a-half tall against Ratchet. Never carries a sword on the cover of chapter 1. | Everywhere |
-| **MOTHER-V** | The broadcast heart of the Depths. She sang the Song that ran the city. Hijacked, not evil. The last fight. | "Not a machine and not a creature: a transmission that grew mass." Radial, no face, one golden core inside a violet-grey shell of plates, everything beating at ~0.9 Hz. | E3, the bottom of the Nest |
-| **The evil robot** | Hijacked the Song and hid the virus in it. The command was his. | **Never seen in the game.** Reported only. See §8. | Nowhere (yet) |
-| **Ratchet** | The trader and tinker. First NPC. Wears the crystal necklace that burned the virus out of him. Pulled his own battery and waited. | Big, round, copper-brass body, domed; the crystal on a cord at his chest; a canister rack on his back that vents heat; a bench of salvage. His tic: the hand reaches for a tool that is not there. | A0B (his den), later A3 (the camp) |
+| **MOTHER-V** | The broadcast heart of the Depths. She sang the Song that ran the city. Hijacked, not evil. The last fight — and she is cleansed and lives. | "Not a machine and not a creature: a transmission that grew mass." Radial, no face, one golden core inside a violet-grey shell of plates, everything beating at ~0.9 Hz. | E3, the bottom of the Nest |
+| **The evil robot — the Eye** | Hijacked the Song and hid the virus in it. The command was his. Built the five constructs. | **Never seen in the game.** Reported, then named at the end as what remains. See §8.1. | Nowhere (yet) |
+| **Ratchet** | The trader and tinker. First NPC. Wears the crystal necklace that burned the virus out of him. Pulled his own battery and waited. | Big, round, copper-brass body, domed; the crystal on a cord at his chest; a canister rack on his back that vents heat; a bench of salvage. His tic: the hand reaches for a tool that is not there. | A0B (his den) until he forges the blade; then A3 (the camp). One machine, one battery, one waking. |
 | **Old Servo** | The meadow's winch-keeper. Raised every gantry over the meadow. | Old, boxy, half turned into the winding drum behind him. | A1 |
 | **Mono** | The Oracle. Archived the network; now archives its ruins. Runs the Cognition Trials. | A CRT face on a shroud of dead cables, reading a river of data in the dark. | B3B, the Parlor |
-| **Kerf** | The Deaf System's last cutter. Deaf from the factory, so the Song never reached her; never switched off. Split the purifier in two. | A cutter unit with one hand always on the floor — she reads the world through the rock. | V1B, the Kerf |
+| **Kerf** | The Deaf System's cutter. Deaf from the factory, so the Song never reached her; never switched off. Her people's harvester gave Ratchet's ancestor his marble; she shaped the second blade. | A cutter unit with one hand always on the floor — she reads the world through the rock. | V1B, the Kerf |
 | **Patch-7** | The Foundry's repair unit. | Copper-domed unit at a hearth. | C5B, the Forge |
-| **The Nine-Lives Sage** | On its ninth life. Knows the Archivist guards the Kernel Key. | A sage in a carrel; the one warm floor in a frozen kingdom. | D1B |
+| **The Nine-Lives Sage** | On its ninth life. Knows GLACIERE, the Archives' sentinel, guards the Kernel Key. | A sage in a carrel; the one warm floor in a frozen kingdom. | D1B |
 | **Lumen** | The Lost Nymph. Glows harder when afraid; always glowing. | A small luminous unit whose glow keeps one pocket of the Nest clean. | E1B, the Hollow |
 | **The seven chamber sages** | The kingdoms' protectors, kneeling under the Song two rooms behind each guardian. | Kneeling figures with a black halo and an ember rim while infected; the halo goes blue when purified. | Every G\*D deep chamber |
 | **NULLFANG** | Guardian of the Meadows. A virus-infected robot lion with whelps. | Lion-frame, red light behind the eyes. | A2 (the meeting), A4 (the fight) |
 | **THE ALPHA** | Leader of the wolf pack. Not a guardian; not the Eye's. | A great wolf-frame with the pack behind it. | A10 |
 | **TALONHOST** | Guardian of the Conduits. The Iron Eagle. | Hangs from above, drops and slams. | B4 |
-| **The Prism Prowler** | The rival robo-cat. The one machine the network never indexed, so the Song never touched it. Set by Kerf to guard the buried half of the blade. | A clear, blue crystal cat under a skin of virus-red; the same body either way. | X1 |
+| **The Prism Prowler** | The rival robo-cat. The one machine the network never indexed, so the Song never touched it — never infected. Keeps Kerf's second blade. | A clear, blue crystal cat under a skin of virus-red; the same body either way. | X1 |
 | **FURNACE CHOIR** | Guardian of the Foundry. A corrupted mecha dragon. | Roosts high; breaks into parts when it falls — wings, then head, then body. | C3 |
-| **GLACIERE** | Guardian of the Archives. The corrupted unicorn of the void. | Ice and void; shatters into parts on death. | D3 |
+| **GLACIERE** | Guardian of the Archives — *THE FROZEN SENTINEL* (never "Purifier": that is the sword's name). The corrupted unicorn of the void. | Ice and void; shatters into parts on death. | D3 |
 | **The Eye's five constructs** | CHIME, CARRIER, KILN-MOTH, LATTICE, THE LENS. Built by the source of the Song, not infected — there is nobody inside. | Instruments, not monsters; each built around a Power Cell. | A9, B8, C7, D6, E6 |
 
 **The three rules of the picture** (from the art direction): red light behind the
@@ -127,39 +135,40 @@ yet. Old Servo will, next room.
 **Panels.** A cramped street; a single red-eyed crawler; the booth — *built from four
 dead haulers and a parade banner* — set into the wall.
 
-### 2.4 Ratchet's den — A0B (the note, the cell, the kit)
+### 2.4 Ratchet's den — A0B (the letter, the drawer, the repair, the kit)
 
 **Where.** Behind the booth door: a den, a crafting bench of a room, a pod built into
-the wall, a chest with a spare Power Cell, and a big round unit sitting dark at the
-bench.
-**What happens.** She reads the tag on his chest:
-> *A tag hangs from his chest plate, written in a steady hand:*
-> *'The broadcast takes every machine that listens. I will not listen — and I will not wait around to change my mind. I have taken out my own cell and hidden it where the rats forget to look.'*
-> *'If you are reading this, the city fell. When it is safe out there — truly safe — put the cell back in. I will do the rest. — R.'*
-> *One Power Cell would bring it back. You are carrying one.*
+the wall, a drawer, and a big round unit sitting dark at the bench. This is his one
+home; he stands here, and only here, until he has forged her blade (§2.10).
+**What happens.** She reads the letter at his empty socket:
+> *A handwritten letter is tucked against his empty battery socket:*
+> *“Mother’s song has been infected. My marble slowed the virus, but cannot stop it. I removed my battery before it could take me. It is in the drawer beside this chair.”*
+> *“Seat my battery in its socket. Connect the positive wire, then the ground, and bridge the relay. Restore power. If you are reading this, perhaps there is still hope. — R.”*
 
-She puts in her only cell. He wakes: *Ratchet is awake.* He gives her the **Repair
-Kit** — *Patches two cores. Use it from here.* If the memory film is on disk it plays
-here: the necklace that saved him. Then he talks:
-> *See that cradle in the corner? Built it into the wall myself. Step in and it remembers you — everything you are, kept safe — and it patches your plating while you stand there. Use it. That is what it is for.*
-> *And when you have scrap, come to my counter. I keep a volt pack — my own charger, cut down to your size. It wires that ring at the top of you to something useful.*
-> *Hits you land charge the ring. With the pack in you, you can SPEND it: hold HEAL to mend a core, or hold ATTACK and let go for a burst from your claws. The ring is empty now — go earn some.*
+She opens the drawer — **Ratchet's battery** — and the repair board opens: seat the
+battery, the amber positive wire, the blue ground, the bridge across the relay, then
+**Restore power** (no timer; a wrong socket can always be retried; leaving keeps the
+placements). He wakes: *Ratchet is awake.* He gives her the **Repair Kit** and — kept
+separately — a spare Power Cell for Servo. If the memory film is on disk it plays here.
+Then the pod and the pack (the cradle lesson, then *And when you have scrap, come to my
+counter. I keep a volt pack…*), and straight into his story and the errand:
+> *Mother’s song kept the kingdoms at peace. An unknown intruder infected its frequency. Our neighbours turned on one another.*
+> *This marble came to me through my family. It slowed the virus, but it was not enough to stop it.*
+> *I removed my own battery before the infection took me. You were asleep for recharging, long before this happened. That is how you missed the broadcast.*
+> *There is a large deposit of raw marble in the caves beneath the meadow. Bring a piece back to my workshop.*
+> *I can forge it into a glowing white sword that neutralizes the virus. The sages and our neighbours can become our friends again.*
+> *I left a spare cell for Servo in your pouch. His gantries overlook the meadow; the marble lies below.*
+> *Bring me: raw cave marble*
+> *The way down is in the meadow hub, at its west end by the climb: a loose floor. Jump onto it and strike straight down — it gives, and the caves are under it.*
 
-And straight into the errand — five beats, the first quest of the game:
-> *You restored my battery. Thank you. The stone in my necklace protected me when the infection reached me.*
-> *An evil robot hid a virus in Mother's song. I was afraid and alone, so I disconnected my battery and waited for help.*
-> *There is more of this stone in the Scrap Meadows cave. Find the rock opening and press UP beside it. Follow the caves to the crystal pillar.*
-> *Beside the pillar, hold ATTACK to charge your claws, then release. Collect the shard that falls.*
-> *Bring that shard back to my workshop. I will forge a cleansing sword. Take it to the first sage to free them from the virus.*
-
-**Story.** This is the founding of the whole plot in one room. He nearly fell; the
-stone on his chest burned the Song out of him; frightened and alone, he pulled his
-own cell and went to sleep hoping somebody would come. She came. He has a cave, a
-pillar and a forge in mind, and the cat has claws that cannot yet crack stone. His
-tic — the hand reaching for a tool that is not there — is the instruction the Song
-interrupted, still firing.
-**Panels.** The tag in a steady hand; her one cell going into his chest; his eyes
-coming up blue; the crystal on its cord; the pod in the wall.
+The last line is **who points her down** (`q_where_ratchet_forge`): it is said with the
+ask and again every time she talks to him while still looking.
+**Story.** The founding of the plot in one room. He nearly fell; the inherited marble
+slowed the song long enough for him to choose; he switched himself off. She was asleep,
+not immune. There is one Ratchet and one revival — the old second, dark Ratchet at the
+camp is gone (§2.15).
+**Panels.** The letter at the empty socket; the drawer; the battery seated, the wires,
+the bridge; his eyes coming up; the marble on its cord; the pod in the wall.
 
 ### 2.5 The volt pack — A0B (the shop, the pack, the two verbs)
 
@@ -194,12 +203,14 @@ off the frame, no rings; the claws releasing.
 
 **Where.** The Scrap Meadows proper; a winding house with an old unit turned into
 its drum.
-**What happens.** Old Servo is dark. She has one spare cell — the chest in Ratchet's
-den — and this is the first "who do I wake" decision: Servo now, or keep the cell.
+**What happens.** Old Servo is dark. She has one spare cell — the one Ratchet handed
+her for him — and this is the first "who do I wake" decision: Servo now, or keep the cell.
 Woken, he gives a Repair Kit and speaks:
-> *Mrrow… a working unit! I haven't seen one since the Null Core began broadcasting.*
-> *Move with the arrows, leap with Z, and swipe those claws with X.*
-> *Claw the corrupted to harvest volts. Then stand still, hold F — the ✚ pad on a phone — and your frame will mend a core.*
+> *Mrrow… a working unit! I haven't seen one since Mother's song went wrong.*
+> *Move with ← →, leap with Z, and swipe those claws with X.* — the controls are the
+> player's OWN: on a controller he names the buttons she bound, on a phone the
+> on-screen glyphs (`{JUMP}` / `{ATK}` / `{HEAL}` filled by `ctlFill`).
+> *Claw the corrupted to harvest volts. Once Ratchet has wired a pack into you, stand still and hold F, and your frame will mend a core.*
 > *The virus corrupts every machine it touches. Purge it, little paw — or rust with the rest of us.*
 > *See the winding house behind me? I raised every gantry over this meadow off that drum, cable by cable. The drum still turns. My climbing days are what rusted.*
 
@@ -208,8 +219,10 @@ Then the first real fight: a crawler, and a guard hidden past a rise.
 the Song went out — that is why they are still themselves, and why they are standing
 dark: nobody has charged them since. Cells are the rarest thing in the world. There is
 never a spare one.
+Once, after his greeting, his own escape: *My receiver was unplugged inside the shielded
+lift housing when the song changed. / I spent the last charge holding the bridge for
+the workers… / Ratchet sent a spare? Tell him the last passenger got home.*
 **Panels.** The winding house; Servo half-drum; the first guard rising over the crest.
-*(Servo's first line names the Null Core as the broadcaster — see §8.3.)*
 
 ### 2.7 The hub and the corridor — A2 (NULLFANG's first meeting)
 
@@ -218,8 +231,10 @@ never a spare one.
 out of the sky east of her. The music stops. The controls go. It walks up. The paw
 rises and is held a hair too long. One swipe — hit-stop, white flash — one core
 taken, never her last. It stands and looks at where she landed. It gets bored of her.
-It bounds east. Not one word is spoken. Afterwards, Ratchet: *It threw you once. The
-corridor still has the dent. Go and put one in it.*
+It bounds east. Not one word is spoken. Afterwards — before the blade exists — Ratchet:
+*It threw you once — I saw the dent in the corridor. Not with claws. Bring me the
+marble first.* (He only says *Go and put one in it* once the sage is free and the bell
+silent, §2.15.)
 **Story.** She is nothing to it. That is the whole scene. The comic's first big
 splash: the lion, red-eyed, standing over a cat it did not bother to finish.
 **Panels.** Seven beats exactly as listed: fall, land, wind, swipe, watch, coil, leave.
@@ -248,9 +263,10 @@ Deaf System's:
 > *They went under. Into the rock, where the signal dies. They rebuilt down here — a system of the deaf, wired by touch and light. No radio. No song.*
 > *The caves do not connect to each other. That is not a flaw. A tunnel the song cannot walk is a tunnel worth keeping short.*
 
-In CV3, two crawlers and then THE PILLAR. Plain claws: *Claws glance off the pure
-crystal. Hold ATTACK to supercharge, then release beside it.* The burst shatters it.
-> **Pure Crystal Shard** — *Quarried from the pillar with the supercharged claw. Ratchet can forge this into something the song will fear.*
+In CV3, two crawlers and then THE MARBLE — a rounded raw nodule in its host rock, never a
+pointed crystal. Plain claws: *Claws glance off the raw marble. Hold ATTACK to supercharge,
+then release beside it.* The burst frees it (the pack is what makes the burst — §2.5).
+> **Raw marble** — *A rounded nodule freed from the host rock. Bring the material to Ratchet; it is not yet a blade.*
 
 Carrying the shard switches on her **aura sense**: she glows white; hostiles read
 purple; guardians red; woken and purified machines blue; an infected sage wears a
@@ -261,18 +277,22 @@ The burst the pack gave her is the only thing that cracks it.
 **Panels.** The mouth breathing; the beacon; the pillar, white, taller than her; the
 storm on her chassis; the shard falling; her aura coming on in the dark.
 
-### 2.10 The forging — A0B or A3
+### 2.10 The forging — A0B (and Ratchet moves to the camp)
 
-**Where.** Back at Ratchet.
-**What happens.** *The pillar shard! Hold still — sparks now — and let the song learn
-what fear is. The PURIFIER is yours.* The forging film plays (*The Forging*). The card:
-> **THE PURIFIER** — *A white crystal shaped like a sword. It hums against the Eye's static — and its handle was made to CONNECT to something.*
+**Where.** Back at Ratchet's workshop — where his errand told her to bring it.
+**What happens.**
+> *You brought the marble. Steady the clamp. I will shape the edge, then fit the grip. Cut what is holding them—not what is left of them.*
+> *When the blade is done I'm taking my tools to the camp by the lion's enclosure. That is where this ends. Find me there.*
 
-A new branch grows on her Neural Tree. From now on Ratchet greets her with: *That
-blade on your back is the best work these hands ever did. Something under this kingdom
-is still singing — go and let it meet my crystal.*
-**Story.** The first sword. Note the handle: it was made to connect. Kerf will explain
-why, three kingdoms from now.
+The forging film plays (*The Forging*). The card:
+> **THE PURIFIER** — *Ratchet forged this glowing white sword from the cave marble. It neutralizes the virus and frees infected robots. Its handle can later connect to another weapon.*
+
+He offers the optional Alpha errand (§2.14). From now on he stands at the camp (A3), not
+in the den — the same machine, awake on the same battery. His standing line there:
+*The maintenance passage beside the marble quarry leads to the first Sage. Clear their
+binding before you face the guardian.*
+**Story.** The first sword is shaped, not found. The blade is now the only thing that
+can free anything: sages, the Alpha and every guardian refuse claws (§2.16).
 
 ### 2.11 The wings of the meadow — A6, A13, A7 (optional)
 
@@ -310,13 +330,20 @@ and it fires the moment she stands up in that chamber:
 > *NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it.*
 > *Take the climb above the meadow. Silence that bell, then return to his enclosure. I will keep this end quiet.*
 
+**What it says is what is true when she stands up** (`sageRevealLines`). The climb is
+open from the hub, so a player can silence the bell first; the sage then says instead:
+*NULLFANG is still resisting — and the bell that wrote the command back into him is
+already silent. You did that.* / *Go to his enclosure past the camp. With the bell
+quiet, the binding will not come back. I will keep this end quiet.* (An old save that
+freed the lion first hears *NULLFANG is free…* with or without the bell.)
+
 **And the promise is kept as it is made.** Whatever is still hunting her in the
 chamber stands down at the moment the halo turns — cyan sensors, no more contact —
 and the whole of that sage's network stays quiet from then on: the tunnel she walked
 in through is not the tunnel she walks back out of. One sage closes one end; the next
 cave and the meadow above are exactly as they were. (Comic p26.)
 
-Ratchet, after: *Word crawls up even from the deaf places: a sage knelt down there
+Ratchet, after (at the camp now): *Word crawls up even from the deaf places: a sage knelt down there
 and STOOD UP clean. My forge did that. You did that. Prices still stand, mind.*
 **Story.** The sword's first work is a rescue, not a kill — and the rescue is what
 hands her the plan. The sage is not a trophy behind a boss; it is the informant that
@@ -328,7 +355,8 @@ the halo turning blue; the sage's hand pointing up at the climb.
 ### 2.13 The Chime — A8, A9, A11 (the Eye's first construct)
 
 **Where.** The climb above the hub, and an arena at the top. She goes because the sage
-sent her, not because the map ran out of rooms.
+sent her, not because the map ran out of rooms — though the climb is open from the
+start, and a player who rings it first is told so by the sage (§2.12).
 **What happens.** *CHIME — it is singing at you.* It hovers, rings, sings a note,
 falls. It is destroyed, not tamed: *Destroyed. There was nobody in it.* It leaves the
 Power Cell it was built around. Behind its wall: a secret coin and the scrap its
@@ -354,64 +382,78 @@ was a pack, and it answers to whoever stands.
 
 ### 2.15 The camp — A3, A12
 
-**Where.** The meadow's breath before the lair: a bench, and Ratchet at a second
-counter. *The trader is open for business.* Under the camp, through a brittle cellar
-floor, a vault of spikes that needs the dash (a Star Fragment at the end).
-**And once, in the window between the sage and the bell, the lair opens on its own.**
-Walking east toward the enclosure with the Sage freed and CHIME still ringing, NULLFANG
-comes OUT. He stops well outside his own reach and the purple goes out of him — the
-same authored veins running clean that the purifier will one day make permanent. He
-looks at her and nothing is driving it. Then a bell answers from above the meadow, the
-order is written back into him, and he turns and goes home. He does not speak; he never
-has. Nothing is taken from her and nothing holds her controls — she may simply keep
-walking. It happens once.
+**Where.** The meadow's breath before the lair: a bench, and — once he has forged her
+blade and moved — Ratchet at his second counter. Before the forge the camp has no
+trader: he is still in his den, dark or awake. Under the camp, through a brittle cellar
+floor, a vault of spikes that needs the dash (a Star Fragment at the end). Above the
+camp, the climb to the Data Conduits — the Meadows' only way out, its hatch jammed
+until NULLFANG is free: *The conduit hatch above the camp is jammed by NULLFANG's
+binding. Free the lion before you climb.*
+**And once, in the window between the sage and the bell, he comes out on his own.**
+It happens where the sage sends her: in the hub, at the foot of the climb above the
+meadow (A2, west end) — *NULLFANG comes along the road from his enclosure and stops.
+The purple goes out of him. He is looking at you, and nothing is driving it.* — or, for
+a player who walks east instead, at the camp's east end by the lair (*NULLFANG walks out
+of the enclosure and stops…*). He stops well outside his own reach and the purple goes
+out of him — the same authored veins running clean that the purifier will one day make
+permanent. Then *a bell answers from above the meadow. The order is written back into
+him, and he turns away.* He does not speak; he never has. Nothing is taken from her and
+nothing holds her controls. It happens once, and only after the corridor meeting.
 **Why it is here.** This is the sage's sentence happening in front of her instead of
 being quoted at her: he is resisting, and something else keeps winning. It is also why the
 climb above the meadow stops being an errand. (Comic p29; `flags.nfBreak`.)
 
-**Story.** Ratchet's standing lines change with what she has done: *Cat-frame. Cute.
-Don't touch the stock with those claws.* → *Heard the Meadows went quiet. Heard it
-was you. Prices stand, mind.* → *Take what you need. I salvage from the dead, and you
-keep making fewer of them.* And once, after her first death: *You came back. Your husk
-was still warm when I passed it.*
+**Story.** Ratchet's standing lines follow the story's order (`ratchetStandingKey`):
+the blade (*The maintenance passage beside the marble quarry leads to the first
+Sage…*) → the sage (*Word crawls up even from the deaf places…*) → the sage AND the bell:
+*It threw you once. The corridor still has the dent. Go and put one in it.* → the lion
+free: *The lion is quiet, and the hatch over my camp unjammed with him. That climb goes
+up into the Data Conduits. Go on — I'll keep the stall open.* Between milestones, the
+war's tiers: *Cat-frame. Cute. Don't touch the stock with those claws.* → *Heard the
+Meadows went quiet…* → *Take what you need…* And once, after her first death: *You came
+back. Your husk was still warm when I passed it.*
 
-### 2.16 NULLFANG — A4 (the first guardian, the fork, and the cave that closes the loop)
+### 2.16 NULLFANG — A4 (the first guardian, freed, and the cave that closes the loop)
 
-**Where.** The end of the kingdom — and the last thing she does in it, with the bell
-already silent and the sage already standing.
+**Where.** The end of the kingdom — and the last thing she does in it. The lair refuses
+her until the story is ready, saying what is missing at the door, in order: *Bring raw
+marble from the cave beneath the meadow to Ratchet. You need his cleansing blade.* →
+*The Sage knows the binding. Take the maintenance door beside the marble quarry and
+free them first.* → *CHIME keeps restoring the order. Take the climb above the meadow
+and silence the bell before returning to NULLFANG.*
 **What happens.** *NULLFANG, THE VIRUS BEAST.* *It remembers the corridor.* Two
 phases — at half health it stalks faster, crouches shorter, chains its leaps. It is
 the one guardian that can be dazed: *⚡ NULLFANG is reeling — hit it NOW.* When it is
-down it kneels, still looking at her, and the game asks:
-> **NULLFANG is down. It is still looking at you.**
-> ◀ **TAME** — *Cut the virus out. It lives, and it owes you.*
-> ▶ **FINISH** — *End it. Take its strength for your own.*
+down it kneels, still looking at her — and the blade frees it. **There is no kill
+choice in the shipped game** (`TAME_ONLY`, js/braid.js: the fork machinery records a
+mercy on the spot) and **no freeing without the blade**: a guardian brought down by
+claws alone is held together by the song at a sliver of health — *Claws cannot cleanse
+the song. The PURIFIER can.* — and nothing is written to the Braid until the blade does
+it.
+- → the purification film → *The virus is destroyed — NULLFANG is free. He seems to like
+  you.* → **NULLFANG'S OATH** — *Once each room, the blow that would break you is
+  answered instead — it comes out of the dark and roars them off you.*
 
-- TAME → the purification film → *The virus is destroyed — NULLFANG is free. He seems
-  to like you.* → **NULLFANG'S OATH** — *Once each room, the blow that would break you is
-  answered instead — it comes out of the dark and roars them off you.* (*NULLFANG
-  answers.*)
-- FINISH → the game closes the distance and lands the blow itself → **RESOLVE** — *You
-  took what it had. Every strike you land from here hits 18% harder, forever.*
-
-Either way: **FireDash**, a Power Cell, the **SCRAPPLATE** suit (Shard Volley), the
-fang relic. *The ground shifted — a CAVE MOUTH has opened in the lair.*
+Then **FireDash**, a Power Cell, the **SCRAPPLATE** suit (Shard Volley), the fang
+relic. *The ground shifted — a CAVE MOUTH has opened in the lair.* And **who points her
+on**: *Above the camp, the conduit hatch unjams. The climb to the Data Conduits is
+open.* — then Ratchet at the camp says it again (§2.15).
 
 **And the cave behind the lair is a room she has already been in the far end of.** The
 grotto GA1 — scrap, a pocket, a bench — opens onto the same tunnel the maintenance door
 let her into from the quarry (GA1T). The kingdom's map closes on itself: the way she
 sneaked in to free the sage becomes the front door once the guardian is no longer
 standing in it.
-**Story.** Every guardian kneels before it dies, and what she does first echoes
-loudest — the ending reel is built from these answers (§7). The comic should draw both
-branches; the reader's version is whichever the owner chooses for the book. The first
-kingdom is restored, the sword works, and the road to the other five is open.
+**Story.** The first kingdom is restored, the sword works, and the road on is open.
+(The FINISH branch — *RESOLVE* — still exists in code for a future mode and is not
+drawn for the book.)
 
 ### 2.17 End of the free chapter
 
-Leaving the camp for the Conduits in the free build: *END OF THE FREE CHAPTER — The
-Scrap Meadows are behind her. The Data Conduits are not. — Five kingdoms, five more
-guardians and the Null Core are waiting in the full game.*
+Leaving the camp for the Conduits — possible only once NULLFANG is free and the blade
+forged — in the free build: *END OF THE FREE CHAPTER — The Scrap Meadows are behind
+her. The Data Conduits are not. — Four kingdoms, four more guardians and Mother's
+hijacked song are waiting in the full game.*
 
 ---
 
@@ -433,13 +475,14 @@ Terminal: *ARCHIVE FRAGMENT, day 1042: the virus does not destroy. It repurposes
 is worse.*
 **Mono (dark until a cell):**
 > *I archived the whole network, once. Now I archive its ruins.*
-> *They say the infection speaks from beneath the Archives — a voice called MOTHER.*
+> *The order comes up from beneath the Archives in Mother's voice. The voice is hers. The command is not.*
 > *Cracked walls hide old maintenance shafts. Strike them. The Depths reward the curious.*
 
 Standing: *Query: purpose. A single maintenance unit against a network is not a plan.*
 → *Correction logged. One unit is not a plan. It is, apparently, a method.* → *I have
 rewritten your entry three times. I am going to stop rewriting it now.*
-**Story.** The first time anyone names what is under the Archives: MOTHER.
+**Story.** The first time anyone says where the order comes from — and that the voice
+is Mother's while the command is someone else's.
 
 ### 3.4 TALONHOST — B4
 *TALONHOST, THE IRON EAGLE.* It hangs above, spawns and slams. The fork: TAME → *The
@@ -449,27 +492,32 @@ mouth → the Canal Sage: *It archived the data canals inside its own head. Its 
 cannot be carried in a bag — it teaches.* (+25 IQ)
 
 ### 3.5 THE CRYSTAL CACHE — B5, V1, V1B, V2, X1 (the second sword)
-**Where.** Past the eagle: a vault door that wants three sigils (V1), a breakable
-ceiling (X1), and the live rail from above (V2). The Cache is a kingdom of its own.
+
+**Where.** Past the eagle: a vault door that wants three sigils (B5 → V1) — and B5's
+east side, which leads to the same place, is sealed with it (*This passage belongs to
+the sealed vault. Three sigils open it.*); a breakable ceiling up to X1; and the live
+rail from above (V2). Sigil I comes from the Prowler, II from every Mind Node, III from
+a ledge nobody climbs (*Hidden on a ledge where nobody climbs. The last seal of the old
+vault.*). So Kerf is met late — after the Prowler.
+**The Prism Prowler, X1.** The rival robo-cat — never indexed, never infected, red on
+the outside and clear blue underneath. When it is down: *The Prowler stands down. There
+was never a virus in it — only a guard keeping its word.* Behind it, with the PURIFIER
+in hand, the second blade: **Second Purifier Sword** — *A second blade, still separate.
+Dual swords are equipped. Hold attack to charge, then release for a hurricane swirl.*
+Held attack is now the **hurricane**. The Crystal Sage: *It harvested this seam before
+the song. It knows exactly what your marble blade is worth — and pays tribute to it.*
 **Kerf, V1B — awake, the only unit that never went dark:**
 > *Do not shout. My receivers were stamped dead at the factory and I have never heard a sound — which is the only reason I am still myself.*
-> *Kerf. The Deaf System quarried this seam, and I am the one who cut what came out of it.*
-> *One blade whole is the last thing left that can burn the Song out of anything. So I split the purifier. One end I laid where a clever machine would find it and forge it. The other I buried at the bottom of the world and sat down beside.*
-> *The white thing prowling out there is mine as well. I set it to keep the half. It has forgotten me, and it will not know you either.*
-> *Take the other end when your paws can hold it. Join what I cut, and do not bring it back to me — I have sat with the pieces long enough.*
+> *Kerf. The Deaf System has quarried this seam for generations. Long before me, one of our harvesters gave a marble to a workshop keeper above. Your trader still wears it.*
+> *The second edge in the cache above is mine. I shaped it from this seam, the way his line shaped yours. It was never half of anything. It is its own blade.*
+> *The white cat up there keeps it for me. There was never a song in that one — it was guarding, not infected. If it let you pass, it decided you were asking, not taking.*
+> *Two blades stay two. Joining them is a different piece of work.*
 
 Standing (read off the floor): *I felt you three rooms out. Even step, light weight,
 no hurry. Nothing the Song drives walks evenly.*
-**The Prism Prowler, X1.** The rival robo-cat — never indexed, never infected, red
-on the outside and clear blue underneath. TAME → *The virus is destroyed — the Prowler
-is free. Just a cat again.* Behind it, with the PURIFIER in hand:
-> **THE OTHER END** — *The buried half. The two handles close like a promise kept — one blade, two white ends. It wants to fly.*
-
-Two swords. Held attack is now the **hurricane**. The Crystal Sage: *It cut the first
-pillar. It knows exactly what your sword is worth — and pays tribute to it.*
-**Story.** Kerf split the one thing that could burn the Song out of anything, so that
-no single machine could be made to give it up. The pillar Ratchet forged was her
-laid end; the Prowler guards the buried one. (See §8.2.)
+**Story.** Two separate swords, each shaped from the same seam; neither is half of an
+older blade. The Prowler is a boundary, not a disease. (See §8.2 for what is still
+missing from the canon version of this chapter.)
 
 ---
 
@@ -513,7 +561,7 @@ Ice underfoot everywhere but one room. Terminal: *COLD STORAGE NOTE: the Prowler
 the ninth prototype crest and fled toward the crystal seams.*
 **The Nine-Lives Sage**, in the one floor the frost never reached:
 > *Nine lives the old fabricators gave us. I am on my ninth.*
-> *Beyond the ice sleeps the Archivist. It guards the Kernel Key.*
+> *Beyond the ice sleeps GLACIERE, the Archives' sentinel. It guards the Kernel Key.*
 > *Spend your lives well, kitten. The ninth is the one that matters.*
 
 Standing: *You have nine lives and no scars. That is a child's arithmetic.* → *You
@@ -522,11 +570,11 @@ You are on your first, and you are further down than I ever went.* Errand: the f
 index, from the Cold Stacks.
 
 ### 5.2 The Rime, the Stacks, the Lattice — D2, D4, D5, D6
-The Rime teaches GLACIERE's absolute-zero read early. THE COLD STACKS: the Archivist's
+The Rime teaches GLACIERE's absolute-zero read early. THE COLD STACKS: the sage's
 climb, the index at the top. Down: *LATTICE — it is still growing.* Destroyed; a cell.
 
 ### 5.3 GLACIERE — D3
-*GLACIERE, THE FROZEN PURIFIER* — the corrupted unicorn of the void: a void lance, ice
+*GLACIERE, THE FROZEN SENTINEL* — the corrupted unicorn of the void: a void lance, ice
 shards, nova crystals, void orbs; it shatters into parts. TAME → *The virus is
 destroyed — GLACIERE is free. She glides at your side.* Drops: the **Kernel Key** — *The
 seal below the Archives is broken* — a Power Cell, the **HALT** suit (Frost Lattice),
@@ -554,7 +602,9 @@ The Nest's hall, its bench. Down: *THE LENS — the Eye is looking back.* The la
 five constructs. Destroyed; a cell.
 
 ### 6.3 MOTHER-V — E3
-*MOTHER-V, the Null Core.* No fork — she is never asked. Four phase bands; each shift
+*MOTHER-V, THE HIJACKED SONG.* No fork — she is never asked, because she is never an
+enemy to end: when the last band breaks, *The command burns out of MOTHER-V. Her song
+stops — and she is still there.* Four phase bands; each shift
 shatters two more plates, the core burns brighter, and one crueller trick unlocks.
 Her moves, all warned on screen:
 - **NULL WAVE** — the tell is silence: the halo freezes and the core runs black. A black
@@ -568,26 +618,29 @@ Her moves, all warned on screen:
   Finish it.
 
 **Story.** She is the singer, not the author. The virus made her Song a command; the
-cat gives the Song back by switching her off. The comic should draw her as light that
+cat cuts the command out of it, and Mother lives. The comic should draw her as light that
 grew mass, never as a villain with a face.
 
 ---
 
 ## 7. THE ENDING — A REEL, NOT A FILM
 
-*SYSTEM PURGED. The Null Core dissolves. Somewhere far above, sunlight touches rusted
-fur. Thank you for playing CLAWBYTE.*
+*SYSTEM PURGED. MOTHER-V is free. Her song is silent, and it is her own again. — What
+remains is the Eye that stole her voice — exposed now, with nothing left to sing
+through. Thank you for playing CLAWBYTE.*
+
+That second line is deliberately all the ending says about the Eye: the game has no
+Eye encounter yet (§8.1), so it tells the truth — he is exposed, not beaten.
 
 The ending is cut from what the player answered. An opener and a closer always play;
 between them, one short vignette per guardian, **only if that guardian is still
 alive**. Order: Mother switching off (her switching off is what turns the lights back
 on across the world), the sunrise, the machine folk, then NULLFANG, TALONHOST,
-GLACIERE, FURNACE CHOIR, the Prowler — each present only if tamed — then the last
-frame. A player who spared nobody gets the same sunrise over an emptier field. That is
-the honest version of what they chose, not a punishment.
+GLACIERE, FURNACE CHOIR, the Prowler — each present only if freed — then the last
+frame. In the shipped game every guardian is freed, because freeing is the only answer
+the fork gives (§2.16).
 
-**For the comic:** draw the reel with every guardian alive. That is the book's ending;
-the game's other endings are subsets of it.
+**For the comic:** draw the reel with every guardian alive. That is the book's ending.
 
 ---
 
@@ -595,7 +648,12 @@ the game's other endings are subsets of it.
 
 These are not fixed by this document. Each needs a ruling, and the game will follow it.
 
-1. **The evil robot is never met.** He exists in the film (*Until an evil robot
+1. **The evil robot is never met — STILL MISSING (2026-10-08).** Canon (Draft 2,
+   `story-draft2/CLAWBYTE-00-story-foundation.md`) has Mother cleansed and then the Eye
+   confronted and defeated. The game now does the first half — MOTHER-V is cleansed and
+   lives, and nothing calls her the Null Core — and ends truthfully on the Eye *exposed*,
+   because there is no Eye room, art or fight. Building that encounter (art through
+   Higgsfield, a room, a fight) is the remaining work. He exists in the film (*Until an evil robot
    hijacked her Song*), in Ratchet's fragments (*The command was his, not hers*) and in
    the forge errand — and nowhere else. The final fight is against MOTHER-V, the
    hijacked singer. Nothing in the game confronts, names or defeats him. The game also
@@ -604,11 +662,18 @@ These are not fixed by this document. Each needs a ruling, and the game will fol
    the evil robot — his instrument, his name in the Depths — and the Lens (*the Eye is
    looking back*) is the first time he looks at her. His own fight is chapter six,
    not yet built.
-2. **Who made the first sword.** Ratchet forges the PURIFIER from the pillar shard
+2. **Who made the swords — RESOLVED IN TEXT, one event still missing.** Kerf no longer
+   says she split a purifier; Ratchet shapes the first blade from cave marble, and Kerf
+   says she shaped the second from the same seam. Canon wants the second shaping to be
+   PLAYED (harvest a raw nodule, Kerf shapes it at her bench); the game still grants the
+   second sword as a pickup behind the Prowler, so Kerf speaks of it as already made.
+   Old note: **Who made the first sword.** Ratchet forges the PURIFIER from the pillar shard
    (played). Kerf says she split a whole purifier and laid one end *where a clever
    machine would find it and forge it* (spoken). Compatible if the pillar is her laid
    end; no line says so yet. Proposal: one line in Ratchet's forging speech.
-3. **The Null Core.** Canon says the Null Core is infrastructure, not the broadcaster.
+3. **The Null Core — RESOLVED.** Servo now says *since Mother's song went wrong*; the
+   boss bar reads *MOTHER-V, THE HIJACKED SONG*; the ending frees her. Old note:
+   **The Null Core.** Canon says the Null Core is infrastructure, not the broadcaster.
    The game still has Old Servo say *since the Null Core began broadcasting*, calls
    MOTHER-V *the Null Core*, and ends on *The Null Core dissolves*. Proposal: keep the
    name as MOTHER-V's housing and change Servo's line to *since the Song went wrong*.
@@ -628,7 +693,10 @@ These are not fixed by this document. Each needs a ruling, and the game will fol
    play, only guardians (TAME) and sages (the purifier) are freed; every other machine
    is broken for scrap. If rank-and-file machines are to be freed, that is a mechanic
    that does not exist yet.
-6. **Two captions are written and never shown** in the film: *Every unit woke to it,
+6. **Vault Sigil III is placed twice** (`js/world.js`: A7, the meadow shaft, and C1, the
+   Foundry tower). Its card no longer names a kingdom, so the text is true either way;
+   which placement stays is a world decision.
+7. **Two captions are written and never shown** in the film: *Every unit woke to it,
    worked to it, slept to it.* and *While she slept, the world changed. She had escaped
    the infection.* The comic may use them; the game does not.
 
@@ -647,7 +715,8 @@ These are not fixed by this document. Each needs a ruling, and the game will fol
 - **Scrap** is money. Only the shop takes it.
 - **IQ ◈** is bought with thought — Mind Nodes, the Cognition Trials, errands — and
   spent on the Neural Tree.
-- **Power Cells** wake machines. She starts with one; there is a spare in Ratchet's den;
+- **Power Cells** wake machines. She starts with none: Ratchet's own battery is in his
+  drawer, and waking him earns the spare he keeps for Servo;
   every guardian and every construct is built around one; two sages keep one. The
   supply is exactly the demand. *Wakes one machine. There are never spare ones.*
 - **Crests** are ceramic seals over the chest port: *Before the song, every unit left
@@ -655,15 +724,18 @@ These are not fixed by this document. Each needs a ruling, and the game will fol
   She left the Foundry with that port empty.
 - **Death** is *CONNECTION LOST*. Her husk stands where she fell and keeps what she was
   carrying; she wakes at the last bench. In Nine Lives, the ninth death erases the save.
+- **Errands start when they are given.** A cull counts kills made after it was accepted;
+  a place counts once she stands in it after being asked; an errand's object is in the
+  world only while somebody is waiting for it.
 - **The Braid.** Every kill and every rest is answered three ways — MERCY (*Cure it. The
   ground remembers.*), SEVER (*End it. Take what is left.*), THE SIGNAL (*Take its gift.
   Something is owed.*) — and *what you do FIRST echoes loudest*. Each answered fork
   drips one more of Ratchet's five story fragments:
-  1. *Mother's song used to bring us together. An evil robot hijacked it and hid a virus in the melody. The command was his, not hers.*
-  2. *Another piece: the day it began, nobody screamed. The song is quiet. My neighbours just stopped, mid-sentence, and turned toward the tower. That was the whole apocalypse — a turn of the head.*
-  3. *The guardians went last, you know. They were made to protect us, so the song had to shout them down — and it took all five before anyone stopped fighting it.*
-  4. *You keep looking at my necklace. My daughter cut that crystal, before. When the song reached for me my eyes went red — and the crystal burned white, and I shut them, and when I opened them they were mine again. Blue.*
-  5. *The necklace protected me, but I was frightened and alone. I disconnected my battery and waited in sleep mode, hoping someone would bring me back. You did.*
+  1. *Mother’s song kept the robots of every kingdom in harmony. Someone unknown hacked its frequency and hid a virus inside it.*
+  2. *The infected song turned our neighbours against each other. You were already asleep for recharging. You missed that broadcast; you were not made immune to it.*
+  3. *The guardians went last, you know. They were made to protect us, so the song had to shout them down — and it took every one of them before anyone stopped fighting it.*
+  4. *The marble in my necklace was an old gift to my ancestor. It slowed the virus long enough for me to think. It could not stop the infection.*
+  5. *Everyone around me was infected. Before I lost myself, I removed my own battery and left that letter. You brought me back.*
 
 ---
 

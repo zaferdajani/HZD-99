@@ -40,6 +40,7 @@ const SUITE = [
   ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
+  ['story-order', 'the story sheet walked through the real build: beat order, gates, named things, migration'],
   ['comic-rewards', 'saved milestone slideshows, updates, accessibility and failure recovery'],
   ['story-battery', 'unique workshop battery and legacy save compatibility'],
   ['story-rescue', 'recoverable machines and persistent cleansing'],
