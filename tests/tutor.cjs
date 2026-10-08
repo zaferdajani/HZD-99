@@ -142,7 +142,13 @@ const { chromium } = require('playwright');
       else if (typeof w.die === 'function') w.die();
       else w.dead = true;
     }
-    const q = G.pickups.find(x => x && !x.dead);
+    // ...the MACHINE'S scrap, specifically. The floor also holds placed
+    // scrap now — A0's teaching secrets keep 20 each sealed behind a brittle
+    // plug and under a brittle crust (js/world.js), and placed scrap carries
+    // a flagKey. "The first pickup" was the sealed one, so this teleported her
+    // INTO the rock to take it: something no player can do, and it reported
+    // the secrets' 40 as the machine's payout (12 -> 72).
+    const q = G.pickups.find(x => x && !x.dead && !x.flagKey);
     // ...and DRIVE the pickup rather than waiting for the loop to do it. Every
     // action that only sets up a condition and then hopes the game's own rAF
     // runs is a step that passes on an idle machine and hangs on a busy one:
@@ -214,6 +220,21 @@ const { chromium } = require('playwright');
       const pw = document.querySelector('.repair-power');
       if (pw && !pw.disabled) pw.click();
       for (let i = 0; i < 120 && G.state === 'REPAIR'; i++) update(1 / 60);
+      return;
+    }
+    if (G.state === 'CUT') {
+      // RATCHET WAKING IS A FILM now (the story's boot cut after the repair),
+      // and this driver did not know the state existed: it waited it out in
+      // real time, about 135 of its 150 tries, and the step then finished on
+      // try 147-149 or ran out depending on a frame or two — "buy -> buy",
+      // the heal lesson measured while still in the shop. A player who has
+      // seen it HOLDS to skip (CUT_SKIP_HOLD, through the real input path);
+      // so does the harness. What follows the film runs exactly as it would.
+      for (let i = 0; i < 120 && G.state === 'CUT'; i++) {
+        keys['Enter'] = 1; keysP['Enter'] = i === 0 ? 1 : 0;
+        update(1 / 30);
+      }
+      keys['Enter'] = 0; keysP['Enter'] = 0;
       return;
     }
     if (G.state === 'DIALOG') {
