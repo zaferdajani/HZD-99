@@ -48,6 +48,7 @@ const SUITE = [
   ['sage-quiet', "comic page 26: the sage's promise closes its end of the network"],
   ['mobile-platform', 'the shipped touch recognizer and the two-state pause, in both built pages'],
   ['gesture-input', 'the picture answers taps and swipes, and nothing the controller owns changes'],
+  ['input-contract', 'one struct the game reads: the devices unchanged, and a struct alone can play'],
   ['winch-integration', 'modular yard machine and persistent cleansing'],
   ['manhwa-reader', 'revised illustrated edition and complete written opening'],
   ['entrance-integration', 'painted entrances share world anchors without duplicate mouth overlays'],

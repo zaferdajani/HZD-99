@@ -2045,6 +2045,11 @@ function tickNPCVox() {
   }
 }
 function update(dt) {
+  // THE INPUT CONTRACT IS FILLED ONCE PER SIMULATION STEP, here rather than in
+  // mainLoop, because every harness in tests/ calls update() directly and a
+  // struct that only existed inside the real loop would be a contract the game
+  // keeps and the tests do not. See PI / pollInput in js/engine.js.
+  if (typeof pollInput === 'function') pollInput();
   if (typeof ComicRewards !== 'undefined' && ComicRewards.tick(dt)) return;
   if (typeof heroMotionGate === 'function' && heroMotionGate(dt)) return;
   if (typeof tutorialTick === 'function') tutorialTick();

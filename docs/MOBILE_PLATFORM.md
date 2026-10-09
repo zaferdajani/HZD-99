@@ -120,8 +120,45 @@ pausing the picture because a desktop player clicked another window would be a
 change to how the game feels — which adding a touch layer is not a licence to
 make.
 
-The larger idea from the drop, a single `PlayerInput` struct that keyboard, pad
-and touch all write, is still unbuilt; see the agent-guide section below.
+### The input contract
+
+The drop's best idea, and now built: `PI` in `js/engine.js`.
+
+The action layer was already shared — `KEYB` maps an action to the codes that can
+produce it, and all three devices write codes — but two things had leaked past it
+into the simulation. `Player.update` read `TOUCH.axis` to find out how hard a
+thumb was pushing, and read the raw `GP_L` / `GP_R` codes to decide whether a pad
+was walking or running. The movement resolver therefore knew which device was
+live, which is the one thing an input layer exists to prevent: a fourth device
+could not be added without editing physics, and nothing that was not a real
+finger could drive the game at all.
+
+`PI` carries what the actions cannot:
+
+| field | what it is |
+|---|---|
+| `moveX` / `moveY` | direction **with magnitude**. A key has none and reads ±1; the touch stick's push *is* its speed and reads 0.34–1. The pad deliberately has none either — on a pad full speed is a decision (click L3 while moving), not a tilt, so reading its tilt here would quietly replace that decision with a dial. |
+| `run` | "give me this device's full speed". A keyboard always wants it; a thumb expresses it through magnitude; a pad wants it once the stick is clicked in and gives it up when the stick centres. That latch is a pad idiom and now lives with the pad instead of on the player. |
+| `down` / `pressed` | the same answers `inD` / `inP` give, per action, as data. |
+
+**And it is a seam, not a cache.** `setInputSource(fn)` replaces the devices with
+any function returning one of these structs — a test, a recorded run, an agent —
+and the game cannot tell, because from the resolver down nothing is left that
+knows what a finger is. `tests/input-contract.cjs` measures both halves: the
+three devices still say exactly what they said, the magnitude reaches the physics
+(340 px/s at a full push against 136 at 0.4 — the only difference being the
+number in the struct), and a struct with no device behind it walks and jumps her
+494 px across A1 while every key on the board is held down and ignored.
+
+`inD` / `inP` **dispatch** rather than always reading `PI`, deliberately: with no
+source installed they are the same two expressions they have always been, so the
+device path keeps its exact semantics and its exact cost in the hottest accessor
+in the game, and nothing has to have called `update()` first for a key to be
+visible — `tests/input-focus.cjs` reads `inP` straight after a `keydown`.
+
+This is also the half of **replay determinism** that was missing: a recorded
+stream of these structs is now a thing the game can be driven by. What remains
+for that is a seed and a state hash, and the harness to compare them.
 
 ## The three defects fixed before it was committed
 
@@ -177,15 +214,14 @@ cannot be enforced here at all: there is no `src/`, and `build.cjs` concatenates
 Three ideas in it are genuinely absent here and worth something, in increasing
 order of cost:
 
-- **A single `PlayerInput` contract.** Keyboard, pad and touch as adapters
-  writing one struct the game reads. RULE ONE already demands parity and
-  `tests/tap.cjs` measures it, but the three remain three paths through `keys`,
-  `keysP`, `TOUCH` and the pad bindings. This is the change that would make the
-  file above droppable instead of graftable.
+- ~~**A single `PlayerInput` contract.**~~ **Built** — `PI` and
+  `setInputSource` in `js/engine.js`; see "The input contract" above. The
+  movement resolver no longer reads a device.
 - **Replay determinism in CI.** A recorded input stream plus a seed, replayed
-  headless, failing the build on a state-hash mismatch. The hard half already
-  exists and was paid for twice — `tests/drawclock.cjs` and `tests/meadow.cjs`
-  exist because draw sampled an unfreezable clock.
+  headless, failing the build on a state-hash mismatch. Two thirds of it exists
+  now: draw purity was paid for twice (`tests/drawclock.cjs`, `tests/meadow.cjs`,
+  both written because draw sampled an unfreezable clock) and the input contract
+  above is the stream's shape. What is missing is a seed and a state hash.
 - **Headless-runnable game logic.** The precondition for the above, and a
   refactor of the engine's spine: `update()` reads `keys`, `player`, `cam` and
   `G` as globals in one concatenated scope and `draw()` runs from the same loop.
