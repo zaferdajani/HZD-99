@@ -1738,27 +1738,21 @@ class Player {
         const turn = !ice && Math.sign(this.vx) === -dir ? 1.6 : 1;
         this.vx += dir * acc * turn * dt;
         // frozen joints: the Archivist's beams halve her top speed for a spell
-        // ...and THE STICK'S PUSH IS A SPEED, on the surface that has one. A
-        // phone's thumb-stick is analogue and this game threw the magnitude
-        // away, so touch had exactly one gait: full sprint, always. There is no
-        // way to inch up to a ledge with a control that only knows "go".
-        // Keyboard and pad are untouched — a key has no magnitude to read, and
-        // TOUCH.axis is 0 unless a thumb is actually on the stick.
-        const push = (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.axis) || 1;
-        // ...AND THE PAD WALKS UNTIL THE STICK IS CLICKED (owner, 2026-09-05).
-        // Read off the raw GP codes rather than PAD.on: a pad left plugged in
-        // beside a keyboard must not slow the keyboard down. The run is armed
-        // by the click while she is already moving and disarmed the moment the
-        // stick comes back to centre — the next push starts at a walk again,
-        // which is what makes the click a decision rather than a toggle.
-        const padMove = !!(keys.GP_L || keys.GP_R);
-        if (padMove && inP('RUN')) this.padRun = 1;
-        const padCap = padMove && !this.padRun ? Math.min(1, PAD_WALK_VX / this.speed()) : 1;
+        // ...and HOW HARD SHE IS BEING PUSHED, from the input contract rather
+        // than from a device. A phone's thumb-stick is analogue and this game
+        // threw the magnitude away, so touch had exactly one gait: full sprint,
+        // always, with no way to inch up to a ledge. It reads TOUCH.axis to fix
+        // that and the raw GP codes to decide whether a pad was walking — which
+        // meant the movement resolver knew which device was live, and a fourth
+        // device could not be added without editing physics. PI.moveX carries
+        // the magnitude and PI.run carries "full speed, please", however the
+        // device chose to say it (js/engine.js, THE INPUT CONTRACT).
+        const push = Math.abs(PI.moveX) || 1;
+        const padCap = PI.run ? 1 : Math.min(1, PAD_WALK_VX / this.speed());
         const cap = this.speed() * (this.slowT > 0 ? 0.5 : 1) * push * padCap;
         this.vx = clamp(this.vx, -cap, cap);
         this.face = dir;
       } else {
-        this.padRun = 0;                        // stick let go: the run is over
         const s = Math.sign(this.vx);
         this.vx -= s * fric * dt;
         if (Math.sign(this.vx) !== s) this.vx = 0;

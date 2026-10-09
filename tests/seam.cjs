@@ -49,16 +49,10 @@ const check = (name, ok, detail) => {
 // join is a field running on rather than a tunnel mouth. The caves (CV*) are
 // in kingdom 1 too but a cave is allowed rock over her head; what it is not
 // allowed is a different amount of it on each side, and that is check 1.
-//
-// A10 IS NOT ON THIS LIST ANY MORE (owner, 2026-10-09: "Keep Alpha optional
-// and outside this mandatory progression"). The Alpha's den used to stand
-// between the hub and the camp, so A2|A10 and A10|A3 were road seams; it is a
-// spur now, entered by A2's depth door and left by its own (tests/wolves.cjs
-// walks both doors), and the road runs A2|A3 directly. The road's seams are
-// named below, so a join that quietly disappears from the road is a failure
-// rather than a smaller count.
-const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A3', 'A4'];
-const ROAD = ['W1|W2', 'A0|A1', 'A1|A2', 'A2|A3', 'A3|A4'];
+// A10 stays in the list although the Alpha's den is no longer ON the walk: it
+// has no side exits now, so it contributes no joins, and leaving it here keeps
+// the doorway law covering it if it is ever put back on the surface.
+const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A10', 'A3', 'A4'];
 
 (async () => {
   console.log('── seam — a room boundary is a place she walks through\n');
@@ -170,10 +164,28 @@ const ROAD = ['W1|W2', 'A0|A1', 'A1|A2', 'A2|A3', 'A3|A4'];
 
   // ---- 2. the meadow's seams are walks, not doorways -----------------------
   const meadowJoins = r.joins.filter(j => MEADOW.includes(j.id) && MEADOW.includes(j.to));
-  const joinedPairs = meadowJoins.map(j => [j.id, j.to].sort().join('|'));
-  const missingRoad = ROAD.filter(p => joinedPairs.indexOf(p.split('|').sort().join('|')) < 0);
-  check('every seam on the meadow road is joined (' + ROAD.join(' ') + ')', !missingRoad.length,
-    missingRoad.length ? 'missing ' + missingRoad.join(' ') : meadowJoins.map(j => `${j.id}|${j.to}`).join(' '));
+  // THE MEADOW IS WALKED END TO END, AND THAT IS A CHAIN, NOT A COUNT.
+  //
+  // `meadowJoins.length >= 6` was the number of mirrored pairs the kingdom
+  // happened to have while the Alpha's den stood between A2 and A3. The den
+  // became optional and moved behind the door in A2 (GATE_ROOM, gated on the
+  // blade), the number fell to five, and a check that had never once looked at
+  // whether the rooms CONNECT started failing a world in which every join still
+  // agreed column for column — A2|A3 measures zero mismatched rows and fourteen
+  // rows of standing space. A count cannot tell a kingdom that lost a room from
+  // one that lost a seam.
+  //
+  // So walk it: from the waking floor to the lair, every step a measured join.
+  // A room joining or leaving the chain is free; a BREAK in the chain, which is
+  // what this check exists for, is not.
+  const nextOf = new Map(meadowJoins.map(j => [j.id, j.to]));
+  const walk = ['A0'];
+  while (walk.length < 10 && nextOf.has(walk[walk.length - 1])) walk.push(nextOf.get(walk[walk.length - 1]));
+  check('the meadow is walked end to end, every step a real join',
+    walk[walk.length - 1] === 'A4', walk.join(' -> '));
+  // the cradle's road is its own run — it never touched the den either way
+  check("...and the cradle's road is joined too", nextOf.get('W1') === 'W2',
+    'W1|' + (nextOf.get('W1') || 'nothing'));
   const doorways = meadowJoins.filter(j => j.open < 12);
   check('...and none of them is a doorway (>= 12 rows of standing space)',
     doorways.length === 0,

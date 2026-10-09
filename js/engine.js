@@ -95,6 +95,7 @@ const PAD = {
   down: {},          // live button state, for the config screen
   lastPress: -1,     // most recent button index, for "press to bind"
   listen: null,      // action currently awaiting a button
+  run: false,        // the stick has been clicked in: full speed until it centres (pollInput)
   seen: false,
 };
 function padLabel(i) {
@@ -419,8 +420,86 @@ if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugin
 // waking rooms a verb that has not been taught reads as not pressed, whatever
 // the finger did. See TUT_UNLOCK in game.js (function hoisting makes it
 // callable from here despite file order).
-function inD(n) { if (typeof tutAllows === 'function' && !tutAllows(n)) return false; return KEYB[n].some(c => keys[c]); }
-function inP(n) { if (typeof tutAllows === 'function' && !tutAllows(n)) return false; return KEYB[n].some(c => keysP[c]); }
+// ---------------------------------------------------------------------------
+// THE INPUT CONTRACT. One struct the game reads; three devices that write it.
+//
+// The action layer was already shared — KEYB maps an action to the codes that
+// can produce it, and keyboard, pad and touch all write codes — but two things
+// had leaked past it into the simulation. Player.update read TOUCH.axis to find
+// out how hard a thumb was pushing, and it read the raw GP_L / GP_R codes to
+// decide whether a pad was walking or running. The physics therefore knew which
+// device was live, which is the one thing an input layer exists to prevent: it
+// means a fourth device cannot be added without editing the movement resolver,
+// and it means nothing can drive this game that is not a real finger.
+//
+// PI is that fourth thing. It carries what the actions cannot:
+//
+//   moveX / moveY  direction WITH MAGNITUDE. A key has none and reads +-1; the
+//                  touch stick's push IS its speed and reads 0.34..1 (see
+//                  tApplyJoy). The pad deliberately has none either — on a pad
+//                  full speed is a DECISION (owner, 2026-09-05: click L3 while
+//                  moving), not a tilt, so reading its tilt here would quietly
+//                  replace that decision with a dial.
+//   run            "give me this device's full speed". A keyboard always wants
+//                  it; a thumb on a stick expresses it through magnitude; a pad
+//                  wants it once the stick has been clicked in, and gives it up
+//                  when the stick centres. That latch is a PAD IDIOM and now
+//                  lives with the pad instead of on the player.
+//   down/pressed   the same answers inD/inP give, per action, as data.
+//
+// AND IT IS A SEAM, not a cache. setInputSource() replaces the devices with any
+// function that returns one of these structs — a test, a recorded run, an
+// agent — and the game cannot tell the difference, because from the resolver
+// down there is nothing left that knows what a finger is. That is the half of
+// replay determinism that was missing; see docs/MOBILE_PLATFORM.md.
+//
+// inD/inP DISPATCH rather than always reading PI, and deliberately: with no
+// source installed they are the same two expressions they have always been, so
+// the device path keeps its exact semantics and its exact cost in the hottest
+// accessor in the game, and nothing has to have called update() first for a
+// key to be visible (tests/input-focus.cjs reads inP straight after a keydown).
+const PI = { moveX: 0, moveY: 0, run: true, down: {}, pressed: {} };
+let INPUT_SRC = null;
+function setInputSource(fn) {
+  INPUT_SRC = typeof fn === 'function' ? fn : null;
+  releaseInput();                       // nothing a real finger left behind survives the handover
+  pollInput();
+}
+function pollInput() {
+  if (INPUT_SRC) {
+    const s = INPUT_SRC() || {};
+    PI.moveX = +s.moveX || 0; PI.moveY = +s.moveY || 0;
+    PI.run = s.run !== false;
+    const d = s.down || {}, pr = s.pressed || {};
+    for (const n in KEYB) { PI.down[n] = !!d[n]; PI.pressed[n] = !!pr[n]; }
+    return PI;
+  }
+  for (const n in KEYB) {
+    PI.down[n] = KEYB[n].some(c => keys[c]);
+    PI.pressed[n] = KEYB[n].some(c => keysP[c]);
+  }
+  const x = (PI.down.RIGHT ? 1 : 0) - (PI.down.LEFT ? 1 : 0);
+  const push = (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.axis) || 1;
+  PI.moveX = x * push;
+  PI.moveY = (PI.down.DOWN ? 1 : 0) - (PI.down.UP ? 1 : 0);
+  // THE PAD'S RUN, armed by the click while she is already moving and given up
+  // the moment the stick comes back to centre — which is what makes the click a
+  // decision rather than a toggle. Read off the raw GP codes rather than PAD.on
+  // so a pad left plugged in beside a keyboard cannot slow the keyboard down.
+  const padMove = !!(keys.GP_L || keys.GP_R);
+  if (!padMove) PAD.run = false;
+  else if (inP('RUN')) PAD.run = true;
+  PI.run = !padMove || !!PAD.run;
+  return PI;
+}
+function inD(n) {
+  if (typeof tutAllows === 'function' && !tutAllows(n)) return false;
+  return INPUT_SRC ? !!PI.down[n] : KEYB[n].some(c => keys[c]);
+}
+function inP(n) {
+  if (typeof tutAllows === 'function' && !tutAllows(n)) return false;
+  return INPUT_SRC ? !!PI.pressed[n] : KEYB[n].some(c => keysP[c]);
+}
 function clearP() {
   for (const k in keysP) keysP[k] = 0;
   // ...and release the touch taps queued this frame — a tap is not a hold
