@@ -118,23 +118,55 @@ const { chromium } = require('playwright');
   check('every wind-up differs from rest in silhouette (IoU <= 0.86)',
     !tooSame.length, tooSame.map(k => k + ' ' + iou[k].toFixed(3)).join(', '));
 
-  // ---- 3. THE ALPHA IS PLACED, AND IT IS ON THE WAY -----------------------
-  const placed = await page.evaluate(() => {
+  // ---- 3. THE ALPHA IS PLACED — OFF THE ROAD, AND OPTIONAL ---------------
+  // THE OWNER'S RULE CHANGED (2026-10-09): "Keep Alpha optional and outside
+  // this mandatory progression"; "must not block the lion or be mandatory."
+  // This used to demand the den stand ON the critical path (A2 -> den -> A3).
+  // It now demands the opposite, and keeps the parts of the old check that
+  // still matter: the den exists, it is reached from the hub's depth door, the
+  // road home from it works, and the lion is reachable without it.
+  const placed = await page.evaluate(async () => {
     let room = null;
     for (const id in ROOMS) for (const e of (ROOMS[id].ents || []))
       if (e[0] === 'boss' && e[3] === 'alpha') room = id;
     if (!room) return { room: null };
-    // reachable from the meadow without a detour: A2 must lead to it and it
-    // must lead to the save room. A mini-boss you can walk past is not "the
-    // first mini-boss we face".
-    const from = Object.keys(ROOMS).filter(id =>
-      Object.values(ROOMS[id].exits || {}).indexOf(room) >= 0);
-    return { room, from, to: Object.values(ROOMS[room].exits || {}) };
+    const sideFrom = Object.keys(ROOMS).filter(id =>
+      Object.values(ROOMS[id].exits || {}).some(v => (v && typeof v === 'object' ? v.to : v) === room));
+    const sideTo = Object.values(ROOMS[room].exits || {});
+    const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, { tut: 1, woke: 1, crystal: 1 });
+    startGame(sv);
+    G.wake = G.cut = G.dialog = G.meet = G.break = G.bossEntry = null; G.tut = null; G.state = 'PLAY';
+    const walkDoor = (to) => {
+      const d = gateDoors().find(x => x.to === to);
+      if (!d) return false;
+      player.x = gateWorldX(d) - player.w / 2; player.y = (G.roomDef.h - 3) * TILE; player.vx = 0; player.vy = 0;
+      for (let i = 0; i < 30 && !player.on; i++) update(1 / 30);
+      G.state = 'PLAY'; G.dialog = null;
+      const ok = gateEnter();
+      let n = 0; while (G.gateWalk && n++ < 300) { G.state = 'PLAY'; update(1 / 30); }
+      G.bossEntry = null; G.dialog = null; G.state = 'PLAY';
+      return ok && G.roomId === to;
+    };
+    loadRoom('A2'); G.meet = null;
+    const inDen = walkDoor(room);
+    const home = inDen && walkDoor('A2');
+    // and the lion is reached without it: the camp's east seam, through the
+    // real crossing, with every milestone the lair needs and no Alpha
+    G.save.flags = { tut: 1, woke: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1 };
+    loadRoom('A3'); G.state = 'PLAY'; G.trans = null; G.break = null;
+    player.x = G.roomDef.w * TILE + 4; player.y = (G.roomDef.h - 4) * TILE; player.vx = 0;
+    checkTransitions();
+    const lion = G.trans && G.trans.to; G.trans = null;
+    return { room, sideFrom, sideTo, inDen, home, lion, a2r: ROOMS.A2.exits.R, alpha: !!G.save.flags.alpha };
   });
   check('the Alpha has a room', !!placed.room, placed.room || 'nowhere');
-  check('...and it is ON the critical path, not down a spur',
-    (placed.from || []).indexOf('A2') >= 0 && (placed.to || []).indexOf('A3') >= 0,
-    'from ' + (placed.from || []).join(',') + ' -> ' + (placed.to || []).join(','));
+  check('...OFF the road: no room walks into it sideways and it walks into none',
+    !(placed.sideFrom || []).length && !(placed.sideTo || []).length,
+    'from ' + (placed.sideFrom || []).join(',') + ' -> ' + (placed.sideTo || []).join(','));
+  check('...the optional den is reached from A2\'s depth door', placed.inDen, placed.room);
+  check('...and its own door walks her back to the hub (A10 -> A2)', placed.home);
+  check('the road runs on without it: A2 -> A3 -> A4 reached with the Alpha untouched',
+    placed.a2r === 'A3' && placed.lion === 'A4' && !placed.alpha, 'A2.R ' + placed.a2r + ', A3 east -> ' + placed.lion);
 
   // ---- 4. THE FIGHT -------------------------------------------------------
   const fight = await page.evaluate(async (room) => {

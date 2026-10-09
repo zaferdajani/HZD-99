@@ -115,12 +115,16 @@ function questVisit(room) {
     if (b && !b.reached) { b.reached = 1; G.toast(t('q_ready')); }
   }
 }
-// is this errand item allowed to lie in the world? Only while somebody is
-// waiting for it — before the ask it would make the errand finish itself, and
-// after the hand-in (questPay empties the bag) it would lie there again.
+// is this errand item allowed to lie in the world? From the start of the run
+// until it is handed in — never twice. It used to appear only once somebody
+// asked for it, which made the player who explored first come BACK to an
+// empty room after the ask (owner, 2026-10-09: "Reward early exploration:
+// remember discoveries and adapt later quest dialogue rather than making
+// players revisit an empty room"). Found early, it waits in the bag, and the
+// asker says so when they ask (questFoundEarly, js/progress.js).
 function questItemLive(item) {
   if (G.save.bag && G.save.bag[item]) return false;
-  for (const q of QUESTS) if (q.kind === 'fetch' && q.item === item) return qState(q.id) === 'active';
+  for (const q of QUESTS) if (q.kind === 'fetch' && q.item === item) return qState(q.id) !== 'done';
   return true;
 }
 // what this NPC has to say about work, if anything
@@ -185,8 +189,11 @@ function questTake(item) {
   G.save.bag[item] = 1;
   G.toast(t('got') + ' — ' + t('it_' + item));
   sfx('chest');
+  let wanted = false;
   for (const q of QUESTS)
-    if (q.kind === 'fetch' && q.item === item && qState(q.id) === 'active') { G.toast(t('q_ready')); }
+    if (q.kind === 'fetch' && q.item === item && qState(q.id) === 'active') { G.toast(t('q_ready')); wanted = true; }
+  // found before anybody asked: it is somebody's, and she keeps it for them
+  if (!wanted && t('pg_keep_it') !== 'pg_keep_it') G.toast(t('pg_keep_it'));
   persist();
 }
 // paid out by the NPC who asked, face to face

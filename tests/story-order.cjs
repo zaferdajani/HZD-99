@@ -412,11 +412,28 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       const d = questById('ratchet_deep'), r0 = qDone(d);
       loadRoom('A7');
       check('a place counts once she stands in it after being asked', !r0 && qDone(d));
+      // THE OWNER'S RULE CHANGED (2026-10-09): "reward early exploration —
+      // remember discoveries and adapt later quest dialogue rather than making
+      // players revisit an empty room". The object used to appear only once it
+      // was asked for; it now lies in the world from the start until it is
+      // handed in, and a find made before the ask is remembered by the asker.
       loadRoom('A6');
       const before = G.statics.some(s => s.type === 'item' && s.extra === 'coil');
       qSet('servo_coil', 'active'); loadRoom('A6');
       const during = G.statics.some(s => s.type === 'item' && s.extra === 'coil');
-      check('an errand\'s object lies in the world only while someone is waiting for it', !before && during);
+      qSet('servo_coil', 'done'); loadRoom('A6');
+      const after = G.statics.some(s => s.type === 'item' && s.extra === 'coil');
+      check('an errand\'s object lies in the world from the start until it is handed in', before && during && !after,
+        'before ' + before + ' during ' + during + ' after ' + after);
+      // ...and found before the ask, the asker says so and pays at once
+      delete G.save.quests.servo_coil; G.save.bag = { coil: 1 };
+      fresh({ 'on_A1|servo': 1 }); G.save.bag = { coil: 1 }; loadRoom('A1'); G.state = 'PLAY';
+      const sv2 = G.statics.find(s => s.extra === 'servo');
+      doInteract(sv2);
+      const early = ((G.dialog && G.dialog.lines) || []).join(' ');
+      let n2 = 0; while (G.dialog && n2++ < 20) { const cb = G.dialog.onEnd; G.dialog = null; G.state = 'PLAY'; if (cb) cb(); }
+      check('...a coil found before Servo asks is handed over on the ask, in his own words',
+        early.indexOf(t('q_early_servo_coil')) >= 0 && G.save.quests.servo_coil === 'done' && !(G.save.bag || {}).coil, early.slice(0, 90));
       // an errand accepted before snapshots existed keeps counting as it did
       G.save.quests.servo_swarm = 'active'; delete G.save.qbase.servo_swarm; G.save.culls.crawler = 6;
       check('...and an errand accepted on an older save keeps its progress', qDone(q));

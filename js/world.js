@@ -692,8 +692,11 @@ const ROOMS = {
     } },
   // ---- THE SHAFT: straight down, in the dark, for the errand nobody takes.
   A7: { zone: 'A', w: 40, h: 32, exits: { T: 'A5' },
+    // THE SURVEY (terminal 20): the quarrymen's own chart of the white seam,
+    // on the far floor past the spikes — the shaft nobody takes is where the
+    // marble's road is written down, and where the chalk arrows come from
     ents: [['blob', 6, 30, 0], ['blob', 15, 30, 0], ['turret', 19, 24],
-           ['scrap', 10, 30, 45], ['scrap', 3, 30, 40], ['scrap', 34, 28, 30]],
+           ['scrap', 10, 30, 45], ['scrap', 3, 30, 40], ['scrap', 34, 28, 30], ['term', 26, 30, 20]],
     build(g) {
       frame(g);
       rect(g, 9, 0, 12, 0, '.');              // the drop in from A5
@@ -1492,7 +1495,14 @@ const ROOMS = {
   // run fell into.
 
   // ---- ZONE A: the Chime, up above the meadow ------------------------------
-  A8: { zone: 'A', w: 44, h: 21, exits: { B: 'A2', T: 'A9' },
+  // THE BELL WAITS FOR THE SAGE (owner, 2026-10-09: "cleanse the first Sage ->
+  // learn about CHIME -> silence CHIME"). The climb to the bell is a gated
+  // exit like the Conduits' hatch: shut until the Meadow Sage is free, a ward
+  // drawn across the hole while it is (js/progress.js), and a ceiling to her
+  // body — vlinkTile reads a closed gate as open air, so there is no floor
+  // above to stand on and no seamless handover to slip through.
+  A8: { zone: 'A', w: 44, h: 21,
+    exits: { B: 'A2', T: { to: 'A9', flag: 'sageTame_GA1D', robo: 1, why: 'gate_chime_ward' } },
     ents: [['crawler', 8, 15], ['flier', 18, 9], ['scrap', 4, 15, 20], ['scrap', 21, 9, 25],
            ['scrap', 31, 12, 25]],
     build(g) {
@@ -1584,7 +1594,9 @@ const ROOMS = {
     // terminal that tells the story of the deaf, a coin's worth of their
     // salvage, and nothing that hunts. A6 is 21 tall and an L crossing keeps
     // her y, so this is 21 tall too and its floor is A6's floor.
-    ents: [['term', 8, 19, 5], ['secret', 22, 19, 'coin'], ['scrap', 15, 19, 30], ['scrap', 24, 15, 25]],
+    // its own log now (terminal 21), not a second copy of the beacon's: the
+    // deaf watched Servo's gantries from here, and say what became of him
+    ents: [['term', 8, 19, 21], ['secret', 22, 19, 'coin'], ['scrap', 15, 19, 30], ['scrap', 24, 15, 25]],
     build(g) {
       frame(g); seamR(g);
       mound(g, 2, 7, 2, 147);
@@ -1605,7 +1617,9 @@ const ROOMS = {
     // cave shape rule — no straight lines), one crawler patrolling, and the
     // first hidden pocket so the cave teaches on entry that its rock keeps
     // things
-    ents: [['crawler', 26, 15], ['scrap', 14, 7, 15], ['scrap', 44, 15, 10]],
+    // ...and the pocket pays in HEALTH, not scrap: a spare core the
+    // quarrymen stashed where only a climber would look
+    ents: [['crawler', 26, 15], ['chest', 14, 7, 'core'], ['scrap', 44, 15, 10]],
     build(g) {
       caveCarve(g, 'CV1', {
         mouth: 1, open: ['R'],
