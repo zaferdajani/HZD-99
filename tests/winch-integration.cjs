@@ -38,6 +38,8 @@ const {chromium}=require('playwright');
    persist();startGame(JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))));stage();e=G.enemies.find(e=>e.mechanism==='winch');e.update(1/60);
    check('disabled state and pivot survive reload',e.disabled&&e.armAngle===angle);
    player.x=e.x+e.w/2-player.w/2;player.y=e.y+e.h-player.h;doInteract(findNear());check('cleansing requires the earned blade',!e.cleanseT);
+   // the refusal is a card she reads (js/overlay.js storyNote, 2026-10-09); she closes it before trying again
+   if(G.dialog&&G.dialog.note){G.dialog=null;G.state='PLAY';}
    G.save.flags.crystal=1;doInteract(findNear());check('blade enables the actual interaction',e.cleanseT===0.65);
    player.x+=200;e.update(0.1);check('walking away cancels cleansing',e.cleanseT===0&&e.disabled);
    player.x=e.x+e.w/2-player.w/2;doInteract(findNear());for(let i=0;i<45;i++)e.update(1/60);

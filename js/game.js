@@ -1321,7 +1321,7 @@ function startGame(save) {
   // restart into the cradle, even though the new cat owned no dash.
   G.impact = null; G.flash = 0; G.hitStop = 0; G.rings = [];
   G.lesson = null; G.brDelta = null; G.elemPop = null; G.songWave = null;
-  G.dialog = null; G.toasts = []; G.zoneToast = null; G.lastZone = ''; G.menuMsg = null;
+  G.dialog = null; G.toasts = []; G.zoneToast = null; G.lastZone = ''; G.menuMsg = null; G.sceneCaps = null;
   if (typeof overlayClear === 'function') overlayClear();
   G.tut = null; G.wake = null; G.meet = null; G.break = null; G.trans = null; G.gateWalk = null;
   G.coreFlash = null; G.coresFullT = 0; G.bolt = null;
@@ -2563,6 +2563,7 @@ function update(dt) {
   if (typeof tutorialTick === 'function') tutorialTick();
   narrativeAudioTick();
   if (typeof menuMsgTick === 'function') menuMsgTick(dt);
+  if (G.state === 'PLAY' && typeof sceneCaptionTick === 'function') sceneCaptionTick(dt);
   // the next queued card / note / dialogue opens on the first free PLAY frame
   if (G.state === 'PLAY' && typeof overlayPump === 'function') overlayPump();
   if (G.state === 'PLAY' || G.state === 'DIALOG') { tickNPCVox(); tickCaveLure(); }
@@ -15640,6 +15641,7 @@ function draw(tms) {
   if (typeof drawGateWalk === 'function') { if (typeof withWorldProjection === 'function') withWorldProjection(c,drawGateWalk); else drawGateWalk(); }
   drawLesson();
   drawHUD();
+  if (typeof drawSceneCaption === 'function') drawSceneCaption();   // js/overlay.js
   drawMapButton();
   if (typeof drawSoundChip === 'function') drawSoundChip(tsec);
   if (typeof drawSaveFeedback === 'function') drawSaveFeedback();

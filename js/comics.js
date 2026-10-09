@@ -52,7 +52,8 @@ const ComicRewards = (() => {
   let root, body, heading, status, returnState, sessionSave, focusBefore, chapter, slide = 0;
   let elapsed = 0, autoplay = false, decoded = false, mode = '', cooldown = 0, readyFor = 0;
   let savedRef, seenInput = false, screenSerial = 0, libraryIndex = 0;
-  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // the pause menu's Reduced motion (js/reveal.js) wins; until it is set, the OS decides
+  const reduced = () => typeof reduceMotion === 'function' ? reduceMotion() : matchMedia('(prefers-reduced-motion: reduce)').matches;
   function progress() {
     if (!G.save.comics || typeof G.save.comics !== 'object') G.save.comics = {};
     return G.save.comics;

@@ -55,6 +55,13 @@ function overlayRequest(open, kind) {
 // Called at the top of update(): the next waiting overlay opens on the first
 // free PLAY frame — never mid-crossing, never over another.
 function overlayPump() {
+  // AN ORPHANED CARD IS SHOWN, NOT LOST. Something that switched the state
+  // straight to PLAY over an open dialogue (a film started from inside one,
+  // say) would leave it invisible, the queue stuck behind it and the tutorial
+  // hidden by it — so it comes back on screen to be read and closed.
+  if (G.state === 'PLAY' && G.dialog && !G.cut && G.dialog.lines && (G.dialog.i | 0) < G.dialog.lines.length) {
+    G.state = 'DIALOG'; return;
+  }
   if (!OVERLAY_Q.length || G.state !== 'PLAY' || overlayOpenNow() || G.trans) return;
   const n = OVERLAY_Q.shift();
   try { n.open(); } catch (e) { if (typeof console !== 'undefined') console.error(e); }
@@ -165,8 +172,13 @@ function dialogView(d) {
 // slow reader reached its end. They are cards now. 'always' lines are events
 // (they happen once); 'once' lines are instructions repeated at a locked door:
 // the first is a card she must acknowledge, every later reminder a toast.
+// 'scene' lines narrate a staged moment that deliberately never takes her
+// controls (the guardian's break: tests/guardian-break.cjs, the audit's rule
+// about a silent hero's agency). They are not cards; they are captions that
+// stay on screen until they have been read, and the scene waits for them
+// (sceneCaptionRead, polled by the scene's own step).
 const STORY_NOTE_KEYS = {
-  nf_break1: 'always', nf_break2: 'always', nf_break1_road: 'always', npc_woke: 'always',
+  nf_break1: 'scene', nf_break2: 'scene', nf_break1_road: 'scene', npc_woke: 'always',
   gh_marble: 'once', gh_sage: 'once', gh_chime: 'once', sage_need_forge: 'once',
   story_need_blade: 'once', gate_conduits: 'once', q_taken: 'once',
 };
@@ -188,8 +200,45 @@ function storyToast(text) {
   const k = storyNoteKey(text);
   if (!k || typeof G === 'undefined' || !G.save) return false;
   if (STORY_NOTE_KEYS[k] === 'once' && G.save.ackd && G.save.ackd[k]) return false;
+  if (STORY_NOTE_KEYS[k] === 'scene') { sceneCaption(text); return true; }
   storyNote(text, k);
   return true;
+}
+// ---- scene captions -------------------------------------------------------
+// Typed, wrapped, paged like every caption, and held on screen until read
+// (each page its reading time after it is whole), then a soft second to fade.
+// A scene keeps its own pace: it waits only until its line has been TYPED
+// out (sceneCaptionShown) — the reading happens while the caption stays up,
+// and a second line arriving meanwhile is stacked under the first rather than
+// replacing it unread.
+function sceneCaption(text) {
+  const cr = capReader(text); cr.fade = 0;
+  (G.sceneCaps || (G.sceneCaps = [])).push(cr);
+  while (G.sceneCaps.length > 3) G.sceneCaps.shift();          // never a wall of text
+}
+function sceneCaptionShown() {
+  return !(G.sceneCaps || []).some(cr => !(cr.pg + 1 >= cr.pages.length && revealDone(cr.R)));
+}
+function sceneCaptionRead() { return !(G.sceneCaps || []).some(cr => !capRead(cr)); }
+function sceneCaptionTick(dt) {
+  const L = G.sceneCaps;
+  if (!L || !L.length) return;
+  for (const cr of L) {
+    capTick(cr, dt); capAutoTurn(cr);
+    if (capRead(cr)) cr.fade += dt;
+  }
+  G.sceneCaps = L.filter(cr => cr.fade <= 1.2);
+}
+function drawSceneCaption() {
+  const L = G.sceneCaps;
+  if (!L || !L.length || G.state !== 'PLAY') return;
+  let y = 168;
+  for (const cr of L) {
+    const n = (cr.pages[cr.pg] || []).length || 1;
+    y += (n - 1) * CAP_LH / 2;
+    drawCaption(cr, Math.min(1, cr.R.t / 0.4) * Math.max(0, 1 - Math.max(0, cr.fade - 0.4) / 0.8), y);
+    y += (n - 1) * CAP_LH / 2 + CAP_LH + 18;
+  }
 }
 function storyNote(text, key) {
   const d = { name: '', lines: [text], i: 0, onEnd: null, note: true, ackKey: key || null };
@@ -271,7 +320,7 @@ function capAutoTurn(cr) {
     cr.pg++; cr.R = revealStart(cr.pages[cr.pg], {});
   }
 }
-function drawCaption(cr, alpha) {
+function drawCaption(cr, alpha, yBase) {
   if (!cr || alpha <= 0.01) return;
   const lines = cr.pages[cr.pg] || [];
   c.save();
@@ -279,7 +328,7 @@ function drawCaption(cr, alpha) {
   c.font = CAP_FONT;
   let w = 0; for (const l of lines) w = Math.max(w, c.measureText(l).width);
   const n = Math.max(1, lines.length), h = 44 + n * CAP_LH;
-  const yMid = 470 - (n - 1) * CAP_LH / 2, top = yMid - h / 2;
+  const yMid = (yBase || 470) - (n - 1) * CAP_LH / 2, top = yMid - h / 2;
   const w2 = Math.min(900, w + 40);
   const g2 = c.createLinearGradient(0, top, 0, top + h);
   g2.addColorStop(0, 'rgba(4,8,12,0)'); g2.addColorStop(0.5, 'rgba(4,8,12,0.74)');
