@@ -8633,9 +8633,14 @@ class Enemy {
     // flashing up for a frame; the plates are fetched on room entry
     // (beastPreload) so the wait is the first frame or two at most.
     const heroEn = typeof isHero === 'function' && isHero();
-    if (isWolf(this)) { drawWolf(c, this); return; }
-    if (isCheetah(this)) { drawCheetah(c, this); return; }
-    if (this.kind === 'crawler' || this.kind === 'hopper') return;
+    // ...and once it HAS drawn, everything that reads the animal still runs
+    // over it: its trait marks, the scrap-drag plate, the landing mark, the
+    // shared wind-up ring. Returning here (as it used to) dropped every one of
+    // those tells for the pack and the cheetahs the day their plates landed.
+    let beastBody = false;
+    if (isWolf(this)) { drawWolf(c, this); beastBody = true; }
+    else if (isCheetah(this)) { drawCheetah(c, this); beastBody = true; }
+    else if (this.kind === 'crawler' || this.kind === 'hopper') return;
     // every flying minion is a small TALONHOST — talons only, no feathers
     if (!heroEn && this.kind === 'flier' && typeof drawEagleMini === 'function' && drawFlierMini(c, this)) return;
     // THE TURRET'S HALF-SECOND, PUT BACK ON SCREEN. There has always been a red
@@ -9344,6 +9349,8 @@ class Enemy {
     }
     // EVERY WIND-UP WEARS THE SAME COLOUR (drawEnemyTell, below the class)
     drawEnemyTell(c, this, cx);
+    // the pack's body is already down (above); nothing below is its body
+    if (beastBody) return;
     // a walker on a FILMED STRIDE draws that instead (ART_QUEUE §2cc-iv/v);
     // the turntable below keeps everything the strip is not — turns, tells,
     // the drip, the shed plate
