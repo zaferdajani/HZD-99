@@ -116,8 +116,10 @@ const { chromium } = require('playwright');
     for (let i = 0; i < 20; i++) __frame(w, -3, 0);
     const atCure = infEyeParticles(w).length;
     w.calm = true; w.hypnoT = 1e9;
-    let newBorn = 0;
-    for (let i = 0; i < 10; i++) { __frame(w, -3, 0); newBorn += infEyeParticles(w).filter(p => p.age < 1 / 60 + 1e-4).length; }
+    // every wisp this body ever laid is counted at birth (infEyeSpawn)
+    const bornAtCure = w._eyeBorn || 0;
+    for (let i = 0; i < 10; i++) __frame(w, -3, 0);
+    const newBorn = (w._eyeBorn || 0) - bornAtCure;
     const midFade = infEyeParticles(w).length;
     for (let i = 0; i < 60 * 2.2; i++) __frame(w, -3, 0);
     out.cure = { atCure, newBorn, midFade, end: infEyeParticles(w).length, glowAfter: w._eyeN > 0 && w._eyeDraw === infEyeStats().frame };

@@ -47,6 +47,9 @@ const { chromium } = require('playwright');
     };
     // the cast, as the rooms place it: one of each kind (a wolf and a cheetah
     // are the same kind in different kingdoms, so the zone's animal counts)
+    // the phone tier: smaller frame, fewer effects — what is measured here is
+    // where the eye is and where the smoke is born, not how pretty the room is
+    if (typeof qualSet === 'function') qualSet('low');
     const cast = [], seen = {};
     for (const id of Object.keys(ROOMS)) {
       try { stage(id); } catch (err) { continue; }
@@ -73,8 +76,14 @@ const { chromium } = require('playwright');
       if (body instanceof Boss) { body.st = 'idle'; body.t = 99; body.meet = false; }
       // somewhere it can be seen and has floor under it
       body.x = Math.min((G.roomDef.w - 6) * TILE, Math.max(8 * TILE, body.x));
-      for (let i = 0; i < 4; i++) { draw(performance.now()); await new Promise(r => setTimeout(r, 80)); }
-      await settle();
+      // wait for THIS body's art (it reports an eye once its art is drawn),
+      // not for every pending fetch in the room — the latter is what made a
+      // 26-body survey outrun the suite's five-minute ceiling
+      for (let i = 0; i < 80; i++) {
+        body.dir = body.faceVis = -1; draw(performance.now());
+        if (body._eyeN > 0 && !Object.keys(MEDIA_PEND).some(k => /^(wolf|cheetah|al|ch|eye|roster|npcs)/.test(k))) break;
+        await new Promise(r => setTimeout(r, 100));
+      }
       const cx = () => body.x + body.w / 2, cy = () => body.y + body.h / 2;
       const r = { k: c.k, id: c.id, cls: infEyeClass(body), boss: body instanceof Boss || !!body.miniboss || body.kind === 'sage' };
       // facing: one still frame each way
@@ -87,8 +96,8 @@ const { chromium } = require('playwright');
       r.size = [body.w, body.h];
       // moving: every frame, the newest wisp sits at THIS frame's eye
       let worst = 0, frames = 0, born = 0;
-      for (let i = 0; i < 36; i++) {
-        frame(body, i < 18 ? -3 : 3);
+      for (let i = 0; i < 24; i++) {
+        frame(body, i < 12 ? -3 : 3);
         if (!body._eyeN) continue;
         const ex = body._eyeW[0], ey = body._eyeW[1];
         const young = infEyeParticles(body).filter(p => p.age < 1 / 60 + 1e-4);

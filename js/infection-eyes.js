@@ -198,6 +198,9 @@ function infEyeSpawn(owner, x, y, purple, young) {
   INF_SZ[i] = 0.8 + Math.random() * 0.5;
   INF_PURP[i] = purple ? 1 : 0;
   INF_OWN[i] = owner;
+  // a running count per body, so a harness can ask "was anything born after
+  // the cure?" instead of guessing from ages
+  owner._eyeBorn = (owner._eyeBorn || 0) + 1;
 }
 function infEyeKill(i) {
   const j = --INF_LIVE;                               // swap the last live one in

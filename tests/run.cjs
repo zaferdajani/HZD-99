@@ -153,7 +153,9 @@ const SUITE = [
   ['terrainrun', 'irregularity is not elevation: she runs it, and so do they'],
   ['enemygait', 'machines stand on the floor, turn on their feet, fly the same at any frame rate, and step with the ground'],
   ['infection-eyes', 'red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending'],
-  ['infection-roster', 'every hostile body and every guardian: an eye, its colour, on the head, facing, and the smoke born there'],
+  // every placed kind and guardian in its own room: the one harness that is a
+  // survey of the whole cast, so it gets a survey's time
+  ['infection-roster', 'every hostile body and every guardian: an eye, its colour, on the head, facing, and the smoke born there', { timeout: 900000 }],
   ['reach',     'she hits what she is standing next to, and she turns to it'],
   ['gatecue',   'the first built thing the player finds sounds like one'],
   ['cuefamily', 'the things she is shot at with do not all sound alike'],
@@ -213,7 +215,7 @@ for (const [name, what, opt] of run) {
   console.log('\n── ' + name + '  — ' + what);
   if (!(opt && opt.noBrowser)) ensureServer();
   try {
-    console.log(execFileSync('node', [file], { encoding: 'utf8', timeout: 300000, maxBuffer: 10 * 1024 * 1024 }).trim());
+    console.log(execFileSync('node', [file], { encoding: 'utf8', timeout: (opt && opt.timeout) || 300000, maxBuffer: 10 * 1024 * 1024 }).trim());
   } catch (e) {
     if (opt && opt.pending) {
       pending++;
