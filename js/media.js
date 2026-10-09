@@ -62,6 +62,13 @@ const MEDIA_SRC = {
     // move, 320-px cells, feet on the cell floor, facing LEFT like the plates.
     // Drawn by alphaStrip in js/wolves.js over the state's own clock; the
     // plate draws whenever a strip is not here.
+    // THE ALPHA reads the approved plates that are on disk (alpha/*.webp, the
+    // set the live game has always drawn). A studio replacement set was
+    // pointed at alpha/studio/ before it existed, which made the Alpha a
+    // manifest of missing files; it is re-pointed here when it lands.
+    repairPanel: 'assets/characters/gear/repair_panel.webp',
+    repairBattery: 'assets/characters/gear/repair_battery.webp',
+    wakeLamp: 'assets/characters/gear/wake_lamp.webp',
     alRest: 'assets/characters/alpha/rest.webp',
     alProwl: 'assets/characters/alpha/prowl.webp',
     alRoar: 'assets/characters/alpha/roar.webp',
@@ -94,6 +101,23 @@ const MEDIA_SRC = {
     // pounce happens in the air where a grounded plate cannot go. Rest, coil,
     // lunge — one per phase of the only move it has.
     wolfRest: 'assets/characters/beasts/wolf.webp',
+    // THE PACK WALKS AND RUNS ON FILMED CYCLES (ART_QUEUE §2cc): one stride per
+    // strip, cut from a Higgsfield take with every cell distinct (measured).
+    wolfWalk8: 'assets/characters/beasts/wolf_walk8.webp',
+    wolfRun6: 'assets/characters/beasts/wolf_run6.webp',
+    cheetahWalk8: 'assets/characters/beasts/cheetah_walk8.webp',
+    cheetahRun6: 'assets/characters/beasts/cheetah_run6.webp',
+    wolfWinded6: 'assets/characters/beasts/wolf_winded6.webp',
+    wolfLand4: 'assets/characters/beasts/wolf_land4.webp',
+    cheetahWinded6: 'assets/characters/beasts/cheetah_winded6.webp',
+    cheetahLand4: 'assets/characters/beasts/cheetah_land4.webp',
+    // THE ROSTER'S WALKS AND THE MINI'S FLIGHT (ART_QUEUE §2cc-iv/v/vi): filmed
+    // strides, every cell measured distinct before it was cut
+    guardWalk8: 'assets/characters/roster/guard_walk8.webp',
+    blobCrawl8: 'assets/characters/roster/blob_crawl8.webp',
+    talonMiniCruise8: 'assets/characters/talon/cruise8.webp',
+    talonMiniChase6: 'assets/characters/talon/chase6.webp',
+    talonMiniPerch: 'assets/characters/talon/perch.webp',
     // ...and the two WALK frames, because a plate that slides is a wolf on
     // treads. See wolfPose(): the cycle is driven by ground travelled.
     wolfWalkA: 'assets/characters/beasts/wolf_walka.webp',
@@ -169,6 +193,9 @@ const MEDIA_SRC = {
     // THE SAGE (§2e) — six authored states replacing drawSage's procedural
     // body at the same anchor. Amber on exactly the three telegraph states.
     sageStand: 'assets/characters/sage/stand.webp',
+    // filmed walk + authored exhale (ART_QUEUE §2cc-vii), three-quarter LEFT
+    sageWalk8: 'assets/characters/sage/walk8.webp',
+    sageExhale: 'assets/characters/sage/exhale.webp',
     sageCoil: 'assets/characters/sage/coil.webp',
     sageLunge: 'assets/characters/sage/lunge.webp',
     sageGather: 'assets/characters/sage/gather.webp',
@@ -180,6 +207,7 @@ const MEDIA_SRC = {
     batShiver: 'assets/characters/bat/shiver.webp',
     batDive: 'assets/characters/bat/dive.webp',
     batFlapUp: 'assets/characters/bat/flap_up.webp',
+    batFlight6: 'assets/characters/bat/flight6.webp',     // one filmed wingbeat (§2cc-vii)
     batFlapDn: 'assets/characters/bat/flap_dn.webp',
     // THE ORACLE'S SHRINE + PARLOR (§2h) — the cable shrine standing in B3
     // (drawOracleBooth's hook was live before the plate) and the data-den
@@ -728,6 +756,10 @@ const MEDIA_LOW = {};
 function mediaDirty(k) {
   try { delete SOFT_ART[k]; } catch (e) {}
   try { delete ATLAS_PROC[k]; } catch (e) {}
+  // ...and the pop grade, which is cached under the media key itself by every
+  // body that grades its own plate (the pack, the roster's walks): kept, it
+  // would hold the quarter-size stand-in on screen after the sheet landed
+  try { delete POP_ART[k]; } catch (e) {}
   // the tile layer is baked once per room — a sheet that lands after that
   // first render would never appear, so force a repaint when art arrives
   if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {
@@ -987,7 +1019,19 @@ function bgLift(key, src, gamma) {
   return out;
 }
 
+// ...as steps too (see processSheetSteps in atlas.js): the lifted sheets read
+// back and rewrite every pixel, so the idle prebake runs them in bands, and an
+// on-demand call finishes a paused one instead of starting over.
+const POP_RUN = {};
 function popArt(key, src, lift) {
+  if (POP_ART[key] !== undefined) return POP_ART[key];
+  const run = POP_RUN[key];
+  delete POP_RUN[key];
+  const it = run || popArtSteps(key, src, lift);
+  let r; do { r = it.next(); } while (!r.done);
+  return POP_ART[key] !== undefined ? POP_ART[key] : (r.value || null);
+}
+function* popArtSteps(key, src, lift) {
   if (POP_ART[key] !== undefined) return POP_ART[key];
   const im = src || MEDIA_RAW[key];
   if (!im || !im.naturalWidth) return null;               // not here yet; ask again
@@ -1008,16 +1052,22 @@ function popArt(key, src, lift) {
     if (lift) {
       const lut = new Uint8ClampedArray(256);
       for (let i = 0; i < 256; i++) lut[i] = 255 * Math.pow(i / 255, lift);
-      const id = x.getImageData(0, 0, cv.width, cv.height), d = id.data;
-      for (let i = 0; i < d.length; i += 4) {
-        if (!d[i + 3]) continue;
-        d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
+      // a per-pixel LUT is the same answer in bands as in one piece
+      for (let y0 = 0; y0 < cv.height; y0 += 256) {
+        yield;
+        const bh = Math.min(256, cv.height - y0);
+        const id = x.getImageData(0, y0, cv.width, bh), d = id.data;
+        for (let i = 0; i < d.length; i += 4) {
+          if (!d[i + 3]) continue;
+          d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]];
+        }
+        x.putImageData(id, 0, y0);
       }
-      x.putImageData(id, 0, 0);
     }
     cv.naturalWidth = cv.width; cv.naturalHeight = cv.height;
     out = cv;
   } catch (e) {}                                           // tainted: ship it raw
+  if (!src && MEDIA_RAW[key] !== im) return null;          // replaced while it ran
   POP_ART[key] = out;
   return out;
 }

@@ -13,9 +13,19 @@ function repairClearInput() {
 function repairClose(resume = true) {
   const s = repairSession;
   if (!s) return;
-  repairSession = null; s.root.remove(); repairClearInput();
-  if (resume && G.state === 'REPAIR') G.state = 'PLAY';
+  repairSession = null;
+  s.cleanup(); s.root.remove(); repairClearInput();
+  // A room/restart closes with resume=false, but cannot leave an orphaned
+  // REPAIR state behind. Preserve any state already chosen by the caller.
+  if (G.state === 'REPAIR') G.state = 'PLAY';
   if (s.focus && s.focus.isConnected) s.focus.focus({preventScroll:true});
+}
+// DOM events can arrive between simulation ticks after a room/save change.
+// Validate before every mutation, not just when power is first pressed.
+function repairValid(s = repairSession) {
+  return !!s && s === repairSession && G.state === 'REPAIR' &&
+    s.room === G.roomId && s.save === G.save && !npcLive(s.npc) &&
+    invCount(npcCellItem(s.npc)) > 0;
 }
 function repairOpen(npc, onComplete) {
   if (repairSession || npcLive(npc) || invCount(npcCellItem(npc)) < 1) return;
@@ -42,7 +52,16 @@ function repairOpen(npc, onComplete) {
     @media(max-height:460px){#ratchet-repair .repair-card{width:min(850px,94vw);padding:8px}#ratchet-repair .repair-board{aspect-ratio:3.2;margin:6px 0}#ratchet-repair h2{font-size:18px}#ratchet-repair #repair-hint{min-height:0;margin:2px 0;font-size:13px}#ratchet-repair .repair-kicker,#ratchet-repair .repair-footer p{display:none}}
   </style><div class="repair-card"><header><div><div class="repair-kicker"></div><h2 id="repair-title"></h2><div class="repair-progress"></div></div><button data-repair-close></button></header><p id="repair-hint" role="status" aria-live="polite"></p><div class="repair-board"><svg viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true"></svg></div><div class="repair-footer"><div><p class="repair-help"></p><p class="repair-safe"></p></div><button class="repair-power"></button></div></div>`;
   document.body.appendChild(root);
-  repairSession = {root,npc,onComplete,step,selected:null,room:G.roomId,save:G.save,focus:document.activeElement,t:0,boot:0};
+  const interrupt = () => repairClose();
+  const visibility = () => { if (document.hidden) interrupt(); };
+  repairSession = {root,npc,onComplete,step,selected:null,room:G.roomId,save:G.save,focus:document.activeElement,t:0,boot:0,
+    cleanup: () => {
+      endDrag();
+      removeEventListener('blur', interrupt);
+      document.removeEventListener('visibilitychange', visibility);
+    }};
+  addEventListener('blur', interrupt);
+  document.addEventListener('visibilitychange', visibility);
   G.dialog = null; G.state = 'REPAIR'; repairClearInput(); npcHush();
   root.querySelector('.repair-kicker').textContent = t('repair_kicker');
   root.querySelector('h2').textContent = t('repair_title');
@@ -64,7 +83,7 @@ function repairOpen(npc, onComplete) {
   root.querySelector('.repair-power').onclick=repairPower;
   let drag=null;
   root.addEventListener('pointerdown',e=>{
-    if(e.button!==0 || repairSession?.boot) return;
+    if(e.button!==0 || !repairValid() || repairSession.boot) return;
     const b=e.target.closest('[data-piece]');if(!b || b.disabled)return;
     repairActivate(b.dataset.piece,true); b.setPointerCapture(e.pointerId);
     drag={id:e.pointerId,x:e.clientX,y:e.clientY,node:b,ghost:null};
@@ -75,9 +94,10 @@ function repairOpen(npc, onComplete) {
     if(drag.ghost){drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';}
   });
   const endDrag=e=>{
-    if(!drag || e.pointerId!==drag.id)return;
+    if(!drag || e && e.pointerId!==drag.id)return;
     const d=drag;drag=null;
-    if(d.ghost){d.ghost.remove();if(e.type!=='pointercancel'){const hit=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-target]');if(hit)repairActivate(hit.dataset.target,false);}}
+    if(d.node.hasPointerCapture(d.id))d.node.releasePointerCapture(d.id);
+    if(d.ghost){d.ghost.remove();if(e && e.type!=='pointercancel'){const hit=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-target]');if(hit && root.contains(hit))repairActivate(hit.dataset.target,false);}}
   };
   root.addEventListener('pointerup',endDrag);root.addEventListener('pointercancel',endDrag);
   // Existing touch controls and browser scrolling must not receive board taps.
@@ -98,7 +118,9 @@ function repairFocus(dir) {
   const i=list.indexOf(document.activeElement);list[(i+dir+list.length)%list.length]?.focus();
 }
 function repairActivate(name,source) {
-  const s=repairSession;if(!s||s.boot)return;
+  const s=repairSession;if(!s)return;
+  if(!repairValid(s)){repairClose();return;}
+  if(s.boot)return;
   if(source){if(name!==REPAIR_PARTS[s.step])return;s.selected=name;sfx('ui');repairRender();return;}
   if(!s.selected)return;
   if(name!==REPAIR_TARGETS[s.step]) {sfx('ui');repairRender(t('repair_retry'));return;}
@@ -109,8 +131,12 @@ function repairActivate(name,source) {
 }
 function repairPower() {
   const s=repairSession;
-  if(!s || s.step!==4 || s.boot || s.room!==G.roomId || s.save!==G.save || npcLive(s.npc) || invCount(npcCellItem(s.npc))<1)return;
+  if(!repairValid(s)){repairClose();return;}
+  if(s.step!==4 || s.boot)return;
   s.boot=.001;sfx('powerUp');repairRender(t('repair_boot'));
+  // Disabling the focused power button can move keyboard focus to <body>.
+  // Keep Escape inside the modal and make every input's cancellation agree.
+  s.root.querySelector('[data-repair-close]').focus();
 }
 function repairRender(message) {
   const s=repairSession;if(!s)return;
@@ -123,7 +149,7 @@ function repairRender(message) {
     if(i===0&&s.step>0&&!q.querySelector('img')){const im=b.querySelector('img').cloneNode();q.prepend(im);}
   }
   s.root.querySelector('.repair-power').disabled=s.step!==4||!!s.boot;
-  s.root.querySelector('[data-repair-close]').disabled=!!s.boot;
+  s.root.querySelector('[data-repair-close]').disabled=false;
   const svg=s.root.querySelector('svg');
   svg.innerHTML=`<path d="M380 172 L470 172 L470 92 L570 92 M380 172 L470 172 L470 292 L570 292 M840 92 L910 92 L910 192 L720 192 M840 292 L910 292 L910 192" fill="none" stroke="#465957" stroke-width="8"/>`+
     (s.step>1?'<path d="M570 92 C650 42 730 42 840 92" fill="none" stroke="#f3b166" stroke-width="9"/>':'')+
@@ -131,8 +157,10 @@ function repairRender(message) {
     (s.step>3?'<path d="M685 192 H755" stroke="#bce9d6" stroke-width="12"/>':'');
 }
 function updateRepair(dt) {
-  const s=repairSession;if(!s)return;
-  if(s.room!==G.roomId||s.save!==G.save){repairClose();return;}
+  const s=repairSession;
+  if(!s){if(G.state==='REPAIR')G.state='PLAY';return;}
+  if(!repairValid(s)){repairClose();return;}
+  if(inP('BACK')||inP('PAUSE')){repairClose();return;}
   s.t+=dt;
   if(s.boot){
     s.boot+=dt;
@@ -140,8 +168,7 @@ function updateRepair(dt) {
     if(s.boot>=1.3){const done=s.onComplete;repairClose();done();}
     return;
   }
-  if(inP('BACK')||inP('PAUSE'))repairClose();
-  else if(inP('RIGHT')||inP('DOWN'))repairFocus(1);
+  if(inP('RIGHT')||inP('DOWN'))repairFocus(1);
   else if(inP('LEFT')||inP('UP'))repairFocus(-1);
   else if(inP('OK')||inP('INT'))document.activeElement?.click();
 }
@@ -166,3 +193,4 @@ function drawWakeCircuit() {
   }
   c.restore();
 }
+

@@ -18,6 +18,13 @@
 //      the HUD goes on. Held the finished screen instead and the crossing
 //      showed two map buttons and two rows of hearts, which reads as a glitch
 //      rather than as travel. Measured on the map button's own rectangle.
+//   4. UP AND DOWN THERE IS NO PICTURE TO SLIDE AT ALL (plan §2 fix 3,
+//      game.js VERTICAL LINKS). A vertical pair is one shaft: the room above
+//      or below is drawn where it really is, and the room changes when her
+//      centre crosses the line with the camera translated by exactly the
+//      offset between them. So a vertical trip is measured the other way
+//      round: nothing is held, nothing slides, and where she is on the screen
+//      moves only by what her own body moved that frame.
 //
 //   node tests/cross.cjs      (needs the repo served on :8220)
 const { chromium } = require('playwright');
@@ -59,7 +66,21 @@ const check = (name, ok, detail) => {
       // put her at the edge and press into it
       if (side === 'R') { player.x = W - 30; player.y = (G.roomDef.h - 4) * TILE; keys['ArrowRight'] = 1; }
       if (side === 'L') { player.x = 12; player.y = (G.roomDef.h - 4) * TILE; keys['ArrowLeft'] = 1; }
-      if (side === 'B') { player.x = W / 2; player.y = H + 60; }
+      // THE CELLAR HATCH IS THE SHAFT between A2 and A5: the way down is the
+      // floor she cuts, and the way back up is the same hole. Both vertical
+      // trips are made through it, cut, the way the route is played.
+      const hatch = () => {
+        const U = buildRoom('A2');
+        for (let ty = U.length - 3; ty < U.length; ty++) for (let tx = 0; tx < U[0].length; tx++)
+          if (U[ty][tx] === 'B') G.save.broken['A2:' + tx + ',' + ty] = 1;
+        tileDirty = true;
+      };
+      if (side === 'B') {
+        hatch();
+        const L = G.vlink && G.vlink.B, lg = buildRoom(want);
+        let hx = 0; for (let x = 1; x < lg[0].length - 1; x++) if (lg[0][x] === '.') { hx = x; break; }
+        player.x = (hx + 1) * TILE + (L ? L.ox : 0); player.y = H - 3 * TILE; player.vy = 300; player.on = false;
+      }
       // THE UPWARD TRIP IS ENTERED DIRECTLY, and it is the one direction that
       // has to be. Teleported above the room she landed on A2's bottom lip
       // with the exit she came from under her feet and fell straight back, so
@@ -69,18 +90,39 @@ const check = (name, ok, detail) => {
       // and the landing — so she is stood under the opening (which is what
       // arms the frame hold) and the crossing is started the way the edge
       // check starts it.
+      // ...and the way up is now JUMPED, not started by hand: the old forced
+      // start existed to arm a held picture, and a vertical crossing has none.
+      // She rises through A5's opening with the jump held, and the shaft does
+      // the rest (it carries her onto the ledge beside A2's hatch).
       if (side === 'T') {
-        player.x = 13 * TILE; player.y = 3 * TILE; player.on = false;
-        await new Promise(k => requestAnimationFrame(k));
-        await new Promise(k => requestAnimationFrame(k));
-        G.trans = { t: TRANS_DUR, to: want, side: 'T', half: false };
-        transSnap = transHeld ? transCv : null;
+        hatch();
+        let hx = 0; for (let x = 1; x < G.roomDef.w - 1; x++) if (G.grid[0][x] === '.') { hx = x; break; }
+        player.x = (hx + 1) * TILE + 4; player.y = TILE + 2; player.vy = -760; player.on = false;
+        keys[KEYB.JUMP[0]] = 1;
       }
       let sawTrans = 0, moved = 0, held = 0, hudLeak = -1, landed = null;
       const seenRooms = [];
       let px0 = null;
+      const vert = side === 'T' || side === 'B';
+      let prevS = player.y - cam.y, prevRoom = G.roomId, tPrev = performance.now(), jump = null, everHeld = 0;
       for (let i = 0; i < 200; i++) {
         await new Promise(k => requestAnimationFrame(k));
+        if (vert) {
+          // one shaft: count anything held or slid, and measure the screen at
+          // the frame the room changes against what her body moved that frame
+          const now = performance.now(), dtf = (now - tPrev) / 1000; tPrev = now;
+          if (G.trans) sawTrans++;
+          if (typeof transSnap !== 'undefined' && transSnap) everHeld++;
+          const sNow = player.y - cam.y;
+          if (G.roomId !== prevRoom && jump == null) {
+            jump = { px: Math.round(Math.abs(sNow - prevS)), allow: Math.round(1100 * Math.min(dtf, 0.1) + 30) };
+            landed = G.roomId;
+          }
+          prevS = sNow; prevRoom = G.roomId;
+          if (G.roomId !== room && seenRooms.indexOf(G.roomId) < 0) seenRooms.push(G.roomId);
+          if (jump && !G.climb && player.on) break;
+          continue;
+        }
         if (G.trans) {
           sawTrans++;
           // WHERE THE FIRST CROSSING PUT HER. The world keeps running now, so
@@ -124,7 +166,8 @@ const check = (name, ok, detail) => {
       // Reading it after the loop said A5 for the upward trip: she arrives in
       // A2 at its bottom edge and falls straight back through the exit she
       // came from, so the answer was the SECOND crossing's.
-      out.runs.push({ room, side, want, landed: landed || G.roomId, seenRooms, frames: sawTrans, held, moved, hudLeak });
+      out.runs.push({ room, side, want, landed: landed || G.roomId, seenRooms, frames: sawTrans, held, moved, hudLeak,
+        vert, jump, everHeld, stand: vert ? (player.on && G.roomId === want) : null });
     }
     out.dur = typeof TRANS_DUR !== 'undefined' ? TRANS_DUR : null;
     return out;
@@ -138,6 +181,14 @@ const check = (name, ok, detail) => {
     check(tag + ': it lands', reached,
           'landed in ' + run.landed + (run.seenRooms && run.seenRooms.length > 1
             ? ' (visited ' + run.seenRooms.join(' -> ') + ')' : ''));
+    if (run.vert) {
+      check(tag + ': one shaft — nothing held, nothing slid', run.frames === 0 && run.everHeld === 0,
+            run.frames + ' frames of cut crossing, ' + run.everHeld + ' frames of held picture');
+      check(tag + ': ...and the camera carries her across the line', !!run.jump && run.jump.px <= run.jump.allow,
+            run.jump ? 'screen moved ' + run.jump.px + ' px on the crossing frame (her own travel allows ' + run.jump.allow + ')' : 'no crossing frame');
+      check(tag + ': ...and she ends on her feet there', run.stand === true, run.stand ? 'standing in ' + run.want : 'not standing in ' + run.want);
+      continue;
+    }
     check(tag + ': the picture she left is held and pushed', run.held > 0,
           run.held + ' of ' + run.frames + ' crossing frames');
     check(tag + ': ...and the interface does not slide with it', run.hudLeak === 0,

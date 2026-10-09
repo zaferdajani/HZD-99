@@ -344,6 +344,24 @@ function drawBrDelta() {
 // history intact. Future game modes are the reason it is a switch and not a
 // deletion.
 const TAME_ONLY = true;
+// ...AND TAMING IS DONE WITH THE BLADE (plan §4.3). Under TAME_ONLY every
+// guardian brought to its knees was freed on the spot, claws or not — so the
+// whole game could be finished without ever forging the sword the world keeps
+// saying is the only thing that cleanses ("Claws cannot cleanse the song").
+// The rule the sages already obey (sageStruck) now holds for the guardians and
+// the Alpha too: without the forged PURIFIER the song holds the body together
+// at the last sliver of health, the claws glance, and the fight goes on until
+// she leaves and comes back with the blade. Nothing is recorded on the ledger
+// for a fork that was never reached, so the braid stays exact.
+function brNeedsBlade(b) {
+  if (!G.save || (typeof isHero === 'function' && isHero())) return false;
+  if (typeof weaponOwned === 'function' && weaponOwned('single')) return false;
+  b.hp = Math.max(1, Math.round((b.hpMax || 100) * 0.04));
+  b.stagT = Math.max(b.stagT || 0, 0.6);
+  if (typeof sfx === 'function') sfx('no');
+  if ((G._sgToldT || 0) <= 0 && typeof G.toast === 'function') { G._sgToldT = 4; G.toast(t('sg_hint')); }
+  return true;
+}
 
 function brOffer(kind, x, y) {
   if (!G.save || (typeof isHero === 'function' && isHero())) return;

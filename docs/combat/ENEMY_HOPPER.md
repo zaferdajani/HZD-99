@@ -147,3 +147,16 @@ window".
 |---|---|---|---|
 | A2 | flier at (52,7) | **hopper** at (52,15) | registry §6.1 — two disruptors on one screen |
 | B6 | — | hopper at (18,18) | new room; it holds the mid risers |
+
+**Motion pass (2026-10-08, plan §1).** Crouch, leap, landing shock and the
+decision gap are untouched.
+
+| Value | Before | After | Reason |
+|---|---|---|---|
+| Grounded flag | never set — `wolfPose` asked `on === false` and was never told, so the hopper-wolf ran its walk frames through the whole arc | set by every move (`moveEnt`); airborne pose once it is up **> 0.06 s** (`AIR_POSE_T`) or rising faster than 60 px/s, so one frame of daylight over a surface fracture is not drawn as a leap | plan §1 fix 1. `tests/enemygait.cjs`: 112 of 112 airborne frames on the airborne plate, 0 walk frames |
+| Facing at take-off and at REFRACT's bend | eased after the velocity — tail-first for the first ~0.18 s whenever the lead put the leap the other way | `faceCommit` on the take-off frame and the bend frame | it leaves nose-first |
+| Landing recovery picture | the standing plate | **LAND** for `HOP_LAND_T` 0.32 s from touchdown (visual only): legs folded under the drop, chest low (`BEAST_RECOVER.land`: ×1.16 / ×0.70, pitch −0.07; the atlas rig's `land`) | plan §1 fix 5; B5's "recovery read" now has a body |
+| Crouch wash | the amber wash that grows behind a wolf/cheetah over its tell ran for the crawler's coil only; the hopper's crouch had neither the wash nor the shared ring (the authored body returns before it) | the crouch wears the same wash | the gold cheetah's crouch measured 52 % amber against a 46 % rest — no visible rise; now 87 % |
+| Air twist yaw | ±0.3 sweep cross-fading two angles | the twist offset only, one authored angle at a time | plan §1 fix 4 |
+
+`tests/artbible.cjs`: rest/crouch 0.58 (wolf) 0.46 (cheetah); rest/land 0.38 / 0.28.

@@ -145,3 +145,17 @@ solid) but it is currently the roster's largest unexamined damage source.
 
 ### Changelog
 No guard values changed this pass. Its art changed — see the ledger.
+
+**Motion pass (2026-10-08, plan §1).** The guard walks on the crawler's gait —
+acceleration, braking, brake → turn → accelerate, a stride clocked by floor
+covered, no head-scan (table in `ENEMY_CRAWLER.md`). Its atlas body now POSES
+each state through the cut-out rig (`ATLAS_POSE` in js/atlas.js): **coil** —
+hips sunk 42 % of leg height on folded legs, weight rocked back 0.16 rad;
+**lunge** — body pitched 0.30 rad forward, legs trailing; **winded** — sunk
+30 %, pitched 0.34 rad forward over splayed legs. Measured by
+`tests/artbible.cjs` (rest/coil 0.70, rest/winded 0.69, coil/winded 0.71).
+
+| Value | Before | After | Reason |
+|---|---|---|---|
+| The open-window ring (plate down) | `TELL_COL` amber, pulsing on the wall clock | pale plate steel `#e4f0fb`, on the simulation clock, off under `G.artProbe` | **registry §2, hard rule 1**: amber is on screen only while something winds up. This ring says the opposite ("open — hit it now"), and the bible's hue law measured the guard's recovery at 24.5 % amber against a 7.6 % rest |
+

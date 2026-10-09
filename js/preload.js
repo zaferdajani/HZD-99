@@ -98,7 +98,7 @@ function preloadNear(from, depth) {
     if (d >= depth) continue;
     const ex = ROOMS[id] && ROOMS[id].exits;
     for (const k in ex) {
-      const n = ex[k];
+      const n = typeof ex[k] === 'object' ? ex[k].to : ex[k];   // a gated exit carries its room in .to
       if (!ROOMS[n] || dist[n] !== undefined) continue;
       dist[n] = d + 1; out.push([n, d + 1]); q.push(n);
     }

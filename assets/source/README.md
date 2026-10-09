@@ -26,10 +26,11 @@ look at to answer "did that actually happen".
 | `hero/` | HZD-99 herself, every plate locked to `ref/hzd99_canon.jpg` | 26 |
 | `crystal/` | The purifier crystal: the weapon, the grips, the four slash light-sheets | 15 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
-| `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line | 16 |
+| `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line; `beasts/cycles/` the filmed walk, run, winded and landing takes | 26 |
+| `roster/cycles/`, `talon/`, `bat/cycles/`, `sage/cycles/` | THE ROSTER WALKS (ART_QUEUE §2cc-iv…vii): the guard, blob, flying minion, bat and sage — green start plates, takes, the perch and exhale plates | 14 |
 | `flora/` | Alien plant life, two species per kingdom | 12 |
-| `gear/` | Thrust boots and the save pod, dormant + active | 4 |
-| `_sheets/` | Contact sheets and before/after comparisons | 17 |
+| `gear/` | Thrust boots and the save pod, dormant + active; Ratchet's repair board, its cell, the wake-room lamp | 7 |
+| `_sheets/` | Contact sheets and before/after comparisons | 18 |
 | `manhua/ch1/` | THE MANHUA, chapter one — the 27 as-fired pages of the second edition (`*_asfired.jpg`, 1024/q90), the refused first edition kept beside them (`*_ed1_asfired.jpg`), and `prompts.json`, the exact prompt and every take of every page; ledger in `docs/MANHUA.md` | 55 |
 
 `beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the
@@ -57,6 +58,37 @@ believing the code comments and photograph it.
 replace the small lions as zone A's first enemy (prowl / coil / pounce), THE
 ALPHA in nine states, and the electronic CHEETAH line for the later kingdoms
 (stand / sprint / wind-up) which has no alpha and is simply killed.
+
+`beasts/cycles/` is where the pack stopped sliding on two drawings (ART_QUEUE §2cc,
+2026-10-09). Each cycle is ONE stride filmed by Higgsfield and cut by
+`tools/vidstrip.cjs`: the identity plate was first re-plated onto flat chroma green
+(GPT Image 2.5, jobs 3d8fd5de wolf / 192f0959 cheetah — the plates are ink-lined on
+white, and a black key eats ink that touches the field), then animated IN PLACE with
+Seedance 2.5 (4 s, 720p, locked camera; jobs 234fd93b wolf walk, 78565285 wolf run,
+34083fbf cheetah walk, 6e273ec1 cheetah run). The stride period was measured from the
+keyed silhouettes and exactly one period cut, sampled at cell midpoints so the last
+cell never repeats the first. Every pair of cells differs (silhouette XOR / union):
+wolf walk ≥ 0.165, wolf run ≥ 0.242, cheetah walk ≥ 0.270, cheetah run ≥ 0.410. The
+wolf run's first cut found TWO strides (period 1.71 s, two cells 1.3% apart — the
+same pose twice) and was re-cut to one (0.54 s). Files: `*_green_start.jpg` (the
+start frames), `*_take.jpg` (each take as a contact sheet).
+
+The rest of §2cc followed the same day, the same way, and the same test: no strip
+ships with two cells that are the same picture. The pack's OPENINGS — winded (6, a
+loop) and land (4, once) — needed second takes: the first pants were so gentle the
+cells were 0.7-1.0% apart, which is the "copies of the same move" the owner ruled
+out, and were re-fired with the heave spelled out (wolf ≥ 7.4%, cheetah ≥ 5.3%); the
+first wolf landing leapt out of the top of the frame and flashed white, and was
+re-fired as a short hop. Landings are cut at hand-picked beats (`VIDSTRIP_TIMES`),
+the strike on the first frame the paws are down. Then the roster, each re-plated onto
+green from its shipped identity first (guard `style_d/guard_4`, blob `style_d/blob_0`,
+TALONHOST `eagle/kCharge`, bat `bat/flap_up`, sage `sage/stand`): guard walk 8
+(≥ 8.1%), blob crawl 8 (≥ 4.8%), minion chase 6 (≥ 32%) and cruise 8 (≥ 25%), bat flight 6
+(≥ 18.5%), sage walk 8 (≥ 9.8%), plus two stills — the minion's perch and the
+sage's exhale. Fliers are cut with `VIDSTRIP_FLOAT=1` (no floor line to clip the
+downstroke; shed flecks dropped). The first cruise take touched the frame edge on
+every downstroke and was re-fired from a smaller-framed start plate
+(`talon/green_start_small.jpg`). Every job id is in the commit that wired it.
 
 THE WOLF WAS REGENERATED ONCE AND THE ALPHA TWICE, and both for the same
 reason: a plate set is only a character if every plate is the SAME character.
@@ -349,6 +381,7 @@ plant that moves when you walk back through a door is worse than no plant.
 | plate | what it is |
 |---|---|
 | `boots` / `boots_fire` | THE THRUST BOOTS. She is a machine, so the dash is a bolt-on, not a talent she discovers. The firing plate is drawn along the dash vector at her feet — the procedural cone was always there, the boots making it were not |
+| `repair_panel` / `repair_battery` / `wake_lamp` | RATCHET'S REPAIR (js/story-repair.js) and the opening's fault. The board is the open service panel inside his chest, fired dark and low-contrast with a calm centre so the puzzle's buttons read over it (2.48:1, shipped 1000×403); the cell is the one power cell she seats (shipped 256²); the lamp is the caged tube over the cradle in W1, fired UNLIT because the game draws the fault's light on it (shipped 208×88, drawn 104×44). Fired 2026-10-09, gpt_image_2_5 against `pod.jpg` / Ratchet's plate for material; jobs 4f38e453, 645f5755, b4d72717 (the other variant of each rejected: a busier panel centre, a thinner cell, a lamp with the conduit leaving the wrong way) |
 | `pod` / `pod_on` | THE SAVE POD, at the size a save point deserves. It was thirty pixels of procedural tube; it is a horseshoe cradle on anti-vibration feet with a beacon mast, servicing arms and pressure tanks, standing four tiles tall. Dormant and awake are two plates, so stepping in is a state change and not a tint |
 
 ---

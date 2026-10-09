@@ -115,9 +115,47 @@ Consumed: registry §1–§5. Nothing needed from another subject.
 3. Hymn ring thickness vs. the gap between rings in phase 2 (3 rings) — is
    threading them actually possible?
 
+## B7. The template pass (2026-10-08, the Hollow Knight study, plan §3)
+
+FURNACE CHOIR walks the floor, so his windows were always *in reach* — the
+walk-in after each move — but nothing guaranteed them: a player standing close
+met the slam a frame after a lob (a 17 ms "opening" measured by
+`tests/guardians.cjs`), and a body walking at you is not an opening anyone
+reads as one.
+
+| move | after it | hold p1 / p2 | measured window, worst / median |
+|---|---|---|---|
+| `fc.slam` | **planted** `recover` (tail driven into the floor), then the walk | 500 / 420 | ≥ 450 / ~860 |
+| `fc.hymn` | **planted** `recover` (the bells ring down) | 550 / 450 | ≥ 483 / ~950 |
+| `fc.meltdown` | **planted** `recover` | 450 / 400 | — |
+| `fc.lob`, `fc.forgebell` | the walk-in, with **450 ms in which no wind-up may start** (`openT`) | — | ≥ 300 / ~620 (lob), ≥ 467 / ~830 (bell) |
+
+Only the heavy three plant him: a planted beat after every lob made him a statue
+for 29 % of `tests/bosspace.cjs` (the line is 34 %).
+
+**The deck:** the hymn was "every third idle, if its cooldown allows"; it is a
+draw now — the bells answer a player who stands close (the rings leave from his
+body, so close is where they are hardest to clear), the lob one who keeps her
+distance. Bands < 170 / < 380 / ≥ 380 px: hymn 3 / 1 / 0.5 (0 while its
+6.5–8.5 s cooldown runs), lob 1 / 2 / 3. The slam (< 100 px, its own cooldown)
+and the forge bell (its own clock) are unchanged. Measured: near draws ~32–43 %
+slam, ~18–21 % hymn; far draws ~88 % lob, 0 % slam.
+
+**The break:** `dazeAt 6`, `dazeSpan 2.6 s`, **1.6 s (p1) / 1.3 s (p2)** in the
+SILENCED slump, ×1.6 damage, plating open, cooldown 6 / 7.5 s. The meltdown's
+wind-up is committed (breaking it would delete the phase's one event).
+
+**Reward check (plan §3.6).** EMP Pulse (`emp`) and the **slag** arm, the key
+to GLACIERE's plating (`BOSS_GATE.zero`). Unchanged.
+
 ### Changelog
 | Value | Before | After | Reason |
 |---|---|---|---|
 | `TELL_ST` | `…\|broodcall/i` | `…\|forgebell\|hymn/i` | two one-channel telegraphs |
 | C1 lower flier | flier (10,25) | **hopper** (8,22) | registry §6.1 |
 | `ROOMS.C5` | — | the Pour Gallery | zone C had two fighting rooms; and the Tinker's cull of four turrets had only two in his own kingdom |
+| hymn selection (2026-10-08) | every 3rd idle (`cycle % 3 === 2`) when its cooldown allows | range deck, hymn 3 / 1 / 0.5 vs lob 1 / 2 / 3 (< 170 / < 380 / ≥ 380 px), cooldown unchanged | the cadence ignored where she stood |
+| slam / hymn / meltdown recovery | `idle` walk-in, `bossRest` × 1.2 / 1.5 / 1.25 | planted `recover` 500/420, 550/450, 450/400 ms, then the walk (× 0.7 / 0.95 / 0.8) | the opening is a thing he does, not a walk at her |
+| lob / forge bell recovery | walk-in, a new wind-up allowed at once | walk-in with `openT` 450 ms before any wind-up | the slam came a frame after a lob: 17 ms |
+| hit-group break | none | `dazeAt 6`, span 2.6 s, 1.6 / 1.3 s, cooldown 6 / 7.5 s | plan §3.6 |
+| `tests/shield.cjs` hymn-cadence step | forced the hymn with `cycle = 2` | pins the draw to the head of the deck (`Math.random = 0`); the "next turn lobs" assertion is unchanged and still fails if the cooldown is ignored | the cadence it forced no longer exists |

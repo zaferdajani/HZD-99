@@ -34,6 +34,16 @@ const { chromium } = require('playwright');
       doInteract(G.statics.find(s => s.type === 'chest' && s.extra === 'it:batt')); dialog();
       need(invCount('ratchetCell') === 1, 'recover his battery from the workshop');
       doInteract(ratchet()); dialog();
+
+      // Complete the actual repair controls; dialogue alone must not wake him.
+      if (G.state !== 'REPAIR') throw new Error('Ratchet repair did not open');
+      for (const [piece,target] of [['cell','socket'],['positive','plus'],['negative','minus'],['bridge','relay']]) {
+        document.querySelector('[data-piece="'+piece+'"]').click();
+        document.querySelector('[data-target="'+target+'"]').click();
+      }
+      document.querySelector('.repair-power').click();
+      for (let i=0;i<90 && G.state==='REPAIR';i++) update(1/60);
+      dialog();
       need(npcLive(ratchet()) && invCount('ratchetCell') === 0 && invCount('batt') === 1,
         'restore his own battery and receive the distinct Servo spare');
       need(qState('ratchet_forge') === 'active' && !weaponOwned('single'), 'rescue activates stone quest without a sword');
@@ -94,3 +104,4 @@ const { chromium } = require('playwright');
     assert.deepEqual(errors, []); console.log('PASS connected first-chapter quest and reloads', result);
   } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
+

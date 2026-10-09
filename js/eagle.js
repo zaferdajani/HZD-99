@@ -308,8 +308,10 @@ function drawEagle(c, b) {
       // COOLANT FREEZE: an uncontrolled tumble, not a stoop
       egFigA(c, 'pDown', 1, Math.sin(t * 7) * 0.5);
       egChestGlow(c, 0.9 + Math.sin(t * 30) * 0.4);
-    } else if (b.st === 'cffloor') {
-      // downed, chest cracked, coolant bleeding out — the repair window
+    } else if (b.st === 'cffloor' || b.st === 'daze') {
+      // downed, chest cracked, coolant bleeding out — the repair window.
+      // The hit-group break wears the same body: knocked off the cable onto
+      // the floor is the one pose this bird already has for "open".
       c.scale(1, 1 + Math.sin(t * 8) * 0.03);
       egFigA(c, 'pRest', 1, 0.12);
       egChestGlow(c, 0.25 + Math.sin(t * 18) * 0.15);

@@ -77,6 +77,62 @@ function skyLid(g) {
   for (let x = 0; x < w; x++) if (g[1][x] !== '#') g[0][x] = '.';
 }
 // ---------------------------------------------------------------------------
+// THE SKY ENDS WHERE THE ROOM ABOVE BEGINS.
+//
+// skyLid opens the whole lid, and that was right for a sky room with nothing
+// over it. But A1, A2 and A3 each have a room STACKED on them — A6, A8, B1 —
+// and a T crossing keeps her x, so that room's floor sits directly over the
+// lower room's first columns. From below she saw open sky there; climbing up,
+// she arrived inside a rock slab that the sky had promised was not there.
+// THE ROOF LAW says it outright: a room with a continuation above it has a
+// load-bearing roof — "it can be one or two frames above", but it exists.
+//
+// So the lid is DERIVED, never authored: wherever the room above has solid
+// floor, this room has rock overhead, and wherever that floor is open (its
+// way down, its drop shaft) this lid is open too — so a drop from above never
+// lands her inside the lid, and the climb up goes through a hole she can see
+// from below. Beyond the upper room's width the sky stays open, exactly as
+// before. The authored way up (g.tGap, remembered by skyLid) is untouched.
+//
+// NO RIGHT ANGLES: a one-row band would be a ruled line across the top of
+// the meadow. Its underside hangs in lumps — the bottom of a slab, not the
+// edge of a ruler — and the lumps stay clear of every opening, of the span's
+// ends (the slab thins out instead of stopping in a face) and of anything
+// built within three rows under them, so no climb or platform loses headroom.
+function skyUnder(g, def, id) {
+  let up = def.exits && def.exits.T;
+  if (!up) return;
+  if (typeof up === 'object') { if (up.at != null) return; up = up.to; }
+  if (!ROOMS[up]) return;
+  const ug = buildRoom(up), ub = ug.length - 1;
+  const w = g[0].length, span = Math.min(w, ug[0].length);
+  // only rock all the way through counts: the floor's bottom row is what is
+  // over her head, and a 'B' there is a hatch she can cut — once cut she
+  // falls through it, so the lid under it has to be open air, not rock
+  const shut = (x) => ug[ub][x] === '#';
+  for (let x = 0; x < span; x++) if (shut(x)) g[0][x] = '#';
+  let seed = 0; for (const ch of id) seed = (seed * 31 + ch.charCodeAt(0)) | 0;
+  // where a lump may hang: solid lid two columns either side, not on the
+  // room's seam columns (tests/seam.cjs holds both sides of a join equal from
+  // row 1 down), and nothing built in the three rows under it
+  const ok = (x) => {
+    if (x < 2 || x > w - 3) return false;
+    for (let k = -2; k <= 2; k++) if (x + k >= span || g[0][x + k] !== '#') return false;
+    for (let y = 2; y <= 4; y++) if (g[y][x] !== '.') return false;
+    return true;
+  };
+  // lumps of two to four columns with gaps of two to five between them —
+  // irregular, deterministic in the room id, never one long flat underside
+  for (let x = 2 + Math.floor(tnoise(1, seed) * 3); x < span;) {
+    const len = 2 + Math.floor(tnoise(x, seed + 7) * 3);
+    for (let k = 0; k < len; k++) if (ok(x + k)) g[1][x + k] = '#';
+    x += len + 2 + Math.floor(tnoise(x, seed + 13) * 4);
+  }
+  // a lone hanging column is a tooth, not a lump — drop it
+  for (let x = 1; x < span - 1; x++)
+    if (g[1][x] === '#' && g[1][x - 1] !== '#' && g[1][x + 1] !== '#' && g[0][x] === '#') g[1][x] = '.';
+}
+// ---------------------------------------------------------------------------
 // THE MEADOW'S OWN FURNITURE.
 //
 // NO RIGHT ANGLES is global, and its second clause is what binds room
@@ -469,10 +525,29 @@ const ROOMS = {
     // tutorial fences her into A0 with nothing left to solve. Moving it out of
     // the room means extending the tutorial into A1, whose crawler and guard
     // are the game's first real fight; that is a design call, not a wiring one.
-    ents: [['crawler', 24, 15], ['riddle', 11, 15, 8]],
+    // ...and the two TEACHING SECRETS (plan §5 fix 1), one at each end of the
+    // floor she cannot leave until she has learned it: the scrap in the wall
+    // pocket over her head where she walks in, and the scrap under the brittle
+    // crown of the last heap before the way out. Both are visible from the
+    // ground before she can reach them — the reward is what asks the question.
+    ents: [['crawler', 24, 15], ['riddle', 11, 15, 8], ['scrap', 2, 12, 20], ['scrap', 57, 15, 20]],
     build(g) {
       frame(g); seamR(g);
       hline(g, 4, 7, 12, '=');            // a lit shelf, for looking at
+      // THE FIRST HOLLOW WALL. The shelf's west end runs into a pocket in the
+      // city wall's inner face: two tiles of air with scrap in it, a roof over
+      // it and a brittle plug where it meets the shelf. Standing on the shelf
+      // she faces the plug at body height; the first blow KNOCKS (hollow note,
+      // grit, the crack opening), the second opens it. The roof's outer corner
+      // is chipped so the wall's face is a lump, not a box.
+      //   row  9  ###.        the roof, its corner broken off
+      //   row 10  #..B        the pocket and the plug
+      //   row 11  #..B
+      //   row 12  ####====    its floor, running into the shelf
+      // Clear of the gate arrival (x=40, on the floor two rows below it).
+      hline(g, 0, 2, 9, '#');
+      rect(g, 1, 10, 2, 11, '.'); rect(g, 3, 10, 3, 11, 'B');
+      hline(g, 0, 3, 12, '#');
       // the step she has to jump — a half-sunk chassis rather than a block:
       // the first thing in the game she climbs, and it is one of the dead
       // machines the backdrop is already full of
@@ -497,6 +572,16 @@ const ROOMS = {
       gantry(g, 36, 43, 9, 1);
       // ...and the yard runs on past the booth rather than stopping at it
       mound(g, 54, 62, 2, 37);
+      // THE FIRST HOLLOW FLOOR, in the last heap she crosses on the way out:
+      // its crown is a brittle crust over a one-tile hold with scrap in it.
+      // She walks over it either way (it is solid until cut); standing on it
+      // she is told how — jump, hold DOWN, strike — which is the exact move
+      // A2's floor asks of her one room later on the way to the first cave.
+      // The crown is widened a tile each way (56-59) so the crust is FLUSH with
+      // the ground she stands on — a crust one course above her feet is a wall
+      // at body height and a side swing would take it. Still one tile per column.
+      hline(g, 56, 59, 13, '#');
+      rect(g, 57, 13, 58, 13, 'B'); rect(g, 57, 14, 58, 14, '.');
     } },
   // THE TRADER'S BOOTH (owner's design): she finds the booth on the meadow,
   // walks INTO it through the depth door, and inside is a den — a crafting
@@ -608,7 +693,7 @@ const ROOMS = {
   // ---- THE SHAFT: straight down, in the dark, for the errand nobody takes.
   A7: { zone: 'A', w: 40, h: 32, exits: { T: 'A5' },
     ents: [['blob', 6, 30, 0], ['blob', 15, 30, 0], ['turret', 19, 24],
-           ['scrap', 10, 30, 45], ['secret', 3, 30, 'sigil3'], ['scrap', 34, 28, 30]],
+           ['scrap', 10, 30, 45], ['scrap', 3, 30, 40], ['scrap', 34, 28, 30]],
     build(g) {
       frame(g);
       rect(g, 9, 0, 12, 0, '.');              // the drop in from A5
@@ -655,7 +740,7 @@ const ROOMS = {
       hline(g, 24, 29, 27, '=');
       hull(g, 30, 38, 2, 141);
     } },
-  A2: { zone: 'A', sky: 1, w: 88, h: 17, exits: { L: 'A1', R: 'A10', B: 'A5', T: 'A8' },
+  A2: { zone: 'A', sky: 1, w: 88, h: 17, exits: { L: 'A1', R: 'A3', B: 'A5', T: 'A8' },
     // TWO DISRUPTORS ON ONE SCREEN WAS THE GAME'S SECOND FIGHT. Fliers dive and
     // withdraw; two of them harassing from opposite angles leaves nothing to do
     // about either, which is agency removal rather than difficulty. The second
@@ -663,7 +748,7 @@ const ROOMS = {
     // question the guard beside it asks — can you wait for the right moment —
     // instead of asking the player to be in two places at once.
     ents: [['crawler', 20, 15], ['flier', 30, 7], ['guard', 46, 15], ['hopper', 52, 15], ['scrap', 8, 15, 8], ['scrap', 35, 11, 12],
-           ['scrap', 65, 10, 15]],
+           ['scrap', 65, 10, 15], ['scrap', 80, 15, 20]],
     build(g) {
       frame(g); seamL(g); seamR(g);
       // ---- THE WEST THIRD IS THE JUNCTION, AND IT DOES NOT MOVE -----------
@@ -694,8 +779,23 @@ const ROOMS = {
       mound(g, 58, 72, 4, 53);
       gantry(g, 63, 71, 8, 2);
       // and a hulk lying across the last of it, so the room ends on something
-      // rather than running out
-      hull(g, 76, 85, 2, 57);
+      // rather than running out.
+      //
+      // THE DOWN-STRIKE AS A TOOL, not a trick (plan §5 fix 1): the hulk's
+      // back is a crust TWO courses deep over a hold with scrap in it. The
+      // strike from above reaches both courses — the downward claw is deep —
+      // and the same blow REBOUNDS her (the pogo), so the lesson is the whole
+      // verb: it cuts, it throws her up, and she comes down into what it
+      // opened. A0's crust taught that floors give; this one teaches that the
+      // down-strike digs, one room before the floor that leads to the first
+      // cave. Laid out by hand so its back is flat for a tile either side of
+      // the crust (a crust one course above her feet is a wall at body height,
+      // and a side swing would take it), still rising one tile per column;
+      // nothing hangs over it, so the strike has clear air.
+      [0, 1, 2, 3, 3, 3, 3, 3, 2, 1, 0].forEach((h, i) => {
+        for (let y = 15 - h; y < 15; y++) put(g, 75 + i, y, '#');
+      });
+      rect(g, 80, 12, 81, 13, 'B'); rect(g, 80, 14, 81, 14, '.');
     } },
   // ---- THE DEN. The first fight in the game you can lose, and it is on the
   // way rather than off it: the pack has been in the meadow since the first
@@ -703,10 +803,10 @@ const ROOMS = {
   // It sits between the meadow and the save point on purpose — you meet the
   // Alpha, you take the pack, and THEN you walk into the room with the bench
   // and the trader in it, which is where the run's first breath is.
-  A10: { zone: 'A', sky: 1, w: 46, h: 17, exits: { L: 'A2', R: 'A3' },
+  A10: { zone: 'A', sky: 1, w: 46, h: 17, exits: {},
     ents: [['boss', 27, 15, 'alpha']],
     build(g) {
-      frame(g); seamL(g); seamR(g);
+      frame(g);
       // THE ARENA STAYS CLEAN, AND THAT IS THE WHOLE CONSTRAINT HERE. The
       // Alpha's leap is the move this room is built around, and a room full of
       // geometry is a room where a committed pounce lands on a corner instead
@@ -724,7 +824,12 @@ const ROOMS = {
       hull(g, 9, 15, 2, 71);
       hull(g, 39, 45, 2, 73);
     } },
-  A3: { zone: 'A', sky: 1, w: 52, h: 17, exits: { L: 'A10', R: 'A4', T: 'B1', B: 'A12' },
+  // THE FIRST KINGDOM'S ONLY WAY OUT is the climb above the camp, and it is
+  // the story's gate (plan §4.2): the Conduits open once NULLFANG is free —
+  // which needs the forged blade, the Meadow Sage and the silenced bell — so
+  // nobody leaves the Meadows having skipped its chapter. Robot story only.
+  A3: { zone: 'A', sky: 1, w: 52, h: 17,
+    exits: { L: 'A2', R: 'A4', T: { to: 'B1', flag: 'bossGlitch', blade: 1, robo: 1, why: 'gate_conduits' }, B: 'A12' },
     ents: [['bench', 8, 15], ['npc', 14, 15, 'ratchet'], ['scrap', 40, 15, 14]],
     build(g) {
       frame(g); seamL(g); seamR(g);
@@ -880,7 +985,13 @@ const ROOMS = {
     // the cable-shrine and she is inside, in a place of her own — the same
     // promotion Ratchet got when the meadow stopped being his shop floor.
     ents: [['bench', 12, 15], ['term', 22, 15, 2], ['trial', 25, 15]],
-    build(g) { frame(g); openL(g); openR(g); rect(g, 4, 15, 6, 16, '.'); rect(g, 30, 15, 30, 16, '.'); } },  // col 30: C1's chimney up
+    // One way down, at 4-6, into C1's ceiling. There used to be a second hole
+    // at col 30, cut so the seam check found the floor open over C1's two dead
+    // columns — C1 was declared 32 wide and built 30, so its lid read open at
+    // 30-31 and this floor was punched to "answer" it. Falling through it
+    // dropped her down a void strip behind C1's east wall. C1 is 30 wide now,
+    // the strip does not exist, and neither does the hole.
+    build(g) { frame(g); openL(g); openR(g); rect(g, 4, 15, 6, 16, '.'); } },
   // THE ORACLE'S PARLOR (kingdom 2's own interior, the B-side of A0B): a
   // one-room den behind the cable-shrine in B3 where mono actually LIVES —
   // the CRT face on its shroud of dead cables, reading a river of data in the
@@ -903,7 +1014,9 @@ const ROOMS = {
                                             // breaking the wall used to reveal
                                             // two more columns of solid frame
     } },
-  B5: { zone: 'B', w: 32, h: 17, exits: { L: 'B4', T: 'X1', R: 'V1' },
+  // The east side leads where the three-sigil vault leads (V1), so it opens on
+  // the vault's own condition: an open side door was the way around the lock.
+  B5: { zone: 'B', w: 32, h: 17, exits: { L: 'B4', T: 'X1', R: { to: 'V1', flag: 'vaultOpen', why: 'gate_vault_side' } },
     ents: [['chest', 12, 15, 'phantom'], ['scrap', 16, 15, 25], ['riddle', 19, 15, 2], ['vault', 21, 15]],
     build(g) {
       frame(g); openL(g); openR(g); hline(g, 8, 15, 12, '=');
@@ -1042,7 +1155,12 @@ const ROOMS = {
       hline(g, 12, 17, 11, '='); hline(g, 20, 24, 8, '=');
     } },
   // ============ ZONE C — The Foundry ============
-  C1: { zone: 'C', w: 32, h: 34, exits: { T: 'B3', B: 'C2' },
+  // 30 WIDE, AS BUILT. The def said 32 while the walls stood at 0 and 29, so
+  // columns 30-31 were a two-tile void strip behind the east wall that the
+  // camera scrolled into and the lid and floor were open over. The room is the
+  // width of its walls now; both vertical exits keep her x, and both openings
+  // (4-6 up, 22-25 down) sit well inside it.
+  C1: { zone: 'C', w: 30, h: 34, exits: { T: 'B3', B: 'C2' },
     // The shaft's two fliers sat ten tiles apart in Y — one screen — and the
     // audit missed it because it only slid a window sideways, which in a room
     // 30 wide and 34 tall is the whole room. Descending past two disruptors
@@ -1399,10 +1517,15 @@ const ROOMS = {
     ents: [['boss', 26, 15, 'chime']],
     build(g) {
       frame(g); seamL(g);
-      rect(g, 11, 15, 15, 16, '.');            // the drop back to A8 — col 11 answers A8's opening
+      // THE DROP BACK TO A8 IS A8'S OWN OPENING, COLUMN FOR COLUMN: 11-14.
+      // It was 11-15, one wider than the hole it falls into, and a vertical
+      // crossing keeps her x — so dropping down column 15 put her inside
+      // A8's roof. A shaft is one hole cut through two rooms; both ends are
+      // the same width or one of them is a trap (tests/shaftfit.cjs).
+      rect(g, 11, 15, 14, 16, '.');
       // the arena rule again: the ground the fight happens on is flat and the
-      // furniture lives on the shoulders. The drop home stays at 12-15 — it is
-      // the only way out of this room and it has to line up with A8's ceiling.
+      // furniture lives on the shoulders. The drop home is the only way out of
+      // this room and it has to line up with A8's ceiling.
       hline(g, 6, 11, 11, '='); hline(g, 31, 36, 11, '=');
       hull(g, 4, 8, 2, 133);                   // was 2-8: the west shoulder now leaves the wall clear
       hull(g, 38, 43, 2, 131);
@@ -1598,7 +1721,7 @@ const ROOMS = {
     ents: [['boss', 20, 15, 'carrier']],
     build(g) {
       frame(g);
-      rect(g, 13, 15, 17, 16, '.');   // col 13 answers B7's opening below
+      rect(g, 13, 15, 16, 16, '.');   // B7's ceiling opening, exactly (13-16)
       hline(g, 3, 9, 10, '='); hline(g, 21, 27, 10, '=');
     } },
 
@@ -1618,7 +1741,7 @@ const ROOMS = {
     ents: [['boss', 20, 16, 'moth']],
     build(g) {
       frame(g);
-      rect(g, 11, 16, 15, 17, '.');   // col 11 answers C6's opening below
+      rect(g, 11, 16, 14, 17, '.');   // C6's ceiling opening, exactly (11-14)
       hline(g, 3, 9, 11, '='); hline(g, 21, 27, 11, '=');
     } },
 
@@ -1628,7 +1751,7 @@ const ROOMS = {
     build(g) {
       frame(g);
       rect(g, 12, 0, 15, 0, '.');
-      rect(g, 12, 22, 16, 23, '.');   // col 16 answers D6's opening below
+      rect(g, 13, 22, 16, 23, '.');   // D6's ceiling opening, exactly (13-16)
       // a descent, and the rungs still have to work going UP, because the only
       // way home is back through here
       // THE SAME STAIR B6 WAS BUILT TO AVOID: six rungs, every gap 3 rows,
@@ -1641,6 +1764,15 @@ const ROOMS = {
       hline(g, 3, 9, 5, '='); hline(g, 15, 20, 9, '=');
       hline(g, 4, 11, 12, '='); hline(g, 16, 22, 15, '=');
       hline(g, 3, 8, 18, '='); hline(g, 14, 21, 20, '=');
+      // ...AND THE LAST RUNG IS UNDER THE DOOR. "The rungs still have to work
+      // going UP" was the promise, and they did not: the top rung ends three
+      // columns short of the opening, so the jump from it meets the lid at
+      // col 9 and she falls back — measured, not guessed (tests/benchloop.cjs
+      // jumps the real body from every footing near the hole). With the boss
+      // room below and no bench in either, a drop into D5 was a one-way trip
+      // with nowhere to rest. A short rung straight under the opening, five
+      // rows over the rung at 15-20, closes the loop.
+      hline(g, 11, 15, 4, '=');
     } },
   D6: { zone: 'D', w: 32, h: 17, exits: { T: 'D5' }, ice: true,
     ents: [['boss', 20, 15, 'lattice']],
@@ -1666,6 +1798,9 @@ const ROOMS = {
       hline(g, 4, 11, 12, '='); hline(g, 17, 23, 15, '=');
       hline(g, 3, 8, 18, '='); hline(g, 15, 22, 20, '=');
       hline(g, 20, 27, 21, '^');
+      // the same broken promise as D5 (see its note) and the same repair: the
+      // way home meets the lid unless there is a rung under the door
+      hline(g, 12, 16, 4, '=');
     } },
   E6: { zone: 'E', w: 32, h: 17, exits: { T: 'E5' },
     ents: [['boss', 22, 15, 'lens']],
@@ -1688,20 +1823,37 @@ const MAPPOS = {
   // which is also why the row starts at -9: the spine needs fifteen cells and it
   // has to end before col 6, where the Foundry begins. tests/mapgrid.cjs holds
   // the whole board against overlap.
-  W1: [-9, 3, 1, 1], W2: [-8, 3, 2, 1], A0: [-6, 3, 2, 1], A0B: [-6, 2, 1, 1], A1: [-4, 3, 2, 1],
-  A2: [-2, 3, 3, 1], A10: [1, 3, 2, 1], A3: [3, 3, 2, 1], A4: [5, 3, 1, 1],
-  A5: [-2, 4, 2, 1], A6: [-4, 2, 1, 1], A7: [-2, 5, 1, 2], A8: [-1, 2, 1, 1], A9: [-1, 1, 1, 1],
-  A11: [-2, 1, 1, 1], A12: [3, 5, 1, 1], A13: [-5, 2, 1, 1],
-  CV1: [0, 4, 2, 1], CV1B: [0, 5, 1, 1], CV2: [2, 4, 2, 1], CV3: [4, 4, 1, 1],
-  B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V1B: [9, 1, 1, 1], V2: [5, 5, 1, 1],
+  //
+  // AND THE BOARD IS WHERE THE ROOMS REALLY ARE (tests/mapexits.cjs). A
+  // vertical crossing keeps her x and a side crossing keeps her y, so every
+  // exit fixes where its neighbour sits — the upper room of a shaft is drawn
+  // so its hole and the lower room's hole are the same place on the chart,
+  // and a side neighbour starts where its room ends. Positions are derived
+  // from those two rules, walked out from B1; fractions of a cell are what
+  // the shaft arithmetic actually gives (A2's hole lands 0.85 of a cell from
+  // A8's when both are drawn on whole cells). The spine runs edge to edge to
+  // A3 again — A10 left it for a depth door off A2, and its old cells were
+  // a two-cell hole in the middle of the meadow.
+  //
+  // TWO ROOMS THE WORLD ITSELF CANNOT PLACE: V2 hangs under B2's floor at
+  // tile 44, which is where A4 already stands, and D4 rises from D2 into the
+  // span C2 occupies. Those are overlaps in the geometry, not in the drawing;
+  // they keep a route line to the room they hang from, and the harness proves
+  // each one still has no free aligned square before it lets it pass.
+  W1: [-7.25, 3, 1, 1], W2: [-6.25, 3, 2, 1], A0: [-4.25, 3, 2, 1], A0B: [-4.25, 2, 1, 1], A1: [-2.25, 3, 2, 1],
+  A2: [-0.25, 3, 3, 1], A10: [1, 0, 2, 1], A3: [2.75, 3, 2, 1], A4: [4.75, 3, 1, 1],
+  A5: [-0.25, 4, 2, 1], A6: [-2, 2, 1, 1], A7: [0, 5, 1, 2], A8: [0, 2, 1, 1], A9: [0, 1, 1, 1],
+  A11: [-1, 1, 1, 1], A12: [3, 4, 1, 1], A13: [-3, 2, 1, 1],
+  CV1: [-6, 5, 2, 1], CV1B: [-6, 6, 1, 1], CV2: [-4, 5, 2, 1], CV3: [-2, 5, 1, 1],
+  B1: [3, 2, 1, 1], B2: [4, 2, 2, 1], B3: [6, 2, 1, 1], B3B: [6, 1, 1, 1], B4: [7, 2, 1, 1], B5: [8, 2, 1, 1], V1: [9, 2, 1, 1], V1B: [10, 2, 1, 1], V2: [5, 4, 1, 1],
   B6: [3, 1, 1, 1], B7: [4, 1, 1, 1], B8: [4, 0, 1, 1],
   X1: [8, 1, 1, 1],
-  C1: [6, 3, 1, 2], C2: [5, 5, 2, 1], C3: [7, 5, 1, 1], C4: [8, 5, 1, 1], C5: [4, 5, 1, 1], C5B: [4, 6, 1, 1],
-  C6: [7, 4, 1, 1], C7: [7, 3, 1, 1],
-  D1: [5, 6, 1, 1], D1B: [5, 7, 1, 1], D2: [6, 6, 2, 1], D3: [8, 6, 1, 1], D4: [6, 5, 1, 1],
-  D5: [6, 7, 1, 1], D6: [6, 8, 1, 1],
-  E1: [8, 7, 1, 1], E1B: [8, 8, 1, 1], E2: [9, 7, 2, 1], E3: [11, 7, 1, 1], E4: [9, 6, 1, 1],
-  E5: [9, 8, 1, 1], E6: [9, 9, 1, 1],
+  C1: [6, 3, 1, 2], C2: [6, 5, 2, 1], C3: [8, 5, 1, 1], C4: [9, 5, 1, 1], C5: [5, 5, 1, 1], C5B: [4, 6, 1, 1],
+  C6: [8, 4, 1, 1], C7: [8, 3, 1, 1],
+  D1: [6, 6, 1, 1], D1B: [5, 7, 1, 1], D2: [7, 6, 2, 1], D3: [9, 6, 1, 1], D4: [7, 4, 1, 1],
+  D5: [7, 7, 1, 1], D6: [7, 8, 1, 1],
+  E1: [9, 7, 1, 1], E1B: [8, 8, 1, 1], E2: [10, 7, 2, 1], E3: [12, 7, 1, 1], E4: [10, 6, 1, 1],
+  E5: [10, 8, 1, 1], E6: [10, 9, 1, 1],
 };
 
 // ==== THE GUARDIAN GROTTOES — every fall or taming REVEALS A CAVE ==========
@@ -1727,14 +1879,15 @@ const MAPPOS = {
 // cave, each its own story.
 const GROTTOES = [
   // [grotto, tunnel, deep chamber, lair, flag, grotto/tunnel/deep map cells]
-  ['GA1', 'GA1T', 'GA1D', 'A4', 'bossGlitch', [5, 4], [6, 4], [10, 4]],
-  ['GA2', 'GA2T', 'GA2D', 'A10', 'alpha', [2, 2], [2, 1], [1, 1]],
-  // GB1's tunnel/deep cells moved up a row: [6,1] is the Oracle's parlor now
-  ['GB1', 'GB1T', 'GB1D', 'B4', 'bossBrood', [7, 1], [7, 0], [6, 0]],
-  ['GC1', 'GC1T', 'GC1D', 'C3', 'bossAtlas', [8, 4], [9, 4], [9, 5]],
-  ['GD1', 'GD1T', 'GD1D', 'D3', 'bossZero', [10, 6], [10, 5], [11, 5]],
+  // each network's three cells in a row: grotto R tunnel R deep chamber are
+  // side exits, so they sit edge to edge (tests/mapexits.cjs)
+  ['GA1', 'GA1T', 'GA1D', 'A4', 'bossGlitch', [1, 5], [2, 5], [3, 5]],
+  ['GA2', 'GA2T', 'GA2D', 'A10', 'alpha', [-2, 0], [-1, 0], [0, 0]],
+  ['GB1', 'GB1T', 'GB1D', 'B4', 'bossBrood', [5, 0], [6, 0], [7, 0]],
+  ['GC1', 'GC1T', 'GC1D', 'C3', 'bossAtlas', [10, 4], [11, 4], [12, 4]],
+  ['GD1', 'GD1T', 'GD1D', 'D3', 'bossZero', [11, 5], [12, 5], [13, 5]],
   ['GX1', 'GX1T', 'GX1D', 'X1', 'bossPrism', [9, 1], [10, 1], [11, 1]],
-  ['GE1', 'GE1T', 'GE1D', 'E3', 'bossMother', [11, 6], [12, 6], [13, 6]],
+  ['GE1', 'GE1T', 'GE1D', 'E3', 'bossMother', [13, 6], [14, 6], [15, 6]],
 ];
 for (const [gid, tid, did, lair, flag, gcell, tcell, dcell] of GROTTOES) {
   ROOMS[gid] = {
@@ -1849,7 +2002,7 @@ function buildRoom(id) {
   } else def.build(g);
   // sky rooms lose the lid after everything else is built, so the pass sees
   // the authored ceiling opening before erasing it — pack rooms included
-  if (def.sky) skyLid(g);
+  if (def.sky) { skyLid(g); skyUnder(g, def, id); }
   gridCache[id] = g;
   return g;
 }

@@ -5878,3 +5878,162 @@ takes each key; #2 replaces `pounce` `from/to` with the air cells indexed by
 arc progress (`b.leapT0`); #1 needs a `run` state in the glitch step logic;
 #3 and #4 need their states. `tests/artbible.cjs` measures silhouettes and
 feet; `tests/openings.cjs` must stay green for every move touched.
+
+## 2cc. THE ROSTER WALKS — walk and run strips per creature, and a body for every opening ✱ NEW 2026-10-08 (code session, enemy motion pass) — §i-vii FIRED + WIRED 2026-10-09; §viii optional
+
+**Why.** The owner's study (plan §1): *"Enemies look like paper because they are
+single still images being slid around … Code fixes the motion; real walk and run
+frames need art."* The code half shipped with this brief: every machine now
+knows when it is on the floor, accelerates, brakes and turns on its feet, flies
+the same path at any frame rate, and clocks its stride by FLOOR COVERED, not by
+time (`tests/enemygait.cjs`). Every attack also has a wind-up and a recovery
+silhouette (`tests/artbible.cjs`, the ENEMY cast) — but the recoveries of the
+pack, the hopper's landing and the sage's exhale are an existing plate RE-POSED
+by a transform (`BEAST_RECOVER` in js/wolves.js, `ATLAS_POSE` in js/atlas.js),
+which ART_BIBLE §3.3 rightly calls a stand-in. Two drawings cannot make a walk
+and one cannot make a recovery. These strips are the art half. **Owner reviews
+every strip before it is keyed; credits are his.**
+
+**Rules for every strip below** (ART_BIBLE §3.2, §2q, the §1 paired-paw rule's
+spirit): pure black background, subject only, NO ground plane, NO cast shadow,
+NO dust, NO motion blur, no text. Side view facing **LEFT**, the house facing of
+every plate in js/wolves.js. Identity-locked to the wired plate named for each
+(same animal, same palette, same key light, same scale) — fire cell 0 against
+that plate, then every later cell against cell 0. Square cells laid out as ONE
+horizontal strip, subject bottom-aligned and centred on the cell floor, **feet on
+the same line in every cell** (the `tools/vidstrip.cjs` contract `drawStripCell`
+reads). Overlay consecutive cells before keying: **all four legs must differ
+cell to cell** — a cycle where one limb moves reads as one leg pumping while the
+body glides (§2q, the owner's own words). Palette named in words in every
+prompt; negatives stated.
+
+**How the code will play them (so the stride in the art matches the floor).**
+The cycle is driven by distance, not time: `wolfPose` banks floor covered in
+half-steps of `STRIDE` (30 px walking) / `STRIDE_RUN` (46 px running; ×1.22 for
+the cheetah). A full strip is ONE full stride cycle = two half-steps = **60 px
+of floor walking, 92 px running (112 px cheetah)** at the drawn size, so the
+planted paw must travel backward across the cell by that much over the cycle
+(at the plate scale: the wolf draws 2.35 hitbox heights = 47 px tall, the
+cheetah 2.10 = 42 px). A paw that slides against that number is the moonwalk
+again, in the art.
+
+### 2cc-i. THE WOLF — `wolfWalk` (8 cells) and `wolfRun` (6 cells)
+
+**FIRED + WIRED 2026-10-09 (code session, owner's order "use Higgsfield for the complete artwork").** `wolf_walk8.webp` (8×192, 62 KB) and `wolf_run6.webp` (6×192, 53 KB), keys `wolfWalk8` / `wolfRun6`, drawn by `drawBeastPlate` as one cell of a real stride on the distance-driven phase; the two-plate pair stays as the fallback. Takes and the uniqueness numbers: `assets/source/README.md`, `beasts/cycles/`.
+
+Identity: `wolfRest` / `wolfWalkA` (assets/characters/beasts/). Palette:
+gunmetal plates over dark graphite, red optic, cyan seam light — as wired.
+
+- **wolfWalk ×8** — a four-beat lateral walk, two contacts per side:
+  0 left-fore + right-hind contact (diagonal pair reaching), 1 down (weight
+  onto them, back dips), 2 passing (the other diagonal swings under the
+  body), 3 up (push-off, back highest), 4 right-fore + left-hind contact
+  (mirror of 0), 5 down, 6 passing, 7 up. Head level and steady; the tail
+  counter-sways a little against the hips.
+- **wolfRun ×6** — a bound (docs/MOVEMENT_SOURCES.md §2, the CC0 wolf's
+  6-frame run): 0 hind legs driving off behind, forelegs reaching far forward
+  (full extension), 1 forepaws strike, 2 forelegs pull under, back FLEXED into
+  an arch (gather), 3 **suspension — all four paws off the floor, folded
+  under**, 4 hind paws strike ahead of where the fore left, 5 push-off into 0.
+  This replaces the §2q run PAIR (`wolfRunA/B`): six cells, not two.
+
+### 2cc-ii. THE CHEETAH — `cheetahWalk` (8) and `cheetahRun` (6)
+
+**FIRED + WIRED 2026-10-09.** `cheetah_walk8.webp` (8×192, 62 KB) and `cheetah_run6.webp` (6×192, 34 KB) — the gallop came back with both suspensions; keys `cheetahWalk8` / `cheetahRun6`, wired as the wolf's.
+
+Identity: `cheetahRest` (the gold unit — §2q found the walk pair drifted into
+two other machines; lock to the REST plate). Palette: brushed gold and tan
+plating, dark spine, amber-free eye (amber is the telegraph's).
+
+- **cheetahWalk ×8** — the same four-beat structure as the wolf, longer and
+  lower: shoulder blades visibly rolling over the top line, head carried below
+  the shoulders.
+- **cheetahRun ×6** — a rotary gallop with TWO suspensions, longer reach than
+  the wolf, deeper back flexion: 0 extended suspension (all legs stretched
+  out), 1 hind lead strikes, 2 hind trail strikes, 3 gathered suspension (all
+  legs folded under, spine coiled hard), 4 fore lead strikes, 5 fore trail
+  pushes off into 0.
+
+### 2cc-iii. THE PACK'S OPENINGS — `wolfWinded` / `cheetahWinded` (6, loop) and `wolfLand` / `cheetahLand` (4, once)
+
+**FIRED + WIRED 2026-10-09.** `wolf_winded6` / `cheetah_winded6` (6×192, 62 / 54 KB) and `wolf_land4` / `cheetah_land4` (4×192, 29 / 27 KB). The first winded takes panted too gently (6 cells only 0.7-1.0% apart — copies) and were re-fired with the heave spelled out (now ≥ 5.3%); the first wolf landing leapt out of frame and flashed white and was re-fired as a short hop. The landing is cut at hand-picked beats (`VIDSTRIP_TIMES`: strike on the first frame the paws are down, fold, lowest, half-risen). `drawBeastPlate` plays winded as a loop on the sim clock (one breath per 0.6 s) and land once across the landing timer; `BEAST_RECOVER` is now only the fallback while they load.
+
+These replace the re-posed rest plate (`BEAST_RECOVER`) the code draws today.
+- **Winded ×6, looping** — after the lunge: head hung BELOW the shoulder line,
+  forelegs splayed a little wide, back sagging, flanks heaving (cells 0-5 are
+  one breath: in over 0-2, out over 3-5). Nothing coiled, nothing pointed at
+  her — it must read as SPENT from across a room. Its silhouette must differ
+  from the coil plate (`wolfCoil` / `cheetahWarn`): coil is low and FORWARD,
+  winded is low and SLACK.
+- **Land ×4, once** — the hopper touching down from its leap: 0 forepaws
+  strike with legs nearly straight, 1 elbows and hocks fold deep, chest almost
+  to the floor, 2 lowest point, 3 half-risen, still heavy. Feet on the cell
+  floor in every cell.
+
+### 2cc-iv. THE GUARD — `guardWalk` (8)
+
+**FIRED + WIRED 2026-10-09.** `roster/guard_walk8.webp` (8×192, 79 KB), key `guardWalk8`, two heavy steps under a steady plate (cells ≥ 8.1% apart). `drawRosterWalk` (entities.js) routes a walking guard through it on the turntable's own gait clock (walkD, one cycle per two `ATLAS_STRIDE`s) once it is settled into a heading; turns, tells and the shed plate stay on the turntable. It takes the npcs sheet's pop grade (lift 0.45) so the body does not change colour when it starts walking.
+
+Identity: the guard row of `npc_6yaw.png` (row 6), in profile facing LEFT, the
+riot plate carried UP on its leading side, red sensor slit, hazard striping on
+the plate edge. A heavy two-legged mech walk: 0 lead foot plants, 1 weight
+drops through the hip, 2 trail foot passes, 3 rise; 4-7 the mirror. The plate
+does NOT bob with the body — it is held steady (a shield bearer keeps the
+shield still and walks under it). **Class note for the wiring session:** the
+guard is ART_BIBLE class C (one turnaround, no per-state art); a walk strip
+promotes it, and `Enemy.draw` must route the guard through `drawStripCell`
+while walking and keep the turnaround for turns. Until wired, the atlas rig's
+distance-clocked cut-out walk stays.
+
+### 2cc-v. THE BLOB — `blobCrawl` (8)
+
+**FIRED + WIRED 2026-10-09.** `roster/blob_crawl8.webp` (8×192, 69 KB), key `blobCrawl8` — the shipped roster blob walks on stone legs, so the strip is that blob's leg ripple, not a legless roll (cells ≥ 4.8% apart). The roster sheet's colour/form/rim grade is baked into the file and the pop grade applied at draw, matching the turntable; the drip tell and rebound stay on the turntable's deformation.
+
+Identity: the blob row of the roster atlas (molten mass, slag crust, red core).
+A peristaltic roll: 0 mass gathered at the rear, 1-2 the front edge flows
+forward and thins, 3 the bulk rolls over its own leading edge, 4-6 the rear
+draws up after it, 7 settled. No legs appearing; the contact edge stays on the
+floor line in every cell; the core light rides the bulk. The drip tell and its
+rebound stay code deformation — this is the travel only.
+
+### 2cc-vi. THE FLYING MINION — `talonMiniCruise` (8) and `talonMiniChase` (6)
+
+**FIRED + WIRED 2026-10-09.** `talon/chase6.webp` (6×192, 41 KB, cells ≥ 32% apart), `talon/cruise8.webp` (8×192, 67 KB, cells ≥ 25% apart), `talon/perch.webp` (one 256 cell). Seedance turned the three-quarter plate FRONT-ON in flight, which is how the mini was always drawn (and banked), so it is kept front-on. The first cruise take clipped its wingtips on every downstroke and was re-fired from a smaller-framed start plate. `tools/vidstrip.cjs` grew `VIDSTRIP_FLOAT=1` for fliers: no floor line clipping the downstroke, and shed flecks dropped.
+
+Identity: the small TALONHOST (`eagleParts`, the `pDown`/`pUp` figures the mini
+flaps between today). Three-quarter side view facing LEFT, so it can face its
+travel (the code mirrors it).
+- **Cruise ×8** — a full wing-beat at patrol pace: power stroke over 0-2
+  (snapping down fast), glide 3, slow recovery 4-7 (wings sweeping up). Body
+  level, talons tucked.
+- **Chase ×6** — the pursuit beat: shorter, harder strokes, body pitched nose-
+  down toward its quarry, talons half-dropped.
+- **Plus one cell, `talonMiniPerch`** — sat on a ledge, wings folded, talons
+  gripping the floor line (today the code borrows the boss's `pRest`).
+
+### 2cc-vii. THE BAT — `batFlight` (6) and THE SAGE — `sageWalk` (8)
+
+**FIRED + WIRED 2026-10-09.** `bat/flight6.webp` (6×192, 43 KB, cells ≥ 18.5% apart) on the same 18 rad/s beat the two plates alternated on; `sage/walk8.webp` (8×192, 34 KB, ≥ 9.8%) clocked by floor covered; `sage/exhale.webp` (one 256 cell) replaces the bow transform. Also fixed: the flap plates face LEFT and the dive RIGHT, and one shared mirror rule had flown the flapping bat backwards between dives — facing is per plate now.
+
+- **batFlight ×6** — identity `batFlapUp`/`batFlapDn` (§2d): a full flap,
+  wings fully up (0), sweeping down (1-2), fully down (3), recovering (4-5).
+  Replaces the two-plate flap the stride counter alternates today.
+- **sageWalk ×8** — identity `sageStand`: the duelist's measured step, robe
+  hem swinging, hood steady, ember eyes level; 0 lead foot forward under the
+  hem … 4 the other. Plus **`sageExhale` ×1**: bowed forward over the spent
+  breath, shoulders sunk, sleeves hanging — replaces the code's bow transform
+  on the standing plate.
+
+### 2cc-viii. OPTIONAL RE-FIRE — the kingdom machines' spent plates
+
+The four rooted machines (breaker, kiln vent, rime coil, nest snare) have
+authored rest / tell / spent plates (§2i, §2l, §2n, §2p) and do not walk — no
+strip is needed. Their SPENT plates sit close to rest in silhouette (measured
+rest/spent IoU 0.61-0.86, held to the authored-plate ceiling of 0.95, where the
+code-posed roster is held to 0.86). If any is re-fired, push the spent plate
+FURTHER from rest: fins/petals/crown drooped flat and the body slumped a
+quarter lower, so the opening reads from across a room.
+
+**The turret and the four rooted machines are deliberately absent from the
+walk/run list:** they are bolted where they stand; their motion is the sweep,
+the lock and the recoil, which the code poses.

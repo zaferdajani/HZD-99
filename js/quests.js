@@ -20,6 +20,7 @@
 // See docs/STORY_CANON.md for the owner's narrative contract.
 // ===========================================================================
 const QUESTS = [
+  {id:'alpha_pack', npc:'ratchet', zone:'A', after:'ratchet_forge', kind:'flag', flag:'alpha', reward:{}},
   {
     // THE GAME'S FIRST QUEST — the sword is EARNED, not handed over.
     // Ratchet's story (the ask text): the corrupted song took every unit
@@ -86,8 +87,41 @@ function qState(id) {
 function qSet(id, v) {
   if (!G.save) return;
   G.save.quests = G.save.quests || {};
+  // THE ERRAND STARTS WHEN IT IS GIVEN (plan §4.9). Progress used to read the
+  // run's all-time counters, so "deal with six crawlers" was finished the
+  // moment it was asked by a player who had broken six crawlers on the way in,
+  // and "stand in the shaft" by one who already had. Accepting snapshots the
+  // counter the errand reads; progress is measured from there.
+  if (v === 'active' && G.save.quests[id] !== 'active') questSnap(id);
   G.save.quests[id] = v;
   persist();
+}
+function questSnap(id) {
+  const q = questById(id);
+  if (!q) return;
+  const base = G.save.qbase = G.save.qbase || {};
+  if (q.kind === 'cull') base[id] = { n: (G.save.culls && G.save.culls[q.foe]) | 0 };
+  // a place counts once she stands in it AFTER being asked (questVisit)
+  else if (q.kind === 'reach') base[id] = { reached: 0 };
+  // a fetch item does not exist in the world until it is asked for (loadRoom
+  // spawns it only for an active errand), so there is nothing to snapshot
+}
+// loadRoom tells the errands where she is standing
+function questVisit(room) {
+  if (!G.save || !G.save.quests) return;
+  for (const q of QUESTS) {
+    if (q.kind !== 'reach' || q.room !== room || qState(q.id) !== 'active') continue;
+    const b = G.save.qbase && G.save.qbase[q.id];
+    if (b && !b.reached) { b.reached = 1; G.toast(t('q_ready')); }
+  }
+}
+// is this errand item allowed to lie in the world? Only while somebody is
+// waiting for it — before the ask it would make the errand finish itself, and
+// after the hand-in (questPay empties the bag) it would lie there again.
+function questItemLive(item) {
+  if (G.save.bag && G.save.bag[item]) return false;
+  for (const q of QUESTS) if (q.kind === 'fetch' && q.item === item) return qState(q.id) === 'active';
+  return true;
 }
 // what this NPC has to say about work, if anything
 function questFor(npc) {
@@ -103,7 +137,7 @@ function questFor(npc) {
   // kingdom; his story cannot.
   if (G.save && G.save.flags && !G.save.flags.tut && npc !== 'ratchet') return null;
   for (const q of QUESTS) {
-    if (q.npc !== npc) continue;
+    if (q.id === 'alpha_pack' || q.npc !== npc) continue;
     if (qState(q.id) === 'done') continue;
     if (q.after && qState(q.after) !== 'done') continue;
     return q;
@@ -111,15 +145,20 @@ function questFor(npc) {
   return null;
 }
 function qProgress(q) {
+  if (q.kind === 'flag') return G.save.flags[q.flag] ? 1 : 0;
   if (q.kind === 'fetch') return (G.save.bag && G.save.bag[q.item]) ? 1 : 0;
-  if (q.kind === 'cull') return Math.min(q.count, (G.save.culls && G.save.culls[q.foe]) | 0);
-  if (q.kind === 'reach') return (G.save.visited && G.save.visited[q.room]) ? 1 : 0;
+  // measured from the snapshot taken when it was accepted; an errand accepted
+  // before snapshots existed (an older save) keeps counting from zero, as it did
+  const b = G.save.qbase && G.save.qbase[q.id];
+  if (q.kind === 'cull') return Math.max(0, Math.min(q.count, ((G.save.culls && G.save.culls[q.foe]) | 0) - (b ? b.n | 0 : 0)));
+  if (q.kind === 'reach') return b ? (b.reached ? 1 : 0) : ((G.save.visited && G.save.visited[q.room]) ? 1 : 0);
   return 0;
 }
 function qGoal(q) { return q.kind === 'cull' ? q.count : 1; }
 function qDone(q) { return qProgress(q) >= qGoal(q); }
 // one line, in the player's language, describing what is being asked
 function qText(q) {
+  if (q.kind === 'flag') return t('q_goal_' + q.id);
   if (q.kind === 'fetch') return t('q_fetch').replace('%s', t('it_' + q.item));
   if (q.kind === 'cull') return t('q_cull').replace('%n', q.count).replace('%s', t('e_' + q.foe));
   return t('q_reach');

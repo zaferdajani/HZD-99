@@ -36,8 +36,11 @@ function ensureServer() {
 }
 
 const SUITE = [
+  ['repair-browser', 'Ratchet drag controls, page reload and interrupted boot in the assembled game'],
+  ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
+  ['story-order', 'the story sheet walked through the real build: beat order, gates, named things, migration'],
   ['comic-rewards', 'saved milestone slideshows, updates, accessibility and failure recovery'],
   ['story-battery', 'unique workshop battery and legacy save compatibility'],
   ['story-rescue', 'recoverable machines and persistent cleansing'],
@@ -103,11 +106,13 @@ const SUITE = [
   ['combat',    'every enemy telegraphs, does something different, and scales by zone'],
   ['pace',      'the game-speed dial slows the simulation and nothing else'],
   ['ceiling',   'every kingdom has a roof that sheds its own weather, at every quality tier'],
+  ['ceillock',  'the roof plate is nailed to the room grid: it never slides against the rock it hangs from'],
   ['tutor',     'the waking floor teaches the whole loop: kill, take, spend, repair, think, spend'],
   ['tells',     'every boss wind-up carries BOTH channels — no silently one-channel telegraphs'],
   ['threat',    'threat concentration per screen, and the forbidden compositions'],
   ['errands',   'every errand has a goal that exists and can be reached'],
   ['deadend',   'no broken exits, no one-way doors, no unreachable rooms, every leaf pays'],
+  ['benchloop', 'every one-way route (a drop she cannot climb back, a door with none behind it) still reaches a bench'],
   ['padlife',   'a yanked controller releases the game; a live one keeps it'],
   ['climbout',  'every floor she can land on she can leave, and every gate names its power'],
   ['cover',     'the platform she is standing on stops a shot, from either side'],
@@ -115,9 +120,11 @@ const SUITE = [
   ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
   ['daze',      'a group of hits breaks NULLFANG open, pays out, closes, and cannot be held'],
   ['openings',  'every boss move opens for at least one hit, and only the bait pays out three'],
+  ['guardians', 'every guardian opens after every move, breaks on a group of hits, and draws its moves by range'],
   ['arc',       'the world notices, she changes on the victory, a death is a beat'],
   ['meet',      'it swats her aside and walks away, and she is still standing'],
   ['secrets',   'two hollow walls, a cellar hatch, and a pit only the dash crosses'],
+  ['secrettell','one tell for every secret: knock before it gives, the floor taught from above, the dig, the fracture'],
   ['tails',     'every authored sound decays to silence instead of stopping'],
   ['kingdom',   'the kingdom protocol driven live: art, enemies, guardian, places, bench, every door walked, sound, music'],
   ['artbible',  'ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor'],
@@ -140,6 +147,7 @@ const SUITE = [
   ['rubble',    'the first tunnel is buried, it calls, and it takes the blade'],
   ['cavedark',  'the cave is dark, and light is the only map of it'],
   ['terrainrun', 'irregularity is not elevation: she runs it, and so do they'],
+  ['enemygait', 'machines stand on the floor, turn on their feet, fly the same at any frame rate, and step with the ground'],
   ['reach',     'she hits what she is standing next to, and she turns to it'],
   ['gatecue',   'the first built thing the player finds sounds like one'],
   ['cuefamily', 'the things she is shot at with do not all sound alike'],
@@ -149,7 +157,11 @@ const SUITE = [
   ['cross',     'a room crossing is a move, not a cut'],
   ['look',      'hold up or down standing still and the frame pans that way; taps, walks and jumps never do'],
   ['seam',      'a room boundary is a place she walks through, not a door'],
+  ['vlink',     'the way up ends on a ledge, and every up/down pair is one shaft: drawn, solid, crossed without a cut'],
+  ['roomcache', 'a doorway costs a frame: rooms baked ahead, never rebaked on a revisit, the save off the crossing'],
   ['mapgrid',   'two rooms cannot stand on the same square of the map'],
+  ['mapexits',  'the map shows rooms where they really are: every shaft stacked, every side exit edge to edge'],
+  ['shaftfit',  'a shaft is one hole through two rooms, and no sky hangs under another room\'s floor'],
   ['glowcost',  'the most expensive thing the renderer does, counted'],
   ['meadow',    'the greenery keeps its colour all the way to the screen'],
   ['drawclock', 'a frozen clock freezes the frame: draw never reads the wall clock'],
@@ -209,3 +221,4 @@ for (const [name, what, opt] of run) {
 console.log('\n' + (failed ? failed + ' harness(es) failed' : 'all ' + run.length + ' harnesses ran')
   + (pending ? ' (' + pending + ' pending, see suite notes)' : ''));
 process.exitCode = failed ? 1 : 0;
+

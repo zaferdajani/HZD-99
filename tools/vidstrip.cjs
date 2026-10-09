@@ -49,6 +49,14 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
   // sparks and background when they would masquerade as an animated body.
   // This changes only the measurement, never the delivered image crop.
   const ROI = (process.env.MOTION_ROI || '0,0,1,1').split(',').map(Number);
+  // VIDSTRIP_FLOAT=1 for anything that flies: no floor line, specks dropped
+  // (see the two FLOAT notes in the page pass).
+  const FLOAT = process.env.VIDSTRIP_FLOAT === '1';
+  // VIDSTRIP_TIMES=t,t,t... for a ONE-SHOT: a landing's beats (strike, fold,
+  // lowest, half-risen) are not evenly spaced in time, and even sampling of
+  // its window spends three cells on the hold. Seconds, one cell each.
+  const TIMES = process.env.VIDSTRIP_TIMES
+    ? process.env.VIDSTRIP_TIMES.split(',').map(Number).filter(Number.isFinite) : null;
   if (ROI.length !== 4 || ROI.some(v => !Number.isFinite(v)) || ROI[0] < 0 || ROI[1] < 0
       || ROI[2] <= 0 || ROI[3] <= 0 || ROI[0] + ROI[2] > 1 || ROI[1] + ROI[3] > 1)
     throw new Error('MOTION_ROI must be normalized x,y,width,height within the source');
@@ -62,10 +70,12 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
   // SAME ORIGIN, or getImageData refuses to read the frame: a video served
   // from the local server into an about:blank page taints the canvas, and the
   // error arrives at the read rather than at the load.
-  try { await page.goto(new URL(SRC).origin + '/'); } catch (e) {}
+  const captureURL = new URL(SRC).origin + '/__strip_capture';
+  await page.route(captureURL, route => route.fulfill({contentType:'text/html', body:'<!doctype html><title>Strip capture</title>'}));
+  await page.goto(captureURL);
   await page.addScriptTag({ content: selectMotionFrames.toString() });
 
-  const res = await page.evaluate(async ({ N: N0, CELL, THR, SRC, FROM, TO, AUTO, ROI }) => {
+  const res = await page.evaluate(async ({ N: N0, CELL, THR, SRC, FROM, TO, AUTO, ROI, FLOAT, TIMES }) => {
     let N = N0, autoThr = null;
     const v = document.createElement('video');
     v.muted = true; v.playsInline = true;
@@ -161,6 +171,9 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
       times = selected.indices.map(i => cand[i].t);
       autoThr = selected.threshold;
       N = times.length;
+    } else if (TIMES) {
+      times = TIMES.map(t => Math.min(D - 0.02, t));
+      N = times.length;
     } else {
       for (let i = 0; i < N; i++)
         times.push(Math.min(D - 0.02, t0w + (i + 0.5) * (t1w - t0w) / N));
@@ -253,6 +266,29 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
           a = tot ? Math.round(255 * (1 - n / tot)) : 255;
         }
         d[j + 3] = a;
+      }
+      // A FLIER DROPS WHAT IT SHEDS. Wing takes come back with flecks drifting
+      // off the feathers — a few pixels each, nowhere near the body — and they
+      // would set the box and ride along in every cell as dust. Any island of
+      // alpha smaller than a fraction of a per cent of the frame goes. Only in
+      // FLOAT mode: a walker's claw tip is small too, and it is attached.
+      if (FLOAT) {
+        const seen = new Uint8Array(W * H), stack = new Int32Array(W * H), comp = [];
+        const minA = W * H * 0.0015;
+        for (let p0 = 0; p0 < W * H; p0++) {
+          if (seen[p0] || d[(p0 << 2) + 3] === 0) continue;
+          let sp = 0; comp.length = 0; stack[sp++] = p0; seen[p0] = 1;
+          while (sp > 0) {
+            const p = stack[--sp]; comp.push(p);
+            const x = p % W, y = (p / W) | 0;
+            for (const q of [x > 0 ? p - 1 : -1, x < W - 1 ? p + 1 : -1, y > 0 ? p - W : -1, y < H - 1 ? p + W : -1])
+              if (q >= 0 && !seen[q] && d[(q << 2) + 3] > 0) { seen[q] = 1; stack[sp++] = q; }
+          }
+          if (comp.length < minA) for (const p of comp) d[(p << 2) + 3] = 0;
+        }
+      }
+      for (let p = 0; p < W * H; p++) {
+        const a = d[(p << 2) + 3];
         // THE BOX IS MEASURED AT THE ALPHA THE RENDERER CALLS SOLID (60), not
         // at the first pixel that is not empty. The key ramps alpha in over a
         // couple of pixels so the cut does not read as a sticker, and those
@@ -299,6 +335,11 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
     const pad = Math.round(Math.max(x1 - x0, y1 - y0) * 0.03);
     x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad);
     x1 = Math.min(W - 1, x1 + pad);
+    // ...EXCEPT FOR A FLIER, which has no floor. Its lowest pixel is a wingtip
+    // on the downstroke, and clipping every cell at the median one cuts the
+    // stroke off in exactly the cells that sell it. FLOAT keeps the whole
+    // union and pads all four sides; the game draws these by the cell centre.
+    if (FLOAT) y1 = Math.min(H - 1, y1 + pad);
     // THE FOOT LINE IS THE MEDIAN FRAME'S, NOT THE LOWEST FRAME'S. A single
     // wisp of vent smoke or one dropped particle reaching below the boots sets
     // the union bottom, and then every cell is bottom-aligned to THAT — which
@@ -307,7 +348,7 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
     // always the box. The median is the row he is really standing on.
     const sorted = feet.slice().sort((a2, b2) => a2 - b2);
     const foot = sorted[sorted.length >> 1];
-    if (foot > 0) y1 = Math.min(y1, foot);
+    if (foot > 0 && !FLOAT) y1 = Math.min(y1, foot);
     const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
 
     // pass 2: same box for every frame, laid out left to right
@@ -331,7 +372,7 @@ const { selectMotionFrames } = require('./motion-sampling.cjs');
     return { png: strip.toDataURL('image/png'), N, CELL, src: W + 'x' + H, dur: +D.toFixed(2),
              box: bw + 'x' + bh, feet, foot, autoThr,
              times: times.map(t => +t.toFixed(3)) };
-  }, { N, CELL, THR, SRC, FROM, TO, AUTO, ROI });
+  }, { N, CELL, THR, SRC, FROM, TO, AUTO, ROI, FLOAT, TIMES });
 
   if (res.err) { console.error('  ' + res.err); process.exit(1); }
   fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });

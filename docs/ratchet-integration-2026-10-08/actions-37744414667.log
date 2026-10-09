@@ -1,0 +1,42 @@
+2026-10-08T07:37:04.4828604Z index.html built (robo): 3.93MB
+2026-10-08T07:37:04.4898512Z odyssey.html built (hero): 2.71MB
+2026-10-08T07:37:04.5033179Z forge.html built (robo+forge): 3.95MB
+2026-10-08T07:37:04.5096284Z forge-odyssey.html built (hero+forge): 2.73MB
+2026-10-08T07:37:04.5618349Z ── repair-lifecycle  — Ratchet puzzle, interrupted visits, saved placements and story reward handoff
+2026-10-08T07:37:04.6354533Z PASS repair lifecycle: ordered puzzle, wrong inputs, prefix reload, boot interruption, once-only NPC rewards, forge quest, stale room/save events, lost cell, menu preservation, visibility cleanup, orphan recovery, legacy save and both loading paths
+2026-10-08T07:37:04.6361900Z ── story-opening  — survivor histories and earned Sage/CHIME route
+2026-10-08T07:37:04.6642729Z PASS opening: earned marble/sword/sage/CHIME order, legacy routes, six distinct survivor histories, once-only reveal preserving reward callback
+2026-10-08T07:37:04.6652741Z ── story-battery  — unique workshop battery and legacy save compatibility
+2026-10-08T07:37:07.2857834Z PASS [
+2026-10-08T07:37:07.2866262Z ── first-sage-route  — pre-guardian route through quarry maintenance passage
+2026-10-08T07:37:08.3625424Z PASS first-sage maintenance route before guardian [
+2026-10-08T07:37:08.3628178Z ── chapter-one  — one earned rescue, quarry, forge and sage save chain
+2026-10-08T07:37:09.4855551Z PASS connected first-chapter quest and reloads { quest: 'done', sword: 'single', sage: true }
+2026-10-08T07:37:09.4864815Z ── tutorial-clarity  — one contextual action, one marker and saved lesson continuity
+2026-10-08T07:37:09.5219981Z PASS tutorial-clarity: contextual controls, one target, dialogue priority, save continuity, progression
+2026-10-08T07:37:09.5227582Z ── story-progression  — battery, earned forge and sage/weapon story ordering
+2026-10-08T07:37:09.5605989Z PASS: battery waking, automatic quest, earned forge, distinct sword/connector pickups and first sage story gate
+2026-10-08T07:37:09.5924193Z ── input-focus  — focus loss clears input and cancelled touches cannot fire
+2026-10-08T07:37:09.5932719Z ── regress  — boots both builds, walks every room in ROOMS, watches for page errors
+2026-10-08T07:38:17.7168655Z index.html | boot PLAY | rooms 77 | roomErrs none | prismStress ok | pageerrors none
+2026-10-08T07:38:17.7169893Z odyssey.html | boot PLAY | rooms 77 | roomErrs none | prismStress ok | pageerrors none
+2026-10-08T07:38:17.7171292Z ── battery  — one cell, one machine, and the shop waits for the lion
+2026-10-08T07:38:26.2954059Z ── battery — the cells, the dark units, and the shop that waits for the lion
+2026-10-08T07:38:26.2955375Z   ok   a cell exists for every dark unit (7 units)  0 start + 1 workshop + 1 spare + 5 constructs + 1 lion = 8
+2026-10-08T07:38:26.2956515Z   ok   and no more than two spare, or the choice is not one  surplus 1
+2026-10-08T07:38:26.2957326Z   ok   an NPC starts dark  A0B|ratchet
+2026-10-08T07:38:26.2958029Z   ok   a dark trader does NOT open the shop  state DIALOG
+2026-10-08T07:38:26.2958788Z   ok   the hand-off spends exactly one cell  1 -> 0
+2026-10-08T07:38:26.2959453Z   ok   and it wakes
+2026-10-08T07:38:26.2960224Z   ok   the first unit repays with a repair kit  kit ×1
+2026-10-08T07:38:26.2960979Z   ok   the powered-down filter was found in the build  grayscale(0.8) brightness(0.8) contrast(1.25)
+2026-10-08T07:38:26.2962432Z   ok   an uncharged NPC is not a smudge — it keeps the form the lit one has  range 111.4 vs charged 111
+2026-10-08T07:38:26.2963417Z   ok   ...and it carries a real highlight, not flat middle grey  white 187.73 (charged 220.23)
+2026-10-08T07:38:26.2964549Z   ok   ...and it still reads as powered DOWN — drained of colour, not of form  sat 0.08 vs 0.27, mid 119.85 vs 152.76
+2026-10-08T07:38:26.2965351Z   ok   a woken unit talks instead of asking again
+2026-10-08T07:38:26.2965894Z   ok   with no cell there is nothing to press
+2026-10-08T07:38:26.2966308Z   ok   and it stays dark
+2026-10-08T07:38:26.2966712Z   ok   NULLFANG leaves a cell behind  0 -> 1
+2026-10-08T07:38:26.2967251Z   ok   the Eye's constructs are never offered the fork  none
+2026-10-08T07:38:26.2967793Z   ok   NOSTOS's people are never dark  live=true
+2026-10-08T07:38:26.2968995Z all 10 harnesses ran

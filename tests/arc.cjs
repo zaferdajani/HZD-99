@@ -42,7 +42,11 @@ const { chromium } = require('playwright');
       if (I18N[l] && I18N[l][k] && I18N[l][k] === I18N.en[k]) out.sameAsEn.push(l + ':' + k);
 
     // ---- 2. the tier is the war: 0 / 1 / 3 / 5 guardians
-    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; startGame(sv); loadRoom('A3');
+    // the trader is one machine: woken in his den, standing at the camp after
+    // the forge (js/story-opening.js npcPlaced) — the save says so up front
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+    sv.flags['on_A0B|ratchet'] = 1; sv.flags.ratchetCamp = 1;
+    startGame(sv); loadRoom('A3');
     G.dialog = null; G.state = 'PLAY';
     G.save.evo = 0;
     out.tier0 = evoTier();
@@ -82,7 +86,6 @@ const { chromium } = require('playwright');
     const npc = G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet');
     out.trader = !!npc;
     if (npc) {
-      G.save.flags['on_A3|ratchet'] = 1;
       delete G.save.flags.crystal; delete G.save.flags['sageTame_GA1D'];
       doInteract(npc);
       out.backLine = !!(G.dialog && G.dialog.lines[0] === t('sl_back'));
@@ -90,8 +93,11 @@ const { chromium } = require('playwright');
       doInteract(npc);
       out.backOnce = !!(G.dialog && G.dialog.lines[0] !== t('sl_back'));
       G.dialog = null; G.state = 'PLAY';
-      // the corridor's dent: after the meeting, before the rematch
+      // the corridor's dent: after the meeting, before the rematch — and only
+      // once the sage is free and the bell silent is he allowed to send her
+      // back at it (the plan's wrong-order line was this, said before the forge)
       G.save.flags.nfMeet = 1; delete G.save.flags.bossGlitch;
+      G.save.flags.crystal = 1; G.save.flags['sageTame_GA1D'] = 1; G.save.flags.bossChime = 1;
       delete G.save.flags.said['sl_ratchet_rematch'];
       doInteract(npc);
       out.rematchLine = !!(G.dialog && G.dialog.lines[0] === t('sl_ratchet_rematch'));

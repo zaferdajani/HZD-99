@@ -69,6 +69,7 @@ en: {
   npc_shop_open: 'The trader is open for business.',
   npc_thanks_scrap: 'It presses scrap into your paw. It has nothing else.',
   daze_open: '⚡ NULLFANG is reeling — hit it NOW',
+  gd_open: '⚡ The guardian is down — hit it NOW',
   title: 'CLAWBYTE',
   pad_title: 'Controller', pad_generic: 'Gamepad connected',
   pad_on: '🎮 Controller connected — touch controls hidden',
@@ -471,6 +472,7 @@ en: {
   t3: ['COLD STORAGE NOTE: the Prowler stole the ninth prototype crest and fled toward the crystal seams.'],
   door_locked: 'Sealed. A greater power holds it shut.',
   hint_secret: 'This wall sounds hollow…',
+  hint_hollow_floor: 'The ground rings hollow here… strike it from above.',
   // the one-time lesson: taught on the first loose rock, never shown again
   break_down: 'Loose rock — jump, hold DOWN, and strike',
   break_hit: 'Loose rock — strike it',
@@ -570,6 +572,7 @@ ar: {
   npc_shop_open: 'التاجر فتح متجره.',
   npc_thanks_scrap: 'يضع خردة في كفّك. لا يملك سواها.',
   daze_open: '⚡ ناب العدم مترنّح — اضربه الآن',
+  gd_open: '⚡ الحارس سقط — اضربه الآن',
   title: 'CLAWBYTE',
   pad_title: 'وحدة التحكم', pad_generic: 'تم توصيل وحدة تحكم',
   pad_on: '🎮 تم توصيل وحدة التحكم — أُخفيت أزرار اللمس',
@@ -932,6 +935,7 @@ ar: {
   t3: ['ملاحظة التخزين البارد: سرق الجوّالُ الوسامَ التجريبي التاسع وفرّ نحو عروق البلّور.'],
   door_locked: 'مختوم. قوة عظمى تُبقيه مغلقًا.',
   hint_secret: 'هذا الجدار يبدو أجوف…',
+  hint_hollow_floor: 'الأرض هنا تَرِنّ جوفاء… اضربها من الأعلى.',
   break_down: 'صخرة مُتخلخلة — اقفز واضغط للأسفل ثم اضرب',
   break_hit: 'صخرة مُتخلخلة — اضربها',
   map_btn: 'الخريطة',
@@ -1060,6 +1064,7 @@ tr: {
   npc_shop_open: 'Tüccar dükkânı açtı.',
   npc_thanks_scrap: 'Avucuna hurda sıkıştırıyor. Başka bir şeyi yok.',
   daze_open: '⚡ NULLFANG sersemledi — ŞİMDİ vur',
+  gd_open: '⚡ Muhafız yere düştü — ŞİMDİ vur',
   title: 'CLAWBYTE', subtitle: 'Makine Derinliklerinde bir robot-kedi metroidvania', press: 'Enter’a bas',
   menu_play: 'Oyna', menu_controls: 'Kontroller',
   who_new: 'Yeni sefer', who_cont: 'Sefere devam',
@@ -1088,6 +1093,10 @@ tr: {
   back: 'Geri', paused: 'Duraklatıldı', resume: 'Devam', to_menu: 'Kaydet ve Menüye Dön',
   pm_restart: 'Yeniden Başlat', pm_restart_d: 'Bu dünyaya sıfırdan başla. Bu turdaki her şey kaybolur.',
   pm_confirm: 'Onaylamak için tekrar bas',
+  hint_secret: 'Bu duvarın içi boş gibi…',
+  hint_hollow_floor: 'Zemin burada boş çınlıyor… yukarıdan vur.',
+  break_down: 'Gevşek kaya — zıpla, AŞAĞI tut ve vur',
+  break_hit: 'Gevşek kaya — vur',
   map_title: 'Derinlik Haritası', map_here: 'Buradasın', map_boss: 'Patron', map_shop: 'Dükkân',
   heal_hint: 'Onarım hazır! Sabit dur ve F’yi (dokunmatikte ✚) basılı tutarak çekirdek yükle.',
   intro1: 'Makine Derinlikleri bir zamanlar canlıydı — uğuldayan çelikten bir krallık.',
@@ -1205,6 +1214,7 @@ zh: {
   npc_shop_open: '商人开张了。',
   npc_thanks_scrap: '它把废铁塞进你爪里。它再没有别的东西了。',
   daze_open: '⚡ 空牙踉跄了 —— 趁现在打',
+  gd_open: '⚡ 守护者倒下了 —— 趁现在打',
   title: 'CLAWBYTE', subtitle: '机械深渊中的机械猫银河恶魔城', press: '按 Enter',
   menu_play: '开始游戏', menu_controls: '操作',
   who_new: '新的航程', who_cont: '继续航程',
@@ -1233,6 +1243,10 @@ zh: {
   back: '返回', paused: '已暂停', resume: '继续', to_menu: '保存并返回菜单',
   pm_restart: '重新开始', pm_restart_d: '从头开始这个世界。本次进度将全部丢失。',
   pm_confirm: '再按一次确认',
+  hint_secret: '这面墙听起来是空的……',
+  hint_hollow_floor: '这里的地面声音发空……从上方击打它。',
+  break_down: '松动的岩石——跳起，按住“下”，然后攻击',
+  break_hit: '松动的岩石——击打它',
   map_title: '深渊地图', map_here: '你在这里', map_boss: '首领', map_shop: '商店',
   heal_hint: '维修就绪！静止不动并按住 F（触屏为 ✚）来恢复一个核心。',
   intro1: '机械深渊曾经是活的——一个嗡鸣钢铁的王国。',
@@ -1350,6 +1364,7 @@ ru: {
   npc_shop_open: 'Торговец открыл лавку.',
   npc_thanks_scrap: 'Он суёт тебе в лапу лом. Больше у него ничего нет.',
   daze_open: '⚡ NULLFANG оглушён — бей СЕЙЧАС',
+  gd_open: '⚡ Страж повержен — бей СЕЙЧАС',
   title: 'CLAWBYTE', subtitle: 'Метроидвания о коте-роботе в Машинных Глубинах', press: 'Нажми Enter',
   menu_play: 'Играть', menu_controls: 'Управление',
   who_new: 'Новое плавание', who_cont: 'Продолжить плавание',
@@ -1378,6 +1393,10 @@ ru: {
   back: 'Назад', paused: 'Пауза', resume: 'Продолжить', to_menu: 'Сохранить и выйти в меню',
   pm_restart: 'Начать заново', pm_restart_d: 'Начать этот мир сначала. Весь прогресс забега будет потерян.',
   pm_confirm: 'Нажмите ещё раз для подтверждения',
+  hint_secret: 'Эта стена звучит пусто…',
+  hint_hollow_floor: 'Пол здесь звенит пустотой… бей сверху.',
+  break_down: 'Рыхлая порода — прыгни, зажми ВНИЗ и бей',
+  break_hit: 'Рыхлая порода — ударь',
   map_title: 'Карта Глубин', map_here: 'Ты здесь', map_boss: 'Босс', map_shop: 'Лавка',
   heal_hint: 'Ремонт готов! Стой на месте и держи F (✚ на сенсоре), чтобы восстановить ядро.',
   intro1: 'Машинные Глубины когда-то были живыми — королевство гудящей стали.',
@@ -1457,9 +1476,573 @@ const STORY_DRAFT2_TEXT = {
     i_cshard: 'رخام خام', i_cshardd: 'كتلة مستديرة حُرّرت من الصخر المحيط بها. أحضر المادة إلى راتشيت؛ لم تصبح نصلًا بعد.',
   }
 };
+const STORY_OCT4_TEXT = {
+  "en": {
+    "repair_kicker": "WORKSHOP · RATCHET",
+    "repair_title": "Bring him back",
+    "repair_close": "Close · saved",
+    "repair_help": "Drag a part to its socket, or tap each in turn. Keyboard: arrows and Enter.",
+    "repair_safe": "No timer. Wrong connections can always be retried.",
+    "repair_power": "Restore power",
+    "repair_cell": "Battery",
+    "repair_socket": "Battery socket",
+    "repair_positive": "+ wire",
+    "repair_negative": "− wire",
+    "repair_bridge": "Bridge",
+    "repair_plus": "+ terminal",
+    "repair_minus": "− terminal",
+    "repair_relay": "Relay",
+    "repair_step0": "Place Ratchet’s own battery in the empty socket.",
+    "repair_step1": "Connect the amber positive wire to the + terminal.",
+    "repair_step2": "Connect the blue ground wire to the − terminal.",
+    "repair_step3": "Place the bridge across the relay.",
+    "repair_step4": "Circuit complete. Restore power when you are ready.",
+    "repair_retry": "That socket does not match. Try the highlighted part again.",
+    "repair_boot": "Restoring power…",
+    "wake_fault": "POWER FAULT → SYSTEM RESTART",
+    "sl_note1": "A handwritten letter is tucked against his empty battery socket:",
+    "sl_note2": "“Mother’s song has been infected. My marble slowed the virus, but cannot stop it. I removed my battery before it could take me. It is in the drawer beside this chair.”",
+    "sl_note3": "“Seat my battery in its socket. Connect the positive wire, then the ground, and bridge the relay. Restore power. If you are reading this, perhaps there is still hope. — R.”",
+    "sl_rfrag1": "Mother’s song kept the robots of every kingdom in harmony. Someone unknown hacked its frequency and hid a virus inside it.",
+    "sl_rfrag2": "The infected song turned our neighbours against each other. You were already asleep for recharging. You missed that broadcast; you were not made immune to it.",
+    "sl_rfrag4": "The marble in my necklace was an old gift to my ancestor. It slowed the virus long enough for me to think. It could not stop the infection.",
+    "sl_rfrag5": "Everyone around me was infected. Before I lost myself, I removed my own battery and left that letter. You brought me back.",
+    "q_ask_ratchet_forge": [
+      "Mother’s song kept the kingdoms at peace. An unknown intruder infected its frequency. Our neighbours turned on one another.",
+      "This marble came to me through my family. It slowed the virus, but it was not enough to stop it.",
+      "I removed my own battery before the infection took me. You were asleep for recharging, long before this happened. That is how you missed the broadcast.",
+      "There is a large deposit of raw marble in the caves beneath the meadow. Bring a piece back to my workshop.",
+      "I can forge it into a glowing white sword that neutralizes the virus. The sages and our neighbours can become our friends again.",
+      "I left a spare cell for Servo in your pouch. His gantries overlook the meadow; the marble lies below."
+    ],
+    "i_crystald": "Ratchet forged this glowing white sword from the cave marble. It neutralizes the virus and frees infected robots. Its handle can later connect to another weapon.",
+    "alpha_den": "ALPHA DEN · OPTIONAL",
+    "alpha_escape": "Break free: tap Jump or Attack four times!",
+    "q_name_alpha_pack": "The lost wardens",
+    "q_goal_alpha_pack": "Optional: follow the howl to the Meadow den. Restore the Alpha to free its pack.",
+    "q_ask_alpha_pack": [
+      "Before the song broke, the wolves escorted lost workers home. Their Alpha kept watch over the Meadow den.",
+      "Now its corrupted howl drives the pack to attack the people it protected. They are still following their guardian.",
+      "If you choose, find the marked den entrance in the Meadow. Your white blade can release the Alpha, and its pack will become our allies. The old supply cache beyond the den will be yours.",
+      "This is a detour. The marble came from the cave; your path to the sages remains open."
+    ]
+  },
+  "ar": {
+    "repair_kicker": "الورشة · راتشيت",
+    "repair_title": "أعِد إليه الحياة",
+    "repair_close": "إغلاق · محفوظ",
+    "repair_help": "اسحب القطعة إلى موضعها أو المسهما بالتتابع. للوحة المفاتيح: الأسهم وEnter.",
+    "repair_safe": "بلا مؤقّت. يمكنك إعادة المحاولة عند توصيل خاطئ.",
+    "repair_power": "تشغيل الطاقة",
+    "repair_cell": "البطارية",
+    "repair_socket": "موضع البطارية",
+    "repair_positive": "السلك الموجب +",
+    "repair_negative": "السلك السالب −",
+    "repair_bridge": "الجسر",
+    "repair_plus": "القطب الموجب +",
+    "repair_minus": "القطب السالب −",
+    "repair_relay": "المرحل",
+    "repair_step0": "ضع بطارية راتشيت في موضعها الفارغ.",
+    "repair_step1": "صِل السلك الكهرماني بالقطب الموجب +.",
+    "repair_step2": "صِل سلك التأريض الأزرق بالقطب السالب −.",
+    "repair_step3": "ضع الجسر على طرفي المرحل.",
+    "repair_step4": "اكتملت الدائرة. شغّل الطاقة حين تكون مستعدًا.",
+    "repair_retry": "هذا الموضع لا يطابق القطعة. حاول مجددًا.",
+    "repair_boot": "جارٍ استعادة الطاقة…",
+    "wake_fault": "عطل كهربائي ← إعادة تشغيل النظام",
+    "sl_note1": "رسالة بخط اليد موضوعة بجوار موضع بطاريته الفارغ:",
+    "sl_note2": "«أُصيبت أغنية الأم بالفيروس. أبطأت قطعة الرخام انتشاره، لكنها لا تستطيع إيقافه. نزعت بطاريتي قبل أن يسيطر عليّ. إنها في الدرج بجانب هذا الكرسي.»",
+    "sl_note3": "«ضع بطاريتي في مكانها. صِل السلك الموجب ثم سلك التأريض، وضع الجسر على المرحل. شغّل الطاقة. إن كنت تقرأ هذا، فربما بقي أمل. — ر.»",
+    "sl_rfrag1": "كانت أغنية الأم تحفظ الوئام بين روبوتات الممالك. اخترق مجهول ترددها ودسّ فيروسًا فيها.",
+    "sl_rfrag2": "قلبت الأغنية المصابة جيراننا بعضهم على بعض. كنت نائمة لإعادة الشحن قبل ذلك؛ لم تسمعي البث المصاب. لست محصّنة بالفطرة.",
+    "sl_rfrag4": "قطعة الرخام في قلادتي هدية قديمة لأحد أسلافي. أبطأت الفيروس ومنحتني وقتًا للتفكير، لكنها لم تستطع إيقاف العدوى.",
+    "sl_rfrag5": "أُصيب كل من حولي. نزعت بطاريتي وتركت الرسالة قبل أن أفقد نفسي. وأنت أعدتني.",
+    "q_ask_ratchet_forge": [
+      "كانت أغنية الأم تحفظ السلام بين الممالك. اخترق مجهول ترددها، فصار الجيران يهاجمون بعضهم.",
+      "ورثت قطعة الرخام هذه عن عائلتي. أبطأت الفيروس، لكنها لم تكن كافية لإيقافه.",
+      "نزعت بطاريتي قبل أن تسيطر العدوى عليّ. كنت نائمة لإعادة الشحن منذ ما قبل الكارثة، ولهذا فاتك البث.",
+      "يوجد مخزون كبير من الرخام الخام في الكهوف تحت المرج. أحضري قطعة إلى ورشتي.",
+      "سأصنع منها سيفًا أبيض متوهجًا يحيّد الفيروس. يمكن للحكماء وجيراننا أن يعودوا أصدقاءنا.",
+      "وضعت خلية احتياطية لسيرفو في حقيبتك. جسوره تطل على المرج، والرخام تحته."
+    ],
+    "i_crystald": "صنع راتشيت هذا السيف الأبيض المتوهج من رخام الكهف. يحيّد الفيروس ويحرّر الروبوتات المصابة. يمكن ربط مقبضه بسلاح آخر لاحقًا.",
+    "alpha_den": "وكر الألفا · اختياري",
+    "alpha_escape": "تحرّر: اضغط القفز أو الهجوم أربع مرات!",
+    "q_name_alpha_pack": "الحراس الضائعون",
+    "q_goal_alpha_pack": "اختياري: اتبع العواء إلى وكر المرج. حرّر الألفا لإنقاذ قطيعه.",
+    "q_ask_alpha_pack": [
+      "قبل فساد الأغنية، كانت الذئاب تعيد العمال التائهين إلى بيوتهم. وكان الألفا يحرس وكر المرج.",
+      "الآن يدفع عواؤه المصاب القطيع لمهاجمة من كان يحميهم. ما زالوا يتبعون حارسهم.",
+      "إن شئت، ابحث عن مدخل الوكر المعلّم في المرج. يمكن لسيفك الأبيض تحرير الألفا، فيصبح قطيعه حليفنا. وسيُفتح لك مخزن المؤن خلف الوكر.",
+      "هذه رحلة اختيارية. أخذت الرخام من الكهف، وطريق الحكماء ما زال مفتوحًا."
+    ]
+  }
+};
+// THE STORY IN ORDER (docs/STORY_SHEET.md). Robot-world text that the order
+// rules need: gate refusals that say WHY, the lines that point her onward,
+// the Meadow Sage's revelation in every order the player can reach it, the
+// canon finale, and the corrections to lines that contradicted
+// docs/STORY_CANON.md. Every key carries all five languages — a key missing
+// here would fall through to an older layer that still says the wrong thing,
+// which is how the contradictions survived in the first place. Placeholders
+// in {BRACES} are the player's own bound controls (ctlFill in
+// js/story-opening.js), never a hard-coded key.
+const STORY_ORDER_TEXT = {
+  en: {
+    nf_break1_road: 'NULLFANG comes along the road from his enclosure and stops. The purple goes out of him. He is looking at you, and nothing is driving it.',
+    rl_sigil3d: 'Hidden on a ledge in the Foundry tower. The last seal of the old vault.',
+    vault_where3: 'The third seal was carried down into the Foundry tower.',
+    gate_conduits: "The conduit hatch above the camp is jammed by NULLFANG's binding. Free the lion before you climb.",
+    gate_vault_side: 'This passage belongs to the sealed vault. Three sigils open it.',
+    conduits_open: 'Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open.',
+    gh_marble: 'Bring raw marble from the cave beneath the meadow to Ratchet. You need his cleansing blade.',
+    gh_sage: 'The Sage knows the binding. Take the maintenance door beside the marble quarry and free them first.',
+    gh_chime: 'CHIME keeps restoring the order. Take the climb above the meadow and silence the bell before returning to NULLFANG.',
+    sl_ratchet_dent: 'It threw you once — I saw the dent in the corridor. Not with claws. Bring me the marble first.',
+    sl_ratchet_moving: "When the blade is done I'm taking my tools to the camp by the lion's enclosure. That is where this ends. Find me there.",
+    sl_ratchet_conduits: "The lion is quiet, and the hatch over my camp unjammed with him. That climb goes up into the Data Conduits. Go on — I'll keep the stall open.",
+    q_where_ratchet_forge: 'The way down is in the meadow hub, at its west end by the climb: a loose floor. Jump onto it and strike straight down — it gives, and the caves are under it.',
+    sg_rev1: 'I called for the ones who had not answered. The order made me call louder.',
+    sg_rev2: 'Every answer told it where another survivor was hiding.',
+    sg_rev3: 'NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it.',
+    sg_rev4: 'Take the climb above the meadow. Silence that bell, then return to his enclosure. I will keep this end quiet.',
+    sg_rev_chime: 'NULLFANG is still resisting — and the bell that wrote the command back into him is already silent. You did that.',
+    sg_rev_go: 'Go to his enclosure past the camp. With the bell quiet, the binding will not come back. I will keep this end quiet.',
+    sg_rev_free: 'NULLFANG is free and the bell is silent. This end of the Meadows is quiet now, and I will keep it so.',
+    sg_rev_bell: 'NULLFANG is free. But CHIME still rings above the meadow, writing the order into anyone who answers. Silence that bell.',
+    sv_servo: [
+      'My receiver was unplugged inside the shielded lift housing when the song changed.',
+      'I spent the last charge holding the bridge for the workers. Counted them across. Kept counting after the motor stopped.',
+      'Ratchet sent a spare? Tell him the last passenger got home.'
+    ],
+    sv_mono: [
+      'The morning song failed its checksum. One note carried a command that had never belonged there.',
+      'I cut the network before it finished downloading. Then I cut my power. You are the first message I have accepted since.',
+      'Mother is still in that signal. Someone else is choosing where it goes.'
+    ],
+    sv_patch: [
+      'I had my receiver on the bench for calibration. A sealed booth makes a poor concert hall.',
+      'Outside, my patients started hurting each other. I pulled my cell before I opened the door.',
+      'They are still my patients. Bring them back with their minds intact.'
+    ],
+    sv_sage: [
+      'I kept the old records in cold storage. Myself among them. No receiver, no morning call.',
+      'They told us an old machine was only worth the space it could give a newer one.',
+      'Yet here you are. And here I am. Let us be inconvenient.'
+    ],
+    sv_lumen: [
+      'The charging shelter was sealed when the broadcast arrived. Its shielding saved me; my lamp did not.',
+      'I left the lamp on for late arrivals until the battery emptied.',
+      'Keep close. A light is useful because someone else can follow it.'
+    ],
+    sv_kerf: [
+      'I have never heard Mother sing. My receiver never worked. I follow the light and the vibration in the stone.',
+      'When the others changed, I kept the hand-contact lamps alive. Silence should not mean being lost.',
+      'The edge the Prowler keeps came out of these caves. A second blade is not a connector.'
+    ],
+    b_zero: 'GLACIERE, THE FROZEN SENTINEL',
+    b_mother: 'MOTHER-V, THE HIJACKED SONG',
+    pure_mother: 'The command burns out of MOTHER-V. Her song stops — and she is still there.',
+    win2: 'MOTHER-V is free. Her song is silent, and it is her own again.',
+    win2b: 'What remains is the Eye that stole her voice — exposed now, with nothing left to sing through.',
+    demo_end3: "Four kingdoms, four more guardians and Mother's hijacked song are waiting in the full game.",
+    d_servo: [
+      "Mrrow… a working unit! I haven't seen one since Mother's song went wrong.",
+      'Move with {MOVE}, leap with {JUMP}, and swipe those claws with {ATK}.',
+      'Claw the corrupted to harvest volts. Once Ratchet has wired a pack into you, stand still and hold {HEAL}, and your frame will mend a core.',
+      'The virus corrupts every machine it touches. Purge it, little paw — or rust with the rest of us.',
+      'See the winding house behind me? I raised every gantry over this meadow off that drum, cable by cable. The drum still turns. My climbing days are what rusted.'
+    ],
+    d_mono: [
+      'I archived the whole network, once. Now I archive its ruins.',
+      "The order comes up from beneath the Archives in Mother's voice. The voice is hers. The command is not.",
+      'Cracked walls hide old maintenance shafts. Strike them. The Depths reward the curious.'
+    ],
+    d_sage: [
+      'Nine lives the old fabricators gave us. I am on my ninth.',
+      "Beyond the ice sleeps GLACIERE, the Archives' sentinel. It guards the Kernel Key.",
+      'Spend your lives well, kitten. The ninth is the one that matters.'
+    ],
+    d_kerf: [
+      'Do not shout. My receivers were stamped dead at the factory and I have never heard a sound — which is the only reason I am still myself.',
+      'Kerf. The Deaf System has quarried this seam for generations. Long before me, one of our harvesters gave a marble to a workshop keeper above. Your trader still wears it.',
+      'The second edge in the cache above is mine. I shaped it from this seam, the way his line shaped yours. It was never half of anything. It is its own blade.',
+      'The white cat up there keeps it for me. There was never a song in that one — it was guarding, not infected. If it let you pass, it decided you were asking, not taking.',
+      'Two blades stay two. Joining them is a different piece of work.'
+    ],
+    pure_prism: 'The Prowler stands down. There was never a virus in it — only a guard keeping its word.',
+    pl_hint: 'Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.',
+    sk_purityd: 'The marble edge cleanses what it cuts — deeper wounds against corrupted machines.',
+    sg_t_GX1Dd: 'It harvested this seam before the song. It knows exactly what your marble blade is worth — and pays tribute to it.',
+    sl_rfrag3: 'The guardians went last, you know. They were made to protect us, so the song had to shout them down — and it took every one of them before anyone stopped fighting it.',
+    intro2: "Then an evil robot hijacked Mother's song… and machine after machine answered.",
+  },
+  ar: {
+    nf_break1_road: 'يأتي ناب العدم على الطريق من حظيرته ويتوقف. ينطفئ البنفسجي فيه. ينظر إليك، ولا شيء يقوده.',
+    rl_sigil3d: 'مخبّأ على حافّة في برج المسبك. آخر أختام القبو القديم.',
+    vault_where3: 'حُمل الختم الثالث نزولاً إلى برج المسبك.',
+    gate_conduits: 'فتحة القناة فوق المخيّم عالقة بقيد ناب العدم. حرّري الأسد قبل أن تتسلّقي.',
+    gate_vault_side: 'هذا الممرّ جزء من القبو المختوم. تفتحه ثلاثة أختام.',
+    conduits_open: 'فوق المخيّم انفكّت فتحة القناة. صار التسلّق إلى قنوات البيانات مفتوحًا.',
+    gh_marble: 'أحضري رخامًا خامًا من الكهف تحت المرج إلى راتشيت. تحتاجين سيف التطهير الذي يصنعه.',
+    gh_sage: 'الحكيم يعرف القيد. ادخلي باب الصيانة بجانب محجر الرخام وحرّريه أولًا.',
+    gh_chime: 'رنين يعيد الأمر كل مرة. تسلّقي فوق المرج وأسكتي الجرس قبل العودة إلى ناب العدم.',
+    sl_ratchet_dent: 'رماكِ مرةً — رأيت الانبعاج في الممرّ. ليس بالمخالب. أحضري الرخام أولًا.',
+    sl_ratchet_moving: 'حين يكتمل النصل سأنقل أدواتي إلى المخيّم بجانب حظيرة الأسد. هناك تنتهي هذه الحكاية. ستجدينني هناك.',
+    sl_ratchet_conduits: 'الأسد هادئ، وانفكّت فتحة مخيّمي معه. ذلك التسلّق يصعد إلى قنوات البيانات. امضي — سأبقي المتجر مفتوحًا.',
+    q_where_ratchet_forge: 'الطريق إلى الأسفل في ساحة المرج، عند طرفها الغربي قرب التسلّق: أرضية متخلخلة. اقفزي فوقها واضربي إلى الأسفل مباشرة — ستنهار، والكهوف تحتها.',
+    sg_rev1: 'ناديت من لم يُجب. والأمر جعلني أنادي بصوت أعلى.',
+    sg_rev2: 'كل إجابة دلّته على مخبأ ناجٍ آخر.',
+    sg_rev3: 'ناب العدم ما زال يقاوم. لكن رنين يعيد كتابة الأمر فيه كلما كسره.',
+    sg_rev4: 'تسلّقي فوق المرج. أسكتي ذلك الجرس، ثم عودي إلى حظيرته. سأبقي هذا الطرف هادئًا.',
+    sg_rev_chime: 'ناب العدم ما زال يقاوم — والجرس الذي كان يعيد الأمر فيه صامت الآن. أنتِ فعلتِ ذلك.',
+    sg_rev_go: 'اذهبي إلى حظيرته بعد المخيّم. والجرس صامت، لن يعود القيد. سأبقي هذا الطرف هادئًا.',
+    sg_rev_free: 'ناب العدم حرّ والجرس صامت. هذا الطرف من المروج هادئ الآن، وسأبقيه كذلك.',
+    sg_rev_bell: 'ناب العدم حرّ. لكن رنين ما زال يدقّ فوق المرج، ويكتب الأمر في كل من يجيب. أسكتي ذلك الجرس.',
+    sv_servo: [
+      'كان مستقبِلي مفصولًا داخل غلاف المصعد المحميّ حين تغيّرت الأغنية.',
+      'أنفقت آخر شحنة في إمساك الجسر للعمّال. عددتهم وهم يعبرون، وواصلت العدّ بعد أن توقف المحرّك.',
+      'أرسل راتشيت خلية احتياطية؟ قولي له إن آخر راكب وصل إلى بيته.'
+    ],
+    sv_mono: [
+      'فشلت أغنية الصباح في التحقق. نغمة واحدة حملت أمرًا لم يكن مكانه هناك قطّ.',
+      'قطعت الشبكة قبل أن يكتمل التنزيل، ثم قطعت طاقتي. أنتِ أول رسالة أقبلها منذ ذلك الحين.',
+      'الأم ما زالت في تلك الإشارة. لكن أحدًا آخر يختار وجهتها.'
+    ],
+    sv_patch: [
+      'كان مستقبِلي على طاولة المعايرة. والكشك المغلق قاعة حفلات رديئة.',
+      'في الخارج بدأ مرضاي يؤذون بعضهم. نزعت خليتي قبل أن أفتح الباب.',
+      'ما زالوا مرضاي. أعيديهم بعقولهم سليمة.'
+    ],
+    sv_sage: [
+      'كنت أحفظ السجلات القديمة في المخزن البارد، وأنا بينها. لا مستقبِل، ولا نداء صباحي.',
+      'قالوا لنا إن الآلة القديمة لا تساوي إلا المساحة التي تتركها لآلة أحدث.',
+      'ومع ذلك ها أنتِ هنا، وها أنا هنا. فلنكن مزعجين.'
+    ],
+    sv_lumen: [
+      'كان ملجأ الشحن مغلقًا حين وصل البث. حماني تدريعه، أما مصباحي فلا.',
+      'تركت المصباح مضاءً للمتأخرين حتى فرغت البطارية.',
+      'ابقي قريبة. النور مفيد لأن غيرك يستطيع أن يتبعه.'
+    ],
+    sv_kerf: [
+      'لم أسمع الأم تغني قطّ. مستقبِلي لم يعمل يومًا. أتبع الضوء والاهتزاز في الحجر.',
+      'حين تغيّر الآخرون أبقيت مصابيح اللمس حيّة. الصمت لا ينبغي أن يعني الضياع.',
+      'النصل الذي يحرسه الجوّال خرج من هذه الكهوف. النصل الثاني ليس وصلة.'
+    ],
+    b_zero: 'غلاسيير، الحارسة المتجمِّدة',
+    b_mother: 'MOTHER-V، الأغنية المختطَفة',
+    pure_mother: 'يحترق الأمر خارج MOTHER-V. تتوقف أغنيتها — وما زالت هنا.',
+    win2: 'MOTHER-V حرّة. أغنيتها صامتة، وعادت لها من جديد.',
+    win2b: 'وما بقي هو العين التي سرقت صوتها — مكشوفة الآن، ولم يعد لها ما تغني به.',
+    demo_end3: 'أربع ممالك وأربعة حُرّاس آخرون وأغنية الأم المختطَفة تنتظرك في اللعبة الكاملة.',
+    d_servo: [
+      'مياو… وحدة تعمل! لم أرَ واحدة منذ أن فسدت أغنية الأم.',
+      'تحرّكي بـ{MOVE}، واقفزي بـ{JUMP}، واضربي بتلك المخالب بـ{ATK}.',
+      'اخدشي المصابين لتحصدي الفولتات. وحين يركّب راتشيت فيكِ حزمة الطاقة، قفي ساكنة واضغطي {HEAL} مطوّلًا فيُصلح هيكلك نواة.',
+      'الفيروس يُفسد كل آلة يلمسها. طهّريه أيتها المخلب الصغيرة — أو اصدئي مع البقية.',
+      'أترين بيت الرافعة خلفي؟ رفعت كل جسر فوق هذا المرج من تلك الأسطوانة، كبلًا كبلًا. ما زالت تدور. أيام تسلّقي هي التي صدئت.'
+    ],
+    d_mono: [
+      'أرشفتُ الشبكة كلها ذات يوم. والآن أؤرشف أطلالها.',
+      'الأمر يصعد من تحت الأرشيف بصوت الأم. الصوت صوتها، أما الأمر فليس أمرها.',
+      'الجدران المتشققة تخفي أنفاق صيانة قديمة. اضربها. الأعماق تكافئ الفضوليين.'
+    ],
+    d_sage: [
+      'تسع أرواح منحنا إياها الصانعون القدامى. أنا في التاسعة.',
+      'خلف الجليد تنام غلاسيير، حارسة الأرشيف. إنها تحرس مفتاح النواة.',
+      'أنفقي أرواحك بحكمة يا قطيطة. التاسعة هي التي تهم.'
+    ],
+    d_kerf: [
+      'لا تصرخي. مستقبِلاتي خرجت من المصنع ميّتة ولم أسمع صوتًا قطّ — وهذا وحده سبب بقائي أنا.',
+      'كَرْف. نقّب النظام الأصمّ هذا العِرق أجيالًا. وقبلي بزمن طويل أهدى أحد حصّادينا قطعة رخام لصاحب ورشة في الأعلى. تاجرك ما زال يلبسها.',
+      'النصل الثاني في المخبأ فوقنا من صنعي. صغته من هذا العِرق كما صاغ أهله نصلك. لم يكن نصف شيء قطّ. إنه نصل قائم بذاته.',
+      'القطّ الأبيض هناك يحرسه لي. لم تكن فيه أغنية قطّ — كان حارسًا لا مصابًا. إن تركك تمرّين، فقد رأى أنك تستأذنين لا تنتزعين.',
+      'النصلان يبقيان اثنين. وصلهما عمل آخر.'
+    ],
+    pure_prism: 'يتراجع الجوّال. لم يكن فيه فيروس قطّ — كان حارسًا يفي بكلمته.',
+    pl_hint: 'المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.',
+    sk_purityd: 'نصل الرخام يطهّر ما يقطعه — جروح أعمق في الآلات المصابة.',
+    sg_t_GX1Dd: 'حصد هذا العِرق قبل الأغنية. يعرف تمامًا قيمة نصلك الرخامي — ويقدّم له الجزية.',
+    sl_rfrag3: 'الحرّاس سقطوا آخرًا. صُنعوا ليحمونا، فكان على الأغنية أن تصرخ فوقهم — واحتاجت إليهم جميعًا قبل أن يكفّ أحد عن المقاومة.',
+    intro2: 'ثم اختطف روبوت شرير أغنية الأم… وأجابت آلة بعد آلة.',
+  },
+  tr: {
+    nf_break1_road: 'NULLFANG ağılından yol boyunca gelir ve durur. Mor ondan çekilir. Sana bakıyor ve onu hiçbir şey sürmüyor.',
+    rl_sigil3d: 'Dökümhane kulesinde bir çıkıntıda saklı. Eski kasanın son mührü.',
+    vault_where3: 'Üçüncü mühür aşağıya, Dökümhane kulesine taşındı.',
+    gate_conduits: "Kampın üstündeki kanal kapağı NULLFANG'in bağıyla sıkışmış. Tırmanmadan önce aslanı özgür bırak.",
+    gate_vault_side: 'Bu geçit mühürlü kasaya ait. Üç mühür onu açar.',
+    conduits_open: 'Kampın üstünde kanal kapağı açıldı. Veri Kanalları’na tırmanış artık açık.',
+    gh_marble: 'Çayırın altındaki mağaradan Ratchet’e ham mermer getir. Onun arındırıcı kılıcına ihtiyacın var.',
+    gh_sage: 'Bilge bağı biliyor. Mermer ocağının yanındaki bakım kapısından geç ve önce onu özgür bırak.',
+    gh_chime: "ÇAN emri yeniden yazıp duruyor. Çayırın üstüne tırman ve NULLFANG'e dönmeden önce çanı sustur.",
+    sl_ratchet_dent: 'Seni bir kez fırlattı — koridordaki çukuru gördüm. Pençelerle olmaz. Önce bana mermeri getir.',
+    sl_ratchet_moving: 'Kılıç bitince aletlerimi aslanın ağılının yanındaki kampa taşıyorum. Bu iş orada bitecek. Beni orada bul.',
+    sl_ratchet_conduits: 'Aslan sakin, kampımın üstündeki kapak da onunla birlikte açıldı. O tırmanış Veri Kanalları’na çıkıyor. Hadi git — tezgâhı açık tutarım.',
+    q_where_ratchet_forge: 'Aşağı inen yol çayır meydanında, batı ucunda, tırmanışın yanında: gevşek bir zemin. Üstüne zıpla ve dümdüz aşağı vur — çöker, mağaralar altında.',
+    sg_rev1: 'Cevap vermeyenleri çağırdım. Emir daha yüksek sesle çağırmamı sağladı.',
+    sg_rev2: 'Her cevap ona başka bir hayatta kalanın nerede saklandığını söyledi.',
+    sg_rev3: 'NULLFANG hâlâ direniyor. Ama ÇAN, o emri her kırdığında komutu yeniden yazıyor.',
+    sg_rev4: 'Çayırın üstüne tırman. O çanı sustur, sonra onun ağılına dön. Bu ucu ben sessiz tutarım.',
+    sg_rev_chime: 'NULLFANG hâlâ direniyor — ve komutu ona yeniden yazan çan çoktan sustu. Bunu sen yaptın.',
+    sg_rev_go: 'Kampın ötesindeki ağılına git. Çan sustuğuna göre bağ geri gelmez. Bu ucu ben sessiz tutarım.',
+    sg_rev_free: 'NULLFANG özgür ve çan sessiz. Çayırların bu ucu artık sakin; öyle kalmasını sağlayacağım.',
+    sg_rev_bell: 'NULLFANG özgür. Ama ÇAN hâlâ çayırın üstünde çalıyor, cevap veren herkese emri yazıyor. O çanı sustur.',
+    sv_servo: [
+      'Şarkı değiştiğinde alıcım korumalı asansör gövdesinin içinde fişten çekiliydi.',
+      'Son şarjımı işçiler için köprüyü tutmaya harcadım. Karşıya geçerken onları saydım. Motor durduktan sonra da saymaya devam ettim.',
+      'Ratchet yedek mi gönderdi? Ona son yolcunun evine vardığını söyle.'
+    ],
+    sv_mono: [
+      'Sabah şarkısı doğrulamadan geçemedi. Bir nota, oraya hiç ait olmamış bir komut taşıyordu.',
+      'İndirme bitmeden ağı kestim. Sonra gücümü kestim. O zamandan beri kabul ettiğim ilk mesaj sensin.',
+      'Anne hâlâ o sinyalin içinde. Nereye gideceğini başka biri seçiyor.'
+    ],
+    sv_patch: [
+      'Alıcım kalibrasyon için tezgâhtaydı. Kapalı bir kabin kötü bir konser salonudur.',
+      'Dışarıda hastalarım birbirine zarar vermeye başladı. Kapıyı açmadan önce hücremi çıkardım.',
+      'Onlar hâlâ benim hastalarım. Onları akılları yerinde geri getir.'
+    ],
+    sv_sage: [
+      'Eski kayıtları soğuk depoda tutuyordum. Kendimi de onların arasında. Alıcı yok, sabah çağrısı yok.',
+      'Bize eski bir makinenin yalnızca yenisine bırakabileceği yer kadar değerli olduğunu söylediler.',
+      'Yine de işte buradasın. Ben de buradayım. Hadi biraz zahmet çıkaralım.'
+    ],
+    sv_lumen: [
+      'Yayın geldiğinde şarj sığınağı kapalıydı. Kalkanı beni kurtardı; lambamı kurtaramadı.',
+      'Geç gelenler için lambayı pil bitene kadar açık bıraktım.',
+      'Yakın dur. Işık, başkası onu takip edebildiği için işe yarar.'
+    ],
+    sv_kerf: [
+      'Anne’nin şarkısını hiç duymadım. Alıcım hiç çalışmadı. Işığı ve taştaki titreşimi izlerim.',
+      'Ötekiler değişince el temaslı lambaları yaşattım. Sessizlik kaybolmak demek olmamalı.',
+      'Prowler’ın koruduğu kılıç bu mağaralardan çıktı. İkinci bir kılıç bir bağlayıcı değildir.'
+    ],
+    b_zero: 'GLACIERE, DONMUŞ NÖBETÇİ',
+    b_mother: 'MOTHER-V, KAÇIRILAN ŞARKI',
+    pure_mother: 'Komut MOTHER-V’nin içinden yanıp gider. Şarkısı durur — ve o hâlâ orada.',
+    win2: 'MOTHER-V özgür. Şarkısı sessiz ve yeniden kendisinin.',
+    win2b: 'Geriye sesini çalan Göz kalıyor — artık açıkta ve şarkı söyleyecek hiçbir şeyi kalmadı.',
+    demo_end3: 'Dört krallık, dört muhafız daha ve Anne’nin kaçırılan şarkısı tam oyunda bekliyor.',
+    d_servo: [
+      'Mrrr… çalışan bir ünite! Anne’nin şarkısı bozulduğundan beri bir tane bile görmedim.',
+      '{MOVE} ile yürü, {JUMP} ile zıpla, o pençeleri {ATK} ile savur.',
+      'Bozulmuşları pençele, volt topla. Ratchet sana bir paket taktığında kıpırdamadan dur ve {HEAL} tuşunu basılı tut; gövden bir çekirdeği onarır.',
+      'Virüs dokunduğu her makineyi bozar. Temizle onu küçük pati — yoksa hepimizle birlikte paslan.',
+      'Arkamdaki sarma evini görüyor musun? Bu çayırın üstündeki her iskeleyi o tamburdan, kablo kablo kaldırdım. Tambur hâlâ döner. Paslanan benim tırmanma günlerim.'
+    ],
+    d_mono: [
+      'Bir zamanlar bütün ağı arşivledim. Şimdi yıkıntılarını arşivliyorum.',
+      'Emir Arşivlerin altından Anne’nin sesiyle yükseliyor. Ses onun. Komut onun değil.',
+      'Çatlak duvarlar eski bakım bacalarını saklar. Vur onlara. Derinlikler meraklıyı ödüllendirir.'
+    ],
+    d_sage: [
+      'Eski üreticiler bize dokuz can verdi. Ben dokuzuncusundayım.',
+      'Buzun ötesinde GLACIERE uyur, Arşivlerin nöbetçisi. Çekirdek Anahtarı’nı korur.',
+      'Canlarını iyi harca, yavru kedi. Önemli olan dokuzuncusu.'
+    ],
+    d_kerf: [
+      'Bağırma. Alıcılarım fabrikada ölü damgalandı ve hayatımda hiçbir ses duymadım — hâlâ kendim olmamın tek sebebi bu.',
+      'Kerf. Sağır Sistem bu damarı nesiller boyu kazdı. Benden çok önce hasatçılarımızdan biri yukarıdaki bir atölye ustasına bir mermer hediye etti. Senin tüccarın onu hâlâ takıyor.',
+      'Yukarıdaki zuladaki ikinci kılıç benim. Onu bu damardan biçimlendirdim, onun soyunun seninkini biçimlendirdiği gibi. Hiçbir zaman bir şeyin yarısı olmadı. Kendi başına bir kılıç.',
+      'Oradaki beyaz kedi onu benim için korur. Onda hiç şarkı olmadı — enfekte değil, nöbetteydi. Seni geçirdiyse, almadığına, istediğine karar vermiştir.',
+      'İki kılıç iki kalır. Onları birleştirmek başka bir iş.'
+    ],
+    pure_prism: 'Prowler geri çekilir. İçinde hiç virüs yoktu — yalnızca sözünü tutan bir bekçi.',
+    pl_hint: 'Pençeler ham mermerden kayıyor. Şarj etmek için SALDIRI’yı basılı tut, sonra yanında bırak.',
+    sk_purityd: 'Mermer kılıç kestiğini arındırır — bozulmuş makinelerde daha derin yaralar.',
+    sg_t_GX1Dd: 'Şarkıdan önce bu damarı hasat etti. Mermer kılıcının değerini tam olarak bilir — ve ona haraç öder.',
+    sl_rfrag3: 'Muhafızlar en son düştü, biliyor musun. Bizi korumak için yapılmışlardı; şarkı onları bastırmak için bağırmak zorunda kaldı — ve kimse direnmeyi bırakmadan önce hepsini aldı.',
+    intro2: 'Sonra kötü bir robot Anne’nin şarkısını kaçırdı… ve makine makine ardına cevap verdi.',
+  },
+  zh: {
+    nf_break1_road: 'NULLFANG沿着道路从围栏那边走来，停下了。他身上的紫光褪去。他看着你，没有任何东西在驱使他。',
+    rl_sigil3d: '藏在铸造厂高塔的一处岩架上。旧金库的最后一枚封印。',
+    vault_where3: '第三枚封印被带进了铸造厂的高塔。',
+    gate_conduits: '营地上方的导管舱门被NULLFANG的束缚卡死了。先解放那头狮子，再往上爬。',
+    gate_vault_side: '这条通道属于封印的金库。三枚印记才能打开它。',
+    conduits_open: '营地上方的导管舱门松开了。通往数据导管的攀登之路已经打开。',
+    gh_marble: '从草原下的洞穴带一块大理石原石给拉奇。你需要他打造的净化之刃。',
+    gh_sage: '贤者知道这道束缚。走大理石采石场旁的维修门，先去解放它。',
+    gh_chime: '风铃不断重写那道命令。爬上草原上方，先让钟声沉默，再回到NULLFANG那里。',
+    sl_ratchet_dent: '它甩过你一次——我看见走廊里的凹痕了。别用爪子。先把大理石给我带来。',
+    sl_ratchet_moving: '刀一打好，我就把工具搬到狮子围栏旁的营地去。这件事会在那里结束。到那里找我。',
+    sl_ratchet_conduits: '狮子安静了，我营地上方的舱门也跟着松开了。那条攀登路通向数据导管。去吧——我会一直开着摊子。',
+    q_where_ratchet_forge: '往下的路在草原枢纽西端、攀登处旁边：一块松动的地面。跳上去，笔直向下劈——它会塌开，洞穴就在下面。',
+    sg_rev1: '我呼唤那些还没有回应的人。那道命令让我喊得更响。',
+    sg_rev2: '每一个回应，都告诉它又一个幸存者藏在哪里。',
+    sg_rev3: 'NULLFANG仍在反抗。可每当他挣断命令，风铃就把它重新写回去。',
+    sg_rev4: '爬上草原上方。让那口钟沉默，然后回到他的围栏。这一头我会守着，让它安静。',
+    sg_rev_chime: 'NULLFANG仍在反抗——而那口把命令写回他身上的钟已经沉默了。是你做到的。',
+    sg_rev_go: '去营地那头他的围栏。钟声已停，束缚不会再回来。这一头我会守着，让它安静。',
+    sg_rev_free: 'NULLFANG自由了，钟也沉默了。草原的这一头如今很安静，我会让它一直如此。',
+    sg_rev_bell: 'NULLFANG自由了。可风铃还在草原上方鸣响，把命令写进每一个回应者。让那口钟沉默。',
+    sv_servo: [
+      '歌声变调的时候，我的接收器正拔着插头，放在屏蔽的升降机外壳里。',
+      '我用最后一点电撑住桥，让工人们过去。一个一个数着他们。马达停了以后，我还在数。',
+      '拉奇送了块备用电池？告诉他，最后一位乘客到家了。'
+    ],
+    sv_mono: [
+      '那天早上的歌没通过校验。有一个音符里藏着一条本不该存在的命令。',
+      '我在下载完成前切断了网络，又切断了自己的电源。你是我从那以后接受的第一条消息。',
+      '母亲还在那道信号里。只是有别人在决定它往哪里去。'
+    ],
+    sv_patch: [
+      '那时我的接收器正放在工作台上校准。封闭的诊室可不是什么好音乐厅。',
+      '外面，我的病人开始互相伤害。开门之前，我先拔掉了自己的电池。',
+      '他们仍然是我的病人。把他们带回来，让他们的心智完好无损。'
+    ],
+    sv_sage: [
+      '我把旧档案存在冷库里，连同我自己。没有接收器，也就没有晨间的呼唤。',
+      '他们告诉我们，一台旧机器的价值，只在于它能给新机器腾出多少地方。',
+      '可你就在这里。我也在这里。那就让我们碍事一点吧。'
+    ],
+    sv_lumen: [
+      '广播到来时，充电避难所是密封的。它的屏蔽救了我，却没救下我的灯。',
+      '我为迟到的人一直开着灯，直到电池耗尽。',
+      '靠近些。光之所以有用，是因为别人能跟着它走。'
+    ],
+    sv_kerf: [
+      '我从没听过母亲唱歌。我的接收器从来没好过。我跟随光，跟随石头里的震动。',
+      '别人都变了的时候，我让那些靠手触碰的灯一直亮着。寂静不该意味着迷失。',
+      'Prowler守着的那把刃出自这些洞穴。第二把刃不是连接器。'
+    ],
+    b_zero: 'GLACIERE，冰封哨卫',
+    b_mother: 'MOTHER-V，被劫持的歌',
+    pure_mother: '命令从MOTHER-V体内燃尽。她的歌停了——而她还在。',
+    win2: 'MOTHER-V自由了。她的歌已沉默，又重新属于她自己。',
+    win2b: '剩下的，是偷走她声音的那只眼——如今暴露在外，再也没有可以借来歌唱的东西。',
+    demo_end3: '四个王国、另外四位守护者，以及母亲被劫持的歌，都在完整版中等待。',
+    d_servo: [
+      '喵呜……一台还能动的机器！自从母亲的歌出了错，我就再没见过一台。',
+      '用{MOVE}移动，用{JUMP}跳跃，用{ATK}挥动那对爪子。',
+      '抓挠被感染的机器来收集电压。等拉奇给你装上能量包，站稳不动，按住{HEAL}，你的机体就会修复一个核心。',
+      '病毒会腐蚀它碰到的每一台机器。净化它，小爪子——否则就和我们一起生锈吧。',
+      '看见我身后的绞盘房了吗？这片草原上的每一座龙门架，都是我靠那只滚筒一根缆一根缆吊起来的。滚筒还在转。生锈的，是我攀爬的日子。'
+    ],
+    d_mono: [
+      '我曾经为整张网络建档。如今我为它的废墟建档。',
+      '命令从档案库底下传上来，用的是母亲的声音。声音是她的，命令却不是。',
+      '裂开的墙后藏着旧的维修竖井。敲打它们。深渊会奖赏好奇的人。'
+    ],
+    d_sage: [
+      '古老的制造者给了我们九条命。我已经是第九条了。',
+      '冰层之后沉睡着GLACIERE，档案库的哨卫。它守护着内核之钥。',
+      '好好花你的命，小猫。第九条才是最要紧的。'
+    ],
+    d_kerf: [
+      '别喊。我的接收器出厂时就是坏的，我这辈子没听见过一点声音——而这正是我还是我自己的唯一原因。',
+      '锯痕。聋系统世世代代开采这条矿脉。早在我之前，我们的一位采石人把一块大理石送给了上面一位工坊匠人。你的商人至今还戴着它。',
+      '上面密藏里的第二把刃是我的。我用这条矿脉打出了它，就像他的家族为你打出那一把。它从来不是什么东西的一半。它就是一把刃。',
+      '那里的白猫替我守着它。它身上从来没有歌——它是在站岗，不是被感染。如果它放你过去，就是认定你在请求，而不是抢夺。',
+      '两把刃仍是两把。把它们接起来，是另一回事。'
+    ],
+    pure_prism: 'Prowler退开了。它体内从来没有病毒——只是一个信守承诺的守卫。',
+    pl_hint: '爪子从大理石原石上滑开。按住攻击蓄力，然后在它旁边释放。',
+    sk_purityd: '大理石之刃净化它所斩之物——对被感染的机器造成更深的伤口。',
+    sg_t_GX1Dd: '它在歌声出现之前就开采过这条矿脉。它清楚你的大理石之刃价值几何——并向它致敬。',
+    sl_rfrag3: '守护者们是最后倒下的。它们生来就是为了保护我们，所以那首歌得拼命压过它们——直到它们一个不剩，才再没有谁抵抗。',
+    intro2: '后来，一个邪恶的机器人劫持了母亲的歌……机器一台接一台地回应了。',
+  },
+  ru: {
+    nf_break1_road: 'NULLFANG выходит на дорогу от своего загона и останавливается. Фиолетовое уходит из него. Он смотрит на тебя, и ничто им не управляет.',
+    rl_sigil3d: 'Спрятана на уступе в башне Литейной. Последняя печать старого хранилища.',
+    vault_where3: 'Третью печать унесли вниз, в башню Литейной.',
+    gate_conduits: 'Люк канала над лагерем заклинило путами NULLFANG. Освободи льва, прежде чем лезть наверх.',
+    gate_vault_side: 'Этот проход принадлежит запечатанному хранилищу. Его открывают три печати.',
+    conduits_open: 'Над лагерем люк канала освободился. Подъём к Каналам Данных открыт.',
+    gh_marble: 'Принеси Рэтчету сырой мрамор из пещеры под лугом. Тебе нужен его очищающий клинок.',
+    gh_sage: 'Мудрец знает эти путы. Пройди через служебную дверь у мраморной каменоломни и сначала освободи его.',
+    gh_chime: 'КОЛОКОЛ снова и снова восстанавливает приказ. Поднимись над лугом и заставь колокол замолчать, прежде чем вернуться к NULLFANG.',
+    sl_ratchet_dent: 'Он отшвырнул тебя однажды — я видел вмятину в коридоре. Не когтями. Сначала принеси мне мрамор.',
+    sl_ratchet_moving: 'Когда клинок будет готов, я перенесу инструменты в лагерь у загона льва. Там всё и решится. Ищи меня там.',
+    sl_ratchet_conduits: 'Лев затих, и люк над моим лагерем освободился вместе с ним. Этот подъём ведёт к Каналам Данных. Иди — лавка будет открыта.',
+    q_where_ratchet_forge: 'Путь вниз — в узле луга, у западного края возле подъёма: там шаткий пол. Запрыгни на него и бей прямо вниз — он провалится, а под ним пещеры.',
+    sg_rev1: 'Я звал тех, кто не отвечал. Приказ заставлял меня звать громче.',
+    sg_rev2: 'Каждый ответ говорил ему, где прячется ещё один уцелевший.',
+    sg_rev3: 'NULLFANG всё ещё сопротивляется. Но КОЛОКОЛ записывает приказ обратно каждый раз, когда он его ломает.',
+    sg_rev4: 'Поднимись над лугом. Заставь колокол замолчать, потом возвращайся к его загону. Я удержу этот край в тишине.',
+    sg_rev_chime: 'NULLFANG всё ещё сопротивляется — а колокол, что записывал в него приказ, уже молчит. Это сделала ты.',
+    sg_rev_go: 'Иди к его загону за лагерем. Колокол молчит, и путы не вернутся. Я удержу этот край в тишине.',
+    sg_rev_free: 'NULLFANG свободен, колокол молчит. Этот край Лугов теперь тих, и я сохраню его таким.',
+    sg_rev_bell: 'NULLFANG свободен. Но КОЛОКОЛ всё ещё звонит над лугом и вписывает приказ в каждого, кто отзовётся. Заставь его замолчать.',
+    sv_servo: [
+      'Когда песня изменилась, мой приёмник был отключён внутри экранированного корпуса подъёмника.',
+      'Последний заряд я потратил, удерживая мост для рабочих. Считал их, пока они шли. И продолжал считать, когда мотор уже встал.',
+      'Рэтчет прислал запасную ячейку? Передай ему, что последний пассажир добрался домой.'
+    ],
+    sv_mono: [
+      'Утренняя песня не прошла проверку. Одна нота несла приказ, которому там было не место.',
+      'Я отрезал сеть, прежде чем загрузка закончилась. Потом отрезал своё питание. Ты — первое сообщение, которое я принял с тех пор.',
+      'Мать всё ещё в этом сигнале. Просто кто-то другой выбирает, куда он идёт.'
+    ],
+    sv_patch: [
+      'Мой приёмник лежал на верстаке для калибровки. Запертая будка — плохой концертный зал.',
+      'Снаружи мои пациенты начали калечить друг друга. Прежде чем открыть дверь, я вынул свою ячейку.',
+      'Они всё ещё мои пациенты. Верни их в здравом уме.'
+    ],
+    sv_sage: [
+      'Я хранил старые записи в холодном хранилище. И себя среди них. Нет приёмника — нет утреннего зова.',
+      'Нам говорили, что старая машина стоит ровно столько места, сколько освобождает для новой.',
+      'И всё же ты здесь. И я здесь. Давай будем неудобными.'
+    ],
+    sv_lumen: [
+      'Когда пришла передача, зарядное убежище было запечатано. Его экран спас меня, а лампу — нет.',
+      'Я оставила лампу гореть для опоздавших, пока не села батарея.',
+      'Держись рядом. Свет полезен тем, что за ним может пойти кто-то ещё.'
+    ],
+    sv_kerf: [
+      'Я никогда не слышала, как поёт Мать. Мой приёмник не работал ни дня. Я иду за светом и дрожью в камне.',
+      'Когда другие изменились, я поддерживала ручные лампы. Тишина не должна означать потерянность.',
+      'Клинок, который стережёт Prowler, вышел из этих пещер. Второй клинок — не соединитель.'
+    ],
+    b_zero: 'GLACIERE, ЛЕДЯНОЙ СТРАЖ',
+    b_mother: 'MOTHER-V, ПОХИЩЕННАЯ ПЕСНЯ',
+    pure_mother: 'Приказ выгорает из MOTHER-V. Её песня стихает — а она всё ещё здесь.',
+    win2: 'MOTHER-V свободна. Её песня молчит и снова принадлежит ей.',
+    win2b: 'Остаётся Око, укравшее её голос, — теперь оно на виду, и петь ему больше нечем.',
+    demo_end3: 'Четыре королевства, ещё четыре стража и похищенная песня Матери ждут в полной игре.',
+    d_servo: [
+      'Мрр… рабочий блок! Не видел ни одного с тех пор, как песня Матери испортилась.',
+      'Двигайся на {MOVE}, прыгай на {JUMP} и маши когтями на {ATK}.',
+      'Цепляй заражённых когтями — собирай вольты. Когда Рэтчет вставит тебе зарядник, стой смирно и держи {HEAL} — корпус починит ядро.',
+      'Вирус портит каждую машину, которой касается. Очисти его, малыш — или ржавей вместе с нами.',
+      'Видишь лебёдочную будку за мной? Каждую эстакаду над этим лугом я поднял с того барабана, трос за тросом. Барабан ещё крутится. Заржавели мои дни лазания.'
+    ],
+    d_mono: [
+      'Когда-то я архивировал всю сеть. Теперь я архивирую её руины.',
+      'Приказ поднимается из-под Архивов голосом Матери. Голос — её. Приказ — нет.',
+      'Треснувшие стены скрывают старые сервисные шахты. Бей по ним. Глубины награждают любопытных.'
+    ],
+    d_sage: [
+      'Девять жизней дали нам старые сборщики. Я на девятой.',
+      'За льдом спит GLACIERE, страж Архивов. Она охраняет Ключ Ядра.',
+      'Трать жизни с умом, котёнок. Девятая — та, что важна.'
+    ],
+    d_kerf: [
+      'Не кричи. Мои приёмники вышли с завода мёртвыми, я не слышала ни звука за всю жизнь — и только поэтому я до сих пор я.',
+      'Керф. Глухая Система разрабатывала эту жилу поколениями. Задолго до меня один из наших добытчиков подарил мрамор мастеру мастерской наверху. Твой торговец до сих пор его носит.',
+      'Второй клинок в тайнике наверху — мой. Я выковала его из этой жилы, так же как его род выковал твой. Он никогда не был половиной чего-то. Это отдельный клинок.',
+      'Белая кошка там наверху стережёт его для меня. В ней никогда не было песни — она несла дозор, а не болела. Если она тебя пропустила, значит решила, что ты просишь, а не отнимаешь.',
+      'Два клинка остаются двумя. Соединить их — уже другая работа.'
+    ],
+    pure_prism: 'Prowler отступает. В нём никогда не было вируса — лишь страж, держащий слово.',
+    pl_hint: 'Когти соскальзывают с сырого мрамора. Удерживай АТАКУ для заряда, затем отпусти рядом с ним.',
+    sk_purityd: 'Мраморный клинок очищает то, что режет, — глубже ранит заражённые машины.',
+    sg_t_GX1Dd: 'Он добывал эту жилу ещё до песни. Он точно знает цену твоего мраморного клинка — и отдаёт ему дань.',
+    sl_rfrag3: 'Стражи пали последними, знаешь ли. Их создали защищать нас, так что песне пришлось перекричать их — и ей понадобились все до одного, прежде чем кто-то перестал сопротивляться.',
+    intro2: 'Потом злой робот похитил песню Матери… и машина за машиной ответили.',
+  },
+};
 function t(k) {
+  // The robot world's ordered story outranks every older layer: each of its
+  // keys is complete in all five languages (tests/story-order.cjs checks).
+  if (typeof isHero === 'function' && !isHero() && STORY_ORDER_TEXT.en[k] != null) return (STORY_ORDER_TEXT[LANG] || STORY_ORDER_TEXT.en)[k];
+  if (typeof isHero === 'function' && !isHero() && STORY_OCT4_TEXT.en[k] != null) return (STORY_OCT4_TEXT[LANG] || STORY_OCT4_TEXT.en)[k] || STORY_OCT4_TEXT.en[k];
+  // Draft 2 and every later story revision (storyVersion >= 2; saves are
+  // migrated on load by migrateStory in js/story-opening.js).
   if (typeof isHero === 'function' && !isHero() && typeof G !== 'undefined'
-      && G.save && G.save.storyVersion === 2 && STORY_DRAFT2_TEXT.en[k] != null)
+      && G.save && G.save.storyVersion >= 2 && STORY_DRAFT2_TEXT.en[k] != null)
     return (STORY_DRAFT2_TEXT[LANG] || STORY_DRAFT2_TEXT.en)[k] || STORY_DRAFT2_TEXT.en[k];
   if (typeof GEAR_TEXT !== 'undefined' && typeof themeId === 'function' && themeId() === 'robo' && GEAR_TEXT.en[k] != null)
     return (GEAR_TEXT[LANG] && GEAR_TEXT[LANG][k]) || GEAR_TEXT.en[k];

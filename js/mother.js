@@ -278,7 +278,8 @@ function drawMother(c, b) {
   const charging = b.st === 'nwcharge';
   const dark = (typeof G !== 'undefined' && (G.darkT || 0) > 0) && !b.dead;
   const song = b.st === 'msong';
-  const stag = (b.stagT || 0) > 0 && !b.dead;
+  // the hit-group break reads as the same exposed, reeling shell
+  const stag = ((b.stagT || 0) > 0 || b.st === 'daze') && !b.dead;
   const grabbing = b.st === 'grabwarn' || b.st === 'grab';
   const hurt = (b.hurtT || 0) > 0 && !b.dead;
   // the heartbeat: ~0.9 Hz at full health, racing toward 1.8 Hz near death

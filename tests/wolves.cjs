@@ -286,6 +286,9 @@ const { chromium } = require('playwright');
   // ---- 6. TAMED, NEVER DESTROYED -----------------------------------------
   const tame = await page.evaluate(async (room) => {
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+    // the den's door opens only to the forged blade, and only the blade frees
+    // the Alpha (brNeedsBlade, js/braid.js) — the save that reaches it owns one
+    sv.flags.crystal = 1;
     startGame(sv); loadRoom(room);
     await new Promise(r => requestAnimationFrame(r));
     const b = G.boss;

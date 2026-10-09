@@ -130,3 +130,13 @@ Consumed: registry §1–§5. Nothing needed from another subject.
 
 ### Changelog
 No blob values changed this pass.
+
+**Motion pass (2026-10-08, plan §1).** The breath still sets the pace
+(`0.6 + 0.4·sin`), but the blob now gets there on the walkers' gait —
+acceleration, braking, and a ledge or wall is a stop and a roll the other way
+rather than an instant reversal (table in `ENEMY_CRAWLER.md`). Its roll toward
+travel survives as an offset to the authored angle it is SHOWN at, one angle at
+a time; the ±0.35 yaw drift that cross-faded two angles is gone. Drip tell and
+rebound silhouettes are measured by `tests/artbible.cjs` (rest/sag 0.73,
+rest/rebound 0.62). No amber by design — its hazard is registry danger red.
+

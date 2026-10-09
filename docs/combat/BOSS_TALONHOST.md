@@ -153,6 +153,50 @@ documented as such in `ENEMY_FLIER.md`.
 2. Whether B4's two ledges are wide enough to shelter under at the fan's full
    7-rank spread. Four tiles each; unverified against the 0.28 rad spacing.
 
+## B7. The template pass (2026-10-08, the Hollow Knight study, plan §3)
+
+**Every move now has a window after it**, not only the fourth beat. The volley
+and the swoop used to return straight to a station ~350 px over the floor, and
+the screech's window was `stagT 900` *at centre-top* — three openings nobody
+could reach. Each now ends in **`recover`**: she sinks into claw range (feet
+40 px over the player's ground, beside her — `bossRecSpot`), holds, then
+`rise`s back to the cable. REST is still the big window and still the fight's
+identity.
+
+| move | after it | hold p1 / p2 | measured window, worst / median (`tests/guardians.cjs`) |
+|---|---|---|---|
+| `th.volley` | `recover` (the fan's recoil drops her down the cable) | 600 / 500 | ≥ 717 / ~870 |
+| `th.swoop` | the pull-up ends 80 px over the labour height (the committed arc stays over a grounded head), then `recover` | 550 / 450 | ≥ 700 / ~833 |
+| `th.broodcall` | `recover` (was `stagT 900` at centre-top) | 700 / 550 | ≥ 833 / ~970 |
+| `th.rest` | unchanged | — | the gift |
+
+**The deck** (was `cycle++ % 4`: volley, swoop, volley, rest). Her range is how
+far the player is from the middle of the arena, where the fan falls:
+
+| move | player within 220 px of centre, on the floor | at the walls or on a ledge |
+|---|---|---|
+| volley | **3** | 0.25 |
+| swoop | 0.4 | **3** |
+| rest | 1 once two beats have passed; **forced** on the fourth | same |
+
+Recency debt ×0.5 on the last two draws. Measured: middle draws ~50–57 % volley,
+wall draws ~67 % swoop and ≤ 8 % volley.
+
+**The break:** `dazeAt 6`, `dazeSpan 3.2 s` — six hits, each within 3.2 s of
+the last (two punishes in a row group), knock her off the cable onto the floor
+in the `cffloor` body: **1.7 s (p1) / 1.35 s (p2)**, ×1.6 damage, plating open,
+not again for 6 / 7.5 s. The swoop and the coolant crash are committed; a break
+asked for during them lands when they end. She gets up into `rise`.
+
+**Every stagger sinks her** (the Song's, the midpoint's 1.5 s) to the same
+claw-range spot instead of freezing her on the cable; she climbs back in
+`rise` rather than snapping to it.
+
+**Reward check (plan §3.6).** Twin Thrusters (`djump`) and the **jet** arm,
+which is the key to FURNACE CHOIR's plating (`BOSS_GATE.atlas`). The climb
+audit finds no room gated on the double jump, so the arm is what matters next
+— it does. Unchanged.
+
 ### Changelog
 | Value | Before | After | Reason |
 |---|---|---|---|
@@ -161,3 +205,10 @@ documented as such in `ENEMY_FLIER.md`.
 | B1 exits | `{B:'A3', R:'B2'}` | `+ T:'B6'` | Zone B had two fighting rooms to zone A's five. |
 | `ROOMS.B6` | — | new: the Relay Gallery | The Conduits' own wing, peak 5. |
 | `QUESTS.mono_relay` | — | new fetch errand | Zone B had no errand at all; A, C and E did. |
+| move selection (2026-10-08) | `cycle++ % 4` → volley, swoop, volley, rest | deck by distance from the arena's centre (table §B7), rest forced by the fourth beat | the same four beats at the centre and in a corner |
+| volley recovery | straight to `idle` at `homeY` (~350 px up) | `recover` hold 600 / 500 ms in claw range, then `rise` | no reachable window |
+| swoop end | bezier ends at `homeY` | ends 80 px over the labour height; `recover` hold 550 / 450 ms | no reachable window; the arc's damaging part is unchanged |
+| broodcall window | `stagT 900` at centre-top | `recover` hold 700 / 550 ms in claw range | a window 350 px over the floor |
+| `rise` climb | `lerp(y, homeY, 0.06)` per frame | `1 - 0.94^(dt·60)` | not dt-scaled: twice as fast at 120 Hz |
+| hit-group break | none | `dazeAt 6`, span 3.2 s, 1.7 / 1.35 s grounded, cooldown 6 / 7.5 s | plan §3.6: the template on every guardian |
+| any stagger | frozen on the cable | sinks into claw range, `rise`s back | a stagger is a window only if it is in reach |

@@ -445,8 +445,10 @@ function drawFurnace(c, b) {
           addPart(cx + rnd(-40, 40), footY - b.h * 1.5, rnd(-80, 80), rnd(-160, -40),
             0.5, chance(0.5) ? '#ffd76a' : '#ff7b3a', 2.5, 0, true);
       }
-    } else if (b.stagT > 0) {
-      // SILENCED: her song killed his — grounded, slumped, the light dimmed
+    } else if (b.stagT > 0 || b.st === 'daze') {
+      // SILENCED: her song killed his — grounded, slumped, the light dimmed.
+      // The hit-group break slumps him the same way: the light goes out of
+      // the bell and the body sags, which is the read for "hit it now".
       c.translate(0, 4);
       drgFig(c, 'idle', wk, 1.6, 0.06);
       c.save(); c.globalAlpha *= 0.4; c.fillStyle = '#1a0a06';

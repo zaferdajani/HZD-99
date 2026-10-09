@@ -73,10 +73,19 @@ const check = (name, ok, detail) => {
       // grounded and braced facing the bell, it holds
       b.hymn = { r: d, t: 0, n: 1 }; floor(); player.iT = 0; player.cores = 5; player.guardHeat = 0; player.guardBreakT = 0; player.guardT = 1;
       b.update(0.001); out.bracedCores = player.cores; player.guardT = 0;
-      // the cadence: a cast arms the cooldown
+      // the cadence: a cast arms the cooldown. The hymn used to come on every
+      // third idle (`cycle % 3 === 2`); it is drawn from a range-weighted deck
+      // now (2026-10-08, docs/combat/BOSS_FURNACE.md), so the first draw is
+      // pinned to the head of the deck — the hymn, whenever its cooldown
+      // allows it — and the second turn must lob whatever the dice say,
+      // because an armed cooldown takes the hymn out of the deck entirely.
+      const realRand = Math.random;
+      Math.random = () => 0;
       b.hymn = null; b.st = 'idle'; b.t = 0; b.cycle = 2; b.hymnCD = 0; b.fbCD = 99; b.slamCD = 99; b.meltUsed = true; player.x = b.cx() + 400;
       b.update(0.001); out.firstSt = b.st; out.cd = +(b.hymnCD || 0).toFixed(1);
+      Math.random = () => 0;
       b.st = 'idle'; b.t = 0; b.cycle = 2; b.update(0.001); out.secondSt = b.st;
+      Math.random = realRand;
     }
     return out;
   });

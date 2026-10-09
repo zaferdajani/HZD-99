@@ -100,6 +100,13 @@ const CHEETAH_ART = {
   runB: { img: 'cheetahRunB', k: 2.10, foot: 1, walkOf: 'walkB' },
   coil: { img: 'cheetahWarn', k: 2.30, foot: 1 },
   lunge: { img: 'cheetahRun', k: 2.05, foot: 0, yOff: -0.18 },
+  // the filmed cycles (§2cc): k is the CELL height, chosen so the body inside
+  // a square cell stands as tall as it does on the rest plate (measured: the
+  // walk's body fills 0.58 of its cell, the gallop's is cut from a wider take)
+  walkStrip: { img: 'cheetahWalk8', cells: 8, k: 3.57 },
+  runStrip: { img: 'cheetahRun6', cells: 6, k: 3.64 },
+  windedStrip: { img: 'cheetahWinded6', cells: 6, k: 3.55 },
+  landStrip: { img: 'cheetahLand4', cells: 4, k: 3.57 },
 };
 // how each animal carries its run (drawBeastPlate): a wolf bounds, a cheetah
 // runs a rotary gallop — longer reach, deeper back flexion, harder suspension
@@ -120,6 +127,10 @@ const WOLF_ART = {
   runB: { img: 'wolfRunB', k: 2.35, foot: 1, walkOf: 'walkB' },
   coil: { img: 'wolfCoil', k: 2.20, foot: 1 },
   lunge: { img: 'wolfLunge', k: 2.15, foot: 0, yOff: -0.22 },
+  walkStrip: { img: 'wolfWalk8', cells: 8, k: 3.87 },
+  runStrip: { img: 'wolfRun6', cells: 6, k: 3.94 },
+  windedStrip: { img: 'wolfWinded6', cells: 6, k: 3.89 },
+  landStrip: { img: 'wolfLand4', cells: 4, k: 3.89 },
 };
 // ---------------------------------------------------------------------------
 // IT WALKS. IT DOES NOT GLIDE.
@@ -141,20 +152,59 @@ const WOLF_ART = {
 // fewer poses, longer reach, a suspension beat where every paw is off the
 // ground). Patrol speed is 62; anything faster than 95 is running. The run
 // stride is half again the walk's, which is where the reach comes from.
+// THE RECOVERIES, re-posed from the rest plate — now only the fallback while
+// their filmed strips (windedStrip / landStrip, ART_QUEUE §2cc-iii) load. Plate space: the animal faces LEFT, +rot turns the nose UP
+// (canvas rotation is clockwise and the nose is on the -x side), and the pivot
+// is the middle of the feet line.
+//   winded — after the crawler's lunge: head and shoulders DOWN, the whole
+//            body sunk and stretched long, the flanks heaving. Spent.
+//   land   — after the hopper's leap: legs folded under the drop, chest low,
+//            the body compressed. Absorbing it.
+// Both are measured against rest and against the coil by tests/artbible.cjs
+// (the ENEMY cast), so a re-tune that makes them read alike fails the build.
+const BEAST_RECOVER = {
+  winded: { rot: -0.12, kx: 1.10, ky: 0.80, dx: 0.04, heave: 9 },
+  land:   { rot: -0.07, kx: 1.16, ky: 0.70, dx: 0, heave: 0 },
+};
+// one full breath of the winded strip, in seconds: the filmed pant is ~1.6 s,
+// played faster because the punish window is only 0.5-0.75 s and a breath
+// that never finishes inside it reads as a held pose, not a heave
+const WINDED_BREATH = 0.6;
 const STRIDE = 30;                          // px of floor per half-step, walking
 const STRIDE_RUN = 46;                      // ...and running (the cheetah adds more)
+// AIRBORNE MEANS OFF THE GROUND FOR REAL. Enemies carry `on` now (moveEnt),
+// and a hopper in flight used to run its walk frames through the whole arc
+// because nothing ever told the pose it had left the floor. One frame of air
+// over a fracture in the surface curve is not a leap, though, so a body only
+// reads as airborne once it has been up for a few hundredths of a second —
+// or at once, if it is going UP, which only a jump does.
+const AIR_POSE_T = 0.06;
+function beastAirborne(e) {
+  return e.on === false && ((e.airT || 0) > AIR_POSE_T || (e.vy || 0) < -60);
+}
 function wolfPose(e) {
-  if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0 || e.on === false) return 'lunge';
-  if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0) return 'coil';
   // how far it has really moved since the last frame, whatever moved it —
   // accumulated in HALF-STEPS of the current stride, so a wolf that breaks
-  // into a run keeps its phase instead of snapping to a new foot
+  // into a run keeps its phase instead of snapping to a new foot. Counted
+  // BEFORE any early return, so the frame after a lunge does not bank the
+  // whole lunge as one giant stride; and only on the ground, because feet in
+  // the air are not taking steps.
   const px = e._lastX == null ? e.x : e._lastX;
   const run = Math.abs(e.vx || 0) > 95;
   e._runG = run;
   const stride = run ? STRIDE_RUN * (e._strideMul || 1) : STRIDE;
-  e._ph = (e._ph || 0) + Math.abs(e.x - px) / stride;
+  if (e.on !== false) e._ph = (e._ph || 0) + Math.abs(e.x - px) / stride;
   e._lastX = e.x;
+  if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0 || beastAirborne(e)) return 'lunge';
+  if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0) return 'coil';
+  // THE RECOVERIES — each attack's opening wears its own picture now, so the
+  // punish window is something she SEES rather than a gap she has to know is
+  // there: the crawler's lunge leaves it WINDED (head down, flanks heaving),
+  // the hopper's landing leaves it ABSORBING the drop (legs folded, chest
+  // low). Both are the rest plate re-posed (BEAST_RECOVER) until their own
+  // plates come off THE FIRING LIST (ART_QUEUE §2cc).
+  if ((e.windedT || 0) > 0) return 'winded';
+  if ((e.landT || 0) > 0) return 'land';
   if (Math.abs(e.vx || 0) < 6) return 'rest';       // standing still stands still
   // contact, passing, contact (mirrored by the other pair), passing — four
   // beats off two drawings, which is what a two-frame cycle is. The run wants
@@ -189,6 +239,36 @@ function drawBeastPlate(c, e, ART, tame) {
     // tell, which is the one frame the player must not be lied to about
     for (const k in ART) mediaFetch(ART[k].img);
   }
+  // THE FILMED CYCLE, when it is here: a walk or run pose draws one cell of a
+  // real stride instead of alternating two plates. The cell is a function of
+  // the same distance-driven phase as everything else (_ph counts half-steps;
+  // a strip is one full stride = two of them), so a paw plants once per stride
+  // of floor at any speed — the strip cannot moonwalk any more than the plates
+  // could. Until it loads, the plates below draw exactly as before.
+  const isRun = pose === 'runA' || pose === 'runB', isWalk = pose === 'walkA' || pose === 'walkB';
+  // THE OPENINGS HAVE BODIES TOO (ART_QUEUE §2cc-iii). The winded breath is
+  // a LOOP on the sim clock — one breath in and out per WINDED_BREATH, so the
+  // flanks keep heaving however long the window is held. The landing is ONCE,
+  // clocked by the landing timer itself: strike, fold, lowest, half-risen,
+  // and it ends on the half-risen cell exactly as the window closes.
+  const SA = isRun ? ART.runStrip : isWalk ? ART.walkStrip
+    : pose === 'winded' ? ART.windedStrip : pose === 'land' ? ART.landStrip : null;
+  let cell = -1;
+  if (SA && typeof mediaHas === 'function') {
+    if (mediaHas(SA.img)) {
+      if (pose === 'winded') {
+        const b = (((e.anim || 0) / WINDED_BREATH) % 1 + 1) % 1;
+        cell = Math.min(SA.cells - 1, Math.floor(b * SA.cells));
+      } else if (pose === 'land') {
+        const L0 = e.land0 || HOP_LAND_T;
+        cell = clamp(Math.floor((1 - (e.landT || 0) / L0) * SA.cells), 0, SA.cells - 1);
+      } else {
+        const half = (((e._ph || 0) % 2) + 2) % 2;
+        cell = Math.min(SA.cells - 1, Math.floor(half / 2 * SA.cells));
+      }
+      A = SA;
+    } else if (typeof mediaFetch === 'function') mediaFetch(SA.img);
+  }
   const im0 = MEDIA_IMG[A.img];
   if (!im0 || !im0.naturalWidth) return false;
   // the pack takes the pop grade (media.js): a predator that blends into the
@@ -196,7 +276,8 @@ function drawBeastPlate(c, e, ART, tame) {
   const im = (typeof popArt === 'function' && popArt(A.img)) || im0;
 
   const cx = e.x + e.w / 2, footY = e.y + e.h;
-  const dh = e.h * A.k, dw = dh * (im.naturalWidth / im.naturalHeight);
+  const cellW = cell >= 0 ? im.naturalWidth / A.cells : im.naturalWidth;
+  const dh = e.h * A.k, dw = dh * (cellW / im.naturalHeight);
   // A GAIT HAS A VERTICAL — AND A RUN HAS A BACK. The vertical is weight
   // transfer taken from the measured CC0 cycles (docs/MOVEMENT_SOURCES.md):
   // a sharp rise onto the planted paw and a soft settle, not a symmetric
@@ -209,7 +290,9 @@ function drawBeastPlate(c, e, ART, tame) {
   const run = !!e._runG && moving;
   const p = (e._ph || 0) % 1;
   let gait = 0, pitch = 0;
-  if (moving) {
+  // a filmed stride already carries its rise, its suspension and its back:
+  // the transform stand-in would add the same motion a second time
+  if (moving && cell < 0) {
     const amp = run ? GAIT.runAmp : 1.6;
     gait = -Math.pow(Math.abs(Math.sin(p * Math.PI)), 0.7) * amp;
     if (run) {
@@ -220,7 +303,7 @@ function drawBeastPlate(c, e, ART, tame) {
     }
   }
   // grounded plates hang off the floor line; the airborne one hangs off centre
-  const yc = (A.foot ? footY - dh / 2 + e.h * (A.yOff || 0)
+  const yc = (A.foot || cell >= 0 ? footY - dh / 2 + e.h * (A.yOff || 0)
                      : e.y + e.h / 2 + dh * (A.yOff || 0)) + gait;
 
   c.save();
@@ -229,8 +312,12 @@ function drawBeastPlate(c, e, ART, tame) {
   // drawing already burns amber where the rest drawing burns red — but a wolf
   // is twenty-six pixels tall in a busy room, so the wind-up also gets the
   // wash the guardians get, behind the body, growing over the tell.
-  if ((e.coilT || 0) > 0 && !G.artProbe && !tame) {
-    const k = clamp(1 - e.coilT / TELL_FAST, 0, 1);
+  // ...and the HOPPER's crouch is the same tell and wears the same wash: it
+  // returned before the shared ring ever drew, so a cheetah — gold all over —
+  // gathered for its leap without the amber rising at all (tests/artbible).
+  const wT = (e.coilT || 0) > 0 ? e.coilT : (e.crouchT || 0);
+  if (wT > 0 && !G.artProbe && !tame) {
+    const k = clamp(1 - wT / TELL_FAST, 0, 1);
     const g2 = Math.pow(k, 0.62);                        // §3.6 — lit from frame one
     const R = Math.max(72, dh * 0.9);
     c.save(); c.globalCompositeOperation = 'lighter';
@@ -251,11 +338,23 @@ function drawBeastPlate(c, e, ART, tame) {
   // the back flexes in plate space (after the mirror), so the flexion reads
   // the same whichever way it is running
   if (pitch) c.rotate(pitch);
+  // THE RECOVERY POSES, in plate space and pivoted on the FEET so the paws
+  // stay on the floor (ART_BIBLE §3.4) whatever the body does above them.
+  // ...the transform stand-in only while the filmed opening is still in flight
+  const R = cell < 0 ? BEAST_RECOVER[pose] : null;
+  if (R) {
+    const heave = R.heave ? Math.sin((e.anim || 0) * R.heave) * 0.025 : 0;
+    c.translate(0, dh / 2);
+    c.rotate(R.rot);
+    c.scale(R.kx, R.ky + heave);
+    c.translate(R.dx * dw, -dh / 2);
+  }
   if (e.hurtT > 0) c.globalAlpha *= 0.85;
-  c.drawImage(im, -dw / 2, -dh / 2, dw, dh);
+  const sx = cell >= 0 ? cell * cellW : 0;
+  c.drawImage(im, sx, 0, cellW, im.naturalHeight, -dw / 2, -dh / 2, dw, dh);
   if (e.hurtT > 0) {
     c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
-    c.drawImage(im, -dw / 2, -dh / 2, dw, dh); c.restore();
+    c.drawImage(im, sx, 0, cellW, im.naturalHeight, -dw / 2, -dh / 2, dw, dh); c.restore();
   }
   c.restore();
 
@@ -296,9 +395,21 @@ function wolfTameStep(e, dt) {
   // an escort, not a shadow: it closes to a comfortable distance and then
   // mills about, so a room of them reads as a pack milling rather than a
   // conga line stapled to the player's back
-  if (ad > 150) { e.dir = Math.sign(d) || e.dir; e.vx = e.dir * e.spd * 0.9; }
-  else if (ad > 70) { e.dir = Math.sign(d) || e.dir; e.vx = e.dir * e.spd * 0.45; }
-  else e.vx = Math.sin((e.anim || 0) * 1.3) * e.spd * 0.3;
+  //
+  // It walks like the hostile ones do (enemyGait): up to speed, down from it,
+  // and round on its feet. The milling used to be vx = sin(t)·spd with the
+  // facing left wherever it was — a friendly wolf drifting backwards and
+  // forwards under a picture that never turned, the moonwalk at its purest.
+  // Now the drift has a direction and the picture follows it, with a beat of
+  // standing still at each end where the sine passes through zero.
+  let want = 0;
+  if (ad > 150) { e.dir = Math.sign(d) || e.dir; want = e.dir * e.spd * 0.9; }
+  else if (ad > 70) { e.dir = Math.sign(d) || e.dir; want = e.dir * e.spd * 0.45; }
+  else {
+    const m = Math.sin((e.anim || 0) * 1.3);
+    if (Math.abs(m) > 0.25) { e.dir = Math.sign(m); want = m * e.spd * 0.3; }
+  }
+  enemyGait(e, want, dt);
   const col = moveEnt(e, dt);
   if (col.l) e.dir = 1; else if (col.r) e.dir = -1;
   else if (col.d && !groundAhead(e, e.dir)) e.dir *= -1;
@@ -373,50 +484,85 @@ const ALPHA_ART = {
 // covered (like wolfPose), the rest and the shake loop on `anim`, and the
 // yield plays once from the frame it is first seen and holds its last cell.
 const ALPHA_STRIP_H = 2.05 * 320 / 227;
+// THE CELLS OF THE PLATES THAT ARE ON DISK (assets/characters/alpha/*.webp:
+// 9-, 16- and 12-cell strips). The table below this one is the 24-cell layout
+// of a studio re-shoot that has not been delivered; slicing these plates by
+// it cut every pose in the wrong place (the rest stood 11 px off its own
+// feet, the claw tell 21). When the studio set lands, point media.js at it
+// and swap the two names — the clock that drives them is the same.
 const ALPHA_STRIP = {
-  rest:      { key: 'alRest',   cells: 9,  k: 1,    loop: 8 },
-  prowl:     { key: 'alProwl',  cells: 16, k: 1,    to: 12, dist: 9 },
-  roarwarn:  { key: 'alRoar',   cells: 12, k: 1.17, from: 0, to: 3,  t0: 0.7 },
-  roar:      { key: 'alRoar',   cells: 12, k: 1.17, from: 4, to: 11, t0: 0.4 },
-  broodcall: { key: 'alHowl',   cells: 12, k: 1,    from: 0, to: 5,  t0: 0.7 },
-  howl:      { key: 'alHowl',   cells: 12, k: 1,    from: 6, to: 11, t0: 0.45 },
-  coil:      { key: 'alLeap',   cells: 12, k: 1.6,  from: 0, to: 4,  t0: 0.5 },
-  leap:      { key: 'alLeap',   cells: 12, k: 1.6,  from: 5, to: 8,  t0: 1.1 },
-  recoil:    { key: 'alLeap',   cells: 12, k: 1.6,  from: 9, to: 11, t0: 0.75 },
-  turn:      { key: 'alLeap',   cells: 12, k: 1.6,  from: 9, to: 11, t0: 0.5 },
-  clawwarn:  { key: 'alClaw',   cells: 12, k: 1.19, from: 0, to: 5,  t0: 0.35 },
-  claw:      { key: 'alClaw',   cells: 12, k: 1.19, from: 6, to: 11, t0: 0.26 },
-  bitewarn:  { key: 'alBite',   cells: 12, k: 1,    from: 0, to: 4,  t0: 0.35 },
-  bite:      { key: 'alBite',   cells: 12, k: 1,    from: 5, to: 11, t0: 0.26 },
-  clinch:    { key: 'alClinch', cells: 12, k: 1.25, from: 0, to: 3,  t0: 0.18 },
-  shake:     { key: 'alClinch', cells: 12, k: 1.25, from: 4, to: 8,  loop: 12 },
-  free:      { key: 'alYield',  cells: 12, k: 1.04, once: 10 },
+  rest:{key:'alRest',cells:9,k:1,loop:8},
+  prowl:{key:'alProwl',cells:16,k:1,from:0,to:12,dist:9},
+  roarwarn:{key:'alRoar',cells:12,k:1.17,from:0,to:3},
+  roar:{key:'alRoar',cells:12,k:1.17,from:4,to:11},
+  broodcall:{key:'alHowl',cells:12,k:1,from:0,to:5},
+  howl:{key:'alHowl',cells:12,k:1,from:6,to:11},
+  coil:{key:'alLeap',cells:12,k:1.6,from:0,to:4},
+  leap:{key:'alLeap',cells:12,k:1.6,from:5,to:8},
+  recoil:{key:'alLeap',cells:12,k:1.6,from:9,to:11},
+  turn:{key:'alLeap',cells:12,k:1.6,from:9,to:11},
+  clawwarn:{key:'alClaw',cells:12,k:1.19,from:0,to:5},
+  claw:{key:'alClaw',cells:12,k:1.19,from:6,to:11},
+  bitewarn:{key:'alBite',cells:12,k:1,from:0,to:4},
+  bite:{key:'alBite',cells:12,k:1,from:5,to:11},
+  clinch:{key:'alClinch',cells:12,k:1.25,from:0,to:3},
+  shake:{key:'alClinch',cells:12,k:1.25,from:4,to:8,loop:12},
+  free:{key:'alYield',cells:12,k:1.04,once:10},
 };
-const ALPHA_STRIPS = Object.values(ALPHA_STRIP).map((s) => s.key).filter((k, i, a) => a.indexOf(k) === i);
-// which strip, and which cell of it, for the state the Alpha is in — or null
-function alphaStripCell(b) {
-  if (typeof G !== 'undefined' && (G.bossRig || G.alphaRig)) return null;
-  let st = (b.purified || b.tamed || (b.dead && !b.forceKill)) ? 'free' : b.st;
-  if (st === 'idle') st = 'rest';
-  // the prowl is the rest state on the move: ground covered picks the cell
-  if (st === 'rest' && Math.abs(b.vx || 0) > 25) st = 'prowl';
-  const S = ALPHA_STRIP[st];
-  if (!S) return null;
-  const from = S.from || 0, to = S.to == null ? S.cells - 1 : S.to, n = to - from + 1;
-  let cell;
-  if (S.loop) cell = from + (Math.floor((b.anim || 0) * S.loop) % n);
-  else if (S.dist) {
-    b._pd = (b._pd || 0) + Math.abs(b.x - (b._px == null ? b.x : b._px)); b._px = b.x;
-    cell = from + (Math.floor(b._pd / S.dist) % n);
-  } else if (S.once) {
-    if (b._onceSt !== st) { b._onceSt = st; b._onceAt = b.anim || 0; }
-    cell = from + Math.min(n - 1, Math.floor(((b.anim || 0) - b._onceAt) * S.once));
-  } else {
-    const p = Math.max(0, Math.min(0.999, 1 - (b.t || 0) / (S.t0 || 1)));
-    cell = from + Math.floor(p * n);
+const ALPHA_STRIP_STUDIO = {
+  rest:{key:'alRest',cells:24,k:1,loop:5},
+  prowl:{key:'alProwl',cells:32,k:1,from:0,to:23,dist:5},
+  roarwarn:{key:'alRoar',cells:24,k:1.17,from:0,to:7},
+  roar:{key:'alRoar',cells:24,k:1.17,from:8,to:23},
+  broodcall:{key:'alHowl',cells:24,k:1,from:0,to:11},
+  howl:{key:'alHowl',cells:24,k:1,from:12,to:23},
+  coil:{key:'alLeap',cells:24,k:1.6,from:0,to:10},
+  leap:{key:'alLeap',cells:24,k:1.6,from:11,to:18},
+  recoil:{key:'alLeap',cells:24,k:1.6,from:19,to:23},
+  turn:{key:'alLeap',cells:24,k:1.6,from:19,to:23},
+  clawwarn:{key:'alClaw',cells:24,k:1.19,from:0,to:11},
+  claw:{key:'alClaw',cells:24,k:1.19,from:12,to:23},
+  bitewarn:{key:'alBite',cells:24,k:1,from:0,to:9},
+  bite:{key:'alBite',cells:24,k:1,from:10,to:23},
+  clinch:{key:'alClinch',cells:24,k:1.25,from:0,to:7},
+  shake:{key:'alClinch',cells:24,k:1.25,from:8,to:17,loop:18},
+  free:{key:'alYield',cells:24,k:1.04,once:12},
+};
+const ALPHA_STRIPS = [...new Set(Object.values(ALPHA_STRIP).map(s=>s.key))];
+// Simulation owns time and resolved distance. Drawing is a pure lookup.
+function alphaMotionBegin(b) {
+  if (b._alphaState !== b.st) { b._alphaState=b.st; b._alphaElapsed=0; b._alphaDuration=Math.max(.05,b.t||0); }
+  b._alphaX=b.x;
+}
+function alphaMotionEnd(b,dt) {
+  if (b._alphaState !== b.st) {
+    b._alphaState=b.st; b._alphaElapsed=0;
+    b._alphaDuration=b.st==='leap'?ALPHA_KIT.leapUp/1000:Math.max(.05,b.t||0);
+  } else b._alphaElapsed=(b._alphaElapsed||0)+dt;
+  const d=Math.abs(b.x-b._alphaX);
+  if (d<100 && (b.st==='rest'||b.st==='idle'||b.petWalk)) {
+    const old=b._alphaDistance||0;b._alphaDistance=old+d;
+    if(d>.1&&Math.floor(old/30)!==Math.floor(b._alphaDistance/30))sfx('alpha_step');
   }
-  if (b._px == null || st !== 'prowl') b._px = b.x;
-  return { S, cell };
+}
+function alphaStripCell(b) {
+  if (typeof G!=='undefined'&&(G.bossRig||G.alphaRig))return null;
+  let st=(b.purified||b.tamed)?(b.petWalk?'prowl':'rest'):(b.dead&&!b.forceKill)?'free':b.st;
+  if(st==='idle')st='rest';
+  if(st==='intro'||st==='dorm')st='roarwarn';
+  if(st==='rest'&&Math.abs(b.vx||0)>25)st='prowl';
+  const S=ALPHA_STRIP[st];if(!S)return null;
+  const from=S.from||0,to=S.to==null?S.cells-1:S.to,n=to-from+1;
+  let cell;
+  if(S.loop)cell=from+Math.floor((b.anim||0)*S.loop)%n;
+  else if(S.dist){let step=Math.floor((b._alphaDistance||0)/S.dist)%n;if((b.vx||0)*b.face<0)step=n-1-step;cell=from+step;}
+  else {const p=S.once?clamp(1-(b.deathAnimT||0)/1.6,0,.999):clamp((b._alphaElapsed||0)/(b._alphaDuration||1),0,.999);cell=from+Math.floor(p*n);}
+  return {S,cell};
+}
+function alphaQuestOffer() {
+  if(isHero()||!G.save.flags.crystal||G.save.flags.alphaLead||G.save.flags.alpha)return;
+  G.save.flags.alphaLead=1;qSet('alpha_pack','active');persist();
+  G.dialog={name:t('n_ratchet'),lines:t('q_ask_alpha_pack'),i:0,npc:'ratchet'};G.state='DIALOG';
 }
 const ALPHA_KIT = {
   spd: 132,          // it prowls; the leap is where the speed is
@@ -425,7 +571,7 @@ const ALPHA_KIT = {
   leapV: 480,        // horizontal launch
   leapUp: 430,       // ...and it leaves the ground, because a wolf does
   kickV: 300,        // how hard it kicks off you when the leap connects
-  stun: 1.05,        // seconds of the roar. Tuned against its own wind-up:
+  stun: 0.45,        // seconds of the roar. Tuned against its own wind-up:
                      // TELL_HEAVY is 0.7s of warning for 1.05s of cost.
   packMax: 3,        // never more than this many betas alive at once
 };
@@ -452,7 +598,7 @@ function alphaHold(b, dt) {
   if (typeof IN_P === 'function' && (IN_P('ATK') || IN_P('JUMP') || IN_P('DASH'))) {
     b.mash = (b.mash || 0) + 1;
     burst(player.x + player.w / 2, player.y, 3, '#9ffcff', 200, 0.3, 0, 2, true);
-    if (b.mash >= 12) b.t = Math.min(b.t, 0.06);
+    if (b.mash >= 4) { b.st='rest'; b.t=bossRest(b,.8); player.stunT=0; player.vx=-b.face*220; player.vy=-180; player.iT=Math.max(player.iT,.35); }
   }
 }
 
@@ -461,7 +607,8 @@ function alphaSummon(b) {
   const want = Math.min(2, ALPHA_KIT.packMax - live);
   for (let i = 0; i < want; i++) {
     const side = i % 2 ? 1 : -1;
-    const x = clamp(b.cx() + side * rnd(90, 190), 40, G.roomDef.w * TILE - 60);
+    let x = side < 0 ? 3*TILE : (G.roomDef.w-4)*TILE;
+    if (Math.abs(x-player.x)<260) x = side < 0 ? (G.roomDef.w-4)*TILE : 3*TILE;
     const w = new Enemy('crawler', x, b.y + b.h - 26);
     w.dir = Math.sign(b.cx() - x) || 1;
     G.enemies.push(w);
@@ -483,7 +630,7 @@ function alphaStep(b, dt, px, py) {
   const dist = px - b.cx(), adist = Math.abs(dist);
   b.t -= dt;
   const airborne = b.st === 'leap';
-  if (!airborne) b.face = Math.sign(dist) || b.face;
+  if (b.st === 'rest' || b.st === 'idle') b.face = Math.sign(dist) || b.face;
 
   if (b.st === 'idle' || b.st === 'rest') {
     if (b.t <= 0) {
@@ -532,7 +679,7 @@ function alphaStep(b, dt, px, py) {
       // opens), and it waits an extra beat first so the opening is unmissable.
       if ((b.denied || 0) >= 3) { b.denied = 0; b.band = 0; b.t = 0.7; return alphaMove(b, dt, adist); }
       b.alphaAlt = !b.alphaAlt;
-      if (b.band === 0) { b.st = b.alphaAlt ? 'clawwarn' : 'bitewarn'; b.t = TELL_FAST; }
+      if (b.band === 0) { b.st = b.alphaAlt ? 'clawwarn' : 'bitewarn'; b.t = Math.max(.42,TELL_FAST); }
       else if (b.band === 1) { b.st = 'coil'; b.t = TELL_SWIPE; }
       else if (b.alphaAlt && packRoom) { b.st = 'broodcall'; b.t = TELL_HEAVY; }
       else { b.st = 'roarwarn'; b.t = TELL_HEAVY; }
@@ -541,7 +688,7 @@ function alphaStep(b, dt, px, py) {
     // it STEPS INTO the swing rather than planting and swinging at air — which
     // is both how an animal does it and what makes a claw thrown from the edge
     // of its reach still worth respecting
-    b.windT = TELL_FAST;
+    b.windT = Math.max(.42,TELL_FAST);
     b.vx += (b.face * ALPHA_KIT.spd * 1.6 - b.vx) * Math.min(1, dt * 5);
     if (b.t <= 0) { b.st = b.st.replace('warn', ''); b.t = 0.26; b.fired = false; }
   } else if (b.st === 'claw' || b.st === 'bite') {
@@ -549,7 +696,7 @@ function alphaStep(b, dt, px, py) {
     // openings if the player is closing off to it" — so the recovery after a
     // claw or a bite is barely half the one after a leap. Standing next to this
     // thing is meant to be the wrong place to be.
-    if (!b.fired) {
+    if (!b.fired && b.t <= .19) {
       b.fired = true;
       const reach = b.st === 'claw' ? b.w * 0.95 : b.w * 0.6;
       const hb = { x: b.cx() + (b.face > 0 ? 0 : -reach), y: b.y + b.h * 0.2,
@@ -565,7 +712,7 @@ function alphaStep(b, dt, px, py) {
       // throw. The claw stays a single clean swipe; that contrast is the whole
       // reason the two moves are worth having next to each other.
       if (hit && b.st === 'bite') {
-        b.st = 'clinch'; b.t = 0.18;
+        b.st = 'clinch'; b.t = 0.18; G.toast(t('alpha_escape'));
         b.shakeN = 0; b.shakeT = 0; b.mash = 0;
         b.vx = 0;
       }
@@ -579,6 +726,7 @@ function alphaStep(b, dt, px, py) {
     // frame the jaws close reads as a glitch rather than as weight.
     b.vx = 0;
     alphaHold(b, dt);
+    if (b.st !== 'clinch') return alphaMove(b,dt,adist);
     if (b.t <= 0) { b.st = 'shake'; b.t = 0.66; b.shakeN = 0; }
   } else if (b.st === 'shake') {
     // THE WORRY: three whips of the head, left-right-left, each one a hit. The
@@ -586,6 +734,7 @@ function alphaStep(b, dt, px, py) {
     // breaking out early actually saves you something.
     b.vx = 0;
     alphaHold(b, dt);
+    if (b.st !== 'shake') return alphaMove(b,dt,adist);
     const want = Math.floor((0.66 - b.t) / 0.2);
     if (want > b.shakeN) {
       b.shakeN = want;
@@ -610,7 +759,7 @@ function alphaStep(b, dt, px, py) {
     if (b.t <= 0) {
       b.st = 'leap'; b.t = 1.1; b.leapHit = false;
       b.vx = b.face * ALPHA_KIT.leapV; b.vy = -ALPHA_KIT.leapUp;
-      sfx('dash'); cam.shake = Math.max(cam.shake, 4);
+      sfx('alpha_leap'); cam.shake = Math.max(cam.shake, 4);
     }
   } else if (b.st === 'leap') {
     // COMMITTED. No steering in the air — that is the whole reason the coil in
@@ -645,7 +794,7 @@ function alphaStep(b, dt, px, py) {
     if (!b.fired) {
       b.fired = true;
       alphaSummon(b);
-      sfx('roar_beast'); cam.shake = Math.max(cam.shake, 7);
+      sfx('alpha_howl'); cam.shake = Math.max(cam.shake, 7);
       if (typeof padRumble === 'function') padRumble(0.7, 0.5, 380);
       if (typeof roarWave === 'function') roarWave(b.cx(), b.cy() - b.h * 0.3, '#ff8a4a');
     }
@@ -667,7 +816,7 @@ function alphaStep(b, dt, px, py) {
         player.vx = 0;
         if (typeof padRumble === 'function') padRumble(0.9, 0.8, 700);
       }
-      sfx('roar_beast'); cam.shake = Math.max(cam.shake, 11);
+      sfx('alpha_bark'); cam.shake = Math.max(cam.shake, 11);
       if (typeof roarWave === 'function') roarWave(b.cx(), b.cy() - b.h * 0.3, '#ffc24a');
       burst(b.cx(), b.cy(), 18, '#ffe6b8', 300, 0.6, 0, 3, true);
     }
@@ -773,9 +922,7 @@ function drawAlpha(c, b, cx, cy) {
       const S = pick.S, H = b.h * ALPHA_STRIP_H * S.k;
       c.save();
       c.translate(cx, b.y + b.h);
-      const bob = Math.sin(t2 * 1.7) * 1.8;
-      const lean = clamp((b.vx || 0) / 900, -0.2, 0.2);
-      const pop = warn ? 1 + 0.05 * Math.sin(t2 * 20) : 1;
+      const bob = 0, lean = 0, pop = 1; // authored paws already carry weight
       c.translate(0, bob);
       c.rotate(lean);
       c.scale(pop * ((b.face || -1) > 0 ? -1 : 1), pop);

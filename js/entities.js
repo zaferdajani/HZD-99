@@ -35,9 +35,20 @@ function evoTier(extra) {
 function relicHas(id) { return G.save.relics && G.save.relics.indexOf(id) >= 0; }
 
 // ---- tile queries against the live room ----
+// THE ROOM ABOVE AND THE ROOM BELOW ARE SOLID TOO — for her body, and only
+// while it is being moved. A vertical pair is one shaft drawn as two rooms
+// (js/game.js, VERTICAL LINKS): the jump up through a hole is real physics into
+// the floor of the room above, and a fall lands on what is really under it.
+// It is a flag rather than a rule for every query because everything else that
+// asks about tiles — the bake, the enemies, the blade breaking a hatch — is
+// about THIS room and must keep reading air past its edge.
+let tileLinkOn = false;
 function tileAt(tx, ty) {
   const g = G.grid;
-  if (ty < 0 || ty >= g.length || tx < 0 || tx >= g[0].length) return '.';
+  if (ty < 0 || ty >= g.length || tx < 0 || tx >= g[0].length) {
+    if (tileLinkOn && (ty < 0 || ty >= g.length) && typeof vlinkTile === 'function') return vlinkTile(tx, ty);
+    return '.';
+  }
   if (G.roomId === 'D3' && !G.save.flags.bossZero && ty >= 15 && tx >= 15 && tx <= 17) return '#';
   // X1: a hardlight bridge seals the floor entrance for the length of the
   // Prowler fight — but ONLY once she is inside and standing clear of it.
@@ -47,7 +58,29 @@ function tileAt(tx, ty) {
       && ty >= 15 && tx >= 6 && tx <= 8) return '#';
   const c = g[ty][tx];
   if ((c === 'B' || c === 'v') && G.save.broken[G.roomId + ':' + tx + ',' + ty]) return '.';
+  // a FRACTURE world's loose rock is authored '#', so the broken check above
+  // never saw it: the claw "broke" it, the save recorded it, and the wall
+  // stood there. Checked through a per-room set so that every other solid
+  // tile — the hot path of all collision — costs one property read.
+  if (c === '#' && looseCut(tx, ty)) return '.';
   return c;
+}
+// THE LOOSE ROCK SHE HAS ALREADY CUT, for this room. Rebuilt only when the
+// room or the save changes, or a tile breaks (breakTile drops it); empty —
+// the common case, any world without the fracture — answers in one read.
+let looseCutSet = null;
+function looseCut(tx, ty) {
+  let s = looseCutSet;
+  if (!s || s.room !== G.roomId || s.save !== G.save || s.grid !== G.grid) {
+    s = looseCutSet = { room: G.roomId, save: G.save, grid: G.grid, keys: null };
+    const pre = G.roomId + ':', g = G.grid;
+    for (const k in G.save.broken) {
+      if (k.indexOf(pre) !== 0) continue;
+      const [x, y] = k.slice(pre.length).split(',').map(Number);
+      if (g[y] && g[y][x] === '#') (s.keys || (s.keys = new Set())).add(x + y * 4096);
+    }
+  }
+  return !!(s.keys && s.keys.has(tx + ty * 4096));
 }
 function solidAt(tx, ty) { const c = tileAt(tx, ty); return c === '#' || c === 'B'; }
 // FRACTURE worlds: a deterministic scatter of ordinary wall is secretly loose.
@@ -185,7 +218,10 @@ function stepUpTop(e, tx, lift) {
   return top;
 }
 function moveEnt(e, dt) {
+  // her body, and only hers, collides on past the room's top and bottom
+  tileLinkOn = e === player;
   const col = { l: 0, r: 0, u: 0, d: 0 };
+  const xStart = e.x;
   e.x += e.vx * dt;
   const t0 = Math.floor(e.y / TILE), t1 = Math.floor((e.y + e.h - 1) / TILE);
   // ...and a blocked move is a STEP before it is a wall (see the note above).
@@ -309,6 +345,25 @@ function moveEnt(e, dt) {
       }
     }
   }
+  // MACHINES KNOW WHEN THEY ARE STANDING. Only the hero ever set `on`, so for
+  // every enemy the downhill branch just above read `e.on` as undefined and
+  // never ran: a walker going down a curve left the surface each column and
+  // fell back onto the next one — the same skip that branch was written to
+  // cure in her — and the hopper-wolf's airborne plate (wolfPose reads
+  // `on === false`) could never be chosen, so it ran its walk frames in mid-
+  // air. Opt-in (`groundTrack`, set by the Enemy constructor) because the hero
+  // and the guardians keep their own flag with their own rules, and a body that
+  // does not ask must not have a field written onto it behind its back.
+  //
+  // `airT` is how long it has been off the ground — the pose reads it so one
+  // frame of daylight over a fracture is not drawn as a leap — and `walkD` is
+  // floor actually covered, which is what a gait is clocked by (atlas 'walk').
+  if (e.groundTrack) {
+    e.on = !!col.d;
+    e.airT = col.d ? 0 : (e.airT || 0) + dt;
+    if (col.d) e.walkD = (e.walkD || 0) + Math.abs(e.x - xStart);
+  }
+  tileLinkOn = false;
   return col;
 }
 // WHAT STOPS A SHOT — which is not the same question as what stops a BODY.
@@ -432,6 +487,75 @@ function groundAhead(e, dir) {
   }
   return false;
 }
+// ===========================================================================
+// THE WALKERS' GAIT — it starts, it stops, and a turn is a TURN.
+//
+// Every walker used to write vx = dir * spd outright: full speed on the first
+// frame, full speed the other way on the frame it decided to turn round. The
+// picture eased round over ~0.18 s (faceVis, dt*5.5) but the velocity had
+// already flipped, so for that long every turn slid the body backwards under
+// an image still pointing the old way — the moonwalk in the owner's study
+// (plan §1). The order is now the order an animal does it in:
+//
+//   1. BRAKE to a stop, still facing where it was going;
+//   2. TURN — the picture comes round while the body stands (and the wolves'
+//      plate mirrors on the crossing, which is now a standing flip);
+//   3. ACCELERATE the new way, and never before the picture shows that way.
+//
+// What that buys, measured by tests/enemygait.cjs: outside a brake, sign(vx)
+// never disagrees with the side the picture faces. Ledge and wall turns go
+// through the same three steps; the brake is short enough (≤ 4 px at the
+// fastest patrol in the roster, a swift crawler) that the ledge probe's own
+// look-ahead still covers it, so nothing walks off a ledge it used to turn at.
+// Tuning lives in docs/combat/ENEMY_CRAWLER.md.
+// ===========================================================================
+const WALK_ACC_T = 0.16;     // s: standstill -> its own patrol speed
+const WALK_BRAKE_T = 0.09;   // s: patrol speed -> standstill
+const FACE_RATE = 5.5;       // faceVis units per second, the rate it always turned at
+// RECOVERY POSES' CLOCKS — visual only, nothing in the rules reads them. The
+// hopper holds its landing crouch for the first third of a second of the gap
+// after touchdown; a turret's barrel kicks back for this long after a shot.
+const HOP_LAND_T = 0.32;
+const TURRET_KICK_T = 0.3;
+// the kinds that walk on the floor and therefore turn with their feet. The
+// sage is a duelist that BACKS AWAY while facing her on purpose, which is a
+// step, not a moonwalk, and keeps its own footwork.
+const WALKERS = { crawler: 1, guard: 1, blob: 1, hopper: 1 };
+// which side the picture shows: the sign of the eased facing
+function faceSide(e) { return (e.faceVis == null ? (e.dir || 1) : e.faceVis) >= 0 ? 1 : -1; }
+// where a walker's picture is heading: wherever it is moving, and only once it
+// has stopped, wherever it has decided to go
+function walkerFaceTarget(e) { return e.vx ? Math.sign(e.vx) : (e.dir || faceSide(e)); }
+// drive vx toward `want` (signed px/s) under the three rules above
+function enemyGait(e, want, dt) {
+  const ref = Math.max(24, e.spd || 24);
+  const ws = Math.sign(want), vs = Math.sign(e.vx);
+  if (vs && vs !== ws) {                       // 1. braking, never through zero
+    const dv = ref / WALK_BRAKE_T * dt;
+    e.vx = Math.abs(e.vx) <= dv ? 0 : e.vx - vs * dv;
+    return;
+  }
+  if (!ws) return;
+  if (faceSide(e) !== ws) { e.vx = 0; return; } // 2. standing while it turns
+  const a = ref / (Math.abs(e.vx) > Math.abs(want) ? WALK_BRAKE_T : WALK_ACC_T) * dt;
+  const d = want - e.vx;                        // 3. accelerating (or easing off)
+  e.vx = Math.abs(d) <= a ? want : e.vx + Math.sign(d) * a;
+}
+// AN ATTACK COMMITS THE FACING. A lunge or a leap writes its velocity in one
+// frame — that IS the move — so the picture is brought across to that side
+// in the same frame rather than eased after it. It only has to cross the
+// middle (0.2 past it): the rest of the turn eases on as usual, so the atlas
+// still sweeps rather than popping to profile. A no-op when it already faces.
+function faceCommit(e, s) {
+  if (s && faceSide(e) !== s) e.faceVis = s * 0.2;
+}
+// FRAME-RATE-PROOF SMOOTHING. `lerp(a, b, 0.1)` once per update is a rate per
+// FRAME, and update runs at the display's rate (1/30 s steps on a slow phone,
+// 1/144 on a fast monitor), so a flier on a 120 Hz screen closed four times
+// faster than on a 30 Hz one. 1 - exp(-k·dt) is the same approach expressed
+// per second: k is chosen so that at 60 Hz it equals the old per-frame
+// fraction, which keeps the tuning everyone has been looking at.
+function smoothK(k, dt) { return 1 - Math.exp(-k * dt); }
 // Resolve the same support used by collision, including raised ground and platforms.
 // null means open space: never print a shadow on an imaginary floor over a pit.
 function shadowGroundY(body, maxDrop = 240) {
@@ -453,8 +577,12 @@ function shadowGroundY(body, maxDrop = 240) {
 function touchingWall(e, dir) {
   const tx = Math.floor((dir > 0 ? e.x + e.w + 2 : e.x - 2) / TILE);
   const t0 = Math.floor((e.y + 4) / TILE), t1 = Math.floor((e.y + e.h - 4) / TILE);
-  for (let ty = t0; ty <= t1; ty++) if (solidAt(tx, ty)) return true;
-  return false;
+  // a shaft wall that belongs to the room above is still a wall she can slide
+  tileLinkOn = e === player;
+  let hit = false;
+  for (let ty = t0; ty <= t1; ty++) if (solidAt(tx, ty)) { hit = true; break; }
+  tileLinkOn = false;
+  return hit;
 }
 
 const FLIP_DUR = 0.62;   // the double-jump pirouette, start to finish
@@ -2187,12 +2315,25 @@ class Player {
         const c = (raw === '#' && brLoose(tx, ty)) ? 'B' : raw;
         if (c === 'B') {
           // floor blocks (at/below the feet) only break with a DOWN-attack
-          // (jump, hold down, hit); side/ceiling secret walls break normally
+          // (jump, hold down, hit), and a down-attack still cuts anything
+          // brittle in ONE — every pogo route in the game is a single strike.
+          //
+          // A SIDE OR CEILING SECRET TAKES TWO BLOWS, and that is the tell
+          // (docs/plan §5 fix 3). One blow used to open it, so the only thing
+          // that ever said "hollow" was the rock vanishing. Now the first blow
+          // KNOCKS: a hollow note, a puff of grit out of the seam, the crack
+          // opening wider — and the second one breaks it. A floor struck from
+          // the side knocks too and stays put, which is the room telling her
+          // this is hollow and the hit came from the wrong direction.
+          // One swing is several frames long; a tile counts once per swing.
           const floorBlock = ty * TILE >= this.y + this.h - 6;
-          if (this.swing.ay > 0 || !floorBlock) {
-            G.breakTile(tx, ty);
-            if (this.swing.ay > 0) pogo = true;
-          }
+          const struck = this.swing.struck || (this.swing.struck = new Set());
+          const key = tx + ty * 4096;
+          if (struck.has(key)) continue;
+          struck.add(key);
+          if (this.swing.ay > 0) { G.breakTile(tx, ty); pogo = true; }
+          else if (!floorBlock) { if (G.knockTile(tx, ty, true) >= 2) G.breakTile(tx, ty); }
+          else G.knockTile(tx, ty, false);
         } else if (c === '^' && this.swing.ay > 0) pogo = true;
       }
       if (pogo && this.swing.ay > 0) {
@@ -5489,6 +5630,16 @@ function platRide(p) {
 }
 
 // ================= PICKUPS =================
+// open air from a pickup to her, sampled every 12 px through the tile grid
+function scrapSees(o) {
+  const x0 = o.x + o.w / 2, y0 = o.y + o.h / 2;
+  const dx = player.x + player.w / 2 - x0, dy = player.y + player.h / 2 - y0;
+  const n = Math.ceil(Math.hypot(dx, dy) / 12);
+  for (let i = 1; i < n; i++) {
+    if (solidAt(Math.floor((x0 + dx * i / n) / TILE), Math.floor((y0 + dy * i / n) / TILE))) return false;
+  }
+  return true;
+}
 class Scrap {
   constructor(x, y, val) {
     this.x = x; this.y = y; this.w = 10; this.h = 10; this.val = val;
@@ -5501,7 +5652,12 @@ class Scrap {
     // A shard that lands in spikes, or on a ledge you cannot stand on, used to be
     // gone for good. After a moment at rest it drifts to you instead.
     const settled = this.rest > 1.2;
-    if (settled && !player.dead && dist2(this.x, this.y, player.x, player.y) < 320 * 320) {
+    // ...but never THROUGH rock. Scrap left in a sealed pocket — behind a
+    // hollow wall, under a brittle crust, in a cave's hidden hold — used to
+    // fly straight out through the stone the moment she came near, so the
+    // secret paid before it was found. It drifts only along open air now;
+    // cut the seal and the line opens.
+    if (settled && !player.dead && dist2(this.x, this.y, player.x, player.y) < 320 * 320 && scrapSees(this)) {
       const dx = player.x + 12 - this.x, dy = player.y + 18 - this.y, d = Math.hypot(dx, dy) || 1;
       this.x += dx / d * 300 * dt; this.y += dy / d * 300 * dt;
       this.vx = 0; this.vy = 0;
@@ -5652,12 +5808,16 @@ function drawTurretLock(c, e, cx) {
   const k = 1 - clamp(e.lockT / (e.lock0 || 0.55), 0, 1);            // 0 -> 1 across the lock
   const px = player ? player.x + player.w / 2 : cx, py = player ? player.y + player.h / 2 : cy;
   c.save();
-  // the beam finds you: faint and wide at first, thin and bright at the end
+  // the beam finds you: faint and wide at first, thin and bright at the end.
+  // It runs off to wherever she is, so it is decoration to the bible's
+  // measurements (G.artProbe), never to the player.
+  if (!G.artProbe) {
   c.globalAlpha = 0.10 + k * 0.5;
   c.strokeStyle = TELL_COL; c.lineWidth = 3.5 - k * 2.2;
   c.setLineDash([9, 7]); c.lineDashOffset = -performance.now() / 45;
   c.beginPath(); c.moveTo(cx, cy); c.lineTo(px, py); c.stroke();
   c.setLineDash([]);
+  }
   // and the eye itself, quickening
   c.globalAlpha = 0.55 + Math.sin(e.anim * (16 + k * 26)) * 0.35;
   c.fillStyle = TELL_COL; c.shadowColor = TELL_COL; c.shadowBlur = 12;
@@ -6859,6 +7019,112 @@ const STORY_ACTOR_ROLES = Object.freeze({
   kiln: 'empty-construct', rime: 'empty-construct', snare: 'empty-construct'
 });
 function storyProtected(e) { return !!(e && (e.disabled || e.rescued)); }
+// ===========================================================================
+// THE FLIER'S BODY — flown per second, not per frame.
+//
+// Every smoothing line in the flier and the bat was `lerp(v, target, 0.1)`
+// once per update, and update runs once per DISPLAY frame (SIM_STEP only caps
+// the step), so the same machine closed four times faster on a 120 Hz screen
+// than on a 30 Hz phone. Each fraction is now a per-second rate through
+// smoothK, chosen so that at 60 Hz it is the fraction it always was:
+// k = -ln(1 - f) · 60. tests/enemygait.cjs flies one through the production
+// mainLoop at 30, 60 and 120 fps and holds the three paths together.
+// ===========================================================================
+const FLY_K = {
+  pkt: 17.3,     // was 0.25/frame: the courier's packet tell stops it dead
+  dive: 7.67,    // was 0.12: steering into the dive
+  riseX: 1.83,   // was 0.03: drifting back over her while it withdraws
+  riseY: 6.32,   // was 0.10: the climb out
+  hold: 13.4,    // was 0.20: the stop in the air that IS its tell
+  steer: 3.5,    // station-keeping and patrol: how fast it takes up a heading
+};
+const FLY_KP = 2.4;            // 1/s: wanted speed per pixel off station
+// its rounds (flierPatrol): a beat either side of its post, a ledge at each end
+const FLY_PATROL_R = 3 * TILE; // how far either side of where it was placed
+const FLY_PERCH_DROP = 3;      // tiles below the beat it will look for somewhere to sit
+const FLY_PERCH_T = 2.2;       // s sat on a perch
+const FLY_HOVER_T = 1.0;       // s holding still where there is nothing to sit on
+const FLY_CRUISE = 0.5;        // of its speed, on its rounds — it hunts at full
+const FLY_LEG_MAX = 6;         // s: a leg that has not arrived by now is abandoned
+// Steer toward (tx, ty) as a CENTRE point: a wanted velocity proportional to
+// the distance, capped at `cap`, which the real velocity eases toward.
+function flySteer(e, tx, ty, cap, dt) {
+  let wx = (tx - (e.x + e.w / 2)) * FLY_KP, wy = (ty - (e.y + e.h / 2)) * FLY_KP;
+  const m = Math.hypot(wx, wy);
+  if (m > cap) { wx *= cap / m; wy *= cap / m; }
+  const k = smoothK(FLY_K.steer, dt);
+  e.vx = lerp(e.vx, wx, k); e.vy = lerp(e.vy, wy, k);
+}
+// WHERE ITS ROUNDS GO, worked out once from the room around where it was put:
+// the clear air along its own altitude either side (stopping short of any
+// wall), and under each end, the first floor or ledge within FLY_PERCH_DROP
+// tiles that its whole body can sit on with clear air above. No ledge in
+// reach means that end is a hover, not a landing far below its beat — the
+// rooms were composed with it at that height and its rounds keep it there.
+function flierPlan(e) {
+  const r0 = Math.floor(e.sy / TILE), r1 = Math.floor((e.sy + e.h - 1) / TILE);
+  const colClear = (tx, a, b) => { for (let ty = a; ty <= b; ty++) if (solidAt(tx, ty)) return false; return true; };
+  const home = e.sx + e.w / 2;
+  const end = (s) => {
+    let d = 0;
+    while (d + 4 <= FLY_PATROL_R && colClear(Math.floor((home + s * (d + 4 + e.w / 2)) / TILE), r0, r1)) d += 4;
+    return home + s * d;
+  };
+  const perch = (x) => {
+    const a = Math.floor((x - e.w / 2 + 2) / TILE), b = Math.floor((x + e.w / 2 - 2) / TILE);
+    for (let ty = r1 + 1; ty <= r1 + FLY_PERCH_DROP; ty++) {
+      let floor = true, air = true;
+      for (let tx = a; tx <= b; tx++) {
+        const c = tileAt(tx, ty);
+        if (!(c === '#' || c === 'B' || c === '=')) floor = false;
+        if (!colClear(tx, r0, ty - 1)) air = false;
+      }
+      if (!air) return null;
+      if (floor) return ty * TILE - e.h;          // body y, sat on that top
+    }
+    return null;
+  };
+  const xs = [end(-1), end(1)];
+  return { xs, perch: [perch(xs[0]), perch(xs[1])] };
+}
+// ITS ROUNDS, one step. Out along its beat at half speed, facing the way it
+// goes (the facing reads its travel), down onto the ledge at the end if there
+// is one, sit — wings folded, `on` the floor like anything else standing —
+// then up to its altitude and back the other way. Deterministic on purpose:
+// nothing here rolls a die, so the same room at a different frame rate flies
+// the same rounds.
+function flierPatrol(e, dt, cx, cy) {
+  if (!e.pat) e.pat = flierPlan(e);
+  const P = e.pat, leg = e.patLeg;
+  if (e.perchT > 0) {
+    e.perchT -= dt;
+    if (e.perched) { e.vx = 0; e.vy = 60; }   // its weight on the ledge
+    else { const k = smoothK(FLY_K.hold, dt); e.vx = lerp(e.vx, 0, k); e.vy = lerp(e.vy, 0, k); }
+    if (e.perchT <= 0) {
+      if (e.perched) e.vy = -70;              // the hop off
+      e.perched = false; e.patLeg = 1 - leg; e.legT = 0;
+    }
+    return;
+  }
+  e.legT = (e.legT || 0) + dt;
+  const alt = e.sy + e.h / 2, px0 = P.xs[leg], pk = P.perch[leg];
+  let tx = px0, ty = alt;
+  // over the end of the beat: straight down onto the ledge
+  if (pk != null && Math.abs(cx - px0) < 6) ty = pk + e.h / 2;
+  // below its altitude and not yet there (it just left a ledge, or came back
+  // from a dive): straight up first, so it never cuts a corner into the rock
+  else if (cy > alt + 6 && e.legT < FLY_LEG_MAX * 0.5) tx = cx;
+  flySteer(e, tx, ty, e.spd * FLY_CRUISE, dt);
+  // ...and it has arrived when it is there, or — for a ledge — when it is
+  // standing on it: the surface curve can hold it a few px above the tile top
+  // the plan was read from, and that is still sitting on the ledge
+  const sit = pk != null && ty !== alt && (e.on || Math.abs(cy - ty) < 3);
+  const arrived = tx === px0 && Math.abs(cx - tx) < 3 && (sit || Math.abs(cy - ty) < 3);
+  if (arrived || e.legT > FLY_LEG_MAX) {
+    e.perched = arrived && sit;
+    e.perchT = e.perched ? FLY_PERCH_T : FLY_HOVER_T;
+  }
+}
 class Enemy {
   constructor(kind, x, y) {
     const k = EKIND[kind];
@@ -6930,6 +7196,20 @@ class Enemy {
     this.vx = 0; this.vy = 0; this.dir = chance(0.5) ? 1 : -1;
     this.t = rnd(0.5, 2); this.sx = x; this.sy = y; this.hurtT = 0; this.dead = false; this.anim = rnd(0, 9);
     this.kbT = 0; this.tr = [];
+    // GROUNDED, LIKE THE HERO (see moveEnt). Born with the answer the floor
+    // gives at its spawn rather than a guess, so a turret bolted to a ledge —
+    // which never moves and so never asks again — still knows it is standing,
+    // and a flier spawned in the air knows it is not. The picture starts on
+    // the side it is walking, so the first step is not a turn.
+    this.groundTrack = true; this.airT = 0; this.walkD = 0;
+    this.on = kind !== 'flier' && kind !== 'bat' && typeof solidAt === 'function' && !!G.grid
+      && solidAt(Math.floor((x + this.w / 2) / TILE), Math.floor((y + this.h + 1) / TILE));
+    this.faceVis = this.dir;
+    // the recovery beats the pose reads (purely visual clocks: no rule reads
+    // them) — the hopper's landing and the turret's recoil — and the flier's
+    // patrol-and-perch, declared here for the same reason as every timer above
+    this.landT = 0; this.kickT = 0;
+    this.pat = null; this.patLeg = 0; this.legT = 0; this.perchT = 0; this.perched = false; this.faceT = this.dir;
   }
   // THE HOOK A KINGDOM SESSION WRITES AGAINST. Its kind's row in FOE_MOVES says
   // what the move costs; this says whether THIS machine could afford it when it
@@ -6963,6 +7243,8 @@ class Enemy {
       return;
     }
     this.anim += dt; this.hurtT -= dt;
+    if (this.landT > 0) this.landT -= dt;
+    if (this.kickT > 0) this.kickT -= dt;
     // the mark CROSSREF leaves on whoever it told, fading on its own so it
     // reads as a moment and not as a permanent badge
     if ((this.refd || 0) > 0) this.refd -= dt;
@@ -6974,9 +7256,17 @@ class Enemy {
       this.expireT -= dt;
       if (this.expireT <= 0) { this.die(0, -0.5); return; }
     }
-    // turn toward where we are going, in time rather than in frames drawn
-    const wantF = (this.kind === 'flier' ? Math.sign(this.vx) || 1 : this.dir) || 1;
-    this.faceVis += clamp(wantF - this.faceVis, -dt * 5.5, dt * 5.5);
+    // turn toward where we are going, in time rather than in frames drawn.
+    // A walker turns only once it has stopped (enemyGait); a flier faces the
+    // way it is TRAVELLING, held through a near-hover by a dead band so a body
+    // hanging over her does not flip its picture on every wobble.
+    let wantF;
+    if (WALKERS[this.kind]) wantF = walkerFaceTarget(this);
+    else if (this.kind === 'flier') {
+      if (Math.abs(this.vx) > 14) this.faceT = Math.sign(this.vx);
+      wantF = this.faceT || this.dir || 1;
+    } else wantF = this.dir || 1;
+    this.faceVis += clamp(wantF - this.faceVis, -dt * FACE_RATE, dt * FACE_RATE);
     // CURED. On ground the player's mercy has bought back, machines wake up as
     // what they were built to be. They potter about, they will not touch her,
     // and their sensor burns cyan instead of red. This is the whole reward for
@@ -6985,7 +7275,9 @@ class Enemy {
       this.stagT = 0; this.hypnoT = 1e9;
       this.t -= dt;
       if (this.t <= 0) { this.dir = -this.dir || 1; this.t = rnd(1.6, 4.2); }
-      this.vx = this.dir * this.spd * 0.26;
+      // pottering is still walking: it stops, turns and sets off (enemyGait)
+      if (WALKERS[this.kind]) enemyGait(this, this.dir * this.spd * 0.26, dt);
+      else this.vx = this.dir * this.spd * 0.26;
       this.vy += 900 * dt;
       const col = moveEnt(this, dt);
       if (col.l || col.r) this.dir = -this.dir;
@@ -7079,6 +7371,10 @@ class Enemy {
         } else if (this.lungeT > 0) {                        // committed
           this.lungeT -= dt;
           this.vx = this.dir * this.spd * 4.2;
+          // the lunge is written in one frame, so the picture commits with it
+          // (a clever one tracks her through the coil, and a wall it hits
+          // mid-commit sends it back the other way)
+          faceCommit(this, this.dir);
           // CINDER (kingdom C, cost 1). A Foundry crawler runs with its belly
           // vents open and a crust of slag on them, and the lunge BURNS THE
           // LANE IT RAN: melt drops off it at a fixed cadence along the whole
@@ -7167,7 +7463,8 @@ class Enemy {
             sfx('dash');
           }
         } else {
-          this.vx = this.dir * this.spd;
+          // the patrol walks: up to speed, and down from it before a turn
+          enemyGait(this, this.dir * this.spd, dt);
           // IT NOTICES HER. Requiring it to already be facing the right way
           // meant it ignored anyone who walked up behind it — which is most of
           // the time, since she moves five times faster than it patrols. It
@@ -7224,7 +7521,9 @@ class Enemy {
       // exactly the question the roster was missing, and it pairs with the
       // turret (which punishes approaching) to make a room out of two enemies.
       case 'blob': {
-        this.vx = this.dir * this.spd * (0.6 + Math.sin(this.anim * 4) * 0.4);
+        // the breath still sets the pace; the gait decides how it gets there,
+        // so a ledge or a wall is a stop and a roll the other way, not a slide
+        enemyGait(this, this.dir * this.spd * (0.6 + Math.sin(this.anim * 4) * 0.4), dt);
         this.vy += 2000 * dt;
         this.dripT = (this.dripT || rnd(0.6, 1.4)) - dt;
         // THE DRIP HAS A TELL, AND THE TELL IS THE BODY.
@@ -7300,9 +7599,16 @@ class Enemy {
         if (this.packetCD == null) this.packetCD = rnd(1.2, 2.6);
         else if (this.packetCD > 0) this.packetCD -= dt;
         const near = dist2(cx, cy, px, py) < 340 * 340 && !player.dead;
+        // she came close: whatever it was doing on its rounds, it is off the
+        // perch and hunting now
+        if (near && (this.perchT > 0 || this.perched)) {
+          if (this.perched) this.vy = Math.min(this.vy, -90);
+          this.perchT = 0; this.perched = false;
+        }
         if ((this.packetT || 0) > 0) {                        // the delivery's tell
           this.packetT -= dt;
-          this.vx = lerp(this.vx, 0, 0.25); this.vy = lerp(this.vy, 0, 0.25);
+          const kp = smoothK(FLY_K.pkt, dt);
+          this.vx = lerp(this.vx, 0, kp); this.vy = lerp(this.vy, 0, kp);
           if (this.packetT <= 0) {
             this.drops = this.drops || [];
             if (this.drops.length < CONDUIT_PACK_MAX)
@@ -7315,23 +7621,29 @@ class Enemy {
         if (this.diveT > 0) {
           this.diveT -= dt;
           // it aims where she is GOING once it has learned to
-          this.vx = lerp(this.vx, (leadX(px, this.iq * 0.36) - cx) * 1.2, 0.12);
+          this.vx = lerp(this.vx, (leadX(px, this.iq * 0.36) - cx) * 1.2, smoothK(FLY_K.dive, dt));
           this.vy = 430;
           if (this.diveT <= 0 || moveEnt(this, dt).d) { this.diveT = 0; this.riseT = 0.9 - this.iq * 0.35; }
           else break;
         } else if (this.riseT > 0) {                        // withdrawing
           this.riseT -= dt;
-          this.vx = lerp(this.vx, (px - cx) * 0.5, 0.03);
-          this.vy = lerp(this.vy, -180, 0.1);
+          this.vx = lerp(this.vx, (px - cx) * 0.5, smoothK(FLY_K.riseX, dt));
+          this.vy = lerp(this.vy, -180, smoothK(FLY_K.riseY, dt));
         } else if (this.holdT > 0) {                        // the tell
           this.holdT -= dt;
-          this.vx = lerp(this.vx, 0, 0.2); this.vy = lerp(this.vy, -20, 0.2);
+          const kh = smoothK(FLY_K.hold, dt);
+          this.vx = lerp(this.vx, 0, kh); this.vy = lerp(this.vy, -20, kh);
           if (this.holdT <= 0) this.diveT = 0.75;
         } else if (near) {
-          const tx = px, ty = py - 120;                     // station above you
-          this.vx += (tx - cx) * 1.6 * dt; this.vy += (ty - cy) * 2.2 * dt;
-          const sp = Math.hypot(this.vx, this.vy);
-          if (sp > this.spd) { this.vx *= this.spd / sp; this.vy *= this.spd / sp; }
+          // STATION ABOVE YOU — steered, not sprung. It used to be an undamped
+          // spring (vx += Δ·1.6·dt) under a speed cap, which never settles: it
+          // swung through her head-height line and back for as long as she
+          // stood there, and how far it swung depended on the step size. Now
+          // it wants a velocity proportional to how far off station it is
+          // (capped at its speed) and eases its real velocity toward that at a
+          // per-second rate, so it arrives, holds, and does the same thing at
+          // 30 Hz as at 144.
+          flySteer(this, px, py - 120, this.spd, dt);
           // THE DELIVERY IS CHECKED FIRST, so the two attacks can never open in
           // the same frame — a courier that dived and dropped at once would be
           // two telegraphs overlapping, which reads as neither.
@@ -7343,8 +7655,10 @@ class Enemy {
             this.atkCD = rnd(2.4 - this.iq * 1.1, 3.6 - this.iq * 1.5); sfx('tell');
           }
         } else {
-          this.vx = lerp(this.vx, Math.sin(this.anim * 1.3) * 40, 0.05);
-          this.vy = lerp(this.vy, (this.sy - this.y) * 1.2 + Math.cos(this.anim * 1.7) * 30, 0.05);
+          // ITS ROUNDS. Not a sine wave about its spawn — a beat between two
+          // posts, and a ledge to sit on at each end when there is one
+          // (flierPatrol, above the class).
+          flierPatrol(this, dt, cx, cy);
         }
         moveEnt(this, dt);
         break;
@@ -7398,15 +7712,16 @@ class Enemy {
                 this.motes.push({ x: cx, y: cy, arm: GLINT_ARM, life: GLINT_LIVE });
             }
           }
-          this.vx = lerp(this.vx, (leadX(px, this.iq * 0.3) - cx) * 1.7, 0.1);
-          this.vy = lerp(this.vy, 300 + Math.sin(this.anim * 9) * 90, 0.12);
+          // per second, not per frame (FLY_K): 0.10 and 0.12 at 60 Hz
+          this.vx = lerp(this.vx, (leadX(px, this.iq * 0.3) - cx) * 1.7, smoothK(6.32, dt));
+          this.vy = lerp(this.vy, 300 + Math.sin(this.anim * 9) * 90, smoothK(7.67, dt));
           if (moveEnt(this, dt).d || this.diveT <= 0) { this.diveT = 0; this.riseT = 1.2; }
           break;
         }
         if (this.riseT > 0) {                       // climbing home, harmless-slow
           this.riseT -= dt;
-          this.vx = lerp(this.vx, Math.sin(this.anim * 5) * 60, 0.08);
-          this.vy = lerp(this.vy, -230, 0.1);
+          this.vx = lerp(this.vx, Math.sin(this.anim * 5) * 60, smoothK(5.0, dt));
+          this.vy = lerp(this.vy, -230, smoothK(6.32, dt));
           const m = moveEnt(this, dt);
           if (m.u) { this.hang = 1; this.riseT = 0; this.vx = 0; this.vy = 0; }
           else if (this.riseT <= 0) this.riseT = 0.6;   // keep climbing till rock
@@ -7505,7 +7820,7 @@ class Enemy {
         if ((this.trainT || 0) > 0) {
           this.trainT -= dt;
           if (this.trainT <= 0) {
-            turretShot(this, cx, cy, px, py);
+            turretShot(this, cx, cy, px, py); this.kickT = TURRET_KICK_T;
             this.burst = (this.burst | 0) + 1;
             if (this.burst < CONDUIT_TRAIN_N) this.trainT = CONDUIT_TRAIN_GAP;
             else { this.burst = 0; this.t = 2.2 / DF().espd; }
@@ -7521,6 +7836,7 @@ class Enemy {
             // you the line — what changes is that standing still stops being
             // safe just because you were moving when it locked.
             const aimX = turretShot(this, cx, cy, px, py);
+            this.kickT = TURRET_KICK_T;    // the recoil pose: barrel back, body rocked
             // FAR AWAY IT FIRES A BURST, close up a single shot. The question
             // it asks is "can you cross this ground?", and a burst is what
             // makes crossing a decision instead of a stroll.
@@ -7636,6 +7952,7 @@ class Enemy {
             const want = (this.markX - cx) / Math.max(0.1, tf);
             this.vx = clamp(want, this.vx - REFRACT_TURN, this.vx + REFRACT_TURN);
             this.dir = Math.sign(this.vx) || this.dir;
+            faceCommit(this, Math.sign(this.vx));   // the bend swings the body round with it
             burst(cx, cy, 11, '#8fe8ff', 200, 0.4, 0, 2.2, true);
             sfx('lumen');
           }
@@ -7648,6 +7965,11 @@ class Enemy {
           if (this.wasAir && Math.abs(px - cx) < 62 && Math.abs(py - cy) < 40 && !player.dead
               && player.iT <= 0 && player.on) player.hurt(DF().edmg, cx, 'hopper.landing');
           if (this.wasAir) {
+            // THE RECOVERY POSE'S CLOCK: it absorbs the landing, legs folded
+            // and chest down, for the first part of the decision gap that
+            // follows — the opening the doc names (ENEMY_HOPPER B5), now with
+            // a picture of its own instead of the standing plate
+            this.landT = HOP_LAND_T;
             cam.shake = Math.max(cam.shake, 2);
             for (let i = 0; i < 7; i++)
               addPart(cx + rnd(-16, 16), this.y + this.h, rnd(-90, 90), rnd(-120, -20), 0.35, '#b9c6d4', 2.2, 700);
@@ -7757,6 +8079,7 @@ class Enemy {
               ? (this.bendDir || this.dir || 1)
               : (Math.sign(leadX(px, this.iq * 0.5) - cx) || 1);
             this.vy = -560; this.vx = this.dir * this.spd * (1 + this.iq * 0.18); this.wasAir = true;
+            faceCommit(this, this.dir);           // it leaves nose-first, never tail-first
             // the arc leaves HONEST — same take-off, same nose, same speed —
             // and the clock that will bend it starts now
             this.bendAt = this.markX != null ? REFRACT_APEX : 0;
@@ -8253,7 +8576,9 @@ class Enemy {
     // the cave bat is its own machine, hanging or flying; authored plates are
     // queued (ART_QUEUE) — this is the engine-drawn first pass, same standing
     // as the other minion fallbacks
-    if (this.kind === 'bat') { drawBat(c, this); return; }
+    // ...and its shiver wears the ring and the downward wedge every other
+    // wind-up does: drawBat returns before the shared block ever ran
+    if (this.kind === 'bat') { drawEnemyTell(c, this, cx); drawBat(c, this); return; }
     if (this.kind === 'sage') { drawSage(c, this); return; }
     // ---- hero world: real hand-animated creatures ----
     if (typeof isHero === 'function' && isHero()) {
@@ -8293,7 +8618,7 @@ class Enemy {
     if (!heroEn && G.roomDef && G.roomDef.zone === 'A' && (this.kind === 'crawler' || this.kind === 'hopper')
         && typeof drawBeastMini === 'function' && drawBeastMini(c, this)) return;
     // every flying minion is a small TALONHOST — talons only, no feathers
-    if (!heroEn && this.kind === 'flier' && typeof drawEagleMini === 'function' && drawEagleMini(c, this)) return;
+    if (!heroEn && this.kind === 'flier' && typeof drawEagleMini === 'function' && drawFlierMini(c, this)) return;
     // THE TURRET'S HALF-SECOND, PUT BACK ON SCREEN. There has always been a red
     // targeting light for the 0.55 s lock — drawn seven hundred lines below,
     // inside the procedural fallback, which stopped executing the day the
@@ -8330,9 +8655,15 @@ class Enemy {
       rr(c, -3, -this.h * 0.5, 6, this.h, 2); c.fill();
       c.strokeStyle = up ? '#dfeaf6' : 'rgba(190,210,230,0.4)'; c.lineWidth = 1.2;
       rr(c, -3, -this.h * 0.5, 6, this.h, 2); c.stroke();
-      if (!up) {                                    // the window, made obvious
-        c.globalAlpha = 0.5 + Math.sin(performance.now() / 90) * 0.3;
-        c.strokeStyle = TELL_COL; c.lineWidth = 2;
+      if (!up && !G.artProbe) {                     // the window, made obvious
+        // (a ring of decoration round the body, so off under G.artProbe like
+        // the wind-up ring; and on the simulation clock, not the wall's)
+        c.globalAlpha = 0.5 + Math.sin((this.anim || 0) * 11.1) * 0.3;
+        // NOT the telegraph amber. Registry §2's first hard rule: #ffc24a is on
+        // screen only while something is winding up — and this ring is the
+        // OPPOSITE message, "it is open, hit it now". Drawn in the plate's own
+        // pale steel, so it reads as the plate's absence, not as a warning.
+        c.strokeStyle = '#e4f0fb'; c.lineWidth = 2;
         c.beginPath(); c.arc(-this.dir * this.w * 0.52, 0, this.w * 0.75, 0, 7); c.stroke();
       }
       c.restore(); c.globalAlpha = 1;
@@ -8992,32 +9323,12 @@ class Enemy {
       }
       c.restore(); c.globalAlpha = 1;
     }
-    // EVERY WIND-UP WEARS THE SAME COLOUR. One hue, one meaning, used by
-    // nothing else in the game — and always with motion and sound beside it,
-    // because roughly one man in twelve cannot rely on hue alone.
-    if (!this.dead && ((this.coilT || 0) > 0 || (this.holdT || 0) > 0 || (this.crouchT || 0) > 0)) {
-      const w = Math.max(this.coilT || 0, this.holdT || 0, this.crouchT || 0);
-      const k = 1 - clamp(w / TELL_FAST, 0, 1);
-      c.save();
-      c.globalAlpha = 0.30 + k * 0.5;
-      c.strokeStyle = TELL_COL; c.lineWidth = 2 + k * 1.4;
-      c.setLineDash([5, 5]); c.lineDashOffset = -performance.now() / 55;
-      c.beginPath();
-      c.arc(cx, this.y + this.h / 2, this.w * 0.72 + 10 - k * 6, 0, 7);
-      c.stroke(); c.setLineDash([]);
-      // a wedge pointing where it is about to go — motion, not just colour
-      const dx = (this.coilT || this.crouchT) ? this.dir : 0, dy = this.holdT ? 1 : 0;
-      if (dx || dy) {
-        c.globalAlpha = 0.5 + k * 0.5; c.fillStyle = TELL_COL;
-        const ox = cx + dx * (this.w * 0.9 + k * 10), oy = this.y + this.h / 2 + dy * (this.h * 0.9 + k * 10);
-        c.beginPath();
-        c.moveTo(ox + dy * 7 + dx * 7, oy + dx * 7 + dy * 7);
-        c.lineTo(ox - dy * 7 - dx * 0, oy - dx * 7 - dy * 0);
-        c.lineTo(ox + dx * 13 + dy * 0, oy + dy * 13 + dx * 0);
-        c.closePath(); c.fill();
-      }
-      c.restore(); c.globalAlpha = 1;
-    }
+    // EVERY WIND-UP WEARS THE SAME COLOUR (drawEnemyTell, below the class)
+    drawEnemyTell(c, this, cx);
+    // a walker on a FILMED STRIDE draws that instead (ART_QUEUE §2cc-iv/v);
+    // the turntable below keeps everything the strip is not — turns, tells,
+    // the drip, the shed plate
+    if (drawRosterWalk(c, this, cx)) return;
     // Pre-rendered 3D turnaround. Selected by angle, never mirrored, so the baked
     // key light stays on the correct side as the machine turns.
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
@@ -9031,6 +9342,10 @@ class Enemy {
           // pose, so the gathering and the release have to be deformation
           sag: this.drip0 || 0, reb: (this.blobReb || 0) / BLOB_REB,
           yawScan: enemyYaw(this),
+          // the gait's clock is the floor it has covered (moveEnt's walkD),
+          // and the state it is in has a pose of its own (enemyAtlasPose)
+          dist: this.walkD || 0,
+          pose: enemyAtlasPose(this),
         })) return;
     c.save();
     if (this.hurtT > 0) { c.globalAlpha = 0.6; }
@@ -9829,6 +10144,113 @@ class Wreck {
   }
 }
 
+// EVERY WIND-UP WEARS THE SAME COLOUR. One hue, one meaning, used by nothing
+// else in the game — and always with motion and sound beside it, because
+// roughly one man in twelve cannot rely on hue alone. A function now rather
+// than a block inside Enemy.draw, because the authored fliers return from
+// draw long before that block and so wound up for their dive with no ring and
+// no wedge at all — the doc's "amber ring + downward wedge" (ENEMY_FLIER B5)
+// was only ever true of the fallback. Decoration, not body: off under
+// G.artProbe like the guardians' wash, so the bible measures the silhouette.
+// The dash crawls on the SIMULATION clock (anim), never the wall clock.
+function drawEnemyTell(c, e, cx) {
+  if (e.dead || G.artProbe) return;
+  // the turret's LOCK is a wind-up like any other and wears the same ring —
+  // its beam says where, the ring says it is coming, as everywhere else. The
+  // hair-trigger re-locks between a burst's shots (0.0001 s) are not a tell.
+  const lock = (e.lockT || 0) > 0.05 ? e.lockT : 0;
+  if (!((e.coilT || 0) > 0 || (e.holdT || 0) > 0 || (e.crouchT || 0) > 0 || lock)) return;
+  const w = Math.max(e.coilT || 0, e.holdT || 0, e.crouchT || 0, lock);
+  const k = 1 - clamp(w / TELL_FAST, 0, 1);
+  c.save();
+  c.globalAlpha = 0.30 + k * 0.5;
+  c.strokeStyle = TELL_COL; c.lineWidth = 2 + k * 1.4;
+  c.setLineDash([5, 5]); c.lineDashOffset = -(e.anim || 0) * 1000 / 55;
+  c.beginPath();
+  c.arc(cx, e.y + e.h / 2, e.w * 0.72 + 10 - k * 6, 0, 7);
+  c.stroke(); c.setLineDash([]);
+  // a wedge pointing where it is about to go — motion, not just colour
+  const dx = (e.coilT || e.crouchT) ? e.dir : 0, dy = e.holdT ? 1 : 0;
+  if (dx || dy) {
+    c.globalAlpha = 0.5 + k * 0.5; c.fillStyle = TELL_COL;
+    const ox = cx + dx * (e.w * 0.9 + k * 10), oy = e.y + e.h / 2 + dy * (e.h * 0.9 + k * 10);
+    c.beginPath();
+    c.moveTo(ox + dy * 7 + dx * 7, oy + dx * 7 + dy * 7);
+    c.lineTo(ox - dy * 7 - dx * 0, oy - dx * 7 - dy * 0);
+    c.lineTo(ox + dx * 13 + dy * 0, oy + dy * 13 + dx * 0);
+    c.closePath(); c.fill();
+  }
+  c.restore(); c.globalAlpha = 1;
+}
+// THE FLYING MINION'S STATES. The small TALONHOST (drawEagleMini, eagle.js)
+// flaps or stoops and nothing else, so its wind-up, its withdrawal and its
+// rest on a ledge were all the same flapping picture. The guardian's own sheet
+// already holds the poses those states want, so they are taken from it, one
+// whole figure each, at the mini's scale:
+//   holdT / packetT  — kCharge: wings thrown wide, the core lit. The STOP in
+//                      the air that is its tell, now a shape as well as a stop.
+//   riseT            — kRecover: wings drooped, climbing out spent. The opening.
+//   perched          — pRest: folded, sat on the ledge at the end of its beat.
+// Everything else is the mini's own flight, BANKED toward where it is going —
+// it is drawn front-on, so leaning into its travel is how it faces it.
+// THE MINI'S OWN FLIGHT IS FILMED (ART_QUEUE §2cc-vi): a cruise beat at
+// patrol pace and a harder chase beat, each one wingbeat of measured-distinct
+// cells, front-on like the figure pair they replace and banked the same way.
+// And it PERCHES on a plate of its own instead of borrowing the boss's.
+// Cell sizes are in hitbox WIDTHS, matched to the figures' drawn wingspan
+// (pDown: 2.39 widths across at the mini's scale).
+const TALON_MINI = {
+  cruise: { img: 'talonMiniCruise8', cells: 8, beat: 0.7, w: 2.42 },
+  chase:  { img: 'talonMiniChase6',  cells: 6, beat: 0.42, w: 2.42 },
+};
+function drawFlierMini(c, e) {
+  const fig = ((e.holdT || 0) > 0 || (e.packetT || 0) > 0) ? 'kCharge'
+    : (e.riseT || 0) > 0 ? 'kRecover' : e.perched ? 'pRest' : null;
+  const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
+  if (fig === 'pRest' && typeof drawStripCell === 'function') {
+    const ph = e.w * 2.3;                         // pRest is 2.2 widths across
+    if (e.hurtT > 0) c.globalAlpha = 0.72;
+    const ok = drawStripCell(c, 'talonMiniPerch', 0, 1, cx, e.y + e.h, ph, (e.dir || -1) > 0);
+    c.globalAlpha = 1;
+    if (ok) return true;
+  }
+  if (!fig) {
+    const bank = clamp((e.vx || 0) / Math.max(60, e.spd || 60), -1, 1) * 0.22;
+    c.save();
+    c.translate(cx, cy); c.rotate(bank); c.translate(-cx, -cy);
+    let ok = false;
+    try {
+      // the chase beat when it is diving or flying flat out, the cruise otherwise
+      const fast = (e.vy || 0) > 120 || Math.hypot(e.vx || 0, e.vy || 0) > Math.max(90, (e.spd || 60) * 1.4);
+      const T = fast ? TALON_MINI.chase : TALON_MINI.cruise;
+      const sh = e.w * T.w;
+      const cell = Math.floor(((((e.anim || 0) / T.beat) % 1) + 1) % 1 * T.cells);
+      if (e.hurtT > 0) c.globalAlpha = 0.72;
+      if (e.hypnoT > 0) c.globalAlpha = 0.85;
+      ok = typeof drawStripCell === 'function' && drawStripCell(c, T.img, cell, T.cells, cx, cy + sh / 2, sh, false);
+      c.globalAlpha = 1;
+      if (!ok) ok = drawEagleMini(c, e);
+    } finally { c.restore(); }
+    return ok;
+  }
+  if (typeof egFigA !== 'function' || typeof eagleImg !== 'function') return false;
+  EG_PURE = false;
+  const im = eagleImg(); if (!im || !im.naturalWidth) return false;
+  drawEnemyTell(c, e, cx);
+  c.save();
+  try {
+    const S = (e.w * 3.2) / 532;
+    // a perched bird's weight is on its feet: sat on the ledge, not hung
+    // over it at its flying height
+    c.translate(cx, e.perched ? e.y + e.h * 0.62 : cy);
+    c.scale(S, S);
+    if (e.hurtT > 0) c.globalAlpha = 0.72;
+    if (e.hypnoT > 0) c.globalAlpha = 0.85;
+    egFigA(c, fig, 1, fig === 'kRecover' ? 0.12 * faceSide(e) : 0);
+  } catch (e2) { c.restore(); return false; }
+  c.restore();
+  return true;
+}
 // ================= BOSSES =================
 // ---------------------------------------------------------------------------
 // USING THE WHOLE TURNTABLE.
@@ -9850,29 +10272,124 @@ function enemyYaw(e) {
   // whole sweep inside the front hemisphere 0..4 — measured, because the first
   // version of this happily rotated a crawler around to face away from camera.
   const S = (c, a) => ({ c: clamp(c, a, 4 - a), r: 0, a });
+  // NO MORE HEAD-SCAN ON ANYTHING THAT WALKS. The crawler swept its yaw ±0.22
+  // forever and every other walker fell through to a ±0.25 default, and the
+  // renderer cross-faded the two angles either side of wherever the sweep had
+  // got to — a permanent double exposure (plan §1). A walker now faces where
+  // its feet are going and nothing else. Where an offset survives (the
+  // hopper's twist in the air, the blob's roll, the flier's bank) it moves the
+  // angle the body is SHOWN at, one authored angle at a time (drawAtlas
+  // `single`), never two pictures at once.
   switch (e.kind) {
     case 'turret':
-      // a sentry sweeping its arc — it does not walk, so the sweep IS its motion
+      // a sentry sweeping its arc — it does not walk, so the sweep IS its
+      // motion. While it LOCKS, and through the kick after the shot, it stops
+      // sweeping and turns its barrel square onto her: the stop and the turn
+      // are part of the tell, and the beam leaves the muzzle it is drawn from.
+      if ((e.lockT || 0) > 0 || (e.kickT || 0) > 0 || (e.trainT || 0) > 0) {
+        const pd = (typeof player !== 'undefined' && player)
+          ? (Math.sign(player.x + player.w / 2 - (e.x + e.w / 2)) || 1) : 1;
+        return S(yawColF(pd), 0);
+      }
       return Object.assign(S(2, 1.6), { r: 0.55 });
     case 'flier':
-      // BANKS into its own movement, the way anything that flies has to, and
-      // drifts a little while hovering so it is never perfectly still
-      return Object.assign(S(base + clamp(e.vx / 150, -1, 1) * 1.15, 0.30), { r: 0.9 });
-    case 'crawler':
-      // a slow head-scan while it walks: it is looking for her
-      return Object.assign(S(base, Math.abs(e.vx) > 12 ? 0.22 : 0.45), { r: 0.7 });
+      // BANKS into its own movement, the way anything that flies has to
+      return S(base + clamp(e.vx / 150, -1, 1) * 1.15, 0);
     case 'blob':
       // a mass that has no front rolls where it is going
-      return Object.assign(S(base + clamp(e.vx / 120, -1, 1) * 0.8, 0.35), { r: 0.5 });
+      return S(base + clamp(e.vx / 120, -1, 1) * 0.8, 0);
     case 'hopper':
       // twists in the air and squares up as it lands
-      return Object.assign(S(base + clamp(-e.vy / 500, -1, 1) * 0.9, e.on ? 0.12 : 0.3), { r: 1.4 });
+      return e.on ? null : S(base + clamp(-e.vy / 500, -1, 1) * 0.9, 0);
     default:
-      return Object.assign(S(base, 0.25), { r: 0.6 });
+      return null;
   }
 }
-// the states that own their stagger rather than being interrupted by one
-const BOSS_SELF_STAG = { nullend: 1, cffloor: 1 };
+// WHICH POSE THE STATE WEARS (drawAtlas ATLAS_POSE). Every attack has a wind-
+// up and a recovery, and each of them now changes the SILHOUETTE rather than
+// only the colour: tests/artbible.cjs's ENEMY cast measures it.
+// THE ROSTER WALKS ON FILMED STRIDES (ART_QUEUE §2cc-iv/v). The turntable
+// is one authored picture per angle, so its walk is a cut-out bobbing along
+// the floor; these strips are one real stride each, cut from a Higgsfield
+// take with every cell measured distinct. Played on the SAME clock as the
+// turntable's gait — floor covered, walkD, one cycle per two ATLAS_STRIDEs —
+// so the feet cannot outrun the ground. `h` is the CELL height in hitboxes,
+// measured so the strip body matches the turntable body it replaces (guard:
+// 1.82 hitboxes of machine either way; blob: the same length of shell).
+// Only while settled into a heading: through a turn the turntable's angles
+// are the honest picture, and a mirrored profile is not.
+// THE SAME GRADE AS THE SHEET IT STANDS IN FOR, or the body changes colour
+// the moment it starts walking: the guard's turntable is the npcs sheet (pop
+// grade, 0.45 shadow lift), the blob's is the roster (its colour/form/rim
+// grade is baked into the strip file — tools2 rostergrade, the same numbers
+// as atlas.js — and the pop grade with no lift is applied here).
+const ROSTER_WALK = {
+  guard: { img: 'guardWalk8', cells: 8, h: 1.89, lift: 0.45 },
+  blob:  { img: 'blobCrawl8', cells: 8, h: 4.0, lift: 0 },
+};
+function drawRosterWalk(c, e, cx) {
+  const S = ROSTER_WALK[e.kind];
+  if (!S || e.dead || (typeof isHero === 'function' && isHero())) return false;
+  if (Math.abs(e.vx || 0) < 12 || enemyAtlasPose(e)) return false;
+  const fv = e.faceVis != null ? e.faceVis : (e.dir || -1);
+  if (Math.abs(fv) < 0.9) return false;
+  // the strip carries the plate in its arms; a guard that has shed it is not that picture
+  if (e.kind === 'guard' && e.plateShed) return false;
+  // the drip and its rebound are deformation of the turntable body
+  if (e.kind === 'blob' && ((e.drip0 || 0) > 0 || (e.blobReb || 0) > 0)) return false;
+  const cyc = ((((e.walkD || 0) / (2 * ATLAS_STRIDE)) % 1) + 1) % 1;
+  const cell = Math.floor(cyc * S.cells);
+  mediaFetch(S.img, 1);
+  const raw = MEDIA_RAW[S.img];
+  if (!raw || !raw.naturalWidth) return false;
+  const im = (typeof popArt === 'function' && popArt(S.img, null, S.lift)) || raw;
+  const h = e.h * S.h, flip = fv > 0;                      // authored facing LEFT
+  const cw = im.naturalWidth / S.cells, dw = h * (cw / im.naturalHeight);
+  if (typeof G !== 'undefined') G.lastStrip = S.img + ':' + cell;
+  c.save();
+  c.translate(cx, e.y + e.h);
+  if (flip) c.scale(-1, 1);
+  if (e.hurtT > 0) c.globalAlpha = 0.85;
+  c.drawImage(im, cell * cw, 0, cw, im.naturalHeight, -dw / 2, -h, dw, h);
+  if (e.hurtT > 0) {
+    c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
+    c.drawImage(im, cell * cw, 0, cw, im.naturalHeight, -dw / 2, -h, dw, h);
+  }
+  c.restore();
+  return true;
+}
+function enemyAtlasPose(e) {
+  switch (e.kind) {
+    case 'crawler': case 'guard':
+      if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0) return 'coil';
+      if ((e.lungeT || 0) > 0) return 'lunge';
+      if ((e.windedT || 0) > 0) return 'winded';
+      return null;
+    case 'hopper':
+      if ((e.crouchT || 0) > 0) return 'coil';
+      if ((e.landT || 0) > 0) return 'land';
+      return null;
+    case 'flier':
+      if ((e.holdT || 0) > 0 || (e.packetT || 0) > 0) return 'coil';
+      if ((e.diveT || 0) > 0) return 'lunge';
+      if ((e.riseT || 0) > 0) return 'winded';
+      if (e.perched) return 'perch';
+      return null;
+    case 'turret':
+      if ((e.lockT || 0) > 0) return 'coil';
+      if ((e.kickT || 0) > 0) return 'kick';
+      return null;
+    default:
+      return null;
+  }
+}
+// the states that own their stagger rather than being interrupted by one.
+// `daze` joined them with the hit-group break for every guardian: a Song cast
+// into a guardian that is already broken open used to FREEZE the break's own
+// clock (stagT returns early), so the two stacked into one long stunlock. The
+// break keeps counting down through a stagger now; the Song still pays out
+// its own window, it just cannot lengthen this one.
+const BOSS_SELF_STAG = { nullend: 1, cffloor: 1, daze: 1 };
 
 // ---------------------------------------------------------------------------
 // ONE GUARDIAN, ONE QUESTION — and it has to be asked no matter what lands the
@@ -10152,6 +10669,8 @@ function bossFork(b) {
   if (typeof brOffer !== 'function' || typeof G === 'undefined') return false;
   if (typeof player === 'undefined' || !player || player.dead) return false;
   if (typeof isHero === 'function' && isHero()) return false;
+  // no blade, no freeing: the song holds it together (brNeedsBlade, braid.js)
+  if (typeof brNeedsBlade === 'function' && brNeedsBlade(b)) return true;
   b.forkAsked = true;
   b.hp = 0; b.vx = 0; b.vy = 0; b.stagT = 0;
   // G.forkBoss FIRST, and that ordering is now load-bearing. It used to be set
@@ -10168,26 +10687,34 @@ function bossFork(b) {
 // `dazeAt` opts a guardian into the hit-group break (see DAZE_WINDOW in
 // types.js): land this many hits inside the rolling window and it comes apart
 // for a second and a half. NULLFANG is the first guardian you meet and the one
-// whose whole read is "a big cat you can out-time", so it is the right place
-// to teach the mechanic; the others are deliberately left off until this one
-// has been played enough to know the number is right.
+// whose whole read is "a big cat you can out-time", so it is where the mechanic
+// is TAUGHT — five hits, 1.1 s between them.
+//
+// EVERY GUARDIAN BREAKS NOW (2026-10-08, the Hollow Knight study, plan §3).
+// The others were left off "until this one had been played enough", and the
+// cost of waiting was a roster in which only the first fight ever rewarded
+// pressing an advantage. `dazeSpan` is how long a hit stays "recent" for that
+// guardian: NULLFANG walks the floor beside her, so a group is five hits in
+// one burst; the fliers are only in reach during their recoveries, so a group
+// is two punishes back to back, and 1.1 s would make the break unreachable by
+// construction. Six hits, roughly two clean three-hit combos, everywhere.
 // `zone` is the kingdom the guardian stands in, and it is load-bearing now: it
 // picks the weapon tier the fight is balanced against (ZONE_ATK). The minis
 // already carried one; the guardians say it here rather than having it inferred
 // from a lair id that a kingdom session is free to move.
 const BSTAT = Object.assign({
   glitch: { w: 84, h: 56, hp: 220, dazeAt: 5, zone: 'A' },
-  brood: { w: 96, h: 64, hp: 320, zone: 'B' },
+  brood: { w: 96, h: 64, hp: 320, dazeAt: 6, dazeSpan: 3.2, zone: 'B' },
   // `tell` overrides the warning size footprint would derive (see
   // Boss.tellCue). FURNACE CHOIR is tall and narrow, so its footprint reads
   // small, but it is a foundry that warns with bells and a hymn — the light
   // tell under that is the wrong instrument for the thing arriving.
-  atlas: { w: 62, h: 74, hp: 460, tell: 'tellmid', zone: 'C' },
-  zero: { w: 112, h: 62, hp: 500, zone: 'D' },   // GLACIERE: a long floating quadruped
+  atlas: { w: 62, h: 74, hp: 460, tell: 'tellmid', dazeAt: 6, dazeSpan: 2.6, zone: 'C' },
+  zero: { w: 112, h: 62, hp: 500, dazeAt: 6, dazeSpan: 3.6, zone: 'D' },   // GLACIERE: a long floating quadruped
   // PRISM is the nimble rival, so it stays the smallest guardian — but a boss
   // still has to stand over HZD-99 (36), and at 34 it stood under her.
-  prism: { w: 62, h: 46, hp: 520, zone: 'X' },
-  mother: { w: 120, h: 120, hp: 750, zone: 'E' },
+  prism: { w: 62, h: 46, hp: 520, dazeAt: 6, dazeSpan: 2.4, zone: 'X' },
+  mother: { w: 120, h: 120, hp: 750, dazeAt: 7, dazeSpan: 3.2, zone: 'E' },
   // THE ALPHA. The first mini-boss in the run, and the only one that is TAMED
   // rather than destroyed — see js/wolves.js. Wider than NULLFANG and shorter:
   // it is a quadruped that fights along the floor, and its reach is the length
@@ -10562,8 +11089,38 @@ function drawSage(c, e) {
   // maps its own opaque-box height to the body rather than one shared number
   const sageH = { sagePure: 0.72, sageLock: 0.66, sageLunge: 0.62 }[sagePlate] || 1.12;
   const sageFlip = !!(typeof player !== 'undefined' && player && player.x + player.w / 2 < cx);
-  if (typeof drawPlateAnchored === 'function' &&
-      drawPlateAnchored(c, sagePlate, cx, base + bob, e.h * sageH, sageFlip, true)) {
+  // THE EXHALE HAS A BODY. The sage's opening (windedT, docs/combat/SAGE.md)
+  // drew the plain standing plate, so the one window the duel is built round
+  // looked exactly like the sage waiting to strike. It now BOWS over the spent
+  // breath — doubled forward toward her, shoulders sunk — pivoted on its feet,
+  // until an authored exhale plate comes off THE FIRING LIST (ART_QUEUE §2cc).
+  const exhale = !kneel && (e.windedT || 0) > 0;
+  // ...and now it has its own plate and its own walk (ART_QUEUE §2cc-vii),
+  // both authored three-quarter facing LEFT, so they turn toward her the
+  // opposite way to the front-on set. The bow transform stays only as the
+  // fallback while the exhale plate is in flight. Cell heights are matched to
+  // the standing plate's 1.12 hitboxes of body (the bow stands a little lower).
+  let sageDrew = false;
+  const towardHer = !sageFlip;
+  if (exhale && typeof drawStripCell === 'function')
+    sageDrew = drawStripCell(c, 'sageExhale', 0, 1, cx, base, e.h * 1.07, towardHer);
+  else if (!kneel && sagePlate === 'sageStand' && Math.abs(e.vx || 0) > 12 && typeof drawStripCell === 'function') {
+    // one stride per 56 px of floor it covers (moveEnt's walkD), like every
+    // walker — never the clock, or the robe would pace faster than the feet
+    const cell = Math.floor(((((e.walkD || 0) / 56) % 1) + 1) % 1 * 8);
+    sageDrew = drawStripCell(c, 'sageWalk8', cell, 8, cx, base + bob, e.h * 1.155, towardHer);
+  }
+  if (!sageDrew) {
+    if (exhale) {
+      c.save();
+      c.translate(cx, base); c.rotate((sageFlip ? -1 : 1) * 0.2); c.scale(1.08, 0.8); c.translate(-cx, -base);
+    }
+    try {
+      sageDrew = typeof drawPlateAnchored === 'function' &&
+        drawPlateAnchored(c, sagePlate, cx, base + bob, e.h * sageH, sageFlip, true);
+    } finally { if (exhale) c.restore(); }
+  }
+  if (sageDrew) {
     // the plate carries the body; the ring, purity bar and halo still ride it
   } else {
   c.save();
@@ -10655,7 +11212,7 @@ function drawSage(c, e) {
 function drawBat(c, e) {
   const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
   const hang = !!e.hang;
-  const shiver = hang && e.holdT > 0 ? Math.sin(performance.now() / 24) * 1.6 : 0;
+  const shiver = hang && e.holdT > 0 ? Math.sin((e.anim || 0) * 42) * 1.6 : 0;   // sim clock, never the wall's
   const flap = Math.sin(e.anim * 18) * (e.diveT > 0 ? 0.9 : 0.6);
   // THE AUTHORED BAT (§2d): five plates on the same reads the fallback uses.
   // hang is the only one with its optic dark; shiver rattles amber out of the
@@ -10665,10 +11222,24 @@ function drawBat(c, e) {
   const batPlate = hang ? (e.holdT > 0 ? 'batShiver' : 'batHang')
     : e.diveT > 0 ? 'batDive'
     : (Math.sin(e.anim * 18) > 0 ? 'batFlapUp' : 'batFlapDn');
+  // THE FLIGHT IS FILMED (ART_QUEUE §2cc-vii): one full wingbeat in six
+  // measured-distinct cells, on the same 18 rad/s beat the two plates
+  // alternated on, so nothing about its rhythm changes — only that the wing
+  // now passes THROUGH the stroke instead of jumping between its ends.
+  // Cell height matches the plates' drawn wingspan (1.8 hitboxes across).
+  if (!hang && batPlate !== 'batDive') {
+    const cell = Math.floor(((((e.anim || 0) * 18) / (Math.PI * 2)) % 1 + 1) % 1 * 6);
+    const sh = e.h * 1.85;
+    if (typeof drawStripCell === 'function' && drawStripCell(c, 'batFlight6', cell, 6, cx, cy + sh / 2, sh, e.vx > 0)) return;
+  }
   const batH = e.h * (hang ? 1.3 : batPlate === 'batDive' ? 1.15 : 1.75);
   const batBase = hang ? e.y + batH : cy + batH / 2;
+  // FACING PER PLATE: the flap plates were authored facing LEFT and the dive
+  // facing RIGHT, and one shared mirror rule flew the flapping bat backwards
+  // between every dive
+  const batFlip = !hang && (batPlate === 'batDive' ? e.vx < 0 : e.vx > 0);
   if (typeof drawPlateAnchored === 'function' &&
-      drawPlateAnchored(c, batPlate, cx + shiver, batBase, batH, !hang && e.vx < 0, true)) return;
+      drawPlateAnchored(c, batPlate, cx + shiver, batBase, batH, batFlip, true)) return;
   c.save();
   c.translate(cx + shiver, cy);
   if (hang) c.scale(1, -1);                    // head down, feet in the rock
@@ -10833,6 +11404,262 @@ function bossRest(b, k) {
   return base * (k || 1);
 }
 // ---------------------------------------------------------------------------
+// GLACIERE IN THE AIR. She flies — she does not glide on a lerp. A lerp
+// toward a target reaches its top speed on the first frame and eases forever,
+// so she read as a cursor being dragged: no launch, no brake, no weight. This
+// is arrive steering: the velocity she WANTS points at the target and shrinks
+// as she gets there, and the velocity she HAS may only change by `acc` per
+// second — so she accelerates out, cruises, and brakes in. The bank and the
+// lean follow from a velocity that is now real (the weight pass in update(),
+// and the roll in js/glaciere.js), and everything is dt-scaled.
+const GLC_CRUISE = 420, GLC_ACCEL = 1500;
+function glcFly(b, tx, ty, vmax, acc, dt, gain) {
+  const g = gain || 3.2;
+  let wx = (tx - b.cx()) * g, wy = (ty - b.y) * g;
+  const wm = Math.hypot(wx, wy);
+  if (wm > vmax) { wx *= vmax / wm; wy *= vmax / wm; }
+  let ax = wx - (b.vx || 0), ay = wy - (b.vy || 0);
+  const am = Math.hypot(ax, ay), cap = acc * dt;
+  if (am > cap) { ax *= cap / am; ay *= cap / am; }
+  b.vx = (b.vx || 0) + ax; b.vy = (b.vy || 0) + ay;
+}
+// a held wind-up glides to a stop rather than stopping dead — the tell is
+// still a stillness, it just arrives like one
+function glcBrake(b, k, dt) { const f = Math.exp(-k * dt); b.vx *= f; b.vy *= f; }
+// how long she HOLDS at hitting height after each power, [phase 1, phase 2].
+// 0.6-1.0 s is the plan's band: one clean three-hit combo is 0.72 s, so the
+// short end is "one combo and leave" and the long end is reserved for the
+// powers that asked the most of the player to survive (the nova you crowded
+// her into, the hush). Phase two tightens every one — toward one hit, never
+// below it (boss-openings §1).
+const GLC_HOLD = {
+  lance: [0.8, 0.7], shard: [0.8, 0.7], dash: [0.8, 0.65], prison: [0.75, 0.65],
+  orbs: [0.95, 0.75], nova: [0.9, 0.75], az: [1.0, 0.85], dc: [0.65, 0.65],
+};
+function glcRecover(b, hold) {
+  const s = bossRecSpot(b);
+  b.st = 'recover'; b.t = hold; b.recX = s.x; b.recY = s.y; b.recLow = false; b.recSink = 0.6;
+}
+// every power's wind-up, in one place, so a chained power is told exactly as
+// fully as a drawn one — a chain may add a link, never shorten a tell
+function glcCast(b, mv, px, py) {
+  if (mv === 'lance') { b.st = 'lancewarn'; b.t = 0.7; b.windT = 0.5; sfx('castice'); }
+  else if (mv === 'shard') { b.st = 'shardwarn'; b.t = 0.5; b.windT = 0.4; sfx('castice'); }
+  else if (mv === 'dash') { b.st = 'dashwarn'; b.t = 0.55; b.windT = 0.5; b.dashAng = NaN; sfx('dash'); }
+  else if (mv === 'orbs') { b.st = 'orbs'; b.t = 1.0; b.windT = 0.5; sfx('castice'); }
+  else {
+    // THE PRISON GETS ITS OWN STATE. It used to be cast from inside `idle`,
+    // which made idle itself a one-channel wind-up: no way to look at a
+    // hovering guardian and know a cage is coming.
+    b.st = 'prisonwarn'; b.t = 0.5; b.windT = 0.5; b.prisonAim = { x: px, y: py }; sfx('prison');
+  }
+}
+// TALONHOST'S WINDOWS. Every move ends low now: the fan's recoil, the swoop's
+// pull-up and the screech's spent wings each put her in claw range for a beat
+// before she climbs back to the cable. Short — the REST beat is still the big
+// one and the fight's identity — but present after everything (boss-openings
+// §3, rung 1: zone B is where openings are still obvious).
+const BROOD_HOLD = { volley: [0.6, 0.5], swoop: [0.55, 0.45], call: [0.7, 0.55] };
+function broodRecover(b, hold) {
+  const s = bossRecSpot(b);
+  b.st = 'recover'; b.t = hold; b.recX = s.x; b.recY = s.y; b.recSink = 0.7;
+}
+// FURNACE CHOIR'S WINDOWS: [hold p1, hold p2, the idle walk that follows, as a
+// bossRest multiple]. The walk-ins after each move were 1.1-1.5 rest beats;
+// the recovery takes the front of that time and the walk keeps the rest, so
+// the cycle is the same length and the opening is now a thing he DOES. Only
+// the heavy three plant him — the slam, the hymn and the meltdown; the lob
+// and the forge bell keep the walk-in, which is already in reach.
+const FURN_REC = {
+  slam: [0.5, 0.42, 0.7], hymn: [0.55, 0.45, 0.95], melt: [0.45, 0.4, 0.8],
+};
+function furnRecover(b, mv) {
+  const R = FURN_REC[mv];
+  b.st = 'recover'; b.vx = 0; b.t = R[b.phase === 2 ? 1 : 0]; b.recNext = R[2];
+}
+// MOTHER-V'S WINDOWS: the hold at the player's level after each move, [p1, p2].
+// The last fight is the tightest — these sit at the minimal end of the
+// doctrine (one hit, toward two), and her hit-group break and the Song's
+// stagger are where the bigger windows live.
+const MOTHER_HOLD = { wave: [0.7, 0.55], ring: [0.6, 0.5], beam: [0.55, 0.45], grab: [0.6, 0.5] };
+function motherRecover(b, mv) {
+  const s = bossRecSpot(b);
+  b.st = 'recover'; b.recT = MOTHER_HOLD[mv][b.phase === 2 ? 1 : 0];
+  b.recX = s.x; b.recY = s.y; b.recSink = 0.8;
+}
+// ---------------------------------------------------------------------------
+// THE TEMPLATE EVERY GUARDIAN NOW SHARES (2026-10-08, the Hollow Knight study,
+// plan §3): warning -> attack -> PUNISH WINDOW, a hit-group break, and a move
+// chosen from where she is standing rather than from a counter. The pieces
+// that are the same for all of them live here, once.
+//
+// HOW HIGH A FLIER HANGS WHILE IT IS OPEN. Forty pixels between its feet and
+// hers is chosen from both sides of the arithmetic: her forward swing reaches
+// 54 px above her own feet (hitbox(): centre at mid-body, half-height 36), so
+// a hurtbox whose bottom is 40 px up takes a plain grounded strike; and she
+// is 36 px tall, so a body whose underside is 40 px up clears her head and she
+// can walk under it without wearing contact damage. Lower and the window costs
+// her a hit to stand in; higher and it needs a jump, which is what GLACIERE's
+// 72-183 px hover already asked of her and what the recovery exists to fix.
+const BOSS_REC_LIFT = 40;
+// the guardians that hang in the air rather than stand on the floor
+const BOSS_FLIES = { brood: 1, zero: 1, mother: 1 };
+// THE DECK (.claude/skills/boss-patterns §1). Weights, never dice across the
+// whole moveset, and RECENCY DEBT: the last two moves drawn are worth half for
+// the next draw, which kills the double-lunge feel-bad without forbidding it.
+// `deck` is [[move, weight], ...]; a weight of 0 removes a move this draw.
+function bossDraw(b, deck) {
+  const last = b.deckLast || (b.deckLast = []);
+  let tot = 0;
+  for (const d of deck) { d[2] = d[1] > 0 ? d[1] * (last.indexOf(d[0]) >= 0 ? 0.5 : 1) : 0; tot += d[2]; }
+  let pick = null, r = rnd(0, tot);
+  for (const d of deck) { if (d[2] <= 0) continue; pick = d[0]; r -= d[2]; if (r <= 0) break; }
+  last.unshift(pick); if (last.length > 2) last.length = 2;
+  return pick;
+}
+// WHERE A FLIER SINKS TO WHEN IT IS SPENT: beside her, at her level, never on
+// top of her. The level is HER ground (a ledge if she is standing on one); the
+// side is whichever keeps a body-width gap from her and still fits the room,
+// so the window never opens by dropping a guardian onto the player.
+function bossRecSpot(b, lift) {
+  const W = G.roomDef.w * TILE, floor = (G.roomDef.h - 2) * TILE;
+  const pcx = player.x + player.w / 2;
+  const ground = player.on ? Math.min(floor, player.y + player.h) : floor;
+  const gap = b.w / 2 + player.w / 2 + 26;
+  let x = b.cx();
+  if (Math.abs(x - pcx) < gap) {
+    const s0 = Math.sign(x - pcx) || -(b.face || 1);
+    const lo = b.w / 2 + 16, hi = W - b.w / 2 - 16;
+    const a = pcx + s0 * gap, c = pcx - s0 * gap;
+    x = (a >= lo && a <= hi) ? a : (c >= lo && c <= hi) ? c : clamp(a, lo, hi);
+  }
+  return { x, y: ground - (lift == null ? BOSS_REC_LIFT : lift) - b.h };
+}
+// ...and the level is HER level for the whole recovery, not the level she
+// stood at when it began: the ground in these rooms rolls (the terrain curve
+// lifts the floor 10-20 px in places), and a target fixed at the start of the
+// sink leaves the window out of reach the moment she steps off the mound
+function bossRecTrack(b, lift) {
+  if (!player.on || player.dead) return;
+  const floor = (G.roomDef.h - 2) * TILE;
+  b.recY = Math.min(floor, player.y + player.h) - (lift == null ? BOSS_REC_LIFT : lift) - b.h;
+}
+// THE HIT-GROUP BREAK, for every guardian that is not NULLFANG (whose break is
+// written into its own machine, where it was taught first). dealDmg raises
+// `dazeReq`; it is TAKEN here, and only out of a state the guardian is not
+// committed to — a charge cut off mid-line, or a meltdown that never pours,
+// would be the break deleting a move rather than opening a window. A request
+// that arrives during a committed state waits for it to end.
+//
+// `dur` is the window (phase one, phase two: the same read, a smaller prize),
+// `cd` how long before it can break again so a fast player cannot hold it
+// down, `after` the state it gets up into. Fliers fall: "grounded and open"
+// is the point of the break, and a floating stagger is a window you cannot
+// reach — which is the complaint this whole pass is answering.
+const BREAK_KIT = {
+  brood:  { dur: [1.7, 1.35], cd: [6, 7.5], fly: true,  after: 'rise', col: '#8fd8ff',
+            busy: { swoop: 1, cfcrash: 1, cffloor: 1 } },
+  atlas:  { dur: [1.6, 1.3],  cd: [6, 7.5], fly: false, after: 'idle', col: '#ffb060',
+            busy: { meltwarn: 1 } },
+  zero:   { dur: [1.8, 1.5],  cd: [6, 7.5], fly: true,  after: 'idle', col: '#a5d8ff',
+            busy: { dash: 1, dccast: 1 } },
+  prism:  { dur: [1.5, 1.2],  cd: [5.5, 7], fly: false, after: 'rest', col: '#37ffd0',
+            busy: { dashslash: 1, pounce: 1, lsvanish: 1, arcspin: 1, arcstorm: 1 } },
+  mother: { dur: [1.7, 1.35], cd: [7, 8.5], fly: true,  after: 'idle', col: '#b48cff',
+            busy: { msong: 1, tnull: 1, grab: 1 } },
+};
+// returns true while the break owns the frame (the guardian's own machine is
+// skipped), false otherwise
+function guardBreak(b, dt) {
+  const K = BREAK_KIT[b.kind];
+  if (!K || !b.dazeAt) return false;
+  if ((b.dazeWin || 0) > 0) b.dazeWin -= dt;
+  if ((b.dazeCD || 0) > 0) b.dazeCD -= dt;
+  const p2 = b.phase === 2 ? 1 : 0;
+  if (b.dazeReq && b.st !== 'daze' && !K.busy[b.st]) {
+    b.dazeReq = false;
+    b.st = 'daze'; b.dazeDur = K.dur[p2]; b.t = b.dazeDur;
+    b.vx = 0; if (!K.fly) b.vy = Math.max(0, b.vy || 0); else b.vy = 0;
+    b.windT = 0; b.chain = null;
+    // WHAT IT WAS HOLDING DROPS WITH IT. The guardian's own machine is
+    // skipped for the length of the break, so anything it was carrying would
+    // otherwise hang frozen in the air — a beam that stays drawn and does not
+    // fire, a ring stopped mid-expansion. The break shatters them instead,
+    // which is also the most legible reward there is for having caused it.
+    const cx = b.cx(), cy = b.cy();
+    if (b.kind === 'zero') {
+      if (b.orbs) for (const ob of b.orbs) burst(ob.x, ob.y, 8, '#d24bff', 160, 0.4, 0, 2.5, true);
+      b.orbs = null; b.nova = null; b.azR = 0; b.marks.length = 0; b.iceTrail = null; b.glcShardQ = null;
+    } else if (b.kind === 'mother') {
+      b.beam = null; b.lash = null; b.nwave = null;
+    } else if (b.kind === 'brood') {
+      b.feaQ = null;
+    }
+    sfx('phase'); sfx('bosshit');
+    cam.shake = Math.max(cam.shake, 8);
+    G.hitStop = Math.max(G.hitStop, 0.11);
+    burst(cx, cy, 26, K.col, 340, 0.7, 260, 4, true);
+    if (typeof roarWave === 'function') roarWave(cx, cy, K.col);
+    if (typeof padRumble === 'function') padRumble(0.75, 0.6, 220);
+    G.toast(t('gd_open'));
+  }
+  if (b.st !== 'daze') return false;
+  b.t -= dt;
+  // the floor is the arena's tile floor, lifted where the terrain curve has
+  // real material over it (groundColumnAt) — a broken flier lands ON the
+  // drawn ground, not inside a mound of it
+  let floorY = (G.roomDef.h - 2) * TILE;
+  const gc = typeof groundColumnAt === 'function' ? groundColumnAt(b.cx()) : null;
+  if (gc && gc[1] >= floorY - 1 && gc[0] < floorY && gc[0] > floorY - 60) floorY = gc[0];
+  floorY -= b.h;
+  if (K.fly) {
+    // it FALLS — out of the air and onto the floor, where she can reach it
+    b.vx = 0;
+    if (b.y < floorY) {
+      b.vy = Math.min(900, (b.vy || 0) + 1900 * dt);
+      b.y = Math.min(floorY, b.y + b.vy * dt);
+      if (b.y >= floorY) {
+        b.vy = 0; cam.shake = Math.max(cam.shake, 6); sfx('land');
+        for (let i = 0; i < 10; i++)
+          addPart(b.cx() + rnd(-b.w * 0.5, b.w * 0.5), b.y + b.h - 3, rnd(-160, 160), rnd(-150, -30),
+            rnd(0.35, 0.55), K.col, rnd(2.5, 3.5), 260, true);
+      }
+    } else { b.y = floorY; b.vy = 0; }
+  } else {
+    b.vx = 0; b.vy += 2100 * dt;
+    moveEnt(b, dt);
+  }
+  if (b.t <= 0) {
+    b.st = K.after;
+    b.t = K.after === 'rise' ? 1.2 : K.after === 'rest' ? 0.35 : bossRest(b, 0.6);
+    b.dazeCD = K.cd[p2]; b.dazeHits = 0; b.dazeWin = 0;
+  }
+  return true;
+}
+// NULLFANG LANDS WHERE SHE IS, NEVER ON THE FURNITURE BESIDE HER. The led
+// landing spot is a point; the lion is 84 px of body around it, and A4 ends on
+// a two-tile hulk. A leap aimed at a player standing at the hulk's foot came
+// down on top of it — 70 px above her, out of a grounded strike's reach, for
+// the whole landing settle (tests/openings.cjs: pounce>recover, worst 0 ms).
+// So the spot slides back along the leap, half a tile at a time, until the
+// body's footprint is clear of solid tile over the two rows above her floor.
+function bossLandClear(b, x, feetY) {
+  const ry = Math.floor(feetY / TILE) - 1;
+  const clearAt = cx => {
+    const t0 = Math.floor((cx - b.w / 2) / TILE), t1 = Math.floor((cx + b.w / 2 - 1) / TILE);
+    for (let tx = t0; tx <= t1; tx++)
+      if (solidAt(tx, ry) || solidAt(tx, ry - 1)) return false;
+    return true;
+  };
+  if (clearAt(x)) return x;
+  const back = Math.sign(b.cx() - x) || -(b.face || 1);
+  for (let k = 1; k <= 20; k++) {
+    const nx = x + back * k * TILE / 2;
+    if (clearAt(nx)) return nx;
+  }
+  return x;
+}
+// ---------------------------------------------------------------------------
 // §3m — WHICH PLATE, IN WHICH STATE, AT WHAT SIZE (task #93).
 //
 // ONE ENTRY, AND THE REASON THERE IS ONLY ONE IS WRITTEN BELOW. Ten plates were
@@ -10905,6 +11732,7 @@ class Boss {
     this.cycle = 0; this.marks = []; this.beam = null;
     this.hypnoT = 0; this.stagT = 0;
     this.dazeAt = s.dazeAt || 0; this.dazeHits = 0; this.dazeWin = 0; this.dazeCD = 0;
+    this.dazeSpan = s.dazeSpan || 0;
     // faceVis trails face, so a machine visibly TURNS instead of teleporting its
     // nose to the other side. Passing through zero squashes the body, which reads
     // as it swinging round.
@@ -10935,6 +11763,7 @@ class Boss {
     this.anim += dt; this.hurtT -= dt;
     const lionMotion = this.kind === 'glitch' && !this.meet;
     if (lionMotion) beastMotionBegin(this);
+    if (this.kind === 'alpha') alphaMotionBegin(this);
     try {
     // THE FIRST MEETING drives this body by hand (js/game.js meetStep): no
     // deck, no cooldowns, no hitboxes of its own — a staged sequence, not a
@@ -11029,12 +11858,18 @@ class Boss {
           addPart(this.cx() + rnd(-14, 14), this.y - 6, rnd(-6, 6), rnd(-42, -22),
             rnd(0.7, 1.1), chance(0.5) ? '#ff8fb3' : '#ffc2d4', 2.6, -14, true);
         const floorY2 = 15 * TILE - this.h;
-        if (this.kind === 'glitch' || this.kind === 'atlas') {
+        if (this.kind === 'glitch' || this.kind === 'atlas' || this.kind === 'alpha') {
           if (this.y < floorY2) this.y = Math.min(floorY2, this.y + 320 * dt);
           let mv = 0;
           if (settled && Math.abs(pd) > 96) { mv = clamp(pd, -70, 70); this.x += mv * dt; }
           this.petWalk = mv !== 0;
-          this.vx = this.kind === 'atlas' ? mv : 0;   // drives the dragon's step rig
+          this.vx = mv;
+          if (this.kind === 'glitch' || this.kind === 'alpha') {
+            this.st = mv ? (this.kind === 'glitch' ? 'stalk' : 'rest') : 'idle';
+            this.vy = 0;
+            const ground = groundColumnAt(this.cx());
+            if (ground && ground.length) this.y = Math.min(...ground) - this.h;
+          }
           if (this.kind === 'atlas') { this.st = 'idle'; this.t = 5; this.vy = 0; }
         } else if (this.kind === 'zero') {
           this.st = 'idle';
@@ -11098,7 +11933,22 @@ class Boss {
     // stopped, which is exactly how it looked from the outside.
     if (this.stagT > 0) {
       this.stagT -= dt;
-      if (!BOSS_SELF_STAG[this.st]) return;             // Song / weakness stagger
+      if (!BOSS_SELF_STAG[this.st]) {                  // Song / weakness stagger
+        // A STAGGER IS AN OPENING, AND AN OPENING IS IN REACH. Every stagger
+        // in the game — the Song's, the half-health midpoint's 1.5 s, MOTHER-V
+        // hanging exposed after Total Null — froze a flier wherever it hung,
+        // which for GLACIERE was 72-183 px over the floor: a free punish you
+        // needed a jump to collect. The fliers sag to the player's level for
+        // it now (bossRecSpot: beside her, underside over her head). Not
+        // mid-swoop: TALONHOST's swoop is a fixed curve it would snap back to.
+        if (BOSS_FLIES[this.kind] && this.st !== 'swoop' && this.st !== 'cfcrash') {
+          const s = bossRecSpot(this);
+          this.y += (s.y - this.y) * (1 - Math.exp(-6 * dt));
+          this.x += (s.x - this.cx()) * (1 - Math.exp(-4 * dt));
+          this.vx = 0; this.vy = 0;
+        }
+        return;
+      }
     }
     if (this.st === 'dorm') {
       // THE EYE'S CONSTRUCTS DO NOT GET A GUARDIAN'S AWAKENING. The shared
@@ -11155,7 +12005,7 @@ class Boss {
         this.roared = true;
         if (this.kind === 'glitch') beastSound('roar');
         else sfx({ glitch: 'roar_beast', brood: 'roar_eagle', zero: 'roar_glc',
-              atlas: 'roar_drg', prism: 'roar_prism', alpha: 'roar_beast' }[this.kind] || 'roar');
+              atlas: 'roar_drg', prism: 'roar_prism', alpha: 'alpha_howl' }[this.kind] || 'roar');
         cam.shake = Math.max(cam.shake, 11);
         this.roarBuzzT = 0.8;
         if (typeof padRumble === 'function') padRumble(0.9, 0.7, 650);
@@ -11234,7 +12084,10 @@ class Boss {
       sfx('step');
     }
     this.tickAbilities(dt, px, py);
-    switch (this.kind) {
+    // the hit-group break owns the frame while it holds (guardBreak, above);
+    // NULLFANG's lives inside its own case, where it was taught first
+    if (this.kind !== 'glitch' && guardBreak(this, dt)) { /* broken open */ }
+    else switch (this.kind) {
       // ---- GLITCH.EXE: charging corrupted hound ----
       case 'glitch': {
         // ---- NULLFANG moves like a LION, traced from the sheet's four
@@ -11458,7 +12311,11 @@ class Boss {
             // feet until the launch. Aiming at where she is GOING means the
             // dodge has to be a real change of direction, which is the fight
             // this move was always supposed to be.
-            const lead = dist + (player.vx || 0) * (this.phase === 2 ? 0.26 : 0.18);
+            let lead = dist + (player.vx || 0) * (this.phase === 2 ? 0.26 : 0.18);
+            // ...on HER floor: a led spot that would put the body on top of
+            // the furniture beside her slides back along the leap until it
+            // fits (bossLandClear) — a landing she cannot reach is no landing
+            lead = bossLandClear(this, this.cx() + lead, player.y + player.h) - this.cx();
             // A LION'S LEAP, NOT A HOP (owner, 2026-09-27: move like the Lion
             // King's grown Simba). It used to leave at 420-680 px/s up under
             // 2100 gravity — a 42-110 px skip, 0.4-0.65 s long, flat across the
@@ -11714,13 +12571,20 @@ class Boss {
         // active state it WRENCHES itself free toward open floor — and if
         // that fails twice more, it re-enters clean from its spawn point.
         {
-          if (this.wdX == null) { this.wdX = this.x; this.wdT = 0; }
+          if (this.wdX == null) { this.wdX = this.x; this.wdY = this.y; this.wdT = 0; }
           const activeSt = this.st === 'stalk' || this.st === 'run' || this.st === 'recover'
             || this.st === 'pounce' || this.st === 'crouch' || this.st === 'nullend';
-          if (Math.abs(this.x - this.wdX) > 10 || !activeSt || this.stagT > 0) {
-            this.wdX = this.x; this.wdT = 0;
+          // A LEAP STRAIGHT UP IS NOT A WEDGE. The watchdog only watched x, so
+          // a coil, a pounce at a player standing right under the landing spot
+          // (the leap goes up and comes down where it left) and its landing
+          // settle added up to 2.6 s of "no movement" — and it fired a wrench
+          // pounce out of the punish window 67 ms in (tests/openings.cjs,
+          // pounce>recover, a seed where the landing had nowhere to slide).
+          if (this.wdY == null) this.wdY = this.y;
+          if (Math.abs(this.x - this.wdX) > 10 || Math.abs(this.y - this.wdY) > 24 || !activeSt || this.stagT > 0) {
+            this.wdX = this.x; this.wdY = this.y; this.wdT = 0;
           } else if ((this.wdT += dt) > 2.6) {
-            this.wdT = 0; this.wdX = this.x;
+            this.wdT = 0; this.wdX = this.x; this.wdY = this.y;
             this.wedged = (this.wedged || 0) + 1;
             const mid = G.roomDef.w * TILE / 2;
             if (this.wedged >= 3) {
@@ -11746,6 +12610,9 @@ class Boss {
         // feathers in fans, swoops through the arena with a wind wake, and
         // must come down low to rest its wings — that's your window ----
         this.bcCD = this.bcCD == null ? 9 : this.bcCD - dt;
+        // a stagger now sags her toward the floor (see the stagT block); she
+        // CLIMBS back to the cable from there, she does not blink up to it
+        if (this.st === 'idle' && this.y > this.homeY + 40) { this.st = 'rise'; this.t = 1.0; }
         if (this.st === 'idle') {
           // IT WENT HOME BETWEEN PASSES. Returning to spawn is the one place in
           // the arena the player never has to be, so every beat between attacks
@@ -11775,9 +12642,24 @@ class Boss {
             this.bcCD = rnd(12, 16); this.bcN = this.phase === 2 ? 4 : 3;
             this.bcT = 0.5; this.bcCried = false;
           } else if (this.t <= 0) {
-            const which = this.cycle++ % 4;   // volley, swoop, volley, rest
-            if (which === 3) { this.st = 'rest'; this.t = bossRest(this, 0.9); }
-            else if (which === 1) { this.st = 'swoopwarn'; this.t = 0.55; this.tx = px; this.ty = py; }
+            // THE DECK, by where she stands — the fixed `cycle++ % 4` (volley,
+            // swoop, volley, rest) threw the same four beats at a player in the
+            // middle of the arena and one pressed into a corner. The fan rains
+            // from centre-top, so it is the answer to a player near the middle;
+            // the swoop is the answer to one at the walls or up on a ledge.
+            // REST KEEPS ITS PROMISE: it comes on the fourth beat at the
+            // latest (the cold-dice floor, boss-openings §4), and may come on
+            // the third — "the fourth beat is yours" became "the fourth beat
+            // is yours, if not sooner".
+            const midDx = Math.abs(px - G.roomDef.w * TILE / 2);
+            const ledge = (player.y + player.h) < (G.roomDef.h - 2) * TILE - 40;
+            const middle = midDx < 220 && !ledge;
+            const since = this.sinceRest || 0;
+            const which = since >= 3 ? 'rest'
+              : bossDraw(this, [['volley', middle ? 3 : 0.25], ['swoop', middle ? 0.4 : 3], ['rest', since >= 2 ? 1 : 0]]);
+            this.sinceRest = which === 'rest' ? 0 : since + 1;
+            if (which === 'rest') { this.st = 'rest'; this.t = bossRest(this, 0.9); }
+            else if (which === 'swoop') { this.st = 'swoopwarn'; this.t = 0.55; this.tx = px; this.ty = py; }
             else {
               this.st = 'volley'; this.t = this.phase === 2 ? 1.6 : 1.9; this.fired = 0;
               if (G.enemies.filter(e => !e.dead && e.kind === 'flier').length < (this.phase === 2 ? 2 : 1)) {
@@ -11817,7 +12699,12 @@ class Boss {
             }
             this.feaQ = this.feaQ.filter(q => q.d > 0);
           }
-          if (this.t <= 0) { this.st = 'idle'; this.t = bossRest(this, 1.2); }
+          if (this.t <= 0) {
+            // SPENT: the recoil of the fan drops her down the cable into claw
+            // range for a beat — the volley used to go straight back to a
+            // station 350 px over the floor, which is no window at all
+            broodRecover(this, BROOD_HOLD.volley[this.phase === 2 ? 1 : 0]);
+          }
         } else if (this.st === 'swoopwarn') {
           // locks on, talons splayed — then the dive
           this.t -= dt; this.windT = 0.3;
@@ -11828,6 +12715,12 @@ class Boss {
             this.mx = clamp(this.tx, 70, W - 70);
             this.my = clamp(this.ty + 4, 60, 14.4 * TILE);
             this.ex = clamp(this.mx + (this.cx() < this.mx ? 300 : -300), 90, W - 90) - this.w / 2;
+            // the pull-up ends LOW, not back on the cable: 80 px over the
+            // height she will labour at, which keeps the whole committed arc
+            // over a grounded player's head (the swoop's answer is unchanged —
+            // move, or do not be in the air) and puts the recovery where she
+            // can reach it
+            this.sEndY = Math.max(this.homeY, bossRecSpot(this).y - 80);
             sfx('dash');
             // her departure leaves the empty cable swinging over the perch
             this.cabV = (this.cabV || 0) + (this.cx() < this.mx ? -2.2 : 2.2);
@@ -11837,7 +12730,7 @@ class Boss {
           this.t += dt / 1.05;
           const u = Math.min(1, this.t), iu = 1 - u;
           const nx = iu * iu * this.sx + 2 * iu * u * (this.mx - this.w / 2) + u * u * this.ex;
-          const ny = iu * iu * this.sy + 2 * iu * u * (this.my - this.h / 2) + u * u * this.homeY;
+          const ny = iu * iu * this.sy + 2 * iu * u * (this.my - this.h / 2) + u * u * (this.sEndY == null ? this.homeY : this.sEndY);
           this.vx = (nx - this.x) / Math.max(dt, 0.001);
           this.vy = (ny - this.y) / Math.max(dt, 0.001);
           this.x = nx; this.y = ny;
@@ -11857,7 +12750,21 @@ class Boss {
             // the catch: she snaps back onto station and the cable takes the
             // leftover momentum as a settling swing
             this.cabV = (this.cabV || 0) + clamp(this.vx * 0.0035, -2.4, 2.4);
-            this.st = 'idle'; this.t = bossRest(this, 1.1); this.vx = 0; this.vy = 0;
+            this.vx = 0; this.vy = 0;
+            broodRecover(this, BROOD_HOLD.swoop[this.phase === 2 ? 1 : 0]);
+          }
+        } else if (this.st === 'recover') {
+          // labouring low after a move: sink into claw range (fast, eased),
+          // HOLD there with the wings beating heavy, then climb. The hold
+          // only counts once she is down.
+          bossRecTrack(this);
+          const k = 1 - Math.exp(-8 * dt);
+          this.x += (this.recX - this.w / 2 - this.x) * (1 - Math.exp(-5 * dt));
+          this.y += (this.recY - this.y) * k;
+          this.recSink -= dt;
+          if (Math.abs(this.y - this.recY) < 8 || this.recSink <= 0) {
+            this.t -= dt;
+            if (this.t <= 0) { this.st = 'rise'; this.t = 1.2; }
           }
         } else if (this.st === 'rest') {
           // wings burn out: it descends into claw range
@@ -11870,7 +12777,9 @@ class Boss {
           this.t -= dt;
           if (this.t <= 0) { this.st = 'rise'; this.t = 1.2; }
         } else if (this.st === 'rise') {
-          this.t -= dt; this.y = lerp(this.y, this.homeY, 0.06);
+          // was lerp(.., 0.06) PER FRAME — a climb twice as fast at 120 Hz as
+          // at 60; the same curve, scaled by dt
+          this.t -= dt; this.y = lerp(this.y, this.homeY, 1 - Math.pow(0.94, dt * 60));
           if (this.t <= 0) {
             this.st = 'idle'; this.t = bossRest(this, 1.1);
             this.cabV = (this.cabV || 0) + 0.9;   // catching the cable rocks it
@@ -11900,8 +12809,10 @@ class Boss {
             }
           }
           if (this.t <= 0 && this.bcN <= 0) {
-            this.st = 'idle'; this.t = bossRest(this, 1.2);
-            this.stagT = Math.max(this.stagT, 0.9);   // wings drooped — window
+            // wings drooped — the window. It was `stagT 0.9`, which froze her
+            // at centre-top where the screech left her: a window 350 px over
+            // the floor. She comes DOWN for it now, like every other move.
+            broodRecover(this, BROOD_HOLD.call[this.phase === 2 ? 1 : 0]);
           }
         } else if (this.st === 'cfcrash') {
           // falling with no lift at all; sparks and coolant trailing
@@ -11943,7 +12854,13 @@ class Boss {
         if (this.st === 'idle') {
           this.vx = this.face * 62 * spd * (this.slag ? 0.55 : 1);
           this.t -= dt;
-          if (!this.meltUsed && this.hp <= this.hpMax * 0.35) {
+          // THE WALK-IN IS A WINDOW, so nothing interrupts its front: after a
+          // lob or a bell he walks at her for `openT` before he may start
+          // another wind-up. Without it a player standing close met the slam
+          // a frame after the lob — a 17 ms "opening" (tests/guardians.cjs)
+          this.openT = Math.max(0, (this.openT || 0) - dt);
+          if (this.openT > 0) { /* walking in, open */ }
+          else if (!this.meltUsed && this.hp <= this.hpMax * 0.35) {
             // MELTDOWN: below a third the furnace stops holding itself back —
             // the bell runs white-hot and the floor starts to pour
             this.meltUsed = true;
@@ -11971,7 +12888,14 @@ class Boss {
             // lot" (owner, 2026-09-19). before → after: every 3rd idle → every
             // 3rd idle AND 6.5–8.5 s since the last. When the cadence says hymn
             // and the cooldown says no, it lobs instead.
-            if (this.cycle++ % 3 === 2 && (this.hymnCD || 0) <= 0) {
+            // ...AND THE CADENCE IS A DECK NOW (2026-10-08): the bells answer a
+            // player who stands close (the rings leave from his body, so close
+            // is where they are hardest to clear), the lob answers one who
+            // keeps her distance. The cooldown still has the last word.
+            const fdx = Math.abs(px - this.cx());
+            const fb = fdx < 170 ? 0 : fdx < 380 ? 1 : 2;
+            const hymnOk = (this.hymnCD || 0) <= 0;
+            if (bossDraw(this, [['hymn', hymnOk ? [3, 1, 0.5][fb] : 0], ['lob', [1, 2, 3][fb]]]) === 'hymn') {
               this.st = 'hymn'; this.t = 1.0; this.hymnCD = rnd(6.5, 8.5);
               this.roarBuzzT = 0.7;
               if (typeof padRumble === 'function') padRumble(0.7, 0.6, 550);
@@ -11990,7 +12914,11 @@ class Boss {
           if (this.t <= 0) {
             const d = px - this.cx();
             this.shoot(clamp(d * 1.1, -300, 300), -460, 8, 900); sfx('lob');
-            this.st = 'idle'; this.t = bossRest(this, 1.1);
+            // the lob keeps the walk-in as its window: it is his commonest
+            // move, a planted beat after every one made him a statue for a
+            // third of the fight (tests/bosspace.cjs: recover 29%), and a
+            // grounded walker coming at you is in reach every frame of it
+            this.st = 'idle'; this.t = bossRest(this, 1.1); this.openT = 0.45;
           }
         } else if (this.st === 'forgebell') {
           // each strike rings out a spark shower, then the sky answers with
@@ -12006,7 +12934,7 @@ class Boss {
             this.forge = this.forge || [];
             this.forge.push({ x: wx, y: -30, vy: 0, landed: false, t: 3, kind: this.fbStruck % 3 });
           }
-          if (this.t <= 0) { this.st = 'idle'; this.t = bossRest(this, 1.35); }
+          if (this.t <= 0) { this.st = 'idle'; this.t = bossRest(this, 1.35); this.openT = 0.45; }   // the walk-in, as the lob
         } else if (this.st === 'meltwarn') {
           // the tell: the bell whitens, steam screams from every joint
           this.vx = 0; this.t -= dt; this.windT = 0.4;
@@ -12014,7 +12942,7 @@ class Boss {
           if (chance(0.9)) addPart(this.cx() + rnd(-40, 40), this.y + rnd(0, this.h),
             rnd(-30, 30), rnd(-140, -60), 0.5, '#fff2dd', 2.5, 0, true);
           if (this.t <= 0) {
-            this.st = 'idle'; this.t = bossRest(this, 1.25);
+            furnRecover(this, 'melt');
             this.slag = { t: 0, life: 6.5, h: 0 };
             cam.shake = 9; sfx('roar');
           }
@@ -12027,17 +12955,25 @@ class Boss {
             // said once, the first time the heat comes for her: what it is and
             // what answers it — the same courtesy MOTHER'S SONG gets
             if (G.save && G.save.flags && !G.save.flags.hymnTold) { G.save.flags.hymnTold = 1; G.toast(t('hymn_warn')); }
-            this.st = 'idle'; this.t = bossRest(this, 1.5);
+            furnRecover(this, 'hymn');
           }
         } else if (this.st === 'slamwarn') {
           this.vx = 0; this.t -= dt;
           if (this.t <= 0) {
-            this.st = 'idle'; this.t = bossRest(this, 1.2);
+            furnRecover(this, 'slam');
             cam.shake = 11; sfx('slam');
             const gy = this.y + this.h - 8;
             G.projs.push(new Proj(this.cx() - 40, gy, -340, 0, false, 1, 8, PAL.C.glow, 0, 1.6));
             G.projs.push(new Proj(this.cx() + 40, gy, 340, 0, false, 1, 8, PAL.C.glow, 0, 1.6));
           }
+        } else if (this.st === 'recover') {
+          // PLANTED: the blow is spent and he stands in it — tail driven into
+          // the floor after the slam, the bell ringing down after the hymn —
+          // and does not walk at her until it is over. The walk-in that used
+          // to follow every move was reachable, but a body coming AT you is
+          // not an opening anyone reads as one.
+          this.vx = 0; this.t -= dt;
+          if (this.t <= 0) { this.st = 'idle'; this.t = bossRest(this, this.recNext || 0.7); }
         }
         if (this.phase === 2) {
           this.embT = (this.embT || 0) - dt;
@@ -12048,10 +12984,33 @@ class Boss {
       }
       // ---- Archivist Zero: teleporting caster ----
       case 'zero': {
-        // ---- GLACIERE, THE FROZEN PURIFIER: she FLOATS, gliding to flank
-        // you, and answers with the sheet's five powers — VOID LANCE, ICE
-        // SHARDS, FROST NOVA, DASH CHARGE, VOID ORBS — every one told.
+        // ---- GLACIERE, THE FROZEN PURIFIER: she FLIES, holding a station off
+        // your shoulder, and answers with the sheet's five powers — VOID LANCE,
+        // ICE SHARDS, FROST NOVA, DASH CHARGE, VOID ORBS — every one told.
         // ABSOLUTE ZERO, DATA CORRUPTION and the prison remain her rites. ----
+        //
+        // THE PUNISH WINDOW IS THE FIGHT NOW (2026-10-08, the Hollow Knight
+        // study, plan §3). Measured before: only the dash had a recovery, and
+        // she floated back up during it; every other power went straight back
+        // to gliding away 72-183 px above the floor. Now EVERY power ends in
+        // `recover`: she sinks to hitting height (glcRecover) — feet 40 px
+        // over her ground, beside her, never on her — and holds there, spent,
+        // for 0.6-1.0 s. The sentence a player learns is the same after every
+        // move: dodge it, then she comes down to you.
+        //
+        // THE SENTENCES (boss-patterns §2). One closer — the recovery — and
+        // the deck decides the opener from where you stand:
+        //   near  (< 200 px)  "the fan"           shards, then she comes down
+        //   mid               "the lance"         lance or dash, then down
+        //   far   (> 380 px)  "the charge"        dash, lance or orbs, then down
+        //   above her floor (on a ledge): lance, dash and the cage lean in,
+        //   because those are the powers that aim
+        // Phase two RECOMBINES, it does not add (plan §3.3, boss-patterns §4.5):
+        //   "dash, then the fan"   — every dash in phase two is followed by
+        //                            shards from where the charge ended
+        //   "lance, then the dash" — at range, the lance is followed by a dash
+        // and only the LAST link carries the recovery, so the chain's end is
+        // the thing to learn. No tell shortens; the cold rites ride on top.
         this.azCD = this.azCD == null ? 10 : this.azCD - dt;
         this.novaCD = Math.max(0, (this.novaCD || 0) - dt);
         // the shard fan's second rank: queued arrows leave a couple frames
@@ -12067,25 +13026,20 @@ class Boss {
           }
         }
         const gW = G.roomDef.w * TILE;
+        const gFloor = (G.roomDef.h - 2) * TILE;
         const hovY = clamp(py - 130, 80, 330);
+        const p2 = this.phase === 2 ? 1 : 0;
+        const adist = Math.abs(px - this.cx());
         if (this.st !== 'dash' && this.st !== 'dashwarn')
           this.face = Math.sign(px - this.cx()) || this.face || 1;
         // leaving idle forgets the station, so coming back picks a new one
         if (this.st !== 'idle') { this.glcStat = null; this._glcWas = this.st; }
         if (this.st === 'idle') {
-          // THE FLOAT, and why it read as waiting rather than flying.
-          //
-          // hovY is `clamp(py - 130, 80, 330)`, and a player standing on the
-          // floor of her room puts that value hard against 330 — so she parked
-          // at one altitude and stayed there for the whole fight, drifting
-          // sideways at a lerp rate of 1.1 that could not close the distance
-          // before the next timer fired. Fixed height plus imperceptible motion
-          // is a hovering statue however many powers it has.
-          //
-          // She now picks a fresh station each time she comes to rest — which
-          // side, how high, how far out — and MOVES to it, fast enough to be
-          // seen going. A guardian who flies should look like she chose where
-          // to be.
+          // THE STATION. She picks a fresh one each time she comes to rest —
+          // which side, how high, how far out — and FLIES to it (glcFly:
+          // she accelerates out, cruises, and brakes into it, banking with
+          // the turn; the old lerp glide reached full speed in one frame and
+          // eased forever, which is how a guardian reads as a cursor).
           if (this.glcStat == null || this.st !== this._glcWas) {
             this.glcStat = { side: this.cx() < px ? -1 : 1, out: rnd(150, 230), up: rnd(-40, 95) };
           }
@@ -12093,11 +13047,9 @@ class Boss {
           const S = this.glcStat;
           const tx2 = clamp(px + S.side * S.out, 70, gW - 70);
           const ty2 = clamp(hovY - S.up, 70, 14 * TILE - this.h - 40);
-          this.x = lerp(this.x, tx2 - this.w / 2, dt * 2.6);
-          this.y = lerp(this.y, ty2, dt * 2.4);
+          glcFly(this, tx2, ty2, GLC_CRUISE * spd, GLC_ACCEL * spd, dt);
           // DATA CORRUPTION makes the whole unit run hotter while your HUD lies
           this.t -= dt * ((G.hudGlitchT || 0) > 0 ? 1.45 : 1);
-          const adist = Math.abs(px - this.cx());
           if (!this.dcUsed && this.hp <= this.hpMax * 0.4) {
             // DATA CORRUPTION: once, below 40% — the void uploads itself
             // into your visor and scrambles everything you trust
@@ -12113,26 +13065,28 @@ class Boss {
             // drops onto the standing frame and gathers, that is the tell
             this.st = 'novawarn'; this.t = 0.6; this.novaCD = 7; sfx('castice'); this.windT = 0.5;
           } else if (this.t <= 0) {
-            const alt = this.cycle++ % 5;
-            if (alt === 0 || alt === 2) { this.st = 'lancewarn'; this.t = 0.7; this.windT = 0.5; sfx('castice'); }
-            else if (alt === 1) { this.st = 'shardwarn'; this.t = 0.5; this.windT = 0.4; sfx('castice'); }
-            else if (alt === 3) { this.st = 'dashwarn'; this.t = 0.55; this.windT = 0.5; sfx('dash'); }
-            else if (!this.orbs || !this.orbs.length) { this.st = 'orbs'; this.t = 1.0; this.windT = 0.5; sfx('castice'); }
-            // THE PRISON GETS ITS OWN STATE. It used to be cast from inside
-            // `idle` — the state was never changed, only `windT` was set — and
-            // that makes `idle` itself a wind-up, which the telegraph auditor
-            // rightly calls a one-channel tell: there is no way to look at a
-            // hovering guardian and know a cage is coming. It only surfaced
-            // once her rest beats got short enough to enter idle eighty times
-            // a fight, but it was always a lie in the state machine.
-            else { this.st = 'prisonwarn'; this.t = 0.5; this.windT = 0.5;
-              this.prisonAim = { x: px, y: py }; sfx('prison'); }
+            // THE DECK, by range and by height — never `cycle++ % 5` again.
+            // The rotation was learnable and it was also deaf: she threw the
+            // same five beats at a player beside her and a player across the
+            // room. Weights per band [near, mid, far]; the cage and the orbs
+            // drop out while one is still standing.
+            const band = adist < 200 ? 0 : adist < 380 ? 1 : 2;
+            const high = (player.y + player.h) < gFloor - 40 ? 1 : 0;
+            const mv = bossDraw(this, [
+              ['lance', [1, 3, 2][band] + high],
+              ['shard', [4, 2, 0.5][band]],
+              ['dash', [1, 2, 3][band] + high],
+              ['orbs', (this.orbs && this.orbs.length) ? 0 : [0.5, 1, 2][band]],
+              ['prison', this.prison ? 0 : 1 + high],
+            ]);
+            this.glcBand = band;
+            glcCast(this, mv, px, py);
           }
         } else if (this.st === 'lancewarn') {
           // the horn drinks void light — hold, watch, then move OFF the line
-          this.t -= dt; this.vx = 0; this.vy = 0;
+          this.t -= dt; glcBrake(this, 6, dt);
           if (this.t <= 0) {
-            const n2 = this.phase === 2 ? 2 : 1;
+            const n2 = p2 ? 2 : 1;
             for (let k = 0; k < n2; k++) {
               const a = Math.atan2(py + (k ? -70 : 0) - this.cy(), px - this.cx());
               const pr = new Proj(this.cx() + this.face * this.w * 0.55, this.y + this.h * 0.18,
@@ -12140,13 +13094,16 @@ class Boss {
               pr.glcFx = 'lance'; G.projs.push(pr);
             }
             sfx('lance'); cam.shake = 4;
-            this.st = 'idle'; this.t = glcRest(this);
+            // "lance, then the dash": phase two, at range, the lance is the
+            // opener and the charge is its closer
+            if (p2 && adist >= 380 && !this.chain) { this.chain = 'lance'; glcCast(this, 'dash', px, py); }
+            else glcRecover(this, GLC_HOLD.lance[p2]);
           }
         } else if (this.st === 'shardwarn') {
           // ice condenses along the spine crystals, then the fan flies
-          this.t -= dt;
+          this.t -= dt; glcBrake(this, 6, dt);
           if (this.t <= 0) {
-            const n2 = this.phase === 2 ? 7 : 5;
+            const n2 = p2 ? 7 : 5;
             const base = Math.atan2(py - this.cy(), px - this.cx());
             // the fan leaves in a RIPPLE, not a wall: even ranks fire now,
             // odd ranks a couple frames later — same angles, same speeds
@@ -12158,11 +13115,12 @@ class Boss {
                 pr.glcFx = 'shard'; pr.frost = true; G.projs.push(pr);
               } else this.glcShardQ.push({ a, d: 0.07 });
             }
-            sfx('shard'); this.st = 'idle'; this.t = glcRest(this);
+            sfx('shard');
+            glcRecover(this, GLC_HOLD.shard[p2]);
           }
         } else if (this.st === 'dashwarn') {
           // she squares up and coils; the charge line is drawn in the air
-          this.t -= dt; this.vx = 0; this.vy = 0;
+          this.t -= dt; glcBrake(this, 9, dt);
           // The line commits for the final 300 ms. Tracking until the launch
           // frame made a correct sidestep move the advertised line with her.
           if (this.t > 0.3 || !Number.isFinite(this.dashAng))
@@ -12176,10 +13134,9 @@ class Boss {
           }
         } else if (this.st === 'dash') {
           // DASH CHARGE: through where you stood, authored crystals hanging
-          // in her wake — the trail itself bites
+          // in her wake — the trail itself bites. The line is committed, so
+          // the velocity is held, not steered.
           this.t -= dt;
-          this.x += this.vx * dt; this.y += this.vy * dt;
-          this.y = clamp(this.y, 50, 14 * TILE - this.h);
           this.trailT = (this.trailT || 0) - dt;
           if (this.trailT <= 0) {
             this.trailT = 0.07;
@@ -12188,14 +13145,38 @@ class Boss {
           }
           if (chance(0.8)) addPart(this.cx() - this.vx * 0.04, this.cy() + rnd(-16, 16),
             -this.vx * 0.2 + rnd(-40, 40), rnd(-40, 40), 0.3, '#bfe8ff', 2.5, 0, true);
-          if (this.t <= 0) { this.vx = 0; this.vy = 0; this.st = 'recover'; this.t = 0.7; }
+          if (this.t <= 0) {
+            // she does not stop dead at the end of a 640 px/s charge: the
+            // speed bleeds off in the recovery's sink (glcFly brakes it),
+            // which is the overshoot the draw side used to fake with a spring
+            // "dash, then the fan": in phase two the charge is an opener
+            if (p2 && !this.chain) { this.chain = 'dash'; glcCast(this, 'shard', px, py); }
+            else glcRecover(this, GLC_HOLD.dash[p2]);
+          }
         } else if (this.st === 'recover') {
-          // spent from the charge — your window
-          this.t -= dt; this.y = lerp(this.y, hovY, dt * 1.2);
-          if (this.t <= 0) { this.st = 'idle'; this.t = glcRest(this); }
+          // SPENT — your window. Sink first (fast, braking into place), then
+          // HOLD: nose down, legs hanging, close enough to hit from the floor.
+          // The hold only counts once she is down; the sink is capped, so a
+          // recovery that starts at the ceiling still opens on time.
+          bossRecTrack(this);
+          if (!this.recLow) {
+            // a stiff arrive (gain 8): a soft one spends its last 40 px
+            // creeping, and the window would be spent before she got there
+            glcFly(this, this.recX, this.recY, 640, 3200, dt, 8);
+            this.recSink -= dt;
+            // ARRIVED means there and STOPPED: a charge that ends at 800 px/s
+            // passes through hitting height on its way somewhere else
+            if ((Math.abs(this.y - this.recY) < 8 && Math.abs(this.cx() - this.recX) < 24
+                 && Math.hypot(this.vx, this.vy) < 140) || this.recSink <= 0)
+              this.recLow = true;
+          } else {
+            glcFly(this, this.recX, this.recY, 90, 3200, dt, 8);
+            this.t -= dt;
+            if (this.t <= 0) { this.st = 'idle'; this.t = glcRest(this); this.chain = null; }
+          }
         } else if (this.st === 'prisonwarn') {
           // the void gathers around where she is looking, then closes
-          this.t -= dt; this.vx = 0; this.vy = 0;
+          this.t -= dt; glcBrake(this, 6, dt);
           const aim = this.prisonAim || (this.prisonAim = { x: px, y: py });
           if (chance(0.7)) {
             const aa = rnd(0, 6.28), rr2 = 44 + rnd(-8, 8);
@@ -12203,34 +13184,36 @@ class Boss {
               -Math.cos(aa) * 90, -Math.sin(aa) * 90, 0.3, '#c88cff', 2.2, 0, true);
           }
           if (this.t <= 0) {
-            this.prison = { x: aim.x, y: aim.y, t: 0, life: this.phase === 2 ? 3.4 : 2.6, held: 0 };
+            this.prison = { x: aim.x, y: aim.y, t: 0, life: p2 ? 3.4 : 2.6, held: 0 };
             this.prisonAim = null;
-            sfx('prison'); this.st = 'idle'; this.t = glcRest(this);
+            sfx('prison');
+            glcRecover(this, GLC_HOLD.prison[p2]);
           }
         } else if (this.st === 'novawarn') {
-          this.t -= dt; this.vx = 0; this.vy = 0;
+          this.t -= dt; glcBrake(this, 8, dt);
           if (this.t <= 0) {
             this.nova = { r: 24 };
             burst(this.cx(), this.cy(), 26, '#e0f7fa', 380, 0.6, 0, 3.5, true);
             cam.shake = 7; sfx('break'); G.flash = Math.max(G.flash, 0.18);
-            // the nova already costs her a stagger; it does not also need a
-            // two-second nap on top of it
-            this.st = 'idle'; this.t = glcRest(this);
-            this.stagT = Math.max(this.stagT, 0.55);   // spent for a breath
+            // the nova was "a 0.55 s stagger" — stagT, which FROZE her in the
+            // air where she stood, usually out of reach. It is the same
+            // recovery as everything else now, and the longest of them: the
+            // power you earned by crowding her pays you for having done it.
+            glcRecover(this, GLC_HOLD.nova[p2]);
           }
         } else if (this.st === 'orbs') {
           // VOID ORBS: she stands and calls them out of the dark
-          this.t -= dt; this.vx = 0; this.vy = 0;
+          this.t -= dt; glcBrake(this, 6, dt);
           if (this.t <= 0) {
             this.orbs = [];
-            const n2 = this.phase === 2 ? 4 : 3;
+            const n2 = p2 ? 4 : 3;
             for (let k = 0; k < n2; k++)
               this.orbs.push({ a: k / n2 * Math.PI * 2, cd: 1.4 + k * 0.5, t: 9, x: this.cx(), y: this.cy() });
             sfx('phase');
-            this.st = 'idle'; this.t = glcRest(this);
+            glcRecover(this, GLC_HOLD.orbs[p2]);
           }
         } else if (this.st === 'azhush') {
-          this.t -= dt;
+          this.t -= dt; glcBrake(this, 6, dt);
           this.azR = 40 + (1.1 - this.t) * 190;      // the aura swelling outward
           if (chance(0.8)) {
             const aa = rnd(0, 6.28);
@@ -12248,10 +13231,10 @@ class Boss {
             // two follow-up beams while you are slowed — dodge on half speed
             this.marks.push({ x: px, t: 0.55 }, { x: px + (Math.sign(player.vx) || 1) * 70, t: 0.85 });
             this.azR = 0;
-            this.st = 'idle'; this.t = glcRest(this) + 0.4;   // her biggest rite earns the longest breath
+            glcRecover(this, GLC_HOLD.az[p2]);   // her biggest rite earns the longest breath
           }
         } else if (this.st === 'dccast') {
-          this.t -= dt;
+          this.t -= dt; glcBrake(this, 6, dt);
           // a stream of cyan digits pouring from the tablet into your visor
           if (chance(0.9)) {
             const k = rnd(0, 1);
@@ -12260,8 +13243,17 @@ class Boss {
           }
           if (this.t <= 0) {
             G.hudGlitchT = 8; G.toast(t('dc_warn')); sfx('phase');
-            this.st = 'idle'; this.t = glcRest(this);
+            glcRecover(this, GLC_HOLD.dc[p2]);
           }
+        }
+        // ONE INTEGRATION for every state: whatever the state asked of the
+        // velocity, this is the only place it becomes position, so nothing
+        // can move her twice in a frame or skip dt
+        this.x += this.vx * dt; this.y += this.vy * dt;
+        {
+          const yMax = this.st === 'dash' ? 14 * TILE - this.h : gFloor - this.h - 18;
+          if (this.y < 50) { this.y = 50; if (this.vy < 0) this.vy = 0; }
+          if (this.y > yMax) { this.y = yMax; if (this.vy > 0) this.vy = 0; }
         }
         for (let i = this.marks.length - 1; i >= 0; i--) {
           const m = this.marks[i]; m.t -= dt;
@@ -12343,23 +13335,38 @@ class Boss {
             burst(this.cx(), this.cy(), 20, PAL.X.glow, 260, 0.5, 0, 3, true);
             sfx('wave');
           } else if (this.t <= 0) {
-            const pick = this.cycle++ % 3;
             // THE FASTEST BOSS IN THE GAME HAD NO TELLS. Its dash covers 1022
             // px/s against her 340 and fired straight out of idle — nothing to
             // read, nothing to beat, and the same for the pounce. Both now
             // gather first, on the shared budget, with the sound the tell
             // system fires automatically on entering a *warn state. The fight
             // is still the tightest cycle in the game; it is now a fair one.
-            if (pick === 0) { this.st = 'dashwarn'; this.t = TELL_FAST; this.vx = 0; }
-            else if (pick === 1) { this.st = 'pouncewarn'; this.t = TELL_FAST * 0.86; this.vx = 0; }
-            else {
-              this.vy = -480;
-              for (let k = -1; k <= 1; k++) {
-                const a = Math.atan2(py - this.cy(), px - this.cx()) + k * 0.3;
-                this.shoot(Math.cos(a) * 300, Math.sin(a) * 300, 6);
-              }
-              this.st = 'rest'; this.t = bossRest(this, 0.8);
+            // ...AND IT READS THE GAP (2026-10-08). `cycle++ % 3` fired dash,
+            // pounce, spread whatever the distance — a spread at point blank
+            // and a pounce from across the room. A cat pounces on what is
+            // close, slashes across the middle distance, and spits light at
+            // what it cannot reach yet.
+            const gdx = Math.abs(px - this.cx());
+            const gb = gdx < 160 ? 0 : gdx < 380 ? 1 : 2;
+            const pick = bossDraw(this, [['pounce', [3, 1, 0.5][gb]], ['dash', [1, 3, 2][gb]], ['spread', [0.5, 1, 3][gb]]]);
+            if (pick === 'dash') { this.st = 'dashwarn'; this.t = TELL_FAST; this.vx = 0; }
+            else if (pick === 'pounce') { this.st = 'pouncewarn'; this.t = TELL_FAST * 0.86; this.vx = 0; }
+            // THE SPREAD HAD NO WIND-UP (docs/combat/AAA_BOSS_AUDIT: "fires
+            // from idle with no dedicated tell"). It gathers like the others.
+            else { this.st = 'spreadwarn'; this.t = TELL_FAST; this.vx = 0; }
+          }
+        } else if (this.st === 'spreadwarn') {
+          this.vx = 0; this.t -= dt;
+          this.face = Math.sign(px - this.cx()) || this.face;
+          if (chance(0.7)) addPart(this.cx() + this.face * rnd(8, 26), this.cy() - rnd(4, 16),
+            this.face * rnd(20, 70), -rnd(20, 80), 0.22, TELL_COL, 2.4, 0, true);
+          if (this.t <= 0) {
+            this.vy = -480;
+            for (let k = -1; k <= 1; k++) {
+              const a = Math.atan2(py - this.cy(), px - this.cx()) + k * 0.3;
+              this.shoot(Math.cos(a) * 300, Math.sin(a) * 300, 6);
             }
+            this.st = 'rest'; this.t = bossRest(this, 0.8);
           }
         } else if (this.st === 'dashslash') {
           this.t -= dt;
@@ -12457,9 +13464,11 @@ class Boss {
         // had, and the same answer: hold a STATION relative to the player,
         // reclaimed after every action, so the beat between attacks is an
         // approach rather than a pause.
-        this.y = lerp(this.y, 110 + Math.sin(this.anim * 1.1) * 16
-          + clamp(py - 300, -70, 70) * 0.35, Math.min(1, dt * 2.2));
-        {
+        // ...except while she is SPENT: the recovery owns her position then
+        // (it sinks her to the player's level — see the 'recover' branch)
+        if (this.st !== 'recover') {
+          this.y = lerp(this.y, 110 + Math.sin(this.anim * 1.1) * 16
+            + clamp(py - 300, -70, 70) * 0.35, Math.min(1, dt * 2.2));
           const mW = G.roomDef.w * TILE;
           if (this.mStat == null || (this.mStatT = (this.mStatT || 0) - dt) <= 0) {
             this.mStat = (chance(0.5) ? -1 : 1) * rnd(90, 210);
@@ -12511,16 +13520,19 @@ class Boss {
           if (nw.r > 620) {
             nw.n--;
             if (nw.n > 0) nw.r = 10;
-            else { this.nwave = null; this.stagT = Math.max(this.stagT, 1.0); }
+            // the wave's own window was `stagT 1.0` here, which froze her
+            // wherever she hung — 250 px over the floor. The sink after the
+            // charge (below) is that window now, and it is in reach.
+            else this.nwave = null;
           }
         }
         if (this.st === 'nwcharge') {
           // the tell is SILENCE: the halo freezes and the core runs black
           this.nwT -= dt;
           if (this.nwT <= 0) {
-            this.st = 'idle';
             this.nwave = { r: 10, n: (this.mPhase || 0) >= 1 ? 2 : 1 };
             cam.shake = 9; sfx('shockring'); G.flash = Math.max(G.flash, 0.3);
+            motherRecover(this, 'wave');
           }
         } else if (this.st === 'msong') {
           // MOTHER'S SONG: the original broadcast — red where hers is cyan
@@ -12567,10 +13579,24 @@ class Boss {
             if (chance(0.6)) addPart(lerp(this.cx(), px, rnd(0.2, 0.9)), lerp(this.cy(), py, rnd(0.2, 0.9)),
               rnd(-30, 30), rnd(-30, 30), 0.2, '#b48cff', 2, 0, true);
           }
-          if (this.nwT <= 0) this.st = 'idle';
+          if (this.nwT <= 0) motherRecover(this, 'grab');
         } else if (this.st === 'beamwarn') {
           this.nwT -= dt; this.windT = 0.3;
-          if (this.nwT <= 0) { this.st = 'idle'; this.t = bossRest(this, 1.0); }
+          if (this.nwT <= 0) motherRecover(this, 'beam');
+        } else if (this.st === 'recover') {
+          // SPENT: the core sags out of the air to the player's level —
+          // underside a body-height over her head, beside her, never on her —
+          // and hangs there venting. The hold waits for her own beam to burn
+          // out: an opening inside a live beam is not one.
+          bossRecTrack(this);
+          const k = 1 - Math.exp(-7 * dt);
+          this.x += (this.recX - this.w / 2 - this.x) * (1 - Math.exp(-4 * dt));
+          this.y += (this.recY - this.y) * k;
+          this.recSink -= dt;
+          if (!this.beam && (Math.abs(this.y - this.recY) < 8 || this.recSink <= 0)) {
+            this.recT -= dt;
+            if (this.recT <= 0) { this.st = 'idle'; this.t = (this.phase === 2 ? 0.45 : 0.6) * (1 - (this.mPhase || 0) * 0.08); }
+          }
         } else if (this.st === 'ringcharge') {
           // HER RING HAS NEVER ONCE FIRED.
           //
@@ -12595,7 +13621,7 @@ class Boss {
             this.ring((this.phase === 2 ? 16 : 12) + (this.mPhase || 0) * 2,
                       250 * (DF().espd || 1), this.anim);
             sfx('orbshot'); cam.shake = 6;
-            this.st = 'idle'; this.t = bossRest(this, 1.2);
+            motherRecover(this, 'ring');
           }
         } else if (this.t <= 0) {
           const p2 = this.phase === 2;
@@ -12606,16 +13632,33 @@ class Boss {
             this.msCD = rnd(18, 24);
             this.st = 'msong'; this.nwT = 1.6; sfx('msong');
           } else {
-            const which = this.cycle++ % 4;
-            if (which === 0 && !this.nwave) { this.st = 'nwcharge'; this.nwT = 1.1; sfx('no'); }
+            // THE DECK, by range (2026-10-08) — `cycle++ % 4` again, and the
+            // same deafness: the wave that leaves her body was thrown at a
+            // player across the arena, the beam that crosses the arena at a
+            // player under her. Close, the Null Wave; far, the beam and (once
+            // the shell is breaking) the tendril that drags you back in; the
+            // ring everywhere. The blob is drawn only while the room has
+            // space for it.
+            const mdx = Math.abs(px - this.cx());
+            const mb = mdx < 220 ? 0 : mdx < 420 ? 1 : 2;
+            const g2 = (this.mPhase || 0) >= 2;
+            const blobOk = G.enemies.filter(e => !e.dead).length < 2;
+            const which = bossDraw(this, [
+              ['wave', this.nwave ? 0 : [4, 1.5, 0.3][mb]],
+              ['ring', [2.5, 2, 1][mb]],
+              ['grab', g2 ? [0, 1, 3][mb] : 0],
+              ['blob', blobOk ? 0.7 : 0],
+              ['beam', [0.3, 2, 4][mb]],
+            ]);
+            if (which === 'wave') { this.st = 'nwcharge'; this.nwT = 1.1; sfx('no'); }
             // THE RING GATHERS FIRST. Sixteen projectiles used to appear in a
             // single frame, in a 34-tile arena with no cover, while she is
             // usually mid-air with her dash spent. The charge is short — this
             // is still the last boss — but it exists, and the tell system
             // sounds it automatically because the state name says 'charge'.
-            else if (which === 1) { this.st = 'ringcharge'; this.nwT = 0.7; }
-            else if (which === 2 && (this.mPhase || 0) >= 2) { this.st = 'grabwarn'; this.nwT = 0.5; sfx('castnull'); }
-            else if (which === 2 && G.enemies.filter(e => !e.dead).length < 2) {
+            else if (which === 'ring') { this.st = 'ringcharge'; this.nwT = 0.7; }
+            else if (which === 'grab') { this.st = 'grabwarn'; this.nwT = 0.5; sfx('castnull'); }
+            else if (which === 'blob') {
               const b = new Enemy('blob', this.cx() - 17, this.y + this.h);
               G.enemies.push(b);
               burst(this.cx(), this.y + this.h, 12, PAL.E.glow, 200, 0.5, 300, 3, true);
@@ -12732,6 +13775,7 @@ class Boss {
       && this.st !== 'lsvanish' && this.st !== 'arcstorm') player.hurt(DF().edmg, this.cx());
     } finally {
       if (lionMotion) beastMotionEnd(this, dt);
+      if (this.kind === 'alpha') alphaMotionEnd(this, dt);
     }
   }
   // ---- the three signature systems -----------------------------------------
@@ -13057,6 +14101,9 @@ class Boss {
     // to kneel here, or it never kneels at all.
     if (!this.forceKill && bossFork(this)) return;
     this.dead = true;
+    // MOTHER IS NOT KILLED (docs/STORY_CANON.md: the hijacked singer, not the
+    // author). The blast below is the command leaving her, and the game says so.
+    if (this.kind === 'mother' && typeof revisedStory === 'function' && revisedStory()) G.toast(t('pure_mother'));
     // A guardian with an authored purification film does not detonate. The
     // film shows the last blow and the virus leaving; we skip straight past
     // the wreck so nothing of him is ever seen destroyed.

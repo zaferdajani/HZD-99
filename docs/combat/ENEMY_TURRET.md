@@ -130,3 +130,16 @@ Consumed: registry §1–§5.
 
 ### Changelog
 No turret values changed this pass.
+
+**Motion pass (2026-10-08, plan §1).** Timings untouched; the lock and the shot
+now have bodies.
+
+| Value | Before | After | Reason |
+|---|---|---|---|
+| Lock (wind-up) picture | the sweep carried on through the lock; the beam was the only change | the sweep STOPS and the barrel turns square onto her (`enemyYaw`), the body hunkers back (`ATLAS_POSE.coil`), and the shared amber ring joins the beam (`drawEnemyTell`, `lockT > 0.05`, so the 0.0001 s re-locks inside a burst are not a tell) | plan §1 fix 5; registry: the lock is a wind-up and wears the wind-up's ring |
+| Recoil (recovery) picture | none — the body did nothing on a shot | **`kickT` = `TURRET_KICK_T` 0.3 s** after every shot: rocked back 0.20 rad and stretched (`ATLAS_POSE.kick`). Visual only; nothing reads it | plan §1 fix 5 |
+| Sweep | ±1.6 yaw, cross-fading two angles | the same sweep, stepping through ONE authored angle at a time | plan §1 fix 4: no double exposure |
+| Beam under `G.artProbe` | drawn | off (decoration that runs to wherever she is) | the bible measures the body |
+
+`tests/artbible.cjs`: rest/lock 0.41, rest/kick 0.44, lock amber 27.3 % vs rest 18.6 %.
+

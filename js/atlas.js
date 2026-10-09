@@ -55,33 +55,71 @@ const ATLAS = {
 // — the subject itself — which structurally removes lines and intruders, then
 // erode boundary pixels that are still near-white. Runs once per sheet.
 const ATLAS_PROC = {};
+// A sheet being processed AHEAD of need (artWarm, below) is a paused generator;
+// asking for it on demand finishes that one rather than starting another.
+const ATLAS_RUN = {};
 function processSheet(key, cols, rows) {
+  if (ATLAS_PROC[key] !== undefined) return ATLAS_PROC[key];
+  const run = ATLAS_RUN[key];
+  delete ATLAS_RUN[key];
+  const out = genRun(run || processSheetSteps(key, cols, rows));
+  return ATLAS_PROC[key] !== undefined ? ATLAS_PROC[key] : (out || null);
+}
+function genRun(it) { let r; do { r = it.next(); } while (!r.done); return r.value; }
+// THE SAME PASS, IN STEPS. One sheet is a 2496x2508 picture and the pass walks
+// it several times — measured at about a second on a slow machine, on whatever
+// frame first draws a creature from it, which was often the frame a door was
+// crossed. As a generator the arithmetic is untouched (tests/roomcache.cjs
+// compares the result pixel for pixel); it only stops between cells and bands
+// so the idle prebake can spread it, and the readback and write-back go in
+// bands for the same reason.
+function* processSheetSteps(key, cols, rows) {
   if (ATLAS_PROC[key] !== undefined) return ATLAS_PROC[key];
   const im = MEDIA_IMG[key];
   if (!im) return null;
   const W = im.naturalWidth, H = im.naturalHeight;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
-  const img = x.getImageData(0, 0, W, H), d = img.data;
-  const lbl = new Int32Array(W * H);
-  const qx = new Int32Array(W * H), qy = new Int32Array(W * H);
+  yield;
+  const BAND = 256;
+  const d = new Uint8ClampedArray(W * H * 4);
+  for (let y0 = 0; y0 < H; y0 += BAND) {
+    d.set(x.getImageData(0, y0, W, Math.min(BAND, H - y0)).data, y0 * W * 4);
+    yield;
+  }
+  const img = new ImageData(d, W, H);
+  // THE LABELS ARE PER CELL. A component never leaves its cell (the flood
+  // stops at the cell's edge), and each cell numbers its own components from
+  // one, so a cell-sized label plane and queue give exactly the answer a
+  // sheet-sized one did — at ~1% of the memory: three sheet-sized Int32
+  // planes were 75 MB of scratch per sheet, the kind of allocation a phone
+  // pays for twice (once to make, once to collect).
+  let CWm = 0, CHm = 0;
+  for (let ci = 0; ci < cols; ci++) CWm = Math.max(CWm, Math.floor((ci + 1) * W / cols) - Math.floor(ci * W / cols));
+  for (let r = 0; r < rows; r++) CHm = Math.max(CHm, Math.floor((r + 1) * H / rows) - Math.floor(r * H / rows));
+  const lbl = new Int32Array(CWm * CHm);
+  const qx = new Int32Array(CWm * CHm), qy = new Int32Array(CWm * CHm);
+  yield;
   for (let r = 0; r < rows; r++) for (let ci = 0; ci < cols; ci++) {
+    yield;
     const x0 = Math.floor(ci * W / cols), x1 = Math.floor((ci + 1) * W / cols);
     const y0 = Math.floor(r * H / rows), y1 = Math.floor((r + 1) * H / rows);
+    const cw = x1 - x0;
+    lbl.fill(0, 0, cw * (y1 - y0));
     // label components (4-connected) inside this cell
     let next = 0; const sizes = [];
     for (let yy = y0; yy < y1; yy++) for (let xx = x0; xx < x1; xx++) {
-      const n = yy * W + xx;
-      if (lbl[n] !== 0 || d[n * 4 + 3] < 16) continue;
+      const n = yy * W + xx, ln = (yy - y0) * cw + (xx - x0);
+      if (lbl[ln] !== 0 || d[n * 4 + 3] < 16) continue;
       next++; let head = 0, tail = 0, size = 0;
-      qx[tail] = xx; qy[tail] = yy; tail++; lbl[n] = next;
+      qx[tail] = xx; qy[tail] = yy; tail++; lbl[ln] = next;
       while (head < tail) {
         const px2 = qx[head], py2 = qy[head]; head++; size++;
         for (const [ax, ay] of [[1,0],[-1,0],[0,1],[0,-1]]) {
           const nx2 = px2 + ax, ny2 = py2 + ay;
           if (nx2 < x0 || ny2 < y0 || nx2 >= x1 || ny2 >= y1) continue;
-          const nn = ny2 * W + nx2;
-          if (lbl[nn] === 0 && d[nn * 4 + 3] >= 16) { lbl[nn] = next; qx[tail] = nx2; qy[tail] = ny2; tail++; }
+          const nn = ny2 * W + nx2, lnn = (ny2 - y0) * cw + (nx2 - x0);
+          if (lbl[lnn] === 0 && d[nn * 4 + 3] >= 16) { lbl[lnn] = next; qx[tail] = nx2; qy[tail] = ny2; tail++; }
         }
       }
       sizes.push(size);
@@ -89,10 +127,10 @@ function processSheet(key, cols, rows) {
     if (!next) continue;
     let best = 1;
     for (let i = 1; i < sizes.length; i++) if (sizes[i] > sizes[best - 1]) best = i + 1;
-    const base = next - sizes.length;   // labels used before this cell
+    const base = next - sizes.length;   // labels used before this cell (always 0 now: numbering is per cell)
     for (let yy = y0; yy < y1; yy++) for (let xx = x0; xx < x1; xx++) {
-      const n = yy * W + xx;
-      if (lbl[n] !== 0 && lbl[n] !== base + best) { d[n * 4 + 3] = 0; }
+      const n = yy * W + xx, ln = (yy - y0) * cw + (xx - x0);
+      if (lbl[ln] !== 0 && lbl[ln] !== base + best) { d[n * 4 + 3] = 0; }
     }
     // two erosion passes on white fringe at the silhouette boundary
     for (let pass = 0; pass < 2; pass++) {
@@ -122,6 +160,7 @@ function processSheet(key, cols, rows) {
     return rr2 >= 130 && rr2 <= 233 && Math.max(rr2, gg, bb) - Math.min(rr2, gg, bb) <= 14;
   };
   for (let r = 0; r < rows; r++) for (let ci = 0; ci < cols; ci++) {
+    yield;
     const x0 = Math.floor(ci * W / cols), x1 = Math.floor((ci + 1) * W / cols);
     const y0 = Math.floor(r * H / rows), y1 = Math.floor((r + 1) * H / rows);
     for (let xx = x0; xx < x1; xx++) {          // vertical frame lines
@@ -160,11 +199,13 @@ function processSheet(key, cols, rows) {
   // -------------------------------------------------------------------------
   const a1 = new Uint8ClampedArray(W * H);
   for (let i = 0, p = 3; i < W * H; i++, p += 4) a1[i] = d[p];
+  yield;
   const SAT = 1.5, CON = 1.1, RIM = 0.5;
   for (let r = 0; r < rows; r++) {
     const y0 = Math.floor(r * H / rows), y1 = Math.floor((r + 1) * H / rows);
     const span = Math.max(1, y1 - y0 - 1);
     for (let yy = y0; yy < y1; yy++) {
+      if ((yy - y0) % 48 === 0) yield;
       const v = (yy - y0) / span;                       // 0 crown .. 1 feet
       const lk = 1.16 - v * 0.34;                       // the key light falling
       for (let xx = 0; xx < W; xx++) {
@@ -187,7 +228,14 @@ function processSheet(key, cols, rows) {
       }
     }
   }
-  x.putImageData(img, 0, 0);
+  for (let y0 = 0; y0 < H; y0 += BAND) {
+    yield;
+    x.putImageData(img, 0, 0, 0, y0, W, Math.min(BAND, H - y0));
+  }
+  // a sheet replaced while this ran (the quarter-size stand-in giving way to
+  // the full one) has already thrown its derivatives away; this result is of
+  // the old picture and is not kept
+  if (MEDIA_IMG[key] !== im) return null;
   ATLAS_PROC[key] = cv;
   return cv;
 }
@@ -217,6 +265,141 @@ function sheetOf(key, cols, rows, clean) {
   if ((key === 'roster' || key === 'npcs') && base && typeof popArt === 'function')
     return popArt('sheet:' + key, base, key === 'npcs' ? 0.45 : 0) || base;
   return base;
+}
+// ---------------------------------------------------------------------------
+// MEETING A MACHINE COSTS NOTHING AT THE DOOR (artWarm).
+//
+// The first creature drawn from a sheet pays for the sheet: the roster's
+// cleanup-and-grade pass, the npcs sheet's lift, a beast plate's pop grade.
+// Measured headless, the roster alone is ~0.9 s, and the frame that first
+// draws a blob or a turret is very often the frame she walks into its room —
+// so the doorway hitch the tile cache removed came back the first time each
+// kind of machine was met. The same idle prebake that bakes the next room's
+// floor (game.js tilePrebakeTick / tileIdle) now also readies the art of the
+// creatures one door away, a slice at a time, and the draw finds it done.
+//
+// It never decides anything about the picture: every unit is the on-demand
+// call itself (processSheet / sheetOf / popArt) run as its steps, so the
+// result is identical and the caches are the same caches. It waits for the
+// FULL sheet (a quarter-size stand-in would be processed and then thrown
+// away), and asks the browser to decode it off the main thread first, so the
+// first step's drawImage is a copy rather than a decode.
+//
+// Memory: nothing is held that the on-demand path would not hold. The pass's
+// scratch (labels and queues, ~12 bytes a pixel) lives only while one unit is
+// in flight, and only one ever is — the peak is the on-demand peak, moved to
+// a quiet moment. The phone tier gets the same treatment for that reason.
+// ---------------------------------------------------------------------------
+let artJob = null;
+const ART_DECODE = {};
+// What the creatures of a room will draw through, as units of work.
+function artWarmUnits(id) {
+  const def = ROOMS[id];
+  if (!def || (typeof isHero === 'function' && isHero())) return [];
+  const out = [], seen = {};
+  const add = (u) => { if (!seen[u.k]) { seen[u.k] = 1; out.push(u); } };
+  for (const e of def.ents || []) {
+    let kind = e[0];
+    if (kind === 'npc') kind = e[3];
+    if (typeof kind !== 'string') continue;
+    // the pack and the cheetahs take their own plates in their kingdoms
+    if ((kind === 'crawler' || kind === 'hopper') && typeof WOLF_ZONES !== 'undefined'
+        && (WOLF_ZONES[def.zone] || CAT_ZONES[def.zone])) {
+      const set = WOLF_ZONES[def.zone] ? WOLF_ART : CHEETAH_ART;
+      for (const p in set) add({ k: 'pop:' + set[p].img, img: set[p].img });
+      continue;
+    }
+    const A = atlasOf(kind);
+    if (A) add({ k: 'sheet:' + A.key, A });
+  }
+  return out;
+}
+function artKeyOf(u) { return u.A ? u.A.key : u.img; }
+function artWarmDone(u) {
+  if (u.A) {
+    const k = u.A.key, popped = (k === 'roster' || k === 'npcs');
+    if (u.A.clean !== false && ATLAS_PROC[k] === undefined) return false;
+    // popArt grades only a picture with a natural size (an <img>); the processed
+    // roster is a canvas and is drawn ungraded, on demand and here alike
+    const base = u.A.clean === false ? MEDIA_RAW[k] : ATLAS_PROC[k];
+    if (!popped || !base || !base.naturalWidth) return true;
+    return typeof POP_ART !== 'undefined' && POP_ART['sheet:' + k] !== undefined;
+  }
+  return typeof POP_ART !== 'undefined' && POP_ART[u.img] !== undefined;
+}
+// the full sheet is here and decoded; if not, ask for it and say "not yet"
+function artWarmReady(k) {
+  const im = typeof MEDIA_RAW !== 'undefined' && MEDIA_RAW[k];
+  const low = typeof MEDIA_LOW !== 'undefined' ? MEDIA_LOW[k] : 0;
+  if (!im || low === 1 || low === 2) {
+    if (typeof mediaFetch === 'function' && typeof MEDIA_SRC !== 'undefined' && MEDIA_SRC.images[k]) mediaFetch(k);
+    return false;
+  }
+  if (ART_DECODE[k] === im) return true;
+  if (ART_DECODE[k] !== 'pending') {
+    ART_DECODE[k] = 'pending';
+    const mark = () => { ART_DECODE[k] = im; };
+    try { (im.decode ? im.decode() : Promise.resolve()).then(mark, mark); } catch (e) { mark(); }
+  }
+  return false;
+}
+function* artWarmSteps(u) {
+  if (u.A) {
+    const A = u.A;
+    if (A.clean !== false && ATLAS_PROC[A.key] === undefined) {
+      const inner = processSheetSteps(A.key, A.cols, A.rows);
+      ATLAS_RUN[A.key] = inner;
+      yield* inner;
+      if (ATLAS_RUN[A.key] === inner) delete ATLAS_RUN[A.key];
+    }
+    const k = A.key;
+    if ((k === 'roster' || k === 'npcs') && typeof POP_RUN !== 'undefined' && POP_ART['sheet:' + k] === undefined) {
+      const base = A.clean === false ? MEDIA_IMG[k] : (ATLAS_PROC[k] || MEDIA_IMG[k]);
+      if (!base || !base.naturalWidth) return;
+      const inner = popArtSteps('sheet:' + k, base, k === 'npcs' ? 0.45 : 0);
+      POP_RUN['sheet:' + k] = inner;
+      yield* inner;
+      if (POP_RUN['sheet:' + k] === inner) delete POP_RUN['sheet:' + k];
+    }
+  } else if (POP_ART[u.img] === undefined) {
+    const inner = popArtSteps(u.img);
+    POP_RUN[u.img] = inner;
+    yield* inner;
+    if (POP_RUN[u.img] === inner) delete POP_RUN[u.img];
+  }
+}
+// Pick the next unit for the rooms given, nearest first. Returns true if a
+// job is now in flight.
+function artWarmPick(ids) {
+  if (artJob) return true;
+  for (const id of ids) {
+    for (const u of artWarmUnits(id)) {
+      if (artWarmDone(u)) continue;
+      if (!artWarmReady(artKeyOf(u))) continue;
+      artJob = { u, it: artWarmSteps(u), room: id };
+      return true;
+    }
+  }
+  return false;
+}
+const ART_STATS = { units: 0, sliceMax: 0, stepMax: 0, stepKey: '' };
+function artWarmSlice(ms) {
+  const j = artJob;
+  if (!j) return;
+  const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  const t0 = now();
+  let done = false;
+  try {
+    do {
+      const ts = now();
+      if (j.it.next().done) { done = true; break; }
+      const st = now() - ts;
+      if (st > ART_STATS.stepMax) { ART_STATS.stepMax = st; ART_STATS.stepKey = j.u.k; }
+    } while (now() - t0 < ms);
+  } catch (e) { done = true; }
+  const spent = now() - t0;
+  if (ms !== Infinity && spent > ART_STATS.sliceMax) ART_STATS.sliceMax = spent;
+  if (done) { artJob = null; ART_STATS.units++; }
 }
 // ---------------------------------------------------------------------------
 // THE SECOND SHEET — the people, and the machine that blocks your way.
@@ -348,18 +531,35 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   // be asked for a specific angle is a turntable renderer with a hole in it.
   if (o.col != null) fy = o.col;
   else if (o.yawSpin) fy = ((t * o.yawSpin) % 8 + 8) % 8;
-  else if (o.yawScan) fy = o.yawScan.c + Math.sin(t * o.yawScan.r) * o.yawScan.a;
+  else if (o.yawScan) fy = o.yawScan.c + Math.sin(t * o.yawScan.r) * (o.yawScan.a || 0);
   else fy = yawColF(faceVis);
   fy = ((fy % A.cols) + A.cols) % A.cols;
+  // ONE ANGLE AT A TIME where it would otherwise be a double exposure. The
+  // cross-fade lays the next authored angle over this one at alpha colF, and
+  // a head-scan kept colF wandering forever — two pictures of the same
+  // machine, a few degrees apart, both on screen all the time (plan §1: "looks
+  // like a double exposure"). Walkers and anything scanning now show the
+  // NEAREST authored angle and only that: a turn steps through the five
+  // front-hemisphere angles, which is what a turntable of stills honestly is.
+  // A body only easing its facing (no scan, not a walker) keeps the fade,
+  // because there it is brief and it is a turn.
+  const single = !!o.yawScan || o.mode === 'walk' || o.mode === 'spring';
+  if (single) fy = Math.round(fy) % A.cols;
   const col0 = Math.floor(fy) % A.cols, col1 = (col0 + 1) % A.cols;
-  const colF = fy - Math.floor(fy);
+  const colF = single ? 0 : fy - Math.floor(fy);
   let bob = 0, rot = 0, kx = 1, ky = 1, pivTop = false;
+  // the gait's phase. A walker's bob and stride are clocked by FLOOR COVERED
+  // (o.dist, px) — never by the wall clock — so the feet cannot run at one
+  // rate while the body moves at another, and a machine standing still stands
+  // still. Callers that do not pass a distance keep the old clock.
+  const gPh = o.dist != null ? o.dist / ATLAS_STRIDE * Math.PI : t * (6 + Math.abs(vx) / 30);
+  const mv = o.dist != null ? clamp(Math.abs(vx) / 40, 0, 1) : 1;
   switch (o.mode) {
     case 'walk': {                 // gait: quick bob, lean into the run
-      const g = t * (6 + Math.abs(vx) / 30);
-      bob = Math.abs(Math.sin(g)) * dh * 0.05;
-      rot = clamp(vx / 420, -1, 1) * 0.075 + Math.sin(g * 2) * 0.022;
-      ky = 1 + Math.sin(g * 2) * 0.02; kx = 1 / ky;
+      const g = gPh;
+      bob = Math.abs(Math.sin(g)) * dh * 0.05 * mv;
+      rot = clamp(vx / 420, -1, 1) * 0.075 + Math.sin(g * 2) * 0.022 * mv;
+      ky = 1 + Math.sin(g * 2) * 0.02 * mv; kx = 1 / ky;
       break;
     }
     case 'spring': {               // hopper: stretch in flight, squash on landing
@@ -408,6 +608,20 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
       break;
     }
   }
+  // ---- THE STATE POSE ------------------------------------------------------
+  // An atlas creature has one authored picture per angle and no per-state art
+  // (ART_BIBLE §4) — so a wind-up and a recovery have to be POSED out of it,
+  // or the punish window has no picture at all (plan §1 fix 5). `o.pose`
+  // names the state; ATLAS_POSE says what it does to the body: for the cut-
+  // out rig below, real articulation (legs fold under a sinking body, splay,
+  // or trail behind it; the body pitches about the hips), and for everything
+  // else a whole-body lean and squash pivoted on the feet. `fwd` is the side
+  // it faces, so "lean forward" is forward whichever way it is looking.
+  const PZ = (o.pose && ATLAS_POSE[o.pose]) || null;
+  const fwd = (faceVis == null ? 1 : faceVis) >= 0 ? 1 : -1;
+  if (PZ && !(o.mode === 'walk' || o.mode === 'spring')) {
+    rot += PZ.lean * fwd; ky *= PZ.ky; kx *= PZ.kx;
+  }
   c.translate(cx, footY);
   const topY = dy - footY;                     // sprite top, relative to the foot
   if (pivTop) { c.translate(0, topY); c.rotate(rot); c.translate(0, -topY); }
@@ -428,32 +642,44 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
     // body is a third part that rides above them and bobs. Three parts of the
     // SAME rendered art, articulated — not one picture sliding.
     const hipF = 0.64;                                  // hips at 64% of the cell
-    const g2 = t * (6 + Math.abs(vx) / 30);
-    const swing = (o.mode === 'walk' ? 0.20 : 0.08) * clamp(Math.abs(vx) / 120 + 0.35, 0.35, 1);
+    const g2 = gPh;
+    const swing = (o.mode === 'walk' ? 0.20 : 0.08)
+      * (o.dist != null ? mv : clamp(Math.abs(vx) / 120 + 0.35, 0.35, 1));
     const legSy = sy + sh2 * hipF, legH = sh2 * (1 - hipF);
-    const legDy = topY + dh * hipF;                     // legs stay planted (no bob)
     const legDh = dh * (1 - hipF);
-    // One authored angle, rigged. Run it twice and the second angle fades in
-    // over the first: this branch used to draw col0 only, so the walkers — the
-    // crawler and the hopper, the two machines the player meets most — STEPPED
-    // between authored angles while everything else on the turntable swept
-    // through them. They turn like the rest of the roster now.
+    // the pose: how far the hips sink (the legs fold to pay for it, so the
+    // feet never leave the floor), how the body pitches about them, and how
+    // the two leg groups are set — splayed (front out, rear back) or trailing
+    const sink = PZ ? PZ.sink : 0;
+    const legDy = topY + dh * hipF + legDh * sink;      // hips, after the sink
+    const legDh2 = legDh * (1 - sink);                  // ...and the folded legs
+    const front = fwd > 0 ? 1 : 0;                      // which half leads
+    // One authored angle, rigged — the NEAREST one (see `single` above). The
+    // second pass that faded the next angle in over the first is gone: on a
+    // walker it was always on, because the head-scan never let colF settle.
     const limbPass = (cc) => {
       for (const [half, ph] of [[0, 1], [1, -1]]) {     // rear group, front group
         c.save();
         c.translate(ddx + dw * (half ? 0.5 : 0), legDy);
         // shear about the hip line: the top edge never leaves the body, so the
         // stride can never tear a gap open the way rotation did
-        c.transform(1, 0, Math.sin(g2) * swing * ph, 1, 0, 0);
+        const set = PZ ? (PZ.splay * (half === front ? 1 : -1) - PZ.drag) * fwd : 0;
+        c.transform(1, 0, Math.sin(g2) * swing * ph + set, 1, 0, 0);
         c.drawImage(im, sxOf(cc) + half * sw2 / 2, legSy, sw2 / 2, legH,
-                    half ? -dw * 0.015 : 0, -legDh * 0.04, dw / 2 + dw * 0.015, legDh * 1.04);
+                    half ? -dw * 0.015 : 0, -legDh2 * 0.04, dw / 2 + dw * 0.015, legDh2 * 1.04);
         c.restore();
       }
-      // the body overlaps the hip line so the seam never shows
+      // the body overlaps the hip line so the seam never shows; it rides the
+      // sink down and pitches about the hip centre
+      c.save();
+      if (PZ) {
+        c.translate(0, legDy); c.rotate(PZ.lean * fwd); c.translate(0, -legDy);
+        c.translate(0, legDh * sink);
+      }
       c.drawImage(im, sxOf(cc), sy, sw2, sh2 * (hipF + 0.05), ddx, ddy, dw, dh * (hipF + 0.05));
+      c.restore();
     };
     limbPass(col0);
-    if (colF > 0.03) { c.save(); c.globalAlpha *= colF; limbPass(col1); c.restore(); }
   } else {
     c.drawImage(im, sxOf(col0), sy, sw2, sh2, ddx, ddy, dw, dh);
     if (colF > 0.03) {                       // the next angle fades in over it
@@ -466,6 +692,30 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   return true;
 }
 
+// the walk's stride, in px of floor per half-cycle of the bob: at the crawler's
+// patrol speed this is the cadence the old clock gave it (6 + 62/30 rad/s), so
+// the same machine walks at the same rhythm — it just cannot slip any more
+const ATLAS_STRIDE = 24;
+// THE STATE POSES (see drawAtlas). Rig fields — sink: fraction of leg height
+// the hips drop; lean: body pitch about the hips (+ is forward, rad); splay:
+// leg shear, front group forward and rear group back; drag: both groups
+// trailing behind. Whole-body fields for the unrigged modes — lean, kx, ky.
+//   coil   — the wind-up: hips down on folded legs, weight rocked BACK
+//   lunge  — the commit: body pitched hard forward, legs left behind it
+//   winded — the recovery: spent, head and shoulders dropped, legs splayed
+//   land   — a landing absorbed: deep fold, body level
+//   kick   — a recoil: rocked back off the shot and stretched up
+//   perch  — a flier sat down: compact, wings in
+// tests/artbible.cjs (the ENEMY cast) measures each against rest and against
+// the others; a re-tune that makes two of them one shape fails the build.
+const ATLAS_POSE = {
+  coil:   { sink: 0.42, lean: -0.16, splay: 0.30, drag: 0, kx: 1.12, ky: 0.82 },
+  lunge:  { sink: 0.10, lean: 0.30, splay: 0, drag: 0.55, kx: 1.10, ky: 0.92 },
+  winded: { sink: 0.30, lean: 0.34, splay: 0.45, drag: 0, kx: 1.08, ky: 0.86 },
+  land:   { sink: 0.50, lean: 0.06, splay: 0.50, drag: 0, kx: 1.16, ky: 0.76 },
+  kick:   { sink: 0, lean: -0.20, splay: 0, drag: 0, kx: 0.92, ky: 1.08 },
+  perch:  { sink: 0.30, lean: 0, splay: 0, drag: 0, kx: 1.10, ky: 0.80 },
+};
 // shared scratch canvas for tinted sprite draws
 let _tintCv = null;
 function tintedSprite(im, sx, sy, sw2, sh2, dw, dh, col, c, dx, dy) {

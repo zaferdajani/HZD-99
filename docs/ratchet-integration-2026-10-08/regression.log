@@ -1,0 +1,17 @@
+
+── repair-lifecycle  — Ratchet puzzle, interrupted visits, saved placements and story reward handoff
+PASS repair lifecycle: ordered puzzle, wrong inputs, prefix reload, boot interruption, once-only NPC rewards, forge quest, stale room/save events, lost cell, menu preservation, visibility cleanup, orphan recovery, legacy save and both loading paths
+
+── story-opening  — survivor histories and earned Sage/CHIME route
+PASS opening: earned marble/sword/sage/CHIME order, legacy routes, six distinct survivor histories, once-only reveal preserving reward callback
+
+── tutorial-clarity  — one contextual action, one marker and saved lesson continuity
+PASS tutorial-clarity: contextual controls, one target, dialogue priority, save continuity, progression
+
+── story-progression  — battery, earned forge and sage/weapon story ordering
+PASS: battery waking, automatic quest, earned forge, distinct sword/connector pickups and first sage story gate
+
+── input-focus  — focus loss clears input and cancelled touches cannot fire
+OK — focus loss clears all input, background input is blocked, fresh input recovers and touch cancellation cannot fire
+
+all 5 harnesses ran

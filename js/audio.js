@@ -210,7 +210,7 @@ function hzdCompletionPlaying() {
 }
 let NARRATIVE_AUDIO_ACTIVE = false;
 function narrativeAudioActive() {
-  return typeof G !== 'undefined' && !!(G.wake || G.cut || ['DIALOG', 'INTRO', 'CUT'].includes(G.state));
+  return typeof G !== 'undefined' && !!(G.wake || G.cut || ['DIALOG', 'INTRO', 'CUT', 'REPAIR'].includes(G.state));
 }
 function hzdQuiet() {
   hzdRelease(0.025);
@@ -1606,6 +1606,17 @@ function sfx(n) {
     case 'boom': hiss(0.45, 0.16); tone(90, 0.4, 'sawtooth', 0.12, 34); break;
     case 'edie': hiss(0.22, 0.11); tone(150, 0.2, 'sawtooth', 0.08, 42); tone(500, 0.12, 'square', 0.04, 120); break;
     case 'break': hiss(0.2, 0.12); tone(200, 0.15, 'square', 0.07, 70); break;
+    // THE HOLLOW KNOCK — a blow that does not break the secret it landed on.
+    // Solid rock answers with nothing; a shell over a void answers TWICE: the
+    // knuckle on the stone, then the cavity behind it ringing back a beat
+    // later and further away. That echo is the whole tell, so it is pitched
+    // clear of the claw's own swing and kept short enough to sit under it.
+    case 'hollow':
+      tone(150, 0.16, 'sine', 0.13, 92);                  // the knuckle on stone
+      tone(310, 0.22, 'triangle', 0.05, 280);              // the cavity rings
+      tone(305, 0.2, 'triangle', 0.026, 270, 0.075);       // ...and again, from inside
+      hiss(0.05, 0.045);                                   // grit off the seam
+      break;
     // steel meeting steel and not liking it: a bright scrape that falls away,
     // a bite of low thud under it, and one ringing partial off the housing
     // THE WARNING. A short rising pair — rising, so it encodes time REMAINING
@@ -1777,6 +1788,11 @@ function sfx(n) {
     case 'roar_beast':   // NULLFANG: a ripping sub-growl that ends in teeth
       tone(46, 1.2, 'sawtooth', 0.17, 26); tone(92, 0.9, 'square', 0.07, 38);
       tone(23, 1.2, 'sine', 0.1, 20); hiss(0.9, 0.09); break;
+    case 'short': hiss(.12,.04); tone(82,.09,'sawtooth',.025,29); break;
+    case 'alpha_step': tone(72,.07,'sine',.025,38); chink(.012,.012); break;
+    case 'alpha_leap': whoosh(.23,800,2600,.06); tone(110,.18,'sawtooth',.035,58); break;
+    case 'alpha_bark': tone(170,.18,'sawtooth',.06,70); hiss(.12,.04); tone(260,.12,'triangle',.035,90,.12); break;
+    case 'alpha_howl': tone(185,.65,'sawtooth',.035,360); tone(370,.85,'sine',.055,410,.16); tone(555,.75,'triangle',.025,615,.2); tone(410,.5,'sine',.035,165,.72); break;
     case 'roar_eagle':   // TALONHOST: a metal screech climbing off the cable
       tone(950, 0.55, 'square', 0.07, 2300); tone(1900, 0.45, 'sawtooth', 0.05, 700, 0.1);
       tone(140, 0.5, 'square', 0.05, 90, 0.05); hiss(0.5, 0.07); break;

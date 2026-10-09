@@ -135,5 +135,49 @@ Consumed: registry §1–§5. Nothing needed from another subject.
    exception rests on them being clearly separable, and that has never been
    verified with a meter.
 
+## B7. The template pass (2026-10-08, the Hollow Knight study, plan §3)
+
+She floats ~250 px over the floor and every move went back to her station, so
+the only reachable windows were the jump-reachable ones. **Every move now ends
+in `recover`**: the core sags to the player's level — its underside 40 px over
+her head, beside her (`bossRecSpot`), never on her — and hangs there venting.
+The last fight is the tightest: the holds sit at the minimal end of the
+doctrine.
+
+| move | hold p1 / p2 | measured window, worst / median (`tests/guardians.cjs`) |
+|---|---|---|
+| `mv.nullwave` | 700 / 550 (the ring expands from her while she sinks — jump it, then hit her) | ≥ 633 / ~800 |
+| `mv.ring` | 600 / 500 | ≥ 583 / ~650 |
+| `mv.beam` | 550 / 450, **counted only once the beam has burned out** | ≥ 600 / ~680 |
+| `mv.grab` | 600 / 500 | ≥ 583 / ~633 |
+
+The wave's own window was `stagT 1.0` after the last ring, which froze her
+wherever she hung; the sink after the charge replaces it.
+
+**The deck** (was `cycle++ % 4`, which threw the Null Wave that leaves her body
+at a player across the arena, and the beam that crosses the arena at a player
+under her). Bands < 220 / < 420 / ≥ 420 px: wave 4 / 1.5 / 0.3 (0 while a wave
+is out), ring 2.5 / 2 / 1, grab (once two plates have broken) 0 / 1 / 3, beam
+0.3 / 2 / 4, the blob 0.7 while the room has space. Measured: near draws ~8 %
+beam, far draws ~50 % beam.
+
+**The break:** `dazeAt 7`, `dazeSpan 3.2 s` — she drops out of the air onto
+the floor, **1.7 s (p1) / 1.35 s (p2)**, ×1.6 damage, plating open, cooldown
+7 / 8.5 s. The Song, Total Null and the grab are committed. The break clears
+any beam, lash or wave in flight (her machine is paused for its length).
+
+**Every stagger sinks her** to the same spot — the Song's 0.8 s, the shell
+breaks' 0.5 s, and Total Null's 2.0 s "FINISH IT" exposure, which used to hang
+her in the dark over the floor.
+
+**Reward check (plan §3.6).** The last guardian; her fall ends the run. No
+change.
+
 ### Changelog
-No MOTHER-V values changed this pass.
+| Value | Before | After | Reason |
+|---|---|---|---|
+| move selection (2026-10-08) | `cycle++ % 4` → wave, ring, grab/blob, beam | range deck (§B7) | the same four beats at every distance |
+| recovery after wave / ring / beam / grab | back to her station ~250 px up | `recover`: sink to the player's level, hold 700/550, 600/500, 550/450 (after the beam burns out), 600/500 ms | no reachable window |
+| wave-spent window | `stagT 1.0` (frozen where she hung) | removed — the post-charge `recover` is the window | it was out of reach |
+| hit-group break | none | `dazeAt 7`, span 3.2 s, 1.7 / 1.35 s on the floor, cooldown 7 / 8.5 s | plan §3.6 |
+| any stagger (Song, shell break, Total Null's end) | frozen where she hung | sinks to the player's level | a stagger is a window only if it is in reach |

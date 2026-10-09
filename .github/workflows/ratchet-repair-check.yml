@@ -1,0 +1,53 @@
+name: Verify Ratchet repair integration
+on:
+  push:
+    branches: [claude/clawbyte-repo-migration-byhyl8]
+    paths:
+      - .github/workflows/ratchet-repair-check.yml
+      - js/story-repair.js
+      - tests/repair-lifecycle.cjs
+      - tests/repair-browser.cjs
+      - tests/story-battery.cjs
+      - tests/chapter-one.cjs
+      - tests/battery.cjs
+      - dev.html
+permissions:
+  contents: read
+concurrency:
+  group: ratchet-repair-verification
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install browser test dependencies
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -p "require('playwright').chromium.executablePath()")" >> "$GITHUB_ENV"
+          sudo mkdir -p /opt/pw-browsers
+          sudo ln -sf "$(node -p "require('playwright').chromium.executablePath()")" /opt/pw-browsers/chromium
+      - name: Build the exact candidate
+        run: |
+          mkdir -p release-evidence/ratchet-repair
+          git rev-parse HEAD > release-evidence/ratchet-repair/commit.txt
+          node build.cjs 2>&1 | tee release-evidence/ratchet-repair/build.log
+      - name: Game, story and persistence regressions
+        run: |
+          set -o pipefail
+          node tests/run.cjs repair-browser repair-lifecycle story-opening story-progression tutorial-clarity input-focus story-battery chapter-one first-sage-route battery regress 2>&1 | tee release-evidence/ratchet-repair/regression.log
+      - name: Preserve verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ratchet-repair-verification
+          path: |
+            release-evidence/ratchet-repair/
+            tests/out/
+          retention-days: 30

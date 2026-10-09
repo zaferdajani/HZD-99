@@ -72,11 +72,15 @@ const { chromium } = require('playwright');
     await new Promise(r => setTimeout(r, 300));
 
     // ---- 4. the trader's standing line moves on the kingdom's milestones -
+    // ONE RATCHET (js/story-opening.js npcPlaced): he is woken once, in his
+    // den, and stands at the camp after the forge. The save is put in that
+    // state before the camp is loaded — that is the only way he is there.
+    G.save.flags['on_A0B|ratchet'] = 1;     // lit, so he talks rather than asks for a cell
+    G.save.flags.ratchetCamp = 1;
     loadRoom('A3');
     const npc = G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet');
     out.trader = !!npc;
     if (npc) {
-      G.save.flags['on_A3|ratchet'] = 1;    // lit, so he talks rather than asks for a cell
       G.save.flags.crystal = 1;             // the purifier is forged...
       G.state = 'PLAY'; doInteract(npc);
       out.forgedLine = !!(G.dialog && G.dialog.lines[0] === t('sl_ratchet_forged'));

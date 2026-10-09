@@ -61,6 +61,9 @@ function bossGateOpen(b) {
   if ((b.shieldT || 0) > 0) return true;
   if ((b.stagT || 0) > 0) return true;                       // the Song opens all
   if (b.kind === 'brood' && (b.st === 'restlow' || b.st === 'rest')) return true;
+  // the hit-group break is OPEN, whatever arm she is wearing: a window that
+  // still clinks at 40% is a pause, not a reward for pressing the advantage
+  if (b.st === 'daze') return true;
   return false;
 }
 
@@ -246,7 +249,9 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty) {
   // machine, or the boss can be yanked out of a committed move mid-frame.
   if (e.dazeAt && !e.dead && (e.dazeCD || 0) <= 0 && e.st !== 'daze') {
     e.dazeHits = ((e.dazeWin || 0) > 0 ? (e.dazeHits || 0) : 0) + 1;
-    e.dazeWin = DAZE_WINDOW;
+    // a guardian's own span when it has one (BSTAT.dazeSpan): the fliers are
+    // only in reach during their recoveries, so their group is two punishes
+    e.dazeWin = e.dazeSpan || DAZE_WINDOW;
     if (e.dazeHits >= e.dazeAt) { e.dazeReq = true; e.dazeHits = 0; }
   }
   // and while it IS broken open, hits land harder — the window has to be worth
