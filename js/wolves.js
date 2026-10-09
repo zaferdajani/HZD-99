@@ -434,7 +434,32 @@ const ALPHA_ART = {
 // covered (like wolfPose), the rest and the shake loop on `anim`, and the
 // yield plays once from the frame it is first seen and holds its last cell.
 const ALPHA_STRIP_H = 2.05 * 320 / 227;
+// THE CELLS OF THE PLATES THAT ARE ON DISK (assets/characters/alpha/*.webp:
+// 9-, 16- and 12-cell strips). The table below this one is the 24-cell layout
+// of a studio re-shoot that has not been delivered; slicing these plates by
+// it cut every pose in the wrong place (the rest stood 11 px off its own
+// feet, the claw tell 21). When the studio set lands, point media.js at it
+// and swap the two names — the clock that drives them is the same.
 const ALPHA_STRIP = {
+  rest:{key:'alRest',cells:9,k:1,loop:8},
+  prowl:{key:'alProwl',cells:16,k:1,from:0,to:12,dist:9},
+  roarwarn:{key:'alRoar',cells:12,k:1.17,from:0,to:3},
+  roar:{key:'alRoar',cells:12,k:1.17,from:4,to:11},
+  broodcall:{key:'alHowl',cells:12,k:1,from:0,to:5},
+  howl:{key:'alHowl',cells:12,k:1,from:6,to:11},
+  coil:{key:'alLeap',cells:12,k:1.6,from:0,to:4},
+  leap:{key:'alLeap',cells:12,k:1.6,from:5,to:8},
+  recoil:{key:'alLeap',cells:12,k:1.6,from:9,to:11},
+  turn:{key:'alLeap',cells:12,k:1.6,from:9,to:11},
+  clawwarn:{key:'alClaw',cells:12,k:1.19,from:0,to:5},
+  claw:{key:'alClaw',cells:12,k:1.19,from:6,to:11},
+  bitewarn:{key:'alBite',cells:12,k:1,from:0,to:4},
+  bite:{key:'alBite',cells:12,k:1,from:5,to:11},
+  clinch:{key:'alClinch',cells:12,k:1.25,from:0,to:3},
+  shake:{key:'alClinch',cells:12,k:1.25,from:4,to:8,loop:12},
+  free:{key:'alYield',cells:12,k:1.04,once:10},
+};
+const ALPHA_STRIP_STUDIO = {
   rest:{key:'alRest',cells:24,k:1,loop:5},
   prowl:{key:'alProwl',cells:32,k:1,from:0,to:23,dist:5},
   roarwarn:{key:'alRoar',cells:24,k:1.17,from:0,to:7},
