@@ -188,7 +188,8 @@ const SUITE = [
   ['cacheroster','the Cache has machines to bend it: V1 and V2 spawn them with the moves, V1B and X1 spawn none'],
   ['npcstrip',  'the five work strips are twelve frames of work, foot-aligned and steady'],
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
-  ['opening-order', 'the opening played with real input in the owner\'s order, desktop and phone, to Old Servo'],
+  // two full playthroughs (desktop, phone) read at a player's pace
+  ['opening-order', 'the opening played with real input in the owner\'s order, desktop and phone, to Old Servo', { timeout: 900000 }],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],
   ['preload',   'the art for the rooms she can reach is fetched before she reaches them'],
   ['boot',      'a cold open spends what it needs and buys the rest behind itself'],

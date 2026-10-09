@@ -50,6 +50,12 @@ const { chromium } = require('playwright');
       const s = await step();
       if (!s) break;
       if (s.id !== id) return s.id;            // already past it
+      // the manhwa at its story moment (js/panels.js): read it the way a
+      // player does — one press completes the caption, the next turns it
+      if (await p.evaluate(() => G.state === 'PANELS')) {
+        await p.evaluate(() => { for (let i = 0; i < 900 && G.state === 'PANELS'; i++) { if (i % 12 === 0) { keysP['Enter'] = 1; keys['Enter'] = 1; } update(1 / 30); keys['Enter'] = 0; keysP['Enter'] = 0; } });
+        continue;
+      }
       await p.evaluate(action);
       await p.waitForTimeout(60);
     }

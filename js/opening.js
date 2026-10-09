@@ -44,10 +44,14 @@ function opSay(name, keys, npc, onEnd) {
   if (npc && typeof npcSay === 'function') npcSay(npc, 0); else sfx('ui');
 }
 // one item card — name, picture, what it is for — and what happens after it
+// showItem RETURNS its card, and the card may be waiting its turn behind
+// another window (js/overlay.js) — so the chain is hung on THIS card, never on
+// whatever G.dialog happens to be when it is asked for
 function opCard(nameKey, descKey, art, demo, onEnd) {
-  showItem(t(nameKey), opFill(t(descKey)), art || null, demo || null);
-  if (G.dialog) G.dialog.onEnd = onEnd || null;
+  const card = showItem(t(nameKey), opFill(t(descKey)), art || null, demo || null);
+  if (card) card.onEnd = onEnd || null;
   else if (onEnd) onEnd();
+  return card;
 }
 // a beat that waits for the screen to be free (no window open) and a moment
 function opLater(sec, fn) { OP.later.push({ t: sec, fn }); }

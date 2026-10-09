@@ -134,7 +134,15 @@ async function play(browser, mode) {
         R.dialogs.push({ step: s.step, room: s.room, name: s.dialog.name, line: s.dialog.line, art: s.dialog.art, demo: s.dialog.demo });
         if (s.dialog.i === 0) await shot('dialog-' + (s.step || s.room));
       }
-      await steer(null); await page.keyboard.press('KeyE'); await page.waitForTimeout(110); continue;
+      // a reader's pace (js/overlay.js): a press inside 0.22 s of the last is a
+      // mash and turns no page
+      await steer(null); await page.keyboard.press('KeyE'); await page.waitForTimeout(320); continue;
+    }
+    // ---- the manhwa at its story moment (js/panels.js), read like a player ----
+    if (s.state === 'PANELS') {
+      if (!R.panels) R.panels = [];
+      if (R.panels[R.panels.length - 1] !== s.room) R.panels.push(s.room);
+      await steer(null); await page.keyboard.press('Enter'); await page.waitForTimeout(350); continue;
     }
     // ---- the repair board, by its own buttons ----
     if (s.state === 'REPAIR') {
@@ -245,12 +253,14 @@ async function play(browser, mode) {
     // talk: seat the cell, watch him wake, hear him out
     const seen = [];
     await page.keyboard.press('KeyE');
-    for (let k = 0; k < 80; k++) {
+    // a reader's pace throughout (js/overlay.js: a press inside 0.22 s of the
+    // last is a mash and turns no page)
+    for (let k = 0; k < 160; k++) {
       const d = await page.evaluate(() => ({ state: G.state, d: G.dialog && { name: G.dialog.name, line: G.dialog.lines[G.dialog.i], i: G.dialog.i }, live: npcLive(G.statics.find(q => q.extra === 'servo')), q: qState('servo_coil'), wake: OP.servoWake }));
       if (d.d) {
         const key = d.d.line;
         if (seen[seen.length - 1] !== key) { seen.push(key); if (seen.length === 2) await shot('servo-intro'); }
-        await page.keyboard.press('KeyE'); await page.waitForTimeout(120); continue;
+        await page.keyboard.press('KeyE'); await page.waitForTimeout(320); continue;
       }
       if (d.wake > 0.8 && !R.servo.wakeShot) { R.servo.wakeShot = 1; await shot('servo-waking'); }
       if (d.live && d.q === 'active' && !d.d && seen.length >= 4) break;
@@ -261,17 +271,17 @@ async function play(browser, mode) {
     await page.waitForTimeout(500);
     await shot('servo-awake');
     // a repeat visit says something else, and does not repeat the intro
-    await page.keyboard.press('KeyE'); await page.waitForTimeout(150);
+    await page.keyboard.press('KeyE'); await page.waitForTimeout(350);
     R.servo.repeat = await page.evaluate(() => G.dialog && G.dialog.lines.slice());
-    for (let k = 0; k < 10 && await page.evaluate(() => !!G.dialog); k++) { await page.keyboard.press('KeyE'); await page.waitForTimeout(120); }
+    for (let k = 0; k < 40 && await page.evaluate(() => !!G.dialog); k++) { await page.keyboard.press('KeyE'); await page.waitForTimeout(320); }
     // THE COIL COMES HOME. Fetching it is the climb into the gantries — a
     // route, not the opening — so the harness puts it in her bag, and the
     // hand-in itself is played: talk to him, read the thanks, see the drum.
     await page.evaluate(() => { G.save.bag = G.save.bag || {}; G.save.bag.coil = 1; });
     const scrap0 = await page.evaluate(() => G.save.scrap);
-    await page.keyboard.press('KeyE'); await page.waitForTimeout(150);
+    await page.keyboard.press('KeyE'); await page.waitForTimeout(350);
     R.servo.thanks = await page.evaluate(() => G.dialog && G.dialog.lines.slice());
-    for (let k = 0; k < 10 && await page.evaluate(() => !!G.dialog); k++) { await page.keyboard.press('KeyE'); await page.waitForTimeout(120); }
+    for (let k = 0; k < 40 && await page.evaluate(() => !!G.dialog); k++) { await page.keyboard.press('KeyE'); await page.waitForTimeout(320); }
     await page.waitForTimeout(400);
     R.servo.paid = await page.evaluate((s0) => ({ q: qState('servo_coil'), scrap: G.save.scrap - s0, joy: OP.coilJoy, spin: opDrumSpin(1000) !== opDrumSpin(2000) }), scrap0);
     await shot('servo-coil-home');
