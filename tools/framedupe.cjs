@@ -23,16 +23,17 @@ const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 
 const SHIPPED = [
+  // her hit string as SWING_STRIP draws it (js/entities.js)
+  ['claw_jab', 'assets/characters/hero/swing/claw_jab.webp'],
   ['claw_1', 'assets/characters/hero/swing/claw_1.webp'],
-  ['claw_2', 'assets/characters/hero/swing/claw_2.webp'],
-  ['finisher', 'assets/characters/hero/swing/finisher.webp'],
-  ['burst', 'assets/characters/hero/swing/burst.webp'],
+  ['uppercut', 'assets/characters/hero/swing/uppercut.webp'],
+  ['claw_charge', 'assets/characters/hero/swing/claw_charge.webp'],
   ['servo', 'assets/characters/npc/servo/work_loop.webp'],
   ['mono', 'assets/characters/npc/mono/work_loop.webp'],
   ['patch', 'assets/characters/npc/patch/work_loop.webp'],
   ['sage', 'assets/characters/npc/sage/work_loop.webp'],
   ['lumen', 'assets/characters/npc/lumen/work_loop.webp'],
-  ['ratchet', 'assets/characters/npc/ratchet/work_loop.webp'],
+  ['ratchet', 'assets/characters/npc/ratchet/work_loop_six.webp'],
 ];
 
 (async () => {

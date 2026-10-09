@@ -139,6 +139,7 @@ const SUITE = [
   ['minis',     "the Eye's five: they wake, telegraph, alternate, die and pay"],
   ['hzdvox',    'her voice: on the frame she moves, never clipping, never twice at once'],
   ['wolves',    'the pack, the Alpha and the flag that changes a whole species'],
+  ['retired',   'the deleted art stays deleted, and no creature wears another body while its art loads'],
   ['gait',      'she runs ON the ground: no bouncing, no falling plate mid-stride'],
   ['motion',    'the fired guardian plates are on screen, not just in the manifest'],
   ['tinker',    "Ratchet's plate set is seven poses, not one picture seven times"],

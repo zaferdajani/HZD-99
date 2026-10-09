@@ -41,10 +41,10 @@ const { chromium } = require('playwright');
 
   // ---- 1. THE ART ---------------------------------------------------------
   const art = await page.evaluate(async () => {
-    const keys = ['wolfRest', 'wolfCoil', 'wolfLunge', 'alphaRest', 'alphaRoar',
-                  'alphaHowl', 'alphaLeap', 'alphaClaw', 'alphaBite', 'alphaClinch',
-                  'alphaRecoil', 'alphaTurn', 'alphaFree',
-                  'cheetahRest', 'cheetahWarn', 'cheetahRun'];
+    // the pack's three plates, the cheetah line's three, and the Alpha's
+    // filmed takes — its ONLY body since the still plates were retired
+    const keys = ['wolfRest', 'wolfCoil', 'wolfLunge',
+                  'cheetahRest', 'cheetahWarn', 'cheetahRun'].concat(ALPHA_STRIPS);
     const out = [];
     for (const k of keys) {
       const src = MEDIA_SRC.images[k];
@@ -56,8 +56,8 @@ const { chromium } = require('playwright');
     return out;
   });
   const missing = art.filter(a => a.err || !a.ok);
-  check('every plate is declared and decodes (16)',
-    art.length === 16 && !missing.length,
+  check('every plate and Alpha take is declared and decodes (6 + ' + (art.length - 6) + ')',
+    art.length >= 15 && !missing.length,
     missing.map(a => a.k + ' ' + (a.err || 'failed to load')).join(', '));
 
   // ---- 2. THE WOLF SHOWS THREE DIFFERENT DRAWINGS -------------------------
@@ -86,19 +86,23 @@ const { chromium } = require('playwright');
       const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null);
       im.src = MEDIA_SRC.images[k];
     });
-    const mask = (im) => {
+    // `cell`: [index, cells] to mask one cell of a filmed strip
+    const mask = (im, cell) => {
       const N = 96, cv = document.createElement('canvas');
       cv.width = N; cv.height = N;
       const x = cv.getContext('2d');
-      x.drawImage(im, 0, 0, N, N);
+      if (cell) {
+        const cw = im.naturalWidth / cell[1];
+        x.drawImage(im, cell[0] * cw, 0, cw, im.naturalHeight, 0, 0, N, N);
+      } else x.drawImage(im, 0, 0, N, N);
       const d = x.getImageData(0, 0, N, N).data, m = new Uint8Array(N * N);
       for (let i = 0; i < N * N; i++) m[i] = d[i * 4 + 3] > 40 ? 1 : 0;
       return m;
     };
-    const score = async (a, b) => {
+    const score = async (a, b, ca, cb) => {
       const ia = await load(a), ib = await load(b);
       if (!ia || !ib) return 1;
-      const ma = mask(ia), mb = mask(ib);
+      const ma = mask(ia, ca), mb = mask(ib, cb);
       let inter = 0, uni = 0;
       for (let i = 0; i < ma.length; i++) { if (ma[i] & mb[i]) inter++; if (ma[i] | mb[i]) uni++; }
       return uni ? inter / uni : 1;
@@ -106,9 +110,12 @@ const { chromium } = require('playwright');
     return {
       wolfCoil: await score('wolfRest', 'wolfCoil'),
       wolfLunge: await score('wolfRest', 'wolfLunge'),
-      alphaHowl: await score('alphaRest', 'alphaHowl'),
-      alphaLeap: await score('alphaRest', 'alphaLeap'),
-      alphaRoar: await score('alphaRest', 'alphaRoar'),
+      // the Alpha's takes, each at the heart of its move against the rest
+      // take's first cell (cells from ALPHA_STRIP: the howl held, the leap
+      // airborne, the roar breaking)
+      alphaHowl: await score('alRest', 'alHowl', [0, ALPHA_STRIP.rest.cells], [9, ALPHA_STRIP.howl.cells]),
+      alphaLeap: await score('alRest', 'alLeap', [0, ALPHA_STRIP.rest.cells], [6, ALPHA_STRIP.leap.cells]),
+      alphaRoar: await score('alRest', 'alRoar', [0, ALPHA_STRIP.rest.cells], [7, ALPHA_STRIP.roar.cells]),
     };
   });
   console.log('');

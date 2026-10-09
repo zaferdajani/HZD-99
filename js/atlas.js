@@ -23,7 +23,7 @@
 // original 1.0, so that correction factor is back to 1 and these are back
 // to their own plain values — no longer scaled BY anything, just what they
 // always were.
-// crawler/hopper/blob/flier/turret draw through here every frame; brood/
+// blob/flier/turret draw through here every frame; brood/
 // atlas/zero/prism/mother/glitch have their own dedicated rigs (beast.js,
 // eagle.js, glaciere.js, furnace.js, prism.js, mother.js) and only fall
 // back to this table while their real art is still loading.
@@ -33,9 +33,10 @@ const ATLAS = {
   // k    = how many hitbox-heights the CELL should occupy on screen
   // yOff = nudge in hitbox-heights; hovering things do not stand on the cell floor
   sub: {
-    hzd:     { row: 0,  k: 1.75, yOff: 0.00 },
-    crawler: { row: 1,  k: 3.10, yOff: 0.06 },
-    hopper:  { row: 2,  k: 2.70, yOff: 0.04 },
+    // rows 0-2 (hzd, crawler, hopper) are in the sheet and drawn by nothing:
+    // she is live-drawn (ART_BIBLE §2) and the crawler and hopper are always
+    // the pack or the cheetah line (js/wolves.js), which wait for their own
+    // plates rather than flash the old machine up for a frame
     blob:    { row: 3,  k: 2.85, yOff: 0.06 },
     flier:   { row: 4,  k: 2.60, yOff: -0.10 },
     turret:  { row: 5,  k: 2.20, yOff: 0.04 },
@@ -543,7 +544,7 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   // front-hemisphere angles, which is what a turntable of stills honestly is.
   // A body only easing its facing (no scan, not a walker) keeps the fade,
   // because there it is brief and it is a turn.
-  const single = !!o.yawScan || o.mode === 'walk' || o.mode === 'spring';
+  const single = !!o.yawScan || o.mode === 'walk';
   if (single) fy = Math.round(fy) % A.cols;
   const col0 = Math.floor(fy) % A.cols, col1 = (col0 + 1) % A.cols;
   const colF = single ? 0 : fy - Math.floor(fy);
@@ -560,14 +561,6 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
       bob = Math.abs(Math.sin(g)) * dh * 0.05 * mv;
       rot = clamp(vx / 420, -1, 1) * 0.075 + Math.sin(g * 2) * 0.022 * mv;
       ky = 1 + Math.sin(g * 2) * 0.02 * mv; kx = 1 / ky;
-      break;
-    }
-    case 'spring': {               // hopper: stretch in flight, squash on landing
-      const airK = clamp(Math.abs(vy) / 700, 0, 1);
-      ky = 1 + (vy < 0 ? 0.16 : 0.10) * airK;
-      if (airK < 0.05) ky = 1 - Math.abs(Math.sin(t * 8)) * 0.05;
-      kx = 1 / ky;
-      rot = clamp(vx / 380, -1, 1) * 0.06;
       break;
     }
     case 'pulse': {                // molten things breathe slowly
@@ -619,7 +612,7 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   // it faces, so "lean forward" is forward whichever way it is looking.
   const PZ = (o.pose && ATLAS_POSE[o.pose]) || null;
   const fwd = (faceVis == null ? 1 : faceVis) >= 0 ? 1 : -1;
-  if (PZ && !(o.mode === 'walk' || o.mode === 'spring')) {
+  if (PZ && o.mode !== 'walk') {
     rot += PZ.lean * fwd; ky *= PZ.ky; kx *= PZ.kx;
   }
   c.translate(cx, footY);
@@ -635,7 +628,7 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
     // clips to the sprite alone.
     const col = o.charm > 0 ? 'rgba(63,216,238,0.42)' : 'rgba(255,235,235,0.55)';
     tintedSprite(im, sxOf(colF > 0.5 ? col1 : col0), sy, sw2, sh2, dw, dh, col, c, ddx, ddy);
-  } else if (o.mode === 'walk' || o.mode === 'spring') {
+  } else if (o.mode === 'walk') {
     // ---- cutout rig: the image is taken apart and mounted on pivots ----------
     // The lower band of the sprite is cut into two leg groups (rear half and
     // front half), each hinged at its own hip and swinging in counterphase; the
@@ -720,7 +713,6 @@ const ATLAS_POSE = {
   coil:   { sink: 0.42, lean: -0.16, splay: 0.30, drag: 0, kx: 1.12, ky: 0.82 },
   lunge:  { sink: 0.10, lean: 0.30, splay: 0, drag: 0.55, kx: 1.10, ky: 0.92 },
   winded: { sink: 0.30, lean: 0.34, splay: 0.45, drag: 0, kx: 1.08, ky: 0.86 },
-  land:   { sink: 0.50, lean: 0.06, splay: 0.50, drag: 0, kx: 1.16, ky: 0.76 },
   kick:   { sink: 0, lean: -0.20, splay: 0, drag: 0, kx: 0.92, ky: 1.08 },
   perch:  { sink: 0.30, lean: 0, splay: 0, drag: 0, kx: 1.10, ky: 0.80 },
 };
@@ -741,72 +733,3 @@ function tintedSprite(im, sx, sy, sw2, sh2, dw, dh, col, c, dx, dy) {
 }
 
 
-// ---------------------------------------------------------------------------
-// The Driller's own sheet: 12 cols x 6 rows of ANIMATION, not just a turnaround.
-//   row 0  turnaround (12 yaws — we use 5 authored buckets, left to right)
-//   row 1  walk cycle, authored facing LEFT
-//   row 2  rear-up (the bore wind-up telegraph)
-//   row 3  drive the bore-head into the floor, dust and all
-//   row 4  damaged idle — smoke and burning; phase two lives here
-//   row 5  destroyed — collapse into wreckage
-// This sheet's light is a soft top key, near-symmetric, so mirroring the
-// animation rows for right-facing is visually safe — unlike the roster sheet,
-// whose hard upper-left key made mirroring a lie. Row 0 is never mirrored; it
-// has real authored angles.
-const DRILLER = { key: 'driller', cols: 12, rows: 6, k: 2.55, yOff: 0.10 };
-// faceVis buckets -> row-0 columns (left profile ... right profile)
-const DRILLER_YAW = [[-0.75, 0], [-0.3, 2], [0.3, 3], [0.75, 8], [9, 10]];
-
-function drawDriller(c, b) {
-  if (typeof MEDIA_IMG === 'undefined' || !MEDIA_IMG[DRILLER.key]) return false;
-  const im = sheetOf(DRILLER.key, DRILLER.cols, DRILLER.rows);
-  const CW = im.width / DRILLER.cols, CH = im.height / DRILLER.rows;
-  const t = b.anim, fv = b.faceVis == null ? -1 : b.faceVis;
-  let row, col, mirror = false, extraDy = 0;
-
-  const facingRight = fv > 0;
-  if (b.dead || b.deathAnimT > 0) {
-    row = 5; extraDy = b.h * 0.10;   // seat the wreck on its shadow
-    const k = 1 - clamp((b.deathAnimT || 0) / 1.6, 0, 1);
-    col = Math.min(11, Math.floor(k * 12));
-    mirror = facingRight;
-  } else if (b.st === 'bore') {
-    if (!b.bored) { row = 2; col = Math.min(11, Math.floor((1.1 - b.t) / 1.1 * 12)); }
-    else { row = 3; col = 3 + Math.floor(t * 14) % 9; }
-    // the rear-up and bore rows are authored mostly front-on: no mirror needed
-  } else if (b.st === 'charge' || Math.abs(b.vx) > 40) {
-    row = 1; col = Math.floor(t * (b.st === 'charge' ? 18 : 11)) % 12;
-    mirror = facingRight;
-  } else if (b.hurtT > 0 || b.phase >= 2) {
-    row = 4; col = Math.floor(t * 9) % 12;
-    mirror = facingRight;
-  } else {
-    // idle: real authored yaw, driven by the eased facing — the turn passes
-    // through the front view because the front view actually exists
-    row = 0; col = 9;
-    for (const [th, cc] of DRILLER_YAW) { if (fv <= th) { col = cc; break; } }
-  }
-
-  const cx = b.x + b.w / 2, footY = b.y + b.h;
-  const dh = b.h * DRILLER.k, dw = dh * (CW / CH);
-  const dy = footY - dh + b.h * DRILLER.yOff + (typeof extraDy === 'number' ? extraDy : 0);
-  // reactive shadow (rows 3-5 carry baked dust, so soften it there)
-  const dusty = row >= 3;
-  const lean = clamp((b.vx || 0) / 420, -1, 1);
-  const sw = dw * 0.30 * (1 + Math.abs(lean) * 0.35);
-  const g = c.createRadialGradient(cx, footY, 0, cx, footY, Math.max(1, sw));
-  g.addColorStop(0, 'rgba(4,8,12,' + (dusty ? 0.3 : 0.55) + ')');
-  g.addColorStop(1, 'rgba(4,8,12,0)');
-  c.fillStyle = g;
-  c.beginPath(); c.ellipse(cx + lean * dw * 0.1, footY, sw, Math.max(2, dh * 0.05), 0, 0, 7); c.fill();
-
-  c.save();
-  c.translate(cx, 0);
-  if (mirror) c.scale(-1, 1);
-  if (b.hurtT > 0 && row !== 4) c.globalAlpha = 0.72;
-  // each cell carries a drawn frame near its edges; crop past it
-  const inx = CW * 0.09, iny = CH * 0.05;
-  c.drawImage(im, col * CW + inx, row * CH + iny, CW - inx * 2, CH - iny * 2 - CH * 0.02, -dw / 2, dy, dw, dh);
-  c.restore();
-  return true;
-}

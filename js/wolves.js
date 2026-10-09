@@ -79,25 +79,37 @@ function isCheetah(e) {
   if (e.kind !== 'crawler' && e.kind !== 'hopper') return false;
   return !!(G.roomDef && CAT_ZONES[G.roomDef.zone]);
 }
-// Fetched on arrival, not on first draw. A lazy plate means the first frame in
-// a room shows whatever the fallback is — and the fallback is the old art the
-// whole line exists to replace, so "it flashes the wrong enemy for a moment"
-// and "it draws the wrong enemy" look identical to somebody playing it.
-function beastPreload(zone) {
+// Fetched on arrival, not on first draw. There is NO fallback body any more —
+// a crawler or hopper whose plates are not here draws nothing (Enemy.draw) —
+// so a room that has the animal in it asks URGENTLY, which also requests the
+// quarter-scale stand-in (media.js mediaLow) that lands in a fraction of the
+// time; a room without one just warms the zone's set at the normal priority.
+function beastPreload(zone, def) {
   if (typeof mediaFetch !== 'function') return;
   const set = WOLF_ZONES[zone] ? WOLF_ART : (CAT_ZONES[zone] ? CHEETAH_ART : null);
   if (!set) return;
-  for (const k in set) mediaFetch(set[k].img);
+  const here = !!(def && (def.ents || []).some(e => e[0] === 'crawler' || e[0] === 'hopper'
+    || (e[0] === 'boss' && e[3] === 'alpha')));
+  for (const k in set) mediaFetch(set[k].img, here);
+}
+// IS THE BODY HERE? A crawler or hopper has no stand-in (Enemy.draw), so it
+// draws nothing — not even its shadow — until its own art can: the pack's or
+// the cheetahs' rest plate in CLAWBYTE (the fallback for every pose whose
+// strip is still in flight), the hound's or the skull's sheet in NOSTOS. Asks
+// for what is missing, urgently, so a failed or evicted fetch is re-made.
+function groundBeastReady(e) {
+  if (typeof isHero === 'function' && isHero()) {
+    const keys = e.kind === 'hopper' ? ['skull'] : ['houndIdle', 'houndRun'];
+    return keys.some(k => sheetReady(k));
+  }
+  const set = isWolf(e) ? WOLF_ART : isCheetah(e) ? CHEETAH_ART : null;
+  if (!set) return false;
+  if (mediaHas(set.rest.img)) return true;
+  if (typeof mediaFetch === 'function') mediaFetch(set.rest.img, true);
+  return false;
 }
 const CHEETAH_ART = {
   rest: { img: 'cheetahRest', k: 2.10, foot: 1 },
-  walkA: { img: 'cheetahWalkA', k: 2.10, foot: 1 },
-  walkB: { img: 'cheetahWalkB', k: 2.10, foot: 1 },
-  // the run pair is on THE FIRING LIST (§2q); until the plates land these
-  // keys resolve to nothing and drawBeastPlate falls back to the walk pair,
-  // with the run's weight carried by the transform work
-  runA: { img: 'cheetahRunA', k: 2.10, foot: 1, walkOf: 'walkA' },
-  runB: { img: 'cheetahRunB', k: 2.10, foot: 1, walkOf: 'walkB' },
   coil: { img: 'cheetahWarn', k: 2.30, foot: 1 },
   lunge: { img: 'cheetahRun', k: 2.05, foot: 0, yOff: -0.18 },
   // the filmed cycles (§2cc): k is the CELL height, chosen so the body inside
@@ -121,10 +133,6 @@ const CAT_GAIT = { strideMul: 1.22, pitch: 0.10, runAmp: 3.0, susp: 2.2 };
 // the same way is what put the pounce fifteen pixels into the floor.
 const WOLF_ART = {
   rest: { img: 'wolfRest', k: 2.35, foot: 1 },
-  walkA: { img: 'wolfWalkA', k: 2.35, foot: 1 },
-  walkB: { img: 'wolfWalkB', k: 2.35, foot: 1 },
-  runA: { img: 'wolfRunA', k: 2.35, foot: 1, walkOf: 'walkA' },
-  runB: { img: 'wolfRunB', k: 2.35, foot: 1, walkOf: 'walkB' },
   coil: { img: 'wolfCoil', k: 2.20, foot: 1 },
   lunge: { img: 'wolfLunge', k: 2.15, foot: 0, yOff: -0.22 },
   walkStrip: { img: 'wolfWalk8', cells: 8, k: 3.87 },
@@ -206,10 +214,9 @@ function wolfPose(e) {
   if ((e.windedT || 0) > 0) return 'winded';
   if ((e.landT || 0) > 0) return 'land';
   if (Math.abs(e.vx || 0) < 6) return 'rest';       // standing still stands still
-  // contact, passing, contact (mirrored by the other pair), passing — four
-  // beats off two drawings, which is what a two-frame cycle is. The run wants
-  // its own pair (ART_QUEUE §2q); until those plates land the walk pair
-  // carries the run cycle and the transform work below carries the weight.
+  // the half-step the stride is on. The names are phases, not plates: the
+  // filmed strips (walkStrip / runStrip) are what draw them, and the old
+  // two-plate pairs that used to alternate here are retired (ART_QUEUE §2q).
   const b2 = (Math.floor(e._ph) % 4) & 1;
   if (run) return b2 ? 'runB' : 'runA';
   return b2 ? 'walkB' : 'walkA';
@@ -228,10 +235,9 @@ function drawBeastPlate(c, e, ART, tame) {
   const GAIT = ART === CHEETAH_ART ? CAT_GAIT : WOLF_GAIT;
   e._strideMul = GAIT.strideMul;
   const pose = wolfPose(e);
-  // the run pair falls back to the walk pair until its plates land (§2q) —
-  // motion first, art when the FIRING LIST reaches it
+  // a walk or run phase has no plate of its own: until its filmed strip
+  // lands it stands on the REST plate, carried by the gait transform below
   let A = ART[pose] || ART.rest;
-  if (A.walkOf && !(typeof mediaHas === 'function' && mediaHas(A.img))) A = ART[A.walkOf];
   if (typeof mediaHas === 'function' && !mediaHas(A.img) && typeof mediaFetch === 'function') {
     mediaFetch(A.img);
     // and pull the other two while we are here: an animal that has to wait for
@@ -244,7 +250,7 @@ function drawBeastPlate(c, e, ART, tame) {
   // the same distance-driven phase as everything else (_ph counts half-steps;
   // a strip is one full stride = two of them), so a paw plants once per stride
   // of floor at any speed — the strip cannot moonwalk any more than the plates
-  // could. Until it loads, the plates below draw exactly as before.
+  // could. Until it loads, the rest plate stands in (see above).
   const isRun = pose === 'runA' || pose === 'runB', isWalk = pose === 'walkA' || pose === 'walkB';
   // THE OPENINGS HAVE BODIES TOO (ART_QUEUE §2cc-iii). The winded breath is
   // a LOOP on the sim clock — one breath in and out per WINDED_BREATH, so the
@@ -440,36 +446,15 @@ function wolfTameStep(e, dt) {
 //   IT MISSED   → it spins on the spot to bring its head back round. That spin
 //                 is the opening, and it is the only generous one in the fight.
 // ===========================================================================
-// One plate per state (ART_BIBLE.md §3.3 — states must differ in SILHOUETTE,
-// and a five-move boss sharing two drawings has two moves as far as the eye is
-// concerned). `foot` anchors by the floor line; the airborne states do not.
-const ALPHA_ART = {
-  rest: { img: 'alphaRest', k: 2.05, foot: 1 },
-  roarwarn: { img: 'alphaRoar', k: 2.15, foot: 1 },
-  roar: { img: 'alphaRoar', k: 2.15, foot: 1 },
-  broodcall: { img: 'alphaHowl', k: 2.30, foot: 1 },
-  howl: { img: 'alphaHowl', k: 2.30, foot: 1 },
-  // its own plate since 2026-09-02: it borrowed the roar's, so the fight's two
-  // far-band tells and its mid-band tell were one drawing (ART_BIBLE §3.3)
-  coil: { img: 'alphaCoil', k: 1.95, foot: 1 },
-  leap: { img: 'alphaLeap', k: 2.20, foot: 0 },
-  clawwarn: { img: 'alphaClaw', k: 2.10, foot: 1 },
-  claw: { img: 'alphaClaw', k: 2.10, foot: 1 },
-  bitewarn: { img: 'alphaBite', k: 2.05, foot: 1 },
-  bite: { img: 'alphaBite', k: 2.05, foot: 1 },
-  clinch: { img: 'alphaClinch', k: 2.05, foot: 1 },
-  shake: { img: 'alphaClinch', k: 2.05, foot: 1 },
-  recoil: { img: 'alphaRecoil', k: 2.10, foot: 0 },
-  turn: { img: 'alphaTurn', k: 2.05, foot: 1 },
-  free: { img: 'alphaFree', k: 2.05, foot: 1 },
-};
 // ---------------------------------------------------------------------------
 // THE ALPHA'S MOVES, FILMED (ART_QUEUE §2ax, 2026-09-05). Nine takes cut to
 // strips, one per move, mapped onto the states over each state's own clock —
 // the same table Nullfang has (BEAST_STRIP in js/beast.js) for the same
 // reason: a plate slid around a room is a picture, a take is the move. The
-// plates stay as the fallback for any state without a strip or with its
-// strip not yet over the wire.
+// strips are the Alpha's ONLY body now (2026-10-09): the nine still plates
+// that used to stand in were retired, a state without a strip of its own
+// wears the rest take, and until its strip is over the wire the Alpha is
+// the dark hold silhouette every guardian waits behind (drawBossHold).
 //
 // THE SCALE, MEASURED. The rest plate is all wolf (467 of 468 px) and draws
 // at 2.05 hitbox heights; the rest take's wolf stands 227 of its 320-px cell,
@@ -485,12 +470,10 @@ const ALPHA_ART = {
 // covered (like wolfPose), the rest and the shake loop on `anim`, and the
 // yield plays once from the frame it is first seen and holds its last cell.
 const ALPHA_STRIP_H = 2.05 * 320 / 227;
-// THE CELLS OF THE PLATES THAT ARE ON DISK (assets/characters/alpha/*.webp:
-// 9-, 16- and 12-cell strips). The table below this one is the 24-cell layout
-// of a studio re-shoot that has not been delivered; slicing these plates by
-// it cut every pose in the wrong place (the rest stood 11 px off its own
-// feet, the claw tell 21). When the studio set lands, point media.js at it
-// and swap the two names — the clock that drives them is the same.
+// THE CELLS OF THE STRIPS THAT ARE ON DISK (assets/characters/alpha/*.webp:
+// 9-, 16- and 12-cell strips). A 24-cell table for a studio re-shoot that was
+// never delivered used to sit beside this one; it was removed with the
+// plates. A re-shoot brings its own cell table with it.
 const ALPHA_STRIP = {
   rest:{key:'alRest',cells:9,k:1,loop:8},
   prowl:{key:'alProwl',cells:16,k:1,from:0,to:12,dist:9},
@@ -509,25 +492,6 @@ const ALPHA_STRIP = {
   clinch:{key:'alClinch',cells:12,k:1.25,from:0,to:3},
   shake:{key:'alClinch',cells:12,k:1.25,from:4,to:8,loop:12},
   free:{key:'alYield',cells:12,k:1.04,once:10},
-};
-const ALPHA_STRIP_STUDIO = {
-  rest:{key:'alRest',cells:24,k:1,loop:5},
-  prowl:{key:'alProwl',cells:32,k:1,from:0,to:23,dist:5},
-  roarwarn:{key:'alRoar',cells:24,k:1.17,from:0,to:7},
-  roar:{key:'alRoar',cells:24,k:1.17,from:8,to:23},
-  broodcall:{key:'alHowl',cells:24,k:1,from:0,to:11},
-  howl:{key:'alHowl',cells:24,k:1,from:12,to:23},
-  coil:{key:'alLeap',cells:24,k:1.6,from:0,to:10},
-  leap:{key:'alLeap',cells:24,k:1.6,from:11,to:18},
-  recoil:{key:'alLeap',cells:24,k:1.6,from:19,to:23},
-  turn:{key:'alLeap',cells:24,k:1.6,from:19,to:23},
-  clawwarn:{key:'alClaw',cells:24,k:1.19,from:0,to:11},
-  claw:{key:'alClaw',cells:24,k:1.19,from:12,to:23},
-  bitewarn:{key:'alBite',cells:24,k:1,from:0,to:9},
-  bite:{key:'alBite',cells:24,k:1,from:10,to:23},
-  clinch:{key:'alClinch',cells:24,k:1.25,from:0,to:7},
-  shake:{key:'alClinch',cells:24,k:1.25,from:8,to:17,loop:18},
-  free:{key:'alYield',cells:24,k:1.04,once:12},
 };
 const ALPHA_STRIPS = [...new Set(Object.values(ALPHA_STRIP).map(s=>s.key))];
 // Simulation owns time and resolved distance. Drawing is a pure lookup.
@@ -552,7 +516,7 @@ function alphaStripCell(b) {
   if(st==='idle')st='rest';
   if(st==='intro'||st==='dorm')st='roarwarn';
   if(st==='rest'&&Math.abs(b.vx||0)>25)st='prowl';
-  const S=ALPHA_STRIP[st];if(!S)return null;
+  const S=ALPHA_STRIP[st]||ALPHA_STRIP.rest;
   const from=S.from||0,to=S.to==null?S.cells-1:S.to,n=to-from+1;
   let cell;
   if(S.loop)cell=from+Math.floor((b.anim||0)*S.loop)%n;
@@ -858,32 +822,9 @@ function alphaMove(b, dt, adist) {
   b.on = !!col.d;
 }
 
-// WHICH PLATE THE STATE IS SHOWING. One lookup, one fallback, and the fallback
-// is the prowl — never a wind-up, because a boss that shows a telegraph it is
-// not actually performing is worse than one that shows none.
-function alphaPlate(b) {
-  if (b.purified || b.tamed || (b.dead && !b.forceKill)) return ALPHA_ART.free;
-  if (b.st === 'intro' || b.st === 'dorm') return ALPHA_ART.roar;
-  return ALPHA_ART[b.st] || ALPHA_ART.rest;
-}
-// HOW IT LOOKS. Nine plates composited the way the Eye's constructs are — bob,
-// lean, a swell on the wind-up — because a static plate slid around a room is
-// exactly what the guardians' leap was rebuilt to stop being.
-// one amber copy of each plate, made the first time its tell is drawn
-const ALPHA_TINT = {};
-function alphaTint(key, im) {
-  let cv = ALPHA_TINT[key];
-  if (cv) return cv;
-  if (!im || !im.naturalWidth) return null;
-  cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight;
-  const x = cv.getContext('2d');
-  x.drawImage(im, 0, 0);
-  x.globalCompositeOperation = 'source-in'; x.fillStyle = TELL_COL; x.fillRect(0, 0, cv.width, cv.height);
-  ALPHA_TINT[key] = cv;
-  return cv;
-}
-// one amber copy of a strip CELL, for the tell on a filmed move — the plate's
-// tint would be the wrong picture over it
+// one amber copy of a strip CELL, for the tell on a filmed move: the Alpha
+// returns before Boss.draw paints the rigs' wind-up amber, so the tell's
+// gold is laid on here, climbing over the wind-up
 const ALPHA_CELL_TINT = { cv: null, key: '', cell: -1 };
 function alphaStripTint(key, cell, cells) {
   const im = MEDIA_RAW[key]; if (!im || !im.naturalWidth) return null;
@@ -901,124 +842,40 @@ function alphaStripTint(key, cell, cells) {
   return T.cv;
 }
 function drawAlpha(c, b, cx, cy) {
-  if (typeof mediaFetch === 'function') {
-    for (const k in ALPHA_ART) mediaFetch(ALPHA_ART[k].img);
-    for (const k of ALPHA_STRIPS) mediaFetch(k);
-  }
-  const A = alphaPlate(b);
-  const im0 = MEDIA_IMG[A.img];
-  if (!im0 || !im0.naturalWidth) { drawBossHold(c, b); return; }
-  const im = (typeof popArt === 'function' && popArt(A.img)) || im0;
-  const t2 = b.anim || 0;
+  if (typeof mediaFetch === 'function') for (const k of ALPHA_STRIPS) mediaFetch(k);
+  const pick = alphaStripCell(b);
+  const sim = pick && MEDIA_RAW[pick.S.key];
+  if (!sim || !sim.naturalWidth) { drawBossHold(c, b); return; }
   const warn = !!(b.st && TELL_ST.test(b.st));
-  // THE FILMED MOVE, when its strip is here: drawn in the plate's own frame
-  // (foot on the hitbox floor, the same mirror, the same bob and lean) but
-  // without the plate's choreography — the corkscrew, the head-shake and the
-  // howl's rise are IN the takes, and rotating a take that already turns
-  // would turn it twice.
-  {
-    const pick = alphaStripCell(b);
-    const sim = pick && MEDIA_RAW[pick.S.key];
-    if (pick && sim && sim.naturalWidth) {
-      const S = pick.S, H = b.h * ALPHA_STRIP_H * S.k;
-      c.save();
-      c.translate(cx, b.y + b.h);
-      const bob = 0, lean = 0, pop = 1; // authored paws already carry weight
-      c.translate(0, bob);
-      c.rotate(lean);
-      c.scale(pop * ((b.face || -1) > 0 ? -1 : 1), pop);
-      if (b.hurtT > 0) c.globalAlpha *= 0.85;
-      drawStripCell(c, S.key, pick.cell, S.cells, 0, 0, H, false);
-      const cw = sim.naturalWidth / S.cells, dw = H * (cw / sim.naturalHeight);
-      if (warn && !b.dead) {
-        const dur = b.windT > 0 ? b.windT
-          : b.st === 'coil' ? TELL_SWIPE : /roarwarn|broodcall/.test(b.st) ? TELL_HEAVY : TELL_FAST;
-        const kk = clamp(1 - (b.t || 0) / dur, 0, 1);
-        const tint = alphaStripTint(S.key, pick.cell, S.cells);
-        if (tint) {
-          c.save(); c.globalCompositeOperation = 'lighter';
-          c.globalAlpha = 0.06 + 0.26 * kk;
-          c.drawImage(tint, -dw / 2, -H, dw, H); c.restore();
-        }
-      }
-      if (b.hurtT > 0) {
-        c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
-        drawStripCell(c, S.key, pick.cell, S.cells, 0, 0, H, false); c.restore();
-      }
-      c.restore();
-      if (!G.artProbe && (b.st === 'roarwarn' || b.st === 'roar')) alphaRoarRing(c, b, cx);
-      return;
-    }
-  }
-  // Scaled to the hitbox by HEIGHT. The nine plates have wildly different
-  // aspect ratios — the howl is nearly square, the leap is a long diagonal —
-  // so the GROUNDED ones are anchored by their feet and the airborne ones by
-  // their centre. Anchoring all nine the same way sinks the Alpha into the
-  // floor on every state that is taller than the prowl, which is the same bug
-  // the lattice construct's `foot` flag exists for.
-  const k = (b.h * A.k) / im.naturalHeight;
-  const dw = im.naturalWidth * k, dh = im.naturalHeight * k;
-  const cyDraw = A.foot ? (b.y + b.h) - dh / 2 : b.y + b.h / 2;
+  // THE FILMED MOVE, drawn foot on the hitbox floor and mirrored for
+  // face > 0 (the takes face LEFT). No bob, lean or spin on top: the
+  // corkscrew, the head-shake and the howl's rise are IN the takes, and
+  // turning a take that already turns would turn it twice.
+  const S = pick.S, H = b.h * ALPHA_STRIP_H * S.k;
   c.save();
-  c.translate(cx, cyDraw);
-  const bob = Math.sin(t2 * 1.7) * (A.foot ? 1.8 : 0);
-  const lean = clamp((b.vx || 0) / 900, -0.2, 0.2);
-  const pop = warn ? 1 + 0.05 * Math.sin(t2 * 20) : 1;
-  c.translate(0, bob);
-  // the corkscrew is IN the leap plate, but a plate is one frame of a spin —
-  // rotating it through the arc is what turns it into the move
-  const spin = b.st === 'leap' ? clamp(1.1 - (b.t || 0), 0, 1.1) * 1.5 * (b.face > 0 ? -1 : 1) : 0;
-  // THE WORRY, as motion rather than as a caption. The clinch plate is one
-  // frame of a head-shake; whipping the whole body about the jaw is what turns
-  // that frame into the move. Fast (about 5 Hz) and asymmetric, because a
-  // symmetric wobble reads as a bounce and an animal tearing at something does
-  // not bounce.
-  const shk = b.st === 'shake' ? Math.sin((b.anim || 0) * 31) * 0.16 : 0;
-  c.rotate(lean + spin + shk);
-  if (shk) c.translate(Math.sin((b.anim || 0) * 31 + 0.5) * 5, 0);
-  // authored facing LEFT, like every plate in this file
-  c.scale(pop * ((b.face || -1) > 0 ? -1 : 1), pop);
-  // THE HOWL RISES. The CC0 reference cycle (docs/MOVEMENT_SOURCES.md — the
-  // wolf's ten-frame howl) spends most of its frames on the head going BACK,
-  // then holds. So the broodcall wind-up is the rise — the muzzle climbs over
-  // the 0.7s tell, weight rocking to the haunches — and the howl itself is
-  // the held throat with a small tremor. One plate, choreographed; the plate
-  // is the pose, the rise is the motion. Applied in plate space (after the
-  // mirror) so the muzzle climbs whichever way it stands.
-  if (b.st === 'broodcall' || b.st === 'howl') {
-    const hk = b.st === 'broodcall'
-      ? Math.pow(clamp(1 - (b.t || 0) / TELL_HEAVY, 0, 1), 0.8) : 1;
-    const trem = b.st === 'howl' ? Math.sin(t2 * 26) * 0.015 : 0;
-    c.translate(dh * 0.04 * hk, dh * 0.02 * hk);       // weight onto the haunches
-    c.rotate(0.22 * hk + trem);                         // muzzle up (nose is -x)
-  }
+  c.translate(cx, b.y + b.h);
+  c.scale((b.face || -1) > 0 ? -1 : 1, 1);
   if (b.hurtT > 0) c.globalAlpha *= 0.85;
-  c.drawImage(im, -dw / 2, -dh / 2, dw, dh);
-  infEyeArt(c, A.img, 0, -dw / 2, -dh / 2, dw, dh);
-  // THE RISING AMBER, ON A PLATE. Boss.draw paints the wind-up amber for the
-  // rigs, and the Alpha returns before that line — so four of its five tells
-  // wore no amber at all beyond the roar's floor ring, and the claw's warning
-  // was the claw's own plate held still. The plate is tinted once through a
-  // scratch canvas and laid on with 'lighter', climbing over the tell the way
-  // the rigs' glow does. Suppressed for the art probe's COLD states by the
-  // warn test itself: only a state whose name says a blow is coming gets it.
+  drawStripCell(c, S.key, pick.cell, S.cells, 0, 0, H, false);
+  const cw = sim.naturalWidth / S.cells, dw = H * (cw / sim.naturalHeight);
+  // THE RISING AMBER. Only a state whose name says a blow is coming wears it,
+  // so the art probe's COLD states stay cold by the warn test itself.
   if (warn && !b.dead) {
     const dur = b.windT > 0 ? b.windT
       : b.st === 'coil' ? TELL_SWIPE : /roarwarn|broodcall/.test(b.st) ? TELL_HEAVY : TELL_FAST;
     const kk = clamp(1 - (b.t || 0) / dur, 0, 1);
-    const tint = alphaTint(A.img, im);
+    const tint = alphaStripTint(S.key, pick.cell, S.cells);
     if (tint) {
       c.save(); c.globalCompositeOperation = 'lighter';
       c.globalAlpha = 0.06 + 0.26 * kk;     // photographed at 0.68: a flat gold silhouette with no wolf left in it
-      c.drawImage(tint, -dw / 2, -dh / 2, dw, dh); c.restore();
+      c.drawImage(tint, -dw / 2, -H, dw, H); c.restore();
     }
   }
   if (b.hurtT > 0) {
     c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
-    c.drawImage(im, -dw / 2, -dh / 2, dw, dh); c.restore();
+    drawStripCell(c, S.key, pick.cell, S.cells, 0, 0, H, false); c.restore();
   }
   c.restore();
-
   // THE ROAR'S RADIUS, DRAWN. A stun the player cannot see the edge of is a
   // stun they will believe was unfair even when it was not — so the ring that
   // decides it is on the floor, growing over the wind-up and flashing at the

@@ -1,4 +1,4 @@
-// THE FIRST BOSS — virus-infected robot beast, and its whelps.
+// THE FIRST BOSS — virus-infected robot beast.
 //
 // Assembled from the authored parts sheet exactly as designed: every part
 // (head, neck, body, two-segment legs, chained tail) is its own sprite
@@ -1528,38 +1528,3 @@ function drawBeast(c, b) {
   } catch (e) { return false; }
 }
 
-// the whelps: Zone A ground minions are literally smaller versions of him
-function drawBeastMini(c, e) {
-  const im = beastImg(); if (!im || !im.naturalWidth) return false;
-  try {
-    const fv = e.faceVis == null ? (e.face || -1) : e.faceVis;
-    const S = (e.h * 1.5) / BEAST_H;
-    c.save();
-    c.translate(e.x + e.w / 2, e.y + e.h);
-    const sgn = fv < 0 ? 1 : -1;
-    const ta = Math.abs(fv);
-    if (e.hurtT > 0) c.globalAlpha = 0.72;
-    if (e.hypnoT > 0) c.globalAlpha = 0.85;
-    const fr = ta < 0.3 ? beastFront() : null;
-    if (fr) {
-      const k = 1 - ta / 0.3;
-      const fs = S * (270 / 274);
-      c.scale((0.82 + 0.18 * k) * fs, fs);
-      c.drawImage(fr, -120, -274);
-      c.restore();
-      return true;
-    }
-    c.translate(0, (1 - ta) * 4);
-    c.scale(sgn * (0.85 + 0.15 * ta) * S, (1 - (1 - ta) * 0.06) * S);
-    c.save(); c.globalAlpha *= 0.3; c.fillStyle = '#04070b';
-    c.beginPath(); c.ellipse(0, 3, 195, 16, 0, 0, 7); c.fill(); c.restore();
-    const fake = {
-      anim: e.anim,
-      st: Math.abs(e.vy || 0) > 80 ? 'leap' : Math.abs(e.vx || 0) > 30 ? 'walk' : 'idle',
-      vx: e.vx, vy: e.vy, t: 0, dead: false, deathAnimT: 0, hurtT: e.hurtT,
-    };
-    beastDraw(c, fake, beastPose(fake));
-    c.restore();
-    return true;
-  } catch (e2) { return false; }
-}

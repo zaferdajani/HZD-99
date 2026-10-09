@@ -1203,7 +1203,7 @@ function loadRoom(id) {
   // plates nobody in zone A will ever look at is twelve plates a phone should
   // not be downloading to get to the first room
   if (typeof floraPreload === 'function') floraPreload(ROOMS[id] && ROOMS[id].zone);
-  if (typeof beastPreload === 'function') beastPreload(ROOMS[id] && ROOMS[id].zone);
+  if (typeof beastPreload === 'function') beastPreload(ROOMS[id] && ROOMS[id].zone, ROOMS[id]);
   // the machine lets go of her the first time she stands in the room it kept
   // her in, and never again
   if (id === 'W1' && typeof wakeStart === 'function') wakeStart();

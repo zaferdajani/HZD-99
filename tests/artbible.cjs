@@ -47,9 +47,9 @@ const CAST = [
     grnd: ['stalk', 'crouch', 'swipe', 'daze'],
   },
   {
-    // the first mini-boss, plates not a rig; its tells are the five states
-    // alphaStep names, and the coil has its own plate since 2026-09-02 (it
-    // borrowed the roar's, and two tells that share a drawing are one tell)
+    // the first mini-boss, filmed takes not a rig; its tells are the five
+    // states alphaStep names, and the coil is its own stretch of the leap take
+    // (two tells that share a drawing are one tell)
     kind: 'alpha', name: 'THE ALPHA', room: 'A10',
     states: {
       rest:     { vx: 0, vy: 0, t: 1 },
@@ -251,9 +251,13 @@ const ENEMY_CAST = [
     const subs = Object.keys((typeof ATLAS !== 'undefined' && ATLAS.sub) || {})
       .concat(Object.keys((typeof ATLAS2 !== 'undefined' && ATLAS2.sub) || {}));
     // drawAtlas is only ever reached with an entity's `kind`, so a subject is
-    // live iff some spawnable kind carries that name
+    // live iff some spawnable kind carries that name. NOT the crawler or the
+    // hopper: in CLAWBYTE those are always the pack or the cheetah line
+    // (js/wolves.js) and in NOSTOS the hound and the skull, and Enemy.draw
+    // returns for them before the turntable — so a roster row declared for
+    // either would be exactly the drawn-by-nothing row this check exists for.
     const kinds = new Set(Object.keys(typeof BSTAT !== 'undefined' ? BSTAT : {})
-      .concat(['crawler', 'hopper', 'blob', 'flier', 'turret', 'guard', 'husk']));
+      .concat(['blob', 'flier', 'turret', 'guard', 'husk']));
     // NPCs are selected by their `extra` name rather than by a kind, so read
     // the actual world: every ['npc', x, y, 'servo'] placed in any room is a
     // live subject. Doing this from ROOMS rather than from a hand-kept list is
@@ -265,11 +269,11 @@ const ENEMY_CAST = [
     }
     return subs.filter(s => !kinds.has(s));
   });
-  // `hzd` is the ONE knowing exception and ART_BIBLE.md §2 says why: she is
-  // drawn procedurally because her arms are IK-solved and her scarf is
-  // simulated, and the generated row was never wired. It is listed here so the
-  // exception is a decision on the record and not an oversight nobody noticed.
-  const ALLOWED_DEAD = ['hzd'];
+  // No exceptions. `hzd` used to be the knowing one — her row was declared and
+  // never wired (she is live-drawn, ART_BIBLE.md §2) — and it was removed from
+  // the table with the crawler's and hopper's rows on 2026-10-09: a row that
+  // nothing draws is old art waiting to be mistaken for a fallback.
+  const ALLOWED_DEAD = [];
   const surprise = dead.filter(s => !ALLOWED_DEAD.includes(s));
   check('no atlas subject is declared and never drawn',
     !surprise.length, surprise.length ? surprise.join(',') : 'known: ' + ALLOWED_DEAD.join(','));
@@ -320,14 +324,16 @@ const ENEMY_CAST = [
           await new Promise(r => setTimeout(r, 50));
         if (!mediaHas(MA.rest) || !mediaHas(MA.warn)) return { err: 'eye plates never loaded' };
       }
-      // the Alpha is nine plates, fetched lazily like the Eye's
-      if (S.kind === 'alpha' && typeof ALPHA_ART !== 'undefined') {
-        const imgs = Object.values(ALPHA_ART).map(a => a.img);
-        imgs.forEach(k => mediaFetch(k, true));
+      // the Alpha is its filmed takes, fetched lazily like the Eye's plates —
+      // the FULL sheets, not the quarter-scale stand-ins, so the silhouette
+      // measured is the one that stays on screen
+      if (S.kind === 'alpha' && typeof ALPHA_STRIPS !== 'undefined') {
+        ALPHA_STRIPS.forEach(k => mediaFetch(k, true));
         const t2 = Date.now();
-        while (Date.now() - t2 < 30000 && !imgs.every(k => mediaHas(k)))
+        const full = () => ALPHA_STRIPS.every(k => mediaHas(k) && MEDIA_LOW[k] === 3);
+        while (Date.now() - t2 < 30000 && !full())
           await new Promise(r => setTimeout(r, 50));
-        if (!imgs.every(k => mediaHas(k))) return { err: 'alpha plates never loaded' };
+        if (!full()) return { err: 'alpha takes never loaded' };
       }
       const sheet = BOSS_ART[S.kind];
       if (sheet) {

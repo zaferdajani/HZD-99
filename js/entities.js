@@ -8578,6 +8578,10 @@ class Enemy {
     const flipS = profile
       ? -TP.dir * (TP.pose === 'q' ? 0.82 + TP.t * 0.18 : 1)
       : -TP.dir;
+    // the ground animals have no stand-in body (see the pack, below): until
+    // their art is here there is no shadow either — a shadow with nothing
+    // standing in it is the wrong body by another name
+    if ((this.kind === 'crawler' || this.kind === 'hopper') && !groundBeastReady(this)) return;
     // grounded creatures cast a contact shadow (lighting pass)
     if (this.kind !== 'flier' && this.kind !== 'bat') contactShadow(c, cx, this.y + this.h, this.w * 0.55, 0.38);
     // the cave bat is its own machine, hanging or flying; authored plates are
@@ -8611,19 +8615,22 @@ class Enemy {
         c.restore();
         return;
       }
+      // the hound and the skull wait for their own sheets: there is no
+      // machine body under them to borrow (NEVER THE WRONG BODY, Boss.draw)
+      if (this.kind === 'crawler' || this.kind === 'hopper') return;
     }
-    // ZONE A'S GROUND MACHINES ARE THE PACK. They used to be the boss's WHELPS
-    // — smaller copies of NULLFANG off the same parts rig — which made the
-    // first enemy in the game a spoiler for the first boss and left the opening
-    // kingdom reading as lion, lion, lion, big lion. They are electronic wolves
-    // now (js/wolves.js), and the whelp rig stays as the fallback for the one
-    // frame before the plates land. CLAWBYTE only: the Odyssey's creatures
-    // never fall back onto the machine art.
+    // THE GROUND MACHINES ARE THE PACK (meadow and conduits) AND THE CHEETAH
+    // LINE (every kingdom after) — js/wolves.js. Every CLAWBYTE zone is one or
+    // the other, so a crawler or hopper has no other body: until its plates
+    // land it draws NOTHING, the rule Boss.draw states as "never the wrong
+    // body". The whelp rig, the roster's turntable rows and the procedural
+    // hauler/leak-seeker that used to stand in were all a different creature
+    // flashing up for a frame; the plates are fetched on room entry
+    // (beastPreload) so the wait is the first frame or two at most.
     const heroEn = typeof isHero === 'function' && isHero();
-    if (isWolf(this) && drawWolf(c, this)) return;
-    if (isCheetah(this) && drawCheetah(c, this)) return;
-    if (!heroEn && G.roomDef && G.roomDef.zone === 'A' && (this.kind === 'crawler' || this.kind === 'hopper')
-        && typeof drawBeastMini === 'function' && drawBeastMini(c, this)) return;
+    if (isWolf(this)) { drawWolf(c, this); return; }
+    if (isCheetah(this)) { drawCheetah(c, this); return; }
+    if (this.kind === 'crawler' || this.kind === 'hopper') return;
     // every flying minion is a small TALONHOST — talons only, no feathers
     if (!heroEn && this.kind === 'flier' && typeof drawEagleMini === 'function' && drawFlierMini(c, this)) return;
     // THE TURRET'S HALF-SECOND, PUT BACK ON SCREEN. There has always been a red
@@ -9343,8 +9350,7 @@ class Enemy {
           charm: this.hypnoT > 0 ? 1 : 0,
           grounded: this.kind !== 'flier',
           t: this.anim, vx: this.vx, vy: this.vy,
-          air: this.kind === 'hopper' ? clamp(Math.abs(this.vy) / 400, 0, 1) : 0,
-          mode: { crawler: 'walk', guard: 'walk', hopper: 'spring', blob: 'pulse', flier: 'hover', turret: 'breathe' }[this.kind] || 'breathe',
+          mode: { guard: 'walk', blob: 'pulse', flier: 'hover', turret: 'breathe' }[this.kind] || 'breathe',
           // the drip tell, handed to the puppet: the authored sheet has one
           // pose, so the gathering and the release have to be deformation
           sag: this.drip0 || 0, reb: (this.blobReb || 0) / BLOB_REB,
@@ -9378,8 +9384,9 @@ class Enemy {
     // separates one machine from another. Each still reads as the job it used to
     // do (STORY.md: a mimic keeps its work, it only stops caring what the work
     // does to you), and each owns a distinct base geometry so no two share an
-    // outline: crawler = long low wedge, hopper = teardrop on springs,
-    // blob = sagging dome, flier = pure circle, turret = rooted trapezoid.
+    // outline: blob = sagging dome, flier = pure circle, turret = rooted
+    // trapezoid. (The crawler's wedge and the hopper's teardrop are gone: those
+    // two are always the pack or the cheetah line now, never a procedural body.)
     const EL = (typeof ELEM !== 'undefined' && typeof MIMIC_EL !== 'undefined' && ELEM[MIMIC_EL[this.kind]]) || { col: '#8aa2b5', glow: '#cfe3ef' };
     // Derived from the NULL-SEEKER DRILLER that rules Zone A: the minions are
     // built out of the same materials as the boss, so a room reads as one family.
@@ -9402,137 +9409,6 @@ class Enemy {
       fn(); c.shadowBlur = 0;
     };
     switch (this.kind) {
-      case 'crawler': {
-        if (TP.pose === 'front') {
-          // head-on: the bore-head end-on, four legs, body much narrower.
-          // Undo the outer flip — a front view is the same from either side, and
-          // mirroring it makes the machine appear to jump as it crosses centre.
-          c.save(); c.scale(1 / flipS, 1);
-          const ph0 = this.anim * 12;
-          for (const [lx, phs, dep] of [[-7, 1.1, 0.7], [7, 3.6, 0.7], [-5, 0, 1], [5, 2.4, 1]]) {
-            const sw = Math.sin(ph0 + phs);
-            c.save(); c.globalAlpha = dep < 1 ? 0.8 : 1;
-            c.strokeStyle = dep < 1 ? MAT.steel.deep : MAT.steel.dark;
-            c.lineWidth = 2.6 * dep; c.lineCap = 'round';
-            c.beginPath(); c.moveTo(lx, 1); c.lineTo(lx + sw, 9); c.stroke();
-            c.fillStyle = MAT.steel.deep; c.fillRect(lx + sw - 1.6 * dep, 8.4, 3.4 * dep, 1.8);
-            c.restore();
-          }
-          plate(() => { c.beginPath(); rr(c, -9, -5, 18, 8, 3); }, -6, 4);
-          c.fillStyle = ramp(c, MAT.bronze, -9, -1, 9, 1); c.fillRect(-9, -1, 18, 2);
-          c.save(); c.translate(0, 1);
-          c.fillStyle = ramp(c, MAT.bronze, -5, -5, 5, 5);
-          c.beginPath(); c.arc(0, 0, 4.6, 0, 7); c.fill();
-          c.strokeStyle = 'rgba(28,20,10,0.6)'; c.lineWidth = 0.7;
-          for (let i = 0; i < 5; i++) {
-            const a = this.anim * 4 + i / 5 * Math.PI * 2;
-            c.beginPath(); c.moveTo(Math.cos(a) * 1.6, Math.sin(a) * 1.6);
-            c.lineTo(Math.cos(a) * 4.4, Math.sin(a) * 4.4); c.stroke();
-          }
-          c.restore();
-          occl(c, 0, 6, 6, 2, 0.5);
-          eyes(-2, -7, 2);
-          c.restore();
-          break;
-        }
-        // DRAKK — a yard hauler that read the word "hound". Long low wedge with
-        // a cargo hopper on its back: the back attachment is what makes it
-        // unmistakable in silhouette, from the front and the side alike.
-        const ph = this.anim * 12;
-        const leg = (hx, phase, len, thick) => {
-          const step = Math.sin(phase) * 3.2, lift = Math.max(0, -Math.cos(phase)) * 2.2;
-          c.strokeStyle = MAT.steel.dark; c.lineWidth = thick; c.lineCap = 'round';
-          c.beginPath(); c.moveTo(hx, 1);
-          c.lineTo(hx + step * 0.5, 5 - lift);
-          c.lineTo(hx + step, 9 - lift * 0.4);          // visible knee, not a peg
-          c.stroke();
-          joint(hx + step * 0.5, 5 - lift, 1.5);
-          c.fillStyle = MAT.steel.deep;                  // a foot, so it stands
-          c.fillRect(hx + step - 1.6, 8.4 - lift * 0.4, 3.4, 1.8);
-        };
-        leg(-7, ph, 9, 2.6); leg(-3.5, ph + 2.4, 9, 2.2);
-        leg(4, ph + 1.1, 9, 3);  leg(8, ph + 3.6, 9, 2.4);
-        // cargo hopper (back attachment)
-        plate(() => {
-          c.beginPath(); c.moveTo(-1, -6); c.lineTo(11, -8); c.lineTo(12, -1); c.lineTo(0, -1);
-          c.closePath();
-        }, -9, -1);
-        accent(() => {                                   // rust bleeding from the bin
-          c.globalAlpha = 0.55;
-          c.fillRect(2, -2.4, 8, 1.4); c.globalAlpha = 1;
-        });
-        c.fillStyle = ramp(c, MAT.bronze, -2, -8, 11, -5);   // bronze rim of the open bin
-        c.beginPath(); c.moveTo(-1.4, -6.2); c.lineTo(11.4, -8.4); c.lineTo(11.6, -7); c.lineTo(-1.2, -4.8);
-        c.closePath(); c.fill();
-        seam(1, -4.2, 10.4, -6, 0.24);
-        // chassis: a long wedge, nose lower than tail
-        plate(() => {
-          c.beginPath(); c.moveTo(-13, -1.5); c.lineTo(-9, -4.5); c.lineTo(9, -4.5);
-          c.lineTo(12.5, -0.5); c.lineTo(10, 2.5); c.lineTo(-11, 2.5); c.closePath();
-        }, -5, 3);
-        seam(-9, -1.2, 8, -1.2, 0.2);
-        // head: a blunt tow-coupling thrust forward on a stub neck
-        plate(() => {
-          c.beginPath(); c.moveTo(-18, -1); c.lineTo(-13, -5); c.lineTo(-10, -5);
-          c.lineTo(-10, 1.5); c.lineTo(-16, 2); c.closePath();
-        }, -5, 2);
-        // a bore-head scaled down from the Driller's: conical, fluted, bronze
-        const bh = this.anim * 26;
-        c.save(); c.translate(-16.5, 0.6); c.rotate(-0.12);
-        c.fillStyle = ramp(c, MAT.bronze, -5, -3, 3, 3);
-        c.beginPath(); c.moveTo(-6.5, 0); c.lineTo(2, -2.6); c.lineTo(2, 2.6); c.closePath(); c.fill();
-        c.strokeStyle = 'rgba(20,16,10,0.55)'; c.lineWidth = 0.6;
-        for (let i = 0; i < 3; i++) {                    // flutes, turning
-          const o = ((bh + i * 2.1) % 6) - 3;
-          c.beginPath(); c.moveTo(o * 0.9 - 2, -2.2); c.lineTo(o * 0.9 - 0.6, 2.2); c.stroke();
-        }
-        c.restore();
-        occl(c, -13, 1, 5, 3, 0.5);
-        seam(-13.4, -4.2, -10.6, -4.2, 0.3);
-        eyes(-16.8, -3.6, 1.9);
-        break;
-      }
-      case 'hopper': {
-        // NIKK — a leak-seeker that copied HZD-99's own frame. It is the only
-        // mimic with ears, and it has them because it was imitating her.
-        const ph = this.anim * 9;
-        const squash = 1 + Math.sin(ph) * 0.06;
-        // coiled spring legs — the species signature, visible at 1x
-        c.strokeStyle = MAT.steel.mid; c.lineWidth = 1.5; c.lineCap = 'round';
-        for (const sx of [-4.5, 4.5]) {
-          c.beginPath();
-          for (let i = 0; i <= 8; i++) {
-            const yy = 4 + i * 0.9, xx = sx + (i % 2 ? 1.7 : -1.7) * (1 - i / 14);
-            i ? c.lineTo(xx, yy) : c.moveTo(sx, yy);
-          }
-          c.stroke();
-          c.fillStyle = MAT.steel.deep; c.fillRect(sx - 2.6, 11, 5.2, 1.8);
-        }
-        // coolant tank on the back
-        plate(() => { c.beginPath(); c.ellipse(6, -2, 3.4, 4.6, 0.25, 0, 7); c.closePath(); }, -7, 3);
-        accent(() => { c.beginPath(); c.ellipse(6.6, -2.6, 1.1, 2.1, 0.25, 0, 7); c.fill(); }, true);
-        // teardrop body
-        plate(() => {
-          c.beginPath(); c.moveTo(0, -11);
-          c.bezierCurveTo(7, -10, 9, -3, 8, 2);
-          c.bezierCurveTo(6, 6, -6, 6, -8, 2);
-          c.bezierCurveTo(-9, -3, -7, -10, 0, -11);
-          c.closePath();
-        }, -12 * squash, 6);
-        seam(-6.5, -3, 6.5, -3, 0.22);
-        // ears — the head-area element that makes it recognisable
-        c.fillStyle = ramp(c, MAT.ceramic, -8, -15, 8, -8, 0.92);
-        for (const [ex, tx] of [[-5.4, -7.6], [4.4, 6.8]]) {
-          c.beginPath(); c.moveTo(ex, -8.6); c.quadraticCurveTo(tx, -14.5, ex + (tx - ex) * 0.55, -8);
-          c.closePath(); c.fill();
-        }
-        // probe snout with a hanging drip
-        c.fillStyle = ramp(c, MAT.bronze, -12, -1, -8, 2);
-        c.beginPath(); c.moveTo(-8, -1); c.lineTo(-12.5, 0.6); c.lineTo(-8, 2.2); c.closePath(); c.fill();
-        accent(() => { c.beginPath(); c.arc(-12.4, 2.4 + Math.sin(ph * 0.7) * 0.6, 0.9, 0, 7); c.fill(); }, true);
-        eyes(-5.2, -6.4, 2);
-        break;
-      }
       case 'blob': {
         // BRUT — foundry spillage that cooled into something with legs. The only
         // asymmetric mimic: it sags, and it has three stubby legs, not four.
@@ -10306,9 +10182,6 @@ function enemyYaw(e) {
     case 'blob':
       // a mass that has no front rolls where it is going
       return S(base + clamp(e.vx / 120, -1, 1) * 0.8, 0);
-    case 'hopper':
-      // twists in the air and squares up as it lands
-      return e.on ? null : S(base + clamp(-e.vy / 500, -1, 1) * 0.9, 0);
     default:
       return null;
   }
@@ -10369,14 +10242,10 @@ function drawRosterWalk(c, e, cx) {
 }
 function enemyAtlasPose(e) {
   switch (e.kind) {
-    case 'crawler': case 'guard':
+    case 'guard':
       if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0) return 'coil';
       if ((e.lungeT || 0) > 0) return 'lunge';
       if ((e.windedT || 0) > 0) return 'winded';
-      return null;
-    case 'hopper':
-      if ((e.crouchT || 0) > 0) return 'coil';
-      if ((e.landT || 0) > 0) return 'land';
       return null;
     case 'flier':
       if ((e.holdT || 0) > 0 || (e.packetT || 0) > 0) return 'coil';
@@ -11670,35 +11539,6 @@ function bossLandClear(b, x, feetY) {
   }
   return x;
 }
-// ---------------------------------------------------------------------------
-// §3m — WHICH PLATE, IN WHICH STATE, AT WHAT SIZE (task #93).
-//
-// ONE ENTRY, AND THE REASON THERE IS ONLY ONE IS WRITTEN BELOW. Ten plates were
-// fired for this and I photographed every one against the rig it was meant to
-// replace, same pose, same frame (tools: the BOSS_MOTION_OFF switch below).
-// Six of the ten are a DIFFERENT CREATURE from the guardian that shipped, and a
-// body that changes species mid-fight is worse than a parts rig. The findings
-// are written up per plate in docs/ART_QUEUE.md §3m for the art session.
-//
-// `h` is the drawn height as a multiple of the collider height, calibrated
-// against what the rig already draws — drawBeast uses b.h * 2.35, and a plate
-// that does not match its own rig's footprint pops the frame it swaps on.
-// `lift` shifts the anchor by a fraction of the collider: these plates carry a
-// soft contact shadow inside the matte, so the opaque box bottom is a few
-// pixels BELOW the feet and the figure floats without it.
-// `faceRight` is per PLATE, not per guardian — the fired set is not consistent
-// with itself (nullfang_walk faces left, nullfang_coil faces right), and the
-// engine's convention is that a guardian faces left at face = -1.
-const BOSS_MOTION = {
-  // NULLFANG'S COIL PLATE IS RETIRED (2026-09-05). It was the one still that
-  // survived the §3m identity audit — a held wind-up, which a still can be —
-  // and it is superseded by the FILMED coil: the leap take's first six cells
-  // (js/beast.js BEAST_STRIP, ART_QUEUE §2ax) show the same crouch as a
-  // motion instead of a picture, and the whole leap after it. A plate here
-  // draws BEFORE drawBeast and returns, so leaving it wired would have kept
-  // the strip from ever playing those two states. The table stays for the
-  // guardians whose moves are still stills.
-};
 class Boss {
   // WHICH OF THE THREE WARNINGS THIS GUARDIAN MAKES.
   //
@@ -14384,45 +14224,6 @@ class Boss {
         c.restore();
         c.restore();
         return;
-      }
-    }
-    // =====================================================================
-    // §3m THE MOTION PLATES (task #93). Every guardian was fired a travel pose
-    // and a wind-up pose — ten plates, 4.4 MB — and until now not one of them
-    // was drawn by anything. They were keyed in media.js and that was the whole
-    // wiring; the code half that shipped was the WEIGHT pass (lean into
-    // acceleration, bob with stride, compress on landing), which is motion of
-    // the body and not of the limbs. These are the limbs.
-    //
-    // WHY ONLY EIGHT OF THE TEN. The brief (ART_QUEUE §3m) asked for walk_a AND
-    // walk_b — a PAIR, so travel is a cycle. What came back is one travel pose
-    // each. That is fine for a body that genuinely holds its pose while
-    // travelling: a serpent gliding, a bell drifting on its cable, a bird in a
-    // stoop. It is wrong for a quadruped mid-stride — a held stride slid along
-    // the floor is the skating that took three passes to get out of the wolves
-    // and out of her. So nullfang_walk and prism_stalk stay UNWIRED until their
-    // walk_b partner is fired (queued in §3m), and the two cats keep their
-    // animated rigs. Better a rig that steps than a painting that skates.
-    //
-    // The wind-ups have no such problem: a tell is a HELD pose by definition,
-    // which is what makes it readable, so all five wire.
-    //
-    // Drawn here, after drawAbilities, so the telegraph rings and the amber
-    // wash still land on top — "the amber wash is code; the POSE is the plate".
-    if (!heroWorld && !this.dead && this.hurtT <= 0 && this.stagT <= 0
-        && !this.purified && !G.bossRig && typeof drawPlateAnchored === 'function') {
-      const bm = BOSS_MOTION[this.kind];
-      const mp = bm && bm.states[this.st];
-      if (mp) {
-        const fv = this.faceVis == null ? (this.face || -1) : this.faceVis;
-        // mid-turn belongs to the rig: the plates are one yaw, and a plate
-        // cannot foreshorten through a turn the way the constructed front does
-        const flip = mp.faceRight ? fv < 0 : fv > 0;
-        if (Math.abs(fv) > 0.7 &&
-            drawPlateAnchored(c, mp.k, cx, this.y + this.h - (bm.lift || 0) * this.h,
-                              this.h * bm.h, flip, true, bm.anchor)) {
-          c.restore(); return;
-        }
       }
     }
     // the machine's authored art is CLAWBYTE-only — hard theme gate

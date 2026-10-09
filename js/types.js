@@ -151,7 +151,7 @@ function hurtBoxOf(e) {
   }
   if (typeof G !== 'undefined' && G.roomDef && G.roomDef.zone === 'A'
       && (e.kind === 'crawler' || e.kind === 'hopper')) {
-    const w = e.w * 1.8, h = e.h * 1.45; // whelps drawn bigger than their box
+    const w = e.w * 1.8, h = e.h * 1.45; // the pack is drawn bigger than its box
     return { x: cx2 - w / 2, y: e.y + e.h - h, w, h };
   }
   return e;
