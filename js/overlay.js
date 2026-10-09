@@ -30,7 +30,7 @@
 // only in PLAY, and every overlay here is a non-PLAY state.
 // ===========================================================================
 const OVERLAY_Q = [];
-const OVERLAY_STATES = { DIALOG: 1, SHOP: 1, OFFER: 1, CUT: 1, CINE: 1, REPAIR: 1, TRIAL: 1 };
+const OVERLAY_STATES = { DIALOG: 1, SHOP: 1, OFFER: 1, CUT: 1, CINE: 1, REPAIR: 1, TRIAL: 1, PANELS: 1 };
 // a card raised FROM one of these menus (a purchase, a learned skill) is shown
 // in place of the menu and hands back to it when read
 const CARD_RETURN = { SHOP: 1, SKILLS: 1, CREST: 1, BAG: 1, RELICS: 1, PAUSE: 1, MAP: 1, BRAID: 1 };

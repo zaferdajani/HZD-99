@@ -50,7 +50,7 @@ const stage = (page, room, flags, keepPanels) => page.evaluate(([room, flags, ke
 }, [room, flags, !!keepPanels]);
 const state = page => page.evaluate(() => ({ st: G.state, id: G.panels && G.panels.seq.id, i: G.panels && G.panels.i,
   ph: G.panels && G.panels.ph, done: G.panels ? panelsRevealDone(G.panels.reveal) : null,
-  rev: G.panels && G.panels.reveal ? G.panels.reveal.n : null }));
+  rev: G.panels && G.panels.reveal ? panelsRevealCount(G.panels.reveal) : null }));
 const waitFor = (page, fn, ms) => page.waitForFunction(fn, null, { timeout: ms || 8000 }).then(() => true, () => false);
 async function tapKey(page, code) {
   await page.evaluate(c => { keys[c] = true; keysP[c] = true; }, code);
@@ -108,7 +108,7 @@ async function tapKey(page, code) {
     await page.evaluate(() => { const P = G.panels; while (P.list[P.i] && !P.list[P.i].cap) panelsAdvance(P); });
     // pick a panel whose caption is not baked into the art in English
     await page.evaluate(() => { const P = G.panels; while (P.list[P.i] && (P.list[P.i].baked || !P.list[P.i].cap)) panelsAdvance(P); });
-    await waitFor(page, () => G.panels && G.panels.ph === 'show' && G.panels.t > 0.45 && G.panels.reveal && G.panels.reveal.n > 0, 4000);
+    await waitFor(page, () => G.panels && G.panels.ph === 'show' && G.panels.t > 0.45 && G.panels.reveal && panelsRevealCount(G.panels.reveal) > 0, 4000);
     s = await state(page);
     check('a caption reveals progressively', s.done === false && s.rev > 0, JSON.stringify(s));
     const i0 = s.i;

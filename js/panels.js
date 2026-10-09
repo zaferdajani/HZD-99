@@ -137,7 +137,6 @@ const PANEL_SEQ = [
 ];
 const PANEL_ZOOM = 0.04;          // the most any crop is ever pushed or drifted
 const PANEL_XF = 0.45;            // cross-dissolve between panels
-const PANEL_CPS = 46;             // caption reveal, characters per second
 const PANEL_TAP = 0.35;           // a press shorter than this is a confirm
 const PN = { img: {}, room: null, settle: 0, ready: 0, queue: [], meetCores: null };
 
@@ -147,10 +146,9 @@ function panelsAtClimb() {
   const cx = player.x + player.w / 2, feet = player.y + player.h;
   return cx >= 17 * TILE && cx <= 29 * TILE && feet <= 12 * TILE + 4;
 }
-function panelsReduced() {
-  try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return true; } catch (e) {}
-  return !!(G.save && G.save.opts && G.save.opts.reduceMotion);
-}
+// the player's choice wins either way (an explicit OFF beats the OS setting);
+// until one is made the OS decides — js/reveal.js reduceMotion()
+function panelsReduced() { return reduceMotion(); }
 function panelsSeq(id) { return PANEL_SEQ.find(s => s.id === id) || null; }
 // The save's own record, created on first sight of a save. A sequence whose
 // event this save had ALREADY passed is marked past, not played: a player who
@@ -283,18 +281,18 @@ function panelsStart(id, opts) {
   if (typeof sfx === 'function') sfx('ui');
   return true;
 }
-// THE CAPTION'S REVEAL, BEHIND ONE ADAPTER. js/reveal.js (the TEXT workstream)
-// owns progressive text for the whole game; when it lands, these four calls
-// are the only place that has to change. The contract the player relies on:
-// the first confirm completes the reveal, a SEPARATE confirm advances, and an
-// unread caption never advances on its own. Reduced motion shows it whole.
-function panelsRevealStart(text) {
-  const ch = Array.from(text || '');
-  return { ch, n: panelsReduced() ? ch.length : 0 };
-}
-function panelsRevealTick(r, dt) { if (r) r.n = Math.min(r.ch.length, r.n + dt * PANEL_CPS); }
-function panelsRevealDone(r) { return !r || r.n >= r.ch.length; }
-function panelsRevealFinish(r) { if (r) r.n = r.ch.length; }
+// THE CAPTION'S REVEAL is js/reveal.js's, the one engine every reader in the
+// game types through: the player's text speed (and instant text), Reduced
+// motion, Arabic revealed whole words at a time so letters keep their joins,
+// graphemes never split. The contract the player relies on is unchanged: the
+// first confirm completes the reveal, a SEPARATE confirm advances, and an
+// unread caption never advances on its own.
+function panelsRevealStart(text) { return revealStart(String(text || '')); }
+function panelsRevealTick(r, dt) { revealTick(r, dt); }
+function panelsRevealDone(r) { return revealDone(r); }
+function panelsRevealFinish(r) { revealSkip(r); }
+// how many characters of the full caption are visible, for the wrapped walk
+function panelsRevealCount(r) { return r ? Array.from(revealText(r)).length : 0; }
 // what the plate shows for this panel in this language — a crop that already
 // carries the page's own English lettering does not repeat it in English
 function panelsCapText(p) {
@@ -476,7 +474,7 @@ function panelsDrawCaption(P, p, alpha) {
   }
   // the reveal walks the SAME wrapped lines the full caption occupies, so the
   // box never changes shape while it fills
-  let left = Math.floor(P.reveal.n);
+  let left = panelsRevealCount(P.reveal);
   c.font = L.font; c.textBaseline = 'middle';
   if (rtl) c.direction = 'rtl';
   c.textAlign = teaser ? 'center' : (rtl ? 'right' : 'left');
