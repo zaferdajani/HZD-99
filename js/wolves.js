@@ -105,6 +105,8 @@ const CHEETAH_ART = {
   // walk's body fills 0.58 of its cell, the gallop's is cut from a wider take)
   walkStrip: { img: 'cheetahWalk8', cells: 8, k: 3.57 },
   runStrip: { img: 'cheetahRun6', cells: 6, k: 3.64 },
+  windedStrip: { img: 'cheetahWinded6', cells: 6, k: 3.55 },
+  landStrip: { img: 'cheetahLand4', cells: 4, k: 3.57 },
 };
 // how each animal carries its run (drawBeastPlate): a wolf bounds, a cheetah
 // runs a rotary gallop — longer reach, deeper back flexion, harder suspension
@@ -127,6 +129,8 @@ const WOLF_ART = {
   lunge: { img: 'wolfLunge', k: 2.15, foot: 0, yOff: -0.22 },
   walkStrip: { img: 'wolfWalk8', cells: 8, k: 3.87 },
   runStrip: { img: 'wolfRun6', cells: 6, k: 3.94 },
+  windedStrip: { img: 'wolfWinded6', cells: 6, k: 3.89 },
+  landStrip: { img: 'wolfLand4', cells: 4, k: 3.89 },
 };
 // ---------------------------------------------------------------------------
 // IT WALKS. IT DOES NOT GLIDE.
@@ -148,8 +152,8 @@ const WOLF_ART = {
 // fewer poses, longer reach, a suspension beat where every paw is off the
 // ground). Patrol speed is 62; anything faster than 95 is running. The run
 // stride is half again the walk's, which is where the reach comes from.
-// THE RECOVERIES, re-posed from the rest plate until their own plates land
-// (ART_QUEUE §2cc). Plate space: the animal faces LEFT, +rot turns the nose UP
+// THE RECOVERIES, re-posed from the rest plate — now only the fallback while
+// their filmed strips (windedStrip / landStrip, ART_QUEUE §2cc-iii) load. Plate space: the animal faces LEFT, +rot turns the nose UP
 // (canvas rotation is clockwise and the nose is on the -x side), and the pivot
 // is the middle of the feet line.
 //   winded — after the crawler's lunge: head and shoulders DOWN, the whole
@@ -162,6 +166,10 @@ const BEAST_RECOVER = {
   winded: { rot: -0.12, kx: 1.10, ky: 0.80, dx: 0.04, heave: 9 },
   land:   { rot: -0.07, kx: 1.16, ky: 0.70, dx: 0, heave: 0 },
 };
+// one full breath of the winded strip, in seconds: the filmed pant is ~1.6 s,
+// played faster because the punish window is only 0.5-0.75 s and a breath
+// that never finishes inside it reads as a held pose, not a heave
+const WINDED_BREATH = 0.6;
 const STRIDE = 30;                          // px of floor per half-step, walking
 const STRIDE_RUN = 46;                      // ...and running (the cheetah adds more)
 // AIRBORNE MEANS OFF THE GROUND FOR REAL. Enemies carry `on` now (moveEnt),
@@ -238,12 +246,26 @@ function drawBeastPlate(c, e, ART, tame) {
   // of floor at any speed — the strip cannot moonwalk any more than the plates
   // could. Until it loads, the plates below draw exactly as before.
   const isRun = pose === 'runA' || pose === 'runB', isWalk = pose === 'walkA' || pose === 'walkB';
-  const SA = isRun ? ART.runStrip : (isWalk ? ART.walkStrip : null);
+  // THE OPENINGS HAVE BODIES TOO (ART_QUEUE §2cc-iii). The winded breath is
+  // a LOOP on the sim clock — one breath in and out per WINDED_BREATH, so the
+  // flanks keep heaving however long the window is held. The landing is ONCE,
+  // clocked by the landing timer itself: strike, fold, lowest, half-risen,
+  // and it ends on the half-risen cell exactly as the window closes.
+  const SA = isRun ? ART.runStrip : isWalk ? ART.walkStrip
+    : pose === 'winded' ? ART.windedStrip : pose === 'land' ? ART.landStrip : null;
   let cell = -1;
   if (SA && typeof mediaHas === 'function') {
     if (mediaHas(SA.img)) {
-      const half = (((e._ph || 0) % 2) + 2) % 2;
-      cell = Math.min(SA.cells - 1, Math.floor(half / 2 * SA.cells));
+      if (pose === 'winded') {
+        const b = (((e.anim || 0) / WINDED_BREATH) % 1 + 1) % 1;
+        cell = Math.min(SA.cells - 1, Math.floor(b * SA.cells));
+      } else if (pose === 'land') {
+        const L0 = e.land0 || HOP_LAND_T;
+        cell = clamp(Math.floor((1 - (e.landT || 0) / L0) * SA.cells), 0, SA.cells - 1);
+      } else {
+        const half = (((e._ph || 0) % 2) + 2) % 2;
+        cell = Math.min(SA.cells - 1, Math.floor(half / 2 * SA.cells));
+      }
       A = SA;
     } else if (typeof mediaFetch === 'function') mediaFetch(SA.img);
   }
@@ -318,7 +340,8 @@ function drawBeastPlate(c, e, ART, tame) {
   if (pitch) c.rotate(pitch);
   // THE RECOVERY POSES, in plate space and pivoted on the FEET so the paws
   // stay on the floor (ART_BIBLE §3.4) whatever the body does above them.
-  const R = BEAST_RECOVER[pose];
+  // ...the transform stand-in only while the filmed opening is still in flight
+  const R = cell < 0 ? BEAST_RECOVER[pose] : null;
   if (R) {
     const heave = R.heave ? Math.sin((e.anim || 0) * R.heave) * 0.025 : 0;
     c.translate(0, dh / 2);

@@ -26,10 +26,11 @@ look at to answer "did that actually happen".
 | `hero/` | HZD-99 herself, every plate locked to `ref/hzd99_canon.jpg` | 26 |
 | `crystal/` | The purifier crystal: the weapon, the grips, the four slash light-sheets | 15 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
-| `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line; `beasts/cycles/` the filmed walk and run takes | 22 |
+| `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line; `beasts/cycles/` the filmed walk, run, winded and landing takes | 26 |
+| `roster/cycles/`, `talon/`, `bat/cycles/`, `sage/cycles/` | THE ROSTER WALKS (ART_QUEUE §2cc-iv…vii): the guard, blob, flying minion, bat and sage — green start plates, takes, the perch and exhale plates | 14 |
 | `flora/` | Alien plant life, two species per kingdom | 12 |
 | `gear/` | Thrust boots and the save pod, dormant + active; Ratchet's repair board, its cell, the wake-room lamp | 7 |
-| `_sheets/` | Contact sheets and before/after comparisons | 17 |
+| `_sheets/` | Contact sheets and before/after comparisons | 18 |
 | `manhua/ch1/` | THE MANHUA, chapter one — the 27 as-fired pages of the second edition (`*_asfired.jpg`, 1024/q90), the refused first edition kept beside them (`*_ed1_asfired.jpg`), and `prompts.json`, the exact prompt and every take of every page; ledger in `docs/MANHUA.md` | 55 |
 
 `beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the
@@ -71,6 +72,23 @@ wolf walk ≥ 0.165, wolf run ≥ 0.242, cheetah walk ≥ 0.270, cheetah run ≥
 wolf run's first cut found TWO strides (period 1.71 s, two cells 1.3% apart — the
 same pose twice) and was re-cut to one (0.54 s). Files: `*_green_start.jpg` (the
 start frames), `*_take.jpg` (each take as a contact sheet).
+
+The rest of §2cc followed the same day, the same way, and the same test: no strip
+ships with two cells that are the same picture. The pack's OPENINGS — winded (6, a
+loop) and land (4, once) — needed second takes: the first pants were so gentle the
+cells were 0.7-1.0% apart, which is the "copies of the same move" the owner ruled
+out, and were re-fired with the heave spelled out (wolf ≥ 7.4%, cheetah ≥ 5.3%); the
+first wolf landing leapt out of the top of the frame and flashed white, and was
+re-fired as a short hop. Landings are cut at hand-picked beats (`VIDSTRIP_TIMES`),
+the strike on the first frame the paws are down. Then the roster, each re-plated onto
+green from its shipped identity first (guard `style_d/guard_4`, blob `style_d/blob_0`,
+TALONHOST `eagle/kCharge`, bat `bat/flap_up`, sage `sage/stand`): guard walk 8
+(≥ 8.1%), blob crawl 8 (≥ 4.8%), minion chase 6 (≥ 32%) and cruise 8 (≥ 25%), bat flight 6
+(≥ 18.5%), sage walk 8 (≥ 9.8%), plus two stills — the minion's perch and the
+sage's exhale. Fliers are cut with `VIDSTRIP_FLOAT=1` (no floor line to clip the
+downstroke; shed flecks dropped). The first cruise take touched the frame edge on
+every downstroke and was re-fired from a smaller-framed start plate
+(`talon/green_start_small.jpg`). Every job id is in the commit that wired it.
 
 THE WOLF WAS REGENERATED ONCE AND THE ALPHA TWICE, and both for the same
 reason: a plate set is only a character if every plate is the SAME character.

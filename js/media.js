@@ -107,6 +107,17 @@ const MEDIA_SRC = {
     wolfRun6: 'assets/characters/beasts/wolf_run6.webp',
     cheetahWalk8: 'assets/characters/beasts/cheetah_walk8.webp',
     cheetahRun6: 'assets/characters/beasts/cheetah_run6.webp',
+    wolfWinded6: 'assets/characters/beasts/wolf_winded6.webp',
+    wolfLand4: 'assets/characters/beasts/wolf_land4.webp',
+    cheetahWinded6: 'assets/characters/beasts/cheetah_winded6.webp',
+    cheetahLand4: 'assets/characters/beasts/cheetah_land4.webp',
+    // THE ROSTER'S WALKS AND THE MINI'S FLIGHT (ART_QUEUE §2cc-iv/v/vi): filmed
+    // strides, every cell measured distinct before it was cut
+    guardWalk8: 'assets/characters/roster/guard_walk8.webp',
+    blobCrawl8: 'assets/characters/roster/blob_crawl8.webp',
+    talonMiniCruise8: 'assets/characters/talon/cruise8.webp',
+    talonMiniChase6: 'assets/characters/talon/chase6.webp',
+    talonMiniPerch: 'assets/characters/talon/perch.webp',
     // ...and the two WALK frames, because a plate that slides is a wolf on
     // treads. See wolfPose(): the cycle is driven by ground travelled.
     wolfWalkA: 'assets/characters/beasts/wolf_walka.webp',
@@ -182,6 +193,9 @@ const MEDIA_SRC = {
     // THE SAGE (§2e) — six authored states replacing drawSage's procedural
     // body at the same anchor. Amber on exactly the three telegraph states.
     sageStand: 'assets/characters/sage/stand.webp',
+    // filmed walk + authored exhale (ART_QUEUE §2cc-vii), three-quarter LEFT
+    sageWalk8: 'assets/characters/sage/walk8.webp',
+    sageExhale: 'assets/characters/sage/exhale.webp',
     sageCoil: 'assets/characters/sage/coil.webp',
     sageLunge: 'assets/characters/sage/lunge.webp',
     sageGather: 'assets/characters/sage/gather.webp',
@@ -193,6 +207,7 @@ const MEDIA_SRC = {
     batShiver: 'assets/characters/bat/shiver.webp',
     batDive: 'assets/characters/bat/dive.webp',
     batFlapUp: 'assets/characters/bat/flap_up.webp',
+    batFlight6: 'assets/characters/bat/flight6.webp',     // one filmed wingbeat (§2cc-vii)
     batFlapDn: 'assets/characters/bat/flap_dn.webp',
     // THE ORACLE'S SHRINE + PARLOR (§2h) — the cable shrine standing in B3
     // (drawOracleBooth's hook was live before the plate) and the data-den
@@ -741,6 +756,10 @@ const MEDIA_LOW = {};
 function mediaDirty(k) {
   try { delete SOFT_ART[k]; } catch (e) {}
   try { delete ATLAS_PROC[k]; } catch (e) {}
+  // ...and the pop grade, which is cached under the media key itself by every
+  // body that grades its own plate (the pack, the roster's walks): kept, it
+  // would hold the quarter-size stand-in on screen after the sheet landed
+  try { delete POP_ART[k]; } catch (e) {}
   // the tile layer is baked once per room — a sheet that lands after that
   // first render would never appear, so force a repaint when art arrives
   if (k === 'platforms' || k === 'strataRubble' || k === 'strataIceB' || k === 'strataLava') {

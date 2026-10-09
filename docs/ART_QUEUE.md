@@ -5879,7 +5879,7 @@ arc progress (`b.leapT0`); #1 needs a `run` state in the glitch step logic;
 #3 and #4 need their states. `tests/artbible.cjs` measures silhouettes and
 feet; `tests/openings.cjs` must stay green for every move touched.
 
-## 2cc. THE ROSTER WALKS — walk and run strips per creature, and a body for every opening ✱ NEW 2026-10-08 (code session, enemy motion pass) — briefed, NOTHING FIRED
+## 2cc. THE ROSTER WALKS — walk and run strips per creature, and a body for every opening ✱ NEW 2026-10-08 (code session, enemy motion pass) — §i-vii FIRED + WIRED 2026-10-09; §viii optional
 
 **Why.** The owner's study (plan §1): *"Enemies look like paper because they are
 single still images being slid around … Code fixes the motion; real walk and run
@@ -5956,6 +5956,8 @@ plating, dark spine, amber-free eye (amber is the telegraph's).
 
 ### 2cc-iii. THE PACK'S OPENINGS — `wolfWinded` / `cheetahWinded` (6, loop) and `wolfLand` / `cheetahLand` (4, once)
 
+**FIRED + WIRED 2026-10-09.** `wolf_winded6` / `cheetah_winded6` (6×192, 62 / 54 KB) and `wolf_land4` / `cheetah_land4` (4×192, 29 / 27 KB). The first winded takes panted too gently (6 cells only 0.7-1.0% apart — copies) and were re-fired with the heave spelled out (now ≥ 5.3%); the first wolf landing leapt out of frame and flashed white and was re-fired as a short hop. The landing is cut at hand-picked beats (`VIDSTRIP_TIMES`: strike on the first frame the paws are down, fold, lowest, half-risen). `drawBeastPlate` plays winded as a loop on the sim clock (one breath per 0.6 s) and land once across the landing timer; `BEAST_RECOVER` is now only the fallback while they load.
+
 These replace the re-posed rest plate (`BEAST_RECOVER`) the code draws today.
 - **Winded ×6, looping** — after the lunge: head hung BELOW the shoulder line,
   forelegs splayed a little wide, back sagging, flanks heaving (cells 0-5 are
@@ -5970,6 +5972,8 @@ These replace the re-posed rest plate (`BEAST_RECOVER`) the code draws today.
 
 ### 2cc-iv. THE GUARD — `guardWalk` (8)
 
+**FIRED + WIRED 2026-10-09.** `roster/guard_walk8.webp` (8×192, 79 KB), key `guardWalk8`, two heavy steps under a steady plate (cells ≥ 8.1% apart). `drawRosterWalk` (entities.js) routes a walking guard through it on the turntable's own gait clock (walkD, one cycle per two `ATLAS_STRIDE`s) once it is settled into a heading; turns, tells and the shed plate stay on the turntable. It takes the npcs sheet's pop grade (lift 0.45) so the body does not change colour when it starts walking.
+
 Identity: the guard row of `npc_6yaw.png` (row 6), in profile facing LEFT, the
 riot plate carried UP on its leading side, red sensor slit, hazard striping on
 the plate edge. A heavy two-legged mech walk: 0 lead foot plants, 1 weight
@@ -5983,6 +5987,8 @@ distance-clocked cut-out walk stays.
 
 ### 2cc-v. THE BLOB — `blobCrawl` (8)
 
+**FIRED + WIRED 2026-10-09.** `roster/blob_crawl8.webp` (8×192, 69 KB), key `blobCrawl8` — the shipped roster blob walks on stone legs, so the strip is that blob's leg ripple, not a legless roll (cells ≥ 4.8% apart). The roster sheet's colour/form/rim grade is baked into the file and the pop grade applied at draw, matching the turntable; the drip tell and rebound stay on the turntable's deformation.
+
 Identity: the blob row of the roster atlas (molten mass, slag crust, red core).
 A peristaltic roll: 0 mass gathered at the rear, 1-2 the front edge flows
 forward and thins, 3 the bulk rolls over its own leading edge, 4-6 the rear
@@ -5991,6 +5997,8 @@ floor line in every cell; the core light rides the bulk. The drip tell and its
 rebound stay code deformation — this is the travel only.
 
 ### 2cc-vi. THE FLYING MINION — `talonMiniCruise` (8) and `talonMiniChase` (6)
+
+**FIRED + WIRED 2026-10-09.** `talon/chase6.webp` (6×192, 41 KB, cells ≥ 32% apart), `talon/cruise8.webp` (8×192, 67 KB, cells ≥ 25% apart), `talon/perch.webp` (one 256 cell). Seedance turned the three-quarter plate FRONT-ON in flight, which is how the mini was always drawn (and banked), so it is kept front-on. The first cruise take clipped its wingtips on every downstroke and was re-fired from a smaller-framed start plate. `tools/vidstrip.cjs` grew `VIDSTRIP_FLOAT=1` for fliers: no floor line clipping the downstroke, and shed flecks dropped.
 
 Identity: the small TALONHOST (`eagleParts`, the `pDown`/`pUp` figures the mini
 flaps between today). Three-quarter side view facing LEFT, so it can face its
@@ -6004,6 +6012,8 @@ travel (the code mirrors it).
   gripping the floor line (today the code borrows the boss's `pRest`).
 
 ### 2cc-vii. THE BAT — `batFlight` (6) and THE SAGE — `sageWalk` (8)
+
+**FIRED + WIRED 2026-10-09.** `bat/flight6.webp` (6×192, 43 KB, cells ≥ 18.5% apart) on the same 18 rad/s beat the two plates alternated on; `sage/walk8.webp` (8×192, 34 KB, ≥ 9.8%) clocked by floor covered; `sage/exhale.webp` (one 256 cell) replaces the bow transform. Also fixed: the flap plates face LEFT and the dive RIGHT, and one shared mirror rule had flown the flapping bat backwards between dives — facing is per plate now.
 
 - **batFlight ×6** — identity `batFlapUp`/`batFlapDn` (§2d): a full flap,
   wings fully up (0), sweeping down (1-2), fully down (3), recovering (4-5).

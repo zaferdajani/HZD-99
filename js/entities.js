@@ -9331,6 +9331,10 @@ class Enemy {
     }
     // EVERY WIND-UP WEARS THE SAME COLOUR (drawEnemyTell, below the class)
     drawEnemyTell(c, this, cx);
+    // a walker on a FILMED STRIDE draws that instead (ART_QUEUE §2cc-iv/v);
+    // the turntable below keeps everything the strip is not — turns, tells,
+    // the drip, the shed plate
+    if (drawRosterWalk(c, this, cx)) return;
     // Pre-rendered 3D turnaround. Selected by angle, never mirrored, so the baked
     // key light stays on the correct side as the machine turns.
     if (drawAtlas(c, this.kind, this.faceVis, cx, this.y + this.h, this.h, {
@@ -10195,16 +10199,44 @@ function drawEnemyTell(c, e, cx) {
 //   perched          — pRest: folded, sat on the ledge at the end of its beat.
 // Everything else is the mini's own flight, BANKED toward where it is going —
 // it is drawn front-on, so leaning into its travel is how it faces it.
+// THE MINI'S OWN FLIGHT IS FILMED (ART_QUEUE §2cc-vi): a cruise beat at
+// patrol pace and a harder chase beat, each one wingbeat of measured-distinct
+// cells, front-on like the figure pair they replace and banked the same way.
+// And it PERCHES on a plate of its own instead of borrowing the boss's.
+// Cell sizes are in hitbox WIDTHS, matched to the figures' drawn wingspan
+// (pDown: 2.39 widths across at the mini's scale).
+const TALON_MINI = {
+  cruise: { img: 'talonMiniCruise8', cells: 8, beat: 0.7, w: 2.42 },
+  chase:  { img: 'talonMiniChase6',  cells: 6, beat: 0.42, w: 2.42 },
+};
 function drawFlierMini(c, e) {
   const fig = ((e.holdT || 0) > 0 || (e.packetT || 0) > 0) ? 'kCharge'
     : (e.riseT || 0) > 0 ? 'kRecover' : e.perched ? 'pRest' : null;
   const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
+  if (fig === 'pRest' && typeof drawStripCell === 'function') {
+    const ph = e.w * 2.3;                         // pRest is 2.2 widths across
+    if (e.hurtT > 0) c.globalAlpha = 0.72;
+    const ok = drawStripCell(c, 'talonMiniPerch', 0, 1, cx, e.y + e.h, ph, (e.dir || -1) > 0);
+    c.globalAlpha = 1;
+    if (ok) return true;
+  }
   if (!fig) {
     const bank = clamp((e.vx || 0) / Math.max(60, e.spd || 60), -1, 1) * 0.22;
     c.save();
     c.translate(cx, cy); c.rotate(bank); c.translate(-cx, -cy);
     let ok = false;
-    try { ok = drawEagleMini(c, e); } finally { c.restore(); }
+    try {
+      // the chase beat when it is diving or flying flat out, the cruise otherwise
+      const fast = (e.vy || 0) > 120 || Math.hypot(e.vx || 0, e.vy || 0) > Math.max(90, (e.spd || 60) * 1.4);
+      const T = fast ? TALON_MINI.chase : TALON_MINI.cruise;
+      const sh = e.w * T.w;
+      const cell = Math.floor(((((e.anim || 0) / T.beat) % 1) + 1) % 1 * T.cells);
+      if (e.hurtT > 0) c.globalAlpha = 0.72;
+      if (e.hypnoT > 0) c.globalAlpha = 0.85;
+      ok = typeof drawStripCell === 'function' && drawStripCell(c, T.img, cell, T.cells, cx, cy + sh / 2, sh, false);
+      c.globalAlpha = 1;
+      if (!ok) ok = drawEagleMini(c, e);
+    } finally { c.restore(); }
     return ok;
   }
   if (typeof egFigA !== 'function' || typeof eagleImg !== 'function') return false;
@@ -10282,6 +10314,56 @@ function enemyYaw(e) {
 // WHICH POSE THE STATE WEARS (drawAtlas ATLAS_POSE). Every attack has a wind-
 // up and a recovery, and each of them now changes the SILHOUETTE rather than
 // only the colour: tests/artbible.cjs's ENEMY cast measures it.
+// THE ROSTER WALKS ON FILMED STRIDES (ART_QUEUE §2cc-iv/v). The turntable
+// is one authored picture per angle, so its walk is a cut-out bobbing along
+// the floor; these strips are one real stride each, cut from a Higgsfield
+// take with every cell measured distinct. Played on the SAME clock as the
+// turntable's gait — floor covered, walkD, one cycle per two ATLAS_STRIDEs —
+// so the feet cannot outrun the ground. `h` is the CELL height in hitboxes,
+// measured so the strip body matches the turntable body it replaces (guard:
+// 1.82 hitboxes of machine either way; blob: the same length of shell).
+// Only while settled into a heading: through a turn the turntable's angles
+// are the honest picture, and a mirrored profile is not.
+// THE SAME GRADE AS THE SHEET IT STANDS IN FOR, or the body changes colour
+// the moment it starts walking: the guard's turntable is the npcs sheet (pop
+// grade, 0.45 shadow lift), the blob's is the roster (its colour/form/rim
+// grade is baked into the strip file — tools2 rostergrade, the same numbers
+// as atlas.js — and the pop grade with no lift is applied here).
+const ROSTER_WALK = {
+  guard: { img: 'guardWalk8', cells: 8, h: 1.89, lift: 0.45 },
+  blob:  { img: 'blobCrawl8', cells: 8, h: 4.0, lift: 0 },
+};
+function drawRosterWalk(c, e, cx) {
+  const S = ROSTER_WALK[e.kind];
+  if (!S || e.dead || (typeof isHero === 'function' && isHero())) return false;
+  if (Math.abs(e.vx || 0) < 12 || enemyAtlasPose(e)) return false;
+  const fv = e.faceVis != null ? e.faceVis : (e.dir || -1);
+  if (Math.abs(fv) < 0.9) return false;
+  // the strip carries the plate in its arms; a guard that has shed it is not that picture
+  if (e.kind === 'guard' && e.plateShed) return false;
+  // the drip and its rebound are deformation of the turntable body
+  if (e.kind === 'blob' && ((e.drip0 || 0) > 0 || (e.blobReb || 0) > 0)) return false;
+  const cyc = ((((e.walkD || 0) / (2 * ATLAS_STRIDE)) % 1) + 1) % 1;
+  const cell = Math.floor(cyc * S.cells);
+  mediaFetch(S.img, 1);
+  const raw = MEDIA_RAW[S.img];
+  if (!raw || !raw.naturalWidth) return false;
+  const im = (typeof popArt === 'function' && popArt(S.img, null, S.lift)) || raw;
+  const h = e.h * S.h, flip = fv > 0;                      // authored facing LEFT
+  const cw = im.naturalWidth / S.cells, dw = h * (cw / im.naturalHeight);
+  if (typeof G !== 'undefined') G.lastStrip = S.img + ':' + cell;
+  c.save();
+  c.translate(cx, e.y + e.h);
+  if (flip) c.scale(-1, 1);
+  if (e.hurtT > 0) c.globalAlpha = 0.85;
+  c.drawImage(im, cell * cw, 0, cw, im.naturalHeight, -dw / 2, -h, dw, h);
+  if (e.hurtT > 0) {
+    c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
+    c.drawImage(im, cell * cw, 0, cw, im.naturalHeight, -dw / 2, -h, dw, h);
+  }
+  c.restore();
+  return true;
+}
 function enemyAtlasPose(e) {
   switch (e.kind) {
     case 'crawler': case 'guard':
@@ -11019,15 +11101,31 @@ function drawSage(c, e) {
   // breath — doubled forward toward her, shoulders sunk — pivoted on its feet,
   // until an authored exhale plate comes off THE FIRING LIST (ART_QUEUE §2cc).
   const exhale = !kneel && (e.windedT || 0) > 0;
-  if (exhale) {
-    c.save();
-    c.translate(cx, base); c.rotate((sageFlip ? -1 : 1) * 0.2); c.scale(1.08, 0.8); c.translate(-cx, -base);
-  }
+  // ...and now it has its own plate and its own walk (ART_QUEUE §2cc-vii),
+  // both authored three-quarter facing LEFT, so they turn toward her the
+  // opposite way to the front-on set. The bow transform stays only as the
+  // fallback while the exhale plate is in flight. Cell heights are matched to
+  // the standing plate's 1.12 hitboxes of body (the bow stands a little lower).
   let sageDrew = false;
-  try {
-    sageDrew = typeof drawPlateAnchored === 'function' &&
-      drawPlateAnchored(c, sagePlate, cx, base + bob, e.h * sageH, sageFlip, true);
-  } finally { if (exhale) c.restore(); }
+  const towardHer = !sageFlip;
+  if (exhale && typeof drawStripCell === 'function')
+    sageDrew = drawStripCell(c, 'sageExhale', 0, 1, cx, base, e.h * 1.07, towardHer);
+  else if (!kneel && sagePlate === 'sageStand' && Math.abs(e.vx || 0) > 12 && typeof drawStripCell === 'function') {
+    // one stride per 56 px of floor it covers (moveEnt's walkD), like every
+    // walker — never the clock, or the robe would pace faster than the feet
+    const cell = Math.floor(((((e.walkD || 0) / 56) % 1) + 1) % 1 * 8);
+    sageDrew = drawStripCell(c, 'sageWalk8', cell, 8, cx, base + bob, e.h * 1.155, towardHer);
+  }
+  if (!sageDrew) {
+    if (exhale) {
+      c.save();
+      c.translate(cx, base); c.rotate((sageFlip ? -1 : 1) * 0.2); c.scale(1.08, 0.8); c.translate(-cx, -base);
+    }
+    try {
+      sageDrew = typeof drawPlateAnchored === 'function' &&
+        drawPlateAnchored(c, sagePlate, cx, base + bob, e.h * sageH, sageFlip, true);
+    } finally { if (exhale) c.restore(); }
+  }
   if (sageDrew) {
     // the plate carries the body; the ring, purity bar and halo still ride it
   } else {
@@ -11130,10 +11228,24 @@ function drawBat(c, e) {
   const batPlate = hang ? (e.holdT > 0 ? 'batShiver' : 'batHang')
     : e.diveT > 0 ? 'batDive'
     : (Math.sin(e.anim * 18) > 0 ? 'batFlapUp' : 'batFlapDn');
+  // THE FLIGHT IS FILMED (ART_QUEUE §2cc-vii): one full wingbeat in six
+  // measured-distinct cells, on the same 18 rad/s beat the two plates
+  // alternated on, so nothing about its rhythm changes — only that the wing
+  // now passes THROUGH the stroke instead of jumping between its ends.
+  // Cell height matches the plates' drawn wingspan (1.8 hitboxes across).
+  if (!hang && batPlate !== 'batDive') {
+    const cell = Math.floor(((((e.anim || 0) * 18) / (Math.PI * 2)) % 1 + 1) % 1 * 6);
+    const sh = e.h * 1.85;
+    if (typeof drawStripCell === 'function' && drawStripCell(c, 'batFlight6', cell, 6, cx, cy + sh / 2, sh, e.vx > 0)) return;
+  }
   const batH = e.h * (hang ? 1.3 : batPlate === 'batDive' ? 1.15 : 1.75);
   const batBase = hang ? e.y + batH : cy + batH / 2;
+  // FACING PER PLATE: the flap plates were authored facing LEFT and the dive
+  // facing RIGHT, and one shared mirror rule flew the flapping bat backwards
+  // between every dive
+  const batFlip = !hang && (batPlate === 'batDive' ? e.vx < 0 : e.vx > 0);
   if (typeof drawPlateAnchored === 'function' &&
-      drawPlateAnchored(c, batPlate, cx + shiver, batBase, batH, !hang && e.vx < 0, true)) return;
+      drawPlateAnchored(c, batPlate, cx + shiver, batBase, batH, batFlip, true)) return;
   c.save();
   c.translate(cx + shiver, cy);
   if (hang) c.scale(1, -1);                    // head down, feet in the rock
