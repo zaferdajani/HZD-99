@@ -316,9 +316,11 @@ function infEyeDraw(c) {
     const k = INF_AGE[i] / INF_LIFE[i];
     const sp = INF_PURP[i] ? S.purple : S.red;
     // young: a hot, narrow point; old: a wide, faint breath that is nearly gone
-    const young = k < 0.12;
-    const r = (young ? 1.2 + k * 10 : 2 + k * 7) * INF_SZ[i];
-    const al = young ? 0.55 * (1 - k * 2) : 0.30 * Math.pow(1 - k, 1.6);
+    // (measured in the recorded build: at 0.30 the thread vanished against
+    // the meadow's dark teal at play size — restrained is not invisible)
+    const young = k < 0.14;
+    const r = (young ? 1.4 + k * 10 : 2.4 + k * 9) * INF_SZ[i];
+    const al = young ? 0.75 * (1 - k * 2.4) : 0.42 * Math.pow(1 - k, 1.4);
     if (al <= 0.01) continue;
     c.globalAlpha = al;
     c.drawImage(young ? sp.core : sp.wisp, INF_X[i] - r, INF_Y[i] - r, r * 2, r * 2);
