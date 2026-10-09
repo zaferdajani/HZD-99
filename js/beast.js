@@ -1302,7 +1302,8 @@ function beastStrip(c, b) {
   const cellH = im && im.naturalHeight ? im.naturalHeight
     : /^(beastStudio|beastGallop|beastRearSwipe|beastHurt)/.test(S.key) ? 256 : 320;
   const height = cellH * BEAST_STRIP_PX * S.k;
-  const drew = drawStripCell(c, S.key, cell, S.cells, 0, 0, height, false);
+  // freed, the violet at every joint is washed teal (media.js pureArt)
+  const drew = drawStripCell(c, S.key, cell, S.cells, 0, 0, height, false, !!b.purified);
   b._stripPose = drew ? {key:S.key, cell, cells:S.cells, height} : null;
   return drew;
 }

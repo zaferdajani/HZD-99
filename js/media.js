@@ -1105,15 +1105,46 @@ function plateFoot(key) {
 // cell. That is the whole reason the strip is built that way — a per-cell foot
 // measurement would wander by a pixel or two per frame, and an idle loop that
 // wanders is worse than one that does not move at all.
-function drawStripCell(c, key, cell, cells, cx, base, h, flip) {
+// THE INFECTION'S COLOUR, WASHED OUT. A guardian freed by the Purifier keeps
+// its body and loses the virus: the violet the art burns at every joint is
+// re-lit teal, once per sheet (keyed by the image itself, so the full sheet
+// that replaces a low-tier copy is recoloured again rather than missed). A
+// derivation of the authored frames, like popArt's grade — nothing redrawn.
+const PURE_ART = new WeakMap();
+function pureArt(im) {
+  if (!im || !(im.naturalWidth || im.width)) return im;
+  const hit = PURE_ART.get(im);
+  if (hit) return hit;
+  let out = im;
+  try {
+    const w = im.naturalWidth || im.width, h = im.naturalHeight || im.height;
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
+    const id = x.getImageData(0, 0, w, h), d = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      if (d[i + 3] && b > 80 && b > g * 1.35 && r > g * 1.05) {
+        const v = Math.max(r, b);
+        d[i] = v * 0.24; d[i + 1] = Math.min(255, v * 0.86); d[i + 2] = Math.min(255, v * 0.78);
+      }
+    }
+    x.putImageData(id, 0, 0);
+    cv.naturalWidth = w; cv.naturalHeight = h;
+    out = cv;
+  } catch (err) { out = im; }
+  PURE_ART.set(im, out);
+  return out;
+}
+function drawStripCell(c, key, cell, cells, cx, base, h, flip, pure) {
   // URGENT: a strip is asked for the frame it is needed, and a body that
   // waits a quarter-megabyte for its run cycle on a phone connection draws
   // its pose cells for a second first. The quarter-scale copy lands in a
   // fraction of that and the full sheet sharpens it from behind, which is
   // what the low tier exists for.
   mediaFetch(key, 1);
-  const im = MEDIA_RAW[key];
-  if (!im || !im.naturalWidth || !heroSheetCompatible(key, im)) return false;
+  const raw = MEDIA_RAW[key];
+  if (!raw || !raw.naturalWidth || !heroSheetCompatible(key, raw)) return false;
+  const im = pure ? pureArt(raw) : raw;
   // what drew the body, for the diag panel: the owner's "nothing changed"
   // is answered by a screenshot that names the strip and the cell
   if (typeof G !== 'undefined') G.lastStrip = key + ':' + (((cell % cells) + cells) % cells);
