@@ -210,12 +210,20 @@ const check = (name, ok, detail) => {
         const z = worldZoom();
         return lum(worldScreenX(wx), worldScreenY(wy), b[2] * z, b[3] * z);
       };
+      // ...and the room's creatures are out of the frame for both halves. The
+      // sim's dice are seeded, but anything that changes how many rolls the
+      // DRAWING takes (a body that draws nothing while its plates load, say)
+      // moves where a cheetah has wandered by now — and one standing in the
+      // box in one half and not the other measured the cheetah, not the
+      // fixture: x1.14 against x1.33 with the same terminal and no animal.
+      const pack = G.enemies; G.enemies = [];
       await hold(20);
       const on = sample();
       const i = G.statics.indexOf(s2);
       G.statics.splice(i, 1); await hold(20);
       const off = sample();
       G.statics.splice(i, 0, s2); await hold(8);
+      G.enemies = pack;
       return { on, off, at: [Math.round(b[0]), Math.round(b[1])] };
     };
     // THE BEACON. She stands thirteen tiles short of it — well outside her own
