@@ -151,8 +151,13 @@ const { chromium } = require('playwright');
     // every grotto pair is complete: lair door needs its boss, grotto door back
     out.allGrottoes = [['A4','GA1','bossGlitch'],['A10','GA2','alpha'],['B4','GB1','bossBrood'],
       ['C3','GC1','bossAtlas'],['D3','GD1','bossZero'],['X1','GX1','bossPrism'],['E3','GE1','bossMother']]
-      .every(([a, g2, f]) => GATE_ROOM[a] && GATE_ROOM[a].to === g2 && GATE_ROOM[a].need === f
-        && GATE_ROOM[g2] && GATE_ROOM[g2].to === a && ROOMS[g2] && ROOMS[g2].cave && MAPPOS[g2]);
+      .every(([a, g2, f]) => {
+        // a room's row may be an ARRAY of doors now (A10 has the road back to A2
+        // and the den): find THE door to the grotto, the same lookup gateDoors does
+        const door = (id, to) => [].concat(GATE_ROOM[id] || []).find(d => d && d.to === to);
+        const lair = door(a, g2), back = door(g2, a);
+        return !!(lair && lair.need === f && back && ROOMS[g2] && ROOMS[g2].cave && MAPPOS[g2]);
+      });
 
     // ---- the aura sense ------------------------------------------------
     // crystal light in her possession = she glows white and the world shows
