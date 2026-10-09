@@ -293,7 +293,7 @@ function tStateKind() {
   if (s === 'TCFG') return 'tcfg';
   if (s === 'MAP') return 'map';
   if (s === 'OFFER') return 'offer';
-  if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'SKILLS' || s === 'TRIAL' || s === 'FILMS') return 'menu';
+  if (s === 'MENU' || s === 'LANGSEL' || s === 'DIFF' || s === 'WHO' || s === 'PAUSE' || s === 'CREST' || s === 'SHOP' || s === 'SKILLS' || s === 'TRIAL' || s === 'FILMS' || s === 'PANELLIST') return 'menu';
   return 'tap';
 }
 // layout-editor chrome: fixed controls that are not part of the layout
@@ -375,6 +375,9 @@ function tapMenu(x, y) {
     const i = Math.round((y - L.y0) / L.step);
     if (i >= 0 && i < L.rows.length && Math.abs(y - (L.y0 + i * L.step)) <= L.h / 2
         && Math.abs(x - 480) <= L.w / 2) { G.filmIdx = i; tPress('VOK'); }
+  } else if (st === 'PANELLIST') {
+    // the same geometry the list is drawn with — see panelListLayout()
+    if (typeof panelListTap === 'function' && panelListTap(x, y)) tPress('VOK');
   } else if (st === 'MORE') {
     // the same geometry the screen is drawn with — see moreLayout()
     const L = moreLayout();
@@ -518,7 +521,7 @@ function tStart(e) {
       if (x >= L.r.left && x <= L.r.right && y >= L.r.top && y <= L.r.bottom) {
         tapMenu((x - L.r.left) * 960 / L.r.width, (y - L.r.top) * 540 / L.r.height);
       }
-    } else if (typeof G !== 'undefined' && G.state === 'CUT') {
+    } else if (typeof G !== 'undefined' && (G.state === 'CUT' || G.state === 'PANELS')) {
       // A FILM IS SKIPPED BY HOLDING, SO THE TOUCH HAS TO ACTUALLY HOLD.
       // Everything else in this branch is a menu-ish screen where a tap means
       // "yes", and tPress is right for those: it presses and auto-releases

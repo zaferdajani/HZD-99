@@ -53,6 +53,7 @@ const SUITE = [
   ['gesture-input', 'the picture answers taps and swipes, and nothing the controller owns changes'],
   ['winch-integration', 'modular yard machine and persistent cleansing'],
   ['manhwa-reader', 'revised illustrated edition and complete written opening'],
+  ['panels', 'approved manhwa crops at story moments: once, safe, readable, skippable, replayable'],
   ['entrance-integration', 'painted entrances share world anchors without duplicate mouth overlays'],
   ['hero-cache-regression', 'third-hit cached sheet geometry and supplied idle in every mood'],
   ['scratch-visual', 'pixel-measured cyan scratch reach, mirroring and fading recovery'],
