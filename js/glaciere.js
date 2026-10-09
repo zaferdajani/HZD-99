@@ -179,6 +179,9 @@ function glcHeroRig(c, rot, shake, gait, k, tuck) {
   glcLegDraw(c, far[0][2], far[0][0], far[0][1], legs[2].a1, legs[2].a2, far[0][3], true);
   glcLegDraw(c, far[1][2], far[1][0], far[1][1], legs[3].a1, legs[3].a2, far[1][3], true);
   c.drawImage(cut, -s[2] / 2, -s[3]);
+  // the cut is the hero figure minus its legs, in the hero's own frame: its
+  // eye is the hero's eye (the rig path drew no eye at all — tests/infection-roster)
+  infEyeArt(c, 'glaciereParts:hero', 0, -s[2] / 2, -s[3], s[2], s[3]);
   glcLegDraw(c, near[1][2], near[1][0], near[1][1], legs[1].a1, legs[1].a2, near[1][3], false);
   glcLegDraw(c, near[0][2], near[0][0], near[0][1], legs[0].a1, legs[0].a2, near[0][3], false);
   c.restore();

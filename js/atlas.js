@@ -37,7 +37,10 @@ const ATLAS = {
     // she is live-drawn (ART_BIBLE §2) and the crawler and hopper are always
     // the pack or the cheetah line (js/wolves.js), which wait for their own
     // plates rather than flash the old machine up for a frame
-    blob:    { row: 3,  k: 2.85, yOff: 0.06 },
+    // the blob's row was rendered with column 0 facing LEFT (its lens leads
+    // into the walk strip's left-facing crawl); read the other way, a blob
+    // that stopped walking left turned to face right (tests/infection-roster)
+    blob:    { row: 3,  k: 2.85, yOff: 0.06, yawFlip: 1 },
     flier:   { row: 4,  k: 2.60, yOff: -0.10 },
     turret:  { row: 5,  k: 2.20, yOff: 0.04 },
     brood:   { row: 6,  k: 1.55, yOff: -0.06, ins: { top: 0.10, bottom: 0.20 } },
@@ -533,7 +536,9 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   if (o.col != null) fy = o.col;
   else if (o.yawSpin) fy = ((t * o.yawSpin) % 8 + 8) % 8;
   else if (o.yawScan) fy = o.yawScan.c + Math.sin(t * o.yawScan.r) * (o.yawScan.a || 0);
-  else fy = yawColF(faceVis);
+  // a row rendered the other way round (yawFlip: column 0 faces LEFT) reads
+  // its facing mirrored, or the body turns its back the moment it stops
+  else fy = yawColF(S.yawFlip ? -faceVis : faceVis);
   fy = ((fy % A.cols) + A.cols) % A.cols;
   // ONE ANGLE AT A TIME where it would otherwise be a double exposure. The
   // cross-fade lays the next authored angle over this one at alpha colF, and

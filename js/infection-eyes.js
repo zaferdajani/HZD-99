@@ -129,16 +129,42 @@ function infEyeMark(c, lx, ly, e) {
   const wx = S.a * dx + S.c * dy + S.e, wy = S.b * dx + S.d * dy + S.f;
   if (!who._eyeW) who._eyeW = [0, 0, 0, 0];
   const i = who._eyeN * 2;
-  // where the BODY was, and which way it faced, when this eye was drawn: the
-  // emitter runs before the next draw and carries the eye by the body's own
-  // travel since, so the newest wisp is born where the eye is about to be
-  if (!i) { who._eyeAX = who.x; who._eyeAY = who.y; who._eyeFace = (who.faceVis != null ? who.faceVis : who.dir) || 0; }
+  infEyeLay(who, who._eyeN, wx, wy);
   who._eyeW[i] = wx; who._eyeW[i + 1] = wy;
   who._eyeN++;
   who._eyeCls = cls;
   // the on-screen scale of this body, so the glow is the size of ITS eye
   who._eyeS = Math.sqrt(Math.abs(m.a * m.d - m.b * m.c)) * Math.sqrt(Math.abs(S.a * S.d - S.b * S.c));
   INF_OWNERS.add(who);
+}
+// THE SMOKE IS LAID WHERE THE EYE IS DRAWN. Called for each eye as the art
+// reports it: wisps go down along the eye's own path since its last draw,
+// the newest exactly at the eye in this frame, each already aged by how long
+// ago (in sim time) the eye passed that point.
+function infEyeLay(e, k, x, y) {
+  const P = e._eyeP;
+  if (!P || k > 1) return;
+  // IT TURNED ROUND: the eye is on the other side of the head now. Joining the
+  // old side to the new would lay a streak of smoke across the face, so the
+  // trail starts again from here.
+  const face = Math.sign((e.faceVis != null ? e.faceVis : e.dir) || 0);
+  if (face !== P.face) { P.face = face; P.ok[0] = P.ok[1] = false; P.owe[0] = P.owe[1] = 0; }
+  const T = P.acc[k]; P.acc[k] = 0;
+  if (!P.ok[k]) { P.x[k] = x; P.y[k] = y; P.ok[k] = true; P.owe[k] = 0; return; }
+  const px = P.x[k], py = P.y[k], d = Math.hypot(x - px, y - py);
+  P.x[k] = x; P.y[k] = y;
+  if (d > INF_EYE_JUMP) { infEyeKillOwner(e); P.owe[k] = 0; return; }   // teleported
+  // owed by TRAVEL only: a body that stops lets its plume rise and thin away
+  // and keeps just the glow — breathing, idle sway and a head tossed in place
+  // leave nothing behind
+  if (!(T > 0)) { P.owe[k] = 0; return; }
+  let owe = P.owe[k] + d / INF_EYE_SPACING;
+  const cnt = Math.min(12, Math.floor(owe));
+  owe -= cnt; P.owe[k] = owe;
+  for (let j = 0; j < cnt; j++) {
+    const t = (j + 1) / cnt;
+    infEyeSpawn(e, px + (x - px) * t, py + (y - py) * t, P.purple, (1 - t) * T);
+  }
 }
 // An eye baked into art: `key` names the image in EYE_MAP, `cell` its cell
 // (0 for a single plate), and (dx, dy, dw, dh) the rectangle the cell was just
@@ -229,42 +255,16 @@ function infEyeUpdate(dt) {
     }
     e._eyeBX = e.x; e._eyeBY = e.y;
     e._eyeMv = Math.max(0, (e._eyeMv || 0) - dt);
-    // per eye: the last point emitted from, the fraction of a particle owed,
-    // and whether that point is real yet (a fresh body starts at its eye)
-    if (!e._eyeP) e._eyeP = { x: [0, 0], y: [0, 0], owe: [0, 0], ok: [false, false] };
+    // ...and how much MOVING sim time each eye is owed since its last draw.
+    // The smoke itself is laid by the draw (infEyeLay), along the eye the art
+    // actually drew — an emitter running here, before the draw, can only aim
+    // at the eye of the frame before, and is a frame late whenever the art
+    // changes cell. The sim clock still decides how much: nothing is owed
+    // while paused, and a camera that moves without the sim owes nothing.
+    if (!e._eyeP) e._eyeP = { x: [0, 0], y: [0, 0], owe: [0, 0], ok: [false, false], acc: [0, 0], face: 0 };
     const P = e._eyeP;
-    // IT TURNED ROUND since its eye was drawn: the eye is on the other side of
-    // the head now and nobody has drawn it there yet. Interpolating from the
-    // old side to the new would lay a streak of smoke across the face, so the
-    // trail starts again from the eye the next draw reports.
-    const face = (e.faceVis != null ? e.faceVis : e.dir) || 0;
-    if (face !== e._eyeFace) { P.ok[0] = P.ok[1] = false; P.owe[0] = P.owe[1] = 0; continue; }
-    const ox = e.x - (e._eyeAX != null ? e._eyeAX : e.x), oy = e.y - (e._eyeAY != null ? e._eyeAY : e.y);
-    const n = Math.min(2, e._eyeN);
-    for (let k = 0; k < n; k++) {
-      const x = e._eyeW[k * 2] + ox, y = e._eyeW[k * 2 + 1] + oy;
-      if (!P.ok[k]) { P.x[k] = x; P.y[k] = y; P.ok[k] = true; }
-      let px = P.x[k], py = P.y[k];
-      const d = Math.hypot(x - px, y - py);
-      if (d > INF_EYE_JUMP) {                       // teleported: no streak across the room
-        infEyeKillOwner(e);
-        px = x; py = y;
-      }
-      // particles owed by TRAVEL only, laid along the EYE's own path. A body
-      // that stops lets its plume rise and thin away and keeps just the glow
-      // — breathing, idle sway and a head that tosses in place leave nothing.
-      const moving = d <= INF_EYE_JUMP && e._eyeMv > 0;
-      let owe = moving ? P.owe[k] + d / INF_EYE_SPACING : 0;
-      const cnt = Math.min(8, Math.floor(owe));
-      owe -= cnt;
-      for (let j = 0; j < cnt; j++) {
-        const t = (j + 1) / cnt;
-        // the youngest at the eye, the older ones back along the path — each
-        // already aged by how long ago the eye passed that point
-        infEyeSpawn(e, px + (x - px) * t, py + (y - py) * t, purple, (1 - t) * dt);
-      }
-      P.owe[k] = owe; P.x[k] = x; P.y[k] = y;
-    }
+    if (e._eyeMv > 0) { P.acc[0] += dt; P.acc[1] += dt; } else { P.acc[0] = P.acc[1] = 0; }
+    P.purple = purple;
   }
   // age and drift: a slow rise that gathers, and a curl that widens with age
   for (let i = INF_LIVE - 1; i >= 0; i--) {
