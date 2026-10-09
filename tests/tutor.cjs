@@ -254,6 +254,10 @@ const { chromium } = require('playwright');
       return;
     }
     if (G.state === 'SHOP') {
+      // the shop eats OK for its first 220 ms (js/npc_shop_exit_fix.js: the
+      // player sees the shop before choosing) — a press inside that window
+      // buys nothing, so wait it out the way a player's eyes do
+      if (G.shopEntryGuardUntil && performance.now() < G.shopEntryGuardUntil) return;
       G.shopIdx = 0;                               // the volt cell
       keysP['Enter'] = 1; keys['Enter'] = 1;
       updateShop();

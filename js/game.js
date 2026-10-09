@@ -3280,7 +3280,11 @@ function updateShop() {
       // (see burstUnlocked). Every cell after it is a refill.
       if (!G.save.flags.heal) {
         G.save.flags.heal = 1; G.save.flags.pack = 1;
-        showItem(t('i_pack'), t('i_packd'));
+        // the card for THE PACK hands back to the world, not the shop: the next
+        // lesson (heal) happens in-world (js/npc_shop_exit_fix.js leaves the
+        // shop after the tutorial purchase for the same reason)
+        const pk = showItem(t('i_pack'), t('i_packd'));
+        if (pk && pk.ret === 'SHOP') pk.ret = null;
         return;
       }
       G.toast(t('s_cell') + '  ⚡ ' + player.volts);
