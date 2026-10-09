@@ -10584,6 +10584,7 @@ function drawMini(c, b, cx, cy) {
     c.scale(pop * (b.face > 0 ? -1 : 1), pop);
     if (b.hurtT > 0) { c.globalAlpha *= 0.85; }
     c.drawImage(im, -w / 2, -h / 2, w, h);
+    infEyeArt(c, warn ? A.warn : A.rest, 0, -w / 2, -h / 2, w, h);
     // hurt flash: the plate re-drawn as pure white through a lighter pass
     if (b.hurtT > 0) {
       c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;

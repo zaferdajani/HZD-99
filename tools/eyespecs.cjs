@@ -37,6 +37,25 @@ module.exports = [
     ({ key: k, cells: n, col: 'red', rule: 'front', region: [0, 0, 0.45, 0.7], aspect: 2.5 })),
   ...strips(['alphaRest', 'alphaRoar', 'alphaHowl', 'alphaLeap', 'alphaCoil', 'alphaClaw', 'alphaBite', 'alphaClinch',
              'alphaRecoil', 'alphaTurn'], { region: [0, 0, 0.5, 0.7] }),
+  // ---- the Eye's constructs (drawMini) — placed from a grid render: the
+  // chime's lens, the courier's camera, the moth's head, the lattice's core,
+  // the lens's pupil. Their wind-up plates are separate drawings, placed alone.
+  { key: 'eyeChime', col: 'white', rule: 'top', at: { 0: [0.586, 0.277] } },
+  { key: 'eyeChimeW', col: 'white', rule: 'top', at: { 0: [0.63, 0.21] } },
+  { key: 'eyeCarrier', col: 'white', rule: 'front', at: { 0: [0.176, 0.55] } },
+  { key: 'eyeCarrierW', col: 'white', rule: 'front', at: { 0: [0.75, 0.76] } },
+  { key: 'eyeMoth', col: 'white', rule: 'top', at: { 0: [0.507, 0.354] } },
+  { key: 'eyeMothW', col: 'white', rule: 'top', at: { 0: [0.505, 0.40] } },
+  { key: 'eyeLattice', col: 'white', rule: 'core', at: { 0: [0.496, 0.457] } },
+  { key: 'eyeLatticeW', col: 'white', rule: 'core', at: { 0: [0.45, 0.41] } },
+  { key: 'eyeLens', col: 'white', rule: 'core', at: { 0: [0.551, 0.473] } },
+  { key: 'eyeLensW', col: 'white', rule: 'core', at: { 0: [0.617, 0.462] } },
+  // CHIME's filmed moves: the lens at the centre of the housing — placed per
+  // cell from a grid render (detection takes the housing's rim highlight)
+  { key: 'chRest', cells: 9, col: 'cyan|white', rule: 'top', at: Object.fromEntries([...Array(9).keys()].map(i => [i, [0.53, 0.28]])) },
+  { key: 'chRing', cells: 12, col: 'cyan|white', rule: 'top', at: { 0: [0.50, 0.63], 1: [0.50, 0.62], 2: [0.51, 0.66], 3: [0.52, 0.66],
+    4: [0.51, 0.66], 5: [0.51, 0.66], 6: [0.50, 0.66], 7: [0.52, 0.65], 8: [0.50, 0.66], 9: [0.49, 0.64], 10: [0.49, 0.63], 11: [0.50, 0.62] } },
+  { key: 'chNote', cells: 12, col: 'cyan|white', rule: 'top', at: Object.fromEntries([...Array(12).keys()].map(i => [i, [0.55, 0.52]])) },
   // ---- the roster's filmed walks -------------------------------------------
   { key: 'guardWalk8', col: 'red', rule: 'front', aspect: 4.5, region: [0, 0, 0.6, 0.5] },
   // the blob's lava seams are red too, and its lens barely moves through the

@@ -129,6 +129,10 @@ function infEyeMark(c, lx, ly, e) {
   const wx = S.a * dx + S.c * dy + S.e, wy = S.b * dx + S.d * dy + S.f;
   if (!who._eyeW) who._eyeW = [0, 0, 0, 0];
   const i = who._eyeN * 2;
+  // where the BODY was, and which way it faced, when this eye was drawn: the
+  // emitter runs before the next draw and carries the eye by the body's own
+  // travel since, so the newest wisp is born where the eye is about to be
+  if (!i) { who._eyeAX = who.x; who._eyeAY = who.y; who._eyeFace = (who.faceVis != null ? who.faceVis : who.dir) || 0; }
   who._eyeW[i] = wx; who._eyeW[i + 1] = wy;
   who._eyeN++;
   who._eyeCls = cls;
@@ -229,9 +233,16 @@ function infEyeUpdate(dt) {
     // and whether that point is real yet (a fresh body starts at its eye)
     if (!e._eyeP) e._eyeP = { x: [0, 0], y: [0, 0], owe: [0, 0], ok: [false, false] };
     const P = e._eyeP;
+    // IT TURNED ROUND since its eye was drawn: the eye is on the other side of
+    // the head now and nobody has drawn it there yet. Interpolating from the
+    // old side to the new would lay a streak of smoke across the face, so the
+    // trail starts again from the eye the next draw reports.
+    const face = (e.faceVis != null ? e.faceVis : e.dir) || 0;
+    if (face !== e._eyeFace) { P.ok[0] = P.ok[1] = false; P.owe[0] = P.owe[1] = 0; continue; }
+    const ox = e.x - (e._eyeAX != null ? e._eyeAX : e.x), oy = e.y - (e._eyeAY != null ? e._eyeAY : e.y);
     const n = Math.min(2, e._eyeN);
     for (let k = 0; k < n; k++) {
-      const x = e._eyeW[k * 2], y = e._eyeW[k * 2 + 1];
+      const x = e._eyeW[k * 2] + ox, y = e._eyeW[k * 2 + 1] + oy;
       if (!P.ok[k]) { P.x[k] = x; P.y[k] = y; P.ok[k] = true; }
       let px = P.x[k], py = P.y[k];
       const d = Math.hypot(x - px, y - py);
