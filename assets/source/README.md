@@ -28,7 +28,7 @@ look at to answer "did that actually happen".
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
 | `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line | 16 |
 | `flora/` | Alien plant life, two species per kingdom | 12 |
-| `gear/` | Thrust boots and the save pod, dormant + active | 4 |
+| `gear/` | Thrust boots and the save pod, dormant + active; Ratchet's repair board, its cell, the wake-room lamp | 7 |
 | `_sheets/` | Contact sheets and before/after comparisons | 17 |
 | `manhua/ch1/` | THE MANHUA, chapter one — the 27 as-fired pages of the second edition (`*_asfired.jpg`, 1024/q90), the refused first edition kept beside them (`*_ed1_asfired.jpg`), and `prompts.json`, the exact prompt and every take of every page; ledger in `docs/MANHUA.md` | 55 |
 
@@ -349,6 +349,7 @@ plant that moves when you walk back through a door is worse than no plant.
 | plate | what it is |
 |---|---|
 | `boots` / `boots_fire` | THE THRUST BOOTS. She is a machine, so the dash is a bolt-on, not a talent she discovers. The firing plate is drawn along the dash vector at her feet — the procedural cone was always there, the boots making it were not |
+| `repair_panel` / `repair_battery` / `wake_lamp` | RATCHET'S REPAIR (js/story-repair.js) and the opening's fault. The board is the open service panel inside his chest, fired dark and low-contrast with a calm centre so the puzzle's buttons read over it (2.48:1, shipped 1000×403); the cell is the one power cell she seats (shipped 256²); the lamp is the caged tube over the cradle in W1, fired UNLIT because the game draws the fault's light on it (shipped 208×88, drawn 104×44). Fired 2026-10-09, gpt_image_2_5 against `pod.jpg` / Ratchet's plate for material; jobs 4f38e453, 645f5755, b4d72717 (the other variant of each rejected: a busier panel centre, a thinner cell, a lamp with the conduit leaving the wrong way) |
 | `pod` / `pod_on` | THE SAVE POD, at the size a save point deserves. It was thirty pixels of procedural tube; it is a horseshoe cradle on anti-vibration feet with a beacon mast, servicing arms and pressure tanks, standing four tiles tall. Dormant and awake are two plates, so stepping in is a state change and not a tint |
 
 ---
