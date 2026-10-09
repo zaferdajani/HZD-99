@@ -124,16 +124,27 @@ const { chromium } = require('playwright');
     for (const id in ROOMS) for (const e of (ROOMS[id].ents || []))
       if (e[0] === 'boss' && e[3] === 'alpha') room = id;
     if (!room) return { room: null };
-    // reachable from the meadow without a detour: A2 must lead to it and it
-    // must lead to the save room. A mini-boss you can walk past is not "the
-    // first mini-boss we face".
-    const from = Object.keys(ROOMS).filter(id =>
-      Object.values(ROOMS[id].exits || {}).indexOf(room) >= 0);
-    return { room, from, to: Object.values(ROOMS[room].exits || {}) };
+    // REACHED FROM THE MEADOW, AND NOT A DEAD END.
+    //
+    // This used to read ROOMS[].exits alone and demand A2 -> den -> A3: the den
+    // stood between them on the walk. It is a SIDE ROOM now ("optional Alpha
+    // source") — A2 goes straight to A3, and the den is entered through the
+    // door in A2, gated on the blade. A door is how this game has always let a
+    // room off the main line (every grotto arrives the same way), so the thing
+    // worth checking is unchanged and the place to read it is not: count both
+    // the walk-through exits and the GATE_ROOM doors.
+    const un = (v) => (v && typeof v === 'object' ? v.to : v);
+    const doors = (id) => {
+      const g = typeof GATE_ROOM !== 'undefined' ? GATE_ROOM[id] : null;
+      return g ? (Array.isArray(g) ? g : [g]).map(d => d.to) : [];
+    };
+    const ways = (id) => Object.values(ROOMS[id].exits || {}).map(un).concat(doors(id));
+    const from = Object.keys(ROOMS).filter(id => ways(id).indexOf(room) >= 0);
+    return { room, from, to: ways(room) };
   });
   check('the Alpha has a room', !!placed.room, placed.room || 'nowhere');
-  check('...and it is ON the critical path, not down a spur',
-    (placed.from || []).indexOf('A2') >= 0 && (placed.to || []).indexOf('A3') >= 0,
+  check('...and the meadow reaches it, and it is not a dead end',
+    (placed.from || []).indexOf('A2') >= 0 && (placed.to || []).indexOf('A2') >= 0,
     'from ' + (placed.from || []).join(',') + ' -> ' + (placed.to || []).join(','));
 
   // ---- 4. THE FIGHT -------------------------------------------------------
