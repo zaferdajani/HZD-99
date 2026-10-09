@@ -15,7 +15,7 @@ look at to answer "did that actually happen".
 
 | Directory | Boss | Parts |
 |---|---|---|
-| `beast/` | NULLFANG, the Virus Beast | 15 |
+| `beast/` | NULLFANG, the Virus Beast (+ `stalk.webp`, the retired first-take stalk strip kept as the §2cb scale reference) | 15 |
 | `beast/motion/` | NULLFANG motion plates — roar, daze, claw, coil, leap | 11 |
 | `eagle/` | TALONHOST, the Iron Eagle | 19 |
 | `furnace/` | FURNACE CHOIR | 14 |
@@ -24,9 +24,9 @@ look at to answer "did that actually happen".
 | `lairs/` | The six boss lairs, as generated | 6 |
 | `takes/` | Generated VIDEO takes the animation strips were cut from | 2 |
 | `hero/` | HZD-99 herself, every plate locked to `ref/hzd99_canon.jpg` | 26 |
-| `crystal/` | The purifier crystal: the weapon, the grips, the four slash light-sheets | 15 |
+| `crystal/` | The purifier crystal: the weapon, the grips, the four slash light-sheets (the sheets were never drawn; their shipped copies were deleted 2026-10-09) | 15 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
-| `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line; `beasts/cycles/` the filmed walk, run, winded and landing takes | 26 |
+| `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line; `beasts/cycles/` the filmed walk, run, winded and landing takes. The Alpha plates and the two-frame walk/run pairs are ARCHIVE ONLY since 2026-10-09 — their shipped copies were deleted (the filmed strips replaced them) | 26 |
 | `roster/cycles/`, `talon/`, `bat/cycles/`, `sage/cycles/` | THE ROSTER WALKS (ART_QUEUE §2cc-iv…vii): the guard, blob, flying minion, bat and sage — green start plates, takes, the perch and exhale plates | 14 |
 | `flora/` | Alien plant life, two species per kingdom | 12 |
 | `gear/` | Thrust boots and the save pod, dormant + active; Ratchet's repair board, its cell, the wake-room lamp | 7 |
@@ -116,7 +116,7 @@ has two moves as far as the player's eye is concerned):
 | `alpha_turn` | turn | it missed, and spins to bring its head round |
 | `alpha_free` | after it yields | the red gone out of it. Permanent |
 
-All nine are wired, all nine are measured by `tests/wolves.cjs`, and the
+**Retired 2026-10-09:** the Alpha draws only its filmed takes (`characters/alpha/*.webp`); these plates are archive only. When they shipped, all nine were wired, all nine were measured by `tests/wolves.cjs`, and the
 wind-ups clear the silhouette law against the prowl by a wide margin — the
 worst of them, the roar, sits at IoU 0.69 against a 0.86 ceiling.
 

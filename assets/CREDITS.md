@@ -15,9 +15,6 @@ of respect. License text: https://creativecommons.org/publicdomain/zero/1.0/
 | File | Author | Source |
 |---|---|---|
 | sci_fi_bg1.jpg | hassekf | https://opengameart.org/content/sci-fi-background |
-| `backgrounds/ind_far.webp` / `ind_mid.webp` / `ind_fg.webp` | Higgsfield | the Scrap Meadows parallax, repainted 2026-09-03 in the corridor look (ART_QUEUE §2am); the near layer's layout follows the CC0 Industrial Parallax pack by Luis Zuno (ansimuz) it replaced; masters in `source/sky/`; colourised per zone in-engine |
-| scifi_platform_BG1.jpg | Eris | https://opengameart.org/content/sci-fi-platform-tiles |
-| scifi_platformTiles_32x32.png | Eris | https://opengameart.org/content/sci-fi-platform-tiles |
 
 ## characters/
 
@@ -59,9 +56,8 @@ Larger CC0 tracks reviewed but not stored in the repo (download if wanted):
 
 | Files | Author | Source |
 |---|---|---|
-| hit_*.ogg, shot_*.ogg, metal_*.ogg, glass_*.ogg, explosion.ogg | rubberduck | https://opengameart.org/content/100-cc0-sfx |
-| laser*.mp3, powerUp*.mp3, zapTwoTone.mp3, phaserUp3.mp3, lowDown.mp3 | Kenney (kenney.nl) | https://opengameart.org/content/63-digital-sound-effects-lasers-phasers-space-etc |
-| kenney/sfx_edie.ogg, kenney/sfx_jump.ogg, kenney/sfx_pick.ogg | Kenney (kenney.nl) | Sci-Fi Sounds 1.0, **CC0** per the pack's own `LICENSE_kenney.txt` shipped alongside them in `sfx/kenney/` — free for commercial use, credit not mandatory and given anyway |
+| hit_01.ogg, hit_02.ogg, metal_05.ogg, explosion.ogg | rubberduck | https://opengameart.org/content/100-cc0-sfx |
+| laser2.mp3, zapTwoTone.mp3 | Kenney (kenney.nl) | https://opengameart.org/content/63-digital-sound-effects-lasers-phasers-space-etc |
 
 ## Generated art — declared, per Steam's disclosure requirement
 
@@ -93,7 +89,6 @@ plate can be traced back to the generation it came from.
 | `characters/npc/ratchet/talk_1.png` | Higgsfield, Nano Banana Pro | Ratchet talking, hand on his own helmet (§2t) |
 | `characters/npc/ratchet/talk_2.png` | Higgsfield, Nano Banana Pro | Ratchet talking, presenting the part (§2t) |
 | `characters/npc/ratchet/vent.png` | Higgsfield, Nano Banana Pro | Ratchet braced, blowing off heat (§2t) |
-| `characters/npc/ratchet/work_loop.webp` | Higgsfield (video) | Ratchet's first work loop: frames of a generated clip of the same body working, cut and keyed by `tools/vidstrip.cjs`; kept on disk, no longer drawn |
 | `characters/npc/ratchet/work_loop_six.webp` | Higgsfield | Ratchet's six-frame work cycle, the owner's 2026-09-24 upload (`character-artwork-20260924-212948.zip`, fetched from the Higgsfield CDN), wired as `ratchetLoop`; sha256 and pivot in `source/ratchet/work-loop-six/manifest.json` |
 | `characters/sage/*.png` | Higgsfield, Seedream 4.5 | the sage's six states (§2e); five matted with `remove_background`, all six one identity |
 | `characters/bat/*.png` | Higgsfield, Seedream 4.5 | the robot bat's five states (§2d); one plate anchored the design, four fired against it |
@@ -103,16 +98,16 @@ plate can be traced back to the generation it came from.
 | `video/sword_forge.mp4` / `.webm` | Higgsfield, Seedance 2.5 | the forging cinematic (§1d), animated from a Seedream opening frame |
 | `video/meet.mp4` / `.webm` | Higgsfield, Seedance 2.5 | THE CORRIDOR — the first meeting with NULLFANG, from her canon element and a screenshot of the lion; as fired in `source/films/` |
 | `characters/alpha/*.webp`, `characters/chime/*.webp`, `source/alpha/takes/*.mp4`, `source/chime/takes/*.mp4` | Higgsfield, Seedance 2.5 | THE ALPHA's and CHIME's move strips (ART_QUEUE §2ax): takes started from each rig's own assembled rest frame, cut by `tools/vidstrip.cjs` |
-| `characters/beast/*.webp`, `source/beast/takes/*.mp4` | Higgsfield, Seedance 2.5 | NULLFANG's move strips (ART_QUEUE §2ax): ten takes started from the rig's own assembled `stalk` frame, cut by `tools/vidstrip.cjs`; the takes archived beside them |
-| `characters/hero/gait/*`, `hero/idle.webp`, `hero/jump.webp`, `hero/hurt.webp`, `hero/swing/jab|hook|uppercut.webp`, `source/hero/takes2/*.mp4`, `source/hero/rig/*` | Higgsfield — Seedance 2.5, Meshy multi_image_to_3d / 3d_rigging | HZD-99's filmed move strips (ART_QUEUE §2aw): takes started from her own painted plates; the rigged model and its clips archived for the record |
-| `characters/hero/idle.webp`, `hero/gait/walk|run.webp`, `hero/fidget.webp`, `hero/heal.webp`, `hero/heal_fx.webp`, `hero/death.webp`, `hero/hurt.webp`, `hero/trans_{air,land,skid,dash,wall,takeoff}.webp`, `hero/gate_walk.webp`, `hero/gate_run.webp`, `hero/gate_walk_{single,dual,joined}.webp`, `hero/swing/{claw_1,claw_2,finisher,burst,burst_fx}.webp`, `source/hero/delivered/*` | OpenAI GPT Image, prompted and reviewed by the owner | HZD-99's DRAWN animation sheets (2026-09-15/16). Generated outside this repo to the briefs in `docs/ART_PROMPTS_GPT.md` and handed over as finished sheets; every one is archived unaltered in `source/hero/delivered/` and cut into strips here by `tools/sheetslice.cjs` + `tools/movestrip.cjs` (bodies) or `tools/fxstrip.cjs` (effects). These supersede the filmed and Higgsfield-painted versions of the same moves, which stay on disk as the record |
+| `characters/beast/*.webp`, `source/beast/takes/*.mp4` | Higgsfield, Seedance 2.5 | NULLFANG's move strips: the `studio-*` takes (2026-10-04) and the first-take `fall`, cut by `tools/vidstrip.cjs`; the takes archived in `source/beast/`. The rest of the first-take set (ART_QUEUE §2ax) was retired 2026-10-09; its `stalk` strip is kept as a scale reference at `source/beast/stalk.webp` |
+| `characters/hero/gait/*`, `hero/idle.webp`, `hero/hurt.webp`, `hero/swing/uppercut.webp`, `source/hero/takes2/*.mp4`, `source/hero/rig/*` | Higgsfield — Seedance 2.5, Meshy multi_image_to_3d / 3d_rigging | HZD-99's filmed move strips (ART_QUEUE §2aw): takes started from her own painted plates; the rigged model and its clips archived for the record |
+| `characters/hero/idle.webp`, `hero/gait/walk|run.webp`, `hero/fidget.webp`, `hero/heal.webp`, `hero/heal_fx.webp`, `hero/death.webp`, `hero/hurt.webp`, `hero/trans_{air,land,skid,dash,wall,takeoff}.webp`, `hero/gate_walk.webp`, `hero/gate_run.webp`, `hero/gate_walk_{single,dual,joined}.webp`, `hero/swing/{claw_1,burst_fx}.webp`, `source/hero/delivered/*` | OpenAI GPT Image, prompted and reviewed by the owner | HZD-99's DRAWN animation sheets (2026-09-15/16). Generated outside this repo to the briefs in `docs/ART_PROMPTS_GPT.md` and handed over as finished sheets; every one is archived unaltered in `source/hero/delivered/` and cut into strips here by `tools/sheetslice.cjs` + `tools/movestrip.cjs` (bodies) or `tools/fxstrip.cjs` (effects). These supersede the filmed and Higgsfield-painted versions of the same moves, which stay on disk as the record |
 | `characters/hero/*`, `characters/hzd_8yaw*.webp` | Higgsfield | HZD-99's body and turnarounds (§1), all pinned to the canon reference element; restyled 2026-09-03 into the corridor film's painted look (ART_QUEUE §2am), every plate archived in `source/hero/style_d/` |
-| `fx/slash_[h,d,u,dn].png`, `characters/gear/jetpack*.png` | Higgsfield | the crystal slash light-sheets (§1b-i) and the back-jet gear (§1c) |
-| `characters/{kiln,rime,snare}/*.png`, `backgrounds/winch_house.png` | Higgsfield, Seedream 4.5 | the zone C/D/E enemies (§2l, §2n, §2p) and Servo's winch (§2t) |
+| `characters/gear/jetpack.webp` | Higgsfield | the back-jet gear (§1c) |
+| `characters/{kiln,rime,snare}/*.png` | Higgsfield, Seedream 4.5 | the zone C/D/E enemies (§2l, §2n, §2p) |
 | `backgrounds/{forge,carrel,hollow}_front.png` / `_interior.jpg` | Higgsfield, Seedream 4.5 | the Tinker's forge (§2k), the Archivist's carrel (§2m) and Lumen's hollow (§2o) |
 | `characters/npc_6yaw.webp`, `characters/roster_8yaw.png` | Higgsfield | the NPC and creature turnaround sheets; the NPC sheet refired 2026-09-03 into the corridor film's painted look, 42 cells, every plate in `source/npc/style_d/`; the roster's five enemy rows refired the same day, 40 cells, in `source/roster/style_d/` (ART_QUEUE §2am) |
-| `characters/beasts/*`, `characters/flora/*`, `characters/gear/*` | Higgsfield | the animal line, the flora deck, the equipment plates; the wolf line (Alpha, wolf, cheetah — 25 plates) refired 2026-09-03 into the corridor film's painted look, in `source/beasts/style_d/` (ART_QUEUE §2am) |
-| `characters/gear/repair_panel.webp`, `repair_battery.webp`, `wake_lamp.webp` | Higgsfield, GPT Image 2.5 | Ratchet's repair board and power cell, the wake-room lamp (2026-10-09); sources in `source/gear/` |
+| `characters/beasts/*`, `characters/flora/*`, `characters/gear/*` | Higgsfield | the animal line, the flora deck, the equipment plates; the wolf line (wolf and cheetah plates; the Alpha's plates and the two-frame walk/run pairs were retired 2026-10-09) refired 2026-09-03 into the corridor film's painted look, in `source/beasts/style_d/` (ART_QUEUE §2am) |
+| `characters/gear/repair_panel.webp`, `repair_battery.webp`, `wake_lamp.webp` | Higgsfield, GPT Image 2.5 | Ratchet's repair board and power cell (loaded by URL from js/story-repair.js), the wake-room lamp (2026-10-09); sources in `source/gear/` |
 | `characters/beasts/{wolf,cheetah}_{walk8,run6}.webp` | Higgsfield, GPT Image 2.5 + Seedance 2.5 | the pack's filmed walk and run cycles, one stride each, cut by `tools/vidstrip.cjs` (2026-10-09); takes in `source/beasts/cycles/` |
 | `characters/beasts/{wolf,cheetah}_{winded6,land4}.webp`, `characters/roster/*`, `characters/talon/*`, `characters/bat/flight6.webp`, `characters/sage/{walk8,exhale}.webp` | Higgsfield, GPT Image 2.5 + Seedance 2.5 | the pack's openings and the roster's filmed walks and flights, plus the minion's perch and the sage's exhale (ART_QUEUE §2cc-iii…vii, 2026-10-09); sources in `source/beasts/cycles/`, `source/roster/cycles/`, `source/talon/`, `source/bat/cycles/`, `source/sage/` |
 | `backgrounds/ceil_*.jpg`, `backgrounds/lair_*.png`, `backgrounds/gate_city.jpg` | Higgsfield | ceiling tiers, guardian lairs, the city gate monument |
@@ -134,7 +129,7 @@ rather than on a contact sheet.
 | `music/mus_boss.m4a`, `mus_nullfang.m4a`, `mus_talonhost.m4a`, `mus_furnace.m4a`, `mus_glaciere.m4a`, `mus_prism.m4a`, `mus_mother.m4a`, `mus_alpha.m4a`, `mus_alphatame.m4a` | Higgsfield | one theme per guardian, plus the alpha duel and the tamed reprise |
 | `music/mus_hero.m4a` | Higgsfield | HER motif (ART_QUEUE §2ae) — the rising five-note music-box line the score never had. Three takes fired, the flat one refused on loudness range (LRA 5.2 against 14.1), the keeper mastered to −14 LUFS. Leads the title slot |
 | `sfx/vox/hzd_*.wav` | Higgsfield | HZD-99's own voice: the kiai that escalates with the combo, hurt, death, dash, jump, land, heal, evolution, the charge release. −17 LUFS, mono, trimmed to game length |
-| `sfx/vox/roar_*.ogg`, `atk*.ogg`, `dash.ogg`, `djump.ogg`, `hurt.ogg`, `land.ogg`, `purr.ogg`, `win.ogg` | Higgsfield | the guardians' roars — each one its own animal — and the first pass of her barks |
+| `sfx/vox/roar_*.ogg`, `purr.ogg`, `win.ogg` | Higgsfield | the guardians' roars — each one its own animal — and her purr and win (the first-pass barks were retired for the `hzd_*.wav` set) |
 | `vox/*.ogg` | Higgsfield | the machine folk speaking: eighteen lines, six characters, one voice each. Streamed, never decoded |
 | `sfx/hz_*.ogg` | Higgsfield | her foley (§2ae): paired swings, the finisher, the volt burst, dash, the charge swell, the ready chime, jump, land, and five authored footstep pairs — metal, grass, rock, ice, and the Nest's roots. Gain-matched to −6 dB peak; near-silent takes refused on measurement and re-fired |
 | `sfx/hz_evosting.ogg`, `hz_winsting.ogg` | cut from `mus_hero.m4a` | her motif quoted at her moments — the same five notes, not a soundalike |
