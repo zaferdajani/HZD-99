@@ -158,10 +158,11 @@ const { chromium } = require('playwright');
   // the scripted first surge should already have landed when the step opened
   await p.evaluate(() => { for (let i = 0; i < 4 && G.state === 'DIALOG'; i++) { keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); keys['Enter'] = 0; } for (let i = 0; i < 60; i++) update(1 / 60); });
   const hurtTo = await p.evaluate(() => ({ cores: player.cores, max: player.maxCores() }));
-  now = await drive('heal', () => {
+  // the pack's card may still be open when the heal lesson starts: read it
+  // through like a player (the other steps do the same)
+  now = await drive('heal', new Function(`if (G.state === 'DIALOG') { (${page})(); return; }
     if (G.state !== 'PLAY') return;
-    keys.KeyF = 1; for (let i = 0; i < 90; i++) update(1 / 60); keys.KeyF = 0; update(1 / 60);
-  });
+    keys.KeyF = 1; for (let i = 0; i < 90; i++) update(1 / 60); keys.KeyF = 0; update(1 / 60);`));
   await record(now);
   // THE OTHER THING THE PACK BOUGHT, and before it: holding the claw is an
   // ordinary attack (measured with the pack switched back off for a moment).
