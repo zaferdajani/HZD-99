@@ -41,6 +41,7 @@ const SUITE = [
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
   ['story-order', 'the story sheet walked through the real build: beat order, gates, named things, migration'],
+  ['den-gate', "the lion's den and the bell, every entrance, dash/jump bypass and save/load, before and after their milestones"],
   ['comic-rewards', 'saved milestone slideshows, updates, accessibility and failure recovery'],
   ['story-battery', 'unique workshop battery and legacy save compatibility'],
   ['story-rescue', 'recoverable machines and persistent cleansing'],

@@ -146,7 +146,7 @@ function pgWardLayers() {
   if (pgLairOpen(f)) return 0;
   return PG_LAIR_NEEDS.filter(k => !f[k]).length;
 }
-const PG_WARD_EAST = 1.5;       // tiles: the lair ward's depth at A3's east seam
+const PG_WARD_EAST = 2.2;       // tiles: the lair ward's depth at A3's east seam (inside the camera's clamp)
 const PG_BELL_COLS = [11, 14];  // A8's way up (world.js: the shaft shared with A2 and A9)
 
 // ---- THE TICK ---------------------------------------------------------------
@@ -295,16 +295,23 @@ function drawCleanses(c) {
     for (let i = 0; i < 3; i++) {
       const u = (q.t - i * 0.35) / 1.8;
       if (u <= 0 || u >= 1) continue;
-      c.strokeStyle = 'rgba(245,252,255,' + ((1 - u) * 0.75 * k).toFixed(3) + ')';
-      c.lineWidth = (1 - u) * 6 + 1;
+      c.strokeStyle = 'rgba(225,245,255,' + ((1 - u) * 0.45 * k).toFixed(3) + ')';
+      c.lineWidth = (1 - u) * 3.5 + 1;
       c.beginPath(); c.ellipse(cx, cy, R * (0.4 + u * 1.6), R * (0.32 + u * 1.25), 0, 0, 7); c.stroke();
     }
     c.restore();
     // ...and the word, so nobody reads the light as a death
     const la = Math.min(1, q.t / 0.35) * Math.max(0, Math.min(1, (3.4 - q.t) / 0.8));
     if (la > 0.02) {
+      // on a dark plate, like every other word the game hands her: white on
+      // the column of light would be white on white
+      const sz = q.small ? 12 : 16, ly = q.y - 22 - Math.min(1, q.t) * 10, word = t(q.label);
       c.save(); c.globalAlpha = la;
-      ftxt(t(q.label), cx, q.y - 18 - Math.min(1, q.t) * 10, q.small ? 12 : 16, '#f4fbff', 'center', 'rgba(140,220,255,0.95)');
+      c.font = '700 ' + sz + 'px "Segoe UI", Tahoma, sans-serif';
+      const lw = c.measureText(word).width + sz * 1.4;
+      c.fillStyle = 'rgba(6,14,24,0.82)';
+      if (typeof rr === 'function') { rr(c, cx - lw / 2, ly - sz * 0.9, lw, sz * 1.8, sz * 0.6); c.fill(); }
+      ftxt(word, cx, ly, sz, '#f4fbff', 'center', 'rgba(140,220,255,0.95)');
       c.restore(); c.globalAlpha = 1;
     }
   }
@@ -320,7 +327,7 @@ function drawProgressGround(c) {
   // the hub's landmark
   if (G.roomId === PG_HUB.room && phase) {
     const x0 = PG_HUB.tx0 * TILE, x1 = (PG_HUB.tx1 + 1) * TILE, cx = (x0 + x1) / 2;
-    const fy = PG_HUB.ty * TILE, broken = pgHubBroken();
+    const broken = pgHubBroken(), fy = broken ? PG_HUB.ty * TILE : Math.min(PG_HUB.ty * TILE, pgFloorY(cx));
     const pu = 0.6 + Math.sin(now * 1.7) * 0.4;
     c.save(); c.globalCompositeOperation = 'lighter';
     // the column of light out of the cracks, tall enough to read from the seam
@@ -335,14 +342,20 @@ function drawProgressGround(c) {
     c.bezierCurveTo(x0 + 10, fy - H * 0.4, cx - 30, fy - H * 0.8, cx, fy - H);
     c.bezierCurveTo(cx + 30, fy - H * 0.8, x1 - 10, fy - H * 0.4, x1 + 6, fy + 4);
     c.fill();
-    // the seams themselves glow: the dust is coming through the cracks
+    // the seams themselves glow: the dust is coming through the cracks — a
+    // pale pool lying ON the surface (anything below it is under the
+    // foreground ground and nobody would see it), split by dark seams
     if (!broken) {
-      c.strokeStyle = 'rgba(' + ink + ',' + (0.45 + pu * 0.4).toFixed(3) + ')';
+      const pg = c.createRadialGradient(cx, fy - 2, 4, cx, fy - 2, (x1 - x0) * 0.75);
+      pg.addColorStop(0, 'rgba(' + ink + ',' + (0.55 + pu * 0.3).toFixed(3) + ')');
+      pg.addColorStop(1, 'rgba(' + ink + ',0)');
+      c.fillStyle = pg; c.beginPath(); c.ellipse(cx, fy - 2, (x1 - x0) * 0.75, 12, 0, 0, 7); c.fill();
+      c.strokeStyle = 'rgba(' + ink + ',' + (0.6 + pu * 0.35).toFixed(3) + ')';
       c.lineWidth = 2; c.lineCap = 'round';
-      for (let i = 0; i < 5; i++) {
-        const sx = x0 + 8 + i * ((x1 - x0 - 16) / 4);
-        c.beginPath(); c.moveTo(sx, fy + 2);
-        c.quadraticCurveTo(sx + (i % 2 ? 7 : -7), fy + 12, sx + (i % 2 ? -4 : 5), fy + 26);
+      for (let i = 0; i < 4; i++) {
+        const sx = x0 + 14 + i * ((x1 - x0 - 28) / 3);
+        c.beginPath(); c.moveTo(sx - 9, fy - 1);
+        c.quadraticCurveTo(sx, fy - 5 - (i % 2) * 3, sx + 9, fy - 1);
         c.stroke();
       }
     } else {
@@ -360,7 +373,10 @@ function drawProgressGround(c) {
       const d = Math.abs(player.x + player.w / 2 - cx);
       if (d > 140 && d < 470) {
         c.save(); c.globalAlpha = Math.min(1, (470 - d) / 120) * 0.92;
-        ftxt(t('pg_marble_here'), cx, fy - 5.2 * TILE, 13, '#f4f7f2', 'center', 'rgba(220,235,225,0.8)');
+        // one sentence a line: the caption stands over the crack, inside the
+        // light, and never runs off the side of a phone's frame
+        const lines = pgSentences(t('pg_marble_here'));
+        lines.forEach((ln, i) => ftxt(ln, cx, fy - 3.9 * TILE + (i - (lines.length - 1)) * 16, 12, '#f4f7f2', 'center', 'rgba(200,225,215,0.9)'));
         c.restore(); c.globalAlpha = 1;
       }
     }
@@ -385,6 +401,10 @@ function drawProgressGround(c) {
     c.restore();
     if (chance(0.3)) addPart(dx + rnd(-40, 40), fy - rnd(20, 120), rnd(-14, 14), rnd(-30, 6), 1.2, '#9fdcff', 2, -8, true);
   }
+}
+function pgSentences(str) {
+  const parts = String(str).split(/(?<=[.!?。！？])\s*/).filter(Boolean);
+  return parts.length ? parts : [String(str)];
 }
 function W_CV3_DOOR() { return G.roomDef.w * TILE * (36 / 56); }
 // one chalk mark: a curved arrow pointing on, and a rounded pebble — the raw
@@ -454,13 +474,23 @@ function drawProgress(c) {
     }
   }
   if (G.roomId === 'A8' && !pgBellOpen(G.save.flags, G.save.visited)) {
-    pgDrawWardH(c, (PG_BELL_COLS[0] - 0.4) * TILE, (PG_BELL_COLS[1] + 1.4) * TILE, -4, TILE * 0.95, now);
+    pgDrawWardH(c, (PG_BELL_COLS[0] - 0.6) * TILE, (PG_BELL_COLS[1] + 1.6) * TILE, -6, TILE * 1.9, now);
   }
   drawCleanses(c);
 }
 function pgDrawWardV(c, x0, x1, y0, y1, layers, now) {
   const fl = G.pgWardFlash || 0;
   c.save(); c.globalCompositeOperation = 'lighter';
+  // the halo it throws on the camp, so the ward reads from across the yard
+  const hw = 3.5 * TILE;
+  const hg = c.createLinearGradient(x0 - hw, 0, x0 + 8, 0);
+  hg.addColorStop(0, 'rgba(170,110,255,0)');
+  hg.addColorStop(1, 'rgba(170,110,255,' + (0.10 + 0.05 * layers + fl * 0.15).toFixed(3) + ')');
+  c.fillStyle = hg;
+  c.beginPath();
+  c.moveTo(x0 + 8, y0);
+  c.quadraticCurveTo(x0 - hw * 0.6, (y0 + y1) / 2, x0 + 8, y1);
+  c.closePath(); c.fill();
   for (let L = 0; L < layers; L++) {
     const depth = L / Math.max(1, layers);
     const left = x0 + depth * (x1 - x0) * 0.45;
@@ -494,7 +524,8 @@ function pgDrawWardH(c, x0, x1, y0, y1, now) {
   const fl = G.pgWardFlash || 0;
   c.save(); c.globalCompositeOperation = 'lighter';
   const g = c.createLinearGradient(0, y0, 0, y1);
-  g.addColorStop(0, 'rgba(255,110,190,' + (0.32 + fl * 0.3).toFixed(3) + ')');
+  g.addColorStop(0, 'rgba(255,120,200,' + (0.55 + fl * 0.3).toFixed(3) + ')');
+  g.addColorStop(0.55, 'rgba(190,120,255,' + (0.28 + fl * 0.2).toFixed(3) + ')');
   g.addColorStop(1, 'rgba(180,120,255,0)');
   c.fillStyle = g;
   c.beginPath();
@@ -502,15 +533,24 @@ function pgDrawWardH(c, x0, x1, y0, y1, now) {
   c.moveTo(x0, y0);
   for (let i = 0; i <= N; i++) {
     const xx = x0 + (x1 - x0) * i / N;
-    c.lineTo(xx, y1 * 0.7 + Math.sin(now * 2.2 + i * 1.1) * 7);
+    const sag = Math.sin(Math.PI * i / N);           // the membrane bellies down in the middle
+    c.lineTo(xx, y0 + (y1 - y0) * (0.35 + 0.65 * sag) + Math.sin(now * 2.2 + i * 1.1) * 6);
   }
   c.lineTo(x1, y0); c.closePath(); c.fill();
-  c.strokeStyle = 'rgba(230,190,255,' + (0.4 + fl * 0.4).toFixed(3) + ')';
-  c.lineWidth = 1.6;
+  // the strings it is wound from, each one bowed and trembling
+  c.strokeStyle = 'rgba(245,215,255,' + (0.55 + fl * 0.4).toFixed(3) + ')';
+  c.lineWidth = 1.5;
+  for (let k = 0; k < 4; k++) {
+    const yy = y0 + 6 + k * (y1 - y0) * 0.18;
+    c.beginPath(); c.moveTo(x0 + 4, yy);
+    c.quadraticCurveTo((x0 + x1) / 2, yy + (y1 - y0) * 0.35 + Math.sin(now * 9 + k) * 3, x1 - 4, yy);
+    c.stroke();
+  }
+  // sound-rings dropping out of it: the bell, ringing somewhere above
   for (let r = 0; r < 3; r++) {
-    const v = ((now * 0.5 + r / 3) % 1);
-    const xx = x0 + v * (x1 - x0);
-    c.beginPath(); c.ellipse(xx, y1 * 0.45, 14, 8, 0, 0, 7); c.stroke();
+    const v = ((now * 0.45 + r / 3) % 1);
+    c.strokeStyle = 'rgba(230,190,255,' + ((1 - v) * 0.6).toFixed(3) + ')';
+    c.beginPath(); c.ellipse((x0 + x1) / 2, y1 * 0.6 + v * TILE * 1.6, 16 + v * 40, 5 + v * 9, 0, 0, 7); c.stroke();
   }
   c.restore();
 }
