@@ -53,6 +53,19 @@ Publication and live verification remain separate from these local passes.
   revised manhwa pages added about 76 MB. The next few chapters will not fit
   unless images move to a lighter tier or out of the published branch.
 
+### Integrator verification of 2779339 — 2026-10-09
+
+- The roster's filmed strides (ART_QUEUE §2cc-iii…vii) on top of a9cca18.
+- Full suite in an isolated namespace: every harness green except `wolves` and
+  `seam`, the two that measure the Alpha den's place on the meadow route — an
+  owner decision, unchanged from a9cca18 and not weakened.
+- pages.yml's own build, rebuild check and release-blocking gameplay checks
+  passed; it then waited on the legacy publisher, and GitHub again never queued
+  a `pages build and deployment` run for the push (the last one was a9cca18).
+  This note is pushed to main to queue that build, as on 2026-09-27.
+- Published tree: 914 MB of the 1 GB Pages limit (912 MB at a9cca18;
+  `assets/source/` alone is 609 MB). The headroom is now about 110 MB.
+
 ## Earlier checkpoint (superseded by the candidate above)
 
 User pushed integration commit 2eedaf8 successfully. Production main and odyssey were still at 44425e967b51870591d96b0967342b0cf177337c when checked this turn. No production publication is claimed here.
