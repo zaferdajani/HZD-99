@@ -36,7 +36,8 @@ const OUT = require('node:path').join(__dirname, 'out/');
       const key=[s.room,s.state,s.step,s.action,s.lock,Math.floor(s.x/80)].join(':');
       if (key!==last) {trace.push(s);if(trace.length<=80 || trace.length%100===0)console.log(JSON.stringify(s));last=key;}
       if (s.step) learned.add(s.step);
-      if (s.state==='DIALOG') {await steer(null);await page.keyboard.press('KeyE');await page.waitForTimeout(90);continue;}
+      // a reader's pace: a press every 90 ms is a mash and turns no page (js/overlay.js DLG_GAP)
+      if (s.state==='DIALOG') {await steer(null);await page.keyboard.press('KeyE');await page.waitForTimeout(300);continue;}
       if (s.wake || s.cut || s.gate || s.state!=='PLAY') {await page.waitForTimeout(80);continue;}
       if (s.step==='buy' && s.room==='A0B') {succeeded=true;break;}
       if (s.hold>0) {await steer('ArrowRight');await page.waitForTimeout(80);continue;}

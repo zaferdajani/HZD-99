@@ -20,10 +20,14 @@ const { chromium } = require('playwright');
       const tick = () => { update(1 / 60); for (const k in keysP) delete keysP[k]; };
       const dialog = () => {
         let count = 0;
-        while (G.state === 'DIALOG' && count++ < 60) {
-          keysP.KeyE = true; tick();
+        // READ, DON'T MASH (owner, 2026-10-09; js/overlay.js): a press every
+        // frame is a mash and turns no page. A reader presses about three
+        // times a second — the first press shows a page, the next turns it.
+        while (G.state === 'DIALOG' && count++ < 4000) {
+          if (count % 20 === 0) keysP.KeyE = true;
+          tick();
         }
-        need(count < 60, 'dialogue chain terminates'); clear();
+        need(count < 4000, 'dialogue chain terminates'); clear();
       };
       const stage = room => { clear(); loadRoom(room); G.wake = null; G.state = 'PLAY'; G.hitStop = 0; G.trans = null; };
       stage('A0B');

@@ -113,7 +113,8 @@ const WWW = path.join(ROOT, 'www');
     const hit = [];
     for (let i = 0; i < PL.items.length; i++) {
       G.pauseIdx = -1;
-      tapMenu(480, PL.y0 + i * PL.step);
+      // the row's own drawn position (pauseLayout().pos: one or two columns)
+      { const P = PL.pos ? PL.pos(i) : { x: 480, y: PL.y0 + i * PL.step }; tapMenu(P.x, P.y); }
       hit.push(G.pauseIdx === i);
     }
     G.pauseConfirm = null; G.state = 'PLAY';
