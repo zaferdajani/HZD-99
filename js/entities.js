@@ -11069,13 +11069,17 @@ function sageTame(e) {
   // moment the halo turns, which is the only frame where the player can see
   // that the sage did it rather than that the room happened to be empty.
   for (const o of (G.enemies || [])) {
-    if (!o || o === e || o.dead || o.calm || o.kind === 'sage') continue;
-    o.calm = true; o.hypnoT = 1e9; o.stagT = 0;
-    // the ones that were people are freed with it, and wear the cure's circle
-    if (o.actorRole === 'infected-person') {
+    if (!o || o === e || o.dead || o.kind === 'sage') continue;
+    const wasCalm = o.calm;
+    // the ones that were people are freed with it — even one the Braid had
+    // already calmed — and wear the cure's circle
+    if (o.actorRole === 'infected-person' && !o.rescued) {
       o.rescued = true; o.disabled = false;
       if (typeof cleanseBegin === 'function') cleanseBegin(o.x, o.y, o.w, o.h, 'pg_freed', null, true);
     }
+    o.calm = true; o.hypnoT = 1e9;
+    if (wasCalm) continue;
+    o.stagT = 0;
     burst(o.x + o.w / 2, o.y + o.h / 2, 9, '#37ffd0', 110, 0.7, -12, 2.2, true);
   }
   if (typeof firstSageRevelation === 'function') firstSageRevelation();

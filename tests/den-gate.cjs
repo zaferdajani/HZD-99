@@ -189,6 +189,33 @@ const check = (name, ok, detail) => {
       loadRoom('GA1');
       out.grottoAfter = gateDoors().some(x => x.to === 'A4');
     }
+    // ---- 8. THE END OF CHAPTER ONE: the climb above the camp, once the lion
+    // is free, hands the chapter-two teaser to the panel player — once
+    {
+      fresh({ bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1, ratchetCamp: 1 });
+      const calls = [], real = window.panelsPlay;
+      window.panelsPlay = (id) => calls.push(id);
+      loadRoom('A3'); quiet();
+      stand(12); for (let i = 0; i < 20; i++) progressTick(1 / 60);
+      const early = calls.length;
+      player.x = 26 * TILE; player.y = 4 * TILE; player.vy = -200;
+      progressTick(1 / 60); progressTick(1 / 60);
+      player.y = 5 * TILE; progressTick(1 / 60);
+      window.panelsPlay = real;
+      out.teaser = { early, calls, flag: !!G.save.flags.ch2Climb };
+    }
+    // ---- 9. the objective, in the chapter's order, from the save alone
+    {
+      fresh({});
+      const seq = [{}, { heal: 1 }, { heal: 1, beacon: 1 }, { heal: 1, pl_cshard: 1 }, { heal: 1, pl_cshard: 1, crystal: 1 },
+        { crystal: 1, sageTame_GA1D: 1 }, { crystal: 1, sageTame_GA1D: 1, bossChime: 1 },
+        { crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1 }, { crystal: 1, bossGlitch: 1 }];
+      const base = { woke: 1, tut: 1, 'on_A0B|ratchet': 1 };
+      out.goals = seq.map(f => { G.save.bag = {}; const k = progressGoal(Object.assign({}, base, f)); return k; });
+      out.goalLangs = [];
+      for (const l of LANGS.map(x => x.id)) { LANG = l; for (const k of out.goals) if (k && t(k) === k) out.goalLangs.push(l + ':' + k); }
+      LANG = 'en';
+    }
     return out;
   });
 
@@ -220,6 +247,13 @@ const check = (name, ok, detail) => {
   check('...nor can the break\'s', r.brk.staged && r.brk.dealt === 0 && !r.brk.dead && r.brk.hp && !r.brk.glitch, JSON.stringify(r.brk));
   check('with the blade, the Sage and the bell, she walks east into the lair and NULLFANG wakes',
     r.opened.inA4 && r.opened.fight && r.opened.boss === 'glitch', JSON.stringify(r.opened));
+  check('the climb above the camp after the lion hands the chapter-two teaser to the panels, once',
+    r.teaser.early === 0 && r.teaser.calls.length === 1 && r.teaser.calls[0] === 'ch2_teaser' && r.teaser.flag, JSON.stringify(r.teaser));
+  const want = ['pg_goal_pack', 'pg_goal_marble', 'pg_goal_quarry', 'pg_goal_return', 'pg_goal_sage', 'pg_goal_chime',
+    'pg_goal_east', 'pg_goal_lion', 'pg_goal_up'];
+  check('the chapter\'s goal follows the owner\'s order: pack, marble, quarry, Ratchet, Sage, CHIME, the enclosure, NULLFANG, up',
+    JSON.stringify(r.goals) === JSON.stringify(want), r.goals.join(' > '));
+  check('...in all five languages', !r.goalLangs.length, r.goalLangs.join(','));
   if (errs.length) check('no page errors', false, errs.slice(0, 3).join(' | '));
   await browser.close();
   if (fails.length) { console.log('\nFAILED: ' + fails.length + ' check(s)'); process.exit(1); }

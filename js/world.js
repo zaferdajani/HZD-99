@@ -1973,6 +1973,10 @@ function sageQuietHere(roomId) {
 // surprise. The other networks keep t5 until their kingdoms' own sessions
 // write their pages.
 ROOMS.GA1T.ents = ROOMS.GA1T.ents.map(e => (e[0] === 'term' ? ['term', e[1], e[2], 6] : e));
+// ...and the Alpha's network (chapter one's optional den) tells ITS story, not
+// a third copy of the founding log: terminal 22, the wardens' route ledger —
+// why the pack walked the meadow and what it was guarding (js/text-progress.js)
+ROOMS.GA2T.ents = ROOMS.GA2T.ents.map(e => (e[0] === 'term' ? ['term', e[1], e[2], 22] : e));
 
 const gridCache = {};
 // ---------------------------------------------------------------------------

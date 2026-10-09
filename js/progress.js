@@ -77,10 +77,10 @@ function progressGoal(f) {
     if (!f.heal) return 'pg_goal_pack';
     return f.beacon ? 'pg_goal_quarry' : 'pg_goal_marble';
   }
+  if (f.bossGlitch) return 'pg_goal_up';           // an older save may hold the lion without the rest
   if (!f.sageTame_GA1D) return 'pg_goal_sage';
   if (!f.bossChime) return 'pg_goal_chime';
-  if (!f.bossGlitch) return f.nfMeet ? 'pg_goal_lion' : 'pg_goal_east';
-  return 'pg_goal_up';
+  return f.nfMeet ? 'pg_goal_lion' : 'pg_goal_east';
 }
 
 // ---- THE QUARRY MARKS -------------------------------------------------------
