@@ -1666,7 +1666,9 @@ function checkTransitions() {
 function exitOpen(d) {
   if (d.robo && isHero()) return true;
   if (G.save.visited && G.save.visited[d.to]) return true;
-  if (d.flag && !G.save.flags[d.flag]) return false;
+  // `or`: other flags that mean the same thing was already earned — a save
+  // that has silenced the bell has been past the bell's gate
+  if (d.flag && !G.save.flags[d.flag] && !(d.or && d.or.some(f => G.save.flags[f]))) return false;
   if (d.blade && !isHero() && !weaponOwned('single')) return false;
   return true;
 }
@@ -1829,7 +1831,7 @@ function roomHasLiveBoss(id) {
 function vlinkSeamless(side) {
   const L = G.vlink && G.vlink[side];
   if (!L) return null;
-  if (L.flag && !G.save.flags[L.flag]) return null;
+  if (L.flag && !G.save.flags[L.flag] && !(L.gate && L.gate.or && L.gate.or.some(f => G.save.flags[f]))) return null;
   // every rule exitOpen knows (blade, hero exemption, a door already walked)
   // — a gate the cut crossing refuses must not be walked through seamlessly
   if (L.gate && !exitOpen(L.gate)) return null;

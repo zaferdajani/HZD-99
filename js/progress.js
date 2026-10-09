@@ -151,6 +151,9 @@ const PG_BELL_COLS = [11, 14];  // A8's way up (world.js: the shaft shared with 
 
 // ---- THE TICK ---------------------------------------------------------------
 function progressTick(dt) {
+  // the cleansing light belongs to the room it was cast in (the reward it was
+  // holding is settled by loadRoom's own safety net)
+  if (G.pgRoom !== G.roomId) { G.pgRoom = G.roomId; G.cleanses = []; }
   if (!pgRobo() || !player || player.dead || G.trans) return;
   const f = G.save.flags, W = G.roomDef.w * TILE, now = G.save.time || 0;
   // THE LAIR WARD, physically. checkTransitions already refuses the crossing at
