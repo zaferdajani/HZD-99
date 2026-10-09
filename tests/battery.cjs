@@ -86,7 +86,7 @@ const { chromium } = require('playwright');
       }
       document.querySelector('.repair-power').click();
       for (let i=0;i<90 && G.state==='REPAIR';i++) update(1/60);
-    const after = { live: npcLive(sp), batt: invCount(cell), kit: invCount('kit') };
+    const after = { live: npcLive(sp), batt: invCount(cell), kit: invCount('kit'), talking: (G.state === 'DIALOG' && G.dialog.npc === 'ratchet') || !!G.cut || G.state === 'CUT' };   // his story, or the memory film that leads into it
     G.dialog = null; G.state = 'PLAY';
     // ...and a second hand-off must not be possible: it is live now
     doInteract(sp);
@@ -99,7 +99,10 @@ const { chromium } = require('playwright');
   check('the hand-off spends exactly one cell',
     hand.before.batt === 1 && hand.after.batt === 0, hand.before.batt + ' -> ' + hand.after.batt);
   check('and it wakes', hand.after.live === true);
-  check('the first unit repays with a repair kit', hand.after.kit === 1, 'kit ×' + hand.after.kit);
+  // (owner, 2026-10-09: no unexplained drops — Ratchet's waking repays with
+  // his story, the errand and the spare cell for Servo, handed over by name
+  // at the end of it; the repair kit he used to press on her is gone)
+  check('the first unit repays with his story, not an unexplained kit', hand.after.kit === 0 && hand.after.talking, 'kit ×' + hand.after.kit);
 
   // ---- A DARK MACHINE IS STILL A MACHINE YOU CAN SEE --------------------
   //
@@ -203,12 +206,17 @@ const { chromium } = require('playwright');
     await new Promise(r => requestAnimationFrame(r));
     const sp = G.statics.find(s => s.type === 'npc');
     doInteract(sp);
-    const had = !!(G.dialog && G.dialog.onEnd);
+    // the letter is read and closed; with no battery nothing can be wired
+    const end = G.dialog && G.dialog.onEnd;
+    G.dialog = null; G.state = 'PLAY';
+    if (end) end();
+    const had = G.state === 'REPAIR' || !!document.getElementById('ratchet-repair');
     const live = npcLive(sp);
+    if (typeof repairClose === 'function') repairClose(false);
     G.dialog = null; G.state = 'PLAY';
     return { had, live };
   });
-  check('with no cell there is nothing to press', broke.had === false);
+  check('with no cell there is nothing to press', broke.had === false && broke.live === false);
   check('and it stays dark', broke.live === false);
 
   // ---- 4. THE LION PAYS FOR THE SHOP -------------------------------------

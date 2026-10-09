@@ -203,7 +203,9 @@ function opServo(s) {
     });
     return true;
   }
-  if (!f.servoMet) { f.servoMet = 1; persist(); opServoIntro(); return true; }
+  // (a Servo woken under an older opening has had his first say: from here
+  // the ordinary conversation leads, standing line first)
+  if (!f.servoMet) { f.servoMet = 1; persist(); }
   return false;
 }
 function opServoIntro() {
@@ -229,9 +231,9 @@ function openingTick(dt) {
   // house's corner: a waking and a conversation are not interrupted by a bite.
   // (and it stays his: a keeper's place is somewhere to stand and talk)
   if (G.roomId === 'A1') {
-    const edge = 11 * TILE;
+    const edge = 13 * TILE;
     for (const e of G.enemies || []) {
-      if (!e || e.dead || e.disabled || e.rescued || e instanceof Boss) continue;
+      if (!e || e.dead || e.disabled || e.rescued || !(e instanceof Enemy) || e instanceof Boss) continue;
       if (e.x < edge) { e.x = edge; if (e.vx < 0) e.vx = Math.abs(e.vx) * 0.5; }
     }
   }
@@ -398,6 +400,12 @@ function drawOpeningWorld() {
     const wx = 3 * TILE + 16 + 2, wy = 15 * TILE - 44;
     addPart(wx + rnd(-18, 18), wy + rnd(-18, 18), rnd(-60, 60), rnd(-90, -10), 0.45, chance(0.5) ? '#ffe08a' : '#8ff6ff', 2, 200, true);
   }
+}
+// what pressing the interact control at this NPC will do, when it is not
+// simply "talk" — read by drawStatics' interact label
+function opNearLabel(s) {
+  if (!opOn() || !s || s.type !== 'npc' || s.extra !== 'servo' || npcLive(s)) return null;
+  return t(invCount('batt') > 0 ? 'op_sv_cue_wake' : 'op_sv_cue_dark');
 }
 // the drum's speed: barely turning while he is dark, turning when he is awake,
 // and turning TRUE once his coil is home

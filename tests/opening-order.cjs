@@ -85,6 +85,7 @@ async function play(browser, mode) {
       const goal = typeof opGoalKey === 'function' && opGoalKey();
       const overlays = [G.dialog && 'dialog', G.state === 'SHOP' && 'shop', document.getElementById('ratchet-repair') && 'repair',
         G.state === 'TRIAL' && 'trial', (G.cut || G.state === 'CUT') && 'film',
+        (G.offer || G.state === 'OFFER') && 'offer', G.state === 'COMICS' && 'comic',
         chipNow && G.state === 'PLAY' && !G.dialog && 'chip'].filter(Boolean);
       const gr = goal && G.state === 'PLAY' && typeof opGoalRect === 'function' ? (() => {
         c.save(); c.font = '600 13px "Segoe UI", Tahoma, sans-serif';
@@ -175,6 +176,7 @@ async function play(browser, mode) {
       } else await page.waitForTimeout(120);
       continue;
     }
+    if (s.state === 'COMICS') { R.comics = (R.comics || 0) + 1; await steer(null); await page.keyboard.press('Escape'); await page.waitForTimeout(200); continue; }
     if (s.state !== 'PLAY' || s.wake || s.cut || s.gate || s.trans) { await steer(null); await page.waitForTimeout(90); continue; }
     if (s.flagsTut || !s.step) { if (s.room === 'A1') break; }
     if (s.hold > 0 || s.rech) { await steer(null); await page.waitForTimeout(90); continue; }

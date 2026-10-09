@@ -12338,12 +12338,24 @@ function drawStatics(P) {
   }
   // the opening's people and props in the world: Servo's cue, the pod's ring
   if (typeof drawOpeningWorld === 'function') drawOpeningWorld();
-  // interact hint
-  if (G.near && G.state === 'PLAY' && !G.recharge) {
+  // interact hint — not while a lesson is asking for something else: a
+  // "Talk" label over Ratchet while the chip says "hold HEAL" is a second
+  // instruction, and the press it names would be refused anyway
+  if (G.near && G.state === 'PLAY' && !G.recharge && (typeof tutAllows !== 'function' || tutAllows('INT'))) {
     const s = G.near;
     const label = s.type === 'rescue' ? t(G.save.flags.crystal ? 'story_cleanse' : 'story_binding') : s.type === 'npc' ? t('talk') : s.type === 'bench' ? t('rest') : s.type === 'term' ? t('read') : s.type === 'riddle' ? t('rd_hint') : s.type === 'secret' ? t('secret_hint') : s.type === 'trial' ? t('tt_open') : s.type === 'vault' ? t('vault_hint') : t('open');
-    // "{INT} — Talk": the label names this player's own interact control
-    ftxt(typeof ctlFill === 'function' ? ctlFill(label) : label, s.x + s.w / 2, s.y - 18, 13, '#eef3fa', 'center', 'rgba(120,220,255,0.8)');
+    // "{INT} — Talk": the label names this player's own interact control —
+    // and what the press will actually DO (a switched-off Servo is woken)
+    const ol = typeof opNearLabel === 'function' ? opNearLabel(s) : null;
+    // ...over the HEAD that is drawn, not the feet box: a machine-person is
+    // drawn at its atlas scale, and a label at the box top sat on the cat
+    let ly = s.y - 18;
+    if (s.type === 'npc' && typeof atlasOf === 'function') {
+      const A = atlasOf(s.extra), kk = A && A.sub[s.extra] ? A.sub[s.extra].k : 1;
+      ly = Math.min(ly, s.y + s.h - s.h * kk - 10);
+    }
+    const lt = ol || label;
+    ftxt(typeof ctlFill === 'function' ? ctlFill(lt) : lt, s.x + s.w / 2, ly, 13, '#eef3fa', 'center', 'rgba(120,220,255,0.8)');
   }
 }
 // ---------------------------------------------------------------------------
