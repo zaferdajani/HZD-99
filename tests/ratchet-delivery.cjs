@@ -5,7 +5,6 @@ const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const protectedFiles={
  'assets/characters/hero/gait/walk.webp':'4d71edab37a592ea3a8e50324d54babaed6bc0bbc4ad15ccdc360d31b961cb5d',
  'assets/characters/hero/gait/run.webp':'374a82f47d48a2fc7c895193a1140a28aea5516a270b0b270b098ac75386ff63',
- 'assets/characters/npc/ratchet/work_loop.webp':'dec89eb49ff47706437e1fb0479c0efc07f2e152375bce56dec1a195746e85bb',
  'assets/sfx/vox/hzd_yalla.wav':'eec30e2cf0d307c6d56846bdd4c41a4a57d7ba3f42bb2cd17b1f431404c54630',
  'js/entities.js':'3bf80c03c58a93bf130ee05e4b8f4e9953eb6015e50f64ed4d1ee483af8e20e8',
  'js/audio.js':'d075ae0159eb7fb2f0b47630d011c409abd3f7f09e014f1ee0e47de35a155d82',

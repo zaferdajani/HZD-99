@@ -1573,11 +1573,11 @@ untouched, which is why this pass needed no code change at all.
 
 | group | plates |
 |---|---|
-| terrain depth planes | `edge_a` `edge_c` `fore_a` `fore_b` `fore_c` `fore_d` `fore_e` `fore_x` |
+| terrain depth planes | `fore_a` `fore_c` (the `edge_` pair and `fore_b/d/e/x` were never drawn and were deleted 2026-10-09) |
 | cave mouths | `cave_mouth` `cave_exit` `cave_mouth_a`…`cave_mouth_e` |
 | kingdom gates | `gate_city` `gate_foundry` `gate_archives` `gate_conduits` `gate_nest` `gate_deep` |
 | interiors | `den_interior` `oracle_interior` `forge_interior` `carrel_interior` `hollow_interior` |
-| the NPCs' places | `booth_front` `oracle_booth` `forge_front` `forge_table` `carrel_front` `hollow_front` `winch_house` |
+| the NPCs' places | `booth_front` `oracle_booth` `forge_front` `forge_table` `carrel_front` `hollow_front` (`winch_house` deleted 2026-10-09, never drawn) |
 | guardian lairs | `lair_den` `lair_nest` `lair_forge` `lair_peak` `lair_vault` `lair_cradle` |
 | the monument | `mindnode_obelisk` |
 
@@ -2010,6 +2010,8 @@ branches, ever. §1 is DONE and merged; the list below is what remains.
 
 ### 3m. BOSS MOTION PLATES (task #93 — owner: "bosses graphics and
 movements need a lot of improvements")
+
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** NEVER FIRE. The ten guardian motion plates were deleted from the game — nothing drew them (`BOSS_MOTION` was empty and is gone); every guardian moves on its filmed §2ax strips or its parts rig. Sources stay in `assets/source/guardians/`.
 
 **WIRING AUDIT 2026-08-21 (code session). SIX OF THE TEN ARE A DIFFERENT
 CREATURE FROM THE GUARDIAN THAT SHIPPED — do not re-fire blind, and do not
@@ -2754,6 +2756,8 @@ invisibly.
 
 ### THE FINAL BATCH — 11 PLATES FIRED, 4 KEYED AND SHIPPED (2026-08-16)
 
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** The `guardians/*` and `beasts/*_run{a,b}` plates listed here were deleted from the game (sources stay archived). Re-fire none of them.
+
 Everything remaining that could be generated was fired in one batch of
 eleven. **All eleven as-fired sources are committed** (`assets/source/` under
 `guardians/`, `beasts/`, `hero/`, `monument/`, `kingdom2/`), contact sheets at
@@ -2810,6 +2814,8 @@ ceiling recorded in the kingdom-345 entry.
 
 ### 3m — GLACIERE AND THE FURNACE CHOIR SHIPPED TOO (2026-08-16)
 
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** These plates were deleted with the rest of §3m — see the RETIRED note on §3m above.
+
 `assets/characters/guardians/`: `glaciere_travel.png` + `glaciere_coil.png`,
 `choir_drift.png` + `choir_clench.png`. All matted, sources archived.
 
@@ -2838,6 +2844,8 @@ appear in the prompt AT ALL** — not as a heading, not in caps, not as a
 label. Describe the posture and never name it.
 
 ### 3m STARTED — NULLFANG FIRST, AND THE RECIPE IS PROVEN (2026-08-16)
+
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** These plates were deleted with the rest of §3m — see the RETIRED note on §3m above.
 
 **Shipped:** `assets/characters/guardians/nullfang_walk.png` and
 `nullfang_coil.png` (jobs ad218a4e, 1781bba8), matted, sources archived.
@@ -2880,6 +2888,8 @@ absolute rect in `js/` and in `tools/bossparts.cjs`'s mirror table; a
 separate sheet does not). That decision no longer blocks generation.
 
 ### 3m. BOSS MOTION PLATES — PREPARED, NOT FIRED (art session, 2026-08-16)
+
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** NEVER FIRE — see the RETIRED note on §3m above.
 
 **Not started, and deliberately so.** This is the largest block left — five
 guardians × (walk pair + one anticipation frame) is fifteen plates minimum,
@@ -3163,6 +3173,8 @@ turret), no second character, no text, no watermark; dark-room phrasing
 per the §1 warnings, subject only.
 
 ### 2j. SERVO'S WINDING HOUSE ✱ FIRE ON REBIND (kingdom 1 session, 2026-08-16)
+
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** NEVER FIRE. `winch_house` was fired and never drawn (the yard winch is `props/winch/base|arm.png`, drawn by `drawWinchHouse`); the plate and its key were deleted.
 
 The kingdom protocol asks that every NPC have a PLACE or a reason; Old Servo
 now has both. His coil errand already says he cannot climb any more, and his
@@ -3775,6 +3787,8 @@ Tasks #79/#80/#81 carry the wiring; the video brief and slash-sheet briefs go
 here when written.
 
 ### 1b-i. THE SLASH LIGHT-SHEETS ✱ FIRE ON REBIND — the single crystal's patterns
+
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** NEVER FIRE. `slash_h/d/u/dn` were keyed and never drawn — her blows carry their own FX strips (`swing*Fx`); the four sheets and keys were deleted. `slashFx` (the rake sheet) stays.
 Four plates, 1:1, additive-light style (painted as pure light on black, drawn
 with 'lighter' like the RAKE sheet — brightness IS the alpha). Each is the ARC
 the crystal leaves, alone, no character: a ribbon of pure white light with a
@@ -3816,6 +3830,8 @@ itself — every number and why — is `docs/combat/HERO_SWIRL.md`, measured by
 `tests/twin.cjs`.
 
 ### 1c. THE BACK JET ✱ FIRE ON REBIND — the double jump is hardware now
+
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** `jetpack_fire` is retired (never drawn; the plume is code) and was deleted — NEVER FIRE it. The `jetpack` gear plate stays live (gear card, MOD_ART).
 The double jump is a BACK JET THRUST (owner's call; the pirouette is retired —
 wired procedurally already, the plume is additive light per §0.0). Two gear
 plates, same treatment as the thrust boots:
@@ -3855,6 +3871,8 @@ faces.
 
 ### 2a-2f. `edge_<zone>` — one per kingdom, horizontally tileable
 
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** NEVER FIRE. `drawDepthPlane` only ever draws the `fore` plane; `edge_a`/`edge_c` were deleted unused and no other zone gets one.
+
 Substitute the kingdom line into the template:
 
 | key | kingdom | material line |
@@ -3887,6 +3905,8 @@ Substitute the kingdom line into the template:
 
 ### 2g-2l. `fore_<zone>` — the foreground occluders
 
+> **2026-10-09 (cleanup):** only `fore_a` and `fore_c` are wired. `fore_b/d/e/x` were fired 2026-08-18, never given a key, and deleted unseen-in-game (floating-island and outline shapes that do not sit on her walk line); zones B/D/E/X draw no near plane. Do not re-fire unless the owner asks.
+
 > A SINGLE TALL FOREGROUND ELEMENT for a side-scrolling game, rising from the
 > BOTTOM of the frame to the TOP, seen straight on and very close to camera:
 > <FOREGROUND SUBJECT>. It is a silhouette-first shape — read as a dark mass
@@ -3911,6 +3931,8 @@ AFTER the player at ~1.15 travel, two or three per room, placed off the room's
 own hash so they never land on a doorway.
 
 ### 2q. THE PACK'S RUN PAIRS ×4 ✱ FIRE ON REBIND (code session, 2026-08-16)
+
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** NEVER FIRE. Superseded by the filmed strides of §2cc (`wolfRun6` / `cheetahRun6`); the run pairs and walk pairs were deleted from the game.
 
 The gait now SPLITS AT SPEED (js/wolves.js): above 95 px/s a wolf or cheetah
 is running — longer stride, suspension beat, back flexion — with the motion
@@ -4003,6 +4025,8 @@ code session's, and it should follow the owner's word on these cells, not
 precede it.
 
 ### 2q. BEAST GAIT REPAIR ×8 (expanded 2026-08-16 — the owner saw the seams)
+
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** NEVER FIRE. Superseded by §2cc (filmed 8-cell walks and 6-cell runs); the `wolf_walka/b`, `wolf_runa/b`, `cheetah_walka/b`, `cheetah_runa/b` plates were deleted.
 
 Owner, watching the pack: "wolf walking with only one leg while sliding the
 rest." Measured against the plates, he is exactly right, twice over:
@@ -4155,6 +4179,8 @@ fragments (sl_rfrag1-5, one per guardian fork answered) — the film is the
 whole; the fragments are the shards, and they must not contradict it.
 
 ### 2s. TERRAIN DEPTH PLATES — FIRST FOUR FIRED (art session, 2026-08-18)
+
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** The `edge_` half of this was never drawn and is deleted; only `fore_a` / `fore_c` remain wired. See §2a-2f / §2g-2l.
 
 **The owner asked what terrain in a futuristic kingdom should look like, and
 for it in two depths.** This is task #76 / §2's `edge_` + `fore_` layers, and
@@ -4716,6 +4742,8 @@ transcode to VP9 before `vidstrip`, Chromium will not decode the h264).
 Strips shipped `assets/characters/beast/*.webp`, 320-px cells, feet on the
 cell floor, one scale per strip:
 
+> **RETIRED 2026-10-09 (cleanup, owner: "these fallbacks should have been deleted to prevent wasting tokens").** NEVER RE-FIRE this first-take table. Every strip below except `fall` was replaced by the 2026-10-04 studio takes (`studio-*.webp`, `BEAST_STRIP` in js/beast.js) and deleted from `assets/characters/beast/`; `stalk.webp` is kept only as a scale reference at `assets/source/beast/stalk.webp`.
+
 | strip | cells | from the take | plays the state(s) |
 |---|---|---|---|
 | `stalk` | 16, auto | stalk.mp4 whole | `stalk` (loop; the walk cycle) |
@@ -4821,7 +4849,7 @@ plate) in every state, mirrors with the facing (the harness now flips the
 velocity with the facing, since a moving body leans into its motion), and
 the grounded Alpha's feet sit on the plate's bottom within 8 px.
 
-**WIRING (code session):** `drawAlpha` in js/wolves.js draws `ALPHA_ART`
+**WIRING (code session):** *(2026-10-09: the Alpha now draws ONLY its filmed strips — `ALPHA_STRIP`; the `ALPHA_ART` plates were retired and deleted.)* `drawAlpha` in js/wolves.js drew `ALPHA_ART`
 plates per state — each becomes a `drawStripCell` over the state's timer with
 the plate as fallback; the constructs draw from `MINI_ART` in entities.js, same
 swap. Faces LEFT as fired; mirror for `face > 0`. Then `bosspace minis
@@ -5851,7 +5879,7 @@ motion principles only.** Do NOT reproduce, trace or evoke any Disney
 character, design, colour scheme or frame — NULLFANG is our ivory-and-violet
 machine lion (assets/characters/beast/, the parts atlas) and stays exactly that.
 Every prompt anchors to his existing strips as the SHAPE/STYLE reference
-(art-prompts skill §1–§2), side view facing LEFT, same scale as `beastStalk`.
+(art-prompts skill §1–§2), side view facing LEFT, same scale as the archived first-take stalk strip (`assets/source/beast/stalk.webp`).
 
 Code already shipped the weight it can (2026-09-27, GLOBAL_REGISTRY changelog):
 a real ballistic leap (apex 129–176 px, 0.62–0.88 s), the body pitching along
@@ -5938,9 +5966,9 @@ brief for the pack — same take list, larger frame, purple at runtime.
 
 ### 2cc-i. THE WOLF — `wolfWalk` (8 cells) and `wolfRun` (6 cells)
 
-**FIRED + WIRED 2026-10-09 (code session, owner's order "use Higgsfield for the complete artwork").** `wolf_walk8.webp` (8×192, 62 KB) and `wolf_run6.webp` (6×192, 53 KB), keys `wolfWalk8` / `wolfRun6`, drawn by `drawBeastPlate` as one cell of a real stride on the distance-driven phase; the two-plate pair stays as the fallback. Takes and the uniqueness numbers: `assets/source/README.md`, `beasts/cycles/`.
+**FIRED + WIRED 2026-10-09 (code session, owner's order "use Higgsfield for the complete artwork").** `wolf_walk8.webp` (8×192, 62 KB) and `wolf_run6.webp` (6×192, 53 KB), keys `wolfWalk8` / `wolfRun6`, drawn by `drawBeastPlate` as one cell of a real stride on the distance-driven phase; the rest plate is the fallback while a strip loads (the two-plate walk pair was deleted 2026-10-09). Takes and the uniqueness numbers: `assets/source/README.md`, `beasts/cycles/`.
 
-Identity: `wolfRest` / `wolfWalkA` (assets/characters/beasts/). Palette:
+Identity: `wolfRest` (assets/characters/beasts/) and the archived walk plate `assets/source/beasts/wolf_walka.jpg`. Palette:
 gunmetal plates over dark graphite, red optic, cyan seam light — as wired.
 
 - **wolfWalk ×8** — a four-beat lateral walk, two contacts per side:

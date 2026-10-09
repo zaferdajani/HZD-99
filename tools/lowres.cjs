@@ -123,6 +123,18 @@ function manifest() {
   }
   await browser.close();
   if (!check) fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify(index, null, 1));
+  // A FULL rebuild owns the directory: a small copy the index no longer names
+  // (its sheet was deleted, or it fell under MIN_BYTES) is dead weight that the
+  // packer would still ship — 137 of them had piled up by 2026-10-09.
+  if (!check && !only) {
+    const live = new Set(Object.values(index).map(p => path.basename(p)));
+    let pruned = 0;
+    for (const f of fs.readdirSync(OUT)) {
+      if (f === 'index.json' || live.has(f)) continue;
+      fs.unlinkSync(path.join(OUT, f)); pruned++;
+    }
+    if (pruned) console.log(pruned + ' stale small copies removed');
+  }
   console.log('\n' + Object.keys(index).length + ' sheets:  '
     + (full / 1048576).toFixed(1) + ' MB -> ' + (low / 1048576).toFixed(2) + ' MB  ('
     + (low / full * 100).toFixed(1) + '%)');

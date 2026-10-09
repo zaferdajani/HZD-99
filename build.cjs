@@ -1,62 +1,12 @@
-// CLAWBYTE build: emits play.html (single file) with curated CC0 assets
-// embedded as data: URIs. Run: node build.cjs
+// CLAWBYTE build: emits index.html + odyssey.html (and the two Forge pages)
+// from dev.html and the js/ sources. Run: node build.cjs
 const fs = require('fs');
-const EMBED = {
-  bgFar: 'assets/backgrounds/sci_fi_bg1.jpg',
-  indFar: 'assets/backgrounds/ind_far.webp',
-  indMid: 'assets/backgrounds/ind_mid.webp',
-  indFg: 'assets/backgrounds/ind_fg.webp',
-  roster: 'assets/characters/roster_8yaw.webp',
-  zones: 'assets/backgrounds/zones_far.jpg',
-  vistaCity: 'assets/backgrounds/vista_city.jpg',
-  vistaCrystal: 'assets/backgrounds/vista_crystal.jpg',
-  driller: 'assets/characters/driller_12x6.webp',
-  beastParts: 'assets/characters/beast_parts.webp',
-  eagleParts: 'assets/characters/eagle_parts.webp',
-  heroIdle: 'assets/characters/gothic-hero-idle.png',
-  heroRun: 'assets/characters/gothic-hero-run.png',
-  heroJump: 'assets/characters/gothic-hero-jump.webp',
-  heroAtk: 'assets/characters/gothic-hero-attack.png',
-  houndRun: 'assets/characters/hell-hound-run.webp',
-  houndIdle: 'assets/characters/hell-hound-idle.png',
-  ghost: 'assets/characters/ghost-idle.webp',
-  skull: 'assets/characters/fire-skull.png',
-  beast: 'assets/characters/hell-beast-idle.png',
-  demon: 'assets/characters/demon-idle.png',
-  hz_swing1: 'assets/sfx/hz_swing1.ogg', hz_swing2: 'assets/sfx/hz_swing2.ogg',
-  hz_fin: 'assets/sfx/hz_fin.ogg', hz_burst: 'assets/sfx/hz_burst.ogg',
-  hz_dash: 'assets/sfx/hz_dash.ogg', hz_charge: 'assets/sfx/hz_charge.ogg',
-  hz_ready: 'assets/sfx/hz_ready.ogg', hz_jump: 'assets/sfx/hz_jump.ogg',
-  hz_land: 'assets/sfx/hz_land.ogg', hz_evosting: 'assets/sfx/hz_evosting.ogg',
-  hum_servo: 'assets/sfx/hum_servo.ogg', hum_ratchet: 'assets/sfx/hum_ratchet.ogg',
-  hum_mono: 'assets/sfx/hum_mono.ogg', hum_sage: 'assets/sfx/hum_sage.ogg',
-  hum_patch: 'assets/sfx/hum_patch.ogg', hum_lumen: 'assets/sfx/hum_lumen.ogg',
-  fz_tell: 'assets/sfx/fz_tell.ogg', fz_tellmid: 'assets/sfx/fz_tellmid.ogg',
-  fz_tellbig: 'assets/sfx/fz_tellbig.ogg', fz_slam: 'assets/sfx/fz_slam.ogg',
-  fz_phase: 'assets/sfx/fz_phase.ogg', fz_wave: 'assets/sfx/fz_wave.ogg',
-  fz_spikeup: 'assets/sfx/fz_spikeup.ogg', fz_summon: 'assets/sfx/fz_summon.ogg',
-  fz_wreck: 'assets/sfx/fz_wreck.ogg', fz_break: 'assets/sfx/fz_break.ogg',
-  fz_roar: 'assets/sfx/fz_roar.ogg', fz_castarc: 'assets/sfx/fz_castarc.ogg',
-  fz_castice: 'assets/sfx/fz_castice.ogg', fz_castnull: 'assets/sfx/fz_castnull.ogg',
-  fz_roar_glitch: 'assets/sfx/fz_roar_glitch.ogg', fz_roar_brood: 'assets/sfx/fz_roar_brood.ogg',
-  fz_roar_atlas: 'assets/sfx/fz_roar_atlas.ogg', fz_roar_zero: 'assets/sfx/fz_roar_zero.ogg',
-  fz_roar_prism: 'assets/sfx/fz_roar_prism.ogg', fz_roar_mother: 'assets/sfx/fz_roar_mother.ogg',
-  hz_winsting: 'assets/sfx/hz_winsting.ogg', hz_step1: 'assets/sfx/hz_step1.ogg', hz_step2: 'assets/sfx/hz_step2.ogg',
-  hz_stepgrass1: 'assets/sfx/hz_stepgrass1.ogg', hz_stepgrass2: 'assets/sfx/hz_stepgrass2.ogg',
-  hz_steprock1: 'assets/sfx/hz_steprock1.ogg', hz_steprock2: 'assets/sfx/hz_steprock2.ogg',
-  hz_stepice1: 'assets/sfx/hz_stepice1.ogg', hz_stepice2: 'assets/sfx/hz_stepice2.ogg',
-  hz_steporg1: 'assets/sfx/hz_steporg1.ogg', hz_steporg2: 'assets/sfx/hz_steporg2.ogg',
-  hit1: 'assets/sfx/hit_01.ogg', hit2: 'assets/sfx/hit_02.ogg', metal: 'assets/sfx/metal_05.ogg',
-  explosion: 'assets/sfx/explosion.ogg', glass: 'assets/sfx/glass_01.ogg', laser: 'assets/sfx/laser2.mp3',
-  zap: 'assets/sfx/zapTwoTone.mp3', powerup: 'assets/sfx/powerUp1.mp3', low: 'assets/sfx/lowDown.mp3',
-};
-const MIME = { webp: 'image/webp', jpg: 'image/jpeg', png: 'image/png', ogg: 'audio/ogg', mp3: 'audio/mpeg', wav: 'audio/wav' };
-const media = {};
+// The core hero sheets are inlined into the CLAWBYTE page so she is never
+// drawn without her body; everything else is fetched (js/media.js).
 const heroCore = {};
 for (const [key,file] of Object.entries({heroStates:'states.webp', gaitWalk:'gait/walk.webp', gaitRun:'gait/run.webp', hzdIdle:'idle.webp'})) {
   heroCore[key] = 'data:image/webp;base64,' + fs.readFileSync('assets/characters/hero/' + file).toString('base64');
 }
-for (const k in EMBED) { const f=EMBED[k], ext=f.split('.').pop().toLowerCase(); media[k]='data:'+MIME[ext]+';base64,'+fs.readFileSync(f).toString('base64'); }
 
 // IMPORTANT: production repairs belong in the compiled source order. Keeping
 // them outside this list made Pages, desktop and local builds run different

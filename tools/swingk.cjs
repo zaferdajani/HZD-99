@@ -29,11 +29,14 @@ const CELLMAP = { claw_1: 13, claw_2: 14, finisher: 15, burst: 17,
 // indices moved when the strips were re-cut at the film's own frame rate —
 // a reference cell is a moment in the move, not a fixed slot, so it has to be
 // re-picked whenever the cell count changes.
+// The strips SWING_STRIP draws today (claw_2 / finisher / burst were re-shot
+// and their old files deleted 2026-10-09). Reference cells are re-picked from
+// the move whenever a strip is re-cut — the burst's starts its draw order at 6.
 const DEF = {
-  claw_1: ['assets/characters/hero/swing/claw_1.webp', 0],
-  claw_2: ['assets/characters/hero/swing/claw_2.webp', 3],
-  finisher: ['assets/characters/hero/swing/finisher.webp', 0],
-  burst: ['assets/characters/hero/swing/burst.webp', 6],
+  claw_1: ['assets/characters/hero/swing/claw_jab.webp', 0],
+  claw_2: ['assets/characters/hero/swing/claw_1.webp', 0],
+  finisher: ['assets/characters/hero/swing/uppercut.webp', 0],
+  burst: ['assets/characters/hero/swing/claw_charge.webp', 6],
 };
 const args = process.argv.slice(2);
 const STRIPS = args.length ? Object.fromEntries(args.map(a => {

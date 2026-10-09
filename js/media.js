@@ -4,10 +4,6 @@
 const MEDIA_SRC = {
   images: {
     bgFar: 'assets/backgrounds/sci_fi_bg1.jpg',
-    bgMid: 'assets/backgrounds/scifi_platform_BG1.jpg',
-    indFar: 'assets/backgrounds/ind_far.webp',
-    indMid: 'assets/backgrounds/ind_mid.webp',
-    indFg: 'assets/backgrounds/ind_fg.webp',
     heroIdle: 'assets/characters/gothic-hero-idle.png',
     heroRun: 'assets/characters/gothic-hero-run.png',
     heroJump: 'assets/characters/gothic-hero-jump.webp',
@@ -28,15 +24,6 @@ const MEDIA_SRC = {
     beastStudioRoar: 'assets/characters/beast/studio-roar.webp',
     beastRearSwipe: 'assets/characters/beast/studio-rake.webp',
     beastHurt: 'assets/characters/beast/studio-hurt.webp',
-    beastStalk: 'assets/characters/beast/stalk.webp',
-    beastRoar: 'assets/characters/beast/roar.webp',
-    beastSwipe: 'assets/characters/beast/swipe.webp',
-    beastLeap: 'assets/characters/beast/leap.webp',
-    beastSpringup: 'assets/characters/beast/springup.webp',
-    beastDive: 'assets/characters/beast/dive.webp',
-    beastPerch: 'assets/characters/beast/perch.webp',
-    beastDaze: 'assets/characters/beast/daze.webp',
-    beastNullcharge: 'assets/characters/beast/nullcharge.webp',
     beastFall: 'assets/characters/beast/fall.webp',
     demon: 'assets/characters/demon-idle.png',
     // pre-rendered 3D turnaround atlas: 11 subjects x 8 yaw angles
@@ -59,15 +46,9 @@ const MEDIA_SRC = {
     // wind-up is a different DRAWING and not the same drawing tinted, which is
     // the silhouette law applied to a class that has no rig to pose.
     // THE ALPHA'S MOVES, FILMED (ART_QUEUE §2ax, Kingdom 1): one take per
-    // move, 320-px cells, feet on the cell floor, facing LEFT like the plates.
-    // Drawn by alphaStrip in js/wolves.js over the state's own clock; the
-    // plate draws whenever a strip is not here.
-    // THE ALPHA reads the approved plates that are on disk (alpha/*.webp, the
-    // set the live game has always drawn). A studio replacement set was
-    // pointed at alpha/studio/ before it existed, which made the Alpha a
-    // manifest of missing files; it is re-pointed here when it lands.
-    repairPanel: 'assets/characters/gear/repair_panel.webp',
-    repairBattery: 'assets/characters/gear/repair_battery.webp',
+    // move, 320-px cells, feet on the cell floor, facing LEFT. Drawn by
+    // drawAlpha in js/wolves.js over the state's own clock, and the Alpha's
+    // only body: the nine still plates that once stood in were retired.
     wakeLamp: 'assets/characters/gear/wake_lamp.webp',
     alRest: 'assets/characters/alpha/rest.webp',
     alProwl: 'assets/characters/alpha/prowl.webp',
@@ -122,20 +103,6 @@ const MEDIA_SRC = {
     talonMiniCruise8: 'assets/characters/talon/cruise8.webp',
     talonMiniChase6: 'assets/characters/talon/chase6.webp',
     talonMiniPerch: 'assets/characters/talon/perch.webp',
-    // NINE PLATES FOR THE ALPHA, one per state, because it has five skills and
-    // two of them have their own recovery. A boss with five moves sharing two
-    // drawings is a boss with two moves as far as the player's eye is concerned.
-    alphaRest: 'assets/characters/beasts/alpha.webp',        // prowling
-    alphaRoar: 'assets/characters/beasts/alpha_roar.webp',   // the stunning roar
-    alphaHowl: 'assets/characters/beasts/alpha_howl.webp',   // calling the betas
-    alphaLeap: 'assets/characters/beasts/alpha_leap.webp',   // the spiral, airborne
-    alphaCoil: 'assets/characters/beasts/alpha_coil.webp',   // the crouch before it: amber in the seams
-    alphaClaw: 'assets/characters/beasts/alpha_claw.webp',   // the swipe
-    alphaBite: 'assets/characters/beasts/alpha_bite.webp',   // the bite lands
-    alphaClinch: 'assets/characters/beasts/alpha_clinch.webp', // ...and worries it
-    alphaRecoil: 'assets/characters/beasts/alpha_recoil.webp', // landed a hit — kicks back
-    alphaTurn: 'assets/characters/beasts/alpha_turn.webp',   // missed — spins to face her
-    alphaFree: 'assets/characters/beasts/alpha_free.webp',   // after it yields
     // THE FLORA. Two species per kingdom, generated in 3D and keyed off black,
     // so a room reads as somewhere that GROWS things rather than as a corridor
     // with a vista behind it. Fetched when she walks into the zone, never at
@@ -225,24 +192,15 @@ const MEDIA_SRC = {
     // grayscale treatment the other dark units get.
     // ===== THE ART SESSION'S 2026-08-16 BATCH ==========================
     // Every draw site below was already written and waiting on its key —
-    // drawTinkerForge fetches forgeFront, wolves.js resolves cheetahRunA, and so
+    // drawTinkerForge fetches forgeFront, and so
     // on — so these entries are what switch the authored art on. Lazy like
     // everything else; each renderer keeps its procedural fallback for the
     // frames before the file lands.
     //
-    // §1b-i the crystal slash light-sheets. BLACK-FIELD, additive: they are
-    // drawn with 'lighter' where brightness IS the alpha, exactly like the
-    // rake sheet, so they must never be alpha-keyed.
-    slashH: 'assets/fx/slash_h.webp',
-    slashD: 'assets/fx/slash_d.webp',
-    slashU: 'assets/fx/slash_u.webp',
-    slashDn: 'assets/fx/slash_dn.webp',
-    // §1c the back-jet gear: the pack as equipment, and at full burn. The
-    // plume itself stays procedural additive light (§0.0).
+    // §1c the back-jet gear: the pack as equipment. The plume is procedural
+    // additive light (§0.0).
     jetpack: 'assets/characters/gear/jetpack.webp',
-    jetpackFire: 'assets/characters/gear/jetpack_fire.webp',
-    // §2j Servo's winch, and §2r the Tinker's bench — objects, not vistas.
-    winchHouse: 'assets/backgrounds/winch_house.webp',
+    // §2r the Tinker's bench — an object, not a vista.
     forgeTable: 'assets/backgrounds/forge_table.webp',
     // THE MIND NODE as a monument (owner 2026-08-16: "it should be like a
     // monument, not a small object"). The plate only pays off once the node
@@ -266,22 +224,6 @@ const MEDIA_SRC = {
     snareRest: 'assets/characters/snare/rest.webp',
     snareTell: 'assets/characters/snare/tell.webp',
     snareLimp: 'assets/characters/snare/limp.webp',
-    // §3m boss motion — a travel pose and a wind-up per guardian. MOTHER-V is
-    // stationary and exempt.
-    nullfangWalk: 'assets/characters/guardians/nullfang_walk.webp',
-    nullfangCoil: 'assets/characters/guardians/nullfang_coil.webp',
-    glaciereTravel: 'assets/characters/guardians/glaciere_travel.webp',
-    glaciereCoil: 'assets/characters/guardians/glaciere_coil.webp',
-    choirDrift: 'assets/characters/guardians/choir_drift.webp',
-    choirClench: 'assets/characters/guardians/choir_clench.webp',
-    talonhostGlide: 'assets/characters/guardians/talonhost_glide.webp',
-    talonhostStrike: 'assets/characters/guardians/talonhost_strike.webp',
-    prismStalk: 'assets/characters/guardians/prism_stalk.webp',
-    prismCoil: 'assets/characters/guardians/prism_coil.webp',
-    // §2q the cheetah RUN pair — reach and gather. js/wolves.js already
-    // resolves these names and falls back to the walk pair without them.
-    cheetahRunA: 'assets/characters/beasts/cheetah_runa.webp',
-    cheetahRunB: 'assets/characters/beasts/cheetah_runb.webp',
     // NPC DIALOGUE BUSTS, cut from npc_6yaw.png by tools/npcbusts.cjs. They
     // exist so drawDialog can show the SPEAKER's face instead of always
     // drawing HZD-99's (owner 2026-08-16).
@@ -293,13 +235,10 @@ const MEDIA_SRC = {
     bustLumen: 'assets/characters/npc/bust/lumen.webp',
     bustKerf: 'assets/characters/npc/bust/kerf.webp',
     // ===================================================================
-    // §2s TERRAIN DEPTH PLANES — the authored answer to a floor that reads as a
-    // bar. edge_ is the band she stands on and draws behind the cast; fore_
-    // crosses in front of her. Named per zone; a zone without a pair simply
-    // draws nothing, which is the same fallback every other plate takes.
-    edgeA: 'assets/backgrounds/edge_a.webp',
+    // §2s TERRAIN DEPTH PLANES — fore_ crosses in front of her (drawDepthPlane,
+    // 'fore' + zone). Only A and C have one; a zone without a plate draws
+    // nothing, which is the same fallback every other plate takes.
     foreA: 'assets/backgrounds/fore_a.webp',
-    edgeC: 'assets/backgrounds/edge_c.webp',
     foreC: 'assets/backgrounds/fore_c.webp',
     boothFront: 'assets/backgrounds/booth_front.webp',
     // THE KERF — kingdom X's structure, fired 2026-09-29 to ART_QUEUE §2aq's
@@ -377,7 +316,6 @@ const MEDIA_SRC = {
     swingSingleCharge: 'assets/characters/hero/swing/single_charge.webp',
     swingSingleFx: 'assets/characters/hero/swing/single_fx.webp',
     swingClaw1: 'assets/characters/hero/swing/claw_1.webp',
-    swingClaw2: 'assets/characters/hero/swing/claw_2.webp',
     swingClawJab: 'assets/characters/hero/swing/claw_jab.webp',
     swingAir: 'assets/characters/hero/swing/air.webp',
     swingDown: 'assets/characters/hero/swing/down.webp',
@@ -388,8 +326,6 @@ const MEDIA_SRC = {
     // swing's own progress, so the energy has its own cadence over the same
     // window. See HERO_BURST_FX in js/entities.js.
     swingBurstFx: 'assets/characters/hero/swing/burst_fx.webp',
-    swingFinisher: 'assets/characters/hero/swing/finisher.webp',
-    swingBurst: 'assets/characters/hero/swing/burst.webp',
     servoLoop: 'assets/characters/npc/servo/work_loop.webp',
     monoLoop: 'assets/characters/npc/mono/work_loop.webp',
     patchLoop: 'assets/characters/npc/patch/work_loop.webp',
@@ -425,8 +361,6 @@ const MEDIA_SRC = {
     hzdGuard: 'assets/characters/hero/guard.webp',
     heroRecharge: 'assets/characters/hero/swing/recharge.webp',
     heroDeparture: 'assets/characters/hero/swing/departure.webp',
-    swingJab: 'assets/characters/hero/swing/jab.webp',
-    swingHook: 'assets/characters/hero/swing/hook.webp',
     swingUppercut: 'assets/characters/hero/swing/uppercut.webp',
     // HER FULL 8-YAW TURNAROUND — the sheet the back plates were bred from,
     // in the manifest at last because the gate walk turns her THROUGH it now:
@@ -472,19 +406,14 @@ const MEDIA_SRC = {
     heroBackB: 'assets/characters/hero/backwalk_b.webp',
     heroBareBackA: 'assets/characters/hero/bare_bwalk_a.webp',
     heroBareBackB: 'assets/characters/hero/bare_bwalk_b.webp',
-    swordGround: 'assets/characters/hero/sword_ground.webp',
     // THE CHEETAH LINE — the second animal, for the kingdoms past the meadow.
     // No alpha, nothing to tame: these came off the same line as the wolves and
-    // whatever was in them is gone. Three plates, same grammar as the wolf.
+    // whatever was in them is gone. Same grammar as the wolf.
     cheetahRest: 'assets/characters/beasts/cheetah.webp',
-    cheetahWalkA: 'assets/characters/beasts/cheetah_walka.webp',
-    cheetahWalkB: 'assets/characters/beasts/cheetah_walkb.webp',
     cheetahWarn: 'assets/characters/beasts/cheetah_warn.webp',
     cheetahRun: 'assets/characters/beasts/cheetah_run.webp',
-    // (the §2q RUN pairs, the §3m guardian motion plates, the §2r forge
-    // table and the Mind Node monument are registered in the fired-plates
-    // section above — both sessions wired the same batch and this comment
-    // marks the dedupe, so nobody re-adds them here.)
+    // (the §2r forge table and the Mind Node monument are registered in the
+    // fired-plates section above — this comment marks the dedupe.)
     // THE LAIRS. One authored prop per guardian, keyed off its generation
     // plate's black field by tools/blackkey.cjs, so each has real alpha and
     // occludes the room properly. Lazy like everything else: a lair is only
@@ -498,7 +427,6 @@ const MEDIA_SRC = {
     // full-frame futuristic vistas (newer set; the gloomy atlas stays for later)
     vistaCity: 'assets/backgrounds/vista_city.jpg',
     vistaCrystal: 'assets/backgrounds/vista_crystal.jpg',
-    driller: 'assets/characters/driller_12x6.webp',
     // the first boss: virus-infected robot beast, parts atlas for the cutout rig
     beastParts: 'assets/characters/beast_parts.webp',
     // boss 01: virus-infected robot eagle, parts atlas for the cutout rig
@@ -530,7 +458,6 @@ const MEDIA_SRC = {
     // frozen) cut from the owner's sheet, and the four scene bands behind them
     platforms: 'assets/tiles/platforms.webp',
     strataRubble: 'assets/backgrounds/strata_rubble.jpg',
-    strataIceA: 'assets/backgrounds/strata_iceA.jpg',
     strataLava: 'assets/backgrounds/strata_lava.jpg',
     strataIceB: 'assets/backgrounds/strata_iceB.jpg',
     // ONE FRAME LIFTED FROM EACH SHOT OF THE OPENING FILM. A browser that
@@ -838,10 +765,6 @@ const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
 }) : MEDIA_RAW;
 // the handful that must never pop in late: the shared turnaround atlas, the
 // player's own sheets and the decks she is standing on
-// `driller` is deliberately NOT in here any more. Nothing in the CLAWBYTE build
-// draws it — the legacy procedural bosses are unreachable (see Boss.draw) — so
-// preloading it spent a request on a sprite sheet whose only remaining job was
-// to occasionally appear instead of the right creature.
 ['roster', 'npcs', 'platforms', 'slashFx'].forEach(mediaFetch);
 // Asking "is this sheet here yet?" must NOT be what fetches it. Several guards
 // test four boss atlases in one condition to decide which renderer to use, and

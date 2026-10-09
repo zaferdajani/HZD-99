@@ -28,15 +28,13 @@ module.exports = [
   // the drawing code) has no lit eye and is placed the same way
   { key: 'cheetahWarn', col: 'red', rule: 'front', at: { 0: [0.10, 0.33] } },
   { key: 'cheetahRun', col: 'red', rule: 'front', at: { 0: [0.33, 0.16] } },
-  ...strips(['cheetahRest', 'cheetahWalkA', 'cheetahWalkB', 'cheetahRunA', 'cheetahRunB',
+  ...strips(['cheetahRest',
              'cheetahWalk8', 'cheetahRun6', 'cheetahWinded6', 'cheetahLand4'], { col: 'red|orange|amber', region: [0, 0, 0.45, 0.6] }),
   // ---- the Alpha (a guardian: purple at runtime, whatever the art paints) ----
   // the studio strips do not carry their cell count in their names (ALPHA_STRIP)
   ...[['alRest', 9], ['alProwl', 16], ['alRoar', 12], ['alHowl', 12], ['alLeap', 12], ['alClaw', 12],
       ['alBite', 12], ['alClinch', 12], ['alYield', 12]].map(([k, n]) =>
     ({ key: k, cells: n, col: 'red', rule: 'front', region: [0, 0, 0.45, 0.7], aspect: 2.5 })),
-  ...strips(['alphaRest', 'alphaRoar', 'alphaHowl', 'alphaLeap', 'alphaCoil', 'alphaClaw', 'alphaBite', 'alphaClinch',
-             'alphaRecoil', 'alphaTurn'], { region: [0, 0, 0.5, 0.7] }),
   // ---- the Eye's constructs (drawMini) — placed from a grid render: the
   // chime's lens, the courier's camera, the moth's head, the lattice's core,
   // the lens's pupil. Their wind-up plates are separate drawings, placed alone.
@@ -61,16 +59,15 @@ module.exports = [
   // the blob's lava seams are red too, and its lens barely moves through the
   // crawl (measured on cells 0 and 4): placed
   { key: 'blobCrawl8', rule: 'none', at: Object.fromEntries([0, 1, 2, 3, 4, 5, 6, 7].map(i => [i, [0.22, 0.67]])) },
-  // ---- the roster turntable: crawler, hopper, blob, flier, turret ------------
+  // ---- the roster turntable: blob, flier, turret (the crawler and hopper rows
+  // are drawn by nothing — those two are always the pack or the cheetahs) ---
   // 8 angles: 0 faces right, 2 faces the camera, 4 faces left, 5-7 the back
   // Too many things on these sheets glow red — the blob's lava, the flier's
   // whole lens, the turret's coils — for detection to be trusted, so every
   // angle the renderer reaches (0-4) is PLACED, read off a 10% grid render of
   // the cell. Angles 5-7 are the back and are never drawn. The turret's red
   // lens shows only from angle 1; the other angles hide it and get none.
-  { key: 'roster', cols: 8, rows: 11, onlyRows: [1, 2, 3, 4, 5], col: 'red', rule: 'none', at: {
-    8: [0.33, 0.42], 9: [0.30, 0.45], 10: [0.50, 0.36], 11: [0.33, 0.45], 12: [0.68, 0.42],     // crawler
-    16: [0.29, 0.44], 17: [0.17, 0.46], 18: [0.38, 0.49], 19: [0.73, 0.54], 20: [0.73, 0.46],   // hopper
+  { key: 'roster', cols: 8, rows: 11, onlyRows: [3, 4, 5], col: 'red', rule: 'none', at: {
     24: [0.28, 0.51], 25: [0.34, 0.49], 26: [0.48, 0.52], 27: [0.55, 0.49], 28: [0.52, 0.56],   // blob
     32: [0.34, 0.43], 33: [0.46, 0.46], 34: [0.52, 0.46], 35: [0.50, 0.48], 36: [0.40, 0.46],   // flier
     41: [0.13, 0.33] } },                                                                         // turret
