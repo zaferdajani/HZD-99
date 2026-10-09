@@ -114,10 +114,13 @@ const { chromium } = require('playwright');
     return { ids, rooms: TUT_ROOMS, last: TUT_LAST };
   });
   console.log('\n    lesson order: ' + order.ids.join(' -> ') + '\n');
-  const want = ['move', 'out', 'jump', 'gate', 'atk'];
-  check('the verbs come in the right order, and the machine comes last',
-    JSON.stringify(order.ids.slice(0, 5)) === JSON.stringify(want),
-    order.ids.slice(0, 5).join(' -> '));
+  // (owner, 2026-10-09) ...and past the gates the first thing is Ratchet's
+  // booth: the machine on the waking floor is met only after the Volt Pack.
+  const want = ['move', 'out', 'jump', 'gate', 'booth'];
+  check('the verbs come in the right order, and Ratchet comes before any machine',
+    JSON.stringify(order.ids.slice(0, 5)) === JSON.stringify(want)
+      && order.ids.indexOf('atk') > order.ids.indexOf('pack'),
+    order.ids.join(' -> '));
   check('the lesson knows all three of its rooms',
     order.rooms.W1 === 0 && order.rooms.W2 === 1 && order.rooms.A0 === 2,
     JSON.stringify(order.rooms));

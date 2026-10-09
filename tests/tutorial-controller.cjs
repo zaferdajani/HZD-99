@@ -17,37 +17,46 @@ vm.runInContext(fs.readFileSync('js/tutorial_enforce.js','utf8'),c);
 const run=s=>vm.runInContext(s,c);
 const step=id=>{c.G.tut={i:run(`TUT_STEPS.findIndex(s=>s.id===${JSON.stringify(id)})`),hold:0,t:1};};
 const prompt=()=>c.tutPrompt(run('TUT_STEPS[G.tut.i]'));
-// Exact reported screenshot: saved buy step, approach outside the workshop.
-step('buy');c.G.walkthroughLock={x:250,active:true};c.G.tutHardLock={x:250,active:true};
-assert.equal(prompt().label,'tut_approach');assert.equal(prompt().action,'MOVE');
+// THE CONTROLLER NEVER FREEZES HER AND NEVER BLOCKS THE THING BEING TAUGHT
+// (owner, 2026-10-09: "fix the input enforcer so it never blocks the action
+// being taught next or freezes her pointlessly"). The old controller pinned
+// her and froze enemies at every target; the one hold left is the jump.
+// Walking to the booth: movement, no lock, no pin; stale locks retire.
+step('booth');c.G.walkthroughLock={x:250,active:true};c.G.tutHardLock={x:250,active:true};
+assert.equal(prompt().action,'MOVE');
 c.tutorialTick();assert.equal(c.tutAllows('RIGHT'),true);assert.equal(c.tutAllows('LEFT'),true);
 assert.equal(c.player.x,250);assert.equal(c.player.vx,160);assert.equal(c.keys.ArrowRight,1);
 assert.equal(c.G.walkthroughLock,null);assert.equal(c.G.tutHardLock,null);
-// Arrive at the actual door: UP is the only gameplay action; its edge survives.
-c.player.x=628;c.tutorialTick();assert.equal(c.G.tutorialLock.action,'UP');
-assert(c.tutAllows('UP'));assert(!c.tutAllows('RIGHT'));assert.equal(c.keysP.ArrowUp,1);
+assert(!c.tutAllows('ATK'),'untaught verbs stay off while she walks');
+// At the door: UP works, its edge survives, and she can still walk away.
+c.player.x=628;c.tutorialTick();assert.equal(prompt().action,'UP');assert.equal(c.G.tutorialLock,null);
+assert(c.tutAllows('UP'));assert(c.tutAllows('RIGHT'),'no freeze at a door');assert.equal(c.keysP.ArrowUp,1);
+assert.equal(c.player.vx,160,'no pin at a door');
 assert(c.tutAllows('PAUSE'));assert(c.tutAllows('BACK'));
-// Entering another room releases the old action even though the saved step stays buy.
-c.G.roomId='A0B';c.player.x=100;
+// Inside: walking to Ratchet is movement; an unrelated object never enables E.
+c.G.roomId='A0B';c.player.x=100;step('note');
 const npc={type:'npc',extra:'ratchet',x:300,y:400,w:32,h:36};c.G.statics=[npc];
 c.tutorialTick();assert.equal(prompt().action,'MOVE');assert.equal(c.G.tutorialLock,null);assert(c.tutAllows('RIGHT'));
-c.G.near={x:100,y:400,w:32,h:36};c.tutorialTick();assert.equal(c.G.tutorialLock,null,'unrelated nearby object does not lock');
-c.G.near=npc;c.tutorialTick();assert.equal(c.G.tutorialLock.action,'INT');assert(c.tutAllows('INT'));
+c.G.near={x:100,y:400,w:32,h:36};assert(!c.tutAllows('INT'),'unrelated nearby object does not answer E');
+c.G.near=npc;c.tutorialTick();assert.equal(prompt().action,'INT');assert(c.tutAllows('INT'));
+assert(c.tutAllows('LEFT'),'she may still step away from him');assert(!c.tutAllows('ATK'),'one action at a time');
+// Backtracking is voluntary: UP at a door she is standing at always works.
+c.player.x=628;assert(c.tutAllows('UP'),'any door she stands at');
 // Shop and other UI controls cannot be captured by a gameplay lesson.
-for(const state of ['SHOP','PAUSE','SKILL','DIALOG','RIDDLE','DEATH']) {
+for(const state of ['SHOP','PAUSE','SKILL','DIALOG','RIDDLE','DEATH','REPAIR','TRIAL']) {
  c.G.state=state;c.tutorialTick();assert.equal(c.G.tutorialLock,null);
  for(const input of ['UP','DOWN','LEFT','RIGHT','OK','BACK','PAUSE']) assert(c.tutAllows(input),state+' '+input);
 }
 c.G.state='PLAY';c.G.dialog={};c.tutorialTick();assert(c.tutAllows('OK'));c.G.dialog=null;
-// Approaching an enemy never announces attack before it is in actual range.
+// The strike: announced only in reach (of the BODY — the winch is 120 px
+// wide), never freezing the machine or her.
 c.G.roomId='A0';c.G.near=null;step('atk');c.player.x=10;
-const update=()=>{}, enemy={x:200,y:400,w:24,h:36,hp:3,vx:30,vy:0,update};c.G.enemies=[enemy];
-assert.equal(prompt().action,'MOVE');c.tutorialTick();assert.equal(c.G.tutorialLock,null);
-c.player.x=150;c.tutorialTick();assert.equal(prompt().action,'ATK');assert(c.tutAllows('ATK'));
-assert(!c.tutAllows('RIGHT'));assert.notEqual(enemy.update,update);assert.equal(enemy.vx,0);
-// A successful blow's knockback is never erased by releasing the lesson.
-enemy.vx=120;c.G.tut.hold=.7;c.tutorialTick();assert.equal(enemy.update,update);assert.equal(enemy.vx,120);
-assert(c.tutAllows('RIGHT'),'acknowledgement permits steering');
+const update=()=>{}, enemy={x:200,y:400,w:120,h:36,hp:3,vx:30,vy:0,update};c.G.enemies=[enemy];
+assert.equal(prompt().action,'MOVE');c.tutorialTick();assert.equal(c.G.tutorialLock,null);assert(!c.tutAllows('ATK'));
+c.player.x=170;c.tutorialTick();assert.equal(prompt().action,'ATK');assert(c.tutAllows('ATK'));
+assert(c.tutAllows('RIGHT'),'no freeze');assert.equal(enemy.update,update,'the enemy is never swapped for a statue');
+assert.equal(enemy.vx,30);assert(!c.tutAllows('INT'),'one action at a time');
+c.G.tut.hold=.7;c.tutorialTick();assert(c.tutAllows('RIGHT'),'acknowledgement permits steering');
 // The jump is demonstrated at a real rise, not merely anywhere in W2.
 c.G.enemies=[];c.G.roomId='W2';step('jump');c.player.x=20;c.player.y=400;c.player.on=true;
 assert.equal(prompt().action,'MOVE');c.tutorialTick();assert.equal(c.G.tutorialLock,null);
@@ -70,4 +79,4 @@ c.solidAt=()=>false;c.player.x=20;
 assert(!c.tutJumpAtObstacle(),'shelf must be within horizontal jumping reach');
 // Completed or dead/paused players never retain enemy wrappers.
 c.G.save.flags.tut=1;c.tutorialTick();assert(c.tutAllows('RIGHT'));assert.equal(c.G.tutorialLock,null);
-console.log('PASS: complete tutorial controller — workshop travel, exact usable verbs, saved steps, menus, jump readiness, enemy restoration and input edges');
+console.log('PASS: complete tutorial controller — free travel, the taught verb always answers, one verb at a time, menus, jump readiness, no frozen enemies and input edges');

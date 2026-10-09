@@ -12,7 +12,7 @@ changes here in the same commit.
 file is the *play-through* of that canon. When they conflict, the canon wins and
 this file is wrong — say so in §8 and fix the game.
 
-**Re-synced 2026-10-08 with the story-order pass.** Every save now plays this story
+**Opening re-synced 2026-10-09 with the rebuilt opening** (§2.2–§2.6: booth first, letter → drawer → repair → explanation → pod → Volt Pack → heal → winch → monument → meadow; comic pages p06–p12 predate it). **Re-synced 2026-10-08 with the story-order pass.** Every save now plays this story
 (old saves are migrated on load — `migrateStory`, js/story-opening.js); the order of
 chapter one is enforced by the game and walked by `tests/story-order.cjs` against
 `docs/STORY_SHEET.md`, which lists every beat with its room, required flags, speaker,
@@ -108,9 +108,11 @@ a small white cat standing up in a cradle too big for her.
 ### 2.2 The road and the gates — W2
 
 **Where.** Outside, under sky, the city gates at the far end.
-**What happens.** A step and a gap: **Jump** — *Press once to jump over the obstacle.*
-Then the gates: **The gates** — *stand beneath them and press UP.* The gates are the
-only way in, and they close behind her. The opening is one-way, like waking up is.
+**What happens.** A fallen beam across the road: **Jump** — *A fallen beam blocks the
+road — press Z to hop it* (every control in a chip is the player's own binding: the
+key they bound, the pad button, or the on-screen glyph). Then the gates: **The city
+gates** — *Stand beneath them and press ↑.* The gates are the only way in, and they
+close behind her. The opening is one-way, like waking up is.
 **Story.** The city is standing. It is silent. The gates were built to be enormous —
 the only monument in the kingdom — and nobody has walked through them in a long time.
 **Panels.** A wide shot of the road with the gates small at the end; then the gates
@@ -118,111 +120,121 @@ huge above her; then the gates closing on the road behind her.
 
 ### 2.3 The waking floor — A0
 
-**Where.** The first street inside the gates: one machine, a booth, a Mind Node.
-**What happens, in order.**
-1. **Scratch** — *Strike the marked machine.* The machine (a crawler) is calm; it does
-   not fight back. **Finish it** — *keep going — it breaks.* It breaks into a wreck;
-   the wreck breaks into scrap.
-2. **Take the scrap** — *walk over it — scrap is what you pay with.* The first pickup
-   explains itself: *Scrap — What a broken machine leaves behind, and the only money
-   down here. The trader takes it for repairs, parts and upgrades — so a machine you
-   break is a machine you spend.*
-3. Twelve scrap in hand, the booth door opens in the street wall. **Buy a volt cell** —
-   *Speak to Ratchet and buy one volt cell.* (Ratchet is asleep at this point, so
-   the chip reads **Read Ratchet's note** — *Interact with the sleeping robot.*)
-**Story.** The first machine she ever breaks was somebody. The game does not say so
-yet. Old Servo will, next room.
-**Panels.** A cramped street; a single red-eyed crawler; the booth — *built from four
-dead haulers and a parade banner* — set into the wall.
+**Where.** The first street inside the gates, read from west to east in the order it
+is used: Ratchet's booth (the first thing past the gates), the yard winch jammed across
+the road, the Mind Node monument, and the road on to the meadow. Nothing fights her on
+the way to the booth (owner, 2026-10-09: the opening is "a clear, forward-moving
+tutorial", taught one action at a time, never a fight before Ratchet).
+**What happens.** **Ratchet's booth** — *A light is on inside — stand at the door and
+press ↑.* The goal line at the top left reads *Find who is still awake — Ratchet's
+booth*; it follows the story for the rest of the chapter.
+**Panels.** A cramped street; the booth — *built from four dead haulers and a parade
+banner* — with warm light behind its curtain; past it, a rusted winch with its arm
+hanging over the road, and a dark obelisk with a cyan sigil.
 
-### 2.4 Ratchet's den — A0B (the letter, the drawer, the repair, the kit)
+### 2.4 Ratchet's den — A0B (the letter, the drawer, the repair, the explanation, the pod)
 
 **Where.** Behind the booth door: a den, a crafting bench of a room, a pod built into
 the wall, a drawer, and a big round unit sitting dark at the bench. This is his one
 home; he stands here, and only here, until he has forged her blade (§2.10).
-**What happens.** She reads the letter at his empty socket:
-> *A handwritten letter is tucked against his empty battery socket:*
-> *“Mother’s song has been infected. My marble slowed the virus, but cannot stop it. I removed my battery before it could take me. It is in the drawer beside this chair.”*
-> *“Seat my battery in its socket. Connect the positive wire, then the ground, and bridge the relay. Restore power. If you are reading this, perhaps there is still hope. — R.”*
+**What happens, one step at a time.**
+1. **Read the letter** — *A switched-off robot with a letter on him — press E.*
+   > *A letter is tucked against his empty battery socket.*
+   > *“Mother’s song has been infected. My marble slowed the virus, but it cannot stop it. I took my battery out before it could take me.”*
+   > *“My battery is in the drawer beside this chair. Seat it, connect the positive wire, then the ground, and bridge the relay. If you are reading this, there may still be hope. — R.”*
+2. **Open the drawer** — the card: **Ratchet's battery** (the repair board's own battery
+   art) — *His own battery, hidden in his drawer. Wire it back into the empty socket in
+   his chest to wake him.*
+3. **Restore his battery** — *His chest socket is empty. Wire his battery back in.* The
+   repair board: seat the battery, the amber positive wire, the blue ground, the bridge
+   across the relay, then **Restore power** (no timer; a wrong socket can always be
+   retried; leaving keeps the placements). He wakes. If the memory film is on disk it
+   plays here; skipping it skips nothing.
+4. **The explanation** — five short pages:
+   > *…My own battery. You put it back. Thank you, little one — I’m Ratchet.*
+   > *Mother’s song was infected. This marble on my necklace slowed the virus. It could not stop it.*
+   > *So I took my battery out before it took me. You were asleep in a recharge cradle — you never heard the broadcast.*
+   > *Under the meadow lies a big deposit of raw marble. Bring me a piece, and I’ll forge a white sword that cuts the virus out.*
+   > *One more thing: this spare Power Cell is not for you. It’s for Old Servo, out in the meadow. He switched himself off too. Wake him.*
 
-She opens the drawer — **Ratchet's battery** — and the repair board opens: seat the
-battery, the amber positive wire, the blue ground, the bridge across the relay, then
-**Restore power** (no timer; a wrong socket can always be retried; leaving keeps the
-placements). He wakes: *Ratchet is awake.* He gives her the **Repair Kit** and — kept
-separately — a spare Power Cell for Servo. If the memory film is on disk it plays here.
-Then the pod and the pack (the cradle lesson, then *And when you have scrap, come to my
-counter. I keep a volt pack…*), and straight into his story and the errand:
-> *Mother’s song kept the kingdoms at peace. An unknown intruder infected its frequency. Our neighbours turned on one another.*
-> *This marble came to me through my family. It slowed the virus, but it was not enough to stop it.*
-> *I removed my own battery before the infection took me. You were asleep for recharging, long before this happened. That is how you missed the broadcast.*
-> *There is a large deposit of raw marble in the caves beneath the meadow. Bring a piece back to my workshop.*
-> *I can forge it into a glowing white sword that neutralizes the virus. The sages and our neighbours can become our friends again.*
-> *I left a spare cell for Servo in your pouch. His gantries overlook the meadow; the marble lies below.*
-> *Bring me: raw cave marble*
-> *The way down is in the meadow hub, at its west end by the climb: a loose floor. Jump onto it and strike straight down — it gives, and the caves are under it.*
-
-The last line is **who points her down** (`q_where_ratchet_forge`): it is said with the
-ask and again every time she talks to him while still looking.
+   The card: **Spare Power Cell** — *Ratchet’s spare, for Old Servo, the winch-keeper in
+   the meadow. Seat it in him to wake him.* The errand (bring raw cave marble) is taken
+   here, and the goal line becomes *Find the raw marble beneath the meadow* once the walk
+   is over.
+5. **Use the pod** — Ratchet: *This pod saves your progress and recharges you. Use it
+   before you leave.* The pod is marked; she steps in and rests; a confirmation fills the
+   middle of the screen — **✓ Progress saved · recharged** — *If you fall, you wake up
+   here.* The save point is now the den. Only then is the next thing introduced.
 **Story.** The founding of the plot in one room. He nearly fell; the inherited marble
 slowed the song long enough for him to choose; he switched himself off. She was asleep,
-not immune. There is one Ratchet and one revival — the old second, dark Ratchet at the
-camp is gone (§2.15).
-**Panels.** The letter at the empty socket; the drawer; the battery seated, the wires,
-the bridge; his eyes coming up; the marble on its cord; the pod in the wall.
+not immune. There is one Ratchet and one revival.
+**Panels.** The letter at the empty socket; the drawer and the battery; the wires and
+the bridge; his eyes coming up; the marble on its cord; the spare cell in her paw; the
+pod in the wall and the word SAVED.
 
-### 2.5 The volt pack — A0B (the shop, the pack, the two verbs)
+### 2.5 The volt pack — A0B and the street (the pitch, the counter, the two verbs)
 
-**Where.** Ratchet's counter, same room.
-**What happens.** She talks to him again and the counter opens: **Ratchet's
-Emporium**. The first line on the list is the only thing she can afford: **Volt Cell**,
-12 scrap — *Refills your volts. The first one wires the Repair Protocol and the Volt
-Burst into you.* She buys it. The card:
-> **Volt Pack** — *Ratchet's charger, wired into you. The shards you knock out of machines are VOLTS now — hold HEAL to spend them mending a core, hold ATTACK to spend them on a Volt Burst.*
+**Where.** Ratchet's counter, then the street outside his door.
+**What happens.**
+1. **The Volt Pack** — *Press E at Ratchet — he will explain it.* He does, before
+   anything is sold — what it does, why she needs it, what it costs — and pays her the
+   scrap for the repair:
+   > *That ring of charge on you fills when your hits land. Right now you have no way to spend it.*
+   > *My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst.*
+   > *You will need the burst — claws alone won’t crack raw marble. The pack is yours for good. It costs 12 scrap.*
+   > *You have no scrap, so take 12 for fixing me. Scrap is the money down here: broken machines leave it behind.*
 
-Then, on the same floor, the two lessons the pack bought:
-- **Repair** — *hold it — volts become a core.* (The wreck she just made discharges
-  once — one core, scripted, in the only room where nothing can hurt her — so there
-  is something to mend.)
-- **Volt Burst** — *hold ATTACK until she crackles, then let go.* The air around her
-  ionises, current runs her chassis foot to ear, and the claws go off in a ring.
+   The card: **12 Scrap** — *The money down here. Broken machines leave it behind;
+   Ratchet takes it for parts and upgrades.* Then **Ratchet's Emporium** opens on the
+   marked row — *BUY THIS FIRST* · **Volt Pack · permanent** — *Wires healing and the Volt
+   Burst into you. Bought once, yours for good.* (12). Every other row reads *After the
+   Volt Pack.* She buys it. The card, with the demo window showing both verbs:
+   > **Volt Pack (permanent)** — *Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst.*
 
-Then: **Solve the puzzle** — *Use the marked node and solve its puzzle* (the Mind
-Node on the waking floor, her first IQ); **Buy a skill** — *Open Skills and buy your
-first skill*; **Go on** — *the way out is right.*
-
-**Story — this is the owner's rule and it must be drawn this way.** She wakes with no
-way to spend what she knocks out of other machines. The ring fills and sits there.
-Ratchet's pack is the mean: one purchase, two verbs. From this panel on she can mend
-herself and she can burst — and the burst is what the pillar in the cave needs.
-Before this panel, holding the claw is just holding the claw.
-**Panels.** The counter; the pack going into her back; the first surge — jagged
-cyan-white arcs running up and down her body, the air around her hazed, sparks thrown
-off the frame, no rings; the claws releasing.
+   From then on the same row is **Volt Refill** — *Refills your volts to full*, a
+   consumable.
+2. **Mend a core** — *The pack's first surge cost you a core — stand still and hold F.*
+3. **Strike the winch** — out of the den (*Back outside — stand at the den door and press
+   ↑*), to the yard winch jammed across the road: *press X beside it.* It does not swing
+   at her while she is being taught.
+4. **Volt Burst** — *Hold X until you crackle, then let go — the burst stops it.* The
+   winch shudders and stops (disabled, not destroyed: the blade can cleanse it later).
+5. **The monument** — the Mind Node stands just past the winch, on the same screen as the
+   booth door: *Press E at the monument and solve its puzzle — puzzles earn IQ for
+   skills.*
+6. **Into the meadow** — *The road east leads to the Scrap Meadows.*
+**Story — the owner's rule, drawn this way.** She wakes with no way to spend what she
+knocks out of other machines. Ratchet's pack is the mean: one purchase, two verbs, and
+it is named for what it is — a permanent charger, not a refill. The burst is what the
+marble in the cave needs.
+**Panels.** The counter and the marked row; the pack going into her back; the first
+surge; the jammed winch and the burst; the monument's riddle; the road east.
 
 ### 2.6 The meadow — A1 (Old Servo, the first fight)
 
-**Where.** The Scrap Meadows proper; a winding house with an old unit turned into
-its drum.
-**What happens.** Old Servo is dark. She has one spare cell — the one Ratchet handed
-her for him — and this is the first "who do I wake" decision: Servo now, or keep the cell.
-Woken, he gives a Repair Kit and speaks:
-> *Mrrow… a working unit! I haven't seen one since Mother's song went wrong.*
-> *Move with ← →, leap with Z, and swipe those claws with X.* — the controls are the
-> player's OWN: on a controller he names the buttons she bound, on a phone the
-> on-screen glyphs (`{JUMP}` / `{ATK}` / `{HEAL}` filled by `ctlFill`).
-> *Claw the corrupted to harvest volts. Once Ratchet has wired a pack into you, stand still and hold F, and your frame will mend a core.*
-> *The virus corrupts every machine it touches. Purge it, little paw — or rust with the rest of us.*
-> *See the winding house behind me? I raised every gantry over this meadow off that drum, cable by cable. The drum still turns. My climbing days are what rusted.*
+**Where.** The Scrap Meadows proper; a winding house with an old unit turned into its
+drum. His corner of the meadow is his: nothing that hunts comes into it.
+**What happens.** Old Servo sits dark, drawn a head taller than her, a cue over him:
+*Switched off · needs a Power Cell* — or, with Ratchet's spare in her pouch, *E — wake
+Old Servo*. *Ratchet’s spare cell fits the port in his chest. You seat it.* Power climbs
+him and his amber eyes come up; then, in three short pages:
+> *Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you.*
+> *After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up.*
+> *And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ.*
 
-Then the first real fight: a crawler, and a guard hidden past a rise.
-**Story.** The Depths are not empty. Every machine person was switched off the night
-the Song went out — that is why they are still themselves, and why they are standing
-dark: nobody has charged them since. Cells are the rarest thing in the world. There is
-never a spare one.
-Once, after his greeting, his own escape: *My receiver was unplugged inside the shielded
-lift housing when the song changed. / I spent the last charge holding the bridge for
-the workers… / Ratchet sent a spare? Tell him the last passenger got home.*
-**Panels.** The winding house; Servo half-drum; the first guard rising over the crest.
+The errand is taken. Asked again: *Bring me: a shaken-loose coil* / *The coil is up in
+the gantries — the climb starts right behind me.* With the coil home: *That’s my coil!
+Listen — the drum turns true again. Here: 60 scrap and 10 IQ, as promised.* — and the
+drum behind him spins up. On later visits: his own escape (*My receiver was unplugged
+inside the shielded lift housing when the song changed…*), then *Hear that? The drum
+turns true. Every gantry over this meadow hangs straight again.* / *Mind the hub’s loose
+floor, little paw. It’s the way down to the marble.*
+
+Then the first real fight, east of his yard: a wolf, and a guard hidden past a rise.
+**Story.** The Depths are not empty. Every machine person was switched off the night the
+Song went out — that is why they are still themselves, and why they are standing dark.
+**Panels.** The winding house; Servo dark in the drum with the cell going in; his eyes
+lighting; him pointing east and up; the first guard rising over the crest.
 
 ### 2.7 The hub and the corridor — A2 (NULLFANG's first meeting)
 

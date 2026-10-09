@@ -422,26 +422,29 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       check('...and an errand accepted on an older save keeps its progress', qDone(q));
     }
 
-    // 4.8 HER OWN CONTROLS IN SPEECH
+    // 4.8 HER OWN CONTROLS IN SPEECH. A line that names a control names the
+    // one she has: the keyboard key she bound, the pad button she bound. Old
+    // Servo used to carry this ("leap with Z") in a second controls speech
+    // straight after Ratchet's; the rebuilt opening (owner, 2026-10-09: "do
+    // not force a second long tutorial speech") moved the controls to where
+    // they are first USED — Ratchet's Volt Pack pitch, {HEAL} and {ATK}.
     {
-      fresh({ 'on_A1|servo': 1 }); loadRoom('A1'); G.state = 'PLAY';
-      // his errands done, so he says his own lines rather than an ask
-      G.save.quests.servo_coil = 'done'; G.save.quests.servo_swarm = 'done';
-      const servo = G.statics.find(s => s.extra === 'servo');
-      doInteract(servo);
+      fresh({ 'on_A0B|ratchet': 1, ratchetRepaired: 1, opTold: 1, opPod: 1 }); loadRoom('A0B'); G.state = 'PLAY';
+      const r = G.statics.find(s => s.extra === 'ratchet');
+      doInteract(r);
       const kb = ((G.dialog && G.dialog.lines) || []).join(' ');
       G.dialog = null; G.state = 'PLAY';
-      const keyJ = KEYB.JUMP.find(c => /^Key/.test(c)).replace('Key', '');
-      check('Old Servo names the keyboard\'s own jump key and no placeholder survives',
-        kb.indexOf('{') < 0 && kb.indexOf(' ' + keyJ + ',') >= 0, kb.slice(0, 160));
-      const wasOn = PAD.on, wasJ = PAD.map.JUMP;
-      PAD.on = true; PAD.map.JUMP = 3;
-      delete G.save.flags.said;
-      doInteract(servo);
+      const keyH = KEYB.HEAL.find(c => /^Key/.test(c)).replace('Key', '');
+      const keyA = KEYB.ATK.find(c => /^Key/.test(c)).replace('Key', '');
+      check('Ratchet names the keyboard\'s own heal and attack keys and no placeholder survives',
+        kb.indexOf('{') < 0 && kb.indexOf('hold ' + keyH + ' ') >= 0 && kb.indexOf('hold ' + keyA + ' ') >= 0, kb.slice(0, 200));
+      const wasOn = PAD.on, wasH = PAD.map.HEAL;
+      PAD.on = true; PAD.map.HEAL = 3;
+      doInteract(r);
       const pad = ((G.dialog && G.dialog.lines) || []).join(' ');
       G.dialog = null; G.state = 'PLAY';
-      PAD.on = wasOn; PAD.map.JUMP = wasJ;
-      check('...and, on a remapped controller, the button she bound', pad.indexOf(padLabel(3)) >= 0, pad.slice(0, 160));
+      PAD.on = wasOn; PAD.map.HEAL = wasH;
+      check('...and, on a remapped controller, the button she bound', pad.indexOf(padLabel(3)) >= 0, pad.slice(0, 200));
     }
 
     // 4.9 CONTRADICTIONS AND THE FINALE (English is the source; the other

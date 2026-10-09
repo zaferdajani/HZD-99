@@ -424,7 +424,10 @@ const ATLAS2 = {
   // why. Ratchet's "double my size" was always double the hero at her
   // original 1.0; that is what she's back to.
   sub: {
-    servo:   { row: 0, k: 1.30, yOff: 0.02 },
+    // 1.30 drew him a head SHORTER than the cat he is meant to greet — "a
+    // tiny floating figure" next to her. He is an old, squat, heavy unit half
+    // turned into his winding drum: a head taller than her reads as that.
+    servo:   { row: 0, k: 1.75, yOff: 0.02 },
     ratchet: { row: 1, k: 2.60, yOff: 0.02 },  // owner: 'the npc is too small, it should be double my size'
     mono:    { row: 2, k: 1.50, yOff: 0.02 },
     patch:   { row: 3, k: 1.40, yOff: 0.02 },

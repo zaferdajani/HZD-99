@@ -85,7 +85,7 @@ function ratchetStandingKey(f, tierKey) {
 // carries {ACTION}; this fills it from the device actually in use — the pad's
 // bound button (howToOpen reads PAD.map), the on-screen glyph on touch, the
 // key otherwise — so the words can never describe a control she does not have.
-const CTL_TOUCH = { MOVE: '◀ ▶', JUMP: '⤒', HEAL: '✚', DOWN: '▼', UP: '▲' };
+const CTL_TOUCH = { MOVE: '◀ ▶', JUMP: '⤒', HEAL: '✚', DOWN: '▼', UP: '▲', INT: 'E' };   // INT: the on-screen button's own letter
 function ctlName(a) {
   const touch = typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled;
   const pad = typeof PAD !== 'undefined' && PAD && PAD.on;
@@ -95,7 +95,10 @@ function ctlName(a) {
   if (touch) return CTL_TOUCH[a] || t('pa_' + a);
   const codes = (typeof KEYB !== 'undefined' && KEYB[a]) || [];
   const k = codes.find(c => /^Key|^Space$|^Arrow/.test(c));
-  return k ? k.replace(/^Key/, '').replace(/^Arrow/, '') : t('pa_' + a);
+  // an arrow key reads as the arrow, not the word "Up"
+  const ARROW = { ArrowUp: '\u2191', ArrowDown: '\u2193', ArrowLeft: '\u2190', ArrowRight: '\u2192' };
+  if (k && ARROW[k]) return ARROW[k];
+  return k ? k.replace(/^Key/, '') : t('pa_' + a);
 }
 function ctlFill(line) {
   return typeof line === 'string' && line.indexOf('{') >= 0

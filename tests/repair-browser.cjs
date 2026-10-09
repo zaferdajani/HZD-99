@@ -42,9 +42,15 @@ const {chromium}=require('playwright');
   assert.equal((await state()).state,'PLAY','Escape cancels power-up and releases gameplay');
   await open();assert.equal((await state()).step,4);await p.locator('.repair-power').click();
   await p.evaluate(()=>{for(let i=0;i<90&&G.state==='REPAIR';i++)update(1/60);});
-  let s=await state();assert.equal(s.live,true);assert.equal(s.cell,0);assert.equal(s.spare,1);assert.equal(s.kit,1);assert.equal(s.state,'DIALOG');
+  // He wakes and, after a beat to SEE it, explains (js/opening.js). The kit he
+  // used to press on her is gone (owner, 2026-10-09: no unexplained drops);
+  // the spare cell for Servo is handed over, with its card, at the end of the
+  // explanation — not silently at the waking.
+  await p.evaluate(()=>{for(let i=0;i<120&&G.state!=='DIALOG';i++)update(1/60);});
+  let s=await state();assert.equal(s.live,true);assert.equal(s.cell,0);assert.equal(s.kit,0);assert.equal(s.state,'DIALOG');
   await p.evaluate(()=>{let n=0;while(G.state==='DIALOG'&&n++<40){const cb=G.dialog.onEnd;G.dialog=null;G.state='PLAY';if(cb)cb();}if(qState('ratchet_forge')!=='active'||weaponOwned('single'))throw Error('Repair broke earned forge progression');});
-  await boot(true);await open();s=await state();assert.equal(s.live,true);assert.equal(s.kit,1);assert.equal(s.spare,1);assert.equal(s.step,null);
+  s=await state();assert.equal(s.spare,1,'the spare is handed over with the explanation');
+  await boot(true);await open();s=await state();assert.equal(s.live,true);assert.equal(s.kit,0);assert.equal(s.spare,1);assert.equal(s.step,null);
   // A fresh interaction interrupted by a direct room transition must recover PLAY.
   await boot();await p.evaluate(()=>{doInteract(G.statics.find(s=>s.type==='chest'&&s.extra==='it:batt'));G.dialog=null;G.state='PLAY';});await open();
   await p.evaluate(()=>loadRoom('A1'));assert.equal(await p.locator('#ratchet-repair').count(),0);assert.equal(await p.evaluate(()=>G.state),'PLAY');

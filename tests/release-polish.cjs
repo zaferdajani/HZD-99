@@ -35,7 +35,7 @@ const engine=process.env.QA_BROWSER==='webkit'?webkit:chromium;
    G.hitStop=.1;keys.KeyX=keysP.KeyX=1;keys.Space=keysP.Space=1;update(1/60);clear();
    const buffered={attack:player.atkBuf,jump:player.jbuf};
    keys.Escape=keysP.Escape=1;update(1/60);clear();const paused=G.state==='PAUSE';G.state='PLAY';G.hitStop=0;
-   stage('A0');G.save.flags.tut=0;G.tut={i:TUT_STEPS.findIndex(s=>s.id==='buy'),t:1,hold:0};
+   stage('A0');G.save.flags.tut=0;G.tut={i:TUT_STEPS.findIndex(s=>s.id==='booth'),t:1,hold:0};
    player.x=300;player.y=330;player.vy=0;tick(30);const x0=player.x;
    G.walkthroughLock={x:player.x,active:true};G.tutHardLock={x:player.x,active:true};
    keys.ArrowRight=keysP.ArrowRight=1;tick(18);clear();

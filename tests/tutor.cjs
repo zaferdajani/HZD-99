@@ -1,11 +1,12 @@
 // The waking floor, all the way through.
 //
-// The opening used to teach three verbs and stop, which taught how to press
-// buttons and nothing about how the game is played. It now teaches the LOOP —
-// break a machine, take its scrap, spend it, repair with what you bought, earn
-// insight, spend that too — and a chain that long is exactly the kind of thing
-// that silently breaks at link four and is never noticed, because nobody
-// replays a tutorial. So it is walked here, step by step, every run.
+// The opening teaches a CHAIN, in the owner's order (2026-10-09): the booth,
+// the letter, his battery, the repair, the explanation, the pod that saves,
+// the Volt Pack explained and paid for, the first surge mended, the jammed
+// winch struck and burst, the monument, the road. A chain that long is exactly
+// the kind of thing that silently breaks at link four and is never noticed,
+// because nobody replays a tutorial. So it is walked here, step by step,
+// every run (tests/opening-order.cjs plays the same walk with real keys).
 //
 // Each step is driven the way a player would drive it, and the harness asserts
 // the step ADVANCED rather than that the input was accepted.
@@ -92,189 +93,72 @@ const { chromium } = require('playwright');
   await record(now);
   now = await drive('gate', () => { loadRoom('A0'); });
   await record(now);
-  // The new tutorial lock requires the dummy in real claw range before ATK is
-  // even allowed (it used to accept the key regardless of distance), so drive
-  // this step the way a player actually does: walk toward it, then swing.
-  now = await drive('atk', () => {
-    const e = G.enemies.find(x => x && !x.dead);
-    if (e && Math.abs((e.x + e.w / 2) - (player.x + player.w / 2)) > 50) {
-      player.vx = e.x > player.x ? 160 : -160;
-      player.x += Math.sign(e.x - player.x) * 4;
+  // ---- THE DEN (owner, 2026-10-09): booth -> letter -> drawer -> repair ->
+  // explanation -> pod -> Volt Pack -> heal, then the winch, the monument and
+  // the road. Every window is paged the way a player pages it (Enter), every
+  // control is the real one; nothing is granted by the harness.
+  const page = () => { for (let i = 0; i < 200 && G.state === 'DIALOG'; i++) { keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); keys['Enter'] = 0; keysP['Enter'] = 0; } };
+  const ratchet = 'G.statics.find(s => s.type === "npc" && s.extra === "ratchet")';
+  now = await drive('booth', () => {
+    // (inside, the den's own way out is a booth-style door too: stand still)
+    if (G.roomId !== 'A0') { update(1 / 60); return; }
+    const gr = gateDoors().find(d => d.style === 'booth');
+    if (gr && G.state === 'PLAY' && !G.gateWalk) {
+      player.x = gateWorldX(gr) - player.w / 2; player.vx = 0; player.on = true;
+      keysP.ArrowUp = 1; keys.ArrowUp = 1; update(1 / 60); keys.ArrowUp = 0; keysP.ArrowUp = 0;
     }
-    keysP['KeyX'] = 1; keys['KeyX'] = 1;
+    for (let i = 0; i < 80 && G.gateWalk; i++) update(1 / 10);
   });
   await record(now);
-
-  // the kill: hit the dummy until it breaks
-  now = await drive('kill', () => {
-    const e = G.enemies.find(x => x && !x.dead);
-    // the same two lines the claw runs: damage, then the caller kills it
-    if (e) { dealDmg(e, 999, 'claw', e.x, e.y, true); if (e.hp <= 0) e.die(1, -0.3); }
-  });
+  // (never while a door walk is still carrying her: she cannot act in one)
+  const near = (sel) => `(() => { if (G.gateWalk) { for (let i = 0; i < 80 && G.gateWalk; i++) update(1 / 10); return; } const s = ${sel}; if (!s) return; player.x = s.x + s.w / 2 - player.w / 2; player.vx = 0; player.on = true; update(1 / 60); return s; })()`;
+  now = await drive('note', new Function(`if (G.state === 'DIALOG') { (${page})(); return; } const s = ${near(ratchet)}; if (s && G.state === 'PLAY') doInteract(s);`));
   await record(now);
-
-  const scrapBefore = await p.evaluate(() => G.save.scrap);
-  now = await drive('coin', () => {
-    // ...and the card that explains what scrap IS lands the moment the errand
-    // is satisfied (js/game.js bankScrap), so page it through the way a player
-    // would. Without this the step reads as hung when the game is in fact
-    // waiting to be read.
-    if (G.state === 'DIALOG') {
-      for (let i = 0; i < 60 && G.state === 'DIALOG'; i++) {
-        keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); keys['Enter'] = 0;
-      }
-      return;
-    }
-    // A DEAD MACHINE IS NOT SCRAP YET. It leaves a WRECK, and the scrap comes
-    // out when the wreck is broken — which is the lesson. This used to rely on
-    // a stray swing from the previous step happening to smash it, so the step
-    // passed or hung depending on timing; it breaks the wreck explicitly now.
-    // A WRECK HAS NO die(). It has explode(), and explode() is what drops the
-    // scrap — so `w.die ? w.die() : w.dead = true` fell through to the else and
-    // marked the wreck dead WITHOUT its payout. The step passed anyway for as
-    // long as the wreck happened to blow itself up first (it explodes on its
-    // own bounce count or after ~1s), which is exactly the timing dependence
-    // the comment below was already complaining about. Call the real method.
-    const w = G.wrecks && G.wrecks.find(x => x && !x.dead);
-    if (w) {
-      w.hp = 0;
-      if (typeof w.explode === 'function') w.explode();
-      else if (typeof w.die === 'function') w.die();
-      else w.dead = true;
-    }
-    // ...the MACHINE'S scrap, specifically. The floor also holds placed
-    // scrap now — A0's teaching secrets keep 20 each sealed behind a brittle
-    // plug and under a brittle crust (js/world.js), and placed scrap carries
-    // a flagKey. "The first pickup" was the sealed one, so this teleported her
-    // INTO the rock to take it: something no player can do, and it reported
-    // the secrets' 40 as the machine's payout (12 -> 72).
-    const q = G.pickups.find(x => x && !x.dead && !x.flagKey);
-    // ...and DRIVE the pickup rather than waiting for the loop to do it. Every
-    // action that only sets up a condition and then hopes the game's own rAF
-    // runs is a step that passes on an idle machine and hangs on a busy one:
-    // under the full suite this one stalled as "coin, coin, coin, coin".
-    if (q) {
-      player.x = q.x - 4; player.y = q.y - 8; player.vy = 0;
-      for (let i = 0; i < 12 && !q.dead; i++) update(1 / 60);
-    }
-  });
+  const letterRead = await p.evaluate(() => !!G.save.flags.opNote);
+  now = await drive('drawer', new Function(`if (G.state === 'DIALOG') { (${page})(); return; } const s = ${near('G.statics.find(s => s.type === "chest" && s.extra === "it:batt")')}; if (s && G.state === 'PLAY') doInteract(s);`));
   await record(now);
-  const scrapAfter = await p.evaluate(() => G.save.scrap);
-
-  // THROUGH THE TRADER, not around him. This step used to call updateShop()
-  // directly, which is why it stayed green while the errand system quietly
-  // replaced the trader's shop with an errand and made the lesson impossible:
-  // the harness was testing the till, not the shopkeeper.
-  now = await drive('buy', () => {
-    const npc = G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet');
-    if (!npc) {
-      // the trader lives in his BOOTH now — walk in through the depth door
-      // read through gateDoors: a room's row may be an ARRAY of doors now
-      const gr = (typeof gateDoors === 'function' ? gateDoors() : []).find(d => d.style === 'booth');
-      if (gr && G.state === 'PLAY') {
-        if (!G.gateWalk) {
-          player.x = gateWorldX(gr) - player.w / 2; player.vx = 0; player.on = true;
-          gateEnter();
-        }
-        // THE WHOLE WALK IN ONE TRY. It used to advance a tenth of a second per
-        // try, and the walk is 3.4 seconds — thirty-four of `drive`'s sixty
-        // tries spent on one doorway, leaving too few for the dialog and the
-        // shop behind it. Under the full suite that ran out and the harness
-        // reported "buy, buy, buy, buy, buy": not a broken lesson, a budget.
-        for (let i = 0; i < 80 && G.gateWalk; i++) update(1 / 10);
-      }
-      return;
-    }
-    // Once the purchase has registered, the lesson advances on its own hold
-    // timer (updateTutor: 0.25s seen + 0.7s held) — a real player just stops
-    // shopping. Re-interacting here reopens Ratchet's dialogue every try and
-    // never lets that timer see an uninterrupted PLAY frame to complete on.
-    if (G.save.flags && G.save.flags.tutBuy) {
-      // ...and the first cell is THE PACK: its card takes the screen and the
-      // walk waits on it, the way it waits on any card. A player reads it and
-      // closes it; so does the harness.
-      if (G.state === 'DIALOG') for (let i = 0; i < 60 && G.state === 'DIALOG'; i++) { keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); keys['Enter'] = 0; }
-      return;
-    }
-    if (G.state === 'PLAY') {
-      // The revised opening starts empty-handed: recover Ratchet's own cell
-      // through the real chest interaction before trying to restore him.
-      const drawer=G.statics.find(s=>s.type==='chest' && s.extra==='it:batt' && !s.opened);
-      if (!npcLive(npc) && !invCount(npcCellItem(npc)) && drawer) doInteract(drawer);
-      else doInteract(npc);
-      return;
-    }
+  now = await drive('repair', new Function(`
+    if (G.state === 'DIALOG') { (${page})(); return; }
     if (G.state === 'REPAIR') {
-      // RATCHET'S REPAIR (js/story-repair.js) is a real puzzle now, and the
-      // waking it gates is the next link of this lesson: the trader cannot
-      // open a shop until he has power. The old driver only paged dialogue, so
-      // it sat in front of the repair board forever and reported "buy, buy,
-      // buy". Solve it with its own buttons, the way a player does (the same
-      // clicks tests/battery.cjs makes), then let the boot run out.
       for (const [piece, target] of [['cell', 'socket'], ['positive', 'plus'], ['negative', 'minus'], ['bridge', 'relay']]) {
-        const a = document.querySelector('[data-piece="' + piece + '"]');
-        const b = document.querySelector('[data-target="' + target + '"]');
-        if (a && !a.disabled && !a.hidden) a.click();
-        if (b) b.click();
+        const a = document.querySelector('[data-piece="' + piece + '"]'), b = document.querySelector('[data-target="' + target + '"]');
+        if (a && !a.disabled && !a.hidden) a.click(); if (b) b.click();
       }
-      const pw = document.querySelector('.repair-power');
-      if (pw && !pw.disabled) pw.click();
+      const pw = document.querySelector('.repair-power'); if (pw && !pw.disabled) pw.click();
       for (let i = 0; i < 120 && G.state === 'REPAIR'; i++) update(1 / 60);
       return;
     }
-    if (G.state === 'CUT') {
-      // RATCHET WAKING IS A FILM now (the story's boot cut after the repair),
-      // and this driver did not know the state existed: it waited it out in
-      // real time, about 135 of its 150 tries, and the step then finished on
-      // try 147-149 or ran out depending on a frame or two — "buy -> buy",
-      // the heal lesson measured while still in the shop. A player who has
-      // seen it HOLDS to skip (CUT_SKIP_HOLD, through the real input path);
-      // so does the harness. What follows the film runs exactly as it would.
-      for (let i = 0; i < 120 && G.state === 'CUT'; i++) {
-        keys['Enter'] = 1; keysP['Enter'] = i === 0 ? 1 : 0;
-        update(1 / 30);
-      }
-      keys['Enter'] = 0; keysP['Enter'] = 0;
-      return;
-    }
-    if (G.state === 'DIALOG') {
-      // PAGE IT THROUGH IN ONE TRY, for the same reason the walk is done in
-      // one: Ratchet's first talk is a long story, one page per try spent the
-      // budget on reading, and the step ran out as "buy, buy, buy, buy".
-      for (let i = 0; i < 200 && G.state === 'DIALOG'; i++) {
-        keysP['Enter'] = 1; keys['Enter'] = 1;
-        update(1 / 30);
-        keys['Enter'] = 0;
-      }
-      return;
-    }
-    if (G.state === 'SHOP') {
-      G.shopIdx = 0;                               // the volt cell
-      keysP['Enter'] = 1; keys['Enter'] = 1;
-      updateShop();
-      G.state = 'PLAY';
-    }
-  });
-  const shopReached = await p.evaluate(() => !!(G.save.flags && G.save.flags.tutBuy));
+    if (G.state === 'CUT') { for (let i = 0; i < 120 && G.state === 'CUT'; i++) { keys['Enter'] = 1; keysP['Enter'] = i === 0 ? 1 : 0; update(1 / 30); } keys['Enter'] = 0; return; }
+    const s = ${near(ratchet)}; if (s && G.state === 'PLAY') doInteract(s);`));
   await record(now);
-  const bought = await p.evaluate(() => ({ volts: player.volts, scrap: G.save.scrap, flag: !!G.save.flags.tutBuy }));
-
-  // the scripted hit should already have landed when the step opened
+  const woke = await p.evaluate(() => ({ live: npcLive(G.statics.find(s => s.extra === 'ratchet')), spare: invCount('batt'), kit: invCount('kit'), quest: qState('ratchet_forge') }));
+  now = await drive('pod', new Function(`
+    if (G.state === 'DIALOG') { (${page})(); return; }
+    if (!G.recharge) { const s = ${near('G.statics.find(s => s.type === "bench")')}; if (s && G.state === 'PLAY') doInteract(s); }
+    for (let i = 0; i < 400 && (G.recharge || !opPodSettled()); i++) update(1 / 30);`));
+  await record(now);
+  const saved = await p.evaluate(() => ({ bench: G.save.bench && G.save.bench.room, stored: JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))).bench.room }));
+  const scrapBefore = await p.evaluate(() => G.save.scrap);
+  let scrapAfter = null, pitch = null;
+  now = await drive('pack', new Function(`
+    if (G.state === 'SHOP') { window.__scrapAtShop = G.save.scrap; window.__row = SHOP[G.shopIdx].type; keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 60); keys['Enter'] = 0; return; }
+    if (G.state === 'DIALOG') { window.__pitch = window.__pitch || G.dialog.lines.join(' '); (${page})(); return; }
+    const s = ${near(ratchet)}; if (s && G.state === 'PLAY') doInteract(s);`));
+  await record(now);
+  scrapAfter = await p.evaluate(() => window.__scrapAtShop); pitch = await p.evaluate(() => ({ text: window.__pitch, row: window.__row }));
+  const bought = await p.evaluate(() => ({ volts: player.volts, scrap: G.save.scrap, flag: !!G.save.flags.tutBuy, heal: !!G.save.flags.heal }));
+  // the scripted first surge should already have landed when the step opened
+  await p.evaluate(() => { for (let i = 0; i < 4 && G.state === 'DIALOG'; i++) { keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); keys['Enter'] = 0; } for (let i = 0; i < 60; i++) update(1 / 60); });
   const hurtTo = await p.evaluate(() => ({ cores: player.cores, max: player.maxCores() }));
   now = await drive('heal', () => {
-    // a player leaves the shop before doing anything else, and the tutorial
-    // only advances while the game is actually being played
-    if (G.state !== 'PLAY') G.state = 'PLAY';
-    player.cores = player.maxCores();
+    if (G.state !== 'PLAY') return;
+    keys.KeyF = 1; for (let i = 0; i < 90; i++) update(1 / 60); keys.KeyF = 0; update(1 / 60);
   });
   await record(now);
-  // THE OTHER THING THE PACK BOUGHT: hold the claw until it crackles, let go.
-  // Driven through the real held-input path, so this also proves the pack
-  // actually unlocked the hold (burstUnlocked) — before the buy, holding X
-  // is an ordinary attack and this step could never complete.
+  // THE OTHER THING THE PACK BOUGHT, and before it: holding the claw is an
+  // ordinary attack (measured with the pack switched back off for a moment).
   const burstLock = await p.evaluate(() => {
     const had = G.save.flags.heal; G.save.flags.heal = 0; const tut = G.save.flags.tut; G.save.flags.tut = 0;
-    if (G.state !== 'PLAY') G.state = 'PLAY';
     player.volts = 99; player.chargeT = 0;
     keys.KeyX = 1; keysP.KeyX = 1;
     for (let i = 0; i < 30; i++) player.update(1 / 60);
@@ -283,31 +167,34 @@ const { chromium } = require('playwright');
     G.save.flags.heal = had; G.save.flags.tut = tut;
     return { locked, had: !!had };
   });
-  now = await drive('burst', () => {
-    if (G.state !== 'PLAY') G.state = 'PLAY';
-    // ONE burst, then wait. The lesson advances on its own clock (0.25 s
-    // seen, 0.7 s held) and a burst every try kept resetting the frame it
-    // needed to see — under the full suite this read "burst, burst".
-    if (G.save.flags && G.save.flags.burstDone) return;
-    player.volts = 99; player.on = true;
-    keys.KeyX = 1; keysP.KeyX = 1;
-    for (let i = 0; i < 45; i++) player.update(1 / 60);
-    keys.KeyX = 0; keysP.KeyX = 0;
-    for (let i = 0; i < 3; i++) player.update(1 / 60);
-  });
+  // out of the den by its own door, to the jammed winch
+  const toWinch = () => {
+    if (G.roomId === 'A0B' && G.state === 'PLAY' && !G.gateWalk) {
+      const d = gateDoors()[0]; player.x = gateWorldX(d) - player.w / 2; player.vx = 0; player.on = true;
+      keysP.ArrowUp = 1; keys.ArrowUp = 1; update(1 / 60); keys.ArrowUp = 0; keysP.ArrowUp = 0;
+      for (let i = 0; i < 80 && G.gateWalk; i++) update(1 / 10);
+      return null;
+    }
+    const e = G.enemies.find(x => x && !x.dead && !x.disabled);
+    if (e) { player.x = e.x + e.w / 2 - player.w / 2 + 40; player.vx = 0; player.on = true; update(1 / 60); }
+    return e;
+  };
+  now = await drive('atk', new Function(`const e = (${toWinch})(); if (!e) return; keysP.KeyX = 1; keys.KeyX = 1; update(1 / 60); keys.KeyX = 0; for (let i = 0; i < 20; i++) update(1 / 60);`));
   await record(now);
-
-  // SHE HAS TO COME BACK OUT OF THE BOOTH FOR THIS ONE, and that is the point
-  // of it: the node stands in A0, thirteen tiles behind where the buy step
-  // left her, and the lesson no longer completes from inside the shop (the
-  // step carries `room` now). Walking out is what a player does — the game
-  // rings the way out while the step is active — so the harness does it too.
+  const winchCalm = await p.evaluate(() => { const e = G.enemies.find(x => x && x.mechanism === 'winch'); return e ? { calm: !!e.calm, phase: e.phase } : null; });
+  now = await drive('burst', new Function(`
+    if (G.save.flags.opBurst) { update(1 / 60); return; }
+    const e = (${toWinch})(); if (!e) return;
+    keys.KeyX = 1; keysP.KeyX = 1; for (let i = 0; i < 45; i++) update(1 / 60);
+    keys.KeyX = 0; for (let i = 0; i < 4; i++) update(1 / 60);`));
+  await record(now);
+  const winchDown = await p.evaluate(() => { const e = G.enemies.find(x => x && x.mechanism === 'winch'); return e ? !!e.disabled : null; });
   now = await drive('node', () => {
-    if (G.roomId !== 'A0') { loadRoom('A0'); G.state = 'PLAY'; G.dialog = null; return; }
-    G.save.iq = 10;
+    if (G.state === 'TRIAL') { triNodeAnswer(true); return; }
+    if (G.state === 'DIALOG') return;
+    const n = G.statics.find(s => s.type === 'riddle' && !s.opened);
+    if (n) { player.x = n.x + n.w / 2 - player.w / 2; player.vx = 0; player.on = true; update(1 / 60); doInteract(n); }
   });
-  await record(now);
-  now = await drive('skill', () => { G.save.skills = ['mind']; });
   await record(now);
 
   // ---- THE WALK CANNOT BE SKIPPED BY LEAVING THE ROOM --------------------
@@ -330,19 +217,21 @@ const { chromium } = require('playwright');
     G.dialog = null; G.state = 'PLAY'; G.toasts = [];
     updateTutor(1 / 60);   // startGame resets G.tut to null; give it its lazy init
     const at = (id) => TUT_STEPS.findIndex(q => q.id === id);
-    G.tut.i = at('kill'); G.tut.t = 1; G.tut.hold = 0;
+    G.tut.i = at('gate'); G.tut.t = 1; G.tut.hold = 0;
     const boothEarly = gateDoors('A0').length;          // must be 0: not built yet
-    // ...and if she gets in anyway, the lessons must not complete in there
-    loadRoom('A0B'); G.state = 'PLAY'; G.dialog = null;
-    const iKill = G.tut.i;
-    for (let k = 0; k < 60; k++) updateTutor(1 / 60);
-    const killHeld = G.tut.i === iKill && !G.tut.hold;
+    // a swing in the den does not finish the strike lesson at the winch
     G.tut.i = at('atk'); G.tut.t = 1; G.tut.hold = 0;
-    player.swing = { t: 0.2, t0: 0.2, combo: 1 };        // a real swing, in the shop
+    loadRoom('A0B'); G.state = 'PLAY'; G.dialog = null;
+    player.swing = { t: 0.2, t0: 0.2, combo: 1 };
     const iAtk = G.tut.i;
     for (let k = 0; k < 60; k++) updateTutor(1 / 60);
     const atkHeld = G.tut.i === iAtk && !G.tut.hold;
     player.swing = null;
+    // ...nor does insight earned anywhere but the monument's floor
+    G.tut.i = at('node'); G.tut.t = 1; G.tut.hold = 0; G.save.iq = 10;
+    for (let k = 0; k < 60; k++) updateTutor(1 / 60);
+    const nodeHeld = G.tut.i === at('node') && !G.tut.hold;
+    G.save.iq = 0;
     // ...and the same swing in the room that teaches it DOES count
     loadRoom('A0'); G.state = 'PLAY'; G.dialog = null;
     G.tut.i = at('atk'); G.tut.t = 1; G.tut.hold = 0;
@@ -350,10 +239,10 @@ const { chromium } = require('playwright');
     for (let k = 0; k < 60; k++) updateTutor(1 / 60);
     const atkCounts = G.tut.i > at('atk') || G.tut.hold > 0;
     player.swing = null;
-    // ...and the booth opens once the lesson that sends her in begins
-    G.tut.i = at('buy'); G.tut.t = 1; G.tut.hold = 0;
+    // ...and the booth exists once the lesson that sends her in begins
+    G.tut.i = at('booth'); G.tut.t = 1; G.tut.hold = 0;
     const boothLater = gateDoors('A0').length;
-    return { boothEarly, killHeld, atkHeld, atkCounts, boothLater };
+    return { boothEarly, killHeld: nodeHeld, atkHeld, atkCounts, boothLater };
   });
   // and the door: held shut until the last lesson, open after it
   const door = await p.evaluate(() => {
@@ -374,48 +263,57 @@ const { chromium } = require('playwright');
   const resume = await p.evaluate(() => {
     const at = (id) => TUT_STEPS.findIndex(q => q.id === id);
     loadRoom('A0'); G.state = 'PLAY'; G.dialog = null;
-    G.tut.i = at('heal'); G.tut.t = 1; G.tut.hold = 0;
+    G.tut.i = at('node'); G.tut.t = 1; G.tut.hold = 0;
     tutSave(G.save, G.tut);
     let stored = -1;
-    try { stored = JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))).flags.tutI; } catch (e) {}
+    try { stored = TUT_STEPS.findIndex(q => q.id === JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))).flags.tutId); } catch (e) {}
     // a reload: the in-memory walk is gone, the save is what is left
     G.tut = null; updateTutor(1 / 60);
     const resumed = TUT_STEPS[G.tut.i].id;
     // ...and a save can never be written backwards
-    G.tut.i = at('atk'); tutSave(G.save, G.tut);
-    const back = G.save.flags.tutI;
-    return { stored, resumed, back, heal: at('heal') };
+    G.tut.i = at('booth'); tutSave(G.save, G.tut);
+    const back = TUT_STEPS.findIndex(q => q.id === G.save.flags.tutId);
+    return { stored, resumed, back, heal: at('node') };
   });
 
   await b.close();
 
   console.log('reload mid-walk: ' + JSON.stringify(resume));
   console.log('steps reached: ' + seen.join(' -> '));
-  console.log('scrap from the waking floor\'s machine: ' + scrapBefore + ' -> ' + scrapAfter);
-  console.log('after buying the cell: ' + JSON.stringify(bought));
+  console.log('Ratchet woke: ' + JSON.stringify(woke) + '   pod: ' + JSON.stringify(saved));
+  console.log('scrap: ' + scrapBefore + ' before the pitch, ' + scrapAfter + ' at the counter (' + pitch.row + ')');
+  console.log('after buying the pack: ' + JSON.stringify(bought));
   console.log('the hold before the pack: ' + JSON.stringify(burstLock));
-  console.log('the scripted first hit left: ' + hurtTo.cores + ' / ' + hurtTo.max + ' cores');
+  console.log('the scripted first surge left: ' + hurtTo.cores + ' / ' + hurtTo.max + ' cores');
+  console.log('the winch: ' + JSON.stringify(winchCalm) + ', stopped by the burst: ' + winchDown);
   console.log('door: ' + JSON.stringify(door));
   console.log('skipping the walk: ' + JSON.stringify(skip));
 
-  const want = ['move', 'jump', 'atk', 'kill', 'coin', 'buy', 'heal', 'burst', 'node', 'skill', 'go'];
+  const want = ['move', 'out', 'jump', 'gate', 'booth', 'note', 'drawer', 'repair', 'pod', 'pack', 'heal', 'atk', 'burst', 'node', 'go'];
   const fails = [];
   for (const w of want) if (!seen.includes(w)) fails.push('never reached the "' + w + '" step (got ' + seen.join(',') + ')');
-  if (scrapAfter < 12) fails.push('the first kill cannot pay for the cheapest thing in the shop (' + scrapAfter + ')');
-  if (!bought.flag) fails.push('buying the volt cell did not register');
-  if (!burstLock.had) fails.push('the first cell did not wire the pack (flags.heal)');
+  if (!letterRead) fails.push('the letter was not what the first E read');
+  if (!woke.live || woke.spare !== 1 || woke.kit !== 0 || woke.quest !== 'active') fails.push('the repair did not wake him with the spare named and the errand given: ' + JSON.stringify(woke));
+  if (saved.bench !== 'A0B' || saved.stored !== 'A0B') fails.push('the pod did not move the save point to the den: ' + JSON.stringify(saved));
+  if (scrapBefore !== 0) fails.push('she had scrap before Ratchet paid her (' + scrapBefore + ')');
+  if (scrapAfter !== 12) fails.push('the counter did not open with exactly the 12 he paid (' + scrapAfter + ')');
+  if (!pitch.text || !/12 scrap/.test(pitch.text)) fails.push('the pack was not pitched with its cost before the counter: ' + pitch.text);
+  if (pitch.row !== 'cell') fails.push('the counter did not open on the pack');
+  if (!bought.flag || !bought.heal) fails.push('buying the pack did not register / wire it');
+  if (!burstLock.had) fails.push('the pack did not wire (flags.heal)');
   if (burstLock.locked > 0) fails.push('the claw charges before the pack is bought (chargeT ' + burstLock.locked + ')');
-  if (bought.scrap !== scrapAfter - 12) fails.push('the cell did not cost 12 scrap');
+  if (bought.scrap !== 0) fails.push('the pack did not cost the 12 scrap (' + bought.scrap + ' left)');
   if (hurtTo.cores >= hurtTo.max) fails.push('the repair lesson opened at full health, so it teaches nothing');
+  if (!winchCalm || !winchCalm.calm || winchCalm.phase !== 'idle') fails.push('the winch swings while she is being taught: ' + JSON.stringify(winchCalm));
+  if (!winchDown) fails.push('the Volt Burst lesson did not stop the winch');
   if (!door.opened) fails.push('the way out never opened');
-  // the escape the owner actually found — see the block that measures it
   if (skip.boothEarly !== 0) fails.push('the booth is open ' + skip.boothEarly + ' door(s) before the lesson that sends her in');
-  if (!skip.killHeld) fails.push('the kill lesson completed inside the shop');
-  if (!skip.atkHeld) fails.push('a swing inside the shop finished the attack lesson');
-  if (!skip.atkCounts) fails.push('a swing on the waking floor did NOT finish the attack lesson');
+  if (!skip.killHeld) fails.push('the monument lesson completed away from the monument');
+  if (!skip.atkHeld) fails.push('a swing inside the den finished the strike lesson');
+  if (!skip.atkCounts) fails.push('a swing on the waking floor did NOT finish the strike lesson');
   if (!(skip.boothLater > 0)) fails.push('the booth never opens for the lesson that sends her in');
-  if (resume.stored !== resume.heal) fails.push('the step index is not in the save (' + resume.stored + ')');
-  if (resume.resumed !== 'heal') fails.push('a reload restarted the lesson at "' + resume.resumed + '"');
+  if (resume.stored !== resume.heal) fails.push('the step is not in the save (' + resume.stored + ')');
+  if (resume.resumed !== 'node') fails.push('a reload restarted the lesson at "' + resume.resumed + '"');
   if (resume.back !== resume.heal) fails.push('the saved step moved backwards (' + resume.back + ')');
   if (errs.length) fails.push('page errors: ' + errs.slice(0, 3).join(' | '));
   if (fails.length) { console.log('\nFAIL\n - ' + fails.join('\n - ')); process.exit(1); }
