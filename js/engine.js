@@ -24,6 +24,7 @@ const KEYB = {
 };
 const keys = {}, keysP = {};
 let inputSuspended = false, padNeedsNeutral = false;
+let LIFE = null;   // the app's background/inactive state — see installLifecycle below
 // ---------------------------------------------------------------------------
 // Gamepad. A Bluetooth pad on a phone should turn the game into a console: the
 // touch gutters disappear, the picture grows to fill the screen, and every
@@ -341,12 +342,64 @@ function releaseInput() {
   if (typeof tCancelAll === 'function') tCancelAll();
 }
 function suspendInput() { inputSuspended = true; releaseInput(); }
-addEventListener('blur', suspendInput);
-addEventListener('focus', () => { inputSuspended = !!document.hidden; });
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) suspendInput();
-  else inputSuspended = !document.hasFocus();
-});
+function resumeInput() { inputSuspended = false; }
+// ---------------------------------------------------------------------------
+// GOING AWAY AND COMING BACK, OWNED IN ONE PLACE (MobilePlatform.Lifecycle).
+//
+// This was three listeners that each recomputed the same thing: blur suspends,
+// focus un-suspends unless hidden, visibilitychange suspends unless focused.
+// They were right, and they were still only half the job — nothing ever
+// SUSPENDED THE AUDIO. The context was created once and left running through
+// every backgrounding for the life of the tab, which on iOS is the documented
+// way to get a context back in a state that will not play, and audio.js has
+// only ever known how to resume one.
+//
+// Lifecycle is the same two states this file already tracked — BACKGROUNDED
+// (hidden, pagehide) and INACTIVE (blur: the app switcher, Control Centre, a
+// call) — held as a pair that cannot resume without having paused, which the
+// three listeners could not promise on a page that LOADS hidden or unfocused.
+//
+// The loop is deliberately not gated on it. rAF already stops when the tab is
+// hidden and SIM_MAX already bounds the catch-up, and pausing the picture
+// because a desktop player clicked another window would be a change to how the
+// game feels, which adding a touch layer is not a licence to make.
+//
+// It is installed from boot.js, because js/mobile-platform.js is concatenated
+// AFTER this file and a top-level `new` here would run before it exists. If it
+// is missing for any reason the old listeners go back in: a generated file that
+// failed to load must never be able to take the input with it.
+function installLifecycle() {
+  if (installLifecycle.done) return;
+  installLifecycle.done = true;
+  if (typeof MobilePlatform === 'undefined' || !MobilePlatform.Lifecycle) {
+    addEventListener('blur', suspendInput);
+    addEventListener('focus', () => { inputSuspended = !!document.hidden; });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) suspendInput();
+      else inputSuspended = !document.hasFocus();
+    });
+    return;
+  }
+  LIFE = new MobilePlatform.Lifecycle({
+    // releaseInput is the game's own one — every held key, every pad button,
+    // every finger — so there is one way to let go of the controls, not two.
+    inputToReset: { reset: releaseInput },
+    onPause() {
+      inputSuspended = true;
+      if (typeof AC !== 'undefined' && AC && AC.state === 'running') {
+        try { const r = AC.suspend(); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+      }
+    },
+    onResume() {
+      resumeInput();
+      // audio.js owns waking the stream back up; it already listens for the
+      // visibility change and re-kicks the element. The context is ours.
+      if (typeof AC !== 'undefined' && AC && AC.state === 'suspended' && typeof AUD_UNLOCKED !== 'undefined' && AUD_UNLOCKED) {
+        try { const r = AC.resume(); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+      }
+    },
+  });
+}
 // THE ANDROID BACK BUTTON. In an app it is a real button on the device, and
 // its default behaviour is to close the app — which, mid-boss, is not a back
 // button, it is a quit button. It now means what BACK means everywhere else in

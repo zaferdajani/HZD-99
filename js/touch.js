@@ -73,6 +73,7 @@ function tcSetup() {
   tc.addEventListener('touchmove', tMove, { passive: false });
   tc.addEventListener('touchend', tEnd, { passive: false });
   tc.addEventListener('touchcancel', tCancel, { passive: false });
+  tGestureSetup();
 }
 function tcResize() {
   // no touch layer (desktop): nothing to lay out — without this guard a
@@ -604,6 +605,7 @@ function tCancelAll() {
   TOUCH.mapT = null; TOUCH.mapPinch = 0;
   TOUCH.wheel = null; TOUCH.wheelFire = null;
   TOUCH.tapRel = [];
+  tGestureRelease();
 }
 function tCancel(e) { e.preventDefault(); tCancelAll(); }
 function tEnd(e) {
@@ -869,4 +871,108 @@ function drawTouchUI() {
     tCircle(L.lgx, 28, 18, false, '✕', 14);
   }
 }
+
+// ---------------------------------------------------------------------------
+// THE PICTURE IS THE REST OF THE CONTROLLER (MobilePlatform, wired 2026-10-09)
+//
+// The controls live in the GUTTERS, outside the frame, and the floating stick
+// already claims the left of the screen — so on a phone the right half of the
+// PICTURE is the one part of the glass that has never done anything. That is
+// where js/mobile-platform.js earns its place: tap to hop, swipe to strike,
+// swipe down to dash, hold to charge. Nothing is taken away; every button, the
+// wheel and the stick behave exactly as before, and a player who never touches
+// the picture never knows this is here.
+//
+// IT WRITES THE SAME CODES AS A BUTTON. The recognizer emits semantic gestures
+// and this adapter turns them into VJUMP / VATK / VDASH through tPress / tHold,
+// which is the whole of the integration: the game has one input vocabulary and
+// touch, keyboard and pad are three ways of speaking it. Nothing downstream
+// learns that gestures exist.
+//
+// WHY IT IS SCOPED RATHER THAN GIVEN ITS OWN ELEMENT. The recognizer owns one
+// finger at a time (its rule 2), so if it listened to the whole overlay the
+// thumb resting on the stick would be the owner and the other thumb's tap would
+// arrive mid-drag as a pan — every tap the player makes WHILE MOVING, which is
+// nearly all of them. Putting it on its own overlay element instead would make
+// that element swallow the touches underneath it, and the layout editor lets
+// the owner drag any button anywhere, including over the picture. So the
+// recognizer stays on the one overlay and is told, per finger, whether that
+// landing point is its business. Out of scope, out of mind: the finger is not
+// tracked at all and the next one starts clean.
+const TGEST = { on: null, drag: null, charge: false };
+// 420 ms, not the recognizer's default 600: this hold is the supercharge, and
+// the player is already holding the attack button down by then on every other
+// control scheme.
+const TGEST_HOLD_MS = 420, TGEST_SWIPE_PX = 34;
+function gestureAllowed() {
+  return !!(TOUCH.enabled && typeof G !== 'undefined' && G.state === 'PLAY'
+    && !inputSuspended && !TOUCH.wheel && !G.dialog && !G.cut && !G.wake
+    && !(G.save && G.save.gestOff));
+}
+// Is this landing point the gesture layer's business? Inside the picture, right
+// of the stick's half, and clear of every control AT ITS CURRENT LAID-OUT
+// POSITION — because a custom layout can put a button anywhere, including here.
+function gestureZone(at) {
+  if (!at || !gestureAllowed() || !cv) return false;
+  let L; try { L = tLayout(); } catch (e) { return false; }
+  if (at.x < L.r.left + 8 || at.x > L.r.right - 8) return false;
+  if (at.y < L.r.top + 8 || at.y > L.r.bottom - 8) return false;
+  if (at.x < L.W * 0.46) return false;                   // the stick's half
+  for (const b of L.corners) if (b.show() && Math.hypot(at.x - b.x, at.y - b.y) < b.r + 9) return false;
+  for (const b of L.btns) if (b.show() && Math.hypot(at.x - b.x, at.y - b.y) < b.r + 9) return false;
+  return true;
+}
+function tGestureRelease() {
+  if (TGEST.charge) { TGEST.charge = false; keys.VATK = 0; }
+  TGEST.drag = null;
+}
+function tGestureEvent(g) {
+  if (g.type === 'cancel') { tGestureRelease(); return; }
+  // The release of a hold is the release of the charge, wherever the finger
+  // ended up — a charge that only let go inside its own zone would stay held
+  // forever the moment the thumb drifted off the picture.
+  if (g.type === 'longPressEnd') {
+    if (TGEST.charge) { TGEST.charge = false; keys.VATK = 0; }
+    return;
+  }
+  if (g.type === 'dragEnd') { TGEST.drag = null; return; }
+  if (g.type === 'dragMove') {
+    if (!TGEST.drag || TGEST.drag.fired) return;
+    const dx = g.at.x - g.from.x, dy = g.at.y - g.from.y;
+    if (Math.abs(dx) >= TGEST_SWIPE_PX && Math.abs(dx) > Math.abs(dy)) { tPress('VATK'); TGEST.drag.fired = 1; }
+    else if (dy >= TGEST_SWIPE_PX && dy > Math.abs(dx)) { tPress('VDASH'); TGEST.drag.fired = 1; }
+    return;
+  }
+  // tap / longPress / dragStart: judged at the point the finger LANDED, which
+  // is what `from` is for — a swipe that ends over a button still belongs to
+  // the picture it started on.
+  const at = g.type === 'dragStart' ? g.from : g.at;
+  if (!gestureZone(at)) { if (g.type === 'dragStart') TGEST.drag = null; return; }
+  // A TAP IS A HOP, and that is honest rather than unfortunate: a tap carries
+  // no hold, so the variable-jump cut has nothing to read. Height lives on the
+  // JUMP button, which is still there, still held, still full.
+  if (g.type === 'tap') tPress('VJUMP');
+  else if (g.type === 'longPress') { TGEST.charge = true; tHold('VATK'); }
+  else if (g.type === 'dragStart') TGEST.drag = { fired: 0 };
+}
+function tGestureSetup() {
+  if (TGEST.on || !tc || typeof MobilePlatform === 'undefined') return;
+  try {
+    TGEST.on = new MobilePlatform.TouchGestures(tc, {
+      longPressMs: TGEST_HOLD_MS,
+      tapDeadZonePx: 10,
+      onGesture: tGestureEvent,
+      scope: gestureZone,
+      toGameSpace: (cx, cy) => ({ x: cx - TOUCH.ox, y: cy - TOUCH.oy }),
+    });
+  } catch (e) { TGEST.on = null; }
+}
+// Rule 4: a finger that lands and does not move produces no events, so the hold
+// is found by the frame loop or not at all. mainLoop calls this.
+function tGestureUpdate(nowMs) {
+  if (!TGEST.on) return;
+  if (!gestureAllowed()) { if (TGEST.charge || TGEST.drag) { TGEST.on.reset(); tGestureRelease(); } return; }
+  TGEST.on.update(nowMs);
+}
+
 if (TOUCH.enabled) tcSetup();

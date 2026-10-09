@@ -3003,6 +3003,13 @@ function pauseItems() {
   it.push({ id: 'films', label: t('film_title') });
   if (!isHero()) it.push({ id: 'comics', label: LANG === 'ar' ? 'ذكريات المانهوا' : 'Manhwa memories' });
   if (pauseHasTouch()) it.push({ id: 'touch', label: t('tl_title') });
+  // THE PICTURE'S GESTURES, AND THE WAY OUT OF THEM. A control the player
+  // cannot see is a control the player must be able to switch off: the picture
+  // answers taps and swipes now (js/touch.js, THE PICTURE IS THE REST OF THE
+  // CONTROLLER), and a thumb that rests on the glass should not have to learn
+  // to hover. Same row shape as the pace and quality dials, so the pause menu's
+  // one geometry keeps covering its tap target.
+  if (pauseHasTouch()) it.push({ id: 'gest', label: t('gest') + ':  ' + (G.save && G.save.gestOff ? t('off') : t('on')) + '   ◂ ▸', arrows: 1, hint: t('gest_d') });
   it.push({ id: 'restart', label: t('pm_restart'), icon: '↻', warn: 1, hint: t('pm_restart_d') });
   it.push({ id: 'quit', label: t('to_menu'), icon: '⏻', warn: 1, out: 1 });
   return it;
@@ -3038,6 +3045,12 @@ function updatePause() {
     sfx('ui'); persist();
   }
   if (cur.id === 'qual' && (inP('LEFT') || inP('RIGHT'))) { qualCycle(); sfx('ui'); }
+  if (cur.id === 'gest' && (inP('LEFT') || inP('RIGHT') || inP('OK'))) {
+    G.save.gestOff = G.save.gestOff ? 0 : 1;
+    if (G.save.gestOff && typeof tGestureRelease === 'function') tGestureRelease();
+    sfx('ui'); persist();
+    if (inP('OK')) return;            // the row toggles; it does not also fire
+  }
   if (inP('OK')) {
     // THROWING A RUN AWAY TAKES TWO PRESSES. Restart and Quit sit at the bottom
     // of a list the player scrolls through with the same key that confirms, and
@@ -17220,6 +17233,10 @@ function mainLoop(tms) {
   }
   lastT = tms;
   if (typeof pollGamepad === 'function') pollGamepad();
+  // Rule 4 of the touch recognizer (js/touch.js, js/mobile-platform.js): a
+  // finger that lands and holds still emits no events, so the long press is
+  // found from the frame loop or not at all.
+  if (typeof tGestureUpdate === 'function') tGestureUpdate(tms);
   const artReady = typeof heroArtBootTick !== 'function' || heroArtBootTick();
   // one step on a healthy frame; two or three when the machine is struggling
   let acc = Math.min(raw, SIM_MAX) * (G.state === 'PLAY' ? paceK() : 1);
