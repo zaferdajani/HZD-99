@@ -51,6 +51,24 @@ export interface TouchGestureOptions {
    * Default: canvas-relative CSS pixels.
    */
   toGameSpace?: (clientX: number, clientY: number) => Vec2;
+  /**
+   * WHICH PART OF THE ELEMENT THIS RECOGNIZER OWNS. Asked once, at the moment a
+   * finger lands, in game space. A finger that fails it is not tracked at all —
+   * no phase, no capture, no gesture — so it is free to belong to something else
+   * on the same element.
+   *
+   * Without this, ONE OWNER (rule 2) is the whole element: a thumb resting on a
+   * virtual stick is the owning finger, and the other thumb's tap arrives mid-
+   * DRAGGING and becomes a pan instead of a tap. In a twin-thumb game that is
+   * every tap the player makes while moving. Scoping the recognizer to the area
+   * it is actually for fixes that without swallowing events another handler on
+   * the same element still needs to see — which is what moving the recognizer
+   * onto its own overlay element would have done, and would have broken any
+   * control the player had dragged into that area.
+   *
+   * Default: the whole element.
+   */
+  scope?: (at: Vec2) => boolean;
 }
 
 type Phase = "IDLE" | "PENDING" | "DRAGGING" | "LONGPRESSED" | "PAN";
@@ -72,6 +90,7 @@ export class TouchGestures {
   private readonly pinchStep: number;
   private readonly emit: (g: GestureEvent) => void;
   private readonly toGame: (x: number, y: number) => Vec2;
+  private readonly scope: (at: Vec2) => boolean;
   private readonly el: HTMLElement;
   private readonly abort = new AbortController();
 
@@ -81,6 +100,7 @@ export class TouchGestures {
     this.deadZone = opts.tapDeadZonePx ?? 8;
     this.pinchStep = opts.pinchStepRatio ?? 0.06;
     this.emit = opts.onGesture;
+    this.scope = opts.scope ?? (() => true);
     this.toGame =
       opts.toGameSpace ??
       ((cx, cy) => {
@@ -140,8 +160,11 @@ export class TouchGestures {
     // finger lands and the state machine never hears about it. Capture is an
     // optimisation (it keeps moves coming if the finger leaves the canvas), so
     // losing it is survivable and losing the touch is not.
-    try { this.el.setPointerCapture?.(e.pointerId); } catch { /* capture is optional */ }
     const p = this.toGame(e.clientX, e.clientY);
+    // Asked BEFORE anything is claimed: an out-of-scope finger leaves no trace,
+    // so a later finger inside the scope still starts cleanly from IDLE.
+    if (!this.scope(p)) return;
+    try { this.el.setPointerCapture?.(e.pointerId); } catch { /* capture is optional */ }
 
     if (this.phase === "IDLE") {
       this.finger1 = e.pointerId;

@@ -19,10 +19,18 @@
 // two-state pause (hidden AND blur) that the web gets wrong by treating them as
 // one. Ported from the GeneralsX iOS layer.
 //
-// WHAT IT IS NOT, YET. Nothing in this game calls it. js/touch.js is still the
-// on-screen controller and tests/tap.cjs still measures that. This file ships
-// so the wiring is a decision rather than an import, and tests/mobile-platform.cjs
-// measures it in the built page so it cannot rot while it waits.
+// WHERE THE GAME USES IT. js/touch.js, "THE PICTURE IS THE REST OF THE
+// CONTROLLER": the gutters keep every button, the floating stick keeps the left
+// of the screen, and the right half of the PICTURE — the one part of the glass
+// that never did anything — becomes tap-to-hop, swipe-to-strike, swipe-down-to-
+// dash and hold-to-charge, written out as the same VJUMP / VATK / VDASH codes a
+// button writes. js/engine.js installs Lifecycle as the single owner of going
+// away and coming back, which is also the first thing in this game ever to
+// SUSPEND the audio context rather than only resume it.
+//
+// The `scope` option is why one recognizer can share an overlay with the old
+// controller: it owns one finger at a time, so unscoped it would make the thumb
+// on the stick the owner and every tap made while moving would arrive as a pan.
 //
 // Three defects were found and fixed before it was committed, each by running
 // it rather than reading it; tests/mobile-platform.cjs holds all three as

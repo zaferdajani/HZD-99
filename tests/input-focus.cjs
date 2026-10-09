@@ -12,6 +12,17 @@ for (const file of ['engine', 'touch']) vm.runInContext(fs.readFileSync(path.joi
 const run = code => vm.runInContext(code, c);
 // No canvas is needed to exercise input ownership; disable its layout side effect.
 run('tcResize = () => {};');
+// GOING AWAY IS INSTALLED, NOT AMBIENT. blur / focus / visibilitychange used to
+// be three top-level listeners in engine.js; they are one MobilePlatform
+// Lifecycle now, installed from boot.js because the file that defines it is
+// concatenated after engine.js. This context loads engine and touch ONLY, so
+// js/mobile-platform.js is absent and installLifecycle takes its fallback path
+// and registers the old three — which is the point: everything below this line
+// is now also a test that losing the generated file cannot take the input with
+// it. The wired path is measured in a real browser by tests/gesture-input.cjs.
+assert.equal(run('typeof MobilePlatform'), 'undefined', 'this context is the fallback case');
+run('installLifecycle();');
+assert.equal(run('LIFE'), null, 'and it really did fall back rather than build one');
 const key = (code, repeat = false) => ({ code, repeat, preventDefault() {} });
 emit('keydown', key('KeyX'));
 assert.equal(run("!!inP('ATK')"), true);

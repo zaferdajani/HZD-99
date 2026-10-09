@@ -55,18 +55,73 @@ And `PlatformerBindings`, an example adapter: floating virtual stick on the left
 thumb, tap = jump / long-press = charge / horizontal swipe = attack / down swipe
 = dash on the right.
 
-## What it is NOT, yet
+## Where the game uses it
 
-**Nothing in the game calls it.** `js/touch.js` is still the on-screen
-controller and `tests/tap.cjs` still measures that. This ships inert so that
-wiring it is a deliberate decision rather than an import, and
-`tests/mobile-platform.cjs` measures it inside the built page so it cannot rot
-while it waits.
+**The picture is the rest of the controller** (`js/touch.js`). The buttons live
+in the gutters outside the frame and the floating stick already claims the left
+of the screen, so the right half of the PICTURE was the one part of the glass
+that had never done anything. It now answers:
 
-Wiring it would mean giving the game a single input contract — one `PlayerInput`
-struct that keyboard, pad and touch all write — which is the genuinely valuable
-idea in the drop and a larger change than adding a file. See the agent-guide
-section below.
+| gesture | code written | why that one |
+|---|---|---|
+| tap | `VJUMP` (a hop) | a tap carries no hold, so the variable-jump cut has nothing to read; height stays on the JUMP button |
+| sideways swipe (≥34 px) | `VATK` | |
+| downward swipe (≥34 px) | `VDASH` | |
+| hold (≥420 ms) → release | `VATK` held, then let go | the supercharge, which is hold-and-release on every other control scheme |
+
+It writes the **same codes a button writes**, through the same `tPress` /
+`tHold`, so nothing downstream learns that gestures exist: the game has one
+input vocabulary and touch, keyboard and pad are three ways of speaking it.
+Nothing is taken away — every button, the wheel, the stick and the layout editor
+behave exactly as before — and a pause-menu row (`Screen gestures: On ◂ ▸`)
+switches it off for a player who rests a thumb on the glass.
+
+It is silent everywhere the old controller already owns: the gutters, the
+stick's half, any control **at its current laid-out position** (the editor can
+put a button over the picture, so the test is run against the live layout, not a
+constant), every state that is not play, and while the power wheel is open.
+
+### The `scope` option, and why it had to exist
+
+The recognizer owns one finger at a time — its rule 2, which is correct for the
+RTS it came from and wrong for a twin-thumb platformer. Listening to the whole
+overlay, the thumb resting on the stick is the owning finger, so the other
+thumb's tap arrives mid-`DRAGGING` and becomes a pan: **every tap the player
+makes while moving**, which is nearly all of them.
+
+Giving the recognizer its own overlay element instead would have swallowed the
+touches underneath it, and the layout editor lets any button be dragged into
+that area. So the master grew `scope?: (at: Vec2) => boolean`, asked once as a
+finger lands: out of scope, the finger is not tracked at all — no phase, no
+capture, no gesture — and the next one starts clean from `IDLE`.
+
+`tests/gesture-input.cjs` holds that: remove the `scope` option and the harness
+reports "a tap must still land while the other thumb is on the stick".
+
+### Lifecycle owns going away and coming back
+
+`js/engine.js` had three listeners that each recomputed the same thing — blur
+suspends, focus un-suspends unless hidden, visibilitychange suspends unless
+focused. They were right, and still only half the job: **nothing ever suspended
+the audio**. The context was created once and left running through every
+backgrounding for the life of the tab, which on iOS is the documented way to get
+a context into a state that will not play, and `js/audio.js` has only ever known
+how to resume one.
+
+`Lifecycle` is now the single owner, with `inputToReset` pointed at the game's
+own `releaseInput` so there is one way to let go of the controls. It is
+installed from `boot.js`, because this file is concatenated after `engine.js`;
+if it is ever missing the old listeners go back in, because a generated file
+that failed to load must not be able to take the input with it.
+
+The loop is deliberately **not** gated on it. `requestAnimationFrame` already
+stops when the tab is hidden and `SIM_MAX` already bounds the catch-up, and
+pausing the picture because a desktop player clicked another window would be a
+change to how the game feels — which adding a touch layer is not a licence to
+make.
+
+The larger idea from the drop, a single `PlayerInput` struct that keyboard, pad
+and touch all write, is still unbuilt; see the agent-guide section below.
 
 ## The three defects fixed before it was committed
 
