@@ -26,7 +26,7 @@ look at to answer "did that actually happen".
 | `hero/` | HZD-99 herself, every plate locked to `ref/hzd99_canon.jpg` | 26 |
 | `crystal/` | The purifier crystal: the weapon, the grips, the four slash light-sheets | 15 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
-| `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line | 16 |
+| `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line; `beasts/cycles/` the filmed walk and run takes | 22 |
 | `flora/` | Alien plant life, two species per kingdom | 12 |
 | `gear/` | Thrust boots and the save pod, dormant + active; Ratchet's repair board, its cell, the wake-room lamp | 7 |
 | `_sheets/` | Contact sheets and before/after comparisons | 17 |
@@ -57,6 +57,20 @@ believing the code comments and photograph it.
 replace the small lions as zone A's first enemy (prowl / coil / pounce), THE
 ALPHA in nine states, and the electronic CHEETAH line for the later kingdoms
 (stand / sprint / wind-up) which has no alpha and is simply killed.
+
+`beasts/cycles/` is where the pack stopped sliding on two drawings (ART_QUEUE §2cc,
+2026-10-09). Each cycle is ONE stride filmed by Higgsfield and cut by
+`tools/vidstrip.cjs`: the identity plate was first re-plated onto flat chroma green
+(GPT Image 2.5, jobs 3d8fd5de wolf / 192f0959 cheetah — the plates are ink-lined on
+white, and a black key eats ink that touches the field), then animated IN PLACE with
+Seedance 2.5 (4 s, 720p, locked camera; jobs 234fd93b wolf walk, 78565285 wolf run,
+34083fbf cheetah walk, 6e273ec1 cheetah run). The stride period was measured from the
+keyed silhouettes and exactly one period cut, sampled at cell midpoints so the last
+cell never repeats the first. Every pair of cells differs (silhouette XOR / union):
+wolf walk ≥ 0.165, wolf run ≥ 0.242, cheetah walk ≥ 0.270, cheetah run ≥ 0.410. The
+wolf run's first cut found TWO strides (period 1.71 s, two cells 1.3% apart — the
+same pose twice) and was re-cut to one (0.54 s). Files: `*_green_start.jpg` (the
+start frames), `*_take.jpg` (each take as a contact sheet).
 
 THE WOLF WAS REGENERATED ONCE AND THE ALPHA TWICE, and both for the same
 reason: a plate set is only a character if every plate is the SAME character.

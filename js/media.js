@@ -101,6 +101,12 @@ const MEDIA_SRC = {
     // pounce happens in the air where a grounded plate cannot go. Rest, coil,
     // lunge — one per phase of the only move it has.
     wolfRest: 'assets/characters/beasts/wolf.webp',
+    // THE PACK WALKS AND RUNS ON FILMED CYCLES (ART_QUEUE §2cc): one stride per
+    // strip, cut from a Higgsfield take with every cell distinct (measured).
+    wolfWalk8: 'assets/characters/beasts/wolf_walk8.webp',
+    wolfRun6: 'assets/characters/beasts/wolf_run6.webp',
+    cheetahWalk8: 'assets/characters/beasts/cheetah_walk8.webp',
+    cheetahRun6: 'assets/characters/beasts/cheetah_run6.webp',
     // ...and the two WALK frames, because a plate that slides is a wolf on
     // treads. See wolfPose(): the cycle is driven by ground travelled.
     wolfWalkA: 'assets/characters/beasts/wolf_walka.webp',

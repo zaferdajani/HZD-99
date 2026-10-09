@@ -100,6 +100,11 @@ const CHEETAH_ART = {
   runB: { img: 'cheetahRunB', k: 2.10, foot: 1, walkOf: 'walkB' },
   coil: { img: 'cheetahWarn', k: 2.30, foot: 1 },
   lunge: { img: 'cheetahRun', k: 2.05, foot: 0, yOff: -0.18 },
+  // the filmed cycles (§2cc): k is the CELL height, chosen so the body inside
+  // a square cell stands as tall as it does on the rest plate (measured: the
+  // walk's body fills 0.58 of its cell, the gallop's is cut from a wider take)
+  walkStrip: { img: 'cheetahWalk8', cells: 8, k: 3.57 },
+  runStrip: { img: 'cheetahRun6', cells: 6, k: 3.64 },
 };
 // how each animal carries its run (drawBeastPlate): a wolf bounds, a cheetah
 // runs a rotary gallop — longer reach, deeper back flexion, harder suspension
@@ -120,6 +125,8 @@ const WOLF_ART = {
   runB: { img: 'wolfRunB', k: 2.35, foot: 1, walkOf: 'walkB' },
   coil: { img: 'wolfCoil', k: 2.20, foot: 1 },
   lunge: { img: 'wolfLunge', k: 2.15, foot: 0, yOff: -0.22 },
+  walkStrip: { img: 'wolfWalk8', cells: 8, k: 3.87 },
+  runStrip: { img: 'wolfRun6', cells: 6, k: 3.94 },
 };
 // ---------------------------------------------------------------------------
 // IT WALKS. IT DOES NOT GLIDE.
@@ -224,6 +231,22 @@ function drawBeastPlate(c, e, ART, tame) {
     // tell, which is the one frame the player must not be lied to about
     for (const k in ART) mediaFetch(ART[k].img);
   }
+  // THE FILMED CYCLE, when it is here: a walk or run pose draws one cell of a
+  // real stride instead of alternating two plates. The cell is a function of
+  // the same distance-driven phase as everything else (_ph counts half-steps;
+  // a strip is one full stride = two of them), so a paw plants once per stride
+  // of floor at any speed — the strip cannot moonwalk any more than the plates
+  // could. Until it loads, the plates below draw exactly as before.
+  const isRun = pose === 'runA' || pose === 'runB', isWalk = pose === 'walkA' || pose === 'walkB';
+  const SA = isRun ? ART.runStrip : (isWalk ? ART.walkStrip : null);
+  let cell = -1;
+  if (SA && typeof mediaHas === 'function') {
+    if (mediaHas(SA.img)) {
+      const half = (((e._ph || 0) % 2) + 2) % 2;
+      cell = Math.min(SA.cells - 1, Math.floor(half / 2 * SA.cells));
+      A = SA;
+    } else if (typeof mediaFetch === 'function') mediaFetch(SA.img);
+  }
   const im0 = MEDIA_IMG[A.img];
   if (!im0 || !im0.naturalWidth) return false;
   // the pack takes the pop grade (media.js): a predator that blends into the
@@ -231,7 +254,8 @@ function drawBeastPlate(c, e, ART, tame) {
   const im = (typeof popArt === 'function' && popArt(A.img)) || im0;
 
   const cx = e.x + e.w / 2, footY = e.y + e.h;
-  const dh = e.h * A.k, dw = dh * (im.naturalWidth / im.naturalHeight);
+  const cellW = cell >= 0 ? im.naturalWidth / A.cells : im.naturalWidth;
+  const dh = e.h * A.k, dw = dh * (cellW / im.naturalHeight);
   // A GAIT HAS A VERTICAL — AND A RUN HAS A BACK. The vertical is weight
   // transfer taken from the measured CC0 cycles (docs/MOVEMENT_SOURCES.md):
   // a sharp rise onto the planted paw and a soft settle, not a symmetric
@@ -244,7 +268,9 @@ function drawBeastPlate(c, e, ART, tame) {
   const run = !!e._runG && moving;
   const p = (e._ph || 0) % 1;
   let gait = 0, pitch = 0;
-  if (moving) {
+  // a filmed stride already carries its rise, its suspension and its back:
+  // the transform stand-in would add the same motion a second time
+  if (moving && cell < 0) {
     const amp = run ? GAIT.runAmp : 1.6;
     gait = -Math.pow(Math.abs(Math.sin(p * Math.PI)), 0.7) * amp;
     if (run) {
@@ -255,7 +281,7 @@ function drawBeastPlate(c, e, ART, tame) {
     }
   }
   // grounded plates hang off the floor line; the airborne one hangs off centre
-  const yc = (A.foot ? footY - dh / 2 + e.h * (A.yOff || 0)
+  const yc = (A.foot || cell >= 0 ? footY - dh / 2 + e.h * (A.yOff || 0)
                      : e.y + e.h / 2 + dh * (A.yOff || 0)) + gait;
 
   c.save();
@@ -301,10 +327,11 @@ function drawBeastPlate(c, e, ART, tame) {
     c.translate(R.dx * dw, -dh / 2);
   }
   if (e.hurtT > 0) c.globalAlpha *= 0.85;
-  c.drawImage(im, -dw / 2, -dh / 2, dw, dh);
+  const sx = cell >= 0 ? cell * cellW : 0;
+  c.drawImage(im, sx, 0, cellW, im.naturalHeight, -dw / 2, -dh / 2, dw, dh);
   if (e.hurtT > 0) {
     c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
-    c.drawImage(im, -dw / 2, -dh / 2, dw, dh); c.restore();
+    c.drawImage(im, sx, 0, cellW, im.naturalHeight, -dw / 2, -dh / 2, dw, dh); c.restore();
   }
   c.restore();
 

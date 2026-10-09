@@ -5919,6 +5919,8 @@ again, in the art.
 
 ### 2cc-i. THE WOLF — `wolfWalk` (8 cells) and `wolfRun` (6 cells)
 
+**FIRED + WIRED 2026-10-09 (code session, owner's order "use Higgsfield for the complete artwork").** `wolf_walk8.webp` (8×192, 62 KB) and `wolf_run6.webp` (6×192, 53 KB), keys `wolfWalk8` / `wolfRun6`, drawn by `drawBeastPlate` as one cell of a real stride on the distance-driven phase; the two-plate pair stays as the fallback. Takes and the uniqueness numbers: `assets/source/README.md`, `beasts/cycles/`.
+
 Identity: `wolfRest` / `wolfWalkA` (assets/characters/beasts/). Palette:
 gunmetal plates over dark graphite, red optic, cyan seam light — as wired.
 
@@ -5936,6 +5938,8 @@ gunmetal plates over dark graphite, red optic, cyan seam light — as wired.
   This replaces the §2q run PAIR (`wolfRunA/B`): six cells, not two.
 
 ### 2cc-ii. THE CHEETAH — `cheetahWalk` (8) and `cheetahRun` (6)
+
+**FIRED + WIRED 2026-10-09.** `cheetah_walk8.webp` (8×192, 62 KB) and `cheetah_run6.webp` (6×192, 34 KB) — the gallop came back with both suspensions; keys `cheetahWalk8` / `cheetahRun6`, wired as the wolf's.
 
 Identity: `cheetahRest` (the gold unit — §2q found the walk pair drifted into
 two other machines; lock to the REST plate). Palette: brushed gold and tan
