@@ -41,7 +41,9 @@ const { chromium } = require('playwright');
 
   // ---- 1. THE ART ---------------------------------------------------------
   const art = await page.evaluate(async () => {
-    const keys = ['wolfRest', 'wolfCoil', 'wolfLunge', 'alphaRest', 'alphaRoar',
+    const keys = ['wolfIdle6', 'wolfProwl8', 'wolfGallop6', 'wolfCoil6', 'wolfBite6', 'wolfCrouch4',
+                  'wolfLeap6', 'wolfLanding4', 'wolfRecoil6', 'wolfPant6', 'wolfPurify6', 'wolfSit6',
+                  'alphaRest', 'alphaRoar',
                   'alphaHowl', 'alphaLeap', 'alphaClaw', 'alphaBite', 'alphaClinch',
                   'alphaRecoil', 'alphaTurn', 'alphaFree',
                   'cheetahRest', 'cheetahWarn', 'cheetahRun'];
@@ -56,8 +58,8 @@ const { chromium } = require('playwright');
     return out;
   });
   const missing = art.filter(a => a.err || !a.ok);
-  check('every plate is declared and decodes (16)',
-    art.length === 16 && !missing.length,
+  check('every plate is declared and decodes (25)',
+    art.length === 25 && !missing.length,
     missing.map(a => a.k + ' ' + (a.err || 'failed to load')).join(', '));
 
   // ---- 2. THE WOLF SHOWS THREE DIFFERENT DRAWINGS -------------------------
@@ -75,7 +77,7 @@ const { chromium } = require('playwright');
     return { rest, coil, lunge,
              img: { rest: WOLF_ART.rest.img, coil: WOLF_ART.coil.img, lunge: WOLF_ART.lunge.img } };
   });
-  check('a wolf at rest, coiled and airborne are three different plates',
+  check('a wolf at rest, coiled and lunging are three different strips',
     poses.rest === 'rest' && poses.coil === 'coil' && poses.lunge === 'lunge'
       && new Set(Object.values(poses.img)).size === 3,
     poses.rest + '/' + poses.coil + '/' + poses.lunge);
@@ -86,26 +88,33 @@ const { chromium } = require('playwright');
       const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null);
       im.src = MEDIA_SRC.images[k];
     });
-    const mask = (im) => {
+    // a strip is compared CELL by cell: the frame of the move that carries it
+    const mask = (im, cells, i) => {
       const N = 96, cv = document.createElement('canvas');
       cv.width = N; cv.height = N;
       const x = cv.getContext('2d');
-      x.drawImage(im, 0, 0, N, N);
+      const cw = im.naturalWidth / (cells || 1);
+      x.drawImage(im, cw * (i || 0), 0, cw, im.naturalHeight, 0, 0, N, N);
       const d = x.getImageData(0, 0, N, N).data, m = new Uint8Array(N * N);
       for (let i = 0; i < N * N; i++) m[i] = d[i * 4 + 3] > 40 ? 1 : 0;
       return m;
     };
-    const score = async (a, b) => {
+    const score = async (a, b, na, ia0, nb, ib0) => {
       const ia = await load(a), ib = await load(b);
       if (!ia || !ib) return 1;
-      const ma = mask(ia), mb = mask(ib);
+      const ma = mask(ia, na, ia0), mb = mask(ib, nb, ib0);
       let inter = 0, uni = 0;
       for (let i = 0; i < ma.length; i++) { if (ma[i] & mb[i]) inter++; if (ma[i] | mb[i]) uni++; }
       return uni ? inter / uni : 1;
     };
     return {
-      wolfCoil: await score('wolfRest', 'wolfCoil'),
-      wolfLunge: await score('wolfRest', 'wolfLunge'),
+      wolfCoil: await score('wolfIdle6', 'wolfCoil6', 6, 0, 6, 5),
+      wolfBite: await score('wolfIdle6', 'wolfBite6', 6, 0, 6, 4),
+      wolfCrouch: await score('wolfIdle6', 'wolfCrouch4', 6, 0, 4, 3),
+      wolfLeap: await score('wolfIdle6', 'wolfLeap6', 6, 0, 6, 3),
+      wolfLand: await score('wolfIdle6', 'wolfLanding4', 6, 0, 4, 1),
+      wolfFlinch: await score('wolfIdle6', 'wolfRecoil6', 6, 0, 6, 1),
+      wolfSit: await score('wolfIdle6', 'wolfSit6', 6, 0, 6, 0),
       alphaHowl: await score('alphaRest', 'alphaHowl'),
       alphaLeap: await score('alphaRest', 'alphaLeap'),
       alphaRoar: await score('alphaRest', 'alphaRoar'),
@@ -117,6 +126,48 @@ const { chromium } = require('playwright');
   const tooSame = Object.keys(iou).filter(k => iou[k] > 0.86);
   check('every wind-up differs from rest in silhouette (IoU <= 0.86)',
     !tooSame.length, tooSame.map(k => k + ' ' + iou[k].toFixed(3)).join(', '));
+
+  // ---- 2b. ONE ANIMAL, ONE SIZE, FEET ON THE FLOOR ------------------------
+  // The pack's strips were cut together at one scale (WOLF_ART, WOLF_PX); the
+  // set they replace changed size between tell and strike because each strip
+  // was fitted to its own crop. Measured in hitbox-heights, from the pixels:
+  // the standing body in idle, prowl and pant must agree, and every grounded
+  // strip's paws must sit on the cell's floor line (the cutter's `pad`).
+  const scale = await page.evaluate(async () => {
+    const out = {};
+    for (const pose of ['rest', 'walkStrip', 'runStrip', 'coil', 'lunge', 'crouch', 'windedStrip', 'landStrip', 'recoil', 'sit']) {
+      const A = WOLF_ART[pose];
+      const im = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = MEDIA_SRC.images[A.img]; });
+      if (!im) { out[pose] = null; continue; }
+      const cw = im.naturalWidth / A.cells, ch = im.naturalHeight;
+      const cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = ch;
+      const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
+      const d = x.getImageData(0, 0, cv.width, ch).data;
+      let hs = [], feet = [];
+      for (let c = 0; c < A.cells; c++) {
+        let top = ch, bot = -1;
+        for (let y = 0; y < ch; y++) for (let xx = Math.floor(c * cw); xx < Math.floor((c + 1) * cw); xx++)
+          if (d[(y * cv.width + xx) * 4 + 3] > 128) { if (y < top) top = y; if (y > bot) bot = y; }
+        hs.push((bot - top + 1) / ch * A.k); feet.push((ch - 1 - bot) / ch - A.pad);
+      }
+      out[pose] = { h: hs, feet };
+    }
+    return out;
+  });
+  const stand = ['rest', 'walkStrip'].map(p => scale[p] && Math.max(...scale[p].h));
+  check('the standing wolf is one size in idle and prowl (within 8%)',
+    stand[0] && stand[1] && Math.abs(stand[0] - stand[1]) / stand[0] < 0.08,
+    stand.map(v => v && v.toFixed(2)).join(' / ') + ' hitbox-heights');
+  check('...the same size the old plates drew (2.34 hitbox-heights, within 10%)',
+    stand[0] && Math.abs(stand[0] - 2.34) / 2.34 < 0.10, stand[0] && stand[0].toFixed(2));
+  const sinks = [];
+  for (const p of ['rest', 'walkStrip', 'coil', 'lunge', 'crouch', 'windedStrip', 'recoil', 'sit']) {
+    const f = scale[p]; if (!f) { sinks.push(p + ' missing'); continue; }
+    // one in four cells of a gait may lift a paw clear; the floor is the max
+    const worst = Math.min(...f.feet.map(Math.abs));
+    if (worst > 0.03) sinks.push(p + ' ' + worst.toFixed(3));
+  }
+  check('every grounded strip puts its paws on the floor line (within 3% of a cell)', !sinks.length, sinks.join(', '));
 
   // ---- 3. THE ALPHA IS PLACED, AND IT IS ON THE WAY -----------------------
   const placed = await page.evaluate(() => {

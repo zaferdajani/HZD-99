@@ -5917,6 +5917,25 @@ planted paw must travel backward across the cell by that much over the cycle
 cheetah 2.10 = 42 px). A paw that slides against that number is the moonwalk
 again, in the art.
 
+### 2cc-0. THE PACK, FILMED WHOLE — the owner's new wolf design (2026-10-09)
+
+**FIRED + WIRED 2026-10-09.** Twelve strips, every state the pack has, cut at
+one scale and one floor line from eleven Seedance takes off one green start
+plate: `wolfIdle6` (rest, 2 s breath loop), `wolfProwl8` (walk, distance
+clocked), `wolfGallop6` (run), `wolfCoil6` (the crawler's tell, once over
+coilT), `wolfBite6` (its lunge, once over lungeT), `wolfCrouch4` (the hopper's
+tell), `wolfLeap6` (airborne, by vertical velocity), `wolfLanding4`,
+`wolfRecoil6` (knock-back; its first three cells are the flinch on a hit),
+`wolfPant6` (winded loop), `wolfPurify6` + `wolfSit6` (the tamed pack). Eye
+anchors per cell in `assets/eyes.json`; the infection smoke stays runtime-only.
+Measured by `tests/wolves.cjs` (scale, floor, per-cell silhouette) and
+`tests/infection-eyes.cjs`. §2cc-i and §2cc-iii below are SUPERSEDED for the
+wolf (their files are deleted); they still stand for the cheetah.
+
+**Still the old animal:** THE ALPHA (`alpha*`, `al*` strips) predates this
+design. Its re-fire against `source/beasts/wolf2/green_plate.jpg` is the next
+brief for the pack — same take list, larger frame, purple at runtime.
+
 ### 2cc-i. THE WOLF — `wolfWalk` (8 cells) and `wolfRun` (6 cells)
 
 **FIRED + WIRED 2026-10-09 (code session, owner's order "use Higgsfield for the complete artwork").** `wolf_walk8.webp` (8×192, 62 KB) and `wolf_run6.webp` (6×192, 53 KB), keys `wolfWalk8` / `wolfRun6`, drawn by `drawBeastPlate` as one cell of a real stride on the distance-driven phase; the two-plate pair stays as the fallback. Takes and the uniqueness numbers: `assets/source/README.md`, `beasts/cycles/`.

@@ -40,6 +40,7 @@ const INF_EYE_COL = {
 const INF_EYE_CAP = { low: 90, mid: 170, high: 260, ultra: 320 };
 const INF_EYE_LIFE = 1.5;          // seconds a wisp lives (each gets ±25%)
 const INF_EYE_SPACING = 2.2;       // px of eye travel per particle at the tip
+const INF_EYE_HOLD = 0.1;          // s: a body counts as travelling this long after it last moved
 const INF_EYE_MIN_V = 10;          // px/s: below this the eye is standing still and emits nothing
 const INF_EYE_JUMP = 90;           // px in one step = a teleport, not a motion
 
@@ -213,6 +214,17 @@ function infEyeUpdate(dt) {
     if (!fresh || !cls) { e._eyeP = null; continue; }
     if (!smoke) { e._eyeP = null; continue; }
     const purple = cls === 'purple';
+    // IS THE CREATURE GOING ANYWHERE? Asked of the BODY, not the eye. A filmed
+    // idle steps its eye a few pixels from one cell to the next, all at once,
+    // and one fixed step of that reads as hundreds of px/s — a wolf breathing
+    // in place used to leave a thread of smoke. The body's own travel is the
+    // honest answer; a short hold carries it across the steps between draws.
+    if (e._eyeBX != null) {
+      const bv = Math.hypot(e.x - e._eyeBX, e.y - e._eyeBY);
+      if (bv <= INF_EYE_JUMP && bv / dt >= INF_EYE_MIN_V) e._eyeMv = INF_EYE_HOLD;
+    }
+    e._eyeBX = e.x; e._eyeBY = e.y;
+    e._eyeMv = Math.max(0, (e._eyeMv || 0) - dt);
     // per eye: the last point emitted from, the fraction of a particle owed,
     // and whether that point is real yet (a fresh body starts at its eye)
     if (!e._eyeP) e._eyeP = { x: [0, 0], y: [0, 0], owe: [0, 0], ok: [false, false] };
@@ -227,10 +239,10 @@ function infEyeUpdate(dt) {
         infEyeKillOwner(e);
         px = x; py = y;
       }
-      // particles owed by TRAVEL only. A body that stops lets its plume rise
-      // and thin away and keeps just the glow — breathing and idle sway (a
-      // few px/s) are under the threshold and leave nothing behind.
-      const moving = d <= INF_EYE_JUMP && d / dt >= INF_EYE_MIN_V;
+      // particles owed by TRAVEL only, laid along the EYE's own path. A body
+      // that stops lets its plume rise and thin away and keeps just the glow
+      // — breathing, idle sway and a head that tosses in place leave nothing.
+      const moving = d <= INF_EYE_JUMP && e._eyeMv > 0;
       let owe = moving ? P.owe[k] + d / INF_EYE_SPACING : 0;
       const cnt = Math.min(8, Math.floor(owe));
       owe -= cnt;

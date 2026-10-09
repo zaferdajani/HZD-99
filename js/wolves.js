@@ -113,25 +113,92 @@ const CHEETAH_ART = {
 const WOLF_GAIT = { strideMul: 1.0, pitch: 0.065, runAmp: 2.6, susp: 1.4 };
 const CAT_GAIT = { strideMul: 1.22, pitch: 0.10, runAmp: 3.0, susp: 2.2 };
 
-// THREE PLATES, ONE PER PHASE OF THE ONLY MOVE IT HAS.
-//   k    — how many hitbox-heights the plate occupies on screen
-//   yOff — nudge in hitbox-heights, for a plate whose art sits high in its frame
-// The lunge plate is airborne in its own frame, so it is anchored by the CENTRE
-// while the two grounded plates are anchored by their FEET. Anchoring all three
-// the same way is what put the pounce fifteen pixels into the floor.
+// THE PACK, FILMED WHOLE (2026-10-09 — the owner's new wolf design).
+//
+// Every state is a STRIP, cut from one series of Higgsfield takes that all
+// start from the same plate, at one scale and one floor line. That is the
+// point of cutting them together: the old set mixed a rest plate, a coil
+// plate, an airborne lunge plate and four strips cut separately, each fitted
+// to its own crop, so the animal changed size between its tell and its
+// strike. Here `ch` is the cell height the strip was cut at and WOLF_PX turns
+// it into hitbox-heights, so a standing wolf is 2.34 hitbox-heights tall in
+// every one of them — the same animal the plates drew. `pad` is the margin
+// the cutter left under the shared floor line, so the paws land ON the floor.
+//
+// How each strip is clocked (drawBeastPlate):
+//   loop  — on the sim clock, one pass per `loop` seconds (idle breath, sit)
+//   once  — a ONE-SHOT over the named timer, from its rising edge to zero:
+//           the wind-up plays while the tell runs, the bite while the lunge
+//           does, so the picture and the hitbox can never disagree
+//   air   — by vertical velocity: spring and stretch going up, reach going
+//           down, whatever the arc's height
+// Body animation only: the infected eyes and their smoke are the runtime's
+// (js/infection-eyes.js), anchored per cell through assets/eyes.json.
+const WOLF_PX = 0.0195;
+function wolfStrip(img, cells, ch, o) {
+  return Object.assign({ img, cells, k: ch * WOLF_PX, pad: 4 / ch }, o || {});
+}
 const WOLF_ART = {
-  rest: { img: 'wolfRest', k: 2.35, foot: 1 },
-  walkA: { img: 'wolfWalkA', k: 2.35, foot: 1 },
-  walkB: { img: 'wolfWalkB', k: 2.35, foot: 1 },
-  runA: { img: 'wolfRunA', k: 2.35, foot: 1, walkOf: 'walkA' },
-  runB: { img: 'wolfRunB', k: 2.35, foot: 1, walkOf: 'walkB' },
-  coil: { img: 'wolfCoil', k: 2.20, foot: 1 },
-  lunge: { img: 'wolfLunge', k: 2.15, foot: 0, yOff: -0.22 },
-  walkStrip: { img: 'wolfWalk8', cells: 8, k: 3.87 },
-  runStrip: { img: 'wolfRun6', cells: 6, k: 3.94 },
-  windedStrip: { img: 'wolfWinded6', cells: 6, k: 3.89 },
-  landStrip: { img: 'wolfLand4', cells: 4, k: 3.89 },
+  rest: wolfStrip('wolfIdle6', 6, 132, { loop: 2.0 }),
+  walkStrip: wolfStrip('wolfProwl8', 8, 125),
+  runStrip: wolfStrip('wolfGallop6', 6, 129),
+  coil: wolfStrip('wolfCoil6', 6, 122, { once: 'coilT' }),
+  lunge: wolfStrip('wolfBite6', 6, 116, { once: 'lungeT' }),
+  crouch: wolfStrip('wolfCrouch4', 4, 97, { once: 'crouchT' }),
+  leap: wolfStrip('wolfLeap6', 6, 152, { air: 1 }),
+  windedStrip: wolfStrip('wolfPant6', 6, 108),
+  landStrip: wolfStrip('wolfLanding4', 4, 146),
+  // one take, two uses: a knock-back plays the whole stagger, a hit that does
+  // not move it plays only the flinch at its head (the first three cells)
+  recoil: wolfStrip('wolfRecoil6', 6, 153, { once: 'kbT' }),
+  hurt: wolfStrip('wolfRecoil6', 6, 153, { once: 'hurtT', upto: 3 }),
+  // the Alpha's yield turns the pack: the seams and eyes go cyan and it sits
+  purify: wolfStrip('wolfPurify6', 6, 127, { raw: 1 }),
+  sit: wolfStrip('wolfSit6', 6, 132, { loop: 1.0, raw: 1 }),
 };
+// a pose the cheetah has no drawing for borrows the nearest one it has
+const BEAST_POSE_FALLBACK = { leap: 'lunge', crouch: 'coil' };
+// how long the purify strip takes, seconds
+const WOLF_PURIFY_T = 1.1;
+// THE TIMER'S RISING EDGE. A one-shot needs to know how long its timer
+// started at, and the timers are set in a dozen places with a dozen lengths
+// (TELL_FAST, TELL_SWIPE, the iq-scaled lunge...). Rather than thread a
+// "duration" through every one, the draw remembers the largest value it has
+// seen since the timer was last at zero — a timer that jumps UP was re-armed.
+function beastOnce(e, key) {
+  const T = e[key] || 0, k0 = '_o0' + key, kp = '_op' + key;
+  if (T <= 0) { e[kp] = 0; return 0; }
+  if (!e[k0] || T > (e[kp] || 0) + 1e-4) e[k0] = T;
+  e[kp] = T;
+  return clamp(1 - T / e[k0], 0, 0.999);
+}
+// A FRIENDLY WOLF IS VISIBLY A DIFFERENT ANIMAL, from across a room: the red
+// seams and optic of every strip are recoloured cyan once per sheet (the
+// purify take shows the same change happening, so the two agree). Cached; a
+// sheet that cannot be read back is drawn as it is.
+const TAME_ART = {};
+function tameArt(key, src) {
+  if (TAME_ART[key] !== undefined) return TAME_ART[key];
+  const w = src && (src.naturalWidth || src.width), h = src && (src.naturalHeight || src.height);
+  if (!w) return src;
+  let out = src;
+  try {
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const x = cv.getContext('2d'); x.drawImage(src, 0, 0);
+    const id = x.getImageData(0, 0, w, h), d = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      if (d[i + 3] && r > 80 && r > g * 1.7 && r > b * 1.5) {
+        d[i] = r * 0.22; d[i + 1] = Math.min(255, r * 0.86); d[i + 2] = Math.min(255, r * 1.05);
+      }
+    }
+    x.putImageData(id, 0, 0);
+    cv.naturalWidth = w; cv.naturalHeight = h;
+    out = cv;
+  } catch (err) { out = src; }
+  TAME_ART[key] = out;
+  return out;
+}
 // ---------------------------------------------------------------------------
 // IT WALKS. IT DOES NOT GLIDE.
 //
@@ -182,7 +249,7 @@ const AIR_POSE_T = 0.06;
 function beastAirborne(e) {
   return e.on === false && ((e.airT || 0) > AIR_POSE_T || (e.vy || 0) < -60);
 }
-function wolfPose(e) {
+function wolfPose(e, ART, tame) {
   // how far it has really moved since the last frame, whatever moved it —
   // accumulated in HALF-STEPS of the current stride, so a wolf that breaks
   // into a run keeps its phase instead of snapping to a new foot. Counted
@@ -195,8 +262,14 @@ function wolfPose(e) {
   const stride = run ? STRIDE_RUN * (e._strideMul || 1) : STRIDE;
   if (e.on !== false) e._ph = (e._ph || 0) + Math.abs(e.x - px) / stride;
   e._lastX = e.x;
-  if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0 || beastAirborne(e)) return 'lunge';
-  if ((e.coilT || 0) > 0 || (e.crouchT || 0) > 0) return 'coil';
+  // the purify plays through whatever it was doing when the pack turned
+  if (tame && e._pur0 != null && (e.anim || 0) - e._pur0 < WOLF_PURIFY_T && ART && ART.purify) return 'purify';
+  if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0) return 'lunge';
+  // a body in the air is LEAPING — the hopper's pounce, a wolf off a ledge —
+  // and only an animal with a leap drawing of its own says so
+  if (beastAirborne(e)) return ART && ART.leap ? 'leap' : 'lunge';
+  if ((e.coilT || 0) > 0) return 'coil';
+  if ((e.crouchT || 0) > 0) return ART && ART.crouch ? 'crouch' : 'coil';
   // THE RECOVERIES — each attack's opening wears its own picture now, so the
   // punish window is something she SEES rather than a gap she has to know is
   // there: the crawler's lunge leaves it WINDED (head down, flanks heaving),
@@ -205,7 +278,12 @@ function wolfPose(e) {
   // plates come off THE FIRING LIST (ART_QUEUE §2cc).
   if ((e.windedT || 0) > 0) return 'winded';
   if ((e.landT || 0) > 0) return 'land';
-  if (Math.abs(e.vx || 0) < 6) return 'rest';       // standing still stands still
+  // KNOCKED BACK, it staggers; HIT where it stands, it flinches. Both after
+  // the tells and openings on purpose: a hit during a wind-up must not hide
+  // the wind-up, which is the one picture the player is reading.
+  if (ART && ART.recoil && (e.kbT || 0) > 0) return 'recoil';
+  if (ART && ART.hurt && (e.hurtT || 0) > 0) return 'hurt';
+  if (Math.abs(e.vx || 0) < 6) return tame && ART && ART.sit ? 'sit' : 'rest';   // standing still stands still
   // contact, passing, contact (mirrored by the other pair), passing — four
   // beats off two drawings, which is what a two-frame cycle is. The run wants
   // its own pair (ART_QUEUE §2q); until those plates land the walk pair
@@ -227,10 +305,14 @@ function drawCheetah(c, e) { return drawBeastPlate(c, e, CHEETAH_ART, false); }
 function drawBeastPlate(c, e, ART, tame) {
   const GAIT = ART === CHEETAH_ART ? CAT_GAIT : WOLF_GAIT;
   e._strideMul = GAIT.strideMul;
-  const pose = wolfPose(e);
+  // the moment the pack turns, a wolf that was seen wild plays the purify
+  // once before it sits; one first met already tame simply is tame
+  if (tame && e._wild && e._pur0 == null) e._pur0 = e.anim || 0;
+  if (!tame) e._wild = 1;
+  const pose = wolfPose(e, ART, tame);
   // the run pair falls back to the walk pair until its plates land (§2q) —
   // motion first, art when the FIRING LIST reaches it
-  let A = ART[pose] || ART.rest;
+  let A = ART[pose] || ART[BEAST_POSE_FALLBACK[pose]] || ART.rest;
   if (A.walkOf && !(typeof mediaHas === 'function' && mediaHas(A.img))) A = ART[A.walkOf];
   if (typeof mediaHas === 'function' && !mediaHas(A.img) && typeof mediaFetch === 'function') {
     mediaFetch(A.img);
@@ -269,11 +351,22 @@ function drawBeastPlate(c, e, ART, tame) {
       A = SA;
     } else if (typeof mediaFetch === 'function') mediaFetch(SA.img);
   }
+  // A POSE THAT IS ITS OWN STRIP (the filmed pack): which cell, by its clock
+  if (cell < 0 && A.cells) {
+    if (typeof mediaHas === 'function' && !mediaHas(A.img) && A !== ART.rest) A = ART.rest;
+    let u = 0;
+    if (A.loop) u = (((e.anim || 0) / A.loop) % 1 + 1) % 1;
+    else if (A.once) u = beastOnce(e, A.once) * (A.upto || A.cells) / A.cells;
+    else if (A.air) u = clamp(((e.vy || 0) + 520) / 1040, 0, 0.999);
+    else if (A === ART.purify) u = clamp(((e.anim || 0) - (e._pur0 || 0)) / WOLF_PURIFY_T, 0, 0.999);
+    cell = Math.min(A.cells - 1, Math.floor(u * A.cells));
+  }
   const im0 = MEDIA_IMG[A.img];
   if (!im0 || !im0.naturalWidth) return false;
   // the pack takes the pop grade (media.js): a predator that blends into the
   // meadow is an ambush, and the owner reported exactly that
-  const im = (typeof popArt === 'function' && popArt(A.img)) || im0;
+  let im = (typeof popArt === 'function' && popArt(A.img)) || im0;
+  if (tame && !A.raw) im = tameArt(A.img, im);
 
   const cx = e.x + e.w / 2, footY = e.y + e.h;
   const cellW = cell >= 0 ? im.naturalWidth / A.cells : im.naturalWidth;
@@ -303,7 +396,9 @@ function drawBeastPlate(c, e, ART, tame) {
     }
   }
   // grounded plates hang off the floor line; the airborne one hangs off centre
-  const yc = (A.foot || cell >= 0 ? footY - dh / 2 + e.h * (A.yOff || 0)
+  // ...and a filmed cell sits its paws on the floor through the margin the
+  // cutter left beneath them (`pad`), except the leap, which is in the air
+  const yc = (!A.air && (A.foot || cell >= 0) ? footY - dh / 2 + dh * (A.pad || 0) + e.h * (A.yOff || 0)
                      : e.y + e.h / 2 + dh * (A.yOff || 0)) + gait;
 
   c.save();
@@ -359,20 +454,6 @@ function drawBeastPlate(c, e, ART, tame) {
   }
   c.restore();
 
-  // A TAMED WOLF IS VISIBLY A DIFFERENT ANIMAL, and it has to be readable from
-  // across a room or the player will keep flinching at it. The plates stay
-  // (there is no second set of art for forty friendly wolves) and the red optic
-  // is overpainted cyan, which is the one pixel the eye actually reads.
-  if (tame) {
-    const nose = cx + (dir > 0 ? 1 : -1) * dw * 0.30;
-    const eyeY = yc - dh * 0.12;
-    c.save(); c.globalCompositeOperation = 'lighter';
-    c.globalAlpha = 0.55 + Math.sin((e.anim || 0) * 3) * 0.12;
-    const g3 = c.createRadialGradient(nose, eyeY, 0, nose, eyeY, dh * 0.20);
-    g3.addColorStop(0, '#9ffcff'); g3.addColorStop(1, 'rgba(60,220,255,0)');
-    c.fillStyle = g3; c.beginPath(); c.arc(nose, eyeY, dh * 0.20, 0, 7); c.fill();
-    c.restore();
-  }
   return true;
 }
 

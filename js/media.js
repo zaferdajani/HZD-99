@@ -93,22 +93,26 @@ const MEDIA_SRC = {
     eyeLatticeW: 'assets/characters/eye/lattice_w.webp',
     eyeLens: 'assets/characters/eye/lens.webp',
     eyeLensW: 'assets/characters/eye/lens_w.webp',
-    // THE PACK. The first thing in the game that is ALIVE rather than
-    // industrial — three plates for the wolf and three for the one that leads
-    // it, keyed off black by tools/blackkey.cjs so each has real alpha.
-    //
-    // Three and not two: a wolf's whole read is coil-then-pounce, and the
-    // pounce happens in the air where a grounded plate cannot go. Rest, coil,
-    // lunge — one per phase of the only move it has.
-    wolfRest: 'assets/characters/beasts/wolf.webp',
-    // THE PACK WALKS AND RUNS ON FILMED CYCLES (ART_QUEUE §2cc): one stride per
-    // strip, cut from a Higgsfield take with every cell distinct (measured).
-    wolfWalk8: 'assets/characters/beasts/wolf_walk8.webp',
-    wolfRun6: 'assets/characters/beasts/wolf_run6.webp',
+    // THE PACK, FILMED WHOLE (2026-10-09, the owner's new wolf design). Every
+    // state is a strip cut from one Higgsfield take series off ONE start plate,
+    // at ONE scale and ONE floor line (scratch tools2/fixcut.py), so a wolf
+    // that goes from prowl to coil to bite to winded never changes size or
+    // sinks. The older plates (wolf.webp, walk/run pairs, coil, lunge, the
+    // first walk8/run6/winded6/land4) were a different animal and are deleted.
+    wolfIdle6: 'assets/characters/beasts/wolf_idle6.webp',
+    wolfProwl8: 'assets/characters/beasts/wolf_prowl8.webp',
+    wolfGallop6: 'assets/characters/beasts/wolf_gallop6.webp',
+    wolfCoil6: 'assets/characters/beasts/wolf_coil6.webp',
+    wolfBite6: 'assets/characters/beasts/wolf_bite6.webp',
+    wolfCrouch4: 'assets/characters/beasts/wolf_crouch4.webp',
+    wolfLeap6: 'assets/characters/beasts/wolf_leap6.webp',
+    wolfLanding4: 'assets/characters/beasts/wolf_landing4.webp',
+    wolfRecoil6: 'assets/characters/beasts/wolf_recoil6.webp',
+    wolfPant6: 'assets/characters/beasts/wolf_pant6.webp',
+    wolfPurify6: 'assets/characters/beasts/wolf_purify6.webp',
+    wolfSit6: 'assets/characters/beasts/wolf_sit6.webp',
     cheetahWalk8: 'assets/characters/beasts/cheetah_walk8.webp',
     cheetahRun6: 'assets/characters/beasts/cheetah_run6.webp',
-    wolfWinded6: 'assets/characters/beasts/wolf_winded6.webp',
-    wolfLand4: 'assets/characters/beasts/wolf_land4.webp',
     cheetahWinded6: 'assets/characters/beasts/cheetah_winded6.webp',
     cheetahLand4: 'assets/characters/beasts/cheetah_land4.webp',
     // THE ROSTER'S WALKS AND THE MINI'S FLIGHT (ART_QUEUE §2cc-iv/v/vi): filmed
@@ -118,12 +122,6 @@ const MEDIA_SRC = {
     talonMiniCruise8: 'assets/characters/talon/cruise8.webp',
     talonMiniChase6: 'assets/characters/talon/chase6.webp',
     talonMiniPerch: 'assets/characters/talon/perch.webp',
-    // ...and the two WALK frames, because a plate that slides is a wolf on
-    // treads. See wolfPose(): the cycle is driven by ground travelled.
-    wolfWalkA: 'assets/characters/beasts/wolf_walka.webp',
-    wolfWalkB: 'assets/characters/beasts/wolf_walkb.webp',
-    wolfCoil: 'assets/characters/beasts/wolf_coil.webp',
-    wolfLunge: 'assets/characters/beasts/wolf_lunge.webp',
     // NINE PLATES FOR THE ALPHA, one per state, because it has five skills and
     // two of them have their own recovery. A boss with five moves sharing two
     // drawings is a boss with two moves as far as the player's eye is concerned.
@@ -227,7 +225,7 @@ const MEDIA_SRC = {
     // grayscale treatment the other dark units get.
     // ===== THE ART SESSION'S 2026-08-16 BATCH ==========================
     // Every draw site below was already written and waiting on its key —
-    // drawTinkerForge fetches forgeFront, wolves.js resolves wolfRunA, and so
+    // drawTinkerForge fetches forgeFront, wolves.js resolves cheetahRunA, and so
     // on — so these entries are what switch the authored art on. Lazy like
     // everything else; each renderer keeps its procedural fallback for the
     // frames before the file lands.
@@ -280,10 +278,8 @@ const MEDIA_SRC = {
     talonhostStrike: 'assets/characters/guardians/talonhost_strike.webp',
     prismStalk: 'assets/characters/guardians/prism_stalk.webp',
     prismCoil: 'assets/characters/guardians/prism_coil.webp',
-    // §2q the beast RUN pairs — reach and gather. js/wolves.js already
+    // §2q the cheetah RUN pair — reach and gather. js/wolves.js already
     // resolves these names and falls back to the walk pair without them.
-    wolfRunA: 'assets/characters/beasts/wolf_runa.webp',
-    wolfRunB: 'assets/characters/beasts/wolf_runb.webp',
     cheetahRunA: 'assets/characters/beasts/cheetah_runa.webp',
     cheetahRunB: 'assets/characters/beasts/cheetah_runb.webp',
     // NPC DIALOGUE BUSTS, cut from npc_6yaw.png by tools/npcbusts.cjs. They

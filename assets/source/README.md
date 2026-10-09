@@ -26,7 +26,7 @@ look at to answer "did that actually happen".
 | `hero/` | HZD-99 herself, every plate locked to `ref/hzd99_canon.jpg` | 26 |
 | `crystal/` | The purifier crystal: the weapon, the grips, the four slash light-sheets | 15 |
 | `eye/` | The Eye's five constructs, rest + wound-up | 10 |
-| `beasts/` | The wolf line, the Alpha's nine states, and the cheetah line; `beasts/cycles/` the filmed walk, run, winded and landing takes | 26 |
+| `beasts/` | The Alpha's nine states and the cheetah line; `beasts/cycles/` the cheetah's filmed takes; `beasts/wolf2/` THE PACK FILMED WHOLE (2026-10-09) — start plates, eleven take sheets, the cut spec and the strip sheet | 26 |
 | `roster/cycles/`, `talon/`, `bat/cycles/`, `sage/cycles/` | THE ROSTER WALKS (ART_QUEUE §2cc-iv…vii): the guard, blob, flying minion, bat and sage — green start plates, takes, the perch and exhale plates | 14 |
 | `flora/` | Alien plant life, two species per kingdom | 12 |
 | `gear/` | Thrust boots and the save pod, dormant + active; Ratchet's repair board, its cell, the wake-room lamp | 7 |
@@ -72,6 +72,25 @@ wolf walk ≥ 0.165, wolf run ≥ 0.242, cheetah walk ≥ 0.270, cheetah run ≥
 wolf run's first cut found TWO strides (period 1.71 s, two cells 1.3% apart — the
 same pose twice) and was re-cut to one (0.54 s). Files: `*_green_start.jpg` (the
 start frames), `*_take.jpg` (each take as a contact sheet).
+
+`beasts/wolf2/` replaces the whole earlier wolf line (its plates, its walk/run
+pairs and its first strips were deleted with it — a different animal from the
+design the owner approved on 2026-10-09). The design reference
+(`hf_20261009_112803_0980f6e8`) was re-plated onto chroma green with GPT Image
+2.5 (jobs 3531e0bb full size, 29486c59 the start plate), then filmed IN PLACE
+with Seedance 2.5 — 4 s, 720p, locked camera, "no smoke, no particles", eleven
+takes: idle 4acb0201, prowl 08f0c6e8, run db65ada5, wind-up 1e2fb3dd, bite
+0f2b46ec, leap 758efc7b, land d9186ac3, recoil 2cdade02, hurt 34794e00,
+purified a6620b9c (the motion preview `115137_a515f829` was reference only:
+its smoke is baked in). Every strip was cut by `tools/fixcut.py` from
+`cut_spec.json` at ONE source→cell scale (0.3) and ONE floor line (source y
+616), so the animal never changes size between states. What the takes got
+wrong and the cut avoids: the land take fell flat in a cloud of dust and the
+bite take flashed at the muzzle, so the landing is the leap take's own
+touchdown and the bite skips the flash frames; the hurt take was hit by a
+visible projectile, so the flinch is the recoil take's rear-back; the winded
+pant is the recoil take's head-down tail (0.5 s period). Cycles measured
+distinct: prowl ≥ 0.239, gallop ≥ 0.432 (silhouette XOR / union).
 
 The rest of §2cc followed the same day, the same way, and the same test: no strip
 ships with two cells that are the same picture. The pack's OPENINGS — winded (6, a

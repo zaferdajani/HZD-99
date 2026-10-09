@@ -19,8 +19,10 @@ const P = { col: 'red', rule: 'front' };
 const strips = (keys, o) => keys.map(k => Object.assign({ key: k }, P, o || {}));
 module.exports = [
   // ---- the pack ------------------------------------------------------------
-  ...strips(['wolfRest', 'wolfWalkA', 'wolfWalkB', 'wolfCoil', 'wolfLunge', 'wolfRunA', 'wolfRunB',
-             'wolfWalk8', 'wolfRun6', 'wolfWinded6', 'wolfLand4'], { region: [0, 0, 0.45, 0.6] }),
+  // the filmed pack (2026-10-09): every hostile state. The purify and sit
+  // strips are the TAMED wolf, which has no infection and so no anchor.
+  ...strips(['wolfIdle6', 'wolfProwl8', 'wolfGallop6', 'wolfCoil6', 'wolfBite6', 'wolfCrouch4',
+             'wolfLeap6', 'wolfLanding4', 'wolfRecoil6', 'wolfPant6'], { region: [0, 0, 0.45, 0.6] }),
   // cheetahWarn: crouched so low the forepaw sits nearer the snout tip than
   // the eye does — placed from a grid render; cheetahRun (silver, unused by
   // the drawing code) has no lit eye and is placed the same way
