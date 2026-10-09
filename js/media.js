@@ -64,6 +64,10 @@ const MEDIA_SRC = {
     chRing: 'assets/characters/chime/ring.webp',
     chNote: 'assets/characters/chime/note.webp',
     chFall: 'assets/characters/chime/fall.webp',
+    // the opening's two objects (js/opening.js opArt): Servo's spare cell and
+    // the handful of scrap Ratchet pays for the repair
+    spareCell: 'assets/characters/gear/spare_cell.webp',
+    scrapPile: 'assets/characters/gear/scrap_pile.webp',
     eyeChime: 'assets/characters/eye/chime.webp',
     eyeChimeW: 'assets/characters/eye/chime_w.webp',
     eyeCarrier: 'assets/characters/eye/carrier.webp',

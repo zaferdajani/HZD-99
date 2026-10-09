@@ -430,47 +430,16 @@ function opDrumSpin(now) {
 
 // ---------------------------------------------------------------------------
 // THE PICTURES on the opening's cards. Ratchet's battery uses its authored
-// art (repair_battery.webp, the board's own). The spare cell and the scrap
-// have no fired plate yet — these are wiring stand-ins in the game's own
-// style, drawn once to a canvas, until the art session fires them
-// (subject list in the opening workstream's report).
-const OP_ART = {};
+// art (repair_battery.webp, the board's own).
+// THE OPENING'S OBJECTS ARE AUTHORED (Higgsfield, 2026-10-09; sources in
+// assets/source/gear/): the spare cell is squat steel with a GOLD charge window
+// — nothing like Ratchet's tall brass battery — and the scrap is a warm heap of
+// salvage. The card names its image by key and draws it the moment it lands.
+const OP_ART = { cell: 'spareCell', scrap: 'scrapPile' };
 function opArt(kind) {
-  const key = 'opArt_' + kind;
-  if (typeof MEDIA_IMG === 'undefined') return null;
-  if (MEDIA_IMG[key]) return key;
-  let cv2;
-  try { cv2 = document.createElement('canvas'); } catch (e) { return null; }
-  cv2.width = 96; cv2.height = 96;
-  const x = cv2.getContext('2d');
-  if (kind === 'cell') {
-    // a squat steel cell with a GOLD charge window and a bolt — the colour
-    // of the ⚡ the world puts over a machine a cell can wake, and nothing like
-    // the tall brass, cyan-glassed battery that is Ratchet's own
-    x.fillStyle = '#2b3946'; x.beginPath(); x.ellipse(48, 22, 20, 7, 0, 0, 7); x.fill();
-    const g = x.createLinearGradient(28, 0, 68, 0);
-    g.addColorStop(0, '#3c4c5a'); g.addColorStop(0.5, '#8aa0b0'); g.addColorStop(1, '#34424e');
-    x.fillStyle = g; x.fillRect(28, 22, 40, 52);
-    x.fillStyle = '#2b3946'; x.beginPath(); x.ellipse(48, 74, 20, 7, 0, 0, 7); x.fill();
-    x.fillStyle = '#ffd76a'; x.shadowColor = '#ffe9a8'; x.shadowBlur = 12; x.fillRect(31, 36, 34, 20);
-    x.shadowBlur = 0; x.fillStyle = '#3a2706';
-    x.beginPath(); x.moveTo(50, 38); x.lineTo(41, 48); x.lineTo(48, 48); x.lineTo(45, 55); x.lineTo(56, 44); x.lineTo(49, 44); x.closePath(); x.fill();
-    x.fillStyle = '#c9d6df'; x.fillRect(42, 12, 12, 7);
-  } else {
-    // a handful of scrap: bent plate, a nut, a gear tooth — gold, like the purse
-    const bits = [[34, 58, 0.4, 18], [58, 62, -0.5, 14], [46, 40, 0.9, 12], [64, 42, 0.2, 10], [30, 36, -0.8, 9]];
-    for (const [bx, by, a, r] of bits) {
-      x.save(); x.translate(bx, by); x.rotate(a);
-      x.fillStyle = '#b8862e'; x.strokeStyle = '#ffe08a'; x.lineWidth = 2;
-      x.beginPath();
-      for (let i = 0; i < 6; i++) { const q = i / 6 * Math.PI * 2; x.lineTo(Math.cos(q) * r, Math.sin(q) * r * 0.8); }
-      x.closePath(); x.fill(); x.stroke();
-      x.fillStyle = '#3a2a10'; x.beginPath(); x.arc(0, 0, r * 0.3, 0, 7); x.fill();
-      x.restore();
-    }
-  }
-  cv2.naturalWidth = cv2.width; cv2.naturalHeight = cv2.height;
-  MEDIA_IMG[key] = cv2;
+  const key = OP_ART[kind];
+  if (!key) return null;
+  if (typeof mediaFetch === 'function') mediaFetch(key, 1);
   return key;
 }
 // THE PACK'S CARD MOVES: hurt, mend, charge, burst — the two verbs it wires,
