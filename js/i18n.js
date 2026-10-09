@@ -2034,7 +2034,22 @@ const STORY_ORDER_TEXT = {
     intro2: 'Потом злой робот похитил песню Матери… и машина за машиной ответили.',
   },
 };
+// TEXT LAYERS: chapter-one workstreams register their strings here from their
+// own files (js/text-*.js) — { robo: true, en: {...}, ar: {...}, tr: {...},
+// zh: {...}, ru: {...} } — so parallel work never edits the same table. A
+// layer outranks everything below it; `robo` limits it to the robot world.
+const TEXT_LAYERS = [];
+function textLayerGet(k) {
+  for (const L of TEXT_LAYERS) {
+    if (!L.en || L.en[k] == null) continue;
+    if (L.robo && typeof isHero === 'function' && isHero()) continue;
+    return (L[LANG] && L[LANG][k] != null) ? L[LANG][k] : L.en[k];
+  }
+  return null;
+}
 function t(k) {
+  const lay = textLayerGet(k);
+  if (lay != null) return lay;
   // The robot world's ordered story outranks every older layer: each of its
   // keys is complete in all five languages (tests/story-order.cjs checks).
   if (typeof isHero === 'function' && !isHero() && STORY_ORDER_TEXT.en[k] != null) return (STORY_ORDER_TEXT[LANG] || STORY_ORDER_TEXT.en)[k];
