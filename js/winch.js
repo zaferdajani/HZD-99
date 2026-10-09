@@ -47,6 +47,15 @@ class YardWinch extends Enemy {
       this.phase='safe'; return;
     }
     if(player.dead||G.state!=='PLAY')return;
+    // CALM IS JAMMED, NOT SWINGING. While the opening teaches (updateTutor
+    // keeps it calm) it is the strike and burst lessons' target: the arm hangs
+    // across the road and judders against its own jam — it reads as stuck
+    // machinery, and it never sweeps a harmless arm through her body.
+    if(this.calm) {
+      this.phase='idle';this.phaseT=0;this.sweepHit=false;
+      this.armAngle=-0.25+0.035*Math.sin(this.anim*9)*Math.max(0,Math.sin(this.anim*1.3));
+      return;
+    }
     this.phaseT+=dt;
     if(this.phase==='idle') {
       this.armAngle=-0.25;
@@ -77,6 +86,11 @@ class YardWinch extends Enemy {
   }
   die() {
     if(this.disabled||this.rescued||this.dead)return;
+    // JAMMED, NOT BROKEN, while the opening teaches: claws dent it and it holds
+    // on one point — the Volt Burst is what stops it (js/opening.js sets
+    // burstOK on the release that lands). Without this a player still mashing
+    // the strike lesson broke the burst lesson's target before it began.
+    if(this.calm&&!this.burstOK&&typeof opTeaching==='function'&&opTeaching()){this.hp=Math.max(1,this.hp);return;}
     this.disabled=true;this.motorEnabled=false;this.hp=1;this.vx=this.vy=0;this.cleanseT=0;
     this.phase='disabled';
     const states=G.save.rescues||(G.save.rescues={});

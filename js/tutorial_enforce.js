@@ -46,8 +46,10 @@ function tutorialReady(p) {
   if (!p || !player || !TUTORIAL_DISCRETE.has(p.action)) return false;
   if (p.action === 'JUMP') return tutJumpAtObstacle();
   if (p.action === 'ATK') {
-    const e = (G.enemies || []).find(q => q && !q.dead && q.hp > 0);
-    return !!e && Math.abs(e.x + e.w/2 - player.x - player.w/2) <= 68
+    const e = (G.enemies || []).find(q => q && !q.dead && !q.disabled && q.hp > 0);
+    // in reach of the BODY, not its centre: the yard winch is 120 px wide,
+    // and standing against its housing is standing in reach of it
+    return !!e && Math.abs(e.x + e.w/2 - player.x - player.w/2) <= Math.max(68, e.w / 2 + 34)
       && Math.abs(e.y + e.h/2 - player.y - player.h/2) <= 58;
   }
   if (p.action === 'UP') {
@@ -75,7 +77,6 @@ function tutorialContext() {
 function tutorialRelease() {
   for (const [e, saved] of tutorialFrozen) {
     if (e.update === saved.frozenUpdate) e.update = saved.update;
-    // Do not erase knockback that an accepted strike has just applied.
     if (e.vx === 0) e.vx = saved.vx;
     if (e.vy === 0) e.vy = saved.vy;
   }
@@ -83,25 +84,26 @@ function tutorialRelease() {
   G.tutorialLock = null;
   G.walkthroughLock = null; G.tutHardLock = null; // retire old transient state
 }
+// THE ONE HOLD LEFT IS THE JUMP (owner, 2026-10-09: "fix the input enforcer
+// so it never blocks the action being taught next or freezes her
+// pointlessly"). The beam in W2 is walk-up height, so a player who is not held
+// at it walks over it and never presses jump — the lesson IS standing at the
+// obstacle with the jump being the way on. Every other lesson leaves her free
+// to move: she can walk off and come back, and the enemies are not frozen
+// mid-swing any more — the waking floor's one machine is calm for the whole
+// walk instead (updateTutor), which is the same safety without a statue.
 function tutorialTick() {
   const ctx = tutorialContext(), p = ctx.prompt, s = ctx.step;
-  if (!s || !p || !ctx.ready || p.action === 'MOVE') { tutorialRelease(); return; }
+  if (!s || !p || !ctx.ready || p.action !== 'JUMP') { tutorialRelease(); return; }
   const L = G.tutorialLock;
   if (!L || L.id !== s.id || L.room !== G.roomId || L.action !== p.action) {
     tutorialRelease();
     G.tutorialLock = { id:s.id, room:G.roomId, action:p.action, active:true };
   }
-  // No player.x pin and no input-array clearing. The instruction filters
-  // unrelated controls, not the physical input edge it is trying to teach.
   player.vx = 0;
-  if (s.id === 'jump') G.tut.jumpShown = true;
-  for (const e of (G.enemies || [])) {
-    if (!e || e.dead || tutorialFrozen.has(e)) continue;
-    const frozenUpdate = function() {};
-    tutorialFrozen.set(e, { update:e.update, frozenUpdate, vx:e.vx, vy:e.vy });
-    e.update = frozenUpdate; e.vx = 0; e.vy = 0;
-  }
+  G.tut.jumpShown = true;
 }
+const TUTORIAL_VERBS = ['ATK', 'INT', 'HEAL', 'SKILL'];
 function tutorialAllows(action) {
   // Menus/dialogue own their controls. A gameplay lesson cannot block buying,
   // choosing a skill, leaving a shop, pausing, or skipping a story film.
@@ -109,18 +111,28 @@ function tutorialAllows(action) {
       || G.cut || G.gateWalk || G.wake) return true;
   const ctx = tutorialContext();
   if (!ctx.step) return true;
-  if (ctx.ready && ctx.prompt) return action === ctx.prompt.action;
-  // The acknowledgement beat releases navigation immediately. A jump that
-  // just succeeded must be steerable in the air, not pinned for 0.7 seconds.
-  if (TUTORIAL_NAV.has(action)) {
-    if (ctx.step.id === 'move') return action === 'LEFT' || action === 'RIGHT';
-    if (action === 'UP' || action === 'DOWN') return false;
+  const p = ctx.prompt, i = G.tut.i;
+  // At the obstacle, the jump is the way on (tutorialTick).
+  if (ctx.ready && p && p.action === 'JUMP') return action === 'JUMP';
+  // The control being taught always answers when she is where it works.
+  if (ctx.ready && p && action === p.action) return true;
+  // Walking and jumping are never taken away: they are the first two things
+  // anyone tries, and a player who wants to look around is not breaking the
+  // lesson. DOWN is a crouch/drop and is free once the claw is taught.
+  if (action === 'LEFT' || action === 'RIGHT' || action === 'JUMP') return true;
+  if (action === 'DOWN') return i >= TUT_STEPS.findIndex(q => q.id === 'atk');
+  // UP walks through a door: the one the step points at, or — backtracking
+  // stays voluntary — any door she is actually standing at.
+  if (action === 'UP') return !!(typeof gateHere === 'function' && player && player.on && gateHere());
+  // Travel never grants untaught powers, and while she is being walked to a
+  // target the verbs wait — one instruction, one thing to do.
+  const need = TUT_UNLOCK[action];
+  if (need) {
+    if (i < TUT_STEPS.findIndex(q => q.id === need)) return false;
+    if (TUTORIAL_VERBS.includes(action) && p && (p.action === 'MOVE' || p.action === 'UP')) return false;
+    if (TUTORIAL_VERBS.includes(action) && p && ctx.ready && action !== p.action) return false;
     return true;
   }
-  // Travel never grants untaught powers. UI navigation outside PLAY is above.
-  const need = TUT_UNLOCK[action];
-  if (need) return G.tut.i >= TUT_STEPS.findIndex(q => q.id === need)
-    && !(ctx.prompt && ctx.prompt.action === 'MOVE' && ['ATK','INT','HEAL','SKILL'].includes(action));
   return action === 'MAP' || action === 'OK';
 }
 // Retain the public diagnostic interface used by release tools, without

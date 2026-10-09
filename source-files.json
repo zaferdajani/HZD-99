@@ -12,6 +12,7 @@
   "text-manhwa",
   "text-progress",
   "text-text",
+  "text-opening",
   "reveal",
   "weapons",
   "gear",
@@ -49,6 +50,7 @@
   "story-opening",
   "panels",
   "progress",
+  "opening",
   "comics",
   "boot"
 ]

@@ -507,30 +507,26 @@ const ROOMS = {
       rect(g, 57, 0, 59, 16, '#');
     } },
   A0: { zone: 'A', sky: 1, w: 64, h: 17, exits: { R: 'A1' },
-    // The waking floor teaches the whole loop, not just the verbs: the machine
-    // is what she scratches, the trader is what the scrap it drops is FOR, and
-    // the node is where the thinking she is about to need comes from.
-    // Ratchet is not standing in the weather any more — his BOOTH stands at
-    // tile 26 (the depth door in GATE_ROOM) and he rests inside it (A0B).
-    // THE NODE IS NOT THE TRADER'S FURNITURE (owner report #7). It stood at
-    // tile 30, four tiles from the booth at 26 — close enough that it read as
-    // part of his pitch rather than as a thing of its own. It stands at 11 now,
-    // most of a screen west of him: the first landmark she passes walking in
-    // from the gate, and a separate destination from the shop.
+    // THE WAKING FLOOR, IN THE ORDER IT IS TAUGHT (owner, 2026-10-09: "a
+    // clear, forward-moving tutorial"). She comes through the gates at the
+    // west end and everything the opening asks of her stands ahead of her, in
+    // order, along the one road east — nothing behind her, nothing to retrace:
     //
-    // It could not leave A0 entirely, and that is a rule of the room rather
-    // than a preference: TUT_DOOR.A0 is 'go', so the fence at A0's east edge
-    // opens only on the LAST lesson, and the `node` lesson before it is done
-    // when iq >= 10 — which needs this node solved. Put it in A1 and the
-    // tutorial fences her into A0 with nothing left to solve. Moving it out of
-    // the room means extending the tutorial into A1, whose crawler and guard
-    // are the game's first real fight; that is a design call, not a wiring one.
-    // ...and the two TEACHING SECRETS (plan §5 fix 1), one at each end of the
-    // floor she cannot leave until she has learned it: the scrap in the wall
-    // pocket over her head where she walks in, and the scrap under the brittle
-    // crown of the last heap before the way out. Both are visible from the
-    // ground before she can reach them — the reward is what asks the question.
-    ents: [['crawler', 24, 15], ['riddle', 11, 15, 8], ['scrap', 2, 12, 20], ['scrap', 57, 15, 20]],
+    //   tile 12  RATCHET'S BOOTH (GATE_ROOM.A0) — the first thing past the
+    //            gates. The den behind it holds the letter, the drawer, the
+    //            repair, the pod and the Volt Pack.
+    //   tile 20  THE YARD WINCH, jammed across the road — the target of the
+    //            strike and the Volt Burst the pack has just paid for. It is
+    //            calm while the lessons run (it never swings at her before
+    //            she has been taught anything) and it is never met before
+    //            Ratchet: the old floor put a fight in front of the booth.
+    //   tile 27  THE MIND NODE — the first puzzle monument, immediately
+    //            beyond the booth on the same screen, on the way out.
+    //
+    // ...then the yard runs on east to the meadow. The two teaching secrets
+    // stay where they were (the pocket over the arrival, the crust in the last
+    // heap) for a player who comes back for them; neither is on the lesson.
+    ents: [['crawler', 20, 15], ['riddle', 27, 15, 8], ['scrap', 2, 12, 20], ['scrap', 57, 15, 20]],
     build(g) {
       frame(g); seamR(g);
       hline(g, 4, 7, 12, '=');            // a lit shelf, for looking at
@@ -548,26 +544,13 @@ const ROOMS = {
       hline(g, 0, 2, 9, '#');
       rect(g, 1, 10, 2, 11, '.'); rect(g, 3, 10, 3, 11, 'B');
       hline(g, 0, 3, 12, '#');
-      // the step she has to jump — a half-sunk chassis rather than a block:
-      // the first thing in the game she climbs, and it is one of the dead
-      // machines the backdrop is already full of
-      hull(g, 15, 21, 1, 13);
-      // THE WALK BETWEEN THE TWO LANDMARKS. The node stands at 11 and the
-      // booth at 49 (0.765 of the room, in GATE_ROOM) — thirty-eight tiles,
-      // most of two screens, because they are two destinations and not one
-      // pitch. That was already the argument for moving the node west; at 34
-      // tiles wide the whole waking floor still fitted on one screen with 128
-      // pixels of slack, so both landmarks were in view at once and the walk
-      // between them did not exist. It exists now.
-      //
-      // What fills the ground between them is the yard itself: spoil heaped
-      // where the loaders left it, a hulk she walks over rather than around,
-      // and a gantry that came down on one end.
-      // ...and between the step and the heaps, TWELVE TILES OF PLAIN FLOOR.
-      // The waking floor's one machine stands at 24 and its wreck is thrown
-      // east when it dies — onto whatever is there. Put a mound under that and
-      // the wreck lands on a slope, bounces differently, and the whole first
-      // lesson of the game becomes a timing question. The kill floor is flat.
+      // FROM THE BOOTH TO THE MONUMENT THE ROAD IS FLAT. The half-sunk chassis
+      // that used to sit at 15-21 was "the step she has to jump" — but the jump
+      // is taught on the road outside the gates now, and a heap under the winch
+      // would put the strike lesson on a slope.
+      // East of the monument the yard itself: spoil heaped where the loaders
+      // left it, a hulk she walks over rather than around, and a gantry that
+      // came down on one end.
       mound(g, 34, 44, 2, 29);
       gantry(g, 36, 43, 9, 1);
       // ...and the yard runs on past the booth rather than stopping at it

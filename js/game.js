@@ -1296,6 +1296,9 @@ function skillNext() {
 function iqNudge() {
   const best = skillAffordable();
   if (!best) return;
+  // the opening teaches one thing at a time, and SKILLS is not one of them:
+  // the nudge waits until the walk is behind her (js/opening.js sends it)
+  if (G.tut && G.save && G.save.flags && !G.save.flags.tut) { G.iqNudgeLater = 1; return; }
   G.save.iqTold = G.save.iqTold || {};
   if (G.save.iqTold[best.id]) return;
   G.save.iqTold[best.id] = 1;
@@ -2189,6 +2192,11 @@ function doInteract(s) {
     return;
   }
   if (s.type === 'npc') {
+    // THE OPENING'S TWO PEOPLE speak through js/opening.js while their story
+    // is being told: Ratchet's letter, repair, explanation, pod and pack, and
+    // Old Servo's waking and errand. It hands back to everything below once
+    // there is nothing scripted left to say.
+    if (typeof openingTalk === 'function' && openingTalk(s)) return;
     // THEY WANT SOMETHING NOW. Talking twice used to give you the same three
     // lines forever; a character who cannot ask you for anything is scenery
     // with a mouth. The errand comes first when there is one, and what they
@@ -2461,7 +2469,9 @@ function doInteract(s) {
       const it = !isHero() && G.save.storyVersion >= 2 && G.roomId === 'A0B' && s.extra === 'it:batt'
         && !G.save.flags['on_A0B|ratchet'] ? 'ratchetCell' : s.extra.slice(3);
       invAdd(it);
-      showItem(t('i_' + it), t('i_' + it + 'd'));
+      // HIS battery is a thing she has to recognise on the repair board, so
+      // the card shows the board's own battery art (repair_battery.webp)
+      showItem(t('i_' + it), t('i_' + it + 'd'), it === 'ratchetCell' ? 'repairBattery' : null);
     }
     else grantCrest(s.extra);
   } else if (s.type === 'mod') {
@@ -2668,6 +2678,7 @@ function update(dt) {
       if (!(typeof isHero === 'function' && isHero())) ceilWeather(dt, G.roomDef.zone);
       sawHum(dt);
       updateTutor(dt);
+      if (typeof openingTick === 'function') openingTick(dt);
       updateLesson(dt);
       // during a finishing blow she is driven, not steered — the choice was the
       // input, and nothing the player does now can fumble it
@@ -2742,7 +2753,9 @@ function update(dt) {
       // only when she is standing on the ground in front of them — pressing up
       // anywhere else in the room does what it always did.
       if (player.on && inP('UP') && typeof gateEnter === 'function' && gateEnter()) { /* she is going */ }
-      else if (G.near && (inP('INT') || (inP('UP') && player.on))) doInteract(G.near);
+      // (not while the pod holds her: a second press used to restart the rest
+      // from the top, so a player who pressed twice never finished resting)
+      else if (G.near && !G.recharge && (inP('INT') || (inP('UP') && player.on))) doInteract(G.near);
       checkTransitions();
       // chapter one's road: the wards' faces, the quarry's return, the bound
       // machines waiting, the cleansing light (js/progress.js)
@@ -3312,10 +3325,11 @@ function updateShop() {
       // (see burstUnlocked). Every cell after it is a refill.
       if (!G.save.flags.heal) {
         G.save.flags.heal = 1; G.save.flags.pack = 1;
-        // the card for THE PACK hands back to the world, not the shop: the next
-        // lesson (heal) happens in-world (js/npc_shop_exit_fix.js leaves the
-        // shop after the tutorial purchase for the same reason)
-        const pk = showItem(t('i_pack'), t('i_packd'));
+        // the card says what it does with HER controls, and shows it working —
+        // and it hands back to the world, not the shop: the next lesson (heal)
+        // happens in-world (js/npc_shop_exit_fix.js leaves the shop after the
+        // tutorial purchase for the same reason)
+        const pk = typeof opPackCard === 'function' ? opPackCard() : showItem(t('i_pack'), t('i_packd'));
         if (pk && pk.ret === 'SHOP') pk.ret = null;
         return;
       }
@@ -8798,9 +8812,11 @@ const GATE_ROOM = {
   // scenery behind the structure; one spot, one gate. The massed wall at
   // 37-39 stays the kingdom's outer boundary behind both.
   W2:  { at: 0.50, to: 'A0',  gx: 0.472, gy: 0.93 },
-  // the trader's booth on the waking floor, and the way back out of it
-  A0:  { at: 0.765, to: 'A0B', ax: 0.12, style: 'booth' },
-  A0B: { at: 0.12,  to: 'A0',  ax: 0.765, style: 'booth' },
+  // the trader's booth on the waking floor, and the way back out of it —
+  // the FIRST thing past the gates (tile 12.5 of 64): the opening teaches in
+  // the order the road runs, booth -> winch -> monument -> meadow (world.js A0)
+  A0:  { at: 0.195, to: 'A0B', ax: 0.12, style: 'booth' },
+  A0B: { at: 0.12,  to: 'A0',  ax: 0.195, style: 'booth' },
   // 0.68 is measured off the fired plate (§2c): the painted opening's centre
   // sits at gx 0.68, and aiming the walk at the old 0.64 sent her into rock
   // a shoulder's width left of the hole
@@ -10574,7 +10590,7 @@ function gateDoors(id) {
 }
 // which step opens each waking-floor depth door — the booth exists once the
 // lesson that sends her inside it begins
-const TUT_BOOTH_ROOM = { A0: 'buy' };
+const TUT_BOOTH_ROOM = { A0: 'booth' };
 // WHICH PLANE A DOOR STANDS IN, and it is the whole of the owner's complaint
 // about the first shop: "the colors are still in dull faded three d instead of
 // drawings like the characters... the player might actually miss it. It's not
@@ -11791,7 +11807,8 @@ function drawWinchHouse(wx, gy) {
   c.closePath(); c.fill();
   // THE DRUM — the winding gear itself, hung slightly askew in the frame
   const dx = wx + 2, dy = gy - 44, dr = 20;
-  const spin = Math.sin(performance.now() / 2600) * 0.2;   // it still turns, barely
+  // it still turns, barely — and turns TRUE once Servo's coil is home
+  const spin = typeof opDrumSpin === 'function' ? opDrumSpin(performance.now()) : Math.sin(performance.now() / 2600) * 0.2;
   c.save();
   c.translate(dx, dy); c.rotate(0.12 + spin * 0.04);
   c.fillStyle = '#141e2a';
@@ -12438,11 +12455,26 @@ function drawStatics(P) {
       }
     }
   }
-  // interact hint
-  if (G.near && G.state === 'PLAY' && !G.recharge) {
+  // the opening's people and props in the world: Servo's cue, the pod's ring
+  if (typeof drawOpeningWorld === 'function') drawOpeningWorld();
+  // interact hint — not while a lesson is asking for something else: a
+  // "Talk" label over Ratchet while the chip says "hold HEAL" is a second
+  // instruction, and the press it names would be refused anyway
+  if (G.near && G.state === 'PLAY' && !G.recharge && (typeof tutAllows !== 'function' || tutAllows('INT'))) {
     const s = G.near;
     const label = s.type === 'rescue' ? t(G.save.flags.crystal ? 'story_cleanse' : 'story_binding') : s.type === 'npc' ? t('talk') : s.type === 'bench' ? t('rest') : s.type === 'term' ? t('read') : s.type === 'riddle' ? t('rd_hint') : s.type === 'secret' ? t('secret_hint') : s.type === 'trial' ? t('tt_open') : s.type === 'vault' ? t('vault_hint') : t('open');
-    ftxt(label, s.x + s.w / 2, s.y - 18, 13, '#eef3fa', 'center', 'rgba(120,220,255,0.8)');
+    // "{INT} — Talk": the label names this player's own interact control —
+    // and what the press will actually DO (a switched-off Servo is woken)
+    const ol = typeof opNearLabel === 'function' ? opNearLabel(s) : null;
+    // ...over the HEAD that is drawn, not the feet box: a machine-person is
+    // drawn at its atlas scale, and a label at the box top sat on the cat
+    let ly = s.y - 18;
+    if (s.type === 'npc' && typeof atlasOf === 'function') {
+      const A = atlasOf(s.extra), kk = A && A.sub[s.extra] ? A.sub[s.extra].k : 1;
+      ly = Math.min(ly, s.y + s.h - s.h * kk - 10);
+    }
+    const lt = ol || label;
+    ftxt(typeof ctlFill === 'function' ? ctlFill(lt) : lt, s.x + s.w / 2, ly, 13, '#eef3fa', 'center', 'rgba(120,220,255,0.8)');
   }
 }
 // ---------------------------------------------------------------------------
@@ -12493,6 +12525,11 @@ function drawBreakHint() {
   // the first cave depends on.
   const fl = (G.save && G.save.flags) || {};
   if (fl.taughtWall && fl.taughtFloor) return;
+  // NOT DURING THE OPENING'S LESSONS. "Loose rock — strike it" over the
+  // gate arrival was the first instruction a new player read, for a verb not
+  // yet taught, beside a pocket that is not on the lesson. One instruction at
+  // a time: the tell waits until the walk is behind her.
+  if (G.tut && !fl.tut && TUT_ROOMS[G.roomId] !== undefined) return;
   const fracture = typeof brHas === 'function' && brHas('fracture');
   const brittle = (tx, ty) => {
     const q = tileAt(tx, ty);
@@ -12734,222 +12771,194 @@ addEventListener('mousedown', (e) => {
   }
 });
 // ===========================================================================
-// FIRST LESSONS. The game opened by handing a seven-year-old a robot cat and a
-// keyboard and saying nothing. Everything she can do is discoverable, which is
-// not the same as discovered — plenty of players never found the claw at all,
-// because nothing ever asked them to use it.
+// FIRST LESSONS — THE OPENING AS ONE FORWARD WALK (owner, 2026-10-09).
 //
-// So the first room teaches three verbs and no more: MOVE, JUMP, SCRATCH. Each
-// one waits for the player to actually do it — not to read about it and press
-// on — and each shows the control THIS player has in their hands: the on-screen
-// button on a phone, the pad button with a pad plugged in, the key otherwise.
-// It never blocks, it never pauses the game, and once a verb is learned it is
-// gone for good.
+// "Rebuild the opening as a clear, forward-moving tutorial. Required order:
+// Wake → movement and jump → city gate → Ratchet's booth → letter and repair →
+// explanation → save/recharge pod → Volt Pack explanation and acquisition →
+// healing/charged-attack lesson → nearby puzzle monument → onward into the
+// meadow. Teach only one action at a time."
+//
+// So every step below is ONE thing: a reason (its hint), one visible
+// destination or interactable (tutPrompt's target, ringed or chevroned), the
+// player's own control for it (tutHand / ctlFill), feedback when it lands (the
+// tick, the chime, the burst — and the step's own result: the letter read, the
+// battery in hand, the pod's "Progress saved"), and a hand-off to the next.
+// Steps advance on the successful action, never a timer, and the index is in
+// the save (flags.tutId), so a reload resumes on the lesson it was on.
+//
+//   `at`    the room the step's destination is in — tutPrompt leads her there
+//           from anywhere in the waking rooms (out of the den, into the booth)
+//   `room`  the room whose state completes it — a lesson is learned where it
+//           is taught (a swing in the den is not a strike at the winch)
+//
+// The story beats between steps (the letter, the repair, Ratchet's short
+// explanation, the spare cell, the pod line, the pack pitch and the scrap he
+// pays her with) are js/opening.js, which owns Ratchet and Servo through the
+// opening; this table owns only what the player is asked to DO.
 // ===========================================================================
 const TUT_STEPS = [
-  { id: 'move', label: 'tut_move', hint: 'tut_move_h',
-    keys: '\u2190 \u2192', pad: 'D-pad', touch: 'stick', vb: null,
+  { id: 'move', label: 'tut_move', hint: 'tut_move_h', at: 'W1',
     done: () => Math.abs(player.vx) > 40 },
-  // ...and now she has to USE it, which is the step that carries the story:
-  // the door out of the room she woke in. It cannot be completed by pressing
-  // anything — only by going, which is exactly what the moment is.
-  { id: 'out', label: 'tut_out', hint: 'tut_out_h',
-    keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
+  // ...and now she has to USE it: the door out of the room she woke in.
+  { id: 'out', label: 'tut_out', hint: 'tut_out_h', at: 'W1',
     done: () => (TUT_ROOMS[G.roomId] || 0) >= 1 },
-  { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h', room: 'W2',
-    keys: 'Space', pad: 'A', touch: 'JUMP', vb: 'VJUMP',
+  { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h', at: 'W2', room: 'W2',
     done: () => !player.on && player.vy < -60 && (typeof window === 'undefined' || !window.__tutorialEnforcement || !!G.tut.jumpShown) },
-  // THE GATES. The second half of the walk, and the reason the walk exists: a
-  // tutorial that ends at a door you can see from where you started gives the
-  // verbs somewhere to have been going.
-  { id: 'gate', label: 'tut_gate', hint: 'tut_gate_h',
-    keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
+  // THE GATES: the only way into the city, and they close behind her.
+  { id: 'gate', label: 'tut_gate', hint: 'tut_gate_h', at: 'W2',
     done: () => (TUT_ROOMS[G.roomId] || 0) >= 2 },
-  // ...AND A LESSON IS ONLY LEARNED IN THE ROOM THAT TEACHES IT.
-  //
-  // Both of the next two read GLOBAL state, and global state changes when she
-  // changes rooms — which is the whole of the owner's report: "the walk through
-  // allows the player to pass the first enemy that needs to be attacked, keep
-  // going to the shop, pass the shop without even attacking it... and if I
-  // press attack inside the shop, the system considers it as if I attacked the
-  // enemy anyway." A swing is a swing wherever it happens, and `no live
-  // enemies` is TRUE in every room that never had one — so stepping into the
-  // booth completed the kill lesson by walking away from the machine.
-  //
-  // `room` names where the lesson lives. tutTick will not complete a step
-  // whose room she is not standing in.
-  { id: 'atk', label: 'tut_atk', hint: 'tut_atk_h', room: 'A0',
-    keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
-    done: () => !!player.swing || player.comboT > 0 },
-  // ---- and now the LOOP, which is the part a verb tutorial never teaches ----
-  // Knowing which button swings is not knowing how to play this game. What a
-  // player actually has to learn is the circuit: a machine broken is scrap,
-  // scrap is volts, volts are cores, and thinking is a currency of its own that
-  // buys the abilities everything above runs on. Each of these steps is one
-  // link, taught in the order the circuit runs, on the floor where nothing can
-  // kill you for getting it wrong.
-  { id: 'kill', label: 'tut_kill', hint: 'tut_kill_h', room: 'A0',
-    keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
-    done: () => !G.enemies.some(e => e && !e.dead && !e.disabled && !e.rescued) },
-  { id: 'coin', label: 'tut_coin', hint: 'tut_coin_h',
-    keys: '\u2190 \u2192', pad: 'D-pad', touch: 'stick', vb: null,
-    done: () => G.save.scrap >= 12 },
-  { id: 'buy', label: 'tut_buy', hint: 'tut_buy_h',
-    keys: 'E', pad: 'B', touch: 'INT', vb: 'VINT',
-    done: () => !!(G.save.flags && G.save.flags.tutBuy) },
-  { id: 'heal', label: 'tut_heal', hint: 'tut_heal_h',
-    keys: 'F', pad: 'Y', touch: 'HEAL', vb: 'VHEAL',
+  // RATCHET'S BOOTH, the first thing past the gates. Nothing is fought on the
+  // way to him: the winch stands BEYOND the booth and is calm until taught.
+  { id: 'booth', label: 'op_booth', hint: 'op_booth_h', at: 'A0', robo: true,
+    done: () => G.roomId === 'A0B' },
+  // THE LETTER FIRST. It is what tells her there is a battery, and where.
+  { id: 'note', label: 'op_note', hint: 'op_note_h', at: 'A0B', room: 'A0B', robo: true,
+    done: () => !!(G.save.flags.opNote || G.save.flags.ratchetRepaired) },
+  { id: 'drawer', label: 'op_drawer', hint: 'op_drawer_h', at: 'A0B', room: 'A0B', robo: true,
+    done: () => invCount('ratchetCell') > 0 || !!G.save.flags.ratchetRepaired },
+  // ...the repair board, and the short explanation he gives on waking (it
+  // ends on the spare cell for Servo and the line that sends her to the pod)
+  { id: 'repair', label: 'op_repair', hint: 'op_repair_h', at: 'A0B', room: 'A0B', robo: true,
+    done: () => !!(G.save.flags.ratchetRepaired && G.save.flags.opTold) },
+  // "This pod saves your progress and recharges you. Use it before you
+  // leave." Done once the rest has finished AND its confirmation has been on
+  // screen — the next lesson is only introduced after it (opening.js).
+  { id: 'pod', label: 'op_pod', hint: 'op_pod_h', at: 'A0B', room: 'A0B', robo: true,
+    done: () => !!G.save.flags.opPod },
+  // THE VOLT PACK: he says what it does, why she needs it and what it costs,
+  // pays her the twelve scrap for the repair, and his counter opens with the
+  // pack marked. One purchase; the step is the purchase.
+  { id: 'pack', label: 'op_pack', hint: 'op_pack_h', at: 'A0B', room: 'A0B', robo: true,
+    done: () => !!G.save.flags.heal },
+  // THE FIRST SURGE. Repair cannot be taught at full health (tutEnter), so the
+  // pack's first surge costs one core, in the den, where nothing can follow it.
+  { id: 'heal', label: 'op_heal', hint: 'op_heal_h', hero: ['tut_heal', 'tut_heal_h'],
     done: () => player.cores >= player.maxCores() },
-  // ...and the OTHER thing the pack bought (owner, 2026-09-19): the same
-  // volts, held into the claw instead of the core. Taught here, on the safe
-  // floor, because the quarry pillar in the stone cave only breaks to a burst
-  // and a player who never learned the hold is stuck in front of a rock.
-  { id: 'burst', label: 'tut_burst', hint: 'tut_burst_h',
-    keys: 'X', pad: 'X', touch: 'ATK', vb: 'VATK',
+  // ...and the two things the claw does, at the yard winch jammed across the
+  // road outside: a strike, then the Volt Burst that stops it.
+  { id: 'atk', label: 'op_atk', hint: 'op_atk_h', at: 'A0', room: 'A0', hero: ['tut_atk', 'tut_atk_h'],
+    done: () => !!player.swing || player.comboT > 0 },
+  { id: 'burst', label: 'op_burst', hint: 'op_burst_h', at: 'A0', room: 'A0', hero: ['tut_burst', 'tut_burst_h'],
     done: () => !!(G.save.flags && G.save.flags.burstDone) },
-  { id: 'node', label: 'tut_node', hint: 'tut_node_h', room: 'A0',
-    keys: 'E', pad: 'B', touch: 'INT', vb: 'VINT',
-    done: () => (G.save.iq | 0) >= 10 },
-  { id: 'skill', label: 'tut_skill', hint: 'tut_skill_h',
-    keys: 'T', pad: 'View', touch: 'SKILL', vb: 'VSKILL',
-    done: () => (G.save.skills && G.save.skills.length > 0) },
-  { id: 'go', label: 'tut_go', hint: 'tut_go_h',
-    keys: '\u2192', pad: 'D-pad', touch: 'stick', vb: null,
+  // THE FIRST PUZZLE MONUMENT, just past the winch, on the same screen as the
+  // booth door and on the way out — never behind her.
+  { id: 'node', label: 'op_node', hint: 'op_node_h', at: 'A0', room: 'A0', hero: ['tut_node', 'tut_node_h'],
+    done: () => !!G.save.flags.rd_n8 || (G.save.iq | 0) >= 10 },
+  { id: 'go', label: 'op_go', hint: 'op_go_h', at: 'A0', hero: ['tut_go', 'tut_go_h'],
     done: () => false },                       // ends by leaving the room
 ];
+// TWO GAMES, ONE ENGINE: NOSTOS shares these rooms but not Ratchet's story —
+// its trader is awake, its hero heals and bursts from birth. `robo` steps are
+// passed over in that world, and `hero` names the generic wording it keeps.
 const TUT_LAST = TUT_STEPS.length - 1;         // the 'go' step, and the open door
+// ...and the list the saves were written against before the opening was
+// rebuilt, so an index saved by that build resumes on the right lesson.
+const TUT_OLD_IDS = ['move', 'out', 'jump', 'gate', 'atk', 'kill', 'coin', 'buy', 'heal', 'burst', 'node', 'skill', 'go'];
 // Some lessons need the world to change before they make any sense.
 function tutEnter(st) {
   if (!st || !player) return;
   if (st.id === 'heal' && player.cores >= player.maxCores()) {
-    // THE FIRST HIT, ON PURPOSE. Repair cannot be taught to somebody at full
+    // THE FIRST SURGE, ON PURPOSE. Repair cannot be taught to somebody at full
     // health: the button does nothing, and a lesson whose demonstration is a
-    // no-op lands as noise. So the wreck she just made discharges once —
-    // scripted, capped at this single core, and staged in the only room in the
-    // game where nothing else can hurt her while she works out the answer.
+    // no-op lands as noise. So the pack's first surge bites once — scripted,
+    // capped at this single core, and staged in the den where nothing else
+    // can hurt her while she works out the answer. The chip says why.
     player.cores = Math.max(1, player.cores - 1);
     G.coreFlash = { i: player.cores, t: 0.6 };
     player.iT = Math.max(player.iT || 0, 1.4);
     cam.shake = Math.max(cam.shake, 5);
     G.flash = Math.max(G.flash, 0.5);
     sfx('hurt');
-    burst(player.x + player.w / 2, player.y + player.h / 2, 20, '#ff5f6d', 230, 0.6, 90, 3, true);
+    burst(player.x + player.w / 2, player.y + player.h / 2, 20, '#8ff6ff', 230, 0.6, 90, 3, true);
     if (typeof tBuzz === 'function') tBuzz(60);
   }
+  // the pack was bought full; a heal spends a third of it. The burst lesson
+  // must never be refused for want of volts she was never told to earn.
+  if (st.id === 'heal' && player.volts < player.healCost()) player.volts = player.healCost();
+  if (st.id === 'burst' && typeof BURST_VOLTS === 'number' && player.volts < BURST_VOLTS) player.volts = BURST_VOLTS;
 }
 // WHAT THE CHIP SAYS, AND WHY IT STOPPED SAYING "stick".
 //
-// The chip names the control this player actually has in their hands, and for
-// the walking steps that was the literal string `stick` — which on a phone sat
-// next to "The gates / the city is still standing, go in" and read as a word
-// nobody asked for. The stick is the thing under the player's left thumb; it
-// does not need naming, it needs POINTING. Direction steps show the arrow.
-const TUT_DIR = { move: '\u2190 \u2192', out: '\u2192', gate: '\u2191', coin: '\u2190 \u2192', go: '\u2192' };
+// The chip names the control this player actually has in their hands: the key
+// they bound, the pad button they bound, or the on-screen glyph on a phone
+// (ctlName, js/story-opening.js — the same names the dialogue fills {ATK}
+// with, so a chip and a line can never disagree). Walking steps show the
+// direction to go, not the name of the stick.
+const TUT_DIR = { move: '← →', out: '→', go: '→' };
+const TUT_ACTION = { jump: 'JUMP', note: 'INT', drawer: 'INT', repair: 'INT', pod: 'INT', pack: 'INT',
+  heal: 'HEAL', atk: 'ATK', burst: 'ATK', node: 'INT' };
 function tutHand(st) {
   if (st.control) return st.control;
-  if (TUT_DIR[st.id]) return TUT_DIR[st.id];
-  if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled)
-    return st.vb === 'VSKILL' ? '☰ ▸ ' + t('pm_skills') : st.touch;
-  if (typeof PAD !== 'undefined' && PAD && PAD.on) {
-    const action = st.vb && st.vb.slice(1);
-    if (action && typeof howToOpen === 'function')
-      return howToOpen(action, t('pa_' + action));
-    return st.pad;
-  }
-  return st.keys;
+  if (st.action === 'MOVE' || !st.action) return TUT_DIR[st.id] || '→';
+  if (typeof ctlName === 'function') return ctlName(st.action);
+  return st.action;
 }
-// The next action, not a list of everything the player will eventually do.
-// A shop lesson outside the workshop teaches UP at its door, then E beside
-// the robot inside. Keeping the saved lesson index unchanged preserves runs.
+// THE NEXT ACTION, AND WHERE. One target, one control: far from the target the
+// chip points the way (an arrow, "follow the gold marker"); at it, the chip
+// names the one control that does the step. A step whose destination is in
+// another waking room leads her there first — out of the den by its door, or
+// into the booth — so the walk always runs forward to the thing being taught.
 function tutPrompt(st) {
-  const view = { ...st, target: null, action: ({ jump:'JUMP', atk:'ATK', kill:'ATK', buy:'INT', node:'INT', heal:'HEAL', burst:'ATK', skill:'SKILL' })[st.id] || 'MOVE' };
+  const action = TUT_ACTION[st.id] || 'MOVE';
+  const view = { ...st, target: null, action, vb: action === 'MOVE' ? null : 'V' + action };
+  if (st.hero && typeof isHero === 'function' && isHero()) { view.label = st.hero[0]; view.hint = st.hero[1]; }
   const pc = player.x + player.w / 2;
   const doors = typeof gateDoors === 'function' ? gateDoors() : [];
   const point = (x, y, color, radius = 30) => { view.target = { x, y, color, radius }; };
-  const doorPrompt = (door, returning) => {
+  const travel = () => {
+    view.action = 'MOVE'; view.vb = null;
+    view.control = !view.target || pc < view.target.x ? '→' : '←';
+    view.hint = 'tut_workshop_h';
+  };
+  // a door is walked to, then entered with UP
+  const doorPrompt = (door, label, hint) => {
     const x = gateWorldX(door);
     point(x, 13 * TILE, '#ffd76a');
-    view.vb = null;
-    view.label = returning ? 'tut_return' : 'tut_enter';
-    view.hint = 'tut_enter_h';
-    view.control = '\u2191'; view.action = 'UP';
-    if (Math.abs(pc - x) > 80) {
-      view.control = pc < x ? '\u2192' : '\u2190'; view.action = 'MOVE';
-      view.hint = returning ? 'tut_return_h' : 'tut_workshop_h';
-      if (!returning) view.label = 'tut_approach';
-    }
+    view.label = label; view.hint = hint;
+    view.action = 'UP'; view.vb = null; view.control = null;
+    if (Math.abs(pc - x) > 80) travel();
   };
-  // Backtracking never rewinds a lesson, but its directions must lead back
-  // to the room where that lesson can actually be completed.
-  const roomRequired = st.room || (st.id === 'jump' || st.id === 'gate' ? 'W2' : null);
-  if (roomRequired && G.roomId !== roomRequired && G.roomId === 'A0B' && doors[0]) {
-    doorPrompt(doors[0], true);
-    return view;
-  }
-  const stage = st.id === 'move' || st.id === 'out' ? 0 : st.id === 'jump' || st.id === 'gate' ? 1 : 2;
-  if (TUT_ROOMS[G.roomId] < stage) {
-    if (!G.roomDef.exits.R && doors[0]) doorPrompt(doors[0], false);
-    else {
-      point((G.roomDef.w - 1.5) * TILE, 13 * TILE, '#ffd76a');
-      view.control = '\u2192'; view.vb = null; view.action = 'MOVE';
-      view.label = 'tut_approach'; view.hint = 'tut_workshop_h';
-    }
-    return view;
-  }
-  if (st.id === 'buy') {
-    const npc = (G.statics || []).find(q => q.type === 'npc' && q.extra === 'ratchet');
-    if (npc) {
-      point(npc.x + npc.w / 2, npc.y + npc.h / 2, '#ffd76a');
-      if (typeof npcLive === 'function' && !npcLive(npc)) {
-        view.label = 'tut_note'; view.hint = 'tut_note_h';
-        if (npcCellItem(npc) === 'ratchetCell' && !invCount('ratchetCell')) {
-          const drawer = (G.statics || []).find(q => q.type === 'chest' && q.extra === 'it:batt' && !q.opened);
-          if (drawer) {
-            point(drawer.x + drawer.w / 2, drawer.y + drawer.h / 2, '#ffd76a');
-            view.label = 'tut_cell'; view.hint = 'tut_cell_h';
-            if (G.near !== drawer) {
-              view.control = pc < view.target.x ? '\u2192' : '\u2190'; view.action = 'MOVE'; view.vb = null;
-            }
-            return view;
-          }
-        }
-      }
-      if (G.near !== npc) {
-        view.control = pc < view.target.x ? '\u2192' : '\u2190'; view.action = 'MOVE';
-        view.label = 'tut_approach'; view.hint = 'tut_workshop_h'; view.vb = null;
-      }
-    } else {
+  // ...and a thing is walked to, then used with the step's own control
+  const useAt = (s, color) => {
+    if (!s) return false;
+    point(s.x + s.w / 2, s.y + s.h / 2, color || '#ffd76a');
+    if (G.near !== s) travel();
+    return true;
+  };
+  // ---- the right room first ----
+  if (st.at && G.roomId !== st.at) {
+    if (G.roomId === 'A0B' && doors[0]) doorPrompt(doors[0], 'op_back', 'op_back_h');
+    else if (G.roomId === 'A0' && st.at === 'A0B') {
       const booth = doors.find(d => d.style === 'booth');
-      if (booth) doorPrompt(booth, false);
-    }
-  } else if (st.id === 'out' || st.id === 'gate' || st.id === 'go') {
-    if (!G.roomDef.exits.R && doors[0]) doorPrompt(doors[0], G.roomId === 'A0B');
-    else point((G.roomDef.w - 1.5) * TILE, 13 * TILE, '#ffd76a');
-  } else if (st.id === 'jump') {
-    point(G.roomId === 'W2' ? 13 * TILE : 17 * TILE + 12, G.roomId === 'W2' ? 11 * TILE : 14 * TILE + 12, '#37ffd0', 34);
-  } else if (st.id === 'atk' || st.id === 'kill') {
-    const enemy = (G.enemies || []).find(q => q && !q.dead);
-    if (enemy) point(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ff8a6a');
-  } else if (st.id === 'coin') {
-    let scrap = null;
-    for (const q of G.pickups || [])
-      if (q && !q.dead && (!scrap || Math.abs(q.x - pc) < Math.abs(scrap.x - pc))) scrap = q;
-    if (scrap) point(scrap.x + 6, scrap.y + 6, '#ffd76a', 24);
-  } else if (st.id === 'node') {
-    const node = (G.statics || []).find(q => q.type === 'riddle' && !q.opened);
-    if (node) {
-      point(node.x + node.w / 2, node.y + node.h / 2, '#c9a6ff');
-      if (G.near !== node) {
-        view.control = pc < view.target.x ? '\u2192' : '\u2190'; view.action = 'MOVE';
-        view.label = 'tut_approach'; view.vb = null;
-      }
-    }
-  } else if (st.id === 'heal') point(pc, player.y + player.h / 2, '#aef7d8', 32);
-  if (['JUMP','ATK'].includes(view.action) && typeof tutorialReady === 'function'
-      && !tutorialReady(view) && view.target && !(G.tut && G.tut.hold > 0)) {
-    view.action = 'MOVE'; view.control = pc < view.target.x ? '\u2192' : '\u2190';
-    view.label = 'tut_approach'; view.hint = 'tut_workshop_h'; view.vb = null;
+      if (booth) doorPrompt(booth, 'op_booth', 'op_booth_h');
+    } else if (G.roomId === 'W2' && doors[0]) doorPrompt(doors[0], 'tut_gate', 'tut_gate_h');
+    else if (G.roomId === 'W1') { point((G.roomDef.w - 1.5) * TILE, 13 * TILE, '#ffd76a'); travel(); view.label = 'tut_out'; view.hint = 'tut_out_h'; }
+    return view;
   }
+  // ---- the step itself ----
+  const ratchet = (G.statics || []).find(q => q.type === 'npc' && q.extra === 'ratchet');
+  if (st.id === 'out' || st.id === 'go') point((G.roomDef.w - 1.5) * TILE, 13 * TILE, '#ffd76a');
+  else if (st.id === 'jump') point(13 * TILE, 11 * TILE, '#37ffd0', 34);
+  else if (st.id === 'gate') { if (doors[0]) doorPrompt(doors[0], 'tut_gate', 'tut_gate_h'); }
+  else if (st.id === 'booth') {
+    const booth = doors.find(d => d.style === 'booth');
+    if (booth) doorPrompt(booth, 'op_booth', 'op_booth_h');
+  } else if (st.id === 'note' || st.id === 'repair' || st.id === 'pack') useAt(ratchet);
+  else if (st.id === 'drawer') {
+    const drawer = (G.statics || []).find(q => q.type === 'chest' && q.extra === 'it:batt' && !q.opened);
+    if (!useAt(drawer)) useAt(ratchet);
+  } else if (st.id === 'pod') useAt((G.statics || []).find(q => q.type === 'bench'), '#8ff6ff');
+  else if (st.id === 'atk' || st.id === 'burst') {
+    const enemy = (G.enemies || []).find(q => q && !q.dead && !q.disabled);
+    if (enemy) {
+      point(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ff8a6a');
+      if (typeof tutorialReady === 'function' && !tutorialReady(view) && !(G.tut && G.tut.hold > 0)) travel();
+    }
+  } else if (st.id === 'node') useAt((G.statics || []).find(q => q.type === 'riddle' && !q.opened), '#c9a6ff');
+  else if (st.id === 'heal') point(pc, player.y + player.h / 2, '#aef7d8', 32);
+  if (view.action === 'JUMP' && typeof tutorialReady === 'function'
+      && !tutorialReady(view) && view.target && !(G.tut && G.tut.hold > 0)) travel();
   return view;
 }
 // The lessons are STAGED IN THE ROOM: open ground for the first, the step for
@@ -12995,7 +13004,9 @@ const TUT_DOOR = { W1: 'out', W2: 'gate', A0: 'go', A0B: 'go' };
 // The LESSON still happens where there is something to clear — the step in W2
 // — because teaching a verb is not the same as permitting it. What changed is
 // that pressing jump before that point does what it looks like it should.
-const TUT_UNLOCK = { ATK: 'atk', INT: 'buy', HEAL: 'heal', SKILL: 'skill', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
+// INTERACT arrives with the letter (the first thing she is asked to use), the
+// claw with the strike lesson at the winch, SKILL with the open road.
+const TUT_UNLOCK = { ATK: 'atk', INT: 'note', HEAL: 'heal', SKILL: 'go', WHEEL: 'go', CREST: 'go', DASH: 'go', CAST: 'go', SONG: 'go', CLAW: 'go', ARM: 'go', STAR: 'go', BRAID: 'go' };
 function tutAllows(act) {
   if (typeof tutorialAllows === 'function') return tutorialAllows(act);
   const need = TUT_UNLOCK[act];
@@ -13006,17 +13017,40 @@ function tutAllows(act) {
   const idx = TUT_STEPS.findIndex(q => q.id === need);
   return idx < 0 || G.tut.i >= idx;
 }
-// the step index, in and out of the save — clamped, because a save written by
-// a build with more steps than this one must not index past the list
+// THE STEP, IN AND OUT OF THE SAVE — by NAME. The opening was rebuilt and its
+// list reordered (2026-10-09), and an index saved by the old list would resume
+// on whatever now sits at that number. The id is what is saved now
+// (flags.tutId, with flags.tutI kept beside it); a save that only has the old
+// index is mapped through the old list to the lesson that replaced it, then
+// carried past every step the save's own facts show is already behind her —
+// a player who woke Ratchet under the old opening is not asked to read his
+// letter again.
+const TUT_FROM_OLD = { atk: 'booth', kill: 'booth', coin: 'booth', buy: 'note', heal: 'heal', burst: 'atk', node: 'node', skill: 'go' };
+const TUT_SETTLED = {
+  note: f => f.opNote || f.ratchetRepaired,
+  drawer: (f, sv) => (sv.items && sv.items.ratchetCell) || f.ratchetRepaired,
+  repair: f => f.ratchetRepaired && f.opTold,
+  pod: f => f.opPod,
+  pack: f => f.heal,
+};
 function tutRestore(sv) {
-  const i = (sv && sv.flags && sv.flags.tutI) | 0;
+  const f = (sv && sv.flags) || {};
+  if (f.tutId) {
+    const k = TUT_STEPS.findIndex(q => q.id === f.tutId);
+    if (k >= 0) return k;
+  }
+  const old = TUT_OLD_IDS[Math.max(0, Math.min(TUT_OLD_IDS.length - 1, f.tutI | 0))];
+  let i = Math.max(0, TUT_STEPS.findIndex(q => q.id === (TUT_FROM_OLD[old] || old)));
+  if ((f.tutI | 0) > 0) while (i < TUT_LAST && TUT_SETTLED[TUT_STEPS[i].id] && TUT_SETTLED[TUT_STEPS[i].id](f, sv)) i++;
   return Math.max(0, Math.min(TUT_LAST, i));
 }
 function tutSave(sv, T) {
   if (!sv || !T) return;
   if (!sv.flags) sv.flags = {};
-  if ((sv.flags.tutI | 0) >= T.i) return;      // one way: never written backwards
+  const was = sv.flags.tutId ? TUT_STEPS.findIndex(q => q.id === sv.flags.tutId) : -1;
+  if (was >= T.i) return;                       // one way: never written backwards
   sv.flags.tutI = T.i;
+  sv.flags.tutId = TUT_STEPS[T.i] ? TUT_STEPS[T.i].id : 'go';
   if (typeof persist === 'function') persist();
 }
 function updateTutor(dt) {
@@ -13042,18 +13076,13 @@ function updateTutor(dt) {
   if (!G.tut) G.tut = { i: tutRestore(sv), t: 0, hold: 0, doneT: 0 };
   const T = G.tut;
   const st = TUT_STEPS[T.i];
-  // THE DUMMY. Calm, so it can never take a core off her, and stopped short of
-  // arm's length until the claw has been taught — then it walks in and is held
-  // there, close enough to be frightening and too far to touch.
-  const dum = G.enemies && G.enemies.find(e => e && !e.dead);
-  if (dum && (!(sv.storyVersion >= 2) || st.id !== 'kill')) {
-    dum.calm = true; dum.hypnoT = 1e9;
-    const gap = (dum.x + dum.w / 2) - (player.x + player.w / 2);
-    // held at arm's length until the claw has been taught, then let close —
-    // but never let loose: the kill step wants a target, not a fight
-    if (T.i < 2 || Math.abs(gap) < 96) { dum.vx = 0; dum.stagT = Math.max(dum.stagT || 0, 0.12); }
-  } else if (dum && !dum.disabled && !dum.rescued) {
-    dum.calm = false; dum.hypnoT = 0;
+  // NOTHING ON THE WAKING FLOOR FIGHTS WHILE SHE IS BEING TAUGHT. The yard
+  // winch is the strike and burst lessons' target, not an encounter: calm (it
+  // holds its arm and never swings — winch.js) until the lessons are behind
+  // her, so no lesson is ever interrupted by a hit she was not taught to read.
+  for (const e of (G.enemies || [])) {
+    if (!e || e.dead || e.disabled || e.rescued) continue;
+    e.calm = true; e.hypnoT = Math.max(e.hypnoT || 0, 1);
   }
   if (typeof TOUCH !== 'undefined' && TOUCH) {
     const prompt = st && tutPrompt(st);
@@ -13097,6 +13126,10 @@ function updateTutor(dt) {
         rnd(-40, 60), rnd(-70, 30), rnd(0.4, 0.8), '#37ffd0', 2.6, 120, true);
   }
   if (!st) return;
+  // a step of Ratchet's story, in the world that does not have it
+  if (st.robo && typeof isHero === 'function' && isHero()) {
+    T.i++; T.t = 0; T.hold = 0; tutEnter(TUT_STEPS[T.i]); tutSave(sv, T); return;
+  }
   T.t += dt;
   if (T.hold > 0) { T.hold -= dt; if (T.hold <= 0) { T.i++; T.t = 0; tutEnter(TUT_STEPS[T.i]); tutSave(sv, T); } return; }
   let ok = false;
@@ -13199,8 +13232,13 @@ function drawTutor() {
     }
     c.restore();
   }
+  // the pod's "Progress saved" is read before the next lesson is introduced
+  if (typeof opPodSettled === 'function' && !opPodSettled()) return;
   const prompt = tutPrompt(st);
-  tutCard(px, py, tutHand(prompt), t(prompt.label), t(prompt.hint), learned, Math.max(0, T.hold / 0.7));
+  // the hint names controls as {ATK}/{INT}/{UP}…, filled with THIS player's own
+  // binding (ctlFill) — the chip and the dialogue speak the same controls
+  const fill = typeof ctlFill === 'function' ? ctlFill : (x => x);
+  tutCard(px, py, tutHand(prompt), t(prompt.label), fill(t(prompt.hint)), learned, Math.max(0, T.hold / 0.7));
 }
 // one card, used by the waking floor and by every power she is handed after it
 function tutCard(px, py, key, label, hint, learned, fade) {
@@ -13212,10 +13250,15 @@ function tutCard(px, py, key, label, hint, learned, fade) {
   const kw = Math.min(240, c.measureText(key).width + 28);
   c.font = '600 ' + titleSize + 'px "Segoe UI", Tahoma, sans-serif';
   const titleWidth = c.measureText(label).width;
-  c.font = '400 ' + helpSize + 'px "Segoe UI", Tahoma, sans-serif';
+  c.font = '700 ' + helpSize + 'px "Segoe UI", Tahoma, sans-serif';
   const lw = Math.max(titleWidth, c.measureText(hint).width);
   const w = Math.min(780, Math.max(260, kw + lw + 50));
+  // (measured in the weight ftxt draws with — measured at 400 and drawn at
+  // 700, a long hint ran out of its own card on a phone)
   const x = (960 - w) / 2, y = touch ? 100 : 436, rtl = LANG === 'ar';
+  // where the chip stands this frame, so nothing else on the HUD (the goal
+  // line, js/opening.js) is ever drawn over it
+  G.tutChip = { x, y, w, h: height, at: G.simClock || 0 };
   c.globalAlpha = learned ? Math.max(0, fade) : 1;
   c.fillStyle = 'rgba(6,14,20,0.92)'; rr(c, x, y, w, height, 8); c.fill();
   const keyX = rtl ? x + w - kw - 14 : x + 14;
@@ -13227,7 +13270,7 @@ function tutCard(px, py, key, label, hint, learned, fade) {
   const labelSize = Math.min(titleSize, titleSize * maxText / Math.max(1,c.measureText(label).width));
   ftxt(learned ? '\u2713 ' + label : label, textX, y + (touch ? 35 : 29), labelSize,
     learned ? '#bff5d2' : '#f3f5f6', align, null, '600');
-  c.font = '400 ' + helpSize + 'px "Segoe UI", Tahoma, sans-serif';
+  c.font = '700 ' + helpSize + 'px "Segoe UI", Tahoma, sans-serif';
   const hintSize = Math.min(helpSize, helpSize * maxText / Math.max(1,c.measureText(hint).width));
   ftxt(hint, textX, y + (touch ? 65 : 53), hintSize, '#c8d5db', align);
   c.restore();
@@ -13434,8 +13477,11 @@ function drawHUD() {
   c.shadowBlur = 0;
   ftxt('⚡', vx, vy + 1, 15, canHeal ? '#aef7d8' : '#ffd76a');
   if (canHeal) {
-    ftxt(TOUCH && TOUCH.enabled ? '✚' : '✚ F', vx + 28, vy, 15, 'rgba(174,247,216,' + hpu + ')', 'left');
-    if (!G.healToasted) { G.healToasted = true; G.toast(t('heal_hint')); }
+    // her own HEAL control, not a literal F (a remapped key or a pad)
+    const hk = typeof ctlName === 'function' ? ctlName('HEAL') : 'F';
+    ftxt(TOUCH && TOUCH.enabled ? '✚' : (hk === '✚' ? '✚' : '✚ ' + hk), vx + 28, vy, 15, 'rgba(174,247,216,' + hpu + ')', 'left');
+    // (the opening's own heal lesson is already saying this, on its chip)
+    if (!G.healToasted && !teaching) { G.healToasted = true; G.toast(typeof ctlFill === 'function' ? ctlFill(t('heal_hint')) : t('heal_hint')); }
   }
   }
   // ---- suit wheel: what you are wearing, and what else you could wear
@@ -15690,6 +15736,7 @@ function draw(tms) {
   drawLesson();
   drawHUD();
   if (typeof drawSceneCaption === 'function') drawSceneCaption();   // js/overlay.js
+  if (typeof drawOpeningHUD === 'function') drawOpeningHUD();
   drawMapButton();
   if (typeof drawSoundChip === 'function') drawSoundChip(tsec);
   if (typeof drawSaveFeedback === 'function') drawSaveFeedback();
@@ -17237,7 +17284,7 @@ function drawMap() {
     ftxt(b.icon, b.x, b.y, b.icon.length > 1 ? 12 : 19, '#cfe8ff', 'center');
   }
   ftxt(Math.round(mapView.z * 100) + '%', 900, 96, 12, '#7d93a8', 'center');
-  ftxt('● ' + t('map_here') + '   ◆ ' + t('rest').replace('E — ', '') + '   ☠ ' + t('map_boss') + '   ⚙ ' + t('map_shop') + '   ∩ ' + t('map_cave'), 480, 502, 13, '#7d93a8');
+  ftxt('● ' + t('map_here') + '   ◆ ' + t('rest').replace(/^(E|\{INT\}) — /, '') + '   ☠ ' + t('map_boss') + '   ⚙ ' + t('map_shop') + '   ∩ ' + t('map_cave'), 480, 502, 13, '#7d93a8');
   ftxt(t('map_ctl'), 480, 522, 12, '#5f7488');
 }
 // the three on-screen controls, shared by the mouse and the touch layer
@@ -17311,9 +17358,14 @@ function drawShop() {
     const sel = i === G.shopIdx, sold = shopSold(it);
     const y = 130 + i * 46;
     if (sel) { c.fillStyle = 'rgba(255,215,106,0.08)'; rr(c, 160, y - 19, 640, 40, 8); c.fill(); }
-    const name = it.type === 'crest' ? t('c_' + it.id) : t('s_' + it.id);
-    const desc = it.type === 'crest' ? t('c_' + it.id + 'd') : t('s_' + it.id + 'd');
-    const col = sold ? '#5a6a78' : sel ? '#eef3fa' : '#9ab0c2';
+    let name = it.type === 'crest' ? t('c_' + it.id) : t('s_' + it.id);
+    let desc = it.type === 'crest' ? t('c_' + it.id + 'd') : t('s_' + it.id + 'd');
+    // THE PACK IS NOT A REFILL. Until it is bought the first row is the Volt
+    // Pack — permanent, marked, and the only thing on the list she can buy;
+    // after it, the same row is the refill it always was (js/opening.js).
+    const row = typeof opShopRow === 'function' ? opShopRow(it, y, sel) : null;
+    if (row) { name = row.name; desc = row.desc; }
+    const col = row && row.locked ? '#56626e' : sold ? '#5a6a78' : sel ? '#eef3fa' : '#9ab0c2';
     ftxt(name, LANG === 'ar' ? 780 : 180, y - 6, 17, col, LANG === 'ar' ? 'right' : 'left');
     ftxt(desc, LANG === 'ar' ? 780 : 180, y + 13, 12, sold ? '#46545f' : '#7d93a8', LANG === 'ar' ? 'right' : 'left', null, '600');
     ftxt(sold ? t('sold') : '⬢ ' + Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1)), LANG === 'ar' ? 180 : 780, y, 16, sold ? '#5a6a78' : '#ffd76a', LANG === 'ar' ? 'left' : 'right');

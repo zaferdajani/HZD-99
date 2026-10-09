@@ -16,7 +16,7 @@ const ctx = vm.createContext({
   G: { roomId: 'A0', roomDef: { w: 64, exits: { R: 'A1' } }, state: 'PLAY',
     save: { flags: {}, scrap: 0 }, enemies: [], statics: [], pickups: [], flash: 0 },
   player: { x: 10, y: 400, w: 24, h: 28, vx: 0, vy: 0, on: true,
-    cores: 3, maxCores: () => 3 },
+    cores: 3, maxCores: () => 3, volts: 0, healCost: () => 33 },
   cam: { x: 0, y: 0, shake: 0 }, TOUCH: { enabled: false }, PAD: { on: false },
   TILE: 32, c: canvas, performance: { now: () => 1000 }, doors: [],
   gateWorldX: d => d.x, sfx() {}, burst() {}, addPart() {},
@@ -34,104 +34,119 @@ const step = id => run(`TUT_STEPS.find(s => s.id === '${id}')`);
 const prompt = id => ctx.tutPrompt(step(id));
 const hand = id => ctx.tutHand(prompt(id));
 
-// The booth door is UP, never the NPC's E. Approach teaches only movement.
-ctx.doors = [{ x: 500, style: 'booth' }];
-assert.equal(hand('buy'), '→');
-assert.equal(prompt('buy').vb, null);
-ctx.player.x = 488;
-assert.equal(hand('buy'), '↑');
-assert.equal(prompt('buy').target.x, 500);
-ctx.player.x = 600;
-assert.equal(hand('buy'), '←');
-
-// Inside, the sole target becomes Ratchet, not the door back outside.
-ctx.G.roomId = 'A0B'; ctx.G.roomDef.exits = {};
-const ratchet = { type: 'npc', extra: 'ratchet', x: 300, y: 400, w: 32, h: 40 };
-ctx.G.statics = [ratchet]; ctx.G.near = ratchet; ctx.player.x = 290;
-assert.equal(hand('buy'), 'E');
-assert.equal(prompt('buy').target.x, 316);
-ctx.npcLive = () => false;
-assert.equal(prompt('buy').label, 'tut_note', 'read the sleeping robot note before shopping');
-ctx.G.save.storyVersion=2;ctx.G.save.items={};
-const drawer={type:'chest',extra:'it:batt',x:400,y:400,w:32,h:32,opened:false};
-ctx.G.statics.push(drawer);ctx.G.near=null;
-assert.equal(prompt('buy').label,'tut_cell','new opening points to hidden battery');
-assert.equal(prompt('buy').action,'MOVE');
-ctx.G.save.items.ratchetCell=1;
-assert.equal(prompt('buy').label,'tut_approach','carry the found battery back to Ratchet');
-ctx.G.near=ratchet;
-assert.equal(prompt('buy').label,'tut_note','found battery points back to Ratchet');
-delete ctx.G.save.storyVersion;ctx.G.statics=[ratchet];ctx.G.near=ratchet;
-ctx.npcLive = () => true;
-assert.equal(prompt('buy').label, 'tut_buy');
-ctx.PAD.on = true; assert.equal(hand('buy'), 'B');
-ctx.TOUCH.enabled = true; assert.equal(hand('buy'), 'INT');
-ctx.TOUCH.enabled = false; ctx.PAD.on = false;
-
-// Use the production binding resolver for remapped controls and menu-only
-// actions. A fixed "View" label would point at claws, not the skill tree.
+// The player's own controls, by the production resolver (js/story-opening.js).
+const so = fs.readFileSync(path.join(__dirname, '../js/story-opening.js'), 'utf8');
+vm.runInContext(so.slice(so.indexOf('const CTL_TOUCH ='), so.indexOf('// EVERY SAVE PLAYS THE SAME STORY')), ctx);
+ctx.KEYB = { UP: ['ArrowUp', 'KeyW'], INT: ['KeyE'], JUMP: ['KeyZ', 'Space'], ATK: ['KeyX', 'KeyJ'], HEAL: ['KeyF'] };
 const engine = fs.readFileSync(path.join(__dirname, '../js/engine.js'), 'utf8');
 vm.runInContext(engine.slice(engine.indexOf('function howToOpen('),
   engine.indexOf('// The same answer, phrased')), ctx);
 ctx.padLabel = n => ({ 0: 'A', 1: 'B', 2: 'X', 5: 'RB', 9: 'Start' }[n] || '—');
-ctx.PAD.map = { JUMP: 5, INT: 2, SKILL: -1, PAUSE: 9 };
-ctx.PAD.on = true;
-assert.equal(hand('buy'), 'X', 'interaction follows remapping');
-assert.equal(hand('skill'), 'Start ▸ pa_SKILL', 'unbound skills show the menu route');
+
+// THE BOOTH IS THE FIRST STEP PAST THE GATES. Approaching it teaches only
+// movement (an arrow, no button lit); at its door the one control is UP.
+ctx.doors = [{ x: 500, style: 'booth' }];
+assert.equal(hand('booth'), '→');
+assert.equal(prompt('booth').vb, null);
+assert.equal(prompt('booth').label, 'op_booth');
+ctx.player.x = 488;
+assert.equal(hand('booth'), '↑');
+assert.equal(prompt('booth').action, 'UP');
+assert.equal(prompt('booth').target.x, 500);
+ctx.player.x = 600;
+assert.equal(hand('booth'), '←');
+
+// Inside: the letter on Ratchet first, then the drawer, then Ratchet again.
+ctx.G.roomId = 'A0B'; ctx.G.roomDef.exits = {};
+const ratchet = { type: 'npc', extra: 'ratchet', x: 300, y: 400, w: 32, h: 40 };
+ctx.G.statics = [ratchet]; ctx.G.near = ratchet; ctx.player.x = 290;
+assert.equal(hand('note'), 'E');
+assert.equal(prompt('note').target.x, 316);
+assert.equal(prompt('note').label, 'op_note', 'read the letter before anything else');
+ctx.G.save.storyVersion = 2; ctx.G.save.items = {};
+const drawer = { type: 'chest', extra: 'it:batt', x: 400, y: 400, w: 32, h: 32, opened: false };
+ctx.G.statics.push(drawer); ctx.G.near = ratchet;
+assert.equal(prompt('drawer').label, 'op_drawer', 'the drawer step points to the drawer');
+assert.equal(prompt('drawer').target.x, 416);
+assert.equal(prompt('drawer').action, 'MOVE', 'standing at Ratchet, the drawer is walked to');
+ctx.G.near = drawer;
+assert.equal(prompt('drawer').action, 'INT');
+drawer.opened = true; ctx.G.near = ratchet;
+assert.equal(prompt('drawer').target.x, 316, 'an opened drawer hands the marker back to Ratchet');
+assert.equal(prompt('repair').label, 'op_repair');
+assert.equal(prompt('repair').action, 'INT');
+const pod = { type: 'bench', x: 880, y: 400, w: 44, h: 52 };
+ctx.G.statics.push(pod);
+assert.equal(prompt('pod').target.x, 902, 'the pod is the one thing marked');
+assert.equal(prompt('pod').action, 'MOVE');
+ctx.G.near = pod; assert.equal(hand('pod'), 'E');
+ctx.G.near = ratchet;
+ctx.PAD.on = true; ctx.PAD.map = { JUMP: 5, INT: 2, SKILL: -1, PAUSE: 9 };
+assert.equal(hand('pack'), 'X', 'interaction follows remapping');
+ctx.PAD.on = false; ctx.TOUCH.enabled = true; assert.equal(hand('pack'), 'E', 'touch names the on-screen E button');
+ctx.TOUCH.enabled = false; ctx.PAD.on = true;
 ctx.G.roomId = 'W2';
 assert.equal(hand('jump'), 'RB', 'jump follows remapping');
-ctx.TOUCH.enabled = true;
-ctx.G.roomId = 'A0';
-assert.equal(hand('skill'), '☰ ▸ pm_skills', 'touch skills show their real menu route');
-ctx.TOUCH.enabled = false; ctx.PAD.on = false; ctx.PAD.map.JUMP = 0;
+ctx.PAD.on = false; ctx.PAD.map.JUMP = 0;
 
-// Backtracking to an earlier room points forward without replaying lessons.
-ctx.G.roomId = 'W1'; ctx.G.roomDef.exits = { R: 'W2' };
+// Backtracking leads FORWARD to the room the lesson lives in, never replays it.
+ctx.G.roomId = 'W1'; ctx.G.roomDef.exits = { R: 'W2' }; ctx.player.x = 10;
 assert.equal(hand('node'), '→');
 assert.equal(prompt('node').vb, null);
 ctx.G.roomId = 'W2'; ctx.G.roomDef.exits = {}; ctx.player.x = 488;
-assert.equal(hand('buy'), '↑');
+assert.equal(hand('note'), '↑', 'from the road, the way to the den is the gate');
 ctx.G.roomId = 'A0B';
-ctx.G.tut = { i: run("TUT_STEPS.findIndex(s => s.id === 'buy')"), hold: 0, t: 1 };
-ctx.drawTutor(); assert.equal(rings, 1, 'only the NPC gets a ring');
+ctx.G.tut = { i: run("TUT_STEPS.findIndex(s => s.id === 'pack')"), hold: 0, t: 1 };
+ctx.G.statics = [ratchet]; ctx.G.near = null; ctx.player.x = 100;
+ctx.drawTutor(); assert.equal(rings, 1, 'only Ratchet gets a ring');
 ctx.G.state = 'DIALOG'; ctx.drawTutor(); assert.equal(rings, 1, 'dialogue owns the screen');
 ctx.G.state = 'PLAY'; ctx.G.gateWalk = {}; ctx.drawTutor(); assert.equal(rings, 1, 'door film owns the screen');
 ctx.G.gateWalk = null;
-
-// Returning from the booth to a meadow lesson must point at the doorway,
-// not an imaginary node, and never tell the player to walk into its right wall.
+// a lesson outside, asked for in the den: the den's own door, never its right wall
 ctx.player.x = 488;
 assert.equal(hand('node'), '↑');
-assert.equal(prompt('node').label, 'tut_return');
-assert.equal(hand('go'), '↑');
+assert.equal(prompt('node').label, 'op_back');
+assert.equal(hand('atk'), '↑');
 assert.equal(prompt('go').target.x, 500);
 
-// One keyboard jump binding shown, with the corresponding pad/touch names.
+// One keyboard binding shown per step, and the pad/touch names for it.
 ctx.G.roomId = 'W2';
-assert.equal(hand('jump'), 'Space');
+assert.equal(hand('jump'), 'Z');
 ctx.PAD.on = true; assert.equal(hand('jump'), 'A');
-ctx.TOUCH.enabled = true; assert.equal(hand('jump'), 'JUMP');
-ctx.TOUCH.enabled = false; ctx.PAD.on = false;
+ctx.TOUCH.enabled = true; ctx.PAD.on = false; assert.equal(hand('jump'), '⤒');
+ctx.TOUCH.enabled = false;
 
-// Do not reset or renumber old saves when improving presentation.
-assert.equal(ctx.tutRestore({ flags: { tutI: 7 } }), 7);
-assert.equal(step('buy').id, run('TUT_STEPS[7].id'));
-ctx.G.save.flags = { tutI: 7 };
+// SAVES RESUME ON THE LESSON BY NAME, and an index written by the old list
+// lands on the lesson that replaced it — carried past what the save already did.
+assert.equal(run("TUT_STEPS[" + ctx.tutRestore({ flags: { tutId: 'pod' } }) + "].id"), 'pod');
+assert.equal(run("TUT_STEPS[" + ctx.tutRestore({ flags: { tutI: 7 } }) + "].id"), 'note', 'old "buy" resumes at the letter');
+assert.equal(run("TUT_STEPS[" + ctx.tutRestore({ flags: { tutI: 7, ratchetRepaired: 1, opTold: 1 } }) + "].id"), 'pod',
+  'an old save that already woke him is not asked to read his letter again');
+assert.equal(run("TUT_STEPS[" + ctx.tutRestore({ flags: { tutI: 2 } }) + "].id"), 'jump');
+ctx.G.save.flags = { tutId: 'repair', tutI: 7 };
+const repairAt = run("TUT_STEPS.findIndex(s => s.id === 'repair')");
 ctx.tutSave(ctx.G.save, { i: 2 });
-assert.equal(ctx.G.save.flags.tutI, 7); assert.equal(writes, 0);
-ctx.tutSave(ctx.G.save, { i: 8 });
-assert.equal(ctx.G.save.flags.tutI, 8); assert.equal(writes, 1);
+assert.equal(ctx.G.save.flags.tutId, 'repair', 'never written backwards'); assert.equal(writes, 0);
+ctx.tutSave(ctx.G.save, { i: repairAt + 1 });
+assert.equal(ctx.G.save.flags.tutId, 'pod'); assert.equal(writes, 1);
 
 // Real updateTutor progression still requires doing the lesson, then waits
 // for its acknowledgement before advancing exactly once.
 ctx.G.roomId = 'W1'; ctx.G.roomDef = { w: 32, exits: { R: 'W2' } };
-ctx.G.save.flags = {}; ctx.G.tut = null; ctx.G.statics = []; ctx.player.x = 10;
+ctx.G.save.flags = {}; ctx.G.tut = null; ctx.G.statics = []; ctx.player.x = 10; ctx.player.vx = 0;
 ctx.updateTutor(0.3); assert.equal(ctx.G.tut.i, 0); assert.equal(ctx.G.tut.hold, 0);
 ctx.player.vx = 200; ctx.updateTutor(0.3);
 assert.equal(ctx.G.tut.i, 0); assert(ctx.G.tut.hold > 0);
-ctx.updateTutor(0.8); assert.equal(ctx.G.tut.i, 1); assert.equal(ctx.G.save.flags.tutI, 1);
+ctx.updateTutor(0.8); assert.equal(ctx.G.tut.i, 1); assert.equal(ctx.G.save.flags.tutId, 'out');
 assert.equal(ctx.tutAllows('ATK'), false);
 assert.equal(ctx.tutAllows('JUMP'), true, 'already available movement remains responsive');
+// NOSTOS shares the rooms, not Ratchet's story: its walk passes over his steps.
+ctx.isHero = () => true; ctx.G.roomId = 'A0'; ctx.G.roomDef = { w: 64, exits: { R: 'A1' } };
+ctx.G.tut = { i: run("TUT_STEPS.findIndex(s => s.id === 'booth')"), t: 0, hold: 0 };
+for (let k = 0; k < 8; k++) ctx.updateTutor(0.1);
+assert.equal(run('TUT_STEPS[G.tut.i].id'), 'heal', 'the hero world skips the den lessons');
+assert.equal(prompt('heal').label, 'tut_heal', '...and keeps its own wording');
+ctx.isHero = () => false;
 console.log('PASS tutorial-clarity: contextual controls, one target, dialogue priority, save continuity, progression');
 
 // The map remains available, but its first-use announcement waits for a

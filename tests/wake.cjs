@@ -42,7 +42,8 @@ const OUT = require('node:path').join(__dirname, 'out/');
       // one press completes the caption, the next turns the panel
       if (s.state==='PANELS') {await steer(null);await page.keyboard.press('Enter');await page.waitForTimeout(350);continue;}
       if (s.wake || s.cut || s.gate || s.state!=='PLAY') {await page.waitForTimeout(80);continue;}
-      if (s.step==='buy' && s.room==='A0B') {succeeded=true;break;}
+      // the booth is the first thing past the gates; inside, the letter waits
+      if (s.step==='note' && s.room==='A0B') {succeeded=true;break;}
       if (s.hold>0) {await steer('ArrowRight');await page.waitForTimeout(80);continue;}
       if (s.action==='MOVE') {
         // An exit marker points THROUGH the seam, not to a spot to turn around at.
@@ -63,9 +64,11 @@ const OUT = require('node:path').join(__dirname, 'out/');
     await steer(null);
     await page.screenshot({path:OUT+'wake-verified.png'});
     assert(succeeded,'fresh tutorial did not reach the workshop; last state: '+JSON.stringify(trace.at(-1)));
-    for (const id of ['move','out','jump','gate','atk','kill','coin','buy']) assert(learned.has(id),'missed taught verb: '+id);
+    for (const id of ['move','out','jump','gate','booth']) assert(learned.has(id),'missed taught verb: '+id);
+    // and nothing was fought on the way to Ratchet
+    assert(!learned.has('atk'),'a fight came before the booth');
     assert.deepEqual(errors,[]);
-    console.log('PASS fresh keyboard opening: wake, walk, obstacle jump, enter city, attack, collect scrap, walk to and enter workshop');
+    console.log('PASS fresh keyboard opening: wake, walk, obstacle jump, enter city, straight to and into the workshop, no fight on the way');
   } finally {
     fs.writeFileSync(OUT+'wake-trace.json',JSON.stringify({trace,errors,succeeded},null,2));
     await browser.close();
