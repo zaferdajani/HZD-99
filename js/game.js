@@ -2535,6 +2535,9 @@ function tickNPCVox() {
 function update(dt) {
   if (G.state === 'REPAIR') { updateRepair(dt); narrativeAudioTick(); return; }
   if (typeof ComicRewards !== 'undefined' && ComicRewards.tick(dt)) return;
+  // THE STORY PANELS (js/panels.js): a story beat's manhwa crops take over at
+  // the first safe moment after it — never mid-fight, mid-dialogue or mid-crossing
+  if (typeof panelsTick === 'function' && panelsTick(dt)) return;
   if (typeof heroMotionGate === 'function' && heroMotionGate(dt)) return;
   if (typeof tutorialTick === 'function') tutorialTick();
   narrativeAudioTick();
@@ -2763,6 +2766,8 @@ function update(dt) {
   else if (G.state === 'TCFG') updateTouchCfg();
   else if (G.state === 'CINE') updateCine(dt);
   else if (G.state === 'CUT') updateCut(dt);
+  else if (G.state === 'PANELS') updatePanels(dt);
+  else if (G.state === 'PANELLIST') updatePanelList();
   else if (G.state === 'MENU') updateMenu();
   else if (G.state === 'LANGSEL') updateLangSel();
   else if (G.state === 'DIFF') updateDiff();
@@ -3004,6 +3009,8 @@ function pauseItems() {
   ];
   it.push({ id: 'films', label: t('film_title') });
   if (!isHero()) it.push({ id: 'comics', label: LANG === 'ar' ? 'ذكريات المانهوا' : 'Manhwa memories' });
+  // the approved manhwa's panels, replayable once seen (js/panels.js)
+  if (!isHero() && typeof panelsSeenList === 'function' && panelsSeenList().length) it.push({ id: 'panels', label: t('pn_menu') });
   if (pauseHasTouch()) it.push({ id: 'touch', label: t('tl_title') });
   // THE PICTURE'S GESTURES, AND THE WAY OUT OF THEM. A control the player
   // cannot see is a control the player must be able to switch off: the picture
@@ -3074,6 +3081,7 @@ function updatePause() {
     else if (cur.id === 'qual') { qualCycle(); G.toast(t('qual') + '  ' + qualLabel()); }
     else if (cur.id === 'films') { G.state = 'FILMS'; G.filmIdx = 0; }
     else if (cur.id === 'comics') ComicRewards.library();
+    else if (cur.id === 'panels') { G.state = 'PANELLIST'; G.panelIdx = 0; }
     else if (cur.id === 'touch') G.state = 'TCFG';
     else if (cur.id === 'restart') {
       // same difficulty, same world, nothing carried — the run starts over
@@ -15360,6 +15368,7 @@ function draw(tms) {
   if (typeof drawHeroMotionLoading === 'function' && drawHeroMotionLoading(c)) return;
   if (st === 'CINE') { drawCine(); return; }
   if (st === 'CUT') { drawCut(); return; }
+  if (st === 'PANELS') { drawPanels(); return; }
   if (st === 'MENU' || st === 'LANGSEL' || st === 'DIFF' || st === 'WHO' || (st === 'CTRL' && G.ctrlBack === 'MENU') || st === 'GAMEOVER') {
     drawMenuBG(tsec);
     if (st === 'LANGSEL') {
@@ -15763,6 +15772,8 @@ function draw(tms) {
     drawCrest();
   } else if (st === 'FILMS') {
     drawFilms();
+  } else if (st === 'PANELLIST') {
+    drawPanelList();
   } else if (st === 'SHOP') {
     drawShop();
   } else if (st === 'SKILLS') {
