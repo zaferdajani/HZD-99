@@ -194,6 +194,10 @@ const { chromium } = require('playwright');
     const sv = newSave(1); sv.flags.woke = 1; sv.flags.tut = 1; sv.time = 99; startGame(sv); loadRoom('A2');
     window.requestAnimationFrame = () => 0; await new Promise(r => setTimeout(r, 80));
     draw = () => {}; drawTouchUI = () => {}; pollGamepad = () => {}; preloadTick = () => {};
+    // the story's overlays are not what is measured here: the corridor meeting
+    // an earlier section staged in this room queues its manhwa (js/panels.js),
+    // which would freeze one run's flier mid-path and not another's
+    if (typeof panelsTick === 'function') panelsTick = () => {};
     const rand0 = Math.random;
     const run = (fps, hunt) => {
       Math.random = () => 0.37;
@@ -202,7 +206,7 @@ const { chromium } = require('playwright');
       surfCurve = null;
       G.enemies = []; G.boss = null; G.statics = []; G.pickups = []; G.plats = []; G.saws = []; G.pools = [];
       G.wake = G.cut = G.gateWalk = G.trans = G.dialog = G.bossEntry = G.tut = G.lesson = null;
-      G.hitStop = 0; G.state = 'PLAY'; inputSuspended = false; PAD.on = false;
+      G.hitStop = 0; G.state = 'PLAY'; G.panels = null; inputSuspended = false; PAD.on = false;
       player = new Player(hunt ? 30 * TILE : 70 * TILE, 15 * TILE - 36 - 0.01);
       player.on = true; player.noHeightfield = true; player.iT = 1e9;
       for (const k in keys) keys[k] = 0; for (const k in keysP) keysP[k] = 0;

@@ -59,6 +59,9 @@ const { chromium } = require('playwright');
       }
     }
     const frame = (body, dx) => {
+      // a guardian's room may open on its entry beat (G.bossEntry), which
+      // holds the simulation; the eyes are what is measured, not the entrance
+      G.bossEntry = null; if (G.state !== 'PLAY') G.state = 'PLAY';
       if (dx) { body.x += dx; body.vx = dx * 60; body.faceVis = body.dir = dx < 0 ? -1 : 1; } else body.vx = 0;
       body.anim = (body.anim || 0) + 1 / 60;
       update(1 / 60);
@@ -100,7 +103,9 @@ const { chromium } = require('playwright');
         frame(body, i < 12 ? -3 : 3);
         if (!body._eyeN) continue;
         const ex = body._eyeW[0], ey = body._eyeW[1];
-        const young = infEyeParticles(body).filter(p => p.age < 1 / 60 + 1e-4);
+        // born in THIS frame's draw: the smoke is laid as the eye is drawn,
+        // the newest at age zero (a frame-old wisp is the frame before's eye)
+        const young = infEyeParticles(body).filter(p => p.age < 1e-6);
         if (!young.length) continue;
         frames++; born += young.length;
         worst = Math.max(worst, Math.min(...young.map(p => Math.hypot(p.x - ex, p.y - ey))));

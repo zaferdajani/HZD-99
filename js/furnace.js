@@ -158,6 +158,10 @@ function drgWalkRig(c, ph, wk, shake, rot) {
   drgLegDraw(c, DRG_HIPS[2][2], DRG_HIPS[2][0], DRG_HIPS[2][1], legs[2].a1, legs[2].a2, true);
   drgLegDraw(c, DRG_HIPS[3][2], DRG_HIPS[3][0], DRG_HIPS[3][1], legs[3].a1, legs[3].a2, true);
   c.drawImage(cut, -s[2] / 2, -s[3]);
+  // the cut is the walk figure minus its legs, in the walk figure's frame:
+  // its eye is the walk figure's (the stepping rig drew none —
+  // tests/infection-roster found ATLAS walking with no eye at all)
+  infEyeArt(c, 'dragonParts:walk', 0, -s[2] / 2, -s[3], s[2], s[3]);
   if (wk > 0) {
     const hcut = drgWalkCut(true);
     if (hcut) {

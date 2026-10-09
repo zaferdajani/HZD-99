@@ -10162,7 +10162,11 @@ function drawFlierMini(c, e) {
 // authored frames, sampled at angles they were rendered for and never reached.
 // ---------------------------------------------------------------------------
 function enemyYaw(e) {
-  const base = yawColF(e.faceVis);
+  // a turntable row rendered the other way round reads its facing mirrored
+  // (ATLAS.sub[kind].yawFlip, js/atlas.js) — here too, or the walker's base
+  // angle undoes it and the body turns its back the moment it stops
+  const Sub = typeof ATLAS !== 'undefined' && ATLAS.sub[e.kind];
+  const base = yawColF(Sub && Sub.yawFlip ? -e.faceVis : e.faceVis);
   // The turntable wraps, and angles 5-7 are the BACK of the model. A
   // side-scroller must never show those, so every offset is clamped to keep the
   // whole sweep inside the front hemisphere 0..4 — measured, because the first
