@@ -235,10 +235,20 @@ function breakGround(b) {
 function breakStep(dt) {
   const S = G.break, b = G.boss;
   if (!S || !b || !b.meet) { G.break = null; return; }
+  // HE WALKS, HE DOES NOT SLIDE. `meet` switches Boss.update off, and with it
+  // the bookkeeping that turns ground covered into stride — so the stalk strip
+  // sat on one frame while he crossed the room at 210 px/s. The first meeting
+  // (meetStep) brackets its step with the same two calls; this one now does.
+  beastMotionBegin(b);
+  breakPhase(S, b, dt);
+  beastMotionEnd(b, dt);
+}
+function breakPhase(S, b, dt) {
   S.t += dt;
   const pcx = player.x + player.w / 2;
   const W = G.roomDef.w * TILE;
   if (S.ph === 'come') {
+    b.st = 'stalk';
     b.face = -1; b.vx = -210; b.x += b.vx * dt; breakGround(b);
     // He stops well outside his own reach — he is not hunting her this time —
     // and never against the east wall, where the camera's clamp would cut him
@@ -246,6 +256,7 @@ function breakStep(dt) {
     const stopAt = Math.min(pcx + 250, W - 5 * TILE);
     if (b.cx() <= stopAt || S.t > 4) {
       b.vx = 0; S.ph = 'still'; S.t = 0;
+      b.st = 'idle';                        // standing is standing, not a frozen step
       b.purified = true;                    // the authored veins run clean
       if (typeof G.toast === 'function') G.toast(t((BREAK_SPOTS[G.roomId] || BREAK_SPOTS.A3).line));
     }

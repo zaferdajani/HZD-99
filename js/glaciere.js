@@ -61,6 +61,7 @@ function glcFig(c, key, rot, shake, alpha) {
   if (shake) c.translate(rnd(-shake, shake), rnd(-shake, shake));
   if (rot) c.rotate(rot);
   c.drawImage(im, s[0], s[1], s[2], s[3], -s[2] / 2, -s[3], s[2], s[3]);
+  if (alpha == null || alpha >= 0.5) infEyeArt(c, 'glaciereParts:' + key, 0, -s[2] / 2, -s[3], s[2], s[3]);
   c.restore();
   return true;
 }

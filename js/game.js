@@ -1018,6 +1018,7 @@ function settlePendingBossReward() {
   }
 }
 function loadRoom(id) {
+  infEyeClearAll();                 // no smoke follows her through a door, a respawn or a load
   repairClose(false);
   settlePendingBossReward();
   if (typeof npcVoxStopAll === 'function') npcVoxStopAll();   // voices stay in their rooms
@@ -2547,7 +2548,7 @@ function update(dt) {
       if (inP('ATK') && player) player.atkBuf = Math.max(player.atkBuf || 0, 0.2);
       if (inP('JUMP') && player) player.jbuf = Math.max(player.jbuf || 0, 0.12);
       if (inP('PAUSE') || inP('BACK')) { G.state = 'PAUSE'; G.pauseIdx = 0; sfx('ui'); }
-      G.hitStop = Math.max(0, G.hitStop - dt); updateParts(dt * 0.25); return;
+      G.hitStop = Math.max(0, G.hitStop - dt); updateParts(dt * 0.25); infEyeUpdate(dt * 0.25); return;
     }
     meetCheck(); if (G.meet) meetStep(dt);
     // THE BREAK (js/story-opening.js): the one moment NULLFANG lets go of the
@@ -2720,12 +2721,13 @@ function update(dt) {
       updateCam(player.x + player.w / 2, player.y + player.h / 2, G.roomDef.w * TILE, G.roomDef.h * TILE, dt);
     }
     updateParts(dt);
+    infEyeUpdate(dt);
     for (const tt of G.toasts) tt.t -= dt;
     G.toasts = G.toasts.filter(tt => tt.t > 0);
     if (G.zoneToast) { G.zoneToast.t -= dt; if (G.zoneToast.t <= 0) G.zoneToast = null; }
   }
   else if (G.state === 'DEAD') {
-    updateParts(dt); fxDecay(dt);
+    updateParts(dt); fxDecay(dt); infEyeUpdate(dt);
     G.deadT -= dt;
     if (G.deadT <= 0) respawn();
   }
@@ -13707,6 +13709,7 @@ function drawWorldFrame() {
   // occluder crosses IN FRONT of her and can never be mistaken for footing.
   c.save();
   c.translate(-Math.round(camSX()), -Math.round(camSY()));
+  infEyeWorldBegin(c);              // world -> pixels, so eyes report WORLD positions
   drawLair();                       // behind the level — see the LAIR table
   drawRoomProp();                   // the cradle, the gates — see ROOM_PROP
   drawFlora();                      // ...and what grows in it — see FLORA
@@ -13968,6 +13971,7 @@ function drawWorldFrame() {
     c.fillStyle = bg2; c.beginPath(); c.arc(bt.x, bt.y, 60 * (1.4 - k), 0, 7); c.fill();
     c.restore(); c.globalAlpha = 1;
   }
+  if (!G.artProbe) infEyeDraw(c);    // the infection's eyes and the smoke they leave
   drawParts(c);
   drawLights(P);
   if (G.rings.length && !G.artProbe) drawRings(c);

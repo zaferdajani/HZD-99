@@ -677,11 +677,13 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
         c.translate(0, legDh * sink);
       }
       c.drawImage(im, sxOf(cc), sy, sw2, sh2 * (hipF + 0.05), ddx, ddy, dw, dh * (hipF + 0.05));
+      atlasEyes(c, A, S, IN, cw, ch, cc, ddx, ddy, dw, dh, sw2, sh2);
       c.restore();
     };
     limbPass(col0);
   } else {
     c.drawImage(im, sxOf(col0), sy, sw2, sh2, ddx, ddy, dw, dh);
+    atlasEyes(c, A, S, IN, cw, ch, colF > 0.5 ? col1 : col0, ddx, ddy, dw, dh, sw2, sh2);
     if (colF > 0.03) {                       // the next angle fades in over it
       c.save(); c.globalAlpha *= colF;
       c.drawImage(im, sxOf(col1), sy, sw2, sh2, ddx, ddy, dw, dh);
@@ -692,6 +694,12 @@ function drawAtlas(c, subject, faceVis, cx, footY, hitH, opts) {
   return true;
 }
 
+// The eye map is measured over WHOLE cells; the atlas draws an inset of each
+// (ATLAS_INSET), so the cell's full rectangle is recovered from the inset one.
+function atlasEyes(c, A, S, IN, cw, ch, col, ddx, ddy, dw, dh, sw2, sh2) {
+  const kx = dw / sw2, ky = dh / sh2;
+  infEyeArt(c, A.key, S.row * A.cols + col, ddx - cw * IN.side * kx, ddy - ch * IN.top * ky, cw * kx, ch * ky);
+}
 // the walk's stride, in px of floor per half-cycle of the bob: at the crawler's
 // patrol speed this is the cadence the old clock gave it (6 + 62/30 rad/s), so
 // the same machine walks at the same rhythm — it just cannot slip any more

@@ -125,6 +125,7 @@ function drawPrismSheet(c, b) {
   // the turn is a real squash through the vertical, matching the turntable
   c.scale(dir * (0.88 + 0.12 * ta), 1);
   c.drawImage(im, sx, sy, sw, sh, -dw / 2, -dh, dw, dh);
+  infEyeArt(c, 'prismParts@' + sx + ',' + sy, 0, -dw / 2, -dh, dw, dh);
 
   // the hit frame: the crystal takes the light straight through, so the whole
   // cat lifts towards white for an instant, punched through its own alpha
@@ -479,6 +480,7 @@ function przBody(c, b, P, fv) {
   // THE EYE: wide, cyan, alive. Blinks slowly; pupil narrows when hunting.
   {
     const open = clamp(P.eyeK, 0.04, 1);
+    infEyeMark(c, -5.2, -2.6);
     c.save(); c.translate(-5.2, -2.6);
     c.scale(1, open);
     c.shadowColor = PRZ.cyan.mid; c.shadowBlur = 8 * P.glow;

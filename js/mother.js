@@ -108,6 +108,7 @@ function mvBlit(c, key, ang, h, alpha, flip) {
   if (flip) c.scale(1, -1);
   c.globalAlpha *= (alpha == null ? 1 : alpha);
   c.drawImage(im, r[0], r[1], r[2], r[3], -w / 2, -h / 2, w, h);
+  if (key === 'coreS' || key === 'coreB' || key === 'coreD') infEyeArt(c, 'motherParts:' + key, 0, -w / 2, -h / 2, w, h);
   c.restore();
 }
 // a part hung out along a radius, so a plate sits in its sector rather than

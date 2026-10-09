@@ -1112,6 +1112,7 @@ function beastDraw(c, b, P) {
   c.rotate(P.neckA * 0.4 + P.headA * 0.8);
   bPart(c, 'head', 118, 92);
   // virus eye: a live glow over the authored eye, breathing with the state
+  infEyeMark(c, -80, -16);
   if (P.glow > 0.05) {
     c.save(); c.globalCompositeOperation = 'lighter';
     const eg = c.createRadialGradient(-80, -16, 1, -80, -16, 26 * P.glow);

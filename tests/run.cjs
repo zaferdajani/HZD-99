@@ -147,6 +147,7 @@ const SUITE = [
   ['cavedark',  'the cave is dark, and light is the only map of it'],
   ['terrainrun', 'irregularity is not elevation: she runs it, and so do they'],
   ['enemygait', 'machines stand on the floor, turn on their feet, fly the same at any frame rate, and step with the ground'],
+  ['infection-eyes', 'red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending'],
   ['reach',     'she hits what she is standing next to, and she turns to it'],
   ['gatecue',   'the first built thing the player finds sounds like one'],
   ['cuefamily', 'the things she is shot at with do not all sound alike'],

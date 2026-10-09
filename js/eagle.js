@@ -89,6 +89,8 @@ function egFigA(c, key, alpha, rot) {
   if (alpha != null) c.globalAlpha *= alpha;
   c.scale(EAGLE_F, EAGLE_F);
   c.drawImage(eagleImg(), s[0], s[1], s[2], s[3], -an[0], -an[1], s[2], s[3]);
+  // a cross-faded figure lends its eyes only while it is the one on top
+  if (alpha == null || alpha >= 0.5) infEyeArt(c, 'eagleParts:' + key, 0, -an[0], -an[1], s[2], s[3]);
   c.restore();
 }
 

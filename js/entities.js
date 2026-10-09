@@ -103,6 +103,7 @@ function drawSheet(c, key, n, cw, ch, frame, scale, yOff) {
   const dw = cw * scale, dh = ch * scale;
   c.imageSmoothingEnabled = false;
   c.drawImage(img, f * cw, 0, cw, ch, -dw / 2, -dh + (yOff || 0), dw, dh);
+  infEyeArt(c, key, f, -dw / 2, -dh + (yOff || 0), dw, dh);
   c.imageSmoothingEnabled = true;
   return true;
 }
@@ -9366,6 +9367,7 @@ class Enemy {
     const eyes = (x, y, s) => {
       const st = this.hypnoT > 0 ? 'alert' : (this.stagT > 0 ? 'overdrive' : 'locked');
       drawSensor(c, x + s * 0.9, y + s * 0.6, s * 0.62, st, this.anim);
+      infEyeMark(c, x + s * 0.9, y + s * 0.6);
     };
     // shaded metal body gradient (top-lit → dark belly) for dimensionality
     const eg = c.createLinearGradient(0, -12, 0, 14);
@@ -10357,6 +10359,7 @@ function drawRosterWalk(c, e, cx) {
   if (flip) c.scale(-1, 1);
   if (e.hurtT > 0) c.globalAlpha = 0.85;
   c.drawImage(im, cell * cw, 0, cw, im.naturalHeight, -dw / 2, -h, dw, h);
+  infEyeArt(c, S.img, cell, -dw / 2, -h, dw, h);
   if (e.hurtT > 0) {
     c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
     c.drawImage(im, cell * cw, 0, cw, im.naturalHeight, -dw / 2, -h, dw, h);
@@ -11182,7 +11185,7 @@ function drawSage(c, e) {
   c.fillStyle = ec; c.shadowColor = ec; c.shadowBlur = hot ? 9 : 5;
   const blink = e.locked ? 0.6 + Math.sin(t2 * 6) * 0.4 : 1;
   c.globalAlpha = blink;
-  for (const s of [-1, 1]) { c.beginPath(); c.arc(s * 2.6, -H2 + 8, 1.4, 0, 7); c.fill(); }
+  for (const s of [-1, 1]) { c.beginPath(); c.arc(s * 2.6, -H2 + 8, 1.4, 0, 7); c.fill(); infEyeMark(c, s * 2.6, -H2 + 8); }
   c.globalAlpha = 1; c.shadowBlur = 0;
   c.restore();
   }
@@ -11288,6 +11291,7 @@ function drawBat(c, e) {
   c.fillStyle = hot ? '#ff5f6d' : '#7a3540';
   if (hot) { c.shadowColor = '#ff5f6d'; c.shadowBlur = 8; }
   c.beginPath(); c.arc(0, hang ? 5.5 : -4.5, 2.1, 0, 7); c.fill();
+  if (!hang) infEyeMark(c, 0, -4.5);
   c.shadowBlur = 0;
   c.restore();
 }
@@ -11320,6 +11324,7 @@ function drawBossHold(c, b) {
     c.beginPath();
     c.ellipse(cx + s * b.w * 0.15, cy - b.h * 0.16, 3.6, 2.3, 0, 0, 6.2832);
     c.fill();
+    infEyeMark(c, cx + s * b.w * 0.15, cy - b.h * 0.16);
   }
   c.restore();
 }

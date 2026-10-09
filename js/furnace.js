@@ -50,6 +50,7 @@ function drgFig(c, key, wk, shake, rot) {
   if (shake) c.translate(rnd(-shake, shake), rnd(-shake, shake) * 0.5);
   if (rot) { c.translate(0, -s[3] * 0.45); c.rotate(rot); c.translate(0, s[3] * 0.45); }
   c.drawImage(im, s[0], s[1], s[2], s[3], -s[2] / 2, -s[3], s[2], s[3]);
+  infEyeArt(c, 'dragonParts:' + key, 0, -s[2] / 2, -s[3], s[2], s[3]);
   if (wk > 0) {
     // capped crossfade: white-hot must READ as him glowing, never erase him
     const h = drgHot();

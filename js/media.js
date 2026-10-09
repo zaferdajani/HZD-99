@@ -1096,6 +1096,7 @@ function drawPlateAnchored(c, key, cx, base, targetH, flip, pop, anchor) {
   if (flip) c.scale(-1, 1);
   const ay = anchor === 'mid' ? (box.y + box.h / 2) : (box.y + box.h);
   c.drawImage(im, -(box.x + box.w / 2) * dw, -ay * dh, dw, dh);
+  infEyeArt(c, key, 0, -(box.x + box.w / 2) * dw, -ay * dh, dw, dh);
   c.restore();
   return true;
 }
@@ -1204,6 +1205,7 @@ function drawStripCell(c, key, cell, cells, cx, base, h, flip) {
   c.translate(cx, base);
   if (flip) c.scale(-1, 1);
   c.drawImage(im, i * cw, 0, cw, ch, -dw / 2, -h, dw, h);
+  infEyeArt(c, key, i, -dw / 2, -h, dw, h);             // the eyes in this cell, for the infection
   c.restore();
   return true;
 }
@@ -1233,6 +1235,7 @@ function drawSetPlate(c, key, cx, base, frameH, flip, refKey) {
   c.translate(cx, base);
   if (flip) c.scale(-1, 1);
   c.drawImage(im, -ft.cx * dw, -ft.y * dh, dw, dh);
+  infEyeArt(c, key, 0, -ft.cx * dw, -ft.y * dh, dw, dh);
   c.restore();
   return true;
 }

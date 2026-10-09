@@ -352,6 +352,7 @@ function drawBeastPlate(c, e, ART, tame) {
   if (e.hurtT > 0) c.globalAlpha *= 0.85;
   const sx = cell >= 0 ? cell * cellW : 0;
   c.drawImage(im, sx, 0, cellW, im.naturalHeight, -dw / 2, -dh / 2, dw, dh);
+  infEyeArt(c, A.img, cell >= 0 ? cell : 0, -dw / 2, -dh / 2, dw, dh);
   if (e.hurtT > 0) {
     c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
     c.drawImage(im, sx, 0, cellW, im.naturalHeight, -dw / 2, -dh / 2, dw, dh); c.restore();
@@ -993,6 +994,7 @@ function drawAlpha(c, b, cx, cy) {
   }
   if (b.hurtT > 0) c.globalAlpha *= 0.85;
   c.drawImage(im, -dw / 2, -dh / 2, dw, dh);
+  infEyeArt(c, A.img, 0, -dw / 2, -dh / 2, dw, dh);
   // THE RISING AMBER, ON A PLATE. Boss.draw paints the wind-up amber for the
   // rigs, and the Alpha returns before that line — so four of its five tells
   // wore no amber at all beyond the roar's floor ring, and the claw's warning

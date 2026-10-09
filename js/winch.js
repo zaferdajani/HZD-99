@@ -113,7 +113,9 @@ class YardWinch extends Enemy {
     const p0=pt(a.lens[0]),p2=pt(a.lens[2]);
     c.fillStyle=this.rescued?'#073f49':'#610909';c.fillRect(p0.x-2,p0.y-2,p2.x-p0.x+4,p2.y-p0.y+4);
     c.globalAlpha=this.disabled||this.rescued?0.95:0.75+0.2*Math.sin(this.anim*6);
-    c.fillStyle=this.rescued?'#59efff':'#ff3927';c.fillRect(p0.x+1,p0.y+1,p2.x-p0.x-2,p2.y-p0.y-2);c.restore();c.restore();
+    c.fillStyle=this.rescued?'#59efff':'#ff3927';c.fillRect(p0.x+1,p0.y+1,p2.x-p0.x-2,p2.y-p0.y-2);c.restore();
+    infEyeMark(c,(p0.x+p2.x)/2,(p0.y+p2.y)/2);   // its one eye, for the infection (a rescued winch reports none)
+    c.restore();
     // The warning follows the same pivot and tip used by the damaging sweep.
     if(this.phase==='tell') {const p=this.armPoint();c.save();c.strokeStyle='#ffc24a';c.lineWidth=2;
       c.beginPath();c.arc(p.x,p.y,15+3*Math.sin(this.anim*12),0,Math.PI*2);c.stroke();c.restore();}
