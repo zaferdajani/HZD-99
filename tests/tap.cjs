@@ -68,7 +68,8 @@ const { chromium } = require('playwright');
     const out = [];
     for (let i = 0; i < PL.items.length; i++) {
       G.pauseIdx = -1;
-      tapMenu(480, PL.y0 + i * PL.step);
+      // the row's own drawn position (pauseLayout().pos: one or two columns)
+      { const P = PL.pos ? PL.pos(i) : { x: 480, y: PL.y0 + i * PL.step }; tapMenu(P.x, P.y); }
       out.push(G.pauseIdx === i ? i : G.pauseIdx);
     }
     G.pauseConfirm = null; G.state = 'PLAY';
@@ -130,6 +131,11 @@ const { chromium } = require('playwright');
       G.save.flags['survivor_' + sp.extra] = 1;
       player.x = sp.x; player.y = sp.y - 6; player.vx = 0; player.vy = 0;
       await new Promise(r => requestAnimationFrame(r));
+      // a player reads the evolution card the felled guardians just raised
+      // before talking: a conversation no longer overwrites an open card, it
+      // waits behind it (js/overlay.js), so close the card the way reading does
+      if (G.dialog) { G.dialog = null; G.state = 'PLAY'; }
+      if (typeof overlayClear === 'function') overlayClear();
       G.near = findNear(); if (G.near) doInteract(G.near);
       out.push({ tier: standingTier(), first: (G.dialog && G.dialog.lines[0]) || '',
                  want: t('sl_' + sp.extra + '_' + standingTier()) });

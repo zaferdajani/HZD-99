@@ -119,6 +119,7 @@ const SUITE = [
   ['climbout',  'every floor she can land on she can leave, and every gate names its power'],
   ['cover',     'the platform she is standing on stops a shot, from either side'],
   ['tap',       'tap where a thing is drawn and that thing happens'],
+  ['textreveal','words typed at a reading pace, paged, read before they turn, one overlay at a time'],
   ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
   ['daze',      'a group of hits breaks NULLFANG open, pays out, closes, and cannot be held'],
   ['openings',  'every boss move opens for at least one hit, and only the bait pays out three'],

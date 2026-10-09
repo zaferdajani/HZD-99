@@ -120,8 +120,11 @@ const { chromium } = require('playwright');
     // would. Without this the step reads as hung when the game is in fact
     // waiting to be read.
     if (G.state === 'DIALOG') {
-      for (let i = 0; i < 60 && G.state === 'DIALOG'; i++) {
-        keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); keys['Enter'] = 0;
+      // a reader's pace (js/overlay.js): a press every frame is a mash and
+      // turns no page; one every third of a second reads it through
+      for (let i = 0; i < 600 && G.state === 'DIALOG'; i++) {
+        if (i % 10 === 0) { keysP['Enter'] = 1; keys['Enter'] = 1; }
+        update(1 / 30); keys['Enter'] = 0; keysP['Enter'] = 0;
       }
       return;
     }
@@ -193,7 +196,9 @@ const { chromium } = require('playwright');
       // ...and the first cell is THE PACK: its card takes the screen and the
       // walk waits on it, the way it waits on any card. A player reads it and
       // closes it; so does the harness.
-      if (G.state === 'DIALOG') for (let i = 0; i < 60 && G.state === 'DIALOG'; i++) { keysP['Enter'] = 1; keys['Enter'] = 1; update(1 / 30); keys['Enter'] = 0; }
+      if (G.state === 'DIALOG') for (let i = 0; i < 600 && G.state === 'DIALOG'; i++) { if (i % 10 === 0) { keysP['Enter'] = 1; keys['Enter'] = 1; } update(1 / 30); keys['Enter'] = 0; keysP['Enter'] = 0; }
+      // the card hands back to the shop it was bought in; she walks out of it
+      if (G.state === 'SHOP') { keysP['Escape'] = 1; update(1 / 30); keysP['Escape'] = 0; }
       return;
     }
     if (G.state === 'PLAY') {
@@ -241,10 +246,10 @@ const { chromium } = require('playwright');
       // PAGE IT THROUGH IN ONE TRY, for the same reason the walk is done in
       // one: Ratchet's first talk is a long story, one page per try spent the
       // budget on reading, and the step ran out as "buy, buy, buy, buy".
-      for (let i = 0; i < 200 && G.state === 'DIALOG'; i++) {
-        keysP['Enter'] = 1; keys['Enter'] = 1;
+      for (let i = 0; i < 2000 && G.state === 'DIALOG'; i++) {
+        if (i % 10 === 0) { keysP['Enter'] = 1; keys['Enter'] = 1; }
         update(1 / 30);
-        keys['Enter'] = 0;
+        keys['Enter'] = 0; keysP['Enter'] = 0;
       }
       return;
     }

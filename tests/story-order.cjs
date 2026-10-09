@@ -282,7 +282,11 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
         const gap = G.grid.tGap;
         player.x = ((gap[0] + gap[1] + 1) / 2) * TILE - player.w / 2; player.y = -player.h - 6; player.vy = -300;
         G.trans = null; checkTransitions();
-        const said = (G.toasts || []).map(x => x.text).join(' | ');
+        // the first refusal is a CARD she acknowledges (js/overlay.js storyNote,
+        // owner 2026-10-09: important instructions stay until acknowledged);
+        // later bumps are toasts — either one says why
+        const said = (G.toasts || []).map(x => x.text)
+          .concat(G.dialog && G.dialog.note ? G.dialog.lines : []).join(' | ');
         // an open shaft is crossed by the silent handover (VERTICAL LINKS): the
         // room really changes, with no G.trans cut — count either as crossing
         return { to: (G.trans && G.trans.to) || (G.roomId !== 'A3' ? G.roomId : null), said };

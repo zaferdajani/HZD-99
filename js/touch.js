@@ -361,9 +361,15 @@ function tapMenu(x, y) {
     if (i >= 0 && i < 3 && y >= 150 && y <= 150 + 3 * 105) { G.diffIdx = i; tPress('VOK'); }
   } else if (st === 'PAUSE') {
     // the same geometry the menu is drawn with — see pauseLayout
+    // (two columns when the list is long: the row is the one whose drawn
+    // position is nearest the finger, in the column the finger is in)
     const PL = pauseLayout();
-    const i = Math.round((y - PL.y0) / PL.step);
-    if (i >= 0 && i < PL.items.length && Math.abs(y - (PL.y0 + i * PL.step)) <= PL.step / 2) {
+    let i = -1;
+    for (let k = 0; k < PL.items.length; k++) {
+      const P = PL.pos ? PL.pos(k) : { x: 480, y: PL.y0 + k * PL.step };
+      if (Math.abs(y - P.y) <= PL.step / 2 && (PL.cols !== 2 || Math.abs(x - P.x) <= PL.colW / 2)) { i = k; break; }
+    }
+    if (i >= 0) {
       // moving to a different row cancels a confirm that was waiting on the old
       // one, so a tap can never confirm something the player did not aim at
       if (i !== G.pauseIdx) G.pauseConfirm = null;

@@ -86,7 +86,15 @@ const G = {
   // it costs no randomness and a replayed frame draws the same ring.
   addRing(x, y, r0, col) { this.rings.push({ x, y, r: r0 || 12, a: 0.85, a0: 0.85, col: col || null, seed: ((x * 7 + y * 13) | 0) & 0x7fffffff }); },
   // nothing speaks over the first meeting (manga-direction §6: the silence IS the beat)
-  toast(text) { if (this.meet) return; this.toasts.push({ text, t: 3 }); },
+  // A STORY LINE IS NOT A TOAST (js/overlay.js storyToast): the sentences the
+  // story turns on become cards she acknowledges; the rest live long enough to
+  // be read, and inside a menu they are said where the menu can show them.
+  toast(text) {
+    if (this.meet) return;
+    if (typeof storyToast === 'function' && storyToast(text)) return;
+    if (typeof menuMsgSet === 'function') menuMsgSet(text);
+    this.toasts.push({ text, t: typeof toastLife === 'function' ? toastLife(text) : 3 });
+  },
   breakTile(tx, ty) {
     this.save.broken[this.roomId + ':' + tx + ',' + ty] = 1;
     // THE GROUND CURVE IS RE-READ. The heightfield she stands on is built
@@ -984,19 +992,28 @@ function grantMod(id) {
 // first seal she seats tells it, once, in the card that hands it over.
 function grantCrest(id) {
   if (G.save.crests.indexOf(id) < 0) G.save.crests.push(id);
-  showItem(t('c_' + id), t('c_' + id + 'd'));
-  if (G.dialog && !(G.save.flags && G.save.flags.crestTold)) {
+  const card = showItem(t('c_' + id), t('c_' + id + 'd'));
+  if (card && !(G.save.flags && G.save.flags.crestTold)) {
     if (!G.save.flags) G.save.flags = {};
     G.save.flags.crestTold = 1;
-    G.dialog.lines.push(t('crest_first'), t('crest_first2'));
+    card.lines.push(t('crest_first'), t('crest_first2'));
   }
 }
+// THE CARD WAITS ITS TURN (owner, 2026-10-09: nothing overlaps). It used to
+// overwrite whatever dialogue was open — the conversation simply vanished. Now
+// it queues behind anything on screen (js/overlay.js), opens in place of a menu
+// it was bought from and hands back to it, and RETURNS the card object, so a
+// caller that adds an onEnd or a line adds it to this card and not to whatever
+// happens to be G.dialog at the time.
 function showItem(name, desc, art, demo) {
-  sfx('win');
-  G.dialog = { name: t('got'), lines: [name + ' — ' + desc], i: 0, onEnd: null,
-               art: art || null, demo: demo || null };
-  G.state = 'DIALOG';
+  const card = { name: t('got'), lines: [name + ' — ' + desc], i: 0, onEnd: null,
+                 art: art || null, demo: demo || null, item: true };
   persist();
+  const open = () => { sfx('win'); G.dialog = card; G.state = 'DIALOG'; };
+  if (typeof overlayRequest !== 'function') open();
+  else if (!G.dialog && typeof CARD_RETURN !== 'undefined' && CARD_RETURN[G.state]) { card.ret = G.state; open(); }
+  else overlayRequest(open, 'item');
+  return card;
 }
 
 // ---------- room loading ----------
@@ -1307,7 +1324,8 @@ function startGame(save) {
   // restart into the cradle, even though the new cat owned no dash.
   G.impact = null; G.flash = 0; G.hitStop = 0; G.rings = [];
   G.lesson = null; G.brDelta = null; G.elemPop = null; G.songWave = null;
-  G.dialog = null; G.toasts = []; G.zoneToast = null; G.lastZone = '';
+  G.dialog = null; G.toasts = []; G.zoneToast = null; G.lastZone = ''; G.menuMsg = null;
+  if (typeof overlayClear === 'function') overlayClear();
   G.tut = null; G.wake = null; G.meet = null; G.break = null; G.trans = null; G.gateWalk = null;
   G.coreFlash = null; G.coresFullT = 0; G.bolt = null;
   cam.shake = 0;
@@ -2154,8 +2172,9 @@ function forgeCrystal() {
     purifyPreload('gift');
     if (startPurifyCut('gift')) { G.cutEnd = () => alphaQuestOffer(); return; }
   }
-  showItem(t('i_crystal'), t('i_crystald'));
-  if (G.dialog) G.dialog.onEnd = () => alphaQuestOffer();
+  const card = showItem(t('i_crystal'), t('i_crystald'));
+  if (card) card.onEnd = () => alphaQuestOffer();
+  else if (G.dialog) G.dialog.onEnd = () => alphaQuestOffer();
 }
 function doInteract(s) {
   if (!s && typeof monoNearTarget === 'function') s = monoNearTarget();
@@ -2310,7 +2329,12 @@ function doInteract(s) {
         // ...and then they go back to being themselves. Guarded on the state
         // still being PLAY, because a hand-in can hand over a relic, and that
         // opens a card the shop must not slam shut.
-        if (base && G.state === 'PLAY') base();
+        // A card or a note that the errand raised goes first; the shop then
+        // opens behind it rather than not at all (js/overlay.js queue).
+        if (base) {
+          if (G.state === 'PLAY' && !(typeof overlayBusy === 'function' && overlayBusy())) base();
+          else if (typeof overlayRequest === 'function') overlayRequest(() => { if (G.state === 'PLAY') base(); }, 'shop');
+        }
       };
     }
     // ...and the first thing out of their mouth is what they make of her NOW.
@@ -2560,6 +2584,9 @@ function update(dt) {
   if (typeof heroMotionGate === 'function' && heroMotionGate(dt)) return;
   if (typeof tutorialTick === 'function') tutorialTick();
   narrativeAudioTick();
+  if (typeof menuMsgTick === 'function') menuMsgTick(dt);
+  // the next queued card / note / dialogue opens on the first free PLAY frame
+  if (G.state === 'PLAY' && typeof overlayPump === 'function') overlayPump();
   if (G.state === 'PLAY' || G.state === 'DIALOG') { tickNPCVox(); tickCaveLure(); }
   else if (typeof npcVoxQuietAll === 'function') npcVoxQuietAll();
   if (G.state === 'PLAY') {
@@ -2756,17 +2783,7 @@ function update(dt) {
     G.deadT -= dt;
     if (G.deadT <= 0) respawn();
   }
-  else if (G.state === 'DIALOG') {
-    if (inP('OK') || inP('INT') || inP('ATK')) {
-      G.dialog.i++;
-      if (G.dialog.i >= G.dialog.lines.length) {
-        const cb = G.dialog.onEnd; G.dialog = null; G.state = 'PLAY';
-        npcHush();                      // cut the line short with the box
-        if (cb) cb();
-      } else if (G.dialog.npc) npcSay(G.dialog.npc, G.dialog.i);
-      else sfx('ui');
-    }
-  }
+  else if (G.state === 'DIALOG') dialogUpdate(dt);   // paged, typed, mash-proof: js/overlay.js
   else if (G.state === 'OFFER') updateOffer(dt);
   else if (G.state === 'BRAID') {
     if (inP('BRAID') || inP('BACK') || inP('PAUSE')) { G.state = 'PLAY'; braidView.ready = false; sfx('ui'); }
@@ -3029,6 +3046,12 @@ function pauseItems() {
     { id: 'pace', label: t('pace') + ':  ' + paceLabel() + '   ◂ ▸', arrows: 1, hint: t('pace_d') },
     { id: 'qual', label: t('qual') + ':  ' + qualLabel() + '   ◂ ▸', arrows: 1, hint: t('qual_d').replace('%s', DEVICE.form) },
   ];
+  // READING (js/reveal.js): how fast words type out, and the switch that
+  // stops every drift and typewriter at once. Same row shape as the dials.
+  if (typeof textSpeedId === 'function') {
+    it.push({ id: 'tspd', label: t('tx_speed') + ':  ' + t('tx_' + textSpeedId()) + '   ◂ ▸', arrows: 1, hint: t('tx_speed_d') });
+    it.push({ id: 'rmot', label: t('tx_motion') + ':  ' + (reduceMotion() ? t('on') : t('off')) + '   ◂ ▸', arrows: 1, hint: t('tx_motion_d') });
+  }
   it.push({ id: 'films', label: t('film_title') });
   if (!isHero()) it.push({ id: 'comics', label: LANG === 'ar' ? 'ذكريات المانهوا' : 'Manhwa memories' });
   // the approved manhwa's panels, replayable once seen (js/panels.js)
@@ -3059,16 +3082,45 @@ function pauseWorldLine() {
   const laws = (u.anom || []).map(a => (typeof BR_ANOM !== 'undefined' && BR_ANOM[a]) ? BR_ANOM[a].n : a).join(' · ');
   return t('pm_world') + ' ' + u.id + '   ·   ' + lean + (laws ? '   ·   ' + laws : '');
 }
+// TWO COLUMNS ONCE ONE IS TOO TALL. With the reading options the list reached
+// seventeen rows on a phone: an 18 px pitch, 10 px type, and every row's hint
+// written over the row below it. Past PAUSE_ONE_COL rows the menu splits —
+// going places on the left, how the game behaves on the right — and the
+// selected row's hint gets a line of its own under both. `items` is in
+// navigation order (left column, then right), so UP/DOWN, the touch hit-test
+// and the drawing all walk the same list; pos(i) is the one geometry.
+const PAUSE_ONE_COL = 12;
+const PAUSE_SETTING = { ctrl: 1, touch: 1 };
 function pauseLayout() {
-  const items = pauseItems();
-  const step = Math.min(40, Math.floor(322 / items.length));
-  return { items: items, step: step, y0: 322 - (items.length - 1) * step / 2 };
+  const all = pauseItems();
+  if (all.length <= PAUSE_ONE_COL) {
+    const step = Math.min(40, Math.floor(322 / all.length)), y0 = 322 - (all.length - 1) * step / 2;
+    return { items: all, step, y0, cols: 1, colW: 360, split: all.length, pos: i => ({ x: 480, y: y0 + i * step }) };
+  }
+  const left = all.filter(it => !(it.arrows || PAUSE_SETTING[it.id]));
+  const right = all.filter(it => it.arrows || PAUSE_SETTING[it.id]);
+  const items = left.concat(right), rows = Math.max(left.length, right.length);
+  const step = Math.min(40, Math.floor(296 / rows)), y0 = 188 + step / 2;
+  const rtl = typeof isRTL === 'function' && isRTL();
+  // reading order: the first column is the one a reader starts from
+  const xa = rtl ? 662 : 298, xb = rtl ? 298 : 662;
+  return { items, step, y0, cols: 2, colW: 340, split: left.length,
+    pos: i => i < left.length ? { x: xa, y: y0 + i * step } : { x: xb, y: y0 + (i - left.length) * step } };
 }
 function updatePause() {
-  const pm = pauseLayout().items, n = pm.length;
+  const PL = pauseLayout(), pm = PL.items, n = pm.length;
   if (inP('DOWN')) { G.pauseIdx = (G.pauseIdx + 1) % n; G.pauseConfirm = null; sfx('ui'); }
   if (inP('UP')) { G.pauseIdx = (G.pauseIdx + n - 1) % n; G.pauseConfirm = null; sfx('ui'); }
   if (inP('PAUSE')) { G.pauseConfirm = null; G.state = 'PLAY'; return; }
+  // in two columns, LEFT/RIGHT on a plain row crosses to the other column (a
+  // dial row keeps them for its value)
+  const cur0 = pm[G.pauseIdx] || pm[0];
+  if (PL.cols === 2 && !cur0.arrows && (inP('LEFT') || inP('RIGHT'))) {
+    const inLeft = G.pauseIdx < PL.split, row = inLeft ? G.pauseIdx : G.pauseIdx - PL.split;
+    const other = inLeft ? [PL.split, n - 1] : [0, PL.split - 1];
+    G.pauseIdx = Math.min(other[1], other[0] + row); G.pauseConfirm = null; sfx('ui');
+    return;
+  }
   const cur = pm[G.pauseIdx] || pm[0];
   if (cur.id === 'pace' && (inP('LEFT') || inP('RIGHT'))) {
     const d = inP('RIGHT') ? 1 : -1, n2 = PACE_STEPS.length;
@@ -3076,6 +3128,14 @@ function updatePause() {
     sfx('ui'); persist();
   }
   if (cur.id === 'qual' && (inP('LEFT') || inP('RIGHT'))) { qualCycle(); sfx('ui'); }
+  if (cur.id === 'tspd' && (inP('LEFT') || inP('RIGHT') || inP('OK'))) {
+    textSpeedCycle(inP('LEFT') ? -1 : 1); sfx('ui'); persist();
+    return;                           // the row cycles; it does not also fire
+  }
+  if (cur.id === 'rmot' && (inP('LEFT') || inP('RIGHT') || inP('OK'))) {
+    reduceMotionToggle(); sfx('ui'); persist();
+    return;
+  }
   if (cur.id === 'gest' && (inP('LEFT') || inP('RIGHT') || inP('OK'))) {
     G.save.gestOff = G.save.gestOff ? 0 : 1;
     if (G.save.gestOff && typeof tGestureRelease === 'function') tGestureRelease();
@@ -5251,6 +5311,16 @@ function updateCut(dt) {
     return;
   }
   if (ct.ph === 'play') {
+    // THE CAPTION RIDES THE CLIP, AND HOLDS ITS LAST FRAME UNTIL READ. A clip
+    // shorter than its sentence used to take the sentence with it; now a page
+    // that has had its reading time turns by itself, a tap reveals or turns,
+    // and the clip's end waits on the last page (js/overlay.js capRead).
+    if (ct.cap && typeof capReader === 'function') {
+      if (!ct.cr) ct.cr = capReader(t(ct.cap));
+      capTick(ct.cr, dt);
+      if (pressed) capPress(ct.cr);
+      capAutoTurn(ct.cr);
+    }
     // stall watch: if the frame clock has not moved after a beat and a half,
     // this browser cannot decode the film. Bail immediately rather than make
     // her stand in the dark — the fight resumes as if the memory never came.
@@ -5282,6 +5352,8 @@ function updateCut(dt) {
       ct.ph = 'hold'; ct.t = 0; ct.stall = 0; ct.held = Math.max(0, (ct.held || 0) - 4);
       return;
     }
+    if ((dead || ct.t > cap) && ct.cr && !ct.skipped && typeof capRead === 'function' && !capRead(ct.cr)
+        && (ct.capHold = (ct.capHold || 0) + dt) < 45) return;
     if (dead || ct.stall > 1.5 || ct.t > cap) {
       ct.ph = 'out'; ct.t = 0;
       // mid-reel the outgoing shot barely dips: the next one is already coming
@@ -5352,7 +5424,9 @@ function drawCut() {
   // carried, one per shot — without them the footage is atmosphere and the
   // story is gone. Fades in over the first beat and sits on a soft plate so it
   // stays readable over whatever the shot happens to be doing underneath.
-  if (ct.cap && ct.ph === 'play') {
+  if (ct.cap && ct.ph === 'play' && ct.cr && typeof drawCaption === 'function') {
+    drawCaption(ct.cr, clamp(ct.t / 0.6, 0, 1));
+  } else if (ct.cap && ct.ph === 'play') {
     const a = clamp(ct.t / 0.6, 0, 1) * clamp((ct.dur ? ct.dur - ct.t : 9) / 0.5, 0, 1);
     if (a > 0.01) {
       c.save();
@@ -15666,23 +15740,36 @@ function draw(tms) {
     // OUT of the game was the row that fell off, which is the worst one to
     // lose, and it is exactly what was reported: "the exit button is under the
     // screen". The step now comes from how many rows there are.
-    const PL = pauseLayout(), pm = PL.items, step = PL.step, y0 = PL.y0;
-    const fs = Math.min(21, step * 0.56);
+    const PL = pauseLayout(), pm = PL.items, step = PL.step;
+    const fs = Math.min(PL.cols === 2 ? 18 : 21, step * 0.56);
     pm.forEach((it, i) => {
-      const sel = i === G.pauseIdx, y = y0 + i * step;
+      const sel = i === G.pauseIdx, P = PL.pos(i), x = P.x, y = P.y;
       // the two irreversible rows are tinted so they can never be hit by feel
       if (it.warn) {
         c.fillStyle = it.out ? 'rgba(255,120,110,0.10)' : 'rgba(255,190,110,0.09)';
-        rr(c, 300, y - step * 0.5, 360, step * 0.86, 8); c.fill();
+        rr(c, x - PL.colW / 2, y - step * 0.5, PL.colW, step * 0.86, 8); c.fill();
       }
-      ftxt((sel ? '▸ ' : '') + (it.icon ? it.icon + '  ' : '') + it.label, 480, y, fs,
+      if (sel && PL.cols === 2) {
+        c.fillStyle = 'rgba(55,255,208,0.07)';
+        rr(c, x - PL.colW / 2, y - step * 0.5, PL.colW, step * 0.86, 8); c.fill();
+      }
+      ftxt((sel ? '▸ ' : '') + (it.icon ? it.icon + '  ' : '') + it.label, x, y, fs,
            sel ? '#eef3fa' : (it.out ? '#e88b86' : it.warn ? '#e8bb86' : '#7d93a8'));
-      // the sub-line goes ABOVE the row near the foot of the list, where below
-      // is the next row's plate rather than empty space
-      const sy = y + step * (i >= pm.length - 2 ? -0.5 : 0.52);
+      if (!sel) return;
       // the confirm replaces the hint, because it is the more urgent sentence
-      if (sel && G.pauseConfirm === it.id) ftxt(t('pm_confirm'), 480, sy, 12, '#ffd76a');
-      else if (sel && it.hint) ftxt(it.hint, 480, sy, 12, '#7d93a8');
+      const line = G.pauseConfirm === it.id ? t('pm_confirm') : it.hint;
+      if (!line) return;
+      const col = G.pauseConfirm === it.id ? '#ffd76a' : '#9fb8c8';
+      if (PL.cols === 2) {
+        // two columns: the hint has its own line under both, never on a row
+        wrapLines(c, line, 820, '700 14px "Segoe UI", Tahoma, sans-serif').slice(0, 2)
+          .forEach((l, k, a) => ftxt(l, 480, 494 - (a.length - 1) * 9 + k * 18, 14, col));
+      } else {
+        // the sub-line goes ABOVE the row near the foot of the list, where below
+        // is the next row's plate rather than empty space
+        const sy = y + step * (i >= pm.length - 2 ? -0.5 : 0.52);
+        ftxt(line, 480, sy, 12, col);
+      }
     });
     drawFooter(522, true);
   } else if (st === 'TCFG') {
@@ -15705,17 +15792,24 @@ function draw(tms) {
     // its left edge at x=170 — on top of a portrait that starts at 152. The
     // face acting the line was underneath the line, in every conversation in
     // the game. The bust is why the panel exists; it does not get written on.
-    const rtl = LANG === 'ar';
+    const rtl = typeof isRTL === 'function' ? isRTL() : LANG === 'ar';
     const px = rtl ? 744 : 152;                    // the 64-wide bust
-    const tw = 548, tx0 = rtl ? 176 : 236;         // and the column beside it
-    const body = wrapText(d.lines[d.i], tw, d.rs ? 15 : 16);
+    // A NOTE HAS NO SPEAKER (js/overlay.js storyNote): the narrator's card
+    // takes the whole width and no face is put on it.
+    const note = !!d.note;
+    const tw = note ? DLG_NOTE_W : DLG_W, tx0 = note ? 480 - DLG_NOTE_W / 2 : (rtl ? 176 : 236);
+    // THE PAGE, NOT THE LINE. The line is wrapped to this column and cut into
+    // pages of at most DLG_LINES (js/overlay.js), and the page types itself
+    // out — so the box is sized from the whole page, never from the part
+    // typed so far, and does not grow under the reader's eye.
+    const view = dialogView(d), body = view.page;
     const lh = d.rs ? 21 : 22;
     const gh = d.rs ? 26 : 0;                      // the glyph row's own band
-    const bh = Math.max(118, 62 + gh + body.length * lh + 26);
+    const bh = Math.max(note ? 96 : 118, (note ? 40 : 62) + gh + body.length * lh + 26);
     const by = 504 - bh;                           // grows upward, foot stays put
     dimPanel(140, by, 680, bh);
     // 64×64 portrait bust — face acting the sprite is too small to carry
-    {
+    if (!note) {
       let expr = 'neutral';
       if (player && player.cores <= 2) expr = 'hurt';
       else if (G.boss && !G.boss.dead) expr = 'determined';
@@ -15787,12 +15881,29 @@ function draw(tms) {
       if (player && player.moodSet)
         player.moodSet(expr === 'neutral' ? 'calm' : expr, 0.4);
     }
-    ftxt(d.name || '', rtl ? tx0 + tw : tx0, by + 24, 16, '#37ffd0', rtl ? 'right' : 'left');
-    let ty = by + 46;
+    if (!note) ftxt(d.name || '', rtl ? tx0 + tw : tx0, by + 24, 16, '#37ffd0', rtl ? 'right' : 'left');
+    let ty = note ? by + 22 : by + 46;
     if (d.rs) { drawGlyphText(c, d.rs, tx0 + tw / 2, ty, 10, 'rgba(120,220,255,0.65)', 'rgba(120,220,255,0.4)'); ty += gh; }
-    body.forEach((ln, i) => ftxt(ln, rtl ? tx0 + tw : tx0, ty + 12 + i * lh,
-      d.rs ? 15 : 16, '#e6eef6', rtl ? 'right' : 'left', null, '600'));
-    ftxt('▼', 480, 494, 13, '#7d93a8');
+    // Arabic is set from the right edge and typed a whole word at a time
+    // (js/reveal.js), so its letters are always joined as they will finally be
+    const fs = d.rs ? 15 : 16;
+    c.font = '600 ' + fs + 'px "Segoe UI", Tahoma, sans-serif';
+    drawRevealLines(c, view.R, rtl ? tx0 + tw : tx0, ty + 12, lh, rtl ? 'right' : 'left',
+      (str, x, y, al) => ftxt(str, x, y, fs, '#e6eef6', al, null, '600'));
+    // the prompt appears only once the page is whole — a ▼ under half a
+    // sentence invites the press that would skip the other half
+    if (view.done) {
+      const pu = 0.55 + Math.sin(performance.now() / 260) * 0.35;
+      c.save(); c.globalAlpha = pu;
+      ftxt(view.more ? '▼' : '■', 480, 494, 13, '#9fb8c8');
+      c.restore();
+      if (view.pages.length > 1) {
+        for (let k = 0; k < view.pages.length; k++) {
+          c.fillStyle = k === d.pg ? '#37ffd0' : 'rgba(180,205,220,0.3)';
+          c.beginPath(); c.arc((rtl ? 160 + (view.pages.length - 1 - k) * 10 : 800 - (view.pages.length - 1 - k) * 10), 494, k === d.pg ? 3 : 2.2, 0, 7); c.fill();
+        }
+      }
+    }
   } else if (st === 'OFFER') {
     drawOffer();
   } else if (st === 'BRAID') {
@@ -15816,6 +15927,8 @@ function draw(tms) {
   } else if (st === 'TRIAL') {
     drawTrial();
   }
+  // a refusal said while a menu is open is said ON the menu (js/overlay.js)
+  if (typeof drawMenuMsg === 'function') drawMenuMsg();
   // LAST, OVER EVERYTHING, AND ONLY WHEN THE URL ASKED FOR IT. See js/diag.js:
   // the panel exists because three faults in a row were reported off a phone
   // and could not be reproduced here, and a guess about somebody else's device
@@ -15980,9 +16093,19 @@ function updateCine(dt) {
   const prev = inP('LEFT');
   if ((next || prev) && introSoundTap()) return;
   if (inP('PAUSE') || inP('BACK')) { sfx('ui'); cineEnd(); return; }
+  // THE CAPTION IS READ BEFORE THE SHOT MOVES (owner, 2026-10-09: no unread
+  // paragraph disappears on a timer). The held stills no longer turn by
+  // themselves; the first press finishes typing the caption, a later one turns
+  // the shot — the same rule as every dialogue (js/overlay.js capPress).
+  const cap = INTRO_FILM[ci.i] && INTRO_FILM[ci.i][1];
+  if (cap && typeof capReader === 'function') {
+    if (!ci.cr || ci.crI !== ci.i) { ci.cr = capReader(t(cap)); ci.crI = ci.i; }
+    capTick(ci.cr, dt);
+  }
+  if (next && ci.cr && typeof capPress === 'function' && capPress(ci.cr)) return;
   if (next) { sfx('ui'); ci.i++; ci.t = 0; }
   else if (prev && ci.i > 0) { sfx('ui'); ci.i--; ci.t = 0; }
-  else if (ci.t > CINE_HOLD) { ci.i++; ci.t = 0; }
+  else if (ci.t > CINE_HOLD && !cap) { ci.i++; ci.t = 0; }
   if (ci.i >= INTRO_FILM.length) cineEnd();
 }
 function cineStill(i) {
@@ -15994,6 +16117,8 @@ function cineStill(i) {
 // the shot breathes the way the footage it came from does
 function cineShot(im, k, dir) {
   if (!im) return;
+  // reduced motion: the still is held, not panned (js/reveal.js reduceMotion)
+  if (typeof reduceMotion === 'function' && reduceMotion()) k = 0.5;
   const z = 1.05 + 0.075 * k;
   const w = 960 * z, h = 540 * z;
   const x = (960 - w) / 2 + dir * (w - 960) * 0.5 * (0.5 - k);
@@ -16039,7 +16164,10 @@ function drawCine() {
   c.globalAlpha = 1;
   // THE CAPTION, set exactly as the film sets it
   const cap = INTRO_FILM[ci.i] && INTRO_FILM[ci.i][1];
-  if (cap) {
+  if (cap && ci.cr && ci.crI === ci.i && typeof drawCaption === 'function') {
+    // it stays until the shot is turned — see updateCine
+    drawCaption(ci.cr, clamp(ci.t / 0.5, 0, 1));
+  } else if (cap) {
     const a = clamp(ci.t / 0.7, 0, 1) * clamp((CINE_HOLD - ci.t) / 0.5, 0, 1);
     if (a > 0.01) {
       c.save(); c.globalAlpha = a;
