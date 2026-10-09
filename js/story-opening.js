@@ -263,7 +263,9 @@ function breakPhase(S, b, dt) {
   } else if (S.ph === 'still') {
     // he stands and lets go. Nothing attacks, nothing is taken from her.
     b.face = pcx < b.cx() ? -1 : 1; b.vx = 0; breakGround(b);
-    if (S.t > 2.6) {
+    // ...and he stands there at least until his sentence has been typed out
+    // (js/overlay.js scene captions; it stays on screen until it is read)
+    if (S.t > 2.6 && (typeof sceneCaptionShown !== 'function' || sceneCaptionShown())) {
       S.ph = 'bell'; S.t = 0;
       b.purified = false;                   // and the bell writes the order back
       if (typeof sfx === 'function') sfx('tellbig');

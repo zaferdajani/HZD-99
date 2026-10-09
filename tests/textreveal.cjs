@@ -26,7 +26,8 @@
 //   8. the Instant option and Reduced motion show the page at once
 //   9. a story line is a card that stays until acknowledged (sixty seconds
 //      of nothing does not close it); a locked-door instruction is a card the
-//      first time and a reminder after
+//      first time and a reminder after; a staged scene's narration is a
+//      caption that stays until read without taking the controls
 //  10. a shop refusal is visible inside the shop
 //  11. the world is frozen while any of it is open
 //  12. the pause menu carries Text speed and Reduced motion, and they persist
@@ -211,7 +212,7 @@ const check = (name, ok, detail) => {
 
     // ---- 9. story lines stay until acknowledged ----------------------------
     fresh('en'); G.save.opts = { textSpeed: 'normal' };
-    G.toast(t('nf_break1'));
+    G.toast(t('npc_woke').replace('%s', t('n_ratchet')));
     out.note = { state: G.state, note: !!(G.dialog && G.dialog.note), toasts: G.toasts.length };
     run(60);
     out.note.after60 = G.state === 'DIALOG' && !!G.dialog && G.dialog.note;
@@ -225,11 +226,19 @@ const check = (name, ok, detail) => {
     // a long ordinary toast lives long enough to be read
     G.toasts = []; G.toast(LONG);
     out.toastLife = G.toasts[0] && G.toasts[0].t;
-    // npc_woke carries the %s name
+    // a staged scene that never takes her controls narrates in a caption that
+    // stays until read, and the scene waits on it (the guardian's break)
     G.toasts = []; G.dialog = null; G.state = 'PLAY';
-    G.toast(t('npc_woke').replace('%s', 'Ratchet'));
-    out.woke = G.state === 'DIALOG' && G.dialog && G.dialog.note;
-    G.dialog = null; G.state = 'PLAY';
+    G.toast(t('nf_break1'));
+    out.scene = { state: G.state, cap: (G.sceneCaps || []).length === 1, toasts: G.toasts.length };
+    run(1);
+    out.scene.typing = !sceneCaptionShown();
+    run(3);
+    out.scene.at4 = (G.sceneCaps || []).length === 1 && sceneCaptionShown() && !sceneCaptionRead();
+    G.toast(t('nf_break2'));                     // a second line stacks, the first is not replaced
+    out.scene.stacked = (G.sceneCaps || []).length === 2;
+    run(30);
+    out.scene.gone = !(G.sceneCaps || []).length && sceneCaptionRead();
 
     // ---- 10. a refusal inside the shop is visible --------------------------
     fresh('en');
@@ -248,7 +257,7 @@ const check = (name, ok, detail) => {
     const foe = G.enemies.find(e => e && !e.dead);
     const px = player.x, ex = foe ? foe.x + ',' + foe.y : '';
     const tm = G.save.time;
-    G.toast(t('nf_break2'));
+    G.toast(t('story_need_blade'));
     player.vx = 300;
     run(2);
     out.frozen = { state: G.state, player: player.x === px, foe: !foe || (foe.x + ',' + foe.y) === ex, time: G.save.time === tm };
@@ -325,7 +334,11 @@ const check = (name, ok, detail) => {
   check('...a locked door\'s instruction is a card the first time', r.gate1.state === 'DIALOG' && r.gate1.note);
   check('...and a reminder after it was acknowledged', r.gate2.state === 'PLAY' && r.gate2.toast && r.gate2.acked, JSON.stringify(r.gate2));
   check('...a long toast lives long enough to read', r.toastLife > 15, r.toastLife && r.toastLife.toFixed(1) + ' s');
-  check('...the waking line (with its name) is a card', r.woke);
+  check('...a scene\'s narration is a caption that leaves her the controls', r.scene.state === 'PLAY' && r.scene.cap && r.scene.toasts === 0, JSON.stringify(r.scene));
+  check('...typed out first (the scene waits on that)', r.scene.typing);
+  check('...then held on screen until read', r.scene.at4);
+  check('...a second line stacks under it rather than replacing it', r.scene.stacked);
+  check('...then it goes', r.scene.gone);
   check('10. a shop refusal is said inside the shop', !!r.shopNo.msg && r.shopNo.drawn, JSON.stringify(r.shopNo));
   check('11. the world is frozen under a story card', r.frozen.state === 'DIALOG' && r.frozen.player && r.frozen.foe && r.frozen.time, JSON.stringify(r.frozen));
   check('12. pause carries Text speed and Reduced motion', r.opts.tspd && r.opts.rmot);
