@@ -10,6 +10,7 @@
   "types",
   "i18n",
   "text-manhwa",
+  "text-progress",
   "weapons",
   "gear",
   "media",
@@ -44,6 +45,7 @@
   "npc_shop_exit_fix",
   "story-opening",
   "panels",
+  "progress",
   "comics",
   "boot"
 ]

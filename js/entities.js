@@ -7025,7 +7025,10 @@ const STORY_ACTOR_ROLES = Object.freeze({
   turret: 'empty-construct', blob: 'empty-construct', surge: 'empty-construct',
   kiln: 'empty-construct', rime: 'empty-construct', snare: 'empty-construct'
 });
-function storyProtected(e) { return !!(e && (e.disabled || e.rescued)); }
+// ...and a STAGED body (the corridor meeting, the break: Boss.meet) is a
+// scene, not a fight — no blow lands on it, so nothing can free or fell the
+// lion out of the story's order while he is only passing through.
+function storyProtected(e) { return !!(e && (e.disabled || e.rescued || e.meet)); }
 // ===========================================================================
 // THE FLIER'S BODY — flown per second, not per frame.
 //
@@ -8509,7 +8512,9 @@ class Enemy {
     if (typeof questKill === 'function') questKill(this.kind);
     bankScrap(8); player.gainVolts(12);
     burst(this.x + this.w / 2, this.y, 8, '#9fefff', 70, 0.5, -15, 2, true);
-    sfx('pick'); G.toast(t('story_rescued')); persist();
+    if (typeof cleanseBegin === 'function') cleanseBegin(this.x, this.y, this.w, this.h, 'pg_freed', null, true);
+    else sfx('pick');
+    G.toast(t('story_rescued')); persist();
   }
   _die0(kx, ky) {
     if (this.dead) return;
@@ -10888,12 +10893,25 @@ function sageTame(e) {
   // the duel track resolves: the chamber goes back to its zone's own quiet
   // (the zone key is what loadRoom itself plays for a non-boss room)
   if (e.duelMus && typeof setMusic === 'function' && G.roomDef) setMusic(G.roomDef.zone);
-  sfx('win');
-  G.flash = Math.max(G.flash, 0.5);
   const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
-  G.addRing(cx, cy);
-  burst(cx, cy, 30, '#ffffff', 320, 0.9, 60, 3, true);
-  burst(cx, cy, 18, '#57a8ff', 260, 1.1, 20, 2.6, true);
+  // A RESCUE, NOT A KILL (owner, 2026-10-09: "The Sage is rescued, not killed.
+  // Cleansing must look and read differently from destroying an enemy"). No
+  // fanfare-and-burst — that is the kill's vocabulary. The cleansing light
+  // (js/progress.js) and the words for what happened.
+  if (typeof cleanseBegin === 'function' && !(typeof isHero === 'function' && isHero())) {
+    cleanseBegin(e.x, e.y, e.w, e.h, 'pg_rescued');
+    if (G.roomId === 'GA1D') {
+      G.toast(t('pg_sage_free'));
+      // the bell's ward over the meadow climb falls with the Sage's binding
+      if (!G.save.flags.bossChime) G.toast(t('ward_chime_fall'));
+    }
+  } else {
+    sfx('win');
+    G.flash = Math.max(G.flash, 0.5);
+    G.addRing(cx, cy);
+    burst(cx, cy, 30, '#ffffff', 320, 0.9, 60, 3, true);
+  }
+  burst(cx, cy, 18, '#57a8ff', 120, 1.1, -40, 2.6, true);
   // THE GIFT — the cave gives "instead of taking from the tamed sage"
   if (!G.save.flags['sageGift_' + G.roomId]) {
     G.save.flags['sageGift_' + G.roomId] = 1;
@@ -10921,8 +10939,17 @@ function sageTame(e) {
   // moment the halo turns, which is the only frame where the player can see
   // that the sage did it rather than that the room happened to be empty.
   for (const o of (G.enemies || [])) {
-    if (!o || o === e || o.dead || o.calm || o.kind === 'sage') continue;
-    o.calm = true; o.hypnoT = 1e9; o.stagT = 0;
+    if (!o || o === e || o.dead || o.kind === 'sage') continue;
+    const wasCalm = o.calm;
+    // the ones that were people are freed with it — even one the Braid had
+    // already calmed — and wear the cure's circle
+    if (o.actorRole === 'infected-person' && !o.rescued) {
+      o.rescued = true; o.disabled = false;
+      if (typeof cleanseBegin === 'function') cleanseBegin(o.x, o.y, o.w, o.h, 'pg_freed', null, true);
+    }
+    o.calm = true; o.hypnoT = 1e9;
+    if (wasCalm) continue;
+    o.stagT = 0;
     burst(o.x + o.w / 2, o.y + o.h / 2, 9, '#37ffd0', 110, 0.7, -12, 2.2, true);
   }
   if (typeof firstSageRevelation === 'function') firstSageRevelation();
@@ -13946,7 +13973,7 @@ class Boss {
     }
   }
   die() {
-    if (this.dead) return;
+    if (this.dead || this.meet) return;
     // THE BLOW THAT WOULD END IT asks the question instead. This is the path
     // every real kill actually takes — the claw, the shuriken, the Song and the
     // pounce all call die() the moment health hits zero — so the guardian has
@@ -13970,6 +13997,27 @@ class Boss {
       G.dropScrap(this.cx(), this.cy(), 30);
       sfx('win'); sfx('winSting');   // her motif over the trumpet - a guardian fell
       if (typeof checkEvo === 'function') checkEvo(1, true);   // she grows on THIS frame; the card waits for the cut
+      return;
+    }
+    // A FREED GUARDIAN WITH NO FILM IS STILL FREED, NOT FELLED. Without a
+    // purification film this used to fall through to the detonation below —
+    // secondary blasts, debris, the wreck sting — so a creature the story says
+    // was rescued looked exactly like one that was destroyed (the Alpha, and
+    // any guardian whose film cannot play). Cleansing has its own picture
+    // (js/progress.js cleanseBegin): a white pulse, the infection rising off
+    // the body, the word over it. The reward waits for the light to settle.
+    if (this.tamed && !this.forceKill && this.kind !== 'mother' && typeof cleanseBegin === 'function'
+        && !(typeof isHero === 'function' && isHero())) {
+      this.deathAnimT = 0; this.deathFxT = 0; this.deathFinale = true;
+      this.purified = true; this.pureT = 0.7; this.vx = 0; this.vy = 0;
+      this.rewardPend = true;
+      setMusic(G.roomDef.zone);
+      G.dropScrap(this.cx(), this.cy(), 30);
+      const pk = { glitch: 'pure_beast', brood: 'pure_brood', atlas: 'pure_atlas',
+                   zero: 'pure_zero', prism: 'pure_prism' }[this.kind];
+      if (pk) G.toast(t(pk));
+      cleanseBegin(this.x, this.y, this.w, this.h, 'pg_freed', this);
+      if (typeof checkEvo === 'function') checkEvo(1, true);
       return;
     }
     this.deathAnimT = Math.max(this.deathAnimT || 0, 1.6);

@@ -49,7 +49,16 @@ const check = (name, ok, detail) => {
 // join is a field running on rather than a tunnel mouth. The caves (CV*) are
 // in kingdom 1 too but a cave is allowed rock over her head; what it is not
 // allowed is a different amount of it on each side, and that is check 1.
-const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A10', 'A3', 'A4'];
+//
+// A10 IS NOT ON THIS LIST ANY MORE (owner, 2026-10-09: "Keep Alpha optional
+// and outside this mandatory progression"). The Alpha's den used to stand
+// between the hub and the camp, so A2|A10 and A10|A3 were road seams; it is a
+// spur now, entered by A2's depth door and left by its own (tests/wolves.cjs
+// walks both doors), and the road runs A2|A3 directly. The road's seams are
+// named below, so a join that quietly disappears from the road is a failure
+// rather than a smaller count.
+const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A3', 'A4'];
+const ROAD = ['W1|W2', 'A0|A1', 'A1|A2', 'A2|A3', 'A3|A4'];
 
 (async () => {
   console.log('── seam — a room boundary is a place she walks through\n');
@@ -161,8 +170,10 @@ const MEADOW = ['W1', 'W2', 'A0', 'A1', 'A2', 'A10', 'A3', 'A4'];
 
   // ---- 2. the meadow's seams are walks, not doorways -----------------------
   const meadowJoins = r.joins.filter(j => MEADOW.includes(j.id) && MEADOW.includes(j.to));
-  check('every meadow room pair is joined', meadowJoins.length >= 6,
-    meadowJoins.map(j => `${j.id}|${j.to}`).join(' '));
+  const joinedPairs = meadowJoins.map(j => [j.id, j.to].sort().join('|'));
+  const missingRoad = ROAD.filter(p => joinedPairs.indexOf(p.split('|').sort().join('|')) < 0);
+  check('every seam on the meadow road is joined (' + ROAD.join(' ') + ')', !missingRoad.length,
+    missingRoad.length ? 'missing ' + missingRoad.join(' ') : meadowJoins.map(j => `${j.id}|${j.to}`).join(' '));
   const doorways = meadowJoins.filter(j => j.open < 12);
   check('...and none of them is a doorway (>= 12 rows of standing space)',
     doorways.length === 0,

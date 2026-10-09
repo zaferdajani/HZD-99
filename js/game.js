@@ -1111,6 +1111,9 @@ function loadRoom(id) {
       // survives leaving the cave and loading it again a week later.
       if (kind !== 'sage' && typeof sageQuietHere === 'function' && sageQuietHere(id)) {
         en.calm = true; en.hypnoT = 1e9;
+        // ...and the ones that were people wear the cure's circle: freed, not
+        // merely quiet, and no stray swing can undo that (storyProtected)
+        if (en.actorRole === 'infected-person') { en.rescued = true; en.disabled = false; }
       }
       if (U) {
         const zi = U.inf[def.zone] != null ? U.inf[def.zone] : 1;
@@ -1313,6 +1316,9 @@ function startGame(save) {
   G.save = save;
   if (typeof qualRestore === 'function') qualRestore();  // the player's own call outranks the guess
   applyTheme();
+  // no saved bench may stand inside a place the story has not opened yet
+  // (js/progress.js) — a hand-edited or pre-gate save wakes at the camp
+  if (typeof progressBenchGuard === 'function') progressBenchGuard(save);
   loadRoom(save.bench.room);
   player = new Player(save.bench.x, save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
@@ -1323,6 +1329,7 @@ function startGame(save) {
 }
 function respawn() {
   if (G.save.diff === 2 && G.save.lives >= 9) { G.state = 'GAMEOVER'; return; }
+  if (typeof progressBenchGuard === 'function') progressBenchGuard(G.save);
   loadRoom(G.save.bench.room);
   player = new Player(G.save.bench.x, G.save.bench.y);
   player.cores = player.maxCores(); player.volts = 33;
@@ -1621,7 +1628,7 @@ function checkTransitions() {
   const storyHint = typeof openingGateHint === 'function' ? openingGateHint(dest) : '';
   if (storyHint) {
     player.x = clamp(player.x, 2, W - player.w - 2); player.vx = 0;
-    if (!G.storyGateAt || G.time - G.storyGateAt > 4) {G.toast(storyHint);G.storyGateAt=G.time||0.001;}
+    if (!G.storyGateAt || G.save.time - G.storyGateAt > 4) {G.toast(storyHint);G.storyGateAt=G.save.time||0.001;}
     return;
   }
   if (demoWall(dest)) { demoStop(side); return; }
@@ -2276,7 +2283,13 @@ function doInteract(s) {
       // looking, because a direction heard once and forgotten is no direction.
       const wk = 'q_where_' + q.id, wl = t(wk);
       const where = wl && wl !== wk ? [wl] : [];
-      if (st === 'none') {
+      if (st === 'none' && typeof questFoundEarly === 'function' && questFoundEarly(q)) {
+        // FOUND BEFORE IT WAS ASKED (owner: "remember discoveries and adapt
+        // later quest dialogue"). The thing is already in her bag, or she has
+        // already stood where they wanted her to stand: they say so, and pay.
+        lines = questEarlyLines(q);
+        qAct = () => { qSet(q.id, 'active'); questPay(q); };
+      } else if (st === 'none') {
         // AN ASK MAY BE SEVERAL SHORT BEATS. It used to be one string, so the
         // only way to tell a story here was to write a paragraph into a speech
         // bubble — and the owner read one: 'npc words are long and repeated'.
@@ -2408,6 +2421,12 @@ function doInteract(s) {
     if (s.flagKey) G.save.flags[s.flagKey] = 1;
     sfx('chest');
     if (s.extra === 'slot') { G.save.slots++; showItem(t('s_slot'), t('s_slotd')); }
+    else if (s.extra === 'core') {
+      // a spare core in a quarry pocket (CV1): the first cave pays in health
+      G.save.coresMax = (G.save.coresMax || 4) + 1;
+      if (player) player.cores = player.maxCores();
+      showItem(t('sp_core'), t('sp_core_d'));
+    }
     else if (s.extra.indexOf('rl:') === 0) G.grantRelic(s.extra.slice(3));
     else if (s.extra.indexOf('it:') === 0) {
       // an inventory item kept in a chest — the booth's spare power cell
@@ -2695,6 +2714,9 @@ function update(dt) {
       if (player.on && inP('UP') && typeof gateEnter === 'function' && gateEnter()) { /* she is going */ }
       else if (G.near && (inP('INT') || (inP('UP') && player.on))) doInteract(G.near);
       checkTransitions();
+      // chapter one's road: the wards' faces, the quarry's return, the bound
+      // machines waiting, the cleansing light (js/progress.js)
+      if (typeof progressTick === 'function') progressTick(dt);
       if (G.winT > 0) {
         G.winT -= dt;
         // the reel plays in the gap the win screen was already waiting through
@@ -5135,6 +5157,9 @@ function endPurifyCut() {
   if (b && b.purified) {
     // the film already showed the rise, so he is simply awake and friendly
     b.pureT = Math.max(b.pureT || 0, 1.2);
+    // ...and the room shows the end of the infection the film began: the
+    // last of it rising off him, and the word, so the light reads as a rescue
+    if (b.tamed && typeof cleanseBegin === 'function' && !isHero()) cleanseBegin(b.x, b.y, b.w, b.h, 'pg_freed');
     if (b.rewardPend) { b.rewardPend = false; G.onBossDead(b.kind); }
   }
   // a film chained out of a conversation hands BACK to it (the memory film
@@ -8775,7 +8800,13 @@ const GATE_ROOM = {
   D3:  { at: 0.62, to: 'GD1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossZero' },
   X1:  { at: 0.45, to: 'GX1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossPrism' },
   E3:  { at: 0.59, to: 'GE1', gx: 0.50, gy: 0.86, ax: 0.06, need: 'bossMother' },
-  GA1: { at: 0.06, to: 'A4',  gx: 0.50, gy: 0.86, ax: 0.23 },
+  // THE GROTTO DOES NOT OPEN INTO THE LAIR BEFORE THE LAIR IS OPEN (owner,
+  // 2026-10-09: "physically block access to the lion's den until the
+  // necessary milestones are complete"). The CV3 maintenance landing reaches
+  // GA1 long before NULLFANG is free; its back door into A4 is built by the
+  // same flag that builds A4's door into it — no door, no chevron, no walk —
+  // so the only way into the fight is the camp's east seam, past its ward.
+  GA1: { at: 0.06, to: 'A4',  gx: 0.50, gy: 0.86, ax: 0.23, need: 'bossGlitch' },
   GA2: { at: 0.06, to: 'A10', gx: 0.50, gy: 0.86, ax: 0.23 },
   GB1: { at: 0.06, to: 'B4',  gx: 0.50, gy: 0.86, ax: 0.62 },
   GC1: { at: 0.06, to: 'C3',  gx: 0.50, gy: 0.86, ax: 0.31 },
@@ -13833,6 +13864,7 @@ function drawWorldFrame() {
   // ghost — correctly, because that pass is for painted distance. She stands
   // beside this and hits it, so it belongs in the world layer with everything
   // else that has a hitbox, in front of the terrain and behind her.
+  if (typeof drawProgressGround === 'function') drawProgressGround(c);   // the quarry marks, the hub's dust
   if (G.rubbles && typeof drawRubble === 'function')
     for (const rb of G.rubbles) drawRubble(rb, rb.x, rubbleFoot(rb) + 4, PAL[G.roomDef.zone]);
   if (G.plats) for (const pl of G.plats) pl.draw(c);
@@ -13844,6 +13876,7 @@ function drawWorldFrame() {
   for (const p of G.projs) p.draw(c);
   if (G.boomer && typeof drawBoomer === 'function') drawBoomer(c);
   if (typeof drawGatePrompt === 'function') drawGatePrompt();
+  if (typeof drawProgress === 'function') drawProgress(c);              // wards and the cleansing light
   if (typeof drawRoarFX === 'function') drawRoarFX(c);
   // the player is drawn AFTER the cinematic grade (bloom + zone wash) so she
   // stays solid and rich instead of being swallowed by the atmosphere — the
@@ -16992,15 +17025,20 @@ function drawMap() {
   const touching = (a, b) =>
     (Math.abs(a.x + a.w - b.x) < 1 || Math.abs(b.x + b.w - a.x) < 1) && a.y < b.y + b.h && b.y < a.y + a.h
     || (Math.abs(a.y + a.h - b.y) < 1 || Math.abs(b.y + b.h - a.y) < 1) && a.x < b.x + b.w && b.x < a.x + a.w;
-  // the ground first, every visited room's terrain filling its own cells
+  // the ground first, every visited room's terrain filling its own cells —
+  // and, fainter, every room a restored survey pod has CHARTED for her
+  // (js/progress.js: the quarrymen's pod in CV1B)
   for (const id in MAPPOS) {
-    if (!G.save.visited[id]) continue;
+    const charted = !G.save.visited[id] && G.save.charted && G.save.charted[id];
+    if (!G.save.visited[id] && !charted) continue;
     const rc = rectFor(id);
+    if (charted) c.globalAlpha = 0.5;
     c.fillStyle = '#0a1016'; c.fillRect(rc.x, rc.y, rc.w, rc.h);
     const mc = roomMini(id);
     c.imageSmoothingEnabled = false;
     c.drawImage(mc, rc.x, rc.y, rc.w, rc.h);
     c.imageSmoothingEnabled = true;
+    c.globalAlpha = 1;
   }
   // routes only where the board leaves a gap between two connected rooms
   c.strokeStyle = 'rgba(140,200,230,0.35)'; c.lineWidth = 3;

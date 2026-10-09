@@ -347,13 +347,15 @@
     {
       "id": "chime",
       "room": "A9",
-      "requires": [],
+      "requires": [
+        "sageTame_GA1D"
+      ],
       "sets": [
         "bossChime"
       ],
       "speaker": "CHIME (no words)",
       "knows": "It is an instrument with nobody in it; while it rings, NULLFANG's binding is rewritten.",
-      "pointer": "The Meadow Sage: 'Take the climb above the meadow. Silence that bell' (sg_rev4); gh_chime at the lair door",
+      "pointer": "The Meadow Sage: 'Take the climb above the meadow. Silence that bell' (sg_rev4); gh_chime at the lair door; the climb itself is warded shut until the Sage is free (gate_chime_ward, ward_chime_fall)",
       "lines": []
     },
     {
