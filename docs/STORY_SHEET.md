@@ -39,7 +39,7 @@ chosen at runtime by `sageRevealLines` / `ratchetStandingKey`
 | 14 | alpha | A10 | `crystal` | `alpha`, `bossAlpha` | THE ALPHA (no words) | Optional: the pack follows its guardian; the white blade releases it. | Ratchet's optional errand at the forge (q_ask_alpha_pack); the den's marked entrance in the hub (alpha_den) | — |
 | 15 | first_sage | GA1D | `crystal` | `sageTame_GA1D`, `chimeRevealed` | The Meadow Sage | Its calling betrayed hidden survivors; NULLFANG resists; CHIME rewrites the order — or, in whatever order she arrives, that the bell is already silent or the lion already free. | Ratchet: 'The maintenance passage beside the marble quarry leads to the first Sage' (sl_ratchet_forged); gh_sage at the lair door | `@sageReveal` |
 | 16 | sage_line | A3 *(optional)* | `sageTame_GA1D`, `ratchetCamp` (+ `ratchetSays`) | — | Ratchet (at the camp) | Word that the sage stood up clean. | The camp is on the road back from the quarry to the lair | `@ratchetStanding` → `sl_ratchet_sage` |
-| 17 | chime | A9 | — | `bossChime` | CHIME (no words) | It is an instrument with nobody in it; while it rings, NULLFANG's binding is rewritten. | The Meadow Sage: 'Take the climb above the meadow. Silence that bell' (sg_rev4); gh_chime at the lair door | — |
+| 17 | chime | A9 | `sageTame_GA1D` | `bossChime` | CHIME (no words) | It is an instrument with nobody in it; while it rings, NULLFANG's binding is rewritten. | The Meadow Sage: 'Take the climb above the meadow. Silence that bell' (sg_rev4); gh_chime at the lair door; the climb itself is warded shut until the Sage is free (gate_chime_ward, ward_chime_fall) | — |
 | 18 | break | A2 / A3 *(optional)* | `sageTame_GA1D`, `nfMeet` (+ `breakWindow`) | `nfBreak` | NULLFANG (never speaks) | He resists; the bell writes the order back. | The Meadow Sage's route: the climb rises out of the hub's west end, where he comes out; the camp's east end for a player who walks on | `nf_break1`, `nf_break2` |
 | 19 | rematch_line | A3 | `sageTame_GA1D`, `bossChime`, `nfMeet`, `ratchetCamp` (+ `ratchetSays`) | — | Ratchet (at the camp) | The lion is winnable now: go and put a dent in it. | The camp is the last room before the lair | `@ratchetStanding` → `sl_ratchet_rematch` |
 | 20 | nullfang | A4 | `crystal`, `sageTame_GA1D`, `bossChime`, `nfMeet` | `bossGlitch` | NULLFANG (never speaks) | — | The Meadow Sage: 'return to his enclosure' (sg_rev4 / sg_rev_go); Ratchet at the camp (sl_ratchet_rematch) | `b_glitch`, `pure_beast` |
@@ -83,7 +83,10 @@ line itself is the introduction (the beat's `introduces`).
 | Where | Gate | Refusal line |
 |---|---|---|
 | A3 ↑ B1 (the only way out of the Meadows) | `bossGlitch` + forged blade (`blade`), robot story only; once walked it stays open | `gate_conduits` |
-| A3 → A4 (the lair) | blade → Meadow Sage → CHIME (`openingGateHint`) | `gh_marble` / `gh_sage` / `gh_chime` |
+| A3 → A4 (the lair) | blade → Meadow Sage → CHIME (`openingGateHint`); a song ward at the seam pushes her back, one sheet per missing milestone (js/progress.js) | `gh_marble` / `gh_sage` / `gh_chime` |
+| GA1 depth door → A4 | `bossGlitch` (the door is not built before; owner, 2026-10-09) | — |
+| A8 ↑ A9 (the bell) | `sageTame_GA1D`, robot story only; ward drawn over the hole (owner, 2026-10-09: Sage before CHIME) | `gate_chime_ward` |
+| a saved bench in A4 / A9 / A11 | the same milestones (`progressBenchGuard`): Continue and respawn wake at the camp bench | — |
 | GA1T → GA1D (the first sage) | forged blade | `sage_need_forge` |
 | A2 depth door → A10 (the Alpha) | forged blade | `story_need_blade` |
 | B5 → V1 (the vault's side) | `vaultOpen` (three sigils) | `gate_vault_side` |
