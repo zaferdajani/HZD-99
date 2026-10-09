@@ -21,6 +21,29 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2be. CHAPTER ONE AFTER THE OWNER'S CORRECTION — what art is still owed ✱ QUEUED 2026-10-09 (code session)
+
+Landed this pass (Higgsfield, wired, credited): the pack filmed whole (§2cc-0),
+the Spare Power Cell and the scrap heap (`characters/gear/spare_cell.webp`,
+`scrap_pile.webp`). Derived, not fired: the freed NULLFANG's teal joints
+(media.js `pureArt`), the tamed pack's cyan (wolves.js `tameArt`).
+
+Still owed, in firing order:
+
+1. **THE ALPHA in the new pack's design.** Its nine filmed takes (`al*`) are
+   the older animal; the pack it leads now looks different. Same take list as
+   §2cc-0 plus howl, roar, claw, clinch and yield, larger frame, fired from
+   `source/beasts/wolf2/green_plate.jpg`. Purple at runtime, so no glow baked.
+2. **Manhwa panels the game's chapter one needs and the approved pages lack**
+   (docs/MANHWA_EVENT_MAP.md, MISSING PANELS): the raw-marble burst at the CV3
+   boulder; Ratchet's letter as the game writes it (drawer, battery, repair);
+   NULLFANG's break; the sage's revelation ("CHIME writes the command back");
+   the maintenance door and GA1T; the corridor meeting and the lair fight with
+   the game's lion; her climb up the camp hatch; any chapter-two page. Pages
+   p06–p12 draw the OLD opening order (a crawler before the booth, "One Power
+   Cell", Servo's controls speech) and are not used for those beats.
+3. Optional: a Volt Pack object plate for its card and shop row.
+
 ## 2ba. THE ARCHIVES' INSTRUMENTS — the filed card, the redaction bar, the index sweep ✱ NEW 2026-09-18 (kingdom D session) — wired, procedural stand-ins live, nothing fired
 
 Kingdom D's three new enemy moves (`recall`, `erasure`, `redact`, `crossref`
