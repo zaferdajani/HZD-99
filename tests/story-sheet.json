@@ -114,11 +114,11 @@
       "sets": [],
       "speaker": "Ratchet (his letter)",
       "knows": "Mother's song is infected; his marble slowed the virus; he removed his own battery; it is in the drawer.",
-      "pointer": "Tutorial chip on the waking floor: Read Ratchet's note — the booth door opens in the street wall (tut_note)",
+      "pointer": "Tutorial chips past the gates: Ratchet's booth — the lit door ahead (op_booth); inside, Read the letter (op_note)",
       "lines": [
-        "sl_note1",
-        "sl_note2",
-        "sl_note3"
+        "op_letter1",
+        "op_letter2",
+        "op_letter3"
       ]
     },
     {
@@ -133,10 +133,16 @@
         "ratchetSpareGiven"
       ],
       "speaker": "Ratchet",
-      "knows": "An unknown intruder infected Mother's song; his inherited marble slowed it; she was asleep, not immune; raw marble lies in the caves beneath the meadow and he can forge a cleansing sword from it; Servo needs the spare cell; the way down is the loose floor at the hub's west end.",
-      "pointer": "His own letter: the battery is in the drawer beside this chair (sl_note2)",
+      "knows": "Mother's song was infected; his marble slowed it and could not stop it; he pulled his own battery; she was asleep in a recharge cradle, not immune; a big raw marble deposit lies under the meadow and he can forge a white sword that cuts the virus out; the spare cell is for Old Servo; the pod saves and recharges; the way down is the loose floor at the hub's west end (said when she asks again).",
+      "pointer": "His letter: the battery is in the drawer beside this chair (op_letter3); tutorial chips: Open the drawer, Restore his battery (op_drawer, op_repair)",
       "lines": [
-        "q_ask_ratchet_forge",
+        "op_r1",
+        "op_r2",
+        "op_r3",
+        "op_r4",
+        "op_r5",
+        "op_spared",
+        "op_r_pod",
         "q_where_ratchet_forge"
       ],
       "introduces": [
@@ -154,11 +160,15 @@
       ],
       "when": "ratchetAwake",
       "speaker": "Ratchet",
-      "knows": "The pack wires repair and the Volt Burst; the ring is empty until she earns volts.",
-      "pointer": "Ratchet: 'come to my counter. I keep a volt pack' (sl_heal_gift); tutorial chip: Buy a volt cell",
+      "knows": "The ring of charge cannot be spent yet; the Volt Pack wires healing and the Volt Burst, permanently; the burst is what cracks raw marble; it costs 12 scrap, which he pays her for the repair; scrap is what broken machines leave behind.",
+      "pointer": "After the pod: tutorial chip The Volt Pack — press E at Ratchet (op_pack); the counter opens on 'Volt Pack · permanent', marked BUY THIS FIRST",
       "lines": [
-        "sl_heal_gift",
-        "sl_heal_how"
+        "op_p1",
+        "op_p2",
+        "op_p3",
+        "op_p4",
+        "op_scrapd",
+        "i_packd"
       ]
     },
     {
@@ -172,10 +182,12 @@
       ],
       "when": "spareCell",
       "speaker": "Old Servo",
-      "knows": "His receiver was unplugged when the song changed; the gantries; how to move, jump, strike and mend — on her own controls.",
-      "pointer": "Ratchet: 'I left a spare cell for Servo in your pouch. His gantries overlook the meadow' (q_ask_ratchet_forge)",
+      "knows": "He is Old Servo, keeper of the winding house; Ratchet's marble is under them, through the hub's loose floor; his gantry coil shook loose in the gantries above (60 scrap and 10 IQ to bring it back).",
+      "pointer": "Ratchet: 'this spare Power Cell is not for you. It's for Old Servo, out in the meadow' (op_r5); the card Spare Power Cell (op_spared); over him: 'Switched off · needs a Power Cell'",
       "lines": [
-        "d_servo"
+        "op_sv1",
+        "op_sv2",
+        "op_sv3"
       ]
     },
     {

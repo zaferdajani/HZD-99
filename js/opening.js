@@ -196,20 +196,26 @@ function opServo(s) {
     opSay(t('n_servo'), ['op_sv_seat'], null, () => {
       if (!invTake('batt')) return;
       npcCharge(s);
-      f.servoMet = 1; persist();
+      f.servoIntro = 1;                      // his first say is owed (survives a reload)
+      persist();
       OP.servoWake = 1.6;
+      // nothing lands on her while she watches him come back
+      if (player) player.iT = Math.max(player.iT || 0, 1.8);
       // the waking is SEEN before he speaks: eyes, sparks, the drum lamp
-      opLater(1.2, () => opServoIntro());
+      opLater(1.2, () => { if (f.servoIntro) opServoIntro(); });
     });
     return true;
   }
   // (a Servo woken under an older opening has had his first say: from here
   // the ordinary conversation leads, standing line first)
+  if (f.servoIntro) { opServoIntro(); return true; }
   if (!f.servoMet) { f.servoMet = 1; persist(); }
   return false;
 }
 function opServoIntro() {
+  G.save.flags.servoIntro = 0;
   opSay(t('n_servo'), ['op_sv1', 'op_sv2', 'op_sv3'], 'servo', () => {
+    G.save.flags.servoMet = 1; persist();
     if (typeof qState === 'function' && qState('servo_coil') === 'none') {
       qSet('servo_coil', 'active'); G.toast(t('q_taken')); sfx('ok');
     }
@@ -227,13 +233,17 @@ function openingTick(dt) {
     if (G.roomId === 'A0B') mediaFetch('bustRatchet');
     else if (G.roomId === 'A1') mediaFetch('bustServo');
   }
-  // SERVO'S YARD IS HIS. The meadow's machines do not come into the winding
-  // house's corner: a waking and a conversation are not interrupted by a bite.
-  // (and it stays his: a keeper's place is somewhere to stand and talk)
-  if (G.roomId === 'A1') {
+  // SERVO'S YARD IS HIS until he has had his say. She arrives carrying the
+  // cell Ratchet sent for him, and the meadow's machines do not come into the
+  // winding house's corner while she wakes him and hears him out: a waking
+  // and a first conversation are not interrupted by a bite. After that the
+  // meadow is the meadow again.
+  if (G.roomId === 'A1' && f.ratchetSpareGiven && !f.servoMet) {
     const edge = 13 * TILE;
     for (const e of G.enemies || []) {
-      if (!e || e.dead || e.disabled || e.rescued || !(e instanceof Enemy) || e instanceof Boss) continue;
+      // (the room's own machines — loadRoom stamps them with a storyKey — not
+      // anything a script or a harness puts down beside her)
+      if (!e || e.dead || e.disabled || e.rescued || !e.storyKey || !(e instanceof Enemy) || e instanceof Boss) continue;
       if (e.x < edge) { e.x = edge; if (e.vx < 0) e.vx = Math.abs(e.vx) * 0.5; }
     }
   }
@@ -256,7 +266,10 @@ function openingTick(dt) {
   }
   if (OP.podBanner > 0) OP.podBanner = Math.max(0, OP.podBanner - dt);
   // the skill nudge the monument earned, held until the walk was over
-  if (f.tut && G.iqNudgeLater) { G.iqNudgeLater = 0; opLater(3, () => { if (typeof iqNudge === 'function') iqNudge(); }); }
+  // (and not over Old Servo's waking: after he has had his say)
+  if (f.tut && G.iqNudgeLater && (f.servoMet || G.roomId !== 'A1' || !f.ratchetSpareGiven)) {
+    G.iqNudgeLater = 0; opLater(2, () => { if (typeof iqNudge === 'function') iqNudge(); });
+  }
   // THE BURST'S PAYOFF: the release that lands on the jammed winch stops it.
   // (It disables, never kills — the blade can cleanse it later: winch.js.)
   const vis = !!(player.swingVis && player.swingVis.charged);
