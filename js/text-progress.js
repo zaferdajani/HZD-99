@@ -14,6 +14,10 @@ TEXT_LAYERS.push({
     pg_rescued: 'RESCUED',
     pg_sage_free: "The Meadow Sage is rescued, not destroyed — and this cave lays down its orders.",
     pure_beast: "The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you.",
+    // the relic NULLFANG leaves is a gift from a cleansed guardian, never a piece
+    // torn off a kill (owner: guardians are rescued, not killed); the base line
+    // read "Torn from GLITCH.EXE." on the toast right after "cleansed, not killed"
+    rl_fangd: "+8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy.",
     pg_keep_it: 'Somebody must be missing this. Keep it safe.',
     q_early: 'You already found it? Then there is nothing left to ask — thank you.',
     q_early_servo_coil: 'That coil — you found it before I could even ask. You have been climbing my gantries, then.',
@@ -50,6 +54,7 @@ TEXT_LAYERS.push({
     pg_rescued: 'أُنقِذ',
     pg_sage_free: "حكيم المرج أُنقِذ ولم يُدمَّر — وهذا الكهف يُلقي أوامره.",
     pure_beast: "تُفلته الأغنية. ناب العدم حرّ — طُهِّر ولم يُقتَل. يبدو أنه أحبّك.",
+    rl_fangd: "ضرر المخالب +8%. سقط من ناب العدم حين أفلتته الأغنية — هديّة، لا غنيمة.",
     pg_keep_it: 'لا بدّ أن أحدًا يفتقد هذا. احتفظي به.',
     q_early: 'وجدتِه بالفعل؟ إذن لم يبقَ ما أطلبه — شكرًا لك.',
     q_early_servo_coil: 'ذلك الملفّ — وجدتِه قبل أن أطلبه. كنتِ تتسلّقين جسوري إذن.',
@@ -86,6 +91,7 @@ TEXT_LAYERS.push({
     pg_rescued: 'KURTARILDI',
     pg_sage_free: "Çayır Bilgesi yok edilmedi, kurtarıldı — ve bu mağara emirlerini bırakıyor.",
     pure_beast: "Şarkı onu bırakıyor. NULLFANG özgür — öldürülmedi, arındırıldı. Seni sevmiş gibi.",
+    rl_fangd: "+%8 pençe hasarı. Şarkı onu bıraktığında NULLFANG'dan düştü — bir hediye, ganimet değil.",
     pg_keep_it: 'Birileri bunu arıyor olmalı. Sakla.',
     q_early: 'Zaten buldun mu? O zaman isteyecek bir şey kalmadı — teşekkürler.',
     q_early_servo_coil: 'O bobin — ben daha istemeden bulmuşsun. Demek iskelelerime tırmanıyordun.',
@@ -122,6 +128,7 @@ TEXT_LAYERS.push({
     pg_rescued: '已救出',
     pg_sage_free: "草甸贤者被救出，而非被摧毁——这座洞穴放下了命令。",
     pure_beast: "歌声放开了他。NULLFANG自由了——是被净化，不是被杀死。他似乎喜欢你。",
+    rl_fangd: "爪击伤害+8%。歌声放开NULLFANG时，它从他身上脱落——是礼物，不是战利品。",
     pg_keep_it: '一定有人在找这个。好好收着。',
     q_early: '你已经找到了？那就没什么要拜托的了——谢谢你。',
     q_early_servo_coil: '那个线圈——我还没开口你就找到了。看来你一直在爬我的吊架。',
@@ -158,6 +165,7 @@ TEXT_LAYERS.push({
     pg_rescued: 'СПАСЁН',
     pg_sage_free: "Луговой Мудрец спасён, а не уничтожен — и эта пещера слагает приказы.",
     pure_beast: "Песня отпускает его. NULLFANG свободен — очищен, а не убит. Ты ему нравишься.",
+    rl_fangd: "+8% к урону когтями. NULLFANG сбросил его, когда песня его отпустила, — подарок, а не трофей.",
     pg_keep_it: 'Кто-то наверняка это ищет. Сохрани.',
     q_early: 'Ты уже нашла это? Тогда и просить не о чем — спасибо.',
     q_early_servo_coil: 'Эта катушка — ты нашла её раньше, чем я успел попросить. Значит, лазила по моим мосткам.',
