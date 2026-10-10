@@ -141,7 +141,28 @@ the VFX merge `infection-eyes`, `infection-roster`, `infection-poses`,
 
 **Fresh normal-input traversal (`campaign-ch1`) on the release build:**
 
-*(Running on the release build; result recorded here when it ends. The previous attempt stalled at the song-locked Sage: a bot defect, fixed in `b3c26d4`.)*
+Two attempts, both reported:
+
+1. **Attempt 1 — timed out at 55:00** (on `c4b0658`; pages identical). Missions
+   opening, servo, marble, forge done; 4 deaths; manhwa seen bay, ratchet,
+   gate, cave, marble, forge, passage. At 17:14 the Sage song-locked; from 17:23
+   the hero stood 1 px from it, wedged against GA1D's rock pillar (tile column
+   6, rows 13–15), for 37 minutes. Cause: **a bot defect, not a game defect** —
+   the bot's "step out to a gap before striking" and its watchdog retreat both
+   pressed into the rock; state stayed PLAY, no input was blocked by the game
+   (a player faces and strikes, or jumps over). Fixed in the harness
+   (`b3c26d4`: `wallBehind()`, a cornered retreat hops the fighter). No check
+   was relaxed.
+2. **Attempt 2 — complete** (on `b3c26d4`; the same built pages, md5 above).
+   Cleared browser → title → film → difficulty ("Kitten", chosen in the game's
+   own menu) → chapter-two teaser, keyboard only, **15:30 wall, 1 death (CV3),
+   0 page errors**. Missions in order: opening, servo, marble, forge, sage,
+   chime, lion, teaser. **All 13 manhwa sequences opened, in story order, none
+   missed**: bay, ratchet, gate, cave, marble, forge, passage, sage, meet,
+   break, chime, free, ch2. The new cornered rule fired once at the Sage
+   (10:50) and the Sage was freed at 11:40. One "stuck" log line at CV2's left
+   edge (12:21) resolved in the next second. Recording: 15:29, 960 px,
+   delivered with this report (not committed — 30 MB).
 
 
 ## 8. Deployment
