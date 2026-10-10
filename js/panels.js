@@ -118,6 +118,9 @@ const PANEL_SEQ = [
     event: 'first arrival in the maintenance tunnel (GA1T) through the door beside the quarry',
     when: f => !!f.crystal,
     past: (f, s) => !!f.sageTame_GA1D || !!(s.visited && s.visited.GA1D),
+    // a brisk walk through the tunnel can leave these owed; once the Sage's
+    // own pages have played they would arrive after the rescue, out of order
+    stale: (S, f) => !!S.seen.sage && !!f.sageTame_GA1D,
     panels: [
       { ref: 'game: passage_a', src: PANEL_GAME('passage_a'), crop: PG_FULL, cap: 'pc_p_door', move: 'in', focus: [0.6, 0.5] },
       { ref: 'game: passage_b', src: PANEL_GAME('passage_b'), crop: PG_FULL, cap: 'pc_p_tunnel', move: 'in', focus: [0.5, 0.5] },
