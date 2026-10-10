@@ -775,7 +775,9 @@ const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
 }) : MEDIA_RAW;
 // the handful that must never pop in late: the shared turnaround atlas, the
 // player's own sheets and the decks she is standing on
-['roster', 'npcs', 'platforms', 'slashFx'].forEach(mediaFetch);
+// one argument each: forEach would pass the index as `urgent` and the array as `bust`,
+// fetching three of the four as urgent with a cache-busting query on every boot
+['roster', 'npcs', 'platforms', 'slashFx'].forEach(k => mediaFetch(k));
 // Asking "is this sheet here yet?" must NOT be what fetches it. Several guards
 // test four boss atlases in one condition to decide which renderer to use, and
 // through the lazy map that innocent-looking check pulled 2.7 MB of art for
