@@ -108,12 +108,14 @@ function mvBlit(c, key, ang, h, alpha, flip) {
   if (flip) c.scale(1, -1);
   c.globalAlpha *= (alpha == null ? 1 : alpha);
   c.drawImage(im, r[0], r[1], r[2], r[3], -w / 2, -h / 2, w, h);
-  if (key === 'coreS' || key === 'coreB' || key === 'coreD') infEyeArt(c, 'motherParts:' + key, 0, -w / 2, -h / 2, w, h);
   c.restore();
 }
 // a part hung out along a radius, so a plate sits in its sector rather than
-// on top of the core
-function mvBlitAt(c, key, ang, rad, h, alpha, spin) {
+// on top of the core. `eye` (a plate's sector index) reports that plate's
+// lens to the infection: HER EYES ARE THE SHELL'S LENSES, one per plate — the
+// core is a sun with no pupil, her light and her weak point, not an eye
+// (tools/eyespecs.cjs says how that was decided).
+function mvBlitAt(c, key, ang, rad, h, alpha, spin, eye) {
   const im = mvArt(); if (!im) return;
   const r = MVA[key]; if (!r) return;
   const k = h / r[3], w = r[2] * k;
@@ -123,6 +125,10 @@ function mvBlitAt(c, key, ang, rad, h, alpha, spin) {
   c.rotate(spin || 0);
   c.globalAlpha *= (alpha == null ? 1 : alpha);
   c.drawImage(im, r[0], r[1], r[2], r[3], -w / 2, -h / 2, w, h);
+  // a plate faded into the TOTAL NULL dark is not looking out: the glow would
+  // light her up in the one move whose point is that she cannot be seen
+  if (eye != null && (alpha == null || alpha >= 0.3) && typeof infEyeArt === 'function')
+    infEyeArt(c, 'motherParts:' + key, 0, -w / 2, -h / 2, w, h, eye);
   c.restore();
 }
 function mvArtBody(c, b, P) {
@@ -163,6 +169,8 @@ function mvArtBody(c, b, P) {
     mvBlit(c, 'collar', tt * 0.06, cw, (b.dead ? 1 - dissK : 1) * (dorm ? 0.85 : 1));
   }
   // ---- the shell: ONE plate, eight sectors --------------------------------
+  // eight plates, eight lenses: the most eyes any body reports (2 by default)
+  if (typeof infEyeSetMax === 'function') infEyeSetMax(b, 8);
   const shellA = tt * 0.1;
   const breathe = 3.5 * beat + (stag ? 14 : 0) + (song ? 5 : 0) + (charging ? -2.5 : 0);
   const shellAl = dark ? 0.08 : dorm ? 0.85 : 1;
@@ -187,7 +195,7 @@ function mvArtBody(c, b, P) {
     // the sheet paints the plate with its crest spikes up; turning it a quarter
     // the other way puts the spikes on the OUTSIDE of the ring, which is the
     // whole point of a silhouette breaker
-    mvBlitAt(c, key, A, rad, 66 * (1 + 0.02 * beat), shellAl * flyAl, -Math.PI / 2);
+    mvBlitAt(c, key, A, rad, 66 * (1 + 0.02 * beat), shellAl * flyAl, -Math.PI / 2, i);
   }
   // ---- shards, only once she is coming apart ------------------------------
   if (b.dead && dd > 0.25) {
@@ -310,9 +318,12 @@ function drawMother(c, b) {
   // the heartbeat, the halo's fall, the plate-loss order, the reach of the
   // tendrils and the collapse of the core are all still the numbers this file
   // already worked out. Only what gets painted is different.
+  // It must answer TRUE: Boss.draw treats a falsy answer as "her art is not
+  // here yet" and paints the loading silhouette (drawBossHold) — a dark disc
+  // and two stand-in eyes — straight over the body that was just drawn.
   if (mvArt() && mvArtBody(c, b, {
     tt, dd, beat, hpFrac, ph, dorm, charging, dark, song, stag, grabbing, hurt, targA, cy,
-  })) { c.restore(); return; }
+  })) { c.restore(); return true; }
 
   // ---- 1. void aura: she is a hole in the world -----------------------------
   if (!dark) {
@@ -725,6 +736,12 @@ function drawMother(c, b) {
         if (charging) open = mvClamp(open, 0.06, 0.35);
         if (b.dead) open *= mvClamp(1 - dd / 0.5, 0, 1);
         c.save(); c.translate(er, 0); c.scale(esc, esc);
+        // the loading body reports the same eyes the painted one does: one
+        // lens per intact plate, while it is open and not lost in the dark
+        if (open > 0.08 && shellAl >= 0.3 && typeof infEyeMark === 'function') {
+          if (typeof infEyeSetMax === 'function') infEyeSetMax(b, 8);
+          infEyeMark(c, 0, 0, null, i);
+        }
         // carved socket: a lens slot cut across the plate, not a sticker on it
         c.fillStyle = '#0a0812';
         c.beginPath(); c.ellipse(0, 0, 3.4, 5.8, 0, 0, 7); c.fill();

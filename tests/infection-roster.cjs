@@ -176,13 +176,18 @@ const { chromium } = require('playwright');
       for (let i = 0; i < 24; i++) {
         frame(body, i < 12 ? -3 : 3);
         if (!body._eyeN) continue;
-        const ex = body._eyeW[0], ey = body._eyeW[1];
         // born in THIS frame's draw: the smoke is laid as the eye is drawn,
         // the newest at age zero (a frame-old wisp is the frame before's eye)
         const young = infEyeParticles(body).filter(p => p.age < 1e-6);
         if (!young.length) continue;
         frames++; born += young.length;
-        worst = Math.max(worst, Math.min(...young.map(p => Math.hypot(p.x - ex, p.y - ey))));
+        // a body with several eyes (MOTHER-V's eight lenses) emits from whichever
+        // eyes moved this frame: the newest wisp must sit at ONE of them
+        worst = Math.max(worst, Math.min(...young.map(p => {
+          let m = 1e9;
+          for (let e = 0; e < body._eyeN; e++) m = Math.min(m, Math.hypot(p.x - body._eyeW[e * 2], p.y - body._eyeW[e * 2 + 1]));
+          return m;
+        })));
       }
       r.trail = { frames, born, worst };
       out.push(r);

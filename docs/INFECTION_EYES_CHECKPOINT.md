@@ -11,9 +11,10 @@ record of what is built, where it hooks in, and what measures it. The code is
 |---|---|---|
 | Ordinary infected enemies: RED eyes. Guardians, the Alpha included: PURPLE | `infEyeClass(e)` — boss instances, mini-bosses and the sage are purple; the Alpha is purple until `alphaFreed()`; everything else red | `infection-eyes`, `infection-roster` (every placed kind) |
 | Moving eyes leave incense-like smoke | the fixed-step update decides HOW MUCH is owed (moving sim time); the draw lays it (`infEyeLay`) along the path of the eye the art actually drew this frame, one wisp per `INF_EYE_SPACING` px, newest exactly at the eye, rising and curling as they age | `infection-eyes`, `infection-roster` (newest wisp within 6 px of that frame's eye, every frame, every kind — measured 0.0 px) |
-| Anchored to the ACTUAL eyes in every frame — facing, crouch, jump, attack, land — not the forehead or body centre | every renderer reports its eye per frame: `infEyeMark` (procedural eyes) or `infEyeArt` (authored art, per-cell points from `assets/eyes.json`), mapped through the canvas transform the body was drawn with | `infection-roster` (per kind, per frame, per facing; the wolf per state) |
+| Anchored to the ACTUAL eyes in every frame — facing, crouch, jump, attack, land — not the forehead or body centre | every renderer reports its eye per frame: `infEyeMark` (procedural eyes) or `infEyeArt` (authored art, per-cell points from `assets/eyes.json`), mapped through the canvas transform the body was drawn with | `infection-roster` (per kind, per frame, per facing; the wolf per state); `infection-poses` (every guardian, every drawn state early/mid/late, both facings: on an opaque pixel of the art, never reported twice, the newest wisp at that frame's eye) |
+| Eyes per body | two by default; a renderer whose body really carries more optics raises its own allowance with `infEyeSetMax(e, n)`, bounded by `INF_EYE_BODY_MAX` (8). Only MOTHER-V does: her eight shell-plate lenses, fewer as phases break plates off. Each slot can carry a tag so a thread never joins one lens to another when the set shifts; a many-eyed body lays each thread sparser by sqrt(n/2). The pool caps (`INF_EYE_CAP`) are unchanged. A cell drawn twice in one frame (the Alpha's and the wolves' hit-flash pass) reports its eye once — it used to double the glow and the thread | `infection-eyes` (Mother on `low`), `infection-poses` (8/6/4/2 by phase) |
 | World coordinates; the camera must not create trails | the transform captured at `infEyeWorldBegin` is inverted, so points and particles live in world space; nothing emits from a draw | `infection-eyes` (a pan with the body still) |
-| Restrained | small, short-lived (`INF_EYE_LIFE` 1.5 s), additive, young wisps bright and old ones faint; idle bodies emit nothing. Tuned once against the recorded build: at the first alpha the thread vanished against the meadow at play size | visual, recorded video |
+| Restrained | small, short-lived (`INF_EYE_LIFE` 1.5 s, each wisp ±25%: 1.125–1.875 s), additive, young wisps bright and old ones faint; idle bodies emit nothing. Tuned once against the recorded build: at the first alpha the thread vanished against the meadow at play size | visual, recorded video |
 | Stop on purification or friendliness; let existing wisps fade (counted at birth per body, `_eyeBorn`) | `infEyeClass` returns null for purified / tame / calm / friendly / rescued / yielded / disabled / hypnotised bodies — emission stops that frame, the pool ages out | `infection-eyes` |
 | Clear on teleport, room change, removal and load | eye jump > `INF_EYE_JUMP` kills that body's trail; `infEyeClearAll()` at the top of `loadRoom`; a body no longer in the room is cleared on the next step | `infection-eyes` |
 | A stopped creature's plume dissipates, leaving only the glow | emission requires the BODY to travel (`INF_EYE_MIN_V`, held `INF_EYE_HOLD`); a filmed idle steps its eye between cells and that must not count as motion. A turn (facing sign) restarts the trail, so no smoke streaks across the face | `infection-eyes` |
@@ -52,12 +53,36 @@ the page as `window.EYE_MAP` and into the build id.
 first full regeneration after the map shipped: ten new strips, every anchor
 checked on the sheet.
 
-Intentional gaps (no anchor, by design): the Alpha's yield cells 7–11 (it is
-turning friendly), the bat hanging asleep, the beast's fall cells 7–11, the
-purified prism frames, and the tamed wolf's purify and sit strips.
+**2026-10-10 — the guardians, pose by pose.** `tests/infection-poses.cjs
+--sheet` and 2%-grid zooms of every figure found anchors that were on the body
+but not on the eye, and one guardian hidden outright:
+
+- MOTHER-V: her eyes are the eight shell-plate lenses (socketed red slits; the
+  procedural body's "lidded eye" per plate), not the golden core, which has no
+  pupil and is her weak point. Renders and the decision:
+  `assets/source/_sheets/mother_eyes_{before,after}.jpg`. Plates faded into the
+  TOTAL NULL dark report nothing. The tendril heads' glints are not eyes.
+- MOTHER-V was drawn UNDER the loading silhouette: `drawMother` answered
+  `undefined` after painting her, and `Boss.draw` then painted `drawBossHold`
+  (a dark disc and two stand-in eyes) over her every frame. The harness now
+  fails any guardian with its art loaded that reaches `drawBossHold`.
+- TALONHOST `pIdle`/`pDown`/`pShoot` sat in the gap above the skull mask;
+  GLACIERE's two figures (a horn glint; a point in the air ahead of the
+  muzzle), FURNACE's flying figure (the wing membrane) and stand (the crest),
+  and PRISM PROWLER's idle/walk/run/hurt/beam/slash frames (forehead and ears)
+  are all re-placed on the eye. The "on the body" check cannot tell a forehead
+  from an eye — the sheet is how these were found, and is the review step
+  for any new art.
+
+Intentional gaps (no anchor, by design): the bat hanging asleep, the beast's
+fall cells 7–11, the purified prism frames, PRISM's spin (vortex) and
+light-step (burst) frames, MOTHER-V's plates in the TOTAL NULL dark, and the
+tamed wolf's purify and sit strips. A dead or yielding Alpha is not infected,
+so its yield strip draws no eye whatever the map holds.
 
 ## Status
 
 Implemented and measured: everything in the table above. `tests/infection-eyes.cjs`
-(21 checks) and `tests/infection-roster.cjs` (every placed hostile kind and
-guardian, and the wolf state by state) run in the full suite.
+(22 checks), `tests/infection-roster.cjs` (every placed hostile kind and
+guardian, and the wolf state by state) and `tests/infection-poses.cjs` (8
+guardians, 95 poses, 570 staged frames, about 3.5 minutes) run in the full suite.
