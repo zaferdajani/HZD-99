@@ -1,0 +1,46 @@
+
+── caves-ch1  — every chapter-one cave pays something of its own; early finds remembered; a rescue never looks like a kill
+── caves-ch1 — every chapter-one cave pays something of its own
+
+    census (as loaded with the blade forged):
+      A5    chest:magnet riddle term:1                   doors CV1          foes 0
+      A7    term:20                                      doors —            foes 3
+      CV1   chest:core                                   doors A5,CV1B      foes 1
+      CV1B  bench                                        doors CV1,CV2      foes 1
+      CV2   term:5                                       doors CV1B         foes 4
+      CV3   —                                            doors GA1T         foes 4
+      GA1T  term:6                                       doors CV3          foes 1
+      GA1   bench                                        doors —            foes 0
+      GA1D  sage:THE MEADOW SAGE                         doors —            foes 1
+      A11   secret:coin                                  doors —            foes 0
+      A12   secret:star                                  doors —            foes 0
+      A13   secret:coin term:21                          doors —            foes 0
+      GA2   bench                                        doors A10          foes 0
+      GA2T  term:22                                      doors —            foes 1
+      GA2D  sage:THE PACK SAGE                           doors —            foes 1
+
+  ok   an empty transit cave with doors and scrap is not a meaningful payoff
+  ok   every chapter-one cave holds a discoverable payoff beyond its exit and scrap  15 caves
+  ok   A5: a Mind Node, the magnet crest, the buried mouth and the first quarry marks  {"riddle":true,"rubble":true,"marks":3,"crest":true}
+  ok   A7: the quarry survey (terminal 20) is down the shaft  {"term":true,"lines":3}
+  ok   ...and Ratchet remembers she was already there: he says so and pays on the ask  You have already stood at the bottom of that shaft? Then you have seen what I wanted seen.
+  ok   ...while a player who has NOT been there is still sent
+  ok   CV1: the pocket chest is a spare core, not scrap  {"chest":true,"cores":1,"full":true}
+  ok   CV1B: resting at the survey pod charts the quarry onto the map  {"charted":"CV1,CV1B,CV2,CV3","said":true,"map":true}
+  ok   CV2: the beacon's log answers the call
+  ok   CV3: the marble is there to quarry, and the passage is not yet built  {"pillar":true,"doorBefore":"","after":{"pillar":false,"door":"GA1T","said":true,"phase":"sage","marks":"12,22,30","once":true,"drawn":true}}
+  ok   ...after the forge the pillar is a cut stump, the passage is open, the marks lead to it, and she is told — once  {"pillar":false,"door":"GA1T","said":true,"phase":"sage","marks":"12,22,30","once":true,"drawn":true}
+  ok   the machines stopped before the forge wait, bound, and say so on the road back  {"said":true,"disabled":true,"freed":true}
+  ok   ...and cleansing one frees it with the rescue's own light and word
+  ok   the logs are distinct: the survey (t20), the gantry watch (t21), the wardens (t22), the refuge (t6), the founding log (t5)
+  ok   ...and the new logs exist in all five languages
+  ok   GA1D: the Sage is RESCUED — the word over the body, the line that says so, no wreck  {"tame":true,"flag":true,"rescuedWord":true,"said":true,"noWreck":true,"reveal":true,"revealLines":["THE MEADOW SAGE — It counted every machine that fell in the scrap fields — and kept one power cell 
+  ok   ...the revelation names CHIME
+  ok   ...the chamber's machines are freed with it, and the tunnel wakes freed on a fresh load  [true]
+  ok   ...and the bell's ward opens with the Sage
+  ok   a freed guardian is cleansed, not detonated (no death scene, the rescue's light)  {"tamed":true,"purified":true,"deathFx":false,"cleanse":true}
+  ok   ...while one that is ended still dies the way a kill does  {"tamed":false,"purified":false,"deathFx":true,"cleanse":false}
+
+OK — every cave pays its own way, and a rescue never looks like a kill
+
+all 1 harnesses ran

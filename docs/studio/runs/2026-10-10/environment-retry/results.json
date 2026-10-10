@@ -1,0 +1,48 @@
+{
+  "started_utc": "2026-10-10T08:40:50.506038+00:00",
+  "base_commit": "47fea7bef2e88c971cc6875c736a3a8d91012ae1",
+  "dirty_at_start": "M forge-odyssey.html\n M forge.html\n M index.html\n M js/game.js\n M js/quests.js\n M js/reveal.js\n M odyssey.html\n M tests/caves-ch1.cjs\n M tests/run.cjs\n M tests/textreveal.cjs\n M tests/tutorial-clarity.cjs\n?? docs/studio/\n?? tools/studio/",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.414869,
+      "log": "build.log",
+      "sha256": "0e4d41c7f6eeefbe4736c654d1cd67072813fed55bebb3290d07eafe3a549c7a"
+    },
+    {
+      "name": "hero-delivery",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.49424,
+      "log": "hero-delivery.log",
+      "sha256": "4d4dc436c7c4b601c19b8d4fae9304b159e9a67e650281c2892b2c499f44d0d9"
+    },
+    {
+      "name": "hero-frame-alpha",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.565731,
+      "log": "hero-frame-alpha.log",
+      "sha256": "df401e3ed01b01ee216da5235778fe7c9c65e19581e6edfdfe6b813f2045d7cd"
+    },
+    {
+      "name": "hero-alpha",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.615856,
+      "log": "hero-alpha.log",
+      "sha256": "84b517b4f0432a82fa241c62a1b5c0983e40ff6353bc3ce8abb87882d557719d"
+    }
+  ],
+  "limitations": [
+    "Automated harnesses include staged saves; not an uninterrupted campaign.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "5a7372bcc3ef9add1c8a3d5b69cb6948f4dceefe87e6b22a161b89b1eff47eb0",
+  "complete_requested_scope": true,
+  "passed": true,
+  "finished_utc": "2026-10-10T08:40:54.888394+00:00"
+}

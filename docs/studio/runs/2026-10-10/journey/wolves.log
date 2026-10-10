@@ -1,0 +1,54 @@
+
+── wolves  — the pack, the Alpha and the flag that changes a whole species
+── wolves — the pack, the Alpha, and the flag that changes a species
+  ok   every strip, plate and Alpha take is declared and decodes (15 + 9)  
+  ok   a wolf at rest, coiled and lunging are three different strips  rest/coil/lunge
+
+    IoU vs rest  wolfCoil    0.408
+    IoU vs rest  wolfBite    0.582
+    IoU vs rest  wolfCrouch  0.551
+    IoU vs rest  wolfLeap    0.360
+    IoU vs rest  wolfLand    0.348
+    IoU vs rest  wolfFlinch  0.308
+    IoU vs rest  wolfSit     0.362
+    IoU vs rest  alphaHowl   0.445
+    IoU vs rest  alphaLeap   0.241
+    IoU vs rest  alphaRoar   0.515
+
+  ok   every wind-up differs from rest in silhouette (IoU <= 0.86)  
+  ok   the standing wolf is one size in idle and prowl (within 8%)  2.46 / 2.32 hitbox-heights
+  ok   ...the same size the old plates drew (2.34 hitbox-heights, within 10%)  2.46
+  ok   every grounded strip puts its paws on the floor line (within 3% of a cell)  
+  ok   the Alpha has a room  A10
+  ok   ...OFF the road: no room walks into it sideways and it walks into none  from  -> 
+  ok   ...the optional den is reached from A2's depth door  A10
+  ok   ...and its own door walks her back to the hub (A10 -> A2)
+  ok   the road runs on without it: A2 -> A3 -> A4 reached with the Alpha untouched  A2.R A3, A3 east -> A4
+    states seen: intro, idle, clawwarn, claw, rest, coil, leap, recoil, broodcall, howl, bitewarn, bite, roarwarn, roar, turn
+    telegraph 39%   motionless 12%
+
+  ok   it starts asleep  dorm
+  ok   ...and wakes to its OWN theme, not the shared boss score  boss_alpha
+  ok   all five skills are used  howl,roar,leap,claw,bite
+  ok   every skill has a wind-up named for it  clawwarn/bitewarn/coil/roarwarn/broodcall
+  ok   it spends real time telegraphing (>= 8%)  39%
+  ok   it does not stand still (<= 40%)  12%
+  ok   the roar actually takes her controls  112 frames stunned
+  ok   a bite that lands CLINCHES rather than ending  bite -> clinch -> shake -> rest -> clawwarn -> claw -> rest
+  ok   ...then WORRIES her — the head-shake, and it hurts every whip  3 shake hits
+  ok   ...and then throws her clear and gives her back  thrown at -250 px/s
+  ok   a stunned HZD-99 cannot walk out of it  0.00 px
+  ok   ...and the stun expires and gives her back  stunT 0.00, then moved 115 px
+  ok   no kill-or-spare fork is ever put to the player
+  ok   it is TAMED, not destroyed
+  ok   ...and beating it sets the flag that changes the species
+  ok   before the Alpha, a wolf is an enemy  hostile true, took damage true, hurt her true
+  ok   after the Alpha, it will not touch her
+  ok   ...and she cannot hurt it, even standing on it
+  ok   past the meadow, the ground machines are cheetahs and not wolves  C1: cheetah true, wolf false
+  ok   taming the Alpha does NOT make them friendly  took damage true, hurt her true
+  ok   ...and it has its own three plates, not the wolf's  cheetahRest, cheetahWarn, cheetahRun
+
+OK — the pack hunts, the Alpha yields, and every wolf in the world changes with it
+
+all 1 harnesses ran

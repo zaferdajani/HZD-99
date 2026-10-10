@@ -1,0 +1,5 @@
+
+── input-focus  — focus loss clears input and cancelled touches cannot fire
+OK — focus loss clears all input, background input is blocked, fresh input recovers and touch cancellation cannot fire
+
+all 1 harnesses ran

@@ -1,0 +1,41 @@
+
+── panels  — approved manhwa crops at story moments: once, safe, readable, skippable, replayable
+── panels — the approved manhwa at story moments
+
+  ok   no manhwa page is fetched at boot
+  ok   every crop lies inside an approved page (or the Conduits backdrop)
+  ok   every caption and label exists in all five languages
+  ok   captions are translated, not English copies
+  ok   the map covers the chapter (≥ 9 sequences)  10
+  ok   arrival does not cut in before the room settles  {"st":"PLAY","done":null,"rev":null}
+  ok   leaving the service bay plays the bay panels in W2
+  ok   it is marked seen (and saved) as it begins
+  ok   a caption reveals progressively  {"st":"PANELS","id":"bay","i":2,"ph":"show","done":false,"rev":5}
+  ok   the first confirm completes the caption and does not turn the page  {"st":"PANELS","id":"bay","i":2,"ph":"show","done":true,"rev":35}
+  ok   a read caption does not advance on its own  {"st":"PANELS","id":"bay","i":2,"ph":"show","done":true,"rev":35}
+  ok   a separate confirm advances  {"st":"PANELS","id":"bay","i":3,"ph":"show","done":false,"rev":0}
+  ok   holding the key skips the sequence back to play
+  ok   a revisit does not replay it  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   reloading the save does not replay it  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   the replay list holds only the seen sequence  ["bay"]
+  ok   the pause menu offers Story panels once one is seen
+  ok   replay plays it again from the list  {"st":"PANELS","id":"bay","i":0,"ph":"in","done":true,"rev":null}
+  ok   a replay hands back to the list, not the room
+  ok   never with a hostile in reach  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   never over a dialogue  {"st":"DIALOG","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   the gate panels play once the room is quiet (A0)
+  ok   a beat the save had already passed is marked past, not replayed  {"bay":1,"gate":1,"ratchet":1,"cave":1,"forge":1}
+  ok   the lying-in-the-scrap panel shows only when the swipe took a core  [3,4]
+  ok   no teaser on the camp floor  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   the chapter-two teaser plays on the climb out of the Meadows
+  ok   the teaser ends on the chapter title card
+  ok   no page errors (desktop)
+  ok   reduced motion: no push or drift
+  ok   reduced motion: captions appear whole
+  ok   touch: a tap completes the caption  [{"st":"PANELS","id":"chime","i":0,"ph":"show","done":false,"rev":6},{"st":"PANELS","id":"chime","i":0,"ph":"show","done":true,"rev":22}]
+  ok   touch: a held finger skips  {"st":"PANELS","id":"chime","i":0,"ph":"out","done":true,"rev":22}
+  ok   no page errors (touch)
+
+all passed
+
+all 1 harnesses ran

@@ -210,11 +210,16 @@ const SUITE = [
 ];
 
 const want = process.argv.slice(2);
+const unknown = want.filter(n => !SUITE.some(([name]) => name === n));
+if (unknown.length) {
+  console.error('Unknown test harness(es): ' + unknown.join(', '));
+  process.exit(1);
+}
 const run = SUITE.filter(([n]) => !want.length || want.includes(n));
 let failed = 0, pending = 0;
 for (const [name, what, opt] of run) {
   const file = path.join(__dirname, name + '.cjs');
-  if (!fs.existsSync(file)) { console.log('· ' + name + ' — missing'); continue; }
+  if (!fs.existsSync(file)) { failed++; console.error('FAILED: ' + name + ' — missing harness ' + file); continue; }
   console.log('\n── ' + name + '  — ' + what);
   if (!(opt && opt.noBrowser)) ensureServer();
   try {

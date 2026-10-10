@@ -1,0 +1,92 @@
+[
+  {
+    "id": "cinematic-designer",
+    "title": "Senior Cinematic Designer",
+    "mandate": "Trigger timing, framing, readable panel transitions, earned equipment and skip continuity.",
+    "prompt": "docs/studio/roles/cinematic-designer.md"
+  },
+  {
+    "id": "player-systems",
+    "title": "Senior Game Designer \u2014 Player Systems",
+    "mandate": "One-control tutorial, readable rewards, healing economy, save continuity and accessibility.",
+    "prompt": "docs/studio/roles/player-systems.md"
+  },
+  {
+    "id": "mission-designer",
+    "title": "Senior Mission Designer \u2014 Quest Craft",
+    "mandate": "Each quest has a motivation, landmark, action, reward and visible consequence.",
+    "prompt": "docs/studio/roles/mission-designer.md"
+  },
+  {
+    "id": "encounter-designer",
+    "title": "Principal Encounter Designer",
+    "mandate": "Enemy placement, safe teaching space, telegraphs, encounter variety and return routes.",
+    "prompt": "docs/studio/roles/encounter-designer.md"
+  },
+  {
+    "id": "boss-designer",
+    "title": "Senior Boss Designer",
+    "mandate": "NULLFANG and Alpha identity, anticipation/contact/recovery, purification and fair gates.",
+    "prompt": "docs/studio/roles/boss-designer.md"
+  },
+  {
+    "id": "mission-director",
+    "title": "Senior Mission Designer \u2014 Campaign",
+    "mandate": "Cross-room causality, cave value, optional Alpha, Blade \u2192 Sage \u2192 CHIME \u2192 NULLFANG.",
+    "prompt": "docs/studio/roles/mission-director.md"
+  },
+  {
+    "id": "producer",
+    "title": "Senior Mission Producer",
+    "mandate": "Scope, deduplication, priorities, branch safety, acceptance evidence and Claude handoff.",
+    "prompt": "docs/studio/roles/producer.md"
+  },
+  {
+    "id": "character-artist",
+    "title": "Senior Character Artist",
+    "mandate": "Hero-relative fidelity, on-model bodies, full pose coverage, feet, scale and NPC readability.",
+    "prompt": "docs/studio/roles/character-artist.md"
+  },
+  {
+    "id": "cinematic-director",
+    "title": "Senior Cinematic Director",
+    "mandate": "Manhwa canon, shot continuity, mood, reveals, missing panels and spoiler-safe teasers.",
+    "prompt": "docs/studio/roles/cinematic-director.md"
+  },
+  {
+    "id": "vfx-artist",
+    "title": "Senior VFX Artist",
+    "mandate": "Eye anchors, red/purple distinction, finite trails, cure cleanup, reduced motion and budgets.",
+    "prompt": "docs/studio/roles/vfx-artist.md"
+  },
+  {
+    "id": "world-director",
+    "title": "Senior Technical Director \u2014 World Systems",
+    "mandate": "Room graph, collision, cave topology, shortcuts, streaming and save migration.",
+    "prompt": "docs/studio/roles/world-director.md"
+  },
+  {
+    "id": "combat-engineer",
+    "title": "Senior Gameplay Engineer \u2014 Combat",
+    "mandate": "Hitboxes, timing, charge, frame-rate invariance, boss transitions and sound/haptic ownership.",
+    "prompt": "docs/studio/roles/combat-engineer.md"
+  },
+  {
+    "id": "mission-engineer",
+    "title": "Senior Gameplay Engineer \u2014 Mission",
+    "mandate": "Quest flags, pre-accept discovery, idempotent rewards, sequence gates and load recovery.",
+    "prompt": "docs/studio/roles/mission-engineer.md"
+  },
+  {
+    "id": "npc-engineer",
+    "title": "Senior Gameplay Engineer \u2014 NPC",
+    "mandate": "Revival, dialogue state, task ownership, friendly motion and persistent rescue.",
+    "prompt": "docs/studio/roles/npc-engineer.md"
+  },
+  {
+    "id": "ui-engineer",
+    "title": "Lead UI Engineer",
+    "mandate": "Text reveal, advance debounce, RTL, touch, overlay queue and readable affordances.",
+    "prompt": "docs/studio/roles/ui-engineer.md"
+  }
+]

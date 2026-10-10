@@ -1,0 +1,17 @@
+
+── hero-alpha  — original transparent artwork retains its dark visor
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/f6b645fbebcc/studio-review/tests/hero-alpha.cjs:2:41
+    at Object.<anonymous> (/workspace/scratch/f6b645fbebcc/studio-review/tests/hero-alpha.cjs:2:1212) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/f6b645fbebcc/studio-review/tests/hero-alpha.cjs:2:41
+    at Object.<anonymous> (/workspace/scratch/f6b645fbebcc/studio-review/tests/hero-alpha.cjs:2:1212) {
+  log: [],
+  name: 'Error'
+}
+
+
+1 harness(es) failed

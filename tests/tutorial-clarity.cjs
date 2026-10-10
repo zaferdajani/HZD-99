@@ -58,6 +58,17 @@ assert.equal(hand('booth'), '←');
 
 // Inside: the letter on Ratchet first, then the drawer, then Ratchet again.
 ctx.G.roomId = 'A0B'; ctx.G.roomDef.exits = {};
+// The room switch precedes the completion hold. Do not briefly tell the
+// arriving player to leave again during either part of that transition.
+for (const hold of [0, 0.7]) {
+  ctx.G.tut = { i: run("TUT_STEPS.findIndex(s => s.id === 'booth')"), hold };
+  assert.equal(prompt('booth').suppressed, true);
+  assert.equal(prompt('booth').action, null);
+  assert.equal(prompt('booth').target, null);
+  ctx.G.tutChip = { stale: true };
+  ctx.drawTutor();
+  assert.equal(ctx.G.tutChip, null, 'no stale exit chip after entering the booth');
+}
 const ratchet = { type: 'npc', extra: 'ratchet', x: 300, y: 400, w: 32, h: 40 };
 ctx.G.statics = [ratchet]; ctx.G.near = ratchet; ctx.player.x = 290;
 assert.equal(hand('note'), 'E');

@@ -1,0 +1,5 @@
+
+── hero-frame-alpha  — discrete sprites never blend into doubled silhouettes
+PASS fractional frames and clip changes draw one opaque silhouette, with no ghost image
+
+all 1 harnesses ran

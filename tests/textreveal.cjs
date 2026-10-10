@@ -133,6 +133,13 @@ const check = (name, ok, detail) => {
     for (let k = 0; k < 40 && G.state === 'DIALOG'; k++) { run(0.4); step(1 / 60, 'Enter'); turns++; }
     out.pages.closed = G.state === 'PLAY'; out.pages.turns = turns;
 
+    // A long name/URL following a normal word must wrap too, without loss.
+    const longToken = 'https://example.invalid/' + 'abcdef'.repeat(60);
+    const narrow = 180, text = 'See ' + longToken + ' now';
+    const wrapped = wrapLines(c, text, narrow);
+    out.longToken = { bounded: wrapped.every(l => c.measureText(l).width <= narrow),
+      preserved: wrapped.join('').replace(/\s/g, '') === text.replace(/\s/g, '') };
+
     // ---- 5. Chinese wraps inside the box -----------------------------------
     fresh('zh');
     const ZH = '守护者们是最后倒下的。它们生来就是为了保护我们，所以那首歌得拼命压过它们——直到它们一个不剩，才再没有谁抵抗。被感染的歌让我们的邻居彼此为敌。那时你正在休眠充电，错过了那次广播。';
@@ -314,6 +321,7 @@ const check = (name, ok, detail) => {
   check('...every line inside the box', r.pages.widest <= r.pages.box, Math.round(r.pages.widest) + ' <= ' + r.pages.box);
   check('...with nothing lost between pages', r.pages.whole);
   check('...and read through to the end it closes', r.pages.closed, r.pages.turns + ' presses');
+  check('long tokens after ordinary text fit and retain every character', r.longToken.bounded && r.longToken.preserved);
   check('5. Chinese wraps inside the box', r.zh.lines >= 2 && r.zh.widest <= r.zh.box, r.zh.lines + ' lines, widest ' + Math.round(r.zh.widest));
   check('...and no line starts with closing punctuation', r.zh.noLeadPunct);
   check('6. Arabic is typed whole words at a time', r.ar.sawPartial && r.ar.partialOk);

@@ -23,14 +23,11 @@ const QUESTS = [
   {id:'alpha_pack', npc:'ratchet', zone:'A', after:'ratchet_forge', kind:'flag', flag:'alpha', reward:{}},
   {
     // THE GAME'S FIRST QUEST — the sword is EARNED, not handed over.
-    // Ratchet's story (the ask text): the corrupted song took every unit
-    // around him; the small crystal on his chest lit and burned the song out
-    // of him — but it was too small, its charge faded, and before the song
-    // could creep back he pulled his own plug. Her cell woke him. He can
-    // forge a PURIFIER from pure crystal, if she quarries a shard of the
-    // pillar in the crystal cave (the depth door in A5's backdrop). Until
-    // then her claws BREAK the small machines but cannot CLEANSE anything —
-    // which is the point of the whole errand.
+    // Ratchet's inherited marble slowed the infection but could not stop it.
+    // He removed his own battery; the hero retrieves it from his drawer and
+    // restores him. Rounded raw marble from the early cave lets him forge
+    // the Purifier before the first Sage. Claws can stop machines, but only
+    // the earned sword cleanses them. See docs/STORY_CANON.md.
     id: 'ratchet_forge',
     npc: 'ratchet', zone: 'A',
     kind: 'fetch', item: 'cshard',
@@ -103,8 +100,9 @@ function questSnap(id) {
   if (q.kind === 'cull') base[id] = { n: (G.save.culls && G.save.culls[q.foe]) | 0 };
   // a place counts once she stands in it AFTER being asked (questVisit)
   else if (q.kind === 'reach') base[id] = { reached: 0 };
-  // a fetch item does not exist in the world until it is asked for (loadRoom
-  // spawns it only for an active errand), so there is nothing to snapshot
+  // Fetch items may already be in the bag before the request; questItemLive
+  // allows early discovery and questFoundEarly handles the NPC response.
+  // There is no fetch counter to snapshot.
 }
 // loadRoom tells the errands where she is standing
 function questVisit(room) {

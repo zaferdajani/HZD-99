@@ -1,0 +1,21 @@
+
+── story-rescue  — recoverable machines and persistent cleansing
+PASS [
+  'opening target is a construct',
+  'person has stable identity',
+  'defeat preserves person and does not create a wreck',
+  'claws cannot cleanse',
+  'disabled person cannot take more damage',
+  'disabled state survives reload',
+  'forged sword starts short interaction',
+  'moving away interrupts without harming person',
+  'damage interrupts',
+  'cleanse changes body behaviour and save state',
+  'cure pays once',
+  'repeated actions cannot duplicate reward or destroy friend',
+  'rescued person persists in room after reload',
+  'rescued contact is safe',
+  'legacy encounters preserved'
+]
+
+all 1 harnesses ran

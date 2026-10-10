@@ -118,6 +118,9 @@ function wrapLines(ctx, text, width, font) {
   const fits = s => ctx.measureText(s.replace(/\s+$/, '')).width <= width;
   for (const u of units) {
     if (u === '\n') { lines.push(line.replace(/\s+$/, '')); line = ''; continue; }
+    // Flush a preceding line before handling an overlong unit. Otherwise a
+    // long word after ordinary text bypasses the grapheme splitting below.
+    if (line && !fits(line + u)) { lines.push(line.replace(/\s+$/, '')); line = ''; }
     const test = line + u;
     if (!line || fits(test)) {
       // a single unit wider than the whole box (a long name, a URL) is cut by

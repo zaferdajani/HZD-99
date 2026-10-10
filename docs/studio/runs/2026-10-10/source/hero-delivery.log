@@ -1,0 +1,17 @@
+
+── hero-delivery  — source provenance, frame gutters, scale and floor registration
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/f6b645fbebcc/studio-review/tests/hero-delivery.cjs:2:571
+    at Object.<anonymous> (/workspace/scratch/f6b645fbebcc/studio-review/tests/hero-delivery.cjs:2:2219) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/f6b645fbebcc/studio-review/tests/hero-delivery.cjs:2:571
+    at Object.<anonymous> (/workspace/scratch/f6b645fbebcc/studio-review/tests/hero-delivery.cjs:2:2219) {
+  log: [],
+  name: 'Error'
+}
+
+
+1 harness(es) failed

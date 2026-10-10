@@ -12909,6 +12909,11 @@ function tutHand(st) {
 function tutPrompt(st) {
   const action = TUT_ACTION[st.id] || 'MOVE';
   const view = { ...st, target: null, action, vb: action === 'MOVE' ? null : 'V' + action };
+  // Entry is already complete; the short completion hold must not route
+  // her back outside before the letter lesson becomes active.
+  if (st.id === 'booth' && G.roomId === 'A0B') {
+    view.suppressed = true; view.action = null; view.vb = null; return view;
+  }
   if (st.hero && typeof isHero === 'function' && isHero()) { view.label = st.hero[0]; view.hint = st.hero[1]; }
   const pc = player.x + player.w / 2;
   const doors = typeof gateDoors === 'function' ? gateDoors() : [];
@@ -13155,6 +13160,7 @@ function drawTutor() {
   const T = G.tut;
   const st = TUT_STEPS[T.i];
   if (!st) return;
+  if (tutPrompt(st).suppressed) { G.tutChip = null; return; }
   const projectX = x => typeof worldScreenX === 'function' ? worldScreenX(x) : x-cam.x;
   const projectY = y => typeof worldScreenY === 'function' ? worldScreenY(y) : y-cam.y;
   const px = projectX(player.x+player.w/2), py = projectY(player.y-12);

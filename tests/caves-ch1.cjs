@@ -185,12 +185,21 @@ const check = (name, ok, detail) => {
     console.log('      ' + id.padEnd(5) + ' ' + (c.statics.join(' ') || '—').padEnd(44) + ' doors ' + (c.doors.join(',') || '—').padEnd(12) + ' foes ' + c.enemies);
   }
   console.log('');
-  const payoffKinds = (id) => r.census[id].statics.filter(s => !/^scrap/.test(s)).concat(r.census[id].doors.map(d => 'door>' + d));
-  const thin = Object.keys(r.census).filter(id => !payoffKinds(id).length);
-  check('every chapter-one cave holds a payoff that is not enemies and scrap', !thin.length, thin.join(',') || Object.keys(r.census).length + ' caves');
-  const sigs = Object.keys(r.census).map(id => payoffKinds(id).sort().join('+'));
-  const dup = sigs.filter((s, i) => sigs.indexOf(s) !== i);
-  check('...and no two caves pay the same thing', !dup.length, dup.join(' | '));
+  // A route is not a reward by itself: counting door destination IDs made
+  // even empty transit rooms pass and made their signatures trivially unique.
+  // Count only discoverable facilities, story, puzzles, material and rewards.
+  // Repeated categories (e.g. two useful rest pods) are legitimate; their
+  // distinct purpose is reviewed in the ledger and the focused checks below.
+  const payoffKinds = census => census.statics.filter(s =>
+    /^(?:bench|riddle|pillar)$/.test(s) || /^(?:term|chest|secret|sage):/.test(s));
+  check('an empty transit cave with doors and scrap is not a meaningful payoff',
+    payoffKinds({ statics: ['scrap', 'gate'], doors: ['CV2', 'CV3'] }).length === 0);
+  // Census is after forging, when the one-time marble has been removed.
+  // Use the separately observed pre-forge pillar for that consumed reward.
+  const thin = Object.keys(r.census).filter(id => !payoffKinds(r.census[id]).length
+    && !(id === 'CV3' && r.cv3.pillar));
+  check('every chapter-one cave holds a discoverable payoff beyond its exit and scrap',
+    !thin.length, thin.join(',') || Object.keys(r.census).length + ' caves');
   check('A5: a Mind Node, the magnet crest, the buried mouth and the first quarry marks',
     r.a5.riddle && r.a5.crest && r.a5.rubble && r.a5.marks >= 2, JSON.stringify(r.a5));
   check('A7: the quarry survey (terminal 20) is down the shaft', r.a7.term && r.a7.lines >= 3, JSON.stringify({ term: r.a7.term, lines: r.a7.lines }));

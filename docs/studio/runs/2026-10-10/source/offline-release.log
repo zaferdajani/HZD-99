@@ -1,0 +1,5 @@
+
+── offline-release  — scoped version cache, media seeking and storage-denied fallback
+PASS: versioned app-only caches, fresh manifests, media seeking, offline fallback, cache denial and no partial-response corruption
+
+all 1 harnesses ran

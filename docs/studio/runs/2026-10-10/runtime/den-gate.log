@@ -1,0 +1,25 @@
+
+── den-gate  — the lion's den and the bell, every entrance, dash/jump bypass and save/load, before and after their milestones
+── den-gate — the lair and the bell, every way in, before and after
+
+  ok   A3's east seam holds at every stage before the lair opens — walk, running jump, dash, air dash  16 runs, none in A4
+  ok   ...and she is stopped at the ward's face, short of the seam — not at an invisible edge  furthest reach 1594 of 1664
+  ok   ...with the staged lion on screen (the break), the seam still holds  {"inA4":false,"fight":false,"broke":true}
+  ok   the grotto (GA1) has no door into the lair before the lion is free — no prompt, no walk  doors:  / room GA1
+  ok   ...and it is built once he is
+  ok   no vertical link anywhere leads into the lair, and the lair has one way in  vlinks  exits L
+  ok   Continue, respawn and a stored save never start her inside the lair or the bell's chamber  A0B->A0B/A0B/A0B A3->A3/A3/A3 CV1B->CV1B/CV1B/CV1B GA1->GA1/GA1/GA1 GA2->GA2/GA2/GA2 A4->A3/A3/A3 A9->A3/A3/A3
+  ok   ...a real bench keeps its own room (A3, CV1B, GA1 …)
+  ok   ...and once the lair is open a save parked there is left alone  A4
+  ok   the bell's climb (A8 -> A9) is shut until the Sage is free
+  ok   ...and climbable once she is
+  ok   the corridor meeting's staged lion takes no blow and cannot be freed early  {"staged":true,"dealt":0,"dead":false,"hp":true,"glitch":false}
+  ok   ...nor can the break's  {"staged":true,"dealt":0,"dead":false,"hp":true,"glitch":false}
+  ok   with the blade, the Sage and the bell, she walks east into the lair and NULLFANG wakes  {"inA4":true,"fight":true,"room":"A4","boss":"glitch"}
+  ok   the climb above the camp after the lion hands the chapter-two teaser to the panels, once  {"early":0,"calls":["ch2_teaser"],"flag":true}
+  ok   the chapter's goal follows the owner's order: pack, marble, quarry, Ratchet, Sage, CHIME, the enclosure, NULLFANG, up  pg_goal_pack > pg_goal_marble > pg_goal_quarry > pg_goal_return > pg_goal_sage > pg_goal_chime > pg_goal_east > pg_goal_lion > pg_goal_up
+  ok   ...in all five languages
+
+OK — the den opens to the chapter, and to nothing else
+
+all 1 harnesses ran

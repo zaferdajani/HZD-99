@@ -1,0 +1,5 @@
+
+── cave-ground  — overhead pockets never become cave floor
+PASS: 25 caves, 1006 floor columns; overhead pockets never become ground
+
+all 1 harnesses ran

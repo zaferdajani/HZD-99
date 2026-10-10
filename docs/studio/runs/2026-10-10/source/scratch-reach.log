@@ -1,0 +1,5 @@
+
+── scratch-reach  — scratch contact boundary, facing and non-damaging recovery wake
+PASS scratch contact boundaries, both facings, charge direction, no repeated damage, 180ms recovery wake: [{"face":1,"combo":0,"reach":86},{"face":1,"combo":1,"reach":86},{"face":1,"combo":2,"reach":100},{"face":-1,"combo":0,"reach":86},{"face":-1,"combo":1,"reach":86},{"face":-1,"combo":2,"reach":100}]
+
+all 1 harnesses ran

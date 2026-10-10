@@ -1,0 +1,14 @@
+[
+  {
+    "label": "main",
+    "url": "https://raw.githubusercontent.com/zaferdajani/HZD-99/47fea7bef2e88c971cc6875c736a3a8d91012ae1/index.html",
+    "sha256": "b7727682b2f20722bc54661db54e66b676bb2ae0048007bbd6e3e5c142475f7b",
+    "build": "504570b027e7"
+  },
+  {
+    "label": "live",
+    "url": "https://zaferdajani.github.io/HZD-99/",
+    "sha256": "b7727682b2f20722bc54661db54e66b676bb2ae0048007bbd6e3e5c142475f7b",
+    "build": "504570b027e7"
+  }
+]

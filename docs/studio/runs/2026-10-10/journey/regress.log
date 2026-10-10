@@ -1,0 +1,6 @@
+
+── regress  — boots both builds, walks every room in ROOMS, watches for page errors
+index.html | boot PLAY | rooms 77 | roomErrs none | prismStress ok | pageerrors none
+odyssey.html | boot PLAY | rooms 77 | roomErrs none | prismStress ok | pageerrors none
+
+all 1 harnesses ran

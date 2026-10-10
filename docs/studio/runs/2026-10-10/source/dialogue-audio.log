@@ -1,0 +1,6 @@
+
+── dialogue-audio  — story voice priority, text-matched NPC lines and asynchronous cancellation
+PASS: exact dialogue takes, unpowered notes, silent unmatched locales, stale errors, page cancellation and story voice priority
+PASS: blocked narrative attack requests and same-frame combat vocal gate
+
+all 1 harnesses ran

@@ -1,0 +1,54 @@
+
+── opening-order  — the opening played with real input in the owner's order, desktop and phone, to Old Servo
+── opening-order — the opening, played in the owner's order with real input
+
+  [desktop] steps: move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go   end: A1
+  ok   desktop: the opening reaches the meadow  A1
+  ok   desktop: every step, in the owner's order  move,out,jump,gate,booth,note,drawer,repair,pod,pack,heal,atk,burst,node,go
+  ok   desktop: every prompt names one control  []
+  ok   desktop: every hint names her real controls (nothing left unfilled)  []
+  ok   the letter is read before the battery is found  0 < 3
+  ok   ...his battery has its own card, with its art  Ratchet's battery — His own battery, hidden in his drawer. Wire it back into the empty socket in his chest to wake him.
+  ok   ...and he wakes after the repair, and says who he is  5
+  ok   the explanation: the song infected, the marble slowed it, the battery pulled, she was asleep, raw marble below, a white sword
+  ok   the spare Power Cell is handed over with a card that names Servo  Spare Power Cell — Ratchet’s spare, for Old Servo, the winch-keeper in the meadow. Seat it in him to wake him.
+  ok   Ratchet sends her to the pod in the owner's words  11
+  ok   the pod saves first: the save point is in the den before the pack is introduced  {"step":"pack","room":"A0B","scrap":0,"bench":"A0B"}
+  ok   ...and the save is confirmed on screen
+  ok   the pack is explained — what, why, the cost — before the counter opens
+  ok   ...he pays her the 12 scrap with a card that says what scrap is  12 Scrap — The money down here. Broken machines leave it behind; Ratchet takes it for parts and upgrades.
+  ok   the counter opens on the Volt Pack, marked permanent, the rest locked until it is bought  {"type":"cell","name":"Volt Pack · permanent","desc":"Wires healing and the Volt Burst into you. Bought once, yours for good.","cost":12,"others":[true,true,true,true,true,true,true]}
+  ok   ...and the purchase card shows the two verbs with her controls  Volt Pack (permanent) — Ratchet’s charger, wired into you for good. Hold F to spend volts mending a core. Hold X and let go to spend them on a Volt Burst.
+  ok   desktop: the Volt Pack is bought with zero scrap gathered from the floor  {"scrapAtShop":12,"pickups":0}
+  ok   desktop: the monument is east of the booth door, within one screen, before the way out  {"node":880,"door":399.36,"exit":2016,"screen":631.578947368421,"winch":596}
+  ok   desktop: ...and the winch stands between them, on the road  {"node":880,"door":399.36,"exit":2016,"screen":631.578947368421,"winch":596}
+  ok   desktop: no two overlays at once  []
+  ok   desktop: the goal line never sits on the lesson chip  []
+  ok   desktop: Servo is switched off on arrival, drawn bigger than her, and standing on the floor  {"live":false,"cells":1,"k":1.75,"drawnH":98,"heroH":36,"onFloor":true}
+  ok   desktop: the spare cell wakes him  {"live":true,"q":"active","cells":0}
+  ok   Servo introduces himself, explains the way to the marble, and names the coil task and its reward  ["Ratchet’s spare cell fits the port in his chest. You seat it.","Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you.","After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up.","And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ.","Errand taken"]
+  ok   ...a repeat visit is not the intro again  ["Mrrow. Little frame. Nothing your size has come back up that corridor.","My receiver was unplugged inside the shielded lift housing when the song changed.","I spent the last charge holding the bridge for the workers. Counted them across. Kept counting after the motor stopped.","Ratchet sent a spare? Tell him the last passenger got home.","Bring me: a shaken-loose coil","The coil is up in the gantries — the climb starts right behind me.","(not yet)"]
+  ok   ...and the coil coming home is answered and paid  {"q":"done","scrap":60,"joy":2.233666666666636,"spin":true}
+  ok   desktop: the coil errand is taken
+  ok   desktop: no page errors  []
+  shots: 50 in tests/out/opening-order/
+
+  [phone] steps: move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go   end: A1
+  ok   phone: the opening reaches the meadow  A1
+  ok   phone: every step, in the owner's order  move,out,jump,gate,booth,note,drawer,repair,pod,pack,heal,atk,burst,node,go
+  ok   phone: every prompt names one control  []
+  ok   phone: every hint names her real controls (nothing left unfilled)  []
+  ok   phone: the Volt Pack is bought with zero scrap gathered from the floor  {"scrapAtShop":12,"pickups":0}
+  ok   phone: the monument is east of the booth door, within one screen, before the way out  {"node":880,"door":399.36,"exit":2016,"screen":631.578947368421,"winch":596}
+  ok   phone: ...and the winch stands between them, on the road  {"node":880,"door":399.36,"exit":2016,"screen":631.578947368421,"winch":596}
+  ok   phone: no two overlays at once  []
+  ok   phone: the goal line never sits on the lesson chip  []
+  ok   phone: Servo is switched off on arrival, drawn bigger than her, and standing on the floor  {"live":false,"cells":1,"k":1.75,"drawnH":98,"heroH":36,"onFloor":true}
+  ok   phone: the spare cell wakes him  {"live":true,"q":"active","cells":0}
+  ok   phone: the coil errand is taken
+  ok   phone: no page errors  []
+  shots: 49 in tests/out/opening-order/
+
+OK — one step at a time, in order, forward, to the meadow and Old Servo
+
+all 1 harnesses ran

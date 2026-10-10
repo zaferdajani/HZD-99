@@ -1,0 +1,28 @@
+
+── infection-eyes  — red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending
+── infection-eyes — red for the rank and file, purple for guardians, smoke that leaves the eye and ends
+  ok   a trotting wolf smokes, and only red  {"live":87,"red":87,"purple":0}
+  ok   ...its eye is found in the art, off the body centre  eye 455,373 centre 494,406 (51 px)
+  ok   ...and the eye is at the front of the head, not the hips  facing left: eye must be left of and above the centre
+  ok   the youngest smoke is born AT the eye  0.0, 1.5, 3.0, 6.0 px
+  ok   ...and older smoke has risen from where it was born  age 0.67s: born y 431, now 420
+  ok   a camera pan makes no smoke and moves none  {"nBefore":89,"nAfter":89,"moved":false}
+  ok   standing still, the plume dissipates and the glow stays  {"live":0,"glow":true}
+  ok   paused, nothing advances  31 particles held
+  ok   purified: not one new wisp from the moment it is cured  0 born after the cure
+  ok   ...the wisps already out fade rather than vanish  59 → 59
+  ok   ...and are gone within their lifetime  0 left
+  ok   ...and a cured machine shows no infected glow
+  ok   a teleport clears the trail  {"preTp":33,"after":0}
+  ok   removal clears the trail  {"preRm":39,"after":0}
+  ok   a room change clears everything  {"preRoom":34,"after":0}
+  ok   the Alpha burns purple  {"red":0,"purple":62,"eye":1}
+  ok   NULLFANG burns purple  {"red":0,"purple":51,"eye":1}
+  ok   ...and once freed, the lion smokes no more  0 left
+  ok   on a phone the smoke is bounded  {"live":90,"red":90,"purple":0,"cap":90,"owners":25,"frame":2757}
+  ok   no page errors  
+  ok   reduced motion: the eye still glows, no smoke is drawn  {"live":0,"glow":true}
+
+OK — the eyes burn the right colour, the smoke leaves the eye, lives in the world and ends
+
+all 1 harnesses ran

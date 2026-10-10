@@ -1,0 +1,57 @@
+
+── textreveal  — words typed at a reading pace, paged, read before they turn, one overlay at a time
+── textreveal — words at a reading pace, pages, one overlay at a time
+
+  ok   1. the page types out over time  12 -> 25 of 225
+  ok   2. the first press reveals the whole page...  {"done":true,"pg":0,"i":0,"len":225,"pg0":225}
+  ok   ...and does not turn it
+  ok   ...a second, separate press turns it  {"pg":1,"i":0,"state":"DIALOG"}
+  ok   3. attack mashed every frame for 3 s turns nothing  {"pg":0,"i":0,"done":true}
+  ok   ...mashed every 100 ms for 3 s turns nothing  {"pg":0,"i":0}
+  ok   ...held for 3 s turns nothing  {"pg":0,"i":0}
+  ok   ...a deliberate press after a pause does  {"pg":1,"i":0}
+  ok   ...a swing landing as the box opens is eaten by the grace  {"i":0}
+  ok   4. a long speech is cut into pages  2 pages
+  ok   ...of at most four lines, none a lone stray line  4..4
+  ok   ...every line inside the box  545 <= 548
+  ok   ...with nothing lost between pages
+  ok   ...and read through to the end it closes  4 presses
+  ok   long tokens after ordinary text fit and retain every character
+  ok   5. Chinese wraps inside the box  2 lines, widest 541
+  ok   ...and no line starts with closing punctuation
+  ok   6. Arabic is typed whole words at a time
+  ok   ...drawn right-aligned at the column's right edge, right to left  {"n":2,"aligns":["right"],"xs":[724]}
+  ok   7. a card raised mid-conversation waits: the conversation stays  {"stillConv":true,"queued":1,"cardReturned":true,"order":"conv,card","together":false,"end":"PLAY","assignKept":true,"shopCard":{"state":"DIALOG","ret":"SHOP"},"shopBack":"SHOP"}
+  ok   ...both appear, in order  conv,card
+  ok   ...never together
+  ok   ...a dialogue assigned over an open one waits its turn
+  ok   ...a card bought in the shop hands back to the shop  {"state":"DIALOG","ret":"SHOP"} -> SHOP
+  ok   8. Instant shows the page at once
+  ok   ...Reduced motion does too, whatever the speed
+  ok   ...and Slow does not
+  ok   9. a story line is a card, not a toast  {"state":"DIALOG","note":true,"toasts":0,"after60":true,"closed":"PLAY"}
+  ok   ...still there after sixty seconds untouched
+  ok   ...and closes when read
+  ok   ...a locked door's instruction is a card the first time
+  ok   ...and a reminder after it was acknowledged  {"state":"PLAY","toast":true,"acked":true}
+  ok   ...a long toast lives long enough to read  24.9 s
+  ok   ...a scene's narration is a caption that leaves her the controls  {"state":"PLAY","cap":true,"toasts":0,"typing":true,"at4":true,"stacked":true,"gone":true}
+  ok   ...typed out first (the scene waits on that)
+  ok   ...then held on screen until read
+  ok   ...a second line stacks under it rather than replacing it
+  ok   ...then it goes
+  ok   10. a shop refusal is said inside the shop  {"msg":"Not enough scrap","drawn":true}
+  ok   11. the world is frozen under a story card  {"state":"DIALOG","player":true,"foe":true,"time":true}
+  ok   12. pause carries Text speed and Reduced motion
+  ok   ...and with a phone's rows the menu keeps a readable pitch  17 rows at 29 px
+  ok   ...RIGHT and OK cycle the speed and the row stays open  {"tspd":true,"rmot":true,"pitch":29,"rows":17,"afterRight":"fast","afterOk":"instant","stillPause":true,"rmToggled":true,"persisted":true}
+  ok   ...Reduced motion toggles
+  ok   ...and both persist in the save
+  ok   13. the held still waits twenty seconds for its reader  {"i":0,"state":"CINE","done":true,"firstPress":{"i":0,"done":true},"secondPress":1}
+  ok   ...the first press finishes the caption without turning the shot  {"i":0,"done":true}
+  ok   ...the next press turns it  1
+  ok   no page errors  
+
+OK — every page is typed, read and turned on purpose, and nothing takes the screen over anything else
+
+all 1 harnesses ran

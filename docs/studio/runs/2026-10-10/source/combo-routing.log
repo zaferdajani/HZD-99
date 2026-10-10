@@ -1,0 +1,8 @@
+
+── combo-routing  — real player inputs select jab, cross, uppercut and the charged burst
+PASS: actual attack inputs select jab, cross, uppercut; wrap, timeout and charged burst agree.
+PASS single-sword combo body routing and missing-image fallback
+PASS held-charge/release frame separation for claw and weapon art
+PASS real aerial/plunge input, contact-gated impact, recharge phases and alternate charge
+
+all 1 harnesses ran

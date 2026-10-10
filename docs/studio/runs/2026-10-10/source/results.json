@@ -1,0 +1,216 @@
+{
+  "started_utc": "2026-10-10T08:38:22.104851+00:00",
+  "base_commit": "47fea7bef2e88c971cc6875c736a3a8d91012ae1",
+  "dirty_at_start": "M forge-odyssey.html\n M forge.html\n M index.html\n M js/quests.js\n M js/reveal.js\n M odyssey.html\n M tests/caves-ch1.cjs\n M tests/run.cjs\n M tests/textreveal.cjs\n?? docs/studio/\n?? tools/studio/",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.416646,
+      "log": "build.log",
+      "sha256": "0e4d41c7f6eeefbe4736c654d1cd67072813fed55bebb3290d07eafe3a549c7a"
+    },
+    {
+      "name": "repair-lifecycle",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.16483,
+      "log": "repair-lifecycle.log",
+      "sha256": "c16d306f6300c4b2a6d00fe53d4676acbd09e426af856ab582779a8f2e7cc226"
+    },
+    {
+      "name": "story-opening",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164853,
+      "log": "story-opening.log",
+      "sha256": "82030a3de16d1d4aeb21f3abfb3cb56adabf79d6741031d6e6b1fa5187025bb5"
+    },
+    {
+      "name": "script-route",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.165541,
+      "log": "script-route.log",
+      "sha256": "90f7bdc52866f6b94185a411c5fb142641212a79d8c55ec35a4bba6fd78b09b4"
+    },
+    {
+      "name": "scratch-reach",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.168228,
+      "log": "scratch-reach.log",
+      "sha256": "758654d0ad2a47b9df37d7be57d70b4149fc32547f2290303779d890e6fa1028"
+    },
+    {
+      "name": "hero-feedback",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.165123,
+      "log": "hero-feedback.log",
+      "sha256": "2840bffd232193d255afe55b13d10d71d3d4036e454d63a1e12768a1138edde0"
+    },
+    {
+      "name": "hero-delivery",
+      "status": "fail",
+      "exit_code": 1,
+      "seconds": 0.519633,
+      "log": "hero-delivery.log",
+      "sha256": "682a77e0199b4b0367147ae44be8d72124224c1aec5cb87622cfbd16f3df3b5c"
+    },
+    {
+      "name": "hero-frame-alpha",
+      "status": "fail",
+      "exit_code": 1,
+      "seconds": 0.469559,
+      "log": "hero-frame-alpha.log",
+      "sha256": "a2cedaecb8b1471b8d2e41fb1dab806e0966af089ac9b926ddbac4f65c002f43"
+    },
+    {
+      "name": "hero-alpha",
+      "status": "fail",
+      "exit_code": 1,
+      "seconds": 0.466907,
+      "log": "hero-alpha.log",
+      "sha256": "b152937ada44eab4d55298791f1c776c442568bd13486acbf8bff632f17fe102"
+    },
+    {
+      "name": "tutorial-controller",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.166174,
+      "log": "tutorial-controller.log",
+      "sha256": "c3ac71a5e9b865cba100c9dba9b6346fe125d220a18f81b21b12d8a55d4a6f77"
+    },
+    {
+      "name": "offline-release",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.16765,
+      "log": "offline-release.log",
+      "sha256": "d06dded3e075d142084ce994c0aa2281eb2d600b335805ed8910c5f5cc83e68f"
+    },
+    {
+      "name": "sage-specials",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.165748,
+      "log": "sage-specials.log",
+      "sha256": "08644cd6da366ccd4b62ca702a7f3bc90536e1fcafedb61d0c3b6a3f845bf5eb"
+    },
+    {
+      "name": "tutorial-clarity",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164347,
+      "log": "tutorial-clarity.log",
+      "sha256": "c4c6e37268708a3d446301c9a38edb9a79762c290b705cb7131192f6dd57a1fc"
+    },
+    {
+      "name": "story-progression",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.169248,
+      "log": "story-progression.log",
+      "sha256": "9ecb05897b239e9daad9de0cdab6c47b01994d34ff3a86a587029b324a679a11"
+    },
+    {
+      "name": "input-focus",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.116922,
+      "log": "input-focus.log",
+      "sha256": "3ba8d8bbe9276500bcae4057c0e82c8ee0a8dd60027fe8870bc81223d56ecaec"
+    },
+    {
+      "name": "voice-handoff",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.173552,
+      "log": "voice-handoff.log",
+      "sha256": "431e7b2d945a0f9e99d5419819f27231fad3d9b1c14ff46730d45fa887bacc5e"
+    },
+    {
+      "name": "desktop-protocol",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.16773,
+      "log": "desktop-protocol.log",
+      "sha256": "09ac2d41870d4a98c1a36109d6c44a1f32420c24e5be41e89fc8616a3ce7d806"
+    },
+    {
+      "name": "cave-ground",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.316067,
+      "log": "cave-ground.log",
+      "sha256": "b2b27dbb436a8b95d2ed0042e61ff636a8ff60f3c1d96262951e3031fd942ef6"
+    },
+    {
+      "name": "seam-route",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.16599,
+      "log": "seam-route.log",
+      "sha256": "82b6a6e0caa15413c09294cd8b2cb6bc918d9a0200918e9a48cb29f0d84b5ec9"
+    },
+    {
+      "name": "shadow-ground",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.165733,
+      "log": "shadow-ground.log",
+      "sha256": "43b022bca65785da2f0b4949bbbf72367a4ed8e0ad21cfd481d647b0cd50fd02"
+    },
+    {
+      "name": "dialogue-audio",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.16443,
+      "log": "dialogue-audio.log",
+      "sha256": "e017bbcf771391d12e7f94fe46253499fc7a7cd92220c4697609a4c5c1cf650e"
+    },
+    {
+      "name": "weapons",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.215051,
+      "log": "weapons.log",
+      "sha256": "ec10ba92d988392631fa209b89f2c83bac7c7da61c2674e54dd653eb73584a9a"
+    },
+    {
+      "name": "gear",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.115435,
+      "log": "gear.log",
+      "sha256": "f3f2564972f1545b567232f1ee688517927f2012692f2761f3a71cf454fa5cca"
+    },
+    {
+      "name": "motion-sampling",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.118841,
+      "log": "motion-sampling.log",
+      "sha256": "74b5651fd5d9fe532b892d94980bfb8d40ef61ef66e16a17a2072ec4d7f9bc7d"
+    },
+    {
+      "name": "combo-routing",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.168976,
+      "log": "combo-routing.log",
+      "sha256": "2748ee629806a5c387069401ccf476da9dd94d2d2f17a0404d7acfdbf3b11ac1"
+    }
+  ],
+  "limitations": [
+    "Automated harnesses include staged saves; not an uninterrupted campaign.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "852f7ca19d2345ddaff8cd186547261939354993abe1ab81f275de1da47b0a50",
+  "complete_requested_scope": true,
+  "passed": false,
+  "finished_utc": "2026-10-10T08:38:27.833620+00:00"
+}

@@ -1,0 +1,79 @@
+{
+  "started_utc": "2026-10-10T08:35:11.737025+00:00",
+  "base_commit": "47fea7bef2e88c971cc6875c736a3a8d91012ae1",
+  "dirty_at_start": "M js/reveal.js\n M tests/run.cjs\n M tests/textreveal.cjs\n?? docs/studio/\n?? tools/studio/",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.41532,
+      "log": "build.log",
+      "sha256": "0e4d41c7f6eeefbe4736c654d1cd67072813fed55bebb3290d07eafe3a549c7a"
+    },
+    {
+      "name": "textreveal",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.824449,
+      "log": "textreveal.log",
+      "sha256": "094b8ace69a496332292f7a76d0b37bb908df6a6bf25c36c2811f410104f848c"
+    },
+    {
+      "name": "infection-eyes",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 88.394664,
+      "log": "infection-eyes.log",
+      "sha256": "0416f2cc2dfc17bcb26781feb09aa3b9519221ead301b568609a588bfa2873dc"
+    },
+    {
+      "name": "infection-roster",
+      "status": "timeout",
+      "exit_code": null,
+      "seconds": 360.005899,
+      "log": "infection-roster.log",
+      "sha256": "9c12406ef84df754c2e5fb60e65167407bb66ee6eb082423816bc593681b35a3"
+    },
+    {
+      "name": "den-gate",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.425556,
+      "log": "den-gate.log",
+      "sha256": "5d4b87e925d1269827ac0c860425439d609ceadb3105441cd2b67caf1cb044d6"
+    },
+    {
+      "name": "panels",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 34.865121,
+      "log": "panels.log",
+      "sha256": "e0dee380dc8f6ed0c894ef72e9332c6c5468dd85bd41bef947b66eb3a861d2d7"
+    },
+    {
+      "name": "story-rescue",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.922949,
+      "log": "story-rescue.log",
+      "sha256": "bd1862ca824763f5cdf1b4378d8ca7fdd032cb6fae7077bde9e567c1eaf1e9e3"
+    },
+    {
+      "name": "lion-studio",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 4.233754,
+      "log": "lion-studio.log",
+      "sha256": "65fe3b5fe938128403163360454182f47a9d87b28b4dd3d31716cc629dccabae"
+    }
+  ],
+  "limitations": [
+    "Automated harnesses include staged saves; not an uninterrupted campaign.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "complete_requested_scope": true,
+  "passed": false,
+  "finished_utc": "2026-10-10T08:43:23.895150+00:00"
+}

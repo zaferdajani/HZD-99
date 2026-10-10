@@ -1,0 +1,5 @@
+
+── hero-feedback  — haptic device routing and duplicate pulse suppression
+PASS haptic routing, bounded strength/duration, duplicate suppression and unsupported-device rejection
+
+all 1 harnesses ran

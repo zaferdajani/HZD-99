@@ -1,0 +1,8 @@
+
+── mobile-platform  — the shipped touch recognizer and the two-state pause, in both built pages
+PASS mobile-platform: both built pages carry the recognizer; held fingers release, cancels are never taps, the stick centres, a throwing capture does not eat the touch, and the lifecycle pauses and resumes in pairs {
+  'index.html': 'longPress+longPressEnd',
+  'odyssey.html': 'longPress+longPressEnd'
+}
+
+all 1 harnesses ran
