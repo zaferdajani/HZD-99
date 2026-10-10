@@ -121,9 +121,20 @@ module.exports = [
   ...['hero', 'walk', 'fly'].map(f => ({ key: 'dragonParts:' + f, img: 'dragonParts', table: 'DRG_P', fig: f,
     col: 'amber|orange|red', rule: 'frontR', region: [0.55, 0, 1, 0.5] })),
   { key: 'dragonParts:idle', img: 'dragonParts', table: 'DRG_P', fig: 'idle', rule: 'none', at: { 0: [0.80, 0.20] } },
-  // ---- MOTHER-V: the core is the eye -------------------------------------------
-  ...['coreS', 'coreB', 'coreD'].map(f => ({ key: 'motherParts:' + f, img: 'motherParts', table: 'MVA', fig: f,
-    col: 'red|purple|orange|white', rule: 'core', eyes: 1, maxFrac: 0.6, aspect: 9 })),
+  // ---- MOTHER-V: her eyes are the SHELL's lenses, not the core ----------------
+  // Identified from renders of her in E3 (idle, dormant, charge, beam, song,
+  // grab, phases 1-3; assets/source/_sheets/mother_eyes_*.jpg). The core is a
+  // golden sun with no pupil or iris — the one warm light and the weak point —
+  // and was wrongly mapped as her eye. Each of her eight armour plates carries
+  // a socketed vertical red slit lens: the "lidded red eye" her procedural
+  // body draws per plate, the "all eyes on you" of the beam and the "every
+  // plate open" of the lights returning. So the plate art is mapped, one lens
+  // each (the largest compact red glow; the vein beneath it is too thin to
+  // pass the area floor). The tendril heads' glints are not mapped: they are
+  // the tendrils' own tips, thrown about by the reach, and the fallback body
+  // gives them no eye either.
+  ...['plate', 'plateB', 'crack', 'crack2'].map(f => ({ key: 'motherParts:' + f, img: 'motherParts', table: 'MVA', fig: f,
+    col: 'red', rule: 'core', eyes: 1, minA: 30, maxFrac: 0.05, aspect: 4 })),
   // ---- PRISM PROWLER: every frame of her sheet (nose RIGHT) -------------------
   // PRISM PROWLER's sheet is a loose collage of frames (PRZ_FR): her eyes are
   // red slits in a white mask beside red crystals, which no detector separates
