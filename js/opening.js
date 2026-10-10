@@ -331,6 +331,10 @@ function opGoalRect(w) {
   // top-left, under the cores, the volt ring and the purse
   let x = 14, y = 124;
   const h = 24;
+  // ...and never over the suit wheel (game.js: badges at y 118, the suit's
+  // name at 146), which appears with the lion's SCRAPPLATE — the goal line was
+  // printed straight across "SCRAPPLATE — Shard Volley" (campaign run, 2026-10-10)
+  if (typeof armSlots === 'function' && armSlots().length > 1) y = 156;
   const hit = (r) => r && x < r.x + r.w && x + w > r.x && y < r.y + r.h && y + h > r.y;
   // never under the lesson chip
   const chip = G.tutChip;

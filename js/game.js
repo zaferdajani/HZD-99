@@ -13415,6 +13415,7 @@ function updateLesson(dt) {
   if (!L || !player || player.dead) return;
   const M = MOD_LESSON[L.id];
   if (!M) { G.lesson = null; return; }
+  if (G.brDelta) return;             // it waits behind the world readout (drawLesson)
   if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled && !G.tut) TOUCH.hi = M.vb || null;
   L.t += dt;
   if (L.hold > 0) {
@@ -13440,7 +13441,13 @@ function drawLesson() {
   if (!L || !player || G.state !== 'PLAY') return;
   const M = MOD_LESSON[L.id];
   if (!M) return;
-  tutCard(typeof worldScreenX==='function'?worldScreenX(player.x+player.w/2):player.x+player.w/2-cam.x, typeof worldScreenY==='function'?worldScreenY(player.y-12):player.y-cam.y, tutHand(M),
+  // ONE CARD AT A TIME, AND THE REAL KEY (campaign run, 2026-10-10). After the
+  // lion the Dash Jets chip sat on top of the world readout (js/braid.js, the
+  // same bottom-centre spot), and tutHand(M) — M has no action — named the
+  // key '→'. The readout plays first; the chip names the bound DASH control.
+  if (G.brDelta) return;
+  const hand = M.vb ? tutHand({ action: M.vb.slice(1) }) : '← →';
+  tutCard(typeof worldScreenX==='function'?worldScreenX(player.x+player.w/2):player.x+player.w/2-cam.x, typeof worldScreenY==='function'?worldScreenY(player.y-12):player.y-cam.y, hand,
     t('m_' + L.id), t('les_' + L.id), L.hold > 0, L.hold / 1.1);
 }
 // ---------------------------------------------------------------------------
