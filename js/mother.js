@@ -318,9 +318,12 @@ function drawMother(c, b) {
   // the heartbeat, the halo's fall, the plate-loss order, the reach of the
   // tendrils and the collapse of the core are all still the numbers this file
   // already worked out. Only what gets painted is different.
+  // It must answer TRUE: Boss.draw treats a falsy answer as "her art is not
+  // here yet" and paints the loading silhouette (drawBossHold) — a dark disc
+  // and two stand-in eyes — straight over the body that was just drawn.
   if (mvArt() && mvArtBody(c, b, {
     tt, dd, beat, hpFrac, ph, dorm, charging, dark, song, stag, grabbing, hurt, targA, cy,
-  })) { c.restore(); return; }
+  })) { c.restore(); return true; }
 
   // ---- 1. void aura: she is a hole in the world -----------------------------
   if (!dark) {

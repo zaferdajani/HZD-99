@@ -87,9 +87,13 @@ module.exports = [
     3: [0.30, 0.66], 4: [0.30, 0.67], 5: [0.31, 0.69] } },
   { key: 'talonMiniPerch', col: 'red', rule: 'front', region: [0, 0, 0.45, 0.5] },
   // TALONHOST's eyes are the two holes in its white skull mask; the mount,
-  // shoulders and chest core all glow red too, so the figures are placed
-  ...Object.entries({ pIdle: [0.46, 0.31, 0.54, 0.31], pDown: [0.46, 0.30, 0.54, 0.30], pUp: [0.49, 0.43],
-      pShoot: [0.47, 0.29, 0.53, 0.29], kCharge: [0.47, 0.31, 0.53, 0.31], kFire: [0.47, 0.33, 0.53, 0.33],
+  // shoulders and chest core all glow red too, so the figures are placed.
+  // Re-placed 2026-10-10 from 2%-grid renders (tests/infection-poses.cjs found
+  // pIdle, pDown and pShoot sitting in the gap above the mask): pIdle is pRest's
+  // figure with the mount on top, so its points are pRest's, moved down by the
+  // 46 px the mount adds; pDown and pShoot read off the mask's own eye holes.
+  ...Object.entries({ pIdle: [0.47, 0.487, 0.53, 0.487], pDown: [0.455, 0.365, 0.525, 0.365], pUp: [0.49, 0.43],
+      pShoot: [0.47, 0.46, 0.523, 0.46], kCharge: [0.466, 0.34, 0.537, 0.34], kFire: [0.47, 0.33, 0.53, 0.33],
       kRecover: [0.47, 0.34, 0.53, 0.34], pRest: [0.47, 0.27, 0.53, 0.27] }).map(([f, pts]) =>
     ({ key: 'eagleParts:' + f, img: 'eagleParts', table: 'EAGLE_P', fig: f, rule: 'none', at: { 0: pts } })),
   // ---- the sage duelist: amber eyes in a hood --------------------------------
@@ -115,12 +119,19 @@ module.exports = [
        // the pounce's two landing frames bury the face in the mane: placed
        at: k === 'beastStudioLeap' ? { 15: [0.15, 0.50], 24: [0.16, 0.70], 25: [0.15, 0.70] } : null })),
   // ---- GLACIERE (faces left), the FURNACE dragon (faces right) ---------------
-  { key: 'glaciereParts:hero', img: 'glaciereParts', table: 'GLC_P', fig: 'hero', col: 'cyan|white|purple|red', rule: 'front', region: [0, 0, 0.45, 0.45] },
-  // the horn tip outshines the eye on the walking figure: placed
-  { key: 'glaciereParts:asm', img: 'glaciereParts', table: 'GLC_P', fig: 'asm', rule: 'none', at: { 0: [0.05, 0.26] } },
-  ...['hero', 'walk', 'fly'].map(f => ({ key: 'dragonParts:' + f, img: 'dragonParts', table: 'DRG_P', fig: f,
+  // Both figures PLACED on the violet eye from 2%-grid renders (2026-10-10).
+  // Detection took a glint at the horn's base on the flying figure, and the
+  // old hand point on the standing one was in the air in front of the muzzle
+  // — tests/infection-poses.cjs measured both off the body.
+  { key: 'glaciereParts:hero', img: 'glaciereParts', table: 'GLC_P', fig: 'hero', rule: 'none', at: { 0: [0.12, 0.272] } },
+  { key: 'glaciereParts:asm', img: 'glaciereParts', table: 'GLC_P', fig: 'asm', rule: 'none', at: { 0: [0.118, 0.27] } },
+  // the flying figure's wing membrane glows amber in front of its head and the
+  // detector took it; the stand's old point sat on the crest spikes. Both are
+  // placed on the eye from 2%-grid zooms (2026-10-10)
+  { key: 'dragonParts:fly', img: 'dragonParts', table: 'DRG_P', fig: 'fly', rule: 'none', at: { 0: [0.82, 0.296] } },
+  ...['hero', 'walk'].map(f => ({ key: 'dragonParts:' + f, img: 'dragonParts', table: 'DRG_P', fig: f,
     col: 'amber|orange|red', rule: 'frontR', region: [0.55, 0, 1, 0.5] })),
-  { key: 'dragonParts:idle', img: 'dragonParts', table: 'DRG_P', fig: 'idle', rule: 'none', at: { 0: [0.80, 0.20] } },
+  { key: 'dragonParts:idle', img: 'dragonParts', table: 'DRG_P', fig: 'idle', rule: 'none', at: { 0: [0.87, 0.25] } },
   // ---- MOTHER-V: her eyes are the SHELL's lenses, not the core ----------------
   // Identified from renders of her in E3 (idle, dormant, charge, beam, song,
   // grab, phases 1-3; assets/source/_sheets/mother_eyes_*.jpg). The core is a
@@ -141,14 +152,19 @@ module.exports = [
   // reliably. Every INFECTED frame is placed from a grid render; the blue
   // frames are her purified self (no infection, no eyes to anchor), and the
   // burst and vortex frames have no face.
+  // RE-PLACED 2026-10-10 from 2%-grid zooms of each frame's head: the idle,
+  // walk, run, hurt, beam and slash points were on her forehead and ears (and
+  // the hurt plate's in the air ahead of her nose) — up to 0.3 of a frame
+  // above the red eyes. The roars were right and are kept; the sleeping
+  // frame (543,739) has its eyes shut and keeps its old point.
   { key: 'prismParts', rects: 'PRZ_FR', rule: 'none', atRect: {
-    '702,739': [0.86, 0.52], '543,739': [0.78, 0.52], '592,165': [0.73, 0.34, 0.81, 0.34],
-    '425,295': [0.65, 0.26, 0.73, 0.26], '849,295': [0.69, 0.36, 0.82, 0.36], '573,295': [0.70, 0.40, 0.81, 0.40],
-    '317,295': [0.83, 0.42], '834,165': [0.68, 0.35, 0.78, 0.35], '700,165': [0.85, 0.45],
-    '124,526': [0.73, 0.29, 0.83, 0.29], '166,295': [0.74, 0.46, 0.82, 0.46], '693,295': [0.71, 0.43, 0.80, 0.42],
-    '356,414': [0.75, 0.36, 0.82, 0.36], '583,635': [0.74, 0.32, 0.81, 0.32], '210,2': [0.78, 0.25],
-    '506,2': [0.82, 0.22], '695,2': [0.76, 0.24], '2,2': [0.45, 0.42], '330,2': [0.80, 0.52],
-    '396,165': [0.86, 0.45], '2,835': [0.08, 0.62] } },
+    '702,739': [0.85, 0.68], '543,739': [0.78, 0.52], '592,165': [0.749, 0.441, 0.866, 0.445],
+    '425,295': [0.759, 0.292, 0.849, 0.31], '849,295': [0.778, 0.50, 0.919, 0.52], '573,295': [0.786, 0.531, 0.917, 0.543],
+    '317,295': [0.758, 0.71], '834,165': [0.747, 0.586, 0.863, 0.60], '700,165': [0.89, 0.575],
+    '124,526': [0.79, 0.419, 0.883, 0.429], '166,295': [0.803, 0.67, 0.903, 0.68], '693,295': [0.765, 0.734, 0.862, 0.752],
+    '356,414': [0.824, 0.633, 0.926, 0.669], '583,635': [0.905, 0.27], '210,2': [0.78, 0.25],
+    '506,2': [0.82, 0.22], '695,2': [0.76, 0.24], '2,2': [0.575, 0.56, 0.66, 0.56], '330,2': [0.713, 0.44],
+    '396,165': [0.751, 0.408], '2,835': [0.08, 0.62] } },
   // ---- the NOSTOS creatures (hero world) ---------------------------------------
   // pixel-art NOSTOS creatures: the eye is a single cyan pixel cluster, too
   // small for the detector at their size — placed, and the cells between the
