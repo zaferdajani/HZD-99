@@ -4,7 +4,10 @@
   python3 -I tools/fixcut.py <spec.json>     (needs ffmpeg, numpy, Pillow; scipy optional)
 
 spec: {"scale": s, "pad": px, "floor": y_src | null, "out": dir,
-       "strips": [{"name", "clip", "times": [...], "float": 0|1}]}
+       "strips": [{"name", "clip", "times": [...], "float": 0|1, "mul": m, "floor": y}]}
+A strip may carry its own "floor" and a "mul" on the scale: a take filmed from a
+start plate shrunk by k (room for a lunge) is cut with mul = 1/k so the animal
+comes out the same size as every other strip.
 Every strip shares the source->cell scale. Grounded strips are cropped so the
 cell's bottom edge sits `pad` px (cell space) below the shared floor line;
 floating strips are cropped tight around their own union bbox. Width is the
@@ -59,6 +62,7 @@ def bbox(a):
 os.makedirs(spec['out'], exist_ok=True)
 report = {}
 for st in spec['strips']:
+    S = spec['scale'] * st.get('mul', 1)
     frames = [key(frame(st['clip'], t)) for t in st['times']]
     bbs = [bbox(a) for _, a in frames]
     x0 = min(b[0] for b in bbs); x1 = max(b[2] for b in bbs)
@@ -67,7 +71,7 @@ for st in spec['strips']:
     if st.get('float'):
         sy0, sy1 = y0 - m, y1 + m
     else:
-        fl = spec['floor']
+        fl = st.get('floor', spec['floor'])
         sy1 = fl + PAD / S
         sy0 = min(y0 - m, sy1 - (st.get('minh', 0) / S))
     # horizontal: centred on the union, so the body does not swim inside the cell

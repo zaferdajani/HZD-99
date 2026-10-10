@@ -120,7 +120,11 @@ const { chromium } = require('playwright');
       // take's first cell (cells from ALPHA_STRIP: the howl held, the leap
       // airborne, the roar breaking)
       alphaHowl: await score('alRest', 'alHowl', [0, ALPHA_STRIP.rest.cells], [9, ALPHA_STRIP.howl.cells]),
-      alphaLeap: await score('alRest', 'alLeap', [0, ALPHA_STRIP.rest.cells], [6, ALPHA_STRIP.leap.cells]),
+      alphaLeap: await score('alRest', 'alAir', [0, ALPHA_STRIP.rest.cells], [3, ALPHA_STRIP.leap.cells]),
+      alphaCoil: await score('alRest', 'alLeap', [0, ALPHA_STRIP.rest.cells], [4, ALPHA_STRIP.coil.cells]),
+      alphaClaw: await score('alRest', 'alClaw', [0, ALPHA_STRIP.rest.cells], [3, ALPHA_STRIP.claw.cells]),
+      alphaBite: await score('alRest', 'alBite', [0, ALPHA_STRIP.rest.cells], [7, ALPHA_STRIP.bite.cells]),
+      alphaClinch: await score('alRest', 'alClinch', [0, ALPHA_STRIP.rest.cells], [6, ALPHA_STRIP.clinch.cells]),
       alphaRoar: await score('alRest', 'alRoar', [0, ALPHA_STRIP.rest.cells], [7, ALPHA_STRIP.roar.cells]),
     };
   });
@@ -172,6 +176,60 @@ const { chromium } = require('playwright');
     if (worst > 0.03) sinks.push(p + ' ' + worst.toFixed(3));
   }
   check('every grounded strip puts its paws on the floor line (within 3% of a cell)', !sinks.length, sinks.join(', '));
+
+  // ---- 2c. THE ALPHA: THE PACK'S BREED, ONE SIZE, FEET DOWN, BIGGER --------
+  // Re-filmed 2026-10-10 from the pack's own design. Every strip was cut at
+  // one scale (ALPHA_PX), so a cell pixel is the same size of wolf in each: the
+  // standing body must agree across rest and prowl, sit on the cell's floor
+  // line in every grounded strip, and stand clearly taller than a pack wolf
+  // on screen, because a leader that reads as one more wolf is no boss.
+  const al = await page.evaluate(async () => {
+    const out = {};
+    for (const st of Object.keys(ALPHA_STRIP)) {
+      const S = ALPHA_STRIP[st];
+      if (out[S.key]) continue;
+      const im = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = MEDIA_SRC.images[S.key]; });
+      if (!im) { out[S.key] = null; continue; }
+      const cw = im.naturalWidth / S.cells, ch = im.naturalHeight;
+      const cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = ch;
+      const x = cv.getContext('2d'); x.drawImage(im, 0, 0);
+      const d = x.getImageData(0, 0, cv.width, ch).data;
+      const hs = [], feet = [];
+      for (let c = 0; c < S.cells; c++) {
+        let top = ch, bot = -1;
+        for (let y = 0; y < ch; y++) for (let xx = Math.floor(c * cw); xx < Math.floor((c + 1) * cw); xx++)
+          if (d[(y * cv.width + xx) * 4 + 3] > 128) { if (y < top) top = y; if (y > bot) bot = y; }
+        hs.push((bot - top + 1) * ALPHA_PX); feet.push(ch - 1 - bot);
+      }
+      out[S.key] = { h: hs, feet, float: !!S.float, chOk: S.ch === ch, pad: ALPHA_PAD };
+    }
+    // drawn heights in world px: the Alpha's rest body against a pack wolf's
+    const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
+    startGame(sv); loadRoom('A10'); const bh = G.boss ? G.boss.h : 0;
+    loadRoom('A1'); const w = G.enemies.find(e => isWolf(e)); const wh = w ? w.h : 0;
+    return { strips: out, bh, wh };
+  });
+  const AS = al.strips;
+  const badCh = Object.keys(AS).filter(k => !AS[k] || !AS[k].chOk);
+  check('every Alpha strip decodes at the cell height its table says', !badCh.length, badCh.join(', ') || Object.keys(AS).length + ' strips');
+  const aStand = ['alRest', 'alProwl'].map(k => AS[k] && Math.max(...AS[k].h));
+  check('the standing Alpha is one size in rest and prowl (within 8%)',
+    aStand[0] && aStand[1] && Math.abs(aStand[0] - aStand[1]) / aStand[0] < 0.08,
+    aStand.map(v => v && v.toFixed(2)).join(' / ') + ' hitbox-heights');
+  check('...and stands 2.05 hitbox-heights, the size its fight was tuned on (within 6%)',
+    aStand[0] && Math.abs(aStand[0] - 2.05) / 2.05 < 0.06, aStand[0] && aStand[0].toFixed(2));
+  const aSinks = [];
+  for (const k of Object.keys(AS)) {
+    const f = AS[k]; if (!f || f.float) continue;
+    // the paws are ALPHA_PAD px above the cell's bottom; a rear-up or a lift
+    // may raise them, so the strip's lowest paw is what is held to the floor
+    const worst = Math.min(...f.feet.map(v => Math.abs(v - f.pad)));
+    if (worst > 3) aSinks.push(k + ' ' + worst + 'px');
+  }
+  check('every grounded Alpha strip puts its paws on the floor line (within 3 cell px)', !aSinks.length, aSinks.join(', ') || 'all');
+  const alphaPx = aStand[0] * al.bh, wolfPx = stand[0] * al.wh;
+  check('the Alpha stands clearly taller than a pack wolf on screen (>= 1.3x)', alphaPx >= wolfPx * 1.3,
+    Math.round(alphaPx) + ' px vs ' + Math.round(wolfPx) + ' px');
 
   // ---- 3. THE ALPHA IS PLACED — OFF THE ROAD, AND OPTIONAL ---------------
   // THE OWNER'S RULE CHANGED (2026-10-09): "Keep Alpha optional and outside

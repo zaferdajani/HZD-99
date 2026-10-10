@@ -677,7 +677,11 @@ const ROOMS = {
   A7: { zone: 'A', w: 40, h: 32, exits: { T: 'A5' },
     // THE SURVEY (terminal 20): the quarrymen's own chart of the white seam,
     // on the far floor past the spikes — the shaft nobody takes is where the
-    // marble's road is written down, and where the chalk arrows come from
+    // marble's road is written down, and where the chalk arrows come from.
+    // READING it is what Ratchet's errand `ratchet_deep` asks for (kind
+    // 'read', js/quests.js) — dropping into the shaft alone finishes nothing.
+    // It is an ordinary 'term' static: the "Read" prompt over it and its warm
+    // halo are the interaction cue every terminal in the game carries.
     ents: [['blob', 6, 30, 0], ['blob', 15, 30, 0], ['turret', 19, 24],
            ['scrap', 10, 30, 45], ['scrap', 3, 30, 40], ['scrap', 34, 28, 30], ['term', 26, 30, 20]],
     build(g) {

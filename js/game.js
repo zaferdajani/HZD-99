@@ -1333,6 +1333,7 @@ function startGame(save) {
   G.coreFlash = null; G.coresFullT = 0; G.bolt = null;
   cam.shake = 0;
   migrateWeapons(save);
+  if (typeof questMigrate === 'function') questMigrate(save);   // MIS-01: the survey errand's old visit residue
   save.iq = save.iq || 0; save.skills = save.skills || []; save.relics = save.relics || [];
   G.save = save;
   if (typeof qualRestore === 'function') qualRestore();  // the player's own call outranks the guess
@@ -2420,6 +2421,8 @@ function doInteract(s) {
   } else if (s.type === 'term') {
     G.dialog = { name: '…', lines: t('t' + s.extra).slice(), i: 0, onEnd: null, rs: RS_TERM[s.extra] };
     G.state = 'DIALOG'; sfx('ui');
+    // a read is remembered per terminal; an errand may be waiting on it (questRead)
+    if (typeof questRead === 'function') questRead(G.roomId, s.extra);
     // THE CALL IS ANSWERED. This is the thing that has been sounding through
     // the rock since the meadow (CAVE_BEACON), and reading it is the first
     // time anything in the world has spoken to her rather than at her. The

@@ -411,11 +411,18 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       const p0 = qProgress(q);
       for (let i = 0; i < 6; i++) questKill('crawler');
       check('a cull counts from the moment it was accepted, not from the start of the run', p0 === 0 && qDone(q), p0 + ' then ' + qProgress(q));
+      // SUPERSEDED RULE (MIS-01): ratchet_deep was a REACH, finished by
+      // standing in A7 after the ask. It is a READ now — the survey in A7
+      // (terminal 20) is the evidence; the room is only where it lies.
       G.save.visited.A7 = 1;
       qSet('ratchet_deep', 'active');
       const d = questById('ratchet_deep'), r0 = qDone(d);
-      loadRoom('A7');
-      check('a place counts once she stands in it after being asked', !r0 && qDone(d));
+      loadRoom('A7'); G.state = 'PLAY';
+      const r1 = qDone(d);
+      doInteract(G.statics.find(s => s.type === 'term' && s.extra === 20));
+      { let n = 0; while (G.dialog && n++ < 20) { const cb = G.dialog.onEnd; G.dialog = null; G.state = 'PLAY'; if (cb) cb(); } }
+      check('the survey errand counts once she READS the survey after being asked — standing in the shaft is not enough',
+        !r0 && !r1 && qDone(d), 'before ' + r0 + ' standing ' + r1 + ' read ' + qDone(d));
       // THE OWNER'S RULE CHANGED (2026-10-09): "reward early exploration —
       // remember discoveries and adapt later quest dialogue rather than making
       // players revisit an empty room". The object used to appear only once it

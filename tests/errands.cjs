@@ -22,7 +22,7 @@ const { chromium } = require('playwright');
 
   const r = await p.evaluate(() => {
     // where everything in the world actually is
-    const items = {}, foes = {}, npcs = {};
+    const items = {}, foes = {}, npcs = {}, terms = {};
     for (const id of Object.keys(ROOMS)) {
       const R = ROOMS[id]; if (!R || !R.ents) continue;
       for (const e of R.ents) {
@@ -32,11 +32,12 @@ const { chromium } = require('playwright');
         // real, it just is not lying on the floor
         if (e[0] === 'pillar') (items[e[3] || 'cshard'] = items[e[3] || 'cshard'] || []).push(id);
         else if (e[0] === 'npc') (npcs[e[3]] = npcs[e[3]] || []).push(id);
+        else if (e[0] === 'term') (terms[id] = terms[id] || []).push(e[3]);
         else (foes[e[0]] = foes[e[0]] || []).push(id);
       }
     }
     return {
-      items, npcs,
+      items, npcs, terms,
       foeCounts: Object.fromEntries(Object.entries(foes).map(([k, v]) => [k, v.length])),
       rooms: Object.keys(ROOMS),
       quests: QUESTS.map(q => ({ ...q })),
@@ -62,6 +63,12 @@ const { chromium } = require('playwright');
     } else if (q.kind === 'reach') {
       state = 'reach ' + q.room + ' -> ' + (r.rooms.includes(q.room) ? 'exists' : 'NO SUCH ROOM');
       if (!r.rooms.includes(q.room)) fails.push(q.id + ': asks you to reach "' + q.room + '", which is not a room');
+    } else if (q.kind === 'read') {
+      // a READ is finished by one terminal (MIS-01): it must stand in the room
+      // the errand names, or the errand can never be finished
+      const there = (r.terms[q.room] || []).some(x => x == q.term);
+      state = 'read terminal ' + q.term + ' in ' + q.room + ' -> ' + (there ? 'placed' : 'NOT PLACED');
+      if (!there) fails.push(q.id + ': asks you to read terminal ' + q.term + ' in "' + q.room + '", which is not placed there');
     }
     lines.push('  ' + q.id.padEnd(14) + ' [' + q.zone + ']  ' + state);
   }
