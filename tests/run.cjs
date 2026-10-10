@@ -6,10 +6,13 @@
 //   node tests/run.cjs            everything
 //   node tests/run.cjs saw cues   just those
 //
-// A local server must be serving the repo root on :8220 —
+// A local server must be serving THIS checkout's root on :8220 —
 //   npx http-server -p 8220 -s &
-const { execFileSync, spawn } = require('child_process');
-const fs = require('fs'), path = require('path');
+// and the runner proves it is this checkout before trusting it (see
+// servedCheck below): a different build on the port refuses the run.
+const { execFileSync, spawn, spawnSync } = require('child_process');
+const fs = require('fs'), os = require('os'), path = require('path');
+const identity = require('./served-identity.cjs');
 
 // THE SERVER DIES. Not sometimes — regularly, mid-suite, and every time it
 // does, a dozen harnesses report ERR_CONNECTION_REFUSED and the run reads as
@@ -33,6 +36,49 @@ function ensureServer() {
     } catch (_) { /* wait for the local server */ }
   }
   throw new Error('Local test server failed to start on 127.0.0.1:8220');
+}
+
+// ...AND A LIVE SERVER IS NOT NECESSARILY OURS. ensureServer() only asks
+// "does something answer"; several worktrees and sessions serve on :8220, so
+// "something" can be another checkout's build, and every browser harness
+// would then pass or fail about code that is not this code (audit QA-04).
+// The first check pins the build: this checkout's pages and a few loose
+// assets, hashed from disk, must be byte-identical to what is served. Every
+// later check compares against that SAME snapshot, not against disk again —
+// a rebuild of these very pages mid-run changes disk and server together and
+// would otherwise look consistent while half the suite tested one build and
+// half another. SERVED_IDENTITY_EXPECT=<snapshot.json> supplies the pin from
+// outside (tools/studio/audit.py pins once for its whole multi-run audit).
+let SNAP = null, SNAP_FILE = null;
+function dropSnapshot() {
+  if (SNAP_FILE && !process.env.SERVED_IDENTITY_EXPECT) { try { fs.rmSync(path.dirname(SNAP_FILE), { recursive: true }); } catch (e) {} }
+}
+function servedCheck(when) {
+  if (!SNAP) {
+    SNAP_FILE = process.env.SERVED_IDENTITY_EXPECT || null;
+    if (SNAP_FILE) SNAP = JSON.parse(fs.readFileSync(SNAP_FILE, 'utf8'));
+    else {
+      SNAP = identity.diskSnapshot();
+      SNAP_FILE = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'served-identity-')), 'snapshot.json');
+      fs.writeFileSync(SNAP_FILE, JSON.stringify(SNAP));
+    }
+  }
+  // a child process because the check is async (http) and this loop is not;
+  // it costs ~0.1 s against harnesses that take tens of seconds
+  const r = spawnSync(process.execPath, [path.join(__dirname, 'served-identity.cjs'), '--expect', SNAP_FILE, '--json'],
+    { encoding: 'utf8', timeout: 60000, maxBuffer: 10 * 1024 * 1024 });
+  let res = null; try { res = JSON.parse(r.stdout); } catch (e) { /* reported below */ }
+  if (r.status === 0 && res && res.ok) return true;
+  if (!res) { console.error('SERVED BUILD UNVERIFIED ' + when + ': ' + (r.stderr || (r.error && r.error.message) || 'no result')); return false; }
+  let cause = '';
+  try {
+    const now = identity.diskSnapshot(SNAP.root);
+    const moved = Object.keys(SNAP.files).filter(p => !now.files[p] || now.files[p].sha256 !== SNAP.files[p].sha256);
+    cause = moved.length ? '\n  this checkout\'s own files changed on disk since the build was pinned: ' + moved.join(', ')
+      + ' (someone rebuilt it during the run)' : '';
+  } catch (e) { /* the report above already says what differs */ }
+  console.error(identity.report(res, when) + cause);
+  return false;
 }
 
 const SUITE = [
@@ -157,7 +203,11 @@ const SUITE = [
   ['infection-eyes', 'red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending'],
   // every placed kind and guardian in its own room: the one harness that is a
   // survey of the whole cast, so it gets a survey's time
-  ['infection-roster', 'every hostile body and every guardian: an eye, its colour, on the head, facing, and the smoke born there', { timeout: 900000 }],
+  // measured 58-99 s (the slow end with other sessions loading the box) on the
+  // 4-core studio machine once it stopped waiting for a
+  // MEDIA_PEND that never empties (557-670 s before); 240 s is ~2.5x the worst
+  // and still inside the studio collector's 360 s per-harness kill
+  ['infection-roster', 'every hostile body and every guardian: an eye, its colour, on the head, facing, and the smoke born there', { timeout: 240000 }],
   ['reach',     'she hits what she is standing next to, and she turns to it'],
   ['gatecue',   'the first built thing the player finds sounds like one'],
   ['cuefamily', 'the things she is shot at with do not all sound alike'],
@@ -217,12 +267,27 @@ if (unknown.length) {
   process.exit(1);
 }
 const run = SUITE.filter(([n]) => !want.length || want.includes(n));
-let failed = 0, pending = 0;
+let failed = 0, pending = 0, sinceCheck = [], browserRan = false;
 for (const [name, what, opt] of run) {
   const file = path.join(__dirname, name + '.cjs');
   if (!fs.existsSync(file)) { failed++; console.error('FAILED: ' + name + ' — missing harness ' + file); continue; }
   console.log('\n── ' + name + '  — ' + what);
-  if (!(opt && opt.noBrowser)) ensureServer();
+  if (!(opt && opt.noBrowser)) {
+    ensureServer();
+    if (!servedCheck(browserRan ? 'before ' + name : 'before the first browser harness')) {
+      // fail closed: nothing after this point would be testing the pinned build,
+      // and the harnesses since the last good check may not have been either
+      console.error(browserRan ? 'Refusing to continue: the served build changed during the run. Results of '
+        + (sinceCheck.join(', ') || 'none') + ' (run since the last good check) are suspect.'
+        : 'Refusing to run browser harnesses against a build that is not this checkout.');
+      dropSnapshot(); process.exit(2);
+    }
+    browserRan = true; sinceCheck = [];
+  }
+  if (!(opt && opt.noBrowser)) sinceCheck.push(name);
+  // every harness says how long it took, so a timeout in SUITE can be set
+  // from a measurement instead of raised until the failure goes away
+  const began = Date.now();
   try {
     console.log(execFileSync('node', [file], { encoding: 'utf8', timeout: (opt && opt.timeout) || 300000, maxBuffer: 10 * 1024 * 1024 }).trim());
   } catch (e) {
@@ -234,7 +299,15 @@ for (const [name, what, opt] of run) {
       console.log('FAILED: ' + (e.stdout || '') + (e.stderr || e.message));
     }
   }
+  console.log('   (' + name + ': ' + ((Date.now() - began) / 1000).toFixed(1) + ' s)');
 }
+// the last harness is not followed by a "before", so the end gets its own look
+if (browserRan && !servedCheck('at the end of the run')) {
+  failed++;
+  console.error('FAILED: the served build changed during the run; results of '
+    + (sinceCheck.join(', ') || 'none') + ' (run since the last good check) are suspect.');
+}
+dropSnapshot();
 console.log('\n' + (failed ? failed + ' harness(es) failed' : 'all ' + run.length + ' harnesses ran')
   + (pending ? ' (' + pending + ' pending, see suite notes)' : ''));
 process.exitCode = failed ? 1 : 0;

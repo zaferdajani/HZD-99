@@ -739,6 +739,11 @@ function mediaFetch(k, urgent, bust) {
     }
     const wasLow = MEDIA_LOW[k] === 2;
     MEDIA_RAW[k] = im; MEDIA_LOW[k] = 3;
+    // PENDING ENDS WHEN IT LANDS. Kept, the key stayed "pending" forever, and
+    // every wait-for-art written as "until MEDIA_PEND is empty" (roomassets,
+    // the eye harnesses) sat out its whole ceiling on art already drawn. The
+    // guard above (RAW present and not a stand-in) is what stops a refetch.
+    delete MEDIA_PEND[k];
     // the tile layer is BAKED, so a sheet that lands after the bake changes
     // nothing until the bake is thrown away. The rock slabs belong here for
     // exactly that reason: they are the surface itself.
