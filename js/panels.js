@@ -98,6 +98,8 @@ const PANEL_SEQ = [
     event: 'the raw marble freed from its host rock in CV3 (pl_cshard)',
     when: f => !!f.pl_cshard,
     past: f => !!f.crystal,
+    // once the forge's pages have been shown, the extraction is behind her
+    stale: (S, f) => !!S.seen.forge && !!f.crystal,
     panels: [
       { ref: 'game: marble_a', src: PANEL_GAME('marble_a'), crop: PG_FULL, cap: 'pc_m_burst', move: 'in', focus: [0.6, 0.5] },
       { ref: 'game: marble_b', src: PANEL_GAME('marble_b'), crop: PG_FULL, cap: 'pc_m_freed', move: 'in', focus: [0.5, 0.45] },
@@ -270,8 +272,16 @@ function panelsSafe() {
   const b = G.boss;
   if (b && (b.rewardPend || !(b.dead || b.tame || b.purified || b.st === 'dorm'))) return false;
   if ((G.projs || []).some(p => p && !p.dead)) return false;
+  // A MACHINE IN REACH, NOT ONE ON THE SAME SCREEN (campaign run, 2026-10-10).
+  // Any live machine within 600 px horizontally — a bat on the cave ceiling
+  // three hundred pixels up, a crawler half a room away — held the page shut,
+  // so in the quarry the marble's pages never opened at the marble: they
+  // waited for a calm visit and played after the forge and the first Sage,
+  // out of story order. The pages pause the world; what matters is whether
+  // something is close enough to be mid-strike when it resumes.
+  const pcx = player.x + player.w / 2, pcy = player.y + player.h / 2;
   if ((G.enemies || []).some(e => e && !e.dead && !e.tame && !e.disabled && !e.rescued && !e.calm
-      && Math.abs(e.x - player.x) < 600)) return false;
+      && Math.hypot(e.x + e.w / 2 - pcx, e.y + e.h / 2 - pcy) < 300)) return false;
   return !!player.on;
 }
 function panelsDue() {
@@ -284,6 +294,8 @@ function panelsDue() {
   }
   for (const s of PANEL_SEQ) {
     if (S.seen[s.id] || S.past[s.id]) continue;
+    // a beat already overtaken by the story is not shown late, out of order
+    if (s.stale && s.stale(S, f)) continue;
     if (G.roomId === s.alsoRoom) { if (s.id === 'ch2' && f.bossGlitch) return s; continue; }
     if (G.roomId !== s.room) continue;
     if (s.when(f)) return s;
