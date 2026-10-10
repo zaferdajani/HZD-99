@@ -1262,7 +1262,9 @@ function loadRoom(id) {
   } else {
     setMusic(def.zone);
   }
-  if (def.zone !== G.lastZone) { G.zoneToast = { text: t('z_' + def.zone), t: 2.6 }; G.lastZone = def.zone; }
+  // named for the kingdom the room lies in, not its palette (world.js zoneLabelKey)
+  { const zk = typeof zoneLabelKey === 'function' ? zoneLabelKey(id) : 'z_' + def.zone;
+    if (zk !== G.lastZone) { G.zoneToast = { text: t(zk), t: 2.6 }; G.lastZone = zk; } }
   cam.x = 0; cam.y = 0; cam.room = null; cam.extUp = 0; cam.extDn = 0; cam.soft = 0;
   persistSoon();           // the next quiet moment writes it; see persistSoon
 }
@@ -1373,7 +1375,7 @@ function respawn() {
   // seconds, then she is herself again. Without the pouch test she would mope
   // after a death that cost her nothing, which is sulking, not grief.
   if (G.save.pouch && player.moodSet) player.moodSet('sad', 2.0);
-  if (G.save.pouch) G.toast(t('pouch') + '  (' + t('z_' + ROOMS[G.save.pouch.room].zone) + ')');
+  if (G.save.pouch) G.toast(t('pouch') + '  (' + t(typeof zoneLabelKey === 'function' ? zoneLabelKey(G.save.pouch.room) : 'z_' + ROOMS[G.save.pouch.room].zone) + ')');
   G.state = 'PLAY';
 }
 function bossActive() { return G.boss && !G.boss.dead && G.boss.st !== 'dorm' && !G.boss.meet; }

@@ -1937,6 +1937,24 @@ for (const [gid, tid, did, lair, flag, gcell, tcell, dcell] of GROTTOES) {
   MAPPOS[did] = [dcell[0], dcell[1], 1, 1];
 }
 
+// WHICH KINGDOM A ROOM BELONGS TO, BY NAME (campaign run, 2026-10-10). Every
+// cave is built in zone 'X' for its look, and 'X' is also the Crystal Cache
+// kingdom — so walking down into the marble quarry under the meadow put
+// "Crystal Cache" across the screen, and a death in the Meadow Sage's chamber
+// said the husk was waiting in the Crystal Cache. A kingdom runs to its sage
+// and the sage's cave (CLAUDE.md, KINGDOMS ARE THE UNIT): the quarry and each
+// guardian network are NAMED for the kingdom they lie under; the palette is
+// untouched.
+const CAVE_KINGDOM = { CV1: 'A', CV1B: 'A', CV2: 'A', CV3: 'A' };
+for (const [gid, tid, did, lair] of GROTTOES) {
+  const k = ROOMS[lair] && ROOMS[lair].zone;
+  if (k) CAVE_KINGDOM[gid] = CAVE_KINGDOM[tid] = CAVE_KINGDOM[did] = k;
+}
+function zoneLabelKey(id) {
+  const def = ROOMS[id];
+  return 'z_' + ((def && def.cave && CAVE_KINGDOM[id]) || (def && def.zone) || 'A');
+}
+
 // WHOSE SAGE ANSWERS FOR THIS ROOM'S QUIET.
 //
 // The Meadow Sage's last line is a promise — "I will keep this end quiet" — and
