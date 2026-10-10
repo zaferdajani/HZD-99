@@ -191,9 +191,12 @@ function progressTick(dt) {
   // THE BOUND ONES WAIT. Every machine she knocked down before the forge is
   // lying where it fell, still bound — and the road back through the caves is
   // where she meets them again with the blade in her paw.
-  if (f.crystal && !(f.pgBound || {})[G.roomId]
+  // Said twice, not in every room: the campaign run heard it in nearly every
+  // room after the forge, and a line the player has already understood
+  // becomes noise that buries the toasts that are news.
+  if (f.crystal && !(f.pgBound || {})[G.roomId] && (f.pgBoundN | 0) < 2
       && (G.enemies || []).some(e => e && e.disabled && !e.rescued)) {
-    (f.pgBound = f.pgBound || {})[G.roomId] = 1; persistSoon();
+    (f.pgBound = f.pgBound || {})[G.roomId] = 1; f.pgBoundN = (f.pgBoundN | 0) + 1; persistSoon();
     G.toast(t('pg_bound_wait'));
   }
   // THE SURVEY POD (CV1B). Resting at the Deaf quarrymen's own pod restores it,
