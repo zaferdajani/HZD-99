@@ -7,7 +7,14 @@ baseline `47fea7b`). Every claim below names its evidence and its kind:
 **staged** (a save set up to the moment, then the game's own code), **looked**
 (a rendered frame inspected), **not verified**.
 
-*(Release summary: filled in when the release is verified live.)*
+**Release summary.** Released and verified live at
+https://zaferdajani.github.io/HZD-99/ from `b37b107` (main and odyssey
+fast-forwarded from `47fea7b`; no force). BUILD_ID `49988b950264`. Pages,
+Android and Windows workflows on `b37b107` all succeeded. The released pages
+are byte-identical to the build the full registered suite ran on, and a fresh
+keyboard-only chapter one completed on them (15:30, all 13 manhwa sequences).
+Closed or verified: 20 findings below. Open, carried forward: 9 (all P2/P3). Owner review
+of the new Alpha takes and the 17 game panels is still owed.
 
 ## 1. The review branch
 
@@ -37,7 +44,7 @@ this run directory.
 | CIN-01 | P1 | Eight missing manhwa scene groups | **closed for chapter one; chapter two is a teaser only** | `8fad5d1`: 17 single panels + wiring + captions in 5 languages; `d529fa0`/`4630531` (campaign) order fixes | harness: `panels` (each new sequence at its event, once; old saves not handed recaps); played: the campaign opened all 12 route sequences in story order; looked: `images/panels-after-desktop.jpg`, `panels-after-phone.jpg` |
 | UX-03 | P2 | Baked English lettering could not reveal or translate | **closed** | `8fad5d1`: every cropped page now comes from an unlettered copy; the game letters all captions; a captioned crop from a lettered page fails the harness. Two crops had been showing superseded balloons under the game's captions (p09 "crystal pillar", p18 "pillar shard") | looked: `images/panels-p09-lettered-vs-clean.jpg`, `panels-p18-lettered-vs-clean.jpg` |
 | VFX-01 | P2 | Mother's optics uncertain; two-eye cap | **closed** | `0883ef7`, `4be2139`: her eyes are the eight plate lenses (the core is her light and weak point); per-body allowance up to 8, global caps unchanged; a shipped bug hid her under the loading silhouette every frame (`drawMother` returned undefined); four guardians re-anchored onto real eyes; duplicate eye reports dropped | harness: `infection-eyes` (8 lenses, purple, phone budget), `infection-poses` (8 guardians, 95 poses × both facings, eye on opaque art ≤ 1 px, newest wisp at an eye 0.00 px), `infection-roster`; looked: `assets/source/_sheets/mother_eyes_before/after.jpg` |
-| QA-03 | P1 | No uninterrupted normal-input chapter one | **closed** | `tests/campaign-ch1.cjs` + eight game fixes (`fcbdd6e`, `80480a0`, `0a3ffb7`, `0b928cb`, `62a9426`, `d529fa0`, `4630531`, `85badd9`) | played: one run, cleared browser → title → film → difficulty → teaser, keyboard only, 14:43, 4 deaths, "Kitten" chosen in the game's menu (disclosed); `docs/CHAPTER_ONE_CAMPAIGN.md` (27-step table: why/where/what/how-known/what-changes) |
+| QA-03 | P1 | No uninterrupted normal-input chapter one | **closed** | `tests/campaign-ch1.cjs` + eight game fixes (`fcbdd6e`, `80480a0`, `0a3ffb7`, `0b928cb`, `62a9426`, `d529fa0`, `4630531`, `85badd9`) | played: two complete runs, cleared browser → title → film → difficulty → teaser, keyboard only, "Kitten" chosen in the game's menu (disclosed) — 14:43 / 4 deaths on the integration build, and 15:30 / 1 death / 13 of 13 manhwa sequences on the released pages (§7); `docs/CHAPTER_ONE_CAMPAIGN.md` (27-step table: why/where/what/how-known/what-changes) |
 | B-Servo | P2 | Hero and Servo overlapped at interaction range; he was sunk into the meadow | **closed** | `5fb0efd`: stand-off from his drawn width (prompt before contact, talking steps her beside him); NPCs lifted onto the real ground height at load | harness: `servo-presence` (desktop and phone touch, whole arc); looked: `images/servo-*-after.jpg` |
 | F-Read | P2 | A fast double tap revealed AND turned a panel; toasts drew over dialogue | **closed** | `5fb0efd` | harness: `text-rules` (combat pauses under cards; one input never does two things; numbers immediate; five languages at phone width) |
 | C-Order | — | Story order and the den gate | **verified, no gap found** | — | harness: `den-gate`, `story-order`, `chapter-one`, `story-progression`, `kingdom1`, `sage`, `first-sage-route`; wording audit of 868 keys × 5 languages (no rescue words on CHIME, no kill words on a Sage/guardian) |
@@ -167,7 +174,31 @@ Two attempts, both reported:
 
 ## 8. Deployment
 
-*(Pending: not yet published.)*
+| | |
+|---|---|
+| Integrated commit (game) | `207d8a7` — last commit that changes the built pages |
+| Released commit | `b37b107` (harness and report commits on top; pages unchanged) |
+| Published | `git push origin <branch>:main <branch>:odyssey`, fast-forward `47fea7b..b37b107`, 2026-10-10 16:18 UTC |
+| Workflows on `b37b107` | Deploy CLAWBYTE to GitHub Pages: success; Build Android APK: success; Build Windows desktop: success |
+| Live BUILD_ID | `49988b950264` (= repo) |
+
+Live hashes, fetched from https://zaferdajani.github.io/HZD-99/ with cache
+busting, against the released commit — **all match**:
+
+| File | md5 |
+|---|---|
+| `index.html` | `a2f88f0b112469a972d4816a45d6633c` |
+| `odyssey.html` | `1627941e4938ab2c944e80dbd1586cad` |
+| `assets/characters/alpha/air.webp` | `5584e80052236b48b94f68f0105e9127` |
+| `assets/manhua/ch1/game/marble_a.webp` | `0fb47d30cbb385983ccacb57169f5462` |
+| `assets/manhua/ch1/clean/p09.webp` | `1955f198d17741886881892da0b0fc3e` |
+| `assets/eyes.json` | `ea56fb41cfad3c4f6b430b8a6919ff4c` |
+
+Live boot: Chromium loaded the live site at 1280×720 and at 844×390 (touch,
+DPR 2), reached the title menu, BUILD_ID `49988b950264`, eye map present,
+0 page errors. The sandbox browser does not trust the egress proxy's CA, so
+the live bytes were fetched by curl (TLS verified against the proxy bundle)
+and handed to the page; verification was never disabled.
 
 ## 9. What is not verified, said plainly
 
