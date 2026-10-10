@@ -146,6 +146,11 @@ function infEyeMark(c, lx, ly, e, tag) {
   const S = INF_S2W;
   const wx = S.a * dx + S.c * dy + S.e, wy = S.b * dx + S.d * dy + S.f;
   if (!who._eyeW) who._eyeW = new Array(max * 2).fill(0);
+  // THE SAME EYE, DRAWN AGAIN: a hit flash re-blits the cell it just drew
+  // (the Alpha's 'lighter' pass, a wolf's), and that second report would
+  // double the glow and lay a second thread on the first
+  for (let k = 0; k < who._eyeN; k++)
+    if (Math.abs(who._eyeW[k * 2] - wx) < 0.5 && Math.abs(who._eyeW[k * 2 + 1] - wy) < 0.5) return;
   const i = who._eyeN * 2;
   infEyeLay(who, who._eyeN, wx, wy, tag);
   who._eyeW[i] = wx; who._eyeW[i + 1] = wy;

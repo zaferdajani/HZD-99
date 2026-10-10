@@ -158,6 +158,7 @@ const SUITE = [
   // every placed kind and guardian in its own room: the one harness that is a
   // survey of the whole cast, so it gets a survey's time
   ['infection-roster', 'every hostile body and every guardian: an eye, its colour, on the head, facing, and the smoke born there', { timeout: 900000 }],
+  ['infection-poses', 'every guardian, every drawn state, both facings: an eye on the art, never twice, never under the loading silhouette, the smoke born there', { timeout: 420000 }],
   ['reach',     'she hits what she is standing next to, and she turns to it'],
   ['gatecue',   'the first built thing the player finds sounds like one'],
   ['cuefamily', 'the things she is shot at with do not all sound alike'],
