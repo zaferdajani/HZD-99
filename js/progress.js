@@ -570,6 +570,8 @@ function questFoundEarly(q) {
   if (!q || !G.save) return false;
   if (q.kind === 'fetch') return !!(G.save.bag && G.save.bag[q.item]);
   if (q.kind === 'reach') return !!(G.save.visited && G.save.visited[q.room]);
+  // a READ is the evidence read, not the room stood in (MIS-01, js/quests.js)
+  if (q.kind === 'read') return typeof qReadDone === 'function' && qReadDone(q);
   return false;
 }
 function questEarlyLines(q) {

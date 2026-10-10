@@ -42,6 +42,7 @@ const SUITE = [
   ['story-opening', 'survivor histories and earned Sage/CHIME route', {noBrowser:true}],
   ['story-order', 'the story sheet walked through the real build: beat order, gates, named things, migration'],
   ['caves-ch1', 'every chapter-one cave pays something of its own; early finds remembered; a rescue never looks like a kill'],
+  ['survey-a7', "Ratchet's shaft errand is finished by reading the A7 survey, not by entering the room; early reads remembered; old saves keep what they earned"],
   ['den-gate', "the lion's den and the bell, every entrance, dash/jump bypass and save/load, before and after their milestones"],
   ['comic-rewards', 'saved milestone slideshows, updates, accessibility and failure recovery'],
   ['story-battery', 'unique workshop battery and legacy save compatibility'],

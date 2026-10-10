@@ -51,7 +51,7 @@ No vertical link anywhere leads into A4; its only exit is L.
 | Room | How she reaches it | What she discovers | Payoff | Flags | On revisit |
 |---|---|---|---|---|---|
 | **A5** under the hub | down-strike through A2's cracked floor | a Mind Node (riddle 0), a chest, maintenance log 1 ("sub-hatch sealed after an anomalous signal"), the buried cave mouth answering a strike, the first chalk marks | **puzzle** + **upgrade** (Magnet crest) + the way to the quarry | `rubbleA5`, `ch_A5_0`, node key | marks turn blue after the forge, then disappear |
-| **A7** the deep shaft | A5's brittle floor | the quarrymen's survey (terminal 20): the white seam's chart, why only pillar stock holds a song out, the chalk road | **story evidence** + Ratchet's errand `ratchet_deep` (coin relic) | `visited.A7` | if she stood here before Ratchet asks, he says so and pays on the ask |
+| **A7** the deep shaft | A5's brittle floor | the quarrymen's survey (terminal 20): the white seam's chart, why only pillar stock holds a song out, the chalk road | **story evidence** + Ratchet's errand `ratchet_deep` (coin relic), finished by READING the survey, not by entering the shaft | `flags.termRead[20]` | if she read the survey before Ratchet asks, he says so and pays on the ask |
 | **CV1** entry hall | A5's mouth (rubble) | one bound crawler, a second buried mouth, a chest in the climb-only pocket | **useful upgrade**: a spare core (`coresMax + 1`, refilled) | `ch_CV1_1`, `rubbleCV1B` | bound bodies left here ask to be freed after the forge |
 | **CV1B** the Seam | CV1's buried side mouth | a rest pod, a mouth onward to CV2 | **restored facility**: resting wakes the quarrymen's survey pod and charts CV1–CV3 on the map; **shortcut** past CV1's corridor | `pgSurvey`, `charted.*` | a rest point on the quarry road |
 | **CV2** the long dark | CV1 R, or CV1B's mouth | the Deaf System's founding log (terminal 5) — the sound she has followed since the meadow | **story evidence**; the lure settles | `beacon` | — |
@@ -69,7 +69,7 @@ No vertical link anywhere leads into A4; its only exit is L.
 | Errand | Found early when | What changes |
 |---|---|---|
 | `servo_coil` (A6 coil) | the coil now lies in the gantries from the start (until handed in); picking it up early says "Somebody must be missing this" | Servo: "That coil — you found it before I could even ask…" and pays on the ask |
-| `ratchet_deep` (A7) | she has already stood in the shaft | Ratchet: "You have already stood at the bottom of that shaft?…" and pays on the ask |
+| `ratchet_deep` (A7) | she has already read the survey (terminal 20) — standing in the shaft is not enough | Ratchet: "You have already read the quarrymen's survey down that shaft?…" and pays on the ask |
 | `ratchet_forge` (marble) | marble already in her bag when he asks | "Is that raw marble? You found the seam before I could even tell you where it was." then the forge |
 
 Culls (`servo_swarm`) still count from the ask: machines broken before it are
