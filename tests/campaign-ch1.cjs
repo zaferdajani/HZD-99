@@ -970,6 +970,17 @@ function pitAhead(s, dir) {
   for (let y = feetRow; y < Math.min(model.h, feetRow + 4); y++) if (model.solid(tx, y) || model.at(tx, y) === '=') return false;
   return true;
 }
+// a rock face right behind her: backing away into it moves nothing, so a
+// "step out to a gap" against a wall is a loop that never ends (release run,
+// 2026-10-10: wedged 37 minutes between GA1D's rock pillar and the kneeling
+// Sage, every retreat and every watchdog step pressing into the stone)
+function wallBehind(s, dir) {
+  if (!model) return false;
+  const edge = dir > 0 ? s.p.x + PW + 4 : s.p.x - 4, tx = Math.floor(edge / TL);
+  const t0 = Math.floor(s.p.y / TL), t1 = Math.floor((s.p.y + PH - 2) / TL);
+  for (let ty = t0; ty <= t1; ty++) if (model.solid(tx, ty)) return true;
+  return false;
+}
 async function backOff(s, dir, ms = 80) {   // dir = the way AWAY
   if (pitAhead(s, dir)) { await hold(['Space', dir > 0 ? 'ArrowRight' : 'ArrowLeft']); await sleep(ms); return; }
   await hold([dir > 0 ? 'ArrowRight' : 'ArrowLeft']); await sleep(ms);
@@ -985,7 +996,10 @@ async function bossFight(s) {
   else if (Date.now() - R.fightSig.t > 25000) {
     R.fightSig.t = Date.now(); log('FIGHT WATCHDOG: no progress in 25 s — stepping back to come in again');
     const tx = sage ? sage.x + sage.w / 2 : s.boss ? s.boss.cx : s.p.x;
-    await backOff(s, tx > s.p.x + 12 ? -1 : 1, 450); await hold([]); return;
+    const away = tx > s.p.x + 12 ? -1 : 1;
+    // cornered: the only way to "come in again" is over the fighter
+    if (wallBehind(s, away)) { await hold(['Space', away > 0 ? 'ArrowLeft' : 'ArrowRight']); await sleep(420); await hold([]); return; }
+    await backOff(s, away, 450); await hold([]); return;
   }
   if (s.room === 'GA1D' && sage) { await sageFight(s, sage); return; }
   if (s.boss && s.boss.k === 'chime') { await chimeFight(s, s.boss); return; }
@@ -1004,7 +1018,11 @@ async function sageFight(s, e) {
   // through it and flips which side it is on, forever. Step out to a small
   // gap, walk back in (she faces where she walks), then strike.
   const strike = async () => {
-    if (dist < 6) { await backOff(s, -dir, 90); await hold([]); return; }
+    if (dist < 6) {
+      // no room behind her: hop over it and take the gap on its far side
+      if (wallBehind(s, -dir)) { log('cornered against the rock: over the top'); await hold(['Space', dir > 0 ? 'ArrowRight' : 'ArrowLeft']); await sleep(360); await hold([]); return; }
+      await backOff(s, -dir, 90); await hold([]); return;
+    }
     if (s.p.face !== dir) { await backOff(s, -dir, 70); await hold([dir > 0 ? 'ArrowRight' : 'ArrowLeft']); await sleep(60); await hold([]); return; }
     await hold([]); await tap('KeyX', 40); await sleep(140);
   };
