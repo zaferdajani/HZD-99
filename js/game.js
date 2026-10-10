@@ -12811,7 +12811,8 @@ const TUT_STEPS = [
   { id: 'out', label: 'tut_out', hint: 'tut_out_h', at: 'W1',
     done: () => (TUT_ROOMS[G.roomId] || 0) >= 1 },
   { id: 'jump', label: 'tut_jump', hint: 'tut_jump_h', at: 'W2', room: 'W2',
-    done: () => !player.on && player.vy < -60 && (typeof window === 'undefined' || !window.__tutorialEnforcement || !!G.tut.jumpShown) },
+    done: () => (!player.on && player.vy < -60 && (typeof window === 'undefined' || !window.__tutorialEnforcement || !!G.tut.jumpShown))
+      || (typeof tutOnJumpShelf === 'function' && tutOnJumpShelf()) },
   // THE GATES: the only way into the city, and they close behind her.
   { id: 'gate', label: 'tut_gate', hint: 'tut_gate_h', at: 'W2',
     done: () => (TUT_ROOMS[G.roomId] || 0) >= 2 },

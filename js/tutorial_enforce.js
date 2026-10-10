@@ -9,6 +9,20 @@ function tutorialStep() {
       || TUT_ROOMS[G.roomId] === undefined) return null;
   return TUT_STEPS[G.tut.i] || null;
 }
+// SHE ALREADY JUMPED ONTO IT (campaign run, 2026-10-10). The jump lesson's gold
+// marker is drawn ON the W2 shelf (tutPrompt points at 13,11), so a player who
+// follows "Follow the gold marker" literally hops up onto it before the chip
+// has ever said JUMP. Standing there, no obstacle is ahead and no shelf is
+// above, so tutJumpAtObstacle never fired, jumpShown never set, and the chip
+// kept saying "follow the marker" while the marker sat under her feet —
+// forever. A '=' shelf cannot be walked onto, only jumped onto, so standing on
+// the lesson's shelf IS the successful action and completes the step.
+function tutOnJumpShelf() {
+  if (!player || !player.on || G.roomId !== 'W2' || typeof tileAt !== 'function') return false;
+  const feet = player.y + player.h, row = Math.round(feet / TILE);
+  if (Math.abs(feet - row * TILE) > 4 || row !== 11) return false;
+  return tileAt(Math.floor((player.x + player.w / 2) / TILE), row) === '=';
+}
 function tutJumpAtObstacle() {
   if (!player || !player.on || G.roomId !== 'W2') return false;
   const dir = player.vx < -8 ? -1 : player.vx > 8 ? 1 : player.face || 1;
