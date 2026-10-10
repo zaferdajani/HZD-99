@@ -167,6 +167,9 @@ and the road A2 → A3 → A4 never passes through it.
 
 - **No single unbroken human-paced run from waking to the teaser.** The
   opening (1–7) is played with real input end to end on desktop and phone;
-  the rest is verified beat by beat, staged at each beat.
+  the rest is verified beat by beat, staged at each beat. *(2026-10-10: an
+  unbroken keyboard-only run from a cleared browser to the teaser now exists —
+  an autopilot, not a person: `tests/campaign-ch1.cjs`, reported in
+  `docs/CHAPTER_ONE_CAMPAIGN.md`.)*
 - The boss fights (Sage, CHIME, NULLFANG) are covered by their own fight
   harnesses with scripted inputs, not by a person playing them.
