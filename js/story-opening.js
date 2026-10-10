@@ -76,7 +76,13 @@ function ratchetStandingKey(f, tierKey) {
   if (f.sageTame_GA1D) return 'sl_ratchet_sage';
   if (f.crystal) return 'sl_ratchet_forged';
   if (f.nfMeet) return 'sl_ratchet_dent';
-  return tierKey;
+  // NO FIRST-MEETING QUIP AFTER THE FIRST MEETING (campaign run, 2026-10-10).
+  // The tier-0 line ("Cat-frame. Cute. Don't touch the stock with those
+  // claws.") is the old story's hello to a stranger. In this story he has
+  // already been woken by her and told her everything, so it opened the
+  // marble hand-in as if they had never met. Before the forge his scripted
+  // lines speak for him; an unknown key is skipped by the caller.
+  return 'sl_ratchet_none';
 }
 
 // ---------------------------------------------------------------------------
