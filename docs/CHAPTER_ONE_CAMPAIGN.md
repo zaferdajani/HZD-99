@@ -91,6 +91,12 @@ was explained before the counter opened and bought with Ratchet's 12 scrap.
 
 ## Observations not fixed (risks, with evidence)
 
+*Integrator follow-up (2026-10-10, after this run): three of these were fixed
+on the integration branch — the bound-ones toast now speaks twice, not in every
+room (`21bacb7`); the objective names "the climb at the meadow hub's west end"
+in five languages (`21bacb7`); and the film path now queues "cleansed, not
+killed" (`207d8a7`). The others stand as written.*
+
 - **The bell climb sits on top of the quarry hole.** A8's way up is A2's ceiling
   at tiles 11–14; the loose floor broken in step 16 is tiles 12–14 directly under
   it. A missed jump on the climb drops her through A2 into A5, and back up A5's
