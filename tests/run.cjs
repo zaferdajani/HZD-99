@@ -121,6 +121,8 @@ const SUITE = [
   ['cover',     'the platform she is standing on stops a shot, from either side'],
   ['tap',       'tap where a thing is drawn and that thing happens'],
   ['textreveal','words typed at a reading pace, paged, read before they turn, one overlay at a time'],
+  ['text-rules', 'cards pause combat; one tap/press never reveals and dismisses; numbers stay immediate; five languages at phone width'],
+  ['servo-presence', 'Old Servo stood beside, not inside: prompt before contact, talk stand-off, grounded, whole arc on desktop and phone'],
   ['bosspace',  'no guardian spends the fight standing still, measured against a moving player'],
   ['daze',      'a group of hits breaks NULLFANG open, pays out, closes, and cannot be held'],
   ['openings',  'every boss move opens for at least one hit, and only the bait pays out three'],

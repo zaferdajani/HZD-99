@@ -239,7 +239,9 @@ async function play(browser, mode) {
       const sv = G.statics.find(q => q.extra === 'servo');
       const A = atlasOf('servo');
       return { live: npcLive(sv), cells: invCount('batt'), k: A.sub.servo.k, drawnH: sv.h * A.sub.servo.k,
-        heroH: player.h, onFloor: Math.abs((sv.y + sv.h) - (Math.floor((sv.y + sv.h) / TILE) * TILE)) < 2 };
+        // the floor is the ground she walks on — the heightfield where the
+        // meadow has one (pgFloorY), not the tile line under it
+        heroH: player.h, onFloor: Math.abs((sv.y + sv.h) - pgFloorY(sv.x + sv.w / 2)) < 2 };
     });
     // the cue is drawn while she approaches; photograph it a step back
     await page.keyboard.down('ArrowLeft'); await page.waitForTimeout(260); await page.keyboard.up('ArrowLeft');
