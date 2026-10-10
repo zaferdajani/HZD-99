@@ -14000,6 +14000,13 @@ class Boss {
       this.vx = 0; this.vy = 0;
       if (this.kind !== 'mother') setMusic(G.roomDef.zone); else stopMusic();
       G.dropScrap(this.cx(), this.cy(), 30);
+      // the film path owes the same sentence the cleanse path says: the
+      // campaign run freed NULLFANG through his film and never read that he
+      // was cleansed, not killed. It waits under the film (toasts hold while
+      // a film plays) and reads the moment play resumes.
+      const pkF = { glitch: 'pure_beast', brood: 'pure_brood', atlas: 'pure_atlas',
+                    zero: 'pure_zero', prism: 'pure_prism' }[this.kind];
+      if (pkF) G.toast(t(pkF));
       sfx('win'); sfx('winSting');   // her motif over the trumpet - a guardian fell
       if (typeof checkEvo === 'function') checkEvo(1, true);   // she grows on THIS frame; the card waits for the cut
       return;
