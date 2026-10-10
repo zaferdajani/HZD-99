@@ -31,6 +31,7 @@ look at to answer "did that actually happen".
 | `flora/` | Alien plant life, two species per kingdom | 12 |
 | `gear/` | Thrust boots and the save pod, dormant + active; Ratchet's repair board, its cell, the wake-room lamp | 7 |
 | `_sheets/` | Contact sheets and before/after comparisons | 18 |
+| `manhua/ch1/game/`, `manhua/ch1/clean/` | THE GAME'S CHAPTER-ONE PANELS (2026-10-10): the seventeen as-fired game-only panels (`*_asfired.jpg`) and the twelve unlettered page re-draws (`*_clean_asfired.jpg`), each folder with its `prompts.json` (exact prompts, refs, job ids) | 31 |
 | `manhua/ch1/` | THE MANHUA, chapter one — the 27 as-fired pages of the second edition (`*_asfired.jpg`, 1024/q90), the refused first edition kept beside them (`*_ed1_asfired.jpg`), and `prompts.json`, the exact prompt and every take of every page; ledger in `docs/MANHUA.md` | 55 |
 
 `beast/motion/` is the reference set for NULLFANG's fight — eleven plates of the

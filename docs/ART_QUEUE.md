@@ -40,7 +40,12 @@ Still owed, in firing order:
    refused (giraffe paw, baked glow) and roar re-fire a3f26e21 unused — the
    first takes' clean frames were cut instead. Ten strips, one scale, one floor
    (`source/beasts/alpha2/`, `tests/wolves.cjs` §2c).
-2. **Manhwa panels the game's chapter one needs and the approved pages lack**
+2. ~~**Manhwa panels the game's chapter one needs and the approved pages lack**~~
+   **LANDED 2026-10-10** — seventeen single panels (nano_banana_pro, elements
+   bound) and twelve unlettered copies of the approved pages; map, triggers and
+   job ids in docs/MANHWA_EVENT_MAP.md and `source/manhua/ch1/{game,clean}/prompts.json`.
+   Still owed: an actual drawn chapter two (the teaser is three panels).
+   The original brief:
    (docs/MANHWA_EVENT_MAP.md, MISSING PANELS): the raw-marble burst at the CV3
    boulder; Ratchet's letter as the game writes it (drawer, battery, repair);
    NULLFANG's break; the sage's revelation ("CHIME writes the command back");

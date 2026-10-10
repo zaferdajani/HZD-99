@@ -29,115 +29,175 @@
 // safe moment; panelsBusy() says whether a sequence is on screen.
 // ===========================================================================
 const PANEL_PG = n => 'assets/manhua/ch1/p' + (n < 10 ? '0' : '') + n + '.webp';
+// THE UNLETTERED PAGES (2026-10-10). Every page a sequence crops from also
+// exists with its lettering painted out (assets/manhua/ch1/clean/, the same
+// page re-drawn through Higgsfield with every box removed, keyed at the
+// master's own size so a crop is the same rectangle on either). The panel
+// player letters them itself, in the player's language, typed out at the
+// reading speed — the baked English could do neither, and two of the pages
+// (p09, p18) still carried the superseded "crystal pillar" errand in their
+// balloons. The lettered masters stay the manhua reader's pages.
+const PANEL_CLEAN = n => 'assets/manhua/ch1/clean/p' + (n < 10 ? '0' : '') + n + '.webp';
+// THE PANELS THE APPROVED PAGES NEVER DREW (2026-10-10): single unlettered
+// panels made for the game's own chapter one — the marble freed, the
+// maintenance door, the sage's revelation, the lion's break and its fight, the
+// corrected letter/drawer/repair, the camp hatch, the Conduits — in the
+// chapter's style, every recurring body bound to its Higgsfield element.
+const PANEL_GAME = name => 'assets/manhua/ch1/game/' + name + '.webp';
+const PANEL_FULL = { w: 1600, h: 893 };          // the 16:9 game panels, keyed at 1600 px
 const PANEL_CONDUITS = 'assets/backgrounds/gate_conduits.jpg';
 // A panel: src (the page master), crop [x, y, w, h] in that page's pixels,
 // cap (caption key | null), who (speaker name key), baked (the crop already
 // carries the page's own lettering of `cap`), move (in | out | left | right),
 // focus [fx, fy] for the push, cond(saveState) for a panel that depends on
 // what actually happened, ref (page/panel, for the map document).
+const PG_FULL = [0, 0, PANEL_FULL.w, PANEL_FULL.h];
 const PANEL_SEQ = [
   { id: 'bay', title: 'pn_s_bay', room: 'W2', prefetch: ['W1', 'W2'],
     event: 'woke — first arrival outside the service bay (W1 → W2)',
     when: f => !!f.woke,
     past: (f, s) => !!f.gateOpened || (!!f.woke && G.roomId !== 'W1'),
     panels: [
-      { ref: 'p04 panel 2', src: PANEL_PG(4), crop: [52, 599, 385, 362], cap: null, move: 'in', focus: [0.45, 0.4] },
-      { ref: 'p04 panel 3', src: PANEL_PG(4), crop: [461, 599, 685, 362], cap: 'pc_quiet', baked: true, move: 'in', focus: [0.4, 0.45] },
-      { ref: 'p04 panel 5', src: PANEL_PG(4), crop: [52, 1308, 1094, 337], cap: 'pc_door', move: 'in', focus: [0.5, 0.55] },
-      { ref: 'p05 panel 1', src: PANEL_PG(5), crop: [400, 33, 762, 341], cap: 'pc_city', move: 'out', focus: [0.3, 0.5] },
+      { ref: 'p04 panel 2', src: PANEL_CLEAN(4), crop: [52, 599, 385, 362], cap: null, move: 'in', focus: [0.45, 0.4] },
+      { ref: 'p04 panel 3', src: PANEL_CLEAN(4), crop: [461, 599, 685, 362], cap: 'pc_quiet', move: 'in', focus: [0.4, 0.45] },
+      { ref: 'p04 panel 5', src: PANEL_CLEAN(4), crop: [52, 1308, 1094, 337], cap: 'pc_door', move: 'in', focus: [0.5, 0.55] },
+      { ref: 'p05 panel 1', src: PANEL_CLEAN(5), crop: [400, 33, 762, 341], cap: 'pc_city', move: 'out', focus: [0.3, 0.5] },
     ] },
   { id: 'gate', title: 'pn_s_gate', room: 'A0', prefetch: ['W2', 'A0'],
     event: 'gateOpened — first arrival inside the city gate (W2 → A0)',
     when: f => !!f.gateOpened,
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']),
     panels: [
-      { ref: 'p05 panel 3', src: PANEL_PG(5), crop: [38, 722, 1125, 626], cap: 'pc_gates', baked: true, move: 'out', focus: [0.5, 0.6] },
-      { ref: 'p05 panel 4', src: PANEL_PG(5), crop: [38, 1370, 1124, 386], cap: 'pc_closed', baked: true, move: 'in', focus: [0.5, 0.5] },
+      { ref: 'p05 panel 3', src: PANEL_CLEAN(5), crop: [38, 722, 1125, 626], cap: 'pc_gates', move: 'out', focus: [0.5, 0.6] },
+      { ref: 'p05 panel 4', src: PANEL_CLEAN(5), crop: [38, 1370, 1124, 386], cap: 'pc_closed', move: 'in', focus: [0.5, 0.5] },
     ] },
+  // the corrected opening as the game plays it: his own tag, his own battery
+  // from his own drawer, the board, and then what he tells her
   { id: 'ratchet', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'],
     event: "Ratchet's battery restored (ratchetRepaired / on_A0B|ratchet), after his wake talk and errand",
     when: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']) && panelsQuest('ratchet_forge') !== 'none',
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']),
     panels: [
-      { ref: 'p07 panel 4', src: PANEL_PG(7), crop: [420, 1202, 361, 549], cap: null, move: 'in', focus: [0.55, 0.4] },
-      { ref: 'p07 panel 5', src: PANEL_PG(7), crop: [792, 1202, 367, 380], cap: 'pc_awake', move: 'in', focus: [0.5, 0.65] },
-      { ref: 'p09 panel 1', src: PANEL_PG(9), crop: [19, 17, 650, 389], cap: 'pc_necklace', who: 'n_ratchet', move: 'in', focus: [0.5, 0.55] },
-      { ref: 'p09 panel 2', src: PANEL_PG(9), crop: [19, 418, 670, 359], cap: 'pc_song', who: 'n_ratchet', move: 'left', focus: [0.6, 0.5] },
+      { ref: 'game: letter', src: PANEL_GAME('letter'), crop: PG_FULL, cap: 'pc_letter', move: 'in', focus: [0.3, 0.45] },
+      { ref: 'game: drawer', src: PANEL_GAME('drawer'), crop: PG_FULL, cap: 'pc_drawer', move: 'in', focus: [0.35, 0.6] },
+      { ref: 'game: repair', src: PANEL_GAME('repair'), crop: [0, 0, 1344, 752], cap: 'pc_awake', move: 'in', focus: [0.65, 0.35] },
+      { ref: 'p09 panel 1', src: PANEL_CLEAN(9), crop: [19, 17, 650, 389], cap: 'pc_necklace', who: 'n_ratchet', move: 'in', focus: [0.5, 0.55] },
+      { ref: 'p09 panel 2', src: PANEL_CLEAN(9), crop: [19, 418, 670, 359], cap: 'pc_song', who: 'n_ratchet', move: 'left', focus: [0.6, 0.5] },
     ] },
   { id: 'cave', title: 'pn_s_cave', room: 'CV1', prefetch: ['A5', 'CV1'],
     event: 'first entry into the marble cave (CV1), through the buried mouth under the hub',
     when: () => true,
     past: (f, s) => !!(s.visited && s.visited.CV1) || !!f.pl_cshard || !!f.crystal,
     panels: [
-      { ref: 'p15 panel 5', src: PANEL_PG(15), crop: [395, 1200, 770, 558], cap: 'pc_breathing', move: 'in', focus: [0.45, 0.45] },
-      { ref: 'p16 panel 1', src: PANEL_PG(16), crop: [69, 74, 690, 427], cap: null, move: 'right', focus: [0.5, 0.5] },
-      { ref: 'p16 panel 3', src: PANEL_PG(16), crop: [69, 523, 1068, 305], cap: null, move: 'in', focus: [0.5, 0.6] },
+      { ref: 'p15 panel 5', src: PANEL_CLEAN(15), crop: [395, 1200, 770, 558], cap: 'pc_breathing', move: 'in', focus: [0.45, 0.45] },
+      { ref: 'p16 panel 1', src: PANEL_CLEAN(16), crop: [69, 74, 690, 427], cap: null, move: 'right', focus: [0.5, 0.5] },
+      { ref: 'p16 panel 3', src: PANEL_CLEAN(16), crop: [69, 523, 1068, 305], cap: null, move: 'in', focus: [0.5, 0.6] },
+    ] },
+  // the marble freed: why the burst matters, and that it is material, not a blade
+  { id: 'marble', title: 'pn_s_marble', room: 'CV3', prefetch: ['CV2', 'CV3'],
+    event: 'the raw marble freed from its host rock in CV3 (pl_cshard)',
+    when: f => !!f.pl_cshard,
+    past: f => !!f.crystal,
+    panels: [
+      { ref: 'game: marble_a', src: PANEL_GAME('marble_a'), crop: PG_FULL, cap: 'pc_m_burst', move: 'in', focus: [0.6, 0.5] },
+      { ref: 'game: marble_b', src: PANEL_GAME('marble_b'), crop: PG_FULL, cap: 'pc_m_freed', move: 'in', focus: [0.5, 0.45] },
     ] },
   { id: 'forge', title: 'pn_s_forge', room: 'A0B', prefetch: ['A0B'],
     event: 'the first sword forged from the raw marble (crystal), after the forge film and its card',
     when: f => !!f.crystal,
     past: f => !!f.crystal,
     panels: [
-      { ref: 'p18 panel 2', src: PANEL_PG(18), crop: [42, 617, 1114, 355], cap: 'pc_forge', who: 'n_ratchet', move: 'in', focus: [0.55, 0.6] },
-      { ref: 'p18 panel 3', src: PANEL_PG(18), crop: [52, 1120, 426, 620], cap: 'pc_blade', move: 'in', focus: [0.45, 0.75] },
-      { ref: 'p18 panel 5', src: PANEL_PG(18), crop: [505, 1345, 300, 396], cap: null, move: 'out', focus: [0.5, 0.5] },
+      { ref: 'p18 panel 2', src: PANEL_CLEAN(18), crop: [42, 617, 1114, 355], cap: 'pc_forge', who: 'n_ratchet', move: 'in', focus: [0.55, 0.6] },
+      { ref: 'p18 panel 3', src: PANEL_CLEAN(18), crop: [52, 1120, 426, 620], cap: 'pc_blade', move: 'in', focus: [0.45, 0.75] },
+      { ref: 'p18 panel 5', src: PANEL_CLEAN(18), crop: [505, 1345, 300, 396], cap: null, move: 'out', focus: [0.5, 0.5] },
+    ] },
+  // the way to the first sage: the door that opens beside the stump she cut
+  { id: 'passage', title: 'pn_s_passage', room: 'GA1T', prefetch: ['CV3', 'GA1T'],
+    event: 'first arrival in the maintenance tunnel (GA1T) through the door beside the quarry',
+    when: f => !!f.crystal,
+    past: (f, s) => !!f.sageTame_GA1D || !!(s.visited && s.visited.GA1D),
+    panels: [
+      { ref: 'game: passage_a', src: PANEL_GAME('passage_a'), crop: PG_FULL, cap: 'pc_p_door', move: 'in', focus: [0.6, 0.5] },
+      { ref: 'game: passage_b', src: PANEL_GAME('passage_b'), crop: PG_FULL, cap: 'pc_p_tunnel', move: 'in', focus: [0.5, 0.5] },
     ] },
   { id: 'meet', title: 'pn_s_meet', room: 'A2', prefetch: ['A1', 'A2'],
     event: "NULLFANG's first appearance — the corridor meeting (nfMeet), once it has left the room",
     when: f => !!f.nfMeet,
     past: f => !!f.nfMeet,
     panels: [
-      { ref: 'p14 panel 1', src: PANEL_PG(14), crop: [23, 18, 1154, 334], cap: null, hold: 1.4, move: 'left', focus: [0.5, 0.5] },
+      { ref: 'p14 panel 1', src: PANEL_CLEAN(14), crop: [23, 18, 1154, 334], cap: null, hold: 1.4, move: 'left', focus: [0.5, 0.5] },
       // only if the swipe actually took a core: the interactive meeting can be dodged
-      { ref: 'p14 panel 2', src: PANEL_PG(14), crop: [23, 371, 1154, 660], cap: 'pc_core', move: 'in', focus: [0.6, 0.45],
+      { ref: 'p14 panel 2', src: PANEL_CLEAN(14), crop: [23, 371, 1154, 660], cap: 'pc_core', move: 'in', focus: [0.6, 0.45],
         cond: s => !!s.meetHit },
-      { ref: 'p14 panel 3', src: PANEL_PG(14), crop: [48, 1185, 540, 360], cap: null, move: 'right', focus: [0.5, 0.5] },
-      { ref: 'p14 panel 4', src: PANEL_PG(14), crop: [605, 1185, 547, 275], cap: 'pc_bored', move: 'right', focus: [0.5, 0.5] },
+      { ref: 'p14 panel 3', src: PANEL_CLEAN(14), crop: [48, 1185, 540, 360], cap: null, move: 'right', focus: [0.5, 0.5] },
+      { ref: 'p14 panel 4', src: PANEL_CLEAN(14), crop: [605, 1185, 547, 275], cap: 'pc_bored', move: 'right', focus: [0.5, 0.5] },
+    ] },
+  // the sage's sentence happening in front of her: he resists, the bell wins
+  { id: 'break', title: 'pn_s_break', room: 'A2', alsoRoom: 'A3', prefetch: ['A2', 'A3'],
+    event: "NULLFANG's break (nfBreak): the purple goes out of him, then the bell writes the order back",
+    when: f => !!f.nfBreak && !f.bossChime && !f.bossGlitch,
+    past: f => !!(f.bossChime || f.bossGlitch),
+    panels: [
+      { ref: 'game: break_a', src: PANEL_GAME('break_a'), crop: PG_FULL, cap: 'pc_b_stop', move: 'in', focus: [0.6, 0.45] },
+      { ref: 'game: break_b', src: PANEL_GAME('break_b'), crop: PG_FULL, cap: 'pc_b_bell', move: 'in', focus: [0.55, 0.4] },
     ] },
   { id: 'sage', title: 'pn_s_sage', room: 'GA1D', prefetch: ['GA1T', 'GA1D'],
     event: 'the first Sage cleansed (sageTame_GA1D), after its gift card and revelation',
     when: f => !!f.sageTame_GA1D,
     past: f => !!f.sageTame_GA1D,
     panels: [
-      { ref: 'p25 panel 3', src: PANEL_PG(25), crop: [20, 562, 1161, 455], cap: 'pc_knelt', move: 'in', focus: [0.3, 0.5] },
-      { ref: 'p26 panel 1', src: PANEL_PG(26), crop: [52, 42, 1096, 310], cap: 'pc_cuts', move: 'right', focus: [0.5, 0.5] },
-      { ref: 'p26 panel 2', src: PANEL_PG(26), crop: [52, 380, 1097, 605], cap: 'pc_letgo', baked: true, move: 'in', focus: [0.6, 0.4] },
-      { ref: 'p26 panel 3', src: PANEL_PG(26), crop: [52, 1013, 1097, 299], cap: 'pc_cell', baked: true, move: 'in', focus: [0.65, 0.5] },
+      { ref: 'p25 panel 3', src: PANEL_CLEAN(25), crop: [20, 562, 1161, 455], cap: 'pc_knelt', move: 'in', focus: [0.3, 0.5] },
+      { ref: 'p26 panel 1', src: PANEL_CLEAN(26), crop: [52, 42, 1096, 310], cap: 'pc_cuts', move: 'right', focus: [0.5, 0.5] },
+      { ref: 'p26 panel 2', src: PANEL_CLEAN(26), crop: [52, 380, 1097, 605], cap: 'pc_letgo', move: 'in', focus: [0.6, 0.4] },
+      { ref: 'p26 panel 3', src: PANEL_CLEAN(26), crop: [52, 1013, 1097, 299], cap: 'pc_cell', move: 'in', focus: [0.65, 0.5] },
+      // THE REVELATION — why she keeps losing, and where to go. The bell
+      // panel is only true while the bell still rings (sageRevealLines says
+      // the same thing in words).
+      { ref: 'game: sage_rev', src: PANEL_GAME('sage_rev'), crop: PG_FULL, cap: 'pc_s_point', move: 'in', focus: [0.7, 0.35] },
+      { ref: 'game: sage_bell', src: PANEL_GAME('sage_bell'), crop: [0, 0, 1600, 679], cap: 'pc_s_bell', move: 'out', focus: [0.4, 0.4],
+        cond: s => !(s.flags && s.flags.bossChime) },
     ] },
   { id: 'chime', title: 'pn_s_chime', room: 'A9', prefetch: ['A8', 'A9'],
     event: 'CHIME silenced (bossChime), once its cell is paid',
     when: f => !!f.bossChime,
     past: f => !!f.bossChime,
     panels: [
-      { ref: 'p20 panel 2', src: PANEL_PG(20), crop: [425, 49, 725, 505], cap: 'pc_singing', move: 'in', focus: [0.5, 0.4] },
-      { ref: 'p20 panel 4', src: PANEL_PG(20), crop: [425, 1091, 725, 298], cap: 'pc_nobody', baked: true, move: 'in', focus: [0.45, 0.6] },
-      { ref: 'p20 panel 5', src: PANEL_PG(20), crop: [425, 1417, 725, 323], cap: 'pc_made', move: 'in', focus: [0.45, 0.5] },
+      { ref: 'p20 panel 2', src: PANEL_CLEAN(20), crop: [425, 49, 725, 505], cap: 'pc_singing', move: 'in', focus: [0.5, 0.4] },
+      { ref: 'p20 panel 4', src: PANEL_CLEAN(20), crop: [425, 1091, 725, 298], cap: 'pc_nobody', move: 'in', focus: [0.45, 0.6] },
+      { ref: 'p20 panel 5', src: PANEL_CLEAN(20), crop: [425, 1417, 725, 323], cap: 'pc_made', move: 'in', focus: [0.45, 0.5] },
     ] },
   { id: 'free', title: 'pn_s_free', room: 'A4', prefetch: ['A3', 'A4'],
     event: 'NULLFANG purified (bossGlitch), after the purification film and its rewards',
     when: f => !!f.bossGlitch,
     past: f => !!f.bossGlitch,
     panels: [
-      { ref: 'p24 left panel 1', src: PANEL_PG(24), crop: [68, 580, 520, 313], cap: null, move: 'in', focus: [0.6, 0.5] },
-      { ref: 'p24 left panel 2', src: PANEL_PG(24), crop: [69, 917, 585, 391], cap: 'pc_oath', baked: true, move: 'in', focus: [0.55, 0.65] },
+      // the fight, on the game's own lion, and the cut that frees rather than kills
+      { ref: 'game: fight_a', src: PANEL_GAME('fight_a'), crop: PG_FULL, cap: null, hold: 1.4, move: 'left', focus: [0.5, 0.45] },
+      { ref: 'game: fight_b', src: PANEL_GAME('fight_b'), crop: PG_FULL, cap: 'pc_f_cut', move: 'in', focus: [0.5, 0.45] },
+      { ref: 'p24 left panel 1', src: PANEL_CLEAN(24), crop: [68, 580, 520, 313], cap: null, move: 'in', focus: [0.6, 0.5] },
+      { ref: 'p24 left panel 2', src: PANEL_CLEAN(24), crop: [69, 917, 585, 391], cap: 'pc_oath', move: 'in', focus: [0.55, 0.65] },
     ] },
   // THE TEASER. Before she climbs out of the Meadows, never after: the camp's
   // climb (A3, tiles 17-29) with NULLFANG free, or B1 if she got there first.
+  // The hatch is her leaving; the three Conduits panels show the place, the
+  // keeper's outline and the talons — shapes and lights, no outcomes.
   { id: 'ch2', title: 'pn_s_ch2', room: 'A3', teaser: true, prefetch: ['A3', 'A4', 'B1'],
     event: 'chapter-two teaser: NULLFANG free and she stands on the climb to the Data Conduits (A3), or first B1 arrival',
     when: f => !!f.bossGlitch && panelsAtClimb(),
     alsoRoom: 'B1',
     past: (f, s) => !!f.bossGlitch && !!(s.visited && s.visited.B1),
     panels: [
-      { ref: 'p27 (tunnel only)', src: PANEL_PG(27), crop: [600, 100, 600, 700], cap: 'pt_behind', move: 'in', focus: [0.6, 0.55] },
-      { ref: 'gate_conduits.jpg', src: PANEL_CONDUITS, crop: [700, 300, 560, 420], cap: 'pt_keeper', move: 'in', focus: [0.5, 0.5] },
-      { ref: 'gate_conduits.jpg', src: PANEL_CONDUITS, crop: [250, 0, 1420, 1072], cap: 'pt_talons', move: 'out', focus: [0.5, 0.5] },
+      { ref: 'game: hatch', src: PANEL_GAME('hatch'), crop: [0, 0, 1600, 1073], cap: 'pt_hatch', move: 'in', focus: [0.45, 0.3] },
+      { ref: 'game: ch2_a', src: PANEL_GAME('ch2_a'), crop: PG_FULL, cap: 'pt_behind', move: 'in', focus: [0.75, 0.75] },
+      { ref: 'game: ch2_b', src: PANEL_GAME('ch2_b'), crop: PG_FULL, cap: 'pt_keeper', move: 'in', focus: [0.5, 0.45] },
+      { ref: 'game: ch2_c', src: PANEL_GAME('ch2_c'), crop: PG_FULL, cap: 'pt_talons', move: 'out', focus: [0.4, 0.4] },
       { ref: 'title card', src: null, crop: null, cap: 'pt_title', title: true },
     ] },
 ];
 const PANEL_ZOOM = 0.04;          // the most any crop is ever pushed or drifted
 const PANEL_XF = 0.45;            // cross-dissolve between panels
-const PANEL_TAP = 0.35;           // a press shorter than this is a confirm
+const PANEL_TAP = 0.35;
+const PANEL_READ_GRACE = 0.35;    // a caption must be whole this long before a confirm turns the page           // a press shorter than this is a confirm
 const PN = { img: {}, room: null, settle: 0, ready: 0, queue: [], meetCores: null };
 
 function panelsQuest(id) { return typeof qState === 'function' ? qState(id) : 'none'; }
@@ -153,6 +213,7 @@ function panelsSeq(id) { return PANEL_SEQ.find(s => s.id === id) || null; }
 // The save's own record, created on first sight of a save. A sequence whose
 // event this save had ALREADY passed is marked past, not played: a player who
 // loads a long run on this build is not handed every story beat as a recap.
+const PANEL_V1 = ['bay', 'gate', 'ratchet', 'cave', 'forge', 'meet', 'sage', 'chime', 'free', 'ch2'];
 function panelsState() {
   const sv = G.save;
   if (!sv) return null;
@@ -162,6 +223,20 @@ function panelsState() {
     for (const s of PANEL_SEQ) if (s.past(f, sv)) sv.panels.past[s.id] = 1;
   }
   sv.panels.seen = sv.panels.seen || {}; sv.panels.past = sv.panels.past || {};
+  // A SEQUENCE THIS SAVE HAS NEVER HEARD OF (a build added it) is judged the
+  // same way the whole record was on first sight: an event the save already
+  // passed is marked past, so a long run loaded on a new build is not handed
+  // a recap of the marble or the hatch the moment it walks into the room.
+  // A record without `k` was made by a build whose map held exactly these ten
+  // sequences, every one of them judged when the record was created.
+  if (!sv.panels.k) { sv.panels.k = {}; for (const id of PANEL_V1) sv.panels.k[id] = 1; }
+  const known = sv.panels.k;
+  const f = sv.flags || {};
+  for (const s of PANEL_SEQ) {
+    if (known[s.id]) continue;
+    if (!sv.panels.seen[s.id] && s.past(f, sv)) sv.panels.past[s.id] = 1;
+    known[s.id] = 1;
+  }
   return sv.panels;
 }
 function panelsSeenList() {
@@ -303,7 +378,7 @@ function panelsCapText(p) {
 function panelsCur() { const P = G.panels; return P && P.list[P.i]; }
 function panelsBegin(P) {
   const p = P.list[P.i];
-  P.t = 0; P.wait = 0;
+  P.t = 0; P.wait = 0; P.readT = null;
   const txt = panelsCapText(p);
   P.reveal = txt ? panelsRevealStart(txt) : null;
 }
@@ -314,8 +389,13 @@ function panelsAdvance(P) {
 }
 function panelsConfirm(P) {
   const p = P.list[P.i];
-  if (P.reveal && !panelsRevealDone(P.reveal)) { panelsRevealFinish(P.reveal); return; }
+  if (P.reveal && !panelsRevealDone(P.reveal)) { panelsRevealFinish(P.reveal); P.readT = P.t; return; }
   if (p && (p.baked || p.cap) && P.t < 0.25) return;    // a press cannot outrun the picture
+  // ...nor the last word. A short caption can finish typing between a press
+  // and its release; a press that lands as the text completes is the player
+  // still asking to SEE it, not to turn the page, so the page waits a beat
+  // after the caption is whole before a confirm may turn it.
+  if (p && p.cap && P.readT != null && P.t - P.readT < PANEL_READ_GRACE) return;
   panelsAdvance(P);
 }
 function panelsImgReady(p) {
@@ -327,6 +407,7 @@ function updatePanels(dt) {
   const P = G.panels;
   if (!P) { G.state = 'PLAY'; return; }
   P.t += dt;
+  if (P.reveal && P.readT == null && panelsRevealDone(P.reveal)) P.readT = P.t;
   // ONE PRESS, TWO MEANINGS, NEVER BOTH. A short press is a confirm, counted
   // on release; holding is the skip, the same deliberate hold as the films
   // (CUT_SKIP_HOLD). A press already down when the panels opened is ignored
