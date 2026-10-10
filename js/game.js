@@ -1181,6 +1181,17 @@ function loadRoom(id) {
       spawnStatic(kind, tx, ty, extra, kind === 'term' ? null : null);
     }
   });
+  // THE MACHINE FOLK STAND ON THE GROUND SHE STANDS ON. A static is placed on
+  // the tile grid, but the floor she walks is the heightfield (groundColumnAt),
+  // which rides up to a couple of dozen px above the grid in the meadow — so
+  // Old Servo's treads were buried 18 px under the grass she stood on beside
+  // him. Lift each person onto the curve where it has added material over the
+  // very floor they were placed on; never down, and never onto a ledge.
+  for (const s of G.statics) {
+    if (s.type !== 'npc') continue;
+    const gc = groundColumnAt(s.x + s.w / 2);
+    if (gc && Math.abs(gc[1] - (s.y + s.h)) < 1 && gc[0] < gc[1] && gc[1] - gc[0] <= 28) s.y -= gc[1] - gc[0];
+  }
   // the freed guardians stay home: every purified boss lives on in its
   // old arena as her pet, forever
   const PET_HOMES = { A4: ['glitch', 20], B4: ['brood', 15], C3: ['atlas', 15], D3: ['zero', 15], X1: ['prism', 20],
@@ -2073,6 +2084,71 @@ function climbStep(dt) {
   }
 }
 // ---------- interaction ----------
+// A CONVERSATION HAS TWO PEOPLE IN IT, SIDE BY SIDE. The reach used to be 46 px
+// from the NPC's FEET BOX (40 wide) — but the machine folk are drawn at their
+// atlas scale, Old Servo 75 px across, so the prompt arrived only once her
+// body was already inside his, and the talk was held with the cat painted over
+// the face she was talking to (the audit's phone capture, 2026-10-10). The
+// stand-off is measured from the body that is DRAWN: his half-width, plus
+// hers, plus a hand's gap. The prompt comes up before she reaches it, and if
+// she has walked into him anyway, the talk steps her back out to it, facing
+// him. (The cell aspect is the npc sheet's own; 0.77 is that sheet until it
+// has decoded, so the number does not jump when the art lands.)
+const TALK_HERO_HALF = 26, TALK_GAP = 4, TALK_MAX = 76;
+function npcStandOff(s) {
+  const A = typeof atlasOf === 'function' && atlasOf(s.extra);
+  const S = A && A.sub && A.sub[s.extra];
+  if (!S) return Math.max(s.w / 2 + TALK_HERO_HALF, 34);
+  let asp = 0.77;
+  const im = A.key && typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG[A.key];
+  if (im && im.naturalWidth && im.naturalHeight) asp = (im.naturalWidth / A.cols) / (im.naturalHeight / A.rows);
+  const half = s.h * S.k * asp / 2;
+  return Math.min(TALK_MAX, half + TALK_HERO_HALF + TALK_GAP);
+}
+function npcReach(s) { return Math.max(46, Math.min(TALK_MAX + 8, npcStandOff(s) + 10)); }
+// can she stand at world x (her centre) at her current height: nothing solid
+// in her body's rows, and something under her feet
+function talkSpotFree(x) {
+  if (!player || !G.grid) return false;
+  const l = Math.floor((x - player.w / 2) / TILE), r = Math.floor((x + player.w / 2 - 1) / TILE);
+  if (l < 1 || r > G.grid[0].length - 2) return false;
+  const top = Math.floor(player.y / TILE), bot = Math.floor((player.y + player.h - 1) / TILE);
+  for (let tx = l; tx <= r; tx++) for (let ty = top; ty <= bot; ty++) if (solidAt(tx, ty)) return false;
+  const under = tileAt(Math.floor(x / TILE), bot + 1);
+  return under === '#' || under === 'B' || under === '=';
+}
+// pick her spot beside this NPC: her own side first, the other if hers is a
+// wall or a drop; nowhere (null) when she is already clear of him
+function npcTalkSpot(s) {
+  if (!player || !s || s.type !== 'npc' || !player.on) return null;
+  const ncx = s.x + s.w / 2, hcx = player.x + player.w / 2;
+  const want = npcStandOff(s), dx = hcx - ncx;
+  player.face = ncx >= hcx ? 1 : -1;               // she turns to him either way
+  if (Math.abs(dx) >= want - 1) return (G.talkSpot = null);
+  const side = dx !== 0 ? Math.sign(dx) : -(player.face || 1);
+  let x = null;
+  for (const sd of [side, -side]) {
+    const cand = ncx + sd * want;
+    // every step of the way there must be standable, not just the end of it
+    let ok = true;
+    for (let k = 1; k <= 4 && ok; k++) ok = talkSpotFree(hcx + (cand - hcx) * k / 4);
+    if (ok) { x = cand; break; }
+  }
+  if (x == null) return (G.talkSpot = null);
+  G.talkSpot = { x: x - player.w / 2, npcX: ncx, room: G.roomId };
+  return G.talkSpot;
+}
+// the step itself: a short walk, a fifth of a second, while the box opens
+function talkSpotStep(dt) {
+  const k = G.talkSpot;
+  if (!k || !player) return;
+  if (k.room !== G.roomId) { G.talkSpot = null; return; }
+  const d = k.x - player.x, v = 260 * dt;
+  if (Math.abs(d) <= v) { player.x = k.x; G.talkSpot = null; }
+  else player.x += Math.sign(d) * v;
+  player.vx = 0;
+  player.face = k.npcX >= player.x + player.w / 2 ? 1 : -1;
+}
 function findNear() {
   if (!player || player.dead) return null;
   let best = null, bestD = 1e9;
@@ -2080,7 +2156,8 @@ function findNear() {
     if ((s.type === 'chest' || s.type === 'riddle') && s.opened) continue;
     const dx = (player.x + player.w / 2) - (s.x + s.w / 2);
     const dy = (player.y + player.h / 2) - (s.y + s.h / 2);
-    if (Math.abs(dx) < 46 && Math.abs(dy) < 60) {
+    const reach = s.type === 'npc' ? npcReach(s) : 46;
+    if (Math.abs(dx) < reach && Math.abs(dy) < 60) {
       const d = dx * dx + dy * dy;
       if (d < bestD) { bestD = d; best = s; }
     }
@@ -2197,6 +2274,8 @@ function doInteract(s) {
     // is being told: Ratchet's letter, repair, explanation, pod and pack, and
     // Old Servo's waking and errand. It hands back to everything below once
     // there is nothing scripted left to say.
+    // she steps to his side and turns to him before a word is said
+    if (typeof npcTalkSpot === 'function') npcTalkSpot(s);
     if (typeof openingTalk === 'function' && openingTalk(s)) return;
     // THEY WANT SOMETHING NOW. Talking twice used to give you the same three
     // lines forever; a character who cannot ask you for anything is scenery
@@ -2614,6 +2693,9 @@ function update(dt) {
   else if (typeof npcVoxQuietAll === 'function') npcVoxQuietAll();
   if (G.state === 'PLAY') {
     G.save.time += dt;
+    // a talk spot belongs to the conversation that asked for it; one left by
+    // a talk that opened a shop instead must not move her in a later one
+    G.talkSpot = null;
     fxDecay(dt);
     rubbleTick(dt);
     if (G.hitStop > 0) {
@@ -2809,7 +2891,18 @@ function update(dt) {
     G.deadT -= dt;
     if (G.deadT <= 0) respawn();
   }
-  else if (G.state === 'DIALOG') dialogUpdate(dt);   // paged, typed, mash-proof: js/overlay.js
+  else if (G.state === 'DIALOG') {
+    // a conversation that opened on its own (Servo's first say comes a beat
+    // after his waking) still puts her beside him, not inside him
+    const dd = G.dialog;
+    if (dd && dd.npc && !dd._spotted) {
+      dd._spotted = 1;
+      const sp = !G.talkSpot && (G.statics || []).find(q => q.type === 'npc' && q.extra === dd.npc);
+      if (sp) npcTalkSpot(sp);
+    }
+    talkSpotStep(dt);
+    dialogUpdate(dt);   // paged, typed, mash-proof: js/overlay.js
+  }
   else if (G.state === 'OFFER') updateOffer(dt);
   else if (G.state === 'BRAID') {
     if (inP('BRAID') || inP('BACK') || inP('PAUSE')) { G.state = 'PLAY'; braidView.ready = false; sfx('ui'); }
@@ -13663,8 +13756,12 @@ function drawHUD() {
   // characters", and true wherever the ground is pale or a fight is happening.
   // A notification is UI, so it is drawn as UI: measured, on its own plate, and
   // not drawn at all over a full-screen menu that has its own reading to do.
+  // ...AND NOT OVER A CONVERSATION. A notice drawn in the band above an open
+  // dialogue is a second thing to read while the first is being read — the
+  // overlap the owner ruled out (js/overlay.js). Its clock only runs in PLAY,
+  // so it is not lost: it waits and is shown, whole, when the talk closes.
   const toastHidden = { SKILLS: 1, CREST: 1, RELICS: 1, MAP: 1, BRAID: 1, PAUSE: 1,
-                        CTRL: 1, SHOP: 1, TRIAL: 1, TCFG: 1, CINE: 1 };
+                        CTRL: 1, SHOP: 1, TRIAL: 1, TCFG: 1, CINE: 1, DIALOG: 1 };
   if (!toastHidden[G.state]) {
     // ...and it sits in the SKY, not on the floor. At 452 a notification landed
     // squarely on the ground the player and everything hunting her are standing

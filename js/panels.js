@@ -362,7 +362,8 @@ function panelsStart(id, opts) {
 // graphemes never split. The contract the player relies on is unchanged: the
 // first confirm completes the reveal, a SEPARATE confirm advances, and an
 // unread caption never advances on its own.
-function panelsRevealStart(text) { return revealStart(String(text || '')); }
+// (a string, or the caption's own wrapped lines — see panelsBegin)
+function panelsRevealStart(text) { return revealStart(Array.isArray(text) ? text : String(text || '')); }
 function panelsRevealTick(r, dt) { revealTick(r, dt); }
 function panelsRevealDone(r) { return revealDone(r); }
 function panelsRevealFinish(r) { revealSkip(r); }
@@ -378,9 +379,16 @@ function panelsCapText(p) {
 function panelsCur() { const P = G.panels; return P && P.list[P.i]; }
 function panelsBegin(P) {
   const p = P.list[P.i];
-  P.t = 0; P.wait = 0; P.readT = null;
+  P.t = 0; P.wait = 0;
   const txt = panelsCapText(p);
-  P.reveal = txt ? panelsRevealStart(txt) : null;
+  // THE REVEAL WALKS THE LINES THE BOX DRAWS. It used to type the unwrapped
+  // caption and the drawing counted characters back across the wrap, one
+  // assumed space per break — a count that drifts on Chinese (no spaces) and
+  // on a word cut in half to fit. Revealing the wrapped lines themselves
+  // keeps every line's visible part exact in every language.
+  const lines = txt ? panelsLayout(p, !!(P.seq && P.seq.teaser)).lines : null;
+  P.reveal = txt ? panelsRevealStart(lines && lines.length ? lines : txt) : null;
+  P.lastPress = -1e9;
 }
 function panelsAdvance(P) {
   if (P.i + 1 >= P.list.length) { P.ph = 'out'; P.t = 0; return; }
@@ -389,13 +397,16 @@ function panelsAdvance(P) {
 }
 function panelsConfirm(P) {
   const p = P.list[P.i];
-  if (P.reveal && !panelsRevealDone(P.reveal)) { panelsRevealFinish(P.reveal); P.readT = P.t; return; }
+  // the same reader's rule as the dialogue box (js/overlay.js): a confirm that
+  // follows the last one inside DLG_GAP is a mash, and a page just completed
+  // must have been seen for DLG_DWELL — so a quick double tap on a phone
+  // finishes the caption and does NOT also throw it away unread
+  const gap = P.t - (P.lastPress == null ? -1e9 : P.lastPress);
+  P.lastPress = P.t;
+  if (P.reveal && !panelsRevealDone(P.reveal)) { panelsRevealFinish(P.reveal); return; }
   if (p && (p.baked || p.cap) && P.t < 0.25) return;    // a press cannot outrun the picture
-  // ...nor the last word. A short caption can finish typing between a press
-  // and its release; a press that lands as the text completes is the player
-  // still asking to SEE it, not to turn the page, so the page waits a beat
-  // after the caption is whole before a confirm may turn it.
-  if (p && p.cap && P.readT != null && P.t - P.readT < PANEL_READ_GRACE) return;
+  const dwell = typeof DLG_DWELL !== 'undefined' ? DLG_DWELL : 0.25, mash = typeof DLG_GAP !== 'undefined' ? DLG_GAP : 0.22;
+  if (P.reveal && (revealSince(P.reveal) < dwell || gap < mash)) return;
   panelsAdvance(P);
 }
 function panelsImgReady(p) {
@@ -407,7 +418,6 @@ function updatePanels(dt) {
   const P = G.panels;
   if (!P) { G.state = 'PLAY'; return; }
   P.t += dt;
-  if (P.reveal && P.readT == null && panelsRevealDone(P.reveal)) P.readT = P.t;
   // ONE PRESS, TWO MEANINGS, NEVER BOTH. A short press is a confirm, counted
   // on release; holding is the skip, the same deliberate hold as the films
   // (CUT_SKIP_HOLD). A press already down when the panels opened is ignored
@@ -450,6 +460,10 @@ function panelsEnd() {
 }
 // ---- drawing ------------------------------------------------------------------
 function panelsWrap(str, maxW, font) {
+  // the one wrapper every reader uses (js/reveal.js): grapheme-safe, kinsoku
+  // for CJK, and a word or URL longer than the box is cut rather than run off
+  // its edge — the fix the dialogue box got (UI-01) reaches the panels too
+  if (typeof wrapLines === 'function') return wrapLines(c, String(str), maxW, font);
   c.font = font;
   const out = [];
   for (const para of String(str).split('\n')) {
@@ -556,6 +570,8 @@ function panelsDrawCaption(P, p, alpha) {
   // the reveal walks the SAME wrapped lines the full caption occupies, so the
   // box never changes shape while it fills
   let left = panelsRevealCount(P.reveal);
+  const vis = P.reveal.lines && P.reveal.lines.length === L.lines.length && P.reveal.lines.every((q, i) => q === L.lines[i])
+    ? revealLines(P.reveal) : null;
   c.font = L.font; c.textBaseline = 'middle';
   if (rtl) c.direction = 'rtl';
   c.textAlign = teaser ? 'center' : (rtl ? 'right' : 'left');
@@ -563,6 +579,7 @@ function panelsDrawCaption(P, p, alpha) {
   c.fillStyle = teaser ? '#e8f1ff' : '#1d1912';
   if (teaser) { c.shadowColor = 'rgba(87,168,255,0.6)'; c.shadowBlur = 10; }
   L.lines.forEach((ln, i) => {
+    if (vis) { if (vis[i]) c.fillText(vis[i], x, by + 13 + L.lh / 2 + i * L.lh); return; }
     if (left <= 0) return;
     const chars = Array.from(ln);
     const part = chars.slice(0, left).join('');
