@@ -196,8 +196,7 @@ const PANEL_SEQ = [
 ];
 const PANEL_ZOOM = 0.04;          // the most any crop is ever pushed or drifted
 const PANEL_XF = 0.45;            // cross-dissolve between panels
-const PANEL_TAP = 0.35;
-const PANEL_READ_GRACE = 0.35;    // a caption must be whole this long before a confirm turns the page           // a press shorter than this is a confirm
+const PANEL_TAP = 0.35;           // a press shorter than this is a confirm
 const PN = { img: {}, room: null, settle: 0, ready: 0, queue: [], meetCores: null };
 
 function panelsQuest(id) { return typeof qState === 'function' ? qState(id) : 'none'; }
