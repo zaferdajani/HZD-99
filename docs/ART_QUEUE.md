@@ -30,11 +30,22 @@ the Spare Power Cell and the scrap heap (`characters/gear/spare_cell.webp`,
 
 Still owed, in firing order:
 
-1. **THE ALPHA in the new pack's design.** Its nine filmed takes (`al*`) are
-   the older animal; the pack it leads now looks different. Same take list as
-   §2cc-0 plus howl, roar, claw, clinch and yield, larger frame, fired from
-   `source/beasts/wolf2/green_plate.jpg`. Purple at runtime, so no glow baked.
-2. **Manhwa panels the game's chapter one needs and the approved pages lack**
+1. ~~**THE ALPHA in the new pack's design.**~~ **LANDED 2026-10-10.** A boss
+   plate of the pack's breed (GPT Image 2.5 off `source/beasts/wolf2/green_plate.jpg`,
+   job 97a4c845 — heavier chest, fuller crest, violet seams and eyes) filmed in
+   place with Seedance 2.5: idle 334e5815, prowl b25c4a9f, roar 44b8f868, howl
+   e50c95a9, leap 2e7f0226, claw 0ea34fcb, yield 11d48212; bite efe151c1 and
+   clinch 28795a2e re-fired from a shrunken plate because the first takes
+   lunged out of frame (first takes 97d3d911, 6840ab2f refused); claw re-fire d61e3c72
+   refused (giraffe paw, baked glow) and roar re-fire a3f26e21 unused — the
+   first takes' clean frames were cut instead. Ten strips, one scale, one floor
+   (`source/beasts/alpha2/`, `tests/wolves.cjs` §2c).
+2. ~~**Manhwa panels the game's chapter one needs and the approved pages lack**~~
+   **LANDED 2026-10-10** — seventeen single panels (nano_banana_pro, elements
+   bound) and twelve unlettered copies of the approved pages; map, triggers and
+   job ids in docs/MANHWA_EVENT_MAP.md and `source/manhua/ch1/{game,clean}/prompts.json`.
+   Still owed: an actual drawn chapter two (the teaser is three panels).
+   The original brief:
    (docs/MANHWA_EVENT_MAP.md, MISSING PANELS): the raw-marble burst at the CV3
    boulder; Ratchet's letter as the game writes it (drawer, battery, repair);
    NULLFANG's break; the sage's revelation ("CHIME writes the command back");

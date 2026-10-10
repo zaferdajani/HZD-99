@@ -55,6 +55,7 @@ const MEDIA_SRC = {
     alRoar: 'assets/characters/alpha/roar.webp',
     alHowl: 'assets/characters/alpha/howl.webp',
     alLeap: 'assets/characters/alpha/leap.webp',
+    alAir: 'assets/characters/alpha/air.webp',
     alClaw: 'assets/characters/alpha/claw.webp',
     alBite: 'assets/characters/alpha/bite.webp',
     alClinch: 'assets/characters/alpha/clinch.webp',
@@ -738,6 +739,11 @@ function mediaFetch(k, urgent, bust) {
     }
     const wasLow = MEDIA_LOW[k] === 2;
     MEDIA_RAW[k] = im; MEDIA_LOW[k] = 3;
+    // PENDING ENDS WHEN IT LANDS. Kept, the key stayed "pending" forever, and
+    // every wait-for-art written as "until MEDIA_PEND is empty" (roomassets,
+    // the eye harnesses) sat out its whole ceiling on art already drawn. The
+    // guard above (RAW present and not a stand-in) is what stops a refetch.
+    delete MEDIA_PEND[k];
     // the tile layer is BAKED, so a sheet that lands after the bake changes
     // nothing until the bake is thrown away. The rock slabs belong here for
     // exactly that reason: they are the surface itself.
@@ -769,7 +775,9 @@ const MEDIA_IMG = (typeof Proxy === 'function') ? new Proxy(MEDIA_RAW, {
 }) : MEDIA_RAW;
 // the handful that must never pop in late: the shared turnaround atlas, the
 // player's own sheets and the decks she is standing on
-['roster', 'npcs', 'platforms', 'slashFx'].forEach(mediaFetch);
+// one argument each: forEach would pass the index as `urgent` and the array as `bust`,
+// fetching three of the four as urgent with a cache-busting query on every boot
+['roster', 'npcs', 'platforms', 'slashFx'].forEach(k => mediaFetch(k));
 // Asking "is this sheet here yet?" must NOT be what fetches it. Several guards
 // test four boss atlases in one condition to decide which renderer to use, and
 // through the lazy map that innocent-looking check pulled 2.7 MB of art for

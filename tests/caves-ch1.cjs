@@ -69,13 +69,15 @@ const check = (name, ok, detail) => {
     const ch = G.statics.find(s => s.type === 'chest');
     doInteract(ch); drain();
     out.a5.crest = (G.save.crests || []).indexOf('magnet') >= 0;
-    // ---- A7: the survey, and Ratchet remembers she was there -----------
+    // ---- A7: the survey, and Ratchet remembers she READ it --------------
+    // (MIS-01: the errand is the survey, terminal 20 — not the room. tests/
+    // survey-a7.cjs walks the same rule through the real key press.)
     fresh({ crystal: 1, ratchetCamp: 1 }); G.save.quests.ratchet_forge = 'done';
     loadRoom('A7'); quiet();
     const t20 = G.statics.find(s => s.type === 'term' && s.extra === 20);
     out.a7 = { term: !!t20 };
     if (t20) { doInteract(t20); out.a7.lines = (G.dialog && G.dialog.lines || []).length; drain(); }
-    // she has stood at the bottom of the shaft BEFORE Ratchet asks
+    // she has read the survey at the bottom of the shaft BEFORE Ratchet asks
     loadRoom('A3'); quiet(); G.save.flags.said = { sl_ratchet_forged: 1 }; G.save.flags.alphaLead = 1;
     const rat = G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet');
     const coins0 = (G.save.relics || []).length;
@@ -83,7 +85,11 @@ const check = (name, ok, detail) => {
     out.a7.ask = (G.dialog && G.dialog.lines || []).join(' ');
     drain();
     out.a7.paid = G.save.quests.ratchet_deep === 'done' && (G.save.relics || []).length > coins0;
-    // ...and the reach that was NOT made early still asks her to go
+    // ...and talking to him again pays nothing more
+    const coins1 = (G.save.relics || []).length, scrap1 = G.save.scrap;
+    doInteract(G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet')); drain();
+    out.a7.once = (G.save.relics || []).length === coins1 && G.save.scrap === scrap1;
+    // ...the errand NOT done early still asks her to go
     fresh({ crystal: 1, ratchetCamp: 1 }); G.save.quests.ratchet_forge = 'done'; G.save.flags.alphaLead = 1;
     delete G.save.visited.A7; G.save.flags.said = { sl_ratchet_forged: 1 };
     loadRoom('A3'); quiet();
@@ -91,6 +97,16 @@ const check = (name, ok, detail) => {
     out.a7.normalAsk = (G.dialog && G.dialog.lines || []).join(' ');
     drain();
     out.a7.normalActive = G.save.quests.ratchet_deep === 'active';
+    out.a7.earlyLine = t('q_early_ratchet_deep');
+    // ...and so does one who dropped into the shaft but never read the survey:
+    // standing in A7 is not the discovery
+    fresh({ crystal: 1, ratchetCamp: 1 }); G.save.quests.ratchet_forge = 'done'; G.save.flags.alphaLead = 1;
+    G.save.flags.said = { sl_ratchet_forged: 1 };
+    loadRoom('A7'); quiet(); loadRoom('A3'); quiet();
+    doInteract(G.statics.find(s => s.type === 'npc' && s.extra === 'ratchet'));
+    out.a7.visitAsk = (G.dialog && G.dialog.lines || []).join(' ');
+    drain();
+    out.a7.visitActive = !!G.save.visited.A7 && G.save.quests.ratchet_deep === 'active' && !qDone(questById('ratchet_deep'));
     // ---- CV1: the pocket pays in health --------------------------------
     fresh({ rubbleA5: 1 }); loadRoom('CV1'); quiet();
     const core = G.statics.find(s => s.type === 'chest' && s.extra === 'core');
@@ -203,9 +219,11 @@ const check = (name, ok, detail) => {
   check('A5: a Mind Node, the magnet crest, the buried mouth and the first quarry marks',
     r.a5.riddle && r.a5.crest && r.a5.rubble && r.a5.marks >= 2, JSON.stringify(r.a5));
   check('A7: the quarry survey (terminal 20) is down the shaft', r.a7.term && r.a7.lines >= 3, JSON.stringify({ term: r.a7.term, lines: r.a7.lines }));
-  check('...and Ratchet remembers she was already there: he says so and pays on the ask',
-    r.a7.ask.indexOf('already stood at the bottom') >= 0 && r.a7.paid, r.a7.ask.slice(0, 90));
-  check('...while a player who has NOT been there is still sent', r.a7.normalActive && r.a7.normalAsk.indexOf('already') < 0);
+  check('...and Ratchet remembers she already read it: he says so and pays on the ask, once',
+    r.a7.ask.indexOf(r.a7.earlyLine) >= 0 && r.a7.paid && r.a7.once, r.a7.ask.slice(0, 90));
+  check('...while a player who has NOT read it is still sent', r.a7.normalActive && r.a7.normalAsk.indexOf(r.a7.earlyLine) < 0);
+  check('...even one who stood at the bottom of the shaft without reading the survey',
+    r.a7.visitActive && r.a7.visitAsk.indexOf(r.a7.earlyLine) < 0, r.a7.visitAsk.slice(0, 90));
   check('CV1: the pocket chest is a spare core, not scrap', r.cv1.chest && r.cv1.cores === 1 && r.cv1.full, JSON.stringify(r.cv1));
   check('CV1B: resting at the survey pod charts the quarry onto the map',
     r.cv1b.charted === 'CV1,CV1B,CV2,CV3' && r.cv1b.said && r.cv1b.map === true, JSON.stringify(r.cv1b));

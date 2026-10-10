@@ -31,10 +31,18 @@ module.exports = [
   ...strips(['cheetahRest',
              'cheetahWalk8', 'cheetahRun6', 'cheetahWinded6', 'cheetahLand4'], { col: 'red|orange|amber', region: [0, 0, 0.45, 0.6] }),
   // ---- the Alpha (a guardian: purple at runtime, whatever the art paints) ----
-  // the studio strips do not carry their cell count in their names (ALPHA_STRIP)
-  ...[['alRest', 9], ['alProwl', 16], ['alRoar', 12], ['alHowl', 12], ['alLeap', 12], ['alClaw', 12],
+  // the pack's breed, filmed 2026-10-10 (ALPHA_STRIP): its eyes and seams glow
+  // VIOLET in the art itself now. The strips do not carry their cell count in
+  // their names. The yield's lying-down cells are the Alpha turning friendly.
+  ...[['alRest', 9], ['alProwl', 16], ['alRoar', 12], ['alHowl', 12], ['alLeap', 9], ['alAir', 6], ['alClaw', 12],
       ['alBite', 12], ['alClinch', 12], ['alYield', 12]].map(([k, n]) =>
-    ({ key: k, cells: n, col: 'red', rule: 'front', region: [0, 0, 0.45, 0.7], aspect: 2.5 })),
+    ({ key: k, cells: n, col: 'purple', rule: 'front', region: [0, 0, 0.45, 0.7], fill: true,
+       // the violet collar seam glows as bright as the eye when the roar
+       // throws the head back: two cells picked the collar (checked large)
+       // the clinch's lunge drops the head faster than a neighbour can follow:
+       // its four lunge cells are placed from a 10% grid render
+       at: k === 'alRoar' ? { 7: [0.105, 0.135], 9: [0.105, 0.13] }
+         : k === 'alClinch' ? { 1: [0.22, 0.31], 2: [0.135, 0.44], 3: [0.125, 0.50], 4: [0.10, 0.48] } : undefined })),
   // ---- the Eye's constructs (drawMini) — placed from a grid render: the
   // chime's lens, the courier's camera, the moth's head, the lattice's core,
   // the lens's pupil. Their wind-up plates are separate drawings, placed alone.

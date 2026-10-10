@@ -73,7 +73,12 @@ async function tapKey(page, code) {
       const sizes = {};
       for (const s of PANEL_SEQ) for (const p of s.panels) {
         if (!p.src) continue;
-        if (!/^assets\/manhua\/ch1\/p\d\d\.webp$/.test(p.src) && p.src !== 'assets/backgrounds/gate_conduits.jpg') out.bad.push(s.id + ':' + p.src);
+        // the unlettered copies of the approved pages, the panels made for the
+        // game's chapter one, or the Conduits backdrop — never the draft set
+        if (!/^assets\/manhua\/ch1\/(clean\/p\d\d|game\/[a-z0-9_]+)\.webp$/.test(p.src) && p.src !== 'assets/backgrounds/gate_conduits.jpg') out.bad.push(s.id + ':' + p.src);
+        // a captioned crop must carry no lettering of its own: the player
+        // letters it in the player's language (the baked English could not be)
+        if (p.cap && (p.baked || /\/ch1\/p\d\d\.webp$/.test(p.src))) out.bad.push(s.id + ' ' + p.ref + ' captioned over baked lettering');
         if (!sizes[p.src]) sizes[p.src] = await new Promise(r => { const im = new Image(); im.onload = () => r([im.naturalWidth, im.naturalHeight]); im.onerror = () => r(null); im.src = p.src; });
         const z = sizes[p.src], [x, y, w, h] = p.crop;
         if (!z || x < 0 || y < 0 || w < 40 || h < 40 || x + w > z[0] || y + h > z[1]) out.bad.push(s.id + ' ' + p.ref + ' ' + JSON.stringify(p.crop) + ' in ' + JSON.stringify(z));
@@ -92,7 +97,43 @@ async function tapKey(page, code) {
     check('every crop lies inside an approved page (or the Conduits backdrop)', data.bad.length === 0, data.bad.join(' | '));
     check('every caption and label exists in all five languages', data.missing.length === 0, data.missing.slice(0, 8).join(', '));
     check('captions are translated, not English copies', data.untranslated.length === 0, data.untranslated.slice(0, 8).join(', '));
-    check('the map covers the chapter (≥ 9 sequences)', data.n >= 9, String(data.n));
+    check('the map covers the chapter (≥ 13 sequences: the eight scene groups the pages lacked are drawn)', data.n >= 13, String(data.n));
+
+    // ---- the scenes made for the game's own chapter one --------------------------
+    // each at its event, in its room, once; and a save from before they existed
+    // is not handed one as a recap of an event it already passed
+    const newSeq = await page.evaluate(() => {
+      const want = { ratchet: ['letter', 'drawer', 'repair'], marble: ['marble_a', 'marble_b'], passage: ['passage_a', 'passage_b'],
+        break: ['break_a', 'break_b'], sage: ['sage_rev', 'sage_bell'], free: ['fight_a', 'fight_b'], ch2: ['hatch', 'ch2_a', 'ch2_b', 'ch2_c'] };
+      const miss = [];
+      for (const id in want) { const s = panelsSeq(id); for (const n of want[id]) if (!s || !s.panels.some(p => p.src === PANEL_GAME(n))) miss.push(id + ':' + n); }
+      return miss;
+    });
+    check('the marble, the maintenance door, the revelation, the break, the fight, the letter and the hatch are all in the map', !newSeq.length, newSeq.join(', '));
+    for (const [id, room, flags] of [['marble', 'CV3', { woke: 1, gateOpened: 1, pl_cshard: 1 }], ['passage', 'GA1T', { woke: 1, gateOpened: 1, crystal: 1 }],
+      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
+      await stage(page, room, flags);
+      // a record made by this build: every sequence known, the others already
+      // seen, so the one under test is the only one owed
+      await page.evaluate(i => { const P = G.save.panels; P.k = {}; for (const s of PANEL_SEQ) { P.k[s.id] = 1; if (s.id !== i) P.seen[s.id] = 1; } }, id);
+      const fired = await waitFor(page, `G.state === 'PANELS' && G.panels.seq.id === '${id}'`, 8000);
+      check('the ' + id + ' panels play in ' + room + ' at their event', fired, await page.evaluate(() => G.state + ' ' + (G.panels && G.panels.seq.id)));
+      await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
+      await waitFor(page, () => G.state === 'PLAY', 4000);
+    }
+    // an old save (no `k`): its ten original sequences keep their verdicts; the
+    // new ones are judged by what it has already done
+    const mig = await page.evaluate(() => {
+      const sv = newSave(1); sv.time = 99; Object.assign(sv.flags, { tut: 1, woke: 1, gateOpened: 1, pl_cshard: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfBreak: 1 });
+      sv.panels = { v: 1, seen: { bay: 1, gate: 1 }, past: { ratchet: 1, cave: 1, forge: 1, sage: 1, chime: 1 }, n: 2 };
+      startGame(sv); loadRoom('CV3'); G.state = 'PLAY';
+      const S = panelsState();
+      return { past: S.past, seen: S.seen, k: Object.keys(S.k).length };
+    });
+    check('an old save is not handed the marble, the door or the break as a recap', mig.past.marble && mig.past.passage && mig.past.break && !mig.past.bay, JSON.stringify(mig));
+    await sleep(2500);
+    const sMig = await state(page);
+    check('...and standing in CV3 plays nothing', sMig.st === 'PLAY', JSON.stringify(sMig));
 
     // ---- once, at its event, never during a crossing / fight / dialogue -----------
     await stage(page, 'W2', { woke: 1 });

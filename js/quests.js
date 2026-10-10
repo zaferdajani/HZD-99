@@ -7,13 +7,13 @@
 // the same as having something to say to you a second time.
 //
 // An errand is deliberately small: somebody asks, you go somewhere you were
-// not going to go, you come back, they are different afterwards. Three kinds,
-// because three is enough to make a kingdom feel inhabited and each one is
-// checkable from state the game already keeps:
+// not going to go, you come back, they are different afterwards. Four kinds,
+// each checkable from state the game already keeps:
 //
 //   FETCH   bring back a thing that exists in exactly one place
 //   CULL    deal with a number of a particular machine, in this kingdom
 //   REACH   stand somewhere that is not on the way to anything
+//   READ    find and read one particular terminal (the evidence, not the room)
 //
 // Most are optional side errands. ratchet_forge is the main-story exception:
 // it earns the cleansing sword required before meeting the first sage.
@@ -46,9 +46,15 @@ const QUESTS = [
     reward: { scrap: 90, iq: 10 },
   },
   {
-    id: 'ratchet_deep',                  // A3 — the drop nobody takes
+    // A3 — the drop nobody takes. What he wants from the bottom of it is the
+    // quarrymen's SURVEY (terminal 20, ROOMS.A7): the chart of the white seam
+    // and the chalk road. It used to be a REACH, finished by falling into the
+    // room — so the coin was paid on arrival, before the one thing down there
+    // worth seeing, and a player could take it without ever reading the
+    // survey at all (studio review MIS-01). It is finished by reading it now.
+    id: 'ratchet_deep',
     npc: 'ratchet', zone: 'A', after: 'ratchet_forge',
-    kind: 'reach', room: 'A7',
+    kind: 'read', room: 'A7', term: 20,
     reward: { scrap: 80, relic: 'coin' },
   },
   {
@@ -102,7 +108,49 @@ function questSnap(id) {
   else if (q.kind === 'reach') base[id] = { reached: 0 };
   // Fetch items may already be in the bag before the request; questItemLive
   // allows early discovery and questFoundEarly handles the NPC response.
-  // There is no fetch counter to snapshot.
+  // There is no fetch counter to snapshot. A READ is the same: a terminal
+  // read before the ask is a discovery the asker remembers (questFoundEarly
+  // pays it on the ask), so there is nothing to measure from.
+}
+// ---- READ: the terminal is the evidence ------------------------------------
+// doInteract's terminal branch reports every read here. The read is recorded
+// per terminal id in the save (flags.termRead), so it is remembered whether or
+// not anybody has asked yet — that record IS the early discovery. Standing in
+// the room records nothing: the room is where the evidence is, not the
+// evidence.
+function questRead(room, term) {
+  if (!G.save || term == null) return;
+  const f = G.save.flags = G.save.flags || {};
+  const rd = f.termRead = f.termRead || {};
+  const fresh = !rd[term];
+  rd[term] = 1;
+  if (fresh) {
+    for (const q of QUESTS)
+      if (q.kind === 'read' && q.term == term && (!q.room || q.room === room) && qState(q.id) === 'active') G.toast(t('q_ready'));
+  }
+  persist();
+}
+function qReadDone(q) {
+  const rd = G.save && G.save.flags && G.save.flags.termRead;
+  return !!(rd && rd[q.term]);
+}
+// THE SURVEY'S SAVE RULE (MIS-01). Brought onto every save at startGame, once
+// or a hundred times — it only ever removes residue:
+//   * paid under the old visit rule ('done'): untouched. questFor skips a
+//     finished errand and questPay only runs for an open one, so it is never
+//     offered again and never paid twice.
+//   * active, and she already dropped into A7 without reading: the old rule
+//     left a snapshot saying the place was reached. Nothing reads it any more
+//     (qProgress for a READ looks only at the terminal), but it is dropped so
+//     no later reach-shaped code can mistake it for the evidence. The errand
+//     stays open until the survey is read — it does not complete on load.
+//   * never asked, but visited A7: nothing to change — the early-discovery
+//     path now asks about the survey, not the room.
+function questMigrate(save) {
+  if (!save || !save.qbase) return save;
+  for (const q of QUESTS)
+    if (q.kind === 'read' && save.qbase[q.id] && save.qbase[q.id].reached != null) delete save.qbase[q.id];
+  return save;
 }
 // loadRoom tells the errands where she is standing
 function questVisit(room) {
@@ -154,6 +202,8 @@ function qProgress(q) {
   const b = G.save.qbase && G.save.qbase[q.id];
   if (q.kind === 'cull') return Math.max(0, Math.min(q.count, ((G.save.culls && G.save.culls[q.foe]) | 0) - (b ? b.n | 0 : 0)));
   if (q.kind === 'reach') return b ? (b.reached ? 1 : 0) : ((G.save.visited && G.save.visited[q.room]) ? 1 : 0);
+  // the survey read, never the room visited — whenever it was read
+  if (q.kind === 'read') return qReadDone(q) ? 1 : 0;
   return 0;
 }
 function qGoal(q) { return q.kind === 'cull' ? q.count : 1; }
@@ -163,6 +213,7 @@ function qText(q) {
   if (q.kind === 'flag') return t('q_goal_' + q.id);
   if (q.kind === 'fetch') return t('q_fetch').replace('%s', t('it_' + q.item));
   if (q.kind === 'cull') return t('q_cull').replace('%n', q.count).replace('%s', t('e_' + q.foe));
+  if (q.kind === 'read') { const k = 'q_goal_' + q.id, v = t(k); if (v !== k) return v; }
   return t('q_reach');
 }
 // ---------------------------------------------------------------------------

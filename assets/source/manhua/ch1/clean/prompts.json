@@ -1,0 +1,18 @@
+{
+ "_what": "The unlettered copies of the approved pages (2026-10-10): each page imported from the live site and re-drawn by nano_banana_pro (2k, 2:3) with every caption, balloon and word removed; keyed at the master size to assets/manhua/ch1/clean/pNN.webp so a crop is the same rectangle on either. A GPT Image 2.5 pass was tried first and refused (688 px, layout drift).",
+ "prompt": "Reproduce this exact comic page with ALL lettering removed: delete every caption box, speech balloon, thought cloud and every written word, and paint the artwork that was hidden underneath each removed box so the picture continues naturally. Everything else must stay IDENTICAL and in exactly the same place: same panel layout, borders and black gutters, same characters, poses, colours, linework, lighting and composition. No text of any kind anywhere.",
+ "jobs": {
+  "p04": "7ca54213-1559-40cc-8782-c62ec4e2284e",
+  "p05": "8ff5e329-f52f-4837-970a-54cbb68c0fee",
+  "p20": "da97985a-a500-45a9-a8aa-539666cddda4",
+  "p24": "78bf4d09-bf79-4a68-9094-8a798668e7cd",
+  "p26": "0bf48c65-b703-474f-afbb-4fcb615c3cad",
+  "p07": "bcfd1247-0c92-4cfc-a4c2-db7074c38c54",
+  "p09": "d44a7b66-0b2c-4f48-a9ee-1ff79fe5bec9",
+  "p14": "1716fdd1-c53d-443d-ab1e-ca5873520297",
+  "p15": "605fa606-b6f7-4f7c-a04e-63ed1de600d3",
+  "p16": "2019088f-1b6e-464e-8cba-4069e9fee714",
+  "p18": "ad3e762d-d8bf-432d-97aa-69bdb8944a5d",
+  "p25": "19480e1c-a997-4f39-bbc3-2afde313a5c5"
+ }
+}

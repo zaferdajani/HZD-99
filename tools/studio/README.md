@@ -22,6 +22,17 @@ CLAUDE_PROMPT.md. Keep source fixes and original evidence; never rewrite a faile
 log as a pass. Put retries in a new directory with their cause explained. Before
 handoff, rebuild again after the final source change and run affected checks.
 
+Server identity is one rule shared with `tests/run.cjs`: `tests/served-identity.cjs`
+hashes `index.html`, `odyssey.html`, `sw.js`, `assets/eyes.json` and one low-tier
+webp as served on `127.0.0.1:8220` and compares them byte for byte with this
+checkout. The collector pins that snapshot once (`served-identity.json` in the
+output directory), passes it to every `run.cjs` call as `SERVED_IDENTITY_EXPECT`,
+and checks it again at the end. A mismatch at the start blocks the run. A change
+during the run (another checkout taking the port, or these pages being rebuilt)
+fails the run, and the log prints what was served and what was expected,
+including each page's `BUILD_ID`. Run `node tests/served-identity.cjs` by itself
+to see which build the port is serving right now.
+
 Use an isolated checkout/server. Do not run overlapping builds against the same
 served pages during a release audit. Source-only review branches must explicitly
 tell the integrator to regenerate the four built HTML pages before release.

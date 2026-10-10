@@ -186,7 +186,10 @@ en: {
   q_ask: 'There is something I cannot go and get myself.',
   q_ask_servo_coil: 'A coil shook loose in the gantries above us. I cannot climb any more.',
   q_ask_servo_swarm: 'The little ones keep coming back up the line. Thin them for me?',
-  q_ask_ratchet_deep: 'There is a shaft under the meadow nobody has stood in since the fall. See it for me.',
+  // MIS-01: the errand is the SURVEY at the bottom of the shaft (terminal 20),
+  // not the shaft — asked for, pointed at, and thanked for as a reading
+  q_ask_ratchet_deep: 'There is a shaft under the meadow nobody has gone down since the fall. The quarrymen left their survey at the bottom. Read it for me.',
+  q_goal_ratchet_deep: 'Read the quarrymen\'s survey at the bottom of the deep shaft — down through the brittle floor in the cave under the hub.',
   q_ask_patch_quiet: 'The gun emplacements never stood down. Quiet them and I can work.',
   q_ask_lumen_light: 'A lens from the old beacon. Without it I cannot see what I am mending.',
   q_fetch: 'Bring me: %s',
@@ -198,7 +201,7 @@ en: {
   q_thanks: 'You went. Thank you.',
   q_thanks_servo_coil: 'That is the one. Take this — I have no use for it and you will.',
   q_thanks_servo_swarm: 'Quieter already. You have a good arm.',
-  q_thanks_ratchet_deep: 'You stood in it. Nobody has, in a long time. Here.',
+  q_thanks_ratchet_deep: 'You read their survey? Then the quarrymen did not chart that seam for nobody. Here.',
   q_thanks_patch_quiet: 'Listen to that. Nothing. Thank you.',
   q_thanks_lumen_light: 'Light again. Small thing. Not to me.',
   q_open: 'Errands',
@@ -689,6 +692,9 @@ ar: {
   q_taken: 'قبلتَ المهمة',
   q_ready: 'المهمة جاهزة — عُد إليه',
   q_thanks: 'ذهبتَ. شكرًا لك.',
+  q_ask_ratchet_deep: 'هناك منجم تحت المرج لم ينزله أحد منذ السقوط. ترك عمّال المقلع مسحهم في قاعه. اقرئيه من أجلي.',
+  q_goal_ratchet_deep: 'اقرئي مسح عمّال المقلع في قاع المنجم العميق — انزلي عبر الأرضية الهشّة في الكهف تحت المحور.',
+  q_thanks_ratchet_deep: 'قرأتِ مسحهم؟ إذن لم يرسم عمّال المقلع ذلك العِرق عبثًا. تفضّلي.',
   q_open: 'المهام',
   it_coil: 'ملفّ مفكوك', it_lens: 'عدسة منارة', it_relay: 'المُرحّل المُعطَّل', it_index: 'الفهرس المتجمّد',
   it_cshard: 'شظية من عمود البلّور',
@@ -979,6 +985,10 @@ ar: {
   map_ctl: 'اسحب للتحريك · عجلة أو تقريب بالإصبعين · E ملء الشاشة · Q توسيط · M إغلاق',
 },
 tr: {
+  // MIS-01: Ratchet's survey errand (see the English block)
+  q_ask_ratchet_deep: 'Çayırın altında, çöküşten beri kimsenin inmediği bir kuyu var. Ocakçılar ölçümlerini dibinde bıraktı. Benim için oku.',
+  q_goal_ratchet_deep: 'Derin kuyunun dibindeki ocakçı ölçümünü oku — merkezin altındaki mağarada kırılgan zeminden aşağı in.',
+  q_thanks_ratchet_deep: 'Ölçümlerini okudun mu? Demek ocakçılar o damarı boşuna çizmemiş. Al.',
   nf_rematch: 'Koridoru hatırlıyor.',
   film_meet: 'Koridor',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
@@ -1129,6 +1139,10 @@ tr: {
   vault_hint: 'E — Mühürlü Kasa', door_locked: 'Mühürlü. Daha büyük bir güç onu kapalı tutuyor.',
 },
 zh: {
+  // MIS-01: Ratchet's survey errand (see the English block)
+  q_ask_ratchet_deep: '草原底下有一口竖井，自从陷落以来没人下去过。采石工把勘测记录留在了井底。替我读一读。',
+  q_goal_ratchet_deep: '读取深井底部采石工的勘测记录——从中枢下方洞穴里的脆裂地面往下走。',
+  q_thanks_ratchet_deep: '读过那份勘测了？那采石工画那条矿脉就没白画。拿着。',
   nf_rematch: '它记得那条走廊。',
   film_meet: '走廊',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
@@ -1279,6 +1293,10 @@ zh: {
   vault_hint: 'E — 封印宝库', door_locked: '已封印。更强大的力量将它锁住。',
 },
 ru: {
+  // MIS-01: Ratchet's survey errand (see the English block)
+  q_ask_ratchet_deep: 'Под лугом есть шахта, куда никто не спускался с самого падения. Каменотёсы оставили на дне свою разведку. Прочти её для меня.',
+  q_goal_ratchet_deep: 'Прочти разведку каменотёсов на дне глубокой шахты — вниз через хрупкий пол в пещере под узлом.',
+  q_thanks_ratchet_deep: 'Прочла их разведку? Значит, каменотёсы чертили эту жилу не впустую. Держи.',
   nf_rematch: 'Оно помнит коридор.',
   film_meet: 'Коридор',
   // THE UNDERDOG ARC (docs/ART_QUEUE.md §2ai): the death beat, the trader
