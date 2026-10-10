@@ -33,11 +33,56 @@ const { chromium } = require('playwright');
   };
   console.log('── infection-roster — every hostile body, every guardian: an eye, the right colour, on the head, facing, and the smoke born there');
 
-  const R = await page.evaluate(async () => {
+  // ROSTER_TRACE=1 streams every phase as it happens, so a run that is killed
+  // still says where it was; the phase summary below is printed every time.
+  const T0 = Date.now();
+  if (process.env.ROSTER_TRACE) page.on('console', m => {
+    if (m.text().startsWith('[roster]')) console.log(((Date.now() - T0) / 1000).toFixed(1).padStart(7) + 's ' + m.text());
+  });
+  const R = await page.evaluate(async (trace) => {
+    const tp = performance.now(), ph = {}, slow = [];
+    const tick = (name, t, extra) => {
+      const ms = performance.now() - t;
+      ph[name] = (ph[name] || 0) + ms;
+      if (trace) console.log('[roster] ' + name + ' ' + Math.round(ms) + 'ms' + (extra ? ' ' + extra : ''));
+      return ms;
+    };
+    // WAITING FOR ART: WHICH ART, AND WHAT "LANDED" MEANS. MEDIA_PEND used to
+    // keep every sheet ever REQUESTED — mediaFetch never removed a key that
+    // loaded (js/media.js now does; a landed sheet is MEDIA_LOW[k] === 3, the
+    // test artbible/kingdom/cavedark use). This harness waited for MEDIA_PEND
+    // to empty, which it never did, so every body sat out its full 80-poll cap
+    // and the wolf 15 s per state: 670 s measured, the 360 s audit kill. And the
+    // background prefetcher, re-aimed at the whole game by every room the
+    // sweep loads, was landing ~200 sheets through the main thread during the
+    // measurement, stretching each 100 ms poll to 200–800 ms. So:
+    //   - the prefetcher is parked (tests/preload.cjs owns it; here it only
+    //     competes with the measurement and decides at random whether a body
+    //     is drawn from its quarter-size stand-in or its real sheet)
+    //   - the sheets a body needs are the ones its room and its draw ASK for:
+    //     the lazy map's accessor calls mediaFetch(k, urgent) for what a draw
+    //     reads, and renderers that read MEDIA_RAW directly ask first
+    //     (drawAlpha fetches its strips; loadRoom fetches the guardian's art)
+    //   - a body is measured once every one of them is here at FULL size
+    const asked = new Set();
+    const realFetch = mediaFetch;
+    mediaFetch = function (k) { asked.add(k); return realFetch.apply(this, arguments); };
+    const landed = (k) => MEDIA_LOW[k] === 3 || !MEDIA_PEND[k] || (!!MEDIA_RAW[k] && MEDIA_LOW[k] !== 2);
+    const waiting = () => [...asked].filter(k => !landed(k));
     const settle = async () => {
       const t0 = Date.now();
-      while (Date.now() - t0 < 15000 && Object.keys(MEDIA_PEND).length) await new Promise(r => setTimeout(r, 60));
+      while (Date.now() - t0 < 15000 && waiting().length) await new Promise(r => setTimeout(r, 60));
+      return waiting();
     };
+    if (typeof PRE !== 'undefined') { PRE.on = false; PRE.q.length = 0; }
+    // a quarter-size stand-in already in the store would be handed to a draw
+    // without asking (the accessor only fetches what is missing), so the body
+    // would be measured on it; forget those, and the draw asks for the real one
+    for (let i = 0; i < 50 && Object.keys(MEDIA_LOW).some(k => MEDIA_LOW[k] === 1); i++) await new Promise(r => setTimeout(r, 100));
+    for (const k of Object.keys(MEDIA_LOW)) {
+      if (MEDIA_LOW[k] !== 2 || MEDIA_PEND[k]) continue;
+      delete MEDIA_RAW[k]; MEDIA_LOW[k] = 0; mediaDirty(k);
+    }
     const keyOf = (e) => (e instanceof Boss ? 'BOSS:' + (e.type || e.kind) : e.kind)
       + (isWolf(e) ? ':wolf' : (typeof isCheetah === 'function' && isCheetah(e)) ? ':cat' : '');
     const stage = (id) => {
@@ -51,13 +96,17 @@ const { chromium } = require('playwright');
     // where the eye is and where the smoke is born, not how pretty the room is
     if (typeof qualSet === 'function') qualSet('low');
     const cast = [], seen = {};
+    let t = performance.now();
     for (const id of Object.keys(ROOMS)) {
+      const ts = performance.now();
       try { stage(id); } catch (err) { continue; }
+      if (trace) tick('sweep.room', ts, id);
       for (const e of G.enemies.concat(G.boss ? [G.boss] : [])) {
         const k = keyOf(e);
         if (!seen[k]) { seen[k] = 1; cast.push({ id, k }); }
       }
     }
+    tick('sweep', t, Object.keys(ROOMS).length + ' rooms, ' + cast.length + ' kinds');
     const frame = (body, dx) => {
       // a guardian's room may open on its entry beat (G.bossEntry), which
       // holds the simulation; the eyes are what is measured, not the entrance
@@ -68,10 +117,11 @@ const { chromium } = require('playwright');
       draw(performance.now());
     };
     const out = [];
-    for (const c of cast) {
+    // the body as the measurement wants it: alone, awake, on open floor
+    const place = (c) => {
       stage(c.id);
       const body = G.enemies.concat(G.boss ? [G.boss] : []).find(e => keyOf(e) === c.k);
-      if (!body) { out.push({ k: c.k, id: c.id, err: 'not placed' }); continue; }
+      if (!body) return null;
       body.update = function () {};
       if (body !== G.boss) { G.enemies = [body]; G.boss = null; } else G.enemies = [];
       // a guardian is measured AWAKE: rooms place them dormant (eyes shut is
@@ -79,14 +129,38 @@ const { chromium } = require('playwright');
       if (body instanceof Boss) { body.st = 'idle'; body.t = 99; body.meet = false; }
       // somewhere it can be seen and has floor under it
       body.x = Math.min((G.roomDef.w - 6) * TILE, Math.max(8 * TILE, body.x));
-      // wait for THIS body's art (it reports an eye once its art is drawn),
-      // not for every pending fetch in the room — the latter is what made a
-      // 26-body survey outrun the suite's five-minute ceiling
+      return body;
+    };
+    t = performance.now();
+    for (const c of cast) {
+      let tb = performance.now();
+      asked.clear();
+      let body = place(c);
+      tick('cast.stage', tb, c.k + ' in ' + c.id);
+      if (!body) { out.push({ k: c.k, id: c.id, err: 'not placed' }); continue; }
+      // REHEARSAL: walk the body through every picture the measurement will
+      // draw — still both ways, then the 24-frame stroll — so its draw asks
+      // for every sheet it uses, then wait for exactly those at full size
+      tb = performance.now();
+      for (const d of [-1, 1]) { body.dir = body.faceVis = d; frame(body, 0); }
+      for (let i = 0; i < 24; i++) frame(body, i < 12 ? -3 : 3);
+      let polls = 0;
       for (let i = 0; i < 80; i++) {
-        body.dir = body.faceVis = -1; draw(performance.now());
-        if (body._eyeN > 0 && !Object.keys(MEDIA_PEND).some(k => /^(wolf|cheetah|al|ch|eye|roster|npcs)/.test(k))) break;
+        body.dir = body.faceVis = -1; draw(performance.now()); polls++;
+        if (body._eyeN > 0 && !waiting().length) break;
         await new Promise(r => setTimeout(r, 100));
       }
+      const waited = tick('cast.artwait', tb, c.k + ' polls ' + polls + ' eye ' + (body._eyeN || 0) + ' asked [' + [...asked].join(',') + '] waiting [' + waiting().join(',') + ']');
+      if (waited > 5000) slow.push(c.k + ' artwait ' + (waited / 1000).toFixed(1) + 's waiting [' + waiting().join(',') + ']');
+      // ...and the measurement starts from a fresh placement, as it always
+      // did: the rehearsal's steps and smoke do not carry into it
+      body = place(c);
+      for (let i = 0; i < 80; i++) {
+        body.dir = body.faceVis = -1; draw(performance.now());
+        if (body._eyeN > 0) break;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      tb = performance.now();
       const cx = () => body.x + body.w / 2, cy = () => body.y + body.h / 2;
       const r = { k: c.k, id: c.id, cls: infEyeClass(body), boss: body instanceof Boss || !!body.miniboss || body.kind === 'sage' };
       // facing: one still frame each way
@@ -112,9 +186,12 @@ const { chromium } = require('playwright');
       }
       r.trail = { frames, born, worst };
       out.push(r);
+      tick('cast.frames', tb, c.k + ' (28 frames)');
     }
+    tick('cast', t, cast.length + ' bodies');
 
     // ---- the wolf, state by state --------------------------------------------
+    t = performance.now();
     stage('A1');
     const w = G.enemies.find(e => isWolf(e));
     w.update = function () {}; G.enemies = [w]; w.x = 20 * TILE; w.dir = w.faceVis = -1;
@@ -128,12 +205,26 @@ const { chromium } = require('playwright');
     for (const s in STATES) {
       const keep = { x: w.x, y: w.y };
       Object.assign(w, { vx: 0, on: true, airT: 0, vy: 0, coilT: 0, lungeT: 0, landT: 0, kbT: 0, windedT: 0, hurtT: 0, crouchT: 0 }, STATES[s]);
-      draw(performance.now()); await settle(); draw(performance.now());
+      const tw = performance.now();
+      asked.clear();
+      draw(performance.now()); const pend = await settle(); draw(performance.now());
+      const ws = tick('wolf.settle', tw, s + ' waiting [' + pend.join(',') + ']');
+      if (ws > 5000) slow.push('wolf ' + s + ' settle ' + (ws / 1000).toFixed(1) + 's waiting [' + pend.join(',') + ']');
       wolf[s] = w._eyeN ? [Math.round((w._eyeW[0] - w.x) * 10) / 10, Math.round((w._eyeW[1] - w.y) * 10) / 10] : null;
       Object.assign(w, keep);
     }
-    return { cast: out, wolf };
-  });
+    tick('wolf', t, Object.keys(STATES).length + ' states');
+    mediaFetch = realFetch;
+    ph.total = performance.now() - tp;
+    return { cast: out, wolf, ph, slow };
+  }, !!process.env.ROSTER_TRACE);
+  // where the time went, every run: the suite's timeout for this harness is
+  // derived from these numbers, so they are printed rather than guessed
+  const sec = (n) => ((R.ph[n] || 0) / 1000).toFixed(1) + 's';
+  console.log('  time: sweep ' + sec('sweep') + ', cast ' + sec('cast') + ' (stage ' + sec('cast.stage') + ', art wait '
+    + sec('cast.artwait') + ', frames ' + sec('cast.frames') + '), wolf ' + sec('wolf') + ' (settle ' + sec('wolf.settle')
+    + '), in-page total ' + sec('total') + ', wall ' + ((Date.now() - T0) / 1000).toFixed(1) + 's');
+  for (const s of R.slow) console.log('  slow: ' + s);
 
   console.log('');
   for (const r of R.cast) {

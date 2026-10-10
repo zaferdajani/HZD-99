@@ -12,6 +12,9 @@ http.createServer((req, res) => {
     const stat = fs.statSync(file);
     if (!stat.isFile()) throw new Error('Not a file');
     res.setHeader('Content-Type', types[path.extname(file)] || 'application/octet-stream');
+    // which checkout this is: tests/served-identity.cjs prints it when the bytes
+    // do not match, so "another worktree owns :8220" names the worktree
+    res.setHeader('X-Served-Root', root);
     res.setHeader('Accept-Ranges', 'bytes');
     let start = 0, end = stat.size - 1;
     if (req.headers.range) {
@@ -26,4 +29,8 @@ http.createServer((req, res) => {
     if (req.method === 'HEAD' || stat.size === 0) return res.end();
     fs.createReadStream(file, {start, end}).on('error', () => res.destroy()).pipe(res);
   } catch (_) { res.writeHead(404); res.end(); }
-}).listen(8220, '127.0.0.1', () => console.log('Test server: http://127.0.0.1:8220'));
+}).on('error', (e) => {
+  // most often EADDRINUSE: some other server (maybe another checkout's) holds
+  // the port. tests/run.cjs then verifies by content whether it is this build.
+  console.error('Test server not started: ' + e.message); process.exit(1);
+}).listen(8220, '127.0.0.1', () => console.log('Test server: http://127.0.0.1:8220 serving ' + root));
