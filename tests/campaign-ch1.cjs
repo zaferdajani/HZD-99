@@ -978,6 +978,15 @@ const bLog = (s, msg) => { if (!R.bossLog || Date.now() - R.bossLog > 3000) { R.
 async function bossFight(s) {
   // the Sage is a duelist in the chamber's enemy list, not a G.boss
   const sage = s.en.find(e => e.k === 'sage');
+  // WATCHDOG: a fight that has not moved in 25 s (no hp, no purity) gets a
+  // fresh approach from a few steps away — and the log says it happened
+  const sig = sage ? Math.round(sage.hp) + '/' + sage.sg.pure : s.boss ? Math.round(s.boss.hp) : '';
+  if (sig !== (R.fightSig || {}).v) R.fightSig = { v: sig, t: Date.now() };
+  else if (Date.now() - R.fightSig.t > 25000) {
+    R.fightSig.t = Date.now(); log('FIGHT WATCHDOG: no progress in 25 s — stepping back to come in again');
+    const tx = sage ? sage.x + sage.w / 2 : s.boss ? s.boss.cx : s.p.x;
+    await backOff(s, tx > s.p.x + 12 ? -1 : 1, 450); await hold([]); return;
+  }
   if (s.room === 'GA1D' && sage) { await sageFight(s, sage); return; }
   if (s.boss && s.boss.k === 'chime') { await chimeFight(s, s.boss); return; }
   if (s.boss && s.boss.k === 'glitch') { await lionFight(s, s.boss); return; }
@@ -991,7 +1000,14 @@ async function sageFight(s, e) {
   const cx = e.x + e.w / 2, dir = cx > px ? 1 : -1, dist = Math.abs(cx - px) - e.w / 2;
   bLog(s, 'SAGE hp=' + e.hp + (g.locked ? ' SONG-LOCKED purity=' + g.pure.toFixed(2) : '') + (g.winded > 0 ? ' exhale' : g.coil > 0 ? ' coil' : g.lunge > 0 ? ' lunge' : g.gather > 0 ? ' gather' : '') + (g.ring != null ? ' ring=' + Math.round(g.ring) : '') + ' dist=' + Math.round(dist));
   const face = async () => { if (s.p.face !== dir) await tap(dir > 0 ? 'ArrowRight' : 'ArrowLeft', 25); };
-  const strike = async () => { await hold([]); await face(); await tap('KeyX', 40); await sleep(140); };
+  // A STRIKE NEEDS A GAP: overlapping its body, a turn-to-face tap walks her
+  // through it and flips which side it is on, forever. Step out to a small
+  // gap, walk back in (she faces where she walks), then strike.
+  const strike = async () => {
+    if (dist < 6) { await backOff(s, -dir, 90); await hold([]); return; }
+    if (s.p.face !== dir) { await backOff(s, -dir, 70); await hold([dir > 0 ? 'ArrowRight' : 'ArrowLeft']); await sleep(60); await hold([]); return; }
+    await hold([]); await tap('KeyX', 40); await sleep(140);
+  };
   if (g.tame) { await hold([]); await sleep(200); return; }
   // the ring rolls along the floor: be in the air as it passes
   if (g.ring != null && s.p.on) {
