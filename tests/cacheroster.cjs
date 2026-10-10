@@ -138,9 +138,23 @@ const check = (name, ok, detail) => {
       // everything else in the room is parked out of the world for the run
       for (const m of G.enemies) if (m !== e) { m.x = -9000; m.y = -9000; }
       const x0 = e.x;
-      const res = { found: true, frames: 0 };
+      const res = { found: true, frames: 0, x0: Math.round(x0), dir0: e.dir };
+      // A PINNED BODY CANNOT PATROL ROUND. The cheetah line only reads a
+      // player in front of it, and turns on its patrol (a wall, a ledge end);
+      // pinned in place it never reaches one, so a spawn that happened to face
+      // away (x 772, dir +1, her at 608 — about one run in two) sat out all
+      // 900 frames without ever seeing her. Face it at her once, at the start,
+      // the way the patrol would have within a few steps.
+      // ...and a pinned body cannot CLOSE either: a lunge that triggers inside
+      // its reach never fires if the spawn landed a tile further from the
+      // fixed stand tile (x 768 measured 160 px off, one tile out of reach,
+      // walking at her on the spot for 900 frames). A null stand tile means
+      // "four tiles in front of where it spawned", so the encounter is the
+      // same one every run, whichever end of its patrol it woke at.
+      const tx = standTx == null ? Math.round((x0 + e.w / 2) / TILE) - 4 : standTx;
+      if (pin) { stand(tx); e.dir = e.faceVis = Math.sign(player.x + player.w / 2 - (e.x + e.w / 2)) || e.dir; }
       for (let f = 0; f < frames; f++) {
-        stand(standTx);
+        stand(tx);
         if (pin) { e.x = x0; }
         update(DT);
         probe(e, res);
@@ -169,7 +183,7 @@ const check = (name, ok, detail) => {
     // the V2 crawler: a lunge that throws the lance behind it. Pinned — the
     // Nest's guard walked out of its room mid-measurement under the same
     // coin-flip `dir`, and this crawler patrols the same way.
-    out.liveCrawler = await live('V2', 'crawler', 19, true, 900, (e, res) => {
+    out.liveCrawler = await live('V2', 'crawler', null, true, 900, (e, res) => {
       if (e.coilT > 0) res.coiled = true;
       if (e.lungeT > 0) res.lunged = true;
       if ((e.lanceT || 0) > 0) { res.lanced = true; res.done = true; }
@@ -241,7 +255,7 @@ const check = (name, ok, detail) => {
     H2.found && H2.painted, 'in ' + H2.frames + ' frames');
   check('V2\'s spawned crawler coils, lunges and throws the lance behind it',
     C.found && C.coiled && C.lunged && C.lanced,
-    'coil ' + !!C.coiled + ', lunge ' + !!C.lunged + ', lance ' + !!C.lanced + ' in ' + C.frames + ' frames');
+    'spawn x ' + C.x0 + ' dir ' + C.dir0 + ': coil ' + !!C.coiled + ', lunge ' + !!C.lunged + ', lance ' + !!C.lanced + ' in ' + C.frames + ' frames');
   check('every hit she took was attributable to a Cache machine', r.hitsAttributed, r.hits.join(','));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
 

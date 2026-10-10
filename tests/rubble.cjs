@@ -36,6 +36,12 @@ const check = (name, ok, detail) => {
   const r = await page.evaluate(async () => {
     const out = {};
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1;
+    // the story panels are not this harness's subject: the cave's pages are
+    // owed on first arrival in CV1, and with them on screen the staged door
+    // walk below cannot advance (a player's input would be reading them).
+    // Mark every sequence seen so the walk measures the doors alone.
+    sv.panels = { v: 1, seen: {}, past: {}, n: 0, k: {} };
+    if (typeof PANEL_SEQ !== 'undefined') for (const q of PANEL_SEQ) { sv.panels.seen[q.id] = 1; sv.panels.k[q.id] = 1; }
     startGame(sv); loadRoom('A5');
     out.exists = !!G.rubble;
     if (!G.rubble) return out;
