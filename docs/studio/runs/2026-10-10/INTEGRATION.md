@@ -110,7 +110,39 @@ stop emitting; teleport, room change and load clear trails (`infection-eyes`).
 
 ## 7. Exact test results
 
-*(Pending: the full registered suite is running on a frozen build of 207d8a7; first half 82/82 passed.)*
+All runs served a frozen worktree in a private network namespace; the
+runner's served-identity check (`tests/served-identity.cjs`) pinned the served
+pages before the first browser harness and re-checked them before every later
+one. The built pages of the release candidate are byte-identical to the frozen
+snapshot (`index.html` md5 `a2f88f0b112469a972d4816a45d6633c`,
+`odyssey.html` md5 `1627941e4938ab2c944e80dbd1586cad`); the commits after it
+change harnesses and documents only.
+
+**Full registered suite — 166 harnesses** (frozen build of `207d8a7`):
+
+| Run | Harnesses | Result |
+|---|---|---|
+| First half | 82 | **82 passed** |
+| Second half | 83 | **81 passed, 2 failed**: `rubble` (3 assertions: the blade opens the branch / the Seam is the tunnel's rest / and walks back out) and `cacheroster` (V2's spawned crawler: coil, lunge, lance false in 900 frames) |
+| `rubble` after `c4b0658` | 1 | **passed**. Cause: the harness's staged save did not mark the new cave panels seen, so CV1's panel sequence held the staged door walk. The game was right; the staging now marks every `PANEL_SEQ` seen |
+| `cacheroster` after `c4b0658` | 1 × 8 | **8/8 passed**. Cause: the staged crawler was placed facing away from the hero on a stand tile behind its own spawn, so it never saw her (this harness also failed on the audited baseline `47fea7b`). The staging now pins it facing her, 4 tiles in front |
+| `campaign-ch1` (the 166th) | 1 | see below |
+
+Slowest: `opening-order` 412.5 s, `infection-poses` 172.4 s, `terrainrun`
+145.4 s, `artbible` 143.0 s, `bosspace` 139.5 s. **`infection-roster` 64.1 s**
+(audit: timed out at 360 s; cause fixed, not the timeout raised — see VFX-T).
+New harnesses: `survey-a7` 3.5 s, `panels` 52.4 s, `text-rules` 24.4 s,
+`servo-presence` 55.0 s, `infection-poses` 172.4 s; `wolves` 12.9 s,
+`infection-eyes` 84.7 s. No retries were used except those stated here.
+
+Earlier, on the mid-integration snapshot: 23 focused regressions 23/23; after
+the VFX merge `infection-eyes`, `infection-roster`, `infection-poses`,
+`artbible`, `wolves` all passed.
+
+**Fresh normal-input traversal (`campaign-ch1`) on the release build:**
+
+*(Running on the release build; result recorded here when it ends. The previous attempt stalled at the song-locked Sage: a bot defect, fixed in `b3c26d4`.)*
+
 
 ## 8. Deployment
 
