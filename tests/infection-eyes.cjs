@@ -166,6 +166,16 @@ const { chromium } = require('playwright');
     G.enemies = herd;
     for (let i = 0; i < 90; i++) { for (const e of herd) { e.x -= 3; e.vx = -180; e.anim = (e.anim || 0) + 1 / 60; } update(1 / 60); draw(performance.now()); }
     out.cap = infEyeStats();
+
+    // ---- 7c: a many-eyed guardian stays inside the same budget ------------------
+    // MOTHER-V looks out through her eight shell lenses (infEyeSetMax); on the
+    // phone tier, moving, her threads share the one pool and never exceed it
+    const mv = __stage('E3', () => G.boss);
+    await mv.ensureArt();
+    mv.body.st = 'idle'; mv.body.t = 99;
+    let most = 0;
+    for (let i = 0; i < 90; i++) { __frame(mv.body, i % 60 < 30 ? -3 : 3, 0); most = Math.max(most, infEyeStats().live); }
+    out.mother = { eyes: mv.body._eyeN, max: mv.body._eyeMax, purple: infEyeStats().purple, red: infEyeStats().red, most, cap: infEyeCap(), bodyMax: INF_EYE_BODY_MAX };
     return out;
   });
 
@@ -190,6 +200,9 @@ const { chromium } = require('playwright');
   check('NULLFANG burns purple', R.lion.purple > 5 && R.lion.red === 0 && R.lion.eye > 0, JSON.stringify(R.lion));
   check('...and once freed, the lion smokes no more', R.lionPure === 0, R.lionPure + ' left');
   check('on a phone the smoke is bounded', R.cap.live <= R.cap.cap && R.cap.cap <= 100, JSON.stringify(R.cap));
+  check('MOTHER-V reports her eight lenses, purple, and her smoke stays inside the phone budget',
+    R.mother.eyes === 8 && R.mother.max === 8 && R.mother.max <= R.mother.bodyMax && R.mother.purple > 5 && R.mother.red === 0
+    && R.mother.most <= R.mother.cap, JSON.stringify(R.mother));
   check('no page errors', !errs.length, errs.slice(0, 3).join(' | '));
   await page.close();
 

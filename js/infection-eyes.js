@@ -43,6 +43,13 @@ const INF_EYE_SPACING = 2.2;       // px of eye travel per particle at the tip
 const INF_EYE_HOLD = 0.1;          // s: a body counts as travelling this long after it last moved
 const INF_EYE_MIN_V = 10;          // px/s: below this the eye is standing still and emits nothing
 const INF_EYE_JUMP = 90;           // px in one step = a teleport, not a motion
+// EYES PER BODY. Two is the default and what every face in the game has; a
+// renderer whose body really carries more optics (MOTHER-V's eight shell
+// lenses) raises its own body's allowance with infEyeSetMax, never past this
+// ceiling. The GLOBAL pool (INF_EYE_CAP) is the same either way, and a
+// many-eyed body lays each thread sparser (infEyeLay) so it does not take
+// more than a fair share of it.
+const INF_EYE_BODY_MAX = 8;
 
 // The pool: structure-of-arrays, allocated once, recycled forever.
 const INF_N = 320;
@@ -114,22 +121,38 @@ function infEyeBodyBegin(e) {
   if (e && e._eyeDraw !== INF_DRAWN) { e._eyeDraw = INF_DRAWN; e._eyeN = 0; }
 }
 function infEyeBodyEnd() { INF_CUR = null; INF_CUR_CLASS = null; }
+// A renderer that draws more than two real eyes on one body says so, once per
+// draw, before it reports them. Bounded by INF_EYE_BODY_MAX.
+function infEyeSetMax(e, n) {
+  if (!e) return;
+  const m = Math.max(1, Math.min(INF_EYE_BODY_MAX, n | 0));
+  if (e._eyeMax !== m) { e._eyeMax = m; e._eyeW = null; }
+}
 
 // A procedural eye at local (lx, ly) in the CURRENT canvas transform.
-function infEyeMark(c, lx, ly, e) {
+// `tag` (optional) names WHICH eye this is when a body's set of eyes changes
+// from frame to frame — MOTHER-V loses plates as her phases break — so a
+// thread is never joined from one lens to a different one.
+function infEyeMark(c, lx, ly, e, tag) {
   const who = e || INF_CUR;
   if (!who || !INF_S2W) return;
   const cls = e ? infEyeClass(e) : INF_CUR_CLASS;
   if (!cls) return;
   if (who._eyeDraw !== INF_DRAWN) { who._eyeDraw = INF_DRAWN; who._eyeN = 0; }
-  if ((who._eyeN || 0) >= 2) return;                 // two eyes is all any machine gets
+  const max = who._eyeMax || 2;                       // two, unless the renderer said more
+  if ((who._eyeN || 0) >= max) return;
   const m = c.getTransform();
   const dx = m.a * lx + m.c * ly + m.e, dy = m.b * lx + m.d * ly + m.f;
   const S = INF_S2W;
   const wx = S.a * dx + S.c * dy + S.e, wy = S.b * dx + S.d * dy + S.f;
-  if (!who._eyeW) who._eyeW = [0, 0, 0, 0];
+  if (!who._eyeW) who._eyeW = new Array(max * 2).fill(0);
+  // THE SAME EYE, DRAWN AGAIN: a hit flash re-blits the cell it just drew
+  // (the Alpha's 'lighter' pass, a wolf's), and that second report would
+  // double the glow and lay a second thread on the first
+  for (let k = 0; k < who._eyeN; k++)
+    if (Math.abs(who._eyeW[k * 2] - wx) < 0.5 && Math.abs(who._eyeW[k * 2 + 1] - wy) < 0.5) return;
   const i = who._eyeN * 2;
-  infEyeLay(who, who._eyeN, wx, wy);
+  infEyeLay(who, who._eyeN, wx, wy, tag);
   who._eyeW[i] = wx; who._eyeW[i + 1] = wy;
   who._eyeN++;
   who._eyeCls = cls;
@@ -141,14 +164,18 @@ function infEyeMark(c, lx, ly, e) {
 // reports it: wisps go down along the eye's own path since its last draw,
 // the newest exactly at the eye in this frame, each already aged by how long
 // ago (in sim time) the eye passed that point.
-function infEyeLay(e, k, x, y) {
+function infEyeLay(e, k, x, y, tag) {
   const P = e._eyeP;
-  if (!P || k > 1) return;
+  if (!P || k >= P.x.length) return;
   // IT TURNED ROUND: the eye is on the other side of the head now. Joining the
   // old side to the new would lay a streak of smoke across the face, so the
   // trail starts again from here.
   const face = Math.sign((e.faceVis != null ? e.faceVis : e.dir) || 0);
-  if (face !== P.face) { P.face = face; P.ok[0] = P.ok[1] = false; P.owe[0] = P.owe[1] = 0; }
+  if (face !== P.face) { P.face = face; P.ok.fill(false); P.owe.fill(0); }
+  // A DIFFERENT EYE in this slot (a plate broke and the rest moved up): the
+  // thread starts again rather than crossing from one lens to the next
+  const id = tag == null ? k : tag;
+  if (P.id[k] !== id) { P.id[k] = id; P.ok[k] = false; }
   const T = P.acc[k]; P.acc[k] = 0;
   if (!P.ok[k]) { P.x[k] = x; P.y[k] = y; P.ok[k] = true; P.owe[k] = 0; return; }
   const px = P.x[k], py = P.y[k], d = Math.hypot(x - px, y - py);
@@ -158,7 +185,10 @@ function infEyeLay(e, k, x, y) {
   // and keeps just the glow — breathing, idle sway and a head tossed in place
   // leave nothing behind
   if (!(T > 0)) { P.owe[k] = 0; return; }
-  let owe = P.owe[k] + d / INF_EYE_SPACING;
+  // a body with more than two eyes lays each thread sparser by sqrt(n/2):
+  // eight lenses smoke about twice as much as a two-eyed beast, not four times
+  const sp = INF_EYE_SPACING * Math.sqrt(Math.max(1, P.x.length / 2));
+  let owe = P.owe[k] + d / sp;
   const cnt = Math.min(12, Math.floor(owe));
   owe -= cnt; P.owe[k] = owe;
   for (let j = 0; j < cnt; j++) {
@@ -169,14 +199,14 @@ function infEyeLay(e, k, x, y) {
 // An eye baked into art: `key` names the image in EYE_MAP, `cell` its cell
 // (0 for a single plate), and (dx, dy, dw, dh) the rectangle the cell was just
 // drawn into, in the current transform. For an atlas, `cell` is row*cols+col.
-function infEyeArt(c, key, cell, dx, dy, dw, dh) {
+function infEyeArt(c, key, cell, dx, dy, dw, dh, tag) {
   if (!INF_CUR || !INF_CUR_CLASS || !INF_S2W || typeof EYE_MAP === 'undefined') return;
   const M = EYE_MAP[key];
   if (!M) return;
   const pts = M.e[cell | 0];
   if (!pts) return;
   for (let i = 0; i + 1 < pts.length; i += 2)
-    infEyeMark(c, dx + pts[i] * dw, dy + pts[i + 1] * dh);
+    infEyeMark(c, dx + pts[i] * dw, dy + pts[i + 1] * dh, null, tag == null ? null : tag + ':' + i);
 }
 
 // ---- the simulation side -----------------------------------------------------
@@ -264,9 +294,14 @@ function infEyeUpdate(dt) {
     // at the eye of the frame before, and is a frame late whenever the art
     // changes cell. The sim clock still decides how much: nothing is owed
     // while paused, and a camera that moves without the sim owes nothing.
-    if (!e._eyeP) e._eyeP = { x: [0, 0], y: [0, 0], owe: [0, 0], ok: [false, false], acc: [0, 0], face: 0 };
+    // one slot per eye the body may report (two, or what its renderer set)
+    const n = e._eyeMax || 2;
+    if (!e._eyeP || e._eyeP.x.length !== n) {
+      e._eyeP = { x: new Array(n).fill(0), y: new Array(n).fill(0), owe: new Array(n).fill(0),
+                  ok: new Array(n).fill(false), acc: new Array(n).fill(0), id: new Array(n).fill(null), face: 0 };
+    }
     const P = e._eyeP;
-    if (e._eyeMv > 0) { P.acc[0] += dt; P.acc[1] += dt; } else { P.acc[0] = P.acc[1] = 0; }
+    if (e._eyeMv > 0) { for (let k = 0; k < n; k++) P.acc[k] += dt; } else P.acc.fill(0);
     P.purple = purple;
   }
   // age and drift: a slow rise that gathers, and a curl that widens with age
