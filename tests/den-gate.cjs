@@ -193,16 +193,19 @@ const check = (name, ok, detail) => {
     // is free, hands the chapter-two teaser to the panel player — once
     {
       fresh({ bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1, ratchetCamp: 1 });
-      const calls = [], real = window.panelsPlay;
-      window.panelsPlay = (id) => calls.push(id);
+      // the hook QUEUES the teaser sequence (it waits for a safe moment); it
+      // used to call panelsPlay('ch2_teaser'), an id no sequence has, so the
+      // check below also requires the id to name a real sequence
+      const calls = [], real = window.panelsQueue;
+      window.panelsQueue = (id) => calls.push(id);
       loadRoom('A3'); quiet();
       stand(12); for (let i = 0; i < 20; i++) progressTick(1 / 60);
       const early = calls.length;
       player.x = 26 * TILE; player.y = 4 * TILE; player.vy = -200;
       progressTick(1 / 60); progressTick(1 / 60);
       player.y = 5 * TILE; progressTick(1 / 60);
-      window.panelsPlay = real;
-      out.teaser = { early, calls, flag: !!G.save.flags.ch2Climb };
+      window.panelsQueue = real;
+      out.teaser = { early, calls, flag: !!G.save.flags.ch2Climb, real: calls.map(id => !!panelsSeq(id)) };
     }
     // ---- 9. the objective, in the chapter's order, from the save alone
     {
@@ -248,7 +251,7 @@ const check = (name, ok, detail) => {
   check('with the blade, the Sage and the bell, she walks east into the lair and NULLFANG wakes',
     r.opened.inA4 && r.opened.fight && r.opened.boss === 'glitch', JSON.stringify(r.opened));
   check('the climb above the camp after the lion hands the chapter-two teaser to the panels, once',
-    r.teaser.early === 0 && r.teaser.calls.length === 1 && r.teaser.calls[0] === 'ch2_teaser' && r.teaser.flag, JSON.stringify(r.teaser));
+    r.teaser.early === 0 && r.teaser.calls.length === 1 && r.teaser.calls[0] === 'ch2' && r.teaser.real[0] && r.teaser.flag, JSON.stringify(r.teaser));
   const want = ['pg_goal_pack', 'pg_goal_marble', 'pg_goal_quarry', 'pg_goal_return', 'pg_goal_sage', 'pg_goal_chime',
     'pg_goal_east', 'pg_goal_lion', 'pg_goal_up'];
   check('the chapter\'s goal follows the owner\'s order: pack, marble, quarry, Ratchet, Sage, CHIME, the enclosure, NULLFANG, up',
