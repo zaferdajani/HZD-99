@@ -222,7 +222,9 @@ function progressTick(dt) {
     const cx = (player.x + player.w / 2) / TILE, cy = (player.y + player.h / 2) / TILE;
     if (cx >= 17 && cx <= 29 && cy < 8) {
       f.ch2Climb = 1; persist();
-      if (typeof panelsPlay === 'function') { try { panelsPlay('ch2_teaser'); } catch (e) {} }
+      // the sequence is 'ch2' (js/panels.js PANEL_SEQ); 'ch2_teaser' named nothing, so this
+      // hook never fired. Queued, so it still waits for a safe moment to open.
+      if (typeof panelsQueue === 'function') { try { panelsQueue('ch2'); } catch (e) {} }
     }
   }
   // cleansing pulses: the reward waits for the light to settle, the way the
