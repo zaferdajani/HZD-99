@@ -55,6 +55,7 @@ const MEDIA_SRC = {
     alRoar: 'assets/characters/alpha/roar.webp',
     alHowl: 'assets/characters/alpha/howl.webp',
     alLeap: 'assets/characters/alpha/leap.webp',
+    alAir: 'assets/characters/alpha/air.webp',
     alClaw: 'assets/characters/alpha/claw.webp',
     alBite: 'assets/characters/alpha/bite.webp',
     alClinch: 'assets/characters/alpha/clinch.webp',

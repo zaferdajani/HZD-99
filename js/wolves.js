@@ -532,51 +532,52 @@ function wolfTameStep(e, dt) {
 //                 is the opening, and it is the only generous one in the fight.
 // ===========================================================================
 // ---------------------------------------------------------------------------
-// THE ALPHA'S MOVES, FILMED (ART_QUEUE §2ax, 2026-09-05). Nine takes cut to
-// strips, one per move, mapped onto the states over each state's own clock —
-// the same table Nullfang has (BEAST_STRIP in js/beast.js) for the same
-// reason: a plate slid around a room is a picture, a take is the move. The
-// strips are the Alpha's ONLY body now (2026-10-09): the nine still plates
-// that used to stand in were retired, a state without a strip of its own
-// wears the rest take, and until its strip is over the wire the Alpha is
-// the dark hold silhouette every guardian waits behind (drawBossHold).
+// THE ALPHA'S MOVES, FILMED — THE PACK'S OWN BREED (2026-10-10, ART_QUEUE §2be).
+// The first filmed set (§2ax, 2026-09-05) was a different animal from the
+// pack: bronze and black, oversized spines, red ribs showing. The pack was
+// re-filmed on 2026-10-09 in clean graphite-and-ivory armour, and the leader
+// of a pack has to read as the same factory's work. So the Alpha was re-plated
+// from the pack's approved design (assets/source/beasts/wolf2/green_plate.jpg)
+// as a bigger, heavier wolf of that breed — deeper chest, fuller crest, longer
+// jaw, VIOLET seams and eyes where the rank and file run red — and filmed in
+// place, one take per move (assets/source/beasts/alpha2/, cut_spec.json).
 //
-// THE SCALE, MEASURED. The rest plate is all wolf (467 of 468 px) and draws
-// at 2.05 hitbox heights; the rest take's wolf stands 227 of its 320-px cell,
-// so the cell draws at 2.05 * 320/227 heights and the wolf comes out the size
-// the plate was. Each take was cropped to its own widest frame, so k puts the
-// resting body length back on the rest take's 304 px: roar 259 -> 1.17, leap
-// (crouch, framed for the whole arc) 188 -> 1.6, claw 255 -> 1.19, clinch
-// 243 -> 1.25, yield 291 -> 1.04, the rest at ~305 -> 1.
+// ONE ANIMAL, ONE SIZE. Every strip was cut by tools/fixcut.py at one
+// source->cell scale and one floor line (the three attack takes filmed from a
+// shrunken plate for lunge room carry `mul` to undo it), so a cell pixel is
+// the same size of wolf in every strip and the draw scale is a constant, not a
+// per-strip guess: the rest take's standing body is 225 px and draws at the
+// 2.05 hitbox heights the first set was sized to. `ch` is the strip's cell
+// height; grounded cells have their paws `pad` px above the cell's bottom.
+// The airborne cells of the leap are cut tight around the body (`float`) and
+// ride the physics arc, because the take's own arc on top of the body's
+// would lift it twice.
 //
 // THE CLOCKS: `b.t` counts down from what the transition set — known
-// constants here (TELL_HEAVY, TELL_SWIPE, TELL_FAST, the 1.1 s leap, 0.26 s
-// blows, the 0.18 s clinch) so `t0` is written in; the prowl runs on ground
-// covered (like wolfPose), the rest and the shake loop on `anim`, and the
-// yield plays once from the frame it is first seen and holds its last cell.
-const ALPHA_STRIP_H = 2.05 * 320 / 227;
-// THE CELLS OF THE STRIPS THAT ARE ON DISK (assets/characters/alpha/*.webp:
-// 9-, 16- and 12-cell strips). A 24-cell table for a studio re-shoot that was
-// never delivered used to sit beside this one; it was removed with the
-// plates. A re-shoot brings its own cell table with it.
+// constants here (TELL_HEAVY, TELL_SWIPE, TELL_FAST, the leap, 0.26 s
+// blows, the 0.18 s clinch); the prowl runs on ground covered (like
+// wolfPose), the rest and the shake loop on `anim` (cells per second), and
+// the yield plays once from the frame it is first seen and holds its last
+// cell.
+const ALPHA_PX = 2.05 / 225, ALPHA_PAD = 4;
 const ALPHA_STRIP = {
-  rest:{key:'alRest',cells:9,k:1,loop:8},
-  prowl:{key:'alProwl',cells:16,k:1,from:0,to:12,dist:9},
-  roarwarn:{key:'alRoar',cells:12,k:1.17,from:0,to:3},
-  roar:{key:'alRoar',cells:12,k:1.17,from:4,to:11},
-  broodcall:{key:'alHowl',cells:12,k:1,from:0,to:5},
-  howl:{key:'alHowl',cells:12,k:1,from:6,to:11},
-  coil:{key:'alLeap',cells:12,k:1.6,from:0,to:4},
-  leap:{key:'alLeap',cells:12,k:1.6,from:5,to:8},
-  recoil:{key:'alLeap',cells:12,k:1.6,from:9,to:11},
-  turn:{key:'alLeap',cells:12,k:1.6,from:9,to:11},
-  clawwarn:{key:'alClaw',cells:12,k:1.19,from:0,to:5},
-  claw:{key:'alClaw',cells:12,k:1.19,from:6,to:11},
-  bitewarn:{key:'alBite',cells:12,k:1,from:0,to:4},
-  bite:{key:'alBite',cells:12,k:1,from:5,to:11},
-  clinch:{key:'alClinch',cells:12,k:1.25,from:0,to:3},
-  shake:{key:'alClinch',cells:12,k:1.25,from:4,to:8,loop:12},
-  free:{key:'alYield',cells:12,k:1.04,once:10},
+  rest:{key:'alRest',cells:9,ch:236,loop:2.6},
+  prowl:{key:'alProwl',cells:16,ch:231,dist:14},
+  roarwarn:{key:'alRoar',cells:12,ch:259,from:0,to:3},
+  roar:{key:'alRoar',cells:12,ch:259,from:4,to:11},
+  broodcall:{key:'alHowl',cells:12,ch:259,from:0,to:5},
+  howl:{key:'alHowl',cells:12,ch:259,from:6,to:11},
+  coil:{key:'alLeap',cells:9,ch:259,from:0,to:4},
+  leap:{key:'alAir',cells:6,ch:258,float:1},
+  recoil:{key:'alLeap',cells:9,ch:259,from:5,to:8},
+  turn:{key:'alLeap',cells:9,ch:259,from:5,to:8},
+  clawwarn:{key:'alClaw',cells:12,ch:237,from:0,to:5},
+  claw:{key:'alClaw',cells:12,ch:237,from:6,to:11},
+  bitewarn:{key:'alBite',cells:12,ch:226,from:0,to:4},
+  bite:{key:'alBite',cells:12,ch:226,from:5,to:11},
+  clinch:{key:'alClinch',cells:12,ch:234,from:0,to:3},
+  shake:{key:'alClinch',cells:12,ch:234,from:4,to:8,loop:6},
+  free:{key:'alYield',cells:12,ch:248,once:10},
 };
 const ALPHA_STRIPS = [...new Set(Object.values(ALPHA_STRIP).map(s=>s.key))];
 // Simulation owns time and resolved distance. Drawing is a pure lookup.
@@ -936,12 +937,18 @@ function drawAlpha(c, b, cx, cy) {
   // face > 0 (the takes face LEFT). No bob, lean or spin on top: the
   // corkscrew, the head-shake and the howl's rise are IN the takes, and
   // turning a take that already turns would turn it twice.
-  const S = pick.S, H = b.h * ALPHA_STRIP_H * S.k;
+  const S = pick.S, H = b.h * ALPHA_PX * S.ch;
+  // grounded: the paws sit ALPHA_PAD cell-px above the cell's bottom, so the
+  // cell drops by that much to plant them on the hitbox floor. Airborne: the
+  // body's own centre rides the hitbox, a little above its middle.
+  const base = S.float ? H / 2 - b.h * 0.55 : ALPHA_PAD * H / S.ch;
+  // a freed Alpha (tamed or purified) wears the cure's teal, not the violet
+  const pure = !!(b.purified || b.tamed);
   c.save();
   c.translate(cx, b.y + b.h);
   c.scale((b.face || -1) > 0 ? -1 : 1, 1);
   if (b.hurtT > 0) c.globalAlpha *= 0.85;
-  drawStripCell(c, S.key, pick.cell, S.cells, 0, 0, H, false);
+  drawStripCell(c, S.key, pick.cell, S.cells, 0, base, H, false, pure);
   const cw = sim.naturalWidth / S.cells, dw = H * (cw / sim.naturalHeight);
   // THE RISING AMBER. Only a state whose name says a blow is coming wears it,
   // so the art probe's COLD states stay cold by the warn test itself.
@@ -953,12 +960,12 @@ function drawAlpha(c, b, cx, cy) {
     if (tint) {
       c.save(); c.globalCompositeOperation = 'lighter';
       c.globalAlpha = 0.06 + 0.26 * kk;     // photographed at 0.68: a flat gold silhouette with no wolf left in it
-      c.drawImage(tint, -dw / 2, -H, dw, H); c.restore();
+      c.drawImage(tint, -dw / 2, base - H, dw, H); c.restore();
     }
   }
   if (b.hurtT > 0) {
     c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.5;
-    drawStripCell(c, S.key, pick.cell, S.cells, 0, 0, H, false); c.restore();
+    drawStripCell(c, S.key, pick.cell, S.cells, 0, base, H, false, pure); c.restore();
   }
   c.restore();
   // THE ROAR'S RADIUS, DRAWN. A stun the player cannot see the edge of is a

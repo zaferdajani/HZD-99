@@ -73,6 +73,23 @@ wolf run's first cut found TWO strides (period 1.71 s, two cells 1.3% apart — 
 same pose twice) and was re-cut to one (0.54 s). Files: `*_green_start.jpg` (the
 start frames), `*_take.jpg` (each take as a contact sheet).
 
+`beasts/alpha2/` is the Alpha re-made as the pack's own breed (2026-10-10):
+the first Alpha was a different animal from the pack the owner approved on
+2026-10-09 (bronze and black, spines, red ribs). `green_plate.jpg` is the boss
+plate drawn from `wolf2/green_plate.jpg` (GPT Image 2.5, job 97a4c845, the
+first of three candidates in `plate_candidates.jpg`); `green_plate_padded.jpg`
+is the same plate shrunk to 0.693 and pushed right, the start frame for the
+bite and clinch takes after the first ones lunged out of frame. Every
+`*_take.jpg` is a 6 fps sheet of a 4 s Seedance 2.5 take (job ids in
+docs/ART_QUEUE.md §2be); the `*2_take.jpg` sheets are the re-fires. The strips
+were cut by `tools/fixcut.py` from `cut_spec.json` at one scale (0.34; the
+padded takes carry `mul` 1.442) and one floor line; `strips_sheet.jpg` is
+what shipped, `eye_anchors_*.jpg` the eye map on every cell, `ingame_states.jpg`
+every state in A10 at the exploration framing, both facings. What the cut
+avoids: the claw take's dust and spark at the strike (the strike is the swipe's
+blur frames, recovery resumes after the dust), the roar's last frames where the
+muzzle leaves the frame, and the clinch's frames that held a stick.
+
 `beasts/wolf2/` replaces the whole earlier wolf line (its plates, its walk/run
 pairs and its first strips were deleted with it — a different animal from the
 design the owner approved on 2026-10-09). The design reference
