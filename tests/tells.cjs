@@ -54,8 +54,8 @@ const HAND_CUED = {
                   'a cue on entry would warn before there is anything to warn about',
 };
 
-const BOSSES = ['glitch', 'brood', 'atlas', 'zero', 'prism', 'mother'];
-const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1', mother: 'E3' };
+const BOSSES = ['glitch', 'brood', 'atlas', 'zero', 'prism', 'mother', 'horn'];
+const ROOMS = { glitch: 'A4', brood: 'B4', atlas: 'C3', zero: 'D3', prism: 'X1', mother: 'E3', horn: 'CV3' };
 
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });

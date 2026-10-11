@@ -145,6 +145,7 @@ function hurtBoxOf(e) {
     const w = e.w * 2.0, h = e.h * 1.7;
     return { x: cx2 - w / 2, y: e.y + e.h / 2 - h / 2, w, h };
   }
+  if (e.kind === 'horn' && typeof ghHurtBox === 'function') return ghHurtBox(e);   // GRAVEHORN: barrel, head and horns
   if (e.kind === 'zero') {              // GLACIERE: the drawn unicorn, horn to tail
     const w = e.w * 1.5, h = e.h * 1.9;
     return { x: cx2 - w / 2, y: e.y + e.h - h, w, h };

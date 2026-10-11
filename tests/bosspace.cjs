@@ -30,6 +30,9 @@ const BOSSES = [
   { room: 'D3', kind: 'zero', name: 'GLACIERE' },
   { room: 'X1', kind: 'prism', name: 'PRISM PROWLER' },
   { room: 'E3', kind: 'mother', name: 'MOTHER-V' },
+  // the Eye's soldier on the marble (js/gravehorn.js) — not a guardian, but a
+  // boss fight all the same, and held to the same bar
+  { room: 'CV3', kind: 'horn', name: 'GRAVEHORN' },
 ];
 // every state name in the game, sorted by what it costs the player
 const IDLE = /^(idle|rest|restlow|recover|wait|dorm|stun|nullend|cffloor|hurt)/;

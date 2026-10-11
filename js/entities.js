@@ -989,6 +989,8 @@ const HERO_TRANS = {
 };
 // How much of an incoming blow the brace cuts. A first pass, not a tuned
 // final number — see the note in Player.hurt().
+// what a dizzy body cannot do (Player.update, playerDizzy in js/gravehorn.js)
+const DIZZY_BLOCK = { JUMP: 1, ATK: 1, DASH: 1, CLAW: 1, CAST: 1, SONG: 1, HEAL: 1, ARM: 1, GUARD: 1 };
 const GUARD_REDUCTION = 0.65;          // a blow from behind the brace, or the one that breaks it
 const GUARD_HEAT_PER_HIT = 0.8;        // heat per held blow; cools 1/s (Player.update)
 const GUARD_BREAK_HEAT = 2.2;          // the third held blow inside ~2 s breaks the brace
@@ -1559,7 +1561,12 @@ class Player {
     // pad, the touch controller — from one line, which is also the only way
     // RULE ONE holds without four copies of the same check.
     const _stun = (this.stunT = Math.max(0, (this.stunT || 0) - dt)) > 0;
-    const inD = _stun ? () => false : IN_D, inP = _stun ? () => false : IN_P;
+    // DIZZY (js/gravehorn.js playerDizzy): she can still WALK, slowly — and
+    // nothing else. One rule, applied here once for every input device.
+    const _dz = (this.dizzyT = Math.max(0, (this.dizzyT || 0) - dt)) > 0;
+    this.flungT = Math.max(0, (this.flungT || 0) - dt);
+    const inD = _stun ? () => false : _dz ? (a => !DIZZY_BLOCK[a] && IN_D(a)) : IN_D;
+    const inP = _stun ? () => false : _dz ? (a => !DIZZY_BLOCK[a] && IN_P(a)) : IN_P;
     if (_stun && chance(0.5))
       addPart(this.x + this.w / 2 + rnd(-10, 10), this.y - 4,
         rnd(-30, 30), rnd(-50, -20), 0.4, '#ffe08a', 2, 60);
@@ -1708,7 +1715,7 @@ class Player {
     // ...and the same hold covers the WAKING: the two seconds in which the
     // cradle lets go of her. A release you can walk out of halfway through is
     // a loading screen with a picture on it.
-    const held = !!G.bossEntry || !!G.wake || !!G.gateWalk || !!(G.meet && !G.meet.interactive);
+    const held = !!G.bossEntry || !!G.wake || !!G.gateWalk || !!(G.meet && !G.meet.interactive) || !!G.ghHold;
     // MOTHER'S SONG mirrors your inputs for its few seconds — fight it
     const dirRaw = held ? 0 : (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
     const dir = (G.revT || 0) > 0 ? -dirRaw : dirRaw;
@@ -1729,8 +1736,10 @@ class Player {
       // horizontal — crisp starts and stops
       // ...and the first meeting's swat carries her the length of the mound:
       // ground friction would stop a 980 px/s throw inside a third of a second
-      const acc = (ice ? 1000 : 3000), fric = G.meet ? 1300 : ice ? 260 : 2900;   // 980²/(2·1300) ≈ 370 px of throw: she lands inside the aftermath frame
-      if (dir !== 0 && !healing) {
+      // ...and a body THROWN (a guardian's toss, a charge) keeps its flight:
+      // on the floor's friction a 600 px/s throw would stop in a fifth of a second
+      const acc = (ice ? 1000 : 3000), fric = G.meet ? 1300 : this.flungT > 0 ? 420 : ice ? 260 : 2900;   // 980²/(2·1300) ≈ 370 px of throw: she lands inside the aftermath frame
+      if (dir !== 0 && !healing && !(this.flungT > 0)) {
         // TURN BOOST: reversing bites harder than accelerating. Pressing away
         // from current speed is always a correction the player already wants
         // finished — every feel-canon movement kit does this (not on ice:
@@ -1749,7 +1758,7 @@ class Player {
         // device chose to say it (js/engine.js, THE INPUT CONTRACT).
         const push = Math.abs(PI.moveX) || 1;
         const padCap = PI.run ? 1 : Math.min(1, PAD_WALK_VX / this.speed());
-        const cap = this.speed() * (this.slowT > 0 ? 0.5 : 1) * push * padCap;
+        const cap = this.speed() * (this.slowT > 0 ? 0.5 : 1) * (this.dizzyT > 0 ? 0.45 : 1) * push * padCap;
         this.vx = clamp(this.vx, -cap, cap);
         this.face = dir;
       } else {
@@ -1823,7 +1832,8 @@ class Player {
           if (typeof padRumble === 'function') padRumble(0.4, 0.3, 160);
         }
       }
-      if (!inD('JUMP') && this.vy < -JUMP_CUT) this.vy = -JUMP_CUT;
+      // (a body THROWN is not a jump being released: the cut must not eat the throw)
+      if (!inD('JUMP') && this.vy < -JUMP_CUT && !(this.flungT > 0)) this.vy = -JUMP_CUT;
       // omnidirectional dash — travels at the angle you hold
       if (inP('DASH') && hasMod('dash') && this.dashCD <= 0) {
         let ddx = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
@@ -1897,7 +1907,7 @@ class Player {
     // So the press is now held for a beat and spent the instant the swing is
     // free. This is the difference between "sluggish" and "tight", and it is
     // almost entirely this one buffer.
-    if (inP('ATK') && !G.bossEntry) this.atkBuf = 0.2;
+    if (inP('ATK') && !G.bossEntry && !G.ghHold) this.atkBuf = 0.2;
     else this.atkBuf = (this.atkBuf || 0) - dt;
     if (this.atkBuf > 0 && this.atkCD <= 0 && this.swirlT <= 0) {
       this.atkBuf = 0;
@@ -10610,6 +10620,13 @@ const BSTAT = Object.assign({
   // of it. 300 HP puts it just above the first guardian's 220 while she still
   // has no dash, which is where the fight wants to sit — losable, not long.
   alpha: { w: 104, h: 58, hp: 300, zone: 'A' },
+  // GRAVEHORN (js/gravehorn.js), the Eye's rhino on the raw marble. The box is
+  // the barrel and the legs under it; his head and horns are measured off the
+  // rig (ghBoxes), because a 243 px animal is not a rectangle. 220 per phase
+  // (329 on Normal), two phases, fought with claws and the Volt Burst — the
+  // blade comes after. 150 measured as a phase spent in ONE hornless window by
+  // the chapter-one autopilot; at 220 a phase takes three or four openings.
+  horn: { w: 176, h: 120, hp: 220, dazeAt: 6, dazeSpan: 2.6, zone: 'A', tell: 'tellbig' },
 // ...and the Eye's constructs join the same table, so every piece of machinery
 // that already works on a boss — the hurt flash, the health bar, the telegraph
 // wash, the artbible harness — works on them without a second code path. They
@@ -11653,6 +11670,9 @@ class Boss {
     // deck, no cooldowns, no hitboxes of its own — a staged sequence, not a
     // fight she could have won
     if (this.meet) return;
+    // GRAVEHORN runs his own machine end to end (js/gravehorn.js): no fork, no
+    // midpoint, no purification — he is the Eye's soldier, not a guardian.
+    if (this.kind === 'horn') { ghStep(this, dt); return; }
     // THE WEIGHT PASS (#93, the code half). Every guardian carries momentum
     // now, from one place, for every boss that exists or will ever exist:
     // a lean INTO acceleration, and a landing squash when a fall dies. The
@@ -13979,6 +13999,9 @@ class Boss {
   }
   die() {
     if (this.dead || this.meet) return;
+    // GRAVEHORN goes down on his knees (phase one) or backs into the rock
+    // (phase two) — never the fork, never a wreck (js/gravehorn.js ghDown)
+    if (this.kind === 'horn') { ghDown(this); return; }
     // THE BLOW THAT WOULD END IT asks the question instead. This is the path
     // every real kill actually takes — the claw, the shuriken, the Song and the
     // pounce all call die() the moment health hits zero — so the guardian has
@@ -14127,6 +14150,9 @@ class Boss {
       c.stroke();
       c.restore();
     } else this._tellDur = 0;
+    // GRAVEHORN draws his own rig (js/gravehorn.js): his weight is in his legs,
+    // not in the shared lean below
+    if (!heroWorld && this.kind === 'horn' && typeof drawGravehorn === 'function') { drawGravehorn(c, this); c.restore(); return; }
     // A REACTION HAS TO HAPPEN IN THE CREATURE. Particles thrown around a
     // motionless body read as an effect played AT it; the bend is what turns a
     // poke into an answer. Rides inside the save above, so every early return

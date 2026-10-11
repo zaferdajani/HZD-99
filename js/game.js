@@ -1087,6 +1087,8 @@ function loadRoom(id) {
   }, 0);
   parts.length = 0;
   const def = ROOMS[id];
+  // a save that already holds the marble met a quarry GRAVEHORN had left
+  if (typeof ghMigrate === 'function') ghMigrate(G.save);
   def.ents.forEach((d, i) => {
     let [kind, tx, ty, extra, cond] = d;
     // The first target is an automatic scrap-yard defence, not a person.
@@ -1255,7 +1257,7 @@ function loadRoom(id) {
   // something has been sleeping, and the light finds it — while the theme
   // cross-fades underneath. Her controls are hers again the moment the lights
   // are up; the hold is short enough to read as staging, not as a cutscene.
-  G.bossEntry = null;
+  G.bossEntry = null; G.ghHold = null; G.ghCard = null;
   if (G.boss && !G.boss.dead && G.boss.st === 'dorm') {
     G.bossEntry = { t: 0, dur: 2.3 };
     setMusic('boss_' + G.boss.kind);
@@ -13738,7 +13740,7 @@ function drawHUD() {
   // audio blocked indicator (browser hasn't allowed sound yet)
   if (!AC || AC.state !== 'running') ftxt('🔇', 480, 26, 18, 'rgba(255,143,157,0.8)');
   // boss bar
-  if (bossActive() && G.boss.st !== 'intro') {
+  if (bossActive() && G.boss.st !== 'intro' && !G.boss.hideBar) {
     const b = G.boss, w = 480;
     c.fillStyle = 'rgba(8,12,18,0.7)'; rr(c, 480 - w / 2, 494, w, 26, 6); c.fill();
     c.fillStyle = P.glow; c.globalAlpha = 0.9;
@@ -13797,6 +13799,7 @@ function drawHUD() {
   }
   // the zone banner is a PLAY-state flourish; over the pause menu it was just a
   // second title crossing the first
+  if (typeof drawGhCard === 'function') drawGhCard(c);    // GRAVEHORN's name, as he bellows
   if (G.zoneToast && G.state === 'PLAY' && !(G.tut && !G.save.flags.tut)) {
     c.globalAlpha = clamp(G.zoneToast.t, 0, 1);
     ftxt(G.zoneToast.text, 480, 90, 34, '#eef3fa', 'center', PAL[G.roomDef.zone].glow);
@@ -14372,6 +14375,8 @@ function drawWorldFrame() {
     if (player.iT > 0 && Math.floor(player.iT * 18) % 2 === 0) c.globalAlpha = 0.4;
     c.translate(-Math.round(camSX()), -Math.round(camSY()));
     player.draw(c);
+    c.globalAlpha = 1;
+    if (typeof drawDizzy === 'function') drawDizzy(c, player);   // stars round her head
     c.restore();
   }
   // ...and the edge of the world OVER her, so the last few pixels of her feet
@@ -16037,6 +16042,8 @@ function draw(tms) {
           bustDrawn = true;
         }
       }
+      // GRAVEHORN speaks with his own face (js/gravehorn.js ghPortrait)
+      if (d.gh && !bustDrawn && typeof ghPortrait === 'function') { ghPortrait(c, px, by + 14, 64); bustDrawn = true; }
       if (d.npc && !bustDrawn) {
         const bk = 'bust' + d.npc.charAt(0).toUpperCase() + d.npc.slice(1);
         if (typeof mediaFetch === 'function') mediaFetch(bk);

@@ -320,7 +320,7 @@ async function snap() {
       menu: G.state === 'MENU' && typeof menuOptions === 'function' ? { opts: menuOptions(), i: G.menuIdx } : null,
       diffIdx: G.diffIdx,
       p: P ? { x: P.x, y: P.y, vx: P.vx, vy: P.vy, on: !!P.on, face: P.face, cores: P.cores, max: P.maxCores ? P.maxCores() : 0, volts: P.volts, dead: !!P.dead, iT: P.iT || 0,
-        healT: P.healT || 0, chargeT: P.chargeT || 0, swing: !!P.swing, stun: P.stunT || 0, dashCD: P.dashCD || 0 } : null,
+        healT: P.healT || 0, chargeT: P.chargeT || 0, swing: !!P.swing, stun: P.stunT || 0, dashCD: P.dashCD || 0, dz: P.dizzyT || 0 } : null,
       flags: Object.keys(f).filter(k => f[k]), bag: Object.keys((G.save && G.save.bag) || {}).filter(k => G.save.bag[k]),
       items: (G.save && G.save.items) || {}, scrap: G.save ? G.save.scrap : 0, iq: G.save ? G.save.iq | 0 : 0,
       bench: G.save && G.save.bench ? G.save.bench.room : null, deaths: G.save ? G.save.deaths | 0 : 0,
@@ -332,7 +332,11 @@ async function snap() {
       tut: st ? { id: st.id, i: G.tut.i, hold: G.tut.hold || 0, action: tp && tp.action, tx: tp && tp.target && tp.target.x, hint: tp ? ctlFill(t(tp.hint)) : '', label: tp && tp.label ? t(tp.label) : '' } : null,
       goal, toasts: (G.toasts || []).map(q => q.text),
       near: G.near ? { type: G.near.type, extra: G.near.extra || null } : null,
-      en, boss: B ? { k: B.kind, x: Math.round(B.x), y: Math.round(B.y), w: B.w, h: B.h, hp: B.hp, max: B.maxHp || B.hp0 || null, st: B.st, dead: !!B.dead, tame: !!B.tame, meet: !!B.meet, face: B.face, t: B.t, wind: B.windT || 0, cx: B.cx ? B.cx() : B.x + B.w / 2, cy: B.cy ? B.cy() : B.y + B.h / 2, vx: B.vx || 0, vy: B.vy || 0, on: !!B.on, purified: !!(B.purified || B.freed) } : null, projs,
+      en, boss: B ? { k: B.kind, x: Math.round(B.x), y: Math.round(B.y), w: B.w, h: B.h, hp: B.hp, max: B.maxHp || B.hp0 || null, st: B.st, dead: !!B.dead, tame: !!B.tame, meet: !!B.meet, face: B.face, t: B.t, wind: B.windT || 0, cx: B.cx ? B.cx() : B.x + B.w / 2, cy: B.cy ? B.cy() : B.y + B.h / 2, vx: B.vx || 0, vy: B.vy || 0, on: !!B.on, purified: !!(B.purified || B.freed),
+        // GRAVEHORN's horns in the air and the rocks over the floor: what is on screen
+        gh: B.kind === 'horn' && B.missiles ? { phase: B.phase, big: B.hornBig !== false, small: B.hornSmall !== false,
+          m: B.missiles.map(m => ({ x: Math.round(m.x), y: Math.round(m.y), vx: Math.round(m.vx), vy: Math.round(m.vy), ph: m.ph, locked: !!m.locked })),
+          r: B.rocks.map(r => ({ x: Math.round(r.x), ph: r.ph })) } : null } : null, projs,
       doors, rub,
       busy: { trans: !!G.trans, gate: !!G.gateWalk, wake: !!G.wake, cut: !!G.cut, entry: !!G.bossEntry, meet: G.meet ? { ph: G.meet.ph, inter: !!G.meet.interactive } : null, brk: G.break ? G.break.ph || 1 : null, rech: !!G.recharge, finish: !!G.finish, hitStop: G.hitStop || 0 },
       panels: G.state === 'PANELS',
@@ -833,6 +837,10 @@ mission('marble', s => s.bag.includes('cshard') || s.flags.includes('crystal'), 
     if (s.room !== 'CV1B') { await travel(s, 'CV1B'); return; }
     await restAt(s); if (s.p.volts >= s.burstVolts) R.needCharge = 0; return;
   }
+  // GRAVEHORN stands on the stone (js/gravehorn.js): rested and charged at the
+  // quarry's pod first, then the fight, then the pillar
+  if (!s.flags.includes('bossHorn') && s.room !== 'CV3' && !(await readyFor(s, 'CV1B', 'CV3'))) return;
+  if (s.room === 'CV3' && s.boss && s.boss.k === 'horn' && !s.boss.dead) { await bossFight(s); return; }
   if (s.room === 'CV3') { await quarryPillar(s); return; }
   await travel(s, 'CV3');
 });
@@ -1004,6 +1012,7 @@ async function bossFight(s) {
   if (s.room === 'GA1D' && sage) { await sageFight(s, sage); return; }
   if (s.boss && s.boss.k === 'chime') { await chimeFight(s, s.boss); return; }
   if (s.boss && s.boss.k === 'glitch') { await lionFight(s, s.boss); return; }
+  if (s.boss && s.boss.k === 'horn') { await hornFight(s, s.boss); return; }
   await genericBoss(s);
 }
 // THE SAGE (docs/combat/SAGE.md): coil -> lunge -> lunge -> EXHALE (the
@@ -1095,6 +1104,113 @@ async function lionFight(s, b) {
   if (s.p.face !== dir) await tap(toward, 25);
   await tap('KeyX', 40); await sleep(150); await tap('KeyX', 40); await sleep(150);
   await hold([away]); await sleep(180); await hold([]);
+}
+// GRAVEHORN (docs/combat/BOSS_GRAVEHORN.md), played the way the doc says it
+// is answered, with the keyboard only:
+//   the horn missile — get out from under its lock (it flies straight after
+//     it), then punish the hornless head
+//   the charge — stand with a wall at her back so it ends in rock, jump it as
+//     it arrives (the measured window is 0.25-0.5 s before contact), punish the
+//     stun from behind
+//   the toss — strike the horn in the last beat of the wind-up (the parry), or
+//     take the throw and wait out the stars
+//   the kick (phase two) — step out from behind him
+// Openings are the recoveries the doc lists; neutral is a respectful distance.
+const GH_OPEN = /^(hornless|hornseat|stunned|recover|skid|tossrecover|kickrecover|stagger|daze|rest|wallslam)$/;
+async function hornFight(s, b) {
+  const st = b.st || '', gh = b.gh || {}, p = s.p;
+  const px = p.x + 12, bx = b.cx, face = b.face || -1;
+  const dir = bx > px ? 1 : -1;
+  const toward = dir > 0 ? 'ArrowRight' : 'ArrowLeft', away = dir > 0 ? 'ArrowLeft' : 'ArrowRight';
+  const front = Math.sign(px - bx) === face;
+  const snout = bx + face * 150, rump = bx - face * 100;
+  const dSn = Math.abs(px - snout), dR = Math.abs(px - rump);
+  const W = (s.w || 56) * TL;
+  bLog(s, 'GRAVEHORN p' + (gh.phase || 1) + ' st=' + st + ' hp=' + Math.round(b.hp) + ' front=' + front + ' dSnout=' + Math.round(dSn) + (p.dz > 0 ? ' DIZZY' : ''));
+  // the beats that are his to play (the entrance, the knees, the exit)
+  if (/^(dorm|ghwake|ghspeak|ghbellow|kneel|rage|beaten|ghspeak2|retreat)$/.test(st)) {
+    if (st === 'dorm') { await hold([toward]); await sleep(80); return; }
+    await hold([]); await sleep(80); return;
+  }
+  if (!R.ghLogged || R.ghLogged !== st) {
+    R.ghLogged = st;
+    if (/^(chargewarn|hornprep|tossprep|kickprep)$/.test(st)) log('GRAVEHORN tells ' + st);
+  }
+  // stars round her head: she can only walk — away
+  if (p.dz > 0) { await backOff(s, -dir, 90); return; }
+  // a horn in the air and coming: once it has LOCKED it flies straight, so a
+  // step out of its line is the answer; before the lock, keep moving
+  const live = (gh.m || []).filter(m => m.ph === 'fly');
+  for (const m of live) {
+    const dx = px - m.x, dy = (p.y + 18) - m.y, d = Math.hypot(dx, dy);
+    const closing = dx * m.vx + dy * m.vy > 0;
+    if (d < 230 && closing) {
+      // run along the floor away from where it is heading; jump a low, flat one
+      const side = Math.sign(m.vx) || -dir;
+      const run = side > 0 ? 'ArrowLeft' : 'ArrowRight';
+      const flat = Math.abs(m.vy) < Math.abs(m.vx) * 0.5 && Math.abs(dy) < 40;
+      await hold(flat && p.on ? [run, 'Space'] : [run]); await sleep(110); return;
+    }
+  }
+  // THE CHARGE: wait for it, then jump it as it arrives
+  if (st === 'chargewarn') { await hold([]); if (p.face !== dir) await tap(toward, 25); await sleep(30); return; }
+  if (st === 'rush') {
+    const v = Math.max(420, Math.abs(b.vx));
+    const coming = Math.sign(b.vx || face) === Math.sign(px - bx);
+    const ttc = (dSn - 12) / v;
+    // jump in place, in the middle of the measured window (0.25-0.52 s)
+    if (coming && ttc <= 0.38 && p.on) {
+      log('GRAVEHORN charge: jump at ' + ttc.toFixed(2) + ' s to contact');
+      await hold(['Space']); await sleep(480); await hold([]); return;
+    }
+    await hold([]); await sleep(15); return;
+  }
+  // THE TOSS: the parry is a strike on the horn in the last beat of its wind-up
+  if (st === 'tossprep') {
+    if (front && dSn < 110 && b.t <= 0.14) {
+      if (p.face !== dir) await tap(toward, 20);
+      log('GRAVEHORN toss: strike the horn (parry) at t=' + b.t.toFixed(2));
+      await tap('KeyX', 40); await sleep(120); return;
+    }
+    await hold([]); if (p.face !== dir) await tap(toward, 20); await sleep(20); return;
+  }
+  if (st === 'toss') { await hold([]); await sleep(40); return; }
+  // THE KICK: out from behind him
+  if (st === 'kickprep' || st === 'kick') { await backOff(s, rump > px ? -1 : 1, 220); await hold([]); return; }
+  // the missile's wind-up: get out from under where it will lock
+  if (st === 'hornprep' || st === 'hornfire') {
+    const out = px < bx ? -1 : 1;
+    if (Math.abs(px - bx) < 360 && !wallBehind(s, out)) { await backOff(s, out, 120); return; }
+    await hold([]); await sleep(40); return;
+  }
+  // AN OPENING: the head when it is hornless and in front of her, else his rear
+  if (GH_OPEN.test(st)) {
+    // the head when she is already on its side (hornless it bites deeper);
+    // his rear when she is behind him — never through his body
+    const head = front && (st === 'hornless' || st === 'hornseat' || st === 'stagger' || st === 'daze' || st === 'tossrecover');
+    let tx = head ? snout + face * 26 : (front ? snout + face * 26 : rump - face * 30);
+    if (tx < 30 || tx > W - 30) tx = front ? snout + face * 26 : rump - face * 30;
+    if (Math.abs(px - tx) > 22) {
+      const go = tx > px ? 'ArrowRight' : 'ArrowLeft';
+      if (pitAhead(s, Math.sign(tx - px))) { await hold([]); await sleep(40); return; }
+      await hold([go]); await sleep(45); return;
+    }
+    await hold([]);
+    if (p.face !== dir) await tap(toward, 25);
+    await tap('KeyX', 40); await sleep(170); await tap('KeyX', 40); await sleep(170);
+    if (/tossrecover|kickrecover|recover|skid/.test(st)) { await backOff(s, -dir, 140); await hold([]); }
+    return;
+  }
+  // NEUTRAL: well off his snout, on the side of him with the most floor — so
+  // a charge she jumps runs on into the rock behind her and stuns him there
+  const AR = 38 * TL;                            // the arena: mouth rock to the shelf's face
+  const want = clamp(bx + (bx < AR / 2 ? 340 : -340), 120, AR - 260);
+  if (Math.abs(px - want) > 40 && !(dSn < 150 && front)) {
+    const go = want > px ? 'ArrowRight' : 'ArrowLeft';
+    await hold([go]); await sleep(60); return;
+  }
+  if (front && dSn < 150) { await backOff(s, -dir, 120); await hold([]); return; }
+  await hold([]); if (p.face !== dir) await tap(toward, 25); await sleep(40);
 }
 async function genericBoss(s) {
   const b = s.boss;

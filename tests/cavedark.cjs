@@ -52,6 +52,10 @@ const check = (name, ok, detail) => {
 
   const r = await page.evaluate(async () => {
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
+    // the quarry's light, not its fight: GRAVEHORN (js/gravehorn.js) has left
+    // the stone, so the pillar stands in the dark alone — as it does once she
+    // can reach it. His fight is tests/gravehorn.cjs.
+    sv.flags.bossHorn = 1;
     sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
     startGame(sv);
     // THE HARNESS OWNS THE CLOCK.

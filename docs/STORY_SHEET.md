@@ -33,7 +33,8 @@ chosen at runtime by `sageRevealLines` / `ratchetStandingKey`
 | 8 | dent_before_forge | A0B *(optional)* | `nfMeet`, `on_A0B\|ratchet` (+ `ratchetSays`) | — | Ratchet | The lion threw her; claws will not answer it; the marble comes first. | Returning to the workshop after the corridor | `@ratchetStanding` → `sl_ratchet_dent` |
 | 9 | way_down | A5 | — | — | the terminal under the hub | A sub-hatch was sealed after an anomalous signal. | Ratchet: the loose floor at the hub's west end, strike straight down (q_where_ratchet_forge); the break_down hint over the loose rock | `q_where_ratchet_forge` |
 | 10 | beacon | CV2 | — | `beacon` | the Deaf System's log | The deaf survived the song underground and quarried this seam. | The sound through the rock since the meadow, and the rubble that answers a strike | — |
-| 11 | quarry | CV3 | `heal` (+ `burst`) | `pl_cshard` | none (pl_hint) | Claws glance off raw marble; the charged burst frees it. | Ratchet: raw marble in the caves beneath the meadow (q_ask_ratchet_forge); pl_hint at the stone | `pl_hint` |
+| 10b | gravehorn | CV3 | — | `ghMet`, `bossHorn` | GRAVEHORN, First Soldier of the Eye | He is the Eye's own heavy trooper, posted on the raw marble: it stays buried. Beaten, he backs into the rock — it is not over, and the Eye sees her. | The quarry road itself: the chalk arrows end in his cavern and he steps out of the dark at her; once he has spoken, the objective names him (op_o_gravehorn) | `grv_intro`, `grv_phase2`, `grv_down`, `op_o_gravehorn` |
+| 11 | quarry | CV3 | `heal`, `bossHorn` (+ `burst`) | `pl_cshard` | none (pl_hint) | Claws glance off raw marble; the charged burst frees it. | Ratchet: raw marble in the caves beneath the meadow (q_ask_ratchet_forge); pl_hint at the stone | `pl_hint` |
 | 12 | forge | A0B | `pl_cshard`, `on_A0B\|ratchet` (+ `forgeReady`) | `crystal`, `ratchetCamp` | Ratchet | He shapes the marble into the PURIFIER, then moves his tools to the camp by the lion's enclosure. | Ratchet's own errand: bring a piece back to my workshop (q_ask_ratchet_forge) | `q_thanks_ratchet_forge`, `sl_ratchet_moving`, `i_crystald` |
 | 13 | forged_line | A3 | `crystal`, `ratchetCamp` (+ `ratchetSays`) | — | Ratchet (at the camp) | The first Sage is behind the maintenance passage beside the quarry; clear their binding before the guardian. | Ratchet himself, at the forge: 'Find me there' (sl_ratchet_moving) | `@ratchetStanding` → `sl_ratchet_forged` |
 | 14 | alpha | A10 | `crystal` | `alpha`, `bossAlpha` | THE ALPHA (no words) | Optional: the pack follows its guardian; the white blade releases it. | Ratchet's optional errand at the forge (q_ask_alpha_pack); the den's marked entrance in the hub (alpha_den) | — |
@@ -69,9 +70,10 @@ line itself is the introduction (the beat's `introduces`).
 | Servo | `ratchetSpareGiven`, `on_A1\|servo` |
 | NULLFANG | `nfMeet`, `chimeRevealed` |
 | CHIME | `chimeRevealed`, `bossChime` |
+| GRAVEHORN | `ghMet` (he names himself in CV3) |
 | the Sage | `crystal`, `sageTame_GA1D` |
 | the Data Conduits | `bossGlitch` |
-| the Eye | `bossLens` |
+| the Eye | `bossLens`, `ghMet` (GRAVEHORN names whom he serves) |
 | Mono | `on_B3B\|mono` |
 | Kerf | `vaultOpen` |
 | the Prowler | `bossPrism` |
