@@ -11825,7 +11825,8 @@ function wakeStart() {
   // unplugs and wakes up should be at the beginning, right after choosing
   // ... before the game plays"). She is held here; panelsTick opens them on
   // the first playing frame and lets the waking run when they close.
-  if (fault && typeof panelsSeq === 'function' && panelsSeq('wake')) {
+  // (never in the Forge: the owner's editor opens straight into the world)
+  if (fault && !(typeof window !== 'undefined' && window.EDITOR) && typeof panelsSeq === 'function' && panelsSeq('wake')) {
     const S = typeof panelsState === 'function' ? panelsState() : null;
     if (S && !S.seen.wake && !S.past.wake) { G.wake.pend = true; return; }
   }
@@ -11836,7 +11837,11 @@ function wakeStart() {
 }
 function updateWake(dt) {
   if (!G.wake) return;
-  if (G.wake.pend) return;               // the wake's pages are still to come
+  // the wake's pages are still to come — in the cradle room only: a save that
+  // starts somewhere else (a load straight into another room) wakes as it
+  // always did, without them
+  if (G.wake.pend && G.roomId === 'W1') return;
+  if (G.wake.pend) G.wake.pend = false;
   if (G.wake.pend === false && !G.wake.go) {
     G.wake.go = 1;
     if (typeof sfx === 'function') sfx('metal');

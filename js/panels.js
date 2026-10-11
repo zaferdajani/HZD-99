@@ -351,7 +351,7 @@ function panelsTick(dt) {
   // THE WAKE'S PAGES come before her first step: wakeStart left her held
   // (G.wake.pend) and the pages open as soon as they have arrived — or after
   // a few seconds regardless, so a slow connection never strands her.
-  if (G.wake && G.wake.pend) {
+  if (G.wake && G.wake.pend && G.roomId === 'W1') {
     const w = panelsSeq('wake');
     if (!w || S.seen.wake || S.past.wake) { G.wake.pend = false; return false; }
     panelsLoad(w); G.wake.pendT = (G.wake.pendT || 0) + dt;
