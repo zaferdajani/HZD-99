@@ -11680,7 +11680,18 @@ class Boss {
     if (this.meet) return;
     // GRAVEHORN runs his own machine end to end (js/gravehorn.js): no fork, no
     // midpoint, no purification — he is the Eye's soldier, not a guardian.
-    if (this.kind === 'horn') { ghStep(this, dt); return; }
+    if (this.kind === 'horn') {
+      // A STAGGER FROM OUTSIDE HIS OWN MACHINE (the Song, a weakness) holds
+      // him where he stands, as it holds every guardian — none of his own
+      // moves use stagT, so without this it was set and never spent. His
+      // shots in the air keep flying; the cinematic beats are not interrupted.
+      if (this.stagT > 0 && !GH_CINE[this.st] && this.st !== 'dorm') {
+        this.stagT -= dt; this.vx = 0;
+        if (this.missiles) ghProjStep(this, dt);
+        return;
+      }
+      ghStep(this, dt); return;
+    }
     // THE WEIGHT PASS (#93, the code half). Every guardian carries momentum
     // now, from one place, for every boss that exists or will ever exist:
     // a lean INTO acceleration, and a landing squash when a fall dies. The

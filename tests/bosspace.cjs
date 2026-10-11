@@ -58,6 +58,13 @@ const WIND = /(^crouch$|warn|tell|wind|charge|cast|call|prep|coil|aim|lock|summo
     const r = await page.evaluate(async ({ B, secs }) => {
       const sv = newSave(1);
       sv.time = 99; sv.flags.tut = 1;
+      // ...and she has WOKEN: every player who reaches a guardian did that in
+      // W1, once. A save without it carries the waking's pages (wakeStart,
+      // the owner's 2026-10-11 order: pages before the game plays) into the
+      // boss room, and they opened over the fight — 3-5 s of every 20 s
+      // window charged to the guardian as "standing still" (NULLFANG read
+      // 34.6% idle, GRAVEHORN 100% in a loaded suite).
+      sv.flags.woke = 1;
       sv.abil = { dash: 1, djump: 1, wall: 1, emp: 1, key: 1 };
       startGame(sv);
       loadRoom(B.room);

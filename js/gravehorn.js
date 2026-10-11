@@ -1345,6 +1345,13 @@ function ghLand(b, F, i, run) {
 }
 // ---- the picture -------------------------------------------------------------
 function drawGravehorn(c, b) {
+  // any construction route draws: a body spawned and drawn without ever
+  // stepping (the infection roster, an art harness) has no shots in the air
+  // and both horns seated — never the entrance's dark, which only ghInit sets
+  if (!b.missiles) b.missiles = [];
+  if (!b.rocks) b.rocks = [];
+  if (b.hornBig == null) b.hornBig = true;
+  if (b.hornSmall == null) b.hornSmall = true;
   const P = ghPose(b);
   const legs = ghLegs(b, P);
   const cx = b.cx(), fy = b.y + b.h;
@@ -1387,6 +1394,10 @@ function drawGravehorn(c, b) {
   // the identity red LERPS toward the amber during a wind-up (Hue Law §3.5)
   const eyeCol = tk > 0 ? ghMix('#ff3b2a', TELL_COL, tk) : '#ff3b2a';
   const eyeP = P.headRig(-36, -12);
+  // the infection looks out through this eye (js/infection-eyes.js): reported
+  // where it is drawn this frame, in the head's own transform — so it rides
+  // the toss, the kneel, the hornless sag and the phase-two head alike
+  if (typeof infEyeMark === 'function') infEyeMark(c, eyeP[0], eyeP[1]);
   const er = 5 + 3 * Math.max(0, (P.eye || 1) - 1);
   const g1 = c.createRadialGradient(eyeP[0], eyeP[1], 0.5, eyeP[0], eyeP[1], er * 3.2);
   g1.addColorStop(0, '#ffffff'); g1.addColorStop(0.25, eyeCol); g1.addColorStop(1, 'rgba(255,40,30,0)');
