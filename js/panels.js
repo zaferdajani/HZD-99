@@ -49,37 +49,74 @@ const PANEL_CONDUITS = 'assets/backgrounds/gate_conduits.jpg';
 // A panel: src (the page master), crop [x, y, w, h] in that page's pixels,
 // cap (caption key | null), who (speaker name key), baked (the crop already
 // carries the page's own lettering of `cap`), move (in | out | left | right),
-// focus [fx, fy] for the push, cond(saveState) for a panel that depends on
+// focus [fx, fy] for the push, cond(panelState, flags) for a panel that depends on
 // what actually happened, ref (page/panel, for the map document).
 const PG_FULL = [0, 0, PANEL_FULL.w, PANEL_FULL.h];
 const PANEL_SEQ = [
+  // 2026-10-11 (owner): "either you use a comic to prepare for an event or to
+  // show an event after it ends." THE WAKE plays before the first step — right
+  // after the difficulty is chosen, ahead of the waking itself (wakeStart
+  // holds her until it ends). It is never room-triggered (`manual`).
+  { id: 'wake', title: 'pn_s_wake', room: 'W1', prefetch: ['W1'], manual: true,
+    event: 'new game: after the difficulty card, before the waking (wakeStart)',
+    when: () => false,
+    past: f => !!f.woke,
+    panels: [
+      { ref: 'game: w_cradle', src: PANEL_GAME('w_cradle'), crop: [0, 0, 1600, 1600], cap: 'pc_w_cradle', move: 'in', focus: [0.5, 0.45] },
+      { ref: 'game: w_eyes', src: PANEL_GAME('w_eyes'), crop: [0, 0, 1600, 1986], cap: 'pc_w_wake', move: 'in', focus: [0.5, 0.4] },
+      { ref: 'game: w_sit', src: PANEL_GAME('w_sit'), crop: [0, 0, 1600, 679], cap: null, move: 'in', focus: [0.3, 0.5], hold: 2.2 },
+      { ref: 'game: w_unplug', src: PANEL_GAME('w_unplug'), crop: [0, 0, 1600, 1600], cap: null, move: 'in', focus: [0.6, 0.4], hold: 1.8 },
+      { ref: 'game: w_quiet', src: PANEL_GAME('w_quiet'), crop: [0, 0, 1600, 893], cap: 'pc_quiet', move: 'in', focus: [0.4, 0.45] },
+    ] },
+  // ...and the door: going out of the bay, to the city, the moment she has.
   { id: 'bay', title: 'pn_s_bay', room: 'W2', prefetch: ['W1', 'W2'],
-    event: 'woke — first arrival outside the service bay (W1 → W2)',
+    event: 'out of the service bay door, first arrival on the road (W1 → W2)',
     when: f => !!f.woke,
     past: (f, s) => !!f.gateOpened || (!!f.woke && G.roomId !== 'W1'),
     panels: [
-      { ref: 'p04 panel 2', src: PANEL_CLEAN(4), crop: [52, 599, 385, 362], cap: null, move: 'in', focus: [0.45, 0.4] },
-      { ref: 'p04 panel 3', src: PANEL_CLEAN(4), crop: [461, 599, 685, 362], cap: 'pc_quiet', move: 'in', focus: [0.4, 0.45] },
-      { ref: 'p04 panel 5', src: PANEL_CLEAN(4), crop: [52, 1308, 1094, 337], cap: 'pc_door', move: 'in', focus: [0.5, 0.55] },
-      { ref: 'p05 panel 1', src: PANEL_CLEAN(5), crop: [400, 33, 762, 341], cap: 'pc_city', move: 'out', focus: [0.3, 0.5] },
+      { ref: 'game: d_walk', src: PANEL_GAME('d_walk'), crop: [0, 0, 1600, 679], cap: null, move: 'right', focus: [0.4, 0.6], hold: 2.0 },
+      { ref: 'game: d_door', src: PANEL_GAME('d_door'), crop: [0, 0, 1600, 679], cap: 'pc_door', move: 'in', focus: [0.5, 0.55] },
+      { ref: 'game: d_road', src: PANEL_GAME('d_road'), crop: [0, 0, 1600, 679], cap: 'pc_city', move: 'out', focus: [0.3, 0.5] },
     ] },
   { id: 'gate', title: 'pn_s_gate', room: 'A0', prefetch: ['W2', 'A0'],
-    event: 'gateOpened — first arrival inside the city gate (W2 → A0)',
+    event: 'gateOpened — through the gates, first arrival inside the city (W2 → A0)',
     when: f => !!f.gateOpened,
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']),
     panels: [
-      { ref: 'p05 panel 3', src: PANEL_CLEAN(5), crop: [38, 722, 1125, 626], cap: 'pc_gates', move: 'out', focus: [0.5, 0.6] },
-      { ref: 'p05 panel 4', src: PANEL_CLEAN(5), crop: [38, 1370, 1124, 386], cap: 'pc_closed', move: 'in', focus: [0.5, 0.5] },
+      { ref: 'game: g_gates', src: PANEL_GAME('g_gates'), crop: [0, 0, 1600, 893], cap: 'pc_gates', move: 'out', focus: [0.5, 0.6] },
+      { ref: 'game: g_closed', src: PANEL_GAME('g_closed'), crop: [0, 0, 1600, 679], cap: 'pc_closed', move: 'in', focus: [0.5, 0.5] },
     ] },
-  // the corrected opening as the game plays it: his own tag, his own battery
-  // from his own drawer, the board, and then what he tells her
+  // THE LETTER IS READ IN PAGES (owner, 2026-10-11: "When I take it to read
+  // what's happening ... instead of typing the events, show comics of the
+  // event"). It plays when she reads the tag (opening.js opRatchet), BEFORE
+  // the drawer and the repair — the story of the battery is known first.
+  { id: 'letter', title: 'pn_s_letter', room: 'A0B', prefetch: ['A0', 'A0B'], manual: true,
+    event: "Ratchet's letter read on his dark body (opNote), before the drawer and the repair",
+    when: () => false,
+    // (any save already past the repair, by any route, has read it)
+    past: f => !!(f.opNote || f.ratchetRepaired || f['on_A0B|ratchet'] || f.pl_cshard || f.crystal),
+    panels: [
+      { ref: 'game: letter', src: PANEL_GAME('letter'), crop: PG_FULL, cap: 'pc_l_tag', move: 'in', focus: [0.3, 0.45] },
+      { ref: 'game: l_song', src: PANEL_GAME('l_song'), crop: [0, 0, 1600, 893], cap: 'pc_l_song', move: 'in', focus: [0.35, 0.45] },
+      { ref: 'game: l_marble', src: PANEL_GAME('l_marble'), crop: [0, 0, 1600, 893], cap: 'pc_l_marble', move: 'in', focus: [0.5, 0.45] },
+      { ref: 'game: l_cell', src: PANEL_GAME('l_cell'), crop: [0, 0, 1600, 893], cap: 'pc_l_cell', move: 'in', focus: [0.6, 0.65] },
+      { ref: 'game: letter', src: PANEL_GAME('letter'), crop: PG_FULL, cap: 'pc_l_hope', move: 'out', focus: [0.55, 0.45] },
+    ] },
+  // the drawer, after she has opened it: his battery, where he said
+  { id: 'drawer', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'],
+    event: "his battery taken from the drawer (ratchetCell in hand), before the repair",
+    when: f => !!f.opNote && !f.ratchetRepaired && typeof invCount === 'function' && invCount('ratchetCell') > 0,
+    past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet'] || f.pl_cshard || f.crystal),
+    panels: [
+      { ref: 'game: drawer', src: PANEL_GAME('drawer'), crop: PG_FULL, cap: 'pc_drawer', move: 'in', focus: [0.35, 0.6] },
+    ] },
+  // AFTER the board: him waking, and what he tells her. (The letter and the
+  // drawer used to play here, after the repair — the story told backwards.)
   { id: 'ratchet', title: 'pn_s_ratchet', room: 'A0B', prefetch: ['A0B'],
     event: "Ratchet's battery restored (ratchetRepaired / on_A0B|ratchet), after his wake talk and errand",
     when: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']) && panelsQuest('ratchet_forge') !== 'none',
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']),
     panels: [
-      { ref: 'game: letter', src: PANEL_GAME('letter'), crop: PG_FULL, cap: 'pc_letter', move: 'in', focus: [0.3, 0.45] },
-      { ref: 'game: drawer', src: PANEL_GAME('drawer'), crop: PG_FULL, cap: 'pc_drawer', move: 'in', focus: [0.35, 0.6] },
       { ref: 'game: repair', src: PANEL_GAME('repair'), crop: [0, 0, 1344, 752], cap: 'pc_awake', move: 'in', focus: [0.65, 0.35] },
       { ref: 'p09 panel 1', src: PANEL_CLEAN(9), crop: [19, 17, 650, 389], cap: 'pc_necklace', who: 'n_ratchet', move: 'in', focus: [0.5, 0.55] },
       { ref: 'p09 panel 2', src: PANEL_CLEAN(9), crop: [19, 418, 670, 359], cap: 'pc_song', who: 'n_ratchet', move: 'left', focus: [0.6, 0.5] },
@@ -89,9 +126,9 @@ const PANEL_SEQ = [
     when: () => true,
     past: (f, s) => !!(s.visited && s.visited.CV1) || !!f.pl_cshard || !!f.crystal,
     panels: [
-      { ref: 'p15 panel 5', src: PANEL_CLEAN(15), crop: [395, 1200, 770, 558], cap: 'pc_breathing', move: 'in', focus: [0.45, 0.45] },
-      { ref: 'p16 panel 1', src: PANEL_CLEAN(16), crop: [69, 74, 690, 427], cap: null, move: 'right', focus: [0.5, 0.5] },
-      { ref: 'p16 panel 3', src: PANEL_CLEAN(16), crop: [69, 523, 1068, 305], cap: null, move: 'in', focus: [0.5, 0.6] },
+      { ref: 'game: cv_mouth', src: PANEL_GAME('cv_mouth'), crop: [0, 0, 1600, 1195], cap: 'pc_breathing', move: 'in', focus: [0.45, 0.45] },
+      { ref: 'game: cv_walk', src: PANEL_GAME('cv_walk'), crop: [0, 0, 1600, 1073], cap: null, move: 'right', focus: [0.5, 0.5] },
+      { ref: 'game: cv_dark', src: PANEL_GAME('cv_dark'), crop: [0, 0, 1600, 679], cap: null, move: 'in', focus: [0.5, 0.6] },
     ] },
   // the marble freed: why the burst matters, and that it is material, not a blade
   { id: 'marble', title: 'pn_s_marble', room: 'CV3', prefetch: ['CV2', 'CV3'],
@@ -109,9 +146,9 @@ const PANEL_SEQ = [
     when: f => !!f.crystal,
     past: f => !!f.crystal,
     panels: [
-      { ref: 'p18 panel 2', src: PANEL_CLEAN(18), crop: [42, 617, 1114, 355], cap: 'pc_forge', who: 'n_ratchet', move: 'in', focus: [0.55, 0.6] },
+      { ref: 'game: f_forge', src: PANEL_GAME('f_forge'), crop: [0, 0, 1600, 679], cap: 'pc_forge', who: 'n_ratchet', move: 'in', focus: [0.55, 0.6] },
       { ref: 'p18 panel 3', src: PANEL_CLEAN(18), crop: [52, 1120, 426, 620], cap: 'pc_blade', move: 'in', focus: [0.45, 0.75] },
-      { ref: 'p18 panel 5', src: PANEL_CLEAN(18), crop: [505, 1345, 300, 396], cap: null, move: 'out', focus: [0.5, 0.5] },
+      { ref: 'game: f_blade', src: PANEL_GAME('f_blade'), crop: [0, 0, 1600, 2143], cap: null, move: 'out', focus: [0.5, 0.5] },
     ] },
   // the way to the first sage: the door that opens beside the stump she cut
   { id: 'passage', title: 'pn_s_passage', room: 'GA1T', prefetch: ['CV3', 'GA1T'],
@@ -132,7 +169,7 @@ const PANEL_SEQ = [
     panels: [
       { ref: 'p14 panel 1', src: PANEL_CLEAN(14), crop: [23, 18, 1154, 334], cap: null, hold: 1.4, move: 'left', focus: [0.5, 0.5] },
       // only if the swipe actually took a core: the interactive meeting can be dodged
-      { ref: 'p14 panel 2', src: PANEL_CLEAN(14), crop: [23, 371, 1154, 660], cap: 'pc_core', move: 'in', focus: [0.6, 0.45],
+      { ref: 'game: m_down', src: PANEL_GAME('m_down'), crop: [0, 0, 1600, 893], cap: 'pc_core', move: 'in', focus: [0.6, 0.45],
         cond: s => !!s.meetHit },
       { ref: 'p14 panel 3', src: PANEL_CLEAN(14), crop: [48, 1185, 540, 360], cap: null, move: 'right', focus: [0.5, 0.5] },
       { ref: 'p14 panel 4', src: PANEL_CLEAN(14), crop: [605, 1185, 547, 275], cap: 'pc_bored', move: 'right', focus: [0.5, 0.5] },
@@ -151,16 +188,16 @@ const PANEL_SEQ = [
     when: f => !!f.sageTame_GA1D,
     past: f => !!f.sageTame_GA1D,
     panels: [
-      { ref: 'p25 panel 3', src: PANEL_CLEAN(25), crop: [20, 562, 1161, 455], cap: 'pc_knelt', move: 'in', focus: [0.3, 0.5] },
+      { ref: 'game: s_ring', src: PANEL_GAME('s_ring'), crop: [0, 0, 1600, 679], cap: 'pc_knelt', move: 'in', focus: [0.3, 0.5] },
       { ref: 'p26 panel 1', src: PANEL_CLEAN(26), crop: [52, 42, 1096, 310], cap: 'pc_cuts', move: 'right', focus: [0.5, 0.5] },
-      { ref: 'p26 panel 2', src: PANEL_CLEAN(26), crop: [52, 380, 1097, 605], cap: 'pc_letgo', move: 'in', focus: [0.6, 0.4] },
-      { ref: 'p26 panel 3', src: PANEL_CLEAN(26), crop: [52, 1013, 1097, 299], cap: 'pc_cell', move: 'in', focus: [0.65, 0.5] },
+      { ref: 'game: s_cleanse', src: PANEL_GAME('s_cleanse'), crop: [0, 0, 1600, 893], cap: 'pc_letgo', move: 'in', focus: [0.6, 0.4] },
+      { ref: 'game: s_cell', src: PANEL_GAME('s_cell'), crop: [0, 0, 1600, 679], cap: 'pc_cell', move: 'in', focus: [0.65, 0.5] },
       // THE REVELATION — why she keeps losing, and where to go. The bell
       // panel is only true while the bell still rings (sageRevealLines says
       // the same thing in words).
       { ref: 'game: sage_rev', src: PANEL_GAME('sage_rev'), crop: PG_FULL, cap: 'pc_s_point', move: 'in', focus: [0.7, 0.35] },
       { ref: 'game: sage_bell', src: PANEL_GAME('sage_bell'), crop: [0, 0, 1600, 679], cap: 'pc_s_bell', move: 'out', focus: [0.4, 0.4],
-        cond: s => !(s.flags && s.flags.bossChime) },
+        cond: (s, f) => !f.bossChime },
     ] },
   { id: 'chime', title: 'pn_s_chime', room: 'A9', prefetch: ['A8', 'A9'],
     event: 'CHIME silenced (bossChime), once its cell is paid',
@@ -169,7 +206,7 @@ const PANEL_SEQ = [
     panels: [
       { ref: 'p20 panel 2', src: PANEL_CLEAN(20), crop: [425, 49, 725, 505], cap: 'pc_singing', move: 'in', focus: [0.5, 0.4] },
       { ref: 'p20 panel 4', src: PANEL_CLEAN(20), crop: [425, 1091, 725, 298], cap: 'pc_nobody', move: 'in', focus: [0.45, 0.6] },
-      { ref: 'p20 panel 5', src: PANEL_CLEAN(20), crop: [425, 1417, 725, 323], cap: 'pc_made', move: 'in', focus: [0.45, 0.5] },
+      { ref: 'game: c_bell', src: PANEL_GAME('c_bell'), crop: [0, 0, 1600, 679], cap: 'pc_made', move: 'in', focus: [0.45, 0.5] },
     ] },
   { id: 'free', title: 'pn_s_free', room: 'A4', prefetch: ['A3', 'A4'],
     event: 'NULLFANG purified (bossGlitch), after the purification film and its rewards',
@@ -179,8 +216,8 @@ const PANEL_SEQ = [
       // the fight, on the game's own lion, and the cut that frees rather than kills
       { ref: 'game: fight_a', src: PANEL_GAME('fight_a'), crop: PG_FULL, cap: null, hold: 1.4, move: 'left', focus: [0.5, 0.45] },
       { ref: 'game: fight_b', src: PANEL_GAME('fight_b'), crop: PG_FULL, cap: 'pc_f_cut', move: 'in', focus: [0.5, 0.45] },
-      { ref: 'p24 left panel 1', src: PANEL_CLEAN(24), crop: [68, 580, 520, 313], cap: null, move: 'in', focus: [0.6, 0.5] },
-      { ref: 'p24 left panel 2', src: PANEL_CLEAN(24), crop: [69, 917, 585, 391], cap: 'pc_oath', move: 'in', focus: [0.55, 0.65] },
+      { ref: 'game: f_strike', src: PANEL_GAME('f_strike'), crop: [0, 0, 1600, 893], cap: null, move: 'in', focus: [0.6, 0.5] },
+      { ref: 'game: f_walk', src: PANEL_GAME('f_walk'), crop: [0, 0, 1600, 1073], cap: 'pc_oath', move: 'in', focus: [0.55, 0.65] },
     ] },
   // THE TEASER. Before she climbs out of the Meadows, never after: the camp's
   // climb (A3, tiles 17-29) with NULLFANG free, or B1 if she got there first.
@@ -296,7 +333,7 @@ function panelsDue() {
     PN.queue.shift();
   }
   for (const s of PANEL_SEQ) {
-    if (S.seen[s.id] || S.past[s.id]) continue;
+    if (S.seen[s.id] || S.past[s.id] || s.manual) continue;
     // a beat already overtaken by the story is not shown late, out of order
     if (s.stale && s.stale(S, f)) continue;
     if (G.roomId === s.alsoRoom) { if (s.id === 'ch2' && f.bossGlitch) return s; continue; }
@@ -311,6 +348,16 @@ function panelsTick(dt) {
   if (!G.save || (typeof isHero === 'function' && isHero())) return false;
   if (G.state !== 'PLAY') { PN.ready = 0; return false; }
   const S = panelsState();
+  // THE WAKE'S PAGES come before her first step: wakeStart left her held
+  // (G.wake.pend) and the pages open as soon as they have arrived — or after
+  // a few seconds regardless, so a slow connection never strands her.
+  if (G.wake && G.wake.pend) {
+    const w = panelsSeq('wake');
+    if (!w || S.seen.wake || S.past.wake) { G.wake.pend = false; return false; }
+    panelsLoad(w); G.wake.pendT = (G.wake.pendT || 0) + dt;
+    if (!panelsLoaded(w) && G.wake.pendT < 5) return false;
+    return panelsStart('wake', { then: () => { if (G.wake) G.wake.pend = false; } });
+  }
   if (PN.room !== G.roomId) { PN.room = G.roomId; PN.settle = 0; }
   PN.settle += dt;
   // THE CORRIDOR: did the swipe land? Recorded while it happens, kept in the
@@ -339,7 +386,8 @@ function panelsPlay(id, opts) { return panelsStart(id, opts); }
 // ---- the player -------------------------------------------------------------
 function panelsList(seq) {
   const S = panelsState() || {};
-  return seq.panels.filter(p => !p.cond || p.cond(S));
+  const f = (G.save && G.save.flags) || {};
+  return seq.panels.filter(p => !p.cond || p.cond(S, f));
 }
 function panelsClearInput() {
   if (typeof releaseInput === 'function') releaseInput();
@@ -361,7 +409,9 @@ function panelsStart(id, opts) {
   } catch (e) { snap = null; }
   G.panels = { seq, list: panelsList(seq), i: 0, t: 0, ph: 'in', snap, prev: null,
     reveal: null, hold: 0, wasDown: true, confirmKey: false, wait: 0,
-    back: o.replay ? 'PANELLIST' : (G.state === 'PANELLIST' ? 'PANELLIST' : 'PLAY'), replay: !!o.replay };
+    back: o.replay ? 'PANELLIST' : (G.state === 'PANELLIST' ? 'PANELLIST' : 'PLAY'), replay: !!o.replay,
+    // what the story does next once the pages close (the waking, the letter read)
+    then: o.replay ? null : (o.then || null) };
   // SEEN AS IT BEGINS: a reload mid-sequence never shows it a second time —
   // it is in the replay list instead
   if (!S.seen[id]) { S.n = (S.n | 0) + 1; S.seen[id] = S.n; if (typeof persist === 'function') persist(); }
@@ -471,6 +521,7 @@ function panelsEnd() {
   panelsClearInput();
   G.state = P && P.back === 'PANELLIST' ? 'PANELLIST' : 'PLAY';
   if (typeof persist === 'function') persist();
+  if (P && typeof P.then === 'function') P.then();
 }
 // ---- drawing ------------------------------------------------------------------
 function panelsWrap(str, maxW, font) {

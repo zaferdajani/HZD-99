@@ -1,0 +1,14 @@
+{
+ "date": "2026-10-11",
+ "model": "gpt_image_2_5",
+ "why": "owner: the repair board typed its parts; every part and socket is now a picture",
+ "jobs": {
+  "bridge": "01b9a2c3-ba34-4893-87d1-faa513c69859",
+  "relay": "596d2b19-3958-4204-8e62-2a683dafac92",
+  "plus": "951ebf06-26ac-41e3-99c9-832cb7e76a9d",
+  "minus": "b545cc38-5e85-4d2c-836f-ce6b03c85fee",
+  "positive": "b91f6ff4-f8cb-47f7-ab8c-3556cb568569",
+  "negative": "5fe3544d-d2de-4a0b-a93d-08574aa077e6",
+  "socket": "255437b7-b79c-43d2-95e4-3dffa3b15548"
+ }
+}

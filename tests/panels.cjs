@@ -103,7 +103,10 @@ async function tapKey(page, code) {
     // each at its event, in its room, once; and a save from before they existed
     // is not handed one as a recap of an event it already passed
     const newSeq = await page.evaluate(() => {
-      const want = { ratchet: ['letter', 'drawer', 'repair'], marble: ['marble_a', 'marble_b'], passage: ['passage_a', 'passage_b'],
+      // 2026-10-11 (owner): the letter's pages play when it is READ, before the
+      // repair; the drawer after the drawer; only his waking after the board
+      const want = { wake: ['w_cradle', 'w_eyes', 'w_unplug'], bay: ['d_door', 'd_road'], letter: ['letter', 'l_song', 'l_marble', 'l_cell'],
+        drawer: ['drawer'], ratchet: ['repair'], marble: ['marble_a', 'marble_b'], passage: ['passage_a', 'passage_b'],
         break: ['break_a', 'break_b'], sage: ['sage_rev', 'sage_bell'], free: ['fight_a', 'fight_b'], ch2: ['hatch', 'ch2_a', 'ch2_b', 'ch2_c'] };
       const miss = [];
       for (const id in want) { const s = panelsSeq(id); for (const n of want[id]) if (!s || !s.panels.some(p => p.src === PANEL_GAME(n))) miss.push(id + ':' + n); }
@@ -131,6 +134,45 @@ async function tapKey(page, code) {
       return { past: S.past, seen: S.seen, k: Object.keys(S.k).length };
     });
     check('an old save is not handed the marble, the door or the break as a recap', mig.past.marble && mig.past.passage && mig.past.break && !mig.past.bay, JSON.stringify(mig));
+    check('...nor the wake or the letter', mig.past.wake && mig.past.letter, JSON.stringify(mig.past));
+
+    // ---- THE ORDER OF THE OPENING (owner, 2026-10-11): pages prepare an event
+    // or follow it, never tell it backwards -----------------------------------
+    const order = await page.evaluate(() => {
+      const post = panelsSeq('ratchet').panels.map(p => p.src);
+      return { postHasLetter: post.some(src => /letter|drawer/.test(src)),
+        letterManual: !!panelsSeq('letter').manual, wakeManual: !!panelsSeq('wake').manual };
+    });
+    check('his letter and drawer are no longer told after the repair', !order.postHasLetter, JSON.stringify(order));
+    check('the wake and the letter are played by their moments, not by a room watch', order.letterManual && order.wakeManual);
+    // the wake: a new game holds her, the pages open first, the waking follows
+    const w0 = await page.evaluate(() => {
+      for (const k in keys) delete keys[k];
+      const sv = newSave(1); sv.time = 99; startGame(sv); loadRoom('W1'); G.state = 'PLAY'; G.dialog = null;
+      return { pend: !!(G.wake && G.wake.pend) };
+    });
+    check('a new game holds the waking until its pages have played', w0.pend, JSON.stringify(w0));
+    const wFired = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'wake', 9000);
+    check('the wake pages open before her first step', wFired, await page.evaluate(() => G.state + ' ' + (G.panels && G.panels.seq.id)));
+    const wFirst = await page.evaluate(() => G.panels && G.panels.list[0].src);
+    check('...beginning in the cradle', /w_cradle/.test(wFirst || ''), wFirst);
+    await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
+    await waitFor(page, () => G.state === 'PLAY', 4000);
+    const w1 = await page.evaluate(() => ({ wake: !!G.wake, pend: !!(G.wake && G.wake.pend), st: G.state }));
+    check('...and when they close, the waking itself runs', w1.wake && !w1.pend && w1.st === 'PLAY', JSON.stringify(w1));
+    // the letter: reading it plays the pages; it is not typed out; then opNote
+    await stage(page, 'A0B', { woke: 1, gateOpened: 1, tut: 1 });
+    const l0 = await page.evaluate(() => {
+      const r = (G.statics || []).concat(G.npcs || []).find(e => e && e.extra === 'ratchet');
+      if (!r) return { err: 'no ratchet' };
+      const said = opRatchet(r);
+      return { said, st: G.state, id: G.panels && G.panels.seq.id, dialog: !!G.dialog };
+    });
+    check('reading the letter plays its pages', l0.st === 'PANELS' && l0.id === 'letter' && !l0.dialog, JSON.stringify(l0));
+    await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
+    await waitFor(page, () => G.state === 'PLAY', 4000);
+    const l1 = await page.evaluate(() => ({ note: !!G.save.flags.opNote, dialog: !!G.dialog }));
+    check('...and when they close the letter counts as read (the drawer lesson follows)', l1.note && !l1.dialog, JSON.stringify(l1));
     await sleep(2500);
     const sMig = await state(page);
     check('...and standing in CV3 plays nothing', sMig.st === 'PLAY', JSON.stringify(sMig));

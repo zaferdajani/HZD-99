@@ -1,0 +1,206 @@
+{
+ "date": "2026-10-11",
+ "why": "owner: the hero shape changes between comic panels; every panel showing her is redrawn from its own page crop with the canon element, composition kept",
+ "panels": [
+  {
+   "file": "assets/manhua/ch1/game/w_cradle.webp",
+   "job": "14f5c6f0-2c97-40f8-b545-340c8d8b276b",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p03 panel 3",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/w_eyes.webp",
+   "job": "85b15d6c-81e0-4e6e-b9ff-f57421fb1b94",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p03 panel 4",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/w_sit.webp",
+   "job": "ebd83e5e-0645-4987-b157-d16b3e1b9c9f",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p04 panel 1",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/w_unplug.webp",
+   "job": "6014c84f-91d9-4e3a-b468-4f6be35eae79",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p04 panel 2",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/w_quiet.webp",
+   "job": "3fb4a2e7-c19d-4a41-b913-c61a4b9da7fb",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p04 panel 3",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/d_walk.webp",
+   "job": "53fd5d00-b662-41e8-8357-ccf8c0334fae",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p04 panel 4",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/d_door.webp",
+   "job": "4186c765-0bff-470e-ac5d-2aba2051f889",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p04 panel 5",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/d_road.webp",
+   "job": "9e5511ae-26b7-4059-b7ff-3bcdfb7fd07d",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p05 panel 1",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/g_gates.webp",
+   "job": "7e983e84-1a25-431a-be95-e6bcdaa65afc",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p05 panel 3",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/g_closed.webp",
+   "job": "4f8975bd-d872-4b78-b5c0-b527c6fdf1be",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p05 panel 4",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/cv_mouth.webp",
+   "job": "4a7c82a3-a15a-4936-b846-3acf6c8ffa32",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p15 panel 5",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/cv_walk.webp",
+   "job": "10141413-bf71-41f5-aa06-560d0b62b488",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p16 panel 1",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/cv_dark.webp",
+   "job": "6dd717c6-36b0-4c8c-8727-54229c571cca",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p16 panel 3",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/f_forge.webp",
+   "job": "55324fa0-acf8-4e6e-b3a6-5419f59c7de3",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p18 panel 2",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/f_blade.webp",
+   "job": "2efc16ae-2a7b-4b69-827d-0c962468c7b8",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p18 panel 5",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/m_down.webp",
+   "job": "c17ffb14-c6d3-494b-bef6-74d560bcb28d",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p14 panel 2",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/s_ring.webp",
+   "job": "19ca059e-e6c2-4fc6-9b5d-2877523c48ee",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p25 panel 3",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/s_cleanse.webp",
+   "job": "d76bf06e-1acc-46cf-a7aa-19e21d051a38",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p26 panel 2",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/s_cell.webp",
+   "job": "1bd323e3-f3fe-470f-ba55-51e7d3d6a229",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p26 panel 3",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/c_bell.webp",
+   "job": "31884233-b75c-4cc8-8926-266ef41cc0b7",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p20 panel 5",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/f_strike.webp",
+   "job": "df425448-aa33-4c2a-9db8-3237e657071d",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p24 left panel 1",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/f_walk.webp",
+   "job": "e967046b-acdb-433a-b60e-f82cdf42e6d7",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "p24 left panel 2",
+   "hero_element": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+   "ratchet_element": null
+  },
+  {
+   "file": "assets/manhua/ch1/game/l_song.webp",
+   "job": "af50a6ba-59a6-448e-ada5-f53916e14217",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "new: Ratchet letter backstory",
+   "hero_element": null,
+   "ratchet_element": "795a5cd6-b404-4623-bcc9-2b32351d71ab"
+  },
+  {
+   "file": "assets/manhua/ch1/game/l_marble.webp",
+   "job": "64dd1c5a-3338-4a43-82e0-dd61b5f7b3e6",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "new: Ratchet letter backstory",
+   "hero_element": null,
+   "ratchet_element": "795a5cd6-b404-4623-bcc9-2b32351d71ab"
+  },
+  {
+   "file": "assets/manhua/ch1/game/l_cell.webp",
+   "job": "84b8c348-6c4a-4619-8580-7e1d88e1ceca",
+   "model": "nano_banana_pro 2k",
+   "redraw_of": "new: Ratchet letter backstory",
+   "hero_element": null,
+   "ratchet_element": "795a5cd6-b404-4623-bcc9-2b32351d71ab"
+  }
+ ]
+}

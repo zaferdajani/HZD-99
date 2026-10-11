@@ -21,6 +21,67 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bf. GRAVEHORN — the Eye's rhino, the marble's guard (chapter one boss) ✱ QUEUED 2026-10-11 (code session, owner's order) — FIRE FIRST
+
+**The owner, 2026-10-11:** *"a very dangerous, evil rhino that works under the
+robot that stole the mother's song ... let it introduce itself as its right hand
+or its soldier ... this rhino shoots missiles as its horn leaves its body. It
+charges at you to hit you with the horn ... second phase will have an advanced
+rhino with two horns being shot, the small and the large ... it can kick if
+you're standing behind it."* And: *"send this rhino's concept to the artwork
+agent to generate it through Higgsfield."* The code session is building the
+fight now (`js/gravehorn.js`, CV3) on stand-in silhouettes that each plate below
+replaces the moment it lands — every renderer guards "the sheet is not here yet".
+
+**Who he is.** GRAVEHORN, *First Soldier of the Eye*. Not infected by accident:
+the Eye's own heavy trooper, posted in the quarry (CV3) to guard the raw marble
+— the one thing that can make a blade that cures. A huge armoured robot
+RHINOCEROS, about 2.2× her height at the shoulder and 3.6× her height long. A
+war machine, not an animal in armour: riveted gunmetal and blackened bronze
+plate, a heavy shoulder hump of layered armour, hazard-red markings, one
+glowing RED eye per side in a deep brow slot, a mouth grille. TWO horns sit in
+SOCKETS on the snout: a huge curved front horn and a short rear horn — each
+horn is a separate weapon with a small rocket nozzle hidden in its base,
+because his horns LEAVE HIS BODY as missiles and slot back in.
+
+**Palette, in words:** gunmetal grey, blackened bronze, oiled steel; hazard red
+stripes; eyes and nozzle glow RED-ORANGE; horn tips bone-ivory. Phase 2 adds
+molten red-orange cracks and jet vents. No cyan anywhere until he is beaten.
+
+**Rules for every plate:** strict SIDE VIEW facing LEFT, pure flat black
+background, subject only, no ground, no cast shadow, no text, one key light
+from upper left, same scale and same light across all parts (fire parts as
+edits WITH THE DESIGN PLATE ATTACHED as the reference, so shape and paint
+match). Separate parts must be complete where they are hidden by the body
+(overdraw the joint ends), cut flat at the joint.
+
+| # | file (`assets/characters/gravehorn/`) | what | model |
+|---|---|---|---|
+| 1 | `design.png` (archive only) | full body, standing, both horns seated — THE reference | nano_banana_pro 2k, 16:9 |
+| 2 | `body.webp` | torso barrel + shoulder hump + back plates; no head, no legs, no tail | gpt_image_2_5 edit of #1 |
+| 3 | `head.webp` | head + neck stub, jaw shut, horn SOCKETS EMPTY (no horns) | gpt edit |
+| 4 | `head_roar.webp` | same head, jaw open roaring, eye flared, sockets empty | gpt edit |
+| 5 | `horn_big.webp` | the big front horn alone, base nozzle visible | gpt edit |
+| 6 | `horn_small.webp` | the small rear horn alone, base nozzle visible | gpt edit |
+| 7–10 | `fleg_up`, `fleg_low` (with hoof), `hleg_up`, `hleg_low` (with hoof) | the four leg segments, cut flat at joints | gpt edits |
+| 11 | `tail.webp` | short armoured tail | gpt edit |
+| 12–15 | `body2`, `head2`, `horn_big2`, `horn_small2` | PHASE 2 "advanced": armour plates blown open, molten red cracks, jet vents along the spine, horns war-tipped red | gpt edits of 2/3/5/6 |
+| 16 | `assets/manhua/ch1/game/gh_intro_a.webp` | panel: he bursts out of the quarry dust in front of the glowing marble rock, towering over the tiny cat (canon element `467c8e08…`) | nano_banana_pro 2k 16:9 |
+| 17 | `…/gh_intro_b.webp` | panel: close-up of his head, red eye, horn raised, sneering (caption: he introduces himself) | nano 2k 16:9 |
+| 18 | `…/gh_phase2.webp` | panel: his armour bursts open, both horns ignite | nano 2k 16:9 |
+| 19 | `…/gh_down.webp` | panel: beaten, big horn snapped, he backs into the rock wall vowing the Eye will come | nano 2k 16:9 |
+
+Make a Higgsfield ELEMENT `gravehorn-drawn` from #1 once approved, so 16–19
+match the rig. Archive everything in `assets/source/gravehorn/` with
+`provenance.json` (job ids). Budget ≈ 2 + 13 × 0.25 + 4 × 2 ≈ 13 credits.
+
+**Wiring (code session owns it):** part names above are the keys `js/gravehorn.js`
+reads (`GH_PARTS`); pivots are measured from the keyed plates by the rig's own
+anchor table, so no plate needs hand-placed coordinates. Drop the files in and
+rebuild — the stand-in disappears part by part.
+
+---
+
 ## 2be. CHAPTER ONE AFTER THE OWNER'S CORRECTION — what art is still owed ✱ QUEUED 2026-10-09 (code session)
 
 Landed this pass (Higgsfield, wired, credited): the pack filmed whole (§2cc-0),

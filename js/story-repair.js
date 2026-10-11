@@ -4,6 +4,8 @@ let repairSession = null;
 const REPAIR_PARTS = ['cell', 'positive', 'negative', 'bridge'];
 const REPAIR_TARGETS = ['socket', 'plus', 'minus', 'relay'];
 const REPAIR_POS = [[16,43],[57,23],[57,73],[16,78],[38,43],[84,23],[84,73],[72,48]];
+// the authored picture of each part and socket (assets/source/repair-parts)
+function repairArt(name) { return 'assets/characters/gear/repair_' + (name === 'cell' ? 'battery' : name) + '.webp'; }
 function repairClearInput() {
   if (typeof releaseInput === 'function') releaseInput();
   for (const k in keys) delete keys[k];
@@ -43,9 +45,9 @@ function repairOpen(npc, onComplete) {
     #ratchet-repair button{font:inherit;color:inherit;cursor:pointer;border:1px solid #62727a;background:#192630;border-radius:12px;min-height:44px;padding:8px 14px;touch-action:none}
     #ratchet-repair button:focus-visible,#ratchet-repair button.selected{outline:3px solid #ffe4a3;outline-offset:3px}#ratchet-repair button:disabled{opacity:.42;cursor:default}
     #ratchet-repair .repair-board{position:relative;direction:ltr;aspect-ratio:2.48;margin:12px 0;background:#111920 url('assets/characters/gear/repair_panel.webp') center/100% 100%;border-radius:15px;overflow:hidden;border:1px solid #6e5b43}
-    #ratchet-repair .repair-node{position:absolute;transform:translate(-50%,-50%);width:12%;min-width:48px;height:21%;min-height:44px;padding:2px;font-size:clamp(11px,1.65vw,17px);font-weight:700;border:2px solid #83918d;background:rgba(12,21,27,.93);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px}
-    #ratchet-repair .repair-node[hidden]{display:none}#ratchet-repair .repair-node small{font-size:clamp(9px,1.1vw,12px);font-weight:500}#ratchet-repair [data-piece=cell],#ratchet-repair [data-target=socket]{width:18%;height:29%}
-    #ratchet-repair .repair-cell{width:100%;height:68%;object-fit:contain;pointer-events:none}#ratchet-repair .repair-node.placed{border-color:#79ddc5;background:#16382e}#ratchet-repair .repair-node.waiting{border-style:dashed}
+    #ratchet-repair .repair-node{position:absolute;transform:translate(-50%,-50%);width:13%;min-width:56px;height:28%;min-height:56px;padding:2px;font-size:clamp(11px,1.65vw,17px);font-weight:700;border:2px solid #83918d;background:rgba(12,21,27,.93);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px}
+    #ratchet-repair .repair-node[hidden]{display:none}#ratchet-repair .repair-node small{font-size:clamp(9px,1.1vw,12px);font-weight:500}#ratchet-repair [data-piece=cell],#ratchet-repair [data-target=socket]{width:17%;height:32%}
+    #ratchet-repair .repair-part{width:100%;height:66%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 3px 4px #000a)}#ratchet-repair .repair-node{position:absolute}#ratchet-repair .repair-on{position:absolute;inset:6% 10% 30%;width:80%;height:64%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 4px 5px #000c)}#ratchet-repair .repair-ghost img{width:72px;height:72px;object-fit:contain;display:block;margin:0 auto 4px}#ratchet-repair .repair-node.placed{border-color:#79ddc5;background:#16382e}#ratchet-repair .repair-node.waiting{border-style:dashed}
     #ratchet-repair svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}#ratchet-repair .repair-footer{display:flex;gap:14px;align-items:center;justify-content:space-between}#ratchet-repair .repair-footer p{margin:3px 0;color:#b5c4cc;font-size:13px}#ratchet-repair #repair-hint{min-height:2.5em;line-height:1.35;margin:10px 0 0}#ratchet-repair .repair-power{white-space:nowrap;background:#254b42;border-color:#7bd9be}
     #ratchet-repair [data-piece=positive],#ratchet-repair [data-target=plus]{border-color:#efb35d}#ratchet-repair [data-piece=negative],#ratchet-repair [data-target=minus]{border-color:#75c9f0}#ratchet-repair .repair-progress{direction:ltr;color:#92e4ce;font-size:12px;letter-spacing:.09em}#ratchet-repair .repair-ghost{position:fixed;z-index:10001;pointer-events:none;transform:translate(-50%,-50%);padding:12px;background:#19342e;border:2px solid #a2ecd4;border-radius:12px}
     @media(max-width:600px){#ratchet-repair .repair-card{padding:10px}#ratchet-repair .repair-board{aspect-ratio:1.45}#ratchet-repair .repair-node{height:19%;font-size:12px}#ratchet-repair .repair-footer{align-items:flex-start}#ratchet-repair .repair-footer p{font-size:11px}#ratchet-repair header button{font-size:12px;padding:6px}#ratchet-repair .repair-node small{font-size:9px}}
@@ -75,7 +77,11 @@ function repairOpen(npc, onComplete) {
     b.setAttribute(i<4?'data-piece':'data-target',name);
     b.style.left=REPAIR_POS[i][0]+'%'; b.style.top=REPAIR_POS[i][1]+'%';
     b.setAttribute('aria-label',t('repair_'+name));
-    if(name==='cell') {const im=document.createElement('img');im.src='assets/characters/gear/repair_battery.webp';im.alt='';im.draggable=false;im.className='repair-cell';b.appendChild(im);}
+    // EVERY PART AND SOCKET IS A PICTURE (owner, 2026-10-11: "you're not
+    // actually using shapes or images of batteries and stuff. You're just
+    // typing it"): the copper bridge looks like a bridge and the relay shows
+    // the gap it closes. The words stay underneath as labels.
+    {const im=document.createElement('img');im.src=repairArt(name);im.alt='';im.draggable=false;im.className='repair-part';b.appendChild(im);}
     const label=document.createElement('span');label.textContent=t('repair_'+name);b.appendChild(label);board.appendChild(b);
     b.addEventListener('click',()=>repairActivate(name,i<4));
   });
@@ -90,7 +96,7 @@ function repairOpen(npc, onComplete) {
   });
   root.addEventListener('pointermove',e=>{
     if(!drag || e.pointerId!==drag.id)return;
-    if(!drag.ghost && Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>8){drag.ghost=document.createElement('div');drag.ghost.className='repair-ghost';drag.ghost.textContent=t('repair_'+drag.node.dataset.piece);root.appendChild(drag.ghost);}
+    if(!drag.ghost && Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>8){drag.ghost=document.createElement('div');drag.ghost.className='repair-ghost';{const im=document.createElement('img');im.src=repairArt(drag.node.dataset.piece);im.alt='';drag.ghost.appendChild(im);const l=document.createElement('div');l.textContent=t('repair_'+drag.node.dataset.piece);drag.ghost.appendChild(l);}root.appendChild(drag.ghost);}
     if(drag.ghost){drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';}
   });
   const endDrag=e=>{
@@ -146,7 +152,8 @@ function repairRender(message) {
     const b=s.root.querySelector('[data-piece="'+REPAIR_PARTS[i]+'"]'),q=s.root.querySelector('[data-target="'+REPAIR_TARGETS[i]+'"]');
     b.disabled=i!==s.step||!!s.boot;b.hidden=i<s.step;b.classList.toggle('selected',s.selected===REPAIR_PARTS[i]);
     q.classList.toggle('placed',i<s.step);q.classList.toggle('waiting',i>=s.step);q.disabled=!!s.boot;
-    if(i===0&&s.step>0&&!q.querySelector('img')){const im=b.querySelector('img').cloneNode();q.prepend(im);}
+    // a part, once placed, is seen sitting in its socket
+    if(i<s.step&&!q.querySelector('.repair-on')){const im=document.createElement('img');im.src=repairArt(REPAIR_PARTS[i]);im.alt='';im.className='repair-on';q.appendChild(im);}
   }
   s.root.querySelector('.repair-power').disabled=s.step!==4||!!s.boot;
   s.root.querySelector('[data-repair-close]').disabled=false;

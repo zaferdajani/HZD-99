@@ -100,6 +100,7 @@ async function play(browser, mode) {
         x: player.x + player.w / 2, on: player.on, cores: player.cores, max: player.maxCores(),
         volts: player.volts, scrap: G.save.scrap, iq: G.save.iq | 0,
         dialog: G.dialog ? { name: G.dialog.name, line: G.dialog.lines[G.dialog.i], i: G.dialog.i, n: G.dialog.lines.length, art: G.dialog.art, demo: G.dialog.demo } : null,
+        pan: G.state === 'PANELS' && G.panels ? { id: G.panels.seq.id, i: G.panels.i, cap: (G.panels.list[G.panels.i] || {}).cap || null } : null,
         shopIdx: G.shopIdx, rech: !!G.recharge, wake: !!G.wake, cut: !!G.cut, gate: !!G.gateWalk, trans: !!G.trans,
         overlays, goal, goalRect: gr, chip,
         bench: G.save.bench && G.save.bench.room, podBanner: typeof OP !== 'undefined' && OP.podBanner > 0,
@@ -142,6 +143,9 @@ async function play(browser, mode) {
     if (s.state === 'PANELS') {
       if (!R.panels) R.panels = [];
       if (R.panels[R.panels.length - 1] !== s.room) R.panels.push(s.room);
+      // the pages are part of the story's order: the letter is READ in pages
+      const pk = s.pan ? s.pan.id + '|' + s.pan.i : '';
+      if (s.pan && pk !== lastDialog) { lastDialog = pk; R.dialogs.push({ step: s.step, room: s.room, panels: s.pan.id, cap: s.pan.cap, line: '' }); }
       await steer(null); await page.keyboard.press('Enter'); await page.waitForTimeout(350); continue;
     }
     // ---- the repair board, by its own buttons ----
@@ -304,7 +308,10 @@ async function play(browser, mode) {
     check(mode + ': every prompt names one control', !R.multiAction.length, R.multiAction.slice(0, 4));
     check(mode + ': every hint names her real controls (nothing left unfilled)', !R.unfilled.length, R.unfilled.slice(0, 3));
     const lines = R.dialogs.map(d => d.line || '');
-    const iLetter = lines.findIndex(l => /letter/i.test(l) && /socket/i.test(l));
+    // the letter is read in pages now (js/panels.js 'letter', 2026-10-11); a
+    // build without them still types it
+    let iLetter = R.dialogs.findIndex(d => d.panels === 'letter');
+    if (iLetter < 0) iLetter = lines.findIndex(l => /letter/i.test(l) && /socket/i.test(l));
     const iBatt = R.dialogs.findIndex(d => d.art === 'repairBattery');
     const iWake = R.dialogs.findIndex(d => /Ratchet/.test(d.line || '') && /I.m Ratchet/.test(d.line || ''));
     if (mode === 'desktop') {

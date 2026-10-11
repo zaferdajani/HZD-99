@@ -11757,6 +11757,14 @@ function wakeStart() {
   if (!G.save || (G.save.flags && G.save.flags.woke)) return;
   const fault = !isHero();
   G.wake = { t: fault ? 4.2 : 2, total: fault ? 4.2 : 2, fault };
+  // THE WAKE'S PAGES FIRST (owner, 2026-10-11: "the pages for when the hero
+  // unplugs and wakes up should be at the beginning, right after choosing
+  // ... before the game plays"). She is held here; panelsTick opens them on
+  // the first playing frame and lets the waking run when they close.
+  if (fault && typeof panelsSeq === 'function' && panelsSeq('wake')) {
+    const S = typeof panelsState === 'function' ? panelsState() : null;
+    if (S && !S.seen.wake && !S.past.wake) { G.wake.pend = true; return; }
+  }
   narrativeAudioTick();
   if (typeof sfx === 'function') sfx(fault ? 'metal' : 'powerUp');
   if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 4);
@@ -11764,6 +11772,12 @@ function wakeStart() {
 }
 function updateWake(dt) {
   if (!G.wake) return;
+  if (G.wake.pend) return;               // the wake's pages are still to come
+  if (G.wake.pend === false && !G.wake.go) {
+    G.wake.go = 1;
+    if (typeof sfx === 'function') sfx('metal');
+    if (typeof cam !== 'undefined') cam.shake = Math.max(cam.shake, 4);
+  }
   const before = G.wake.t;
   G.wake.t -= dt;
   if (G.wake.fault) {

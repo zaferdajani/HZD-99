@@ -74,7 +74,13 @@ function opRatchet(s) {
     // THE LETTER FIRST, always — it is what says there is a battery and where
     // it is. Read on the dark body, the way the den has always told it.
     if (invCount('ratchetCell') <= 0) {
-      opSay(t('op_letter'), ['op_letter1', 'op_letter2', 'op_letter3'], null, () => {
+      // THE LETTER IS READ IN PAGES the first time (js/panels.js 'letter'):
+      // what happened to him, shown, not typed. A second read is the short
+      // reminder of where the battery is and what the board asks for.
+      const S = typeof panelsState === 'function' ? panelsState() : null;
+      if (!f.opNote && S && !S.seen.letter && typeof panelsStart === 'function' && panelsSeq('letter')
+          && panelsStart('letter', { then: () => { if (!f.opNote) { f.opNote = 1; persist(); } } })) return true;
+      opSay(t('op_letter'), f.opNote ? ['op_letter3'] : ['op_letter1', 'op_letter2', 'op_letter3'], null, () => {
         if (!f.opNote) { f.opNote = 1; persist(); }
       });
       return true;
