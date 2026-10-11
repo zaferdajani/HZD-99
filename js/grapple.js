@@ -239,3 +239,20 @@ function grapDraw(c, p) {
   }
   c.restore();
 }
+
+// THE CLAW IN EVERY LANGUAGE (handoff Part 1 step 4): Turkish, Chinese and
+// Russian used to fall back to English. A robot-world layer (NOSTOS keeps its
+// own grapnel names in js/theme.js), all five languages so none falls through.
+TEXT_LAYERS.push({
+  robo: true,
+  en: { pa_GRAPPLE: 'Grapple Claw', grap_on: 'GRAPPLE CLAW online — press U (on a pad, bind it in Controls)',
+    m_grapple: 'Grapple Claw', m_grappled: 'Press U to fire the claw: it reels you to walls and into enemies. Hold UP to aim it high; JUMP during the reel to vault.' },
+  ar: { pa_GRAPPLE: 'مخلب الخطّاف', grap_on: 'مخلب الخطّاف جاهز — اضغط U (في يد التحكم: عيّنه من الإعدادات)',
+    m_grapple: 'مخلب الخطّاف', m_grappled: 'اضغط U لإطلاق المخلب: يسحبك إلى الجدران ونحو الأعداء. اضغط للأعلى لتصويبه عاليًا، والقفز أثناء السحب ليقذفك.' },
+  tr: { pa_GRAPPLE: 'Kanca Pençe', grap_on: 'KANCA PENÇE hazır — U tuşuna bas (kumandada: Kontroller’den ata)',
+    m_grapple: 'Kanca Pençe', m_grappled: 'Pençeyi fırlatmak için U’ya bas: seni duvarlara ve düşmanlara çeker. Yükseğe nişan almak için YUKARI’yı tut; çekiş sırasında ZIPLA ile sıçra.' },
+  zh: { pa_GRAPPLE: '抓钩爪', grap_on: '抓钩爪已就绪——按 U（手柄：在“操作设置”中绑定）',
+    m_grapple: '抓钩爪', m_grappled: '按 U 射出抓钩爪：它会把你拉向墙壁或敌人。按住“上”向高处瞄准；收绳时按“跳跃”可借力跃出。' },
+  ru: { pa_GRAPPLE: 'Коготь-крюк', grap_on: 'КОГОТЬ-КРЮК готов — нажми U (на геймпаде: назначь в Управлении)',
+    m_grapple: 'Коготь-крюк', m_grappled: 'Нажми U, чтобы выпустить коготь: он подтягивает тебя к стенам и к врагам. Держи ВВЕРХ, чтобы целиться выше; ПРЫЖОК во время подтягивания — отскок.' },
+});

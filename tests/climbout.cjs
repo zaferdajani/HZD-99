@@ -86,7 +86,16 @@ const { chromium } = require('playwright');
       { name: 'base', dash: 0, air: 0 },
       { name: 'dash', dash: DASH, air: 0 },
       { name: 'double jump', dash: DASH, air: 1 },
+      // THE GRAPPLING CLAW (handoff Part 1 step 5): eleven tiles of cable,
+      // thrown forward, straight up or up-and-forward, onto any wall, floor or
+      // ceiling — the ledge she wants is its own anchor. Strongest kit, last.
+      { name: '+grapple', dash: DASH, air: 1, grap: 11 },
     ];
+    // ...and the claw arrives WITH the dash (grapUnlocked), before the double
+    // jump: a gate the double jump was meant to hold that dash + claw already
+    // opens is a gate the claw skips. Listed, not failed — which gates the claw
+    // may open is the owner's call.
+    const CLAW_EARLY = { name: 'dash + claw', dash: DASH, air: 0, grap: 11 };
     // can she land on a ledge `up` tiles higher, `dx` tiles away, with this kit?
     const canClimb = (dx, up, kit) => {
       // a second jump buys another arc's worth of height, taken from wherever
@@ -94,6 +103,9 @@ const { chromium } = require('playwright');
       const climb = d => (ARC[Math.min(d, ARC.length - 1)] || 0)
         + (kit.air ? (ARC[Math.max(0, Math.min(d, ARC.length - 1) - 3)] || 0) * 0.88 : 0);
       const span = ACROSS + kit.dash;
+      // the claw: a straight throw along one of its three aims, within reach
+      if (kit.grap && up > 0 && Math.hypot(dx, up) <= kit.grap
+          && (dx <= 1 || Math.abs(dx - up) <= 2)) return true;
       if (up > 0) return dx <= span && climb(dx) >= up * 32;
       if (up === 0) return dx <= span;
       // falling: the drop buys airtime, and airtime buys distance. A one-tile
@@ -237,6 +249,19 @@ const { chromium } = require('playwright');
           }
         }
       }
+      // gates the double jump was meant to hold, opened early by dash + claw
+      const early = [];
+      {
+        const adj = graphFor(CLAW_EARLY);
+        for (const from of sides) {
+          const can = flood(doors[from], adj);
+          for (const to of sides) {
+            if (to === from) continue;
+            const nm = from + '→' + to;
+            if (gates[nm] != null && KITS[gates[nm]].name === 'double jump' && doors[to].some(i => can[i])) early.push(nm);
+          }
+        }
+      }
       // a cell freed only by kit >0 is a gate; a cell freed by nothing is a trap
       const trapped = [], gatedCells = {};
       for (let i = 0; i < cells.length; i++) {
@@ -250,8 +275,8 @@ const { chromium } = require('playwright');
         if (gates[nm] == null) gated.push(nm + ' IMPOSSIBLE');
         else if (gates[nm] > 0) gated.push(nm + ' needs ' + KITS[gates[nm]].name);
       }
-      if (trapped.length || gated.length || Object.keys(gatedCells).length)
-        out.push({ id: id, zone: def.zone, trapped: trapped, gated: gated,
+      if (trapped.length || gated.length || Object.keys(gatedCells).length || early.length)
+        out.push({ id: id, zone: def.zone, trapped: trapped, gated: gated, early: early,
                    gatedCells: gatedCells, total: cells.length });
     }
     return { rooms: Object.keys(ROOMS).length, UP: UP, ACROSS: ACROSS, out: out, drift: drift };
@@ -259,7 +284,7 @@ const { chromium } = require('playwright');
 
   console.log('one jump clears ' + res.UP + ' tiles up and ' + res.ACROSS + ' across; '
     + res.rooms + ' rooms checked, base kit only');
-  let bad = 0, gates = 0;
+  let bad = 0, gates = 0, clawEarly = 0;
   for (const d of (res.drift || [])) { console.log('  STALE MODEL  ' + d); bad++; }
   for (const r of res.out) {
     if (r.err) { console.log('  ERROR ' + r.id + ': ' + r.err); bad++; continue; }
@@ -278,6 +303,7 @@ const { chromium } = require('playwright');
     if (imp.length) { bad++; console.log('  NO ROUTE ' + r.id + ' [' + r.zone + ']  ' + imp.join(', ')); }
     const soft = r.gated.filter(s => !/IMPOSSIBLE/.test(s));
     if (soft.length) { gates++; console.log('  gated    ' + r.id + ' [' + r.zone + ']  ' + soft.join(', ')); }
+    if (r.early && r.early.length) { clawEarly++; console.log('  claw     ' + r.id + ' [' + r.zone + ']  dash + claw opens before the double jump: ' + r.early.join(', ')); }
     for (const kit in r.gatedCells) {
       const by = {};
       for (const t of r.gatedCells[kit]) (by[t.y] = by[t.y] || []).push(t.x);
@@ -291,5 +317,6 @@ const { chromium } = require('playwright');
   await browser.close();
   if (bad) { console.log('\nFAILED — ' + bad + ' room(s) can strand the player'); process.exit(1); }
   console.log('\nOK — no room can strand her'
-    + (gates ? '; ' + gates + ' room(s) gate a door behind a later power (listed above — by design or not, it is now visible)' : ''));
+    + (gates ? '; ' + gates + ' room(s) gate a door behind a later power (listed above — by design or not, it is now visible)' : '')
+    + (clawEarly ? '; the claw opens ' + clawEarly + ' double-jump gate room(s) early (listed as "claw" — the owner decides which it may)' : ''));
 })().catch(e => { console.error(e); process.exit(1); });

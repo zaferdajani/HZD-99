@@ -21,6 +21,26 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bg. THE GRAPPLING CLAW — head, cable, throw strip, latch sparks ✱ QUEUED 2026-10-11 (code session, from docs/handoff/GRAPPLE_AND_IMPROVEMENTS.md Part 1)
+
+The claw shipped live on stand-ins: the cable and claw head are drawn in code
+behind her body (`grapDraw` in `js/grapple.js`), and the reel borrows her dash
+plate (`heroState` returns `dash`). Owner reviews each plate before it is keyed;
+wire into `HERO_TRANS` and `grapDraw` only after approval.
+
+| # | file | what | model |
+|---|---|---|---|
+| 1 | `assets/characters/gear/grap_head.webp` | the claw head alone: three hooked brass-and-steel talons on a cylindrical socket, a cyan lit seam, side view pointing RIGHT, pure black bg | gpt_image_2_5, ref her canon element `467c8e08…` for materials |
+| 2 | `assets/characters/gear/grap_cable.webp` | a 1-tile repeating cable segment: braided steel with a cyan core thread, horizontal, tiles seamlessly left-right | gpt_image_2_5 |
+| 3 | `assets/characters/hero/grap_throw.webp` | a 4-cell strip (one row): HZD-99 throws the claw from her wrist — wind, fling, follow-through, recover — side view facing RIGHT, same scale as her run strip | nano_banana_pro with the canon element |
+| 4 | `assets/characters/hero/grap_reel.webp` | optional 2-cell reel pose: body stretched toward the anchor, cape streaming back (the dash plate stands in until then) | nano_banana_pro with the canon element |
+| 5 | `assets/fx/grap_spark.webp` | latch-spark sheet, 4 cells: the bite on stone (orange sparks + grit) and on metal (white-cyan sparks) — drawn as objects with a dark base, NOT additive light | gpt_image_2_5 |
+
+Rules: pure flat black backgrounds, no ground, no shadow, no text; key with
+`tools/blackkey.cjs`; archive in `assets/source/grapple/` with job ids.
+
+---
+
 ## 2bf. GRAVEHORN — the Eye's rhino, the marble's guard (chapter one boss) ✱ QUEUED 2026-10-11 (code session, owner's order) — FIRE FIRST
 
 **The owner, 2026-10-11:** *"a very dangerous, evil rhino that works under the

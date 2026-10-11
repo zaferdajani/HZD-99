@@ -32,3 +32,22 @@ how to cut it into the game so it loops, ducks and fades correctly.
 the fleet split ART/AUDIO/VIDEO into separate owner-opened sessions. The
 project manager (code session) queues a brief here whenever a decomposed
 request needs one; the AUDIO session fires top to bottom, same as ART_QUEUE.)*
+
+---
+
+## A-GRAPPLE. The grappling claw's voice ✱ QUEUED 2026-10-11 (code session, from docs/handoff/GRAPPLE_AND_IMPROVEMENTS.md Part 1)
+
+Today the claw borrows `dash` (throw), `hit` (wall bite), `bosshit` (enemy bite)
+and `djump` (vault); rumble is already wired through `padRumble`. Five one-shots
+and one loop, all short, all must survive a hit-stop and duck under dialogue:
+
+| cue | function | contract |
+|---|---|---|
+| `grap_throw` | a whip-fast metallic whirr: "it's out, and it's quick" | one-shot ≤ 0.25 s, bright, no low end |
+| `grap_wall` | the bite into stone/steel: a solid clank with grit | one-shot ≤ 0.2 s, strong transient |
+| `grap_bite` | the bite into a machine: a hooked tearing clang, crueler than the wall | one-shot ≤ 0.25 s |
+| `grap_reel` | the winch-whine of the reel pulling her in | seamless LOOP 0.3–0.5 s, rising pitch feel, stops on cut |
+| `grap_vault` | the release-and-fling off the anchor | one-shot ≤ 0.25 s, airy, upward |
+
+Owner reviews every cue before it is cut; wire into `js/audio.js`'s SFX map and
+swap the borrowed names in `js/grapple.js`.
