@@ -21,6 +21,33 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bj. THE TRANSITION SET — six strips between the poses she already has ✱ QUEUED 2026-10-11 (code session, handoff Part 2 D3)
+
+`HERO_TRANS` (js/entities.js) covers land, skid, dash, hurt, heal and guard;
+everything else cuts straight from pose to pose. Each strip below is a short
+in-between, fired like `transLand` (black background, side view facing right,
+whole body, no ground, canon element
+`<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>` in every prompt), cut to cells
+with the existing strip tool. The trigger column is the wiring contract: the
+event already exists in the engine, so wiring is one `HERO_TRANS` row (plus, for
+the turn, the 0.14 s timer it names).
+
+| key | cells | the in-between | trigger (already in the engine) |
+|---|---|---|---|
+| `transTurn` | 4 | standing turn-in-place: weight shifts back, head leads, body follows, tail whips round | `face` flips while `on` and `|vx| < 60` (new timer `turnT`, 0.14 s, set on that flip) |
+| `transWallAir` | 4 | kick off a wall: crouched against it, shove, body uncoils away into the air | wall jump (`flipT = FLIP_DUR` at the wall-jump line in `Player.update`) |
+| `transFallRun` | 4 | landing at speed into the run: no full squash, one paw catches, she rolls into the stride | `col.d` with `wasFalling > 420` and `|vx| > 200` (`landT` path, run branch) |
+| `transAtkRec` | 3 | attack recovery: the paw drawn back in, shoulders settle, ready stance | `swingVis` ending (`atkCD` tail after the strike) |
+| `transGrapThrow` | 4 | the claw throw: arm snaps forward, cable pays out from the pack | `player.grap.st === 'throw'` |
+| `transGrapReel` | 3 | being reeled: body stretched toward the anchor, claws forward, legs trailing | `player.grap.st === 'pull'` (today it borrows the dash plate) |
+| `transGlideIn` / `transGlideOut` | 3 + 3 | the glide (handoff B3, when it ships): scarf/jets open, then fold | the glide state (B3) |
+
+Silhouettes must differ from both neighbouring poses (artbible IoU ≤ 0.86);
+`node tests/run.cjs hero-move-coverage artbible` after wiring — the coverage
+harness prints how many of these are fired.
+
+---
+
 ## 2bi. VOLT SOAR — the launch and the rise ✱ QUEUED 2026-10-11 (code session, handoff Part 2 B2)
 
 UP + claw on the ground launches her straight up six tiles (`js/soar.js`); it

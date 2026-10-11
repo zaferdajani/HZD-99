@@ -30,4 +30,11 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=requ
  fs.mkdirSync('release-evidence',{recursive:true});fs.writeFileSync('release-evidence/hero-move-coverage.png',Buffer.from(result.png.split(',')[1],'base64'));delete result.png;
  fs.writeFileSync('release-evidence/hero-move-coverage.json',JSON.stringify(result,null,2));
  console.log('PASS '+result.rows.length+' actual-renderer move selections and supplied departure art');
+ // THE TRANSITION SET (handoff Part 2 D3, docs/ART_QUEUE.md §2bj): what is
+ // fired and what is still queued. A report, not a gate — the strips are art,
+ // and art is the owner's to approve; the line says how far the set has come.
+ const QUEUED=['transTurn','transWallAir','transFallRun','transAtkRec','transGrapThrow','transGrapReel','transGlideIn','transGlideOut'];
+ const src=fs.readFileSync(require('node:path').join(__dirname,'../js/entities.js'),'utf8');
+ const fired=QUEUED.filter(k=>new RegExp("key: '"+k+"'").test(src));
+ console.log('     transition set: '+fired.length+' of '+QUEUED.length+' fired'+(fired.length<QUEUED.length?' (queued: '+QUEUED.filter(k=>!fired.includes(k)).join(', ')+')':''));
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
