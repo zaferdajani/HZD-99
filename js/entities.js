@@ -1787,6 +1787,22 @@ class Player {
           this.tailFlickIn = rnd(2.4, 6);
           this.tailV[0] += 0.55; this.tailV[1] += 0.35; this.tailV[2] += 0.2;
         }
+        // THE LOW-CORE IDLE (handoff Part 2 D5). On her last core a still body
+        // is not resting, it is running down: the pack sputters — a few sparks
+        // and a stutter in the light, at uneven gaps, the way a failing cell
+        // catches. Glow and sparks are the procedural layer (ART_BIBLE §0.0);
+        // the slumped body itself is queued (ART_QUEUE §2bl). G.artProbe keeps
+        // it out of the measurements.
+        if (this.cores <= 1 && !G.artProbe) {
+          this.sputterIn = (this.sputterIn == null ? rnd(0.4, 1.0) : this.sputterIn) - dt;
+          if (this.sputterIn <= 0) {
+            this.sputterIn = rnd(0.7, 1.6);
+            this.sputters = (this.sputters || 0) + 1;
+            const bx = this.x + this.w / 2 - (this.face || 1) * 6, by = this.y + this.h * 0.38;
+            burst(bx, by, 4, chance(0.5) ? '#ffd08a' : '#aef7d8', 120, 0.3, 380, 1.8, true);
+            this.sputterT = 0.12;
+          }
+        }
         // Once per uninterrupted idle, at five seconds. Narrative audio and
         // the character voice arbiter retain priority; there is no bypass.
         if (this.idleT >= FIDGET_AFTER && !this.idleSpoke) {
@@ -2298,6 +2314,7 @@ class Player {
     this.armCD -= dt; this.songT -= dt; this.songCD -= dt; this.starCD -= dt;
     if (this.moodT > 0) this.moodT -= dt;
     if (this.reliefT > 0) this.reliefT -= dt;
+    if (this.sputterT > 0) this.sputterT -= dt;     // the low-core stutter in her lights
     // THE SWIRL runs on its own clock so its four passes keep their spacing
     // whatever the frame rate is doing
     if (this.swirlT > 0) {
@@ -3516,7 +3533,8 @@ class Player {
       // the far eye (screen-left when she faces right) carries the asymmetry
       const k = side < 0 ? (M.as == null ? 1 : M.as) : 1;
       const rw = ew * M.ar * k, rh = eh * M.sq * blink * k;
-      const lit = 0.55 + 0.45 * Math.min(1.4, M.gl * pulse);
+      // ...dipping for the instant a failing cell sputters (the low-core idle)
+      const lit = (0.55 + 0.45 * Math.min(1.4, M.gl * pulse)) * ((this.sputterT || 0) > 0 ? 0.45 : 1);
       c.globalCompositeOperation = 'lighter';
       c.fillStyle = 'rgba(' + Math.round(90 * lit) + ',' + Math.round(255 * lit) + ',' + Math.round(232 * lit) + ',1)';
       c.shadowColor = '#37ffd0'; c.shadowBlur = 3 * M.gl * pulse;

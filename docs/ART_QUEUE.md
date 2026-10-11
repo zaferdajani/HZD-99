@@ -21,6 +21,23 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bl. CONTEXT IDLES — the last core, the wind, the updraft ✱ QUEUED 2026-10-11 (code session, handoff Part 2 D5)
+
+Her idle is one authored strip plus scripted fidgets. Three context idles,
+fired like `hzdIdle` (black background, side view facing right, whole body,
+no ground, canon element `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`):
+
+| key | cells | the idle | trigger |
+|---|---|---|---|
+| `idleLowCore` | 6 | on her last core: shoulders down, weight on one leg, the pack's light guttering, a hand to her chest | `cores <= 1` while idle — **live now**: the pack already sputters (sparks + an eye-light dip, `Player.update`), this strip replaces the standing body |
+| `idleWind` | 6 | leaning into a side wind, scarf streaming, ears flattened, eyes narrowed | idle within a vent's blast — **needs a world source**: no room has a wind vent yet; a kingdom/TERRAIN session adds the vent object, then the trigger is its rect |
+| `idleUpdraft` | 6 | hovering slightly on rising air, scarf and tail lifted, paws loose | idle over an updraft column — **needs a world source** the same way |
+
+Wire `idleLowCore` into the idle branch of `drawRoboPlate` (in place of `HERO_IDLE` when `cores <= 1`);
+`node tests/run.cjs face hero artbible`.
+
+---
+
 ## 2bk. HER VISOR, ACTING — mood plates for the eye lights ✱ QUEUED 2026-10-11 (code session, handoff Part 2 D4)
 
 `drawHeroEyes` repaints her two eye-lights per mood (HERO_MOOD: calm, happy,

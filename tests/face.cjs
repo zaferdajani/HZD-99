@@ -17,7 +17,7 @@ const check = (name, ok, detail) => {
 };
 
 (async () => {
-  console.log('── face — effort on the reel, relief after a repair, fear at a roar\n');
+  console.log('── face — effort on the reel, relief after a repair, fear at a roar, a sputter on the last core\n');
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
@@ -56,6 +56,15 @@ const check = (name, ok, detail) => {
     out.heal = { during, after, healed, keyb: KEYB.HEAL };
     await frames(70);
     out.relaxed = p.heroMood('idle');
+    // THE LOW-CORE IDLE (D5): standing still on one core sputters; on full
+    // cores it does not
+    const sputterOver = async (cores) => {
+      clear(); p.cores = cores; p.sputters = 0; p.sputterIn = null; p.vx = 0; p.on = true; G.artProbe = false;
+      await frames(150);
+      return p.sputters || 0;
+    };
+    out.sputter = { low: await sputterOver(1), full: await sputterOver(p.maxCores()) };
+    clear();
     // each face, drawn: the eye lights off the real renderer, counted
     const drawn = (m) => {
       const cv = document.createElement('canvas'); cv.width = 240; cv.height = 240;
@@ -85,6 +94,7 @@ const check = (name, ok, detail) => {
   check('each new face is a visibly different pair of lights from calm (pixels off the renderer)',
     diff(px.calm, px.effort) && diff(px.calm, px.relief) && diff(px.calm, px.afraid), JSON.stringify(px));
   check('...fear opens the eyes wider than calm, effort squeezes them', px.afraid.tall > px.calm.tall && px.effort.tall < px.calm.tall, JSON.stringify(px));
+  check('LOW-CORE IDLE: standing on her last core the pack sputters; on full cores it does not', r.sputter.low >= 1 && r.sputter.full === 0, JSON.stringify(r.sputter));
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
 
   await browser.close();
