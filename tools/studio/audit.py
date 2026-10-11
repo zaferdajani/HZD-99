@@ -1,11 +1,66 @@
 #!/usr/bin/env python3
 """Evidence collector. Does not claim to replace the 15-role human/agent review."""
-import argparse, datetime, hashlib, json, os, pathlib, re, subprocess, sys, time, urllib.request
+import argparse, datetime, hashlib, json, math, os, pathlib, re, signal, subprocess, sys, time, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FOCUS = ['opening-order', 'textreveal', 'panels', 'caves-ch1', 'den-gate',
          'chapter-one', 'infection-eyes', 'infection-roster', 'wolves',
          'lion-studio', 'sage-quiet', 'story-rescue', 'mobile-platform', 'regress']
+
+# Match the runner's declared budgets, including its default, rather than
+# cutting the real-input campaign off at the old six-minute collector limit.
+# The extra 180 seconds covers the runner's two 60-second identity checks and
+# server startup; it does not change or retry the harness's own deadline.
+RUNNER_OVERHEAD_SECONDS = 180
+
+def suite_budgets(source):
+    suite_match = re.search(r"const SUITE = \[(.*?)\n\];", source, re.S)
+    default_match = re.search(r"timeout:\s*\(opt && opt\.timeout\) \|\| (\d+)", source)
+    if not suite_match or not default_match:
+        raise ValueError('Cannot read test runner suite/default timeout; refusing guessed coverage')
+    default_ms = int(default_match.group(1))
+    budgets = {}
+    for line in suite_match.group(1).splitlines():
+        entry = re.match(r"\s*\['([^']+)'", line)
+        if not entry:
+            continue
+        # Options follow the description string. Do not accidentally treat
+        # the word timeout in a human description as an option.
+        option = re.search(r",\s*\{([^{}]*)\}\s*\]", line)
+        options = option.group(1) if option else ''
+        timeout = re.search(r"\btimeout\s*:\s*(\d+)\s*(?:,|$)", options)
+        if re.search(r"\btimeout\s*:", options) and not timeout:
+            raise ValueError('Unsupported timeout metadata for '+entry.group(1))
+        ms = int(timeout.group(1)) if timeout else default_ms
+        if ms <= 0 or entry.group(1) in budgets:
+            raise ValueError('Invalid/duplicate test metadata: '+entry.group(1))
+        budgets[entry.group(1)] = math.ceil(ms / 1000) + RUNNER_OVERHEAD_SECONDS
+    if not budgets:
+        raise ValueError('No test harnesses found; refusing empty coverage')
+    return budgets
+
+def run_owned(cmd, *, cwd, log, timeout, env=None):
+    """Kill our entire runner/harness process group if the outer budget expires.
+
+    subprocess.run kills only the runner; its harness/browser could continue
+    consuming CPU and writing evidence while the next check starts. The new
+    session belongs solely to this command, never to an existing test server.
+    """
+    proc = subprocess.Popen(cmd, cwd=cwd, stdout=log, stderr=subprocess.STDOUT,
+                            env=env, start_new_session=(os.name == 'posix'))
+    try:
+        code = proc.wait(timeout=timeout)
+        return code, 'pass' if code == 0 else 'fail'
+    except subprocess.TimeoutExpired:
+        if os.name == 'posix':
+            try: os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError: pass
+        else:
+            proc.kill()
+        proc.wait()
+        log.write('\nCollector timeout after '+str(timeout)+' seconds; owned process group terminated.\n')
+        log.flush()
+        return None, 'timeout'
 
 def main():
     p = argparse.ArgumentParser()
@@ -14,8 +69,8 @@ def main():
     p.add_argument('--tests', nargs='+', help='Explicit subset, reported as partial')
     args = p.parse_args()
     out = pathlib.Path(args.output).resolve(); out.mkdir(parents=True, exist_ok=True)
-    suite = re.findall(r"^\s*\['([^']+)'", (ROOT/'tests/run.cjs').read_text(), re.M)
-    names = args.tests or (suite if args.profile == 'full' else FOCUS)
+    suite = suite_budgets((ROOT/'tests/run.cjs').read_text())
+    names = args.tests or (list(suite) if args.profile == 'full' else FOCUS)
     unknown = set(names)-set(suite)
     if unknown: p.error('Unknown tests: '+', '.join(sorted(unknown)))
     def git(*cmd):
@@ -31,13 +86,11 @@ def main():
         started = datetime.datetime.now(datetime.timezone.utc)
         with log.open('w') as f:
             try:
-                code = subprocess.run(cmd, cwd=ROOT, stdout=f, stderr=subprocess.STDOUT, timeout=timeout,
-                                      env=run_env.get('env')).returncode
-                state = 'pass' if code == 0 else 'fail'
-            except subprocess.TimeoutExpired: code, state = None, 'timeout'
+                code, state = run_owned(cmd, cwd=ROOT, log=f, timeout=timeout, env=run_env.get('env'))
             except OSError as e: f.write(str(e)); code, state = None, 'blocked'
         report['results'].append({'name': name, 'status': state, 'exit_code': code,
                                   'seconds': (datetime.datetime.now(datetime.timezone.utc)-started).total_seconds(),
+                                  'timeout_seconds': timeout,
                                   'log': log.name, 'sha256': hashlib.sha256(log.read_bytes()).hexdigest()})
         (out/'results.json').write_text(json.dumps(report, indent=2)+'\n')
         print(name+': '+state, flush=True)
@@ -86,7 +139,7 @@ def main():
         for name in names:
             if not (ROOT/'tests'/f'{name}.cjs').exists():
                 report['results'].append({'name':name,'status':'missing'}); continue
-            run(name, ['node','tests/run.cjs', name], 960 if name == 'opening-order' else 360)
+            run(name, ['node','tests/run.cjs', name], suite[name])
         # and at the end: the served build must still be the one pinned at the start
         ready = identity('end', snapshot)
     report['complete_requested_scope'] = ready and len([x for x in report['results'] if x['name'] in names]) == len(names)

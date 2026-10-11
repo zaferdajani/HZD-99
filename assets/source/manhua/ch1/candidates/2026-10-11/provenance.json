@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-11",
+  "status": "generated candidate; not runtime-wired or owner-approved",
+  "tool": "image_gen.imagegen (built-in)",
+  "edit_target": "assets/manhua/ch1/game/repair.webp",
+  "identity_reference": "assets/source/ref/hzd99_canon.jpg",
+  "output": "repair-identity.png",
+  "prompt": "Use case: precise-object-edit. Asset: unlettered widescreen manhwa game panel, candidate correction. Image 1 is the edit target, Ratchet repair workshop panel. Image 2 is ONLY the canon hero identity reference. Change ONLY the small robot-cat hero in image 1 to match image 2's identity, translated faithfully into image 1's inked, softly painted comic style. The hero must have ivory robotic cat head with pointed ears and pale cyan ear inserts, a dark charcoal rounded visor containing TWO luminous vertical cyan eyes, metallic whiskers, red neck scarf, gold round shoulder fasteners, compact ivory robot limbs and paws. NO organic nose, NO mouth, NO black dot eyes. Keep hero's position, size, leaned-forward repair pose, both paws holding the SAME cylindrical cyan battery on the workbench. Keep Ratchet's exact face, amber slit, body, necklace marble, posture and all workshop tools, shelves, warm lamp, cable and architecture composition unchanged. This is BEFORE earning a sword: do NOT include the sword, blades or jet flames from the reference. Do NOT add any text, labels, balloons, logos or new characters. Preserve the landscape 16:9 framing and quiet warm repair mood. Produce a clean full-resolution panel.",
+  "validation": "Visually checked: visor, two cyan eyes, whiskers, scarf, gold fasteners restored; no sword. Workshop and Ratchet broadly preserved, not pixel-identical. Full test run still uses original repair.webp. Integrator must review full composition, derive runtime size/tier, update provenance/map and run panel/package tests before wiring."
+}

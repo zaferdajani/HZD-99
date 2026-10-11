@@ -5994,9 +5994,16 @@ Measured by `tests/wolves.cjs` (scale, floor, per-cell silhouette) and
 `tests/infection-eyes.cjs`. §2cc-i and §2cc-iii below are SUPERSEDED for the
 wolf (their files are deleted); they still stand for the cheetah.
 
-**Still the old animal:** THE ALPHA (`alpha*`, `al*` strips) predates this
-design. Its re-fire against `source/beasts/wolf2/green_plate.jpg` is the next
-brief for the pack — same take list, larger frame, purple at runtime.
+**ALPHA UPDATED AND INTEGRATED 2026-10-10:** the old-animal re-fire brief is
+complete. `assets/characters/alpha/` now contains ten matching boss strips
+(rest, prowl, roar, howl, leap/recovery, air, claw, bite, clinch/shake and yield),
+selected by `ALPHA_STRIP` in `js/wolves.js`; filmed takes are preserved under
+`assets/source/alpha/takes/`. The boss retains a larger silhouette than its
+pack, runtime purple infection eyes, and teal purification grading. See
+`docs/studio/runs/2026-10-10/INTEGRATION.md` (ART-01 and animation matrix) for
+integration evidence. Do not regenerate this completed set from the obsolete
+brief above. Owner visual approval remains outstanding; the faint violet
+collar seam after purification is tracked separately as ART-2.
 
 ### 2cc-i. THE WOLF — `wolfWalk` (8 cells) and `wolfRun` (6 cells)
 

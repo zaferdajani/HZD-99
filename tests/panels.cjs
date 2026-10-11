@@ -111,7 +111,8 @@ async function tapKey(page, code) {
     });
     check('the marble, the maintenance door, the revelation, the break, the fight, the letter and the hatch are all in the map', !newSeq.length, newSeq.join(', '));
     for (const [id, room, flags] of [['marble', 'CV3', { woke: 1, gateOpened: 1, pl_cshard: 1 }], ['passage', 'GA1T', { woke: 1, gateOpened: 1, crystal: 1 }],
-      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
+      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }],
+      ['break', 'A3', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
       await stage(page, room, flags);
       // a record made by this build: every sequence known, the others already
       // seen, so the one under test is the only one owed
@@ -121,6 +122,20 @@ async function tapKey(page, code) {
       await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
       await waitFor(page, () => G.state === 'PLAY', 4000);
     }
+    // The alternate room must keep the event gates, not play the break before
+    // it happens or after CHIME/NULLFANG have already been resolved.
+    const alternate = await page.evaluate(() => {
+      const P = G.save.panels, f = G.save.flags;
+      delete P.seen.break; delete P.past.break; PN.queue.length = 0;
+      G.roomId = 'A3'; delete f.nfBreak;
+      const before = panelsDue();
+      f.nfBreak = 1; f.bossChime = 1;
+      const afterBell = panelsDue();
+      delete f.bossChime; f.bossGlitch = 1;
+      const afterLion = panelsDue();
+      return [before, afterBell, afterLion].map(s => s && s.id);
+    });
+    check('A3 never plays the break before its event or after the bell/lion', alternate.every(s => !s), JSON.stringify(alternate));
     // an old save (no `k`): its ten original sequences keep their verdicts; the
     // new ones are judged by what it has already done
     const mig = await page.evaluate(() => {
@@ -235,6 +250,16 @@ async function tapKey(page, code) {
       return [a, b];
     });
     check('the lying-in-the-scrap panel shows only when the swipe took a core', cond[1] === cond[0] + 1, JSON.stringify(cond));
+    const bell = await page.evaluate(() => {
+      const seq = panelsSeq('sage'), f = G.save.flags, old = f.bossChime;
+      delete f.bossChime;
+      const ringing = panelsList(seq).some(p => p.ref === 'game: sage_bell');
+      f.bossChime = 1;
+      const silenced = panelsList(seq).some(p => p.ref === 'game: sage_bell');
+      if (old == null) delete f.bossChime; else f.bossChime = old;
+      return { ringing, silenced };
+    });
+    check('the Sage only says CHIME still rings while it is active, including replay', bell.ringing && !bell.silenced, JSON.stringify(bell));
 
     // the teaser: on the climb, not on the camp floor
     await stage(page, 'A3', { woke: 1, bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1 });

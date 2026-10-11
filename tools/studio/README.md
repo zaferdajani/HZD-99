@@ -36,3 +36,11 @@ to see which build the port is serving right now.
 Use an isolated checkout/server. Do not run overlapping builds against the same
 served pages during a release audit. Source-only review branches must explicitly
 tell the integrator to regenerate the four built HTML pages before release.
+
+The collector reads each harness deadline from `tests/run.cjs` and allows an
+additional 180 seconds for server and identity checks. The harness's own deadline
+is unchanged. This matters for the real-time `campaign-ch1` run: it must not be
+cut short by a generic six-minute outer timeout. An outer timeout terminates the
+collector-owned POSIX process group so abandoned harnesses cannot keep writing
+evidence. Run `python -m unittest discover -s tools/studio -p 'test_audit.py' -v`
+to check deadline agreement and descendant cleanup without starting a browser.

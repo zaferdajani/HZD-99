@@ -40,7 +40,7 @@ player's input rules.
   grounded and `panelsSafe()` holds: state `PLAY`; no dialogue, item card, shop,
   offer, film, wake, gate walk, crossing, staged meeting/break, boss entry,
   finisher, pending boss reward, tutorial lock or hit-stop; no live projectile;
-  no hostile within 600 px; any boss dead, tamed, purified or dormant.
+  no hostile within 300 px measured between actor centres (Euclidean distance); any boss dead, tamed, purified or dormant.
 - **Once.** Marked `G.save.panels.seen[id]` as it begins and persisted, so a
   reload never replays it. A save that had already passed an event when it was
   first seen by this build marks that sequence `past` instead of handing the

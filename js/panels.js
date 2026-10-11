@@ -49,7 +49,7 @@ const PANEL_CONDUITS = 'assets/backgrounds/gate_conduits.jpg';
 // A panel: src (the page master), crop [x, y, w, h] in that page's pixels,
 // cap (caption key | null), who (speaker name key), baked (the crop already
 // carries the page's own lettering of `cap`), move (in | out | left | right),
-// focus [fx, fy] for the push, cond(saveState) for a panel that depends on
+// focus [fx, fy] for the push, cond(panelState, flags) for a panel that depends on
 // what actually happened, ref (page/panel, for the map document).
 const PG_FULL = [0, 0, PANEL_FULL.w, PANEL_FULL.h];
 const PANEL_SEQ = [
@@ -160,7 +160,7 @@ const PANEL_SEQ = [
       // the same thing in words).
       { ref: 'game: sage_rev', src: PANEL_GAME('sage_rev'), crop: PG_FULL, cap: 'pc_s_point', move: 'in', focus: [0.7, 0.35] },
       { ref: 'game: sage_bell', src: PANEL_GAME('sage_bell'), crop: [0, 0, 1600, 679], cap: 'pc_s_bell', move: 'out', focus: [0.4, 0.4],
-        cond: s => !(s.flags && s.flags.bossChime) },
+        cond: (s, f) => !f.bossChime },
     ] },
   { id: 'chime', title: 'pn_s_chime', room: 'A9', prefetch: ['A8', 'A9'],
     event: 'CHIME silenced (bossChime), once its cell is paid',
@@ -299,8 +299,10 @@ function panelsDue() {
     if (S.seen[s.id] || S.past[s.id]) continue;
     // a beat already overtaken by the story is not shown late, out of order
     if (s.stale && s.stale(S, f)) continue;
-    if (G.roomId === s.alsoRoom) { if (s.id === 'ch2' && f.bossGlitch) return s; continue; }
-    if (G.roomId !== s.room) continue;
+    // Alternate rooms share the event condition. Only the teaser has a
+    // location-specific condition: reaching B1 replaces standing on A3's climb.
+    if (G.roomId === s.alsoRoom && s.id === 'ch2' && f.bossGlitch) return s;
+    if (G.roomId !== s.room && G.roomId !== s.alsoRoom) continue;
     if (s.when(f)) return s;
   }
   return null;
@@ -339,7 +341,8 @@ function panelsPlay(id, opts) { return panelsStart(id, opts); }
 // ---- the player -------------------------------------------------------------
 function panelsList(seq) {
   const S = panelsState() || {};
-  return seq.panels.filter(p => !p.cond || p.cond(S));
+  const f = G.save && G.save.flags || {};
+  return seq.panels.filter(p => !p.cond || p.cond(S, f));
 }
 function panelsClearInput() {
   if (typeof releaseInput === 'function') releaseInput();
