@@ -1691,15 +1691,27 @@ const ROOMS = {
       });
     } },
   CV3: { zone: 'X', cave: 1, w: 56, h: 17, exits: { L: 'CV2' },
-    // the end of the dark: two crawlers between her and the PILLAR — which
-    // needs the supercharged claw, and the crawlers are where the volts for
-    // it come from. That is the room teaching the tool.
-    ents: [['crawler', 16, 15], ['crawler', 36, 15], ['bat', 24, 6], ['bat', 44, 6],
-           ['scrap', 10, 7, 20], ['pillar', 50, 15]],
+    // the end of the dark: the PILLAR — which needs the supercharged claw —
+    // and, standing on it, GRAVEHORN, First Soldier of the Eye (owner,
+    // 2026-10-11: "the boss I will have to fight in order to get the marble").
+    // The cave's own machines (the crawlers that teach the burst's volts, the
+    // bats) come back only once he is gone: a soldier holding a room does not
+    // share it, and a crawler underfoot in a charge arena is noise, not a read.
+    // His fight pays the volts the crawlers used to.
+    ents: [['crawler', 16, 15, null, 'bossHorn'], ['crawler', 36, 15, null, 'bossHorn'],
+           ['bat', 24, 6, null, 'bossHorn'], ['bat', 44, 6, null, 'bossHorn'],
+           ['scrap', 10, 7, 20], ['pillar', 50, 15], ['boss', 33, 16, 'horn']],
     build(g) {
       caveCarve(g, 'CV3', {
         mouth: 1, open: ['L'],
-        anchor: [{ x: 16, y: 15 }, { x: 36, y: 15 }, { x: 50, y: 15, w2: 2, h2: 4 }],
+        // THE ARENA: one long rolling floor from the mouth to the rock shelf in
+        // front of the stone (tiles 2-37), so a charge has a line to run and
+        // the shelf's face to end in. The knobs and the half-height plateau
+        // that used to break it up were a staircase under a 243 px animal —
+        // every stride a step. The surface curve still rolls it (no right
+        // angles); the shelf at 38-47 is where his charge meets rock.
+        anchor: [{ x: 12, y: 15, w2: 10, h2: 5 }, { x: 30, y: 15, w2: 7, h2: 5 },
+                 { x: 16, y: 15 }, { x: 36, y: 15 }, { x: 50, y: 15, w2: 2, h2: 4 }],
         pocket: [{ x: 10, y: 6 }],
       });
     } },

@@ -65,6 +65,12 @@ const { chromium } = require('playwright');
       for (let i = 0; i < 180; i++) tick();
       need(!G.recharge && player.volts >= BURST_VOLTS, 'real rest supplies the quarry burst');
       stage('CV3');
+      // GRAVEHORN stands on the stone (js/gravehorn.js). His fight is played and
+      // measured in tests/gravehorn.cjs; here the chain takes its production
+      // outcome — he backs into the rock (ghGone) — and the quarry goes on.
+      need(G.boss && G.boss.kind === 'horn' && !G.boss.dead, 'GRAVEHORN guards the quarry before the marble is freed');
+      ghGone(G.boss); G.state = 'PLAY'; G.toasts = [];
+      need(G.save.flags.bossHorn && !bossActive(), 'the soldier gone, the quarry unlocked');
       const pillar = G.statics.find(s => s.type === 'pillar'); need(pillar, 'quarry pillar exists');
       player.x = pillar.x - 30; player.y = pillar.y + pillar.h - player.h;
       player.on = true; player.vx = player.vy = 0; player.face = 1;

@@ -93,6 +93,29 @@ const CAST = [
     rest: 'idle', pairs: [['idle', 'lancewarn', 0.94], ['idle', 'dashwarn', 0.94], ['idle', 'daze', 0.90]],
     tell: ['lancewarn'], cold: ['idle', 'recover', 'daze'], grnd: ['daze'],
   },
+  // GRAVEHORN, the Eye's rhino on the marble (js/gravehorn.js): a parts rig
+  // whose plates are briefed (ART_QUEUE §2bf) and drawn as stand-ins until
+  // they land — held to the same laws now, so the plates inherit a rig that
+  // already passes them. The toss rears the whole body; the wind-ups drop the
+  // head and load the haunches; the charge is a body crouched at a run.
+  {
+    kind: 'horn', name: 'GRAVEHORN', room: 'CV3',
+    states: {
+      idle:       { vx: 0, vy: 0, t: 1 },
+      hornprep:   { vx: 0, vy: 0, t: 0.1 },
+      chargewarn: { vx: 0, vy: 0, t: 0.1 },
+      tossprep:   { vx: 0, vy: 0, t: 0.06 },
+      toss:       { vx: 0, vy: 0, t: 0.12 },
+      rush:       { vx: -640, vy: 0, t: 1 },
+      stunned:    { vx: 0, vy: 0, t: 0.6 },
+      kick:       { vx: 0, vy: 0, t: 0.1, phase: 2 },
+    },
+    rest: 'idle',
+    pairs: [['idle', 'tossprep', 0.86], ['idle', 'chargewarn', 0.86], ['idle', 'hornprep', 0.86],
+            ['tossprep', 'toss', 0.80], ['idle', 'toss', 0.80], ['idle', 'kick', 0.86], ['chargewarn', 'rush', 0.90]],
+    tell: ['hornprep', 'chargewarn', 'tossprep'], cold: ['idle', 'rush', 'stunned'],
+    grnd: ['idle', 'hornprep', 'chargewarn', 'tossprep', 'stunned'],
+  },
   // ---- CLASS E: the Eye's constructs ------------------------------------
   // They are procedural geometry and light rather than authored creatures
   // (ART_BIBLE.md §1), but the SILHOUETTE LAW and the HUE LAW are about what
@@ -308,6 +331,7 @@ const ENEMY_CAST = [
       // it stashes the pre-wrap function so those states stay checkable too.
       const src = (Boss.prototype.update || function () {}).toString()
         + (typeof alphaStep === 'function' ? alphaStep.toString() : '')
+        + (typeof ghStep === 'function' ? ghStep.toString() + ghPose.toString() : '')
         + (Boss.prototype.__aaaOriginalUpdate ? Boss.prototype.__aaaOriginalUpdate.toString() : '');
       const kit = (typeof MINI_KIT !== 'undefined' && MINI_KIT[S.kind]) || null;
       const built = kit ? [kit.close, kit.far, kit.close + 'warn', kit.far + 'warn'] : [];

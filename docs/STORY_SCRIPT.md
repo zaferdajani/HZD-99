@@ -33,7 +33,7 @@ cannot be spent. §2.5 is that scene.
 |---|---|---|---|
 | **HZD-99** | The hero. A small maintenance robo-cat, the last uninfected unit awake. | White chassis, black visor face with two cyan eyes, red scarf-cape, claws. Head-and-a-half tall against Ratchet. Never carries a sword on the cover of chapter 1. | Everywhere |
 | **MOTHER-V** | The broadcast heart of the Depths. She sang the Song that ran the city. Hijacked, not evil. The last fight — and she is cleansed and lives. | "Not a machine and not a creature: a transmission that grew mass." Radial, no face, one golden core inside a violet-grey shell of plates, everything beating at ~0.9 Hz. | E3, the bottom of the Nest |
-| **The evil robot — the Eye** | Hijacked the Song and hid the virus in it. The command was his. Built the five constructs. | **Never seen in the game.** Reported, then named at the end as what remains. See §8.1. | Nowhere (yet) |
+| **The evil robot — the Eye** | Hijacked the Song and hid the virus in it. The command was his. Built the five constructs. | **Never seen in the game.** First NAMED by his soldier GRAVEHORN in the quarry (CV3, chapter one, owner 2026-10-11); reported, then named at the end as what remains. See §8.1. | Nowhere (yet) |
 | **Ratchet** | The trader and tinker. First NPC. Wears the crystal necklace that burned the virus out of him. Pulled his own battery and waited. | Big, round, copper-brass body, domed; the crystal on a cord at his chest; a canister rack on his back that vents heat; a bench of salvage. His tic: the hand reaches for a tool that is not there. | A0B (his den) until he forges the blade; then A3 (the camp). One machine, one battery, one waking. |
 | **Old Servo** | The meadow's winch-keeper. Raised every gantry over the meadow. | Old, boxy, half turned into the winding drum behind him. | A1 |
 | **Mono** | The Oracle. Archived the network; now archives its ruins. Runs the Cognition Trials. | A CRT face on a shroud of dead cables, reading a river of data in the dark. | B3B, the Parlor |
@@ -43,6 +43,7 @@ cannot be spent. §2.5 is that scene.
 | **Lumen** | The Lost Nymph. Glows harder when afraid; always glowing. | A small luminous unit whose glow keeps one pocket of the Nest clean. | E1B, the Hollow |
 | **The seven chamber sages** | The kingdoms' protectors, kneeling under the Song two rooms behind each guardian. | Kneeling figures with a black halo and an ember rim while infected; the halo goes blue when purified. | Every G\*D deep chamber |
 | **NULLFANG** | Guardian of the Meadows. A virus-infected robot lion with whelps. | Lion-frame, red light behind the eyes. | A2 (the meeting), A4 (the fight) |
+| **GRAVEHORN** | *First Soldier of the Eye* (owner, 2026-10-11). Not infected by accident — the Eye's own heavy trooper, posted on the raw marble so the blade that cures is never made. Not cured, not killed: beaten, he backs into the rock and swears the Eye will come. The first voice to NAME the Eye. | A huge armoured robot rhinoceros, gunmetal and blackened bronze, hazard-red stripes, one red eye per side in a deep brow slot; two horns in sockets that leave his head as missiles and fly back (ART_QUEUE §2bf). Phase two: armour blown open, molten red cracks, both horns lit. | CV3, on the marble |
 | **THE ALPHA** | Leader of the wolf pack. Not a guardian; not the Eye's. | A great wolf-frame with the pack behind it. | A10 |
 | **TALONHOST** | Guardian of the Conduits. The Iron Eagle. | Hangs from above, drops and slams. | B4 |
 | **The Prism Prowler** | The rival robo-cat. The one machine the network never indexed, so the Song never touched it — never infected. Keeps Kerf's second blade. | A clear, blue crystal cat under a skin of virus-red; the same body either way. | X1 |
@@ -275,8 +276,29 @@ Deaf System's:
 > *They went under. Into the rock, where the signal dies. They rebuilt down here — a system of the deaf, wired by touch and light. No radio. No song.*
 > *The caves do not connect to each other. That is not a flaw. A tunnel the song cannot walk is a tunnel worth keeping short.*
 
-In CV3, two crawlers and then THE MARBLE — a rounded raw nodule in its host rock, never a
-pointed crystal. Plain claws: *Claws glance off the raw marble. Hold ATTACK to supercharge,
+In CV3 the chalk arrows end in a long cavern — and something steps out of the dark at
+the far end of it, between her and the stone: GRAVEHORN, an armoured rhino the size of a
+room, one red eye, two horns. The exits close behind her. He speaks:
+> *So the little cleaner woke up.*
+> *I am GRAVEHORN, First Soldier of the Eye. It posted me on this stone.*
+> *The marble stays buried. So will you.*
+
+He bellows; his name goes up. She has only her claws and the burst. His big horn leaves his
+head as a missile, homes on her and LOCKS (a cyan flash), and while it is away his head is
+bare; he charges the length of the cavern and she jumps him, and if it ends in the rock wall
+the roof comes down on him and he stands stunned; up close he hooks her into the air with
+his whole body and she lands seeing stars — unless she meets the horn with a strike as it
+comes up, and steel rings on steel. Beaten once, he crashes to his knees:
+> *Enough. The Eye built me for war. Now you see all of it.*
+
+His armour blows off, molten red underneath, and the second horn lights: both horns fly
+now, the charge comes back at her off the wall, and standing behind him earns a double kick.
+Beaten again, he backs into the rock:
+> *This isn't over.*
+> *The Eye sees you, cleaner. Next time it comes itself.*
+
+And then — the cave's own two crawlers come back out of the rock, and past them, THE
+MARBLE — a rounded raw nodule in its host rock, never a pointed crystal. Plain claws: *Claws glance off the raw marble. Hold ATTACK to supercharge,
 then release beside it.* The burst frees it (the pack is what makes the burst — §2.5).
 > **Raw marble** — *A rounded nodule freed from the host rock. Bring the material to Ratchet; it is not yet a blade.*
 
@@ -285,9 +307,15 @@ purple; guardians red; woken and purified machines blue; an infected sage wears 
 black halo with an ember rim.
 **Story.** A second people lived down here — the deaf, who could not hear the Song and
 so survived it — and they quarried this seam. The stone Ratchet wears came from here.
-The burst the pack gave her is the only thing that cracks it.
-**Panels.** The mouth breathing; the beacon; the pillar, white, taller than her; the
-storm on her chassis; the shard falling; her aura coming on in the dark.
+The burst the pack gave her is the only thing that cracks it. And the thing that stole the
+Song knows it: it posted a soldier on the stone. GRAVEHORN is the first of the Eye's own to
+stand in front of her and say whose he is — the story's enemy gets a name, and a reason to
+come back.
+**Panels.** The mouth breathing; the beacon; GRAVEHORN bursting out of the quarry dust in
+front of the glowing stone, towering over her (gh_intro_a); his head, red eye, horn raised
+(gh_intro_b); the armour bursting open, both horns lit (gh_phase2); beaten, the big horn
+cracked, backing into the rock (gh_down); the pillar, white, taller than her; the storm on
+her chassis; the shard falling; her aura coming on in the dark.
 
 ### 2.10 The forging — A0B (and Ratchet moves to the camp)
 

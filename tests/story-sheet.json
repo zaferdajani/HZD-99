@@ -30,6 +30,12 @@
         "bossChime"
       ]
     },
+    "GRAVEHORN": {
+      "re": "GRAVEHORN",
+      "known": [
+        "ghMet"
+      ]
+    },
     "the Sage": {
       "re": "\\bSage\\b",
       "known": [
@@ -46,7 +52,8 @@
     "the Eye": {
       "re": "\\bEye\\b",
       "known": [
-        "bossLens"
+        "bossLens",
+        "ghMet"
       ]
     },
     "Mono": {
@@ -245,10 +252,33 @@
       "lines": []
     },
     {
+      "id": "gravehorn",
+      "room": "CV3",
+      "requires": [],
+      "sets": [
+        "ghMet",
+        "bossHorn"
+      ],
+      "speaker": "GRAVEHORN, First Soldier of the Eye",
+      "knows": "He is the Eye's own heavy trooper, posted on the raw marble: it stays buried. Beaten, he backs into the rock — it is not over, and the Eye sees her.",
+      "pointer": "The quarry road itself: the chalk arrows end in his cavern and he steps out of the dark at her; once he has spoken, the objective names him (op_o_gravehorn)",
+      "lines": [
+        "grv_intro",
+        "grv_phase2",
+        "grv_down",
+        "op_o_gravehorn"
+      ],
+      "introduces": [
+        "GRAVEHORN",
+        "the Eye"
+      ]
+    },
+    {
       "id": "quarry",
       "room": "CV3",
       "requires": [
-        "heal"
+        "heal",
+        "bossHorn"
       ],
       "sets": [
         "pl_cshard"

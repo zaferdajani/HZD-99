@@ -75,6 +75,7 @@ function progressGoal(f) {
   if (!f.crystal) {
     if (G.save.bag && G.save.bag.cshard || f.pl_cshard && !f.crystal) return 'pg_goal_return';
     if (!f.heal) return 'pg_goal_pack';
+    if (f.ghMet && !f.bossHorn) return 'pg_goal_gravehorn';   // the soldier on the stone
     return f.beacon ? 'pg_goal_quarry' : 'pg_goal_marble';
   }
   if (f.bossGlitch) return 'pg_goal_up';           // an older save may hold the lion without the rest

@@ -2493,6 +2493,8 @@ const RECORDED_TRACKS = {
   // is not a victory fanfare but a truce: the same hunting-horn call, broken
   // and alone, resolving from C minor into C major as the pack accepts her.
   boss_alpha: [['mus_alpha', 0.62], ['mus_boss', 0.6]],
+  // GRAVEHORN is the Eye's own soldier: he fights under the Eye's score
+  boss_horn: [['mus_eye', 0.62], ['mus_boss', 0.6]],
   alphaTame: [['mus_alphatame', 0.6]],
   boss: [['mus_boss', 0.6]], mother: [['mus_mother', 0.64], ['mus_boss', 0.6]],
   // the one that plays over the ending, after the last blow has been swung
@@ -2506,7 +2508,7 @@ function pickRecorded(name) {
 // when a per-guardian slot has neither a recording nor a synth track of its own
 const MUS_FALL = {
   boss_glitch: 'boss', boss_brood: 'boss', boss_atlas: 'boss',
-  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss', boss_alpha: 'boss',
+  boss_zero: 'boss', boss_prism: 'boss', boss_mother: 'mother', boss_mini: 'boss', boss_alpha: 'boss', boss_horn: 'boss',
   // the sage duel has its OWN slot now: drop mus_sage.m4a into assets/music
   // (ART_QUEUE brief) and every chamber picks it up; until then the duels
   // borrow the guardian track through this fallback
