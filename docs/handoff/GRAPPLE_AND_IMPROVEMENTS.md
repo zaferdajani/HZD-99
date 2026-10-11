@@ -1,3 +1,8 @@
+> **Owner decisions, 2026-10-11 (later the same day).** Decision 1 is settled: the claw unlocks with the dash, as it
+> already does (`grapUnlocked()`), so the stand-in becomes the rule; keep the `abil.grapple` flag for a future pickup.
+> The owner then ordered it published: the integration branch was mirrored to `main` and `odyssey`. Decisions 2 (touch
+> seat) and 3 (pad button) remain open and ship as built until the owner says otherwise.
+>
 > **Status, 2026-10-11 (read first).** Part 1, the grappling claw, is already committed on
 > `claude/clawbyte-repo-migration-byhyl8` on top of e1db4ef, in the commit that added this file. By the owner's choice it
 > is **not** mirrored to `main` or `odyssey` and is **not** live. Step 1 below (applying the patch) is done; the patch,
