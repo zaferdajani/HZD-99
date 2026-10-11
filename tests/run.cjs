@@ -102,6 +102,7 @@ const SUITE = [
   ['gesture-input', 'the picture answers taps and swipes, and nothing the controller owns changes'],
   ['input-contract', 'one struct the game reads: the devices unchanged, and a struct alone can play'],
   ['winch-integration', 'modular yard machine and persistent cleansing'],
+  ['winch-purpose', 'the jammed winch arm blocks the road, every strike knocks scrap she collects, the burst lifts the arm; reloads and NOSTOS unaffected'],
   ['manhwa-reader', 'revised illustrated edition and complete written opening'],
   ['panels', 'approved manhwa crops at story moments: once, safe, readable, skippable, replayable'],
   ['entrance-integration', 'painted entrances share world anchors without duplicate mouth overlays'],

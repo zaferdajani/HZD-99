@@ -32,6 +32,10 @@ const {chromium}=require('playwright');
    for(const k in keys)delete keys[k];
    check('real claw inputs isolate motor and retain the machine',e.disabled&&!e.dead&&!e.motorEnabled);
    check('first disable pays the tutorial salvage once',G.save.scrap===before+12);
+   // the stopped motor lets the arm swing up clear of the road (owner,
+   // 2026-10-11: the jammed arm was the reason to strike it), then it is still
+   const a0=e.armAngle;for(let i=0;i<90;i++)e.update(1/60);
+   check('stopping the motor lifts the arm clear of the road',a0>WINCH_RAISED&&e.armAngle===WINCH_RAISED);
    const angle=e.armAngle;e.update(0.2);e.die();check('disabled mechanism stays still without repeat rewards',e.armAngle===angle&&G.save.scrap===before+12);
    function colors(){const cv=document.createElement('canvas');cv.width=1000;cv.height=650;const c=cv.getContext('2d');c.translate(450-e.x,-100);e.draw(c);const d=c.getImageData(0,0,1000,650).data;let red=0,cyan=0;for(let i=0;i<d.length;i+=4){if(d[i+3]<180)continue;if(d[i]>180&&d[i+1]<110&&d[i+2]<100)red++;if(d[i]<130&&d[i+1]>170&&d[i+2]>180)cyan++;}return{red,cyan};}
    const disabledColor=colors();check('disabled control remains visibly red',disabledColor.red>15);

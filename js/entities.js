@@ -2508,7 +2508,9 @@ class Player {
     if (G.boomer || this.swirlT > 0) { this.chargeT = 0; return false; }
     // the tutorial's burst lesson (TUT_STEPS 'burst') completes on a real
     // release, whichever weapon shaped it
-    if (G.save && G.save.flags && !G.save.flags.burstDone) { G.save.flags.burstDone = 1; }
+    // ...at the jammed winch, while the opening teaches it (opBurstMisses)
+    if (G.save && G.save.flags && !G.save.flags.burstDone
+        && !(typeof opBurstMisses === 'function' && opBurstMisses(this))) { G.save.flags.burstDone = 1; }
     const mode = weaponMode(G.save);
     if (mode === 'dual') return this.swirl();
     if (mode === 'joined') return this.throwJoined();
@@ -5681,7 +5683,7 @@ class Scrap {
     }
   }
   draw(c) {
-    const s = this.val >= 15 ? 6 : 4;
+    const s = this.size || (this.val >= 15 ? 6 : 4);
     c.save(); c.translate(this.x + 5, this.y + 5); c.rotate(this.t * 3);
     c.shadowColor = '#ffd76a'; c.shadowBlur = 8; c.fillStyle = '#ffd76a';
     c.fillRect(-s / 2, -s / 2, s, s);
