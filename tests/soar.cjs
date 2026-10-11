@@ -130,7 +130,7 @@ const check = (name, ok, detail) => {
     G.soarLast = null; player.iT = 5;
     out.cutRun = await launch(30);
     clearInterval(pin);
-    out.cut = { hpLost: hp0 - e.hp, fixed: SOAR.dmg, hits: G.soarLast ? G.soarLast.hit : null };
+    out.cut = { hpLost: hp0 - e.hp, fixed: 48, hits: G.soarLast ? G.soarLast.hit : null };
 
     // ---- 5. in the air the same input is the claw
     await place(out.open);

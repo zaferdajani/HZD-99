@@ -91,26 +91,43 @@ const check = (name, ok, detail) => {
       e.dir = -1; e.iq = 0.2; e.iqT = 99; e.windedT = 0; e.coilT = 0.12; e.lungeT = 0; e.atkCD = 9;
       G.enemies = [e];
       const c0 = player.cores, hp0 = e.hp;
-      let glint = false, raisedAt = null, contactAt = null, n = 0;
+      let glint = false, raisedAt = null, contactAt = null, n = 0, lungeMash = false, finalAt = null;
       if (brace === 'late') keys['KeyL'] = 1;
       for (; n < 90; n++) {
         const hb = hurtBoxOf(e), d = hb.x - (player.x + player.w);
         if (e.parryable) glint = true;
-        if (brace === 'perfect' && raisedAt == null && e.lungeT > 0 && d <= gap) { keys['KeyL'] = 1; raisedAt = n; }
-        if (brace === 'mash' && raisedAt == null && e.lungeT > 0 && d <= 30) {
-          keys['KeyL'] = 1; await frames(2); delete keys['KeyL']; await frames(2); keys['KeyL'] = 1; raisedAt = n;
+        if (brace === 'perfect' && raisedAt == null && e.lungeT > 0 && d <= gap) { keys['KeyL'] = 1; raisedAt = n; finalAt = n; }
+        // the masher: up early (too early to count), dropped as the blow
+        // closes and snapped back up at the perfect instant — inside the lock
+        if (brace === 'mash' && e.lungeT > 0) {
+          if (raisedAt == null && d <= 60) { keys['KeyL'] = 1; raisedAt = n; }
+          else if (raisedAt != null && !lungeMash && d <= 20) { delete keys['KeyL']; await frame(); keys['KeyL'] = 1; lungeMash = true; finalAt = n; }
         }
         if (contactAt == null && aabb(e, player)) contactAt = n;
         if (player.parries || player.cores < c0 || (contactAt != null && n > contactAt + 4)) break;
         await frame();
       }
-      const out = { kind, brace, lost: c0 - player.cores, parries: player.parries | 0, glint,
+      const pressedFirst = brace === 'late' || (finalAt != null && (contactAt == null || contactAt > finalAt) && (brace !== 'mash' || lungeMash));
+      const out = { kind, brace, pressedFirst, mashed: lungeMash, lost: c0 - player.cores, parries: player.parries | 0, glint,
         winded: +(e.windedT || 0).toFixed(2), counterOpen: player.counterT > 0, heat: +(player.guardHeat || 0).toFixed(2),
         how: G.parryLog && G.parryLog.length ? G.parryLog[G.parryLog.length - 1].how : null, e, hp0 };
       return out;
     };
+    // A loaded machine renders a frame in 100 ms, and the lunge closes 20 px
+    // in that: the press can land on the far side of contact. That run did not
+    // test the parry at all, so it is run again — at most four times — rather
+    // than counted; the press must be BEFORE contact for the case to exist.
+    const lungeTimed = async (kind, brace) => {
+      let r0;
+      for (let a = 0; a < 4; a++) {
+        r0 = await lunge(kind, brace); r0.tries = a + 1;
+        if (r0.pressedFirst) break;
+        delete keys['KeyL'];
+      }
+      return r0;
+    };
     const res = {};
-    const A = await lunge('guard', 'perfect');
+    const A = await lungeTimed('guard', 'perfect');
     // THE COUNTER: a real ATTACK press inside the window, sampled for i-frames
     const hpBefore = A.e.hp;
     let invulnAll = true, sawAct = false;
@@ -122,11 +139,11 @@ const check = (name, ok, detail) => {
       if (player.counterAct) { sawAct = true; if (!(player.iT > 0)) invulnAll = false; }
       else if (sawAct) break;
     }
-    res.counter = { pre, sawAct, invulnAll, dealt: G.lastCounter ? G.lastCounter.dealt : null, hpLost: hpBefore - A.e.hp, fixed: COUNTER_DMG };
+    res.counter = { pre, sawAct, invulnAll, dealt: G.lastCounter ? G.lastCounter.dealt : null, hpLost: hpBefore - A.e.hp, fixed: 36 };   // written out, not read from ATTACKS.counter
     delete keys['KeyL'];
     res.perfect = Object.assign({}, A, { e: undefined });
     for (const [k, kind, br] of [['late', 'guard', 'late'], ['plain', 'crawler', 'perfect'], ['mash', 'guard', 'mash']]) {
-      const r0 = await lunge(kind, br); r0.e = undefined; res[k] = r0; delete keys['KeyL'];
+      const r0 = await lungeTimed(kind, br); r0.e = undefined; res[k] = r0; delete keys['KeyL'];
     }
     // THE GLINT IS ACTUALLY DRAWN: one parryable machine through drawParryTells
     // onto a clean canvas, counting the pixels of its colour round the point
@@ -167,7 +184,7 @@ const check = (name, ok, detail) => {
   check('an attack without the glint cannot be parried, even at perfect timing',
     !P.plain.glint && P.plain.parries === 0 && !P.plain.counterOpen, JSON.stringify(P.plain));
   check('mashing GUARD buys no window: a re-raise inside the lock is a plain brace',
-    P.mash.parries === 0 && !P.mash.counterOpen, JSON.stringify(P.mash));
+    P.mash.mashed && P.mash.parries === 0 && !P.mash.counterOpen, JSON.stringify(P.mash));
   check('the glint is drawn in its colour where the blow comes from, and not when nothing is parryable',
     P.glint.lime >= 20 && P.glint.offPixels === 0, JSON.stringify(P.glint));
   check('the parry colour is used by nothing else in the game (only js/parry.js names it)',

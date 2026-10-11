@@ -33,7 +33,16 @@ run(fn(entities, 'sageStruck'));
 const gifts = entities.indexOf('const SAGE_GIFT =');
 run(entities.slice(gifts, entities.indexOf('\n};', gifts) + 3));
 run(fn(entities, 'sageTame'));
-run('class SpecialPlayer { ' + ['swirlPass', 'releaseCharged'].map(method).join('\n') + ' }\nthis.SpecialPlayer = SpecialPlayer;');
+// THE ATTACK TABLE (handoff A1-A3): the specials read their damage, knockback
+// and hit-stop from ATTACKS through attackDmg/attackKnock/attackFreeze, so the
+// shipped table and its helpers load here too — from the source, not a copy.
+const table = entities.indexOf('const ATK_MOD = {');
+assert(table >= 0, 'ATTACKS table exists');
+run(entities.slice(table, entities.indexOf('\n}', entities.indexOf('function attackFreeze(', table)) + 2));
+const atkDmg = entities.indexOf('  attackDmg(id, ctx) {');
+assert(atkDmg >= 0, 'attackDmg exists');
+run('class SpecialPlayer { ' + ['swirlPass', 'releaseCharged'].map(method).join('\n')
+  + '\n' + entities.slice(atkDmg, entities.indexOf('\n  }', atkDmg) + 4) + ' }\nthis.SpecialPlayer = SpecialPlayer;');
 const p = new ctx.SpecialPlayer();
 Object.assign(p, { x: 0, y: 0, w: 28, h: 36, swirlT: 0, swirlHits: 0,
   startScratchWake: noop, // Visual effect; real-player coverage lives in scratch-reach.cjs.

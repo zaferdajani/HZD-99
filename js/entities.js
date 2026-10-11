@@ -589,6 +589,126 @@ function touchingWall(e, dir) {
 const FLIP_DUR = 0.62;   // the double-jump pirouette, start to finish
 
 // ===========================================================================
+// THE ATTACK TABLE — ONE CLAW STAT, A ROW PER MOVE (handoff Part 2, A1-A3).
+//
+// Player.dmg() is the one stat: 12 x weapon tier x crest x resolve x relics x
+// difficulty. Every strike she has is a row here, keyed off that stat, so one
+// upgrade lifts every move at once and nothing is hand-rebalanced at a call
+// site. Before the table each move carried its own literals inline — the
+// finisher's 1.35 inside the swing, 0.6 in the plunge ring, 0.35/0.8 in
+// grapple.js, 310/220/120 knockback on every slash, 240 on the throw — and a
+// change to one move was a hunt through four files.
+//
+//   mult        x dmg(). `skill: [id, mult]` replaces it while the skill is owned
+//   floor       the least the rounded number may be (moves that always register)
+//   feral, wield, purity, crit
+//               which CONDITIONAL factors the row takes (ATK_MOD, applied in
+//               Player.attackDmg and nowhere else)
+//   multi       a sustained move: it re-hits on its own clock, every `every`
+//               seconds of GAME time — never per frame and never per update()
+//               call, because the loop runs a fixed SIM_STEP and may call
+//               update() several times in one frame
+//   kb          px/s along the blow's direction. 0 PINS the body where it was
+//               struck; null means the move does not knock at all
+//   kbV         px/s along the blow's vertical component
+//   kbUp        px/s of lift on top of that (null: the move leaves vy alone)
+//   kbT         s the body is a thrown object before its own brain resumes
+//   freeze      hit-stop on contact, s. For a multi-hit, on its FIRST contact
+//   tickFreeze  hit-stop on a multi-hit's later contacts (0: no stutter)
+//   freezeBig   hit-stop against a guardian, where it differs
+//   recoil      px/s her own blow pushes HER back
+//
+// A1 — the damage is exactly what each move dealt before the table existed.
+// tests/attacks.cjs swings every row across a matrix of builds and checks it
+// against the pre-refactor formulas, written out by hand in the harness.
+//
+// A2 — KNOCKBACK, CHOSEN PER MOVE, and why:
+//   slash      310  the jab, unchanged. A chain's opener must leave the foe
+//                   inside the next beat's reach: 310 over 0.26 s carries a
+//                   crawler ~50 px, which the next beat still covers.
+//   finisher   465  1.5x the jab, ~80 px. The third beat ENDS the exchange and
+//                   buys her space; at 310 (the old number, the same as the
+//                   jab) the finisher landed like the first hit.
+//   throw      465  the thrown blade is the spear (Silksong's Silkspear: 1.5x
+//                   magnitude), along its flight. Was 240.
+//   throwBack    0  the RETURN pass still cuts, but pins. A blade flying home
+//                   that carried the foe with it dragged it onto her — the old
+//                   240 toward the catcher made the throw punish the thrower.
+//   swirl        0  a multi-hit PINS (Silksong's multi-hitters use 0). The ring
+//                   is worth standing in only if what it catches stays caught;
+//                   the old 120 px/s outward shove walked a foe out of a 62 px
+//                   ring before the last pass. The 60 px/s lift stays: juggled,
+//                   not thrown, exactly as the swirl's own note says.
+//   burst      420  the radial "get off me", unchanged.
+//   plunge     260  the ring beside the pogo, radial, unchanged.
+//   grapHit    260  the claw's arrival strike, unchanged; she bounces off it.
+//   grapBite  null  the bite holds the foe on the line while she reels in.
+//   thunder      0  NOSTOS's bolt falls from straight above: it pins and lifts.
+//   risecut         the up-slash launcher: the slash's push, then a fixed 430
+//                   lift that meets an air chain — kept exactly as it was.
+//   clash      260  every parry (js/parry.js parryClash: the perfect guard and
+//                   GRAVEHORN's strike on his horn): steel on steel, no damage,
+//                   the attacker is shoved back on its heels.
+//   counter    360  the parry's answer (js/parry.js): FLAT 36, upgrades do not
+//                   scale it (Silksong's Cross Stitch is 15 flat on a 5 needle).
+//   soar         0  Volt Soar (js/soar.js): FLAT 48 to everything she passes,
+//                   pinned and thrown upward, out of her way.
+//
+// A3 — only the FIRST contact of a move freezes the game. The swirl froze
+// 35 ms on every pass: four stutters in the one move whose point is that you
+// watch it. Its later passes now freeze 0 (tickFreeze). Ranged kit — stars,
+// suits, the wave, the EMP — is priced in ammo and volts, not in the claw
+// stat, and is deliberately not in this table.
+// ===========================================================================
+const ATK_MOD = {
+  feral: 1.45,                // FERAL CLAWS (clawT): the claws rake deeper
+  wield: [1, 1.25, 1.45],     // bare paws / a crystal / the joined blade
+  purity: 1.3,                // skill 'purity': a pure edge on a guardian or the corrupted
+  crit: 2, critChance: 0.1,   // relic 'lens'
+};
+const ATTACKS = {
+  slash:     { mult: 1, feral: 1, wield: 1, purity: 1, crit: 1,
+               kb: 310, kbV: 220, kbUp: 120, kbT: 0.26, freeze: 0.05, freezeBig: 0.06, recoil: 62 },
+  finisher:  { mult: 1.35, skill: ['calc', 1.55], feral: 1, wield: 1, purity: 1, crit: 1,
+               kb: 465, kbV: 220, kbUp: 120, kbT: 0.30, freeze: 0.085, recoil: 130 },
+  risecut:   { mult: 1, kbUp: 430, kbT: 0.4, lift: 300 },   // rides on the slash it launches from
+  plunge:    { mult: 0.6, kb: 260, kbUp: 180, kbT: 0.3 },
+  throw:     { mult: 1.15, skill: ['boomer', 1.45], kb: 465, kbT: 0.22, freeze: 0.05 },
+  throwBack: { mult: 1.15, skill: ['boomer', 1.45], kb: 0, kbT: 0.22, freeze: 0.05 },
+  swirl:     { mult: 0.95, floor: 1, multi: true, every: 0.16,
+               kb: 0, kbUp: 60, kbT: 0.16, freeze: 0.035, tickFreeze: 0 },
+  burst:     { mult: 3.2, kb: 420, kbV: 200, kbUp: 180, kbT: 0.3, freeze: 0.12 },
+  thunder:   { mult: 1.6, kb: 0, kbUp: 180, kbT: 0.3 },
+  grapBite:  { mult: 0.35, floor: 1, kb: null, freeze: 0.035 },
+  grapHit:   { mult: 0.8, floor: 1, kb: 260, kbUp: 160, kbT: 0.26, freeze: 0.07 },
+  clash:     { mult: 0, kb: 260, freeze: 0.14 },
+  counter:   { mult: 0, flat: 36, kb: 360, kbUp: 160, kbT: 0.3, freeze: 0.09 },
+  soar:      { mult: 0, flat: 48, kb: 0, kbUp: 320, kbT: 0.3, freeze: 0.04 },
+};
+// every row carries every field, so a reader (or the Forge) never has to know
+// which ones a move happened to need
+for (const id in ATTACKS) ATTACKS[id] = Object.assign({ id, mult: 1, skill: null, floor: 0,
+  flat: 0, feral: 0, wield: 0, purity: 0, crit: 0, multi: false, every: 0, kb: null, kbV: 0, kbUp: null,
+  kbT: 0, freeze: 0, tickFreeze: 0, freezeBig: null, recoil: 0 }, ATTACKS[id]);
+// Knockback, from the row. dx/dy are the blow's unit direction. Guardians and
+// turrets are never moved by her blows; returns whether this body was.
+function attackKnock(e, id, dx, dy) {
+  const A = ATTACKS[id];
+  if (A.kb == null || (typeof Boss !== 'undefined' && e instanceof Boss) || e.kind === 'turret') return false;
+  e.kbT = A.kbT;
+  if (A.kb) e.vx += dx * A.kb; else e.vx = 0;             // 0 PINS
+  if (A.kbUp != null) e.vy = Math.min(e.vy, 0) + (dy || 0) * A.kbV - A.kbUp;
+  return true;
+}
+// Hit-stop, from the row. `later`: a multi-hit's contact after its first.
+function attackFreeze(id, big, later) {
+  const A = ATTACKS[id];
+  const f = later ? A.tickFreeze : (big && A.freezeBig != null ? A.freezeBig : A.freeze);
+  if (f > 0) G.hitStop = Math.max(G.hitStop || 0, f);
+  return f;
+}
+
+// ===========================================================================
 // THE SLASH, DEFINED ONCE.
 //
 // The paw's pose and the claw effect used to be authored separately — two
@@ -619,7 +739,8 @@ const FLIP_DUR = 0.62;   // the double-jump pirouette, start to finish
 // Her own recovery is the risk she is buying the ring with. 300 ms is longer
 // than any of her combo beats (0.23–0.33) and is meant to be felt: the swirl is
 // a decision, not a better button.
-const SWIRL_T = 0.64, SWIRL_STEP = 0.16, SWIRL_R = 62;
+// The pass clock is the swirl row's `every` (ATTACKS above): one number.
+const SWIRL_T = 0.64, SWIRL_STEP = ATTACKS.swirl.every, SWIRL_R = 62;
 const SLASH = [
   { hand: 'F', a0: -0.95, a1: 0.42, r0: 11.5, r1: 21 },   // beat 1 — right paw, steep down-rake
   { hand: 'B', a0: -0.45, a1: 0.92, r0: 11, r1: 20 },     // beat 2 — left paw, shallower, crosses under
@@ -1521,7 +1642,7 @@ class Player {
     this.mood = null; this.moodT = 0;      // a scripted feeling, and its clock
     // THE SWIRL and the window it leaves: while twinT runs the blade is in two
     // and her combo swings both. See swirl().
-    this.swirlT = 0; this.swirlTick = 0; this.swirlHits = 0; this.twinT = 0;
+    this.swirlT = 0; this.swirlTick = 0; this.swirlHits = 0; this.swirlFroze = false; this.twinT = 0;
     this.clawT = 0; this.clawCD = 0; this.pounceT = 0;   // FERAL CLAWS (robo-cat)
     this.armCD = 0; this.songT = 0; this.songCD = 0; this.starCD = 0;
     this.downBuf = 0; this.pogoT = 0; this.slowT = 0;   // frost-slow from the Archivist
@@ -1548,6 +1669,32 @@ class Player {
   // that makes an earned sword worth earning. Every other move reads dmg(), so
   // the combo, finisher, burst, hurricane and throw all inherit it from here.
   dmg() { return Math.round(12 * weaponAtk() * (hasCrest('claws') ? 1.25 : 1) * (G.save.flags && G.save.flags.resolve ? 1.18 : 1) * (1 + (relicHas('fang') ? 0.08 : 0) + (relicHas('whisker') ? 0.06 : 0)) * DF().pdmg); }
+  // THE ONE PLACE A STRIKE'S DAMAGE IS COMPUTED: dmg() x the move's row
+  // (ATTACKS) x the conditional factors the row takes (ATK_MOD). ctx carries
+  // the swing's own state — { clawT, wield, pure, target, x, y } — and may be
+  // omitted for moves that take no factor. The factor ORDER (row, feral,
+  // wield; round; purity; crit) is the order the inline code used, so the
+  // rounding is the same rounding and no number moved (tests/attacks.cjs).
+  attackDmg(id, ctx) {
+    const A = ATTACKS[id], c = ctx || {};
+    if (A.flat) return A.flat;          // a fixed blow: no stat, no factor, no crit
+    let dm = this.dmg() * (A.skill && hasSkill(A.skill[0]) ? A.skill[1] : A.mult);
+    if (A.feral && c.clawT > 0) dm *= ATK_MOD.feral;
+    if (A.wield && c.wield) dm *= ATK_MOD.wield[c.wield];
+    dm = Math.max(A.floor, Math.round(dm));
+    // PURITY: the crystal is a disinfectant before it is a weapon. With the
+    // skill, a pure edge bites the Eye's own machines — guardians and the
+    // corrupted — harder, and says so in white.
+    if (A.purity && c.pure && hasSkill('purity') && c.target && (c.target instanceof Boss || c.target.miniboss)) {
+      dm = Math.round(dm * ATK_MOD.purity);
+      burst(c.x, c.y, 8, '#ffffff', 220, 0.3, -60, 2.4, true);
+    }
+    if (A.crit && relicHas('lens') && chance(ATK_MOD.critChance)) {
+      dm *= ATK_MOD.crit;
+      burst(c.x, c.y, 10, '#ffffff', 340, 0.4, 100, 4, true);
+    }
+    return dm;
+  }
   voltMax() { return relicHas('collar') ? 110 : 99; }
   healCost() { return relicHas('coolant') ? 28 : 33; }
   gainVolts(n) { this.volts = clamp(this.volts + Math.round(n * (hasCrest('siphon') ? 1.5 : 1)) + (relicHas('silk') ? 2 : 0), 0, this.voltMax()); }
@@ -1996,8 +2143,8 @@ class Player {
           for (const e of G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'dorm' && G.boss.st !== 'intro' ? [G.boss] : [])) {
             if (e.dead || e.disabled || e.rescued) continue;
             if (Math.abs((e.x + e.w / 2) - tx2) < 46 && Math.abs((e.y + e.h / 2) - ty2) < 120) {
-              e.hp -= Math.round(this.dmg() * 1.6); e.hurtT = 0.15;
-              if (!(e instanceof Boss) && e.kind !== 'turret') { e.kbT = 0.3; e.vy -= 180; }
+              e.hp -= this.attackDmg('thunder'); e.hurtT = 0.15;
+              attackKnock(e, 'thunder', 0, 0);
               if (e.hp <= 0) e.die(Math.sign(ax) || 1, -0.5);
             }
           }
@@ -2247,31 +2394,21 @@ class Player {
         if (e.dead || e.disabled || e.rescued || this.swing.set.has(e)) continue;
         if (aabb(hb, hurtBoxOf(e))) {
           this.swing.set.add(e);
-          let dm = Math.round(this.dmg() * (this.swing.combo === 2 ? (hasSkill('calc') ? 1.55 : 1.35) : 1)
-                              * (this.clawT > 0 ? 1.45 : 1)     // claws rake deeper
-                              * (this.swing.wield === 2 ? 1.45 : this.swing.wield ? 1.25 : 1));  // the crystal has an edge
-          // PURITY: the crystal is a disinfectant before it is a weapon. With
-          // the skill, a pure edge bites the Eye's own machines — bosses and
-          // the corrupted — harder, and says so in white.
-          if (this.swing.pure && hasSkill('purity') && (e instanceof Boss || e.miniboss)) {
-            dm = Math.round(dm * 1.3);
-            burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 8, '#ffffff', 220, 0.3, -60, 2.4, true);
-          }
-          if (relicHas('lens') && chance(0.1)) {
-            dm *= 2;
-            burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 10, '#ffffff', 340, 0.4, 100, 4, true);
-          }
+          // the opener and the second beat are the slash row; the third is
+          // the finisher's. Feral claws rake deeper, the crystal has an edge,
+          // a pure edge bites the corrupted, the lens can crit: all of it is
+          // the row's named factors, applied in attackDmg (ATTACKS / ATK_MOD).
+          const aid = this.swing.combo === 2 ? 'finisher' : 'slash';
+          let dm = this.attackDmg(aid, { clawT: this.clawT, wield: this.swing.wield, pure: this.swing.pure,
+                                         target: e, x: hb.x + hb.w / 2, y: hb.y + hb.h / 2 });
           dm = dealDmg(e, dm, armEl(), hb.x + hb.w / 2, hb.y + hb.h / 2, true);
-          if (!(e instanceof Boss) && e.kind !== 'turret') {
-            e.kbT = 0.26;
-            e.vx += kx * 310;
-            e.vy = Math.min(e.vy, 0) + ky * 220 - 120;
+          if (attackKnock(e, aid, kx, ky)) {
             // RISECUT: the up-slash becomes a LAUNCHER (Lost Crown's juggle
             // grammar). The enemy goes up far enough to meet an air chain,
             // and a grounded cut that connects lifts her into the juggle too.
             if (this.swing.ay < 0 && this.swing.wield >= 1 && hasSkill('risecut')) {
-              e.vy = -430; e.kbT = 0.4;
-              if (this.on) this.vy = -300, this.on = false;
+              e.vy = -ATTACKS.risecut.kbUp; e.kbT = ATTACKS.risecut.kbT;
+              if (this.on) this.vy = -ATTACKS.risecut.lift, this.on = false;
             }
           }
           this.gainVolts(11);
@@ -2281,10 +2418,10 @@ class Player {
           const heavy = this.swing.combo === 2, big = e instanceof Boss;
           sfx(big ? 'bosshit' : 'hit');
           cam.shake = Math.max(cam.shake, heavy ? 5 : big ? 3.4 : 2.5);
-          G.hitStop = Math.max(G.hitStop, heavy ? 0.085 : big ? 0.06 : 0.05);
+          attackFreeze(aid, big);
           // RECOIL. Contact has to push back on HER too, or the enemy is made of
           // paper — a few pixels against the swing is all it takes to sell mass.
-          this.vx -= kx * (heavy ? 130 : 62);
+          this.vx -= kx * ATTACKS[aid].recoil;
           if (typeof padRumble === 'function') padRumble(heavy ? 0.42 : 0.2, heavy ? 0.6 : 0.42, heavy ? 110 : 60);
           this.hitConfirmT = 0.14;
           burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 14, '#fff2a8', 280, 0.35, 300, 3, true);
@@ -2371,8 +2508,9 @@ class Player {
             if (e2.dead || this.swing.set.has(e2)) continue;
             if (Math.abs(e2.x + e2.w / 2 - px0) < 78 && Math.abs(e2.y + e2.h - py0) < 40) {
               this.swing.set.add(e2);
-              dealDmg(e2, Math.round(this.dmg() * 0.6), armEl(), e2.x + e2.w / 2, e2.y + e2.h / 2, true);
-              e2.kbT = 0.3; e2.vx += Math.sign(e2.x - px0) * 260; e2.vy = -180;
+              dealDmg(e2, this.attackDmg('plunge'), armEl(), e2.x + e2.w / 2, e2.y + e2.h / 2, true);
+              attackKnock(e2, 'plunge', Math.sign(e2.x - px0), 0);
+              attackFreeze('plunge');
               if (e2.hp <= 0) e2.die(Math.sign(e2.x - px0) || 1, -0.4);
             }
           }
@@ -2387,7 +2525,7 @@ class Player {
         this.dashCD = Math.min(this.dashCD, 0); this.swing.t = 0; sfx('pogo');
         if (typeof padRumble === 'function') padRumble(0.3, 0.55, 90);
         cam.shake = Math.max(cam.shake, 4);
-        G.hitStop = Math.max(G.hitStop, 0.05);
+        attackFreeze('slash');            // the rebound is the down-slash's own contact
         burst(this.x + this.w / 2, this.y + this.h + 4, 10, '#cfe8ff', 220, 0.3, 260, 3, true);
       }
     }
@@ -2432,11 +2570,13 @@ class Player {
       if (typeof isPet === 'function' && isPet(e)) continue;
       if (aabb(bb, hurtBoxOf(e))) {
         b.set.add(e);
-        const dm = dealDmg(e, Math.round(this.dmg() * (hasSkill('boomer') ? 1.45 : 1.15)), armEl(), b.x, b.y, true);
+        // out, it is the spear; on its way home it cuts and PINS (ATTACKS)
+        const aid = b.out ? 'throw' : 'throwBack';
+        const dm = dealDmg(e, this.attackDmg(aid), armEl(), b.x, b.y, true);
         sfx(e instanceof Boss ? 'bosshit' : 'hit');
-        G.hitStop = Math.max(G.hitStop, 0.05);
+        attackFreeze(aid);
         burst(b.x, b.y, 10, '#ffffff', 240, 0.3, 120, 2.6, true);
-        if (!(e instanceof Boss) && e.kind !== 'turret') { e.kbT = 0.22; e.vx += Math.sign(b.vx) * 240; }
+        attackKnock(e, aid, Math.sign(b.vx), 0);
         if (e.hp <= 0) e.die(Math.sign(b.vx) || 1, -0.3);
       }
     }
@@ -2462,7 +2602,7 @@ class Player {
   swirl() {
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     this.chargeT = 0;
-    this.swirlT = SWIRL_T; this.swirlTick = 0; this.swirlHits = 0;
+    this.swirlT = SWIRL_T; this.swirlTick = 0; this.swirlHits = 0; this.swirlFroze = false;
     this.twinT = 0;
     this.swing = null; this.atkBuf = 0;
     this.atkCD = Math.max(this.atkCD, SWIRL_T + 0.3);
@@ -2481,7 +2621,7 @@ class Player {
   // one damage pass of the swirl, called on its own clock from update()
   swirlPass() {
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
-    const R = SWIRL_R, dm = Math.max(1, Math.round(this.dmg() * 0.95));
+    const R = SWIRL_R, dm = this.attackDmg('swirl');
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     let hit = 0;
     for (const e of targets) {
@@ -2495,15 +2635,17 @@ class Player {
       hit++;
       e.hurtT = 0.18;
       const n = d || 1;
-      // it LIFTS rather than throws: a thing juggled inside the ring stays in
-      // it for the next pass, which is what makes standing your ground pay
-      if (!(e instanceof Boss) && e.kind !== 'turret') {
-        e.kbT = 0.16; e.vx += ex / n * 120; e.vy = Math.min(e.vy, -60);
-      }
+      // it LIFTS and PINS rather than throws: a thing juggled inside the ring
+      // stays in it for the next pass, which is what makes standing your
+      // ground pay (ATTACKS.swirl: kb 0, a 60 px/s lift)
+      attackKnock(e, 'swirl', ex / n, ey / n);
       this.gainVolts(4);
       if (e.hp <= 0) e.die(ex / n, ey / n);
     }
-    if (hit) { G.hitStop = Math.max(G.hitStop, 0.035); sfx('hit');
+    // ONLY THE FIRST CONTACT FREEZES (A3). A 35 ms stop on every pass was four
+    // stutters in a move that exists to be watched; the first one still lands
+    // the weight, the rest keep the dance moving (ATTACKS.swirl.tickFreeze).
+    if (hit) { attackFreeze('swirl', false, this.swirlFroze); this.swirlFroze = true; sfx('hit');
       if (typeof padRumble === 'function') padRumble(0.22, 0.38, 65);
     }
     this.swirlHits += hit;
@@ -2545,7 +2687,7 @@ class Player {
     // its OWN bigger presence instead: three rings instead of two (one more
     // sweep to read), and both particle bursts roughly doubled in count and
     // size — this move's punch is now carried by things only IT fires.
-    cam.shake = 13; G.hitStop = Math.max(G.hitStop, 0.12);
+    cam.shake = 13; attackFreeze('burst');
     G.flash = Math.max(G.flash, 0.55);
     G.impact = { t: 0.16, t0: 0.16, x: cx, y: cy };
     G.addRing(cx, cy); G.addRing(cx, cy, 60); G.addRing(cx, cy, 130);
@@ -2564,7 +2706,7 @@ class Player {
     // reduce more lives from enemies and have more reach"). 2.6 -> 3.2 on the
     // damage; 128 -> 165 on the radius, with the ring FX scaled to match so the
     // visible burst never undersells what it actually touches.
-    const R = 165, dm = Math.round(this.dmg() * 3.2);
+    const R = 165, dm = this.attackDmg('burst');
     const targets = G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'intro' && G.boss.st !== 'dorm' ? [G.boss] : []);
     for (const e of targets) {
       if (e.dead || e.disabled || e.rescued || (typeof isPet === 'function' && isPet(e))) continue;
@@ -2576,9 +2718,7 @@ class Player {
       if (dealDmg(e, dm, armEl(), e.x + e.w / 2, e.y + e.h / 2, true) <= 0) continue;
       e.hurtT = 0.2;
       const n = d || 1;
-      if (!(e instanceof Boss) && e.kind !== 'turret') {
-        e.kbT = 0.3; e.vx += ex / n * 420; e.vy = Math.min(e.vy, 0) + ey / n * 200 - 180;
-      }
+      attackKnock(e, 'burst', ex / n, ey / n);
       this.gainVolts(11);
       if (e.hp <= 0) e.die(ex / n, ey / n);
     }

@@ -17,7 +17,10 @@
 //
 // Numbers come from Silksong's own Clawline and were scaled to CLAWBYTE's
 // world: reach ~11 tiles (TILE = 32), reel ~1150 px/s, arrival ~0.8x slash
-// damage, bite ~0.35x. Everything is in GRAP so it is tuned in one place.
+// damage, bite ~0.35x. The flight is tuned in GRAP; what the bite and the
+// arrival DO to a foe (damage, knockback, hit-stop) is their two rows in the
+// one attack table, ATTACKS.grapBite / ATTACKS.grapHit (js/entities.js), so
+// the claw scales with every upgrade the way every other move does.
 //
 // Integration (all small, see PROMPT.md "Grappling claw" for the exact diff):
 //   1. js/engine.js: KEYB.GRAPPLE (KeyU, Digit3), GP_CODES 'GP_GRAPPLE', PAD_ACTIONS + PAD_DEFAULT (-1)
@@ -41,8 +44,7 @@ const GRAP = {
   pullMax: 0.5,    // s: the longest a reel may take before it lets go
   cd: 0.38,        // s between grapples
   airUses: 2,      // grapples allowed before she touches ground or a wall
-  biteK: 0.35,     // damage on the bite, x her slash damage
-  hitK: 0.8,       // damage on arrival, x her slash damage
+  // bite and arrival damage: ATTACKS.grapBite (0.35x) and ATTACKS.grapHit (0.8x)
 };
 function grapUnlocked() {
   return !!(typeof G !== 'undefined' && G.save && G.save.abil && (G.save.abil.grapple || G.save.abil.dash));
@@ -108,7 +110,7 @@ function grapUpdate(p, dt) {
         const hb = hurtBoxOf(e);
         if (g.tx >= hb.x - 6 && g.tx <= hb.x + hb.w + 6 && g.ty >= hb.y - 6 && g.ty <= hb.y + hb.h + 6) {
           g.st = 'pull'; g.t = 0; g.foe = e;
-          grapBite(p, e, g, GRAP.biteK, false);
+          grapBite(p, e, g, 'grapBite', false);
           return true;
         }
       }
@@ -140,7 +142,7 @@ function grapUpdate(p, dt) {
     if (g.lastD != null && g.lastD - d < GRAP.pull * dt * 0.25) g.stall = (g.stall || 0) + dt; else g.stall = 0;
     g.lastD = d;
     if (d <= reach || g.t > GRAP.pullMax || g.stall > 0.06) {
-      if (g.foe) grapBite(p, g.foe, g, GRAP.hitK, true);
+      if (g.foe) grapBite(p, g.foe, g, 'grapHit', true);
       grapEnd(p, false);
       return false;
     }
@@ -180,17 +182,15 @@ function grapAssist(ox, oy, dx, dy) {
   }
   return best;
 }
-function grapBite(p, e, g, k, arrive) {
-  let dm = Math.max(1, Math.round(p.dmg() * k));
+function grapBite(p, e, g, id, arrive) {
+  let dm = p.attackDmg(id);
   dm = dealDmg(e, dm, armEl(), g.tx, g.ty, true);
-  if (arrive && !(e instanceof Boss) && e.kind !== 'turret') {
-    e.kbT = 0.26; e.vx += g.dx * 260; e.vy = Math.min(e.vy, 0) - 160;
-  }
+  attackKnock(e, id, g.dx, g.dy);   // the bite holds (kb null); the arrival shoves
   p.gainVolts(arrive ? 8 : 4);
   sfx(e instanceof Boss ? 'bosshit' : 'hit');
   burst(g.tx, g.ty, arrive ? 14 : 8, '#ffffff', arrive ? 300 : 200, 0.35, 200, 3, true);
   cam.shake = Math.max(cam.shake, arrive ? 4 : 2);
-  G.hitStop = Math.max(G.hitStop || 0, arrive ? 0.07 : 0.035);
+  attackFreeze(id);
   if (typeof padRumble === 'function') padRumble(arrive ? 0.45 : 0.25, arrive ? 0.7 : 0.4, arrive ? 110 : 60);
   if (arrive) { p.vx = -g.dx * 220; p.vy = -560; p.iT = Math.max(p.iT, 0.25); }   // bounce off it, like a pogo
 }

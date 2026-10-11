@@ -1169,7 +1169,7 @@ function ghClashed(b, p, how) {
   // both pushed apart
   player.vx = face * 380; player.vy = Math.min(player.vy, -170); player.iT = Math.max(player.iT, 0.45);
   player.flungT = Math.max(player.flungT || 0, 0.18);
-  b.vx = -face * 260;
+  b.vx = -face * ATTACKS.clash.kb;
   b.parries = (b.parries || 0) + 1;
   b.tossHit = true;
   ghSet(b, 'stagger', GH.stagger);

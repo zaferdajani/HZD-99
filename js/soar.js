@@ -17,7 +17,6 @@ const SOAR = {
   // head lands in, and a slow frame carried her through a two-tile roof
   speed: 900,
   carry: -220,     // vy she keeps at the top, so the arc rounds off instead of stopping dead
-  dmg: 48,         // FIXED, four plain slashes (Silk Soar is 20 flat on a 5 needle)
   maxT: 0.4,       // s: never longer than this, whatever happens
   cd: 0.5,         // s before the claw or the soar again
 };
@@ -58,13 +57,13 @@ function soarStep(p, dt) {
     const hb = hurtBoxOf(e);
     if (!aabb(box, hb)) continue;
     s.hit.push(e);
-    const dm = dealDmg(e, SOAR.dmg, null, hb.x + hb.w / 2, hb.y + hb.h / 2, true);
+    const dm = dealDmg(e, p.attackDmg('soar'), null, hb.x + hb.w / 2, hb.y + hb.h / 2, true);   // ATTACKS.soar: flat
     s.dealt.push(dm);
     sfx(e instanceof Boss ? 'bosshit' : 'hit');
-    G.hitStop = Math.max(G.hitStop || 0, 0.04);
+    attackFreeze('soar');
     burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 12, '#fff2a8', 260, 0.3, 200, 2.6, true);
     if (typeof p.gainVolts === 'function') p.gainVolts(11);
-    if (!(e instanceof Boss) && e.kind !== 'turret') { e.kbT = 0.3; e.vy = Math.min(e.vy || 0, 0) - 320; }
+    attackKnock(e, 'soar', 0, -1);
     if (e.hp <= 0 && typeof e.die === 'function') e.die(0, -1);
   }
   // the wake under her: the pack's exhaust, drawn as sparks

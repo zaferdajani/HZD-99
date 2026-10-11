@@ -20,10 +20,8 @@ const PARRY_COL = '#c6ff1a';
 const PARRY_WIN = 0.14;       // s from the press: a brace this fresh meets the blow
 const PARRY_LOCK = 0.3;       // a brace dropped this recently re-raises with no window
 const PARRY_LEAD = 0.15;      // a parryable wind-up opens its window this long before it fires
-const PARRY_FREEZE = 0.14;    // the clash's hit-stop
 const PARRY_STAGGER = 0.9;    // what a turned blow costs a common machine
 const COUNTER_WIN = 0.6;      // s after the clash in which ATTACK answers
-const COUNTER_DMG = 36;       // FIXED, three plain slashes: upgrades do not scale it
 const COUNTER_T = 0.3;        // the counter's own length, invulnerable throughout
 const COUNTER_REACH = 96;     // px from her centre to the foe's hurt box
 
@@ -73,7 +71,7 @@ function parryPoint(foe) {
 function parryClash(p, foe, how) {
   const pcx = p.x + p.w / 2, pcy = p.y + p.h * 0.42;
   const fp = parryPoint(foe), sx = (fp[0] + pcx) / 2, sy = (fp[1] + pcy) / 2;
-  G.hitStop = Math.max(G.hitStop || 0, PARRY_FREEZE);
+  attackFreeze('clash');                 // ATTACKS.clash (js/entities.js)
   cam.shake = Math.max(cam.shake, 6);
   sfx('block'); sfx('crack');
   if (typeof padRumble === 'function') padRumble(0.6, 0.6, 160);
@@ -121,16 +119,16 @@ function parryCounterHit(p, k) {
   const foe = k.foe, hb = hurtBoxOf(foe);
   k.hit = true;
   const x = hb.x + hb.w / 2, y = hb.y + hb.h / 2;
-  const dm = dealDmg(foe, COUNTER_DMG, null, x, y, true);
+  const dm = dealDmg(foe, p.attackDmg('counter'), null, x, y, true);   // ATTACKS.counter: flat
   k.dealt = dm; G.lastCounter = { dealt: dm, kind: foe.kind };
   const big = typeof Boss !== 'undefined' && foe instanceof Boss;
   sfx(big ? 'bosshit' : 'hit'); sfx('crack');
-  G.hitStop = Math.max(G.hitStop || 0, 0.09);
+  attackFreeze('counter');
   cam.shake = Math.max(cam.shake, 6);
   burst(x, y, 20, PARRY_COL, 340, 0.4, 200, 3, true);
   burst(x, y, 12, '#ffffff', 260, 0.3, 120, 2.6, true);
   if (typeof p.gainVolts === 'function') p.gainVolts(11);
-  if (!big && foe.kind !== 'turret') { foe.kbT = 0.3; foe.vx += k.dir * 360; foe.vy = Math.min(foe.vy || 0, 0) - 160; }
+  attackKnock(foe, 'counter', k.dir, 0);
   if (foe.hp <= 0 && typeof foe.die === 'function') foe.die(k.dir, -0.4);
 }
 
