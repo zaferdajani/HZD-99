@@ -97,14 +97,24 @@ const check = (name, ok, detail) => {
 
     // ---- 2. the miss: the open side, out to full reach and back, she stays free
     await place(spot, -spot.wallDir);
-    await press('KeyU');
+    // The peak is read per SIMULATION STEP, not per rendered frame: under load
+    // one frame runs several steps, and the turn from full reach to 'back'
+    // happens inside one of them, so a frame sample can miss the top by 40 px.
+    const grapStepOrig = grapUpdate;
     let maxLen = 0, sawBack = false, heldAfterBack = false;
+    window.grapUpdate = function (p, dt) {
+      const r = grapStepOrig(p, dt);
+      if (p === player && p.grap) maxLen = Math.max(maxLen, p.grap.len);
+      return r;
+    };
+    await press('KeyU');
     for (let i = 0; i < 40 && player.grap; i++) {
       await frames(1);
       if (player.grap) { maxLen = Math.max(maxLen, player.grap.len); if (player.grap.st === 'back') sawBack = true; }
       if (sawBack && player.grap && player.grap.st === 'throw') heldAfterBack = true;
     }
     out.miss = { maxLen: Math.round(maxLen), sawBack, gone: !player.grap, heldAfterBack };
+    window.grapUpdate = grapStepOrig;
 
     // ---- 3. the wall: reel to it, arrive with a fresh air jump and the dash ready
     await place(spot, spot.wallDir);
