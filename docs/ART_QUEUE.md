@@ -21,6 +21,32 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bk. HER VISOR, ACTING — mood plates for the eye lights ✱ QUEUED 2026-10-11 (code session, handoff Part 2 D4)
+
+`drawHeroEyes` repaints her two eye-lights per mood (HERO_MOOD: calm, happy,
+excited, determined, angry, sad, hurt, curious, weary, and now effort, relief,
+afraid) as procedural ellipses over the plate's baked pair. They read, but
+they are shapes, not a face. Fire a VISOR SHEET: her visor band alone, front
+three-quarter as on the idle plate, one cell per mood, eye-lights in the cyan
+`#37ffd0` with a white-hot core, on black, canon element
+`<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>` for the visor's exact shape.
+
+| cell | mood | the lights |
+|---|---|---|
+| 0 | calm | two soft ovals |
+| 1 | effort | squeezed hard, one tighter than the other, a strain flicker in the glow |
+| 2 | relief | soft, slightly drooped at the outer corners, half-lidded |
+| 3 | afraid | wide, round, lifted at the outer corners, a tremble in the light |
+| 4 | hurt | screwed shut, two bright slits |
+| 5 | determined | narrowed, inner corners down |
+| 6 | happy | the ^^ smile, shut upward |
+| 7 | weary | guttering, low, outer corners down |
+
+Wire as a `visorFx` media key sampled by `heroMood()` in `drawHeroEyes`, keeping
+the ellipse path as the fallback while the sheet loads; `node tests/run.cjs face hero artbible`.
+
+---
+
 ## 2bj. THE TRANSITION SET — six strips between the poses she already has ✱ QUEUED 2026-10-11 (code session, handoff Part 2 D3)
 
 `HERO_TRANS` (js/entities.js) covers land, skid, dash, hurt, heal and guard;

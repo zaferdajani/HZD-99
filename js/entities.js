@@ -1621,6 +1621,13 @@ const HERO_MOOD = {
   hurt:       { sq: 0.22, tl:  0.10, gl: 0.85, ar: 1.40, pu: 15.0, as: 1.00 },  // screwed shut, flickering
   curious:    { sq: 1.10, tl:  0.14, gl: 0.95, ar: 0.92, pu: 0.00, as: 0.62 },  // one eye small: a question
   weary:      { sq: 0.45, tl:  0.26, gl: 0.40, ar: 1.30, pu: 1.10, as: 1.00 },  // one core left: guttering
+  // FACE ACTING (handoff Part 2 D4): the three moments the face used to sit
+  // out. Effort is a squeeze with a strain flicker, one eye harder than the
+  // other; relief is the exhale after a repair, soft and a little drooped;
+  // fear is wide, lifted at the outer corners, trembling — at a guardian's roar.
+  effort:     { sq: 0.60, tl: -0.22, gl: 1.20, ar: 1.22, pu: 9.00, as: 0.80 },  // the reel, the soar, the counter
+  relief:     { sq: 0.70, tl:  0.24, gl: 1.05, ar: 1.15, pu: 0.00, as: 1.00 },  // just after a repair lands
+  afraid:     { sq: 1.38, tl:  0.30, gl: 0.88, ar: 0.78, pu: 11.0, as: 1.00 },  // a guardian roars
 };
 
 // ================= PLAYER =================
@@ -2281,6 +2288,7 @@ class Player {
       if (this.healTick <= 0) { this.healTick = 0.16; sfxHealTick(this.healT / 0.85); }
       if (this.healT >= 0.85) {
         this.healT = 0; this.volts -= this.healCost(); this.cores++;
+        this.reliefT = 0.9;                              // the face exhales (heroMood 'relief')
         G.coreFlash = { i: this.cores - 1, t: 0.5 };
         if (this.cores >= this.maxCores()) G.coresFullT = 0.8;
         if (typeof padRumble === 'function') padRumble(0.12, 0.25, 90);
@@ -2289,6 +2297,7 @@ class Player {
     } else this.healT = 0;
     this.armCD -= dt; this.songT -= dt; this.songCD -= dt; this.starCD -= dt;
     if (this.moodT > 0) this.moodT -= dt;
+    if (this.reliefT > 0) this.reliefT -= dt;
     // THE SWIRL runs on its own clock so its four passes keep their spacing
     // whatever the frame rate is doing
     if (this.swirlT > 0) {
@@ -3452,8 +3461,12 @@ class Player {
   heroMood(st) {
     if (this.moodT > 0 && this.mood) return this.mood;
     if (this.hurtPoseT > 0) return 'hurt';
+    // a guardian's roar frightens her — its entrance, or any state it names roar
+    if (G && (G.bossEntry || (G.boss && !G.boss.dead && /roar/i.test(G.boss.st || '')))) return 'afraid';
     if (this.cores <= 1) return 'weary';
     if (this.healT > 0) return 'happy';                 // relief, eyes closed
+    if ((this.reliefT || 0) > 0) return 'relief';       // ...and the exhale after it lands
+    if ((this.grap && this.grap.st === 'pull') || this.soar || this.counterAct) return 'effort';
     if (this.songT > 0) return 'excited';
     if (st === 'burst') return 'angry';                 // the charged blow only
     if (this.chargeT > 0.05) return 'determined';

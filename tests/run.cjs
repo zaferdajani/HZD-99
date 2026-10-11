@@ -238,6 +238,7 @@ const SUITE = [
   ['grapple',   'the grappling claw: walls, enemies, aim assist, and everything that outranks it'],
   ['hitshape',  'authored hit shapes: every swing inside its old square, the far corners trimmed, the Forge overlay'],
   ['slashlayer','her cuts on their own layer, drawn after her, with a glow copy on the dial'],
+  ['face',      'face acting: effort on the reel, relief after a repair, fear at a roar, drawn'],
   ['soar',      'Volt Soar: UP + claw on the ground, six tiles straight up, to the first ceiling, cutting what she passes'],
   ['shopscale', 'a shop door has no depth, a gate and a cave do'],
   ['foescale',  'every machine reads in the hero\'s weight class'],
