@@ -4,11 +4,11 @@
 > seat) and 3 (pad button) remain open and ship as built until the owner says otherwise.
 >
 > **Status, 2026-10-11 (read first).** Part 1, the grappling claw, is already committed on
-> `claude/clawbyte-repo-migration-byhyl8` on top of e1db4ef, in the commit that added this file. By the owner's choice it
-> is **not** mirrored to `main` or `odyssey` and is **not** live. Step 1 below (applying the patch) is done; the patch,
-> script and module files named in the table exist only in the owner's local handoff folder, and the change they carry is
-> this commit. What remains for Part 1: the three owner decisions, the full suite on your machine, then mirroring per the
-> one-branch protocol. Test evidence from the authoring machine is at the end of this file.
+> `claude/clawbyte-repo-migration-byhyl8` on top of e1db4ef, in the commit that added this file (57c8052). It is now
+> mirrored to `main` and `odyssey` (62adb65) and **live**: verified with `tools/verify-live-legacy.cjs`, BUILD_ID
+> 70c3c5143ea8. Step 1 below (applying the patch) is done; the patch, script and module files named in the table exist
+> only in the owner's local handoff folder, and the change they carry is that commit. What remains for Part 1: decisions
+> 2 and 3 if the owner raises them, and the full suite on your machine. Then start Part 2. Test evidence from the authoring machine is at the end of this file.
 >
 > The same machine also saw these harnesses fail **without** the claw (on f40f291 with nothing applied), so they are not
 > caused by it: `meet`, `kingdom` (the tails sound check), `enemygait` (13 px gait difference), `opening-order`, and
