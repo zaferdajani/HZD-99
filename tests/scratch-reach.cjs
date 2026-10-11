@@ -27,6 +27,8 @@ const ctx = vm.createContext({
 });
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../js/weapons.js'), 'utf8'), ctx);
 vm.runInContext(fs.readFileSync(process.argv[2] || path.join(__dirname, '../js/entities.js'), 'utf8'), ctx);
+// the swing's authored shapes (js/hitshape.js) live beside the Player, as in the build
+vm.runInContext(fs.readFileSync(path.join(__dirname, '../js/hitshape.js'), 'utf8'), ctx);
 vm.runInContext('var player = new Player(300, 444); player.on = true;', ctx);
 const player = ctx.player;
 function tick(dt = 1 / 60) { player.update(dt); pressed.clear(); }

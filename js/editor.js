@@ -286,10 +286,21 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       logLine('· exported room brief — ask your assistant for JSON ops, review them, then paste above');
     };
+    // SHAPES: what her claws actually cover, what each machine can be hit on,
+    // and her own body, drawn live in play (js/hitshape.js). F3 does the same.
+    const shapesB = mk('button', frow, BTN); shapesB.textContent = 'SHAPES';
+    F.shapesB = shapesB;
+    shapesB.onclick = () => forgeShapes();
     const hideB = mk('button', frow, BTN); hideB.textContent = 'HIDE';
     hideB.onclick = () => { panel.style.display = 'none'; F.open = false; };
 
     refreshPanel();
+  }
+
+  function forgeShapes() {
+    G.showShapes = !G.showShapes;
+    if (F.shapesB) F.shapesB.style.background = G.showShapes ? '#622' : '#12333a';
+    logLine(G.showShapes ? '· SHAPES on: orange = her claws, green = what can be hit, blue = her body' : '· SHAPES off');
   }
 
   // ---- pointing at the world ------------------------------------------------
@@ -323,6 +334,7 @@
     cv.addEventListener('mousemove', (e) => { if (painting && F.mode === 'paint') paintAt(e); });
     window.addEventListener('mouseup', () => { painting = false; });
     window.addEventListener('keydown', (e) => {
+      if (e.key === 'F3') forgeShapes();
       if (e.key === 'F2') {
         F.open = !F.open;
         if (panel) panel.style.display = F.open ? 'block' : 'none';

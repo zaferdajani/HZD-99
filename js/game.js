@@ -14460,6 +14460,7 @@ function drawWorldFrame() {
     c.globalAlpha = 1;
     if (typeof drawDizzy === 'function') drawDizzy(c, player);   // stars round her head
     if (typeof drawParryFx === 'function') drawParryFx(c, player);  // the clash and the counter's cross-cut
+    if (typeof drawHitShapes === 'function') drawHitShapes(c);      // the Forge's SHAPES overlay (js/hitshape.js)
     c.restore();
   }
   // ...and the edge of the world OVER her, so the last few pixels of her feet

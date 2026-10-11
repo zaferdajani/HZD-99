@@ -2392,7 +2392,7 @@ class Player {
       const kx = this.swing.ax / n0 || this.face, ky = this.swing.ay / n0;
       for (const e of targets) {
         if (e.dead || e.disabled || e.rescued || this.swing.set.has(e)) continue;
-        if (aabb(hb, hurtBoxOf(e))) {
+        if (swingTouches(this, hurtBoxOf(e), hb)) {      // the authored shape inside the box (js/hitshape.js)
           this.swing.set.add(e);
           // the opener and the second beat are the slash row; the third is
           // the finisher's. Feral claws rake deeper, the crystal has an edge,

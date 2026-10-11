@@ -1084,7 +1084,7 @@ function ghProjStep(b, dt) {
       if (chance(0.8)) addPart(m.x - m.vx * 0.03, m.y - m.vy * 0.03, rnd(-20, 20), rnd(-30, 10), rnd(0.3, 0.6), chance(0.5) ? '#6b6b6b' : '#8a8580', rnd(2.5, 4), -30);
       const bx = ghMissileBox(m);
       // her claws knock it out of the air: it bursts, harmlessly, where it was
-      if (player.swing && player.swing.t > 0 && aabb(player.hitbox(), bx)) { ghBoom(b, m, true); continue; }
+      if (player.swing && player.swing.t > 0 && swingTouches(player, bx)) { ghBoom(b, m, true); continue; }
       if (!player.dead && player.iT <= 0 && aabb(bx, player)) { m.hit = true; ghHurtBy(b, m.x, 'horn.missile'); ghBoom(b, m, false); continue; }
       const gy = ghGround(b, m.x);
       const solid = solidAt(Math.floor(m.x / TILE), Math.floor(m.y / TILE));
@@ -1150,7 +1150,7 @@ function ghParry(b) {
   if (!facing) return false;
   const B = ghBoxes(b);
   const hb = player.hitbox();
-  if (!((B.horn && aabb(hb, B.horn)) || aabb(hb, B.head) || aabb(hb, B.scoop))) return false;
+  if (!((B.horn && swingTouches(player, B.horn, hb)) || swingTouches(player, B.head, hb) || swingTouches(player, B.scoop, hb))) return false;
   player.swing.ghClash = true;
   // the clash itself (freeze, ring, the counter it opens) is the shared one,
   // so a strike on the horn and a perfect guard are the same event to the game
@@ -1198,7 +1198,7 @@ function ghHeadBonus(b) {
   const drop = b._hpPrev - b.hp;
   if (!player.swing) return;
   const B = ghBoxes(b);
-  if (!aabb(player.hitbox(), B.head)) return;
+  if (!swingTouches(player, B.head)) return;
   const extra = Math.max(1, Math.round(drop * 0.4));
   b.hp -= extra;
   const h = ghHeadWorld(b);
