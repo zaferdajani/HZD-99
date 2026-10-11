@@ -47,7 +47,14 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
     console.log('  ── kingdom ' + Z);
     const r = await page.evaluate(async ({ Z }) => {
       const DT = 1 / 60, out = { rooms: [], enemies: {}, npcs: [], doors: [] };
-      const ids = Object.keys(ROOMS).filter(id => ROOMS[id].zone === Z && (Z !== 'X' || id[0] !== 'G'));
+      // WHICH KINGDOM A ROOM IS IN is the game's own answer, not its palette:
+      // every cave is BUILT in zone 'X' for its look, and the marble quarry
+      // under the meadow (CV1-CV3) belongs to kingdom A (world.js CAVE_KINGDOM,
+      // the map label, the death text). Reading the palette handed the
+      // quarry's guardian GRAVEHORN to the Crystal Cache. Grotto networks keep
+      // their own rule below.
+      const kingdomOf = (id) => (id[0] !== 'G' && ROOMS[id].cave && typeof CAVE_KINGDOM !== 'undefined' && CAVE_KINGDOM[id]) || ROOMS[id].zone;
+      const ids = Object.keys(ROOMS).filter(id => kingdomOf(id) === Z && (Z !== 'X' || id[0] !== 'G'));
       // the kingdom's own grotto belongs to it, whatever palette it wears
       for (const id of Object.keys(ROOMS)) if (id.startsWith('G' + Z) && !ids.includes(id)) ids.push(id);
       out.rooms = ids;
@@ -58,12 +65,24 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
       };
       // ---- 1. the cast: enemies placed here, the guardian, the NPCs, the benches
       const kinds = new Set(); let bossRoom = null, bossKind = null; const benches = [];
+      // THE KINGDOM'S GUARDIAN is the one with a lair behind it (its grotto
+      // network). A kingdom may hold other fights — GRAVEHORN on the marble —
+      // and which one this picked used to be whichever the room list happened
+      // to name last. With no lair-holder at all, the last boss is still
+      // taken, and the lair check below fails exactly as it always did.
+      const hasLair = (id) => { const l = (typeof GATE_ROOM !== 'undefined' && GATE_ROOM[id]) || null;
+        return !!(l && [].concat(l).some(d => d.to && d.to[0] === 'G' && ROOMS[d.to])); };
+      let lairBoss = null;
       for (const id of ids) for (const e of (ROOMS[id].ents || [])) {
         if (typeof EKIND !== 'undefined' && EKIND[e[0]]) kinds.add(e[0]);
-        if (e[0] === 'boss' && BSTAT[e[3]] && !(typeof MINIS !== 'undefined' && MINIS[e[3]])) { bossRoom = id; bossKind = e[3]; }
+        if (e[0] === 'boss' && BSTAT[e[3]] && !(typeof MINIS !== 'undefined' && MINIS[e[3]])) {
+          bossRoom = id; bossKind = e[3];
+          if (hasLair(id)) lairBoss = [id, e[3]];
+        }
         if (e[0] === 'bench') benches.push(id);
         if (e[0] === 'npc') out.npcs.push({ id: e[3], room: id });
       }
+      if (lairBoss) { bossRoom = lairBoss[0]; bossKind = lairBoss[1]; }
       out.bossRoom = bossRoom; out.bossKind = bossKind; out.benches = benches;
       // ---- 2. every enemy shows four pictures alive
       const maskOf = (e) => {
@@ -207,7 +226,7 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
         out.guardian = g;
         // ---- 5. a bench on the road before the guardian: BFS from the kingdom's entry
         const nbrs = (id) => { const o = []; const ex = ROOMS[id].exits || {}; for (const k in ex) { const v = ex[k]; o.push(typeof v === 'object' ? v.to : v); } for (const d of (typeof GATE_ROOM !== 'undefined' && GATE_ROOM[id] ? [].concat(GATE_ROOM[id]) : [])) if (d.to) o.push(d.to); return o.filter(x => ROOMS[x]); };
-        const entry = ids.find(id => nbrs(id).some(n => ROOMS[n].zone !== Z && !n.startsWith('G'))) || ids[0];
+        const entry = ids.find(id => nbrs(id).some(n => kingdomOf(n) !== Z && !n.startsWith('G'))) || ids[0];
         const prev = { [entry]: null }; const q = [entry];
         while (q.length) { const id = q.shift(); if (id === bossRoom) break; for (const n of nbrs(id)) if (!(n in prev)) { prev[n] = id; q.push(n); } }
         const path = []; for (let id = bossRoom; id; id = prev[id]) path.unshift(id);
