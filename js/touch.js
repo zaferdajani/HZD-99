@@ -150,6 +150,10 @@ const WHEEL = [
     on: () => player && player.volts >= (typeof SONG_COST === 'number' ? SONG_COST : 26) },
   { code: 'VARM', icon: '◈', a: wa(5),
     on: () => typeof armSlots === 'function' && armSlots().length > 1 },
+  // THE GRAPPLING CLAW takes a NEW seat past the suit rather than reshuffling the six
+  // the thumb already knows; it appears once the claw is hers (grapUnlocked).
+  { code: 'VGRAPPLE', icon: '⟟', heroIcon: '⚓', a: wa(6),
+    on: () => player && !player.grap && !(player.grapCD > 0) },
 ];
 // which seats exist at all for this save — a power the player has never been
 // given does not get a seat, so an early run shows a small clean ring
@@ -159,6 +163,7 @@ function wheelItems() {
     if (w.code === 'VCAST') return !!(G.save && G.save.abil.emp);
     if (w.code === 'VSTAR') return !!(G.save && (G.save.stars > 0 || (typeof starCount === 'function' && starCount() > 0)));
     if (w.code === 'VARM') return typeof armSlots === 'function' && armSlots().length > 1;
+    if (w.code === 'VGRAPPLE') return typeof grapUnlocked === 'function' && grapUnlocked();
     return true;                       // the claw and the Song are hers from the start
   });
 }
@@ -756,7 +761,7 @@ function drawWheel(L) {
     }
     tcx.save();
     if (!live) tcx.globalAlpha = 0.3;
-    const ic = (it.code === 'VCLAW' && G.save && G.save.theme === 'hero') ? it.heroIcon : it.icon;
+    const ic = ((it.code === 'VCLAW' || it.code === 'VGRAPPLE') && G.save && G.save.theme === 'hero') ? it.heroIcon : it.icon;
     tCircle(x, y, g.ir, hot && live, ic, null, it.sym, it.tint);
     tcx.restore();
   }

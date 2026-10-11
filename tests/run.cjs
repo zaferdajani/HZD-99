@@ -233,6 +233,7 @@ const SUITE = [
   ['guard',     'she braces, and bracing costs the hit its push'],
   ['shield',    'the brace holds, the plate has a side, the hymn can be jumped'],
   ['airattack', 'a strike in the air is its own move, once it has one'],
+  ['grapple',   'the grappling claw: walls, enemies, aim assist, and everything that outranks it'],
   ['shopscale', 'a shop door has no depth, a gate and a cave do'],
   ['foescale',  'every machine reads in the hero\'s weight class'],
   ['foelevel',  'a machine\'s level is its kingdom plus the run, and it spends it'],

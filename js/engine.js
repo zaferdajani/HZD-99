@@ -11,6 +11,8 @@ const KEYB = {
   // stealing someone else's slot.
   GUARD: ['KeyL', 'VGUARD', 'GP_GUARD'],
   CLAW: ['KeyQ', 'VCLAW', 'GP_CLAW'],
+  // THE GRAPPLING CLAW (js/grapple.js). L went to GUARD; U sits beside I (Crests) and is free.
+  GRAPPLE: ['KeyU', 'Digit3', 'VGRAPPLE', 'GP_GRAPPLE'],
   ARM: ['KeyG', 'Digit1', 'VARM', 'GP_ARM'], SONG: ['KeyB', 'KeyN', 'VSONG', 'GP_SONG'],
   STAR: ['KeyR', 'Digit2', 'VSTAR', 'GP_STAR'],
   MAP: ['Tab', 'KeyM', 'VMAP', 'GP_MAP'], BRAID: ['KeyY', 'VBRAID', 'GP_BRAID'], CREST: ['KeyI', 'VCREST', 'GP_CREST'], SKILL: ['KeyT', 'VSKILL', 'GP_SKILL'],
@@ -30,7 +32,7 @@ let LIFE = null;   // the app's background/inactive state — see installLifecyc
 // touch gutters disappear, the picture grows to fill the screen, and every
 // action moves onto a real button. Detection is automatic on first input.
 // ---------------------------------------------------------------------------
-const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST', 'GP_STAR', 'GP_RUN', 'GP_GUARD',
+const GP_CODES = ['GP_L', 'GP_R', 'GP_U', 'GP_D', 'GP_JUMP', 'GP_ATK', 'GP_DASH', 'GP_CAST', 'GP_HEAL', 'GP_INT', 'GP_MAP', 'GP_PAUSE', 'GP_OK', 'GP_BACK', 'GP_CLAW', 'GP_ARM', 'GP_SONG', 'GP_SKILL', 'GP_CREST', 'GP_STAR', 'GP_RUN', 'GP_GUARD', 'GP_GRAPPLE',
   // the d-pad alone, edge-detected like everything else — see pollGamepad
   'GP_PL', 'GP_PR', 'GP_PU', 'GP_PD'];
 const GP_PREV = {};
@@ -49,7 +51,7 @@ const PAD_BTN_XB = {
 };
 // every action that lives on a face/shoulder button, in the order the config
 // screen lists them. Movement stays on the stick + d-pad and is not remappable.
-const PAD_ACTIONS = ['JUMP', 'ATK', 'RUN', 'STAR', 'DASH', 'CAST', 'ARM', 'SONG', 'CLAW', 'HEAL', 'INT', 'MAP', 'SKILL', 'CREST', 'PAUSE', 'GUARD'];
+const PAD_ACTIONS = ['JUMP', 'ATK', 'RUN', 'STAR', 'DASH', 'CAST', 'ARM', 'SONG', 'CLAW', 'HEAL', 'INT', 'MAP', 'SKILL', 'CREST', 'PAUSE', 'GUARD', 'GRAPPLE'];
 const PAD_DEFAULT = {
   JUMP: 0, ATK: 2, INT: 1, HEAL: 3,
   DASH: 5,        // R1
@@ -87,6 +89,8 @@ const PAD_DEFAULT = {
   // same honest-unbound treatment as SKILL above, routed to Options ▸
   // Controls (tests/platform.cjs VIA.GUARD) instead of stealing a slot.
   GUARD: -1,
+  // GRAPPLE: no real button is left either; unbound and remappable like GUARD.
+  GRAPPLE: -1,
   PAUSE: 9,       // Options
 };
 const PAD = {

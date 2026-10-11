@@ -1714,7 +1714,9 @@ class Player {
     const dir = (G.revT || 0) > 0 ? -dirRaw : dirRaw;
     const healing = this.healT > 0;
 
-    if (this.dashT > 0) {
+    if (typeof grapUpdate === 'function' && grapUpdate(this, dt)) {
+      // THE GRAPPLING CLAW owns her motion while it flies and while it reels (js/grapple.js)
+    } else if (this.dashT > 0) {
       this.dashT -= dt;
       this.vx = this.dashVX; this.vy = this.dashVY;
       if (this.dashT <= 0) { if (this.dashVY < 0) this.vy = -240; else this.vy = Math.min(this.vy, 320); }
@@ -2679,6 +2681,7 @@ class Player {
   // the run and is read from the console.
   hurt(d, fromX, src) {
     if (this.dead || this.iT > 0) return;
+    this.grap = null;   // a hit knocks the claw loose
     try {
       G.dmgLog = G.dmgLog || {};
       const key = src || 'unknown';
@@ -2819,6 +2822,8 @@ class Player {
     // was describing. No code change is needed for it — the plate is the pose.
     if (this.chargeT > 0.05 && this.on && Math.abs(this.vx) <= 34) return 'charge';
     if (this.guardT > 0) return 'guard';
+    // the claw's reel is drawn as her dash plate: the same low driving pose, held
+    if (this.grap && this.grap.st === 'pull') return 'dash';
     if (this.dashT > 0) return 'dash';
     if (this.wallSlide !== 0 && !this.on) return 'wall_cling';
     if (!this.on) {
@@ -3493,6 +3498,7 @@ class Player {
   }
   draw(c) {
     if (this.dead) { this.drawDeath(c); return; }
+    if (typeof grapDraw === 'function') grapDraw(c, this);   // the claw's cable, behind her
     // (the i-frame flicker is applied by the CALLER as an alpha — see the player
     //  draw block in game.js. It used to `return` here, which is why she
     //  vanished outright on alternate frames instead of blinking.)

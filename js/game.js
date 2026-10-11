@@ -17392,7 +17392,8 @@ function drawPadCfg() {
   for (let i = 0; i < n; i++) {
     const a = PAD_ACTIONS[i];
     const col = i < colH ? 0 : 1, row = i % colH;
-    const x = 140 + col * 372, y = 142 + row * 34;   // 15 rows now (RUN joined): 34 px pitch keeps row 8 clear of the footer text
+    // 17 actions (GRAPPLE joined) make nine rows a column: 31 px keeps row 9 clear of the footer at 412
+    const x = 140 + col * 372, y = 142 + row * (colH > 8 ? 31 : 34);   // 15 rows now (RUN joined): 34 px pitch keeps row 8 clear of the footer text
     const sel = i === G.padIdx;
     const btn = PAD.map[a];
     const live = btn >= 0 && PAD.down[btn];
