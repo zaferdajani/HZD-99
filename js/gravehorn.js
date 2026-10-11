@@ -1147,7 +1147,7 @@ function ghParry(b) {
   if (!((B.horn && aabb(hb, B.horn)) || aabb(hb, B.head) || aabb(hb, B.scoop))) return false;
   player.swing.ghClash = true;
   const face = b.face || -1;
-  G.hitStop = Math.max(G.hitStop, 0.14);
+  attackFreeze('clash');            // the parry is a row in the attack table (ATTACKS.clash)
   cam.shake = Math.max(cam.shake, 7);
   const tip = ghHornTip(b);
   const sx = (tip[0] + pcx) / 2, sy = Math.min(tip[1], player.y + 10);
@@ -1159,7 +1159,7 @@ function ghParry(b) {
   // both pushed apart
   player.vx = face * 380; player.vy = Math.min(player.vy, -170); player.iT = Math.max(player.iT, 0.45);
   player.flungT = Math.max(player.flungT || 0, 0.18);
-  b.vx = -face * 260;
+  b.vx = -face * ATTACKS.clash.kb;
   b.parries = (b.parries || 0) + 1;
   ghSet(b, 'stagger', GH.stagger);
   return true;

@@ -147,6 +147,7 @@ const SUITE = [
   ['cues',      'level, onset and length of each melodic cue'],
   ['herofoley', 'her authored move sounds decode with real signal in them'],
   ['feel',      'input latency, hit-stop and camera lead, as frames'],
+  ['attacks',   'one claw stat, a row per move: damage unchanged, knockback per attack, multi-hits on a clock that freeze once'],
   ['credits',   'every shipped sound traces to a line in assets/CREDITS.md'],
   ['brand',     'every release surface carries the studio name'],
   ['slashsnd',  'the claw: onset, separate passes, heavy third hit'],

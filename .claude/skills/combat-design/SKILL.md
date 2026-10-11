@@ -202,8 +202,9 @@ Do not re-implement these. Audit them and extend.
 |---|---|---|
 | Input buffer | **200 ms attack, 120 ms jump** | `entities.js` 551, 463 |
 | Coyote time | **100 ms** | `entities.js` 693 |
-| Hitstop scaled to damage | **50 / 60 / 85 ms** | `entities.js` 763 |
-| Knockback | present, per-hit, with recoil on her too | `entities.js` 751–767 |
+| Damage per move | **one stat, a row per move**: `dmg()` x `ATTACKS[id].mult` x named factors (`ATK_MOD`) | `entities.js` `ATTACKS`, `Player.attackDmg` |
+| Hitstop scaled to the blow | **50 / 60 / 85 ms** (jab / jab on a guardian / finisher); a multi-hit freezes on its FIRST contact only | `ATTACKS[id].freeze`, `attackFreeze` |
+| Knockback | **per move** (jab 310, finisher 465, thrown blade 465, multi-hits pin at 0), with recoil on her too | `ATTACKS[id].kb`, `attackKnock`; measured by `tests/attacks.cjs` and `tests/combat.cjs` |
 | Rumble scaled to hit weight | present | `padRumble` |
 | Audio per telegraph | **automatic** via `TELL_ST` | `entities.js` `Boss.update` |
 | Animation-cancel on hit | **absent** | — |
