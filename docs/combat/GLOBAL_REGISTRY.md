@@ -29,6 +29,7 @@ correct.** Re-measure, do not remember.
 | Jump buffer / coyote | **120 ms / 100 ms** |
 | Hurt i-frames | **1300 ms** (1650 with `reflex`) |
 | Block | **GUARD**: front blows stopped, 3rd held blow inside ~2 s breaks it (0.6 s down); from behind cut by 65% |
+| Volt Soar (late) | UP + claw on the ground: **192 px** straight up at 900 px/s (never more than a tile per 1/30 s step), stops at the first ceiling, **48 fixed** to each foe passed, cd 0.5 s; unlocks with the EMP module (`js/soar.js`) |
 | Parry (perfect guard) | **140 ms from the press**; a brace re-raised < 300 ms after dropping gets none. Turns only blows wearing the parry glint. Freeze 140 ms; counter window 600 ms; counter **36 fixed**, 300 ms, invulnerable (`js/parry.js`) |
 | Base damage | **12** before crest/relic/difficulty multipliers |
 | Cores (HP) | **7 / 5 / 5** by difficulty; damage is denominated in cores |

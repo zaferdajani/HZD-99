@@ -90,6 +90,10 @@ const { chromium } = require('playwright');
       // thrown forward, straight up or up-and-forward, onto any wall, floor or
       // ceiling — the ledge she wants is its own anchor. Strongest kit, last.
       { name: '+grapple', dash: DASH, air: 1, grap: 11 },
+      // VOLT SOAR (handoff Part 2 B2, js/soar.js): straight up six tiles from
+      // the ground, with the double jump still in hand at the top — the late
+      // key, so it is the strongest kit and comes after the claw.
+      { name: '+soar', dash: DASH, air: 1, grap: 11, soar: 6 },
     ];
     // ...and the claw arrives WITH the dash (grapUnlocked), before the double
     // jump: a gate the double jump was meant to hold that dash + claw already
@@ -106,6 +110,9 @@ const { chromium } = require('playwright');
       // the claw: a straight throw along one of its three aims, within reach
       if (kit.grap && up > 0 && Math.hypot(dx, up) <= kit.grap
           && (dx <= 1 || Math.abs(dx - up) <= 2)) return true;
+      // the soar: straight up from the floor, a little drift at the top, and
+      // the second jump's arc stacked on it
+      if (kit.soar && up > 0 && dx <= 2 && up * 32 <= kit.soar * 32 + (kit.air ? (ARC[3] || 0) * 0.88 : 0)) return true;
       if (up > 0) return dx <= span && climb(dx) >= up * 32;
       if (up === 0) return dx <= span;
       // falling: the drop buys airtime, and airtime buys distance. A one-tile

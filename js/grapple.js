@@ -65,6 +65,9 @@ function grapUpdate(p, dt) {
     G.save.flags.grapSeen = 1;
     if (G.toast) G.toast(grapTxt('grap_on', 'GRAPPLE CLAW online: press U to fire it'));
   }
+  // VOLT SOAR rides this input and owns her motion while it lasts (js/soar.js)
+  const so = typeof soarStep === 'function' ? soarStep(p, dt) : null;
+  if (so !== null) return so;
   const g = p.grap;
   if (g && g.room !== G.roomId) { p.grap = null; return false; }
   if (!g) {
@@ -77,6 +80,7 @@ function grapUpdate(p, dt) {
     let ax = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
     const ay = inD('UP') ? -1 : 0;
     if (!ax && !ay) ax = p.face;
+    if (typeof soarTry === 'function' && soarTry(p, ax, ay)) return true;   // UP on the ground: the launch
     if (ax) p.face = ax;
     const n = Math.hypot(ax, ay) || 1;
     let dx = ax / n, dy = ay / n;

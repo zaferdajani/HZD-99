@@ -35,6 +35,16 @@ request needs one; the AUDIO session fires top to bottom, same as ART_QUEUE.)*
 
 ---
 
+## A-SOAR. The launch ✱ QUEUED 2026-10-11 (code session, handoff Part 2 B2)
+
+The soar borrows `djump` (`js/soar.js`). One cue, one contract:
+
+| cue | function | contract |
+|---|---|---|
+| `soar_launch` | the pack venting all at once: a rising whoosh with an electrical crackle, upward in feel | one-shot 0.3–0.45 s, strong onset, no low rumble tail |
+
+Owner reviews before it is cut; wire into `js/audio.js` and swap the borrowed name.
+
 ## A-PARRY. The clash and the counter ✱ QUEUED 2026-10-11 (code session, handoff Part 2 A4)
 
 The parry borrows `block` + `crack` for the clash and `dash` + `hit` for the

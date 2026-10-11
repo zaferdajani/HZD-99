@@ -2186,6 +2186,7 @@ class Player {
     // resolve movement
     const wasFalling = this.vy;
     const col = moveEnt(this, dt);
+    this.lastCol = col;   // what the resolver met this step (js/soar.js reads the ceiling)
     if (col.d) {
       if (!this.on && wasFalling > 420) {
         this.landT = wasFalling > 700 ? 0.22 : 0.12; this.land0 = this.landT; sfx('land');
@@ -2703,6 +2704,7 @@ class Player {
     // parried, and only while that attacker shows the glint (js/parry.js).
     if (foe && typeof parryTry === 'function' && parryTry(this, foe, fromX)) return;
     this.grap = null;   // a hit knocks the claw loose
+    this.soar = null;   // ...and ends a soar
     try {
       G.dmgLog = G.dmgLog || {};
       const key = src || 'unknown';

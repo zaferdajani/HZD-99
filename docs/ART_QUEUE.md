@@ -21,6 +21,21 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bi. VOLT SOAR — the launch and the rise ✱ QUEUED 2026-10-11 (code session, handoff Part 2 B2)
+
+UP + claw on the ground launches her straight up six tiles (`js/soar.js`); it
+borrows the double-jump pose and draws its exhaust as sparks. Embed the canon
+element `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>`; black background, whole
+body, side view facing right, no ground.
+
+| plate | key | what it is |
+|---|---|---|
+| soar | `hzdSoar` (3 cells) | cell 0 the crouch-and-fire (pack vents flaring downward, claws tucked); cell 1 the rise, body straight as a spear, claws raised overhead to cut; cell 2 the crest, body uncurling at the top of the arc |
+
+Wire into `HERO_TRANS` while `player.soar` is set, then `node tests/run.cjs soar artbible`.
+
+---
+
 ## 2bh. THE PARRY — her perfect guard, the counter, and the clash ✱ QUEUED 2026-10-11 (code session, handoff Part 2 A4)
 
 The parry shipped on stand-ins (`js/parry.js`): the clash flare, the lime glint
