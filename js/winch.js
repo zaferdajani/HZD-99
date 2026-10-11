@@ -3,6 +3,28 @@
 const YARD_WINCH = Object.freeze({ scale: 192 / 1191, armScale: 0.62,
   floor: [630,879], mount: [575,385], pivot: [1140,648], tip: [84,703],
   cable: [1140,544], lens: [[663,442],[742,451],[742,503],[663,494]] });
+// THE ARM IS THE REASON TO HIT IT (owner, 2026-10-11: "Either I hit the winch
+// to get something out of it, or I hit an enemy, but not just hitting for the
+// sake of hitting"). While the infection holds it, the arm is jammed DOWN
+// across the road — its end a shin's height off the ground, west of the
+// housing, between her and the monument — and it is a real barrier, not a
+// picture of one. Every strike knocks scrap out of the housing onto the road
+// (a few pieces, capped and saved, so it cannot be farmed); the Volt Burst
+// stops the motor, and the arm swings up clear of the road and stays there.
+// Angles are the arm's rotation about its pivot (armPoint): JAM puts the tip
+// 15 px above the road 75 px west of the base's centre, RAISED stands it
+// steeply up out of the way.
+const WINCH_JAM = 0.6, WINCH_RAISED = -1.05, WINCH_LIFT = 2.4, WINCH_FRONT = -0.6;
+const WINCH_KNOCKS = 4, WINCH_KNOCK_SCRAP = 3;
+// the barrier stands while the opening teaches and the burst has not landed,
+// and nowhere else: never in NOSTOS (no winch there, and its tutorial differs),
+// never in a save whose burst is behind her
+function winchBlocking(e) {
+  return !!(e && e.mechanism === 'winch' && !e.dead && !e.disabled && !e.rescued && e.calm
+    && !(typeof isHero === 'function' && isHero())
+    && G.save && G.save.flags && !G.save.flags.burstDone
+    && typeof opTeaching === 'function' && opTeaching());
+}
 
 class YardWinch extends Enemy {
   constructor(x,y) {
@@ -13,7 +35,7 @@ class YardWinch extends Enemy {
     this.hp=this.hpMax0=38; this.traits=[]; this.moves=[];
     this.armAngle=-0.25; this.phase='idle'; this.phaseT=0;
     this.face=-1; this.sweepHit=false; this.motorEnabled=true;
-    this.vx=this.vy=0;
+    this.vx=this.vy=0; this.liftLive=false; this.pushT=0; this.toldT=0;
     if(typeof mediaFetch==='function') { mediaFetch('yardWinchBase'); mediaFetch('yardWinchArm'); }
   }
   point(p) {
@@ -21,18 +43,80 @@ class YardWinch extends Enemy {
     return {x:this.x+this.w/2+this.face*(p[0]-a.floor[0])*s,
       y:this.y+this.h+(p[1]-a.floor[1])*s};
   }
-  armPoint(p=YARD_WINCH.tip) {
+  armPoint(p=YARD_WINCH.tip, ang=this.armAngle) {
     const a=YARD_WINCH, m=this.point(a.mount), k=a.scale*a.armScale;
     const dx=-(p[0]-a.pivot[0])*k,dy=(p[1]-a.pivot[1])*k;
-    return {x:m.x+this.face*(dx*Math.cos(this.armAngle)-dy*Math.sin(this.armAngle)),
-      y:m.y+dx*Math.sin(this.armAngle)+dy*Math.cos(this.armAngle)};
+    return {x:m.x+this.face*(dx*Math.cos(ang)-dy*Math.sin(ang)),
+      y:m.y+dx*Math.sin(ang)+dy*Math.cos(ang)};
+  }
+  // THE BARRIER: the jammed arm's end, on the side she comes from (face -1:
+  // the arm reaches west, toward the gates and the booth). She is stopped only
+  // while she is on that side — a body already past the base's centre (a
+  // harness, a teleport) is never pulled back through it — so she cannot be
+  // trapped on the wrong side of it.
+  barrier() {
+    const tip=this.armPoint(YARD_WINCH.tip,WINCH_JAM), cx=this.x+this.w/2;
+    const pc=player.x+player.w/2;
+    if(this.face<0) {
+      const lim=tip.x-1;
+      if(pc>=cx||player.x+player.w<=lim||player.y+player.h<this.y+this.h-260)return;
+      player.x=lim-player.w; if(player.vx>0)player.vx=0;
+      if(inD('RIGHT'))this.pushed();
+    } else {
+      const lim=tip.x+1;
+      if(pc<=cx||player.x>=lim||player.y+player.h<this.y+this.h-260)return;
+      player.x=lim; if(player.vx<0)player.vx=0;
+      if(inD('LEFT'))this.pushed();
+    }
+  }
+  // pushing on it answers: the arm judders against its jam, and — outside the
+  // two lessons whose chip already says it — one line says why the road is shut
+  pushed() {
+    if(this.pushT<=0)sfx('block');
+    this.pushT=0.35;
+    if(this.toldT<=0) {
+      this.toldT=5;
+      const id=typeof opStepId==='function'?opStepId():null;
+      if(id!=='atk'&&id!=='burst')G.toast(t('op_winch_block'));
+    }
+  }
+  // SCRAP OUT OF THE HOUSING, on every strike the lesson lands (dealDmg calls
+  // this after the damage): a piece pops from the housing's face and arcs onto
+  // the road on HER side of the arm, where it is an ordinary pickup. Capped
+  // per save (flags.winchKnock) — the burst's own salvage is paid in die().
+  onStruck() {
+    if(!this.calm||this.disabled||this.rescued||this.dead)return;
+    if(typeof isHero==='function'&&isHero())return;
+    const f=G.save&&G.save.flags; if(!f||f.burstDone)return;
+    if(typeof opTeaching!=='function'||!opTeaching())return;
+    const n=f.winchKnock|0; if(n>=WINCH_KNOCKS)return;
+    f.winchKnock=n+1;
+    const side=this.face<0?-1:1, hx=this.x+this.w/2+side*(this.w/2-14), hy=this.y+this.h*0.35;
+    const s=new Scrap(hx-5,hy-5,WINCH_KNOCK_SCRAP);
+    s.vx=side*rnd(90,150); s.vy=rnd(-330,-270);
+    s.size=7;   // (drawn a size up: a phone has to see it come out)
+    G.pickups.push(s);
+    burst(hx,hy,8,'#ffd76a',170,0.4,260,2.2,true);
+    sfx('hollow'); this.pushT=0.25;
+    persist();
   }
   update(dt) {
     this.anim+=dt; this.hurtT=Math.max(0,this.hurtT-dt);
     this.vx=0; this.vy+=900*dt; moveEnt(this,dt);
+    this.pushT=Math.max(0,this.pushT-dt); this.toldT=Math.max(0,this.toldT-dt);
     if(this.disabled) {
       this.motorEnabled=false;
-      if(Number.isFinite(G.save.winchArmAngle))this.armAngle=G.save.winchArmAngle;
+      // THE ARM LIFTS CLEAR when the burst stops the motor (die() sets
+      // liftLive), and a winch loaded already stopped is simply up.
+      if(!this.liftLive)this.armAngle=WINCH_RAISED;
+      else if(this.armAngle!==WINCH_RAISED) {
+        const d=WINCH_RAISED-this.armAngle;
+        this.armAngle=Math.abs(d)<=dt*WINCH_LIFT?WINCH_RAISED:this.armAngle+Math.sign(d)*dt*WINCH_LIFT;
+        if(this.armAngle===WINCH_RAISED) {
+          sfx('land'); const tp=this.armPoint();
+          burst(tp.x,tp.y,6,'#ffd38b',90,0.3,160,2,true);
+        }
+      }
       if(this.cleanseT>0) {
         const near=player&&!player.dead&&Math.abs(player.x+player.w/2-this.x-this.w/2)<46
           &&Math.abs(player.y+player.h/2-this.y-this.h/2)<60;
@@ -53,7 +137,15 @@ class YardWinch extends Enemy {
     // machinery, and it never sweeps a harmless arm through her body.
     if(this.calm) {
       this.phase='idle';this.phaseT=0;this.sweepHit=false;
-      this.armAngle=-0.25+0.035*Math.sin(this.anim*9)*Math.max(0,Math.sin(this.anim*1.3));
+      // ...and the jam is DOWN across the road (WINCH_JAM), straining harder
+      // while she pushes on it or strikes it. It stays down through the
+      // frames between the burst landing and the motor stopping (burstNear,
+      // js/opening.js) rather than jumping; a calm winch with no lesson
+      // running — an older save's — keeps the old held pose over her head,
+      // since nothing stops her there.
+      const jam=winchBlocking(this)||!!this.burstNear, strain=0.035+0.05*Math.min(1,this.pushT/0.25);
+      this.armAngle=(jam?WINCH_JAM:-0.25)+strain*Math.sin(this.anim*9)*Math.max(jam?0.35:0,Math.sin(this.anim*1.3));
+      if(jam&&winchBlocking(this))this.barrier();
       return;
     }
     this.phaseT+=dt;
@@ -97,7 +189,7 @@ class YardWinch extends Enemy {
     if(this.storyKey&&states[this.storyKey]!=='disabled') {
       states[this.storyKey]='disabled';bankScrap(12);player.gainVolts(8);G.save.flags.sawScrap=1;
     }
-    G.save.winchArmAngle=this.armAngle;
+    this.liftLive=true; G.save.winchArmAngle=WINCH_RAISED;
     burst(this.x+this.w/2,this.y+this.h/2,10,'#ffc886',120,0.35,200,2,true);
     sfx('break');persist();
   }
@@ -111,6 +203,10 @@ class YardWinch extends Enemy {
     burst(p.x,p.y,9,'#7eeaff',90,0.55,-25,2,true);sfx('pick');
     G.toast(t('story_winch_clean'));persist();
   }
+  drawArm(c,arm,mount,k) {
+    c.save();c.translate(mount.x,mount.y);c.rotate(this.armAngle);c.scale(-k,k);
+    c.drawImage(arm,-YARD_WINCH.pivot[0],-YARD_WINCH.pivot[1]);c.restore();
+  }
   draw(c) {
     const a=YARD_WINCH,s=a.scale,base=MEDIA_IMG.yardWinchBase,arm=MEDIA_IMG.yardWinchArm;
     if(!base||!base.complete||!base.naturalWidth||!arm||!arm.complete||!arm.naturalWidth)return;
@@ -120,9 +216,14 @@ class YardWinch extends Enemy {
     c.lineCap='round';c.beginPath();c.moveTo(cable.x,cable.y);
     c.bezierCurveTo(cable.x+35,cable.y+32,cable.x+64,-3,cable.x+95,-2);
     c.strokeStyle='#1d1b1a';c.lineWidth=3;c.stroke();c.strokeStyle='#ab9876';c.lineWidth=1;c.stroke();
-    c.save();c.translate(mount.x,mount.y);c.rotate(this.armAngle);c.scale(-k,k);
-    c.drawImage(arm,-a.pivot[0],-a.pivot[1]);c.restore();
+    // THE JAMMED ARM IS IN FRONT OF THE HOUSING. Lowered across the road it
+    // would otherwise sit behind the drum, and the thing in her way would be
+    // the one thing she cannot see; it goes back behind the housing once the
+    // lift has carried it up over the top (WINCH_FRONT).
+    const front=this.armAngle>WINCH_FRONT&&(this.disabled?this.liftLive:(this.calm&&!this.rescued&&this.armAngle>0.2));
+    if(!front)this.drawArm(c,arm,mount,k);
     c.drawImage(base,-a.floor[0]*s,-a.floor[1]*s,base.naturalWidth*s,base.naturalHeight*s);
+    if(front)this.drawArm(c,arm,mount,k);
     c.save();c.beginPath();a.lens.forEach((p,i)=>{const q=pt(p);i?c.lineTo(q.x,q.y):c.moveTo(q.x,q.y)});c.closePath();c.clip();
     const p0=pt(a.lens[0]),p2=pt(a.lens[2]);
     c.fillStyle=this.rescued?'#073f49':'#610909';c.fillRect(p0.x-2,p0.y-2,p2.x-p0.x+4,p2.y-p0.y+4);

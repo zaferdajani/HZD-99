@@ -259,6 +259,9 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty) {
   if (e.st === 'daze') mul *= DAZE_MUL;
   const out = Math.max(1, Math.round(dm * mul));
   e.hp -= out; e.hurtT = 0.15;
+  // a body that answers being struck with something of its own (the yard
+  // winch knocks scrap out of its housing: js/winch.js onStruck)
+  if (typeof e.onStruck === 'function') e.onStruck(out, x, y);
   if (mul >= 2) {
     e.stagT = Math.max(e.stagT || 0, 0.32);
     burst(x, y, 16, ELEM[atkEl] ? ELEM[atkEl].glow : '#ffffff', 360, 0.45, 120, 4, true);

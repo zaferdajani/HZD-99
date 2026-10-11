@@ -276,13 +276,21 @@ function openingTick(dt) {
   }
   // THE BURST'S PAYOFF: the release that lands on the jammed winch stops it.
   // (It disables, never kills — the blade can cleanse it later: winch.js.)
+  // The arm then lifts clear of the road (winch.js), which is what she sees.
   const vis = !!(player.swingVis && player.swingVis.charged);
-  if (vis && !OP.burstVis && G.roomId === 'A0') {
+  // (a release measured in reach counts even when the picture of an earlier
+  // charged swing is still up, so no rising edge is seen)
+  const marked = G.roomId === 'A0' && (G.enemies || []).some(e => e && e.burstNear);
+  if ((vis && !OP.burstVis && G.roomId === 'A0') || marked) {
     f.opBurst = 1;
     const cx = player.x + player.w / 2, cy = player.y + player.h / 2;
     for (const e of G.enemies || []) {
       if (!e || e.dead || e.disabled || e.rescued || e.mechanism !== 'winch') continue;
-      if (Math.hypot(e.x + e.w / 2 - cx, e.y + e.h / 2 - cy) > 165 + Math.max(e.w, e.h) / 2) continue;
+      // (in reach when it was let go — measured at the release, opBurstMisses —
+      // or now, a frame later)
+      const near = e.burstNear;
+      e.burstNear = false;
+      if (!near && Math.hypot(e.x + e.w / 2 - cx, e.y + e.h / 2 - cy) > 165 + Math.max(e.w, e.h) / 2) continue;
       e.burstOK = true;
       if (typeof e.die === 'function') e.die();
       G.toast(t('op_winch_down'));
@@ -298,6 +306,28 @@ function openingTick(dt) {
     sfx('powerUp');
   }
   if (OP.coilJoy > 0) OP.coilJoy = Math.max(0, OP.coilJoy - dt);
+}
+// THE BURST IS LEARNED AT THE WINCH. A release anywhere used to finish the
+// lesson (releaseCharged sets flags.burstDone), so one let go by the booth
+// passed it with the winch still jammed and its arm still down across the
+// road — and the barrier (winch.js) is keyed to burstDone. During the two
+// winch lessons a release out of the jammed winch's reach does not count, and
+// says why; one in reach marks the winch so the payoff above lands on it.
+function opBurstMisses(pl) {
+  if (!opOn() || G.roomId !== 'A0' || !pl) return false;
+  const id = opStepId();
+  if (id !== 'atk' && id !== 'burst') return false;
+  const cx = pl.x + pl.w / 2, cy = pl.y + pl.h / 2;
+  let jammed = false;
+  for (const e of G.enemies || []) {
+    if (!e || e.dead || e.disabled || e.rescued || e.mechanism !== 'winch') continue;
+    jammed = true;
+    if (Math.hypot(e.x + e.w / 2 - cx, e.y + e.h / 2 - cy) <= 165 + Math.max(e.w, e.h) / 2) {
+      e.burstNear = true; return false;
+    }
+  }
+  if (jammed) G.toast(t('op_burst_far'));
+  return jammed;
 }
 // the pod step is only finished once its confirmation has been read
 function opPodSettled() { return !(OP.podBanner > 0); }
