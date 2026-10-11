@@ -1,0 +1,12 @@
+{
+  "checked_utc": "2026-10-11T08:34:43.087705+00:00",
+  "frozen_file_count": 65,
+  "all_frozen_files_match": true,
+  "source_commit": "31d761d476a7097a12fa70d9eed41d3784628bc6",
+  "critical_source_readback": {
+    "js/panels.js": "78c0fc760faaccb06eb295cf7c19cede6c14c4f2",
+    "tools/studio/audit.py": "fbdcbf63f509d0fc110a0f953e6339f774ab857f",
+    "tests/roomcache.cjs": "ebca2cd5ad043505ffdf4581f82ca58e1142b4af"
+  },
+  "note": "GitHub connector fetched these source blobs back at the prepared source commit; hashes match. No branch merge/deployment performed. Final report commit is identified by branch head and delivery response."
+}

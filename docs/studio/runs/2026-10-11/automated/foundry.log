@@ -1,0 +1,49 @@
+
+── foundry  — kingdom C's machines learn to leave melt behind, and warn first
+── foundry — kingdom C's machines learn to leave melt, and warn first
+
+WHAT EACH KINGDOM'S MACHINES CAN AFFORD
+  A:fresh   {"crawler":[],"hopper":[],"kiln":[]}
+  A:deep    {"crawler":["scrapdrag"],"hopper":["scrapkick"],"kiln":[]}
+  C:fresh   {"crawler":["cinder"],"hopper":["slagsplash"],"kiln":[]}
+  C:deep    {"crawler":["cinder"],"hopper":["slagsplash"],"kiln":["pour"]}
+
+  ok   a Foundry crawler carries cinder at the kingdom's own floor  ["cinder"]
+  ok   ...and a Foundry hopper carries slagsplash  ["slagsplash"]
+  ok   ...but the pot that POURS is a deep machine, not the one she is taught on  fresh [] -> deep ["pour"]
+  ok   NONE of it reaches the meadow — the @C scope holds  {"crawler":["scrapdrag"],"hopper":["scrapkick"],"kiln":[]}
+
+CINDER — the crawler's lane
+  zone C  {"moves":["cinder"],"lunges":60,"melt":12}
+  zone A  {"moves":[],"lunges":42,"melt":0}
+  ok   a Foundry crawler actually lays melt when it lunges  12 pools over 60 lunge frames
+  ok   ...and the meadow's crawler still lunges and still leaves nothing  42 lunge frames, 0 pools
+  ok   ...and the same machine with the move taken away is the old one exactly  {"melt":0,"lunge":60}
+  ok   THE TELL IS NOT THE PRICE: the wind-up is the same length with the move and without  22 vs 22 frames of coil
+  ok   ...and a full wind-up is spent BEFORE the first melt exists  22 warned frames, floor is 21
+
+SLAGSPLASH — the hopper's two gobs
+  zone C  {"moves":["slagsplash"],"gobFrames":85,"maxGobs":2,"melt":8}
+  zone A  {"moves":[],"gobFrames":0,"melt":0}
+  ok   a Foundry hopper throws on the landing — two gobs, both ways  peak 2 in the air
+  ok   ...and the gobs set into melt where they come down  8 pools
+  ok   THE ARC IS THE WARNING: they fly, visibly, before any of it is hot  gob at frame 122, melt at 143
+  ok   ...and nothing in flight can touch her — the melt only bites once it sets  []
+  ok   ...and the meadow's hopper leaps exactly as it always did, empty-handed  {"leaps":1,"gobs":0,"melt":0}
+
+POUR — the kiln tips toward the side she chose
+  deep, player right  {"moves":["pour"],"side":1,"at":[30,30,30],"melt":3}
+  deep, player left   {"moves":["pour"],"side":-1,"at":[-30,-30,-30],"melt":4}
+  fresh               {"moves":[],"melt":0}
+  ok   a deep kiln pours after the blow  3 pools after 144 plume frames
+  ok   ...on the side she was standing on, both ways round  right [30,30], left [-30,-30]
+  ok   ...and the pot she is taught on, one kingdom-floor lower, pours nothing  {"melt":0,"plume":144}
+  ok   THE CHARGE IS NOT THE PRICE: the pouring pot warns for as long as the plain one  31 vs 31 frames of charge
+  ok   ...and the spent window she punishes it in is untouched at 0.95 s  0.950 / 0.950
+  ok   ...and the whole charge AND the whole blow are spent before the melt lands  79 warned frames, floor is 78
+  ok   no page errors
+
+all good
+   (foundry: 2.0 s)
+
+all 1 harnesses ran

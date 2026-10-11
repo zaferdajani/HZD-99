@@ -1,0 +1,37 @@
+{
+  "checked_utc": "2026-10-11T07:47:06.156966+00:00",
+  "comparison": "pinned baseline HEAD, not review branch",
+  "files": [
+    {
+      "path": "index.html",
+      "url": "https://zaferdajani.github.io/HZD-99/index.html",
+      "live_sha256": "633f88cfa6518dba7c2a354fce5dbc6c9f1506b5f4757aa8c2a549310f488015",
+      "baseline_sha256": "633f88cfa6518dba7c2a354fce5dbc6c9f1506b5f4757aa8c2a549310f488015",
+      "matches": true
+    },
+    {
+      "path": "assets/characters/alpha/air.webp",
+      "url": "https://zaferdajani.github.io/HZD-99/assets/characters/alpha/air.webp",
+      "live_sha256": "de696cdaa8a69bbdeecd3b3945b9f8c4104e22e78142fccf6de9e20501f5535d",
+      "baseline_sha256": "de696cdaa8a69bbdeecd3b3945b9f8c4104e22e78142fccf6de9e20501f5535d",
+      "matches": true
+    },
+    {
+      "path": "assets/manhua/ch1/game/repair.webp",
+      "url": "https://zaferdajani.github.io/HZD-99/assets/manhua/ch1/game/repair.webp",
+      "live_sha256": "7807434a27b8dc8db4c41e3090725d24fde1f347f2d26baffbf39068e740bc2f",
+      "baseline_sha256": "7807434a27b8dc8db4c41e3090725d24fde1f347f2d26baffbf39068e740bc2f",
+      "matches": true
+    },
+    {
+      "path": "assets/eyes.json",
+      "url": "https://zaferdajani.github.io/HZD-99/assets/eyes.json",
+      "live_sha256": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+      "baseline_sha256": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+      "matches": true
+    }
+  ],
+  "baseline_build_id": "49988b950264",
+  "review_build_id": "aee134b4b5ee",
+  "build_id_evidence": "Baseline ID extracted from the exact baseline HTML whose SHA256 matches sampled live HTML; review ID from frozen locally tested build."
+}

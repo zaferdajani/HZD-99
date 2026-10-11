@@ -1,0 +1,59 @@
+
+── infection-roster  — every hostile body and every guardian: an eye, its colour, on the head, facing, and the smoke born there
+── infection-roster — every hostile body, every guardian: an eye, the right colour, on the head, facing, and the smoke born there
+  time: sweep 0.0s, cast 25.2s (stage 0.1s, art wait 15.1s, frames 9.5s), wolf 0.4s (settle 0.4s), in-page total 25.6s, wall 25.6s
+
+    turret            red    eye L -12,-27 | -12,-27  trail 22f/22 worst 0.0px  (A0)
+    crawler:wolf      red    eye L -36,-38 | 36,-38   trail 22f/22 worst 0.0px  (A1)
+    guard             red    eye L -16,-18 | 13,-18   trail 22f/22 worst 0.0px  (A1)
+    flier             red    eye L -10,10 | -10,10    trail 22f/22 worst 0.0px  (A6)
+    blob              red    eye L -17,-17 | 3,-13    trail 22f/22 worst 0.0px  (A7)
+    hopper:wolf       red    eye L -38,-34 | 38,-34   trail 22f/22 worst 0.0px  (A2)
+    BOSS:alpha        purple eye L -79,-68 | -79,-68  trail 22f/22 worst 0.0px  (A10)
+    BOSS:glitch       purple eye L -74,-38 | 74,-38   trail 22f/22 worst 0.0px  (A4)
+    surge             red    eye L 7,-12 | 7,-12      trail 22f/22 worst 0.0px  (B1)
+    BOSS:brood        purple eye L -6,-52 | -6,-52    trail 22f/44 worst 0.0px  (B4)
+    bat               red    eye L -10,1 | -10,1      trail 22f/22 worst 0.0px  (V1)
+    hopper:cat        red    eye L -39,-31 | 39,-31   trail 22f/22 worst 0.0px  (V1)
+    crawler:cat       red    eye L -38,-33 | 38,-33   trail 22f/22 worst 0.0px  (V2)
+    BOSS:prism        purple eye L -20,-27 | 20,-27   trail 22f/36 worst 0.0px  (X1)
+    kiln              red    eye L 0,-28 | 0,-28      trail 22f/22 worst 0.0px  (C1)
+    BOSS:atlas        purple eye L -54,-68 | 54,-68   trail 22f/22 worst 0.0px  (C3)
+    rime              red    eye L 0,-25 | 0,-25      trail 22f/22 worst 0.0px  (D2)
+    BOSS:zero         purple eye L -66,-59 | 66,-58   trail 22f/22 worst 0.0px  (D3)
+    snare             red    eye L 0,-15 | 0,-15      trail 22f/22 worst 0.0px  (E1)
+    BOSS:mother       purple eye L 60,12 | 60,12      trail 20f/112 worst 0.0px  (E3)
+    BOSS:chime        purple eye L 5,-24 | 5,-24      trail 22f/22 worst 0.0px  (A9)
+    BOSS:carrier      purple eye L -26,5 | -26,5      trail 22f/22 worst 0.0px  (B8)
+    BOSS:moth         purple eye L 1,-12 | 1,-11      trail 22f/22 worst 0.0px  (C7)
+    BOSS:lattice      purple eye L 0,-30 | 0,-29      trail 22f/22 worst 0.0px  (D6)
+    BOSS:lens         purple eye L 4,-2 | 4,-1        trail 22f/22 worst 0.0px  (E6)
+    sage              purple eye L -1,-30 | -1,-30    trail 22f/22 worst 0.0px  (GA1D)
+
+  ok   every hostile body the rooms place reports an eye (26 kinds)  all
+  ok   ...red for the rank and file, purple for every guardian  13 guardians purple
+  ok   ...on the body, not off in the room  
+  ok   ...and not pasted at the centre of a creature that has a head  none
+  ok   a body drawn in profile carries its eye to the side it faces (10 in profile)  crawler:wolf guard blob hopper:wolf BOSS:glitch hopper:cat crawler:cat BOSS:prism BOSS:atlas BOSS:zero
+  ok   moving, every one of them smokes  all
+  ok   ...and the newest wisp is born at THAT frame's eye, every frame (within 6 px)  worst 0.0 px
+
+    wolf rest    -22.2, -27.7
+    wolf prowl   -23.3, -23.9
+    wolf gallop  -24.7, -25.8
+    wolf coil    -17.8, -10.2
+    wolf bite    -13.5, -7.9
+    wolf leap    -25.1, -12.3
+    wolf landing -24.6, -4.1
+    wolf recoil  -6.3, -42.3
+    wolf winded  -22.5, -5.7
+
+  ok   the wolf reports its eye in every state it has a picture for  9 states
+  ok   ...and the eye moves with the body: not one point pasted on all of them  9 distinct points in 9 states
+  ok   ...the crouch drops it and the recoil throws it up  rest y -27.7, coil y -10.2, recoil y -42.3
+  ok   no page errors  
+
+OK — every hostile body looks out through its eyes, in its colour, and the smoke is born there
+   (infection-roster: 26.3 s)
+
+all 1 harnesses ran

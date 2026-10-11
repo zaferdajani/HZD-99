@@ -1,0 +1,7 @@
+{
+  "file": "tests/out/campaign-ch1/campaign-ch1.webm",
+  "bytes": 96490641,
+  "sha256": "30e7ce25565ae30a0d89d086f9acba253fad6779a383de2321bd1a591816e150",
+  "committed": false,
+  "reason": "Full video is approximately93MiB; branch retains complete log/result and all22 original frame captures. Video remains a local transient recording, not a durable delivered artifact."
+}

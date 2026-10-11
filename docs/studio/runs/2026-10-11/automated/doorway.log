@@ -1,0 +1,16 @@
+
+── doorway  — the painted door is where she walks in, not the wall beside it
+ok   a wide lit opening is found, and a bright lantern does not win it  found 0.297 for a door painted at 0.300, lantern at 0.80
+  ok   ...and it is not just reporting the middle  found 0.658 for a door painted at 0.660
+  ok   a plate with no lit way in falls back to centred, exactly as before  frac 0.5
+    derived door position per fired plate: boothFront 0.619  oracleBooth 0.500  forgeFront 0.643  carrelFront 0.500  hollowFront 0.451
+  ok   no plate acts on a reading it should have declined  5 plate(s) read
+    declined (drawn centred, as before): oracleBooth carrelFront
+  ok   the booth — the shop he reported — is read, and is not centred  boothFront 0.619
+  ok   the painted door lands on the stand spot  0.0 px off (centred, it was 37.5 px — against a body 24 px wide)
+  ok   ...and that correction was worth making  the door was 37 px from where she stood
+
+OK — she walks in through the door, not through the wall beside it
+   (doorway: 1.2 s)
+
+all 1 harnesses ran

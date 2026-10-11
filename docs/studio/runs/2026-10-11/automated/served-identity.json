@@ -1,0 +1,32 @@
+{
+  "root": "/workspace/scratch/ff087aa19a00/studio-review",
+  "base": "http://127.0.0.1:8220/",
+  "takenAt": "2026-10-11T07:44:28.933Z",
+  "files": {
+    "index.html": {
+      "sha256": "0f893f1d10622fbd1f4a7c28e8396860a30d991f554d0c2c8cd211e65e917923",
+      "bytes": 4630121,
+      "buildId": "aee134b4b5ee"
+    },
+    "odyssey.html": {
+      "sha256": "c65dc10d7fb13d6aaaf514b327bef5d3ae80549942440668dcd9c7a2409865d1",
+      "bytes": 3344886,
+      "buildId": "aee134b4b5ee"
+    },
+    "sw.js": {
+      "sha256": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+      "bytes": 2494,
+      "buildId": null
+    },
+    "assets/eyes.json": {
+      "sha256": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+      "bytes": 14438,
+      "buildId": null
+    },
+    "assets/lowres/alBite.webp": {
+      "sha256": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2",
+      "bytes": 26442,
+      "buildId": null
+    }
+  }
+}

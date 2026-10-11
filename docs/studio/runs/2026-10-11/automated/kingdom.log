@@ -1,0 +1,129 @@
+
+── kingdom  — the kingdom protocol driven live: art, enemies, guardian, places, bench, every door walked, sound, music
+── kingdom — the protocol, driven live, kingdom by kingdom
+  ── kingdom A
+  ok   A: every room's declared art is a real file the manifest knows (23 rooms)  
+  ok   A: every enemy shows four different pictures alive  crawler 34, guard 23, flier 51, turret 11, blob 32, hopper 33, bat 41, sage 30
+  ok   A: the guardian glitch stands in A4
+  ok   A: ...it can be hurt
+  ok   A: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   A: ...it can die
+  ok   A: ...and it has a lair  GA1
+  ok   A: a bench stands on the road before it  road A3>A4  benches A0B,A3,GA1,GA2
+  ok   A: ratchet has a place of their own  A0B (interior)
+  ok   A: servo has a place of their own  A1 (housing)
+  ok   A: the plain door W2 > A0 draws  46.4% of its frame
+  ok   A: the booth door A0 > A0B draws  35.8% of its frame
+  ok   A: the booth door A0B > A0 draws  33.0% of its frame
+  ok   A: the plain door A2 > A10 draws  38.7% of its frame
+  ok   A: the plain door A10 > A2 draws  44.5% of its frame
+  ok   A: the gate door A10 > GA2 draws  57.4% of its frame
+  ok   A: the gate door A4 > GA1 draws  60.2% of its frame
+  ok   A: the mouth door A5 > CV1 draws  14.0% of its frame
+  ok   A: ...and wears its plate caveMouth  56.1% is the plate of 14.0% drawn
+  ok   A: the plain door GA1 > A4 draws  58.6% of its frame
+  ok   A: the plain door GA2 > A10 draws  60.8% of its frame
+  ok   A: the music streams from files the build knows  mus_meadows:yes
+  ── kingdom B
+  ok   B: every room's declared art is a real file the manifest knows (12 rooms)  
+  ok   B: every enemy shows four different pictures alive  flier 50, surge 23, turret 7, hopper 10, guard 20, blob 26, bat 27, sage 22
+  ok   B: the guardian brood stands in B4
+  ok   B: ...it can be hurt
+  ok   B: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   B: ...it can die
+  ok   B: ...and it has a lair  GB1
+  ok   B: a bench stands on the road before it  road B1>B2>B3>B4  benches B3,GB1
+  ok   B: mono has a place of their own  B3B (interior)
+  ok   B: the oracle door B3 > B3B draws  28.8% of its frame
+  ok   B: the oracle door B3B > B3 draws  31.1% of its frame
+  ok   B: the gate door B4 > GB1 draws  67.7% of its frame
+  ok   B: ...and wears its plate gateConduits  67.7% is the plate of 67.7% drawn
+  ok   B: the plain door GB1 > B4 draws  62.1% of its frame
+  ok   B: the music streams from files the build knows  mus_conduits:yes
+  ── kingdom C
+  ok   C: every room's declared art is a real file the manifest knows (11 rooms)  
+  ok   C: every enemy shows four different pictures alive  kiln 15, hopper 22, turret 9, crawler 11, guard 23, blob 24, bat 27, sage 22
+  ok   C: the guardian atlas stands in C3
+  ok   C: ...it can be hurt
+  ok   C: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   C: ...it can die
+  ok   C: ...and it has a lair  GC1
+  ok   C: a bench stands on the road before it  road C1>C2>C3  benches C5B,GC1
+  ok   C: patch has a place of their own  C5B (interior)
+  ok   C: the forge door C5 > C5B draws  25.6% of its frame
+  ok   C: the forge door C5B > C5 draws  26.4% of its frame
+  ok   C: the gate door C3 > GC1 draws  67.5% of its frame
+  ok   C: ...and wears its plate gateFoundry  67.6% is the plate of 67.5% drawn
+  ok   C: the plain door GC1 > C3 draws  61.3% of its frame
+  ok   C: the music streams from files the build knows  mus_foundry:yes
+  ── kingdom D
+  ok   D: every room's declared art is a real file the manifest knows (10 rooms)  
+  ok   D: every enemy shows four different pictures alive  rime 29, guard 29, hopper 19, turret 12, crawler 31, blob 22, flier 53, bat 27, sage 25
+  ok   D: the guardian zero stands in D3
+  ok   D: ...it can be hurt
+  ok   D: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   D: ...it can die
+  ok   D: ...and it has a lair  GD1
+  ok   D: a bench stands on the road before it  road D1>D2>D3  benches D1,GD1
+  ok   D: sage has a place of their own  D1B (interior)
+  ok   D: the carrel door D1 > D1B draws  39.3% of its frame
+  ok   D: the carrel door D1B > D1 draws  37.6% of its frame
+  ok   D: the gate door D3 > GD1 draws  73.0% of its frame
+  ok   D: ...and wears its plate gateArchives  73.9% is the plate of 73.0% drawn
+  ok   D: the plain door GD1 > D3 draws  60.2% of its frame
+  ok   D: the music streams from files the build knows  mus_archives:yes
+  ── kingdom E
+  ok   E: every room's declared art is a real file the manifest knows (10 rooms)  
+  ok   E: every enemy shows four different pictures alive  snare 20, blob 35, hopper 19, crawler 18, turret 10, flier 57, guard 27, bat 31, sage 22
+  ok   E: the guardian mother stands in E3
+  ok   E: ...it can be hurt
+  ok   E: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   E: ...it can die
+  ok   E: ...and it has a lair  GE1
+  ok   E: a bench stands on the road before it  road E1>E2>E3  benches E2,GE1
+  ok   E: lumen has a place of their own  E1B (interior)
+  ok   E: the hollow door E1 > E1B draws  32.4% of its frame
+  ok   E: the hollow door E1B > E1 draws  32.1% of its frame
+  ok   E: the gate door E3 > GE1 draws  60.9% of its frame
+  ok   E: ...and wears its plate gateNest  61.0% is the plate of 60.9% drawn
+  ok   E: the plain door GE1 > E3 draws  61.3% of its frame
+  ok   E: the music streams from files the build knows  mus_nest:yes
+  ── kingdom X
+  ok   X: every room's declared art is a real file the manifest knows (11 rooms)  
+  ok   X: every enemy shows four different pictures alive  bat 29, hopper 28, crawler 39, sage 26
+  ok   X: the guardian prism stands in X1
+  ok   X: ...it can be hurt
+  ok   X: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   X: ...it can die
+  ok   X: ...and it has a lair  GX1
+  ok   X: a bench stands on the road before it  road V1>B5>X1  benches V2,CV1B,GX1
+  ok   X: kerf has a place of their own  V1B (interior)
+  ok   X: the kerf door V1 > V1B draws  36.7% of its frame
+  ok   X: the kerf door V1B > V1 draws  35.7% of its frame
+  ok   X: the gate door X1 > GX1 draws  68.4% of its frame
+  ok   X: ...and wears its plate gateDeep  67.8% is the plate of 68.4% drawn
+  ok   X: the plain door CV1 > A5 draws  61.8% of its frame
+  ok   X: ...and wears its plate caveExit  47.0% is the plate of 61.8% drawn
+  ok   X: the mouth door CV1 > CV1B draws  24.4% of its frame
+  ok   X: ...and wears its plate caveMouthE  17.7% is the plate of 24.4% drawn
+  ok   X: the mouth door CV1B > CV1 draws  64.6% of its frame
+  ok   X: ...and wears its plate caveMouthE  36.2% is the plate of 64.6% drawn
+  ok   X: the mouth door CV1B > CV2 draws  58.5% of its frame
+  ok   X: ...and wears its plate caveMouthE  38.7% is the plate of 58.5% drawn
+  ok   X: the mouth door CV2 > CV1B draws  61.4% of its frame
+  ok   X: ...and wears its plate caveMouthE  42.0% is the plate of 61.4% drawn
+  ok   X: the plain door GX1 > X1 draws  61.8% of its frame
+  ok   X: the music streams from files the build knows  mus_cache:yes
+  ok   every one-shot sound in the game decays (tests/tails.cjs)  
+  ok   no page errors  
+
+OK — every kingdom holds its own rules, measured
+   (kingdom: 30.3 s)
+
+all 1 harnesses ran

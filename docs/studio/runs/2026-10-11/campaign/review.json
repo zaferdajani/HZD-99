@@ -1,0 +1,52 @@
+{
+  "engine_result": "complete",
+  "engine_exit_status": 0,
+  "narrative_gate": "fail",
+  "expected_sequences": [
+    "bay",
+    "gate",
+    "ratchet",
+    "cave",
+    "marble",
+    "forge",
+    "passage",
+    "meet",
+    "break",
+    "sage",
+    "chime",
+    "free",
+    "ch2"
+  ],
+  "observed_sequences": [
+    "bay",
+    "gate",
+    "ratchet",
+    "marble",
+    "cave",
+    "forge",
+    "sage",
+    "meet",
+    "break",
+    "chime",
+    "free",
+    "ch2"
+  ],
+  "missing_sequences_derived": [
+    "passage"
+  ],
+  "reported_panelsMissed": [],
+  "chronology_defects": [
+    {
+      "id": "CIN-2",
+      "observed": "raw marble at04:26, marble panels04:32\u201304:33, cave introduction04:58\u201305:00 on return"
+    }
+  ],
+  "page_errors": [],
+  "result_wall_includes_video_close": "13:37",
+  "gameplay_complete_log_wall": "13:36",
+  "difficulty": "Kitten / row0",
+  "segment": null,
+  "input": "keyboard only; state/map reads, no game-state writes",
+  "stuck_diagnostics": 5,
+  "deaths": 1
+}

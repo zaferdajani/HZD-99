@@ -1,0 +1,86 @@
+
+── vlink  — the way up ends on a ledge, and every up/down pair is one shaft: drawn, solid, crossed without a cut
+── vlink — the way up ends on a ledge, and a shaft is one place
+
+  ok   every way up in the world is listed  24 T exits
+  ok   A1 -> A6: a ledge from every column she can rise through  4/4 columns
+  ok   A7 -> A5: a ledge from every column she can rise through  4/4 columns
+  ok   A2 -> A8: a ledge from every column she can rise through  4/4 columns
+  ok   A3 -> B1: a ledge from every column she can rise through  4/4 columns
+  ok   A5 -> A2: a ledge from every column she can rise through  3/3 columns
+  ok   B1 -> B6: a ledge from every column she can rise through  4/4 columns
+  ok   B2 -> B7: a ledge from every column she can rise through  4/4 columns
+  ok   B5 -> X1: a ledge from every column she can rise through  3/3 columns
+  ok   V2 -> B2: a ledge from every column she can rise through  4/4 columns
+  ok   C1 -> B3: a ledge from every column she can rise through  3/3 columns
+  ok   C2 -> C1: a ledge from every column she can rise through  4/4 columns
+  ok   C3 -> C6: a ledge from every column she can rise through  4/4 columns
+  ok   D1 -> C2: a ledge from every column she can rise through  3/3 columns
+  ok   D2 -> D4: a ledge from every column she can rise through  4/4 columns
+  ok   E1 -> D3: a ledge from every column she can rise through  3/3 columns
+  ok   E2 -> E4: a ledge from every column she can rise through  4/4 columns
+  ok   A8 -> A9: a ledge from every column she can rise through  4/4 columns
+  ok   A12 -> A3: a ledge from every column she can rise through  2/2 columns
+  ok   B7 -> B8: a ledge from every column she can rise through  4/4 columns
+  ok   C6 -> C7: a ledge from every column she can rise through  4/4 columns
+  ok   D5 -> D2: a ledge from every column she can rise through  4/4 columns
+  ok   D6 -> D5: a ledge from every column she can rise through  4/4 columns
+  ok   E5 -> E2: a ledge from every column she can rise through  4/4 columns
+  ok   E6 -> E5: a ledge from every column she can rise through  4/4 columns
+  ok   up A1 -> A6: carried onto a ledge, controls held, never back down  standing in A6 at feet 608 after 26 steps
+  ok   up A7 -> A5: carried onto a ledge, controls held, never back down  standing in A5 at feet 467 after 26 steps
+  ok   up A2 -> A8: carried onto a ledge, controls held, never back down  standing in A8 at feet 600 after 26 steps
+  ok   up A3 -> B1: carried onto a ledge, controls held, never back down  standing in B1 at feet 464 after 26 steps
+  ok   up A5 -> A2: carried onto a ledge, controls held, never back down  standing in A2 at feet 472 after 26 steps
+  ok   up B1 -> B6: carried onto a ledge, controls held, never back down  standing in B6 at feet 1072 after 26 steps
+  ok   up B2 -> B7: carried onto a ledge, controls held, never back down  standing in B7 at feet 632 after 26 steps
+  ok   up B5 -> X1: carried onto a ledge, controls held, never back down  standing in X1 at feet 475 after 26 steps
+  ok   up V2 -> B2: carried onto a ledge, controls held, never back down  standing in B2 at feet 467 after 26 steps
+  ok   up C1 -> B3: carried onto a ledge, controls held, never back down  standing in B3 at feet 464 after 26 steps
+  ok   up C2 -> C1: carried onto a ledge, controls held, never back down  standing in C1 at feet 1024 after 26 steps
+  ok   up C3 -> C6: carried onto a ledge, controls held, never back down  standing in C6 at feet 632 after 26 steps
+  ok   up D1 -> C2: carried onto a ledge, controls held, never back down  standing in C2 at feet 472 after 26 steps
+  ok   up D2 -> D4: carried onto a ledge, controls held, never back down  standing in D4 at feet 600 after 26 steps
+  ok   up E1 -> D3: carried onto a ledge, controls held, never back down  standing in D3 at feet 471 after 26 steps
+  ok   up E2 -> E4: carried onto a ledge, controls held, never back down  standing in E4 at feet 568 after 26 steps
+  ok   up A8 -> A9: carried onto a ledge, controls held, never back down  standing in A9 at feet 472 after 26 steps
+  ok   up A12 -> A3: carried onto a ledge, controls held, never back down  standing in A3 at feet 470 after 26 steps
+  ok   up B7 -> B8: carried onto a ledge, controls held, never back down  standing in B8 at feet 472 after 26 steps
+  ok   up C6 -> C7: carried onto a ledge, controls held, never back down  standing in C7 at feet 504 after 26 steps
+  ok   up D5 -> D2: carried onto a ledge, controls held, never back down  standing in D2 at feet 469 after 26 steps
+  ok   up D6 -> D5: carried onto a ledge, controls held, never back down  standing in D5 at feet 704 after 26 steps
+  ok   up E5 -> E2: carried onto a ledge, controls held, never back down  standing in E2 at feet 472 after 26 steps
+  ok   up E6 -> E5: carried onto a ledge, controls held, never back down  standing in E5 at feet 704 after 26 steps
+  ok   down A6 -> A1: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down A5 -> A7: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down A8 -> A2: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down B1 -> A3: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down A2 -> A5: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down B6 -> B1: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down B7 -> B2: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down X1 -> B5: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down B2 -> V2: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down B3 -> C1: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down C1 -> C2: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down C6 -> C3: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down C2 -> D1: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down D4 -> D2: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down D3 -> E1: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down E4 -> E2: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down A9 -> A8: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down A3 -> A12: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down B8 -> B7: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down C7 -> C6: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down D2 -> D5: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down D5 -> D6: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down E2 -> E5: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   down E5 -> E6: silent handover, no cut, no snap  screen moved 14 px on the crossing step
+  ok   an uncut hatch overhead is a ceiling, not a door  still in A7, centre never above 18
+  ok   a closed story gate (A3 -> B1) is no seamless shaft and no floor above  seamless false, solid tiles above 0, ended in A3, seamless once open true
+  ok   the room above is drawn above the room  camera at y -261 (extension 540 px), top strip painted by B7
+  ok   no page errors
+
+OK — every way up ends on a ledge, and every shaft is one place
+   (vlink: 1.0 s)
+
+all 1 harnesses ran

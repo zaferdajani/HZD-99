@@ -1,0 +1,29 @@
+
+── survey-a7  — Ratchet's shaft errand is finished by reading the A7 survey, not by entering the room; early reads remembered; old saves keep what they earned
+── survey-a7 — Ratchet's errand is finished by reading the survey, not by standing in the shaft
+
+  ok   the strings exist and speak of the survey  ["There is a shaft under the meadow nobody has gone down since the fall. The quarrymen left their survey at the bottom. 
+  ok   Ratchet asks for the survey (real interact press beside him)  {"near":{"found":true,"near":true,"label":"npc"},"state":"active","said":"There is a shaft under the meadow nobody has gone down since the fall. The quarr"}
+  ok   standing in A7 after the ask does NOT complete the errand  {"state":"active","done":false,"scrap":0,"coin":0,"read":false,"toasts":[]}
+  ok   ...and Ratchet does not pay for it: he still points her at the survey  Read the quarrymen's survey at the bottom of the deep shaft — down through the brittle floor in the cave under the hub. 
+  ok   the survey is a real interactable: the "Read" cue over it, the key opens it  {"found":true,"near":true,"label":"term"}
+  ok   ...the press reads all three lines of the survey  3 lines
+  ok   ...and reading it after the ask completes the errand, and says so  {"state":"active","done":true,"scrap":0,"coin":0,"read":true,"toasts":["Errand ready — go back"]}
+  ok   ...the read is in the saved game
+  ok   Ratchet thanks her for the reading and pays: +80 scrap and the coin  {"scrap":80,"coin":1,"state":"done"}
+  ok   ...exactly once: talking again and re-reading pay nothing more  {"d":0}
+  ok   reading the survey before anyone asks is remembered, and is not an errand yet  {"state":"none","done":true,"scrap":0,"coin":0,"read":true,"toasts":[]}
+  ok   ...Ratchet says she already read it — the early line — and pays on the ask  {"said":"You have already read the quarrymen's survey down that shaft? Then you know what I wanted known. Thi","scrap":80,"coin":1}
+  ok   ...once
+  ok   having stood in A7 without reading is NOT early discovery: he asks, nothing is paid  There is a shaft under the meadow nobody has gone down since the fall. The quarrymen left their surv
+  ok   an old save paid under the visit rule loads still paid  {"state":"done","done":false,"scrap":500,"coin":1,"read":false,"toasts":[],"qbase":"{}"}
+  ok   ...is never offered again, and reading the survey afterwards pays nothing  {"scrap":0,"coin":1}
+  ok   an old save with the errand active and A7 visited but the survey unread stays ACTIVE on load  {"state":"active","done":false,"scrap":0,"coin":0,"read":false,"toasts":[],"qbase":"{}"}
+  ok   ...Ratchet still sends her to the survey and pays nothing  Read the quarrymen's survey at the bottom of the deep shaft — down through the brittle floor in the 
+  ok   ...until she reads it: then he thanks her and pays once  {"scrap":80,"coin":1,"state":"done"}
+  ok   ask, goal, thanks and early lines exist in every language, each its own translation  en,ar,tr,zh,ru
+
+OK — the coin is paid for the survey, once, and old saves keep what they earned
+   (survey-a7: 1.3 s)
+
+all 1 harnesses ran

@@ -1,0 +1,90 @@
+{
+  "000-difficulty.png": {
+    "bytes": 209532,
+    "sha256": "6c26ef82e84d920b7cd61f61c1bcc0e6f17eb760a2fee733a6c7852a9b439d3e"
+  },
+  "001-repair-board.png": {
+    "bytes": 619848,
+    "sha256": "02e536ab6005e59f00026a3f5d705c6343081eadc7944831b9389f1558cccff9"
+  },
+  "002-counter.png": {
+    "bytes": 387378,
+    "sha256": "d840cbca32266ea428a4d610bf9c35f31255629290e5076d175084e65a473217"
+  },
+  "003-monument-puzzle.png": {
+    "bytes": 176255,
+    "sha256": "6013401d01a504a5ffbfe09c8027a7196280e2d111df56b7a282fedf39d34a1c"
+  },
+  "004-done-opening.png": {
+    "bytes": 587282,
+    "sha256": "057cf99ece137d5cf0ab06ee9ec5589459d1c87f3042013c47cb396e86eac169"
+  },
+  "005-done-servo.png": {
+    "bytes": 673616,
+    "sha256": "5356eba26895e26d23ed18b28db638846f59d8ecc0bd14a5f079d16f47324b70"
+  },
+  "006-pillar-claws.png": {
+    "bytes": 621627,
+    "sha256": "4f620e7f65b32719e904316cff74df7ff0c95d8a3a3de55b528d3a316ff97c44"
+  },
+  "007-done-marble.png": {
+    "bytes": 500069,
+    "sha256": "82f03889af5be16a8cea5bc3bdb9ae3c6c3c240ed8b7cff9e162b3059aef68da"
+  },
+  "008-stuck-A1.png": {
+    "bytes": 578714,
+    "sha256": "71635d73e4002ae2f43380622b8ff3a204e5ee11eb6687902edc57e02d43e799"
+  },
+  "009-done-forge.png": {
+    "bytes": 759110,
+    "sha256": "cb50b090b015f0aef506d9540175971730ef61d4bb4d08bd9b7e45d6969f8cfb"
+  },
+  "010-stuck-A1.png": {
+    "bytes": 568632,
+    "sha256": "3aaa39fbdb8e6109b985b6047361ed2d33aecb1391090fb4f249381e3afbeaaa"
+  },
+  "011-stuck-CV2.png": {
+    "bytes": 629517,
+    "sha256": "89b548c23d3d990ca5e6701dd029b3a0546f5a20adf67d12cd3aa8be94b50286"
+  },
+  "012-done-sage.png": {
+    "bytes": 617446,
+    "sha256": "678e1affe0a4045c268a8230bb760c6e1f87587df63bc6f37feb9c1efc089582"
+  },
+  "013-nullfang-meet.png": {
+    "bytes": 669980,
+    "sha256": "5c87a0d44315a24c862058b4cc0239b5e447477ca9a317a1773bdf3058cdb2d5"
+  },
+  "014-nullfang-break.png": {
+    "bytes": 626147,
+    "sha256": "9f66a7395b83a27e915b161ab698aad62a03b3fd962ded5a6008266c44adc3e7"
+  },
+  "015-done-chime.png": {
+    "bytes": 711862,
+    "sha256": "9c6961ddab96cb933159a6387fe320ec905d62bb7189a22ed1db485761c575a4"
+  },
+  "016-lesson-dash.png": {
+    "bytes": 811642,
+    "sha256": "77563ab202c923295fa3d4dc3abee4a67b2116fbd5ecc08d7b2378bd257704d7"
+  },
+  "017-done-lion.png": {
+    "bytes": 746542,
+    "sha256": "a09b8cf7229b95c01068e8a6293c1129369fa0496d573dc29a039410588a6612"
+  },
+  "018-stuck-A4.png": {
+    "bytes": 740120,
+    "sha256": "d67e4e93ee2d63c28623ed26339e9f1c9eda0dae82e01d42881de51517be1e5f"
+  },
+  "019-stuck-A4.png": {
+    "bytes": 736401,
+    "sha256": "06470f162314240ca5c3a0ba39434ad6ca9d3c38315fb652eba00cd82f39a19a"
+  },
+  "020-done-teaser.png": {
+    "bytes": 810722,
+    "sha256": "8b66b8285e33f06dff3f81d125550367a6cf4d3e15a7e9dbba5313c2af861681"
+  },
+  "021-end.png": {
+    "bytes": 810334,
+    "sha256": "3c01634e5cfaac56dc0a2a004869e305b1a2d4a53b497b5ea34882b236274f4d"
+  }
+}

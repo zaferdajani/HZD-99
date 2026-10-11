@@ -1,0 +1,7 @@
+{
+  "path": "tests/roomcache.cjs",
+  "sha256": "3a39b5c267967c0b79cd8c78b070a1530fdee3e1a46e37058d87032bd55159ee",
+  "reason": "QA-07 consistent post-lion staged save; no gameplay source or built page changed",
+  "validation": "roomcache-investigation/fixed.log",
+  "original_failure": "automated/roomcache.log"
+}

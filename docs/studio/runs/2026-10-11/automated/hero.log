@@ -1,0 +1,68 @@
+
+── hero  — her arm is ONE piece, she has two of them, nothing bolted on
+── hero — her arm is one piece, she has two of them, and nothing is bolted on
+  ok   nothing stamps a joint onto her arm, in any state  0 armJoint call(s) across 32 poses
+
+    idle/R      left  1312   right  1083
+    idle/L      left  1315   right  1081
+    run/R       left  1400   right   839
+    run/L       left   822   right  1419
+    air/R       left  1015   right  1543
+    air/L       left  1524   right  1030
+
+  ok   she reads as two-armed in every pose  
+    IoU vs idle (must be <= 0.9):
+      run       0.688
+      air       0.552
+      fall      0.731
+      swing     0.510
+      combo2    0.444
+      dash      0.475
+      boost     0.646
+      skid      0.490
+      wallcling 0.654
+      song      0.695
+      armfire   0.710
+      lowhp     0.472
+      charge    0.416
+      hurt      0.555
+      heal      0.792
+  ok   every named state differs from idle in SILHOUETTE  
+  ok   ...and she is drawn at all in every state  
+    state sheet 7680x320, 24 cells, 24 names, highest index 23
+  ok   every state she can be in has a cell on the sheet  
+  ok   ...and no two states share one cell
+  ok   ...and the sheet divides evenly into its cells  7680 / 24 = 320 px per cell
+    mood vs calm (must differ over 0.12 of lit pixels):
+      happy      0.306
+      excited    0.371
+      determined 0.259
+      angry      0.277
+      sad        0.283
+      hurt       0.318
+      curious    0.248
+      weary      0.304
+  ok   every mood puts a different face on her  
+      idle     0/6 pairs prefer its mirror
+      walk_a   0/6 pairs prefer its mirror
+      walk_b   0/6 pairs prefer its mirror
+      walk_c   0/6 pairs prefer its mirror
+      run_a    0/6 pairs prefer its mirror
+      run_b    0/6 pairs prefer its mirror
+      run_c    0/6 pairs prefer its mirror
+  ok   every locomotion cell faces the same way  
+      eye gap / figure height — walk & run cells: walk_a 0.032  walk_b 0.039  walk_c 0.166  run_a 0.179  run_b 0.018   (widest 0.179)
+      attack cells on the sheet: claw_1 0.256  claw_2 0.273  finisher 0.083  burst 0.044
+      air      strip median 0.101 over 6 cells
+      down     strip median 0.117 over 6 cells
+      claw_1   strip median 0.106 over 5 cells
+      claw_2   strip median 0.105 over 6 cells
+      finisher strip median 0.099 over 6 cells
+      burstLegacystrip median 0.111 over 12 cells
+      burst    strip median 0.122 over 12 cells
+  ok   every attack strip faces where she is heading, not the screen   vs the walk's widest 0.179 — ART_QUEUE §2av
+
+OK — one limb, two arms, no hardware bolted to the outside
+   (hero: 4.1 s)
+
+all 1 harnesses ran

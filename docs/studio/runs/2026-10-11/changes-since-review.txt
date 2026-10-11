@@ -1,0 +1,199 @@
+ assets/CREDITS.md                                  |    4 +-
+ assets/characters/alpha/air.webp                   |  Bin 0 -> 88430 bytes
+ assets/characters/alpha/bite.webp                  |  Bin 287098 -> 219404 bytes
+ assets/characters/alpha/claw.webp                  |  Bin 239826 -> 207610 bytes
+ assets/characters/alpha/clinch.webp                |  Bin 218264 -> 213186 bytes
+ assets/characters/alpha/howl.webp                  |  Bin 240058 -> 200768 bytes
+ assets/characters/alpha/leap.webp                  |  Bin 136306 -> 139850 bytes
+ assets/characters/alpha/prowl.webp                 |  Bin 411988 -> 265058 bytes
+ assets/characters/alpha/rest.webp                  |  Bin 258792 -> 160176 bytes
+ assets/characters/alpha/roar.webp                  |  Bin 269616 -> 220226 bytes
+ assets/characters/alpha/yield.webp                 |  Bin 191172 -> 184330 bytes
+ assets/eyes.json                                   |    2 +-
+ assets/lowres/alBite.webp                          |  Bin 27030 -> 26442 bytes
+ assets/lowres/alClaw.webp                          |  Bin 20612 -> 28076 bytes
+ assets/lowres/alClinch.webp                        |  Bin 18914 -> 24642 bytes
+ assets/lowres/alHowl.webp                          |  Bin 22592 -> 24640 bytes
+ assets/lowres/alLeap.webp                          |  Bin 11720 -> 16474 bytes
+ assets/lowres/alProwl.webp                         |  Bin 37994 -> 32974 bytes
+ assets/lowres/alRest.webp                          |  Bin 24132 -> 19764 bytes
+ assets/lowres/alRoar.webp                          |  Bin 22860 -> 27494 bytes
+ assets/lowres/alYield.webp                         |  Bin 17854 -> 19506 bytes
+ assets/lowres/beastGallop.webp                     |  Bin 32716 -> 38282 bytes
+ assets/lowres/beastHurt.webp                       |  Bin 18574 -> 21520 bytes
+ assets/lowres/beastRearSwipe.webp                  |  Bin 44624 -> 51362 bytes
+ assets/lowres/beastStudioLeap.webp                 |  Bin 42734 -> 49688 bytes
+ assets/lowres/beastStudioRoar.webp                 |  Bin 54096 -> 61836 bytes
+ assets/lowres/beastStudioStalk.webp                |  Bin 36490 -> 41908 bytes
+ assets/lowres/beastStudioSwipe.webp                |  Bin 37226 -> 42932 bytes
+ assets/manhua/ch1/clean/p04.webp                   |  Bin 0 -> 108726 bytes
+ assets/manhua/ch1/clean/p05.webp                   |  Bin 0 -> 169754 bytes
+ assets/manhua/ch1/clean/p07.webp                   |  Bin 0 -> 230324 bytes
+ assets/manhua/ch1/clean/p09.webp                   |  Bin 0 -> 251008 bytes
+ assets/manhua/ch1/clean/p14.webp                   |  Bin 0 -> 265534 bytes
+ assets/manhua/ch1/clean/p15.webp                   |  Bin 0 -> 167936 bytes
+ assets/manhua/ch1/clean/p16.webp                   |  Bin 0 -> 116926 bytes
+ assets/manhua/ch1/clean/p18.webp                   |  Bin 0 -> 258262 bytes
+ assets/manhua/ch1/clean/p20.webp                   |  Bin 0 -> 283430 bytes
+ assets/manhua/ch1/clean/p24.webp                   |  Bin 0 -> 224434 bytes
+ assets/manhua/ch1/clean/p25.webp                   |  Bin 0 -> 177522 bytes
+ assets/manhua/ch1/clean/p26.webp                   |  Bin 0 -> 196906 bytes
+ assets/manhua/ch1/game/break_a.webp                |  Bin 0 -> 258240 bytes
+ assets/manhua/ch1/game/break_b.webp                |  Bin 0 -> 183012 bytes
+ assets/manhua/ch1/game/ch2_a.webp                  |  Bin 0 -> 174632 bytes
+ assets/manhua/ch1/game/ch2_b.webp                  |  Bin 0 -> 140314 bytes
+ assets/manhua/ch1/game/ch2_c.webp                  |  Bin 0 -> 104614 bytes
+ assets/manhua/ch1/game/drawer.webp                 |  Bin 0 -> 190200 bytes
+ assets/manhua/ch1/game/fight_a.webp                |  Bin 0 -> 316770 bytes
+ assets/manhua/ch1/game/fight_b.webp                |  Bin 0 -> 239346 bytes
+ assets/manhua/ch1/game/hatch.webp                  |  Bin 0 -> 324750 bytes
+ assets/manhua/ch1/game/letter.webp                 |  Bin 0 -> 152114 bytes
+ assets/manhua/ch1/game/marble_a.webp               |  Bin 0 -> 128698 bytes
+ assets/manhua/ch1/game/marble_b.webp               |  Bin 0 -> 92520 bytes
+ assets/manhua/ch1/game/passage_a.webp              |  Bin 0 -> 134894 bytes
+ assets/manhua/ch1/game/passage_b.webp              |  Bin 0 -> 205050 bytes
+ assets/manhua/ch1/game/repair.webp                 |  Bin 0 -> 196222 bytes
+ assets/manhua/ch1/game/sage_bell.webp              |  Bin 0 -> 170268 bytes
+ assets/manhua/ch1/game/sage_rev.webp               |  Bin 0 -> 197350 bytes
+ assets/roomassets.json                             |    2 +-
+ assets/source/README.md                            |   18 +
+ assets/source/_sheets/mother_eyes_after.jpg        |  Bin 0 -> 163151 bytes
+ assets/source/_sheets/mother_eyes_before.jpg       |  Bin 0 -> 84051 bytes
+ assets/source/beasts/alpha2/bite2_take.jpg         |  Bin 0 -> 177118 bytes
+ assets/source/beasts/alpha2/bite_take.jpg          |  Bin 0 -> 257583 bytes
+ assets/source/beasts/alpha2/claw2_take.jpg         |  Bin 0 -> 179512 bytes
+ assets/source/beasts/alpha2/claw_take.jpg          |  Bin 0 -> 249394 bytes
+ assets/source/beasts/alpha2/clinch2_take.jpg       |  Bin 0 -> 179381 bytes
+ assets/source/beasts/alpha2/clinch_take.jpg        |  Bin 0 -> 253528 bytes
+ assets/source/beasts/alpha2/cut_spec.json          |  185 +++
+ assets/source/beasts/alpha2/eye_anchors_1.jpg      |  Bin 0 -> 196090 bytes
+ assets/source/beasts/alpha2/eye_anchors_2.jpg      |  Bin 0 -> 219690 bytes
+ assets/source/beasts/alpha2/green_plate.jpg        |  Bin 0 -> 122897 bytes
+ assets/source/beasts/alpha2/green_plate_padded.jpg |  Bin 0 -> 76197 bytes
+ assets/source/beasts/alpha2/howl_take.jpg          |  Bin 0 -> 242563 bytes
+ assets/source/beasts/alpha2/idle_take.jpg          |  Bin 0 -> 256946 bytes
+ assets/source/beasts/alpha2/ingame_states.jpg      |  Bin 0 -> 269980 bytes
+ assets/source/beasts/alpha2/leap_take.jpg          |  Bin 0 -> 235675 bytes
+ assets/source/beasts/alpha2/plate_candidates.jpg   |  Bin 0 -> 122708 bytes
+ assets/source/beasts/alpha2/prowl_take.jpg         |  Bin 0 -> 241106 bytes
+ assets/source/beasts/alpha2/roar_take.jpg          |  Bin 0 -> 257780 bytes
+ assets/source/beasts/alpha2/strips_sheet.jpg       |  Bin 0 -> 370279 bytes
+ assets/source/beasts/alpha2/yield_take.jpg         |  Bin 0 -> 227328 bytes
+ .../source/manhua/ch1/clean/p04_clean_asfired.jpg  |  Bin 0 -> 125929 bytes
+ .../source/manhua/ch1/clean/p05_clean_asfired.jpg  |  Bin 0 -> 147135 bytes
+ .../source/manhua/ch1/clean/p07_clean_asfired.jpg  |  Bin 0 -> 193797 bytes
+ .../source/manhua/ch1/clean/p09_clean_asfired.jpg  |  Bin 0 -> 208634 bytes
+ .../source/manhua/ch1/clean/p14_clean_asfired.jpg  |  Bin 0 -> 218382 bytes
+ .../source/manhua/ch1/clean/p15_clean_asfired.jpg  |  Bin 0 -> 168242 bytes
+ .../source/manhua/ch1/clean/p16_clean_asfired.jpg  |  Bin 0 -> 131533 bytes
+ .../source/manhua/ch1/clean/p18_clean_asfired.jpg  |  Bin 0 -> 203933 bytes
+ .../source/manhua/ch1/clean/p20_clean_asfired.jpg  |  Bin 0 -> 206113 bytes
+ .../source/manhua/ch1/clean/p24_clean_asfired.jpg  |  Bin 0 -> 184067 bytes
+ .../source/manhua/ch1/clean/p25_clean_asfired.jpg  |  Bin 0 -> 164409 bytes
+ .../source/manhua/ch1/clean/p26_clean_asfired.jpg  |  Bin 0 -> 174676 bytes
+ assets/source/manhua/ch1/clean/prompts.json        |   18 +
+ assets/source/manhua/ch1/game/break_a_asfired.jpg  |  Bin 0 -> 208300 bytes
+ assets/source/manhua/ch1/game/break_b_asfired.jpg  |  Bin 0 -> 168035 bytes
+ assets/source/manhua/ch1/game/ch2_a_asfired.jpg    |  Bin 0 -> 155314 bytes
+ assets/source/manhua/ch1/game/ch2_b_asfired.jpg    |  Bin 0 -> 136910 bytes
+ assets/source/manhua/ch1/game/ch2_c_asfired.jpg    |  Bin 0 -> 106194 bytes
+ assets/source/manhua/ch1/game/drawer_asfired.jpg   |  Bin 0 -> 163892 bytes
+ assets/source/manhua/ch1/game/fight_a_asfired.jpg  |  Bin 0 -> 243462 bytes
+ assets/source/manhua/ch1/game/fight_b_asfired.jpg  |  Bin 0 -> 208931 bytes
+ assets/source/manhua/ch1/game/hatch_asfired.jpg    |  Bin 0 -> 247634 bytes
+ assets/source/manhua/ch1/game/letter_asfired.jpg   |  Bin 0 -> 140277 bytes
+ assets/source/manhua/ch1/game/marble_a_asfired.jpg |  Bin 0 -> 132736 bytes
+ assets/source/manhua/ch1/game/marble_b_asfired.jpg |  Bin 0 -> 104024 bytes
+ .../source/manhua/ch1/game/passage_a_asfired.jpg   |  Bin 0 -> 134410 bytes
+ .../source/manhua/ch1/game/passage_b_asfired.jpg   |  Bin 0 -> 180433 bytes
+ assets/source/manhua/ch1/game/prompts.json         |  141 +++
+ assets/source/manhua/ch1/game/repair_asfired.jpg   |  Bin 0 -> 192500 bytes
+ .../source/manhua/ch1/game/sage_bell_asfired.jpg   |  Bin 0 -> 123142 bytes
+ assets/source/manhua/ch1/game/sage_rev_asfired.jpg |  Bin 0 -> 173683 bytes
+ docs/ART_QUEUE.md                                  |   21 +-
+ docs/CAVES_CH1.md                                  |    4 +-
+ docs/CHAPTER_ONE_CAMPAIGN.md                       |  151 +++
+ docs/CHAPTER_ONE_WALKTHROUGH.md                    |    5 +-
+ docs/INFECTION_EYES_CHECKPOINT.md                  |   39 +-
+ docs/MANHWA_EVENT_MAP.md                           |  209 ++--
+ docs/campaign/01-difficulty-kitten.jpg             |  Bin 0 -> 30939 bytes
+ docs/campaign/02-repair-board.jpg                  |  Bin 0 -> 56246 bytes
+ docs/campaign/03-volt-pack-counter.jpg             |  Bin 0 -> 36059 bytes
+ docs/campaign/04-servo-wakes.jpg                   |  Bin 0 -> 48537 bytes
+ docs/campaign/05-a2-loose-floor.jpg                |  Bin 0 -> 50842 bytes
+ docs/campaign/06-marble-pages-at-the-marble.jpg    |  Bin 0 -> 55835 bytes
+ docs/campaign/07-sage-rescued.jpg                  |  Bin 0 -> 48137 bytes
+ docs/campaign/08-chime-fight.jpg                   |  Bin 0 -> 45695 bytes
+ .../09-nullfang-freed-overlap-before-fix.jpg       |  Bin 0 -> 77418 bytes
+ docs/campaign/10-chapter-two-teaser.jpg            |  Bin 0 -> 49776 bytes
+ docs/campaign/11-dash-chip-after-fix-staged.jpg    |  Bin 0 -> 67921 bytes
+ docs/studio/runs/2026-10-10/INTEGRATION.md         |  216 ++++
+ docs/studio/runs/2026-10-10/NEXT_REVIEW.md         |   37 +
+ .../runs/2026-10-10/images/alpha-after-freed.jpg   |  Bin 0 -> 97590 bytes
+ .../2026-10-10/images/alpha-after-infected.jpg     |  Bin 0 -> 102082 bytes
+ .../runs/2026-10-10/images/alpha-after-states.jpg  |  Bin 0 -> 187695 bytes
+ .../runs/2026-10-10/images/alpha-after-strips.jpg  |  Bin 0 -> 247967 bytes
+ .../runs/2026-10-10/images/alpha-before-after.jpg  |  Bin 0 -> 56427 bytes
+ .../2026-10-10/images/panels-after-desktop.jpg     |  Bin 0 -> 307315 bytes
+ .../runs/2026-10-10/images/panels-after-phone.jpg  |  Bin 0 -> 162979 bytes
+ .../images/panels-p09-lettered-vs-clean.jpg        |  Bin 0 -> 254698 bytes
+ .../images/panels-p18-lettered-vs-clean.jpg        |  Bin 0 -> 242624 bytes
+ .../images/servo-desktop-intro-after.jpg           |  Bin 0 -> 35603 bytes
+ .../images/servo-desktop-prompt-after.jpg          |  Bin 0 -> 43808 bytes
+ .../images/servo-desktop-prompt-before.jpg         |  Bin 0 -> 45924 bytes
+ .../2026-10-10/images/servo-desktop-talk-after.jpg |  Bin 0 -> 38136 bytes
+ .../images/servo-desktop-talk-before.jpg           |  Bin 0 -> 44954 bytes
+ .../2026-10-10/images/servo-phone-coil-after.jpg   |  Bin 0 -> 34548 bytes
+ .../2026-10-10/images/servo-phone-intro-after.jpg  |  Bin 0 -> 21834 bytes
+ .../2026-10-10/images/servo-phone-prompt-after.jpg |  Bin 0 -> 32914 bytes
+ .../images/servo-phone-prompt-before.jpg           |  Bin 0 -> 32404 bytes
+ .../2026-10-10/images/servo-phone-talk-after.jpg   |  Bin 0 -> 23203 bytes
+ .../2026-10-10/images/servo-phone-talk-before.jpg  |  Bin 0 -> 25652 bytes
+ .../runs/2026-10-10/images/text-phone-ar-after.jpg |  Bin 0 -> 25408 bytes
+ .../runs/2026-10-10/images/text-phone-zh-after.jpg |  Bin 0 -> 26138 bytes
+ forge-odyssey.html                                 |  779 ++++++++++---
+ forge.html                                         |  779 ++++++++++---
+ index.html                                         |  779 ++++++++++---
+ js/entities.js                                     |    7 +
+ js/game.js                                         |  124 +-
+ js/i18n.js                                         |   22 +-
+ js/infection-eyes.js                               |   59 +-
+ js/media.js                                        |   10 +-
+ js/mother.js                                       |   27 +-
+ js/opening.js                                      |    4 +
+ js/panels.js                                       |  182 ++-
+ js/progress.js                                     |   13 +-
+ js/quests.js                                       |   63 +-
+ js/story-opening.js                                |    8 +-
+ js/text-manhwa.js                                  |   66 ++
+ js/text-opening.js                                 |   10 +-
+ js/text-progress.js                                |   18 +-
+ js/tutorial_enforce.js                             |   14 +
+ js/wolves.js                                       |   97 +-
+ js/world.js                                        |   24 +-
+ odyssey.html                                       |  779 ++++++++++---
+ tests/cacheroster.cjs                              |   22 +-
+ tests/campaign-ch1.cjs                             | 1223 ++++++++++++++++++++
+ tests/caves-ch1.cjs                                |   30 +-
+ tests/den-gate.cjs                                 |   13 +-
+ tests/errands.cjs                                  |   11 +-
+ tests/infection-eyes.cjs                           |   13 +
+ tests/infection-poses.cjs                          |  336 ++++++
+ tests/infection-roster.cjs                         |  122 +-
+ tests/opening-order.cjs                            |    4 +-
+ tests/panels.cjs                                   |   45 +-
+ tests/rubble.cjs                                   |    6 +
+ tests/run.cjs                                      |   90 +-
+ tests/serve.cjs                                    |    9 +-
+ tests/served-identity.cjs                          |  120 ++
+ tests/servo-presence.cjs                           |  231 ++++
+ tests/story-order.cjs                              |   11 +-
+ tests/survey-a7.cjs                                |  259 +++++
+ tests/text-rules.cjs                               |  383 ++++++
+ tests/wolves.cjs                                   |   60 +-
+ tools/eyespecs.cjs                                 |   77 +-
+ tools/fixcut.py                                    |    8 +-
+ tools/manhwamap.cjs                                |   30 +
+ tools/studio/README.md                             |   11 +
+ tools/studio/audit.py                              |   59 +-
+ 198 files changed, 7211 insertions(+), 878 deletions(-)

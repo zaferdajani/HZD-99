@@ -1,0 +1,394 @@
+diff --git a/docs/ART_QUEUE.md b/docs/ART_QUEUE.md
+index 9ed31f3..d8c104a 100644
+--- a/docs/ART_QUEUE.md
++++ b/docs/ART_QUEUE.md
+@@ -5994,9 +5994,16 @@ Measured by `tests/wolves.cjs` (scale, floor, per-cell silhouette) and
+ `tests/infection-eyes.cjs`. §2cc-i and §2cc-iii below are SUPERSEDED for the
+ wolf (their files are deleted); they still stand for the cheetah.
+ 
+-**Still the old animal:** THE ALPHA (`alpha*`, `al*` strips) predates this
+-design. Its re-fire against `source/beasts/wolf2/green_plate.jpg` is the next
+-brief for the pack — same take list, larger frame, purple at runtime.
++**ALPHA UPDATED AND INTEGRATED 2026-10-10:** the old-animal re-fire brief is
++complete. `assets/characters/alpha/` now contains ten matching boss strips
++(rest, prowl, roar, howl, leap/recovery, air, claw, bite, clinch/shake and yield),
++selected by `ALPHA_STRIP` in `js/wolves.js`; filmed takes are preserved under
++`assets/source/alpha/takes/`. The boss retains a larger silhouette than its
++pack, runtime purple infection eyes, and teal purification grading. See
++`docs/studio/runs/2026-10-10/INTEGRATION.md` (ART-01 and animation matrix) for
++integration evidence. Do not regenerate this completed set from the obsolete
++brief above. Owner visual approval remains outstanding; the faint violet
++collar seam after purification is tracked separately as ART-2.
+ 
+ ### 2cc-i. THE WOLF — `wolfWalk` (8 cells) and `wolfRun` (6 cells)
+ 
+diff --git a/docs/MANHWA_EVENT_MAP.md b/docs/MANHWA_EVENT_MAP.md
+index 08ca455..147bcc1 100644
+--- a/docs/MANHWA_EVENT_MAP.md
++++ b/docs/MANHWA_EVENT_MAP.md
+@@ -40,7 +40,7 @@ player's input rules.
+   grounded and `panelsSafe()` holds: state `PLAY`; no dialogue, item card, shop,
+   offer, film, wake, gate walk, crossing, staged meeting/break, boss entry,
+   finisher, pending boss reward, tutorial lock or hit-stop; no live projectile;
+-  no hostile within 600 px; any boss dead, tamed, purified or dormant.
++  no hostile within 300 px measured between actor centres (Euclidean distance); any boss dead, tamed, purified or dormant.
+ - **Once.** Marked `G.save.panels.seen[id]` as it begins and persisted, so a
+   reload never replays it. A save that had already passed an event when it was
+   first seen by this build marks that sequence `past` instead of handing the
+diff --git a/js/panels.js b/js/panels.js
+index 4e257a9..78c0fc7 100644
+--- a/js/panels.js
++++ b/js/panels.js
+@@ -49,7 +49,7 @@ const PANEL_CONDUITS = 'assets/backgrounds/gate_conduits.jpg';
+ // A panel: src (the page master), crop [x, y, w, h] in that page's pixels,
+ // cap (caption key | null), who (speaker name key), baked (the crop already
+ // carries the page's own lettering of `cap`), move (in | out | left | right),
+-// focus [fx, fy] for the push, cond(saveState) for a panel that depends on
++// focus [fx, fy] for the push, cond(panelState, flags) for a panel that depends on
+ // what actually happened, ref (page/panel, for the map document).
+ const PG_FULL = [0, 0, PANEL_FULL.w, PANEL_FULL.h];
+ const PANEL_SEQ = [
+@@ -160,7 +160,7 @@ const PANEL_SEQ = [
+       // the same thing in words).
+       { ref: 'game: sage_rev', src: PANEL_GAME('sage_rev'), crop: PG_FULL, cap: 'pc_s_point', move: 'in', focus: [0.7, 0.35] },
+       { ref: 'game: sage_bell', src: PANEL_GAME('sage_bell'), crop: [0, 0, 1600, 679], cap: 'pc_s_bell', move: 'out', focus: [0.4, 0.4],
+-        cond: s => !(s.flags && s.flags.bossChime) },
++        cond: (s, f) => !f.bossChime },
+     ] },
+   { id: 'chime', title: 'pn_s_chime', room: 'A9', prefetch: ['A8', 'A9'],
+     event: 'CHIME silenced (bossChime), once its cell is paid',
+@@ -299,8 +299,10 @@ function panelsDue() {
+     if (S.seen[s.id] || S.past[s.id]) continue;
+     // a beat already overtaken by the story is not shown late, out of order
+     if (s.stale && s.stale(S, f)) continue;
+-    if (G.roomId === s.alsoRoom) { if (s.id === 'ch2' && f.bossGlitch) return s; continue; }
+-    if (G.roomId !== s.room) continue;
++    // Alternate rooms share the event condition. Only the teaser has a
++    // location-specific condition: reaching B1 replaces standing on A3's climb.
++    if (G.roomId === s.alsoRoom && s.id === 'ch2' && f.bossGlitch) return s;
++    if (G.roomId !== s.room && G.roomId !== s.alsoRoom) continue;
+     if (s.when(f)) return s;
+   }
+   return null;
+@@ -339,7 +341,8 @@ function panelsPlay(id, opts) { return panelsStart(id, opts); }
+ // ---- the player -------------------------------------------------------------
+ function panelsList(seq) {
+   const S = panelsState() || {};
+-  return seq.panels.filter(p => !p.cond || p.cond(S));
++  const f = G.save && G.save.flags || {};
++  return seq.panels.filter(p => !p.cond || p.cond(S, f));
+ }
+ function panelsClearInput() {
+   if (typeof releaseInput === 'function') releaseInput();
+diff --git a/tests/panels.cjs b/tests/panels.cjs
+index 7676db2..f7de07c 100644
+--- a/tests/panels.cjs
++++ b/tests/panels.cjs
+@@ -111,7 +111,8 @@ async function tapKey(page, code) {
+     });
+     check('the marble, the maintenance door, the revelation, the break, the fight, the letter and the hatch are all in the map', !newSeq.length, newSeq.join(', '));
+     for (const [id, room, flags] of [['marble', 'CV3', { woke: 1, gateOpened: 1, pl_cshard: 1 }], ['passage', 'GA1T', { woke: 1, gateOpened: 1, crystal: 1 }],
+-      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
++      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }],
++      ['break', 'A3', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
+       await stage(page, room, flags);
+       // a record made by this build: every sequence known, the others already
+       // seen, so the one under test is the only one owed
+@@ -121,6 +122,20 @@ async function tapKey(page, code) {
+       await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
+       await waitFor(page, () => G.state === 'PLAY', 4000);
+     }
++    // The alternate room must keep the event gates, not play the break before
++    // it happens or after CHIME/NULLFANG have already been resolved.
++    const alternate = await page.evaluate(() => {
++      const P = G.save.panels, f = G.save.flags;
++      delete P.seen.break; delete P.past.break; PN.queue.length = 0;
++      G.roomId = 'A3'; delete f.nfBreak;
++      const before = panelsDue();
++      f.nfBreak = 1; f.bossChime = 1;
++      const afterBell = panelsDue();
++      delete f.bossChime; f.bossGlitch = 1;
++      const afterLion = panelsDue();
++      return [before, afterBell, afterLion].map(s => s && s.id);
++    });
++    check('A3 never plays the break before its event or after the bell/lion', alternate.every(s => !s), JSON.stringify(alternate));
+     // an old save (no `k`): its ten original sequences keep their verdicts; the
+     // new ones are judged by what it has already done
+     const mig = await page.evaluate(() => {
+@@ -235,6 +250,16 @@ async function tapKey(page, code) {
+       return [a, b];
+     });
+     check('the lying-in-the-scrap panel shows only when the swipe took a core', cond[1] === cond[0] + 1, JSON.stringify(cond));
++    const bell = await page.evaluate(() => {
++      const seq = panelsSeq('sage'), f = G.save.flags, old = f.bossChime;
++      delete f.bossChime;
++      const ringing = panelsList(seq).some(p => p.ref === 'game: sage_bell');
++      f.bossChime = 1;
++      const silenced = panelsList(seq).some(p => p.ref === 'game: sage_bell');
++      if (old == null) delete f.bossChime; else f.bossChime = old;
++      return { ringing, silenced };
++    });
++    check('the Sage only says CHIME still rings while it is active, including replay', bell.ringing && !bell.silenced, JSON.stringify(bell));
+ 
+     // the teaser: on the climb, not on the camp floor
+     await stage(page, 'A3', { woke: 1, bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1 });
+diff --git a/tests/roomcache.cjs b/tests/roomcache.cjs
+index 5dc0d79..ebca2cd 100644
+--- a/tests/roomcache.cjs
++++ b/tests/roomcache.cjs
+@@ -54,6 +54,14 @@ const check = (name, ok, detail) => {
+     sv.comics = {};
+     for (const ch of ((window.COMIC_MANIFEST || {}).chapters || [])) sv.comics[ch.id] = { offered: true, revision: ch.revision };
+     for (const b of ['Glitch', 'Brood', 'Atlas', 'Zero', 'Prism', 'Mother', 'Alpha', 'Chime', 'Carrier', 'Moth', 'Lattice', 'Lens']) sv.flags['boss' + b] = 1;
++    // This is a post-guardian cache fixture (bossGlitch is already complete).
++    // Its first lion meeting must also be past. Without it, the first A2 east
++    // crossing triggers the meeting pages, which correctly clear RIGHT; quiet()
++    // then forces PLAY but cannot restore the consumed input. Captured failure:
++    // frame10 PANELS/meet, x2777, then vx0 through frame119. Record the actual
++    // earlier milestone and let normal panel migration handle it; do not mark
++    // the whole story seen or bypass transitions in the measured walk.
++    sv.flags.nfMeet = 1;
+     startGame(sv);
+     // the slabs are art, and art arriving is its own (separately tested)
+     // story: have the two kingdoms walked here before the walk starts
+@@ -148,8 +156,13 @@ const check = (name, ok, detail) => {
+       else if (side === 'T') { player.vy = -760; keys[KEYB.JUMP[0]] = 1; }
+       else { player.vy = 300; }
+       let cost = null, liveAt = null;
++      const crossingTrace = [];
++      const crossingState = () => ({ room: G.roomId, state: G.state, panel: G.panels && G.panels.seq && G.panels.seq.id,
++        x: Math.round(player.x), y: Math.round(player.y), vx: Math.round(player.vx), vy: Math.round(player.vy),
++        right: keys[KEYB.RIGHT[0]], left: keys[KEYB.LEFT[0]], dead: player.dead });
+       tPrev = performance.now();
+       for (let i = 0; i < 120; i++) {
++        if (i === 0 || G.state !== 'PLAY' || i === 119) crossingTrace.push({ frame: i, ...crossingState() });
+         quiet();
+         const lf = TILE_STATS.live;
+         await raf();
+@@ -162,7 +175,7 @@ const check = (name, ok, detail) => {
+         }
+       }
+       for (const k in keys) keys[k] = 0;
+-      out.walk.push({ room, side, dest, arrived: G.roomId === dest, freshBefore, revisit, cost, liveBakes: liveAt, waited });
++      out.walk.push({ room, side, dest, arrived: G.roomId === dest, freshBefore, revisit, cost, liveBakes: liveAt, waited, crossingTrace, finalState: crossingState() });
+     }
+     // ---- 3. the same picture -----------------------------------------------------
+     const hashOf = (cvx) => {
+@@ -330,10 +343,13 @@ const check = (name, ok, detail) => {
+   });
+ 
+   // ---- report ---------------------------------------------------------------------------
++  check('the staged cache walk is not intercepted by story panels',
++    r.walk.every(w => w.crossingTrace.every(s => s.state !== 'PANELS')),
++    'post-guardian fixture includes its earlier lion meeting');
+   const BUDGET = Math.max(90, r.median * 4);
+   for (const [i, w] of r.walk.entries()) {
+     const tag = w.room + ' ' + w.side + ' -> ' + w.dest;
+-    if (!w.arrived) { check(tag + ': arrives', false, 'never reached ' + w.dest); continue; }
++    if (!w.arrived) { check(tag + ': arrives', false, 'never reached ' + w.dest + '; diagnostic ' + JSON.stringify({ trace: w.crossingTrace, final: w.finalState })); continue; }
+     if (i === 0) {
+       console.log('  ..   ' + tag + ': first crossing ' + Math.round(w.cost) + ' ms, ' + w.liveBakes + ' bake on the frame (warm-up, not judged)');
+       continue;
+diff --git a/tools/studio/README.md b/tools/studio/README.md
+index 43aeb6a..8e6f50e 100644
+--- a/tools/studio/README.md
++++ b/tools/studio/README.md
+@@ -36,3 +36,11 @@ to see which build the port is serving right now.
+ Use an isolated checkout/server. Do not run overlapping builds against the same
+ served pages during a release audit. Source-only review branches must explicitly
+ tell the integrator to regenerate the four built HTML pages before release.
++
++The collector reads each harness deadline from `tests/run.cjs` and allows an
++additional 180 seconds for server and identity checks. The harness's own deadline
++is unchanged. This matters for the real-time `campaign-ch1` run: it must not be
++cut short by a generic six-minute outer timeout. An outer timeout terminates the
++collector-owned POSIX process group so abandoned harnesses cannot keep writing
++evidence. Run `python -m unittest discover -s tools/studio -p 'test_audit.py' -v`
++to check deadline agreement and descendant cleanup without starting a browser.
+diff --git a/tools/studio/audit.py b/tools/studio/audit.py
+index f7b669c..fbdcbf6 100644
+--- a/tools/studio/audit.py
++++ b/tools/studio/audit.py
+@@ -1,12 +1,67 @@
+ #!/usr/bin/env python3
+ """Evidence collector. Does not claim to replace the 15-role human/agent review."""
+-import argparse, datetime, hashlib, json, os, pathlib, re, subprocess, sys, time, urllib.request
++import argparse, datetime, hashlib, json, math, os, pathlib, re, signal, subprocess, sys, time, urllib.request
+ 
+ ROOT = pathlib.Path(__file__).resolve().parents[2]
+ FOCUS = ['opening-order', 'textreveal', 'panels', 'caves-ch1', 'den-gate',
+          'chapter-one', 'infection-eyes', 'infection-roster', 'wolves',
+          'lion-studio', 'sage-quiet', 'story-rescue', 'mobile-platform', 'regress']
+ 
++# Match the runner's declared budgets, including its default, rather than
++# cutting the real-input campaign off at the old six-minute collector limit.
++# The extra 180 seconds covers the runner's two 60-second identity checks and
++# server startup; it does not change or retry the harness's own deadline.
++RUNNER_OVERHEAD_SECONDS = 180
++
++def suite_budgets(source):
++    suite_match = re.search(r"const SUITE = \[(.*?)\n\];", source, re.S)
++    default_match = re.search(r"timeout:\s*\(opt && opt\.timeout\) \|\| (\d+)", source)
++    if not suite_match or not default_match:
++        raise ValueError('Cannot read test runner suite/default timeout; refusing guessed coverage')
++    default_ms = int(default_match.group(1))
++    budgets = {}
++    for line in suite_match.group(1).splitlines():
++        entry = re.match(r"\s*\['([^']+)'", line)
++        if not entry:
++            continue
++        # Options follow the description string. Do not accidentally treat
++        # the word timeout in a human description as an option.
++        option = re.search(r",\s*\{([^{}]*)\}\s*\]", line)
++        options = option.group(1) if option else ''
++        timeout = re.search(r"\btimeout\s*:\s*(\d+)\s*(?:,|$)", options)
++        if re.search(r"\btimeout\s*:", options) and not timeout:
++            raise ValueError('Unsupported timeout metadata for '+entry.group(1))
++        ms = int(timeout.group(1)) if timeout else default_ms
++        if ms <= 0 or entry.group(1) in budgets:
++            raise ValueError('Invalid/duplicate test metadata: '+entry.group(1))
++        budgets[entry.group(1)] = math.ceil(ms / 1000) + RUNNER_OVERHEAD_SECONDS
++    if not budgets:
++        raise ValueError('No test harnesses found; refusing empty coverage')
++    return budgets
++
++def run_owned(cmd, *, cwd, log, timeout, env=None):
++    """Kill our entire runner/harness process group if the outer budget expires.
++
++    subprocess.run kills only the runner; its harness/browser could continue
++    consuming CPU and writing evidence while the next check starts. The new
++    session belongs solely to this command, never to an existing test server.
++    """
++    proc = subprocess.Popen(cmd, cwd=cwd, stdout=log, stderr=subprocess.STDOUT,
++                            env=env, start_new_session=(os.name == 'posix'))
++    try:
++        code = proc.wait(timeout=timeout)
++        return code, 'pass' if code == 0 else 'fail'
++    except subprocess.TimeoutExpired:
++        if os.name == 'posix':
++            try: os.killpg(proc.pid, signal.SIGKILL)
++            except ProcessLookupError: pass
++        else:
++            proc.kill()
++        proc.wait()
++        log.write('\nCollector timeout after '+str(timeout)+' seconds; owned process group terminated.\n')
++        log.flush()
++        return None, 'timeout'
++
+ def main():
+     p = argparse.ArgumentParser()
+     p.add_argument('--profile', choices=['focus', 'full'], default='full')
+@@ -14,8 +69,8 @@ def main():
+     p.add_argument('--tests', nargs='+', help='Explicit subset, reported as partial')
+     args = p.parse_args()
+     out = pathlib.Path(args.output).resolve(); out.mkdir(parents=True, exist_ok=True)
+-    suite = re.findall(r"^\s*\['([^']+)'", (ROOT/'tests/run.cjs').read_text(), re.M)
+-    names = args.tests or (suite if args.profile == 'full' else FOCUS)
++    suite = suite_budgets((ROOT/'tests/run.cjs').read_text())
++    names = args.tests or (list(suite) if args.profile == 'full' else FOCUS)
+     unknown = set(names)-set(suite)
+     if unknown: p.error('Unknown tests: '+', '.join(sorted(unknown)))
+     def git(*cmd):
+@@ -31,13 +86,11 @@ def main():
+         started = datetime.datetime.now(datetime.timezone.utc)
+         with log.open('w') as f:
+             try:
+-                code = subprocess.run(cmd, cwd=ROOT, stdout=f, stderr=subprocess.STDOUT, timeout=timeout,
+-                                      env=run_env.get('env')).returncode
+-                state = 'pass' if code == 0 else 'fail'
+-            except subprocess.TimeoutExpired: code, state = None, 'timeout'
++                code, state = run_owned(cmd, cwd=ROOT, log=f, timeout=timeout, env=run_env.get('env'))
+             except OSError as e: f.write(str(e)); code, state = None, 'blocked'
+         report['results'].append({'name': name, 'status': state, 'exit_code': code,
+                                   'seconds': (datetime.datetime.now(datetime.timezone.utc)-started).total_seconds(),
++                                  'timeout_seconds': timeout,
+                                   'log': log.name, 'sha256': hashlib.sha256(log.read_bytes()).hexdigest()})
+         (out/'results.json').write_text(json.dumps(report, indent=2)+'\n')
+         print(name+': '+state, flush=True)
+@@ -86,7 +139,7 @@ def main():
+         for name in names:
+             if not (ROOT/'tests'/f'{name}.cjs').exists():
+                 report['results'].append({'name':name,'status':'missing'}); continue
+-            run(name, ['node','tests/run.cjs', name], 960 if name == 'opening-order' else 360)
++            run(name, ['node','tests/run.cjs', name], suite[name])
+         # and at the end: the served build must still be the one pinned at the start
+         ready = identity('end', snapshot)
+     report['complete_requested_scope'] = ready and len([x for x in report['results'] if x['name'] in names]) == len(names)
+diff --git a/tools/studio/test_audit.py b/tools/studio/test_audit.py
+new file mode 100644
+index 0000000..307c281
+--- /dev/null
++++ b/tools/studio/test_audit.py
+@@ -0,0 +1,72 @@
++"""Collector regressions: real runner budgets and timeout descendant cleanup.
++
++Run: python -m unittest discover -s tools/studio -p 'test_audit.py' -v
++No browser, server, build or game state is used.
++"""
++import importlib.util
++import io
++import os
++from pathlib import Path
++import subprocess
++import sys
++import tempfile
++import time
++import unittest
++
++SPEC = importlib.util.spec_from_file_location('studio_audit', Path(__file__).with_name('audit.py'))
++audit = importlib.util.module_from_spec(SPEC)
++SPEC.loader.exec_module(audit)
++
++
++class AuditBudgets(unittest.TestCase):
++    def test_actual_runner_deadlines_are_preserved(self):
++        budgets = audit.suite_budgets((audit.ROOT / 'tests/run.cjs').read_text())
++        self.assertEqual(budgets['campaign-ch1'], 3600 + 180)
++        self.assertEqual(budgets['infection-poses'], 420 + 180)
++        self.assertEqual(budgets['infection-roster'], 240 + 180)
++        self.assertEqual(budgets['opening-order'], 900 + 180)
++        self.assertEqual(budgets['textreveal'], 300 + 180)
++
++    def test_unreadable_or_invalid_metadata_fails_closed(self):
++        with self.assertRaises(ValueError):
++            audit.suite_budgets('')
++        source = "const SUITE = [\n ['example', 'description', { timeout: LONG_BUDGET }],\n];\ntimeout: (opt && opt.timeout) || 300000"
++        with self.assertRaises(ValueError):
++            audit.suite_budgets(source)
++
++    def test_process_status_preserved(self):
++        with tempfile.TemporaryFile(mode='w+') as log:
++            self.assertEqual(audit.run_owned([sys.executable, '-c', 'raise SystemExit(7)'],
++                             cwd=audit.ROOT, log=log, timeout=5), (7, 'fail'))
++            self.assertEqual(audit.run_owned([sys.executable, '-c', 'print("ok")'],
++                             cwd=audit.ROOT, log=log, timeout=5), (0, 'pass'))
++
++    @unittest.skipUnless(os.name == 'posix', 'process-group regression requires POSIX')
++    def test_timeout_stops_descendant_output(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            # Child deliberately outlives its parent unless the process group
++            # is stopped. It ignores TERM, to exercise hard deadline cleanup.
++            child = Path(tmp) / 'child.py'
++            heartbeat = Path(tmp) / 'heartbeat'
++            child.write_text('import signal,time,pathlib\n'
++                'signal.signal(signal.SIGTERM, signal.SIG_IGN)\n'
++                f'p=pathlib.Path({str(heartbeat)!r})\n'
++                'while True:\n'
++                ' with p.open("a") as f: f.write("tick\\n")\n'
++                ' time.sleep(.03)\n')
++            parent = ('import subprocess,sys,time; '
++                      f'subprocess.Popen([sys.executable, {str(child)!r}]); '
++                      'time.sleep(30)')
++            with tempfile.TemporaryFile(mode='w+') as log:
++                self.assertEqual(audit.run_owned([sys.executable, '-c', parent],
++                    cwd=tmp, log=log, timeout=.8), (None, 'timeout'))
++                log.seek(0)
++                self.assertIn('owned process group terminated', log.read())
++            self.assertTrue(heartbeat.exists(), 'child must have actually started')
++            before = heartbeat.read_bytes()
++            time.sleep(.2)
++            self.assertEqual(heartbeat.read_bytes(), before, 'timed-out child continued writing')
++
++
++if __name__ == '__main__':
++    unittest.main()

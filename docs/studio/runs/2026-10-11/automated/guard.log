@@ -1,0 +1,16 @@
+
+── guard  — she braces, and bracing costs the hit its push
+── guard — she braces, and bracing costs the hit its push
+
+  ok   the guard is still wired into the transition table  hzdGuard
+  ok   holding GUARD raises the timer  guardT 1
+  ok   ...and the timer names the state  guard
+  ok   ...and the state draws the guard plate  hzdGuard:0
+  ok   letting go drops it  guardT 0
+  ok   a braced hit shoves her far less than an open one  guarded 88 vs open 250
+  ok   no page errors
+
+all good
+   (guard: 7.9 s)
+
+all 1 harnesses ran

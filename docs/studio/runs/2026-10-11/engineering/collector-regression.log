@@ -1,0 +1,9 @@
+test_actual_runner_deadlines_are_preserved (test_audit.AuditBudgets.test_actual_runner_deadlines_are_preserved) ... ok
+test_process_status_preserved (test_audit.AuditBudgets.test_process_status_preserved) ... ok
+test_timeout_stops_descendant_output (test_audit.AuditBudgets.test_timeout_stops_descendant_output) ... ok
+test_unreadable_or_invalid_metadata_fails_closed (test_audit.AuditBudgets.test_unreadable_or_invalid_metadata_fails_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 1.035s
+
+OK

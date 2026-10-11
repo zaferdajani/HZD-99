@@ -1,0 +1,30 @@
+
+── denlight  — every interior at full glow, the way a strong phone shows it: lit, not a disc
+── denlight — the interiors at full glow, the way a strong phone shows them
+
+  interiors: A0B, B3B, V1B, C5B, D1B, E1B   INT_ADD as shipped: 0.25
+
+  ok   A0B @0.25: the frame survives its own lamps  1.0% clipped (max 3%)
+  ok   A0B @0.25: the keeper is lit, not dissolved  0.0% clipped around the NPC (max 12%)
+  ok   A0B @0.25: ...and the lamps are on  mean 135 lit vs 91 dark (+44, min +25)
+  ok   B3B @0.25: the frame survives its own lamps  1.1% clipped (max 3%)
+  ok   B3B @0.25: the keeper is lit, not dissolved  0.0% clipped around the NPC (max 12%)
+  ok   B3B @0.25: ...and the lamps are on  mean 124 lit vs 87 dark (+37, min +25)
+  ok   V1B @0.25: the frame survives its own lamps  0.9% clipped (max 3%)
+  ok   V1B @0.25: the keeper is lit, not dissolved  0.0% clipped around the NPC (max 12%)
+  ok   V1B @0.25: ...and the lamps are on  mean 111 lit vs 72 dark (+39, min +25)
+  ok   C5B @0.25: the frame survives its own lamps  1.1% clipped (max 3%)
+  ok   C5B @0.25: the keeper is lit, not dissolved  0.2% clipped around the NPC (max 12%)
+  ok   C5B @0.25: ...and the lamps are on  mean 96 lit vs 58 dark (+38, min +25)
+  ok   D1B @0.25: the frame survives its own lamps  1.2% clipped (max 3%)
+  ok   D1B @0.25: the keeper is lit, not dissolved  0.2% clipped around the NPC (max 12%)
+  ok   D1B @0.25: ...and the lamps are on  mean 124 lit vs 86 dark (+38, min +25)
+  ok   E1B @0.25: the frame survives its own lamps  1.1% clipped (max 3%)
+  ok   E1B @0.25: the keeper is lit, not dissolved  0.0% clipped around the NPC (max 12%)
+  ok   E1B @0.25: ...and the lamps are on  mean 82 lit vs 51 dark (+32, min +25)
+  ok   no page errors
+
+OK — six lamplit rooms, none of them a disc
+   (denlight: 8.1 s)
+
+all 1 harnesses ran

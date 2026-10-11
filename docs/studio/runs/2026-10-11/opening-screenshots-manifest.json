@@ -1,0 +1,230 @@
+{
+  "desktop-00-move-move.png": {
+    "bytes": 681174,
+    "sha256": "fd73dac8b1cd379d76926a4b3bae9e8e7823bd9da97d5d7259f13c04becbdaa0"
+  },
+  "desktop-01-out-move.png": {
+    "bytes": 666794,
+    "sha256": "562637ff86c6edc5c77a700c2d4a6cffb4820d07f42e08d0d82bd35c6dbcd1ed"
+  },
+  "desktop-02-jump-move.png": {
+    "bytes": 499604,
+    "sha256": "80434569d54d20cba00a0215adc216cadace7143f5b663ee0cf20dccba60a5be"
+  },
+  "desktop-03-jump-jump.png": {
+    "bytes": 489347,
+    "sha256": "8854016695f8f3c2478b2f0d283c8a7fe08e1ca7fca4f8d375a4a511429d8a1e"
+  },
+  "desktop-04-gate-move.png": {
+    "bytes": 514707,
+    "sha256": "a38bc8617d6d1712a1cc95e26ba81ab6466ded69218e1f52bd05466e12514012"
+  },
+  "desktop-05-gate-up.png": {
+    "bytes": 605304,
+    "sha256": "b036f83ecb5ece84446f03833f51d05d90f125803309fd6f81e948dbc8172d15"
+  },
+  "desktop-06-booth-move.png": {
+    "bytes": 726952,
+    "sha256": "dc319b0de7fc107becba299ed4ec3c8798999397a0c4e13c36fc2a9fb6da358b"
+  },
+  "desktop-07-booth-up.png": {
+    "bytes": 699669,
+    "sha256": "b20f155360956b715026d9a14cebf9f34bea1660d009f2b6ecad8a8de8af8ec2"
+  },
+  "desktop-08-booth-x.png": {
+    "bytes": 737855,
+    "sha256": "2a662b59b805361d6f83070d15bfca3793a17dfc76b43838407ddf9e6f6a0fdf"
+  },
+  "desktop-09-note-move.png": {
+    "bytes": 747076,
+    "sha256": "b31bd4f1073e541f7c34dbf298e68fa042dc136d801cacae8b0a50426907c670"
+  },
+  "desktop-10-note-int.png": {
+    "bytes": 746650,
+    "sha256": "7ab8edcbbeba0825df5aa6cc9b662988c15724ca4163daba4ba47c6cdd74b3d7"
+  },
+  "desktop-11-dialog-note.png": {
+    "bytes": 692496,
+    "sha256": "9ba29f9b91f7cf1b02983de4128610decb4f7646dbf1db88131dc502feac8b06"
+  },
+  "desktop-12-drawer-int.png": {
+    "bytes": 738524,
+    "sha256": "4e1e76c84ce128d1d1aa55b9b3a580d1959f8fd9d7c567c34543e4450fa170bd"
+  },
+  "desktop-13-dialog-drawer.png": {
+    "bytes": 672611,
+    "sha256": "bd63471256da09ab442408c9c6cb1c920a107f220eb743dca66abd5f90d7b9b9"
+  },
+  "desktop-14-repair-int.png": {
+    "bytes": 749830,
+    "sha256": "b67be76dbf61d53f4fd467f350ad7780af7fad0d2e45732e2a9ac6fcd5159c7e"
+  },
+  "desktop-15-dialog-repair.png": {
+    "bytes": 684208,
+    "sha256": "f7d3e3465cfbfb3da7a08c1895bae27d6b954ac79f270e95379d0535090933e7"
+  },
+  "desktop-16-repair-board.png": {
+    "bytes": 618629,
+    "sha256": "f7529c5c65212b71b237d0a07cfd54d732df0686e928436690c55bc9e92351d8"
+  },
+  "desktop-17-dialog-repair.png": {
+    "bytes": 674134,
+    "sha256": "086f07d88a46d3bde7f7ce360247a68b2ba3310dd74b5954480e3498c67bf3db"
+  },
+  "desktop-18-dialog-repair.png": {
+    "bytes": 657983,
+    "sha256": "6ac7885fbf1bf55391b118dcb8043486a605226e0d739d899d1b9b3f1d28ef63"
+  },
+  "desktop-19-dialog-repair.png": {
+    "bytes": 654034,
+    "sha256": "37b005d89e6545a08d3bea40061be3e4d1041507ff378863623c08782239a0af"
+  },
+  "desktop-20-pod-move.png": {
+    "bytes": 747838,
+    "sha256": "ceec8ac6d1aa215d10ccb81e468c5495e9cd5a21c9ad2a7c70aa517d2a3cfac1"
+  },
+  "desktop-21-pod-int.png": {
+    "bytes": 744653,
+    "sha256": "b6975e3cd5d09eedfc8c9a17764798eeda862816e746ca3314f6035be3b74845"
+  },
+  "desktop-22-pack-move.png": {
+    "bytes": 742374,
+    "sha256": "5c08517efb95d851c8694be40d72455f45ae7993b45ee1d289e9e5679bbe8268"
+  },
+  "desktop-23-pack-int.png": {
+    "bytes": 717906,
+    "sha256": "e5a08ffba3d94eb13e66d8e4da31516ba6c2c36281a1cca81ce0145ce98d1408"
+  },
+  "desktop-24-dialog-pack.png": {
+    "bytes": 653923,
+    "sha256": "57a2b61cfb71f194b5c2183f4c2bd763fd2bb9fa475235c757a0436ebae4bf77"
+  },
+  "desktop-25-dialog-pack.png": {
+    "bytes": 661585,
+    "sha256": "f3a6e2b62f80c22ae6a96a3d9e42e8782609d045ff11d091f110df8fc8958bbc"
+  },
+  "desktop-26-counter.png": {
+    "bytes": 384572,
+    "sha256": "0f1eba214eca11d3ccb6bd169206067a5a17557c355288c3ffdd1dc2dfc008a3"
+  },
+  "desktop-27-dialog-pack.png": {
+    "bytes": 632186,
+    "sha256": "4d156b44c1236e293de641004666f00f646bf5b96b042844802990aabaedeae5"
+  },
+  "desktop-28-heal-heal.png": {
+    "bytes": 709649,
+    "sha256": "f706a034f5b8c480a087f4c8837d0a7de51f8df2683bf51df157088a64c52693"
+  },
+  "desktop-29-atk-move.png": {
+    "bytes": 722405,
+    "sha256": "404f4a9d04e157c566c09741ac2eee266af96f381887290e0f3960eaf7e86cfa"
+  },
+  "desktop-30-atk-up.png": {
+    "bytes": 733057,
+    "sha256": "b24969f539ac337184328deaf69f1f18f2f60c93ae975e1f3ba903e3d5743d97"
+  },
+  "phone-00-move-move.png": {
+    "bytes": 516441,
+    "sha256": "76c3e25225669cc94b185ffe9d286394f4187842676bff37ec1a44b3e5960996"
+  },
+  "phone-01-out-move.png": {
+    "bytes": 502880,
+    "sha256": "71db5430fb7f731983772df0584df01eaa75c4a1e559392bafc9b58fa00900e7"
+  },
+  "phone-02-jump-move.png": {
+    "bytes": 411880,
+    "sha256": "1a6b02f8ed5f57dccd5ea8b943753cca75156db7c770fde705825ed45e8c1456"
+  },
+  "phone-03-jump-jump.png": {
+    "bytes": 429344,
+    "sha256": "5307d54a93c6f37af0dd73f2982d73194eb8e4902d71636d0b5b4c936a9641f4"
+  },
+  "phone-04-gate-move.png": {
+    "bytes": 440131,
+    "sha256": "3235e934717b2900e5417bb9a555b8662ecea1267fca1df2ccf73ffd8149078d"
+  },
+  "phone-05-gate-up.png": {
+    "bytes": 535096,
+    "sha256": "f358c759dd9113e4eff80dcb663f9c2b11c807d88bb38d99e9e01eb711061330"
+  },
+  "phone-06-gate-move.png": {
+    "bytes": 638229,
+    "sha256": "029706361375ec6ea70d570c2757d084ad650d986c855376b549cbe39b408026"
+  },
+  "phone-07-booth-move.png": {
+    "bytes": 633848,
+    "sha256": "ed38d883cafa818dc0a387d24406097bbf03d2a84ad3006aa0a073b48e103bcb"
+  },
+  "phone-08-booth-up.png": {
+    "bytes": 599911,
+    "sha256": "509f8eaae650ac04ad1c8e7847ad90d16d12c6284634efad113632f73bef9aea"
+  },
+  "phone-09-booth-x.png": {
+    "bytes": 685871,
+    "sha256": "e32c67ce32b53beb8c967a070c07afad2ba8a0aebe1be21a08892ba99b75e14c"
+  },
+  "phone-10-note-move.png": {
+    "bytes": 672009,
+    "sha256": "949243a371d1b8a29cffc0bb4a468b199c4c978c88a81a4c75b8a932e406a5d7"
+  },
+  "phone-11-note-int.png": {
+    "bytes": 677980,
+    "sha256": "7758ac084371292d78e22ad6ff41f173deb6c35746909930419107eb11b12f29"
+  },
+  "phone-12-dialog-note.png": {
+    "bytes": 616220,
+    "sha256": "629d6571a4223ccff271811cc3e809190f8d98362e21666c1454775fef9c6bfb"
+  },
+  "phone-13-drawer-int.png": {
+    "bytes": 670306,
+    "sha256": "e15ec15b15550261521c4bab9b7f787a0a77cc799f740032ec18ca0e41143e7e"
+  },
+  "phone-14-dialog-drawer.png": {
+    "bytes": 599929,
+    "sha256": "cbdce3f45d2b58f4cc8ebfa467188b99fe03f64047c6bf457a2141098d5a6c08"
+  },
+  "phone-15-repair-int.png": {
+    "bytes": 681235,
+    "sha256": "eee48ff79a900a1d631aefce5645f3e0a523ef960e42052d72caa0e298c46791"
+  },
+  "phone-16-dialog-repair.png": {
+    "bytes": 610368,
+    "sha256": "7c4384485970ef4177ec88d76a17e53a5cd2dc103b241547ab8b8a7f3ed15b04"
+  },
+  "phone-17-repair-board.png": {
+    "bytes": 899825,
+    "sha256": "7c65bb73d4bcc62b2d5c8e114bf1784fb9564fb3bda3175b69be9d5d0f090fa1"
+  },
+  "phone-18-dialog-repair.png": {
+    "bytes": 601631,
+    "sha256": "59a1afc2093e41717cf214ae358eec4f161cf5e821623d98b8b8d045c1e0a99b"
+  },
+  "phone-19-dialog-repair.png": {
+    "bytes": 593017,
+    "sha256": "f2f728567e324a21eb73ad7699f521d67371aaa2cefde5649585afaf800b7f56"
+  },
+  "phone-20-dialog-repair.png": {
+    "bytes": 589289,
+    "sha256": "35c0f556ef507695c056d34ebe9087f38a1a7a664ec90cfc4b00954da8306f98"
+  },
+  "phone-21-pod-move.png": {
+    "bytes": 683211,
+    "sha256": "d931c77a41ae414ce864de7597c7df11563d7b87f0344be4057a995600d5c889"
+  },
+  "phone-22-pod-int.png": {
+    "bytes": 698528,
+    "sha256": "ceee4401e6276cef0b4df9c4d31bd44b0fee10568a8e2bb31b9a402b7fbba1b1"
+  },
+  "phone-23-pack-move.png": {
+    "bytes": 692881,
+    "sha256": "03989d63530e14ebeb42151b663819416481f822749771b2fc12622e0e204b17"
+  },
+  "phone-24-pack-int.png": {
+    "bytes": 662975,
+    "sha256": "14e38c7d97e11dc61ec0f6389610cc1c03ced6be20de354118f9027b90ac6e25"
+  },
+  "phone-portrait-390x844.png": {
+    "bytes": 296749,
+    "sha256": "a2a1c5d5cbef17dc4c901a96cc2d027e94523385e5aa649a20606cb47d2dc6cb"
+  }
+}

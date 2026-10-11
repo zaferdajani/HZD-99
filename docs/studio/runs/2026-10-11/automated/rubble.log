@@ -1,0 +1,31 @@
+
+── rubble  — the first tunnel is buried, it calls, and it takes the blade
+── rubble — the first tunnel is buried, it calls, and it takes the blade
+
+  ok   the first tunnel is buried on a fresh save  6 hp
+  ok   the mouth is where she stands
+  ok   UP will not take her through rock
+  ok   the voice from inside gets louder as she closes  0.072 → 0.082 → 0.113 → 0.142 → 0.164
+  ok   every blow takes silhouette off the pile  21968 → 17013 → 14657 → 12608 → 8064 → 5994 px
+  ok   ...and no two states are the same picture  worst hp5→hp4 IoU 0.849 (max 0.86)
+  ok   the pile stands on the floor she stands on  8.4 px from her feet (max 10)
+  ok   the blade opens it  6 blows for 6 hp
+  ok   ...and then the mouth takes her
+  ok   it does not grow back
+  ok   a room can hold more than one depth door  A5 + CV1B
+  ok   ...each with its own pile  rubbleCV1B
+  ok   ...and standing at one gives you THAT one  CV1B
+  ok   the branch is buried too
+  ok   the blade opens the branch  in CV1B
+  ok   the Seam is the tunnel's rest
+  ok   ...and it walks back out
+  ok   the sound gets LOUDER the deeper she goes  A5 0.28 -> CV1 0.50 -> CV2 0.84
+  ok   ...and there is something down there making it
+  ok   ...loudest standing at it  at the beacon 0.84 vs across the room 0.30
+  ok   ...and it says something worth the walk
+  ok   ...and reading it answers the call
+
+all good
+   (rubble: 11.8 s)
+
+all 1 harnesses ran

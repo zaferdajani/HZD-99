@@ -1,0 +1,31 @@
+
+── combat  — every enemy telegraphs, does something different, and scales by zone
+REACTION BUDGET (seconds of warning)
+  100%   boss swipe 0.5  minion 0.35
+  90%    boss swipe 0.56  minion 0.39
+  80%    boss swipe 0.63  minion 0.44
+  70%    boss swipe 0.71  minion 0.5
+
+EVERY ENEMY, AND WHAT IT DOES
+  crawler   {"telegraphed":true,"tellSeconds":0.73,"does":"lunge+recovery"}
+  flier     {"telegraphed":true,"tellSeconds":0.8,"does":"dive+withdraw"}
+  turret    {"telegraphed":true,"tellSeconds":2.1,"does":"walks"}
+  hopper    {"telegraphed":true,"tellSeconds":1.47,"does":"leap"}
+  blob      {"telegraphed":false,"tellSeconds":0,"does":"pool"}
+  bat       {"telegraphed":true,"tellSeconds":0.37,"does":"dive+withdraw"}
+  surge     {"telegraphed":true,"tellSeconds":1.55,"does":"recovery+wave"}
+  kiln      {"telegraphed":true,"tellSeconds":1.03,"does":"plume+recovery"}
+  rime      {"telegraphed":true,"tellSeconds":1.4,"does":"ring+recovery"}
+  snare     {"telegraphed":true,"tellSeconds":1.4,"does":"reel+recovery"}
+
+THE SAME CRAWLER, ZONE BY ZONE
+  zone A {"hp":35,"spd":62}
+  zone B {"hp":43,"spd":64}
+  zone C {"hp":91,"spd":59}
+  zone D {"hp":57,"spd":90}
+  zone E {"hp":65,"spd":74}
+
+pageerrors: none
+   (combat: 4.8 s)
+
+all 1 harnesses ran

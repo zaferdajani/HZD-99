@@ -1,0 +1,6 @@
+
+── hero-move-coverage  — actual renderer coverage for movement, aerial attacks, reactions and departure
+PASS 19 actual-renderer move selections and supplied departure art
+   (hero-move-coverage: 1.0 s)
+
+all 1 harnesses ran

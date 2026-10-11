@@ -1,0 +1,1552 @@
+{
+  "started_utc": "2026-10-11T07:44:28.023695+00:00",
+  "base_commit": "7b48b89d5fb2643ef58965eed36b6b8a06dddfd7",
+  "dirty_at_start": "M docs/ART_QUEUE.md\n M js/panels.js\n M tests/panels.cjs\n M tools/studio/audit.py\n?? tools/studio/__pycache__/\n?? tools/studio/test_audit.py",
+  "profile": "full",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.364958,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "38ce56104ac35cf2f7382dc524c598f52d9baa6e63e996e349545a225e6e087a"
+    },
+    {
+      "name": "pack",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.214607,
+      "timeout_seconds": 180,
+      "log": "pack.log",
+      "sha256": "65e1c04c36642eeada89d33928a7a870525bfbd91fcfb5dc7f21306fa1fa8d99"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "0f893f1d10622fbd1f4a7c28e8396860a30d991f554d0c2c8cd211e65e917923",
+        "odyssey.html": "c65dc10d7fb13d6aaaf514b327bef5d3ae80549942440668dcd9c7a2409865d1",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "repair-browser",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 3.780403,
+      "timeout_seconds": 480,
+      "log": "repair-browser.log",
+      "sha256": "0b9a382cefe65245280071c38051ac0eff960096b6adc9ef5a8e5b2b78564097"
+    },
+    {
+      "name": "repair-lifecycle",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164362,
+      "timeout_seconds": 480,
+      "log": "repair-lifecycle.log",
+      "sha256": "0e15e559d14bbaec11d9f9e5d10a1841677ab33250332688551a7c3c9de2b5fe"
+    },
+    {
+      "name": "lion-studio",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 4.279375,
+      "timeout_seconds": 480,
+      "log": "lion-studio.log",
+      "sha256": "d4c822a669fe37d857a0d4369c6e3685219794664507a07d5448efb6f6d4c6b7"
+    },
+    {
+      "name": "story-opening",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.114225,
+      "timeout_seconds": 480,
+      "log": "story-opening.log",
+      "sha256": "4d24a76bfb865353e0a32ea3d3c82d8211f11b54c1b43e9ea163bde3fd349460"
+    },
+    {
+      "name": "story-order",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.06672,
+      "timeout_seconds": 480,
+      "log": "story-order.log",
+      "sha256": "f0b43ff68c9d9c28221b6a7d422ee4ea9c05ef5e614cf86c62cead28b3b46e97"
+    },
+    {
+      "name": "caves-ch1",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.07308,
+      "timeout_seconds": 480,
+      "log": "caves-ch1.log",
+      "sha256": "6bbae55aa74937a3fff544134bb1598729c7e0d8eef123b1ac1065975725c6aa"
+    },
+    {
+      "name": "survey-a7",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.520035,
+      "timeout_seconds": 480,
+      "log": "survey-a7.log",
+      "sha256": "b5a003ba21a6c294d11650141c9400908c48580c3ef84506ab505709d1d8a5e0"
+    },
+    {
+      "name": "den-gate",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.318099,
+      "timeout_seconds": 480,
+      "log": "den-gate.log",
+      "sha256": "90a61b2185aad3e2998300ae143156fbdea889b38b7df5db5d97e9fa0593d2f4"
+    },
+    {
+      "name": "comic-rewards",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.674926,
+      "timeout_seconds": 480,
+      "log": "comic-rewards.log",
+      "sha256": "9a70eff9a234e652d35e4365f1d108cbf9f772423f8d3ef6a8ca5ddbe753e137"
+    },
+    {
+      "name": "story-battery",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.024858,
+      "timeout_seconds": 480,
+      "log": "story-battery.log",
+      "sha256": "6ecb768c26dea22d4587072c82e9fefe282243d33302bc2f7488e3f38e85dae2"
+    },
+    {
+      "name": "story-rescue",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.920008,
+      "timeout_seconds": 480,
+      "log": "story-rescue.log",
+      "sha256": "bb5a6e2396752eaf17cd556fe6d5cba70d868cdf57b0031396006355578f61ae"
+    },
+    {
+      "name": "story-meeting",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.968707,
+      "timeout_seconds": 480,
+      "log": "story-meeting.log",
+      "sha256": "1f0d280e72a58cf88f4060037111363a9b9732d234d9e3adbe4d40b3148f0fcd"
+    },
+    {
+      "name": "first-sage-route",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.919234,
+      "timeout_seconds": 480,
+      "log": "first-sage-route.log",
+      "sha256": "af68dcd17e9a739e40b6fd34f41e1aa1c52333c70bd5811e62e719e97b92de50"
+    },
+    {
+      "name": "script-route",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.167394,
+      "timeout_seconds": 480,
+      "log": "script-route.log",
+      "sha256": "485e35e3caa9ea77fc14c4ee966a46682ba9d2143e87e54917a7bf8db11bcad1"
+    },
+    {
+      "name": "guardian-break",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 7.49142,
+      "timeout_seconds": 480,
+      "log": "guardian-break.log",
+      "sha256": "d8689af18711ca710b207b978de0b104be23e642c0a0e46242fc3a149c63913d"
+    },
+    {
+      "name": "sage-quiet",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.918714,
+      "timeout_seconds": 480,
+      "log": "sage-quiet.log",
+      "sha256": "3a8d85ad3ad9fb9487e71bd7e2c021988db8291e62e8e6483b05b91c3023a334"
+    },
+    {
+      "name": "mobile-platform",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.0737,
+      "timeout_seconds": 480,
+      "log": "mobile-platform.log",
+      "sha256": "d6f1604610e5781150c52959de41252577c9a67879053932ccd79e73099ef65c"
+    },
+    {
+      "name": "gesture-input",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.867563,
+      "timeout_seconds": 480,
+      "log": "gesture-input.log",
+      "sha256": "d4e433c54b47e1f1d8cdbd8545b1f70d72ddfddc2789e55e79d025b5415804c6"
+    },
+    {
+      "name": "input-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.966114,
+      "timeout_seconds": 480,
+      "log": "input-contract.log",
+      "sha256": "00a88dc43c7e9f905e1bf09c2e7e9e32edb30618a13db620fc8b2ef05b5a6698"
+    },
+    {
+      "name": "winch-integration",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.774724,
+      "timeout_seconds": 480,
+      "log": "winch-integration.log",
+      "sha256": "7aa40ea6f0203b6fb26e3989b1dbccbe384d124cd0cec3de94c9659fa0a33473"
+    },
+    {
+      "name": "manhwa-reader",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.52139,
+      "timeout_seconds": 480,
+      "log": "manhwa-reader.log",
+      "sha256": "0aff64181229d5af58b2f98d7432f8587826ed7584436ba6188cb80f65586fcf"
+    },
+    {
+      "name": "panels",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 44.190121,
+      "timeout_seconds": 480,
+      "log": "panels.log",
+      "sha256": "052b1603af970fe521ee2772de358224bdfae82cc8e124e4ce5642f2ca32bf86"
+    },
+    {
+      "name": "entrance-integration",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.819057,
+      "timeout_seconds": 480,
+      "log": "entrance-integration.log",
+      "sha256": "8ea83257a22e913116a3058c9c624c4867ec2514c6b0b5f63fe9197177b86eee"
+    },
+    {
+      "name": "hero-cache-regression",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.018016,
+      "timeout_seconds": 480,
+      "log": "hero-cache-regression.log",
+      "sha256": "1a57e2585a61966b9d51a1f533c45cb78284721108f91ddd84303b8b4ce10b76"
+    },
+    {
+      "name": "scratch-visual",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.17063,
+      "timeout_seconds": 480,
+      "log": "scratch-visual.log",
+      "sha256": "609f3c4844f2b34105de412623c2b7df0963e3a5e5285d28aaea9ca2640708b7"
+    },
+    {
+      "name": "scratch-reach",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164395,
+      "timeout_seconds": 480,
+      "log": "scratch-reach.log",
+      "sha256": "ffa2216e547011a907c1f1157f4281ea6fbe184744575951a7803f5a49de6d39"
+    },
+    {
+      "name": "hero-move-coverage",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.268135,
+      "timeout_seconds": 480,
+      "log": "hero-move-coverage.log",
+      "sha256": "da846410d78cf7e56ef1fd8a16b612fa1d3ee7ad4b8a8b5a3243ee8aa987a692"
+    },
+    {
+      "name": "hero-feedback",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164849,
+      "timeout_seconds": 480,
+      "log": "hero-feedback.log",
+      "sha256": "be52f8a8e5e29cdc98e5981886e34eeea486fd8e36e71c43627e40eef3b065f0"
+    },
+    {
+      "name": "hero-delivery",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.376971,
+      "timeout_seconds": 480,
+      "log": "hero-delivery.log",
+      "sha256": "119ef3782011a2c3a58156036b677789efc9f45bb2d449ddc20b36c33f1804ac"
+    },
+    {
+      "name": "hero-frame-alpha",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.515408,
+      "timeout_seconds": 480,
+      "log": "hero-frame-alpha.log",
+      "sha256": "8a34389301ddc0be366c7d7ba68b650179756109df2c87efcd5142f04dd5673e"
+    },
+    {
+      "name": "hero-alpha",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.520406,
+      "timeout_seconds": 480,
+      "log": "hero-alpha.log",
+      "sha256": "fcd85a6f6a7cc41718d013e0bb70874b66991b34314f004211038c31da2130d6"
+    },
+    {
+      "name": "tutorial-controller",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.167816,
+      "timeout_seconds": 480,
+      "log": "tutorial-controller.log",
+      "sha256": "b15e9c8d93aa7f4bcc7887dcbd4d1c1a785244fe4adc0691f89db7c6d13cf5a7"
+    },
+    {
+      "name": "offline-release",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.165666,
+      "timeout_seconds": 480,
+      "log": "offline-release.log",
+      "sha256": "e95b1b36733610861291a45e8d26a0576adfbdd35eb275b98c41c8477bb4c42d"
+    },
+    {
+      "name": "release-polish",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 7.644125,
+      "timeout_seconds": 480,
+      "log": "release-polish.log",
+      "sha256": "98ab24c8f1dad77f8069ab676918993884c0045d6794c987575a9f019d5648c1"
+    },
+    {
+      "name": "chapter-one",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.020716,
+      "timeout_seconds": 480,
+      "log": "chapter-one.log",
+      "sha256": "f56601630f501e5b74042eec5ffb9e56de927309a7866a41c794f2d5f72a64fc"
+    },
+    {
+      "name": "sage-specials",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164515,
+      "timeout_seconds": 480,
+      "log": "sage-specials.log",
+      "sha256": "83e612131a12629c96e0d4c864d2083d28b6422fec599b54fbaa1a841f810d20"
+    },
+    {
+      "name": "tutorial-clarity",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164669,
+      "timeout_seconds": 480,
+      "log": "tutorial-clarity.log",
+      "sha256": "d38d462670977c2eb01a793c0d5ab18551c99cee4a49bb64646728ddecf391ff"
+    },
+    {
+      "name": "story-progression",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164612,
+      "timeout_seconds": 480,
+      "log": "story-progression.log",
+      "sha256": "6816c053e1b610eedcd5e9d82ebd39c833240870d66cb344d6f0f535ed57cab0"
+    },
+    {
+      "name": "input-focus",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.116499,
+      "timeout_seconds": 480,
+      "log": "input-focus.log",
+      "sha256": "2644ee90d30e50f6f0c093c9c6ca8a22be440c3abe617426d14bf4de28a13b44"
+    },
+    {
+      "name": "voice-handoff",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.114235,
+      "timeout_seconds": 480,
+      "log": "voice-handoff.log",
+      "sha256": "53a90d21b5e2fd75a38aa43fbb2b721a533e64ce7c93735d50e8012c305bf384"
+    },
+    {
+      "name": "desktop-protocol",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164469,
+      "timeout_seconds": 480,
+      "log": "desktop-protocol.log",
+      "sha256": "72ab3995559ccdd043452f8db0db369292a565081c937fb13e23ce592cae07a4"
+    },
+    {
+      "name": "cave-passage",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.970147,
+      "timeout_seconds": 480,
+      "log": "cave-passage.log",
+      "sha256": "2e9bff8c27e5c5fcbffb56471e5191118b173a9436484b1e8f1d8a00d90f2b0e"
+    },
+    {
+      "name": "cave-ground",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.264798,
+      "timeout_seconds": 480,
+      "log": "cave-ground.log",
+      "sha256": "4415b4a128e34c81161abf4429e4878f8ab99ab7712461e4dd76037642491461"
+    },
+    {
+      "name": "seam-route",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164356,
+      "timeout_seconds": 480,
+      "log": "seam-route.log",
+      "sha256": "992cabad28fd8e9007636d66f54255bb0d2caabbe2a101621f1446958e2d6588"
+    },
+    {
+      "name": "shadow-ground",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.114315,
+      "timeout_seconds": 480,
+      "log": "shadow-ground.log",
+      "sha256": "73da52a301ef0e3abb066462991eb76cb477de26399f190aa61b89ad78b5aefc"
+    },
+    {
+      "name": "visual-depth",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.717544,
+      "timeout_seconds": 480,
+      "log": "visual-depth.log",
+      "sha256": "b2351bfec4bf50a8b47687be5bb42174c8f6401569f0add9af296cf262821a6f"
+    },
+    {
+      "name": "dialogue-audio",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.114775,
+      "timeout_seconds": 480,
+      "log": "dialogue-audio.log",
+      "sha256": "044a47d071898fdcae0e5e6948eded494d07a6eb7cab2f5f58f75aaecdc86563"
+    },
+    {
+      "name": "weapons",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.214688,
+      "timeout_seconds": 480,
+      "log": "weapons.log",
+      "sha256": "bcd5241bfea20d19c43456d8fed284b03058547d134f0433fa62ca4f77435fea"
+    },
+    {
+      "name": "gear",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.11834,
+      "timeout_seconds": 480,
+      "log": "gear.log",
+      "sha256": "800676a9991c4b59349b0e3fa5f38a48c00a1404cab6f2b60e8165168577bd83"
+    },
+    {
+      "name": "motion-sampling",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.115304,
+      "timeout_seconds": 480,
+      "log": "motion-sampling.log",
+      "sha256": "0f0d61bbfb0a51d4888af715427d96a75fe9b0ceaaa9a84c77632b7922956796"
+    },
+    {
+      "name": "combo-routing",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164744,
+      "timeout_seconds": 480,
+      "log": "combo-routing.log",
+      "sha256": "9f5db0bd7427473dbccdd2d46425f91476c746c39a5caacf9c55506d67dceb38"
+    },
+    {
+      "name": "regress",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 67.904192,
+      "timeout_seconds": 480,
+      "log": "regress.log",
+      "sha256": "6959dab99795cf81698420a1b16544f13416e8873590640434576476e228f729"
+    },
+    {
+      "name": "wake",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 22.551387,
+      "timeout_seconds": 480,
+      "log": "wake.log",
+      "sha256": "77a7ead37bca8ef0e411562be7022fb69022d149a0f93b178de4abfb74d30321"
+    },
+    {
+      "name": "lesson",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 20.417553,
+      "timeout_seconds": 480,
+      "log": "lesson.log",
+      "sha256": "f0398648d6eaeffe82b098162d4d1efd052862531fe7a932fbec5bf2ab3f2158"
+    },
+    {
+      "name": "nodes",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 17.469829,
+      "timeout_seconds": 480,
+      "log": "nodes.log",
+      "sha256": "51d79a32567fb1a2a8f4c8d5d0e805d5485fdae981e571e1e3e19b9d7757911c"
+    },
+    {
+      "name": "film",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 67.852833,
+      "timeout_seconds": 480,
+      "log": "film.log",
+      "sha256": "7671deedd97c155124f93ab34acbcffa131d097663607c1bd693bdb85b7c75ac"
+    },
+    {
+      "name": "cutskip",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.024989,
+      "timeout_seconds": 480,
+      "log": "cutskip.log",
+      "sha256": "88c0a91907de6a682cc8727d9f883682dae7cf55b240eb51ec20d38000321ba9"
+    },
+    {
+      "name": "frames",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 12.371107,
+      "timeout_seconds": 480,
+      "log": "frames.log",
+      "sha256": "6c4bf5d60127648e938a33e9afca85473feb4f7ac7e8e879418b6dd5a07eb7d1"
+    },
+    {
+      "name": "whatplays",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 4.936628,
+      "timeout_seconds": 480,
+      "log": "whatplays.log",
+      "sha256": "1ad3a856d0f263215bed41604b6504bc9cf6abf2cb21058c458916c3ea416720"
+    },
+    {
+      "name": "overlap",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 15.415155,
+      "timeout_seconds": 480,
+      "log": "overlap.log",
+      "sha256": "4bf8ffce27c2709f16def0af232549b6a866a9b0edfca0047c5a937d31766c70"
+    },
+    {
+      "name": "cuepitch",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.680934,
+      "timeout_seconds": 480,
+      "log": "cuepitch.log",
+      "sha256": "ba2d6ee30ce64558d3e0a071d496436adc80e2d878e586531b06a0d6420e76e8"
+    },
+    {
+      "name": "cues",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.679672,
+      "timeout_seconds": 480,
+      "log": "cues.log",
+      "sha256": "eb789391a333612c6044a061b3f888ebcfefb6b20999da285eaa03d8897d8e3f"
+    },
+    {
+      "name": "herofoley",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.11963,
+      "timeout_seconds": 480,
+      "log": "herofoley.log",
+      "sha256": "2c1d9bac45b8f6fc9fd0d230f66a80ccff7f01f418e9d091a19f6547bc017c48"
+    },
+    {
+      "name": "feel",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.620847,
+      "timeout_seconds": 480,
+      "log": "feel.log",
+      "sha256": "4d479a487b1281a85d5384b8c06812d9d24f2a04f4a34b543571c8b03903d197"
+    },
+    {
+      "name": "credits",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.315019,
+      "timeout_seconds": 480,
+      "log": "credits.log",
+      "sha256": "6b0a9ab20e582c4fb5bb93a4b9b8b3ca4b3fc435180945fe2bdd77c2ae16f1f1"
+    },
+    {
+      "name": "brand",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.069256,
+      "timeout_seconds": 480,
+      "log": "brand.log",
+      "sha256": "6e3ce03ab755a995cc0dd56d1cdbeef6c75adb7b276ae4a8fd9247c425f9c9a9"
+    },
+    {
+      "name": "slashsnd",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.934196,
+      "timeout_seconds": 480,
+      "log": "slashsnd.log",
+      "sha256": "90edacd4d7755b50d8fa07929fab941a04d3ab0c5eb513d1434840dba149f400"
+    },
+    {
+      "name": "voxmeas",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.780109,
+      "timeout_seconds": 480,
+      "log": "voxmeas.log",
+      "sha256": "e4476c9d872e35946a4ff52551e5cd448aa308d028186f811dc731abe123e98b"
+    },
+    {
+      "name": "speed2",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.326781,
+      "timeout_seconds": 480,
+      "log": "speed2.log",
+      "sha256": "35a2d9aedf31db947c3547e65836c8913700802707f88b3f8dda5d9203ba77b9"
+    },
+    {
+      "name": "saw",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 7.284096,
+      "timeout_seconds": 480,
+      "log": "saw.log",
+      "sha256": "10005af0cad8735dbb98be48a9fef98fe93e34d900ae45814a38a64812c435c1"
+    },
+    {
+      "name": "boss-counters",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.970293,
+      "timeout_seconds": 480,
+      "log": "boss-counters.log",
+      "sha256": "65a5d35bf94c6f6fed727eaf18cc13d043150b44942059000d1c9558138a19e5"
+    },
+    {
+      "name": "combat",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.034306,
+      "timeout_seconds": 480,
+      "log": "combat.log",
+      "sha256": "1e8e147bff0b88deb7be50bc7f59e7fba42b4f72cb944538d7e5d086d91438f1"
+    },
+    {
+      "name": "pace",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.285794,
+      "timeout_seconds": 480,
+      "log": "pace.log",
+      "sha256": "b0f1d5a01bc08feca9d0741f33e8554cd763ccf4d95f41fd252bb3a1fbac6b1a"
+    },
+    {
+      "name": "ceiling",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.586363,
+      "timeout_seconds": 480,
+      "log": "ceiling.log",
+      "sha256": "4873ef05ef5c859acb29bd69f7c5a76c503ad23150bb9a3381892cf7d9680300"
+    },
+    {
+      "name": "ceillock",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.470232,
+      "timeout_seconds": 480,
+      "log": "ceillock.log",
+      "sha256": "a6350f180ef634aaaa272bd868b77a47fc1c2d126ddc9cce23f4b6a476c8f4b5"
+    },
+    {
+      "name": "tutor",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 17.875455,
+      "timeout_seconds": 480,
+      "log": "tutor.log",
+      "sha256": "89a02db4ab04c0565c1293592a762401a0f096e991f934a1edfed37421fd1b79"
+    },
+    {
+      "name": "tells",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 3.62655,
+      "timeout_seconds": 480,
+      "log": "tells.log",
+      "sha256": "944c55c5bea9a9b92fa0c43b6f26cf224a860c4354b158dacd9db1cac608e918"
+    },
+    {
+      "name": "threat",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.870997,
+      "timeout_seconds": 480,
+      "log": "threat.log",
+      "sha256": "ac1f6d945c9da187cc3c69b628dd3e3e9185fa77b119b0379edc71ad88c1b80b"
+    },
+    {
+      "name": "errands",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.91928,
+      "timeout_seconds": 480,
+      "log": "errands.log",
+      "sha256": "956a95861544309f8dfeb354ae618b7404472229bebfcb0638d1006c23c19616"
+    },
+    {
+      "name": "deadend",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.971925,
+      "timeout_seconds": 480,
+      "log": "deadend.log",
+      "sha256": "924ab1cd180f6e6d004ffde2105fcf8bb2b3e2dda5f0649ed3a98d9c543c7ca8"
+    },
+    {
+      "name": "benchloop",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.267449,
+      "timeout_seconds": 480,
+      "log": "benchloop.log",
+      "sha256": "7bfc1b4ca9b4fea7b571b31a6d9e4d286228dddc83aa8d3d2df57613f1499c18"
+    },
+    {
+      "name": "padlife",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.322691,
+      "timeout_seconds": 480,
+      "log": "padlife.log",
+      "sha256": "558ff2976a09e295a244b1b591d733ce4a268c050c371411f8a28cad4092b0c7"
+    },
+    {
+      "name": "climbout",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.971058,
+      "timeout_seconds": 480,
+      "log": "climbout.log",
+      "sha256": "86bbfc632a073c280c63e9c5bc26a271e8cb96b2cf177d7edb5894840d881dc2"
+    },
+    {
+      "name": "cover",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.518439,
+      "timeout_seconds": 480,
+      "log": "cover.log",
+      "sha256": "4329d51055ba5b22de46b5e9bd8287866707b4bd186f5d89a0a8f147686c787f"
+    },
+    {
+      "name": "tap",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.824915,
+      "timeout_seconds": 480,
+      "log": "tap.log",
+      "sha256": "ecb13c6b1869f1c835f572ed08b3761adf1a7fcb8c6b784d11d471afb92a0c60"
+    },
+    {
+      "name": "textreveal",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.37196,
+      "timeout_seconds": 480,
+      "log": "textreveal.log",
+      "sha256": "36132f4c767db2ae06de250c9ddb0cf490f26442f128258cdcb09d80a7335a57"
+    },
+    {
+      "name": "text-rules",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 14.924342,
+      "timeout_seconds": 480,
+      "log": "text-rules.log",
+      "sha256": "19628f571ddf969954449123d0b58dd4f24598a04cb2074541a57a138c44c460"
+    },
+    {
+      "name": "servo-presence",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 32.038632,
+      "timeout_seconds": 480,
+      "log": "servo-presence.log",
+      "sha256": "9dc425a53df369d036f974bab418693be98d2c255d34a99af2b9a91c2b1a66e9"
+    },
+    {
+      "name": "bosspace",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 128.039767,
+      "timeout_seconds": 480,
+      "log": "bosspace.log",
+      "sha256": "8efd60112a9b415290ff59a5f0223395fc8378c9dee8ba27dcea458fb8e36aaa"
+    },
+    {
+      "name": "daze",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.871423,
+      "timeout_seconds": 480,
+      "log": "daze.log",
+      "sha256": "462568e725dcf330773c6231471df2a19198ef2485005f3d2ca9f1afd623d9c9"
+    },
+    {
+      "name": "openings",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.525097,
+      "timeout_seconds": 480,
+      "log": "openings.log",
+      "sha256": "eca0438cf6004b3714e025f3f6ac28e0b20ad77cc22c626d932fc8be74958e0c"
+    },
+    {
+      "name": "guardians",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 8.503459,
+      "timeout_seconds": 480,
+      "log": "guardians.log",
+      "sha256": "91dfddd2c6651efc625a49246a56fe0c2ab5fb161209fa4115cbfa317c6e2e96"
+    },
+    {
+      "name": "arc",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.216944,
+      "timeout_seconds": 480,
+      "log": "arc.log",
+      "sha256": "17d1084e970d74b7ae62a5321997bdcb554e155c0870b182afbf951f274a3b91"
+    },
+    {
+      "name": "meet",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.27239,
+      "timeout_seconds": 480,
+      "log": "meet.log",
+      "sha256": "6ea23d4b548d2b86b8b0599c186f3029d971d911198f08391de2270c755622ee"
+    },
+    {
+      "name": "secrets",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.018116,
+      "timeout_seconds": 480,
+      "log": "secrets.log",
+      "sha256": "243b6f910040ee68afb3b1405a77abe121b3973ce5c833dbf0102b539da8f3ad"
+    },
+    {
+      "name": "secrettell",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.017772,
+      "timeout_seconds": 480,
+      "log": "secrettell.log",
+      "sha256": "33382ba80620a9e755b7585721938c990679a3c7118c1181f103e6a1e3df32a5"
+    },
+    {
+      "name": "tails",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 4.849905,
+      "timeout_seconds": 480,
+      "log": "tails.log",
+      "sha256": "e83e05240a31bdd285ddf1aad21bdf21830b7b0c6efcfc40587c0f534ecc9df6"
+    },
+    {
+      "name": "kingdom",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 30.562607,
+      "timeout_seconds": 480,
+      "log": "kingdom.log",
+      "sha256": "49449d460c395b0d64d733caa62323a9b873ff2a031a744dcd646501675570d8"
+    },
+    {
+      "name": "artbible",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 51.128304,
+      "timeout_seconds": 480,
+      "log": "artbible.log",
+      "sha256": "0064cd9ecfb06f6f96052c47b7f09ce17aeaa9a26d5e26041c3890ad7f019adc"
+    },
+    {
+      "name": "grammar",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 6.338218,
+      "timeout_seconds": 480,
+      "log": "grammar.log",
+      "sha256": "3ee58b9ff80a806b48acca48d686381e7cdd3dd57105aada11bdd31e7149e339"
+    },
+    {
+      "name": "battery",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 10.396311,
+      "timeout_seconds": 480,
+      "log": "battery.log",
+      "sha256": "8fac2c85073c9983c0b1c974473dd9f2348b5d92b0ad2b97478caec403eeb406"
+    },
+    {
+      "name": "minis",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.369528,
+      "timeout_seconds": 480,
+      "log": "minis.log",
+      "sha256": "656e9e8b6e5f2a578e27ffdccd80ddc46ca4e9e147134b1e1ec579a420e3e27a"
+    },
+    {
+      "name": "hzdvox",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 11.300021,
+      "timeout_seconds": 480,
+      "log": "hzdvox.log",
+      "sha256": "033f05376370470ff5fe96fa5996da3d1448d34c650a3b8fbed4532ce85767ba"
+    },
+    {
+      "name": "wolves",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.341812,
+      "timeout_seconds": 480,
+      "log": "wolves.log",
+      "sha256": "89bdb6d5e17b07089e342b23218626ae12e93af4cd90676263a75499ca0bdf02"
+    },
+    {
+      "name": "retired",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 10.72352,
+      "timeout_seconds": 480,
+      "log": "retired.log",
+      "sha256": "2a9b79cb5b14e2bee9f1056dc99b31f0bf6769291bc7465174a593d207956b06"
+    },
+    {
+      "name": "gait",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 24.335366,
+      "timeout_seconds": 480,
+      "log": "gait.log",
+      "sha256": "842fa99ae4593bda94834f6a0887adbb146baf8774ad65ff3a4b9dd242b188f3"
+    },
+    {
+      "name": "motion",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.572037,
+      "timeout_seconds": 480,
+      "log": "motion.log",
+      "sha256": "ad75c145581f37ccc9a4d8b3559dd89e83bb34e62423f7b6a62386547216c8cf"
+    },
+    {
+      "name": "tinker",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.620282,
+      "timeout_seconds": 480,
+      "log": "tinker.log",
+      "sha256": "57fb85bc7c62c826ef5be2699ee950bd2fa2cd7f947907543883234f1e12b497"
+    },
+    {
+      "name": "folk",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.916336,
+      "timeout_seconds": 480,
+      "log": "folk.log",
+      "sha256": "c9bcaba918afa104c78c9c3c11391344b8287c40c97b7170353239de52e6aceb"
+    },
+    {
+      "name": "rubble",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 12.061388,
+      "timeout_seconds": 480,
+      "log": "rubble.log",
+      "sha256": "4e2e4121b98fc94c69dbe29842a0d3a03c66585d6451a393c2cc832aa5c72986"
+    },
+    {
+      "name": "cavedark",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 53.247467,
+      "timeout_seconds": 480,
+      "log": "cavedark.log",
+      "sha256": "d4431571a92e10e0e6bcbdf0c16e850065d202c828fc09f98f37d2c49f23c992"
+    },
+    {
+      "name": "terrainrun",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 74.565265,
+      "timeout_seconds": 480,
+      "log": "terrainrun.log",
+      "sha256": "670e4f6f09a26515d087fd347489efce3c91c4eb4689688d9668557cefb8a259"
+    },
+    {
+      "name": "enemygait",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.119995,
+      "timeout_seconds": 480,
+      "log": "enemygait.log",
+      "sha256": "209e3cf7e7d9699909e39132a103502dbcdb9ff85ed1717c15436d08150c7c21"
+    },
+    {
+      "name": "infection-eyes",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 56.579061,
+      "timeout_seconds": 480,
+      "log": "infection-eyes.log",
+      "sha256": "5282444725910ff8d107dac842e7519c50d7871e75533ad14291683f137464a8"
+    },
+    {
+      "name": "infection-roster",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 26.534454,
+      "timeout_seconds": 420,
+      "log": "infection-roster.log",
+      "sha256": "5f698b4c34316b653885bbd00d70328285a3452322c87b1c5067b72f21f67719"
+    },
+    {
+      "name": "infection-poses",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 123.790602,
+      "timeout_seconds": 600,
+      "log": "infection-poses.log",
+      "sha256": "eb24c76d30b5767a3be8708e0134b57f857d53a3f3f66e3a5fd6a8b88613789a"
+    },
+    {
+      "name": "reach",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 17.566545,
+      "timeout_seconds": 480,
+      "log": "reach.log",
+      "sha256": "65ae34e2ce33fadafa521642ca94d65880ad129ce9433935912508b6f871ff20"
+    },
+    {
+      "name": "gatecue",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.877328,
+      "timeout_seconds": 480,
+      "log": "gatecue.log",
+      "sha256": "6440a7cefb99970a05408549b86141052c2ca6f485d19f237b09987788c7abbe"
+    },
+    {
+      "name": "cuefamily",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 4.183532,
+      "timeout_seconds": 480,
+      "log": "cuefamily.log",
+      "sha256": "aba4a8c938fed24cda282ef8d6355f66e576f08926191eb45aea38f3ec4bb958"
+    },
+    {
+      "name": "shopread",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 112.48641,
+      "timeout_seconds": 480,
+      "log": "shopread.log",
+      "sha256": "b9ac99d57145c8edd5589cca534465b455c1ea83cd54944ba0bfb33f71d75646"
+    },
+    {
+      "name": "beacon",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 6.286396,
+      "timeout_seconds": 480,
+      "log": "beacon.log",
+      "sha256": "17b5744d20162dfe2bbcf6f03e75154505b57558bd1266a3c6ad696e6ba2c3a1"
+    },
+    {
+      "name": "doorway",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.469435,
+      "timeout_seconds": 480,
+      "log": "doorway.log",
+      "sha256": "70fbc9c5f47f874968588dd18578b0c06a6c0f66730317617fbf360641d4912e"
+    },
+    {
+      "name": "cross",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 10.902441,
+      "timeout_seconds": 480,
+      "log": "cross.log",
+      "sha256": "05a296629cc5d6ed914071d69a1236c18240a00285e8e34b88e4211143971886"
+    },
+    {
+      "name": "look",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.067074,
+      "timeout_seconds": 480,
+      "log": "look.log",
+      "sha256": "efe124897b85f8c97c9e350a8401941f9e1bae8cd3e18f97aae0be1fb251cf6a"
+    },
+    {
+      "name": "seam",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.916742,
+      "timeout_seconds": 480,
+      "log": "seam.log",
+      "sha256": "2e7084c54aa57bb7d3d6cf0c0cc34967e74a21b27b90ab372a9a6b6221721f1a"
+    },
+    {
+      "name": "vlink",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.269208,
+      "timeout_seconds": 480,
+      "log": "vlink.log",
+      "sha256": "c8cbe2dde8c6ac28fb592488a6097c8b24ddf067e078c2049a100a0e60bcdfd8"
+    },
+    {
+      "name": "roomcache",
+      "status": "fail",
+      "exit_code": 1,
+      "seconds": 39.519068,
+      "timeout_seconds": 480,
+      "log": "roomcache.log",
+      "sha256": "9f20e2956bf055e1390030f0bfdae76bb3999fc4f7277283b60890ca8cb012eb"
+    },
+    {
+      "name": "mapgrid",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.967976,
+      "timeout_seconds": 480,
+      "log": "mapgrid.log",
+      "sha256": "456c70e8a911d572a5a081ca7c1eff10b28b4bffa3161ae40c44241ada81efb7"
+    },
+    {
+      "name": "mapexits",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.916593,
+      "timeout_seconds": 480,
+      "log": "mapexits.log",
+      "sha256": "95b174e8db2fb408dec91197febcaf25ed0b7055b57f45fa3f7515fa9a82c523"
+    },
+    {
+      "name": "shaftfit",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.026888,
+      "timeout_seconds": 480,
+      "log": "shaftfit.log",
+      "sha256": "65a03a8c8d087dd74479e06b945162bc55f990ed9d64ef21d853cbe0a4b11825"
+    },
+    {
+      "name": "glowcost",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 7.942607,
+      "timeout_seconds": 480,
+      "log": "glowcost.log",
+      "sha256": "308459e11c8de299283aac02182cfb46c41a54719715c211ddd44470403fa38f"
+    },
+    {
+      "name": "meadow",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 8.843285,
+      "timeout_seconds": 480,
+      "log": "meadow.log",
+      "sha256": "3f65b116e8922a09f4a7a381052e05e4635d98ab0ee95c6b34d0b896c659babd"
+    },
+    {
+      "name": "drawclock",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 10.962762,
+      "timeout_seconds": 480,
+      "log": "drawclock.log",
+      "sha256": "cb99bd1acd03507036bf9d9b3e35fe8d01bdb8f847275d49c8a982fc4727b1b5"
+    },
+    {
+      "name": "guard",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 8.136925,
+      "timeout_seconds": 480,
+      "log": "guard.log",
+      "sha256": "50c6bb9be33b3d50c274bef9b2a85c0494a6aedca36aa40c3f89c5c72b8a8b79"
+    },
+    {
+      "name": "shield",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.922173,
+      "timeout_seconds": 480,
+      "log": "shield.log",
+      "sha256": "2d87a339da8d6473d6f1da8dc4eaf8c241ff5c9ce053a6f72d50f4cef74019f4"
+    },
+    {
+      "name": "airattack",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 7.599885,
+      "timeout_seconds": 480,
+      "log": "airattack.log",
+      "sha256": "88a5b1221ef8a488facb3553d7fb4d632cba91beca0d4ef2699c0d3446dcd827"
+    },
+    {
+      "name": "shopscale",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.867556,
+      "timeout_seconds": 480,
+      "log": "shopscale.log",
+      "sha256": "ef9b510704218754ee8fcd7155a8d9bfcb0f9ddac10ea37ade51dee0fe7bc77e"
+    },
+    {
+      "name": "foescale",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 6.090412,
+      "timeout_seconds": 480,
+      "log": "foescale.log",
+      "sha256": "567b8d4422813d093664d72b585416ae5df458f54b9b72c28c6cbe13e587fc80"
+    },
+    {
+      "name": "foelevel",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 3.42486,
+      "timeout_seconds": 480,
+      "log": "foelevel.log",
+      "sha256": "3f4295f03bc76439c4a83d558c8581d4578036a4de05bda8b2c9e7b81c3b15e4"
+    },
+    {
+      "name": "scrapmoves",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 3.473682,
+      "timeout_seconds": 480,
+      "log": "scrapmoves.log",
+      "sha256": "e0243f330469313fec2c5f25b051020e988ffaf82a6e0db2f6fa1468c584a19f"
+    },
+    {
+      "name": "conduits",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.974714,
+      "timeout_seconds": 480,
+      "log": "conduits.log",
+      "sha256": "57a8290eea26c52a51473804cc9e29ae362171d1c3db5b577254c814129e27c5"
+    },
+    {
+      "name": "foundry",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.26961,
+      "timeout_seconds": 480,
+      "log": "foundry.log",
+      "sha256": "befff898d95cc88d7598b844282c14a166a71d3ee4ff40a8cbdbd37703f0ac0e"
+    },
+    {
+      "name": "archives",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.232811,
+      "timeout_seconds": 480,
+      "log": "archives.log",
+      "sha256": "1758a345b7140d3f3ed2b99c463ed7c0b7e09ad1ee29ef07c4f87effe7aff669"
+    },
+    {
+      "name": "nestmoves",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 3.775149,
+      "timeout_seconds": 480,
+      "log": "nestmoves.log",
+      "sha256": "0df4248ef5513b04e4771f3a0c69567fd5456b89b01bd880f19ae87ddc817afe"
+    },
+    {
+      "name": "cachemoves",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.923594,
+      "timeout_seconds": 480,
+      "log": "cachemoves.log",
+      "sha256": "d7f75012d26b6534475e65e99b72b838e052ff8ff1e3cea5fd2bcb8fe79dfa6f"
+    },
+    {
+      "name": "cacheroster",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 6.54026,
+      "timeout_seconds": 480,
+      "log": "cacheroster.log",
+      "sha256": "7d08b06280e4996a4237486841aec8ad9584ad5e1490a4f84216d0220fe72092"
+    },
+    {
+      "name": "npcstrip",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.819158,
+      "timeout_seconds": 480,
+      "log": "npcstrip.log",
+      "sha256": "3a1c00bc2bf3ab0d923f4ea9f1a5641841b2f9656cb57d09344a3fc920d4c492"
+    },
+    {
+      "name": "opening",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 3.09102,
+      "timeout_seconds": 480,
+      "log": "opening.log",
+      "sha256": "d30d27e5e3ab8ac5d2d86ca3f94764fbef1631f3ddd4e8ed1367c353192283d4"
+    },
+    {
+      "name": "opening-order",
+      "status": "fail",
+      "exit_code": 1,
+      "seconds": 483.701678,
+      "timeout_seconds": 1080,
+      "log": "opening-order.log",
+      "sha256": "9aa1047a22d9dc4549843e3846154ba4a201fdf59439077bfa9247df71a0890c"
+    },
+    {
+      "name": "campaign-ch1",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 817.761435,
+      "timeout_seconds": 3780,
+      "log": "campaign-ch1.log",
+      "sha256": "20a5bb1d797d4cb8d5f961b101f672fb03a57bec0e7a82992131aba7f17f4a98"
+    },
+    {
+      "name": "hero",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 4.432482,
+      "timeout_seconds": 480,
+      "log": "hero.log",
+      "sha256": "1cd79fa8b72ca4ad52f47ab9381563d258d93178ed9500716a1426f803bad62d"
+    },
+    {
+      "name": "preload",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 10.045347,
+      "timeout_seconds": 480,
+      "log": "preload.log",
+      "sha256": "cc60e00e0563f16028994dbe5eb81ff15c7d722a8b2ebd01c03a6420080d8501"
+    },
+    {
+      "name": "boot",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 19.278463,
+      "timeout_seconds": 480,
+      "log": "boot.log",
+      "sha256": "88b806541cc8f7b3bdefcdc26873a7366cc689b87204f60326fcbad8092fa007"
+    },
+    {
+      "name": "lowres",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 7.036001,
+      "timeout_seconds": 480,
+      "log": "lowres.log",
+      "sha256": "c307b0ebe43b684b44385e28584b2ac0f9e8a4d6d387fcc2c0fa743c9959a4c9"
+    },
+    {
+      "name": "demo",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.873718,
+      "timeout_seconds": 480,
+      "log": "demo.log",
+      "sha256": "4e04153ac2b7ccb377fa266efb848427f8e299d95cdf7784e1b1a8121710674a"
+    },
+    {
+      "name": "twin",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.468499,
+      "timeout_seconds": 480,
+      "log": "twin.log",
+      "sha256": "282fd234e7de13d16c7b8863fa4dec155881d111c502bf42a85870d4dee4a2f1"
+    },
+    {
+      "name": "crystal",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.032616,
+      "timeout_seconds": 480,
+      "log": "crystal.log",
+      "sha256": "a766f4f35a5803de3e7d32f9dce7644535b73a0048d7de46fbbc9d523ab809ca"
+    },
+    {
+      "name": "sage",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.321479,
+      "timeout_seconds": 480,
+      "log": "sage.log",
+      "sha256": "2c1fe0bd47d80b94a59c903ca6c28ea28993d767d2d75c6b61c9e72d2703d5b6"
+    },
+    {
+      "name": "kingdom1",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.776673,
+      "timeout_seconds": 480,
+      "log": "kingdom1.log",
+      "sha256": "ac35cabd4c0a5d27784a5fcbb960526c8c8f7299f0a16f7ed52fb715d9a187ac"
+    },
+    {
+      "name": "memnote",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 4.580064,
+      "timeout_seconds": 480,
+      "log": "memnote.log",
+      "sha256": "47b2ed05587c892265896f51d54a3da7398272941850b4cb6c72f6d79db3df24"
+    },
+    {
+      "name": "platform",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.070185,
+      "timeout_seconds": 480,
+      "log": "platform.log",
+      "sha256": "56ca4699e21285198f39de86289583307dc578273ea7493170f10a177ca19c0e"
+    },
+    {
+      "name": "packs",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 4.125524,
+      "timeout_seconds": 480,
+      "log": "packs.log",
+      "sha256": "44e3178a72268617e6a5399c5582dba35cf62fac536d6cb91e6d448a2994316d"
+    },
+    {
+      "name": "warp",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 16.014706,
+      "timeout_seconds": 480,
+      "log": "warp.log",
+      "sha256": "db92261b49cedaa636531bcfb212cc61de031f473bbd7edd8590c81494141228"
+    },
+    {
+      "name": "denlight",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 8.386752,
+      "timeout_seconds": 480,
+      "log": "denlight.log",
+      "sha256": "770710cbeb428da90ab244a020156fc1bd49310dc2166f913f6e9226ec1cc99c"
+    },
+    {
+      "name": "bake3d",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.825045,
+      "timeout_seconds": 480,
+      "log": "bake3d.log",
+      "sha256": "b544b24df54a6e824b975f5325cdb10816bf634c870bf2fe617a6e994cc22458"
+    },
+    {
+      "name": "forge",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 11.500663,
+      "timeout_seconds": 480,
+      "log": "forge.log",
+      "sha256": "d1aa3d864f1e46561cc2434cd819822f1ba43f47f6ad3146a74aa8dade08cb5a"
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "0f893f1d10622fbd1f4a7c28e8396860a30d991f554d0c2c8cd211e65e917923",
+        "odyssey.html": "c65dc10d7fb13d6aaaf514b327bef5d3ae80549942440668dcd9c7a2409865d1",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Automated harnesses include staged saves; not an uninterrupted campaign.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "0f893f1d10622fbd1f4a7c28e8396860a30d991f554d0c2c8cd211e65e917923",
+  "complete_requested_scope": true,
+  "passed": false,
+  "finished_utc": "2026-10-11T08:31:27.911992+00:00"
+}

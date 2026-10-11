@@ -1,0 +1,19 @@
+
+── sage-quiet  — comic page 26: the sage's promise closes its end of the network
+PASS sage-quiet: the chamber stands down in the moment (1 machines), all three rooms of the network wake calm on a fresh load, and no other cave or surface is touched {
+  before: { chamber: 1, n: 1 },
+  beforeTunnel: 1,
+  company: 1,
+  afterMoment: 0,
+  net: {
+    GA1: { hostile: 0, total: 0 },
+    GA1T: { hostile: 0, total: 1 },
+    GA1D: { hostile: 0, total: 1 }
+  },
+  otherNet: 1,
+  meadow: 2,
+  flagged: true
+}
+   (sage-quiet: 0.7 s)
+
+all 1 harnesses ran
