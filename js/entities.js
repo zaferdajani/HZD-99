@@ -1909,7 +1909,11 @@ class Player {
     // So the press is now held for a beat and spent the instant the swing is
     // free. This is the difference between "sluggish" and "tight", and it is
     // almost entirely this one buffer.
-    if (inP('ATK') && !G.bossEntry && !G.ghHold) this.atkBuf = 0.2;
+    // ...unless it is the answer to a parry, which spends the press itself
+    // (js/parry.js) — fresh, or buffered through the clash's own freeze,
+    // which is exactly when a player who saw the clash presses it
+    if (this.atkBuf > 0 && this.counterT > 0 && typeof parryCounter === 'function' && parryCounter(this)) this.atkBuf = 0;
+    if (inP('ATK') && !G.bossEntry && !G.ghHold && !(typeof parryCounter === 'function' && parryCounter(this))) this.atkBuf = 0.2;
     else this.atkBuf = (this.atkBuf || 0) - dt;
     if (this.atkBuf > 0 && this.atkCD <= 0 && this.swirlT <= 0) {
       this.atkBuf = 0;
@@ -2020,8 +2024,11 @@ class Player {
     // by cools here, so a block she takes now is forgotten two seconds on.
     this.guardBreakT = Math.max(0, (this.guardBreakT || 0) - dt);
     this.guardHeat = Math.max(0, (this.guardHeat || 0) - dt);
+    const wasGuard = this.guardT > 0;
     this.guardT = (inD('GUARD') && this.on && !this.swingVis && this.dashT <= 0
       && this.chargeT <= 0.05 && this.healT <= 0 && this.guardBreakT <= 0) ? 1 : 0;
+    // the perfect-guard window and the counter it opens (js/parry.js)
+    if (typeof parryGuardStep === 'function') parryGuardStep(this, dt, wasGuard);
     // hold attack to charge the volt-burst
     // ...ONLY ONCE THE PACK IS WIRED (burstUnlocked, game.js): before the first
     // volt cell is bought, a held ATTACK is an attack, and nothing builds.
@@ -2689,8 +2696,12 @@ class Player {
   // the published heuristic is blunt — any single attack above about 40% of all
   // damage taken has a telegraph problem. Nothing is sent anywhere; it lives in
   // the run and is read from the console.
-  hurt(d, fromX, src) {
+  hurt(d, fromX, src, foe) {
     if (this.dead || this.iT > 0) return;
+    // A BLOW MET IN THE PARRY WINDOW is turned before anything is spent: no
+    // core, no heat, no log entry. Only callers that name the attacker can be
+    // parried, and only while that attacker shows the glint (js/parry.js).
+    if (foe && typeof parryTry === 'function' && parryTry(this, foe, fromX)) return;
     this.grap = null;   // a hit knocks the claw loose
     try {
       G.dmgLog = G.dmgLog || {};
@@ -8469,8 +8480,13 @@ class Enemy {
     // spikes are spikes for everyone: a machine that lands in the pit dies
     // in it — no creature camps where the player cannot stand
     if (onSpike(this)) { this.die(0, -0.4); return; }
+    // THE GUARD'S LUNGE IS THE FIRST PARRYABLE BLOW A PLAYER MEETS: from the
+    // last PARRY_LEAD of the coil through the commit, it wears the glint
+    // (drawParryTells), and a brace raised in time turns it (js/parry.js)
+    this.parryable = this.kind === 'guard' && !this.plateShed
+      && (this.lungeT > 0 || (this.coilT > 0 && this.coilT <= PARRY_LEAD));
     // touch damage
-    if (!player.dead && aabb(this, player)) player.hurt(DF().edmg, cx);
+    if (!player.dead && aabb(this, player)) player.hurt(DF().edmg, cx, undefined, this);
   }
   // VOLATILE: it takes the room with it. Telegraphed by its own colour on the
   // body and by a beat of warning light, so it is a thing you step away from

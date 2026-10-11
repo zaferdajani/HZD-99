@@ -342,6 +342,30 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const early = await tossWith(0.42);
     check('a strike well before the window does not: the toss lands', early.parries === 0 && early.lost >= 1,
       'pressed at t=' + early.pressed + ' s; parries ' + early.parries + ', lost ' + early.lost);
+    // THE PERFECT GUARD turns the same toss (js/parry.js): the brace raised in
+    // the instant it lands, not held through the wind-up
+    const guardWith = async (raiseAt) => {
+      await page.evaluate(() => { T.stage({ ghMet: 1, ghParryTold: 1 }); T.arena(700, 700 - 150 - 40); G.boss.parries = 0; player.parryLockT = 0; T.go('tossprep', GH.tossTell); });
+      const c0 = (await S()).cores;
+      let raised = null;
+      const t0 = Date.now();
+      while (Date.now() - t0 < 2500) {
+        const s = await S();
+        if (!raised && s.st === 'tossprep' && s.t <= raiseAt) { raised = +s.t.toFixed(3); await page.keyboard.down('KeyL'); }
+        if (['stagger', 'tossrecover'].includes(s.st)) break;
+        await sleep(3);
+      }
+      await sleep(150);
+      await page.keyboard.up('KeyL');
+      const s = await S();
+      const glint = await page.evaluate(() => !!(player.counterT > 0 || player.counterAct));
+      return { lost: c0 - s.cores, st: s.st, parries: s.parries, raised, counter: glint };
+    };
+    const pg = await guardWith(0.05);
+    check('a brace raised as the toss lands turns it too: he staggers, she takes nothing, the counter opens',
+      pg.parries === 1 && pg.st === 'stagger' && pg.lost === 0 && pg.counter, JSON.stringify(pg));
+    const hg = await guardWith(0.6);
+    check('...a brace held through the wind-up only blocks: no clash', hg.parries === 0, JSON.stringify(hg));
     // the stagger is an opening
     const st = await page.evaluate(() => GH.stagger);
     check('the clash buys an opening of ' + Math.round((st - 0.033) * 1000) + ' ms', st - 0.033 >= 0.25);

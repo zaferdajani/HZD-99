@@ -21,6 +21,26 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bh. THE PARRY — her perfect guard, the counter, and the clash ✱ QUEUED 2026-10-11 (code session, handoff Part 2 A4)
+
+The parry shipped on stand-ins (`js/parry.js`): the clash flare, the lime glint
+on a parryable blow and the counter's cross-cut are procedural LIGHT and stay
+that way (ART_BIBLE: additive glow is never generated). What is missing is HER:
+the turn and the answer currently reuse the guard plate and the dash pose.
+Embed the canon element `<<<467c8e08-8161-483f-a4cf-439875ff04e2>>>` in every
+prompt; black background, whole body, side view facing right, no ground.
+
+| plate | key | what it is |
+|---|---|---|
+| parry turn | `hzdParry` (2 cells) | cell 0: the brace snapping forward into the blow, forearm plate angled to deflect, weight on the front paw; cell 1: the follow-through, plate swept outward, body opened for the answer |
+| counter | `hzdCounter` (3 cells) | the Cross Stitch answer: a low lunge, both claws crossing in an X, then the recovery stance |
+
+Silhouettes must differ from `hzdGuard` (artbible IoU ≤ 0.86). Wire into
+`HERO_TRANS` (state `parry` while `counterT` is open, `counter` while
+`counterAct` runs) and run `node tests/run.cjs guard artbible`.
+
+---
+
 ## 2bg. THE GRAPPLING CLAW — head, cable, throw strip, latch sparks ✱ QUEUED 2026-10-11 (code session, from docs/handoff/GRAPPLE_AND_IMPROVEMENTS.md Part 1)
 
 The claw shipped live on stand-ins: the cable and claw head are drawn in code

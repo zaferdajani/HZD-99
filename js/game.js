@@ -14206,6 +14206,7 @@ function drawWorldFrame() {
   for (const e of G.enemies) e.draw(c);
   for (const w of G.wrecks) w.draw(c);
   if (G.boss) G.boss.draw(c);
+  if (typeof drawParryTells === 'function') drawParryTells(c);           // the parry glint (js/parry.js)
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
   for (const p of G.projs) p.draw(c);
   if (G.boomer && typeof drawBoomer === 'function') drawBoomer(c);
@@ -14458,6 +14459,7 @@ function drawWorldFrame() {
     player.draw(c);
     c.globalAlpha = 1;
     if (typeof drawDizzy === 'function') drawDizzy(c, player);   // stars round her head
+    if (typeof drawParryFx === 'function') drawParryFx(c, player);  // the clash and the counter's cross-cut
     c.restore();
   }
   // ...and the edge of the world OVER her, so the last few pixels of her feet

@@ -28,7 +28,8 @@ correct.** Re-measure, do not remember.
 | **Dash i-frames** | **NONE** (only with the `phantom` crest) |
 | Jump buffer / coyote | **120 ms / 100 ms** |
 | Hurt i-frames | **1300 ms** (1650 with `reflex`) |
-| Block / parry | **DOES NOT EXIST** |
+| Block | **GUARD**: front blows stopped, 3rd held blow inside ~2 s breaks it (0.6 s down); from behind cut by 65% |
+| Parry (perfect guard) | **140 ms from the press**; a brace re-raised < 300 ms after dropping gets none. Turns only blows wearing the parry glint. Freeze 140 ms; counter window 600 ms; counter **36 fixed**, 300 ms, invulnerable (`js/parry.js`) |
 | Base damage | **12** before crest/relic/difficulty multipliers |
 | Cores (HP) | **7 / 5 / 5** by difficulty; damage is denominated in cores |
 | Repair | **850 ms hold, 33 volts, +1 core**, movement locked, cancelled by damage |
@@ -66,6 +67,7 @@ Stage C will report it.**
 | Frost blue | `#a5d8ff` | **Cold.** Slow, freeze, brittle floor. | shard proj |
 | Repair green | `#aef7d8` | **Player-positive only.** Never on a hostile effect. | heal burst |
 | Reward gold | `#ffd76a` | **Player-positive only.** Scrap, relics, opened things. | scrap, relics |
+| Parry lime | `#c6ff1a` | **This blow can be turned.** Drawn on the striking part for exactly its parry window; nothing else may use it. Lime because pink is Kingdom X's glow and violet is Kingdom E's. | `PARRY_COL`, `js/parry.js` (`tests/guard.cjs` checks no other file names it) |
 | Kingdom glow | `PAL[zone].glow` | Ambience. **Never** a telegraph — it is the room's own colour and reads as background. | palettes |
 
 **The two hard rules:**

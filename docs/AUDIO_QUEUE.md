@@ -35,6 +35,21 @@ request needs one; the AUDIO session fires top to bottom, same as ART_QUEUE.)*
 
 ---
 
+## A-PARRY. The clash and the counter ✱ QUEUED 2026-10-11 (code session, handoff Part 2 A4)
+
+The parry borrows `block` + `crack` for the clash and `dash` + `hit` for the
+counter (`js/parry.js`). It must sound like nothing else in the game, because
+the colour channel it rides on is unique too:
+
+| cue | function | contract |
+|---|---|---|
+| `parry_clash` | steel turning steel: a bright ringing CLANG with a fast shimmer tail — unmistakably "you did it" | one-shot ≤ 0.5 s, sharp transient, plays through a 140 ms hit-stop |
+| `parry_ready` | the counter window is open: a tiny high glint | one-shot ≤ 0.15 s, quiet, never masks the clash |
+| `parry_counter` | the X-cut landing: two crossed slashes in one heavy beat, a low 74–110 Hz thump under it | one-shot ≤ 0.35 s |
+
+Owner reviews every cue before it is cut; wire into `js/audio.js`'s SFX map and
+swap the borrowed names in `js/parry.js`.
+
 ## A-GRAPPLE. The grappling claw's voice ✱ QUEUED 2026-10-11 (code session, from docs/handoff/GRAPPLE_AND_IMPROVEMENTS.md Part 1)
 
 Today the claw borrows `dash` (throw), `hit` (wall bite), `bosshit` (enemy bite)

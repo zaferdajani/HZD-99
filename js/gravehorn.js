@@ -588,6 +588,12 @@ function ghStep(b, dt) {
   const px = player.x + player.w / 2, py = player.y + player.h / 2;
   const dist = px - b.cx(), adist = Math.abs(dist);
   b.t -= dt;
+  // THE TOSS WEARS THE PARRY GLINT (js/parry.js), for exactly the window that
+  // turns it: the last parryLead of the wind-up and the active frames. Either
+  // answer works inside it — her strike on the horn (ghParry, the owner's own
+  // order) or a brace raised in the instant it lands (the perfect guard).
+  b.parryable = (b.st === 'tossprep' && b.t <= GH.parryLead) || (b.st === 'toss' && b._el <= GH.tossHit && !b.tossHit);
+  if (!b.parryAt) { b.parryAt = () => ghHornTip(b); b.onParried = (p, how) => ghClashed(b, p, how); }
   // ---- the hit-group break, taken out of anything he is not committed to ----
   if ((b.dazeWin || 0) > 0) b.dazeWin -= dt;
   if ((b.dazeCD || 0) > 0) b.dazeCD -= dt;
@@ -769,7 +775,7 @@ function ghStep(b, dt) {
     case 'tossprep': {
       want = 0; b.windT = b.t;
       if (b._el < 0.05 && !b.snorted) { b.snorted = true; ghSnort(b); }
-      if (b.t <= GH.parryLead && !b.glinted) { b.glinted = true; const h = ghHornTip(b); burst(h[0], h[1], 5, '#ffffff', 120, 0.22, 0, 2.2, true); }
+      if (b.t <= GH.parryLead && !b.glinted) { b.glinted = true; const h = ghHornTip(b); burst(h[0], h[1], 5, PARRY_COL, 120, 0.22, 0, 2.2, true); }
       if (ghParry(b)) break;
       if (b.t <= 0) { ghSet(b, 'toss', GH.toss); b.tossHit = false; sfx('launch'); cam.shake = Math.max(cam.shake, 3); }
       break;
@@ -1146,28 +1152,33 @@ function ghParry(b) {
   const hb = player.hitbox();
   if (!((B.horn && aabb(hb, B.horn)) || aabb(hb, B.head) || aabb(hb, B.scoop))) return false;
   player.swing.ghClash = true;
+  // the clash itself (freeze, ring, the counter it opens) is the shared one,
+  // so a strike on the horn and a perfect guard are the same event to the game
+  parryClash(player, b, 'strike');
+  return true;
+}
+// ...and what a turned toss does to him, however it was turned
+function ghClashed(b, p, how) {
   const face = b.face || -1;
-  G.hitStop = Math.max(G.hitStop, 0.14);
   cam.shake = Math.max(cam.shake, 7);
-  const tip = ghHornTip(b);
+  const tip = ghHornTip(b), pcx = player.x + player.w / 2;
   const sx = (tip[0] + pcx) / 2, sy = Math.min(tip[1], player.y + 10);
-  burst(sx, sy, 22, '#ffffff', 380, 0.4, 200, 3, true);
   burst(sx, sy, 12, '#dfe6ee', 300, 0.35, 120, 2.6, true);   // steel, not lock cyan (registry §2)
-  sfx('block'); sfx('bosshit'); sfx('crack');
+  sfx('bosshit');
   if (typeof padRumble === 'function') padRumble(0.7, 0.6, 180);
-  if (typeof G.addRing === 'function') G.addRing(sx, sy);
   // both pushed apart
   player.vx = face * 380; player.vy = Math.min(player.vy, -170); player.iT = Math.max(player.iT, 0.45);
   player.flungT = Math.max(player.flungT || 0, 0.18);
   b.vx = -face * 260;
   b.parries = (b.parries || 0) + 1;
+  b.tossHit = true;
   ghSet(b, 'stagger', GH.stagger);
-  return true;
 }
 function ghTossHit(b) {
   const p2 = b.phase === 2, face = b.face || -1;
   const c0 = player.cores, iT0 = player.iT;
-  player.hurt(DF().edmg, b.cx(), 'horn.toss');
+  player.hurt(DF().edmg, b.cx(), 'horn.toss', b);
+  if (b.st === 'stagger') return;          // turned by a perfect guard (js/parry.js → ghClashed)
   const KB = p2 ? GH.tossKB2 : GH.tossKB;
   if (player.cores < c0) {
     // THROWN FAR, and dizzy when she lands from it
