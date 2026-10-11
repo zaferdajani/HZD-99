@@ -3130,9 +3130,17 @@ class Player {
       charged:!!sv.charged,ang:angle,reach,x:this.x+this.w/2,y:this.y+this.h/2};
     if(typeof mediaFetch==='function')mediaFetch('swingSingleFx',1);
   }
-  drawScratchWake(c) {
+  scratchWakeReady() {
+    const w=this.scratchWake,im=typeof MEDIA_RAW!=='undefined'&&MEDIA_RAW.swingSingleFx;
+    return !!(w&&im&&im.complete&&im.naturalWidth);
+  }
+  // pass 'glow' (the slash layer's duplicate, D1): the same strip, a size up,
+  // softened, at under half strength — a halo with the cut's own shape
+  drawScratchWake(c, pass) {
     const w=this.scratchWake,im=typeof MEDIA_RAW!=='undefined'&&MEDIA_RAW.swingSingleFx;
     if(!w||!im?.complete||!im.naturalWidth)return false;
+    const glowK = pass === 'glow' ? SLASH_GLOW.alpha : 1;
+    if (G.slashPasses) G.slashPasses.push({ layer: 'scratch', pass: pass || 'base' });
     const age=w.t0-w.t,p=clamp(age/w.attackT,0,1);
     const gate=w.charged?1:clamp((age-.025)/.035,0,1);
     const fade=age>w.attackT?Math.pow(clamp(w.t/.18,0,1),1.5):1;
@@ -3141,10 +3149,11 @@ class Player {
     c.save();c.translate(w.x,w.y);
     // Mirroring leaves the rising crescent rising for either facing.
     const left=Math.cos(w.ang)<0;c.rotate(left?Math.PI-w.ang:w.ang);c.scale(left?-1:1,1);
+    if (pass === 'glow') { c.scale(SLASH_GLOW.scale, SLASH_GLOW.scale); c.filter = 'blur(' + SLASH_GLOW.blur + 'px)'; }
     const cw=im.naturalWidth/6;
     c.globalCompositeOperation='lighter';
     const paint=(frame,near,far,height,y,alpha)=>{
-      c.globalAlpha=gate*fade*alpha;
+      c.globalAlpha=gate*fade*alpha*glowK;
       // The authored FX occupies the centre 88% of its padded cell.
       c.drawImage(im,frame*cw+cw*.06,im.naturalHeight*.06,cw*.88,im.naturalHeight*.88,
         near,y-height/2,far-near,height);
@@ -3177,6 +3186,7 @@ class Player {
       paint(prev,near+6,tip-4,44,2,trail);
       paint(f,near,tip,48,0,.85);
     }
+    c.filter = 'none';
     c.restore();return true;
   }
   // ADDED AS LIGHT, NOT COMPOSITED AS AN OBJECT. The plates are energy on
@@ -4774,7 +4784,10 @@ class Player {
     }
     // Authored effects replace the procedural slash only when both images loaded.
     // Impact particles and sounds still come from confirmed gameplay contacts.
-    const scratchDrawn = this.drawScratchWake(c);
+    // the scratch itself is drawn on the slash layer, after her (D1); here it
+    // only decides whether the procedural fallback below is needed
+    const scratchDrawn = this.scratchWakeReady();
+    this._slashScratch = scratchDrawn;
     if (this.swingVis && !scratchDrawn && this._authoredSwingFx !== this.swingVis) {
       const sv = this.swingVis;
       const p = 1 - sv.t / sv.t0;
@@ -4853,7 +4866,10 @@ class Player {
       // doing can deform it. Each beat of the combo escalates the shape and the
       // finisher is a crossing double-rake; the sheet is painted on black, so
       // brightness IS the alpha and no cutting is needed.
-      if (!hero) for (const mk of marks) drawRake(c, this, mk);
+      // ...ON ITS OWN LAYER (handoff Part 2 D1): the marks are kept, and
+      // drawSlashLayer composites them after her body is finished, each with
+      // its glowing duplicate on top, the way Silksong ships every slash.
+      this._slashMarks = hero ? null : marks;
       // WRATH OF OLYMPUS: the cut lands as a forked thunderbolt
       const boltCut = (len, wid, alpha) => {
         const hl = len / 2;
@@ -10863,8 +10879,36 @@ function rakePlace(c, mk, aim) {
   // y-flip by dir, points away from the shoulder, so the crescent bows outward
   c.rotate(mk.a + Math.PI / 2 * mk.dir);
 }
-function drawRake(c, pl, mk) {
+// THE SLASH LAYER (handoff Part 2 D1). Called by game.js right after
+// player.draw, in the same world transform the marks were resolved in. Two
+// passes: the authored rake, then its glow copy — larger, blurred, additive —
+// spent only when the quality dial spends glow (QUAL.glow, js/perf.js).
+// A crest that changes her cut (C1) swaps the arc here, not in the body draw.
+const SLASH_GLOW = { scale: 1.18, alpha: 0.45, blur: 2.5 };
+function drawSlashLayer(c, pl) {
+  if (!pl) return;
+  const glow = typeof QUAL === 'undefined' || QUAL.glow;
+  // the passes this frame drew (tests/slashlayer.cjs reads it); only kept on
+  // frames that cut, so the loop allocates nothing otherwise
+  if (pl._slashScratch || (pl._slashMarks && pl._slashMarks.length)) G.slashPasses = [];
+  // the authored scratch (the plate era's cut, single_fx.webp)
+  if (pl._slashScratch) {
+    pl.drawScratchWake(c, 'base');
+    if (glow) pl.drawScratchWake(c, 'glow');
+  }
+  pl._slashScratch = false;
+  // the procedural body's rake, when that is the body being drawn
+  const marks = pl._slashMarks;
+  pl._slashMarks = null;
+  if (!marks || !marks.length || !pl.swingVis) return;
+  for (const mk of marks) {
+    drawRake(c, pl, mk, 'base');
+    if (glow) drawRake(c, pl, mk, 'glow');
+  }
+}
+function drawRake(c, pl, mk, pass) {
   const dir = mk.dir, far = mk.far;
+  if (G.slashPasses) G.slashPasses.push({ layer: 'rake', pass: pass || 'base' });
   const im = (typeof MEDIA_IMG !== 'undefined') ? MEDIA_IMG.slashFx : null;
   if (!im || !im.naturalWidth) return;
   const sv = pl.swingVis, p = clamp(1 - sv.t / sv.t0, 0, 1);
@@ -10881,7 +10925,7 @@ function drawRake(c, pl, mk) {
   // light — the one channel the art rules leave procedural (§0.0) — and never
   // as the claw sheet, which is claw art and would put a cat's rake on a
   // sword's cut.
-  if (sv.wield) { drawCrystalArc(c, pl, mk, sv, p, abody); return; }
+  if (sv.wield) { if (pass !== 'glow') drawCrystalArc(c, pl, mk, sv, p, abody); return; }   // the crystal's cut is already light
   // THE LONG RAKE IS EARNED. The wide shining arc is the best-looking thing in
   // the sheet, and spending it on every third punch from the first room leaves
   // nothing to grow into. The default finisher is a heavier version of the same
@@ -10910,6 +10954,17 @@ function drawRake(c, pl, mk) {
   // drawn below. This sweep sits UNDER it at half strength so the third beat
   // reads as one heavier blow rather than two effects arguing.
   c.globalAlpha = a * (claw ? 0.95 : 0.8) * (sv.combo === 2 ? 0.5 : 1) * (far ? 0.8 : 1);
+  if (pass === 'glow') {
+    // the duplicate: the same stroke, a size up, softened, at under half
+    // strength — a halo that has the cut's own shape, not a generic bloom
+    c.globalAlpha *= SLASH_GLOW.alpha;
+    c.filter = 'blur(' + SLASH_GLOW.blur + 'px)';
+    c.scale(SLASH_GLOW.scale, SLASH_GLOW.scale);
+    c.drawImage(im, r[0], r[1], r[2], r[3], -w * (0.5 + RAKE_LAG), -h / 2, w, h);
+    c.filter = 'none';
+    c.restore();
+    return;
+  }
   c.drawImage(im, r[0], r[1], r[2], r[3], -w * (0.5 + RAKE_LAG), -h / 2, w, h);
   // the strike flash: one bright burst on the frame the hitbox is live, thrown
   // at the LEADING tip of the stroke — where the claws are, not where they were

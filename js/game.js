@@ -14458,6 +14458,7 @@ function drawWorldFrame() {
     c.translate(-Math.round(camSX()), -Math.round(camSY()));
     player.draw(c);
     c.globalAlpha = 1;
+    if (typeof drawSlashLayer === 'function') drawSlashLayer(c, player);   // her cuts, on their own layer, with their glow
     if (typeof drawDizzy === 'function') drawDizzy(c, player);   // stars round her head
     if (typeof drawParryFx === 'function') drawParryFx(c, player);  // the clash and the counter's cross-cut
     if (typeof drawHitShapes === 'function') drawHitShapes(c);      // the Forge's SHAPES overlay (js/hitshape.js)
