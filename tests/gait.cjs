@@ -153,7 +153,14 @@ const check = (name, ok, detail) => {
     let fore = null;
     const key = 'fore' + G.roomDef.zone;
     const im = (typeof MEDIA_IMG !== 'undefined') && MEDIA_IMG[key];
-    if (im && im.naturalWidth && typeof roomFloorAnchor === 'function') {
+    // the game's own answer first: since the near plate stopped being laid
+    // whole (it is cut to its foreground picture and ends at the walk line —
+    // tests/seam-look.cjs), the old 0.22-of-the-plate formula below describes
+    // a drawing that no longer exists
+    const span = (im && im.naturalWidth && typeof nearPlateSpan === 'function') ? nearPlateSpan() : null;
+    if (span) {
+      fore = { top: span.top - camSY(), feet: player.y + player.h - camSY() };
+    } else if (im && im.naturalWidth && typeof roomFloorAnchor === 'function') {
       const h = im.naturalHeight * (0.46 * 540 / im.naturalHeight);
       const anchor = roomFloorAnchor(0) - camSY();
       fore = { top: anchor - h * 0.22, feet: player.y + player.h - camSY() };

@@ -221,6 +221,7 @@ const SUITE = [
   ['look',      'hold up or down standing still and the frame pans that way; taps, walks and jumps never do'],
   ['seam',      'a room boundary is a place she walks through, not a door'],
   ['vlink',     'the way up ends on a ledge, and every up/down pair is one shaft: drawn, solid, crossed without a cut'],
+  ['seam-look', 'a floor wears one face across a vertical seam: seen from below, stood on from above, nothing black in front of it'],
   ['roomcache', 'a doorway costs a frame: rooms baked ahead, never rebaked on a revisit, the save off the crossing'],
   ['mapgrid',   'two rooms cannot stand on the same square of the map'],
   ['mapexits',  'the map shows rooms where they really are: every shaft stacked, every side exit edge to edge'],
