@@ -1864,7 +1864,11 @@ function roomHasLiveBoss(id) {
 // chamber (it stages its own entrance: the dark hold, X1's bridge), keep the
 // old crossing.
 function vlinkSeamless(side) {
-  const L = G.vlink && G.vlink[side];
+  return vlinkLive(G.vlink && G.vlink[side]);
+}
+// the same question about ANY link, not only the live room's — the fringe asks
+// it about a neighbour's own lid while that neighbour is being drawn
+function vlinkLive(L) {
   if (!L) return null;
   if (L.flag && !G.save.flags[L.flag] && !(L.gate && L.gate.or && L.gate.or.some(f => G.save.flags[f]))) return null;
   // every rule exitOpen knows (blade, hero exemption, a door already walked)
@@ -1967,7 +1971,36 @@ function drawVLinkArt() {
     const sx1 = Math.min(e.cv.width, Math.ceil(vx1 - L.ox) + 2), sy1 = Math.min(e.cv.height, Math.ceil(vy1 - L.oy) + 2);
     if (sx1 <= sx0 || sy1 <= sy0) continue;
     c.drawImage(e.cv, sx0, sy0, sx1 - sx0, sy1 - sy0, L.ox + sx0, L.oy + sy0, sx1 - sx0, sy1 - sy0);
+    // ...AND WHAT GROWS ON IT. The fringe is not in the baked layer (the live
+    // room draws its own over her feet), so a neighbour seen across the seam
+    // used to show its floor bare — and then grassed the moment she stood on
+    // it. Its blades come with it now, from the same deterministic plan.
+    const fr = vlinkFringe(L, e);
+    if (fr) c.drawImage(fr, sx0, sy0, sx1 - sx0, sy1 - sy0, L.ox + sx0, L.oy + sy0, sx1 - sx0, sy1 - sy0);
   }
+}
+// The neighbour's fringe, painted once in the neighbour's own clothes (the
+// same swap tileJobSlice makes) and kept on its tile entry beside the bake it
+// grows on, so it is rebuilt exactly when that bake is.
+function vlinkFringe(L, e) {
+  if (G.fringeProbe || (typeof QUAL !== 'undefined' && QUAL.ceil <= 0)) return null;
+  if (e.fringe && e.fringeSig === e.sig) return e.fringe;
+  const W = e.cv.width, H = e.cv.height;
+  let f = e.fringe;
+  if (!f || f.width !== W || f.height !== H) {
+    if (!f) e.bytes += W * H * 4;
+    f = document.createElement('canvas'); f.width = W; f.height = H;
+  }
+  const sv = { id: G.roomId, def: G.roomDef, grid: G.grid, sc: surfCurve, sr: surfRoom };
+  G.roomId = L.id; G.roomDef = ROOMS[L.id]; G.grid = L.grid;
+  surfCurve = e.curve || null; surfRoom = e.curve ? L.id : null;
+  try { paintFringe(f.getContext('2d'), W, H); }
+  finally {
+    if (surfRoom === L.id && surfCurve) e.curve = surfCurve;
+    G.roomId = sv.id; G.roomDef = sv.def; G.grid = sv.grid; surfCurve = sv.sc; surfRoom = sv.sr;
+  }
+  e.fringe = f; e.fringeSig = e.sig;
+  return f;
 }
 // ---------------------------------------------------------------------------
 // THE LEDGE — the owner's rule for the way up: "jump up and you are carried
@@ -4730,7 +4763,29 @@ function buildFringe() {
   if (!fringeCv || fringeCv.width !== W || fringeCv.height !== H) {
     fringeCv = document.createElement('canvas'); fringeCv.width = W; fringeCv.height = H;
   }
-  const x = fringeCv.getContext('2d');
+  paintFringe(fringeCv.getContext('2d'), W, H);
+  fringeDirty = false;
+}
+// THE LID A ROOM'S TOP ROW WEARS. Past the top edge the grid says nothing, so
+// tileAt reads air there and every blade along row 0 grew — including under a
+// room above whose floor sits right on top of that row. Seen from below, that
+// was a band of grass growing INSIDE the slab between two rooms (A2's ceiling
+// under A8's floor), which from A8 is plain rock: the same seam wearing two
+// faces. The room above, when it is drawn there (vlinkLive), is the lid.
+const FRINGE_LINK = {};
+function fringeLid(tx) {
+  const id = G.roomId;
+  if (!(id in FRINGE_LINK)) FRINGE_LINK[id] = ROOMS[id] ? vlinkFor(id).T : null;
+  const L = vlinkLive(FRINGE_LINK[id]);
+  if (!L) return '.';
+  const nx = tx - L.otx, g = L.grid;
+  if (nx < 0 || nx >= g[0].length) return '.';
+  const ch = g[g.length - 1][nx];
+  if ((ch === 'B' || ch === 'v') && G.save.broken[L.id + ':' + nx + ',' + (g.length - 1)]) return '.';
+  return ch;
+}
+function paintFringe(x, W, H) {
+  const g = G.grid; if (!g || !g[0]) return;
   x.clearRect(0, 0, W, H);
   const zone = G.roomDef.zone, P = PAL[zone] || PAL.A;
   // no lawn indoors (owner, 2026-08-16): a workshop floor grows shavings and
@@ -4759,7 +4814,7 @@ function buildFringe() {
   for (let ty = 0; ty < g.length; ty++) for (let tx = 0; tx < g[0].length; tx++) {
     const ch = tileAt(tx, ty);
     if (!solid(ch)) continue;
-    const up = tileAt(tx, ty - 1);
+    const up = ty === 0 ? fringeLid(tx) : tileAt(tx, ty - 1);
     if (solid(up) || up === '^' || up === 'v') continue;   // buried, or wearing a hazard
     const X = tx * TILE, Y = ty * TILE;
     for (let i = 0; i < per; i++) {
@@ -4915,7 +4970,6 @@ function buildFringe() {
     }
     x.restore();
   }
-  fringeDirty = false;
 }
 function drawFringe() {
   // the measurement hook, the same shape as G.artProbe: with it set the fringe
@@ -7252,7 +7306,7 @@ function tileEvict(keep) {
     const e = tileStore.get(victim);
     // a canvas holds its backing store until it is resized — dropping the
     // reference alone leaves megabytes waiting on a collector
-    try { e.cv.width = 0; e.cv.height = 0; } catch (err) {}
+    try { e.cv.width = 0; e.cv.height = 0; if (e.fringe) { e.fringe.width = 0; e.fringe.height = 0; } } catch (err) {}
     tileStore.delete(victim);
     TILE_STATS.evicted++;
   }
@@ -7260,7 +7314,7 @@ function tileEvict(keep) {
 function tileEntry(id, W, H) {
   let e = tileStore.get(id);
   if (!e || e.cv.width !== W || e.cv.height !== H) {
-    if (e) { try { e.cv.width = 0; e.cv.height = 0; } catch (err) {} }
+    if (e) { try { e.cv.width = 0; e.cv.height = 0; if (e.fringe) { e.fringe.width = 0; e.fringe.height = 0; } } catch (err) {} }
     const cv2 = document.createElement('canvas'); cv2.width = W; cv2.height = H;
     e = { cv: cv2, sig: '', ready: false, bytes: W * H * 4, used: 0, curve: null };
     tileStore.set(id, e);
@@ -7335,6 +7389,14 @@ function tileJobSlice(ms) {
     if (e && e.cv === j.cv) { e.ready = true; e.sig = j.sig; e.curve = j.curve; }
     TILE_STATS.bakes++; TILE_STATS.pre++;
     tileJob = null;
+    // a room above or below is drawn across the seam WITH its grass, so its
+    // fringe is grown here, in the idle gap, rather than in the first frame
+    // that looks at it (drawVLinkArt would otherwise pay for it mid-play)
+    const V = G.vlink;
+    for (const side of ['T', 'B']) {
+      const L = V && V[side];
+      if (L && L.id === j.id && e && e.ready) vlinkFringe(L, e);
+    }
   }
 }
 // The rooms one door away, nearest door first — the order she is likely to
@@ -14672,9 +14734,18 @@ function roomFloorAnchor(fallbackWorldY) {
   if (floorAnchorRoom === G.roomId) return floorAnchorY;
   let v = fallbackWorldY;
   const cur = (typeof surfaceCurve === 'function') ? surfaceCurve() : null;
+  // the surface she WALKS on, which is the curve wherever it rides above the
+  // tile top (groundColumnAt) — not the tile tops themselves. The curve's roll
+  // is biased upward, so the raw tops sit up to a body-ankle below her soles
+  // (measured: soles at 468 over raw tops of 480 in A1), and a plate measured
+  // from them crossed her by 12 px where it was meant to cross her by 24.
   if (cur && cur.raw) {
     const ys = [];
-    for (let i = 0; i < cur.N; i++) { const y = cur.raw[i]; if (!isNaN(y)) ys.push(y); }
+    for (let i = 0; i < cur.N; i++) {
+      const t = cur.raw[i], y = cur.y ? cur.y[i] : NaN;
+      if (isNaN(t)) continue;
+      ys.push(isNaN(y) ? t : Math.min(y, t));
+    }
     if (ys.length) { ys.sort((a, b) => a - b); v = ys[ys.length >> 1]; }
   }
   floorAnchorRoom = G.roomId; floorAnchorY = v;
@@ -14737,12 +14808,13 @@ function drawDepthPlane(kind) {
   // wrong place. Pits and high ledges are outvoted, which is what a median is
   // for — the answer wanted is "how high is the ground in this room".
   floorY = roomFloorAnchor(floorY + camSY()) - camSY();
+  if (near) { drawNearPlate(im, floorY); return; }
   // The mid plate is a BAND whose lower part meets the floor and whose upper
   // part is the wreck standing behind it, so most of it belongs ABOVE the walk
   // line. Anchoring it below put the whole plate under the tile layer and left
-  // only a sliver of glow showing. The near plate is the opposite: it hangs off
-  // the bottom of the frame and only its top outline should be in shot.
-  const y = near ? floorY - h * 0.22 : floorY - h * 1.02;   // mid: fully above her line
+  // only a sliver of glow showing. (The near plate is drawn by drawNearPlate,
+  // which never lets it reach below the walk line.)
+  const y = floorY - h * 1.02;   // mid: fully above her line
   let x = -((cam.x * par) % w);
   if (x > 0) x -= w;
   // MIRROR EVERY OTHER STAMP. This plate is one painting repeated along the
@@ -14755,7 +14827,7 @@ function drawDepthPlane(kind) {
   // the loop, so which stamps are mirrored does not change as she walks.
   let k = Math.round((cam.x * par + x) / w);
   c.save();
-  if (!near) c.globalAlpha = 0.95;
+  c.globalAlpha = 0.95;
   const Wd = Math.ceil(w), Hd = Math.ceil(h), Y = Math.round(y);
   for (; x < 960; x += w - 1, k++) {
     const X = Math.round(x);
@@ -14768,6 +14840,149 @@ function drawDepthPlane(kind) {
   }
   c.restore();
   c.globalAlpha = 1;
+}
+
+// THE NEAR PLATE IS NOT A FLOOR (owner, 2026-10-11, on the phone: "When I see
+// it from underneath, it shows normal. When I go on it, it shows the second
+// floor layer, which is black, which does not make sense because it can't just
+// appear because I jumped on the top").
+//
+// He jumped from A2 up through the ceiling hole into A8. From below, A8's floor
+// is drawn by drawVLinkArt — A8's own baked tile layer, grass and stone. Arrive
+// on it and the same floor turned into a black city skyline. That was this
+// plate: fore_a.webp is two pictures in one file (a solid skyline above, rubble
+// and pipes below — see the NOT INDOORS note at the call site), and it was laid
+// whole with its top 22% above the walk line, which put the skyline's SOLID
+// BODY exactly over the floor rows: soles down to +59 px, near-black, in every
+// outdoor room of the kingdom. Seen from the room below, the plate belongs to
+// nobody (it hangs off THIS room's floor in THIS room's frame), so the floor
+// looked like two different surfaces depending on which side of the seam she
+// stood. It is the mid plate's "second floor" again, at the near plane.
+//
+// The plate keeps its one job — something in front of her ankles, so she is
+// in the world rather than pasted on it (tests/gait.cjs) — and loses the other
+// two it never should have had:
+//   * ONLY THE FOREGROUND PICTURE. The lowest picture in the file, found by
+//     measuring its alpha (a run of empty rows separates them), never the
+//     skyline: a skyline is a far object and has no business at 1.16 parallax.
+//   * NOTHING BELOW THE WALK LINE. Its crest rises RISE px above the floor and
+//     it feathers out by the line itself, so the floor she stands on is the
+//     tile layer and only the tile layer — the same pixels the room below
+//     shows her from underneath. tests/seam-look.cjs measures both sides.
+const NEAR_RISE = 24, NEAR_SOLID = 10, NEAR_DROP = 2;
+let nearCutIm = null, nearCut = null;
+function nearPlateCut(im) {
+  if (nearCutIm === im && nearCut) return nearCut;
+  const W = im.naturalWidth, H = im.naturalHeight;
+  const s = 0.46 * 540 / H;                       // the plate's drawn scale, unchanged
+  let start = 0, crest = 0;
+  try {
+    // rows at full height, columns squeezed: a row's coverage is all this
+    // asks, and a 256-wide readback is a fraction of a millisecond where the
+    // full plate cost 30-50 ms of one frame
+    const MW = Math.min(W, 256);
+    const m = document.createElement('canvas'); m.width = MW; m.height = H;
+    const mx = m.getContext('2d', { willReadFrequently: true });
+    mx.drawImage(im, 0, 0, W, H, 0, 0, MW, H);
+    const d = mx.getImageData(0, 0, MW, H).data;
+    const cov = new Float32Array(H);
+    for (let y = 0; y < H; y++) {
+      let n = 0;
+      for (let x = 0; x < MW; x++) if (d[(y * MW + x) * 4 + 3] > 60) n++;
+      cov[y] = n / MW;
+    }
+    m.width = m.height = 0;
+    // the lowest run of near-empty rows at least 8% of the plate tall: the gap
+    // between two pictures. Everything under it is the foreground.
+    const minRun = Math.max(4, Math.round(H * 0.08));
+    let gapTop = 0;
+    for (let y = H - 1, run = 0; y >= 0; y--) {
+      if (cov[y] < 0.12) { if (++run >= minRun) { start = y + run; gapTop = y; break; } }
+      else run = 0;
+    }
+    if (start >= H) start = gapTop = 0;
+    // ...then back up to the picture's very first opaque row (never out of
+    // the gap), so the tip of the tallest pipe is the crest — cutting at the
+    // gap's threshold would shear every tip off along one straight line
+    while (start > gapTop && cov[start - 1] > 0) start--;
+    crest = start;
+    while (crest < H - 1 && cov[crest] === 0) crest++;
+  } catch (e) { start = crest = 0; }
+  // bake the cut ONCE: crest down to the walk line, opaque to NEAR_SOLID above
+  // it and feathered to nothing NEAR_DROP below it — a fade, not a ruled edge
+  const rows = Math.max(1, Math.min(H - crest, Math.ceil((NEAR_RISE + NEAR_DROP) / s)));
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = rows;
+  const x = cv.getContext('2d');
+  x.drawImage(im, 0, -crest);
+  x.globalCompositeOperation = 'destination-in';
+  const g = x.createLinearGradient(0, 0, 0, rows);
+  g.addColorStop(0, 'rgba(0,0,0,1)');
+  g.addColorStop(clamp((NEAR_RISE - NEAR_SOLID) / (NEAR_RISE + NEAR_DROP), 0, 1), 'rgba(0,0,0,1)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, W, rows);
+  nearCutIm = im;
+  nearCut = { cv, s, start, crest, w: W * s, h: rows * s };
+  return nearCut;
+}
+// where the near plate is drawn, in WORLD y — the harnesses ask this rather
+// than re-deriving the geometry (tests/gait.cjs, tests/seam-look.cjs)
+function nearPlateSpan() {
+  if (!G.roomDef) return null;
+  const im = typeof MEDIA_IMG !== 'undefined' && MEDIA_IMG['fore' + G.roomDef.zone];
+  if (!im || !im.naturalWidth || G.roomDef.indoor) return null;
+  const k = nearPlateCut(im), a = roomFloorAnchor(G.roomDef.h * TILE);
+  return { top: a - NEAR_RISE, bottom: a - NEAR_RISE + k.h, anchor: a };
+}
+// ...AND NOT OVER THE GROUND EITHER. The walk line above is the room's MEDIAN
+// floor; beside a hole, on a heap's foot, the ground she actually stands on
+// rolls up to a dozen pixels above it (measured: soles at 467 over a median of
+// 480 in A2, A5, A9), and there the crest would lie across the floor's lip
+// again. So the band is composed in a strip of its own and the terrain is cut
+// out of it: the floor's pixels are the tile layer's, everywhere, always.
+let nearBandCv = null;
+function drawNearPlate(im, floorY) {
+  const k = nearPlateCut(im), par = 1.16;
+  const w = k.w, Y = Math.round(floorY - NEAR_RISE);
+  const Wd = Math.ceil(w), Hd = Math.ceil(k.h);
+  if (Y >= 540 || Y + Hd <= 0) return;
+  // the strip at the backbuffer's own resolution, so the plate is not softened
+  const sf = Math.max(1, (cv && cv.width ? cv.width : 960) / 960);
+  const bw = Math.ceil(960 * sf), bh = Math.ceil((Hd + 2) * sf);
+  if (!nearBandCv) nearBandCv = document.createElement('canvas');
+  if (nearBandCv.width !== bw || nearBandCv.height !== bh) { nearBandCv.width = bw; nearBandCv.height = bh; }
+  const b = nearBandCv.getContext('2d');
+  b.setTransform(1, 0, 0, 1, 0, 0);
+  b.globalCompositeOperation = 'source-over';
+  b.clearRect(0, 0, bw, bh);
+  b.setTransform(sf, 0, 0, sf, 0, 0);
+  let x = -((cam.x * par) % w);
+  if (x > 0) x -= w;
+  // mirrored alternate stamps, keyed to the world — see drawDepthPlane
+  let n = Math.round((cam.x * par + x) / w);
+  for (; x < 960; x += w - 1, n++) {
+    const X = Math.round(x);
+    if ((n & 1) === 0) { b.drawImage(k.cv, X, 0, Wd, Hd); continue; }
+    b.save();
+    b.translate(X + Wd, 0);
+    b.scale(-1, 1);
+    b.drawImage(k.cv, 0, 0, Wd, Hd);
+    b.restore();
+  }
+  // the terrain, exactly where the world pass put it (same rounding)
+  // — only the slice under the strip, clipped by hand: Safari draws nothing at
+  // all for a source rectangle that runs off its canvas
+  if (tileCv && tileCv.width) {
+    const ox = Math.round(camSX()), oy = Math.round(camSY()) + Y;
+    const sx0 = Math.max(0, ox), sy0 = Math.max(0, oy);
+    const sx1 = Math.min(tileCv.width, ox + 960), sy1 = Math.min(tileCv.height, oy + Hd + 2);
+    if (sx1 > sx0 && sy1 > sy0) {
+      b.globalCompositeOperation = 'destination-out';
+      b.drawImage(tileCv, sx0, sy0, sx1 - sx0, sy1 - sy0, sx0 - ox, sy0 - oy, sx1 - sx0, sy1 - sy0);
+      b.globalCompositeOperation = 'source-over';
+    }
+  }
+  b.setTransform(1, 0, 0, 1, 0, 0);
+  c.drawImage(nearBandCv, 0, 0, bw, bh, 0, Y, 960, Hd + 2);
 }
 
 // ===========================================================================
