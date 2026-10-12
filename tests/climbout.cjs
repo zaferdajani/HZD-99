@@ -85,15 +85,17 @@ const { chromium } = require('playwright');
     const KITS = [
       { name: 'base', dash: 0, air: 0 },
       { name: 'dash', dash: DASH, air: 0 },
-      { name: 'double jump', dash: DASH, air: 1 },
+      // THE GLIDE (handoff B3, js/glide.js) is the jetpack's own: it arrives
+      // with the double jump, so every kit from here on carries it
+      { name: 'double jump', dash: DASH, air: 1, glide: 1 },
       // THE GRAPPLING CLAW (handoff Part 1 step 5): eleven tiles of cable,
       // thrown forward, straight up or up-and-forward, onto any wall, floor or
       // ceiling — the ledge she wants is its own anchor. Strongest kit, last.
-      { name: '+grapple', dash: DASH, air: 1, grap: 11 },
+      { name: '+grapple', dash: DASH, air: 1, grap: 11, glide: 1 },
       // VOLT SOAR (handoff Part 2 B2, js/soar.js): straight up six tiles from
       // the ground, with the double jump still in hand at the top — the late
       // key, so it is the strongest kit and comes after the claw.
-      { name: '+soar', dash: DASH, air: 1, grap: 11, soar: 6 },
+      { name: '+soar', dash: DASH, air: 1, grap: 11, soar: 6, glide: 1 },
     ];
     // ...and the claw arrives WITH the dash (grapUnlocked), before the double
     // jump: a gate the double jump was meant to hold that dash + claw already
@@ -113,12 +115,20 @@ const { chromium } = require('playwright');
       // the soar: straight up from the floor, a little drift at the top, and
       // the second jump's arc stacked on it
       if (kit.soar && up > 0 && dx <= 2 && up * 32 <= kit.soar * 32 + (kit.air ? (ARC[3] || 0) * 0.88 : 0)) return true;
+      // the glide: whatever height the double jump buys over the target is
+      // spent as distance at the jets' 170 px/s fall and 0.85x air speed
+      const GL = (h) => RUN * 0.85 * (h / 170) / 32;
+      if (kit.glide && up >= 0) {
+        const top = (Math.max.apply(null, ARC)) * 1.88;      // both arcs stacked, at the apex
+        if (top >= up * 32 && dx <= span * 0.5 + GL(top - up * 32)) return true;
+      }
       if (up > 0) return dx <= span && climb(dx) >= up * 32;
       if (up === 0) return dx <= span;
       // falling: the drop buys airtime, and airtime buys distance. A one-tile
       // step down does NOT let her cross the room, which "any fall, any gap"
       // quietly assumed.
       const drop = -up * 32;
+      if (kit.glide) return dx <= Math.max(span, span * 0.5 + GL(Math.max.apply(null, ARC) * 1.88 + drop));
       return dx <= Math.max(span, RUN * Math.sqrt(2 * drop / GD) / 32 + span * 0.5);
     };
     // ...and she has to have room to jump. A full jump under a low ceiling is

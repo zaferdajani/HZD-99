@@ -1954,6 +1954,8 @@ class Player {
       if (!this.on && Math.abs(this.vy) < JUMP_FLOAT) grav *= 0.55;
       if ((G.lowGravT || 0) > 0) grav *= 0.32;   // NULL GRAVITY field
       this.vy = Math.min(this.vy + grav * dt, 1020);
+      // THE GLIDE caps the fall once the double jump is spent (js/glide.js)
+      if (typeof glideStep === 'function') glideStep(this, dt);
       // THE T-CROSSING CARRY (set in applyTransition): while her feet are
       // still below the destination's floor line she is inside the shaft she
       // jumped up through, and the rise is re-asserted AFTER gravity — a
@@ -1999,6 +2001,7 @@ class Player {
           // one thing the art rules leave procedural (§0.0).
           this.vy = -680; this.airJumps--; this.jbuf = 0;
           this.jetT = 0.34; this.boostT = 0.3; sfx('djump');
+          if (typeof glideHint === 'function') glideHint();
           this.takeoffT = this.takeoff0 = 0.12; this.takeoffCoil = 0;
           burst(this.x + this.w / 2, this.y + this.h, 10, '#8ff6ff', 160, 0.35, 500, 3, true);
           if (typeof padRumble === 'function') padRumble(0.4, 0.3, 160);

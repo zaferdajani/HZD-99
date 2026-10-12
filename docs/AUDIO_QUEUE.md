@@ -35,6 +35,16 @@ request needs one; the AUDIO session fires top to bottom, same as ART_QUEUE.)*
 
 ---
 
+## A-GLIDE. The hover jets ✱ QUEUED 2026-10-12 (code session, handoff Part 2 B3)
+
+The glide is silent today (`js/glide.js`). One loop:
+
+| cue | function | contract |
+|---|---|---|
+| `glide_jets` | two small jets holding her up: a soft steady hiss with a faint flutter, lighter than the double jump's burst | seamless LOOP 0.4–0.6 s, starts and stops with the glide, ducks under dialogue |
+
+Owner reviews before it is cut; wire into `js/audio.js` and start/stop it from `glideStep`.
+
 ## A-SOAR. The launch ✱ QUEUED 2026-10-11 (code session, handoff Part 2 B2)
 
 The soar borrows `djump` (`js/soar.js`). One cue, one contract:

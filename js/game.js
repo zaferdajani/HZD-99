@@ -14459,6 +14459,7 @@ function drawWorldFrame() {
     player.draw(c);
     c.globalAlpha = 1;
     if (typeof drawSlashLayer === 'function') drawSlashLayer(c, player);   // her cuts, on their own layer, with their glow
+    if (typeof drawGlideJets === 'function') drawGlideJets(c, player);     // the hover jets (js/glide.js)
     if (typeof drawDizzy === 'function') drawDizzy(c, player);   // stars round her head
     if (typeof drawParryFx === 'function') drawParryFx(c, player);  // the clash and the counter's cross-cut
     if (typeof drawHitShapes === 'function') drawHitShapes(c);      // the Forge's SHAPES overlay (js/hitshape.js)

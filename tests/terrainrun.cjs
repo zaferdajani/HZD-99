@@ -130,7 +130,15 @@ const check = (name, ok, detail) => {
     // knocked backwards. What is being measured here is the FLOOR.
     for (const id of ['A1', 'A2', 'CV1', 'CV2', 'C2']) {
       if (!ROOMS[id]) continue;
+      // A ROOM THAT WAS LEFT BEFORE IT WAS MEASURED IS MEASURED AGAIN. The
+      // previous room's walk can end at its exit, and the crossing it queued
+      // fires as this room loads — CV1 then reads "0.03 s of sim in 0 frames",
+      // a room that never ran because she was carried out of it. Any pending
+      // crossing is dropped on entry, and a walk that leaves the room before
+      // thirty sampled frames is retried (at most twice) instead of counted.
+      for (let attempt = 0; attempt < 3; attempt++) {
       await enter(id);
+      G.trans = null;
       G.enemies = []; G.boss = null; G.projs = [];
       // SHE IS PUT ON THE FLOOR THIS ROOM ACTUALLY HAS, not on a fixed row.
       //
@@ -202,11 +210,11 @@ const check = (name, ok, detail) => {
       // comparable; a page that is genuinely dead still ends here rather than
       // hanging the suite.
       const wallStop = performance.now() + 40000;
-      let frames = 0, mid = null, lastClock = t0;
+      let frames = 0, mid = null, lastClock = t0, endedBy = null;
       while ((G.simClock || 0) - t0 < 5 && performance.now() < wallStop) {
         keys.ArrowRight = 1;                        // direction only. Never jump.
         await new Promise(k => requestAnimationFrame(k));
-        if (G.roomId !== id || player.dead) break;  // she walked out; not a stall
+        if (G.roomId !== id || player.dead) { endedBy = G.roomId !== id ? 'left' : 'dead'; break; }  // she walked out; not a stall
         // A SAMPLE IS A SIMULATED FRAME, NOT A CALLBACK.
         //
         // rAF callbacks are not evenly spaced under load: after a stall the
@@ -248,7 +256,10 @@ const check = (name, ok, detail) => {
       // or she never landed — and telling those apart by re-running the harness
       // and squinting is how an evening disappears.
       const why = mid || { note: 'never sampled' };
-      out.stalls.push({ room: id, travelled: Math.round(travelled), rises: hits, simRan, frames, why });
+      out.stalls.push({ room: id, travelled: Math.round(travelled), rises: hits, simRan, frames, why, endedBy, attempt });
+      if (!(endedBy === 'left' && frames < 30)) break;
+      out.stalls.pop();
+      }
     }
 
     // ---- 2: the walkers walk -------------------------------------------------
