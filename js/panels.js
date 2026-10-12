@@ -342,7 +342,11 @@ function panelsDue() {
 // sequence takes over, so the caller skips the rest of that update.
 function panelsTick(dt) {
   if (!G.save || (typeof isHero === 'function' && isHero())) return false;
-  if (G.state !== 'PLAY') { PN.ready = 0; return false; }
+  // an ARRIVAL is only the crossing itself: a room entered under a dialogue,
+  // a repair or a film has already been shown, so whatever becomes due later
+  // in it is an event and waits for panelsSafe like any other
+  if (PN.room !== G.roomId) { PN.room = G.roomId; PN.settle = 0; PN.hold = 0; PN.arrival = G.state === 'PLAY'; }
+  if (G.state !== 'PLAY') { PN.ready = 0; PN.arrival = false; return false; }
   const S = panelsState();
   // THE WAKE'S PAGES come before her first step: wakeStart left her held
   // (G.wake.pend) and the pages open as soon as they have arrived — or after
@@ -366,8 +370,6 @@ function panelsTick(dt) {
   //     over, not a second and a half later while she is walking about.
   // The old rule — let the room settle, then open — was exactly what made
   // every page land in the middle of play.
-  const arrived = PN.room !== G.roomId;
-  if (arrived) { PN.room = G.roomId; PN.settle = 0; PN.hold = 0; PN.arrival = true; }
   PN.settle += dt;
   // THE CORRIDOR: did the swipe land? Recorded while it happens, kept in the
   // save, so the panel of her lying in the scrap is shown only when she did.

@@ -207,6 +207,9 @@ const check = (name, ok, detail) => {
       progressTick(1 / 60); progressTick(1 / 60);
       player.y = 5 * TILE; progressTick(1 / 60);
       window.panelsQueue = real;
+      // the save's panel record exists from her first step in a real run, so
+      // B1 is judged by it — not re-judged as "already visited" on arrival
+      panelsState();
       loadRoom('B1'); quiet();
       const due = panelsDue();
       out.teaser = { early, calls, flag: !!G.save.flags.ch2Climb, b1: due && due.id };
