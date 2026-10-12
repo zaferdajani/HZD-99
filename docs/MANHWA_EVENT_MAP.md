@@ -135,9 +135,8 @@ player's input rules.
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
-| 1 | `assets/manhua/ch1/game/repair.webp` (game: repair) | [0, 0, 1344, 752] | `pc_awake` | Ratchet was awake. |
-| 2 | `assets/manhua/ch1/clean/p09.webp` (p09 panel 1) | [19, 17, 650, 389] | `pc_necklace` (n_ratchet) | The marble in my necklace was an old gift to my ancestor. It slowed the virus long enough for me to think. It could not stop the infection. |
-| 3 | `assets/manhua/ch1/clean/p09.webp` (p09 panel 2) | [19, 418, 670, 359] | `pc_song` (n_ratchet) | Mother's song kept the robots of every kingdom in harmony. Someone unknown hacked its frequency and hid a virus inside it. |
+| 1 | `assets/manhua/ch1/game/r_cell.webp` (game: r_cell) | [0, 0, 1600, 893] | `pc_r_cell` | His first gift was not for her. A spare cell, for Old Servo — out in the meadow, switched off by his own hand. |
+| 2 | `assets/manhua/ch1/game/r_marble.webp` (game: r_marble) | [0, 0, 1600, 893] | `pc_r_marble` | Under the meadow lay raw marble. Bring him one piece, and he would forge a white blade that cuts the virus out. |
 
 ### cave — The marble cave
 

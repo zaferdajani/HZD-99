@@ -14,7 +14,7 @@ const { chromium } = require('playwright');
       const need = (ok, message) => { if (!ok) throw new Error(message); };
       const sv = newSave(1); sv.time = 99; sv.flags.woke = 1; sv.flags.tut = 1;
       // Exercise readable story fallback when optional films cannot play.
-      PURIFY_VID.memory = null; PURIFY_VID.gift = null;
+      PURIFY_VID.revive = null; PURIFY_VID.gift = null;
       startGame(sv);
       const clear = () => { for (const k in keys) delete keys[k]; for (const k in keysP) delete keysP[k]; };
       const tick = () => { update(1 / 60); for (const k in keysP) delete keysP[k]; };

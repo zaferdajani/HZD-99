@@ -109,7 +109,7 @@ async function tapKey(page, code) {
       // 2026-10-11 (owner): the letter's pages play when it is READ, before the
       // repair; the drawer after the drawer; only his waking after the board
       const want = { wake: ['w_cradle', 'w_eyes', 'w_unplug'], bay: ['d_door', 'd_road'], letter: ['letter', 'l_song', 'l_marble', 'l_cell'],
-        drawer: ['drawer'], ratchet: ['repair'], marble: ['marble_a', 'marble_b'], passage: ['passage_a', 'passage_b'],
+        drawer: ['drawer'], ratchet: ['r_cell', 'r_marble'], marble: ['marble_a', 'marble_b'], passage: ['passage_a', 'passage_b'],
         break: ['break_a', 'break_b'], sage: ['sage_rev', 'sage_bell'], free: ['fight_a', 'fight_b'], ch2: ['hatch', 'ch2_a', 'ch2_b', 'ch2_c'] };
       const miss = [];
       for (const id in want) { const s = panelsSeq(id); for (const n of want[id]) if (!s || !s.panels.some(p => p.src === PANEL_GAME(n))) miss.push(id + ':' + n); }

@@ -118,11 +118,12 @@ function opRatchetRestored(s) {
   npcCharge(s);
   f.ratchetRepaired = 1; persist();
   const go = () => opExplain(s);
-  // THE MEMORY FILM, when it is on disk — and skipping it skips nothing: the
-  // explanation below plays either way, so the errand is never film-only.
-  if (typeof PURIFY_VID !== 'undefined' && PURIFY_VID.memory && typeof startPurifyCut === 'function') {
-    if (typeof purifyPreload === 'function') purifyPreload('memory');
-    if (startPurifyCut('memory')) { G.cutEnd = go; return; }
+  // THE WAKING FILM (owner, 2026-10-12): the cell goes home and he comes on.
+  // Skipping it skips nothing: the explanation below plays either way, so the
+  // errand is never film-only.
+  if (typeof PURIFY_VID !== 'undefined' && PURIFY_VID.revive && typeof startPurifyCut === 'function') {
+    if (typeof purifyPreload === 'function') purifyPreload('revive');
+    if (startPurifyCut('revive')) { G.cutEnd = go; return; }
   }
   go();
 }

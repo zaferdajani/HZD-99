@@ -210,9 +210,9 @@ en: {
   it_cshard: 'a shard of the crystal pillar',
   // THREE SHORT BEATS, NOT ONE WALL. This was 687 characters in a single
   // speech bubble — the whole of his backstory plus the errand plus the
-  // route plus the mechanic. The story of the Song is memory.mp4, which he
-  // plays her the moment his cell is back in; what stays in text is what she
-  // has to ACT on.
+  // route plus the mechanic. The story of the Song is told by his letter's
+  // comic pages before the repair; what stays in text is what she has to ACT
+  // on.
   q_ask_ratchet_forge: [
     'You restored my battery. Thank you. The stone in my necklace protected me when the infection reached me.',
     "An evil robot hid a virus in Mother's song. I was afraid and alone, so I disconnected my battery and waited for help.",
@@ -301,7 +301,7 @@ en: {
   i_crystal2: 'THE OTHER END', i_crystal2d: 'The buried half. The two handles close like a promise kept — one blade, two white ends. It wants to fly.',
   pm_map: 'Map', pm_crests: 'Crests', pm_skills: 'Neural Tree', pm_relics: 'Relics',
   film_title: 'Films', film_hint: 'Enter — watch    Esc — back', film_wait: 'That film is still arriving.',
-  film_memory: 'The Workshop', film_gift: 'The Forging',
+  film_revive: 'The Waking', film_gift: 'The Forging',
   rl_title: 'Relics', rl_none: 'No relics yet. They drop from foes, hide in glimmers, and are torn from guardians.',
   rl_close: 'Enter / Esc — close',
   secret_hint: 'E — Something glimmers here…',
@@ -784,7 +784,7 @@ ar: {
   i_crystal2: 'الطرف الآخر', i_crystal2d: 'النصف المدفون. المقبضان يلتئمان كوعد تحقّق — نصل واحد بطرفين أبيضين. وهو يريد أن يطير.',
   pm_map: 'الخريطة', pm_crests: 'الأوسمة', pm_skills: 'الشجرة العصبية', pm_relics: 'التُحف',
   film_title: 'الأفلام', film_hint: 'إدخال — مشاهدة    خروج — رجوع', film_wait: 'الفيلم ما زال قيد التحميل.',
-  film_memory: 'الورشة', film_gift: 'الصياغة',
+  film_revive: 'الاستيقاظ', film_gift: 'الصياغة',
   rl_title: 'التُحف', rl_none: 'لا تُحف بعد. تسقط من الأعداء، وتختبئ في الومضات، وتُنتزع من الحرّاس.',
   rl_close: 'Enter / Esc — إغلاق',
   secret_hint: 'E — شيء يلمع هنا…',
@@ -1120,7 +1120,7 @@ tr: {
   rd_hint: 'E — Çöz', sk_title: 'Sinir Ağacı', sk_iq: 'IQ', sk_hint: 'Enter — aç  ·  T / Esc — kapat',
   pm_map: 'Harita', pm_crests: 'Armalar', pm_skills: 'Sinir Ağacı', pm_relics: 'Kalıntılar',
   film_title: 'Filmler', film_hint: 'Enter — izle    Esc — geri', film_wait: 'O film hâlâ yükleniyor.',
-  film_memory: 'Atölye', film_gift: 'Dövme',
+  film_revive: 'Uyanış', film_gift: 'Dövme',
   rl_title: 'Kalıntılar', rl_none: 'Henüz kalıntı yok. Düşmanlardan düşer, parıltılarda saklanır, koruyuculardan koparılır.', rl_close: 'Enter / Esc — kapat',
   secret_hint: 'E — Burada bir şey parıldıyor…',
   tt_title: 'Biliş Sınavları', tt_full: 'Tam Sınav — 4 oyun', tt_practice: 'alıştırma', tt_open: 'E — Biliş Sınavları',
@@ -1274,7 +1274,7 @@ zh: {
   rd_hint: 'E — 解答', sk_title: '神经树', sk_iq: '智商', sk_hint: 'Enter — 解锁  ·  T / Esc — 关闭',
   pm_map: '地图', pm_crests: '纹章', pm_skills: '神经树', pm_relics: '遗物',
   film_title: '影片', film_hint: 'Enter — 观看    Esc — 返回', film_wait: '影片仍在载入。',
-  film_memory: '工坊', film_gift: '锻造',
+  film_revive: '苏醒', film_gift: '锻造',
   rl_title: '遗物', rl_none: '还没有遗物。它们从敌人身上掉落、藏在微光中、从守卫身上夺取。', rl_close: 'Enter / Esc — 关闭',
   secret_hint: 'E — 这里有微光闪动…',
   tt_title: '认知试炼', tt_full: '完整试炼 — 4 个游戏', tt_practice: '练习', tt_open: 'E — 认知试炼',
@@ -1428,7 +1428,7 @@ ru: {
   rd_hint: 'E — Решить', sk_title: 'Нейродрево', sk_iq: 'IQ', sk_hint: 'Enter — открыть  ·  T / Esc — закрыть',
   pm_map: 'Карта', pm_crests: 'Гербы', pm_skills: 'Нейродрево', pm_relics: 'Реликвии',
   film_title: 'Фильмы', film_hint: 'Enter — смотреть    Esc — назад', film_wait: 'Фильм ещё загружается.',
-  film_memory: 'Мастерская', film_gift: 'Ковка',
+  film_revive: 'Пробуждение', film_gift: 'Ковка',
   rl_title: 'Реликвии', rl_none: 'Реликвий пока нет. Они падают с врагов, прячутся в отблесках и срываются со стражей.', rl_close: 'Enter / Esc — закрыть',
   secret_hint: 'E — Здесь что-то мерцает…',
   tt_title: 'Испытания разума', tt_full: 'Полное испытание — 4 игры', tt_practice: 'тренировка', tt_open: 'E — Испытания разума',

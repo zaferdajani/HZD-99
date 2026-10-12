@@ -117,9 +117,14 @@ const PANEL_SEQ = [
     when: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']) && panelsQuest('ratchet_forge') !== 'none',
     past: f => !!(f.ratchetRepaired || f['on_A0B|ratchet']),
     panels: [
-      { ref: 'game: repair', src: PANEL_GAME('repair'), crop: [0, 0, 1344, 752], cap: 'pc_awake', move: 'in', focus: [0.65, 0.35] },
-      { ref: 'p09 panel 1', src: PANEL_CLEAN(9), crop: [19, 17, 650, 389], cap: 'pc_necklace', who: 'n_ratchet', move: 'in', focus: [0.5, 0.55] },
-      { ref: 'p09 panel 2', src: PANEL_CLEAN(9), crop: [19, 418, 670, 359], cap: 'pc_song', who: 'n_ratchet', move: 'left', focus: [0.6, 0.5] },
+      // AFTER HIS WAKING (owner, 2026-10-12: "show something that's
+      // meaningful"). The waking itself is the film now (PURIFY_VID.revive),
+      // and the song and the necklace were already told by his letter's
+      // pages — so these two show what she does NEXT: the spare cell that is
+      // for Old Servo, and the raw marble under the meadow that becomes the
+      // white blade. Both drawn with the canon elements.
+      { ref: 'game: r_cell', src: PANEL_GAME('r_cell'), crop: [0, 0, 1600, 893], cap: 'pc_r_cell', move: 'in', focus: [0.5, 0.45] },
+      { ref: 'game: r_marble', src: PANEL_GAME('r_marble'), crop: [0, 0, 1600, 893], cap: 'pc_r_marble', move: 'in', focus: [0.5, 0.7] },
     ] },
   { id: 'cave', title: 'pn_s_cave', room: 'CV1', prefetch: ['A5', 'CV1'],
     event: 'first entry into the marble cave (CV1), through the buried mouth under the hub',

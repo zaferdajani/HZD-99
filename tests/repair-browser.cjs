@@ -14,7 +14,7 @@ const {chromium}=require('playwright');
     const sv=reload?JSON.parse(localStorage.getItem(saveKeyFor('robo'))):newSave(1);
     if(!sv)throw Error('Missing durable save');sv.time=99;sv.flags.woke=sv.flags.tut=1;
     startGame(sv);loadRoom('A0B');G.state='PLAY';G.wake=null;G.cut=null;G.dialog=null;G.trans=null;G.meet=null;G.gateWalk=null;
-    PURIFY_VID.memory=null;PURIFY_VID.gift=null;
+    PURIFY_VID.revive=null;PURIFY_VID.gift=null;
    },reload);
    await p.waitForTimeout(50);
   }

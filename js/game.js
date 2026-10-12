@@ -2487,13 +2487,12 @@ function doInteract(s) {
                   };
                   G.state = 'DIALOG'; sfx('ui'); npcSay(s.extra, 0);
                 };
-                // THE MEMORY (owner): the first thing he does with his cell
-                // back in is TELL — the fired film of the city falling and
-                // the necklace that saved him. When the clip is not on disk
-                // yet the wake flows straight on to the lessons.
-                if (PURIFY_VID.memory) {
-                  purifyPreload('memory');
-                  if (startPurifyCut('memory')) { G.cutEnd = lesson; return; }
+                // THE WAKING (owner, 2026-10-12): his cell goes in and he
+                // comes on — filmed, not told. When the clip is not on disk
+                // the wake flows straight on to the lessons.
+                if (PURIFY_VID.revive) {
+                  purifyPreload('revive');
+                  if (startPurifyCut('revive')) { G.cutEnd = lesson; return; }
                 }
                 lesson();
               };
@@ -5135,14 +5134,11 @@ const PURIFY_VID = {
   // crystal, ending on the same white flare the grant flashes. It supersedes
   // sword_gift.mp4 (the tight handover close-up), which stays on disk as good
   // work but is no longer the moment the quest pays off on.
-  // THE MEMORY — the den wake already asks for this film by name and has
-  // done since the wake was written; it just had no file. It is what he
-  // tells her the moment his cell is back in: the workshop floor, the Song
-  // taking every machine in the room, his chest crystal burning it out of
-  // him, and the cable he pulled himself. It replaced 687 characters of
-  // speech bubble, which is the owner's own instruction — 'npc story should
-  // be short generated video'.
-  memory: 'assets/video/memory.mp4',
+  // THE WAKING (owner, 2026-10-12) — she pushes his cell home, the light
+  // runs up through him, his visor comes on and he looks down at her. It
+  // replaced memory.mp4 (his own hands pulling the cable), which told the
+  // story backwards once the letter's comic pages had already told it.
+  revive: 'assets/video/ratchet_wake.mp4',
   // THE CORRIDOR — the first meeting (underdog-arc §2.1) as the gallery keeps
   // it: the crest, the lion dropping in, the swat, her thrown and still alive.
   // Unlocked by the meeting itself (meetCheck); the live sequence is the beat,
@@ -5194,13 +5190,6 @@ Object.assign(PURIFY_VID, ENDING_VID);
 {
   const have = (typeof window !== 'undefined' && window.VID_FILES) || null;
   if (have) for (const k in have) if (k.indexOf('intro') === 0) PURIFY_VID[k] = have[k];
-  // THE MEMORY FILM (owner, 2026-08-16): the moment his cell goes back in,
-  // Ratchet tells what happened to the city — the necklace, the red flicker,
-  // the crystal turning his eyes back blue, and his own hands opening his
-  // chest. §3n on THE FIRING LIST. Registered only when the fired clip is
-  // actually on disk, so until it lands the wake goes straight to the gift
-  // and never waits on black.
-  if (have && have.ratchet_memory) PURIFY_VID.memory = have.ratchet_memory;
 }
 function endingReel() {
   const killed = (G.save && G.save.flags && G.save.flags.killed) || {};
@@ -5369,7 +5358,7 @@ function purifyPreloadNear(id) {
 // path (G.reel) that hands its ending to the comic or the win screen; putting
 // one behind a menu row would need that path to learn where it came from. They
 // are noted here so the omission is a decision rather than an oversight.
-const FILM_GALLERY = ['memory', 'meet', 'gift', 'glitch', 'brood', 'zero', 'atlas', 'prism'];
+const FILM_GALLERY = ['revive', 'meet', 'gift', 'glitch', 'brood', 'zero', 'atlas', 'prism'];
 // SEEN IS RECORDED WHERE THE FILM ACTUALLY STARTS, not where it is triggered
 // from — every path into a film goes through startPurifyCut, including the
 // gallery itself, so there is exactly one place this can be missed.

@@ -11,7 +11,7 @@ const {chromium}=require('playwright');
    const checks=[],check=(name,ok)=>{if(!ok)throw Error(name);checks.push(name);};
    window.requestAnimationFrame=()=>0;
    const save=newSave(1);save.time=99;save.flags.woke=save.flags.tut=1;
-   startGame(save);PURIFY_VID.memory=null;PURIFY_VID.gift=null;
+   startGame(save);PURIFY_VID.revive=null;PURIFY_VID.gift=null;
    const stage=r=>{loadRoom(r);G.state='PLAY';G.wake=null;G.cut=null;G.dialog=null;G.trans=null;};
    const finish=()=>{let n=0;while(G.state==='DIALOG'&&G.dialog&&n++<40){const d=G.dialog;G.dialog=null;G.state='PLAY';if(d.onEnd)d.onEnd();}check('dialogue terminates',n<40);};
    stage('A0B');let ratchet=G.statics.find(s=>s.extra==='ratchet');

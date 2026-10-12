@@ -35,3 +35,24 @@ skill's SHAPE-vs-STYLE rule** before briefing any generator, video included.
 the fleet split ART/AUDIO/VIDEO into separate owner-opened sessions. The
 project manager (code session) queues a brief here whenever a decomposed
 request needs one; the VIDEO session fires top to bottom, same as ART_QUEUE.)*
+
+---
+
+## THE WAKING — Ratchet's cell goes home (FIRED + WIRED 2026-10-12)
+
+Owner, 2026-10-12: *"there is no need now for the video that shows Ratchet
+taking off its battery because we already introduced the comics. Instead ...
+create a new video ... when it actually receives its battery and wake up."*
+
+- `assets/video/ratchet_wake.mp4` / `.webm` / `light/` — 6 s, Kling 3.0 pro,
+  silent, from a Nano Banana Pro opening frame drawn with `hzd99-canon` and
+  `ratchet-canon` in the forging film's set and render style. She pushes the
+  brass cell into the round hatch in his belly; the light runs up to his chest
+  crystal; his visor comes on amber; his head lifts; his hand opens toward her.
+- Wired as `PURIFY_VID.revive`: plays the moment the repair board powers him
+  (`opRatchetRestored`, and the den wake's older path), then his words. In the
+  film gallery as "The Waking". Replaces `memory.mp4`, which is retired.
+- One take refused (a green blade appeared in her paw), one clean alternate
+  kept in the provenance only. Jobs and reasons:
+  `assets/source/manhua/ch1/game/ratchet-wake-2026-10-12.json`.
+

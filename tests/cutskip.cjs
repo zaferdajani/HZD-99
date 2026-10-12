@@ -55,8 +55,8 @@ const check = (name, ok, detail) => {
     // and the film waits out its four-second patience instead.
     const mk = (at) => {
       const v = fake(at);
-      purifyPre['memory'] = v;
-      G.cut = { kind: 'memory', v, snap: null, t: 0, ph: 'hold',
+      purifyPre['revive'] = v;
+      G.cut = { kind: 'revive', v, snap: null, t: 0, ph: 'hold',
                 hint: 0, failed: false, held: 0 };
       G.state = 'CUT';
       return G.cut;

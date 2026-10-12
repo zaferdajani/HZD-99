@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-12",
+  "why": "owner: the 'Ratchet was awake' panel drew a hero that is not her (cream kitten, no visor, no cape); memory.mp4 (Ratchet pulling his own battery) is no longer needed once the letter's comic pages tell it; film his waking instead, and make the panels after it meaningful",
+  "elements": {
+    "hero": "467c8e08-8161-483f-a4cf-439875ff04e2 (hzd99-canon)",
+    "ratchet": "795a5cd6-b404-4623-bcc9-2b32351d71ab (ratchet-canon)",
+    "den": "44ecbf7f-0326-418f-9cc9-122391cad46f (ratchet-den)",
+    "servo": "5549ba09-f898-4022-ab66-5686999059e0 (servo-drawn)",
+    "blade": "d0a03e79-2887-4bcd-a209-11732c6754ef (purifier-crystal)"
+  },
+  "film": {
+    "file": "assets/video/ratchet_wake.mp4 (+ .webm, light/)",
+    "start_frame": { "job": "47a7a60a-dc54-4449-9136-466c7ed44069", "model": "nano_banana_pro 2k", "refs": ["sword_forge.mp4 frame (style/set)", "l_cell.webp (hatch geometry)"], "archived": "assets/source/films/ratchet_wake_start_asfired.jpg", "rejected": { "89525a65-e3d0-4901-a2d9-4608b211167b": "his head upright, reads awake" } },
+    "chosen": { "job": "e8dccb0b-66d4-4504-b27b-5523a48dcdf9", "model": "kling3_0 pro 6s, silent", "archived": "assets/source/films/ratchet_wake_asfired_1280.mp4" },
+    "rejected": {
+      "80b86d44-997f-47aa-bf91-9da40995719a": "a glowing GREEN blade appears in her paw at 1.5-2.5 s (she has no sword yet; the purifier is white)",
+      "d7be2be8-a041-4f6d-8eab-5610d7f1c495": "clean, but the hand rising toward her reads less than the chosen take"
+    }
+  },
+  "panels": [
+    { "file": "assets/manhua/ch1/game/r_cell.webp", "job": "b799521d-4e5d-4237-a6b9-178fc5a7ae09", "model": "nano_banana_pro 2k", "style_ref": "drawer.webp", "rejected": { "90519d5f-cc30-4600-85b2-5d7e9e67a29c": "Ratchet off-model (a slim white robot)" } },
+    { "file": "assets/manhua/ch1/game/r_marble.webp", "job": "6bff0dde-bc07-4da9-b552-794a219ccba9", "model": "nano_banana_pro 2k", "style_ref": "drawer.webp, marble_a.webp", "rejected": { "5facf42d-39c0-436c-855a-e9f3b6dbf4ce": "hero off-model (a realistic four-legged robot cat)" } }
+  ],
+  "retired": ["assets/manhua/ch1/game/repair.webp (off-model hero)", "assets/video/memory.mp4 / .webm / light (superseded by the letter's pages)"]
+}
