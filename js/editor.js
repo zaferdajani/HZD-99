@@ -291,12 +291,22 @@
     const shapesB = mk('button', frow, BTN); shapesB.textContent = 'SHAPES';
     F.shapesB = shapesB;
     shapesB.onclick = () => forgeShapes();
+    // DAMAGE: what has cost her cores in this room, ranked, with any single
+    // source over 40% flagged as a telegraph problem (js/dmglog.js). F4 too.
+    const dmgB = mk('button', frow, BTN); dmgB.textContent = 'DAMAGE';
+    F.dmgB = dmgB;
+    dmgB.onclick = () => forgeDmg();
     const hideB = mk('button', frow, BTN); hideB.textContent = 'HIDE';
     hideB.onclick = () => { panel.style.display = 'none'; F.open = false; };
 
     refreshPanel();
   }
 
+  function forgeDmg() {
+    G.showDmg = !G.showDmg;
+    if (F.dmgB) F.dmgB.style.background = G.showDmg ? '#622' : '#12333a';
+    logLine(G.showDmg ? '· DAMAGE on: cores lost here by source; ! marks one over 40% (a telegraph problem)' : '· DAMAGE off');
+  }
   function forgeShapes() {
     G.showShapes = !G.showShapes;
     if (F.shapesB) F.shapesB.style.background = G.showShapes ? '#622' : '#12333a';
@@ -335,6 +345,7 @@
     window.addEventListener('mouseup', () => { painting = false; });
     window.addEventListener('keydown', (e) => {
       if (e.key === 'F3') forgeShapes();
+      if (e.key === 'F4') forgeDmg();
       if (e.key === 'F2') {
         F.open = !F.open;
         if (panel) panel.style.display = F.open ? 'block' : 'none';

@@ -2958,6 +2958,7 @@ class Player {
       G.toast(t('oath_fire'));
       return;
     }
+    if (typeof dmgNote === 'function') dmgNote(src, d);   // what actually cost her cores (js/dmglog.js)
     this.cores -= d; this.iT = hasSkill('reflex') ? 1.65 : 1.3; this.healT = 0;
     this.hurtPoseT = guarded ? 0.15 : 0.3;   // limbs flail for a beat while the knockback carries her
     cam.shake = guarded ? 4 : 9; sfx(guarded ? 'block' : 'hurt');

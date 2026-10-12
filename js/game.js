@@ -16102,6 +16102,7 @@ function draw(tms) {
   if (typeof drawGateWalk === 'function') { if (typeof withWorldProjection === 'function') withWorldProjection(c,drawGateWalk); else drawGateWalk(); }
   drawLesson();
   drawHUD();
+  if (typeof drawDmgOverlay === 'function') drawDmgOverlay(c);   // the Forge's DAMAGE ranking (js/dmglog.js)
   if (typeof drawSceneCaption === 'function') drawSceneCaption();   // js/overlay.js
   if (typeof drawOpeningHUD === 'function') drawOpeningHUD();
   drawMapButton();
