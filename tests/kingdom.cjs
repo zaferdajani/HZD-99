@@ -296,6 +296,10 @@ const RA = JSON.parse(fs.readFileSync('assets/roomassets.json', 'utf8'));
           // Async loading can let the room's arrival dialogue open. Measure
           // the structure itself, not a dimmed frame under its story panel.
           G.dialog = null; G.state = 'PLAY'; G.toasts = []; G.zoneToast = null;
+          // ...and not the black an arriving comic holds while its pages load
+          // (js/panels.js panelsCovering: a story beat due in this room plays
+          // over the crossing, before the room is shown)
+          if (typeof PN !== 'undefined') { PN.arrival = false; PN.hold = 0; }
           const shot = () => {
             draw();
             const sx = Math.round(wx - camSX()), scale = cv.width / 960;
