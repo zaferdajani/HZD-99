@@ -142,6 +142,9 @@ const check = (name, ok, detail) => {
       await rest(6);
     };
     const enter = async (room, at) => {
+      // light is measured here, not story: a beat due in the room would open
+      // its comic over the crossing (js/panels.js) and black the frame
+      if (typeof panelsState === 'function' && G.save) { const P = panelsState(); if (P) for (const sq of PANEL_SEQ) P.past[sq.id] = 1; }
       loadRoom(room);
       if (at != null) { player.x = at * TILE; player.y = (ROOMS[room].h - 3) * TILE; }
       G.dialog = null; G.trans = null; G.state = 'PLAY';   // NOT G.toast — it is a function
