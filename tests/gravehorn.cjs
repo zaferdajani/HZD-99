@@ -124,7 +124,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const talk = await waitFor(s => s.state === 'DIALOG', 4000);
     const dlg = await page.evaluate(() => G.dialog && { name: G.dialog.name, n: G.dialog.lines.length, l0: G.dialog.lines[0], gh: !!G.dialog.gh });
     check('he speaks: a dialogue box under his own name', !!talk && dlg && dlg.name === 'GRAVEHORN' && dlg.gh, JSON.stringify(dlg));
-    check('...three lines the first time (who he is, whom he serves, the threat)', dlg && dlg.n === 3, dlg && dlg.l0);
+    check('...four lines the first time (who he is, whom he serves, that the Eye stole the Song, the threat)', dlg && dlg.n === 4, dlg && dlg.l0);
     const locked = await page.evaluate(() => {
       const keep = player.x; player.x = -40; checkTransitions();
       const ok = !G.trans && player.x >= 0; player.x = keep; return { ok, bossActive: bossActive() };
