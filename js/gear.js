@@ -269,9 +269,17 @@ function drawGear() {
     if (lo) drawLoadoutFrame(c, lo, ar ? 890 : 500, y, 11, r.installed ? 'filled' : r.acquired ? 'empty' : 'locked');
     const align = ar ? 'right' : 'left', x = ar ? 870 : 520;
     ftxt(t(r.name), x, y - 4, 16, r.acquired ? '#eef3fa' : '#6f8294', align);
-    ftxt(t(r.slot) + ' · ' + t(r.installed ? 'gear_installed' : r.acquired ? 'gear_stored' : 'gear_locked'), x, y + 13, 11, r.installed ? '#37ffd0' : '#8098ad', align);
+    // ONE STYLE AT A TIME (C1): a worn seal with an attack block says whether
+    // it is the one setting her fighting style, or which seal is
+    const note = r.installed && typeof crestStyleNote === 'function' ? crestStyleNote(r.id) : '';
+    ftxt(t(r.slot) + ' · ' + t(r.installed ? 'gear_installed' : r.acquired ? 'gear_stored' : 'gear_locked') + (note ? ' · ' + note : ''), x, y + 13, 11, r.installed ? '#37ffd0' : '#8098ad', align);
   });
   ftxt('↑', 565, 432, 22, '#37ffd0'); ftxt((l.index + 1) + ' / ' + l.rows.length, 695, 432, 13, '#8aa2b5'); ftxt('↓', 825, 432, 22, '#37ffd0');
-  wrapText(t(selected.desc), 850, 14).slice(0, 2).forEach((line, i) => ftxt(line, 480, 462 + i * 19, 14, '#b2c6d4'));
+  // the part's own line, then — for a seal that changes how she fights — what
+  // it does to her attacks, in plain words (C1)
+  const fight = typeof crestFightText === 'function' && Object.prototype.hasOwnProperty.call(CRESTS, selected.id) ? crestFightText(selected.id) : '';
+  const wrap = typeof wrapCrest === 'function' ? wrapCrest : wrapText;
+  const lines = wrap(t(selected.desc), 850, 14).slice(0, fight ? 1 : 2).concat(fight ? wrap(fight, 850, 14).slice(0, 2) : []);
+  lines.forEach((line, i) => ftxt(line, 480, 462 + i * 19, 14, i && fight ? '#e2edf5' : '#b2c6d4'));
   ftxt(t('crest_hint'), 480, 516, 12, '#8aa2b5');
 }

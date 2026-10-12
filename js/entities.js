@@ -11,6 +11,18 @@ function DF() { return DIFFS[G.save.diff]; }
 // originals are captured here, at load, from the hoisted declarations.
 const IN_D = inD, IN_P = inP;
 function hasCrest(id) { return G.save.equip.indexOf(id) >= 0; }
+// THE CREST'S ATTACK BLOCK (C1; CREST_ATTACK beside CRESTS in js/game.js).
+// The style is taken once, when a swing starts, and travels ON the swing (and
+// its drawing), so everything that swing does — its box, its shape, its push,
+// its freeze, its cut — reads the same block. Guarded: the combat harnesses
+// run this file in a bare VM without game.js, where she wears nothing.
+function crestStyleNow() { return typeof crestStyle === 'function' && G.save ? crestStyle(G.save) : null; }
+function swingCrest(s) { return s && s.crest && typeof crestAttackOf === 'function' ? crestAttackOf(s.crest) : null; }
+// a factor of the swing she is in now (1 when no seal shapes it)
+function crestSwingMul(k) {
+  const b = typeof player !== 'undefined' && player ? swingCrest(player.swing) : null;
+  return b && b[k] != null ? b[k] : 1;
+}
 function hasMod(id) { return !!G.save.abil[id]; }
 function hasSkill(id) { return G.save.skills && G.save.skills.indexOf(id) >= 0; }
 // evolution: power milestones make the character visibly bigger and better-geared
@@ -618,6 +630,9 @@ const FLIP_DUR = 0.62;   // the double-jump pirouette, start to finish
 //   tickFreeze  hit-stop on a multi-hit's later contacts (0: no stutter)
 //   freezeBig   hit-stop against a guardian, where it differs
 //   recoil      px/s her own blow pushes HER back
+//   crest       the row is HER SWING (slash, finisher): the seal that sets her
+//               fighting style scales its kb, kbV and freeze (CREST_ATTACK in
+//               js/game.js, C1). Damage is never touched by it
 //
 // A1 — the damage is exactly what each move dealt before the table existed.
 // tests/attacks.cjs swings every row across a matrix of builds and checks it
@@ -668,9 +683,9 @@ const ATK_MOD = {
   crit: 2, critChance: 0.1,   // relic 'lens'
 };
 const ATTACKS = {
-  slash:     { mult: 1, feral: 1, wield: 1, purity: 1, crit: 1,
+  slash:     { mult: 1, feral: 1, wield: 1, purity: 1, crit: 1, crest: 1,
                kb: 310, kbV: 220, kbUp: 120, kbT: 0.26, freeze: 0.05, freezeBig: 0.06, recoil: 62 },
-  finisher:  { mult: 1.35, skill: ['calc', 1.55], feral: 1, wield: 1, purity: 1, crit: 1,
+  finisher:  { mult: 1.35, skill: ['calc', 1.55], feral: 1, wield: 1, purity: 1, crit: 1, crest: 1,
                kb: 465, kbV: 220, kbUp: 120, kbT: 0.30, freeze: 0.085, recoil: 130 },
   risecut:   { mult: 1, kbUp: 430, kbT: 0.4, lift: 300 },   // rides on the slash it launches from
   plunge:    { mult: 0.6, kb: 260, kbUp: 180, kbT: 0.3 },
@@ -689,22 +704,26 @@ const ATTACKS = {
 // every row carries every field, so a reader (or the Forge) never has to know
 // which ones a move happened to need
 for (const id in ATTACKS) ATTACKS[id] = Object.assign({ id, mult: 1, skill: null, floor: 0,
-  flat: 0, feral: 0, wield: 0, purity: 0, crit: 0, multi: false, every: 0, kb: null, kbV: 0, kbUp: null,
+  flat: 0, feral: 0, wield: 0, purity: 0, crit: 0, crest: 0, multi: false, every: 0, kb: null, kbV: 0, kbUp: null,
   kbT: 0, freeze: 0, tickFreeze: 0, freezeBig: null, recoil: 0 }, ATTACKS[id]);
 // Knockback, from the row. dx/dy are the blow's unit direction. Guardians and
 // turrets are never moved by her blows; returns whether this body was.
+// A row marked `crest` (the swing's two rows) is scaled by the attack block of
+// the seal that set her style (CREST_ATTACK, js/game.js): a fixed blow never is.
 function attackKnock(e, id, dx, dy) {
   const A = ATTACKS[id];
   if (A.kb == null || (typeof Boss !== 'undefined' && e instanceof Boss) || e.kind === 'turret') return false;
   e.kbT = A.kbT;
-  if (A.kb) e.vx += dx * A.kb; else e.vx = 0;             // 0 PINS
-  if (A.kbUp != null) e.vy = Math.min(e.vy, 0) + (dy || 0) * A.kbV - A.kbUp;
+  const ck = A.crest && !A.flat ? crestSwingMul('kb') : 1;
+  if (A.kb) e.vx += dx * A.kb * ck; else e.vx = 0;        // 0 PINS
+  if (A.kbUp != null) e.vy = Math.min(e.vy, 0) + (dy || 0) * A.kbV * ck - A.kbUp;
   return true;
 }
 // Hit-stop, from the row. `later`: a multi-hit's contact after its first.
 function attackFreeze(id, big, later) {
   const A = ATTACKS[id];
-  const f = later ? A.tickFreeze : (big && A.freezeBig != null ? A.freezeBig : A.freeze);
+  const f = (later ? A.tickFreeze : (big && A.freezeBig != null ? A.freezeBig : A.freeze))
+    * (A.crest && !A.flat ? crestSwingMul('freeze') : 1);
   if (f > 0) G.hitStop = Math.max(G.hitStop || 0, f);
   return f;
 }
@@ -742,6 +761,9 @@ function attackFreeze(id, big, later) {
 // a decision, not a better button.
 // The pass clock is the swirl row's `every` (ATTACKS above): one number.
 const SWIRL_T = 0.64, SWIRL_STEP = ATTACKS.swirl.every, SWIRL_R = 62;
+// the plate's diagonal pogo (C1) rebounds her FORWARD at her own run speed, so
+// holding on carries her over what she struck and letting go lets it bleed off
+const DIAG_POGO_VX = 340;
 const SLASH = [
   { hand: 'F', a0: -0.95, a1: 0.42, r0: 11.5, r1: 21 },   // beat 1 — right paw, steep down-rake
   { hand: 'B', a0: -0.45, a1: 0.92, r0: 11, r1: 20 },     // beat 2 — left paw, shallower, crosses under
@@ -2094,13 +2116,19 @@ class Player {
       // The combo ACCELERATES. Three identical beats read as one slow beat
       // repeated; opening fast and landing heavy on the finisher is what makes
       // a three-hit string feel like a sentence instead of a metronome.
-      const nextC = this.comboT > 0 ? (this.combo + 1) % 3 : 0;
-      this.atkCD = (nextC === 0 ? 0.26 : nextC === 1 ? 0.23 : 0.33) * (hasCrest('over') ? 0.7 : 1);
+      // THE SEAL SHE FIGHTS WITH (C1): taken once, here, and carried on the
+      // swing so its box, shape, push, freeze and cut all read the same block
+      const crest = crestStyleNow(), blk = swingCrest({ crest });
+      // a two-beat seal (chain 2) goes straight from the jab to the finisher
+      const nextC = this.comboT > 0 ? (blk && blk.chain === 2 ? (this.combo === 0 ? 2 : 0) : (this.combo + 1) % 3) : 0;
+      this.atkCD = (nextC === 0 ? 0.26 : nextC === 1 ? 0.23 : 0.33) * (hasCrest('over') ? 0.7 : 1) * (blk ? blk.cd : 1);
       let ax = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
       let ay = (inD('UP') ? -1 : 0) + (this.downBuf > 0 && !this.on ? 1 : 0);
       // a down-attack goes straight down. Diagonal aim used to push the hitbox
       // forward of whatever you were standing over, which is why it kept missing.
-      if (ay > 0) ax = 0;
+      // The plate's slam is the one exception, and on purpose: its down-strike
+      // is the diagonal pogo, forward-down the way she faces (or is holding).
+      if (ay > 0) ax = blk && blk.down === 'diag' ? (ax || this.face) : 0;
       // SHE TURNS TO WHAT SHE IS FIGHTING when the player has not said
       // otherwise (owner, 2026-08-24: "facing my first enemy was not accurate").
       //
@@ -2120,7 +2148,7 @@ class Player {
       const mode = G.boomer ? 'claws' : weaponMode(G.save);
       const wield = mode === 'joined' ? 2 : mode === 'claws' ? 0 : 1;
       {
-      this.combo = this.comboT > 0 ? (this.combo + 1) % 3 : 0;
+      this.combo = nextC;
       this.comboT = 0.9;
       // THE CRYSTAL'S FINISHER RISES. Lost Crown grammar: the third beat of a
       // grounded chain is a diagonal cut that carries UP-forward, so a chain
@@ -2133,15 +2161,18 @@ class Player {
       // active a touch longer, so a swing that looks like it should connect does
       // Dual swords widen the arc with a second independently held blade.
       const twin = mode === 'dual';
-      this.swing = { t: 0.15, ax, ay: aay, ang, combo: this.combo, set: new Set(), wield,
-                     pure: wield >= 1, twin, weaponMode: mode };
+      const tk = blk ? blk.t : 1;
+      this.swing = { t: 0.15 * tk, t0: 0.15 * tk, ax, ay: aay, ang, combo: this.combo, set: new Set(), wield,
+                     pure: wield >= 1, twin, weaponMode: mode, crest };
       // ay and air ride along so the RENDERER can tell an airborne or downward
       // strike from a standing one — see heroSwingState. They are the swing's
       // own aim and stance at the moment it started, not the body's current
       // state: she may land mid-swing, and the move she began is the move she
       // is playing.
-      this.swingVis = { t: 0.24, t0: 0.24, ang, combo: this.combo, wield, twin, weaponMode: mode,
-                        ay: aay, air: !this.on };
+      this.swingVis = { t: 0.24 * tk, t0: 0.24 * tk, ang, combo: this.combo, wield, twin, weaponMode: mode,
+                        ay: aay, air: !this.on, crest };
+      // the cut the seal draws (drawCrestEdge) is the box the swing really has
+      if (blk) { const hb0 = this.hitbox(); this.swingVis.reach = hb0.R + hb0.half; this.swingVis.half = hb0.half; }
       this.startScratchWake(this.swingVis);
       if (hasSkill('wave')) {
         const wn = Math.hypot(ax, ay) || 1;
@@ -2150,7 +2181,7 @@ class Player {
       }
       // EVERY grounded swing steps into the strike. Only the finisher used to
       // move her, so the first two hits felt like swiping at air from a standstill.
-      if (this.on && !ay) this.vx += ax * (this.combo === 2 ? 230 : 96);
+      if (this.on && !ay) this.vx += ax * (this.combo === 2 ? 230 : 96) * (blk ? blk.step : 1);
       // and in the air a level swing arrests the fall for a moment: it reads as
       // committing weight to the blow rather than flailing while dropping
       if (!this.on && !ay && this.vy > -60) this.vy = Math.min(this.vy, 40);
@@ -2400,11 +2431,17 @@ class Player {
     if (this.swing && this.swing.t > 0) {
       // …and the other order too: ATK first, DOWN a frame later. Within the first
       // 60ms the swing is still re-aimable.
-      if (this.swing.t > 0.06 && this.swing.ay <= 0 && !this.on && inD('DOWN')) {
-        this.swing.ax = 0; this.swing.ay = 1; this.swing.ang = Math.PI / 2;
+      if (this.swing.t > (this.swing.t0 || 0.15) - 0.09 && this.swing.ay <= 0 && !this.on && inD('DOWN')) {
+        const sb = swingCrest(this.swing), dg = sb && sb.down === 'diag';
+        this.swing.ax = dg ? (this.swing.ax || this.face) : 0; this.swing.ay = 1;
+        this.swing.ang = Math.atan2(1, this.swing.ax);
         // the swing is re-aimable for 60ms and the DRAWING has to follow it,
         // or a strike re-aimed into a plunge goes on playing the one it was
-        if (this.swingVis) { this.swingVis.ay = 1; this.swingVis.ang = Math.PI / 2; }
+        if (this.swingVis) {
+          this.swingVis.ay = 1; this.swingVis.ang = this.swing.ang;
+          // ...and the seal's edge follows it onto the plunge's own box
+          if (sb) { const hb1 = this.hitbox(); this.swingVis.reach = hb1.R + hb1.half; this.swingVis.half = hb1.half; }
+        }
       }
       this.swing.t -= dt;
       const hb = this.hitbox();
@@ -2451,7 +2488,7 @@ class Player {
           attackFreeze(aid, big);
           // RECOIL. Contact has to push back on HER too, or the enemy is made of
           // paper — a few pixels against the swing is all it takes to sell mass.
-          this.vx -= kx * ATTACKS[aid].recoil;
+          this.vx -= kx * ATTACKS[aid].recoil * crestSwingMul('recoil');
           if (typeof padRumble === 'function') padRumble(heavy ? 0.42 : 0.2, heavy ? 0.6 : 0.42, heavy ? 110 : 60);
           this.hitConfirmT = 0.14;
           burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 14, '#fff2a8', 280, 0.35, 300, 3, true);
@@ -2548,6 +2585,9 @@ class Player {
         // A short, crisp rebound rather than a free jump — hold JUMP to get the
         // taller one. Either way you leave the enemy instead of falling into it.
         this.vy = inD('JUMP') ? -880 : -660;
+        // THE DIAGONAL POGO (the plate's slam): the rebound carries her on,
+        // forward over what she struck, instead of straight back up off it
+        if (this.swing.ax) this.vx = this.swing.ax * DIAG_POGO_VX;
         if (this.dashT > 0 && this.dashVY > 0) { this.dashT = 0; this.dashVY = 0; }
         this.iT = Math.max(this.iT, 0.18);   // no contact damage from what you just hit
         this.pogoT = 0.18;
@@ -2812,16 +2852,30 @@ class Player {
     const tw = s.twin ? 1.45 : 1;
     // Ground claws now clear the body by 86px (jab/double) or 100px
     // (uppercut). Swords retain their longer ranges. The wake uses this box.
-    const claw = !s.wield && !down && !(typeof isHero==='function' && isHero());
-    const R = (down ? 46 : (s.combo === 2 ? (rk ? (claw ? 76 : 68) : (claw ? 58 : 50)) : (claw ? 50 : 44))) * wm;
-    const half = (down ? 32 : (s.combo === 2 ? (rk ? (claw ? 50 : 46) : (claw ? 42 : 35)) : (claw ? 36 : 30))) * wm * tw;
+    // THE PLATE'S DIAGONAL POGO (C1) is a down-strike sent forward at 45
+    // degrees: the plunge's own box, carried along the diagonal.
+    // (ay > 0.5: a real down aim. A level swing built from an angle carries
+    // sin(PI) = 1e-16 in ay, and that is not a plunge.)
+    const diag = s.ay > 0.5 && !!s.ax;
+    const plunge = down || diag;
+    const claw = !s.wield && !plunge && !(typeof isHero==='function' && isHero());
+    let R = (plunge ? 46 : (s.combo === 2 ? (rk ? (claw ? 76 : 68) : (claw ? 58 : 50)) : (claw ? 50 : 44))) * wm;
+    let half = (plunge ? 32 : (s.combo === 2 ? (rk ? (claw ? 50 : 46) : (claw ? 42 : 35)) : (claw ? 36 : 30))) * wm * tw;
+    // THE SEAL SHE FIGHTS WITH (CREST_ATTACK, js/game.js) lays its reach and
+    // width over every weapon form the same way, after the weapon's own
+    // factors. REACH IS THE FAR EDGE — where the cut stops, the thing a player
+    // actually judges — so a x1.25 seal puts the far edge 25% further out and a
+    // wider seal grows the cut across the aim without pushing that edge on.
+    const blk = swingCrest(s), near0 = R - half;
+    if (blk) { const far = (R + half) * blk.R; half *= blk.half; R = far - half; }
     const cx = this.x + this.w / 2 + s.ax / n * R;
     const cy = this.y + this.h / 2 + s.ay / n * R;
     // ax0/ay0 is the swing's ANCHOR — where R put the box before any edge rule
     // touched it. It is carried on the box because the twin's law is about the
     // anchor ("half grows, R does not") and the near-edge floor below moves the
     // box's geometric centre, so centre-of-box stopped being a witness for it.
-    const box = { x: cx - half, y: cy - half, w: half * 2, h: half * 2, ax0: cx, ay0: cy };
+    // R and half ride along too: the crest's cut is drawn from them (drawCrestEdge)
+    const box = { x: cx - half, y: cy - half, w: half * 2, h: half * 2, ax0: cx, ay0: cy, R, half };
     // ...AND THE NEAR EDGE REACHES BACK TO HER OWN BODY.
     //
     // The box was centred R in front of her and R is 44 for a claw, so with
@@ -2835,7 +2889,14 @@ class Player {
     // Only the near edge moves. The far edge is the move's reach and stays
     // exactly where the drawing says it is — this does not extend her range, it
     // stops there being a dead ring around her feet.
-    if (!down) {
+    // A STRAIGHT DOWN- OR UP-CUT KEEPS ITS NEAR EDGE when a seal moves its far
+    // one: the plunge's box starts at her feet, and a reaching seal must not
+    // open a gap under them (the side cuts have the body rule just below).
+    if (blk && !s.ax && near0 < R - half) {
+      const d = (R - half) - near0;
+      if (s.ay > 0) { box.y -= d; box.h += d; } else if (s.ay < 0) box.h += d;
+    }
+    if (!plunge) {
       const bx = this.x, bw = this.w;
       if (s.ax > 0 && box.x > bx + bw) { box.w += box.x - (bx + bw); box.x = bx + bw; }
       else if (s.ax < 0 && box.x + box.w < bx) { box.w += bx - (box.x + box.w); }
@@ -3149,7 +3210,8 @@ class Player {
     let reach=165;
     if (!sv.charged) {
       const old=this.swing;
-      this.swing={ax,ay,combo:sv.combo,wield:0};
+      // the seal's reach too (C1): the wake's tip is where the claws really reach
+      this.swing={ax,ay,combo:sv.combo,wield:0,crest:sv.crest};
       const box=this.hitbox();this.swing=old;
       // Rectangular contact geometry projected onto the direction of the cut.
       const cx=this.x+this.w/2,cy=this.y+this.h/2;
@@ -10926,13 +10988,15 @@ function drawSlashLayer(c, pl) {
   const glow = typeof QUAL === 'undefined' || QUAL.glow;
   // the passes this frame drew (tests/slashlayer.cjs reads it); only kept on
   // frames that cut, so the loop allocates nothing otherwise
-  if (pl._slashScratch || (pl._slashMarks && pl._slashMarks.length)) G.slashPasses = [];
+  if (pl._slashScratch || (pl._slashMarks && pl._slashMarks.length) || (pl.swingVis && pl.swingVis.crest)) G.slashPasses = [];
   // the authored scratch (the plate era's cut, single_fx.webp)
   if (pl._slashScratch) {
     pl.drawScratchWake(c, 'base');
     if (glow) pl.drawScratchWake(c, 'glow');
   }
   pl._slashScratch = false;
+  // the seal's edge (C1): every weapon form, both worlds, whatever body drew
+  if (drawCrestEdge(c, pl, 'base') && glow) drawCrestEdge(c, pl, 'glow');
   // the procedural body's rake, when that is the body being drawn
   const marks = pl._slashMarks;
   pl._slashMarks = null;
@@ -10941,6 +11005,52 @@ function drawSlashLayer(c, pl) {
     drawRake(c, pl, mk, 'base');
     if (glow) drawRake(c, pl, mk, 'glow');
   }
+}
+// THE SEAL'S EDGE (handoff Part 2 C1). A seal that changes how she fights has
+// to be SEEN changing it, on every weapon: the claws' authored scratch, the
+// sword strips and the joined blade each draw their own cut, and on top of it
+// this lays one crescent of the seal's own light, built from the box the swing
+// really has — its outer rim at the cut's reach, its span the cut's width, its
+// thickness its weight. A reaching seal draws a longer arc, the slam a wider,
+// heavier one, the quick swipes a short thin flick. Additive light only (the
+// channel the art rules leave procedural); the authored arc plates that will
+// replace it are queued in docs/ART_QUEUE.md §2bo.
+function drawCrestEdge(c, pl, pass) {
+  const sv = pl.swingVis;
+  const blk = sv && !sv.charged && !sv.swirl && sv.reach ? swingCrest(sv) : null;
+  if (!blk) return false;
+  const p = clamp(1 - sv.t / sv.t0, 0, 1);
+  if (p < 0.04) return false;                 // nothing during the wind-up
+  // snaps in, holds, thins away — the cut's own envelope
+  const a = p < 0.25 ? p / 0.25 : Math.pow(1 - (p - 0.25) / 0.75, 1.4);
+  if (a <= 0.02) return false;
+  if (G.slashPasses) G.slashPasses.push({ layer: 'crest', pass: pass || 'base', crest: sv.crest });
+  const reach = sv.reach, half = sv.half;
+  const lw = clamp(half * 0.17, 2.5, 11);      // the cut's weight is its width
+  const rad = Math.max(8, reach - lw / 2);     // the outer rim lands on the reach
+  const span = Math.min(1.25, Math.atan2(half, Math.max(1, reach - half)));
+  // the arc opens across the cut as the swing travels, then holds
+  const open = Math.min(1, p / 0.4);
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  c.translate(pl.x + pl.w / 2, pl.y + pl.h / 2);
+  c.rotate(sv.ang || 0);
+  // the glow copy is the same stroke, FATTER and softened — never scaled out
+  // from her centre the way the rake's copy is, because a scaled copy of this
+  // arc would draw a second rim past the reach the seal really gives her
+  const glowP = pass === 'glow';
+  if (glowP) c.filter = 'blur(' + SLASH_GLOW.blur + 'px)';
+  c.globalAlpha = a * (glowP ? SLASH_GLOW.alpha : 0.9);
+  c.strokeStyle = blk.tint; c.lineCap = 'round';
+  c.lineWidth = lw * (glowP ? 2 : 1);           // the halo: twice the stroke, blurred
+  c.beginPath(); c.arc(0, 0, rad, -span, -span + span * 2 * open); c.stroke();
+  // a thinner inner rim, so it reads as a crescent and not a ring segment
+  if (glowP) { c.filter = 'none'; c.restore(); return true; }   // the halo needs no inner rim
+  c.lineWidth = Math.max(1.2, lw * 0.4); c.globalAlpha *= 0.6;
+  c.beginPath(); c.arc(0, 0, Math.max(4, rad - lw * 1.4), -span * 0.8, -span * 0.8 + span * 1.6 * open); c.stroke();
+  c.filter = 'none';
+  c.restore();
+  return true;
 }
 function drawRake(c, pl, mk, pass) {
   const dir = mk.dir, far = mk.far;

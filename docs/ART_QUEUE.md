@@ -21,6 +21,45 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bo. THE SEALS' CUTS — six crest arcs over her swing ✱ QUEUED 2026-10-12 (code session, handoff Part 2 C1)
+
+A seal of two or more sockets now changes how she fights (`CREST_ATTACK` in
+`js/game.js`, `docs/CRESTS.md` "Seals that change how she fights"), and the
+player sees which: over every weapon's own cut the slash layer draws one
+crescent in the seal's tint, sized from the box the swing really has
+(`drawCrestEdge` in `js/entities.js` — a procedural additive stand-in, the one
+function these plates replace). Fire them as ENERGY ON BLACK, like the
+supercharge effects (§2az): pure black background, the arc only, no hand, no
+weapon, no body, no ground; it is composited with `lighter`, so black is
+transparent and the core may blow out to white. Each strip is drawn facing
+RIGHT, the arc's outer rim touching the right edge of the cell (the code puts
+that rim on the cut's reach), its chord vertical and spanning the cell's
+middle 80 % (the code stretches it to the cut's width).
+
+| key | seal / style | tint (core → rim) | the arc's character | cells |
+|---|---|---|---|---|
+| `crestCutReach` | Sharpened Claws — Long reach | acid green `#2dff1e` | a long thin crescent with a needle-sharp leading point; the edge of a cutter's blade | 6: gather → open → full → thin → wisp → gone |
+| `crestCutSlam` | Thick Plating — Heavy slam | slate `#5c7aa8` | a broad, flat-faced wedge of force, almost a slab, with a dust-like grain on its trailing side | 6, the same beats, held one cell longer on "full" |
+| `crestCutQuick` | Actuator Overclock — Quick swipes | pink `#ff9be0` | a short flick, two parallel hair-thin streaks, motion-blurred | 6 |
+| `crestCutLunge` | Phase Coil — Lunge | lavender `#b8a0ff` | a crescent that smears BACKWARD into an after-image trail, as if the cut arrived ahead of her | 6 |
+| `crestCutRooted` | Insulated Soles — Rooted | teal `#16a596` | a crescent with a heavy base, small arcs of grounding current crawling along its inner rim | 6 |
+| `crestCutTwo` | Emergency Restart Unit — Two-beat | moss `#69872d` | a crescent with a second, fainter echo arc 15 % inside it — the restart's double pulse | 6 |
+
+One 6×6 sheet (rows = seals in the order above, columns = the six beats),
+each cell square, 256 px master. Negatives: no red, no amber, no lime, no
+gold glints (the registry reserves them — `docs/combat/GLOBAL_REGISTRY.md` §2,
+"Crest cuts" lists these six tints), no sparks that read as a hostile hit, no
+text, no frame.
+
+Wire: key with `tools/blackkey.cjs`, archive in `assets/source/`, add the six
+keys to the media manifest; in `drawCrestEdge` blit the cell at the swing's
+progress (`1 - sv.t / sv.t0`), rotated to `sv.ang`, scaled so the rim lands on
+`sv.reach` and the chord spans `2 × sv.half`, keeping the stroked crescent as
+the fallback; derive the low tier with `tools/lowres.cjs` (RULE ZERO).
+`node tests/run.cjs crestfight slashlayer glowcost`.
+
+---
+
 ## 2bm. THE LOADOUT FRAMES — arm hex, crest diamond, relic seal ✱ QUEUED 2026-10-12 (code session, handoff Part 2 C2)
 
 Arms, crests and relics are colour-coded on every screen now (shop, Gear /
