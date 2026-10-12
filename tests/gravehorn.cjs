@@ -321,17 +321,41 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   // 5. THE PARRY
   // ======================================================================
   const tossWith = async (pressAt) => {
-    await page.evaluate(() => { T.stage({ ghMet: 1, ghParryTold: 1 }); T.arena(700, 700 - 150 - 40); G.boss.parries = 0; T.go('tossprep', GH.tossTell); });
-    const c0 = (await S()).cores;
-    let pressed = null;
+    // THE PRESS RIDES THE SIMULATION, not a poll from outside the page: a
+    // loaded machine answered the poll 100 ms late and the strike meant for
+    // t=0.42 s landed at 0.32 s, inside a different case. The keydown is the
+    // real input event, dispatched from the step the wind-up crosses the mark.
+    await page.evaluate((at) => {
+      const orig = window.__ghStepOrig || (window.__ghStepOrig = ghStep);
+      window.__ghPressed = null;
+      window.ghStep = function (b, dt) {
+        const r = orig(b, dt);
+        if (window.__ghPressed == null && b.st === 'tossprep' && b.t <= at) {
+          window.__ghPressed = +b.t.toFixed(3);
+          // ...dispatched just after THIS frame: fired inside the update, the
+          // frame's own input clear (clearP) wiped the press before her next
+          // update could read it, and no strike happened at all
+          setTimeout(() => {
+            dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyX' }));
+            requestAnimationFrame(() => requestAnimationFrame(() => dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyX' }))));
+          }, 0);
+        }
+        return r;
+      };
+      // ...installed BEFORE the wind-up starts, in the same turn of the page
+      T.stage({ ghMet: 1, ghParryTold: 1 }); T.arena(700, 700 - 150 - 40); G.boss.parries = 0;
+      window.__ghC0 = player.cores;
+      T.go('tossprep', GH.tossTell);
+    }, pressAt);
+    const c0 = await page.evaluate(() => window.__ghC0);
     const t0 = Date.now();
     while (Date.now() - t0 < 2500) {
       const s = await S();
-      if (!pressed && s.st === 'tossprep' && s.t <= pressAt) { pressed = +s.t.toFixed(3); await page.keyboard.press('KeyX'); }
       if (['stagger', 'tossrecover'].includes(s.st)) break;
       await sleep(3);
     }
     await sleep(150);
+    const pressed = await page.evaluate(() => { window.ghStep = window.__ghStepOrig; return window.__ghPressed; });
     const s = await S();
     return { lost: c0 - s.cores, st: s.st, parries: s.parries, pressed };
   };

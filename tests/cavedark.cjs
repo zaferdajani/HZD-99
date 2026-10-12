@@ -171,10 +171,18 @@ const check = (name, ok, detail) => {
     // away across the room. Her own body is excluded from the box: she is
     // drawn post-grade and would measure her own paint, not her light.
     await enter('CV2', 40);
+    // ...with the room's creatures out of frame, as for the fixtures below:
+    // what is measured is the GROUND her lamp lights. Since every creature
+    // carries a pale readability rim (js/foeread.js, owner 2026-10-12: always
+    // keep a contrast between the background and the enemy), a bat wandering
+    // into the far box read as light there — the rim doing its job, not the
+    // cave getting brighter.
+    const lampPack = G.enemies; G.enemies = [];
     await pin(1);
     const psx = player.x + player.w / 2 - camSX(), psy = player.y - camSY();
     out.nearHer = lum(psx + 70, psy - 10, 120, 110);
     out.farFromHer = lum(psx + 400 > 820 ? psx - 460 : psx + 400, psy - 10, 120, 110);
+    G.enemies = lampPack;
 
     // ---- 4: light is a guide ------------------------------------------------
     // TAKE IT AWAY, do not sample beside it. The first version compared the
