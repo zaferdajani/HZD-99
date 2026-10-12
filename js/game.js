@@ -14219,9 +14219,11 @@ function drawWorldFrame() {
     for (const rb of G.rubbles) drawRubble(rb, rb.x, rubbleFoot(rb) + 4, PAL[G.roomDef.zone]);
   if (G.plats) for (const pl of G.plats) pl.draw(c);
   if (G.saws) for (const sw of G.saws) sw.draw(c);
-  for (const e of G.enemies) e.draw(c);
+  // every hostile body and the guardian through foeDraw: the pale rim that
+  // keeps each one off its room (js/foeread.js, tests/contrast.cjs)
+  for (const e of G.enemies) foeDraw(c, e);
   for (const w of G.wrecks) w.draw(c);
-  if (G.boss) G.boss.draw(c);
+  if (G.boss) foeDraw(c, G.boss);
   if (typeof drawParryTells === 'function') drawParryTells(c);           // the parry glint (js/parry.js)
   if (typeof drawPetFx === 'function') { drawPetFx(c); drawPetBond(c); }
   for (const p of G.projs) p.draw(c);

@@ -109,6 +109,7 @@ function drawSheet(c, key, n, cw, ch, frame, scale, yOff) {
 }
 // soft contact shadow — the cheapest, strongest "grounded / lit scene" cue
 function contactShadow(c, cx, feetY, w, alpha) {
+  if (typeof FOE_READ !== 'undefined' && FOE_READ.sil) return;   // a rim's stencil is the body, not its shadow (js/foeread.js)
   c.save();
   const g = c.createRadialGradient(cx, feetY, 1, cx, feetY, w);
   g.addColorStop(0, 'rgba(0,0,0,' + (alpha || 0.4) + ')');
@@ -14276,7 +14277,7 @@ class Boss {
       c.ellipse(bx, this.y + this.h - 2, this.w * (0.6 + e * 0.5), 9 + e * 6, 0, 0, 7);
       c.stroke();
       c.restore();
-    } else this._tellDur = 0;
+    } else if (!FOE_READ.sil) this._tellDur = 0;   // the rim's stencil pass (js/foeread.js) raises the probe; it must not reset the ramp
     // GRAVEHORN draws his own rig (js/gravehorn.js): his weight is in his legs,
     // not in the shared lean below
     if (!heroWorld && this.kind === 'horn' && typeof drawGravehorn === 'function') { drawGravehorn(c, this); c.restore(); return; }
@@ -14296,7 +14297,9 @@ class Boss {
     // and compresses when a fall lands — pivoted at the FEET so mass stays
     // planted. Suppressed for the art probe (it measures feet, not physics)
     // and for the dead (their collapses are choreographed per guardian).
-    if (!this.dead && !G.artProbe) {
+    // The rim's stencil (js/foeread.js) raises the probe for decoration only:
+    // the lean is pose, and the rim has to fit the body that is drawn.
+    if (!this.dead && (!G.artProbe || FOE_READ.sil)) {
       const wx = this.cx(), wy = this.y + this.h;
       const spd = Math.abs(this.vx);
       const bob = Math.abs(this.vy) < 30 && spd > 26

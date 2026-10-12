@@ -88,16 +88,37 @@ roughly one man in twelve.
 
 | System | Hue | Hex | Frame | Why this hue |
 |---|---|---|---|---|
-| Arms (attack) | Rose | `#ff45b4` | hex bezel | Orange was the obvious "attack" colour and is taken twice over: it sits between telegraph amber and danger red (ΔE 30 to amber) and IS Kingdom C's glow and the slag arm's element. Rose stays warm: ΔE 46 from danger red, 47 from purifier violet. |
+| Arms (attack) | Coral | `#ffb4a5` | hex bezel | Orange was the obvious "attack" colour and is taken twice over: it sits between telegraph amber and danger red (ΔE 30 to amber) and IS Kingdom C's glow and the slag arm's element. The first pick, rose `#ff45b4`, sat ΔE 9 from Kingdom X's glow and was retired (owner, 2026-10-12). Coral is the best non-yellow point a full RGB sweep finds against the eight hues above and all six kingdom palettes: ΔE 41 from danger red, 47 from reward gold, 50 from telegraph amber, ≥ 42 from every kingdom's glow and edge, and ≥ 3:1 luminance against every kingdom's ground colours. |
 | Crests (combat passives) | Cobalt | `#4a7bff` | diamond socket | A deep saturated blue, far from the pale blues: frost ΔE 64, lock cyan ΔE 86. |
 | Relics (exploration) | Trail green | `#4fe36a` | double-ringed round seal | A saturated path green: lime ΔE 46, repair mint ΔE 53. Reward gold keeps the moment a relic is *found* (the drop, the chest); the seal is what it is once carried. |
 
-Pairwise: rose/cobalt ΔE 73, cobalt/green 150, rose/green 156. States: **filled**
+Pairwise: coral/cobalt ΔE 93, cobalt/green 151, coral/green 94. States: **filled**
 (worn/seated/carried), **empty** (on offer or owned but not worn — a dashed rim),
 **locked** (not hers yet — the same frame, faint). `tests/loadout.cjs` re-reads
 this table and the hard-rule table above, re-measures every distance, and checks
 the frames on the canvas. The authored frame plates are queued in
 `docs/ART_QUEUE.md` §2bm.
+
+### Readability rim — the pale edge round every hostile body (2026-10-12)
+
+Not a combat hue either: it MEANS nothing, on purpose. Owner, 2026-10-12: "you
+should always keep a contrast between the background and the enemy." Every
+enemy and guardian in CLAWBYTE is drawn with a thin pale rim outside its
+silhouette (`js/foeread.js`, `FOE_RIM`), one tint per kingdom, the same in
+every state — so it can never be read as a tell, a lock, a cure or a parry
+window. Pale because every room is dark; warm where the kingdom is cool and
+neutral where it is warm, so it is not the room's own light.
+
+| Kingdom | Rim | Nearest reserved hue | Its own glow/edge |
+|---|---|---|---|
+| A | `#ffe6d6` | repair ΔE 35 | ΔE 59 |
+| B, E, X | `#fff0dc` | repair ΔE 31 | ΔE 61 / 106 / 72 |
+| C | `#fff0f0` | frost ΔE 31 | ΔE 64 |
+| D | `#ffd9c4` | repair ΔE 40 | ΔE 36 |
+
+`tests/contrast.cjs` reads this table's source (`FOE_RIM`), holds each tint
+ΔE > 30 from every hue above and from its kingdom's glow and edge, and measures
+every room × creature pair's silhouette edge against the room it stands in.
 
 ---
 

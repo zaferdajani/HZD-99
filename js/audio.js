@@ -1095,7 +1095,7 @@ const VOX = {
 };
 let HZSW = false, HZST = false;   // stride/swing alternation for her paired takes
 function sfx(n) {
-  if (!AC || MUTED) return;
+  if (!AC || MUTED || (typeof FOE_READ !== 'undefined' && FOE_READ.sil)) return;   // a rim's stencil pass is silent (js/foeread.js)
   if (narrativeAudioActive() && ['ui', 'ok', 'no', 'purr'].includes(n)) return;
   if (typeof isHero === 'function' && isHero() && heroSfx(n)) return;
   // HER KIAI, ON THE RIGHT BEAT. The three-hit string escalates, so the shout

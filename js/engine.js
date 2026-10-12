@@ -719,6 +719,7 @@ function camSY() { return cam.y+(cam.shakeY||0); }
 
 let parts = [];
 function addPart(x, y, vx, vy, life, color, size, grav, glow) {
+  if (typeof FOE_READ !== 'undefined' && FOE_READ.sil) return;   // a rim's stencil pass lays nothing (js/foeread.js)
   // the budget is the device's, not the effect's — every burst in the game asks
   // for as many as it wants and gets as many as this machine can draw
   if (parts.length > (typeof QUAL !== 'undefined' ? QUAL.parts : 600)) return;

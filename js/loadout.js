@@ -15,16 +15,24 @@
 //   - ORANGE was the obvious "attack" colour and is the one that cannot be
 //     had: it sits between telegraph amber and danger red (ΔE 30 to amber), and
 //     it IS Kingdom C's glow and the slag arm's element (ΔE 5 / 11).
-//   - arm   ROSE   #ff45b4 — warm without being amber or red: ΔE 46 from danger
-//     red, 47 from purifier violet. The nearest thing in the game is Kingdom
-//     X's pink ambience, which is a backdrop, never a frame.
+//   - arm   CORAL  #ffb4a5 — a pale warm coral, warm without being amber, red
+//     or gold: ΔE 41 from danger red, 47 from reward gold, 50 from telegraph
+//     amber. It replaced ROSE #ff45b4 (owner, 2026-10-12), which sat ΔE 9 from
+//     Kingdom X's own glow (#ff5ec8) — an arm frame in the rift read as part of
+//     the room. Searched, not picked: the free room between eight reserved hues
+//     and six kingdom palettes is narrow (the best a full RGB sweep finds is
+//     ΔE ≈ 32, and that is a yellow wedged between amber and lime). Coral is the
+//     best of what is not yellow: ΔE ≥ 42 from every kingdom's glow and edge
+//     (C's orange edge is the nearest), and pale, so it stands at 3:1 or better
+//     against every kingdom's ground colours on a HUD laid over the world.
 //   - crest COBALT #4a7bff — a deep saturated blue, far from the PALE blues
 //     (frost ΔE 64, lock cyan ΔE 86) because those are pastels and this is not.
 //   - relic TRAIL  #4fe36a — a saturated path-green: lime ΔE 46, repair mint
 //     ΔE 53. Relics used to share reward gold, which belongs to the moment of
 //     getting a thing; the relic's FRAME is what it is once you carry it.
-//   Pairwise the three are ΔE 73 (rose/cobalt), 150 (cobalt/green) and 156
-//   (rose/green). tests/loadout.cjs re-measures all of this from the canvas.
+//   Pairwise the three are ΔE 93 (coral/cobalt), 151 (cobalt/green) and 94
+//   (coral/green). tests/loadout.cjs re-measures all of this from the canvas,
+//   and measures the arm hue against every kingdom's palette and painted rooms.
 //
 // WHY A SHAPE AS WELL. Roughly one man in twelve cannot separate some of these
 // hues, so the colour is never the only cue: an arm sits in a HEX (the
@@ -36,7 +44,7 @@
 // THESE ARE STAND-INS. A stroked frame is UI chrome; the authored frames are
 // queued in docs/ART_QUEUE.md §2bm, and drawLoadoutFrame is the one function
 // the plates replace.
-const LOADOUT_COL = Object.freeze({ arm: '#ff45b4', crest: '#4a7bff', relic: '#4fe36a' });
+const LOADOUT_COL = Object.freeze({ arm: '#ffb4a5', crest: '#4a7bff', relic: '#4fe36a' });
 const LOADOUT_SHAPE = Object.freeze({ arm: 'hex', crest: 'diamond', relic: 'seal' });
 
 // the same hue at an alpha, derived from the one constant (selection plates,
