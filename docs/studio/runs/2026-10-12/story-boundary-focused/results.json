@@ -1,0 +1,104 @@
+{
+  "started_utc": "2026-10-12T12:02:16.614100+00:00",
+  "base_commit": "1bf250f0c7e758e7ea907d1adbba9504adeba21f",
+  "dirty_at_start": "M docs/studio/runs/2026-10-11/images/winch-after-burst.png\n M docs/studio/runs/2026-10-11/images/winch-strike-scrap.png\n M forge-odyssey.html\n M forge.html\n M index.html\n M js/game.js\n M js/grapple.js\n M js/panels.js\n M odyssey.html\n M tests/campaign-ch1.cjs\n M tests/chapter-one.cjs\n M tests/grapple.cjs\n M tests/gravehorn.cjs\n M tests/panels.cjs\n M tests/roomcache.cjs\n M tests/run.cjs\n M tests/secrettell.cjs\n M tests/story-order.cjs\n M tools/studio/README.md\n M tools/studio/audit.py\n?? docs/studio/runs/2026-10-12/\n?? tests/campaign-contract.cjs\n?? tools/studio/test_audit.py",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.476462,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "58e3b19378b896cae94e12f482a5af50f5dec294490c18d457e316000442c2d6"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "5f5f779bbc50da8be6b5f29c84c4969505da9004f5a458aac3ede65576169f4e",
+        "odyssey.html": "258af72b36e59c8ae0c171e5180fedb9b581670efc0ba61a0432af5607a9ced3",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "panels",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 59.104868,
+      "timeout_seconds": 480,
+      "log": "panels.log",
+      "sha256": "d6d5ef7f495f2dff97a0d7aa119e7abfadae4a0bfae0aad1906d0cf94e5925d4"
+    },
+    {
+      "name": "chapter-one",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.67984,
+      "timeout_seconds": 480,
+      "log": "chapter-one.log",
+      "sha256": "ce8fdcff8d2cf2cf6a33c47e4a497df5c8b995595bfecc699f0bfa0a80ad3c2c"
+    },
+    {
+      "name": "campaign-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.81853,
+      "timeout_seconds": 480,
+      "log": "campaign-contract.log",
+      "sha256": "7e1cc5535432412dd38d399c71c9c3fc8f350adec35b3807edc1c6f220b78180"
+    },
+    {
+      "name": "story-order",
+      "status": "fail",
+      "exit_code": 1,
+      "seconds": 1.992669,
+      "timeout_seconds": 480,
+      "log": "story-order.log",
+      "sha256": "7715085b41d9e3557cf2b46fcd54e28c2406f127e1910aaeed21c36cf41285c4"
+    },
+    {
+      "name": "opening-order",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 422.916094,
+      "timeout_seconds": 1080,
+      "log": "opening-order.log",
+      "sha256": "54c56f8bb641d9e3d54142fb8a22ce2fdb905722a26c9d2b331636e7d254a4bc"
+    },
+    {
+      "name": "roomcache",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 69.997669,
+      "timeout_seconds": 480,
+      "log": "roomcache.log",
+      "sha256": "0bfd6aa8c7c212d04c0b9bdf80371d766869c27c09579502973b9e3871c01b24"
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "5f5f779bbc50da8be6b5f29c84c4969505da9004f5a458aac3ede65576169f4e",
+        "odyssey.html": "258af72b36e59c8ae0c171e5180fedb9b581670efc0ba61a0432af5607a9ced3",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "5f5f779bbc50da8be6b5f29c84c4969505da9004f5a458aac3ede65576169f4e",
+  "complete_requested_scope": true,
+  "passed": false,
+  "finished_utc": "2026-10-12T12:11:35.373490+00:00"
+}

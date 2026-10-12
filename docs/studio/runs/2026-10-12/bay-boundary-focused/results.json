@@ -1,0 +1,86 @@
+{
+  "started_utc": "2026-10-12T12:16:02.370585+00:00",
+  "base_commit": "1bf250f0c7e758e7ea907d1adbba9504adeba21f",
+  "dirty_at_start": "M docs/studio/runs/2026-10-11/images/winch-after-burst.png\n M docs/studio/runs/2026-10-11/images/winch-strike-scrap.png\n M forge-odyssey.html\n M forge.html\n M index.html\n M js/game.js\n M js/grapple.js\n M js/panels.js\n M odyssey.html\n M tests/campaign-ch1.cjs\n M tests/chapter-one.cjs\n M tests/grapple.cjs\n M tests/gravehorn.cjs\n M tests/panels.cjs\n M tests/roomcache.cjs\n M tests/run.cjs\n M tests/secrettell.cjs\n M tests/story-order.cjs\n M tools/studio/README.md\n M tools/studio/audit.py\n?? docs/studio/runs/2026-10-12/\n?? tests/campaign-contract.cjs\n?? tools/studio/test_audit.py",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.861787,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "a36b16365fcb30daecf89b36c4fb0e111a066419c78c8ede3376739fccd7d7bd"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "0b6941bdbd887fc7ab22d89071bb53f44b2507958c162493aa8d5bf8fc3fc723",
+        "odyssey.html": "8b8fd918a0269f17400e869a32053ccc16c4c13b461ca6693c06b0411b2ac77e",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "panels",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 63.675664,
+      "timeout_seconds": 480,
+      "log": "panels.log",
+      "sha256": "227f0c9401295afa22bd4bd82d8a36a86127678c7de0296bd46971b0b9ae6191"
+    },
+    {
+      "name": "chapter-one",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 3.185993,
+      "timeout_seconds": 480,
+      "log": "chapter-one.log",
+      "sha256": "b64ec464205454e0624505391ce7ab4ef87474df4608b38e8564186fe7dfe167"
+    },
+    {
+      "name": "story-order",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.157307,
+      "timeout_seconds": 480,
+      "log": "story-order.log",
+      "sha256": "999493fd737c6509b7aab40252e06ef38441b7c67e27b1ebf42789e3fcc7efa8"
+    },
+    {
+      "name": "campaign-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.229474,
+      "timeout_seconds": 480,
+      "log": "campaign-contract.log",
+      "sha256": "75597acadbc797510def20b25248611ba68c5c5eb277c58f4a44c4c89fd58cfd"
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "0b6941bdbd887fc7ab22d89071bb53f44b2507958c162493aa8d5bf8fc3fc723",
+        "odyssey.html": "8b8fd918a0269f17400e869a32053ccc16c4c13b461ca6693c06b0411b2ac77e",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "0b6941bdbd887fc7ab22d89071bb53f44b2507958c162493aa8d5bf8fc3fc723",
+  "complete_requested_scope": true,
+  "passed": true,
+  "finished_utc": "2026-10-12T12:17:15.275335+00:00"
+}
