@@ -44,6 +44,26 @@ The glide is silent today (`js/glide.js`). One loop:
 | `glide_jets` | two small jets holding her up: a soft steady hiss with a faint flutter, lighter than the double jump's burst | seamless LOOP 0.4–0.6 s, starts and stops with the glide, ducks under dialogue |
 
 Owner reviews before it is cut; wire into `js/audio.js` and start/stop it from `glideStep`.
+## A-FURNACE. The bellows and the drop ✱ QUEUED 2026-10-12 (code session, handoff Part 2 A5)
+
+FURNACE CHOIR's new moves (`js/furnace-fight.js`) ship on borrowed cues: the
+wind-ups already speak through his own warning voice (`tell_atlas`, fired by
+`TELL_ST` on `ventwarn`, `dropcrouch` and `droplock`), and the rest borrows
+`vent`, `castfire` + `blast`, `launch` + `dash`, `chirp`, `slam` + `land`.
+Read the `composer` skill first; every cue is a one-shot that must survive a
+hit-stop and sit under the Foundry's boss theme without masking the tell.
+
+| cue | function | contract |
+|---|---|---|
+| `fc_breath` | THE BELLOWS DRAWING IN: a huge forge bellows inhaling — a rising roar of air sucked into a furnace, metal plates creaking open. "You hit it three times; it noticed." | one-shot 0.4 s (the p1 breath is 450 ms, p2 400 ms) — must END on a held peak, never resolve, because the blast follows |
+| `fc_backdraft` | the furnace exhaling fire out of its chest: a short, violent WHOOMPH of flame with a low 74–110 Hz body | one-shot ≤ 0.35 s, hard onset |
+| `fc_choke` | a perfect guard turned the fire back into him: the bellows coughing — a sputtering, smoke-choked wheeze with a metallic rattle | one-shot ≤ 0.6 s; plays with the parry's clash, so leave the first 100 ms quiet |
+| `fc_launch` | the wings throwing a two-ton dragon into the air: one deep wingbeat plus a scrape of claws leaving the floor | one-shot ≤ 0.4 s |
+| `fc_lock` | the LOCK (the moment to move): a short, dry, high metallic click-chime — distinct from GRAVEHORN's missile `chirp` | one-shot ≤ 0.15 s, must cut through the music |
+
+Owner reviews every cue before it is cut; wire into `js/audio.js`'s SFX map and
+swap the borrowed names in `js/furnace-fight.js` (`fcStart` 'vent', the
+`ventwarn`/`vent`/`dropcrouch`/`rise` states, `fcClashed`, `fcLand`).
 
 ## A-SOAR. The launch ✱ QUEUED 2026-10-11 (code session, handoff Part 2 B2)
 

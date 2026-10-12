@@ -347,11 +347,12 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const guardWith = async (raiseAt) => {
       await page.evaluate(() => { T.stage({ ghMet: 1, ghParryTold: 1 }); T.arena(700, 700 - 150 - 40); G.boss.parries = 0; player.parryLockT = 0; T.go('tossprep', GH.tossTell); });
       const c0 = (await S()).cores;
-      let raised = null;
+      let raised = null, upAtToss = null;
       const t0 = Date.now();
       while (Date.now() - t0 < 2500) {
         const s = await S();
         if (!raised && s.st === 'tossprep' && s.t <= raiseAt) { raised = +s.t.toFixed(3); await page.keyboard.down('KeyL'); }
+        if (upAtToss == null && s.st === 'toss') upAtToss = await page.evaluate(() => player.guardT > 0);
         if (['stagger', 'tossrecover'].includes(s.st)) break;
         await sleep(3);
       }
@@ -359,9 +360,13 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       await page.keyboard.up('KeyL');
       const s = await S();
       const glint = await page.evaluate(() => !!(player.counterT > 0 || player.counterAct));
-      return { lost: c0 - s.cores, st: s.st, parries: s.parries, raised, counter: glint };
+      return { lost: c0 - s.cores, st: s.st, parries: s.parries, raised, counter: glint, upAtToss: upAtToss !== false };
     };
-    const pg = await guardWith(0.05);
+    // A loaded machine can deliver the toss's first frames before the keydown
+    // is seen; that run never raised the brace in time and did not test the
+    // parry at all, so it is run again (at most four times) rather than counted.
+    let pg;
+    for (let a = 0; a < 4; a++) { pg = await guardWith(0.05); pg.tries = a + 1; if (pg.upAtToss) break; }
     check('a brace raised as the toss lands turns it too: he staggers, she takes nothing, the counter opens',
       pg.parries === 1 && pg.st === 'stagger' && pg.lost === 0 && pg.counter, JSON.stringify(pg));
     const hg = await guardWith(0.6);

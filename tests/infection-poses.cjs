@@ -57,7 +57,11 @@ const GUARDIANS = [
     { st: 'dash' }, { st: 'azhush' }, { st: 'recover' }, { st: 'idle', hurtT: 0.2, name: 'hurt' }, { st: 'daze', stagT: 1 }] },
   { kind: 'atlas', poses: [
     { st: 'idle' }, { st: 'idle', vx: -110, name: 'walk' }, { st: 'slamwarn' }, { st: 'forgebell' }, { st: 'meltwarn' },
-    { st: 'hymn' }, { st: 'idle', hurtT: 0.2, name: 'hurt' }, { st: 'daze', stagT: 1 }] },
+    { st: 'hymn' }, { st: 'idle', hurtT: 0.2, name: 'hurt' }, { st: 'daze', stagT: 1 },
+    // the A5 move set (js/furnace-fight.js): the bellows, its openings, the drop
+    { st: 'lobwarn', t0: 0.45 }, { st: 'ventwarn', t0: 0.45 }, { st: 'vent', t0: 0.18 }, { st: 'stagger' },
+    { st: 'recover', recMv: 'vent', t0: 0.6, name: 'cooled' }, { st: 'recover', recMv: 'drop', t0: 0.7, name: 'sprawl' },
+    { st: 'dropcrouch', t0: 0.6 }, { st: 'rise', t0: 0.45, ...AIR }, { st: 'droplock', t0: 0.38, ...AIR }, { st: 'dive', t0: 1, ...AIR }] },
   { kind: 'prism', poses: [
     { st: 'idle' }, { st: 'aim' }, { st: 'beam' }, { st: 'pounce', ...AIR }, { st: 'dashslash' }, { st: 'arcstorm' },
     { st: 'rest' }, { st: 'idle', hurtT: 0.2, name: 'hurt' }, { st: 'daze', stagT: 1 },

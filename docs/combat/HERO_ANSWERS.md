@@ -20,7 +20,7 @@ shape decides the answer.
 | Shape | States in this game |
 |---|---|
 | **Contact rush** — the boss moves through space at you | `dash`, `dashslash`, `swoop`, `dive`, `pounce`, `spring`, `nullhop` |
-| **Melee arc** — a swing in place | `swipe`, `slam` |
+| **Melee arc** — a swing in place | `swipe`, `slam`, `vent` (FURNACE CHOIR's backdraft: the one zone-C blow a perfect guard turns) |
 | **Aimed projectile** | `volley`, `lance`, `shard` |
 | **Persistent orbiter** | `orbs` |
 | **Expanding area** — a radius that grows from a point | `nova`, `azhush`, `ringcharge`, `nullcharge`, `tnull`, `roar` |
