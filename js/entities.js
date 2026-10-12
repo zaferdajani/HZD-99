@@ -12177,7 +12177,7 @@ class Boss {
         if (typeof roarWave === 'function')
           roarWave(this.cx(), this.cy() - this.h * 0.35,
             { glitch: '#b48cff', brood: '#ff5f6d', zero: '#a5d8ff',
-              atlas: '#ffd76a', prism: '#37ffd0', alpha: '#ffc24a' }[this.kind] || '#e05aff');
+              atlas: '#ff9a5a', prism: '#37ffd0', alpha: '#ffc24a' }[this.kind] || '#e05aff');   // atlas: molten, not reward gold (owner, 2026-10-12)
         burst(this.cx(), this.cy() - this.h * 0.3, 16, '#ffffff', 260, 0.5, 160, 3, true);
       }
       if (this.kind === 'atlas' && this.nestFootY != null && this.t <= 0.6 && !this.nestLanded) {

@@ -281,6 +281,7 @@ the far end of it, between her and the stone: GRAVEHORN, an armoured rhino the s
 room, one red eye, two horns. The exits close behind her. He speaks:
 > *So the little cleaner woke up.*
 > *I am GRAVEHORN, First Soldier of the Eye. It posted me on this stone.*
+> *The Eye is the one who stole your Mother's Song. I guard what it took.*
 > *The marble stays buried. So will you.*
 
 He bellows; his name goes up. She has only her claws and the burst. His big horn leaves his
@@ -692,7 +693,11 @@ the fork gives (§2.16).
 
 These are not fixed by this document. Each needs a ruling, and the game will follow it.
 
-1. **The evil robot is never met — STILL MISSING (2026-10-08).** Canon (Draft 2,
+1. **The Eye IS the evil robot — RULED (owner, 2026-10-12): named in chapter one.** GRAVEHORN,
+   his First Soldier, names him in the quarry and says it plainly: *The Eye is the one who
+   stole your Mother's Song.* His own encounter (room, art, fight) is still unbuilt — chapter six.
+   The older note follows.
+   **The evil robot is never met — STILL MISSING (2026-10-08).** Canon (Draft 2,
    `story-draft2/CLAWBYTE-00-story-foundation.md`) has Mother cleansed and then the Eye
    confronted and defeated. The game now does the first half — MOTHER-V is cleansed and
    lives, and nothing calls her the Null Core — and ends truthfully on the Eye *exposed*,

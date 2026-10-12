@@ -155,7 +155,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const bad = [];
     for (const l in langs) {
       const L = langs[l];
-      if (!Array.isArray(L.intro) || L.intro.length !== 3) bad.push(l + ':intro');
+      if (!Array.isArray(L.intro) || L.intro.length !== 4) bad.push(l + ':intro');   // four: the Eye named as the thief (owner, 2026-10-12)
       if (!Array.isArray(L.down) || L.down.length !== 2) bad.push(l + ':down');
       for (const k of ['name', 'hint', 'bar', 'goal']) if (typeof L[k] !== 'string' || /^grv_|^b_|^op_/.test(L[k])) bad.push(l + ':' + k);
       if (l !== 'en' && JSON.stringify(L.intro) === JSON.stringify(langs.en.intro)) bad.push(l + ':untranslated');

@@ -136,7 +136,7 @@ function fcStart(b, mv) {
     fcBegin(b, mv); b.st = 'hymn'; b.t = FC.hymnTell; b.hymnCD = rnd(6.5, 8.5);
     b.roarBuzzT = 0.7;
     if (typeof padRumble === 'function') padRumble(0.7, 0.6, 550);
-    if (typeof roarWave === 'function') roarWave(b.cx() + b.face * 34, b.y - b.h * 0.6, '#ffd76a');
+    if (typeof roarWave === 'function') roarWave(b.cx() + b.face * 34, b.y - b.h * 0.6, '#ff9a5a');   // molten, never reward gold (registry §2)
   } else if (mv === 'melt') {
     fcBegin(b, mv); b.meltUsed = true; b.st = 'meltwarn'; b.t = FC.meltTell; sfx('castfire');
   } else if (mv === 'vent') {

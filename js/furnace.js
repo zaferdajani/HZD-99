@@ -399,7 +399,7 @@ function drawFurnaceBody(c, b) {
       // the heat leaves him: embers rising off the wreck
       if (fade > 0.2 && typeof addPart === 'function' && chance(0.35))
         addPart(cx + rnd(-40, 40), footY - rnd(0, 30), rnd(-20, 20), rnd(-80, -30),
-          0.5, chance(0.5) ? '#ffd76a' : '#ff7b3a', 2.5, 0, true);
+          0.5, chance(0.5) ? '#ff9a5a' : '#ff7b3a', 2.5, 0, true);
       c.restore(); return true;
     }
 
@@ -467,7 +467,7 @@ function drawFurnaceBody(c, b) {
         c.restore();
         if (fl > 0.3 && typeof addPart === 'function' && chance(0.7))
           addPart(cx + rnd(-40, 40), footY - b.h * 1.5, rnd(-80, 80), rnd(-160, -40),
-            0.5, chance(0.5) ? '#ffd76a' : '#ff7b3a', 2.5, 0, true);
+            0.5, chance(0.5) ? '#ff9a5a' : '#ff7b3a', 2.5, 0, true);
       }
     } else if (b.stagT > 0 || b.st === 'daze' || b.st === 'stagger'
       || (b.st === 'recover' && (b.recMv === 'vent' || b.recMv === 'drop'))) {
@@ -567,7 +567,7 @@ function drawFurnaceBody(c, b) {
       c.restore();
       if (fc.pulseT > 0.16 && typeof addPart === 'function' && chance(0.8))
         addPart(cx + rnd(-30, 30) * sgn, footY - b.h * 1.6, rnd(-160, -60) * sgn, rnd(-40, 20),
-          0.4, '#ffd76a', 2.5, 0, true);
+          0.4, '#ff9a5a', 2.5, 0, true);   // molten, never reward gold (registry §2)
     } else if (b.st === 'slamwarn' || fc.slamT > 0) {
       // TAIL SLAM. The warn coils the authored tail overhead — that is the
       // tell — then it cuts to planted-in-the-ground with NO smear between.

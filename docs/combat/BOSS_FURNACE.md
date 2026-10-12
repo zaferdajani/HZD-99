@@ -208,8 +208,9 @@ reaction floor), §2 (amber, lime, lock cyan, danger red), §4 (greed test).
 1. **Hymn and forge bell share one tell shape** (the HERO figure). The pose is
    briefed (§2bn `bell`); until it lands they are told apart by sound (one held
    roar vs three clapper strikes) and by the spark showers.
-2. **Reward gold in his fire.** The hymn's roar wave and some of his glow use
-   `#ffd76a` (registry: player-positive only). Predates this pass; left alone.
+2. **Reward gold in his fire — FIXED (owner, 2026-10-12).** The hymn's roar wave, his
+   ember shower and the bellows' pulse were `#ffd76a`, which the registry keeps for
+   player-positive things only. They are now molten `#ff9a5a`.
 
 ### UNKNOWN
 
