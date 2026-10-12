@@ -908,13 +908,11 @@ mission('lion', s => s.flags.includes('bossGlitch') && (R.pansSeen && R.pansSeen
   if (s.room !== 'A4') { await travel(s, 'A4'); return; }
   await bossFight(s);
 });
-// 8. THE CLIMB ABOVE THE CAMP — the chapter-two teaser
+// 8. THE CROSSING INTO THE CONDUITS — the chapter-two teaser plays over the
+// doorway into B1 (owner, 2026-10-12: comics at a screen change, never mid-room)
 mission('teaser', s => (R.teaserSeen || (R.pansMissed || []).includes('ch2')) && s.state === 'PLAY', async s => {
-  if (s.room !== 'A3') { await travel(s, 'A3'); return; }
-  // the climb is the camp's ledges, tiles 17-29; up them until the story speaks
-  const r = await walkTo(s, { x: 20.5 * TL, tol: 40, y: 6 * TL, ytol: 8 });
-  if (r === 'stuck') await unstick(s, 'the climb above the camp');
-  if (r === 'arrived') await linger(s, 'ch2', 40000);
+  if (s.room !== 'B1') { await travel(s, 'B1'); return; }
+  await linger(s, 'ch2', 40000);
 });
 
 // travel between rooms, with the few things on the road that are not walking

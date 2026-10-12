@@ -139,6 +139,7 @@ const SUITE = [
   ['lesson',    'every power teaches itself and completes on real use'],
   ['nodes',     'all eight Mind Nodes open a puzzle and pay out'],
   ['film',      'the intro reel plays all eight shots without falling back'],
+  ['filmflow',  'the opening plays as one film: no black, no caption freeze, between shots'],
   ['cutskip',   'a tap does not spend the story, and a film starts at its start'],
   ['frames',    'every verb is a move, not one pose held for a quarter second'],
   ['whatplays', 'every music cue resolves to the intended track'],

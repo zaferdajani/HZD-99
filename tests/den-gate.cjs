@@ -190,7 +190,9 @@ const check = (name, ok, detail) => {
       out.grottoAfter = gateDoors().some(x => x.to === 'A4');
     }
     // ---- 8. THE END OF CHAPTER ONE: the climb above the camp, once the lion
-    // is free, hands the chapter-two teaser to the panel player — once
+    // is free, closes the chapter — and queues NO comic on the ledges (owner,
+    // 2026-10-12: never in the middle of play). The teaser belongs to the
+    // crossing into B1.
     {
       fresh({ bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1, ratchetCamp: 1 });
       // the hook QUEUES the teaser sequence (it waits for a safe moment); it
@@ -205,7 +207,9 @@ const check = (name, ok, detail) => {
       progressTick(1 / 60); progressTick(1 / 60);
       player.y = 5 * TILE; progressTick(1 / 60);
       window.panelsQueue = real;
-      out.teaser = { early, calls, flag: !!G.save.flags.ch2Climb, real: calls.map(id => !!panelsSeq(id)) };
+      loadRoom('B1'); quiet();
+      const due = panelsDue();
+      out.teaser = { early, calls, flag: !!G.save.flags.ch2Climb, b1: due && due.id };
     }
     // ---- 9. the objective, in the chapter's order, from the save alone
     {
@@ -250,8 +254,8 @@ const check = (name, ok, detail) => {
   check('...nor can the break\'s', r.brk.staged && r.brk.dealt === 0 && !r.brk.dead && r.brk.hp && !r.brk.glitch, JSON.stringify(r.brk));
   check('with the blade, the Sage and the bell, she walks east into the lair and NULLFANG wakes',
     r.opened.inA4 && r.opened.fight && r.opened.boss === 'glitch', JSON.stringify(r.opened));
-  check('the climb above the camp after the lion hands the chapter-two teaser to the panels, once',
-    r.teaser.early === 0 && r.teaser.calls.length === 1 && r.teaser.calls[0] === 'ch2' && r.teaser.real[0] && r.teaser.flag, JSON.stringify(r.teaser));
+  check('the climb above the camp after the lion closes the chapter and queues no comic mid-room; the teaser is B1\'s doorway',
+    r.teaser.calls.length === 0 && r.teaser.flag && r.teaser.b1 === 'ch2', JSON.stringify(r.teaser));
   const want = ['pg_goal_pack', 'pg_goal_marble', 'pg_goal_quarry', 'pg_goal_return', 'pg_goal_sage', 'pg_goal_chime',
     'pg_goal_east', 'pg_goal_lion', 'pg_goal_up'];
   check('the chapter\'s goal follows the owner\'s order: pack, marble, quarry, Ratchet, Sage, CHIME, the enclosure, NULLFANG, up',

@@ -11,7 +11,9 @@ const L = ctx.TEXT_LAYERS.find(l => l.en && l.en.pn_menu).en;
 let md = '## The map\n\n';
 for (const s of ctx.PANEL_SEQ) {
   md += '### ' + s.id + ' — ' + (L[s.title] || s.title) + '\n\n';
-  md += '- **Event / trigger:** ' + s.event + '. Plays in room `' + s.room + '`' + (s.alsoRoom ? ' (or `' + s.alsoRoom + '`)' : '') + ' at the first safe moment.\n';
+  md += '- **Event / trigger:** ' + s.event + '. ' + (s.manual
+    ? 'Played by its own moment (see the trigger).'
+    : 'Plays over the crossing into `' + s.room + '` if it is already due when she arrives; otherwise in `' + s.room + '` the moment its event is over.') + '\n';
   md += '- **Completion flag:** `G.save.panels.seen.' + s.id + '` (set when it starts; `past.' + s.id + '` if the save had already passed the event).\n\n';
   md += '| # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |\n|---|---|---|---|---|\n';
   s.panels.forEach((p, i) => {

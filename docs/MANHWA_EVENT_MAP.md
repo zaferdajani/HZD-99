@@ -34,13 +34,24 @@ player's input rules.
 
 ## How a sequence plays
 
-- **Trigger.** `panelsTick` (called at the top of `update`) watches the save's
-  flags and the room. A sequence starts only when the room has settled (0.8 s
-  after arrival — a crossing always finishes as a crossing), the player is
-  grounded and `panelsSafe()` holds: state `PLAY`; no dialogue, item card, shop,
-  offer, film, wake, gate walk, crossing, staged meeting/break, boss entry,
-  finisher, pending boss reward, tutorial lock or hit-stop; no live projectile;
-  no hostile within 600 px; any boss dead, tamed, purified or dormant.
+- **Trigger: a comic is a doorway, never an interruption** (owner,
+  2026-10-12: "the comics does not appear in the middle of the game. It
+  should be either before an event or directly after an event that comes
+  before another screen"). `panelsTick` (called at the top of `update`)
+  watches the save's flags and the room, and opens a sequence at one of two
+  moments only:
+  - **Arrival** — the frame the room changes. A beat already due in the room
+    she is entering plays over the crossing itself, before a single frame of
+    that room is shown (`panelsCovering` holds the screen black for at most
+    4 s while its pages arrive; the crossing's push is finished by the pages,
+    not resumed after them).
+  - **Event** — a beat whose condition flips while she is in the room (the
+    repair, the marble freed, a guardian falling) opens the instant
+    `panelsSafe()` holds — no settle delay: state `PLAY`; no dialogue, item
+    card, shop, offer, film, wake, gate walk, crossing, staged meeting/break,
+    boss entry, finisher, pending boss reward, tutorial lock or hit-stop; no
+    live projectile; no hostile within reach; any boss dead, tamed, purified
+    or dormant.
 - **Once.** Marked `G.save.panels.seen[id]` as it begins and persisted, so a
   reload never replays it. A save that had already passed an event when it was
   first seen by this build marks that sequence `past` instead of handing the
@@ -61,55 +72,87 @@ player's input rules.
 
 ## The map
 
+### wake — The cradle
+
+- **Event / trigger:** new game: after the difficulty card, before the waking (wakeStart). Played by its own moment (see the trigger).
+- **Completion flag:** `G.save.panels.seen.wake` (set when it starts; `past.wake` if the save had already passed the event).
+
+| # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
+|---|---|---|---|---|
+| 1 | `assets/manhua/ch1/game/w_cradle.webp` (game: w_cradle) | [0, 0, 1600, 1600] | `pc_w_cradle` | Forgotten in a service cradle, a small maintenance cat slept through the broadcast. |
+| 2 | `assets/manhua/ch1/game/w_eyes.webp` (game: w_eyes) | [0, 0, 1600, 1986] | `pc_w_wake` | Then her eyes came on. |
+| 3 | `assets/manhua/ch1/game/w_sit.webp` (game: w_sit) | [0, 0, 1600, 679] | — (silent) |  |
+| 4 | `assets/manhua/ch1/game/w_unplug.webp` (game: w_unplug) | [0, 0, 1600, 1600] | — (silent) |  |
+| 5 | `assets/manhua/ch1/game/w_quiet.webp` (game: w_quiet) | [0, 0, 1600, 893] | `pc_quiet` | ...quiet. |
+
 ### bay — The service bay
 
-- **Event / trigger:** woke — first arrival outside the service bay (W1 → W2). Plays in room `W2` at the first safe moment.
+- **Event / trigger:** out of the service bay door, first arrival on the road (W1 → W2). Plays over the crossing into `W2` if it is already due when she arrives; otherwise in `W2` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.bay` (set when it starts; `past.bay` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
-| 1 | `assets/manhua/ch1/clean/p04.webp` (p04 panel 2) | [52, 599, 385, 362] | — (silent) |  |
-| 2 | `assets/manhua/ch1/clean/p04.webp` (p04 panel 3) | [461, 599, 685, 362] | `pc_quiet` | ...quiet. |
-| 3 | `assets/manhua/ch1/clean/p04.webp` (p04 panel 5) | [52, 1308, 1094, 337] | `pc_door` | The door had been open a long time. |
-| 4 | `assets/manhua/ch1/clean/p05.webp` (p05 panel 1) | [400, 33, 762, 341] | `pc_city` | The city was standing. It was silent. |
+| 1 | `assets/manhua/ch1/game/d_walk.webp` (game: d_walk) | [0, 0, 1600, 679] | — (silent) |  |
+| 2 | `assets/manhua/ch1/game/d_door.webp` (game: d_door) | [0, 0, 1600, 679] | `pc_door` | The door had been open a long time. |
+| 3 | `assets/manhua/ch1/game/d_road.webp` (game: d_road) | [0, 0, 1600, 679] | `pc_city` | The city was standing. It was silent. |
 
 ### gate — The city gate
 
-- **Event / trigger:** gateOpened — first arrival inside the city gate (W2 → A0). Plays in room `A0` at the first safe moment.
+- **Event / trigger:** gateOpened — through the gates, first arrival inside the city (W2 → A0). Plays over the crossing into `A0` if it is already due when she arrives; otherwise in `A0` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.gate` (set when it starts; `past.gate` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
-| 1 | `assets/manhua/ch1/clean/p05.webp` (p05 panel 3) | [38, 722, 1125, 626] | `pc_gates` | The gates were the only monument in the kingdom, and nobody had walked through them in a long time. |
-| 2 | `assets/manhua/ch1/clean/p05.webp` (p05 panel 4) | [38, 1370, 1124, 386] | `pc_closed` | They closed behind her. Waking up is one-way too. |
+| 1 | `assets/manhua/ch1/game/g_gates.webp` (game: g_gates) | [0, 0, 1600, 893] | `pc_gates` | The gates were the only monument in the kingdom, and nobody had walked through them in a long time. |
+| 2 | `assets/manhua/ch1/game/g_closed.webp` (game: g_closed) | [0, 0, 1600, 679] | `pc_closed` | They closed behind her. Waking up is one-way too. |
+
+### letter — Ratchet's letter
+
+- **Event / trigger:** Ratchet's letter read on his dark body (opNote), before the drawer and the repair. Played by its own moment (see the trigger).
+- **Completion flag:** `G.save.panels.seen.letter` (set when it starts; `past.letter` if the save had already passed the event).
+
+| # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
+|---|---|---|---|---|
+| 1 | `assets/manhua/ch1/game/letter.webp` (game: letter) | [0, 0, 1600, 893] | `pc_l_tag` | A tag on his chest, in his own hand. |
+| 2 | `assets/manhua/ch1/game/l_song.webp` (game: l_song) | [0, 0, 1600, 893] | `pc_l_song` | “Mother’s song has been infected.” |
+| 3 | `assets/manhua/ch1/game/l_marble.webp` (game: l_marble) | [0, 0, 1600, 893] | `pc_l_marble` | “My marble slowed the virus, but it cannot stop it.” |
+| 4 | `assets/manhua/ch1/game/l_cell.webp` (game: l_cell) | [0, 0, 1600, 893] | `pc_l_cell` | “I took my battery out before it could take me. It is in the drawer beside this chair.” |
+| 5 | `assets/manhua/ch1/game/letter.webp` (game: letter) | [0, 0, 1600, 893] | `pc_l_hope` | “If you are reading this, there may still be hope. — R.” |
+
+### drawer — Ratchet's battery
+
+- **Event / trigger:** his battery taken from the drawer (ratchetCell in hand), before the repair. Plays over the crossing into `A0B` if it is already due when she arrives; otherwise in `A0B` the moment its event is over.
+- **Completion flag:** `G.save.panels.seen.drawer` (set when it starts; `past.drawer` if the save had already passed the event).
+
+| # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
+|---|---|---|---|---|
+| 1 | `assets/manhua/ch1/game/drawer.webp` (game: drawer) | [0, 0, 1600, 893] | `pc_drawer` | His own battery, exactly where he had left it. |
 
 ### ratchet — Ratchet's battery
 
-- **Event / trigger:** Ratchet's battery restored (ratchetRepaired / on_A0B|ratchet), after his wake talk and errand. Plays in room `A0B` at the first safe moment.
+- **Event / trigger:** Ratchet's battery restored (ratchetRepaired / on_A0B|ratchet), after his wake talk and errand. Plays over the crossing into `A0B` if it is already due when she arrives; otherwise in `A0B` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.ratchet` (set when it starts; `past.ratchet` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
-| 1 | `assets/manhua/ch1/game/letter.webp` (game: letter) | [0, 0, 1600, 893] | `pc_letter` | A tag on his chest, in his own hand: his battery was in the drawer. |
-| 2 | `assets/manhua/ch1/game/drawer.webp` (game: drawer) | [0, 0, 1600, 893] | `pc_drawer` | His own battery, exactly where he had left it. |
-| 3 | `assets/manhua/ch1/game/repair.webp` (game: repair) | [0, 0, 1344, 752] | `pc_awake` | Ratchet was awake. |
-| 4 | `assets/manhua/ch1/clean/p09.webp` (p09 panel 1) | [19, 17, 650, 389] | `pc_necklace` (n_ratchet) | The marble in my necklace was an old gift to my ancestor. It slowed the virus long enough for me to think. It could not stop the infection. |
-| 5 | `assets/manhua/ch1/clean/p09.webp` (p09 panel 2) | [19, 418, 670, 359] | `pc_song` (n_ratchet) | Mother's song kept the robots of every kingdom in harmony. Someone unknown hacked its frequency and hid a virus inside it. |
+| 1 | `assets/manhua/ch1/game/repair.webp` (game: repair) | [0, 0, 1344, 752] | `pc_awake` | Ratchet was awake. |
+| 2 | `assets/manhua/ch1/clean/p09.webp` (p09 panel 1) | [19, 17, 650, 389] | `pc_necklace` (n_ratchet) | The marble in my necklace was an old gift to my ancestor. It slowed the virus long enough for me to think. It could not stop the infection. |
+| 3 | `assets/manhua/ch1/clean/p09.webp` (p09 panel 2) | [19, 418, 670, 359] | `pc_song` (n_ratchet) | Mother's song kept the robots of every kingdom in harmony. Someone unknown hacked its frequency and hid a virus inside it. |
 
 ### cave — The marble cave
 
-- **Event / trigger:** first entry into the marble cave (CV1), through the buried mouth under the hub. Plays in room `CV1` at the first safe moment.
+- **Event / trigger:** first entry into the marble cave (CV1), through the buried mouth under the hub. Plays over the crossing into `CV1` if it is already due when she arrives; otherwise in `CV1` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.cave` (set when it starts; `past.cave` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
-| 1 | `assets/manhua/ch1/clean/p15.webp` (p15 panel 5) | [395, 1200, 770, 558] | `pc_breathing` | The rock gave way. The tunnel was open, and it was breathing. |
-| 2 | `assets/manhua/ch1/clean/p16.webp` (p16 panel 1) | [69, 74, 690, 427] | — (silent) |  |
-| 3 | `assets/manhua/ch1/clean/p16.webp` (p16 panel 3) | [69, 523, 1068, 305] | — (silent) |  |
+| 1 | `assets/manhua/ch1/game/cv_mouth.webp` (game: cv_mouth) | [0, 0, 1600, 1195] | `pc_breathing` | The rock gave way. The tunnel was open, and it was breathing. |
+| 2 | `assets/manhua/ch1/game/cv_walk.webp` (game: cv_walk) | [0, 0, 1600, 1073] | — (silent) |  |
+| 3 | `assets/manhua/ch1/game/cv_dark.webp` (game: cv_dark) | [0, 0, 1600, 679] | — (silent) |  |
 
 ### marble — The raw marble
 
-- **Event / trigger:** the raw marble freed from its host rock in CV3 (pl_cshard). Plays in room `CV3` at the first safe moment.
+- **Event / trigger:** the raw marble freed from its host rock in CV3 (pl_cshard). Plays over the crossing into `CV3` if it is already due when she arrives; otherwise in `CV3` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.marble` (set when it starts; `past.marble` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
@@ -119,18 +162,18 @@ player's input rules.
 
 ### forge — The forging
 
-- **Event / trigger:** the first sword forged from the raw marble (crystal), after the forge film and its card. Plays in room `A0B` at the first safe moment.
+- **Event / trigger:** the first sword forged from the raw marble (crystal), after the forge film and its card. Plays over the crossing into `A0B` if it is already due when she arrives; otherwise in `A0B` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.forge` (set when it starts; `past.forge` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
-| 1 | `assets/manhua/ch1/clean/p18.webp` (p18 panel 2) | [42, 617, 1114, 355] | `pc_forge` (n_ratchet) | You brought the marble. Steady the clamp. I will shape the edge, then fit the grip. Cut what is holding them — not what is left of them. |
+| 1 | `assets/manhua/ch1/game/f_forge.webp` (game: f_forge) | [0, 0, 1600, 679] | `pc_forge` (n_ratchet) | You brought the marble. Steady the clamp. I will shape the edge, then fit the grip. Cut what is holding them — not what is left of them. |
 | 2 | `assets/manhua/ch1/clean/p18.webp` (p18 panel 3) | [52, 1120, 426, 620] | `pc_blade` | Ratchet forged a glowing white sword from the cave marble. It frees infected robots — and its handle can later connect to another weapon. |
-| 3 | `assets/manhua/ch1/clean/p18.webp` (p18 panel 5) | [505, 1345, 300, 396] | — (silent) |  |
+| 3 | `assets/manhua/ch1/game/f_blade.webp` (game: f_blade) | [0, 0, 1600, 2143] | — (silent) |  |
 
 ### passage — The maintenance door
 
-- **Event / trigger:** first arrival in the maintenance tunnel (GA1T) through the door beside the quarry. Plays in room `GA1T` at the first safe moment.
+- **Event / trigger:** first arrival in the maintenance tunnel (GA1T) through the door beside the quarry. Plays over the crossing into `GA1T` if it is already due when she arrives; otherwise in `GA1T` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.passage` (set when it starts; `past.passage` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
@@ -140,19 +183,19 @@ player's input rules.
 
 ### meet — The corridor
 
-- **Event / trigger:** NULLFANG's first appearance — the corridor meeting (nfMeet), once it has left the room. Plays in room `A2` at the first safe moment.
+- **Event / trigger:** NULLFANG's first appearance — the corridor meeting (nfMeet), once it has left the room. Plays over the crossing into `A2` if it is already due when she arrives; otherwise in `A2` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.meet` (set when it starts; `past.meet` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
 | 1 | `assets/manhua/ch1/clean/p14.webp` (p14 panel 1) | [23, 18, 1154, 334] | — (silent) |  |
-| 2 | `assets/manhua/ch1/clean/p14.webp` (p14 panel 2) | [23, 371, 1154, 660] | `pc_core` · conditional | It took one core. Never her last. |
+| 2 | `assets/manhua/ch1/game/m_down.webp` (game: m_down) | [0, 0, 1600, 893] | `pc_core` · conditional | It took one core. Never her last. |
 | 3 | `assets/manhua/ch1/clean/p14.webp` (p14 panel 3) | [48, 1185, 540, 360] | — (silent) |  |
 | 4 | `assets/manhua/ch1/clean/p14.webp` (p14 panel 4) | [605, 1185, 547, 275] | `pc_bored` | She was nothing to it. It got bored of her. |
 
 ### break — NULLFANG resists
 
-- **Event / trigger:** NULLFANG's break (nfBreak): the purple goes out of him, then the bell writes the order back. Plays in room `A2` (or `A3`) at the first safe moment.
+- **Event / trigger:** NULLFANG's break (nfBreak): the purple goes out of him, then the bell writes the order back. Plays over the crossing into `A2` if it is already due when she arrives; otherwise in `A2` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.break` (set when it starts; `past.break` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
@@ -162,44 +205,44 @@ player's input rules.
 
 ### sage — The Meadow Sage
 
-- **Event / trigger:** the first Sage cleansed (sageTame_GA1D), after its gift card and revelation. Plays in room `GA1D` at the first safe moment.
+- **Event / trigger:** the first Sage cleansed (sageTame_GA1D), after its gift card and revelation. Plays over the crossing into `GA1D` if it is already due when she arrives; otherwise in `GA1D` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.sage` (set when it starts; `past.sage` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
-| 1 | `assets/manhua/ch1/clean/p25.webp` (p25 panel 3) | [20, 562, 1161, 455] | `pc_knelt` | The sage knelt. The song held its body together. Broken, but not CLEAN. |
+| 1 | `assets/manhua/ch1/game/s_ring.webp` (game: s_ring) | [0, 0, 1600, 679] | `pc_knelt` | The sage knelt. The song held its body together. Broken, but not CLEAN. |
 | 2 | `assets/manhua/ch1/clean/p26.webp` (p26 panel 1) | [52, 42, 1096, 310] | `pc_cuts` | Claws could not cleanse the song. The PURIFIER could. |
-| 3 | `assets/manhua/ch1/clean/p26.webp` (p26 panel 2) | [52, 380, 1097, 605] | `pc_letgo` | The song let go. The sage remembered everything — and gave what it had kept for whoever would come with clean light. |
-| 4 | `assets/manhua/ch1/clean/p26.webp` (p26 panel 3) | [52, 1013, 1097, 299] | `pc_cell` | It had counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light. |
+| 3 | `assets/manhua/ch1/game/s_cleanse.webp` (game: s_cleanse) | [0, 0, 1600, 893] | `pc_letgo` | The song let go. The sage remembered everything — and gave what it had kept for whoever would come with clean light. |
+| 4 | `assets/manhua/ch1/game/s_cell.webp` (game: s_cell) | [0, 0, 1600, 679] | `pc_cell` | It had counted every machine that fell in the scrap fields — and kept one power cell safe for whoever came with clean light. |
 | 5 | `assets/manhua/ch1/game/sage_rev.webp` (game: sage_rev) | [0, 0, 1600, 893] | `pc_s_point` | It pointed up, toward the climb above the meadow. |
 | 6 | `assets/manhua/ch1/game/sage_bell.webp` (game: sage_bell) | [0, 0, 1600, 679] | `pc_s_bell` · conditional | NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it. |
 
 ### chime — CHIME
 
-- **Event / trigger:** CHIME silenced (bossChime), once its cell is paid. Plays in room `A9` at the first safe moment.
+- **Event / trigger:** CHIME silenced (bossChime), once its cell is paid. Plays over the crossing into `A9` if it is already due when she arrives; otherwise in `A9` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.chime` (set when it starts; `past.chime` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
 | 1 | `assets/manhua/ch1/clean/p20.webp` (p20 panel 2) | [425, 49, 725, 505] | `pc_singing` | It was singing at her. |
 | 2 | `assets/manhua/ch1/clean/p20.webp` (p20 panel 4) | [425, 1091, 725, 298] | `pc_nobody` | Destroyed. There was nobody in it. |
-| 3 | `assets/manhua/ch1/clean/p20.webp` (p20 panel 5) | [425, 1417, 725, 323] | `pc_made` | A guardian is a machine that was infected. This was not. It had been MADE by the source of the Song, and there was nothing under the virus to give back. |
+| 3 | `assets/manhua/ch1/game/c_bell.webp` (game: c_bell) | [0, 0, 1600, 679] | `pc_made` | A guardian is a machine that was infected. This was not. It had been MADE by the source of the Song, and there was nothing under the virus to give back. |
 
 ### free — NULLFANG, free
 
-- **Event / trigger:** NULLFANG purified (bossGlitch), after the purification film and its rewards. Plays in room `A4` at the first safe moment.
+- **Event / trigger:** NULLFANG purified (bossGlitch), after the purification film and its rewards. Plays over the crossing into `A4` if it is already due when she arrives; otherwise in `A4` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.free` (set when it starts; `past.free` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |
 |---|---|---|---|---|
 | 1 | `assets/manhua/ch1/game/fight_a.webp` (game: fight_a) | [0, 0, 1600, 893] | — (silent) |  |
 | 2 | `assets/manhua/ch1/game/fight_b.webp` (game: fight_b) | [0, 0, 1600, 893] | `pc_f_cut` | One clean cut. The virus came off him like ash — and he was still there. |
-| 3 | `assets/manhua/ch1/clean/p24.webp` (p24 left panel 1) | [68, 580, 520, 313] | — (silent) |  |
-| 4 | `assets/manhua/ch1/clean/p24.webp` (p24 left panel 2) | [69, 917, 585, 391] | `pc_oath` | The virus was destroyed. NULLFANG was free. He seemed to like her, and once in every room the blow that would have broken her came out of the dark and roared them off her instead. |
+| 3 | `assets/manhua/ch1/game/f_strike.webp` (game: f_strike) | [0, 0, 1600, 893] | — (silent) |  |
+| 4 | `assets/manhua/ch1/game/f_walk.webp` (game: f_walk) | [0, 0, 1600, 1073] | `pc_oath` | The virus was destroyed. NULLFANG was free. He seemed to like her, and once in every room the blow that would have broken her came out of the dark and roared them off her instead. |
 
 ### ch2 — Next: the Data Conduits
 
-- **Event / trigger:** chapter-two teaser: NULLFANG free and she stands on the climb to the Data Conduits (A3), or first B1 arrival. Plays in room `A3` (or `B1`) at the first safe moment.
+- **Event / trigger:** chapter-two teaser: NULLFANG free, played over her crossing into the Data Conduits (B1). Plays over the crossing into `B1` if it is already due when she arrives; otherwise in `B1` the moment its event is over.
 - **Completion flag:** `G.save.panels.seen.ch2` (set when it starts; `past.ch2` if the save had already passed the event).
 
 | # | Source asset | Crop [x, y, w, h] | Caption key | Caption (en) |

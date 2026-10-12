@@ -137,7 +137,8 @@ him.
 
 ## 14. To chapter two
 
-Climbing above the camp after the lion, the **chapter-two teaser** plays once:
+Crossing up through the camp's hatch into the Data Conduits (B1) after the lion,
+the **chapter-two teaser** plays once, over the crossing itself:
 crops of the tunnel page and the conduit gate, hint lines revealed one by one,
 and the title card *CHAPTER TWO — THE DATA CONDUITS*. Nothing in it says how
 chapter two ends.

@@ -220,16 +220,13 @@ function progressTick(dt) {
     }
   }
   // THE END OF CHAPTER ONE: the climb above the camp, once the lion is free.
-  // The manhwa's chapter-two teaser rides the moment she starts up it (the
-  // MANHWA workstream owns the panels; this is only the hook).
+  // This only closes the chapter's objective line. The chapter-two teaser is
+  // NOT queued here any more: a comic on the ledges is a comic in the middle
+  // of play (owner, 2026-10-12), so it plays over the crossing into B1
+  // instead (js/panels.js, the 'ch2' entry).
   if (G.roomId === 'A3' && f.bossGlitch && f.crystal && !f.ch2Climb) {
     const cx = (player.x + player.w / 2) / TILE, cy = (player.y + player.h / 2) / TILE;
-    if (cx >= 17 && cx <= 29 && cy < 8) {
-      f.ch2Climb = 1; persist();
-      // the sequence is 'ch2' (js/panels.js PANEL_SEQ); 'ch2_teaser' named nothing, so this
-      // hook never fired. Queued, so it still waits for a safe moment to open.
-      if (typeof panelsQueue === 'function') { try { panelsQueue('ch2'); } catch (e) {} }
-    }
+    if (cx >= 17 && cx <= 29 && cy < 8) { f.ch2Climb = 1; persist(); }
   }
   // cleansing pulses: the reward waits for the light to settle, the way the
   // kill path waits for its finale

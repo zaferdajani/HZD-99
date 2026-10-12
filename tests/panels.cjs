@@ -4,9 +4,12 @@
 //   - every crop lies inside its page, and every page is an approved ed.2 page
 //     (never the draft set) or the Conduits backdrop;
 //   - no page is fetched at boot;
-//   - a sequence fires at its event, ONCE: not before the room has settled,
-//     not with a hostile nearby, not over a dialogue, and not again on revisit
-//     or after reloading the save;
+//   - a sequence fires ONCE, and only at a doorway (owner, 2026-10-12: "the
+//     comics does not appear in the middle of the game"): a beat due in the
+//     room she enters opens on the crossing, before a single frame of that
+//     room is shown; a beat whose event happens in the room opens the moment
+//     the event is over — not with a hostile nearby, not over a dialogue, and
+//     not again on revisit or after reloading the save;
 //   - a caption reveals, the first confirm completes it and a SEPARATE confirm
 //     advances; an unread caption never advances on its own;
 //   - holding skips (keyboard, and a real held touch on a touch device);
@@ -178,12 +181,26 @@ async function tapKey(page, code) {
     check('...and standing in CV3 plays nothing', sMig.st === 'PLAY', JSON.stringify(sMig));
 
     // ---- once, at its event, never during a crossing / fight / dialogue -----------
-    await stage(page, 'W2', { woke: 1 });
-    await sleep(350);
-    let s = await state(page);
-    check('arrival does not cut in before the room settles', s.st === 'PLAY', JSON.stringify(s));
+    // every frame drawn between the crossing and the pages: none may show the
+    // room being played (panelsCovering holds it black while pages arrive)
+    const coverWatch = room => page.evaluate(r => {
+      const d0 = draw; window.__unc = 0; window.__draw0 = d0;
+      draw = function () { if (G.state === 'PLAY' && G.roomId === r && !panelsCovering()) window.__unc++; return d0.apply(this, arguments); };
+    }, room);
+    const coverDone = () => page.evaluate(() => { draw = window.__draw0; return window.__unc; });
+    // a real crossing: she walks out of the service bay (W1) through its door
+    await stage(page, 'W1', { woke: 1 });
+    await page.evaluate(() => { G.save.panels.past.wake = 1; });
+    await sleep(300);
+    await coverWatch('W2');
+    await page.evaluate(() => { G.trans = { t: TRANS_DUR, to: 'W2', side: 'R', half: false }; });
     const fired = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'bay');
-    check('leaving the service bay plays the bay panels in W2', fired);
+    check('leaving the service bay plays the bay panels in W2', fired, await page.evaluate(() => G.state + ' ' + G.roomId + ' ' + (G.panels && G.panels.seq.id)));
+    const unc = await coverDone();
+    check('...over the crossing: not one frame of W2 is played before them', unc === 0, unc + ' frames');
+    const tr = await page.evaluate(() => ({ room: G.roomId, trans: !!G.trans }));
+    check('...and the crossing is finished by them, not resumed after', tr.room === 'W2' && !tr.trans, JSON.stringify(tr));
+    let s;
     const seenSaved = await page.evaluate(() => !!JSON.parse(localStorage.getItem(saveKeyFor(G.save.theme))).panels.seen.bay);
     check('it is marked seen (and saved) as it begins', seenSaved);
 
@@ -242,9 +259,14 @@ async function tapKey(page, code) {
     await page.evaluate(() => { G.state = 'PLAY'; });
 
     // a hostile nearby, and an open dialogue, hold it back
-    await stage(page, 'A0', { woke: 1, gateOpened: 1 });
+    // the gate opens WHILE she is in A0 (an event, not an arrival)
+    await stage(page, 'A0', { woke: 1 });
+    await sleep(600);
+    s = await state(page);
+    check('nothing plays on arrival when no beat is due', s.st === 'PLAY', JSON.stringify(s));
     await page.evaluate(() => {
       const e = new Enemy('crawler', player.x + 120, player.y); G.enemies.push(e);
+      G.save.flags.gateOpened = 1;
     });
     await sleep(2600);
     s = await state(page);
@@ -253,9 +275,13 @@ async function tapKey(page, code) {
     await sleep(2000);
     s = await state(page);
     check('never over a dialogue', s.st === 'DIALOG', JSON.stringify(s));
-    await page.evaluate(() => { G.dialog = null; G.state = 'PLAY'; });
-    const gate = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'gate');
+    await waitFor(page, () => panelsLoaded(panelsSeq('gate')), 8000);
+    const tQuiet = await page.evaluate(() => { G.dialog = null; G.state = 'PLAY'; return G.time || performance.now() / 1000; });
+    const gate = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'gate', 8000);
+    const tOpen = await page.evaluate(() => G.time || performance.now() / 1000);
     check('the gate panels play once the room is quiet (A0)', gate);
+    // directly after the event: no settle, no walking about first
+    check('...the moment it is quiet, not after a settle', tOpen - tQuiet < 0.45, (tOpen - tQuiet).toFixed(2) + ' s');
     await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } });
     await waitFor(page, () => G.state === 'PLAY', 2000);
 
@@ -278,24 +304,27 @@ async function tapKey(page, code) {
     });
     check('the lying-in-the-scrap panel shows only when the swipe took a core', cond[1] === cond[0] + 1, JSON.stringify(cond));
 
-    // the teaser: on the climb, not on the camp floor
-    await stage(page, 'A3', { woke: 1, bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1 });
-    await page.evaluate(() => { G.save.panels.past = { free: 1 }; });
-    // the guardian flags hand out an evolution card on arrival; close it like a player would
-    for (let k = 0; k < 20; k++) {
-      await page.evaluate(() => { if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; } });
-      await sleep(100);
+    // the teaser: not in the Meadows at all — it plays over the crossing into
+    // the Data Conduits (B1), the next screen after her victory
+    for (const room of ['A3', 'A4']) {
+      await stage(page, room, { woke: 1, bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1 });
+      await page.evaluate(() => { G.save.panels.past = { free: 1 }; });
+      for (let k = 0; k < 20; k++) {
+        await page.evaluate(() => { if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; } });
+        await sleep(100);
+      }
+      s = await state(page);
+      check('no teaser in ' + room, s.st === 'PLAY' || (s.st === 'PANELS' && s.id !== 'ch2'), JSON.stringify(s));
     }
-    await sleep(1200);
-    s = await state(page);
-    check('no teaser on the camp floor', s.st === 'PLAY', JSON.stringify(s));
-    await page.evaluate(() => { player.x = 19 * TILE; player.y = 12 * TILE - player.h; player.vx = player.vy = 0; player.on = true; });
+    await coverWatch('B1');
+    await stage(page, 'B1', { woke: 1, bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1 }, true);
     const tz = await waitFor(page, () => {
       if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; }
-      if (G.state === 'PLAY') { player.x = 19 * TILE; player.y = 12 * TILE - player.h; player.vy = 0; player.on = true; }
       return G.state === 'PANELS' && G.panels.seq.id === 'ch2';
-    }, 6000);
-    check('the chapter-two teaser plays on the climb out of the Meadows', tz);
+    }, 8000);
+    check('the chapter-two teaser plays over the crossing into the Data Conduits', tz, await page.evaluate(() => G.state + ' ' + (G.panels && G.panels.seq.id)));
+    const uncB = await coverDone();
+    check('...before a single frame of B1 is played', uncB === 0, uncB + ' frames');
     const last = await page.evaluate(() => { const P = G.panels; return P && P.list[P.list.length - 1].title === true; });
     check('the teaser ends on the chapter title card', last);
     await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } });

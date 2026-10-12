@@ -219,14 +219,15 @@ const PANEL_SEQ = [
       { ref: 'game: f_strike', src: PANEL_GAME('f_strike'), crop: [0, 0, 1600, 893], cap: null, move: 'in', focus: [0.6, 0.5] },
       { ref: 'game: f_walk', src: PANEL_GAME('f_walk'), crop: [0, 0, 1600, 1073], cap: 'pc_oath', move: 'in', focus: [0.55, 0.65] },
     ] },
-  // THE TEASER. Before she climbs out of the Meadows, never after: the camp's
-  // climb (A3, tiles 17-29) with NULLFANG free, or B1 if she got there first.
-  // The hatch is her leaving; the three Conduits panels show the place, the
+  // THE TEASER. As she climbs out of the Meadows: over the crossing into B1,
+  // with NULLFANG free. The hatch is her leaving; the three Conduits panels show the place, the
   // keeper's outline and the talons — shapes and lights, no outcomes.
-  { id: 'ch2', title: 'pn_s_ch2', room: 'A3', teaser: true, prefetch: ['A3', 'A4', 'B1'],
-    event: 'chapter-two teaser: NULLFANG free and she stands on the climb to the Data Conduits (A3), or first B1 arrival',
-    when: f => !!f.bossGlitch && panelsAtClimb(),
-    alsoRoom: 'B1',
+  // AT THE CROSSING (owner, 2026-10-12: no comic in the middle of the game) —
+  // it used to open on a spot of the A3 climb, mid-room; now it IS the climb
+  // out of the Meadows, played over the crossing into B1.
+  { id: 'ch2', title: 'pn_s_ch2', room: 'B1', teaser: true, prefetch: ['A3', 'A4', 'B1'],
+    event: 'chapter-two teaser: NULLFANG free, played over her crossing into the Data Conduits (B1)',
+    when: f => !!f.bossGlitch,
     past: (f, s) => !!f.bossGlitch && !!(s.visited && s.visited.B1),
     panels: [
       { ref: 'game: hatch', src: PANEL_GAME('hatch'), crop: [0, 0, 1600, 1073], cap: 'pt_hatch', move: 'in', focus: [0.45, 0.3] },
@@ -242,11 +243,6 @@ const PANEL_TAP = 0.35;           // a press shorter than this is a confirm
 const PN = { img: {}, room: null, settle: 0, ready: 0, queue: [], meetCores: null };
 
 function panelsQuest(id) { return typeof qState === 'function' ? qState(id) : 'none'; }
-function panelsAtClimb() {
-  if (G.roomId !== 'A3' || !player || !player.on) return false;
-  const cx = player.x + player.w / 2, feet = player.y + player.h;
-  return cx >= 17 * TILE && cx <= 29 * TILE && feet <= 12 * TILE + 4;
-}
 // the player's choice wins either way (an explicit OFF beats the OS setting);
 // until one is made the OS decides — js/reveal.js reduceMotion()
 function panelsReduced() { return reduceMotion(); }
@@ -336,7 +332,7 @@ function panelsDue() {
     if (S.seen[s.id] || S.past[s.id] || s.manual) continue;
     // a beat already overtaken by the story is not shown late, out of order
     if (s.stale && s.stale(S, f)) continue;
-    if (G.roomId === s.alsoRoom) { if (s.id === 'ch2' && f.bossGlitch) return s; continue; }
+    if (G.roomId === s.alsoRoom) continue;
     if (G.roomId !== s.room) continue;
     if (s.when(f)) return s;
   }
@@ -358,7 +354,20 @@ function panelsTick(dt) {
     if (!panelsLoaded(w) && G.wake.pendT < 5) return false;
     return panelsStart('wake', { then: () => { if (G.wake) G.wake.pend = false; } });
   }
-  if (PN.room !== G.roomId) { PN.room = G.roomId; PN.settle = 0; }
+  // A COMIC IS A DOORWAY, NEVER AN INTERRUPTION (owner, 2026-10-12: "the
+  // comics do not appear in the middle of the game. It should be either before
+  // an event or directly after an event that comes before another screen").
+  // Two moments only:
+  //   ARRIVAL — the frame the room changes. A beat due in the room she is
+  //     entering plays over the crossing itself, before the new room is ever
+  //     shown; until its pages are in, the crossing holds (at most 4 s).
+  //   EVENT — a beat whose condition flips while she is in the room (the
+  //     repair, the forge, a guardian falling) plays the moment that event is
+  //     over, not a second and a half later while she is walking about.
+  // The old rule — let the room settle, then open — was exactly what made
+  // every page land in the middle of play.
+  const arrived = PN.room !== G.roomId;
+  if (arrived) { PN.room = G.roomId; PN.settle = 0; PN.hold = 0; PN.arrival = true; }
   PN.settle += dt;
   // THE CORRIDOR: did the swipe land? Recorded while it happens, kept in the
   // save, so the panel of her lying in the scrap is shown only when she did.
@@ -371,15 +380,28 @@ function panelsTick(dt) {
   for (const s of PANEL_SEQ)
     if (!S.seen[s.id] && !S.past[s.id] && s.prefetch && s.prefetch.indexOf(G.roomId) >= 0) panelsLoad(s);
   const seq = panelsDue();
-  if (!seq) { PN.ready = 0; return false; }
+  if (!seq) { PN.ready = 0; PN.arrival = false; return false; }
   panelsLoad(seq);
-  // ARRIVAL IS NOT A CUT: the room settles first, so a crossing always
-  // finishes as a crossing and the panels open on a standing player
-  if (PN.settle < 0.8 || !panelsSafe()) { PN.ready = 0; return false; }
-  PN.ready += dt;
-  if (PN.ready < 0.5 || !panelsLoaded(seq)) return false;
+  if (PN.arrival) {
+    // the crossing holds on its last frame while the pages arrive
+    if (!panelsLoaded(seq) && (PN.hold = (PN.hold || 0) + dt) < 4) return true;
+    PN.arrival = false;
+    if (PN.queue[0] === seq.id) PN.queue.shift();
+    // the pages ARE the crossing: the push has nothing left to carry, and
+    // resuming it after them would slide the room she left across the new one
+    if (G.trans && G.trans.half) G.trans = null;
+    return panelsStart(seq.id);
+  }
+  // an event's beat: the instant it is safe to stop the world
+  if (!panelsSafe()) { PN.ready = 0; return false; }
+  if (!panelsLoaded(seq)) return false;
   if (PN.queue[0] === seq.id) PN.queue.shift();
   return panelsStart(seq.id);
+}
+// true while a room must stay unseen because its pages are about to open over it
+function panelsCovering() {
+  if (G.wake && G.wake.pend && G.roomId === 'W1') return true;
+  return !!(PN.arrival && PN.hold > 0);
 }
 function panelsQueue(id) { if (panelsSeq(id) && PN.queue.indexOf(id) < 0) PN.queue.push(id); }
 function panelsPlay(id, opts) { return panelsStart(id, opts); }

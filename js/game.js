@@ -5473,19 +5473,35 @@ function endPurifyCut() {
     // browser cannot decode the reel at all — trying the other seven would be
     // fifty seconds of black, so the first failure ends it.
     if (ct.skipped || !ct.ran) { G.reel = []; G.reelCap = null; }
+    // A CAPTION STILL BEING READ RIDES INTO THE NEXT SHOT instead of holding
+    // the film on its last frame (owner, 2026-10-12: "between each scene there
+    // is a pause instead of being continuous" — measured: every shot froze for
+    // up to 3.6 s waiting on its sentence). The words are never cut short; they
+    // finish over the moving picture, and the next shot's line follows them.
+    const carry = (ct.cr && !ct.skipped && typeof capRead === 'function' && !capRead(ct.cr)) ? ct.cr : null;
     while (G.reel.length) {
       const k = G.reel.shift();
       const cap = G.reelCap ? G.reelCap.shift() : null;
       if (startPurifyCut(k)) {
         if (cap) { G.cut.cap = cap; G.cut.patient = true; }
+        if (carry) { G.cut.cr = carry; G.cut.capNext = cap; G.cut.patient = true; }
         // and top the window back up: this shot is playing, the next two are
         // arriving behind it
         filmAhead(G.reel);
-        // straight into the next shot, over the frame the last one ended on
-        if (purifyReady(k)) {
+        // straight into the next shot, over the frame the last one ended on —
+        // and mid-reel "ready" means frames are buffered ahead (readyState 3):
+        // waiting for "can play through" put a fade and a black hold between
+        // every pair of shots that were already loaded
+        const pv = purifyPre[k];
+        if (purifyReady(k) || (pv && pv.readyState >= 3)) {
           G.cut.ph = 'play'; G.cut.t = 0; G.cut.diss = 0.5;
           const pr = G.cut.v.play();
           if (pr && pr.catch) pr.catch(() => { if (G.cut) G.cut.failed = true; });
+        } else {
+          // not buffered yet: no fade to black and no dark hold — the last
+          // shot's final frame stays up (drawCut, ct.keep) until this one can
+          // play, then dissolves over it
+          G.cut.ph = 'hold'; G.cut.t = 0; G.cut.keep = true;
         }
         return;
       }
@@ -5576,7 +5592,7 @@ function updateCut(dt) {
     // black. If the film still is not ready, we simply wait here — the dark
     // reads as the moment before a memory surfaces, never as a stall.
     ct.held += dt;
-    if (purifyReady(ct.kind) || ct.held > (ct.patient ? 14 : 4)) {
+    if (purifyReady(ct.kind) || (ct.keep && v.readyState >= 3) || ct.held > (ct.patient ? 14 : 4)) {
       // WAIT FOR THE REWIND TO LAND. Asking for currentTime = 0 and calling
       // play() on the same frame is a RACE, and it is the one the owner kept
       // losing: "the first story glitches most of the time, I need to replay it
@@ -5602,6 +5618,7 @@ function updateCut(dt) {
       const pr = v.play();
       if (pr && pr.catch) pr.catch(() => { if (G.cut === ct) ct.failed = true; });
       ct.ph = 'play'; ct.t = 0;
+      if (ct.keep) { ct.diss = 0.5; ct.keep = false; }
     }
     return;
   }
@@ -5611,6 +5628,8 @@ function updateCut(dt) {
     // that has had its reading time turns by itself, a tap reveals or turns,
     // and the clip's end waits on the last page (js/overlay.js capRead).
     if (ct.cap && typeof capReader === 'function') {
+      // the line carried in from the shot before hands over once it is read
+      if (ct.capNext && ct.cr && typeof capRead === 'function' && capRead(ct.cr)) { ct.cr = capReader(t(ct.capNext)); ct.capNext = null; }
       if (!ct.cr) ct.cr = capReader(t(ct.cap));
       capTick(ct.cr, dt);
       if (pressed) capPress(ct.cr);
@@ -5647,7 +5666,10 @@ function updateCut(dt) {
       ct.ph = 'hold'; ct.t = 0; ct.stall = 0; ct.held = Math.max(0, (ct.held || 0) - 4);
       return;
     }
-    if ((dead || ct.t > cap) && ct.cr && !ct.skipped && typeof capRead === 'function' && !capRead(ct.cr)
+    // only the LAST shot holds its frame for an unread line; mid-reel the
+    // line rides on (endPurifyCut carries it into the next shot)
+    if ((dead || ct.t > cap) && ct.cr && !ct.skipped && typeof capRead === 'function'
+        && (!capRead(ct.cr) || ct.capNext) && !(G.reel && G.reel.length)
         && (ct.capHold = (ct.capHold || 0) + dt) < 45) return;
     if (dead || ct.stall > 1.5 || ct.t > cap) {
       ct.ph = 'out'; ct.t = 0;
@@ -5656,7 +5678,8 @@ function updateCut(dt) {
     }
     return;
   }
-  if (ct.t >= (ct.quick ? 0.16 : 0.65)) endPurifyCut();
+  // mid-reel there is no dip at all: the next shot dissolves in over this one
+  if (ct.t >= (ct.quick ? 0 : 0.65)) endPurifyCut();
 }
 function drawCut() {
   const ct = G.cut;
@@ -5668,6 +5691,12 @@ function drawCut() {
       c.drawImage(ct.snap, 0, 0, 960, 540);
       c.restore();
     }
+    return;
+  }
+  if (ct.ph === 'hold' && ct.keep && ct.snap) {
+    // mid-reel, the next shot still buffering: hold the frame the last one
+    // ended on rather than going dark between two shots of one film
+    try { c.drawImage(ct.snap, 0, 0, 960, 540); } catch (e) {}
     return;
   }
   if (ct.ph === 'hold') {
@@ -16015,6 +16044,10 @@ function draw(tms) {
   if (st === 'CINE') { drawCine(); return; }
   if (st === 'CUT') { drawCut(); return; }
   if (st === 'PANELS') { drawPanels(); return; }
+  // A ROOM IS NOT SHOWN BEFORE THE PAGES THAT LEAD INTO IT: the wake's pages
+  // right after the difficulty choice, an arrival's pages while they finish
+  // loading (js/panels.js panelsCovering) — black, never the game underneath
+  if (st === 'PLAY' && typeof panelsCovering === 'function' && panelsCovering()) { c.fillStyle = '#000'; c.fillRect(0, 0, 960, 540); return; }
   if (st === 'MENU' || st === 'LANGSEL' || st === 'DIFF' || st === 'WHO' || (st === 'CTRL' && G.ctrlBack === 'MENU') || st === 'GAMEOVER') {
     drawMenuBG(tsec);
     if (st === 'LANGSEL') {
