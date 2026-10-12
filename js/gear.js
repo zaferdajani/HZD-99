@@ -283,3 +283,34 @@ function drawGear() {
   lines.forEach((line, i) => ftxt(line, 480, 462 + i * 19, 14, i && fight ? '#e2edf5' : '#b2c6d4'));
   ftxt(t('crest_hint'), 480, 516, 12, '#8aa2b5');
 }
+// CREST NAMES AND THEIR PASSIVES in tr / zh / ru. The tables in js/i18n.js carry
+// only English and Arabic, so in three of the five languages a crest's name
+// and what it does fell back to English — visible since C1 put "Style held by
+// <crest>" on screen. The English and Arabic are read from I18N so this layer
+// changes nothing in those two; the four names GEAR_TEXT renames for the robot
+// (sprint, over, ground, nine) keep theirs.
+(function () {
+  if (typeof TEXT_LAYERS === 'undefined' || typeof I18N === 'undefined') return;
+  const KEYS = ['c_claws', 'c_plate', 'c_magnet', 'c_siphon', 'c_phantom',
+    'c_clawsd', 'c_overd', 'c_plated', 'c_magnetd', 'c_siphond', 'c_phantomd', 'c_groundd', 'c_sprintd', 'c_nined'];
+  const pick = (L) => { const o = {}; for (const k of KEYS) if (I18N[L] && I18N[L][k] != null) o[k] = I18N[L][k]; return o; };
+  TEXT_LAYERS.push({
+    robo: true,
+    en: pick('en'), ar: pick('ar'),
+    tr: { c_claws: 'Bilenmiş Pençeler', c_plate: 'Kalın Zırh', c_magnet: 'Mıknatıs Çekirdek', c_siphon: 'Volt Sifonu', c_phantom: 'Hayalet Bobin',
+      c_clawsd: 'Pençe hasarı +%25.', c_overd: 'Pençelerini %30 daha hızlı savur.', c_plated: 'Takılıyken +1 çekirdek.',
+      c_magnetd: 'Hurda uzaktan sana uçar.', c_siphond: 'Vuruş başına %50 daha fazla volt.', c_phantomd: 'Atılırken kısa süre dokunulmaz olursun.',
+      c_groundd: 'Canlı raylar sana zarar veremez — kırılgan olanı kesip geçebilirsin.', c_sprintd: '%15 daha hızlı koş, daha uzağa atıl.',
+      c_nined: 'Her dinlenmede bir kez ölümü atlat: 3 çekirdekle dirilirsin.' },
+    zh: { c_claws: '磨利之爪', c_plate: '厚重装甲', c_magnet: '磁力核心', c_siphon: '电压虹吸', c_phantom: '幻影线圈',
+      c_clawsd: '利爪伤害 +25%。', c_overd: '挥爪速度加快 30%。', c_plated: '装备时核心 +1。',
+      c_magnetd: '废料会从远处飞向你。', c_siphond: '每次命中多获得 50% 电压。', c_phantomd: '冲刺时短暂无敌。',
+      c_groundd: '带电轨道伤不到你——脆弱的轨道还能被切开。', c_sprintd: '奔跑快 15%，冲刺更远。',
+      c_nined: '每次休息可免死一次：以 3 个核心复活。' },
+    ru: { c_claws: 'Заточенные когти', c_plate: 'Толстая броня', c_magnet: 'Магнитное ядро', c_siphon: 'Вольт-сифон', c_phantom: 'Фантомная катушка',
+      c_clawsd: 'Урон когтями +25%.', c_overd: 'Когти бьют на 30% быстрее.', c_plated: '+1 ядро, пока установлено.',
+      c_magnetd: 'Лом летит к вам издалека.', c_siphond: 'На 50% больше вольт за удар.', c_phantomd: 'Рывок ненадолго делает вас неуязвимой.',
+      c_groundd: 'Рельсы под током вам не вредят — а хрупкие можно прорубить.', c_sprintd: 'Бег на 15% быстрее, рывок дальше.',
+      c_nined: 'Раз за отдых обмануть смерть: воскрешение с 3 ядрами.' },
+  });
+})();
