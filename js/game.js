@@ -168,7 +168,7 @@ const G = {
     if (this.save.relics.indexOf(id) >= 0) return;
     this.save.relics.push(id);
     persist(); sfx('win');
-    showItem(t('rl_' + id), t('rl_' + id + 'd'));
+    loadoutTagCard(showItem(t('rl_' + id), t('rl_' + id + 'd')), 'relic', id);
   },
   maybeDropRelic(x, y) {
     const pool = RELIC_DROPS.filter(id => !(this.save.relics || []).includes(id));
@@ -243,7 +243,7 @@ const G = {
       if (!this.save.arms.includes(arm)) {
         this.save.arms.push(arm);
         this.save.armIdx = this.save.arms.length;   // wear it immediately
-        showItem(t('arm_' + arm), t('arm_' + arm + 'd') + '  —  ' + t('arm_how'));
+        loadoutTagCard(showItem(t('arm_' + arm), t('arm_' + arm + 'd') + '  —  ' + t('arm_how')), 'arm', arm);
       }
     }
     const tr = RELIC_TROPHY[kind];
@@ -992,7 +992,7 @@ function grantMod(id) {
 // first seal she seats tells it, once, in the card that hands it over.
 function grantCrest(id) {
   if (G.save.crests.indexOf(id) < 0) G.save.crests.push(id);
-  const card = showItem(t('c_' + id), t('c_' + id + 'd'));
+  const card = loadoutTagCard(showItem(t('c_' + id), t('c_' + id + 'd')), 'crest', id);
   if (card && !(G.save.flags && G.save.flags.crestTold)) {
     if (!G.save.flags) G.save.flags = {};
     G.save.flags.crestTold = 1;
@@ -3195,9 +3195,9 @@ function pauseItems() {
     { id: 'resume', label: t('resume') },
     { id: 'map', label: t('pm_map') },
     { id: 'bag', label: t('pm_bag') },
-    { id: 'crests', label: t('pm_crests') },
+    { id: 'crests', label: t('pm_crests'), lo: 'crest' },
     { id: 'skills', label: t('pm_skills') },
-    { id: 'relics', label: t('pm_relics') },
+    { id: 'relics', label: t('pm_relics'), lo: 'relic' },
     { id: 'ctrl', label: t('ctl_title') },
     { id: 'pace', label: t('pace') + ':  ' + paceLabel() + '   ◂ ▸', arrows: 1, hint: t('pace_d') },
     { id: 'qual', label: t('qual') + ':  ' + qualLabel() + '   ◂ ▸', arrows: 1, hint: t('qual_d').replace('%s', DEVICE.form) },
@@ -3344,22 +3344,34 @@ function updateTouchCfg() {
 function updateRelics() {
   if (inP('OK') || inP('BACK')) { G.state = 'PLAY'; sfx('ui'); }
 }
+// ONE GEOMETRY for the relic case, read by the drawing and tests/loadout.cjs.
+// Two columns in reading order: in Arabic the first relic is top-RIGHT and the
+// seal sits on the right of its name, the way the line is read.
+function relicsLayout() {
+  const owned = (G.save && G.save.relics) || [];
+  const rtl = typeof isRTL === 'function' ? isRTL() : LANG === 'ar';
+  return { owned, rtl, r: 17, pos: i => {
+    const col = i % 2;
+    return { x: rtl ? 710 - col * 400 : 250 + col * 400, y: 120 + Math.floor(i / 2) * 62 };
+  } };
+}
 function drawRelics() {
   c.fillStyle = 'rgba(4,7,12,0.88)'; c.fillRect(0, 0, 960, 540);
-  ftxt(t('rl_title'), 480, 46, 28, '#eef3fa', 'center', '#ffd76a');
-  const owned = G.save.relics || [];
+  ftxt(t('rl_title'), 480, 46, 28, '#eef3fa', 'center', LOADOUT_COL.relic);
+  const L = relicsLayout(), owned = L.owned;
   if (!owned.length) {
     wrapText(t('rl_none'), 620, 17).forEach((ln, i) => ftxt(ln, 480, 250 + i * 26, 17, '#8aa2b5'));
   } else {
     owned.forEach((id, i) => {
-      const x = 250 + (i % 2) * 400, y = 120 + Math.floor(i / 2) * 62;
-      c.shadowColor = '#ffd76a'; c.shadowBlur = 10;
-      c.fillStyle = '#2c2517'; c.beginPath(); c.arc(x, y, 17, 0, 7); c.fill();
-      c.strokeStyle = '#ffd76a'; c.lineWidth = 2; c.beginPath(); c.arc(x, y, 17, 0, 7); c.stroke();
-      c.shadowBlur = 0;
-      ftxt(RELIC_ICONS[id] || '◆', x, y + 1, 14, '#ffd76a');
-      ftxt(t('rl_' + id), x + 30, y - 9, 16, '#eef3fa', 'left');
-      ftxt(t('rl_' + id + 'd'), x + 30, y + 11, 12, '#8aa2b5', 'left', null, '600');
+      const P = L.pos(i), x = P.x, y = P.y;
+      // the relic's seal (js/loadout.js): carried, so filled
+      drawLoadoutFrame(c, 'relic', x, y, L.r, 'filled', RELIC_ICONS[id] || '◆', '#eef3fa');
+      const tx = L.rtl ? x - 30 : x + 30, al = L.rtl ? 'right' : 'left';
+      ftxt(t('rl_' + id), tx, y - 9, 16, '#eef3fa', al);
+      // wrapped to its column: a long line used to run off the screen's edge
+      // (Glitch Fang in English, most of them in Arabic)
+      wrapText(t('rl_' + id + 'd'), 256, 12).slice(0, 2)
+        .forEach((ln, k) => ftxt(ln, tx, y + 11 + k * 15, 12, '#8aa2b5', al, null, '600'));
     });
   }
   ftxt(t('rl_close'), 480, 516, 12, '#7d93a8');
@@ -13701,6 +13713,10 @@ function drawHUD() {
     ftxt(a ? t('arm_' + a.id) : t('arm_none'), 44, 146, 12, a ? ELEM[a.el].glow : '#7d93a8', 'left');
     if (!(TOUCH && TOUCH.enabled)) ftxt('G', 26, 118, 11, '#546b7d');
   }
+  // ...and THE REST OF THE BUILD on the same line (js/loadout.js): a cobalt
+  // diamond per worn crest, one green seal with the relic count. Arms, crests,
+  // relics: three frames, three hues, read without opening a menu.
+  if (typeof drawLoadoutHud === 'function') drawLoadoutHud(c);
   // ONE PANEL, ONE CLUSTER. The song glyph, the shuriken pips and their key
   // hints floated loose over the art with nothing behind them, and on a tall
   // phone the pip row lands mid-screen — six glowing diamonds hovering in the
@@ -16176,8 +16192,17 @@ function draw(tms) {
         c.fillStyle = 'rgba(55,255,208,0.07)';
         rr(c, x - PL.colW / 2, y - step * 0.5, PL.colW, step * 0.86, 8); c.fill();
       }
-      ftxt((sel ? '▸ ' : '') + (it.icon ? it.icon + '  ' : '') + it.label, x, y, fs,
+      const rowTxt = (sel ? '▸ ' : '') + (it.icon ? it.icon + '  ' : '') + it.label;
+      ftxt(rowTxt, x, y, fs,
            sel ? '#eef3fa' : (it.out ? '#e88b86' : it.warn ? '#e8bb86' : '#7d93a8'));
+      // the two loadout doors carry their system's frame at the line's leading
+      // edge (js/loadout.js) — the same diamond and seal the screens behind them use
+      if (it.lo && typeof drawLoadoutFrame === 'function') {
+        c.font = '700 ' + fs + 'px "Segoe UI", Tahoma, sans-serif';
+        const hw = c.measureText(rowTxt).width / 2, fr = Math.max(6, Math.min(10, step * 0.28));
+        const rtlP = typeof isRTL === 'function' && isRTL();
+        drawLoadoutFrame(c, it.lo, rtlP ? x + hw + fr + 8 : x - hw - fr - 8, y, fr, sel ? 'filled' : 'empty');
+      }
       if (!sel) return;
       // the confirm replaces the hint, because it is the more urgent sentence
       const line = G.pauseConfirm === it.id ? t('pm_confirm') : it.hint;
@@ -16282,6 +16307,10 @@ function draw(tms) {
           bustDrawn = true;
         }
       }
+      // A LOADOUT HANDOVER SHOWS ITS SYSTEM (js/loadout.js): the arm's hex,
+      // the crest's diamond, the relic's seal — the frame it will wear on
+      // every screen from now on, and the system's name under it.
+      if (d.lo && !bustDrawn && typeof drawLoadoutCard === 'function') { drawLoadoutCard(c, d, px, by + 14); bustDrawn = true; }
       // GRAVEHORN speaks with his own face (js/gravehorn.js ghPortrait)
       if (d.gh && !bustDrawn && typeof ghPortrait === 'function') { ghPortrait(c, px, by + 14, 64); bustDrawn = true; }
       if (d.npc && !bustDrawn) {
@@ -16306,7 +16335,8 @@ function draw(tms) {
       if (player && player.moodSet)
         player.moodSet(expr === 'neutral' ? 'calm' : expr, 0.4);
     }
-    if (!note) ftxt(d.name || '', rtl ? tx0 + tw : tx0, by + 24, 16, '#37ffd0', rtl ? 'right' : 'left');
+    if (!note) ftxt(d.name || '', rtl ? tx0 + tw : tx0, by + 24, 16,
+      d.lo && typeof LOADOUT_COL !== 'undefined' && LOADOUT_COL[d.lo] ? LOADOUT_COL[d.lo] : '#37ffd0', rtl ? 'right' : 'left');
     let ty = note ? by + 22 : by + 46;
     if (d.rs) { drawGlyphText(c, d.rs, tx0 + tw / 2, ty, 10, 'rgba(120,220,255,0.65)', 'rgba(120,220,255,0.4)'); ty += gh; }
     // Arabic is set from the right edge and typed a whole word at a time
@@ -17687,15 +17717,13 @@ function mapTap(sx, sy) {
 function drawCrest() {
   if (!isHero()) return drawGear();
   c.fillStyle = 'rgba(4,7,12,0.85)'; c.fillRect(0, 0, 960, 540);
-  ftxt(t('crest_title'), 480, 50, 28, '#eef3fa', 'center', '#37ffd0');
+  ftxt(t('crest_title'), 480, 50, 28, '#eef3fa', 'center', LOADOUT_COL.crest);
   const used = G.save.equip.reduce((s, x) => s + CRESTS[x], 0);
-  // sockets
+  // sockets — the crest's own diamond (js/loadout.js): seated ones filled,
+  // the free width of the port dashed
   for (let i = 0; i < effSlots(); i++) {
     const x = 480 - (effSlots() - 1) * 14 + i * 28;
-    c.save(); c.translate(x, 92); c.rotate(Math.PI / 4);
-    c.fillStyle = i < used ? '#37ffd0' : 'rgba(90,110,130,0.4)';
-    if (i < used) { c.shadowColor = '#37ffd0'; c.shadowBlur = 8; }
-    c.fillRect(-7, -7, 14, 14); c.restore(); c.shadowBlur = 0;
+    drawLoadoutFrame(c, 'crest', x, 92, 10, i < used ? 'filled' : 'empty');
   }
   ftxt(t('crest_slots') + '  ' + used + ' / ' + effSlots(), 480, 124, 14, '#8aa2b5');
   const list = G.save.crests;
@@ -17710,10 +17738,13 @@ function drawCrest() {
   ftxt(t('crest_port'), 480, 146, 12, '#5f7488');
   list.forEach((id, i) => {
     const sel = i === G.crestIdx, eq = G.save.equip.indexOf(id) >= 0;
-    const y = 170 + i * 40;
-    if (sel) { c.fillStyle = 'rgba(55,255,208,0.08)'; rr(c, 180, y - 17, 430, 34, 8); c.fill(); }
-    ftxt((eq ? '◈ ' : '◇ ') + t('c_' + id), LANG === 'ar' ? 590 : 200, y, 18, eq ? '#aef7d8' : sel ? '#eef3fa' : '#8aa2b5', LANG === 'ar' ? 'right' : 'left');
-    ftxt('▪'.repeat(CRESTS[id]), LANG === 'ar' ? 210 : 570, y, 14, '#ffd76a', LANG === 'ar' ? 'left' : 'right');
+    const y = 170 + i * 40, ar = LANG === 'ar';
+    if (sel) { c.fillStyle = loadoutRGBA('crest', 0.12); rr(c, 180, y - 17, 430, 34, 8); c.fill(); }
+    // the diamond replaces the ◈/◇ glyph that used to say seated/unseated:
+    // the same two states, now in the crest's frame and hue
+    drawLoadoutFrame(c, 'crest', ar ? 592 : 198, y, 11, eq ? 'filled' : 'empty');
+    ftxt(t('c_' + id), ar ? 572 : 218, y, 18, eq ? '#eef3fa' : sel ? '#eef3fa' : '#8aa2b5', ar ? 'right' : 'left');
+    ftxt('▪'.repeat(CRESTS[id]), ar ? 210 : 570, y, 14, '#ffd76a', ar ? 'left' : 'right');
   });
   const cur = list[G.crestIdx];
   dimPanel(630, 160, 280, 140);
@@ -17737,8 +17768,14 @@ function drawShop() {
     const row = typeof opShopRow === 'function' ? opShopRow(it, y, sel) : null;
     if (row) { name = row.name; desc = row.desc; }
     const col = row && row.locked ? '#56626e' : sold ? '#5a6a78' : sel ? '#eef3fa' : '#9ab0c2';
-    ftxt(name, LANG === 'ar' ? 780 : 180, y - 6, 17, col, LANG === 'ar' ? 'right' : 'left');
-    ftxt(desc, LANG === 'ar' ? 780 : 180, y + 13, 12, sold ? '#46545f' : '#7d93a8', LANG === 'ar' ? 'right' : 'left', null, '600');
+    // WHICH SYSTEM IS THIS LINE? A crest — and the port width a crest sits
+    // in — wears the crest's diamond (js/loadout.js): dashed while it is on
+    // the shelf, filled once it is hers. The cell and the core are neither
+    // and keep a bare line; every name moves over so the column stays one.
+    const ar = LANG === 'ar', lo = loadoutKindOf(it.type, it.id);
+    if (lo) drawLoadoutFrame(c, lo, ar ? 774 : 186, y, 13, row && row.locked ? 'locked' : sold ? 'filled' : 'empty');
+    ftxt(name, ar ? 752 : 208, y - 6, 17, col, ar ? 'right' : 'left');
+    ftxt(desc, ar ? 752 : 208, y + 13, 12, sold ? '#46545f' : '#7d93a8', ar ? 'right' : 'left', null, '600');
     ftxt(sold ? t('sold') : '⬢ ' + Math.floor(it.cost * (relicHas('coin') ? 0.9 : 1)), LANG === 'ar' ? 180 : 780, y, 16, sold ? '#5a6a78' : '#ffd76a', LANG === 'ar' ? 'left' : 'right');
   });
   ftxt(t('shop_hint'), 480, 512, 13, '#7d93a8');

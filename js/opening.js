@@ -373,6 +373,9 @@ function opGoalRect(w) {
   // name at 146), which appears with the lion's SCRAPPLATE — the goal line was
   // printed straight across "SCRAPPLATE — Shard Volley" (campaign run, 2026-10-10)
   if (typeof armSlots === 'function' && armSlots().length > 1) y = 156;
+  // ...or the loadout row beside it: worn crests and relics share that line
+  // even before a suit does (js/loadout.js loadoutHudRow)
+  else if (typeof loadoutHudRow === 'function' && loadoutHudRow()) y = 140;
   const hit = (r) => r && x < r.x + r.w && x + w > r.x && y < r.y + r.h && y + h > r.y;
   // never under the lesson chip
   const chip = G.tutChip;

@@ -159,7 +159,13 @@ function drawGear() {
     const y = l.y + i * l.step, sel = l.start + i === l.index;
     c.fillStyle = sel ? 'rgba(55,255,208,0.15)' : 'rgba(110,140,160,0.06)';
     rr(c, l.x, y - 21, l.w, l.h, 6); c.fill();
-    const align = LANG === 'ar' ? 'right' : 'left', x = LANG === 'ar' ? 894 : 495;
+    // A CREST ROW WEARS THE CREST'S DIAMOND (js/loadout.js): seated filled,
+    // carried dashed, not yet hers faint. Traversal hardware and the weapon
+    // forms are not loadout systems and keep a bare line; every name moves
+    // over by the frame's width so the column stays one column.
+    const ar = LANG === 'ar', lo = typeof loadoutKindOf === 'function' ? loadoutKindOf('gear', r.id) : null;
+    if (lo) drawLoadoutFrame(c, lo, ar ? 890 : 500, y, 11, r.installed ? 'filled' : r.acquired ? 'empty' : 'locked');
+    const align = ar ? 'right' : 'left', x = ar ? 870 : 520;
     ftxt(t(r.name), x, y - 4, 16, r.acquired ? '#eef3fa' : '#6f8294', align);
     ftxt(t(r.slot) + ' · ' + t(r.installed ? 'gear_installed' : r.acquired ? 'gear_stored' : 'gear_locked'), x, y + 13, 11, r.installed ? '#37ffd0' : '#8098ad', align);
   });

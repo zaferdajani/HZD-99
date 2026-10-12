@@ -21,6 +21,38 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bm. THE LOADOUT FRAMES — arm hex, crest diamond, relic seal ✱ QUEUED 2026-10-12 (code session, handoff Part 2 C2)
+
+Arms, crests and relics are colour-coded on every screen now (shop, Gear /
+Tokens, relic case, pause rows, item cards, the HUD row, the suit seat on the
+touch wheel) — each system one hue and one frame SHAPE, registered in
+`docs/combat/GLOBAL_REGISTRY.md` §2 "UI loadout". The frames are stroked
+procedural stand-ins (`drawLoadoutFrame` in `js/loadout.js`, the one function
+these plates replace). Fire them as UI ornaments: pure black background, the
+frame only, centred, front-on, no perspective, no glow halo baked in (the game
+adds its own), machined metal with an enamel inlay in the system's hue, worn
+like her own plating — the same hand as the suit badges, not a fantasy-RPG gilt.
+
+| key | frame | hue (enamel) | states (one cell each) | sizes |
+|---|---|---|---|---|
+| `loFrameArm` | pointy-top HEX bezel, bolt-head chamfer on each corner | rose `#ff45b4` | filled (lit inlay), empty (inlay dark, rim intact), locked (rim only, dull) | 128 px master; HUD cut at 36 px |
+| `loFrameCrest` | DIAMOND socket, a stepped inner bevel the crest jewel sits in | cobalt `#4a7bff` | filled (jewel seated), empty (open socket), locked | 128 px master; HUD cut at 20 px |
+| `loFrameRelic` | ROUND double-ringed SEAL, a ring of eight small rivets between the rings | trail green `#4fe36a` | filled (inlay lit), empty, locked | 128 px master; HUD cut at 20 px |
+
+Nine cells: one 3×3 sheet (rows arm / crest / relic, columns filled / empty /
+locked) is the cheapest fire. The centre of each frame stays EMPTY — the game
+draws the arm's element glyph or the relic's icon inside it. Silhouettes must
+stay distinct at 20 px with the colour removed (photograph a greyscale cut
+before wiring: hex, diamond, seal must not blur together).
+
+Wire: key with `tools/blackkey.cjs`, archive in `assets/source/`, add the
+three keys to the media manifest, and in `drawLoadoutFrame` blit the cell for
+`(kind, state)` at `2r × 2r` when the sheet is loaded, keeping the stroked path
+as the fallback; the HUD cut comes from `tools/lowres.cjs` (RULE ZERO).
+`node tests/run.cjs loadout tap glowcost`.
+
+---
+
 ## 2bl. CONTEXT IDLES — the last core, the wind, the updraft ✱ QUEUED 2026-10-11 (code session, handoff Part 2 D5)
 
 Her idle is one authored strip plus scripted fidgets. Three context idles,

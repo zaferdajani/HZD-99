@@ -329,8 +329,15 @@ function drawArmBadge(c, id, r, lit) {
     c[i ? 'lineTo' : 'moveTo'](Math.cos(an) * r, Math.sin(an) * r);
   }
   c.closePath(); c.fill();
-  c.strokeStyle = lit ? E.glow : 'rgba(120,150,170,0.45)';
-  c.lineWidth = lit ? 2.2 : 1.4; c.stroke();
+  // THE BEZEL SAYS "ARM", THE FILL SAYS WHICH ONE. The rim is the loadout's
+  // arm hue (js/loadout.js) on every badge, worn or not — the system reads at
+  // a glance; the element keeps the glyph inside, so the suit still does too.
+  // An unworn badge is the same rim, dashed and thinner.
+  const AC = typeof LOADOUT_COL !== 'undefined' ? LOADOUT_COL.arm : E.glow;
+  c.strokeStyle = AC;
+  c.lineWidth = lit ? Math.max(2.2, r * 0.15) : 1.6;
+  if (!lit) c.setLineDash([r * 0.42, r * 0.22]);
+  c.stroke(); c.setLineDash([]);
 
   c.save(); c.scale(r / 16, r / 16);
   c.fillStyle = E.col;
