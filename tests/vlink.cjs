@@ -47,6 +47,11 @@ const check = (name, ok, detail) => {
     window.requestAnimationFrame = () => 0;
     const sv = newSave(1); sv.time = 99; sv.flags.tut = 1; sv.flags.woke = 1;
     sv.comics = {};
+    // the story's pages are not the question either: a beat due in the room
+    // above (the chapter-two teaser over A3 -> B1) would open over the crossing
+    // — tests/panels.cjs measures that the climb still lands after it
+    sv.panels = { v: 1, seen: {}, past: {}, n: 0, k: {} };
+    for (const sq of PANEL_SEQ) { sv.panels.past[sq.id] = 1; sv.panels.k[sq.id] = 1; }
     for (const ch of ((window.COMIC_MANIFEST || {}).chapters || [])) sv.comics[ch.id] = { offered: true, revision: ch.revision };
     // the state the shafts are designed to be climbed in: the kernel sealed
     // over E1 is open once ZERO is down, and every guardian's chamber is

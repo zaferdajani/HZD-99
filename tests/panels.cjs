@@ -329,6 +329,36 @@ async function tapKey(page, code) {
     check('the teaser ends on the chapter title card', last);
     await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } });
     await waitFor(page, () => G.state === 'PLAY', 2000);
+
+    // ...and over the REAL way up: she jumps through the camp's hatch, the
+    // teaser opens over the shaft, and when it closes the climb still carries
+    // her onto B1's ledge — the pages pause the crossing, they do not break it
+    await stage(page, 'A3', { woke: 1, bossGlitch: 1, crystal: 1, sageTame_GA1D: 1, bossChime: 1, nfMeet: 1, ch2Climb: 1 });
+    await page.evaluate(() => { G.save.panels.past.free = 1; if (G.save.visited) delete G.save.visited.B1; });
+    await waitFor(page, () => panelsLoaded(panelsSeq('ch2')), 10000);
+    await page.evaluate(() => {
+      G.dialog = null; G.state = 'PLAY'; G.enemies = []; G.projs = [];
+      const g = G.grid, cols = [];
+      if (g.tGap) for (let x = g.tGap[0]; x <= g.tGap[1]; x++) cols.push(x);
+      else for (let x = 1; x < G.roomDef.w - 1; x++) if (g[0][x] === '.') cols.push(x);
+      const cx = cols[Math.floor(cols.length / 2)];
+      player.x = cx * TILE + (TILE - player.w) / 2; player.y = TILE + 2; player.vx = 0; player.vy = -760; player.on = false; player.iT = 99;
+      keys[KEYB.JUMP[0]] = 1;
+    });
+    const shaftTz = await waitFor(page, () => {
+      if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; }
+      return G.state === 'PANELS' && G.panels.seq.id === 'ch2';
+    }, 6000);
+    await page.evaluate(() => { for (const k in keys) keys[k] = 0; });
+    check('jumping up through the hatch opens the teaser over the shaft', shaftTz, await page.evaluate(() => G.state + ' ' + G.roomId));
+    await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } });
+    const landed = await waitFor(page, () => {
+      if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; }
+      G.enemies = []; if (player) player.iT = 99;
+      return G.state === 'PLAY' && G.roomId === 'B1' && !G.climb && player.on;
+    }, 6000);
+    const atB1 = await page.evaluate(() => ({ room: G.roomId, on: player.on, feet: Math.round(player.y + player.h), st: G.state }));
+    check('...and when it closes, the climb still lands her on B1\'s ledge', landed && atB1.room === 'B1' && atB1.on, JSON.stringify(atB1));
     check('no page errors (desktop)', errs.length === 0, errs.slice(0, 2).join(' | '));
     await ctx.close();
 
