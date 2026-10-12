@@ -35,7 +35,7 @@ like her own plating — the same hand as the suit badges, not a fantasy-RPG gil
 
 | key | frame | hue (enamel) | states (one cell each) | sizes |
 |---|---|---|---|---|
-| `loFrameArm` | pointy-top HEX bezel, bolt-head chamfer on each corner | rose `#ff45b4` | filled (lit inlay), empty (inlay dark, rim intact), locked (rim only, dull) | 128 px master; HUD cut at 36 px |
+| `loFrameArm` | pointy-top HEX bezel, bolt-head chamfer on each corner | coral `#ffb4a5` (was rose `#ff45b4`, retired 2026-10-12: ΔE 9 from Kingdom X's glow) | filled (lit inlay), empty (inlay dark, rim intact), locked (rim only, dull) | 128 px master; HUD cut at 36 px |
 | `loFrameCrest` | DIAMOND socket, a stepped inner bevel the crest jewel sits in | cobalt `#4a7bff` | filled (jewel seated), empty (open socket), locked | 128 px master; HUD cut at 20 px |
 | `loFrameRelic` | ROUND double-ringed SEAL, a ring of eight small rivets between the rings | trail green `#4fe36a` | filled (inlay lit), empty, locked | 128 px master; HUD cut at 20 px |
 

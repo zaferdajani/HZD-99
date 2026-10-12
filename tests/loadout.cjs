@@ -85,6 +85,29 @@ const COUNT = `(rect, cols, tol) => {
     for (const k of ks) if (body.includes(LO[k])) leaks.push(f + ':' + k);
   }
   check('the loadout hexes are written only in js/loadout.js', !leaks.length, leaks.join(' '));
+  // ...and none is a KINGDOM's colour either (owner, 2026-10-12: the first arm
+  // hue, rose #ff45b4, sat ΔE 9 from Kingdom X's glow, so an arm frame in the
+  // rift read as part of the room). Every kingdom's glow and edge — the room's
+  // own light — must be as far from each loadout hue as a reserved hue is.
+  {
+    const wsrc = fs.readFileSync(path.join(ROOT, 'js/world.js'), 'utf8');
+    const palSrc = wsrc.slice(wsrc.indexOf('const PAL_ROBO'), wsrc.indexOf('};', wsrc.indexOf('const PAL_ROBO')));
+    const pal = {};
+    for (const m of palSrc.matchAll(/^\s*([A-Z]):\s*\{([^}]*)\}/gm)) {
+      const g = m[2].match(/glow:\s*'(#[0-9a-fA-F]{6})'/), e = m[2].match(/edge:\s*'(#[0-9a-fA-F]{6})'/);
+      if (g && e) pal[m[1]] = [g[1], e[1]];
+    }
+    check('the six kingdom palettes are read from js/world.js', Object.keys(pal).length >= 6, Object.keys(pal).join(''));
+    for (const k of Object.keys(LO)) {
+      let worst = null;
+      for (const [z, hs] of Object.entries(pal)) for (const h of hs) {
+        const d = dE(LO[k], h);
+        if (!worst || d < worst.d) worst = { z, h, d };
+      }
+      check(k + ' ' + LO[k] + ' is no kingdom\'s glow or edge (ΔE > 30)', worst && worst.d > 30,
+        'nearest ' + worst.z + ' ' + worst.h + ': ΔE ' + worst.d.toFixed(0));
+    }
+  }
   check('the frame art is queued (ART_QUEUE §2bm)', /## 2bm\. THE LOADOUT FRAMES/.test(fs.readFileSync(path.join(ROOT, 'docs/ART_QUEUE.md'), 'utf8')));
 
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
@@ -233,7 +256,7 @@ const COUNT = `(rect, cols, tol) => {
     }`);
     const on = r.badges.find(b => b.on), off = r.badges.find(b => !b.on);
     check('HUD: the suit wheel is up with two suits', r.badges.length === 2, JSON.stringify(r.badges));
-    if (on) frameCheck('HUD: the worn arm sits in the rose hex', on.n, 'arm', 40);
+    if (on) frameCheck('HUD: the worn arm sits in the coral hex', on.n, 'arm', 40);
     if (on && off) check('HUD: the worn arm\'s frame outweighs an unworn one', on.n[0] > off.n[0] * 2, on.n[0] + ' vs ' + off.n[0]);
     check('HUD: one crest diamond per worn crest', r.crests.length === 2, String(r.crests.length));
     r.crests.forEach((n, i) => frameCheck('HUD: worn crest ' + i + ' is a cobalt diamond', n, 'crest', 18));
@@ -256,6 +279,10 @@ const COUNT = `(rect, cols, tol) => {
   const card = async (name, grant, kind) => {
     const r = await shot(pg, `() => {
       LANG = 'en'; G.dialog = null; G.state = 'PLAY'; if (typeof overlayClear === 'function') overlayClear();
+      // the card's measured strip reaches up into the room, and in A1 she is
+      // standing in it: her own pale coat and red hair are not a frame, so she
+      // steps out of the shot (the arm hue is a pale coral — skin-adjacent)
+      if (!player._keepDraw) { player._keepDraw = player.draw; player.draw = function () {}; }
       ${grant};
     }`, `(count) => {
       const d = G.dialog;
@@ -264,7 +291,8 @@ const COUNT = `(rect, cols, tol) => {
     }`);
     check('card: ' + name + ' is tagged ' + kind, r.lo === kind && r.st === 'DIALOG', JSON.stringify({ lo: r.lo, st: r.st }));
     frameCheck('card: ' + name + ' shows the ' + kind + ' frame', r.n, kind, 60);
-    await pg.evaluate(() => { G.dialog = null; G.state = 'PLAY'; if (typeof overlayClear === 'function') overlayClear(); });
+    await pg.evaluate(() => { G.dialog = null; G.state = 'PLAY'; if (typeof overlayClear === 'function') overlayClear();
+      if (player._keepDraw) { player.draw = player._keepDraw; player._keepDraw = null; } });
   };
   await card('a relic', "G.save.relics = G.save.relics.filter(x => x !== 'spring'); G.grantRelic('spring')", 'relic');
   await card('a crest', "G.save.crests = G.save.crests.filter(x => x !== 'over'); grantCrest('over')", 'crest');
@@ -273,6 +301,42 @@ const COUNT = `(rect, cols, tol) => {
   {
     const gsrc = fs.readFileSync(path.join(ROOT, 'js/game.js'), 'utf8');
     check('card: the boss\'s arm handover is tagged in onBossDead', /loadoutTagCard\(showItem\(t\('arm_' \+ arm\)[^\n]*'arm', arm\)/.test(gsrc));
+  }
+
+  // ---- 7b. the painted rooms: no kingdom paints itself in the arm hue -----
+  // The palette check above reads the code; this reads the PICTURE. One room
+  // per kingdom, the world frame alone (no HUD — the HUD is where the arm hue
+  // is supposed to be), art warm: the share of the frame within ΔE 12 of the
+  // arm hue. A frame laid over a room made of its own colour vanishes into it.
+  {
+    const r = await pg.evaluate(async (cols) => {
+      const lin = v => { v /= 255; return v > 0.04045 ? Math.pow((v + 0.055) / 1.055, 2.4) : v / 12.92; };
+      const q = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+      const lab = (r, g, b) => { r = lin(r); g = lin(g); b = lin(b);
+        const x = q((r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047), y = q(r * 0.2126 + g * 0.7152 + b * 0.0722), z = q((r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883);
+        return [116 * y - 16, 500 * (x - y), 200 * (y - z)]; };
+      const want = cols.map(h => lab(...[1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16))));
+      const out = {};
+      const cvs = document.getElementById('cv'), ctx = cvs.getContext('2d', { willReadFrequently: true });
+      for (const id of ['A1', 'B2', 'C2', 'D2', 'E2', 'V1']) {
+        loadRoom(id); G.state = 'PLAY'; G.enemies = []; G.boss = null; G.dialog = null; G.toasts = [];
+        for (let i = 0; i < 40; i++) await new Promise(k => requestAnimationFrame(k));
+        await new Promise(k => setTimeout(k, 700));
+        qFrame(c); c.clearRect(0, 0, 960, 540); drawWorldFrame();
+        const d = ctx.getImageData(0, 0, cvs.width, cvs.height).data;
+        const n = want.map(() => 0); let tot = 0;
+        for (let i = 0; i < d.length; i += 16) {         // every 4th pixel is plenty
+          const L = lab(d[i], d[i + 1], d[i + 2]); tot++;
+          want.forEach((W, j) => { if (Math.hypot(L[0] - W[0], L[1] - W[1], L[2] - W[2]) < 12) n[j]++; });
+        }
+        out[id + ' ' + G.roomDef.zone] = n.map(v => v / tot);
+      }
+      loadRoom('A1'); G.state = 'PLAY'; G.enemies = []; G.boss = null;
+      return out;
+    }, [L.arm, '#ff45b4']);
+    for (const [room, v] of Object.entries(r))
+      check('room ' + room + ': under 1% of the painted frame is the arm hue', v[0] < 0.01,
+        (v[0] * 100).toFixed(2) + '% (the retired rose: ' + (v[1] * 100).toFixed(2) + '%)');
   }
 
   // ---- 8. the touch wheel's suit seat wears the arm hue ------------------
