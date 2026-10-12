@@ -148,7 +148,11 @@ const WHEEL = [
     on: () => player && player.clawCD <= 0 && player.clawT <= 0 },
   { code: 'VSONG', icon: '♪', a: wa(4),
     on: () => player && player.volts >= (typeof SONG_COST === 'number' ? SONG_COST : 26) },
-  { code: 'VARM', icon: '◈', a: wa(5),
+  // the suit seat wears the ARM's hue and hex (js/loadout.js), so the thumb
+  // finds "change suit" by the same frame the HUD draws the suits in
+  { code: 'VARM', icon: '⬡', a: wa(5),
+    // (guarded: harnesses load this file alone in a VM, without js/loadout.js)
+    tint: typeof LOADOUT_COL !== 'undefined' ? { fill: LOADOUT_COL.arm, ring: LOADOUT_COL.arm } : null,
     on: () => typeof armSlots === 'function' && armSlots().length > 1 },
   // THE GRAPPLING CLAW takes a NEW seat past the suit rather than reshuffling the six
   // the thumb already knows; it appears once the claw is hers (grapUnlocked).

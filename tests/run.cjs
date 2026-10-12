@@ -240,6 +240,7 @@ const SUITE = [
   ['slashlayer','her cuts on their own layer, drawn after her, with a glow copy on the dial'],
   ['face',      'face acting: effort on the reel, relief after a repair, fear at a roar, drawn'],
   ['glide',     'the glide: after the double jump, JUMP held caps the fall; let go and she drops'],
+  ['loadout',   'arms, crests and relics each wear their own registered hue and frame, on every screen and the HUD'],
   ['soar',      'Volt Soar: UP + claw on the ground, six tiles straight up, to the first ceiling, cutting what she passes'],
   ['shopscale', 'a shop door has no depth, a gate and a cave do'],
   ['foescale',  'every machine reads in the hero\'s weight class'],

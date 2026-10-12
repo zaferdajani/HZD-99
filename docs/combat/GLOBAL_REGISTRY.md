@@ -68,7 +68,7 @@ Stage C will report it.**
 | Purifier violet | `#d24bff` | **Void / null.** GLACIERE's lance, MOTHER-V's null effects. Damage that ignores position rather than occupying it. | lance proj |
 | Frost blue | `#a5d8ff` | **Cold.** Slow, freeze, brittle floor. | shard proj |
 | Repair green | `#aef7d8` | **Player-positive only.** Never on a hostile effect. | heal burst |
-| Reward gold | `#ffd76a` | **Player-positive only.** Scrap, relics, opened things. | scrap, relics |
+| Reward gold | `#ffd76a` | **Player-positive only.** Scrap, relics, opened things. | scrap, relic drops (the carried relic wears the UI loadout seal below) |
 | Parry lime | `#c6ff1a` | **This blow can be turned.** Drawn on the striking part for exactly its parry window; nothing else may use it. Lime because pink is Kingdom X's glow and violet is Kingdom E's. | `PARRY_COL`, `js/parry.js` (`tests/guard.cjs` checks no other file names it) |
 | Kingdom glow | `PAL[zone].glow` | Ambience. **Never** a telegraph — it is the room's own colour and reads as background. | palettes |
 
@@ -77,6 +77,27 @@ Stage C will report it.**
    is winding up, the contract is broken and every telegraph in the game is worth
    less.
 2. `#aef7d8` and `#ffd76a` never appear on anything that can hurt the player.
+
+### UI loadout — three systems, three hues, three frames (2026-10-12, handoff Part 2 C2)
+
+Not combat hues: these are the menu and HUD's names for the player's build. They
+are registered here so no fight borrows them and no menu borrows a fight's.
+Defined ONCE as `LOADOUT_COL` in `js/loadout.js` (call sites name the constant,
+never the hex) and always paired with a frame SHAPE, because hue alone fails
+roughly one man in twelve.
+
+| System | Hue | Hex | Frame | Why this hue |
+|---|---|---|---|---|
+| Arms (attack) | Rose | `#ff45b4` | hex bezel | Orange was the obvious "attack" colour and is taken twice over: it sits between telegraph amber and danger red (ΔE 30 to amber) and IS Kingdom C's glow and the slag arm's element. Rose stays warm: ΔE 46 from danger red, 47 from purifier violet. |
+| Crests (combat passives) | Cobalt | `#4a7bff` | diamond socket | A deep saturated blue, far from the pale blues: frost ΔE 64, lock cyan ΔE 86. |
+| Relics (exploration) | Trail green | `#4fe36a` | double-ringed round seal | A saturated path green: lime ΔE 46, repair mint ΔE 53. Reward gold keeps the moment a relic is *found* (the drop, the chest); the seal is what it is once carried. |
+
+Pairwise: rose/cobalt ΔE 73, cobalt/green 150, rose/green 156. States: **filled**
+(worn/seated/carried), **empty** (on offer or owned but not worn — a dashed rim),
+**locked** (not hers yet — the same frame, faint). `tests/loadout.cjs` re-reads
+this table and the hard-rule table above, re-measures every distance, and checks
+the frames on the canvas. The authored frame plates are queued in
+`docs/ART_QUEUE.md` §2bm.
 
 ---
 
