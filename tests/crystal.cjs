@@ -84,6 +84,9 @@ const { chromium } = require('playwright');
 
     // ---- the depth door, round trip (the owner: it must be SOLID) ------
     delete G.save.flags.crystal2;
+    // the doors are the question, not the story: the cave's own pages open
+    // over her first walk into CV1 (js/panels.js), so its beats are past here
+    { const P = panelsState(); if (P) for (const sq of PANEL_SEQ) P.past[sq.id] = 1; }
     loadRoom('A5');
     await new Promise(r => setTimeout(r, 300));
     G.wake = null; G.state = 'PLAY'; G.hitStop = 0;
