@@ -36,10 +36,14 @@ const FIGHTS_ALL = [
     release: { volley: 'volley', swoop: 'swoop', broodcall: 'broodcall' },
     tell: ['volley', 'swoopwarn', 'broodcall'], hit: ['swoop', 'cfcrash'],
     pick: { volley: 'volley', swoopwarn: 'swoop', rest: 'rest' }, decide: ['idle'] },
+  // FURNACE CHOIR's A5 move set (js/furnace-fight.js): the phase-two drop is
+  // released out of its dive and wound up by its crouch and its lock; the
+  // bellows (ventwarn -> vent) only answers a third hit, which this scripted
+  // player never lands, so it is measured in tests/furnace.cjs instead
   { name: 'FURNACE CHOIR', kind: 'atlas', room: 'C3',
-    release: { slamwarn: 'slam', lobwarn: 'lob', forgebell: 'forgebell', hymn: 'hymn' },
-    tell: ['slamwarn', 'lobwarn', 'forgebell', 'hymn', 'meltwarn'], hit: [],
-    pick: { slamwarn: 'slam', lobwarn: 'lob', hymn: 'hymn' }, decide: ['idle'] },
+    release: { slamwarn: 'slam', lobwarn: 'lob', forgebell: 'forgebell', hymn: 'hymn', dive: 'drop', vent: 'backdraft' },
+    tell: ['slamwarn', 'lobwarn', 'forgebell', 'hymn', 'meltwarn', 'ventwarn', 'dropcrouch', 'droplock'], hit: ['rise', 'dive', 'vent'],
+    pick: { slamwarn: 'slam', lobwarn: 'lob', hymn: 'hymn', dropcrouch: 'drop' }, decide: ['idle'] },
   { name: 'GLACIERE', kind: 'zero', room: 'D3', minHold: 600,
     release: { lancewarn: 'lance', shardwarn: 'shard', dash: 'dash', prisonwarn: 'prison',
                orbs: 'orbs', novawarn: 'nova', azhush: 'hush', dccast: 'corrupt' },

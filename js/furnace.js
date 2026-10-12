@@ -44,12 +44,22 @@ function drgHot() {
 
 // one authored figure, bottom-anchored at the origin (art faces RIGHT).
 // wk crossfades the white-hot copy over it.
-function drgFig(c, key, wk, shake, rot) {
+function drgFig(c, key, wk, shake, rot, cool) {
   const im = drgImg(); const s = DRG_P[key];
   c.save();
   if (shake) c.translate(rnd(-shake, shake), rnd(-shake, shake) * 0.5);
   if (rot) { c.translate(0, -s[3] * 0.45); c.rotate(rot); c.translate(0, s[3] * 0.45); }
   c.drawImage(im, s[0], s[1], s[2], s[3], -s[2] / 2, -s[3], s[2], s[3]);
+  // COOLED: the sheet's own pixels under the warm-shadow copy (drgDark) — the
+  // light gone out of the furnace, which is how every opening reads
+  if (cool > 0) {
+    const dk = drgDark();
+    if (dk) {
+      c.save(); c.globalAlpha *= Math.min(1, cool);
+      c.drawImage(dk, s[0], s[1], s[2], s[3], -s[2] / 2, -s[3], s[2], s[3]);
+      c.restore();
+    }
+  }
   infEyeArt(c, 'dragonParts:' + key, 0, -s[2] / 2, -s[3], s[2], s[3]);
   if (wk > 0) {
     // capped crossfade: white-hot must READ as him glowing, never erase him
@@ -272,7 +282,16 @@ function drgSleep(c, t, lift) {
   c.restore();
 }
 
+// the marks his machine puts on the world (js/furnace-fight.js fcDrawFx: the
+// drop's landing, the lock, the backdraft's cone) are gameplay, so they are
+// drawn whether or not the sheet is in yet — under him and over him
 function drawFurnace(c, b) {
+  if (typeof fcDrawFx === 'function') fcDrawFx(c, b, 'under');
+  const ok = drawFurnaceBody(c, b);
+  if (typeof fcDrawFx === 'function') fcDrawFx(c, b, 'over');
+  return ok;
+}
+function drawFurnaceBody(c, b) {
   const im = drgImg(); if (!im || !im.naturalWidth) return false;
   c.save();
   try {
@@ -394,7 +413,7 @@ function drawFurnace(c, b) {
     // It was never gated because the old plate's lower half was too dim to pass
     // the harness's lit-pixel test; a brighter plate made the same ring measure
     // as his feet standing 11 px through the ground, in every state, identically.
-    if (grounded && ringGate > 0.01 && !G.artProbe) {
+    if (grounded && ringGate > 0.01 && !G.artProbe && !FC_AIR[b.st]) {
       const rg = DRG_P.ring;
       const hotStat = b.st === 'hymn' || b.st === 'forgebell' || b.st === 'meltwarn';
       const ra = (0.2 + Math.sin(b.anim * 2.6) * 0.07 + (hotStat ? 0.22 : 0) + wk * 0.25) * ringGate;
@@ -450,14 +469,52 @@ function drawFurnace(c, b) {
           addPart(cx + rnd(-40, 40), footY - b.h * 1.5, rnd(-80, 80), rnd(-160, -40),
             0.5, chance(0.5) ? '#ffd76a' : '#ff7b3a', 2.5, 0, true);
       }
-    } else if (b.stagT > 0 || b.st === 'daze') {
+    } else if (b.stagT > 0 || b.st === 'daze' || b.st === 'stagger'
+      || (b.st === 'recover' && (b.recMv === 'vent' || b.recMv === 'drop'))) {
       // SILENCED: her song killed his — grounded, slumped, the light dimmed.
       // The hit-group break slumps him the same way: the light goes out of
       // the bell and the body sags, which is the read for "hit it now".
+      // So does every opening the new moves leave (js/furnace-fight.js): the
+      // vents cooling after the backdraft, the sprawl after the drop, and the
+      // choke after a parried breath — ONE picture for "now", fight-wide.
       c.translate(0, 4);
-      drgFig(c, 'idle', wk, 1.6, 0.06);
+      drgFig(c, 'idle', wk, b.st === 'stagger' ? 3 : 1.6, b.st === 'recover' && b.recMv === 'drop' ? 0.09 : 0.06, 0.85);
       c.save(); c.globalAlpha *= 0.4; c.fillStyle = '#1a0a06';
       c.beginPath(); c.ellipse(30, -100, 26, 18, 0.2, 0, 7); c.fill(); c.restore();
+    } else if (b.st === 'ventwarn' || b.st === 'vent') {
+      // THE BELLOWS. The breath: rocked back on the haunches, the chest
+      // drawn up and in, the core in it swelling to white — then the lunge
+      // that throws the fire (the cone itself is fcDrawFx's, in world space)
+      const warm = b.st === 'ventwarn';
+      const dur = b.phase === 2 ? FC.ventTell2 : FC.ventTell;
+      const k = warm ? clamp(1 - (b.t || 0) / dur, 0, 1) : 1;
+      c.save();
+      if (warm) {
+        c.translate(-8 * k, 0);
+        c.scale(1 - 0.1 * k, 1 + 0.1 * k);
+        drgFig(c, 'idle', wk, 0.4 + k * 1.6 + shk, -0.14 * k);
+      } else {
+        c.translate(12, 2);
+        drgFig(c, 'idle', wk, 1.4 + shk, 0.14);
+      }
+      c.restore();
+      drgGlow(c, warm ? 18 : 34, -82, 12 + k * 30, 0.3 + k * 0.5, !warm || k > 0.6);
+    } else if (b.st === 'dropcrouch' || FC_AIR[b.st]) {
+      // THE DROP: the authored FLY figure. Gathered on the ground (the wings
+      // up, the body sunk onto the haunches) is the tell; on the wing over
+      // her it tracks; locked it holds and shakes; then it falls nose-first.
+      if (b.st === 'dropcrouch') {
+        const k = clamp(1 - (b.t || 0) / FC.dropTell, 0, 1);
+        c.scale(1 + 0.06 * k, 1 - 0.14 * k);
+        drgFig(c, 'fly', wk, k * 1.6 + shk, 0.05 + 0.06 * k);
+      } else if (b.st === 'dive') {
+        c.scale(0.94, 1.08);
+        drgFig(c, 'fly', wk, 0.8 + shk, 0.32);
+      } else {
+        const lock = b.st === 'droplock';
+        c.translate(0, lock ? 0 : Math.sin(b.anim * 18) * 2);
+        drgFig(c, 'fly', wk, (lock ? 1.2 : 0) + shk, lock ? 0.12 : -0.08);
+      }
     } else if (heroPose) {
       // THE FORGE ROAR / ORB SUMMONING / MELTDOWN: the sheet's large flying
       // figure — he rears onto the air, wings spread, and the foundry answers
@@ -471,6 +528,20 @@ function drawFurnace(c, b) {
       c.translate(0, -(4 + k * 9) + Math.sin(b.anim * 3.2) * 2);
       c.scale(HR, HR);
       drgFig(c, 'hero', wk, wind + shk, -0.04 - k * 0.05);
+      // THE TELL'S OWN LIGHT. The reared figure is twice his standing height,
+      // so the shared wash behind him (Boss.draw) covers a fraction of it, and
+      // tests/artbible.cjs measured the hymn's wind-up at 17.9% amber against
+      // a 10.6% rest — under the +8 the bible asks for. While the bells (or the
+      // forge bell) wind up, the upper body takes the warning colour itself.
+      if ((b.st === 'hymn' || b.st === 'forgebell') && k > 0 && !b.dead) {
+        c.save(); c.globalCompositeOperation = 'lighter';
+        const tg = c.createRadialGradient(80, -300, 12, 80, -300, 290);
+        tg.addColorStop(0, 'rgba(255,194,74,' + (0.22 + 0.4 * k) + ')');
+        tg.addColorStop(0.55, 'rgba(255,194,74,' + (0.1 + 0.22 * k) + ')');
+        tg.addColorStop(1, 'rgba(255,194,74,0)');
+        c.fillStyle = tg; c.beginPath(); c.ellipse(80, -300, 290, 250, 0, 0, 7); c.fill();
+        c.restore();
+      }
       // the mouth: heat gathers through the windup, flashes on every peal
       const mp = fc.pulseT > 0 ? fc.pulseT / 0.25 : 0;
       drgGlow(c, 266, -292, 22 + k * 22 + mp * 24, 0.35 + k * 0.3 + mp * 0.5, mp > 0.4);
@@ -548,7 +619,11 @@ function drawFurnace(c, b) {
     }
 
     // grounded overlays -----------------------------------------------------
-    if (!heroPose && b.stagT <= 0 && b.st !== 'dorm' && b.st !== 'intro') {
+    // ...and the openings keep the light OUT of the bell: the slumped picture
+    // is "hit it now", and a live core over it would read as a breath drawn
+    const slumped = b.st === 'daze' || b.st === 'stagger' || (b.st === 'recover' && (b.recMv === 'vent' || b.recMv === 'drop'));
+    const fcOwn = slumped || b.st === 'ventwarn' || b.st === 'vent' || b.st === 'dropcrouch' || FC_AIR[b.st];
+    if (!heroPose && !fcOwn && b.stagT <= 0 && b.st !== 'dorm' && b.st !== 'intro') {
       const mk2 = DRG_MOUTH[!grounded ? 'fly' : (Math.abs(b.vx || 0) > 20 ? 'walk' : 'idle')];
       // FIREBALL tell: heat climbs into the mouth as the lob comes due
       if (b.st === 'idle' && (b.t || 0) < 0.6 && !b.hymn && !b.slag)

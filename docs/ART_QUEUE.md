@@ -21,6 +21,46 @@ in `assets/source/`, wire it, photograph it, and run `node tests/run.cjs`.
 
 ---
 
+## 2bj. FURNACE CHOIR — the bellows, the drop, and the bell's own pose ✱ QUEUED 2026-10-12 (code session, handoff Part 2 A5)
+
+His new move set (`js/furnace-fight.js`, `docs/combat/BOSS_FURNACE.md`) ships
+on the owner's existing sheet: the bellows' breath and blast rock and lunge the
+IDLE figure, the drop gathers and flies the FLY figure, and every opening is
+the slumped IDLE under the sheet's own warm-shadow copy. That passes the
+silhouette and hue laws (`tests/artbible.cjs`: IoU 0.41–0.63 between the new
+states, every tell +14–37 points of amber over rest) — but a transform of a
+standing drawing is not a pose, and two older tells still SHARE one: the hymn
+and the forge bell both rear into the HERO figure. These plates fix that.
+
+Reference: attach the archived source plates in `assets/source/furnace/`
+(`idle.jpg`, `fly.jpg`, `hero.jpg`) and match the sheet exactly — the same
+corrupted mecha dragon, chrome-and-bone plating, molten orange seams, red
+eyes, art FACING RIGHT. Pure black background, whole body, side view, no
+ground plane, no cast shadow, no fire or glow painted in (the cone, the steam
+and every light are procedural and must stay so — ART_BIBLE: additive light is
+never generated).
+
+| plate | archive as | what it is | replaces in `drawFurnaceBody` |
+|---|---|---|---|
+| breath | `assets/source/furnace/breath.jpg` | THE BELLOWS' TELL: sat back hard on the haunches, chest thrust up and OPEN — the breast plates lifted apart on their hinges to show the core cavity — head drawn back and up, jaw shut, wings half-raised and pressed back | `ventwarn` (today: idle scaled 0.9 × 1.1, tilted back) |
+| blast | `assets/source/furnace/blast.jpg` | the backdraft going off: lunged forward low, forelegs braced wide, the opened chest pushed toward the viewer's right, jaw dropped, wings flung back | `vent` (today: idle tilted forward) |
+| spent | `assets/source/furnace/spent.jpg` | EVERY OPENING: slumped, head hanging to the floor, wings drooped open on the ground, the chest plates shut and dull — a furnace gone cold | `recover` after the vent/drop, `stagger`, `daze` (today: idle + the dark copy) |
+| gather | `assets/source/furnace/gather.jpg` | THE DROP'S TELL: crouched to spring, haunches loaded, wings raised high and cupped above the back, head low, looking UP | `dropcrouch` (today: FLY figure squashed) |
+| dive | `assets/source/furnace/dive.jpg` | falling nose-first, wings swept back flat, all four claws reaching down | `dive` (today: FLY figure rotated) |
+| bell | `assets/source/furnace/bell.jpg` | THE FORGE BELL'S TELL, so it stops sharing the hymn's: standing tall on the hind legs, one forepaw raised and striking his OWN chest plate like a clapper, head tipped up, wings closed | `forgebell` (today: the HERO figure, the hymn's pose) |
+
+Wiring notes: composite each keyed plate into `assets/characters/dragon_parts.webp`
+(`tools/lowres.cjs` regenerates the low tier), add its rect to `DRG_P` under
+the SAME key as its archive file (the archive rule in `tests/artbible.cjs`),
+and swap the branch's `drgFig(c, 'idle'|'fly'|'hero', …)` for the new key.
+Feet stay bottom-anchored at the origin. Then add `forgebell` to the FURNACE
+cast in `tests/artbible.cjs` with a `['hymn', 'forgebell', 0.86]` pair and run
+`node tests/run.cjs artbible furnace infection-roster` (every plate must carry
+his infection eye — `infEyeArt` is called by `drgFig`; mark the eye on the new
+key in `js/infection-eyes.js` if the pose moves the head).
+
+---
+
 ## 2bi. VOLT SOAR — the launch and the rise ✱ QUEUED 2026-10-11 (code session, handoff Part 2 B2)
 
 UP + claw on the ground launches her straight up six tiles (`js/soar.js`); it

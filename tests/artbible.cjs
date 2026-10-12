@@ -69,11 +69,24 @@ const CAST = [
     rest: 'idle', pairs: [['idle', 'dive', 0.90]],
     tell: [], cold: ['idle'], grnd: [],
   },
+  // FURNACE CHOIR's move set (js/furnace-fight.js, handoff A5): every new
+  // sentence is drawn from his own sheet — the breath of the bellows rocks the
+  // idle figure back and draws it up, the blast lunges it into its cone, the
+  // drop gathers the FLY figure on the ground, and every opening is the one
+  // slumped picture ("hit it now"). The opening must not look like the
+  // breath that precedes it, and the breath must not look like the walk.
   {
     kind: 'atlas', name: 'FURNACE CHOIR', room: 'C3',
-    states: { idle: { vx: 60, vy: 0, t: 1 }, lobwarn: { vx: 0, vy: 0, t: 0.2 } },
-    rest: 'idle', pairs: [['idle', 'lobwarn', 0.94]],
-    tell: ['lobwarn'], cold: ['idle'], grnd: ['idle', 'lobwarn'],
+    states: { idle: { vx: 60, vy: 0, t: 1 }, lobwarn: { vx: 0, vy: 0, t: 0.2 },
+              slamwarn: { vx: 0, vy: 0, t: 0.25 }, ventwarn: { vx: 0, vy: 0, t: 0.12 },
+              vent: { vx: 0, vy: 0, t: 0.09 }, dropcrouch: { vx: 0, vy: 0, t: 0.15 },
+              hymn: { vx: 0, vy: 0, t: 0.4 }, recover: { vx: 0, vy: 0, t: 0.4, recMv: 'vent' } },
+    rest: 'idle',
+    pairs: [['idle', 'lobwarn', 0.94], ['idle', 'slamwarn', 0.90], ['idle', 'ventwarn', 0.90],
+            ['ventwarn', 'vent', 0.90], ['idle', 'dropcrouch', 0.90], ['ventwarn', 'dropcrouch', 0.90],
+            ['ventwarn', 'recover', 0.90], ['dropcrouch', 'hymn', 0.90], ['idle', 'recover', 0.90]],
+    tell: ['lobwarn', 'slamwarn', 'ventwarn', 'dropcrouch', 'hymn'], cold: ['idle', 'recover'],
+    grnd: ['idle', 'lobwarn', 'slamwarn', 'ventwarn', 'vent', 'dropcrouch', 'recover'],
   },
   {
     kind: 'zero', name: 'GLACIERE', room: 'D3',
@@ -332,6 +345,7 @@ const ENEMY_CAST = [
       const src = (Boss.prototype.update || function () {}).toString()
         + (typeof alphaStep === 'function' ? alphaStep.toString() : '')
         + (typeof ghStep === 'function' ? ghStep.toString() + ghPose.toString() : '')
+        + (typeof fcStep === 'function' ? fcStep.toString() + fcStart.toString() : '')
         + (Boss.prototype.__aaaOriginalUpdate ? Boss.prototype.__aaaOriginalUpdate.toString() : '');
       const kit = (typeof MINI_KIT !== 'undefined' && MINI_KIT[S.kind]) || null;
       const built = kit ? [kit.close, kit.far, kit.close + 'warn', kit.far + 'warn'] : [];

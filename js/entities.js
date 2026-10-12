@@ -11560,19 +11560,8 @@ function broodRecover(b, hold) {
   const s = bossRecSpot(b);
   b.st = 'recover'; b.t = hold; b.recX = s.x; b.recY = s.y; b.recSink = 0.7;
 }
-// FURNACE CHOIR'S WINDOWS: [hold p1, hold p2, the idle walk that follows, as a
-// bossRest multiple]. The walk-ins after each move were 1.1-1.5 rest beats;
-// the recovery takes the front of that time and the walk keeps the rest, so
-// the cycle is the same length and the opening is now a thing he DOES. Only
-// the heavy three plant him — the slam, the hymn and the meltdown; the lob
-// and the forge bell keep the walk-in, which is already in reach.
-const FURN_REC = {
-  slam: [0.5, 0.42, 0.7], hymn: [0.55, 0.45, 0.95], melt: [0.45, 0.4, 0.8],
-};
-function furnRecover(b, mv) {
-  const R = FURN_REC[mv];
-  b.st = 'recover'; b.vx = 0; b.t = R[b.phase === 2 ? 1 : 0]; b.recNext = R[2];
-}
+// FURNACE CHOIR'S WINDOWS (FURN_REC, furnRecover) live with his machine in
+// js/furnace-fight.js.
 // MOTHER-V'S WINDOWS: the hold at the player's level after each move, [p1, p2].
 // The last fight is the tightest — these sit at the minimal end of the
 // doctrine (one hit, toward two), and her hit-group break and the Song's
@@ -11656,7 +11645,7 @@ const BREAK_KIT = {
   brood:  { dur: [1.7, 1.35], cd: [6, 7.5], fly: true,  after: 'rise', col: '#8fd8ff',
             busy: { swoop: 1, cfcrash: 1, cffloor: 1 } },
   atlas:  { dur: [1.6, 1.3],  cd: [6, 7.5], fly: false, after: 'idle', col: '#ffb060',
-            busy: { meltwarn: 1 } },
+            busy: { meltwarn: 1, ventwarn: 1, vent: 1, rise: 1, droplock: 1, dive: 1 } },
   zero:   { dur: [1.8, 1.5],  cd: [6, 7.5], fly: true,  after: 'idle', col: '#a5d8ff',
             busy: { dash: 1, dccast: 1 } },
   prism:  { dur: [1.5, 1.2],  cd: [5.5, 7], fly: false, after: 'rest', col: '#37ffd0',
@@ -11872,6 +11861,8 @@ class Boss {
       this._tellSt = this.st;
       if (TELL_ST.test(this.st || '')) sfx(this.tellCue());
     }
+    // FURNACE CHOIR's state log and his parry glint's reset (js/furnace-fight.js)
+    if (this.kind === 'atlas') fcLogStep(this, dt);
     if (this.roarBuzzT > 0) {
       // the roar VIBRATES: a held tremble on the camera and, through the
       // rumble motors, on the controller — re-armed in short pulses
@@ -12012,7 +12003,10 @@ class Boss {
     // stagger had just expired. NULLFANG's 1.15s recovery took 22 seconds and
     // TALONHOST's 1.7s repair took 42 — the boss visibly stopped and stayed
     // stopped, which is exactly how it looked from the outside.
-    if (this.stagT > 0) {
+    // ...except a body in the air: FURNACE CHOIR's drop is flown by hand, and
+    // a stagger that froze it would hang him over her head. It waits for the
+    // landing, where it is an opening again (FC_AIR, js/furnace-fight.js).
+    if (this.stagT > 0 && !(this.kind === 'atlas' && FC_AIR[this.st])) {
       this.stagT -= dt;
       if (!BOSS_SELF_STAG[this.st]) {                  // Song / weakness stagger
         // A STAGGER IS AN OPENING, AND AN OPENING IS IN REACH. Every stagger
@@ -12922,145 +12916,11 @@ class Boss {
       }
       // ---- ATLAS-7: slow walker, slams and lobs ----
       case 'atlas': {
-        this.vy += 2100 * dt;
-        this.face = Math.sign(px - this.cx()) || 1;
-        this.fbCD = this.fbCD == null ? 8 : this.fbCD - dt;
-        // THE SLAM HAD NO COOLDOWN. Its only gate was "she is within a hundred
-        // pixels", which against a player who stays in melee range is always
-        // true — so once the fight closed, the slam was the ONLY thing she ever
-        // did: 38% of the encounter was one telegraph on repeat, and the bell,
-        // the hymn and the forge never got a turn.
-        this.slamCD = this.slamCD == null ? 0 : this.slamCD - dt;
-        this.hymnCD = Math.max(0, (this.hymnCD || 0) - dt);
-        if (this.st === 'idle') {
-          this.vx = this.face * 62 * spd * (this.slag ? 0.55 : 1);
-          this.t -= dt;
-          // THE WALK-IN IS A WINDOW, so nothing interrupts its front: after a
-          // lob or a bell he walks at her for `openT` before he may start
-          // another wind-up. Without it a player standing close met the slam
-          // a frame after the lob — a 17 ms "opening" (tests/guardians.cjs)
-          this.openT = Math.max(0, (this.openT || 0) - dt);
-          if (this.openT > 0) { /* walking in, open */ }
-          else if (!this.meltUsed && this.hp <= this.hpMax * 0.35) {
-            // MELTDOWN: below a third the furnace stops holding itself back —
-            // the bell runs white-hot and the floor starts to pour
-            this.meltUsed = true;
-            this.st = 'meltwarn'; this.t = 1.2; this.vx = 0; sfx('castfire');
-          } else if (this.fbCD <= 0 && this.t <= 0.6) {
-            // FORGE BELL: three rapid clapper strikes, three falling weapons
-            // THE SHORTEST TELL IN THE GAME, LENGTHENED. It ran 300 ms to the
-            // first clapper strike, which clears the 250 ms reaction floor by
-            // fifty — for an ADULT. This game is for eight- to ten-year-olds,
-            // whose choice-reaction time (four moves to tell apart, not one
-            // stimulus to press a key on) is materially slower than the number
-            // every window in docs/combat was checked against. 1.5 s to the
-            // first strike puts it at 450 ms, in line with the rest of the
-            // roster, and costs the fight nothing: its difficulty is the size
-            // of its openings, not the speed of its warnings.
-            this.st = 'forgebell'; this.t = 1.5; this.vx = 0;
-            this.fbCD = rnd(11, 15); this.fbStruck = 0;
-          } else if (Math.abs(px - this.cx()) < 100 && this.slamCD <= 0) {
-            this.st = 'slamwarn'; this.t = 0.55; this.vx = 0;
-            this.slamCD = rnd(2.6, 4.0);
-          }
-          else if (this.t <= 0) {
-            // THE HYMN IS ON A COOLDOWN NOW. One idle in three fired it and idle
-            // rests 1.5 s, so it came round every few seconds — "it happens a
-            // lot" (owner, 2026-09-19). before → after: every 3rd idle → every
-            // 3rd idle AND 6.5–8.5 s since the last. When the cadence says hymn
-            // and the cooldown says no, it lobs instead.
-            // ...AND THE CADENCE IS A DECK NOW (2026-10-08): the bells answer a
-            // player who stands close (the rings leave from his body, so close
-            // is where they are hardest to clear), the lob answers one who
-            // keeps her distance. The cooldown still has the last word.
-            const fdx = Math.abs(px - this.cx());
-            const fb = fdx < 170 ? 0 : fdx < 380 ? 1 : 2;
-            const hymnOk = (this.hymnCD || 0) <= 0;
-            if (bossDraw(this, [['hymn', hymnOk ? [3, 1, 0.5][fb] : 0], ['lob', [1, 2, 3][fb]]]) === 'hymn') {
-              this.st = 'hymn'; this.t = 1.0; this.hymnCD = rnd(6.5, 8.5);
-              this.roarBuzzT = 0.7;
-              if (typeof padRumble === 'function') padRumble(0.7, 0.6, 550);
-              if (typeof roarWave === 'function')
-                roarWave(this.cx() + this.face * 34, this.y - this.h * 0.6, '#ffd76a');
-            }
-            else { this.st = 'lobwarn'; this.t = 0.45; this.vx = 0; }
-          }
-        } else if (this.st === 'lobwarn') {
-          // THE LOB WAS NOT A STATE, and that is two bugs in one. It fired from
-          // inside `idle` — so the automatic telegraph, which keys off the state
-          // NAME, never sounded for it, and every measurement of this fight
-          // counted her heaviest ranged attack as standing still. It has a
-          // wind-up and a name now, so it warns like everything else does.
-          this.vx = 0; this.t -= dt; this.windT = 0.3;
-          if (this.t <= 0) {
-            const d = px - this.cx();
-            this.shoot(clamp(d * 1.1, -300, 300), -460, 8, 900); sfx('lob');
-            // the lob keeps the walk-in as its window: it is his commonest
-            // move, a planted beat after every one made him a statue for a
-            // third of the fight (tests/bosspace.cjs: recover 29%), and a
-            // grounded walker coming at you is in reach every frame of it
-            this.st = 'idle'; this.t = bossRest(this, 1.1); this.openT = 0.45;
-          }
-        } else if (this.st === 'forgebell') {
-          // each strike rings out a spark shower, then the sky answers with
-          // embedded white-hot weapons — break them before they burst
-          this.vx = 0; this.t -= dt; this.windT = 0.3;
-          // the first strike lands 450 ms in; the three are 300 ms apart after
-          const due = Math.floor((1.5 - 0.15 - this.t) / 0.3);
-          while (this.fbStruck < Math.min(3, due)) {
-            this.fbStruck++;
-            cam.shake = 6; sfx('bosshit');
-            burst(this.cx(), this.cy() - 10, 12, MAT.molten.mid, 260, 0.45, 200, 3, true);
-            const wx = clamp(px + rnd(-110, 110), 60, G.roomDef.w * TILE - 60);
-            this.forge = this.forge || [];
-            this.forge.push({ x: wx, y: -30, vy: 0, landed: false, t: 3, kind: this.fbStruck % 3 });
-          }
-          if (this.t <= 0) { this.st = 'idle'; this.t = bossRest(this, 1.35); this.openT = 0.45; }   // the walk-in, as the lob
-        } else if (this.st === 'meltwarn') {
-          // the tell: the bell whitens, steam screams from every joint
-          this.vx = 0; this.t -= dt; this.windT = 0.4;
-          this.whiteHot = Math.min(1, (this.whiteHot || 0) + dt * 1.2);
-          if (chance(0.9)) addPart(this.cx() + rnd(-40, 40), this.y + rnd(0, this.h),
-            rnd(-30, 30), rnd(-140, -60), 0.5, '#fff2dd', 2.5, 0, true);
-          if (this.t <= 0) {
-            furnRecover(this, 'melt');
-            this.slag = { t: 0, life: 6.5, h: 0 };
-            cam.shake = 9; sfx('roar');
-          }
-        } else if (this.st === 'hymn') {
-          // the bells wind up, then ring: expanding rings of heat
-          this.vx = 0; this.t -= dt; this.windT = 0.4;
-          if (this.t <= 0) {
-            this.hymn = { r: 10, t: 0, n: this.phase === 2 ? 3 : 2 };
-            sfx('roar'); cam.shake = 7;
-            // said once, the first time the heat comes for her: what it is and
-            // what answers it — the same courtesy MOTHER'S SONG gets
-            if (G.save && G.save.flags && !G.save.flags.hymnTold) { G.save.flags.hymnTold = 1; G.toast(t('hymn_warn')); }
-            furnRecover(this, 'hymn');
-          }
-        } else if (this.st === 'slamwarn') {
-          this.vx = 0; this.t -= dt;
-          if (this.t <= 0) {
-            furnRecover(this, 'slam');
-            cam.shake = 11; sfx('slam');
-            const gy = this.y + this.h - 8;
-            G.projs.push(new Proj(this.cx() - 40, gy, -340, 0, false, 1, 8, PAL.C.glow, 0, 1.6));
-            G.projs.push(new Proj(this.cx() + 40, gy, 340, 0, false, 1, 8, PAL.C.glow, 0, 1.6));
-          }
-        } else if (this.st === 'recover') {
-          // PLANTED: the blow is spent and he stands in it — tail driven into
-          // the floor after the slam, the bell ringing down after the hymn —
-          // and does not walk at her until it is over. The walk-in that used
-          // to follow every move was reachable, but a body coming AT you is
-          // not an opening anyone reads as one.
-          this.vx = 0; this.t -= dt;
-          if (this.t <= 0) { this.st = 'idle'; this.t = bossRest(this, this.recNext || 0.7); }
-        }
-        if (this.phase === 2) {
-          this.embT = (this.embT || 0) - dt;
-          if (this.embT <= 0) { this.embT = 1.1; G.projs.push(new Proj(px + rnd(-130, 130), 40, 0, 300, false, 1, 6, '#ff9430', 100, 3)); }
-        }
-        moveEnt(this, dt);
+        // FURNACE CHOIR's machine lives in js/furnace-fight.js (fcStep): the
+        // bellows that answers the third hit, the drop that takes distance
+        // away in phase two, every move told and opened. Its own physics
+        // (moveEnt) runs there, because the drop flies by hand.
+        fcStep(this, dt, px, py, spd);
         break;
       }
       // ---- Archivist Zero: teleporting caster ----
@@ -14473,6 +14333,10 @@ class Boss {
       const s = BSPR[this.kind];
       if (s && sheetReady(s[0])) {
         const [key, n, cw, ch, fps, mult] = s;
+        // Talos runs FURNACE CHOIR's machine, so his drop's landing mark and
+        // his backdraft's cone are the same gameplay here (js/furnace-fight.js)
+        const fcFx = this.kind === 'atlas' && typeof fcDrawFx === 'function';
+        if (fcFx) fcDrawFx(c, this, 'under');
         c.save();
         if (this.hurtT > 0) c.globalAlpha = 0.65;
         c.translate(cx, this.y + this.h);
@@ -14486,6 +14350,7 @@ class Boss {
         }
         drawSheet(c, key, n, cw, ch, Math.floor(this.anim * fps) % n, (this.h * 1.55 * mult) / ch, 4);
         c.restore();
+        if (fcFx) fcDrawFx(c, this, 'over');
         c.restore();
         return;
       }

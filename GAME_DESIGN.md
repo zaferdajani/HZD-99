@@ -285,7 +285,11 @@ shipped code and assets, not from intention.*
   editor); shop/skill screens are functional but text-heavy.
 - [x] **Gameplay repetition risk** — Zones C–E still run on the older, simpler
   boss brains; they need the NULLFANG/TALONHOST treatment (bespoke move sets
-  from artwork).
+  from artwork). **Zone C done 2026-10-12** (handoff A5): FURNACE CHOIR's own
+  machine (`js/furnace-fight.js`) — the bellows that answers the third hit
+  (parryable), the phase-two drop, a veto list, `tests/furnace.cjs`,
+  `docs/combat/BOSS_FURNACE.md`. GLACIERE (D) and MOTHER-V (E) remain, one per
+  release.
 - [ ] Performance — solved (1.1 MB slim build, streamed assets, service
   worker; 60 fps on mid phones).
 - [ ] Missing visual feedback — largely solved; remaining: damage numbers are

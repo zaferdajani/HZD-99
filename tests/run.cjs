@@ -196,6 +196,7 @@ const SUITE = [
   ['hzdvox',    'her voice: on the frame she moves, never clipping, never twice at once'],
   ['wolves',    'the pack, the Alpha and the flag that changes a whole species'],
   ['gravehorn', "GRAVEHORN: the entrance, every move told and opened, the charge jumped, the toss thrown and parried, twin horns, the kick from behind, the exit"],
+  ['furnace',   'FURNACE CHOIR: every move told and opened, the third hit answered by the bellows (and the parry that turns it), the phase-two drop, the veto list'],
   ['retired',   'the deleted art stays deleted, and no creature wears another body while its art loads'],
   ['gait',      'she runs ON the ground: no bouncing, no falling plate mid-stride'],
   ['motion',    'the fired guardian plates are on screen, not just in the manifest'],
