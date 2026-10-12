@@ -339,7 +339,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const good = await tossWith(0.11);
     check('a strike in the last 150 ms of the wind-up CLASHES: he staggers, she takes nothing',
       good.parries === 1 && good.st === 'stagger' && good.lost === 0, 'pressed at t=' + good.pressed + ' s; ' + good.st + ', lost ' + good.lost);
-    const early = await tossWith(0.42);
+    // the early strike has to BE early: a keydown the loaded machine delivered
+    // late (t < 0.38 s) leaves the swing live into the parry window, which is a
+    // different case — re-run it (at most four times) rather than count it
+    let early;
+    for (let a = 0; a < 4; a++) { early = await tossWith(0.42); early.tries = a + 1; if (early.pressed == null || early.pressed >= 0.38) break; }
     check('a strike well before the window does not: the toss lands', early.parries === 0 && early.lost >= 1,
       'pressed at t=' + early.pressed + ' s; parries ' + early.parries + ', lost ' + early.lost);
     // THE PERFECT GUARD turns the same toss (js/parry.js): the brace raised in
