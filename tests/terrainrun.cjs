@@ -140,6 +140,12 @@ const check = (name, ok, detail) => {
       await enter(id);
       G.trans = null;
       G.enemies = []; G.boss = null; G.projs = [];
+      // ...AND SHE ARRIVES WHOLE. The Foundry's floor has slag and spikes, and a
+      // body carried in from four rooms of walking on a core or two died in C2
+      // before a frame was sampled (logged: two spike touches and one slag
+      // pool) — on the published build too. This harness asks what the FLOOR
+      // does to a walk; whether she survives the walk is campaign-ch1's question.
+      player.cores = player.maxCores(); player.iT = 0;
       // SHE IS PUT ON THE FLOOR THIS ROOM ACTUALLY HAS, not on a fixed row.
       //
       // `h - 4` is the floor in the meadow and it is not the floor everywhere.
@@ -214,7 +220,7 @@ const check = (name, ok, detail) => {
       while ((G.simClock || 0) - t0 < 5 && performance.now() < wallStop) {
         keys.ArrowRight = 1;                        // direction only. Never jump.
         await new Promise(k => requestAnimationFrame(k));
-        if (G.roomId !== id || player.dead) { endedBy = G.roomId !== id ? 'left' : 'dead'; break; }  // she walked out; not a stall
+        if (G.roomId !== id || player.dead) { endedBy = G.roomId !== id ? 'left' : 'dead:' + JSON.stringify({ log: G.dmgFight && G.dmgFight.cores, cores: player.cores, y: Math.round(player.y), x: Math.round(player.x) }); break; }  // she walked out; not a stall
         // A SAMPLE IS A SIMULATED FRAME, NOT A CALLBACK.
         //
         // rAF callbacks are not evenly spaced under load: after a stall the
@@ -338,9 +344,11 @@ const check = (name, ok, detail) => {
   const STEP_MIN = 0.010;                       // 10 ms of sim per advancing frame
   const unrun = r.stalls.filter(s => s.frames < 30
     || (s.simRan / Math.max(1, s.frames)) < STEP_MIN);
+  for (const s of r.stalls) if (s.endedBy) console.log('     ' + s.room + ' ended early: ' + s.endedBy + ' after ' + s.simRan + ' s');
   check('the clock ran in every room', unrun.length === 0,
         unrun.length ? unrun.map(s => s.room + ' only ' + s.simRan + 's of sim in ' + s.frames
-              + ' frames (' + Math.round(s.simRan / Math.max(1, s.frames) * 1000) + 'ms/frame)').join(', ')
+              + ' frames (' + Math.round(s.simRan / Math.max(1, s.frames) * 1000) + 'ms/frame'
+              + (s.endedBy ? ', ended: ' + s.endedBy + ' on attempt ' + (s.attempt + 1) : '') + ')').join(', ')
                      : r.stalls.map(s => s.room + ' ' + s.simRan + 's/' + s.frames + 'f@'
               + Math.round(s.simRan / Math.max(1, s.frames) * 1000) + 'ms').join('  '));
   // A ROOM WHOSE FIRST OBSTACLE IS A REAL STEP IS NOT A DEAD ROOM.
