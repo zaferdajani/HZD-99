@@ -55,6 +55,106 @@ function applyUpdate() {
 }
 
 const CRESTS = { claws: 2, over: 2, plate: 2, magnet: 1, siphon: 1, phantom: 2, sprint: 1, ground: 2, nine: 3 };
+// ===========================================================================
+// CRESTS THAT CHANGE HOW SHE FIGHTS (handoff Part 2 C1; owner, 2026-10-12:
+// "expensive crests should change how she fights, give her something tangible
+// that helps in the game... applicable for all weapons, whether it's claw,
+// sword, double sword, etc.").
+//
+// A seal is a dead unit's certified rating (docs/CRESTS.md), and a rating is a
+// way of moving. Every seal that takes TWO OR MORE units of port width carries
+// an ATTACK BLOCK as well as its passive: a set of multipliers laid over her
+// swing at ONE place, so the same block shapes the bare claws, the single
+// sword, the twin blades and the joined blade identically, and NOSTOS's hero
+// through the same Player code. The one-socket seals (magnet, siphon, sprint)
+// stay passives: a courier's sprint was rated to run, not to fight.
+//
+//   t       the swing's ACTIVE window (0.15 s) and its drawn clock (0.24 s)
+//   cd      her RECOVERY after each beat (0.26 / 0.23 / 0.33 s). Overclock's
+//           own passive x0.7 still applies on top: the passive is kept
+//   R       REACH: how far in front of her the cut's FAR EDGE lands (Player.hitbox)
+//   half    WIDTH: the cut's half-height across the aim (Player.hitbox)
+//   kb      knockback of the swing rows (ATTACKS.slash / .finisher, crest: 1)
+//   freeze  hit-stop of the swing rows
+//   step    how far each grounded beat carries her in (96 / 230 px/s)
+//   recoil  how hard her own blow pushes her back (62 / 130 px/s)
+//   chain   3: jab, jab, finisher. 2: every second beat is the finisher
+//   down    'diag': the air down-strike goes down-forward at 45 degrees and
+//           its pogo carries her on over what it struck
+//   shape   which authored hit shape (js/hitshape.js) each beat uses
+//   tint    the colour of the cut she draws on the slash layer. Measured
+//           against every reserved hue in docs/combat/GLOBAL_REGISTRY.md §2
+//           (ΔE > 30) by tests/crestfight.cjs
+//
+// Every block is a TRADE, never a pure upgrade: whatever it gives (reach,
+// width, push, speed, ground) it pays for in recovery, reach or push. A fixed
+// blow (ATTACKS rows with `flat`: the parry counter, Volt Soar) and the charged
+// moves (burst, swirl, the thrown blade) are their own moves and stay fixed.
+//
+// ONE STYLE AT A TIME. If she wears several, the seal taking the most port
+// width sets it; between equals, the one she seated first (crestStyle). Gear
+// marks that row "sets your fighting style". tests/crestfight.cjs swings every
+// block with every weapon form through real input and measures all of it.
+// ===========================================================================
+const CREST_ATTACK = {
+  // the cutter's rating: the edge goes further and pays in width and recovery
+  claws:   { t: 1,   cd: 1.15, R: 1.25, half: 0.9,  kb: 1,    freeze: 1,   step: 1,   recoil: 1, chain: 3, down: 'straight',
+             shape: { slash: 'reach', finisher: 'reach' }, tint: '#fff4f4' },
+  // the wall-walker's rating: a slower, wider, heavier slam and a diagonal pogo
+  plate:   { t: 1.2, cd: 1.25, R: 1,    half: 1.35, kb: 1.4,  freeze: 1.3, step: 1,   recoil: 1, chain: 3, down: 'diag',
+             shape: { slash: 'slam', finisher: 'slam' }, tint: '#5c7aa8' },
+  // the actuator's rating: quicker, shorter, lighter swipes
+  over:    { t: 0.8, cd: 1,    R: 0.85, half: 1,    kb: 0.75, freeze: 0.6, step: 1,   recoil: 1, chain: 3, down: 'straight',
+             shape: null, tint: '#ff9be0' },
+  // the phase-dasher's rating: every cut lunges, a little shorter
+  phantom: { t: 1,   cd: 1.1,  R: 0.9,  half: 1,    kb: 1,    freeze: 1,   step: 2.5, recoil: 1, chain: 3, down: 'straight',
+             shape: null, tint: '#b8a0ff' },
+  // the insulated unit's rating: planted feet, no step and no recoil, a
+  // heavier shove from a stance that recovers slower
+  ground:  { t: 1,   cd: 1.1,  R: 1,    half: 1.15, kb: 1.3,  freeze: 1,   step: 0,   recoil: 0, chain: 3, down: 'straight',
+             shape: null, tint: '#16a596' },
+  // the prototype's rating: a two-beat string — every second cut is the finisher
+  nine:    { t: 1,   cd: 1,    R: 1,    half: 1,    kb: 1,    freeze: 1,   step: 1,   recoil: 1, chain: 2, down: 'straight',
+             shape: null, tint: '#ffb090' },
+};
+// Which worn seal sets her fighting style: the one taking the most port
+// width; between equals, the one seated first. null: her own, uncertified.
+function crestStyle(save) {
+  const eq = (save || (typeof G !== 'undefined' && G.save) || {}).equip || [];
+  let best = null;
+  for (const id of eq) if (CREST_ATTACK[id] && (!best || CRESTS[id] > CRESTS[best])) best = id;
+  return best;
+}
+function crestAttackOf(id) { return (id && CREST_ATTACK[id]) || null; }
+// the plain-words line a crest's card adds about her attacks ('' for a seal
+// that does not change them)
+function crestFightText(id) { return CREST_ATTACK[id] ? t('cf_' + id) : ''; }
+// a seal's whole card: what it does to her body, then what it does to her attacks
+function crestCardText(id) { const f = crestFightText(id); return t('c_' + id + 'd') + (f ? ' ' + f : ''); }
+// the seal's name as the screen she is on calls it (Gear names the coil)
+function crestNameKey(id) { return id === 'phantom' && !isHero() ? 'gear_phase' : 'c_' + id; }
+// For a WORN seal with an attack block: does it set her style, or which seal
+// does? '' for anything else. The one-style rule, said where it applies.
+function crestStyleNote(id, save) {
+  const s = save || G.save;
+  if (!CREST_ATTACK[id] || !s || (s.equip || []).indexOf(id) < 0) return '';
+  const on = crestStyle(s);
+  return on === id ? t('cf_active') : t('cf_held').replace('%s', t(crestNameKey(on)));
+}
+// wrapText breaks at spaces, and Chinese has none: a line that is still too
+// wide is broken between characters, so a panel never runs out of its frame
+function wrapCrest(str, maxW, size) {
+  const out = [];
+  for (const ln of wrapText(str, maxW, size)) {
+    if (c.measureText(ln).width <= maxW) { out.push(ln); continue; }
+    let cur = '';
+    for (const ch of Array.from(ln)) {
+      if (cur && c.measureText(cur + ch).width > maxW) { out.push(cur); cur = ch; } else cur += ch;
+    }
+    if (cur) out.push(cur);
+  }
+  return out;
+}
 const SHOP = [
   // SOMETHING SHE CAN ACTUALLY AFFORD. Every other line on this list costs more
   // than a whole kingdom's scrap, which meant a new player met the shop, read
@@ -992,7 +1092,8 @@ function grantMod(id) {
 // first seal she seats tells it, once, in the card that hands it over.
 function grantCrest(id) {
   if (G.save.crests.indexOf(id) < 0) G.save.crests.push(id);
-  const card = loadoutTagCard(showItem(t('c_' + id), t('c_' + id + 'd')), 'crest', id);
+  // ...and a seal that changes how she fights says how, in plain words (C1)
+  const card = loadoutTagCard(showItem(t('c_' + id), crestCardText(id)), 'crest', id);
   if (card && !(G.save.flags && G.save.flags.crestTold)) {
     if (!G.save.flags) G.save.flags = {};
     G.save.flags.crestTold = 1;
@@ -17747,9 +17848,14 @@ function drawCrest() {
     ftxt('▪'.repeat(CRESTS[id]), ar ? 210 : 570, y, 14, '#ffd76a', ar ? 'left' : 'right');
   });
   const cur = list[G.crestIdx];
-  dimPanel(630, 160, 280, 140);
+  // the panel grew to hold the seal's fighting style (C1) and, when it is
+  // worn, whether it is the one setting her style
+  const note = crestStyleNote(cur);
+  const body = wrapCrest(crestCardText(cur), 240, 14).slice(0, note ? 7 : 8);
+  dimPanel(630, 160, 280, Math.max(140, 72 + body.length * 19 + (note ? 22 : 0)));
   ftxt(t('c_' + cur), 770, 190, 17, '#eef3fa');
-  wrapText(t('c_' + cur + 'd'), 240, 14).forEach((ln, i) => ftxt(ln, 770, 220 + i * 20, 14, '#9fb8c8'));
+  body.forEach((ln, i) => ftxt(ln, 770, 216 + i * 19, 14, '#9fb8c8'));
+  if (note) ftxt(note, 770, 216 + body.length * 19 + 4, 13, '#eef3fa');
   ftxt(t('crest_hint'), 480, 512, 13, '#7d93a8');
 }
 function drawShop() {
@@ -17762,6 +17868,8 @@ function drawShop() {
     if (sel) { c.fillStyle = 'rgba(255,215,106,0.08)'; rr(c, 160, y - 19, 640, 40, 8); c.fill(); }
     let name = it.type === 'crest' ? t('c_' + it.id) : t('s_' + it.id);
     let desc = it.type === 'crest' ? t('c_' + it.id + 'd') : t('s_' + it.id + 'd');
+    // a seal that changes how she fights names its style on the shelf (C1)
+    if (it.type === 'crest' && CREST_ATTACK[it.id]) desc += '  ·  ' + t('cf_style') + ': ' + t('cfs_' + it.id);
     // THE PACK IS NOT A REFILL. Until it is bought the first row is the Volt
     // Pack — permanent, marked, and the only thing on the list she can buy;
     // after it, the same row is the refill it always was (js/opening.js).

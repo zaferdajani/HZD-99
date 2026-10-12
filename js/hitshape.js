@@ -21,8 +21,22 @@ const HIT_SHAPES = {
   finisher: [[0, 0.02], [0.55, 0], [0.86, 0.08], [1, 0.3], [1, 0.7], [0.86, 0.92], [0.55, 1], [0, 0.98]],
   // the plunge: wide at her feet, narrowing to the point she drives down
   down:     [[0, 0], [1, 0], [0.96, 0.5], [0.76, 1], [0.24, 1], [0.04, 0.5]],
+  // THE SEALS' CUTS (C1, CREST_ATTACK in js/game.js names which beat uses which).
+  // the cutter's reach: the long edge narrows to its point
+  reach:    [[0, 0.04], [0.5, 0], [0.84, 0.1], [1, 0.34], [1, 0.66], [0.84, 0.9], [0.5, 1], [0, 0.96]],
+  // the plate's slam: a heavy flat face, barely rounded — the width is the point
+  slam:     [[0, 0], [0.62, 0], [0.94, 0.08], [1, 0.26], [1, 0.74], [0.94, 0.92], [0.62, 1], [0, 1]],
+  // the plate's diagonal pogo: the box sits on the 45-degree line, so its
+  // shape is the one that reads the same turned either way — an octagon
+  diag:     [[0.15, 0], [0.85, 0], [1, 0.15], [1, 0.85], [0.85, 1], [0.15, 1], [0, 0.85], [0, 0.15]],
 };
-function swingShapeId(s) { return (s.ay > 0 && !s.ax) ? 'down' : s.combo === 2 ? 'finisher' : 'slash'; }
+function swingShapeId(s) {
+  if (s.ay > 0 && !s.ax) return 'down';
+  if (s.ay > 0.5) return 'diag';             // the plate's diagonal pogo (C1)
+  const id = s.combo === 2 ? 'finisher' : 'slash';
+  const blk = typeof swingCrest === 'function' ? swingCrest(s) : null;
+  return (blk && blk.shape && blk.shape[id]) || id;
+}
 // the authored shape, in world space, for the swing `s` and its box `b`
 function swingShape(s, b) {
   const pts = HIT_SHAPES[swingShapeId(s)], out = [];

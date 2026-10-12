@@ -99,6 +99,26 @@ this table and the hard-rule table above, re-measures every distance, and checks
 the frames on the canvas. The authored frame plates are queued in
 `docs/ART_QUEUE.md` §2bm.
 
+### Crest cuts — the seals' fighting styles (2026-10-12, handoff Part 2 C1)
+
+Not reserved meanings either: each is the light ONE seal adds to her own cut
+(`drawCrestEdge`, js/entities.js), drawn only during her swing, never on
+anything that can hurt her. Defined once in `CREST_ATTACK` (js/game.js).
+`tests/crestfight.cjs` re-reads every hue registered above and requires each
+tint ΔE > 30 from all of them and ΔE > 25 from each other.
+
+| Seal | Style | Tint | Nearest registered hue |
+|---|---|---|---|
+| `claws` | Long reach | `#fff4f4` bone white | frost, ΔE 31 |
+| `plate` | Heavy slam | `#5c7aa8` slate | frost, ΔE 35 |
+| `over` | Quick swipes | `#ff9be0` pink | arms rose, ΔE 35 |
+| `phantom` | Lunge | `#b8a0ff` lavender | crests cobalt, ΔE 31 |
+| `ground` | Rooted | `#16a596` teal | repair green, ΔE 34 |
+| `nine` | Two-beat | `#ffb090` ember | reward gold, ΔE 39 |
+
+The numbers of each block (`CREST_ATTACK`) are in docs/CRESTS.md; how they move
+§1 is in the changelog below.
+
 ---
 
 ## 3. Move ID namespace
@@ -254,3 +274,26 @@ Binding on every room in every zone.
 | drawn weight (js/beast.js) | — | leap pitches along the arc (±0.26–0.30 rad), touchdown squash 0.22 s, breathing idle | a picture sliding along a curve is not an animal going over the top |
 
 bosspace NULLFANG after: idle 24% (was 28–35%). openings, daze, artbible, motion, tells, combat green.
+
+## Changelog — 2026-10-12 (owner: "expensive crests should change how she fights... applicable for all weapons")
+
+§1 is her capability with NO seal and is unchanged. A seal of two or more
+sockets now lays an attack block (`CREST_ATTACK`, js/game.js; full table in
+docs/CRESTS.md) over her swing — every weapon form, both worlds. Only one sets
+her style: the seal taking the most port width, between equals the one seated
+first. With a seal set, §1's swing rows read:
+
+| value | no seal | claws (Long reach) | plate (Heavy slam) | over (Quick swipes) | phantom (Lunge) | ground (Rooted) | nine (Two-beat) |
+|---|---|---|---|---|---|---|---|
+| attack active | 150 ms | 150 | **180** | **120** | 150 | 150 | 150 |
+| recovery hit 1 / 2 / finisher | 260 / 230 / 330 ms | **299 / 265 / 380** | **325 / 288 / 413** | **182 / 161 / 231** (the passive's ×0.7) | **286 / 253 / 363** | **286 / 253 / 363** | 260 / — / 330: jab, finisher |
+| reach (the far edge) / width (half) | ×1 / ×1 | **×1.25 / ×0.9** | ×1 / **×1.35** | **×0.85** / ×1 | **×0.9** / ×1 | ×1 / **×1.15** | ×1 / ×1 |
+| knockback / hit-stop | ×1 / ×1 | ×1 / ×1 | **×1.4 / ×1.3** | **×0.75 / ×0.6** | ×1 / ×1 | **×1.3** / ×1 | ×1 / ×1 |
+| step in / recoil | 96, 230 / 62, 130 px/s | ×1 / ×1 | ×1 / ×1, **diagonal pogo** | ×1 / ×1 | **×2.5** / ×1 | **0 / 0** | ×1 / ×1 |
+
+Every opening calculation in this file assumed 230 ms as her fastest recovery.
+Overclock already broke that floor (161 ms) before C1 and still does; the
+quick-swipes block shortens her active window, not her recovery, so no
+existing opening classification moves. Every other block LENGTHENS recovery,
+which only makes an opening harder for her to fill, never easier.
+

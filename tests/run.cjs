@@ -239,6 +239,7 @@ const SUITE = [
   ['grapple',   'the grappling claw: walls, enemies, aim assist, and everything that outranks it'],
   ['hitshape',  'authored hit shapes: every swing inside its old square, the far corners trimmed, the Forge overlay'],
   ['slashlayer','her cuts on their own layer, drawn after her, with a glow copy on the dial'],
+  ['crestfight','the expensive seals change how she fights: each attack block measured with every weapon, drawn, one style at a time, in five languages'],
   ['face',      'face acting: effort on the reel, relief after a repair, fear at a roar, drawn'],
   ['glide',     'the glide: after the double jump, JUMP held caps the fall; let go and she drops'],
   ['dmglog',    'the damage log as a check: cores lost by source per room, the 40% flag, the Forge overlay'],
