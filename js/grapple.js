@@ -50,10 +50,17 @@ function grapUnlocked() {
   return !!(typeof G !== 'undefined' && G.save && G.save.abil && (G.save.abil.grapple || G.save.abil.dash));
 }
 function grapTxt(k, en) { const v = typeof t === 'function' ? t(k) : k; return (v == null || v === k) ? en : v; }
+// Only a live hostile can be an anchor. Story-disabled machines, cleansed
+// creatures and companion guardians share the ordinary enemy arrays, so
+// checking `dead` alone lets the claw drag them and farm charge from them.
+function grapHostile(e) {
+  return !!(e && !e.dead && !e.disabled && !e.rescued && !e.calm && !e.tame && !e.tamed
+    && !e.purified && !e.friendly && !e.yielded && !(typeof isPet === 'function' && isPet(e)));
+}
 function grapTargets() {
   const b = G.boss;
-  const bossOk = b && !b.dead && b.st !== 'intro' && b.st !== 'dorm' && !(typeof isPet === 'function' && isPet(b));
-  return G.enemies.concat(bossOk ? [b] : []);
+  const bossOk = grapHostile(b) && b.st !== 'intro' && b.st !== 'dorm';
+  return G.enemies.filter(grapHostile).concat(bossOk ? [b] : []);
 }
 function grapGlow() {
   const hero = typeof isHero === 'function' && isHero();
@@ -106,7 +113,6 @@ function grapUpdate(p, dt) {
       g.len += step / sub;
       g.tx = g.ox + g.dx * g.len; g.ty = g.oy + g.dy * g.len;
       for (const e of grapTargets()) {
-        if (e.dead) continue;
         const hb = hurtBoxOf(e);
         if (g.tx >= hb.x - 6 && g.tx <= hb.x + hb.w + 6 && g.ty >= hb.y - 6 && g.ty <= hb.y + hb.h + 6) {
           g.st = 'pull'; g.t = 0; g.foe = e;
@@ -130,7 +136,9 @@ function grapUpdate(p, dt) {
   }
   if (g.st === 'pull') {
     if (g.foe) {
-      if (g.foe.dead) { grapEnd(p, false); return false; }
+      // Rescue/cure can complete while the claw is in flight. Let go before
+      // moving either actor or awarding a second hit.
+      if (!grapHostile(g.foe)) { grapEnd(p, false); return false; }
       const hb = hurtBoxOf(g.foe); g.tx = hb.x + hb.w / 2; g.ty = hb.y + hb.h / 2;
     }
     const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
@@ -165,7 +173,6 @@ const GRAP_CONE = Math.cos(40 * Math.PI / 180);   // 28 degrees missed a crawler
 function grapAssist(ox, oy, dx, dy) {
   let best = null, bestScore = Infinity;
   for (const e of grapTargets()) {
-    if (e.dead) continue;
     const hb = hurtBoxOf(e);
     const cx = hb.x + hb.w / 2, cy = hb.y + hb.h / 2;
     const vx = cx - ox, vy = cy - oy, d = Math.hypot(vx, vy);
@@ -185,6 +192,9 @@ function grapAssist(ox, oy, dx, dy) {
 function grapBite(p, e, g, id, arrive) {
   let dm = p.attackDmg(id);
   dm = dealDmg(e, dm, armEl(), g.tx, g.ty, true);
+  // A protected or immune target rejected the hit. It must not be shoved,
+  // charged from, frozen or presented as a successful impact.
+  if (!(dm > 0)) return false;
   attackKnock(e, id, g.dx, g.dy);   // the bite holds (kb null); the arrival shoves
   p.gainVolts(arrive ? 8 : 4);
   sfx(e instanceof Boss ? 'bosshit' : 'hit');
@@ -193,6 +203,7 @@ function grapBite(p, e, g, id, arrive) {
   attackFreeze(id);
   if (typeof padRumble === 'function') padRumble(arrive ? 0.45 : 0.25, arrive ? 0.7 : 0.4, arrive ? 110 : 60);
   if (arrive) { p.vx = -g.dx * 220; p.vy = -560; p.iT = Math.max(p.iT, 0.25); }   // bounce off it, like a pogo
+  return true;
 }
 function grapEnd(p, toDash) {
   const g = p.grap; if (!g) return;

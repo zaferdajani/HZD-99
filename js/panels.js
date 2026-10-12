@@ -302,13 +302,22 @@ function panelsLoaded(seq) {
   return seq.panels.every(p => !p.src || (PN.img[p.src] && (PN.img[p.src].ok || PN.img[p.src].err)));
 }
 // ---- when it is allowed to begin ------------------------------------------
-function panelsSafe() {
+function panelsSafe(seq) {
   if (G.state !== 'PLAY' || !player || player.dead || !G.save) return false;
   if (typeof isHero === 'function' && isHero()) return false;
+  // The bay and city-gate pages ARE the arrival beats of the opening movement
+  // lesson. W2/A0 can still carry its controller lock for a few frames after
+  // each door; treating that lock like combat intermittently put the gate
+  // page after Ratchet's letter. Only these two arrival pages may wait beside
+  // that lock. Every actual combat/cutscene owner below remains protected.
+  const openingArrival = seq && (seq.id === 'bay' || seq.id === 'gate');
   if (G.dialog || G.cut || G.trans || G.gateWalk || G.wake || G.meet || G.break || G.bossEntry
       || G.offer || G.forkBoss || G.finisher || G.finish || G.winT || (G.hitStop || 0) > 0
-      || G.recharge || G.lesson || G.tutorialLock) return false;
-  if (typeof inputSuspended !== 'undefined' && inputSuspended) return false;
+      || G.recharge || (!openingArrival && (G.lesson || G.tutorialLock))) return false;
+  // inputSuspended also reflects that same opening lesson lock.  Every other
+  // unsafe owner has already been rejected above, so the arrival exception
+  // must cover both representations of the tutorial hold.
+  if (typeof inputSuspended !== 'undefined' && inputSuspended && !openingArrival) return false;
   const b = G.boss;
   if (b && (b.rewardPend || !(b.dead || b.tame || b.purified || b.st === 'dorm'))) return false;
   if ((G.projs || []).some(p => p && !p.dead)) return false;
@@ -336,8 +345,11 @@ function panelsDue() {
     if (S.seen[s.id] || S.past[s.id] || s.manual) continue;
     // a beat already overtaken by the story is not shown late, out of order
     if (s.stale && s.stale(S, f)) continue;
-    if (G.roomId === s.alsoRoom) { if (s.id === 'ch2' && f.bossGlitch) return s; continue; }
-    if (G.roomId !== s.room) continue;
+    // Alternate rooms inherit the same event gate as the primary room. The
+    // chapter teaser is the one exception: B1 arrival replaces A3's climb
+    // test, while every other alternate still has to satisfy `when` below.
+    if (G.roomId === s.alsoRoom && s.id === 'ch2' && f.bossGlitch) return s;
+    if (G.roomId !== s.room && G.roomId !== s.alsoRoom) continue;
     if (s.when(f)) return s;
   }
   return null;
@@ -375,7 +387,7 @@ function panelsTick(dt) {
   panelsLoad(seq);
   // ARRIVAL IS NOT A CUT: the room settles first, so a crossing always
   // finishes as a crossing and the panels open on a standing player
-  if (PN.settle < 0.8 || !panelsSafe()) { PN.ready = 0; return false; }
+  if (PN.settle < 0.8 || !panelsSafe(seq)) { PN.ready = 0; return false; }
   PN.ready += dt;
   if (PN.ready < 0.5 || !panelsLoaded(seq)) return false;
   if (PN.queue[0] === seq.id) PN.queue.shift();

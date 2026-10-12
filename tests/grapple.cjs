@@ -173,6 +173,32 @@ const check = (name, ok, detail) => {
     out.enemy = { latched, hpLost: hp0 - foe.hp, bounced, iFrames: +player.iT.toFixed(2), voltsGained: player.volts - volts0 };
     G.enemies = []; await frames(40);
 
+    // A rescued machine remains in the room for the story, but it is not a
+    // combat anchor. The claw must pass it without damage, motion or charge.
+    await place(spot, -spot.wallDir);
+    foe = mk(-spot.wallDir * 150, 0); foe.hp = foe.hpMax = 400; foe.update = function () {};
+    foe.rescued = true; foe.calm = true;
+    const rescued0 = { hp: foe.hp, x: foe.x, volts: player.volts };
+    await press('KeyU');
+    let rescuedLatch = false;
+    for (let i = 0; i < 30; i++) { await frames(1); if (player.grap && player.grap.foe === foe) rescuedLatch = true; }
+    out.rescued = { latched: rescuedLatch, hp: foe.hp, x: foe.x, volts: player.volts,
+      hp0: rescued0.hp, x0: rescued0.x, volts0: rescued0.volts };
+    player.grap = null; G.enemies = []; await frames(20);
+
+    // If rescue completes during the reel, the claw releases before an
+    // arrival strike or extra charge can touch the newly friendly creature.
+    await place(spot, -spot.wallDir);
+    foe = mk(-spot.wallDir * 170, 0); foe.hp = foe.hpMax = 400; foe.update = function () {};
+    await press('KeyU');
+    let cureLatch = false;
+    for (let i = 0; i < 20; i++) { await frames(1); if (player.grap && player.grap.foe === foe) { cureLatch = true; break; } }
+    const cureVolts = player.volts;
+    foe.rescued = true; foe.calm = true;
+    await frames(3);
+    out.curedMidReel = { latched: cureLatch, released: !player.grap || !player.grap.foe, voltsBefore: cureVolts, voltsAfter: player.volts };
+    player.grap = null; G.enemies = []; await frames(20);
+
     // ---- 8. aim assist: she is in the air a tile and a half up, the crawler is on
     // the floor ahead — a level throw from her chest passes over its back, so only
     // the assist can land it (the case that missed in play before the assist)
@@ -243,6 +269,10 @@ const check = (name, ok, detail) => {
     check('a hit knocks the claw loose', r.hurtCancel === true);
     check('enemy: latched, bitten and struck on arrival', r.enemy.latched && r.enemy.hpLost > 0 && r.enemy.bounced, JSON.stringify(r.enemy));
     check('enemy: arrival grants i-frames and volts', r.enemy.iFrames > 0 && r.enemy.voltsGained > 0, JSON.stringify(r.enemy));
+    check('rescued machine is not a target, is not moved and grants no charge', !r.rescued.latched && r.rescued.hp === r.rescued.hp0
+      && r.rescued.x === r.rescued.x0 && r.rescued.volts === r.rescued.volts0, JSON.stringify(r.rescued));
+    check('a creature rescued during the reel is released without an arrival reward', r.curedMidReel.latched && r.curedMidReel.released
+      && r.curedMidReel.voltsAfter === r.curedMidReel.voltsBefore, JSON.stringify(r.curedMidReel));
     check('aim assist: from the air, a level throw would pass over the crawler', r.assist.geometry.passesOver, JSON.stringify(r.assist.geometry));
     check('aim assist takes it anyway', r.assist.latched && r.assist.hpLost > 0, JSON.stringify(r.assist));
     check('stun, brace, boss entrance, gate walk and scripted meeting all outrank the claw',

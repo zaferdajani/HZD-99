@@ -147,6 +147,12 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
     const bossFlag = (k) => (k === 'alpha' ? 'alpha' : 'boss' + k.charAt(0).toUpperCase() + k.slice(1));
     const reach = (F) => {
       G.save.flags = Object.assign({}, F); G.save.visited = {};      // no gate is open because it was once walked
+      // This graph walker models story beats, not panel input. Production's
+      // event-owned boundaries wait for the gate, maintenance-passage and
+      // CHIME pages; acknowledge those presentations so the topology proof
+      // can keep testing the route instead of stopping at a reader boundary.
+      G.save.panels = { v: 1, seen: { gate: 1, passage: 1, chime: 1 }, past: {}, n: 3,
+        k: { gate: 1, passage: 1, chime: 1 } };
       const seen = new Set(['W1']), q = ['W1'];
       while (q.length) {
         const id = q.shift();

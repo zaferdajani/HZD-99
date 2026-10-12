@@ -258,6 +258,7 @@ const SUITE = [
   ['opening',   'she wakes, she walks, she arrives — and only then does anything move'],
   // two full playthroughs (desktop, phone) read at a player's pace
   ['opening-order', 'the opening played with real input in the owner\'s order, desktop and phone, to Old Servo', { timeout: 900000 }],
+  ['campaign-contract', 'chapter-one certification fails on missing or late scenes, page errors, restored segments and developer stops'],
   ['campaign-ch1', 'chapter one played end to end with keyboard input only, from a cleared browser to the chapter-two teaser (long, real time)', { timeout: 3600000 }],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],
   ['preload',   'the art for the rooms she can reach is fetched before she reaches them'],

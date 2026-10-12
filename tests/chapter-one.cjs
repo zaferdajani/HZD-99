@@ -89,6 +89,13 @@ const { chromium } = require('playwright');
       const iq = G.save.iq; G.state = 'PLAY'; doInteract(ratchet()); dialog();
       need(G.save.iq === iq && !weaponOwned('dual'), 'returning again cannot duplicate the reward');
       stage('GA1T');
+      // The short tunnel cannot be jumped past before its arrival pages. This
+      // connected-chain harness acknowledges that story input explicitly;
+      // panels.cjs proves the actual reader/reveal behavior.
+      const P = panelsState(); P.k.passage = 1; delete P.seen.passage; delete P.past.passage;
+      player.x = G.roomDef.w * TILE + 3; player.y = 14 * TILE; checkTransitions();
+      need(!G.trans && G.roomId === 'GA1T', 'first sage waits for the maintenance-passage beat');
+      P.seen.passage = 1;
       player.x = G.roomDef.w * TILE + 3; player.y = 14 * TILE; checkTransitions();
       need(G.trans && G.trans.to === 'GA1D', 'earned sword opens first sage');
       stage('GA1D'); G.trans = null;

@@ -14,10 +14,16 @@ VFX, wolf, lion, rescue, mobile and room smoke tests. `--tests NAME ...`
 selects an explicitly partial run. Neither subset certifies a full release.
 The collector builds first, packages when needed, verifies local-server identity,
 records logs/checksums/status after each check, and returns nonzero for failure,
-missing harness, timeout or blocker. It does not install dependencies, publish,
-generate artwork, or pretend to conduct a human playthrough automatically.
+missing harness, timeout or blocker. Per-harness outer deadlines are derived from
+`tests/run.cjs`; on timeout the collector terminates the runner and every child it
+owns. The full profile includes `campaign-ch1`, the repository's uninterrupted
+keyboard-input playthrough. Its files are stored below `automated/campaign-ch1`,
+and inherited segment/stop variables are cleared so they cannot masquerade as a
+full certificate. Most other harnesses deliberately stage saves or positions.
+The collector does not install dependencies, publish, generate artwork, or turn
+that bot run into a claim of subjective human play quality.
 
-Finish with the role review, actual campaign capture, detailed REPORT.md and one
+Finish with the role review, campaign evidence, detailed REPORT.md and one
 CLAUDE_PROMPT.md. Keep source fixes and original evidence; never rewrite a failed
 log as a pass. Put retries in a new directory with their cause explained. Before
 handoff, rebuild again after the final source change and run affected checks.

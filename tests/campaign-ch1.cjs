@@ -57,6 +57,39 @@ const STOP_AT = process.env.CAMPAIGN_STOP || null;
 const VIDEO = process.env.CAMPAIGN_VIDEO !== '0';
 const DEBUG = process.env.CAMPAIGN_DEBUG === '1';
 
+// A full chapter certificate is stricter than reaching the final mission.
+// These are the story beats every clean chapter-one route owns, in the order
+// the player is meant to understand them. GRAVEHORN's four authored panels
+// are not listed yet because they do not exist in PANEL_SEQ; their absence is
+// a production gap, not something this harness may silently invent.
+const REQUIRED_PANELS = ['wake', 'bay', 'gate', 'letter', 'drawer', 'ratchet', 'meet',
+  'cave', 'marble', 'forge', 'passage', 'sage', 'break', 'chime', 'free', 'ch2'];
+
+function campaignCertification(result, panelsSeen, panelsMissed, errors, segment, stopAt) {
+  const seen = Array.from(panelsSeen || []);
+  const missed = Array.from(panelsMissed || []);
+  const pageErrors = Array.from(errors || []);
+  const missing = REQUIRED_PANELS.filter(id => !seen.includes(id));
+  const orderErrors = [];
+  let last = -1;
+  for (const id of REQUIRED_PANELS) {
+    const at = seen.indexOf(id);
+    if (at < 0) continue;
+    if (at <= last) orderErrors.push(id);
+    last = Math.max(last, at);
+  }
+  const full = !segment && !stopAt;
+  const certified = result === 'complete' && full && !missed.length && !pageErrors.length
+    && !missing.length && !orderErrors.length;
+  let verdict = result;
+  if (result === 'complete' && !full) verdict = 'partial-diagnostic';
+  else if (result === 'complete' && pageErrors.length) verdict = 'complete-with-page-errors';
+  else if (result === 'complete' && missed.length) verdict = 'complete-with-missed-panels';
+  else if (result === 'complete' && missing.length) verdict = 'complete-without-required-panels';
+  else if (result === 'complete' && orderErrors.length) verdict = 'complete-with-panel-order-errors';
+  return { result: verdict, certified, missing, missed, orderErrors, pageErrors: pageErrors.length, full };
+}
+
 const T0 = Date.now();
 const stamp = () => {
   const s = Math.floor((Date.now() - T0) / 1000);
@@ -831,6 +864,15 @@ mission('servo', s => s.flags.includes('servoMet'), async s => {
 // 3. THE RAW MARBLE — under the meadow, through the hub's loose floor, the
 // quarry's buried mouths, to the white pillar in CV3; claws glance, the burst frees it
 mission('marble', s => s.bag.includes('cshard') || s.flags.includes('crystal'), async s => {
+  // The chapter's inciting encounter is on A2's east crest.  The quarry hatch
+  // is deliberately west of it, so visit the landmark before descending; the
+  // runtime also keeps that hatch intact until this meeting has occurred.
+  if (!s.flags.includes('nfMeet')) {
+    if (s.room !== 'A2') { await travel(s, 'A2'); return; }
+    const r = await walkTo(s, { x: 61 * TL, tol: 28 });
+    if (r === 'stuck') await unstick(s, 'NULLFANG\'s east-crest landmark');
+    return;
+  }
   // the quarry's own road: CV1 -> the pod chamber CV1B (it saves, recharges
   // and charts the quarry) -> CV2 -> CV3. A burst needs charge; the pod gives it.
   if (!s.flags.includes('pgSurvey') || (R.needCharge && s.p && s.p.volts < s.burstVolts)) {
@@ -1247,7 +1289,8 @@ async function runMissions(s) {
   return 'complete';
 }
 
-if (require.main !== module) module.exports = { roomModel, distTo, simulate, PROGS, nodeStart, nodeFeet };
+if (require.main !== module) module.exports = { roomModel, distTo, simulate, PROGS, nodeStart, nodeFeet,
+  campaignCertification, REQUIRED_PANELS };
 else (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, ...(VIDEO ? { recordVideo: { dir: OUT, size: { width: 1280, height: 720 } } } : {}) });
@@ -1325,7 +1368,8 @@ else (async () => {
     prevS = s;
     await sleep(15);
   }
-  if (result === 'complete' && !R.teaserSeen) result = 'complete-without-teaser-panels';
+  const certification = campaignCertification(result, R.pansSeen, R.pansMissed, errors, SEGMENT, STOP_AT);
+  result = certification.result;
   await hold([]);
   await frame('end');
   log('MANHWA seen: ' + [...(R.pansSeen || [])].join(', ') + (R.pansMissed ? '  (did not open: ' + R.pansMissed.join(', ') + ')' : ''));
@@ -1334,6 +1378,10 @@ else (async () => {
   await ctx.close();
   if (vid) { const vp = await vid.path(); const dst = path.join(OUT, 'campaign-ch1.webm'); try { fs.renameSync(vp, dst); log('VIDEO ' + dst); } catch (e) { log('VIDEO ' + vp); } }
   await browser.close();
-  fs.writeFileSync(path.join(OUT, 'result.json'), JSON.stringify({ result, wall: stamp(), deaths: R.deaths, missions: R.missions, rooms: R.rooms, panelsSeen: [...(R.pansSeen || [])], panelsMissed: R.pansMissed || [], difficulty: DIFF, segment: SEGMENT, errors }, null, 1));
-  if (result !== 'complete') process.exitCode = 1;
+  fs.writeFileSync(path.join(OUT, 'result.json'), JSON.stringify({ result, certified: certification.certified,
+    missingPanels: certification.missing, panelOrderErrors: certification.orderErrors,
+    wall: stamp(), deaths: R.deaths, missions: R.missions, rooms: R.rooms,
+    panelsSeen: [...(R.pansSeen || [])], panelsMissed: R.pansMissed || [], difficulty: DIFF,
+    segment: SEGMENT, stopAt: STOP_AT, errors }, null, 1));
+  if (!certification.certified) process.exitCode = 1;
 })().catch(e => { log('FATAL ' + e.stack); process.exit(1); });

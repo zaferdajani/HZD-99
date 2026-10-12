@@ -114,7 +114,8 @@ async function tapKey(page, code) {
     });
     check('the marble, the maintenance door, the revelation, the break, the fight, the letter and the hatch are all in the map', !newSeq.length, newSeq.join(', '));
     for (const [id, room, flags] of [['marble', 'CV3', { woke: 1, gateOpened: 1, pl_cshard: 1 }], ['passage', 'GA1T', { woke: 1, gateOpened: 1, crystal: 1 }],
-      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
+      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }],
+      ['break', 'A3', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
       await stage(page, room, flags);
       // a record made by this build: every sequence known, the others already
       // seen, so the one under test is the only one owed
@@ -124,6 +125,78 @@ async function tapKey(page, code) {
       await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
       await waitFor(page, () => G.state === 'PLAY', 4000);
     }
+    // A continuous jump can cross this short room before a grounded-safe
+    // panel frame exists. The Sage doorway must hold that owed beat, then
+    // become an ordinary crossing as soon as the sequence has been seen.
+    await stage(page, 'GA1T', { woke: 1, gateOpened: 1, crystal: 1 });
+    const passageDoor = await page.evaluate(() => {
+      const P = G.save.panels; P.k = {};
+      for (const s of PANEL_SEQ) { P.k[s.id] = 1; if (s.id !== 'passage') P.seen[s.id] = 1; }
+      const W = G.roomDef.w * TILE;
+      player.x = W + 3; player.y = 200; player.vx = 340; player.vy = 120; player.on = false;
+      checkTransitions();
+      const held = G.roomId === 'GA1T' && !G.trans && player.x <= W - player.w - 2 && player.vx === 0;
+      P.seen.passage = 1; player.x = W + 3; player.vx = 340;
+      checkTransitions();
+      return { held, released: !!G.trans || G.roomId === 'GA1D' };
+    });
+    check('an airborne dash cannot overtake the maintenance-passage pages', passageDoor.held, JSON.stringify(passageDoor));
+    check('the Sage doorway releases immediately after that beat is seen', passageDoor.released, JSON.stringify(passageDoor));
+    // Two more event-owned boundaries came from the continuous campaign:
+    // Ratchet's booth must not overtake the city arrival, and leaving CHIME's
+    // arena must not erase the silencing page before it reaches a safe frame.
+    const eventDoors = await page.evaluate(() => {
+      const owed = id => {
+        const P = panelsState(); P.k = {};
+        for (const s of PANEL_SEQ) { P.k[s.id] = 1; if (s.id !== id) P.seen[s.id] = 1; }
+        delete P.seen[id]; delete P.past[id];
+        return P;
+      };
+      loadRoom('W2'); G.state = 'PLAY'; G.trans = null; G.gateWalk = null; G.enemies = [];
+      Object.assign(G.save.flags, { woke: 1 });
+      let P = owed('bay');
+      let door = gateDoors().find(d => d.to === 'A0');
+      player.x = gateWorldX(door) - player.w / 2; player.on = true;
+      const bayHeld = gateEnter() === false && !G.gateWalk;
+      P.seen.bay = 1;
+      const bayReleased = gateEnter() === true && !!G.gateWalk;
+
+      loadRoom('A0'); G.state = 'PLAY'; G.trans = null; G.gateWalk = null; G.enemies = [];
+      Object.assign(G.save.flags, { woke: 1, gateOpened: 1 });
+      P = owed('gate');
+      const booth = gateDoors().find(d => d.to === 'A0B');
+      player.x = gateWorldX(booth) - player.w / 2; player.on = true;
+      const gateHeld = gateEnter() === false && !G.gateWalk;
+      P.seen.gate = 1;
+      const gateReleased = gateEnter() === true && !!G.gateWalk;
+
+      loadRoom('A9'); G.state = 'PLAY'; G.trans = null; G.gateWalk = null; G.enemies = []; G.boss = null;
+      G.save.flags.bossChime = 1; P = owed('chime');
+      const H = G.roomDef.h * TILE;
+      player.x = 12 * TILE; player.y = H + 50; player.vx = 0; player.vy = 200; player.on = false;
+      checkTransitions();
+      const chimeHeld = G.roomId === 'A9' && !G.trans;
+      P.seen.chime = 1; player.y = H + 50; checkTransitions();
+      const chimeReleased = !!G.trans || G.roomId === 'A8';
+      return { bayHeld, bayReleased, gateHeld, gateReleased, chimeHeld, chimeReleased };
+    });
+    check('the city gates cannot overtake the service-bay pages', eventDoors.bayHeld && eventDoors.bayReleased, JSON.stringify(eventDoors));
+    check('Ratchet\'s booth cannot overtake the city-gate pages', eventDoors.gateHeld && eventDoors.gateReleased, JSON.stringify(eventDoors));
+    check('leaving CHIME cannot overtake its silencing pages', eventDoors.chimeHeld && eventDoors.chimeReleased, JSON.stringify(eventDoors));
+    // The alternate room must keep the event gates, not play the break before
+    // it happens or after CHIME/NULLFANG have already been resolved.
+    const alternate = await page.evaluate(() => {
+      const P = G.save.panels, f = G.save.flags;
+      delete P.seen.break; delete P.past.break; PN.queue.length = 0;
+      G.roomId = 'A3'; delete f.nfBreak;
+      const before = panelsDue();
+      f.nfBreak = 1; f.bossChime = 1;
+      const afterBell = panelsDue();
+      delete f.bossChime; f.bossGlitch = 1;
+      const afterLion = panelsDue();
+      return [before, afterBell, afterLion].map(s => s && s.id);
+    });
+    check('A3 never plays the break before its event or after the bell/lion', alternate.every(s => !s), JSON.stringify(alternate));
     // an old save (no `k`): its ten original sequences keep their verdicts; the
     // new ones are judged by what it has already done
     const mig = await page.evaluate(() => {
@@ -241,6 +314,35 @@ async function tapKey(page, code) {
     check('a replay hands back to the list, not the room', toList);
     await page.evaluate(() => { G.state = 'PLAY'; });
 
+    // A real first traversal can arrive while the opening lesson lock is
+    // still being retired.  The bay page is the close of that lesson, so it
+    // Neither opening-arrival page may be starved by the lock; later story
+    // pages remain protected.
+    await page.evaluate(() => {
+      const sv = newSave(1); sv.time = 99; sv.flags.woke = 1;
+      startGame(sv);
+      // A real run creates the panel ledger in W1 before crossing.  Do the
+      // same here; creating it for the first time in W2 correctly classifies
+      // bay as historical migration content and is not this scenario.
+      G.save.panels = { v: 1, seen: {}, past: {}, n: 0 };
+      loadRoom('W2'); G.wake = null; G.state = 'PLAY'; G.enemies = [];
+      G.lesson = { id: 'opening' }; G.tutorialLock = { id: 'opening', active: true }; player.on = true;
+    });
+    const bayUnderLock = await waitFor(page, () => G.state === 'PANELS' && G.panels.seq.id === 'bay', 5000);
+    check('the bay pages survive the opening lesson lock on real W2 arrival', bayUnderLock);
+    await page.evaluate(() => { if (G.panels) G.panels.ph = 'out'; });
+    await waitFor(page, () => G.state === 'PLAY', 4000);
+    const gateUnderLock = await page.evaluate(() => {
+      const S = panelsState(); S.seen.bay = 1; delete S.seen.gate; G.save.flags.gateOpened = 1;
+      loadRoom('A0'); G.state = 'PLAY'; G.enemies = []; G.lesson = { id: 'opening' };
+      G.tutorialLock = { id: 'opening', active: true }; player.on = true;
+      return panelsSafe(panelsSeq('gate')) === true;
+    });
+    check('the city-gate pages survive the opening lesson lock too', gateUnderLock);
+    const laterBlocked = await page.evaluate(() => panelsSafe(panelsSeq('cave')) === false);
+    check('the opening exemption does not admit later story pages', laterBlocked);
+    await page.evaluate(() => { G.lesson = null; G.tutorialLock = null; });
+
     // a hostile nearby, and an open dialogue, hold it back
     await stage(page, 'A0', { woke: 1, gateOpened: 1 });
     await page.evaluate(() => {
@@ -341,13 +443,18 @@ async function tapKey(page, code) {
       const dir = process.env.PANELS_SHOTS;
       for (const [vw, vh, tch] of [[1280, 720, false], [844, 390, true], [390, 844, true]]) {
         const b2 = await boot(browser, { viewport: { width: vw, height: vh }, hasTouch: tch, isMobile: tch });
-        for (const [id, lang] of [['sage', 'en'], ['meet', 'ar'], ['ch2', 'zh'], ['forge', 'ru']]) {
+        // The review set includes the three identity/parity hotspots at their
+        // actual gameplay size, not only generic multilingual samples.
+        for (const [shot, id, lang, panel] of [
+          ['repair', 'ratchet', 'en', 0], ['passage-a', 'passage', 'en', 0],
+          ['passage-b', 'passage', 'en', 1], ['nullfang-down', 'meet', 'en', 1],
+          ['sage', 'sage', 'en', 1], ['ch2', 'ch2', 'zh', 1], ['forge', 'forge', 'ru', 1]]) {
           await stage(b2.page, 'A0B', { woke: 1 });
           await b2.page.evaluate(([id, lang]) => { LANG = lang; G.save.panels.meetHit = 1; panelsPlay(id); }, [id, lang]);
           await sleep(1800);
-          await b2.page.evaluate(() => { const P = G.panels; P.i = Math.min(1, P.list.length - 1); panelsBegin(P); P.prev = null; });
+          await b2.page.evaluate(i => { const P = G.panels; P.i = Math.min(i, P.list.length - 1); panelsBegin(P); P.prev = null; }, panel);
           await sleep(1200);
-          await b2.page.screenshot({ path: dir + '/panels_' + id + '_' + lang + '_' + vw + 'x' + vh + '.png' });
+          await b2.page.screenshot({ path: dir + '/panels_' + shot + '_' + lang + '_' + vw + 'x' + vh + '.png' });
         }
         await b2.ctx.close();
       }
