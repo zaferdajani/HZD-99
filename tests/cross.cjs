@@ -105,6 +105,15 @@ const check = (name, ok, detail) => {
       let px0 = null;
       const vert = side === 'T' || side === 'B';
       let prevS = player.y - cam.y, prevRoom = G.roomId, tPrev = performance.now(), jump = null, everHeld = 0;
+      const __st = { tx: null, dir: 0 };
+      // she steers her own landing now (owner, 2026-10-13): toward the nearer
+      // ledge beside the hole, letting go once she is over it
+      const __steer = (up) => {
+        if (G.roomId !== up || player.on) { keys[KEYB.LEFT[0]] = 0; keys[KEYB.RIGHT[0]] = 0; return; }
+        if (__st.tx == null) { const led = topLedge(up, player.x, player.y, 1, true); __st.tx = led ? led.x1 : player.x; __st.dir = Math.sign(__st.tx - player.x); }
+        const go = __st.dir > 0 ? player.x < __st.tx - 4 : __st.dir < 0 ? player.x > __st.tx + 4 : false;
+        keys[KEYB.LEFT[0]] = go && __st.dir < 0 ? 1 : 0; keys[KEYB.RIGHT[0]] = go && __st.dir > 0 ? 1 : 0;
+      };
       for (let i = 0; i < 200; i++) {
         await new Promise(k => requestAnimationFrame(k));
         if (vert) {
@@ -120,6 +129,7 @@ const check = (name, ok, detail) => {
           }
           prevS = sNow; prevRoom = G.roomId;
           if (G.roomId !== room && seenRooms.indexOf(G.roomId) < 0) seenRooms.push(G.roomId);
+          if (jump && side === 'T') __steer(landed);
           if (jump && !G.climb && player.on) break;
           continue;
         }

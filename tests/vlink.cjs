@@ -119,32 +119,52 @@ const check = (name, ok, detail) => {
       const row = out.table.find(q => q.id === id);
       const good = cols.filter(cx => row.rock.indexOf(cx) < 0);
       const cx = good[Math.floor(good.length / 2)];
-      for (const k in keys) keys[k] = 0;
-      player.x = cx * TILE + (TILE - player.w) / 2; player.y = TILE + 2; player.vx = 0; player.vy = -760;
-      player.on = false; player.iT = 99; player.dead = false;
-      keys[KEYB.JUMP[0]] = 1;
-      const res = { id, up, arrived: false, back: false, landed: false, climb: false, held: true, trans: 0, steps: 0 };
-      let climbSteps = 0;
-      const n = step(150, (i) => {
-        G.enemies = []; G.projs = []; player.iT = 99;
-        if (G.trans) res.trans++;
-        if (G.roomId === up) res.arrived = true;
-        if (res.arrived && G.roomId === id) res.back = true;
-        if (G.climb) {
-          res.climb = true; climbSteps++;
-          // a held direction must not steer the arc: the controls are the
-          // script's for its length
-          keys[(climbSteps % 2 ? KEYB.LEFT : KEYB.RIGHT)[0]] = 1;
-          const k = G.climb, p = climbPos(k, clamp(k.t / k.dur, 0, 1));
-          if (Math.abs(p[0] - player.x) > 0.5 || Math.abs(p[1] - player.y) > 0.5) res.held = false;
-        } else { keys[KEYB.LEFT[0]] = 0; keys[KEYB.RIGHT[0]] = 0; }
-        if (res.arrived && !G.climb && player.on && G.roomId === up) { res.landed = true; return true; }
-        return false;
-      });
-      for (const k in keys) keys[k] = 0;
-      res.steps = n;
-      res.feet = Math.round(player.y + player.h); res.room = G.roomId;
-      out.up.push(res);
+      // THE OWNER'S RULE (2026-10-13): a seamless shaft is one place, so the
+      // way up is HERS to steer. Two plays of every way up: holding toward the
+      // nearer ledge she lands on it; holding nothing, nothing moves her
+      // sideways (she rises clear of the floor line and comes back down the
+      // hole). Neither may ever run the scripted ledge arc.
+      const play = (mode) => {
+        loadRoom(id); G.state = 'PLAY'; G.wake = null; G.bossEntry = null; G.dialog = null;
+        G.enemies = []; G.boss = null; G.projs = []; G.climb = null;
+        for (const k in keys) keys[k] = 0;
+        player.x = cx * TILE + (TILE - player.w) / 2; player.y = TILE + 2; player.vx = 0; player.vy = -760;
+        player.on = false; player.iT = 99; player.dead = false;
+        keys[KEYB.JUMP[0]] = 1;
+        const res = { id, up, mode, arrived: false, back: false, landed: false, climb: false, trans: 0, steps: 0, drift: 0, cleared: false };
+        let dir = 0, xArr = null, tx = null;
+        const n = step(150, () => {
+          G.enemies = []; G.projs = []; player.iT = 99;
+          if (G.trans) res.trans++;
+          if (G.climb) res.climb = true;
+          if (G.roomId === up && !res.arrived) {
+            res.arrived = true; xArr = player.x;
+            const led = topLedge(up, player.x, player.y, 1, true);
+            dir = led ? (Math.sign(led.x1 - led.x0) || 1) : 1;
+            tx = led ? led.x1 : null;
+          }
+          if (res.arrived && G.roomId === id) { res.back = true; return mode === 'free'; }
+          if (G.roomId === up) {
+            if (player.y + player.h <= (G.roomDef.h - 2) * TILE + 2) res.cleared = true;
+            // steer like a player: toward the ledge, and let go once over it
+            // (holding on carries her past it, into spikes or out of the room)
+            if (mode === 'steer') {
+              const go = tx == null || (dir > 0 ? player.x < tx - 4 : player.x > tx + 4);
+              keys[KEYB.LEFT[0]] = go && dir < 0 ? 1 : 0; keys[KEYB.RIGHT[0]] = go && dir > 0 ? 1 : 0;
+            }
+            else res.drift = Math.max(res.drift, Math.abs(player.x - xArr));
+            if (res.arrived && player.on) { res.landed = true; return true; }
+          }
+          return false;
+        });
+        for (const k in keys) keys[k] = 0;
+        res.steps = n; res.drift = Math.round(res.drift);
+        res.feet = Math.round(player.y + player.h); res.room = G.roomId;
+        return res;
+      };
+      out.up.push(play('steer'));
+      out.upFree = out.upFree || [];
+      out.upFree.push(play('free'));
     }
     // ---- 3. every way down, played --------------------------------------------
     for (const [lo, upId] of ups) {
@@ -266,12 +286,19 @@ const check = (name, ok, detail) => {
   }
   for (const u of r.up) {
     const tag = 'up ' + u.id + ' -> ' + u.up;
-    check(tag + ': carried onto a ledge, controls held, never back down',
-      u.arrived && u.landed && u.climb && u.held && !u.back && u.trans === 0,
+    check(tag + ': steering toward a ledge lands her on it — no scripted arc, no cut',
+      u.arrived && u.landed && !u.climb && !u.back && u.trans === 0 && u.room === u.up,
       (u.landed ? 'standing in ' + u.room + ' at feet ' + u.feet + ' after ' + u.steps + ' steps'
                 : 'ended in ' + u.room + ' feet ' + u.feet) +
-      (u.climb ? '' : ', no arc') + (u.held ? '' : ', ARC STEERED') + (u.back ? ', FELL BACK' : '') +
+      (u.climb ? ', SCRIPTED ARC' : '') + (u.back ? ', FELL BACK' : '') +
       (u.trans ? ', ' + u.trans + ' steps of cut crossing' : ''));
+  }
+  for (const u of (r.upFree || [])) {
+    const tag = 'up ' + u.id + ' -> ' + u.up;
+    check(tag + ': holding nothing, nothing pushes her sideways (she clears the floor line)',
+      u.arrived && !u.climb && u.drift <= 6 && u.cleared,
+      'drift ' + u.drift + ' px' + (u.climb ? ', SCRIPTED ARC' : '') + (u.cleared ? '' : ', never cleared the floor line') +
+      (u.landed ? ', landed in ' + u.room : u.back ? ', fell back down the hole' : ''));
   }
   for (const d of r.down) {
     const tag = 'down ' + d.id + ' -> ' + d.to;

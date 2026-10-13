@@ -257,7 +257,16 @@ const TAG = process.env.SEAM_LOOK_TAG || '';
       for (const k in keys) keys[k] = 0;
       player.x = cx * TILE + (TILE - player.w) / 2; player.y = TILE + 2; player.vx = 0; player.vy = -760;
       player.on = false; keys[KEYB.JUMP[0]] = 1;
-      S.step(200, () => G.roomId === up && !G.climb && player.on);
+      const __st = { tx: null, dir: 0 };
+      // she steers her own landing now (owner, 2026-10-13): toward the nearer
+      // ledge beside the hole, letting go once she is over it
+      const __steer = (up) => {
+        if (G.roomId !== up || player.on) { keys[KEYB.LEFT[0]] = 0; keys[KEYB.RIGHT[0]] = 0; return; }
+        if (__st.tx == null) { const led = topLedge(up, player.x, player.y, 1, true); __st.tx = led ? led.x1 : player.x; __st.dir = Math.sign(__st.tx - player.x); }
+        const go = __st.dir > 0 ? player.x < __st.tx - 4 : __st.dir < 0 ? player.x > __st.tx + 4 : false;
+        keys[KEYB.LEFT[0]] = go && __st.dir < 0 ? 1 : 0; keys[KEYB.RIGHT[0]] = go && __st.dir > 0 ? 1 : 0;
+      };
+      S.step(200, () => { __steer(up); return G.roomId === up && !G.climb && player.on; });
       for (const k in keys) keys[k] = 0;
       S.step(20);
       if (G.roomId !== up || !player.on) return { err: 'did not land in ' + up + ' (in ' + G.roomId + ')' };

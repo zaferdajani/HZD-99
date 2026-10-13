@@ -2027,10 +2027,17 @@ function vlinkHandover(side, dest) {
   cam.extDn = Math.max(0, cam.y - (H - 540 + oyz));
   cam.soft = 0.4;
   G.vlinkLast = { side, from: L, at: G.time || 0 };
-  if (side === 'T') {
-    const led = topLedge(G.roomId, player.x, player.y, Math.sign(player.vx) || player.face);
-    if (led) climbStart(led); else player.tCarry = 1.0;
-  }
+  // A SEAMLESS SHAFT IS ONE PLACE, SO SHE LANDS WHERE SHE CHOOSES (owner,
+  // 2026-10-13: "when I jump up and I'm not changing the screen or the rooms
+  // ... the system should not push me to the left or right of the opening ...
+  // I will be choosing the direction I land in. The only reason to be pushed
+  // ... is if I'm leaving one room to another"). Nothing on screen changes
+  // here, so the scripted ledge arc (climbStart) is not used: only the rise is
+  // held until her feet clear the floor line, so the hole never swallows a
+  // jump that reached it, and her own left/right takes her onto either side
+  // — or, with no direction held, back down the way she came. The arc is
+  // kept for the CUT crossing (applyTransition), which is a real change of room.
+  if (side === 'T') player.tCarry = 1.0;
 }
 // How far past its top and bottom the camera may look. Only toward a link
 // whose neighbour is baked (there is a picture to show), and only while she is
@@ -2108,7 +2115,10 @@ function vlinkFringe(L, e) {
 // ---------------------------------------------------------------------------
 // THE LEDGE — the owner's rule for the way up: "jump up and you are carried
 // onto the floor beside the hole", in a short scripted arc with the controls
-// held, instead of arriving inside a shaft and being shoved. Pure geometry
+// held, instead of arriving inside a shaft and being shoved. SUPERSEDED for
+// the seamless shaft (owner, 2026-10-13): where nothing on screen changes she
+// steers her own landing (vlinkHandover); the arc now runs only on a CUT
+// crossing, which is a real change of room. Pure geometry
 // against the destination's grid, so the harness asks exactly the question the
 // game does (tests/vlink.cjs walks all 24 ways up through it).
 //
@@ -7781,11 +7791,22 @@ function buildSurfaceCurve() {
   // RAMP the steps. A one-tile step is a 32px vertical jump; spreading it over
   // ~1.5 tiles is the single operation that kills the staircase, and it is why
   // the curve has to be computed across the span rather than per tile.
-  const N2 = new Float32Array(N), RAD = Math.round((TILE * 1.5) / SURF_STEP);
+  //
+  // ...but only a STEP is ramped, never a CLIFF (owner, 2026-10-13: "these
+  // loops in the air ... the character standing on is ridiculous"). In an
+  // open room a ledge high overhead is its columns' ground, and blending the
+  // floor beside it toward that height raised a thin leg of curve from the
+  // floor up into the sky and back down: drawn as a lit crest with grass on
+  // it, and — because the collider stands her on the curve wherever it rises
+  // above the tiles — a loop in mid-air she could stand on. A neighbour more
+  // than three tiles away in height is a different surface, not part of this
+  // one's step.
+  const N2 = new Float32Array(N), RAD = Math.round((TILE * 1.5) / SURF_STEP), STEP_MAX = TILE * 3;
   for (let i = 0; i < N; i++) {
     let acc = 0, wsum = 0;
     for (let k = -RAD; k <= RAD; k++) {
       const j = i + k; if (j < 0 || j >= N || isNaN(raw[j])) continue;
+      if (!isNaN(raw[i]) && Math.abs(raw[j] - raw[i]) > STEP_MAX) continue;
       const w = 1 - Math.abs(k) / (RAD + 1);
       acc += raw[j] * w; wsum += w;
     }
@@ -7855,6 +7876,9 @@ function buildSurfaceCurve() {
     // changed what the level was asking of her.
     const t = soft[i] ? raw[i] : N2[i];
     if (!isNaN(t)) y = Math.max(t - (soft[i] ? 14 : 46), Math.min(y, t + 8));
+    // and never more than two tiles above the column's OWN tiles, whatever
+    // the ramp says: ground is built on ground, not hung in the air
+    if (!isNaN(raw[i])) y = Math.max(y, raw[i] - TILE * 2);
     out[i] = y;
   }
   // THE PASS AND THE COLLIDER MUST BOTH MEASURE AGAINST THE SURFACE THIS CURVE
@@ -8039,10 +8063,13 @@ function* surfaceCurveSteps(x) {
   let i0 = 0;
   const sign = (i) => (isNaN(cur.y[i]) || isNaN(top[i])) ? 0
                     : (cur.y[i] < top[i] - 0.5 ? 1 : cur.y[i] > top[i] + 0.5 ? -1 : 0);
+  // ...and a region never spans a cliff: its polygon would join the floor to
+  // the ledge above it with a slab of invented rock
+  const cliff = (i) => Math.abs(top[i + 1] - top[i]) > TILE * 3;
   while (i0 < cur.N) {
     const sg = sign(i0);
     let i1 = i0;
-    while (i1 + 1 < cur.N && sign(i1 + 1) === sg) i1++;
+    while (i1 + 1 < cur.N && sign(i1 + 1) === sg && !cliff(i1)) i1++;
     if (sg !== 0 && i1 > i0) regions.push({ a: i0, b: i1, sg });
     i0 = i1 + 1;
   }
@@ -8158,6 +8185,9 @@ function* surfaceCurveSteps(x) {
     let started = false;
     for (let i = 0; i < cur.N; i++) {
       if (isNaN(cur.y[i])) { started = false; continue; }
+      // a cliff is two surfaces: lift the pen instead of drawing a lit leg
+      // from one up to the other
+      if (started && Math.abs(cur.y[i] - cur.y[i - 1]) > TILE) started = false;
       const X = i * SURF_STEP, Y = cur.y[i] + off;
       if (!started) { x.moveTo(X, Y); started = true; } else x.lineTo(X, Y);
     }

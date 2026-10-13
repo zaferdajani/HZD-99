@@ -352,13 +352,20 @@ async function tapKey(page, code) {
     await page.evaluate(() => { for (const k in keys) keys[k] = 0; });
     check('jumping up through the hatch opens the teaser over the shaft', shaftTz, await page.evaluate(() => G.state + ' ' + G.roomId));
     await page.evaluate(() => { if (G.panels) { G.panels.ph = 'out'; G.panels.t = 1; } });
+    // ...she steers her own landing in a seamless shaft (owner, 2026-10-13),
+    // toward the ledge beside the hatch, letting go once over it
     const landed = await waitFor(page, () => {
       if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; }
       G.enemies = []; if (player) player.iT = 99;
+      if (G.state === 'PLAY' && G.roomId === 'B1' && !player.on) {
+        if (window.__tx == null) { const led = topLedge('B1', player.x, player.y, 1, true); window.__tx = led ? led.x1 : player.x; }
+        const d = Math.sign(window.__tx - player.x), go = Math.abs(window.__tx - player.x) > 4;
+        keys[KEYB.LEFT[0]] = go && d < 0 ? 1 : 0; keys[KEYB.RIGHT[0]] = go && d > 0 ? 1 : 0;
+      } else { keys[KEYB.LEFT[0]] = 0; keys[KEYB.RIGHT[0]] = 0; }
       return G.state === 'PLAY' && G.roomId === 'B1' && !G.climb && player.on;
     }, 6000);
     const atB1 = await page.evaluate(() => ({ room: G.roomId, on: player.on, feet: Math.round(player.y + player.h), st: G.state }));
-    check('...and when it closes, the climb still lands her on B1\'s ledge', landed && atB1.room === 'B1' && atB1.on, JSON.stringify(atB1));
+    check('...and when it closes, she can still steer onto B1\'s ledge', landed && atB1.room === 'B1' && atB1.on, JSON.stringify(atB1));
     check('no page errors (desktop)', errs.length === 0, errs.slice(0, 2).join(' | '));
     await ctx.close();
 
