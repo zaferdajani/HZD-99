@@ -7876,9 +7876,10 @@ function buildSurfaceCurve() {
     // changed what the level was asking of her.
     const t = soft[i] ? raw[i] : N2[i];
     if (!isNaN(t)) y = Math.max(t - (soft[i] ? 14 : 46), Math.min(y, t + 8));
-    // and never more than two tiles above the column's OWN tiles, whatever
-    // the ramp says: ground is built on ground, not hung in the air
-    if (!isNaN(raw[i])) y = Math.max(y, raw[i] - TILE * 2);
+    // and never more than a ramped step above the column's OWN tiles,
+    // whatever the noise says: ground is built on ground, not hung in the air
+    // (a three-tile step is a hill she walks up, so the cap sits just past it)
+    if (!isNaN(raw[i])) y = Math.max(y, raw[i] - STEP_MAX - 4);
     out[i] = y;
   }
   // THE PASS AND THE COLLIDER MUST BOTH MEASURE AGAINST THE SURFACE THIS CURVE

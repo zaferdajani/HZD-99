@@ -322,14 +322,18 @@ async function snap() {
       // RISING THROUGH A HATCH she steers her own landing (owner, 2026-10-13):
       // the ledge beside the hole she just came up through, planned once at
       // the crossing, so the walker can aim for it like a player would
+      // (timed on the sim clock from the moment this crossing is first seen:
+      // one rise only, never every jump after it)
       upLedge: (() => {
         const V = G.vlinkLast;
-        if (!P || P.on || !V || V.side !== 'T' || (G.time || 0) - V.at > 2.5) return null;
-        if (!window.__upLed || window.__upLed.at !== V.at) {
-          let led = null; try { led = topLedge(G.roomId, P.x, P.y, P.face || 1, true); } catch (e) { }
-          window.__upLed = { at: V.at, x1: led ? led.x1 : null };
+        if (!P || !V || V.side !== 'T') return null;
+        if (!window.__upLed || window.__upLed.v !== V) {
+          let led = null;
+          if (!P.on) try { led = topLedge(G.roomId, P.x, P.y, P.face || 1, true); } catch (e) { }
+          window.__upLed = { v: V, t0: G.simClock || 0, x1: led ? led.x1 : null };
         }
-        return window.__upLed.x1 == null ? null : { x1: window.__upLed.x1 };
+        if (P.on || (G.simClock || 0) - window.__upLed.t0 > 2.5 || window.__upLed.x1 == null) return null;
+        return { x1: window.__upLed.x1 };
       })(),
       p: P ? { x: P.x, y: P.y, vx: P.vx, vy: P.vy, on: !!P.on, face: P.face, cores: P.cores, max: P.maxCores ? P.maxCores() : 0, volts: P.volts, dead: !!P.dead, iT: P.iT || 0,
         healT: P.healT || 0, chargeT: P.chargeT || 0, swing: !!P.swing, stun: P.stunT || 0, dashCD: P.dashCD || 0, dz: P.dizzyT || 0 } : null,
