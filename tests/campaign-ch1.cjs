@@ -57,6 +57,38 @@ const STOP_AT = process.env.CAMPAIGN_STOP || null;
 const VIDEO = process.env.CAMPAIGN_VIDEO !== '0';
 const DEBUG = process.env.CAMPAIGN_DEBUG === '1';
 
+// A chapter certificate is stricter than reaching the final mission. These
+// are the story beats a clean route must deliver, in causal order. Missing
+// GRAVEHORN panels remain an explicit production gap; the harness cannot
+// invent non-existent art and count it as delivered.
+const REQUIRED_PANELS = ['wake', 'bay', 'gate', 'letter', 'drawer', 'ratchet', 'meet',
+  'cave', 'marble', 'forge', 'passage', 'sage', 'break', 'chime', 'free', 'ch2'];
+
+function campaignCertification(result, panelsSeen, panelsMissed, errors, segment, stopAt) {
+  const seen = Array.from(panelsSeen || []);
+  const missed = Array.from(panelsMissed || []);
+  const pageErrors = Array.from(errors || []);
+  const missing = REQUIRED_PANELS.filter(id => !seen.includes(id));
+  const orderErrors = [];
+  let last = -1;
+  for (const id of REQUIRED_PANELS) {
+    const at = seen.indexOf(id);
+    if (at < 0) continue;
+    if (at <= last) orderErrors.push(id);
+    last = Math.max(last, at);
+  }
+  const full = !segment && !stopAt;
+  const certified = result === 'complete' && full && !missed.length && !pageErrors.length
+    && !missing.length && !orderErrors.length;
+  let verdict = result;
+  if (result === 'complete' && !full) verdict = 'partial-diagnostic';
+  else if (result === 'complete' && pageErrors.length) verdict = 'complete-with-page-errors';
+  else if (result === 'complete' && missed.length) verdict = 'complete-with-missed-panels';
+  else if (result === 'complete' && missing.length) verdict = 'complete-without-required-panels';
+  else if (result === 'complete' && orderErrors.length) verdict = 'complete-with-panel-order-errors';
+  return { result: verdict, certified, missing, missed, orderErrors, pageErrors: pageErrors.length, full };
+}
+
 const T0 = Date.now();
 const stamp = () => {
   const s = Math.floor((Date.now() - T0) / 1000);
@@ -1245,7 +1277,8 @@ async function runMissions(s) {
   return 'complete';
 }
 
-if (require.main !== module) module.exports = { roomModel, distTo, simulate, PROGS, nodeStart, nodeFeet };
+if (require.main !== module) module.exports = { roomModel, distTo, simulate, PROGS, nodeStart, nodeFeet,
+  campaignCertification, REQUIRED_PANELS };
 else (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, ...(VIDEO ? { recordVideo: { dir: OUT, size: { width: 1280, height: 720 } } } : {}) });
@@ -1323,7 +1356,8 @@ else (async () => {
     prevS = s;
     await sleep(15);
   }
-  if (result === 'complete' && !R.teaserSeen) result = 'complete-without-teaser-panels';
+  const certification = campaignCertification(result, R.pansSeen, R.pansMissed, errors, SEGMENT, STOP_AT);
+  result = certification.result;
   await hold([]);
   await frame('end');
   log('MANHWA seen: ' + [...(R.pansSeen || [])].join(', ') + (R.pansMissed ? '  (did not open: ' + R.pansMissed.join(', ') + ')' : ''));
@@ -1332,6 +1366,10 @@ else (async () => {
   await ctx.close();
   if (vid) { const vp = await vid.path(); const dst = path.join(OUT, 'campaign-ch1.webm'); try { fs.renameSync(vp, dst); log('VIDEO ' + dst); } catch (e) { log('VIDEO ' + vp); } }
   await browser.close();
-  fs.writeFileSync(path.join(OUT, 'result.json'), JSON.stringify({ result, wall: stamp(), deaths: R.deaths, missions: R.missions, rooms: R.rooms, panelsSeen: [...(R.pansSeen || [])], panelsMissed: R.pansMissed || [], difficulty: DIFF, segment: SEGMENT, errors }, null, 1));
-  if (result !== 'complete') process.exitCode = 1;
+  fs.writeFileSync(path.join(OUT, 'result.json'), JSON.stringify({ result, certified: certification.certified,
+    missingPanels: certification.missing, panelOrderErrors: certification.orderErrors,
+    wall: stamp(), deaths: R.deaths, missions: R.missions, rooms: R.rooms,
+    panelsSeen: [...(R.pansSeen || [])], panelsMissed: R.pansMissed || [], difficulty: DIFF,
+    segment: SEGMENT, stopAt: STOP_AT, errors }, null, 1));
+  if (!certification.certified) process.exitCode = 1;
 })().catch(e => { log('FATAL ' + e.stack); process.exit(1); });
