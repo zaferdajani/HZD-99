@@ -17,7 +17,8 @@ The art review directly re-inspected four current 1600×893 panels and 844×390 
 | Frozen `main` | `14bef4baba6b12d78b7ba2e41c221e8b95b9f938` |
 | Frozen integration | `claude/clawbyte-repo-migration-byhyl8` at the same `14bef4b` |
 | Review branch | `codex/studio-review-2026-10-14` |
-| Implementation commit | `ea9f710` locally; use the published branch head for integration |
+| Local implementation commit | `ea9f710` |
+| Published source/evidence commit | `5d1b6101b4f8ff6458a078673864d744d114ca45` |
 | Built game | Four HTML files, `BUILD_ID 07f3967fe8dc` |
 | Previous review | `codex/studio-review-2026-10-13`; reconciled finding by finding, never wholesale-merged |
 | Production | Not merged, deployed or live-verified |

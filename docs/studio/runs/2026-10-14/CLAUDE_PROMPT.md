@@ -1,6 +1,6 @@
 # Single Claude integration prompt
 
-You are the integrator for `zaferdajani/HZD-99`. Integrate the bounded studio-review work from branch `codex/studio-review-2026-10-14` into the latest `claude/clawbyte-repo-migration-byhyl8`, preserving every newer change. Do not merge or deploy production until the complete browser and uninterrupted campaign gates below are green. Read `docs/DEVELOPMENT_AUTHORITY.md`, `docs/STORY_CANON.md`, `docs/studio/PIPELINE.md`, `docs/studio/runs/2026-10-14/REPORT.md` and `VALIDATION.md` first.
+You are the integrator for `zaferdajani/HZD-99`. Integrate the bounded studio-review work from branch `codex/studio-review-2026-10-14` (published source/evidence commit `5d1b6101b4f8ff6458a078673864d744d114ca45`) into the latest `claude/clawbyte-repo-migration-byhyl8`, preserving every newer change. Do not merge or deploy production until the complete browser and uninterrupted campaign gates below are green. Read `docs/DEVELOPMENT_AUTHORITY.md`, `docs/STORY_CANON.md`, `docs/studio/PIPELINE.md`, `docs/studio/runs/2026-10-14/REPORT.md` and `VALIDATION.md` first.
 
 The review began with `main` and integration both at `14bef4baba6b12d78b7ba2e41c221e8b95b9f938`. Fetch them again before applying. Prefer an ordinary merge/cherry-pick while ancestry is clean; otherwise port only the bounded changes. Never replace `js/game.js`, `tests/campaign-ch1.cjs`, `js/panels.js` or generated HTML wholesale with an older version. Rebuild all four HTML outputs from source after resolving.
 
