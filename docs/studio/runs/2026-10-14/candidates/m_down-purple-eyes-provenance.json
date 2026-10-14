@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-14",
+  "tool": "OpenAI built-in image generation edit",
+  "use_case": "precise-object-edit",
+  "source": "assets/manhua/ch1/game/m_down.webp",
+  "source_sha256": "c65be806cf5fdc6b005d551504625dd0d38ffec4f7afcb260205f2a45930acaa",
+  "source_dimensions": "1600x893",
+  "candidate": "m_down-purple-eyes-candidate.png",
+  "candidate_sha256": "7af50e5df1cb3ad97a75999d09dd0ed3e538e60f378151cd99001424c50fff2b",
+  "candidate_dimensions": "1678x937",
+  "prompt": "Change only NULLFANG's two glowing eye lights from saturated red/pink to the established infected-boss violet-purple, harmonizing with existing violet seams. Preserve exact style, linework, texture, shading, resolution, composition, camera, character identities, eye shape and every pixel outside the eye-glow region. Add no text, watermark, objects, anatomy changes, smoke or trails.",
+  "verdict": "review-only: colour direction is correct, but whole-frame raster and dimensions changed; never wire automatically",
+  "integrated": false
+}

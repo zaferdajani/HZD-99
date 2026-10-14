@@ -54,6 +54,10 @@ const check = (name, ok, detail) => {
     sv.comics = {};
     for (const ch of ((window.COMIC_MANIFEST || {}).chapters || [])) sv.comics[ch.id] = { offered: true, revision: ch.revision };
     for (const b of ['Glitch', 'Brood', 'Atlas', 'Zero', 'Prism', 'Mother', 'Alpha', 'Chime', 'Carrier', 'Moth', 'Lattice', 'Lens']) sv.flags['boss' + b] = 1;
+    // This is a post-guardian cache fixture. Keep its earlier lion meeting
+    // coherent so the meeting pages do not consume the crossing input the
+    // cache test is trying to measure.
+    sv.flags.nfMeet = 1;
     startGame(sv);
     // the slabs are art, and art arriving is its own (separately tested)
     // story: have the two kingdoms walked here before the walk starts
@@ -148,8 +152,13 @@ const check = (name, ok, detail) => {
       else if (side === 'T') { player.vy = -760; keys[KEYB.JUMP[0]] = 1; }
       else { player.vy = 300; }
       let cost = null, liveAt = null;
+      const crossingTrace = [];
+      const crossingState = () => ({ room: G.roomId, state: G.state, panel: G.panels && G.panels.seq && G.panels.seq.id,
+        x: Math.round(player.x), y: Math.round(player.y), vx: Math.round(player.vx), vy: Math.round(player.vy),
+        right: keys[KEYB.RIGHT[0]], left: keys[KEYB.LEFT[0]], dead: player.dead });
       tPrev = performance.now();
       for (let i = 0; i < 120; i++) {
+        if (i === 0 || G.state !== 'PLAY' || i === 119) crossingTrace.push({ frame: i, ...crossingState() });
         quiet();
         const lf = TILE_STATS.live;
         await raf();
@@ -162,7 +171,7 @@ const check = (name, ok, detail) => {
         }
       }
       for (const k in keys) keys[k] = 0;
-      out.walk.push({ room, side, dest, arrived: G.roomId === dest, freshBefore, revisit, cost, liveBakes: liveAt, waited });
+      out.walk.push({ room, side, dest, arrived: G.roomId === dest, freshBefore, revisit, cost, liveBakes: liveAt, waited, crossingTrace, finalState: crossingState() });
     }
     // ---- 3. the same picture -----------------------------------------------------
     const hashOf = (cvx) => {
@@ -330,10 +339,13 @@ const check = (name, ok, detail) => {
   });
 
   // ---- report ---------------------------------------------------------------------------
+  check('the staged cache walk is not intercepted by story panels',
+    r.walk.every(w => w.crossingTrace.every(s => s.state !== 'PANELS')),
+    'post-guardian fixture includes its earlier lion meeting');
   const BUDGET = Math.max(90, r.median * 4);
   for (const [i, w] of r.walk.entries()) {
     const tag = w.room + ' ' + w.side + ' -> ' + w.dest;
-    if (!w.arrived) { check(tag + ': arrives', false, 'never reached ' + w.dest); continue; }
+    if (!w.arrived) { check(tag + ': arrives', false, 'never reached ' + w.dest + '; diagnostic ' + JSON.stringify({ trace: w.crossingTrace, final: w.finalState })); continue; }
     if (i === 0) {
       console.log('  ..   ' + tag + ': first crossing ' + Math.round(w.cost) + ' ms, ' + w.liveBakes + ' bake on the frame (warm-up, not judged)');
       continue;

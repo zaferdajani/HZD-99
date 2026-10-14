@@ -117,7 +117,8 @@ async function tapKey(page, code) {
     });
     check('the marble, the maintenance door, the revelation, the break, the fight, the letter and the hatch are all in the map', !newSeq.length, newSeq.join(', '));
     for (const [id, room, flags] of [['marble', 'CV3', { woke: 1, gateOpened: 1, pl_cshard: 1 }], ['passage', 'GA1T', { woke: 1, gateOpened: 1, crystal: 1 }],
-      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
+      ['break', 'A2', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }],
+      ['break', 'A3', { woke: 1, gateOpened: 1, crystal: 1, nfMeet: 1, sageTame_GA1D: 1, nfBreak: 1 }]]) {
       await stage(page, room, flags);
       // a record made by this build: every sequence known, the others already
       // seen, so the one under test is the only one owed

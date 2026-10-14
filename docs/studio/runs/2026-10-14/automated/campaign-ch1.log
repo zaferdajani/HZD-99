@@ -1,0 +1,9 @@
+
+── campaign-ch1  — chapter one played end to end with keyboard input only, from a cleared browser to the chapter-two teaser (long, real time)
+FAILED: [00:00] FATAL browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/campaign-ch1.cjs:1305:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/campaign-ch1.cjs:1397:3)
+Command failed: node /workspace/scratch/7ada3b7523b4/studio-review/tests/campaign-ch1.cjs
+   (campaign-ch1: 0.3 s)
+
+1 harness(es) failed

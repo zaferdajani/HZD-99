@@ -172,8 +172,10 @@ and the forge bell both rear into the HERO figure. These plates fix that.
 
 Reference: attach the archived source plates in `assets/source/furnace/`
 (`idle.jpg`, `fly.jpg`, `hero.jpg`) and match the sheet exactly — the same
-corrupted mecha dragon, chrome-and-bone plating, molten orange seams, red
-eyes, art FACING RIGHT. Pure black background, whole body, side view, no
+corrupted mecha dragon, chrome-and-bone plating and molten orange seams, art
+FACING RIGHT. Preserve the eye geometry but paint no eye emission: as an
+infected boss, FURNACE receives the established PURPLE eye and trail at runtime,
+not red baked into a plate. Pure black background, whole body, side view, no
 ground plane, no cast shadow, no fire or glow painted in (the cone, the steam
 and every light are procedural and must stay so — ART_BIBLE: additive light is
 never generated).
@@ -6288,9 +6290,10 @@ Measured by `tests/wolves.cjs` (scale, floor, per-cell silhouette) and
 `tests/infection-eyes.cjs`. §2cc-i and §2cc-iii below are SUPERSEDED for the
 wolf (their files are deleted); they still stand for the cheetah.
 
-**Still the old animal:** THE ALPHA (`alpha*`, `al*` strips) predates this
-design. Its re-fire against `source/beasts/wolf2/green_plate.jpg` is the next
-brief for the pack — same take list, larger frame, purple at runtime.
+**ALPHA RE-FIRE LANDED 2026-10-09:** the dedicated `assets/characters/alpha/`
+rest, prowl, roar, howl, leap, air, claw, bite, clinch and yield strips replace
+the old animal across its authored states. Preserve these strips and their
+purple runtime infection treatment; this paragraph is not a regeneration brief.
 
 ### 2cc-i. THE WOLF — `wolfWalk` (8 cells) and `wolfRun` (6 cells)
 

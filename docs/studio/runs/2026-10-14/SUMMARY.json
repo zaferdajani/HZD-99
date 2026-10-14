@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-14",
+  "base": "14bef4baba6b12d78b7ba2e41c221e8b95b9f938",
+  "branch": "codex/studio-review-2026-10-14",
+  "implementation_commit_local": "ea9f710",
+  "build_id": "07f3967fe8dc",
+  "full_collector": { "total": 188, "pass": 29, "fail_at_browser_launch": 159, "exit": 1 },
+  "final_static": { "total": 28, "pass": 28, "exit": 0 },
+  "browser_provisioning": "blocked_zero_byte_archive",
+  "uninterrupted_campaign": "not_run_browser_launch_blocked",
+  "physical_device": "not_run",
+  "production_merge": false,
+  "production_deploy": false
+}
