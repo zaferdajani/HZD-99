@@ -43,12 +43,19 @@ async function nullfangReel() {
     R.place(x, gc && gc.length ? Math.min(...gc) : (G.roomDef.h - 2) * TILE);
     player.face = 1;
     let t0 = R.t, began = false;
+    // the film's own title first, over the corridor before anything happens;
+    // then the chapter card as she walks on into it
+    const card = (age, len) => age < 0 ? 0 : age < 0.25 ? age / 0.25 : age < len - 0.4 ? 1 : age < len ? (len - age) / 0.4 : 0;
     const capM = () => {
-      const age = R.t - t0, a = age < 0.25 ? age / 0.25 : age < 1.6 ? 1 : age < 2 ? (2 - age) / 0.4 : 0;
-      const bb = G.boss;
+      const age = R.t - t0, bb = G.boss;
+      const a1 = card(age, 2.8), a2 = card(age - 2.9, 2.0);
+      const title = a1 > 0 ? 'NULLFANG' : a2 > 0 ? 'The First Meeting' : '';
+      const sub = a1 > 0 ? 'the first guardian  ·  every move, effect and sound, recorded in-game'
+        : 'the corridor  ·  it drops in, swats her aside, and leaves';
       return { name: 'NULLFANG', state: 'The First Meeting   [' + (G.meet ? G.meet.ph : bb ? bb.st : 'corridor') + ']',
-        zoom: 1, title: a > 0 ? 'The First Meeting' : '', sub: 'the corridor  ·  it drops in, swats her aside, and leaves', titleA: a };
+        zoom: 1, title, sub, titleA: Math.max(a1, a2) };
     };
+    await R.run(2.9, capM);
     R.hold('RIGHT', 1);
     await R.run(9.5, capM, () => {
       if (G.meet) { began = true; R.hold('RIGHT', 0); }
@@ -127,7 +134,7 @@ async function nullfangReel() {
 
   // ---- 0. the title, over the sleeping animal ------------------------------
   R.place(b.x - 560, FLOOR); player.face = 1;
-  await scene('NULLFANG', 'the first guardian  ·  every move, effect and sound, recorded in-game', 3.2, () => { hold(''); watch(); });
+  await scene('The Arena', 'Scrap Meadows  ·  it sleeps until she comes close', 2.6, () => { hold(''); watch(); });
 
   // ---- 1. the stir and the wake roar ---------------------------------------
   R.hold('RIGHT', 1);
@@ -245,9 +252,13 @@ async function nullfangReel() {
   // has replaced; the freeing is filmed in the arena (the game's no-film
   // path) and the film itself is cut onto the end of the reel instead
   const cutFn = startPurifyCut; startPurifyCut = () => false;
+  // ...and her evolution card is her reward, not the lion's: it would sit
+  // over the cleansing for its whole length
+  const evoFn = checkEvo; checkEvo = () => {};
   arena(MID + 120, -70); b.st = 'idle'; b.t = 1; hpFloor = 0; b.hp = 3; b.dazeCD = 99;
-  await scene('Freed', 'the last blow puts it on its knees  ·  the virus leaves  ·  the lion stays', 8.5, (i) => {
+  await scene('Freed', 'the last blow puts it on its knees  ·  the virus leaves  ·  the lion stays', 10.5, (i) => {
     hold(''); watch();
+    if (i < 54) { face(); if (b.st === 'idle' || b.st === 'stalk') { b.st = 'idle'; b.t = 1; } return; }   // the card reads over the lion first
     if (!b.dead && b.hp > 0) {
       face(); if (b.st === 'idle' || b.st === 'stalk') { b.st = 'idle'; b.t = 1; }
       if (i % 8 === 0) R.press('ATK'); else if (i % 8 === 3) R.release('ATK');
@@ -259,7 +270,7 @@ async function nullfangReel() {
     if (G.state !== 'PLAY' && G.state !== 'CUT') { R.log.push('state ' + G.state + ' cleared'); G.state = 'PLAY'; }
   });
   R.clearKeys();
-  G.onBossDead = onDead; startPurifyCut = cutFn;
+  G.onBossDead = onDead; startPurifyCut = cutFn; checkEvo = evoFn;
   chapter = 'The Purification Film'; sub = 'as the game plays it  ·  assets/video/purify_glitch.mp4'; titleAt = R.t;
   await R.run(1.6, cap(), () => { settle(); });
   player.hurt = realHurt;
