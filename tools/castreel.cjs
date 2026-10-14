@@ -27,7 +27,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const FF = path.join(__dirname, '..', 'node_modules', 'ffmpeg-static', 'ffmpeg');
+const FF = (() => { const p = path.join(__dirname, '..', 'node_modules', 'ffmpeg-static', 'ffmpeg'); return fs.existsSync(p) ? p : 'ffmpeg'; })();
 const FPS = 30, SR = 32000;
 
 // ---------------------------------------------------------------------------
@@ -91,6 +91,15 @@ function installReel(cfg) {
     if (AC instanceof OfflineAudioContext) return _voice(id);
     offRender('voice:' + id, () => _voice(id), 2);
   };
+  // the coil's rising ladder is drawn straight on AC by tone(), not through
+  // sfx(), so it needs its own tap or the lion gathers itself in silence
+  if (typeof sfxChargeTick === 'function') {
+    const _tick = sfxChargeTick;
+    sfxChargeTick = function (k) {
+      if (AC instanceof OfflineAudioContext) return _tick(k);
+      offRender('charge', () => _tick(k), 1.2);
+    };
+  }
   function streamIn(label, src, vol, maxSec) {
     if (!R.sec || !src) return false;
     const sec = R.sec, at = R.t - sec.t0;
@@ -197,7 +206,18 @@ function installReel(cfg) {
       S.fillText('♪ ' + e.label, 942, 518 - (recent.length - 1 - i) * 17);
     });
     S.fillStyle = 'rgba(159,184,204,0.55)'; S.font = '500 12px system-ui, sans-serif'; S.textAlign = 'left';
-    S.fillText('CLAWBYTE — THE CAST  ·  ' + (R.sec ? R.sec.name : ''), 14, 20);
+    S.fillText((R.brand || 'CLAWBYTE — THE CAST') + '  ·  ' + (R.sec ? R.sec.name : ''), 14, 20);
+    // a chapter card over the picture: the game keeps running underneath it,
+    // so the move it names is already moving when the card lifts
+    if (cap.title) {
+      const a = cap.titleA == null ? 1 : cap.titleA;
+      S.fillStyle = 'rgba(3,4,8,' + (0.62 * a).toFixed(2) + ')'; S.fillRect(0, 170, 960, 150);
+      S.globalAlpha = a; S.textAlign = 'center';
+      S.fillStyle = '#f3e9ff'; S.font = '700 44px system-ui, sans-serif';
+      S.fillText(cap.title, 480, 240);
+      if (cap.sub) { S.fillStyle = '#c9b2ec'; S.font = '500 19px system-ui, sans-serif'; S.fillText(cap.sub, 480, 282); }
+      S.globalAlpha = 1;
+    }
     R.queue.push(ST.toDataURL('image/jpeg', 0.86));
     R.nfr++;
     if (R.queue.length >= 45) await new Promise(r => { R.resume = r; });
@@ -539,13 +559,11 @@ async function program(opts) {
 }
 
 // ---------------------------------------------------------------------------
-(async () => {
-  const args = process.argv.slice(2);
-  const out = args.find(a => !a.startsWith('--')) || 'restyle/reel/cast_reel.mp4';
-  const opt = (n, d) => { const a = args.find(x => x.startsWith('--' + n + '=')); return a ? a.slice(n.length + 3) : d; };
-  const sections = opt('only', 'hero,npc,enemy,boss').split(',');
-  const MAXF = parseInt(opt('max', '0'), 10) || 0;
-  const fdir = opt('frames', path.join(path.dirname(out), 'frames'));
+// THE FILMING RIG, shared: boot the shipped page, install the reel, hand it a
+// programme (page-side source plus the call that starts it), then collect the
+// frames and the per-section sound and cut them into one mp4. The cast reel
+// below is one programme; tools/nullfangreel.cjs is another.
+async function film({ out, fdir, keep, cfg, src, start, startArg, wavName }) {
   fs.mkdirSync(fdir, { recursive: true });
   for (const f of fs.readdirSync(fdir)) fs.unlinkSync(path.join(fdir, f));
 
@@ -554,15 +572,13 @@ async function program(opts) {
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.goto('http://127.0.0.1:8220/index.html');
   await page.waitForFunction(() => typeof startGame === 'function', { timeout: 20000 });
-  await page.evaluate(installReel, { FPS, SR, MAXF, bossFilter: opt('boss', '') });
+  await page.evaluate(installReel, Object.assign({ FPS, SR }, cfg));
   const takes = await page.evaluate(() => REEL.boot());
   console.log('booted; foley takes decoded:', takes);
   // the programme lives in the page as source, so the sections can call the
   // game's own functions by name
-  const src = [sectionHero, sectionNPC, sectionEnemies, sectionBosses, program]
-    .map(f => f.toString()).join('\n') + '\nconst BOSS_STATES = ' + JSON.stringify(BOSS_STATES) + ';\n';
-  await page.addScriptTag({ content: src + '\nwindow.__reelProgram = program;' });
-  await page.evaluate(sections => { window.__reelProgram({ sections }); }, sections);
+  await page.addScriptTag({ content: src + '\nwindow.__reelProgram = ' + start + ';' });
+  await page.evaluate(a => { window.__reelProgram(a); }, startArg);
 
   let n = 0; const pcm = []; const secs = []; const logAll = [];
   for (;;) {
@@ -589,18 +605,33 @@ async function program(opts) {
   // the soundtrack: one WAV, section PCM back to back — each section's audio
   // is exactly its frame count long, so the picture and the sound share a clock
   const data = Buffer.concat(pcm);
-  const wav = path.join(fdir, '..', 'cast_reel.wav');
+  const wav = path.join(fdir, '..', (wavName || 'cast_reel') + '.wav');
   const hdr = Buffer.alloc(44);
   hdr.write('RIFF', 0); hdr.writeUInt32LE(36 + data.length, 4); hdr.write('WAVE', 8);
   hdr.write('fmt ', 12); hdr.writeUInt32LE(16, 16); hdr.writeUInt16LE(1, 20); hdr.writeUInt16LE(1, 22);
   hdr.writeUInt32LE(SR, 24); hdr.writeUInt32LE(SR * 2, 28); hdr.writeUInt16LE(2, 32); hdr.writeUInt16LE(16, 34);
   hdr.write('data', 36); hdr.writeUInt32LE(data.length, 40);
   fs.writeFileSync(wav, Buffer.concat([hdr, data]));
-  fs.writeFileSync(path.join(fdir, '..', 'cast_reel.log'), log.join('\n') + '\n\n' + JSON.stringify(secs, null, 1));
+  fs.writeFileSync(path.join(fdir, '..', (wavName || 'cast_reel') + '.log'), log.join('\n') + '\n\n' + JSON.stringify(secs, null, 1));
 
   execFileSync(FF, ['-y', '-hide_banner', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(fdir, '%06d.jpg'),
     '-i', wav, '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-pix_fmt', 'yuv420p',
     '-c:a', 'aac', '-b:a', '128k', '-shortest', '-movflags', '+faststart', out], { stdio: 'inherit' });
   console.log('wrote', out, (fs.statSync(out).size / 1048576).toFixed(1) + ' MB', (n / FPS).toFixed(0) + ' s');
-  if (!args.includes('--keep')) { for (const f of fs.readdirSync(fdir)) fs.unlinkSync(path.join(fdir, f)); fs.rmdirSync(fdir); }
+  if (!keep) { for (const f of fs.readdirSync(fdir)) fs.unlinkSync(path.join(fdir, f)); fs.rmdirSync(fdir); }
+  return { frames: n, secs, log, wav };
+}
+
+module.exports = { installReel, film, FPS, SR };
+
+if (require.main === module) (async () => {
+  const args = process.argv.slice(2);
+  const out = args.find(a => !a.startsWith('--')) || 'restyle/reel/cast_reel.mp4';
+  const opt = (n, d) => { const a = args.find(x => x.startsWith('--' + n + '=')); return a ? a.slice(n.length + 3) : d; };
+  const sections = opt('only', 'hero,npc,enemy,boss').split(',');
+  const MAXF = parseInt(opt('max', '0'), 10) || 0;
+  const src = [sectionHero, sectionNPC, sectionEnemies, sectionBosses, program]
+    .map(f => f.toString()).join('\n') + '\nconst BOSS_STATES = ' + JSON.stringify(BOSS_STATES) + ';\n';
+  await film({ out, fdir: opt('frames', path.join(path.dirname(out), 'frames')), keep: args.includes('--keep'),
+    cfg: { MAXF, bossFilter: opt('boss', '') }, src, start: 'program', startArg: { sections } });
 })().catch(e => { console.error(e); process.exit(1); });
