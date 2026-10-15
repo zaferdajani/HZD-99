@@ -239,6 +239,7 @@ const SUITE = [
   ['airattack', 'a strike in the air is its own move, once it has one'],
   ['grapple',   'the grappling claw: walls, enemies, aim assist, and everything that outranks it'],
   ['grapple-contract', 'protected and zero-damage grapple targets never grant combat side effects', { noBrowser: true }],
+  ['reel-contract', 'capture reels fail closed for runtime errors and missing required beats', { noBrowser: true }],
   ['hitshape',  'authored hit shapes: every swing inside its old square, the far corners trimmed, the Forge overlay'],
   ['slashlayer','her cuts on their own layer, drawn after her, with a glow copy on the dial'],
   ['crestfight','the expensive seals change how she fights: each attack block measured with every weapon, drawn, one style at a time, in five languages'],
