@@ -15,6 +15,7 @@ This review branch preserves both upstream reel commits, reuses the bounded 2026
 | Previous review | `codex/studio-review-2026-10-14` at `a7bf31253550d79f5ba6a34472e973d97385e857` |
 | Review branch | `codex/studio-review-2026-10-15` |
 | Local implementation head before report | `73be40495ad3638c8ceeec6ca21c25061d0dc791` |
+| Published source/evidence commit | [`c860fa9b54f11bc8f96fb480ed1e425e3b3b5c1f`](https://github.com/zaferdajani/HZD-99/commit/c860fa9b54f11bc8f96fb480ed1e425e3b3b5c1f) |
 | Built pages | local only, `BUILD_ID 07f3967fe8dc`; deliberately not deployed |
 | Live production | not tested and not changed |
 
