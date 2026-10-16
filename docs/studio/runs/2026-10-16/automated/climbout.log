@@ -1,0 +1,18 @@
+
+── climbout  — every floor she can land on she can leave, and every gate names its power
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/climbout.cjs:22:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/climbout.cjs:339:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/climbout.cjs:22:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/climbout.cjs:339:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (climbout: 0.4 s)
+
+1 harness(es) failed

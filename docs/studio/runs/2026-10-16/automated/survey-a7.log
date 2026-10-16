@@ -1,0 +1,20 @@
+
+── survey-a7  — Ratchet's shaft errand is finished by reading the A7 survey, not by entering the room; early reads remembered; old saves keep what they earned
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/survey-a7.cjs:33:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/survey-a7.cjs:259:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── survey-a7 — Ratchet's errand is finished by reading the survey, not by standing in the shaft
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/survey-a7.cjs:33:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/survey-a7.cjs:259:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (survey-a7: 0.3 s)
+
+1 harness(es) failed

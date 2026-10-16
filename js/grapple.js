@@ -50,10 +50,37 @@ function grapUnlocked() {
   return !!(typeof G !== 'undefined' && G.save && G.save.abil && (G.save.abil.grapple || G.save.abil.dash));
 }
 function grapTxt(k, en) { const v = typeof t === 'function' ? t(k) : k; return (v == null || v === k) ? en : v; }
+function grapControlHint() {
+  if (typeof TOUCH !== 'undefined' && TOUCH && TOUCH.enabled)
+    return G.save && G.save.theme === 'hero' ? '⚓' : '⟟';
+  if (typeof PAD !== 'undefined' && PAD && PAD.on) {
+    const b = PAD.map && PAD.map.GRAPPLE;
+    if (b != null && b >= 0) return padLabel(b);
+    return padLabel(PAD.map.PAUSE) + ' ▸ ' + t('menu_controls') + ' ▸ ' + t('pa_GRAPPLE');
+  }
+  const codes = (typeof KEYB !== 'undefined' && KEYB.GRAPPLE) || [];
+  const k = codes.find(c => /^Key|^Digit/.test(c));
+  return k ? k.replace(/^Key/, '').replace(/^Digit/, '') : 'U';
+}
+function grapIntroText() {
+  return grapTxt('grap_on', 'GRAPPLE CLAW online — press {GRAPPLE}')
+    .replace('{GRAPPLE}', grapControlHint());
+}
+// Only a live hostile can be an anchor. Disabled story machines, cleansed
+// creatures and companion guardians remain in ordinary enemy arrays.
+function grapHostile(e) {
+  if (!e || e.dead || e.disabled || e.rescued || e.meet || e.calm || e.tame || e.tamed
+      || e.purified || e.friendly || e.yielded || (typeof isPet === 'function' && isPet(e))) return false;
+  // The ordinary wolves do not each receive a tame bit: Alpha's persistent
+  // pack flag changes the whole species. Keep that global ally law at target
+  // selection, before a claw can latch or move one of them.
+  if (typeof isWolf === 'function' && isWolf(e) && typeof packTamed === 'function' && packTamed()) return false;
+  return true;
+}
 function grapTargets() {
   const b = G.boss;
-  const bossOk = b && !b.dead && b.st !== 'intro' && b.st !== 'dorm' && !(typeof isPet === 'function' && isPet(b));
-  return G.enemies.concat(bossOk ? [b] : []);
+  const bossOk = grapHostile(b) && b.st !== 'intro' && b.st !== 'dorm';
+  return G.enemies.filter(grapHostile).concat(bossOk ? [b] : []);
 }
 function grapGlow() {
   const hero = typeof isHero === 'function' && isHero();
@@ -65,7 +92,7 @@ function grapUpdate(p, dt) {
   if (p.on || p.wallSlide) p.grapAir = 0;
   if (grapUnlocked() && G.save.flags && !G.save.flags.grapSeen) {
     G.save.flags.grapSeen = 1;
-    if (G.toast) G.toast(grapTxt('grap_on', 'GRAPPLE CLAW online: press U to fire it'));
+    if (G.toast) G.toast(grapIntroText());
   }
   // VOLT SOAR rides this input and owns her motion while it lasts (js/soar.js)
   const so = typeof soarStep === 'function' ? soarStep(p, dt) : null;
@@ -106,7 +133,6 @@ function grapUpdate(p, dt) {
       g.len += step / sub;
       g.tx = g.ox + g.dx * g.len; g.ty = g.oy + g.dy * g.len;
       for (const e of grapTargets()) {
-        if (e.dead) continue;
         const hb = hurtBoxOf(e);
         if (g.tx >= hb.x - 6 && g.tx <= hb.x + hb.w + 6 && g.ty >= hb.y - 6 && g.ty <= hb.y + hb.h + 6) {
           g.st = 'pull'; g.t = 0; g.foe = e;
@@ -130,7 +156,7 @@ function grapUpdate(p, dt) {
   }
   if (g.st === 'pull') {
     if (g.foe) {
-      if (g.foe.dead) { grapEnd(p, false); return false; }
+      if (!grapHostile(g.foe)) { grapEnd(p, false); return false; }
       const hb = hurtBoxOf(g.foe); g.tx = hb.x + hb.w / 2; g.ty = hb.y + hb.h / 2;
     }
     const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
@@ -165,7 +191,6 @@ const GRAP_CONE = Math.cos(40 * Math.PI / 180);   // 28 degrees missed a crawler
 function grapAssist(ox, oy, dx, dy) {
   let best = null, bestScore = Infinity;
   for (const e of grapTargets()) {
-    if (e.dead) continue;
     const hb = hurtBoxOf(e);
     const cx = hb.x + hb.w / 2, cy = hb.y + hb.h / 2;
     const vx = cx - ox, vy = cy - oy, d = Math.hypot(vx, vy);
@@ -185,6 +210,10 @@ function grapAssist(ox, oy, dx, dy) {
 function grapBite(p, e, g, id, arrive) {
   let dm = p.attackDmg(id);
   dm = dealDmg(e, dm, armEl(), g.tx, g.ty, true);
+  // dealDmg owns guard clangs, storm deflection and Sage purification. A zero
+  // return means that interaction has already supplied its own feedback; do
+  // not add grapple knockback, charge, generic hit FX or an arrival bounce.
+  if (!(dm > 0)) return false;
   attackKnock(e, id, g.dx, g.dy);   // the bite holds (kb null); the arrival shoves
   p.gainVolts(arrive ? 8 : 4);
   sfx(e instanceof Boss ? 'bosshit' : 'hit');
@@ -193,6 +222,7 @@ function grapBite(p, e, g, id, arrive) {
   attackFreeze(id);
   if (typeof padRumble === 'function') padRumble(arrive ? 0.45 : 0.25, arrive ? 0.7 : 0.4, arrive ? 110 : 60);
   if (arrive) { p.vx = -g.dx * 220; p.vy = -560; p.iT = Math.max(p.iT, 0.25); }   // bounce off it, like a pogo
+  return true;
 }
 function grapEnd(p, toDash) {
   const g = p.grap; if (!g) return;
@@ -249,14 +279,14 @@ function grapDraw(c, p) {
 // own grapnel names in js/theme.js), all five languages so none falls through.
 TEXT_LAYERS.push({
   robo: true,
-  en: { pa_GRAPPLE: 'Grapple Claw', grap_on: 'GRAPPLE CLAW online — press U (on a pad, bind it in Controls)',
+  en: { pa_GRAPPLE: 'Grapple Claw', grap_on: 'GRAPPLE CLAW online — press {GRAPPLE}',
     m_grapple: 'Grapple Claw', m_grappled: 'Press U to fire the claw: it reels you to walls and into enemies. Hold UP to aim it high; JUMP during the reel to vault.' },
-  ar: { pa_GRAPPLE: 'مخلب الخطّاف', grap_on: 'مخلب الخطّاف جاهز — اضغط U (في يد التحكم: عيّنه من الإعدادات)',
+  ar: { pa_GRAPPLE: 'مخلب الخطّاف', grap_on: 'مخلب الخطّاف جاهز — اضغط {GRAPPLE}',
     m_grapple: 'مخلب الخطّاف', m_grappled: 'اضغط U لإطلاق المخلب: يسحبك إلى الجدران ونحو الأعداء. اضغط للأعلى لتصويبه عاليًا، والقفز أثناء السحب ليقذفك.' },
-  tr: { pa_GRAPPLE: 'Kanca Pençe', grap_on: 'KANCA PENÇE hazır — U tuşuna bas (kumandada: Kontroller’den ata)',
+  tr: { pa_GRAPPLE: 'Kanca Pençe', grap_on: 'KANCA PENÇE hazır — {GRAPPLE} tuşuna bas',
     m_grapple: 'Kanca Pençe', m_grappled: 'Pençeyi fırlatmak için U’ya bas: seni duvarlara ve düşmanlara çeker. Yükseğe nişan almak için YUKARI’yı tut; çekiş sırasında ZIPLA ile sıçra.' },
-  zh: { pa_GRAPPLE: '抓钩爪', grap_on: '抓钩爪已就绪——按 U（手柄：在“操作设置”中绑定）',
+  zh: { pa_GRAPPLE: '抓钩爪', grap_on: '抓钩爪已就绪——按 {GRAPPLE}',
     m_grapple: '抓钩爪', m_grappled: '按 U 射出抓钩爪：它会把你拉向墙壁或敌人。按住“上”向高处瞄准；收绳时按“跳跃”可借力跃出。' },
-  ru: { pa_GRAPPLE: 'Коготь-крюк', grap_on: 'КОГОТЬ-КРЮК готов — нажми U (на геймпаде: назначь в Управлении)',
+  ru: { pa_GRAPPLE: 'Коготь-крюк', grap_on: 'КОГОТЬ-КРЮК готов — нажми {GRAPPLE}',
     m_grapple: 'Коготь-крюк', m_grappled: 'Нажми U, чтобы выпустить коготь: он подтягивает тебя к стенам и к врагам. Держи ВВЕРХ, чтобы целиться выше; ПРЫЖОК во время подтягивания — отскок.' },
 });

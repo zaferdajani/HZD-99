@@ -1,0 +1,19 @@
+
+── demo  — the free chapter ends at one door, and she can walk back in
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/demo.cjs:28:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/demo.cjs:327:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── demo — the free chapter ends where it says, and only there
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/demo.cjs:28:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/demo.cjs:327:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (demo: 0.3 s)
+
+1 harness(es) failed

@@ -82,6 +82,9 @@ function servedCheck(when) {
 }
 
 const SUITE = [
+  ['combat-impact-contract', 'armor, protected contacts, charged weight and bounded combat ledger', {noBrowser:true}],
+  ['combat-impact-browser', 'rendered hit flash and finite hardware particles, charged weight, equipped stats and ledger export'],
+  ['combat-impact-input', 'real keyboard tap and held charge through the normal game loop in a staged arena'],
   ['repair-browser', 'Ratchet drag controls, page reload and interrupted boot in the assembled game'],
   ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],
   ['lion-studio', 'Nullfang motion clocks, planted gait, attack cadence and creature cue ownership'],
@@ -238,6 +241,8 @@ const SUITE = [
   ['shield',    'the brace holds, the plate has a side, the hymn can be jumped'],
   ['airattack', 'a strike in the air is its own move, once it has one'],
   ['grapple',   'the grappling claw: walls, enemies, aim assist, and everything that outranks it'],
+  ['grapple-contract', 'protected and zero-damage grapple targets never grant combat side effects', { noBrowser: true }],
+  ['reel-contract', 'capture reels fail closed for runtime errors and missing required beats', { noBrowser: true }],
   ['hitshape',  'authored hit shapes: every swing inside its old square, the far corners trimmed, the Forge overlay'],
   ['slashlayer','her cuts on their own layer, drawn after her, with a glow copy on the dial'],
   ['crestfight','the expensive seals change how she fights: each attack block measured with every weapon, drawn, one style at a time, in five languages'],
@@ -262,6 +267,7 @@ const SUITE = [
   // two full playthroughs (desktop, phone) read at a player's pace
   ['opening-order', 'the opening played with real input in the owner\'s order, desktop and phone, to Old Servo', { timeout: 900000 }],
   ['campaign-ch1', 'chapter one played end to end with keyboard input only, from a cleared browser to the chapter-two teaser (long, real time)', { timeout: 3600000 }],
+  ['campaign-contract', 'chapter-one campaign certification fails closed for missing, late, partial and error-bearing evidence', { noBrowser: true }],
   ['hero',      'her arm is ONE piece, she has two of them, nothing bolted on'],
   ['preload',   'the art for the rooms she can reach is fetched before she reaches them'],
   ['boot',      'a cold open spends what it needs and buys the rest behind itself'],

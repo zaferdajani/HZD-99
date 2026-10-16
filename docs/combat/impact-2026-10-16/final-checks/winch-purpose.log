@@ -1,0 +1,29 @@
+  ok   the strike lesson is running at the jammed winch  {"step":"atk","calm":true,"angle":0.6199278590395723,"tipX":581.4571430567332,"tipUp":14.727911117331644,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   the jammed arm is down across the road (its end low, west of the base)  {"step":"atk","calm":true,"angle":0.6199278590395723,"tipX":581.4571430567332,"tipUp":14.727911117331644,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   walking east she is stopped at the arm, on the booth side  {"step":"atk","calm":true,"angle":0.6199278590395723,"tipX":581.4571430567332,"tipUp":14.727911117331644,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   ...and where it stops her the strike is ready (the chip names ATTACK)  {"step":"atk","calm":true,"angle":0.6199278590395723,"tipX":581.4571430567332,"tipUp":14.727911117331644,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   a jump does not carry her over the jam  {"pc":567.8589339323496,"cx":656}
+  ok   pushing on the arm says why the road is shut  {"said":["The jammed winch arm blocks the road."],"want":"The jammed winch arm blocks the road."}
+  ok   a body already past the base is never pulled back through it  {"stayed":true,"east":856.3611111111102,"cx":656}
+  ok   the strike lesson finishes on a real strike at the winch  "burst"
+  ok   strikes knock scrap out (one piece per strike, capped at 4 per save)  {"rows":[{"hurt":false,"hp":20,"flag":1},{"hurt":false,"hp":2,"flag":2},{"hurt":false,"hp":1,"flag":3},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4}],"flag":4,"live":[{"x":499,"y":457},{"x":460,"y":461},{"x":490,"y":462},{"x":448,"y":460}],"scrap0":0,"stillJammed":true,"step":"burst"}
+  ok   strikes alone never stop the jammed winch  {"rows":[{"hurt":false,"hp":20,"flag":1},{"hurt":false,"hp":2,"flag":2},{"hurt":false,"hp":1,"flag":3},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4}],"flag":4,"live":[{"x":499,"y":457},{"x":460,"y":461},{"x":490,"y":462},{"x":448,"y":460}],"scrap0":0,"stillJammed":true,"step":"burst"}
+  ok   the knocked scrap lands on her side of the arm  {"n":5,"worth":15,"gained":15,"left":0,"sides":[true,true,true,true,true]}
+  ok   she collects every piece as ordinary scrap  {"n":5,"worth":15,"gained":15,"left":0,"sides":[true,true,true,true,true]}
+  ok   a burst let go far from the winch does not pass the lesson  {"burstDone":false,"disabled":false,"step":"burst","said":["Too far — let the burst go beside the winch."],"want":"Too far — let the burst go beside the winch."}
+  ok   ...and says why  {"burstDone":false,"disabled":false,"step":"burst","said":["Too far — let the burst go beside the winch."],"want":"Too far — let the burst go beside the winch."}
+  ok   a burst beside the winch stops it  {"burstDone":true,"disabled":true,"paid":12,"said":["The winch stops — its arm lifts clear of the road."],"want":"The winch stops — its arm lifts clear of the road.","a0":0.16728836616744733}
+  ok   ...and says so  {"burstDone":true,"disabled":true,"paid":12,"said":["The winch stops — its arm lifts clear of the road."],"want":"The winch stops — its arm lifts clear of the road.","a0":0.16728836616744733}
+  ok   the burst still pays the winch's salvage once (12)  {"burstDone":true,"disabled":true,"paid":12,"said":["The winch stops — its arm lifts clear of the road."],"want":"The winch stops — its arm lifts clear of the road.","a0":0.16728836616744733}
+  ok   the arm visibly lifts (over several frames, never back down)  {"samples":[0.127,-0.473,-1.05,-1.05,-1.05,-1.05],"angle":-1.05,"tipUp":168.4557640750117,"cx":656}
+  ok   ...and comes to rest clear of the road  {"samples":[0.127,-0.473,-1.05,-1.05,-1.05,-1.05],"angle":-1.05,"tipUp":168.4557640750117,"cx":656}
+  ok   after the burst the road is open: she walks past the winch  {"pc":1206.3611111111102,"cx":656,"step":"node"}
+  ok   reloaded after the burst the winch is still stopped and its arm up  {"disabled":true,"angle":-1.05,"raised":-1.05,"pc":1517.6944444444478,"cx":656}
+  ok   ...and nothing blocks the road  {"disabled":true,"angle":-1.05,"raised":-1.05,"pc":1517.6944444444478,"cx":656}
+  ok   a save with the burst behind her is never blocked  {"jammed":true,"blocking":false,"pc":1517.6944444444478,"cx":656}
+  ok   after the tutorial: no barrier, no scrap from the winch  {"blocking":false,"knocked":0,"pc":1517.6944444444478,"cx":656}
+  ok   no page errors (CLAWBYTE)  []
+  ok   NOSTOS: no yard winch, nothing knocks scrap, nothing blocks  {"hero":true,"winch":false,"knock":false}
+  ok   no page errors (NOSTOS)  []
+
+PASS winch-purpose: the jammed arm blocks the road, every strike knocks scrap she collects, the burst lifts the arm and opens the way; reloads and NOSTOS unaffected

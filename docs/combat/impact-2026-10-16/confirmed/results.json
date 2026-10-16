@@ -1,0 +1,104 @@
+{
+  "started_utc": "2026-10-16T11:33:35.929163+00:00",
+  "base_commit": "6ab143757faab781c9aa0da596c047e1b429cc2c",
+  "dirty_at_start": "M forge-odyssey.html\n M forge.html\n M index.html\n M js/engine.js\n M js/entities.js\n M js/foeread.js\n M js/game.js\n M js/gear.js\n M js/types.js\n M js/winch.js\n M odyssey.html\n M source-files.json\n M tests/run.cjs\n M tests/shield.cjs\n?? docs/combat/impact-2026-10-16/\n?? js/combat-stats.js\n?? tests/combat-impact-contract.cjs\n?? tools/combat-field-guide.cjs",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.465345,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "b8b59e1fd27825f58d9aeebf563b2b4cceedb0c14110f4b7cf7103d6a59dc656"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "4f2f774340142f168f2539f87efa95e0290c1eeaba1dd8c8c61b36b2dc075d74",
+        "odyssey.html": "609ae5ea7763d8e0f1523f908fd687280f832a03d6616a109a4b74540bf097b7",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "combat-impact-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164464,
+      "timeout_seconds": 480,
+      "log": "combat-impact-contract.log",
+      "sha256": "05aba05fc6f6147fa8fc44184910cd7f9f81afae80aa5a17856cdd7693d8a50a"
+    },
+    {
+      "name": "shield",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 1.21759,
+      "timeout_seconds": 480,
+      "log": "shield.log",
+      "sha256": "65f0057d27717005a013a91127a64d3dd1e95e8d99ad51e3b770a8dc145c8362"
+    },
+    {
+      "name": "guard",
+      "status": "fail",
+      "exit_code": 1,
+      "seconds": 17.514226,
+      "timeout_seconds": 480,
+      "log": "guard.log",
+      "sha256": "e4e958b9a489a11cf51bed3260f9b8a6dcd240985c11787f66a4eb3818177768"
+    },
+    {
+      "name": "attacks",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.772689,
+      "timeout_seconds": 480,
+      "log": "attacks.log",
+      "sha256": "60aa4f2128803daf257028328340e29fad612e052390a7bdd3af514563a072a3"
+    },
+    {
+      "name": "airattack",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 7.793421,
+      "timeout_seconds": 480,
+      "log": "airattack.log",
+      "sha256": "1265669f2ef8ed01c1c4c71911e7159e2a80731c373df1a33bdce5e1728506e4"
+    },
+    {
+      "name": "weapons",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.214464,
+      "timeout_seconds": 480,
+      "log": "weapons.log",
+      "sha256": "bcd5241bfea20d19c43456d8fed284b03058547d134f0433fa62ca4f77435fea"
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "4f2f774340142f168f2539f87efa95e0290c1eeaba1dd8c8c61b36b2dc075d74",
+        "odyssey.html": "609ae5ea7763d8e0f1523f908fd687280f832a03d6616a109a4b74540bf097b7",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "4f2f774340142f168f2539f87efa95e0290c1eeaba1dd8c8c61b36b2dc075d74",
+  "complete_requested_scope": true,
+  "passed": false,
+  "finished_utc": "2026-10-16T11:34:06.594941+00:00"
+}

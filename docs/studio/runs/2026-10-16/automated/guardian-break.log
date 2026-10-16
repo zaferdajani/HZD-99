@@ -1,0 +1,18 @@
+
+── guardian-break  — comic page 29: NULLFANG lets go, and the bell writes the order back
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/guardian-break.cjs:13:28
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/guardian-break.cjs:131:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/guardian-break.cjs:13:28
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/guardian-break.cjs:131:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (guardian-break: 0.3 s)
+
+1 harness(es) failed

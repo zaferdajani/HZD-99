@@ -1,0 +1,20 @@
+
+── gait  — she runs ON the ground: no bouncing, no falling plate mid-stride
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/gait.cjs:28:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/gait.cjs:434:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── gait — she runs on the ground, and the drawing agrees
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/gait.cjs:28:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/gait.cjs:434:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (gait: 0.3 s)
+
+1 harness(es) failed

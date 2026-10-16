@@ -1,0 +1,18 @@
+
+── story-battery  — unique workshop battery and legacy save compatibility
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/story-battery.cjs:5:31
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/story-battery.cjs:50:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/story-battery.cjs:5:31
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/story-battery.cjs:50:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (story-battery: 0.4 s)
+
+1 harness(es) failed

@@ -1,0 +1,18 @@
+
+── entrance-integration  — painted entrances share world anchors without duplicate mouth overlays
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/entrance-integration.cjs:2:35
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/entrance-integration.cjs:22:29) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/entrance-integration.cjs:2:35
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/entrance-integration.cjs:22:29) {
+  log: [],
+  name: 'Error'
+}
+
+   (entrance-integration: 0.3 s)
+
+1 harness(es) failed

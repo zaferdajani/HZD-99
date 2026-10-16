@@ -1,0 +1,17 @@
+
+── tutor  — the opening chain: booth, letter, battery, repair, pod, Volt Pack, heal, winch, monument, road
+reload mid-walk: {"stored":13,"resumed":"node","back":13,"heal":13}
+steps reached: move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go
+Ratchet woke: {"live":true,"spare":1,"kit":0,"quest":"active"}   pod: {"bench":"A0B","stored":"A0B"}
+scrap: 0 before the pitch, 12 at the counter (cell)
+after buying the pack: {"volts":99,"scrap":0,"flag":true,"heal":true}
+the hold before the pack: {"locked":0,"had":true}
+the scripted first surge left: 4 / 5 cores
+the winch: {"calm":true,"phase":"idle"}, stopped by the burst: true
+door: {"opened":true,"before":false,"i":14,"last":14}
+skipping the walk: {"boothEarly":0,"killHeld":true,"atkHeld":true,"atkCounts":true,"boothLater":1}
+
+OK
+   (tutor: 18.3 s)
+
+all 1 harnesses ran

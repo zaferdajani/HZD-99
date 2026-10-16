@@ -1,0 +1,32 @@
+
+── cacheroster  — the Cache has machines to bend it: V1 and V2 spawn them with the moves, V1B and X1 spawn none
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/cacheroster.cjs:45:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/cacheroster.cjs:265:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── cacheroster — the Cache has machines to bend it
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/cacheroster.cjs:45:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/cacheroster.cjs:265:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (cacheroster: 0.4 s)
+
+1 harness(es) failed

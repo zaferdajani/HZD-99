@@ -1,0 +1,35 @@
+
+── winch-integration  — modular yard machine and persistent cleansing
+PASS winch integration {
+  "checks": [
+    "actual opening room spawns modular winch",
+    "warning is harmless and lasts at least half a second",
+    "damaging sweep reaches the rendered arm tip",
+    "recovery cannot deal contact damage",
+    "real claw inputs isolate motor and retain the machine",
+    "first disable pays the tutorial salvage once",
+    "stopping the motor lifts the arm clear of the road",
+    "disabled mechanism stays still without repeat rewards",
+    "disabled control remains visibly red",
+    "disabled state and pivot survive reload",
+    "cleansing requires the earned blade",
+    "blade enables the actual interaction",
+    "walking away cancels cleansing",
+    "completed interaction changes persistent control state",
+    "cleansed receiver is cyan",
+    "clean mechanism cannot hurt hero",
+    "cleansed machine stays present after reload"
+  ],
+  "disabledColor": {
+    "red": 80,
+    "cyan": 0
+  },
+  "cleanColor": {
+    "red": 1,
+    "cyan": 77
+  },
+  "build": "ea051c2c83ca"
+}
+   (winch-integration: 1.6 s)
+
+all 1 harnesses ran

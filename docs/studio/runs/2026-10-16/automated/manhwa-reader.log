@@ -1,0 +1,18 @@
+
+── manhwa-reader  — revised illustrated edition and complete written opening
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/manhwa-reader.cjs:4:25
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/manhwa-reader.cjs:23:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/manhwa-reader.cjs:4:25
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/manhwa-reader.cjs:23:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (manhwa-reader: 0.3 s)
+
+1 harness(es) failed

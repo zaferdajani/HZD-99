@@ -1,0 +1,32 @@
+
+── seam-look  — a floor wears one face across a vertical seam: seen from below, stood on from above, nothing black in front of it
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/seam-look.cjs:55:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/seam-look.cjs:350:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── seam-look — a floor looks the same from below and from on top of it
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/seam-look.cjs:55:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/seam-look.cjs:350:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (seam-look: 0.3 s)
+
+1 harness(es) failed

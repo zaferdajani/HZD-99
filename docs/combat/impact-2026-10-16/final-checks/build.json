@@ -1,0 +1,11 @@
+{
+  "build": "28c9dd55fec4",
+  "sha256": {
+    "index.html": "75a9f9dab78048a302ac188056ba05b969b54b3ce2a04e3a0f86df90a3130df1",
+    "odyssey.html": "3e9926eaed52fc8c4fceaa4c27a1e4cee2db4d59ae7369e3e957804b10626d18",
+    "forge.html": "e41fd282e7522024e2b6ae048df4549f9fefa830ac7bdf9843ba4bc486c36c9a",
+    "forge-odyssey.html": "71cd13555e62a2834b0cc9735a3154d17d5701dad9ceeba2e9612ea86ae2f5cc"
+  },
+  "browser": "Chromium 153.0.8010.0",
+  "method": "Separate localhost:8222 served these exact compiled pages while the broad audit retained its earlier pinned build on :8220. Test source loaded unchanged except replacing the localhost port."
+}

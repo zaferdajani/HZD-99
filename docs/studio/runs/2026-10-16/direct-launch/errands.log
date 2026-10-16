@@ -1,0 +1,14 @@
+Command: node tests/errands.cjs
+Exit: 1
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/errands.cjs:16:28
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/errands.cjs:88:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0

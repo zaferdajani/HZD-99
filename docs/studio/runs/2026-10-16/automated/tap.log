@@ -1,0 +1,18 @@
+
+── tap  — tap where a thing is drawn and that thing happens
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/tap.cjs:25:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/tap.cjs:174:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/tap.cjs:25:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/tap.cjs:174:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (tap: 0.3 s)
+
+1 harness(es) failed

@@ -1,0 +1,18 @@
+
+── hero-frame-alpha  — discrete sprites never blend into doubled silhouettes
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/hero-frame-alpha.cjs:2:41
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/hero-frame-alpha.cjs:4:1062) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/hero-frame-alpha.cjs:2:41
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/hero-frame-alpha.cjs:4:1062) {
+  log: [],
+  name: 'Error'
+}
+
+   (hero-frame-alpha: 0.4 s)
+
+1 harness(es) failed

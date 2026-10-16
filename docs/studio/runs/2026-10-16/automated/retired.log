@@ -1,0 +1,23 @@
+
+── retired  — the deleted art stays deleted, and no creature wears another body while its art loads
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/retired.cjs:69:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/retired.cjs:192:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── retired — the deleted art stays deleted, and nothing stands in for it
+  ok   no retired file is on disk
+  ok   the low tier holds only the copies its index names
+  ok   ...and none of them is a retired sheet
+  ok   the eye map measures no retired sheet
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/retired.cjs:69:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/retired.cjs:192:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (retired: 0.3 s)
+
+1 harness(es) failed

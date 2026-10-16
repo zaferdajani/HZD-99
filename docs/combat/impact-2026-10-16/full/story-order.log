@@ -1,0 +1,64 @@
+
+── story-order  — the story sheet walked through the real build: beat order, gates, named things, migration
+── story-order — the story sheet, walked through the real build
+  ok   the sheet: every beat has room, speaker, what they know and who points there  34 beats
+  ok   every ordered-story line exists, in the same shape, in all 5 languages  43 keys
+  ok   greedy: no beat is possible before its required flags  34 beats in order
+  ok   greedy: every beat on the sheet can be reached  all
+  ok   greedy: no line names something she has not met  clean
+  ok   sage route: no beat is possible before its required flags  34 beats in order
+  ok   sage route: every beat on the sheet can be reached  all
+  ok   sage route: no line names something she has not met  clean
+  ok   the sage route passes the break where the sage sends her (the hub, under the climb)  break fired in A2
+  ok   ...and in canon order: forge < sage < bell < NULLFANG < Conduits  wake > gates > ratchet_note > ratchet_wake > volt_pack > servo > meeting > dent_before_forge > way_down > beacon > gravehorn > quarry > forge > forged_line > alpha > first_sage > sage_line > break > chime > rematch_line > nullfang > conduits_line > conduits > mono > talonhost > sigil_foundry > furnace > archives_sage > glaciere > prowler > mind_nodes > vault > mother > kerf
+  ok   migration: an old save becomes the current story version  3
+  ok   migration: the camp waking is Ratchet's one waking (one flag, no second revival)  {"tut":1,"woke":1,"on_A3|ratchet":1,"crystal":1,"nfMeet":1,"sageTame_GA1D":1,"bossGlitch":1,"on_A0B|ratchet":1,"ratchetRepaired":1,"ratchetSpareGiven":1,"heal":1,"ratchetCamp":1,"chimeRevealed":1,"nfBreak":1}
+  ok   migration: nothing earned is stripped (blade, sage, lion, cell kept)
+  ok   migration: nothing is paid twice (no Draft 2 spare, forge errand closed, pack kept)
+  ok   migration: beats the old route passed are not replayed
+  ok   migration runs once (a migrated save is left as it is)
+  ok   migration: the drawer cell she already took is his cell again (no locked workshop)  {"ratchetCell":1}
+  ok   migration: ...or, every cell spent, the drawer holds it again
+  ok   migration leaves NOSTOS saves alone
+  ok   the climb to the Conduits refuses before NULLFANG is free
+  ok   ...and says why, in the player's language  The conduit hatch above the camp is jammed by NULLFANG's binding. Free the lion before you climb.
+  ok   ...and still refuses a save that never forged the blade
+  ok   ...and opens once the lion is free and the blade forged  B1
+  ok   without the forged blade a guardian cannot be freed (the song holds it)  hp 13 dead false tamed false
+  ok   ...and nothing is written to the braid for a fork never reached
+  ok   with the blade the same blow frees it, and the braid records the fork  tamed true forks 1
+  ok   a new run: Ratchet stands in his workshop, and nowhere else  {"den":1,"camp":0,"campLive":null,"campKey":null}
+  ok   after the forge he has moved to the camp — one body, still awake on the one waking  {"den":0,"camp":1,"campLive":true,"campKey":"A0B|ratchet"}
+  ok   handing over the marble, he says he is moving to the camp  2 lines
+  ok   ...and the forge moves him
+  ok   Ratchet does not send claws at NULLFANG before the forge  sl_ratchet_dent,sl_ratchet_forged
+  ok   ...he does once the sage is free and the bell silent
+  ok   ...and after the lion, he points up to the Conduits
+  ok   the first sage says "silence that bell" only while the bell still rings
+  ok   NULLFANG's break happens on the sage's route, under the climb in the hub
+  ok   ...never before he has been met, and never after the bell
+  ok   B5's east side does not walk around the three-sigil vault  {"to":null,"inside":true}
+  ok   ...and opens with the vault  V1
+  ok   Vault Sigil III is placed once, in the Foundry tower (C1)  C1
+  ok   the locked vault points a player missing Sigil III to the Foundry tower  without: The vault door needs three sigils  2/3  The third seal was carried down into the Foundry tower. / with: The vault door needs three sigils  2/3
+  ok   a cull counts from the moment it was accepted, not from the start of the run  0 then 6
+  ok   the survey errand counts once she READS the survey after being asked — standing in the shaft is not enough  before false standing false read true
+  ok   an errand's object lies in the world from the start until it is handed in  before true during true after false
+  ok   ...a coil found before Servo asks is handed over on the ask, in his own words  Mrrow. Little frame. Nothing your size has come back up that corridor. My receiver was unp
+  ok   ...and an errand accepted on an older save keeps its progress
+  ok   Ratchet names the keyboard's own heal and attack keys and no placeholder survives  That ring of charge on you fills when your hits land. Right now you have no way to spend it. My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst. You will ne
+  ok   ...and, on a remapped controller, the button she bound  That ring of charge on you fills when your hits land. Right now you have no way to spend it. My Volt Pack fixes that. With it, hold Triangle to mend a core, or hold Square and let go for a Volt Burst.
+  ok   GLACIERE's title is not the sword's name  GLACIERE, THE FROZEN SENTINEL
+  ok   the Archives sage names GLACIERE, not a different "Archivist"
+  ok   the free chapter counts the guardians that are actually left  4: Four kingdoms, four more guardians and Mother's hijacked song are waiting in the full game.
+  ok   Mono does not blame MOTHER for the order
+  ok   the Prowler was never infected, and nothing says it was
+  ok   Kerf never split a purifier in two
+  ok   the finale cleanses and frees MOTHER — no "Null Core" is killed  MOTHER-V, THE HIJACKED SONG MOTHER-V is free. Her song is silent, and it is her own again. What remains is the Eye that 
+  ok   ...and is truthful about the Eye: exposed, not defeated
+  ok   marble, not crystal, in the quarry's own words
+
+OK — every beat in its order, every gate says why, every line names only what she has met
+   (story-order: 0.9 s)
+
+all 1 harnesses ran

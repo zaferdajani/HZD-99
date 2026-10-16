@@ -1,0 +1,20 @@
+
+── text-rules  — cards pause combat; one tap/press never reveals and dismisses; numbers stay immediate; five languages at phone width
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/text-rules.cjs:73:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/text-rules.cjs:383:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── text-rules — combat pauses under cards, one input never does two things, numbers stay immediate
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/text-rules.cjs:73:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/text-rules.cjs:383:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (text-rules: 0.4 s)
+
+1 harness(es) failed

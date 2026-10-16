@@ -1,0 +1,19 @@
+
+── artbible  — ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/artbible.cjs:248:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/artbible.cjs:635:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── artbible — the rules in ART_BIBLE.md, measured rather than asserted
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/artbible.cjs:248:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/artbible.cjs:635:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (artbible: 0.3 s)
+
+1 harness(es) failed

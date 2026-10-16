@@ -1,0 +1,18 @@
+
+── comic-rewards  — saved milestone slideshows, updates, accessibility and failure recovery
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/comic-rewards.cjs:24:25
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/comic-rewards.cjs:109:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/comic-rewards.cjs:24:25
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/comic-rewards.cjs:109:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (comic-rewards: 0.4 s)
+
+1 harness(es) failed

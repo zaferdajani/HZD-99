@@ -1,0 +1,35 @@
+
+── loadout  — arms, crests and relics each wear their own registered hue and frame, on every screen and the HUD
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/loadout.cjs:113:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/loadout.cjs:394:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── loadout — arms, crests and relics each wear their own hue and frame, on every screen
+
+  ok   LOADOUT_COL defines arm, crest and relic  {"arm":"#ffb4a5","crest":"#4a7bff","relic":"#4fe36a"}
+  ok   the registry reserves at least the eight combat hues  Telegraph amber, Danger red, Lock cyan, Purifier violet, Frost blue, Repair green, Reward gold, Parry lime
+  ok   the registry's UI loadout block names the same three hexes
+  ok   arm #ffb4a5 is none of the reserved hues (RGB > 60, ΔE > 30)  nearest Danger red: RGB 102, ΔE 41
+  ok   crest #4a7bff is none of the reserved hues (RGB > 60, ΔE > 30)  nearest Purifier violet: RGB 144, ΔE 50
+  ok   relic #4fe36a is none of the reserved hues (RGB > 60, ΔE > 30)  nearest Parry lime: RGB 146, ΔE 47
+  ok   arm / crest are pairwise distinct (RGB > 120, ΔE > 50)  RGB 210, ΔE 93
+  ok   arm / relic are pairwise distinct (RGB > 120, ΔE > 50)  RGB 191, ΔE 94
+  ok   crest / relic are pairwise distinct (RGB > 120, ΔE > 50)  RGB 182, ΔE 151
+  ok   the loadout hexes are written only in js/loadout.js
+  ok   the six kingdom palettes are read from js/world.js  ABCDEX
+  ok   arm #ffb4a5 is no kingdom's glow or edge (ΔE > 30)  nearest C #ffab4a: ΔE 42
+  ok   crest #4a7bff is no kingdom's glow or edge (ΔE > 30)  nearest B #57a8ff: ΔE 34
+  ok   relic #4fe36a is no kingdom's glow or edge (ΔE > 30)  nearest A #3adfb2: ΔE 39
+  ok   the frame art is queued (ART_QUEUE §2bm)
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/loadout.cjs:113:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/loadout.cjs:394:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (loadout: 0.3 s)
+
+1 harness(es) failed

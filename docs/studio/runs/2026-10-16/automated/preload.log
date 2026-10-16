@@ -1,0 +1,19 @@
+
+── preload  — the art for the rooms she can reach is fetched before she reaches them
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/preload.cjs:21:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/preload.cjs:147:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── preload — the next room's art arrives before the next room does
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/preload.cjs:21:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/preload.cjs:147:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (preload: 0.3 s)
+
+1 harness(es) failed

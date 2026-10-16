@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-15",
+  "main": "14bef4baba6b12d78b7ba2e41c221e8b95b9f938",
+  "integration": "911893775559e189418705a5d841bf29d4fe992e",
+  "branch": "codex/studio-review-2026-10-15",
+  "implementation_head": "73be40495ad3638c8ceeec6ca21c25061d0dc791",
+  "published_source_evidence_commit": "c860fa9b54f11bc8f96fb480ed1e425e3b3b5c1f",
+  "build_id": "07f3967fe8dc",
+  "static": { "passed": 29, "failed": 0 },
+  "full": { "passed": 30, "browser_blocked": 159 },
+  "merged": false,
+  "deployed": false
+}

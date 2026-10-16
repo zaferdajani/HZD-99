@@ -196,6 +196,13 @@ const G = {
     this.toasts.push({ text, t: typeof toastLife === 'function' ? toastLife(text) : 3 });
   },
   breakTile(tx, ty) {
+    // The first cave is below the hub, but the chapter first sends the player
+    // across A2 to meet NULLFANG. Keep only that cracked quarry hatch intact
+    // until the meeting, so an exploratory down-strike cannot reorder the
+    // inciting encounter. It still gives the ordinary hollow knock/tell.
+    const beforeLion = this.roomId === 'A2' && tx >= 12 && tx <= 14 && ty >= 15 && ty <= 16
+      && this.save && this.save.flags && !this.save.flags.nfMeet;
+    if (beforeLion) { this.knockTile(tx, ty, false); return false; }
     this.save.broken[this.roomId + ':' + tx + ',' + ty] = 1;
     // THE GROUND CURVE IS RE-READ. The heightfield she stands on is built
     // from the grid once per room and cached by room id, so a floor she cut
@@ -217,6 +224,7 @@ const G = {
     sfx('break'); cam.shake = Math.max(cam.shake, 4);
     burst(tx * TILE + 16, ty * TILE + 16, 14, PAL[this.roomDef.zone].solid, 220, 0.6, 600, 4);
     burst(tx * TILE + 16, ty * TILE + 16, 6, PAL[this.roomDef.zone].glow, 160, 0.4, 300, 3, true);
+    return true;
   },
   // A BLOW THAT DOES NOT BREAK IT. The secret's tell is a SOUND as much as a
   // crack: a hollow knock, grit puffing out of the seam, the crack opening
@@ -1128,7 +1136,9 @@ function spawnStatic(type, tx, ty, extra, flagKey) {
   // because npcKey() must stay stable for a static that outlives a room change
   // (the pet follows, the reward queue drains a room late) — and because a key
   // that depends on when you ask it is not a key.
-  G.statics.push({ type, room: G.roomId, x: tx * TILE + (TILE - w) / 2, y: ty * TILE - h, w, h, extra, flagKey, opened: !!(flagKey && G.save.flags[flagKey]), t: rnd(0, 9) });
+  const actor = { type, room: G.roomId, x: tx * TILE + (TILE - w) / 2, y: ty * TILE - h, w, h, extra, flagKey, opened: !!(flagKey && G.save.flags[flagKey]), t: rnd(0, 9) };
+  if (type === 'npc') Object.assign(actor, {hp:100, hpMax:100, defense:100, attackPower:0, attackSpeed:0, friendly:true});
+  G.statics.push(actor);
 }
 function settlePendingBossReward() {
   if (G.boss && G.boss.dead && G.boss.rewardPend) {

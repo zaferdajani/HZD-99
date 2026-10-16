@@ -1,0 +1,53 @@
+  ok   every attack deals exactly its pre-refactor damage  110 hits measured across 7 builds, 0 differ
+
+  THE TABLE AS PLAYED  (damage, enemy vx, enemy vy, hit-stop in 60 Hz frames)
+  attack            dmg       vx       vy   stop
+  slash 1 (claws)    12      310     -120     3f   base 12
+  slash 2 (claws)    12      310     -120     3f   
+  finisher (claws)   16      465     -120     5f   
+  feral slash        17      310     -120     3f   feral claws x1.45
+  crystal slash      20      310     -120     3f   wield x1.25
+  crystal finisher   27    407.4     -226     5f   rises: aim ay -0.55
+  joined slash       54      310     -120     3f   wield x1.45 (easy, crest)
+  risecut            20      310     -430     3f   the launcher
+  plunge ring        10      260     -180     3f   beside the pogo
+  throw (out)        43      465        0     7f   spear
+  throw (back)       43        0        0     3f   
+  swirl pass 1       18        0      -60     7f   t=0.1667s
+  swirl pass 2       18        0      -60     0f   t=0.3333s
+  swirl pass 3       18        0      -60     0f   t=0.4833s
+  swirl pass 4       18        0      -60     0f   t=0.65s
+  burst (claws)      38    417.3   -157.3     7f   
+  thunderfall        19        0     -180     0f   NOSTOS feral finisher
+  claw bite           4        0        0     2f   
+  claw arrival       10    259.8     -160     4f   
+
+  ATTACKS (the table in the build)
+    slash     {"id":"slash","mult":1,"skill":null,"floor":0,"flat":0,"feral":1,"wield":1,"purity":1,"crit":1,"crest":1,"multi":false,"every":0,"kb":310,"kbV":220,"kbUp":120,"kbT":0.26,"freeze":0.05,"tickFreeze":0,"freezeBig":0.06,"recoil":62}
+    finisher  {"id":"finisher","mult":1.35,"skill":["calc",1.55],"floor":0,"flat":0,"feral":1,"wield":1,"purity":1,"crit":1,"crest":1,"multi":false,"every":0,"kb":465,"kbV":220,"kbUp":120,"kbT":0.3,"freeze":0.085,"tickFreeze":0,"freezeBig":null,"recoil":130}
+    risecut   {"id":"risecut","mult":1,"skill":null,"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":null,"kbV":0,"kbUp":430,"kbT":0.4,"freeze":0,"tickFreeze":0,"freezeBig":null,"recoil":0,"lift":300}
+    plunge    {"id":"plunge","mult":0.6,"skill":null,"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":260,"kbV":0,"kbUp":180,"kbT":0.3,"freeze":0,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    throw     {"id":"throw","mult":1.15,"skill":["boomer",1.45],"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":465,"kbV":0,"kbUp":null,"kbT":0.22,"freeze":0.05,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    throwBack {"id":"throwBack","mult":1.15,"skill":["boomer",1.45],"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":0,"kbV":0,"kbUp":null,"kbT":0.22,"freeze":0.05,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    swirl     {"id":"swirl","mult":0.95,"skill":null,"floor":1,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":true,"every":0.16,"kb":0,"kbV":0,"kbUp":60,"kbT":0.16,"freeze":0.035,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    burst     {"id":"burst","mult":3.2,"skill":null,"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":420,"kbV":200,"kbUp":180,"kbT":0.3,"freeze":0.12,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    thunder   {"id":"thunder","mult":1.6,"skill":null,"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":0,"kbV":0,"kbUp":180,"kbT":0.3,"freeze":0,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    grapBite  {"id":"grapBite","mult":0.35,"skill":null,"floor":1,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":null,"kbV":0,"kbUp":null,"kbT":0,"freeze":0.035,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    grapHit   {"id":"grapHit","mult":0.8,"skill":null,"floor":1,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":260,"kbV":0,"kbUp":160,"kbT":0.26,"freeze":0.07,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    clash     {"id":"clash","mult":0,"skill":null,"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":260,"kbV":0,"kbUp":null,"kbT":0,"freeze":0.14,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    counter   {"id":"counter","mult":0,"skill":null,"floor":0,"flat":36,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":360,"kbV":0,"kbUp":160,"kbT":0.3,"freeze":0.09,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    soar      {"id":"soar","mult":0,"skill":null,"floor":0,"flat":48,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":0,"kbV":0,"kbUp":320,"kbT":0.3,"freeze":0.04,"tickFreeze":0,"freezeBig":null,"recoil":0}
+
+  ok   a finisher throws farther than a jab  jab vx 310, finisher vx 465
+  ok   ...on a crystal too, where the finisher rises  jab vx 310, rising finisher vx 407.4
+  ok   a multi-hit PINS: every swirl pass stops a body walking at 90 px/s dead  pass vx 0 / 0 / 0 / 0
+  ok   the thrown blade is a spear: ~1.5x a jab  throw vx 465 vs jab 310
+  ok   the risecut still LAUNCHES  vy -430
+  ok   the swirl re-hits every 0.16 s of game time (+-1 SIM_STEP) at 1/60  gaps 0.1666 0.15 0.1667
+  ok   ...and at 1/30  gaps 0.1666 0.1667 0.1667
+  ok   ...the same number of hits per second whatever the step  4 hits (6.22/s) at 1/60, 4 (6.06/s) at 1/30
+  ok   only the first swirl pass freezes the game; the later ticks do not stutter it  hit-stop per pass 120ms/0ms/0ms/0ms  |  120ms/0ms/0ms/0ms  |  120ms/0ms/0ms/0ms
+  ok   single-contact moves still freeze on contact  3f 5f 7f 7f 4f
+  ok   no page errors
+
+OK — one claw stat, a row per move, and the player feels the table that is written

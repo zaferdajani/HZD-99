@@ -89,6 +89,13 @@ const check = (name, ok, detail) => {
       out.pad = { listed: PAD_ACTIONS.indexOf('GRAPPLE') >= 0, unbound: PAD_DEFAULT.GRAPPLE === -1,
         lastRowY: 142 + (colH - 1) * (colH > 8 ? 31 : 34), label: t('pa_GRAPPLE') };
       out.keyb = KEYB.GRAPPLE;
+      const touchWas = TOUCH.enabled, padWas = PAD.on, bindWas = PAD.map.GRAPPLE;
+      TOUCH.enabled = false; PAD.on = false; const keyboard = grapIntroText();
+      TOUCH.enabled = true; PAD.on = false; const touch = grapIntroText();
+      TOUCH.enabled = false; PAD.on = true; PAD.map.GRAPPLE = -1; const padUnbound = grapIntroText();
+      PAD.map.GRAPPLE = 2; const padBound = grapIntroText();
+      TOUCH.enabled = touchWas; PAD.on = padWas; PAD.map.GRAPPLE = bindWas;
+      out.hints = { keyboard, touch, padUnbound, padBound };
     }
     const spot = await findSpot();
     out.spot = spot && { room: spot.room, x: Math.round(spot.x), y: Math.round(spot.y), wallDir: spot.wallDir, wallD: Math.round(spot.wallD) };
@@ -173,6 +180,32 @@ const check = (name, ok, detail) => {
     out.enemy = { latched, hpLost: hp0 - foe.hp, bounced, iFrames: +player.iT.toFixed(2), voltsGained: player.volts - volts0 };
     G.enemies = []; await frames(40);
 
+    // A rescued machine is still present for the story, but no longer a
+    // combat anchor and cannot be moved or farmed for charge.
+    await place(spot, -spot.wallDir);
+    foe = mk(-spot.wallDir * 150, 0); foe.hp = foe.hpMax = 400; foe.update = function () {};
+    foe.rescued = true; foe.calm = true;
+    const rescued0 = { hp: foe.hp, x: foe.x, volts: player.volts };
+    await press('KeyU');
+    let rescuedLatch = false;
+    for (let i = 0; i < 30; i++) { await frames(1); if (player.grap && player.grap.foe === foe) rescuedLatch = true; }
+    out.rescued = { latched: rescuedLatch, hp: foe.hp, x: foe.x, volts: player.volts,
+      hp0: rescued0.hp, x0: rescued0.x, volts0: rescued0.volts };
+    player.grap = null; G.enemies = []; await frames(20);
+
+    // If rescue completes during the reel, release before an arrival strike
+    // or any second charge award reaches the newly friendly creature.
+    await place(spot, -spot.wallDir);
+    foe = mk(-spot.wallDir * 170, 0); foe.hp = foe.hpMax = 400; foe.update = function () {};
+    await press('KeyU');
+    let cureLatch = false;
+    for (let i = 0; i < 20; i++) { await frames(1); if (player.grap && player.grap.foe === foe) { cureLatch = true; break; } }
+    const cureVolts = player.volts;
+    foe.rescued = true; foe.calm = true;
+    await frames(3);
+    out.curedMidReel = { latched: cureLatch, released: !player.grap || !player.grap.foe, voltsBefore: cureVolts, voltsAfter: player.volts };
+    player.grap = null; G.enemies = []; await frames(20);
+
     // ---- 8. aim assist: she is in the air a tile and a half up, the crawler is on
     // the floor ahead — a level throw from her chest passes over its back, so only
     // the assist can land it (the case that missed in play before the assist)
@@ -243,6 +276,10 @@ const check = (name, ok, detail) => {
     check('a hit knocks the claw loose', r.hurtCancel === true);
     check('enemy: latched, bitten and struck on arrival', r.enemy.latched && r.enemy.hpLost > 0 && r.enemy.bounced, JSON.stringify(r.enemy));
     check('enemy: arrival grants i-frames and volts', r.enemy.iFrames > 0 && r.enemy.voltsGained > 0, JSON.stringify(r.enemy));
+    check('rescued machine is not a target, is not moved and grants no charge', !r.rescued.latched && r.rescued.hp === r.rescued.hp0
+      && r.rescued.x === r.rescued.x0 && r.rescued.volts === r.rescued.volts0, JSON.stringify(r.rescued));
+    check('a creature rescued during the reel is released without an arrival reward', r.curedMidReel.latched && r.curedMidReel.released
+      && r.curedMidReel.voltsAfter === r.curedMidReel.voltsBefore, JSON.stringify(r.curedMidReel));
     check('aim assist: from the air, a level throw would pass over the crawler', r.assist.geometry.passesOver, JSON.stringify(r.assist.geometry));
     check('aim assist takes it anyway', r.assist.latched && r.assist.hpLost > 0, JSON.stringify(r.assist));
     check('stun, brace, boss entrance, gate walk and scripted meeting all outrank the claw',
@@ -252,6 +289,10 @@ const check = (name, ok, detail) => {
   }
   check('controller screen lists GRAPPLE, unbound, clear of the footer (row < 397)', r.pad.listed && r.pad.unbound && r.pad.lastRowY < 397, JSON.stringify(r.pad));
   check('keyboard: U and 3', JSON.stringify(r.keyb) === JSON.stringify(['KeyU', 'Digit3', 'VGRAPPLE', 'GP_GRAPPLE']), JSON.stringify(r.keyb));
+  check('first-use prompt follows keyboard, touch, bound pad and unbound pad', /U/.test(r.hints.keyboard)
+    && /⟟|⚓/.test(r.hints.touch) && /Controls|أزرار|Kontroller|操作|Управ/.test(r.hints.padUnbound)
+    && !/\{GRAPPLE\}/.test(Object.values(r.hints).join(' ')) && r.hints.padBound !== r.hints.padUnbound,
+    JSON.stringify(r.hints));
   check('no page errors', errs.length === 0, errs.slice(0, 3).join(' | '));
 
   await browser.close();

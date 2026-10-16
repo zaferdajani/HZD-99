@@ -164,12 +164,21 @@ function hurtBoxOf(e) {
 // to frame-count, and a player poking from range never does.
 const DAZE_WINDOW = 1.1, DAZE_MUL = 1.6;
 
-function dealDmg(e, dm, atkEl, x, y, noPenalty) {
+function dealDmg(e, dm, atkEl, x, y, noPenalty, move) {
+  if (typeof combatProtected === 'function' && combatProtected(e)) return 0;
+  if (!Number.isFinite(dm) || dm <= 0) return 0;
+  const raw = dm, hpBefore = e.hp;
+  if (typeof combatDamage === 'function') dm = combatDamage(dm, combatDefense(e));
   if (typeof storyProtected === 'function' && storyProtected(e)) return 0;
   // THE SAGE IS NEVER KILLED. Every strike on one routes through its own
   // law (js/entities.js sageStruck): claws break it down to the floor and
   // no further; the crystal purifies. docs/combat/SAGE.md.
-  if (e.kind === 'sage' && typeof sageStruck === 'function') return sageStruck(e, dm, x, y);
+  if (e.kind === 'sage' && typeof sageStruck === 'function') {
+    const accepted = sageStruck(e, dm, x, y), lost = Math.max(0, hpBefore - e.hp);
+    if (typeof combatLog === 'function') combatLog(e, raw, lost, move, accepted > 0 ? 'hit' : 'purification-or-lock');
+    if (lost > 0 && typeof combatImpact === 'function') combatImpact(e, x, y, move);
+    return accepted > 0 ? lost : 0;
+  }
   // NEVER PUNISH AFFECTION — and never let a mis-swing undo an hour of the run.
   // A wolf that has changed sides cannot be hurt by her, at all: the swing
   // lands as a hand on a flank instead (js/pets.js has the same law for the
@@ -204,6 +213,7 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty) {
       if (typeof sfx === 'function') sfx('bosshit');
       e.hurtT = 0.12;
       e.hp -= Math.max(1, Math.round(dm * 0.12));
+      if (typeof combatLog === 'function') combatLog(e, raw, Math.min(hpBefore, hpBefore - e.hp), move, 'shield-chip');
       if (e.hp <= 0 && !e.dead) e.die(Math.sign(x - ecx) || 1, -0.3);
       return 0;
     }
@@ -260,6 +270,8 @@ function dealDmg(e, dm, atkEl, x, y, noPenalty) {
   if (e.st === 'daze') mul *= DAZE_MUL;
   const out = Math.max(1, Math.round(dm * mul));
   e.hp -= out; e.hurtT = 0.15;
+  if (typeof combatLog === 'function') combatLog(e, raw, Math.min(hpBefore, out), move);
+  if (typeof combatImpact === 'function') combatImpact(e, x, y, move);
   // a body that answers being struck with something of its own (the yard
   // winch knocks scrap out of its housing: js/winch.js onStruck)
   if (typeof e.onStruck === 'function') e.onStruck(out, x, y);

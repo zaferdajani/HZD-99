@@ -1,0 +1,244 @@
+
+── artbible  — ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor
+── artbible — the rules in ART_BIBLE.md, measured rather than asserted
+  ok   no atlas subject is declared and never drawn  known: 
+  ── NULLFANG
+  ok   NULLFANG: stalk vs crouch is a different SHAPE (IoU <= 0.86)  IoU 0.424
+  ok   NULLFANG: stalk vs pounce is a different SHAPE (IoU <= 0.8)  IoU 0.403
+  ok   NULLFANG: crouch vs pounce is a different SHAPE (IoU <= 0.8)  IoU 0.411
+  ok   NULLFANG: stalk vs swipe is a different SHAPE (IoU <= 0.9)  IoU 0.637
+  ok   NULLFANG: stalk vs daze is a different SHAPE (IoU <= 0.88)  IoU 0.653
+  ok   NULLFANG: crouch raises the amber above its own rest  61.0% vs rest 0.0%
+  ok   NULLFANG: stalk does not pass for a wind-up  0.0% of lit pixels
+  ok   NULLFANG: pounce does not pass for a wind-up  0.0% of lit pixels
+  ok   NULLFANG: stalk still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+  ok   NULLFANG: stalk has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: crouch has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: swipe has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: daze has its feet on the floor (±10 px)  -4 px
+  ── THE ALPHA
+  ok   THE ALPHA: rest vs coil is a different SHAPE (IoU <= 0.88)  IoU 0.279
+  ok   THE ALPHA: coil vs roarwarn is a different SHAPE (IoU <= 0.88)  IoU 0.845
+  ok   THE ALPHA: rest vs leap is a different SHAPE (IoU <= 0.85)  IoU 0.364
+  ok   THE ALPHA: coil raises the amber above its own rest  76.2% vs rest 0.7%
+  ok   THE ALPHA: clawwarn raises the amber above its own rest  78.7% vs rest 0.7%
+  ok   THE ALPHA: roarwarn raises the amber above its own rest  76.4% vs rest 0.7%
+  ok   THE ALPHA: rest does not pass for a wind-up  0.7% of lit pixels
+  ok   THE ALPHA: leap does not pass for a wind-up  0.5% of lit pixels
+  ok   THE ALPHA: rest still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+  ok   THE ALPHA: rest has its feet on the floor (±10 px)  -1 px
+  ok   THE ALPHA: coil has its feet on the floor (±10 px)  -1 px
+  ── TALONHOST
+  ok   TALONHOST: idle vs dive is a different SHAPE (IoU <= 0.9)  IoU 0.254
+  ok   TALONHOST: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   TALONHOST: idle still reads as PARTS, not one flat tone (>= 3 value bands)  8 of 8 bands carry area
+  ── FURNACE CHOIR
+  ok   FURNACE CHOIR: idle vs lobwarn is a different SHAPE (IoU <= 0.94)  IoU 0.582
+  ok   FURNACE CHOIR: idle vs slamwarn is a different SHAPE (IoU <= 0.9)  IoU 0.552
+  ok   FURNACE CHOIR: idle vs ventwarn is a different SHAPE (IoU <= 0.9)  IoU 0.561
+  ok   FURNACE CHOIR: ventwarn vs vent is a different SHAPE (IoU <= 0.9)  IoU 0.410
+  ok   FURNACE CHOIR: idle vs dropcrouch is a different SHAPE (IoU <= 0.9)  IoU 0.498
+  ok   FURNACE CHOIR: ventwarn vs dropcrouch is a different SHAPE (IoU <= 0.9)  IoU 0.602
+  ok   FURNACE CHOIR: ventwarn vs recover is a different SHAPE (IoU <= 0.9)  IoU 0.591
+  ok   FURNACE CHOIR: dropcrouch vs hymn is a different SHAPE (IoU <= 0.9)  IoU 0.424
+  ok   FURNACE CHOIR: idle vs recover is a different SHAPE (IoU <= 0.9)  IoU 0.636
+  ok   FURNACE CHOIR: lobwarn raises the amber above its own rest  24.4% vs rest 10.6%
+  ok   FURNACE CHOIR: slamwarn raises the amber above its own rest  25.5% vs rest 10.6%
+  ok   FURNACE CHOIR: ventwarn raises the amber above its own rest  47.6% vs rest 10.6%
+  ok   FURNACE CHOIR: dropcrouch raises the amber above its own rest  38.5% vs rest 10.6%
+  ok   FURNACE CHOIR: hymn raises the amber above its own rest  46.2% vs rest 10.6%
+  ok   FURNACE CHOIR: idle does not pass for a wind-up  10.6% of lit pixels
+  ok   FURNACE CHOIR: recover does not pass for a wind-up  4.7% of lit pixels
+  ok   FURNACE CHOIR: idle still reads as PARTS, not one flat tone (>= 3 value bands)  7 of 8 bands carry area
+  ok   FURNACE CHOIR: idle has its feet on the floor (±10 px)  -5 px
+  ok   FURNACE CHOIR: lobwarn has its feet on the floor (±10 px)  -1 px
+  ok   FURNACE CHOIR: slamwarn has its feet on the floor (±10 px)  +3 px
+  ok   FURNACE CHOIR: ventwarn has its feet on the floor (±10 px)  +1 px
+  ok   FURNACE CHOIR: vent has its feet on the floor (±10 px)  +1 px
+  ok   FURNACE CHOIR: dropcrouch has its feet on the floor (±10 px)  -3 px
+  ok   FURNACE CHOIR: recover has its feet on the floor (±10 px)  +2 px
+  ── GLACIERE
+  ok   GLACIERE: idle vs lancewarn is a different SHAPE (IoU <= 0.94)  IoU 0.704
+  ok   GLACIERE: idle vs dashwarn is a different SHAPE (IoU <= 0.94)  IoU 0.810
+  ok   GLACIERE: idle vs daze is a different SHAPE (IoU <= 0.9)  IoU 0.262
+  ok   GLACIERE: lancewarn raises the amber above its own rest  13.1% vs rest 0.0%
+  ok   GLACIERE: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   GLACIERE: recover does not pass for a wind-up  0.0% of lit pixels
+  ok   GLACIERE: daze does not pass for a wind-up  0.0% of lit pixels
+  ok   GLACIERE: idle still reads as PARTS, not one flat tone (>= 3 value bands)  8 of 8 bands carry area
+  ok   GLACIERE: daze has its feet on the floor (±10 px)  -3 px
+  ── GRAVEHORN
+  ok   GRAVEHORN: idle vs tossprep is a different SHAPE (IoU <= 0.86)  IoU 0.454
+  ok   GRAVEHORN: idle vs chargewarn is a different SHAPE (IoU <= 0.86)  IoU 0.521
+  ok   GRAVEHORN: idle vs hornprep is a different SHAPE (IoU <= 0.86)  IoU 0.523
+  ok   GRAVEHORN: tossprep vs toss is a different SHAPE (IoU <= 0.8)  IoU 0.433
+  ok   GRAVEHORN: idle vs toss is a different SHAPE (IoU <= 0.8)  IoU 0.672
+  ok   GRAVEHORN: idle vs kick is a different SHAPE (IoU <= 0.86)  IoU 0.818
+  ok   GRAVEHORN: chargewarn vs rush is a different SHAPE (IoU <= 0.9)  IoU 0.520
+  ok   GRAVEHORN: hornprep raises the amber above its own rest  45.3% vs rest 0.0%
+  ok   GRAVEHORN: chargewarn raises the amber above its own rest  46.7% vs rest 0.0%
+  ok   GRAVEHORN: tossprep raises the amber above its own rest  56.3% vs rest 0.0%
+  ok   GRAVEHORN: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   GRAVEHORN: rush does not pass for a wind-up  0.0% of lit pixels
+  ok   GRAVEHORN: stunned does not pass for a wind-up  0.0% of lit pixels
+  ok   GRAVEHORN: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ok   GRAVEHORN: idle has its feet on the floor (±10 px)  +2 px
+  ok   GRAVEHORN: hornprep has its feet on the floor (±10 px)  +2 px
+  ok   GRAVEHORN: chargewarn has its feet on the floor (±10 px)  +2 px
+  ok   GRAVEHORN: tossprep has its feet on the floor (±10 px)  +3 px
+  ok   GRAVEHORN: stunned has its feet on the floor (±10 px)  +2 px
+  ── CHIME
+  ok   CHIME: ringwarn raises the amber above its own rest  65.5% vs rest 0.0%
+  ok   CHIME: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   CHIME: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── CARRIER
+  ok   CARRIER: tosswarn raises the amber above its own rest  69.6% vs rest 0.0%
+  ok   CARRIER: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   CARRIER: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── KILN-MOTH
+  ok   KILN-MOTH: cinderwarn raises the amber above its own rest  81.2% vs rest 21.6%
+  ok   KILN-MOTH: idle does not pass for a wind-up  21.6% of lit pixels
+  ok   KILN-MOTH: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── LATTICE
+  ok   LATTICE: growwarn raises the amber above its own rest  62.1% vs rest 0.0%
+  ok   LATTICE: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   LATTICE: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ok   LATTICE: idle has its feet on the floor (±10 px)  -3 px
+  ok   LATTICE: growwarn has its feet on the floor (±10 px)  -4 px
+  ── THE LENS
+  ok   THE LENS: beamwarn raises the amber above its own rest  67.1% vs rest 2.5%
+  ok   THE LENS: idle does not pass for a wind-up  2.5% of lit pixels
+  ok   THE LENS: idle still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+  ── WOLF (crawler@A1)
+  ok   WOLF: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.621
+  ok   WOLF: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.533
+  ok   WOLF: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.578
+  ok   WOLF: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.413
+  ok   WOLF: active vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.490
+  ok   WOLF: windup raises the amber above its own rest  80.6% vs rest 0.1%
+  ok   WOLF: rest does not pass for a wind-up  0.1% of lit pixels
+  ok   WOLF: recovery does not pass for a wind-up  0.1% of lit pixels
+  ok   WOLF: rest has its feet on the floor (±10 px)  -1 px
+  ok   WOLF: windup has its feet on the floor (±10 px)  -1 px
+  ok   WOLF: recovery has its feet on the floor (±10 px)  +0 px
+  ── CHEETAH (crawler@C2)
+  ok   CHEETAH: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.484
+  ok   CHEETAH: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.785
+  ok   CHEETAH: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.484
+  ok   CHEETAH: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.511
+  ok   CHEETAH: active vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.552
+  ok   CHEETAH: windup raises the amber above its own rest  90.3% vs rest 47.1%
+  ok   CHEETAH: rest does not pass for a wind-up  47.1% of lit pixels
+  ok   CHEETAH: recovery does not pass for a wind-up  50.7% of lit pixels
+  ok   CHEETAH: rest has its feet on the floor (±10 px)  -1 px
+  ok   CHEETAH: windup has its feet on the floor (±10 px)  -1 px
+  ok   CHEETAH: recovery has its feet on the floor (±10 px)  -1 px
+  ── HOPPER-WOLF (hopper@A2)
+  ok   HOPPER-WOLF: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.385
+  ok   HOPPER-WOLF: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.428
+  ok   HOPPER-WOLF: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.640
+  ok   HOPPER-WOLF: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.154
+  ok   HOPPER-WOLF: windup raises the amber above its own rest  74.5% vs rest 0.2%
+  ok   HOPPER-WOLF: rest does not pass for a wind-up  0.2% of lit pixels
+  ok   HOPPER-WOLF: recovery does not pass for a wind-up  0.1% of lit pixels
+  ok   HOPPER-WOLF: rest has its feet on the floor (±10 px)  -1 px
+  ok   HOPPER-WOLF: windup has its feet on the floor (±10 px)  -1 px
+  ok   HOPPER-WOLF: recovery has its feet on the floor (±10 px)  +0 px
+  ── HOPPER-CHEETAH (hopper@C2)
+  ok   HOPPER-CHEETAH: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.460
+  ok   HOPPER-CHEETAH: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.280
+  ok   HOPPER-CHEETAH: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.252
+  ok   HOPPER-CHEETAH: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.491
+  ok   HOPPER-CHEETAH: windup raises the amber above its own rest  87.4% vs rest 46.1%
+  ok   HOPPER-CHEETAH: rest does not pass for a wind-up  46.1% of lit pixels
+  ok   HOPPER-CHEETAH: recovery does not pass for a wind-up  53.7% of lit pixels
+  ok   HOPPER-CHEETAH: rest has its feet on the floor (±10 px)  -1 px
+  ok   HOPPER-CHEETAH: windup has its feet on the floor (±10 px)  -2 px
+  ok   HOPPER-CHEETAH: recovery has its feet on the floor (±10 px)  -1 px
+  ── GUARD (guard@A1)
+  ok   GUARD: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.695
+  ok   GUARD: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.687
+  ok   GUARD: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.713
+  ok   GUARD: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.719
+  ok   GUARD: windup raises the amber above its own rest  31.6% vs rest 7.6%
+  ok   GUARD: rest does not pass for a wind-up  7.6% of lit pixels
+  ok   GUARD: recovery does not pass for a wind-up  5.4% of lit pixels
+  ok   GUARD: rest has its feet on the floor (±10 px)  +0 px
+  ok   GUARD: windup has its feet on the floor (±10 px)  +0 px
+  ok   GUARD: recovery has its feet on the floor (±10 px)  +0 px
+  ── FLIER (flier@A2)
+  ok   FLIER: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.221
+  ok   FLIER: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.162
+  ok   FLIER: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.637
+  ok   FLIER: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.304
+  ok   FLIER: windup raises the amber above its own rest  19.0% vs rest 0.2%
+  ok   FLIER: rest does not pass for a wind-up  0.2% of lit pixels
+  ok   FLIER: recovery does not pass for a wind-up  2.4% of lit pixels
+  ── BLOB (blob@C2)
+  ok   BLOB: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.636
+  ok   BLOB: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.537
+  ok   BLOB: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.439
+  ok   BLOB: rest has its feet on the floor (±10 px)  -1 px
+  ok   BLOB: windup has its feet on the floor (±10 px)  +0 px
+  ok   BLOB: recovery has its feet on the floor (±10 px)  -1 px
+  ── TURRET (turret@B1)
+  ok   TURRET: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.530
+  ok   TURRET: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.671
+  ok   TURRET: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.625
+  ok   TURRET: windup raises the amber above its own rest  28.2% vs rest 18.6%
+  ok   TURRET: rest does not pass for a wind-up  18.6% of lit pixels
+  ok   TURRET: recovery does not pass for a wind-up  21.9% of lit pixels
+  ok   TURRET: rest has its feet on the floor (±10 px)  +0 px
+  ok   TURRET: windup has its feet on the floor (±10 px)  +5 px
+  ok   TURRET: recovery has its feet on the floor (±10 px)  +5 px
+  ── BAT (bat@A1)
+  ok   BAT: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.620
+  ok   BAT: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.375
+  ok   BAT: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.314
+  ok   BAT: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.339
+  ok   BAT: windup raises the amber above its own rest  76.7% vs rest 0.0%
+  ok   BAT: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   BAT: recovery does not pass for a wind-up  0.3% of lit pixels
+  ── BREAKER (surge@B2)
+  ok   BREAKER: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.772
+  ok   BREAKER: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.605
+  ok   BREAKER: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.579
+  ok   BREAKER: windup raises the amber above its own rest  44.4% vs rest 1.8%
+  ok   BREAKER: rest does not pass for a wind-up  1.8% of lit pixels
+  ok   BREAKER: recovery does not pass for a wind-up  8.4% of lit pixels
+  ── KILN VENT (kiln@C2)
+  ok   KILN VENT: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.692
+  ok   KILN VENT: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.859
+  ok   KILN VENT: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.647
+  ok   KILN VENT: windup raises the amber above its own rest  54.0% vs rest 1.6%
+  ok   KILN VENT: rest does not pass for a wind-up  1.6% of lit pixels
+  ok   KILN VENT: recovery does not pass for a wind-up  5.7% of lit pixels
+  ── RIME COIL (rime@D1)
+  ok   RIME COIL: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.626
+  ok   RIME COIL: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.688
+  ok   RIME COIL: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.565
+  ok   RIME COIL: windup raises the amber above its own rest  29.9% vs rest 0.0%
+  ok   RIME COIL: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   RIME COIL: recovery does not pass for a wind-up  0.0% of lit pixels
+  ── NEST SNARE (snare@E1)
+  ok   NEST SNARE: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.342
+  ok   NEST SNARE: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.696
+  ok   NEST SNARE: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.333
+  ok   NEST SNARE: windup raises the amber above its own rest  71.0% vs rest 0.0%
+  ok   NEST SNARE: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   NEST SNARE: recovery does not pass for a wind-up  0.0% of lit pixels
+  ── SAGE (sage@A1)
+  ok   SAGE: rest vs windup is a different SHAPE (IoU <= 0.9)  IoU 0.603
+  ok   SAGE: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.778
+  ok   SAGE: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.537
+  ok   SAGE: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.449
+  ok   SAGE: windup raises the amber above its own rest  10.5% vs rest 0.0%
+  ok   SAGE: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   SAGE: recovery does not pass for a wind-up  0.0% of lit pixels
+  ok   SAGE: rest has its feet on the floor (±10 px)  -3 px
+  ok   SAGE: recovery has its feet on the floor (±10 px)  -2 px
+
+OK — the bible was followed, and this is how you know without looking
+   (artbible: 76.9 s)
+
+all 1 harnesses ran

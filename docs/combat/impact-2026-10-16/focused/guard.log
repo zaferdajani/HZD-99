@@ -1,0 +1,36 @@
+
+── guard  — she braces, and bracing costs the hit its push
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+page.evaluate: TypeError: src.split is not a function
+    at combatIncoming (http://127.0.0.1:8220/index.html:34787:22)
+    at Player.hurt (http://127.0.0.1:8220/index.html:22623:51)
+    at eval (eval at evaluate (:311:30), <anonymous>:17:12)
+    at async <anonymous>:337:30
+    at /workspace/scratch/7ada3b7523b4/combat-impact/tests/guard.cjs:32:24 {
+  log: []
+}
+
+Node.js v24.19.0
+FAILED: ── guard — she braces, bracing costs the hit its push, and a brace in the instant turns it
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+page.evaluate: TypeError: src.split is not a function
+    at combatIncoming (http://127.0.0.1:8220/index.html:34787:22)
+    at Player.hurt (http://127.0.0.1:8220/index.html:22623:51)
+    at eval (eval at evaluate (:311:30), <anonymous>:17:12)
+    at async <anonymous>:337:30
+    at /workspace/scratch/7ada3b7523b4/combat-impact/tests/guard.cjs:32:24 {
+  log: []
+}
+
+Node.js v24.19.0
+
+   (guard: 8.4 s)
+
+1 harness(es) failed

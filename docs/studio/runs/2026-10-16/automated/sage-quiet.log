@@ -1,0 +1,16 @@
+
+── sage-quiet  — comic page 26: the sage's promise closes its end of the network
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/sage-quiet.cjs:16:28
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/sage-quiet.cjs:81:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/sage-quiet.cjs:16:28
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/sage-quiet.cjs:81:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (sage-quiet: 0.3 s)

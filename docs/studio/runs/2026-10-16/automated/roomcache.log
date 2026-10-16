@@ -1,0 +1,32 @@
+
+── roomcache  — a doorway costs a frame: rooms baked ahead, never rebaked on a revisit, the save off the crossing
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/roomcache.cjs:44:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/roomcache.cjs:389:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── roomcache — a doorway costs a frame, not a room
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/roomcache.cjs:44:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/roomcache.cjs:389:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (roomcache: 0.3 s)
+
+1 harness(es) failed

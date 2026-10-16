@@ -1,0 +1,32 @@
+
+── foescale  — every machine reads in the hero's weight class
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/foescale.cjs:28:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/foescale.cjs:112:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── foescale — every machine reads in the hero's weight class
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/foescale.cjs:28:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/foescale.cjs:112:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (foescale: 0.3 s)
+
+1 harness(es) failed

@@ -1,0 +1,65 @@
+{
+  "scope": "staged real-keyboard combat, normal game loop",
+  "normal": {
+    "events": [
+      {
+        "time": 99.883,
+        "room": "A1",
+        "target": "crawler",
+        "move": "slash",
+        "raw": 12,
+        "defense": 0,
+        "lost": 12,
+        "hp": 988,
+        "result": "hit",
+        "weapon": "claws"
+      }
+    ],
+    "sounds": [
+      "atk",
+      "hit"
+    ],
+    "enemyVx": 310
+  },
+  "charge": 0.8998333333333332,
+  "special": {
+    "events": [
+      {
+        "time": 100.533,
+        "room": "A1",
+        "target": "crawler",
+        "move": "slash",
+        "raw": 12,
+        "defense": 0,
+        "lost": 12,
+        "hp": 988,
+        "result": "hit",
+        "weapon": "claws"
+      },
+      {
+        "time": 101.567,
+        "room": "A1",
+        "target": "crawler",
+        "move": "burst",
+        "raw": 38,
+        "defense": 0,
+        "lost": 38,
+        "hp": 950,
+        "result": "hit",
+        "weapon": "claws"
+      }
+    ],
+    "sounds": [
+      "atk",
+      "hit",
+      "chargeReady",
+      "pick",
+      "chargedHit",
+      "bosshit"
+    ],
+    "enemyVx": 712.8289178821149,
+    "build": "28c9dd55fec4"
+  },
+  "expired": 0,
+  "errors": []
+}

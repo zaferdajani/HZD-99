@@ -1,0 +1,12 @@
+
+── pace  — the game-speed dial slows the simulation and nothing else
+100% {"pxPerRealSecond":0,"vxEnd":0,"k":1}
+               90% {"pxPerRealSecond":0,"vxEnd":0,"k":0.9}
+               80% {"pxPerRealSecond":0,"vxEnd":0,"k":0.8}
+               70% {"pxPerRealSecond":0,"vxEnd":0,"k":0.7}
+  swipeTellSeconds 0.5
+  swipeTellAt70pct 0.71
+pageerrors: none
+   (pace: 5.4 s)
+
+all 1 harnesses ran

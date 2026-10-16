@@ -1,0 +1,16 @@
+
+── grammar  — ART_BIBLE §9/§10 measured on the ASSEMBLED FRAME: value bands, straight runs, corners, skirts, tiling
+── grammar — ART_BIBLE §9/§10: the frame is the unit, not the asset
+  ok   §10.2/§10.3 every run over 96px carries a lit lip AND a broken skirt  0 of 0 long edge(s) are bare  (A0:0 A1:0 B4:0 C3:0 D3:0)
+       longest run 208px in A0 — length alone is not a failure, see ART_BIBLE §10.2
+  ok   §10.4 no bare 90° corner survives  0 corner(s)  (A0:0 A1:0 B4:0 C3:0 D3:0)
+  ok   §10.7 no visible tile repeat within one screen width  A0 Δ7.5/sd12.8  A1 Δ8.7/sd13.7  B4 Δ0.3/sd0.2  C3 Δ2.0/sd1.1  D3 Δ4.8/sd16.4
+  ok   §9.1 the background plane sits at or under 32% luminance  A0 31  A1 31  B4 18  C3 23  D3 29
+  ok   §9.1 the playable plane stands clear of the background  A0 terrain 42 vs bg 31  A1 terrain 44 vs bg 31  B4 terrain 36 vs bg 18  C3 terrain 39 vs bg 23  D3 terrain 57 vs bg 29
+  ok   §9.4 the background plane is quieter than the cast (absolute chroma ≤ 16)  A0 sat 13  A1 sat 13  B4 sat 8  C3 sat 4  D3 sat 9
+  ok   no page errors while sampling the rooms
+
+OK — the assembled frame obeys the grammar
+   (grammar: 6.2 s)
+
+all 1 harnesses ran

@@ -1,0 +1,19 @@
+
+── twin  — the swirl: four passes, a ring not a punch, and two blades afterwards
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/twin.cjs:12:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/twin.cjs:214:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── twin — permanent dual swords and the hurricane
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/twin.cjs:12:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/twin.cjs:214:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (twin: 0.3 s)
+
+1 harness(es) failed

@@ -7,10 +7,11 @@
 // A thirty-second brawl showed whichever moves the dice picked; the owner
 // asked for all of them. So each chapter sets up the conditions the lion's own
 // state machine needs to choose that move — the range she stands at, which
-// cooldowns are spent, its health — and then lets the machine run. No state is
-// forced: a forced `dive` has no perch to dive from, a forced `pounce` no arc.
-// The one exception is a fallback, logged, if the break has not landed by
-// hand inside its window.
+// cooldowns are spent, its health — and then lets the machine run. Neutral
+// setup states are assigned between chapters, but trajectory-dependent attack
+// states are not forced: a forced `dive` has no perch to dive from, a forced
+// `pounce` no arc. The one exception is a logged daze-request fallback if the
+// break has not landed by hand inside its window.
 //
 //   node tools/nullfangreel.cjs [out.mp4] [--keep]
 //
@@ -28,6 +29,7 @@ async function nullfang() {
 }
 async function nullfangReel() {
   const R = REEL;
+  let meetPlayed = false;
   R.brand = 'NULLFANG — EVERY MOVE';
   R.secStart('NULLFANG', 260);
   // ---- the corridor: the first meeting (A2) --------------------------------
@@ -64,6 +66,7 @@ async function nullfangReel() {
       if (G.state === 'DIALOG') { G.dialog = null; G.state = 'PLAY'; }
     });
     R.clearKeys();
+    meetPlayed = began;
     R.log.push('meet: ' + (began ? 'played' : 'NEVER STARTED'));
   }
   await R.loadRoom('A4');
@@ -221,7 +224,7 @@ async function nullfangReel() {
   let swipes = 0, wasSw = false;
   await scene('Phase Two: the Double Swipe', 'an angry lion swipes twice  ·  each with its full tell', 4.0, () => {
     hold('swipe'); watch();
-    if (b.st === 'swipe' && !wasSw) swipes++;
+    if (b.phase === 2 && b.st === 'swipe' && !wasSw) swipes++;
     wasSw = b.st === 'swipe';
     if (b.st === 'idle' && swipes) b.swipeCD = 99;
   });
@@ -256,6 +259,7 @@ async function nullfangReel() {
   // over the cleansing for its whole length
   const evoFn = checkEvo; checkEvo = () => {};
   arena(MID + 120, -70); b.st = 'idle'; b.t = 1; hpFloor = 0; b.hp = 3; b.dazeCD = 99;
+  let purifiedFollow = false;
   await scene('Freed', 'the last blow puts it on its knees  ·  the virus leaves  ·  the lion stays', 10.5, (i) => {
     hold(''); watch();
     if (i < 54) { face(); if (b.st === 'idle' || b.st === 'stalk') { b.st = 'idle'; b.t = 1; } return; }   // the card reads over the lion first
@@ -265,7 +269,10 @@ async function nullfangReel() {
     } else {
       R.clearKeys();
       // she walks off a few steps so it pads after her
-      if (b.purified && b.pureT > 1.6 && b.pureT < 3.4) R.hold('LEFT', 1); else R.hold('LEFT', 0);
+      if (b.purified && b.pureT > 1.6 && b.pureT < 3.4) {
+        R.hold('LEFT', 1);
+        if (b.petWalk) purifiedFollow = true;
+      } else R.hold('LEFT', 0);
     }
     if (G.state !== 'PLAY' && G.state !== 'CUT') { R.log.push('state ' + G.state + ' cleared'); G.state = 'PLAY'; }
   });
@@ -274,7 +281,20 @@ async function nullfangReel() {
   chapter = 'The Purification Film'; sub = 'as the game plays it  ·  assets/video/purify_glitch.mp4'; titleAt = R.t;
   await R.run(1.6, cap(), () => { settle(); });
   player.hurt = realHurt;
-  R.log.push('states seen: ' + Object.keys(seenSt).join(' '));
+  const requiredStates = ['dorm', 'intro', 'stalk', 'run', 'swipewarn', 'swipe', 'crouch', 'pounce',
+    'roar', 'springwarn', 'spring', 'perch', 'dive', 'recover', 'daze', 'nullcharge', 'nullhop', 'nullend'];
+  const observed = Object.keys(seenSt);
+  const expected = ['meeting'].concat(requiredStates, ['phase-two-double-swipe', 'purified-follow']);
+  const observedBeats = (meetPlayed ? ['meeting'] : []).concat(observed,
+    swipes >= 2 ? ['phase-two-double-swipe'] : [], purifiedFollow ? ['purified-follow'] : []);
+  R.coverage = {
+    kind: 'staged-nullfang-reel', expected, observed: observedBeats,
+    missing: expected.filter(k => !observedBeats.includes(k)),
+    forcedFallbacks: forced ? ['dazeReq'] : [],
+    note: 'Directed/staged capture; never evidence of an uninterrupted campaign playthrough.',
+  };
+  R.log.push('states seen: ' + observed.join(' '));
+  R.log.push('coverage: ' + JSON.stringify(R.coverage));
   await R.secEnd();
 }
 
@@ -287,7 +307,7 @@ if (require.main === module) (async () => {
   await film({
     out: reel, fdir: path.join(path.dirname(out), 'nf_frames'), keep: args.includes('--keep'),
     cfg: { MAXF: 0, bossFilter: 'glitch' }, src: nullfang.toString() + '\n' + nullfangReel.toString(), start: 'nullfang', startArg: null,
-    wavName: 'nullfang_moves',
+    wavName: 'nullfang_moves', requireCoverage: true,
   });
   // ...and the purification film after it, as shipped. It carries no sound
   // of its own (the game plays it over the zone's music), so it rides on

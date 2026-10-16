@@ -1,0 +1,6 @@
+
+── reel-contract  — capture reels fail closed for runtime errors and missing required beats
+reel contract passed
+   (reel-contract: 0.3 s)
+
+all 1 harnesses ran

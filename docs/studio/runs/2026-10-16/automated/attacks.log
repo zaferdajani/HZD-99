@@ -1,0 +1,18 @@
+
+── attacks  — one claw stat, a row per move: damage unchanged, knockback per attack, multi-hits on a clock that freeze once
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/attacks.cjs:30:28
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/attacks.cjs:318:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/attacks.cjs:30:28
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/attacks.cjs:318:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (attacks: 0.3 s)
+
+1 harness(es) failed

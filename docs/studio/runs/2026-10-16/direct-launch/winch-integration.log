@@ -1,0 +1,8 @@
+Command: node tests/winch-integration.cjs
+Exit: 1
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/winch-integration.cjs:4:25
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/winch-integration.cjs:62:3) {
+  log: [],
+  name: 'Error'
+}

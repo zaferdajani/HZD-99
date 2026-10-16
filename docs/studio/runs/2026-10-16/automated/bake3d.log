@@ -1,0 +1,78 @@
+
+── bake3d  — any authored GLB bakes to a turnaround the atlas can wear: grounded, rotating, silhouettes apart
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tools/bake3d.cjs:76:29
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tools/bake3d.cjs:282:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+node:internal/errors:985
+  const err = new Error(message);
+              ^
+
+Error: Command failed: node /workspace/scratch/7ada3b7523b4/studio-review/tools/bake3d.cjs /tmp/bake3d-NyWbdK/fixture.glb fixture --cell=256 --out=/tmp/bake3d-NyWbdK
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:942:11)
+    at execFileSync (node:child_process:978:15)
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/bake3d.cjs:94:3
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/bake3d.cjs:169:3)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 7541,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.19.0
+FAILED: node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tools/bake3d.cjs:76:29
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tools/bake3d.cjs:282:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+node:internal/errors:985
+  const err = new Error(message);
+              ^
+
+Error: Command failed: node /workspace/scratch/7ada3b7523b4/studio-review/tools/bake3d.cjs /tmp/bake3d-NyWbdK/fixture.glb fixture --cell=256 --out=/tmp/bake3d-NyWbdK
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:942:11)
+    at execFileSync (node:child_process:978:15)
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/bake3d.cjs:94:3
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/bake3d.cjs:169:3)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 7541,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.19.0
+
+   (bake3d: 0.7 s)
+
+1 harness(es) failed

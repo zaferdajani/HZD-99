@@ -1,0 +1,32 @@
+
+── cachemoves  — the Crystal Cache bends the answer — behind, off the arc and in the air
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/cachemoves.cjs:39:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/cachemoves.cjs:425:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── cachemoves — the Crystal Cache bends the answer, and says so first
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/cachemoves.cjs:39:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/cachemoves.cjs:425:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (cachemoves: 0.3 s)
+
+1 harness(es) failed

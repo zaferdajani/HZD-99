@@ -2121,7 +2121,7 @@ class Player {
       const crest = crestStyleNow(), blk = swingCrest({ crest });
       // a two-beat seal (chain 2) goes straight from the jab to the finisher
       const nextC = this.comboT > 0 ? (blk && blk.chain === 2 ? (this.combo === 0 ? 2 : 0) : (this.combo + 1) % 3) : 0;
-      this.atkCD = (nextC === 0 ? 0.26 : nextC === 1 ? 0.23 : 0.33) * (hasCrest('over') ? 0.7 : 1) * (blk ? blk.cd : 1);
+      this.atkCD = (typeof COMBAT_HERO_CD !== 'undefined' ? COMBAT_HERO_CD[nextC] : [0.26, 0.23, 0.33][nextC]) * (hasCrest('over') ? 0.7 : 1) * (blk ? blk.cd : 1);
       let ax = (inD('RIGHT') ? 1 : 0) - (inD('LEFT') ? 1 : 0);
       let ay = (inD('UP') ? -1 : 0) + (this.downBuf > 0 && !this.on ? 1 : 0);
       // a down-attack goes straight down. Diagonal aim used to push the hitbox
@@ -2201,7 +2201,7 @@ class Player {
           for (const e of G.enemies.concat(G.boss && !G.boss.dead && G.boss.st !== 'dorm' && G.boss.st !== 'intro' ? [G.boss] : [])) {
             if (e.dead || e.disabled || e.rescued) continue;
             if (Math.abs((e.x + e.w / 2) - tx2) < 46 && Math.abs((e.y + e.h / 2) - ty2) < 120) {
-              e.hp -= this.attackDmg('thunder'); e.hurtT = 0.15;
+              if (dealDmg(e, this.attackDmg('thunder'), armEl(), tx2, ty2, true, 'thunder') <= 0) continue;
               attackKnock(e, 'thunder', 0, 0);
               if (e.hp <= 0) e.die(Math.sign(ax) || 1, -0.5);
             }
@@ -2468,7 +2468,8 @@ class Player {
           const aid = this.swing.combo === 2 ? 'finisher' : 'slash';
           let dm = this.attackDmg(aid, { clawT: this.clawT, wield: this.swing.wield, pure: this.swing.pure,
                                          target: e, x: hb.x + hb.w / 2, y: hb.y + hb.h / 2 });
-          dm = dealDmg(e, dm, armEl(), hb.x + hb.w / 2, hb.y + hb.h / 2, true);
+          dm = dealDmg(e, dm, armEl(), hb.x + hb.w / 2, hb.y + hb.h / 2, true, aid);
+          if (dm <= 0) continue;
           if (attackKnock(e, aid, kx, ky)) {
             // RISECUT: the up-slash becomes a LAUNCHER (Lost Crown's juggle
             // grammar). The enemy goes up far enough to meet an air chain,
@@ -2575,7 +2576,7 @@ class Player {
             if (e2.dead || this.swing.set.has(e2)) continue;
             if (Math.abs(e2.x + e2.w / 2 - px0) < 78 && Math.abs(e2.y + e2.h - py0) < 40) {
               this.swing.set.add(e2);
-              dealDmg(e2, this.attackDmg('plunge'), armEl(), e2.x + e2.w / 2, e2.y + e2.h / 2, true);
+              if (dealDmg(e2, this.attackDmg('plunge'), armEl(), e2.x + e2.w / 2, e2.y + e2.h / 2, true, 'plunge') <= 0) continue;
               attackKnock(e2, 'plunge', Math.sign(e2.x - px0), 0);
               attackFreeze('plunge');
               if (e2.hp <= 0) e2.die(Math.sign(e2.x - px0) || 1, -0.4);
@@ -2642,7 +2643,8 @@ class Player {
         b.set.add(e);
         // out, it is the spear; on its way home it cuts and PINS (ATTACKS)
         const aid = b.out ? 'throw' : 'throwBack';
-        const dm = dealDmg(e, this.attackDmg(aid), armEl(), b.x, b.y, true);
+        const dm = dealDmg(e, this.attackDmg(aid), armEl(), b.x, b.y, true, aid);
+        if (dm <= 0) continue;
         sfx(e instanceof Boss ? 'bosshit' : 'hit');
         attackFreeze(aid);
         burst(b.x, b.y, 10, '#ffffff', 240, 0.3, 120, 2.6, true);
@@ -2672,7 +2674,7 @@ class Player {
   swirl() {
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
     this.chargeT = 0;
-    this.swirlT = SWIRL_T; this.swirlTick = 0; this.swirlHits = 0; this.swirlFroze = false;
+    this.swirlT = SWIRL_T; this.swirlTick = 0; this.swirlHits = 0; this.swirlFroze = false; this.swirlImpactDone = false;
     this.twinT = 0;
     this.swing = null; this.atkBuf = 0;
     this.atkCD = Math.max(this.atkCD, SWIRL_T + 0.3);
@@ -2701,7 +2703,7 @@ class Player {
       if (d > R + Math.max(e.w, e.h) / 2) continue;
       // Specials obey the same purification, ally and guardian defenses as
       // ordinary strikes. A blocked/purifying hit earns no launch or volts.
-      if (dealDmg(e, dm, armEl(), e.x + e.w / 2, e.y + e.h / 2, true) <= 0) continue;
+      if (dealDmg(e, dm, armEl(), e.x + e.w / 2, e.y + e.h / 2, true, 'swirl') <= 0) continue;
       hit++;
       e.hurtT = 0.18;
       const n = d || 1;
@@ -2748,6 +2750,7 @@ class Player {
     if (mode === 'joined') return this.throwJoined();
     this.chargeT = 0;
     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
+    this.burstImpactDone = false;
     sfx('chargedHit');
     // THE MOVE THE WHOLE CHARGE WAS FOR (owner, 2026-09-15: "no supercharge or
     // after effect"). Verified live: the release fired every time, but the
@@ -2757,7 +2760,8 @@ class Player {
     // its OWN bigger presence instead: three rings instead of two (one more
     // sweep to read), and both particle bursts roughly doubled in count and
     // size — this move's punch is now carried by things only IT fires.
-    cam.shake = 13; attackFreeze('burst');
+    // Release is visible on a miss; confirmed damage owns the heavy pause.
+    cam.shake = Math.max(cam.shake, 2);
     G.flash = Math.max(G.flash, 0.55);
     G.impact = { t: 0.16, t0: 0.16, x: cx, y: cy };
     G.addRing(cx, cy); G.addRing(cx, cy, 60); G.addRing(cx, cy, 130);
@@ -2785,7 +2789,7 @@ class Player {
       if (d > R + Math.max(e.w, e.h) / 2) continue;
       // In particular, a charged claw must stop at a sage's song-lock and
       // a crystal burst must cleanse it, never bypass the shared harm rule.
-      if (dealDmg(e, dm, armEl(), e.x + e.w / 2, e.y + e.h / 2, true) <= 0) continue;
+      if (dealDmg(e, dm, armEl(), e.x + e.w / 2, e.y + e.h / 2, true, 'burst') <= 0) continue;
       e.hurtT = 0.2;
       const n = d || 1;
       attackKnock(e, 'burst', ex / n, ey / n);
@@ -2930,6 +2934,7 @@ class Player {
   // the run and is read from the console.
   hurt(d, fromX, src, foe) {
     if (this.dead || this.iT > 0) return;
+    if (typeof combatIncoming === 'function') d = combatIncoming(d, foe, src);
     // A BLOW MET IN THE PARRY WINDOW is turned before anything is spent: no
     // core, no heat, no log entry. Only callers that name the attacker can be
     // parried, and only while that attacker shows the glint (js/parry.js).
@@ -3022,6 +3027,7 @@ class Player {
     }
     if (typeof dmgNote === 'function') dmgNote(src, d);   // what actually cost her cores (js/dmglog.js)
     this.cores -= d; this.iT = hasSkill('reflex') ? 1.65 : 1.3; this.healT = 0;
+    if (typeof combatLog === 'function') combatLog(this, d, Math.min(this.cores + d, d), src || 'incoming', 'hero-hit');
     this.hurtPoseT = guarded ? 0.15 : 0.3;   // limbs flail for a beat while the knockback carries her
     cam.shake = guarded ? 4 : 9; sfx(guarded ? 'block' : 'hurt');
     if (typeof padRumble === 'function') padRumble(guarded ? 0.5 : 0.85, guarded ? 0.3 : 0.5, guarded ? 140 : 240);
@@ -5441,7 +5447,8 @@ class Proj {
       for (const e of targets) {
         if (e.dead || e.disabled || e.rescued) continue;
         if (aabb(this.box(), hurtBoxOf(e))) {
-          dealDmg(e, this.dmg, this.el || armEl(), this.x, this.y); this.dead = true;
+          const dealt = dealDmg(e, this.dmg, this.el || armEl(), this.x, this.y, false, 'projectile'); this.dead = true;
+          if (dealt <= 0) return;
           if (this.freeze) {                       // HALT: holds a target still
             e.stagT = Math.max(e.stagT || 0, 2.0);
             burst(this.x, this.y, 14, ELEM.glazz.glow, 200, 0.6, 40, 3, true);
@@ -7481,6 +7488,7 @@ class Enemy {
     const pw = foePow();
     this.hp = Math.round(k.hp * FOE_HP * DF().ehp * zk * pw * th);
     this.hpMax0 = this.hp;
+    if (typeof combatInit === 'function') combatInit(this);
     this.spd = k.spd * DF().espd * (0.88 + zk * 0.12) * (0.94 + pw * 0.06) * ts;
     this.vx = 0; this.vy = 0; this.dir = chance(0.5) ? 1 : -1;
     this.t = rnd(0.5, 2); this.sx = x; this.sy = y; this.hurtT = 0; this.dead = false; this.anim = rnd(0, 9);
@@ -7533,6 +7541,7 @@ class Enemy {
     }
     this.anim += dt; this.hurtT -= dt;
     if (this.landT > 0) this.landT -= dt;
+    const attackDt = dt * (this.attackSpeed || 1);
     if (this.kickT > 0) this.kickT -= dt;
     // the mark CROSSREF leaves on whoever it told, fading on its own so it
     // reads as a moment and not as a permanent badge
@@ -7760,7 +7769,7 @@ class Enemy {
           // TURNS to face her first and lunges on the following pass, so the
           // turn itself becomes part of the warning.
           if (!player.dead && Math.abs(px - cx) < 160 && Math.abs(py - cy) < 70
-              && (this.atkCD -= dt) <= 0) {
+              && (this.atkCD -= attackDt) <= 0) {
             const want = Math.sign(px - cx) || this.dir;
             if (want !== this.dir) { this.dir = want; this.atkCD = 0.28 - this.iq * 0.14; }
             else {
@@ -7939,7 +7948,7 @@ class Enemy {
           if (this.hasMove('packet') && this.packetCD <= 0 && Math.abs(px - cx) < 70 && cy < py - 40) {
             this.packetT = TELL_SWIPE;     // longer than the dive's tell, never shortened by iq
             sfx('tell');
-          } else if (Math.abs(px - cx) < 46 + this.iq * 26 && cy < py - 60 && (this.atkCD -= dt) <= 0) {
+          } else if (Math.abs(px - cx) < 46 + this.iq * 26 && cy < py - 60 && (this.atkCD -= attackDt) <= 0) {
             this.holdT = TELL_FAST;                          // unchanged, always
             this.atkCD = rnd(2.4 - this.iq * 1.1, 3.6 - this.iq * 1.5); sfx('tell');
           }
@@ -7971,7 +7980,7 @@ class Enemy {
           if (this.holdT > 0) {                     // the shiver — wings rustle
             this.holdT -= dt;
             if (this.holdT <= 0) { this.hang = 0; this.diveT = 0.85; this.vy = 80; }
-          } else if (near && (this.atkCD -= dt) <= 0) {
+          } else if (near && (this.atkCD -= attackDt) <= 0) {
             // ...and a Cache bat shivers LONGER for it. The dive is about to
             // leave something behind it, so the dive is announced sooner:
             // TELL_SWIPE against the bare TELL_FAST, the same trade every
@@ -8462,7 +8471,7 @@ class Enemy {
         }
         // idle: latched, humming, watching its band
         if (!player.dead && Math.abs(px - cx) < 230 && Math.abs(py - cy) < 90
-            && (this.atkCD -= dt) <= 0) {
+            && (this.atkCD -= attackDt) <= 0) {
           this.crouchT = TELL_SWIPE;       // zone-B floor: the tell never shortens
           this.atkCD = rnd(2.4 - this.iq * 0.8, 3.6 - this.iq * 1.2);
           sfx('tell');
@@ -8539,7 +8548,7 @@ class Enemy {
         // idle: plumbed in, breathing embers, watching its patch — the band
         // reaches UP, because the lane it closes does
         if (!player.dead && Math.abs(px - cx) < 210 && py > cy - 190 && py < cy + 70
-            && (this.atkCD -= dt) <= 0) {
+            && (this.atkCD -= attackDt) <= 0) {
           this.crouchT = TELL_SWIPE;       // the kingdom floor: the tell never shortens
           this.atkCD = rnd(2.2 - this.iq * 0.7, 3.4 - this.iq * 1.1);
           sfx('tell');
@@ -8617,7 +8626,7 @@ class Enemy {
         // idle: bolted in, breathing cold, watching its patch — the band is
         // a little wider than the widest circle, so the first read is free
         if (!player.dead && Math.abs(px - cx) < 240 && Math.abs(py - cy) < 150
-            && (this.atkCD -= dt) <= 0) {
+            && (this.atkCD -= attackDt) <= 0) {
           this.crouchT = TELL_HEAVY;       // the kingdom floor: the tell never shortens
           this.ringR = 0;
           // cunning buys REACH: a wider circle each iq step, never less warning
@@ -8720,7 +8729,7 @@ class Enemy {
         // band is a little wider than the longest reach, so the first read
         // is free
         if (!player.dead && Math.abs(px - cx) < 250 && Math.abs(py - cy) < 130
-            && (this.atkCD -= dt) <= 0) {
+            && (this.atkCD -= attackDt) <= 0) {
           this.crouchT = TELL_HEAVY;       // the kingdom floor: the tell never shortens
           // cunning buys REACH and GRIP: a longer line and a harder pull
           // each iq step, never less warning (and never past the guardian's
@@ -11984,6 +11993,7 @@ class Boss {
     // falls to the middle of the weapon curve rather than to 1, which would
     // silently make it the easiest thing in its own kingdom.
     this.hpMax = Math.round(s.hp * FOE_HP * (ZONE_ATK[s.zone] || 1.6) * DF().ehp); this.hp = this.hpMax;
+    if (typeof combatInit === 'function') combatInit(this);
     this.vx = 0; this.vy = 0; this.st = 'dorm'; this.t = 1.4; this.phase = 1;
     this.hurtT = 0; this.dead = false; this.anim = 0; this.face = -1;
     this.cycle = 0; this.marks = []; this.beam = null;
@@ -12339,7 +12349,7 @@ class Boss {
     }
     const px = player.x + player.w / 2, py = player.y + player.h / 2;
     // each boss up the chain is natively faster and more relentless
-    const spd = DF().espd * (BOSS_AGGRO[this.kind] || 1);
+    const spd = DF().espd * (this.attackSpeed || BOSS_AGGRO[this.kind] || 1);
     this.windT -= dt; this.overdriveT -= dt;
     // every boss looks where it is going, even the ones that do not walk
     // GLACIERE owns facing in her state handler: a committed charge keeps

@@ -1,0 +1,18 @@
+
+── story-order  — the story sheet walked through the real build: beat order, gates, named things, migration
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/story-order.cjs:32:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/story-order.cjs:508:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/story-order.cjs:32:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/story-order.cjs:508:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (story-order: 0.3 s)
+
+1 harness(es) failed

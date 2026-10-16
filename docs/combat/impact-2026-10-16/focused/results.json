@@ -1,0 +1,194 @@
+{
+  "started_utc": "2026-10-16T11:27:54.494474+00:00",
+  "base_commit": "6ab143757faab781c9aa0da596c047e1b429cc2c",
+  "dirty_at_start": "M forge-odyssey.html\n M forge.html\n M index.html\n M js/engine.js\n M js/entities.js\n M js/foeread.js\n M js/game.js\n M js/gear.js\n M js/types.js\n M odyssey.html\n M source-files.json\n M tests/run.cjs\n?? js/combat-stats.js\n?? tests/combat-impact-contract.cjs",
+  "profile": "subset",
+  "results": [
+    {
+      "name": "build",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.415488,
+      "timeout_seconds": 180,
+      "log": "build.log",
+      "sha256": "b8b59e1fd27825f58d9aeebf563b2b4cceedb0c14110f4b7cf7103d6a59dc656"
+    },
+    {
+      "name": "server-identity",
+      "when": "start",
+      "status": "pass",
+      "files": {
+        "index.html": "86404bd70c607332d9a463e382d6b6accae048a2a38797a9dc9ad1ba5deee9e4",
+        "odyssey.html": "f858b7dd55688dad82ff30349746ea91be6413a9f6c4d9d2104bb463c25c39d3",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    },
+    {
+      "name": "combat-impact-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.215118,
+      "timeout_seconds": 480,
+      "log": "combat-impact-contract.log",
+      "sha256": "05aba05fc6f6147fa8fc44184910cd7f9f81afae80aa5a17856cdd7693d8a50a"
+    },
+    {
+      "name": "weapons",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.366677,
+      "timeout_seconds": 480,
+      "log": "weapons.log",
+      "sha256": "5ebcab493f405dbee1c079186556a5b6c6c190d697b897416724df7ef8d893e4"
+    },
+    {
+      "name": "attacks",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 2.779734,
+      "timeout_seconds": 480,
+      "log": "attacks.log",
+      "sha256": "60aa4f2128803daf257028328340e29fad612e052390a7bdd3af514563a072a3"
+    },
+    {
+      "name": "combat",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 5.285649,
+      "timeout_seconds": 480,
+      "log": "combat.log",
+      "sha256": "0587a7256905a73791d0bf20f942f9909469bc8b63cc043abb68c499942313b8"
+    },
+    {
+      "name": "shield",
+      "status": "fail",
+      "exit_code": 1,
+      "seconds": 1.117609,
+      "timeout_seconds": 480,
+      "log": "shield.log",
+      "sha256": "3b21b0ae919d2600615282dea56169465682c4439b9995e3b878ce0380047f36"
+    },
+    {
+      "name": "guard",
+      "status": "fail",
+      "exit_code": 1,
+      "seconds": 8.69432,
+      "timeout_seconds": 480,
+      "log": "guard.log",
+      "sha256": "b4abe901f8c97873ffa7c1cb6d36d9998a08b422ac80f46fd4ed66e0e18a8762"
+    },
+    {
+      "name": "airattack",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 8.445656,
+      "timeout_seconds": 480,
+      "log": "airattack.log",
+      "sha256": "708df8c868db740ded928351b430d84916aa3b80cbace8141bdf7f523cd6c20b"
+    },
+    {
+      "name": "grapple",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 22.33573,
+      "timeout_seconds": 480,
+      "log": "grapple.log",
+      "sha256": "247ecbacce5ce8c8b9f9d72f35a9fff1e20e75cbe1cc0fad714e5cacff832562"
+    },
+    {
+      "name": "infection-eyes",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 66.53475,
+      "timeout_seconds": 480,
+      "log": "infection-eyes.log",
+      "sha256": "8c242e3510aeca80e6452597c24bd6706e4adb35c23393ca4909e03b8bed9ba0"
+    },
+    {
+      "name": "infection-roster",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 32.006611,
+      "timeout_seconds": 420,
+      "log": "infection-roster.log",
+      "sha256": "1e74c952c9adee10229f8778a2339fb2858e0e0f01a1ba5955e249939c893ba6"
+    },
+    {
+      "name": "infection-poses",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 158.512306,
+      "timeout_seconds": 600,
+      "log": "infection-poses.log",
+      "sha256": "ea6c986258e98762a85d36cb9bbe021eae5f2c1f92b7a0de166cef6e49b94f91"
+    },
+    {
+      "name": "lion-studio",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 4.939569,
+      "timeout_seconds": 480,
+      "log": "lion-studio.log",
+      "sha256": "2b79c0de4ebc640672f5a68ad83b4ebf1d2a425d360f9168ba02db6c358cdd8f"
+    },
+    {
+      "name": "hero-feedback",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.165242,
+      "timeout_seconds": 480,
+      "log": "hero-feedback.log",
+      "sha256": "be52f8a8e5e29cdc98e5981886e34eeea486fd8e36e71c43627e40eef3b065f0"
+    },
+    {
+      "name": "story-progression",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.165558,
+      "timeout_seconds": 480,
+      "log": "story-progression.log",
+      "sha256": "6816c053e1b610eedcd5e9d82ebd39c833240870d66cb344d6f0f535ed57cab0"
+    },
+    {
+      "name": "campaign-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.415813,
+      "timeout_seconds": 480,
+      "log": "campaign-contract.log",
+      "sha256": "2c0c7b9ec41ee76b22ce22115a49d18ff439cfc1618ba4bf9c225e8629d63ab2"
+    },
+    {
+      "name": "grapple-contract",
+      "status": "pass",
+      "exit_code": 0,
+      "seconds": 0.164711,
+      "timeout_seconds": 480,
+      "log": "grapple-contract.log",
+      "sha256": "7c721a72da07456da64e4880da4dc844a9717bd38ba29db323b16a3437da6f5b"
+    },
+    {
+      "name": "server-identity",
+      "when": "end",
+      "status": "pass",
+      "files": {
+        "index.html": "86404bd70c607332d9a463e382d6b6accae048a2a38797a9dc9ad1ba5deee9e4",
+        "odyssey.html": "f858b7dd55688dad82ff30349746ea91be6413a9f6c4d9d2104bb463c25c39d3",
+        "sw.js": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+        "assets/eyes.json": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+        "assets/lowres/alBite.webp": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2"
+      }
+    }
+  ],
+  "limitations": [
+    "Most harnesses stage saves or positions. campaign-ch1 is the only uninterrupted real-input playthrough, and only when this run includes it.",
+    "The opening phone check uses a mobile viewport with keyboard traversal; it is not a full touch-control playthrough.",
+    "Visual quality and all 15 role reviews require separate signed findings."
+  ],
+  "server_sha256": "86404bd70c607332d9a463e382d6b6accae048a2a38797a9dc9ad1ba5deee9e4",
+  "complete_requested_scope": true,
+  "passed": false,
+  "finished_utc": "2026-10-16T11:33:07.646142+00:00"
+}

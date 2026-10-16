@@ -1,0 +1,13 @@
+
+── filmflow  — the opening plays as one film: no black, no caption freeze, between shots
+shots: intro1 intro2 intro3 intro4 intro5 intro6 intro7 intro8
+  ok   all eight shots play  8 / 8
+  ok   no frame of black between two shots
+  ok   the picture never stops between shots for more than 0.25 s  worst 0.06 s  [["intro2",0.05],["intro3",0.05],["intro4",0.06],["intro5",0.05],["intro6",0.05],["intro7",0.04],["intro8",0.05]]
+  ok   no shot but the last freezes on its caption
+  ok   no page errors
+
+OK — the opening plays as one film, shot into shot
+   (filmflow: 52.5 s)
+
+all 1 harnesses ran

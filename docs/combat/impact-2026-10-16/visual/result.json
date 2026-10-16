@@ -1,0 +1,142 @@
+{
+  "build": "28c9dd55fec4",
+  "before": {
+    "white": 20,
+    "opaque": 2603
+  },
+  "during": {
+    "white": 1798,
+    "opaque": 2622
+  },
+  "after": {
+    "white": 140,
+    "opaque": 2622
+  },
+  "normal": 12,
+  "charged": 38,
+  "normalParts": 5,
+  "chargedParts": 14,
+  "stop": 0.12,
+  "recoil": -90,
+  "capped": 80,
+  "expired": 0,
+  "protectedDamage": 0,
+  "protectedHp": true,
+  "modes": {
+    "claws": {
+      "kind": "HZD-99",
+      "hp": 5,
+      "hpMax": 5,
+      "hpUnit": "cores",
+      "defense": 0,
+      "basePower": 12,
+      "attackPower": 12,
+      "attackSpeed": 3.66,
+      "speedUnit": "swings/second before hit-stop",
+      "weapon": "claws",
+      "guard": "front blocks; brace breaks on third hit",
+      "burst": 38,
+      "specialPower": 38,
+      "specialPerPass": false,
+      "protected": false
+    },
+    "single": {
+      "kind": "HZD-99",
+      "hp": 5,
+      "hpMax": 5,
+      "hpUnit": "cores",
+      "defense": 0,
+      "basePower": 16,
+      "attackPower": 20,
+      "attackSpeed": 3.66,
+      "speedUnit": "swings/second before hit-stop",
+      "weapon": "single",
+      "guard": "front blocks; brace breaks on third hit",
+      "burst": 51,
+      "specialPower": 51,
+      "specialPerPass": false,
+      "protected": false
+    },
+    "dual": {
+      "kind": "HZD-99",
+      "hp": 5,
+      "hpMax": 5,
+      "hpUnit": "cores",
+      "defense": 0,
+      "basePower": 19,
+      "attackPower": 24,
+      "attackSpeed": 3.66,
+      "speedUnit": "swings/second before hit-stop",
+      "weapon": "dual",
+      "guard": "front blocks; brace breaks on third hit",
+      "burst": 61,
+      "specialPower": 18,
+      "specialPerPass": true,
+      "protected": false
+    },
+    "joined": {
+      "kind": "HZD-99",
+      "hp": 5,
+      "hpMax": 5,
+      "hpUnit": "cores",
+      "defense": 0,
+      "basePower": 23,
+      "attackPower": 33,
+      "attackSpeed": 3.66,
+      "speedUnit": "swings/second before hit-stop",
+      "weapon": "joined",
+      "guard": "front blocks; brace breaks on third hit",
+      "burst": 74,
+      "specialPower": 26,
+      "specialPerPass": true,
+      "protected": false
+    }
+  },
+  "log": {
+    "version": "2026-10-16.1",
+    "build": "28c9dd55fec4",
+    "hero": {
+      "kind": "HZD-99",
+      "hp": 5,
+      "hpMax": 5,
+      "hpUnit": "cores",
+      "defense": 0,
+      "basePower": 12,
+      "attackPower": 12,
+      "attackSpeed": 3.66,
+      "speedUnit": "swings/second before hit-stop",
+      "weapon": "claws",
+      "guard": "front blocks; brace breaks on third hit",
+      "burst": 38,
+      "specialPower": 38,
+      "specialPerPass": false,
+      "protected": false
+    },
+    "events": [
+      {
+        "time": 99,
+        "room": "A1",
+        "target": "crawler",
+        "move": "slash",
+        "raw": 12,
+        "defense": 0,
+        "lost": 12,
+        "hp": 988,
+        "result": "hit",
+        "weapon": "claws"
+      },
+      {
+        "time": 99,
+        "room": "A1",
+        "target": "crawler",
+        "move": "burst",
+        "raw": 38,
+        "defense": 0,
+        "lost": 38,
+        "hp": 950,
+        "result": "hit",
+        "weapon": "claws"
+      }
+    ]
+  }
+}

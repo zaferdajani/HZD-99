@@ -1,0 +1,146 @@
+
+── infection-poses  — every guardian, every drawn state, both facings: an eye on the art, never twice, never under the loading silhouette, the smoke born there
+── infection-poses — every guardian, every drawn state, both facings: an eye, on the body, the smoke born there
+    alpha staged (25 s)
+    glitch staged (54 s)
+    brood staged (70 s)
+    zero staged (86 s)
+    atlas staged (114 s)
+    prism staged (129 s)
+    mother staged (148 s)
+    chime staged (157 s)
+
+    alpha (A10)     purple
+      rest           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      prowl          eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      roarwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      roar           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      broodcall      eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      howl           eyes 111111  off-body  1.0px   trail 17f/17 worst 0.0px
+      coil           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      leap           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      recoil         eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      turn           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      clawwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      claw           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      bitewarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      bite           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      clinch         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      shake          eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      hurt           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+    glitch (A4)     purple
+      idle           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      stalk          eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      run            eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      swipewarn      eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      swipe          eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      rearwarn       eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      rearswipe      eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      crouch         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      springwarn     eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      spring         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      dive           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      pounce         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      perch          eyes 111111  off-body  0.1px   trail 17f/17 worst 0.0px
+      nullhop        eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      nullcharge     eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      nullend        eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      roar           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      land           eyes 111111  off-body  0.1px   trail 17f/17 worst 0.0px
+      recoil         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      hurt           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      daze           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+    brood (B4)      purple
+      idle           eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      volley         eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      broodcall      eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      swoopwarn      eyes 211211  off-body  0.3px   trail 17f/33 worst 0.0px
+      swoop          eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      rise           eyes 112222  off-body  0.2px   trail 17f/24 worst 0.0px
+      restlow        eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      cffloor        eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      cfcrash        eyes 222222  off-body  0.3px   trail 16f/28 worst 0.0px
+      hurt           eyes 222222  off-body  0.2px   trail 17f/34 worst 0.0px
+      daze           eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+    zero (D3)       purple
+      idle           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      novawarn       eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      shardwarn      eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      orbs           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      lancewarn      eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      dashwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      dash           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      azhush         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      recover        eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      hurt           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      daze           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+    atlas (C3)      purple
+      idle           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      walk           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      slamwarn       eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      forgebell      eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      meltwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      hymn           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      hurt           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      daze           eyes 111111  off-body  0.2px   trail 15f/15 worst 0.0px
+      lobwarn        eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      ventwarn       eyes 111111  off-body  0.3px   trail 16f/16 worst 0.0px
+      vent           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      stagger        eyes 111111  off-body  0.2px   trail 15f/15 worst 0.0px
+      cooled         eyes 111111  off-body  0.3px   trail 14f/14 worst 0.0px
+      sprawl         eyes 111111  off-body  0.2px   trail 16f/16 worst 0.0px
+      dropcrouch     eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      rise           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      droplock       eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      dive           eyes 111111  off-body  0.3px   trail 16f/16 worst 0.0px
+    prism (X1)      purple
+      idle           eyes 222222  off-body  0.3px   trail 17f/20 worst 0.0px
+      aim            eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      beam           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      pounce         eyes 222222  off-body  0.3px   trail 17f/22 worst 0.0px
+      dashslash      eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      arcstorm       eyes 222222  off-body  0.3px   trail 17f/20 worst 0.0px
+      rest           eyes 222222  off-body  0.3px   trail 17f/20 worst 0.0px
+      hurt           eyes 222222  off-body  0.3px   trail 17f/20 worst 0.0px
+      daze           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      arcspin    gap eyes 000000  off-body    —px   trail 0f/0 worst 0.0px
+      lsvanish   gap eyes 000000  off-body    —px   trail 0f/0 worst 0.0px
+      lsarrive   gap eyes 000000  off-body    —px   trail 0f/0 worst 0.0px
+    mother (E3)     purple
+      idle           eyes 888888  off-body  0.3px   trail 15f/85 worst 0.0px
+      nwcharge       eyes 888888  off-body  0.3px   trail 15f/86 worst 0.0px
+      msong          eyes 888888  off-body  0.3px   trail 15f/86 worst 0.0px
+      grabwarn       eyes 888888  off-body  0.3px   trail 15f/86 worst 0.0px
+      grab           eyes 888888  off-body  0.3px   trail 15f/85 worst 0.0px
+      beamwarn       eyes 888888  off-body  0.3px   trail 15f/86 worst 0.0px
+      recover        eyes 888888  off-body  0.3px   trail 15f/85 worst 0.0px
+      phase1         eyes 666666  off-body  0.3px   trail 15f/64 worst 0.0px
+      phase2         eyes 444444  off-body  0.3px   trail 15f/43 worst 0.0px
+      phase3         eyes 222222  off-body  0.3px   trail 13f/21 worst 0.0px
+      hurt           eyes 888888  off-body  0.3px   trail 15f/86 worst 0.0px
+      daze           eyes 888888  off-body  0.3px   trail 15f/85 worst 0.0px
+    chime (A9)      purple
+      rest           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      ringwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      ring           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      notewarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      note           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      hurt           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+
+  ok   every guardian is staged in its room (8 of 8)
+  ok   ...with its art loaded at full size
+  ok   an eye is reported in every pose, early/mid/late, both facings (105 poses, 630 frames)
+  ok   ...and every eye sits on the drawn body (within 3 px of a solid pixel)  worst 1.0 px
+  ok   no eye is reported twice in one frame
+  ok   no guardian with its art loaded is drawn under the loading silhouette
+  ok   moving in every pose, the eyes smoke
+  ok   ...and every newest wisp is born at an eye of THAT frame (within 1 px)  worst 0.00 px
+  ok   the deliberate gaps report no eye (prism:arcspin prism:lsvanish prism:lsarrive)
+  ok   every guardian burns purple
+  ok   no page errors  
+  (157 s)
+
+OK — every guardian looks out through its eyes in every pose it is drawn in, and the smoke is born there
+   (infection-poses: 158.2 s)
+
+all 1 harnesses ran

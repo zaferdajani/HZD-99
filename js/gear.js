@@ -1,6 +1,9 @@
 // Physical equipment UI. Keep legacy save IDs so earned gear survives upgrades.
 const GEAR_TEXT = {
   en: {
+    combat_export: 'Export combat log [L]', combat_stats: 'HP %h cores | ATK %a | DEF 0%',
+    combat_rate: '%s swings/s | Special %b',
+    combat_pass: ' / pass',
     crest_title: 'Gear', pm_crests: 'Gear', pa_CREST: 'Gear', crest_slots: 'Power capacity',
     crest_full: 'Not enough power capacity', crest_hint: 'Select a part · Enter to install / remove · Back to return',
     crest_lore: 'Your body is built to be repaired and upgraded. Salvage useful parts, bring materials to the forge, and install the equipment you earn.',
@@ -34,6 +37,9 @@ const GEAR_TEXT = {
     t3: ['COLD STORAGE NOTE: the Prowler stole the ninth prototype restart unit and fled toward the crystal seams.']
   },
   ar: {
+    combat_export: 'تصدير سجل القتال [L]', combat_stats: 'الطاقة %h | الهجوم %a | الدفاع 0%',
+    combat_rate: '%s ضربة/ث | الضربة الخاصة %b',
+    combat_pass: ' / مرور',
     crest_title: 'التجهيزات', pm_crests: 'التجهيزات', pa_CREST: 'التجهيزات', crest_slots: 'سعة الطاقة',
     crest_full: 'سعة الطاقة غير كافية', crest_hint: 'اختر قطعة · Enter للتركيب أو النزع · رجوع',
     crest_lore: 'جسمك قابل للإصلاح والتطوير. اجمع القطع المفيدة وأعد المواد إلى الحداد وركّب المعدات التي تكسبها.',
@@ -210,6 +216,7 @@ function gearActivate() {
   player.cores = Math.min(player.cores, player.maxCores()); persist(); sfx('ok');
 }
 function updateGear() {
+  if (typeof keysP !== 'undefined' && keysP.KeyL && typeof exportCombatLog === 'function') { exportCombatLog(); keysP.KeyL = 0; }
   if (inP('CREST') || inP('BACK')) { G.state = 'PLAY'; sfx('ui'); return; }
   const n = gearRows(G.save).length;
   G.crestIdx = gearLayout().index;
@@ -218,6 +225,7 @@ function updateGear() {
   if (inP('OK')) gearActivate();
 }
 function gearTouch(x, y) {
+  if (x >= 730 && x <= 935 && y >= 20 && y <= 65 && typeof exportCombatLog === 'function') { exportCombatLog(); return; }
   const l = gearLayout(), i = Math.round((y - l.y) / l.step);
   if (x >= l.x && x <= l.x + l.w && i >= 0 && i < l.visible.length && Math.abs(y - (l.y + i * l.step)) <= l.h / 2) {
     G.crestIdx = l.start + i; tPress('VOK'); return;
@@ -230,10 +238,16 @@ function gearTouch(x, y) {
 function drawGear() {
   c.fillStyle = 'rgba(4,7,12,0.97)'; c.fillRect(0, 0, 960, 540);
   ftxt(t('crest_title'), 480, 42, 28, '#eef3fa');
+  dimPanel(38, 82, 415, 352);
+  if (typeof combatStats === 'function') {
+    const stats = combatStats(player);
+    ftxt(t('combat_export'), 830, 42, 13, '#9fe8ff');
+    ftxt(t('combat_stats').replace('%h', stats.hp + '/' + stats.hpMax).replace('%a', stats.attackPower), 245, 96, 12, '#eef3fa');
+    ftxt(t('combat_rate').replace('%s', stats.attackSpeed).replace('%b', stats.specialPower) + (stats.specialPerPass ? t('combat_pass') : ''), 245, 426, 11, '#9fe8ff');
+  }
   const used = G.save.equip.reduce((n, id) => n + (CRESTS[id] || 0), 0), l = gearLayout(), selected = l.rows[l.index];
   ftxt(t('crest_slots') + '  ' + used + ' / ' + effSlots(), 695, 83, 15, '#37ffd0');
   ftxt(t('gear_parts'), 695, 112, 16, '#9fb8c8');
-  dimPanel(38, 82, 415, 352);
   // Use existing authored character art. Attachment labels report real save
   // state; do not invent painted boots/jets that have no approved source.
   const im = MEDIA_IMG.heroStates;

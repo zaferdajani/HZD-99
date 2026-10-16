@@ -98,8 +98,10 @@ const check = (name, ok, detail) => {
   check('...and the brace cannot be raised while broken', r.guardWhileBroken === 0, 'guardT ' + r.guardWhileBroken);
   check('...but comes back a second on', r.guardAfter > 0, 'guardT ' + r.guardAfter);
   check("the machine's plate denies a blow from the front", r.frontDenied <= 3, 'took ' + r.frontDenied);
-  check('...a blow from BEHIND lands whole', r.behindLanded === 20, 'took ' + r.behindLanded);
-  check('...a blow from ABOVE lands whole', r.aboveLanded === 20, 'took ' + r.aboveLanded);
+  // Owner armor stats: 20 raw through 12% chassis defense = 18. Flanking
+  // still bypasses the directional shield (2 chip); it does not erase armor.
+  check('...a blow from BEHIND bypasses shield, retaining chassis armor', r.behindLanded === 18, 'took ' + r.behindLanded);
+  check('...a blow from ABOVE bypasses shield, retaining chassis armor', r.aboveLanded === 18, 'took ' + r.aboveLanded);
   check('its winded window is at least half a second at full cunning', r.winded >= 0.5, r.winded + ' s');
   check('the Furnace Choir stands in C3', r.bossKind === 'atlas', String(r.bossKind));
   check('the hymn misses an airborne body', r.airCores === 5, 'cores ' + r.airCores);

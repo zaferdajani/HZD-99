@@ -1,0 +1,13 @@
+
+── cover  — the platform she is standing on stops a shot, from either side
+── cover  — a one-way platform stops a shot from either side, at any speed
+   platform at tile 18,12 (top y=384)
+  ok   up_slow    stopped=true  passed through=false  y=419
+  ok   up_fast    stopped=true  passed through=false  y=417
+  ok   down_slow  stopped=true  passed through=false  y=348
+  ok   down_fast  stopped=true  passed through=false  y=381
+
+OK — the floor she is standing on is cover
+   (cover: 1.3 s)
+
+all 1 harnesses ran

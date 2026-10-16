@@ -1,0 +1,32 @@
+
+── warp  — ?room= drops the owner into any room: locked, loud when refused, and never his save
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/warp.cjs:34:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/warp.cjs:125:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── warp — one person's door into any room, and it stays one person's
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/warp.cjs:34:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/warp.cjs:125:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (warp: 0.5 s)
+
+1 harness(es) failed

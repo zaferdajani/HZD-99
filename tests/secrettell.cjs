@@ -141,9 +141,13 @@ const check = (name, ok, detail) => {
     out.floorPays = G.save.scrap > s1;
     out.floorFlag = !!G.save.flags.taughtFloor;
 
-    // ---- 3. the dig: one strike, both courses, and the rebound ------------
+    // ---- 3. the dig: the quarry hatch waits for the lion meeting ----------
     boot('A2');
     settle(60);
+    stand(13, 15, 1);
+    downStrike(13, 15);
+    out.hatchHeldBeforeMeet = tileAt(13, 15) === 'B' && !G.save.broken['A2:13,15'];
+    G.save.flags.nfMeet = 1;
     stand(79, 12, 1);
     out.digBefore = tileAt(80, 12) + tileAt(80, 13);
     const s2 = G.save.scrap;
@@ -206,6 +210,7 @@ const check = (name, ok, detail) => {
   check('...which pays', r.floorPays);
   check('...and retires the floor\'s prompt', r.floorFlag);
   check('A2\'s hulk is a crust two courses deep', r.digBefore === 'BB', r.digBefore);
+  check('the quarry hatch stays intact until NULLFANG\'s east-crest meeting', r.hatchHeldBeforeMeet);
   check('...one strike from above cuts both', r.digAfter === '..', r.digAfter);
   check('...and the blow rebounds her (the pogo)', r.digRebound != null && r.digRebound < 0, 'vy after the cut ' + r.digRebound);
   check('...she comes down into the hold', r.digDown, 'feet at ' + r.digFeet + ' (crust top 384)');

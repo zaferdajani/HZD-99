@@ -1,0 +1,18 @@
+
+── bosspace  — no guardian spends the fight standing still, measured against a moving player
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/bosspace.cjs:50:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/bosspace.cjs:271:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/bosspace.cjs:50:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/bosspace.cjs:271:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (bosspace: 0.4 s)
+
+1 harness(es) failed

@@ -1,0 +1,18 @@
+
+── guardians  — every guardian opens after every move, breaks on a group of hits, and draws its moves by range
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/guardians.cjs:69:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/guardians.cjs:385:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/guardians.cjs:69:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/guardians.cjs:385:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (guardians: 0.3 s)
+
+1 harness(es) failed

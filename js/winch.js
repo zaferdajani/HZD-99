@@ -32,6 +32,7 @@ class YardWinch extends Enemy {
     const floor=y+this.h, cx=x+this.w/2;
     this.w=120; this.h=78; this.x=cx-this.w/2; this.y=floor-this.h;
     this.mechanism='winch'; this.actorRole='empty-construct';
+    if(typeof combatInit==='function') combatInit(this);
     this.hp=this.hpMax0=38; this.traits=[]; this.moves=[];
     this.armAngle=-0.25; this.phase='idle'; this.phaseT=0;
     this.face=-1; this.sweepHit=false; this.motorEnabled=true;

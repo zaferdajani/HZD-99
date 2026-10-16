@@ -164,4 +164,13 @@ function foeDraw(c, e) {
   c.drawImage(FR_R, 0, 0, w, h, ox, oy, w / q, h / q);
   c.restore();
   e.draw(c);
+  // Reuse the anatomy stencil, not a white rectangle or brightness filter.
+  // This covers every drawn enemy/guardian without changing sprite pixels,
+  // eye anchors, collision or the telegraph layers excluded from the stencil.
+  if ((e.impactUntil || 0) > performance.now() && !e.rescued && !e.tame && e.st !== 'purified') {
+    T.globalCompositeOperation = 'source-in'; T.fillStyle = '#ffffff'; T.fillRect(0, 0, w, h);
+    T.globalCompositeOperation = 'source-over';
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 0.92;
+    c.drawImage(FR_T, 0, 0, w, h, ox, oy, w / q, h / q); c.restore();
+  }
 }

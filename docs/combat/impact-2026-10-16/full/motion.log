@@ -1,0 +1,117 @@
+
+── motion  — the fired guardian plates are on screen, not just in the manifest
+── motion — the filmed guardian takes are on screen, not in the manifest
+
+  ok   the filmed take is what draws alpha:rest, not the stand-in  12001 px differ
+  ok   ...and it turns with the body in alpha:rest  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:rest  -1 px off the hitbox floor
+  ok   the filmed take is what draws alpha:prowl, not the stand-in  11636 px differ
+  ok   ...and it turns with the body in alpha:prowl  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:prowl  -1 px off the hitbox floor
+  ok   the filmed take is what draws alpha:roarwarn, not the stand-in  12512 px differ
+  ok   ...and it turns with the body in alpha:roarwarn  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:roarwarn  -1 px off the hitbox floor
+  ok   the filmed take is what draws alpha:roar, not the stand-in  12918 px differ
+  ok   ...and it turns with the body in alpha:roar  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:roar  -1 px off the hitbox floor
+  ok   the filmed take is what draws alpha:broodcall, not the stand-in  11149 px differ
+  ok   ...and it turns with the body in alpha:broodcall  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:broodcall  0 px off the hitbox floor
+  ok   the filmed take is what draws alpha:howl, not the stand-in  10403 px differ
+  ok   ...and it turns with the body in alpha:howl  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:howl  1 px off the hitbox floor
+  ok   the filmed take is what draws alpha:coil, not the stand-in  10655 px differ
+  ok   ...and it turns with the body in alpha:coil  mirror agreement 1
+  ok   the filmed take is what draws alpha:leap, not the stand-in  10947 px differ
+  ok   ...and it turns with the body in alpha:leap  mirror agreement 1
+  ok   the filmed take is what draws alpha:recoil, not the stand-in  9978 px differ
+  ok   ...and it turns with the body in alpha:recoil  mirror agreement 1
+  ok   the filmed take is what draws alpha:turn, not the stand-in  9605 px differ
+  ok   ...and it turns with the body in alpha:turn  mirror agreement 1
+  ok   the filmed take is what draws alpha:clawwarn, not the stand-in  11977 px differ
+  ok   ...and it turns with the body in alpha:clawwarn  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:clawwarn  0 px off the hitbox floor
+  ok   the filmed take is what draws alpha:claw, not the stand-in  11798 px differ
+  ok   ...and it turns with the body in alpha:claw  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:claw  0 px off the hitbox floor
+  ok   the filmed take is what draws alpha:bitewarn, not the stand-in  12902 px differ
+  ok   ...and it turns with the body in alpha:bitewarn  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:bitewarn  0 px off the hitbox floor
+  ok   the filmed take is what draws alpha:bite, not the stand-in  13207 px differ
+  ok   ...and it turns with the body in alpha:bite  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:bite  0 px off the hitbox floor
+  ok   the filmed take is what draws alpha:clinch, not the stand-in  12432 px differ
+  ok   ...and it turns with the body in alpha:clinch  mirror agreement 1
+  ok   the filmed take is what draws alpha:shake, not the stand-in  11735 px differ
+  ok   ...and it turns with the body in alpha:shake  mirror agreement 1
+  ok   the filmed take is what draws alpha:free, not the stand-in  12001 px differ
+  ok   ...and it turns with the body in alpha:free  mirror agreement 1
+  ok   the filmed take is what draws chime:rest, not the stand-in  5384 px differ
+  ok   ...and it turns with the body in chime:rest  mirror agreement 1
+  ok   the filmed take is what draws chime:ringwarn, not the stand-in  10416 px differ
+  ok   ...and it turns with the body in chime:ringwarn  mirror agreement 1
+  ok   the filmed take is what draws chime:ring, not the stand-in  26746 px differ
+  ok   ...and it turns with the body in chime:ring  mirror agreement 1
+  ok   the filmed take is what draws chime:notewarn, not the stand-in  10091 px differ
+  ok   ...and it turns with the body in chime:notewarn  mirror agreement 1
+  ok   the filmed take is what draws chime:note, not the stand-in  7047 px differ
+  ok   ...and it turns with the body in chime:note  mirror agreement 1
+  ok   the filmed take is what draws chime:dead, not the stand-in  6306 px differ
+  ok   ...and it turns with the body in chime:dead  mirror agreement 1
+  ok   the retired §3m still-plate table is gone (no plate can draw in front of a guardian's rig or take)
+  ok   the filmed take is what draws NULLFANG's stalk, not the rig  14436 px differ
+  ok   ...and it turns with him in stalk  mirror agreement 1
+  ok   ...and its feet are where the rig's are in stalk  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's run, not the rig  14802 px differ
+  ok   ...and it turns with him in run  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's idle, not the rig  14002 px differ
+  ok   ...and it turns with him in idle  mirror agreement 1
+  ok   ...and its feet are where the rig's are in idle  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's roar, not the rig  13314 px differ
+  ok   ...and it turns with him in roar  mirror agreement 1
+  ok   ...and its feet are where the rig's are in roar  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's intro, not the rig  13541 px differ
+  ok   ...and it turns with him in intro  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's swipewarn, not the rig  14720 px differ
+  ok   ...and it turns with him in swipewarn  mirror agreement 1
+  ok   ...and its feet are where the rig's are in swipewarn  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's swipe, not the rig  14742 px differ
+  ok   ...and it turns with him in swipe  mirror agreement 1
+  ok   ...and its feet are where the rig's are in swipe  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's crouch, not the rig  13937 px differ
+  ok   ...and it turns with him in crouch  mirror agreement 1
+  ok   ...and its feet are where the rig's are in crouch  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's springwarn, not the rig  13911 px differ
+  ok   ...and it turns with him in springwarn  mirror agreement 1
+  ok   ...and its feet are where the rig's are in springwarn  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's pounce, not the rig  15909 px differ
+  ok   ...and it turns with him in pounce  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's recover, not the rig  14445 px differ
+  ok   ...and it turns with him in recover  mirror agreement 1
+  ok   ...and its feet are where the rig's are in recover  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's spring, not the rig  13814 px differ
+  ok   ...and it turns with him in spring  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's dive, not the rig  16672 px differ
+  ok   ...and it turns with him in dive  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's perch, not the rig  14788 px differ
+  ok   ...and it turns with him in perch  mirror agreement 1
+  ok   ...and its feet are where the rig's are in perch  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's daze, not the rig  13543 px differ
+  ok   ...and it turns with him in daze  mirror agreement 1
+  ok   ...and its feet are where the rig's are in daze  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's nullcharge, not the rig  14321 px differ
+  ok   ...and it turns with him in nullcharge  mirror agreement 1
+  ok   ...and its feet are where the rig's are in nullcharge  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's nullhop, not the rig  12650 px differ
+  ok   ...and it turns with him in nullhop  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's nullend, not the rig  12113 px differ
+  ok   ...and it turns with him in nullend  mirror agreement 1
+  ok   ...and its feet are where the rig's are in nullend  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's dead, not the rig  13052 px differ
+  ok   ...and it turns with him in dead  mirror agreement 1
+  ok   no page errors while drawing them
+
+OK — the filmed takes are on screen, facing the right way, standing on the floor
+   (motion: 2.8 s)
+
+all 1 harnesses ran

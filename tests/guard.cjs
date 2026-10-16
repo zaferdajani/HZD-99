@@ -177,8 +177,10 @@ const check = (name, ok, detail) => {
   check('the lunge wore the parry glint before it landed', pf.glint);
   check('the counter: one ATTACK press answers, invulnerable for all of it',
     P.counter.sawAct && P.counter.invulnAll, JSON.stringify(P.counter));
-  check('...for fixed damage (' + P.counter.fixed + '), not her scaled slash',
-    P.counter.dealt === P.counter.fixed && P.counter.hpLost >= P.counter.fixed, JSON.stringify(P.counter));
+  // The owner added chassis armor: fixed RAW 36, through the guard's 12%
+  // defense, is 32. It still ignores the hero's equipment multipliers.
+  check('...for fixed raw 36 through 12% armor, not her scaled slash',
+    P.counter.fixed === 36 && P.counter.dealt === 32 && P.counter.hpLost === 32, JSON.stringify(P.counter));
   check('a brace held from early is just the brace: blocked, heated, not parried',
     P.late.parries === 0 && P.late.lost === 0 && P.late.heat > 0 && !P.late.counterOpen, JSON.stringify(P.late));
   check('an attack without the glint cannot be parried, even at perfect timing',

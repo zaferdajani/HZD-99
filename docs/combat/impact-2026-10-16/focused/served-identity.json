@@ -1,0 +1,32 @@
+{
+  "root": "/workspace/scratch/7ada3b7523b4/combat-impact",
+  "base": "http://127.0.0.1:8220/",
+  "takenAt": "2026-10-16T11:27:55.315Z",
+  "files": {
+    "index.html": {
+      "sha256": "86404bd70c607332d9a463e382d6b6accae048a2a38797a9dc9ad1ba5deee9e4",
+      "bytes": 4913286,
+      "buildId": "2185238e5019"
+    },
+    "odyssey.html": {
+      "sha256": "f858b7dd55688dad82ff30349746ea91be6413a9f6c4d9d2104bb463c25c39d3",
+      "bytes": 3628051,
+      "buildId": "2185238e5019"
+    },
+    "sw.js": {
+      "sha256": "6e21a93cb091aefaad93b0d7572ba506f6c9f0cc4f8fc8bd40e2e18edf4ce4b5",
+      "bytes": 2494,
+      "buildId": null
+    },
+    "assets/eyes.json": {
+      "sha256": "1c2cd68f095c9cfb1960ef752c4ed3ac550a2b5ad3b93be6c8be5ddb83b31faf",
+      "bytes": 14438,
+      "buildId": null
+    },
+    "assets/lowres/alBite.webp": {
+      "sha256": "3733553b294f3431ae5a4308f460a1947644e3866f7cbc8add189a301bc08fa2",
+      "bytes": 26442,
+      "buildId": null
+    }
+  }
+}

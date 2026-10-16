@@ -722,8 +722,19 @@ function addPart(x, y, vx, vy, life, color, size, grav, glow) {
   if (typeof FOE_READ !== 'undefined' && FOE_READ.sil) return;   // a rim's stencil pass lays nothing (js/foeread.js)
   // the budget is the device's, not the effect's — every burst in the game asks
   // for as many as it wants and gets as many as this machine can draw
-  if (parts.length > (typeof QUAL !== 'undefined' ? QUAL.parts : 600)) return;
-  parts.push({ x, y, vx, vy, life, life0: life, color, size: size || 3, grav: grav == null ? 600 : grav, glow: !!glow });
+  if (parts.length >= (typeof QUAL !== 'undefined' ? QUAL.parts : 600)) return;
+  const p = { x, y, vx, vy, life, life0: life, color, size: size || 3, grav: grav == null ? 600 : grav, glow: !!glow };
+  parts.push(p); return p;
+}
+// Tiny cosmetic hardware, never pickups or lost robot limbs. Shares the
+// existing particle budget, room cleanup and clock; no new unbounded emitter.
+function metalBurst(x, y, count, heavy) {
+  let available = Math.max(0, 80 - parts.filter(p => p.metal).length);
+  for (let i = 0; i < Math.min(count, available); i++) {
+    const p = addPart(x, y, rnd(-1, 1) * (heavy ? 210 : 130), rnd(-210, -70),
+      rnd(0.32, 0.65), i % 2 ? '#aeb9c8' : '#e6edf4', rnd(2, 4), 680, false);
+    if (p) Object.assign(p, { metal: i % 2 ? 'shard' : 'screw', angle: rnd(0, Math.PI), spin: rnd(-14, 14), bounced: false });
+  }
 }
 function burst(x, y, n, color, sp, life, grav, size, glow) {
   for (let i = 0; i < n; i++) {
@@ -736,7 +747,15 @@ function updateParts(dt) {
     const p = parts[i];
     p.life -= dt;
     if (p.life <= 0) { parts.splice(i, 1); continue; }
+    const oldY = p.y;
     p.vy += p.grav * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.metal) {
+      p.angle += p.spin * dt;
+      if (!p.bounced && p.vy > 0 && typeof solidAt === 'function' && typeof G !== 'undefined' && G.grid) {
+        const tx = Math.floor(p.x / TILE), ty = Math.floor(p.y / TILE);
+        if (oldY <= ty * TILE && solidAt(tx, ty)) { p.y = ty * TILE - 1; p.vy *= -0.3; p.vx *= 0.55; p.bounced = true; }
+      }
+    }
   }
 }
 function drawParts(c) {
@@ -747,7 +766,14 @@ function drawParts(c) {
     c.globalAlpha = Math.max(0, p.life / p.life0);
     if (p.glow && glowOK) { c.shadowColor = p.color; c.shadowBlur = 10; }
     c.fillStyle = p.color;
-    c.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+    if (p.metal) {
+      c.save(); c.translate(p.x, p.y); c.rotate(p.angle);
+      if (p.metal === 'screw') {
+        c.fillRect(-p.size * 0.25, -p.size, p.size * 0.5, p.size * 2);
+        c.fillRect(-p.size * 0.7, -p.size, p.size * 1.4, p.size * 0.55);
+      } else { c.beginPath(); c.moveTo(-p.size, p.size * 0.5); c.lineTo(0, -p.size); c.lineTo(p.size, 0); c.closePath(); c.fill(); }
+      c.restore();
+    } else c.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
     c.shadowBlur = 0;
   }
   c.globalAlpha = 1;

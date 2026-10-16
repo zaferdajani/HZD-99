@@ -26,9 +26,52 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const servedIdentity = require('../tests/served-identity.cjs');
+const { createHash } = require('crypto');
 
 const FF = (() => { const p = path.join(__dirname, '..', 'node_modules', 'ffmpeg-static', 'ffmpeg'); return fs.existsSync(p) ? p : 'ffmpeg'; })();
 const FPS = 30, SR = 32000;
+
+function assessFilm(runtimeErrors, pageErrors, coverage, requireCoverage = false) {
+  const errors = [...new Set([...(runtimeErrors || []), ...(pageErrors || [])].filter(Boolean))];
+  const validList = a => Array.isArray(a) && a.every(k => typeof k === 'string' && k.trim().length > 0);
+  if ((requireCoverage || coverage != null) && (!coverage || !validList(coverage.expected)
+      || coverage.expected.length === 0 || !validList(coverage.observed)))
+    errors.push('missing or malformed required coverage manifest');
+  const expected = coverage && Array.isArray(coverage.expected) ? coverage.expected : [];
+  const observed = coverage && Array.isArray(coverage.observed) ? coverage.observed : [];
+  // Recompute from observations; a producer's stale empty missing list cannot certify a move.
+  const missing = [...new Set(expected.filter(k => !observed.includes(k)).concat(
+    coverage && Array.isArray(coverage.missing) ? coverage.missing : []))];
+  return {
+    scope: coverage ? 'staged-move-coverage' : 'capture-only-no-move-certification',
+    complete: errors.length === 0 && missing.length === 0,
+    errors, coverage: coverage ? Object.assign({}, coverage, { expected, observed, missing }) : null,
+  };
+}
+
+function encodeAndCertify(certificate, certPath, out, encode) {
+  const evidenceComplete = certificate.complete;
+  certificate.complete = false;
+  certificate.encoding = 'pending';
+  fs.writeFileSync(certPath, JSON.stringify(certificate, null, 2) + '\n');
+  try {
+    encode();
+    const bytes = fs.readFileSync(out);
+    if (!bytes.length) throw new Error('encoder produced empty output');
+    certificate.artifact = { path: path.resolve(out), bytes: bytes.length,
+      sha256: createHash('sha256').update(bytes).digest('hex') };
+    certificate.encoding = 'complete';
+    certificate.complete = evidenceComplete;
+  } catch (e) {
+    certificate.encoding = 'failed';
+    certificate.errors.push('encoding: ' + (e.message || e));
+    throw e;
+  } finally {
+    fs.writeFileSync(certPath, JSON.stringify(certificate, null, 2) + '\n');
+  }
+  return certificate;
+}
 
 // ---------------------------------------------------------------------------
 // The page side. Everything in here runs inside the game's own scope.
@@ -70,11 +113,11 @@ function installReel(cfg) {
     const off = new OfflineAudioContext(1, Math.ceil(SR * dur), SR);
     const saveAC = AC, saveM = MUTED;
     AC = off; MUTED = false; voxMech = () => null;
-    try { fn(); } catch (e) { R.log.push('ERR ' + label + ' ' + e); }
+    try { fn(); } catch (e) { R.errors.push('audio ' + label + ': ' + e); }
     AC = saveAC; MUTED = saveM; voxMech = _vm;
     R.pend.push(off.startRendering()
       .then(b => mixInto(sec, b.getChannelData(0), at, 1))
-      .catch(() => {}));
+      .catch(e => R.errors.push('audio render ' + label + ': ' + e)));
     tick(label);
   }
   sfx = function (n) {
@@ -103,7 +146,7 @@ function installReel(cfg) {
   function streamIn(label, src, vol, maxSec) {
     if (!R.sec || !src) return false;
     const sec = R.sec, at = R.t - sec.t0;
-    R.pend.push(fetch(src).then(r => r.arrayBuffer())
+    R.pend.push(fetch(src).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
       .then(ab => new OfflineAudioContext(1, SR, SR).decodeAudioData(ab))
       .then(b => {
         const d = b.getChannelData(0);
@@ -112,7 +155,7 @@ function installReel(cfg) {
         const out = new Float32Array(n);
         for (let i = 0; i < n; i++) out[i] = d[i] * (i > n - fade ? (n - i) / fade : 1);
         mixInto(sec, out, at, vol);
-      }).catch(() => {}));
+      }).catch(e => R.errors.push('audio stream ' + label + ': ' + e)));
     tick(label);
     return true;
   }
@@ -160,7 +203,8 @@ function installReel(cfg) {
     const frames = R.queue.splice(0);
     const audio = R.audioOut.splice(0);
     const res = R.resume; R.resume = null; if (res) res();
-    return { frames, audio, done: R.done, log: R.log.splice(0), errors: R.errors.splice(0), nfr: R.nfr };
+    return { frames, audio, done: R.done, log: R.log.splice(0), errors: R.errors.splice(0),
+      coverage: R.coverage || null, nfr: R.nfr };
   };
   R.camOn = (x, y) => {
     if (R.bossFilter) return; // keep the shipped fight camera, including its zoom
@@ -563,14 +607,18 @@ async function program(opts) {
 // programme (page-side source plus the call that starts it), then collect the
 // frames and the per-section sound and cut them into one mp4. The cast reel
 // below is one programme; tools/nullfangreel.cjs is another.
-async function film({ out, fdir, keep, cfg, src, start, startArg, wavName }) {
+async function film({ out, fdir, keep, cfg, src, start, startArg, wavName, requireCoverage = false }) {
   fs.mkdirSync(fdir, { recursive: true });
   for (const f of fs.readdirSync(fdir)) fs.unlinkSync(path.join(fdir, f));
 
+  const identityExpected = servedIdentity.diskSnapshot();
+  const identityResult = await servedIdentity.verifyServed(identityExpected);
+  if (!identityResult.ok) throw new Error(servedIdentity.report(identityResult, 'before reel capture'));
+
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
-  const page = await browser.newPage({ viewport: { width: 960, height: 540 }, deviceScaleFactor: 2 });
+  const page = await browser.newPage({ viewport: { width: 960, height: 540 }, deviceScaleFactor: 2, serviceWorkers: 'block' });
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
-  await page.goto('http://127.0.0.1:8220/index.html');
+  await page.goto(servedIdentity.BASE + 'index.html');
   await page.waitForFunction(() => typeof startGame === 'function', { timeout: 20000 });
   await page.evaluate(installReel, Object.assign({ FPS, SR }, cfg));
   const takes = await page.evaluate(() => REEL.boot());
@@ -580,7 +628,8 @@ async function film({ out, fdir, keep, cfg, src, start, startArg, wavName }) {
   await page.addScriptTag({ content: src + '\nwindow.__reelProgram = ' + start + ';' });
   await page.evaluate(a => { window.__reelProgram(a); }, startArg);
 
-  let n = 0; const pcm = []; const secs = []; const logAll = [];
+  let n = 0; const pcm = []; const secs = []; const logAll = [], runtimeErrors = [];
+  let finalCoverage = null;
   for (;;) {
     const r = await page.evaluate(() => REEL.take());
     for (const f of r.frames) {
@@ -593,14 +642,23 @@ async function film({ out, fdir, keep, cfg, src, start, startArg, wavName }) {
       console.log('section', a.name, a.frames + 'f', 'peak', a.peak.toFixed(2));
     }
     for (const l of r.log) { logAll.push(l); if (/ERR|decoded/.test(l)) console.log(' ', l); }
-    for (const e of r.errors) console.log('  PAGE:', e);
+    for (const e of r.errors) { runtimeErrors.push(e); console.log('  PAGE:', e); }
+    if (r.coverage) finalCoverage = r.coverage;
     if (r.done && !r.frames.length) break;
     if (!r.frames.length) await new Promise(res => setTimeout(res, 120));
   }
   const log = logAll.concat(await page.evaluate(() => REEL.log));
   await browser.close();
+  const identityEnd = await servedIdentity.verifyServed(identityExpected);
+  if (!identityEnd.ok) runtimeErrors.push(servedIdentity.report(identityEnd, 'after reel capture'));
   for (const e of errs) console.log('pageerror:', e);
   console.log('frames:', n, 'sections:', secs.length);
+
+  const certificate = Object.assign({ frames: n, sections: secs,
+    servedIdentity: { root: identityExpected.root, files: identityExpected.files } },
+  assessFilm(runtimeErrors, errs, finalCoverage, requireCoverage));
+  const certPath = path.join(fdir, '..', (wavName || 'cast_reel') + '.certificate.json');
+  // The sidecar covers this staged capture, not any later concatenated movie.
 
   // the soundtrack: one WAV, section PCM back to back — each section's audio
   // is exactly its frame count long, so the picture and the sound share a clock
@@ -614,15 +672,20 @@ async function film({ out, fdir, keep, cfg, src, start, startArg, wavName }) {
   fs.writeFileSync(wav, Buffer.concat([hdr, data]));
   fs.writeFileSync(path.join(fdir, '..', (wavName || 'cast_reel') + '.log'), log.join('\n') + '\n\n' + JSON.stringify(secs, null, 1));
 
-  execFileSync(FF, ['-y', '-hide_banner', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(fdir, '%06d.jpg'),
+  encodeAndCertify(certificate, certPath, out, () => execFileSync(FF, ['-y', '-hide_banner', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(fdir, '%06d.jpg'),
     '-i', wav, '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-pix_fmt', 'yuv420p',
-    '-c:a', 'aac', '-b:a', '128k', '-shortest', '-movflags', '+faststart', out], { stdio: 'inherit' });
+    '-c:a', 'aac', '-b:a', '128k', '-shortest', '-movflags', '+faststart', out], { stdio: 'inherit' }));
   console.log('wrote', out, (fs.statSync(out).size / 1048576).toFixed(1) + ' MB', (n / FPS).toFixed(0) + ' s');
   if (!keep) { for (const f of fs.readdirSync(fdir)) fs.unlinkSync(path.join(fdir, f)); fs.rmdirSync(fdir); }
-  return { frames: n, secs, log, wav };
+  if (!certificate.complete) {
+    const why = certificate.errors.length ? certificate.errors.length + ' runtime/page error(s)'
+      : certificate.coverage.missing.length + ' required beat(s) missing';
+    throw new Error('reel evidence incomplete: ' + why + '; see ' + certPath);
+  }
+  return { frames: n, secs, log, wav, certificate, certPath };
 }
 
-module.exports = { installReel, film, FPS, SR };
+module.exports = { installReel, film, assessFilm, encodeAndCertify, FPS, SR };
 
 if (require.main === module) (async () => {
   const args = process.argv.slice(2);

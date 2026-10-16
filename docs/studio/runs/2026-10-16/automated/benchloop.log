@@ -1,0 +1,32 @@
+
+── benchloop  — every one-way route (a drop she cannot climb back, a door with none behind it) still reaches a bench
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/benchloop.cjs:42:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/benchloop.cjs:165:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── benchloop — every one-way route loops back to a bench
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/benchloop.cjs:42:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/benchloop.cjs:165:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (benchloop: 0.4 s)
+
+1 harness(es) failed

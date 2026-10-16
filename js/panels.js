@@ -337,8 +337,7 @@ function panelsDue() {
     if (S.seen[s.id] || S.past[s.id] || s.manual) continue;
     // a beat already overtaken by the story is not shown late, out of order
     if (s.stale && s.stale(S, f)) continue;
-    if (G.roomId === s.alsoRoom) continue;
-    if (G.roomId !== s.room) continue;
+    if (G.roomId !== s.room && G.roomId !== s.alsoRoom) continue;
     if (s.when(f)) return s;
   }
   return null;

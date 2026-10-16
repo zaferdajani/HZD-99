@@ -1,0 +1,28 @@
+
+── brand  — every release surface carries the studio name
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/brand.cjs:30:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/brand.cjs:68:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/brand.cjs:30:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/brand.cjs:68:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (brand: 0.3 s)
