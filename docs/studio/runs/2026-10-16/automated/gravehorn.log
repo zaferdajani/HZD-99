@@ -1,0 +1,18 @@
+
+── gravehorn  — GRAVEHORN: the entrance, every move told and opened, the charge jumped, the toss thrown and parried, twin horns, the kick from behind, the exit
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/gravehorn.cjs:42:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/gravehorn.cjs:668:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/gravehorn.cjs:42:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/gravehorn.cjs:668:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (gravehorn: 0.4 s)
+
+1 harness(es) failed

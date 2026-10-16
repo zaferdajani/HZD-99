@@ -1,0 +1,21 @@
+
+── platform  — RULE ONE: web, phone, app and desktop shell are the same game
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/platform.cjs:57:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/platform.cjs:168:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── platform — one build, four platforms, no divergence
+  ok   index.html: the packaged page is the web page  
+  ok   index.html: and the app does not register a worker
+  ok   odyssey.html: the packaged page is the web page  
+  ok   odyssey.html: and the app does not register a worker
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/platform.cjs:57:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/platform.cjs:168:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (platform: 0.4 s)

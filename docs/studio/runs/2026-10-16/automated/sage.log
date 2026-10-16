@@ -1,0 +1,18 @@
+
+── sage  — the duelist that can only be cleansed: floor, lock, purity, tame, the once-paid gift
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/sage.cjs:18:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/sage.cjs:114:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/sage.cjs:18:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/sage.cjs:114:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (sage: 0.3 s)
+
+1 harness(es) failed

@@ -1,0 +1,18 @@
+
+── cave-passage  — real cave traversal and reciprocal gate walks
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/cave-passage.cjs:4:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/cave-passage.cjs:48:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/cave-passage.cjs:4:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/cave-passage.cjs:48:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (cave-passage: 0.3 s)
+
+1 harness(es) failed

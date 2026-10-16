@@ -1,0 +1,32 @@
+
+── hitshape  — authored hit shapes: every swing inside its old square, the far corners trimmed, the Forge overlay
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/hitshape.cjs:20:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/hitshape.cjs:116:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── hitshape — every swing has an authored shape inside its old square, and the Forge can show it
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/hitshape.cjs:20:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/hitshape.cjs:116:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (hitshape: 0.3 s)
+
+1 harness(es) failed

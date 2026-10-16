@@ -1,0 +1,32 @@
+
+── cavedark  — the cave is dark, and light is the only map of it
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/cavedark.cjs:47:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/cavedark.cjs:410:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── cavedark — the cave is dark and light is the map
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/cavedark.cjs:47:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/cavedark.cjs:410:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (cavedark: 0.4 s)
+
+1 harness(es) failed

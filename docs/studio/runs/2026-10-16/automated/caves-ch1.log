@@ -1,0 +1,20 @@
+
+── caves-ch1  — every chapter-one cave pays something of its own; early finds remembered; a rescue never looks like a kill
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/caves-ch1.cjs:28:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/caves-ch1.cjs:253:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── caves-ch1 — every chapter-one cave pays something of its own
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/caves-ch1.cjs:28:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/caves-ch1.cjs:253:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (caves-ch1: 0.3 s)
+
+1 harness(es) failed

@@ -1,0 +1,20 @@
+
+── crestfight  — the expensive seals change how she fights: each attack block measured with every weapon, drawn, one style at a time, in five languages
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/crestfight.cjs:53:28
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/crestfight.cjs:529:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── crestfight — the expensive seals change how she fights, with every weapon, and she can see it
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/crestfight.cjs:53:28
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/crestfight.cjs:529:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (crestfight: 0.3 s)
+
+1 harness(es) failed

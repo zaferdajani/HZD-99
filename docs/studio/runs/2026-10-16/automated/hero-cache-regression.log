@@ -1,0 +1,18 @@
+
+── hero-cache-regression  — third-hit cached sheet geometry and supplied idle in every mood
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/hero-cache-regression.cjs:4:31
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/hero-cache-regression.cjs:51:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/hero-cache-regression.cjs:4:31
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/hero-cache-regression.cjs:51:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (hero-cache-regression: 0.4 s)
+
+1 harness(es) failed

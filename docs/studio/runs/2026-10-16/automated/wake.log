@@ -1,0 +1,18 @@
+
+── wake  — the opening: film, waking floor, move -> jump -> gates -> straight into Ratchet's booth
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/wake.cjs:9:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/wake.cjs:76:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/wake.cjs:9:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/wake.cjs:76:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (wake: 0.3 s)
+
+1 harness(es) failed

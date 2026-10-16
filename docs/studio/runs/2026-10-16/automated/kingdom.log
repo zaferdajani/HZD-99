@@ -1,0 +1,30 @@
+
+── kingdom  — the kingdom protocol driven live: art, enemies, guardian, places, bench, every door walked, sound, music
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/kingdom.cjs:27:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/kingdom.cjs:387:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/kingdom.cjs:27:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/kingdom.cjs:387:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (kingdom: 0.4 s)
+
+1 harness(es) failed

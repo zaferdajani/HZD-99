@@ -1,0 +1,20 @@
+
+── servo-presence  — Old Servo stood beside, not inside: prompt before contact, talk stand-off, grounded, whole arc on desktop and phone
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/servo-presence.cjs:191:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/servo-presence.cjs:231:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── servo-presence — Old Servo, stood beside: prompt, stand-off, grounding, the whole arc
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/servo-presence.cjs:191:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/servo-presence.cjs:231:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (servo-presence: 0.4 s)
+
+1 harness(es) failed

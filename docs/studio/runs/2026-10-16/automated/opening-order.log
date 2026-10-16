@@ -1,0 +1,18 @@
+
+── opening-order  — the opening played with real input in the owner's order, desktop and phone, to Old Servo
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/opening-order.cjs:301:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/opening-order.cjs:368:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/opening-order.cjs:301:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/opening-order.cjs:368:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (opening-order: 0.3 s)
+
+1 harness(es) failed

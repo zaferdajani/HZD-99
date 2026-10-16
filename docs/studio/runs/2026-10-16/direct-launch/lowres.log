@@ -1,0 +1,13 @@
+Command: node tests/lowres.cjs
+Exit: 1
+── lowres — the whole world, roughly, for half a megabyte
+  ok   every small copy the manifest names is on disk  89 entries
+  ok   ...and every one of them is at most a quarter of its full sheet  all under
+  ok   the whole tier is small enough to front-load  1.81 MB for 26.7 MB of art (6.8%)
+  ok   no sheet addressed by absolute pixel rect has a small copy  6 guardian files checked
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/lowres.cjs:83:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/lowres.cjs:145:3) {
+  log: [],
+  name: 'Error'
+}

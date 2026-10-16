@@ -1,0 +1,16 @@
+Command: node tests/face.cjs
+Exit: 1
+── face — effort on the reel, relief after a repair, fear at a roar, a sputter on the last core
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/face.cjs:21:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/face.cjs:103:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0

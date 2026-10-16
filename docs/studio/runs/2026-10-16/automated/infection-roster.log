@@ -1,0 +1,30 @@
+
+── infection-roster  — every hostile body and every guardian: an eye, its colour, on the head, facing, and the smoke born there
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/infection-roster.cjs:23:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/infection-roster.cjs:289:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/infection-roster.cjs:23:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/infection-roster.cjs:289:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (infection-roster: 0.4 s)
+
+1 harness(es) failed

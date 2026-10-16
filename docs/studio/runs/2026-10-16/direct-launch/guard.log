@@ -1,0 +1,16 @@
+Command: node tests/guard.cjs
+Exit: 1
+── guard — she braces, bracing costs the hit its push, and a brace in the instant turns it
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/guard.cjs:26:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/guard.cjs:197:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0

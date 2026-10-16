@@ -1,0 +1,18 @@
+
+── repair-browser  — Ratchet drag controls, page reload and interrupted boot in the assembled game
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/repair-browser.cjs:5:31
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/repair-browser.cjs:60:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/repair-browser.cjs:5:31
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/repair-browser.cjs:60:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (repair-browser: 0.3 s)
+
+1 harness(es) failed

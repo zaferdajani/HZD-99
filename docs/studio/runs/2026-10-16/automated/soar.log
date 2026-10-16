@@ -1,0 +1,32 @@
+
+── soar  — Volt Soar: UP + claw on the ground, six tiles straight up, to the first ceiling, cutting what she passes
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/soar.cjs:20:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/soar.cjs:161:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── soar — UP + claw on the ground launches her six tiles, to the first ceiling, cutting what she passes
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/soar.cjs:20:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/soar.cjs:161:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (soar: 0.3 s)
+
+1 harness(es) failed

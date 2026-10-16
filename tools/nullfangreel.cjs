@@ -224,7 +224,7 @@ async function nullfangReel() {
   let swipes = 0, wasSw = false;
   await scene('Phase Two: the Double Swipe', 'an angry lion swipes twice  ·  each with its full tell', 4.0, () => {
     hold('swipe'); watch();
-    if (b.st === 'swipe' && !wasSw) swipes++;
+    if (b.phase === 2 && b.st === 'swipe' && !wasSw) swipes++;
     wasSw = b.st === 'swipe';
     if (b.st === 'idle' && swipes) b.swipeCD = 99;
   });
@@ -307,7 +307,7 @@ if (require.main === module) (async () => {
   await film({
     out: reel, fdir: path.join(path.dirname(out), 'nf_frames'), keep: args.includes('--keep'),
     cfg: { MAXF: 0, bossFilter: 'glitch' }, src: nullfang.toString() + '\n' + nullfangReel.toString(), start: 'nullfang', startArg: null,
-    wavName: 'nullfang_moves',
+    wavName: 'nullfang_moves', requireCoverage: true,
   });
   // ...and the purification film after it, as shipped. It carries no sound
   // of its own (the game plays it over the zone's music), so it rides on

@@ -1,0 +1,32 @@
+
+── dmglog  — the damage log as a check: cores lost by source per room, the 40% flag, the Forge overlay
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/dmglog.cjs:22:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/dmglog.cjs:75:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── dmglog — what costs her cores, by source, per room, with the 40% flag
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/dmglog.cjs:22:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/dmglog.cjs:75:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (dmglog: 0.3 s)
+
+1 harness(es) failed

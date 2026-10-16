@@ -1,0 +1,18 @@
+
+── wolves  — the pack, the Alpha and the flag that changes a whole species
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/wolves.cjs:29:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/wolves.cjs:572:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/wolves.cjs:29:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/wolves.cjs:572:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (wolves: 0.4 s)
+
+1 harness(es) failed

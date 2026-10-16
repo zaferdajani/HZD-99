@@ -1,0 +1,18 @@
+
+── contrast  — every hostile body and every guardian stands off the room it is placed in: silhouette edge contrast, room by room
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/contrast.cjs:77:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/contrast.cjs:328:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/contrast.cjs:77:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/contrast.cjs:328:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (contrast: 0.4 s)
+
+1 harness(es) failed

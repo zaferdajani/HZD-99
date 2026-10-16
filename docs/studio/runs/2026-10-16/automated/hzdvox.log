@@ -1,0 +1,18 @@
+
+── hzdvox  — her voice: on the frame she moves, never clipping, never twice at once
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/hzdvox.cjs:22:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/hzdvox.cjs:272:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/hzdvox.cjs:22:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/hzdvox.cjs:272:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (hzdvox: 0.3 s)
+
+1 harness(es) failed

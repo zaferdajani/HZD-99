@@ -1,0 +1,32 @@
+
+── terrainrun  — irregularity is not elevation: she runs it, and so do they
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/terrainrun.cjs:47:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/terrainrun.cjs:411:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+FAILED: ── terrainrun — irregularity is not elevation
+
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/terrainrun.cjs:47:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/terrainrun.cjs:411:3) {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.19.0
+
+   (terrainrun: 0.4 s)
+
+1 harness(es) failed

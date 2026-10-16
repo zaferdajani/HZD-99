@@ -1,0 +1,20 @@
+
+── den-gate  — the lion's den and the bell, every entrance, dash/jump bypass and save/load, before and after their milestones
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/den-gate.cjs:28:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/den-gate.cjs:271:3) {
+  log: [],
+  name: 'Error'
+}
+FAILED: ── den-gate — the lair and the bell, every way in, before and after
+
+browserType.launch: Failed to launch chromium because executable doesn't exist at /opt/pw-browsers/chromium
+    at /workspace/scratch/7ada3b7523b4/studio-review/tests/den-gate.cjs:28:34
+    at Object.<anonymous> (/workspace/scratch/7ada3b7523b4/studio-review/tests/den-gate.cjs:271:3) {
+  log: [],
+  name: 'Error'
+}
+
+   (den-gate: 0.3 s)
+
+1 harness(es) failed
