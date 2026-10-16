@@ -167,9 +167,15 @@ const WOLF_ART = {
   // the Alpha's yield turns the pack: the seams and eyes go cyan and it sits
   purify: wolfStrip('wolfPurify6', 6, 127, { raw: 1 }),
   sit: wolfStrip('wolfSit6', 6, 132, { loop: 1.0, raw: 1 }),
+  // BOUND, WAITING FOR THE BLADE (owner, 2026-10-16: "if the enemy is waiting
+  // to be cleansed, it should be down on the floor ... not standing still like
+  // a mannequin"). The lowest cell of the filmed crouch, held, and laid lower
+  // still by BEAST_RECOVER.down — chest on the ground, head sunk, breathing.
+  // A lying-down take of its own is on THE FIRING LIST (ART_QUEUE §2cc-ix).
+  down: wolfStrip('wolfCrouch4', 4, 97, { hold: 0 }),
 };
 // a pose the cheetah has no drawing for borrows the nearest one it has
-const BEAST_POSE_FALLBACK = { leap: 'lunge', crouch: 'coil' };
+const BEAST_POSE_FALLBACK = { leap: 'lunge', crouch: 'coil', down: 'coil' };
 // how long the purify strip takes, seconds
 const WOLF_PURIFY_T = 1.1;
 // THE TIMER'S RISING EDGE. A one-shot needs to know how long its timer
@@ -244,6 +250,9 @@ function tameArt(key, src) {
 const BEAST_RECOVER = {
   winded: { rot: -0.12, kx: 1.10, ky: 0.80, dx: 0.04, heave: 9 },
   land:   { rot: -0.07, kx: 1.16, ky: 0.70, dx: 0, heave: 0 },
+  // bound: flattened onto the floor, head down, a slow shallow breath — and it
+  // applies over the held filmed cell too, which is what lays the crouch down
+  down:   { rot: -0.13, kx: 1.12, ky: 0.62, dx: 0.03, heave: 1.4, always: 1 },
 };
 // one full breath of the winded strip, in seconds: the filmed pant is ~1.6 s,
 // played faster because the punish window is only 0.5-0.75 s and a breath
@@ -274,6 +283,8 @@ function wolfPose(e, ART, tame) {
   const stride = run ? STRIDE_RUN * (e._strideMul || 1) : STRIDE;
   if (e.on !== false) e._ph = (e._ph || 0) + Math.abs(e.x - px) / stride;
   e._lastX = e.x;
+  // bound by her blow and waiting for the blade: it lies where it is
+  if (e.disabled) return 'down';
   // the purify plays through whatever it was doing when the pack turned
   if (tame && e._pur0 != null && (e.anim || 0) - e._pur0 < WOLF_PURIFY_T && ART && ART.purify) return 'purify';
   if ((e.lungeT || 0) > 0 || (e.diveT || 0) > 0) return 'lunge';
@@ -365,7 +376,8 @@ function drawBeastPlate(c, e, ART, tame) {
   if (cell < 0 && A.cells) {
     if (typeof mediaHas === 'function' && !mediaHas(A.img) && A !== ART.rest) A = ART.rest;
     let u = 0;
-    if (A.loop) u = (((e.anim || 0) / A.loop) % 1 + 1) % 1;
+    if (A.hold != null) u = (A.hold + 0.5) / A.cells;
+    else if (A.loop) u = (((e.anim || 0) / A.loop) % 1 + 1) % 1;
     else if (A.once) u = beastOnce(e, A.once) * (A.upto || A.cells) / A.cells;
     else if (A.air) u = clamp(((e.vy || 0) + 520) / 1040, 0, 0.999);
     else if (A === ART.purify) u = clamp(((e.anim || 0) - (e._pur0 || 0)) / WOLF_PURIFY_T, 0, 0.999);
@@ -446,7 +458,7 @@ function drawBeastPlate(c, e, ART, tame) {
   // THE RECOVERY POSES, in plate space and pivoted on the FEET so the paws
   // stay on the floor (ART_BIBLE §3.4) whatever the body does above them.
   // ...the transform stand-in only while the filmed opening is still in flight
-  const R = cell < 0 ? BEAST_RECOVER[pose] : null;
+  const R = (cell < 0 || (BEAST_RECOVER[pose] && BEAST_RECOVER[pose].always)) ? BEAST_RECOVER[pose] : null;
   if (R) {
     const heave = R.heave ? Math.sin((e.anim || 0) * R.heave) * 0.025 : 0;
     c.translate(0, dh / 2);

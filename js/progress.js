@@ -286,16 +286,9 @@ function drawCleanses(c) {
     // a column of clean light standing on the body, fading as it settles
     const colA = Math.max(0, 1 - q.t / 2.6) * 0.42 * k;
     if (colA > 0.01) {
+      // scattered like every shaft (drawSoftShaft): no ruled sides
       const cw = q.w * 0.9;
-      const g = c.createLinearGradient(0, q.y + q.h, 0, q.y - 260 * k);
-      g.addColorStop(0, 'rgba(235,250,255,' + colA.toFixed(3) + ')');
-      g.addColorStop(1, 'rgba(235,250,255,0)');
-      c.fillStyle = g;
-      c.beginPath();
-      c.moveTo(cx - cw / 2, q.y + q.h);
-      c.quadraticCurveTo(cx - cw * 0.2, q.y - 120 * k, cx, q.y - 260 * k);
-      c.quadraticCurveTo(cx + cw * 0.2, q.y - 120 * k, cx + cw / 2, q.y + q.h);
-      c.fill();
+      drawSoftShaft(c, cx, q.y - 260 * k, cw * 0.35, cx, q.y + q.h, cw * 1.2, '235,250,255', 0, colA * 1.3, false);
     }
     // three slow white rings, the pulse going OUT and staying soft
     for (let i = 0; i < 3; i++) {
@@ -337,25 +330,15 @@ function drawProgressGround(c) {
     const pu = 0.6 + Math.sin(now * 1.7) * 0.4;
     c.save(); c.globalCompositeOperation = 'lighter';
     // the column of light out of the cracks, tall enough to read from the seam
+    // ...scattered, never ruled (owner, 2026-10-16): the column has no edge —
+    // it is strongest in its core, gone at its sides, thins away into the air
+    // above, and pools out along the floor where it stands (drawSoftShaft)
     const H = 8.5 * TILE;
-    const g = c.createLinearGradient(0, fy, 0, fy - H);
-    g.addColorStop(0, 'rgba(' + ink + ',' + (0.30 + pu * 0.12).toFixed(3) + ')');
-    g.addColorStop(0.45, 'rgba(' + ink + ',' + (0.10 + pu * 0.05).toFixed(3) + ')');
-    g.addColorStop(1, 'rgba(' + ink + ',0)');
-    c.fillStyle = g;
-    c.beginPath();
-    c.moveTo(x0 - 6, fy + 4);
-    c.bezierCurveTo(x0 + 10, fy - H * 0.4, cx - 30, fy - H * 0.8, cx, fy - H);
-    c.bezierCurveTo(cx + 30, fy - H * 0.8, x1 - 10, fy - H * 0.4, x1 + 6, fy + 4);
-    c.fill();
-    // the seams themselves glow: the dust is coming through the cracks — a
-    // pale pool lying ON the surface (anything below it is under the
-    // foreground ground and nobody would see it), split by dark seams
+    drawSoftShaft(c, cx, fy - H, (x1 - x0) * 0.55, cx, fy + 2, (x1 - x0) * 1.35, ink,
+      0.0, 0.30 + pu * 0.12, !broken);
+    // the seams themselves glow: the dust is coming through the cracks,
+    // split by dark seams on the pool the column lays on the surface
     if (!broken) {
-      const pg = c.createRadialGradient(cx, fy - 2, 4, cx, fy - 2, (x1 - x0) * 0.75);
-      pg.addColorStop(0, 'rgba(' + ink + ',' + (0.55 + pu * 0.3).toFixed(3) + ')');
-      pg.addColorStop(1, 'rgba(' + ink + ',0)');
-      c.fillStyle = pg; c.beginPath(); c.ellipse(cx, fy - 2, (x1 - x0) * 0.75, 12, 0, 0, 7); c.fill();
       c.strokeStyle = 'rgba(' + ink + ',' + (0.6 + pu * 0.35).toFixed(3) + ')';
       c.lineWidth = 2; c.lineCap = 'round';
       for (let i = 0; i < 4; i++) {

@@ -8999,6 +8999,68 @@ const FRONTIER = {
   // room: the ceiling opening in tiles, and which kingdom is on the other side
   A3: { tx0: 25, tx1: 29, zone: 'B' },
 };
+// LIGHT SCATTERS; IT HAS NO EDGE (owner, 2026-10-16: "any light beam that is
+// coming like this from the sky downward should be scattered, should be blended
+// with the environment, should fade on the side instead of a straight line ...
+// It reflects on the floor."). Every shaft in the game used to be ONE filled
+// trapezoid — a vertical fade inside, a ruler-straight boundary outside — and
+// a straight boundary is what reads as a cut-out laid on the room. So a shaft
+// is drawn as vertical slices whose strength follows a bell across the beam:
+// full in the core, nothing at the sides, with a second, wider and fainter
+// layer for the light the air scatters out of it. Where it lands it pools and
+// spreads along the floor — that pool is the reflection.
+//   xt,yt,wt — centre, y and width at the top;  xb,yb,wb — the same at the foot
+//   rgb      — 'r,g,b';  at/ab — strength at the top and at the foot
+function drawSoftShaft(c, xt, yt, wt, xb, yb, wb, rgb, at, ab, pool) {
+  const N = 14;
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  const layer = (spread, gain) => {
+    for (let i = 0; i < N; i++) {
+      const u0 = i / N * 2 - 1, u1 = (i + 1) / N * 2 - 1, um = (u0 + u1) / 2;
+      const wgt = Math.exp(-um * um * 2.6) * gain;          // the bell across the beam
+      if (wgt < 0.01) continue;
+      const g = c.createLinearGradient(0, yt, 0, yb);
+      g.addColorStop(0, 'rgba(' + rgb + ',' + (at * wgt).toFixed(3) + ')');
+      g.addColorStop(0.55, 'rgba(' + rgb + ',' + ((at + ab) * 0.5 * wgt).toFixed(3) + ')');
+      g.addColorStop(1, 'rgba(' + rgb + ',' + (ab * wgt).toFixed(3) + ')');
+      c.fillStyle = g;
+      const ht = wt * spread / 2, hb = wb * spread / 2;
+      c.beginPath();
+      c.moveTo(xt + u0 * ht, yt); c.lineTo(xt + u1 * ht, yt);
+      c.lineTo(xb + u1 * hb, yb); c.lineTo(xb + u0 * hb, yb);
+      c.closePath(); c.fill();
+    }
+  };
+  layer(2.1, 0.35);                     // the scatter: wide, faint, no edge at all
+  layer(1.0, 1.0);                      // the beam itself
+  // WHERE IT LANDS: a pool that spreads along the floor, brighter where the
+  // core strikes and running out sideways the way light does on a surface
+  if (pool !== false && !G.artProbe) {
+    const pr = wb * 1.15;
+    const g1 = c.createRadialGradient(xb, yb, 0, xb, yb, pr);
+    g1.addColorStop(0, 'rgba(' + rgb + ',' + Math.min(0.9, ab * 1.6).toFixed(3) + ')');
+    g1.addColorStop(0.45, 'rgba(' + rgb + ',' + (ab * 0.55).toFixed(3) + ')');
+    g1.addColorStop(1, 'rgba(' + rgb + ',0)');
+    c.fillStyle = g1;
+    c.save(); c.translate(xb, yb); c.scale(1, 0.2); c.translate(-xb, -yb);
+    c.beginPath(); c.arc(xb, yb, pr, 0, 7); c.fill();
+    c.restore();
+    const sr = wb * 2.6;                // the sheen: the floor catching it further out
+    const g2 = c.createRadialGradient(xb, yb, 0, xb, yb, sr);
+    g2.addColorStop(0, 'rgba(' + rgb + ',' + (ab * 0.35).toFixed(3) + ')');
+    g2.addColorStop(1, 'rgba(' + rgb + ',0)');
+    c.fillStyle = g2;
+    c.save(); c.translate(xb, yb); c.scale(1, 0.12); c.translate(-xb, -yb);
+    c.beginPath(); c.arc(xb, yb, sr, 0, 7); c.fill();
+    c.restore();
+  }
+  c.restore();
+}
+function hexRgb(h) {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(h || '');
+  return m ? parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) : '95,200,232';
+}
 function drawFrontier() {
   if (typeof isHero === 'function' && isHero()) return;
   const F = FRONTIER[G.roomId];
@@ -9022,21 +9084,10 @@ function drawFrontier() {
   // phone in daylight completely invisible. This is the one moment in the free
   // chapter whose whole job is to be noticed, so it is lit like a set piece:
   // roughly three times that, in two layers, with a near-white core.
-  // 1. THE SHAFT — a soft trapezoid opening downward, fading as it falls
-  const shaft = (widen, a, top) => {
-    const g1 = c.createLinearGradient(0, 0, 0, drop);
-    g1.addColorStop(0, top); g1.addColorStop(0.30, col); g1.addColorStop(1, 'rgba(0,0,0,0)');
-    c.globalAlpha = a * breathe;
-    c.fillStyle = g1;
-    c.beginPath();
-    c.moveTo(cx - w * 0.5 * (widen > 1 ? 1 : 0.55), 0);
-    c.lineTo(cx + w * 0.5 * (widen > 1 ? 1 : 0.55), 0);
-    c.lineTo(cx + w * widen / 2, drop); c.lineTo(cx - w * widen / 2, drop);
-    c.closePath(); c.fill();
-  };
-  // Keep the frontier readable even at the dim phase of its breathing cycle.
-  shaft(spread, 0.55, col);                    // the body of the beam
-  shaft(spread * 0.5, 0.60, '#ffffff');        // and the hot core inside it
+  // 1. THE SHAFT — scattered, edgeless, pooling where it lands (drawSoftShaft)
+  const rgb = hexRgb(col);
+  drawSoftShaft(c, cx, 0, w, cx, drop, w * spread, rgb, 0.50 * breathe, 0.10 * breathe);
+  drawSoftShaft(c, cx, 0, w * 0.55, cx, drop, w * spread * 0.5, '255,255,255', 0.42 * breathe, 0.06 * breathe, false);
   // 2. THE HALO — light does not stop at the edge of the hole it came through
   const g0 = c.createRadialGradient(cx, TILE * 0.4, 0, cx, TILE * 0.4, w * 1.5);
   g0.addColorStop(0, col); g0.addColorStop(1, 'rgba(0,0,0,0)');
@@ -9046,11 +9097,14 @@ function drawFrontier() {
   // 3. THE MOUTH — the opening itself, blown out. Drawn from y=0 rather than
   // above it: the camera sits within a few pixels of the room's top edge here,
   // so anything painted off the top of the room is simply never seen.
+  // ...and it has no edge either: an oval glow, not a lit rectangle
   c.globalAlpha = 0.95 * breathe;
-  const g2 = c.createLinearGradient(0, 0, 0, TILE * 2.6);
-  g2.addColorStop(0, '#ffffff'); g2.addColorStop(0.35, col); g2.addColorStop(1, 'rgba(0,0,0,0)');
+  const g2 = c.createRadialGradient(cx, 0, 0, cx, 0, w * 0.75);
+  g2.addColorStop(0, '#ffffff'); g2.addColorStop(0.4, col); g2.addColorStop(1, 'rgba(0,0,0,0)');
   c.fillStyle = g2;
-  c.fillRect(x0 - 6, 0, w + 12, TILE * 2.6);
+  c.save(); c.translate(cx, 0); c.scale(1, (TILE * 2.6) / (w * 0.75)); c.translate(-cx, 0);
+  c.beginPath(); c.arc(cx, 0, w * 0.75, 0, 7); c.fill();
+  c.restore();
   // 3. WHAT DRIFTS IN IT. Dust only exists where light is, which is the oldest
   // trick there is for making a beam read as volume rather than as a gradient.
   const mote = (typeof QUAL !== 'undefined' && !QUAL.glow) ? 0 : 22;
@@ -9067,17 +9121,8 @@ function drawFrontier() {
     c.globalAlpha = 0.7 * a * breathe;
     c.beginPath(); c.arc(x, y, 1.1 + (i % 3) * 0.5, 0, 7); c.fill();
   }
-  // 4. WHERE IT LANDS. Ground-anchored, so it obeys the art harness's probe —
-  // tests/artbible.cjs measures her FEET against the floor and a glow pooled
-  // under them is exactly the decoration G.artProbe exists to switch off.
-  if (!G.artProbe) {
-    const fy = drop;
-    const g3 = c.createRadialGradient(cx, fy, 0, cx, fy, w * spread * 0.6);
-    g3.addColorStop(0, col); g3.addColorStop(1, 'rgba(0,0,0,0)');
-    c.globalAlpha = 0.30 * breathe;
-    c.fillStyle = g3;
-    c.beginPath(); c.ellipse(cx, fy, w * spread * 0.6, TILE * 0.9, 0, 0, 7); c.fill();
-  }
+  // 4. WHERE IT LANDS: drawSoftShaft's pool, ground-anchored and off under
+  // G.artProbe (tests/artbible.cjs measures her feet, not the glow under them)
   c.restore();
   c.globalAlpha = 1;
   c.globalCompositeOperation = 'source-over';

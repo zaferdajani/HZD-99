@@ -56,7 +56,7 @@
 // Only CLAWBYTE's machine world is rimmed. NOSTOS draws its own creatures and
 // has not been measured by tests/contrast.cjs; a change it was not measured
 // against is not one this file makes for it.
-const FOE_READ = { on: true, sil: false, alpha: 0.62, width: 1.5, q: 1 };
+const FOE_READ = { on: true, sil: false, alpha: 0.62, width: 1.5, q: 1, feather: 1.8 };
 const FOE_RIM = Object.freeze({
   A: '#ffe6d6',   // teal yard → warm peach-white       (ΔE 59 to its glow/edge)
   B: '#fff0dc',   // blue conduits → ivory              (ΔE 61)
@@ -92,6 +92,8 @@ function frEnsure(w, h) {
 // is this body rimmed? (the rest are drawn exactly as they always were)
 function foeReadOn(e) {
   if (!FOE_READ.on || !e || e.dead) return false;
+  // a bound or freed body is not a threat to find in the room: no rim
+  if (e.disabled || e.rescued) return false;
   if (typeof G === 'undefined' || G.artProbe || !G.roomDef) return false;
   if (typeof isHero === 'function' && isHero()) return false;
   return true;
@@ -100,7 +102,21 @@ function foeRimCol(zone) { return FOE_RIM[zone] || FOE_RIM_DEFAULT; }
 
 // THE ONE CALL SITE: drawWorldFrame draws every enemy and the guardian through
 // this, in place of e.draw(c).
+// A BOUND MACHINE IS DOWN, NOT STANDING (owner, 2026-10-16). The wolves and
+// cheetahs lie down through their own plates (wolves.js, the 'down' pose);
+// every other bound body — the guard, the fliers, the bat — is slumped over
+// onto the floor here, pivoted on its feet so it rests where it fell.
+function foeDrawDown(c, e) {
+  if (!e.disabled || (typeof isWolf === 'function' && isWolf(e))
+      || (typeof isCheetah === 'function' && isCheetah(e))) { e.draw(c); return; }
+  const fx = e.x + e.w / 2, fy = e.y + e.h, dir = e.dir || 1;
+  c.save();
+  c.translate(fx, fy); c.rotate(dir * 0.32); c.scale(1.08, 0.66); c.translate(-fx, -fy);
+  e.draw(c);
+  c.restore();
+}
 function foeDraw(c, e) {
+  if (e && e.disabled) { foeDrawDown(c, e); return; }
   if (!foeReadOn(e)) { c.save(); if (e && e.purified && !isHero() && ['glitch','brood','atlas','zero','prism'].includes(e.kind)) c.filter = 'sepia(1) saturate(1.8) brightness(1.08)'; e.draw(c); c.restore(); return; }
   const m = c.getTransform();
   const cvW = c.canvas.width, cvH = c.canvas.height;
@@ -148,10 +164,21 @@ function foeDraw(c, e) {
   const r = Math.max(1, Math.max(2, Math.round(FOE_READ.width * sc)) * q), d = r * 0.7071;
   R.setTransform(1, 0, 0, 1, 0, 0); R.globalCompositeOperation = 'source-over';
   R.clearRect(0, 0, w, h);
-  R.drawImage(FR_T, 0, 0, w, h, r, 0, w, h); R.drawImage(FR_T, 0, 0, w, h, -r, 0, w, h);
-  R.drawImage(FR_T, 0, 0, w, h, 0, r, w, h); R.drawImage(FR_T, 0, 0, w, h, 0, -r, w, h);
-  R.drawImage(FR_T, 0, 0, w, h, d, d, w, h); R.drawImage(FR_T, 0, 0, w, h, -d, d, w, h);
-  R.drawImage(FR_T, 0, 0, w, h, d, -d, w, h); R.drawImage(FR_T, 0, 0, w, h, -d, -d, w, h);
+  // AN EDGE LIGHT, NOT A FRAME (owner, 2026-10-16: the wolf "is framed by a
+  // white frame, which is weird"). One crisp ring at a single alpha is a
+  // keyline — a sticker's cut edge. Two rings, the outer one fainter, make the
+  // light fall off away from the body the way light off a surface does.
+  const ring = (rr, a) => {
+    const dd = rr * 0.7071;
+    R.globalAlpha = a;
+    R.drawImage(FR_T, 0, 0, w, h, rr, 0, w, h); R.drawImage(FR_T, 0, 0, w, h, -rr, 0, w, h);
+    R.drawImage(FR_T, 0, 0, w, h, 0, rr, w, h); R.drawImage(FR_T, 0, 0, w, h, 0, -rr, w, h);
+    R.drawImage(FR_T, 0, 0, w, h, dd, dd, w, h); R.drawImage(FR_T, 0, 0, w, h, -dd, dd, w, h);
+    R.drawImage(FR_T, 0, 0, w, h, dd, -dd, w, h); R.drawImage(FR_T, 0, 0, w, h, -dd, -dd, w, h);
+  };
+  ring(r * FOE_READ.feather, 0.35);
+  ring(r, 1);
+  R.globalAlpha = 1;
   R.globalCompositeOperation = 'destination-out'; R.drawImage(FR_T, 0, 0, w, h, 0, 0, w, h);
   R.globalCompositeOperation = 'source-in';
   R.fillStyle = foeRimCol(G.roomDef.zone); R.fillRect(0, 0, w, h);

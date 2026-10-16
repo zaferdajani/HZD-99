@@ -7611,8 +7611,8 @@ class Enemy {
       this.vy += 2000 * dt;
       moveEnt(this, dt);
       this.vx *= Math.pow(0.02, dt);
-      if (onSpike(this)) { this.die(Math.sign(this.vx) || 1, -0.4); return; }
-      if (this.y > G.roomDef.h * TILE + 40) { this.die(0, 1); return; }
+      if (onSpike(this)) { this._envDeath = 1; this.die(Math.sign(this.vx) || 1, -0.4); return; }
+      if (this.y > G.roomDef.h * TILE + 40) { this._envDeath = 1; this.die(0, 1); return; }
       if (!player.dead && aabb(this, player)) player.hurt(DF().edmg, this.x + this.w / 2, this.kind + '.knockback');
       return;
     }
@@ -8744,7 +8744,7 @@ class Enemy {
     }
     // spikes are spikes for everyone: a machine that lands in the pit dies
     // in it — no creature camps where the player cannot stand
-    if (onSpike(this)) { this.die(0, -0.4); return; }
+    if (onSpike(this)) { this._envDeath = 1; this.die(0, -0.4); return; }
     // THE GUARD'S LUNGE IS THE FIRST PARRYABLE BLOW A PLAYER MEETS: from the
     // last PARRY_LEAD of the coil through the commit, it wears the glint
     // (drawParryTells), and a brace raised in time turns it (js/parry.js)
@@ -8758,6 +8758,18 @@ class Enemy {
   // rather than a thing that happens to you.
   die(kx, ky) {
     if (storyProtected(this)) return;
+    // ...and only HER blow binds one (owner, 2026-10-16: "this particular one
+    // I did not actually hit, so why is it staying still as if it was
+    // defeated?"). A body that walked into a pit, onto spikes or off the bottom
+    // of the room was saved as bound all the same, and from then on stood at
+    // its spawn point on every visit waiting for a blade it had never earned.
+    // The room takes it instead: it is gone for this visit, unrecorded, and
+    // wakes as itself the next time she comes through.
+    if (this.storyKey && this.actorRole === 'infected-person' && this._envDeath) {
+      this.dead = true; this.vx = this.vy = 0; this.tr.length = 0;
+      burst(this.x + this.w / 2, this.y + this.h / 2, 8, '#8a8a96', 160, 0.4, 300, 2.5, true);
+      return;
+    }
     if (this.storyKey && this.actorRole === 'infected-person') {
       this.disabled = true; this.hp = 1; this.vx = this.vy = 0;
       this.cleanseT = 0; this.tr.length = 0;

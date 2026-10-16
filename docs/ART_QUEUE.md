@@ -6415,3 +6415,24 @@ quarter lower, so the opening reads from across a room.
 **The turret and the four rooted machines are deliberately absent from the
 walk/run list:** they are bolted where they stand; their motion is the sweep,
 the lock and the recoil, which the code poses.
+
+### 2cc-ix. THE BOUND BODY — `wolfDown` (4, hold) ✱ NEW 2026-10-16 (code session, owner's A2 note)
+
+Owner, on the A2 screenshot: *"If the enemy is waiting to be cleansed, it should
+be down on the floor and crouched or sleeping or whatever naturally defeated
+position, not standing still like a mannequin."* Wired today as a STAND-IN: a
+disabled wolf holds cell 0 of `wolfCrouch4` under a flattening transform
+(`WOLF_ART.down`, `BEAST_RECOVER.down` in js/wolves.js), and every other bound
+machine slumps via `foeDrawDown` in js/foeread.js. A take of its own replaces it.
+
+- **Subject:** the owner's 2026-10-09 wolf (canon from §2cc-0), lying on its
+  side/belly on the floor, legs folded under, head resting on the forepaws, the
+  infection light in its eyes dimmed to an ember, chest rising — asleep, beaten,
+  waiting. Facing LEFT like every plate in the pack.
+- **Strip:** 4 cells, a slow breath (chest up / hold / down / hold), same cell
+  size and floor line as `wolfCrouch4`, so `wolfStrip('wolfDown4', 4, 97)` drops in.
+- **Negatives:** no blood, no broken parts lying apart, no standing pose, no
+  ground shadow or floor drawn, no outline, pure black background.
+- **Wiring:** replace `wolfCrouch4` in `WOLF_ART.down`, delete the `hold` and
+  `BEAST_RECOVER.down` flattening; `tests/artbible.cjs` feet rule applies.
+- **Cheetah:** the same brief for `cheetahDown4` once the wolf take is approved.
