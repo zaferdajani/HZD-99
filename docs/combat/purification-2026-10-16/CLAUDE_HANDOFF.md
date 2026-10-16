@@ -1,0 +1,13 @@
+# Single continuation prompt
+
+Copy the following as one prompt:
+
+Work on zaferdajani/HZD-99 using the current development-authority instructions. Read docs/combat/purification-2026-10-16/IMPLEMENTATION.md, VALIDATION.md and HIGGSFIELD_SCRIPT.md before changing anything. Preserve the combat impact/stats/card work from a393877 and the new deliberate guardian purification implementation.
+
+The principal guardians must never auto-die on the last hit: earned marble sword, protected hold-to-free prompt, fresh 1.6-second continuous hold, white flakes into raised blade, slash, short impact flash/freeze/shake, black transition, boss-to-sword black-red virus extraction and neutralization, golden friendly guardian back in the same stage. Preserve cancellation, reduced-motion behavior, portrait/focus/background safety, exactly-once rewards, saved restoration and missing-video fallback. Keep Alpha optional and Mother's ending separate.
+
+The new lion Higgsfield film is already generated and integrated at assets/video/purify_glitch_ritual.mp4. Do not regenerate it or overwrite newer hero artwork. Four corresponding guardian films remain ungenerated because Higgsfield rejected the next request for insufficient credits. Once credits are available, use each current approved guardian reference and the exact shot script to produce Brood, Atlas, Zero and Prism films. Review the actual output for stable identity, one sword, unmistakable virus flow FROM boss INTO blade, neutralization and golden restoration. The existing older videos were reviewed and lack that full choreography; do not relabel them as the requested new movies. Populate PURIFICATION_MOVIES only after verified new assets ship.
+
+Run purification, purification-controls, kingdom, warp, story-order, survey-a7, the combat-impact checks, build integrity and release gates. Keep the room-entry initialization order and the swing-object lifetime fix: do not null the current swing inside the lethal-hit callback. Do not overwrite historical evidence when tests write fixed report paths. Review the campaign logs honestly: a staged fight, a save continuation and an uninterrupted fresh chapter run are distinct evidence. A segmented completion must never be labeled fresh-run certification.
+
+Read the recorded validation and publishing status before claiming anything is live. Preserve other contributors' changes, use normal fast-forward integration, and verify actual live BUILD_ID plus the new movie hash after any authorized deployment. Fix concrete failures; do not relax assertions, skip required stages or claim ungenerated movies are finished.

@@ -37,6 +37,8 @@ const check = (name, ok, detail) => {
   await page.goto('http://127.0.0.1:8220/index.html');
   await page.waitForFunction(() => typeof startGame === 'function' && typeof questRead === 'function', { timeout: 30000 });
 
+  await page.evaluate(() => heroMotionWarm());
+  await page.waitForFunction(() => heroMotionMissing().length === 0);
   // the harness drives the clock itself, so stop the page's own loop
   await page.evaluate(() => {
     window.requestAnimationFrame = () => 0;
@@ -47,6 +49,8 @@ const check = (name, ok, detail) => {
         if (typeof overlayClear === 'function') overlayClear();
         G.wake = G.cut = G.dialog = G.meet = G.trans = G.gateWalk = G.bossEntry = G.item = null; G.tut = null; G.state = 'PLAY';
         G.hitStop = 0; G.recharge = null;
+        // Isolated post-story errand fixture: presentation sequencing is tested elsewhere.
+        for (const seq of PANEL_SEQ) panelsState().seen[seq.id] = 1;
       },
       // a chapter-one save past the forge, before the survey errand
       fresh() {

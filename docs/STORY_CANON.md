@@ -1,5 +1,9 @@
 # HZD-99 / CLAWBYTE — owner-confirmed story canon
 
+## Guardian purification — owner instruction, October 16
+The final combat hit does not kill or automatically free a guardian. With the earned marble sword, it exposes a deliberate hold-to-free action. The hero raises the blade, gathers pure white flakes, slashes in a brief cinematic impact, and transitions through black into purification. Dark black-red virus energy flows from the guardian into the sword and is neutralized. Return to the stage with the same guardian alive, friendly and golden. No reward before completion; an interrupted charge remains retryable. This applies to the five principal guardians, not the optional Alpha or Mother's separate ending.
+Production script and truthful film availability: docs/combat/purification-2026-10-16/HIGGSFIELD_SCRIPT.md.
+
 ## Current storytelling revision — September 19, Draft 3
 
 The owner accepted the improved character fidelity of the new comic proofs but

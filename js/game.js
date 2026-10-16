@@ -1146,6 +1146,7 @@ function settlePendingBossReward() {
   }
 }
 function loadRoom(id) {
+  if (typeof purificationCancel === 'function') purificationCancel();
   infEyeClearAll();                 // no smoke follows her through a door, a respawn or a load
   repairClose(false);
   settlePendingBossReward();
@@ -2834,6 +2835,8 @@ function update(dt) {
   // state that exits before the rest of the body still reads fresh input.
   // See PI / pollInput in js/engine.js.
   if (typeof pollInput === 'function') pollInput();
+  if (G.state === 'PURIFY') { updatePurification(dt); return; }
+  if (G.purificationReturn > 0) G.purificationReturn = Math.max(0,G.purificationReturn-dt);
   if (G.state === 'REPAIR') { updateRepair(dt); narrativeAudioTick(); return; }
   if (typeof ComicRewards !== 'undefined' && ComicRewards.tick(dt)) return;
   // THE STORY PANELS (js/panels.js): a story beat's manhwa crops take over at
@@ -5475,6 +5478,10 @@ function endPurifyCut() {
   if (!ct) { G.state = 'PLAY'; return; }
   try { ct.v.pause(); } catch (e) {}
   G.cut = null;
+  if(ct.purificationRitual && !ct.ran && !ct.skipped && G.boss){
+    G.purification={b:G.boss,room:G.roomId,phase:'film',hold:1.6,t:0,clock:0,armed:false,committed:false,recovery:true};
+    G.state='PURIFY';return;
+  }
   // MID-REEL: hand straight to the next clip rather than back to the game, so
   // the vignettes read as one move instead of eight separate cutscenes.
   if (G.reel) {
@@ -5533,6 +5540,7 @@ function endPurifyCut() {
     return;
   }
   G.state = 'PLAY';
+  if (ct.purificationRitual) G.purificationReturn = .65;
   const b = G.boss;
   if (b && b.purified) {
     // the film already showed the rise, so he is simply awake and friendly
@@ -5542,6 +5550,7 @@ function endPurifyCut() {
     if (b.tamed && typeof cleanseBegin === 'function' && !isHero()) cleanseBegin(b.x, b.y, b.w, b.h, 'pg_freed');
     if (b.rewardPend) { b.rewardPend = false; G.onBossDead(b.kind); }
   }
+  if(ct.purificationRitual) purificationRestoreStage();
   // a film chained out of a conversation hands BACK to it (the memory film
   // plays inside the wake sequence): one-shot, cleared before it runs so a
   // callback that starts another cut cannot re-fire itself.
@@ -14635,6 +14644,7 @@ function drawWorldFrame() {
     if (player.iT > 0 && Math.floor(player.iT * 18) % 2 === 0) c.globalAlpha = 0.4;
     c.translate(-Math.round(camSX()), -Math.round(camSY()));
     player.draw(c);
+    if (typeof drawPurificationWorld === 'function') drawPurificationWorld(c);
     c.globalAlpha = 1;
     if (typeof drawSlashLayer === 'function') drawSlashLayer(c, player);   // her cuts, on their own layer, with their glow
     if (typeof drawGlideJets === 'function') drawGlideJets(c, player);     // the hover jets (js/glide.js)
@@ -16073,6 +16083,7 @@ function draw(tms) {
   if (typeof drawHeroMotionLoading === 'function' && drawHeroMotionLoading(c)) return;
   if (st === 'CINE') { drawCine(); return; }
   if (st === 'CUT') { drawCut(); return; }
+  if (st === 'PURIFY') { drawPurification(); return; }
   if (st === 'PANELS') { drawPanels(); return; }
   // A ROOM IS NOT SHOWN BEFORE THE PAGES THAT LEAD INTO IT: the wake's pages
   // right after the difficulty choice, an arrival's pages while they finish
@@ -18092,6 +18103,7 @@ function mainLoop(tms) {
   // interface, and they lose to a stream at full volume (audio.js MUS_DUCK)
   if (typeof MUS_DUCK !== 'undefined') MUS_DUCK = G.state === 'TRIAL' ? 0.3 : 1;
   draw(tms);
+  if (G.purificationReturn > 0) { c.fillStyle='rgba(0,0,0,'+Math.min(1,G.purificationReturn/.65)+')'; c.fillRect(0,0,960,540); }
   drawTouchUI();
   clearP();
   if (!mainLoop.ldGone && artReady) {

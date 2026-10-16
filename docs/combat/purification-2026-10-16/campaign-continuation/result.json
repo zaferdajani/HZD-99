@@ -1,0 +1,52 @@
+{
+ "result": "partial-diagnostic",
+ "certified": false,
+ "missingPanels": [
+  "wake",
+  "bay",
+  "gate",
+  "letter",
+  "drawer",
+  "ratchet",
+  "meet",
+  "cave",
+  "marble",
+  "forge",
+  "passage",
+  "sage",
+  "break",
+  "chime"
+ ],
+ "panelOrderErrors": [],
+ "wall": "01:30",
+ "deaths": 0,
+ "missions": [
+  "opening",
+  "servo",
+  "first-meeting",
+  "marble",
+  "forge",
+  "sage",
+  "chime",
+  "lion",
+  "teaser"
+ ],
+ "rooms": [
+  "",
+  "A3",
+  "A4",
+  "A3",
+  "A4",
+  "A3",
+  "B1"
+ ],
+ "panelsSeen": [
+  "free",
+  "ch2"
+ ],
+ "panelsMissed": [],
+ "difficulty": 0,
+ "segment": "docs/combat/purification-2026-10-16/campaign-route/save-after-chime.json",
+ "stopAt": null,
+ "errors": []
+}

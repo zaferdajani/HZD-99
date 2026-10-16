@@ -1,0 +1,181 @@
+[00:00] BOOT continuing from the game's own pod save docs/combat/purification-2026-10-16/campaign-route/save-after-chime.json; difficulty row 0; video off
+[00:00] ROOM - -> 
+[00:00] STATE null -> MENU
+[00:00] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:00] MENU choose "continue"
+[00:01] ROOM - -> A3  at x=250
+[00:01] STATE MENU -> PLAY
+[00:01] OBJECTIVE "Free NULLFANG in his enclosure past the camp"
+[00:01] FLAG +tutI
+[00:01] FLAG +tutId
+[00:01] FLAG +gateOpened
+[00:01] FLAG +opNote
+[00:01] FLAG +ch_A0B_1
+[00:01] FLAG +on_A0B|ratchet
+[00:01] FLAG +ratchetRepaired
+[00:01] FLAG +opTold
+[00:01] FLAG +ratchetSpareGiven
+[00:01] FLAG +opPod
+[00:01] FLAG +opScrap
+[00:01] FLAG +sawScrap
+[00:01] FLAG +tutBuy
+[00:01] FLAG +heal
+[00:01] FLAG +pack
+[00:01] FLAG +winchKnock
+[00:01] FLAG +burstDone
+[00:01] FLAG +opBurst
+[00:01] FLAG +rd_n8
+[00:01] FLAG +tut
+[00:01] FLAG +mapSeen
+[00:01] FLAG +on_A1|servo
+[00:01] FLAG +sc_A1_3
+[00:01] FLAG +servoMet
+[00:01] FLAG +sc_A1_4
+[00:01] FLAG +sc_A2_4
+[00:01] FLAG +sc_A2_5
+[00:01] FLAG +nfMeet
+[00:01] FLAG +sc_A2_6
+[00:01] FLAG +taughtBreak
+[00:01] FLAG +taughtFloor
+[00:01] FLAG +pgMarks
+[00:01] FLAG +sc_A5_5
+[00:01] FLAG +rubbleA5
+[00:01] FLAG +rubbleCV1B
+[00:01] FLAG +sc_CV1B_4
+[00:01] FLAG +pgSurvey
+[00:01] FLAG +sc_CV1B_2
+[00:01] FLAG +sc_CV2_7
+[00:01] FLAG +ghMet
+[00:01] FLAG +ghHeadTold
+[00:01] FLAG +ghParryTold
+[00:01] FLAG +parryTold
+[00:01] FLAG +bossHorn
+[00:01] FLAG +pl_cshard
+[00:01] FLAG +sc_A5_3
+[00:01] FLAG +sc_A5_4
+[00:01] FLAG +deathsSeen
+[00:01] FLAG +said
+[00:01] FLAG +crystal
+[00:01] FLAG +ratchetCamp
+[00:01] FLAG +alphaLead
+[00:01] FLAG +pgBound
+[00:01] FLAG +pgBoundN
+[00:01] FLAG +heardHollowFloor
+[00:01] FLAG +heardHollow
+[00:01] FLAG +taughtWall
+[00:01] FLAG +sc_CV2_5
+[00:01] FLAG +pgCv3Back
+[00:01] FLAG +sc_GA1D_2
+[00:01] FLAG +sgLockSeen
+[00:01] FLAG +sageTame_GA1D
+[00:01] FLAG +sageGift_GA1D
+[00:01] FLAG +chimeRevealed
+[00:01] FLAG +nfBreak
+[00:01] FLAG +sc_A8_2
+[00:01] FLAG +bossChime
+[00:01] SCRAP 0 -> 77
+[00:01] ITEMS {"batt":2}
+[00:01] SAVEPOINT null -> A3
+[00:01] WEAPON null -> single
+[00:01]   . A3 x=250 y=432 vx=0 on cores=7/7 volts=33 mission=undefined held= near=bench:null
+[00:02] MISSION DONE opening
+[00:03] FRAME 000-done-opening.png
+[00:03] MISSION DONE servo
+[00:04] FRAME 001-done-servo.png
+[00:04] MISSION DONE first-meeting
+[00:05] FRAME 002-done-first-meeting.png
+[00:05] MISSION DONE marble
+[00:06] FRAME 003-done-marble.png
+[00:06] MISSION DONE forge
+[00:07] FRAME 004-done-forge.png
+[00:08] MISSION DONE sage
+[00:08] FRAME 005-done-sage.png
+[00:09] MISSION DONE chime
+[00:10] FRAME 006-done-chime.png
+[00:10] MISSION lion (objective: "Free NULLFANG in his enclosure past the camp")
+[00:10] PLAN room A3: 68 standable tiles, 1040 moves (66 ms)
+[00:10]   . A3 x=270 y=436 vx=300 on cores=7/7 volts=33 mission=lion held=ArrowRight near=bench:null
+[00:16] ROOM A3 -> A4  at x=10
+[00:18] NULLFANG st=dorm hp=247 dist=704 | cores 7/7 volts 33
+[00:18] PLAN room A4: 53 standable tiles, 865 moves (62 ms)
+[00:18]   . A4 x=58 y=432 vx=340 on cores=7/7 volts=33 mission=lion held=ArrowRight
+[00:19] TOAST It remembers the corridor.
+[00:21] NULLFANG st=intro hp=247 dist=43 | cores 7/7 volts 33
+[00:22] TOAST It remembers the corridor. / Repair ready! Stand still and hold F to restore a core.
+[00:22] HURT 7 -> 6 in A4 (nearest glitch/idle at 50 px)
+[00:23] TOAST Repair ready! Stand still and hold F to restore a core.
+[00:25] HURT 6 -> 5 in A4 (nearest glitch/swipewarn at 129 px)
+[00:25] NULLFANG st=swipewarn hp=155 dist=86 | cores 5/7 volts 77
+[00:26] HURT 5 -> 4 in A4 (nearest glitch/swipewarn at 105 px)
+[00:26]   . A4 x=550 y=436 vx=-340 on cores=4/7 volts=99 mission=lion held=ArrowLeft
+[00:28] NULLFANG st=swipewarn hp=109 dist=166 | cores 4/7 volts 99
+[00:31] HURT 4 -> 3 in A4 (nearest glitch/nullcharge at 119 px)
+[00:31] NULLFANG st=nullcharge hp=63 dist=77 | cores 3/7 volts 99
+[00:31] HEAL (cores 3/7, volts 99)
+[00:34] HURT 3 -> 2 in A4 (nearest glitch/nullend at 73 px)
+[00:34] NULLFANG st=nullend hp=17 dist=31 | cores 2/7 volts 88
+[00:35] STATE PLAY -> PURIFY
+[00:35]   . A4 x=426 y=430 vx=0 on cores=2/7 volts=99 mission=lion held=
+[00:40] STATE PURIFY -> CUT
+[00:40] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you.
+[00:40] FLAG +oath
+[00:43]   . A4 x=426 y=430 vx=0 on cores=2/7 volts=99 mission=lion held=
+[00:51]   . A4 x=426 y=430 vx=0 on cores=2/7 volts=99 mission=lion held=
+[00:51] STATE CUT -> DIALOG
+[00:51] OBJECTIVE "Climb to the Data Conduits above the camp"
+[00:51] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you. / The ground shifted — a CAVE MOUTH has opened in the lair. The map marks it: ∩ / Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open. / Glitch Fang — +8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy.
+[00:51] FLAG +bossGlitch
+[00:51] SAY ACQUIRED: "Dash Jets — Press C or Shift — twin combustion jets ignite at your feet and hurl you forward." [card bootsIdle]
+[00:51] ITEMS {"batt":3}
+[00:53] SAY ACQUIRED: "Power Cell — A charged cell. Seated in a switched-off machine, it wakes them."
+[00:54] SAY ACQUIRED: "SCRAPPLATE — Shard Volley — A cone of magnetised shrapnel. Grounds anything arcing.  —  V or K fires it, G changes suit"
+[00:56] STATE DIALOG -> PLAY
+[00:56] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you. / The ground shifted — a CAVE MOUTH has opened in the lair. The map marks it: ∩ / Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open. / Glitch Fang — +8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy. / GRAPPLE CLAW online — press U
+[00:56] FLAG +grapSeen
+[00:56] LESSON chip: dash — doing it
+[00:56] FRAME 007-lesson-dash.png
+[00:56] STATE PLAY -> DIALOG
+[00:56] SAY ACQUIRED: "NULLFANG'S OATH — Once each room, the blow that would break you is answered instead — it comes out of the dark and roars them off you."
+[00:56] SCRAP 77 -> 98
+[00:57] STATE DIALOG -> PLAY
+[00:57] SCRAP 98 -> 107
+[00:58] ROOM A4 -> A3  at x=1451
+[00:59] ROOM A3 -> A4  at x=16
+[00:59] STATE PLAY -> PANELS
+[00:59] MANHWA free panel 1/4
+[00:59]   . A4 x=16 y=437 vx=0 on cores=2/7 volts=99 mission=lion held=
+[01:00] MANHWA free panel 2/4
+[01:01] FRAMES median 17 ms -> planner step 1/60, game time 1.03x wall
+[01:01] PACE sim 57.3 s per 60 s wall (pace dial / slow frames)
+[01:01] MANHWA free panel 3/4
+[01:02] MANHWA free panel 4/4
+[01:03] STATE PANELS -> PLAY
+[01:04] TOAST The song lets go. NULLFANG is free — cleansed, not killed. He seems to like you. / The ground shifted — a CAVE MOUTH has opened in the lair. The map marks it: ∩ / Above the camp, the conduit hatch unjams. The climb to the Data Conduits is open. / Glitch Fang — +8% claw damage. NULLFANG shed it when the song let him go — a gift, not a trophy.
+[01:06] MISSION DONE lion
+[01:06] FRAME 008-done-lion.png
+[01:06] MISSION teaser (objective: "Climb to the Data Conduits above the camp")
+[01:07] HEAL (cores 2/7, volts 99)
+[01:09] FLAG +les_dash
+[01:09]   . A4 x=1352 y=424 vx=0 on cores=3/7 volts=66 mission=teaser held=
+[01:09] HEAL (cores 3/7, volts 66)
+[01:10] HEAL (cores 4/7, volts 33)
+[01:17] PLAN room A3: 68 standable tiles, 1031 moves (75 ms)
+[01:17] ROOM A4 -> A3  at x=1573
+[01:17]   . A3 x=1573 y=428 vx=-340 on cores=5/7 volts=0 mission=teaser held=
+[01:20] FLAG +ch2Climb
+[01:22] ROOM A3 -> B1  at x=878
+[01:22] OBJECTIVE "null"
+[01:22] LINGER for the ch2 panels in B1
+[01:22] STATE PLAY -> PANELS
+[01:22] MANHWA ch2 panel 1/5
+[01:23] MANHWA ch2 panel 2/5
+[01:25] MANHWA ch2 panel 3/5
+[01:25]   . B1 x=878 y=522 vx=0 air cores=5/7 volts=0 mission=teaser held=
+[01:26] MANHWA ch2 panel 4/5
+[01:27] MANHWA ch2 panel 5/5
+[01:29] STATE PANELS -> PLAY
+[01:29] MISSION DONE teaser
+[01:29] FRAME 009-done-teaser.png
+[01:30] FRAME 010-end.png
+[01:30] MANHWA seen: free, ch2
+[01:30] RESULT partial-diagnostic  wall 01:30  deaths 0  missions opening,servo,first-meeting,marble,forge,sage,chime,lion,teaser  stuck 0  page errors 0

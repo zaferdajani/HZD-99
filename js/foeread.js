@@ -101,7 +101,7 @@ function foeRimCol(zone) { return FOE_RIM[zone] || FOE_RIM_DEFAULT; }
 // THE ONE CALL SITE: drawWorldFrame draws every enemy and the guardian through
 // this, in place of e.draw(c).
 function foeDraw(c, e) {
-  if (!foeReadOn(e)) { e.draw(c); return; }
+  if (!foeReadOn(e)) { c.save(); if (e && e.purified && !isHero() && ['glitch','brood','atlas','zero','prism'].includes(e.kind)) c.filter = 'sepia(1) saturate(1.8) brightness(1.08)'; e.draw(c); c.restore(); return; }
   const m = c.getTransform();
   const cvW = c.canvas.width, cvH = c.canvas.height;
   // the body's neighbourhood in WORLD units — generous above (a guardian's

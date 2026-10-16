@@ -10851,6 +10851,7 @@ function miniFire(b, st, K) {
   }
 }
 function bossFork(b) {
+  if (typeof purificationBegin === 'function' && b && !b.forkAsked && purificationBegin(b)) return true;
   // the Eye's constructs are never offered mercy: there is nobody in there
   if (isMini(b)) return false;
   if (!b || b.forkAsked || b.dead || b.kind === 'mother') return false;
@@ -14265,7 +14266,7 @@ class Boss {
     // forceKill is the FINISH branch of the first fork. Without it the film runs
     // either way and both answers end with the lion alive, which would make the
     // choice a costume change. Choosing to end it has to actually end it.
-    if (!this.forceKill && typeof startPurifyCut === 'function' && startPurifyCut(this.kind)) {
+    if (!this.forceKill && !this.skipPurifyFilm && typeof startPurifyCut === 'function' && startPurifyCut(this.kind)) {
       this.deathAnimT = 0; this.deathFxT = 0; this.deathFinale = true;
       this.purified = true; this.pureT = 0; this.rewardPend = true;
       this.vx = 0; this.vy = 0;

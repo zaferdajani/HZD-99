@@ -311,8 +311,9 @@ const SHEET = JSON.parse(fs.readFileSync(path.join(__dirname, 'story-sheet.json'
       check('...and nothing is written to the braid for a fork never reached', JSON.stringify(braid()) === before);
       G.save.flags.crystal = 1;
       b.hp = 0; b.die();
-      check('with the blade the same blow frees it, and the braid records the fork',
-        b.tamed && braid().forks === 1, 'tamed ' + !!b.tamed + ' forks ' + braid().forks);
+      check('with the blade the blow prompts deliberate purification, without paying early',
+        G.state === 'PURIFY' && !b.tamed && !b.dead && braid().forks === 0, 'state ' + G.state + ' forks ' + braid().forks);
+      purificationCancel(); G.state = 'PLAY';
     }
 
     // 4.4 ONE RATCHET

@@ -1,0 +1,73 @@
+[00:00] BOOT cleared browser storage; difficulty row 0; video off
+[00:00] ROOM - -> 
+[00:00] STATE null -> MENU
+[00:00] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:00] MENU choose "newgame"
+[00:01] STATE MENU -> CUT
+[00:50] STATE CUT -> DIFF
+[00:50] DIFFICULTY row 0 chosen through the menu (the easiest preset — disclosed assist)
+[00:51] FRAME 000-difficulty.png
+[00:51] ROOM - -> W1  at x=96
+[00:51] STATE DIFF -> PANELS
+[00:51] MANHWA wake panel 1/5
+[00:51] OBJECTIVE "Reach the city gates"
+[00:51] CHIP move |  | 
+[00:51] SAVEPOINT null -> W1
+[00:51] WEAPON null -> claws
+[00:51]   . W1 x=96 y=418 vx=0 air cores=7/7 volts=33 tut=move/null@-1 mission=undefined held=
+[00:53] MANHWA wake panel 2/5
+[00:54] MANHWA wake panel 3/5
+[00:55] MANHWA wake panel 4/5
+[00:55] MANHWA wake panel 5/5
+[00:57] STATE PANELS -> PLAY
+[00:57] CHIP move | Move | Walk right toward the light
+[00:59]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[00:59] TOAST POWER FAULT → SYSTEM RESTART
+[01:01] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[01:01] PACE sim 60.1 s per 60 s wall (pace dial / slow frames)
+[01:01] FLAG +woke
+[01:01] MISSION opening (objective: "Reach the city gates")
+[01:02] CHIP out | Leave | The door has been open a long time — walk out
+[01:02] FLAG +tutI
+[01:02] FLAG +tutId
+[01:06] ROOM W1 -> W2  at x=21
+[01:06] CHIP out | The city gates | Follow the gold marker
+[01:06] STATE PLAY -> PANELS
+[01:06] MANHWA bay panel 1/3
+[01:06] CHIP out |  | 
+[01:07] MANHWA bay panel 2/3
+[01:07]   . W2 x=21 y=436 vx=0 on cores=7/7 volts=33 tut=out/null@-1 mission=opening held=
+[01:08] MANHWA bay panel 3/3
+[01:10] STATE PANELS -> PLAY
+[01:10] CHIP out | The city gates | Follow the gold marker
+[01:10] CHIP jump | Jump | Follow the gold marker
+[01:11] CHIP jump | Jump | A fallen beam blocks the road — press Z to hop it
+[01:12] CHIP gate | The city gates | Follow the gold marker
+[01:14] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:14] FLAG +gateOpened
+[01:15]   . W2 x=948 y=400 vx=0 on cores=7/7 volts=33 tut=gate/UP@960 mission=opening held=
+[01:18] ROOM W2 -> A0  at x=40
+[01:18] OBJECTIVE "Find who is still awake — Ratchet’s booth"
+[01:18] STATE PLAY -> PANELS
+[01:18] MANHWA gate panel 1/2
+[01:18] CHIP gate |  | 
+[01:20] MANHWA gate panel 2/2
+[01:22] STATE PANELS -> PLAY
+[01:22] CHIP gate | The city gates | Stand beneath them and press ↑
+[01:22] TOAST Scrap — the money down here. The trader takes it for repairs, parts and upgrades.
+[01:22] FLAG +sawScrap
+[01:22] FLAG +sc_A0_2
+[01:22] SCRAP 0 -> 30
+[01:22] CHIP booth | Ratchet's booth | Follow the gold marker
+[01:24]   . A0 x=72 y=348 vx=0 on cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight
+[01:32]   . A0 x=72 y=348 vx=0 on cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight
+[01:40]   . A0 x=72 y=348 vx=0 on cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight
+[01:48]   . A0 x=72 y=348 vx=0 on cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight
+[01:56]   . A0 x=72 y=348 vx=0 on cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight
+[02:01] FRAMES median 33 ms -> planner step 1/30, game time 1.00x wall
+[02:01] PACE sim 60.4 s per 60 s wall (pace dial / slow frames)
+[02:05]   . A0 x=72 y=348 vx=0 on cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight
+[02:13]   . A0 x=72 y=348 vx=0 on cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight
+[02:21]   . A0 x=72 y=348 vx=0 on cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight
+[02:29]   . A0 x=72 y=348 vx=0 on cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight
+[02:37]   . A0 x=72 y=348 vx=0 on cores=7/7 volts=33 tut=booth/MOVE@399 mission=opening held=ArrowRight

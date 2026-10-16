@@ -1,0 +1,78 @@
+{
+  "initial": {
+    "state": "PURIFY",
+    "alive": true,
+    "hp": 1,
+    "paid": false
+  },
+  "reset": 0,
+  "result": {
+    "state": "DIALOG",
+    "pure": true,
+    "dead": true,
+    "paid": true,
+    "ledger": {
+      "led": "L",
+      "trail": "",
+      "tally": {
+        "L": 1,
+        "R": 0,
+        "X": 0
+      },
+      "nodes": [
+        {
+          "p": "L",
+          "k": "firstboss",
+          "r": "A4",
+          "d": 1
+        }
+      ],
+      "seen": {
+        "U-CSDDQY": 1
+      },
+      "kills": 0,
+      "forks": 1
+    },
+    "hidden": true,
+    "ritual": false
+  },
+  "guards": {
+    "out": [
+      [
+        "glitch",
+        true,
+        "PURIFY"
+      ],
+      [
+        "brood",
+        true,
+        "PURIFY"
+      ],
+      [
+        "atlas",
+        true,
+        "PURIFY"
+      ],
+      [
+        "zero",
+        true,
+        "PURIFY"
+      ],
+      [
+        "prism",
+        true,
+        "PURIFY"
+      ]
+    ],
+    "noBlade": true,
+    "state": "PLAY",
+    "hp": 13
+  },
+  "filmFrames": 114,
+  "recovery": {
+    "fallback": true,
+    "done": true,
+    "paid": true
+  },
+  "errors": []
+}

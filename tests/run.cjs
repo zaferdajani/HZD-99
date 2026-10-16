@@ -84,6 +84,8 @@ function servedCheck(when) {
 const SUITE = [
   ['combat-impact-contract', 'armor, protected contacts, charged weight and bounded combat ledger', {noBrowser:true}],
   ['combat-impact-browser', 'rendered hit flash and finite hardware particles, charged weight, equipped stats and ledger export'],
+  ['purification-controls', 'mobile hold/cancel, focus-loss safety and restored save'],
+  ['purification', 'deliberate guardian rescue hold, cancellation, choreography and protected rewards'],
   ['combat-impact-input', 'real keyboard tap and held charge through the normal game loop in a staged arena'],
   ['repair-browser', 'Ratchet drag controls, page reload and interrupted boot in the assembled game'],
   ['repair-lifecycle', 'Ratchet puzzle, interrupted visits, saved placements and story reward handoff', {noBrowser:true}],

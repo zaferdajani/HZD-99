@@ -1,0 +1,296 @@
+
+── purification-controls  — mobile hold/cancel, focus-loss safety and restored save
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'hold' !== 'slash'
+
+    at /workspace/scratch/7ada3b7523b4/combat-impact/tests/purification-controls.cjs:14:200 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'hold',
+  expected: 'slash',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+FAILED: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'hold' !== 'slash'
+
+    at /workspace/scratch/7ada3b7523b4/combat-impact/tests/purification-controls.cjs:14:200 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'hold',
+  expected: 'slash',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+   (purification-controls: 1.3 s)
+
+── purification  — deliberate guardian rescue hold, cancellation, choreography and protected rewards
+{
+  state: 'DIALOG',
+  pure: true,
+  dead: true,
+  paid: true,
+  ledger: {
+    led: 'L',
+    trail: '',
+    tally: { L: 1, R: 0, X: 0 },
+    nodes: [ [Object] ],
+    seen: { 'U-CSDDQY': 1 },
+    kills: 0,
+    forks: 1
+  },
+  hidden: true,
+  ritual: false
+}
+PASS deliberate hold, cancellation, all guardian gates, staged choreography, single reward and restored actor
+   (purification: 19.7 s)
+
+── story-order  — the story sheet walked through the real build: beat order, gates, named things, migration
+── story-order — the story sheet, walked through the real build
+  ok   the sheet: every beat has room, speaker, what they know and who points there  34 beats
+  ok   every ordered-story line exists, in the same shape, in all 5 languages  43 keys
+  ok   greedy: no beat is possible before its required flags  34 beats in order
+  ok   greedy: every beat on the sheet can be reached  all
+  ok   greedy: no line names something she has not met  clean
+  ok   sage route: no beat is possible before its required flags  34 beats in order
+  ok   sage route: every beat on the sheet can be reached  all
+  ok   sage route: no line names something she has not met  clean
+  ok   the sage route passes the break where the sage sends her (the hub, under the climb)  break fired in A2
+  ok   ...and in canon order: forge < sage < bell < NULLFANG < Conduits  wake > gates > ratchet_note > ratchet_wake > volt_pack > servo > meeting > dent_before_forge > way_down > beacon > gravehorn > quarry > forge > forged_line > alpha > first_sage > sage_line > break > chime > rematch_line > nullfang > conduits_line > conduits > mono > talonhost > sigil_foundry > furnace > archives_sage > glaciere > prowler > mind_nodes > vault > mother > kerf
+  ok   migration: an old save becomes the current story version  3
+  ok   migration: the camp waking is Ratchet's one waking (one flag, no second revival)  {"tut":1,"woke":1,"on_A3|ratchet":1,"crystal":1,"nfMeet":1,"sageTame_GA1D":1,"bossGlitch":1,"on_A0B|ratchet":1,"ratchetRepaired":1,"ratchetSpareGiven":1,"heal":1,"ratchetCamp":1,"chimeRevealed":1,"nfBreak":1}
+  ok   migration: nothing earned is stripped (blade, sage, lion, cell kept)
+  ok   migration: nothing is paid twice (no Draft 2 spare, forge errand closed, pack kept)
+  ok   migration: beats the old route passed are not replayed
+  ok   migration runs once (a migrated save is left as it is)
+  ok   migration: the drawer cell she already took is his cell again (no locked workshop)  {"ratchetCell":1}
+  ok   migration: ...or, every cell spent, the drawer holds it again
+  ok   migration leaves NOSTOS saves alone
+  ok   the climb to the Conduits refuses before NULLFANG is free
+  ok   ...and says why, in the player's language  The conduit hatch above the camp is jammed by NULLFANG's binding. Free the lion before you climb.
+  ok   ...and still refuses a save that never forged the blade
+  ok   ...and opens once the lion is free and the blade forged  B1
+  ok   without the forged blade a guardian cannot be freed (the song holds it)  hp 13 dead false tamed false
+  ok   ...and nothing is written to the braid for a fork never reached
+  ok   with the blade the blow prompts deliberate purification, without paying early  state PURIFY forks 0
+  ok   a new run: Ratchet stands in his workshop, and nowhere else  {"den":1,"camp":0,"campLive":null,"campKey":null}
+  ok   after the forge he has moved to the camp — one body, still awake on the one waking  {"den":0,"camp":1,"campLive":true,"campKey":"A0B|ratchet"}
+  ok   handing over the marble, he says he is moving to the camp  2 lines
+  ok   ...and the forge moves him
+  ok   Ratchet does not send claws at NULLFANG before the forge  sl_ratchet_dent,sl_ratchet_forged
+  ok   ...he does once the sage is free and the bell silent
+  ok   ...and after the lion, he points up to the Conduits
+  ok   the first sage says "silence that bell" only while the bell still rings
+  ok   NULLFANG's break happens on the sage's route, under the climb in the hub
+  ok   ...never before he has been met, and never after the bell
+  ok   B5's east side does not walk around the three-sigil vault  {"to":null,"inside":true}
+  ok   ...and opens with the vault  V1
+  ok   Vault Sigil III is placed once, in the Foundry tower (C1)  C1
+  ok   the locked vault points a player missing Sigil III to the Foundry tower  without: The vault door needs three sigils  2/3  The third seal was carried down into the Foundry tower. / with: The vault door needs three sigils  2/3
+  ok   a cull counts from the moment it was accepted, not from the start of the run  0 then 6
+  ok   the survey errand counts once she READS the survey after being asked — standing in the shaft is not enough  before false standing false read true
+  ok   an errand's object lies in the world from the start until it is handed in  before true during true after false
+  ok   ...a coil found before Servo asks is handed over on the ask, in his own words  Mrrow. Little frame. Nothing your size has come back up that corridor. My receiver was unp
+  ok   ...and an errand accepted on an older save keeps its progress
+  ok   Ratchet names the keyboard's own heal and attack keys and no placeholder survives  That ring of charge on you fills when your hits land. Right now you have no way to spend it. My Volt Pack fixes that. With it, hold F to mend a core, or hold X and let go for a Volt Burst. You will ne
+  ok   ...and, on a remapped controller, the button she bound  That ring of charge on you fills when your hits land. Right now you have no way to spend it. My Volt Pack fixes that. With it, hold Triangle to mend a core, or hold Square and let go for a Volt Burst.
+  ok   GLACIERE's title is not the sword's name  GLACIERE, THE FROZEN SENTINEL
+  ok   the Archives sage names GLACIERE, not a different "Archivist"
+  ok   the free chapter counts the guardians that are actually left  4: Four kingdoms, four more guardians and Mother's hijacked song are waiting in the full game.
+  ok   Mono does not blame MOTHER for the order
+  ok   the Prowler was never infected, and nothing says it was
+  ok   Kerf never split a purifier in two
+  ok   the finale cleanses and frees MOTHER — no "Null Core" is killed  MOTHER-V, THE HIJACKED SONG MOTHER-V is free. Her song is silent, and it is her own again. What remains is the Eye that 
+  ok   ...and is truthful about the Eye: exposed, not defeated
+  ok   marble, not crystal, in the quarry's own words
+
+OK — every beat in its order, every gate says why, every line names only what she has met
+   (story-order: 1.2 s)
+
+── survey-a7  — Ratchet's shaft errand is finished by reading the A7 survey, not by entering the room; early reads remembered; old saves keep what they earned
+── survey-a7 — Ratchet's errand is finished by reading the survey, not by standing in the shaft
+
+  ok   the strings exist and speak of the survey  ["There is a shaft under the meadow nobody has gone down since the fall. The quarrymen left their survey at the bottom. 
+  ok   Ratchet asks for the survey (real interact press beside him)  {"near":{"found":true,"near":true,"label":"npc"},"state":"active","said":"There is a shaft under the meadow nobody has gone down since the fall. The quarr"}
+  ok   standing in A7 after the ask does NOT complete the errand  {"state":"active","done":false,"scrap":0,"coin":0,"read":false,"toasts":[]}
+  ok   ...and Ratchet does not pay for it: he still points her at the survey  Read the quarrymen's survey at the bottom of the deep shaft — down through the brittle floor in the cave under the hub. 
+  ok   the survey is a real interactable: the "Read" cue over it, the key opens it  {"found":true,"near":true,"label":"term"}
+  ok   ...the press reads all three lines of the survey  3 lines
+  ok   ...and reading it after the ask completes the errand, and says so  {"state":"active","done":true,"scrap":0,"coin":0,"read":true,"toasts":["Errand ready — go back"]}
+  ok   ...the read is in the saved game
+  ok   Ratchet thanks her for the reading and pays: +80 scrap and the coin  {"scrap":80,"coin":1,"state":"done"}
+  ok   ...exactly once: talking again and re-reading pay nothing more  {"d":0}
+  ok   reading the survey before anyone asks is remembered, and is not an errand yet  {"state":"none","done":true,"scrap":0,"coin":0,"read":true,"toasts":[]}
+  ok   ...Ratchet says she already read it — the early line — and pays on the ask  {"said":"You have already read the quarrymen's survey down that shaft? Then you know what I wanted known. Thi","scrap":80,"coin":1}
+  ok   ...once
+  ok   having stood in A7 without reading is NOT early discovery: he asks, nothing is paid  There is a shaft under the meadow nobody has gone down since the fall. The quarrymen left their surv
+  ok   an old save paid under the visit rule loads still paid  {"state":"done","done":false,"scrap":500,"coin":1,"read":false,"toasts":[],"qbase":"{}"}
+  ok   ...is never offered again, and reading the survey afterwards pays nothing  {"scrap":0,"coin":1}
+  ok   an old save with the errand active and A7 visited but the survey unread stays ACTIVE on load  {"state":"active","done":false,"scrap":0,"coin":0,"read":false,"toasts":[],"qbase":"{}"}
+  ok   ...Ratchet still sends her to the survey and pays nothing  Read the quarrymen's survey at the bottom of the deep shaft — down through the brittle floor in the 
+  ok   ...until she reads it: then he thanks her and pays once  {"scrap":80,"coin":1,"state":"done"}
+  ok   ask, goal, thanks and early lines exist in every language, each its own translation  en,ar,tr,zh,ru
+
+OK — the coin is paid for the survey, once, and old saves keep what they earned
+   (survey-a7: 2.1 s)
+
+── regress  — boots both builds, walks every room in ROOMS, watches for page errors
+index.html | boot PLAY | rooms 77 | roomErrs none | prismStress ok | pageerrors none
+odyssey.html | boot PLAY | rooms 77 | roomErrs none | prismStress ok | pageerrors none
+   (regress: 72.3 s)
+
+── kingdom  — the kingdom protocol driven live: art, enemies, guardian, places, bench, every door walked, sound, music
+── kingdom — the protocol, driven live, kingdom by kingdom
+  ── kingdom A
+  ok   A: every room's declared art is a real file the manifest knows (27 rooms)  
+  ok   A: every enemy shows four different pictures alive  crawler 34, guard 23, flier 51, turret 11, blob 32, hopper 33, bat 31, sage 30
+  ok   A: the guardian glitch stands in A4
+  ok   A: ...it can be hurt
+  ok   A: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   A: ...the final hit reaches its terminal rescue or defeat state
+  ok   A: ...and it has a lair  GA1
+  ok   A: a bench stands on the road before it  road A3>A4  benches A0B,A3,CV1B,GA1,GA2
+  ok   A: ratchet has a place of their own  A0B (interior)
+  ok   A: servo has a place of their own  A1 (housing)
+  ok   A: the plain door W2 > A0 draws  46.7% of its frame
+  ok   A: the booth door A0 > A0B draws  37.3% of its frame
+  ok   A: the booth door A0B > A0 draws  32.2% of its frame
+  ok   A: the plain door A2 > A10 draws  37.9% of its frame
+  ok   A: the plain door A10 > A2 draws  45.1% of its frame
+  ok   A: the gate door A10 > GA2 draws  58.0% of its frame
+  ok   A: the gate door A4 > GA1 draws  62.2% of its frame
+  ok   A: the mouth door A5 > CV1 draws  14.1% of its frame
+  ok   A: ...and wears its plate caveMouth  56.1% is the plate of 14.1% drawn
+  ok   A: the plain door CV1 > A5 draws  40.9% of its frame
+  ok   A: ...and wears its plate caveExit  38.7% is the plate of 40.9% drawn
+  ok   A: the mouth door CV1 > CV1B draws  25.1% of its frame
+  ok   A: ...and wears its plate caveMouthE  19.0% is the plate of 25.1% drawn
+  ok   A: the mouth door CV1B > CV1 draws  65.2% of its frame
+  ok   A: ...and wears its plate caveMouthE  35.8% is the plate of 65.2% drawn
+  ok   A: the mouth door CV1B > CV2 draws  59.0% of its frame
+  ok   A: ...and wears its plate caveMouthE  39.1% is the plate of 59.0% drawn
+  ok   A: the mouth door CV2 > CV1B draws  61.8% of its frame
+  ok   A: ...and wears its plate caveMouthE  42.3% is the plate of 61.8% drawn
+  ok   A: the plain door GA1 > A4 draws  6.3% of its frame
+  ok   A: the plain door GA2 > A10 draws  61.5% of its frame
+  ok   A: the music streams from files the build knows  mus_meadows:yes
+  ── kingdom B
+  ok   B: every room's declared art is a real file the manifest knows (12 rooms)  
+  ok   B: every enemy shows four different pictures alive  flier 55, surge 23, turret 7, hopper 10, guard 19, blob 26, bat 31, sage 27
+  ok   B: the guardian brood stands in B4
+  ok   B: ...it can be hurt
+  ok   B: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   B: ...the final hit reaches its terminal rescue or defeat state
+  ok   B: ...and it has a lair  GB1
+  ok   B: a bench stands on the road before it  road B1>B2>B3>B4  benches B3,GB1
+  ok   B: mono has a place of their own  B3B (interior)
+  ok   B: the oracle door B3 > B3B draws  28.6% of its frame
+  ok   B: the oracle door B3B > B3 draws  31.0% of its frame
+  ok   B: the gate door B4 > GB1 draws  16.6% of its frame
+  ok   B: ...and wears its plate gateConduits  16.5% is the plate of 16.6% drawn
+  ok   B: the plain door GB1 > B4 draws  61.2% of its frame
+  ok   B: the music streams from files the build knows  mus_conduits:yes
+  ── kingdom C
+  ok   C: every room's declared art is a real file the manifest knows (11 rooms)  
+  ok   C: every enemy shows four different pictures alive  kiln 18, hopper 27, turret 9, crawler 22, guard 23, blob 24, bat 32, sage 27
+  ok   C: the guardian atlas stands in C3
+  ok   C: ...it can be hurt
+  ok   C: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   C: ...the final hit reaches its terminal rescue or defeat state
+  ok   C: ...and it has a lair  GC1
+  ok   C: a bench stands on the road before it  road C1>C2>C3  benches C5B,GC1
+  ok   C: patch has a place of their own  C5B (interior)
+  ok   C: the forge door C5 > C5B draws  26.7% of its frame
+  ok   C: the forge door C5B > C5 draws  27.7% of its frame
+  ok   C: the gate door C3 > GC1 draws  12.5% of its frame
+  ok   C: ...and wears its plate gateFoundry  12.3% is the plate of 12.5% drawn
+  ok   C: the plain door GC1 > C3 draws  61.8% of its frame
+  ok   C: the music streams from files the build knows  mus_foundry:yes
+  ── kingdom D
+  ok   D: every room's declared art is a real file the manifest knows (10 rooms)  
+  ok   D: every enemy shows four different pictures alive  rime 26, guard 32, hopper 20, turret 12, crawler 33, blob 23, flier 52, bat 31, sage 29
+  ok   D: the guardian zero stands in D3
+  ok   D: ...it can be hurt
+  ok   D: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   D: ...the final hit reaches its terminal rescue or defeat state
+  ok   D: ...and it has a lair  GD1
+  ok   D: a bench stands on the road before it  road D1>D2>D3  benches D1,GD1
+  ok   D: sage has a place of their own  D1B (interior)
+  ok   D: the carrel door D1 > D1B draws  39.6% of its frame
+  ok   D: the carrel door D1B > D1 draws  38.0% of its frame
+  ok   D: the gate door D3 > GD1 draws  23.4% of its frame
+  ok   D: ...and wears its plate gateArchives  24.2% is the plate of 23.4% drawn
+  ok   D: the plain door GD1 > D3 draws  59.9% of its frame
+  ok   D: the music streams from files the build knows  mus_archives:yes
+  ── kingdom E
+  ok   E: every room's declared art is a real file the manifest knows (10 rooms)  
+  ok   E: every enemy shows four different pictures alive  snare 18, blob 34, hopper 16, crawler 18, turret 10, flier 53, guard 25, bat 32, sage 27
+  ok   E: the guardian mother stands in E3
+  ok   E: ...it can be hurt
+  ok   E: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   E: ...the final hit reaches its terminal rescue or defeat state
+  ok   E: ...and it has a lair  GE1
+  ok   E: a bench stands on the road before it  road E1>E2>E3  benches E2,GE1
+  ok   E: lumen has a place of their own  E1B (interior)
+  ok   E: the hollow door E1 > E1B draws  31.7% of its frame
+  ok   E: the hollow door E1B > E1 draws  31.9% of its frame
+  ok   E: the gate door E3 > GE1 draws  5.8% of its frame
+  ok   E: ...and wears its plate gateNest  7.0% is the plate of 5.8% drawn
+  ok   E: the plain door GE1 > E3 draws  61.2% of its frame
+  ok   E: the music streams from files the build knows  mus_nest:yes
+  ── kingdom X
+  ok   X: every room's declared art is a real file the manifest knows (7 rooms)  
+  ok   X: every enemy shows four different pictures alive  bat 29, hopper 25, crawler 42, sage 30
+  ok   X: the guardian prism stands in X1
+  ok   X: ...it can be hurt
+  ok   X: ...it can be staggered
+       daze: a hit-group opens it (dazeAt )
+  ok   X: ...the final hit reaches its terminal rescue or defeat state
+  ok   X: ...and it has a lair  GX1
+  ok   X: a bench stands on the road before it  road V1>B5>X1  benches V2,GX1
+  ok   X: kerf has a place of their own  V1B (interior)
+  ok   X: the kerf door V1 > V1B draws  36.6% of its frame
+  ok   X: the kerf door V1B > V1 draws  35.3% of its frame
+  ok   X: the gate door X1 > GX1 draws  23.4% of its frame
+  ok   X: ...and wears its plate gateDeep  23.0% is the plate of 23.4% drawn
+  ok   X: the plain door GX1 > X1 draws  60.8% of its frame
+  ok   X: the music streams from files the build knows  mus_cache:yes
+  ok   every one-shot sound in the game decays (tests/tails.cjs)  
+  ok   no page errors  
+
+OK — every kingdom holds its own rules, measured
+   (kingdom: 32.5 s)
+
+── warp  — ?room= drops the owner into any room: locked, loud when refused, and never his save
+── warp — one person's door into any room, and it stays one person's
+
+  ok   no query string: the game boots to its own menu  MENU
+  ok   no query string: the save slot is the ordinary one  clawbyte_save_robo
+  ok   no query string: nothing is said
+  ok   a browser with no Forge key does not warp  (menu)
+  ok   ...and it says why, out loud  warp refused — this browser has no Forge key | warp: warp refused — this browser has no Forge key
+  ok   ...and it leaves his real save slot alone  clawbyte_save_robo
+  ok   an id that is not a room does not warp  MENU
+  ok   ...and the id it could not find is in the message  warp — no room "V1Bx" | warp: warp — no room "V1Bx"
+  ok   an unlocked browser lands in the room  V1B
+  ok   ...playing, not at a menu or in a film  PLAY
+  ok   ...standing in open air over the floor, not inside the rock
+  ok   ...with every power, so the room can be walked  5 abilities
+  ok   ...and the Cutter is standing there  kerf
+  ok   ...and it says where it put him  WARP — V1B | GRAPPLE CLAW online — press U | VOLT SOAR online: hold UP and fire the claw on the ground to launch straight up.
+  ok   a warp session writes to its OWN slot, never his run  clawbyte_save_robo_warp
+  ok   any room in the game is reachable (the Cache proper)  X1
+  ok   no page errors in any of it
+
+OK — the door opens for the key, refuses everyone else out loud, and never touches his save
+   (warp: 17.6 s)
+
+1 harness(es) failed

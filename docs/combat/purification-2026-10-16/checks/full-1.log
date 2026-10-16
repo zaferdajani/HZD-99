@@ -1,0 +1,1719 @@
+
+── combat-impact-browser  — rendered hit flash and finite hardware particles, charged weight, equipped stats and ledger export
+PASS staged real renderer: white silhouette/expiry, metal count/lifetime/cap, charged recoil/stop, protected actors, all special values, downloadable ledger
+   (combat-impact-browser: 5.8 s)
+
+── repair-browser  — Ratchet drag controls, page reload and interrupted boot in the assembled game
+PASS browser repair: actual drag/click controls, wrong target, Escape, page reload, interrupted boot, once-only rewards, forge continuation and room exit
+   (repair-browser: 4.2 s)
+
+── story-opening  — survivor histories and earned Sage/CHIME route
+PASS opening: earned marble/sword/sage/CHIME order, legacy routes, six distinct survivor histories, once-only reveal preserving reward callback
+   (story-opening: 0.1 s)
+
+── survey-a7  — Ratchet's shaft errand is finished by reading the A7 survey, not by entering the room; early reads remembered; old saves keep what they earned
+── survey-a7 — Ratchet's errand is finished by reading the survey, not by standing in the shaft
+
+  ok   the strings exist and speak of the survey  ["There is a shaft under the meadow nobody has gone down since the fall. The quarrymen left their survey at the bottom. 
+  ok   Ratchet asks for the survey (real interact press beside him)  {"near":{"found":true,"near":true,"label":"npc"},"state":"active","said":"There is a shaft under the meadow nobody has gone down since the fall. The quarr"}
+  ok   standing in A7 after the ask does NOT complete the errand  {"state":"active","done":false,"scrap":0,"coin":0,"read":false,"toasts":[]}
+  ok   ...and Ratchet does not pay for it: he still points her at the survey  Read the quarrymen's survey at the bottom of the deep shaft — down through the brittle floor in the cave under the hub. 
+  ok   the survey is a real interactable: the "Read" cue over it, the key opens it  {"found":true,"near":true,"label":"term"}
+  ok   ...the press reads all three lines of the survey  3 lines
+  ok   ...and reading it after the ask completes the errand, and says so  {"state":"active","done":true,"scrap":0,"coin":0,"read":true,"toasts":["Errand ready — go back"]}
+  ok   ...the read is in the saved game
+  ok   Ratchet thanks her for the reading and pays: +80 scrap and the coin  {"scrap":80,"coin":1,"state":"done"}
+  ok   ...exactly once: talking again and re-reading pay nothing more  {"d":0}
+  ok   reading the survey before anyone asks is remembered, and is not an errand yet  {"state":"none","done":true,"scrap":0,"coin":0,"read":true,"toasts":[]}
+  ok   ...Ratchet says she already read it — the early line — and pays on the ask  {"said":"You have already read the quarrymen's survey down that shaft? Then you know what I wanted known. Thi","scrap":80,"coin":1}
+  ok   ...once
+  ok   having stood in A7 without reading is NOT early discovery: he asks, nothing is paid  There is a shaft under the meadow nobody has gone down since the fall. The quarrymen left their surv
+  ok   an old save paid under the visit rule loads still paid  {"state":"done","done":false,"scrap":500,"coin":1,"read":false,"toasts":[],"qbase":"{}"}
+  ok   ...is never offered again, and reading the survey afterwards pays nothing  {"scrap":0,"coin":1}
+  ok   an old save with the errand active and A7 visited but the survey unread stays ACTIVE on load  {"state":"active","done":false,"scrap":0,"coin":0,"read":false,"toasts":[],"qbase":"{}"}
+  ok   ...Ratchet still sends her to the survey and pays nothing  Read the quarrymen's survey at the bottom of the deep shaft — down through the brittle floor in the 
+  ok   ...until she reads it: then he thanks her and pays once  {"scrap":80,"coin":1,"state":"done"}
+  ok   ask, goal, thanks and early lines exist in every language, each its own translation  en,ar,tr,zh,ru
+
+OK — the coin is paid for the survey, once, and old saves keep what they earned
+   (survey-a7: 2.5 s)
+
+── story-battery  — unique workshop battery and legacy save compatibility
+PASS [
+  'fresh cat carries no cell',
+  'dialogue terminates',
+  'cannot wake before finding battery',
+  'dialogue terminates',
+  'drawer grants unique battery',
+  'repeated interaction cannot duplicate',
+  'found battery persists',
+  'drawer stays open after reload',
+  'dialogue terminates',
+  'Ratchet battery cannot be spent on Servo',
+  'dialogue terminates',
+  'dialogue terminates',
+  'Ratchet cell installed, distinct spare granted',
+  'dialogue terminates',
+  'spare not duplicated',
+  'dialogue terminates',
+  'separate spare wakes Servo',
+  'dialogue terminates',
+  'old save retains its original rescue path'
+]
+   (story-battery: 1.2 s)
+
+── first-sage-route  — pre-guardian route through quarry maintenance passage
+PASS first-sage maintenance route before guardian [
+  { from: 'CV3', to: 'GA1T', x: 628 },
+  { from: 'GA1T', to: 'CV3', x: 1140 }
+]
+   (first-sage-route: 1.4 s)
+
+── sage-quiet  — comic page 26: the sage's promise closes its end of the network
+PASS sage-quiet: the chamber stands down in the moment (1 machines), all three rooms of the network wake calm on a fresh load, and no other cave or surface is touched {
+  before: { chamber: 1, n: 1 },
+  beforeTunnel: 1,
+  company: 1,
+  afterMoment: 0,
+  net: {
+    GA1: { hostile: 0, total: 0 },
+    GA1T: { hostile: 0, total: 1 },
+    GA1D: { hostile: 0, total: 1 }
+  },
+  otherNet: 1,
+  meadow: 2,
+  flagged: true
+}
+   (sage-quiet: 1.1 s)
+
+── input-contract  — one struct the game reads: the devices unchanged, and a struct alone can play
+PASS input-contract: keyboard, stick and pad still say exactly what they said; the magnitude reaches the physics (340 px/s at full push, 136 at 0.4); and a struct with no device behind it walks and jumps her 494 px {
+  keyboard: { moveX: 1, run: true, down: true },
+  stick: { moveX: 0.5, run: true },
+  padWalk: false,
+  padAfterClick: true,
+  padHoldsRun: true,
+  padCentred: false,
+  padWalksAgain: false,
+  full: { v: 340, x: 759 },
+  half: { v: 136, x: 366 },
+  struct: { moved: 494, jumped: true },
+  readsThrough: { right: true, left: false, jump: true },
+  devicesIgnored: { left: false, atk: false },
+  afterHandback: { anyDown: false, moveX: 0 },
+  deviceWalks: 340
+}
+   (input-contract: 1.2 s)
+
+── manhwa-reader  — revised illustrated edition and complete written opening
+PASS manhwa: 32 decoded and hash-verified pages, full revised story, desktop/390px layout, honest incomplete status, no browser errors
+   (manhwa-reader: 3.9 s)
+
+── hero-cache-regression  — third-hit cached sheet geometry and supplied idle in every mood
+PASS third-hit gameplay renders six complete cells; incompatible cached sheet rejected; all 64 idle frame/mood/facing cases keep supplied art; voice and art URLs match build
+   (hero-cache-regression: 1.2 s)
+
+── hero-move-coverage  — actual renderer coverage for movement, aerial attacks, reactions and departure
+PASS 19 actual-renderer move selections and supplied departure art
+     transition set: 0 of 8 fired (queued: transTurn, transWallAir, transFallRun, transAtkRec, transGrapThrow, transGrapReel, transGlideIn, transGlideOut)
+   (hero-move-coverage: 1.2 s)
+
+── hero-frame-alpha  — discrete sprites never blend into doubled silhouettes
+PASS fractional frames and clip changes draw one opaque silhouette, with no ghost image
+   (hero-frame-alpha: 0.6 s)
+
+── offline-release  — scoped version cache, media seeking and storage-denied fallback
+PASS: versioned app-only caches, fresh manifests, media seeking, offline fallback, cache denial and no partial-response corruption
+   (offline-release: 0.1 s)
+
+── sage-specials  — charged attacks obey purification and protected-target rules
+OK — held specials cleanse sages, protect allies and respect defenses
+   (sage-specials: 0.1 s)
+
+── input-focus  — focus loss clears input and cancelled touches cannot fire
+OK — focus loss clears all input, background input is blocked, fresh input recovers and touch cancellation cannot fire
+   (input-focus: 0.1 s)
+
+── cave-passage  — real cave traversal and reciprocal gate walks
+{"passes":[{"id":"CV1","centre":14,"dir":-1,"x":287.1766666666664,"end":288,"ok":true},{"id":"CV1","centre":14,"dir":1,"x":611.5,"end":608,"ok":true},{"id":"CV1B","centre":9,"dir":-1,"x":124.49999999999964,"end":128,"ok":true},{"id":"CV1B","centre":9,"dir":1,"x":451.50000000000045,"end":448,"ok":true},{"id":"CV2","centre":22,"dir":-1,"x":541.1766666666674,"end":544,"ok":true},{"id":"CV2","centre":22,"dir":1,"x":867.499999999998,"end":864,"ok":true},{"id":"CV2","centre":48,"dir":-1,"x":1372.499999999996,"end":1376,"ok":true},{"id":"CV2","centre":48,"dir":1,"x":1699.500000000004,"end":1696,"ok":true}],"doors":[{"from":"CV1B","to":"CV2","accepted":true,"arrived":"CV2","x":372},{"from":"CV2","to":"CV1B","accepted":true,"arrived":"CV1B","x":1108}]}
+PASS: real player crosses cave pockets both ways and completes onward/return gate walks
+   (cave-passage: 1.3 s)
+
+── shadow-ground  — contact shadows follow real terrain and platforms
+PASS: shadows follow curved support, shelves, moving platforms and pits
+   (shadow-ground: 0.1 s)
+
+── weapons  — sword ownership, migration, permanent dual mode and real charged input
+PASS: gated sword progression, legacy migration, saved selection, both-facing real melee and charged specials.
+   (weapons: 0.3 s)
+
+── combo-routing  — real player inputs select jab, cross, uppercut and the charged burst
+PASS: actual attack inputs select jab, cross, uppercut; wrap, timeout and charged burst agree.
+PASS single-sword combo body routing and missing-image fallback
+PASS held-charge/release frame separation for claw and weapon art
+PASS real aerial/plunge input, contact-gated impact, recharge phases and alternate charge
+   (combo-routing: 0.3 s)
+
+── lesson  — every power teaches itself and completes on real use
+dash   card: {"lesson":"dash","key":"→"} -> used: {"hold":null} ->  {"lesson":null,"flag":true}
+djump  card: {"lesson":"djump","key":"→"} -> used: {"hold":null} ->  {"lesson":null,"flag":true}
+wall   card: {"lesson":"wall","key":"→"} -> used: {"hold":null} ->  {"lesson":null,"flag":true}
+emp    card: {"lesson":"emp","key":"→"} -> used: {"hold":null} ->  {"lesson":null,"flag":true}
+taught twice?      : no
+pageerrors         : none
+   (lesson: 24.9 s)
+
+── filmflow  — the opening plays as one film: no black, no caption freeze, between shots
+shots: intro1 intro2 intro3 intro4 intro5 intro6 intro7 intro8
+  ok   all eight shots play  8 / 8
+  ok   no frame of black between two shots
+  ok   the picture never stops between shots for more than 0.25 s  worst 0.10 s  [["intro2",0.06],["intro3",0.06],["intro4",0.06],["intro5",0.07],["intro6",0.06],["intro7",0.1],["intro8",0.06]]
+  ok   no shot but the last freezes on its caption
+  ok   no page errors
+
+OK — the opening plays as one film, shot into shot
+   (filmflow: 52.9 s)
+
+── whatplays  — every music cue resolves to the intended track
+── whatplays — every slot leads with the score we commissioned
+
+  20 tracks in assets/music, 21 slots
+
+    A            mus_meadows
+    B            mus_conduits
+    C            mus_foundry
+    D            mus_archives
+    E            mus_nest
+    X            mus_cache
+    alphaTame    mus_alphatame
+    boss         mus_boss
+    boss_alpha   mus_alpha -> mus_boss
+    boss_atlas   mus_furnace -> mus_boss
+    boss_brood   mus_talonhost -> mus_boss
+    boss_glitch  mus_nullfang -> mus_boss
+    boss_horn    mus_eye -> mus_boss
+    boss_mini    mus_eye -> mus_boss
+    boss_mother  mus_mother -> mus_boss
+    boss_prism   mus_prism -> mus_boss
+    boss_zero    mus_glaciere -> mus_boss
+    intro        mus_intro -> mus_title
+    mother       mus_mother -> mus_boss
+    title        mus_hero -> mus_title
+    winTheme     mus_ending
+
+  ok   every track a slot names is on disk  20 named, all present
+  ok   every track shipped is reachable from some slot  20 shipped, all reachable
+  ok   no slot reaches for a track outside the authored score  every candidate is a mus_ track
+  ok   every guardian leads with its own name theme  7 fights, each with its own
+  ok   every kingdom puts a track on the stream  A:mus_meadows  B:mus_conduits  C:mus_foundry  D:mus_archives  E:mus_nest  X:mus_cache
+
+OK — every slot leads with the score we commissioned
+   (whatplays: 4.2 s)
+
+── cues  — level, onset and length of each melodic cue
+jump   {"peak":0.083,"onsetMs":3,"lenMs":125,"notes":["C6(-0.35)","C6(0.06)"]}
+djump  {"peak":0.068,"onsetMs":2,"lenMs":176,"notes":["E6(-0.28)","G6(0.08)","G6(0.08)"]}
+land   {"peak":0.081,"onsetMs":0,"lenMs":141,"notes":["C5(0.06)"]}
+dash   {"peak":0.065,"onsetMs":0,"lenMs":162,"notes":["E5(-0.03)","G5(0.08)","A5(0.04)","A5(0.04)"]}
+pick   {"peak":0.083,"onsetMs":3,"lenMs":173,"notes":["A5(0.04)","E6(0.23)"]}
+heal   {"peak":0.07,"onsetMs":3,"lenMs":400,"notes":["C5(0.06)","E5(-0.03)","G5(0.08)","C6(0.06)"]}
+chest  {"peak":0.099,"onsetMs":3,"lenMs":520,"notes":["C5(0.06)","E5(-0.03)","G5(0.08)","A5(0.04)","C5(0.06)"]}
+hurt   {"peak":0.076,"onsetMs":2,"lenMs":237,"notes":["C3(0.21)","C5(0.06)","C5(0.06)","A4(0.04)"]}
+edie   {"peak":0.094,"onsetMs":3,"lenMs":198,"notes":["G5(0.08)","E5(-0.03)","C5(0.06)","C5(0.06)"]}
+pageerrors: none
+   (cues: 5.3 s)
+
+── attacks  — one claw stat, a row per move: damage unchanged, knockback per attack, multi-hits on a clock that freeze once
+ok   every attack deals exactly its pre-refactor damage  110 hits measured across 7 builds, 0 differ
+
+  THE TABLE AS PLAYED  (damage, enemy vx, enemy vy, hit-stop in 60 Hz frames)
+  attack            dmg       vx       vy   stop
+  slash 1 (claws)    12      310     -120     3f   base 12
+  slash 2 (claws)    12      310     -120     3f   
+  finisher (claws)   16      465     -120     5f   
+  feral slash        17      310     -120     3f   feral claws x1.45
+  crystal slash      20      310     -120     3f   wield x1.25
+  crystal finisher   27    407.4     -226     5f   rises: aim ay -0.55
+  joined slash       54      310     -120     3f   wield x1.45 (easy, crest)
+  risecut            20      310     -430     3f   the launcher
+  plunge ring        10      260     -180     3f   beside the pogo
+  throw (out)        43      465        0     7f   spear
+  throw (back)       43        0        0     3f   
+  swirl pass 1       18        0      -60     7f   t=0.1667s
+  swirl pass 2       18        0      -60     0f   t=0.3333s
+  swirl pass 3       18        0      -60     0f   t=0.4833s
+  swirl pass 4       18        0      -60     0f   t=0.65s
+  burst (claws)      38    417.3   -157.3     7f   
+  thunderfall        19        0     -180     0f   NOSTOS feral finisher
+  claw bite           4        0        0     2f   
+  claw arrival       10    259.8     -160     4f   
+
+  ATTACKS (the table in the build)
+    slash     {"id":"slash","mult":1,"skill":null,"floor":0,"flat":0,"feral":1,"wield":1,"purity":1,"crit":1,"crest":1,"multi":false,"every":0,"kb":310,"kbV":220,"kbUp":120,"kbT":0.26,"freeze":0.05,"tickFreeze":0,"freezeBig":0.06,"recoil":62}
+    finisher  {"id":"finisher","mult":1.35,"skill":["calc",1.55],"floor":0,"flat":0,"feral":1,"wield":1,"purity":1,"crit":1,"crest":1,"multi":false,"every":0,"kb":465,"kbV":220,"kbUp":120,"kbT":0.3,"freeze":0.085,"tickFreeze":0,"freezeBig":null,"recoil":130}
+    risecut   {"id":"risecut","mult":1,"skill":null,"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":null,"kbV":0,"kbUp":430,"kbT":0.4,"freeze":0,"tickFreeze":0,"freezeBig":null,"recoil":0,"lift":300}
+    plunge    {"id":"plunge","mult":0.6,"skill":null,"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":260,"kbV":0,"kbUp":180,"kbT":0.3,"freeze":0,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    throw     {"id":"throw","mult":1.15,"skill":["boomer",1.45],"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":465,"kbV":0,"kbUp":null,"kbT":0.22,"freeze":0.05,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    throwBack {"id":"throwBack","mult":1.15,"skill":["boomer",1.45],"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":0,"kbV":0,"kbUp":null,"kbT":0.22,"freeze":0.05,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    swirl     {"id":"swirl","mult":0.95,"skill":null,"floor":1,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":true,"every":0.16,"kb":0,"kbV":0,"kbUp":60,"kbT":0.16,"freeze":0.035,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    burst     {"id":"burst","mult":3.2,"skill":null,"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":420,"kbV":200,"kbUp":180,"kbT":0.3,"freeze":0.12,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    thunder   {"id":"thunder","mult":1.6,"skill":null,"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":0,"kbV":0,"kbUp":180,"kbT":0.3,"freeze":0,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    grapBite  {"id":"grapBite","mult":0.35,"skill":null,"floor":1,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":null,"kbV":0,"kbUp":null,"kbT":0,"freeze":0.035,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    grapHit   {"id":"grapHit","mult":0.8,"skill":null,"floor":1,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":260,"kbV":0,"kbUp":160,"kbT":0.26,"freeze":0.07,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    clash     {"id":"clash","mult":0,"skill":null,"floor":0,"flat":0,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":260,"kbV":0,"kbUp":null,"kbT":0,"freeze":0.14,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    counter   {"id":"counter","mult":0,"skill":null,"floor":0,"flat":36,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":360,"kbV":0,"kbUp":160,"kbT":0.3,"freeze":0.09,"tickFreeze":0,"freezeBig":null,"recoil":0}
+    soar      {"id":"soar","mult":0,"skill":null,"floor":0,"flat":48,"feral":0,"wield":0,"purity":0,"crit":0,"crest":0,"multi":false,"every":0,"kb":0,"kbV":0,"kbUp":320,"kbT":0.3,"freeze":0.04,"tickFreeze":0,"freezeBig":null,"recoil":0}
+
+  ok   a finisher throws farther than a jab  jab vx 310, finisher vx 465
+  ok   ...on a crystal too, where the finisher rises  jab vx 310, rising finisher vx 407.4
+  ok   a multi-hit PINS: every swirl pass stops a body walking at 90 px/s dead  pass vx 0 / 0 / 0 / 0
+  ok   the thrown blade is a spear: ~1.5x a jab  throw vx 465 vs jab 310
+  ok   the risecut still LAUNCHES  vy -430
+  ok   the swirl re-hits every 0.16 s of game time (+-1 SIM_STEP) at 1/60  gaps 0.1666 0.15 0.1667
+  ok   ...and at 1/30  gaps 0.1666 0.1667 0.1667
+  ok   ...the same number of hits per second whatever the step  4 hits (6.22/s) at 1/60, 4 (6.06/s) at 1/30
+  ok   only the first swirl pass freezes the game; the later ticks do not stutter it  hit-stop per pass 120ms/0ms/0ms/0ms  |  120ms/0ms/0ms/0ms  |  120ms/0ms/0ms/0ms
+  ok   single-contact moves still freeze on contact  3f 5f 7f 7f 4f
+  ok   no page errors
+
+OK — one claw stat, a row per move, and the player feels the table that is written
+   (attacks: 2.9 s)
+
+── slashsnd  — the claw: onset, separate passes, heavy third hit
+player exists: true
+slash beat 1   {"peak":0.074,"onsetMs":1,"lenMs":76,"passes":5,"at":[4,21,28,34,41],"edgeKHz":2.3}
+slash beat 2   {"peak":0.054,"onsetMs":0,"lenMs":81,"passes":6,"at":[4,10,22,28,34,44],"edgeKHz":2.2}
+slash beat 3   {"peak":0.142,"onsetMs":2,"lenMs":161,"passes":7,"at":[5,21,29,38,51,57],"edgeKHz":1.7}
+(ref) hit      {"peak":0.137,"onsetMs":0,"lenMs":38,"passes":0,"at":[],"edgeKHz":0.4}
+(ref) jump     {"peak":0.083,"onsetMs":3,"lenMs":125,"passes":3,"at":[4,14,52],"edgeKHz":2}
+(ref) dash     {"peak":0.065,"onsetMs":1,"lenMs":162,"passes":7,"at":[5,12,34,40,65,74],"edgeKHz":1.2}
+wClaw          {"centroid":816,"ringHz":224,"ringAmp":0.002}
+wCrystal       {"centroid":1615,"ringHz":2004,"ringAmp":0.007}
+wDouble        {"centroid":1026,"ringHz":1024,"ringAmp":0.012}
+join           {"centroid":1382,"ringHz":1746,"ringAmp":0.071}
+ok   single crystal sustains a glass ring the claw lacks  claw 0.002 vs crystal 0.007 @2004Hz
+ok   the double's ring sits below the single's  1024 vs 2004 Hz
+ok   no two weapons share a spectral centre (>=12% apart)  claw 816Hz, crystal 1615Hz, double 1026Hz
+ok   the join sting exists and rings  ringAmp 0.071
+pageerrors: none
+   (slashsnd: 5.4 s)
+
+── saw  — the chainsaw rig: sparks, impacts, contact damage
+C2        {"inList":1,"isRig":true,"sparkFrames":"37%","peakParticles":42,"endImpacts":8,"speed":"2-201 px/s","travelPx":192}
+D2        {"inList":4,"isRig":true,"sparkFrames":"40%","peakParticles":75,"endImpacts":10,"speed":"3-207 px/s","travelPx":224}
+E2        {"inList":5,"isRig":true,"sparkFrames":"40%","peakParticles":105,"endImpacts":12,"speed":"1-232 px/s","travelPx":192}
+contact   {"coresBefore":5,"coresAfter":4,"hurt":true}
+pageerrors: none
+   (saw: 6.0 s)
+
+── pace  — the game-speed dial slows the simulation and nothing else
+100% {"pxPerRealSecond":0,"vxEnd":0,"k":1}
+               90% {"pxPerRealSecond":0,"vxEnd":0,"k":0.9}
+               80% {"pxPerRealSecond":0,"vxEnd":0,"k":0.8}
+               70% {"pxPerRealSecond":0,"vxEnd":0,"k":0.7}
+  swipeTellSeconds 0.5
+  swipeTellAt70pct 0.71
+pageerrors: none
+   (pace: 5.9 s)
+
+── tutor  — the opening chain: booth, letter, battery, repair, pod, Volt Pack, heal, winch, monument, road
+reload mid-walk: {"stored":13,"resumed":"node","back":13,"heal":13}
+steps reached: move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go
+Ratchet woke: {"live":true,"spare":1,"kit":0,"quest":"active"}   pod: {"bench":"A0B","stored":"A0B"}
+scrap: 0 before the pitch, 12 at the counter (cell)
+after buying the pack: {"volts":99,"scrap":0,"flag":true,"heal":true}
+the hold before the pack: {"locked":0,"had":true}
+the scripted first surge left: 4 / 5 cores
+the winch: {"calm":true,"phase":"idle"}, stopped by the burst: true
+door: {"opened":true,"before":false,"i":14,"last":14}
+skipping the walk: {"boothEarly":0,"killHeld":true,"atkHeld":true,"atkCounts":true,"boothLater":1}
+
+OK
+   (tutor: 23.3 s)
+
+── errands  — every errand has a goal that exists and can be reached
+errands:
+  alpha_pack     [A]  
+  ratchet_forge  [A]  fetch cshard -> CV3
+  servo_coil     [A]  fetch coil -> A6
+  servo_swarm    [A]  cull 6 x crawler -> 13 authored in the world
+  ratchet_deep   [A]  read terminal 20 in A7 -> placed
+  mono_relay     [B]  fetch relay -> B6
+  patch_quiet    [C]  cull 4 x turret -> 14 authored in the world
+  sage_index     [D]  fetch index -> D4
+  lumen_light    [E]  fetch lens -> E4
+
+quest items in the world: coil, relay, index, lens, cshard
+
+OK — every errand has a reachable goal
+   (errands: 1.0 s)
+
+── padlife  — a yanked controller releases the game; a live one keeps it
+── padlife  — a yanked controller must not lock the game in pad mode
+  ok   live pad -> pad mode  true
+  ok   yanked -> pad mode off  false
+  ok   yanked -> touch controls back  true
+  ok   corpse in rack -> pad mode off  false
+  ok   corpse in rack -> touch controls back  true
+  ok   corpse in rack -> trials read touch  true
+  ok   flapped flag but a button down -> still a pad  true
+  ok   reconnected on another slot -> pad mode  true
+  ok   corpse on another slot -> pad mode off  false
+  stick only 185  click 340  released+pushed 185  (walk cap 185, top 340, RUN on button 10)
+  ok   stick alone walks  true
+  ok   L3 while moving runs  true
+  ok   stick released, next push walks again  true
+  ok   RUN defaults to L3  10
+
+OK — a dead pad releases the game, a live one keeps it
+   (padlife: 1.4 s)
+
+── tap  — tap where a thing is drawn and that thing happens
+── tap  — tap where a thing is drawn and that thing happens
+  ok   a tap releases itself; a held button stays down until the finger lifts  {"tapCleared":true,"stillHeld":true,"notQueued":true}
+  ok   pause: every row selects itself  [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+  ok   trial mem: 4 tiles fire their own key  []
+  ok   trial log: 2 tiles fire their own key  []
+  ok   trial vis: 3 tiles fire their own key  []
+  ok   trial calc: 3 tiles fire their own key  []
+  ok   standing line leads the conversation at every tier  [0,1,2]
+  ok   no two corner buttons share a touch  []
+  ok   the map is the biggest corner button  true
+  ok   the crest button is off the HUD column (it lives under Pause)  false
+
+OK — the hit-boxes are the drawing
+   (tap: 3.5 s)
+
+── servo-presence  — Old Servo stood beside, not inside: prompt before contact, talk stand-off, grounded, whole arc on desktop and phone
+── servo-presence — Old Servo, stood beside: prompt, stand-off, grounding, the whole arc
+
+  ok   desktop: the prompt comes up while she is still clear of his drawn body  {"dx":-74,"gap":10,"half":38}
+  ok   desktop: ...and it says what the press will do (wake Old Servo)  E — wake Old Servo
+  ok   desktop: walked into him on purpose, she is inside his body  {"dx":14,"half":38}
+  ok   desktop: the talk steps her out to his side, clear of his body  {"dx":68,"gap":4,"standOff":68}
+  ok   desktop: ...facing him, on the floor  {"face":-1,"on":true}
+  ok   desktop: he stands on the meadow floor (feet on the ground)  {"feet":461.9166259765625,"floor":461.9166259765625,"tile":448}
+  ok   desktop: dark, he cannot speak: the line is hers, and the spare cell is seated  {"lines":["Ratchet’s spare cell fits the port in his chest. You seat it."],"live":true}
+  ok   desktop: his first say opens by itself after the waking
+  ok   desktop: ...and she is beside him for it, though she walked into him while he woke  {"dx":-68,"gap":4}
+  ok   desktop: he says who he is, the way to the marble, the coil, and the reward (60 scrap, 10 IQ)  ["Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you.","After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up.","And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ.","Errand taken"]
+  ok   desktop: the coil errand is taken  active
+  ok   desktop: a second talk says something else  ["Mrrow. Little frame. Nothing your size has come back up that corridor.","My receiver was unplugged inside the shielded lift housing when the song changed.","I spent the last charge holding the bridge for the workers. Counted them across. Kept counting after the motor stopped.","Ratchet sent a spare? Tell him the last passenger got home.","Bring me: a shaken-loose coil","The coil is up in the gantries — the climb starts right behind me.","(not yet)"]
+  ok   desktop: ...beside him  4
+  ok   desktop: the coil home is answered  ["That’s my coil! Listen — the drum turns true again. Here: 60 scrap and 10 IQ, as promised."]
+  ok   desktop: ...beside him  4
+  ok   desktop: ...and paid as promised, and his drum turns true  {"q":"done","scrap":60,"iq":10,"spin":true,"joy":true}
+  ok   desktop: after the coil, he says something new again  ["The little ones keep coming back up the line. Thin them for me?","Deal with 6 × crawlers"]
+  ok   desktop: ...beside him  4
+  ok   desktop: no page errors  []
+  ok   phone: the prompt comes up while she is still clear of his drawn body  {"dx":-74,"gap":10,"half":38}
+  ok   phone: ...and it says what the press will do (wake Old Servo)  E — wake Old Servo
+  ok   phone: walked into him on purpose, she is inside his body  {"dx":14,"half":38}
+  ok   phone: the talk steps her out to his side, clear of his body  {"dx":68,"gap":4,"standOff":68}
+  ok   phone: ...facing him, on the floor  {"face":-1,"on":true}
+  ok   phone: he stands on the meadow floor (feet on the ground)  {"feet":461.9166259765625,"floor":461.9166259765625,"tile":448}
+  ok   phone: the on-screen E button was there to press
+  ok   phone: dark, he cannot speak: the line is hers, and the spare cell is seated  {"lines":["Ratchet’s spare cell fits the port in his chest. You seat it."],"live":true}
+  ok   phone: his first say opens by itself after the waking
+  ok   phone: ...and she is beside him for it, though she walked into him while he woke  {"dx":-68,"gap":4}
+  ok   phone: he says who he is, the way to the marble, the coil, and the reward (60 scrap, 10 IQ)  4 pages
+  ok   phone: the coil errand is taken  active
+  ok   phone: a second talk says something else  ["Mrrow. Little frame. Nothing your size has come back up that corridor.","My receiver was unplugged inside the shielded lift housing when the song changed.","I spent the last charge holding the bridge for the workers. Counted them across. Kept counting after the motor stopped.","Ratchet sent a spare? Tell him the last passenger got home.","Bring me: a shaken-loose coil","The coil is up in the gantries — the climb starts right behind me.","(not yet)"]
+  ok   phone: ...beside him  4
+  ok   phone: the coil home is answered  ["That’s my coil! Listen — the drum turns true again. Here: 60 scrap and 10 IQ, as promised."]
+  ok   phone: ...beside him  4
+  ok   phone: ...and paid as promised, and his drum turns true  {"q":"done","scrap":60,"iq":10,"spin":true,"joy":true}
+  ok   phone: after the coil, he says something new again  ["The little ones keep coming back up the line. Thin them for me?","Deal with 6 × crawlers"]
+  ok   phone: ...beside him  4
+  ok   phone: no page errors  []
+  shots in tests/out/servo-presence/
+
+OK — she stands beside Old Servo, and he has something new to say each time
+   (servo-presence: 46.5 s)
+
+── openings  — every boss move opens for at least one hit, and only the bait pays out three
+── openings — every move opens for at least one hit, and only the bait pays out three
+  ── NULLFANG
+       @70px p1  idle 39%  swipewarn 34%  swipe 16%  perch 4%  spring 2%  stalk 1%  springwarn 1%  dive 1%  recover 1%
+         tells began at (px): swipewarn 14  springwarn 3  perch 234
+         swipe>idle: idle 517, stalk 17 -> swipewarn  (reach 32/32)
+         swipe>idle: idle 483, stalk 50 -> swipewarn  (reach 32/32)
+         dive>recover: recover 317, idle 350, stalk 17 -> swipewarn  (reach 41/41)
+         dive>recover: recover 317, idle 367, stalk 17 -> swipewarn  (reach 42/42)
+       @320px p1  crouch 26%  pounce 20%  idle 19%  recover 10%  stalk 8%  swipewarn 7%  swipe 4%  perch 3%  springwarn 1%  spring 1%  dive 1%  roar 1%
+         tells began at (px): crouch 281  swipewarn 39  springwarn 123  perch 200
+         pounce>recover: recover 367, idle 417, stalk 17 -> swipewarn  (reach 48/48)
+         pounce>recover: recover 367, idle 433, stalk 17 -> swipewarn  (reach 49/49)
+         swipe>idle: idle 483 -> crouch  (reach 29/29)
+         swipe>idle: idle 667 -> crouch  (reach 40/40)
+         dive>recover: recover 317, idle 433 -> crouch  (reach 45/45)
+         dive>recover: recover 317, idle 433, stalk 17 -> swipewarn  (reach 46/46)
+       @70px p2  swipewarn 44%  swipe 31%  idle 20%  stalk 1%  springwarn 1%  spring 1%  perch 1%  dive 1%  recover 0%
+         tells began at (px): swipewarn 19  springwarn 10  perch 234
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>idle: idle 567, stalk 17 -> swipewarn  (reach 35/35)
+         swipe>idle: idle 567, stalk 17 -> swipewarn  (reach 35/35)
+         dive>recover: recover 233, idle 317, stalk 17 -> swipewarn  (reach 34/34)
+       @320px p2  crouch 21%  idle 18%  swipewarn 16%  pounce 15%  swipe 11%  recover 6%  stalk 5%  perch 2%  springwarn 1%  spring 1%  dive 1%  roar 1%
+         tells began at (px): crouch 280  swipewarn 145  springwarn 209  perch 398
+         pounce>recover: recover 267, idle 333, stalk 17 -> swipewarn  (reach 37/37)
+         pounce>recover: recover 267, idle 333, stalk 17 -> swipewarn  (reach 37/37)
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>swipewarn:  -> swipewarn  (reach 0/0)
+         swipe>idle: idle 567 -> crouch  (reach 34/34)
+         swipe>idle: idle 600 -> crouch  (reach 36/36)
+         dive>recover: recover 233, idle 417, stalk 17 -> swipewarn  (reach 40/40)
+         dive>recover: recover 233, idle 367, stalk 17 -> swipewarn  (reach 37/37)
+       dive>recover         n= 7  min   567  med   683  max   767
+  ok   NULLFANG: dive>recover opens for at least one hit (>= 250 ms)  worst 567 ms (med 683)
+  ok   NULLFANG: dive>recover is not a gift (3 in 4 openings <= 900 ms)  p75 750 ms
+       pounce>recover       n=26  min   617  med   750  max  2517
+  ok   NULLFANG: pounce>recover opens for at least one hit (>= 250 ms)  worst 617 ms (med 750)
+  ok   NULLFANG: pounce>recover is not a gift (3 in 4 openings <= 900 ms)  p75 783 ms
+       swipe>idle           n=101  min   383  med   533  max   717
+  ok   NULLFANG: swipe>idle opens for at least one hit (>= 250 ms)  worst 383 ms (med 533)
+  ok   NULLFANG: swipe>idle is not a gift (3 in 4 openings <= 900 ms)  p75 600 ms
+       swipe>swipewarn      n=44  min     0  med     0  max     0   (chain middle)
+  ok   NULLFANG: every damaging move was seen  all
+  ── THE ALPHA
+       @60px p1  rest 43%  roarwarn 10%  coil 9%  turn 9%  leap 7%  roar 6%  clawwarn 4%  bitewarn 4%  claw 3%  broodcall 2%  bite 2%  howl 1%
+         tells began at (px): clawwarn 244  coil 112  broodcall 215  howl 222  bitewarn 291  roarwarn 210
+         claw>rest: rest 600 -> coil  (reach 36/36)
+         claw>rest: rest 667 -> coil  (reach 40/40)
+         leap>turn: turn 517, rest 1200 -> broodcall  (reach 103/103)
+         leap>turn: turn 517, rest 1317 -> roarwarn  (reach 110/110)
+         bite>rest: rest 417 -> coil  (reach 25/25)
+         bite>rest: rest 417 -> coil  (reach 25/25)
+         roar>rest: rest 717 -> clawwarn  (reach 43/43)
+         roar>rest: rest 700 -> clawwarn  (reach 42/42)
+       @200px p1  rest 43%  roarwarn 10%  coil 9%  turn 9%  leap 7%  roar 6%  clawwarn 4%  bitewarn 4%  claw 3%  broodcall 2%  bite 2%  howl 1%
+         tells began at (px): clawwarn 283  coil 87  broodcall 132  howl 132  bitewarn 132  roarwarn 183
+         claw>rest: rest 600 -> coil  (reach 36/36)
+         claw>rest: rest 350 -> coil  (reach 21/21)
+         leap>turn: turn 517, rest 1233 -> broodcall  (reach 105/105)
+         leap>turn: turn 517, rest 1117 -> roarwarn  (reach 98/98)
+         bite>rest: rest 583 -> coil  (reach 35/35)
+         bite>rest: rest 583 -> coil  (reach 35/35)
+         roar>rest: rest 817 -> clawwarn  (reach 49/49)
+         roar>rest: rest 667 -> clawwarn  (reach 40/40)
+       @420px p1  rest 42%  coil 10%  turn 10%  roarwarn 10%  leap 7%  roar 6%  clawwarn 4%  bitewarn 4%  claw 3%  broodcall 2%  bite 2%  howl 1%
+         tells began at (px): clawwarn 314  coil 163  broodcall 196  howl 228  bitewarn 300  roarwarn 190
+         claw>rest: rest 383 -> coil  (reach 23/23)
+         claw>rest: rest 350 -> coil  (reach 21/21)
+         leap>turn: turn 517, rest 1350 -> broodcall  (reach 112/112)
+         leap>turn: turn 517, rest 1117 -> roarwarn  (reach 98/98)
+         bite>rest: rest 350 -> coil  (reach 21/21)
+         bite>rest: rest 350 -> coil  (reach 21/21)
+         roar>rest: rest 750 -> clawwarn  (reach 45/45)
+         roar>rest: rest 800 -> clawwarn  (reach 48/48)
+       bite>rest            n=18  min   350  med   417  max   667
+  ok   THE ALPHA: bite>rest opens for at least one hit (>= 250 ms)  worst 350 ms (med 417)
+  ok   THE ALPHA: bite>rest is not a gift (3 in 4 openings <= 900 ms)  p75 583 ms
+       claw>rest            n=19  min   350  med   417  max   667
+  ok   THE ALPHA: claw>rest opens for at least one hit (>= 250 ms)  worst 350 ms (med 417)
+  ok   THE ALPHA: claw>rest is not a gift (3 in 4 openings <= 900 ms)  p75 600 ms
+       leap>turn            n=36  min  1600  med  1733  max  1867   (the gift)
+  ok   THE ALPHA: leap>turn opens for at least one hit (>= 250 ms)  worst 1600 ms (med 1733)
+  ok   THE ALPHA: leap>turn is the one gift, and pays out (> 900 ms)  1733 ms
+       roar>rest            n=30  min   667  med   717  max   817
+  ok   THE ALPHA: roar>rest opens for at least one hit (>= 250 ms)  worst 667 ms (med 717)
+  ok   THE ALPHA: roar>rest is not a gift (3 in 4 openings <= 900 ms)  p75 767 ms
+  ok   THE ALPHA: every damaging move was seen  all
+  ok   no page errors  
+
+OK — every move opens, and the fight hands out its gift exactly where it means to
+   (openings: 3.9 s)
+
+── meet  — it swats her aside and walks away, and she is still standing
+── meet — it swats her aside and walks away, and she is still standing
+  ok   it happens on the crest of A2  fall@4.63 land@5.17 wind@6.32 swipe@6.83 watch@7.30 coil@8.40 leave@9.00
+  ok   every beat plays: fall, land, wind, swipe, watch, coil, leave
+  ok   ...and it is over inside ten seconds  9.9 s
+  ok   the music drops out for it and comes back  stop,set:A
+  ok   arrival, tell, creature swipe, impact and departure each have a cue  nf_arrive,nf_breath,nf_step,bosshit,nf_step,bosshit,tellbig,nf_swipe,hit,nf_coil,tellbig,nf_leap
+  ok   it costs her exactly one core  4
+  ok   she is thrown the length of the mound (> 200 px west)  345 px
+  ok   her controls are held while it walks up  69 frames
+  ok   it leaves, and the sequence ends
+  ok   ...and gives her controls back  328 px in a second
+  ok   the flag holds and the Braid marks it
+  ok   it never happens twice
+  ok   at one core it never kills: a survival, not a scripted death  1
+  ok   A4 wakes as the rematch: one distinct awakening  ui,nf_awake,tellbig
+  ok   ...says it remembers  It remembers the corridor.
+  ok   ...and the Braid marks the rematch
+  ok   no page errors  
+
+OK — she met it, it cost her, she is still standing, and the arena knows her
+   (meet: 1.6 s)
+
+── tails  — every authored sound decays to silence instead of stopping
+── tails — every authored sound decays to silence instead of stopping (88 files)
+  measured 82 one-shots, skipped 6 loops
+  hottest tails: hzd_hurtbad.wav -35.6 dB, fz_break.ogg -36.1 dB, fz_roar.ogg -36.3 dB, hzd_win2.wav -36.7 dB
+  ok   every one-shot ends at least 35 dB under its peak, and none starts on a click
+
+OK — nothing is cut; every sound has its decay
+   (tails: 1.2 s)
+
+── grammar  — ART_BIBLE §9/§10 measured on the ASSEMBLED FRAME: value bands, straight runs, corners, skirts, tiling
+── grammar — ART_BIBLE §9/§10: the frame is the unit, not the asset
+  ok   §10.2/§10.3 every run over 96px carries a lit lip AND a broken skirt  0 of 0 long edge(s) are bare  (A0:0 A1:0 B4:0 C3:0 D3:0)
+       longest run 209px in A0 — length alone is not a failure, see ART_BIBLE §10.2
+  ok   §10.4 no bare 90° corner survives  0 corner(s)  (A0:0 A1:0 B4:0 C3:0 D3:0)
+  ok   §10.7 no visible tile repeat within one screen width  A0 Δ7.6/sd12.8  A1 Δ8.7/sd13.7  B4 Δ0.2/sd0.2  C3 Δ2.0/sd1  D3 Δ4.7/sd16.2
+  ok   §9.1 the background plane sits at or under 32% luminance  A0 31  A1 31  B4 18  C3 23  D3 29
+  ok   §9.1 the playable plane stands clear of the background  A0 terrain 42 vs bg 31  A1 terrain 44 vs bg 31  B4 terrain 36 vs bg 18  C3 terrain 39 vs bg 23  D3 terrain 57 vs bg 29
+  ok   §9.4 the background plane is quieter than the cast (absolute chroma ≤ 16)  A0 sat 13  A1 sat 13  B4 sat 8  C3 sat 4  D3 sat 9
+  ok   no page errors while sampling the rooms
+
+OK — the assembled frame obeys the grammar
+   (grammar: 7.1 s)
+
+── hzdvox  — her voice: on the frame she moves, never clipping, never twice at once
+── hzdvox — her voice: no dead air in front of it, no clipping, and it holds its gate
+  ok   every take decodes  
+  ok   every voice the code can ask for has a take on disk  17 named, all present
+  ok   and no take ships that her voice can never reach  17 shipped, all reachable
+
+  take            len    peak   onset    rms   ch  sr
+  hzd_yalla      0.58s  0.781  5ms      0.1496 1   44100
+  hzd_atk1       0.29s  0.85   10ms     0.1304 1   44100
+  hzd_atk2       0.8s   0.784  5ms      0.0312 1   44100
+  hzd_atk3       0.8s   0.848  10ms     0.1487 1   44100
+  hzd_hurt       0.8s   0.854  5ms      0.1245 1   44100
+  hzd_hurtbad    0.39s  0.851  10ms     0.1657 1   44100
+  hzd_die        1.4s   0.851  10ms     0.1879 1   44100
+  hzd_dash       0.77s  0.861  10ms     0.0509 1   44100
+  hzd_djump      0.8s   0.848  10ms     0.0637 1   44100
+  hzd_land       0.8s   0.849  5ms      0.096  1   44100
+  hzd_heal       1.4s   0.854  10ms     0.0992 1   44100
+  hzd_evo        0.82s  0.853  10ms     0.1982 1   44100
+  hzd_win        2.13s  0.79   10ms     0.136  1   44100
+  hzd_purr       1.17s  0.854  10ms     0.087  1   44100
+  hzd_jump       0.6s   0.85   10ms     0.1297 1   44100
+  hzd_charge     1.6s   0.802  10ms     0.1212 1   44100
+  hzd_release    1s     0.848  5ms      0.1355 1   44100
+
+  ok   no take opens with dead air (onset <= 60 ms)  
+  ok   nothing is clipping (peak <= 0.95)  
+  ok   nothing is silence pretending to be a sound  
+  ok   combat barks are short enough to not overlap (<= 1.0 s)  
+  ok   the charge note outlasts the charge itself (>= 0.6 s)  1.6s vs 0.6 s of hold
+  ok   ...and there is a shout to spend it on  1s
+  ok   all mono — a positional bark in stereo fights the mix  
+  ok   a swing speaks  hzd_atk1,hzd_atk1
+  ok   two swings on one frame do not stutter  delta 1
+  ok   an ordinary tap never starts the held note  held 0.3s, note started 0 time(s)
+  ok   ...and a real charge does  held 0.5s, note started 1 time(s)
+  ok   ...and letting go ends it  1 release(s)
+  ok   ...and so does firing it  held 0.7s, 1 start / 5 release
+  ok   a charge she cannot pay for stays silent  0 note(s) on 0.47s with 5 volts
+      hzd_yalla       343 Hz
+      hzd_atk1        364 Hz
+      hzd_atk3        386 Hz
+      hzd_release     434 Hz
+      hzd_win         460 Hz
+      hzd_jump        460 Hz
+      hzd_atk2        517 Hz
+      hzd_hurtbad     517 Hz
+      hzd_evo         581 Hz
+      hzd_die         653 Hz
+      hzd_heal        875 Hz
+      hzd_hurt        928 Hz
+      hzd_djump       984 Hz
+      hzd_dash       1172 Hz
+  ok   every word she says is in her own register  
+
+OK — she sounds on the frame she moves, and never twice at once
+   (hzdvox: 18.2 s)
+
+── furnace  — FURNACE CHOIR: every move told and opened, the third hit answered by the bellows (and the parry that turns it), the phase-two drop, the veto list
+── furnace — FURNACE CHOIR, every move told and opened, the bellows, the drop, phase two
+  ok   p1 lob: tell -> active -> recovery  lobwarn(467) > idle(867) > lobwarn
+  ok   p1 lob: the tell is a TELL_ST name, nothing after it in the move is  lobwarn / idle
+  ok   p1 slam: tell -> active -> recovery  slamwarn(567) > recover(517) > idle(667) > hymn
+  ok   p1 slam: the tell is a TELL_ST name, nothing after it in the move is  slamwarn / recover
+  ok   p1 forgebell: tell -> active -> recovery  forgebell(1517) > idle(1200) > hymn
+  ok   p1 forgebell: the tell is a TELL_ST name, nothing after it in the move is  forgebell / idle
+  ok   p1 hymn: tell -> active -> recovery  hymn(1000) > recover(567) > idle(750) > lobwarn
+  ok   p1 hymn: the tell is a TELL_ST name, nothing after it in the move is  hymn / recover
+  ok   p1 vent: tell -> active -> recovery  ventwarn(467) > vent(183) > recover(600) > idle(767) > hymn
+  ok   p1 vent: the tell is a TELL_ST name, nothing after it in the move is  ventwarn / vent,recover
+  ok   p1 melt: tell -> active -> recovery  meltwarn(1200) > recover(467) > idle(717) > lobwarn
+  ok   p1 melt: the tell is a TELL_ST name, nothing after it in the move is  meltwarn / recover
+  ok   p2 lob: tell -> active -> recovery  lobwarn(467) > idle(583) > dropcrouch
+  ok   p2 lob: the tell is a TELL_ST name, nothing after it in the move is  lobwarn / idle
+  ok   p2 slam: tell -> active -> recovery  slamwarn(567) > recover(433) > idle(383) > hymn
+  ok   p2 slam: the tell is a TELL_ST name, nothing after it in the move is  slamwarn / recover
+  ok   p2 forgebell: tell -> active -> recovery  forgebell(1517) > idle(633) > lobwarn
+  ok   p2 forgebell: the tell is a TELL_ST name, nothing after it in the move is  forgebell / idle
+  ok   p2 hymn: tell -> active -> recovery  hymn(1000) > recover(467) > idle(550) > lobwarn
+  ok   p2 hymn: the tell is a TELL_ST name, nothing after it in the move is  hymn / recover
+  ok   p2 vent: tell -> active -> recovery  ventwarn(417) > vent(183) > recover(517) > idle(500) > hymn
+  ok   p2 vent: the tell is a TELL_ST name, nothing after it in the move is  ventwarn / vent,recover
+  ok   p2 drop: tell -> active -> recovery  dropcrouch(600) > rise(467) > droplock(383) > dive(100) > recover(633) > idle(500) > hymn
+  ok   p2 drop: the tell is a TELL_ST name, nothing after it in the move is  dropcrouch / rise,droplock,dive,recover
+  ok   p2 melt: tell -> active -> recovery  meltwarn(1200) > recover(417) > idle(433) > lobwarn
+  ok   p2 melt: the tell is a TELL_ST name, nothing after it in the move is  meltwarn / recover
+  ok   1:lob tell >= 430 ms  467 ms
+  ok   1:slam tell >= 530 ms  567 ms
+  ok   1:forgebell tell >= 1480 ms  1517 ms
+  ok   1:hymn tell >= 980 ms  1000 ms
+  ok   1:vent tell >= 380 ms  467 ms
+  ok   1:melt tell >= 1180 ms  1200 ms
+  ok   2:lob tell >= 430 ms  467 ms
+  ok   2:slam tell >= 530 ms  567 ms
+  ok   2:forgebell tell >= 1480 ms  1517 ms
+  ok   2:hymn tell >= 980 ms  1000 ms
+  ok   2:vent tell >= 380 ms  417 ms
+  ok   2:drop tell >= 580 ms  600 ms
+  ok   2:melt tell >= 1180 ms  1200 ms
+  ok   p1 forgebell: the first clapper strike lands >= 430 ms in, three strikes 300 ms apart  450, 750, 1033 ms
+  ok   p1 lob: the fireball leaves as the tell ends  450 ms
+  ok   p2 forgebell: the first clapper strike lands >= 430 ms in, three strikes 300 ms apart  450, 750, 1033 ms
+  ok   p2 lob: the fireball leaves as the tell ends  450 ms
+  ok   p2 drop: lock -> impact gives the read >= 400 ms  483 ms (lock 383 + fall 100)
+  ok   p2 drop: he lands where the lock marked (no tracking after the lock)  lock 300 / landed 300
+  ok   hymn: two rings in phase one, three in phase two  2 / 3
+  ok   every recovery is an opening >= 250 ms (opening = recovery - 33 ms)  1:lob 834, 1:slam 484, 1:forgebell 1167, 1:hymn 534, 1:vent 567, 1:melt 434, 2:lob 550, 2:slam 400, 2:forgebell 600, 2:hymn 434, 2:vent 484, 2:drop 600, 2:melt 384
+  ok   1:slam: the opening takes two hits, and the THIRD wakes the bellows  {"hits":3,"during":["recover","recover","ventwarn"],"vent":{"afterHit":3},"armed":true,"swings":3}
+  ok   1:hymn: the opening takes two hits, and the THIRD wakes the bellows  {"hits":3,"during":["recover","recover","ventwarn"],"vent":{"afterHit":3},"armed":true,"swings":3}
+  ok   p1 lob: the walk-in is free — three hits do not wake the bellows in phase one  {"hits":3,"during":["idle","idle","idle"],"vent":null,"armed":false,"swings":3}
+  ok   2:lob: phase two guards every opening — the third hit wakes it  {"hits":3,"during":["idle","idle","ventwarn"],"vent":{"afterHit":3},"armed":true,"swings":3}
+  ok   2:forgebell: phase two guards every opening — the third hit wakes it  {"hits":3,"during":["idle","idle","ventwarn"],"vent":{"afterHit":3},"armed":true,"swings":3}
+  ok   2:drop: phase two guards every opening — the third hit wakes it  {"hits":3,"during":["recover","recover","ventwarn"],"vent":{"afterHit":3},"armed":true,"swings":3}
+  ok   ...but not inside a stagger she was given (the Song): a reward does not bite back  {"st":"recover","hits":0,"sawVent":false}
+  ok   the backdraft takes a body standing in front of him (the control)  {"st":"recover","lost":1,"parries":0,"parryKind":null,"counter":false,"raised":null,"jumped":null,"parryableEarly":false,"airborneAt":23,"stagger":null}
+  ok   ...a body that steps BEHIND him during the breath is not in the cone  {"st":"recover","lost":0,"parries":0,"parryKind":null,"counter":false,"raised":null,"jumped":null,"parryableEarly":false,"airborneAt":0,"stagger":null}
+  ok   ...a jump timed off the breath clears it (some take-off in the last 400 ms is safe)  0.4s:clear@216px 0.3s:clear@216px 0.22s:clear@212px 0.16s:clear@202px 0.1s:clear@182px 0.05s:hit@81px
+  ok   ...a brace held from the start of the breath only blocks: no core, no clash  {"st":"recover","lost":0,"parries":0,"parryKind":null,"counter":false,"raised":null,"jumped":null,"parryableEarly":false,"airborneAt":9,"stagger":null}
+  ok   a PERFECT GUARD turns it: he chokes (stagger), she takes nothing, the counter opens  {"st":"stagger","lost":0,"parries":1,"parryKind":"atlas","counter":true,"raised":0.05,"jumped":null,"parryableEarly":false,"airborneAt":9,"stagger":1}
+  ok   ...in phase two as well (the 400 ms breath)  {"st":"stagger","lost":0,"parries":1,"parryKind":"atlas","counter":true,"raised":0.05,"jumped":null,"parryableEarly":false,"airborneAt":9,"stagger":1}
+  ok   ...and the choke is an opening of >= 867 ms (the one gift-sized window, for the hardest read)  1 s left after the clash
+  ok   the lime glint is lit only in its window (the last 150 ms of the breath, and the blast)  {"first":["ventwarn",0.133,true],"warnLitMs":150,"anyEarly":false}
+  ok   the counter lands on him after the clash  {"kind":"atlas","dealt":11,"hpDrop":11,"st":"stagger"}
+  ok   the drop takes a body that stays on the marked floor (the control)  {"lost":1,"gap":9,"log":"dropcrouch>rise>droplock>dive>recover","jumped":false}
+  ok   ...a body that leaves the mark at the lock and jumps the wave takes nothing  {"lost":0,"gap":261,"log":"dropcrouch>rise>droplock>dive>recover","jumped":false}
+  ok   ...and so does one that DASHES off the mark  {"lost":0,"gap":364,"log":"dropcrouch>rise>droplock>dive>recover","jumped":false}
+       deck %  1:near {"hymn":70,"lob":30}  1:far {"lob":81,"hymn":19}  2:near {"hymn":69,"lob":31}  2:far {"lob":41,"drop":40,"hymn":19}
+  ok   phase one never draws the drop  {"lob":81,"hymn":19}
+  ok   phase two: the drop takes distance away (>= 30% of far draws)  {"lob":41,"drop":40,"hymn":19}
+  ok   ...and never at his feet (the near deck has no drop)  {"hymn":69,"lob":31}
+  ok   the near deck is not the far deck in either phase (the bells close, the lob far)  {"1:near":{"hymn":70,"lob":30},"1:far":{"lob":81,"hymn":19},"2:near":{"hymn":69,"lob":31},"2:far":{"lob":41,"drop":40,"hymn":19}}
+  ok   veto: no drop while forge weapons are live  {"lob":124,"hymn":76}
+  ok   veto: no drop and no hymn while the slag pours  {"lob":200} near {"lob":200}
+  ok   veto: no slam straight off a drop, no drop straight off a drop
+  ok   the cold-dice floor: after three moves that reached her, the next is the lob (a cold ledger slams)  {"got":[1,1,1],"streak":3,"next":"lobwarn"} / {"next":"slamwarn"}
+  ok   every state of the fight draws from his own sheet  15 states
+  ok   no page errors
+
+  measured sentences:
+    1:lob       lobwarn(467) > idle(867) > lobwarn
+    1:slam      slamwarn(567) > recover(517) > idle(667) > hymn
+    1:forgebell forgebell(1517) > idle(1200) > hymn
+    1:hymn      hymn(1000) > recover(567) > idle(750) > lobwarn
+    1:vent      ventwarn(467) > vent(183) > recover(600) > idle(767) > hymn
+    1:melt      meltwarn(1200) > recover(467) > idle(717) > lobwarn
+    2:lob       lobwarn(467) > idle(583) > dropcrouch
+    2:slam      slamwarn(567) > recover(433) > idle(383) > hymn
+    2:forgebell forgebell(1517) > idle(633) > lobwarn
+    2:hymn      hymn(1000) > recover(467) > idle(550) > lobwarn
+    2:vent      ventwarn(417) > vent(183) > recover(517) > idle(500) > hymn
+    2:drop      dropcrouch(600) > rise(467) > droplock(383) > dive(100) > recover(633) > idle(500) > hymn
+    2:melt      meltwarn(1200) > recover(417) > idle(433) > lobwarn
+
+OK — FURNACE CHOIR tells every move, opens after every move, answers the third hit, and changes the question in phase two
+   (furnace: 3.0 s)
+
+── motion  — the fired guardian plates are on screen, not just in the manifest
+── motion — the filmed guardian takes are on screen, not in the manifest
+
+  ok   the filmed take is what draws alpha:rest, not the stand-in  12001 px differ
+  ok   ...and it turns with the body in alpha:rest  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:rest  -1 px off the hitbox floor
+  ok   the filmed take is what draws alpha:prowl, not the stand-in  11636 px differ
+  ok   ...and it turns with the body in alpha:prowl  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:prowl  -1 px off the hitbox floor
+  ok   the filmed take is what draws alpha:roarwarn, not the stand-in  12512 px differ
+  ok   ...and it turns with the body in alpha:roarwarn  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:roarwarn  -1 px off the hitbox floor
+  ok   the filmed take is what draws alpha:roar, not the stand-in  12918 px differ
+  ok   ...and it turns with the body in alpha:roar  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:roar  -1 px off the hitbox floor
+  ok   the filmed take is what draws alpha:broodcall, not the stand-in  11149 px differ
+  ok   ...and it turns with the body in alpha:broodcall  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:broodcall  0 px off the hitbox floor
+  ok   the filmed take is what draws alpha:howl, not the stand-in  10403 px differ
+  ok   ...and it turns with the body in alpha:howl  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:howl  1 px off the hitbox floor
+  ok   the filmed take is what draws alpha:coil, not the stand-in  10655 px differ
+  ok   ...and it turns with the body in alpha:coil  mirror agreement 1
+  ok   the filmed take is what draws alpha:leap, not the stand-in  10947 px differ
+  ok   ...and it turns with the body in alpha:leap  mirror agreement 1
+  ok   the filmed take is what draws alpha:recoil, not the stand-in  9978 px differ
+  ok   ...and it turns with the body in alpha:recoil  mirror agreement 1
+  ok   the filmed take is what draws alpha:turn, not the stand-in  9605 px differ
+  ok   ...and it turns with the body in alpha:turn  mirror agreement 1
+  ok   the filmed take is what draws alpha:clawwarn, not the stand-in  11977 px differ
+  ok   ...and it turns with the body in alpha:clawwarn  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:clawwarn  0 px off the hitbox floor
+  ok   the filmed take is what draws alpha:claw, not the stand-in  11798 px differ
+  ok   ...and it turns with the body in alpha:claw  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:claw  0 px off the hitbox floor
+  ok   the filmed take is what draws alpha:bitewarn, not the stand-in  12902 px differ
+  ok   ...and it turns with the body in alpha:bitewarn  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:bitewarn  0 px off the hitbox floor
+  ok   the filmed take is what draws alpha:bite, not the stand-in  13207 px differ
+  ok   ...and it turns with the body in alpha:bite  mirror agreement 1
+  ok   ...and its feet are on the floor in alpha:bite  0 px off the hitbox floor
+  ok   the filmed take is what draws alpha:clinch, not the stand-in  12432 px differ
+  ok   ...and it turns with the body in alpha:clinch  mirror agreement 1
+  ok   the filmed take is what draws alpha:shake, not the stand-in  11735 px differ
+  ok   ...and it turns with the body in alpha:shake  mirror agreement 1
+  ok   the filmed take is what draws alpha:free, not the stand-in  12001 px differ
+  ok   ...and it turns with the body in alpha:free  mirror agreement 1
+  ok   the filmed take is what draws chime:rest, not the stand-in  5384 px differ
+  ok   ...and it turns with the body in chime:rest  mirror agreement 1
+  ok   the filmed take is what draws chime:ringwarn, not the stand-in  10416 px differ
+  ok   ...and it turns with the body in chime:ringwarn  mirror agreement 1
+  ok   the filmed take is what draws chime:ring, not the stand-in  26746 px differ
+  ok   ...and it turns with the body in chime:ring  mirror agreement 1
+  ok   the filmed take is what draws chime:notewarn, not the stand-in  10091 px differ
+  ok   ...and it turns with the body in chime:notewarn  mirror agreement 1
+  ok   the filmed take is what draws chime:note, not the stand-in  7047 px differ
+  ok   ...and it turns with the body in chime:note  mirror agreement 1
+  ok   the filmed take is what draws chime:dead, not the stand-in  6306 px differ
+  ok   ...and it turns with the body in chime:dead  mirror agreement 1
+  ok   the retired §3m still-plate table is gone (no plate can draw in front of a guardian's rig or take)
+  ok   the filmed take is what draws NULLFANG's stalk, not the rig  14436 px differ
+  ok   ...and it turns with him in stalk  mirror agreement 1
+  ok   ...and its feet are where the rig's are in stalk  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's run, not the rig  14802 px differ
+  ok   ...and it turns with him in run  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's idle, not the rig  14002 px differ
+  ok   ...and it turns with him in idle  mirror agreement 1
+  ok   ...and its feet are where the rig's are in idle  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's roar, not the rig  13231 px differ
+  ok   ...and it turns with him in roar  mirror agreement 1
+  ok   ...and its feet are where the rig's are in roar  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's intro, not the rig  13559 px differ
+  ok   ...and it turns with him in intro  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's swipewarn, not the rig  14720 px differ
+  ok   ...and it turns with him in swipewarn  mirror agreement 1
+  ok   ...and its feet are where the rig's are in swipewarn  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's swipe, not the rig  14742 px differ
+  ok   ...and it turns with him in swipe  mirror agreement 1
+  ok   ...and its feet are where the rig's are in swipe  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's crouch, not the rig  13937 px differ
+  ok   ...and it turns with him in crouch  mirror agreement 1
+  ok   ...and its feet are where the rig's are in crouch  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's springwarn, not the rig  13911 px differ
+  ok   ...and it turns with him in springwarn  mirror agreement 1
+  ok   ...and its feet are where the rig's are in springwarn  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's pounce, not the rig  15909 px differ
+  ok   ...and it turns with him in pounce  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's recover, not the rig  14445 px differ
+  ok   ...and it turns with him in recover  mirror agreement 1
+  ok   ...and its feet are where the rig's are in recover  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's spring, not the rig  13814 px differ
+  ok   ...and it turns with him in spring  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's dive, not the rig  16672 px differ
+  ok   ...and it turns with him in dive  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's perch, not the rig  14788 px differ
+  ok   ...and it turns with him in perch  mirror agreement 1
+  ok   ...and its feet are where the rig's are in perch  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's daze, not the rig  13543 px differ
+  ok   ...and it turns with him in daze  mirror agreement 1
+  ok   ...and its feet are where the rig's are in daze  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's nullcharge, not the rig  14321 px differ
+  ok   ...and it turns with him in nullcharge  mirror agreement 1
+  ok   ...and its feet are where the rig's are in nullcharge  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's nullhop, not the rig  12650 px differ
+  ok   ...and it turns with him in nullhop  mirror agreement 1
+  ok   the filmed take is what draws NULLFANG's nullend, not the rig  12112 px differ
+  ok   ...and it turns with him in nullend  mirror agreement 1
+  ok   ...and its feet are where the rig's are in nullend  0 px off the rig's sole line
+  ok   the filmed take is what draws NULLFANG's dead, not the rig  13052 px differ
+  ok   ...and it turns with him in dead  mirror agreement 1
+  ok   no page errors while drawing them
+
+OK — the filmed takes are on screen, facing the right way, standing on the floor
+   (motion: 3.4 s)
+
+── rubble  — the first tunnel is buried, it calls, and it takes the blade
+── rubble — the first tunnel is buried, it calls, and it takes the blade
+
+  ok   the first tunnel is buried on a fresh save  6 hp
+  ok   the mouth is where she stands
+  ok   UP will not take her through rock
+  ok   the voice from inside gets louder as she closes  0.072 → 0.082 → 0.113 → 0.142 → 0.164
+  ok   every blow takes silhouette off the pile  21968 → 17011 → 14657 → 12607 → 8062 → 5991 px
+  ok   ...and no two states are the same picture  worst hp5→hp4 IoU 0.849 (max 0.86)
+  ok   the pile stands on the floor she stands on  8.4 px from her feet (max 10)
+  ok   the blade opens it  6 blows for 6 hp
+  ok   ...and then the mouth takes her
+  ok   it does not grow back
+  ok   a room can hold more than one depth door  A5 + CV1B
+  ok   ...each with its own pile  rubbleCV1B
+  ok   ...and standing at one gives you THAT one  CV1B
+  ok   the branch is buried too
+  ok   the blade opens the branch  in CV1B
+  ok   the Seam is the tunnel's rest
+  ok   ...and it walks back out
+  ok   the sound gets LOUDER the deeper she goes  A5 0.28 -> CV1 0.50 -> CV2 0.84
+  ok   ...and there is something down there making it
+  ok   ...loudest standing at it  at the beacon 0.84 vs across the room 0.30
+  ok   ...and it says something worth the walk
+  ok   ...and reading it answers the call
+
+all good
+   (rubble: 17.7 s)
+
+── enemygait  — machines stand on the floor, turn on their feet, fly the same at any frame rate, and step with the ground
+── enemygait — grounded, no moonwalk, the same flight at any frame rate, a gait clocked by the floor
+  ok   every kind is born with a grounded flag  12 kinds
+  ok   the walkers ran in real rooms  A1:2 A2:3 A6:1 B2:3 C2:3 CV2:3 D2:3 E1:2
+  ok   every walker carries `on`, every frame
+  ok   ...and it is true while they walk the floor  17090 grounded frames
+  ok   no walker skips down a curve (one/two-frame losses of ground that is there)  4 in 30000 walker-frames · A1 0, A2 0, A6 0, B2 0, C2 0, CV2 4, D2 0, E1 0
+  ok   they turned round, plenty  58 picture turns, 0 braking frames against the facing
+  ok   NO MOONWALK: outside a brake, vx never runs against the facing  0 frames
+  ok   the TAMED pack mills about without moonwalking  1 wolves, 6 turns, 0 frames against the facing
+  ok   the airborne hopper is a wolf in zone A (the case that ran walk frames mid-air)
+  ok   ...it left the ground  112 airborne frames
+  ok   ...and wears the airborne plate, never a walk frame, in the air  112 lunge / 0 walk of 112
+  ok   ...and lands into its own recovery pose  80 of 80 landing frames
+  ok   rounds: the flier at 30 fps flies the 60 fps path (within 4 px)  worst 2.3 px at 8.00 s
+  ok   rounds: the flier at 120 fps flies the 60 fps path (within 4 px)  worst 1.3 px at 8.00 s
+  ok   rounds: ...and it actually went somewhere  122 px from where it started
+       states rounds: 30→perch  60→perch  120→perch
+  ok   hunt: the flier at 30 fps flies the 60 fps path (within 4 px)  worst 0.2 px at 3.00 s
+  ok   hunt: the flier at 120 fps flies the 60 fps path (within 4 px)  worst 0.3 px at 2.75 s
+  ok   hunt: ...and it actually went somewhere  152 px from where it started
+       states hunt: 30→hold+dive+rise  60→hold+dive+rise  120→hold+dive+rise
+  ok   its rounds include a PERCH, not a sine drift  perch
+  ok   the hunt runs the whole cycle at every rate: tell, dive, climb out
+  ok   it faces where it is going  11 of 11 travelling samples
+  ok   guard: the drawing is there to measure  1163 px
+  ok   guard: the same floor covered at a different clock time is the SAME picture  0 px differ
+  ok   guard: ...and more floor covered at the same clock time is a different picture  251 px differ
+  ok   a walker standing still does not bob on the clock  0 px differ over 2.4 s
+  ok   one authored angle at a time: two facings inside the same angle draw identically (no blend)  between 0 px, vs profile 883 px
+  ok   the gait banks the floor it covered, nothing else  moved 100.3 px, banked 100.3
+
+OK — they stand on the floor, turn on their feet, fly the same at any rate, and step with the ground
+   (enemygait: 3.5 s)
+
+── infection-poses  — every guardian, every drawn state, both facings: an eye on the art, never twice, never under the loading silhouette, the smoke born there
+── infection-poses — every guardian, every drawn state, both facings: an eye, on the body, the smoke born there
+    alpha staged (32 s)
+    glitch staged (69 s)
+    brood staged (91 s)
+    zero staged (112 s)
+    atlas staged (145 s)
+    prism staged (165 s)
+    mother staged (189 s)
+    chime staged (199 s)
+
+    alpha (A10)     purple
+      rest           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      prowl          eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      roarwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      roar           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      broodcall      eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      howl           eyes 111111  off-body  1.0px   trail 17f/17 worst 0.0px
+      coil           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      leap           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      recoil         eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      turn           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      clawwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      claw           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      bitewarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      bite           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      clinch         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      shake          eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      hurt           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+    glitch (A4)     purple
+      idle           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      stalk          eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      run            eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      swipewarn      eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      swipe          eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      rearwarn       eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      rearswipe      eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      crouch         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      springwarn     eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      spring         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      dive           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      pounce         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      perch          eyes 111111  off-body  0.1px   trail 17f/17 worst 0.0px
+      nullhop        eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      nullcharge     eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      nullend        eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      roar           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      land           eyes 111111  off-body  0.1px   trail 17f/17 worst 0.0px
+      recoil         eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      hurt           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      daze           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+    brood (B4)      purple
+      idle           eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      volley         eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      broodcall      eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      swoopwarn      eyes 211211  off-body  0.3px   trail 17f/33 worst 0.0px
+      swoop          eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      rise           eyes 112222  off-body  0.2px   trail 17f/24 worst 0.0px
+      restlow        eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      cffloor        eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      cfcrash        eyes 222222  off-body  0.3px   trail 16f/28 worst 0.0px
+      hurt           eyes 222222  off-body  0.2px   trail 17f/34 worst 0.0px
+      daze           eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+    zero (D3)       purple
+      idle           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      novawarn       eyes 111111  off-body  0.3px   trail 16f/16 worst 0.0px
+      shardwarn      eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      orbs           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      lancewarn      eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      dashwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      dash           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      azhush         eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      recover        eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      hurt           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      daze           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+    atlas (C3)      purple
+      idle           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      walk           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      slamwarn       eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      forgebell      eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      meltwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      hymn           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      hurt           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      daze           eyes 111111  off-body  0.3px   trail 16f/16 worst 0.0px
+      lobwarn        eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      ventwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      vent           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      stagger        eyes 111111  off-body  0.2px   trail 14f/14 worst 0.0px
+      cooled         eyes 111111  off-body  0.2px   trail 16f/16 worst 0.0px
+      sprawl         eyes 111111  off-body  0.3px   trail 16f/16 worst 0.0px
+      dropcrouch     eyes 111111  off-body  0.4px   trail 16f/16 worst 0.0px
+      rise           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      droplock       eyes 111111  off-body  0.3px   trail 16f/16 worst 0.0px
+      dive           eyes 111111  off-body  0.3px   trail 16f/16 worst 0.0px
+    prism (X1)      purple
+      idle           eyes 222222  off-body  0.3px   trail 17f/20 worst 0.0px
+      aim            eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      beam           eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      pounce         eyes 222222  off-body  0.3px   trail 17f/22 worst 0.0px
+      dashslash      eyes 222222  off-body  0.3px   trail 17f/34 worst 0.0px
+      arcstorm       eyes 222222  off-body  0.3px   trail 17f/20 worst 0.0px
+      rest           eyes 222222  off-body  0.3px   trail 17f/20 worst 0.0px
+      hurt           eyes 222222  off-body  0.3px   trail 17f/20 worst 0.0px
+      daze           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      arcspin    gap eyes 000000  off-body    —px   trail 0f/0 worst 0.0px
+      lsvanish   gap eyes 000000  off-body    —px   trail 0f/0 worst 0.0px
+      lsarrive   gap eyes 000000  off-body    —px   trail 0f/0 worst 0.0px
+    mother (E3)     purple
+      idle           eyes 888888  off-body  0.3px   trail 15f/85 worst 0.0px
+      nwcharge       eyes 888888  off-body  0.3px   trail 15f/86 worst 0.0px
+      msong          eyes 888888  off-body  0.3px   trail 15f/86 worst 0.0px
+      grabwarn       eyes 888888  off-body  0.3px   trail 15f/86 worst 0.0px
+      grab           eyes 888888  off-body  0.3px   trail 15f/85 worst 0.0px
+      beamwarn       eyes 888888  off-body  0.3px   trail 15f/86 worst 0.0px
+      recover        eyes 888888  off-body  0.3px   trail 15f/85 worst 0.0px
+      phase1         eyes 666666  off-body  0.3px   trail 15f/64 worst 0.0px
+      phase2         eyes 444444  off-body  0.3px   trail 15f/43 worst 0.0px
+      phase3         eyes 222222  off-body  0.3px   trail 13f/21 worst 0.0px
+      hurt           eyes 888888  off-body  0.3px   trail 15f/86 worst 0.0px
+      daze           eyes 888888  off-body  0.3px   trail 15f/85 worst 0.0px
+    chime (A9)      purple
+      rest           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      ringwarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      ring           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      notewarn       eyes 111111  off-body  0.3px   trail 17f/17 worst 0.0px
+      note           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+      hurt           eyes 111111  off-body  0.2px   trail 17f/17 worst 0.0px
+
+  ok   every guardian is staged in its room (8 of 8)
+  ok   ...with its art loaded at full size
+  ok   an eye is reported in every pose, early/mid/late, both facings (105 poses, 630 frames)
+  ok   ...and every eye sits on the drawn body (within 3 px of a solid pixel)  worst 1.0 px
+  ok   no eye is reported twice in one frame
+  ok   no guardian with its art loaded is drawn under the loading silhouette
+  ok   moving in every pose, the eyes smoke
+  ok   ...and every newest wisp is born at an eye of THAT frame (within 1 px)  worst 0.00 px
+  ok   the deliberate gaps report no eye (prism:arcspin prism:lsvanish prism:lsarrive)
+  ok   every guardian burns purple
+  ok   no page errors  
+  (199 s)
+
+OK — every guardian looks out through its eyes in every pose it is drawn in, and the smoke is born there
+   (infection-poses: 200.8 s)
+
+── cuefamily  — the things she is shot at with do not all sound alike
+── cuefamily — the things she is shot at with do not all sound alike
+
+    shoot     0.106s  attack 0s  bright   1619  peak 0.078
+    lob       0.466s  attack 0.02s  bright    530  peak 0.068
+    cinder    0.269s  attack 0s  bright   6587  peak 0.092
+    quill     0.151s  attack 0s  bright   4901  peak 0.036
+    shard     0.58s  attack 0s  bright   6408  peak 0.086
+    orbshot   0.37s  attack 0s  bright    830  peak 0.054
+    ringshot  0.33s  attack 0s  bright   1870  peak 0.073
+    lance     0.135s  attack 0s  bright   6860  peak 0.093
+    summon    0.47s  attack 0.051s  bright   2041  peak 0.037
+    erupt     0.335s  attack 0.002s  bright   3054  peak 0.158
+    castfire  0.58s  attack 0.001s  bright   2202  peak 0.084
+    castice   0.73s  attack 0.16s  bright   8725  peak 0.051
+    castnull  0.691s  attack 0s  bright    437  peak 0.124
+    castarc   0.53s  attack 0.003s  bright   1058  peak 0.088
+    snarecast 0.365s  attack 0.001s  bright   1299  peak 0.046
+    plume     0.644s  attack 0.002s  bright    216  peak 0.102
+    spikeup   0.29s  attack 0.001s  bright   2173  peak 0.128
+    icecolumn 0.365s  attack 0s  bright   5185  peak 0.093
+    lash      0.21s  attack 0.085s  bright   4440  peak 0.06
+    prison    1.467s  attack 0.24s  bright    335  peak 0.143
+    msong     1.129s  attack 0.001s  bright    755  peak 0.095
+    beamwarn  0.73s  attack 0s  bright   4808  peak 0.068
+    burstout  1.286s  attack 0s  bright   1094  peak 0.145
+    wreck     0.439s  attack 0s  bright   3982  peak 0.141
+    wreckbig  0.768s  attack 0s  bright   3130  peak 0.183
+    blast     0.35s  attack 0s  bright  12556  peak 0.1
+    shockring 0.575s  attack 0.001s  bright    812  peak 0.121
+    slam      0.384s  attack 0.003s  bright    651  peak 0.21
+    quake     1.006s  attack 0.003s  bright   2289  peak 0.183
+    crack     0.371s  attack 0s  bright    940  peak 0.168
+    beamfire  0.615s  attack 0s  bright   5296  peak 0.14
+    launch    0.216s  attack 0.001s  bright   1443  peak 0.124
+
+  ok   every cue in the family makes a sound  32 cues
+  ok   ...and no two of them are the same sound wearing two names  all 496 pairs separate
+  ok   the four elements gather differently enough to act on  fire 2202, ice 8725, null 437, arc 1058
+  ok   her burst does not sound like a thing dying  burst 1094 vs wreck 3130
+  ok   a creature arriving does not sound like a rifle  summon 0.47s vs shoot 0.106s
+  ok   ...and a lob is heaved, not fired  lob reaches half-peak at 0.02s, the bolt at 0s
+  ok   nothing in the family clips  all under 1.0
+
+    tell      0.22s  rise x1.42  weight 0.2
+    tellmid   0.29s  rise x1.42  weight 0.38
+    tellbig   0.37s  rise x1.5  weight 4.73
+
+  ok   every warning RISES, because that is what encodes time remaining  all 10 climb across the cue
+  ok   ...and the generic three get heavier with the thing making them, not different  weight 0.2 -> 0.38 -> 4.73
+
+    tell_glitch  0.28s  rise x1.5  weight   1.14  bright   1418
+    tell_brood   0.23s  rise x1.42  weight   0.21  bright   6033
+    tell_atlas   0.37s  rise x3.03  weight   0.78  bright   1342
+    tell_zero    0.36s  rise x3.82  weight    0.6  bright   3835
+    tell_prism   0.19s  rise x1.34  weight   0.15  bright   3620
+    tell_mother  0.45s  rise x1.9  weight   5.14  bright    651
+    tell_alpha   0.26s  rise x2.13  weight   0.73  bright   2081
+  ok   every guardian has a tell of its own  7 of 7
+  ok   ...and no two guardians warn with the same instrument  all 21 pairs separate
+  ok   ...and none of the new voices clips  loudest 0.09
+
+all good
+   (cuefamily: 2.0 s)
+
+── doorway  — the painted door is where she walks in, not the wall beside it
+ok   a wide lit opening is found, and a bright lantern does not win it  found 0.297 for a door painted at 0.300, lantern at 0.80
+  ok   ...and it is not just reporting the middle  found 0.658 for a door painted at 0.660
+  ok   a plate with no lit way in falls back to centred, exactly as before  frac 0.5
+    derived door position per fired plate: boothFront 0.619  oracleBooth 0.500  forgeFront 0.643  carrelFront 0.500  hollowFront 0.451
+  ok   no plate acts on a reading it should have declined  5 plate(s) read
+    declined (drawn centred, as before): oracleBooth carrelFront
+  ok   the booth — the shop he reported — is read, and is not centred  boothFront 0.619
+  ok   the painted door lands on the stand spot  0.0 px off (centred, it was 37.5 px — against a body 24 px wide)
+  ok   ...and that correction was worth making  the door was 37 px from where she stood
+
+OK — she walks in through the door, not through the wall beside it
+   (doorway: 1.2 s)
+
+── seam  — a room boundary is a place she walks through, not a door
+── seam — a room boundary is a place she walks through
+
+  ok   every mirrored horizontal join agrees on both sides  35 joins
+  ok   ...including the joins between rooms of different heights  C5|C2
+  ok   the meadow is walked end to end, every step a real join  A0 -> A1 -> A2 -> A3 -> A4
+  ok   ...and the cradle's road is joined too  W1|W2
+  ok   ...and none of them is a doorway (>= 12 rows of standing space)  W1|W2=14 A0|A1=14 A1|A2=14 A2|A3=14 A3|A4=14
+  ok   the crystal cave mouths are tunnels, not slots (> 4 rows)  CV1|CV2=10 CV2|CV3=10
+  ok   a seam never opens the lid (sky rooms excepted)  60 lidded + 10 open-sky seam columns
+  ok   ...and never opens the ground under it  ground unbroken to every edge
+  ok   every T opening answers through the floor above it  23 vertical seams open both ways
+  ok   no page errors
+
+OK — the meadow is joined by ground, not by doors
+   (seam: 0.9 s)
+
+── roomcache  — a doorway costs a frame: rooms baked ahead, never rebaked on a revisit, the save off the crossing
+── roomcache — a doorway costs a frame, not a room
+
+  ok   the staged cache walk is not intercepted by story panels  post-guardian fixture includes its earlier lion meeting
+  ..   A1 R -> A2: first crossing 52 ms, 0 bake on the frame (warm-up, not judged)
+  ok   A2 L -> A1: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   A2 L -> A1: ...and the crossing frame is a frame  56 ms (budget 144 ms, a median frame here is 36)
+  ok   A1 R -> A2: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   A1 R -> A2: ...and the crossing frame is a frame  44 ms (budget 144 ms, a median frame here is 36)
+  ok   A2 R -> A3: the room is already baked when she gets there  one door ahead (ready after 37 frames at the door), 0 bake on the crossing frame
+  ok   A2 R -> A3: ...and the crossing frame is a frame  37 ms (budget 144 ms, a median frame here is 36)
+  ok   A3 L -> A2: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   A3 L -> A2: ...and the crossing frame is a frame  35 ms (budget 144 ms, a median frame here is 36)
+  ok   A2 R -> A3: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   A2 R -> A3: ...and the crossing frame is a frame  36 ms (budget 144 ms, a median frame here is 36)
+  ok   B2 T -> B7: the room is already baked when she gets there  one door ahead (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   B2 T -> B7: ...and the crossing frame is a frame  41 ms (budget 144 ms, a median frame here is 36)
+  ok   B7 B -> B2: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   B7 B -> B2: ...and the crossing frame is a frame  44 ms (budget 144 ms, a median frame here is 36)
+  ok   B2 T -> B7: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   B2 T -> B7: ...and the crossing frame is a frame  46 ms (budget 144 ms, a median frame here is 36)
+  ok   B7 B -> B2: the room is already baked when she gets there  revisit (ready after 31 frames at the door), 0 bake on the crossing frame
+  ok   B7 B -> B2: ...and the crossing frame is a frame  31 ms (budget 144 ms, a median frame here is 36)
+  ok   baking ahead never takes a frame hostage  longest frame while baking ahead 114 ms (median 36)
+  ok   A3: baked ahead in slices = baked live  21 slices, identical
+  ok   B3: baked ahead in slices = baked live  15 slices, identical
+  ok   A12: baked ahead in slices = baked live  17 slices, identical
+  ok   D2: baked ahead in slices = baked live  21 slices, identical
+  ok   a cached room is not baked again on the way back  0 bakes
+  ok   ...a tile she breaks repaints the floor at once  1 bake when the hatch was cut
+  ok   ...and the floor she comes back to is the cut one, not rebaked again  0 bakes on the way back in, cut in the cached bake
+  ok   the cache stays inside the device budget  at most 4 rooms / 29.0 MB (cap 4 / 40 MB)
+  ok   ...and the phone tier holds fewer  low tier at most 3 rooms (cap 3)
+  ok   the save is not written on the crossing frame  0 writes inside loadRoom
+  ok   ...it is written in the next quiet moment  1 write(s) after 628 ms
+  ok   ...and at once when the page is hidden  1 write on pagehide, A2 recorded
+  ..   {"bakes":73,"live":45,"pre":28,"hits":21,"misses":44,"evicted":85,"sliceMax":22,"lastMs":55,"stepMax":21.899999998509884,"stepPass":"erode@A2","pass":"gamma"}
+  ok   a sheet readied in slices is the sheet drawn on demand  203 slices for the roster and the npcs sheet, identical
+  ok   the creatures one door away are readied before she gets there  ready after 159 frames at the door
+  ok   ...and meeting them costs the crossing frame no sheet processing  0.1 ms in the sheet passes on the crossing frame, 3 machines there, frame 53 ms
+  ..   {"units":7,"sliceMax":15,"stepMax":15,"stepKey":"sheet:npcs"}
+  ok   no page errors
+
+OK — the room behind the door is ready before she opens it
+   (roomcache: 45.2 s)
+
+── shaftfit  — a shaft is one hole through two rooms, and no sky hangs under another room's floor
+── shaftfit — a shaft is one hole cut through two rooms
+
+  ok   every shaft is the same columns at both ends  23 vertical pairs
+  ok   no drop from above lands inside the roof below  every drop lands in air
+  ok   no open sky under another room's floor  A1 under A6 (cols 0-43 roofed)  A2 under A8 (cols 0-43 roofed)  A3 under B1 (cols 0-31 roofed)
+  ok   every room is as wide as it is built  no void strip at any edge
+  ok   no page errors
+
+OK — every shaft is one hole, and nothing hangs over open sky
+   (shaftfit: 0.9 s)
+
+── drawclock  — a frozen clock freezes the frame: draw never reads the wall clock
+── drawclock — a frozen clock freezes the frame
+
+  ok   the save toast dates itself on the frozen clock  planted=11630 frozen=9930
+  ok   two seconds of wall clock change nothing in a frozen frame  0px
+  ok   no page errors
+
+all good
+   (drawclock: 12.7 s)
+
+── airattack  — a strike in the air is its own move, once it has one
+── airattack — a strike in the air is its own move, once it has one
+
+  ok   a grounded combo is untouched  claw_1,claw_2,finisher
+  ok   the charged burst still wins over everything  burst
+  ok   with no air sheet, an airborne strike keeps the animated combo  claw_1
+  ok   ...and so does a downward one, rather than dropping to a held pose  claw_1
+  ok   once an air sheet exists the airborne strike selects it  air
+  ok   ...and a downward one selects the down sheet  down
+  ok   ...without disturbing the grounded combo  claw_2
+  ok   she really does leave the ground in this test  2 airborne frames
+  ok   a real airborne attack records that it was airborne  true
+  ok   ...and carries its aim to the renderer  number
+  ok   no page errors
+
+all good
+   (airattack: 9.9 s)
+
+── reel-contract  — capture reels fail closed for runtime errors and missing required beats
+reel contract passed (coverage + injected encoder cases; no real video claim)
+   (reel-contract: 0.4 s)
+
+── crestfight  — the expensive seals change how she fights: each attack block measured with every weapon, drawn, one style at a time, in five languages
+── crestfight — the expensive seals change how she fights, with every weapon, and she can see it
+
+  seals with an attack block (2+ sockets): claws, plate, over, phantom, ground, nine
+
+  AS PLAYED  (opener, vs the same weapon with no seal)
+  seal    weapon    active   recov   reach   width      kb    stop    step  cut px    rim
+  -       claws     0.1667    0.26      86      72     310    0.05      96       0      -
+  -       single    0.1667    0.26    88.8      72     310    0.05      96       0      -
+  -       dual      0.1667    0.26     105   104.4     310    0.05      96       0      -
+  -       joined    0.1667    0.26    99.9      81     310    0.05      96       0      -
+  claws   claws     0.1667   0.299   107.5    64.8     310    0.05      96     605  107.5
+  plate   claws     0.1833   0.325      86    97.2     434   0.065      96    1309   85.5
+  over    claws     0.1333   0.182    73.1      72   232.5    0.03      96     984   72.5
+  phantom claws     0.1667   0.286    77.4      72     310    0.05     240     878   77.5
+  ground  claws     0.1667   0.286      86    82.8     403    0.05       0    1080   85.5
+  nine    claws     0.1667    0.26      86      72     310    0.05      96     794   85.5
+  claws   single    0.1667   0.299     111    64.8     310    0.05      96     602  110.5
+  plate   single    0.1833   0.325    88.8    97.2     434   0.065      96    1299   88.5
+  over    single    0.1333   0.182   75.48      72   232.5    0.03      96     981   75.5
+  phantom single    0.1667   0.286   79.92      72     310    0.05     240     868   79.5
+  ground  single    0.1667   0.286    88.8    82.8     403    0.05       0    1090   88.5
+  nine    single    0.1667    0.26    88.8      72     310    0.05      96     788   88.5
+  claws   dual      0.1667   0.299  131.25   93.96     310    0.05      96    1301  130.5
+  plate   dual      0.1833   0.325     105  140.94     434   0.065      96    2488  104.5
+  over    dual      0.1333   0.182   89.25   104.4   232.5    0.03      96    2066   89.5
+  phantom dual      0.1667   0.286    94.5   104.4     310    0.05     240    1801   94.5
+  ground  dual      0.1667   0.286     105  120.06     403    0.05       0    2304  104.5
+  nine    dual      0.1667    0.26     105   104.4     310    0.05      96    1685  104.5
+  claws   joined    0.1667   0.299  124.88    72.9     310    0.05      96     755  124.5
+  plate   joined    0.1833   0.325    99.9  109.35     434   0.065      96    1629   99.5
+  over    joined    0.1333   0.182   84.91      81   232.5    0.03      96    1230   84.5
+  phantom joined    0.1667   0.286   89.91      81     310    0.05     240    1064   89.5
+  ground  joined    0.1667   0.286    99.9   93.15     403    0.05       0    1350   99.5
+  nine    joined    0.1667    0.26    99.9      81     310    0.05      96     985   99.5
+  ok   claws x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   claws x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   claws x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   claws x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   plate x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   plate x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   plate x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   plate x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   over x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   over x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   over x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   over x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   phantom x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   phantom x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   phantom x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   phantom x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   ground x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   ground x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   ground x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   ground x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   nine x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   nine x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   nine x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   nine x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   without a seal no edge is drawn (the cut is the weapon's own)  0/0/0/0
+  ok   claws is a trade, not a pure upgrade (gains and pays)  {"t":1,"cd":1.15,"R":1.25,"half":0.9,"kb":1,"freeze":1,"step":1,"recoil":1,"chain":3,"down":"straight","shape":{"slash":"reach","finisher":"reach"},"tint":"#2dff1e"}
+  ok   plate is a trade, not a pure upgrade (gains and pays)  {"t":1.2,"cd":1.25,"R":1,"half":1.35,"kb":1.4,"freeze":1.3,"step":1,"recoil":1,"chain":3,"down":"diag","shape":{"slash":"slam","finisher":"slam"},"tint":"#5c7aa8"}
+  ok   over is a trade, not a pure upgrade (gains and pays)  {"t":0.8,"cd":1,"R":0.85,"half":1,"kb":0.75,"freeze":0.6,"step":1,"recoil":1,"chain":3,"down":"straight","shape":null,"tint":"#ff9be0"}
+  ok   phantom is a trade, not a pure upgrade (gains and pays)  {"t":1,"cd":1.1,"R":0.9,"half":1,"kb":1,"freeze":1,"step":2.5,"recoil":1,"chain":3,"down":"straight","shape":null,"tint":"#b8a0ff"}
+  ok   ground is a trade, not a pure upgrade (gains and pays)  {"t":1,"cd":1.1,"R":1,"half":1.15,"kb":1.3,"freeze":1,"step":0,"recoil":0,"chain":3,"down":"straight","shape":null,"tint":"#16a596"}
+  ok   nine is a trade, not a pure upgrade (gains and pays)  {"t":1,"cd":1,"R":1,"half":1,"kb":1,"freeze":1,"step":1,"recoil":1,"chain":2,"down":"straight","shape":null,"tint":"#69872d"}
+  ok   claws: the drawn edge is longest for the long reach and shortest for the quick swipes; the slam is the heaviest  rim claws 107.5 / plain 85.5 / over 72.5; px plate 1309 / over 984
+  ok   single: the drawn edge is longest for the long reach and shortest for the quick swipes; the slam is the heaviest  rim claws 110.5 / plain 88.5 / over 75.5; px plate 1299 / over 981
+  ok   dual: the drawn edge is longest for the long reach and shortest for the quick swipes; the slam is the heaviest  rim claws 130.5 / plain 104.5 / over 89.5; px plate 2488 / over 2066
+  ok   joined: the drawn edge is longest for the long reach and shortest for the quick swipes; the slam is the heaviest  rim claws 124.5 / plain 99.5 / over 84.5; px plate 1629 / over 1230
+  ok   claws: the plain string is jab, jab, finisher; the two-beat seal goes jab, finisher  base 0 1 2 0, nine 0 2 0 2
+  ok   claws: the plate's down-strike is the diagonal pogo (45 degrees forward, strikes ahead-below, rebounds forward); plain is straight down  {"base":{"s0":{"ax":0,"ay":1,"shape":"down"},"hit":false,"pogo":false,"fwd":0},"plate":{"s0":{"ax":1,"ay":1,"shape":"diag"},"hit":true,"pogo":true,"fwd":340}}
+  ok   single: the plain string is jab, jab, finisher; the two-beat seal goes jab, finisher  base 0 1 2 0, nine 0 2 0 2
+  ok   single: the plate's down-strike is the diagonal pogo (45 degrees forward, strikes ahead-below, rebounds forward); plain is straight down  {"base":{"s0":{"ax":0,"ay":1,"shape":"down"},"hit":false,"pogo":false,"fwd":0},"plate":{"s0":{"ax":1,"ay":1,"shape":"diag"},"hit":true,"pogo":true,"fwd":340}}
+  ok   dual: the plain string is jab, jab, finisher; the two-beat seal goes jab, finisher  base 0 1 2 0, nine 0 2 0 2
+  ok   dual: the plate's down-strike is the diagonal pogo (45 degrees forward, strikes ahead-below, rebounds forward); plain is straight down  {"base":{"s0":{"ax":0,"ay":1,"shape":"down"},"hit":false,"pogo":false,"fwd":0},"plate":{"s0":{"ax":1,"ay":1,"shape":"diag"},"hit":true,"pogo":true,"fwd":340}}
+  ok   joined: the plain string is jab, jab, finisher; the two-beat seal goes jab, finisher  base 0 1 2 0, nine 0 2 0 2
+  ok   joined: the plate's down-strike is the diagonal pogo (45 degrees forward, strikes ahead-below, rebounds forward); plain is straight down  {"base":{"s0":{"ax":0,"ay":1,"shape":"down"},"hit":false,"pogo":false,"fwd":0},"plate":{"s0":{"ax":1,"ay":1,"shape":"diag"},"hit":true,"pogo":true,"fwd":340}}
+  ok   two seals worn: the one taking the most power sets the style; between equals the one seated first; one-socket seals never do  claws+nine→nine  plate+claws→plate  claws+plate→claws  sprint+claws→claws  siphon+sprint→null  over+ground+nine→nine
+  ok   ...and the swing really is that seal's (claws+plate reaches further than plate+claws)  far edge 86 vs 107.5
+  ok   claws: in the running game the seal's edge is drawn on the slash layer, and not without one  with plate 2 passes over 3 frames; plain 0
+  ok   single: in the running game the seal's edge is drawn on the slash layer, and not without one  with plate 8 passes over 4 frames; plain 0
+  ok   dual: in the running game the seal's edge is drawn on the slash layer, and not without one  with plate 6 passes over 3 frames; plain 0
+  ok   joined: in the running game the seal's edge is drawn on the slash layer, and not without one  with plate 6 passes over 3 frames; plain 0
+  ok   every seal's fighting line, style name and the style notes exist and are translated in all five languages
+  ok   the English line names each percentage the block applies
+  ok   Gear [en]: the selected seal shows its fighting line, its row says it sets the style, the overruled one says which does, the shop names it  {"fightShown":true,"active":true,"held":true,"widest":815.568359375,"shop":true}
+  ok   Gear [ar]: the selected seal shows its fighting line, its row says it sets the style, the overruled one says which does, the shop names it  {"fightShown":true,"active":true,"held":true,"widest":844.56640625,"shop":true}
+  ok   Gear [tr]: the selected seal shows its fighting line, its row says it sets the style, the overruled one says which does, the shop names it  {"fightShown":true,"active":true,"held":true,"widest":834.080078125,"shop":true}
+  ok   Gear [zh]: the selected seal shows its fighting line, its row says it sets the style, the overruled one says which does, the shop names it  {"fightShown":true,"active":true,"held":true,"widest":336.109375,"shop":true}
+  ok   Gear [ru]: the selected seal shows its fighting line, its row says it sets the style, the overruled one says which does, the shop names it  {"fightShown":true,"active":true,"held":true,"widest":818.9248046875,"shop":true}
+  ok   the item card that hands a seal over says what it does to her attacks  +1 core while equipped. Fighting style — Heavy slam: 35% wider, 40% more push, slower to s
+  ok   every seal's cut (4 aims x 2 beats x 4 weapons) keeps its shape inside its box, 80-100% of it  192 shapes; reach:0.876 diag:0.955 slam:0.954 slash:0.88 finisher:0.911
+  ok   docs/CRESTS.md carries the attack-block table with the numbers in the code
+  ok   every seal's tint is clear of the 15 registered hues (ΔE > 30) and of each other (ΔE > 25)
+  ok   the registry records the seals' attack blocks and their tints (§2, Crest cuts)
+  ok   parry lime stays in js/parry.js alone
+  ok   NOSTOS: the hero swings through the same block (the plate widens his cut and slows his recovery)  {"isHero":true,"base":{"crest":null,"half":30,"atkCD":0.26,"line":"Fighting style — Heavy slam: 35% wider, 40% more push, slower to swing and recover; the down-strike goes diagonal.","name":"Bronze Cuirass"},"plate":{"crest":"plate","half":40.5,"atkCD":0.325,"line":"Fighting style — Heavy slam: 35% wider, 40% more push, slower to swing and recover; the down-strike goes diagonal.","name":"Bronze Cuirass"}}
+  ok   no page errors
+
+OK — every expensive seal changes how she fights, the same way with every weapon, and she can see which
+   (crestfight: 26.1 s)
+
+── dmglog  — the damage log as a check: cores lost by source per room, the 40% flag, the Forge overlay
+── dmglog — what costs her cores, by source, per room, with the 40% flag
+
+  ok   cores lost are recorded by source, most damaging first  [{"src":"horn.toss","lost":4,"share":0.57,"flag":true},{"src":"crawler.lunge","lost":2,"share":0.29,"flag":false},{"src":"turret.shot","lost":1,"share":0.14,"flag":false}]
+  ok   the source over 40% of the damage is flagged, the others are not  [{"src":"horn.toss","lost":4,"share":0.57,"flag":true},{"src":"crawler.lunge","lost":2,"share":0.29,"flag":false},{"src":"turret.shot","lost":1,"share":0.14,"flag":false}]
+  ok   a held brace costs nothing and records nothing  [{"src":"horn.toss","lost":4,"share":0.57,"flag":true},{"src":"crawler.lunge","lost":2,"share":0.29,"flag":false},{"src":"turret.shot","lost":1,"share":0.14,"flag":false}]
+  ok   a new room starts a new record  0
+  ok   ...and with too little damage to mean anything, nothing is flagged  [{"src":"bat.glint","share":1,"flag":false}]
+  ok   the overlay draws when on, and nothing when off  on 10752, off 0
+  ok   the Forge has the DAMAGE toggle (button and F4); the game pages do not
+  ok   no page errors
+
+all good
+   (dmglog: 4.5 s)
+
+── shopscale  — a shop door has no depth, a gate and a cave do
+── shopscale — a shop door has no depth, a gate and a cave do
+
+  ok   a real gate recedes to 16% of her size  0.16000000000000003
+  ok   a cave mouth keeps 84% — swallowed, not shrunk away  0.84
+  ok   the trader's booth stays close to full size  0.88
+  ok   ...and so does the Oracle's parlor — every style row, not just one  0.88
+  ok   a cave flag wins over a style tag, if they ever coincide  0.84
+  ok   halfway in, the shop has barely receded  0.94
+  ok   ...while the gate is already visibly smaller  0.5800000000000001
+  ok   no page errors
+
+all good
+   (shopscale: 1.1 s)
+
+── foelevel  — a machine's level is its kingdom plus the run, and it spends it
+── foelevel — a machine's level is its kingdom plus the run, and it spends it
+
+  ok   a fresh save has taken nothing  iq 0
+  ok   the opening meadow is level 1 and spends nothing  lv 1, 0 pts
+  ok   every kingdom after it is deeper than the one before  1 < 2 < 3 < 4 < 5
+  ok   the Cache stands with the deepest kingdoms  X 5
+  ok   the Nest has points to spend where the meadow has none  4 pts
+  ok   a finished run raises the machines above it  A 1->3, E 5->7
+  ok   ...and never past the ceiling  E late 7
+  ok   a level-1 machine never rolls a trait  max 0
+  ok   a levelled one does
+  ok   ...but never more than two — a room stays varied, not uniform  max 2
+  ok   ...and never the same trait twice on one body
+  ok   ...and the same level still produces different machines  7 distinct loadouts
+  ok   every row in the registry keeps the contract it was written against
+  ok   ...and every scoped key names one real kingdom, so no two sessions collide
+  ok   ...and a kind with no row at all buys nothing
+  ok   a row is bought cheapest-first, within its points  [[],["burrow"],["burrow","spit"]]
+  ok   ...and a move nothing can afford is never handed out  burrow,spit
+  ok   a kingdom-scoped move reaches its own kingdom  burrow,spit,slag
+  ok   ...and NOT the kingdom next door — parallel sessions cannot collide  burrow,spit
+  ok   ...and a scoped row stands alone where there is no shared one  [[],["slag"]]
+  ok   a spawned machine carries its level and its moves  lv 3
+  ok   ...and hasMove refuses a move it never bought
+  ok   the registry is left as it was found
+  ok   no page errors
+
+all good
+   (foelevel: 4.3 s)
+
+── foundry  — kingdom C's machines learn to leave melt behind, and warn first
+── foundry — kingdom C's machines learn to leave melt, and warn first
+
+WHAT EACH KINGDOM'S MACHINES CAN AFFORD
+  A:fresh   {"crawler":[],"hopper":[],"kiln":[]}
+  A:deep    {"crawler":["scrapdrag"],"hopper":["scrapkick"],"kiln":[]}
+  C:fresh   {"crawler":["cinder"],"hopper":["slagsplash"],"kiln":[]}
+  C:deep    {"crawler":["cinder"],"hopper":["slagsplash"],"kiln":["pour"]}
+
+  ok   a Foundry crawler carries cinder at the kingdom's own floor  ["cinder"]
+  ok   ...and a Foundry hopper carries slagsplash  ["slagsplash"]
+  ok   ...but the pot that POURS is a deep machine, not the one she is taught on  fresh [] -> deep ["pour"]
+  ok   NONE of it reaches the meadow — the @C scope holds  {"crawler":["scrapdrag"],"hopper":["scrapkick"],"kiln":[]}
+
+CINDER — the crawler's lane
+  zone C  {"moves":["cinder"],"lunges":60,"melt":12}
+  zone A  {"moves":[],"lunges":42,"melt":0}
+  ok   a Foundry crawler actually lays melt when it lunges  12 pools over 60 lunge frames
+  ok   ...and the meadow's crawler still lunges and still leaves nothing  42 lunge frames, 0 pools
+  ok   ...and the same machine with the move taken away is the old one exactly  {"melt":0,"lunge":60}
+  ok   THE TELL IS NOT THE PRICE: the wind-up is the same length with the move and without  22 vs 22 frames of coil
+  ok   ...and a full wind-up is spent BEFORE the first melt exists  22 warned frames, floor is 21
+
+SLAGSPLASH — the hopper's two gobs
+  zone C  {"moves":["slagsplash"],"gobFrames":84,"maxGobs":2,"melt":8}
+  zone A  {"moves":[],"gobFrames":0,"melt":0}
+  ok   a Foundry hopper throws on the landing — two gobs, both ways  peak 2 in the air
+  ok   ...and the gobs set into melt where they come down  8 pools
+  ok   THE ARC IS THE WARNING: they fly, visibly, before any of it is hot  gob at frame 166, melt at 187
+  ok   ...and nothing in flight can touch her — the melt only bites once it sets  []
+  ok   ...and the meadow's hopper leaps exactly as it always did, empty-handed  {"leaps":1,"gobs":0,"melt":0}
+
+POUR — the kiln tips toward the side she chose
+  deep, player right  {"moves":["pour"],"side":1,"at":[30,30,30],"melt":3}
+  deep, player left   {"moves":["pour"],"side":-1,"at":[-30,-30,-30],"melt":3}
+  fresh               {"moves":[],"melt":0}
+  ok   a deep kiln pours after the blow  3 pools after 152 plume frames
+  ok   ...on the side she was standing on, both ways round  right [30,30], left [-30,-30]
+  ok   ...and the pot she is taught on, one kingdom-floor lower, pours nothing  {"melt":0,"plume":144}
+  ok   THE CHARGE IS NOT THE PRICE: the pouring pot warns for as long as the plain one  31 vs 31 frames of charge
+  ok   ...and the spent window she punishes it in is untouched at 0.95 s  0.950 / 0.950
+  ok   ...and the whole charge AND the whole blow are spent before the melt lands  79 warned frames, floor is 78
+  ok   no page errors
+
+all good
+   (foundry: 2.8 s)
+
+── cachemoves  — the Crystal Cache bends the answer — behind, off the arc and in the air
+── cachemoves — the Crystal Cache bends the answer, and says so first
+
+  ok   kingdom X wrote three rows, all of them kingdom-scoped  crawler@X hopper@X bat@X
+  ok   ...and not one unscoped row — the integrator's layer is untouched
+  ok   the Cache's whole roster can afford its own move at the kingdom floor  lv 5 (4 pts) → {"crawler":["facet"],"hopper":["refract"],"bat":["glint"]}
+  ok   ...and not one of them leaks into another kingdom, at any level, on any kind  no leaks
+  ok   the cost-3 is unaffordable below level 4, and the Cache floor clears it  floor lv 5
+  ok   facet: the lunge throws a lance across the floor it left  live 0.23s
+  ok   ...and it owns that strip while it is real  13 hits
+  ok   ...but standing in the told strip costs nothing until it fires  0 hits across 0.52s of warning
+  ok   ...and it fires exactly where the amber drew it  0px drift
+  ok   ...the coil is longer than a bare crawler's, not shorter  cache 0.52s vs plain 0.37s
+  ok   ...at the same length once the run is finished  fresh 0.52s vs finished-run 0.52s
+  ok   ...and the punish window after it is the one a bare crawler hands back  cache 0.75s vs plain 0.75s
+  ok   ...and a meadow crawler never splits — it is the crawler it always was
+  ok   refract: the floor is painted before the machine leaves it  crouch 0.52s
+  ok   ...and the paint stays lit across the crouch AND the whole flight  1.08s of notice
+  ok   ...the spot sits off the honest arc by exactly its offset, both sides  62px off aim (want 62)
+  ok   ...and the machine comes down ON it, not on the arc  missed by 0px fresh, 10.8px finished-run
+  ok   ...at exactly the same warning once the run is finished  fresh 0.52s vs finished-run 0.52s
+  ok   ...and the paint goes out with the intention when the leap never comes  lit for 0 frames after the crouch ended
+  ok   ...and a meadow hopper never paints and never bends
+  ok   glint: the dive leaves splinters hanging in the air  3 at once, cap 6
+  ok   ...and they cannot touch her while they are arming  0 hits across 0.43s of arming
+  ok   ...and they own that air once they are real  70 hits
+  ok   ...never more than the cap, so a dive is a dotted line not a wall  3 / 3
+  ok   ...the shiver is the full told length at every level of cunning  fresh 0.52s vs finished-run 0.52s
+  ok   ...and a meadow bat sheds nothing, and shivers the shorter tell  meadow 0.37s vs cache 0.52s
+  ok   every new read draws without throwing  5 drawn
+  ok   no page errors
+
+all good
+   (cachemoves: 4.0 s)
+
+── opening  — she wakes, she walks, she arrives — and only then does anything move
+── opening — she wakes, she walks, she arrives, and only then does anything move
+  ok   both waking rooms exist  W1, W2
+  ok   the run STARTS in the cradle, not on the meadow  newSave starts at W1
+  ok   W1 walks to W2, and the GATES are the only way into the city  [true,true]
+  ok   ...she can walk back to the cradle, and there is NO side door past the gates  [true,true]
+  ok   both rooms are on the map
+  ok   nothing in either room can hurt her  W1 [] W2 []
+  ok   ...and neither floor has spikes in it
+  ok   the cradle takes hold of her when she arrives
+  ok   ...and its pages come before the waking
+  ok   ...and she cannot walk out of the release  0.00 px
+  ok   ...it ENDS, and gives her back  held false, then moved 170 px
+  ok   ...and it happens exactly once per save
+
+    lesson order: move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go
+
+  ok   the verbs come in the right order, and Ratchet comes before any machine  move -> out -> jump -> gate -> booth -> note -> drawer -> repair -> pod -> pack -> heal -> atk -> burst -> node -> go
+  ok   the lesson knows all three of its rooms  {"W1":0,"W2":1,"A0":2,"A0B":2}
+  ok   standing still in the cradle room cannot skip the lesson  stalled at move
+  ok   the cradle and the gates exist and decode  
+  ok   ...the cradle stands in its room and the gates ARE their room's horizon  {"W1":true,"W2":true}
+  ok   the walk arrives: right to the gates, UP through them  W1 -> W2 -> A0
+  ok   the gates are the room's backdrop, not a rectangle pasted into it
+  ok   pressing up away from the gates does nothing
+  ok   pressing up AT the gates walks her in
+  ok   ...and she arrives inside the city, not past the far side of it  A0 at x=40
+  ok   her back plates decode
+  ok   she walks away with her BACK to us, never her side view  heroDeparture / 0 side frames
+  ok   ...and unarmed she wears the BARE back pair, not the sword she lacks  heroDeparture
+  ok   a moving wolf cycles real gait frames  runA,runB
+  ok   a standing wolf stands still  rest
+  ok   the gait answers to the FLOOR, not to a clock (half speed = half the steps)  10 steps fast vs 5 slow
+
+OK — she wakes, she is let go, she walks, she arrives, and nothing touched her on the way
+   (opening: 3.2 s)
+
+── hero  — her arm is ONE piece, she has two of them, nothing bolted on
+── hero — her arm is one piece, she has two of them, and nothing is bolted on
+  ok   nothing stamps a joint onto her arm, in any state  0 armJoint call(s) across 32 poses
+
+    idle/R      left  1307   right  1091
+    idle/L      left  1325   right  1069
+    run/R       left  1400   right   839
+    run/L       left   822   right  1419
+    air/R       left  1006   right  1560
+    air/L       left  1538   right  1026
+
+  ok   she reads as two-armed in every pose  
+    IoU vs idle (must be <= 0.9):
+      run       0.695
+      air       0.553
+      fall      0.731
+      swing     0.510
+      combo2    0.445
+      dash      0.490
+      boost     0.646
+      skid      0.486
+      wallcling 0.655
+      song      0.694
+      armfire   0.709
+      lowhp     0.472
+      charge    0.420
+      hurt      0.554
+      heal      0.793
+  ok   every named state differs from idle in SILHOUETTE  
+  ok   ...and she is drawn at all in every state  
+    state sheet 7680x320, 24 cells, 24 names, highest index 23
+  ok   every state she can be in has a cell on the sheet  
+  ok   ...and no two states share one cell
+  ok   ...and the sheet divides evenly into its cells  7680 / 24 = 320 px per cell
+    mood vs calm (must differ over 0.12 of lit pixels):
+      happy      0.306
+      excited    0.371
+      determined 0.259
+      angry      0.277
+      sad        0.283
+      hurt       0.318
+      curious    0.248
+      weary      0.304
+      effort     0.270
+      relief     0.270
+      afraid     0.317
+  ok   every mood puts a different face on her  
+      idle     0/6 pairs prefer its mirror
+      walk_a   0/6 pairs prefer its mirror
+      walk_b   0/6 pairs prefer its mirror
+      walk_c   0/6 pairs prefer its mirror
+      run_a    0/6 pairs prefer its mirror
+      run_b    0/6 pairs prefer its mirror
+      run_c    0/6 pairs prefer its mirror
+  ok   every locomotion cell faces the same way  
+      eye gap / figure height — walk & run cells: walk_a 0.032  walk_b 0.039  walk_c 0.166  run_a 0.179  run_b 0.018   (widest 0.179)
+      attack cells on the sheet: claw_1 0.256  claw_2 0.273  finisher 0.083  burst 0.044
+      air      strip median 0.101 over 6 cells
+      down     strip median 0.117 over 6 cells
+      claw_1   strip median 0.106 over 5 cells
+      claw_2   strip median 0.105 over 6 cells
+      finisher strip median 0.099 over 6 cells
+      burstLegacystrip median 0.111 over 12 cells
+      burst    strip median 0.122 over 12 cells
+  ok   every attack strip faces where she is heading, not the screen   vs the walk's widest 0.179 — ART_QUEUE §2av
+
+OK — one limb, two arms, no hardware bolted to the outside
+   (hero: 5.4 s)
+
+── lowres  — the whole world at quarter size, and nothing sliced by pixel gets one
+── lowres — the whole world, roughly, for half a megabyte
+  ok   every small copy the manifest names is on disk  89 entries
+  ok   ...and every one of them is at most a quarter of its full sheet  all under
+  ok   the whole tier is small enough to front-load  1.81 MB for 26.7 MB of art (6.8%)
+  ok   no sheet addressed by absolute pixel rect has a small copy  6 guardian files checked
+  ok   the page carries the manifest  89 keys in window.LOWRES
+  ok   ...and the prefetcher is told to front-load it
+  ok   a small copy stands in for a sheet that has not arrived  2688 px wide
+  ok   ...and the full sheet replaces it  2688 -> 10752 px
+  ok   ...and every cached derivative of the soft one is thrown away  on stand-in: true, on upgrade: true
+  ok   the tier is fetched ahead of the full-size art  52 small copies fetched in the first six seconds
+
+OK — the room is right immediately and sharp a moment later
+   (lowres: 7.2 s)
+
+── crystal  — the purifier: gift, tree, reach, rising finisher, launcher, the throw that returns
+── crystal — the purifier: gift, tree, reach, grammar, launcher, throw
+  ok   the bare tree has no crystal nodes  7 nodes
+  ok   the waking gift is a KIT — the crystal is never handed over
+  ok   the forge quest exists and gates ratchet's second errand
+  ok   handing Ratchet the shard FORGES the crystal  flag true, bag cleared true, card true
+  ok   the crystal grows the branch (+3)  10 nodes
+  ok   the joined blade opens the throw node (+1)  11 nodes
+  ok   the pillar stands in the cave's last room
+  ok   claws glance off it
+  ok   the supercharged claw shatters it, into the bag  down true, bag true, flag true
+  ok   ...and it does not grow back
+  ok   A5 and CV1 are a two-way door pair
+  ok   the first mouth is buried and refuses the walk
+  ok   ...and the blade is what opens it
+  ok   UP at the mouth opens the walk, and only once
+  ok   the walk arrives inside the cave
+  ok   and walks back out to the mouth  back true, room true, at mouth true
+  ok   a lair holds NO cave door before its guardian falls
+  ok   ...and grows one the moment it does
+  ok   the revealed door walks into the grotto
+  ok   ...which pays something (scrap and a rest)
+  ok   every guardian has its grotto pair, cave-marked and on the map
+  ok   crystal light turns the aura sense ON (her + the machines)  3 halos
+  ok   no crystal light, no halos
+  ok   the crystal out-reaches the claw, the joined blade more  claw 74 < crystal 76.8 < joined 87.9
+  ok   the claw finisher stays flat  {"ay":0,"wield":0}
+  ok   the crystal finisher RISES (diagonal cut)  {"ay":-0.55,"combo":2,"wield":1}
+  ok   up-aim and the opener are untouched  up {"ay":-1,"combo":0}, open {"ay":0,"combo":0}
+  ok   risecut launches the target upward  vy -430
+  ok   ordinary joined finisher remains melee
+  ok   holding and releasing attack throws the joined blade
+  ok   ...and her paw sounds EMPTY while it flies  claw
+  ok   it flies out a real distance  211px
+  ok   and she catches it  caught true, audio crystal2
+  ok   the opener never throws
+  ok   room transition returns the thrown blade without losing equipment
+  ok   room transition cancels hurricane, partial charge and buffered melee
+
+OK — given, grown, longer, rising, launching, flying, and coming back
+   (crystal: 5.8 s)
+
+── memnote  — the memory game is audible: phone-register bells, and the music steps aside
+── memnote — the memory game is audible: register, reply, and the duck
+  ok   the audio context is live in the harness  running
+  ok   the show phase actually reaches the synth  3 notes for a sequence of 3
+  ok   every note sits where a phone speaker speaks (midi >= 69 / A4 440Hz)  lowest 69
+  ok   the notes are not whispered under the mix (gain >= 0.1)  [0.115,0.115,0.115]
+  ok   the music ducks while the trial is open  MUS_DUCK 0.3
+  ok   the reply voice answers a fifth up, still in register  {"m":85,"v":0.08}
+  ok   ...and the duck lifts the moment the trial closes  MUS_DUCK 1
+
+OK — four bells a phone can speak, and a stream that steps aside for them
+   (memnote: 4.9 s)
+
+── warp  — ?room= drops the owner into any room: locked, loud when refused, and never his save
+FAILED: ── warp — one person's door into any room, and it stays one person's
+
+  ok   no query string: the game boots to its own menu  MENU
+  ok   no query string: the save slot is the ordinary one  clawbyte_save_robo
+  ok   no query string: nothing is said
+  ok   a browser with no Forge key does not warp  (menu)
+  ok   ...and it says why, out loud  warp refused — this browser has no Forge key | warp: warp refused — this browser has no Forge key
+  ok   ...and it leaves his real save slot alone  clawbyte_save_robo
+  ok   an id that is not a room does not warp  MENU
+  ok   ...and the id it could not find is in the message  warp — no room "V1Bx" | warp: warp — no room "V1Bx"
+  FAIL an unlocked browser lands in the room
+  FAIL ...playing, not at a menu or in a film  MENU
+  FAIL ...standing in open air over the floor, not inside the rock
+  FAIL ...with every power, so the room can be walked  0 abilities
+  FAIL ...and the Cutter is standing there  nobody
+  FAIL ...and it says where it put him
+  ok   a warp session writes to its OWN slot, never his run  clawbyte_save_robo_warp
+  FAIL any room in the game is reachable (the Cache proper)
+  FAIL no page errors in any of it  ReferenceError: Cannot access 'purificationButton' before initialization | ReferenceError: Cannot access 'purificationButton' before initialization
+
+8 FAILED:
+  an unlocked browser lands in the room
+  ...playing, not at a menu or in a film — MENU
+  ...standing in open air over the floor, not inside the rock
+  ...with every power, so the room can be walked — 0 abilities
+  ...and the Cutter is standing there — nobody
+  ...and it says where it put him
+  any room in the game is reachable (the Cache proper)
+  no page errors in any of it — ReferenceError: Cannot access 'purificationButton' before initialization | ReferenceError: Cannot access 'purificationButton' before initialization
+Command failed: node /workspace/scratch/7ada3b7523b4/combat-impact/tests/warp.cjs
+   (warp: 33.5 s)
+
+── forge  — the Forge: gated to the owner, every op changes the live world, main rooms edit like DLCs
+ok  index.html carries no editor
+  ok  forge.html is the editor page
+  ok  wrong passphrase does not open
+  ok  the word opens the Forge and the world starts
+  ok  the Forge plays on its own save
+  ok  new room created and entered
+  ok  heap and frame are material
+  ok  bench, crawler and keeper placed (3)
+  ok  the keeper has a name and a conversation
+  ok  the keeper wears the borrowed body
+  ok  a main-game room edits like a DLC room
+  ok  the export carries rooms, dialogue, bodies and start
+  ok  a click paints the pointed tile
+  ok  legacy key removed without transmission
+  ok  invalid JSON stays available for correction
+  ok  JSON console applies reviewed operations
+  ok  editor never calls the external AI API
+  ok  no API key input
+  ok  room brief exports for use in an assistant
+  ok  no page errors
+forge: the owner describes, the world changes, and only the owner
+   (forge: 12.1 s)
+
+1 harness(es) failed

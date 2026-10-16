@@ -500,6 +500,7 @@ async function handleMenus(s) {
     await tap('Enter'); await sleep(500); return true;
   }
   if (s.state === 'WHO') { await tap('Enter'); await sleep(300); return true; }
+  if (s.state === 'PURIFY') { await hold([]); await sleep(150); await hold(['KeyE']); await sleep(1900); await hold([]); await sleep(300); return true; }
   if (s.state === 'DIALOG') { await hold([]); await readerPress('KeyE'); await sleep(60); return true; }
   if (s.state === 'PANELS') { await hold([]); await readerPress('Enter'); await sleep(80); return true; }
   if (s.state === 'COMICS') { await hold([]); await tap('Escape'); await sleep(200); return true; }
@@ -881,6 +882,12 @@ mission('opening', s => s.flags.includes('tut'), async s => {
 mission('servo', s => s.flags.includes('servoMet'), async s => {
   if (s.room !== 'A1') { await goRoom(s, 'A1'); return; }
   await talkTo(s, 'servo', 'wake him with the spare Power Cell');
+});
+// The existing quarry hatch is locked until the nonlethal A2 meeting.
+// Walk to its trigger with normal input before attempting the cave route.
+mission('first-meeting', s => s.flags.includes('nfMeet'), async s => {
+  if(s.room!=='A2'){await goRoom(s,'A2');return;}
+  await walkTo(s,{x:60*TL+32,tol:12});
 });
 // 3. THE RAW MARBLE — under the meadow, through the hub's loose floor, the
 // quarry's buried mouths, to the white pillar in CV3; claws glance, the burst frees it
@@ -1328,6 +1335,9 @@ else (async () => {
       await sleep(500); continue;
     }
     S = s;
+    // Room transitions deliberately clear game input: release the driver's
+    // physical held keys too so the next movement is a fresh keydown.
+    if(prevS && prevS.room !== s.room) await hold([]);
     // the map changes as the story does (doors are built by flags): re-read it per room
     if (s.room && s.room !== lastRoom) { try { G_GRAPH = await worldGraph(); } catch (e) { } }
     diffLog(s);

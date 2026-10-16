@@ -1,0 +1,193 @@
+
+── entrance-integration  — painted entrances share world anchors without duplicate mouth overlays
+PASS painted cave/city thresholds follow world anchors through camera travel; no duplicate cave-mouth overlay
+   (entrance-integration: 2.0 s)
+
+── hero-cache-regression  — third-hit cached sheet geometry and supplied idle in every mood
+PASS third-hit gameplay renders six complete cells; incompatible cached sheet rejected; all 64 idle frame/mood/facing cases keep supplied art; voice and art URLs match build
+   (hero-cache-regression: 0.9 s)
+
+── scratch-visual  — pixel-measured cyan scratch reach, mirroring and fading recovery
+PASS 16 pixel-measured scratch/fade samples, facing symmetry, visual/contact reach; build f9863af94c78
+   (scratch-visual: 0.9 s)
+
+── scratch-reach  — scratch contact boundary, facing and non-damaging recovery wake
+PASS scratch contact boundaries, both facings, charge direction, no repeated damage, 180ms recovery wake: [{"face":1,"combo":0,"reach":86},{"face":1,"combo":1,"reach":86},{"face":1,"combo":2,"reach":100},{"face":-1,"combo":0,"reach":86},{"face":-1,"combo":1,"reach":86},{"face":-1,"combo":2,"reach":100}]
+   (scratch-reach: 0.1 s)
+
+── tutorial-controller  — complete production tutorial, contextual locks and transition recovery
+PASS: complete tutorial controller — free travel, the taught verb always answers, one verb at a time, menus, jump readiness, no frozen enemies and input edges
+   (tutorial-controller: 0.1 s)
+
+── offline-release  — scoped version cache, media seeking and storage-denied fallback
+PASS: versioned app-only caches, fresh manifests, media seeking, offline fallback, cache denial and no partial-response corruption
+   (offline-release: 0.1 s)
+
+── release-polish  — cold artwork, actual screen scale, camera, input edges, workshop and movies
+PASS cold desktop viewport fills available 16:9 area {"width":1280,"height":720,"pixels":1664}
+PASS cold-start canonical art without external gait downloads {"build":"f9863af94c78","core":[{"key":"heroStates","embedded":true,"width":7680},{"key":"gaitWalk","embedded":true,"width":2560},{"key":"gaitRun","embedded":true,"width":5120},{"key":"hzdIdle","embedded":true,"width":2560}],"run":{"key":"gaitRun","cells":16,"k":1.441025641025641,"from":0,"to":15}}
+PASS pressed edges consumed once during multi-step frames {"pressed":1,"held":3,"steps":3}
+PASS buffered combat/jump inputs and immediate pause during hitstop {"attack":0.2,"jump":0.12}
+PASS reported workshop approach moves with stale locks present {"dx":85.50000000000023,"prompt":"UP","lock":null,"legacy":null}
+PASS touch movement remains held until finger release {"dx":108.16666666666694,"heldAfterFrame":true}
+PASS actual rendered hero size {"height":71,"viewportRatio":0.19985185185185186,"zoom":1.52,"renderer":"hzdIdle:0"}
+PASS seven room camera/framing transitions [{"id":"W1","zoom":1.52,"x":442,"y":392.81342548828127},{"id":"W2","zoom":1.52,"x":442,"y":382},{"id":"A0","zoom":1.52,"x":442,"y":406.69293476562507},{"id":"A0B","zoom":1.52,"x":442,"y":406.69293476562507},{"id":"A1","zoom":1.52,"x":442,"y":406.69293476562507},{"id":"CV1","zoom":1.52,"x":442,"y":382},{"id":"A3","zoom":1.52,"x":442,"y":406.69293476562507}]
+PASS charged locomotion, real idle and no legacy run fallback {"state":"run_a","missing":"loading:run_b"}
+PASS save persistence {"saved":true,"scrap":137,"tutorial":7}
+Production clip playback [{"key":"intro1","started":true,"time":0.093155,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro1.mp4","phase":"play","error":null},{"key":"intro2","started":true,"time":0.119655,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro2.mp4","phase":"play","error":null},{"key":"intro3","started":true,"time":0.114908,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro3.mp4","phase":"play","error":null},{"key":"intro4","started":true,"time":0.137128,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro4.mp4","phase":"play","error":null},{"key":"intro5","started":true,"time":0.122226,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro5.mp4","phase":"play","error":null},{"key":"intro6","started":true,"time":0.116247,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro6.mp4","phase":"play","error":null},{"key":"intro7","started":true,"time":0.154869,"width":1920,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro7.mp4","phase":"play","error":null},{"key":"intro8","started":true,"time":0.118797,"width":1920,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro8.mp4","phase":"play","error":null}]
+PASS all eight intro clips really decode and advance [{"key":"intro1","started":true,"time":0.093155,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro1.mp4","phase":"play","error":null},{"key":"intro2","started":true,"time":0.119655,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro2.mp4","phase":"play","error":null},{"key":"intro3","started":true,"time":0.114908,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro3.mp4","phase":"play","error":null},{"key":"intro4","started":true,"time":0.137128,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro4.mp4","phase":"play","error":null},{"key":"intro5","started":true,"time":0.122226,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro5.mp4","phase":"play","error":null},{"key":"intro6","started":true,"time":0.116247,"width":960,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro6.mp4","phase":"play","error":null},{"key":"intro7","started":true,"time":0.154869,"width":1920,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro7.mp4","phase":"play","error":null},{"key":"intro8","started":true,"time":0.118797,"width":1920,"ran":true,"src":"http://127.0.0.1:8220/assets/video/intro8.mp4","phase":"play","error":null}]
+   (release-polish: 8.4 s)
+
+── chapter-one  — one earned rescue, quarry, forge and sage save chain
+PASS connected first-chapter quest and reloads { quest: 'done', sword: 'single', sage: true }
+   (chapter-one: 1.0 s)
+
+── input-focus  — focus loss clears input and cancelled touches cannot fire
+OK — focus loss clears all input, background input is blocked, fresh input recovers and touch cancellation cannot fire
+   (input-focus: 0.1 s)
+
+── voice-handoff  — foreground voice ownership across actions and charge
+PASS: vocal handoffs, uninterrupted foley, missing takes, charge ownership, damage and dialogue priority
+   (voice-handoff: 0.1 s)
+
+── wake  — the opening: film, waking floor, move -> jump -> gates -> straight into Ratchet's booth
+{"room":"W1","state":"PLAY","wake":true,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":108,"on":false,"hold":0,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":412.467837975,"input":false,"suspended":false}
+{"room":"W1","state":"PANELS","wake":true,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":108,"on":false,"hold":0,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":418.9840028500001,"input":false,"suspended":false}
+{"room":"W1","state":"PLAY","wake":true,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":108,"on":true,"hold":0,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":427.26191162109376,"input":false,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":167.61535333333245,"on":true,"hold":0.550066666666668,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":428.53364013671876,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":269.5246866666688,"on":true,"hold":0.250333333333326,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":433.4791052246094,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"move","action":"MOVE","target":null,"x":331.8240200000026,"on":true,"hold":0.06709999999999124,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.3177587890625,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":371.4453533333373,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":429.46747802734376,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":405.40002000000544,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":435.67365478515626,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":496.0100200000054,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":435.90482543945313,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":586.5973533333432,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":434.55512451171876,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":643.2300200000105,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":431.1143896484375,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":733.8060200000112,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.3433630371094,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":818.73802000001,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":434.252939453125,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":903.6926866666759,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":425.985361328125,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":960.3480200000103,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":432.3274938964844,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1050.9693533333425,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":435.5522253417969,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1141.5566866666727,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":428.42508911132813,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1203.8560200000065,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.7253210449219,"input":true,"suspended":false}
+{"room":"W1","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","target":1232,"x":1288.788020000005,"on":true,"hold":-0.03286666666667834,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.13874267578126,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":33.333333333333336,"on":true,"hold":0.7,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":436.38404296875,"input":true,"suspended":false}
+{"room":"W2","state":"PANELS","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":33.333333333333336,"on":true,"hold":0.7,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":436.38404296875,"input":false,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":33.333333333333336,"on":true,"hold":0.5336333333333363,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":436.38404296875,"input":false,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":103.42968333333445,"on":true,"hold":0.2505,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":425.59784912109376,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"out","action":"MOVE","control":"→","target":960,"x":171.35035000000312,"on":true,"hold":0.05073333333332751,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":427.89933227539063,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"MOVE","control":"→","target":416,"x":199.70635000000362,"on":true,"hold":-0.03266666666667395,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":425.4815771484375,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"MOVE","control":"→","target":416,"x":256.33901666666833,"on":true,"hold":-0.03266666666667395,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.27543090820313,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":290.3050166666688,"on":true,"hold":-0.03266666666667395,"shown":false,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":436.26142333984376,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":378.24635333333265,"on":false,"hold":0.4335000000000074,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":250.512704395397,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":406.5683533333336,"on":false,"hold":0.3502000000000044,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":244.70117607872962,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"jump","action":"JUMP","target":416,"x":491.5343533333316,"on":false,"hold":0.10030000000001027,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":299.29138766761434,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":548.1670199999962,"on":false,"hold":-0.01626666666665058,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":327.72309769722216,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":582.1443533333291,"on":false,"hold":-0.01626666666665058,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":366.5711273083324,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":667.1216866666621,"on":true,"hold":-0.01626666666665058,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":372.7530310058594,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":723.7770199999966,"on":false,"hold":-0.01626666666665058,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":408.22006953537385,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","control":"→","target":960,"x":820.0310199999939,"on":true,"hold":-0.01626666666665058,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":434.252939453125,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"UP","control":null,"target":960,"x":904.9970199999946,"on":true,"hold":-0.01626666666665058,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":404.39957641601563,"input":true,"suspended":false}
+{"room":"W2","state":"PLAY","wake":false,"cut":false,"gate":true,"step":"gate","action":"UP","control":null,"target":960,"x":960,"on":true,"hold":-0.01626666666665058,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":400.3274938964844,"input":false,"suspended":false}
+{"room":"A0","state":"PANELS","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":52,"on":true,"hold":-0.01626666666665058,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":0,"y":400.3274938964844,"input":false,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":52,"on":false,"hold":0.6333333333333333,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":0,"y":417.61082722981774,"input":false,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":83.15904333333398,"on":true,"hold":0.4166333333333363,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":443.99,"input":true,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"gate","action":"MOVE","target":null,"x":173.7577100000066,"on":true,"hold":0.1501666666666522,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":427.89933227539063,"input":true,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":"MOVE","control":"→","target":399.36,"x":247.41304333334094,"on":true,"hold":-0.016466666666684025,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":428.90363525390626,"input":true,"suspended":false}
+{"room":"A0","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":"UP","control":null,"target":399.36,"x":355.0910433333399,"on":true,"hold":-0.016466666666684025,"shown":true,"enemy":1,"cores":5,"scrap":0,"lock":null,"vx":340,"y":430.1747839355469,"input":true,"suspended":false}
+{"room":"A0B","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":null,"target":null,"x":115,"on":true,"hold":-0.016466666666684025,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":0,"y":434.4061071777344,"input":false,"suspended":false}
+{"room":"A0B","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":null,"target":null,"x":179.46599999999802,"on":true,"hold":0.28350000000000003,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":426.62531494140626,"input":true,"suspended":false}
+{"room":"A0B","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"booth","action":null,"target":null,"x":270.1440000000019,"on":true,"hold":0.01679999999998838,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":433.31888793945313,"input":true,"suspended":false}
+{"room":"A0B","state":"PLAY","wake":false,"cut":false,"gate":false,"step":"note","action":"MOVE","control":"→","target":560,"x":287.1440000000019,"on":true,"hold":-0.016533333333344953,"shown":true,"enemy":0,"cores":5,"scrap":0,"lock":null,"vx":340,"y":435.43921875,"input":true,"suspended":false}
+PASS fresh keyboard opening: wake, walk, obstacle jump, enter city, straight to and into the workshop, no fight on the way
+   (wake: 75.1 s)
+
+── frames  — every verb is a move, not one pose held for a quarter second
+── frames — a verb is a move, not a pose held for a quarter of a second
+
+  ok   claw_1 is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 48.5 / 51.3 / 0 / 49.6 / 39.3 %, mean 37.7, biggest step 51.3%
+  ok   claw_2 is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 60.1 / 57.4 / 53.4 / 43.3 / 59.8 %, mean 54.8, biggest step 60.1%
+  ok   finisher is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 55.7 / 62.2 / 69.7 / 63.8 / 64.7 %, mean 63.2, biggest step 69.7%
+  ok   burst is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 32.5 / 24.8 / 17.2 / 49 / 65.9 %, mean 37.9, biggest step 65.9%
+  ok   air: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   down: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   claw_1: the strip is played whole, every cell the film holds  declared 5 cells, the sheet holds 5
+  ok   claw_2: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   finisher: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   burstLegacy: the strip is played whole, every cell the film holds  declared 12 cells, the sheet holds 12
+  ok   burst: the strip is played whole, every cell the film holds  declared 12 cells, the sheet holds 12
+  ok   every strip in the game is a sequence, not a flip-book of one picture  air 6c  down 6c  claw_1 5c  claw_2 6c  finisher 6c  burstLegacy 12c  burst 12c  servo 16c  mono 16c  patch 13c  sage 11c  lumen 10c  kerf 8c
+  ok   the jump arc is indexed by her own vertical speed  vy -770..+690 asked for cells 0.00,1.26,2.28,2.62,3.64,4.97
+  ok   a grounded transition is indexed by the clock the physics keeps  over its timer it asked for cells 0.00,1.00,2.50,4.00,4.90
+  ok   a spent clock hands the frame back to the pose cell
+  ok   and with no strip fired every state falls through to its pose
+  ok   every wired strip is reachable in the state that owns it
+  ok   no page errors
+
+OK — the verbs move, and the transition layer draws the cell its clock asks for
+   (frames: 13.5 s)
+
+── feel  — input latency, hit-stop and camera lead, as frames
+run latency 1f   jump latency 1f   hit-stop 3f   camera answers a reversal in 2f
+  ok   a run starts within 2 frames of the key  1 frames
+  ok   a jump leaves the ground within 2 frames of the key  1 frames
+  ok   a claw hit freezes the world for at least 3 frames  3 frames
+  ok   the camera answers a reversal within 9 frames (150 ms)  2 frames
+  swirl, frame by frame (H pass, f frozen, . running): .........Hffffffff.........H........H.........H
+  ok   the swirl lands its four passes through the real frame  4 passes
+  ok   ...its FIRST pass freezes the world (the weight lands)  8 frozen frames
+  ok   ...and the later passes do not stutter it  frozen frames after each pass: 8 0 0 0
+  ok   no page errors
+
+OK — the body answers the hand, and the world answers the body
+   (feel: 2.4 s)
+
+── speed2  — movement speed is identical from 12 to 144 fps
+{"fps":144,"seconds":0.5,"simulated":0.4999999999999937,"travel":169.9999999999984,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":120,"seconds":0.5,"simulated":0.4999999999999953,"travel":169.99999999999898,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":60,"seconds":0.5,"simulated":0.5000000000000018,"travel":170.00000000000045,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":30,"seconds":0.5,"simulated":0.499999999999999,"travel":169.99999999999972,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":20,"seconds":0.5,"simulated":0.49999999999999994,"travel":170,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":12,"seconds":0.5,"simulated":0.49999999999999956,"travel":169.99999999999955,"expected":170,"velocity":340,"state":"PLAY"}
+PASS actual mainLoop preserves travel speed at 12, 20, 30, 60, 120 and 144 fps
+   (speed2: 1.1 s)
+
+── gait  — she runs ON the ground: no bouncing, no falling plate mid-stride
+── gait — she runs on the ground, and the drawing agrees
+
+  ok   she does not skip: no one-frame departures from ground that is there  0 skip(s) of 1-2 frames; departures none over 48 floor frames (vx 340)
+  ok   the drawing never calls a stride a fall  0 airborne pose(s) mid-run: run_b run_a
+  ok   her feet follow the ground rather than bouncing on it  worst single-frame step 3.0 px
+  ok   she leaves the ground once and deliberately, not over and over  0 separate departure(s) from solid floor
+  ok   authored stride has genuine foot lift  filmed foot travel 8.65 world units
+  ok   run uses at least eight distinct recorded frames  distinct frames 16
+  ok   recorded gait is not given a second procedural bob  extra synthetic travel 0.00
+  ok   the stride length in the code is the stride length in the ART  plates say 29.5 world units per step (soles 109px apart in a 320px cell), HERO_STEP_WALK is 29.3
+  ok   walk_b is the passing pose, feet together  walk_b feet 0px apart, centre to centre, vs the contacts' soles 109
+  ok   the run turns its legs over like a runner (4-7.5 beats/s)  5.99 beats/sec at vx 340
+  ok   the walk turns its legs over like a walker (3-5.5 beats/s)  4.26 beats/sec at vx 185
+  ok   ...and the walk is slower-footed than the run  4.26 vs 5.99
+  ok   the foreground plate crosses in front of her, not under her feet  its top edge sits 25 px above her soles
+  ok   a light push on the phone stick is a walk, not a sprint  186 px/s at a light push vs 340 at full
+  ok   a thumb resting on the threshold does not chatter the input  0 on/off flips under a trembling thumb
+  ok   no page errors while running
+
+OK — she runs on the ground, and the drawing agrees
+   (gait: 27.4 s)
+
+── platform  — RULE ONE: web, phone, app and desktop shell are the same game
+── platform — one build, four platforms, no divergence
+  ok   index.html: the packaged page is the web page  
+  ok   index.html: and the app does not register a worker
+  ok   odyssey.html: the packaged page is the web page  
+  ok   odyssey.html: and the app does not register a worker
+  ok   every asset the manifest names is in the package (502)  
+  ok   ...and every one of them exists on disk at all  
+  ok   the generation archive stays out of the package  
+  ok   every pause row is reachable by touch  15 / 15
+  ok   every pad action is reachable (17 actions, 5 via the menu)  
+  ok   ...and an unbound action names its route rather than a missing button  
+
+OK — the web page, the phone, the app and the desktop shell are the same game
+   (platform: 0.9 s)
+
+all 16 harnesses ran
