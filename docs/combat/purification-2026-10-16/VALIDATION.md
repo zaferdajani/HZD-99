@@ -27,3 +27,9 @@ Screens capture prompt, gathering, slash, fallback, actual movie, restored stage
 ## Remaining
 Four guardian movies require Higgsfield credits. Their in-engine fallback is functional but is not a generated cinematic. Full fresh-run chapter certification and physical-device validation remain unverified.
 Publishing is reported only after remote refs and the actual live build/movie are checked; passing these local tests alone is not a deployment claim.
+
+## Live release verification and CI follow-up
+Commit 33bdb39221d5b533765072337abfdf783b152e8a was fast-forwarded to integration, main and odyssey. GitHub Pages served build f9863af94c78; the live index and lion movie matched local bytes exactly. Movie SHA-256: 8d8b5bb7a982ca3990ed837b64073ec7fccf216dd32feceb5e8ddf9e266ea646.
+The purification browser harness also passed against the public site, including 114 advancing movie samples and no page errors. This browser used the environment's network proxy; local proxy-certificate handling was confined to that disposable public-site test context.
+
+The hosted verification job failed its wake harness twice: first at the workshop's final transition, then still in the opening panels. Investigation found the harness's zero-duration Enter presses could occur wholly between frames. updatePanels samples HELD input and confirms on release, so it never saw those presses. The follow-up changes only tests/wake.cjs to a 60-ms Enter press, leaving the 90-second deadline and every assertion unchanged. This is the same real press/release behavior used by the successful campaign driver. Hosted rerun status must be checked separately; this note does not claim a future CI result.

@@ -39,8 +39,10 @@ const OUT = require('node:path').join(__dirname, 'out/');
       // a reader's pace: a press every 90 ms is a mash and turns no page (js/overlay.js DLG_GAP)
       if (s.state==='DIALOG') {await steer(null);await page.keyboard.press('KeyE');await page.waitForTimeout(300);continue;}
       // the manhwa at its story moment (js/panels.js): read like a player —
-      // one press completes the caption, the next turns the panel
-      if (s.state==='PANELS') {await steer(null);await page.keyboard.press('Enter');await page.waitForTimeout(350);continue;}
+      // one press completes the caption, the next turns the panel. Panels sample
+      // held input and confirm on release: a zero-ms synthetic press may occur
+      // entirely between frames. Keep a real short press, below the skip hold.
+      if (s.state==='PANELS') {await steer(null);await page.keyboard.press('Enter',{delay:60});await page.waitForTimeout(350);continue;}
       if (s.wake || s.cut || s.gate || s.state!=='PLAY') {await page.waitForTimeout(80);continue;}
       // the booth is the first thing past the gates; inside, the letter waits
       if (s.step==='note' && s.room==='A0B') {succeeded=true;break;}
