@@ -5454,7 +5454,8 @@ function startPurifyCut(kind) {
     snap.width = cv.width; snap.height = cv.height;
     snap.getContext('2d').drawImage(cv, 0, 0);
   } catch (e) { snap = null; }
-  G.cut = { kind, v, snap, t: 0, ph: 'in', hint: 0, failed: false, held: 0 };
+  G.cut = { kind, v, snap, t: 0, ph: 'in', hint: 0, failed: false, held: 0,
+    authoredOutro: PURIFY_VID[kind] === 'assets/video/purify_glitch_ritual.mp4' };
   try { v.currentTime = 0; } catch (e) {}
   G.state = 'CUT';
   filmSee(kind);
@@ -5697,7 +5698,10 @@ function updateCut(dt) {
     return;
   }
   // mid-reel there is no dip at all: the next shot dissolves in over this one
-  if (ct.t >= (ct.quick ? 0 : 0.65)) endPurifyCut();
+  // The lion asset now resolves picture AND soundtrack before EOF. Do not
+  // hold another full fade on its already-black tail. Skips/errors retain
+  // the normal fade; mid-reel dissolves are unchanged.
+  if (ct.t >= (ct.quick ? 0 : ct.authoredOutro && !ct.skipped && !ct.failed && ct.ran ? 0.15 : 0.65)) endPurifyCut();
 }
 function drawCut() {
   const ct = G.cut;

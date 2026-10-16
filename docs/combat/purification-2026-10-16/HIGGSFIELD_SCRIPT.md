@@ -29,3 +29,12 @@ Brood/eagle, Atlas/dragon, Zero/unicorn and Prism/panther still need their own f
 
 ## Review criteria
 Check the actual video, not just the prompt: one sword; clear boss-to-blade flow; neutralization; no injury; golden guardian; stable identity. A polished video is not proof of uninterrupted gameplay. Test touch/keyboard cancellation, reward idempotency, media failure, saved restoration and return framing separately.
+
+## Ending correction — 2026-10-16
+Owner observed an abrupt picture/music ending. Re-edited the existing master; no regeneration or new credits. Runtime now lasts 13.25 seconds: original peaceful golden-lion closing shot, picture fades 11.5–13.0 s, soundtrack fades 10.25–12.25 s, final frame extended through the fade with silence to EOF. H.264/AAC 1280×720, fast-start. The game avoids a redundant long black hold after this authored ending; ordinary skips/errors and opening-reel dissolves retain their prior timing. The game currently plays these video elements muted with its separate music system, so the baked audio correction also matters for standalone playback.
+
+Encode from the recorded master:
+```sh
+ffmpeg -i master.mp4 -vf 'scale=1280:-2,tpad=stop_mode=clone:stop_duration=1,fade=t=out:st=11.5:d=1.5' -af 'afade=t=out:st=10.25:d=2,apad=pad_dur=1' -t 13.25 -c:v libx264 -crf 24 -preset fast -c:a aac -b:a 96k -movflags +faststart assets/video/purify_glitch_ritual.mp4
+```
+Evidence: `ending/contact-sheet.jpg`, `ending/media-check.json` (decoded grayscale samples and PCM RMS; final sampled brightness <1.2%, final audio digital silence), and `ending/browser-tests.log`. These are focused/staged checks, not a new uninterrupted chapter playthrough.
