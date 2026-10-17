@@ -1,0 +1,17 @@
+
+── boot  — a cold open spends what it needs and buys the rest behind itself
+── boot — what a cold open spends, and on what
+  ok   a returning player does not buy the whole opening reel  0 intro clip(s): 0.00 MB
+  ok   the title screen prefetches art at all  63 sheets, 13.71 MB, still queued: 64
+  ok   ...and it never left the menu to do it  MENU
+  ok   ...and it starts with the room the SAVE is in, not the default start  saved in A4: its 10 sheets land at positions 4,5,6,7,8,9,10,11,12,13 — one unbroken run
+  ok   the empty override slots do not 404 in the first wave  0 total 404s (all expected: true)
+  ok   a first boot fetches ONE opening shot, not eight  video/intro1.mp4
+
+  a returning player's first 9 s: 125 asset requests, 17.29 MB
+  a first-time player's first 9 s: 126 asset requests, 18.86 MB
+
+OK — it starts on what it needs and buys the rest behind itself
+   (boot: 22.5 s)
+
+all 1 harnesses ran

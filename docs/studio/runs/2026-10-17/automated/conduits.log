@@ -1,0 +1,41 @@
+
+── conduits  — kingdom B's three moves fire, stay optional, and warn first
+── conduits — kingdom B's three moves fire, stay optional, and warn first
+
+  — what the kingdom can afford —
+  ok   a fresh save meets the courier and nothing else  lv 2: flier ["packet"], surge []
+  ok   a run behind her buys the repeater and the train  lv 4
+  ok   all three are on the conduits' own machines  packet, relay, train
+  ok   ...and not one of them reaches another kingdom  checked every kind in all six zones
+  — the repeater —
+  ok   the breaker's wave leaves the drum at all  93.1px over 21 frames, wall 4 tiles off
+  ok   the breaker's tell is TELL_SWIPE, with the move and without it  relay 0.5s vs plain 0.5s
+  ok   the wave latches at the wall for its full hold  0.317s of 0.3s
+  ok   ...standing still for all of it
+  ok   ...and harmless for all of it
+  ok   then it comes back down the rail
+  ok   ...live, and it bites where it latched
+  ok   a breaker without the move never sends one back
+  — the courier —
+  ok   the delivery holds TELL_SWIPE of station before it lets go  0.5s
+  ok   and a packet is delivered
+  ok   it falls to the floor the lane pointed at  floor y 480
+  ok   what it spills is live for its second, then gone  1s of 1s
+  ok   ...and standing in it costs a core
+  ok   a flier without the move never delivers one
+  ok   ...and still dives exactly as it always did
+  — the metered train —
+  ok   the conduit gun's lock is LONGER than the plain gun's  0.8s vs 0.55s
+  ok   it sends the count it declared, near and far alike  near 3, far 3, wanted 3
+  ok   a gun without the move is the single shot it always was  1 shot(s) close up
+  — and every warning is actually drawn —
+  ok   the repeater wears its second ring through the charge  683px vs 0
+  ok   ...and flares where it latched  363px vs 0
+  ok   the courier draws its lane before it drops  379px vs 0
+  ok   the train shows the count it is about to spend  102px vs 0
+  ok   no page errors
+
+all good
+   (conduits: 7.6 s)
+
+all 1 harnesses ran

@@ -1,0 +1,16 @@
+
+── foescale  — every machine reads in the hero's weight class
+FAILED: ── foescale — every machine reads in the hero's weight class
+
+  ok   the hero measures at all, from her real art  71px via hzdIdle:0
+  FAIL no machine reads as scenery beside her (>= 0.5 of her height)  flier 0.34x
+  ok   ...and none of them reads as big as her — the SCALE LAW holds  max 0.9x
+  ok   no page errors
+
+  hero 71px  ·  flier 0.34  bat 0.61  surge 0.7  kiln 0.72  rime 0.75  snare 0.75  guard 0.77  blob 0.85  turret 0.87  sage 0.87  crawler 0.9  hopper 0.9
+
+FAILED: no machine reads as scenery beside her (>= 0.5 of her height) — flier 0.34x
+Command failed: node /workspace/scratch/ca5f63b4744e/HZD-99-fixes/tests/foescale.cjs
+   (foescale: 12.8 s)
+
+1 harness(es) failed

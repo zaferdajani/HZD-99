@@ -1,0 +1,17 @@
+
+── campaign-ch1  — chapter one played end to end with keyboard input only, from a cleared browser to the chapter-two teaser (long, real time)
+FAILED: [00:00] FATAL browserContext.newPage: Executable doesn't exist at /root/.cache/ms-playwright/ffmpeg-1011/ffmpeg-linux
+╔═════════════════════════════════════════════════════════════════╗
+║ Video rendering requires ffmpeg binary.                         ║
+║ Downloading it will not affect any of the system-wide settings. ║
+║ Please run the following command:                               ║
+║                                                                 ║
+║     npx playwright install ffmpeg                               ║
+║                                                                 ║
+║ <3 Playwright Team                                              ║
+╚═════════════════════════════════════════════════════════════════╝
+    at /workspace/scratch/ca5f63b4744e/HZD-99/tests/campaign-ch1.cjs:1317:20
+Command failed: node /workspace/scratch/ca5f63b4744e/HZD-99/tests/campaign-ch1.cjs
+   (campaign-ch1: 1.6 s)
+
+1 harness(es) failed

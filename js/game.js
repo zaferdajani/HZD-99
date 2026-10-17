@@ -288,6 +288,7 @@ const G = {
     if (kind === 'alpha' && this.save.flags.alpha) return;
     const cap = kind.charAt(0).toUpperCase() + kind.slice(1);
     this.save.flags['boss' + cap] = 1;
+    if (typeof purificationCommitChoice === 'function') purificationCommitChoice(kind);
     if (typeof checkEvo === 'function') checkEvo();   // the card the victory frame held back
     // THE RULE: every guardian resolved — felled or tamed — REVEALS A CAVE.
     // The lair grows a depth door (GATE_ROOM `need` flags), the map grows the

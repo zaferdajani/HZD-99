@@ -1,0 +1,6 @@
+{
+  "certified": false,
+  "result": "interrupted-diagnostic",
+  "reason": "Off-target airborne breakFloor driver suppressed route navigation; retained logs and frames. Driver order corrected, fresh run started. No completion claim.",
+  "scope": "Ordinary keyboard input from clean save; stopped at A2 quarry approach; no video recording."
+}

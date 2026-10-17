@@ -1,0 +1,132 @@
+
+── purification-save  — interrupted guardian film preserves atomic choice and completion; legacy retry does not duplicate
+{
+  "fallback": {
+    "before": {
+      "forks": 0,
+      "flag": false,
+      "phase": "film"
+    },
+    "after": {
+      "forks": 1,
+      "flag": true,
+      "pending": false
+    }
+  },
+  "completed": {
+    "led": "L",
+    "forks": 1,
+    "boss": true,
+    "oath": true,
+    "afterRepeat": 1
+  },
+  "legacyDone": {
+    "forks": 1,
+    "boss": true
+  },
+  "scope": "STAGED regression; initial save and room injected; subsequent save is actual persisted disk save, not an uninterrupted campaign.",
+  "identity": {
+    "build": "fbfa046c42b4",
+    "url": "http://127.0.0.1:8220/index.html"
+  },
+  "before": {
+    "led": "",
+    "forks": 0,
+    "boss": false
+  },
+  "first": {
+    "state": "CUT",
+    "cutKind": "glitch",
+    "led": "",
+    "forks": 0,
+    "nodes": [],
+    "boss": false,
+    "runtimeBoss": false
+  },
+  "reloaded": {
+    "led": "",
+    "forks": 0,
+    "boss": false,
+    "spawned": true,
+    "dead": false
+  },
+  "second": {
+    "state": "CUT",
+    "cutKind": "glitch",
+    "led": "",
+    "forks": 0,
+    "nodes": [],
+    "boss": false,
+    "runtimeBoss": false
+  },
+  "errors": [],
+  "verdict": "PASS: interrupted/retried film records no early choice; completed rescue commits once; legacy guardian choice is preserved without duplication."
+}
+   (purification-save: 3.7 s)
+
+── purification-controls  — mobile hold/cancel, focus-loss safety and restored save
+PASS mobile touch hold/cancel, focus loss, accessible target size, saved restored guardian
+   (purification-controls: 2.5 s)
+
+── purification  — deliberate guardian rescue hold, cancellation, choreography and protected rewards
+{
+  state: 'DIALOG',
+  pure: true,
+  dead: true,
+  paid: true,
+  ledger: {
+    led: 'L',
+    trail: '',
+    tally: { L: 1, R: 0, X: 0 },
+    nodes: [ [Object] ],
+    seen: { 'U-CSDDQY': 1 },
+    kills: 0,
+    forks: 1
+  },
+  hidden: true,
+  ritual: false
+}
+PASS deliberate hold, cancellation, all guardian gates, staged choreography, single reward and restored actor
+   (purification: 64.6 s)
+
+── infection-eyes  — red eyes for the rank and file, purple for guardians; incense smoke born at the eye, in the world, and ending
+── infection-eyes — red for the rank and file, purple for guardians, smoke that leaves the eye and ends
+  ok   a trotting wolf smokes, and only red  {"live":56,"red":56,"purple":0}
+  ok   ...its eye is found in the art, off the body centre  eye 455,373 centre 494,406 (51 px)
+  ok   ...and the eye is at the front of the head, not the hips  facing left: eye must be left of and above the centre
+  ok   the youngest smoke is born AT the eye  0.0, 3.1, 4.5, 6.1 px
+  ok   ...and older smoke has risen from where it was born  age 0.63s: born y 370, now 361
+  ok   a camera pan makes no smoke and moves none  {"nBefore":59,"nAfter":59,"moved":false}
+  ok   standing still, the plume dissipates and the glow stays  {"live":0,"glow":true}
+  ok   paused, nothing advances  30 particles held
+  ok   purified: not one new wisp from the moment it is cured  0 born after the cure
+  ok   ...the wisps already out fade rather than vanish  58 → 58
+  ok   ...and are gone within their lifetime  0 left
+  ok   ...and a cured machine shows no infected glow
+  ok   a teleport clears the trail  {"preTp":33,"after":0}
+  ok   removal clears the trail  {"preRm":38,"after":0}
+  ok   a room change clears everything  {"preRoom":34,"after":0}
+  ok   the Alpha burns purple  {"red":0,"purple":63,"eye":1}
+  ok   NULLFANG burns purple  {"red":0,"purple":51,"eye":1}
+  ok   ...and once freed, the lion smokes no more  0 left
+  ok   on a phone the smoke is bounded  {"live":90,"red":90,"purple":0,"cap":90,"owners":25,"frame":809}
+  ok   MOTHER-V reports her eight lenses, purple, and her smoke stays inside the phone budget  {"eyes":8,"max":8,"purple":90,"red":0,"most":90,"cap":90,"bodyMax":8}
+  ok   no page errors  
+  ok   reduced motion: the eye still glows, no smoke is drawn  {"live":0,"glow":true}
+
+OK — the eyes burn the right colour, the smoke leaves the eye, lives in the world and ends
+   (infection-eyes: 124.6 s)
+
+── campaign-contract  — chapter-one campaign certification fails closed for missing, late, partial and error-bearing evidence
+ok   clean complete route certifies  {"result":"complete","certified":true,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   missing required passage fails  {"result":"complete-without-required-panels","certified":false,"missing":["passage"],"missed":[],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   a timed-out story beat fails  {"result":"complete-with-missed-panels","certified":false,"missing":[],"missed":["cave"],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   a page error fails  {"result":"complete-with-page-errors","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":1,"full":true}
+  ok   a late cave introduction fails chronology  {"result":"complete-with-panel-order-errors","certified":false,"missing":[],"missed":[],"orderErrors":["marble","forge"],"pageErrors":0,"full":true}
+  ok   restored segment is diagnostic, never a full certificate  {"result":"partial-diagnostic","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":false}
+  ok   developer stop is diagnostic, never a full certificate  {"result":"partial-diagnostic","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":false}
+
+all campaign certificate checks passed
+   (campaign-contract: 0.5 s)
+
+all 5 harnesses ran

@@ -1,0 +1,97 @@
+{
+  "scope": "Staged saved guardian, then real keyboard and elapsed-time frames; not a full campaign or all-direction gait certification.",
+  "samples": [
+    {
+      "x": 500,
+      "y": 424,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.006162121212121395,
+      "purified": true,
+      "eyeClass": null,
+      "state": "DIALOG",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 500,
+      "y": 424,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.006162121212121395,
+      "purified": true,
+      "eyeClass": null,
+      "state": "DIALOG",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 500,
+      "y": 424,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.006162121212121395,
+      "purified": true,
+      "eyeClass": null,
+      "state": "DIALOG",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 500,
+      "y": 424,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.006162121212121395,
+      "purified": true,
+      "eyeClass": null,
+      "state": "DIALOG",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 500,
+      "y": 424,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.006162121212121395,
+      "purified": true,
+      "eyeClass": null,
+      "state": "DIALOG",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 500,
+      "y": 424,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.006162121212121395,
+      "purified": true,
+      "eyeClass": null,
+      "state": "DIALOG",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 500,
+      "y": 424,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.006162121212121395,
+      "purified": true,
+      "eyeClass": null,
+      "state": "DIALOG",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 500,
+      "y": 424,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.006162121212121395,
+      "purified": true,
+      "eyeClass": null,
+      "state": "DIALOG",
+      "build": "64bc72365fdf"
+    }
+  ],
+  "cells": [
+    0
+  ],
+  "errors": []
+}

@@ -227,7 +227,7 @@ function brHas(a) { return universe().anom.indexOf(a) >= 0; }
 // ---------------------------------------------------------------------------
 // RECORDING A CHOICE. One character on the ledger. Everything else follows.
 // ---------------------------------------------------------------------------
-function brRecord(pick, kind, room) {
+function brRecord(pick, kind, room, deferPersist = false) {
   const b = braid(); if (!b) return;
   const before = universe();
   b.led += pick;
@@ -238,7 +238,7 @@ function brRecord(pick, kind, room) {
   brCache.key = null;                       // the world has changed underneath us
   const after = universe();
   b.seen[after.id] = 1;
-  if (typeof persist === 'function') persist();
+  if (!deferPersist && typeof persist === 'function') persist();
 
   // PROVE IT, EVERY TIME. A game can claim that choices matter, or it can show
   // the reader the diff. This is the diff: what that single press actually did
@@ -437,7 +437,11 @@ function updateSpoilQ(dt) {
 function brAnswer(pick) {
   const o = G.offer; if (!o || o.done) return;
   o.done = true;
-  const u = brRecord(pick, o.kind, G.roomId);
+  // Principal-guardian rescue is committed with its completion flag, after
+  // the film. Reloading mid-film must not save a choice or a random spoil.
+  const ritual = pick === 'L' && G.forkBoss && G.forkBoss.purificationDone;
+  if (ritual) G.forkBoss.purificationChoice = { kind:o.kind, room:G.roomId, first:o.kind === 'firstboss' };
+  const u = ritual ? universe() : brRecord(pick, o.kind, G.roomId);
   if (typeof sfx === 'function') sfx(pick === 'L' ? 'powerUp' : 'ui');
   // THE GUARDIAN'S FORK. The first one hands over authored gifts, because it is
   // the moment the game teaches the rule; every one after it pays out of the
@@ -453,7 +457,8 @@ function brAnswer(pick) {
       // guardian's spoil for it on top would be paying twice for one fight, and
       // the spoil table's whole premise — that this creature had a life before
       // the Song — is not true of something that was simply the biggest wolf.
-      if (b2.kind === 'alpha') { /* handled by G.onBossDead */ }
+      if (ritual) { /* committed with G.onBossDead after the film */ }
+      else if (b2.kind === 'alpha') { /* handled by G.onBossDead */ }
       else if (first) { G.save.flags.oath = 1; spoilLater({ name: t('oath_name'), desc: t('oath_desc') }); }
       else spoilLater(bossSpoil(b2.kind, 'L'));
     } else {

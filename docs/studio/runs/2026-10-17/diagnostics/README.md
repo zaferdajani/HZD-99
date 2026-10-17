@@ -1,0 +1,3 @@
+# Excluded diagnostics
+
+These are not campaign certificates. `campaign-attempt1` used the old hatch driver and was interrupted after repeated off-target down-strikes. Its partial log is retained to explain the driver correction. `campaign-interrupted-mixed` is contaminated: the first process survived SIGINT and wrote into a reused output path alongside a restarted process. Both exact owned process trees were terminated, and the accepted run started later in the unique `campaign-clean` directory. Do not combine these logs into an uninterrupted route, infer deaths from them, or use them as completed-scope evidence. Diagnostic screenshots are not included; logs and results are retained.

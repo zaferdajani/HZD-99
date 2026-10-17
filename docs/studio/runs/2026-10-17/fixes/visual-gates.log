@@ -1,0 +1,382 @@
+
+── artbible  — ART_BIBLE.md, measured: silhouettes differ, tells wear the amber, feet on the floor
+── artbible — the rules in ART_BIBLE.md, measured rather than asserted
+  ok   no atlas subject is declared and never drawn  known: 
+  ── NULLFANG
+  ok   NULLFANG: stalk vs crouch is a different SHAPE (IoU <= 0.86)  IoU 0.424
+  ok   NULLFANG: stalk vs pounce is a different SHAPE (IoU <= 0.8)  IoU 0.403
+  ok   NULLFANG: crouch vs pounce is a different SHAPE (IoU <= 0.8)  IoU 0.411
+  ok   NULLFANG: stalk vs swipe is a different SHAPE (IoU <= 0.9)  IoU 0.637
+  ok   NULLFANG: stalk vs daze is a different SHAPE (IoU <= 0.88)  IoU 0.653
+  ok   NULLFANG: crouch raises the amber above its own rest  61.0% vs rest 0.0%
+  ok   NULLFANG: stalk does not pass for a wind-up  0.0% of lit pixels
+  ok   NULLFANG: pounce does not pass for a wind-up  0.0% of lit pixels
+  ok   NULLFANG: stalk still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+  ok   NULLFANG: stalk has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: crouch has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: swipe has its feet on the floor (±10 px)  -1 px
+  ok   NULLFANG: daze has its feet on the floor (±10 px)  -4 px
+  ── THE ALPHA
+  ok   THE ALPHA: rest vs coil is a different SHAPE (IoU <= 0.88)  IoU 0.308
+  ok   THE ALPHA: coil vs roarwarn is a different SHAPE (IoU <= 0.88)  IoU 0.841
+  ok   THE ALPHA: rest vs leap is a different SHAPE (IoU <= 0.85)  IoU 0.364
+  ok   THE ALPHA: coil raises the amber above its own rest  76.3% vs rest 0.7%
+  ok   THE ALPHA: clawwarn raises the amber above its own rest  78.7% vs rest 0.7%
+  ok   THE ALPHA: roarwarn raises the amber above its own rest  76.4% vs rest 0.7%
+  ok   THE ALPHA: rest does not pass for a wind-up  0.7% of lit pixels
+  ok   THE ALPHA: leap does not pass for a wind-up  0.5% of lit pixels
+  ok   THE ALPHA: rest still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+  ok   THE ALPHA: rest has its feet on the floor (±10 px)  -1 px
+  ok   THE ALPHA: coil has its feet on the floor (±10 px)  -1 px
+  ── TALONHOST
+  ok   TALONHOST: idle vs dive is a different SHAPE (IoU <= 0.9)  IoU 0.254
+  ok   TALONHOST: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   TALONHOST: idle still reads as PARTS, not one flat tone (>= 3 value bands)  8 of 8 bands carry area
+  ── FURNACE CHOIR
+  ok   FURNACE CHOIR: idle vs lobwarn is a different SHAPE (IoU <= 0.94)  IoU 0.582
+  ok   FURNACE CHOIR: idle vs slamwarn is a different SHAPE (IoU <= 0.9)  IoU 0.546
+  ok   FURNACE CHOIR: idle vs ventwarn is a different SHAPE (IoU <= 0.9)  IoU 0.564
+  ok   FURNACE CHOIR: ventwarn vs vent is a different SHAPE (IoU <= 0.9)  IoU 0.408
+  ok   FURNACE CHOIR: idle vs dropcrouch is a different SHAPE (IoU <= 0.9)  IoU 0.498
+  ok   FURNACE CHOIR: ventwarn vs dropcrouch is a different SHAPE (IoU <= 0.9)  IoU 0.601
+  ok   FURNACE CHOIR: ventwarn vs recover is a different SHAPE (IoU <= 0.9)  IoU 0.587
+  ok   FURNACE CHOIR: dropcrouch vs hymn is a different SHAPE (IoU <= 0.9)  IoU 0.424
+  ok   FURNACE CHOIR: idle vs recover is a different SHAPE (IoU <= 0.9)  IoU 0.626
+  ok   FURNACE CHOIR: lobwarn raises the amber above its own rest  24.4% vs rest 10.6%
+  ok   FURNACE CHOIR: slamwarn raises the amber above its own rest  25.7% vs rest 10.6%
+  ok   FURNACE CHOIR: ventwarn raises the amber above its own rest  47.5% vs rest 10.6%
+  ok   FURNACE CHOIR: dropcrouch raises the amber above its own rest  38.5% vs rest 10.6%
+  ok   FURNACE CHOIR: hymn raises the amber above its own rest  46.2% vs rest 10.6%
+  ok   FURNACE CHOIR: idle does not pass for a wind-up  10.6% of lit pixels
+  ok   FURNACE CHOIR: recover does not pass for a wind-up  4.8% of lit pixels
+  ok   FURNACE CHOIR: idle still reads as PARTS, not one flat tone (>= 3 value bands)  7 of 8 bands carry area
+  ok   FURNACE CHOIR: idle has its feet on the floor (±10 px)  -5 px
+  ok   FURNACE CHOIR: lobwarn has its feet on the floor (±10 px)  -1 px
+  ok   FURNACE CHOIR: slamwarn has its feet on the floor (±10 px)  +4 px
+  ok   FURNACE CHOIR: ventwarn has its feet on the floor (±10 px)  +2 px
+  ok   FURNACE CHOIR: vent has its feet on the floor (±10 px)  +2 px
+  ok   FURNACE CHOIR: dropcrouch has its feet on the floor (±10 px)  -4 px
+  ok   FURNACE CHOIR: recover has its feet on the floor (±10 px)  +2 px
+  ── GLACIERE
+  ok   GLACIERE: idle vs lancewarn is a different SHAPE (IoU <= 0.94)  IoU 0.704
+  ok   GLACIERE: idle vs dashwarn is a different SHAPE (IoU <= 0.94)  IoU 0.804
+  ok   GLACIERE: idle vs daze is a different SHAPE (IoU <= 0.9)  IoU 0.264
+  ok   GLACIERE: lancewarn raises the amber above its own rest  13.3% vs rest 0.0%
+  ok   GLACIERE: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   GLACIERE: recover does not pass for a wind-up  0.0% of lit pixels
+  ok   GLACIERE: daze does not pass for a wind-up  0.0% of lit pixels
+  ok   GLACIERE: idle still reads as PARTS, not one flat tone (>= 3 value bands)  8 of 8 bands carry area
+  ok   GLACIERE: daze has its feet on the floor (±10 px)  -3 px
+  ── GRAVEHORN
+  ok   GRAVEHORN: idle vs tossprep is a different SHAPE (IoU <= 0.86)  IoU 0.454
+  ok   GRAVEHORN: idle vs chargewarn is a different SHAPE (IoU <= 0.86)  IoU 0.521
+  ok   GRAVEHORN: idle vs hornprep is a different SHAPE (IoU <= 0.86)  IoU 0.523
+  ok   GRAVEHORN: tossprep vs toss is a different SHAPE (IoU <= 0.8)  IoU 0.433
+  ok   GRAVEHORN: idle vs toss is a different SHAPE (IoU <= 0.8)  IoU 0.672
+  ok   GRAVEHORN: idle vs kick is a different SHAPE (IoU <= 0.86)  IoU 0.818
+  ok   GRAVEHORN: chargewarn vs rush is a different SHAPE (IoU <= 0.9)  IoU 0.520
+  ok   GRAVEHORN: hornprep raises the amber above its own rest  44.9% vs rest 0.0%
+  ok   GRAVEHORN: chargewarn raises the amber above its own rest  45.0% vs rest 0.0%
+  ok   GRAVEHORN: tossprep raises the amber above its own rest  56.0% vs rest 0.0%
+  ok   GRAVEHORN: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   GRAVEHORN: rush does not pass for a wind-up  0.0% of lit pixels
+  ok   GRAVEHORN: stunned does not pass for a wind-up  0.0% of lit pixels
+  ok   GRAVEHORN: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ok   GRAVEHORN: idle has its feet on the floor (±10 px)  +2 px
+  ok   GRAVEHORN: hornprep has its feet on the floor (±10 px)  +2 px
+  ok   GRAVEHORN: chargewarn has its feet on the floor (±10 px)  +2 px
+  ok   GRAVEHORN: tossprep has its feet on the floor (±10 px)  +3 px
+  ok   GRAVEHORN: stunned has its feet on the floor (±10 px)  +2 px
+  ── CHIME
+  ok   CHIME: ringwarn raises the amber above its own rest  65.5% vs rest 0.0%
+  ok   CHIME: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   CHIME: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── CARRIER
+  ok   CARRIER: tosswarn raises the amber above its own rest  69.6% vs rest 0.0%
+  ok   CARRIER: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   CARRIER: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── KILN-MOTH
+  ok   KILN-MOTH: cinderwarn raises the amber above its own rest  81.2% vs rest 21.6%
+  ok   KILN-MOTH: idle does not pass for a wind-up  21.6% of lit pixels
+  ok   KILN-MOTH: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ── LATTICE
+  ok   LATTICE: growwarn raises the amber above its own rest  62.1% vs rest 0.0%
+  ok   LATTICE: idle does not pass for a wind-up  0.0% of lit pixels
+  ok   LATTICE: idle still reads as PARTS, not one flat tone (>= 3 value bands)  5 of 8 bands carry area
+  ok   LATTICE: idle has its feet on the floor (±10 px)  -3 px
+  ok   LATTICE: growwarn has its feet on the floor (±10 px)  -4 px
+  ── THE LENS
+  ok   THE LENS: beamwarn raises the amber above its own rest  67.1% vs rest 2.5%
+  ok   THE LENS: idle does not pass for a wind-up  2.5% of lit pixels
+  ok   THE LENS: idle still reads as PARTS, not one flat tone (>= 3 value bands)  6 of 8 bands carry area
+  ── WOLF (crawler@A1)
+  ok   WOLF: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.621
+  ok   WOLF: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.533
+  ok   WOLF: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.578
+  ok   WOLF: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.413
+  ok   WOLF: active vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.490
+  ok   WOLF: windup raises the amber above its own rest  80.6% vs rest 0.1%
+  ok   WOLF: rest does not pass for a wind-up  0.1% of lit pixels
+  ok   WOLF: recovery does not pass for a wind-up  0.1% of lit pixels
+  ok   WOLF: rest has its feet on the floor (±10 px)  -1 px
+  ok   WOLF: windup has its feet on the floor (±10 px)  -1 px
+  ok   WOLF: recovery has its feet on the floor (±10 px)  +0 px
+  ── CHEETAH (crawler@C2)
+  ok   CHEETAH: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.484
+  ok   CHEETAH: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.785
+  ok   CHEETAH: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.484
+  ok   CHEETAH: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.511
+  ok   CHEETAH: active vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.552
+  ok   CHEETAH: windup raises the amber above its own rest  90.3% vs rest 47.1%
+  ok   CHEETAH: rest does not pass for a wind-up  47.1% of lit pixels
+  ok   CHEETAH: recovery does not pass for a wind-up  50.7% of lit pixels
+  ok   CHEETAH: rest has its feet on the floor (±10 px)  -1 px
+  ok   CHEETAH: windup has its feet on the floor (±10 px)  -1 px
+  ok   CHEETAH: recovery has its feet on the floor (±10 px)  -1 px
+  ── HOPPER-WOLF (hopper@A2)
+  ok   HOPPER-WOLF: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.385
+  ok   HOPPER-WOLF: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.428
+  ok   HOPPER-WOLF: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.640
+  ok   HOPPER-WOLF: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.154
+  ok   HOPPER-WOLF: windup raises the amber above its own rest  74.5% vs rest 0.2%
+  ok   HOPPER-WOLF: rest does not pass for a wind-up  0.2% of lit pixels
+  ok   HOPPER-WOLF: recovery does not pass for a wind-up  0.1% of lit pixels
+  ok   HOPPER-WOLF: rest has its feet on the floor (±10 px)  -1 px
+  ok   HOPPER-WOLF: windup has its feet on the floor (±10 px)  -1 px
+  ok   HOPPER-WOLF: recovery has its feet on the floor (±10 px)  +0 px
+  ── HOPPER-CHEETAH (hopper@C2)
+  ok   HOPPER-CHEETAH: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.460
+  ok   HOPPER-CHEETAH: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.280
+  ok   HOPPER-CHEETAH: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.252
+  ok   HOPPER-CHEETAH: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.491
+  ok   HOPPER-CHEETAH: windup raises the amber above its own rest  87.4% vs rest 46.1%
+  ok   HOPPER-CHEETAH: rest does not pass for a wind-up  46.1% of lit pixels
+  ok   HOPPER-CHEETAH: recovery does not pass for a wind-up  53.7% of lit pixels
+  ok   HOPPER-CHEETAH: rest has its feet on the floor (±10 px)  -1 px
+  ok   HOPPER-CHEETAH: windup has its feet on the floor (±10 px)  -2 px
+  ok   HOPPER-CHEETAH: recovery has its feet on the floor (±10 px)  -1 px
+  ── GUARD (guard@A1)
+  ok   GUARD: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.695
+  ok   GUARD: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.687
+  ok   GUARD: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.713
+  ok   GUARD: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.719
+  ok   GUARD: windup raises the amber above its own rest  31.6% vs rest 7.6%
+  ok   GUARD: rest does not pass for a wind-up  7.6% of lit pixels
+  ok   GUARD: recovery does not pass for a wind-up  5.4% of lit pixels
+  ok   GUARD: rest has its feet on the floor (±10 px)  +0 px
+  ok   GUARD: windup has its feet on the floor (±10 px)  +0 px
+  ok   GUARD: recovery has its feet on the floor (±10 px)  +0 px
+  ── FLIER (flier@A2)
+  ok   FLIER: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.221
+  ok   FLIER: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.162
+  ok   FLIER: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.637
+  ok   FLIER: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.304
+  ok   FLIER: windup raises the amber above its own rest  19.0% vs rest 0.2%
+  ok   FLIER: rest does not pass for a wind-up  0.2% of lit pixels
+  ok   FLIER: recovery does not pass for a wind-up  2.4% of lit pixels
+  ── BLOB (blob@C2)
+  ok   BLOB: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.636
+  ok   BLOB: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.537
+  ok   BLOB: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.439
+  ok   BLOB: rest has its feet on the floor (±10 px)  -1 px
+  ok   BLOB: windup has its feet on the floor (±10 px)  +0 px
+  ok   BLOB: recovery has its feet on the floor (±10 px)  -1 px
+  ── TURRET (turret@B1)
+  ok   TURRET: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.530
+  ok   TURRET: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.671
+  ok   TURRET: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.625
+  ok   TURRET: windup raises the amber above its own rest  28.1% vs rest 18.6%
+  ok   TURRET: rest does not pass for a wind-up  18.6% of lit pixels
+  ok   TURRET: recovery does not pass for a wind-up  21.9% of lit pixels
+  ok   TURRET: rest has its feet on the floor (±10 px)  +0 px
+  ok   TURRET: windup has its feet on the floor (±10 px)  +5 px
+  ok   TURRET: recovery has its feet on the floor (±10 px)  +5 px
+  ── BAT (bat@A1)
+  ok   BAT: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.620
+  ok   BAT: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.375
+  ok   BAT: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.314
+  ok   BAT: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.339
+  ok   BAT: windup raises the amber above its own rest  76.7% vs rest 0.0%
+  ok   BAT: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   BAT: recovery does not pass for a wind-up  0.3% of lit pixels
+  ── BREAKER (surge@B2)
+  ok   BREAKER: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.772
+  ok   BREAKER: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.605
+  ok   BREAKER: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.579
+  ok   BREAKER: windup raises the amber above its own rest  44.4% vs rest 1.8%
+  ok   BREAKER: rest does not pass for a wind-up  1.8% of lit pixels
+  ok   BREAKER: recovery does not pass for a wind-up  8.4% of lit pixels
+  ── KILN VENT (kiln@C2)
+  ok   KILN VENT: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.692
+  ok   KILN VENT: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.859
+  ok   KILN VENT: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.647
+  ok   KILN VENT: windup raises the amber above its own rest  54.0% vs rest 1.6%
+  ok   KILN VENT: rest does not pass for a wind-up  1.6% of lit pixels
+  ok   KILN VENT: recovery does not pass for a wind-up  5.3% of lit pixels
+  ── RIME COIL (rime@D1)
+  ok   RIME COIL: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.626
+  ok   RIME COIL: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.688
+  ok   RIME COIL: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.565
+  ok   RIME COIL: windup raises the amber above its own rest  29.9% vs rest 0.0%
+  ok   RIME COIL: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   RIME COIL: recovery does not pass for a wind-up  0.0% of lit pixels
+  ── NEST SNARE (snare@E1)
+  ok   NEST SNARE: rest vs windup is a different SHAPE (IoU <= 0.86)  IoU 0.342
+  ok   NEST SNARE: rest vs recovery is a different SHAPE (IoU <= 0.95)  IoU 0.696
+  ok   NEST SNARE: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.333
+  ok   NEST SNARE: windup raises the amber above its own rest  71.0% vs rest 0.0%
+  ok   NEST SNARE: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   NEST SNARE: recovery does not pass for a wind-up  0.0% of lit pixels
+  ── SAGE (sage@A1)
+  ok   SAGE: rest vs windup is a different SHAPE (IoU <= 0.9)  IoU 0.603
+  ok   SAGE: rest vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.778
+  ok   SAGE: windup vs recovery is a different SHAPE (IoU <= 0.86)  IoU 0.537
+  ok   SAGE: rest vs active is a different SHAPE (IoU <= 0.86)  IoU 0.449
+  ok   SAGE: windup raises the amber above its own rest  10.5% vs rest 0.0%
+  ok   SAGE: rest does not pass for a wind-up  0.0% of lit pixels
+  ok   SAGE: recovery does not pass for a wind-up  0.0% of lit pixels
+  ok   SAGE: rest has its feet on the floor (±10 px)  -3 px
+  ok   SAGE: recovery has its feet on the floor (±10 px)  -2 px
+
+OK — the bible was followed, and this is how you know without looking
+   (artbible: 162.9 s)
+
+── contrast  — every hostile body and every guardian stands off the room it is placed in: silhouette edge contrast, room by room
+── contrast — every hostile body and every guardian reads off the room it stands in
+
+  ok   every kingdom has a rim tint (ABCDEX)
+  ok   rim A #ffe6d6 is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Repair green ΔE 35, own glow/edge ΔE 59
+  ok   rim B #fff0dc is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Repair green ΔE 31, own glow/edge ΔE 61
+  ok   rim C #fff0f0 is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Frost blue ΔE 31, own glow/edge ΔE 64
+  ok   rim D #ffd9c4 is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Repair green ΔE 40, own glow/edge ΔE 36
+  ok   rim E #fff0dc is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Repair green ΔE 31, own glow/edge ΔE 106
+  ok   rim X #fff0dc is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Repair green ΔE 31, own glow/edge ΔE 72
+    room   zone  creature              share   CR(med)  ΔE(med)   ring CR  ring ΔE   body L / ring L
+    A0     A     turret                  83%     2.18     24.3      1.99     21.8     65 / 44  
+    A1     A     crawler:wolf            84%     2.32     27.5      1.98     22.5     64 / 43  
+    A1     A     guard                   82%     2.42     29.0      2.31     24.5     61 / 38  
+    A6     A     flier                   67%     1.89     18.9      1.85     18.2     60 / 42  
+    A6     A     crawler:wolf            88%     2.40     26.4      2.25     25.1     65 / 41  
+    A6     A     turret                  85%     2.41     26.5      2.25     24.2     63 / 39  
+    A7     A     blob                    80%     2.24     25.7      1.99     19.8     60 / 41  
+    A7     A     turret                  76%     2.31     26.3      1.91     21.0     64 / 44  
+    A2     A     crawler:wolf            75%     2.03     24.1      1.79     18.1     61 / 44  
+    A2     A     flier                   69%     2.00     21.1      1.91     19.3     60 / 41  
+    A2     A     guard                   90%     3.14     33.9      2.63     29.5     66 / 36  
+    A2     A     hopper:wolf             86%     2.21     27.4      1.88     21.2     65 / 44  
+    A10    A     BOSS:alpha              84%     2.29     26.6      2.01     22.5     70 / 48  
+    A4     A     BOSS:glitch             67%     1.93     20.7      1.84     17.8     62 / 44  
+    B1     B     flier                   79%     1.99     21.5      1.95     20.7     63 / 44  
+    B1     B     surge                   71%     2.25     23.9      2.30     21.8     53 / 33  
+    B6     B     turret                  84%     2.59     28.2      2.38     25.5     63 / 39  
+    B6     B     hopper:wolf             87%     2.43     26.8      2.24     25.2     67 / 43  
+    B6     B     flier                   72%     2.11     22.4      1.99     20.7     62 / 42  
+    B2     B     turret                  77%     2.18     24.3      2.06     21.9     63 / 43  
+    B2     B     hopper:wolf             77%     2.25     24.8      2.07     22.0     63 / 43  
+    B2     B     surge                   68%     2.09     22.7      1.87     17.7     57 / 41  
+    B2     B     guard                   80%     2.50     26.7      2.28     24.6     64 / 41  
+    B4     B     BOSS:brood              77%     2.16     24.1      2.07     22.9     71 / 49  
+    V1     X     bat                     85%     2.22     23.8      2.14     23.2     65 / 43  
+    V1     X     hopper:cat              82%     2.32     26.2      2.04     24.2     70 / 46  
+    V2     X     hopper:cat              84%     2.50     27.6      2.21     25.5     68 / 43  
+    V2     X     crawler:cat             85%     2.55     28.1      2.28     25.6     67 / 42  
+    X1     X     BOSS:prism              71%     2.12     23.3      1.99     19.6     61 / 43  
+    C1     C     kiln                    75%     2.43     24.9      2.31     21.1     56 / 35  
+    C1     C     hopper:cat              88%     2.50     26.7      2.28     24.8     67 / 43  
+    C1     C     turret                  82%     2.34     25.1      2.11     20.9     62 / 41  
+    C5     C     turret                  78%     2.23     23.9      2.04     20.2     63 / 43  
+    C5     C     crawler:cat             82%     2.32     25.3      2.09     22.6     68 / 45  
+    C2     C     kiln                    75%     2.32     24.5      2.09     19.7     58 / 38  
+    C2     C     turret                  81%     2.29     23.9      2.12     21.5     63 / 41  
+    C2     C     hopper:cat              84%     2.33     24.9      2.16     22.8     67 / 44  
+    C2     C     guard                   80%     2.41     26.2      2.33     24.6     65 / 40  
+    C2     C     blob                    77%     2.28     24.5      2.06     19.7     61 / 41  
+    C3     C     BOSS:atlas              79%     2.21     24.2      2.03     22.0     69 / 47  
+    D2     D     rime                    64%     1.84     19.1      1.67     16.2     61 / 46  
+    D2     D     guard                   81%     2.70     28.9      2.31     26.0     67 / 41  
+    D2     D     hopper:cat              82%     2.21     24.7      2.05     23.4     66 / 44  
+    D2     D     turret                  75%     2.08     23.7      1.93     20.9     62 / 43  
+    D4     D     guard                   75%     2.10     23.9      2.06     22.0     64 / 44  
+    D4     D     rime                    81%     2.26     23.9      2.19     22.5     56 / 34  
+    D4     D     crawler:cat             82%     2.35     26.2      2.13     24.3     64 / 41  
+    D3     D     BOSS:zero               84%     2.15     24.3      2.04     23.4     70 / 48  
+    E1     E     snare                   68%     1.97     22.7      1.82     16.8     54 / 38  
+    E1     E     blob                    79%     2.39     28.0      2.14     21.7     60 / 39  
+    E1     E     hopper:cat              79%     2.17     28.2      1.99     21.2     64 / 44  
+    E4     E     blob                    74%     2.12     26.6      1.95     18.9     60 / 41  
+    E4     E     snare                   73%     2.17     23.4      2.03     19.9     56 / 37  
+    E4     E     crawler:cat             88%     2.68     28.7      2.38     26.5     65 / 39  
+    E2     E     turret                  84%     2.31     27.0      2.20     23.2     62 / 40  
+    E2     E     flier                   76%     2.27     23.5      2.13     22.0     60 / 39  
+    E2     E     guard                   87%     3.47     37.7      3.06     32.4     67 / 35  
+    E2     E     blob                    76%     2.18     26.4      1.97     20.1     62 / 43  
+    E2     E     hopper:cat              79%     2.15     26.8      1.98     21.5     67 / 46  
+    E3     E     BOSS:mother             71%     2.06     21.4      2.08     20.1     54 / 35  
+    A8     A     crawler:wolf            83%     2.24     25.5      1.98     21.8     67 / 45  
+    A8     A     flier                   79%     2.14     22.1      2.03     20.7     59 / 39  
+    A9     A     BOSS:chime              65%     1.79     20.9      1.63     16.4     71 / 55  
+    CV1    X     crawler:cat             74%     1.91     18.8      1.76     16.9     41 / 24  
+    CV1B   X     bat                     70%     1.89     18.3      1.73     16.5     43 / 27  
+    CV2    X     hopper:cat              80%     2.15     22.1      1.98     21.1     63 / 42  
+    CV2    X     crawler:cat             73%     1.90     18.7      1.78     17.0     41 / 25  
+    CV2    X     bat                     62%     1.71     15.9      1.69     15.4     42 / 27  
+    CV3    X     BOSS:horn               84%     1.99     19.8      1.94     19.1     46 / 27  
+    B7     B     turret                  88%     2.58     27.9      2.37     25.9     62 / 37  
+    B7     B     flier                   80%     2.00     21.6      1.96     20.9     65 / 45  
+    B7     B     blob                    73%     2.13     23.8      2.07     21.1     61 / 41  
+    B8     B     BOSS:carrier            83%     2.32     26.7      2.12     23.3     70 / 48  
+    C6     C     hopper:cat              88%     2.44     26.0      2.24     24.3     68 / 43  
+    C6     C     turret                  85%     2.34     24.6      2.19     22.7     64 / 41  
+    C6     C     blob                    81%     2.31     25.0      2.18     21.7     63 / 41  
+    C7     C     BOSS:moth               74%     2.24     25.0      2.06     21.5     70 / 49  
+    D5     D     blob                    68%     2.01     21.9      1.77     18.2     60 / 43  
+    D5     D     turret                  76%     2.05     23.5      1.94     21.6     64 / 44  
+    D5     D     flier                   78%     2.22     23.5      2.11     22.0     56 / 35  
+    D6     D     BOSS:lattice            86%     2.25     25.6      2.10     24.5     72 / 48  
+    E5     E     blob                    76%     2.28     26.9      2.04     20.2     60 / 40  
+    E5     E     hopper:cat              87%     2.30     28.1      2.15     23.6     65 / 42  
+    E5     E     turret                  86%     2.38     26.1      2.26     24.2     63 / 40  
+    E6     E     BOSS:lens               93%     2.55     29.2      2.42     27.1     69 / 43  
+    GA1T   X     bat                     70%     1.80     17.3      1.74     16.1     41 / 26  
+    GA1D   X     bat                     65%     1.71     15.6      1.73     15.7     42 / 27  
+    GA1D   X     sage                    92%     2.80     29.8      2.66     28.0     60 / 32  
+    GA2T   X     bat                     70%     1.82     17.3      1.77     16.5     41 / 25  
+    GA2D   X     bat                     71%     1.78     16.5      1.75     16.0     43 / 27  
+    GA2D   X     sage                    92%     2.82     30.0      2.68     28.0     60 / 32  
+    GB1T   X     bat                     72%     1.78     16.8      1.75     16.2     42 / 27  
+    GB1D   X     bat                     73%     1.88     18.5      1.78     16.8     43 / 27  
+    GB1D   X     sage                    92%     2.84     30.1      2.69     28.1     60 / 32  
+    GC1T   X     bat                     63%     1.71     15.9      1.70     15.4     41 / 27  
+    GC1D   X     bat                     71%     1.78     16.6      1.75     16.2     42 / 26  
+    GC1D   X     sage                    93%     2.86     30.5      2.72     28.4     60 / 32  
+    GD1T   X     bat                     78%     1.92     18.7      1.83     17.5     42 / 25  
+    GD1D   X     bat                     69%     1.77     16.3      1.74     16.0     42 / 27  
+    GD1D   X     sage                    93%     2.86     30.3      2.75     28.6     60 / 31  
+    GX1T   X     bat                     70%     1.80     17.2      1.76     16.3     41 / 25  
+    GX1D   X     bat                     75%     1.92     18.7      1.82     17.2     43 / 27  
+    GX1D   X     sage                    93%     2.85     30.3      2.70     28.3     60 / 32  
+    GE1T   X     bat                     70%     1.76     16.3      1.74     15.9     42 / 27  
+    GE1D   X     bat                     76%     1.88     18.8      1.80     17.0     43 / 27  
+    GE1D   X     sage                    93%     2.90     30.3      2.71     28.6     60 / 32  
+
+  ok   every placed body was measured (106 room × creature pairs)
+  ok   ...with its art landed, not its stand-in
+  ok   every body reads off its room: >= 50% of its silhouette edge at CR >= 1.6 or ΔE >= 25  worst 62%
+  ok   no page errors
+
+OK — every machine and every guardian stands off the room it is in
+   (contrast: 93.4 s)
+
+── campaign-contract  — chapter-one campaign certification fails closed for missing, late, partial and error-bearing evidence
+ok   clean complete route certifies  {"result":"complete","certified":true,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   missing required passage fails  {"result":"complete-without-required-panels","certified":false,"missing":["passage"],"missed":[],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   a timed-out story beat fails  {"result":"complete-with-missed-panels","certified":false,"missing":[],"missed":["cave"],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   a page error fails  {"result":"complete-with-page-errors","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":1,"full":true}
+  ok   a late cave introduction fails chronology  {"result":"complete-with-panel-order-errors","certified":false,"missing":[],"missed":[],"orderErrors":["marble","forge"],"pageErrors":0,"full":true}
+  ok   restored segment is diagnostic, never a full certificate  {"result":"partial-diagnostic","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":false}
+  ok   developer stop is diagnostic, never a full certificate  {"result":"partial-diagnostic","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":false}
+
+all campaign certificate checks passed
+   (campaign-contract: 0.8 s)
+
+all 3 harnesses ran

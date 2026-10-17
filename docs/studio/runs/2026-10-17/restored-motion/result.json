@@ -1,0 +1,120 @@
+{
+  "scope": "Staged saved guardian, then real keyboard and elapsed-time frames; not a full campaign or all-direction gait certification.",
+  "samples": [
+    {
+      "x": 568.81,
+      "y": 416.84002685546875,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.47009065656565685,
+      "purified": true,
+      "eyeClass": null,
+      "state": "PLAY",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 617.7843333333334,
+      "y": 409.923095703125,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.7298030303030313,
+      "purified": true,
+      "eyeClass": null,
+      "state": "PLAY",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 644.6060000000002,
+      "y": 415.5798034667969,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.8720391414141433,
+      "purified": true,
+      "eyeClass": null,
+      "state": "PLAY",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 670.2563333333337,
+      "y": 414.8110656738281,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.008063636363639015,
+      "purified": true,
+      "eyeClass": null,
+      "state": "PLAY",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 716.8903333333338,
+      "y": 405.8857421875,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.25536515151515476,
+      "purified": true,
+      "eyeClass": null,
+      "state": "PLAY",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 743.7026666666669,
+      "y": 414.9275207519531,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.39755176767676964,
+      "purified": true,
+      "eyeClass": null,
+      "state": "PLAY",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 769.3646666666672,
+      "y": 413.7107238769531,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.5336381313131345,
+      "purified": true,
+      "eyeClass": null,
+      "state": "PLAY",
+      "build": "64bc72365fdf"
+    },
+    {
+      "x": 795.0056666666674,
+      "y": 403.6590270996094,
+      "st": "stalk",
+      "walking": true,
+      "gait": 0.6696131313131355,
+      "purified": true,
+      "eyeClass": null,
+      "state": "PLAY",
+      "build": "64bc72365fdf"
+    }
+  ],
+  "cells": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    0,
+    1,
+    2
+  ],
+  "errors": []
+}

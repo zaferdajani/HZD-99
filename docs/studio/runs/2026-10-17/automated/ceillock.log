@@ -1,0 +1,19 @@
+
+── ceillock  — the roof plate is nailed to the room grid: it never slides against the rock it hangs from
+── ceillock — the roof plate is nailed to the room grid
+
+  ok   C1 near plate stays on the grid as the camera moves  world y spread 0.0 px, x phase spread 0.0 px over 2 camera positions
+  ok   C1 far plate stays on the grid as the camera moves  world y spread 0.0 px, x phase spread 0.0 px over 2 camera positions
+  ok   C1 near plate reaches the room's top edge  hangs from world y -8
+  ok   B2 near plate stays on the grid as the camera moves  world y spread 0.0 px, x phase spread 0.0 px over 4 camera positions
+  ok   B2 far plate stays on the grid as the camera moves  world y spread 0.0 px, x phase spread 0.0 px over 4 camera positions
+  ok   B2 near plate reaches the room's top edge  hangs from world y -8
+  ok   A7 near plate stays on the grid as the camera moves  world y spread 0.0 px, x phase spread 0.0 px over 3 camera positions
+  ok   A7 far plate stays on the grid as the camera moves  world y spread 0.0 px, x phase spread 0.0 px over 2 camera positions
+  ok   A7 near plate reaches the room's top edge  hangs from world y -8
+  ok   no page errors
+
+OK — the roof moves with the room it is the roof of
+   (ceillock: 3.3 s)
+
+all 1 harnesses ran

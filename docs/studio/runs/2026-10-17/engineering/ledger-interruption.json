@@ -1,0 +1,59 @@
+{
+  "scope": "STAGED regression; initial save and room injected; subsequent save is actual persisted disk save, not an uninterrupted campaign.",
+  "identity": {
+    "build": "a2e6994d283e",
+    "url": "http://127.0.0.1:8220/index.html"
+  },
+  "before": {
+    "led": "",
+    "forks": 0,
+    "boss": false
+  },
+  "first": {
+    "state": "CUT",
+    "cutKind": "glitch",
+    "led": "L",
+    "forks": 1,
+    "nodes": [
+      {
+        "p": "L",
+        "k": "firstboss",
+        "r": "A4",
+        "d": 1
+      }
+    ],
+    "boss": false,
+    "runtimeBoss": false
+  },
+  "reloaded": {
+    "led": "L",
+    "forks": 1,
+    "boss": false,
+    "spawned": true,
+    "dead": false
+  },
+  "second": {
+    "state": "CUT",
+    "cutKind": "glitch",
+    "led": "LL",
+    "forks": 2,
+    "nodes": [
+      {
+        "p": "L",
+        "k": "firstboss",
+        "r": "A4",
+        "d": 1
+      },
+      {
+        "p": "L",
+        "k": "firstboss",
+        "r": "A4",
+        "d": 2
+      }
+    ],
+    "boss": false,
+    "runtimeBoss": false
+  },
+  "errors": [],
+  "verdict": "REPRODUCED: interrupted film permanently appends a guardian braid entry; retry appends another while guardian flag remains false."
+}

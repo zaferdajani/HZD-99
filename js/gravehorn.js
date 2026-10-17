@@ -1402,8 +1402,9 @@ function drawGravehorn(c, b) {
   c.save();
   c.globalCompositeOperation = 'lighter';
   const tk = P.tell || 0;
-  // the identity red LERPS toward the amber during a wind-up (Hue Law §3.5)
-  const eyeCol = tk > 0 ? ghMix('#ff3b2a', TELL_COL, tk) : '#ff3b2a';
+  // Boss infection stays purple, including wind-up. Amber remains on the
+  // horn/nozzle telegraph; it must not recolor the eye or its trail.
+  const eyeCol = '#c174ff';
   const eyeP = P.headRig(-36, -12);
   // the infection looks out through this eye (js/infection-eyes.js): reported
   // where it is drawn this frame, in the head's own transform — so it rides
@@ -1411,7 +1412,7 @@ function drawGravehorn(c, b) {
   if (typeof infEyeMark === 'function') infEyeMark(c, eyeP[0], eyeP[1]);
   const er = 5 + 3 * Math.max(0, (P.eye || 1) - 1);
   const g1 = c.createRadialGradient(eyeP[0], eyeP[1], 0.5, eyeP[0], eyeP[1], er * 3.2);
-  g1.addColorStop(0, '#ffffff'); g1.addColorStop(0.25, eyeCol); g1.addColorStop(1, 'rgba(255,40,30,0)');
+  g1.addColorStop(0, '#ffffff'); g1.addColorStop(0.25, eyeCol); g1.addColorStop(1, 'rgba(193,116,255,0)');
   c.globalAlpha = clamp(P.eye, 0.2, 1);
   c.fillStyle = g1; c.beginPath(); c.arc(eyeP[0], eyeP[1], er * 3.2, 0, 6.2832); c.fill();
   if (P.glance) {

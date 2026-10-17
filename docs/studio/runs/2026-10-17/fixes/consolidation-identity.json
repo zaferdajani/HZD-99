@@ -1,0 +1,30 @@
+{
+  "isolated_build": "64bc72365fdf",
+  "consolidated_build": "fbfa046c42b4",
+  "explanation": "The isolated worktree contained an unreferenced temporary music-copy residue, which runtimeAssetDigest includes although the music filename manifest does not. All common asset bytes are identical, and every generated page is byte-identical after normalizing only BUILD_ID. No temporary media residue is included in the branch. Runtime game source is unchanged during consolidation.",
+  "pages": {
+    "index.html": {
+      "consolidated_sha256": "3035f23f6225c319d924440caee4ea7d79e07a2fa4381409414c55f6156aae26",
+      "isolated_sha256": "2fe4b1779b3277bb5f526572ab352694d56522a55ca694a6d08185d2857d7957",
+      "identical_except_build_id": true
+    },
+    "odyssey.html": {
+      "consolidated_sha256": "b20dd1edc47684877ed20a4319e0f04f2691d9344dc56759354fce4cee22973f",
+      "isolated_sha256": "f8ca865d25c68961650b491961f091ad8302149314426808de6e4782e63389ce",
+      "identical_except_build_id": true
+    },
+    "forge.html": {
+      "consolidated_sha256": "9e69a50b849f290dde3a89b577f50bbeb4ab997417795e8c284616350860e6d3",
+      "isolated_sha256": "09d717002fb633cf42a6e3e395dfa0db4bede6781e94a069435ca484f4216e52",
+      "identical_except_build_id": true
+    },
+    "forge-odyssey.html": {
+      "consolidated_sha256": "e98f32610726721a3088c5b0c44c9575817b0b19defa2a5faf9601c973ef9e22",
+      "isolated_sha256": "34555e86848a9b97c8918b9fcc6f7b5063015d8da0d72e84677f69c652533f23",
+      "identical_except_build_id": true
+    }
+  },
+  "common_runtime_asset_count": 694,
+  "common_runtime_asset_inventory_digest": "93669787a16c21349fff7b2d4c6abf22da83e78dba0ba24e49d1ac642b46bbd9",
+  "common_runtime_asset_bytes_identical": true
+}

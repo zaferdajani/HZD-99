@@ -1,0 +1,17 @@
+
+── dmglog  — the damage log as a check: cores lost by source per room, the 40% flag, the Forge overlay
+── dmglog — what costs her cores, by source, per room, with the 40% flag
+
+  ok   cores lost are recorded by source, most damaging first  [{"src":"horn.toss","lost":4,"share":0.57,"flag":true},{"src":"crawler.lunge","lost":2,"share":0.29,"flag":false},{"src":"turret.shot","lost":1,"share":0.14,"flag":false}]
+  ok   the source over 40% of the damage is flagged, the others are not  [{"src":"horn.toss","lost":4,"share":0.57,"flag":true},{"src":"crawler.lunge","lost":2,"share":0.29,"flag":false},{"src":"turret.shot","lost":1,"share":0.14,"flag":false}]
+  ok   a held brace costs nothing and records nothing  [{"src":"horn.toss","lost":4,"share":0.57,"flag":true},{"src":"crawler.lunge","lost":2,"share":0.29,"flag":false},{"src":"turret.shot","lost":1,"share":0.14,"flag":false}]
+  ok   a new room starts a new record  0
+  ok   ...and with too little damage to mean anything, nothing is flagged  [{"src":"bat.glint","share":1,"flag":false}]
+  ok   the overlay draws when on, and nothing when off  on 10752, off 0
+  ok   the Forge has the DAMAGE toggle (button and F4); the game pages do not
+  ok   no page errors
+
+all good
+   (dmglog: 7.0 s)
+
+all 1 harnesses ran

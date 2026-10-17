@@ -1,0 +1,35 @@
+{
+  "guidance": {
+    "keyboard": "Release, then hold F / Interact or this button",
+    "xbox": "Release, then hold Y / Interact or this button",
+    "xboxButton": "Y",
+    "pad": "Release, then hold Square / Interact or this button",
+    "padButton": "Square",
+    "unbound": "Release, then hold the Free the guardian button",
+    "touch": "Release, then hold the Free the guardian button",
+    "localized": [
+      "Release, then hold the Free the guardian button",
+      "اترك الزر ثم اضغط مطوّلاً على زر حرّر الحارس",
+      "Bırak, sonra Muhafızı kurtar düğmesini basılı tut",
+      "松开后按住净化守护者按钮",
+      "Отпустите, затем удерживайте кнопку Освободите стража"
+    ]
+  },
+  "portraitBlocked": true,
+  "hiddenClock": true,
+  "touchHold": true,
+  "touchCancel": true,
+  "blurCancels": true,
+  "mobileButton": {
+    "x": 305.421875,
+    "y": 293.328125,
+    "width": 233.109375,
+    "height": 48
+  },
+  "saved": {
+    "pure": true,
+    "dead": true,
+    "pending": false,
+    "kind": "glitch"
+  }
+}

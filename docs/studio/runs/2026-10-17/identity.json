@@ -1,0 +1,28 @@
+{
+  "base": "62d75d204c6f6264f25150bb419fc262ff2c18ea",
+  "main_at_start": "62d75d204c6f6264f25150bb419fc262ff2c18ea",
+  "integration_at_start": "62d75d204c6f6264f25150bb419fc262ff2c18ea",
+  "review_branch": "codex/studio-review-2026-10-17",
+  "baseline_build": "a2e6994d283e",
+  "final_candidate_build": "64bc72365fdf",
+  "fix_candidate_files": {
+    "js/purification.js": "a058dab68d899f2c8c02a45a0c66f789cf8e69f732a4187aef60ea2896a899a3",
+    "js/braid.js": "17f27fdcae6ce1ed53aa49db814df31578cfda792efd54a46fdcc385b26118c4",
+    "js/game.js": "021cfaca35dfd405f8e06f7de8f2ae204e9aa82edeaa62eed9cc45835bb79453",
+    "js/gravehorn.js": "a9c1f770c57b4f341608a5432e149da11ed9e52c4d7805f0c8cd3bbc0f00d73d",
+    "tests/purification-save.cjs": "201b2069c54824683cbd9feba756ed2b81fa55442ff5b75396c95dbbe2a6026f",
+    "tests/purification-controls.cjs": "fce0c25e93b2fa66b2b08b2cf08edaf6fa3189c5b95d45a82a6f103ff918fdab",
+    "tests/run.cjs": "fa18f6b1d3238d7125f4137b418f6a0da76807ebe1dedbfaeae93577e11f7095",
+    "tests/campaign-ch1.cjs": "f0454c82490eb24d4588473889db96f7a2e1b0d4de323bdf420c7ed8cdaf5e4e"
+  },
+  "environment": {
+    "node": "v24.19.0",
+    "browser": "Chromium 153.0.8010.0 from pinned @sparticuz/chromium 153.0.0",
+    "dependencies": "npm ci, lockfile unchanged",
+    "physical_devices": false,
+    "full_collector_and_later_candidate": "separate process/network contexts and worktrees; no built-page mutation during a run"
+  },
+  "consolidated_build": "fbfa046c42b4",
+  "consolidation_evidence": "fixes/consolidation-identity.json",
+  "save_test_output_note": "Default output changed after the isolated run to ignored tests/out/purification-save so future runs do not overwrite dated evidence. Assertions and runtime unchanged."
+}

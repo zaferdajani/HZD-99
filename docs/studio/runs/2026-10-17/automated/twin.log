@@ -1,0 +1,20 @@
+
+── twin  — the swirl: four passes, a ring not a punch, and two blades afterwards
+── twin — permanent dual swords and the hurricane
+  ok   the swirl has its OWN cue, on the pass clock  loudest note per 160ms window: 0 1 2 3
+  ok   ...and it is bright where the burst is a thud  low:high  swirl 0.50  vs burst 4.04
+  ok   one half: the charged blow is still the burst
+  ok   both halves: the charged blow is the SWIRL  swirlT 0.64s
+  ok   ...and she leaves the floor to do it
+  ok   it lands four passes, not one  4 passes, 72 damage
+  ok   it costs her real recovery afterwards  0.907s
+  ok   it is a RING — it hits what is behind her too  72 damage behind
+  ok   dual swords remain equipped beyond the old six-second window
+  ok   ...and the twin swing is WIDER  77 -> 104 px
+  ok   ...but reaches no further  anchor unchanged
+  ok   ...and it grows both ways, not forwards  behind:ahead 52:52
+
+OK — she dances, it hurts, and she keeps her two swords afterwards
+   (twin: 3.6 s)
+
+all 1 harnesses ran

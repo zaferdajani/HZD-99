@@ -1,0 +1,22 @@
+
+── padlife  — a yanked controller releases the game; a live one keeps it
+── padlife  — a yanked controller must not lock the game in pad mode
+  ok   live pad -> pad mode  true
+  ok   yanked -> pad mode off  false
+  ok   yanked -> touch controls back  true
+  ok   corpse in rack -> pad mode off  false
+  ok   corpse in rack -> touch controls back  true
+  ok   corpse in rack -> trials read touch  true
+  ok   flapped flag but a button down -> still a pad  true
+  ok   reconnected on another slot -> pad mode  true
+  ok   corpse on another slot -> pad mode off  false
+  stick only 185  click 340  released+pushed 185  (walk cap 185, top 340, RUN on button 10)
+  ok   stick alone walks  true
+  ok   L3 while moving runs  true
+  ok   stick released, next push walks again  true
+  ok   RUN defaults to L3  10
+
+OK — a dead pad releases the game, a live one keeps it
+   (padlife: 1.4 s)
+
+all 1 harnesses ran

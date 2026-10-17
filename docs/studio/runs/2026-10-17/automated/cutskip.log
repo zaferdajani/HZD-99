@@ -1,0 +1,20 @@
+
+── cutskip  — a tap does not spend the story, and a film starts at its start
+── cutskip — a story costs a deliberate hold, and it starts at the start
+
+  ok   a clip parked near its end holds in the dark instead of playing  phase hold, played false
+  ok   ...and it asks for the rewind while it waits  currentTime 0
+  ok   ...and plays only once the seek has landed  phase play
+  ok   a clip already at the start plays at once  phase play
+  ok   ONE PRESS DOES NOT SPEND THE STORY  phase play, skipped false
+  ok   ...but a sustained hold does  skipped after 0.78 s
+  ok   ...and letting go puts the meter back  meter 0
+  ok   a touch during a film HOLDS instead of auto-releasing  held VOK, queued for auto-release false
+  ok   ...so the phone can reach the skip at all  stayed down true, skipped true
+  ok   ...and lifting the finger lets go
+  ok   no page errors
+
+OK — a tap is not a skip, and the film starts where it should
+   (cutskip: 2.4 s)
+
+all 1 harnesses ran

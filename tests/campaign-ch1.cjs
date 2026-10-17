@@ -994,8 +994,11 @@ async function travel(s, target) {
 async function breakFloor(s, x0, x1) {
   const cx = (x0 + x1 + 1) / 2 * TL;
   const px = s.p.x + 12;
-  if (!s.p.on) { await hold(['ArrowDown']); if (s.p.vy > 0) { await tap('KeyX', 40); } await sleep(40); return; }
+  // Navigate to the hatch before attempting its down-strike. Striking while
+  // airborne far from the hatch cancels horizontal travel and can pogo on a
+  // bound enemy indefinitely; it is a driver error, not a locked quarry.
   if (Math.abs(px - cx) > 14) { const r = await walkTo(s, { x: cx, tol: 12 }); if (r === 'stuck') await unstick(s, 'the loose floor'); return; }
+  if (!s.p.on) { await hold(['ArrowDown']); if (s.p.vy > 0) { await tap('KeyX', 40); } await sleep(40); return; }
   log('DOWN-STRIKE at the loose floor (tiles ' + x0 + '-' + x1 + ')');
   await hold([]);
   await page.keyboard.down('Space'); await sleep(260); await page.keyboard.up('Space');

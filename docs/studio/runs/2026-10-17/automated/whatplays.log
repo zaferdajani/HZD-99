@@ -1,0 +1,38 @@
+
+── whatplays  — every music cue resolves to the intended track
+── whatplays — every slot leads with the score we commissioned
+
+  20 tracks in assets/music, 21 slots
+
+    A            mus_meadows
+    B            mus_conduits
+    C            mus_foundry
+    D            mus_archives
+    E            mus_nest
+    X            mus_cache
+    alphaTame    mus_alphatame
+    boss         mus_boss
+    boss_alpha   mus_alpha -> mus_boss
+    boss_atlas   mus_furnace -> mus_boss
+    boss_brood   mus_talonhost -> mus_boss
+    boss_glitch  mus_nullfang -> mus_boss
+    boss_horn    mus_eye -> mus_boss
+    boss_mini    mus_eye -> mus_boss
+    boss_mother  mus_mother -> mus_boss
+    boss_prism   mus_prism -> mus_boss
+    boss_zero    mus_glaciere -> mus_boss
+    intro        mus_intro -> mus_title
+    mother       mus_mother -> mus_boss
+    title        mus_hero -> mus_title
+    winTheme     mus_ending
+
+  ok   every track a slot names is on disk  20 named, all present
+  ok   every track shipped is reachable from some slot  20 shipped, all reachable
+  ok   no slot reaches for a track outside the authored score  every candidate is a mus_ track
+  ok   every guardian leads with its own name theme  7 fights, each with its own
+  ok   every kingdom puts a track on the stream  A:mus_meadows  B:mus_conduits  C:mus_foundry  D:mus_archives  E:mus_nest  X:mus_cache
+
+OK — every slot leads with the score we commissioned
+   (whatplays: 4.3 s)
+
+all 1 harnesses ran

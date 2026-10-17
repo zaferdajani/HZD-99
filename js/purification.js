@@ -6,14 +6,30 @@ const PURIFICATION_HOLD = 1.6;
 const PURIFICATION_MOVIES = {glitch:'assets/video/purify_glitch_ritual.mp4'};
 if(!isHero()) Object.assign(PURIFY_VID,PURIFICATION_MOVIES);
 const PURIFICATION_WORDS = {
- en: ['Free the guardian', 'Release, then hold E / Interact or this button', 'Gathering pure light…', 'The sword draws out the corrupted song.', 'The guardian is free.'],
- ar: ['حرّر الحارس', 'اترك الزر ثم اضغط مطوّلاً على E أو زر التفاعل', 'نجمع النور النقي…', 'السيف يسحب اللحن الفاسد.', 'تحرّر الحارس.'],
- tr: ['Muhafızı kurtar', 'Bırak, sonra E / Etkileşim veya bu düğmeyi basılı tut', 'Saf ışık toplanıyor…', 'Kılıç bozulmuş şarkıyı çekiyor.', 'Muhafız artık özgür.'],
- zh: ['净化守护者', '松开后按住 E / 互动键或此按钮', '正在汇聚纯净之光…', '剑正在吸收被污染的歌声。', '守护者重获自由。'],
- ru: ['Освободите стража', 'Отпустите, затем удерживайте E / Взаимодействие или эту кнопку', 'Собирается чистый свет…', 'Меч вытягивает заражённую песню.', 'Страж свободен.']
+ en: ['Free the guardian', 'Release, then hold {INT} / Interact or this button', 'Gathering pure light…', 'The sword draws out the corrupted song.', 'The guardian is free.'],
+ ar: ['حرّر الحارس', 'اترك الزر ثم اضغط مطوّلاً على {INT} أو زر التفاعل', 'نجمع النور النقي…', 'السيف يسحب اللحن الفاسد.', 'تحرّر الحارس.'],
+ tr: ['Muhafızı kurtar', 'Bırak, sonra {INT} / Etkileşim veya bu düğmeyi basılı tut', 'Saf ışık toplanıyor…', 'Kılıç bozulmuş şarkıyı çekiyor.', 'Muhafız artık özgür.'],
+ zh: ['净化守护者', '松开后按住 {INT} / 互动键或此按钮', '正在汇聚纯净之光…', '剑正在吸收被污染的歌声。', '守护者重获自由。'],
+ ru: ['Освободите стража', 'Отпустите, затем удерживайте {INT} / Взаимодействие или эту кнопку', 'Собирается чистый свет…', 'Меч вытягивает заражённую песню.', 'Страж свободен.']
 };
 function purificationPortrait() { return typeof TOUCH !== 'undefined' && TOUCH.enabled && window.innerHeight > window.innerWidth; }
-function purificationText(i) { return (PURIFICATION_WORDS[LANG] || PURIFICATION_WORDS.en)[i]; }
+const PURIFICATION_BUTTON_HINT = {
+ en: 'Release, then hold the Free the guardian button',
+ ar: 'اترك الزر ثم اضغط مطوّلاً على زر حرّر الحارس',
+ tr: 'Bırak, sonra Muhafızı kurtar düğmesini basılı tut',
+ zh: '松开后按住净化守护者按钮',
+ ru: 'Отпустите, затем удерживайте кнопку Освободите стража'
+};
+function purificationText(i) {
+ const line = (PURIFICATION_WORDS[LANG] || PURIFICATION_WORDS.en)[i];
+ if (i !== 1) return line;
+ // The dedicated button works on touch and when Interact has no pad binding.
+ // Never ask the player to hold a keyboard letter or a menu-navigation route.
+ if ((typeof TOUCH !== 'undefined' && TOUCH.enabled && !PAD.on)
+     || (PAD.on && (PAD.map.INT == null || PAD.map.INT < 0)))
+  return PURIFICATION_BUTTON_HINT[LANG] || PURIFICATION_BUTTON_HINT.en;
+ return ctlFill(line);
+}
 let purificationButton = null, purificationPointer = false;
 function purificationButtonHide() { if (purificationButton) purificationButton.hidden = true; purificationPointer = false; }
 function purificationCancel() {
@@ -58,6 +74,17 @@ function purificationBegin(b) {
 function purificationRestoreStage() {
  G.impact=null;G.flash=0;G.hitStop=0;cam.shake=0;
  if(G.boss){G.boss.impactUntil=0;infEyeClearOwner(G.boss);}
+}
+function purificationCommitChoice(kind) {
+ const b=G.boss,q=b && b.kind===kind && b.purificationChoice;
+ if(!q)return;
+ b.purificationChoice=null; // repeated completion cannot pay twice
+ const prior=braid().nodes.some(n=>n.p==='L' && n.k===q.kind && n.r===q.room);
+ // Preserve an old interrupted save's exact guardian choice; do not append
+ // another or reroll a spoil whose old payment status cannot be recovered.
+ if(!prior)brRecord('L',q.kind,q.room,true);
+ if(q.first){G.save.flags.oath=1;spoilLater({name:t('oath_name'),desc:t('oath_desc')});}
+ else if(!prior)spoilLater(bossSpoil(kind,'L'));
 }
 function purificationFinish(p) {
  if (p.committed) return; p.committed = true;

@@ -1,0 +1,12 @@
+
+── speed2  — movement speed is identical from 12 to 144 fps
+{"fps":144,"seconds":0.5,"simulated":0.4999999999999937,"travel":169.9999999999984,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":120,"seconds":0.5,"simulated":0.4999999999999953,"travel":169.99999999999898,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":60,"seconds":0.5,"simulated":0.5000000000000018,"travel":170.00000000000045,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":30,"seconds":0.5,"simulated":0.499999999999999,"travel":169.99999999999972,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":20,"seconds":0.5,"simulated":0.49999999999999994,"travel":170,"expected":170,"velocity":340,"state":"PLAY"}
+{"fps":12,"seconds":0.5,"simulated":0.49999999999999956,"travel":169.99999999999955,"expected":170,"velocity":340,"state":"PLAY"}
+PASS actual mainLoop preserves travel speed at 12, 20, 30, 60, 120 and 144 fps
+   (speed2: 1.9 s)
+
+all 1 harnesses ran

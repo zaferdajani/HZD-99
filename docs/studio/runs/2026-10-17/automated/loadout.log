@@ -1,0 +1,101 @@
+
+── loadout  — arms, crests and relics each wear their own registered hue and frame, on every screen and the HUD
+── loadout — arms, crests and relics each wear their own hue and frame, on every screen
+
+  ok   LOADOUT_COL defines arm, crest and relic  {"arm":"#ffb4a5","crest":"#4a7bff","relic":"#4fe36a"}
+  ok   the registry reserves at least the eight combat hues  Telegraph amber, Danger red, Lock cyan, Purifier violet, Frost blue, Repair green, Reward gold, Parry lime
+  ok   the registry's UI loadout block names the same three hexes
+  ok   arm #ffb4a5 is none of the reserved hues (RGB > 60, ΔE > 30)  nearest Danger red: RGB 102, ΔE 41
+  ok   crest #4a7bff is none of the reserved hues (RGB > 60, ΔE > 30)  nearest Purifier violet: RGB 144, ΔE 50
+  ok   relic #4fe36a is none of the reserved hues (RGB > 60, ΔE > 30)  nearest Parry lime: RGB 146, ΔE 47
+  ok   arm / crest are pairwise distinct (RGB > 120, ΔE > 50)  RGB 210, ΔE 93
+  ok   arm / relic are pairwise distinct (RGB > 120, ΔE > 50)  RGB 191, ΔE 94
+  ok   crest / relic are pairwise distinct (RGB > 120, ΔE > 50)  RGB 182, ΔE 151
+  ok   the loadout hexes are written only in js/loadout.js
+  ok   the six kingdom palettes are read from js/world.js  ABCDEX
+  ok   arm #ffb4a5 is no kingdom's glow or edge (ΔE > 30)  nearest C #ffab4a: ΔE 42
+  ok   crest #4a7bff is no kingdom's glow or edge (ΔE > 30)  nearest B #57a8ff: ΔE 34
+  ok   relic #4fe36a is no kingdom's glow or edge (ΔE > 30)  nearest A #3adfb2: ΔE 39
+  ok   the frame art is queued (ART_QUEUE §2bm)
+  ok   shop [en]: the cell row carries no loadout hue  0/0/0
+  ok   shop [en]: the crest row wears the crest frame  own 191 (≥25), others 0/0
+  ok   shop [en]: the crest row wears the crest frame  own 32 (≥25), others 0/0
+  ok   shop [en]: the crest row wears the crest frame  own 190 (≥25), others 0/0
+  ok   shop [en]: the crest row wears the crest frame  own 190 (≥25), others 0/0
+  ok   shop [en]: the crest row wears the crest frame  own 32 (≥25), others 0/0
+  ok   shop [en]: the slot row wears the crest frame  own 32 (≥25), others 0/0
+  ok   shop [en]: the core row carries no loadout hue  0/0/0
+  ok   shop [ar]: the cell row carries no loadout hue  0/0/0
+  ok   shop [ar]: the crest row wears the crest frame  own 191 (≥25), others 0/0
+  ok   shop [ar]: the crest row wears the crest frame  own 32 (≥25), others 0/0
+  ok   shop [ar]: the crest row wears the crest frame  own 190 (≥25), others 0/0
+  ok   shop [ar]: the crest row wears the crest frame  own 190 (≥25), others 0/0
+  ok   shop [ar]: the crest row wears the crest frame  own 32 (≥25), others 0/0
+  ok   shop [ar]: the slot row wears the crest frame  own 32 (≥25), others 0/0
+  ok   shop [ar]: the core row carries no loadout hue  0/0/0
+  ok   shop: tapping a row's frame selects that row  [0,1,2,3,4,5,6,7]
+  ok   gear [en]: crest rows are on screen  emp,key,claws,plate,siphon,phantom
+  ok   gear [en]: emp is not a loadout row and carries no loadout hue  0/0/0
+  ok   gear [en]: key is not a loadout row and carries no loadout hue  0/0/0
+  ok   gear [en]: claws (filled) wears the crest diamond  own 155 (≥18), others 0/0
+  ok   gear [en]: plate (empty) wears the crest diamond  own 27 (≥18), others 0/0
+  ok   gear [en]: siphon (filled) wears the crest diamond  own 150 (≥18), others 0/0
+  ok   gear [ar]: crest rows are on screen  emp,key,claws,plate,siphon,phantom
+  ok   gear [ar]: emp is not a loadout row and carries no loadout hue  0/0/0
+  ok   gear [ar]: key is not a loadout row and carries no loadout hue  0/0/0
+  ok   gear [ar]: claws (filled) wears the crest diamond  own 155 (≥18), others 0/0
+  ok   gear [ar]: plate (empty) wears the crest diamond  own 27 (≥18), others 0/0
+  ok   gear [ar]: siphon (filled) wears the crest diamond  own 150 (≥18), others 0/0
+  ok   gear: tapping a row's frame selects that row  [true,true,true,true,true,true]
+  ok   relics [en]: relic 0 sits in the relic seal  own 273 (≥40), others 0/0
+  ok   relics [en]: relic 1 sits in the relic seal  own 273 (≥40), others 0/0
+  ok   relics [en]: relic 2 sits in the relic seal  own 273 (≥40), others 0/0
+  ok   relics [ar]: relic 0 sits in the relic seal  own 273 (≥40), others 0/0
+  ok   relics [ar]: relic 1 sits in the relic seal  own 273 (≥40), others 0/0
+  ok   relics [ar]: relic 2 sits in the relic seal  own 273 (≥40), others 0/0
+  ok   relics [ar]: the first relic is top-right, read first  [{"x":710,"y":120},{"x":310,"y":120}]
+  ok   pause [en]: the crests row carries the crest diamond  own 26 (≥10), others 0/0
+  ok   pause [en]: the relics row carries the relic seal  own 31 (≥10), others 0/0
+  ok   pause [en]: rows that are not loadout carry no loadout hue  0/0/0/0/0/0
+  ok   pause [ar]: the crests row carries the crest diamond  own 27 (≥10), others 0/0
+  ok   pause [ar]: the relics row carries the relic seal  own 36 (≥10), others 0/0
+  ok   pause [ar]: rows that are not loadout carry no loadout hue  0/0/0/0/0/0
+  ok   HUD: the suit wheel is up with two suits  [{"on":true,"n":[189,0,0]},{"on":false,"n":[0,0,0]}]
+  ok   HUD: the worn arm sits in the coral hex  own 189 (≥40), others 0/0
+  ok   HUD: the worn arm's frame outweighs an unworn one  189 vs 0
+  ok   HUD: one crest diamond per worn crest  2
+  ok   HUD: worn crest 0 is a cobalt diamond  own 108 (≥18), others 0/0
+  ok   HUD: worn crest 1 is a cobalt diamond  own 108 (≥18), others 0/0
+  ok   HUD: the relic seal is trail green  own 96 (≥18), others 0/0
+  ok   HUD: with crests but no suit, the goal line starts below the loadout row  {"row":true,"rect":{"x":14,"y":140,"w":200,"h":24},"top":127}
+  ok   card: a relic is tagged relic  {"lo":"relic","st":"DIALOG"}
+  ok   card: a relic shows the relic frame  own 817 (≥60), others 0/0
+  ok   card: a crest is tagged crest  {"lo":"crest","st":"DIALOG"}
+  ok   card: a crest shows the crest frame  own 792 (≥60), others 0/0
+  ok   card: an arm is tagged arm  {"lo":"arm","st":"DIALOG"}
+  ok   card: an arm shows the arm frame  own 577 (≥60), others 0/0
+  ok   card: the boss's arm handover is tagged in onBossDead
+  ok   room A1 A: under 1% of the painted frame is the arm hue  0.00% (the retired rose: 0.00%)
+  ok   room B2 B: under 1% of the painted frame is the arm hue  0.00% (the retired rose: 0.00%)
+  ok   room C2 C: under 1% of the painted frame is the arm hue  0.00% (the retired rose: 0.00%)
+  ok   room D2 D: under 1% of the painted frame is the arm hue  0.00% (the retired rose: 0.00%)
+  ok   room E2 E: under 1% of the painted frame is the arm hue  0.00% (the retired rose: 0.00%)
+  ok   room V1 X: under 1% of the painted frame is the arm hue  0.00% (the retired rose: 0.00%)
+  ok   touch wheel: the change-suit seat is tinted the arm hue  #ffb4a5
+  ok   every language names all three systems  {"en":["Arm","Gear","Relics"],"ar":["سلاح","التجهيزات","التُحف"],"tr":["Silah","Teçhizat","Kalıntılar"],"zh":["武装","装备","遗物"],"ru":["Оружие","Снаряжение","Реликвии"]}
+  ok   the arm label is translated (not English) outside en  {"en":"Arm","ar":"سلاح","tr":"Silah","zh":"武装","ru":"Оружие"}
+  ok   tokens [en]: claws (seated) wears the crest diamond  own 156 (≥18), others 0/0
+  ok   tokens [en]: plate (unseated) wears the crest diamond  own 27 (≥18), others 0/0
+  ok   tokens [en]: siphon (seated) wears the crest diamond  own 150 (≥18), others 0/0
+  ok   tokens [en]: the port's sockets are crest diamonds  own 437 (≥60), others 0/0
+  ok   tokens [ar]: claws (seated) wears the crest diamond  own 156 (≥18), others 0/0
+  ok   tokens [ar]: plate (unseated) wears the crest diamond  own 27 (≥18), others 0/0
+  ok   tokens [ar]: siphon (seated) wears the crest diamond  own 150 (≥18), others 0/0
+  ok   tokens [ar]: the port's sockets are crest diamonds  own 437 (≥60), others 0/0
+  ok   tokens: tapping a row's frame selects that row  [0,1,2]
+  ok   no page errors
+
+  all loadout checks passed
+   (loadout: 29.0 s)
+
+all 1 harnesses ran

@@ -1,0 +1,50 @@
+[
+  {
+    "path": "js/braid.js",
+    "exit_code": 0,
+    "output": "",
+    "sha256": "17f27fdcae6ce1ed53aa49db814df31578cfda792efd54a46fdcc385b26118c4"
+  },
+  {
+    "path": "js/game.js",
+    "exit_code": 0,
+    "output": "",
+    "sha256": "021cfaca35dfd405f8e06f7de8f2ae204e9aa82edeaa62eed9cc45835bb79453"
+  },
+  {
+    "path": "js/gravehorn.js",
+    "exit_code": 0,
+    "output": "",
+    "sha256": "a9c1f770c57b4f341608a5432e149da11ed9e52c4d7805f0c8cd3bbc0f00d73d"
+  },
+  {
+    "path": "js/purification.js",
+    "exit_code": 0,
+    "output": "",
+    "sha256": "a058dab68d899f2c8c02a45a0c66f789cf8e69f732a4187aef60ea2896a899a3"
+  },
+  {
+    "path": "tests/run.cjs",
+    "exit_code": 0,
+    "output": "",
+    "sha256": "fa18f6b1d3238d7125f4137b418f6a0da76807ebe1dedbfaeae93577e11f7095"
+  },
+  {
+    "path": "tests/campaign-ch1.cjs",
+    "exit_code": 0,
+    "output": "",
+    "sha256": "f0454c82490eb24d4588473889db96f7a2e1b0d4de323bdf420c7ed8cdaf5e4e"
+  },
+  {
+    "path": "tests/purification-controls.cjs",
+    "exit_code": 0,
+    "output": "",
+    "sha256": "fce0c25e93b2fa66b2b08b2cf08edaf6fa3189c5b95d45a82a6f103ff918fdab"
+  },
+  {
+    "path": "tests/purification-save.cjs",
+    "exit_code": 0,
+    "output": "",
+    "sha256": "201b2069c54824683cbd9feba756ed2b81fa55442ff5b75396c95dbbe2a6026f"
+  }
+]

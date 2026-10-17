@@ -1,0 +1,7 @@
+
+── cave-passage  — real cave traversal and reciprocal gate walks
+{"passes":[{"id":"CV1","centre":14,"dir":-1,"x":287.1766666666664,"end":288,"ok":true},{"id":"CV1","centre":14,"dir":1,"x":611.5,"end":608,"ok":true},{"id":"CV1B","centre":9,"dir":-1,"x":124.49999999999964,"end":128,"ok":true},{"id":"CV1B","centre":9,"dir":1,"x":451.50000000000045,"end":448,"ok":true},{"id":"CV2","centre":22,"dir":-1,"x":541.1766666666674,"end":544,"ok":true},{"id":"CV2","centre":22,"dir":1,"x":867.499999999998,"end":864,"ok":true},{"id":"CV2","centre":48,"dir":-1,"x":1372.499999999996,"end":1376,"ok":true},{"id":"CV2","centre":48,"dir":1,"x":1699.500000000004,"end":1696,"ok":true}],"doors":[{"from":"CV1B","to":"CV2","accepted":true,"arrived":"CV2","x":372},{"from":"CV2","to":"CV1B","accepted":true,"arrived":"CV1B","x":1108}]}
+PASS: real player crosses cave pockets both ways and completes onward/return gate walks
+   (cave-passage: 1.0 s)
+
+all 1 harnesses ran

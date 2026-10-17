@@ -1,0 +1,63 @@
+{
+  "scope": "Staged 844x390 gameplay rendering; injected save/positions/states, not real-input traversal",
+  "errors": [],
+  "a2": {
+    "wolf": {
+      "x": 642,
+      "y": 460,
+      "kind": "crawler",
+      "w": 28,
+      "h": 20
+    },
+    "enemies": [
+      {
+        "kind": "crawler",
+        "x": 642,
+        "y": 460
+      },
+      {
+        "kind": "flier",
+        "x": 963,
+        "y": 202
+      },
+      {
+        "kind": "guard",
+        "x": 1473,
+        "y": 458
+      },
+      {
+        "kind": "hopper",
+        "x": 1667,
+        "y": 456
+      }
+    ],
+    "build": "a2e6994d283e"
+  },
+  "bound": {
+    "pose": "down",
+    "class": null,
+    "rim": false
+  },
+  "gh": {
+    "class": "purple",
+    "eye": [
+      590.5479993191065,
+      413.88872803760535,
+      0,
+      0
+    ],
+    "eyeN": 1,
+    "eyeDraw": 4,
+    "rendererSource": true
+  },
+  "gh2": {
+    "class": "purple",
+    "eye": [
+      594.1665041928395,
+      402.8878319952409,
+      0,
+      0
+    ],
+    "eyeN": 1
+  }
+}

@@ -274,13 +274,13 @@ the Eye's own heavy trooper, posted in the quarry (CV3) to guard the raw marble
 RHINOCEROS, about 2.2× her height at the shoulder and 3.6× her height long. A
 war machine, not an animal in armour: riveted gunmetal and blackened bronze
 plate, a heavy shoulder hump of layered armour, hazard-red markings, one
-glowing RED eye per side in a deep brow slot, a mouth grille. TWO horns sit in
+purple-lit eye per side (emission supplied by runtime, not baked into plates) in a deep brow slot, a mouth grille. TWO horns sit in
 SOCKETS on the snout: a huge curved front horn and a short rear horn — each
 horn is a separate weapon with a small rocket nozzle hidden in its base,
 because his horns LEAVE HIS BODY as missiles and slot back in.
 
 **Palette, in words:** gunmetal grey, blackened bronze, oiled steel; hazard red
-stripes; eyes and nozzle glow RED-ORANGE; horn tips bone-ivory. Phase 2 adds
+stripes; boss eyes PURPLE (runtime emission); nozzle exhaust RED-ORANGE; horn tips bone-ivory. Phase 2 adds
 molten red-orange cracks and jet vents. No cyan anywhere until he is beaten.
 
 **Rules for every plate:** strict SIDE VIEW facing LEFT, pure flat black
@@ -302,7 +302,7 @@ match). Separate parts must be complete where they are hidden by the body
 | 11 | `tail.webp` | short armoured tail | gpt edit |
 | 12–15 | `body2`, `head2`, `horn_big2`, `horn_small2` | PHASE 2 "advanced": armour plates blown open, molten red cracks, jet vents along the spine, horns war-tipped red | gpt edits of 2/3/5/6 |
 | 16 | `assets/manhua/ch1/game/gh_intro_a.webp` | panel: he bursts out of the quarry dust in front of the glowing marble rock, towering over the tiny cat (canon element `467c8e08…`) | nano_banana_pro 2k 16:9 |
-| 17 | `…/gh_intro_b.webp` | panel: close-up of his head, red eye, horn raised, sneering (caption: he introduces himself) | nano 2k 16:9 |
+| 17 | `…/gh_intro_b.webp` | panel: close-up of his head, purple eye, horn raised, sneering (caption: he introduces himself) | nano 2k 16:9 |
 | 18 | `…/gh_phase2.webp` | panel: his armour bursts open, both horns ignite | nano 2k 16:9 |
 | 19 | `…/gh_down.webp` | panel: beaten, big horn snapped, he backs into the rock wall vowing the Eye will come | nano 2k 16:9 |
 

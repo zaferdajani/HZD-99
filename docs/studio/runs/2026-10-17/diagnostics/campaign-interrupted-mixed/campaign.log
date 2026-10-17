@@ -1,0 +1,106 @@
+[00:00] BOOT cleared browser storage; difficulty row 0; video off
+[00:00] ROOM - -> 
+[00:00] STATE null -> MENU
+[00:01] FRAMES median 17 ms -> planner step 1/60, game time 1.00x wall
+[00:01] MENU choose "newgame"
+[00:01] STATE MENU -> CUT
+[07:08]   . A2 x=1421 y=383 vx=0 air cores=1/7 volts=0 mission=marble held=ArrowDown
+[07:09] STUCK trying to reach the loose floor in A2 at x=1421,y=444
+[07:09] FRAME 017-stuck-A2.png
+[07:10] STATE PLAY -> DEAD
+[07:10] DEATH #1 in A2 (save deaths 1)
+[07:10] HURT 1 -> 0 in A2 (nearest hopper at 25 px)
+[07:10] SCRAP 101 -> 0
+[07:11] ROOM A2 -> A0B  at x=890
+[07:11] STATE DEAD -> PLAY
+[07:11] TOAST Your husk still stands where you fell — it kept what you were carrying.  (Scrap Meadows)
+[07:11] PLAN room A0B: 33 standable tiles, 432 moves (62 ms)
+[07:14] DOOR up at 115 -> A0
+[07:16]   . A0B x=102 y=427 vx=0 on cores=7/7 volts=33 mission=marble held=
+[07:18] ROOM A0B -> A0  at x=387
+[07:18] FRAMES median 50 ms -> planner step 1/30, game time 0.94x wall
+[07:18] PACE sim 56.6 s per 60 s wall (pace dial / slow frames)
+[07:18] PLAN room A0: 80 standable tiles, 1125 moves (46 ms)
+[07:24]   . A0 x=1965 y=412 vx=195 on cores=7/7 volts=33 mission=marble held=
+[07:25] ROOM A0 -> A1  at x=25
+[07:26] PLAN room A1: 92 standable tiles, 1411 moves (135 ms)
+[07:34]   . A1 x=1711 y=426 vx=340 on cores=7/7 volts=33 mission=marble held=ArrowRight
+[07:35] PLAN room A2: 116 standable tiles, 1727 moves (251 ms)
+[07:35] ROOM A1 -> A2  at x=135
+[07:36] DOWN-STRIKE at the loose floor (tiles 12-14)
+[07:38] ROOM A2 -> A5  at x=422
+[07:38] FLAG +taughtBreak
+[07:38] FLAG +taughtFloor
+[07:39] PLAN room A5: 58 standable tiles, 764 moves (48 ms)
+[07:39] TOAST Chalk arrows — the old quarrymen marked their road to the marble.
+[07:39] FLAG +pgMarks
+[07:41] FLAG +sc_A5_5
+[07:41] SCRAP 0 -> 30
+[07:41] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it.
+[07:42]   . A5 x=1176 y=430 vx=195 on cores=7/7 volts=33 mission=marble held=Space
+[07:42] RUBBLE strike (hp 6)
+[07:42] TOAST Chalk arrows — the old quarrymen marked their road to the marble. / Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[07:43] RUBBLE strike (hp 5)
+[07:43] RUBBLE strike (hp 4)
+[07:44] RUBBLE strike (hp 3)
+[07:44] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer.
+[07:44] RUBBLE strike (hp 2)
+[07:45] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer.
+[07:45] RUBBLE strike (hp 1)
+[07:45] TOAST Something is calling from behind the fallen rock. STRIKE it. / The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[07:45] FLAG +rubbleA5
+[07:45] DOOR up at 1106 -> CV1
+[07:47] TOAST The pile shifts. The sound behind it comes closer. / The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[07:47] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[07:49] TOAST The rock gives way — the tunnel is open, and it is breathing.
+[07:50] ROOM A5 -> CV1  at x=167
+[07:50] STATE PLAY -> PANELS
+[07:50] MANHWA cave panel 1/3
+[07:50]   . CV1 x=167 y=427 vx=0 on cores=7/7 volts=33 mission=marble held=
+[07:51] MANHWA cave panel 2/3
+[07:52] MANHWA cave panel 3/3
+[07:53] STATE PANELS -> PLAY
+[07:53] PLAN room CV1: 74 standable tiles, 806 moves (19 ms)
+[07:56] FIGHT crawler (hp 83) in CV1
+[00:51] STATE CUT -> DIFF
+[00:51] DIFFICULTY row 0 chosen through the menu (the easiest preset — disclosed assist)
+[00:51] FRAME 000-difficulty.png
+[00:52] ROOM - -> W1  at x=96
+[00:52] STATE DIFF -> PANELS
+[00:52] MANHWA wake panel 1/5
+[00:52] OBJECTIVE "Reach the city gates"
+[00:52] CHIP move |  | 
+[00:52] SAVEPOINT null -> W1
+[00:52] WEAPON null -> claws
+[00:52]   . W1 x=96 y=423 vx=0 air cores=7/7 volts=33 tut=move/null@-1 mission=undefined held=
+[07:57] HURT 7 -> 6 in CV1 (nearest crawler at 77 px)
+[07:58]   . CV1 x=599 y=465 vx=0 on cores=6/7 volts=55 mission=marble held= threat={"k":"crawler","x":612,"y":476,"w":28,"h":20,"hp":55,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[00:53] MANHWA wake panel 2/5
+[00:54] MANHWA wake panel 3/5
+[08:00] FIGHT crawler (hp 23) in CV1
+[08:00] HURT 6 -> 5 in CV1 (nearest crawler at 28 px)
+[00:55] MANHWA wake panel 4/5
+[00:55] MANHWA wake panel 5/5
+[08:01] TOAST Something is calling from behind the fallen rock. STRIKE it.
+[00:57] STATE PANELS -> PLAY
+[00:57] CHIP move | Move | Walk right toward the light
+[08:04] FIGHT crawler (hp 9) in CV1
+[01:00] TOAST POWER FAULT → SYSTEM RESTART
+[01:00]   . W1 x=96 y=427 vx=0 on cores=7/7 volts=33 tut=move/MOVE@-1 mission=undefined held=
+[08:06]   . CV1 x=1081 y=433 vx=-63 air cores=5/7 volts=88 mission=marble held=ArrowLeft threat={"k":"crawler","x":1130,"y":476,"w":28,"h":20,"hp":9,"mech":null,"calm":false,"st":null,"wt":0,"sg":null}
+[01:01] FRAMES median 33 ms -> planner step 1/30, game time 1.01x wall
+[01:01] PACE sim 56.3 s per 60 s wall (pace dial / slow frames)
+[08:06] TOAST The pile shifts. The sound behind it comes closer.
+[08:06] RUBBLE strike (hp 5)
+[08:07] RUBBLE strike (hp 4)
+[01:02] FLAG +woke
+[01:02] MISSION opening (objective: "Reach the city gates")
+[08:07] RUBBLE strike (hp 3)
+[08:08] RUBBLE strike (hp 2)
+[01:03] CHIP out | Leave | The door has been open a long time — walk out
+[01:03] FLAG +tutI
+[01:03] FLAG +tutId
+[08:08] RUBBLE strike (hp 1)
+[08:09] TOAST The pile shifts. The sound behind it comes closer. / The rock gives way — the tunnel is open, and it is breathing.
+[08:09] FLAG +rubbleCV1B
+[08:09] DOOR up at 1111 -> CV1B
