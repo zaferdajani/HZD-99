@@ -45,10 +45,14 @@ const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 
 const OUT = process.env.CAMPAIGN_OUT || path.join(__dirname, 'out', 'campaign-ch1');
-fs.mkdirSync(OUT, { recursive: true });
-fs.mkdirSync(path.join(OUT, 'frames'), { recursive: true });
 const LOGF = path.join(OUT, 'campaign.log');
-fs.writeFileSync(LOGF, '');
+// Contract/planner checks import the helpers after the real campaign. Importing
+// them must not create output or erase that completed run's evidence.
+if (require.main === module) {
+  fs.mkdirSync(OUT, { recursive: true });
+  fs.mkdirSync(path.join(OUT, 'frames'), { recursive: true });
+  fs.writeFileSync(LOGF, '');
+}
 const MAX_MS = (+process.env.CAMPAIGN_MAX_MIN || 55) * 60000;   // inside run.cjs's 60-minute budget
 // 0 = the easiest preset (most cores, softest machines); disclosed in the log
 const DIFF = process.env.CAMPAIGN_DIFF == null ? 0 : +process.env.CAMPAIGN_DIFF;

@@ -1,0 +1,145 @@
+
+── combat-impact-input  — real keyboard tap and held charge through the normal game loop in a staged arena
+AssertionError [ERR_ASSERTION]: held real input reaches charge threshold
+    at /workspace/scratch/b4e9aa23d77e/HZD-99/tests/combat-impact-input.cjs:28:9
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:502:9) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+FAILED: AssertionError [ERR_ASSERTION]: held real input reaches charge threshold
+    at /workspace/scratch/b4e9aa23d77e/HZD-99/tests/combat-impact-input.cjs:28:9
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:502:9) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+   (combat-impact-input: 7.3 s)
+
+── script-route  — the story script draws the route the game plays
+PASS script-route: forge < sage < CHIME < NULLFANG in the script, the revelation is in the sage's section, the ruling is recorded, and the reward unlocks match
+   (script-route: 0.1 s)
+
+── mobile-platform  — the shipped touch recognizer and the two-state pause, in both built pages
+PASS mobile-platform: both built pages carry the recognizer; held fingers release, cancels are never taps, the stick centres, a throwing capture does not eat the touch, and the lifecycle pauses and resumes in pairs {
+  'index.html': 'longPress+longPressEnd',
+  'odyssey.html': 'longPress+longPressEnd'
+}
+   (mobile-platform: 3.4 s)
+
+── winch-purpose  — the jammed winch arm blocks the road, every strike knocks scrap she collects, the burst lifts the arm; reloads and NOSTOS unaffected
+ok   the strike lesson is running at the jammed winch  {"step":"atk","calm":true,"angle":0.6302615582492755,"tipX":580.1762220055142,"tipUp":16.408300809091486,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   the jammed arm is down across the road (its end low, west of the base)  {"step":"atk","calm":true,"angle":0.6302615582492755,"tipX":580.1762220055142,"tipUp":16.408300809091486,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   walking east she is stopped at the arm, on the booth side  {"step":"atk","calm":true,"angle":0.6302615582492755,"tipX":580.1762220055142,"tipUp":16.408300809091486,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   ...and where it stops her the strike is ready (the chip names ATTACK)  {"step":"atk","calm":true,"angle":0.6302615582492755,"tipX":580.1762220055142,"tipUp":16.408300809091486,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   a jump does not carry her over the jam  {"pc":567.8589339323496,"cx":656}
+  ok   pushing on the arm says why the road is shut  {"said":["The jammed winch arm blocks the road."],"want":"The jammed winch arm blocks the road."}
+  ok   a body already past the base is never pulled back through it  {"stayed":true,"east":856.3611111111102,"cx":656}
+  ok   the strike lesson finishes on a real strike at the winch  "burst"
+  ok   strikes knock scrap out (one piece per strike, capped at 4 per save)  {"rows":[{"hurt":false,"hp":20,"flag":1},{"hurt":false,"hp":2,"flag":2},{"hurt":false,"hp":1,"flag":3},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4}],"flag":4,"live":[{"x":537,"y":456},{"x":494,"y":463},{"x":484,"y":462},{"x":458,"y":461}],"scrap0":0,"stillJammed":true,"step":"burst"}
+  ok   strikes alone never stop the jammed winch  {"rows":[{"hurt":false,"hp":20,"flag":1},{"hurt":false,"hp":2,"flag":2},{"hurt":false,"hp":1,"flag":3},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4}],"flag":4,"live":[{"x":537,"y":456},{"x":494,"y":463},{"x":484,"y":462},{"x":458,"y":461}],"scrap0":0,"stillJammed":true,"step":"burst"}
+  ok   the knocked scrap lands on her side of the arm  {"n":5,"worth":15,"gained":15,"left":0,"sides":[true,true,true,true,true]}
+  ok   she collects every piece as ordinary scrap  {"n":5,"worth":15,"gained":15,"left":0,"sides":[true,true,true,true,true]}
+  ok   a burst let go far from the winch does not pass the lesson  {"burstDone":false,"disabled":false,"step":"burst","said":["Too far — let the burst go beside the winch."],"want":"Too far — let the burst go beside the winch."}
+  ok   ...and says why  {"burstDone":false,"disabled":false,"step":"burst","said":["Too far — let the burst go beside the winch."],"want":"Too far — let the burst go beside the winch."}
+  ok   a burst beside the winch stops it  {"burstDone":true,"disabled":true,"paid":12,"said":["The winch stops — its arm lifts clear of the road."],"want":"The winch stops — its arm lifts clear of the road.","a0":0.14888454351580735}
+  ok   ...and says so  {"burstDone":true,"disabled":true,"paid":12,"said":["The winch stops — its arm lifts clear of the road."],"want":"The winch stops — its arm lifts clear of the road.","a0":0.14888454351580735}
+  ok   the burst still pays the winch's salvage once (12)  {"burstDone":true,"disabled":true,"paid":12,"said":["The winch stops — its arm lifts clear of the road."],"want":"The winch stops — its arm lifts clear of the road.","a0":0.14888454351580735}
+  ok   the arm visibly lifts (over several frames, never back down)  {"samples":[0.109,-0.491,-1.05,-1.05,-1.05,-1.05],"angle":-1.05,"tipUp":168.4557640750117,"cx":656}
+  ok   ...and comes to rest clear of the road  {"samples":[0.109,-0.491,-1.05,-1.05,-1.05,-1.05],"angle":-1.05,"tipUp":168.4557640750117,"cx":656}
+  ok   after the burst the road is open: she walks past the winch  {"pc":1206.3611111111102,"cx":656,"step":"node"}
+  ok   reloaded after the burst the winch is still stopped and its arm up  {"disabled":true,"angle":-1.05,"raised":-1.05,"pc":1517.6944444444478,"cx":656}
+  ok   ...and nothing blocks the road  {"disabled":true,"angle":-1.05,"raised":-1.05,"pc":1517.6944444444478,"cx":656}
+  ok   a save with the burst behind her is never blocked  {"jammed":true,"blocking":false,"pc":1517.6944444444478,"cx":656}
+  ok   after the tutorial: no barrier, no scrap from the winch  {"blocking":false,"knocked":0,"pc":1517.6944444444478,"cx":656}
+  ok   no page errors (CLAWBYTE)  []
+  ok   NOSTOS: no yard winch, nothing knocks scrap, nothing blocks  {"hero":true,"winch":false,"knock":false}
+  ok   no page errors (NOSTOS)  []
+
+PASS winch-purpose: the jammed arm blocks the road, every strike knocks scrap she collects, the burst lifts the arm and opens the way; reloads and NOSTOS unaffected
+   (winch-purpose: 5.8 s)
+
+── panels  — approved manhwa crops at story moments: once, safe, readable, skippable, replayable
+── panels — the approved manhwa at story moments
+
+  ok   no manhwa page is fetched at boot
+  ok   every crop lies inside an approved page (or the Conduits backdrop)
+  ok   every caption and label exists in all five languages
+  ok   captions are translated, not English copies
+  ok   the map covers the chapter (≥ 13 sequences: the eight scene groups the pages lacked are drawn)  16
+  ok   the marble, the maintenance door, the revelation, the break, the fight, the letter and the hatch are all in the map
+  ok   the marble panels play in CV3 at their event  PANELS marble
+  ok   the passage panels play in GA1T at their event  PANELS passage
+  ok   the break panels play in A2 at their event  PANELS break
+  ok   the break panels play in A3 at their event  PANELS break
+  ok   an old save is not handed the marble, the door or the break as a recap  {"past":{"ratchet":1,"cave":1,"forge":1,"sage":1,"chime":1,"wake":1,"letter":1,"drawer":1,"marble":1,"passage":1,"break":1},"seen":{"bay":1,"gate":1},"k":16}
+  ok   ...nor the wake or the letter  {"ratchet":1,"cave":1,"forge":1,"sage":1,"chime":1,"wake":1,"letter":1,"drawer":1,"marble":1,"passage":1,"break":1}
+  ok   his letter and drawer are no longer told after the repair  {"postHasLetter":false,"letterManual":true,"wakeManual":true}
+  ok   the wake and the letter are played by their moments, not by a room watch
+  ok   a new game holds the waking until its pages have played  {"pend":true}
+  ok   the wake pages open before her first step  PANELS wake
+  ok   ...beginning in the cradle  assets/manhua/ch1/game/w_cradle.webp
+  ok   ...and when they close, the waking itself runs  {"wake":true,"pend":false,"st":"PLAY"}
+  ok   reading the letter plays its pages  {"said":true,"st":"PANELS","id":"letter","dialog":false}
+  ok   ...and when they close the letter counts as read (the drawer lesson follows)  {"note":true,"dialog":false}
+  ok   ...and standing in CV3 plays nothing  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   leaving the service bay plays the bay panels in W2  PANELS W2 bay
+  ok   ...over the crossing: not one frame of W2 is played before them  0 frames
+  ok   ...and the crossing is finished by them, not resumed after  {"room":"W2","trans":false}
+  ok   it is marked seen (and saved) as it begins
+  ok   a caption reveals progressively  {"st":"PANELS","id":"bay","i":1,"ph":"show","done":false,"rev":5}
+  ok   the first confirm completes the caption and does not turn the page  {"st":"PANELS","id":"bay","i":1,"ph":"show","done":true,"rev":35}
+  ok   a read caption does not advance on its own  {"st":"PANELS","id":"bay","i":1,"ph":"show","done":true,"rev":35}
+  ok   a separate confirm advances  {"st":"PANELS","id":"bay","i":2,"ph":"show","done":false,"rev":0}
+  ok   holding the key skips the sequence back to play
+  ok   a revisit does not replay it  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   reloading the save does not replay it  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   the replay list holds only the seen sequence  ["bay"]
+  ok   the pause menu offers Story panels once one is seen
+  ok   replay plays it again from the list  {"st":"PANELS","id":"bay","i":0,"ph":"in","done":true,"rev":null}
+  ok   a replay hands back to the list, not the room
+  ok   nothing plays on arrival when no beat is due  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   never with a hostile in reach  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   never over a dialogue  {"st":"DIALOG","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   the gate panels play once the room is quiet (A0)
+  ok   ...the moment it is quiet, not after a settle  0.02 s
+  ok   a beat the save had already passed is marked past, not replayed  {"wake":1,"bay":1,"gate":1,"letter":1,"drawer":1,"ratchet":1,"cave":1,"marble":1,"forge":1}
+  ok   the lying-in-the-scrap panel shows only when the swipe took a core  [3,4]
+  ok   no teaser in A3  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   no teaser in A4  {"st":"PANELS","id":"free","i":1,"ph":"show","done":false,"rev":1}
+  ok   the chapter-two teaser plays over the crossing into the Data Conduits  PANELS ch2
+  ok   ...before a single frame of B1 is played  0 frames
+  ok   the teaser ends on the chapter title card
+  ok   jumping up through the hatch opens the teaser over the shaft  PANELS B1
+  ok   ...and when it closes, she can still steer onto B1's ledge  {"room":"B1","on":true,"feet":459,"st":"PLAY"}
+  ok   no page errors (desktop)
+  ok   reduced motion: no push or drift
+  ok   reduced motion: captions appear whole
+  ok   touch: a tap completes the caption  [{"st":"PANELS","id":"chime","i":0,"ph":"show","done":false,"rev":6},{"st":"PANELS","id":"chime","i":0,"ph":"show","done":true,"rev":22}]
+  ok   touch: a held finger skips  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   no page errors (touch)
+
+all passed
+   (panels: 52.5 s)
+
+── filmflow  — the opening plays as one film: no black, no caption freeze, between shots
+shots: intro1 intro2 intro3 intro4 intro5 intro6 intro7 intro8
+  ok   all eight shots play  8 / 8
+  ok   no frame of black between two shots
+  ok   the picture never stops between shots for more than 0.25 s  worst 0.10 s  [["intro2",0.06],["intro3",0.04],["intro4",0.09],["intro5",0.09],["intro6",0.05],["intro7",0.1],["intro8",0.05]]
+  ok   no shot but the last freezes on its caption
+  ok   no page errors
+
+OK — the opening plays as one film, shot into shot
+   (filmflow: 57.2 s)
+
+1 harness(es) failed

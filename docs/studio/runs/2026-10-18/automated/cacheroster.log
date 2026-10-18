@@ -1,0 +1,28 @@
+
+── cacheroster  — the Cache has machines to bend it: V1 and V2 spawn them with the moves, V1B and X1 spawn none
+── cacheroster — the Cache has machines to bend it
+
+  ok   V1 spawns what it declares on a finished run  bat+hopper (declared bat+hopper) at level 7
+  ok   ...and the spawned bat carries glint
+  ok   ...and the spawned hopper carries refract
+  ok   V2 spawns what it declares on a finished run  crawler+hopper (declared hopper+crawler) at level 7
+  ok   ...and the spawned crawler carries facet
+  ok   ...and the spawned hopper carries refract
+  ok   every spawned Cache machine holds only its own kingdom's moves  bat:glint hopper:refract hopper:refract crawler:facet
+  ok   a fresh save's Cache floor already buys every move (level 5, four points)  level 5, 4 pts
+  ok   V1B — the Kerf, the kingdom's NPC home — spawns nothing  0 spawned
+  ok   X1 spawns no roster machine — the arena is PRISM's  0 spawned, boss prism
+  ok   the bat hangs under rock at dive height, not from a roof nine rows up  bat top row 5, rock at row 4
+  ok   ...and the rock is a spar grown from the roof, one object  depths across the roof: 1,2,3,4
+  ok   ...and the ground under the spar is the floor, never the spar's underside  ground at 467 (spar bottom 160, ledge 352, floor 480)
+  ok   V1's spawned bat shivers, dives and leaves splinters in the air  shiver true, dive true, 1 splinters in 78 frames
+  ok   V1's spawned hopper crouches and paints its landing  painted at 478 in 68 frames
+  ok   V2's spawned hopper paints its landing  in 21 frames
+  ok   V2's spawned crawler coils, lunges and throws the lance behind it  spawn x 655 dir -1: coil true, lunge true, lance true in 62 frames
+  ok   every hit she took was attributable to a Cache machine
+  ok   no page errors
+
+all good
+   (cacheroster: 21.7 s)
+
+all 1 harnesses ran

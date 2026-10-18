@@ -1,0 +1,28 @@
+
+── demo  — the free chapter ends at one door, and she can walk back in
+── demo — the free chapter ends where it says, and only there
+  ok   the boundary is OFF until somebody turns it on  DEMO_OFFER false
+  ok   every door out of the free chapter is closed  A3 T -> B1 (A->B)
+  ok   ...and it is the ONE door, not a wall around the zone  1 closed
+  ok   ...while every door inside the chapter stays open  26 interior routes untouched
+  ok   the free version really is ONE kingdom, by every route there is  A:17
+  ok   ...and the paid kingdoms are the rest of the game, not a scrap of it  17 of 77 rooms free (22%)
+  ok   a bought copy and a packaged app are never the demo  demoOn() checks both the purchase flag and the package
+  ok   it opens the screen rather than the next room  MORE
+  ok   ...and puts her back INSIDE the room first  y -4
+  ok   ...so closing it does not immediately re-open it  PLAY
+  ok   tapping a row selects that row  [0,1]
+  ok   ...and a tap beside the buttons selects nothing
+  ok   the ending screen has words in every language  en, ar, tr, zh, ru
+  ok   every frontier points at a kingdom the room really connects to  A3->B
+  ok   ...and shines through a real hole in that room's roof  A3 4/4 tiles open
+  ok   the light is actually visible in the frame  shaft adds 67 brightness (68,84,91 -> 116,156,172)
+  ok   the frontier stays readable through its breathing cycle  minimum gain 67.0 across seven light phases
+  ok   ...and it is the NEXT kingdom's colour, not this one's  blue gains 33 more than red
+  ok   ...and it is the shaft, not the whole room getting brighter  adds 67 inside the beam, 0 beside it
+  ok   the pool on the floor obeys the art probe  the probe takes 10.07 luminance off the landing patch at the brightest phase of the breath (one-instant reading: probe 99.0 vs normal 107.5)
+
+OK — one door closes, the chapter ends, and she can walk back in
+   (demo: 5.3 s)
+
+all 1 harnesses ran

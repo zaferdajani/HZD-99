@@ -1,0 +1,15 @@
+
+── folk  — the machine folk have jobs, and no two of them share a beat
+── folk — the machine folk have jobs, and no two of them share a beat
+
+  ok   every one of them actually turns  servo 5.0 angles/51 stops  mono 3.0 angles/31 stops  patch 5.0 angles/51 stops  lumen 4.0 angles/41 stops  sage 2.0 angles/21 stops  ratchet 5.0 angles/51 stops  kerf 3.0 angles/31 stops
+  ok   no repeating cycle of beats  worst patch: 112 beats, every 11th matches 10% (max 55%)
+  ok   no two of them move in step  lumen/kerf agree 23% of frames (max 50%)
+  ok   the job yields when she walks up  ok
+  ok   every work strip is reachable from the job  servo after 0.0s  mono after 0.0s  patch after 0.9s  sage after 11.6s  lumen after 0.0s  kerf after 0.0s
+  ok   ...and the strip advances while it plays  servo 25/16  mono 6/4  patch 16/11  sage 15/8  lumen 19/11  kerf 9/5
+
+all good
+   (folk: 1.5 s)
+
+all 1 harnesses ran

@@ -1,0 +1,10 @@
+{
+  "scope": "Actual module import in isolated subprocess; not gameplay.",
+  "existingLogPreserved": false,
+  "absentOutputRemainsAbsent": false,
+  "importExitCodes": [
+    0,
+    0
+  ],
+  "importErrors": []
+}

@@ -1,0 +1,109 @@
+
+── panels  — approved manhwa crops at story moments: once, safe, readable, skippable, replayable
+browserContext.newPage: Target page, context or browser has been closed
+Browser logs:
+
+<launching> /tmp/clawbyte-18-browser/run.cjs --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-uF5MGX --remote-debugging-pipe --no-startup-window
+<launched> pid=2559
+[pid=2559][err] [1018/102659.305277:ERROR:../net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)
+[pid=2559][err] [1018/102707.898043:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102709.574708:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102710.033925:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102711.278631:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102711.650624:INFO:CONSOLE:49564] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (49564)
+[pid=2559][err] [1018/102711.779053:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102714.382995:INFO:CONSOLE:11069] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (11069)
+[pid=2559][err] [1018/102716.894616:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102733.102806:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102735.727740:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102739.024962:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102742.017832:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102750.854364:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102752.187783:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102752.841528:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+    at boot (/workspace/scratch/b4e9aa23d77e/HZD-99/tests/panels.cjs:33:26)
+    at async /workspace/scratch/b4e9aa23d77e/HZD-99/tests/panels.cjs:374:28 {
+  log: []
+}
+FAILED: ── panels — the approved manhwa at story moments
+
+  ok   no manhwa page is fetched at boot
+  ok   every crop lies inside an approved page (or the Conduits backdrop)
+  ok   every caption and label exists in all five languages
+  ok   captions are translated, not English copies
+  ok   the map covers the chapter (≥ 13 sequences: the eight scene groups the pages lacked are drawn)  16
+  ok   the marble, the maintenance door, the revelation, the break, the fight, the letter and the hatch are all in the map
+  ok   the marble panels play in CV3 at their event  PANELS marble
+  ok   the passage panels play in GA1T at their event  PANELS passage
+  ok   the break panels play in A2 at their event  PANELS break
+  ok   the break panels play in A3 at their event  PANELS break
+  ok   an old save is not handed the marble, the door or the break as a recap  {"past":{"ratchet":1,"cave":1,"forge":1,"sage":1,"chime":1,"wake":1,"letter":1,"drawer":1,"marble":1,"passage":1,"break":1},"seen":{"bay":1,"gate":1},"k":16}
+  ok   ...nor the wake or the letter  {"ratchet":1,"cave":1,"forge":1,"sage":1,"chime":1,"wake":1,"letter":1,"drawer":1,"marble":1,"passage":1,"break":1}
+  ok   his letter and drawer are no longer told after the repair  {"postHasLetter":false,"letterManual":true,"wakeManual":true}
+  ok   the wake and the letter are played by their moments, not by a room watch
+  ok   a new game holds the waking until its pages have played  {"pend":true}
+  ok   the wake pages open before her first step  PANELS wake
+  ok   ...beginning in the cradle  assets/manhua/ch1/game/w_cradle.webp
+  ok   ...and when they close, the waking itself runs  {"wake":true,"pend":false,"st":"PLAY"}
+  ok   reading the letter plays its pages  {"said":true,"st":"PANELS","id":"letter","dialog":false}
+  ok   ...and when they close the letter counts as read (the drawer lesson follows)  {"note":true,"dialog":false}
+  ok   ...and standing in CV3 plays nothing  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   leaving the service bay plays the bay panels in W2  PANELS W2 bay
+  ok   ...over the crossing: not one frame of W2 is played before them  0 frames
+  ok   ...and the crossing is finished by them, not resumed after  {"room":"W2","trans":false}
+  ok   it is marked seen (and saved) as it begins
+  ok   a caption reveals progressively  {"st":"PANELS","id":"bay","i":1,"ph":"show","done":false,"rev":5}
+  ok   the first confirm completes the caption and does not turn the page  {"st":"PANELS","id":"bay","i":1,"ph":"show","done":true,"rev":35}
+  ok   a read caption does not advance on its own  {"st":"PANELS","id":"bay","i":1,"ph":"show","done":true,"rev":35}
+  ok   a separate confirm advances  {"st":"PANELS","id":"bay","i":2,"ph":"show","done":false,"rev":0}
+  ok   holding the key skips the sequence back to play
+  ok   a revisit does not replay it  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   reloading the save does not replay it  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   the replay list holds only the seen sequence  ["bay"]
+  ok   the pause menu offers Story panels once one is seen
+  ok   replay plays it again from the list  {"st":"PANELS","id":"bay","i":0,"ph":"in","done":true,"rev":null}
+  ok   a replay hands back to the list, not the room
+  ok   nothing plays on arrival when no beat is due  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   never with a hostile in reach  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   never over a dialogue  {"st":"DIALOG","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   the gate panels play once the room is quiet (A0)
+  ok   ...the moment it is quiet, not after a settle  0.05 s
+  ok   a beat the save had already passed is marked past, not replayed  {"wake":1,"bay":1,"gate":1,"letter":1,"drawer":1,"ratchet":1,"cave":1,"marble":1,"forge":1}
+  ok   the lying-in-the-scrap panel shows only when the swipe took a core  [3,4]
+  ok   no teaser in A3  {"st":"PLAY","id":null,"i":null,"ph":null,"done":null,"rev":null}
+  ok   no teaser in A4  {"st":"PANELS","id":"free","i":1,"ph":"show","done":false,"rev":10}
+  ok   the chapter-two teaser plays over the crossing into the Data Conduits  PANELS ch2
+  ok   ...before a single frame of B1 is played  0 frames
+  ok   the teaser ends on the chapter title card
+  ok   jumping up through the hatch opens the teaser over the shaft  PANELS B1
+  ok   ...and when it closes, she can still steer onto B1's ledge  {"room":"B1","on":true,"feet":463,"st":"PLAY"}
+  ok   no page errors (desktop)
+browserContext.newPage: Target page, context or browser has been closed
+Browser logs:
+
+<launching> /tmp/clawbyte-18-browser/run.cjs --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-uF5MGX --remote-debugging-pipe --no-startup-window
+<launched> pid=2559
+[pid=2559][err] [1018/102659.305277:ERROR:../net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)
+[pid=2559][err] [1018/102707.898043:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102709.574708:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102710.033925:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102711.278631:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102711.650624:INFO:CONSOLE:49564] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (49564)
+[pid=2559][err] [1018/102711.779053:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102714.382995:INFO:CONSOLE:11069] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (11069)
+[pid=2559][err] [1018/102716.894616:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102733.102806:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102735.727740:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102739.024962:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102742.017832:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102750.854364:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102752.187783:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+[pid=2559][err] [1018/102752.841528:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+    at boot (/workspace/scratch/b4e9aa23d77e/HZD-99/tests/panels.cjs:33:26)
+    at async /workspace/scratch/b4e9aa23d77e/HZD-99/tests/panels.cjs:374:28 {
+  log: []
+}
+
+   (panels: 56.9 s)
+
+1 harness(es) failed

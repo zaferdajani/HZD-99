@@ -1,0 +1,105 @@
+
+── crestfight  — the expensive seals change how she fights: each attack block measured with every weapon, drawn, one style at a time, in five languages
+── crestfight — the expensive seals change how she fights, with every weapon, and she can see it
+
+  seals with an attack block (2+ sockets): claws, plate, over, phantom, ground, nine
+
+  AS PLAYED  (opener, vs the same weapon with no seal)
+  seal    weapon    active   recov   reach   width      kb    stop    step  cut px    rim
+  -       claws     0.1667    0.26      86      72     310    0.05      96       0      -
+  -       single    0.1667    0.26    88.8      72     310    0.05      96       0      -
+  -       dual      0.1667    0.26     105   104.4     310    0.05      96       0      -
+  -       joined    0.1667    0.26    99.9      81     310    0.05      96       0      -
+  claws   claws     0.1667   0.299   107.5    64.8     310    0.05      96     605  107.5
+  plate   claws     0.1833   0.325      86    97.2     434   0.065      96    1309   85.5
+  over    claws     0.1333   0.182    73.1      72   232.5    0.03      96     984   72.5
+  phantom claws     0.1667   0.286    77.4      72     310    0.05     240     878   77.5
+  ground  claws     0.1667   0.286      86    82.8     403    0.05       0    1080   85.5
+  nine    claws     0.1667    0.26      86      72     310    0.05      96     794   85.5
+  claws   single    0.1667   0.299     111    64.8     310    0.05      96     602  110.5
+  plate   single    0.1833   0.325    88.8    97.2     434   0.065      96    1299   88.5
+  over    single    0.1333   0.182   75.48      72   232.5    0.03      96     981   75.5
+  phantom single    0.1667   0.286   79.92      72     310    0.05     240     868   79.5
+  ground  single    0.1667   0.286    88.8    82.8     403    0.05       0    1090   88.5
+  nine    single    0.1667    0.26    88.8      72     310    0.05      96     788   88.5
+  claws   dual      0.1667   0.299  131.25   93.96     310    0.05      96    1301  130.5
+  plate   dual      0.1833   0.325     105  140.94     434   0.065      96    2488  104.5
+  over    dual      0.1333   0.182   89.25   104.4   232.5    0.03      96    2066   89.5
+  phantom dual      0.1667   0.286    94.5   104.4     310    0.05     240    1801   94.5
+  ground  dual      0.1667   0.286     105  120.06     403    0.05       0    2304  104.5
+  nine    dual      0.1667    0.26     105   104.4     310    0.05      96    1685  104.5
+  claws   joined    0.1667   0.299  124.88    72.9     310    0.05      96     755  124.5
+  plate   joined    0.1833   0.325    99.9  109.35     434   0.065      96    1629   99.5
+  over    joined    0.1333   0.182   84.91      81   232.5    0.03      96    1230   84.5
+  phantom joined    0.1667   0.286   89.91      81     310    0.05     240    1064   89.5
+  ground  joined    0.1667   0.286    99.9   93.15     403    0.05       0    1350   99.5
+  nine    joined    0.1667    0.26    99.9      81     310    0.05      96     985   99.5
+  ok   claws x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   claws x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   claws x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   claws x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   plate x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   plate x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   plate x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   plate x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   over x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   over x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   over x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   over x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   phantom x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   phantom x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   phantom x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   phantom x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   ground x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   ground x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   ground x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   ground x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   nine x claws: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   nine x single: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   nine x dual: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   nine x joined: active, recovery, reach, width, shape, knockback, hit-stop, step, recoil, edge probe and drawn cut as stated
+  ok   without a seal no edge is drawn (the cut is the weapon's own)  0/0/0/0
+  ok   claws is a trade, not a pure upgrade (gains and pays)  {"t":1,"cd":1.15,"R":1.25,"half":0.9,"kb":1,"freeze":1,"step":1,"recoil":1,"chain":3,"down":"straight","shape":{"slash":"reach","finisher":"reach"},"tint":"#2dff1e"}
+  ok   plate is a trade, not a pure upgrade (gains and pays)  {"t":1.2,"cd":1.25,"R":1,"half":1.35,"kb":1.4,"freeze":1.3,"step":1,"recoil":1,"chain":3,"down":"diag","shape":{"slash":"slam","finisher":"slam"},"tint":"#5c7aa8"}
+  ok   over is a trade, not a pure upgrade (gains and pays)  {"t":0.8,"cd":1,"R":0.85,"half":1,"kb":0.75,"freeze":0.6,"step":1,"recoil":1,"chain":3,"down":"straight","shape":null,"tint":"#ff9be0"}
+  ok   phantom is a trade, not a pure upgrade (gains and pays)  {"t":1,"cd":1.1,"R":0.9,"half":1,"kb":1,"freeze":1,"step":2.5,"recoil":1,"chain":3,"down":"straight","shape":null,"tint":"#b8a0ff"}
+  ok   ground is a trade, not a pure upgrade (gains and pays)  {"t":1,"cd":1.1,"R":1,"half":1.15,"kb":1.3,"freeze":1,"step":0,"recoil":0,"chain":3,"down":"straight","shape":null,"tint":"#16a596"}
+  ok   nine is a trade, not a pure upgrade (gains and pays)  {"t":1,"cd":1,"R":1,"half":1,"kb":1,"freeze":1,"step":1,"recoil":1,"chain":2,"down":"straight","shape":null,"tint":"#69872d"}
+  ok   claws: the drawn edge is longest for the long reach and shortest for the quick swipes; the slam is the heaviest  rim claws 107.5 / plain 85.5 / over 72.5; px plate 1309 / over 984
+  ok   single: the drawn edge is longest for the long reach and shortest for the quick swipes; the slam is the heaviest  rim claws 110.5 / plain 88.5 / over 75.5; px plate 1299 / over 981
+  ok   dual: the drawn edge is longest for the long reach and shortest for the quick swipes; the slam is the heaviest  rim claws 130.5 / plain 104.5 / over 89.5; px plate 2488 / over 2066
+  ok   joined: the drawn edge is longest for the long reach and shortest for the quick swipes; the slam is the heaviest  rim claws 124.5 / plain 99.5 / over 84.5; px plate 1629 / over 1230
+  ok   claws: the plain string is jab, jab, finisher; the two-beat seal goes jab, finisher  base 0 1 2 0, nine 0 2 0 2
+  ok   claws: the plate's down-strike is the diagonal pogo (45 degrees forward, strikes ahead-below, rebounds forward); plain is straight down  {"base":{"s0":{"ax":0,"ay":1,"shape":"down"},"hit":false,"pogo":false,"fwd":0},"plate":{"s0":{"ax":1,"ay":1,"shape":"diag"},"hit":true,"pogo":true,"fwd":340}}
+  ok   single: the plain string is jab, jab, finisher; the two-beat seal goes jab, finisher  base 0 1 2 0, nine 0 2 0 2
+  ok   single: the plate's down-strike is the diagonal pogo (45 degrees forward, strikes ahead-below, rebounds forward); plain is straight down  {"base":{"s0":{"ax":0,"ay":1,"shape":"down"},"hit":false,"pogo":false,"fwd":0},"plate":{"s0":{"ax":1,"ay":1,"shape":"diag"},"hit":true,"pogo":true,"fwd":340}}
+  ok   dual: the plain string is jab, jab, finisher; the two-beat seal goes jab, finisher  base 0 1 2 0, nine 0 2 0 2
+  ok   dual: the plate's down-strike is the diagonal pogo (45 degrees forward, strikes ahead-below, rebounds forward); plain is straight down  {"base":{"s0":{"ax":0,"ay":1,"shape":"down"},"hit":false,"pogo":false,"fwd":0},"plate":{"s0":{"ax":1,"ay":1,"shape":"diag"},"hit":true,"pogo":true,"fwd":340}}
+  ok   joined: the plain string is jab, jab, finisher; the two-beat seal goes jab, finisher  base 0 1 2 0, nine 0 2 0 2
+  ok   joined: the plate's down-strike is the diagonal pogo (45 degrees forward, strikes ahead-below, rebounds forward); plain is straight down  {"base":{"s0":{"ax":0,"ay":1,"shape":"down"},"hit":false,"pogo":false,"fwd":0},"plate":{"s0":{"ax":1,"ay":1,"shape":"diag"},"hit":true,"pogo":true,"fwd":340}}
+  ok   two seals worn: the one taking the most power sets the style; between equals the one seated first; one-socket seals never do  claws+nine→nine  plate+claws→plate  claws+plate→claws  sprint+claws→claws  siphon+sprint→null  over+ground+nine→nine
+  ok   ...and the swing really is that seal's (claws+plate reaches further than plate+claws)  far edge 86 vs 107.5
+  ok   claws: in the running game the seal's edge is drawn on the slash layer, and not without one  with plate 2 passes over 3 frames; plain 0
+  ok   single: in the running game the seal's edge is drawn on the slash layer, and not without one  with plate 4 passes over 2 frames; plain 0
+  ok   dual: in the running game the seal's edge is drawn on the slash layer, and not without one  with plate 6 passes over 3 frames; plain 0
+  ok   joined: in the running game the seal's edge is drawn on the slash layer, and not without one  with plate 6 passes over 3 frames; plain 0
+  ok   every seal's fighting line, style name and the style notes exist and are translated in all five languages
+  ok   the English line names each percentage the block applies
+  ok   Gear [en]: the selected seal shows its fighting line, its row says it sets the style, the overruled one says which does, the shop names it  {"fightShown":true,"active":true,"held":true,"widest":815.568359375,"shop":true}
+  ok   Gear [ar]: the selected seal shows its fighting line, its row says it sets the style, the overruled one says which does, the shop names it  {"fightShown":true,"active":true,"held":true,"widest":844.56640625,"shop":true}
+  ok   Gear [tr]: the selected seal shows its fighting line, its row says it sets the style, the overruled one says which does, the shop names it  {"fightShown":true,"active":true,"held":true,"widest":834.080078125,"shop":true}
+  ok   Gear [zh]: the selected seal shows its fighting line, its row says it sets the style, the overruled one says which does, the shop names it  {"fightShown":true,"active":true,"held":true,"widest":336.109375,"shop":true}
+  ok   Gear [ru]: the selected seal shows its fighting line, its row says it sets the style, the overruled one says which does, the shop names it  {"fightShown":true,"active":true,"held":true,"widest":818.9248046875,"shop":true}
+  ok   the item card that hands a seal over says what it does to her attacks  +1 core while equipped. Fighting style — Heavy slam: 35% wider, 40% more push, slower to s
+  ok   every seal's cut (4 aims x 2 beats x 4 weapons) keeps its shape inside its box, 80-100% of it  192 shapes; reach:0.876 diag:0.955 slam:0.954 slash:0.88 finisher:0.911
+  ok   docs/CRESTS.md carries the attack-block table with the numbers in the code
+  ok   every seal's tint is clear of the 15 registered hues (ΔE > 30) and of each other (ΔE > 25)
+  ok   the registry records the seals' attack blocks and their tints (§2, Crest cuts)
+  ok   parry lime stays in js/parry.js alone
+  ok   NOSTOS: the hero swings through the same block (the plate widens his cut and slows his recovery)  {"isHero":true,"base":{"crest":null,"half":30,"atkCD":0.26,"line":"Fighting style — Heavy slam: 35% wider, 40% more push, slower to swing and recover; the down-strike goes diagonal.","name":"Bronze Cuirass"},"plate":{"crest":"plate","half":40.5,"atkCD":0.325,"line":"Fighting style — Heavy slam: 35% wider, 40% more push, slower to swing and recover; the down-strike goes diagonal.","name":"Bronze Cuirass"}}
+  ok   no page errors
+
+OK — every expensive seal changes how she fights, the same way with every weapon, and she can see which
+   (crestfight: 34.6 s)
+
+all 1 harnesses ran

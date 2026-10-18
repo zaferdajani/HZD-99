@@ -189,11 +189,11 @@ const G = {
   // A STORY LINE IS NOT A TOAST (js/overlay.js storyToast): the sentences the
   // story turns on become cards she acknowledges; the rest live long enough to
   // be read, and inside a menu they are said where the menu can show them.
-  toast(text) {
+  toast(text, scope) {
     if (this.meet) return;
     if (typeof storyToast === 'function' && storyToast(text)) return;
     if (typeof menuMsgSet === 'function') menuMsgSet(text);
-    this.toasts.push({ text, t: typeof toastLife === 'function' ? toastLife(text) : 3 });
+    this.toasts.push({ text, t: typeof toastLife === 'function' ? toastLife(text) : 3, ...(scope ? {scope} : {}) });
   },
   breakTile(tx, ty) {
     // The first cave is below the hub, but the chapter first sends the player

@@ -25,6 +25,12 @@ supercharge when she wakes. The first thing she ever buys, Ratchet's volt pack,
 wires both. Until then the ring of charge at the top of the screen fills and
 cannot be spent. §2.5 is that scene.
 
+**Review sync (2026-10-18):** the required road is blade → Meadow Sage → CHIME →
+NULLFANG. Alpha is an optional branch, not a room on that road. Boss infection
+eyes are purple; ordinary infected eyes are red. §2.16 includes the owner's
+deliberate hold-to-free ritual. Its completion/save wording describes the review
+candidate's corrected source, not a claim that the branch has reached production.
+
 ---
 
 ## 0. THE CAST — WHO THEY ARE AND WHAT THEY LOOK LIKE
@@ -42,17 +48,19 @@ cannot be spent. §2.5 is that scene.
 | **The Nine-Lives Sage** | On its ninth life. Knows GLACIERE, the Archives' sentinel, guards the Kernel Key. | A sage in a carrel; the one warm floor in a frozen kingdom. | D1B |
 | **Lumen** | The Lost Nymph. Glows harder when afraid; always glowing. | A small luminous unit whose glow keeps one pocket of the Nest clean. | E1B, the Hollow |
 | **The seven chamber sages** | The kingdoms' protectors, kneeling under the Song two rooms behind each guardian. | Kneeling figures with a black halo and an ember rim while infected; the halo goes blue when purified. | Every G\*D deep chamber |
-| **NULLFANG** | Guardian of the Meadows. A virus-infected robot lion with whelps. | Lion-frame, red light behind the eyes. | A2 (the meeting), A4 (the fight) |
-| **GRAVEHORN** | *First Soldier of the Eye* (owner, 2026-10-11). Not infected by accident — the Eye's own heavy trooper, posted on the raw marble so the blade that cures is never made. Not cured, not killed: beaten, he backs into the rock and swears the Eye will come. The first voice to NAME the Eye. | A huge armoured robot rhinoceros, gunmetal and blackened bronze, hazard-red stripes, one red eye per side in a deep brow slot; two horns in sockets that leave his head as missiles and fly back (ART_QUEUE §2bf). Phase two: armour blown open, molten red cracks, both horns lit. | CV3, on the marble |
+| **NULLFANG** | Guardian of the Meadows. A virus-infected robot lion with whelps. | Lion-frame, purple infection light behind the eyes. | A2 (the meeting), A4 (the fight) |
+| **GRAVEHORN** | *First Soldier of the Eye* (owner, 2026-10-11). Not infected by accident — the Eye's own heavy trooper, posted on the raw marble so the blade that cures is never made. Not cured, not killed: beaten, he backs into the rock and swears the Eye will come. The first voice to NAME the Eye. | A huge armoured robot rhinoceros, gunmetal and blackened bronze, hazard-red stripes, one purple boss eye per side in a deep brow slot; two horns in sockets that leave his head as missiles and fly back (ART_QUEUE §2bf). Phase two: armour blown open, molten red cracks, both horns lit. | CV3, on the marble |
 | **THE ALPHA** | Leader of the wolf pack. Not a guardian; not the Eye's. | A great wolf-frame with the pack behind it. | A10 |
 | **TALONHOST** | Guardian of the Conduits. The Iron Eagle. | Hangs from above, drops and slams. | B4 |
 | **The Prism Prowler** | The rival robo-cat. The one machine the network never indexed, so the Song never touched it — never infected. Keeps Kerf's second blade. | A clear, blue crystal cat under a skin of virus-red; the same body either way. | X1 |
 | **FURNACE CHOIR** | Guardian of the Foundry. A corrupted mecha dragon. | Roosts high; breaks into parts when it falls — wings, then head, then body. | C3 |
-| **GLACIERE** | Guardian of the Archives — *THE FROZEN SENTINEL* (never "Purifier": that is the sword's name). The corrupted unicorn of the void. | Ice and void; shatters into parts on death. | D3 |
+| **GLACIERE** | Guardian of the Archives — *THE FROZEN SENTINEL* (never "Purifier": that is the sword's name). The corrupted unicorn of the void. | Ice and void; the Purifier's ritual frees the guardian alive, never kills it. | D3 |
 | **The Eye's five constructs** | CHIME, CARRIER, KILN-MOTH, LATTICE, THE LENS. Built by the source of the Song, not infected — there is nobody inside. | Instruments, not monsters; each built around a Power Cell. | A9, B8, C7, D6, E6 |
 
-**The three rules of the picture** (from the art direction): red light behind the
-eyes means infected; nothing down here is new, everything is somebody's afterwards;
+**The three rules of the picture** (from the art direction): infection light behind
+the eyes is red for ordinary creatures and purple for bosses, with finite motion
+trails that end after the emitter stops or is cleansed; nothing down here is new,
+everything is somebody's afterwards;
 the deeper she goes, the less it looks built and the more it looks grown.
 
 ---
@@ -278,7 +286,7 @@ Deaf System's:
 
 In CV3 the chalk arrows end in a long cavern — and something steps out of the dark at
 the far end of it, between her and the stone: GRAVEHORN, an armoured rhino the size of a
-room, one red eye, two horns. The exits close behind her. He speaks:
+room, one purple boss eye, two horns. The exits close behind her. He speaks:
 > *So the little cleaner woke up.*
 > *I am GRAVEHORN, First Soldier of the Eye. It posted me on this stone.*
 > *The Eye is the one who stole your Mother's Song. I guard what it took.*
@@ -313,7 +321,7 @@ Song knows it: it posted a soldier on the stone. GRAVEHORN is the first of the E
 stand in front of her and say whose he is — the story's enemy gets a name, and a reason to
 come back.
 **Panels.** The mouth breathing; the beacon; GRAVEHORN bursting out of the quarry dust in
-front of the glowing stone, towering over her (gh_intro_a); his head, red eye, horn raised
+front of the glowing stone, towering over her (gh_intro_a); his head, purple eye, horn raised
 (gh_intro_b); the armour bursting open, both horns lit (gh_phase2); beaten, the big horn
 cracked, backing into the rock (gh_down); the pillar, white, taller than her; the storm on
 her chassis; the shard falling; her aura coming on in the dark.
@@ -371,8 +379,10 @@ and it fires the moment she stands up in that chamber:
 > *NULLFANG is still resisting. But CHIME writes the command back whenever he breaks it.*
 > *Take the climb above the meadow. Silence that bell, then return to his enclosure. I will keep this end quiet.*
 
-**What it says is what is true when she stands up** (`sageRevealLines`). The climb is
-open from the hub, so a player can silence the bell first; the sage then says instead:
+**What it says is what is true when she stands up** (`sageRevealLines`). On a fresh
+run the climb above the hub is warded until the Sage is free: she cannot silence the
+bell first. Compatibility dialogue remains for an older save that already silenced
+the bell; the sage then says instead:
 *NULLFANG is still resisting — and the bell that wrote the command back into him is
 already silent. You did that.* / *Go to his enclosure past the camp. With the bell
 quiet, the binding will not come back. I will keep this end quiet.* (An old save that
@@ -396,8 +406,9 @@ the halo turning blue; the sage's hand pointing up at the climb.
 ### 2.13 The Chime — A8, A9, A11 (the Eye's first construct)
 
 **Where.** The climb above the hub, and an arena at the top. She goes because the sage
-sent her, not because the map ran out of rooms — though the climb is open from the
-start, and a player who rings it first is told so by the sage (§2.12).
+sent her, not because the map ran out of rooms. The climb's ward opens when the
+Meadow Sage is free; compatibility dialogue for old out-of-order saves is not an
+alternate route available to a fresh run (§2.12).
 **What happens.** *CHIME — it is singing at you.* It hovers, rings, sings a note,
 falls. It is destroyed, not tamed: *Destroyed. There was nobody in it.* It leaves the
 Power Cell it was built around. Behind its wall: a secret coin and the scrap its
@@ -410,16 +421,24 @@ he breaks it. Silence is the first thing she ever takes away from the Eye.
 
 ### 2.14 The Alpha's den — A10
 
-**Where.** On the road, not off it: the first fight you can lose. Hulk middens at both
-ends of a clean floor.
+**Where.** An optional detour through the marked depth door in the meadow hub (A2,
+0.84 of the room), reachable with the forged blade. A2 → A3 → A4 stays on the main
+road and does not pass through A10. Hulk middens sit at both ends of a clean arena.
+Ratchet offers **The lost wardens** after the forge: before the song broke, the
+wolves escorted lost workers home; now their Alpha's corrupted howl turns that
+protective pack against them. The offer names both the pack's rescue and the supply
+cache beyond the den, and explicitly calls this a detour. The quest log and marked
+den guide the player; accepting or completing it is never a lion-lair prerequisite.
 **What happens.** *THE ALPHA — the pack answers to this.* Three hundred points of wolf.
 There is no fork here; taming is the only ending. *THE PACK IS YOURS — It yielded.
 Every wolf in the machine world knows it now — they will not raise a tooth to you
 again.* A Power Cell, sixty scrap, and every wolf in every room turns friendly. A cave
 mouth opens in the den: the Pack Sage's grotto (*It ran with the wolves before the
 song. It gives what a pack values: mending, and something for the road.*)
-**Story.** The first thing she wins is not a kill. The pack was never the Song's; it
-was a pack, and it answers to whoever stands.
+**Story.** This optional victory is a rescue, not a kill. The wolves are still
+following the leader that once protected the workers; freeing that leader changes
+the pack's allegiance everywhere. The cache and Pack Sage beyond it make the
+detour's reward distinct from the mandatory marble quarry.
 
 ### 2.15 The camp — A3, A12
 
@@ -465,13 +484,32 @@ and silence the bell before returning to NULLFANG.*
 **What happens.** *NULLFANG, THE VIRUS BEAST.* *It remembers the corridor.* Two
 phases — at half health it stalks faster, crouches shorter, chains its leaps. It is
 the one guardian that can be dazed: *⚡ NULLFANG is reeling — hit it NOW.* When it is
-down it kneels, still looking at her — and the blade frees it. **There is no kill
-choice in the shipped game** (`TAME_ONLY`, js/braid.js: the fork machinery records a
-mercy on the spot) and **no freeing without the blade**: a guardian brought down by
+down it kneels, still looking at her — but the final combat hit does not free it.
+**There is no kill choice in the current robot story** (`TAME_ONLY`, js/braid.js)
+and **no freeing without the blade**: a guardian brought down by
 claws alone is held together by the song at a sliver of health — *Claws cannot cleanse
-the song. The PURIFIER can.* — and nothing is written to the Braid until the blade does
-it.
-- → the purification film → *The virus is destroyed — NULLFANG is free. He seems to like
+the song. The PURIFIER can.*
+
+**The deliberate rescue** (`js/purification.js`): the screen offers **Free the
+guardian**. The player must release the previous input, then hold the actual
+Interact binding or the dedicated on-screen button for 1.6 seconds. Releasing
+before completion resets the gathering; losing focus or entering phone portrait
+cannot complete the hold. Pure white flakes converge on the raised, glowing white
+blade, followed by the slash, brief white impact/hold and shake (flash/shake
+suppressed in reduced motion), then a fade through black into the lion's
+purification film. Dark black-red virus energy flows into the sword and is
+neutralized. The film's ending fades out rather than cutting directly to play.
+The film/in-engine fallback returns to the stage with the same guardian alive,
+friendly and golden. The raised-blade body performance still needs authored pose
+review; its VFX is not proof that the full arm animation exists.
+
+The review candidate commits the mercy ledger and spoil with guardian completion,
+not on the final hit or while the film is still running (`purificationCommitChoice`
+from `G.onBossDead`). Reloading an unfinished ritual remains retryable without
+appending another mercy. Existing legacy choices are preserved. This is corrected
+source behavior on the review branch, not a deployment assertion.
+
+- → completion, restoration dialogue and rewards → *The virus is destroyed — NULLFANG is free. He seems to like
   you.* → **NULLFANG'S OATH** — *Once each room, the blow that would break you is
   answered instead — it comes out of the dark and roars them off you.*
 

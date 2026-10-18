@@ -1,0 +1,14 @@
+
+── campaign-contract  — chapter-one campaign certification fails closed for missing, late, partial and error-bearing evidence
+ok   clean complete route certifies  {"result":"complete","certified":true,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   missing required passage fails  {"result":"complete-without-required-panels","certified":false,"missing":["passage"],"missed":[],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   a timed-out story beat fails  {"result":"complete-with-missed-panels","certified":false,"missing":[],"missed":["cave"],"orderErrors":[],"pageErrors":0,"full":true}
+  ok   a page error fails  {"result":"complete-with-page-errors","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":1,"full":true}
+  ok   a late cave introduction fails chronology  {"result":"complete-with-panel-order-errors","certified":false,"missing":[],"missed":[],"orderErrors":["marble","forge"],"pageErrors":0,"full":true}
+  ok   restored segment is diagnostic, never a full certificate  {"result":"partial-diagnostic","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":false}
+  ok   developer stop is diagnostic, never a full certificate  {"result":"partial-diagnostic","certified":false,"missing":[],"missed":[],"orderErrors":[],"pageErrors":0,"full":false}
+
+all campaign certificate checks passed
+   (campaign-contract: 1.5 s)
+
+all 1 harnesses ran

@@ -1,0 +1,27 @@
+
+── frames  — every verb is a move, not one pose held for a quarter second
+── frames — a verb is a move, not a pose held for a quarter of a second
+
+  ok   claw_1 is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 49.6 / 52.1 / 0 / 50 / 39.3 %, mean 38.2, biggest step 52.1%
+  ok   claw_2 is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 59.6 / 57.4 / 53.2 / 44.1 / 58.8 %, mean 54.6, biggest step 59.6%
+  ok   finisher is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 56.4 / 61.8 / 69.5 / 64 / 65.5 %, mean 63.4, biggest step 69.5%
+  ok   burst is a move rather than a pose held for the whole blow  frame-to-frame silhouette change 33 / 24.6 / 17.5 / 49.4 / 65.7 %, mean 38, biggest step 65.7%
+  ok   air: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   down: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   claw_1: the strip is played whole, every cell the film holds  declared 5 cells, the sheet holds 5
+  ok   claw_2: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   finisher: the strip is played whole, every cell the film holds  declared 6 cells, the sheet holds 6
+  ok   burstLegacy: the strip is played whole, every cell the film holds  declared 12 cells, the sheet holds 12
+  ok   burst: the strip is played whole, every cell the film holds  declared 12 cells, the sheet holds 12
+  ok   every strip in the game is a sequence, not a flip-book of one picture  air 6c  down 6c  claw_1 5c  claw_2 6c  finisher 6c  burstLegacy 12c  burst 12c  servo 16c  mono 16c  patch 13c  sage 11c  lumen 10c  kerf 8c
+  ok   the jump arc is indexed by her own vertical speed  vy -770..+690 asked for cells 0.00,1.26,2.28,2.62,3.64,4.97
+  ok   a grounded transition is indexed by the clock the physics keeps  over its timer it asked for cells 0.00,1.00,2.50,4.00,4.90
+  ok   a spent clock hands the frame back to the pose cell
+  ok   and with no strip fired every state falls through to its pose
+  ok   every wired strip is reachable in the state that owns it
+  ok   no page errors
+
+OK — the verbs move, and the transition layer draws the cell its clock asks for
+   (frames: 28.8 s)
+
+all 1 harnesses ran

@@ -1,0 +1,6 @@
+
+── shadow-ground  — contact shadows follow real terrain and platforms
+PASS: shadows follow curved support, shelves, moving platforms and pits
+   (shadow-ground: 0.2 s)
+
+all 1 harnesses ran

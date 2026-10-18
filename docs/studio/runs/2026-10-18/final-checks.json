@@ -1,0 +1,30 @@
+{
+  "pinnedFiles": [
+    "index.html",
+    "odyssey.html",
+    "sw.js",
+    "assets/eyes.json",
+    "assets/lowres/alBite.webp"
+  ],
+  "pinnedDiskDrift": [],
+  "generatedPages": {
+    "index.html": {
+      "build": "7984b6ea8f08",
+      "sha256": "bc4430db55e21af54d25bfa112a93b3368ce7a501e5d2c33fc44523d5756ce2e"
+    },
+    "odyssey.html": {
+      "build": "7984b6ea8f08",
+      "sha256": "cb62aa09120eaa2f3f5f4e6feedfb82ca9d75fd87e6770b806c5f169872b99ab"
+    },
+    "forge.html": {
+      "build": "7984b6ea8f08",
+      "sha256": "389161f1a619ef621d3f9d253130554bc8895df8a87eec2d4eaf33a2cc5aa1b2"
+    },
+    "forge-odyssey.html": {
+      "build": "7984b6ea8f08",
+      "sha256": "ae3b887cb6115d02a7a629e355614718f8cdbbeb45812f7cad7bb8ff282bf834"
+    }
+  },
+  "scope": "Five selected HTTP files passed start/end checks; four generated pages checked locally. Not exhaustive live asset verification.",
+  "productionWrites": false
+}

@@ -11909,7 +11909,7 @@ function guardBreak(b, dt) {
     burst(cx, cy, 26, K.col, 340, 0.7, 260, 4, true);
     if (typeof roarWave === 'function') roarWave(cx, cy, K.col);
     if (typeof padRumble === 'function') padRumble(0.75, 0.6, 220);
-    G.toast(t('gd_open'));
+    G.toast(t('gd_open'), 'boss-opening');
   }
   if (b.st !== 'daze') return false;
   b.t -= dt;
@@ -12425,7 +12425,7 @@ class Boss {
             burst(this.cx(), this.y + 50, 26, '#d68cff', 340, 0.7, 260, 4, true);
             if (typeof roarWave === 'function') roarWave(this.cx(), this.y + 60, '#d68cff');
             if (typeof padRumble === 'function') padRumble(0.75, 0.6, 220);
-            G.toast(t('daze_open'));
+            G.toast(t('daze_open'), 'boss-opening');
           }
         }
         if ((this.dazeWin || 0) > 0) this.dazeWin -= dt;

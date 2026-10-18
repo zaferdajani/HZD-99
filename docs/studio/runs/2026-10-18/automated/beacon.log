@@ -1,0 +1,20 @@
+
+── beacon  — a marker lights the way TO a character, never over one
+── beacon — a marker lights the way TO a character, never over one
+
+  drawn body: box top 415.6517028808594, head 326.05170288085935 (k 2.6, 89.60000000000002px above the box)
+  torso: with marker {"mean":169.1,"sd":25.86}  without {"mean":169.1,"sd":25.86}
+  ok   paired control is the same scene and projected crop  repeat drift 0
+  ok   a deliberately broken full-body wash is rejected  {"mean":250.53,"sd":1.7}
+  ok   the marker does not wash the body out  torso mean +0 levels with the beacon lit (<= 8)
+  ok   the body keeps its own modelling under the marker  contrast retained 100% (>= 80%)
+  ok   the marker is anchored above the DRAWN head, not the collision box  the figure rises 89.60000000000002px above its box
+
+  phone 3x, box 583px, tier mid: backing 1539, target 1539
+  ok   the touch controller owns the layout in this run  TOUCH.enabled true
+  ok   the backbuffer is sized for the box the canvas is displayed in  backing/target 1
+
+OK — the shop shows its characters, at the size the screen has
+   (beacon: 9.8 s)
+
+all 1 harnesses ran

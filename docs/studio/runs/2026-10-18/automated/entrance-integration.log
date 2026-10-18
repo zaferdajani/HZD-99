@@ -1,0 +1,6 @@
+
+── entrance-integration  — painted entrances share world anchors without duplicate mouth overlays
+PASS painted cave/city thresholds follow world anchors through camera travel; no duplicate cave-mouth overlay
+   (entrance-integration: 5.1 s)
+
+all 1 harnesses ran

@@ -1,0 +1,51 @@
+
+── minis  — the Eye's five: they wake, telegraph, alternate, die and pay
+── minis — the Eye's five, and the grammar they all share
+  ok   every construct is placed in the world  chime, carrier, moth, lattice, lens
+
+  construct   room   wake   states seen                       tell%  still%
+  chime      A9     yes   idle,notewarn,note,rest,ringwarn,ring28%    14%
+  ok   chime: starts asleep and wakes when she arrives  start dorm
+  ok   chime: every attack has a wind-up named for it  note/ring
+  ok   chime: it uses BOTH of its moves, not one  note/ring
+  ok   chime: it spends real time telegraphing (>= 8%)  28%
+  ok   chime: it does not stand still (<= 40%)  14%
+  ok   chime: destroyed, never spared
+  ok   chime: and it pays exactly one cell  +1
+  carrier    B8     yes   idle,lungewarn,lunge,rest,tosswarn,toss31%    6%
+  ok   carrier: starts asleep and wakes when she arrives  start dorm
+  ok   carrier: every attack has a wind-up named for it  lunge/toss
+  ok   carrier: it uses BOTH of its moves, not one  lunge/toss
+  ok   carrier: it spends real time telegraphing (>= 8%)  31%
+  ok   carrier: it does not stand still (<= 40%)  6%
+  ok   carrier: destroyed, never spared
+  ok   carrier: and it pays exactly one cell  +1
+  moth       C7     yes   idle,dropwarn,drop,rest,cinderwarn,cinder28%    2%
+  ok   moth: starts asleep and wakes when she arrives  start dorm
+  ok   moth: every attack has a wind-up named for it  drop/cinder
+  ok   moth: it uses BOTH of its moves, not one  drop/cinder
+  ok   moth: it spends real time telegraphing (>= 8%)  28%
+  ok   moth: it does not stand still (<= 40%)  2%
+  ok   moth: destroyed, never spared
+  ok   moth: and it pays exactly one cell  +1
+  lattice    D6     yes   idle,spikewarn,spike,rest,growwarn,grow28%    4%
+  ok   lattice: starts asleep and wakes when she arrives  start dorm
+  ok   lattice: every attack has a wind-up named for it  spike/grow
+  ok   lattice: it uses BOTH of its moves, not one  spike/grow
+  ok   lattice: it spends real time telegraphing (>= 8%)  28%
+  ok   lattice: it does not stand still (<= 40%)  4%
+  ok   lattice: destroyed, never spared
+  ok   lattice: and it pays exactly one cell  +1
+  lens       E6     yes   idle,lungewarn,lunge,rest,beamwarn,beam25%    5%
+  ok   lens: starts asleep and wakes when she arrives  start dorm
+  ok   lens: every attack has a wind-up named for it  lunge/beam
+  ok   lens: it uses BOTH of its moves, not one  lunge/beam
+  ok   lens: it spends real time telegraphing (>= 8%)  25%
+  ok   lens: it does not stand still (<= 40%)  5%
+  ok   lens: destroyed, never spared
+  ok   lens: and it pays exactly one cell  +1
+
+OK — five constructs, one grammar, every one of them readable
+   (minis: 3.3 s)
+
+all 1 harnesses ran

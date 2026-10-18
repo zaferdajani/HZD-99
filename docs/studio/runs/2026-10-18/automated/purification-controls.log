@@ -1,0 +1,6 @@
+
+── purification-controls  — mobile hold/cancel, focus-loss safety and restored save
+PASS mobile touch hold/cancel, focus loss, accessible target size, saved restored guardian
+   (purification-controls: 3.6 s)
+
+all 1 harnesses ran

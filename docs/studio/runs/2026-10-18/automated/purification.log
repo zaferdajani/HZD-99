@@ -1,0 +1,23 @@
+
+── purification  — deliberate guardian rescue hold, cancellation, choreography and protected rewards
+{
+  state: 'DIALOG',
+  pure: true,
+  dead: true,
+  paid: true,
+  ledger: {
+    led: 'L',
+    trail: '',
+    tally: { L: 1, R: 0, X: 0 },
+    nodes: [ [Object] ],
+    seen: { 'U-CSDDQY': 1 },
+    kills: 0,
+    forks: 1
+  },
+  hidden: true,
+  ritual: false
+}
+PASS deliberate hold, cancellation, all guardian gates, staged choreography, single reward and restored actor
+   (purification: 23.9 s)
+
+all 1 harnesses ran

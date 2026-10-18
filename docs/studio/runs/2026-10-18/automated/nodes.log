@@ -1,0 +1,15 @@
+
+── nodes  — all eight Mind Nodes open a puzzle and pay out
+word riddles left in the build: undefined
+node 0 {"state":"TRIAL","game":"mem","level":1,"mode":"node","iq":10} -> {"state":"PLAY","iq":10,"flag":true}
+node 1 {"state":"TRIAL","game":"vis","level":1,"mode":"node","iq":10} -> {"state":"PLAY","iq":10,"flag":true}
+node 2 {"state":"TRIAL","game":"log","level":1,"mode":"node","iq":10} -> {"state":"PLAY","iq":10,"flag":true}
+node 3 {"state":"TRIAL","game":"mem","level":3,"mode":"node","iq":10} -> {"state":"PLAY","iq":10,"flag":true}
+node 4 {"state":"TRIAL","game":"vis","level":3,"mode":"node","iq":10} -> {"state":"PLAY","iq":10,"flag":true}
+node 5 {"state":"TRIAL","game":"log","level":4,"mode":"node","iq":10} -> {"state":"PLAY","iq":10,"flag":true}
+node 6 {"state":"TRIAL","game":"mem","level":5,"mode":"node","iq":15} -> {"state":"PLAY","iq":15,"flag":true}
+node 7 {"state":"TRIAL","game":"log","level":7,"mode":"node","iq":15} -> {"state":"TRIAL","iq":0,"flag":false}
+pageerrors: none
+   (nodes: 20.7 s)
+
+all 1 harnesses ran

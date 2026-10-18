@@ -1,0 +1,6 @@
+
+── voice-handoff  — foreground voice ownership across actions and charge
+PASS: vocal handoffs, uninterrupted foley, missing takes, charge ownership, damage and dialogue priority
+   (voice-handoff: 0.2 s)
+
+all 1 harnesses ran

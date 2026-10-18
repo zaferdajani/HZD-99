@@ -611,7 +611,7 @@ function ghStep(b, dt) {
       G.hitStop = Math.max(G.hitStop, 0.11);
       burst(b.cx(), b.y + 30, 24, '#ff7a6a', 320, 0.6, 240, 4, true);
       if (typeof roarWave === 'function') roarWave(b.cx(), b.y + 40, '#ff5f6d');
-      G.toast(t('gd_open'));
+      G.toast(t('gd_open'), 'boss-opening');
     }
   }
   // the Song's stagger (and any other) is an opening, never a move eaten

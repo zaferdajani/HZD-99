@@ -1,0 +1,20 @@
+
+── airattack  — a strike in the air is its own move, once it has one
+── airattack — a strike in the air is its own move, once it has one
+
+  ok   a grounded combo is untouched  claw_1,claw_2,finisher
+  ok   the charged burst still wins over everything  burst
+  ok   with no air sheet, an airborne strike keeps the animated combo  claw_1
+  ok   ...and so does a downward one, rather than dropping to a held pose  claw_1
+  ok   once an air sheet exists the airborne strike selects it  air
+  ok   ...and a downward one selects the down sheet  down
+  ok   ...without disturbing the grounded combo  claw_2
+  ok   she really does leave the ground in this test  2 airborne frames
+  ok   a real airborne attack records that it was airborne  true
+  ok   ...and carries its aim to the renderer  number
+  ok   no page errors
+
+all good
+   (airattack: 15.4 s)
+
+all 1 harnesses ran

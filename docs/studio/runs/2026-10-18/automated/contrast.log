@@ -1,0 +1,128 @@
+
+── contrast  — every hostile body and every guardian stands off the room it is placed in: silhouette edge contrast, room by room
+── contrast — every hostile body and every guardian reads off the room it stands in
+
+  ok   every kingdom has a rim tint (ABCDEX)
+  ok   rim A #ffe6d6 is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Repair green ΔE 35, own glow/edge ΔE 59
+  ok   rim B #fff0dc is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Repair green ΔE 31, own glow/edge ΔE 61
+  ok   rim C #fff0f0 is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Frost blue ΔE 31, own glow/edge ΔE 64
+  ok   rim D #ffd9c4 is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Repair green ΔE 40, own glow/edge ΔE 36
+  ok   rim E #fff0dc is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Repair green ΔE 31, own glow/edge ΔE 106
+  ok   rim X #fff0dc is no reserved hue (ΔE > 30) and not its kingdom's own light (ΔE > 30)  nearest reserved Repair green ΔE 31, own glow/edge ΔE 72
+    room   zone  creature              share   CR(med)  ΔE(med)   ring CR  ring ΔE   body L / ring L
+    A0     A     turret                  83%     2.19     24.3      2.00     21.8     65 / 44  
+    A1     A     crawler:wolf            84%     2.24     27.3      1.90     21.6     65 / 44  
+    A1     A     guard                   89%     3.32     36.5      2.94     31.6     66 / 35  
+    A6     A     flier                   67%     1.90     18.9      1.85     18.6     59 / 42  
+    A6     A     crawler:wolf            86%     2.48     27.0      2.26     25.1     64 / 40  
+    A6     A     turret                  82%     2.37     26.0      2.20     23.7     63 / 40  
+    A7     A     blob                    80%     2.29     26.1      2.01     20.2     60 / 40  
+    A7     A     turret                  75%     2.18     25.0      1.90     21.0     65 / 45  
+    A2     A     crawler:wolf            79%     2.07     25.2      1.93     20.8     63 / 43  
+    A2     A     flier                   70%     1.91     19.9      1.85     18.5     60 / 42  
+    A2     A     guard                   91%     3.67     39.7      3.12     34.2     70 / 35  
+    A2     A     hopper:wolf             83%     2.19     25.7      1.93     22.0     66 / 45  
+    A10    A     BOSS:alpha              83%     2.26     26.2      1.99     22.4     70 / 48  
+    A4     A     BOSS:glitch             67%     1.93     20.6      1.83     17.7     62 / 45  
+    B1     B     flier                   78%     1.94     21.1      1.90     20.0     64 / 46  
+    B1     B     surge                   70%     2.22     23.6      2.28     21.6     54 / 33  
+    B6     B     turret                  84%     2.56     27.9      2.35     25.1     62 / 38  
+    B6     B     hopper:wolf             87%     2.47     27.2      2.27     25.4     67 / 43  
+    B6     B     flier                   79%     2.12     22.7      2.00     20.9     62 / 42  
+    B2     B     turret                  82%     2.33     25.9      2.19     23.7     65 / 42  
+    B2     B     hopper:wolf             81%     2.24     24.8      2.07     22.3     64 / 43  
+    B2     B     surge                   67%     2.10     22.7      1.88     17.5     56 / 40  
+    B2     B     guard                   79%     2.46     27.0      2.25     24.3     65 / 41  
+    B4     B     BOSS:brood              77%     2.13     23.8      2.05     22.6     71 / 49  
+    V1     X     bat                     85%     2.22     23.8      2.14     23.3     65 / 43  
+    V1     X     hopper:cat              82%     2.31     26.2      2.04     24.2     70 / 46  
+    V2     X     hopper:cat              84%     2.48     27.7      2.20     25.3     68 / 43  
+    V2     X     crawler:cat             85%     2.56     28.2      2.29     25.8     67 / 42  
+    X1     X     BOSS:prism              71%     2.12     23.3      1.99     19.6     61 / 43  
+    C1     C     kiln                    75%     2.47     25.3      2.33     21.3     56 / 35  
+    C1     C     hopper:cat              88%     2.43     26.0      2.24     24.3     67 / 43  
+    C1     C     turret                  78%     2.29     24.4      2.07     20.3     61 / 41  
+    C5     C     turret                  80%     2.28     24.5      2.11     21.2     63 / 42  
+    C5     C     crawler:cat             81%     2.31     25.3      2.08     22.5     68 / 46  
+    C2     C     kiln                    72%     2.29     23.8      2.08     19.2     57 / 38  
+    C2     C     turret                  82%     2.42     25.9      2.18     22.5     64 / 42  
+    C2     C     hopper:cat              82%     2.26     24.6      2.05     21.6     67 / 45  
+    C2     C     guard                   80%     2.44     26.2      2.29     24.0     65 / 41  
+    C2     C     blob                    77%     2.32     25.4      2.05     19.8     61 / 42  
+    C3     C     BOSS:atlas              80%     2.21     24.1      2.03     22.0     69 / 47  
+    D2     D     rime                    63%     1.80     18.7      1.66     15.9     61 / 46  
+    D2     D     guard                   71%     2.12     23.2      1.90     20.8     63 / 44  
+    D2     D     hopper:cat              86%     2.26     26.0      1.99     23.4     65 / 43  
+    D2     D     turret                  76%     2.14     23.8      1.94     21.5     62 / 42  
+    D4     D     guard                   78%     2.07     23.8      2.07     22.2     63 / 42  
+    D4     D     rime                    82%     2.24     24.3      2.16     22.5     56 / 34  
+    D4     D     crawler:cat             82%     2.36     26.3      2.13     24.5     64 / 41  
+    D3     D     BOSS:zero               85%     2.17     24.6      2.07     23.7     69 / 47  
+    E1     E     snare                   68%     1.98     23.1      1.83     17.4     55 / 38  
+    E1     E     blob                    79%     2.33     27.7      2.15     22.1     60 / 39  
+    E1     E     hopper:cat              86%     2.21     27.5      2.06     22.1     65 / 43  
+    E4     E     blob                    78%     2.22     26.5      2.05     20.2     60 / 41  
+    E4     E     snare                   74%     2.28     24.1      2.08     20.3     57 / 37  
+    E4     E     crawler:cat             88%     2.69     29.0      2.39     26.5     65 / 39  
+    E2     E     turret                  83%     2.37     26.9      2.21     23.6     63 / 40  
+    E2     E     flier                   74%     2.23     23.2      2.08     21.2     60 / 39  
+    E2     E     guard                   78%     2.37     28.1      2.13     21.8     62 / 40  
+    E2     E     blob                    70%     2.07     24.5      1.86     17.8     60 / 43  
+    E2     E     hopper:cat              81%     2.20     27.2      2.05     22.0     66 / 45  
+    E3     E     BOSS:mother             71%     2.06     21.4      2.08     20.1     54 / 35  
+    A8     A     crawler:wolf            83%     2.24     26.2      1.94     21.9     67 / 45  
+    A8     A     flier                   85%     2.17     22.8      2.11     21.9     60 / 39  
+    A9     A     BOSS:chime              66%     1.79     21.4      1.65     16.8     70 / 54  
+    CV1    X     crawler:cat             74%     1.92     19.0      1.77     17.1     41 / 24  
+    CV1B   X     bat                     54%     1.71     15.4      1.61     14.1     43 / 29  
+    CV2    X     hopper:cat              80%     2.07     21.5      2.00     21.4     63 / 42  
+    CV2    X     crawler:cat             73%     1.90     18.7      1.78     17.1     41 / 25  
+    CV2    X     bat                     59%     1.68     15.8      1.68     15.1     42 / 28  
+    CV3    X     BOSS:horn               84%     2.00     19.8      1.94     19.1     46 / 27  
+    B7     B     turret                  84%     2.48     26.9      2.31     25.0     62 / 38  
+    B7     B     flier                   74%     2.07     22.0      1.98     20.6     62 / 42  
+    B7     B     blob                    75%     2.13     23.4      2.07     21.1     62 / 42  
+    B8     B     BOSS:carrier            83%     2.33     26.7      2.13     23.5     70 / 48  
+    C6     C     hopper:cat              88%     2.44     26.3      2.25     24.4     68 / 43  
+    C6     C     turret                  84%     2.48     26.2      2.29     23.8     64 / 41  
+    C6     C     blob                    80%     2.27     24.0      2.16     21.4     63 / 41  
+    C7     C     BOSS:moth               74%     2.23     25.0      2.05     21.4     70 / 49  
+    D5     D     blob                    72%     2.03     22.7      1.78     18.9     60 / 43  
+    D5     D     turret                  70%     1.92     21.7      1.79     20.4     62 / 45  
+    D5     D     flier                   78%     2.22     23.6      2.12     22.1     56 / 35  
+    D6     D     BOSS:lattice            86%     2.27     25.8      2.12     24.8     71 / 48  
+    E5     E     blob                    82%     2.31     26.5      2.14     21.6     61 / 40  
+    E5     E     hopper:cat              86%     2.30     28.0      2.14     23.4     65 / 42  
+    E5     E     turret                  85%     2.53     27.5      2.33     24.8     63 / 39  
+    E6     E     BOSS:lens               93%     2.55     29.2      2.42     27.1     69 / 43  
+    GA1T   X     bat                     71%     1.76     16.8      1.73     15.9     43 / 28  
+    GA1D   X     bat                     60%     1.72     15.4      1.69     15.2     42 / 27  
+    GA1D   X     sage                    92%     2.87     30.5      2.66     27.8     60 / 32  
+    GA2T   X     bat                     69%     1.77     16.1      1.73     15.7     42 / 27  
+    GA2D   X     bat                     68%     1.73     15.7      1.72     15.5     43 / 28  
+    GA2D   X     sage                    91%     2.90     30.6      2.70     28.2     60 / 32  
+    GB1T   X     bat                     66%     1.72     16.0      1.72     15.7     41 / 26  
+    GB1D   X     bat                     66%     1.72     15.7      1.70     15.4     42 / 28  
+    GB1D   X     sage                    93%     2.83     30.1      2.70     28.4     60 / 32  
+    GC1T   X     bat                     70%     1.76     16.3      1.74     15.9     42 / 27  
+    GC1D   X     bat                     73%     1.83     17.2      1.78     16.6     42 / 26  
+    GC1D   X     sage                    93%     2.90     30.5      2.73     28.8     60 / 31  
+    GD1T   X     bat                     78%     1.92     18.8      1.83     17.6     42 / 25  
+    GD1D   X     bat                     68%     1.76     16.4      1.74     15.9     42 / 27  
+    GD1D   X     sage                    91%     2.80     29.9      2.67     28.0     60 / 32  
+    GX1T   X     bat                     63%     1.72     15.9      1.71     15.5     41 / 27  
+    GX1D   X     bat                     75%     1.92     18.8      1.81     17.2     43 / 26  
+    GX1D   X     sage                    92%     2.88     30.8      2.69     28.1     60 / 32  
+    GE1T   X     bat                     62%     1.71     15.6      1.70     15.3     41 / 27  
+    GE1D   X     bat                     69%     1.78     16.8      1.73     15.8     42 / 27  
+    GE1D   X     sage                    92%     2.85     30.4      2.71     28.3     60 / 32  
+
+  ok   every placed body was measured (106 room × creature pairs)
+  ok   ...with its art landed, not its stand-in
+  ok   every body reads off its room: >= 50% of its silhouette edge at CR >= 1.6 or ΔE >= 25  worst 54%
+  ok   no page errors
+
+OK — every machine and every guardian stands off the room it is in
+   (contrast: 110.9 s)
+
+all 1 harnesses ran

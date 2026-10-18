@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-18",
+  "main_at_intake": "62d75d204c6f6264f25150bb419fc262ff2c18ea",
+  "integration_at_intake": "62d75d204c6f6264f25150bb419fc262ff2c18ea",
+  "parent": "84f44587fc57fcc00d1fc40fba1a6640636fc0c7",
+  "branch": "codex/studio-review-2026-10-18",
+  "build": "7984b6ea8f08",
+  "files": {
+    "js/game.js": "e8983ff8e8b8720ce1bddcaefa089106f67d37695e3fbc96e301f80e2e1d9258",
+    "js/entities.js": "9eaa3ce605a741d7f32b323000830a9dc47cb1d210c9bcd2ccac2b5800d430b8",
+    "js/gravehorn.js": "26ce309a8f56a592e12106802de7293a6c61e78e51af6f46a68fc771a40aae09",
+    "js/purification.js": "e3bba0182c3123c8e3d775b58d195e6fa5e11cc2fffbaa944989428b9c37ba7e",
+    "js/braid.js": "17f27fdcae6ce1ed53aa49db814df31578cfda792efd54a46fdcc385b26118c4",
+    "tests/run.cjs": "5a886d1196990467c8482e8bac97f8df49d4cf42b5b792d5760944047e15ceb0",
+    "tests/purification-notices.cjs": "3b742387a0d2b33aa333f0bd6367855b25dd08ef33729ca492002fb0d874049a",
+    "tests/purification-save.cjs": "201b2069c54824683cbd9feba756ed2b81fa55442ff5b75396c95dbbe2a6026f",
+    "tests/campaign-ch1.cjs": "9667873824b6be63f450d5e80964dac6e8085d97e087674e3ad8ef06f27213ef",
+    "docs/STORY_SCRIPT.md": "ca0b694eb57e38c753ca42713da3b85799a3685f36360842a165bf17fc901528"
+  },
+  "environment": {
+    "node": "v24.19.0",
+    "chromium": "153.0.8010.0",
+    "package": "@sparticuz/chromium 153.0.0",
+    "dependencies": "npm ci; repository lockfile unchanged",
+    "campaign_video": false,
+    "physical_devices": false
+  },
+  "scope": "Review branch only. Main/integration and live deployment not modified."
+}

@@ -1,0 +1,50 @@
+{
+  "scope": "Separate same-build unchanged-test reruns and read-only diagnostics; not an all-pass full suite.",
+  "checks": [
+    {
+      "name": "unchanged-subset",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "tests/run.cjs",
+        "combat-impact-input",
+        "mobile-platform",
+        "winch-purpose",
+        "panels",
+        "filmflow",
+        "script-route"
+      ],
+      "startedUTC": "2026-10-18T09:00:17.196Z",
+      "log": "rerun/unchanged-subset.log",
+      "exitCode": 1,
+      "signal": null,
+      "finishedUTC": "2026-10-18T09:02:26.841Z"
+    },
+    {
+      "name": "charge-diagnostic",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "/workspace/scratch/b4e9aa23d77e/HZD-99/docs/studio/runs/2026-10-18/charge-diagnostic.cjs"
+      ],
+      "startedUTC": "2026-10-18T09:02:26.848Z",
+      "log": "rerun/charge-diagnostic.log",
+      "exitCode": 0,
+      "signal": null,
+      "finishedUTC": "2026-10-18T09:02:34.849Z"
+    },
+    {
+      "name": "flier-diagnostic",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "/workspace/scratch/b4e9aa23d77e/HZD-99/docs/studio/runs/2026-10-18/flier-diagnostic.cjs"
+      ],
+      "startedUTC": "2026-10-18T09:02:34.850Z",
+      "log": "rerun/flier-diagnostic.log",
+      "exitCode": 0,
+      "signal": null,
+      "finishedUTC": "2026-10-18T09:02:41.072Z"
+    }
+  ],
+  "startedUTC": "2026-10-18T09:00:17.190Z",
+  "fullFinishedUTC": "2026-10-18T09:00:02.910268+00:00",
+  "finishedUTC": "2026-10-18T09:02:41.073Z"
+}

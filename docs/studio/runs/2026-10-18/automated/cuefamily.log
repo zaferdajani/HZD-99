@@ -1,0 +1,67 @@
+
+── cuefamily  — the things she is shot at with do not all sound alike
+── cuefamily — the things she is shot at with do not all sound alike
+
+    shoot     0.106s  attack 0s  bright   1619  peak 0.078
+    lob       0.466s  attack 0.02s  bright    530  peak 0.068
+    cinder    0.269s  attack 0s  bright   6587  peak 0.092
+    quill     0.151s  attack 0s  bright   4901  peak 0.036
+    shard     0.58s  attack 0s  bright   6408  peak 0.086
+    orbshot   0.37s  attack 0s  bright    830  peak 0.054
+    ringshot  0.33s  attack 0s  bright   1870  peak 0.073
+    lance     0.135s  attack 0s  bright   6860  peak 0.093
+    summon    0.47s  attack 0.051s  bright   2041  peak 0.037
+    erupt     0.335s  attack 0.002s  bright   3054  peak 0.158
+    castfire  0.58s  attack 0.001s  bright   2202  peak 0.084
+    castice   0.73s  attack 0.16s  bright   8725  peak 0.051
+    castnull  0.691s  attack 0s  bright    437  peak 0.124
+    castarc   0.53s  attack 0.003s  bright   1058  peak 0.088
+    snarecast 0.365s  attack 0.001s  bright   1299  peak 0.046
+    plume     0.644s  attack 0.002s  bright    216  peak 0.102
+    spikeup   0.29s  attack 0.001s  bright   2173  peak 0.128
+    icecolumn 0.365s  attack 0s  bright   5185  peak 0.093
+    lash      0.21s  attack 0.085s  bright   4440  peak 0.06
+    prison    1.467s  attack 0.24s  bright    335  peak 0.143
+    msong     1.129s  attack 0.001s  bright    755  peak 0.095
+    beamwarn  0.73s  attack 0s  bright   4808  peak 0.068
+    burstout  1.286s  attack 0s  bright   1094  peak 0.145
+    wreck     0.439s  attack 0s  bright   3982  peak 0.141
+    wreckbig  0.768s  attack 0s  bright   3130  peak 0.183
+    blast     0.35s  attack 0s  bright  12556  peak 0.1
+    shockring 0.575s  attack 0.001s  bright    812  peak 0.121
+    slam      0.384s  attack 0.003s  bright    651  peak 0.21
+    quake     1.006s  attack 0.003s  bright   2289  peak 0.183
+    crack     0.371s  attack 0s  bright    940  peak 0.168
+    beamfire  0.615s  attack 0s  bright   5296  peak 0.14
+    launch    0.216s  attack 0.001s  bright   1443  peak 0.124
+
+  ok   every cue in the family makes a sound  32 cues
+  ok   ...and no two of them are the same sound wearing two names  all 496 pairs separate
+  ok   the four elements gather differently enough to act on  fire 2202, ice 8725, null 437, arc 1058
+  ok   her burst does not sound like a thing dying  burst 1094 vs wreck 3130
+  ok   a creature arriving does not sound like a rifle  summon 0.47s vs shoot 0.106s
+  ok   ...and a lob is heaved, not fired  lob reaches half-peak at 0.02s, the bolt at 0s
+  ok   nothing in the family clips  all under 1.0
+
+    tell      0.22s  rise x1.42  weight 0.2
+    tellmid   0.29s  rise x1.42  weight 0.38
+    tellbig   0.37s  rise x1.5  weight 4.73
+
+  ok   every warning RISES, because that is what encodes time remaining  all 10 climb across the cue
+  ok   ...and the generic three get heavier with the thing making them, not different  weight 0.2 -> 0.38 -> 4.73
+
+    tell_glitch  0.28s  rise x1.5  weight   1.14  bright   1418
+    tell_brood   0.23s  rise x1.42  weight   0.21  bright   6033
+    tell_atlas   0.37s  rise x3.03  weight   0.78  bright   1342
+    tell_zero    0.36s  rise x3.82  weight    0.6  bright   3835
+    tell_prism   0.19s  rise x1.34  weight   0.15  bright   3620
+    tell_mother  0.45s  rise x1.9  weight   5.14  bright    651
+    tell_alpha   0.26s  rise x2.13  weight   0.73  bright   2081
+  ok   every guardian has a tell of its own  7 of 7
+  ok   ...and no two guardians warn with the same instrument  all 21 pairs separate
+  ok   ...and none of the new voices clips  loudest 0.09
+
+all good
+   (cuefamily: 2.9 s)
+
+all 1 harnesses ran

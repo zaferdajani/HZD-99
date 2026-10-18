@@ -1,0 +1,49 @@
+{
+  "build": "fbfa046c42b4",
+  "scope": "STAGED save/arena; not a campaign",
+  "entered": true,
+  "hint": "⚡ NULLFANG is reeling — hit it NOW",
+  "before": [
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    },
+    {
+      "text": "earned reward",
+      "t": 3
+    },
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    }
+  ],
+  "after": [
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    },
+    {
+      "text": "earned reward",
+      "t": 3
+    },
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    }
+  ],
+  "retry": [
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    },
+    {
+      "text": "earned reward",
+      "t": 3
+    },
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,14 @@
+
+── benchloop  — every one-way route (a drop she cannot climb back, a door with none behind it) still reaches a bench
+── benchloop — every one-way route loops back to a bench
+
+  --   bench rooms: A3 B3 D1 E2 A0B V2 C5B CV1B GA1 GA2 GB1 GC1 GD1 GX1 GE1
+  --   one-way routes found: W2->A0 (door: no door back) rest at A0B in 1  B2->V2 (B: no footing near the opening) rest at V2 in 0  C1->C2 (B: no footing near the opening) rest at D1 in 1  C2->D1 (B: no footing near the opening) rest at D1 in 0  D3->E1 (B: no footing near the opening) rest at E2 in 1  A9->A8 (B: no jump from 12 footings clears the lid) rest at A3 in 2  B7->B2 (B: no footing near the opening) rest at B3 in 1
+  ok   the graph has one-way routes to check  149 edges
+  ok   every one-way route can reach a bench again  7 routes, every one reaches a rest
+  ok   no page errors
+
+OK — wherever a one-way route lets her out, a bench is still within reach
+   (benchloop: 3.6 s)
+
+all 1 harnesses ran

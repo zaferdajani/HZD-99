@@ -1,0 +1,28 @@
+
+── shield  — the brace holds, the plate has a side, the hymn can be jumped
+── shield — the brace holds, the plate has a side, the hymn can be jumped
+
+{"guardUp":1,"frontCores":5,"frontKb":55,"behindCores":4,"afterThree":4,"broken":0.6,"guardWhileBroken":0,"guardAfter":1,"frontDenied":2,"behindLanded":18,"aboveLanded":18,"winded":0.75,"bossKind":"atlas","airCores":5,"groundCores":4,"bracedCores":5,"firstSt":"hymn","cd":6.5,"secondSt":"lobwarn"}
+  ok   holding GUARD raises the brace
+  ok   a blow she faces is STOPPED — no core lost  cores 5
+  ok   ...and it barely shoves her  vx 55
+  ok   a blow from behind the brace is cut, not stopped  cores 4
+  ok   the third held blow inside two seconds breaks the brace and lands  cores 4 breakT 0.6
+  ok   ...and the brace cannot be raised while broken  guardT 0
+  ok   ...but comes back a second on  guardT 1
+  ok   the machine's plate denies a blow from the front  took 2
+  ok   ...a blow from BEHIND bypasses shield, retaining chassis armor  took 18
+  ok   ...a blow from ABOVE bypasses shield, retaining chassis armor  took 18
+  ok   its winded window is at least half a second at full cunning  0.75 s
+  ok   the Furnace Choir stands in C3  atlas
+  ok   the hymn misses an airborne body  cores 5
+  ok   ...and takes a grounded, open one  cores 4
+  ok   ...and a grounded brace facing the bell holds  cores 5
+  ok   a cast arms the hymn cooldown  hymn cd 6.5
+  ok   ...and the next turn of the cycle lobs instead  lobwarn
+  ok   no page errors
+
+all good
+   (shield: 2.1 s)
+
+all 1 harnesses ran

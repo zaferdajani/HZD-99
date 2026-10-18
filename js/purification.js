@@ -56,6 +56,9 @@ function purificationBegin(b) {
  if (brNeedsBlade(b)) return true;
  if (G.purification) return true;
  purificationEnsureButton();
+ // Toast clocks pause outside PLAY. A combat opening must not survive the
+ // deliberate rescue and tell her to hit a freed guardian. Keep earned notices.
+ G.toasts = G.toasts.filter(tt => tt.scope !== 'boss-opening');
  b.hp = 1; b.forkAsked = true; b.vx = b.vy = 0; b.st = 'winded'; b.stagT = 0;
  player.vx = player.vy = 0;
  // die() may be called inside the active swing loop. Keep that frame's

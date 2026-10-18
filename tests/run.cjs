@@ -85,6 +85,7 @@ const SUITE = [
   ['combat-impact-contract', 'armor, protected contacts, charged weight and bounded combat ledger', {noBrowser:true}],
   ['combat-impact-browser', 'rendered hit flash and finite hardware particles, charged weight, equipped stats and ledger export'],
   ['purification-save', 'interrupted guardian film preserves atomic choice and completion; legacy retry does not duplicate'],
+  ['purification-notices', 'retire stale combat openings at rescue without losing earned notices'],
   ['purification-controls', 'mobile hold/cancel, focus-loss safety and restored save'],
   ['purification', 'deliberate guardian rescue hold, cancellation, choreography and protected rewards'],
   ['combat-impact-input', 'real keyboard tap and held charge through the normal game loop in a staged arena'],

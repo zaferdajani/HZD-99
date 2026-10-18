@@ -1,0 +1,97 @@
+
+── threat  — threat concentration per screen, and the forbidden compositions
+worst one-screen window (30x17 tiles) per room  (room total in brackets)
+
+ZONE A
+  A0   w=64  peak  1 [ 1]  crawler(pressure)
+  A0B  w=30  peak  0 [ 0]  —   rest beat
+  A1   w=56  peak  4 [ 4]  crawler(pressure) + guard(anchor)
+  A10  w=46  peak  0 [ 0]  —   rest beat
+  A11  w=30  peak  0 [ 0]  —   rest beat
+  A12  w=44  peak  0 [ 0]  —   rest beat
+  A13  w=30  peak  0 [ 0]  —   rest beat
+  A2   w=88  peak  6 [ 7]  crawler(pressure) + flier(disruptor) + guard(anchor)
+  A3   w=52  peak  0 [ 0]  —   rest beat
+  A4   w=44  peak  0 [ 0]  —   rest beat
+  A5   w=48  peak  0 [ 0]  —   rest beat
+  A6   w=44  peak  5 [ 5]  flier(disruptor) + crawler(pressure) + turret(zoner)
+  A7   w=40  peak  6 [ 6]  blob(denial) + blob(denial) + turret(zoner)
+  A8   w=44  peak  3 [ 3]  crawler(pressure) + flier(disruptor)
+  A9   w=44  peak  0 [ 0]  —   rest beat
+  W1   w=40  peak  0 [ 0]  —   rest beat
+  W2   w=60  peak  0 [ 0]  —   rest beat
+
+ZONE B
+  B1   w=32  peak  4 [ 4]  flier(disruptor) + surge(zoner)
+  B2   w=60  peak  7 [ 9]  hopper(pressure) + surge(zoner) + hopper(pressure) + guard(anchor)
+  B3   w=32  peak  0 [ 0]  —   rest beat
+  B3B  w=30  peak  0 [ 0]  —   rest beat
+  B4   w=32  peak  0 [ 0]  —   rest beat
+  B5   w=32  peak  0 [ 0]  —   rest beat
+  B6   w=32  peak  3 [ 5]  turret(zoner) + hopper(pressure)
+  B7   w=32  peak  6 [ 6]  turret(zoner) + flier(disruptor) + blob(denial)
+  B8   w=32  peak  0 [ 0]  —   rest beat
+
+ZONE C
+  C1   w=30  peak  3 [ 5]  hopper(pressure) + turret(zoner)
+  C2   w=60  peak  6 [10]  turret(zoner) + hopper(pressure) + guard(anchor)
+  C3   w=32  peak  0 [ 0]  —   rest beat
+  C4   w=32  peak  0 [ 0]  —   rest beat
+  C5   w=32  peak  5 [ 5]  turret(zoner) + turret(zoner) + crawler(pressure)
+  C5B  w=30  peak  0 [ 0]  —   rest beat
+  C6   w=32  peak  5 [ 5]  hopper(pressure) + turret(zoner) + blob(denial)
+  C7   w=32  peak  0 [ 0]  —   rest beat
+
+ZONE D
+  D1   w=32  peak  0 [ 0]  —   rest beat
+  D1B  w=30  peak  0 [ 0]  —   rest beat
+  D2   w=60  peak  7 [11]  guard(anchor) + hopper(pressure) + guard(anchor)
+  D3   w=32  peak  0 [ 0]  —   rest beat
+  D4   w=34  peak  5 [ 6]  guard(anchor) + rime(zoner)
+  D5   w=32  peak  4 [ 6]  blob(denial) + turret(zoner)
+  D6   w=32  peak  0 [ 0]  —   rest beat
+
+ZONE E
+  E1   w=32  peak  5 [ 5]  snare(disruptor) + blob(denial) + hopper(pressure)
+  E1B  w=30  peak  0 [ 0]  —   rest beat
+  E2   w=60  peak  8 [10]  turret(zoner) + guard(anchor) + blob(denial) + hopper(pressure)
+  E3   w=34  peak  0 [ 0]  —   rest beat
+  E4   w=32  peak  7 [ 7]  blob(denial) + blob(denial) + snare(disruptor) + crawler(pressure)
+  E5   w=32  peak  5 [ 5]  blob(denial) + hopper(pressure) + turret(zoner)
+  E6   w=32  peak  0 [ 0]  —   rest beat
+
+ZONE X
+  CV1  w=56  peak  1 [ 1]  crawler(pressure)
+  CV1B w=40  peak  0 [ 0]  —   rest beat
+  CV2  w=64  peak  2 [ 3]  hopper(pressure) + hopper(pressure)
+  CV3  w=56  peak  2 [ 2]  crawler(pressure) + crawler(pressure)
+  GA1  w=36  peak  0 [ 0]  —   rest beat
+  GA1D w=44  peak  0 [ 0]  —   rest beat
+  GA1T w=40  peak  0 [ 0]  —   rest beat
+  GA2  w=36  peak  0 [ 0]  —   rest beat
+  GA2D w=44  peak  0 [ 0]  —   rest beat
+  GA2T w=40  peak  0 [ 0]  —   rest beat
+  GB1  w=36  peak  0 [ 0]  —   rest beat
+  GB1D w=44  peak  0 [ 0]  —   rest beat
+  GB1T w=40  peak  0 [ 0]  —   rest beat
+  GC1  w=36  peak  0 [ 0]  —   rest beat
+  GC1D w=44  peak  0 [ 0]  —   rest beat
+  GC1T w=40  peak  0 [ 0]  —   rest beat
+  GD1  w=36  peak  0 [ 0]  —   rest beat
+  GD1D w=44  peak  0 [ 0]  —   rest beat
+  GD1T w=40  peak  0 [ 0]  —   rest beat
+  GE1  w=36  peak  0 [ 0]  —   rest beat
+  GE1D w=44  peak  0 [ 0]  —   rest beat
+  GE1T w=40  peak  0 [ 0]  —   rest beat
+  GX1  w=36  peak  0 [ 0]  —   rest beat
+  GX1D w=44  peak  0 [ 0]  —   rest beat
+  GX1T w=40  peak  0 [ 0]  —   rest beat
+  V1   w=32  peak  1 [ 1]  hopper(pressure)
+  V1B  w=30  peak  0 [ 0]  —   rest beat
+  V2   w=32  peak  2 [ 2]  hopper(pressure) + crawler(pressure)
+  X1   w=32  peak  0 [ 0]  —   rest beat
+
+across 26 fighting rooms: median peak 5, 90th percentile 7, max 8
+
+OK
+   (threat: 1.7 s)

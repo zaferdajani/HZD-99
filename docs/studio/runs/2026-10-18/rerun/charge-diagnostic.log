@@ -1,0 +1,21 @@
+{
+  "output": "/workspace/scratch/b4e9aa23d77e/HZD-99/docs/studio/runs/2026-10-18/charge-diagnostic-result.json",
+  "build": "7984b6ea8f08",
+  "holdDelta": {
+    "wallMs": 1113,
+    "simSeconds": 0.7000000000000006,
+    "saveSeconds": 0.6999999999999602,
+    "frames": 7,
+    "chargeSeconds": 0.5333333333333333
+  },
+  "originalConditions": {
+    "normalClaw12": true,
+    "normalKnockback": true,
+    "chargeThreshold": false,
+    "chargedDamage38": true,
+    "releaseAndContactAudio": true,
+    "particlesExpired": true,
+    "noPageErrors": true
+  },
+  "errors": []
+}

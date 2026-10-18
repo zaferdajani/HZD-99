@@ -1,0 +1,26 @@
+
+── cross  — a room crossing is a move, not a cut
+── cross — a room crossing is a move, not a cut
+
+  ok   the crossing is a slide, not a blink  TRANS_DUR 0.34s
+  ok   A1 R -> A2: it lands  landed in A2
+  ok   A1 R -> A2: the picture she left is held and pushed  4 of 4 crossing frames
+  ok   A1 R -> A2: ...and the interface does not slide with it  0 lit pixels of HUD in the held world frame
+  ok   A2 L -> A1: it lands  landed in A1
+  ok   A2 L -> A1: the picture she left is held and pushed  5 of 5 crossing frames
+  ok   A2 L -> A1: ...and the interface does not slide with it  0 lit pixels of HUD in the held world frame
+  ok   A2 B -> A5: it lands  landed in A5
+  ok   A2 B -> A5: one shaft — nothing held, nothing slid  0 frames of cut crossing, 0 frames of held picture
+  ok   A2 B -> A5: ...and the camera carries her across the line  screen moved 11 px on the crossing frame (her own travel allows 140)
+  ok   A2 B -> A5: ...and she ends on her feet there  standing in A5
+  ok   A5 T -> A2: it lands  landed in A2
+  ok   A5 T -> A2: one shaft — nothing held, nothing slid  0 frames of cut crossing, 0 frames of held picture
+  ok   A5 T -> A2: ...and the camera carries her across the line  screen moved 8 px on the crossing frame (her own travel allows 99)
+  ok   A5 T -> A2: ...and she ends on her feet there  standing in A2
+  ok   she keeps walking through it  R moves  L moves
+  ok   an upward jump under load-jank still lands the floor above  rooms A6, standing at its floor
+
+all good
+   (cross: 21.8 s)
+
+all 1 harnesses ran

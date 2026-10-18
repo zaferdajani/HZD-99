@@ -1,0 +1,6 @@
+
+── chapter-one  — one earned rescue, quarry, forge and sage save chain
+PASS connected first-chapter quest and reloads { quest: 'done', sword: 'single', sage: true }
+   (chapter-one: 3.6 s)
+
+all 1 harnesses ran

@@ -1,0 +1,10 @@
+
+── overlap  — never two music streams audible outside a cross-fade
+elements created        : 5
+most audible at once    : 2 (1 = never overlaid; 2 only inside a cross-fade)
+samples with >1 audible : 43 / 257
+still playing at the end: [ 'mus_hero.m4a' ]
+pageerrors              : none
+   (overlap: 17.2 s)
+
+all 1 harnesses ran

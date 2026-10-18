@@ -1,0 +1,65 @@
+{
+  "build": "fbfa046c42b4",
+  "scope": "STAGED save/arena; not a campaign",
+  "entered": true,
+  "hint": "⚡ NULLFANG is reeling — hit it NOW",
+  "before": [
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    },
+    {
+      "text": "earned reward",
+      "t": 3
+    },
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    }
+  ],
+  "after": [
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    },
+    {
+      "text": "earned reward",
+      "t": 3
+    },
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    }
+  ],
+  "retry": [
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    },
+    {
+      "text": "earned reward",
+      "t": 3
+    },
+    {
+      "text": "⚡ NULLFANG is reeling — hit it NOW",
+      "t": 3.47
+    }
+  ],
+  "errors": []
+}
+AssertionError [ERR_ASSERTION]: combat hints carry provenance
++ actual - expected
+
++ undefined
+- 'boss-opening'
+
+    at /workspace/scratch/b4e9aa23d77e/HZD-99/tests/purification-notices.cjs:19:72
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:502:9) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: 'boss-opening',
+  operator: 'strictEqual',
+  diff: 'simple'
+}

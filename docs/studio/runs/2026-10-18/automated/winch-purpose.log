@@ -1,0 +1,55 @@
+
+── winch-purpose  — the jammed winch arm blocks the road, every strike knocks scrap she collects, the burst lifts the arm; reloads and NOSTOS unaffected
+browserContext.newPage: Target page, context or browser has been closed
+Browser logs:
+
+<launching> /tmp/clawbyte-18-browser/run.cjs --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-lTxyEv --remote-debugging-pipe --no-startup-window
+<launched> pid=2364
+[pid=2364][err] [1018/102646.262917:ERROR:../net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)
+[pid=2364][err] [1018/102647.544829:WARNING:../services/audio/sync_reader.cc:154] ASR: No room in socket buffer.: Broken pipe (32)
+[pid=2364][err] [1018/102648.737418:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+    at boot (/workspace/scratch/b4e9aa23d77e/HZD-99/tests/winch-purpose.cjs:31:26)
+    at async /workspace/scratch/b4e9aa23d77e/HZD-99/tests/winch-purpose.cjs:261:15 {
+  log: []
+}
+FAILED:   ok   the strike lesson is running at the jammed winch  {"step":"atk","calm":true,"angle":0.6811756861242553,"tipX":580.9332551585699,"tipUp":15.406777856574593,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   the jammed arm is down across the road (its end low, west of the base)  {"step":"atk","calm":true,"angle":0.6811756861242553,"tipX":580.9332551585699,"tipUp":15.406777856574593,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   walking east she is stopped at the arm, on the booth side  {"step":"atk","calm":true,"angle":0.6811756861242553,"tipX":580.9332551585699,"tipUp":15.406777856574593,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   ...and where it stops her the strike is ready (the chip names ATTACK)  {"step":"atk","calm":true,"angle":0.6811756861242553,"tipX":580.9332551585699,"tipUp":15.406777856574593,"cx":656,"right":579.8589339323496,"pc":567.8589339323496,"ready":true}
+  ok   a jump does not carry her over the jam  {"pc":567.8589339323496,"cx":656}
+  ok   pushing on the arm says why the road is shut  {"said":["The jammed winch arm blocks the road."],"want":"The jammed winch arm blocks the road."}
+  ok   a body already past the base is never pulled back through it  {"stayed":true,"east":856.3611111111102,"cx":656}
+  ok   the strike lesson finishes on a real strike at the winch  "burst"
+  ok   strikes knock scrap out (one piece per strike, capped at 4 per save)  {"rows":[{"hurt":false,"hp":20,"flag":1},{"hurt":false,"hp":2,"flag":2},{"hurt":false,"hp":1,"flag":3},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4}],"flag":4,"live":[{"x":507,"y":460},{"x":440,"y":459},{"x":453,"y":461},{"x":461,"y":461}],"scrap0":0,"stillJammed":true,"step":"burst"}
+  ok   strikes alone never stop the jammed winch  {"rows":[{"hurt":false,"hp":20,"flag":1},{"hurt":false,"hp":2,"flag":2},{"hurt":false,"hp":1,"flag":3},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4},{"hurt":false,"hp":1,"flag":4}],"flag":4,"live":[{"x":507,"y":460},{"x":440,"y":459},{"x":453,"y":461},{"x":461,"y":461}],"scrap0":0,"stillJammed":true,"step":"burst"}
+  ok   the knocked scrap lands on her side of the arm  {"n":5,"worth":15,"gained":15,"left":0,"sides":[true,true,true,true,true]}
+  ok   she collects every piece as ordinary scrap  {"n":5,"worth":15,"gained":15,"left":0,"sides":[true,true,true,true,true]}
+  ok   a burst let go far from the winch does not pass the lesson  {"burstDone":false,"disabled":false,"step":"burst","said":["Too far — let the burst go beside the winch."],"want":"Too far — let the burst go beside the winch."}
+  ok   ...and says why  {"burstDone":false,"disabled":false,"step":"burst","said":["Too far — let the burst go beside the winch."],"want":"Too far — let the burst go beside the winch."}
+  ok   a burst beside the winch stops it  {"burstDone":true,"disabled":true,"paid":12,"said":["The winch stops — its arm lifts clear of the road."],"want":"The winch stops — its arm lifts clear of the road.","a0":0.17130041586883238}
+  ok   ...and says so  {"burstDone":true,"disabled":true,"paid":12,"said":["The winch stops — its arm lifts clear of the road."],"want":"The winch stops — its arm lifts clear of the road.","a0":0.17130041586883238}
+  ok   the burst still pays the winch's salvage once (12)  {"burstDone":true,"disabled":true,"paid":12,"said":["The winch stops — its arm lifts clear of the road."],"want":"The winch stops — its arm lifts clear of the road.","a0":0.17130041586883238}
+  ok   the arm visibly lifts (over several frames, never back down)  {"samples":[0.131,-0.469,-1.05,-1.05,-1.05,-1.05],"angle":-1.05,"tipUp":168.4557640750117,"cx":656}
+  ok   ...and comes to rest clear of the road  {"samples":[0.131,-0.469,-1.05,-1.05,-1.05,-1.05],"angle":-1.05,"tipUp":168.4557640750117,"cx":656}
+  ok   after the burst the road is open: she walks past the winch  {"pc":1206.3611111111102,"cx":656,"step":"node"}
+  ok   reloaded after the burst the winch is still stopped and its arm up  {"disabled":true,"angle":-1.05,"raised":-1.05,"pc":1517.6944444444478,"cx":656}
+  ok   ...and nothing blocks the road  {"disabled":true,"angle":-1.05,"raised":-1.05,"pc":1517.6944444444478,"cx":656}
+  ok   a save with the burst behind her is never blocked  {"jammed":true,"blocking":false,"pc":1517.6944444444478,"cx":656}
+  ok   after the tutorial: no barrier, no scrap from the winch  {"blocking":false,"knocked":0,"pc":1517.6944444444478,"cx":656}
+  ok   no page errors (CLAWBYTE)  []
+browserContext.newPage: Target page, context or browser has been closed
+Browser logs:
+
+<launching> /tmp/clawbyte-18-browser/run.cjs --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-lTxyEv --remote-debugging-pipe --no-startup-window
+<launched> pid=2364
+[pid=2364][err] [1018/102646.262917:ERROR:../net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)
+[pid=2364][err] [1018/102647.544829:WARNING:../services/audio/sync_reader.cc:154] ASR: No room in socket buffer.: Broken pipe (32)
+[pid=2364][err] [1018/102648.737418:INFO:CONSOLE:47525] "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently", source: http://127.0.0.1:8220/index.html (47525)
+    at boot (/workspace/scratch/b4e9aa23d77e/HZD-99/tests/winch-purpose.cjs:31:26)
+    at async /workspace/scratch/b4e9aa23d77e/HZD-99/tests/winch-purpose.cjs:261:15 {
+  log: []
+}
+
+   (winch-purpose: 5.4 s)
+
+1 harness(es) failed
