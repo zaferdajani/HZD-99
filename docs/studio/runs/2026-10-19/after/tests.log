@@ -1,0 +1,193 @@
+
+── marble-notices  — retire the extraction hint only after raw marble acquisition; preserve rewards and missed-attempt guidance
+{
+  "scope": "STAGED save/placement and production update/releaseCharged; not a chapter playthrough.",
+  "results": [
+    {
+      "lang": "en",
+      "build": "1d3a7c72250c",
+      "hint": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+      "produced": [
+        {
+          "text": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+          "t": 6.120000000000001,
+          "scope": "marble-extraction"
+        }
+      ],
+      "survivesClaw": true,
+      "survivesMiss": true,
+      "afterMiss": [
+        {
+          "text": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+          "t": 6.120000000000001,
+          "scope": "marble-extraction"
+        },
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+          "t": 6.220000000000001
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        }
+      ],
+      "after": [
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+          "t": 6.220000000000001
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        },
+        {
+          "text": "ACQUIRED — raw cave marble",
+          "t": 3.0300000000000002
+        },
+        {
+          "text": "Somebody must be missing this. Keep it safe.",
+          "t": 4.02
+        }
+      ],
+      "retry": [
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "Claws glance off the raw marble. Hold ATTACK to supercharge, then release beside it.",
+          "t": 6.220000000000001
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        },
+        {
+          "text": "ACQUIRED — raw cave marble",
+          "t": 3.0300000000000002
+        },
+        {
+          "text": "Somebody must be missing this. Keep it safe.",
+          "t": 4.02
+        }
+      ],
+      "acquired": true,
+      "flag": true,
+      "removed": true
+    },
+    {
+      "lang": "ar",
+      "build": "1d3a7c72250c",
+      "hint": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+      "produced": [
+        {
+          "text": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+          "t": 5.460000000000001,
+          "scope": "marble-extraction"
+        }
+      ],
+      "survivesClaw": true,
+      "survivesMiss": true,
+      "afterMiss": [
+        {
+          "text": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+          "t": 5.460000000000001,
+          "scope": "marble-extraction"
+        },
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+          "t": 5.5600000000000005
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        }
+      ],
+      "after": [
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+          "t": 5.5600000000000005
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        },
+        {
+          "text": "تم الحصول على — رخام خام من الكهف",
+          "t": 3.415
+        },
+        {
+          "text": "لا بدّ أن أحدًا يفتقد هذا. احتفظي به.",
+          "t": 3.5250000000000004
+        }
+      ],
+      "retry": [
+        {
+          "text": "earned reward",
+          "t": 3
+        },
+        {
+          "text": "المخالب تنزلق عن الرخام الخام. اضغطي الهجوم مطوّلًا للشحن ثم أفلتي بجانبه.",
+          "t": 5.5600000000000005
+        },
+        {
+          "text": "guardian unrelated",
+          "t": 3,
+          "scope": "boss-opening"
+        },
+        {
+          "text": "تم الحصول على — رخام خام من الكهف",
+          "t": 3.415
+        },
+        {
+          "text": "لا بدّ أن أحدًا يفتقد هذا. احتفظي به.",
+          "t": 3.5250000000000004
+        }
+      ],
+      "acquired": true,
+      "flag": true,
+      "removed": true
+    }
+  ],
+  "errors": []
+}
+   (marble-notices: 0.9 s)
+
+── foescale  — every machine reads in the hero's weight class
+── foescale — every machine reads in the hero's weight class
+
+  ok   the hero measures at all, from her real art  71px via hzdIdle:0
+  ok   no machine reads as scenery beside her (>= 0.5 of her height)  12 kinds
+  ok   ...and none of them reads as big as her — the SCALE LAW holds  max 0.9x
+  ok   no page errors
+  ok   the loaded flier is measured from its authored strip  {"assets":[{"key":"talonMiniCruise8","width":1536,"height":192,"tier":3},{"key":"talonMiniChase6","width":1152,"height":192,"tier":3}],"renderer":"talonMiniCruise8:5"}
+  ok   every full wingbeat sample uses the intended authored strip  80 samples
+  ok   the complete wingbeat stays in the same unchanged size band  {"min":0.5070422535211268,"max":0.9436619718309859,"tooSmall":0,"tooBig":0}
+
+  hero 71px  ·  flier 0.54  bat 0.61  surge 0.7  kiln 0.72  rime 0.75  snare 0.75  guard 0.77  blob 0.85  turret 0.87  sage 0.87  crawler 0.9  hopper 0.9
+
+all good
+   (foescale: 7.7 s)
+
+all 2 harnesses ran

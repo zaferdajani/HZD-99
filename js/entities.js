@@ -2511,7 +2511,7 @@ class Player {
         this.swing.pilHit = true;                       // one clink per swing
         burst(hb.x + hb.w / 2, hb.y + hb.h / 2, 6, '#bfe9ff', 180, 0.22, 220, 2, true);
         sfx('no');
-        if ((G._pillarToldT || 0) <= 0) { G._pillarToldT = 3; G.toast(t('pl_hint')); }
+        if ((G._pillarToldT || 0) <= 0) { G._pillarToldT = 3; G.toast(t('pl_hint'), 'marble-extraction'); }
       }
       // WHIFF. A miss used to be silent, which made a missed swing feel like a
       // dropped input rather than a mistake. The blade now cuts air on the frame
@@ -2816,6 +2816,9 @@ class Player {
       if (Math.hypot(sx - cx, sy - cy) > R + 60) continue;
       G.statics.splice(i, 1);
       G.save.flags['pl_' + (s.extra || 'cshard')] = 1;
+      // Panel/dialog clocks preserve rewards, but this prerequisite is now
+      // complete. Retire only its instruction, not earned/unrelated notices.
+      G.toasts = G.toasts.filter(tt => tt.scope !== 'marble-extraction');
       sfx('glass');
       cam.shake = Math.max(cam.shake, 11);
       G.flash = Math.max(G.flash, 0.65);
@@ -10398,11 +10401,13 @@ function drawEnemyTell(c, e, cx) {
 // patrol pace and a harder chase beat, each one wingbeat of measured-distinct
 // cells, front-on like the figure pair they replace and banked the same way.
 // And it PERCHES on a plate of its own instead of borrowing the boss's.
-// Cell sizes are in hitbox WIDTHS, matched to the figures' drawn wingspan
-// (pDown: 2.39 widths across at the mini's scale).
+// Cell sizes are in hitbox WIDTHS. Loaded flight was far smaller than the cold
+// fallback (24px versus 56px at the same pose, hero71). One constant size for
+// both flight strips restores body readability without flattening wingbeats,
+// changing hitboxes, or scaling each pose to a convenient measured height.
 const TALON_MINI = {
-  cruise: { img: 'talonMiniCruise8', cells: 8, beat: 0.7, w: 2.42 },
-  chase:  { img: 'talonMiniChase6',  cells: 6, beat: 0.42, w: 2.42 },
+  cruise: { img: 'talonMiniCruise8', cells: 8, beat: 0.7, w: 3.75 },
+  chase:  { img: 'talonMiniChase6',  cells: 6, beat: 0.42, w: 3.75 },
 };
 function drawFlierMini(c, e) {
   const fig = ((e.holdT || 0) > 0 || (e.packetT || 0) > 0) ? 'kCharge'

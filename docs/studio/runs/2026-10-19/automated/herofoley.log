@@ -1,0 +1,73 @@
+
+── herofoley  — her authored move sounds decode with real signal in them
+ok   hz_swing1   dur 1.02s  peak 0.708
+  ok   hz_swing2   dur 1.02s  peak 0.694
+  ok   hz_fin      dur 1.41s  peak 0.602
+  ok   hz_burst    dur 1.38s  peak 0.103
+  ok   hz_dash     dur 0.8s  peak 0.671
+  ok   hz_charge   dur 1.54s  peak 0.333
+  ok   hz_ready    dur 0.96s  peak 0.701
+  ok   hz_jump     dur 0.7s  peak 0.447
+  ok   hz_land     dur 0.63s  peak 0.507
+  ok   hz_step1    dur 0.36s  peak 0.252
+  ok   hz_step2    dur 0.51s  peak 0.607
+  ok   hz_evosting dur 10s  peak 0.896
+  ok   hz_winsting dur 10s  peak 0.534
+  ok   hz_stepgrass1dur 0.51s  peak 0.463
+  ok   hz_stepgrass2dur 0.48s  peak 0.495
+  ok   hz_steprock1dur 0.5s  peak 0.177
+  ok   hz_steprock2dur 0.48s  peak 0.412
+  ok   hz_stepice1 dur 0.36s  peak 0.205
+  ok   hz_stepice2 dur 0.31s  peak 0.398
+  ok   hz_steporg1 dur 0.48s  peak 0.463
+  ok   hz_steporg2 dur 0.42s  peak 0.412
+  ok   fz_tell     dur 0.38s  peak 0.38
+  ok   fz_tellmid  dur 0.81s  peak 0.631
+  ok   fz_tellbig  dur 1.02s  peak 0.603
+  ok   fz_slam     dur 1.02s  peak 0.631
+  ok   fz_phase    dur 1.2s  peak 0.375
+  ok   fz_wave     dur 0.88s  peak 0.596
+  ok   fz_spikeup  dur 0.81s  peak 0.549
+  ok   fz_summon   dur 1s  peak 0.547
+  ok   fz_wreck    dur 1.47s  peak 0.471
+  ok   fz_break    dur 0.72s  peak 0.659
+  ok   fz_roar     dur 1.15s  peak 0.651
+  ok   fz_castarc  dur 0.81s  peak 0.407
+  ok   fz_castice  dur 0.64s  peak 0.637
+  ok   fz_castnull dur 0.37s  peak 0.592
+  ok   fz_roar_glitchdur 1.2s  peak 0.542
+  ok   fz_roar_brooddur 1.11s  peak 0.539
+  ok   fz_roar_atlasdur 1.21s  peak 0.637
+  ok   fz_roar_zerodur 1.2s  peak 0.613
+  ok   fz_roar_prismdur 1.21s  peak 0.552
+  ok   fz_roar_motherdur 1.42s  peak 0.525
+  ok   hum_servo   dur 3s  peak 0.161
+  ok   hum_ratchet dur 3s  peak 0.261
+  ok   hum_mono    dur 3s  peak 0.249
+  ok   hum_sage    dur 3s  peak 0.254
+  ok   hum_patch   dur 3s  peak 0.271
+  ok   hum_lumen   dur 3s  peak 0.227
+  ok   mus_hero.m4a is on disk for the title slot
+  ok   nothing over 5s is decoded (2 streamed instead)
+  ok   hz_swing1     reaches her at 0 dB of its peak, 45 ms in, 19% of it
+  ok   hz_swing2     reaches her at 0 dB of its peak, 45 ms in, 18% of it
+  ok   hz_fin        reaches her at 0 dB of its peak, 19 ms in, 52% of it
+  ok   hz_jump       reaches her at 0 dB of its peak, 31 ms in, 22% of it
+  ok   hz_land       reaches her at 0 dB of its peak, 45 ms in, 93% of it
+  ok   hz_dash       reaches her at 0 dB of its peak, 45 ms in, 74% of it
+  ok   hz_burst      reaches her at 0 dB of its peak, 45 ms in, 48% of it
+  ok   hz_step1      reaches her at 0 dB of its peak, 8 ms in, 60% of it
+  ok   hz_step2      reaches her at 0 dB of its peak, 45 ms in, 71% of it
+  ok   hz_stepgrass1 reaches her at 0 dB of its peak, 22 ms in, 72% of it
+  ok   hz_stepgrass2 reaches her at 0 dB of its peak, 45 ms in, 59% of it
+  ok   hz_steprock1  reaches her at 0 dB of its peak, 45 ms in, 31% of it
+  ok   hz_steprock2  reaches her at 0 dB of its peak, 45 ms in, 55% of it
+  ok   hz_stepice1   reaches her at -1.2 dB of its peak, 64 ms in, 95% of it
+  ok   hz_stepice2   reaches her at 0 dB of its peak, 5 ms in, 40% of it
+  ok   hz_steporg1   reaches her at 0 dB of its peak, 13 ms in, 78% of it
+  ok   hz_steporg2   reaches her at 0 dB of its peak, 45 ms in, 58% of it
+
+OK — every authored take decodes, and reaches her at full strength on time
+   (herofoley: 2.3 s)
+
+all 1 harnesses ran

@@ -1,0 +1,100 @@
+
+── gravehorn  — GRAVEHORN: the entrance, every move told and opened, the charge jumped, the toss thrown and parried, twin horns, the kick from behind, the exit
+── gravehorn — the Eye's rhino, measured in the real build
+  ok   he is posted in CV3 while the marble is still in the rock
+  ok   ...asleep in the dark until she comes in  dorm
+  ok   he steps out of the dark when she walks in
+  ok   ...and she is held while he does (the staging is not walk-out-able)
+  ok   ...a held direction does not move her through it  0 px
+  ok   he speaks: a dialogue box under his own name  {"name":"GRAVEHORN","n":4,"l0":"So the little cleaner woke up.","gh":true}
+  ok   ...four lines the first time (who he is, whom he serves, that the Eye stole the Song, the threat)  So the little cleaner woke up.
+  ok   the room locks while he stands: the way out does not cross  {"ok":true,"bossActive":true}
+  ok   the conversation closes on ordinary presses  PLAY
+  ok   ...then he bellows, and his name card goes up
+  ok   ...and the fight begins, her controls hers again  idle hold=false
+  ok   the meeting is remembered (a retry gets the short version)
+  ok   every line of his exists in all five languages, translated  en ar tr zh ru
+  ok   ...Arabic is set right to left
+  ok   missile: tell -> active -> recovery  hornprep(717) > hornfire(350) > hornless(2533) > hornseat(333) > idle
+  ok   missile: the tell is a TELL_ST name (its sound fires), the active and recovery are not  hornprep / hornfire / hornless,hornseat
+  ok   charge: tell -> active -> recovery  chargewarn(817) > rush(983) > wallslam(217) > stunned(1216) > recover(350) > idle
+  ok   charge: the tell is a TELL_ST name (its sound fires), the active and recovery are not  chargewarn / rush / wallslam,stunned,recover
+  ok   chargeSkid: tell -> active -> recovery  turn(167) > chargewarn(817) > rush(850) > skid(433) > recover(650) > idle
+  ok   chargeSkid: the tell is a TELL_ST name (its sound fires), the active and recovery are not  chargewarn / rush / skid,recover
+  ok   toss: tell -> active -> recovery  tossprep(467) > toss(333) > tossrecover(683) > idle
+  ok   toss: the tell is a TELL_ST name (its sound fires), the active and recovery are not  tossprep / toss / tossrecover
+  ok   kick: tell -> active -> recovery  kickprep(350) > kick(217) > kickrecover(583) > idle
+  ok   kick: the tell is a TELL_ST name (its sound fires), the active and recovery are not  kickprep / kick / kickrecover
+  ok   every tell is at least 350 ms (the zone-A floor is 400 for all but the close kick)  hornprep 717, chargewarn 817, tossprep 467, kickprep 350 ms
+  ok   every recovery is an opening of >= 250 ms (opening = recovery - 33 ms)  missile (hornless) 2500, charge->wall (stunned) 1533, charge->skid (skid+recover) 1050, toss (tossrecover) 650, kick (kickrecover) 550
+  ok   standing in the charge costs a core (the control)  lost 1
+  ok   a keyboard jump at the right moment clears him: no core lost  jumped at time-to-contact 0.227 s, charge -640 px/s
+  ok   ...and she lands behind him
+       jump take-off (time to contact, s) -> 0.1:hit 0.16:hit 0.2:clear 0.3:clear 0.36:clear 0.44:clear 0.52:clear
+  ok   the toss lands: a core  1 lost
+  ok   ...she is thrown FAR: up and away  rose 104 px, carried 225 px
+  ok   ...and DIZZY (stars, 1.4 s)  1.40 s
+  ok   ...with i-frames on the knockback (longer than she is dizzy, almost)  1.30 s
+  ok   ...and he does not start a move on a dizzy body (no blow lands until it passes)  {"lost":0,"st":"idle"}
+  ok   dizzy: the jump does nothing  0 px
+  ok   dizzy: the strike does nothing
+  ok   dizzy: she can walk, at under half speed  153 px/s
+  ok   dizzy never stacks  {"a":0.5505333333333443,"r":false,"grew":false}
+  ok   ...and when it passes she jumps again
+  ok   a strike in the last 150 ms of the wind-up CLASHES: he staggers, she takes nothing  pressed at t=0.084 s; stagger, lost 0
+  ok   a strike well before the window does not: the toss lands  pressed at t=0.4 s; parries 0, lost 1
+  ok   a brace raised as the toss lands turns it too: he staggers, she takes nothing, the counter opens  {"lost":0,"st":"stagger","parries":1,"raised":0.034,"counter":true,"upAtToss":true,"tries":1}
+  ok   ...a brace held through the wind-up only blocks: no clash  {"lost":0,"st":"tossrecover","parries":0,"raised":0.4,"counter":false,"upAtToss":true}
+  ok   the clash buys an opening of 867 ms
+  ok   the first toss teaches the parry, once (a hint line, in her language)  {"st":"tossprep","said":true,"told":true}
+  ok   the big horn LEAVES the head (a missile in the air, the socket empty)
+  ok   it homes, then LOCKS ~0.35 s after launch (the cyan flash)  366 ms
+  ok   ...and after the lock it flies STRAIGHT (dodging works)  heading drift 0.0000 rad
+  ok   hornless, a strike on the HEAD deals more than one on his flank  head 14 vs flank 10
+  ok   the horn flies home and SEATS (harmless on its way back)  returned true, hurt false
+  ok   the hornless opening lasts ~2.5 s  2533 ms
+  ok   at 0 HP in phase one he crashes to his knees (not dead, not a fork)  kneel hp 1
+  ok   ...and she is held for the beat
+  ok   ...the beat cannot be cheesed: a hit in it changes nothing  {"h0":1,"h1":1,"st":"kneel"}
+  ok   he speaks into the change (the phase-two line)  Enough. The Eye built me for war. Now you see all of it.
+  ok   ...the armour goes, the second horn lights: PHASE TWO, HP refilled, her controls back  hp 329/329
+  ok   phase two fires BOTH horns  [["big",68.413],["small",68.88]]
+  ok   ...staggered: the gap between them is the dodge (~0.45 s)  467 ms, big then small
+  ok   ...and the hornless opening is LONGER with both away  3148 ms
+  ok   phase two: standing behind him draws the REAR KICK  {"kickprep":150}
+  ok   ...never from in front  {"tossprep":124,"hornprep":26}
+  ok   ...and never in phase one (he turns instead — that turn is the opening)  {"turn":150}
+  ok   the kick connects behind: a core, and she is driven away  lost 1, at 1060
+  ok   phase two charges ~1.3x faster  830 px/s (phase one 640)
+  ok   ...chained: the wall turns him and he charges back once  chargewarn > rush > wallturn > chargewarn > rush > skid > recover > idle
+  ok   ...the second wind-up visibly differs (longer, a third scrape)  833 then 1082 ms
+  ok   ...and only the last leg ends in the opening
+  ok   a death mid-fight is a death (no special case)
+  ok   ...and walking back in, he is there again, full, phase one, asleep  {"from":"W1","kind":"horn","st":"dorm","phase":1,"full":true,"flag":false}
+  ok   ...and the second meeting is the short one (one line)  1
+  ok   at 0 HP in phase two he is beaten, not destroyed
+  ok   ...he speaks: "This isn't over. The Eye sees you."  ["This isn't over.","The Eye sees you, cleaner. Next time it comes itself."]
+  ok   ...he backs into the rock and is gone  backed 138 px
+  ok   the flag is set and saved (bossHorn)
+  ok   the room unlocks and her controls are hers
+  ok   ...the way out crosses again
+  ok   re-entering CV3 after the flag: no boss, the crawlers back, the stone still there  {"boss":false,"crawlers":2,"pillar":true}
+  ok   the raw marble is reachable on foot from the arena (walked with the keyboard)
+  ok   ...and the Volt Burst frees it, exactly as before  {"bag":true,"flag":true}
+  ok   the objective names him while he stands, and the marble after  op_o_gravehorn -> op_o_marble
+  ok   he walks (a real gait, not a slide)  moved 231 px, 14 plants
+  ok   a planted hoof does not slide (max drift during stance <= 1 px)  0.15 px
+  ok   ...and it stands ON the drawn floor (|hoof - heightfield| <= 3 px)  0.75 px (worst 1@819), 167 samples
+  ok   no page errors
+
+  move timings (game clock):
+    missile    hornprep 717 > hornfire 350 > hornless 2533 > hornseat 333 > idle
+    charge     chargewarn 817 > rush 983 > wallslam 217 > stunned 1216 > recover 350 > idle
+    chargeSkid turn 167 > chargewarn 817 > rush 850 > skid 433 > recover 650 > idle
+    toss       tossprep 467 > toss 333 > tossrecover 683 > idle
+    kick       kickprep 350 > kick 217 > kickrecover 583 > idle
+
+OK — GRAVEHORN tells, hits, opens, turns, and leaves, as written
+   (gravehorn: 95.5 s)
+
+all 1 harnesses ran

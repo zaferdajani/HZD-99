@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-19",
+  "branch": "codex/studio-review-2026-10-19",
+  "parent": "69640ed83d72d451cfb6f0b59fafb2c029cc5802",
+  "main_at_intake": "62d75d204c6f6264f25150bb419fc262ff2c18ea",
+  "integration_at_intake": "62d75d204c6f6264f25150bb419fc262ff2c18ea",
+  "build": "1d3a7c72250c",
+  "files": {
+    "js/entities.js": "86c9f9abf3474df6bd9badb6431502028d7ceb3cf482b5e440f687c20701268d",
+    "js/game.js": "e8983ff8e8b8720ce1bddcaefa089106f67d37695e3fbc96e301f80e2e1d9258",
+    "js/infection-eyes.js": "5a9a078833e495f233b42b31f1657903d5ce721c8410fe7d015c7ba76d89950e",
+    "js/purification.js": "e3bba0182c3123c8e3d775b58d195e6fa5e11cc2fffbaa944989428b9c37ba7e",
+    "tests/foescale.cjs": "07aeeb43c2537a07b048804bef97c190d0ac9ca7d49d06206fff2eea8ad761f0",
+    "tests/marble-notices.cjs": "0c878a34e9583a61ea2a8c679ab1dbdf08e53e163c51c02b768838ad29c0162d",
+    "tests/campaign-import.cjs": "9d995027faf60f9529a61d6a84bc2796426bf6c2420a4b7b0384ae70b6deaef7",
+    "tests/campaign-ch1.cjs": "9667873824b6be63f450d5e80964dac6e8085d97e087674e3ad8ef06f27213ef",
+    "tests/run.cjs": "cbf64f4e02ed195d483c4a0568255d2b33cd7dab454f5ab4c30f100d079bf959"
+  },
+  "environment": {
+    "node": "v24.19.0",
+    "chromium": "153.0.8010.0",
+    "package": "@sparticuz/chromium153.0.0 outside repository",
+    "dependencies": "npm ci; lockfile unchanged",
+    "browserArguments": "corrected multi-process wrapper from start",
+    "campaignVideo": false,
+    "physicalDevices": false
+  },
+  "scope": "Review only; no main/integration/production writes."
+}

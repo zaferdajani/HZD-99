@@ -1,0 +1,18 @@
+
+── glide  — the glide: after the double jump, JUMP held caps the fall; let go and she drops
+── glide — the jets hold her after the double jump, for as long as JUMP is held
+
+  ok   an open column to drop through  {"tx":2,"ty":15}
+  ok   without the jetpack, holding JUMP does nothing: she falls  {"maxVy":981,"glided":false,"frames":5,"landed":true}
+  ok   with the double jump not yet spent, holding JUMP does not glide  {"maxVy":958,"glided":false,"frames":6,"landed":true}
+  ok   double jump spent, JUMP held: the fall is capped at 170 px/s  {"maxVy":170,"glided":true,"frames":22,"landed":true}
+  ok   ...and the drop takes much longer than a plain fall (at least twice)  glide 22 frames vs plain 5
+  ok   let go of JUMP and she drops again  {"maxVy":830,"glided":true,"frames":19,"landed":true}
+  ok   the hover jets are drawn while she glides, and not otherwise  on 82, off 0
+  ok   the first double jump says the jets can hold her, once  {"said":true,"flag":true}
+  ok   no page errors
+
+all good
+   (glide: 10.7 s)
+
+all 1 harnesses ran

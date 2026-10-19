@@ -1,0 +1,2450 @@
+{
+  "scope": "STAGED renderer/asset diagnostic; no real-input combat or traversal. Alpha>24 dimensions mirror foescale, not perceived body-mass certification.",
+  "errors": [],
+  "limitations": [
+    "The initial first-read is called cold only if recorded assets are actually absent; no network blocking or fake unloaded state is used.",
+    "The hero yardstick is fixed fully loaded idle. Flight changes vertical silhouette: a height-only one-pose ratio cannot alone settle size/art acceptance.",
+    "Enemy.draw includes its normal body presentation; hurt, telegraph and legacy travel trails are suppressed as in foescale. No pixel mask claims anatomical mass.",
+    "States, animation clocks, actor placement and velocities are injected. Wingbeat samples are analytic frame selections, not video or real AI movement.",
+    "Cruise and chase are sampled independently at zero bank; banked chase is a separate variant. Perch/tell/recovery are optional extra source-supported states.",
+    "No scale or assertion change is proposed merely because one frame fails the existing 0.5 height floor."
+  ],
+  "served": {
+    "indexSha256": "7072f1ee84c2acab1f553e03c102af460c35c3fd34165884c7d08ba72a9b4d41",
+    "sameCheckout": true,
+    "ownedEphemeralPort": true
+  },
+  "firstRead": {
+    "build": "1d3a7c72250c",
+    "before": [
+      {
+        "key": "talonMiniCruise8",
+        "registered": "assets/characters/talon/cruise8.webp",
+        "src": null,
+        "width": 0,
+        "height": 0,
+        "tier": 0,
+        "pending": false
+      },
+      {
+        "key": "talonMiniChase6",
+        "registered": "assets/characters/talon/chase6.webp",
+        "src": null,
+        "width": 0,
+        "height": 0,
+        "tier": 0,
+        "pending": false
+      },
+      {
+        "key": "talonMiniPerch",
+        "registered": "assets/characters/talon/perch.webp",
+        "src": null,
+        "width": 0,
+        "height": 0,
+        "tier": 0,
+        "pending": false
+      },
+      {
+        "key": "eagleParts",
+        "registered": "assets/characters/eagle_parts.webp",
+        "src": null,
+        "width": 0,
+        "height": 0,
+        "tier": 0,
+        "pending": false
+      },
+      {
+        "key": "roster",
+        "registered": "assets/characters/roster_8yaw.webp",
+        "src": "http://127.0.0.1:43253/assets/characters/roster_8yaw.webp",
+        "width": 2496,
+        "height": 2508,
+        "tier": 3,
+        "pending": false
+      }
+    ],
+    "after": [
+      {
+        "key": "talonMiniCruise8",
+        "registered": "assets/characters/talon/cruise8.webp",
+        "src": null,
+        "width": 0,
+        "height": 0,
+        "tier": 0,
+        "pending": true
+      },
+      {
+        "key": "talonMiniChase6",
+        "registered": "assets/characters/talon/chase6.webp",
+        "src": null,
+        "width": 0,
+        "height": 0,
+        "tier": 0,
+        "pending": false
+      },
+      {
+        "key": "talonMiniPerch",
+        "registered": "assets/characters/talon/perch.webp",
+        "src": null,
+        "width": 0,
+        "height": 0,
+        "tier": 0,
+        "pending": false
+      },
+      {
+        "key": "eagleParts",
+        "registered": "assets/characters/eagle_parts.webp",
+        "src": null,
+        "width": 0,
+        "height": 0,
+        "tier": 0,
+        "pending": true
+      },
+      {
+        "key": "roster",
+        "registered": "assets/characters/roster_8yaw.webp",
+        "src": "http://127.0.0.1:43253/assets/characters/roster_8yaw.webp",
+        "width": 2496,
+        "height": 2508,
+        "tier": 3,
+        "pending": false
+      }
+    ],
+    "measurement": {
+      "height": 56,
+      "width": 59,
+      "opaquePixels": 1935,
+      "bbox": [
+        165,
+        144,
+        223,
+        199
+      ],
+      "clipped": false,
+      "anim": 1.2,
+      "mode": "cruise",
+      "lastStrip": null,
+      "trace": [
+        {
+          "renderer": "strip",
+          "key": "talonMiniCruise8",
+          "cell": 5,
+          "cells": 8,
+          "ok": false
+        },
+        {
+          "renderer": "eagleMiniFallback",
+          "ok": false
+        },
+        {
+          "renderer": "atlasFallback",
+          "kind": "flier",
+          "ok": true
+        }
+      ]
+    },
+    "wasCold": true,
+    "ratioAgainstLaterLoadedHero": 0.7887323943661971
+  },
+  "build": "1d3a7c72250c",
+  "loaded": {
+    "hero": {
+      "height": 71,
+      "width": 49,
+      "opaquePixels": 2356,
+      "bbox": [
+        165,
+        150,
+        213,
+        220
+      ],
+      "clipped": false,
+      "renderer": "hzdIdle:0",
+      "assets": [
+        {
+          "key": "heroStates",
+          "registered": {
+            "type": "embedded-media-reference",
+            "mimeType": "image/webp",
+            "bytes": 409214,
+            "sha256": "c01b8884f588cd10d369ac1633ca174af01e046e5545192b2159578e2e4cbbed",
+            "dataURLSha256": "ba8f6c592fa168467c81dbc01c29389eb9efd45223a463e47a9a6623b8ed2f36"
+          },
+          "src": {
+            "type": "embedded-media-reference",
+            "mimeType": "image/webp",
+            "bytes": 409214,
+            "sha256": "c01b8884f588cd10d369ac1633ca174af01e046e5545192b2159578e2e4cbbed",
+            "dataURLSha256": "ba8f6c592fa168467c81dbc01c29389eb9efd45223a463e47a9a6623b8ed2f36"
+          },
+          "width": 7680,
+          "height": 320,
+          "tier": 3,
+          "pending": false
+        },
+        {
+          "key": "gaitWalk",
+          "registered": {
+            "type": "embedded-media-reference",
+            "mimeType": "image/webp",
+            "bytes": 145332,
+            "sha256": "4d71edab37a592ea3a8e50324d54babaed6bc0bbc4ad15ccdc360d31b961cb5d",
+            "dataURLSha256": "d4f8c7dac46cb2884ef6d7276aa78867d8ed5525c2866edda220f1fc962eb9a8"
+          },
+          "src": {
+            "type": "embedded-media-reference",
+            "mimeType": "image/webp",
+            "bytes": 145332,
+            "sha256": "4d71edab37a592ea3a8e50324d54babaed6bc0bbc4ad15ccdc360d31b961cb5d",
+            "dataURLSha256": "d4f8c7dac46cb2884ef6d7276aa78867d8ed5525c2866edda220f1fc962eb9a8"
+          },
+          "width": 2560,
+          "height": 320,
+          "tier": 3,
+          "pending": false
+        },
+        {
+          "key": "gaitRun",
+          "registered": {
+            "type": "embedded-media-reference",
+            "mimeType": "image/webp",
+            "bytes": 267992,
+            "sha256": "374a82f47d48a2fc7c895193a1140a28aea5516a270b0b270b098ac75386ff63",
+            "dataURLSha256": "999fe9bae02c2cc18d6b16671c49dddc855470fc28adf6f067d4d13a6bd1dd69"
+          },
+          "src": {
+            "type": "embedded-media-reference",
+            "mimeType": "image/webp",
+            "bytes": 267992,
+            "sha256": "374a82f47d48a2fc7c895193a1140a28aea5516a270b0b270b098ac75386ff63",
+            "dataURLSha256": "999fe9bae02c2cc18d6b16671c49dddc855470fc28adf6f067d4d13a6bd1dd69"
+          },
+          "width": 5120,
+          "height": 320,
+          "tier": 3,
+          "pending": false
+        },
+        {
+          "key": "hzdIdle",
+          "registered": {
+            "type": "embedded-media-reference",
+            "mimeType": "image/webp",
+            "bytes": 141336,
+            "sha256": "b47834ef527e319db28f61975a5febb18ea22cf7ba3e0ff5be81ec659cf5cfee",
+            "dataURLSha256": "e301d93f8d3fc453133faf78459026f4ec7d8abf2bac9a6e3a45359b5918f487"
+          },
+          "src": {
+            "type": "embedded-media-reference",
+            "mimeType": "image/webp",
+            "bytes": 141336,
+            "sha256": "b47834ef527e319db28f61975a5febb18ea22cf7ba3e0ff5be81ec659cf5cfee",
+            "dataURLSha256": "e301d93f8d3fc453133faf78459026f4ec7d8abf2bac9a6e3a45359b5918f487"
+          },
+          "width": 2560,
+          "height": 320,
+          "tier": 3,
+          "pending": false
+        }
+      ]
+    },
+    "assets": [
+      {
+        "key": "talonMiniCruise8",
+        "registered": "assets/characters/talon/cruise8.webp",
+        "src": "http://127.0.0.1:43253/assets/characters/talon/cruise8.webp",
+        "width": 1536,
+        "height": 192,
+        "tier": 3,
+        "pending": false
+      },
+      {
+        "key": "talonMiniChase6",
+        "registered": "assets/characters/talon/chase6.webp",
+        "src": "http://127.0.0.1:43253/assets/characters/talon/chase6.webp",
+        "width": 1152,
+        "height": 192,
+        "tier": 3,
+        "pending": false
+      },
+      {
+        "key": "talonMiniPerch",
+        "registered": "assets/characters/talon/perch.webp",
+        "src": "http://127.0.0.1:43253/assets/characters/talon/perch.webp",
+        "width": 256,
+        "height": 256,
+        "tier": 3,
+        "pending": false
+      },
+      {
+        "key": "eagleParts",
+        "registered": "assets/characters/eagle_parts.webp",
+        "src": "http://127.0.0.1:43253/assets/characters/eagle_parts.webp",
+        "width": 1500,
+        "height": 575,
+        "tier": 3,
+        "pending": false
+      },
+      {
+        "key": "roster",
+        "registered": "assets/characters/roster_8yaw.webp",
+        "src": "http://127.0.0.1:43253/assets/characters/roster_8yaw.webp",
+        "width": 2496,
+        "height": 2508,
+        "tier": 3,
+        "pending": false
+      }
+    ],
+    "edraw": 0.96,
+    "hitbox": {
+      "w": 26,
+      "h": 22
+    },
+    "foescalePinned": {
+      "height": 38,
+      "width": 91,
+      "opaquePixels": 1944,
+      "bbox": [
+        148,
+        194,
+        238,
+        231
+      ],
+      "clipped": false,
+      "anim": 1.2,
+      "mode": "cruise",
+      "lastStrip": "talonMiniCruise8:5",
+      "trace": [
+        {
+          "renderer": "strip",
+          "key": "talonMiniCruise8",
+          "cell": 5,
+          "cells": 8,
+          "ok": true
+        }
+      ],
+      "ratio": 0.5352112676056338
+    },
+    "cycles": [
+      {
+        "mode": "cruise",
+        "strip": {
+          "img": "talonMiniCruise8",
+          "cells": 8,
+          "beat": 0.7,
+          "w": 3.75
+        },
+        "samples": [
+          {
+            "height": 67,
+            "width": 71,
+            "opaquePixels": 1908,
+            "bbox": [
+              161,
+              169,
+              231,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.0109375,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 0,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 67,
+            "width": 71,
+            "opaquePixels": 1908,
+            "bbox": [
+              161,
+              169,
+              231,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.032812499999999994,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 0,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 67,
+            "width": 71,
+            "opaquePixels": 1908,
+            "bbox": [
+              161,
+              169,
+              231,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.0546875,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 0,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 67,
+            "width": 71,
+            "opaquePixels": 1908,
+            "bbox": [
+              161,
+              169,
+              231,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.07656249999999999,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 0,
+                "cells": 8,
+                "ok": true
+              }
+            ],
+            "gameplaySnapshot": "gameplay-cruise-max.png"
+          },
+          {
+            "height": 51,
+            "width": 90,
+            "opaquePixels": 1832,
+            "bbox": [
+              149,
+              185,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.0984375,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 1,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 51,
+            "width": 90,
+            "opaquePixels": 1832,
+            "bbox": [
+              149,
+              185,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.12031249999999999,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 1,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 51,
+            "width": 90,
+            "opaquePixels": 1832,
+            "bbox": [
+              149,
+              185,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.1421875,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 1,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 51,
+            "width": 90,
+            "opaquePixels": 1832,
+            "bbox": [
+              149,
+              185,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.1640625,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 1,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 36,
+            "width": 93,
+            "opaquePixels": 1824,
+            "bbox": [
+              146,
+              200,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.18593749999999998,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 2,
+                "cells": 8,
+                "ok": true
+              }
+            ],
+            "gameplaySnapshot": "gameplay-cruise-min.png"
+          },
+          {
+            "height": 36,
+            "width": 93,
+            "opaquePixels": 1824,
+            "bbox": [
+              146,
+              200,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.20781249999999998,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 2,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 36,
+            "width": 93,
+            "opaquePixels": 1824,
+            "bbox": [
+              146,
+              200,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.2296875,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 2,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 36,
+            "width": 93,
+            "opaquePixels": 1824,
+            "bbox": [
+              146,
+              200,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.25156249999999997,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 2,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 37,
+            "width": 86,
+            "opaquePixels": 1822,
+            "bbox": [
+              146,
+              198,
+              231,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.2734375,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 3,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 37,
+            "width": 86,
+            "opaquePixels": 1822,
+            "bbox": [
+              146,
+              198,
+              231,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.2953125,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 3,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 37,
+            "width": 86,
+            "opaquePixels": 1822,
+            "bbox": [
+              146,
+              198,
+              231,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.31718749999999996,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 3,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 37,
+            "width": 86,
+            "opaquePixels": 1822,
+            "bbox": [
+              146,
+              198,
+              231,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.3390625,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 3,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 36,
+            "width": 88,
+            "opaquePixels": 1857,
+            "bbox": [
+              146,
+              197,
+              233,
+              232
+            ],
+            "clipped": false,
+            "anim": 0.36093749999999997,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 4,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 36,
+            "width": 88,
+            "opaquePixels": 1857,
+            "bbox": [
+              146,
+              197,
+              233,
+              232
+            ],
+            "clipped": false,
+            "anim": 0.3828125,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 4,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 36,
+            "width": 88,
+            "opaquePixels": 1857,
+            "bbox": [
+              146,
+              197,
+              233,
+              232
+            ],
+            "clipped": false,
+            "anim": 0.4046875,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 4,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 36,
+            "width": 88,
+            "opaquePixels": 1857,
+            "bbox": [
+              146,
+              197,
+              233,
+              232
+            ],
+            "clipped": false,
+            "anim": 0.42656249999999996,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 4,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 38,
+            "width": 91,
+            "opaquePixels": 1944,
+            "bbox": [
+              148,
+              194,
+              238,
+              231
+            ],
+            "clipped": false,
+            "anim": 0.4484375,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 5,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 38,
+            "width": 91,
+            "opaquePixels": 1944,
+            "bbox": [
+              148,
+              194,
+              238,
+              231
+            ],
+            "clipped": false,
+            "anim": 0.47031249999999997,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 5,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 38,
+            "width": 91,
+            "opaquePixels": 1944,
+            "bbox": [
+              148,
+              194,
+              238,
+              231
+            ],
+            "clipped": false,
+            "anim": 0.49218749999999994,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 5,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 38,
+            "width": 91,
+            "opaquePixels": 1944,
+            "bbox": [
+              148,
+              194,
+              238,
+              231
+            ],
+            "clipped": false,
+            "anim": 0.5140625,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 5,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 50,
+            "width": 87,
+            "opaquePixels": 1964,
+            "bbox": [
+              152,
+              181,
+              238,
+              230
+            ],
+            "clipped": false,
+            "anim": 0.5359375,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:6",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 6,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 50,
+            "width": 87,
+            "opaquePixels": 1964,
+            "bbox": [
+              152,
+              181,
+              238,
+              230
+            ],
+            "clipped": false,
+            "anim": 0.5578124999999999,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:6",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 6,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 50,
+            "width": 87,
+            "opaquePixels": 1964,
+            "bbox": [
+              152,
+              181,
+              238,
+              230
+            ],
+            "clipped": false,
+            "anim": 0.5796874999999999,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:6",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 6,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 50,
+            "width": 87,
+            "opaquePixels": 1964,
+            "bbox": [
+              152,
+              181,
+              238,
+              230
+            ],
+            "clipped": false,
+            "anim": 0.6015625,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:6",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 6,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 77,
+            "opaquePixels": 1975,
+            "bbox": [
+              158,
+              170,
+              234,
+              230
+            ],
+            "clipped": false,
+            "anim": 0.6234375,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:7",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 7,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 77,
+            "opaquePixels": 1975,
+            "bbox": [
+              158,
+              170,
+              234,
+              230
+            ],
+            "clipped": false,
+            "anim": 0.6453125,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:7",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 7,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 77,
+            "opaquePixels": 1975,
+            "bbox": [
+              158,
+              170,
+              234,
+              230
+            ],
+            "clipped": false,
+            "anim": 0.6671874999999999,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:7",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 7,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 77,
+            "opaquePixels": 1975,
+            "bbox": [
+              158,
+              170,
+              234,
+              230
+            ],
+            "clipped": false,
+            "anim": 0.6890624999999999,
+            "mode": "cruise",
+            "lastStrip": "talonMiniCruise8:7",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniCruise8",
+                "cell": 7,
+                "cells": 8,
+                "ok": true
+              }
+            ]
+          }
+        ],
+        "min": {
+          "height": 36,
+          "width": 93,
+          "opaquePixels": 1824,
+          "bbox": [
+            146,
+            200,
+            238,
+            235
+          ],
+          "clipped": false,
+          "anim": 0.18593749999999998,
+          "mode": "cruise",
+          "lastStrip": "talonMiniCruise8:2",
+          "trace": [
+            {
+              "renderer": "strip",
+              "key": "talonMiniCruise8",
+              "cell": 2,
+              "cells": 8,
+              "ok": true
+            }
+          ],
+          "gameplaySnapshot": "gameplay-cruise-min.png"
+        },
+        "max": {
+          "height": 67,
+          "width": 71,
+          "opaquePixels": 1908,
+          "bbox": [
+            161,
+            169,
+            231,
+            235
+          ],
+          "clipped": false,
+          "anim": 0.07656249999999999,
+          "mode": "cruise",
+          "lastStrip": "talonMiniCruise8:0",
+          "trace": [
+            {
+              "renderer": "strip",
+              "key": "talonMiniCruise8",
+              "cell": 0,
+              "cells": 8,
+              "ok": true
+            }
+          ],
+          "gameplaySnapshot": "gameplay-cruise-max.png"
+        },
+        "meanHeight": 47,
+        "minRatio": 0.5070422535211268,
+        "maxRatio": 0.9436619718309859
+      },
+      {
+        "mode": "chase",
+        "strip": {
+          "img": "talonMiniChase6",
+          "cells": 6,
+          "beat": 0.42,
+          "w": 3.75
+        },
+        "samples": [
+          {
+            "height": 61,
+            "width": 61,
+            "opaquePixels": 1797,
+            "bbox": [
+              165,
+              175,
+              225,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.008749999999999999,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 0,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 61,
+            "opaquePixels": 1797,
+            "bbox": [
+              165,
+              175,
+              225,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.02625,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 0,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 61,
+            "opaquePixels": 1797,
+            "bbox": [
+              165,
+              175,
+              225,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.04375,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 0,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 61,
+            "opaquePixels": 1797,
+            "bbox": [
+              165,
+              175,
+              225,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.06125,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 0,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 75,
+            "opaquePixels": 1735,
+            "bbox": [
+              156,
+              175,
+              230,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.07875,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 1,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 75,
+            "opaquePixels": 1735,
+            "bbox": [
+              156,
+              175,
+              230,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.09624999999999999,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 1,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 75,
+            "opaquePixels": 1735,
+            "bbox": [
+              156,
+              175,
+              230,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.11374999999999999,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 1,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 61,
+            "width": 75,
+            "opaquePixels": 1735,
+            "bbox": [
+              156,
+              175,
+              230,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.13125,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 1,
+                "cells": 6,
+                "ok": true
+              }
+            ],
+            "gameplaySnapshot": "gameplay-chase-max.png"
+          },
+          {
+            "height": 36,
+            "width": 93,
+            "opaquePixels": 1846,
+            "bbox": [
+              146,
+              200,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.14875,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 2,
+                "cells": 6,
+                "ok": true
+              }
+            ],
+            "gameplaySnapshot": "gameplay-chase-min.png"
+          },
+          {
+            "height": 36,
+            "width": 93,
+            "opaquePixels": 1846,
+            "bbox": [
+              146,
+              200,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.16624999999999998,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 2,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 36,
+            "width": 93,
+            "opaquePixels": 1846,
+            "bbox": [
+              146,
+              200,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.18375,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 2,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 36,
+            "width": 93,
+            "opaquePixels": 1846,
+            "bbox": [
+              146,
+              200,
+              238,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.20125,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 2,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 37,
+            "width": 86,
+            "opaquePixels": 1919,
+            "bbox": [
+              147,
+              199,
+              232,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.21875,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 3,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 37,
+            "width": 86,
+            "opaquePixels": 1919,
+            "bbox": [
+              147,
+              199,
+              232,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.23625,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 3,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 37,
+            "width": 86,
+            "opaquePixels": 1919,
+            "bbox": [
+              147,
+              199,
+              232,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.25375,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 3,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 37,
+            "width": 86,
+            "opaquePixels": 1919,
+            "bbox": [
+              147,
+              199,
+              232,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.27125,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 3,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 44,
+            "width": 89,
+            "opaquePixels": 2004,
+            "bbox": [
+              149,
+              190,
+              237,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.28875,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 4,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 44,
+            "width": 89,
+            "opaquePixels": 2004,
+            "bbox": [
+              149,
+              190,
+              237,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.30624999999999997,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 4,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 44,
+            "width": 89,
+            "opaquePixels": 2004,
+            "bbox": [
+              149,
+              190,
+              237,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.32375,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 4,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 44,
+            "width": 89,
+            "opaquePixels": 2004,
+            "bbox": [
+              149,
+              190,
+              237,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.34125,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 4,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 59,
+            "width": 69,
+            "opaquePixels": 1973,
+            "bbox": [
+              160,
+              175,
+              228,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.35874999999999996,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 5,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 59,
+            "width": 69,
+            "opaquePixels": 1973,
+            "bbox": [
+              160,
+              175,
+              228,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.37625000000000003,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 5,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 59,
+            "width": 69,
+            "opaquePixels": 1973,
+            "bbox": [
+              160,
+              175,
+              228,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.39375,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 5,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 59,
+            "width": 69,
+            "opaquePixels": 1973,
+            "bbox": [
+              160,
+              175,
+              228,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.41124999999999995,
+            "mode": "chase",
+            "lastStrip": "talonMiniChase6:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 5,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          }
+        ],
+        "min": {
+          "height": 36,
+          "width": 93,
+          "opaquePixels": 1846,
+          "bbox": [
+            146,
+            200,
+            238,
+            235
+          ],
+          "clipped": false,
+          "anim": 0.14875,
+          "mode": "chase",
+          "lastStrip": "talonMiniChase6:2",
+          "trace": [
+            {
+              "renderer": "strip",
+              "key": "talonMiniChase6",
+              "cell": 2,
+              "cells": 6,
+              "ok": true
+            }
+          ],
+          "gameplaySnapshot": "gameplay-chase-min.png"
+        },
+        "max": {
+          "height": 61,
+          "width": 75,
+          "opaquePixels": 1735,
+          "bbox": [
+            156,
+            175,
+            230,
+            235
+          ],
+          "clipped": false,
+          "anim": 0.13125,
+          "mode": "chase",
+          "lastStrip": "talonMiniChase6:1",
+          "trace": [
+            {
+              "renderer": "strip",
+              "key": "talonMiniChase6",
+              "cell": 1,
+              "cells": 6,
+              "ok": true
+            }
+          ],
+          "gameplaySnapshot": "gameplay-chase-max.png"
+        },
+        "meanHeight": 49.666666666666664,
+        "minRatio": 0.5070422535211268,
+        "maxRatio": 0.8591549295774648
+      },
+      {
+        "mode": "banked-chase",
+        "strip": {
+          "img": "talonMiniChase6",
+          "cells": 6,
+          "beat": 0.42,
+          "w": 3.75
+        },
+        "samples": [
+          {
+            "height": 65,
+            "width": 63,
+            "opaquePixels": 1787,
+            "bbox": [
+              165,
+              170,
+              227,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.008749999999999999,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 0,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 65,
+            "width": 63,
+            "opaquePixels": 1787,
+            "bbox": [
+              165,
+              170,
+              227,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.02625,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 0,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 65,
+            "width": 63,
+            "opaquePixels": 1787,
+            "bbox": [
+              165,
+              170,
+              227,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.04375,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 0,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 65,
+            "width": 63,
+            "opaquePixels": 1787,
+            "bbox": [
+              165,
+              170,
+              227,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.06125,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:0",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 0,
+                "cells": 6,
+                "ok": true
+              }
+            ],
+            "gameplaySnapshot": "gameplay-banked-chase-max.png"
+          },
+          {
+            "height": 64,
+            "width": 75,
+            "opaquePixels": 1735,
+            "bbox": [
+              158,
+              172,
+              232,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.07875,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 1,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 64,
+            "width": 75,
+            "opaquePixels": 1735,
+            "bbox": [
+              158,
+              172,
+              232,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.09624999999999999,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 1,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 64,
+            "width": 75,
+            "opaquePixels": 1735,
+            "bbox": [
+              158,
+              172,
+              232,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.11374999999999999,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 1,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 64,
+            "width": 75,
+            "opaquePixels": 1735,
+            "bbox": [
+              158,
+              172,
+              232,
+              235
+            ],
+            "clipped": false,
+            "anim": 0.13125,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:1",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 1,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 38,
+            "width": 93,
+            "opaquePixels": 1849,
+            "bbox": [
+              141,
+              197,
+              233,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.14875,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 2,
+                "cells": 6,
+                "ok": true
+              }
+            ],
+            "gameplaySnapshot": "gameplay-banked-chase-min.png"
+          },
+          {
+            "height": 38,
+            "width": 93,
+            "opaquePixels": 1849,
+            "bbox": [
+              141,
+              197,
+              233,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.16624999999999998,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 2,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 38,
+            "width": 93,
+            "opaquePixels": 1849,
+            "bbox": [
+              141,
+              197,
+              233,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.18375,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 2,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 38,
+            "width": 93,
+            "opaquePixels": 1849,
+            "bbox": [
+              141,
+              197,
+              233,
+              234
+            ],
+            "clipped": false,
+            "anim": 0.20125,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:2",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 2,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 42,
+            "width": 86,
+            "opaquePixels": 1916,
+            "bbox": [
+              140,
+              196,
+              225,
+              237
+            ],
+            "clipped": false,
+            "anim": 0.21875,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 3,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 42,
+            "width": 86,
+            "opaquePixels": 1916,
+            "bbox": [
+              140,
+              196,
+              225,
+              237
+            ],
+            "clipped": false,
+            "anim": 0.23625,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 3,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 42,
+            "width": 86,
+            "opaquePixels": 1916,
+            "bbox": [
+              140,
+              196,
+              225,
+              237
+            ],
+            "clipped": false,
+            "anim": 0.25375,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 3,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 42,
+            "width": 86,
+            "opaquePixels": 1916,
+            "bbox": [
+              140,
+              196,
+              225,
+              237
+            ],
+            "clipped": false,
+            "anim": 0.27125,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:3",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 3,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 44,
+            "width": 89,
+            "opaquePixels": 2007,
+            "bbox": [
+              147,
+              190,
+              235,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.28875,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 4,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 44,
+            "width": 89,
+            "opaquePixels": 2007,
+            "bbox": [
+              147,
+              190,
+              235,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.30624999999999997,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 4,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 44,
+            "width": 89,
+            "opaquePixels": 2007,
+            "bbox": [
+              147,
+              190,
+              235,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.32375,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 4,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 44,
+            "width": 89,
+            "opaquePixels": 2007,
+            "bbox": [
+              147,
+              190,
+              235,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.34125,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:4",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 4,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 63,
+            "width": 71,
+            "opaquePixels": 1972,
+            "bbox": [
+              161,
+              171,
+              231,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.35874999999999996,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 5,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 63,
+            "width": 71,
+            "opaquePixels": 1972,
+            "bbox": [
+              161,
+              171,
+              231,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.37625000000000003,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 5,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 63,
+            "width": 71,
+            "opaquePixels": 1972,
+            "bbox": [
+              161,
+              171,
+              231,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.39375,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 5,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          },
+          {
+            "height": 63,
+            "width": 71,
+            "opaquePixels": 1972,
+            "bbox": [
+              161,
+              171,
+              231,
+              233
+            ],
+            "clipped": false,
+            "anim": 0.41124999999999995,
+            "mode": "banked-chase",
+            "lastStrip": "talonMiniChase6:5",
+            "trace": [
+              {
+                "renderer": "strip",
+                "key": "talonMiniChase6",
+                "cell": 5,
+                "cells": 6,
+                "ok": true
+              }
+            ]
+          }
+        ],
+        "min": {
+          "height": 38,
+          "width": 93,
+          "opaquePixels": 1849,
+          "bbox": [
+            141,
+            197,
+            233,
+            234
+          ],
+          "clipped": false,
+          "anim": 0.14875,
+          "mode": "banked-chase",
+          "lastStrip": "talonMiniChase6:2",
+          "trace": [
+            {
+              "renderer": "strip",
+              "key": "talonMiniChase6",
+              "cell": 2,
+              "cells": 6,
+              "ok": true
+            }
+          ],
+          "gameplaySnapshot": "gameplay-banked-chase-min.png"
+        },
+        "max": {
+          "height": 65,
+          "width": 63,
+          "opaquePixels": 1787,
+          "bbox": [
+            165,
+            170,
+            227,
+            234
+          ],
+          "clipped": false,
+          "anim": 0.06125,
+          "mode": "banked-chase",
+          "lastStrip": "talonMiniChase6:0",
+          "trace": [
+            {
+              "renderer": "strip",
+              "key": "talonMiniChase6",
+              "cell": 0,
+              "cells": 6,
+              "ok": true
+            }
+          ],
+          "gameplaySnapshot": "gameplay-banked-chase-max.png"
+        },
+        "meanHeight": 52.666666666666664,
+        "minRatio": 0.5352112676056338,
+        "maxRatio": 0.9154929577464789
+      }
+    ]
+  },
+  "completed": true,
+  "embeddedURLPolicy": "Embedded base64 media replaced with MIME, byte count, content and URL SHA-256; original asset bytes untouched."
+}

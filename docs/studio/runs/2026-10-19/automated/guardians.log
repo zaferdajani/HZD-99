@@ -1,0 +1,157 @@
+
+── guardians  — every guardian opens after every move, breaks on a group of hits, and draws its moves by range
+── guardians — every attack opens, a group of hits breaks it, and range changes the deck
+  ── TALONHOST
+       broodcall  n= 24  min   833  med   983  max  2950
+  ok   TALONHOST: broodcall opens a reachable window (>= 250 ms)  worst 833 ms (med 983)
+       swoop      n= 38  min   717  med   817  max  2583
+  ok   TALONHOST: swoop opens a reachable window (>= 250 ms)  worst 717 ms (med 817)
+       volley     n= 14  min   783  med   883  max  2533
+  ok   TALONHOST: volley opens a reachable window (>= 250 ms)  worst 783 ms (med 883)
+       near (n=23): rest 26%  swoop 13%  volley 61%
+       far  (n=27): rest 26%  swoop 70%  volley 4%
+  ok   TALONHOST: the deck it draws close is not the deck it draws far (total variation >= 0.25)  TV 0.57 over 23/27 draws
+  ok   TALONHOST: and neither band is one move on repeat  near rest,swoop,volley / far rest,swoop,volley
+  ok   TALONHOST: 6 grouped hits break it  span 3.2 s
+  ok   TALONHOST: the break is a real window (1.2-2.0 s)  1.42 s
+  ok   TALONHOST: grounded while broken (feet within 6 px of the floor)  0 px
+  ok   TALONHOST: the open window pays more damage
+  ok   TALONHOST: it gets up rather than sticking  st=rise
+  ok   TALONHOST: and cannot be broken again at once
+  ok   TALONHOST: the same hits spaced wider than the span do not break it
+  ── FURNACE CHOIR
+       drop       n= 12  min  1100  med  1100  max  1133
+  ok   FURNACE CHOIR: drop opens a reachable window (>= 250 ms)  worst 1100 ms (med 1100)
+       forgebell  n= 33  min   467  med   750  max  1333
+  ok   FURNACE CHOIR: forgebell opens a reachable window (>= 250 ms)  worst 467 ms (med 750)
+       hymn       n= 43  min   483  med   950  max  1500
+  ok   FURNACE CHOIR: hymn opens a reachable window (>= 250 ms)  worst 483 ms (med 950)
+       lob        n=160  min   467  med   600  max  1083
+  ok   FURNACE CHOIR: lob opens a reachable window (>= 250 ms)  worst 467 ms (med 600)
+       slam       n= 40  min   450  med   833  max  1217
+  ok   FURNACE CHOIR: slam opens a reachable window (>= 250 ms)  worst 450 ms (med 833)
+       near (n=110): drop 0%  hymn 20%  lob 45%  slam 35%
+       far  (n=81): drop 7%  hymn 16%  lob 77%  slam 0%
+  ok   FURNACE CHOIR: the deck it draws close is not the deck it draws far (total variation >= 0.25)  TV 0.39 over 110/81 draws
+  ok   FURNACE CHOIR: and neither band is one move on repeat  near hymn,lob,slam / far drop,hymn,lob
+  ok   FURNACE CHOIR: 6 grouped hits break it  span 2.6 s
+  ok   FURNACE CHOIR: the break is a real window (1.2-2.0 s)  1.32 s
+  ok   FURNACE CHOIR: grounded while broken (feet within 6 px of the floor)  0 px
+  ok   FURNACE CHOIR: the open window pays more damage
+  ok   FURNACE CHOIR: it gets up rather than sticking  st=idle
+  ok   FURNACE CHOIR: and cannot be broken again at once
+  ok   FURNACE CHOIR: the same hits spaced wider than the span do not break it
+  ── GLACIERE
+       dash       n= 19  min  1017  med  1333  max  1750   (+15 chained on)
+  ok   GLACIERE: dash opens a reachable window (>= 600 ms)  worst 1017 ms (med 1333)
+       hush       n= 24  min   917  med  1267  max  1383
+  ok   GLACIERE: hush opens a reachable window (>= 600 ms)  worst 917 ms (med 1267)
+       lance      n= 22  min   883  med  1033  max  1383   (+6 chained on)
+  ok   GLACIERE: lance opens a reachable window (>= 600 ms)  worst 883 ms (med 1033)
+       nova       n= 21  min   917  med  1183  max  1633
+  ok   GLACIERE: nova opens a reachable window (>= 600 ms)  worst 917 ms (med 1183)
+       orbs       n= 17  min   950  med  1183  max  1783
+  ok   GLACIERE: orbs opens a reachable window (>= 600 ms)  worst 950 ms (med 1183)
+       prison     n= 24  min   750  med   983  max  1183
+  ok   GLACIERE: prison opens a reachable window (>= 600 ms)  worst 750 ms (med 983)
+       shard      n= 56  min   750  med  1050  max  1350
+  ok   GLACIERE: shard opens a reachable window (>= 600 ms)  worst 750 ms (med 1050)
+       near (n=59): dash 17%  lance 10%  orbs 10%  prison 17%  shard 46%
+       far  (n=25): dash 36%  lance 16%  orbs 16%  prison 20%  shard 12%
+  ok   GLACIERE: the deck it draws close is not the deck it draws far (total variation >= 0.25)  TV 0.34 over 59/25 draws
+  ok   GLACIERE: and neither band is one move on repeat  near dash,lance,orbs,prison,shard / far dash,lance,orbs,prison,shard
+  ok   GLACIERE: 6 grouped hits break it  span 3.6 s
+  ok   GLACIERE: the break is a real window (1.2-2.0 s)  1.52 s
+  ok   GLACIERE: grounded while broken (feet within 6 px of the floor)  0 px
+  ok   GLACIERE: the open window pays more damage
+  ok   GLACIERE: it gets up rather than sticking  st=idle
+  ok   GLACIERE: and cannot be broken again at once
+  ok   GLACIERE: the same hits spaced wider than the span do not break it
+  ── PRISM PROWLER
+       dash       n= 64  min   700  med  1050  max  1400
+  ok   PRISM PROWLER: dash opens a reachable window (>= 250 ms)  worst 700 ms (med 1050)
+       pounce     n=119  min   667  med  1033  max  1400
+  ok   PRISM PROWLER: pounce opens a reachable window (>= 250 ms)  worst 667 ms (med 1033)
+       spread     n= 47  min   583  med   967  max  1283
+  ok   PRISM PROWLER: spread opens a reachable window (>= 250 ms)  worst 583 ms (med 967)
+       near (n=113): dash 25%  pounce 65%  spread 11%
+       far  (n=53): dash 36%  pounce 13%  spread 51%
+  ok   PRISM PROWLER: the deck it draws close is not the deck it draws far (total variation >= 0.25)  TV 0.51 over 113/53 draws
+  ok   PRISM PROWLER: and neither band is one move on repeat  near dash,pounce,spread / far dash,pounce,spread
+  ok   PRISM PROWLER: 6 grouped hits break it  span 2.4 s
+  ok   PRISM PROWLER: the break is a real window (1.2-2.0 s)  1.22 s
+  ok   PRISM PROWLER: grounded while broken (feet within 6 px of the floor)  0 px
+  ok   PRISM PROWLER: the open window pays more damage
+  ok   PRISM PROWLER: it gets up rather than sticking  st=rest
+  ok   PRISM PROWLER: and cannot be broken again at once
+  ok   PRISM PROWLER: the same hits spaced wider than the span do not break it
+  ── MOTHER-V
+       beam       n= 36  min   650  med   767  max   917
+  ok   MOTHER-V: beam opens a reachable window (>= 250 ms)  worst 650 ms (med 767)
+       grab       n= 10  min   617  med   650  max   733
+  ok   MOTHER-V: grab opens a reachable window (>= 250 ms)  worst 617 ms (med 650)
+       ring       n= 78  min   617  med   717  max   850
+  ok   MOTHER-V: ring opens a reachable window (>= 250 ms)  worst 617 ms (med 717)
+       wave       n= 47  min   667  med   800  max   917
+  ok   MOTHER-V: wave opens a reachable window (>= 250 ms)  worst 667 ms (med 800)
+       near (n=102): beam 9%  grab 0%  ring 57%  wave 34%
+       far  (n=24): beam 33%  grab 13%  ring 38%  wave 17%
+  ok   MOTHER-V: the deck it draws close is not the deck it draws far (total variation >= 0.25)  TV 0.37 over 102/24 draws
+  ok   MOTHER-V: and neither band is one move on repeat  near beam,ring,wave / far beam,grab,ring,wave
+  ok   MOTHER-V: 7 grouped hits break it  span 3.2 s
+  ok   MOTHER-V: the break is a real window (1.2-2.0 s)  1.42 s
+  ok   MOTHER-V: grounded while broken (feet within 6 px of the floor)  0 px
+  ok   MOTHER-V: the open window pays more damage
+  ok   MOTHER-V: it gets up rather than sticking  st=idle
+  ok   MOTHER-V: and cannot be broken again at once
+  ok   MOTHER-V: the same hits spaced wider than the span do not break it
+  ── GLACIERE, power by power
+       p1 lancewarn  lancewarn>recover>idle   held 883 ms
+  ok   GLACIERE p1: lancewarn ends in a recovery she holds at hitting height (>= 600 ms)  883 ms
+       p1 shardwarn  shardwarn>recover>idle   held 883 ms
+  ok   GLACIERE p1: shardwarn ends in a recovery she holds at hitting height (>= 600 ms)  883 ms
+       p1 dashwarn   dashwarn>dash>recover>idle   held 783 ms
+  ok   GLACIERE p1: dashwarn ends in a recovery she holds at hitting height (>= 600 ms)  783 ms
+       p1 prisonwarn prisonwarn>recover>idle   held 833 ms
+  ok   GLACIERE p1: prisonwarn ends in a recovery she holds at hitting height (>= 600 ms)  833 ms
+       p1 orbs       orbs>recover>idle   held 1033 ms
+  ok   GLACIERE p1: orbs ends in a recovery she holds at hitting height (>= 600 ms)  1033 ms
+       p1 novawarn   novawarn>recover>idle   held 983 ms
+  ok   GLACIERE p1: novawarn ends in a recovery she holds at hitting height (>= 600 ms)  983 ms
+       p1 azhush     azhush>recover>idle   held 1083 ms
+  ok   GLACIERE p1: azhush ends in a recovery she holds at hitting height (>= 600 ms)  1083 ms
+       p1 dccast     dccast>recover>idle   held 733 ms
+  ok   GLACIERE p1: dccast ends in a recovery she holds at hitting height (>= 600 ms)  733 ms
+       p2 lancewarn  lancewarn>dashwarn>dash>recover>idle   held 633 ms
+  ok   GLACIERE p2: lancewarn ends in a recovery she holds at hitting height (>= 600 ms)  633 ms
+       p2 shardwarn  shardwarn>recover>idle   held 783 ms
+  ok   GLACIERE p2: shardwarn ends in a recovery she holds at hitting height (>= 600 ms)  783 ms
+       p2 dashwarn   dashwarn>dash>shardwarn>recover>idle   held 683 ms
+  ok   GLACIERE p2: dashwarn ends in a recovery she holds at hitting height (>= 600 ms)  683 ms
+       p2 prisonwarn prisonwarn>recover>idle   held 733 ms
+  ok   GLACIERE p2: prisonwarn ends in a recovery she holds at hitting height (>= 600 ms)  733 ms
+       p2 orbs       orbs>recover>idle   held 833 ms
+  ok   GLACIERE p2: orbs ends in a recovery she holds at hitting height (>= 600 ms)  833 ms
+       p2 novawarn   novawarn>recover>idle   held 833 ms
+  ok   GLACIERE p2: novawarn ends in a recovery she holds at hitting height (>= 600 ms)  833 ms
+       p2 azhush     azhush>recover>idle   held 933 ms
+  ok   GLACIERE p2: azhush ends in a recovery she holds at hitting height (>= 600 ms)  933 ms
+       p2 dccast     dccast>recover>idle   held 733 ms
+  ok   GLACIERE p2: dccast ends in a recovery she holds at hitting height (>= 600 ms)  733 ms
+  ── NULLFANG, the landing
+       at the hulk: crouch>pounce>recover>idle  lands 17 px over her floor, settle 367 ms
+       straight up: crouch>pounce>recover>idle  settle 367 ms
+  ok   NULLFANG: a leap at a player beside the hulk lands on her floor, not on the hulk (<= 20 px)  17 px
+  ok   NULLFANG: a leap straight up settles in full — the watchdog does not take it (>= 250 ms, then idle)  crouch>pounce>recover>idle 367 ms
+  ok   reward: glitch's arm shorts brood's plating  shard vs shard
+  ok   reward: brood's arm shorts atlas's plating  jet vs jet
+  ok   reward: atlas's arm shorts zero's plating  slag vs slag
+  ok   reward: zero's arm shorts prism's plating  frost vs frost
+  ok   reward: prism's arm shorts mother's plating  arc vs arc
+  ok   reward: GLACIERE's fall opens the way down into the Nest  bossZero
+  ok   no page errors  
+
+OK — every guardian opens after every move, breaks on a group, and reads the room
+   (guardians: 10.3 s)
+
+all 1 harnesses ran

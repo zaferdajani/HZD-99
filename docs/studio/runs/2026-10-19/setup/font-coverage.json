@@ -1,0 +1,6 @@
+{
+  "scope": "Host Fontconfig CLI using wrapper configuration; not a Chrome per-glyph trace.",
+  "chineseFonts": "",
+  "chineseFallback": "Open Sans: /tmp/clawbyte-19-browser/fonts/Open_Sans/OpenSans-Regular.ttf\n",
+  "interpretation": "No zh-capable font is listed. Missing CJK coverage is relevant to textreveal; do not treat fallback width as physical-device Chinese layout certification or weaken the assertion."
+}

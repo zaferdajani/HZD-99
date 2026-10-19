@@ -42,6 +42,13 @@ const FLOOR = 0.5, CEIL = 1.0;
     for (let i = 0; i < 240 && !heroArtReady(); i++)
       await new Promise(k => requestAnimationFrame(k));
     for (let i = 0; i < 60; i++) await new Promise(k => requestAnimationFrame(k));
+    // The flier must also be its authored drawing, not the much larger cold
+    // roster fallback. Oct18's diagnostic measured 56px cold versus 24px loaded.
+    const flierKeys = ['talonMiniCruise8', 'talonMiniChase6'];
+    for (const key of flierKeys) mediaFetch(key, 1);
+    const flightReady = () => flierKeys.every(key => MEDIA_RAW[key] && MEDIA_RAW[key].naturalWidth > 0 && MEDIA_LOW[key] === 3);
+    for (let i = 0; i < 240 && !flightReady(); i++) await new Promise(k => requestAnimationFrame(k));
+    if (!flightReady()) throw Error('Authored full-tier flier strips not ready; refusing fallback scale proof');
     // Each body is rendered ALONE onto a scratch canvas and measured by its own
     // pixels: what the player sees, not what a table claims.
     const cv = document.createElement('canvas'); cv.width = 400; cv.height = 300;
@@ -54,6 +61,7 @@ const FLOOR = 0.5, CEIL = 1.0;
       return y1 < 0 ? 0 : y1 - y0 + 1;
     };
     const out = { drawn: {} };
+    out.flierAssets = flierKeys.map(key => ({key, width:MEDIA_RAW[key].naturalWidth, height:MEDIA_RAW[key].naturalHeight, tier:MEDIA_LOW[key]}));
     const ocx = cam.x, ocy = cam.y;
     cam.x = 0; cam.y = 0; cam.shakeX = 0; cam.shakeY = 0;
     // The player stays PUT for the whole measurement, not just her own frame.
@@ -82,8 +90,22 @@ const FLOOR = 0.5, CEIL = 1.0;
       // pointing at the player is neither its body nor a constant.
       e.anim = 1.2; e.hurtT = 0; e.t = 1; e.lockT = 0;
       cx2.clearRect(0, 0, 400, 300);
+      G.lastStrip = null;
       e.draw(cx2);
       out.drawn[kind] = height();
+      if (kind === 'flier') out.flierRenderer = G.lastStrip;
+    }
+    // Keep the natural wingbeat: measure all cells and bank, never normalize
+    // each pose to a fixed height or accept one conveniently tall wing frame.
+    const flier = new Enemy('flier', 180, 180);
+    out.flight = [];
+    for (const mode of ['cruise', 'chase', 'banked-chase']) {
+      const strip = mode === 'cruise' ? TALON_MINI.cruise : TALON_MINI.chase;
+      for (let i = 0; i < strip.cells * 4; i++) {
+        Object.assign(flier, {x:180,y:180,anim:(i+.5)/(strip.cells*4)*strip.beat,t:1,hurtT:0,lockT:0,holdT:0,packetT:0,riseT:0,perched:false,hypnoT:0,tr:[],vx:mode==='banked-chase'?flier.spd*1.6:0,vy:mode==='chase'?150:0});
+        cx2.clearRect(0, 0, 400, 300); G.lastStrip = null; flier.draw(cx2);
+        out.flight.push({mode,cell:i,height:height(),renderer:G.lastStrip,expected:strip.img});
+      }
     }
     player.x = px; player.y = py;
     cam.x = ocx; cam.y = ocy;
@@ -103,6 +125,12 @@ const FLOOR = 0.5, CEIL = 1.0;
   check('...and none of them reads as big as her — the SCALE LAW holds',
     big.length === 0, big.map(([k, v]) => k + ' ' + v + 'x').join(', ') || 'max ' + Math.max(...Object.values(ratios)) + 'x');
   check('no page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
+  check('the loaded flier is measured from its authored strip', /^talonMiniCruise8:/.test(r.flierRenderer || ''), JSON.stringify({assets:r.flierAssets,renderer:r.flierRenderer}));
+  check('every full wingbeat sample uses the intended authored strip', r.flight.every(s => (s.renderer || '').startsWith(s.expected + ':')), r.flight.length + ' samples');
+  const flightSmall = r.flight.filter(s => s.height / r.hero < FLOOR);
+  const flightBig = r.flight.filter(s => s.height / r.hero >= CEIL);
+  check('the complete wingbeat stays in the same unchanged size band', !flightSmall.length && !flightBig.length,
+    JSON.stringify({min:Math.min(...r.flight.map(s=>s.height))/r.hero,max:Math.max(...r.flight.map(s=>s.height))/r.hero,tooSmall:flightSmall.length,tooBig:flightBig.length}));
   console.log('\n  hero ' + r.hero + 'px  ·  ' +
     Object.entries(ratios).sort((a, b) => a[1] - b[1]).map(([k, v]) => k + ' ' + v).join('  '));
 

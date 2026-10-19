@@ -1,0 +1,18 @@
+// Repeatable source/environment inventory; no credentials or environment dump.
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{execFileSync}=require('node:child_process');
+const root=path.resolve(__dirname,'../../../..'),git=(...a)=>execFileSync('git',a,{cwd:root,encoding:'utf8'}).trim();
+const files=['js/entities.js','js/game.js','js/infection-eyes.js','js/purification.js','tests/foescale.cjs','tests/marble-notices.cjs','tests/campaign-import.cjs','tests/campaign-ch1.cjs','tests/run.cjs'];
+const sha=f=>crypto.createHash('sha256').update(fs.readFileSync(path.join(root,f))).digest('hex');
+const id={date:'2026-10-19',branch:git('branch','--show-current'),parent:git('rev-parse','HEAD'),main_at_intake:'62d75d204c6f6264f25150bb419fc262ff2c18ea',integration_at_intake:'62d75d204c6f6264f25150bb419fc262ff2c18ea',build:fs.readFileSync(path.join(root,'index.html'),'utf8').match(/window.BUILD_ID="([^"]+)/)[1],files:Object.fromEntries(files.map(f=>[f,sha(f)])),environment:{node:process.version,chromium:'153.0.8010.0',package:'@sparticuz/chromium153.0.0 outside repository',dependencies:'npm ci; lockfile unchanged',browserArguments:'corrected multi-process wrapper from start',campaignVideo:false,physicalDevices:false},scope:'Review only; no main/integration/production writes.'};
+const file=path.join(__dirname,'identity.json');
+if(fs.existsSync(file)){const old=JSON.parse(fs.readFileSync(file));for(const f of files)if(old.files[f]!==id.files[f])throw Error('Frozen source drift: '+f);if(old.build!==id.build)throw Error('Frozen build drift');}
+fs.writeFileSync(file,JSON.stringify(id,null,2)+'\n');
+const syntax=files.map(f=>{execFileSync(process.execPath,['--check',f],{cwd:root});return {file:f,sha256:sha(f),status:'pass'};});
+fs.writeFileSync(path.join(__dirname,'syntax.json'),JSON.stringify(syntax,null,2)+'\n');
+const fontEnv={...process.env,FONTCONFIG_PATH:'/tmp/clawbyte-19-browser'};
+const fontCoverage={scope:'Host Fontconfig CLI using wrapper configuration; not a Chrome per-glyph trace.',chineseFonts:execFileSync('fc-list',[':lang=zh','family','file'],{env:fontEnv,encoding:'utf8'}),chineseFallback:execFileSync('fc-match',['-f','%{family}: %{file}\n',':lang=zh'],{env:fontEnv,encoding:'utf8'}),interpretation:'No zh-capable font is listed. Missing CJK coverage is relevant to textreveal; do not treat fallback width as physical-device Chinese layout certification or weaken the assertion.'};
+fs.writeFileSync(path.join(__dirname,'setup/font-coverage.json'),JSON.stringify(fontCoverage,null,2)+'\n');
+const copies={'/tmp/clawbyte-19-npm.log':'setup/npm-ci.log','/tmp/clawbyte-19-browser-package.log':'setup/browser-package.log','/tmp/clawbyte-19-browser-prepare.log':'setup/automatic-extraction-failure.log','/tmp/clawbyte-19-browser/fonts.conf':'setup/fonts.conf','/tmp/clawbyte-19-before.log':'before/tests.log','/tmp/clawbyte-19-after.log':'after/tests.log','/tmp/clawbyte-19-flier-before.log':'before/flier.log','/tmp/clawbyte-19-flier-after.log':'after/flier.log','/tmp/clawbyte-19-states.log':'graphics/capture.log','/tmp/clawbyte-19-build-after.log':'after/build.log'};
+for(const [from,to]of Object.entries(copies))if(fs.existsSync(from)){const dest=path.join(__dirname,to);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(from,dest);}
+const full=path.join(__dirname,'automated/results.json');if(fs.existsSync(full)&&JSON.parse(fs.readFileSync(full)).finished_utc)fs.copyFileSync('/tmp/clawbyte-19-full.log',path.join(__dirname,'automated/collector.log'));
+console.log(JSON.stringify({build:id.build,frozenFiles:files.length,syntax:syntax.length,status:'pass'}));

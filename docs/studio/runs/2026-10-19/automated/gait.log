@@ -1,0 +1,25 @@
+
+── gait  — she runs ON the ground: no bouncing, no falling plate mid-stride
+── gait — she runs on the ground, and the drawing agrees
+
+  ok   she does not skip: no one-frame departures from ground that is there  0 skip(s) of 1-2 frames; departures none over 48 floor frames (vx 340)
+  ok   the drawing never calls a stride a fall  0 airborne pose(s) mid-run: run_b run_a
+  ok   her feet follow the ground rather than bouncing on it  worst single-frame step 3.0 px
+  ok   she leaves the ground once and deliberately, not over and over  0 separate departure(s) from solid floor
+  ok   authored stride has genuine foot lift  filmed foot travel 8.65 world units
+  ok   run uses at least eight distinct recorded frames  distinct frames 16
+  ok   recorded gait is not given a second procedural bob  extra synthetic travel 0.00
+  ok   the stride length in the code is the stride length in the ART  plates say 29.5 world units per step (soles 109px apart in a 320px cell), HERO_STEP_WALK is 29.3
+  ok   walk_b is the passing pose, feet together  walk_b feet 0px apart, centre to centre, vs the contacts' soles 109
+  ok   the run turns its legs over like a runner (4-7.5 beats/s)  5.99 beats/sec at vx 340
+  ok   the walk turns its legs over like a walker (3-5.5 beats/s)  4.26 beats/sec at vx 185
+  ok   ...and the walk is slower-footed than the run  4.26 vs 5.99
+  ok   the foreground plate crosses in front of her, not under her feet  its top edge sits 25 px above her soles
+  ok   a light push on the phone stick is a walk, not a sprint  186 px/s at a light push vs 340 at full
+  ok   a thumb resting on the threshold does not chatter the input  0 on/off flips under a trembling thumb
+  ok   no page errors while running
+
+OK — she runs on the ground, and the drawing agrees
+   (gait: 27.4 s)
+
+all 1 harnesses ran

@@ -86,6 +86,8 @@ const SUITE = [
   ['combat-impact-browser', 'rendered hit flash and finite hardware particles, charged weight, equipped stats and ledger export'],
   ['purification-save', 'interrupted guardian film preserves atomic choice and completion; legacy retry does not duplicate'],
   ['purification-notices', 'retire stale combat openings at rescue without losing earned notices'],
+  ['marble-notices', 'retire the extraction hint only after raw marble acquisition; preserve rewards and missed-attempt guidance'],
+  ['campaign-import', 'helper imports preserve completed playthrough logs and create no output', {noBrowser:true}],
   ['purification-controls', 'mobile hold/cancel, focus-loss safety and restored save'],
   ['purification', 'deliberate guardian rescue hold, cancellation, choreography and protected rewards'],
   ['combat-impact-input', 'real keyboard tap and held charge through the normal game loop in a staged arena'],

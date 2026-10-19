@@ -1,0 +1,55 @@
+{
+  "scope": "Evidence integrity, not release/art/device approval. Mismatched original logs are not repaired by later reruns.",
+  "build": "1d3a7c72250c",
+  "registeredHarnesses": 194,
+  "checkedLogHashes": 196,
+  "matchedLogHashes": 195,
+  "mismatches": [
+    {
+      "name": "input-focus",
+      "file": "input-focus.log",
+      "expected": "2644ee90d30e50f6f0c093c9c6ca8a22be440c3abe617426d14bf4de28a13b44",
+      "actual": "5a64759c7cb51acadbd220e39a20a3e19719bec46e5f93b9dcfc7dff8271c1a8"
+    }
+  ],
+  "frozenSourceHashes": 9,
+  "selectedHttpFiles": 5,
+  "failed": [
+    {
+      "name": "textreveal",
+      "status": "fail"
+    },
+    {
+      "name": "infection-roster",
+      "status": "fail"
+    }
+  ],
+  "campaignCertified": true,
+  "collectorPassed": false,
+  "integrity": "fail"
+}
+node:assert:152
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: Every original log must match its collector hash; retain/report mismatches, never silently replace with a rerun
+
+1 !== 0
+
+    at Object.<anonymous> (/workspace/scratch/b4e9aa23d77e/HZD-99/docs/studio/runs/2026-10-19/verify-evidence.cjs:28:8)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

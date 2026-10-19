@@ -1,0 +1,19 @@
+
+── glowcost  — the most expensive thing the renderer does, counted
+── glowcost — the most expensive thing the renderer does, counted
+
+     A0B: 8 blurred of 80 draws/frame   drawParts:3.7 drawHUD:2 drawStatics:1 ftxt:1
+     A0: 9 blurred of 123 draws/frame   ftxt:2 Scrap:2 drawHUD:2 drawParts:1.6 drawCeilWeather:0.8
+     A1: 16 blurred of 266 draws/frame   drawParts:8.6 ftxt:2 drawHUD:2 Scrap:1.6 drawCeilWeather:1.4
+
+  ok   the HUD is not re-blurring its icons every frame  worst room: 2 blurred HUD draws/frame
+  ok   no outdoor ceiling weather inside the den  A0B drawCeilWeather: 0
+  ok   A0B stays under 24 blurred draws a frame  8 / 24
+  ok   A0 stays under 26 blurred draws a frame  9 / 26
+  ok   A1 stays under 30 blurred draws a frame  16 / 30
+  ok   no page errors
+
+OK — the glow is budgeted, and the HUD pays once instead of every frame
+   (glowcost: 8.8 s)
+
+all 1 harnesses ran

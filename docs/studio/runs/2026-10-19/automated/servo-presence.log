@@ -1,0 +1,49 @@
+
+── servo-presence  — Old Servo stood beside, not inside: prompt before contact, talk stand-off, grounded, whole arc on desktop and phone
+── servo-presence — Old Servo, stood beside: prompt, stand-off, grounding, the whole arc
+
+  ok   desktop: the prompt comes up while she is still clear of his drawn body  {"dx":-74,"gap":10,"half":38}
+  ok   desktop: ...and it says what the press will do (wake Old Servo)  E — wake Old Servo
+  ok   desktop: walked into him on purpose, she is inside his body  {"dx":14,"half":38}
+  ok   desktop: the talk steps her out to his side, clear of his body  {"dx":68,"gap":4,"standOff":68}
+  ok   desktop: ...facing him, on the floor  {"face":-1,"on":true}
+  ok   desktop: he stands on the meadow floor (feet on the ground)  {"feet":461.9166259765625,"floor":461.9166259765625,"tile":448}
+  ok   desktop: dark, he cannot speak: the line is hers, and the spare cell is seated  {"lines":["Ratchet’s spare cell fits the port in his chest. You seat it."],"live":true}
+  ok   desktop: his first say opens by itself after the waking
+  ok   desktop: ...and she is beside him for it, though she walked into him while he woke  {"dx":-68,"gap":4}
+  ok   desktop: he says who he is, the way to the marble, the coil, and the reward (60 scrap, 10 IQ)  ["Mrrow… power! A working unit — and a cat, no less. I’m Old Servo, keeper of this winding house. Tell Ratchet thank you.","After his marble? It’s under us. The hub east of here has a loose floor at its west end — break through it and the caves open up.","And a favour, if you have legs for it: my gantry coil shook loose up in the gantries. The climb starts right behind me. Bring it back and I’ll pay you 60 scrap and 10 IQ.","Errand taken"]
+  ok   desktop: the coil errand is taken  active
+  ok   desktop: a second talk says something else  ["Mrrow. Little frame. Nothing your size has come back up that corridor.","My receiver was unplugged inside the shielded lift housing when the song changed.","I spent the last charge holding the bridge for the workers. Counted them across. Kept counting after the motor stopped.","Ratchet sent a spare? Tell him the last passenger got home.","Bring me: a shaken-loose coil","The coil is up in the gantries — the climb starts right behind me.","(not yet)"]
+  ok   desktop: ...beside him  4
+  ok   desktop: the coil home is answered  ["That’s my coil! Listen — the drum turns true again. Here: 60 scrap and 10 IQ, as promised."]
+  ok   desktop: ...beside him  4
+  ok   desktop: ...and paid as promised, and his drum turns true  {"q":"done","scrap":60,"iq":10,"spin":true,"joy":true}
+  ok   desktop: after the coil, he says something new again  ["The little ones keep coming back up the line. Thin them for me?","Deal with 6 × crawlers"]
+  ok   desktop: ...beside him  4
+  ok   desktop: no page errors  []
+  ok   phone: the prompt comes up while she is still clear of his drawn body  {"dx":-74,"gap":10,"half":38}
+  ok   phone: ...and it says what the press will do (wake Old Servo)  E — wake Old Servo
+  ok   phone: walked into him on purpose, she is inside his body  {"dx":14,"half":38}
+  ok   phone: the talk steps her out to his side, clear of his body  {"dx":68,"gap":4,"standOff":68}
+  ok   phone: ...facing him, on the floor  {"face":-1,"on":true}
+  ok   phone: he stands on the meadow floor (feet on the ground)  {"feet":461.9166259765625,"floor":461.9166259765625,"tile":448}
+  ok   phone: the on-screen E button was there to press
+  ok   phone: dark, he cannot speak: the line is hers, and the spare cell is seated  {"lines":["Ratchet’s spare cell fits the port in his chest. You seat it."],"live":true}
+  ok   phone: his first say opens by itself after the waking
+  ok   phone: ...and she is beside him for it, though she walked into him while he woke  {"dx":-68,"gap":4}
+  ok   phone: he says who he is, the way to the marble, the coil, and the reward (60 scrap, 10 IQ)  4 pages
+  ok   phone: the coil errand is taken  active
+  ok   phone: a second talk says something else  ["Mrrow. Little frame. Nothing your size has come back up that corridor.","My receiver was unplugged inside the shielded lift housing when the song changed.","I spent the last charge holding the bridge for the workers. Counted them across. Kept counting after the motor stopped.","Ratchet sent a spare? Tell him the last passenger got home.","Bring me: a shaken-loose coil","The coil is up in the gantries — the climb starts right behind me.","(not yet)"]
+  ok   phone: ...beside him  4
+  ok   phone: the coil home is answered  ["That’s my coil! Listen — the drum turns true again. Here: 60 scrap and 10 IQ, as promised."]
+  ok   phone: ...beside him  4
+  ok   phone: ...and paid as promised, and his drum turns true  {"q":"done","scrap":60,"iq":10,"spin":true,"joy":true}
+  ok   phone: after the coil, he says something new again  ["The little ones keep coming back up the line. Thin them for me?","Deal with 6 × crawlers"]
+  ok   phone: ...beside him  13
+  ok   phone: no page errors  []
+  shots in tests/out/servo-presence/
+
+OK — she stands beside Old Servo, and he has something new to say each time
+   (servo-presence: 36.9 s)
+
+all 1 harnesses ran

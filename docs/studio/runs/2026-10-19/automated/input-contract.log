@@ -1,0 +1,21 @@
+
+── input-contract  — one struct the game reads: the devices unchanged, and a struct alone can play
+PASS input-contract: keyboard, stick and pad still say exactly what they said; the magnitude reaches the physics (340 px/s at full push, 136 at 0.4); and a struct with no device behind it walks and jumps her 494 px {
+  keyboard: { moveX: 1, run: true, down: true },
+  stick: { moveX: 0.5, run: true },
+  padWalk: false,
+  padAfterClick: true,
+  padHoldsRun: true,
+  padCentred: false,
+  padWalksAgain: false,
+  full: { v: 340, x: 759 },
+  half: { v: 136, x: 366 },
+  struct: { moved: 494, jumped: true },
+  readsThrough: { right: true, left: false, jump: true },
+  devicesIgnored: { left: false, atk: false },
+  afterHandback: { anyDown: false, moveX: 0 },
+  deviceWalks: 340
+}
+   (input-contract: 0.8 s)
+
+all 1 harnesses ran

@@ -1,0 +1,38 @@
+
+── archives  — kingdom D files, strikes out and cross-references — and warns before each
+── archives — kingdom D files, strikes out and cross-references, and warns before each
+
+  ok   the Archives coil files a record, and the deep one strikes it out  lv4 [recall]  lv6 [recall,erasure]
+  ok   the Archives turret redacts, the Archives guard cross-references  [redact] [crossref]
+  ok   ...and none of it reaches another kingdom
+  ok   ...and no unscoped row was touched — the shared layer is the integrator's
+  ok   the copied tell constants still equal the originals they copy
+  ok   RECALL files the ground she was standing on
+  ok   ...and the card lies dormant until the coil's own circle has snapped  dormant 0.7s
+  ok   ...so the second circle is warned for longer than the first, never less  1.4s of floor to read
+  ok   ...and it takes the ground she left
+  ok   ...and nothing at all if she never goes back
+  ok   ERASURE strikes out the ground the card fetched
+  ok   ...and that floor is harmless for the whole of its own settle  0.87s settling
+  ok   ...and then it costs her
+  ok   a coil without the move is the coil that shipped  tell 0.98s
+  ok   REDACT lays a bar, one to a volley  5 laid
+  ok   ...and it is pale and harmless for the whole of its settle  0.52s settling
+  ok   ...and then the floor really does cost her
+  ok   ...and being off the floor is the answer
+  ok   a turret without the move still shoots and never redacts
+  ok   CROSSREF sweeps before it lands  0.52s sweep
+  ok   ...and the call closes the room's rest
+  ok   ...but never below the floor — a called room still arrives one tell at a time
+  ok   ...never pulls a machine that is already winding up
+  ok   ...never reaches past earshot
+  ok   ...and shows on whoever it told
+  ok   ...and moved no telegraph anywhere
+  ok   a guard in the meadow has none of this
+  ok   D2 spawns the kingdom armed  rime:recall guard:crossref hopper: guard:crossref turret:redact
+  ok   no page errors
+
+all good
+   (archives: 6.6 s)
+
+all 1 harnesses ran

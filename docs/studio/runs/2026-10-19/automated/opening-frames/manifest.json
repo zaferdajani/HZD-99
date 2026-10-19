@@ -1,0 +1,576 @@
+{
+  "scope": "Fresh completed opening-order: selected raw screenshots archived; remaining capture hashes retained, not all image bytes archived. Desktop/phone viewport input is keyboard, not physical touch approval.",
+  "openingLogSha256": "c88192357be86a6f669e575c543b06bf15801f533b295d190003a560daa511da",
+  "files": [
+    {
+      "file": "desktop-00-move-move.png",
+      "bytes": 694005,
+      "sha256": "dd80efd8a26aa3f2ab05bc40f6b30fb3c4d285991f185e356773b329ed64c452",
+      "archived": false
+    },
+    {
+      "file": "desktop-01-out-move.png",
+      "bytes": 678915,
+      "sha256": "56a804aa55265383b0dd640108fe7b08d5d12f5ea640c75b5d30523f75f24f6c",
+      "archived": false
+    },
+    {
+      "file": "desktop-02-jump-move.png",
+      "bytes": 558262,
+      "sha256": "c16bc824022bffff9fd2b28735d91bfa89e3e32e436998c00832f00e2c5421a2",
+      "archived": false
+    },
+    {
+      "file": "desktop-03-jump-jump.png",
+      "bytes": 515635,
+      "sha256": "5b0fa4bb605c561332dfdd10de9048debf2b42505f3a3409bd5d98877ed22dfd",
+      "archived": false
+    },
+    {
+      "file": "desktop-04-gate-move.png",
+      "bytes": 519381,
+      "sha256": "f7c8cc7660c09d3a405fe6250b9f55d0058eb2a2f2a963cff70785f90318351c",
+      "archived": false
+    },
+    {
+      "file": "desktop-05-gate-up.png",
+      "bytes": 638768,
+      "sha256": "43a696b167a0c30aef80d400f945039a7872e1417e9e1e281be93cc068adb8c0",
+      "archived": false
+    },
+    {
+      "file": "desktop-06-gate-move.png",
+      "bytes": 495403,
+      "sha256": "3fa588ee442b5623327a0ba79057e12848e451f4c967a38f55d627501515d981",
+      "archived": false
+    },
+    {
+      "file": "desktop-07-booth-move.png",
+      "bytes": 744769,
+      "sha256": "92a292505ab4c334034054fd4f49512ed47a3c50e2b9ef69f1482fc27fd8fa56",
+      "archived": false
+    },
+    {
+      "file": "desktop-08-booth-up.png",
+      "bytes": 729609,
+      "sha256": "bfe2551003a6b87a864af4bea8d6321d5a5f6052d67b4b6b2ea7046d25692b71",
+      "archived": false
+    },
+    {
+      "file": "desktop-09-booth-x.png",
+      "bytes": 736309,
+      "sha256": "031bced9b309e91841d14e0ea8e9b04b15cbe012499776703300bfd0e3ad457c",
+      "archived": false
+    },
+    {
+      "file": "desktop-10-note-move.png",
+      "bytes": 747349,
+      "sha256": "cb3d03c9fdf3c65810dc2640c2490cef74016aee5830ecc1c604f680c5982c6e",
+      "archived": false
+    },
+    {
+      "file": "desktop-11-note-int.png",
+      "bytes": 764207,
+      "sha256": "f0ca53974680a60c46e2b116173a54a3e8462a041154fde1a6a357d8d0e7a2d8",
+      "archived": false
+    },
+    {
+      "file": "desktop-12-drawer-move.png",
+      "bytes": 751780,
+      "sha256": "8100b9534e71b19a9070ff5236c79886abae0f69d4dc045def4e342f452231ab",
+      "archived": false
+    },
+    {
+      "file": "desktop-13-drawer-int.png",
+      "bytes": 741933,
+      "sha256": "11e5e322df6531068bc49de5b7384389eb86cdde03528ac57df06bb9ba3fce75",
+      "archived": false
+    },
+    {
+      "file": "desktop-14-dialog-drawer.png",
+      "bytes": 679271,
+      "sha256": "ae9a2b969dd800aaddc48fe54b2bd80f8141c60870a2afa4aba7abe3e480cd40",
+      "archived": false
+    },
+    {
+      "file": "desktop-15-repair-move.png",
+      "bytes": 766893,
+      "sha256": "e225fbca7847fea7c87a2de6f7bf26e04aaa3b5f2393d1ff158320d828e4bb94",
+      "archived": false
+    },
+    {
+      "file": "desktop-16-repair-int.png",
+      "bytes": 764942,
+      "sha256": "dfbc065439c45208a9eedd673702e263034a678a346c59acef535973125c7ab9",
+      "archived": false
+    },
+    {
+      "file": "desktop-17-dialog-repair.png",
+      "bytes": 692275,
+      "sha256": "04584a10f9c0a62bd8d97697a751aac36487eace823fafbf64b56d2a25715087",
+      "archived": false
+    },
+    {
+      "file": "desktop-18-repair-board.png",
+      "bytes": 634804,
+      "sha256": "afd22681acc6da176fb707c986a21aef30faeb5e56b79f0f91f35b46c61cca45",
+      "archived": true
+    },
+    {
+      "file": "desktop-19-dialog-repair.png",
+      "bytes": 680266,
+      "sha256": "0fa12fec799c0358400ade95bf2ff61f1a36538ce2dfdfb2565b4d4a7a07b3cd",
+      "archived": false
+    },
+    {
+      "file": "desktop-20-dialog-repair.png",
+      "bytes": 668051,
+      "sha256": "15bcf14c582ee346d48c555956da1a6b0bfe70fe09f048301ff48a6e25b0b99d",
+      "archived": false
+    },
+    {
+      "file": "desktop-21-dialog-repair.png",
+      "bytes": 662268,
+      "sha256": "6d73b2331e7a95f6ad7c5a0621c94554b9e891cfc0bc890ae608433409f87e2f",
+      "archived": false
+    },
+    {
+      "file": "desktop-22-pod-move.png",
+      "bytes": 743185,
+      "sha256": "077e7af9aa65bc040e453c2d96fbffc3bc45580d011eefbc44f52dd047bfc705",
+      "archived": true
+    },
+    {
+      "file": "desktop-23-pod-int.png",
+      "bytes": 746085,
+      "sha256": "8391846005effb6a61681088b1bb9de15c92712331545d3fdab597e3fe68f6f1",
+      "archived": false
+    },
+    {
+      "file": "desktop-24-pack-move.png",
+      "bytes": 746195,
+      "sha256": "2e5dd626cf49c46d9698658091f5e60abaaf813aaae8b4ce560a65d7c09a0d40",
+      "archived": false
+    },
+    {
+      "file": "desktop-25-pack-int.png",
+      "bytes": 724905,
+      "sha256": "b4cc11029bd851b5bdc2bdeb8ad057548bd901c897db465032b5fe5c146994a5",
+      "archived": false
+    },
+    {
+      "file": "desktop-26-dialog-pack.png",
+      "bytes": 656376,
+      "sha256": "e2fd18849ec8fcfc799e0e9a896a5a54e785252146b9990b431a8fef7a398020",
+      "archived": false
+    },
+    {
+      "file": "desktop-27-dialog-pack.png",
+      "bytes": 663495,
+      "sha256": "007c659eb3505b3b756d6b9705a9a25b758cce9dd42e8ba14ecc930d8988c233",
+      "archived": false
+    },
+    {
+      "file": "desktop-28-counter.png",
+      "bytes": 387948,
+      "sha256": "2fe79587fbb96b74e79f48d3d9c7f4ffc51db086de35d168cb9ae3ccc385978e",
+      "archived": true
+    },
+    {
+      "file": "desktop-29-dialog-pack.png",
+      "bytes": 631578,
+      "sha256": "c9072dac5c75fdca97792e7080f6aae7cf4edb359ce610a1fb2869b4fdb1d64d",
+      "archived": false
+    },
+    {
+      "file": "desktop-30-heal-heal.png",
+      "bytes": 715321,
+      "sha256": "f01081ed22f905138bc5accc6553e4f46fc607bb740355d4b67f17cb52fb1799",
+      "archived": false
+    },
+    {
+      "file": "desktop-31-atk-move.png",
+      "bytes": 722658,
+      "sha256": "164b46e5b842a50653cf69f76b9efb31f8cf56e4e22bb1384be252e1603235d2",
+      "archived": false
+    },
+    {
+      "file": "desktop-32-atk-up.png",
+      "bytes": 733635,
+      "sha256": "736c4de1970cc0b9037290418cdeeef6c0fe489bbf9d110e2e53bf0997ab4c80",
+      "archived": false
+    },
+    {
+      "file": "desktop-33-atk-move.png",
+      "bytes": 755418,
+      "sha256": "889250727acb5b62a964f368a53527064070c417438d62c109adc49153d1c434",
+      "archived": false
+    },
+    {
+      "file": "desktop-34-atk-atk.png",
+      "bytes": 729494,
+      "sha256": "f2862cd1c87b63a369aca5b08490c4d5f9afb1f1d222723e24da2f088609cb7b",
+      "archived": false
+    },
+    {
+      "file": "desktop-35-burst-atk.png",
+      "bytes": 724093,
+      "sha256": "c4b0c7b57969a200329c817dfce2272b9d759f58c5e8d0f4464764507de1ccbe",
+      "archived": false
+    },
+    {
+      "file": "desktop-36-burst-charging.png",
+      "bytes": 731740,
+      "sha256": "8ee01354029de5b5eddcfe9b8560118f19f92584cc05b8a2f41ce3519a482165",
+      "archived": true
+    },
+    {
+      "file": "desktop-37-node-move.png",
+      "bytes": 732042,
+      "sha256": "c9f9c6a7514c852491abd3cf8c99a7bf70195b636838d5eb57fedb637d34a65f",
+      "archived": false
+    },
+    {
+      "file": "desktop-38-node-int.png",
+      "bytes": 615173,
+      "sha256": "f725b37c81319aa2eb7d888494e28315572ee5ade370db963cac65bf73fe9b0c",
+      "archived": false
+    },
+    {
+      "file": "desktop-39-monument-puzzle.png",
+      "bytes": 174705,
+      "sha256": "583163669b5648c026454a05a1aec6bd3950705bb314d4e3439a2d88c5f77005",
+      "archived": true
+    },
+    {
+      "file": "desktop-40-go-move.png",
+      "bytes": 621354,
+      "sha256": "104641b5c078600a1bcae1c3d8def3852090dd011952f43dde5c8800c4b5a841",
+      "archived": false
+    },
+    {
+      "file": "desktop-41-meadow-arrival.png",
+      "bytes": 599344,
+      "sha256": "4a640a3916211bf0738561b8c8c15e97b62515d6ee7ef12be845246ef07cffa8",
+      "archived": false
+    },
+    {
+      "file": "desktop-42-servo-dark-cue.png",
+      "bytes": 597166,
+      "sha256": "64a3eb1c875fe48dd277904614fd5e3b77e6a3911d5419c8dc8dfcd0c9024cc9",
+      "archived": true
+    },
+    {
+      "file": "desktop-43-servo-waking.png",
+      "bytes": 680751,
+      "sha256": "530ed0c7de966d2c2e8c2b8738ed0e017836c2f802ce94181f68f1ecf325a3e4",
+      "archived": false
+    },
+    {
+      "file": "desktop-44-servo-intro.png",
+      "bytes": 496612,
+      "sha256": "3b84749b41e50fffe5ab8e48169eac50db65ccf0c61a62ca7781f4abba34c939",
+      "archived": false
+    },
+    {
+      "file": "desktop-45-servo-awake.png",
+      "bytes": 578772,
+      "sha256": "1010dc62b01b996f813578dd7ccaca3aa9b82ff18c24289f37f298d1eca52187",
+      "archived": true
+    },
+    {
+      "file": "desktop-46-servo-coil-home.png",
+      "bytes": 590556,
+      "sha256": "6956772dd721ddff05ca593ff3f0e59a494b86fe4ef88d2fa9d6a967959f5196",
+      "archived": true
+    },
+    {
+      "file": "phone-00-move-move.png",
+      "bytes": 594761,
+      "sha256": "c152d230162a0af54cd06affce31cf4b835c0977b04b16850b9e474e75debe7e",
+      "archived": false
+    },
+    {
+      "file": "phone-01-out-move.png",
+      "bytes": 581978,
+      "sha256": "38c1bcb7a52fd5269b8b6bdbf9e87ee6fde50efac5afbcb73610854801c9f09a",
+      "archived": false
+    },
+    {
+      "file": "phone-02-jump-move.png",
+      "bytes": 467399,
+      "sha256": "1f0cba184c8292a26450c5740814142c5b54d6a9eae161b45d736b6413fe990d",
+      "archived": false
+    },
+    {
+      "file": "phone-03-jump-jump.png",
+      "bytes": 481798,
+      "sha256": "85e31fcae9890aa93855fd879a79163994a57038cfb9f9ff07ec69d982049c96",
+      "archived": false
+    },
+    {
+      "file": "phone-04-gate-move.png",
+      "bytes": 441342,
+      "sha256": "7fa3f3cf1a95d5d2e878012541603bfb6ae0628d69e6235b7f376e9073eceb85",
+      "archived": false
+    },
+    {
+      "file": "phone-05-gate-up.png",
+      "bytes": 568164,
+      "sha256": "688cd3f044a2efe5bbcf0bc5ac60e1109b3480e715f484451a8d9239660be1e7",
+      "archived": false
+    },
+    {
+      "file": "phone-06-gate-move.png",
+      "bytes": 453476,
+      "sha256": "f983680051125929624d6e553b4462983e665f72c9f665be487dda679d285ecb",
+      "archived": false
+    },
+    {
+      "file": "phone-07-booth-move.png",
+      "bytes": 701388,
+      "sha256": "f1536fd0840be61cc41ac945b8dbf602accc0a103d3a9529677e4ad1c24a411f",
+      "archived": false
+    },
+    {
+      "file": "phone-08-booth-up.png",
+      "bytes": 691455,
+      "sha256": "3d97674da22ba558d2a212484886175c7db27c1294172d1d4f8bc49eb768bc16",
+      "archived": false
+    },
+    {
+      "file": "phone-09-booth-x.png",
+      "bytes": 681554,
+      "sha256": "7259a07c34eb0a5659312a0a927fd64170c1bbdf6285ee6fdc9563e94e19b132",
+      "archived": false
+    },
+    {
+      "file": "phone-10-note-move.png",
+      "bytes": 675466,
+      "sha256": "0c96959dc7c8d8042137e876e55e4775676ccbfc30221c5623d7ea457130e9a6",
+      "archived": false
+    },
+    {
+      "file": "phone-11-note-int.png",
+      "bytes": 683618,
+      "sha256": "6067693437a32fbff941b4b58737e4aadfd2a8c21f4537c14880035915179028",
+      "archived": false
+    },
+    {
+      "file": "phone-12-drawer-move.png",
+      "bytes": 701976,
+      "sha256": "f977d83a78b528d178eb08e4b885268aaa4f1a7f03e4a3c2675a1bcf06b9a798",
+      "archived": false
+    },
+    {
+      "file": "phone-13-drawer-int.png",
+      "bytes": 674719,
+      "sha256": "61d3e38a2a39874ba38c57366413447a497eb50d8f9e334945d55d66f3232268",
+      "archived": false
+    },
+    {
+      "file": "phone-14-dialog-drawer.png",
+      "bytes": 605219,
+      "sha256": "5b7b8e2317137445036cbb17c3f4276dc858a01c2bab8bea40e9fcd474297e70",
+      "archived": false
+    },
+    {
+      "file": "phone-15-repair-move.png",
+      "bytes": 701203,
+      "sha256": "d91dd617d5148baff7c72069564915790811ef6e6cf2844e5ada0b70827f16a9",
+      "archived": false
+    },
+    {
+      "file": "phone-16-repair-int.png",
+      "bytes": 708903,
+      "sha256": "d932b3aea4b1d64b396d1f810a1ad08622b93444945d8ac769809e0ef0067543",
+      "archived": false
+    },
+    {
+      "file": "phone-17-dialog-repair.png",
+      "bytes": 616234,
+      "sha256": "d4dc8d9bea4900c310ede60f20117e12191f63c6cc081f918206ab4cd82f5e0c",
+      "archived": false
+    },
+    {
+      "file": "phone-18-repair-board.png",
+      "bytes": 931222,
+      "sha256": "6cc7497f5f21f4b83676432b05399b46cf0196278aa412129b6361ab54a0610d",
+      "archived": true
+    },
+    {
+      "file": "phone-19-dialog-repair.png",
+      "bytes": 607792,
+      "sha256": "2783cb5ddd80cdd181b8b0f33b7da8ff790cd1b46ad1beb85bc9916e24352323",
+      "archived": false
+    },
+    {
+      "file": "phone-20-dialog-repair.png",
+      "bytes": 601472,
+      "sha256": "41e23b4b65aa28b64f414b11abfd743198a111b4bd20a81085621ee792a0010f",
+      "archived": false
+    },
+    {
+      "file": "phone-21-dialog-repair.png",
+      "bytes": 596380,
+      "sha256": "60c017ee9fba9bec94c3807791ab04ed0adfc4c099e905a3c586630e1e58d46c",
+      "archived": false
+    },
+    {
+      "file": "phone-22-pod-move.png",
+      "bytes": 695982,
+      "sha256": "22b8e2daecbc959f172de94ebd3d60b59473ac3be9570040e561cd220de82f84",
+      "archived": true
+    },
+    {
+      "file": "phone-23-pod-int.png",
+      "bytes": 681484,
+      "sha256": "03d01da6c0637d86046b393129ace462eb5a67ddb2663114263af464d1e1606a",
+      "archived": false
+    },
+    {
+      "file": "phone-24-pack-move.png",
+      "bytes": 691630,
+      "sha256": "a0ab42f6ed6f10103db8d81b44c3a4fcaaf42739f629f2e15db1514d1568f140",
+      "archived": false
+    },
+    {
+      "file": "phone-25-pack-int.png",
+      "bytes": 668455,
+      "sha256": "ea9a26b2f3d0c58b12ad1663145b3f63f74395d86f4739402a1d70db3fcc93b1",
+      "archived": false
+    },
+    {
+      "file": "phone-26-dialog-pack.png",
+      "bytes": 591402,
+      "sha256": "3f099085995afc7ac48ea55d06af8d054469d217a215f9538216a5bbb56e7799",
+      "archived": false
+    },
+    {
+      "file": "phone-27-dialog-pack.png",
+      "bytes": 597421,
+      "sha256": "76886906fc8999a664added665e1e75acd17343a40b50c34e2413fbdcfb61ea2",
+      "archived": false
+    },
+    {
+      "file": "phone-28-counter.png",
+      "bytes": 365367,
+      "sha256": "df09e791fdea2677c0fc573959466765a23ff9169b9f8ab7c2cacd32df260571",
+      "archived": true
+    },
+    {
+      "file": "phone-29-dialog-pack.png",
+      "bytes": 569224,
+      "sha256": "6cef25d39b2bb1e814e6d6e473981aa9186e521c21f857f47a3af358cb6d92e7",
+      "archived": false
+    },
+    {
+      "file": "phone-30-heal-heal.png",
+      "bytes": 664646,
+      "sha256": "2805055fee30c4a82279b4e3f5c595802723bd1a67cc198750a890deb7a9c100",
+      "archived": false
+    },
+    {
+      "file": "phone-31-atk-move.png",
+      "bytes": 663601,
+      "sha256": "c6dd5382dc61a070c7eb992188482afc07ed7559c71628abcbea953df939d949",
+      "archived": false
+    },
+    {
+      "file": "phone-32-atk-up.png",
+      "bytes": 660431,
+      "sha256": "a011060d3cea3cba95fd97479c21f993a76ebc1f880c090b718e79af17fdfee1",
+      "archived": false
+    },
+    {
+      "file": "phone-33-atk-move.png",
+      "bytes": 716681,
+      "sha256": "45b8dbf65a46a15af5561421ceede441d3c9ccb8536e7e6c187442134ef796f0",
+      "archived": false
+    },
+    {
+      "file": "phone-34-atk-atk.png",
+      "bytes": 721155,
+      "sha256": "fc43e086d113ad0f784fc0822b2b91bf5b0c6375e7903895eaf64137d61a1b1d",
+      "archived": false
+    },
+    {
+      "file": "phone-35-burst-atk.png",
+      "bytes": 716572,
+      "sha256": "d368b6984f0961007f6c8b8cec4a2d82ceae3fc318f2fff3adbe99c63ad54fc4",
+      "archived": false
+    },
+    {
+      "file": "phone-36-burst-charging.png",
+      "bytes": 719745,
+      "sha256": "3716d11cee2290a8613477a4538d03e42ec2b83a22d33079168be00650f6e3fa",
+      "archived": true
+    },
+    {
+      "file": "phone-37-node-move.png",
+      "bytes": 717089,
+      "sha256": "7e1fbea7ecced91933fbb4d6aa294c1826cf51688e057c491b5ed69271e8a8ec",
+      "archived": false
+    },
+    {
+      "file": "phone-38-node-int.png",
+      "bytes": 635252,
+      "sha256": "1d638f3d5d1855a933c313e421656015446b283741767d7e2d7b8ba38df782d8",
+      "archived": false
+    },
+    {
+      "file": "phone-39-monument-puzzle.png",
+      "bytes": 183676,
+      "sha256": "274817eebf2b4c7964911d9949d3c5368f8914e3f28085723d2c2b2347699aa8",
+      "archived": true
+    },
+    {
+      "file": "phone-40-go-move.png",
+      "bytes": 640564,
+      "sha256": "a8267cf73155f098a13812411045c9e1bf673b15a13c506c51c947bef89731d5",
+      "archived": false
+    },
+    {
+      "file": "phone-41-meadow-arrival.png",
+      "bytes": 623128,
+      "sha256": "2f9768b006c99fb7d6ecc1a401d6af18ad8180ebf59e9d9aad37a338529b871a",
+      "archived": false
+    },
+    {
+      "file": "phone-42-servo-dark-cue.png",
+      "bytes": 620253,
+      "sha256": "6abc8bd73777f07f8c1455dd7d2a7dbd03d9d088d07e3435dbc5a4923c728e83",
+      "archived": true
+    },
+    {
+      "file": "phone-43-servo-waking.png",
+      "bytes": 642705,
+      "sha256": "a5996f6944a5ad1ac19f7a0dbf2bd31c131068fb22ae6a14f4335d4e7f78526c",
+      "archived": false
+    },
+    {
+      "file": "phone-44-servo-intro.png",
+      "bytes": 484343,
+      "sha256": "352078afc6bbdd4dd9abe16744caa6eb6e6f9f45905f1de2f7e2fd2493a16c18",
+      "archived": false
+    },
+    {
+      "file": "phone-45-servo-awake.png",
+      "bytes": 624138,
+      "sha256": "3fa704466b0de8e83e6e200fccbfbd924829446fe664f4b029ce367addb11a76",
+      "archived": true
+    },
+    {
+      "file": "phone-46-servo-coil-home.png",
+      "bytes": 635877,
+      "sha256": "61c942ebc8b25352f05602448d741221fb561c48b662c87eb78eb98b25f3c367",
+      "archived": true
+    },
+    {
+      "file": "phone-portrait-390x844.png",
+      "bytes": 85895,
+      "sha256": "7cec395082c2d1fb7bfe5730cc9c7303536a4b0c025637fc86cfc455053f903d",
+      "archived": true
+    }
+  ]
+}

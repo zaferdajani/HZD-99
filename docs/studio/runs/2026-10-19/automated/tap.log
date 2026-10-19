@@ -1,0 +1,18 @@
+
+── tap  — tap where a thing is drawn and that thing happens
+── tap  — tap where a thing is drawn and that thing happens
+  ok   a tap releases itself; a held button stays down until the finger lifts  {"tapCleared":true,"stillHeld":true,"notQueued":true}
+  ok   pause: every row selects itself  [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+  ok   trial mem: 4 tiles fire their own key  []
+  ok   trial log: 2 tiles fire their own key  []
+  ok   trial vis: 3 tiles fire their own key  []
+  ok   trial calc: 3 tiles fire their own key  []
+  ok   standing line leads the conversation at every tier  [0,1,2]
+  ok   no two corner buttons share a touch  []
+  ok   the map is the biggest corner button  true
+  ok   the crest button is off the HUD column (it lives under Pause)  false
+
+OK — the hit-boxes are the drawing
+   (tap: 2.8 s)
+
+all 1 harnesses ran

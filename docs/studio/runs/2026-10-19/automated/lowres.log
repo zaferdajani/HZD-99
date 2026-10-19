@@ -1,0 +1,18 @@
+
+── lowres  — the whole world at quarter size, and nothing sliced by pixel gets one
+── lowres — the whole world, roughly, for half a megabyte
+  ok   every small copy the manifest names is on disk  89 entries
+  ok   ...and every one of them is at most a quarter of its full sheet  all under
+  ok   the whole tier is small enough to front-load  1.81 MB for 26.7 MB of art (6.8%)
+  ok   no sheet addressed by absolute pixel rect has a small copy  6 guardian files checked
+  ok   the page carries the manifest  89 keys in window.LOWRES
+  ok   ...and the prefetcher is told to front-load it
+  ok   a small copy stands in for a sheet that has not arrived  2688 px wide
+  ok   ...and the full sheet replaces it  2688 -> 10752 px
+  ok   ...and every cached derivative of the soft one is thrown away  on stand-in: true, on upgrade: true
+  ok   the tier is fetched ahead of the full-size art  52 small copies fetched in the first six seconds
+
+OK — the room is right immediately and sharp a moment later
+   (lowres: 7.0 s)
+
+all 1 harnesses ran

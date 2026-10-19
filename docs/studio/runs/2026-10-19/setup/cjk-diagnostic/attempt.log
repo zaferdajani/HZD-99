@@ -1,0 +1,41 @@
+{
+  "scope": "Post-collector font diagnostic: unchanged canvas wrapping plus DOM platform-font trace for the exact same text/font; not full-suite, physical-device or canvas per-glyph certification.",
+  "servedIndexSha256": "7072f1ee84c2acab1f553e03c102af460c35c3fd34165884c7d08ba72a9b4d41",
+  "fixtureSha256": "7c96e32accca7ddd09eadc8d138979b8e3f717a40f3e1796881c98f5c58b987a",
+  "samples": [
+    {
+      "font": "600 16px \"Segoe UI\", Tahoma, sans-serif",
+      "box": 548,
+      "fullWidth": 467,
+      "lines": 1,
+      "widest": 467,
+      "textPreserved": true,
+      "build": "1d3a7c72250c",
+      "domPlatformFonts": [
+        {
+          "familyName": "URW Bookman",
+          "postScriptName": "URWBookman-Demi",
+          "isCustomFont": false,
+          "glyphCount": 89
+        }
+      ],
+      "name": "original",
+      "wrapper": "browser-wrapper.cjs",
+      "errors": [],
+      "screenshot": "original.png"
+    }
+  ]
+}
+browserType.launch: Failed to launch: Error: spawn /workspace/scratch/b4e9aa23d77e/HZD-99/docs/studio/runs/2026-10-19/setup/cjk-browser-wrapper.cjs EACCES
+Call log:
+[2m  - <launching> /workspace/scratch/b4e9aa23d77e/HZD-99/docs/studio/runs/2026-10-19/setup/cjk-browser-wrapper.cjs --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-i4CYPk --remote-debugging-pipe --no-startup-window[22m
+[2m  - [pid=N/A] starting temporary directories cleanup[22m
+[2m  - [pid=N/A] finished temporary directories cleanup[22m
+
+    at /workspace/scratch/b4e9aa23d77e/HZD-99/docs/studio/runs/2026-10-19/cjk-diagnostic.cjs:16:32 {
+  log: [
+    '  - <launching> /workspace/scratch/b4e9aa23d77e/HZD-99/docs/studio/runs/2026-10-19/setup/cjk-browser-wrapper.cjs --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-i4CYPk --remote-debugging-pipe --no-startup-window',
+    '  - [pid=N/A] starting temporary directories cleanup',
+    '  - [pid=N/A] finished temporary directories cleanup'
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "scope": "Post-collector font diagnostic: unchanged canvas wrapping plus DOM platform-font trace for the exact same text/font; not full-suite, physical-device or canvas per-glyph certification.",
+  "servedIndexSha256": "7072f1ee84c2acab1f553e03c102af460c35c3fd34165884c7d08ba72a9b4d41",
+  "fixtureSha256": "7c96e32accca7ddd09eadc8d138979b8e3f717a40f3e1796881c98f5c58b987a",
+  "samples": [
+    {
+      "font": "600 16px \"Segoe UI\", Tahoma, sans-serif",
+      "box": 548,
+      "fullWidth": 467,
+      "lines": 1,
+      "widest": 467,
+      "textPreserved": true,
+      "build": "1d3a7c72250c",
+      "domPlatformFonts": [
+        {
+          "familyName": "URW Bookman",
+          "postScriptName": "URWBookman-Demi",
+          "isCustomFont": false,
+          "glyphCount": 89
+        }
+      ],
+      "name": "original",
+      "wrapper": "browser-wrapper.cjs",
+      "errors": [],
+      "screenshot": "original.png"
+    }
+  ]
+}

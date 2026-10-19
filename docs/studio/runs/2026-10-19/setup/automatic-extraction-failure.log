@@ -1,0 +1,12 @@
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+[Error: EINVAL: invalid argument, chown '/tmp/fonts'] {
+  errno: -22,
+  code: 'EINVAL',
+  syscall: 'chown',
+  path: '/tmp/fonts'
+}
+
+Node.js v24.19.0
